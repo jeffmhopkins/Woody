@@ -23,7 +23,7 @@ BODY-OAK,mechanical,TBD,,Oak top and bottom panels,n/a,2,candidate,,0009,Bottom 
 SIDE-ACRYLIC,mechanical,TBD,,Frosted acrylic side panels,n/a,2,candidate,,0009,Edge-lit
 BENCH,tooling,n/a,,"Scopes, logic analysers, DMMs, signal generators, RF",n/a,1,available,,0006,Full bench available - E9 not gated on tooling
 U-BUF,controller,MCP6002-I/SN,Microchip,Dual RRIO op-amp for the breath buffer,SOIC-8 (1.27mm pitch),1,candidate,,0003,SOIC-8. Rails to within ~25mV so 4.7V from 5V is fine. Second half spare for the low-pass
-U-DIFFRX,module,INA134,TI,Difference amp with on-chip matched resistors,SOIC-8 (1.27mm pitch),1,candidate,,0003,~90dB CMRR vs 60dB needed. On-chip matching means no external network
+U-DIFFRX,module,INA821 or INA828,TI,"Instrumentation amp - breath receiver, senses against AGND",SOIC-8 (1.27mm pitch),1,candidate,,0003,Buffered GOhm inputs make source impedance irrelevant. Absorbs the ~2.13x gain stage. REF pin takes the ambient-zero injection
 J-USB,controller,USB-C receptacle,,USB-C connector for the real-time carrier,n/a,1,not-needed,,0013,Dev boards carry these. Only required if a custom MCU carrier is ever built (ADR 0013)
 U-ESD-USB,controller,USBLC6-2SC6,ST,USB ESD protection array,n/a,1,not-needed,,0013,Dev boards carry these. Only required if a custom MCU carrier is ever built (ADR 0013)
 SW-BOOT,controller,TBD,,Boot and reset buttons,n/a,2,not-needed,,0013,Dev boards carry these. Only required if a custom MCU carrier is ever built (ADR 0013)
@@ -31,7 +31,7 @@ U-TVS-UMB,controller,SP3012-06UTG or similar array,multiple,TVS array on umbilic
 C-BULK-DISP,controller,TBD,,Local bulk capacitance at the display board,1206 / electrolytic THT,1,open,,0013,Absorbs WiFi TX transients so they do not reach the rack rail
 TUBE,controller,silicone tube + dead-volume trap,,Breath tube from mouthpiece to sensor,n/a,1,open,,0003,~30mm. Trap clearable without disassembly
 SW-PWR-INST,controller,TBD,,Instrument power switch,panel slide switch,1,open,,0005,Switches the buck EN pin not the 12V rail - no current through it
-R-PD-BREATH,module,100k,,Pulldown on the breath receive input,0805 (2.0 x 1.25mm),1,candidate,,0005,High enough not to load the INA134 input network
+R-PD-BREATH,module,100k,,Pulldown on the breath receive input,0805 (2.0 x 1.25mm),1,candidate,,0005,DIFFERENTIAL across BREATH-AGND not one leg - a single-leg shunt caps CMRR near 19dB
 U-LVLSHIFT,controller,74AHCT125,multiple,Quad buffer as LED data level shifter,SOIC-14 (1.27mm pitch),1,candidate,,0014,SOIC-14. 5V rail TTL thresholds so 3V3 reads high. Two spare gates. VERIFY WS2815 threshold
 F-POLY,controller,PPTC 1206 500mA hold,multiple,Resettable fuse at umbilical entry,1206 (3.2 x 1.6mm),1,candidate,,0005,1206 not 0603 - larger package is easier to place and inspect
 R-DIV-ADC,controller,TBD,,Divider on the ADC branch of the breath buffer,0805 (2.0 x 1.25mm),2,open,,0003,Sensor reaches 4.7V into a 3V3 ADC. Divide after the buffer not before

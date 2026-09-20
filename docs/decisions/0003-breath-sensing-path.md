@@ -154,6 +154,153 @@ wave is the wrong model once there is a trap volume at the end — it is a
 - Tube length is the cheapest remaining lever if measurements come back worse
   than expected.
 
+## Breath output is analog, sent differentially
+
+Breath is the one channel where output steppiness reaches the ear: it modulates
+continuously, usually into a VCA, so staircase ripple becomes amplitude
+modulation. Pitch is static between notes and mod channels are slow, so neither
+has the same problem.
+
+**So the breath CV never gets digitised on its way to the jack.** The sensor's
+buffered output is driven down the umbilical as an analog signal and scaled in
+the module. Zero steps, by construction, at any rate.
+
+### Why a Eurorack patch cable gets away with this, and what to copy
+
+A patch cable carries single-ended CV between modules with no trouble at all,
+and understanding *why* is what makes this work here.
+
+**A module's power returns through the bus board's ground rail, not through the
+patch cable.** The patch cable's ground carries only the signal current flowing
+into a high-impedance input — microamps — so it develops essentially no IR drop
+and acts as a pure voltage reference.
+
+| Receiving input | Signal current | Drop across 2 m of 24 AWG |
+|---|---|---|
+| 100 kΩ | 50 µA | 8.4 µV |
+| 1 MΩ | 5 µA | 0.8 µV |
+
+Against a 153 µV LSB on a 10 V output, that is nothing. The patch cable works
+because **its ground does exactly one job.**
+
+### The failure mode is a shared conductor, not a cable
+
+The umbilical breaks that condition only if one ground conductor does both jobs.
+The instrument draws its power down the same cable, and that return current
+through a shared ground develops a real, *moving* offset:
+
+| Instrument draw | Offset on a shared ground |
+|---|---|
+| 100 mA | 16.8 mV |
+| 200 mA | 33.7 mV |
+| 350 mA | 58.9 mV |
+
+It moves with display brightness, LED animation and WiFi bursts — breath CV
+modulated by the light show.
+
+### So separate the grounds and it is a patch cable again
+
+**Give the analog signal its own return conductor that carries no power
+current**, and have the module sense `BREATH` against `AGND` rather than against
+its own local ground. `AGND` then sits at true instrument-ground potential at
+both ends, and the error falls back to the microvolts in the table above.
+
+This restores exactly the Eurorack condition inside the umbilical, and it means
+the instrument end needs **only a buffer** — an op-amp follower, band-limited,
+with a series resistor for protection. No differential line driver.
+
+The module end must sense `BREATH` against `AGND` rather than against local
+ground — that part is not optional, since sensing against local ground puts the
+shared-ground offset straight back in.
+
+**But the receiver is a true instrumentation amplifier (INA821 / INA828), not a
+difference amplifier.** A difference amp's CMRR is set by **source-impedance
+balance, not by the chip**: TI's own datasheet states that a 10 Ω mismatch
+degrades the INA134 to ~74 dB, and this design's own protection resistor and
+pulldown would have left roughly **19–34 dB against the 60 dB the scheme needs.**
+
+The two requirements were also incompatible as specified: protecting the buffer
+against a sustained +12 V fault on the BREATH conductor needs **≥3.3 kΩ** of
+series resistance, and 3.3 kΩ unmatched leaves ~24 dB of CMRR.
+
+**A buffered-input in-amp dissolves that conflict entirely** — gigaohm inputs
+make source impedance irrelevant, so protection resistors can be 10 kΩ and
+unmatched with no CMRR penalty. Three further benefits: it **absorbs the ~2.13×
+scaling stage** so net part count is flat or lower; its **REF pin is the natural
+injection point** for the firmware ambient-zero, driven from a low-impedance
+buffer rather than a divider; and it has **real DC offset and drift
+specifications**, where the INA134 is an audio part characterised for AC feeding
+what is here a DC-accurate output.
+
+Put the pulldown **differentially across BREATH–AGND**, not on one leg. A shunt
+on a single leg does not symmetrise the way a series element does — 100 kΩ on
+the + input alone would cap CMRR near 19 dB.
+
+Full differential signalling was considered and is not needed: it buys about
+6 dB against induced noise, which a twisted pair band-limited to 500 Hz does not
+need, at the cost of a driver in the instrument.
+
+### Impedance and bandwidth are non-problems
+
+Drive low-impedance, receive high-impedance, standard practice. With ~200 pF of
+cable and a 100 Ω source the corner sits at 8 MHz against a 160 Hz signal — six
+orders of margin. Transmission-line behaviour is irrelevant at this bandwidth.
+
+**Band-limit at both ends, around 500 Hz.** The sensor only has ~159 Hz of real
+bandwidth, so a narrow channel costs nothing and rejects almost everything that
+could couple in — SPI edges, LED PWM, WiFi bursts and switching-supply hash all
+live far above it. A low-bandwidth analog channel is much easier to keep clean
+than a wide one.
+
+### It pays for itself on the digital link
+
+| | Payload | SPI clock |
+|---|---|---|
+| Breath digital at 96 kHz + 5 channels at 2 kHz | 3.39 Mbit/s | ~6.8 MHz |
+| **Breath analog, 5 channels at 2 kHz** | **0.32 Mbit/s** | **~0.6 MHz** |
+
+This **cancels the RS-485 escalation** in ADR 0004 and **removes the sub-10 µs
+DAC settling requirement** in ADR 0006. Both of those existed only to carry a
+96 kHz breath channel that no longer exists.
+
+### The ADC does not go away
+
+The sensor's buffered output splits two ways:
+
+- **To the umbilical buffer** — full scale, 0.2–4.7 V, for the CV output.
+- **To the SAR ADC** — for breath threshold and note gating, as a modulation
+  source for the mod channels, for the display, and for USB MIDI.
+
+**The ADC branch needs attenuating.** The sensor reaches 4.7 V while the ADC
+runs on 3.3 V, so that branch takes a divided copy — roughly 0.6× — to land
+inside the converter's input range. The umbilical branch stays full scale.
+Divide *after* the buffer, not before, so the divider does not load the sensor.
+
+So curve shaping, thresholds and ambient zeroing still exist in firmware; they
+just no longer sit in the path to the breath jack.
+
+### What the analog path gives up, and what replaces it
+
+**Curve shaping on the breath output.** Genuinely lost — `breath_gamma` cannot
+apply to a signal firmware never touches. In a modular context this is arguably
+correct: sending raw breath and shaping it with the rack's own tools is the
+idiom, and the panel gain and offset knobs (ADR 0006) are exactly the Pulp
+Logic model. Shaping still applies to the digital copy driving mod channels and
+MIDI.
+
+**Ambient zeroing.** Not lost — solved with a spare DAC channel. The DAC is
+octal with channels going spare, so **one channel drives a firmware-controlled
+DC offset into the module's analog summing stage.** Firmware measures ambient at
+startup exactly as the 2021 code did, and nulls it by moving that offset. Digital
+control of an analog signal path, for the cost of one already-paid-for channel.
+
+### Parts
+
+A precision op-amp differential driver and receiver pair is sufficient at this
+bandwidth — no audio-specialty part is required, though THAT1606/THAT1200 or
+DRV134/INA1650 are drop-in options if convenient. What matters is the receiver's
+CMRR and low offset drift, since this feeds a 0–10 V output.
+
 ## The closed tube is correct, and why
 
 A design review raised this as a likely error, on good evidence: no commercial
