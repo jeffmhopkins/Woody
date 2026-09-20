@@ -58,18 +58,52 @@ Hand-wired on laser-cut plates during ergonomic iteration (hours per iteration),
 moving to PCB once the layout is locked. PCB turnaround is a week and is the
 enemy of ergonomic iteration, so it comes after M3, not before.
 
-## Switch weight is not yet confirmed
+## Switch weight: red (linear), and swappable by design
 
-The KS-33 ships in several weights and actuation types. Which variant is in hand
-matters, because the left thumb actuates with its tip while partly giving up
-grip (ADR 0010), and that gesture has much less force available than a finger
-pressing straight down.
+**Red** — linear, and the lightest common option in the KS-33 line. Right for
+this instrument: tactile or clicky variants add breakaway force that would fight
+the left thumb, which actuates with its tip while partly giving up grip
+(ADR 0010), and on a wind instrument a tactile bump buys nothing since there is
+no typing feedback to want.
 
-**Light linear is almost certainly correct.** Tactile or clicky variants add
-breakaway force that will fight the thumb gesture, and on a wind instrument the
-tactile bump buys nothing — there is no typing feedback to want.
+Bought to try. Whether it is *right* is a question only playing answers.
 
-Confirm at M1, while the switches are on the bench for cutout measurement.
+### So the final build uses hot-swap sockets
+
+Keeping the option to change switches is worth designing for rather than
+retrofitting, for three reasons:
+
+**Feel is genuinely uncertain until played.** A thumb tip extending from a grip
+has much less force available than a finger pressing straight down. Red may
+still be too heavy there, or fine everywhere. Nobody can answer that from a
+datasheet.
+
+**Mixed weights become a free experiment.** This is the interesting one. There
+is no reason every key needs the same spring — real woodwinds vary spring weight
+across keys for exactly this reason. **The four left-thumb keys could run
+lighter than the eleven finger keys**, which directly addresses the force
+concern above. With sockets that is a five-minute change; soldered, it is a
+rebuild.
+
+**Serviceability in a sealed body.** The instrument is a bonded laminated stack
+(ADR 0009). A dead switch in a soldered build means taking it apart. Socketed,
+the eleven top keys can be pulled from the outside with a keycap and switch
+puller, no disassembly at all. The four thumb switches mount to the inside face
+of the bottom panel and are not reachable that way, but eight of eleven beats
+none of eighteen.
+
+Sockets cost a little height below the PCB and slightly less retention — but
+retention is the plate's job here anyway (above), not the solder joint's.
+
+### What is and is not swappable
+
+Sockets cover **any switch sharing the KS-33 footprint** — other weights in the
+Gateron low-profile line, which is the realistic case.
+
+They do **not** cover a change of switch family. Moving to Choc or full-height
+MX would need a new plate cutout and a new PCB footprint. The MT165 caps also
+pin this: they are MX-stem, so the low-profile MX-stem family is effectively
+locked by the keycaps regardless.
 
 ## Open
 
