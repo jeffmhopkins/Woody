@@ -1,5 +1,5 @@
 ref,category,part,manufacturer,description,qty,status,source,adr,notes
-SW1-n,controller,KS-33 Red (linear),Gateron,Low-profile mechanical switch MX stem,18,purchased,Amazon,0002,Binary. Plate cutout must be measured. Thumb keys may want lighter - hot-swap makes that free
+SW1-n,controller,KS-33 Red (linear),Gateron,Low-profile mechanical switch MX stem,18,purchased,Amazon,0002,Binary. Plate cutout must be measured. Soldered. Thumb keys may want a lighter spring - decide at M1
 CAP1-n,controller,MT165-MX,Tai-Hao,Keycap 16.5x16.5mm blank black MX stem,18,purchased,Beekeeb,0002,Sold in 5-packs - 18 keys needs 4 packs. Smaller than 18mm MX spacing
 U-MCU-RT,controller,ESP32-S3-WROOM-1,Espressif,Real-time MCU - keys sensors DAC drive USB MIDI,1,candidate,,0013,Mid-body board. Prefer quad PSRAM. 13 of ~30 pins used
 U-BREATH,controller,MPXV4006GP,NXP,Pressure transducer 0-6kPa gauge conditioned,1,selected,,0003,~1ms response = ~159Hz corner. ADC runs 4-8kHz; rate lives on the DAC side
@@ -33,4 +33,3 @@ U-TVS-UMB,controller,TBD,,TVS / ESD protection on umbilical entry,1,open,,0004,8
 C-BULK-DISP,controller,TBD,,Local bulk capacitance at the display board,1,open,,0013,Absorbs WiFi TX transients so they do not reach the rack rail
 R-I2C,controller,TBD,,I2C pull-ups for the IMU,2,open,,0007,
 TUBE,controller,silicone tube + dead-volume trap,,Breath tube from mouthpiece to sensor,1,open,,0003,~30mm. Trap clearable without disassembly
-SKT-HS,controller,Gateron low-profile hot-swap socket,,Hot-swap socket for KS-33 footprint,18,open,,0002,Final PCB build. Covers weight changes within the KS-33 line not a family change

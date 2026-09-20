@@ -58,7 +58,7 @@ Hand-wired on laser-cut plates during ergonomic iteration (hours per iteration),
 moving to PCB once the layout is locked. PCB turnaround is a week and is the
 enemy of ergonomic iteration, so it comes after M3, not before.
 
-## Switch weight: red (linear), and swappable by design
+## Switch weight: red (linear)
 
 **Red** — linear, and the lightest common option in the KS-33 line. Right for
 this instrument: tactile or clicky variants add breakaway force that would fight
@@ -66,44 +66,31 @@ the left thumb, which actuates with its tip while partly giving up grip
 (ADR 0010), and on a wind instrument a tactile bump buys nothing since there is
 no typing feedback to want.
 
-Bought to try. Whether it is *right* is a question only playing answers.
+Bought to try. Whether the action is right is settled **by hand at M1**, before
+anything is built — press one with a fingertip, then with the tip of a thumb
+held as it would grip the instrument. That is a ten-minute question with
+switches on the bench and no hardware.
 
-### So the final build uses hot-swap sockets
+Switches are soldered in the final build. An earlier revision of this ADR
+argued for hot-swap sockets, which was over-engineering: the decision happens
+once, up front, not repeatedly at runtime.
 
-Keeping the option to change switches is worth designing for rather than
-retrofitting, for three reasons:
+### Weights need not be uniform
 
-**Feel is genuinely uncertain until played.** A thumb tip extending from a grip
-has much less force available than a finger pressing straight down. Red may
-still be too heavy there, or fine everywhere. Nobody can answer that from a
-datasheet.
+Worth deciding at M1 rather than defaulting: **the four left-thumb keys may want
+a lighter spring than the eleven finger keys.** A thumb tip extending from a
+grip has considerably less force available than a finger pressing straight down,
+and real woodwinds vary spring weight across keys for exactly this reason.
 
-**Mixed weights become a free experiment.** This is the interesting one. There
-is no reason every key needs the same spring — real woodwinds vary spring weight
-across keys for exactly this reason. **The four left-thumb keys could run
-lighter than the eleven finger keys**, which directly addresses the force
-concern above. With sockets that is a five-minute change; soldered, it is a
-rebuild.
+Since this is settled before the build, mixed weights cost nothing but ordering
+four of something different.
 
-**Serviceability in a sealed body.** The instrument is a bonded laminated stack
-(ADR 0009). A dead switch in a soldered build means taking it apart. Socketed,
-the eleven top keys can be pulled from the outside with a keycap and switch
-puller, no disassembly at all. The four thumb switches mount to the inside face
-of the bottom panel and are not reachable that way, but eight of eleven beats
-none of eighteen.
+### Accepted consequence
 
-Sockets cost a little height below the PCB and slightly less retention — but
-retention is the plate's job here anyway (above), not the solder joint's.
-
-### What is and is not swappable
-
-Sockets cover **any switch sharing the KS-33 footprint** — other weights in the
-Gateron low-profile line, which is the realistic case.
-
-They do **not** cover a change of switch family. Moving to Choc or full-height
-MX would need a new plate cutout and a new PCB footprint. The MT165 caps also
-pin this: they are MX-stem, so the low-profile MX-stem family is effectively
-locked by the keycaps regardless.
+A failed switch in a bonded laminated body (ADR 0009) means taking the
+instrument apart. Accepted — mechanical switches are reliable, this is a
+one-off, and designing the whole build around a failure that probably never
+comes is the wrong trade.
 
 ## Open
 

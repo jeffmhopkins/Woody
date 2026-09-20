@@ -65,7 +65,7 @@ runs — which is what makes 18 inches workable.
 
 | ID | Milestone | Done when |
 |---|---|---|
-| M1 | Switch characterisation | KS-33 plate cutout measured with calipers; test coupon cut at ±0.1mm steps; retention verified by hand; **contact bounce scoped** and debounce windows set from the measurement; red linear confirmed; thumb-tip actuation force assessed against finger actuation, and whether the thumb keys want a lighter spring (ADR 0002) |
+| M1 | Switch characterisation | KS-33 plate cutout measured with calipers; test coupon cut at ±0.1mm steps; retention verified by hand; **contact bounce scoped** and debounce windows set from the measurement; **action assessed by hand** — fingertip vs thumb-tip, and whether the four thumb keys want a lighter spring than the eleven finger keys (ADR 0002) |
 | M2 | Layout mule | Full key count on a laser-cut plate, hand-wired, mounted to a mock body; playable |
 | M3 | Layout locked | Ergonomics settled after 2–3 iterations of M2. No aluminium cut before this |
 | M4 | Stack design | Full laminated stack in CAD, every layer a 2D part |
