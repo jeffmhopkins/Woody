@@ -202,17 +202,26 @@ input if something later wants one.
 
 ### Two things to carry forward
 
-**The 64 LED drivers are never turned on, and they are not free.** WS2812-class
+**The 64 LED drivers are not free — so they get a job.** WS2812-class
 controllers draw roughly 0.6–1 mA each with their outputs off, so the matrix
-represents an estimated **~50 mA and ~0.25 W continuously** — inside a sealed
-body with a documented 10–20 K interior rise, near a temperature-sensitive gauge
-sensor, for no function. That is about 8 % of the instrument's current budget.
+represents an estimated **~50 mA and ~0.25 W continuously** whether or not
+anything is ever displayed — inside a sealed body with a documented 10–20 K
+interior rise, near a temperature-sensitive gauge sensor.
 
-**Measure it at E1** with the board idle, rather than carrying the estimate
-forward. Cutting the matrix's supply trace was considered and declined: it is a
-permanent modification to a part that is not easily replaced, made against an
-estimated number, for a saving that is real but not large. Revisit only if the
-measurement is materially worse than 50 mA.
+This ADR originally recorded that as pure waste, with cutting the supply trace
+as the only remedy. **It is now the instrument's second display**: the board
+faces out through a window in the oak underside at the tail, and the matrix is a
+generic assignable surface defaulting to breath (ADR 0014). The idle current is
+being spent either way, and sparse content costs single-digit milliamps on top
+of it.
+
+**Measure the idle draw at E1** regardless, because the shared lighting budget
+in ADR 0014 is sized from it and it is currently an estimate.
+
+This also settles the board's position rather than leaving it to convenience:
+**the very bottom tip**, which is where acceleration sensitivity wants the IMU
+*and* where a display wants to be in the player's downward glance. The two
+requirements agree, which is rare enough to take advantage of.
 
 **If the board ships with octal PSRAM, the pin budget collapses to exactly
 enough.** Octal PSRAM consumes GPIO33–37, which would take the 16 broken-out

@@ -73,7 +73,7 @@ runs — which is what makes 18 inches workable.
 | M3 | Layout locked | Ergonomics settled after 2–3 iterations of M2. No aluminium cut before this |
 | M4 | Stack design | Full laminated stack in CAD, every layer a 2D part |
 | M5 | Aluminium top plate | Cut, fitted, switches retained solidly, **bonded to `PWR_GND`**. Not before E13 — see the ordering rules below |
-| M6 | Body | Oak top and bottom, frosted acrylic sides, LEDs, strap points |
+| M6 | Body | Oak top and bottom, frosted acrylic sides, LEDs, strap points, **tail matrix window + diffuser and USB-C slot** (ADR 0009) |
 | M7 | Integration | Electronics mounted in the body, umbilical connector fitted and strain-relieved |
 | M8 | **Pre-bond gate** | Assembled but **not bonded**. Full E11 breath-noise test re-run on the *final* harness, thermal soak, two-hour play test, failure injection, self-test. Nothing closes until this passes |
 
@@ -136,6 +136,7 @@ not a release, and should not be filtered as though the phrase were ending.
 | F5 | **Web config app** | SoftAP, captive portal, web app served from flash. Fingering table, routing matrix, breath curves |
 | F6 | Live monitoring | WebSocket telemetry to the phone: breath, IMU angles, commanded CV |
 | F7 | Status display | Note, breath, active channels, mode. Status only — config lives on the phone |
+| F9 | **Matrix surface** | 8×8 as a generic assignable sink: breath by default, other sources and render modes from config. Alarm states preempt and cannot be configured off (ADR 0014) |
 | F8 | Persistence | Config and calibration in NVS; presets |
 
 ---
@@ -149,7 +150,7 @@ not a release, and should not be filtered as though the phrase were ending.
 | **2** | M3, E6–E9 | Layout locked; pitch CV calibrated and accurate |
 | **3** | E10–E12, M4 | Module complete and racked; stack designed. **M5 moves to Phase 4** — the plate is cut after the carrier layout exists |
 | **4** | E13, E14, M5–M7, M8 | Carrier built and re-proven; plate cut; real instrument in a real body, validated before bonding |
-| **5** | F4–F8 | Routing matrix, web config, monitoring, presets |
+| **5** | F4–F9 | Routing matrix, web config, monitoring, presets, matrix surface |
 
 ## Out-of-order work worth pulling forward
 
@@ -176,7 +177,8 @@ came out of the analog design review specifically.
 
 | Measure | At | Why |
 |---|---|---|
-| **Real-time board idle current** | E1 | 64 unlit WS2812C drivers are an estimated ~50 mA and 0.25 W of pure waste next to a temperature-sensitive sensor. Decides whether the matrix supply gets cut (ADR 0007) |
+| **Real-time board idle current** | E1 | 64 unlit WS2812C drivers are an estimated ~50 mA and 0.25 W, spent whether or not anything is displayed. The shared lighting budget is sized from this number (ADR 0014) |
+| **Matrix diffusion prototype** | M6 | Can an 8×8 at 2.6 mm pitch stay pixel-distinct through a window, or only as a blurred bar? Decides whether the 2-D IMU assignment is usable (ADR 0014) |
 | **PSRAM mode on the ESP32-S3-Matrix** | E1 | Quad leaves 16 broken-out GPIO; octal would consume GPIO33–37 and leave exactly 12 with nothing spare. **The carrier pin map depends on this** (ADR 0007) |
 | **DAC saturation vs AVDD** | E7 | The output span *is* the supply. Record the actual saturation code at the actual rail rather than claiming +7 V (ADR 0006) |
 | **Pitch DC load sweep: open / 100k / 50k / 33k** | E9 | Quantifies the 1 kΩ divider error against the real patch, and tells you how much a re-mult actually shifts tuning (ADR 0006) |

@@ -8,6 +8,16 @@ An addressable LED run down the length of the instrument, driven by breath and
 other instrument state, diffused through the frosted acrylic side panels
 (ADR 0009).
 
+**Two light sources, not one.** The side strips above, and the **8×8 RGB matrix
+on the real-time board** (ADR 0007), which faces out through a window in the
+underside at the tail. The matrix was originally counted as dead weight — 64 LED
+drivers that would never be lit, costing current and heat for nothing. Pointing
+it at a window turns that into the instrument's only two-dimensional display.
+
+They are covered by one ADR because they share a current budget, a clamp rule
+and a blank-at-boot rule, and because the easiest way to get those wrong is to
+design them separately.
+
 ## Geometry: two runs, one chain
 
 A single strip "down the middle" is not available — switch bodies occupy the
@@ -118,9 +128,13 @@ white at 60/m would take a third to a whole rail on its own, and it is not a
 mode anyone intends to use — but it is one bug away.
 
 **So the brightness cap is enforced in firmware as a hard limit, not exposed as
-a setting.** Sum the commanded channels, and clamp before writing to the strip.
-A display bug that sets 50 LEDs to white at full brightness must not be able to
-brown out the rack, which would take every other module with it.
+a setting.** Sum the commanded channels, and clamp before writing. A display bug
+that sets 50 LEDs to white at full brightness must not be able to brown out the
+rack, which would take every other module with it.
+
+**The budget is instrument-wide and shared with the 8×8 matrix**, not per
+device — see the matrix section below. Two independent caps cannot see that both
+are drawing at once, and the matrix alone can ask for 960 mA.
 
 ### The firmware clamp used to be the only defence, and it did not survive
 
@@ -145,9 +159,10 @@ clamp anything.
   thermal one.
 - **The load switch is at the module, not the instrument**, so the limit holds
   whatever the instrument's MCU is doing — including nothing.
-- **Blank both strips as the first act at boot**, before anything else
-  initialises. A reset then clears a latched state in a few hundred
-  milliseconds rather than leaving it until something happens to overwrite it.
+- **Blank both strips *and the matrix* as the first act at boot**, before
+  anything else initialises. A reset then clears a latched state in a few
+  hundred milliseconds rather than leaving it until something happens to
+  overwrite it. The matrix is on the MCU that resets, so it latches too.
 
 **The firmware clamp is now a comfort feature, not a safety feature.** That is
 the right status for it. Treat it as aesthetic, and size the hardware so the
@@ -194,6 +209,117 @@ Two fixes, both free:
 
 The second one is the real fix and it is a single line about which variable
 feeds the animation.
+
+## The 8×8 matrix
+
+The real-time board sits at the very bottom tip of the instrument — where
+ADR 0007 wants it for maximum acceleration sensitivity — with its LED face
+directed out through a window in the oak underside, below the right-hand key
+run. Facing the player's downward glance, not the audience.
+
+### It is a generic assignable surface, defaulting to breath
+
+The same shape as the mod channels in ADR 0006: a **sink with a configurable
+source**, set from the display and the web app rather than wired to one thing.
+
+| | |
+|---|---|
+| **Default source** | **Breath** |
+| Other sources | IMU tilt, IMU roll, acceleration, note/pitch, any mod channel value, playing state |
+| Render modes | Level bar, 2-D dot against a captured zero, centre bloom, whole-field brightness, glyph |
+| Per assignment | Palette, orientation, and which edge reads as zero |
+
+**Orientation is configuration, not construction.** Which edge of the grid is
+"up" depends on how the board lands in the body at M4, and nobody should have to
+rotate a PCB to fix a display that reads sideways. One config field.
+
+**What it can do that nothing else in the instrument can is two dimensions.**
+The AMOLED at the top is text, and you are not looking at the far end mid-phrase;
+the side strips are a one-dimensional glow. Tilt and roll are two axes, and
+ADR 0007's capture-on-press gating means there is a captured zero and a live
+deviation from it — which is a dot moving against a centre mark, **with the
+deadband drawn on the grid.** That is the assignment to reach for once breath
+gets boring, and it is the reason to keep pixel definition in the diffuser
+below.
+
+### Alarms are not assignable away
+
+One reserved behaviour on an otherwise generic surface: **alarm states preempt
+whatever is assigned.**
+
+The roadmap requires an uncalibrated instrument to be unmissable, stuck-key
+suspects to be reported, and the key-chain marker error count to be visible —
+because each of those otherwise fails silently and gets blamed on the player for
+years. A full-field red X is unmissable and needs no menu.
+
+If the surface were fully generic, a configuration could hide exactly the
+information that exists to be impossible to hide. So it cannot be configured
+off, in the same way and for the same reason that the brightness cap below is a
+hard limit rather than a setting.
+
+### Current: sparse is free, full field is not
+
+WS2812C-2020 draws **5 mA per channel**, so 15 mA per LED at full white and
+960 mA for all 64. Converted to the +12 V umbilical through the buck (×0.49):
+
+| Matrix state | mA @ 5 V | ≈ mA @ 12 V |
+|---|---|---|
+| Idle — all off, drivers powered | ~40–64 *(estimated, measure at E1)* | ~20–31 |
+| One dot at full brightness | +5 | +2 |
+| Eight-pixel bar at 25 % | +10 | +5 |
+| Breath bar, full field, single hue at 50 % | +160 | +78 |
+| **Full field white** | **+960** | **+470** |
+
+**The useful content is nearly free; the pathological content is not.** A dot or
+a bar costs single-digit milliamps on top of an idle draw that is being spent
+either way. Full-field white would roughly double the instrument's total draw.
+
+**So the clamp is a shared current budget, not a per-device brightness cap.**
+ADR 0014 previously clamped only the strips. That is now wrong in two ways: it
+left the matrix uncovered, and a per-device cap cannot see that both are drawing
+at once.
+
+> **One instrument-wide lighting budget, summed across both strips and the
+> matrix, enforced in firmware before any write.** When the commanded total
+> exceeds it, scale everything down proportionally rather than refusing the
+> write.
+
+Proportional scaling is what makes a full-field breath bar behave: it simply
+arrives dimmer than a single dot would, which is also what looks right.
+
+**And the blank-at-boot rule matters more here than for the strips.** The
+failure in the strips' case was that a brownout resets the MCU and the WS2815s
+latch. The matrix is physically *on* the MCU that resets, so it latches too, and
+it is the more visible of the two. Blanking both is the first act at boot.
+
+### The diffuser is a different problem from the side panels
+
+The side panels are **frosted** precisely to blur the strips into a glow. An 8×8
+wants the opposite: enough diffusion to kill hot spots, little enough to keep 64
+pixels distinguishable. At 2.6 mm LED pitch a 10 mm standoff blends adjacent
+pixels into mush.
+
+**The default assignment is forgiving and the interesting one is not.** A breath
+bar reads perfectly well through heavy diffusion; a 2-D IMU dot against a
+deadband does not. So prototype against the demanding case — board close to the
+window, a thin diffuser rather than a thick frost, possibly a light-guide grid —
+and fall back to the forgiving one only if that proves impossible.
+
+### Construction constraints, which belong in CAD now
+
+- **The carrier needs a ~22 mm cutout** under the board, because the LED face
+  points at the carrier and the light has to pass through it. Free on a 2-layer
+  board, impossible to add later.
+- **Confirm which face carries the matrix relative to the header rows** when the
+  board arrives. If the geometry is wrong, the fallback is mounting the board on
+  the carrier's underside, and failing that a flying harness for 14 signals,
+  which is ugly enough to be worth checking early.
+- **A window in the oak underside** below the right-hand key run, clear of the
+  thumb keys and the U-bolt. It is a through-cut in a flat part, so the
+  laminated construction gives it for free (ADR 0009).
+- **A USB-C slot at the tail**, which the instrument needs regardless — flashing
+  and USB MIDI both require it in a body that cannot be opened. Keep that edge
+  of the board at the tail face.
 
 ## Diffusion is a prototype question
 

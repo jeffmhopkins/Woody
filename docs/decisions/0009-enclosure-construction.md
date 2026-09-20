@@ -239,6 +239,37 @@ The only stack requirement is **access to clear it without disassembly**. Not a
 drain plumbed through the body — just a serviceable path to the sensor end of a
 short tube near the top.
 
+### The tail carries a display window and a USB port
+
+Two openings in the tail section, below the right-hand key run, clear of the
+thumb keys and the U-bolt:
+
+**A window in the oak underside for the 8×8 matrix** on the real-time board
+(ADR 0007, ADR 0014). Roughly 22 mm square, facing the player's downward glance
+rather than the audience. It is a through-cut in a flat part, so lamination
+gives it for free — the cost is entirely in planning, because it constrains
+where that board sits and it cannot be added once the stack is bonded.
+
+Three details that have to be in the CAD from the start:
+
+- **A matching cutout in the carrier PCB**, because the board's LED face points
+  at the carrier and the light has to pass through it.
+- **A diffuser, and not the side panels' material.** The sides are frosted to
+  blur the strips into a glow; an 8×8 needs enough diffusion to kill hot spots
+  and little enough to keep pixels distinguishable. Thin, and close to the LEDs.
+- **Which face of the board carries the matrix** relative to its header rows.
+  Confirm on arrival. If it is the wrong way round, the board moves to the
+  carrier's underside; if that fails too, a flying harness for 14 signals, which
+  is ugly enough to be worth knowing about early.
+
+**A USB-C slot at the tail face**, which the instrument needs regardless of the
+window. Flashing and USB MIDI (E5) both require reaching the real-time board's
+own connector, and there is no reaching anything once the body is bonded. Keep
+that edge of the board at the tail.
+
+Both are cheap now and unavailable later, which is the recurring shape of every
+decision in this section.
+
 ### Strap point: U-bolt above the centre of gravity
 
 A U-bolt near the middle of the instrument, **slightly above the centre of
