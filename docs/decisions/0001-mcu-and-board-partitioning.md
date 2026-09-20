@@ -62,6 +62,12 @@ on the other. A display refresh must never block a CV update.
 - The 74HC165 chain suits this geometry well — four wires running the length of
   the body, one register per key cluster. No matrix, no ghosting, no long
   parallel runs, no per-key wiring back to a central point.
+- **Chain is 4 registers, 32 bits, for 18 switches** (ADR 0010): one device per
+  cluster — left hand, left thumb, right hand, right thumb — ordered down the
+  body. One register per cluster wastes 14 bits but makes every satellite board
+  identical, and the spare bits are free expansion for octave, mode and hold
+  inputs. Full chain reads in ~32 µs at 1 MHz, about 13% of a 250 µs loop
+  period, and it can be clocked considerably faster.
 - LED power and data run the length of the body too. Keep their ground return
   separate from the analog section and star-ground at one point, or the LEDs
   will be audible.

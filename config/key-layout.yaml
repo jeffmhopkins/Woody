@@ -7,8 +7,10 @@
 # When a key moves, both stay in sync by construction. Do not hand-edit the
 # generated plate or the firmware mapping.
 #
-# STATUS: schema only. Key count and positions are not yet decided and this
-# blocks milestone M2. See ADR 0010.
+# STATUS: key count and grouping are decided. Physical positions are NOT —
+# they come out of ergonomic iteration at M2/M3. Every x/y below is null on
+# purpose; the first laser-cut plate is generated from this file once they
+# are filled in.
 
 meta:
   units: mm
@@ -19,33 +21,66 @@ meta:
   plate_cutout: null
   plate_thickness: null
 
-# Physical switch positions. One entry per switch.
+counts:
+  left_hand: 5
+  right_hand: 6
+  left_thumb: 4
+  right_thumb: 3
+  total: 18
+
+# Physical switch positions.
 #
 #   id:       stable identifier, referenced by firmware and fingering table
-#   face:     top | bottom   (bottom = left thumb keys, inset — ADR 0009)
-#   x, y:     position on the plate, mm
+#   face:     top | bottom | side   (ADR 0009)
+#   x, y:     position on the plate, mm — filled in at M3
 #   rotation: degrees, for keys angled to the finger
 #   hand:     left | right
-#   finger:   thumb | index | middle | ring | little
-#   cluster:  groups keys onto a shift register; chain order follows cluster
+#   finger:   thumb | index | middle | ring | little — assign at M2
+#   cluster:  groups keys onto a shift register
 #
-# Example — delete once real keys are defined:
-#
-# keys:
-#   - id: L_INDEX_1
-#     face: top
-#     x: 0.0
-#     y: 0.0
-#     rotation: 0
-#     hand: left
-#     finger: index
-#     cluster: left_hand
+# Left hand is upper (nearer the mouthpiece), right hand lower.
 
-keys: []
+keys:
+  # --- Left hand, top face -------------------------------------------------
+  - { id: LH1, face: top,    x: null, y: null, rotation: 0, hand: left,  finger: null, cluster: left_hand }
+  - { id: LH2, face: top,    x: null, y: null, rotation: 0, hand: left,  finger: null, cluster: left_hand }
+  - { id: LH3, face: top,    x: null, y: null, rotation: 0, hand: left,  finger: null, cluster: left_hand }
+  - { id: LH4, face: top,    x: null, y: null, rotation: 0, hand: left,  finger: null, cluster: left_hand }
+  - { id: LH5, face: top,    x: null, y: null, rotation: 0, hand: left,  finger: null, cluster: left_hand }
 
-# Shift register chain order, outermost first (ADR 0001).
-# Each cluster is one or more 74HC165 devices.
-chain: []
+  # --- Left thumb, bottom face (inset — ADR 0009) --------------------------
+  - { id: LT1, face: bottom, x: null, y: null, rotation: 0, hand: left,  finger: thumb, cluster: left_thumb }
+  - { id: LT2, face: bottom, x: null, y: null, rotation: 0, hand: left,  finger: thumb, cluster: left_thumb }
+  - { id: LT3, face: bottom, x: null, y: null, rotation: 0, hand: left,  finger: thumb, cluster: left_thumb }
+  - { id: LT4, face: bottom, x: null, y: null, rotation: 0, hand: left,  finger: thumb, cluster: left_thumb }
+
+  # --- Right hand, top face ------------------------------------------------
+  - { id: RH1, face: top,    x: null, y: null, rotation: 0, hand: right, finger: null, cluster: right_hand }
+  - { id: RH2, face: top,    x: null, y: null, rotation: 0, hand: right, finger: null, cluster: right_hand }
+  - { id: RH3, face: top,    x: null, y: null, rotation: 0, hand: right, finger: null, cluster: right_hand }
+  - { id: RH4, face: top,    x: null, y: null, rotation: 0, hand: right, finger: null, cluster: right_hand }
+  - { id: RH5, face: top,    x: null, y: null, rotation: 0, hand: right, finger: null, cluster: right_hand }
+  - { id: RH6, face: top,    x: null, y: null, rotation: 0, hand: right, finger: null, cluster: right_hand }
+
+  # --- Right thumb, face TBD — see ADR 0010 open item ----------------------
+  - { id: RT1, face: null,   x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb }
+  - { id: RT2, face: null,   x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb }
+  - { id: RT3, face: null,   x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb }
+
+# Shift register chain, ordered by physical position down the body, nearest
+# the MCU first (ADR 0001). One 74HC165 per cluster: 4 devices, 32 bits, 18
+# used, 14 spare.
+chain:
+  - cluster: left_hand    # bits 0-7   — 5 used, 3 spare
+  - cluster: left_thumb   # bits 8-15  — 4 used, 4 spare
+  - cluster: right_hand   # bits 16-23 — 6 used, 2 spare
+  - cluster: right_thumb  # bits 24-31 — 3 used, 5 spare
+
+# Spare chain bits are free expansion. Candidates: octave up/down, a mode or
+# menu button, a hold/sustain switch. The 2021 firmware triggered mode changes
+# from key combinations (A[1], A[7], A[8]); dedicated inputs are better and
+# these bits are already paid for.
+spare_bits: 14
 
 # Fingering table lives in NVS and is editable at runtime, not compiled in
 # (ADR 0010). This file defines the physical layout only.
