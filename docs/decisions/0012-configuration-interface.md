@@ -49,7 +49,20 @@ avoidable annoyance at a festival.
 
 ## The radio must be off while playing
 
-**This is the rule that makes the rest of the design survive.**
+> **Substantially relaxed by [ADR 0013](0013-two-mcu-split.md).** The radio now
+> lives on its own MCU, so the CPU-contention half of this reasoning no longer
+> applies — WiFi cannot preempt the output loop because it is not on that
+> silicon. The current-transient half still stands, but is containable with a
+> separate regulator and local bulk capacitance on the display board. **Live
+> configuration while playing is therefore expected to be workable**, which is
+> worth real effort: adjusting a routing matrix and hearing the result
+> immediately is a different instrument to one you stop playing to configure.
+>
+> Measure it before trusting it (see the characterisation table in the latency
+> budget). The reasoning below is kept because it is why the split was worth
+> making.
+
+**This was the rule that made the rest of the design survive.**
 
 WiFi is actively hostile to everything this project has been careful about:
 
@@ -68,8 +81,8 @@ So:
    explicitly, by entering config mode — one of the spare shift-register inputs
    (ADR 0010) or a gesture. It is not a background service.
 2. **WiFi is pinned to the UI core**, never the core running the sensor and
-   output loop. The core split already exists for the display (ADR 0001); the
-   radio goes on the same side of it.
+   output loop. (Under ADR 0013 this is stronger still: the radio is on a
+   different chip.)
 3. **The latency budget is only valid with the radio off.** Noted in
    [the budget](../reference/latency-budget.md). If config mode is ever usable
    while playing, that combination needs measuring before it is trusted.
@@ -77,6 +90,7 @@ So:
 ## Consequences
 
 ### The display's job shrinks substantially
+
 
 This is the biggest downstream effect. The display no longer has to host a
 navigable configuration system — it becomes a **status** display: current note,

@@ -5,12 +5,15 @@ it is the thing most likely to be violated accidentally by a change that looks
 harmless — a blocking display refresh, an oversampled ADC, a filter corner set
 too low.
 
-> **These figures assume the WiFi radio is off.** The radio is off by default
-> and during performance for exactly this reason — transmit bursts cause both
-> current transients on the rail and preemption of the output loop. See
-> [ADR 0012](../decisions/0012-configuration-interface.md). If config mode ever
-> becomes usable while playing, that combination must be measured before it is
-> trusted.
+> **The display and radio are on a separate MCU**
+> ([ADR 0013](../decisions/0013-two-mcu-split.md)), so neither can preempt the
+> loop these figures describe. That isolation is physical rather than a
+> scheduling discipline.
+>
+> What remains is the **current transient** a WiFi burst puts on the rail, which
+> reaches the analog section through shared power rather than shared CPU. Each
+> board gets its own regulator and local bulk capacitance for that reason. Verify
+> by measurement before trusting configuration-while-playing.
 
 ## Target
 
@@ -64,7 +67,8 @@ load-bearing enough that being wrong about them would change the design.
 | **SPI over the umbilical at length** | Logic analyser at the module end, cable at full length | Setup/hold margin, ringing, double-clocking. This is where a long cable bites, and it is invisible without an LA. Gates E11 |
 | **DAC settling and filter corners** | Scope a commanded step | Confirm settling to within an LSB, and that the pitch and breath filters actually sit where they were designed to |
 | **Rack rail ripple, both directions** | Scope +12V at the module with the instrument running | Incoming ripple lands on the CV outputs; outgoing noise from the local buck lands on every other module in the rack. Gates E6 |
-| **WiFi transmit transients** | Scope the rail during a TX burst with the radio enabled | Quantifies what config mode costs, and whether the decoupling absorbs it or the rack sees it (ADR 0012) |
+| **WiFi transmit transients** | Scope the rail during a TX burst with the radio enabled | Now the *only* path by which WiFi can affect the outputs (ADR 0013). Decides whether configuration-while-playing is usable |
+| **Inter-MCU UART link** | Logic analyser on the pair, under load | Frame integrity and whether status traffic is jitter-free at rate (ADR 0013) |
 | **End-to-end, in one shot** | Two scope channels: one on the sensor output, one on the CV jack | Measures the real gesture-to-output time directly instead of summing estimates. This is the number that actually matters, and it is the one measurement that validates or refutes the entire table above |
 
 A signal generator driving a known waveform into the ADC front end also
@@ -84,8 +88,8 @@ a hypothesis; a budget made of measurements is a constraint.
 3. **Display rendering never blocks the output loop.** Separate SPI host,
    separate core. A full-screen refresh on a colour LCD is orders of magnitude
    longer than the whole budget above.
-4. **The WiFi stack shares the display's core, never the output loop's**, and
-   the radio is off while playing (ADR 0012).
+4. **The WiFi stack and display are on a different MCU entirely** (ADR 0013).
+   Nothing on the real-time board competes with the output loop.
 5. **Pitch output filter stays fast** (10–20 kHz). A low corner is an audible
    glide on every note.
 6. **Smoothing happens in software**, where it can be set per channel according

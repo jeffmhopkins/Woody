@@ -38,10 +38,11 @@ existing. Drive it from any dev board with a test pattern and a multimeter.
 
 | ID | Milestone | Done when |
 |---|---|---|
-| E1 | Dev board evaluation | Plain ESP32-S3 board + separate display module chosen and running; matches final architecture, not an integrated-screen board |
+| E1 | Board selection | ESP32-S3 real-time board + an integrated AMOLED display board (ADR 0013). Display board needs only 4 free pins |
 | E2 | Breath sensing | Analog sensor read through external SAR ADC, ambient zeroing works, stable reading |
 | E3 | IMU | Tilt and roll angles read reliably at rate |
 | E4 | Key scan | 74HC165 chain reads all switches; debounce asymmetric (instant press, filtered release) |
+| E4b | **Inter-MCU link** | Framed UART between the two boards, status flowing, logic-analyser clean (ADR 0013) |
 | E5 | **USB MIDI out** | Plays into a DAW. Fingering table exercised. First playable milestone |
 | E6 | Module power | ±12V from rack, input filtering, no noise injected back into the rack |
 | E7 | DAC raw | Commanded codes produce expected voltages on the meter, all six channels |
@@ -127,5 +128,5 @@ dev board on the bench.
 |---|---|---|
 | E2 | Which breath sensor is actually in hand | [ADR 0003](docs/decisions/0003-breath-sensing-path.md) |
 | E12 | Connector choice, pending panel fit check | [ADR 0004](docs/decisions/0004-cv-interface-module.md) |
-| E1 | Which AMOLED board — needs ≥10 free broken-out GPIO | [ADR 0008](docs/decisions/0008-display-selection.md) |
+| E1 | Which AMOLED board — needs a genuine AMOLED panel and 4 free pins | [ADR 0008](docs/decisions/0008-display-selection.md) |
 | E3 | IMU part | [ADR 0007](docs/decisions/0007-imu-selection.md) |

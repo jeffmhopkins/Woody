@@ -27,7 +27,7 @@ why it was deleted is worth keeping.
 
 | # | Title | Status |
 |---|---|---|
-| [0001](0001-mcu-and-board-partitioning.md) | MCU selection and board partitioning | Accepted |
+| [0001](0001-mcu-and-board-partitioning.md) | MCU selection and board partitioning | Accepted (partitioning revised by 0013) |
 | [0002](0002-key-switches-and-mounting.md) | Key switches and mounting | Accepted |
 | [0003](0003-breath-sensing-path.md) | Breath sensing signal path | Accepted |
 | [0004](0004-cv-interface-module.md) | CV interface module and umbilical | Accepted |
@@ -39,3 +39,4 @@ why it was deleted is worth keeping.
 | [0010](0010-key-layout-as-data.md) | Key layout as data | Accepted |
 | [0011](0011-licensing.md) | Licensing | Open |
 | [0012](0012-configuration-interface.md) | Configuration interface | Accepted |
+| [0013](0013-two-mcu-split.md) | Two-MCU split | Accepted |

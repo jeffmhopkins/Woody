@@ -1,6 +1,16 @@
 # Firmware
 
-ESP32-S3, PlatformIO. Nothing here yet — Track F follows Track E
+**Two images** ([ADR 0013](../docs/decisions/0013-two-mcu-split.md)):
+
+- `realtime/` — ESP32-S3. Keys, breath, IMU, DAC loop, USB MIDI. Owns all
+  state and persistence. This is the instrument.
+- `display/` — the AMOLED board. Panel, WiFi, web app. Renders what it is told
+  and forwards what the user does. **Persists nothing.**
+
+Joined by a framed UART. Put a protocol version in the frame header from the
+first commit — two images that can drift apart need a way to notice.
+
+PlatformIO, ESP-IDF underneath. Nothing here yet — Track F follows Track E
 (see [ROADMAP.md](../ROADMAP.md)).
 
 ## Architecture constraints
@@ -20,10 +30,11 @@ negotiable without revisiting those:
   filter is fixed; firmware knows what each channel carries.
 - **Nothing expressive touches the ESP32's internal ADC.** It is noisy and
   nonlinear, and breath drives a 0–10V output where that shows.
-- **WiFi shares the display's core and is off while playing.** Transmit bursts
-  cause current transients on the rail and preempt the output loop; the latency
-  budget assumes the radio is down
-  ([ADR 0012](../docs/decisions/0012-configuration-interface.md)).
+- **WiFi and the display are on the other MCU.** They cannot preempt the output
+  loop. What remains is the current transient a transmit burst puts on the
+  shared rail, handled with separate regulators rather than by scheduling
+  ([ADR 0012](../docs/decisions/0012-configuration-interface.md),
+  [ADR 0013](../docs/decisions/0013-two-mcu-split.md)).
 
 ## Data, not code
 
@@ -47,9 +58,14 @@ the instrument firmware. It is a tool, not a deliverable.
 
 ## Configuration lives on a phone
 
-Config is a web app served from flash over SoftAP, not a menu system on the
-display ([ADR 0012](../docs/decisions/0012-configuration-interface.md)). The
+Config is a web app served from the display board's flash over SoftAP, not a
+menu system ([ADR 0012](../docs/decisions/0012-configuration-interface.md)). The
 display shows status only.
+
+**Single source of truth:** every config edit round-trips. The phone edits, the
+display board forwards, the real-time board validates, applies, persists and
+echoes back. The display board never writes authoritative state — two
+authorities that can disagree is the failure mode worth designing out.
 
 Build the live-telemetry WebSocket early — it is a test instrument for the
 mechanical and calibration work, not just a configuration convenience.

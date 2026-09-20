@@ -60,6 +60,11 @@ MCU is unremarkable, and it reinforces the partitioning rather than fighting it.
 
 ## Pin budget
 
+> Superseded in effect by [ADR 0013](0013-two-mcu-split.md), which splits the
+> display and radio onto their own MCU. The analysis below is what *forced* that
+> split, and is kept for that reason. The display board now needs four pins, not
+> ten.
+
 The real constraint is **free GPIO count**, not signal translation. Nothing in
 this design needs level shifting — the S3, the sensors, the shift registers and
 the DAC logic are all 3.3V.
@@ -129,8 +134,11 @@ supply to design, no FPC to route.
 Two things to check on any specific board in that category, because the common
 ones fail one or both:
 
-**Is it an S3?** Many are ESP32-C6, which breaks the core split and removes USB
-MIDI (ADR 0001). The form factor is right; the part underneath often is not.
+**Is it an S3?** ~~Many are ESP32-C6, which breaks the core split and removes
+USB MIDI.~~ **No longer a gate** — [ADR 0013](0013-two-mcu-split.md) moved the
+display and radio onto their own MCU, so a C6 is perfectly good in this role.
+Single core is irrelevant when nothing real-time runs on it, and USB MIDI lives
+on the other board.
 
 **Is it actually AMOLED?** Most of this category ship IPS LCD, not AMOLED — the
 1.47-inch class in particular. An LCD gives up the off-axis legibility that
@@ -141,16 +149,16 @@ Waveshare's ESP32-S3-Touch-AMOLED series (1.43-inch round and 1.8-inch),
 LilyGO's T-Display-S3 AMOLED (1.91-inch, RM67162), and LilyGO's T4-S3
 (2.41-inch). Specifications to verify per board rather than take from here.
 
-**And the pin count question applies hardest to this category.** The more
-integrated and compact the board, the fewer pins reach a header. A board that
-satisfies both checks above and then breaks out only 6 GPIO is still unusable.
-Ten is the number (see above).
+**And the pin count question is largely dissolved.** It was ten free GPIO, which
+disqualified most of this category. Under ADR 0013 the display board needs
+**four** — a UART pair and power — because everything else moved to the
+real-time board. Almost anything in this category clears that.
 
 ## Open
 
-- **Which board.** Needs identifying, against three gates in order: an S3 rather
-  than a C6, a genuine AMOLED panel, and at least 10 free broken-out GPIO. The
-  third is the one most likely to disqualify an otherwise ideal board.
+- **Which board.** Under ADR 0013 only one gate really remains: **a genuine
+  AMOLED panel** rather than the IPS LCD most of this category ships. The MCU
+  family no longer matters, and the pin requirement is down to four.
 - Whether the panel has touch, and whether touch is wanted at all — with
   configuration on a phone (ADR 0012), it may be redundant.
 - Physical fit: panel active area and board outline against the 30 mm display
