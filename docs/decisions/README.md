@@ -44,7 +44,7 @@ why it was deleted is worth keeping.
 | [0004](0004-cv-interface-module.md) | CV interface module and umbilical | Accepted |
 | [0005](0005-power-architecture.md) | Power architecture | Accepted |
 | [0006](0006-cv-channel-allocation.md) | CV channel allocation and calibration | Accepted |
-| [0007](0007-imu-selection.md) | IMU selection | Open |
+| [0007](0007-imu-selection.md) | IMU selection | Accepted (board open) |
 | [0008](0008-display-selection.md) | Display selection | Accepted (board open) |
 | [0009](0009-enclosure-construction.md) | Enclosure construction | Accepted |
 | [0010](0010-key-layout-as-data.md) | Key layout as data | Accepted |
