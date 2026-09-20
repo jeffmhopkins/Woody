@@ -306,11 +306,25 @@ flat parts, and not blocked.
   and mounts to the body at a few points.
 - Strap attachment points are hard points through the oak and must be designed
   in, not retrofitted (ADR 0005).
-- Acrylic lighting runs in the two side channels flanking the switch column,
-  one run per side, chained as a single data line (ADR 0014). Their return
-  current is exactly why the analog breath channel has a separate sense return
-  (ADR 0003). The diffusion gap between strip and acrylic is a prototype
-  question and it constrains the side channel depth.
+- **The two side channels are shared: LED strips on both sides, looms alongside.**
+  An earlier revision assigned the channels to the wiring looms while ADR 0014
+  assigned the same two to the LED strips — a direct contradiction between two
+  accepted decisions, and one that made ADR 0014's own instruction ("keep the LED
+  runs away from the breath wiring") unsatisfiable.
+
+  **It is resolved by the sensor moving to the bottom** (ADR 0003). The analog
+  breath pair no longer runs the length of the body at all, so what shares the
+  channels with pulsed LED current is the SPI key chain, the UART and power —
+  all digital and all tolerant. Digital beside pulsed LED current is a far weaker
+  objection than analog beside it would have been.
+
+  **The key chain still needs a ground return per signal** (ribbon with
+  alternating grounds, or twisted pairs) — that requirement is independent of
+  what else is in the channel, and it is the one thing that makes this sharing
+  safe.
+
+  Diffusion gap between strip and acrylic is a prototype question and it
+  constrains the channel depth.
 
 ## Open
 

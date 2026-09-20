@@ -18,6 +18,14 @@ illuminate.
 
 So: **one run per side**, roughly 420 mm each, 0.84 m total.
 
+**Both channels carry LEDs, and the wiring looms share them.** ADR 0009
+previously assigned these same channels to the looms — a contradiction between
+two accepted decisions. It resolves because the breath sensor moved to the
+bottom of the instrument (ADR 0003), so no analog signal traverses the body and
+the looms carry only digital traffic. The instruction below to keep LED runs
+away from the breath wiring now costs nothing, because the breath wiring is not
+in the body.
+
 ### Two independent strips, not one chained pair
 
 Three ways to wire two runs:
@@ -139,8 +147,10 @@ the instrument's other power current.
 34 mV ground offset that moves with the animation. The lighting decision
 validates that choice rather than complicating it.
 
-Keep the LED runs and their return physically away from the breath buffer and
-its wiring inside the instrument.
+The breath buffer and sensor now live at the bottom with the real-time board
+(ADR 0003), so there is no long analog run to keep clear of. Keep the LED return
+off the analog section's local ground at that end, and give the SPI key chain
+its own ground return per signal where it shares a channel with the strips.
 
 ## Open
 
