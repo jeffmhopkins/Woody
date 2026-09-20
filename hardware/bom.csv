@@ -6,7 +6,7 @@ U-BREATH,controller,MPXV4006GP,NXP,Pressure transducer 0-6kPa gauge conditioned,
 U-ADC,controller,MCP33131-10,Microchip,16-bit SAR ADC SPI,1,candidate,,0003,SAR not delta-sigma - group delay would blow latency budget
 U-IMU,controller,BNO085,CEVA,9-axis IMU with onboard fusion 400Hz,1,candidate,,0007,Successor to BNO055 used in previous project
 U-KEYS,controller,74HC165,multiple,8-bit parallel-in shift register,4,candidate,,0001,One per cluster - 32 bits for 18 keys with 14 spare
-U-DISP,controller,TBD,,Integrated AMOLED + MCU board (display + WiFi),1,open,,0013,Any MCU family incl C6. Needs only 4 free pins - UART pair + power
+U-DISP,controller,T-Display-S3 AMOLED (base not Plus),LilyGO,1.91in 536x240 AMOLED RM67162 QSPI + ESP32-S3,1,selected,,0008,60x25.5x10mm - mounts lengthwise. 18 GPIO broken out
 U-BUCK,controller,TBD,,12V to 3.3V buck converter,1,candidate,,0005,Local regulation from umbilical +12V
 LED-SIDE,controller,SK6812 or WS2812B,multiple,Addressable LED for acrylic edge lighting,TBD,candidate,,0009,Keep ground return off the analog path
 U-DAC,module,DAC8568 or AD5676,TI / ADI,Octal 16-bit DAC SPI,1,candidate,,0006,Populate 6 of 8 - expansion room for no cost

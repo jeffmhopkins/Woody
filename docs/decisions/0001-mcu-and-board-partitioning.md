@@ -10,10 +10,18 @@ still applies to *that* role; a C6 is fine as the display board.
 The previous project used a Teensy 3.2. This iteration wants a modern part with
 a display, USB, and enough I/O for a distributed instrument.
 
-Two physical constraints drive the partitioning: the IMU must sit near the
-bottom of the instrument (it senses the instrument's tilt, and the lever arm
-matters), and the display must sit near the top where it can be read while
+Two physical constraints drive the partitioning: the IMU sits near the bottom of
+the instrument, and the display sits near the top where it can be read while
 playing. In a body roughly two feet long, those cannot share a board.
+
+**On why the IMU goes low** — stated loosely in an earlier revision as "the
+lever arm matters", which is only half right. *Tilt angle is
+position-independent*: a rigid body has one orientation, and a sensor anywhere
+on it reads the same pitch and roll. Position matters for **acceleration**,
+where a sensor further from the pivot at the player's hands and neck sees
+larger tangential accelerations. The 2021 firmware used acceleration as a
+modulation source separate from angle (ADR 0007), so gesture sensitivity is the
+real reason to mount low — not tilt sensing.
 
 ## Options
 

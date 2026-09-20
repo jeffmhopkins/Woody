@@ -154,12 +154,78 @@ disqualified most of this category. Under ADR 0013 the display board needs
 **four** — a UART pair and power — because everything else moved to the
 real-time board. Almost anything in this category clears that.
 
+## Recommended board: LilyGO T-Display-S3 AMOLED
+
+Boards are being bought new, so this is a free choice rather than a constraint.
+
+| | |
+|---|---|
+| Panel | 1.91 in AMOLED, 536 × 240, RM67162, QSPI |
+| Active area | 44.22 × 19.8 mm |
+| Board outline | 60 × 25.5 × 10 mm |
+| Breakout | 28 pins — 18 GPIO plus 3V3 / GND / VBUS |
+
+### Why this one
+
+**The aspect ratio is close to purpose-made for a narrow instrument.** 536 × 240
+is a 2.2:1 strip, and a 44 × 20 mm active area is exactly the shape of a status
+bar — current note, breath meter, channel indicators in a row. Squarer panels
+waste area on a body only 57 mm wide, and the display's job here is status
+rather than a navigable UI (ADR 0012).
+
+**Pin breakout is generous** — 18 GPIO against the 4 this role needs.
+
+**It carries little that goes unused.** Boards in this category often bundle a
+PMIC, battery charging and an onboard IMU. None of that helps here: there is no
+battery (ADR 0005), and an IMU at the top of the instrument is the wrong end —
+see ADR 0001 on why the IMU belongs low.
+
+### Fit
+
+**It must mount lengthwise.** At 60 mm the board is 3 mm wider than the
+instrument, so it cannot sit crosswise. Lengthwise it needs 60 mm of body length
+and 25.5 mm across, and its 10 mm depth clears the ~20 mm cavity comfortably.
+
+Lengthwise is arguably better anyway: text runs along the body, which is the
+natural reading direction looking down the instrument while playing.
+
+The cost is the display band growing from 30 mm to 60 mm, which takes the length
+budget from 61 mm of slack to **31 mm (1.2 in)**. Still closes, but no longer
+generously — worth knowing before anything else claims length (ADR 0009).
+
+### Notes
+
+- **The base version, not the Plus.** Touch is redundant with configuration on a
+  phone, and it costs pins and complexity.
+- Order the version whose header suits the build — some ship with pins
+  pre-soldered, which may or may not be wanted inside a sealed body.
+- Verify the 60 mm outline against the final display band before committing.
+
+### This does not undo the two-MCU split
+
+With 18 free GPIO, this board could in principle run the whole instrument — the
+pin budget that originally forced ADR 0013 is no longer binding. **The split
+stands anyway**, because its real value is isolation: WiFi and display rendering
+on different silicon from the 4 kHz loop is a physical guarantee rather than a
+scheduling discipline. The pin budget was the symptom, not the reason.
+
+Placement reinforces it — the display belongs at the top, the real-time board
+mid-body (ADR 0013).
+
+## Alternatives considered
+
+**Waveshare ESP32-S3-Touch-AMOLED-1.8** — 368 × 448, SH8601, capacitive touch,
+7 GPIO broken out on 1.27 mm pads, onboard PMIC and 6-axis IMU. Perfectly
+capable, and the pin breakout clears the requirement. Rejected on shape: a
+nearly square panel suits a 57 mm-wide instrument less well than a strip, and
+the PMIC, battery support and IMU are all unused here. Worth revisiting if a
+larger, denser display turns out to be wanted.
+
+The rest of the Waveshare AMOLED range (1.43 and 1.75 in round, 1.64, 2.06 in)
+was not pursued — round panels are attractive but waste area for text, and the
+larger ones do not fit the length budget.
+
 ## Open
 
-- **Which board.** Under ADR 0013 only one gate really remains: **a genuine
-  AMOLED panel** rather than the IPS LCD most of this category ships. The MCU
-  family no longer matters, and the pin requirement is down to four.
-- Whether the panel has touch, and whether touch is wanted at all — with
-  configuration on a phone (ADR 0012), it may be redundant.
-- Physical fit: panel active area and board outline against the 30 mm display
-  band and 57 mm width (ADR 0009).
+- Nothing blocking. Confirm the board outline on arrival and lay out the display
+  band against it.

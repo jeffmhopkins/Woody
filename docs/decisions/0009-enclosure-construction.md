@@ -32,20 +32,23 @@ pitch:
 | Segment | mm |
 |---|---|
 | Mouthpiece / breath inlet (short) | 40 |
-| Display band | 30 |
+| Display band | 60 |
 | Left hand, 5 keys in line | 96 |
 | Inter-hand gap | 50 |
 | Right hand, 6 keys in line | 120 |
 | Tail: connector + strain relief (short) | 40 |
 | End margins | 20 |
-| **Total** | **396** |
+| **Total** | **426** |
 | **Available** | **457** |
-| **Slack** | **61 (2.4 in)** |
+| **Slack** | **31 (1.2 in)** |
 
-It closes with 2.4 inches of slack, and more at a tighter pitch — the MT165 caps
+It closes with 1.2 inches of slack, and more at a tighter pitch — the MT165 caps
 at 16.5 mm allow roughly 18–20 mm before caps collide, against standard 18 mm MX
 spacing. Not constrained, but the layout wants designing rather than
-improvising.
+improvising, and the display band is now the second largest single claim on
+length after the key runs — it grew from 30 mm to 60 mm when the board was
+chosen (ADR 0008), which halved the slack. Anything else wanting length should
+be checked against this table rather than assumed to fit.
 
 **A useful side effect: the long-run signal concern from ADR 0001 largely
 evaporates.** That analysis assumed roughly two feet between the MCU at the top
