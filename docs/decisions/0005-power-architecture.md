@@ -55,6 +55,30 @@ Pitch at −2 to +7V is comfortable on ±12V with ample headroom.
 A local boost in the module could raise the rails, but it would reintroduce
 exactly the switching noise this decision escapes. Not worth it.
 
+### Power switch on the instrument
+
+**Switch the buck converter's enable pin, not the +12 V rail.**
+
+The instrument draws a few hundred milliamps at 12 V. Breaking that with a panel
+switch means a switch rated for it, arcing over time, and a fat conductor routed
+to wherever the switch sits. Switching the regulator's `EN` pin instead carries
+no current at all, so it can be a tiny slide switch anywhere convenient, wired
+with signal-gauge wire.
+
+Placement has to be **reachable but not reachable by accident** — there is very
+little free surface on a body whose top face is a key run and whose underside
+carries thumb keys. The upper section above the left hand, or the tail below the
+right, are the candidates.
+
+This does not replace the switch on the module panel (ADR 0004). That one is a
+hard power cut at the source; this one is a local enable. Both are cheap and
+they do different jobs.
+
+**Pull down the module's breath receive input**, so that an instrument which is
+switched off — or unplugged — presents 0 V rather than a floating buffer output.
+One resistor, and it means powering down the instrument silences the patch
+instead of leaving a stuck level (ADR 0003).
+
 ### USB power for the bench, not as a feature
 
 **OR the umbilical power with USB power** — it costs a diode, and it means the

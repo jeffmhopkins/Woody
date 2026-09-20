@@ -306,8 +306,11 @@ flat parts, and not blocked.
   and mounts to the body at a few points.
 - Strap attachment points are hard points through the oak and must be designed
   in, not retrofitted (ADR 0005).
-- Acrylic LEDs are edge-lit into the frosted sides. Their power and ground must
-  stay off the analog section's return path (ADR 0001).
+- Acrylic lighting runs in the two side channels flanking the switch column,
+  one run per side, chained as a single data line (ADR 0014). Their return
+  current is exactly why the analog breath channel has a separate sense return
+  (ADR 0003). The diffusion gap between strip and acrylic is a prototype
+  question and it constrains the side channel depth.
 
 ## Open
 

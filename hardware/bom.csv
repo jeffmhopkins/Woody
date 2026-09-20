@@ -8,7 +8,7 @@ U-IMU,controller,QMI8658 (onboard) or equivalent 6-axis,multiple,6-axis IMU - ac
 U-KEYS,controller,74HC165,multiple,8-bit parallel-in shift register,4,candidate,,0001,One per cluster - 32 bits for 18 keys with 14 spare
 U-DISP,controller,T-Display-S3 AMOLED (base not Plus),LilyGO,1.91in 536x240 AMOLED RM67162 QSPI + ESP32-S3,1,selected,,0008,60x25.5x10mm - mounts lengthwise. 18 GPIO broken out
 U-BUCK,controller,TBD,,12V to 3.3V buck converter,1,candidate,,0005,Local regulation from umbilical +12V
-LED-SIDE,controller,SK6812 or WS2812B,multiple,Addressable LED for acrylic edge lighting,TBD,candidate,,0009,Keep ground return off the analog path
+LED-SIDE,controller,WS2815 (12V addressable),multiple,Addressable LED strip - two runs in the side channels,0.84m,candidate,,0014,12V native so no 5V rail. Backup data line survives a dead LED. Density pending diffusion test
 U-DAC,module,DAC8568 or AD5676,TI / ADI,Octal 16-bit DAC SPI,1,candidate,,0006,Populate 6 of 8 - pitch + 4 mod + breath zero offset. No fast settling needed
 U-OPA-PITCH,module,OPA2197,TI,Low-drift op-amp for pitch scaling,1,candidate,,0006,Precision channel only - offset drift is tuning drift
 U-OPA-GEN,module,TBD,,General op-amp for channels 2-6,3,candidate,,0006,Ordinary 1% parts acceptable
@@ -33,3 +33,5 @@ U-TVS-UMB,controller,TBD,,TVS / ESD protection on umbilical entry,1,open,,0004,8
 C-BULK-DISP,controller,TBD,,Local bulk capacitance at the display board,1,open,,0013,Absorbs WiFi TX transients so they do not reach the rack rail
 R-I2C,controller,TBD,,I2C pull-ups for the IMU,2,open,,0007,
 TUBE,controller,silicone tube + dead-volume trap,,Breath tube from mouthpiece to sensor,1,open,,0003,~30mm. Trap clearable without disassembly
+SW-PWR-INST,controller,TBD,,Instrument power switch,1,open,,0005,Switches the buck EN pin not the 12V rail - no current through it
+R-PD-BREATH,module,TBD,,Pulldown on the breath receive input,1,open,,0005,Instrument off or unplugged presents 0V not a floating buffer

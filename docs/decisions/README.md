@@ -51,3 +51,4 @@ why it was deleted is worth keeping.
 | [0011](0011-licensing.md) | Licensing | Open |
 | [0012](0012-configuration-interface.md) | Configuration interface | Accepted |
 | [0013](0013-two-mcu-split.md) | Two-MCU split | Accepted |
+| [0014](0014-lighting.md) | Lighting | Accepted |
