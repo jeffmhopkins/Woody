@@ -50,9 +50,26 @@ by a fast ADC. The fast configuration genuinely is an analog front end.
 **Use a SAR converter, not delta-sigma.** A delta-sigma at high oversampling has
 real group delay in its digital decimation filter — potentially milliseconds,
 which would consume the entire budget above. SAR converters have essentially
-zero latency. Candidate: MCP33131 (16-bit SAR, SPI).
+zero latency.
 
-Loop rate: 4 kHz.
+Loop rate: 4–8 kHz.
+
+### The ADC specification needs revisiting
+
+MCP33131-10 (16-bit, 500 ksps) was chosen when the breath **output** was going
+to be digitised. It no longer is — the CV path is analog end to end.
+
+What the ADC actually serves now is much less demanding: breath threshold and
+note gating, a modulation source for the mod channels, the display, and USB
+MIDI. Only the mod-channel use benefits from real resolution, and MIDI CC is
+7 bits.
+
+So 16 bits at 500 ksps is considerable overkill, and a cheaper, simpler part at
+12–16 bits and a few tens of ksps would do. The SAR-not-delta-sigma rule still
+holds — the threshold that starts a note is on the latency-critical path.
+
+Still worth keeping it external rather than using the ESP32's internal ADC,
+which is noisy and nonlinear enough to be visible on a modulation output.
 
 ## What digitising buys
 

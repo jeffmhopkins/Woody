@@ -3,7 +3,7 @@ SW1-n,controller,KS-33,Gateron,Low-profile mechanical switch MX stem,18,purchase
 CAP1-n,controller,MT165-MX,Tai-Hao,Keycap 16.5x16.5mm blank black MX stem,18,purchased,Beekeeb,0002,Sold in 5-packs - 18 keys needs 4 packs. Smaller than 18mm MX spacing
 U-MCU-RT,controller,ESP32-S3-WROOM-1,Espressif,Real-time MCU - keys sensors DAC drive USB MIDI,1,candidate,,0013,Mid-body board. Prefer quad PSRAM. 13 of ~30 pins used
 U-BREATH,controller,MPXV4006GP,NXP,Pressure transducer 0-6kPa gauge conditioned,1,selected,,0003,~1ms response = ~159Hz corner. ADC runs 4-8kHz; rate lives on the DAC side
-U-ADC,controller,MCP33131-10,Microchip,16-bit SAR ADC SPI,1,candidate,,0003,SAR not delta-sigma - group delay would blow latency budget
+U-ADC,controller,TBD (was MCP33131-10),Microchip,SAR ADC SPI for breath,1,respec,,0003,SPEC IS STALE - breath output went analog so this only serves thresholds/mod/display/MIDI. 16-bit 500ksps is now overkill
 U-IMU,controller,BNO085,CEVA,9-axis IMU with onboard fusion 400Hz,1,candidate,,0007,Successor to BNO055 used in previous project
 U-KEYS,controller,74HC165,multiple,8-bit parallel-in shift register,4,candidate,,0001,One per cluster - 32 bits for 18 keys with 14 spare
 U-DISP,controller,T-Display-S3 AMOLED (base not Plus),LilyGO,1.91in 536x240 AMOLED RM67162 QSPI + ESP32-S3,1,selected,,0008,60x25.5x10mm - mounts lengthwise. 18 GPIO broken out
@@ -25,3 +25,11 @@ SIDE-ACRYLIC,mechanical,TBD,,Frosted acrylic side panels,2,candidate,,0009,Edge-
 BENCH,tooling,n/a,,"Scopes, logic analysers, DMMs, signal generators, RF",1,available,,0006,Full bench available - E9 not gated on tooling
 U-BUF,controller,precision op-amp,multiple,Buffer for analog breath onto the umbilical,1,candidate,,0003,Follower + ~500Hz low-pass + series protection. No diff driver needed
 U-DIFFRX,module,precision difference amp,multiple,Senses BREATH against AGND not local ground,1,candidate,,0003,Not optional - local ground reference reinstates the shared-ground offset
+U-VREF-ADC,controller,TBD,,Voltage reference for the breath ADC,1,open,,0003,Depends on the ADC re-spec. Modest requirement now
+J-USB,controller,USB-C receptacle,,USB-C connector for the real-time carrier,1,open,,0013,Flashing and bench power. Needs ESD protection
+U-ESD-USB,controller,TBD,,USB ESD protection array,1,open,,0013,
+SW-BOOT,controller,TBD,,Boot and reset buttons,2,open,,0013,Carrier board only - dev boards have their own
+U-TVS-UMB,controller,TBD,,TVS / ESD protection on umbilical entry,1,open,,0004,8 conductors entering from outside the instrument
+C-BULK-DISP,controller,TBD,,Local bulk capacitance at the display board,1,open,,0013,Absorbs WiFi TX transients so they do not reach the rack rail
+R-I2C,controller,TBD,,I2C pull-ups for the IMU,2,open,,0007,
+TUBE,controller,silicone tube + dead-volume trap,,Breath tube from mouthpiece to sensor,1,open,,0003,~30mm. Trap clearable without disassembly
