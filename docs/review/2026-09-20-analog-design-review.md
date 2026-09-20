@@ -679,6 +679,34 @@ fixing the source-impedance problem at the same time.
 
 ---
 
+## Resolved by the project owner
+
+### R1 — REJECTED. The closed tube is correct.
+The reviewer's evidence about commercial instruments was accurate; the premise
+about this instrument was not. **The player vents through the corners of the
+mouth around the mouthpiece**, which is also what makes circular breathing
+possible. Air leaves continuously — it simply never enters the sensor tube. The
+sealed sensor branch stays. Recorded in ADR 0003 so it is not re-raised.
+
+The moisture finding (R22) and the Helmholtz resonance finding (R21) are
+independent of the bleed question and remain open.
+
+### R4 / R6 — RESOLVED by adding pitch trim pots.
+Rather than respeccing the output range to reach an exactly-constructible gain,
+**the pitch channel gets scale and offset trimmers**, which is what every
+commercial 1V/oct module does. That directly fixes the missing offset authority
+(R6) and removes the need for a buildable 1.8 ratio (R4).
+
+Cost is honest and acceptable: a 5–10 % trim range contributes 2.4–3.7 cents per
+10 °C, **comparable to the drift of the VCO being driven** (~3.5 cents/10 °C), so
+it is not the limiting term. Keep the LT5400 setting the nominal ratio with the
+trimmer providing only the adjustment.
+
+Knock-on effects: the "design the gain 5 % high" kludge is deleted; the DAC now
+uses its 0.25–4.75 V window for headroom (R5) with the trimmer absorbing the gain
+change; **R18's multi-point INL table is still needed** — trimmers straighten the
+line, firmware straightens the bow.
+
 ## Not acting on
 
 - **Adding a +5 V fallback regulator to the module.** Two agents recommend it for

@@ -127,53 +127,76 @@ modulation CV moves a few cents' equivalent with temperature.
 This is materially less expensive and less work than treating all six as
 precision outputs.
 
-## No trimmers anywhere — and the one thing that makes that work
+## Pitch gets trim pots. Calibration is hardware first, firmware second.
 
-A conventional Eurorack module of this kind would carry trimmer pots: one for
-1V/oct scale, one for offset, and often one per channel. **This design has
-none**, because calibration lives in firmware as a stored two-point fit
-(above) rather than in a screwdriver adjustment.
+An earlier revision of this ADR specified **no trimmers anywhere**, on the
+grounds that a stored firmware fit is better than a screwdriver adjustment. A
+design review found two independent reasons that does not work, and the decision
+is reversed for the pitch channel.
 
-That is the better arrangement here:
+### Why firmware alone was not enough
 
-- Nothing mechanical to drift, and nothing to knock while patching.
-- No screwdriver access needed into a rack-mounted module.
-- Repeatable, storable, and re-runnable without opening anything.
-- More than two calibration points are possible if tracking ever needs it.
+**Firmware calibration has no offset authority.** A two-point fit is
+`y = a·x + b`. Scaling the DAC code implements `a`. **Nothing implemented `b`.**
+If the hardware offset came out at −1.90 V instead of −2.00 V, firmware could
+not reach −2 V at all — and the ADR prescribed a deliberate +5 % *gain* bias
+while saying nothing about the offset, whose safe bias direction is the opposite
+one.
 
-Every place a trimmer would traditionally go is already covered: pitch scale and
-offset by the firmware fit, the mod channels by the same digital scaling, breath
-gain and offset by the panel pots (user-facing, not calibration), and breath
-ambient zero by a dedicated DAC channel (ADR 0003).
+**The gain ratio was not buildable.** The 1.8× gain needed for a 0–5 V DAC span
+to become −2…+7 V is 9/5, which cannot be made from a matched resistor quad. Any
+external resistor added to reach it puts its absolute tempco inside the ratio —
+exactly the failure the matched network was bought to prevent.
 
-### The catch: firmware can only scale *down*
+A trimmer solves both directly, which is also why every commercial 1V/oct module
+has scale and offset trimmers.
 
-A digital calibration multiplies the DAC code by something at or below 1. It
-cannot push the converter past full scale. So if the analog stage is built even
-slightly *under* its target gain, the top of the range is simply gone and no
-amount of firmware fixes it:
+### What it costs, honestly
 
-| Built gain error | Max output | Recoverable? |
+The trimmer is in the gain ratio, so its tempco is too. Against a fixed 0.1 %
+10 ppm/°C resistor:
+
+| Trim range | Net ratio tempco | Drift over 10 °C |
 |---|---|---|
-| −3% | 8.73 V | **No — range lost** |
-| −1% | 8.91 V | **No — range lost** |
-| +3% | 9.27 V | Yes, scale down |
-| +5% | 9.45 V | Yes, scale down |
+| 5 % | 22 ppm/°C | **2.4 cents** |
+| 10 % | 34 ppm/°C | 3.7 cents |
+| 20 % | 58 ppm/°C | 6.3 cents |
 
-**So design the pitch analog gain about 5% high.** Target a 9.45 V span from
-full DAC scale and let firmware trim it to exactly 9.0 V. The cost is 0.07 bits
-of resolution out of 16 — nothing at all, in exchange for guaranteeing the
-calibration always has somewhere to go.
+That is worse than a matched network (0.11 cents) and comparable to discrete
+resistors (5.4 cents). **It is also comparable to what the VCO being driven does
+on its own** — a well-compensated analog VCO drifts around 0.35 cents/K, so
+3.5 cents over the same 10 °C. The trimmer is therefore not the limiting term in
+the system, and the precision-network argument was over-engineering relative to
+the load it feeds.
 
-The same applies to the mod channels: aim slightly over 10 V and trim down.
+**Keep the trim range small — 5 to 10 % — around a fixed precision resistor.**
+The LT5400 can still set the nominal ratio exactly, with the trimmer providing
+only the adjustment; that keeps most of the matched-network benefit and adds
+trimmability.
 
-### What this does not cover
+### The division of labour
 
-Digital calibration absorbs component tolerance. It does not rescue a build
-error — a wrong resistor value or a misplaced part puts the gain far enough out
-that neither firmware nor a trimmer would help. **Milestone E8 should verify the
-raw analog gain is in the right ballpark before E9 relies on firmware to finish
-the job.**
+- **Trimmers set gain and offset.** Two per pitch channel, multiturn cermet.
+- **Firmware handles what trimmers cannot:** DAC integral nonlinearity, which is
+  curvature no gain-and-offset adjustment can remove (±4 LSB typical is
+  0.66 cents, ±12 LSB is 2.0 cents). Use a **multi-point** table, roughly one
+  point per octave — Mutable's Yarns uses twelve for exactly this reason.
+
+These are complementary, not alternatives. Hardware gets the line straight;
+firmware straightens the bow in it.
+
+### Consequences elsewhere
+
+- **The "design the gain 5 % high" kludge is deleted.** It existed only because
+  firmware could scale in one direction. A trimmer goes both ways.
+- **Use the DAC's 0.25–4.75 V window rather than its full 0–5 V span.** That
+  leaves 250 mV of headroom at both rails — the DAC8568 at AVDD = 5 V cannot
+  reliably swing to its own supply — and the trimmer absorbs the resulting gain
+  change. This achieves the same benefit as respeccing the output range, without
+  needing an exactly-constructible resistor ratio.
+- **Mod channels stay trimmer-free.** They need to be linear and repeatable, not
+  musically accurate; firmware scaling is sufficient there and nobody's ear
+  cares about a few cents' equivalent on a modulation CV.
 
 ## Labelling
 

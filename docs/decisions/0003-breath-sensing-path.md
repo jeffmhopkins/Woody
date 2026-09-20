@@ -270,6 +270,35 @@ bandwidth — no audio-specialty part is required, though THAT1606/THAT1200 or
 DRV134/INA1650 are drop-in options if convenient. What matters is the receiver's
 CMRR and low offset drift, since this feeds a 0–10 V output.
 
+## The closed tube is correct, and why
+
+A design review raised this as a likely error, on good evidence: no commercial
+wind controller uses a sealed pneumatic path. The Akai EWI plugs its sensor tube
+and drills a side hole, then runs a second tube dangling free for restricted
+airflow. The Yamaha WX has a drain hole with swappable plugs that set blowing
+resistance. Against a full occlusion an adult produces 15–20 kPa, and the
+reviewer concluded the player could not exhale through the instrument at all.
+
+**The premise was wrong, because the exhale path is not the instrument.** The
+player vents through the corners of the mouth, around the mouthpiece — which is
+also what makes **circular breathing** possible. Air leaves continuously; it just
+never enters the sensor tube.
+
+So the tube to the sensor stays **completely closed**, and this is a deliberate
+choice rather than an oversight:
+
+- Embouchure controls pressure directly, with no bleed orifice in series to
+  blunt it
+- Nothing to clog, tune, or get wrong as a manufacturing tolerance
+- No flow through the sensor branch at all, which is the property the
+  condensation handling below depends on
+
+**Recorded so it is not re-raised.** The commercial designs solve a problem this
+playing technique does not have.
+
+Two consequences that do *not* follow from the bleed question and remain open:
+the moisture handling below, and the tube resonance model.
+
 ## Condensation, in proportion
 
 **This is a closed, dead-ended system** — the tube terminates at the sensor and
