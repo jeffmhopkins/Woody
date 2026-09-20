@@ -123,18 +123,60 @@ ferrite bead is effectively a wire at that frequency (ADR 0004).
 | 30/m (25 LEDs) | 0.50 A | 0.17 A | **0.07 A** |
 | 60/m (50 LEDs) | 1.01 A | 0.34 A | **0.13 A** |
 
-**Eurorack supplies commonly provide 1–3 A on +12 V for the entire case.** Full
-white at 60/m would take a third to a whole rail on its own, and it is not a
-mode anyone intends to use — but it is one bug away.
+### The constraint is not the rack. It never really was.
 
-**So the brightness cap is enforced in firmware as a hard limit, not exposed as
-a setting.** Sum the commanded channels, and clamp before writing. A display bug
-that sets 50 LEDs to white at full brightness must not be able to brown out the
-rack, which would take every other module with it.
+Earlier revisions of this section argued from the rack supply: *"Eurorack
+supplies commonly provide 1–3 A on +12 V for the entire case, and full white at
+60/m would take a third to a whole rail."* **The target rack's supply is
+generous** (see the design scope in the README), so that argument is withdrawn.
 
-**The budget is instrument-wide and shared with the 8×8 matrix**, not per
-device — see the matrix section below. Two independent caps cannot see that both
-are drawing at once, and the matrix alone can ask for 960 mA.
+Withdrawing it does not relax the clamp. It **replaces a soft constraint with
+two harder ones that were sitting underneath it**, and the binding one is
+tighter than the rack ever was.
+
+**Heat, which is the one that actually binds.** The body is oak and acrylic —
+both insulators — sealed, with the aluminium plate as the only real path out and
+the player's hands covering part of it. The existing electronics dissipate
+roughly 5 W for an interior rise of 10–20 K, so call it **~3 K per watt**.
+
+| Lighting state | Power | Interior rise it would add |
+|---|---|---|
+| Realistic use — single hue tracking breath | ~1.5 W | ~4 K |
+| Both strips full white at 60/m | 12.1 W | ~36 K |
+| Matrix full white as well | ~17.7 W | **~53 K** |
+
+A pathological state is not a brownout any more. It is an instrument too hot to
+hold, an acrylic bond at its service limit, and a gauge sensor whose zero is
+chasing the room. **The rack supply would have delivered it happily.**
+
+**The instrument's own regulator, which is a 1 A part.** The matrix hangs on the
+R-78E5.0-1.0 alongside both dev boards, and at full field it asks for 960 mA on
+its own. The rack's headroom is on the far side of a 2 m cable and a switching
+regulator; neither cares how large the supply behind them is.
+
+**And fault current, which a larger supply makes worse.** A short in the
+umbilical now has more energy available, not less. That is the module load
+switch's job (ADR 0005) and it is unaffected by any of this — except that it
+matters slightly more than it did.
+
+### The clamp, restated on thermal grounds
+
+**A single instrument-wide lighting budget of ~3 W**, summed across both strips
+and the matrix, enforced in firmware before any write. When the commanded total
+exceeds it, **scale everything down proportionally** rather than refusing the
+write.
+
+3 W is twice realistic use and about a sixth of the pathological case, and it
+costs roughly 9 K of interior rise — inside what the design already tolerates.
+It is generous visually: on the strips it is a quarter of full white or a single
+hue at ~75 %; on the matrix it is a sparse display at full brightness or a full
+field at around 60 % of one channel.
+
+**Validate it at M8's thermal soak**, which exists anyway, rather than trusting
+3 K/W. That figure is a bounding estimate, not a measurement.
+
+Proportional scaling is what makes a full-field breath bar behave: it arrives
+dimmer than a single dot would, which is also what looks right.
 
 ### The firmware clamp used to be the only defence, and it did not survive
 
@@ -164,24 +206,28 @@ clamp anything.
   hundred milliseconds rather than leaving it until something happens to
   overwrite it. The matrix is on the MCU that resets, so it latches too.
 
-**The firmware clamp is now a comfort feature, not a safety feature.** That is
-the right status for it. Treat it as aesthetic, and size the hardware so the
-worst case a latched strip can present is inside budget.
+**The firmware clamp is a comfort feature against the electrical failure, and a
+real one against the thermal failure.** The load switch bounds current whatever
+the firmware is doing; nothing but firmware bounds a *sustained* bright state
+that is electrically legal and thermally not. Those are different failures and
+the clamp is only redundant against one of them.
 
-**Which makes worst-case current a constraint on density, not a consequence of
-it.** All-white is 0.50 A at 30/m and 1.01 A at 60/m; a Eurorack supply commonly
-offers 1–3 A on +12 V for the whole case. 30/m is inside budget unconditionally.
-60/m is fine too, but only if the firmware clamp is set so no commanded state
-exceeds ~0.5 A — which is not restrictive in practice, since 60/m at a single
-hue and 40 % brightness is 0.13 A. **Decide density with the diffusion
-prototype below; carry the 0.5 A ceiling into whichever is chosen.**
+### Density: 60/m
+
+The density question was open on a budget argument — 30/m stays inside a rack
+budget unconditionally, 60/m needs a clamp to. **That argument is withdrawn with
+the rest of the rack framing**, and the thermal clamp applies identically to
+both, so nothing distinguishes them on current any more.
+
+Which leaves appearance, where 60/m was already the preference: denser LEDs
+diffuse more smoothly behind the acrylic. **60/m.**
 
 Realistic use — a single hue tracking breath at moderate brightness — sits
-around **0.1 A**, which is unremarkable.
+around **0.13 A** there, which is unremarkable against a 3 W budget.
 
-60/m is the sensible default on appearance grounds: denser than 30/m for
-smoother diffusion, and well inside budget once capped. 30/m is the choice that
-needs no clamp to stay inside budget at all. The diffusion prototype decides.
+The diffusion prototype at M6 can still downgrade this if 30/m turns out to look
+identical through the panels, but it is now a question of appearance and cost
+rather than one the electrical design has a stake in.
 
 ## The LEDs do reach the breath channel, but not the way expected
 
@@ -272,20 +318,19 @@ WS2812C-2020 draws **5 mA per channel**, so 15 mA per LED at full white and
 
 **The useful content is nearly free; the pathological content is not.** A dot or
 a bar costs single-digit milliamps on top of an idle draw that is being spent
-either way. Full-field white would roughly double the instrument's total draw.
+either way. Full-field white is 4.8 W at the LEDs — on its own, roughly the
+dissipation of the entire rest of the instrument.
 
-**So the clamp is a shared current budget, not a per-device brightness cap.**
-ADR 0014 previously clamped only the strips. That is now wrong in two ways: it
-left the matrix uncovered, and a per-device cap cannot see that both are drawing
-at once.
+It is also **more than the instrument's 5 V regulator can supply.** The matrix
+shares the 1 A R-78E5.0 with both dev boards, which take roughly 330–400 mA
+between them, so a full-field matrix would ask for about 1.36 A from a 1 A part.
+The rack's supply is on the far side of a 2 m cable and that regulator, and has
+no say in the matter.
 
-> **One instrument-wide lighting budget, summed across both strips and the
-> matrix, enforced in firmware before any write.** When the commanded total
-> exceeds it, scale everything down proportionally rather than refusing the
-> write.
-
-Proportional scaling is what makes a full-field breath bar behave: it simply
-arrives dimmer than a single dot would, which is also what looks right.
+**So the clamp is the shared thermal budget above, not a per-device brightness
+cap.** This ADR previously clamped only the strips, which was wrong in two ways:
+it left the matrix uncovered, and a per-device cap cannot see that both are
+drawing at once.
 
 **And the blank-at-boot rule matters more here than for the strips.** The
 failure in the strips' case was that a brownout resets the MCU and the WS2815s

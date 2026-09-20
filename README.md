@@ -60,6 +60,20 @@ get to constrain anything.
 
 There is no onboard synthesizer. There is no battery.
 
+**The target rack has a generous supply and a regulated +5 V rail.** Both are
+stated properties of the system this is built for, not assumptions to be
+defended. Rack current budget is therefore **not** a design constraint here, and
+arguments of the form "a small Eurorack PSU might not cope" do not apply.
+
+That relief is narrower than it sounds, and worth stating precisely so nobody
+re-derives the wrong caution later. What still binds:
+
+- **Heat.** The body is oak and acrylic — insulators — and sealed. Every watt
+  leaves through the aluminium plate, part of which is under the player's hands.
+- **The instrument's own 5 V regulator**, which is a 1 A part at the end of a
+  2 m cable, not the rack supply.
+- **Fault current**, which a larger supply makes *worse*, not better.
+
 ## Repository layout
 
 ```
