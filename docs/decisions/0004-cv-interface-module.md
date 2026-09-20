@@ -284,6 +284,24 @@ is what made it necessary.
 turns out to need edge cleanup at length, that wants a 74AHCT14 — decide it at
 E11 with a logic analyser on the real cable, not now.
 
+### A stuck CV is worse than a dead one
+
+If the real-time board hangs mid-note, the DAC holds its last written value and
+**the rack drones forever.** Nothing in the design notices. That is a worse
+failure than the module going dark, because it is loud, it is indefinite, and
+the instrument in your hands will not respond to anything you do with it.
+
+**Assert `CLR` at the module when no valid frame has arrived for N milliseconds.**
+A few gates or a retriggerable monostable, at the module end where it is
+independent of the thing that hung. The DAC's own `CLR` pin already does exactly
+what is wanted — an A/C grade part clears to zero scale, which parks pitch
+subsonic and the mod channels at 0 V (ADR 0006), the same safe state as rack
+power-on.
+
+Size N so a busy loop cannot trip it but a hang is caught in well under a
+second. This also gives umbilical disconnection the same behaviour as a hang,
+which is correct: both mean "the instrument is no longer telling me anything."
+
 **220 Ω in series on MOSI at the driving end.** Source termination on the one
 line that runs the full umbilical carrying data. It also makes SYNC-signal
 regeneration at the module unnecessary, which was the alternative under

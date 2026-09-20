@@ -261,12 +261,31 @@ Two consequences:
   a shell (ADR 0002) and a U-bolt through oak alone will crush the fibres and
   eventually tear out. Through-bolt to a metal backing plate inside the cavity,
   tied into the same structure that carries the keys.
-- **The position must be adjustable.** CG cannot be known accurately from CAD —
-  cable, connector, adhesive and finish all add mass that is hard to model, and
-  what matters is how it *feels* hanging, not where the model says the centroid
-  is. Design in a short slot or two or three discrete hole positions so balance
-  can be tuned empirically after assembly. Cheap now, painful to retrofit into a
-  finished instrument.
+- **The position must be settled empirically, which is not the same as being
+  adjustable.** CG cannot be known accurately from CAD — cable, connector,
+  adhesive and finish all add mass that is hard to model, and what matters is
+  how it *feels* hanging, not where the model says the centroid is.
+
+  An earlier revision asked for a slot or discrete hole positions "so balance
+  can be tuned empirically after assembly." **That is impossible as written**,
+  and a review caught it: the backing plate the U-bolt anchors to sits inside a
+  bonded cavity. Once the stack is closed, there is nothing to move the bolt
+  *to*. An adjustment that requires reaching a part you cannot reach is not an
+  adjustment.
+
+  Two ways to have it, and they are exclusive:
+
+  - **Dry-assemble, hang, balance, then bond.** The stack goes together
+    unbonded with everything in it that contributes mass, it hangs from a
+    temporary strap, the position is marked, and only then does the adhesive
+    come out. This is free, and it folds naturally into the **M8 pre-bond gate**
+    — which exists anyway, for other reasons.
+  - **Or make the anchorage reachable from outside** — a captive plate in a
+    machined recess accessible through the bottom face, with the slot in the
+    external hardware rather than the internal plate.
+
+  **Take the first.** The second adds a serviceability feature to a part of the
+  instrument that will be adjusted exactly once.
 
 The U-bolt also intrudes into the electronics cavity near the middle of the
 body. It is an obstruction that belongs in the CAD from the start, with cable
@@ -326,11 +345,39 @@ flat parts, and not blocked.
   Diffusion gap between strip and acrylic is a prototype question and it
   constrains the channel depth.
 
+## Things that are free now and impossible later
+
+A body that is bonded shut is a body that is never opened again. These four cost
+almost nothing while the stack is apart and cannot be had afterwards at any
+price.
+
+**Bond the aluminium plate to `PWR_GND`. Never to `AGND`.** Nothing currently
+bonds it. It floats under the player's hands, one to two millimetres from
+eighteen switch pins that are wired directly to shift-register inputs — and a
+corrupted chain read becomes a spurious note-on at full velocity (ADR 0001). An
+unbonded plate means the instrument fires random notes when touched in a dry
+room, and that will be blamed on firmware forever. The choice of *which* ground
+matters as much as the bonding: tying it to `AGND` would put the player's body
+capacitance straight onto the breath channel's voltage reference.
+
+**Run two spare conductors in every internal loom.** The looms are hand-built,
+once, into a stack that cannot be reopened. A spare pair costs a few cents and
+some crimping now; discovering you need one signal more after bonding costs the
+instrument.
+
+**Conformal-coat the boards.** The instrument is breathed into for hours, behind
+eighteen unsealed switch cutouts, in a body whose interior runs 10–20 K above
+ambient. There is no coating anywhere in the BOM and nothing else in the design
+addresses humidity inside the cavity.
+
+**Dry-assemble and balance before bonding**, per the U-bolt section above. This
+is the M8 gate in the roadmap, and the U-bolt position is one of several things
+it is the last chance to settle.
+
 ## Open
 
-- **Instrument dimensions.** Length, width and stack thickness. This constrains
-  board sizes, display placement and the umbilical entry point, and it blocks
-  M4.
+- **U-bolt position.** Settled at M8 by hanging the dry-assembled stack, not in
+  CAD. The CAD carries a nominal position and the cavity clearance around it.
 - CAD tool, which decides whether `mechanical/cad/` holds Fusion, FreeCAD or
   neutral STEP.
 - Oak thickness for the bottom panel, which sets thumb key travel.
