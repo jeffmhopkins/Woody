@@ -45,7 +45,10 @@ BOT   IMU, umbilical connector to the rack module
 ```
 
 The display is the only thing that cannot run far — high-bandwidth SPI with many
-signals will ring and crosstalk over two feet. So the MCU lives with the display
+signals will ring and crosstalk over any distance. (The instrument is 18 inches
+overall per ADR 0009, so the longest run is nearer 14–16 inches than the two
+feet this analysis originally assumed. The topology stands; the margin is
+better than feared.) So the MCU lives with the display
 and everything else runs long and slow. Bandwidth down the body is trivial: six
 16-bit channels at 4kHz is ~576 kbit/s, comfortable at 2MHz SPI over twisted
 pair.

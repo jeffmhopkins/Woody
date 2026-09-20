@@ -120,7 +120,7 @@ dev board on the bench.
 
 | Blocks | Question | Tracked in |
 |---|---|---|
-| M4 onward | Instrument dimensions and envelope | [ADR 0009](docs/decisions/0009-enclosure-construction.md) |
+| M4 onward | Instrument **width** — length and thickness are set | [ADR 0009](docs/decisions/0009-enclosure-construction.md) |
 | E2 | Which breath sensor is actually in hand | [ADR 0003](docs/decisions/0003-breath-sensing-path.md) |
 | E12 | Connector choice, pending panel fit check | [ADR 0004](docs/decisions/0004-cv-interface-module.md) |
 | E1 | Display type | [ADR 0008](docs/decisions/0008-display-selection.md) |

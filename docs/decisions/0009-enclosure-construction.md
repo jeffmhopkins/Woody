@@ -12,6 +12,95 @@ frosted acrylic sides carrying LEDs, aluminium key plate on top, and three or
 four mechanical keys on the underside for the left thumb, inset so the travel
 feels right.
 
+## Envelope
+
+**18 inches long (457 mm), 1.5 inches thick (38 mm).** Width not yet decided.
+
+### Length closes, with room
+
+18 inches is compact for a wind controller — an EWI USB is around 24 inches, a
+clarinet closer to 26. Worth checking rather than assuming:
+
+| Segment | mm |
+|---|---|
+| Mouthpiece / breath inlet | 40 |
+| Display | 30 |
+| Left hand cluster, 5 keys | 90 |
+| Inter-hand gap | 50 |
+| Right hand cluster, 6 keys | 110 |
+| Umbilical connector + strain relief | 40 |
+| End margins | 20 |
+| **Total** | **380** |
+| **Available** | **457** |
+| **Slack** | **77 (3.0 in)** |
+
+It closes with three inches of slack. Tight enough that the layout wants
+designing rather than improvising, but not constrained. The MT165 caps at
+16.5 mm help here — they are smaller than standard 18 mm MX spacing, so key
+clusters pack tighter than a keyboard footprint would suggest.
+
+**A useful side effect: the long-run signal concern from ADR 0001 largely
+evaporates.** That analysis assumed roughly two feet between the MCU at the top
+and the IMU and connector at the bottom. At 18 inches overall the longest run is
+more like 14–16 inches, which is comfortable for SPI with ordinary care. RS-485
+transceivers stay a contingency rather than a likely requirement.
+
+### Thickness is bounded by switch bodies, not boards
+
+38 mm of stack, consumed roughly as:
+
+```
+  aluminium top plate       ~2 mm
+  oak top                   ~6 mm
+  ---- cavity ----          remainder
+  oak bottom                ~8 mm   <- sets thumb key inset depth
+  thumb switch plate        ~2 mm
+```
+
+That leaves around 20 mm of clear cavity — except where switch bodies intrude.
+Top switches pass through the plate and oak and protrude slightly into the
+cavity; the bottom thumb switches mount to the inside face and protrude *up*
+into it by most of their body height. In the thumb regions, usable cavity may be
+half of what it is elsewhere.
+
+**The KS-33 body height below the plate is the number that decides this**, and it
+is unmeasured. It comes out of M1 alongside the cutout dimension.
+
+Boards are not the constraint. An ESP32-S3-WROOM module on a PCB is around 5 mm
+total, and an OLED module is a few millimetres. 38 mm is comfortable for
+electronics; it is the switch bodies and the U-bolt that eat the space.
+
+### 1.5 inches suits the grip
+
+The left hand sandwiches the body between fingers and thumb (ADR 0010). At
+1.5 inches thick that is a comfortable pinch — about the span of a thick book
+spine. Thinner would make the grip cramped and give the thumb less leverage;
+much thicker would strain it.
+
+### Strap placement follows from the layout
+
+The U-bolt goes on the **bottom face, in the inter-hand gap** — the 50 mm band
+between the left thumb cluster and the right thumb rest, which is free of
+switches and lands near the middle of the instrument where CG will be.
+
+Bottom face is correct for the same reason a saxophone's strap ring is on the
+back: the instrument hangs with its key face outward and the attachment toward
+the player's body.
+
+**Through-bolt the entire laminated stack.** The U-bolt then does two jobs: it
+anchors the strap to the aluminium plate, which is the strongest element in the
+sandwich, and it adds clamping force to the lamination at mid-span where it is
+otherwise held only by adhesive.
+
+## Open: width
+
+The remaining dimension, and it is a grip decision more than a layout one. Two
+keys side by side at 16.5 mm is 33 mm plus margins, so roughly 50 mm is the
+layout floor. Much beyond about 55–60 mm and the left thumb cannot oppose the
+fingers comfortably, which breaks the sandwich grip the whole layout depends on.
+
+Answer it with the paper mockup at M2 rather than from a number.
+
 ## Decision
 
 **A laminated stack of flat parts, every layer a 2D through-cut.**
