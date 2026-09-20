@@ -99,14 +99,47 @@ The cost is that a 5 V DAC wants roughly 3.5 V for a logic high while the
 instrument sends 3.3 V, so SPI needs shifting. That turns out to be free in
 parts terms:
 
-- **The rack's own +5 V rail** for the 5 V supply. The module is inches from the
-  bus board, so there is no drop to worry about and no regulator needed
-  (ADR 0005). The target rack has the rail, so this is required rather than
-  optional — the 16-pin bus header carries it.
-- **74AHCT125** for the shifter — the *same part* as the instrument's LED data
-  lines (ADR 0014), with a spare gate left over.
+- **A local 5.25 V regulator off the protected +12 V rail** for the DAC's AVDD
+  — not the rack's +5 V bus. See below.
+- **74AHCT125** for the shifter, running from the **bus +5 V rail** — the *same
+  part* as the instrument's LED data lines (ADR 0014), with a spare gate left
+  over.
 
-Two part numbers shared across both boards rather than two more to source.
+One part number shared across both boards rather than one more to source.
+
+### The DAC gets a local regulator; the level shifter keeps the bus rail
+
+The obvious move is to take the module's 5 V straight from the rack. It is
+inches from the bus board, the load is milliamps, and the rail is right there on
+the 16-pin header. That was the original decision, and it is wrong for the DAC.
+
+**The rack's +5 V is the least-regulated rail in Eurorack** — ±5 % is normal, and
+it moves with whatever else in the case is drawing from it. Two consequences:
+
+- **The DAC's full-scale output is its supply.** DAC8568 at internal reference
+  × 2 spans 0–5 V, so full scale *equals* AVDD. TI does not specify the headroom
+  needed to actually reach it, and wants AVDD ≈ 5.5 V for a true 5 V full scale.
+  At a bus rail sagging to 4.75 V the DAC saturates somewhere around 4.55–4.65 V
+  — and the top calibration point lands in the nonlinear region, which corrupts
+  the whole two-point fit rather than just clipping the top.
+- **It puts a rail the rack moves underneath the pitch calibration.** Pitch is
+  calibrated once against a real VCO (ADR 0006). A supply that shifts when
+  another module powers up shifts the calibration with it.
+
+**So: an LM317LZ set to 5.25 V, fed from +12 V downstream of the module's
+reverse-protection diode.** TO-92, two resistors and two capacitors, a few
+milliamps of load, 135 mW dissipated — the lowest-effort regulator that exists,
+and it buys back both properties. 5.25 V nominal keeps worst-case tolerance
+(±4 % on the LM317 reference) inside the DAC's 5.5 V recommended maximum while
+staying above the 4.75 V top of the used output window (ADR 0006).
+
+**The 74AHCT125 stays on the bus +5 V rail.** Its job is to get 3.3 V logic over
+the DAC's 0.7 × AVDD input threshold — 3.68 V at AVDD = 5.25 V. An AHCT gate on
+a rail sagging to 4.75 V still drives 4.6 V, with a volt of margin. Leaving it
+there keeps its switching current off the DAC's supply, and it means the only
+thing hanging on the unprotected bus +5 V pin is a $0.30 buffer. A reversed or
+row-offset ribbon that puts +12 V onto that pin kills the buffer and nothing
+else, which is why the +5 V entry gets no protection network of its own.
 
 ### Module parts, chosen for build ease
 
@@ -154,9 +187,9 @@ one draws its own analog current *plus* everything the instrument consumes:
 
 | Rail | Draw |
 |---|---|
-| +12 V | ~290 mA (40 module, 250 instrument) |
+| +12 V | ~295 mA (45 module incl. the DAC regulator, 250 instrument) |
 | −12 V | ~40 mA |
-| +5 V | ~20 mA |
+| +5 V | ~10 mA (level shifter only) |
 
 That is about 15% of a modern rack supply's +12 V capacity — unremarkable, but
 it **rules out the series-resistor variant**, which is harmless at 50 mA and is
@@ -179,12 +212,14 @@ through this module.
 Those are different problems and they want separate treatment:
 
 ```
-bus +12V ──[1N5817]──┬──[ferrite]──[bulk]── module analog (op-amps, DAC)
+bus +12V ──[1N5817]──┬──[ferrite]──[bulk]──┬── module analog (op-amps)
+                     │                      │
+                     │                      └──[LM317LZ 5.25V]── DAC AVDD
                      │
                      └──[ferrite]──[bulk]── umbilical +12V to the instrument
 
 bus -12V ──[1N5817]─────[ferrite]──[bulk]── module analog
-bus +5V  ────────────────[ferrite]──[bulk]── DAC VDD, level shifter
+bus +5V  ────────────────[ferrite]──[bulk]── 74AHCT125 level shifter only
 ```
 
 **Branch the two +12 V paths after the protection diode, each with its own

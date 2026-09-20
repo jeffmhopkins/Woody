@@ -99,16 +99,21 @@ Two further reasons the question does not arise:
 - **The R-78E5.0 is a 3-pin through-hole module**, among the lowest-effort parts
   in the design. Deleting it saves almost no build effort to begin with.
 
-### The module takes +5 V from the bus
+### The module's 5 V splits: bus rail for logic, local regulator for the DAC
 
-The module sits in the rack on a short ribbon, with negligible drop, and its 5 V
-load is the DAC plus one level shifter — around 20 mA. **It takes that from the
-bus. No local regulator.**
+The module sits in the rack on a short ribbon with negligible drop, so the bus
++5 V rail is free and convenient. It is used — but **only for the 74AHCT125
+level shifter**, around 10 mA.
 
-The target rack supplies +5 V, so this is a **requirement, not an option**. No
-jumper, no unpopulated fallback footprint. A module that also worked in cases
-without a +5 V rail would be engineering for a case this instrument is never in
-(see the design scope in the README).
+**The DAC gets its own LM317LZ set to 5.25 V, off the protected +12 V rail.**
+The DAC8568's full-scale output *is* its supply, so a rail the rack is allowed
+to move ±5 % moves the top of the pitch range and the pitch calibration with it.
+That belongs on a regulated supply of its own. Reasoning in full in ADR 0004.
+
+The target rack supplies +5 V, so the level shifter's rail is a **requirement,
+not an option**. No jumper, no unpopulated fallback footprint. A module that
+also worked in cases without a +5 V rail would be engineering for a case this
+instrument is never in (see the design scope in the README).
 
 ### Power tree
 

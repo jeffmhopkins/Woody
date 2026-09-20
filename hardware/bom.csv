@@ -9,7 +9,7 @@ U-KEYS,controller,74LVC165A,multiple,8-bit parallel-in shift register,SOIC-16 (1
 U-DISP,controller,T-Display-S3 AMOLED (base not Plus),LilyGO,1.91in 536x240 AMOLED RM67162 QSPI + ESP32-S3,"dev board, headers",1,selected,,0008,60x25.5x10mm - mounts lengthwise. 18 GPIO broken out
 U-BUCK,controller,R-78E5.0-1.0,Recom,12V to 5V switching regulator module,SIP-3 THROUGH-HOLE,1,candidate,,0005,3-pin SIP on a 7805 footprint. No inductor no feedback network no layout risk. 1A vs ~350mA needed
 LED-SIDE,controller,WS2815 (12V addressable),multiple,Addressable LED strip - two runs in the side channels,flexible strip,2 x 420mm,candidate,,0014,12V native so no 5V rail. Backup data line survives a dead LED. TWO independent strips - no crossover wire. Density pending diffusion test
-U-DAC,module,DAC8568,TI,"Octal 16-bit DAC SPI, internal reference",TSSOP-16 (0.65mm pitch),1,candidate,,0006,Populate 6 of 8. Internal ref is sufficient - resistor tracking dominates drift 10:1
+U-DAC,module,DAC8568,TI,"Octal 16-bit DAC SPI, internal reference",TSSOP-16 (0.65mm pitch),1,candidate,,0006,"Populate 6 of 8. Internal ref is sufficient - resistor tracking dominates drift 10:1. AVDD from U-REG-DAC, not the rack +5V bus"
 U-OPA-PITCH,module,OPA2197,TI,Dual low-drift RRIO op-amp,SOIC-8 (1.27mm pitch),5,candidate,,0006,"ONE op-amp part throughout the module - pitch, mod 1-4, breath scaling. RRIO on +/-12V reaches ~11.9V"
 U-OPA-GEN,module,(none - OPA2197 used throughout),,Superseded by U-OPA-PITCH,n/a,0,not-needed,,0006,Single part number beats saving a few dollars on a one-off. Removes a class of assembly error
 R-PRECISION,module,LT5400-class matched network,ADI / Vishay,Matched resistor network for pitch scaling,MSOP-8 (0.65mm pitch),TBD,candidate,,0006,Highest-value precision part in the design. Ratio tracking is what matters not absolute tempco
@@ -35,9 +35,12 @@ R-PD-BREATH,module,100k,,Pulldown on the breath receive input,0805 (2.0 x 1.25mm
 U-LVLSHIFT,controller,74AHCT125,multiple,Quad buffer as LED data level shifter,SOIC-14 (1.27mm pitch),1,candidate,,0014,SOIC-14. 5V rail TTL thresholds so 3V3 reads high. Two spare gates. VERIFY WS2815 threshold
 F-POLY,controller,PPTC 1206 500mA hold,multiple,Resettable fuse at umbilical entry,1206 (3.2 x 1.6mm),1,candidate,,0005,1206 not 0603 - larger package is easier to place and inspect
 R-DIV-ADC,controller,TBD,,Divider on the ADC branch of the breath buffer,0805 (2.0 x 1.25mm),2,open,,0003,Sensor reaches 4.7V into a 3V3 ADC. Divide after the buffer not before
-U-LVL-MOD,module,74AHCT125,,"Level shifter, 3V3 SPI up to 5V for the DAC",SOIC-14 (1.27mm pitch),1,candidate,,0006,SAME part as the instrument LED shifter. Covers SCLK MOSI CS with a spare gate
+U-LVL-MOD,module,74AHCT125,,"Level shifter, 3V3 SPI up to 5V for the DAC",SOIC-14 (1.27mm pitch),1,candidate,,0006,SAME part as the instrument LED shifter. Covers SCLK MOSI CS with a spare gate. Runs from bus +5V; the DAC runs from U-REG-DAC
 J-PWR-EURO,module,16-pin shrouded keyed IDC header,,Eurorack power inlet,THROUGH-HOLE,1,candidate,,0005,Shrouded and keyed - reversed ribbon is the classic eurorack failure. Carries the +5V rail the module REQUIRES
 D-REVPOL,module,1N5817,,Schottky reverse polarity protection,DO-41 THROUGH-HOLE,2,candidate,,0005,~0.3-0.4V drop at 290mA. Community standard for eurorack power entry
+U-REG-DAC,module,LM317LZ,multiple,Adjustable LDO set to 5.25V for the DAC AVDD,TO-92 THROUGH-HOLE,1,candidate,,0004,"Off protected +12V. ~5mA load, 135mW. Decouples DAC full scale from the rack's +-5% +5V rail"
+R-REG-SET,module,240R / 768R 1% metal film,,LM317 output setting divider,0805 or through-hole,2,candidate,,0004,"Vout = 1.25*(1+768/240) = 5.25V. Worst-case +-4% = 5.04-5.46V, inside the DAC8568 5.5V max"
+C-REG-ADJ,module,10uF / 1uF ceramic or tantalum,,LM317 ADJ bypass and output cap,0805 / 1206,2,candidate,,0004,ADJ bypass drops output noise to ~50uV RMS. Output cap for LDO stability
 FB-IN,module,Ferrite bead + 47uF electrolytic per branch,,"Input filtering, branched per rail",0805 bead / THT electrolytic,4,candidate,,0004,NOT a series resistor - we pass 290mA so even 2.2ohm costs 0.64V. Branch the two +12V paths separately
 R-OUT-PROT,module,"1k series, 0805",,Series protection on each CV output,0805 (2.0 x 1.25mm),6,candidate,,0006,Standard eurorack practice - survives shorts and output-to-output patching
 C-DECOUPLE,module,100nF ceramic,,HF decoupling at every IC,0805 (2.0 x 1.25mm),10,candidate,,0004,"One per supply pin, close to the pin"
