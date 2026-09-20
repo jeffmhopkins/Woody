@@ -18,7 +18,7 @@ meta:
   envelope:
     length: 457     # 18 in
     thickness: 38   # 1.5 in
-    width: 64       # 2.5 in
+    width: 57       # 2.25 in
   origin: top-left of key plate, +x right, +y down
   switch: gateron-ks33
   keycap: mt165-mx

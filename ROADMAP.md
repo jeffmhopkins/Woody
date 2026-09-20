@@ -57,7 +57,7 @@ that is always slightly out of tune.** Verify against a VCO.
 
 ## Track M — Mechanical
 
-The envelope is set at 18 × 2.5 × 1.5 in (ADR 0009). Keys run in a **single
+The envelope is set at 18 × 2.25 × 1.5 in (ADR 0009). Keys run in a **single
 line** down the body, flute-style, with short sections above and below the key
 runs — which is what makes 18 inches workable.
 

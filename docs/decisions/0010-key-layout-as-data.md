@@ -131,6 +131,13 @@ that arc is what makes four reachable; laying them in a straight line is what
 makes four too many. This supersedes the earlier arc-versus-line note — it is no
 longer a preference, it is the mechanism.
 
+**That arc runs along the body, not across it.** Four 16.5 mm caps laid
+laterally would need 66 mm of cap width before margins, which exceeds the
+instrument's 57 mm width (ADR 0009). So the arc is primarily longitudinal —
+roughly 57 mm of travel down the body with perhaps 15–25 mm of lateral
+deviation, sitting underneath the left-hand key run rather than beside it. It
+consumes length in that region, not width.
+
 **Actuation force has to suit a thumb tip at an awkward angle.** A thumb tip
 extending from a grip has far less available force than a finger pressing
 straight down, and it is doing so while partly giving up its grip. Light linear

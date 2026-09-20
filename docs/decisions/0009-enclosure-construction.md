@@ -14,7 +14,7 @@ feels right.
 
 ## Envelope
 
-**18 inches long (457 mm), 1.5 inches thick (38 mm).** Width not yet decided.
+**18 × 2.25 × 1.5 inches** — 457 × 57 × 38 mm.
 
 ### Keys run in a single line
 
@@ -100,11 +100,9 @@ anchors the strap to the aluminium plate, which is the strongest element in the
 sandwich, and it adds clamping force to the lamination at mid-span where it is
 otherwise held only by adhesive.
 
-## Width: 2.5 inches
+## Width: 2.25 inches
 
-**63.5 mm.** This is above the 50–60 mm window originally sketched here, and
-that earlier figure was a heuristic rather than a measurement. Recording why it
-is still the right call, and what to watch.
+**57 mm**, in the middle of the 50–60 mm window originally sketched here.
 
 ### Why the grip concern is smaller than the heuristic implied
 
@@ -118,23 +116,38 @@ point is nearer three inches across. The relevant question is not "can the hand
 clamp this" but "can the thumb reach a comfortable opposing position and still
 extend to its keys", which is a much weaker constraint.
 
-### What the width buys
+### Nothing on the instrument binds the width
 
-An earlier version of this ADR justified the width partly on two-column key
-clusters. **That justification is void** — keys run in a single line. What
-actually carries the width:
+Two earlier justifications in this ADR turned out not to hold, and both are
+worth recording because they were wrong in the same direction — assuming
+something needed lateral room that does not.
 
-- **The left thumb's four-key arc**, on the bottom face. An arc needs lateral
-  extent, and this is now the binding constraint on width rather than anything
-  on the top face (ADR 0010).
-- Room for a readable display, usable PCB area, and acrylic side panels with
-  enough presence for the edge lighting to be worth doing.
-- More cavity volume where the thumb switches are eating into it.
+- **Two-column key clusters.** Void: keys run in a single line (ADR 0010).
+- **The left thumb's four-key arc.** Also void, and usefully so — see below.
+  Four 16.5 mm caps laid *across* the body would need 66 mm of cap width alone,
+  which does not fit at any width under consideration. The arc therefore has to
+  run **along** the body, so it consumes length in the left-hand region, not
+  width.
 
-Since the top keys no longer need the width, narrowing toward 2 inches for a
-more slender, flute-like feel is now *possible* — at the cost of squeezing the
-thumb arc, which is the thing that would suffer first. Worth deciding with hands
-on the M2 mockup rather than on paper here.
+What is left is grip feel, display legibility, PCB area, cavity volume, and
+enough side-panel height for the edge lighting to read. None of those is tight
+at 57 mm, so the width is set by how the instrument should *feel* rather than by
+a clearance anywhere.
+
+2.25 inches sits between the slender flute-like 2 inches and the roomier 2.5,
+and it is comfortably inside the span where the thumb can oppose the fingers.
+
+### Mass
+
+| Width | Mass |
+|---|---|
+| 2.00 in | ~735 g (1.62 lb) |
+| **2.25 in** | **~778 g (1.72 lb)** |
+| 2.50 in | ~825 g (1.82 lb) |
+
+Aluminium plate, oak top and bottom, acrylic sides, plus ~200 g of electronics
+and hardware. All three land in EWI territory (~1.5–2 lb); the width barely
+moves it, which is another reason to choose on feel.
 
 ### Mass
 
