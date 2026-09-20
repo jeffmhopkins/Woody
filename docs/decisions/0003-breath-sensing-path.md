@@ -146,7 +146,9 @@ wave is the wrong model once there is a trap volume at the end — it is a
 **Helmholtz resonator**, and at 3 mL of trap it lands near **320 Hz, below the
 500 Hz filter corner**, where it would pass straight through. So:
 
-- **Specify the trap volume at ≤1 mL.** "Small" is not a spec.
+- **Specify the trap volume at ≤1 mL.** "Small" is not a spec, and trap volume
+  and response time are coupled — the ADR previously treated them as
+  independent.
 - Add a deliberate pneumatic restrictor at the sensor port to make the path
   first-order rather than resonant. Sizing depends on orifice length as well as
   diameter and needs a bench check — a porous PTFE plug does the same job and
@@ -463,4 +465,33 @@ Still worth handling, cheaply:
 
 Not a stack-level design problem, and not a reason to choose one sensor position
 over another.
+
+### But the vapour problem is underestimated in *kind*, not just in degree
+
+The section above is about liquid. The datasheet's objection is not:
+
+- NXP qualifies this sensor family on **dry air** and states it is **"NOT
+  compatible with water or water vapors"**.
+- The **gel die coat swells when wet**, which shows up as unreliable readings
+  rather than as a dead part.
+- Exhaled breath is **~100 % RH**, and at 6 kPa the air in the tube compresses
+  about 6 % — so every note pumps a little saturated air toward the die.
+
+A dead-volume trap catches liquid and does nothing about vapour, and **vapour
+cannot be eliminated from a closed tube that is breathed into.** So the honest
+handling is three partial measures rather than one fix:
+
+- **A porous hydrophobic PTFE plug at the sensor port.** It blocks liquid water
+  and it is *the same part as the Helmholtz restrictor above* — one component
+  doing both jobs, which is why the restrictor should be specified as a PTFE
+  plug rather than a drilled orifice.
+- **The restrictor limits the pumping itself**, since the ~6 % volume exchange
+  per note has to pass through it.
+- **Treat the sensor as a wear part.** It is socketed or otherwise replaceable,
+  the trap is clearable without disassembly, and — since the MPXV4006GP has been
+  EOL since 2021 and exists only in distributor stock — **buy three to five now**
+  rather than discovering in two years that the instrument has no sensor.
+
+That last one is the real mitigation. The first two slow the mechanism down; only
+spares make it survivable.
 

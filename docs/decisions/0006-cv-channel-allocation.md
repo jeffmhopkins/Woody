@@ -40,8 +40,11 @@ cannot be generic:
   firmware where it can be switched off.
 - **Breath wants a gentler filter**, ~2 kHz. It is an inherently slow signal and
   the steps should be smoothed in hardware.
-- **Mod 1–4** get a uniform fast filter with smoothing applied in software,
-  per-channel, according to what each is assigned to.
+- **Mod 1–4** get a uniform **~2 kHz** filter with smoothing applied in
+  software, per-channel, according to what each is assigned to. An earlier
+  revision called this a "uniform fast filter"; a fast corner leaves the
+  zero-order-hold image audible, and their sources top out around 400 Hz so a
+  2 kHz corner costs nothing in signal. See the update-rate section below.
 
 Dedicating the first two channels means they get optimal analog treatment rather
 than a compromise, and only the generic four need the uniform-filter-plus-
@@ -140,12 +143,49 @@ entire bandwidth budget.
 
 | Channel | Rate | Why |
 |---|---|---|
-| Pitch | 2 kHz, plus **immediate update on note change** | Static between notes; what matters is latency at the transition, not rate |
-| Mod 1–4 | 2 kHz | Sources are slow — IMU tops out around 400 Hz |
-| Breath zero offset | on demand | Changes only at ambient calibration |
+| Pitch | **4 kHz**, plus **immediate update on note change** | Static between notes; what matters is latency at the transition, not rate |
+| Mod 1–4 | **4 kHz** | See below — 2 kHz leaves an audible image |
+| Breath zero offset | continuous, slow | See the auto-zero rule below |
+| Mod offset | written once at boot | The shared 2.5 V reference point |
 
 Pitch is the subtle one: it needs no *rate*, but it must not wait for its turn
 in a round-robin. Push it the instant the note resolves.
+
+**The table used to say 2 kHz and it was wrong twice over.** It contradicted
+this ADR's own bounding argument, which cites 4 kHz, and it contradicted the
+loop budget, which already assumes six DAC channels serviced every 250 µs pass.
+Nothing is saved by updating at half the rate the loop already pays for.
+
+It also conflated amplitude quantisation with time quantisation. **Software
+smoothing band-limits the content; it cannot remove the images the DAC creates
+after it.** At a 2 kHz update a 400 Hz IMU signal puts its first zero-order-hold
+image at 1.6 kHz, only **12.6 dB** below the modulation — and a 15 kHz
+reconstruction filter attenuates that by 0.07 dB, which is nothing.
+
+At 4 kHz the image moves to 3.6 kHz and drops to −19.2 dB. Better, and still not
+enough on its own, so:
+
+**Give the mod channels a lower reconstruction corner than pitch — around
+2 kHz.** Their sources top out near 400 Hz, so the corner costs nothing in
+signal and puts real attenuation on the image. Pitch keeps its fast corner
+because a slow one is an audible glide on every note; these are different
+channels with different needs, which is the same argument that made them
+dedicated rather than generic in the first place.
+
+### Ambient zero is continuous, not startup-only
+
+The breath sensor is a gauge part with a temperature-dependent offset, sitting
+inside a sealed oak-and-acrylic body — both insulators — warmed by breath, by
+the LEDs and by its own electronics. The interior rises on the order of 10–20 K
+over the first 10–20 minutes of a session, and the aluminium plate is the only
+real heat path out of it, partly covered by the player's hands.
+
+**A zero captured once at startup is wrong by the time the first piece ends.**
+
+The mechanism already exists: DAC channel 6 drives the ambient-zero offset into
+the in-amp's REF pin. So **decay the zero toward the current reading whenever
+breath has been sub-threshold for about 2 seconds.** Slow enough that it cannot
+chase a held note, fast enough to track a warming body.
 
 A 96 kHz breath channel was specified before the output went analog, which
 implied sub-10 µs DAC settling and ~6.8 MHz on the umbilical. **Both
