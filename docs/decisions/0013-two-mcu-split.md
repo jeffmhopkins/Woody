@@ -204,7 +204,8 @@ at all.** The carrier holds only:
 
 - Headers the dev boards plug into
 - 74LVC165 shift registers
-- MCP3202 ADC and MCP6002 buffer
+- MCP3202 ADC, REF5050 5.000 V reference, OPA2197 dual (reference buffer +
+  breath buffer, both on +12 V)
 - 74AHCT125 level shifter
 - R-78E5.0 regulator module, polyfuse, umbilical connector
 - Passives

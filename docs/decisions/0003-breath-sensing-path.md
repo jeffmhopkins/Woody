@@ -225,7 +225,9 @@ series resistance, and 3.3 kΩ unmatched leaves ~24 dB of CMRR.
 
 **A buffered-input in-amp dissolves that conflict entirely** — gigaohm inputs
 make source impedance irrelevant, so protection resistors can be 10 kΩ and
-unmatched with no CMRR penalty. Three further benefits: it **absorbs the ~2.13×
+unmatched with no CMRR penalty. (Moving the buffer to a +12 V rail, below,
+removes the ≥3.3 kΩ requirement at its source as well. The two fixes attack
+opposite ends of the same conflict and neither depends on the other.) Three further benefits: it **absorbs the ~2.13×
 scaling stage** so net part count is flat or lower; its **REF pin is the natural
 injection point** for the firmware ambient-zero, driven from a low-impedance
 buffer rather than a divider; and it has **real DC offset and drift
@@ -262,6 +264,93 @@ than a wide one.
 This **cancels the RS-485 escalation** in ADR 0004 and **removes the sub-10 µs
 DAC settling requirement** in ADR 0006. Both of those existed only to carry a
 96 kHz breath channel that no longer exists.
+
+### The sensor runs from a precision reference, not the shared 5 V rail
+
+**The MPXV4006GP is ratiometric by specification:**
+
+```
+Vout = VS × (0.1533 · P + 0.04)
+```
+
+Its output is a *fraction of its own supply*. Put it on a rail that moves, and
+the breath CV moves with it — and since the output path is analog end to end,
+nothing downstream can correct it.
+
+The original design fed the sensor from the same 12 V→5 V buck as both dev
+boards. That rail carries AMOLED current steps, WiFi TX bursts and key-LED
+transitions:
+
+| 5 V rail excursion | Error at the breath jack |
+|---|---|
+| 0.4 % (a modest load step) | 21 mV |
+| 1 % | 52 mV |
+| 2 % | 104 mV |
+
+For scale: the AGND common-mode path that this ADR spends several pages
+resolving contributes **0.13 mV**. The ratiometric path is roughly **30 dB
+worse** than the one that was analysed.
+
+**The usual free fix does not apply here.** Normally you reference the ADC to
+the same rail as the sensor, and the ratio cancels in the digital reading. That
+works for a digital breath path. This one is analog to the jack by design, so
+there is no division to cancel in.
+
+**Absolute accuracy is not what matters.** Breath is zeroed at ambient and the
+module's gain knob sets the span, so a rail that is 4.93 V instead of 5.00 V
+calibrates out on the first breath. What does not calibrate out is *dynamic*
+excursion — load steps with millisecond envelopes, which pass straight through
+the 500 Hz filter as amplitude modulation correlated with whatever the display
+happens to be doing.
+
+**So the sensor gets its own supply:**
+
+```
+umbilical +12V ──[REF5050 5.000V]──[OPA2197 ½ buffer]──┬── MPXV4006GP VS
+                                                       └── (10 mA available)
+```
+
+- **REF5050**, SOIC-8, 7–18 V in, 5.000 V out at ±0.05 % and 3 ppm/°C, with line
+  regulation around 5 ppm/V — so a full volt of movement on +12 V shifts the
+  sensor supply by ~25 µV.
+- **Buffered by half an OPA2197** running on +12 V. The reference alone can
+  source 10 mA against the sensor's ~10 mA, which is inside its rating and has
+  no margin; the buffer removes the question and costs nothing, because the
+  other half of the package is the breath buffer itself.
+
+### The breath buffer moves to +12 V, which dissolves the protection conflict
+
+The buffer was an MCP6002 on the 5 V rail. It becomes **the second half of the
+OPA2197**, running from +12 V.
+
+That is partly tidiness — one part number instead of two, and the same part
+number the module already uses — but the real reason is that it resolves a
+conflict this ADR could not otherwise settle.
+
+**The conflict:** a sustained +12 V fault on the BREATH conductor drives the
+buffer's output back through its series resistor into the buffer's own supply
+rail. Through 1 kΩ into a 5 V rail that is 6.4 mA against a ~2 mA clamp rating,
+so protection needs **≥3.3 kΩ** — and 3.3 kΩ unmatched leaves only ~24 dB of
+CMRR against the 60 dB the link needs. The two requirements were incompatible as
+specified.
+
+**With the buffer on +12 V there is no conflict, because there is no fault
+current.** A +12 V conductor against a +12 V rail is at the rail, not above it.
+The clamp never conducts, the series resistor is free to stay at the value CMRR
+wants, and the worst case is the op-amp sinking a few milliamps within its
+linear output range. The umbilical's highest voltage is +12 V, so this covers
+the realistic fault rather than an arbitrary one.
+
+The buffer still has to reach 0.2 V at the bottom of the sensor's range. An
+OPA2197 is rail-to-rail on a single +12 V supply and reaches within ~30 mV of
+ground, so the requirement that drove the original RRIO-on-5 V choice is met
+with far more headroom than before.
+
+**The ADC stays on 3.3 V.** The obvious follow-on — move the ADC to the buffered
+5.000 V rail too, so the digital reading becomes ratiometric — is wrong here.
+The MCP3202 takes its reference from VDD, so a 5 V VDD also means 5 V logic on
+DOUT into an ESP32-S3 pin that is not 5 V tolerant. That trades an analog
+divider for a level shifter. The 0.6× divider below stays.
 
 ### The ADC does not go away
 

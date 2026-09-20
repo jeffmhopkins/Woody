@@ -23,7 +23,8 @@ PLATE-TOP,mechanical,TBD,,Aluminium key plate laser or waterjet cut,n/a,1,candid
 BODY-OAK,mechanical,TBD,,Oak top and bottom panels,n/a,2,candidate,,0009,Bottom panel thickness sets thumb key inset depth
 SIDE-ACRYLIC,mechanical,TBD,,Frosted acrylic side panels,n/a,2,candidate,,0009,Edge-lit
 BENCH,tooling,n/a,,"Scopes, logic analysers, DMMs, signal generators, RF",n/a,1,available,,0006,Full bench available - E9 not gated on tooling
-U-BUF,controller,MCP6002-I/SN,Microchip,Dual RRIO op-amp for the breath buffer,SOIC-8 (1.27mm pitch),1,candidate,,0003,SOIC-8. Rails to within ~25mV so 4.7V from 5V is fine. Second half spare for the low-pass
+U-REF-BREATH,controller,REF5050AIDR,TI,5.000V precision series reference for the breath sensor supply,SOIC-8 (1.27mm pitch),1,candidate,,0003,"+-0.05%, 3ppm/degC, ~5ppm/V line reg. The MPXV4006GP is ratiometric so its supply IS its scale factor. Buffered by half of U-BUF"
+U-BUF,controller,OPA2197IDR,TI,Dual RRIO op-amp: breath buffer + reference buffer,SOIC-8 (1.27mm pitch),1,candidate,,0003,"SOIC-8. Runs on +12V not 5V - a +12V fault on the BREATH conductor is at the rail so no clamp current, which kills the >=3.3k protection resistor requirement. SAME part as the module op-amps"
 U-DIFFRX,module,INA821 or INA828,TI,"Instrumentation amp - breath receiver, senses against AGND",SOIC-8 (1.27mm pitch),1,candidate,,0003,Buffered GOhm inputs make source impedance irrelevant. Absorbs the ~2.13x gain stage. REF pin takes the ambient-zero injection
 J-USB,controller,USB-C receptacle,,USB-C connector for the real-time carrier,n/a,1,not-needed,,0013,Dev boards carry these. Only required if a custom MCU carrier is ever built (ADR 0013)
 U-ESD-USB,controller,USBLC6-2SC6,ST,USB ESD protection array,n/a,1,not-needed,,0013,Dev boards carry these. Only required if a custom MCU carrier is ever built (ADR 0013)
