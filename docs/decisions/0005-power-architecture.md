@@ -70,6 +70,47 @@ Feeding the dev boards 5 V is also the right way round. Both carry their own
 lets that circuitry do its job, rather than backfeeding a `3V3` pin and
 contending with USB when it is plugged in for flashing.
 
+### Why 12 V goes up the umbilical, not 5 V
+
+The rack supplies a regulated +5 V rail alongside ±12 V, so sending 5 V up the
+cable and deleting the instrument's buck converter looks attractive. **The drop
+maths says otherwise.**
+
+The instrument's load is roughly 3 W. Over 2 m of 24 AWG, round trip ~0.34 Ω:
+
+| Delivered at | Current | Drop | Arrives as | Error |
+|---|---|---|---|---|
+| **12 V** | 250 mA | 84 mV | **11.92 V** | **0.7%** |
+| 5 V | 600 mA | 202 mV | 4.80 V | 4.0% |
+
+The same power at a lower voltage means proportionally more current, and drop
+scales with current. At 5 V the instrument would see **4.80 V** — inside the
+MPXV4006GP's 5.00 ±0.25 V specification with no margin left, and that sensor is
+**ratiometric**, so supply variation reads directly as breath variation.
+
+This is simply why power distribution uses higher voltages, and it applies at
+two metres as much as at two kilometres.
+
+Two further reasons the question does not arise:
+
+- **The WS2815 strips need 12 V anyway** (ADR 0014). A 5 V-only umbilical would
+  force 5 V strips, giving up the backup data line that matters in a sealed
+  body — and drawing more current while doing it.
+- **The R-78E5.0 is a 3-pin through-hole module**, among the lowest-effort parts
+  in the design. Deleting it saves almost no build effort to begin with.
+
+### The module is a different case, and there the rack's +5 V wins
+
+The module sits in the rack on a short ribbon, with negligible drop, and its 5 V
+load is the DAC plus one level shifter — around 20 mA. **Take that from the bus
+rather than regulating it locally** (ADR 0004). One fewer part on that board.
+
+**With a fallback, though.** Eurorack +5 V is optional on the bus board and is
+frequently absent or weak in other cases. Fit the module with a jumper selecting
+either bus +5 V or a populated R-78E5.0 footprint. That costs one jumper and an
+unpopulated footprint, and it means the module works in any case rather than
+only this one.
+
 ### Power tree
 
 ```

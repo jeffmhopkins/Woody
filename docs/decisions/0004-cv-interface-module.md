@@ -99,8 +99,10 @@ The cost is that a 5 V DAC wants roughly 3.5 V for a logic high while the
 instrument sends 3.3 V, so SPI needs shifting. That turns out to be free in
 parts terms:
 
-- **R-78E5.0-1.0** for the 5 V rail — the *same regulator module* as the
-  instrument (ADR 0005).
+- **The rack's own +5 V rail** for the 5 V supply. The module is inches from the
+  bus board, so there is no drop to worry about and no regulator needed
+  (ADR 0005). A jumper and an unpopulated R-78E5.0 footprint sit behind it as a
+  fallback, because +5 V is optional on a Eurorack bus board and often absent.
 - **74AHCT125** for the shifter — the *same part* as the instrument's LED data
   lines (ADR 0014), with a spare gate left over.
 
