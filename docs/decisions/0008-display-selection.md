@@ -1,6 +1,6 @@
 # 0008 — Display selection
 
-**Status:** Accepted (technology). Specific board open.
+**Status:** Accepted. Board selected: LilyGO T-Display-S3 AMOLED (base, not Plus).
 
 ## Context
 
