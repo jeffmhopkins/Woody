@@ -127,6 +127,54 @@ modulation CV moves a few cents' equivalent with temperature.
 This is materially less expensive and less work than treating all six as
 precision outputs.
 
+## No trimmers anywhere — and the one thing that makes that work
+
+A conventional Eurorack module of this kind would carry trimmer pots: one for
+1V/oct scale, one for offset, and often one per channel. **This design has
+none**, because calibration lives in firmware as a stored two-point fit
+(above) rather than in a screwdriver adjustment.
+
+That is the better arrangement here:
+
+- Nothing mechanical to drift, and nothing to knock while patching.
+- No screwdriver access needed into a rack-mounted module.
+- Repeatable, storable, and re-runnable without opening anything.
+- More than two calibration points are possible if tracking ever needs it.
+
+Every place a trimmer would traditionally go is already covered: pitch scale and
+offset by the firmware fit, the mod channels by the same digital scaling, breath
+gain and offset by the panel pots (user-facing, not calibration), and breath
+ambient zero by a dedicated DAC channel (ADR 0003).
+
+### The catch: firmware can only scale *down*
+
+A digital calibration multiplies the DAC code by something at or below 1. It
+cannot push the converter past full scale. So if the analog stage is built even
+slightly *under* its target gain, the top of the range is simply gone and no
+amount of firmware fixes it:
+
+| Built gain error | Max output | Recoverable? |
+|---|---|---|
+| −3% | 8.73 V | **No — range lost** |
+| −1% | 8.91 V | **No — range lost** |
+| +3% | 9.27 V | Yes, scale down |
+| +5% | 9.45 V | Yes, scale down |
+
+**So design the pitch analog gain about 5% high.** Target a 9.45 V span from
+full DAC scale and let firmware trim it to exactly 9.0 V. The cost is 0.07 bits
+of resolution out of 16 — nothing at all, in exchange for guaranteeing the
+calibration always has somewhere to go.
+
+The same applies to the mod channels: aim slightly over 10 V and trim down.
+
+### What this does not cover
+
+Digital calibration absorbs component tolerance. It does not rescue a build
+error — a wrong resistor value or a misplaced part puts the gain far enough out
+that neither firmware nor a trimmer would help. **Milestone E8 should verify the
+raw analog gain is in the right ballpark before E9 relies on firmware to finish
+the job.**
+
 ## Labelling
 
 Channels 1 and 2 are silkscreened. Mod 1–4 are numbered with a write-on strip,
