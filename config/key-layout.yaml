@@ -22,8 +22,14 @@ meta:
   origin: top-left of key plate, +x right, +y down
   switch: gateron-ks33
   keycap: mt165-mx
-  # Measured at M1. NOT the standard 14mm MX cutout — must be measured.
-  plate_cutout: null
+  # 14.0 x 14.0 mm — the same as standard MX. Measured from a working KS-33
+  # build; see docs/reference/ks33-geometry.md. An earlier revision of this
+  # file claimed it was NOT the MX figure, which was wrong.
+  # The *achieved* cutout may differ by the cutter's kerf: M1 coupon decides.
+  plate_cutout: 14.0
+  # OPEN, and it blocks M4/M5. 2 mm defeats the retention clips entirely;
+  # MX standard is 1.5 mm; the reference KS-33 build uses 1.1 mm.
+  # Needs the clip dimension from Gateron's drawing (ADR 0002).
   plate_thickness: null
 
 counts:
