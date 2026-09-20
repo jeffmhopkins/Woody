@@ -68,18 +68,20 @@ runs — which is what makes 18 inches workable.
 
 | ID | Milestone | Done when |
 |---|---|---|
-| M1 | Switch characterisation | KS-33 plate cutout measured with calipers; test coupon cut at ±0.1mm steps; retention verified by hand; **bounce scoped on fast press, slow press, fast release, slow release and a worn switch**; **action assessed by hand** — fingertip vs thumb-tip, and whether the four thumb keys want a lighter spring than the eleven finger keys (ADR 0002) |
+| M1 | Switch characterisation | **Cutout and body geometry from Gateron's datasheet and STEP model, not calipers** (ADR 0002). Test coupon cut at ±0.1mm around nominal to find the *achieved* fit in real material; retention verified by hand; **bounce and the actuation/reset hysteresis gap scoped** on fast press, slow press, fast release, slow release and a worn switch — neither is published; **action assessed by hand** — fingertip vs thumb-tip, and whether the four thumb keys want a lighter spring than the eleven finger keys |
 | M2 | Layout mule | Full key count on a laser-cut plate, hand-wired, mounted to a mock body; playable |
 | M3 | Layout locked | Ergonomics settled after 2–3 iterations of M2. No aluminium cut before this |
-| M4 | Stack design | Full laminated stack in CAD, every layer a 2D part |
+| M4 | Stack design | Full laminated stack in CAD, every layer a 2D part, **modelled against the real KS-33 STEP solid** rather than a nominal box (ADR 0002) |
 | M5 | Aluminium top plate | Cut, fitted, switches retained solidly, **bonded to `PWR_GND`**. Not before E13 — see the ordering rules below |
 | M6 | Body | Oak top and bottom, frosted acrylic sides, LEDs, strap points, **tail matrix window + diffuser and USB-C slot** (ADR 0009) |
 | M7 | Integration | Electronics mounted in the body, umbilical connector fitted and strain-relieved |
 | M8 | **Pre-bond gate** | Assembled but **not bonded**. Full E11 breath-noise test re-run on the *final* harness, **thermal soak at the lighting clamp, watching temperature *and the breath zero* at the sensor**, two-hour play test, failure injection, self-test. Nothing closes until this passes |
 
-**M1 is the first thing that happens when the switches arrive.** That cutout
-measurement is the single most important input to the entire mechanical design;
-everything downstream inherits it.
+**M1 no longer gates M4.** An earlier revision made the cutout measurement the
+single most important input to the mechanical design, on the assumption it could
+only come from calipers. Gateron publishes the drawing and a STEP model
+(ADR 0002), so **CAD can start now** — M1 narrows to confirming the *achieved*
+fit in real material, and to the two timing figures nobody publishes.
 
 **Nothing expensive gets cut before M3.** The ergonomic iteration ladder is
 paper at 1:1, then laser-cut acrylic, then aluminium — cheapest first, and

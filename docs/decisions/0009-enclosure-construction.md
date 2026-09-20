@@ -71,11 +71,23 @@ transceivers stay a contingency rather than a likely requirement.
 That leaves around 20 mm of clear cavity — except where switch bodies intrude.
 Top switches pass through the plate and oak and protrude slightly into the
 cavity; the bottom thumb switches mount to the inside face and protrude *up*
-into it by most of their body height. In the thumb regions, usable cavity may be
-half of what it is elsewhere.
+into it by most of their body height.
 
-**The KS-33 body height below the plate is the number that decides this**, and it
-is unmeasured. It comes out of M1 alongside the cutout dimension.
+**The KS-33 is 12.2 mm tall overall**, from Gateron's published specification —
+this ADR previously called it unmeasured and deferred it to M1, which was wrong
+on both counts: the switch is documented, and the number was available all along
+(ADR 0002).
+
+That is good news for the cavity. Against 20 mm of clear space, even if the
+entire 12.2 mm sat inside it there would be 8 mm left, and in practice several
+millimetres of that height is stem and top housing sitting *above* the plate.
+**The earlier worry that "usable cavity may be half of what it is elsewhere" in
+the thumb regions looks overstated.**
+
+What is still missing is the **split** — how much of the 12.2 mm falls above
+versus below the mounting plane. That is on the dimensioned drawing, and it is
+the reason to download the drawing and the STEP model before starting M4 rather
+than modelling against a nominal box.
 
 Boards are not the constraint on *depth*. An ESP32-S3-WROOM module on a PCB is
 around 5 mm total. 38 mm is comfortable; it is the switch bodies and the U-bolt

@@ -92,10 +92,58 @@ instrument apart. Accepted — mechanical switches are reliable, this is a
 one-off, and designing the whole build around a failure that probably never
 comes is the wrong trade.
 
+## The switch is documented; use the documentation
+
+An earlier revision of this ADR said the cutout dimension *"must be measured,
+not taken from a datasheet"*. **That was wrong.** Gateron publishes a KS-33 Low
+Profile 2.0 datasheet and downloadable 3D models for this exact switch, there is
+a community CAD model on GrabCAD, and at least one open-source keyboard
+([ianmaclarty/ik](https://github.com/ianmaclarty/ik)) is built on KS-33 with a
+real plate whose geometry is in the repository.
+
+**And a caliper is the worse instrument for this.** Measuring a moulded plastic
+housing gives you *that sample's* dimension including draft angle and mould
+flash — not the design intent, and not the tolerance band. The drawing gives
+both. Measuring was the right instinct for a part nobody documents; it is the
+wrong one here.
+
+Known from the published specification, pending the drawing itself:
+
+| | |
+|---|---|
+| Height | **12.2 mm** |
+| Pretravel | 1.70 mm |
+| Total travel | 3.00 mm |
+| Pins | 3-pin, SMD LED support |
+| Materials | POM stem, PC top housing, nylon bottom |
+
+**Download the datasheet and the STEP model before any CAD starts.** They are at
+[gateron.com/pages/3d](https://www.gateron.com/pages/3d) and the
+[KS-33 Low Profile 2.0 datasheet page](https://www.gateron.co/pages/gateron-ks-33-low-profile-2-0-mechanical-switch-datasheet).
+Put the STEP in `mechanical/` so the stack is modelled against the real solid
+rather than a nominal box.
+
+## What still has to be measured, and why
+
+Two things, narrower than before.
+
+**The achieved fit, which is a process question rather than a geometry one.**
+The drawing gives the nominal cutout; it cannot tell you what *your* cutter
+produces in *your* material. Kerf varies with machine, material and thickness,
+and this is a press fit at ±0.1 mm. **So the test coupon survives** — cut the
+nominal dimension plus a ladder of steps either side, and find which one retains
+solidly without fighting during assembly. That is a half-hour at the vendor's
+minimum order, not a discovery exercise.
+
+**Contact bounce and the actuation/reset hysteresis gap, which Gateron does not
+publish.** Travel and force are specified; bounce duration and the reset point
+are not, for this switch or for most. These genuinely need a scope, and they set
+the debounce windows on the most latency-sensitive path in the instrument
+(ADR 0001). Measure on fast press, slow press, fast release, slow release, and a
+worn switch — the slow cases matter because a legato release can park the
+plunger in the hysteresis gap and chatter for tens of milliseconds.
+
 ## Open
 
-**The KS-33 plate cutout dimension is not yet known and must be measured**, not
-taken from a datasheet or from MX convention — Gateron low-profile does not use
-the standard 14 mm MX cutout. Milestone M1: measure with calipers, cut a test
-coupon at ±0.1 mm steps, find the size that retains solidly without fighting
-during assembly. Everything downstream inherits this number.
+Nothing blocking. The cutout comes from the datasheet, the fit from a coupon,
+and the timing from a scope.
