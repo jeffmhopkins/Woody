@@ -180,6 +180,7 @@ came out of the analog design review specifically.
 | **Real-time board idle current** | E1 | 64 unlit WS2812C drivers are an estimated ~50 mA and 0.25 W, spent whether or not anything is displayed. The shared lighting budget is sized from this number (ADR 0014) |
 | **Matrix diffusion prototype** | M6 | Can an 8×8 at 2.6 mm pitch stay pixel-distinct through a window, or only as a blurred bar? Decides whether the 2-D IMU assignment is usable (ADR 0014) |
 | **Interior temperature rise under load** | M8 | The lighting budget is set from an estimated 3 K/W. Soak with strips and matrix at the clamp, and measure at the breath sensor (ADR 0014) |
+| **Cold-start warm-up sweep** | E2 | Run the sensor from cold through 20 minutes of playing. Output that *falls* under warming is a blocked reference chamber; output that *drifts* is ordinary thermal offset (ADR 0003) |
 | **Breath zero vs cavity temperature** | M8 | The DP's reference port is open to the cavity, so the cavity must leak. Watch the zero during the same soak — a walking zero means it is sealing more than assumed. **M8 is pre-bond, so a vent can still be added** (ADR 0003) |
 | **PSRAM mode on the ESP32-S3-Matrix** | E1 | Quad leaves 16 broken-out GPIO; octal would consume GPIO33–37 and leave exactly 12 with nothing spare. **The carrier pin map depends on this** (ADR 0007) |
 | **DAC saturation vs AVDD** | E7 | The output span *is* the supply. Record the actual saturation code at the actual rail rather than claiming +7 V (ADR 0006) |

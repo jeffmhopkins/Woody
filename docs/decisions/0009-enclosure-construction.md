@@ -401,6 +401,13 @@ eighteen unsealed switch cutouts, in a body whose interior runs 10–20 K above
 ambient. There is no coating anywhere in the BOM and nothing else in the design
 addresses humidity inside the cavity.
 
+**Mask both pressure-sensor ports before coating.** The breath sensor's
+reference port has to stay open to the cavity, and coating that seals it turns
+the reference chamber into a trapped volume that gains ~5.2 kPa when the body
+warms — clipping the output to zero and presenting as a dead sensor that works
+from cold and fails ten minutes in (ADR 0003). Adhesive during lamination can do
+the same thing, so orient the part with neither port facing a glue line.
+
 **Dry-assemble and balance before bonding**, per the U-bolt section above. This
 is the M8 gate in the roadmap, and the U-bolt position is one of several things
 it is the last chance to settle.

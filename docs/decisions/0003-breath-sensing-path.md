@@ -130,9 +130,19 @@ playing sits around 0–5 kPa.
 
 ### The reference port stays open to the cavity
 
-A DP part measures P1 − P2, so using it as a gauge means leaving the second port
-open. It is left open **inside the instrument**, connected to nothing — which
-makes it behave exactly as the GP did, with no extra tube, vent or plug.
+**The second port is the other face of the same diaphragm, not an outlet.** The
+die has one silicon diaphragm with a chamber on each side, sealed from each
+other by the diaphragm itself, and the output is proportional to the difference
+across it. No air passes between the ports. **The breath tube remains as closed
+and dead-ended as it has always been** (see below) — nothing escapes through P2,
+and none of this changes the closed-system decision.
+
+The only difference from a gauge part is *where the reference chamber gets its
+air*. A gauge vents that chamber through the package; the DP brings it out to a
+port stub. Leaving the stub unconnected reproduces the gauge's behaviour exactly.
+
+So it is left open **inside the instrument**, connected to nothing — no extra
+tube, vent or plug.
 
 **That is a dependency, not a non-decision, and it is worth stating plainly
 because it was never written down while the part was a gauge:**
@@ -169,6 +179,35 @@ still be added with the instrument open in front of you.
 a syringe at E2. This is a unidirectional 0–6 kPa part, so a reversed connection
 does not read backwards — it reads zero, which is easy to mistake for a dead
 sensor.
+
+### Assembly rule: the reference port must never be blocked
+
+"Open to the cavity" is a requirement on the build, not just an absence of
+plumbing, and there is already something in the design that could violate it.
+
+If the reference chamber gets sealed — tape, adhesive wicking in during
+lamination, potting, or **the conformal coating this project specifies for the
+in-body boards** (ADR 0009) — it becomes a trapped volume inside a body that
+warms 10–20 K. That air gains roughly **5.2 kPa** by the same arithmetic as the
+cavity case above. The output is P1 − P2, so the reading goes *negative* by
+5.2 kPa, and a unidirectional part simply clips:
+
+> **The instrument sits at 0.2 V and looks dead** — or needs implausible breath
+> pressure to register anything at all. And because it tracks temperature, it
+> reads correctly from cold and fails after ten minutes of playing.
+
+That is a far more confusing failure than a drifting zero, and it is an
+*assembly* mistake rather than a design one, which is the kind that actually
+gets made. Three rules follow:
+
+- **Mask both ports before coating.** The pressure port takes a tube; the
+  reference port takes nothing and must stay open to air.
+- **Keep adhesive away from the sensor during lamination**, and orient the part
+  so neither port faces a glue line.
+- **The E2 warm-up check catches it.** Run the sensor from cold through twenty
+  minutes of playing and watch for output that falls rather than drifts. A
+  falling output under warming is a blocked reference chamber; a drifting one is
+  ordinary thermal offset that auto-zero handles.
 
 ## Sensor placement: at the bottom, with the real-time board
 
