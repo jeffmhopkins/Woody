@@ -23,5 +23,5 @@ PLATE-TOP,mechanical,TBD,,Aluminium key plate laser or waterjet cut,1,candidate,
 BODY-OAK,mechanical,TBD,,Oak top and bottom panels,2,candidate,,0009,Bottom panel thickness sets thumb key inset depth
 SIDE-ACRYLIC,mechanical,TBD,,Frosted acrylic side panels,2,candidate,,0009,Edge-lit
 BENCH,tooling,n/a,,"Scopes, logic analysers, DMMs, signal generators, RF",1,available,,0006,Full bench available - E9 not gated on tooling
-U-DIFFTX,controller,THAT1606 / DRV134 / op-amp pair,multiple,Differential line driver for analog breath,1,candidate,,0003,Band-limit ~500Hz before driving
-U-DIFFRX,module,THAT1200 / INA1650 / precision diff amp,multiple,Differential receiver for analog breath,1,candidate,,0003,CMRR and low offset drift are what matter
+U-BUF,controller,precision op-amp,multiple,Buffer for analog breath onto the umbilical,1,candidate,,0003,Follower + ~500Hz low-pass + series protection. No diff driver needed
+U-DIFFRX,module,precision difference amp,multiple,Senses BREATH against AGND not local ground,1,candidate,,0003,Not optional - local ground reference reinstates the shared-ground offset

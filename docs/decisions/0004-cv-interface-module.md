@@ -49,21 +49,22 @@ Plain single-ended SPI at well under 1 MHz over twisted pair is unremarkable.
 
 ### Revised conductor budget
 
-The analog breath pair consumes the two spares:
-
 ```
-+12V, GND, GND          power
-SCLK, MOSI, CS          SPI to the DAC, ~1 MHz
-BREATH+, BREATH-        analog, differential, band-limited ~500 Hz
++12V      / PWR_GND     power, and the presence signal
+SCLK      / DIG_GND     SPI to the DAC, ~1 MHz
+MOSI      / CS
+BREATH    / AGND        analog, band-limited ~500 Hz, sense return
 ```
 
-All eight used. MISO goes, and with it the planned module-ID line — but
-**presence detect survives for free**: the instrument is rack-powered, so the
-presence of +12V on the umbilical *is* the signal that the module is connected.
-No +12V means running on USB, which means standalone mode. No conductor needed.
+Eight of eight, paired to suit Cat5's four twists. **`AGND` carries no power
+current** — it is a sense reference only, which is the whole reason the analog
+channel survives the cable (ADR 0003). Keep it twisted with `BREATH` and away
+from the SPI clock pair.
 
-Keep the analog pair on its own twisted pair, and ideally not adjacent to the
-SPI clock pair in the cable.
+MISO goes, and with it the planned module-ID line — but **presence detect
+survives for free**: the instrument is rack-powered, so the presence of +12V on
+the umbilical *is* the signal that the module is connected. No +12V means
+running on USB, which means standalone mode. No conductor needed.
 
 ### Why this partitioning is right
 

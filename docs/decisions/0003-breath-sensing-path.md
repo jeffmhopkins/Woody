@@ -140,32 +140,57 @@ has the same problem.
 buffered output is driven down the umbilical as an analog signal and scaled in
 the module. Zero steps, by construction, at any rate.
 
-### It must be differential — single-ended would not survive the cable
+### Why a Eurorack patch cable gets away with this, and what to copy
 
-The instrument draws its power through the umbilical, and that current flows in
-the ground conductor. Over 2 m of 24 AWG that is a real offset, and worse, it
-**moves with display brightness, LED animation and WiFi bursts**:
+A patch cable carries single-ended CV between modules with no trouble at all,
+and understanding *why* is what makes this work here.
 
-| Instrument draw | Ground offset | % of 4.5 V span |
+**A module's power returns through the bus board's ground rail, not through the
+patch cable.** The patch cable's ground carries only the signal current flowing
+into a high-impedance input — microamps — so it develops essentially no IR drop
+and acts as a pure voltage reference.
+
+| Receiving input | Signal current | Drop across 2 m of 24 AWG |
 |---|---|---|
-| 100 mA | 16.8 mV | 0.37% |
-| 200 mA | 33.7 mV | 0.75% |
-| 350 mA | 58.9 mV | 1.31% |
+| 100 kΩ | 50 µA | 8.4 µV |
+| 1 MΩ | 5 µA | 0.8 µV |
 
-Single-ended, that is breath CV modulated by the light show. Not acceptable.
+Against a 153 µV LSB on a 10 V output, that is nothing. The patch cable works
+because **its ground does exactly one job.**
 
-Differentially, it is common mode and simply rejected:
+### The failure mode is a shared conductor, not a cable
 
-| Receiver CMRR | Residual error |
+The umbilical breaks that condition only if one ground conductor does both jobs.
+The instrument draws its power down the same cable, and that return current
+through a shared ground develops a real, *moving* offset:
+
+| Instrument draw | Offset on a shared ground |
 |---|---|
-| 60 dB | 33.7 µV |
-| 80 dB | 3.4 µV |
-| 100 dB | 0.3 µV |
+| 100 mA | 16.8 mV |
+| 200 mA | 33.7 mV |
+| 350 mA | 58.9 mV |
 
-A 16-bit LSB on a 10 V output is 153 µV, so even a mediocre 60 dB receiver puts
-the ground-offset error **well below the resolution the digital path would have
-had**. This is exactly the problem balanced audio exists to solve, over exactly
-the same kind of cable.
+It moves with display brightness, LED animation and WiFi bursts — breath CV
+modulated by the light show.
+
+### So separate the grounds and it is a patch cable again
+
+**Give the analog signal its own return conductor that carries no power
+current**, and have the module sense `BREATH` against `AGND` rather than against
+its own local ground. `AGND` then sits at true instrument-ground potential at
+both ends, and the error falls back to the microvolts in the table above.
+
+This restores exactly the Eurorack condition inside the umbilical, and it means
+the instrument end needs **only a buffer** — an op-amp follower, band-limited,
+with a series resistor for protection. No differential line driver.
+
+The module end needs a difference amplifier taking `BREATH` and `AGND` as its
+two inputs, which is one op-amp. That part is not optional: sensing against
+local ground would put the shared-ground offset straight back in.
+
+Full differential signalling was considered and is not needed here. It buys
+about 6 dB against induced noise, which a twisted pair band-limited to 500 Hz
+does not need, at the cost of a driver in the instrument.
 
 ### Impedance and bandwidth are non-problems
 
