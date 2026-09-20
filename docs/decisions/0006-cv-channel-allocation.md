@@ -83,9 +83,17 @@ Optional later: an LED per jack tracking that channel's value, for instant
 visual confirmation of what is doing what. Costs a driver and six LEDs; not
 worth designing in now.
 
-## Open
+## Test equipment
 
-**A 4.5-digit multimeter is needed for E9** and is not yet confirmed as
-available. Calibration realistically cannot be done without one. Roughly a $50
-purchase, and it blocks the milestone that decides whether the instrument plays
-in tune.
+Resolved — a full bench is available: oscilloscopes, logic analysers,
+multimeters, signal generators and RF gear. E9 is not gated on tooling.
+
+This raises what is achievable at several milestones. Rather than trusting
+datasheet figures, the assumed numbers in
+[the latency budget](../reference/latency-budget.md) should be measured; see
+the characterisation section there.
+
+For calibration specifically: take the two-point fit with the meter, then verify
+tracking against a real VCO by ear and by frequency counter. A meter confirms
+the voltage is what was commanded; only the VCO confirms the voltage is
+musically right.

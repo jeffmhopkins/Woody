@@ -13,7 +13,9 @@ negotiable without revisiting those:
 - **Display renders on the other core, on its own SPI host.** A display refresh
   must never block the output loop.
 - **Asymmetric key debounce** — fire immediately on press, filter only the
-  release. A symmetric window puts its full length into the attack.
+  release. A symmetric window puts its full length into the attack. The release
+  window is set from **measured** KS-33 bounce (milestone M1), not from the
+  conventional 20 ms the 2021 firmware used.
 - **Per-channel smoothing in software**, not in the analog filter. The analog
   filter is fixed; firmware knows what each channel carries.
 - **Nothing expressive touches the ESP32's internal ADC.** It is noisy and

@@ -22,4 +22,4 @@ PANEL,module,TBD,,6HP Eurorack panel,1,candidate,,0004,~107mm of ~110mm usable -
 PLATE-TOP,mechanical,TBD,,Aluminium key plate laser or waterjet cut,1,candidate,,0009,Flat 2D through-cuts only - no CNC needed
 BODY-OAK,mechanical,TBD,,Oak top and bottom panels,2,candidate,,0009,Bottom panel thickness sets thumb key inset depth
 SIDE-ACRYLIC,mechanical,TBD,,Frosted acrylic side panels,2,candidate,,0009,Edge-lit
-DMM,tooling,TBD,,4.5-digit multimeter,1,needed,,0006,Blocks E9 pitch calibration
+BENCH,tooling,n/a,,"Scopes, logic analysers, DMMs, signal generators, RF",1,available,,0006,Full bench available - E9 not gated on tooling

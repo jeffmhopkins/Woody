@@ -59,7 +59,7 @@ that is always slightly out of tune.** Verify against a VCO.
 
 | ID | Milestone | Done when |
 |---|---|---|
-| M1 | Switch characterisation | KS-33 plate cutout measured with calipers; test coupon cut at ±0.1mm steps; retention verified by hand |
+| M1 | Switch characterisation | KS-33 plate cutout measured with calipers; test coupon cut at ±0.1mm steps; retention verified by hand; **contact bounce scoped** and debounce windows set from the measurement |
 | M2 | Layout mule | Full key count on a laser-cut plate, hand-wired, mounted to a mock body; playable |
 | M3 | Layout locked | Ergonomics settled after 2–3 iterations of M2. No aluminium cut before this |
 | M4 | Stack design | Full laminated stack in CAD, every layer a 2D part |
@@ -107,7 +107,6 @@ every expensive mistake made in the cheap material.
 | M2 onward | Key count and custom layout | [ADR 0010](docs/decisions/0010-key-layout-as-data.md) |
 | M4 onward | Instrument dimensions and envelope | [ADR 0009](docs/decisions/0009-enclosure-construction.md) |
 | E2 | Which breath sensor is actually in hand | [ADR 0003](docs/decisions/0003-breath-sensing-path.md) |
-| E9 | A 4.5-digit multimeter. Calibration needs one | [ADR 0006](docs/decisions/0006-cv-channel-allocation.md) |
 | E12 | Connector choice, pending panel fit check | [ADR 0004](docs/decisions/0004-cv-interface-module.md) |
 | E1 | Display type | [ADR 0008](docs/decisions/0008-display-selection.md) |
 | E3 | IMU part | [ADR 0007](docs/decisions/0007-imu-selection.md) |
