@@ -74,9 +74,17 @@ half of what it is elsewhere.
 **The KS-33 body height below the plate is the number that decides this**, and it
 is unmeasured. It comes out of M1 alongside the cutout dimension.
 
-Boards are not the constraint. An ESP32-S3-WROOM module on a PCB is around 5 mm
-total, and an OLED module is a few millimetres. 38 mm is comfortable for
-electronics; it is the switch bodies and the U-bolt that eat the space.
+Boards are not the constraint on *depth*. An ESP32-S3-WROOM module on a PCB is
+around 5 mm total. 38 mm is comfortable; it is the switch bodies and the U-bolt
+that eat the space.
+
+**But the cavity is not a clear box in plan, either.** Switch bodies run down
+the centreline for the whole length of both key runs, and thumb switches
+protrude upward from the bottom face. The genuinely free volume is the upper
+section, the inter-hand gap (minus the U-bolt), the lower section, and two
+narrow side channels flanking the switch column — which are the natural route
+for wiring looms. Board outlines belong on that plan, not on the raw envelope
+(ADR 0013).
 
 ### 1.5 inches suits the grip
 

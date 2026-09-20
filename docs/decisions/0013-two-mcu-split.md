@@ -122,43 +122,72 @@ than reaching the analog section.
 Being able to adjust a routing matrix and hear the result immediately is worth
 real effort, and this comes close to free.
 
-## Physical placement
+## Physical placement: three zones
 
-**Display board at the top. Real-time board at the bottom.**
+> Naming, to avoid confusion: **the DAC itself is not in the instrument.** It
+> lives in the rack module (ADR 0004). The mid-body board is the real-time MCU —
+> the board that *drives* the DAC down the umbilical.
 
-An earlier revision put both at the top, on the reasoning that the breath sensor
-is analog and must stay near the mouthpiece. That constraint does not bind: the
-sensor is digitised **where it sits**, by an ADC sharing the SPI bus that already
-runs the length of the body for the key chain. Only the digitised signal
-travels, so the sensor's position stops dictating the MCU's (ADR 0003).
-
-Putting the real-time board at the bottom is strictly better, because the two
-things it most wants to be near are already there:
-
-- **The IMU**, which belongs low in the instrument for leverage (ADR 0001). No
-  I2C run down the body at all now.
-- **The umbilical connector**, so SPI to the DAC exits immediately instead of
-  traversing the instrument first.
-
-### What runs down the body becomes far more benign
-
-| Before | After |
+| Zone | Contents |
 |---|---|
-| SPI (3) + chip selects to the DAC | — exits at the bottom |
-| I2C to the IMU | — IMU is at the bottom |
-| Shift register chain | Shift register chain |
-| LED data | LED data |
-| — | UART to the display board |
-| — | Power to the display board |
+| **Top** | Display board (AMOLED + WiFi), breath sensor + ADC on a short tube, upper key cluster |
+| **Middle** | Real-time MCU |
+| **Bottom** | IMU, umbilical connector, power entry and 3.3 V regulation, protection |
 
-**UART is close to the most robust thing that can be sent down a wooden
-instrument.** It is asynchronous and self-clocking, with no setup-and-hold
-relationship to preserve and wide tolerance to skew and slew — unlike SPI, which
-needs clock and data to stay aligned. Trading a clocked bus for an async pair
-over that distance is a real gain.
+### Mid-body placement halves the worst-case run
 
-Balance improves slightly too: mass distributed between the ends rather than
-concentrated at the top.
+Centring the MCU is what a star topology buys: nothing is far from it.
+
+| Destination | MCU mid-body | MCU at the bottom |
+|---|---|---|
+| Display | 170 mm | 360 mm |
+| Breath ADC | 145 mm | 335 mm |
+| Left-hand cluster | 75 mm | 265 mm |
+| Right-hand cluster | 75 mm | 115 mm |
+| IMU | 175 mm | 15 mm |
+| Umbilical | 205 mm | 15 mm |
+| **Worst case** | **205 mm (8.1 in)** | **360 mm (14.2 in)** |
+
+Longest run drops from 14 inches to 8. Nothing in this design *needs* that —
+UART and slow SPI were both fine at 14 inches — but it buys margin on every
+link at once, and margin is what stops intermittent faults.
+
+It also puts the heaviest board near the U-bolt and therefore near the centre of
+gravity, which makes balance more predictable (ADR 0009).
+
+### Two physical constraints on the middle
+
+**The U-bolt passes through the inter-hand gap.** That gap is 50 × 57 mm, and
+the strap anchor through-bolts the whole stack right there (ADR 0009). A
+mid-body board shares that window and must route around it. Worth laying out
+together rather than discovering at assembly.
+
+**The cavity is not a clear box.** Switch bodies protrude into it along the
+centreline for the full length of both key runs, and thumb switches protrude
+upward from the bottom face. What is actually free is:
+
+- The upper section, above the left-hand key run
+- The inter-hand gap, minus the U-bolt
+- The lower section, below the right-hand key run
+- **Two side channels** either side of the switch column — narrow, but
+  continuous end to end, and the natural route for the wiring looms
+
+Board outlines want planning against that shape, not against the raw envelope.
+A long narrow board running alongside the switch column is a legitimate
+alternative to fitting a square one into the inter-hand gap.
+
+### Is the third board worth it?
+
+The alternative is two boards, with the real-time MCU riding on the bottom board
+alongside the power entry, IMU and connector. That saves a board and an
+inter-board connector — fewer things to fail — at the cost of 14-inch runs
+instead of 8-inch ones.
+
+Both work. The three-board split is preferred because the instrument has the
+room, the runs get shorter everywhere at once, and mass lands near the
+suspension point. But if the inter-hand gap turns out too crowded once the
+U-bolt and its backing plate are drawn, collapsing to two boards is a clean
+fallback rather than a redesign.
 
 ## Considered and rejected
 
