@@ -1,14 +1,14 @@
 ref,category,part,manufacturer,description,qty,status,source,adr,notes
 SW1-n,controller,KS-33 Red (linear),Gateron,Low-profile mechanical switch MX stem,18,purchased,Amazon,0002,Binary. Plate cutout must be measured. Soldered. Thumb keys may want a lighter spring - decide at M1
 CAP1-n,controller,MT165-MX,Tai-Hao,Keycap 16.5x16.5mm blank black MX stem,18,purchased,Beekeeb,0002,Sold in 5-packs - 18 keys needs 4 packs. Smaller than 18mm MX spacing
-U-MCU-RT,controller,ESP32-S3-Matrix (candidate),Waveshare,Real-time MCU with onboard QMI8658 IMU,1,candidate,,0007,Mounted low for acceleration sensitivity. ~17 GPIO broken out vs ~11 needed. No LCD to waste
+U-MCU-RT,controller,ESP32-S3-Matrix (candidate),Waveshare,Real-time MCU with onboard QMI8658 IMU,1,candidate,,0007,Mounted low for acceleration sensitivity. ~17 GPIO broken out vs ~12 needed. No LCD to waste
 U-BREATH,controller,MPXV4006GP,NXP,Pressure transducer 0-6kPa gauge conditioned,1,selected,,0003,~1ms response = ~159Hz corner. ADC runs 4-8kHz; rate lives on the DAC side
 U-ADC,controller,TBD (was MCP33131-10),Microchip,SAR ADC SPI for breath,1,respec,,0003,SPEC IS STALE - breath output went analog so this only serves thresholds/mod/display/MIDI. 16-bit 500ksps is now overkill
 U-IMU,controller,QMI8658 (onboard) or equivalent 6-axis,multiple,6-axis IMU - accel + gyro no fusion,1,candidate,,0007,Fusion not wanted - raw accel is the signal and capture-on-press makes drift irrelevant
 U-KEYS,controller,74HC165,multiple,8-bit parallel-in shift register,4,candidate,,0001,One per cluster - 32 bits for 18 keys with 14 spare
 U-DISP,controller,T-Display-S3 AMOLED (base not Plus),LilyGO,1.91in 536x240 AMOLED RM67162 QSPI + ESP32-S3,1,selected,,0008,60x25.5x10mm - mounts lengthwise. 18 GPIO broken out
 U-BUCK,controller,TBD,,12V to 3.3V buck converter,1,candidate,,0005,Local regulation from umbilical +12V
-LED-SIDE,controller,WS2815 (12V addressable),multiple,Addressable LED strip - two runs in the side channels,0.84m,candidate,,0014,12V native so no 5V rail. Backup data line survives a dead LED. Density pending diffusion test
+LED-SIDE,controller,WS2815 (12V addressable),multiple,Addressable LED strip - two runs in the side channels,2 x 420mm,candidate,,0014,12V native so no 5V rail. Backup data line survives a dead LED. TWO independent strips - no crossover wire. Density pending diffusion test
 U-DAC,module,DAC8568 or AD5676,TI / ADI,Octal 16-bit DAC SPI,1,candidate,,0006,Populate 6 of 8 - pitch + 4 mod + breath zero offset. No fast settling needed
 U-OPA-PITCH,module,OPA2197,TI,Low-drift op-amp for pitch scaling,1,candidate,,0006,Precision channel only - offset drift is tuning drift
 U-OPA-GEN,module,TBD,,General op-amp for channels 2-6,3,candidate,,0006,Ordinary 1% parts acceptable

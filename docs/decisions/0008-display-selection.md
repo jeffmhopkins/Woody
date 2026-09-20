@@ -80,9 +80,9 @@ the DAC logic are all 3.3V.
 | CS: DAC (down the umbilical) | 1 |
 | CS: breath ADC | 1 |
 | Shift register latch | 1 |
-| LED data (WS2812) | 1 |
+| LED data (two strips) | 2 |
 | USB D+/D− (fixed, GPIO19/20) | 2 |
-| **Total** | **20** |
+| **Total** | **21** |
 
 An ESP32-S3-WROOM-1 has ~45 nominal GPIO, but SPI flash and PSRAM claim
 GPIO26–32 — and GPIO33–37 as well with octal PSRAM — leaving roughly **30

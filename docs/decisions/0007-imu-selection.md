@@ -114,7 +114,7 @@ The IMU on a dev board is a **bring-up convenience**. The final custom carrier
 IMU now does not lock that choice.
 
 **Waveshare ESP32-S3-Matrix** — ESP32-S3, QMI8658 6-axis, ~17 GPIO broken out
-against the ~11 this role needs, compact, and **no LCD to pay for or find room
+against the ~12 this role needs, compact, and **no LCD to pay for or find room
 for**. The 8×8 RGB LED matrix is unused but harmless. Best shape of the options
 found.
 

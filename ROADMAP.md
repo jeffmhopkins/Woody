@@ -127,4 +127,4 @@ dev board on the bench.
 | Blocks | Question | Tracked in |
 |---|---|---|
 | E12 | Connector choice, pending panel fit check | [ADR 0004](docs/decisions/0004-cv-interface-module.md) |
-| E3 | Which real-time board — needs an onboard 6-axis IMU and ≥11 free GPIO | [ADR 0007](docs/decisions/0007-imu-selection.md) |
+| E3 | Which real-time board — needs an onboard 6-axis IMU and ≥12 free GPIO | [ADR 0007](docs/decisions/0007-imu-selection.md) |

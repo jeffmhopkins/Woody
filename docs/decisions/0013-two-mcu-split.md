@@ -45,12 +45,12 @@ Its pin budget is now comfortable rather than binding:
 | CS: DAC, CS: breath ADC | 2 |
 | Shift register latch | 1 |
 | I2C: IMU | 2 |
-| LED data | 1 |
+| LED data, two strips | 2 |
 | UART to display board | 2 |
 | USB D+/D− | 2 |
-| **Total** | **13** of ~30 usable |
+| **Total** | **14** of ~30 usable |
 
-Seventeen pins of headroom, against two before.
+Sixteen pins of headroom, against two before.
 
 ### The display board is a terminal
 

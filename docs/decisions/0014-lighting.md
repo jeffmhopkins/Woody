@@ -16,9 +16,38 @@ volume is the **two side channels flanking the switch column**, which is also
 exactly where the light needs to be: immediately behind the acrylic it has to
 illuminate.
 
-So: **one run per side, chained as a single data line.** Addressable strips
-chain natively, so both sides cost one GPIO. Roughly 420 mm of usable run per
-side, 0.84 m total.
+So: **one run per side**, roughly 420 mm each, 0.84 m total.
+
+### Two independent strips, not one chained pair
+
+Three ways to wire two runs:
+
+| | GPIO | Crossover wire | Sides can differ |
+|---|---|---|---|
+| **A** — chained, data loops end to end | 1 | **yes** | yes |
+| **B** — two independent data lines | 2 | no | yes |
+| **C** — parallel, same data to both | 1 | no | no, always mirrored |
+
+**B.** The deciding factor is physical: chaining needs a data wire crossing the
+cavity at one end of the runs, and **both ends are the congested ones** — the
+display board and breath sensor at the top, the real-time board, IMU and
+umbilical connector at the bottom. Adding a signal wire across either, inside a
+bonded stack that cannot be reopened, is a liability for no benefit.
+
+Two data lines cost one extra GPIO, against roughly 17 broken out and 12 needed
+on the real-time board (ADR 0007). The ESP32-S3 drives both on separate RMT
+channels without effort.
+
+Splitting also means each run installs and is replaced independently during
+assembly, and each gets its own power feed, which halves the current per tap.
+
+**C is the fallback if GPIO ever gets tight.** A single GPIO can drive both
+strips' data inputs in parallel with no extra parts — each strip's first LED is
+a high-impedance input. The cost is that the two sides can never show different
+content, which for a symmetric instrument light is probably not a loss. It is
+worth knowing the option exists rather than treating one GPIO as a constraint.
+
+Buy one 1 m strip and cut two 420 mm runs from it.
 
 ## Rail: use a 12 V strip
 
