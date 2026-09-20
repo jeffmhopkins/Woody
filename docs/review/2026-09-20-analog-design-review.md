@@ -1,0 +1,733 @@
+# Analog design review — 2026-09-20
+
+Six independent adversarial review agents were run against the analog design,
+each given one slice, told to hunt for what is wrong rather than confirm what is
+fine, and told to check claims against datasheets and real-world practice.
+
+**Status: all 6 reported. Review pass in progress. No design changes made yet —
+one coherent revision follows the review.**
+
+This file is a capture of findings, not a set of decisions. Nothing here is
+accepted until it survives review and is written into the relevant ADR.
+
+## Why confidence is high on some of these
+
+Several findings were reached **independently by agents given different scopes
+and no knowledge of each other**. Convergence is noted per finding. Where three
+agents hit the same thing from three directions, it is almost certainly real.
+
+---
+
+## P0 — breaks a stated requirement or a stated design goal
+
+### R1. No bleed path. The instrument may not be playable as specified.
+*Breath agent. Not electrical, and more consequential than anything that is.*
+
+ADR 0003 specifies a closed, dead-ended pneumatic system. No commercial wind
+controller works this way:
+
+- **Akai EWI** plugs the sensor tube at the mouthpiece end and drills a 1.5 mm
+  hole through its side wall, then runs a **second tube dangling free from the
+  bottom of the instrument** for restricted airflow — explicitly to improve
+  tonguing response and to carry moisture away from the electronics.
+- **Yamaha WX** has a drain hole with **swappable plugs** that partially block
+  it "to create a tighter blowing feel" — an adjustable bleed as the primary
+  feel control — plus a dedicated air-inlet elbow (P/N VF096100) whose only job
+  is keeping moisture off the breath sensor.
+
+Against a full occlusion an adult produces **15–20 kPa**, 2.5–3× the sensor's
+full scale. With no escape the player cannot exhale through the instrument, and
+tonguing articulation is muted because articulation works by interrupting flow.
+
+**Proposed:** adjustable bleed feeding a drain out of the body, with the sensor
+**teed off upstream through a restrictor**, so the sensor branch stays
+dead-ended relative to the flow. Preserves the no-droplet-transport property and
+gives the player somewhere to breathe.
+
+**Couples to range:** 0–6 kPa cannot be settled until the bleed is. Measured
+playing pressures: clarinet 2–4.5 kPa, saxophone up to 8 kPa loud, literature
+range 1–12 kPa across wind instruments.
+
+**Needs a decision from the project owner — it contradicts a stated design
+assumption.**
+
+### R2. MPXV4006GP is discontinued, and the architecture is single-sourced on it
+*Breath agent.*
+
+NXP PCN 202009013DN: last-time-buy **15 May 2021**. Distributor stock only.
+
+This is architectural rather than a sourcing note, because **every modern
+replacement is ASIC-plus-internal-DAC**: Honeywell ABP updates at ~1 kHz, ABP2
+at ~200 Hz. A 200 Hz staircase into a VCA is exactly the artefact ADR 0003's
+analog path exists to prevent, and a 500 Hz filter does nothing to it.
+
+So "swap the sensor later" is not available. **The sensor choice and the
+analog-breath decision are one decision.**
+
+**Actions:** buy 3–5 units now; record the dependency in ADR 0003; document a
+fallback that preserves continuity — raw piezoresistive bridge plus
+instrumentation amp (the MPX2010-class topology ADR 0003 dismissed, which is now
+arguably the better topology anyway since the in-amp's REF pin does the zero
+subtraction and bridge excitation from the same reference makes the chain
+ratiometric by construction).
+
+### R3. The 1 kΩ series resistor destroys pitch accuracy, load-dependently
+*CV output agent and pitch agent, independently. Verified locally.*
+
+1 kΩ in series into a Eurorack input forms a divider:
+
+| Destination | Pitch error at 5 V |
+|---|---|
+| Open circuit (DMM during calibration) | 0 |
+| One 100 k input | **−59.4 cents** |
+| Multed to two VCOs (50 k) | **−117.6 cents** |
+| Multed to three (33 k) | −176.5 cents |
+
+Calibrating against one VCO absorbs the nominal value; the **variation with what
+is patched** does not calibrate out. Calibrate into one VCO then add a second on
+a mult and the rack detunes by **58 cents**.
+
+For scale, the LT5400 matched network is bought to fight 5.4 cents of tempco
+drift. This throws away 59 cents, 5 mm downstream.
+
+**Proposed:** take the op-amp's feedback from the **jack side** of the series
+resistor so it sits inside the loop — output impedance collapses, fault current
+limiting is unchanged. Needs compensation design and a bench phase-margin check.
+Fallback with zero design risk: **100 Ω on pitch only** (6 cents), 1 kΩ retained
+on breath and the mod channels where it is correct.
+
+### R4. An LT5400 cannot build a gain of 1.8
+*Pitch agent.*
+
+Matched networks come as 1:1:1:1 or 10:1. From four equal resistors you can make
+1, 2, 3, ½, ⅔, 3/2 — **9/5 is not available**. Landing on 1.8 requires an
+external resistor whose *absolute* tempco then sits inside the gain ratio, which
+is precisely the failure ADR 0006 bought the network to prevent. The part the
+ADR calls "the single highest-value precision component in the design" cannot do
+the job as specified.
+
+**Proposed, and it resolves four findings at once:** respec pitch to
+**−2.5…+7.5 V** and use `Vout = 2·Vdac − Voff` with `R1 = R2` from one matched
+quad.
+
+- Gain is exactly 2 by construction, set only by matching
+- −2 V and +7 V land at Vdac = 0.25 V and 4.75 V — **250 mV of DAC headroom at
+  both rails**, which fixes R5
+- Offset becomes a DAC channel, so calibration gains **two-sided authority**,
+  which fixes R6
+- Deletes the "design the gain 5 % high" kludge entirely
+- The spec is unchanged: −2.5…+7.5 contains −2…+7
+
+### R5. DAC8568 at AVDD = 5 V cannot reliably reach its own full scale
+*Pitch agent.*
+
+Internal 2.5 V reference at gain 2 gives a 0–5 V span from a 5 V supply — full
+scale *equals* AVDD. TI's position is that the required headroom is not defined
+in the datasheet and that AVDD ≈ 5.5 V is wanted for a true 5 V full scale. The
+rack +5 V bus is ±5 % and is the least-regulated rail in Eurorack.
+
+At AVDD = 4.75 V the DAC saturates around 4.55–4.65 V, losing ~3.7 semitones off
+the top — and worse, the top calibration point lands in the nonlinear region,
+which corrupts the whole fit rather than just the top.
+
+Fixed by R4's topology, which moves the used window to 0.25–4.75 V.
+
+### R6. "Firmware can only scale down" is half true; the missing half is unrecoverable
+*Pitch agent.*
+
+A two-point fit is `y = a·x + b`. Code scaling implements `a`. **Nothing in the
+design implements `b`.** ADR 0006 prescribes a deliberate +5 % gain bias and says
+nothing about the offset — whose safe bias direction is the opposite one. If the
+hardware offset lands at −1.90 V instead of −2.00 V, firmware cannot reach −2 V
+at all.
+
+Fixed by R4 (offset from a DAC channel, plus 0.5 V of slack at each end).
+
+### R7. The Recom R-78E5.0 has no enable pin
+*Power agent. Provable from this repo's own BOM.*
+
+The BOM says `SIP-3 THROUGH-HOLE`, "3-pin SIP on a 7805 footprint" — IN, GND,
+OUT. ADR 0005's instrument power switch says "switch the buck converter's enable
+pin." **That pin does not exist and the switch as specified cannot be built.**
+
+And it would not work even if it did: the WS2815 strips hang on raw umbilical
++12 V **upstream of the buck**. Switching the buck off leaves ~120 mA of strip
+quiescent draw and the strips holding their last latched colours. "Off" would be
+a lit instrument drawing a third of its running current.
+
+**Proposed:** P-channel MOSFET high-side switch on the instrument's 12 V rail,
+gate pulled down through the panel switch, RC on the gate. One part gets a switch
+carrying no current (the original intent), a real power-off that kills the LEDs,
+and a soft-start ramp that also addresses R9.
+
+### R8. The ratiometric path is ~30 dB worse than the one that was analysed
+*Breath agent.*
+
+MPXV4006 is explicitly ratiometric: `Vout = VS × (0.1533·P + 0.04)`. The sensor
+shares the 5 V buck with both dev boards. Nothing downstream tracks VS, and
+firmware cannot correct an analog path.
+
+| 5 V rail excursion | Error at the jack |
+|---|---|
+| 0.4 % (a modest load step) | 21 mV (−54 dBFS) |
+| 1 % | 52 mV (−46 dBFS) |
+| 2 % (R-78E initial tolerance) | 104 mV (−40 dBFS) |
+
+The AGND common-mode path that ADR 0003 spends pages on contributes **0.13 mV**.
+The disturbers are the same ones — AMOLED current steps, WiFi TX bursts — on the
+same rail, with millisecond envelopes that pass straight through the 500 Hz
+filter.
+
+**Proposed:** dedicated precision 5.000 V reference (MAX6350, 15 mA) fed from
+the umbilical +12 V, powering the sensor and its buffer. Single highest-leverage
+change in the breath path. The ADC can share it — see R11.
+
+---
+
+## P1 — significant
+
+### R9. No inrush limiting anywhere
+*Power agent.*
+
+ADR 0004 rules out the conventional 2.2–10 Ω series resistor on DC-drop grounds.
+The arithmetic is right and the conclusion is right — **but that resistor is also
+the standard Eurorack inrush limiter, and nothing replaced it.** Ferrite beads
+are ~0.2–0.35 Ω and provide no controlled limiting.
+
+Estimated 300–1500 µF total through ~1 Ω → **~12 A peak**. Doepfer's PSU3 is
+documented to stall on +12 V from module bypass capacitance; the WMD Soft Start
+module exists solely for this.
+
+Three trigger events, the worst being **the module's own panel toggle flipped
+with the rack live** — contacts arcing into a capacitive load every time.
+
+Note the internal inconsistency: ADR 0005 argues at length that the instrument
+should never switch a few hundred mA with a panel switch, then ADR 0004 puts
+exactly such a switch in the module.
+
+### R10. INA134 cannot deliver the CMRR it is credited with
+*CV agent and breath agent, independently.*
+
+A difference amplifier's CMRR is set by **source-impedance balance**, not by the
+chip. INA134 presents 50 k on +IN and 25 k on −IN.
+
+| Source imbalance | Achieved CMRR |
+|---|---|
+| 1.6 Ω | 90 dB (the datasheet figure) |
+| 100 Ω | 54 dB |
+| **1 kΩ** (a plausible protection resistor) | **34 dB** |
+
+ADR 0003 specifies a series protection resistor on BREATH and nothing on AGND —
+and a 100 k pulldown on one leg only, which alone caps CMRR at 40 dB. Combined,
+~31 dB against the 60 dB the ADR says is needed. **Missed by ~30 dB.**
+
+Worse, R14 shows the protection requirement and the CMRR requirement are in
+direct conflict as specified.
+
+**Proposed:** replace with a true instrumentation amp (INA821/INA828) whose
+buffered GΩ inputs make CMRR independent of source impedance. That also absorbs
+a gain stage and gives proper DC offset/drift specs — the INA134 is an audio
+part spec'd for AC. Alternative if keeping it: matched 0.1 % resistors on **both**
+legs, pulldown mirrored on both legs, pulldown at the connector.
+
+### R11. The ADC is not ratiometric with the sensor, and the divider is too stiff
+*Breath agent and ADC agent.*
+
+MCP3202 has **no separate VREF pin** — pin 8 is VDD/VREF. With VDD = 3.3 V from
+a dev board LDO and the sensor on the 5 V buck, the digital breath reading is the
+ratio of two unrelated regulators (±2 % each). That moves the note-on threshold,
+the mod-channel depth and the MIDI CC.
+
+Separately, Microchip specifies source impedance below ~1 kΩ; a natural 0.6 %
+divider (10 k/15 k) gives 6 kΩ — 6× over.
+
+**Proposed:** run the MCP3202 from the same precision 5.0 V as the sensor. Then
+VREF = VS, **supply variation cancels exactly**, the divider **disappears
+entirely**, and 40 % of ADC range is recovered. Costs a DOUT level-shift to
+3.3 V. Cheapest partial fix: digitise the 5 V rail on the MCP3202's spare
+channel and ratio in firmware.
+
+### R12. Ambient zero is knob-dependent and the loop is open
+*Three agents independently.*
+
+The sensor's zero enters **before** the panel gain pot; the DAC zero-correction
+is summed **after** it. The correct null is `0.2 V × G`, where G is a passive pot
+the firmware cannot read — ADR 0004 deleted MISO, so the module reports nothing.
+
+Zero at startup, then turn the gain knob, and the zero is wrong by `0.2 V × ΔG`
+— at full gain, **435 mV stuck offset**, i.e. an open VCA droning with no breath.
+
+Also: a unipolar 0–5 V DAC channel summed additively **can only add**, and the
+sensor's offset needs subtracting. Not addressed anywhere.
+
+**Proposed:** do the zero subtraction **in the instrument, ahead of the cable and
+ahead of all gain**. One zero, one truth, and the ADC copy sees the same zeroed
+signal. Put a ~1 Hz RC on the zero DAC so its update steps do not land on the CV.
+
+### R13. Floating SPI inputs at the module whenever the instrument is off
+*All three of pitch, power and CV agents.*
+
+`SW-POWER` cuts +12 V to the umbilical while the module stays powered from the
+bus. So the normal "off" state is: module alive, DAC alive, SCLK/MOSI/CS floating
+at the 74AHCT125. This is a **designed-in operating mode, not a fault.**
+
+Floating CMOS inputs oscillate and draw crowbar current inside the precision
+analog box — and a stray edge on CS latches a garbage word into the pitch DAC.
+
+**Proposed:** CS pulled to +5 V, SCLK and MOSI pulled to ground, at the module.
+Gate the 74AHCT125's OE from umbilical +12 V presence so "instrument absent" is a
+designed state. Note the 74AHCT125 is a plain buffer, not a Schmitt — if edge
+integrity needs help, that wants a 74AHCT14.
+
+### R14. The breath protection resistor requirement conflicts with the CMRR requirement
+*Breath agent.*
+
+A sustained +12 V on the BREATH conductor drives the MCP6002 output through the
+series resistor into its 5 V rail: through 1 kΩ that is 6.4 mA against a ~2 mA
+clamp rating. **Needs ≥3.3 kΩ.** But 3.3 kΩ unmatched leaves 24 dB CMRR (R10).
+
+The two requirements are incompatible as specified and the ADR resolves neither.
+
+**Proposed:** decouple the jobs — clamp diodes take the fault current, the
+resistor merely limits it; keep the resistor small and **matched on both legs**.
+Or adopt the in-amp from R10, which makes the whole conflict disappear.
+
+### R15. Current budget understated ~50 %, and three ADRs disagree
+*Power agent.*
+
+ADR 0005 says 250 mA, ADR 0004 says 290 mA, ADR 0003's table runs to 350 mA, the
+BOM says 350 mA in two places.
+
+Missing loads, largest first:
+
+- **WS2815 quiescent ~113–140 mA, always** — every pixel carries a second
+  always-powered backup driver, which is the exact feature ADR 0014 bought the
+  part for. ADR 0014's table is emission-only.
+- **The ESP32-S3-Matrix's onboard 8×8 RGB matrix** — 64 addressable LEDs nobody
+  budgeted, disabled or unpowered
+- Buck conversion loss (~12 % of the 5 V branch)
+- WiFi TX peaks to ~0.5 A
+
+Corrected: **~410–430 mA on +12 V typical**, not 290 — about 34 % of a 1.2 A
+Doepfer rail, not the "about 15 %, unremarkable" ADR 0004 claims. Everything
+sized against 290 mA needs re-deriving.
+
+### R16. Mod channels are unipolar-only — a permanent hardware limitation
+*CV agent.*
+
+MOD 1–4 are described as generic and assignable, but the analog stage is 0–10 V
+only. They cannot produce a bipolar CV at all — no ±5 V LFO, no negative
+excursion, no through-zero modulation. That forecloses a large part of what
+"assignable modulation" means in a rack, permanently, in hardware.
+
+**Proposed:** design the mod scaling for **−5…+10 V** (same fixed-offset trick
+pitch already uses) and let firmware select the range per channel from the
+display: 0–5 V, 0–8 V, 0–10 V, ±5 V. Costs 229 µV/LSB instead of 153 µV.
+
+Also: research says the de-facto unipolar convention is **0–8 V** (Doepfer), with
+0–10 V legitimate but aggressive. A 0–10 V breath CV into a destination
+calibrated for 5 V reaches full effect at 50 % breath — the top of the dynamic
+range does nothing, on the one channel where that matters most.
+
+### R17. The polyfuse is at the wrong end, undersized, and its drop is unbudgeted
+*Power agent.*
+
+It sits at the **instrument's** umbilical entry, leaving 2 m of constantly-flexing
+cable and both connectors — by far the most likely failure — upstream and
+unprotected. ADR 0005's own stated purpose is stopping a fault from pulling on
+the rack rail; a crushed cable does exactly that, on the far side of the fuse.
+
+500 mA hold against a corrected 370–500 mA is 1.0–1.35×; standard practice is
+≥2×, and PPTC hold derates ~−0.5 %/°C in a sealed warm body. Its 0.6–1.4 Ω
+initial resistance is **0.24–0.56 V at 0.4 A** — several times the 84 mV cable
+drop the entire 12-V-delivery argument was built on, and absent from the table.
+Voltage rating is unspecified; a 6 V part on a 12 V rail fails destructively.
+
+**Proposed:** move protection to the **module end** so the cable is inside the
+protected zone, size for ≥2×, ≥16 V rated. Better: an eFuse / current-limited
+load switch, which also provides the soft-start R9 needs.
+
+---
+
+## P0 — added by the final two reviews
+
+### R31. The 74x165 chain and the MCP3202 cannot share MISO. Show-stopper.
+*ADC agent. Verified independently.*
+
+The 74x165 — any family — has **QH as a permanently driven totem-pole output
+with no output-enable pin**. It is not an SPI peripheral and cannot be taken off
+the bus. The MCP3202's DOUT does tri-state on CS high, so the shift register
+wins the line unconditionally: **the ADC can never be read**, and two push-pull
+drivers fight continuously (±24 mA on an LVC part).
+
+This invalidates the stated justification in ADR 0003 for placing the breath
+sensor at the top: *"Putting the breath ADC up there therefore shares an existing
+bus. It costs a chip select, plus MOSI if the converter takes commands."* That
+sentence is wrong, and the 0.09 ms tube delay follows from it.
+
+**Fix is free.** ADR 0013 moved the display to the other MCU, so **both of the
+S3's general-purpose SPI hosts are now unused on the real-time board**. Put the
+DAC and the MCP3202 on one (both tri-state-friendly) and the 165 chain alone on
+the other — it needs only MISO, SCK and a latch GPIO. One extra pin against 16
+of headroom. ADR 0013's pin table also needs correcting.
+
+### R32. Fire-on-first-sample removes the only thing hiding key-chain read errors
+*ADC agent.*
+
+Two individually defensible decisions are jointly dangerous. Asymmetric debounce
+fires on the first closed sample, so **one corrupted 32-bit read produces one
+spurious note-on at full velocity with zero filtering**. A conventional 20 ms
+symmetric window silently absorbs single-sample bus errors; this design
+deliberately removes it — and raises the chain's integrity requirement from
+"mostly right" to "never wrong" without saying so.
+
+Meanwhile the chain as specified has four weaknesses:
+
+- **No ground return specified.** ADR 0001 says "four wires running the length of
+  the body". Return current finds its own path — most likely through analog
+  ground, injecting SCK edges into the breath path. The exact failure ADR 0003
+  eliminates on the umbilical, reintroduced inside the instrument.
+- **Electrically long and unterminated.** Round trip 3.6–4.0 ns at 14 in against
+  1–2 ns LVC edges. Terminate when round-trip exceeds rise time — so yes. **This
+  is an edge-rate problem, not a frequency problem: slowing the clock does not
+  fix ringing.**
+- **The BOM's reason for choosing LVC over HC is backwards.** On an unterminated
+  line, LVC's stronger drive and faster edges are *worse*. 74HC165 at 3.3 V has
+  ~±4 mA and 6–15 ns edges (no termination needed) and roughly **2× the input
+  noise margin**. Either part works; the recorded rationale does not.
+- **SH/LD is asynchronous and level-sensitive.** Any glitch below V_IL during the
+  32-clock shift **re-loads all four registers and corrupts the whole word** —
+  which, per the interaction above, becomes a spurious note.
+
+**Fixes:** ground return per signal (highest value); chain the topology rather
+than star it; 33–68 Ω series termination at the MCU; **order the chain so serial
+data flows toward the clock source** so skew eats setup margin (recoverable by
+slowing down) rather than hold margin (not recoverable at any speed); require
+**2 consecutive agreeing samples** before a note-on (125 µs at 8 kHz, inaudible);
+and use 4–6 of the 14 spare chain bits as a **fixed marker pattern** so a
+corrupted frame is detectable and countable rather than silently becoming a note.
+That last one costs nothing — the pins, wires and devices already exist.
+
+### R33. The complementary filter is the wrong estimator, by ADR 0007's own logic
+*ADC agent.*
+
+Gyro noise is irrelevant — 0.026° over a 3 s gesture. **Bias is the entire
+story**, and a complementary filter's steady-state error from bias is exactly
+`b·τ`. Published practice sets τ = 0.5–5 s to reject linear-acceleration
+contamination, which produces a pincer:
+
+- At τ ≥ 0.5 s the accel correction has barely acted inside a gesture anyway —
+  **inside the gate window it is already approximately gyro-only**
+- But it still carries the accel term's contamination: a 0.5 g jab makes
+  accel-derived tilt read **26.6° wrong**, injecting ~10° of bogus tilt exactly
+  when the player is making the gesture
+- Shortening τ makes contamination worse
+
+ADR 0007 rejects the BNO085 because "fusion works against the signal of
+interest" — then selects a crude fusion with **no acceleration gating at all**.
+The reasoning, followed properly, eliminates the filter it chose.
+
+**Proposed:** three independent estimators that do not fight.
+**Gated tilt: bias-snapshot gyro integration, no accelerometer** — average the
+gyro for 0.2 s before the gate press to estimate bias, giving **~0.1–0.2° over a
+3 s gesture** and complete immunity to linear acceleration. **Roll: low-passed
+accelerometer only.** **Shake: high-passed raw accelerometer.**
+
+### R34. The IMU read does not fit the loop, and the budget has no row for it
+*ADC agent.*
+
+The ESP32-S3-Matrix wires the QMI8658 to **I2C** (SPI not brought out). A 12-byte
+accel+gyro read at 400 kHz is **~363 µs** — does not fit a 250 µs loop, let alone
+125 µs. And an I2C read is blocking and clock-stretchable, so a stuck bus stalls
+the output loop.
+
+**Fix:** decouple entirely — read at 200–500 Hz in a lower-priority task,
+**match the QMI8658's ODR to the read rate** (reading a 1 kHz stream at 250 Hz
+aliases the IMU), use FIFO + INT, non-blocking driver with a timeout. Add an IMU
+row to the latency budget.
+
+### R35. AGND must be bonded at one end only, and nothing says so
+*Umbilical agent.*
+
+If AGND lands on the module's ground plane — the natural thing for anyone reading
+the schematic — the three ground conductors become parallel returns. AGND then
+carries ~97 mA of the 290 mA, and the INA134 sees **18.1 mV of breath-correlated
+offset** (it tracks LED brightness, which tracks breath) → ~40 mV on the CV.
+
+**The two versions look identical on a netlist.** This must be a written rule,
+not a note:
+
+> `AGND` connects to the instrument's analog ground star point **at the
+> instrument end only**. At the module end it connects to **the receiver's
+> inverting input and nothing else** — not to a ground pour, not to a stitching
+> via.
+
+## P1 — added by the final two reviews
+
+### R36. MOSI/CS sharing one twist with no return is a functional failure risk
+*Umbilical agent.*
+
+Two independent signals in one twisted pair is the textbook worst case — the
+twist exists to couple them to each other. Backward-crosstalk coefficient
+≈ 0.3–0.4, so **a 3.3 V MOSI edge puts ~1 V on CS for ~20 ns**, against the
+74AHCT125's 0.8 V V_IL. CS is static exactly when MOSI is the aggressor. A false
+SYNC edge on the DAC8568 corrupts frame alignment and writes garbage to a CV
+output.
+
+It is also the only pair in the cable that radiates, turning a balanced-pair
+problem into a common-mode problem on the whole bundle — rejected only by the
+receiver's CMRR **at MHz**, which is ~40–50 dB, not 90.
+
+**Proposed reassignment** (recommended): recover the CS conductor by regenerating
+SYNC at the module from clock idle, then every signal has its own return:
+
+```
+Orange 1,2   +12V / PWR_GND      keep together - this pairing is correct
+Blue   4,5   SCLK / DIG_GND_A
+Green  3,6   MOSI / DIG_GND_B
+Brown  7,8   BREATH / AGND       max pin distance from the power pair
+```
+
+**Crosstalk SPI→breath is a non-problem** and the design is over-worried about
+it: Cat5e NEXT is 65.3 dB at 1 MHz, and rising/falling edge areas cancel through
+a 500 Hz pole to ~0.3 µV against a 153 µV LSB. The two ways it *does* become
+in-band are both design errors, not physics: rectification if the filter sits
+downstream of the amplifier, and common-mode conversion from the unbalanced
+twist.
+
+### R37. Hot-plug: 30 A inrush into a 1.5 A contact
+*Umbilical agent.*
+
+etherCON has **no sequenced contacts** — all 8 mate within ~1 mm in unpredictable
+order. With a 0.4 Ω loop, peak inrush is **~30 A, 20× the NE8FDP's 1.5 A per
+contact rating**. It arcs, and gold flash erodes fast over the few hundred plug
+cycles an instrument sees. It also drags the rack rail down hard enough to glitch
+other modules.
+
+Moving the make to the module's toggle does not fix it — it just arcs a 6 mm
+toggle instead.
+
+### R38. Solid-core Cat5 will fatigue-fracture; no cable is specified at all
+*Umbilical agent.*
+
+ADR 0004's whole etherCON argument is "any Ethernet patch cable works", and most
+cheap Cat5e is **solid core** — which work-hardens and fractures under repeated
+flex. ADR 0004 itself says the cable flexes at the connector every time the
+instrument is played. A broken strand in AGND is an intermittent 54 mV breath
+offset: the worst possible fault, because it will look like a firmware bug.
+
+**The BOM has no cable line item and no etherCON cable carriers (NE8MC-1).**
+Specify: stranded, flexible/tour-grade **F/UTP** Cat5e, 2 m, made up with
+etherCON carriers at both ends. Shield terminated **both ends** (the usual
+one-end advice is moot — three ground conductors already tie the ends together)
+and bonded to the aluminium key plate at the instrument end, which also stops
+that plate floating against the player's face.
+
+### R39. No anti-alias filter before the ADC
+*ADC agent.*
+
+The signal is band-limited by the sensor (~159 Hz); the **noise is not** — the
+MCP6002 has ~1 MHz GBW and passes switching ripple, SPI crosstalk, WS2815 data at
+800 kHz. A buck at 500 kHz sampled at 8 kHz folds to **4.0 kHz**; at 496.1 kHz it
+folds to **100 Hz — directly into the breath band**, indistinguishable from
+playing, and the alias frequency moves with the converter's load-dependent
+switching frequency.
+
+**Fix:** one 220 nF cap at the ADC pin → ~600 Hz corner, **58 dB at 500 kHz**,
+and it doubles as the charge reservoir for the MCP3202's sample capacitor,
+fixing the source-impedance problem at the same time.
+
+## P2 — added by the final two reviews
+
+- **R40. The SAR-vs-delta-sigma rule is wrong by 10× as written.** *(ADC agent.)*
+  A sinc³ decimator at 8 kHz ODR costs **187 µs**, not "potentially
+  milliseconds" — the folklore comes from 50 Hz weigh-scale parts. And the rule
+  is self-inconsistent: firmware oversample-and-average *is* a sinc¹ decimator,
+  and N=8 at 8 kHz costs **440 µs — more than a sinc³ at the same output rate**.
+  Keep the SAR (right call on cost and simplicity) but **restate the rule as a
+  number** — "converter group delay under 200 µs" — or it will wrongly veto a
+  better part later.
+- **R41. MCP3202 cannot take 2 MHz SPI at 3.3 V.** f_CLK ≤0.9 MHz at 2.7 V,
+  ≤1.8 MHz at 5 V → **~1.1 MHz at 3.3 V**, against ADR 0001's 2 MHz bus. Not a
+  redesign (per-device clock rates are supported) but it must be written down or
+  it returns subtly wrong codes with no error.
+- **R42. 12 bits bites in exactly one place: the bottom of a gamma curve.** At
+  γ=0.5 and 1 % of full scale, low-end steps are magnified 5× — a 2.44 mV DAC
+  step becomes **14.6 cents**, audible on quiet passages. Free fix: **two taps
+  off one sample stream** — raw for the note gate (needs speed), N=8 decimated
+  (+1.5 bits, 0.44 ms) for mod/MIDI/display (needs bits).
+- **R43. Sensor range is wrong in the docs.** MPXV4006GP is **0.26–4.86 V at
+  Vs=5.00 V**, not 0.2–4.7 V. At Vs=5.25 V the divided max is 3.06 V into a 3.3 V
+  reference — it fits, with less margin than the document implies.
+- **R44. ADR 0007's "no onboard fusion" is factually wrong.** The QMI8658 has an
+  on-chip Motion Co-Processor with a 6DOF/9DOF AttitudeEngine. Does not change
+  the decision; the record should be right.
+- **R45. Package policy conflicts with the IMU upgrade path.** The obvious better
+  parts (ICM-42688-P, LSM6DSV) are 0.5 mm LGA/QFN, which ADR 0013 explicitly
+  lists as avoid. So "put a better part on the custom board later" is not
+  actually available under current policy. Note the exception or accept the
+  QMI8658 as the long-term part.
+- **R46. Accel gain is pivot-dependent.** The pivot moves between neck strap,
+  hands and wrists, so the same jab reads **2–3× differently** between postures.
+  Normalise the shake channel against its own recent peak — the same class of fix
+  as the capture-on-press gate.
+- **R47. Ambient zeroing should be continuous, not startup-only.** A gauge sensor
+  with temperature-dependent offset, in a body warmed by breath and LEDs, over a
+  session. The mechanism already exists (the spare DAC offset channel); decay the
+  zero toward the current reading whenever breath has been sub-threshold for ~2 s.
+- **R48. No controller-side decoupling in the BOM at all.** The only
+  `C-DECOUPLE` line is module-side. **For a VDD-referenced ADC the decoupling
+  capacitor *is* the voltage reference.** Each remote 165 board needs its own
+  100 nF or its ±24 mA edges brown out the local rail on every clock.
+- **R49. 5 V-before-3.3 V sequencing drives ~2.5 mA into the ADC's ESD diode**,
+  at or over the family-typical ±2 mA clamp limit. Size the upper divider
+  resistor ≥10 kΩ (which needs R39's cap to still settle).
+- **R50. Three documents disagree on the umbilical rate**, and the 8 kHz end of
+  "4–8 kHz" does not close: ADC 24 µs + keys 16 µs + six DAC channels 96 µs =
+  **136 µs against a 125 µs period.** Either state the loop is 4 kHz or re-derive.
+- **R51. The latency budget omits the sampling period entirely.** Sampling at
+  4 kHz adds 0–250 µs of age before conversion, so real ADC-path latency is
+  ~150–280 µs, not the 50–200 µs stated.
+- **R52. Release latency is not free on a woodwind.** Fingerings are
+  combinational — lifting a finger is how you *start* the next note. A 10 ms
+  release window delays the new note by 10 ms, landing in the territory the
+  attack-latency work was protecting. Apply the release filter to the **note
+  decision**, not to each key independently.
+- **R53. The release window is being sized from the wrong measurement.** For an
+  MX-style switch the dominant release-side number is the **actuation/reset
+  hysteresis gap**, not contact bounce. A slow deliberate release — exactly what
+  a woodwind player does on a legato phrase — can park the plunger in that gap
+  and chatter for tens of ms. Gateron publishes neither figure for the KS-33.
+  Extend the M1 measurement to slow press, slow release, and a worn switch.
+
+## P2 — worth fixing, lower stakes
+
+- **R18. Two-point calibration does not remove DAC INL.** *(CV + pitch agents.)*
+  ±4 LSB typ / ±12 LSB max = 0.66–2.0 cents of curvature no two-point fit can
+  touch. Mutable's Yarns uses a **12-point** table for exactly this. Make the NVS
+  table multi-point (~one per octave, ~40 bytes). Also put the two anchor points
+  **inside the musically used range**, not at −2/+7 where no VCO tracks well.
+- **R19. DAC8568 grade unspecified.** A/C grades reset to zero scale, **B/D reset
+  to midscale**. The BOM says only "DAC8568". At midscale the pitch output parks
+  a VCO octaves up and all four mod outputs sit at half scale from rack power-on
+  until firmware writes. Specify the full orderable part number. Also: the
+  internal reference is **disabled by default** and needs an explicit enable
+  write — a known DAC8568 bring-up trap.
+- **R20. No clamp diodes at the CV jacks.** *(CV + power agents.)* Defensible —
+  most modules rely on the series resistor plus the op-amp's ESD structures. But
+  with a long external umbilical it is ~6 parts. **Use BAV99 (silicon), not
+  BAT54S (Schottky):** Schottky leakage of 2 µA through 1 kΩ is 2 mV = **2.4
+  cents of temperature-dependent pitch error**, reintroducing exactly what the
+  LT5400 was bought to remove.
+- **R21. My tube resonance model was wrong.** I used quarter-wave (c/4L) giving
+  2858 Hz. With a trap volume at the end it is a **Helmholtz resonator**: at 3 mL
+  it lands at **323 Hz — below the 500 Hz filter corner**, so it passes straight
+  through. Trap volume and response time are coupled and the ADR treats them as
+  independent. Fix with a deliberate restrictor (~0.4 mm orifice → 788 Hz pole)
+  and specify trap volume ≤1 mL. A porous PTFE plug does this and doubles as the
+  moisture barrier.
+- **R22. Condensation is underestimated in kind.** NXP states this sensor family
+  is qualified on **dry air**, is "NOT compatible with water or water vapors",
+  and that the **gel die coat swells when wet, causing unreliable readings**.
+  Exhaled breath is ~100 % RH. At 6 kPa the tube air compresses ~6 %, so every
+  note pumps saturated air toward the die. Add a **hydrophobic PTFE membrane
+  vent** at the sensor port, not just a trap.
+- **R23. 2 kHz on the mod channels leaves audible ZOH images.** *(CV agent.)*
+  Software smoothing band-limits content; it cannot remove images the DAC creates
+  after it. A 400 Hz IMU signal puts an image at 1.6 kHz only **12.6 dB** below
+  the modulation, and a 15 kHz filter adds −0.07 dB. My own bounding argument in
+  ADR 0006 cites 4 kHz while the table specifies 2 kHz, and conflates amplitude
+  quantisation with time quantisation. **Raise mod to 8 kHz and/or give the mod
+  channels a 2-pole filter at 500 Hz–1 kHz** — they want a *slower* filter than
+  pitch, not the same one. The ADR has it backwards.
+- **R24. Pitch at 2 kHz contradicts portamento.** *(Pitch agent.)* A 1-octave
+  glide in 100 ms at 2 kHz is 5 mV steps = **6 cents per step** at an audio-band
+  rate, which is the staircase argument used to keep breath analog. Run pitch at
+  8–16 kHz at least while moving; the link budget allows it easily.
+- **R25. My stated reason for the fast pitch filter is wrong.** *(CV agent.)* A
+  2 kHz corner settles a 1 V step to 1 cent in 0.56 ms — inaudible as glide. You
+  would need a corner below ~100 Hz for "audible glide" to be true. The filter is
+  a DAC-glitch snubber, not a reconstruction filter, and choosing 10–20 kHz for a
+  reason that does not apply forfeits free image rejection. Restate the
+  requirement as settling time and set 2–5 kHz. *(Note: the pitch agent argues
+  10–20 kHz is fine. Disagreement — resolve in review.)*
+- **R26. Panel pot control law and reference.** *(CV agent.)* If the gain pot is a
+  plain 0–1 attenuator ahead of a fixed 2.2× stage, every useful setting lives in
+  the top 45 % of rotation. Add a series resistor at the bottom of the pot to
+  reshape the law. **And never reference the offset pot to the raw ±12 V bus** —
+  rack ripple would land on the breath CV as DC wander, on the one channel most
+  work went into keeping clean.
+- **R27. +5 V has no protection while ±12 V does.** A row-offset insertion on the
+  16-pin header can land +12 V on the +5 V pins. DAC8568 absolute max VDD is 6 V.
+  ADR 0004 says shrouding and keying are "not worth trusting" for ±12 V and then
+  trusts them completely for +5 V. **Clamp** (5.6 V zener / TVS after the
+  ferrite), do not add series drop — the DAC span was hard won.
+- **R28. Hot-plug mating order.** etherCON contacts mate in arbitrary order. If
+  +12 V makes before PWR_GND, the full return current finds its way home through
+  DIG_GND or AGND — i.e. through the INA134's reference input.
+- **R29. Ferrite bead current rating.** 0805 600 Ω parts are commonly rated
+  **300 mA**; both +12 V branches now exceed that at the corrected budget, and a
+  saturated bead loses its impedance entirely. Use 1206/1210 rated ≥1 A.
+- **R30. The branching scheme does not work at the frequencies that matter.** A
+  ferrite bead is a wire at the WS2815's ~2 kHz PWM rate, and 47 µF does not hold
+  the rail against a 200–400 mA square wave. Outcome is probably survivable
+  (~90 dB PSRR at 2 kHz) but **the reasoning in ADR 0004 is wrong**, and the
+  second claimed job — keeping the module out of the rack — is not done at all,
+  since both branches are common upstream at the bus header. **Bulk belongs at
+  the load:** 470–1000 µF at each WS2815 feed point, and a real LC (10–47 µH, not
+  a bead) between the umbilical node and the buck input.
+
+---
+
+## Not acting on
+
+- **Adding a +5 V fallback regulator to the module.** Two agents recommend it for
+  cases without the rail. The project owner has explicitly decided +5 V is
+  required and told this project to stop hedging for racks it will never be in
+  (see the design scope in the README). **The decision stands.** The legitimate
+  sub-finding is that ADR 0004 still claims the module is "independently useful",
+  which is now inconsistent — fix the claim, not the decision.
+
+---
+
+## Open for the project owner
+
+1. **The bleed path (R1).** Contradicts a stated design assumption. Strong
+   evidence from every commercial wind controller plus the physiology.
+2. **Buy MPXV4006GP stock now (R2)** — EOL, distributor stock only.
+3. **Pitch range −2.5…+7.5 V (R4)** — accepting this unlocks R5 and R6 too.
+4. **Mod channels bipolar-capable (R16)** — a one-time PCB decision that cannot
+   be recovered in firmware later.
+
+---
+
+## Bench measurements this review added
+
+- MPXV4006GP output noise — the only non-negligible noise term in the chain, and
+  not obtainable from any accessible datasheet mirror
+- MPXV4006GP burst pressure vs a 15–20 kPa cough into a sealed mouthpiece
+- WS2815 quiescent draw on the actual strip purchased, all pixels black
+- R-78E5.0 **load-step response** (not its ripple spec) — the audio-band settling
+  envelope after a WiFi burst is what reaches the breath CV
+- Waveshare ESP32-S3-Matrix: **is the header `5V` pin raw USB VBUS?** If so,
+  driving it from the buck while USB is connected for flashing parallels two
+  supplies. Highest bench-damage risk in the project.
+- LilyGO T-Display-S3 AMOLED: its SY6970 PMU is documented unstable on 5 V
+  **without a battery** — in a deliberately battery-free design
+- DAC8568 output headroom vs code near full scale at AVDD = 4.75 V
+- Target rack's actual +5 V presence, voltage and ripple under full case load
+
+## Documentation contradictions to fix
+
+- `docs/reference/latency-budget.md` still describes breath as "a differential
+  analog signal" with a "differential driver" and a "~2 kHz corner" — all three
+  superseded by ADR 0003 (buffer, sense return, 500 Hz both ends)
+- The same table still charges the breath path for SAR conversion, SPI-to-DAC and
+  DAC settling — stages that no longer exist for the CV output. Honest number is
+  ~1.75 ms
+- ADR 0003 says the sensor "reaches 4.7 V"; it is **4.8 V** at 6 kPa — and that is
+  the number that sizes the divider
+- BOM `U-BREATH` package is wrong: MPXV4006GP is **SOP-8 SMT, side port**, not
+  "ported case, THT leads"
+- BOM `R-PD-BREATH` note claims the pulldown is "high enough not to load the
+  INA134 input network" — loading was never the issue, **balance** is (R10)
