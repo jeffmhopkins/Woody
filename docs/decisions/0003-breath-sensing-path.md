@@ -236,10 +236,14 @@ DAC settling requirement** in ADR 0006. Both of those existed only to carry a
 
 The sensor's buffered output splits two ways:
 
+- **To the umbilical buffer** — full scale, 0.2–4.7 V, for the CV output.
 - **To the SAR ADC** — for breath threshold and note gating, as a modulation
-  source for the mod channels, for the display, and for USB MIDI. All the
-  firmware logic that ADR 0003 originally digitised for.
-- **To the differential driver** — for the CV output.
+  source for the mod channels, for the display, and for USB MIDI.
+
+**The ADC branch needs attenuating.** The sensor reaches 4.7 V while the ADC
+runs on 3.3 V, so that branch takes a divided copy — roughly 0.6× — to land
+inside the converter's input range. The umbilical branch stays full scale.
+Divide *after* the buffer, not before, so the divider does not load the sensor.
 
 So curve shaping, thresholds and ambient zeroing still exist in firmware; they
 just no longer sit in the path to the breath jack.

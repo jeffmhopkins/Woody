@@ -55,6 +55,48 @@ Pitch at −2 to +7V is comfortable on ±12V with ample headroom.
 A local boost in the module could raise the rails, but it would reintroduce
 exactly the switching noise this decision escapes. Not worth it.
 
+### The rail that matters is 5 V, not 3.3 V
+
+An earlier revision of this ADR specified a 12 V to 3.3 V buck. **That is
+wrong**, and the reason is the breath sensor.
+
+The MPXV4006GP is a 5 V part outputting **0.2–4.7 V** (ADR 0003). A buffer
+running on 3.3 V would clip the top 30% of the breath range. So the analog front
+end needs 5 V, and a rail-to-rail op-amp on 5 V reaches 4.7 V with margin to
+spare.
+
+Feeding the dev boards 5 V is also the right way round. Both carry their own
+3.3 V regulators and their own USB power paths; driving their `5V`/`VBUS` pins
+lets that circuitry do its job, rather than backfeeding a `3V3` pin and
+contending with USB when it is plugged in for flashing.
+
+### Power tree
+
+```
+umbilical +12V ──┬── WS2815 LED strips          (direct, no conversion)
+                 │
+                 ├── 12V→5V buck ──┬── display board  5V pin
+                 │                 ├── real-time board 5V pin
+                 │                 ├── MPXV4006GP breath sensor
+                 │                 ├── breath buffer op-amp (RRIO, must reach 4.7V)
+                 │                 └── LED data level shifter
+                 │
+                 └── polyfuse / input filter at entry
+
+real-time board 3V3 out ──┬── 74HC165 chain
+                          ├── breath ADC
+                          └── I2C pull-ups
+```
+
+**3.3 V does not need its own converter.** The loads on it are the shift register
+chain (microamps), the ADC (milliamps) and pull-ups, all comfortably inside the
+headroom of the real-time board's onboard regulator.
+
+**Fuse the instrument at the umbilical entry.** A short inside the instrument
+otherwise pulls on the rack's +12 V rail and can brown out every other module in
+the case. A polyfuse is cheap insurance for a fault that takes down more than
+just this project.
+
 ### Power switch on the instrument
 
 **Switch the buck converter's enable pin, not the +12 V rail.**

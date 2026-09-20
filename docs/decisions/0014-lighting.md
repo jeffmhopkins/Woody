@@ -68,6 +68,28 @@ counts:
 Against: slightly less common and a little more expensive than WS2812B/SK6812.
 Worth it here.
 
+## There is no LED driver, but there is a level shifter
+
+Addressable strips carry a controller in every LED, so no external constant-
+current driver, no multiplexing and no PWM generator is needed. One GPIO per
+strip is the whole interface.
+
+**What is needed is level shifting on the data line.** The ESP32-S3 drives
+3.3 V logic; addressable strips generally want a logic high near 0.7 × their
+supply. A **74AHCT125** is the standard answer — powered from 5 V with TTL input
+thresholds, so a 3.3 V input reads as high and it outputs a clean 5 V edge. One
+package covers both strips.
+
+**Verify the WS2815's data threshold against its datasheet before committing.**
+It is a 12 V part, and if its logic threshold is referenced to 12 V rather than
+an internal rail, 5 V shifting will not be enough and the part choice needs
+revisiting. Most 12 V addressable strips accept 5 V logic, but "most" is not a
+basis for a sealed build.
+
+This is a classic source of intermittent, maddening LED behaviour — strips that
+work on the bench and glitch in the build — so it is worth getting right rather
+than discovering empirically.
+
 ## Power budget, and the cap that is not optional
 
 0.84 m total, by density and use:
