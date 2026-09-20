@@ -92,14 +92,65 @@ anchors the strap to the aluminium plate, which is the strongest element in the
 sandwich, and it adds clamping force to the lamination at mid-span where it is
 otherwise held only by adhesive.
 
-## Open: width
+## Width: 2.5 inches
 
-The remaining dimension, and it is a grip decision more than a layout one. Two
-keys side by side at 16.5 mm is 33 mm plus margins, so roughly 50 mm is the
-layout floor. Much beyond about 55–60 mm and the left thumb cannot oppose the
-fingers comfortably, which breaks the sandwich grip the whole layout depends on.
+**63.5 mm.** This is above the 50–60 mm window originally sketched here, and
+that earlier figure was a heuristic rather than a measurement. Recording why it
+is still the right call, and what to watch.
 
-Answer it with the paper mockup at M2 rather than from a number.
+### Why the grip concern is smaller than the heuristic implied
+
+The earlier reasoning assumed the sandwich grip carries the instrument. It does
+not — **the strap does** (ADR 0005, U-bolt above). The grip *stabilises* and
+positions; it does not bear weight.
+
+That is exactly how a saxophone works: the right thumb hook and left thumb rest
+stabilise while the neck strap takes the load, and a tenor body at the grip
+point is nearer three inches across. The relevant question is not "can the hand
+clamp this" but "can the thumb reach a comfortable opposing position and still
+extend to its keys", which is a much weaker constraint.
+
+### What the width buys
+
+- **Two-column key clusters** become possible, instead of a single column with
+  side keys. Six right-hand keys as 4 + 2 rather than 6 in a line.
+- **This buys length back.** Two-column clusters are shorter longitudinally, so
+  the 3 inches of slack in the length budget above grows rather than shrinks.
+- Room for a readable display, usable PCB area, and acrylic side panels with
+  enough presence for the edge lighting to be worth doing.
+- More cavity volume where the thumb switches are eating into it.
+
+### Mass
+
+Rough estimate at this envelope:
+
+| Part | g |
+|---|---|
+| Aluminium top plate, 2 mm | 157 |
+| Oak top, 6 mm | 131 |
+| Oak bottom, 8 mm | 174 |
+| Acrylic sides, 2 × 4 mm | 164 |
+| Electronics and hardware | 200 |
+| **Total** | **~825 (1.8 lb)** |
+
+Squarely in EWI territory (~1.5–2 lb), and on a strap that is unremarkable. Not
+a reason to reconsider.
+
+### What to check at M2
+
+The paper mockup should answer three specific things, and they are the only real
+risks at this width:
+
+1. **Can the left thumb reach its four-key arc** from a comfortable opposing
+   position, without the hand shifting?
+2. **Is the grip patch far enough from the key arc** that gripping does not
+   trigger keys (ADR 0010)?
+3. **Does the right thumb rest fall naturally** where the body wants to sit in
+   the hand?
+
+If any of those fail, the fix is narrowing toward 55 mm, which costs the
+two-column layout. Worth knowing before anything is cut, and it costs one sheet
+of paper.
 
 ## Decision
 

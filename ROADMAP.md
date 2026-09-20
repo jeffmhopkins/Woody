@@ -57,6 +57,11 @@ that is always slightly out of tune.** Verify against a VCO.
 
 ## Track M — Mechanical
 
+The envelope is set at 18 × 2.5 × 1.5 in (ADR 0009). At that width the hand
+clusters can run two columns rather than one, which shortens them
+longitudinally and grows the slack in the length budget.
+
+
 | ID | Milestone | Done when |
 |---|---|---|
 | M1 | Switch characterisation | KS-33 plate cutout measured with calipers; test coupon cut at ±0.1mm steps; retention verified by hand; **contact bounce scoped** and debounce windows set from the measurement; switch weight variant confirmed and thumb-tip actuation force assessed |
@@ -120,7 +125,6 @@ dev board on the bench.
 
 | Blocks | Question | Tracked in |
 |---|---|---|
-| M4 onward | Instrument **width** — length and thickness are set | [ADR 0009](docs/decisions/0009-enclosure-construction.md) |
 | E2 | Which breath sensor is actually in hand | [ADR 0003](docs/decisions/0003-breath-sensing-path.md) |
 | E12 | Connector choice, pending panel fit check | [ADR 0004](docs/decisions/0004-cv-interface-module.md) |
 | E1 | Display type | [ADR 0008](docs/decisions/0008-display-selection.md) |

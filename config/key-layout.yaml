@@ -14,11 +14,11 @@
 
 meta:
   units: mm
-  # Instrument envelope (ADR 0009). Width is still open.
+  # Instrument envelope (ADR 0009).
   envelope:
     length: 457     # 18 in
     thickness: 38   # 1.5 in
-    width: null
+    width: 64       # 2.5 in
   origin: top-left of key plate, +x right, +y down
   switch: gateron-ks33
   keycap: mt165-mx
