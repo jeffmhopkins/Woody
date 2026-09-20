@@ -1022,6 +1022,146 @@ reference for the breath sensor has a better cost/benefit than several of the
 eight fixes** — it addresses ~30 dB of ratiometric error, against the 0.13 mV
 the AGND path contributes that the ADRs spend pages on.
 
+## V — Verification pass: what survives, what does not
+
+*A seventh agent was told to falsify the others rather than extend them. Several
+findings do not survive, including one this document asserted confidently.*
+
+### V1. Contradictions, resolved
+
+**Pitch filter corner: 5 kHz — and it should never have been a finding.** Any
+corner from 3 to 20 kHz satisfies every real requirement; 5 kHz settles a
+full-range step to 1 cent in 296 µs, 30× inside the glide-perception threshold,
+with 4× better glitch and EMI snubbing than 20 kHz. **What is wrong is the
+stated reason in two documents, not the number** — for a corner to produce
+perceptible glide you would need ~74 Hz, so "audible glide" is wrong by 2.3
+decades. Image rejection is *not* a criterion on pitch: a ZOH DAC emits no image
+energy at constant code, and during a bend the result is FM at ~−110 dBc.
+Restate the requirement as a settling-time number and the argument disappears.
+
+**Breath receiver: (c), a true in-amp (INA821/INA828).** And **my objection to
+buffering both legs was backwards** — buffering does not defeat the sense
+return, it *perfects* it: the INA134's −IN leg draws ~160 µA through AGND today;
+an OPA2197 input draws ~5 pA. Seven orders of magnitude.
+
+R10 is **confirmed against TI's own datasheet**, which states a 10 Ω mismatch
+degrades INA134 CMRR to ~74 dB — exactly 50 kΩ/10 Ω. But R10 **understates its
+own case**: a 100 kΩ pulldown on +IN parallels the internal 25 kΩ to give
+CMRR ≈ **19 dB**, not the 40 dB claimed. And **R10's own proposed patch is
+wrong** — mirroring the pulldown on AGND does not symmetrise the way a series
+element does. The correct fix is a pulldown **differentially across
+BREATH–AGND**. With an in-amp, R14's protection-vs-CMRR conflict evaporates
+entirely and its REF pin becomes the natural injection point for the ambient
+zero.
+
+**74LVC165 vs 74HC165: keep LVC, fix the rationale.** Neither agent was right.
+The decisive point both missed: **SCK and SH/LD are driven by the ESP32, not by
+the registers** — so family choice affects only the last QH→MISO hop, the least
+critical line in the chain. The signals that actually ring keep their 1–2 ns MCU
+edges either way. The "2× noise margin" claim is wrong (it compares HC at 5 V
+against LVC at 3.3 V; at 3.3 V LVC has the better HIGH margin and HC the better
+LOW). **The real levers are series termination and the S3's configurable GPIO
+drive strength** — the latter free and mentioned by nobody.
+
+**Current: 300 mA typical, 600 mA peak, ~1.25 A ceiling.** The WS2815 idle
+figure is **unresolved by 17×** between two secondary sources, and R15 took the
+high one from a snippet. R15's "410–430 mA" is only true if that figure is right
+— mark it a **precondition**, not a finding. Also: ADR 0004's "about 15 %,
+unremarkable" is wrong either way — honest figures are ~25 % typical, ~50 % peak.
+
+### V2. Findings that are WRONG
+
+- **R4's premise is false.** "Matched networks come as 1:1:1:1 or 10:1" is not
+  true — the LT5400 family includes 1:1, 1:4, 1:5, 1:9 and 1:10, and the
+  LT5400-7 (1.25 k/5 k) builds a gain of **exactly 1.800** from on-chip resistors
+  alone. **The recommendation survives for a different reason:** gain 1.8 needs
+  the *full* 0–5 V DAC span, which walks into R5; gain 2 makes 9 V from a 4.5 V
+  window and buys 250 mV of headroom at each rail. *(Already superseded by the
+  trim-pot decision, which reaches the same place — but the reasoning recorded
+  in this document was wrong.)*
+- **R37's arcing claim is physically impossible.** The minimum arc voltage for
+  gold contacts is ~15 V. **A 12 V rail cannot sustain an arc on gold.** There is
+  molten-bridge transfer and mechanical wear over a few hundred cycles; there is
+  no arc. The 30 A figure is also overstated ~4× — it assumed a zero-impedance
+  loop, while the review's own findings supply 1.6–3 Ω of it. Real peak 4–7.5 A.
+  **P1 → P2.**
+- **R33's central argument is self-defeating.** `b·τ` is the complementary
+  filter's bias-induced error — but it is a **steady-state constant, and
+  capture-on-press subtracts exactly that.** The error the finding is built on is
+  already cancelled by the design it criticises. Worse, **the prescribed fix
+  fails catastrophically**: the gate is pressed at the start of a bend, when the
+  instrument is already rotating, and 20 °/s captured as "bias" and integrated
+  for 3 s gives **60° of error** with no recovery — an order of magnitude worse
+  than the filter it replaces. The accel-contamination figure is also overstated
+  5–8× (1.3°, not ~10°). **The one real sub-finding: ADR 0007's filter has no
+  acceleration gating.** Keep the complementary filter, freeze the accel
+  correction when ‖a‖ deviates from 1 g, state τ = 1–2 s. **P0 → P2.**
+- **R27 — drop the mechanism.** Getting +12 V onto the module's +5 V pins needs a
+  *three-pair* offset, which the shrouded keyed header already specified
+  physically prevents. A 5.6 V TVS is ten cents and worth fitting as blanket
+  insurance, but not as a named failure mode.
+- **R26 first half — drop.** "Every useful setting lives in the top 45 % of
+  rotation" assumes gain below 1× is useless. It is not: the lower half produces
+  0–5 V and 0–8 V, which R16's own research says are the *more* common
+  conventions. *(The second half — never reference the offset pot to the raw
+  ±12 V bus — is correct and important. Keep it.)*
+- **R16 second half — drop.** A 0–10 V breath CV into a 5 V destination is fixed
+  by turning down the panel gain knob. A configuration question presented as a
+  hardware limitation. *(The bipolar limitation in the first half is real. Keep.)*
+- **R28 — merge into R35.** Conditional on R35 being violated; with AGND
+  connected only to the receiver's inverting input, a 25 kΩ input limits the
+  return path to microamps.
+
+### V3. Findings that are OVERSTATED
+
+- **R23 by ~37 dB.** The −12.6 dB figure used 400 Hz, which is the IMU's *ODR*,
+  not its signal bandwidth. Real gesture content is under 20 Hz → first image at
+  1980 Hz, **−50 dB**. *(The structural half is right and worth keeping: the mod
+  channels are given a faster filter than breath, which is backwards, and the
+  ADR's internal 4 kHz-vs-2 kHz inconsistency is real.)*
+- **R24 — the analogy to breath is false by ~60 dB.** A staircase on *breath* is
+  AM into a VCA and audible. The same staircase on *pitch* is FM into a VCO at
+  modulation index 1.7e−4 → sidebands near **−81 dBc**. Raising the pitch rate is
+  nearly free so the action stands, but delete the breath comparison.
+- **R8/R11 — the honest gap is 21–27 dB, not 30.** R8's millivolt figures are
+  *sensor-referred* while labelled "at the jack", so it **understates its own
+  case** by the scaling gain; and the 0.13 mV quoted for the common-mode path is
+  not reconstructible — at R10's realistic 31–34 dB CMRR it is ~1.7 mV. **R8 and
+  R10 cannot both be quoted at full strength in the same document.**
+- **R11's "run the ADC at 5 V" is more expensive than stated** — MCP3202 VIH at
+  5 V is 3.5 V, so CLK, DIN *and* CS all need shifting up, not just DOUT down.
+  **Better and cheaper: keep the ADC at 3.3 V and digitise the precision
+  reference on the spare channel.** Both channels share VREF = VDD, so the ratio
+  `breath_code / ref_code` is independent of VDD **exactly**. Two resistors.
+- **R50 — the timing failure is not real.** Its premise (six DAC channels every
+  loop) contradicts ADR 0006, which specifies mod at 2 kHz and pitch on demand.
+  Real per-loop cost is ~72 µs, and after R31 the two buses overlap via DMA.
+  *(The documentation inconsistency about "4–8 kHz" is real. Downgrade to a
+  documentation fix.)*
+- **R9's 12 A, R42's cents figure, R29's 300 mA bead rating, R17's framing**
+  (the PPTC drop matters because **the WS2815 strips hang on unregulated +12 V
+  downstream of it** — the buck regulates its own drop away; the LEDs cannot),
+  and **R21's 788 Hz restrictor** (a restrictor *lowers* the Helmholtz frequency
+  and works by viscous damping; the number needs a stated orifice geometry).
+
+### V4. A conflict nobody noticed
+
+**R11 and R49 contradict each other.** R11 wants the ADC divider's source
+impedance *lower* (6 kΩ is 6× the MCP3202's limit); R49 wants the upper resistor
+*higher* (≥10 kΩ to keep sequencing current out of the ESD diode).
+
+**Both are resolved by R39's single capacitor**, which decouples the converter's
+sampling-charge demand from the divider's DC impedance. **R39 is the keystone of
+that cluster** and should be cross-referenced from R11, R43 and R49 rather than
+sitting alone as a P1.
+
+### V5. Called out as the strongest work in the register
+
+R35 (the "identical on a netlist" observation — the highest-value free fix),
+R40 (the best-argued finding), R32's marker pattern and hold-margin chain
+ordering (the best ideas in the review, and they cost nothing), R39's
+single-capacitor fix, and R20's BAV99-not-BAT54S catch.
+
 ## Resolved by the project owner
 
 ### R1 — REJECTED. The closed tube is correct.
