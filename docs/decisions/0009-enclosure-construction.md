@@ -16,28 +16,36 @@ feels right.
 
 **18 inches long (457 mm), 1.5 inches thick (38 mm).** Width not yet decided.
 
-### Length closes, with room
+### Keys run in a single line
+
+The instrument stays long and slender like a flute, with keys in **one
+longitudinal line**. What makes 18 inches workable is not compressing the key
+runs but **shortening the sections above and below them** — there is no acoustic
+bore to accommodate, so the mouthpiece region and the tail can both be brief.
+
+### Length closes
 
 18 inches is compact for a wind controller — an EWI USB is around 24 inches, a
-clarinet closer to 26. Worth checking rather than assuming:
+clarinet closer to 26. Worth checking rather than assuming, at a 24 mm key
+pitch:
 
 | Segment | mm |
 |---|---|
-| Mouthpiece / breath inlet | 40 |
-| Display | 30 |
-| Left hand cluster, 5 keys | 90 |
+| Mouthpiece / breath inlet (short) | 40 |
+| Display band | 30 |
+| Left hand, 5 keys in line | 96 |
 | Inter-hand gap | 50 |
-| Right hand cluster, 6 keys | 110 |
-| Umbilical connector + strain relief | 40 |
+| Right hand, 6 keys in line | 120 |
+| Tail: connector + strain relief (short) | 40 |
 | End margins | 20 |
-| **Total** | **380** |
+| **Total** | **396** |
 | **Available** | **457** |
-| **Slack** | **77 (3.0 in)** |
+| **Slack** | **61 (2.4 in)** |
 
-It closes with three inches of slack. Tight enough that the layout wants
-designing rather than improvising, but not constrained. The MT165 caps at
-16.5 mm help here — they are smaller than standard 18 mm MX spacing, so key
-clusters pack tighter than a keyboard footprint would suggest.
+It closes with 2.4 inches of slack, and more at a tighter pitch — the MT165 caps
+at 16.5 mm allow roughly 18–20 mm before caps collide, against standard 18 mm MX
+spacing. Not constrained, but the layout wants designing rather than
+improvising.
 
 **A useful side effect: the long-run signal concern from ADR 0001 largely
 evaporates.** That analysis assumed roughly two feet between the MCU at the top
@@ -112,13 +120,21 @@ extend to its keys", which is a much weaker constraint.
 
 ### What the width buys
 
-- **Two-column key clusters** become possible, instead of a single column with
-  side keys. Six right-hand keys as 4 + 2 rather than 6 in a line.
-- **This buys length back.** Two-column clusters are shorter longitudinally, so
-  the 3 inches of slack in the length budget above grows rather than shrinks.
+An earlier version of this ADR justified the width partly on two-column key
+clusters. **That justification is void** — keys run in a single line. What
+actually carries the width:
+
+- **The left thumb's four-key arc**, on the bottom face. An arc needs lateral
+  extent, and this is now the binding constraint on width rather than anything
+  on the top face (ADR 0010).
 - Room for a readable display, usable PCB area, and acrylic side panels with
   enough presence for the edge lighting to be worth doing.
 - More cavity volume where the thumb switches are eating into it.
+
+Since the top keys no longer need the width, narrowing toward 2 inches for a
+more slender, flute-like feel is now *possible* — at the cost of squeezing the
+thumb arc, which is the thing that would suffer first. Worth deciding with hands
+on the M2 mockup rather than on paper here.
 
 ### Mass
 

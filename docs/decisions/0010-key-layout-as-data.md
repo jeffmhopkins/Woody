@@ -80,6 +80,37 @@ The arc-versus-line consideration still stands — a thumb rolls more easily tha
 it reaches, so lay the four along an arc matching the thumb's rotation. But the
 risk is lower than first assessed, and the paper-at-1:1 step will settle it.
 
+## Top keys run in a single line
+
+Eleven top keys — five left hand, six right hand — in **one longitudinal line**,
+flute-style. No second column, no lateral side-key bank.
+
+### Spacing will not be uniform, and should not be
+
+A single line of 6 keys at a relaxed 24 mm pitch spans 120 mm. A relaxed adult
+four-finger span, index to little, is roughly 80–90 mm. Six keys in a line is
+therefore **beyond a fixed hand position by design** — and that is how real
+woodwinds work: three or four keys sit under the fingers at comfortable spacing,
+and the outermost are **pinky-reach** keys that the little finger extends to,
+clustered tighter at the end of the run.
+
+So the pitch should vary along the line: comfortable spacing under
+index/middle/ring, tighter grouping for the keys the pinky reaches.
+
+**The layout file already supports this**, and it is a good example of why it is
+structured the way it is. Keys carry explicit `x`/`y` positions rather than a
+pitch parameter, so non-uniform spacing needs no schema change — it is just
+different numbers.
+
+### What M2 has to establish
+
+- Where the natural finger positions actually fall for each hand.
+- Which keys are under-finger and which are pinky-reach.
+- Whether 6 in a strict line works for the right hand, or whether the outermost
+  one or two want a small lateral offset. A modest offset preserves the
+  single-line character while relieving the reach; it is the obvious fix if the
+  mockup says the stretch is bad.
+
 ## How the left thumb actually works
 
 The left thumb's primary job is **sandwiching** — opposing the fingers on the

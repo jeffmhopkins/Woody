@@ -50,6 +50,11 @@ counts:
 #             control - modulation, IMU gating, mode. NOT a fingering input
 #
 # Left hand is upper (nearer the mouthpiece), right hand lower.
+#
+# Top keys run in a SINGLE LINE down the body, flute-style (ADR 0010).
+# Spacing along that line is deliberately NON-UNIFORM: comfortable pitch under
+# index/middle/ring, tighter grouping for the keys the little finger reaches.
+# That is why keys carry explicit x/y rather than a pitch parameter.
 
 keys:
   # --- Left hand, top face -------------------------------------------------
