@@ -1,0 +1,45 @@
+# Licensing
+
+Woody is released under three licences, one per kind of work. All three are
+**share-alike**: derivatives stay open on the same terms.
+
+| Path | Licence | SPDX |
+|---|---|---|
+| `firmware/`, `tools/` | GNU General Public License v3.0 only | `GPL-3.0-only` |
+| `hardware/`, `mechanical/` | CERN Open Hardware Licence v2 — Strongly Reciprocal | `CERN-OHL-S-2.0` |
+| `docs/`, `README.md`, `ROADMAP.md` | Creative Commons Attribution-ShareAlike 4.0 International | `CC-BY-SA-4.0` |
+| `config/` | Either of `GPL-3.0-only` **or** `CERN-OHL-S-2.0`, at your option | see below |
+
+Full texts are in [`LICENSES/`](LICENSES/).
+
+## Why three
+
+They cover different kinds of work and the wrong one is unenforceable or
+meaningless against the others. The GPL's "source code" and "linking" have no
+sensible reading against a DXF or a bill of materials; CERN-OHL's "Available
+Component" and "Product" have none against a firmware image. Using one licence
+for everything would mean using one that does not fit two thirds of the
+repository.
+
+The choices match the project's history and its neighbours: GPLv3 continues
+[the 2021 Open Woodwind Project](https://github.com/jeffmhopkins/Open-Woodwind-Project),
+CERN-OHL-S is the prevailing licence for open hardware of this kind, and
+CC-BY-SA is the normal choice for documentation.
+
+## `config/` is deliberately dual-licensed
+
+`config/key-layout.yaml` is the single source of truth for both the firmware's
+key-to-bit mapping and the DXF that cuts the aluminium plate (ADR 0010). It is
+genuinely both a source file and a hardware design document, so it carries both
+licences and you may use it under either.
+
+This is not a technicality. The whole point of that file is that one artefact
+feeds both sides, and a licence boundary drawn through the middle of it would
+recreate exactly the divergence it exists to prevent.
+
+## Attribution
+
+Copyright © 2026 Jeff Hopkins.
+
+Individual files may carry `SPDX-License-Identifier` headers. Where they do,
+the header is authoritative for that file.

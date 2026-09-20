@@ -74,6 +74,16 @@ re-derives the wrong caution later. What still binds:
   2 m cable, not the rack supply.
 - **Fault current**, which a larger supply makes *worse*, not better.
 
+## Licence
+
+Three share-alike licences, one per kind of work — **GPL-3.0-only** for
+firmware, **CERN-OHL-S-2.0** for hardware and mechanical design,
+**CC-BY-SA-4.0** for documentation. Derivatives stay open on the same terms.
+
+See [`LICENSE`](LICENSE) for the mapping and the reasoning, and
+[ADR 0011](docs/decisions/0011-licensing.md) for why it is three rather than
+one.
+
 ## Repository layout
 
 ```

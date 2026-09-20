@@ -214,7 +214,6 @@ spurious note, made countable by the marker pattern (ADR 0001).
 | Blocks | Question | Tracked in |
 |---|---|---|
 | E12 | Connector choice, pending panel fit check | [ADR 0004](docs/decisions/0004-cv-interface-module.md) |
-| — | **Licensing.** Relicensing later needs every contributor's agreement, so it gets cheaper to settle the earlier it happens | [ADR 0011](docs/decisions/0011-licensing.md) |
 | M4 | CAD tool — Fusion, FreeCAD, or neutral STEP in `mechanical/cad/` | [ADR 0009](docs/decisions/0009-enclosure-construction.md) |
 | M4 | Oak thickness for the bottom panel, which sets thumb key travel | [ADR 0009](docs/decisions/0009-enclosure-construction.md) |
 | E4b | Inter-MCU frame format and protocol versioning | [ADR 0013](docs/decisions/0013-two-mcu-split.md) |
