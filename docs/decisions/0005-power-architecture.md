@@ -55,12 +55,14 @@ Pitch at −2 to +7V is comfortable on ±12V with ample headroom.
 A local boost in the module could raise the rails, but it would reintroduce
 exactly the switching noise this decision escapes. Not worth it.
 
-### USB stays as an alternate source
+### USB power for the bench, not as a feature
 
-**OR the umbilical power with USB power** — it costs a diode. The instrument
-then has a standalone mode: plug into a laptop and run as a USB MIDI controller
-for practice, or for working out fingerings away from the rack. Same hardware,
-no extra parts.
+**OR the umbilical power with USB power** — it costs a diode, and it means the
+instrument runs on the bench during development without a rack attached. That
+is worth a diode.
+
+It is not a standalone mode and should not be designed toward. The instrument's
+outputs are CV; unplugged from the module it has nowhere to send them.
 
 ## Consequences
 

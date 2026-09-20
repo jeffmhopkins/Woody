@@ -4,6 +4,17 @@ Every non-obvious choice in this project gets a numbered record here: what was
 decided, what the alternatives were, and why. Six months from now, "why did I
 pick that sensor" should have a written answer.
 
+## Scope
+
+Decisions here are made for **one case: a tethered rack instrument**, powered by
+and patched into a Eurorack system. See the design scope in the
+[README](../../README.md).
+
+Battery operation, wireless output, standalone use and touring durability are
+explicit non-goals. An argument that only holds away from the rack is not a
+reason to do anything — several ADRs here previously carried justifications of
+that kind and have been trimmed.
+
 ## Status values
 
 | Status | Meaning |

@@ -42,10 +42,21 @@ Six CV channels from the module:
 - **Mod 1–4** — assignable; source, scale, offset, curve and slew configured
   on the instrument's own display
 
-USB MIDI exists on the controller but is a development and practice
-convenience, not a product feature. It is how the keys, fingering and breath
-response get validated before any analog hardware is built, and it gives the
-instrument a standalone mode when it is away from the rack.
+## Design scope
+
+**This is a tethered rack instrument.** It is powered by a Eurorack system,
+patched into one, and played in front of one. That is the design case, and
+decisions get made for it.
+
+It is explicitly **not**: battery powered, wireless, standalone, a USB MIDI
+controller product, or a touring instrument. Requirements that only make sense
+away from the rack do not belong here, and past versions of these documents
+drifted into arguing for some of them.
+
+USB exists for flashing, and USB MIDI on top of it is a **bring-up tool** — it
+is how keys, fingering and breath response get validated in a DAW before any
+analog hardware is built (milestone E5). It is not a feature and it does not
+get to constrain anything.
 
 There is no onboard synthesizer. There is no battery.
 

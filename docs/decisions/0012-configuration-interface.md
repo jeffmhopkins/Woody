@@ -25,11 +25,12 @@ hardware.
 The instrument hosts its own access point. The phone joins it directly and a
 captive portal opens the config page.
 
-This is chosen over joining an existing network because **it works everywhere
-with zero infrastructure** — at a gig, in a rehearsal room, in someone else's
-studio, on a plane. A station-mode option (joining a known network, discovered
-by mDNS at `woody.local`) is worth adding later for convenience at home, where
-the phone keeps its internet connection, but it cannot be the only path.
+This is chosen over joining an existing network because it needs **no
+credentials to provision and no router to depend on** — the instrument is
+self-contained and there is nothing to configure before you can configure
+anything. A station-mode option (joining a known network, found by mDNS at
+`woody.local`) is worth adding later so the phone keeps its internet connection,
+but SoftAP is the one that always works.
 
 ### A web app, not a native app
 
@@ -43,9 +44,8 @@ relationship for a one-person instrument project.
 
 ### Security
 
-WPA2 with a password, not an open AP. This is not a high-security problem, but
-an open access point that lets anyone reconfigure the instrument mid-set is an
-avoidable annoyance at a festival.
+WPA2 with a password, not an open AP. Not a high-security problem — just enough
+that a stray phone cannot join and start changing things.
 
 ## The radio must be off while playing
 

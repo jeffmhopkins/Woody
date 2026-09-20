@@ -72,7 +72,7 @@ mechanical and calibration work, not just a configuration convenience.
 
 ## USB MIDI
 
-Present, and the bring-up path for the whole instrument — keys, fingering and
-breath response get validated in a DAW before any analog hardware exists. Also
-gives the instrument a standalone mode away from the rack
-([ADR 0005](../docs/decisions/0005-power-architecture.md)).
+A **bring-up tool, not a feature.** Keys, fingering and breath response get
+validated in a DAW before any analog hardware exists (milestone E5). The
+instrument is a tethered rack device; USB MIDI does not get to constrain the
+design.

@@ -61,10 +61,10 @@ current** — it is a sense reference only, which is the whole reason the analog
 channel survives the cable (ADR 0003). Keep it twisted with `BREATH` and away
 from the SPI clock pair.
 
-MISO goes, and with it the planned module-ID line — but **presence detect
-survives for free**: the instrument is rack-powered, so the presence of +12V on
-the umbilical *is* the signal that the module is connected. No +12V means
-running on USB, which means standalone mode. No conductor needed.
+MISO goes, and with it the planned module-ID line. No loss worth engineering
+around: the instrument is rack-powered, so +12V on the umbilical is itself
+evidence the module is connected, and the only other case is sitting on the
+bench under USB power during development.
 
 ### Why this partitioning is right
 
@@ -109,13 +109,10 @@ Print the panel at 1:1 on paper and check it is actually usable before cutting.
 | **Hirose HR10** | ~14 mm | Push-pull lock, elegant, pricier. Custom cable |
 | Rear-mount | n/a | Frees the panel entirely; worse to plug and unplug |
 
-Bare 8P8C is rejected outright — the retention tab is the most-broken connector
-in the industry and it has no strain relief. On a moving instrument tethered to
-a rack, that is a matter of when.
+Bare 8P8C is rejected — the retention tab is the most-broken connector in the
+industry and it has no strain relief. That matters here not because of stages or
+trip hazards, but because **the instrument moves constantly while being played**
+and the cable flexes at the connector every time. That is true in a studio.
 
-The argument for etherCON despite the tightness is real: any Ethernet cable
-works, and spares are everywhere. M12 and HR10 both mean a custom cable to make,
-order, and remember to bring.
-
-Also worth considering a deliberate **breakaway** at the instrument end — better
-to lose the connection than to pull the rack off the shelf.
+The argument for etherCON is that any Ethernet cable works and spares are
+everywhere. M12 and HR10 both mean a custom cable to make and keep track of.
