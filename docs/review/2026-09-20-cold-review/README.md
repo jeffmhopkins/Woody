@@ -220,16 +220,20 @@ divider from a ±12 V rail, sensitivity ~0.21 V/V:
 — 80 dB of PSRR, 0.011 cents — **while the offset reference is a bare divider
 off the same rail with no rejection at all. 86 dB off the right node.**
 
-### W4. Blow harder, the pitch bends — 3 independent mechanisms, [verified]
+### W4. Blow harder, the pitch bends — 4 independent mechanisms, [verified]
 
-Three agents found breath-correlated pitch error by completely separate routes,
-and they add:
+**The most-converged finding in the review.** Four agents found breath-correlated
+pitch error by four completely separate routes, and they add:
 
 | Route | Magnitude |
 |---|---|
-| Offset reference rail (W3) | ~22 cents p-p |
-| The rack's shared bus ground | ~4.8 cents |
+| Offset reference rail + WS2815 ripple (W3) | ~22 cents p-p |
+| **A shared 1N5817: the module's analog rail and the umbilical feed are on the same diode, so instrument current modulates V_f by ~80 mV** | **~20 cents** |
 | The module's internal ground | 5.7–7.2 cents |
+| The rack's shared bus ground | ~4.8 cents |
+
+The second is visible by inspection of ADR 0004's own power-tree diagram, and
+needs no ground path at all — the branch point is *downstream* of the diode.
 
 Each is larger than every term in ADR 0006's precision budget, and they are the
 only *dynamic* ones. **The one test in the plan for this class of problem scopes
@@ -336,6 +340,116 @@ alive, buffer alive, both analog conductors intact.
 
 ---
 
+### W11. The auto-zero conceals the faults it was added to absorb — 2 agents, [verified]
+
+Continuous auto-zero was added to absorb thermal drift. It cannot distinguish
+drift from **a partially blocked PTFE restrictor, a cavity that has started
+sealing, or a shifted sensor offset** — the exact three failures the DP
+reference-port decision depends on being able to see. The rule as written
+("sub-threshold for ~2 s") also eats sustained pianissimo and re-zeros during a
+circular-breathing catch-breath.
+
+Fix reuses a pattern already in the design: **gate the decay on "sub-threshold
+AND quiet"** — σ below 2× commissioning — which is ADR 0007's stillness-gated
+IMU bias estimator applied to a different sensor.
+
+### W12. The zero correction is open-loop across two representations — 1 agent, [verified]
+
+Firmware reads the ADC at the sensor's buffered output, **before** the umbilical.
+The zero is injected at the module's in-amp REF pin, **after** it. Firmware can
+therefore null the digital copy perfectly while the jack sits at a standing DC
+offset — reporting "zero is fine" about a signal it is not measuring. A direct
+consequence of the analog-to-the-jack architecture that nobody had traced.
+
+### W13. Nothing mutes breath when the watchdog fires — 3 agents, [verified]
+
+`CLR` reaches pitch and the four mod channels. Breath never passes through the
+DAC, so the sixth jack keeps driving — and `CLR` simultaneously removes its zero.
+**The "stuck CV" failure ADR 0004 declares unacceptable happens on exactly the
+channel the watchdog cannot reach.** A second route to the same hole: the buck
+drops out at 8 V while the REF5050 and OPA2197 hold regulation to ~7.2 V, so a
+sagging cable parks everything except breath.
+
+### W14. Key switches have no pull-ups anywhere — 3 agents, [verified], unretrofittable
+
+74x165 parallel inputs have no internal pull-ups and the BOM has no line for
+them. Every key input floats when open, in a side channel shared with WS2815
+power and 800 kHz data. A 12 V LED edge at ~120 V/µs through ~15 pF injects a
+full false level into an asymmetric debounce that fires on the first closed
+sample.
+
+Proposed per key: 10 kΩ pull-up + 10 nF + 100 Ω series. Press stays instant,
+release gains a free ~93 µs hardware filter, LED coupling drops ~54 dB.
+
+---
+
+## The missing dimension
+
+One agent was pointed at the instrument as an instrument rather than as a set of
+circuits, and returned the finding the other twenty-two could not have:
+
+> **Every document describes a channel. None describes a note.**
+
+Fourteen ADRs, a roadmap and a 62-row BOM, and nothing answers how a note starts,
+how it ends, what happens between two fingerings, what the pitch of a fingering
+*is*, or what the player's mouth touches.
+
+- **The mouthpiece does not exist.** The word appears four times, always as a
+  reference point — "from the mouthpiece", 40 mm of length budget, the reason the
+  cable exits at the far end. There is no part, no dimension, no material, no
+  ADR. **E2's acceptance test requires one.**
+- **Tonguing cannot be threshold-detected, because of the closed tube.** On a
+  dead-ended tube the tongue produces a shallow *volume-driven dip*, not a flow
+  interruption — there is no flow to interrupt. Detection must be relative-dip
+  based. A direct physical consequence of a decision taken and defended, never
+  traced.
+- **Slur transients have no settling rule.** Fifteen combinational keys mean
+  every interval passes through intermediate, often unmapped, fingering sets.
+- **The fingering table has no pitch model, and USB MIDI is about to pick one.**
+  Storing MIDI note numbers at F1/F5 forfeits microtonality, temperaments and
+  real alternate fingerings. Storing a tuning-table index or cents is free today.
+- **Circular breathing is named once and supported nowhere** — needs a dropout
+  hold window and the auto-zero interlock of W11.
+- **"14 spare chain bits" are not spare switches.** The bits are free; the
+  switches, keycaps and plate cutouts are not, and the BOM carries 18 for 18.
+
+**And the deadline is earlier than the rest of this register assumes: M3, layout
+lock.** A switch that is not in the plate DXF never exists.
+
+---
+
+## Diagnostics: what fails silently
+
+Nineteen findings, **17 of them firmware-only**; total hardware cost is a divider
+into a spare ADC channel, one LED on the module panel, and a DAC part choice.
+
+The organising argument is worth keeping: **the four annunciation surfaces are
+not interchangeable, and the 8×8 matrix is the only one on the authoritative
+MCU** — it survives the display board, the UART, WiFi and the umbilical. So no
+hard alarm may live only on the AMOLED.
+
+**No commissioning baseline exists**, and eleven of the proposed detectors are of
+the form "it got worse". M8 already gathers most of the numbers and stores none;
+after bonding they can never be re-measured. A CRC'd as-built fingerprint in NVS
+is the enabling item for the rest.
+
+Two structural rules fall out, both new:
+
+- **Put unobservable things in the module — four screws away forever — never in
+  the instrument.**
+- **Do not "optimise" the output loop to write-on-change.** The every-pass
+  refresh is the cheapest error correction in the system and is currently
+  *accidental*. Same conclusion as S4 from the opposite direction: with no
+  readback, refresh everything, every pass.
+
+**Three agents independently proposed the same free part**: the QMI8658C's
+die-temperature register, on a bus already in use, centimetres from the breath
+sensor. It closes the thermal budget on measurement rather than a 3 K/W estimate
+and discriminates thermal drift from a blocked reference port. There is no
+temperature sensor anywhere in the BOM.
+
+---
+
 ## Errors of my own worth naming separately
 
 - **The 496.1 kHz buck frequency was invented** to make an aliasing example land
@@ -357,6 +471,12 @@ alive, buffer alive, both analog conductors intact.
 - **The README has two licensing sections**, one of which still says "not yet
   decided".
 - **`U-REG-DAC`'s "135 mW"** is 34 mW: 6.75 V × 5 mA.
+- **R48's own line was applied to the wrong part.** *"For a VDD-referenced ADC
+  the decoupling capacitor **is** the voltage reference"* — I applied it to the
+  shift registers and not to the ADC it was written about. 100 mV on VREF is
+  124 LSB.
+- **The 100 kΩ differential pulldown is silently a 17 % attenuator** against the
+  10 kΩ series resistors in each leg. Nobody accounted for it, including me.
 
 ---
 
