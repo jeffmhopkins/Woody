@@ -679,6 +679,219 @@ fixing the source-impedance problem at the same time.
 
 ---
 
+## S — Systems review (cross-subsystem; invisible to the siloed reviews)
+
+*These sit between the six agents' scopes. Several invalidate the premise of a
+finding another agent made. There was no mechanical, thermal or failure-mode
+agent, and that is where the damage concentrated.*
+
+### S1. ADR 0009 and ADR 0014 assign the same two side channels to different things. **Both Accepted.**
+
+- **ADR 0009:** the two side channels flanking the switch column are *"the natural
+  route for the wiring looms."* ADR 0013 repeats it.
+- **ADR 0014:** *"the free volume is the two side channels … one run per side"* —
+  for the LED strips.
+
+There are two channels. The LEDs claim both. ADR 0014 then instructs *"keep the
+LED runs and their return physically away from the breath buffer and its wiring
+inside the instrument"* — **which is unsatisfiable given the geometry both ADRs
+describe.** Everything that runs the length of the body has one route, shared
+with the pulsed LED current.
+
+**This defeats the AGND argument mechanically, and it is unfixable after
+bonding.** Highest-priority contradiction in the project.
+
+### S2. The analog-return rule stops at the connector. Inside the body there is none.
+
+ADR 0003 proves at length that the breath pair needs a return carrying no power
+current over 2 m of umbilical. **The identical problem exists over ~400 mm inside
+the instrument and no ADR addresses it.** Sensor at the top, connector at the
+bottom — the analog signal traverses the whole body.
+
+R35's rule says AGND bonds to *"the instrument's analog ground star point"* —
+**no such star point is defined anywhere in the documentation.** The rule
+references an object that does not exist.
+
+### S3. ADR 0003's sensor placement has lost its rationale.
+
+Option A (sensor at top, 30 mm tube) was chosen because *"putting the breath ADC
+up there shares an existing bus."* **R31 proved that false** — and R31's own fix
+moves the ADC to a separate SPI host. The reason is gone.
+
+Three forces now push the sensor *away* from the top: routing (S1), thermal (S5
+— the display board with AMOLED and WiFi is the hottest item and ADR 0013 puts
+it in the same zone as a temperature-sensitive gauge sensor), and serviceability
+(the EOL, moisture-sensitive, most-likely-to-fail part is sealed into a body
+that cannot be reopened).
+
+**Decision needs re-taking.** Candidate: a serviceable mouthpiece sub-assembly
+external to the bonded lamination, with only a shielded pair entering the body.
+
+### S4. The LED safety clamp does not survive the failure it guards.
+
+A positive-feedback path closes through the protection device:
+
+> LED current ↑ → umbilical current ↑ → PPTC self-heats, resistance rises → rail
+> sags → buck draws more input current → PPTC heats further → brownout → MCU
+> resets → **strips hold their last latched colour** → load does not fall
+
+Corrected budget 410–430 mA against a 500 mA part that derates ~0.5 %/°C in a
+10–20 K interior: **~0.95× hold before any transient.** Above hold a PPTC does
+not trip cleanly, it gradually current-limits, so the MCU misbehaves at reduced
+voltage before it resets.
+
+**And ADR 0014's firmware brightness clamp is the only thing between a display
+bug and a rack brownout — it is gone the instant the MCU is what failed, and
+WS2815s latch.** Fix by bounding the worst case in hardware: choose strip
+density so all-white is inside budget (30/m ≈ 0.5 A vs 60/m ≈ 1.0 A), treat the
+firmware clamp as aesthetic only, and blank the strips as the first act at boot.
+
+### S5. Thermal: ~5 W in a sealed insulator, and the breath zero is the casualty.
+
+Oak (k≈0.16) and acrylic (k≈0.19) are insulators; the aluminium plate is the only
+real path and **the player's hands cover part of it**. Bounding case ~21 K; call
+it **10–20 K interior rise over 10–20 minutes.**
+
+**This promotes R47 (continuous auto-zero) from P2 to required** — the startup
+zero is captured cold and goes stale. Combined with R12's knob-dependence, this
+is the mechanism behind "the VCA drones quietly after twenty minutes."
+
+Counter-intuitively the rise is *protective* against condensation at steady state
+(exhaled dew point ~34 °C). **The danger windows are the first ten minutes and
+the cool-down**, when the cavity contracts and pumps humid air back in through 18
+unsealed switch cutouts.
+
+### S6. The LED/breath loop is real, but the symptom is not what was expected.
+
+Traced both ways. **Through the CV path it is negative** — more breath → brighter
+LEDs → AGND rises → CV reads lower. Loop gain ≈0.004, so a 0.4 % gain
+compression, never an oscillation.
+
+**Through the ADC it is positive**, via VREF depression from shared-ground LED
+current. Also far from instability — **but the symptom is note-gate chatter, not
+gain error.** At the breath threshold, LEDs lighting shifts the reading in the
+direction that keeps them lit: latch on one side, chatter on the other.
+
+Two free fixes: **size note-on/off hysteresis from the measured LED-induced
+step**, and **drive the LEDs from the post-gate slew-limited value, not the raw
+ADC sample.**
+
+### S7. R12's proposed fix is not implementable.
+
+R12 says *"do the zero subtraction in the instrument."* **The instrument has no
+DAC** — ADR 0013 states it in bold, and the S3 dropped the original ESP32's DACs.
+The fix needs PWM + RC off the S3 (viable; R12 already wants a ~1 Hz pole) or a
+small SPI DAC on the carrier. **State which, or R12 silently does not get built.**
+
+Root cause: ADR 0004 claims the instrument is *"purely digital: no analog signal
+path"*, which is already false — it carries the sensor, the buffer and the analog
+drive. That false claim is what let R12 through.
+
+### S8. The aluminium plate is unbonded, and which ground it bonds to is undecided.
+
+Nothing bonds the plate. It floats under the player's hands, 1–2 mm from 18
+switch pins, wired to shift-register inputs. **R32 established that asymmetric
+debounce turns one corrupted read into one spurious note-on at full velocity.**
+So the instrument fires random notes when touched in a dry room — and it will be
+blamed on firmware forever.
+
+**It must bond to `PWR_GND`, never `AGND`.** Bonding to AGND puts the player's
+body capacitance directly onto the breath channel's voltage reference.
+
+### S9. Silent failure modes — the top three are free to fix and none is on the roadmap
+
+Ranked by how silently they fail:
+
+1. **Blank or corrupt NVS → default calibration.** Defaults are `a=1, b=0`
+   against an analog stage deliberately built 5 % high → **plays, sounds like an
+   instrument, is ~85 cents out, with zero indication.** More silent than a crash
+   because everything works. *(Partly superseded — the 5 % bias is deleted by the
+   trim-pot decision — but an uncalibrated state still needs to be loud.)*
+   → CRC the cal blob; a hard UNCALIBRATED state the player cannot miss.
+2. **Stuck-closed switch.** Does not kill a note — silently returns *different*
+   notes for every fingering involving it. Presents as "some fingerings feel
+   wrong." Unfalsifiable by ear, in a body that cannot be opened.
+   → Flag any key closed at boot or held > N seconds as suspect, and report it.
+3. **Stale breath zero from thermal drift** (S5) + knob-dependence (R12).
+   → R47 continuous auto-zero, now required.
+
+Also notable: **E9 calibration performed into the wrong load** (R3) — the
+milestone the ROADMAP calls decisive **passes while being wrong**.
+
+### S10. Bring-up sequence problems
+
+- **E11 tests a ground topology that will not exist in the finished instrument.**
+  At E11 (Phase 3) the LED strips are not installed — they arrive at M6, Phase 4
+  — and the body is not bonded, so the loom under test is not the final loom.
+  **The single test validating the entire analog-breath decision runs on a
+  topology that changes afterwards, and cannot be re-run after M7 without
+  unbonding.** → Add a gate: re-run the full E11 breath-noise test on the final
+  harness, in the assembled-but-unbonded body, as the last act before closing.
+  **Most important missing milestone in the project.**
+- **E8's done-when would reject a corrected board** — it requires gain ~5 % over
+  target, which the trim-pot decision deletes. Rewrite it.
+- **E2 cannot validate what it claims.** "Stable reading" is achievable with a
+  syringe and proves nothing about the pneumatic system, where the risk is.
+  Re-scope to require a mouthpiece, tube, trap and a human playing for 20 minutes.
+- **M5 cuts the aluminium plate (Phase 3) before the carrier PCB exists (E13,
+  Phase 4)** — the most expensive irreversible part is committed before the board
+  layout it constrains is designed.
+- **E13 and M7 are in the same phase with a hard dependency** — you cannot mount
+  electronics before the carrier exists, and the carrier *will* spin (R31 alone
+  changes its SPI topology). → Rule: **the body does not close until the carrier
+  is revision-final and burned in.**
+- **Nothing is re-proven on the carrier.** E1–E11 all run on dev boards.
+- **No thermal soak, no two-hour play test, no failure injection, no pre-bond
+  self-test.**
+
+### S11. Structurally absent
+
+- **No self-test / diagnostic mode.** Nothing exercises all 18 switches, both LED
+  strips, the IMU, six CV channels and the umbilical before the body is bonded
+  shut. **Highest-value missing firmware in the project — build it before M7.**
+- **No error reporting path to the player.** The display is "status only". No
+  channel for uncalibrated, config rejected, CRC errors, stuck key, brownout,
+  version mismatch. **Every silent failure above is silent partly because this
+  does not exist.**
+- **No watchdog / stuck-CV failsafe.** If the real-time board hangs mid-note the
+  DAC holds its last value and the rack drones forever. → "no valid frame for
+  N ms → assert CLR" at the module is a few gates.
+- **No umbilical presence detect.** ADR 0004 deleted MISO arguing *"+12 V is
+  itself evidence"* — **but nothing senses +12 V.** The evidence exists and is
+  not read.
+- **No spare-conductor policy.** Internal looms are hand-built once into a stack
+  that cannot be reopened. **Run two spares in every internal loom — free now,
+  impossible later.**
+- **No conformal coating anywhere in the BOM**, for a body breathed into for
+  hours behind 18 unsealed switch cutouts.
+- **The U-bolt adjustability requirement is impossible as written.** ADR 0009
+  requires a slot *"so balance can be tuned empirically after assembly"* — and
+  the backing plate is inside a bonded cavity. Either it is reachable from
+  outside, or the stack must be **dry-assembled, hung, balanced, and only then
+  bonded**. Nobody wrote that sequence down.
+
+### S12. Proportionality — what to consciously decline
+
+*(This is the part worth heeding: 53+ findings can kill a hobby project.)*
+
+**Decline outright:** the in-loop feedback compensation for R3 (take the 100 Ω
+fallback — it saves 5 cents for a compensation redesign and a phase-margin
+check); a 12-point calibration procedure (leave the NVS schema able to hold N
+points and stop); clamp diodes at the jacks; CS regeneration at the module (take
+series resistors + a Schmitt receiver instead); the LC redesign beyond bulk at
+the LED feeds; the filter-corner argument between agents (neither is audible —
+take the two free actions and stop).
+
+**Delete the instrument power switch entirely.** It cannot be built as specified,
+its replacement is a P-FET circuit with an RC, it creates a third undefined "off"
+state, and the module toggle two metres away already does the job at the source.
+**One fewer thing inside a body that cannot be opened.** The one place where the
+right answer to a P0 is "remove the feature."
+
+**Hold the line on not designing a custom ESP32-S3 carrier.** ADR 0013 already
+declined it. Every finding that makes the carrier more complex is an argument
+someone will use to reopen it, and it is the single biggest scope risk here.
+
 ## Resolved by the project owner
 
 ### R1 — REJECTED. The closed tube is correct.
