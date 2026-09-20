@@ -39,19 +39,25 @@ the instrument.
 
 Its pin budget is now comfortable rather than binding:
 
-| Function | Pins |
-|---|---|
-| SPI2: SCK, MOSI, MISO — DAC8568 + MCP3202 | 3 |
-| CS: DAC, CS: breath ADC | 2 |
-| **SPI3: SCK, MISO — 74x165 chain alone** | **2** |
-| Shift register latch | 1 |
-| I2C: IMU | 2 |
-| LED data, two strips | 2 |
-| UART to display board | 2 |
-| USB D+/D− | 2 |
-| **Total** | **16** of ~30 usable |
+| Function | Pins | Needs a broken-out pin? |
+|---|---|---|
+| SPI2: SCK, MOSI, MISO — DAC8568 + MCP3202 | 3 | yes |
+| CS: DAC, CS: breath ADC | 2 | yes |
+| **SPI3: SCK, MISO — 74x165 chain alone** | **2** | yes |
+| Shift register latch | 1 | yes |
+| LED data, two strips | 2 | yes |
+| UART1 to display board | 2 | yes |
+| UART0 console to a test header | 2 | yes |
+| I2C: IMU | 2 | **no** — onboard, GPIO11/12 |
+| USB D+/D− | 2 | **no** — the board's own USB-C, GPIO19/20 |
+| **Total on the chip** | **18** of ~30 | **14 broken out** |
 
-Fourteen pins of headroom, against two before.
+The distinction in the last column is what decides the board, not the raw count:
+an onboard IMU and a native USB connector cost chip pins but not *header* pins.
+On the selected ESP32-S3-Matrix that is **14 of 16 broken out, two spare** —
+see ADR 0007 for the assignment.
+
+Fourteen chip pins of headroom, against two before.
 
 **The chain gets its own SPI host because it has to.** A 74x165's `QH` is a
 permanently driven totem-pole output with no output enable, so it cannot share

@@ -38,7 +38,7 @@ existing. Drive it from any dev board with a test pattern and a multimeter.
 
 | ID | Milestone | Done when |
 |---|---|---|
-| E1 | Board bring-up | ESP32-S3 real-time board + LilyGO T-Display-S3 AMOLED (ADR 0008). Both running, outline confirmed against the display band |
+| E1 | Board bring-up | Waveshare ESP32-S3-Matrix + LilyGO T-Display-S3 AMOLED (ADR 0008). Both running; **PSRAM confirmed quad, not octal**, and **idle current measured** before the carrier is laid out (ADR 0007) |
 | E2 | Breath sensing | **A human plays it for 20 minutes** through a real mouthpiece, tube and trap — not a syringe. Ambient zeroing tracks, the PTFE restrictor is sized, no condensation artefacts. Sensor + ADC at the bottom with the real-time board (ADR 0003) |
 | E3 | IMU | Tilt and roll angles read reliably at rate |
 | E4 | Key scan | 74HC165 chain reads all switches; debounce asymmetric (instant press, filtered release) |
@@ -176,6 +176,8 @@ came out of the analog design review specifically.
 
 | Measure | At | Why |
 |---|---|---|
+| **Real-time board idle current** | E1 | 64 unlit WS2812C drivers are an estimated ~50 mA and 0.25 W of pure waste next to a temperature-sensitive sensor. Decides whether the matrix supply gets cut (ADR 0007) |
+| **PSRAM mode on the ESP32-S3-Matrix** | E1 | Quad leaves 16 broken-out GPIO; octal would consume GPIO33–37 and leave exactly 12 with nothing spare. **The carrier pin map depends on this** (ADR 0007) |
 | **DAC saturation vs AVDD** | E7 | The output span *is* the supply. Record the actual saturation code at the actual rail rather than claiming +7 V (ADR 0006) |
 | **Pitch DC load sweep: open / 100k / 50k / 33k** | E9 | Quantifies the 1 kΩ divider error against the real patch, and tells you how much a re-mult actually shifts tuning (ADR 0006) |
 | **Pitch stability into worst-case cable capacitance** | E9 | Confirms the plain series RC is unconditionally stable where an in-loop version would not have been |
@@ -207,6 +209,5 @@ spurious note, made countable by the marker pattern (ADR 0001).
 | Blocks | Question | Tracked in |
 |---|---|---|
 | E12 | Connector choice, pending panel fit check | [ADR 0004](docs/decisions/0004-cv-interface-module.md) |
-| E3 | Which real-time board — needs an onboard 6-axis IMU and ≥14 free GPIO | [ADR 0007](docs/decisions/0007-imu-selection.md) |
 | M4 | U-bolt position — adjustable-after-assembly is impossible as specified | [ADR 0009](docs/decisions/0009-enclosure-construction.md) |
 | M6 | LED density: 30/m needs no clamp, 60/m diffuses better. Decide with the diffusion prototype | [ADR 0014](docs/decisions/0014-lighting.md) |

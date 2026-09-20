@@ -196,7 +196,7 @@ one draws its own analog current *plus* everything the instrument consumes:
 
 | Rail | Draw |
 |---|---|
-| +12 V | ~295 mA (45 module incl. the DAC regulator, 250 instrument) |
+| +12 V | ~320 mA (45 module incl. the DAC regulator, ~275 instrument) — **estimated, and a review put it nearer 410–430 mA. Measure at E6 before sizing the load switch** |
 | −12 V | ~40 mA |
 | +5 V | ~10 mA (level shifter only) |
 
@@ -212,6 +212,13 @@ not at 290 mA:
 **So: ferrite beads, not resistors.** A 1N5817 drops roughly 0.3–0.4 V at this
 current, leaving ~11.5 V at the instrument after cable drop, against a buck that
 needs more than 6 V in. Ample.
+
+**The instrument figure is the least trustworthy number in this document.** It
+has already moved twice — once for the DAC regulator, once for the ~50 mA of
+idle LED drivers on the real-time board (ADR 0007) — and a review's independent
+estimate lands 100 mA above it, mostly on LED strip assumptions. Nothing
+downstream should be sized from it. **E6 measures the real draw with a current
+probe**, and the load switch's current limit is set from that measurement.
 
 **It has two filtering jobs, not one.** Most modules only need to keep rack hash
 out of themselves. This one also has to keep *itself* out of the rack, because
