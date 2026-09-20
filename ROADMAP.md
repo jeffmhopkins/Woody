@@ -49,8 +49,8 @@ existing. Drive it from any dev board with a test pattern and a multimeter.
 | E8 | Pitch channel scaled | Raw analog gain and offset trimmed to target, linear across the span. The 5%-over kludge is deleted — trimmers go both ways (ADR 0006) |
 | E9 | **Pitch calibration** | Two-point fit stored in NVS; 1V/oct verified against a real VCO, not just a meter, loaded the way it will be played (ADR 0006) |
 | E10 | Remaining channels | Analog breath stage: differential receiver, gain/offset knobs, DAC-driven ambient zero. Four mod channels trimmed |
-| E11 | Umbilical link | SPI (~0.6 MHz) and the differential analog breath pair over the real cable at length. Breath output clean while display, LEDs and WiFi are exercised (ADR 0003) |
-| E12 | Module PCB + panel | 6HP panel cut, module assembled and racked |
+| E11 | Umbilical link | SPI (~0.6 MHz) and the analog breath pair over the real cable at length, **on the T568B pin mapping in ADR 0004** — the mapping is reasoned, not measured. Breath output clean while display, LEDs and WiFi are exercised (ADR 0003) |
+| E12 | Module PCB + panel | 6HP panel cut, module assembled and racked. **etherCON braced to the PCB, not carried by two 3.19 mm strips of aluminium** (ADR 0004) |
 | E13 | Carrier PCB | **Passive** carrier: dev boards plug in, carrier holds shift registers, ADC, buffer, level shifter, regulator, connector. No MCU, no USB, no RF on it (ADR 0013) |
 | E14 | **Carrier re-validation** | E1–E11 re-run on the carrier, not on dev boards. Everything before this was proven on a different physical thing |
 
@@ -178,6 +178,7 @@ came out of the analog design review specifically.
 | Measure | At | Why |
 |---|---|---|
 | **Real-time board idle current** | E1 | 64 unlit WS2812C drivers are an estimated ~50 mA and 0.25 W, spent whether or not anything is displayed. The shared lighting budget is sized from this number (ADR 0014) |
+| **1:1 paper fit check, both faces** | M4 | The etherCON flange against a 30.18 mm 6HP panel *and* against the 57 × 38 mm instrument tail beside the USB-C slot. Confirm the D-series screw positions fall inside the panel at all (ADR 0004, ADR 0009) |
 | **Matrix diffusion prototype** | M6 | Can an 8×8 at 2.6 mm pitch stay pixel-distinct through a window, or only as a blurred bar? Decides whether the 2-D IMU assignment is usable (ADR 0014) |
 | **Interior temperature rise under load** | M8 | The lighting budget is set from an estimated 3 K/W. Soak with strips and matrix at the clamp, and measure at the breath sensor (ADR 0014) |
 | **Cold-start warm-up sweep** | E2 | Run the sensor from cold through 20 minutes of playing. Output that *falls* under warming is a blocked reference chamber; output that *drifts* is ordinary thermal offset (ADR 0003) |
@@ -213,7 +214,6 @@ spurious note, made countable by the marker pattern (ADR 0001).
 
 | Blocks | Question | Tracked in |
 |---|---|---|
-| E12 | Connector choice, pending panel fit check | [ADR 0004](docs/decisions/0004-cv-interface-module.md) |
 | M4 | CAD tool — Fusion, FreeCAD, or neutral STEP in `mechanical/cad/` | [ADR 0009](docs/decisions/0009-enclosure-construction.md) |
 | M4 | Oak thickness for the bottom panel, which sets thumb key travel | [ADR 0009](docs/decisions/0009-enclosure-construction.md) |
 | E4b | Inter-MCU frame format and protocol versioning | [ADR 0013](docs/decisions/0013-two-mcu-split.md) |

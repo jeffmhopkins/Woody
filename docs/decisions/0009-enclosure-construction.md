@@ -267,6 +267,25 @@ window. Flashing and USB MIDI (E5) both require reaching the real-time board's
 own connector, and there is no reaching anything once the body is bonded. Keep
 that edge of the board at the tail.
 
+**And the umbilical connector, which is the reason the tail face is now
+crowded.** The etherCON chassis flange (ADR 0004) is roughly 26 × 31 mm on a
+face that measures 57 × 38 mm. Two consequences:
+
+- **It leaves about 3.5 mm of material above and below the cutout**, and
+  **oak is not what should be carrying it.** This is the same rule as the
+  U-bolt and the key switches: the wood is a shell, not structure (ADR 0002).
+  **Mount the connector to an internal backing plate** — aluminium or ply, tied
+  into the same stack that carries the keys — and let the oak be the face the
+  screws pass through rather than the thing the screws hold.
+- **It shares the face with the USB-C slot**, leaving roughly 31 mm beside the
+  flange for it. That fits, but it is not the place to discover a conflict.
+  Both openings and the backing plate go into the M4 CAD together, and the
+  1:1 paper check covers this face as well as the 6HP panel.
+
+Placing the umbilical at the tail also puts it as far as possible from the
+mouthpiece, so the cable leaves the instrument at the end that hangs low and
+does not foul the player's hands or the strap.
+
 Both are cheap now and unavailable later, which is the recurring shape of every
 decision in this section.
 

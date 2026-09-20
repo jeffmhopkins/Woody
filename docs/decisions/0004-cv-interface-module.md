@@ -352,21 +352,99 @@ write-on strip. Roughly 107 mm of ~110 mm usable height — full but workable.
 
 Print the panel at 1:1 on paper and check it is actually usable before cutting.
 
+## Connector: Neutrik etherCON, both ends
+
+**The cable is a consumable.** That is the decision, and everything else follows
+from it.
+
+Bare 8P8C was rejected early — the retention tab is the most-broken connector in
+the industry and it has no strain relief. That matters here not because of
+stages or trip hazards, but because **the instrument moves constantly while
+being played** and the cable flexes at the connector every time. That is true in
+a studio. etherCON is an RJ45 inside a latching metal shell, which keeps the
+electrical standard and replaces the failure mode.
+
+### What the alternatives measured
+
+A 6HP panel is **30.18 mm** wide — `(6 × 5.08) − 0.3`, +0/−0.2.
+
+| | **etherCON D** | M12 X-coded | Hirose HR10A |
+|---|---|---|---|
+| Panel hole | 23.8 mm | ~16 mm | 10.2 mm |
+| Aluminium left each side | **3.19 mm** | ~7 mm | ~10 mm |
+| Current per contact | ~1.5 A | **0.5 A** | 2 A |
+| Cable | **any Cat5e patch lead** | off-the-shelf M12-X | build it yourself |
+
+**M12 X-coded is ruled out on current, not on cable.** An earlier revision of
+this section listed its cost as "industrial-looking custom cable", which was
+wrong twice over: M12 X-coded *is* industrial Ethernet, with off-the-shelf
+shielded assemblies in 1, 3, 5 and 10 m — and its real problem is that
+8-contact X-code sits at the 0.5 A end of the M12 rating range. Against an
+instrument drawing ~400 mA that is 80 % of rating, on a figure that has already
+moved twice.
+
+**HR10A is mechanically better on every axis and loses on one that matters more
+than all of them.** A 10.2 mm hole and 2 A per pin would solve both panel
+problems outright. But the cable is the most-flexed, most-abused part of the
+system, Ethernet patch lead is not flex-rated and *will* eventually fail, and
+when it does the question is whether the instrument is out of action for an
+afternoon with a crimp tool or for the time it takes to open a drawer.
+
+**So: etherCON, and treat cable failure as routine.** Keep spares. Replace the
+lead at the first sign of intermittency rather than diagnosing it.
+
+### Which costs two mechanical accommodations, both mandatory
+
+**The module panel cannot carry the connector alone.** A 23.8 mm hole in a
+30.18 mm panel leaves two strips of aluminium 3.19 mm wide. That is a fit the
+panel passes and a stiffness test it does not — the cable tugs sideways every
+time the instrument moves. **Brace the connector to the module PCB**, so the
+load path runs into the board rather than into two thin strips. Free on a board
+being designed anyway; impossible to retrofit behind a fabbed panel.
+
+**The instrument end needs a backing plate, not oak.** See ADR 0009.
+
+### Cable specification, which is not "any Ethernet cable"
+
+Close, but two things are not optional:
+
+- **Stranded patch cable, never solid-core installation cable.** Solid core
+  work-hardens and fractures under repeated flexing, which is this cable's
+  entire life. This is the easiest thing in the project to get wrong by buying
+  whatever is in the drawer.
+- **Shielded (STP/FTP) preferred.** Twisted pairs are what make the analog
+  breath channel survive (ADR 0003) and any Cat5e has those, but the shield is
+  free at this price and the breath pair is the one signal with no digital
+  margin to spare.
+
+### Pin assignment, which the connector choice now constrains
+
+A standard patch lead's twisted pairs are fixed by T568B: **(1,2), (3,6), (4,5),
+(7,8)**. The conductor budget above has to map onto those, and the mapping is
+not arbitrary — pairs untwist for about 13 mm inside an RJ45 plug, so pin
+adjacency at the connector is where crosstalk actually happens.
+
+| Pins | Pair | Signal |
+|---|---|---|
+| 1, 2 | ✓ | **BREATH / AGND** |
+| 3, 6 | ✓ | +12V / PWR_GND |
+| 4, 5 | ✓ | MOSI / CS |
+| 7, 8 | ✓ | SCLK / DIG_GND |
+
+**The power pair's two DC conductors sit between the analog pair and both
+digital pairs, acting as a guard.** BREATH at pin 1 is adjacent only to its own
+sense return; SCLK, the fastest edge in the system, is at the far end. Nothing
+with a sharp edge is ever adjacent to the analog pair.
+
+Confirm at E11 with a logic analyser and a scope on the real cable at length —
+that milestone exists precisely to catch what this reasoning gets wrong.
+
 ## Open
 
-**Connector choice**, pending a fit check against the real datasheet cutout:
-
-| Option | Panel | Trade |
-|---|---|---|
-| **etherCON** (Neutrik) | ~24 mm — fits 6HP with ~3 mm margin each side | Any Ethernet patch cable works. Tight |
-| **M12 8-pin** | ~14 mm | Rugged, cheap, fits easily. Industrial-looking custom cable |
-| **Hirose HR10** | ~14 mm | Push-pull lock, elegant, pricier. Custom cable |
-| Rear-mount | n/a | Frees the panel entirely; worse to plug and unplug |
-
-Bare 8P8C is rejected — the retention tab is the most-broken connector in the
-industry and it has no strain relief. That matters here not because of stages or
-trip hazards, but because **the instrument moves constantly while being played**
-and the cable flexes at the connector every time. That is true in a studio.
-
-The argument for etherCON is that any Ethernet cable works and spares are
-everywhere. M12 and HR10 both mean a custom cable to make and keep track of.
+**Which etherCON variant at each end.** Feedthrough (NE8FDP-class) presents a
+plain RJ45 on the back, so the instrument end could take a short patch lead to a
+jack on the carrier instead of eight soldered wires inside a body that cannot be
+reopened — genuinely attractive. The cost is two more contact interfaces in
+every signal, including the +12 V path and the analog pair. A solder-tag or
+PCB-mount variant avoids that and costs a fiddlier assembly. **Decide with the
+datasheets in hand at E12 and M7**, not now.
