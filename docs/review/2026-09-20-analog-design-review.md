@@ -892,6 +892,136 @@ right answer to a P0 is "remove the feature."
 declined it. Every finding that makes the carrier more complex is an argument
 someone will use to reopen it, and it is the single biggest scope risk here.
 
+## F — Stress-test of the proposed fixes
+
+*Eight proposed remedies were stress-tested for whether they work, what they
+break, and whether anything simpler exists. Three changed materially.*
+
+### F1. "Feedback from the jack side" would oscillate as described
+
+Putting Riso inside the loop puts the `Riso·C_load` pole inside the loop too:
+
+| Load | Pole |
+|---|---|
+| 2 m patch cable (~200 pF) | 796 kHz |
+| Multed, 3 cables (~600 pF) | 265 kHz |
+| Cable + a destination input cap (~2 nF) | **80 kHz** |
+
+OPA2197 crosses ~5 MHz at noise gain 2, so that pole contributes 80–89° of excess
+phase at crossover. **Naked in-loop 1 kΩ is unconditionally unstable into a patch
+cable** — a several-MHz oscillation that rectifies in the destination VCO's input
+and shows up as *a tuning offset that changes when you touch the cable.*
+
+**But the correct version is cheap, not risky.** TI's Riso + dual-feedback needs
+**one capacitor, and that capacitor replaces the separate pitch output RC** —
+which was going to be fitted anyway. So it is not an added part.
+
+**It also closes the R24/R25 filter-corner disagreement**: the dual-feedback Cf
+sets the corner at ~3.4 kHz by construction, and the requirement becomes a
+settling-time number rather than an argument.
+
+**Reserve footprints for both the Cf and a 100 Ω rollback**, and let the bench
+decide.
+
+### F2. Four pairs of fixes are mutually incompatible
+
+This is the section that matters most, and none of it is visible from inside a
+single finding.
+
+1. **SYNC regeneration (R36's conductor saving) and the SPI split (R31) are
+   directly incompatible.** The split puts the ADC on the same host as the DAC, so
+   a clock-idle-derived SYNC would assert during every ADC read. **Adopt the
+   split, reject SYNC regeneration.**
+2. **An instrument-side power switch and R13's OE gating are incompatible.** With
+   the switch at the instrument, *"+12 V present on the umbilical"* no longer means
+   *"instrument alive"* — so gating the level shifter's OE from +12 V presence
+   fails in exactly the state it exists for. **Moving the switch to the module
+   resolves both**, which is why the relocation matters more than the part choice.
+3. **The in-loop Cf and ADR 0006's separate 10–20 kHz pitch output filter are the
+   same component and must not both be built.** The reconstruction cap after the
+   1 kΩ *is* the C_L inside the compensation design. Design them together or you
+   get a filter you did not intend and a phase margin you did not compute.
+4. **A DAC-channel offset and the pitch offset trimmer are alternatives, not
+   additions.** Two offset authorities in series is the split-brain failure
+   ADR 0013 avoids by rule elsewhere. **Trimmer for pitch** (already decided);
+   **DAC channel for the four mod channels** — and that has a property nobody
+   claimed for it: it makes the mod outputs **park at 0 V at rack power-on rather
+   than −5 V.**
+
+### F3. Verdicts on the eight
+
+| Fix | Verdict |
+|---|---|
+| In-loop Riso (pitch) | **Adopt as dual-feedback**, not as described. One cap, replaces the output RC |
+| Respec to −2.5…+7.5 V | **Superseded** by the trim-pot decision. The 0.25–4.75 V window already gives the headroom |
+| Mod channels −5…+10 V | **Adopt.** Costs less than claimed; take the DAC-channel offset with it |
+| Split the SPI | **Adopt.** Unambiguously right, free, and it improves the loop budget |
+| Bias-snapshot gyro | **Adopt the conclusion, reject the mechanism** — see F4 |
+| P-FET power switch | **Adopt the intent, reject the location.** Load-switch IC at the *module* |
+| Marker bits in spare chain bits | **Adopt, and be honest about the blind spot** — see F5 |
+| SYNC regeneration | **Reject outright.** Unsound, silent failure mode, incompatible with the SPI split |
+
+### F4. The bias snapshot was naive; the correct version is the hybrid
+
+A fixed 0.2 s pre-press window fails if the player is already moving when they
+press the gate — which is exactly when they would. **Correct version: a
+continuously-maintained, stillness-gated bias estimate**, with the pre-press
+window ending ~50 ms before the press and a validity check. Same cost, no
+runaway. This is the hybrid between "gyro only" and "complementary filter".
+
+### F5. The marker pattern is a framing check, not an error-detecting code
+
+It catches nearly all of the dominant failure modes — a glitch on the
+level-sensitive SH/LD reloading mid-shift, double-clocks, clock-count errors —
+and **roughly 80 % of isolated single-bit data errors are invisible to it.**
+
+Write that limitation into the ADR rather than letting it imply frame integrity,
+and pair it with the two-consecutive-samples rule, which is what actually covers
+the blind spot. Use mixed polarity — one high and one low per package.
+
+### F6. Accept-and-document, rather than engineer
+
+- **If the 100 Ω rollback is taken:** *"Pitch output impedance is 100 Ω.
+  Calibrate against the patch you will use. Changing how pitch is multed shifts
+  tuning by up to 6 cents."* A real, liveable constraint for one person's rack.
+- **The top of the pitch range**, if the DAC runs from rack +5 V: measure the
+  actual saturation code at the actual rail and **document the achievable
+  maximum as a measured number** rather than claiming +7 V.
+- **The mod channels' non-exact zero** — a few millivolts, calibrated once into
+  NVS. Not worth hardware.
+
+### F7. Build order, for a one-off
+
+**Tier 0, before any PCB is drawn** — permanent, unrecoverable in firmware:
+split the SPI (and correct ADR 0013's pin table: +2 pins, not +1); mod channels
+at −5…+10 V with a DAC-channel offset; move the power switch to the module as a
+current-limited load-switch IC and **delete `SW-PWR-INST`**; in-loop dual
+feedback designed together with the filter it replaces, with a 100 Ω rollback
+footprint; and **decide the DAC's AVDD source** — rack +5 V and document the
+top-of-range loss, or a local 5.0–5.5 V regulator that fixes R5 properly and
+neutralises R27.
+
+**Tier 1, same board revision:** R13's pull resistors; R39's 220 nF at the ADC;
+R48's 100 nF per shift register; 220 Ω series on MOSI (which makes SYNC
+regeneration unnecessary); 1 kΩ on the pitch op-amp's + input; ferrites rated
+≥1 A; 470–1000 µF at each strip feed; marker bits wired now, since they cannot be
+retrofitted into a bonded body.
+
+**Tier 2, firmware before the first play test:** stillness-gated bias estimate;
+two-consecutive-samples rule; marker check with hold-previous-frame and a visible
+error counter; enable the DAC's internal reference at boot; default all mod and
+breath ranges to **0–8 V**, bipolar explicit per channel.
+
+**Tier 3, bench, in order:** DAC saturation vs AVDD; pitch DC load sweep across
+open/100 k/50 k/33 k; pitch stability into worst-case cable capacitance; inrush
+with a current probe on both switch-on and hot-plug; gate-press-while-moving IMU
+test; key-chain error counter over an hour with LEDs and WiFi active.
+
+**One note on priority:** the stress-test flags that **R8's precision 5 V
+reference for the breath sensor has a better cost/benefit than several of the
+eight fixes** — it addresses ~30 dB of ratiometric error, against the 0.13 mV
+the AGND path contributes that the ADRs spend pages on.
+
 ## Resolved by the project owner
 
 ### R1 — REJECTED. The closed tube is correct.
