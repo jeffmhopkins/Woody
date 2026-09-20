@@ -24,17 +24,19 @@ instrument and a toy. Everything below has comfortable margin against it.
 
 | Stage | Time | Notes |
 |---|---|---|
-| Pressure transducer | **~1 ms** | Dominant term. A property of the sensor, not the design |
+| **Tube propagation** | **~1.17 ms** | 400 mm at the speed of sound. Dominant term, and a *design* parameter — shorten the tube to shrink it (ADR 0003) |
+| Pressure transducer | ~1 ms | A property of the sensor, not the design |
 | SAR ADC conversion | 50–200 µs | SAR, not delta-sigma — see below |
 | SPI to MCU + firmware | < 20 µs | |
 | SPI to DAC over umbilical | ~50 µs | 2 MHz, ~30% utilised |
 | DAC settling | ~10 µs | |
 | Op-amp + reconstruction filter | ~160 µs | ~2 kHz corner on breath |
-| **Total** | **< 1.5 ms** | |
+| **Total** | **~2.6 ms** | |
 
 For scale: a hard tongue attack has a rise time of roughly 5–15 ms. Diaphragm
-dynamics are far slower. The chain has about 10x margin against the fastest
-gesture physically available.
+dynamics are far slower. The chain still has several times the margin it needs
+against the fastest gesture physically available — but note the tube alone now
+costs more than everything downstream of the transducer combined.
 
 ## Key path
 
@@ -61,7 +63,8 @@ load-bearing enough that being wrong about them would change the design.
 
 | What | How | Why it matters |
 |---|---|---|
-| **Breath transducer response** | Step the pressure, scope the sensor output, measure rise time | The dominant term in the whole budget. If it is really 3 ms the margin shrinks; if it is 200 µs there is far more headroom than assumed |
+| **Breath transducer response** | Step the pressure, scope the sensor output, measure rise time | A large term and a datasheet figure. If it is really 3 ms the margin shrinks; if it is 200 µs there is far more headroom than assumed |
+| **Tube delay and ringing** | Step the pressure at the mouthpiece, scope at the sensor. Measure both the delay and any quarter-wave ringing | Now the largest single term, and unlike the others it is tunable — tube length is a design choice (ADR 0003). Also confirms whether resonance needs damping |
 | **KS-33 contact bounce** | Scope a switch, measure bounce duration on press *and* release | The 2021 firmware used a flat 20 ms debounce. If these switches settle in 2 ms, setting the window from data buys back 18 ms of the most latency-sensitive path in the instrument |
 | **ADC + SPI round trip** | Logic analyser on the bus | Datasheet conversion time excludes driver overhead. The real number includes it |
 | **SPI over the umbilical at length** | Logic analyser at the module end, cable at full length | Setup/hold margin, ringing, double-clocking. This is where a long cable bites, and it is invisible without an LA. Gates E11 |

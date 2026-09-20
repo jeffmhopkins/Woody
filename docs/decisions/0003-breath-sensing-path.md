@@ -86,7 +86,69 @@ Probably a stale comment against an upgraded part, but it needs confirming.
 Either way the 0–6 kPa range was well chosen: normal wind-controller playing
 sits around 0–5 kPa. Gauge, not differential, is correct for breath.
 
-## Unsolved regardless of sensor
+## The sensor is remote, fed by a tube
 
-Spit and condensation management. A water trap and a drain path are mechanical
-problems that no sensor choice fixes, and they will eventually need a design.
+The sensor does **not** sit at the mouthpiece. A pneumatic tube carries mouth
+pressure down the body to wherever the sensor is — standard practice on wind
+controllers, and it frees the board placement entirely (ADR 0013). The sensor
+and its ADC sit with the real-time board at the bottom of the instrument.
+
+### The tube costs latency, and becomes the largest single term
+
+Pressure propagates at the speed of sound, so a 400 mm tube adds ~1.17 ms before
+the transducer sees anything:
+
+| Stage | ms |
+|---|---|
+| **Tube propagation, 400 mm** | **1.17** |
+| Pressure transducer | 1.00 |
+| SAR ADC | 0.20 |
+| SPI + firmware | 0.02 |
+| SPI to DAC over umbilical | 0.05 |
+| DAC settling | 0.01 |
+| Op-amp + reconstruction filter | 0.16 |
+| **Total** | **2.61** |
+
+Still comfortably inside the 5 ms target, but it roughly doubles the breath
+path and displaces the transducer as the dominant term. Tube length is now a
+latency parameter, not just a routing convenience:
+
+| Tube | Delay | Quarter-wave resonance |
+|---|---|---|
+| 150 mm | 0.44 ms | 572 Hz |
+| 300 mm | 0.87 ms | 286 Hz |
+| 400 mm | 1.17 ms | 214 Hz |
+
+**Keep it as short as the layout allows.** If latency measurements come back
+worse than expected, moving the sensor to mid-body is the cheapest lever
+available — it costs nothing but a slightly longer wire run in place of a
+shorter tube.
+
+### Tube resonance
+
+A closed tube rings at its quarter-wave frequency — 214 Hz for 400 mm. That sits
+well above the breath signal band, which is mostly under 50 Hz, so it should
+filter out cleanly in software. But it is a real mechanism and it is measurable:
+a pressure step will show the ringing on a scope.
+
+If it proves troublesome, a deliberate acoustic restriction damps it, at the
+cost of a little more delay. Do not add damping pre-emptively.
+
+## Spit and condensation: now a gravity problem
+
+This was previously noted as unsolved. **The tube makes it acute**, and gives it
+a specific shape rather than a vague one.
+
+With the sensor below the mouthpiece and a tube between them, **gravity feeds
+saliva and condensation directly into the sensor.** That is not a maybe; it is
+what will happen, and a wet pressure transducer reads garbage and then stops
+reading at all.
+
+The tube therefore needs a **trap at its low point with a drain, upstream of the
+sensor** — or a routing that rises before reaching the sensor, so liquid
+collects where it can be cleared rather than where it does damage. It must be
+drainable without disassembling the instrument.
+
+This is a mechanical requirement on the laminated stack (ADR 0009), not a
+detail to resolve during assembly, and it is the single most likely thing to
+ruin the instrument three months in.

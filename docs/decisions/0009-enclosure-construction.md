@@ -218,6 +218,21 @@ and the through-cut in the oak is the recess. **Oak thickness sets the inset
 depth** — choose the bottom panel thickness to get the thumb travel wanted, and
 the geometry follows. No pocketing anywhere in the design.
 
+### The breath tube needs a drainable trap
+
+Mouth pressure reaches the sensor down a tube (ADR 0003), and the sensor sits
+low in the instrument. **Gravity therefore feeds saliva and condensation
+straight into it**, which is not a risk but a certainty.
+
+The stack has to accommodate a **trap at the tube's low point, upstream of the
+sensor**, and it must be drainable without taking the instrument apart. In a
+laminated design that means a deliberate cavity in one of the interior layers
+with a drain path reaching an outside face — another 2D feature, cut flat, not
+machined.
+
+Easy to leave until assembly and very expensive to retrofit, since it sits in
+the middle of a bonded stack.
+
 ### Strap point: U-bolt above the centre of gravity
 
 A U-bolt near the middle of the instrument, **slightly above the centre of

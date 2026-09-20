@@ -124,15 +124,41 @@ real effort, and this comes close to free.
 
 ## Physical placement
 
-**Both boards at the top of the instrument**, a few centimetres apart.
+**Display board at the top. Real-time board at the bottom.**
 
-This is forced by the breath sensor: it is analog (ADR 0003), and analog must
-not run 16 inches down a wooden body next to LED power. So the sensor and its
-ADC sit near the mouthpiece, which puts the real-time board there too.
+An earlier revision put both at the top, on the reasoning that the breath sensor
+is analog and must stay near the mouthpiece. That constraint does not exist —
+**a pneumatic tube carries the pressure to wherever the sensor is** (ADR 0003),
+which is how wind controllers normally do it. The sensor and its ADC therefore
+follow the real-time board rather than pinning it.
 
-Everything leaving that assembly is slow digital and runs down the body happily:
-SPI and chip selects to the IMU and out through the umbilical, the shift
-register chain, and LED data.
+Putting the real-time board at the bottom is strictly better, because the two
+things it most wants to be near are already there:
+
+- **The IMU**, which belongs low in the instrument for leverage (ADR 0001). No
+  I2C run down the body at all now.
+- **The umbilical connector**, so SPI to the DAC exits immediately instead of
+  traversing the instrument first.
+
+### What runs down the body becomes far more benign
+
+| Before | After |
+|---|---|
+| SPI (3) + chip selects to the DAC | — exits at the bottom |
+| I2C to the IMU | — IMU is at the bottom |
+| Shift register chain | Shift register chain |
+| LED data | LED data |
+| — | UART to the display board |
+| — | Power to the display board |
+
+**UART is close to the most robust thing that can be sent down a wooden
+instrument.** It is asynchronous and self-clocking, with no setup-and-hold
+relationship to preserve and wide tolerance to skew and slew — unlike SPI, which
+needs clock and data to stay aligned. Trading a clocked bus for an async pair
+over that distance is a real gain.
+
+Balance improves slightly too: mass distributed between the ends rather than
+concentrated at the top.
 
 ## Considered and rejected
 

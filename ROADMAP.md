@@ -39,7 +39,7 @@ existing. Drive it from any dev board with a test pattern and a multimeter.
 | ID | Milestone | Done when |
 |---|---|---|
 | E1 | Board selection | ESP32-S3 real-time board + an integrated AMOLED display board (ADR 0013). Display board needs only 4 free pins |
-| E2 | Breath sensing | Analog sensor read through external SAR ADC, ambient zeroing works, stable reading |
+| E2 | Breath sensing | Analog sensor read through external SAR ADC, ambient zeroing works, stable reading. Tube delay and ringing measured (ADR 0003) |
 | E3 | IMU | Tilt and roll angles read reliably at rate |
 | E4 | Key scan | 74HC165 chain reads all switches; debounce asymmetric (instant press, filtered release) |
 | E4b | **Inter-MCU link** | Framed UART between the two boards, status flowing, logic-analyser clean (ADR 0013) |
