@@ -39,7 +39,7 @@ existing. Drive it from any dev board with a test pattern and a multimeter.
 | ID | Milestone | Done when |
 |---|---|---|
 | E1 | Board bring-up | Waveshare ESP32-S3-Matrix + LilyGO T-Display-S3 AMOLED (ADR 0008). Both running; **PSRAM confirmed quad, not octal**, and **idle current measured** before the carrier is laid out (ADR 0007) |
-| E2 | Breath sensing | **A human plays it for 20 minutes** through a real mouthpiece, tube and trap — not a syringe. Ambient zeroing tracks, the PTFE restrictor is sized, no condensation artefacts. Sensor + ADC at the bottom with the real-time board (ADR 0003) |
+| E2 | Breath sensing | **Port orientation confirmed with a syringe first** — a reversed DP reads zero, not backwards. Then **a human plays it for 20 minutes** through a real mouthpiece, tube and trap — not a syringe. Ambient zeroing tracks, the PTFE restrictor is sized, no condensation artefacts. Sensor + ADC at the bottom with the real-time board (ADR 0003) |
 | E3 | IMU | Tilt and roll angles read reliably at rate |
 | E4 | Key scan | 74HC165 chain reads all switches; debounce asymmetric (instant press, filtered release) |
 | E4b | **Inter-MCU link** | Framed UART between the two boards, status flowing, logic-analyser clean (ADR 0013) |
@@ -75,7 +75,7 @@ runs — which is what makes 18 inches workable.
 | M5 | Aluminium top plate | Cut, fitted, switches retained solidly, **bonded to `PWR_GND`**. Not before E13 — see the ordering rules below |
 | M6 | Body | Oak top and bottom, frosted acrylic sides, LEDs, strap points, **tail matrix window + diffuser and USB-C slot** (ADR 0009) |
 | M7 | Integration | Electronics mounted in the body, umbilical connector fitted and strain-relieved |
-| M8 | **Pre-bond gate** | Assembled but **not bonded**. Full E11 breath-noise test re-run on the *final* harness, **thermal soak at the lighting clamp with a thermocouple at the breath sensor**, two-hour play test, failure injection, self-test. Nothing closes until this passes |
+| M8 | **Pre-bond gate** | Assembled but **not bonded**. Full E11 breath-noise test re-run on the *final* harness, **thermal soak at the lighting clamp, watching temperature *and the breath zero* at the sensor**, two-hour play test, failure injection, self-test. Nothing closes until this passes |
 
 **M1 is the first thing that happens when the switches arrive.** That cutout
 measurement is the single most important input to the entire mechanical design;
@@ -180,6 +180,7 @@ came out of the analog design review specifically.
 | **Real-time board idle current** | E1 | 64 unlit WS2812C drivers are an estimated ~50 mA and 0.25 W, spent whether or not anything is displayed. The shared lighting budget is sized from this number (ADR 0014) |
 | **Matrix diffusion prototype** | M6 | Can an 8×8 at 2.6 mm pitch stay pixel-distinct through a window, or only as a blurred bar? Decides whether the 2-D IMU assignment is usable (ADR 0014) |
 | **Interior temperature rise under load** | M8 | The lighting budget is set from an estimated 3 K/W. Soak with strips and matrix at the clamp, and measure at the breath sensor (ADR 0014) |
+| **Breath zero vs cavity temperature** | M8 | The DP's reference port is open to the cavity, so the cavity must leak. Watch the zero during the same soak — a walking zero means it is sealing more than assumed. **M8 is pre-bond, so a vent can still be added** (ADR 0003) |
 | **PSRAM mode on the ESP32-S3-Matrix** | E1 | Quad leaves 16 broken-out GPIO; octal would consume GPIO33–37 and leave exactly 12 with nothing spare. **The carrier pin map depends on this** (ADR 0007) |
 | **DAC saturation vs AVDD** | E7 | The output span *is* the supply. Record the actual saturation code at the actual rail rather than claiming +7 V (ADR 0006) |
 | **Pitch DC load sweep: open / 100k / 50k / 33k** | E9 | Quantifies the 1 kΩ divider error against the real patch, and tells you how much a re-mult actually shifts tuning (ADR 0006) |

@@ -89,18 +89,86 @@ recoverable in hardware:
 Panel knobs (ADR 0006) handle *range fitting*; firmware handles *response feel*.
 Different jobs, both kept.
 
-## Sensor: MPXV4006GP
+## Sensor: MPXV4006DP
 
-0–6 kPa gauge, integrated signal conditioning, ~0.2–4.7 V out. Directly usable
-by a SAR ADC with no instrumentation amplifier.
+0–6 kPa, integrated signal conditioning, ~0.2–4.7 V out. Directly usable by a
+SAR ADC with no instrumentation amplifier.
 
 The old repository contradicted itself — its README said MPXV4006GP while
 `src/owp/owp.ino` said MPX2010GS, which is uncompensated and unamplified at
 ~25 mV full scale and would have needed an instrumentation amp. That question is
-moot now that parts are being bought new: **specify the MPXV4006GP.**
+moot now that parts are being bought new.
+
+**The part is the DP, not the GP, and that is a sourcing decision rather than a
+technical one.**
+
+| | MPXV4006**GP** | MPXV4006**DP** |
+|---|---|---|
+| Lifecycle | **Obsolete**, distributor stock only | **Production**, supported through at least 2028 |
+| Sensitivity | 766 mV/kPa | 766 mV/kPa |
+| Output span | 0.2–4.7 V | 0.2–4.7 V |
+| Supply | 4.75–5.25 V, 10 mA | 4.75–5.25 V, 10 mA |
+| Case | 1369-01, single side port | **1351-01, dual ports, same side** |
+
+**The transfer function is identical**, and it verifies against this ADR's own
+figures: `Vout = VS × (0.1533·P + 0.04)` at VS = 5 V is 0.7665 V/kPa with 0.20 V
+at zero — the DP's published numbers exactly. Same die, same datasheet, same
+ratiometric behaviour, so nothing downstream changes: the REF5050 supply
+decision, the 400 mm tube, the in-amp receiver and the analog path are all
+untouched.
+
+What changes is that **the project's largest sourcing risk goes away.** The GP
+had been EOL since 2021 and the standing action item was to hoard three to five
+before stock disappeared. The DP needs no hoarding — buy two, as ordinary spares
+for a part that gets breathed into for years.
+
+The cost is a different footprint, and it is free because the carrier has not
+been laid out. **Design for case 1351-01.**
 
 The 0–6 kPa range was well chosen in 2021 and stands. Normal wind-controller
-playing sits around 0–5 kPa. Gauge, not differential, is correct for breath.
+playing sits around 0–5 kPa.
+
+### The reference port stays open to the cavity
+
+A DP part measures P1 − P2, so using it as a gauge means leaving the second port
+open. It is left open **inside the instrument**, connected to nothing — which
+makes it behave exactly as the GP did, with no extra tube, vent or plug.
+
+**That is a dependency, not a non-decision, and it is worth stating plainly
+because it was never written down while the part was a gauge:**
+
+> **The cavity must leak.** A gauge reference is the air around the sensor. If
+> the cavity were airtight, warming it 15 K would raise its pressure by ΔT/T —
+> 5.1 % of 101.3 kPa, or **5.2 kPa against a 6 kPa full scale.** Eighty-six
+> percent of range, from nothing but the instrument warming up.
+
+It does leak, through eighteen unsealed switch cutouts and the seams, fast
+enough that the thermal rise over 10–20 minutes never builds pressure. Two
+things make that safe rather than lucky:
+
+- **Continuous auto-zero absorbs anything slow** (ADR 0006). The zero decays
+  toward the current reading whenever breath has been sub-threshold for ~2 s, so
+  a partial leak presents as drift the instrument is already correcting.
+- **M8's thermal soak tests it directly.** The soak already puts a thermocouple
+  at the breath sensor; watching the breath zero during the same run costs
+  nothing and is exactly the measurement that would catch a cavity sealing more
+  than assumed.
+
+**And it constrains one future decision: do not gasket the switch cutouts.** The
+review wants moisture control inside a body breathed into for hours, and sealing
+those cutouts is the obvious move. It would silently break the pressure
+reference. If moisture control ever pushes that way, the reference port gets
+vented to outside through its own filtered stub first — which the DP makes
+possible and the GP did not.
+
+The decision is also recoverable, which is why it is safe to take now: **M8 is
+pre-bond.** If the soak shows the zero walking with temperature, the vent can
+still be added with the instrument open in front of you.
+
+**Confirm which port is P1 before layout**, from the datasheet, and verify with
+a syringe at E2. This is a unidirectional 0–6 kPa part, so a reversed connection
+does not read backwards — it reads zero, which is easy to mistake for a dead
+sensor.
 
 ## Sensor placement: at the bottom, with the real-time board
 
@@ -126,7 +194,7 @@ With that gone, three things push the sensor down:
   10–20 minutes, and this is a **gauge sensor with a temperature-dependent
   offset whose zero is captured once at cold startup.** Putting it next to the
   heat source is the worst available placement for both.
-- **Serviceability.** The sensor is EOL (below), moisture-sensitive, and the
+- **Serviceability.** The sensor is moisture-sensitive (below), and the
   most likely part to fail, in a body that cannot be reopened. At the bottom it
   is at least near the one face that is not a key surface.
 
@@ -269,7 +337,7 @@ DAC settling requirement** in ADR 0006. Both of those existed only to carry a
 
 ### The sensor runs from a precision reference, not the shared 5 V rail
 
-**The MPXV4006GP is ratiometric by specification:**
+**The MPXV4006DP is ratiometric by specification:**
 
 ```
 Vout = VS × (0.1533 · P + 0.04)
@@ -308,7 +376,7 @@ happens to be doing.
 **So the sensor gets its own supply:**
 
 ```
-umbilical +12V ──[REF5050 5.000V]──[OPA2197 ½ buffer]──┬── MPXV4006GP VS
+umbilical +12V ──[REF5050 5.000V]──[OPA2197 ½ buffer]──┬── MPXV4006DP VS
                                                        └── (10 mA available)
 ```
 
@@ -532,10 +600,14 @@ handling is three partial measures rather than one fix:
 - **The restrictor limits the pumping itself**, since the ~6 % volume exchange
   per note has to pass through it.
 - **Treat the sensor as a wear part.** It is socketed or otherwise replaceable,
-  the trap is clearable without disassembly, and — since the MPXV4006GP has been
-  EOL since 2021 and exists only in distributor stock — **buy three to five now**
-  rather than discovering in two years that the instrument has no sensor.
+  and the trap is clearable without disassembly. **Buy two** — ordinary spares
+  for a part that gets breathed into for years.
 
 That last one is the real mitigation. The first two slow the mechanism down; only
 spares make it survivable.
+
+This used to be urgent. An earlier revision specified the MPXV4006**GP**, EOL
+since 2021 and available only from remaining distributor stock, and said to buy
+three to five immediately against the part disappearing entirely. **The DP is in
+production**, so the spares are now just spares.
 

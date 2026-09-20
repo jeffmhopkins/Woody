@@ -89,8 +89,10 @@ falsify rather than extend — was the highest-value single thing in the exercis
 
 ## Still open
 
-- **Buy 3–5 MPXV4006GP now.** EOL since 2021, distributor stock only, and it is
-  the most likely part to fail in service.
+- ~~Buy 3–5 MPXV4006GP now.~~ **Resolved later the same day.** The
+  MPXV4006**DP** has an identical transfer function and is still in production,
+  so the part switches and the hoarding problem disappears. Buy two as ordinary
+  spares (ADR 0003).
 - LED density: 30/m needs no firmware clamp to stay inside budget; 60/m diffuses
   better. The diffusion prototype decides.
 - Connector choice, pending a panel fit check.

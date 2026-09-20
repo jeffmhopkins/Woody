@@ -58,7 +58,7 @@ exactly the switching noise this decision escapes. Not worth it.
 ### The breath sensor is not on the 5 V rail at all
 
 The section below was written when the breath sensor shared the buck's 5 V rail
-with both dev boards. **It no longer does.** The MPXV4006GP is ratiometric to
+with both dev boards. **It no longer does.** The MPXV4006DP is ratiometric to
 its supply and the breath path is analog to the jack, so it runs from a REF5050
 precision reference buffered by half an OPA2197, straight off +12 V — see
 ADR 0003. The breath buffer moved to that same +12 V package.
@@ -71,7 +71,7 @@ boards and the LED data level shifter.
 An earlier revision of this ADR specified a 12 V to 3.3 V buck. **That is
 wrong**, and the reason is the breath sensor.
 
-The MPXV4006GP is a 5 V part outputting **0.2–4.7 V** (ADR 0003). A buffer
+The MPXV4006DP is a 5 V part outputting **0.2–4.7 V** (ADR 0003). A buffer
 running on 3.3 V would clip the top 30% of the breath range. So the analog front
 end needs 5 V, and a rail-to-rail op-amp on 5 V reaches 4.7 V with margin to
 spare.
@@ -96,7 +96,7 @@ The instrument's load is roughly 3 W. Over 2 m of 24 AWG, round trip ~0.34 Ω:
 
 The same power at a lower voltage means proportionally more current, and drop
 scales with current. At 5 V the instrument would see **4.80 V** — inside the
-MPXV4006GP's 5.00 ±0.25 V specification with no margin left, and that sensor is
+MPXV4006DP's 5.00 ±0.25 V specification with no margin left, and that sensor is
 **ratiometric**, so supply variation reads directly as breath variation.
 
 This is simply why power distribution uses higher voltages, and it applies at
@@ -131,7 +131,7 @@ instrument is never in (see the design scope in the README).
 ```
 umbilical +12V ──┬── WS2815 LED strips          (direct, no conversion)
                  │
-                 ├── REF5050 5.000V ──[OPA2197 ½]── MPXV4006GP breath sensor
+                 ├── REF5050 5.000V ──[OPA2197 ½]── MPXV4006DP breath sensor
                  │
                  ├── OPA2197 V+  (½ reference buffer, ½ breath buffer)
                  │
