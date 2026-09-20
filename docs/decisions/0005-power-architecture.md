@@ -142,24 +142,59 @@ otherwise pulls on the rack's +12 V rail and can brown out every other module in
 the case. A polyfuse is cheap insurance for a fault that takes down more than
 just this project.
 
-### Power switch on the instrument
+### There is no power switch on the instrument. Switching happens at the module.
 
-**Switch the buck converter's enable pin, not the +12 V rail.**
+An earlier revision of this ADR specified a panel switch on the instrument that
+**switched the buck converter's enable pin, not the +12 V rail** — carrying no
+current, so it could be a tiny slide switch anywhere convenient. A design review
+found that it cannot be built as written and would not work if it could.
 
-The instrument draws a few hundred milliamps at 12 V. Breaking that with a panel
-switch means a switch rated for it, arcing over time, and a fat conductor routed
-to wherever the switch sits. Switching the regulator's `EN` pin instead carries
-no current at all, so it can be a tiny slide switch anywhere convenient, wired
-with signal-gauge wire.
+**The regulator has no enable pin.** The Recom R-78E5.0 is a 3-pin SIP on a 7805
+footprint: IN, GND, OUT. The switch as specified has nothing to switch.
 
-Placement has to be **reachable but not reachable by accident** — there is very
-little free surface on a body whose top face is a key run and whose underside
-carries thumb keys. The upper section above the left hand, or the tail below the
-right, are the candidates.
+**And switching the buck would not turn the instrument off.** The WS2815 strips
+run on raw umbilical +12 V, *upstream* of the buck, because they need 12 V and
+the buck makes 5 V. Killing the buck leaves roughly 120 mA of strip quiescent
+draw and the strips **holding their last latched colours** — an instrument still
+lit, still drawing current, with its logic dead.
 
-This does not replace the switch on the module panel (ADR 0004). That one is a
-hard power cut at the source; this one is a local enable. Both are cheap and
-they do different jobs.
+The version that actually works is a high-side P-FET on raw +12 V, which means a
+FET, a gate network, and a fat conductor routed to a panel location inside a
+bonded body that cannot be reopened to change the decision.
+
+**So `SW-PWR-INST` is deleted.** Nothing on the instrument switches anything.
+
+### The module's toggle drives a current-limited load switch
+
+The module panel already carries a rated SPST toggle (ADR 0004), one reach away
+in the same rack the instrument is patched into. That is upgraded rather than
+duplicated.
+
+**The toggle drives a TPS2553-class current-limited load switch on the
+umbilical +12 V feed**, rather than breaking the current itself. That buys two
+things the bare toggle does not have:
+
+- **Inrush limiting.** The instrument's bulk capacitance is a near-short at the
+  instant of connection. A toggle takes that surge across its contacts every
+  time; a load switch ramps the output instead.
+- **Short-circuit foldback.** A fault in the umbilical — a crushed cable, a
+  connector half-inserted — is current-limited at the module instead of pulling
+  on the rack's +12 V rail and browning out every other module in the case. This
+  is the same job as the instrument-end polyfuse, done faster and self-resetting,
+  and the two are complementary rather than redundant.
+
+The part is SOT-23-6, which looks like a step away from the package policy in
+ADR 0013 and is not: at 0.95 mm pitch it is *coarser* than the TSSOP-16 DAC
+already accepted, and it has six leads rather than sixteen.
+
+The toggle now carries no load current, so its rating stops mattering — it
+drives an enable pin. It stays a rated part anyway because it is already
+specified and costs nothing to keep.
+
+**The honest cost of deleting the instrument switch:** there is no way to kill
+the instrument without reaching the rack. For a tethered instrument whose
+outputs go nowhere but that rack, there is nowhere else to be standing (see the
+design scope in the README).
 
 **Pull down the module's breath receive input**, so that an instrument which is
 switched off — or unplugged — presents 0 V rather than a floating buffer output.

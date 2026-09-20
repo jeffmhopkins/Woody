@@ -15,7 +15,8 @@ U-OPA-GEN,module,(none - OPA2197 used throughout),,Superseded by U-OPA-PITCH,n/a
 R-PRECISION,module,LT5400-class matched network,ADI / Vishay,Matched resistor network for pitch scaling,MSOP-8 (0.65mm pitch),TBD,candidate,,0006,Highest-value precision part in the design. Ratio tracking is what matters not absolute tempco
 J-CV,module,PJ398SM (Thonkiconn),,3.5mm mono PCB-mount jack,THROUGH-HOLE,6,candidate,,0006,De facto eurorack standard. Standard panel hole
 POT-BREATH,module,"Alpha 9mm vertical PCB mount, B50k linear",Alpha,Panel potentiometer - breath gain and offset,THROUGH-HOLE,2,candidate,,0006,Linear taper - predictable for CV scaling. Gain then offset order
-SW-POWER,module,"SPST sub-miniature toggle, 6mm bushing, >=1A",,Panel power switch - cuts +12V to the umbilical,THROUGH-HOLE,1,candidate,,0004,Carries the instrument current ~350mA so rate it properly
+SW-POWER,module,"SPST sub-miniature toggle, 6mm bushing",,"Panel power switch - drives the load switch enable, carries no load current",THROUGH-HOLE,1,candidate,,0004,Signal-level only now. The only power switch in the system; SW-PWR-INST is deleted (ADR 0005)
+U-LOADSW,module,TPS2553DBV,TI,Current-limited load switch on the umbilical +12V feed,SOT-23-6,1,candidate,,0005,Adjustable limit set ~500mA. Inrush ramp into the instrument bulk caps; foldback on an umbilical fault so the rack rail is not pulled down
 J-UMBILICAL,module,Neutrik etherCON NE8FDP,Neutrik,"8-conductor ruggedised connector, both ends",panel mount,2,candidate,,0004,Any Cat5 cable works. Panel cutout is laser cut anyway so complexity is free. VERIFY 24mm flange in 30mm panel
 PANEL,module,"2mm aluminium, 6HP x 3U (30.0 x 128.5mm)",,Eurorack front panel,n/a,1,candidate,,0004,Laser or waterjet from DXF - SAME vendor and order as the key plate
 PLATE-TOP,mechanical,TBD,,Aluminium key plate laser or waterjet cut,n/a,1,candidate,,0009,Flat 2D through-cuts only - no CNC needed
@@ -30,7 +31,6 @@ SW-BOOT,controller,TBD,,Boot and reset buttons,n/a,2,not-needed,,0013,Dev boards
 U-TVS-UMB,controller,SP3012-06UTG or similar array,multiple,TVS array on umbilical entry,SOT-23-6 (0.95mm pitch),1,candidate,,0004,Multi-line array beats discretes for placement. 8 conductors from outside
 C-BULK-DISP,controller,TBD,,Local bulk capacitance at the display board,1206 / electrolytic THT,1,open,,0013,Absorbs WiFi TX transients so they do not reach the rack rail
 TUBE,controller,silicone tube + dead-volume trap,,Breath tube from mouthpiece to sensor,n/a,1,open,,0003,~30mm. Trap clearable without disassembly
-SW-PWR-INST,controller,TBD,,Instrument power switch,panel slide switch,1,open,,0005,Switches the buck EN pin not the 12V rail - no current through it
 R-PD-BREATH,module,100k,,Pulldown on the breath receive input,0805 (2.0 x 1.25mm),1,candidate,,0005,DIFFERENTIAL across BREATH-AGND not one leg - a single-leg shunt caps CMRR near 19dB
 U-LVLSHIFT,controller,74AHCT125,multiple,Quad buffer as LED data level shifter,SOIC-14 (1.27mm pitch),1,candidate,,0014,SOIC-14. 5V rail TTL thresholds so 3V3 reads high. Two spare gates. VERIFY WS2815 threshold
 F-POLY,controller,PPTC 1206 500mA hold,multiple,Resettable fuse at umbilical entry,1206 (3.2 x 1.6mm),1,candidate,,0005,1206 not 0603 - larger package is easier to place and inspect

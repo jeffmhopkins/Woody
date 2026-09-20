@@ -216,7 +216,9 @@ bus +12V ──[1N5817]──┬──[ferrite]──[bulk]──┬── modul
                      │                      │
                      │                      └──[LM317LZ 5.25V]── DAC AVDD
                      │
-                     └──[ferrite]──[bulk]── umbilical +12V to the instrument
+                     └──[ferrite]──[bulk]──[TPS2553]── umbilical +12V
+                                                    ↑         to the instrument
+                                              panel toggle
 
 bus -12V ──[1N5817]─────[ferrite]──[bulk]── module analog
 bus +5V  ────────────────[ferrite]──[bulk]── 74AHCT125 level shifter only
@@ -238,13 +240,21 @@ on diodes, ferrites and reservoir values.
 no encoder, no screen. All UI lives on the instrument, which already has a
 display and a processor. This is what keeps the panel inside 6HP.
 
+**The module's power switch is the only power switch in the system.** The
+instrument has none (ADR 0005), so the panel toggle is the single point of
+control — and it does not break the current itself. It drives a **TPS2553-class
+current-limited load switch** on the umbilical +12 V feed, which adds inrush
+limiting into the instrument's bulk capacitance and short-circuit foldback on a
+crushed cable or a half-inserted connector. A bare toggle would take that surge
+on its contacts and pass a umbilical fault straight through to the rack's rail.
+
 Input filtering on the +12V rail so the instrument's local buck converter does
 not inject switching noise back into the rack.
 
 ### Panel, top to bottom
 
-Connector, power switch and LED, two breath knobs, then six jacks in two
-columns: **PITCH** and **BREATH** silkscreened, **MOD 1–4** numbered with a
+Connector, power switch and LED — the system's only power switch, since the
+instrument has none — two breath knobs, then six jacks in two columns: **PITCH** and **BREATH** silkscreened, **MOD 1–4** numbered with a
 write-on strip. Roughly 107 mm of ~110 mm usable height — full but workable.
 
 Print the panel at 1:1 on paper and check it is actually usable before cutting.
