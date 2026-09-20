@@ -59,7 +59,7 @@ that is always slightly out of tune.** Verify against a VCO.
 
 | ID | Milestone | Done when |
 |---|---|---|
-| M1 | Switch characterisation | KS-33 plate cutout measured with calipers; test coupon cut at ±0.1mm steps; retention verified by hand; **contact bounce scoped** and debounce windows set from the measurement |
+| M1 | Switch characterisation | KS-33 plate cutout measured with calipers; test coupon cut at ±0.1mm steps; retention verified by hand; **contact bounce scoped** and debounce windows set from the measurement; switch weight variant confirmed and thumb-tip actuation force assessed |
 | M2 | Layout mule | Full key count on a laser-cut plate, hand-wired, mounted to a mock body; playable |
 | M3 | Layout locked | Ergonomics settled after 2–3 iterations of M2. No aluminium cut before this |
 | M4 | Stack design | Full laminated stack in CAD, every layer a 2D part |

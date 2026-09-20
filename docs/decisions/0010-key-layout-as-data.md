@@ -80,6 +80,43 @@ The arc-versus-line consideration still stands — a thumb rolls more easily tha
 it reaches, so lay the four along an arc matching the thumb's rotation. But the
 risk is lower than first assessed, and the paper-at-1:1 step will settle it.
 
+## How the left thumb actually works
+
+The left thumb's primary job is **sandwiching** — opposing the fingers on the
+top face to grip the instrument. It actuates keys with the **end of the thumb**,
+extending from that grip position, not with the pad.
+
+Three things follow, and they constrain the layout more than the key count does:
+
+**The grip patch and the key cluster must be separate.** If the keys sit where
+the thumb bears down while gripping, they will trigger constantly. The thumb has
+to *deliberately move* to reach them. This is the same principle as the right
+thumb's rest-versus-switches offset, and it means the plate needs a defined
+grip area that has no switches in it.
+
+**The four keys lie on the thumb tip's sweep, not in a line.** The tip traces an
+arc as the thumb extends and rotates away from the grip. Laying the keys along
+that arc is what makes four reachable; laying them in a straight line is what
+makes four too many. This supersedes the earlier arc-versus-line note — it is no
+longer a preference, it is the mechanism.
+
+**Actuation force has to suit a thumb tip at an awkward angle.** A thumb tip
+extending from a grip has far less available force than a finger pressing
+straight down, and it is doing so while partly giving up its grip. Light linear
+switches are almost certainly right here; anything tactile or heavy will fight
+the gesture.
+
+### The inset rim is a tactile locator
+
+Bottom panel thickness sets the thumb key inset depth (ADR 0009). Since these
+keys are operated entirely by feel — the player cannot see the underside of the
+instrument — **the rim of that recess is a feature, not a side effect.** A felt
+edge tells the thumb where the key is without looking.
+
+Worth designing deliberately: rim profile, chamfer versus sharp, and whether
+adjacent keys share a recess or get individual ones. Individual recesses locate
+better; a shared one is easier to sweep across. That is an M2 question.
+
 ## Open
 
 **Finger assignment within each hand.** Five keys across four left-hand fingers

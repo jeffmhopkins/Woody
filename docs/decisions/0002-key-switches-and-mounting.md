@@ -58,6 +58,19 @@ Hand-wired on laser-cut plates during ergonomic iteration (hours per iteration),
 moving to PCB once the layout is locked. PCB turnaround is a week and is the
 enemy of ergonomic iteration, so it comes after M3, not before.
 
+## Switch weight is not yet confirmed
+
+The KS-33 ships in several weights and actuation types. Which variant is in hand
+matters, because the left thumb actuates with its tip while partly giving up
+grip (ADR 0010), and that gesture has much less force available than a finger
+pressing straight down.
+
+**Light linear is almost certainly correct.** Tactile or clicky variants add
+breakaway force that will fight the thumb gesture, and on a wind instrument the
+tactile bump buys nothing — there is no typing feedback to want.
+
+Confirm at M1, while the switches are on the bench for cutout measurement.
+
 ## Open
 
 **The KS-33 plate cutout dimension is not yet known and must be measured**, not

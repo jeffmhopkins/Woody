@@ -49,6 +49,39 @@ and the through-cut in the oak is the recess. **Oak thickness sets the inset
 depth** — choose the bottom panel thickness to get the thumb travel wanted, and
 the geometry follows. No pocketing anywhere in the design.
 
+### Strap point: U-bolt above the centre of gravity
+
+A U-bolt near the middle of the instrument, **slightly above the centre of
+gravity**, carries a neck strap.
+
+Above CG is correct and deliberate: a mass hung below its suspension point is
+pendulum-stable and self-rights, while hanging at or below CG is unstable and
+wants to flip. *Slightly* above is also right — a large offset gives a strong
+restoring torque that fights the player, and a wind controller has to be angled
+by the player at will. A small offset gives a gentle centring tendency with
+compliance left over.
+
+**This is the highest-stress point in the entire build.** The strap carries the
+whole instrument, and it carries it *during play*, not just at rest — the left
+thumb momentarily gives up grip every time it extends to a key (ADR 0010).
+
+Two consequences:
+
+- **It must anchor to the structural plate stack, not to the oak.** The wood is
+  a shell (ADR 0002) and a U-bolt through oak alone will crush the fibres and
+  eventually tear out. Through-bolt to a metal backing plate inside the cavity,
+  tied into the same structure that carries the keys.
+- **The position must be adjustable.** CG cannot be known accurately from CAD —
+  cable, connector, adhesive and finish all add mass that is hard to model, and
+  what matters is how it *feels* hanging, not where the model says the centroid
+  is. Design in a short slot or two or three discrete hole positions so balance
+  can be tuned empirically after assembly. Cheap now, painful to retrofit into a
+  finished instrument.
+
+The U-bolt also intrudes into the electronics cavity near the middle of the
+body. It is an obstruction that belongs in the CAD from the start, with cable
+routing designed around it rather than discovered during assembly.
+
 ### The right thumb rest is a stack feature
 
 The right thumb rests on the instrument and its three control switches sit
