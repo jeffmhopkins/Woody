@@ -9,11 +9,10 @@ U-KEYS,controller,74LVC165A,multiple,8-bit parallel-in shift register,SOIC-16 (1
 U-DISP,controller,T-Display-S3 AMOLED (base not Plus),LilyGO,1.91in 536x240 AMOLED RM67162 QSPI + ESP32-S3,"dev board, headers",1,selected,,0008,60x25.5x10mm - mounts lengthwise. 18 GPIO broken out
 U-BUCK,controller,R-78E5.0-1.0,Recom,12V to 5V switching regulator module,SIP-3 THROUGH-HOLE,1,candidate,,0005,3-pin SIP on a 7805 footprint. No inductor no feedback network no layout risk. 1A vs ~350mA needed
 LED-SIDE,controller,WS2815 (12V addressable),multiple,Addressable LED strip - two runs in the side channels,flexible strip,2 x 420mm,candidate,,0014,12V native so no 5V rail. Backup data line survives a dead LED. TWO independent strips - no crossover wire. Density pending diffusion test
-U-DAC,module,DAC8568 or AD5676,TI / ADI,Octal 16-bit DAC SPI,TSSOP-16 or SOIC,1,candidate,,0006,Populate 6 of 8 - pitch + 4 mod + breath zero offset. No fast settling needed
+U-DAC,module,DAC8568,TI,"Octal 16-bit DAC SPI, internal reference",TSSOP-16 (0.65mm pitch),1,candidate,,0006,Populate 6 of 8. Internal ref is sufficient - resistor tracking dominates drift 10:1
 U-OPA-PITCH,module,OPA2197,TI,Low-drift op-amp for pitch scaling,SOIC-8 (1.27mm pitch),1,candidate,,0006,Precision channel only - offset drift is tuning drift
 U-OPA-GEN,module,TBD,,General op-amp for channels 2-6,SOIC-8 (1.27mm pitch),3,candidate,,0006,Ordinary 1% parts acceptable
-U-VREF,module,TBD,,Precision voltage reference,SOT-23 / SOIC-8,1,candidate,,0006,Pitch stability over temperature - not the supply rail
-R-PRECISION,module,TBD,,0.1% thin-film resistors for pitch scaling,0805 (2.0 x 1.25mm),TBD,candidate,,0006,Channel 1 only
+R-PRECISION,module,LT5400-class matched network,ADI / Vishay,Matched resistor network for pitch scaling,MSOP-8 (0.65mm pitch),TBD,candidate,,0006,Highest-value precision part in the design. Ratio tracking is what matters not absolute tempco
 J-CV,module,3.5mm mono jack,multiple,CV output jack,panel mount THT,6,candidate,,0006,PITCH BREATH MOD1-4
 POT-BREATH,module,TBD,,Panel potentiometer,panel mount THT,2,candidate,,0006,Gain then offset - order matters
 SW-POWER,module,TBD,,Panel power switch,panel mount THT,1,candidate,,0004,

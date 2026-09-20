@@ -209,10 +209,19 @@ at all.** The carrier holds only:
 - R-78E5.0 regulator module, polyfuse, umbilical connector
 - Passives
 
-Nothing on that board is fast, nothing is RF, nothing needs more than two
-layers, and **every active part is SOIC or larger with no thermal pads** — see
-the package choices in `hardware/bom.csv`. It is a board that can be assembled
-by hand at a kitchen table.
+Nothing on that board is fast, nothing is RF, and nothing needs more than two
+layers. It can be assembled by hand.
+
+**Package policy**, so part choices do not drift later:
+
+| | Pitch | Verdict |
+|---|---|---|
+| SOIC, SIP, through-hole | 1.27 mm+ | Preferred |
+| TSSOP, MSOP | 0.65 mm | Acceptable — drag-solderable with flux |
+| QFN, BGA, leadless | 0.5 mm, hidden pads | **Avoid** — needs paste, stencil and a hotplate |
+
+Passives at 0805 or 1206, not 0402. See the `package` column in
+`hardware/bom.csv`.
 
 The dev boards already carry USB-C, regulation, boot and reset buttons, and —
 in the ESP32-S3-Matrix's case — the IMU. Rebuilding any of that is work for no

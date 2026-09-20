@@ -93,10 +93,36 @@ just a meter, because a meter will not catch a scaling error that sounds wrong.
 Channels 2–6 need only to be linear and repeatable. Nobody's ear cares whether a
 modulation CV is 2% off.
 
-So the precision parts concentrate on channel 1: low-drift op-amp (OPA2197-class,
-not TL072 — offset drift on pitch is drift in tuning), 0.1% thin-film resistors,
-and a clean path from a precision voltage reference rather than the supply rail.
-Channels 2–6 run on ordinary 1% parts.
+So the precision parts concentrate on channel 1. But **where** that budget goes
+is worth checking rather than assuming, and the arithmetic is not what it looks
+like.
+
+Over a 10 °C swing on a 9 V span, against one semitone at 83.3 mV:
+
+| Source | Drift | Cents |
+|---|---|---|
+| DAC internal reference, 5 ppm/°C | 0.45 mV | 0.54 |
+| **Discrete resistors, 25 ppm/°C each, drifting oppositely** | **4.50 mV** | **5.40** |
+| Matched network, 1 ppm/°C tracking | 0.09 mV | 0.11 |
+
+**Resistor tracking dominates reference drift by roughly ten to one.** The gain
+of a scaling stage is a resistor *ratio*, so what matters is not each resistor's
+absolute tempco but how well the two track each other — and two discrete parts
+do not track at all.
+
+Consequences:
+
+- **Use a matched resistor network for the pitch scaling stage** (LT5400 class,
+  MSOP-8), not discrete 0.1% parts. This is the single highest-value precision
+  component in the design.
+- **The DAC's internal reference is sufficient.** At 0.54 cents over 10 °C it is
+  an order of magnitude inside the resistors, so a separate precision reference
+  buys nothing measurable. One fewer part.
+- Still use a low-drift op-amp (OPA2197-class, not TL072) — offset drift on
+  pitch is drift in tuning.
+
+Channels 2–6 run on ordinary 1% discretes; nobody's ear cares whether a
+modulation CV moves a few cents' equivalent with temperature.
 
 This is materially less expensive and less work than treating all six as
 precision outputs.
