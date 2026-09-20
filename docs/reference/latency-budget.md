@@ -71,6 +71,8 @@ load-bearing enough that being wrong about them would change the design.
 | **Rack rail ripple, both directions** | Scope +12V at the module with the instrument running | Incoming ripple lands on the CV outputs; outgoing noise from the local buck lands on every other module in the rack. Gates E6 |
 | **WiFi transmit transients** | Scope the rail during a TX burst with the radio enabled | Now the *only* path by which WiFi can affect the outputs (ADR 0013). Decides whether configuration-while-playing is usable |
 | **Inter-MCU UART link** | Logic analyser on the pair, under load | Frame integrity and whether status traffic is jitter-free at rate (ADR 0013) |
+| **Umbilical link at full rate** | Logic analyser at the module end, cable at length, breath channel at 96 kHz | Decides whether single-ended SPI holds ~7 MHz over the cable or RS-485 transceivers are needed (ADR 0004) |
+| **Output staircase on a VCA** | Patch breath CV to a VCA, listen and scope the audio | The end test for the update-rate decision. Ripple becomes amplitude modulation, which is the artefact the rate exists to avoid |
 | **End-to-end, in one shot** | Two scope channels: one on the sensor output, one on the CV jack | Measures the real gesture-to-output time directly instead of summing estimates. This is the number that actually matters, and it is the one measurement that validates or refutes the entire table above |
 
 A signal generator driving a known waveform into the ADC front end also
@@ -83,7 +85,11 @@ a hypothesis; a budget made of measurements is a constraint.
 
 ## Rules that follow
 
-1. **Loop rate 4 kHz** for sensor read and DAC update.
+1. **Sensor read at 4–8 kHz; breath DAC output at 96 kHz.** These are
+   deliberately different. The transducer's own corner is ~159 Hz, so a fast ADC
+   buys nothing — the output rate exists to keep staircase ripple out of the
+   audio band, and the high-rate stream is generated in firmware by a smoothing
+   filter rather than by sampling faster (ADR 0003).
 2. **SAR ADC, never delta-sigma.** A delta-sigma's decimation filter has real
    group delay — potentially milliseconds — which would consume the entire
    budget on its own.

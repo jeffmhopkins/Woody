@@ -2,14 +2,14 @@ ref,category,part,manufacturer,description,qty,status,source,adr,notes
 SW1-n,controller,KS-33,Gateron,Low-profile mechanical switch MX stem,18,purchased,Amazon,0002,Binary. Plate cutout must be measured - not standard 14mm MX
 CAP1-n,controller,MT165-MX,Tai-Hao,Keycap 16.5x16.5mm blank black MX stem,18,purchased,Beekeeb,0002,Sold in 5-packs - 18 keys needs 4 packs. Smaller than 18mm MX spacing
 U-MCU-RT,controller,ESP32-S3-WROOM-1,Espressif,Real-time MCU - keys sensors DAC drive USB MIDI,1,candidate,,0013,Mid-body board. Prefer quad PSRAM. 13 of ~30 pins used
-U-BREATH,controller,MPXV4006GP,NXP,Pressure transducer 0-6kPa gauge conditioned,1,unconfirmed,,0003,Old repo contradicts itself - may be MPX2010GS instead
+U-BREATH,controller,MPXV4006GP,NXP,Pressure transducer 0-6kPa gauge conditioned,1,selected,,0003,~1ms response = ~159Hz corner. ADC runs 4-8kHz; rate lives on the DAC side
 U-ADC,controller,MCP33131-10,Microchip,16-bit SAR ADC SPI,1,candidate,,0003,SAR not delta-sigma - group delay would blow latency budget
 U-IMU,controller,BNO085,CEVA,9-axis IMU with onboard fusion 400Hz,1,candidate,,0007,Successor to BNO055 used in previous project
 U-KEYS,controller,74HC165,multiple,8-bit parallel-in shift register,4,candidate,,0001,One per cluster - 32 bits for 18 keys with 14 spare
 U-DISP,controller,T-Display-S3 AMOLED (base not Plus),LilyGO,1.91in 536x240 AMOLED RM67162 QSPI + ESP32-S3,1,selected,,0008,60x25.5x10mm - mounts lengthwise. 18 GPIO broken out
 U-BUCK,controller,TBD,,12V to 3.3V buck converter,1,candidate,,0005,Local regulation from umbilical +12V
 LED-SIDE,controller,SK6812 or WS2812B,multiple,Addressable LED for acrylic edge lighting,TBD,candidate,,0009,Keep ground return off the analog path
-U-DAC,module,DAC8568 or AD5676,TI / ADI,Octal 16-bit DAC SPI,1,candidate,,0006,Populate 6 of 8 - expansion room for no cost
+U-DAC,module,DAC8568 or AD5676,TI / ADI,Octal 16-bit DAC SPI,1,candidate,,0006,Populate 6 of 8. MUST settle <10us for the 96kHz breath channel
 U-OPA-PITCH,module,OPA2197,TI,Low-drift op-amp for pitch scaling,1,candidate,,0006,Precision channel only - offset drift is tuning drift
 U-OPA-GEN,module,TBD,,General op-amp for channels 2-6,3,candidate,,0006,Ordinary 1% parts acceptable
 U-VREF,module,TBD,,Precision voltage reference,1,candidate,,0006,Pitch stability over temperature - not the supply rail

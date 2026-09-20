@@ -44,6 +44,28 @@ bounded by slew rate, not full scale.** A signal moving over ~10 ms sampled at
 over 10V is ~150 µV. The only large step is a deliberate note change, which
 should be fast anyway.
 
+## Channels do not share an update rate
+
+Breath needs a high output rate to keep staircase ripple out of the audio band
+(ADR 0003). The others do not, and giving them one would waste the umbilical's
+entire bandwidth budget.
+
+| Channel | Rate | Why |
+|---|---|---|
+| Breath | **96 kHz** | Ripple becomes amplitude modulation on a VCA |
+| Pitch | 2 kHz, plus **immediate update on note change** | Static between notes; what matters is latency at the transition, not rate |
+| Mod 1–4 | 2 kHz | Sources are slow — IMU tops out around 400 Hz |
+
+Pitch is the subtle one: it needs no *rate*, but it must not wait for its turn
+in a round-robin. Push it the instant the note resolves.
+
+### Consequent requirement on the DAC
+
+96 kHz means a settling time comfortably under ~10 µs. That is at the edge of
+the DAC8565/8568 family and needs checking against the datasheet at the chosen
+reference and load, or a faster part selected. This is a new constraint on the
+DAC choice that did not exist when the rate was 4 kHz.
+
 ## Breath knobs are analog, in the signal path
 
 With breath locked to channel 2 there is no genericity conflict, so the knobs

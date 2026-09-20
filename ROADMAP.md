@@ -49,7 +49,7 @@ existing. Drive it from any dev board with a test pattern and a multimeter.
 | E8 | Pitch channel scaled | Channel 1 hits −2V and +7V, linear between |
 | E9 | **Pitch calibration** | Two-point fit stored in NVS; 1V/oct verified against a real VCO, not just a meter |
 | E10 | Remaining channels | Breath 0–10V with working gain/offset knobs; four mod channels trimmed |
-| E11 | Umbilical link | SPI over the real cable at length, no errors, module-present detect works |
+| E11 | Umbilical link | SPI over the real cable at length carrying the 96 kHz breath channel (~7 MHz), no errors, module-present detect works. RS-485 fitted if single-ended will not hold it (ADR 0004) |
 | E12 | Module PCB + panel | 6HP panel cut, module assembled and racked |
 | E13 | Controller PCBs | Custom carrier + satellite boards; replaces the dev board |
 
@@ -126,6 +126,5 @@ dev board on the bench.
 
 | Blocks | Question | Tracked in |
 |---|---|---|
-| E2 | Which breath sensor is actually in hand | [ADR 0003](docs/decisions/0003-breath-sensing-path.md) |
 | E12 | Connector choice, pending panel fit check | [ADR 0004](docs/decisions/0004-cv-interface-module.md) |
 | E3 | IMU part | [ADR 0007](docs/decisions/0007-imu-selection.md) |

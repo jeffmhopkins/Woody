@@ -33,12 +33,31 @@ spare               reserved
 No −12V goes up the cable; nothing in the instrument is bipolar any more.
 
 With real Cat5/6 each signal sits against a ground in its own twisted pair.
-Bandwidth needed is ~576 kbit/s (six 16-bit channels at 4 kHz), so under 30%
-utilisation at 2 MHz. It closes with room.
 
-RS-485 transceivers on one pair would make the link immune to ground offsets
-between rack and instrument. Start with plain SPI; escalate only if the bench
-shows problems.
+**Bandwidth is no longer trivial.** The 96 kHz breath rate (ADR 0003, ADR 0006)
+raises what the link has to carry by roughly an order of magnitude:
+
+| Channel rates | Payload | SPI clock at 50% use |
+|---|---|---|
+| all six at 4 kHz | 0.77 Mbit/s | ~1.5 MHz |
+| breath 48 kHz, rest 2 kHz | 1.86 Mbit/s | ~3.7 MHz |
+| **breath 96 kHz, rest 2 kHz** | **3.39 Mbit/s** | **~6.8 MHz** |
+| breath 192 kHz, rest 2 kHz | 6.46 Mbit/s | ~12.9 MHz |
+
+Per-channel rates are what make this affordable at all — running all six at
+96 kHz would need three times the bandwidth for no benefit.
+
+**This promotes RS-485 from contingency to likely requirement.** Single-ended
+SPI at ~7 MHz over a couple of metres of cable, in a rack full of switching
+supplies, is not something to assume will work. Differential signalling on a
+twisted pair handles that rate comfortably and is immune to ground offsets
+between rack and instrument, which single-ended SPI is not.
+
+Bench the plain-SPI version first since it is simpler, but expect to escalate,
+and lay the module out so transceivers can be fitted without a respin. If the
+link will not hold 96 kHz, **48 kHz is the graceful fallback** — 55 dB of image
+rejection instead of 67 dB, which is still far better than the 12 dB that 4 kHz
+would have given.
 
 **Wire MISO even though nothing uses it.** It is free, and it lets the
 instrument detect whether the module is connected at all — so an unplugged

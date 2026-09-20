@@ -72,19 +72,18 @@ recoverable in hardware:
 Panel knobs (ADR 0006) handle *range fitting*; firmware handles *response feel*.
 Different jobs, both kept.
 
-## Open
+## Sensor: MPXV4006GP
 
-**Which sensor is actually in hand.** The old repository contradicts itself:
+0–6 kPa gauge, integrated signal conditioning, ~0.2–4.7 V out. Directly usable
+by a SAR ADC with no instrumentation amplifier.
 
-- `README.md` says **MPXV4006GP** — 0–6 kPa gauge, integrated signal
-  conditioning, ~0.2–4.7V out. Directly usable.
-- `src/owp/owp.ino` header says **MPX2010GS** — 0–10 kPa differential,
-  uncompensated and unamplified, ~25 mV full scale. Would need an
-  instrumentation amp to be usable.
+The old repository contradicted itself — its README said MPXV4006GP while
+`src/owp/owp.ino` said MPX2010GS, which is uncompensated and unamplified at
+~25 mV full scale and would have needed an instrumentation amp. That question is
+moot now that parts are being bought new: **specify the MPXV4006GP.**
 
-Probably a stale comment against an upgraded part, but it needs confirming.
-Either way the 0–6 kPa range was well chosen: normal wind-controller playing
-sits around 0–5 kPa. Gauge, not differential, is correct for breath.
+The 0–6 kPa range was well chosen in 2021 and stands. Normal wind-controller
+playing sits around 0–5 kPa. Gauge, not differential, is correct for breath.
 
 ## Sensor placement: near the top, short tube
 
@@ -129,6 +128,58 @@ by the transducer itself:
 Option C remains a legitimate fallback if the top-end board gets crowded — it
 costs about 1.1 ms, which the budget can absorb. Tube length is a lever that
 stays available either way.
+
+## Update rate: well above audio, but not where you would expect
+
+The CV output should update **considerably above audio rate**. That requirement
+is right, and it lands somewhere counter-intuitive — so it is worth separating
+two things that look like one.
+
+### The sensor cannot produce information above ~160 Hz
+
+A 1 ms transducer response is a first-order corner around **159 Hz**. Sampling
+above roughly 2 kHz captures **no additional breath information whatsoever**.
+Any rate beyond that buys *reconstruction smoothness*, not signal.
+
+That is not an argument against a high rate. It is an argument about **where the
+high rate has to be**: on the DAC side, not the ADC side.
+
+### Why smoothness genuinely matters here
+
+Output steps are not a theoretical concern when the destination is a modular
+rack. Breath CV driving a VCA means staircase ripple becomes amplitude
+modulation, and that is audible.
+
+During a fast tongue attack — full range in ~5 ms — step size by update rate:
+
+| Rate | Samples across the attack | Step | Images (2-pole @ 2 kHz) |
+|---|---|---|---|
+| 4 kHz | 20 | **500 mV** | 12 dB down, at 4 kHz |
+| 24 kHz | 120 | 83 mV | 43 dB down |
+| 48 kHz | 240 | 42 mV | 55 dB down |
+| **96 kHz** | **480** | **21 mV** | **67 dB down, at 96 kHz** |
+| 192 kHz | 960 | 10 mV | 79 dB down |
+
+At 4 kHz those are half-volt steps landing squarely in the audio band, barely
+filtered. That is the buzz worth designing out.
+
+### Decision
+
+**Target 96 kHz on the breath channel**, 48 kHz as the fallback if the link
+proves difficult. Images land at 96 kHz, far outside the audio band and 67 dB
+down.
+
+**The ADC stays slow.** Run it at 4–8 kHz — already several times the sensor's
+own bandwidth — and generate the high-rate DAC stream in firmware with a
+smoothing filter running at the output rate, its time constant set just below
+the sensor's corner so it does not slow the response.
+
+Use a filter rather than interpolation between samples: interpolation needs the
+*next* sample and therefore adds a full sample period of latency, while a
+one-pole IIR at the output rate costs only its own group delay and no lookahead.
+
+This is the cheap version of the requirement. A faster ADC and a faster sensor
+would buy nothing; only the DAC side needs the rate.
 
 ## Condensation, in proportion
 
