@@ -127,10 +127,10 @@ real effort, and this comes close to free.
 **Display board at the top. Real-time board at the bottom.**
 
 An earlier revision put both at the top, on the reasoning that the breath sensor
-is analog and must stay near the mouthpiece. That constraint does not exist —
-**a pneumatic tube carries the pressure to wherever the sensor is** (ADR 0003),
-which is how wind controllers normally do it. The sensor and its ADC therefore
-follow the real-time board rather than pinning it.
+is analog and must stay near the mouthpiece. That constraint does not bind: the
+sensor is digitised **where it sits**, by an ADC sharing the SPI bus that already
+runs the length of the body for the key chain. Only the digitised signal
+travels, so the sensor's position stops dictating the MCU's (ADR 0003).
 
 Putting the real-time board at the bottom is strictly better, because the two
 things it most wants to be near are already there:

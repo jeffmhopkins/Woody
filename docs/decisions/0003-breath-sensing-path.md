@@ -86,69 +86,69 @@ Probably a stale comment against an upgraded part, but it needs confirming.
 Either way the 0–6 kPa range was well chosen: normal wind-controller playing
 sits around 0–5 kPa. Gauge, not differential, is correct for breath.
 
-## The sensor is remote, fed by a tube
+## Sensor placement: near the top, short tube
 
-The sensor does **not** sit at the mouthpiece. A pneumatic tube carries mouth
-pressure down the body to wherever the sensor is — standard practice on wind
-controllers, and it frees the board placement entirely (ADR 0013). The sensor
-and its ADC sit with the real-time board at the bottom of the instrument.
+The sensor does not have to sit at the mouthpiece — a pneumatic tube carries
+mouth pressure to it. But it also does not have to travel far, and the tube is
+the most expensive part of the breath path, so keep it short.
 
-### The tube costs latency, and becomes the largest single term
+### The SPI bus already runs the full length of the body
 
-Pressure propagates at the speed of sound, so a 400 mm tube adds ~1.17 ms before
-the transducer sees anything:
+This is what makes placement cheap, and it is easy to miss. The 74HC165 key
+chain reaches the **left-hand cluster, which is the upper one** — so SCK, MISO
+and LATCH already run from the real-time board at the bottom all the way to the
+top of the instrument (ADR 0001, ADR 0013).
+
+Putting the breath ADC up there therefore **shares an existing bus**. It costs a
+chip select, plus MOSI if the converter takes commands. It is not a new run.
+
+### Options
+
+| Option | Tube | Delay | Resonance | Extra wires |
+|---|---|---|---|---|
+| **A — top, sharing the left-hand cluster board** | 30 mm | **0.09 ms** | 2858 Hz | CS + MOSI |
+| B — mid-body, on a cluster board | 200 mm | 0.58 ms | 429 Hz | CS + MOSI |
+| C — bottom, with the real-time board | 400 mm | 1.17 ms | 214 Hz | none |
+
+**Option A.** Tube delay effectively disappears, resonance is pushed to 2858 Hz
+— far outside any band that matters and trivially filtered — and the cost is two
+wires on a bus that is already there. The breath path returns to being dominated
+by the transducer itself:
 
 | Stage | ms |
 |---|---|
-| **Tube propagation, 400 mm** | **1.17** |
+| Tube propagation, 30 mm | 0.09 |
 | Pressure transducer | 1.00 |
 | SAR ADC | 0.20 |
 | SPI + firmware | 0.02 |
 | SPI to DAC over umbilical | 0.05 |
 | DAC settling | 0.01 |
 | Op-amp + reconstruction filter | 0.16 |
-| **Total** | **2.61** |
+| **Total** | **~1.5** |
 
-Still comfortably inside the 5 ms target, but it roughly doubles the breath
-path and displaces the transducer as the dominant term. Tube length is now a
-latency parameter, not just a routing convenience:
+Option C remains a legitimate fallback if the top-end board gets crowded — it
+costs about 1.1 ms, which the budget can absorb. Tube length is a lever that
+stays available either way.
 
-| Tube | Delay | Quarter-wave resonance |
-|---|---|---|
-| 150 mm | 0.44 ms | 572 Hz |
-| 300 mm | 0.87 ms | 286 Hz |
-| 400 mm | 1.17 ms | 214 Hz |
+## Condensation, in proportion
 
-**Keep it as short as the layout allows.** If latency measurements come back
-worse than expected, moving the sensor to mid-body is the cheapest lever
-available — it costs nothing but a slightly longer wire run in place of a
-shorter tube.
+**This is a closed, dead-ended system** — the tube terminates at the sensor and
+no air flows through it. Pressure transmits without bulk flow.
 
-### Tube resonance
+An earlier revision of this ADR called saliva reaching the sensor a certainty
+and the most likely thing to ruin the instrument. That was overstated: it
+assumed a flow path carrying droplets along, which a sealed dead-end does not
+have. What actually happens is **condensation forming slowly on the tube walls**
+as warm breath meets cooler surfaces.
 
-A closed tube rings at its quarter-wave frequency — 214 Hz for 400 mm. That sits
-well above the breath signal band, which is mostly under 50 Hz, so it should
-filter out cleanly in software. But it is a real mechanism and it is measurable:
-a pressure step will show the ringing on a scope.
+Still worth handling, cheaply:
 
-If it proves troublesome, a deliberate acoustic restriction damps it, at the
-cost of a little more delay. Do not add damping pre-emptively.
+- A **small dead-volume trap at the sensor end** catches what does accumulate.
+  Low cost, no downside, and it works regardless of where the sensor sits.
+- Make it **clearable without disassembly**. Not a drain plumbed through the
+  body — just access.
+- Short tubes accumulate less, which Option A gives for free.
 
-## Spit and condensation: now a gravity problem
+Not a stack-level design problem, and not a reason to choose one sensor position
+over another.
 
-This was previously noted as unsolved. **The tube makes it acute**, and gives it
-a specific shape rather than a vague one.
-
-With the sensor below the mouthpiece and a tube between them, **gravity feeds
-saliva and condensation directly into the sensor.** That is not a maybe; it is
-what will happen, and a wet pressure transducer reads garbage and then stops
-reading at all.
-
-The tube therefore needs a **trap at its low point with a drain, upstream of the
-sensor** — or a routing that rises before reaching the sensor, so liquid
-collects where it can be cleared rather than where it does damage. It must be
-drainable without disassembling the instrument.
-
-This is a mechanical requirement on the laminated stack (ADR 0009), not a
-detail to resolve during assembly, and it is the single most likely thing to
-ruin the instrument three months in.
