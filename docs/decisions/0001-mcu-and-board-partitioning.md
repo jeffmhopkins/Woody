@@ -15,14 +15,17 @@ playing. In a body roughly two feet long, those cannot share a board.
 ## Options
 
 **ESP32-S3.** Native USB OTG, so a genuinely class-compliant USB MIDI device
-with no serial-bridge workaround and no host drivers. Dual core allows pinning
-the sensor and output loop to one core while the display renders on the other.
+with no serial-bridge workaround and no host drivers. 2.4 GHz WiFi and BLE 5
+built in, which ADR 0012 requires for phone-based configuration. Dual core
+allows pinning the sensor and output loop to one core while the display and
+radio live on the other.
 Most nice-display dev boards are S3-based. Note it has **no DAC at all** — the
 original ESP32's two 8-bit DACs were dropped on the S3. Irrelevant here, since
 8 bits was never usable for pitch CV.
 
-**ESP32-P4.** More capable, real MIPI display support, but no built-in radio and
-less mature software support. Not a good bet for a first build.
+**ESP32-P4.** More capable, real MIPI display support, but **no built-in
+radio** and less mature software support. The radio is now a requirement
+(ADR 0012), so this is ruled out outright rather than merely disfavoured.
 
 **ESP32-C6.** Single RISC-V core, weaker. Wireless features irrelevant here.
 
@@ -49,6 +52,11 @@ pair.
 
 The two SPI hosts on the S3 get split: display on one, DAC and shift registers
 on the other. A display refresh must never block a CV update.
+
+**The core split carries the WiFi stack too.** Sensor read, key scan and DAC
+output own one core; display, radio and web server own the other. The radio is
+the less polite neighbour of the two — see ADR 0012 for why it is also off
+during performance.
 
 ## Consequences
 

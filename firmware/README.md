@@ -20,6 +20,10 @@ negotiable without revisiting those:
   filter is fixed; firmware knows what each channel carries.
 - **Nothing expressive touches the ESP32's internal ADC.** It is noisy and
   nonlinear, and breath drives a 0–10V output where that shows.
+- **WiFi shares the display's core and is off while playing.** Transmit bursts
+  cause current transients on the rail and preempt the output loop; the latency
+  budget assumes the radio is down
+  ([ADR 0012](../docs/decisions/0012-configuration-interface.md)).
 
 ## Data, not code
 
@@ -40,6 +44,15 @@ Both live in NVS and are editable from the display and over USB.
 
 Throwaway test firmware for E-track milestones belongs in `fixtures/`, not in
 the instrument firmware. It is a tool, not a deliverable.
+
+## Configuration lives on a phone
+
+Config is a web app served from flash over SoftAP, not a menu system on the
+display ([ADR 0012](../docs/decisions/0012-configuration-interface.md)). The
+display shows status only.
+
+Build the live-telemetry WebSocket early — it is a test instrument for the
+mechanical and calibration work, not just a configuration convenience.
 
 ## USB MIDI
 

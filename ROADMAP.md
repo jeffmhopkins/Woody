@@ -83,9 +83,10 @@ every expensive mistake made in the cheap material.
 | F2 | Breath response | Curve shaping, ambient zeroing, threshold and note gating |
 | F3 | Channel output | Fixed-rate DAC loop, per-channel smoothing in software |
 | F4 | Routing matrix | Four mod channels: source, scale, offset, curve, slew |
-| F5 | Display UI | Navigable config on the instrument; module is dumb by design |
-| F6 | Persistence | Config and calibration in NVS; presets |
-| F7 | Host tooling | Config editor over USB |
+| F5 | **Web config app** | SoftAP, captive portal, web app served from flash. Fingering table, routing matrix, breath curves |
+| F6 | Live monitoring | WebSocket telemetry to the phone: breath, IMU angles, commanded CV |
+| F7 | Status display | Note, breath, active channels, mode. Status only — config lives on the phone |
+| F8 | Persistence | Config and calibration in NVS; presets |
 
 ---
 
@@ -98,7 +99,22 @@ every expensive mistake made in the cheap material.
 | **2** | M3, E6–E9 | Layout locked; pitch CV calibrated and accurate |
 | **3** | E10–E12, M4–M5 | Module complete and racked; aluminium plate |
 | **4** | M6–M7, E13 | Real instrument in a real body |
-| **5** | F4–F7 | Routing matrix, UI, presets, tooling |
+| **5** | F4–F8 | Routing matrix, web config, monitoring, presets |
+
+## Out-of-order work worth pulling forward
+
+**F6 (live monitoring) is worth building well before its phase.** A phone
+showing live breath pressure, IMU angles and commanded CV over a WebSocket is a
+test instrument, not just a convenience:
+
+- **M2/M3** — see which keys actually register while trying a layout, instead of
+  inferring it by ear
+- **E9** — watch commanded against measured while trimming calibration, instead
+  of alternating between a meter and a menu
+- **E2** — see the breath response curve while playing against it
+
+It depends only on E1 and a WiFi stack, so it can be built as soon as there is a
+dev board on the bench.
 
 ## Open items blocking work
 

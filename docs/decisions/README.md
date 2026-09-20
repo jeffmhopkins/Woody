@@ -38,3 +38,4 @@ why it was deleted is worth keeping.
 | [0009](0009-enclosure-construction.md) | Enclosure construction | Accepted |
 | [0010](0010-key-layout-as-data.md) | Key layout as data | Accepted |
 | [0011](0011-licensing.md) | Licensing | Open |
+| [0012](0012-configuration-interface.md) | Configuration interface | Accepted |
