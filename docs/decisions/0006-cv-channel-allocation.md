@@ -248,6 +248,68 @@ firmware straightens the bow in it.
   musically accurate; firmware scaling is sufficient there and nobody's ear
   cares about a few cents' equivalent on a modulation CV.
 
+## The pitch output keeps its 1 kΩ series resistor
+
+Every CV output in this design gets a 1 kΩ series resistor — standard Eurorack
+practice, and what makes the module survive a short to ground or someone
+patching output to output. A design review argued that on the pitch jack
+specifically the resistor should be removed or shrunk, because it forms a
+divider against whatever is plugged in:
+
+| Load | Divider | Tracking error |
+|---|---|---|
+| 100 kΩ (one typical VCO) | 0.9901 | **−11.9 cents/octave** |
+| 50 kΩ (two VCOs, passive mult) | 0.9804 | **−23.5 cents/octave** |
+
+Five octaves up, that is 59.4 cents and 117.6 cents respectively.
+
+**The resistor stays at 1 kΩ, and calibration absorbs it.** Two reasons.
+
+**It is a pure gain error, and the gain trimmer has full authority over it.**
+This is the distinction that matters. The offset error that forced trimmers into
+this design in the first place was unrecoverable because nothing implemented
+`b`. A resistive divider is entirely `a` — it multiplies the whole transfer
+function by a constant. Both the trimmer and the firmware scale factor can
+cancel it exactly, at any magnitude. Nothing is lost that cannot be recovered.
+
+**The alternatives each cost more than they return.** Dropping to 100 Ω gives up
+an order of magnitude of short-circuit protection to reduce, not remove, an
+error that calibration removes entirely. Feeding the op-amp's feedback from the
+jack side eliminates the error properly but puts the patch cable's capacitance
+inside the loop, and the correct compensated version of that (TI's dual-feedback
+topology) has to be designed as one piece with the output filter it replaces.
+That is real stability work, on a board without one, to fix something a
+screwdriver already fixes.
+
+### What this costs, and how it is paid
+
+**The calibration is specific to the load it was made against.** Re-patching
+pitch from one VCO to two on a passive mult changes the gain by 0.98 % — about
+**58 cents at five octaves up**, which is audible and then some.
+
+Three things pay for it, none of them hardware:
+
+- **Calibrate with the real patch connected.** E9 already verifies against a
+  real VCO rather than a meter; it now also means *the* VCO, loaded the way it
+  will be played.
+- **Use a buffered mult for pitch, not a passive one.** A buffered mult presents
+  one constant high-impedance load no matter how many oscillators hang off it,
+  which makes the whole problem disappear at the patch level. This is the actual
+  fix and it costs nothing, because the rack already has the option.
+- **Firmware carries a per-load scale factor.** Firmware could never implement
+  `b`, but it has always been able to implement `a`. A named scale preset per
+  patch — "one VCO", "two multed" — is a stored float and a display line, and it
+  reaches loads the trimmer was not set for without touching a screwdriver.
+
+### Consequence elsewhere
+
+**The pitch output filter stays an ordinary series RC.** With no in-loop
+compensation capacitor, the filter's corner is set by its own R and C and
+nothing else. Two proposed review fixes were in conflict over that capacitor —
+the in-loop `Cf` and the separate output filter are physically the same part and
+cannot both exist. Declining the in-loop version resolves the conflict rather
+than deferring it.
+
 ## Labelling
 
 Channels 1 and 2 are silkscreened. Mod 1–4 are numbered with a write-on strip,

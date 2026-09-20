@@ -44,10 +44,10 @@ existing. Drive it from any dev board with a test pattern and a multimeter.
 | E4 | Key scan | 74HC165 chain reads all switches; debounce asymmetric (instant press, filtered release) |
 | E4b | **Inter-MCU link** | Framed UART between the two boards, status flowing, logic-analyser clean (ADR 0013) |
 | E5 | **USB MIDI out** | Plays into a DAW. Fingering table exercised. First playable milestone |
-| E6 | Module power | ±12V from rack via keyed header + reverse protection, 5V logic rail up, input filtering, no noise injected back into the rack |
+| E6 | Module power | ±12V from rack via keyed header + reverse protection, local 5.25V DAC regulator and bus +5V logic rail up, input filtering, no noise injected back into the rack |
 | E7 | DAC raw | Commanded codes produce expected voltages on the meter, all six channels |
-| E8 | Pitch channel scaled | Raw analog gain measured and confirmed ~5% **over** target, linear across the span — firmware calibration can only scale down (ADR 0006) |
-| E9 | **Pitch calibration** | Two-point fit stored in NVS; 1V/oct verified against a real VCO, not just a meter |
+| E8 | Pitch channel scaled | Raw analog gain and offset trimmed to target, linear across the span. The 5%-over kludge is deleted — trimmers go both ways (ADR 0006) |
+| E9 | **Pitch calibration** | Two-point fit stored in NVS; 1V/oct verified against a real VCO, not just a meter, loaded the way it will be played (ADR 0006) |
 | E10 | Remaining channels | Analog breath stage: differential receiver, gain/offset knobs, DAC-driven ambient zero. Four mod channels trimmed |
 | E11 | Umbilical link | SPI (~0.6 MHz) and the differential analog breath pair over the real cable at length. Breath output clean while display, LEDs and WiFi are exercised (ADR 0003) |
 | E12 | Module PCB + panel | 6HP panel cut, module assembled and racked |
