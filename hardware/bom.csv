@@ -19,7 +19,7 @@ SW-POWER,module,"SPST sub-miniature toggle, 6mm bushing",,"Panel power switch - 
 U-LOADSW,module,TPS2553DBV,TI,Current-limited load switch on the umbilical +12V feed,SOT-23-6,1,candidate,,0005,Adjustable limit set ~500mA. Inrush ramp into the instrument bulk caps; foldback on an umbilical fault so the rack rail is not pulled down
 J-UMBILICAL,module,Neutrik etherCON D-series chassis (variant TBD),Neutrik,"8-conductor ruggedised connector, module panel and instrument tail",panel mount,2,candidate,,0004,"23.8mm cutout in a 30.18mm 6HP panel = 3.19mm each side, so BRACE IT TO THE PCB - the panel passes the fit and fails the stiffness. Instrument end mounts to an internal backing plate, not oak. Feedthrough vs solder-tag variant decided at E12/M7 with datasheets"
 PANEL,module,"2mm aluminium, 6HP x 3U (30.0 x 128.5mm)",,Eurorack front panel,n/a,1,candidate,,0004,Laser or waterjet from DXF - SAME vendor and order as the key plate
-PLATE-TOP,mechanical,TBD,,Aluminium key plate laser or waterjet cut,n/a,1,candidate,,0009,Flat 2D through-cuts only - no CNC needed
+PLATE-TOP,mechanical,TBD,,Aluminium key plate laser or waterjet cut,n/a,1,candidate,,0009,"Cutout 14.0 x 14.0mm, same as MX (docs/reference/ks33-geometry.md). THICKNESS OPEN: 2mm defeats the retention clips entirely, MX standard is 1.5mm, the reference KS-33 build uses 1.1mm. Decide with Gateron's clip dimension"
 BODY-OAK,mechanical,TBD,,Oak top and bottom panels,n/a,2,candidate,,0009,Bottom panel thickness sets thumb key inset depth
 SIDE-ACRYLIC,mechanical,TBD,,Frosted acrylic side panels,n/a,2,candidate,,0009,Edge-lit
 BENCH,tooling,n/a,,"Scopes, logic analysers, DMMs, signal generators, RF",n/a,1,available,,0006,Full bench available - E9 not gated on tooling

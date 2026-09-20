@@ -61,7 +61,7 @@ transceivers stay a contingency rather than a likely requirement.
 38 mm of stack, consumed roughly as:
 
 ```
-  aluminium top plate       ~2 mm
+  aluminium top plate       ~2 mm   <- may become 1.5 mm, see ADR 0002
   oak top                   ~6 mm
   ---- cavity ----          remainder
   oak bottom                ~8 mm   <- sets thumb key inset depth

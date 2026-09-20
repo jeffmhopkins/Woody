@@ -68,7 +68,7 @@ runs — which is what makes 18 inches workable.
 
 | ID | Milestone | Done when |
 |---|---|---|
-| M1 | Switch characterisation | **Cutout and body geometry from Gateron's datasheet and STEP model, not calipers** (ADR 0002). Test coupon cut at ±0.1mm around nominal to find the *achieved* fit in real material; retention verified by hand; **bounce and the actuation/reset hysteresis gap scoped** on fast press, slow press, fast release, slow release and a worn switch — neither is published; **action assessed by hand** — fingertip vs thumb-tip, and whether the four thumb keys want a lighter spring than the eleven finger keys |
+| M1 | Switch characterisation | **Cutout is 14.0 × 14.0 mm**, measured from a working KS-33 build ([reference](docs/reference/ks33-geometry.md)); body geometry from Gateron's STEP model, not calipers. Test coupon cut at ±0.1mm around 14.0 to find the *achieved* fit in real material; retention verified by hand; **bounce and the actuation/reset hysteresis gap scoped** on fast press, slow press, fast release, slow release and a worn switch — neither is published; **action assessed by hand** — fingertip vs thumb-tip, and whether the four thumb keys want a lighter spring than the eleven finger keys |
 | M2 | Layout mule | Full key count on a laser-cut plate, hand-wired, mounted to a mock body; playable |
 | M3 | Layout locked | Ergonomics settled after 2–3 iterations of M2. No aluminium cut before this |
 | M4 | Stack design | Full laminated stack in CAD, every layer a 2D part, **modelled against the real KS-33 STEP solid** rather than a nominal box (ADR 0002) |
@@ -216,6 +216,7 @@ spurious note, made countable by the marker pattern (ADR 0001).
 
 | Blocks | Question | Tracked in |
 |---|---|---|
+| M4, M5 | **Plate thickness** — 1.5 mm with lamination stiffening, or 2 mm with a structural backer. Needs the clip dimension from Gateron's drawing | [ADR 0002](docs/decisions/0002-key-switches-and-mounting.md) |
 | M4 | CAD tool — Fusion, FreeCAD, or neutral STEP in `mechanical/cad/` | [ADR 0009](docs/decisions/0009-enclosure-construction.md) |
 | M4 | Oak thickness for the bottom panel, which sets thumb key travel | [ADR 0009](docs/decisions/0009-enclosure-construction.md) |
 | E4b | Inter-MCU frame format and protocol versioning | [ADR 0013](docs/decisions/0013-two-mcu-split.md) |

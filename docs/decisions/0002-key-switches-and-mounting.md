@@ -107,6 +107,12 @@ flash — not the design intent, and not the tolerance band. The drawing gives
 both. Measuring was the right instinct for a part nobody documents; it is the
 wrong one here.
 
+**The cutout is 14.0 × 14.0 mm — the same as standard MX.** An earlier revision
+of this ADR asserted that Gateron low-profile *"does not use the standard 14 mm
+MX cutout"*. Measured out of a working KS-33 build's published top-case meshes,
+it is exactly 14.000 mm square, 47 times across two halves. Details and method
+in [the geometry reference](../reference/ks33-geometry.md).
+
 Known from the published specification, pending the drawing itself:
 
 | | |
@@ -127,6 +133,31 @@ rather than a nominal box.
 
 Two things, narrower than before.
 
+**The plate thickness, which is now a live question rather than a given.**
+ADR 0009 specifies a ~2 mm aluminium top plate. Standard MX plates are 1.5 mm;
+the reference KS-33 build uses **1.1 mm**. Neither is 2 mm, and a low-profile
+switch has shallower retention tabs than full-height MX to begin with.
+
+At 2 mm the clips will not engage at all. **That is survivable but it changes
+which requirement is load-bearing:** the switch still seats on its top flange,
+the cutout still captures it laterally, and it is still soldered — but
+requirement 2 above, *"something backs the switch so it cannot push through"*,
+stops being belt-and-braces and becomes the only thing resisting push-through.
+That requirement is already flagged as "most commonly forgotten, and the first
+thing to fail."
+
+Two ways out, and the cheap one is available: **take the plate to 1.5 mm and
+recover the stiffness from the lamination**, which is ADR 0009's whole thesis
+anyway — a 1.5 mm plate bonded to oak is not a 1.5 mm plate. Or keep 2 mm and
+design the backer as a structural member rather than a spacer. **Decide with the
+vendor drawing's clip dimension in hand**, which is the one number that settles
+it and the one this project does not yet have.
+
+**There are also no alignment posts.** An MX switch is located by its cutout
+*and* two ⌀1.75 mm posts at ±5.08 mm; the low-profile footprint has neither.
+The cutout is the only lateral location feature there is, which is the evidence
+behind calling it "the precision feature of the entire build".
+
 **The achieved fit, which is a process question rather than a geometry one.**
 The drawing gives the nominal cutout; it cannot tell you what *your* cutter
 produces in *your* material. Kerf varies with machine, material and thickness,
@@ -145,5 +176,9 @@ plunger in the hysteresis gap and chatter for tens of milliseconds.
 
 ## Open
 
-Nothing blocking. The cutout comes from the datasheet, the fit from a coupon,
-and the timing from a scope.
+**Plate thickness**, pending the clip dimension from Gateron's drawing — 1.5 mm
+with lamination doing the stiffening, or 2 mm with a structural backer. Blocks
+M4 and M5.
+
+Otherwise nothing: the cutout is 14.0 mm, the fit comes from a coupon, and the
+timing from a scope.
