@@ -129,57 +129,100 @@ Option C remains a legitimate fallback if the top-end board gets crowded — it
 costs about 1.1 ms, which the budget can absorb. Tube length is a lever that
 stays available either way.
 
-## Update rate: well above audio, but not where you would expect
+## Breath output is analog, sent differentially
 
-The CV output should update **considerably above audio rate**. That requirement
-is right, and it lands somewhere counter-intuitive — so it is worth separating
-two things that look like one.
+Breath is the one channel where output steppiness reaches the ear: it modulates
+continuously, usually into a VCA, so staircase ripple becomes amplitude
+modulation. Pitch is static between notes and mod channels are slow, so neither
+has the same problem.
 
-### The sensor cannot produce information above ~160 Hz
+**So the breath CV never gets digitised on its way to the jack.** The sensor's
+buffered output is driven down the umbilical as an analog signal and scaled in
+the module. Zero steps, by construction, at any rate.
 
-A 1 ms transducer response is a first-order corner around **159 Hz**. Sampling
-above roughly 2 kHz captures **no additional breath information whatsoever**.
-Any rate beyond that buys *reconstruction smoothness*, not signal.
+### It must be differential — single-ended would not survive the cable
 
-That is not an argument against a high rate. It is an argument about **where the
-high rate has to be**: on the DAC side, not the ADC side.
+The instrument draws its power through the umbilical, and that current flows in
+the ground conductor. Over 2 m of 24 AWG that is a real offset, and worse, it
+**moves with display brightness, LED animation and WiFi bursts**:
 
-### Why smoothness genuinely matters here
+| Instrument draw | Ground offset | % of 4.5 V span |
+|---|---|---|
+| 100 mA | 16.8 mV | 0.37% |
+| 200 mA | 33.7 mV | 0.75% |
+| 350 mA | 58.9 mV | 1.31% |
 
-Output steps are not a theoretical concern when the destination is a modular
-rack. Breath CV driving a VCA means staircase ripple becomes amplitude
-modulation, and that is audible.
+Single-ended, that is breath CV modulated by the light show. Not acceptable.
 
-During a fast tongue attack — full range in ~5 ms — step size by update rate:
+Differentially, it is common mode and simply rejected:
 
-| Rate | Samples across the attack | Step | Images (2-pole @ 2 kHz) |
-|---|---|---|---|
-| 4 kHz | 20 | **500 mV** | 12 dB down, at 4 kHz |
-| 24 kHz | 120 | 83 mV | 43 dB down |
-| 48 kHz | 240 | 42 mV | 55 dB down |
-| **96 kHz** | **480** | **21 mV** | **67 dB down, at 96 kHz** |
-| 192 kHz | 960 | 10 mV | 79 dB down |
+| Receiver CMRR | Residual error |
+|---|---|
+| 60 dB | 33.7 µV |
+| 80 dB | 3.4 µV |
+| 100 dB | 0.3 µV |
 
-At 4 kHz those are half-volt steps landing squarely in the audio band, barely
-filtered. That is the buzz worth designing out.
+A 16-bit LSB on a 10 V output is 153 µV, so even a mediocre 60 dB receiver puts
+the ground-offset error **well below the resolution the digital path would have
+had**. This is exactly the problem balanced audio exists to solve, over exactly
+the same kind of cable.
 
-### Decision
+### Impedance and bandwidth are non-problems
 
-**Target 96 kHz on the breath channel**, 48 kHz as the fallback if the link
-proves difficult. Images land at 96 kHz, far outside the audio band and 67 dB
-down.
+Drive low-impedance, receive high-impedance, standard practice. With ~200 pF of
+cable and a 100 Ω source the corner sits at 8 MHz against a 160 Hz signal — six
+orders of margin. Transmission-line behaviour is irrelevant at this bandwidth.
 
-**The ADC stays slow.** Run it at 4–8 kHz — already several times the sensor's
-own bandwidth — and generate the high-rate DAC stream in firmware with a
-smoothing filter running at the output rate, its time constant set just below
-the sensor's corner so it does not slow the response.
+**Band-limit at both ends, around 500 Hz.** The sensor only has ~159 Hz of real
+bandwidth, so a narrow channel costs nothing and rejects almost everything that
+could couple in — SPI edges, LED PWM, WiFi bursts and switching-supply hash all
+live far above it. A low-bandwidth analog channel is much easier to keep clean
+than a wide one.
 
-Use a filter rather than interpolation between samples: interpolation needs the
-*next* sample and therefore adds a full sample period of latency, while a
-one-pole IIR at the output rate costs only its own group delay and no lookahead.
+### It pays for itself on the digital link
 
-This is the cheap version of the requirement. A faster ADC and a faster sensor
-would buy nothing; only the DAC side needs the rate.
+| | Payload | SPI clock |
+|---|---|---|
+| Breath digital at 96 kHz + 5 channels at 2 kHz | 3.39 Mbit/s | ~6.8 MHz |
+| **Breath analog, 5 channels at 2 kHz** | **0.32 Mbit/s** | **~0.6 MHz** |
+
+This **cancels the RS-485 escalation** in ADR 0004 and **removes the sub-10 µs
+DAC settling requirement** in ADR 0006. Both of those existed only to carry a
+96 kHz breath channel that no longer exists.
+
+### The ADC does not go away
+
+The sensor's buffered output splits two ways:
+
+- **To the SAR ADC** — for breath threshold and note gating, as a modulation
+  source for the mod channels, for the display, and for USB MIDI. All the
+  firmware logic that ADR 0003 originally digitised for.
+- **To the differential driver** — for the CV output.
+
+So curve shaping, thresholds and ambient zeroing still exist in firmware; they
+just no longer sit in the path to the breath jack.
+
+### What the analog path gives up, and what replaces it
+
+**Curve shaping on the breath output.** Genuinely lost — `breath_gamma` cannot
+apply to a signal firmware never touches. In a modular context this is arguably
+correct: sending raw breath and shaping it with the rack's own tools is the
+idiom, and the panel gain and offset knobs (ADR 0006) are exactly the Pulp
+Logic model. Shaping still applies to the digital copy driving mod channels and
+MIDI.
+
+**Ambient zeroing.** Not lost — solved with a spare DAC channel. The DAC is
+octal with channels going spare, so **one channel drives a firmware-controlled
+DC offset into the module's analog summing stage.** Firmware measures ambient at
+startup exactly as the 2021 code did, and nulls it by moving that offset. Digital
+control of an analog signal path, for the cost of one already-paid-for channel.
+
+### Parts
+
+A precision op-amp differential driver and receiver pair is sufficient at this
+bandwidth — no audio-specialty part is required, though THAT1606/THAT1200 or
+DRV134/INA1650 are drop-in options if convenient. What matters is the receiver's
+CMRR and low offset drift, since this feeds a 0–10 V output.
 
 ## Condensation, in proportion
 

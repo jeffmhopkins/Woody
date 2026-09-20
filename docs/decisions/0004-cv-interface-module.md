@@ -34,35 +34,36 @@ No −12V goes up the cable; nothing in the instrument is bipolar any more.
 
 With real Cat5/6 each signal sits against a ground in its own twisted pair.
 
-**Bandwidth is no longer trivial.** The 96 kHz breath rate (ADR 0003, ADR 0006)
-raises what the link has to carry by roughly an order of magnitude:
+**Bandwidth is modest again.** A 96 kHz digital breath channel would have
+needed ~6.8 MHz on the wire and probably RS-485 transceivers. With breath going
+analog instead (ADR 0003), the digital link carries only pitch, four mod
+channels and the zero offset at 2 kHz:
 
-| Channel rates | Payload | SPI clock at 50% use |
+| | Payload | SPI clock at 50% use |
 |---|---|---|
-| all six at 4 kHz | 0.77 Mbit/s | ~1.5 MHz |
-| breath 48 kHz, rest 2 kHz | 1.86 Mbit/s | ~3.7 MHz |
-| **breath 96 kHz, rest 2 kHz** | **3.39 Mbit/s** | **~6.8 MHz** |
-| breath 192 kHz, rest 2 kHz | 6.46 Mbit/s | ~12.9 MHz |
+| Breath digital at 96 kHz + 5 channels | 3.39 Mbit/s | ~6.8 MHz |
+| **Breath analog, 5 channels at 2 kHz** | **0.32 Mbit/s** | **~0.6 MHz** |
 
-Per-channel rates are what make this affordable at all — running all six at
-96 kHz would need three times the bandwidth for no benefit.
+Plain single-ended SPI at well under 1 MHz over twisted pair is unremarkable.
+**RS-485 returns to contingency status**, not a likely requirement.
 
-**This promotes RS-485 from contingency to likely requirement.** Single-ended
-SPI at ~7 MHz over a couple of metres of cable, in a rack full of switching
-supplies, is not something to assume will work. Differential signalling on a
-twisted pair handles that rate comfortably and is immune to ground offsets
-between rack and instrument, which single-ended SPI is not.
+### Revised conductor budget
 
-Bench the plain-SPI version first since it is simpler, but expect to escalate,
-and lay the module out so transceivers can be fitted without a respin. If the
-link will not hold 96 kHz, **48 kHz is the graceful fallback** — 55 dB of image
-rejection instead of 67 dB, which is still far better than the 12 dB that 4 kHz
-would have given.
+The analog breath pair consumes the two spares:
 
-**Wire MISO even though nothing uses it.** It is free, and it lets the
-instrument detect whether the module is connected at all — so an unplugged
-instrument can fall back to USB MIDI mode automatically instead of quietly
-sending CV into nothing.
+```
++12V, GND, GND          power
+SCLK, MOSI, CS          SPI to the DAC, ~1 MHz
+BREATH+, BREATH-        analog, differential, band-limited ~500 Hz
+```
+
+All eight used. MISO goes, and with it the planned module-ID line — but
+**presence detect survives for free**: the instrument is rack-powered, so the
+presence of +12V on the umbilical *is* the signal that the module is connected.
+No +12V means running on USB, which means standalone mode. No conductor needed.
+
+Keep the analog pair on its own twisted pair, and ideally not adjacent to the
+SPI clock pair in the cable.
 
 ### Why this partitioning is right
 

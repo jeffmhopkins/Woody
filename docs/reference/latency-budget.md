@@ -26,6 +26,7 @@ instrument and a toy. Everything below has comfortable margin against it.
 |---|---|---|
 | Tube propagation | ~0.09 ms | 30 mm at the speed of sound. A *design* parameter — a 400 mm tube would cost 1.17 ms instead (ADR 0003) |
 | Pressure transducer | **~1 ms** | Dominant term. A property of the sensor, not the design |
+| *(breath output is analog from here — differential driver, cable, receiver and scaling add only propagation and filter group delay, well under 0.2 ms total)* | | |
 | SAR ADC conversion | 50–200 µs | SAR, not delta-sigma — see below |
 | SPI to MCU + firmware | < 20 µs | |
 | SPI to DAC over umbilical | ~50 µs | 2 MHz, ~30% utilised |
@@ -71,8 +72,8 @@ load-bearing enough that being wrong about them would change the design.
 | **Rack rail ripple, both directions** | Scope +12V at the module with the instrument running | Incoming ripple lands on the CV outputs; outgoing noise from the local buck lands on every other module in the rack. Gates E6 |
 | **WiFi transmit transients** | Scope the rail during a TX burst with the radio enabled | Now the *only* path by which WiFi can affect the outputs (ADR 0013). Decides whether configuration-while-playing is usable |
 | **Inter-MCU UART link** | Logic analyser on the pair, under load | Frame integrity and whether status traffic is jitter-free at rate (ADR 0013) |
-| **Umbilical link at full rate** | Logic analyser at the module end, cable at length, breath channel at 96 kHz | Decides whether single-ended SPI holds ~7 MHz over the cable or RS-485 transceivers are needed (ADR 0004) |
-| **Output staircase on a VCA** | Patch breath CV to a VCA, listen and scope the audio | The end test for the update-rate decision. Ripple becomes amplitude modulation, which is the artefact the rate exists to avoid |
+| **Umbilical link** | Logic analyser at the module end, cable at length | ~0.6 MHz now that breath is analog — confirm it is clean and that RS-485 stays unnecessary (ADR 0004) |
+| **Breath channel noise** | Scope the breath jack while sweeping display brightness, LED animation and a WiFi burst | The end test for the differential analog decision. Any of those appearing on the output means the pair or its CMRR is not doing its job (ADR 0003) |
 | **End-to-end, in one shot** | Two scope channels: one on the sensor output, one on the CV jack | Measures the real gesture-to-output time directly instead of summing estimates. This is the number that actually matters, and it is the one measurement that validates or refutes the entire table above |
 
 A signal generator driving a known waveform into the ADC front end also
@@ -85,11 +86,10 @@ a hypothesis; a budget made of measurements is a constraint.
 
 ## Rules that follow
 
-1. **Sensor read at 4–8 kHz; breath DAC output at 96 kHz.** These are
-   deliberately different. The transducer's own corner is ~159 Hz, so a fast ADC
-   buys nothing — the output rate exists to keep staircase ripple out of the
-   audio band, and the high-rate stream is generated in firmware by a smoothing
-   filter rather than by sampling faster (ADR 0003).
+1. **Sensor read at 4–8 kHz. Breath output never digitised at all** — it goes
+   down the umbilical as a differential analog signal (ADR 0003), so there is no
+   output rate to get wrong and no staircase to filter. The ADC exists for
+   thresholds, note gating, mod routing and MIDI, not for the breath jack.
 2. **SAR ADC, never delta-sigma.** A delta-sigma's decimation filter has real
    group delay — potentially milliseconds — which would consume the entire
    budget on its own.

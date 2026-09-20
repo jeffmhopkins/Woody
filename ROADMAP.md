@@ -48,8 +48,8 @@ existing. Drive it from any dev board with a test pattern and a multimeter.
 | E7 | DAC raw | Commanded codes produce expected voltages on the meter, all six channels |
 | E8 | Pitch channel scaled | Channel 1 hits −2V and +7V, linear between |
 | E9 | **Pitch calibration** | Two-point fit stored in NVS; 1V/oct verified against a real VCO, not just a meter |
-| E10 | Remaining channels | Breath 0–10V with working gain/offset knobs; four mod channels trimmed |
-| E11 | Umbilical link | SPI over the real cable at length carrying the 96 kHz breath channel (~7 MHz), no errors, module-present detect works. RS-485 fitted if single-ended will not hold it (ADR 0004) |
+| E10 | Remaining channels | Analog breath stage: differential receiver, gain/offset knobs, DAC-driven ambient zero. Four mod channels trimmed |
+| E11 | Umbilical link | SPI (~0.6 MHz) and the differential analog breath pair over the real cable at length. Breath output clean while display, LEDs and WiFi are exercised (ADR 0003) |
 | E12 | Module PCB + panel | 6HP panel cut, module assembled and racked |
 | E13 | Controller PCBs | Custom carrier + satellite boards; replaces the dev board |
 

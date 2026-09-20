@@ -6,11 +6,18 @@
 
 **Six channels from an octal DAC, two dedicated and four assignable.**
 
-| Ch | Function | Range | Panel control | Precision |
+| Output | Source | Range | Panel control | Precision |
 |---|---|---|---|---|
-| 1 | **Pitch** | −2 to +7V, 1V/oct | none | Calibrated |
-| 2 | **Breath** | 0–10V | gain + offset knobs | Trimmed |
-| 3–6 | **Mod 1–4** | 0–10V | none — configured on the instrument | Trimmed |
+| **Pitch** | DAC ch 1 | −2 to +7V, 1V/oct | none | Calibrated |
+| **Breath** | **analog, differential over the umbilical** | 0–10V | gain + offset knobs | Trimmed |
+| **Mod 1–4** | DAC ch 2–5 | 0–10V | none — configured on the instrument | Trimmed |
+| *(internal)* | DAC ch 6 | — | — | Breath ambient-zero offset (ADR 0003) |
+
+Six jacks on the panel as before, but only five of them come from the DAC.
+**Breath never enters the digital path on its way out** — it is the one channel
+where output steps reach the ear, so it stays analog end to end (ADR 0003).
+A sixth DAC channel drives the firmware-controlled zero offset for that analog
+stage, leaving two of the octal part's channels still spare.
 
 Use an **octal** 16-bit DAC (DAC8568 or AD5676) and populate six. Eight-channel
 parts cost barely more than quads and occupy the same board area; there is no
@@ -52,19 +59,17 @@ entire bandwidth budget.
 
 | Channel | Rate | Why |
 |---|---|---|
-| Breath | **96 kHz** | Ripple becomes amplitude modulation on a VCA |
 | Pitch | 2 kHz, plus **immediate update on note change** | Static between notes; what matters is latency at the transition, not rate |
 | Mod 1–4 | 2 kHz | Sources are slow — IMU tops out around 400 Hz |
+| Breath zero offset | on demand | Changes only at ambient calibration |
 
 Pitch is the subtle one: it needs no *rate*, but it must not wait for its turn
 in a round-robin. Push it the instant the note resolves.
 
-### Consequent requirement on the DAC
-
-96 kHz means a settling time comfortably under ~10 µs. That is at the edge of
-the DAC8565/8568 family and needs checking against the datasheet at the chosen
-reference and load, or a faster part selected. This is a new constraint on the
-DAC choice that did not exist when the rate was 4 kHz.
+A 96 kHz breath channel was specified before the output went analog, which
+implied sub-10 µs DAC settling and ~6.8 MHz on the umbilical. **Both
+requirements are withdrawn** — nothing left on the DAC needs that rate
+(ADR 0003).
 
 ## Breath knobs are analog, in the signal path
 
