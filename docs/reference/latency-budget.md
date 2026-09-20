@@ -73,6 +73,7 @@ load-bearing enough that being wrong about them would change the design.
 | **WiFi transmit transients** | Scope the rail during a TX burst with the radio enabled | Now the *only* path by which WiFi can affect the outputs (ADR 0013). Decides whether configuration-while-playing is usable |
 | **Inter-MCU UART link** | Logic analyser on the pair, under load | Frame integrity and whether status traffic is jitter-free at rate (ADR 0013) |
 | **Umbilical link** | Logic analyser at the module end, cable at length | ~0.6 MHz now that breath is analog — confirm it is clean and that RS-485 stays unnecessary (ADR 0004) |
+| **WiFi range through the stack** | Assemble the layers loosely, connect from a phone at playing distance | The aluminium top plate sits directly over the display board's antenna. Config depends on this working (ADR 0013) |
 | **Breath channel noise** | Scope the breath jack while sweeping display brightness, LED animation and a WiFi burst | The end test for the analog breath decision. Any of those appearing on the output means AGND is picking up power return current, or the module is sensing against local ground (ADR 0003) |
 | **End-to-end, in one shot** | Two scope channels: one on the sensor output, one on the CV jack | Measures the real gesture-to-output time directly instead of summing estimates. This is the number that actually matters, and it is the one measurement that validates or refutes the entire table above |
 

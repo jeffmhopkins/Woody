@@ -189,6 +189,52 @@ suspension point. But if the inter-hand gap turns out too crowded once the
 U-bolt and its backing plate are drawn, collapsing to two boards is a clean
 fallback rather than a redesign.
 
+## Build approach: dev boards as modules on a passive carrier
+
+Optimising for ease of construction changes the shape of the final build, so it
+is worth stating rather than leaving implied by milestone E13.
+
+**Do not design a custom ESP32-S3 carrier.** That means taking on the module
+footprint, USB-C, ESD, boot and reset circuitry, power sequencing, antenna
+keepout and RF layout rules — a real PCB design with real ways to fail, for an
+instrument where none of it is the interesting part.
+
+**Instead: keep both dev boards as modules, on a carrier that has no MCU on it
+at all.** The carrier holds only:
+
+- Headers the dev boards plug into
+- 74LVC165 shift registers
+- MCP3202 ADC and MCP6002 buffer
+- 74AHCT125 level shifter
+- R-78E5.0 regulator module, polyfuse, umbilical connector
+- Passives
+
+Nothing on that board is fast, nothing is RF, nothing needs more than two
+layers, and **every active part is SOIC or larger with no thermal pads** — see
+the package choices in `hardware/bom.csv`. It is a board that can be assembled
+by hand at a kitchen table.
+
+The dev boards already carry USB-C, regulation, boot and reset buttons, and —
+in the ESP32-S3-Matrix's case — the IMU. Rebuilding any of that is work for no
+gain.
+
+Costs, honestly: the dev board outlines dictate carrier layout, the stack gains
+a board-on-board height (affordable against 38 mm of cavity and 10 mm boards),
+and a discontinued dev board would mean a redesign. Against a custom S3 carrier
+that risks not working at all, this is the better trade.
+
+### One thing to verify: RF through an aluminium top plate
+
+The display board sits at the top of the instrument, directly under the
+aluminium key plate (ADR 0009). Aluminium is not RF-transparent, and
+configuration depends on WiFi (ADR 0012).
+
+Oak and acrylic are both effectively transparent, so the sides and underside
+should radiate — and the display needs a window cut in the plate anyway, which
+doubles as an aperture. It is probably fine. But "probably fine" is worth
+turning into "measured" before the stack is bonded, because a rack instrument
+whose config interface will not connect is an irritating thing to discover late.
+
 ## Considered and rejected
 
 **A non-ESP real-time MCU** — RP2350 in particular, whose PIO is genuinely

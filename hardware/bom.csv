@@ -3,11 +3,11 @@ SW1-n,controller,KS-33 Red (linear),Gateron,Low-profile mechanical switch MX ste
 CAP1-n,controller,MT165-MX,Tai-Hao,Keycap 16.5x16.5mm blank black MX stem,18,purchased,Beekeeb,0002,Sold in 5-packs - 18 keys needs 4 packs. Smaller than 18mm MX spacing
 U-MCU-RT,controller,ESP32-S3-Matrix (candidate),Waveshare,Real-time MCU with onboard QMI8658 IMU,1,candidate,,0007,Mounted low for acceleration sensitivity. ~17 GPIO broken out vs ~12 needed. No LCD to waste
 U-BREATH,controller,MPXV4006GP,NXP,Pressure transducer 0-6kPa gauge conditioned,1,selected,,0003,~1ms response = ~159Hz corner. ADC runs 4-8kHz; rate lives on the DAC side
-U-ADC,controller,TBD (was MCP33131-10),Microchip,SAR ADC SPI for breath,1,respec,,0003,SPEC IS STALE - breath output went analog so this only serves thresholds/mod/display/MIDI. 16-bit 500ksps is now overkill
+U-ADC,controller,MCP3202-CI/SN,Microchip,12-bit 2-ch SAR ADC SPI,1,candidate,,0003,SOIC-8. VDD-referenced so no separate ref chip. 50ksps at 3V3 vs 4-8kHz needed. One spare channel
 U-IMU,controller,QMI8658 (onboard) or equivalent 6-axis,multiple,6-axis IMU - accel + gyro no fusion,1,candidate,,0007,Fusion not wanted - raw accel is the signal and capture-on-press makes drift irrelevant
-U-KEYS,controller,74HC165,multiple,8-bit parallel-in shift register,4,candidate,,0001,One per cluster - 32 bits for 18 keys with 14 spare
+U-KEYS,controller,74LVC165A,multiple,8-bit parallel-in shift register,4,candidate,,0001,SOIC-16. Same footprint as 74HC165 but designed for 3V3 - better drive over a 14in chain
 U-DISP,controller,T-Display-S3 AMOLED (base not Plus),LilyGO,1.91in 536x240 AMOLED RM67162 QSPI + ESP32-S3,1,selected,,0008,60x25.5x10mm - mounts lengthwise. 18 GPIO broken out
-U-BUCK,controller,TBD,,12V to 5V buck converter,1,open,,0005,5V NOT 3.3V - breath sensor is 5V and its output reaches 4.7V. Boards regulate 3V3 onboard
+U-BUCK,controller,R-78E5.0-1.0,Recom,12V to 5V switching regulator module,1,candidate,,0005,3-pin SIP on a 7805 footprint. No inductor no feedback network no layout risk. 1A vs ~350mA needed
 LED-SIDE,controller,WS2815 (12V addressable),multiple,Addressable LED strip - two runs in the side channels,2 x 420mm,candidate,,0014,12V native so no 5V rail. Backup data line survives a dead LED. TWO independent strips - no crossover wire. Density pending diffusion test
 U-DAC,module,DAC8568 or AD5676,TI / ADI,Octal 16-bit DAC SPI,1,candidate,,0006,Populate 6 of 8 - pitch + 4 mod + breath zero offset. No fast settling needed
 U-OPA-PITCH,module,OPA2197,TI,Low-drift op-amp for pitch scaling,1,candidate,,0006,Precision channel only - offset drift is tuning drift
@@ -23,18 +23,16 @@ PLATE-TOP,mechanical,TBD,,Aluminium key plate laser or waterjet cut,1,candidate,
 BODY-OAK,mechanical,TBD,,Oak top and bottom panels,2,candidate,,0009,Bottom panel thickness sets thumb key inset depth
 SIDE-ACRYLIC,mechanical,TBD,,Frosted acrylic side panels,2,candidate,,0009,Edge-lit
 BENCH,tooling,n/a,,"Scopes, logic analysers, DMMs, signal generators, RF",1,available,,0006,Full bench available - E9 not gated on tooling
-U-BUF,controller,RRIO op-amp on 5V,multiple,Buffer for analog breath onto the umbilical,1,candidate,,0003,Must reach 4.7V so RRIO on 5V. Follower + ~500Hz low-pass + series protection
+U-BUF,controller,MCP6002-I/SN,Microchip,Dual RRIO op-amp for the breath buffer,1,candidate,,0003,SOIC-8. Rails to within ~25mV so 4.7V from 5V is fine. Second half spare for the low-pass
 U-DIFFRX,module,precision difference amp,multiple,Senses BREATH against AGND not local ground,1,candidate,,0003,Not optional - local ground reference reinstates the shared-ground offset
-U-VREF-ADC,controller,TBD,,Voltage reference for the breath ADC,1,open,,0003,Depends on the ADC re-spec. Modest requirement now
-J-USB,controller,USB-C receptacle,,USB-C connector for the real-time carrier,1,open,,0013,Flashing and bench power. Needs ESD protection
-U-ESD-USB,controller,TBD,,USB ESD protection array,1,open,,0013,
-SW-BOOT,controller,TBD,,Boot and reset buttons,2,open,,0013,Carrier board only - dev boards have their own
-U-TVS-UMB,controller,TBD,,TVS / ESD protection on umbilical entry,1,open,,0004,8 conductors entering from outside the instrument
+J-USB,controller,USB-C receptacle,,USB-C connector for the real-time carrier,1,not-needed,,0013,Dev boards carry these. Only required if a custom MCU carrier is ever built (ADR 0013)
+U-ESD-USB,controller,USBLC6-2SC6,ST,USB ESD protection array,1,not-needed,,0013,Dev boards carry these. Only required if a custom MCU carrier is ever built (ADR 0013)
+SW-BOOT,controller,TBD,,Boot and reset buttons,2,not-needed,,0013,Dev boards carry these. Only required if a custom MCU carrier is ever built (ADR 0013)
+U-TVS-UMB,controller,SP3012-06UTG or similar array,multiple,TVS array on umbilical entry,1,candidate,,0004,Multi-line array beats discretes for placement. 8 conductors from outside
 C-BULK-DISP,controller,TBD,,Local bulk capacitance at the display board,1,open,,0013,Absorbs WiFi TX transients so they do not reach the rack rail
-R-I2C,controller,TBD,,I2C pull-ups for the IMU,2,open,,0007,
 TUBE,controller,silicone tube + dead-volume trap,,Breath tube from mouthpiece to sensor,1,open,,0003,~30mm. Trap clearable without disassembly
 SW-PWR-INST,controller,TBD,,Instrument power switch,1,open,,0005,Switches the buck EN pin not the 12V rail - no current through it
 R-PD-BREATH,module,TBD,,Pulldown on the breath receive input,1,open,,0005,Instrument off or unplugged presents 0V not a floating buffer
-U-LVLSHIFT,controller,74AHCT125,multiple,Level shifter for LED strip data lines,1,candidate,,0014,3V3 logic to 5V. VERIFY WS2815 threshold is not referenced to 12V
-F-POLY,controller,polyfuse,,Resettable fuse at umbilical entry,1,open,,0005,A short inside the instrument must not brown out the rack
+U-LVLSHIFT,controller,74AHCT125,multiple,Quad buffer as LED data level shifter,1,candidate,,0014,SOIC-14. 5V rail TTL thresholds so 3V3 reads high. Two spare gates. VERIFY WS2815 threshold
+F-POLY,controller,PPTC 1206 500mA hold,multiple,Resettable fuse at umbilical entry,1,candidate,,0005,1206 not 0603 - larger package is easier to place and inspect
 R-DIV-ADC,controller,TBD,,Divider on the ADC branch of the breath buffer,2,open,,0003,Sensor reaches 4.7V into a 3V3 ADC. Divide after the buffer not before

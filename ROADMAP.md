@@ -51,7 +51,7 @@ existing. Drive it from any dev board with a test pattern and a multimeter.
 | E10 | Remaining channels | Analog breath stage: differential receiver, gain/offset knobs, DAC-driven ambient zero. Four mod channels trimmed |
 | E11 | Umbilical link | SPI (~0.6 MHz) and the differential analog breath pair over the real cable at length. Breath output clean while display, LEDs and WiFi are exercised (ADR 0003) |
 | E12 | Module PCB + panel | 6HP panel cut, module assembled and racked |
-| E13 | Controller PCBs | Custom carrier + satellite boards; replaces the dev board |
+| E13 | Carrier PCB | **Passive** carrier: dev boards plug in, carrier holds shift registers, ADC, buffer, level shifter, regulator, connector. No MCU, no USB, no RF on it (ADR 0013) |
 
 **E9 is the milestone that decides whether this is an instrument or a thing
 that is always slightly out of tune.** Verify against a VCO.
