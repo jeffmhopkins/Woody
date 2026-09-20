@@ -40,9 +40,58 @@ depended on chip-side fusion and reproducing that is the fastest path to a
 playable result. The ICM-42688-P is the better part on raw merits and worth
 revisiting if the BNO085's fusion behaviour disappoints.
 
+## Gating: capture-on-press, not absolute tilt
+
+The most important thing to carry forward from the 2021 firmware, and the reason
+the right thumb gets control switches (ADR 0010).
+
+Absolute tilt is unusable as a modulation source. The instrument's resting angle
+varies with posture, with standing versus sitting, and from session to session —
+there is no fixed zero. The old firmware solved this with a **gate button that
+captures the current angle as the reference at the moment it is pressed**:
+
+```c
+if (B[3] || B[4] || B[5]) {          // pitch bend gates active
+    if (!imu_pb_active) {
+        imu_pb_active   = true;
+        imu_pb_deg_init = deg_y;     // capture zero HERE, NOW
+    }
+}
+if (!(B[3] || B[4] || B[5])) {
+    imu_pb_active = false;
+}
+```
+
+Every limit and deadband downstream is then computed relative to
+`imu_pb_deg_init` rather than to absolute zero. Release the gate and modulation
+stops.
+
+Carry forward as well:
+
+- **A deadband around the captured zero.** The old comment is worth preserving
+  verbatim: *"this allows for accel shakes inside the deadband to self center,
+  but longer angle changes do full pitch bends."* Shakes and playing movement
+  fall inside it; deliberate gestures escape it.
+- **Two independent axes.** Tilt (`deg_y`) drove gated pitch bend; roll
+  (`deg_z`) drove expression continuously, outside the gate, with its own
+  deadband and limits.
+- **Acceleration as a separate source** from angle, with its own damping —
+  useful for articulation in a way that angle is not.
+
+### What the three right-thumb switches should support
+
+- **Momentary gate** — hold to enable, capturing zero on press. The default.
+- **Latch** — press to enable and capture, press again to release, for gestures
+  longer than a thumb wants to hold.
+- **Source or destination select** — which mod channel the IMU drives (ADR 0006).
+
+All three are behaviours over the same switches, configured rather than wired,
+and they belong in the routing matrix alongside everything else.
+
 ## Open
 
 - Confirm the part.
 - Decide whether tilt and roll get dedicated mod channels by default, or are
   simply available as routing sources (ADR 0006). The latter is more flexible
   and costs nothing.
+- Which of the three gating behaviours each right-thumb switch defaults to.

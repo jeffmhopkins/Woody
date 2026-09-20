@@ -28,7 +28,9 @@ Two things are explicitly configuration rather than compiled constants
 [ADR 0006](../docs/decisions/0006-cv-channel-allocation.md)):
 
 - **Fingering table** — a custom fingering system takes a lot of playing to get
-  right, and a recompile per experiment is the wrong loop.
+  right, and a recompile per experiment is the wrong loop. It covers the 15
+  `note` keys only; the three right-thumb switches are `control` and must never
+  enter it (ADR 0010).
 - **Routing matrix** — four mod channels, each with source, scale, offset, curve
   and slew.
 

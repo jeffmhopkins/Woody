@@ -27,6 +27,9 @@ counts:
   left_thumb: 4
   right_thumb: 3
   total: 18
+  by_role:
+    note: 15      # LH1-5, RH1-6, LT1-4 — fingering inputs
+    control: 3    # RT1-3 — modulation and IMU gating
 
 # Physical switch positions.
 #
@@ -37,35 +40,43 @@ counts:
 #   hand:     left | right
 #   finger:   thumb | index | middle | ring | little — assign at M2
 #   cluster:  groups keys onto a shift register
+#   role:     note | control
+#             note    - participates in the fingering table
+#             control - modulation, IMU gating, mode. NOT a fingering input
 #
 # Left hand is upper (nearer the mouthpiece), right hand lower.
 
 keys:
   # --- Left hand, top face -------------------------------------------------
-  - { id: LH1, face: top,    x: null, y: null, rotation: 0, hand: left,  finger: null, cluster: left_hand }
-  - { id: LH2, face: top,    x: null, y: null, rotation: 0, hand: left,  finger: null, cluster: left_hand }
-  - { id: LH3, face: top,    x: null, y: null, rotation: 0, hand: left,  finger: null, cluster: left_hand }
-  - { id: LH4, face: top,    x: null, y: null, rotation: 0, hand: left,  finger: null, cluster: left_hand }
-  - { id: LH5, face: top,    x: null, y: null, rotation: 0, hand: left,  finger: null, cluster: left_hand }
+  - { id: LH1, face: top,    x: null, y: null, rotation: 0, hand: left,  finger: null, cluster: left_hand, role: note }
+  - { id: LH2, face: top,    x: null, y: null, rotation: 0, hand: left,  finger: null, cluster: left_hand, role: note }
+  - { id: LH3, face: top,    x: null, y: null, rotation: 0, hand: left,  finger: null, cluster: left_hand, role: note }
+  - { id: LH4, face: top,    x: null, y: null, rotation: 0, hand: left,  finger: null, cluster: left_hand, role: note }
+  - { id: LH5, face: top,    x: null, y: null, rotation: 0, hand: left,  finger: null, cluster: left_hand, role: note }
 
   # --- Left thumb, bottom face (inset — ADR 0009) --------------------------
-  - { id: LT1, face: bottom, x: null, y: null, rotation: 0, hand: left,  finger: thumb, cluster: left_thumb }
-  - { id: LT2, face: bottom, x: null, y: null, rotation: 0, hand: left,  finger: thumb, cluster: left_thumb }
-  - { id: LT3, face: bottom, x: null, y: null, rotation: 0, hand: left,  finger: thumb, cluster: left_thumb }
-  - { id: LT4, face: bottom, x: null, y: null, rotation: 0, hand: left,  finger: thumb, cluster: left_thumb }
+  # Marked `note` on the assumption these are octave/register keys, as on a
+  # conventional woodwind. Confirm at M2.
+  - { id: LT1, face: bottom, x: null, y: null, rotation: 0, hand: left,  finger: thumb, cluster: left_thumb, role: note }
+  - { id: LT2, face: bottom, x: null, y: null, rotation: 0, hand: left,  finger: thumb, cluster: left_thumb, role: note }
+  - { id: LT3, face: bottom, x: null, y: null, rotation: 0, hand: left,  finger: thumb, cluster: left_thumb, role: note }
+  - { id: LT4, face: bottom, x: null, y: null, rotation: 0, hand: left,  finger: thumb, cluster: left_thumb, role: note }
 
   # --- Right hand, top face ------------------------------------------------
-  - { id: RH1, face: top,    x: null, y: null, rotation: 0, hand: right, finger: null, cluster: right_hand }
-  - { id: RH2, face: top,    x: null, y: null, rotation: 0, hand: right, finger: null, cluster: right_hand }
-  - { id: RH3, face: top,    x: null, y: null, rotation: 0, hand: right, finger: null, cluster: right_hand }
-  - { id: RH4, face: top,    x: null, y: null, rotation: 0, hand: right, finger: null, cluster: right_hand }
-  - { id: RH5, face: top,    x: null, y: null, rotation: 0, hand: right, finger: null, cluster: right_hand }
-  - { id: RH6, face: top,    x: null, y: null, rotation: 0, hand: right, finger: null, cluster: right_hand }
+  - { id: RH1, face: top,    x: null, y: null, rotation: 0, hand: right, finger: null, cluster: right_hand, role: note }
+  - { id: RH2, face: top,    x: null, y: null, rotation: 0, hand: right, finger: null, cluster: right_hand, role: note }
+  - { id: RH3, face: top,    x: null, y: null, rotation: 0, hand: right, finger: null, cluster: right_hand, role: note }
+  - { id: RH4, face: top,    x: null, y: null, rotation: 0, hand: right, finger: null, cluster: right_hand, role: note }
+  - { id: RH5, face: top,    x: null, y: null, rotation: 0, hand: right, finger: null, cluster: right_hand, role: note }
+  - { id: RH6, face: top,    x: null, y: null, rotation: 0, hand: right, finger: null, cluster: right_hand, role: note }
 
-  # --- Right thumb, face TBD — see ADR 0010 open item ----------------------
-  - { id: RT1, face: null,   x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb }
-  - { id: RT2, face: null,   x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb }
-  - { id: RT3, face: null,   x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb }
+  # --- Right thumb, bottom face, offset from the thumb rest ----------------
+  # Control switches, not fingering. Modulation and IMU gating (ADR 0007).
+  # The right thumb normally rests; these sit offset from the rest position,
+  # reachable without giving up support.
+  - { id: RT1, face: bottom, x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb, role: control }
+  - { id: RT2, face: bottom, x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb, role: control }
+  - { id: RT3, face: bottom, x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb, role: control }
 
 # Shift register chain, ordered by physical position down the body, nearest
 # the MCU first (ADR 0001). One 74HC165 per cluster: 4 devices, 32 bits, 18

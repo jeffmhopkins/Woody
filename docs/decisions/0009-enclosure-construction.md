@@ -49,6 +49,17 @@ and the through-cut in the oak is the recess. **Oak thickness sets the inset
 depth** — choose the bottom panel thickness to get the thumb travel wanted, and
 the geometry follows. No pocketing anywhere in the design.
 
+### The right thumb rest is a stack feature
+
+The right thumb rests on the instrument and its three control switches sit
+offset from that rest position (ADR 0010). That means a **defined thumb rest**,
+not bare oak — and on a flat sandwich with no pocketing available, it is another
+laminated layer: a small additional piece bonded to the bottom panel forming a
+lip or contour for the thumb to sit against.
+
+Consistent with everything else here — a 2D part, cut flat, added by lamination
+rather than removed by machining.
+
 ## Ergonomic iteration ladder
 
 Without a printer, iteration goes cheapest-first:

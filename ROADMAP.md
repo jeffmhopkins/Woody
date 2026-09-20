@@ -104,7 +104,6 @@ every expensive mistake made in the cheap material.
 
 | Blocks | Question | Tracked in |
 |---|---|---|
-| M4 onward | Which face the right thumb keys sit on | [ADR 0010](docs/decisions/0010-key-layout-as-data.md) |
 | M4 onward | Instrument dimensions and envelope | [ADR 0009](docs/decisions/0009-enclosure-construction.md) |
 | E2 | Which breath sensor is actually in hand | [ADR 0003](docs/decisions/0003-breath-sensing-path.md) |
 | E12 | Connector choice, pending panel fit check | [ADR 0004](docs/decisions/0004-cv-interface-module.md) |

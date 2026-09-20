@@ -44,35 +44,50 @@ source, scale, offset, curve and slew, defined as data rather than code.
 
 **18 switches**, decided:
 
-| Group | Count | Face |
-|---|---|---|
-| Left hand | 5 | top |
-| Right hand | 6 | top |
-| Left thumb | 4 | bottom, inset (ADR 0009) |
-| Right thumb | 3 | TBD — see below |
+| Group | Count | Face | Role |
+|---|---|---|---|
+| Left hand | 5 | top | note |
+| Right hand | 6 | top | note |
+| Left thumb | 4 | bottom, inset (ADR 0009) | note |
+| Right thumb | 3 | bottom, offset from the rest | **control** |
 
-This unblocks M2 and sizes the shift-register chain (ADR 0001).
+## Not every switch is a note key
+
+The right thumb's three switches are **control inputs, not fingering inputs** —
+modulation and IMU gating (ADR 0007). The fingering table covers 15 keys, not
+18, and the layout file carries a `role` field so firmware and the plate
+generator both know the difference.
+
+This matters more than it looks. A control switch inside the fingering table
+would produce phantom notes; a note key treated as a control would silently drop
+fingerings. Keeping the distinction in data rather than in code is the point of
+this ADR.
+
+## The right thumb rests; the left thumb works
+
+The right thumb's normal state is resting on the instrument, with its three
+switches offset from the rest position so they are reachable without giving up
+support. This is idiomatic — on a saxophone the right thumb hook carries the
+instrument while the left thumb works the octave key.
+
+**This corrects a concern raised earlier in this ADR.** The worry was that four
+left-thumb keys were ambitious for a thumb also carrying the instrument's
+weight. With the right thumb as the primary rest, the left thumb is largely
+freed to actuate, and four register keys under it is conventional rather than
+ambitious.
+
+The arc-versus-line consideration still stands — a thumb rolls more easily than
+it reaches, so lay the four along an arc matching the thumb's rotation. But the
+risk is lower than first assessed, and the paper-at-1:1 step will settle it.
 
 ## Open
 
-**Which face the right thumb keys sit on.** If they are on the underside like
-the left thumb, they fold into the existing laminated stack. If they are on the
-*side*, the frosted acrylic side panel becomes a switch plate — switches mounted
-perpendicular to the main plate, which is a different mechanical problem and
-interacts with the edge-lighting. Needs answering before M4.
-
 **Finger assignment within each hand.** Five keys across four left-hand fingers
-means one finger takes two, or one is a side key. Six on the right hand likewise.
-Left as `null` in the layout file rather than guessed; assign during M2 when
-there is something to put hands on.
+means one finger takes two, or one is a side key. Six on the right hand
+likewise. Left as `null` in the layout file rather than guessed; assign during
+M2 when there is something to put hands on.
 
-**Four discrete keys under the left thumb is ambitious.** That thumb is also
-carrying the instrument's weight (ADR 0005), and a thumb has limited reach
-without the hand shifting. This is exactly why EWI-style instruments use octave
-*rollers* rather than discrete thumb keys — a thumb rolls far more easily than
-it reaches.
-
-Worth designing for deliberately: arrange the four along an arc matching the
-thumb's rotation rather than a straight line, and be open to some of them
-becoming a rocker if M2 shows the reach is bad. The paper-at-1:1 step is cheap
-and will answer this before anything is cut.
+**What the left thumb keys actually do.** Marked `note` on the assumption they
+are octave/register keys, as on a conventional woodwind. The 2021 firmware used
+three left-thumb inputs for octave selection across a four-octave span,
+including bridged positions. Confirm at M2.
