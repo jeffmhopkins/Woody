@@ -22,21 +22,48 @@ instrument and a toy. Everything below has comfortable margin against it.
 
 ## Breath path
 
+**These are two different paths and they used to be one table.** The breath CV
+at the jack is analog from the sensor onward and is never sampled. The digital
+copy — thresholds, note gating, mod routing, MIDI — is sampled, and pays for it.
+
+### Breath CV at the jack (analog, no sampling)
+
 | Stage | Time | Notes |
 |---|---|---|
-| Tube propagation | ~0.09 ms | 30 mm at the speed of sound. A *design* parameter — a 400 mm tube would cost 1.17 ms instead (ADR 0003) |
-| Pressure transducer | **~1 ms** | Dominant term. A property of the sensor, not the design |
-| *(breath output is analog from here — differential driver, cable, receiver and scaling add only propagation and filter group delay, well under 0.2 ms total)* | | |
+| Tube propagation | **~1.17 ms** | 400 mm. The sensor sits at the bottom with the real-time board (ADR 0003) |
+| Pressure transducer | **~1 ms** | A property of the sensor, not the design |
+| Buffer, cable, in-amp, output filter | < 0.2 ms | Propagation plus filter group delay only |
+| **Total** | **~2.4 ms** | |
+
+### Breath digital copy (sampled)
+
+Everything above as far as the sensor output — **~2.17 ms** — then:
+
+| Stage | Time | Notes |
+|---|---|---|
+| Sampling period | **0–250 µs** | At a 4 kHz loop, a change waits up to one period to be seen. Mean 125 µs |
 | SAR ADC conversion | 50–200 µs | SAR, not delta-sigma — see below |
 | SPI to MCU + firmware | < 20 µs | |
-| SPI to DAC over umbilical | ~50 µs | 2 MHz, ~30% utilised |
+| SPI to DAC over umbilical | ~50 µs | 2 MHz |
 | DAC settling | ~10 µs | |
-| Op-amp + reconstruction filter | ~160 µs | ~2 kHz corner on breath |
-| **Total** | **~1.5 ms** | |
+| Op-amp + reconstruction filter | ~160 µs | ~2 kHz corner |
+| **Total** | **~2.6–2.9 ms** | |
+
+The sampling period was previously omitted from this table entirely, which
+understated the digital path by up to a quarter of a millisecond. It is not a
+conversion time — it is quantisation in *time*, and it is there whether or not
+the converter is fast.
+
+### The tube is now the largest single term
+
+Moving the sensor to the bottom of the instrument (ADR 0003) traded 0.09 ms of
+tube for 1.17 ms. That was a deliberate exchange for a short, quiet analog run
+instead of a 400 mm one, and the budget absorbs it: **2.4 ms against a 5 ms
+target**, with the two largest terms both physical rather than architectural.
 
 For scale: a hard tongue attack has a rise time of roughly 5–15 ms. Diaphragm
-dynamics are far slower. The chain has roughly 10x margin against the fastest
-gesture physically available.
+dynamics are far slower. Even at 2.9 ms the chain has several times the margin
+against the fastest gesture physically available.
 
 ## Key path
 
@@ -64,7 +91,7 @@ load-bearing enough that being wrong about them would change the design.
 | What | How | Why it matters |
 |---|---|---|
 | **Breath transducer response** | Step the pressure, scope the sensor output, measure rise time | A large term and a datasheet figure. If it is really 3 ms the margin shrinks; if it is 200 µs there is far more headroom than assumed |
-| **Tube delay and ringing** | Step the pressure at the mouthpiece, scope at the sensor. Measure both the delay and any quarter-wave ringing | Small at 30 mm, but it is the one term that is tunable by design, so confirm it is where it should be (ADR 0003) |
+| **Tube delay and ringing** | Step the pressure at the mouthpiece, scope at the sensor. Measure both the delay and any quarter-wave ringing | Now the **largest single term** at 400 mm, and the one term tunable by design. Also sizes the Helmholtz restrictor (ADR 0003) |
 | **KS-33 contact bounce** | Scope a switch, measure bounce duration on press *and* release | The 2021 firmware used a flat 20 ms debounce. If these switches settle in 2 ms, setting the window from data buys back 18 ms of the most latency-sensitive path in the instrument |
 | **ADC + SPI round trip** | Logic analyser on the bus | Datasheet conversion time excludes driver overhead. The real number includes it |
 | **SPI over the umbilical at length** | Logic analyser at the module end, cable at full length | Setup/hold margin, ringing, double-clocking. This is where a long cable bites, and it is invisible without an LA. Gates E11 |
@@ -86,10 +113,17 @@ a hypothesis; a budget made of measurements is a constraint.
 
 ## Rules that follow
 
-1. **Sensor read at 4–8 kHz. Breath output never digitised at all** — it goes
+1. **The output loop runs at 4 kHz, not 8. Breath output never digitised at
+   all** — it goes
    down the umbilical as a differential analog signal (ADR 0003), so there is no
    output rate to get wrong and no staircase to filter. The ADC exists for
    thresholds, note gating, mod routing and MIDI, not for the breath jack.
+
+   **The 8 kHz end of the old "4–8 kHz" range does not close.** Serialised, one
+   pass costs ADC 24 µs + key chain 16 µs + six DAC channels 96 µs = **136 µs**,
+   against a 125 µs period at 8 kHz. At 4 kHz it is 136 µs of 250 µs — 54 %
+   duty, with room for the loop to do work. Three documents used to disagree
+   about this; 4 kHz is the number.
 2. **SAR ADC, never delta-sigma.** A delta-sigma's decimation filter has real
    group delay — potentially milliseconds — which would consume the entire
    budget on its own.

@@ -52,7 +52,7 @@ real group delay in its digital decimation filter — potentially milliseconds,
 which would consume the entire budget above. SAR converters have essentially
 zero latency.
 
-Loop rate: 4–8 kHz.
+Loop rate: 4 kHz (settled — see the latency budget for why 8 kHz does not close).
 
 ### The ADC specification needs revisiting
 
@@ -364,6 +364,29 @@ The sensor's buffered output splits two ways:
 runs on 3.3 V, so that branch takes a divided copy — roughly 0.6× — to land
 inside the converter's input range. The umbilical branch stays full scale.
 Divide *after* the buffer, not before, so the divider does not load the sensor.
+
+**Size the upper divider resistor at ≥10 kΩ.** On a cold start the 5 V rail
+comes up before the real-time board's 3.3 V regulator, so for a few milliseconds
+the divider drives the ADC input above its own supply and current flows through
+the ESD clamp. A low-impedance divider puts ~2.5 mA into that diode, at or over
+the family-typical ±2 mA limit, on **every power-up**.
+
+**And put a 220 nF cap at the ADC input pin.** This is the highest-value passive
+in the breath path and it does three jobs at once:
+
+- **Anti-aliasing, which is otherwise absent.** The *signal* is band-limited by
+  the sensor to ~159 Hz. The *noise* is not — the buffer has ~1 MHz of bandwidth
+  and passes switching ripple, SPI crosstalk and WS2815 data at 800 kHz. A buck
+  running at 500 kHz sampled at 4 kHz folds to DC; at 498 kHz it folds to
+  **2 kHz**, and at 496.1 kHz to **100 Hz — directly into the breath band**,
+  indistinguishable from playing. Worse, the alias frequency *moves* with the
+  converter's load-dependent switching frequency, so it is a wandering tone
+  rather than a fixed one. 220 nF gives a ~600 Hz corner and **58 dB at
+  500 kHz**.
+- **It is the charge reservoir for the MCP3202's sample capacitor**, which fixes
+  the source-impedance problem that the ≥10 kΩ divider above would otherwise
+  create.
+- Together with the divider it settles well inside the 250 µs loop period.
 
 So curve shaping, thresholds and ambient zeroing still exist in firmware; they
 just no longer sit in the path to the breath jack.

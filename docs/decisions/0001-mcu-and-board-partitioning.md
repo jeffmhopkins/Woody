@@ -84,8 +84,87 @@ and everything else runs long and slow. Bandwidth down the body is trivial: six
 16-bit channels at 4kHz is ~576 kbit/s, comfortable at 2MHz SPI over twisted
 pair.
 
-The two SPI hosts on the S3 get split: display on one, DAC and shift registers
-on the other. A display refresh must never block a CV update.
+The two SPI hosts on the S3 get split — but **not the way this line originally
+said**, and not for the reason it gave. ADR 0013 moved the display to a second
+MCU, so both of the real-time board's SPI hosts are free, and a hard electrical
+constraint decides how they are used:
+
+**The 74x165 chain cannot share MISO with the MCP3202.** `QH` on a 74x165 — any
+family — is a permanently driven totem-pole output with no output-enable pin. It
+is not an SPI peripheral and cannot be taken off the bus. The ADC's `DOUT` does
+tri-state on CS high, so the shift register wins the line unconditionally: the
+**ADC could never be read**, and two push-pull drivers would fight continuously.
+
+So:
+
+| Host | Devices | Why together |
+|---|---|---|
+| **SPI2** | DAC8568 (down the umbilical) + MCP3202 | Both tri-state properly on CS |
+| **SPI3** | 74x165 chain alone | `QH` is always driven; it gets a bus to itself |
+
+SPI3 needs only SCK and MISO plus the existing latch GPIO. Two extra pins
+against sixteen of headroom — and it has the side benefit the original line was
+after, since a key scan and a CV update no longer contend.
+
+### Key-chain signal integrity
+
+The chain runs the length of the body as four unshielded conductors, alongside
+LED data and LED power, inside a body that cannot be reopened. Two decisions
+elsewhere make a single corrupted read worse than it looks:
+
+- **Asymmetric debounce fires on the first closed sample** (below), so one
+  corrupted 32-bit word becomes **one spurious note-on at full velocity, with no
+  filtering**. A conventional symmetric 20 ms window would silently absorb it.
+- **`SH/LD` is asynchronous and level-sensitive.** Any glitch below V_IL during
+  the 32-clock shift re-loads all four registers and corrupts the whole word.
+
+Five fixes, in descending order of value. The first four are wiring and cost
+nothing but planning; they cannot be retrofitted into a bonded body.
+
+1. **A ground return per signal.** The highest-value item on this list. Four
+   signals down a 14-inch body sharing one return is a loop antenna next to an
+   800 kHz LED data line.
+2. **Chain the topology, do not star it.** One run passing through each cluster
+   board in turn, not four stubs from a central point.
+3. **Order the chain so serial data flows *toward* the clock source.** This
+   makes propagation skew eat **setup** margin rather than **hold** margin.
+   Setup margin is recoverable by clocking slower; hold margin is not
+   recoverable at any speed.
+4. **33–68 Ω series termination at the MCU** on the clock and latch lines.
+5. **100 nF at every register**, on its own board. There is no controller-side
+   decoupling in the design at all, and a 74x165's output edges brown out a
+   local rail that has no reservoir.
+
+**On family choice:** the recorded rationale for 74HC over 74LVC was wrong in
+its reasoning even though the conclusion is fine. Over an unterminated line
+LVC's stronger drive and faster edges are *worse*, not better; 74HC165 at 3.3 V
+has roughly **2× the input noise margin** and edges slow enough not to need
+termination. Either part works. Prefer 74HC165 on the noise-margin argument, not
+the speed one.
+
+### Two firmware rules the chain depends on
+
+Both are free, and both are the difference between a detectable error and a
+spurious note.
+
+**Require two consecutive agreeing samples before a note-on.** At the 4 kHz loop
+rate that is 250 µs of added latency — inaudible, and a twentieth of the 5 ms
+budget. (The chain now has its own SPI host, so it *could* be scanned faster
+than the output loop if the measurement at M1 says bounce demands it.) Note-*off*
+stays filtered as before. This keeps the asymmetric debounce's fast attack while
+removing its single-sample credulity.
+
+**Use 4–6 of the 14 spare chain bits as a fixed marker pattern.** The pins, the
+wires and the devices already exist, so this costs nothing but the decision to
+wire it — and it cannot be added later. Firmware checks the marker on every
+read; a frame that fails it **holds the previous frame** rather than acting on
+garbage, and increments a **visible error counter**.
+
+That counter is the point. It is a framing check, not an error-detecting code —
+it cannot correct anything and will miss some corruptions — but it converts an
+invisible intermittent fault into a number on the display that says whether the
+looms are good. Without it, a marginal chain presents as occasional wrong notes
+that are indistinguishable from playing mistakes.
 
 **The core split carries the WiFi stack too.** Sensor read, key scan and DAC
 output own one core; display, radio and web server own the other. The radio is

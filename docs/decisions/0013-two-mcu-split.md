@@ -41,16 +41,23 @@ Its pin budget is now comfortable rather than binding:
 
 | Function | Pins |
 |---|---|
-| SPI2: SCK, MOSI, MISO | 3 |
+| SPI2: SCK, MOSI, MISO — DAC8568 + MCP3202 | 3 |
 | CS: DAC, CS: breath ADC | 2 |
+| **SPI3: SCK, MISO — 74x165 chain alone** | **2** |
 | Shift register latch | 1 |
 | I2C: IMU | 2 |
 | LED data, two strips | 2 |
 | UART to display board | 2 |
 | USB D+/D− | 2 |
-| **Total** | **14** of ~30 usable |
+| **Total** | **16** of ~30 usable |
 
-Sixteen pins of headroom, against two before.
+Fourteen pins of headroom, against two before.
+
+**The chain gets its own SPI host because it has to.** A 74x165's `QH` is a
+permanently driven totem-pole output with no output enable, so it cannot share
+MISO with the MCP3202 — the ADC would never be readable. This is a hard
+electrical constraint, not a partitioning preference; see ADR 0001. An earlier
+version of this table showed 14 pins and one shared host, and was wrong.
 
 ### The display board is a terminal
 
