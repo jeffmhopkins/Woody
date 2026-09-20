@@ -168,6 +168,33 @@ around **0.1 A**, which is unremarkable.
 smoother diffusion, and well inside budget once capped. 30/m is the choice that
 needs no clamp to stay inside budget at all. The diffusion prototype decides.
 
+## The LEDs do reach the breath channel, but not the way expected
+
+The loop was traced in both directions and neither is an oscillation.
+
+**Through the CV path it is negative feedback.** More breath → brighter LEDs →
+`AGND` rises → the CV reads lower. Loop gain is around 0.004, so the effect is
+**0.4 % of gain compression** — a slight softening of the top of the breath
+range, and nothing more.
+
+**Through the ADC it is positive feedback**, via reference depression from
+shared-ground LED current. Still far from instability — **but the symptom is not
+gain error, it is note-gate chatter.** Right at the breath threshold, LEDs
+lighting shifts the reading in the direction that keeps them lit. Below
+threshold nothing happens; at threshold the gate latches on one side and
+chatters on the other.
+
+Two fixes, both free:
+
+- **Size the note-on/note-off hysteresis from the measured LED-induced step**,
+  not from a guessed value. Measure the step at E4 with the strips running.
+- **Drive the LEDs from the post-gate, slew-limited breath value, not from the
+  raw ADC sample.** The strips then cannot respond fast enough to close the loop
+  within a gate decision.
+
+The second one is the real fix and it is a single line about which variable
+feeds the animation.
+
 ## Diffusion is a prototype question
 
 Frosted acrylic close to an LED shows the LED. Even illumination needs either

@@ -444,6 +444,50 @@ playing technique does not have.
 Two consequences that do *not* follow from the bleed question and remain open:
 the moisture handling below, and the tube resonance model.
 
+## The analog ground star point, defined
+
+Several rules in this ADR refer to bonding `AGND` to "the instrument's analog
+ground star point". A review pointed out that **no such point was defined
+anywhere**, so the rules referenced an object that did not exist.
+
+It exists now, and moving the sensor to the bottom is what made it trivial:
+
+> **The star point is the analog ground pour on the bottom cluster board, at the
+> sensor and reference, immediately adjacent to the umbilical connector.**
+
+Everything analog in the instrument — the sensor, the REF5050, both halves of
+the OPA2197, the ADC divider — sits on that one board within a few centimetres
+of each other and of the connector. `AGND` leaves the board straight into the
+umbilical.
+
+**The same problem used to exist inside the body and was never addressed.** With
+the sensor at the top and the connector at the bottom, the analog pair had to
+traverse ~400 mm of interior alongside LED power and an 800 kHz data line — the
+identical problem this ADR argues at length about over the 2 m umbilical, with
+none of the same care applied to it. The sensor move deleted that run rather
+than solving it, which is the better outcome and was not the reason the move was
+made.
+
+**What replaced it is a 400 mm pneumatic run**, whose failure modes are delay
+and condensation rather than common-mode noise, and both of those are handled
+above.
+
+### The ambient-zero injection point, for the same reason
+
+A review finding proposed doing the zero subtraction *in the instrument*. It is
+not implementable: **the instrument has no DAC** — the ESP32-S3 dropped the
+original's DACs and ADR 0013 puts the only DAC at the module. Building it would
+have needed PWM plus an RC, or a second converter on the carrier.
+
+It does not need building. **The zero is injected at the module, into the
+in-amp's `REF` pin, from DAC channel 6** (ADR 0006). That was already the design;
+the finding was aimed at a version of it that no longer existed.
+
+The claim that let the finding through is worth correcting explicitly, because
+it appears in ADR 0004: the instrument is **not** "purely digital with no analog
+signal path". It carries the sensor, a precision reference, two op-amp stages
+and the analog drive. It is where most of the project's analog risk lives.
+
 ## Condensation, in proportion
 
 **This is a closed, dead-ended system** — the tube terminates at the sensor and

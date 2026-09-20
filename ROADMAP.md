@@ -68,7 +68,7 @@ runs — which is what makes 18 inches workable.
 
 | ID | Milestone | Done when |
 |---|---|---|
-| M1 | Switch characterisation | KS-33 plate cutout measured with calipers; test coupon cut at ±0.1mm steps; retention verified by hand; **contact bounce scoped** and debounce windows set from the measurement; **action assessed by hand** — fingertip vs thumb-tip, and whether the four thumb keys want a lighter spring than the eleven finger keys (ADR 0002) |
+| M1 | Switch characterisation | KS-33 plate cutout measured with calipers; test coupon cut at ±0.1mm steps; retention verified by hand; **bounce scoped on fast press, slow press, fast release, slow release and a worn switch**; **action assessed by hand** — fingertip vs thumb-tip, and whether the four thumb keys want a lighter spring than the eleven finger keys (ADR 0002) |
 | M2 | Layout mule | Full key count on a laser-cut plate, hand-wired, mounted to a mock body; playable |
 | M3 | Layout locked | Ergonomics settled after 2–3 iterations of M2. No aluminium cut before this |
 | M4 | Stack design | Full laminated stack in CAD, every layer a 2D part |
@@ -104,6 +104,26 @@ the body is not bonded, so the loom under test is not the final loom. The single
 test that validates the entire analog-breath decision was running against a
 configuration that changes afterwards, and could not be re-run once bonded.
 **This was the most important missing milestone in the project.**
+
+### Why M1 measures slow presses, not just bounce
+
+The release window was being sized from the wrong number. For an MX-style switch
+the dominant release-side effect is not contact bounce — it is the **gap between
+the actuation point and the reset point**. A slow, deliberate release, which is
+exactly what a woodwind player does on a legato phrase, can park the plunger
+inside that gap and chatter for tens of milliseconds. Gateron publishes neither
+figure for the KS-33, so both have to be measured, on a worn switch as well as a
+fresh one.
+
+**And release latency is not free on a woodwind.** On a keyboard, filtering the
+release costs nothing because the note is already sounding. Here fingerings are
+combinational: **lifting a finger is how you start the next note.** A 10 ms
+release window delays that new note by 10 ms, landing squarely in the territory
+the attack-latency work exists to protect.
+
+So: **apply the release filter to the note decision, not to each key
+independently.** A key that opens while others close is part of a transition,
+not a release, and should not be filtered as though the phrase were ending.
 
 ## Track F — Firmware
 

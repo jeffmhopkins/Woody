@@ -16,8 +16,17 @@ instrument by a single cable — solves several problems at once.
 **A 6HP Eurorack module holding all analog output hardware, connected to the
 instrument by an 8-conductor ruggedised umbilical.**
 
-The instrument becomes purely digital: no analog signal path, no battery, no
-jacks. It takes power from the rack and sends channel data down the same cable.
+The instrument loses its **output** analog: no jacks, no bipolar rails, no
+battery. It takes power from the rack and sends channel data down the same
+cable.
+
+**It does not become purely digital, and an earlier version of this line said it
+did.** That claim was already false when written and it let a review finding
+through unchallenged. The instrument still carries the pressure sensor, a
+precision reference, two op-amp stages and the analog drive onto the umbilical —
+which is where most of the project's analog risk actually lives (ADR 0003). What
+moved to the module is the *scaling, conversion and output* analog, not all of
+it.
 
 ### What goes over the cable
 
