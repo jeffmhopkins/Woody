@@ -223,17 +223,12 @@ a board-on-board height (affordable against 38 mm of cavity and 10 mm boards),
 and a discontinued dev board would mean a redesign. Against a custom S3 carrier
 that risks not working at all, this is the better trade.
 
-### One thing to verify: RF through an aluminium top plate
+### RF through the aluminium plate: not a concern
 
-The display board sits at the top of the instrument, directly under the
-aluminium key plate (ADR 0009). Aluminium is not RF-transparent, and
-configuration depends on WiFi (ADR 0012).
-
-Oak and acrylic are both effectively transparent, so the sides and underside
-should radiate — and the display needs a window cut in the plate anyway, which
-doubles as an aperture. It is probably fine. But "probably fine" is worth
-turning into "measured" before the stack is bonded, because a rack instrument
-whose config interface will not connect is an irritating thing to discover late.
+Raised and dismissed. The display board's antenna sits under the aluminium key
+plate, but oak and acrylic are effectively RF-transparent, the plate is only one
+face of the enclosure, and the display needs a window cut in it regardless.
+Recorded so it does not get re-litigated.
 
 ## Considered and rejected
 
