@@ -230,6 +230,65 @@ locally instead of modulating the rail the pitch scaling stage is referenced to
 — which is the whole point, since this module's analog section is precision and
 most modules' are not.
 
+**The branching survives review; the reasoning above does not.** A design review
+found two errors in it, and the corrections change the parts rather than the
+topology.
+
+*A ferrite bead is a wire at the frequencies that actually matter here.* The
+WS2815 strips modulate their current at the PWM rate, around 2 kHz. A bead is a
+few hundred milliohms at 2 kHz and 47 µF does not hold a rail against a
+200–400 mA square wave. The outcome is probably survivable — the op-amps have
+~90 dB of PSRR down there — but it is survivable by accident, not by design.
+
+*And the second claimed job is not done at all.* "Keeping the module out of the
+rack" cannot work by branching, because both branches are common upstream at the
+bus header. Filtering downstream of a shared node does not isolate that node.
+
+Three corrections:
+
+- **Bulk belongs at the load, not at the entry.** 470–1000 µF at each WS2815
+  feed point, where the current actually swings, rather than at the module end
+  of a 14-inch cable.
+- **A real LC between the umbilical node and the buck input** — 10–47 µH of
+  inductance, not a bead. That is the component that does the job the bead was
+  credited with.
+- **Ferrites rated ≥1 A, 1206 or 1210.** The common 0805 600 Ω part is rated
+  around 300 mA, and both +12 V branches exceed that at the corrected current
+  budget. A saturated bead loses its impedance entirely.
+
+### The module's normal "off" state has the SPI bus floating
+
+The panel switch cuts +12 V to the umbilical while the module stays powered from
+the bus. So the ordinary powered-down state is: **module alive, DAC alive, and
+SCLK / MOSI / CS floating** at the level shifter's inputs. That is a designed-in
+operating mode, not a fault case, and it is the state the instrument spends most
+of its life in.
+
+Floating CMOS inputs oscillate and draw crowbar current — inside the precision
+analog box — and a stray edge on CS latches a garbage word into the pitch DAC.
+
+**So pull them, and gate the buffer:**
+
+- **CS pulled to +5 V; SCLK and MOSI pulled to ground**, at the module end.
+- **Gate the 74AHCT125's output enable from umbilical +12 V presence**, so
+  "instrument absent" is a state the hardware knows about rather than one it
+  stumbles into.
+
+That OE gating is the reason the power switch had to move to the module
+(ADR 0005). With a switch at the instrument end, "+12 V present on the
+umbilical" would no longer mean "instrument alive", and the gating would fail in
+exactly the state it exists for. The relocation was load-switch-shaped but this
+is what made it necessary.
+
+**Note the 74AHCT125 is a plain buffer, not a Schmitt trigger.** If the umbilical
+turns out to need edge cleanup at length, that wants a 74AHCT14 — decide it at
+E11 with a logic analyser on the real cable, not now.
+
+**220 Ω in series on MOSI at the driving end.** Source termination on the one
+line that runs the full umbilical carrying data. It also makes SYNC-signal
+regeneration at the module unnecessary, which was the alternative under
+consideration.
+
 Sources: Doepfer's A-100 technical documentation for the bus and supply
 conventions; ModWiggler's module-power-entry threads for the community consensus
 on diodes, ferrites and reservoir values.

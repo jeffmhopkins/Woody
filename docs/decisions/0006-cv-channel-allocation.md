@@ -12,12 +12,14 @@
 | **Breath** | **analog, differential over the umbilical** | 0–10V | gain + offset knobs | Trimmed |
 | **Mod 1–4** | DAC ch 2–5 | **−10…+10V** | none — configured on the instrument | Trimmed |
 | *(internal)* | DAC ch 6 | — | — | Breath ambient-zero offset (ADR 0003) |
+| *(internal)* | DAC ch 7 | — | — | Shared 2.5 V offset for mod 1–4 |
 
 Six jacks on the panel as before, but only five of them come from the DAC.
 **Breath never enters the digital path on its way out** — it is the one channel
 where output steps reach the ear, so it stays analog end to end (ADR 0003).
-A sixth DAC channel drives the firmware-controlled zero offset for that analog
-stage, leaving two of the octal part's channels still spare.
+Two further DAC channels drive offsets rather than jacks: the firmware-controlled
+ambient zero for the breath stage, and the shared 2.5 V reference point the mod
+channels subtract from. Seven of eight channels used, one spare.
 
 Use an **octal** 16-bit DAC (DAC8568 or AD5676) and populate six. Eight-channel
 parts cost barely more than quads and occupy the same board area; there is no
@@ -77,11 +79,12 @@ Three things make this cheap rather than awkward:
 
 - **Gain of 4 is a 1:4 ratio**, which the LT5400 family offers directly — no
   external resistor, so no absolute tempco leaks into the gain.
-- **The 2.5 V reference point is the DAC8568's own internal reference.** Gain and
-  offset therefore share one reference and drift together, which is the benign
-  form of reference drift — it pivots the transfer about 0 V output rather than
-  sliding it. One buffered reference serves all four channels; no DAC channel is
-  spent on the offset.
+- **The 2.5 V reference point comes from a buffered DAC channel**, not directly
+  from the internal reference. Both routes track the same reference — the gain
+  is a resistor ratio and does not involve the reference at all — so the drift
+  argument is a wash, and the DAC channel wins on the power-on state below. One
+  buffered channel serves all four mod channels, the same arrangement already
+  used for the breath ambient-zero into the in-amp's REF pin.
 - **Headroom is ample.** ±12 V rails less ~0.35 V of Schottky leaves ±11.65 V,
   and an OPA2197 reaches ~±11.45 V — 1.45 V of margin at ±10 V.
 
@@ -90,16 +93,44 @@ Three things make this cheap rather than awkward:
 Resolution goes from 153 µV/LSB on a 10 V span to **305 µV/LSB** on 20 V. That is
 0.003 % of full scale, and irrelevant against anything a modulation CV drives.
 
-### Open: what the outputs do at power-on
+### Resolved: what the outputs do at power-on
 
-`Vout = 4 × (Vdac − 2.5)` means a DAC at **zero scale parks the mod outputs at
-−10 V**, and at **midscale parks them at 0 V**. The DAC8568's reset state is set
-by its grade — A and C reset to zero scale, B and D to midscale — and it is one
-chip shared with pitch, whose preferred reset state is the opposite.
+This looked like a conflict. With a fixed 2.5 V offset, `Vout = 4 × (Vdac − 2.5)`
+parks the mod outputs at **−10 V** on a zero-scale reset and at **0 V** on a
+midscale reset — and the DAC8568's reset state is set by its grade, one chip
+shared with pitch, whose preferred reset is the opposite one. A and C reset to
+zero scale; B and D reset to midscale.
 
-**This needs resolving alongside the DAC supply decision.** Options include
-accepting one channel group's power-on state, holding `CLR` asserted until
-firmware writes a valid frame, or gating the outputs from umbilical presence.
+**Taking the offset from a DAC channel dissolves it.** On a zero-scale reset
+*both* terms are zero:
+
+```
+Vout = 4 × (Vdac − Voffset) = 4 × (0 − 0) = 0 V
+```
+
+So specify an **A or C grade** part — zero-scale reset — and the power-on state
+is the best available on every channel at once:
+
+| Output | At rack power-on, before firmware writes | Why that is right |
+|---|---|---|
+| **Pitch** | Bottom of its range, below −2 V | Subsonic. A VCO there is inaudible |
+| **Mod 1–4** | **Exactly 0 V** | Both terms of the difference are zero |
+| **Breath** | 0 V | The receiver's differential pulldown holds it there (ADR 0003) |
+
+**Specify the full orderable part number in the BOM**, not "DAC8568". The grade
+letter is the whole decision and it is invisible in the generic name.
+
+A second trap in the same part: **the internal reference is disabled by default**
+and needs an explicit enable write at boot. This is a known DAC8568 bring-up
+surprise — a board that looks dead at E7 with every channel reading 0 V is
+usually this, not a soldering fault. It also means the outputs sit at 0 V from
+rack power-on until firmware enables the reference, which happens to reinforce
+the table above.
+
+**Two offset authorities in series would be a split-brain failure**, so they are
+kept apart deliberately: the **trimmer** is the offset authority for pitch, the
+**DAC channel** is the offset authority for the mod channels, and neither
+channel group has both.
 
 ## Channels do not share an update rate
 
@@ -309,6 +340,50 @@ nothing else. Two proposed review fixes were in conflict over that capacitor —
 the in-loop `Cf` and the separate output filter are physically the same part and
 cannot both exist. Declining the in-loop version resolves the conflict rather
 than deferring it.
+
+## Firmware defaults and bring-up rules
+
+Small things, but each is the difference between a first power-on that behaves
+and one that surprises someone holding an instrument.
+
+**Enable the DAC's internal reference explicitly at boot.** It is disabled by
+default. Nothing works until this write happens, and the failure looks like dead
+hardware.
+
+**Default every mod and breath range to 0–8 V.** The mod channels *can* do
+±10 V, but that is headroom, not a default — 0–8 V is the de-facto Eurorack
+convention and is what most patches want. **Bipolar is opt-in per channel**, set
+explicitly from the display, so nothing sends a negative voltage into a patch
+that was not asked to receive one.
+
+**Put the two pitch calibration anchor points inside the musically used range**,
+not at the −2 V and +7 V extremes. A two-point fit is only as good as its
+anchors, and no VCO tracks well at the far ends of its own range — anchoring
+there fits the line to the worst two points available. Anchor around the
+octaves actually played; the multi-point NVS table handles the rest.
+
+## Small protective parts on the module
+
+Three items that are cheap, are invisible once the board is fabbed, and cannot
+be added afterwards.
+
+**1 kΩ in series with each op-amp's non-inverting input where the DAC drives
+it.** The DAC runs from its own 5.25 V regulator and the op-amps from ±12 V, so
+the two supplies do not come up or collapse together. A driven DAC output into
+an op-amp whose rails are absent forces current through the input clamp
+structure; 1 kΩ bounds it, and it is outside the feedback path so it costs
+nothing in accuracy.
+
+**BAV99 clamp diodes at the CV jacks — silicon, not Schottky.** With a long
+external umbilical these are worth the six parts. The part choice matters more
+than it looks: a BAT54S's ~2 µA of Schottky leakage through the 1 kΩ output
+resistor is 2 mV, which is **2.4 cents of temperature-dependent pitch error** —
+reintroducing exactly what the matched network and the trimmers were bought to
+remove. BAV99 leakage is orders of magnitude lower.
+
+**Ferrite beads rated ≥1 A, in 1206 or 1210.** The common 0805 600 Ω part is
+rated around 300 mA and both +12 V branches now exceed that. A saturated bead
+does not degrade gracefully — it loses its impedance entirely and becomes a wire.
 
 ## Labelling
 

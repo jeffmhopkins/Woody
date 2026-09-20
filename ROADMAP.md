@@ -122,6 +122,27 @@ test instrument, not just a convenience:
 It depends only on E1 and a WiFi stack, so it can be built as soon as there is a
 dev board on the bench.
 
+## Bench measurements the review asked for
+
+These are not milestones — they are measurements that turn assumed numbers into
+known ones. Each hangs off a milestone that is happening anyway. The full
+characterisation table lives in
+[the latency budget](docs/reference/latency-budget.md); these are the ones that
+came out of the analog design review specifically.
+
+| Measure | At | Why |
+|---|---|---|
+| **DAC saturation vs AVDD** | E7 | The output span *is* the supply. Record the actual saturation code at the actual rail rather than claiming +7 V (ADR 0006) |
+| **Pitch DC load sweep: open / 100k / 50k / 33k** | E9 | Quantifies the 1 kΩ divider error against the real patch, and tells you how much a re-mult actually shifts tuning (ADR 0006) |
+| **Pitch stability into worst-case cable capacitance** | E9 | Confirms the plain series RC is unconditionally stable where an in-loop version would not have been |
+| **Inrush with a current probe, on switch-on *and* hot-plug** | E6 | Sizes the load switch's current limit from measurement rather than from a guess (ADR 0005) |
+| **Gate-press-while-moving IMU test** | E3 | The failure mode that killed the bias-snapshot proposal. Press the gate mid-gesture and check the stillness-gated estimator does not adopt motion as bias (ADR 0007) |
+| **Key-chain error counter over an hour, LEDs and WiFi active** | E4 | The marker pattern's whole purpose. A non-zero count says the looms need work while the body is still openable (ADR 0001) |
+| **Helmholtz restrictor sizing** | E2 | Trap volume and response time are coupled. Size the orifice to put the resonance above the 500 Hz filter corner (ADR 0003) |
+
+**The key-chain and restrictor measurements are the time-critical ones** — both
+inform wiring and plumbing that get sealed inside a bonded body at M6.
+
 ## Open items blocking work
 
 | Blocks | Question | Tracked in |

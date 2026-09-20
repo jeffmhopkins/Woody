@@ -99,6 +99,38 @@ Carry forward as well:
   (`deg_z`) drove expression continuously, outside the gate.
 - **Acceleration as a separate source** from angle, with its own damping.
 
+### The angle estimator: stillness-gated bias, not a plain complementary filter
+
+Capture-on-press makes long-term drift irrelevant, but it does **not** make gyro
+bias irrelevant — it subtracts the bias's accumulated *offset* at the moment of
+the press, while the bias itself keeps integrating for the seconds the gesture
+lasts. Over a 3 s gesture, gyro noise contributes about 0.026°. Bias is the
+entire story.
+
+A review proposed replacing the complementary filter with a **bias snapshot
+taken in a fixed window just before the press.** That is wrong in a specific and
+instructive way: the window is sampled at exactly the moment the player is most
+likely to be moving, because reaching for the gate button *is* motion. 20 °/s of
+real rotation captured as "bias" and then subtracted for three seconds is a
+**60° error** — far worse than the drift it was meant to remove.
+
+**The correct version is the hybrid:** maintain a bias estimate continuously,
+and **update it only when the instrument is demonstrably still** — gyro
+magnitude below a threshold and accelerometer magnitude near 1 g, sustained.
+Then:
+
+- End the pre-press sampling window **~50 ms before the press**, not at the
+  press, so the reach for the button is outside it.
+- **Validity-check the estimate** before trusting it. If the instrument has not
+  been still recently enough, hold the last good bias rather than adopting a
+  fresh bad one.
+
+Same cost as either alternative, no runaway. It is genuinely a hybrid: gyro-only
+inside the gesture, where the complementary filter's accelerometer correction has
+barely acted anyway at the τ = 0.5–5 s that linear-acceleration rejection
+requires — and accelerometer-referenced only while stationary, which is the one
+condition under which the accelerometer is actually measuring gravity.
+
 ### What the three right-thumb switches should support
 
 - **Momentary gate** — hold to enable, capturing zero on press. The default.

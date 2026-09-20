@@ -100,6 +100,12 @@ than discovering empirically.
 
 ## Power budget, and the cap that is not optional
 
+**470–1000 µF at each strip feed point.** Bulk capacitance belongs where the
+current swings, not at the module end of a 14-inch cable — a WS2815 run
+modulates its draw by hundreds of milliamps at the ~2 kHz PWM rate, and a
+ferrite bead is effectively a wire at that frequency (ADR 0004).
+
+
 0.84 m total, by density and use:
 
 | Density | Full white | Single hue, full | Single hue, 40% |
@@ -116,11 +122,51 @@ a setting.** Sum the commanded channels, and clamp before writing to the strip.
 A display bug that sets 50 LEDs to white at full brightness must not be able to
 brown out the rack, which would take every other module with it.
 
+### The firmware clamp used to be the only defence, and it did not survive
+
+A design review found the failure the clamp guards against is precisely the one
+in which the clamp is not running:
+
+> LED current ↑ → umbilical current ↑ → the polyfuse self-heats and its
+> resistance rises → the rail sags → the buck draws more input current → the
+> polyfuse heats further → brownout → **the MCU resets** → the WS2815s **hold
+> their last latched colour** → the load does not fall.
+
+A polyfuse above its hold current does not trip cleanly; it gradually
+current-limits, so the MCU misbehaves at reduced voltage before it resets. And
+once it has reset, the strips are latched and there is no firmware left to
+clamp anything.
+
+**Three things break that loop, and the first two are already decided:**
+
+- **The module's current-limited load switch** (ADR 0005) replaces a slow,
+  self-heating, thermally-hysteretic protection device with a fast fixed limit
+  that does not run away. The positive feedback term disappears with the
+  thermal one.
+- **The load switch is at the module, not the instrument**, so the limit holds
+  whatever the instrument's MCU is doing — including nothing.
+- **Blank both strips as the first act at boot**, before anything else
+  initialises. A reset then clears a latched state in a few hundred
+  milliseconds rather than leaving it until something happens to overwrite it.
+
+**The firmware clamp is now a comfort feature, not a safety feature.** That is
+the right status for it. Treat it as aesthetic, and size the hardware so the
+worst case a latched strip can present is inside budget.
+
+**Which makes worst-case current a constraint on density, not a consequence of
+it.** All-white is 0.50 A at 30/m and 1.01 A at 60/m; a Eurorack supply commonly
+offers 1–3 A on +12 V for the whole case. 30/m is inside budget unconditionally.
+60/m is fine too, but only if the firmware clamp is set so no commanded state
+exceeds ~0.5 A — which is not restrictive in practice, since 60/m at a single
+hue and 40 % brightness is 0.13 A. **Decide density with the diffusion
+prototype below; carry the 0.5 A ceiling into whichever is chosen.**
+
 Realistic use — a single hue tracking breath at moderate brightness — sits
 around **0.1 A**, which is unremarkable.
 
-60/m is the sensible default: denser than 30/m for smoother diffusion, and well
-inside budget once capped.
+60/m is the sensible default on appearance grounds: denser than 30/m for
+smoother diffusion, and well inside budget once capped. 30/m is the choice that
+needs no clamp to stay inside budget at all. The diffusion prototype decides.
 
 ## Diffusion is a prototype question
 

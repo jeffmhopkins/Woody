@@ -135,12 +135,18 @@ nothing but planning; they cannot be retrofitted into a bonded body.
    decoupling in the design at all, and a 74x165's output edges brown out a
    local rail that has no reservoir.
 
-**On family choice:** the recorded rationale for 74HC over 74LVC was wrong in
-its reasoning even though the conclusion is fine. Over an unterminated line
-LVC's stronger drive and faster edges are *worse*, not better; 74HC165 at 3.3 V
-has roughly **2× the input noise margin** and edges slow enough not to need
-termination. Either part works. Prefer 74HC165 on the noise-margin argument, not
-the speed one.
+**On family choice: the part stays 74LVC165A, but the recorded reason for it was
+backwards.** The BOM justified LVC as *"better drive over a 14 in chain"*. Over
+an **unterminated** line, stronger drive and faster edges are exactly what
+produces ringing and reflections — the drive that helps into a lumped load hurts
+into a transmission line. 74HC165 at 3.3 V has edges slow enough not to need
+termination at all, and would have been the lower-risk choice on those grounds.
+
+Either family works here. LVC is kept because it is specified natively at 3.3 V
+and is already selected — but it is kept **with item 4 above**, the series
+termination, which is what actually makes the drive argument safe rather than
+merely confident. If the chain misbehaves at E4 and termination does not settle
+it, 74HC165 is a drop-in on the same SOIC-16 footprint.
 
 ### Two firmware rules the chain depends on
 
