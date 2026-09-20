@@ -10,20 +10,20 @@ U-DISP,controller,T-Display-S3 AMOLED (base not Plus),LilyGO,1.91in 536x240 AMOL
 U-BUCK,controller,R-78E5.0-1.0,Recom,12V to 5V switching regulator module,SIP-3 THROUGH-HOLE,1,candidate,,0005,3-pin SIP on a 7805 footprint. No inductor no feedback network no layout risk. 1A vs ~350mA needed
 LED-SIDE,controller,WS2815 (12V addressable),multiple,Addressable LED strip - two runs in the side channels,flexible strip,2 x 420mm,candidate,,0014,12V native so no 5V rail. Backup data line survives a dead LED. TWO independent strips - no crossover wire. Density pending diffusion test
 U-DAC,module,DAC8568,TI,"Octal 16-bit DAC SPI, internal reference",TSSOP-16 (0.65mm pitch),1,candidate,,0006,Populate 6 of 8. Internal ref is sufficient - resistor tracking dominates drift 10:1
-U-OPA-PITCH,module,OPA2197,TI,Low-drift op-amp for pitch scaling,SOIC-8 (1.27mm pitch),1,candidate,,0006,Precision channel only - offset drift is tuning drift
-U-OPA-GEN,module,TBD,,General op-amp for channels 2-6,SOIC-8 (1.27mm pitch),3,candidate,,0006,Ordinary 1% parts acceptable
+U-OPA-PITCH,module,OPA2197,TI,Dual low-drift RRIO op-amp,SOIC-8 (1.27mm pitch),5,candidate,,0006,"ONE op-amp part throughout the module - pitch, mod 1-4, breath scaling. RRIO on +/-12V reaches ~11.9V"
+U-OPA-GEN,module,(none - OPA2197 used throughout),,Superseded by U-OPA-PITCH,n/a,0,not-needed,,0006,Single part number beats saving a few dollars on a one-off. Removes a class of assembly error
 R-PRECISION,module,LT5400-class matched network,ADI / Vishay,Matched resistor network for pitch scaling,MSOP-8 (0.65mm pitch),TBD,candidate,,0006,Highest-value precision part in the design. Ratio tracking is what matters not absolute tempco
-J-CV,module,3.5mm mono jack,multiple,CV output jack,panel mount THT,6,candidate,,0006,PITCH BREATH MOD1-4
-POT-BREATH,module,TBD,,Panel potentiometer,panel mount THT,2,candidate,,0006,Gain then offset - order matters
-SW-POWER,module,TBD,,Panel power switch,panel mount THT,1,candidate,,0004,
-J-UMBILICAL,module,etherCON / M12 / HR10,Neutrik / other,8-conductor ruggedised connector,panel mount,2,open,,0004,etherCON ~24mm vs 6HP 30.3mm - fit check needed
-PANEL,module,TBD,,6HP Eurorack panel,n/a,1,candidate,,0004,~107mm of ~110mm usable - paper mockup first
+J-CV,module,PJ398SM (Thonkiconn),,3.5mm mono PCB-mount jack,THROUGH-HOLE,6,candidate,,0006,De facto eurorack standard. Standard panel hole
+POT-BREATH,module,"Alpha 9mm vertical PCB mount, B50k linear",Alpha,Panel potentiometer - breath gain and offset,THROUGH-HOLE,2,candidate,,0006,Linear taper - predictable for CV scaling. Gain then offset order
+SW-POWER,module,"SPST sub-miniature toggle, 6mm bushing, >=1A",,Panel power switch - cuts +12V to the umbilical,THROUGH-HOLE,1,candidate,,0004,Carries the instrument current ~350mA so rate it properly
+J-UMBILICAL,module,Neutrik etherCON NE8FDP,Neutrik,"8-conductor ruggedised connector, both ends",panel mount,2,candidate,,0004,Any Cat5 cable works. Panel cutout is laser cut anyway so complexity is free. VERIFY 24mm flange in 30mm panel
+PANEL,module,"2mm aluminium, 6HP x 3U (30.0 x 128.5mm)",,Eurorack front panel,n/a,1,candidate,,0004,Laser or waterjet from DXF - SAME vendor and order as the key plate
 PLATE-TOP,mechanical,TBD,,Aluminium key plate laser or waterjet cut,n/a,1,candidate,,0009,Flat 2D through-cuts only - no CNC needed
 BODY-OAK,mechanical,TBD,,Oak top and bottom panels,n/a,2,candidate,,0009,Bottom panel thickness sets thumb key inset depth
 SIDE-ACRYLIC,mechanical,TBD,,Frosted acrylic side panels,n/a,2,candidate,,0009,Edge-lit
 BENCH,tooling,n/a,,"Scopes, logic analysers, DMMs, signal generators, RF",n/a,1,available,,0006,Full bench available - E9 not gated on tooling
 U-BUF,controller,MCP6002-I/SN,Microchip,Dual RRIO op-amp for the breath buffer,SOIC-8 (1.27mm pitch),1,candidate,,0003,SOIC-8. Rails to within ~25mV so 4.7V from 5V is fine. Second half spare for the low-pass
-U-DIFFRX,module,precision difference amp,multiple,Senses BREATH against AGND not local ground,SOIC-8 (1.27mm pitch),1,candidate,,0003,Not optional - local ground reference reinstates the shared-ground offset
+U-DIFFRX,module,INA134,TI,Difference amp with on-chip matched resistors,SOIC-8 (1.27mm pitch),1,candidate,,0003,~90dB CMRR vs 60dB needed. On-chip matching means no external network
 J-USB,controller,USB-C receptacle,,USB-C connector for the real-time carrier,n/a,1,not-needed,,0013,Dev boards carry these. Only required if a custom MCU carrier is ever built (ADR 0013)
 U-ESD-USB,controller,USBLC6-2SC6,ST,USB ESD protection array,n/a,1,not-needed,,0013,Dev boards carry these. Only required if a custom MCU carrier is ever built (ADR 0013)
 SW-BOOT,controller,TBD,,Boot and reset buttons,n/a,2,not-needed,,0013,Dev boards carry these. Only required if a custom MCU carrier is ever built (ADR 0013)
@@ -31,7 +31,13 @@ U-TVS-UMB,controller,SP3012-06UTG or similar array,multiple,TVS array on umbilic
 C-BULK-DISP,controller,TBD,,Local bulk capacitance at the display board,1206 / electrolytic THT,1,open,,0013,Absorbs WiFi TX transients so they do not reach the rack rail
 TUBE,controller,silicone tube + dead-volume trap,,Breath tube from mouthpiece to sensor,n/a,1,open,,0003,~30mm. Trap clearable without disassembly
 SW-PWR-INST,controller,TBD,,Instrument power switch,panel slide switch,1,open,,0005,Switches the buck EN pin not the 12V rail - no current through it
-R-PD-BREATH,module,TBD,,Pulldown on the breath receive input,0805 (2.0 x 1.25mm),1,open,,0005,Instrument off or unplugged presents 0V not a floating buffer
+R-PD-BREATH,module,100k,,Pulldown on the breath receive input,0805 (2.0 x 1.25mm),1,candidate,,0005,High enough not to load the INA134 input network
 U-LVLSHIFT,controller,74AHCT125,multiple,Quad buffer as LED data level shifter,SOIC-14 (1.27mm pitch),1,candidate,,0014,SOIC-14. 5V rail TTL thresholds so 3V3 reads high. Two spare gates. VERIFY WS2815 threshold
 F-POLY,controller,PPTC 1206 500mA hold,multiple,Resettable fuse at umbilical entry,1206 (3.2 x 1.6mm),1,candidate,,0005,1206 not 0603 - larger package is easier to place and inspect
 R-DIV-ADC,controller,TBD,,Divider on the ADC branch of the breath buffer,0805 (2.0 x 1.25mm),2,open,,0003,Sensor reaches 4.7V into a 3V3 ADC. Divide after the buffer not before
+U-REG-5V,module,R-78E5.0-1.0,Recom,12V to 5V for the DAC and level shifter,SIP-3 THROUGH-HOLE,1,candidate,,0006,SAME part as the instrument. DAC8568 is a 2.7-5.5V part - cannot run on rack rails
+U-LVL-MOD,module,74AHCT125,,"Level shifter, 3V3 SPI up to 5V for the DAC",SOIC-14 (1.27mm pitch),1,candidate,,0006,SAME part as the instrument LED shifter. Covers SCLK MOSI CS with a spare gate
+J-PWR-EURO,module,16-pin shrouded keyed IDC header,,Eurorack power inlet,THROUGH-HOLE,1,candidate,,0005,Shrouded and keyed - reversed ribbon is the classic eurorack failure
+D-REVPOL,module,Schottky diodes in series with +/-12V,,Reverse polarity protection,SOD-123 / THT,2,candidate,,0005,"Backup for the keyed header. ~0.3V drop, harmless with 2V of headroom"
+FB-IN,module,ferrite bead + bulk caps,,Input LC filter on +/-12V,0805 / THT electrolytic,1,open,,0004,"Keeps rack hash out, and the module out of the rack"
+R-OUT-PROT,module,"1k series, 0805",,Series protection on each CV output,0805 (2.0 x 1.25mm),6,candidate,,0006,Standard eurorack practice - survives shorts and output-to-output patching

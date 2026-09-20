@@ -44,7 +44,7 @@ existing. Drive it from any dev board with a test pattern and a multimeter.
 | E4 | Key scan | 74HC165 chain reads all switches; debounce asymmetric (instant press, filtered release) |
 | E4b | **Inter-MCU link** | Framed UART between the two boards, status flowing, logic-analyser clean (ADR 0013) |
 | E5 | **USB MIDI out** | Plays into a DAW. Fingering table exercised. First playable milestone |
-| E6 | Module power | ±12V from rack, input filtering, no noise injected back into the rack |
+| E6 | Module power | ±12V from rack via keyed header + reverse protection, 5V logic rail up, input filtering, no noise injected back into the rack |
 | E7 | DAC raw | Commanded codes produce expected voltages on the meter, all six channels |
 | E8 | Pitch channel scaled | Channel 1 hits −2V and +7V, linear between |
 | E9 | **Pitch calibration** | Two-point fit stored in NVS; 1V/oct verified against a real VCO, not just a meter |

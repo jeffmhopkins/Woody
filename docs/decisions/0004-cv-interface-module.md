@@ -81,6 +81,58 @@ bench under USB power during development.
 - The module is independently useful. "Digital controller to six-channel CV over
   Cat5" stands on its own.
 
+### The module needs its own logic rail
+
+Easy to miss: **the DAC8568 is a 2.7–5.5 V part and cannot run on the rack
+rails.** The module therefore derives a low-voltage rail from +12 V, and the
+choice of which interacts with noise more than it looks:
+
+| DAC VDD | Output span | Gain the scaling stage must supply |
+|---|---|---|
+| 3.3 V | 0–2.5 V (ref × 1) | **3.6×** |
+| **5 V** | **0–5 V (ref × 2)** | **1.8×** |
+
+Everything the scaling stage amplifies — op-amp noise, offset, drift — is
+amplified by that factor. **5 V halves it.**
+
+The cost is that a 5 V DAC wants roughly 3.5 V for a logic high while the
+instrument sends 3.3 V, so SPI needs shifting. That turns out to be free in
+parts terms:
+
+- **R-78E5.0-1.0** for the 5 V rail — the *same regulator module* as the
+  instrument (ADR 0005).
+- **74AHCT125** for the shifter — the *same part* as the instrument's LED data
+  lines (ADR 0014), with a spare gate left over.
+
+Two part numbers shared across both boards rather than two more to source.
+
+### Module parts, chosen for build ease
+
+**One op-amp part throughout: OPA2197.** Pitch scaling, all four mod channels
+and the breath stage use the same dual RRIO part. It is rated to ±18 V, so on
+±12 V it reaches roughly 11.9 V — comfortably past the 10 V output. Using a
+cheaper part for the non-precision channels would save a few dollars on a
+one-off and introduce a whole class of "which chip goes here" assembly error.
+Not worth it.
+
+**INA134 for the breath difference amp.** On-chip matched resistors give ~90 dB
+CMRR against the 60 dB needed (ADR 0003), with no external matching network to
+place or match.
+
+**Standard eurorack hardware elsewhere:** PJ398SM jacks, Alpha 9 mm vertical
+pots (linear taper — predictable for CV scaling), a rated SPST toggle for power,
+and a 16-pin shrouded keyed IDC power header with Schottky diodes behind it.
+Reversed ribbon cable is the classic Eurorack failure and the keying alone is
+not worth trusting.
+
+**1 kΩ series resistors on every CV output.** Standard practice, and it means
+the module survives a short or someone patching output to output.
+
+**The 6HP panel is laser or waterjet cut from DXF — same vendor and ideally the
+same order as the aluminium key plate** (ADR 0009). Which also disposes of the
+last objection to etherCON: its cutout is more complex than a round hole, and on
+a laser-cut panel complexity is free.
+
 ### Module design principles
 
 **The module is dumb.** Jacks, knobs, connector, power switch, analog. No menu,
