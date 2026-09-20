@@ -27,7 +27,27 @@ original ESP32's two 8-bit DACs were dropped on the S3. Irrelevant here, since
 radio** and less mature software support. The radio is now a requirement
 (ADR 0012), so this is ruled out outright rather than merely disfavoured.
 
-**ESP32-C6.** Single RISC-V core, weaker. Wireless features irrelevant here.
+**ESP32-C6.** Rejected, and worth spelling out because C6 boards are common in
+the integrated screen-and-MCU form factor this project wants (ADR 0008). Three
+consequences, in descending order of severity:
+
+- **Single core.** The whole timing architecture here is a core split: sensor,
+  key scan and DAC output own one core; display, WiFi and web server own the
+  other. On a single core that guarantee becomes a software discipline instead —
+  a 4 kHz high-priority task can still preempt rendering, but any driver that
+  blocks with interrupts masked or holds a lock across a DMA wait puts jitter
+  straight into the output loop. Workable with care; not the same thing as
+  workable by construction.
+- **No USB OTG device peripheral.** C6 has USB Serial/JTAG but not the OTG
+  controller that class-compliant USB MIDI needs. That removes E5, the first
+  playable milestone and the whole strategy of validating keys, fingering and
+  breath response in a DAW before any analog hardware exists. WiFi telemetry
+  (F6) covers observability but not *playing* the thing.
+- **Fewer GPIO**, against a budget (ADR 0008) that is already the binding
+  constraint on board choice.
+
+The radio is present on C6, so ADR 0012 is satisfied — but the first two points
+are architectural, not preferences.
 
 ## Decision
 
