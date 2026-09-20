@@ -10,7 +10,7 @@
 |---|---|---|---|---|
 | **Pitch** | DAC ch 1 | −2 to +7V, 1V/oct | none | Calibrated |
 | **Breath** | **analog, differential over the umbilical** | 0–10V | gain + offset knobs | Trimmed |
-| **Mod 1–4** | DAC ch 2–5 | 0–10V | none — configured on the instrument | Trimmed |
+| **Mod 1–4** | DAC ch 2–5 | **−10…+10V** | none — configured on the instrument | Trimmed |
 | *(internal)* | DAC ch 6 | — | — | Breath ambient-zero offset (ADR 0003) |
 
 Six jacks on the panel as before, but only five of them come from the DAC.
@@ -50,6 +50,56 @@ bounded by slew rate, not full scale.** A signal moving over ~10 ms sampled at
 4 kHz changes by a fortieth of its excursion per sample, and one LSB at 16-bit
 over 10V is ~150 µV. The only large step is a deliberate note change, which
 should be fast anyway.
+
+## Mod channels are bipolar, −10 to +10 V
+
+An earlier revision made the mod stage unipolar 0–10 V. That would have been
+permanent in hardware: no ±5 V LFO, no negative excursion, no through-zero
+modulation, ever, with firmware unable to recover any of it. **The stage is
+bipolar instead, spanning −10 to +10 V.**
+
+The point is not to *output* ±10 V routinely — it is to be **able** to, with
+firmware selecting the actual range per channel from the instrument's display:
+0–5 V, 0–8 V, 0–10 V, ±5 V, ±2.5 V. Most patches will use 0–8 V or ±5 V, which
+are the de-facto Eurorack conventions; the extra span is headroom, not a default.
+
+### The topology falls out neatly
+
+```
+Vout = 4 × (Vdac − 2.5 V)
+
+  Vdac 0.00 V  →  −10 V
+  Vdac 2.50 V  →    0 V
+  Vdac 5.00 V  →  +10 V
+```
+
+Three things make this cheap rather than awkward:
+
+- **Gain of 4 is a 1:4 ratio**, which the LT5400 family offers directly — no
+  external resistor, so no absolute tempco leaks into the gain.
+- **The 2.5 V reference point is the DAC8568's own internal reference.** Gain and
+  offset therefore share one reference and drift together, which is the benign
+  form of reference drift — it pivots the transfer about 0 V output rather than
+  sliding it. One buffered reference serves all four channels; no DAC channel is
+  spent on the offset.
+- **Headroom is ample.** ±12 V rails less ~0.35 V of Schottky leaves ±11.65 V,
+  and an OPA2197 reaches ~±11.45 V — 1.45 V of margin at ±10 V.
+
+### The cost
+
+Resolution goes from 153 µV/LSB on a 10 V span to **305 µV/LSB** on 20 V. That is
+0.003 % of full scale, and irrelevant against anything a modulation CV drives.
+
+### Open: what the outputs do at power-on
+
+`Vout = 4 × (Vdac − 2.5)` means a DAC at **zero scale parks the mod outputs at
+−10 V**, and at **midscale parks them at 0 V**. The DAC8568's reset state is set
+by its grade — A and C reset to zero scale, B and D to midscale — and it is one
+chip shared with pitch, whose preferred reset state is the opposite.
+
+**This needs resolving alongside the DAC supply decision.** Options include
+accepting one channel group's power-on state, holding `CLR` asserted until
+firmware writes a valid frame, or gating the outputs from umbilical presence.
 
 ## Channels do not share an update rate
 
