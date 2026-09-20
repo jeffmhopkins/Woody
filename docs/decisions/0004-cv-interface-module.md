@@ -101,8 +101,8 @@ parts terms:
 
 - **The rack's own +5 V rail** for the 5 V supply. The module is inches from the
   bus board, so there is no drop to worry about and no regulator needed
-  (ADR 0005). A jumper and an unpopulated R-78E5.0 footprint sit behind it as a
-  fallback, because +5 V is optional on a Eurorack bus board and often absent.
+  (ADR 0005). The target rack has the rail, so this is required rather than
+  optional — the 16-pin bus header carries it.
 - **74AHCT125** for the shifter — the *same part* as the instrument's LED data
   lines (ADR 0014), with a spare gate left over.
 

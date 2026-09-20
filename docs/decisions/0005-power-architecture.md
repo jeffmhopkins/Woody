@@ -99,17 +99,16 @@ Two further reasons the question does not arise:
 - **The R-78E5.0 is a 3-pin through-hole module**, among the lowest-effort parts
   in the design. Deleting it saves almost no build effort to begin with.
 
-### The module is a different case, and there the rack's +5 V wins
+### The module takes +5 V from the bus
 
 The module sits in the rack on a short ribbon, with negligible drop, and its 5 V
-load is the DAC plus one level shifter — around 20 mA. **Take that from the bus
-rather than regulating it locally** (ADR 0004). One fewer part on that board.
+load is the DAC plus one level shifter — around 20 mA. **It takes that from the
+bus. No local regulator.**
 
-**With a fallback, though.** Eurorack +5 V is optional on the bus board and is
-frequently absent or weak in other cases. Fit the module with a jumper selecting
-either bus +5 V or a populated R-78E5.0 footprint. That costs one jumper and an
-unpopulated footprint, and it means the module works in any case rather than
-only this one.
+The target rack supplies +5 V, so this is a **requirement, not an option**. No
+jumper, no unpopulated fallback footprint. A module that also worked in cases
+without a +5 V rail would be engineering for a case this instrument is never in
+(see the design scope in the README).
 
 ### Power tree
 

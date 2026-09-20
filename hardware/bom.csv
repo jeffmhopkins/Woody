@@ -35,10 +35,8 @@ R-PD-BREATH,module,100k,,Pulldown on the breath receive input,0805 (2.0 x 1.25mm
 U-LVLSHIFT,controller,74AHCT125,multiple,Quad buffer as LED data level shifter,SOIC-14 (1.27mm pitch),1,candidate,,0014,SOIC-14. 5V rail TTL thresholds so 3V3 reads high. Two spare gates. VERIFY WS2815 threshold
 F-POLY,controller,PPTC 1206 500mA hold,multiple,Resettable fuse at umbilical entry,1206 (3.2 x 1.6mm),1,candidate,,0005,1206 not 0603 - larger package is easier to place and inspect
 R-DIV-ADC,controller,TBD,,Divider on the ADC branch of the breath buffer,0805 (2.0 x 1.25mm),2,open,,0003,Sensor reaches 4.7V into a 3V3 ADC. Divide after the buffer not before
-U-REG-5V,module,R-78E5.0-1.0,Recom,12V to 5V fallback if the case lacks a +5V bus rail,SIP-3 THROUGH-HOLE,1,fallback-DNP,,0006,"Footprint fitted, normally unpopulated. Jumper selects bus +5V or this. Rack +5V is the default"
 U-LVL-MOD,module,74AHCT125,,"Level shifter, 3V3 SPI up to 5V for the DAC",SOIC-14 (1.27mm pitch),1,candidate,,0006,SAME part as the instrument LED shifter. Covers SCLK MOSI CS with a spare gate
-J-PWR-EURO,module,16-pin shrouded keyed IDC header,,Eurorack power inlet,THROUGH-HOLE,1,candidate,,0005,Shrouded and keyed - reversed ribbon is the classic eurorack failure. 16-pin carries +5V as well as +/-12V
+J-PWR-EURO,module,16-pin shrouded keyed IDC header,,Eurorack power inlet,THROUGH-HOLE,1,candidate,,0005,Shrouded and keyed - reversed ribbon is the classic eurorack failure. Carries the +5V rail the module REQUIRES
 D-REVPOL,module,Schottky diodes in series with +/-12V,,Reverse polarity protection,SOD-123 / THT,2,candidate,,0005,"Backup for the keyed header. ~0.3V drop, harmless with 2V of headroom"
 FB-IN,module,ferrite bead + bulk caps,,Input LC filter on +/-12V,0805 / THT electrolytic,1,open,,0004,"Keeps rack hash out, and the module out of the rack"
 R-OUT-PROT,module,"1k series, 0805",,Series protection on each CV output,0805 (2.0 x 1.25mm),6,candidate,,0006,Standard eurorack practice - survives shorts and output-to-output patching
-JP-5V-SEL,module,2-way jumper / solder bridge,,Selects bus +5V or the local regulator,THROUGH-HOLE,1,candidate,,0005,Makes the module work in cases without a +5V bus rail
