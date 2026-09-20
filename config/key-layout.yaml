@@ -1,0 +1,51 @@
+# Key layout — single source of truth (ADR 0010)
+#
+# Consumed by:
+#   - mechanical: key positions generate plate DXF cutout geometry
+#   - firmware:   key ids generate 74HC165 bit mapping and fingering table
+#
+# When a key moves, both stay in sync by construction. Do not hand-edit the
+# generated plate or the firmware mapping.
+#
+# STATUS: schema only. Key count and positions are not yet decided and this
+# blocks milestone M2. See ADR 0010.
+
+meta:
+  units: mm
+  origin: top-left of key plate, +x right, +y down
+  switch: gateron-ks33
+  keycap: mt165-mx
+  # Measured at M1. NOT the standard 14mm MX cutout — must be measured.
+  plate_cutout: null
+  plate_thickness: null
+
+# Physical switch positions. One entry per switch.
+#
+#   id:       stable identifier, referenced by firmware and fingering table
+#   face:     top | bottom   (bottom = left thumb keys, inset — ADR 0009)
+#   x, y:     position on the plate, mm
+#   rotation: degrees, for keys angled to the finger
+#   hand:     left | right
+#   finger:   thumb | index | middle | ring | little
+#   cluster:  groups keys onto a shift register; chain order follows cluster
+#
+# Example — delete once real keys are defined:
+#
+# keys:
+#   - id: L_INDEX_1
+#     face: top
+#     x: 0.0
+#     y: 0.0
+#     rotation: 0
+#     hand: left
+#     finger: index
+#     cluster: left_hand
+
+keys: []
+
+# Shift register chain order, outermost first (ADR 0001).
+# Each cluster is one or more 74HC165 devices.
+chain: []
+
+# Fingering table lives in NVS and is editable at runtime, not compiled in
+# (ADR 0010). This file defines the physical layout only.

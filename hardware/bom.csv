@@ -1,0 +1,25 @@
+ref,category,part,manufacturer,description,qty,status,source,adr,notes
+SW1-n,controller,KS-33,Gateron,Low-profile mechanical switch MX stem,TBD,purchased,Amazon,0002,Binary. Plate cutout must be measured - not standard 14mm MX
+CAP1-n,controller,MT165-MX,Tai-Hao,Keycap 16.5x16.5mm blank black MX stem,TBD,purchased,Beekeeb,0002,Sold in 5-packs. Smaller than 18mm MX spacing
+U-MCU,controller,ESP32-S3-WROOM-1,Espressif,MCU module dual core native USB OTG,1,candidate,,0001,No internal DAC - external DAC required regardless
+U-BREATH,controller,MPXV4006GP,NXP,Pressure transducer 0-6kPa gauge conditioned,1,unconfirmed,,0003,Old repo contradicts itself - may be MPX2010GS instead
+U-ADC,controller,MCP33131-10,Microchip,16-bit SAR ADC SPI,1,candidate,,0003,SAR not delta-sigma - group delay would blow latency budget
+U-IMU,controller,BNO085,CEVA,9-axis IMU with onboard fusion 400Hz,1,candidate,,0007,Successor to BNO055 used in previous project
+U-KEYS,controller,74HC165,multiple,8-bit parallel-in shift register,TBD,candidate,,0001,Daisy-chained per key cluster - 4 wires down the body
+U-DISP,controller,TBD,,Display module IPS or OLED,1,open,,0008,Read at steep angle while playing - viewing angle dominant
+U-BUCK,controller,TBD,,12V to 3.3V buck converter,1,candidate,,0005,Local regulation from umbilical +12V
+LED-SIDE,controller,SK6812 or WS2812B,multiple,Addressable LED for acrylic edge lighting,TBD,candidate,,0009,Keep ground return off the analog path
+U-DAC,module,DAC8568 or AD5676,TI / ADI,Octal 16-bit DAC SPI,1,candidate,,0006,Populate 6 of 8 - expansion room for no cost
+U-OPA-PITCH,module,OPA2197,TI,Low-drift op-amp for pitch scaling,1,candidate,,0006,Precision channel only - offset drift is tuning drift
+U-OPA-GEN,module,TBD,,General op-amp for channels 2-6,3,candidate,,0006,Ordinary 1% parts acceptable
+U-VREF,module,TBD,,Precision voltage reference,1,candidate,,0006,Pitch stability over temperature - not the supply rail
+R-PRECISION,module,TBD,,0.1% thin-film resistors for pitch scaling,TBD,candidate,,0006,Channel 1 only
+J-CV,module,3.5mm mono jack,multiple,CV output jack,6,candidate,,0006,PITCH BREATH MOD1-4
+POT-BREATH,module,TBD,,Panel potentiometer,2,candidate,,0006,Gain then offset - order matters
+SW-POWER,module,TBD,,Panel power switch,1,candidate,,0004,
+J-UMBILICAL,module,etherCON / M12 / HR10,Neutrik / other,8-conductor ruggedised connector,2,open,,0004,etherCON ~24mm vs 6HP 30.3mm - fit check needed
+PANEL,module,TBD,,6HP Eurorack panel,1,candidate,,0004,~107mm of ~110mm usable - paper mockup first
+PLATE-TOP,mechanical,TBD,,Aluminium key plate laser or waterjet cut,1,candidate,,0009,Flat 2D through-cuts only - no CNC needed
+BODY-OAK,mechanical,TBD,,Oak top and bottom panels,2,candidate,,0009,Bottom panel thickness sets thumb key inset depth
+SIDE-ACRYLIC,mechanical,TBD,,Frosted acrylic side panels,2,candidate,,0009,Edge-lit
+DMM,tooling,TBD,,4.5-digit multimeter,1,needed,,0006,Blocks E9 pitch calibration
