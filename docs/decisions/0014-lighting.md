@@ -398,6 +398,14 @@ its own ground return per signal where it shares a channel with the strips.
 
 ## Open
 
-- Density, pending the diffusion test.
-- What the lighting actually does. Breath level is the obvious driver; note,
-  active mod channels and config-mode state are all available.
+- **What the side strips actually do.** Breath level is the obvious driver;
+  note, active mod channels and config-mode state are all available. The 8×8
+  matrix is settled — generic and assignable, defaulting to breath — and the
+  strips could reasonably take the same treatment, which would make this a
+  firmware question rather than a design one.
+- Diffusion gap and material for the side panels, and separately for the matrix
+  window, which wants pixel definition rather than blur. Both are M6 prototype
+  questions.
+
+*(Density is settled at 60/m, and the clamp is settled as a shared thermal
+budget. Both were listed here before the rack-supply framing was withdrawn.)*

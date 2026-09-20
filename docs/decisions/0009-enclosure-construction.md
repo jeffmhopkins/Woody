@@ -414,8 +414,6 @@ it is the last chance to settle.
 
 ## Open
 
-- **U-bolt position.** Settled at M8 by hanging the dry-assembled stack, not in
-  CAD. The CAD carries a nominal position and the cavity clearance around it.
 - CAD tool, which decides whether `mechanical/cad/` holds Fusion, FreeCAD or
   neutral STEP.
 - Oak thickness for the bottom panel, which sets thumb key travel.
