@@ -37,6 +37,7 @@ F-POLY,controller,PPTC 1206 500mA hold,multiple,Resettable fuse at umbilical ent
 R-DIV-ADC,controller,TBD,,Divider on the ADC branch of the breath buffer,0805 (2.0 x 1.25mm),2,open,,0003,Sensor reaches 4.7V into a 3V3 ADC. Divide after the buffer not before
 U-LVL-MOD,module,74AHCT125,,"Level shifter, 3V3 SPI up to 5V for the DAC",SOIC-14 (1.27mm pitch),1,candidate,,0006,SAME part as the instrument LED shifter. Covers SCLK MOSI CS with a spare gate
 J-PWR-EURO,module,16-pin shrouded keyed IDC header,,Eurorack power inlet,THROUGH-HOLE,1,candidate,,0005,Shrouded and keyed - reversed ribbon is the classic eurorack failure. Carries the +5V rail the module REQUIRES
-D-REVPOL,module,Schottky diodes in series with +/-12V,,Reverse polarity protection,SOD-123 / THT,2,candidate,,0005,"Backup for the keyed header. ~0.3V drop, harmless with 2V of headroom"
-FB-IN,module,ferrite bead + bulk caps,,Input LC filter on +/-12V,0805 / THT electrolytic,1,open,,0004,"Keeps rack hash out, and the module out of the rack"
+D-REVPOL,module,1N5817,,Schottky reverse polarity protection,DO-41 THROUGH-HOLE,2,candidate,,0005,~0.3-0.4V drop at 290mA. Community standard for eurorack power entry
+FB-IN,module,Ferrite bead + 47uF electrolytic per branch,,"Input filtering, branched per rail",0805 bead / THT electrolytic,4,candidate,,0004,NOT a series resistor - we pass 290mA so even 2.2ohm costs 0.64V. Branch the two +12V paths separately
 R-OUT-PROT,module,"1k series, 0805",,Series protection on each CV output,0805 (2.0 x 1.25mm),6,candidate,,0006,Standard eurorack practice - survives shorts and output-to-output patching
+C-DECOUPLE,module,100nF ceramic,,HF decoupling at every IC,0805 (2.0 x 1.25mm),10,candidate,,0004,"One per supply pin, close to the pin"

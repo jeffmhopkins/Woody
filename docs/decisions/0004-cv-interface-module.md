@@ -135,6 +135,68 @@ same order as the aluminium key plate** (ADR 0009). Which also disposes of the
 last objection to etherCON: its cutout is more complex than a round hole, and on
 a laser-cut panel complexity is free.
 
+### Power entry, and why this module is not a typical one
+
+Eurorack practice for module power entry is well settled, and converges on:
+
+- **Series Schottky diodes** on +12 V and −12 V for reverse polarity, 1N5817
+  being the common choice for its low drop at module currents
+- **A ferrite bead** in series for RF suppression — or, in many designs, a small
+  series resistor of 2.2–10 Ω instead
+- **Bulk electrolytics**, typically 10–100 µF per rail, for ripple and as a
+  local reservoir
+- **100 nF ceramics** at every IC
+
+Two things make this module unusual, and both change the answer.
+
+**It passes the instrument's current.** A typical module draws 20–100 mA. This
+one draws its own analog current *plus* everything the instrument consumes:
+
+| Rail | Draw |
+|---|---|
+| +12 V | ~290 mA (40 module, 250 instrument) |
+| −12 V | ~40 mA |
+| +5 V | ~20 mA |
+
+That is about 15% of a modern rack supply's +12 V capacity — unremarkable, but
+it **rules out the series-resistor variant**, which is harmless at 50 mA and is
+not at 290 mA:
+
+| Series R | Drop at 290 mA |
+|---|---|
+| 2.2 Ω | 0.64 V |
+| 10 Ω | 2.90 V |
+
+**So: ferrite beads, not resistors.** A 1N5817 drops roughly 0.3–0.4 V at this
+current, leaving ~11.5 V at the instrument after cable drop, against a buck that
+needs more than 6 V in. Ample.
+
+**It has two filtering jobs, not one.** Most modules only need to keep rack hash
+out of themselves. This one also has to keep *itself* out of the rack, because
+the instrument's buck converter is a switching load drawing pulsed current
+through this module.
+
+Those are different problems and they want separate treatment:
+
+```
+bus +12V ──[1N5817]──┬──[ferrite]──[bulk]── module analog (op-amps, DAC)
+                     │
+                     └──[ferrite]──[bulk]── umbilical +12V to the instrument
+
+bus -12V ──[1N5817]─────[ferrite]──[bulk]── module analog
+bus +5V  ────────────────[ferrite]──[bulk]── DAC VDD, level shifter
+```
+
+**Branch the two +12 V paths after the protection diode, each with its own
+ferrite and bulk capacitance.** That way the buck's pulsed draw is absorbed
+locally instead of modulating the rail the pitch scaling stage is referenced to
+— which is the whole point, since this module's analog section is precision and
+most modules' are not.
+
+Sources: Doepfer's A-100 technical documentation for the bus and supply
+conventions; ModWiggler's module-power-entry threads for the community consensus
+on diodes, ferrites and reservoir values.
+
 ### Module design principles
 
 **The module is dumb.** Jacks, knobs, connector, power switch, analog. No menu,
