@@ -113,100 +113,73 @@ SPI3 needs only SCK and MISO plus the existing latch GPIO. Two extra pins
 against sixteen of headroom — and it has the side benefit the original line was
 after, since a key scan and a CV update no longer contend.
 
-### The registers live at the tail, not in the clusters
+### One register per cluster, on the board its switches are already on
 
-**Decided after the prior-art review found this ADR and ADR 0013 specifying
-opposite looms** — one register per cluster here, all four on the carrier
-there — with the BOM carrying rows for both. The loom is hand-built once into a
-body that is bonded shut, so this could not stay open.
+**Decided, reversed, and decided again.** ADR 0001 originally put one register
+in each cluster; ADR 0013's build-approach section put all four on the carrier;
+the BOM carried rows for both and neither document noticed. It was settled at
+the tail on 2026-09-21 and reversed the same day, because the argument that
+settled it did not survive review.
 
-**All four registers go on the carrier at the tail.** Each switch gets its own
-conductor back to it.
+**The registers go on the cluster boards.** Each cluster already needs a rigid
+PCB with its switches soldered to it (ADR 0002) — the register, its decoupling
+and the per-key filter network go on that same board, so every switch-to-chip
+connection is a copper trace. Four conductors plus power leave each board.
 
-| | Registers at the tail | One per cluster |
+| | **One per cluster** | All four at the tail |
 |---|---|---|
-| Conductors down the body | **~23** (18 switches + grounds + spares) | ~10 |
-| What they carry | **DC levels, filtered at 100 µs** | clock, latch and serial data with fast edges |
-| Boards | **1** | 5 |
-| Vulnerable to the LED channel | **No** — see the arithmetic below | Yes, and unfilterable |
+| Conductors down the body | **6 per hop** | 32–44 |
+| Hand-terminated joints | **~4 connectors** | **~46 individual wires** |
+| Boards | 5 | 5 — *the switches need a PCB either way* |
+| Carrier area | as designed | **+41 %**: 4 ICs and 63 passives |
+| Risk | clocked lines in the LED channel | a fat loom, and blast radius if one is hit |
 
-**The whole argument is that one option's risk is retrofittable and the
-other's is not.** A fat loom is a nuisance you can see, measure and re-route on
-the bench. A clocked line that picks up an 800 kHz LED edge gives you a wrong
-note, intermittently, inside a body that never opens again — and it cannot be
-filtered, because filtering a clock is what breaks it.
-
-**The arithmetic this section used to give was wrong three ways, and it is
-worth correcting rather than quietly deleting**, because a decision was taken
-on it.
-
-It said: a 12 V LED edge through ~15 pF injects ~180 pC, which is 18 mV into
-`C-KEY` but **4.5 V into a bare wire — a false key press**. Every step of that
-is wrong:
+**The tail argument was sold on arithmetic that was wrong three ways.** It
+claimed a 12 V LED edge through ~15 pF injects ~180 pC — 18 mV into a filter
+capacitor but **4.5 V into a bare wire, a false key press**. In fact:
 
 - **There is no 12 V edge.** The WS2815 rail is held up by 470–1000 µF and its
   LED current is PWM'd at ~2 kHz (ADR 0014). The fast aggressor is the **data
-  line, at 5 V** from the 74AHCT125.
-- **`Q/C` is the wrong model.** Capacitive coupling is a *divider*:
+  line, at 5 V**.
+- **`Q/C` is the wrong model.** Coupling is a *divider*:
   `ΔV = V_agg · C_c/(C_c + C_v)`. It agrees with `Q/C` when `C_v ≫ C_c`, which
   is why the 18 mV figure survived, and diverges badly when it does not.
-- **So a passive divider cannot exceed the aggressor's own swing.** The
-  published 4.5 V was 37 % above the ceiling of its own mechanism.
+- **A passive divider cannot exceed the aggressor's own swing.** The published
+  4.5 V was 37 % above the ceiling of its own mechanism.
 
-Corrected:
+Corrected, an unfiltered wire sees **1.36 V**, landing at 1.94 V against a
+0.8 V threshold. **Capacitive coupling does not produce a false press on either
+topology**, and the decision has to be made on something else.
 
-| Aggressor | Into `C-KEY` 10 nF | Into ~40 pF of bare wire |
-|---|---|---|
-| 5 V data line (real) | 7 mV | **1.36 V** |
-| 12 V rail (hypothetical) | 18 mV | 3.27 V |
+**On the something else, per-cluster wins on three counts and loses on one.**
+It wins on hand-joint count (about 4 connectors against about 46 wires, in a
+strap-worn instrument that is bonded shut), on loom width (6 conductors per hop
+against 40–56 mm of ribbon sharing channels with the LED strips and the breath
+tube), and on carrier area — the tail version added 4 ICs and 63 passives to a
+two-layer board already about 82 % covered, with a 22 mm hole through it.
 
-A line idling at 3.3 V kicked down by 1.36 V lands at **1.94 V, well above the
-0.8 V input-low threshold**. On these numbers capacitive coupling does not
-produce a false press *even on an unfiltered wire*, and a balanced pulse train
-injects no net charge, so it cannot hold one low either.
+It loses on **blast radius**: a disturbed switch line is one wrong note, a
+disturbed clock or latch is all 32 bits, and a glitch on `SH/LD` reloads every
+register mid-shift. That is a severity argument, and severity is why the
+signal-integrity rules below are not optional.
 
-**What actually survives as an argument for the tail** is narrower and was
-never stated:
+### And the part changes to the slow family
 
-- **Sampling aperture.** A parallel input is sampled for a few nanoseconds once
-  per 250 µs scan. A clock or latch line is sensitive to a glitch **100 % of
-  the time**, and a glitch on `SH/LD` reloads all four registers mid-shift and
-  corrupts the whole 32-bit word rather than one bit.
-- **Blast radius.** A disturbed switch line is one wrong note. A disturbed
-  clock is every key at once.
+**74HC165, not 74LVC165.** This ADR already said so in passing — "74HC165 at
+3.3 V has edges slow enough not to need termination at all, and would have been
+the lower-risk choice on those grounds" — and then kept LVC anyway.
 
-Those are real, and the second is the one ADR 0001 already calls a top-two
-risk. They are a good deal weaker than "4.5 V versus 18 mV", and the honest
-position is that this is a **judgement about failure modes, not a calculation
-that settles it** — see "What this cost" below.
+That sentence is now load-bearing. The hazards used to reject the per-cluster
+loom the first time round — reflections, termination on a multidrop line, hold
+margin — are properties of **fast edges**. At LVC's rise times 265 mm is a
+transmission line; at HC's it is an ordinary lumped load. Same SOIC-16
+footprint, and the drive is ample: ~26 pF of loom plus connectors, at 1 MHz.
 
-### What this cost, stated honestly
-
-Three objections survive review and are not answered:
-
-- **It is 32–44 conductors, not 23.** With a ground every four signals and the
-  two spare conductors ADR 0009 mandates, 32 at 1.27 mm pitch is ~41 mm of
-  ribbon width; with this ADR's own "ground return per signal" rule it is 44
-  and ~56 mm — wider than the instrument. It probably still fits folded, in
-  both side channels, but it forces the key ribbons to share channels with the
-  LED runs, which was otherwise a free mitigation. **M4 CAD item.**
-- **Hand joints go from about 4 to about 46**, on a strap-worn instrument, in a
-  body that never reopens. That is the opposite of the usual reliability trade.
-- **"One board versus five" was a false dichotomy.** The switches need a
-  stiffener PCB either way (ADR 0002), so the real comparison is five boards
-  against five boards, four of which would also carry a SOIC-16. The marginal
-  cost of the per-cluster option is one chip per board, not four boards.
-
-**And the per-cluster option was compared against a strawman.** Its hazards —
-reflections, termination, hold margin — are properties of the fast-edged
-74LVC165. This ADR already says **74HC165 "would have been the lower-risk
-choice"** and is a drop-in on the same footprint; with HC edges, 265 mm is a
-lumped load rather than a transmission line and those hazards largely vanish.
-
-The decision stands, but on the failure-mode argument above rather than on the
-arithmetic, and with the objections recorded rather than argued away. If E4
-shows the loom is awkward, per-cluster HC165 is the fallback and it is cheap to
-take.
+**So `R-TERM-CHAIN` is not restored.** It was wrong as written anyway — series
+termination is a point-to-point technique and those lines drop on four boards,
+where intermediate receivers sit at the incident half-step. With HC there is
+nothing to terminate. If E4 says otherwise, series resistors at the driving end
+are the fallback and LVC is the other way to go.
 
 ### Key-line signal integrity
 
@@ -235,51 +208,52 @@ reserved spare-switch bits are covered too. (`R-KEY-PU`, `R-KEY-SER`, `C-KEY`.)
 Five further fixes, in descending order of value. The first four are wiring and
 cost nothing but planning; they cannot be retrofitted into a bonded body.
 
-1. **A ground return every few signals.** Eighteen switch lines down a
-   14-inch body sharing one return is a loop antenna next to an 800 kHz LED
-   data line. One ground per four signals in each ribbon, which a standard
-   ribbon gives for free by alternating.
-2. **Star it from the carrier — one ribbon per cluster.** With the registers at
-   the tail there is nothing to chain, and four short independent runs are
-   easier to build and easier to fault-find than one trunk with taps.
-3. ~~**Order the chain so serial data flows toward the clock source.**~~
-   **Moot.** This was the rule for a clocked loom, and the research found it
-   overstated anyway — the skew between adjacent clusters was ~0.5 ns against a
-   propagation delay of 5–14 ns, so the wrong order degraded hold margin by
-   roughly 12 % rather than violating it. `key-layout.yaml` said it would have
-   put "hold-margin violations" into a bonded body, which was an honesty marker
-   pointing the wrong way. The chain is now four devices on one PCB with
-   millimetre traces, and the question does not arise.
+1. **A ground return per signal.** The highest-value item on this list. Four
+   clocked signals down a 14-inch body sharing one return is a loop antenna
+   next to an 800 kHz LED data line.
+2. **Chain the topology, do not star it.** One run passing through each cluster
+   board in turn, not four stubs from a central point.
+3. **Order the chain so serial data flows *toward* the clock source**, which
+   makes propagation skew eat **setup** margin rather than **hold** margin.
+   Setup is recoverable by clocking slower; hold is not recoverable at any
+   speed. With the MCU at the tail (ADR 0013) that is
+   `right_thumb → right_hand → left_thumb → left_hand`, and **`bit 0` means the
+   first bit clocked out — the device nearest the MCU.**
 
-   **`bit 0` still means the first bit clocked out**, because firmware needs it
-   defined. It is now a board-layout detail rather than a loom decision.
+   **Magnitude, honestly:** the skew between adjacent clusters is ~0.5 ns
+   against an HC165's propagation delay of tens of nanoseconds, so the wrong
+   order costs a few percent of hold margin rather than violating it. An
+   earlier version of `config/key-layout.yaml` claimed it would put
+   "hold-margin violations" into a bonded body — an honesty marker pointing the
+   wrong way. The rule is still worth following because it is free. It is not
+   what decides whether the chain works.
 4. ~~**33–68 Ω series termination at the MCU** on the clock and latch lines.~~
-   **Also moot, and it was wrong as written**: series termination is a
-   point-to-point technique, and those lines dropped on four boards. On a
-   multidrop line intermediate receivers sit at the incident half-step —
-   at 68 Ω that step could land at 1.96 V against a 2.0 V threshold, so the
-   BOM's own "33–68 Ω" range spanned fine to marginal, in the counterintuitive
-   direction. On one board it is a non-question.
-5. **100 nF at every register.** Still required — a 74x165's output edges brown
-   out a local rail with no reservoir — but now four caps on the carrier rather
-   than one on each of four satellite boards.
+   **Deleted, for two independent reasons.** It was wrong as written — series
+   termination is a point-to-point technique and these lines drop on *four*
+   boards, where intermediate receivers sit at the incident half-step; at 68 Ω
+   that step can land at 1.96 V against a 2.0 V threshold, so the specified
+   "33–68 Ω" spanned fine to marginal, in the counterintuitive direction. And
+   with HC165's slow edges there is nothing to terminate.
+5. **100 nF at every register**, on its own board — which is where it belongs.
+   A 74x165's output edges brown out a local rail that has no reservoir.
 6. **Tie `CLK INH` low at all four devices, and pull every unused parallel
-   input.** Both are permanent, both were sitting only in a review document,
-   and the five "free" spare bits are floating CMOS inputs — the exact fault
-   `R-KEY-PU` exists to fix.
+   input.** Both are permanent and both were sitting only in a review document.
+   The five genuinely free spare bits are floating CMOS inputs — the exact
+   fault `R-KEY-PU` exists to fix.
 
-**On family choice: the part stays 74LVC165A, but the recorded reason for it was
-backwards.** The BOM justified LVC as *"better drive over a 14 in chain"*. Over
-an **unterminated** line, stronger drive and faster edges are exactly what
-produces ringing and reflections — the drive that helps into a lumped load hurts
-into a transmission line. 74HC165 at 3.3 V has edges slow enough not to need
-termination at all, and would have been the lower-risk choice on those grounds.
+**On family choice: the part becomes 74HC165, and this ADR said why before it
+chose otherwise.** The BOM justified LVC as *"better drive over a 14 in
+chain"*, which is backwards: over an unterminated line, stronger drive and
+faster edges are what produce ringing and reflections. This section already
+recorded that *"74HC165 at 3.3 V has edges slow enough not to need termination
+at all, and would have been the lower-risk choice on those grounds"* — and then
+kept LVC anyway, with a termination scheme that turned out to be the wrong
+technique for the topology.
 
-Either family works here. LVC is kept because it is specified natively at 3.3 V
-and is already selected — but it is kept **with item 4 above**, the series
-termination, which is what actually makes the drive argument safe rather than
-merely confident. If the chain misbehaves at E4 and termination does not settle
-it, 74HC165 is a drop-in on the same SOIC-16 footprint.
+**HC makes the loom an ordinary lumped load instead of a transmission line**,
+which is what removes the hazards that sent the registers to the tail in the
+first place. Same SOIC-16 footprint, and the drive is ample into ~26 pF of loom
+at 1 MHz. If E4 disagrees, LVC with proper source termination is the way back.
 
 ### Two firmware rules the chain depends on
 

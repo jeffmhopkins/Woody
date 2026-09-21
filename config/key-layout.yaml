@@ -94,35 +94,31 @@ keys:
   - { id: RT2, face: bottom, x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb, role: control }
   - { id: RT3, face: bottom, x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb, role: control }
 
-# Shift register chain. Four 74LVC165s, 32 bits, 18 used, 14 spare.
+# Shift register chain. One 74HC165 per cluster, ON THE BOARD ITS SWITCHES ARE
+# ALREADY ON: 4 devices, 32 bits, 18 used, 14 spare.
 #
-# ALL FOUR LIVE ON THE CARRIER AT THE TAIL (ADR 0001, ADR 0013). Each switch
-# runs its own conductor back to it - four ribbons, one per cluster, DC levels
-# filtered at ~100us by R-KEY-PU and C-KEY. Nothing clocked goes into the loom.
+# Six conductors leave each board - VCC, GND, CLK, SH/LD, SER-in, QH-out - with
+# a ground return per signal, chained cluster to cluster rather than starred.
 #
-# This replaces one-register-per-cluster. ADR 0001 and ADR 0013 specified
-# opposite looms and the BOM carried rows for both; the loom is hand-built once
-# into a body that is bonded shut, so it could not stay open.
+# THE ORDER BELOW IS A LOOM DECISION, not a layout detail. ADR 0001 requires
+# serial data to flow TOWARD the clock source so that propagation skew eats
+# SETUP margin (recoverable by clocking slower) rather than HOLD margin (not
+# recoverable at any speed). The MCU is at the tail, so right_thumb is nearest
+# and reads out first; left_hand is furthest and takes the loom's SER end.
 #
-# The coupling arithmetic originally given here was WRONG - see ADR 0001. A
-# capacitive divider cannot exceed the aggressor's swing, and the aggressor is
-# the 5V data line, not the 12V rail. What actually decides it is blast radius:
-# a disturbed switch line is one wrong note, a disturbed clock or latch is all
-# 32 bits at once, and a parallel input is only sensitive for nanoseconds per
-# scan where a clock is sensitive always.
+# BIT 0 IS THE FIRST BIT CLOCKED OUT - the device nearest the MCU. That
+# definition was ambiguous once and the ambiguity is what got the order wrong.
 #
-# ONE SENTINEL CONDUCTOR PER RIBBON, grounded at the cluster end and returned
-# to a spare chain bit: without it the marker pattern cannot see the loom at
-# all, because the marker bits are now board-local tie-offs.
-#
-# CHAIN ORDER IS NOW A PCB LAYOUT DETAIL, not a loom decision - four devices,
-# millimetre traces. The order below is kept because firmware needs the bit map,
-# and bit 0 still means THE FIRST BIT CLOCKED OUT.
+# Honest magnitude: adjacent-cluster skew is ~0.5ns against an HC165's tens of
+# nanoseconds of propagation delay, so the wrong order costs a few percent of
+# hold margin rather than violating it. An earlier version of this comment said
+# it would put "hold-margin violations" into a bonded body; that was an honesty
+# marker pointing the wrong way. Follow the rule anyway - it is free.
 chain:
-  - cluster: right_thumb  # bits 0-7   — 3 used, 5 spare — first out
+  - cluster: right_thumb  # bits 0-7   — 3 used, 5 spare — nearest the MCU
   - cluster: right_hand   # bits 8-15  — 6 used, 2 spare
   - cluster: left_thumb   # bits 16-23 — 4 used, 4 spare
-  - cluster: left_hand    # bits 24-31 — 5 used, 3 spare — last out
+  - cluster: left_hand    # bits 24-31 — 5 used, 3 spare — SER end of the loom
 
 # Spare chain bits: 14 total, but NOT all available.
 #   4-6 are claimed by the marker pattern (ADR 0001) - wiring-only, and they

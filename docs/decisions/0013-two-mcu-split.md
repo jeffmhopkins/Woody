@@ -235,10 +235,10 @@ instrument where none of it is the interesting part.
 at all.** The carrier holds only:
 
 - Headers the dev boards plug into
-- **All four 74LVC165 shift registers**, and the 21 sets of pull-up, series
-  resistor and filter capacitor that go with them. ADR 0001 used to put one
-  register in each key cluster; the two ADRs specified opposite looms and this
-  one wins — see ADR 0001 for the arithmetic that decided it
+- ~~The shift registers~~ — **no.** This line and ADR 0001 specified opposite
+  looms for a long time without either noticing. It is settled the other way:
+  **one 74HC165 per cluster, on the board its switches are already on**, which
+  keeps 4 ICs and 63 passives off a carrier that is short of room. See ADR 0001
 - MCP3202 ADC, REF5050 5.000 V reference, OPA2197 dual (reference buffer +
   breath buffer, both on +12 V)
 - 74AHCT125 level shifter
