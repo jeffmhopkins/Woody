@@ -339,3 +339,36 @@ some four-channel arrays are six-pin. What makes it a defect is that
 the five-pin one. The row is right by accident and wrong by its own reasoning.
 
 **This is the thesis of every wave this project has run, on a two-row fix.**
+
+## C6 / A5 — the umbilical's conductor gauge is nowhere, and three derivations assume it
+
+| Claim | Check | Verdict |
+|---|---|---|
+| `CABLE-UMB` specifies no gauge while three derivations compute from 24 AWG | Read the BOM row and grepped for the assumption | **Confirmed.** The row buys a `"Cat5e STP patch lead, **STRANDED**, ~2m"` — no AWG anywhere in it. Three documents derive from 24 AWG: `breath-sense-link.md:100` (0.168 Ω of return resistance), `0003:315` (the whole signal-drop table), `0005:91` ("Over 2 m of 24 AWG, round trip ~0.34 Ω") |
+
+What makes this more than an omission: the row's own note explains at length
+*why* it is stranded — "solid core work-hardens and fractures under constant
+flexing, which is this cable's whole life". Stranded patch leads are commonly
+26 or 28 AWG, i.e. **1.6× to 2.6× the assumed resistance**. So the deliberate,
+well-argued choice is exactly the one that invalidates the gauge three other
+pages depend on, and nobody connected the two. A5 reached the same place from
+the power side and put 26 AWG at **+59 % drop**.
+
+## C6 / A10 — a settled figure, contradicted twice, by documents that cite each other
+
+| Claim | Check | Verdict |
+|---|---|---|
+| `plate-thickness` is **settled at 1.20 mm** while `config/key-layout.yaml` calls it unset and `cluster-boards.md` calls it open | Read all three | **Confirmed.** `config/key-layout.yaml:33` reads `plate_thickness: null`. `hardware/cluster/cluster-boards.md:167` reads "**Plate thickness is still open and blocks M4/M5**" — and cites `[repo] key-layout.yaml, 0002, bom.csv` as its authority |
+
+The citation chain is **intact**. The page cites the config file, the config
+file says `null`, and the two agree with each other perfectly. They just both
+contradict the register entry that says the question is settled. A reader who
+checks the source gets the wrong answer confirmed.
+
+**And no possible `forbidden` pattern catches it.** The register protects
+against a superseded *value*; `null` and "still open" are the absence of one.
+That is C6's generalised point and it is correct: **the register can protect a
+wrong number and cannot protect a missing one.** It is also the cheapest
+missing check in the repository after the one `STATUS.md` already names — both
+are of the form "assert that what is written now resolves", which is the
+principle the restructure's own three new checks were built on.
