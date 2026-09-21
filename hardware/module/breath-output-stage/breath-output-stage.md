@@ -14,15 +14,20 @@ Every net that crosses this circuit's boundary. Quantities appear **only** as a
 citation into `config/figures.yaml` — this table names nodes, it does not
 restate values.
 
+`Dir` is this circuit's side of the net — `in`, `out`, `in/out`, `ref` (a
+return or reference) or `—` (no connection here, the row is context). `Peer`
+is a bare `board/circuit` id when the other end is a circuit in this tree, a
+reference designator or part name when it is not, and `—` when there is
+nothing on the other end.
+
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| in-amp output | in | `module/breath-receive-stage` | `inamp-full-scale`, `breath-working-point` | The drawing's `from the INA828`, resting at 0 V because the pedestal is nulled at the in-amp's `REF`. `module/breath-response-shaper` is *proposed* to insert here, ahead of `POT-GAIN` |
-| buffered +5.21 V | in | `module/power-entry` | `dac-rail` | Top of `POT-OFFSET`, buffered. The positive leg of the offset pair |
-| −12 V | in | `module/power-entry` | — | `R-OFFNEG`'s fixed leg. Chosen over +12 V because this rail carries no LED current |
-| ±12 V | in | `module/power-entry` | — | Op-amp supplies, and `D-JACK-CLAMP` returns to both rails |
-| `AGND` (module) | ref | `module/power-entry` | `dig-gnd-topology` | `R-GAIN-FLOOR`, the summer's (+) input and `C-OUT-BREATH` all return here. The module ground plan is unsettled — see the figure |
-| `BREATH` | out | panel jack | — | Feedback comes from the op-amp output, so `R-OUT-PROT` isolates `C-OUT-BREATH` from the loop |
-| `POT-GAIN`, `POT-OFFSET` | panel | `module/panel` | `panel-width`, `panel-height-budget` | Two of the three panel pots. Row and knob geometry belongs to the panel page, not here |
+| in-amp output | in | `module/breath-receive-stage`, `interfaces/breath-sense-link`, `module/breath-response-shaper` | `inamp-full-scale`, `breath-working-point` | The drawing's `from the INA828`, resting at 0 V because the pedestal is nulled at the in-amp's `REF`. `module/breath-response-shaper` is *proposed* to insert here, ahead of `POT-GAIN` |
+| `DAC AVDD` | in | `module/power-entry` | `dac-rail` | The top of `POT-OFFSET`, buffered — the positive leg of the offset pair. The drawing below labels this node as the buffered LM317 rail and restates the figure's value in the label; the value belongs to `dac-rail` and not to a net name |
+| `MODULE ANALOG +12V`, `MODULE ANALOG −12V` | in | `module/power-entry` | — | Op-amp supplies, and `D-JACK-CLAMP` returns to both rails. `R-OFFNEG`'s fixed leg is on −12 V, chosen over +12 V because that rail carries no LED current |
+| `AGND_MOD` | ref | `module/power-entry` | `dig-gnd-topology` | The module analog star, drawn `AGND(module)`. `R-GAIN-FLOOR`, the summer's (+) input and `C-OUT-BREATH` all return here. The module ground plan is unsettled — see the figure |
+| `BREATH_OUT` | out | `module/panel` | — | The panel jack. Feedback comes from the op-amp output, so `R-OUT-PROT` isolates `C-OUT-BREATH` from the loop. **Not `BREATH_SENSE`**, the umbilical conductor that arrives at the in-amp |
+| `POT-GAIN`, `POT-OFFSET` | — | `module/panel` | `panel-width`, `panel-height-budget` | Two of the three panel pots — a panel cutout and a knob envelope, not a net that leaves this circuit. Row and knob geometry belongs to the panel page, not here |
 
 ## What it has to do
 

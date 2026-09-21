@@ -1,44 +1,41 @@
-# STATUS: SEEDED, NOT VERIFIED. Read this before trusting an edge.
+# STATUS OF THE EDGES BELOW, 2026-09-21.
 #
-# depends_on was machine-seeded from CO-MENTION - what this page names - and
-# co-mention is not dependency. A cold reviewer reconciled the refdes edges
-# against the BOM fragments and verified three as false by reading:
+# circuit: edges are VERIFIED. They were rebuilt, in one pass across all 23
+# circuits, from the `## Interfaces` tables after a 22-slice cold review found
+# the machine-seeded set both wrong and one-sided: five rows named
+# module/digital-and-supervision for nets that come from module/dac8568, and
+# 26 of the 50 declared edges existed at only one end (the review counted
+# 27 of 49 before the day's other edits; the count was re-measured here). Nine
+# circuits - all of carrier/**, all of cluster/** and module/panel - declared
+# no circuit: edge at all, because their tables wrote peers as prose.
+# The graph is now 48 edges, every one declared from both ends, and no
+# circuit is isolated.
+#
+# The rule is now mechanical, so an edge can be checked against the two tables
+# it comes from:
+#
+#   ONE circuit: edge per distinct `board/circuit` id in the Peer column of
+#   this circuit's Interfaces table, AND every such edge is declared from BOTH
+#   ends. A peer that is not a circuit in this tree - a connector, the Eurorack
+#   bus board, a dev board header - is named in the Peer column by its
+#   reference designator or its name, and creates no edge.
+#
+# adr:, fig: and refdes: edges are STILL SEEDED FROM CO-MENTION and are NOT
+# VERIFIED. An edge of those three kinds means "this page mentions this thing",
+# which is a useful starting graph and a bad finished one. A cold reviewer
+# verified three refdes edges as false by reading:
 #   pitch-stage -> R-BIAS-INAMP   the page names it as an explicit CONTRAST
 #   breath-adc  -> C-STRIP-BULK   a citation of a note about the LED strip
 #   breath-receive -> U-OPA-PITCH a package-count consequence, not a use
-# Expect more of that shape. An edge here means "this page mentions this
-# thing", which is a useful starting graph and a bad finished one.
+# Those three are still declared. Expect more of that shape.
 #
-# IT IS ALSO ASYMMETRIC, and the reason is worth knowing: circuit: edges were
-# seeded from the Interfaces tables' Peer column, and the agents that wrote
-# those tables did not agree on notation. The module pages named peers as
-# `board/circuit` ids; the carrier pages named them in prose ("the dev
-# board's LDO", a link to carrier.md). So carrier/** and cluster/** declare
-# ZERO circuit: edges while module/power-entry declares seven. That is a
-# property of the tables, not of the hardware.
+# Direction is still not recorded: several pairs are mutual, which is honest
+# for a net shared between two circuits and useless for ordering anything.
 #
-# Direction is meaningless: several pairs are mutual, which is honest for a
-# net shared between two circuits and useless for ordering anything.
-#
-# WHAT IS ACTUALLY GUARANTEED: every edge RESOLVES. A refdes names a BOM row
-# that exists, a fig names a register entry, a circuit names a declared id.
-# That is what catches a dependency on a deleted part, which is the semantic
-# half CLAUDE.md 5 says a grep cannot reach. Correctness of the edge itself
-# is a reader's job and has not been done.
-
-# Seeded 2026-09-21 from what the page already states - the ADRs it
-# cites, the figures it names, and the refdes it draws that the BOM
-# carries. Nothing here was guessed: an edge is listed because the
-# page names the thing.
-#
-# depends_on is the field that can lie. It fails SILENT - an
-# undeclared edge is an unchecked edge - so it is seeded rather than
-# started empty, and tools/check-staleness.py resolves every entry.
-#
-# There is deliberately no `revision`: git holds it exactly and
-# cannot forget. And no `figures_owned`: that would put ownership in
-# two files, which is rule 1 broken in the project's own metadata.
-# config/figures.yaml owner: is the one declaration.
+# WHAT IS GUARANTEED FOR EVERY EDGE, verified or seeded: it RESOLVES. A refdes
+# names a BOM row that exists, a fig names a register entry, a circuit names a
+# declared id. That is what catches a dependency on a deleted part, which is
+# the semantic half CLAUDE.md 5 says a grep cannot reach.
 
 id: interfaces/breath-sense-link
 title: Breath sense link — the sensor, the pair and the in-amp
@@ -65,5 +62,4 @@ depends_on:
 - circuit:carrier/breath-excitation-reference
 - circuit:module/breath-output-stage
 - circuit:module/breath-receive-stage
-- circuit:module/digital-and-supervision
-- circuit:module/power-entry
+- circuit:module/link-supervision

@@ -11,15 +11,21 @@ Every net that crosses this circuit's boundary. Quantities appear **only** as a
 citation into `config/figures.yaml` — this table names nodes, it does not
 restate values.
 
+`Dir` is this circuit's side of the net — `in`, `out`, `in/out`, `ref` (a
+return or reference) or `—` (no connection here, the row is context). `Peer`
+is a bare `board/circuit` id when the other end is a circuit in this tree, a
+reference designator or part name when it is not, and `—` when there is
+nothing on the other end.
+
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `J-UMB` pin 3 `+12V` | in | the module, down the umbilical | `umbilical-pinmap`, `umbilical-current` | `D-REVSHUNT` sits at the connector, ahead of `L-BUCK-IN` |
-| `J-UMB` pin 6 `PWR_GND` | in | the module, down the umbilical | `umbilical-pinmap` | This board's only supply return |
-| `+12V` strip feed | out | [`led-strip-drive`](../led-strip-drive/led-strip-drive.md), via `J-LED-L/-R` | — | Taken direct off the input node. `C-STRIP-BULK` is this circuit's part |
-| `+12V` analog | out | [`breath-excitation-reference`](../breath-excitation-reference/breath-excitation-reference.md) | — | REF5050 `VIN`, and the V+ of both OPA2197 halves |
-| 5 V, buck A | out | `HDR-DEV`; the 74AHCT125 of [`led-strip-drive`](../led-strip-drive/led-strip-drive.md) | `matrix-led-current` | Through `D-USBOR` onto the dev board's 5 V pin |
-| 5 V, buck B | out | [`display-and-service-uart`](../display-and-service-uart/display-and-service-uart.md), on `J-DISP` | — | Buck B's location is open — see *Still open* |
-| `PWR_GND` pour | ref | the whole board, and the aluminium key plate | `dig-gnd-topology` | `MECH-GNDBOND` can only originate here |
+| `UMBILICAL +12V` at `J-UMB` | in | `module/umbilical-load-switch` | `umbilical-pinmap`, `umbilical-current` | Arrives down the umbilical from the module's load switch. `D-REVSHUNT` sits at the connector, ahead of `L-BUCK-IN` |
+| `PWR_GND` at `J-UMB` | ref | `module/power-entry` | `umbilical-pinmap` | This board's only supply return, down the umbilical to the module star |
+| `+12V` strip feed | out | `carrier/led-strip-drive` | — | Taken direct off the input node. `C-STRIP-BULK` is this circuit's part |
+| `+12V` analog | out | `carrier/breath-excitation-reference` | — | REF5050 `VIN`, and the V+ of both OPA2197 halves |
+| 5 V, buck A | out | `HDR-DEV`, `carrier/led-strip-drive` | `matrix-led-current` | Through `D-USBOR` onto the dev board's 5 V pin, and on to the 74AHCT125 |
+| 5 V, buck B | out | `carrier/display-and-service-uart` | — | On `J-DISP`. Buck B's location is open — see *Still open* |
+| `PWR_GND` pour | ref | `carrier/breath-adc`, `carrier/breath-excitation-reference`, `carrier/display-and-service-uart`, `carrier/led-strip-drive` | `dig-gnd-topology` | The whole board returns here, and the aluminium key plate through `MECH-GNDBOND`, which can only originate here. `AGND_INST` reaches it on a single tie |
 
 ## §1 Power entry
 

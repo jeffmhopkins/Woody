@@ -18,13 +18,19 @@ Every net that crosses this circuit's boundary. Quantities appear **only** as a
 citation into `config/figures.yaml` — this table names nodes, it does not
 restate values.
 
+`Dir` is this circuit's side of the net — `in`, `out`, `in/out`, `ref` (a
+return or reference) or `—` (no connection here, the row is context). `Peer`
+is a bare `board/circuit` id when the other end is a circuit in this tree, a
+reference designator or part name when it is not, and `—` when there is
+nothing on the other end.
+
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `+12V` | in | [`power-entry-instrument`](../power-entry-instrument/power-entry-instrument.md) | — | REF5050 `VIN` and the buffer half's V+ |
-| REF5050 `VOUT` | internal | — | `cref-out-node` | Which side of the buffer `C-REF-OUT` sits on. Settled, and it decides the whole compensation |
-| op-amp output | internal | — | `opa2197-output-impedance` | The impedance `R-ISO-REF` is sized against. Specified, not back-solved |
-| `VS` | out | `U-BREATH`'s excitation pin, drawn in [`carrier.md`](../carrier.md) §2 | `riso-ref-topology` | Through `R-ISO-REF`. DC feedback is taken **here**, not at the op-amp output — which is what makes the DC error across `R-ISO-REF` zero |
-| `AGND-local` | ref | the analog star point, [`carrier.md`](../carrier.md) §2 | — | `C-REF-OUT` and the sensor's 100 nF decoupler return to it |
+| `+12V` | in | `carrier/power-entry-instrument` | — | REF5050 `VIN` and the buffer half's V+ |
+| REF5050 `VOUT` | — | — | `cref-out-node` | Internal to this circuit. Which side of the buffer `C-REF-OUT` sits on. Settled, and it decides the whole compensation |
+| op-amp output | — | — | `opa2197-output-impedance` | Internal to this circuit. The impedance `R-ISO-REF` is sized against. Specified, not back-solved |
+| `VS` | out | `interfaces/breath-sense-link` | `riso-ref-topology` | `U-BREATH`'s excitation pin, drawn in `carrier.md` §2. Through `R-ISO-REF`. DC feedback is taken **here**, not at the op-amp output — which is what makes the DC error across `R-ISO-REF` zero |
+| `AGND_INST` | ref | `carrier/power-entry-instrument` | — | The instrument analog star, drawn `AGND-local` in `carrier.md` §2. `C-REF-OUT` and the sensor's 100 nF decoupler return to it |
 
 ## `R-ISO-REF` and the compensation network
 

@@ -15,14 +15,20 @@ Every net that crosses this circuit's boundary. Quantities appear **only** as a
 citation into `config/figures.yaml` — this table names nodes, it does not
 restate values.
 
+`Dir` is this circuit's side of the net — `in`, `out`, `in/out`, `ref` (a
+return or reference) or `—` (no connection here, the row is context). `Peer`
+is a bare `board/circuit` id when the other end is a circuit in this tree, a
+reference designator or part name when it is not, and `—` when there is
+nothing on the other end.
+
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
 | IO1, IO2 | in | `HDR-DEV` | — | High-impedance through the bootloader window; `R-LED-PD` is what holds them down in it |
-| 5 V | in | [`power-entry-instrument`](../power-entry-instrument/power-entry-instrument.md), buck A | — | The 74AHCT125's rail. TTL thresholds on this rail are why 3.3 V in reads high |
+| 5 V | in | `carrier/power-entry-instrument` | — | Buck A. The 74AHCT125's rail; TTL thresholds on this rail are why 3.3 V in reads high |
 | `J-LED-L` `DI`, `J-LED-R` `DI` | out | the two WS2815 strips | — | Through `R-LED-SER` |
-| `J-LED-L` `BI`, `J-LED-R` `BI` | out | the head of each strip | — | A **ground** connection, not a driven one — see below |
-| `+12V`, GND at `J-LED-L/-R` | — | [`power-entry-instrument`](../power-entry-instrument/power-entry-instrument.md) | — | Strip power passes through this connector but is that circuit's |
-| `OE` ×4 | — | tied LOW | — | Which is why the pull-downs are needed rather than optional |
+| `J-LED-L` `BI`, `J-LED-R` `BI` | ref | the head of each strip | — | A **ground** connection, not a driven one — see below |
+| `+12V`, GND at `J-LED-L/-R` | — | `carrier/power-entry-instrument` | — | Strip power passes through this connector but is that circuit's net |
+| `OE_INST` ×4 | ref | — | — | `U-LVLSHIFT`'s four enables, tied LOW on this board, which is why the pull-downs are needed rather than optional. **Not `OE_MOD`**, the module buffer's |
 
 ## §5 LED data
 

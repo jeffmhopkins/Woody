@@ -20,15 +20,21 @@ Every net that crosses this circuit's boundary. Quantities appear **only** as a
 citation into `config/figures.yaml` — this table names nodes, it does not
 restate values.
 
+`Dir` is this circuit's side of the net — `in`, `out`, `in/out`, `ref` (a
+return or reference) or `—` (no connection here, the row is context). `Peer`
+is a bare `board/circuit` id when the other end is a circuit in this tree, a
+reference designator or part name when it is not, and `—` when there is
+nothing on the other end.
+
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| IO5, IO6 | in/out | `HDR-DEV` → the display board, on `J-DISP` | — | UART1. **Far end undrawn** |
-| `U0TXD` (IO43), `U0RXD` (IO44) | in/out | `HDR-DEV` → `HDR-SERVICE`, and up `J-DISP` | — | The real-time board's console pair |
+| IO5, IO6 | in/out | `HDR-DEV` | — | UART1, out to the display board on `J-DISP`. **Far end undrawn** |
+| `U0TXD` (IO43), `U0RXD` (IO44) | in/out | `HDR-DEV` | — | The real-time board's console pair, to `HDR-SERVICE` and up `J-DISP` |
 | display board `U0TXD`, `U0RXD` | in/out | `HDR-SERVICE` | — | **Far end undrawn** — three of `HDR-SERVICE`'s six pins belong to a board with no page |
-| 5 V (or `+12V`) on `J-DISP` | out | [`power-entry-instrument`](../power-entry-instrument/power-entry-instrument.md), buck B | — | Which of the two it is depends on where buck B lives, which is open on [`carrier.md`](../carrier.md) |
-| GND ×2 on `J-DISP` | ref | the `PWR_GND` pour | `dig-gnd-topology` | One with the supply, one with the UART pairs |
+| 5 V (or `+12V`) on `J-DISP` | in | `carrier/power-entry-instrument` | — | Buck B, and it leaves this circuit again on `J-DISP`. Which of the two rails it is depends on where buck B lives, which is open in `carrier.md` |
+| GND ×2 on `J-DISP` | ref | `carrier/power-entry-instrument` | `dig-gnd-topology` | The `PWR_GND` pour. One with the supply, one with the UART pairs |
 | two spare conductors | — | — | — | Per ADR 0009, unallocated |
-| `EN`, `IO0` | — | **not wired** | — | Withdrawn — see below. They are not on the dev board's headers |
+| `EN`, `IO0` | — | — | — | **Not wired** — withdrawn, see below. They are not on the dev board's headers |
 
 ## §6 Display loom and service header
 

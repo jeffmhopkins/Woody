@@ -10,11 +10,17 @@ Every net that crosses this circuit's boundary. Quantities appear **only** as a
 citation into `config/figures.yaml` — this table names nodes, it does not
 restate values.
 
+`Dir` is this circuit's side of the net — `in`, `out`, `in/out`, `ref` (a
+return or reference) or `—` (no connection here, the row is context). `Peer`
+is a bare `board/circuit` id when the other end is a circuit in this tree, a
+reference designator or part name when it is not, and `—` when there is
+nothing on the other end.
+
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
 | `+12V` ahead of `D1`/`D2` | in | `module/power-entry` | — | `U-LOADSW`'s `VCC` and the top of `R-ILIM`. Taken before the entry diodes, which is the point of the split |
-| `ON` | in | panel toggle `SW-POWER` | — | The LT1641's undervoltage-lockout input. The divider around it is **still not designed** — see below |
-| `UMBILICAL +12V` | out | the instrument, down the Cat5 umbilical | `umbilical-current` | The FET's source. What the far end needs is what sizes the `FB` divider |
+| `ON` | in | `module/panel` | — | The panel toggle `SW-POWER`. The LT1641's undervoltage-lockout input; the divider around it is **still not designed** — see below |
+| `UMBILICAL +12V` | out | `carrier/power-entry-instrument`, `module/link-supervision` | `umbilical-current` | The FET's source, down the Cat5 umbilical. What the far end needs is what sizes the `FB` divider. `module/link-supervision`'s deleted presence detect gated `OE_MOD` from this node |
 | `PWR_GND` | ref | `module/power-entry` | — | `C-TIMER`, `C-GATE`, `R-FB-LO` and the FET source return here, to the star at the IDC |
 | `TIMER` / `GATE` | — | `module/panel-led` | `loadswitch-timer` | **Proposed only, nothing is drawn on it.** The indicator's missing "latched" signal would come from here — see [`panel-led.md`](../panel-led/panel-led.md) |
 

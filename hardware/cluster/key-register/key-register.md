@@ -12,15 +12,21 @@ Every net that crosses this circuit's boundary. Quantities appear **only** as a
 citation into `config/figures.yaml` — this table names nodes, it does not
 restate values.
 
+`Dir` is this circuit's side of the net — `in`, `out`, `in/out`, `ref` (a
+return or reference) or `—` (no connection here, the row is context). `Peer`
+is a bare `board/circuit` id when the other end is a circuit in this tree, a
+reference designator or part name when it is not, and `—` when there is
+nothing on the other end.
+
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `SCK` | in | chain bus, [`../cluster-boards.md`](../cluster-boards.md) §3 | `chain-conductors` | Straight bus, IN to OUT, so any two boards take a plain straight-through ribbon |
-| `SH/LD` | in | chain bus, [`../cluster-boards.md`](../cluster-boards.md) §3 | `chain-conductors` | Falling edge loads the parallel inputs |
-| `SER` | in | the next board's `QH`, or the carrier through `LK-SER` | `chain-connectors` | Point to point, not a bus — which is what forces two connectors on most boards |
-| `QH` | out | toward the carrier, on `IN` pin 8 | `chain-connectors` | Bit 0 is the `H` input of the `right_thumb` device |
-| `A`…`H` | in | [`../key-switch-network/key-switch-network.md`](../key-switch-network/key-switch-network.md), [`../key-marker-and-bits/key-marker-and-bits.md`](../key-marker-and-bits/key-marker-and-bits.md) | `marker-bits`, `free-bits` | Eight parallel inputs per device: a switch network, a marker strap or a free bit |
-| `3V3` | in | chain bus pin 10, [`../cluster-boards.md`](../cluster-boards.md) §3 | — | `C-DECOUPLE-165` is the local reservoir this input has no other source for |
-| `GND` | ref | chain bus, five alternating grounds | `chain-conductors` | `C-DECOUPLE-165` returns here, at the package |
+| `SCK` | in | `interfaces/key-chain-loom` | `chain-conductors` | The chain bus, `cluster-boards.md` §3. Straight bus, IN to OUT, so any two boards take a plain straight-through ribbon |
+| `SH/LD` | in | `interfaces/key-chain-loom` | `chain-conductors` | The chain bus. Falling edge loads the parallel inputs |
+| `SER` | in | `interfaces/key-chain-loom` | `chain-connectors` | The next board's `QH`, or the carrier through `LK-SER`. Point to point, not a bus — which is what forces two connectors on most boards |
+| `QH` | out | `interfaces/key-chain-loom` | `chain-connectors` | Toward the carrier, on `IN` pin 8. Bit 0 is the `H` input of the `right_thumb` device |
+| `A`…`H` | in | `cluster/key-switch-network`, `cluster/key-marker-and-bits` | `marker-bits`, `free-bits` | Eight parallel inputs per device: a switch network, a marker strap or a free bit |
+| `3V3` | in | `interfaces/key-chain-loom` | — | Chain bus pin 10, `cluster-boards.md` §3. `C-DECOUPLE-165` is the local reservoir this input has no other source for |
+| `GND` | ref | `interfaces/key-chain-loom` | `chain-conductors` | The chain bus, five alternating grounds. `C-DECOUPLE-165` returns here, at the package |
 
 ## §1 The device
 

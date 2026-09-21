@@ -12,13 +12,19 @@ Every net that crosses this circuit's boundary. Quantities appear **only** as a
 citation into `config/figures.yaml` — this table names nodes, it does not
 restate values.
 
+`Dir` is this circuit's side of the net — `in`, `out`, `in/out`, `ref` (a
+return or reference) or `—` (no connection here, the row is context). `Peer`
+is a bare `board/circuit` id when the other end is a circuit in this tree, a
+reference designator or part name when it is not, and `—` when there is
+nothing on the other end.
+
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `3V3` | in | chain bus pin 10 of `J-CHAIN`, [`../cluster-boards.md`](../cluster-boards.md) §3 | `key-pullup-qty` | What `R-KEY-PU` pulls to. It is also the MCP3202's reference, which is what makes the static draw a live trade rather than a free one |
-| key input node | out | [`../key-register/key-register.md`](../key-register/key-register.md) parallel input | `key-release-time`, `key-press-time` | Both passives sit **at the register input**, millimetres from the switch |
-| `SW` | in | the KS-33 in its plate cutout, [`../cluster-boards.md`](../cluster-boards.md) §5 | — | Pressed = pulled LOW, through `R-KEY-SER` |
-| `GND` | ref | chain bus, five alternating grounds | — | `C-KEY` and the closed switch both return here |
-| unfitted positions | — | [`../key-marker-and-bits/key-marker-and-bits.md`](../key-marker-and-bits/key-marker-and-bits.md) | `free-bits` | The reserved spare-switch positions carry the full network; the free bits carry a pull-up only, and the marker straps carry nothing |
+| `3V3` | in | `interfaces/key-chain-loom` | `key-pullup-qty` | Chain bus pin 10 of `J-CHAIN`, `cluster-boards.md` §3. What `R-KEY-PU` pulls to. It is also the MCP3202's reference, which is what makes the static draw a live trade rather than a free one |
+| key input node | out | `cluster/key-register` | `key-release-time`, `key-press-time` | Both passives sit **at the register input**, millimetres from the switch |
+| `SW` | in | `SW-THUMB` | — | The KS-33 in its plate cutout, `cluster-boards.md` §5. Pressed = pulled LOW, through `R-KEY-SER` |
+| `GND` | ref | `interfaces/key-chain-loom` | — | The chain bus, five alternating grounds. `C-KEY` and the closed switch both return here |
+| unfitted positions | — | `cluster/key-marker-and-bits` | `free-bits` | The reserved spare-switch positions carry the full network; the free bits carry a pull-up only, and the marker straps carry nothing |
 
 ---
 

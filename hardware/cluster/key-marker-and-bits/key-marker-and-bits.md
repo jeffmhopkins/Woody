@@ -11,13 +11,19 @@ Every net that crosses this circuit's boundary. Quantities appear **only** as a
 citation into `config/figures.yaml` — this table names nodes, it does not
 restate values.
 
+`Dir` is this circuit's side of the net — `in`, `out`, `in/out`, `ref` (a
+return or reference) or `—` (no connection here, the row is context). `Peer`
+is a bare `board/circuit` id when the other end is a circuit in this tree, a
+reference designator or part name when it is not, and `—` when there is
+nothing on the other end.
+
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| marker straps | out | [`../key-register/key-register.md`](../key-register/key-register.md) parallel inputs | `marker-bits` | Copper straight to a rail, two per device, one high and one low |
-| free-bit pull-ups | out | [`../key-register/key-register.md`](../key-register/key-register.md) parallel inputs | `free-bits`, `key-pullup-qty` | An `R-KEY-PU` and nothing else — no switch, no series resistor, no capacitor |
-| switch positions | in | [`../key-switch-network/key-switch-network.md`](../key-switch-network/key-switch-network.md) | — | The networked positions, fitted and reserved, take the rest of the allocation |
-| the serial bit stream | out | the carrier, through the chain | `chain-connectors` | The allocation rides on the chain order, which the board page fixes and may yet change |
-| `3V3`, `GND` | ref | chain bus, [`../cluster-boards.md`](../cluster-boards.md) §3 | — | The straps land directly on the rails and share no component with the key networks they are read as vouching for |
+| marker straps | out | `cluster/key-register` | `marker-bits` | Into the parallel inputs. Copper straight to a rail, two per device, one high and one low |
+| free-bit pull-ups | out | `cluster/key-register` | `free-bits`, `key-pullup-qty` | Into the parallel inputs. An `R-KEY-PU` and nothing else — no switch, no series resistor, no capacitor |
+| switch positions | in | `cluster/key-switch-network` | — | The networked positions, fitted and reserved, take the rest of the allocation |
+| the serial bit stream | out | `interfaces/key-chain-loom` | `chain-connectors` | The allocation rides on the chain order, which `cluster-boards.md` fixes and may yet change |
+| `3V3`, `GND` | ref | `interfaces/key-chain-loom` | — | The chain bus, `cluster-boards.md` §3. The straps land directly on the rails and share no component with the key networks they are read as vouching for |
 
 ## §4 The 32 bits
 

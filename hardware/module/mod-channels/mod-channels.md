@@ -21,14 +21,20 @@ Every net that crosses this circuit's boundary. Quantities appear **only** as a
 citation into `config/figures.yaml` — this table names nodes, it does not
 restate values.
 
+`Dir` is this circuit's side of the net — `in`, `out`, `in/out`, `ref` (a
+return or reference) or `—` (no connection here, the row is context). `Peer`
+is a bare `board/circuit` id when the other end is a circuit in this tree, a
+reference designator or part name when it is not, and `—` when there is
+nothing on the other end.
+
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `DAC ch7` | in | `module/digital-and-supervision` | `mod-reference` | The shared offset reference. Through `R-OPAMP-IN` into the follower's (+) input, and from there to all four channels |
-| `DAC ch2`–`ch5` | in | `module/digital-and-supervision` | `dac-rail` | One signal channel per mod channel, through `R-OPAMP-IN` into the (+) input |
-| `CLR` | in | `module/digital-and-supervision` | — | Not a net inside this circuit — it acts on the DAC. Listed because this stage's park-at-0 V property is entirely downstream of it, including for channel 7 |
-| `MOD 1`–`MOD 4` | out | panel jack | — | Feedback is taken at the op-amp output, not at the jack, so `R-OUT-PROT` isolates `C-FILT-MOD` from the loop |
-| `±12 V` | in | `module/power-entry` | — | `D-JACK-CLAMP` returns to both rails |
-| `AGND` | ref | `module/power-entry` | `dig-gnd-topology` | `C-FILT-MOD` shunts to it. Not a return path — see the figure |
+| `DAC ch7` | in | `module/dac8568` | `mod-reference` | The shared offset reference. Through `R-OPAMP-IN` into the follower's (+) input, and from there to all four channels |
+| `DAC ch2`–`ch5` | in | `module/dac8568` | `dac-rail` | One signal channel per mod channel, through `R-OPAMP-IN` into the (+) input |
+| `CLR` | — | `module/dac8568` | — | Not a net inside this circuit — it acts on the DAC. Listed because this stage's park-at-0 V property is entirely downstream of it, including for channel 7 |
+| `MOD 1`–`MOD 4` | out | `module/panel` | — | The four panel jacks. Feedback is taken at the op-amp output, not at the jack, so `R-OUT-PROT` isolates `C-FILT-MOD` from the loop |
+| `MODULE ANALOG +12V`, `MODULE ANALOG −12V` | in | `module/power-entry` | — | `D-JACK-CLAMP` returns to both rails |
+| `AGND_MOD` | ref | `module/power-entry` | `dig-gnd-topology` | The module analog star, drawn `AGND`. `C-FILT-MOD` shunts to it. Not a return path — see the figure |
 
 ## The circuit — one channel of four
 

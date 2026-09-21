@@ -33,17 +33,23 @@ are no longer on this page: they moved to
 with the instrument-side half they depend on — see the pointer below the `REF`
 section. The table below is unchanged and still names this circuit's boundary.)*
 
+`Dir` is this circuit's side of the net — `in`, `out`, `in/out`, `ref` (a
+return or reference) or `—` (no connection here, the row is context). `Peer`
+is a bare `board/circuit` id when the other end is a circuit in this tree, a
+reference designator or part name when it is not, and `—` when there is
+nothing on the other end.
+
 | Node / part | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `BREATH` | in | `carrier/carrier.md`, umbilical | `umbilical-pinmap`, `sensor-full-scale` | The sensor's buffered output, arriving through the instrument-side `R1`. Drives `IN−` through `R3` |
-| `AGND` | in | `carrier/carrier.md`, umbilical | `umbilical-pinmap` | The instrument's analog star, arriving through the instrument-side `R1b`. Drives `IN+` through `R2`: on this page it is **a signal leg, not a local ground**, and the twisted pair's other conductor |
-| `R1`, `R1b` (`R-SER-BREATH-INST`) | — | `carrier/carrier.md` | — | Both legs' series resistance sets the differential pole against `C_diff`, and their match is what the bias pair's balance is measured against. Neither part is on this board |
-| `MPXV4006DP` and its `VS` reference buffer | — | `carrier/carrier.md` | `sensor-full-scale`, `riso-ref-topology`, `cref-out-node`, `opa2197-output-impedance` | Sets the span this page multiplies and the pedestal `TRIM-BREATH-ZERO` nulls. Not this page's circuit — see [`notes.md`](notes.md) |
-| in-amp output | out | `module/breath-output-stage` | `inamp-full-scale` | **Owned here.** Into the panel GAIN/OFFSET stage, which inverts |
-| LM317 rail | in | `module/power-entry` | `dac-rail` | Feeds `TRIM-BREATH-ZERO` and its buffer. Never `VREFOUT`, which is disabled until firmware enables it |
-| `±12 V` | in | `module/power-entry` | — | The INA828, both OPA2197 halves, and the BAV99 legs on the input pair and at the jack |
-| `AGND` (module) | ref | `module/power-entry` | `dig-gnd-topology` | Where `R4`, `R5`, both `C_cm` and the output RC return |
-| `CLR` | — | `module/digital-and-supervision` | — | **Reaches no part of this circuit**, which is the whole of what the `CLR` section below settles |
+| `BREATH_SENSE` | in | `interfaces/breath-sense-link` | `umbilical-pinmap`, `sensor-full-scale` | The sensor's buffered output, arriving on `J-UMB` through the instrument-side `R1`. Drives `IN−` through `R3`. **Not `BREATH_OUT`**, the module's jack |
+| `AGND_SENSE` | in | `interfaces/breath-sense-link` | `umbilical-pinmap` | The instrument's analog star, arriving through the instrument-side `R1b`. Drives `IN+` through `R2`: on this page it is **a signal leg, not a local ground**, and the twisted pair's other conductor. The drawing labels it `AGND (pin 2)`. **Not `AGND_MOD`** |
+| `R1`, `R1b` (`R-SER-BREATH-INST`) | — | `interfaces/breath-sense-link` | — | Both legs' series resistance sets the differential pole against `C_diff`, and their match is what the bias pair's balance is measured against. Neither part is on this board |
+| `MPXV4006DP` and its `VS` reference buffer | — | `interfaces/breath-sense-link` | `sensor-full-scale`, `riso-ref-topology`, `cref-out-node`, `opa2197-output-impedance` | Sets the span this page multiplies and the pedestal `TRIM-BREATH-ZERO` nulls. Not this page's circuit — see [`notes.md`](notes.md) |
+| in-amp output | out | `module/breath-output-stage`, `module/breath-response-shaper`, `interfaces/breath-sense-link` | `inamp-full-scale` | **Owned here.** Into the panel GAIN/OFFSET stage, which inverts; `module/breath-response-shaper` is *proposed* to tap the same node |
+| `DAC AVDD` | in | `module/power-entry` | `dac-rail` | Feeds `TRIM-BREATH-ZERO` and its buffer. Never `VREFOUT`, which is disabled until firmware enables it. The drawing calls this node the LM317 rail |
+| `MODULE ANALOG +12V`, `MODULE ANALOG −12V` | in | `module/power-entry` | — | The INA828, both OPA2197 halves, and the BAV99 legs on the input pair and at the jack |
+| `AGND_MOD` | ref | `module/power-entry` | `dig-gnd-topology` | The module analog star, drawn `AGND(module)`. Where `R4`, `R5`, both `C_cm` and the output RC return |
+| `CLR` | — | — | — | **Reaches no part of this circuit**, which is the whole of what the `CLR` section below settles. It is `module/dac8568`'s |
 
 ## The circuit
 

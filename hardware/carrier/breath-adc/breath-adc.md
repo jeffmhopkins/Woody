@@ -17,14 +17,20 @@ Every net that crosses this circuit's boundary. Quantities appear **only** as a
 citation into `config/figures.yaml` — this table names nodes, it does not
 restate values.
 
+`Dir` is this circuit's side of the net — `in`, `out`, `in/out`, `ref` (a
+return or reference) or `—` (no connection here, the row is context). `Peer`
+is a bare `board/circuit` id when the other end is a circuit in this tree, a
+reference designator or part name when it is not, and `—` when there is
+nothing on the other end.
+
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| buffered sensor output | in | the breath buffer, drawn in [`carrier.md`](../carrier.md) §2 | `sensor-full-scale`, `breath-working-point` | Arrives at `R-ADCDIV`'s upper leg. The same node feeds `R1` and the umbilical |
-| `VDD`/`VREF` 3V3 | in | the dev board's LDO, through `HDR-DEV` | — | The MCP3202 has no `VREF` pin. **The key pull-ups load this same node** — that argument stays on [`carrier.md`](../carrier.md) |
-| SPI2 `SCLK`, `MOSI`, `DOUT` | in/out | `HDR-DEV`, on the host shared with the DAC8568 | `loop-budget` | Clocked slower than the DAC, per [`carrier.md`](../carrier.md) §4 |
-| `CS` (IO39) | in | `HDR-DEV` | — | Its own chip select on the shared host |
-| `AGND-local` | ref | the analog star point, [`carrier.md`](../carrier.md) §2 | — | `R-ADCDIV`'s lower leg and `C-AA-ADC` return here |
-| CH1 | — | unconnected | — | Spare input |
+| buffered sensor output | in | `interfaces/breath-sense-link` | `sensor-full-scale`, `breath-working-point` | The breath buffer, drawn in `carrier.md` §2. Arrives at `R-ADCDIV`'s upper leg; the same node feeds `R1` and the umbilical |
+| `VDD`/`VREF` 3V3 | in | `HDR-DEV`, `interfaces/key-chain-loom` | — | The dev board's LDO. The MCP3202 has no `VREF` pin. **The key pull-ups load this same node** — that argument stays in `carrier.md` §2 |
+| SPI2 `SCLK`, `MOSI`, `DOUT` | in/out | `HDR-DEV`, `interfaces/spi-link` | `loop-budget` | One host shared with the DAC8568, clocked slower than the DAC, per `carrier.md` §4 |
+| `CS_ADC` (IO39) | in | `HDR-DEV` | — | This device's own chip select on the shared host, and a carrier-local net. **Not `CS_MOD`**, the DAC's, which leaves on `J-UMB` |
+| `AGND_INST` | ref | `carrier/power-entry-instrument` | — | The instrument analog star, drawn `AGND-local` in `carrier.md` §2 and tied to `PWR_GND` at one point. `R-ADCDIV`'s lower leg and `C-AA-ADC` return here. **Not `AGND_SENSE`** (the umbilical conductor) and **not `AGND_MOD`** |
+| CH1 | — | — | — | Spare input, unconnected |
 
 ### Derivations
 

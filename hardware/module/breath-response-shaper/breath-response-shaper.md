@@ -20,13 +20,19 @@ Every net that crosses this circuit's boundary. Quantities appear **only** as a
 citation into `config/figures.yaml` — this table names nodes, it does not
 restate values.
 
+`Dir` is this circuit's side of the net — `in`, `out`, `in/out`, `ref` (a
+return or reference) or `—` (no connection here, the row is context). `Peer`
+is a bare `board/circuit` id when the other end is a circuit in this tree, a
+reference designator or part name when it is not, and `—` when there is
+nothing on the other end.
+
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
 | in-amp output | in | `module/breath-receive-stage` | `inamp-full-scale`, `breath-working-point` | The drawing's `in-amp out`. `R1` and the `2 × 10 k` divider that makes `V_in/2` both hang on it |
 | `V_shaped` | out | `module/breath-output-stage` | — | Drawn feeding the gain attenuator. *Where it inserts* is argued below and is open |
-| ±12 V | in | `module/power-entry` | — | `U-RESP`'s two halves — the last two on the module |
-| `AGND` | ref | `module/power-entry` | `dig-gnd-topology` | The `2 × 10 k` divider's bottom leg. The module ground plan is unsettled — see the figure |
-| `POT-RESP` | panel | `module/panel` | `panel-width`, `panel-height-budget` | The third pot and the third knob. What that costs the panel is on the panel page |
+| `MODULE ANALOG +12V`, `MODULE ANALOG −12V` | in | `module/power-entry` | — | `U-RESP`'s two halves — the last two on the module |
+| `AGND_MOD` | ref | `module/power-entry` | `dig-gnd-topology` | The module analog star. The `2 × 10 k` divider's bottom leg returns to it. The module ground plan is unsettled — see the figure |
+| `POT-RESP` | — | `module/panel` | `panel-width`, `panel-height-budget` | The third pot and the third knob — a panel cutout, not a net that leaves this circuit. What that costs the panel is on the panel page |
 
 ## The property the circuit is built around
 

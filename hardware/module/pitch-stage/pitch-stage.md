@@ -14,13 +14,19 @@ Every net that crosses this circuit's boundary. Quantities appear **only** as a
 citation into `config/figures.yaml` — this table names nodes, it does not
 restate values.
 
+`Dir` is this circuit's side of the net — `in`, `out`, `in/out`, `ref` (a
+return or reference) or `—` (no connection here, the row is context). `Peer`
+is a bare `board/circuit` id when the other end is a circuit in this tree, a
+reference designator or part name when it is not, and `—` when there is
+nothing on the other end.
+
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `VREFOUT` | in | `module/digital-and-supervision` | — | The DAC's own reference out. Trimmed by `TRIM-OFFSET`, then buffered. The whole tracking argument below depends on this being the same node the DAC's full scale references |
-| `DAC ch1` | in | `module/digital-and-supervision` | `dac-rail` | Through `R-OPAMP-IN` into the (+) input |
-| `PITCH` | out | panel jack | `pitch-cents-budget` | **DC feedback is tapped here, not at the op-amp output** — so whatever is patched in sits inside the loop |
-| `±12 V` | in | `module/power-entry` | — | `D-JACK-CLAMP` returns to both rails |
-| `AGND` | ref | `module/power-entry` | `dig-gnd-topology` | `C-AA-PITCH` and `C-FILT-PITCH` shunt to it. Not a return path — see the figure |
+| `VREFOUT` | in | `module/dac8568` | — | The DAC's own reference out. Trimmed by `TRIM-OFFSET`, then buffered. The whole tracking argument below depends on this being the same node the DAC's full scale references |
+| `DAC ch1` | in | `module/dac8568` | `dac-rail` | Through `R-OPAMP-IN` into the (+) input |
+| `PITCH` | out | `module/panel` | `pitch-cents-budget` | The panel jack. **DC feedback is tapped here, not at the op-amp output** — so whatever is patched in sits inside the loop |
+| `MODULE ANALOG +12V`, `MODULE ANALOG −12V` | in | `module/power-entry` | — | `D-JACK-CLAMP` returns to both rails |
+| `AGND_MOD` | ref | `module/power-entry` | `dig-gnd-topology` | The module analog star, drawn `AGND`. `C-AA-PITCH` and `C-FILT-PITCH` shunt to it. Not a return path — see the figure |
 
 ## The circuit
 

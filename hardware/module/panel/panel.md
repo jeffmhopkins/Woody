@@ -1,12 +1,45 @@
 # Module panel — geometry and control layout
 
-**A board-level page, not a circuit**, so it carries no `## Interfaces` table.
-Its subject is the module's front panel: width, clear height, how many rows of
+**The module's front panel** — width, clear height, how many rows of
 controls fit and how big the knobs may be. The tracked figures for that are
 `panel-width` and `panel-height-budget` in `config/figures.yaml`, whose owner
 is `docs/decisions/0004-cv-interface-module.md` — this page cites them and
 does not restate them. It exists so that panel reasoning is collected here
 rather than filed under whichever circuit happened to provoke it.
+
+**This page used to call itself "a board-level page, not a circuit" and carry
+no `## Interfaces` table**, while carrying a `circuit.yaml` that two circuits
+declared a dependency on. It is a circuit directory like the others; the
+contradiction is resolved that way rather than by deleting the graph node,
+because a panel-mounted part is where another circuit's net ends, and every
+one of this module's jacks, pots and the toggle is a panel-mounted part.
+What crosses this boundary is mechanical rather than electrical — a
+cutout, a bushing, a knob envelope — so every row's `Dir` is `—`.
+
+## Interfaces
+
+Every part of this circuit that another circuit's net terminates on.
+Quantities appear **only** as a citation into `config/figures.yaml` — this
+table names nodes, it does not restate values.
+
+`Dir` is this circuit's side of the net — `in`, `out`, `in/out`, `ref` (a
+return or reference) or `—` (no connection here, the row is context). `Peer`
+is a bare `board/circuit` id when the other end is a circuit in this tree, a
+reference designator or part name when it is not, and `—` when there is
+nothing on the other end.
+
+| Node | Dir | Peer | Figure | Note |
+|---|---|---|---|---|
+| `POT-GAIN`, `POT-OFFSET` | — | `module/breath-output-stage` | `panel-width`, `panel-height-budget` | Two of the three pots. What they do electrically is on that page; the row they sit in and the knob envelope are here |
+| `POT-RESP` | — | `module/breath-response-shaper` | `panel-width`, `panel-height-budget` | The third pot — the one that made three-across a single row instead of two |
+| `PITCH` jack | — | `module/pitch-stage` | `panel-height-budget` | A panel cutout. The net is that circuit's |
+| `BREATH_OUT` jack | — | `module/breath-output-stage` | `panel-height-budget` | A panel cutout. The net is that circuit's |
+| `MOD 1`–`MOD 4` jacks | — | `module/mod-channels` | `panel-height-budget` | Four cutouts in the jack rows. The nets are that circuit's |
+| `LED-PANEL` bezel | — | `module/panel-led` | `panel-height-budget` | Beside the etherCON flange; the figure's `toggle_row` note is what establishes that it fits |
+| `SW-POWER` toggle | — | `module/umbilical-load-switch` | `panel-toggle-hole`, `panel-height-budget` | The shaped hole this page owns — it has to be in the DXF because it cannot be cut afterwards. The switch's net is that circuit's |
+| etherCON flange | — | — | `panel-width` | The umbilical connector's panel cutout |
+
+## Where the panel width came from
 
 *The block below moved verbatim from
 `hardware/module/breath-output-stage/breath-output-stage.md`, 2026-09-21,

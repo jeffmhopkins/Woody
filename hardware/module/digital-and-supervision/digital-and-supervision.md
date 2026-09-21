@@ -18,15 +18,21 @@ Every net that crosses this circuit's boundary. Quantities appear **only** as a
 citation into `config/figures.yaml` — this table names nodes, it does not
 restate values.
 
+`Dir` is this circuit's side of the net — `in`, `out`, `in/out`, `ref` (a
+return or reference) or `—` (no connection here, the row is context). `Peer`
+is a bare `board/circuit` id when the other end is a circuit in this tree, a
+reference designator or part name when it is not, and `—` when there is
+nothing on the other end.
+
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `SCLK` | in | `carrier` via the umbilical | `umbilical-pinmap`, `spi-series-r` | Pulled **down**, cable side and DAC side |
-| `MOSI` | in | `carrier` via the umbilical | `umbilical-pinmap`, `spi-series-r` | Pulled **down**, both sides. Shares a pair with `SCLK` |
-| `CS` | in | `carrier` via the umbilical | `umbilical-pinmap`, `spi-series-r` | Pulled **up**, both sides. Shares a pair with `DIG_GND` |
-| `DIG_GND` | ref | `carrier` via the umbilical | `umbilical-pinmap`, `dig-gnd-topology` | `CS`'s return partner. Where it ties is the disputed figure, not a fact this page settles |
-| `SCLK`, `DIN`, `SYNC` | out | `module/dac8568` | — | Buffer outputs. The DAC-side three of the six `R-SPI-PULL` sit on these |
-| bus +5 V | in | Eurorack bus header | — | Supplies the 74AHCT125 and nothing else. Open — see below |
-| `OE` ×4 | ref | `module/link-supervision` | — | Tied to `GND`, permanently enabled. The circuit that used to gate it is not fitted |
+| `SCLK` | in | `interfaces/spi-link` | `umbilical-pinmap`, `spi-series-r` | From the carrier on `J-UMB`. Pulled **down**, cable side and DAC side. **Not `SCLK_DAC`**, this buffer's output |
+| `MOSI` | in | `interfaces/spi-link` | `umbilical-pinmap`, `spi-series-r` | From the carrier on `J-UMB`. Pulled **down**, both sides. Shares a pair with `SCLK` |
+| `CS_MOD` | in | `interfaces/spi-link` | `umbilical-pinmap`, `spi-series-r` | From the carrier on `J-UMB`. Pulled **up**, both sides. Shares a pair with `DIG_GND` |
+| `DIG_GND` | ref | `interfaces/spi-link`, `module/power-entry` | `umbilical-pinmap`, `dig-gnd-topology` | `CS_MOD`'s return partner. Where it ties is the disputed figure, not a fact this page settles |
+| `SCLK_DAC`, `DIN`, `SYNC` | out | `module/dac8568`, `interfaces/spi-link` | — | **Sourced here** — the 74AHCT125 (`U-LVL-MOD`) is this circuit's part. The DAC-side three of the six `R-SPI-PULL` sit on these |
+| bus `+5V` after `FB4`/`C4` | in | `module/power-entry` | — | Through `FB4` and `C4`. Supplies the 74AHCT125 and nothing else, and it is the one rail with no diode. Open — see below |
+| `OE_MOD` ×4 | ref | `module/link-supervision` | — | This buffer's four enables, tied to `GND` and permanently enabled. The circuit that used to gate them is not fitted. **Not `OE_INST`**, the carrier level shifter's |
 
 ## The circuit
 

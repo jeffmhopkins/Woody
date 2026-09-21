@@ -28,28 +28,43 @@ of the umbilical each one is on**. Quantities appear **only** as a citation
 into `config/figures.yaml` — this table names nodes, it does not restate
 values.
 
-Two names collide across the boundary and the collision is inside this block,
-which is why the `End` column exists: `BREATH` is both the conductor arriving
-from the instrument and the name of the module's output jack, and `AGND` is
-both a signal leg on the pair and the module's own analog ground. A netlist
-taken off the drawings without this column shorts the in-amp input to the
-output jack.
+Two names collided across this boundary and the collision was inside this
+block, which is why the `End` column exists: `BREATH` was both the conductor
+arriving from the instrument and the name of the module's output jack, and
+`AGND` was a signal leg on the pair, the instrument's analog star **and** the
+module's own analog ground. A netlist taken off the drawings without this
+column shorts the in-amp input to the output jack.
+
+**The tables now qualify the names as well as the ends**, because a
+transcription reads the Node cell and an `End` column only exists here:
+`BREATH_SENSE` is the conductor, `BREATH_OUT` is the module's jack;
+`AGND_SENSE` is the conductor, `AGND_INST` is the instrument's star and
+`AGND_MOD` is the module's. `R1b` sits between `AGND_INST` and `AGND_SENSE`,
+so they are not one net either. The drawings still spell all of these `AGND`,
+`AGND-local`, `AGND(module)` and `BREATH`; each row says which.
+
+`Dir` is this circuit's side of the net — `in`, `out`, `in/out`, `ref` (a
+return or reference) or `—` (no connection here, the row is context). `Peer`
+is a bare `board/circuit` id when the other end is a circuit in this tree, a
+reference designator or part name when it is not, and `—` when there is
+nothing on the other end.
 
 | Node / part | End | Dir | Peer | Figure | Note |
 |---|---|---|---|---|---|
-| `BREATH` (`J-UMB` pin 1) | instrument → module | out | `carrier/carrier.md` §2 → `module/breath-receive-stage` | `umbilical-pinmap`, `sensor-full-scale` | The sensor's buffered output, leaving through the instrument-side `R1` and driving `IN−` through `R3`. **Not** the module's `BREATH` jack, which is the far end of the output stage |
-| `AGND` (`J-UMB` pin 2) | instrument → module | out | `carrier/carrier.md` §2 → `module/breath-receive-stage` | `umbilical-pinmap`, `dig-gnd-topology` | The instrument's analog star, leaving through the instrument-side `R1b` and driving `IN+` through `R2`. **A signal leg, not a local ground**, and the twisted pair's other conductor. **Not** the module's `AGND` |
-| `R1`, `R1b` (`R-SER-BREATH-INST`) | instrument | — | `carrier/carrier.md` component table | — | One in each leg. Both legs' series resistance sets the differential pole against `C_diff`, and their match is what the bias pair's balance is measured against. Unretrofittable |
-| `U-BREATH` (MPXV4006DP) | instrument | — | `carrier/carrier.md` §2 | `sensor-full-scale`, `breath-working-point` | Sets the span the module end multiplies and the pedestal `TRIM-BREATH-ZERO` nulls |
+| `BREATH_SENSE` | instrument → module | out | `carrier/carrier.md` §2 → `module/breath-receive-stage` | `umbilical-pinmap`, `sensor-full-scale` | The sensor's buffered output, on `J-UMB`. Leaves through the instrument-side `R1` and drives `IN−` through `R3`. **Not `BREATH_OUT`**, the module's jack, which is the far end of the output stage |
+| `AGND_SENSE` | instrument → module | out | `carrier/carrier.md` §2 → `module/breath-receive-stage` | `umbilical-pinmap`, `dig-gnd-topology` | The instrument's analog star exported on `J-UMB`. Leaves through the instrument-side `R1b` and drives `IN+` through `R2`. **A signal leg, not a local ground**, and the twisted pair's other conductor. It is neither `AGND_MOD` nor `AGND_INST` — `R1b` is between it and the star |
+| `R1`, `R1b` (`R-SER-BREATH-INST`) | instrument | — | — | — | This circuit's own parts, drawn in `carrier.md` §2, one in each leg. Both legs' series resistance sets the differential pole against `C_diff`, and their match is what the bias pair's balance is measured against. Unretrofittable |
+| `U-BREATH` (MPXV4006DP) | instrument | — | — | `sensor-full-scale`, `breath-working-point` | This circuit's own part, drawn in `carrier.md` §2. Sets the span the module end multiplies and the pedestal `TRIM-BREATH-ZERO` nulls |
 | `VS` excitation | instrument | in | `carrier/breath-excitation-reference` | `riso-ref-topology`, `cref-out-node`, `opa2197-output-impedance` | The sensor's excitation, and its own circuit |
 | buffered sensor output | instrument | out | `carrier/breath-adc` | — | The same node that feeds `R1`. The instrument's own copy of breath leaves here and does not cross |
-| `D-TVS-BREATH` ×2 | instrument | — | `carrier/carrier.md` component table | — | At the connector, on both legs |
+| `D-TVS-BREATH` ×2 | instrument | — | — | — | This circuit's own parts, at the connector, on both legs |
 | `R2`, `R3`, `C_diff`, `C_cm` ×2, `R4`, `R5` | module | — | `module/breath-receive-stage` | — | The receive filter and the common-mode bias return, all module-side |
-| in-amp output | module | out | `module/breath-output-stage` | `inamp-full-scale` | Into the panel GAIN/OFFSET stage, which inverts. **The figure is owned at the module end and derived here** |
-| `REF` | module | in | `module/breath-receive-stage`, from `module/power-entry` | `breath-zero-ref`, `dac-rail` | The buffered trimmer that nulls the instrument's pedestal. Its own section stayed on the module page |
-| `AGND` (module) | module | ref | `module/power-entry` | `dig-gnd-topology` | Where `R4`, `R5`, both `C_cm` and the output RC return |
-| `±12 V` | module | in | `module/power-entry` | — | The INA828, both OPA2197 halves, and the BAV99 legs |
-| `CLR` | module | — | `module/digital-and-supervision` | — | **Reaches no part of this circuit** |
+| in-amp output | module | out | `module/breath-receive-stage` → `module/breath-output-stage` | `inamp-full-scale` | Into the panel GAIN/OFFSET stage, which inverts. **The figure is owned at the module end and derived here** |
+| `REF` | module | in | `module/breath-receive-stage` | `breath-zero-ref`, `dac-rail` | The buffered trimmer that nulls the instrument's pedestal, fed from the `DAC AVDD` rail. Its own section stayed on the module page |
+| `AGND_MOD` | module | ref | `module/breath-receive-stage` | `dig-gnd-topology` | The module's own analog star, sourced by `module/power-entry`. Where `R4`, `R5`, both `C_cm` and the output RC return. **Not `AGND_SENSE`**, the conductor on the pair |
+| `±12 V` | module | in | `module/breath-receive-stage` | — | The module analog rails, sourced by `module/power-entry`: the INA828, both OPA2197 halves, and the BAV99 legs |
+| presence detect on the pair | module | — | `module/link-supervision` | — | **Not fitted.** The deleted LM311 watched `BREATH_SENSE`/`AGND_SENSE` to gate `OE_MOD`; its threshold sat inside the breath signal's own range |
+| `CLR` | module | — | — | — | **Reaches no part of this circuit.** It is `module/dac8568`'s, and nothing drives it |
 
 ---
 

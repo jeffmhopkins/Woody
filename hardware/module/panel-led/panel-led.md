@@ -9,12 +9,19 @@ Every net that crosses this circuit's boundary. Quantities appear **only** as a
 citation into `config/figures.yaml` — this table names nodes, it does not
 restate values.
 
+`Dir` is this circuit's side of the net — `in`, `out`, `in/out`, `ref` (a
+return or reference) or `—` (no connection here, the row is context). `Peer`
+is a bare `board/circuit` id when the other end is a circuit in this tree, a
+reference designator or part name when it is not, and `—` when there is
+nothing on the other end.
+
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `+12 V analog` | in | `module/power-entry` | — | Through `R-LED-PANEL` into `LED-PANEL`. Live whenever the rack is, which is the whole of the problem below |
+| `MODULE ANALOG +12V` | in | `module/power-entry` | — | Through `R-LED-PANEL` into `LED-PANEL`. Live whenever the rack is, which is the whole of the problem below |
 | LED return | ref | `module/power-entry` | `dig-gnd-topology` | **Not drawn anywhere in the corpus.** The rail it comes from is the analog one; which ground it lands on is the disputed figure |
-| panel cutout | — | `PANEL` | `panel-height-budget` | The bezel sits beside the etherCON flange; the figure's `toggle_row` note is what establishes that it fits |
+| panel cutout | — | `module/panel` | `panel-height-budget` | A cutout, not a net. The bezel sits beside the etherCON flange; the figure's `toggle_row` note is what establishes that it fits |
 | `TIMER` / `GATE` of `U-LOADSW` | — | `module/umbilical-load-switch` | `loadswitch-timer` | **Proposed, not drawn.** The rework below would take the indication from here instead |
+| comparator collector node | — | `module/link-supervision` | — | **Not fitted.** The deleted presence comparator shared this node, and that was the indication this LED was kept to give. It is an ordinary power indicator now |
 
 ## The circuit
 

@@ -30,18 +30,25 @@ Every net that crosses this circuit's boundary, and **which end of the
 umbilical each one is on**. Quantities appear **only** as a citation into
 `config/figures.yaml` — this table names nodes, it does not restate values.
 
+`Dir` is this circuit's side of the net — `in`, `out`, `in/out`, `ref` (a
+return or reference) or `—` (no connection here, the row is context). `Peer`
+is a bare `board/circuit` id when the other end is a circuit in this tree, a
+reference designator or part name when it is not, and `—` when there is
+nothing on the other end.
+
 | Node | End | Dir | Peer | Figure | Note |
 |---|---|---|---|---|---|
-| `SCLK` (`J-UMB` pin 4) | instrument → module | out | `HDR-DEV` IO35 → `74AHCT125` | `umbilical-pinmap`, `spi-series-r` | Series resistor at the driving end, pulled **down** on both sides of the buffer. Shares a pair with `MOSI` |
-| `MOSI` (`J-UMB` pin 5) | instrument → module | out | `HDR-DEV` IO36 → `74AHCT125` | `umbilical-pinmap`, `spi-series-r` | Pulled **down**, both sides. Sampled only on a `SCLK` edge, which is why it shares that pair |
-| `CS` (`J-UMB` pin 7) | instrument → module | out | `HDR-DEV` IO34 → `74AHCT125` | `umbilical-pinmap`, `spi-series-r` | Pulled **up**, both sides. The one that must not glitch. Shares a pair with `DIG_GND` |
-| `DIG_GND` (`J-UMB` pin 8) | instrument ↔ module | ref | `carrier/carrier.md` ↔ `module/power-entry` | `umbilical-pinmap`, `dig-gnd-topology` | `CS`'s return partner. Where it ties is the disputed figure, not a fact either end settles |
-| `U-TVS-SPI` | instrument | — | `carrier/carrier.md` component table | — | On all three signals, to `PWR_GND`, at the connector |
+| `SCLK` | instrument → module | out | `HDR-DEV` IO35 → `module/digital-and-supervision` | `umbilical-pinmap`, `spi-series-r` | On `J-UMB`. Series resistor at the driving end, pulled **down** on both sides of the buffer. Shares a pair with `MOSI`. **Not `SCLK_DAC`**, which is the buffer's output |
+| `MOSI` | instrument → module | out | `HDR-DEV` IO36 → `module/digital-and-supervision` | `umbilical-pinmap`, `spi-series-r` | On `J-UMB`. Pulled **down**, both sides. Sampled only on a `SCLK` edge, which is why it shares that pair |
+| `CS_MOD` | instrument → module | out | `HDR-DEV` IO34 → `module/digital-and-supervision` | `umbilical-pinmap`, `spi-series-r` | On `J-UMB`. Pulled **up**, both sides. The one that must not glitch. Shares a pair with `DIG_GND`. **Not `CS_ADC`**, the MCP3202's, which never leaves the carrier |
+| `DIG_GND` | instrument ↔ module | ref | `carrier/carrier.md` ↔ `module/power-entry` | `umbilical-pinmap`, `dig-gnd-topology` | On `J-UMB`. `CS_MOD`'s return partner. Where it ties is the disputed figure, not a fact either end settles |
+| `U-TVS-SPI` | instrument | — | — | — | This circuit's own part: on all three signals, to `PWR_GND`, at the connector |
 | `MISO` | instrument | — | `carrier/breath-adc` | — | IO37 is the MCP3202's `DOUT` and **never leaves the board**. ADR 0004 deleted `MISO` from the umbilical, which is why nothing reads the DAC back |
 | SPI2 host | instrument | — | `carrier/breath-adc`, `module/dac8568` | `loop-budget` | One host, two devices, two clocks. The ADC's limit is a fact about a part on the instrument board that constrains the link's budget |
-| `SCLK`, `DIN`, `SYNC` | module | out | `module/dac8568` | — | Buffer outputs. The DAC-side three of the six `R-SPI-PULL` sit on these |
-| bus +5 V | module | in | Eurorack bus header | — | Supplies the 74AHCT125 and nothing else. **Open**, and the item stayed on [`digital-and-supervision.md`](../../module/digital-and-supervision/digital-and-supervision.md) because it is a rail and connector question about that board, not about this link |
-| `OE` ×4 | module | ref | `module/link-supervision` | — | Tied to `GND`, permanently enabled. The circuit that used to gate it is not fitted |
+| `SCLK_DAC`, `DIN`, `SYNC` | module | — | `module/digital-and-supervision` → `module/dac8568` | — | **Not sourced here.** The 74AHCT125 is on `module/digital-and-supervision`, which owns that row; these three are a module-board net and do not cross the umbilical. The DAC-side three of the six `R-SPI-PULL` — this circuit's `bom.csv` — sit on them |
+| `DAC AVDD` | module | in | `module/power-entry` | `dac-rail` | What the DAC-side `CS` pull returns to, **not** bus `+5V`: on the bus rail a reversed ribbon reaches the DAC's `SYNC` pin. See this circuit's `bom.csv` |
+| bus `+5V` after `FB4`/`C4` | module | — | `module/power-entry` → `module/digital-and-supervision` | — | Supplies the 74AHCT125 and nothing else, and reaches no part of this circuit. **Open**, and the item stayed on `module/digital-and-supervision` because it is a rail and connector question about that board, not about this link |
+| `OE_MOD` ×4 | module | — | `module/digital-and-supervision` | — | The module buffer's four enables, tied to `GND` and permanently enabled. On that circuit's part, so they reach nothing here; the circuit that used to gate them, `module/link-supervision`, is not fitted. **Not `OE_INST`** |
 
 ---
 

@@ -19,12 +19,18 @@ Every net that would cross this circuit's boundary **if it were fitted**. Not
 one of them is driven today. Quantities appear **only** as a citation into
 `config/figures.yaml` — this table names nodes, it does not restate values.
 
+`Dir` is this circuit's side of the net — `in`, `out`, `in/out`, `ref` (a
+return or reference) or `—` (no connection here, the row is context). `Peer`
+is a bare `board/circuit` id when the other end is a circuit in this tree, a
+reference designator or part name when it is not, and `—` when there is
+nothing on the other end.
+
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
 | `CLR` | out | `module/dac8568` | — | **Not fitted.** The 74HC123 drove this. `R-CLR-PU` now holds it inactive and `LK-CLR` is the hand assert |
-| `OE` ×4 | out | `module/digital-and-supervision` | — | **Not fitted.** The comparator gated this. Tied enabled instead |
-| breath pair | in | `carrier` via the umbilical | `umbilical-pinmap` | **Not fitted.** The LM311 version watched this pair |
-| +12 V, umbilical side | in | `module/power-entry` | — | **Not fitted.** The first presence version gated `OE` from this node, downstream of the module's own load switch |
+| `OE_MOD` ×4 | out | `module/digital-and-supervision` | — | **Not fitted.** The comparator gated these. Tied enabled instead |
+| breath pair | in | `interfaces/breath-sense-link` | `umbilical-pinmap` | **Not fitted.** The LM311 version watched `BREATH_SENSE` and `AGND_SENSE` |
+| `UMBILICAL +12V` | in | `module/umbilical-load-switch` | — | **Not fitted.** The first presence version gated `OE_MOD` from this node, downstream of the module's own load switch |
 | panel LED | out | `module/panel-led` | — | **Not fitted.** Shared the comparator's collector node. It is an ordinary power indicator now |
 
 ## There is no presence detect either

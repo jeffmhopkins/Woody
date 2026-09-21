@@ -18,17 +18,23 @@ Every net that crosses this circuit's boundary. Quantities appear **only** as a
 citation into `config/figures.yaml` — this table names nodes, it does not
 restate values.
 
+`Dir` is this circuit's side of the net — `in`, `out`, `in/out`, `ref` (a
+return or reference) or `—` (no connection here, the row is context). `Peer`
+is a bare `board/circuit` id when the other end is a circuit in this tree, a
+reference designator or part name when it is not, and `—` when there is
+nothing on the other end.
+
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
 | `+12V`, `-12V`, `+5V`, `GND` on `J-PWR-EURO` | in | Eurorack bus board | — | 16-pin shrouded keyed IDC. `GND` is the star point |
-| `MODULE ANALOG +12V` | out | `module/pitch-stage`, `module/breath-receive-stage`, `module/breath-output-stage`, `module/mod-channels` | — | After `D1`, `FB1`, `C1` |
-| `MODULE ANALOG −12V` | out | the same four analog pages | — | After `D3`, `FB3`, `C3` |
-| `DAC AVDD` | out | `module/digital-and-supervision` | `dac-rail` | The LM317 output. Selected on the bench, per the figure's floor |
+| `MODULE ANALOG +12V` | out | `module/pitch-stage`, `module/breath-receive-stage`, `module/breath-output-stage`, `module/breath-response-shaper`, `module/mod-channels`, `module/panel-led` | — | After `D1`, `FB1`, `C1`. `R-LED-PANEL` hangs on it too, which is the whole of why the indicator cannot say what it was kept to say |
+| `MODULE ANALOG −12V` | out | `module/pitch-stage`, `module/breath-receive-stage`, `module/breath-output-stage`, `module/breath-response-shaper`, `module/mod-channels` | — | After `D3`, `FB3`, `C3` |
+| `DAC AVDD` | out | `module/dac8568`, `module/breath-receive-stage`, `module/breath-output-stage`, `interfaces/spi-link` | `dac-rail` | The LM317 output. Selected on the bench, per the figure's floor. **Not `module/digital-and-supervision`**, whose 74AHCT125 runs from bus `+5V` |
 | bus `+5V` after `FB4`/`C4` | out | `module/digital-and-supervision` | — | The level shifter only, and it is the one rail with no diode |
 | `+12V` ahead of `D1`/`D2` | out | `module/umbilical-load-switch` | — | The branch is taken **before** the diodes; `U-LOADSW`'s `VCC` and the top of `R-ILIM` hang off it |
-| `+12 V analog` | out | `module/panel-led` | — | Feeds `R-LED-PANEL`, and that is the whole of why the indicator cannot say what it was kept to say |
-| `PWR_GND` | ref | `module/umbilical-load-switch`, the instrument | `umbilical-current` | The umbilical return, on its own copper to the star |
-| `AGND` / `DIG_GND` | ref | `module/breath-receive-stage`, `module/digital-and-supervision` | `dig-gnd-topology` | Where each returns is the disputed part — see the figure |
+| `PWR_GND` | ref | `module/umbilical-load-switch`, `carrier/power-entry-instrument` | `umbilical-current` | The umbilical return, on its own copper to the star |
+| `AGND_MOD` | ref | `module/dac8568`, `module/pitch-stage`, `module/breath-receive-stage`, `module/breath-output-stage`, `module/breath-response-shaper`, `module/mod-channels` | `dig-gnd-topology` | The module analog star. Where it returns is the disputed part — see the figure |
+| `DIG_GND` | ref | `module/digital-and-supervision`, `interfaces/spi-link` | `umbilical-pinmap`, `dig-gnd-topology` | `CS_MOD`'s return partner, down the umbilical. Where it ties is the disputed part — see the figure |
 | `FB1`–`FB4` | — | — | `ferrite-bias-impedance` | One bead per rail; the impedance each actually has under its own DC bias is the figure |
 
 ## The circuit
