@@ -31,7 +31,12 @@ sensor's own settling time. Going fully analog would save roughly 400 µs agains
 a 1 ms floor.
 
 For scale: the fastest physical gesture available is a hard tongue attack, with
-a rise time somewhere around 5–15 ms. The digitised path has roughly 10x margin.
+a rise time somewhere around 5–15 ms. The digitised path comes to **~3.1 ms**
+against a 5 ms target — **about 1.6×, not the 10× this sentence used to claim**.
+The old figure came from a table that left out the filter poles this design
+specifies, the sampling period, and the pneumatic restrictor. See
+[the latency budget](../reference/latency-budget.md); the restrictor is still
+unmeasured and is the term most able to break it.
 
 On resolution: a 16-bit path gives 65,536 steps. The noise floor of human breath
 — turbulence, diaphragm tremor — sits orders of magnitude above that. The

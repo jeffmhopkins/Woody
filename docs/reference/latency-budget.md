@@ -18,7 +18,12 @@ too low.
 ## Target
 
 **Under 5 ms from gesture to output.** That is roughly the line between an
-instrument and a toy. Everything below has comfortable margin against it.
+instrument and a toy.
+
+**The margin is about 1.6×, not the 10× that was claimed elsewhere**, and one
+term — the pneumatic restrictor — is not measured yet. This budget is close
+enough to its target that a change which looks harmless can break it, which is
+the reason the page exists.
 
 ## Breath path
 
@@ -31,9 +36,18 @@ copy — thresholds, note gating, mod routing, MIDI — is sampled, and pays for
 | Stage | Time | Notes |
 |---|---|---|
 | Tube propagation | **~1.17 ms** | 400 mm. The sensor sits at the bottom with the real-time board (ADR 0003) |
+| **Pneumatic restrictor** | **? — sized at E2** | A deliberate low-pass, added to damp the tube's pipe mode (ADR 0003). **Not previously in this budget at all**, and the term most able to break it |
 | Pressure transducer | **~1 ms** | A property of the sensor, not the design |
-| Buffer, cable, in-amp, output filter | < 0.2 ms | Propagation plus filter group delay only |
-| **Total** | **~2.4 ms** | |
+| Buffer and cable propagation | < 10 µs | |
+| Receive filter, 531 Hz | **300 µs** | `1/(2πf)`. One pole, not two — the schematic puts the whole filter at the receive end |
+| Output RC at the jack, 480 Hz | **332 µs** | |
+| **Total** | **~2.80 ms + restrictor** | |
+
+**The filter line used to read "< 0.2 ms" and it was the design's own
+specified corners that broke it.** Three reviewers found the same thing: a
+500 Hz pole has 318 µs of group delay by definition, and this path has two of
+them. The real figure is 632 µs — three times what was written, though still
+inside the target.
 
 ### Breath digital copy (sampled)
 
@@ -41,13 +55,14 @@ Everything above as far as the sensor output — **~2.17 ms** — then:
 
 | Stage | Time | Notes |
 |---|---|---|
+| **Anti-alias filter, 564 Hz** | **282 µs** | `C-AA-ADC` against the divider's 6 kΩ. **Omitted entirely before**, like the restrictor |
 | Sampling period | **0–250 µs** | At a 4 kHz loop, a change waits up to one period to be seen. Mean 125 µs |
 | SAR ADC conversion | 50–200 µs | SAR, not delta-sigma — see below |
 | SPI to MCU + firmware | < 20 µs | |
-| SPI to DAC over umbilical | ~50 µs | 2 MHz |
+| SPI to DAC over umbilical | ~112 µs | Seven 32-bit words at 2 MHz. The loop refreshes all of them every pass (`firmware/README.md`), so the whole burst is the latency, not one word |
 | DAC settling | ~10 µs | |
-| Op-amp + reconstruction filter | ~160 µs | ~2 kHz corner |
-| **Total** | **~2.6–2.9 ms** | |
+| Reconstruction filter | ~82 µs | Mod channels, 1.94 kHz. Pitch is 15.9 kHz and costs ~10 µs |
+| **Total** | **~2.9–3.1 ms + restrictor** | |
 
 The sampling period was previously omitted from this table entirely, which
 understated the digital path by up to a quarter of a millisecond. It is not a
@@ -58,12 +73,20 @@ the converter is fast.
 
 Moving the sensor to the bottom of the instrument (ADR 0003) traded 0.09 ms of
 tube for 1.17 ms. That was a deliberate exchange for a short, quiet analog run
-instead of a 400 mm one, and the budget absorbs it: **2.4 ms against a 5 ms
+instead of a 400 mm one, and the budget absorbs it: **2.80 ms against a 5 ms
 target**, with the two largest terms both physical rather than architectural.
 
 For scale: a hard tongue attack has a rise time of roughly 5–15 ms. Diaphragm
-dynamics are far slower. Even at 2.9 ms the chain has several times the margin
-against the fastest gesture physically available.
+dynamics are far slower. Even at 3.1 ms the chain has margin against the
+fastest gesture physically available.
+
+**But "roughly 10× margin" was never true and is not true now.** ADR 0003 used
+that phrase; against a 5 ms target the real figure is about **1.6×**, and the
+restrictor has not been measured yet. Two terms are unbounded until E2 — the
+restrictor and the transducer's own response, which is a datasheet number — and
+between them they decide whether this budget holds. The honest statement is
+that the design has margin, not headroom, and the end-to-end measurement at the
+bottom of this page is the one that settles it.
 
 ## Key path
 
@@ -91,7 +114,7 @@ load-bearing enough that being wrong about them would change the design.
 | What | How | Why it matters |
 |---|---|---|
 | **Breath transducer response** | Step the pressure, scope the sensor output, measure rise time | A large term and a datasheet figure. If it is really 3 ms the margin shrinks; if it is 200 µs there is far more headroom than assumed |
-| **Tube delay and ringing** | Step the pressure at the mouthpiece, scope at the sensor. Measure both the delay and any quarter-wave ringing | Now the **largest single term** at 400 mm, and the one term tunable by design. Also sizes the Helmholtz restrictor (ADR 0003) |
+| **Tube delay, ring-down, and the restrictor's time constant** | Step the pressure at the mouthpiece, scope at the sensor. Measure the delay, the ring-down, and — with the plug fitted — the added time constant | Now the **largest single term** at 400 mm, and the one term tunable by design. The restrictor is sized by damping, not by frequency (ADR 0003), and **its time constant is a latency term this budget cannot fill in until E2** |
 | **KS-33 contact bounce** | Scope a switch, measure bounce duration on press *and* release | The 2021 firmware used a flat 20 ms debounce. If these switches settle in 2 ms, setting the window from data buys back 18 ms of the most latency-sensitive path in the instrument |
 | **ADC + SPI round trip** | Logic analyser on the bus | Datasheet conversion time excludes driver overhead. The real number includes it |
 | **SPI over the umbilical at length** | Logic analyser at the module end, cable at full length | Setup/hold margin, ringing, double-clocking. This is where a long cable bites, and it is invisible without an LA. Gates E11 |
@@ -99,7 +122,7 @@ load-bearing enough that being wrong about them would change the design.
 | **Rack rail ripple, both directions** | Scope +12V at the module with the instrument running | Incoming ripple lands on the CV outputs; outgoing noise from the local buck lands on every other module in the rack. Gates E6 |
 | **WiFi transmit transients** | Scope the rail during a TX burst with the radio enabled | Now the *only* path by which WiFi can affect the outputs (ADR 0013). Decides whether configuration-while-playing is usable |
 | **Inter-MCU UART link** | Logic analyser on the pair, under load | Frame integrity and whether status traffic is jitter-free at rate (ADR 0013) |
-| **Umbilical link** | Logic analyser at the module end, cable at length | ~0.6 MHz now that breath is analog — confirm it is clean and that RS-485 stays unnecessary (ADR 0004) |
+| **Umbilical link** | Logic analyser at the module end, cable at length | **2 MHz** — the 0.6 MHz this row used to give came from a 2 kHz mod rate and does not close at 4 kHz (ADR 0004). Confirm it is clean at the rate actually needed, and that RS-485 stays unnecessary |
 | **Breath channel noise** | Scope the breath jack while sweeping display brightness, LED animation and a WiFi burst | The end test for the analog breath decision. Any of those appearing on the output means AGND is picking up power return current, or the module is sensing against local ground (ADR 0003) |
 | **End-to-end, in one shot** | Two scope channels: one on the sensor output, one on the CV jack | Measures the real gesture-to-output time directly instead of summing estimates. This is the number that actually matters, and it is the one measurement that validates or refutes the entire table above |
 
@@ -120,10 +143,15 @@ a hypothesis; a budget made of measurements is a constraint.
    thresholds, note gating, mod routing and MIDI, not for the breath jack.
 
    **The 8 kHz end of the old "4–8 kHz" range does not close.** Serialised, one
-   pass costs ADC 24 µs + key chain 16 µs + six DAC channels 96 µs = **136 µs**,
-   against a 125 µs period at 8 kHz. At 4 kHz it is 136 µs of 250 µs — 54 %
-   duty, with room for the loop to do work. Three documents used to disagree
-   about this; 4 kHz is the number.
+   pass costs ADC 24 µs + key chain 16 µs + **seven** DAC channels at 2 MHz
+   112 µs = **152 µs**, against a 125 µs period at 8 kHz. At 4 kHz it is 152 µs
+   of 250 µs — 61 % duty, with room for the loop to do work. Three documents
+   used to disagree about this; 4 kHz is the number.
+
+   Seven channels, not six: the loop refreshes the mod offset and the breath
+   ambient zero every pass rather than writing them once
+   (`firmware/README.md`). The old table booked six while writing five, which
+   is how the seventh fits inside a budget that was already paid.
 2. **SAR ADC, never delta-sigma.** A delta-sigma's decimation filter has real
    group delay — potentially milliseconds — which would consume the entire
    budget on its own.
