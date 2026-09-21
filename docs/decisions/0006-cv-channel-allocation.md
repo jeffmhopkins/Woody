@@ -184,8 +184,32 @@ real heat path out of it, partly covered by the player's hands.
 
 The mechanism already exists: DAC channel 6 drives the ambient-zero offset into
 the in-amp's REF pin. So **decay the zero toward the current reading whenever
-breath has been sub-threshold for about 2 seconds.** Slow enough that it cannot
+breath has been sub-threshold for about 2 seconds** — slow enough that it cannot
 chase a held note, fast enough to track a warming body.
+
+**Sub-threshold is not enough of a condition, and an auto-zero that never
+reports is a fault-concealment machine.** Two reviewers found the same thing
+from different directions, and both are right:
+
+- The rule as written eats a sustained pianissimo, and it re-zeros during the
+  catch-breath of a circular-breathing passage — both of which are quiet on
+  purpose and are the player doing something.
+- Continuous auto-zero cannot tell thermal drift from **a partially blocked
+  PTFE restrictor, a cavity that has started sealing, or a shifted sensor
+  offset** — which are exactly the three failures the DP reference-port
+  decision depends on being able to see (ADR 0003). It absorbs them silently
+  and presents them later as an instrument that has gone vague.
+
+**Gate the decay on "sub-threshold *and* quiet".** Quiet means the signal's
+standard deviation is below about 2× what it measured at commissioning — the
+same stillness-gated estimator ADR 0007 already uses for IMU bias, applied to a
+different sensor. A held pianissimo has breath noise in it; an instrument on a
+stand does not.
+
+**And log the accumulated correction.** The zero is allowed to move; it is not
+allowed to move silently. A running total, visible on the display and in the
+web app, turns all three concealed failures into a number that walks — which is
+the diagnostic the design otherwise does not have.
 
 A 96 kHz breath channel was specified before the output went analog, which
 implied sub-10 µs DAC settling and ~6.8 MHz on the umbilical. **Both

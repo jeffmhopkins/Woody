@@ -239,29 +239,46 @@ With that gone, three things push the sensor down:
 
 ### The cost, and why it is affordable
 
-| Tube | Delay | Helmholtz |
+| Tube | Delay | First resonance |
 |---|---|---|
-| 30 mm (old) | 0.09 ms | 2858 Hz |
-| **400 mm (chosen)** | **1.17 ms** | **214 Hz** |
+| 30 mm (old) | 0.09 ms | ~2.9 kHz |
+| **400 mm (chosen)** | **1.17 ms** | **214–429 Hz** |
 
 Breath path goes from ~1.5 ms to ~2.6 ms against a 5 ms target. The tube
 displaces the transducer as the dominant term, but there is ample margin against
 the 5–15 ms rise of the fastest gesture available.
 
-**The resonance needs handling, and the model matters.** A quarter-wave standing
-wave is the wrong model once there is a trap volume at the end — it is a
-**Helmholtz resonator**, and at 3 mL of trap it lands near **320 Hz, below the
-500 Hz filter corner**, where it would pass straight through. So:
+**The resonance needs handling, and the model this ADR used was invalid.** An
+earlier revision called it a **Helmholtz resonator** at ~320 Hz and prescribed a
+trap volume to place it. A Helmholtz model requires the neck volume to be small
+against the cavity, and here it is the other way round: at a 3 mm bore the
+400 mm tube holds **2.83 mL**, which is larger than the ≤1 mL trap. The lumped
+assumption is violated backwards.
 
-- **Specify the trap volume at ≤1 mL.** "Small" is not a spec, and trap volume
-  and response time are coupled — the ADR previously treated them as
-  independent.
-- Add a deliberate pneumatic restrictor at the sensor port to make the path
-  first-order rather than resonant. Sizing depends on orifice length as well as
-  diameter and needs a bench check — a porous PTFE plug does the same job and
-  doubles as the moisture barrier.
-- Tube length is the cheapest remaining lever if measurements come back worse
-  than expected.
+The correct model is a **distributed pipe**: 214 Hz closed at the sensor and
+open at the mouth, 429 Hz with the mouth sealed on the mouthpiece. Two things
+follow, and the second is the one that changes what gets built:
+
+- It sits **below the 500 Hz filter corner either way**, so the electrical
+  filter does not help. That was already true and the old model got it right by
+  luck.
+- It is **independent of trap volume.** No restrictor *size* moves it. The
+  previous prescription — size the trap to place the resonance — cannot work,
+  and neither can tube length within any range this instrument has.
+
+**So the intent is damping, not placement.** The PTFE restrictor stays and its
+job is restated: add acoustic resistance so the pipe mode is damped wherever it
+lands, rather than tuned to somewhere convenient. The same plug still doubles as
+the moisture barrier, which is why it is specified as porous PTFE rather than as
+an orifice.
+
+- **Specify the trap volume at ≤1 mL**, still — but for response time and
+  clearability, which is what it was always actually buying.
+- **Specify the bore** (below), because until this revision the two resonance
+  figures in the repository described different tubes.
+- **E2 measures the damped response**, not the resonant frequency: tap the
+  mouthpiece end and watch the sensor ring down. One time constant, or a
+  decaying oscillation that needs a denser plug.
 
 ## Breath output is analog, sent differentially
 

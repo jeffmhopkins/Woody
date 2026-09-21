@@ -199,9 +199,14 @@ cheaper part for the non-precision channels would save a few dollars on a
 one-off and introduce a whole class of "which chip goes here" assembly error.
 Not worth it.
 
-**INA134 for the breath difference amp.** On-chip matched resistors give ~90 dB
-CMRR against the 60 dB needed (ADR 0003), with no external matching network to
-place or match.
+**INA828 for the breath receiver.** ~~INA134~~ — this ADR named a *difference
+amp* with on-chip matched resistors. It is an **instrumentation amp**, and the
+distinction is the whole design: a difference amp's input impedance is its
+resistor network, so source-impedance mismatch caps its effective CMRR, while
+an in-amp's gigaohm inputs remove that coupling entirely and let the protection
+resistors be whatever the filter wants. Topology, values and derivation are in
+`hardware/module/breath-receive-stage.md`, which supersedes this paragraph and
+ADR 0003's prose where they disagree.
 
 **Standard eurorack hardware elsewhere:** PJ398SM jacks, Alpha 9 mm vertical
 pots (linear taper — predictable for CV scaling), a rated SPST toggle for power,
@@ -337,7 +342,7 @@ analog box — and a stray edge on CS latches a garbage word into the pitch DAC.
 **So pull them, and gate the buffer:**
 
 - **CS pulled to +5 V; SCLK and MOSI pulled to ground**, at the module end.
-- **Gate the 74AHCT125's output enable from umbilical +12 V presence**, so
+- **Gate the 74AHCT125's output enable from a real presence detect**, so
   "instrument absent" is a state the hardware knows about rather than one it
   stumbles into.
 
@@ -346,6 +351,36 @@ That OE gating is the reason the power switch had to move to the module
 umbilical" would no longer mean "instrument alive", and the gating would fail in
 exactly the state it exists for. The relocation was load-switch-shaped but this
 is what made it necessary.
+
+### Presence detect is a comparator on the breath line, not +12 V on the cable
+
+**Sensing umbilical +12 V does not detect the instrument.** That node is
+downstream of the module's *own* load switch, so it is present whenever the
+panel toggle is on — with nothing plugged in at all. It fails in precisely the
+state it exists to detect, and part of the argument above rests on it.
+
+A free and much better detect already exists in the circuit, and it comes from
+the breath receiver's own resting behaviour:
+
+| State | At the in-amp |
+|---|---|
+| Cable unplugged | R4/R5 pull both inputs to module `AGND` → output sits **at `V_REF`** |
+| Instrument alive | Sensor's designed +0.2 V zero-pressure floor → output sits **~437 mV below `V_REF`** |
+
+**One comparator against a threshold partway between them reports all of it at
+once**: cable connected, +12 V actually reaching the far end, REF5050 alive,
+sensor alive, buffer alive, and both analog conductors intact. Nothing else in
+the design reports any of those, and nothing extra is needed to get them.
+
+So: an LM393 half, open-collector, pulled to the bus +5 V rail, driving all four
+`OE` pins. Hysteresis from a three-resistor network; the second half of the
+package is spare. The +12 V divider that used to do this job is deleted rather
+than kept alongside — it answers "is my own switch on", which the panel LED
+already answers.
+
+**The same signal is the module's only health indicator**, so bring it to the
+panel LED too: lit means the instrument is there and its analog front end is
+working, rather than lit means a toggle is up.
 
 **Note the 74AHCT125 is a plain buffer, not a Schmitt trigger.** If the umbilical
 turns out to need edge cleanup at length, that wants a 74AHCT14 — decide it at
@@ -488,6 +523,33 @@ Close, but two things are not optional:
   breath channel survive (ADR 0003) and any Cat5e has those, but the shield is
   free at this price and the breath pair is the one signal with no digital
   margin to spare.
+- **Straight-through, and this one is a hazard rather than a preference.** Not
+  every RJ45 lead is straight-through, and the wrong ones are visually
+  identical to the right ones.
+
+| Lead type | Swaps | Against the map below |
+|---|---|---|
+| Rollover / console | 1↔8, 2↔7, **3↔6**, 4↔5 | 3 and 6 are **+12 V and PWR_GND** — reverse polarity into the instrument |
+| 10/100 crossover | (1,2) ↔ (3,6) | **BREATH/AGND ↔ +12 V/PWR_GND** — 12 V onto a buffer output |
+
+This ADR fits two Schottkys on the rack connector because "keying alone is not
+worth trusting", for a connection made *once* in the module's life, and then
+trusted a generic consumable patch lead completely. The lead is the part most
+likely to be swapped in a hurry, in the dark, from a drawer.
+
+**Neither case needs a new idea, because both are already nearly covered:**
+
+- The crossover case is covered *by design*. ADR 0003 put the breath buffer on
+  +12 V precisely so that a sustained +12 V fault on that line sits at the rail
+  rather than above it, and the instrument-side 1 kΩ plus the module-side 10 kΩ
+  and BAV99 bound the rest (`hardware/module/breath-receive-stage.md`).
+- The rollover case needs **one shunt SS34 at the instrument's power entry**,
+  cathode to the +12 V pin. Reversed, it conducts hard, the module's LT1641-1
+  sees a short, **latches off**, and the panel LED goes out. The load switch
+  becomes the fuse, which is what it was for.
+
+A pin-map reorder was considered and declined: a gigabit crossover swaps the
+other pair group as well, so no mapping is safe against every lead. A diode is.
 
 ### Pin assignment, which the connector choice now constrains
 
