@@ -1,0 +1,206 @@
+# Shared figures — the single source of truth.
+#
+# WHY THIS FILE EXISTS
+# Three review waves found the same defect ~90 times: a value changes, and the
+# numbers derived from it in other documents do not follow. The corpus contains
+# exactly one fact with zero staleness findings against it (USB MIDI opt-in),
+# and what makes it different is that it is stated ONCE and cited by name from
+# everywhere else. This file generalises that.
+#
+# RULES
+#   1. A figure listed here is stated ONCE, in its `owner` document.
+#   2. Every other document CITES it. It does not restate the number.
+#   3. `forbidden` lists values this quantity USED to have. tools/check-staleness.py
+#      fails if any of them appear in the design corpus.
+#   4. When a figure changes: update it here, move the old value into `forbidden`,
+#      and run the checker. The checker then tells you every place to fix.
+#
+# STATUS
+#   settled  - derived, agreed, safe to cite
+#   disputed - the corpus disagrees; `candidates` lists what, `decided_by` says how
+#   blocked  - needs a datasheet or a bench measurement
+
+figures:
+
+  - id: inamp-full-scale
+    quantity: In-amp output at full sensor range
+    value: "-9.94 V"
+    status: settled
+    owner: hardware/module/breath-receive-stage.md
+    derivation: "G = 1 + 50k/42.2k = 2.18483; x 1M/(1M+11k) = 2.16106 effective; x 4.6 V sensor span = 9.941 V"
+    forbidden: ["-9.6 V", "−9.6 V", "-10.05 V", "−10.05 V"]
+    note: "-10.05 V is the same gain with the 1M bias divider omitted. -9.6 V is derived from nothing and matches no configuration."
+
+  - id: sensor-full-scale
+    quantity: MPXV4006DP output at full scale
+    value: "4.80 V"
+    status: settled
+    owner: docs/decisions/0003-breath-sensing-path.md
+    derivation: "0.2 V + 0.766 V/kPa x 6 kPa = 4.796 V"
+    forbidden: ["4.7 V output", "0.2-4.7 V", "0.2 – 4.7 V"]
+
+  - id: key-release-time
+    quantity: Key network release, crossing V_IH
+    value: "119.9 us"
+    status: settled
+    owner: hardware/controller/cluster-boards.md
+    derivation: "Pressed node sits at 3.3 x 100/(2200+100) = 0.1435 V, NOT 0 V. Charging through 2.2k: t = -103.4us x ln((3.3-2.31)/(3.3-0.1435)) = 119.9 us"
+    forbidden: ["125 us", "125 µs", "~93 us", "~93 µs", "93.2 us"]
+    note: "Starting from 0 V instead of the divider voltage gives 124.5 us, which is the error the 125 us figure came from."
+
+  - id: key-press-time
+    quantity: Key network press, crossing V_IL
+    value: "5.92 us"
+    status: settled
+    owner: hardware/controller/cluster-boards.md
+    derivation: "tau = (2200||100) x 47nF = 4.496 us; t = -4.496 x ln((0.99-0.1435)/(3.3-0.1435)) = 5.92 us"
+    forbidden: ["5.7 us", "5.7 µs", "~1 us release", "1.4 us", "1.4 µs", "176x", "176×"]
+
+  - id: marker-bits
+    quantity: Marker pattern width
+    value: "8 bits"
+    status: settled
+    owner: config/key-layout.yaml
+    derivation: "Two per device, one high one low, so every device fails its own marker whichever way it breaks. Decided 2026-09-21."
+    forbidden: ["four to six", "Four to six", "4-6 are claimed", "six bits carry the marker", "6 marker"]
+
+  - id: free-bits
+    quantity: Genuinely free chain bits
+    value: "3"
+    status: settled
+    owner: config/key-layout.yaml
+    forbidden: ["five genuinely free", "The 5 genuinely free", "5 free bits", "Eight to ten remain"]
+
+  - id: chain-conductors
+    quantity: Conductors per key-chain hop
+    value: "12"
+    status: settled
+    owner: docs/decisions/0001-mcu-and-board-partitioning.md
+    derivation: "4 signals + 5 alternating grounds + 3V3 + 2 spare, on a 2x6 IDC"
+    forbidden: ["six conductors per hop", "SIX conductors per hop", "6 conductors per hop", "Six conductors leave", "six conductors leave"]
+
+  - id: chain-connectors
+    quantity: J-CHAIN connectors in the system
+    value: "8"
+    status: settled
+    owner: hardware/controller/cluster-boards.md
+    derivation: "SER/QH are point-to-point, so every cluster board but the last has IN and OUT: carrier 1, RT 2, RH 2, LT 2, LH 1"
+    forbidden: ["five connectors must match", "Five connectors", "~4 connectors"]
+
+  - id: key-pullup-qty
+    quantity: R-KEY-PU quantity
+    value: "24"
+    status: settled
+    owner: hardware/bom.csv
+    derivation: "21 switch positions + 3 free bits (22, 23, 31) which also need pulling"
+    forbidden: ["21 pull-ups", "Twenty-one sets"]
+
+  - id: spi-series-r
+    quantity: SPI series resistor at the driving end
+    value: "100 ohm, R-SPI-SER, qty 3"
+    status: settled
+    owner: hardware/controller/carrier.md
+    derivation: "2 m of Cat5 is a 100-ohm transmission line. At 220R the far end's first step is 1.83 V against a 2.0 V V_IH, dwelling ~20 ns per edge in the forbidden band. 68R is ideal but draws 48 mA against a 40 mA pad spec."
+    forbidden: ["R-MOSI-SER at 220", "R-MOSI-SER` at 220", "R-SCLK-SER", "R-CS-SER", "220 Ω with\n~200 pF"]
+
+  - id: umbilical-pinmap
+    quantity: Umbilical pin assignment
+    value: "1,2 BREATH/AGND | 3,6 +12V/PWR_GND | 4,5 SCLK/MOSI | 7,8 CS/DIG_GND"
+    status: settled
+    owner: docs/decisions/0004-cv-interface-module.md
+    derivation: "CS must have a ground partner: it frames the word, MISO is deleted so a mis-frame is unreadable and sticky. SCLK+MOSI is safe by construction - MOSI is only sampled on a SCLK edge."
+    forbidden: ["MOSI / CS", "4 MOSI", "5 CS", "7 SCLK", "MOSI/CS on 4"]
+
+  - id: dac-rail
+    quantity: LM317 DAC AVDD rail
+    value: "5.21 V"
+    status: settled
+    owner: hardware/module/power-entry.md
+    derivation: "1.25 x (1 + 475/150) = 5.208 V"
+    forbidden: ["5.25V", "5.25 V"]
+
+  - id: mod-reference
+    quantity: Mod channel reference, DAC channel 7
+    value: "3.3333 V"
+    status: settled
+    owner: hardware/module/mod-channels.md
+    derivation: "Two-resistor non-inverting form, k=3 from R1 10k / R2 30k, lands on exactly +/-10.000 V"
+    forbidden: ["4 x (Vdac - 2.5 V)", "1:4 ratio", "written once at boot"]
+    note: "Writing 2.5 V into ch7 against the 10k/30k network gives a -7.5...+12.5 V window and clips positive."
+
+  - id: pitch-compensation
+    quantity: C-FB-PITCH value and net
+    value: "2.2 nF, op-amp OUTPUT to the (-) input"
+    status: settled
+    owner: hardware/module/pitch-stage.md
+    forbidden: ["1 nF across the feedback resistor", "1nF across the feedback", "C-FB-PITCH 1nF"]
+    note: "Across the feedback resistor gives 18 degrees of phase margin with 2 m of cable."
+
+  - id: panel-width
+    quantity: Module panel width
+    value: "50.50 mm (10HP)"
+    status: settled
+    owner: docs/decisions/0004-cv-interface-module.md
+    derivation: "(10 x 5.08) - 0.3, +0/-0.2"
+    forbidden: ["40.34 mm", "8HP panel", "inside 8HP", "at 8HP this", "Comfortable at 8HP"]
+
+  - id: panel-height-budget
+    quantity: Module panel height used
+    value: "DISPUTED"
+    status: disputed
+    owner: docs/decisions/0004-cv-interface-module.md
+    candidates: ["107 mm (asserted, never derived)", "97 mm (derived, but with no clearance allowance - the same defect)", "112 mm (97 mm with B1's clearances restored)", "124 mm (with the toggle/LED row not assumed to fit beside the flange)"]
+    decided_by: "A 1:1 paper check at M4 with real parts. ~110 mm usable is itself derived nowhere - nothing connects it to the 128.5 mm panel."
+    forbidden: []
+
+  - id: breath-working-point
+    quantity: Breath pressure at a hard blow
+    value: "DISPUTED"
+    status: disputed
+    owner: docs/decisions/0003-breath-sensing-path.md
+    candidates: ["2.8 kPa (cited to ADR 0003, which does not contain it; the two schematic pages cite each other)", "0-5 kPa (what ADR 0003 actually says)", "3-4 kPa (published wind-controller figures)"]
+    decided_by: "M1, with a player and a manometer. Sets the panel gain range AND the ADC headroom."
+    forbidden: []
+
+  - id: pitch-cents-budget
+    quantity: Total pitch error budget
+    value: "DISPUTED"
+    status: disputed
+    owner: hardware/module/pitch-stage.md
+    candidates: ["0.42 cents (this is a ROW of one table, not a total - and it is what power-entry.md scaled the ground-path finding against)", "0.85 cents RSS", "1.35 cents linear sum", "~1.2 cents RSS over 0-40 C from an independent reviewer"]
+    decided_by: "pitch-stage.md has two contradictory budget tables back to back and states no total. One coherent table, then cite it."
+    forbidden: []
+
+  - id: loadswitch-timer
+    quantity: C-TIMER-LOADSW
+    value: "BLOCKED"
+    status: blocked
+    owner: hardware/module/power-entry.md
+    candidates: ["365 nF if I_TIMER is 3 uA", "9.25 uF if I_TIMER is 76 uA"]
+    decided_by: "Reading I_TIMER off the LT1641 datasheet. analog.com was unreachable through four review waves."
+    forbidden: ["10nF", "10 nF timer", "12x to 300x"]
+    note: "The '12x to 300x' ratio is itself wrong - the page's own equation gives 37x to 925x, and bom.csv repeats the bad ratio so cross-checking finds false agreement."
+
+  - id: loop-budget
+    quantity: Real-time loop, one pass
+    value: "196-241 us of 250 us"
+    status: settled
+    owner: docs/reference/latency-budget.md
+    derivation: "Bus time 148-155 us PLUS ESP-IDF per-transaction overhead (24 us interrupt / 9 us polling) which no document counted. 291 us with driver defaults - does not close. Polling transactions on an acquired bus are not an optimisation, they are what makes 4 kHz reachable."
+    forbidden: ["16 us", "16 µs", "50-200 us", "50–200 µs", "< 10 µs via SPI DMA"]
+
+  - id: umbilical-current
+    quantity: Instrument current down the umbilical, typical play
+    value: "359 mA"
+    status: settled
+    owner: docs/decisions/0005-power-architecture.md
+    derivation: "226 mA x 5 V / (0.9 x 11.4 V) + 248 mA = 358.1 mA. This is the only derived figure; eight others are asserted."
+    forbidden: ["275 mA", "290 mA", "320 mA", "392 mA", "410-430 mA"]
+
+  - id: diode-split-rationale
+    quantity: What the D1/D2 split actually buys
+    value: "fault isolation and HF isolation (r_d 69 mohm at 392 mA)"
+    status: settled
+    owner: hardware/module/power-entry.md
+    derivation: "The 80 mV Vf modulation is real, but reaches the jack as 75 mV -> LM317 line reg 0.52 mV/V -> 39 uV on AVDD -> OPA2197 PSRR -> 0.00018 cents. Pitch references the DAC's INTERNAL reference, not this rail."
+    forbidden: ["20 cents of breath-correlated", "20 cents of pitch bend", "about 20 cents"]
