@@ -97,12 +97,19 @@ docs/decisions/   Architecture decision records — the important stuff
 docs/log/         Dated build log
 docs/reference/   Latency budgets, fingering notes, specs
 docs/research/    Component comparisons and datasheet notes
+docs/review/      Cold review waves. A dated record, never corrected
+datasheets/       The actual vendor PDFs, one MANIFEST.csv row each
 hardware/         BOM, schematics, PCB, split by board
 firmware/         ESP32-S3 firmware (PlatformIO)
 mechanical/       CAD source, 2D cut exports, drawings
 config/           Key layout and routing, as data
 tools/            Host-side utilities
 ```
+
+*(`docs/review/` and `datasheets/` were missing from this tree until
+2026-09-21. `datasheets/` is 77 banked documents and the largest directory in
+the repository; `docs/review/` is seven waves. Both were invisible in the one
+file a new reader opens first.)*
 
 ## Where to start reading
 
@@ -111,8 +118,8 @@ tools/            Host-side utilities
 3. [docs/reference/latency-budget.md](docs/reference/latency-budget.md) — the
    constraint that shapes most of the electrical design
 
-## Licensing
-
-Not yet decided — see
-[ADR 0011](docs/decisions/0011-licensing.md). The previous project's firmware
-was GPLv3.
+*(This file carried a second "Licensing" section here saying the licence was
+"not yet decided", contradicting the "Licence" section above it, which states
+the three that were chosen. ADR 0011 has read `Accepted` since it was written
+and `LICENSE` has held the mapping the whole time. Deleted 2026-09-21 — the
+licence is stated once, above, and nowhere else.)*
