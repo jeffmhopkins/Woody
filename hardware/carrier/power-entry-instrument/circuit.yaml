@@ -1,3 +1,31 @@
+# STATUS: SEEDED, NOT VERIFIED. Read this before trusting an edge.
+#
+# depends_on was machine-seeded from CO-MENTION - what this page names - and
+# co-mention is not dependency. A cold reviewer reconciled the refdes edges
+# against the BOM fragments and verified three as false by reading:
+#   pitch-stage -> R-BIAS-INAMP   the page names it as an explicit CONTRAST
+#   breath-adc  -> C-STRIP-BULK   a citation of a note about the LED strip
+#   breath-receive -> U-OPA-PITCH a package-count consequence, not a use
+# Expect more of that shape. An edge here means "this page mentions this
+# thing", which is a useful starting graph and a bad finished one.
+#
+# IT IS ALSO ASYMMETRIC, and the reason is worth knowing: circuit: edges were
+# seeded from the Interfaces tables' Peer column, and the agents that wrote
+# those tables did not agree on notation. The module pages named peers as
+# `board/circuit` ids; the carrier pages named them in prose ("the dev
+# board's LDO", a link to carrier.md). So carrier/** and cluster/** declare
+# ZERO circuit: edges while module/power-entry declares seven. That is a
+# property of the tables, not of the hardware.
+#
+# Direction is meaningless: several pairs are mutual, which is honest for a
+# net shared between two circuits and useless for ordering anything.
+#
+# WHAT IS ACTUALLY GUARANTEED: every edge RESOLVES. A refdes names a BOM row
+# that exists, a fig names a register entry, a circuit names a declared id.
+# That is what catches a dependency on a deleted part, which is the semantic
+# half CLAUDE.md 5 says a grep cannot reach. Correctness of the edge itself
+# is a reader's job and has not been done.
+
 # Seeded 2026-09-21 from what the page already states - the ADRs it
 # cites, the figures it names, and the refdes it draws that the BOM
 # carries. Nothing here was guessed: an edge is listed because the

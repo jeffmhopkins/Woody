@@ -110,7 +110,82 @@ Reported, verified by hand, then fixed by me in separate commits:
 **The grep-first rule earned itself again** on defect 2: the agent found
 three of five occurrences because it was reading only its own page.
 
+## The two cold reviews, and what they cost
+
+Both reviewers were barred from `docs/review/**`, so neither could agree
+with anything written here.
+
+**Conservation: nothing was lost.** 97.2 % of the original word-mass present
+verbatim; zero dropped passages, table rows, list items, headings or numeric
+values, across all four of the gate's structural blind spots. It found two
+things the gate cannot see — a duplicated derivation whose five numbers were
+untracked, and a `sim/README.md` crediting a page that no longer derives the
+figures. Both fixed.
+
+**Tooling: twelve findings, and four were fail-open holes in checks I wrote
+to close fail-open holes.** The worst: one non-UTF-8 byte in any BOM fragment
+turned the generated-file guard off and flipped FAIL to PASS, because the
+check harvested stdout only and the tool crashed to stderr. That is the
+fourth instance of the class, inside the check written to close the third.
+
+Tightening `check_owners` from "any token of the value appears" to "the most
+distinctive one does" immediately found a real defect: `loop-budget`'s owner
+stated neither 196 nor 241, only the shared denominator 250 — and what it
+stated instead was a superseded 136 µs at "54 % duty, with room for the loop
+to do work", against a true 78–96 %.
+
+### The pattern across all six of my own defects this session
+
+Every one landed where I was editing and not where the reader looks, which
+is the mechanism `CLAUDE.md` names in its first paragraph. A commit message
+that described two tools while carrying twenty-two file moves. A STATUS
+section saying the split had not happened, one commit after it had.
+`repo-maintenance.md`, `CLAUDE.md` and `README.md` still describing a
+hand-edited BOM hours after it became generated. A guard on the file that
+never had the accident while the file that did went unguarded.
+
+**The rules are mechanical because trying harder does not work.** I spent
+this session building checks against exactly this failure and committed six
+instances of it anyway.
+
 ## Still to do
+
+### Known debt, named rather than hidden
+
+- **`circuit.yaml` edges are co-mention, not verified dependency.** Three
+  verified false by a reviewer; expect more of that shape. The graph is also
+  asymmetric — `carrier/**` and `cluster/**` declare zero `circuit:` edges
+  because the agents that wrote their Interfaces tables named peers in prose
+  rather than as ids. Every `circuit.yaml` now says so at the top. What *is*
+  guaranteed is that every edge resolves.
+- **`provides:` and `verified_against:` are empty**, so two checks over them
+  can never fail. `check_checks` proves they are *called*; nothing proves
+  they *check*.
+- **`unplaced.csv` holds the principal IC of five circuits that have
+  directories** — `U-DAC`, `U-DIFFRX`, `U-REG-DAC`, `D-REVPOL`, `U-LVL-MOD`.
+  Assignment went by refdes string, so parts the drawings label by part
+  number fell through. `hardware/module/dac8568/bom.csv` holds two resistors
+  and not the DAC.
+- **`check_sections` pools all 15 `notes.md` into one namespace** (keyed on
+  basename), so a `notes.md §N` reference resolves against any of them.
+  Latent, created by the restructure.
+- **Two of four board directories have no board page** — `hardware/module/`
+  and `hardware/interfaces/`. `panel.md` calls itself "a board-level page,
+  not a circuit" while carrying a `circuit.yaml` two circuits depend on, and
+  restates both figures it claims to cite.
+- **Nothing checks rule 1.** The checker only searches *already-known-old*
+  values; restating a figure's **current** value elsewhere is undetectable,
+  and that is the state every future staleness defect grows from.
+  `sensor-full-scale` — the figure `CLAUDE.md` names as the worst recorded
+  case — is restated six times. This is the cheapest missing check in the
+  repository.
+- **The ADC-reference duplication is tracked but not deduplicated.**
+- **`verify-datasheets.py` is wired to nothing**, so `CLAUDE.md`'s "must pass
+  before committing" is a human rule with no mechanism.
+
+### Still to build
+
+
 
 - **Consolidate the three board-crossing blocks** — breath, SPI, key-chain.
   Each is currently split across a board page and a module page by necessity,
