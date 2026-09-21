@@ -29,9 +29,13 @@ voltage rating, which is the tell.
 
 Not a simple swap: every modern one-chip 12 V eFuse checked fails the package
 policy (TPS2592Ax is VSON-10, TPS27S100 is HTSSOP PowerPAD). The proposal on the
-table is **LT1641-2CS8 (SO-8, 9–80 V) + N-FET + sense resistor**, latch-off
-rather than auto-retry, because auto-retry reproduces the oscillating-protection
-failure ADR 0014 analyses. This is a design decision, not a substitution.
+table is **LT1641-1CS8 (SO-8, 9–80 V) + N-FET + sense resistor** — note the
+suffix. **`-1` latches off; `-2` auto-retries**, and an earlier version of this
+register had them inverted *while arguing for latch-off*, which would have
+ordered the part whose behaviour the same sentence rejects. It is the only error
+in this register that would have been soldered on rather than merely
+miscalculated. LM5069MM (MSOP-10) and LTC4210 (MSOP-8) are equally valid, so
+naming one part overstates. This is a design decision, not a substitution.
 
 **Four decisions across ADRs 0004, 0005 and 0014 depend on this limiter working.**
 
@@ -499,7 +503,12 @@ reads worse than the design is.
 
 - **"The analog architecture is genuinely good and I could not break it."**
   Total coupled noise at the breath jack is **~60 µV on a 10 V output (−104 dB)**,
-  and nothing the instrument does reaches pitch above **0.03 cents**. The
+  and nothing the instrument does reaches pitch **through the op-amp supply
+  pins** above 0.03 cents. **Read that narrowly.** W3 and W4 above describe the
+  same disturbance arriving on the *offset reference*, which has no rejection at
+  all — and an earlier version of this register carried 22 cents and 0.03 cents
+  285 lines apart without connecting them, because the findings and the
+  confirmations were written as separate exercises. The
   failures are in the sampler, the digital wiring and one undefined DC reference
   — *not* in the analog channel the ADRs spent their effort defending.
 - **The ratiometric-supply decision was more right than argued.** Its own table
