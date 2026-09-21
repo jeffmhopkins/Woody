@@ -148,10 +148,26 @@ def cmd_verify(pairs):
     return 1 if survivors else 0
 
 
+def invert_targets(pairs):
+    """Every file A2 could have touched, paired with its baseline path.
+
+    NOT just the moved ones. A2 rewrote seven files that did not move at all
+    (config/figures.yaml, hardware/bom.csv, five ADRs), and an inversion check
+    that skipped them would have proved nothing about the files where most of
+    the rewriting actually happened. Found by running the check and noticing
+    it reported a suspiciously small number.
+    """
+    targets = dict(pairs)                       # moved: baseline old -> new
+    for rel in tracked_files():                 # unmoved: same path both ends
+        if rewritable(rel) and rel not in targets.values():
+            targets[rel] = rel
+    return targets
+
+
 def cmd_invert(pairs, baseline):
     """THE PROOF. invert(HEAD:new) must equal baseline:old, byte for byte."""
     bad, checked, skipped = [], 0, 0
-    for old, new in pairs.items():
+    for old, new in invert_targets(pairs).items():
         try:
             was = subprocess.run(["git", "show", f"{baseline}:{old}"], cwd=ROOT,
                                  capture_output=True, check=True).stdout

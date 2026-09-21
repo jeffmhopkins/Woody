@@ -351,7 +351,7 @@ ground — that part is not optional, since sensing against local ground puts th
 shared-ground offset straight back in.
 
 **But the receiver is a true instrumentation amplifier — settled as the
-INA828 (`hardware/module/breath-receive-stage.md`) — not a difference
+INA828 (`hardware/module/breath-receive-stage/breath-receive-stage.md`) — not a difference
 amplifier.** A difference amp's CMRR is set by **source-impedance
 balance, not by the chip**: TI's own datasheet states that a 10 Ω mismatch
 degrades the INA134 to ~74 dB, and this design's own protection resistor and
@@ -394,7 +394,7 @@ it always meant**, because as literally written it forbids the thing that makes
 the receiver work.
 
 Values, derivation and the full topology are in
-[the schematic](../../hardware/module/breath-receive-stage.md).
+[the schematic](../../hardware/module/breath-receive-stage/breath-receive-stage.md).
 
 Full differential signalling was considered and is not needed: it buys about
 6 dB against induced noise, which a twisted pair band-limited to 500 Hz does not
@@ -616,7 +616,7 @@ Firmware seeds the digital zero from an ADC capture at power-on, exactly as the
 2021 code did, and then keeps tracking it (ADR 0006). The analog path is not
 touched by firmware at all: the in-amp's `REF` pin carries a trimmer set once at
 commissioning, and the panel OFFSET knob is the performance control
-(`hardware/module/breath-receive-stage.md`).
+(`hardware/module/breath-receive-stage/breath-receive-stage.md`).
 
 **That trimmer is referenced to the LM317's 5.21 V rail, deliberately, and not
 to the DAC's `VREFOUT`.** `VREFOUT` is the DAC8568's internal reference, which

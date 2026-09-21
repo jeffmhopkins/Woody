@@ -220,7 +220,7 @@ four boards, so the three reserved spare-switch bits are covered too.
 
 `[calc]`, at 3.3 V into 74HC165 thresholds (`V_IH` 2.31 V, `V_IL` 0.99 V —
 0.70/0.30 × VCC, from onsemi MC74HC165A Rev. 13's published 3.0 V row; see
-`hardware/controller/cluster-boards.md` for why three other vendors omit it):
+`hardware/cluster/cluster-boards.md` for why three other vendors omit it):
 
 | | |
 |---|---|
@@ -238,7 +238,7 @@ four boards, so the three reserved spare-switch bits are covered too.
 
 > **25.8 mA is 4.4× the old figure** and it is drawn from the dev board's 3V3
 > LDO, down the loom, as a play-rate step. That LDO is also the MCP3202's
-> voltage reference (the part has no `VREF` pin). See `hardware/controller/carrier.md` §2.
+> voltage reference (the part has no `VREF` pin). See `hardware/carrier/carrier.md` §2.
 
 Five further fixes, in descending order of value. The first four are wiring and
 cost nothing but planning; they cannot be retrofitted into a bonded body.
@@ -341,7 +341,7 @@ plate cutouts at M3 and are untouched by this. So the allocation went from a sup
 8 marker, 5 free → 3 free**, and the 3 that remain still get pulled per fix 6.
 
 The bit-by-bit assignment and levels are in
-`hardware/controller/cluster-boards.md` §4.
+`hardware/cluster/cluster-boards.md` §4.
 
 That counter is the point. It is a framing check, not an error-detecting code —
 it cannot correct anything and will miss some corruptions — but it converts an

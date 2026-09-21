@@ -80,8 +80,8 @@ are the de-facto Eurorack conventions; the extra span is headroom, not a default
 ### The topology falls out neatly
 
 > **Drawn now**, in `hardware/module/`: the
-> [pitch stage](../../hardware/module/pitch-stage.md) and the
-> [mod channels](../../hardware/module/mod-channels.md). Where those pages
+> [pitch stage](../../hardware/module/pitch-stage/pitch-stage.md) and the
+> [mod channels](../../hardware/module/mod-channels/mod-channels.md). Where those pages
 > disagree with the prose here, they win — that is the rule the breath page
 > established and the reason it exists.
 >
@@ -370,7 +370,7 @@ Consequences:
 - **Use a matched resistor network for the pitch scaling stage** (LT5400 class,
   MSOP-8), not discrete 0.1% parts. This is the single highest-value precision
   component in the design. **The ratio is 1:1** — see
-  [the pitch stage schematic](../../hardware/module/pitch-stage.md), which is
+  [the pitch stage schematic](../../hardware/module/pitch-stage/pitch-stage.md), which is
   where the topology finally got drawn and turned out to be a non-inverting amp
   with the reference at the bottom of the feedback divider, not the difference
   amp everyone had been assuming. Two matched resistors, not four, and the
@@ -761,7 +761,7 @@ the easy half:
 
 Breath is the odd one because it never passes through the DAC: it has no
 zero-order-hold image to attenuate, and it is already a 482 Hz channel by the
-time it reaches the module (`hardware/module/breath-receive-stage.md`). This
+time it reaches the module (`hardware/module/breath-receive-stage/breath-receive-stage.md`). This
 ADR's earlier "~2 kHz for breath" is superseded by that page.
 
 ## Firmware defaults and bring-up rules

@@ -331,7 +331,7 @@ watchdog (`ROADMAP.md`, E10).
     node; a single inverting summer multiplies any offset at the virtual ground
     by `Rf`, which reintroduces the very interaction the `REF` trimmer was
     added to remove, displaced onto the OFFSET knob.
-  - **Drawn**, at last: `hardware/module/breath-output-stage.md`. GAIN 0.5–4×
+  - **Drawn**, at last: `hardware/module/breath-output-stage/breath-output-stage.md`. GAIN 0.5–4×
     as a buffered attenuator ahead of a fixed ×4; OFFSET ±5 V with zero at
     centre, from two resistors and no extra op-amp half. Two halves, which
     settles a count that was wrong twice.
@@ -343,7 +343,7 @@ buffers the REF5050 with half an OPA2197 straight into the sensor's `VS` pin,
 which carries a 100 nF decoupler. That load alone leaves **1.5° of phase
 margin** against the OPA2197's specified 375 Ω `Zo`, so the buffer is
 compensated — and **the compensation is now decided: see `riso-ref-topology`,
-and `hardware/controller/carrier.md` §2 for the drawing.**
+and `hardware/carrier/carrier.md` §2 for the drawing.**
 
 Two things this page used to say about it are superseded, and both mattered to
 the number this page multiplies:

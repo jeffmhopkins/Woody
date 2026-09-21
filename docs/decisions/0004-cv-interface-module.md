@@ -228,7 +228,7 @@ distinction is the whole design: a difference amp's input impedance is its
 resistor network, so source-impedance mismatch caps its effective CMRR, while
 an in-amp's gigaohm inputs remove that coupling entirely and let the protection
 resistors be whatever the filter wants. Topology, values and derivation are in
-`hardware/module/breath-receive-stage.md`, which supersedes this paragraph and
+`hardware/module/breath-receive-stage/breath-receive-stage.md`, which supersedes this paragraph and
 ADR 0003's prose where they disagree.
 
 **Standard eurorack hardware elsewhere:** PJ398SM jacks, Alpha 9 mm vertical
@@ -488,7 +488,7 @@ the instrument in your hands will not respond to anything you do with it.
 > the link going away, and that is now uncovered: **pull the umbilical mid-note
 > and the rack holds the note until the module's toggle is flipped.** The
 > reasoning, the cost and the no-new-parts way to get the link coverage back
-> are in `hardware/module/digital-and-supervision.md`. The paragraphs below are
+> are in `hardware/module/digital-and-supervision/digital-and-supervision.md`. The paragraphs below are
 > kept because the problem they describe is still real.
 
 ~~**Assert `CLR` at the module when no valid frame has arrived for N milliseconds.**~~
@@ -870,7 +870,7 @@ likely to be swapped in a hurry, in the dark, from a drawer.
 - The crossover case is covered *by design*. ADR 0003 put the breath buffer on
   +12 V precisely so that a sustained +12 V fault on that line sits at the rail
   rather than above it, and the instrument-side 1 kΩ plus the module-side 10 kΩ
-  and BAV99 bound the rest (`hardware/module/breath-receive-stage.md`).
+  and BAV99 bound the rest (`hardware/module/breath-receive-stage/breath-receive-stage.md`).
 - The rollover case needs **one shunt SS34 at the instrument's power entry**,
   cathode to the +12 V pin. Reversed, it conducts hard, the module's LT1641-1
   sees a short, **latches off**, and the panel LED goes out. The load switch

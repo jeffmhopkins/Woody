@@ -127,7 +127,7 @@ chain:
 #   the 4-6 this file used to say. Two per device, one wired high and one
 #   wired low, so any device that is dead, unclocked, stuck high or stuck low
 #   fails its own marker whichever way it broke. See
-#   hardware/controller/cluster-boards.md section 4 for the bit assignment.
+#   hardware/cluster/cluster-boards.md section 4 for the bit assignment.
 #   3 are reserved for spare switches: octave up, octave down, hold/preset.
 #   The 3 genuinely free bits are FLOATING CMOS INPUTS and must be pulled -
 #   the exact fault R-KEY-PU exists to fix (ADR 0001).

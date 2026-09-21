@@ -964,7 +964,7 @@ Ordered by what blocks what. The first four block layout.
 > now `PCB-CLUSTER` decisions `[repo] 0001, 0002`. Both are still
 > unretrofittable, both still have to be told to firmware, and neither is any
 > less urgent — they are just not on this board's critical path. They are now
-> on `hardware/controller/cluster-boards.md`, which proposes an answer to both.
+> on `hardware/cluster/cluster-boards.md`, which proposes an answer to both.
 - **Whether the sensor is reachable after bonding**, which decides whether
   `SKT-BREATH` earns its place. ADR 0003 wants a replaceable wear part and a
   trap "clearable without disassembly"; ADR 0009 gives a 12 × 40 mm cover over a

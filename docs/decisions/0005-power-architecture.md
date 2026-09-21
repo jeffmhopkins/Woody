@@ -268,7 +268,7 @@ things the bare toggle does not have:
 > guide. That is a **4:1** current window, and no single gate capacitor can hold
 > a ramp inside a 2:1 time window when the current that drives it varies 4:1.
 > `C-GATE` at 82 nF centres the *typical* at 98 ms, inside this spec; the
-> **guaranteed envelope is 49–197 ms** (`hardware/module/power-entry.md`).
+> **guaranteed envelope is 49–197 ms** (`hardware/module/power-entry/power-entry.md`).
 >
 > **This ADR has to choose.** Either widen the specification to **50–200 ms**,
 > which costs nothing the analysis below depends on — the 75 ms start it cites
@@ -339,7 +339,7 @@ exists to avoid. LM5069MM (MSOP-10) and LTC4210 (MSOP-8) are equally valid.
 
 Programmable ramp rate and a programmable fault timer come with the part, which
 is what the 75 ms start above needs. **Both are now programmed**: `C-GATE` at
-82 nF and `C-TIMER` at 10 µF, sized in `hardware/module/power-entry.md` against
+82 nF and `C-TIMER` at 10 µF, sized in `hardware/module/power-entry/power-entry.md` against
 the datasheet rather than against search results, with the ramp caveat above.
 The fault timer's binding case turned out to be the **hot-plug** — 47.5 ms
 entirely in current limit, against a worst-case timer of 95.6 ms — and not the
