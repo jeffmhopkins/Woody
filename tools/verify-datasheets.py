@@ -152,6 +152,57 @@ if uncovered:
     for u in uncovered:
         print("    " + u)
     print("  Clear each by banking the document or adding a BLOCKED row.")
+# --------------------------------------------------------------------------
+# THE CORPUS HALF. This tool checked the manifest against the disk and the
+# disk against the manifest, and never the CORPUS against either - so a
+# document citing a datasheet that was never banked, or that has since moved,
+# read as clean forever.
+#
+# It cost something real: hardware/bom.csv cited
+# datasheets/discrete-and-power/MF-PSMF010X.pdf, which has never existed (the
+# banked file carries a -polyfuse suffix). Every run of this tool passed. It
+# was found by a researcher reading, not by a check.
+#
+# Same principle as check_links, check_owners and check_sections in
+# check-staleness.py: do not hunt for spellings already known to be wrong;
+# assert that what is written now RESOLVES.
+CORPUS = ["README.md", "ROADMAP.md", "CLAUDE.md", "hardware", "config",
+          "firmware", "docs/decisions", "docs/reference"]
+PATH_RE = re.compile(r"datasheets/[A-Za-z0-9_][A-Za-z0-9_./-]*"
+                     r"\.(?:pdf|dxf|step|stp|kicad_mod|kicad_pcb|jpg|png|js|py|csv|c)"
+                     r"(?![A-Za-z0-9])")
+
+dangling, checked = [], 0
+for top in CORPUS:
+    full = os.path.join(ROOT, top)
+    walk = ([(os.path.dirname(full), None, [os.path.basename(full)])]
+            if os.path.isfile(full) else os.walk(full))
+    for dirpath, _, names in walk:
+        for n in names:
+            if not n.endswith((".md", ".csv", ".yaml", ".yml")):
+                continue
+            p = os.path.join(dirpath, n)
+            try:
+                text = open(p, encoding="utf-8").read()
+            except Exception:
+                continue
+            rel = os.path.relpath(p, ROOT)
+            # The map is the record of where things USED to be; its old-side
+            # column is supposed to name paths that no longer resolve.
+            if rel.startswith("docs/reference/path-map-"):
+                continue
+            for m in PATH_RE.finditer(text):
+                checked += 1
+                if not os.path.exists(os.path.join(ROOT, m.group(0))):
+                    line = text[:m.start()].count("\n") + 1
+                    dangling.append(f"{rel}:{line} cites {m.group(0)}, "
+                                    f"which is not on disk")
+
+if dangling:
+    print(f"  CORPUS PATHS THAT DO NOT RESOLVE ({len(dangling)}) of {checked} cited:")
+    for d in dangling:
+        print("    " + d)
+
 for b in bad:
     print("  " + b)
-sys.exit(1 if bad else 0)
+sys.exit(1 if (bad or dangling) else 0)

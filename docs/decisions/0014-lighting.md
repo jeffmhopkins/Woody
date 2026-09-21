@@ -101,7 +101,7 @@ package covers both strips.
 > **Verified 2026-09-21, and the answer is yes.** `V_IH ≥ 0.7 VDD` in a table
 > whose header declares `VDD = 4.5…5.5 V` — so **3.15 to 3.85 V**, and the
 > 74AHCT125 at 5 V clears it (Worldsemi WS2815 V1.1,
-> `datasheets/other-semi/WS2815.pdf`). The worry below was the right worry:
+> `datasheets/led/WS2815.pdf`). The worry below was the right worry:
 > reading `0.7 × VDD` with pin 2's +12 V meaning gives **8.4 V**, an impossible
 > threshold, and the datasheet does reuse the symbol for both nets. The
 > conditions line governs. The part choice stands, on a document rather than on
@@ -365,8 +365,8 @@ hard limit rather than a setting.
 >
 > **5 mA per channel is the WS2812C's figure. 12 mA is the WS2812B family's**,
 > and both documents are already in this repo:
-> `datasheets/other-semi/WS2812C.pdf` — *"The working current of each channel is
-> 5mA"*; `datasheets/other-semi/WS2812B-2020.pdf` p.4 — *"Quiescent Current：
+> `datasheets/led/WS2812C.pdf` — *"The working current of each channel is
+> 5mA"*; `datasheets/led/WS2812B-2020.pdf` p.4 — *"Quiescent Current：
 > <0.6mA … Working Current **12mA**"*. Read by hand from both.
 >
 > | per channel | source | 64 LEDs at full white |

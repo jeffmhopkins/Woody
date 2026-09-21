@@ -69,7 +69,7 @@ figures:
       value first and add a pattern per spelling found, rather than writing the
       forbidden list from the document in front of you.
     note: |
-      CORRECTED 2026-09-21 against datasheets/other-semi/MPXV4006DP.pdf, which
+      CORRECTED 2026-09-21 against datasheets/analog/MPXV4006DP.pdf, which
       refutes a figure this register had marked SETTLED.
       The old derivation used a 0.200 V pedestal. That number is the
       datasheet's own COVER-PAGE line - "0 to 6 kPa, 0.2 to 4.8 V Output" -
@@ -127,7 +127,7 @@ figures:
     status: settled
     owner: hardware/cluster/key-switch-network/key-switch-network.md
     derivation: "Pressed node sits at 3.3 x 100/(2200+100) = 0.1435 V, NOT 0 V. Charging through 2.2k (tau = 103.40 us): t = -103.40 x ln((3.3-2.31)/(3.3-0.1435)) = 119.9 us"
-    threshold_note: "V_IH = 2.31 V = 0.70 x VCC. THIS FIGURE MOVED TWICE ON 2026-09-21 AND THE SECOND MOVE PUT IT BACK. First move: TI's SCLS116E (datasheets/other-semi/74HC165.pdf) has NO 3.3 V row - it tabulates 2 V (1.5/0.5 = 0.75/0.25), 4.5 V and 6 V (both 0.70/0.30) - so the 0.75/0.25 bound was taken on the reasoning that 0.70/0.30 'breaks' at 2 V. Second move: onsemi's MC74HC165A/D Rev. 13 p.4 PUBLISHES A 3.0 V ROW, V_IH 2.1 V / V_IL 0.9 V, which is exactly 0.70/0.30. 3.3 V is therefore bracketed on BOTH sides by published 0.70/0.30 rows and needs no extrapolation through the 2 V point; 2 V is the single exception at the bottom of the family range, not a trend. TI, Nexperia (Rev. 8) and Toshiba agree with onsemi digit for digit at every shared rail, so the 3.0 V row is the family's, not one vendor's. All four PDFs are banked."
+    threshold_note: "V_IH = 2.31 V = 0.70 x VCC. THIS FIGURE MOVED TWICE ON 2026-09-21 AND THE SECOND MOVE PUT IT BACK. First move: TI's SCLS116E (datasheets/logic/74HC165-ti-scls116e.pdf) has NO 3.3 V row - it tabulates 2 V (1.5/0.5 = 0.75/0.25), 4.5 V and 6 V (both 0.70/0.30) - so the 0.75/0.25 bound was taken on the reasoning that 0.70/0.30 'breaks' at 2 V. Second move: onsemi's MC74HC165A/D Rev. 13 p.4 PUBLISHES A 3.0 V ROW, V_IH 2.1 V / V_IL 0.9 V, which is exactly 0.70/0.30. 3.3 V is therefore bracketed on BOTH sides by published 0.70/0.30 rows and needs no extrapolation through the 2 V point; 2 V is the single exception at the bottom of the family range, not a trend. TI, Nexperia (Rev. 8) and Toshiba agree with onsemi digit for digit at every shared rail, so the 3.0 V row is the family's, not one vendor's. All four PDFs are banked."
     conservative_bound: "If a TI SN74HC165 is the part fitted, its own datasheet guarantees nothing at 3.3 V and the pessimistic bound is V_IH = 2.475 V, giving 138.7 us. Nothing in the design depends on which is used - the release is absorbed by the asymmetric debounce either way. Design margin against 138.7 us if it ever gets tight."
     forbidden: ["`V_IH` at **125", "release ~93 us", "~93 µs hardware", "93.2 us", "at **138.7", "crosses `V_IH` at **138.7", "0.75 x VCC = 2.475", "0.75 × VCC = 2.475"]
     false_positive_note: "A bare 125 us also legitimately means the MEAN SAMPLING PERIOD (0-250 us at 4 kHz) and the 8 kHz LOOP PERIOD. Match the phrase, not the numeral. 138.7 us appears legitimately as the stated conservative bound and in the text recording the two moves - those lines carry refutation wording."
@@ -208,7 +208,7 @@ figures:
     derivation: "1.25 x (1 + 475/150) = 5.208 V"
     forbidden: ["5.25V]", "local 5.25 V regulator", "own 5.25 V regulator", "LM317's own 5.25 V", "5.25V DAC regulator", "set to 5.25V", "LDO set to 5.25"]
     false_positive_note: "The MPXV4006DP's supply spec is legitimately 4.75-5.25 V. Match the regulator, not the numeral."
-    floor: "5.00 V, HARD. The DAC8568's C grade is specified only for AVDD 5.0-5.5 V (SBAS430E, datasheets/texas-instruments/DAC8568CIPW.pdf). E7 selects R-REG-SET on the bench across a 0.66 V worst-case spread and must not land below 5.00 V. Added 2026-09-21; nothing in the roadmap knew this."
+    floor: "5.00 V, HARD. The DAC8568's C grade is specified only for AVDD 5.0-5.5 V (SBAS430E, datasheets/analog/DAC8568CIPW.pdf). E7 selects R-REG-SET on the bench across a 0.66 V worst-case spread and must not land below 5.00 V. Added 2026-09-21; nothing in the roadmap knew this."
     note: "bom.csv's U-REG-DAC DESCRIPTION field said 'set to 5.25V' until 2026-09-21 - the forbidden list matched the notes field's phrasings and not this one, which is why it survived. Both phrasings are listed now."
 
   - id: mod-reference
@@ -348,7 +348,7 @@ figures:
       Raised by the datasheet-reconciliation wave 2026-09-21 and decided the same
       day by preflight agent A4 (docs/review/2026-09-21-preflight/A4-carrier.md
       section 1), whose decisive citation was re-verified by hand against
-      datasheets/texas-instruments/REF5050.pdf before this entry was settled.
+      datasheets/analog/REF5050.pdf before this entry was settled.
       NO GREP FOUND IT. It was a topology disagreement between three drawings that
       each read correctly on their own, which is why three review waves and a
       mechanical checker all passed over it. Same class as dig-gnd-topology and the
@@ -425,7 +425,7 @@ figures:
     status: settled
     owner: hardware/module/power-entry/power-entry.md
     derivation: "Vf modulation is 120 mV: 0.24 V at 245 mA -> 0.36 V at 612 mA, digitised off Fig. 2 of Diodes Inc DS23001 Rev.8 (datasheets/discrete-and-power/1N5817.pdf). Reaches the jack as 120 mV -> LM317 line reg 0.52 mV/V -> 62 uV on AVDD -> OPA2197 PSRR 110.5 dB worst case -> 0.00044 cents. Pitch references the DAC's INTERNAL reference, not this rail."
-    provenance_note: "This was 75-80 mV from a review agent's estimate until 2026-09-21. The 120 mV is read off the actual curve, and the digitisation is calibrated: the same extraction gives 0.454 V at 1.0 A and 0.746 V at 3.0 A against the datasheet's guaranteed maxima of 0.450 V and 0.750 V, so it is good to about +/-0.01 V - and the plotted curve sits essentially ON the max spec, so read these as typical-to-max. The conclusion is unchanged: 0.00044 cents is still five orders of magnitude below every other term in the table. SEPARATELY, 2026-09-21: the PSRR in this chain was 114 dB and that figure is NOT IN THE OPA2197 DATASHEET - SBOS737C p.8 specifies +-1 uV/V typ and +-3 uV/V max, i.e. 120 dB typ and 110.5 dB worst case. Using the guaranteed maximum scales the result by 1.50x, from 0.00029 to 0.00044 cents, and changes nothing. SBOS737C is banked at datasheets/texas-instruments/OPA2197.pdf."
+    provenance_note: "This was 75-80 mV from a review agent's estimate until 2026-09-21. The 120 mV is read off the actual curve, and the digitisation is calibrated: the same extraction gives 0.454 V at 1.0 A and 0.746 V at 3.0 A against the datasheet's guaranteed maxima of 0.450 V and 0.750 V, so it is good to about +/-0.01 V - and the plotted curve sits essentially ON the max spec, so read these as typical-to-max. The conclusion is unchanged: 0.00044 cents is still five orders of magnitude below every other term in the table. SEPARATELY, 2026-09-21: the PSRR in this chain was 114 dB and that figure is NOT IN THE OPA2197 DATASHEET - SBOS737C p.8 specifies +-1 uV/V typ and +-3 uV/V max, i.e. 120 dB typ and 110.5 dB worst case. Using the guaranteed maximum scales the result by 1.50x, from 0.00029 to 0.00044 cents, and changes nothing. SBOS737C is banked at datasheets/analog/OPA2197.pdf."
     forbidden: ["20 cents of breath-correlated", "20 cents of pitch bend", "about 20 cents", "by ~80mV", "by **~80 mV**", "A7 independently gets 75 mV", "0.00018 cents", "0.00027 cents", "0.00029 cents", "voltage by ~80 mV", "The 80 mV of", "computes 75 mV", "path is 75 mV", "75 mV → LM317", "39 µV on `AVDD`", "39 uV on AVDD"]
     false_positive_note: "DO NOT add a bare '80 mV' pattern. hardware/module/power-entry/power-entry.md states 80 mV twice as the LT1641 ON-pin comparator hysteresis (1.233 V falling / 1.313 V rising) - a completely unrelated quantity that happens to share the number. Every pattern here carries enough surrounding words to tell the two apart. power-entry.md's own 'This page said ~80 mV' is its refutation record and is correct as written."
     escape_note: |
@@ -462,7 +462,7 @@ figures:
     value: "375 ohm"
     status: settled
     owner: hardware/carrier/breath-excitation-reference/breath-excitation-reference.md
-    derivation: "SPECIFIED, not derived: SBOS737C EC table p.8 and p.10, 'ZO Open-loop output impedance | f = 1 MHz, IO = 0 A, See Figure 26 | 375 | ohm'. Figure 26 reads ~3.26k at 0.1 Hz, 482 at 10 Hz, a 375 plateau from 100 Hz to 300 kHz, 301 at 1 MHz and ~73 at 10 MHz. Banked at datasheets/texas-instruments/OPA2197.pdf."
+    derivation: "SPECIFIED, not derived: SBOS737C EC table p.8 and p.10, 'ZO Open-loop output impedance | f = 1 MHz, IO = 0 A, See Figure 26 | 375 | ohm'. Figure 26 reads ~3.26k at 0.1 Hz, 482 at 10 Hz, a 375 plateau from 100 Hz to 300 kHz, 301 at 1 MHz and ~73 at 10 MHz. Banked at datasheets/analog/OPA2197.pdf."
     provenance_note: "The corpus BACK-SOLVED 75.8 ohm from its own stated 21 kHz pole and carried it through three review waves because ti.com was unreachable. ti.com is reachable now and the BLOCKED manifest row was a proxy artefact. 75.8 ohm is about the 10 MHz value, so it is defensible as a crossover-region number and was not a wild guess - it is simply not TI's specified figure."
     forbidden: ["Ro ≈ 75.8 Ω**. The actual load", "gives **Ro ≈ 75.8"]
     false_positive_note: "75.8 appears legitimately in the text that records the correction. Match the assertion, not the numeral."

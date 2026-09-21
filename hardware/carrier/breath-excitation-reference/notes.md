@@ -21,8 +21,8 @@ value from a live one, so the two always travel together.
 drawing it refers to is still in [`carrier.md`](../carrier.md) §2.*
 
 > **✅ BOTH BLOCKERS CLOSED 2026-09-21, AND THE HEDGES THAT USED TO LIVE HERE
-> ARE GONE WITH THEM.** `datasheets/texas-instruments/OPA2197.pdf` (SBOS737C,
-> 56 pp) and `datasheets/texas-instruments/REF5050.pdf` (SBOS410O, 52 pp) are
+> ARE GONE WITH THEM.** `datasheets/analog/OPA2197.pdf` (SBOS737C,
+> 56 pp) and `datasheets/analog/REF5050.pdf` (SBOS410O, 52 pp) are
 > both banked. Two earlier notes on this page are superseded rather than
 > amended, and are recorded here because each was a *correct* finding filed the
 > wrong way:

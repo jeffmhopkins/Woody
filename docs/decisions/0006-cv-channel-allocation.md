@@ -176,7 +176,7 @@ reference voltage at all. Only C satisfies both requirements. `bom.csv` is
 locked to `DAC8568CIPW`.
 
 > **Confirmed 2026-09-21 against SBAS430E**, now held at
-> `datasheets/texas-instruments/DAC8568CIPW.pdf`. This paragraph asked for
+> `datasheets/analog/DAC8568CIPW.pdf`. This paragraph asked for
 > that check because no browser in the sandbox could reach `ti.com`; the
 > datasheet says what the ADR guessed, verbatim: *"For device grades A and C
 > on power-up, all DAC registers are filled with zeros and the output voltages

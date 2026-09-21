@@ -439,7 +439,7 @@ being asked to guess.
 | **SPI3** | 74HC165 chain alone, because `QH` is always driven (ADR 0001) | **1 MHz, and not much more** — the chain crosses four connectors and ~265 mm of loom, and HC's slow edges are what keep that a lumped load `[repo] 0001` |
 
 > **The MCP3202 cannot run at 2 MHz.** `[repo, verified]` against Microchip
-> DS21034F, now at `datasheets/other-semi/MCP3202-CI-SN.pdf`. The Timing
+> DS21034F, now at `datasheets/analog/MCP3202-CI-SN.pdf`. The Timing
 > Parameters table gives `fCLK` max = **1.8 MHz at VDD = 5 V** and **0.9 MHz at
 > VDD = 2.7 V**. There is no 3.3 V row. ADR 0003, ADR 0004,
 > `latency-budget.md` and `power-entry.md` all say "SPI2 at 2 MHz", and ADR 0004

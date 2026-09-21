@@ -60,7 +60,7 @@ end has none.
 
 **Both open questions here are closed, 2026-09-21**, against the genuine
 Worldsemi WS2815 datasheet V1.1 now at
-`datasheets/other-semi/WS2815.pdf` `[repo, verified]`:
+`datasheets/led/WS2815.pdf` `[repo, verified]`:
 
 - **Yes, the WS2815 accepts 5 V logic, and the 74AHCT125 is the right part.**
   The Electrical Characteristics table gives `V_IH ≥ 0.7 VDD` — and **the table

@@ -56,7 +56,7 @@ restate values.
 >
 > | source | 2.0 V | **3.0 V** | 4.5 V | 6.0 V |
 > |---|---|---|---|---|
-> | TI SCLS116E `datasheets/other-semi/74HC165.pdf` | 1.5 / 0.5 | *(absent)* | 3.15 / 1.35 | 4.2 / 1.8 |
+> | TI SCLS116E `datasheets/logic/74HC165-ti-scls116e.pdf` | 1.5 / 0.5 | *(absent)* | 3.15 / 1.35 | 4.2 / 1.8 |
 > | Nexperia Rev. 8 `74HC165-nexperia.pdf` | 1.5 / 0.5 | *(absent)* | 3.15 / 1.35 | 4.2 / 1.8 |
 > | Toshiba TC74HC165 `74HC165-toshiba.pdf` | 1.5 / 0.5 | *(absent)* | 3.15 / 1.35 | 4.2 / 1.8 |
 > | **onsemi MC74HC165A Rev. 13** `74HC165-onsemi.pdf` | 1.5 / 0.5 | **2.1 / 0.9** | 3.15 / 1.35 | 4.2 / 1.8 |

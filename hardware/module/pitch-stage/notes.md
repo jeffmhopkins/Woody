@@ -72,7 +72,7 @@ question inside it is **still open** and is carried forward in
 `pitch-stage.md`; everything else here closed.*
 
 - ~~**The LT5400 option suffix.**~~ **CLOSED 2026-09-21.** `5400fa.pdf` is
-  banked at `datasheets/other-semi/LT5400.pdf`. The option table (p.2) is
+  banked at `datasheets/analog/LT5400.pdf`. The option table (p.2) is
   `-1` 10k 1:1, `-2` 100k 1:1, `-3` 1:10, `-4` 1k 1:1, `-5` 1M 1:1, `-6` 1:5 —
   so **`-1` is the four-equal-10k 1:1 quad** and **there is no 1:3 option at
   all**, which the arithmetic below had already concluded from the other

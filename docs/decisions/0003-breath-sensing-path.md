@@ -478,7 +478,7 @@ umbilical +12V ──[REF5050 5.000V]──[OPA2197 ½ buffer]──┬── MP
 
 - **REF5050**, SOIC-8, 5.2–18 V in, 5.000 V out, with line regulation around
   5 ppm/V — so a full volt of movement on +12 V shifts the sensor supply by
-  ~25 µV `[SBOS410O, datasheets/texas-instruments/REF5050.pdf]`.
+  ~25 µV `[SBOS410O, datasheets/analog/REF5050.pdf]`.
 
   > **⚠ The accuracy this line claimed belongs to a grade `bom.csv` does not
   > order. 2026-09-21.** This read *"±0.05 % and 3 ppm/°C"*. SBOS410O Table 4-2
