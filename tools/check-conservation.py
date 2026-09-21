@@ -51,6 +51,15 @@ while i <= len(was) - N:
     else:
         i += 1
 
+# A TAIL LOSS HIDES BELOW N. In the interior a 1-word deletion breaks N
+# shingles and is reported; at the very end only k shingles exist to break,
+# so deleting the last 1/3/5/7 words scores seams:1 REAL GAPS:0. Verified.
+# Compare the final N words explicitly rather than pretending the shingle
+# walk covers them.
+tail_lost = ""
+if len(was) >= N and " ".join(was[-N:]) not in have:
+    tail_lost = " ".join(was[-N:])
+
 print(f"source {src}@{rev}: {len(was)} words")
 print(f"destinations: {len(now)} words across {len(dests)} file(s)")
 seams=[l for l in lost if l[1]<N]   # a seam loses at most N-1 shingles
@@ -59,3 +68,13 @@ print(f"seams (new text inserted between preserved passages): {len(seams)}")
 print(f"REAL GAPS (source text with no home): {len(real)}")
 for pos,gap,text in real:
     print(f"  gap {gap} words @ {pos}: {text[:220]}")
+if tail_lost:
+    print(f"  TAIL: the source's last {N} words are not in any destination: "
+          f"{tail_lost[:200]}")
+
+# Exit non-zero on a real gap. This printed its findings and exited 0 for its
+# whole life, so any caller that trusted the exit code - a hook, a CI step, a
+# `&&` chain - read a real gap as success. Same class as the three fail-open
+# holes this restructure already found; it is only luck that every invocation
+# so far was read by a human.
+sys.exit(1 if (real or tail_lost) else 0)

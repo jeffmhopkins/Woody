@@ -47,7 +47,10 @@ EXCLUDE = ("docs/review", "docs/log", "docs/research")
 # The floor is a tripwire, not a specification. Splitting files moves the count
 # UP, so any real drop below it means the corpus definition and the tree have
 # disagreed. Raise it when the tree grows; never lower it to make a run pass.
-MIN_CORPUS_FILES = 30
+# Raised 30 -> 100 on 2026-09-21: the restructure took the corpus from 33
+# files to 118, and a floor of 30 would have let two thirds of it vanish
+# before tripping. A floor that no plausible accident reaches is decoration.
+MIN_CORPUS_FILES = 100
 
 # The two files this tool READS rather than scans. Moving either one raised a
 # FileNotFoundError traceback and exit 0 - and the commit hook greps stdout for

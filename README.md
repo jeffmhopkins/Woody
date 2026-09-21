@@ -99,7 +99,13 @@ docs/reference/   Latency budgets, fingering notes, specs
 docs/research/    Component comparisons and datasheet notes
 docs/review/      Cold review waves. A dated record, never corrected
 datasheets/       The actual vendor PDFs, one MANIFEST.csv row each
-hardware/         BOM, schematics, PCB, split by board
+hardware/         Schematics, split by CIRCUIT under each board:
+                    <board>/<circuit>/<circuit>.md  the drawing + derivations
+                                      bom.csv       fragment; generates the BOM
+                                      circuit.yaml  declared dependencies
+                                      notes.md      what it used to be
+                  interfaces/  the three circuits that cross a board boundary
+                  bom.csv      GENERATED from the fragments - do not edit
 firmware/         ESP32-S3 firmware (PlatformIO)
 mechanical/       CAD source, 2D cut exports, drawings
 config/           Key layout and routing, as data

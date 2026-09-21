@@ -7,9 +7,9 @@
         "hooks": [
           {
             "type": "command",
-            "command": "o=$(python3 \"$CLAUDE_PROJECT_DIR/tools/check-staleness.py\" 2>&1 || true); printf \"%s\\n\" \"$o\" > \"$CLAUDE_PROJECT_DIR/.staleness-report.txt\"; s=$(printf \"%s\" \"$o\" | grep -E \"^(STALE VALUES STILL LIVE|BOM INTEGRITY|PASS|FAIL)\" | head -3 | tr \"\\n\" \"; \"); jq -n --arg s \"$s\" '{systemMessage: (\"staleness: \" + $s), hookSpecificOutput:{hookEventName:\"PreToolUse\", additionalContext:(\"staleness check: \" + $s + \" Full list in .staleness-report.txt - read it when fixing, do not re-run for detail.\")}}'",
+            "command": "o=$(python3 \"$CLAUDE_PROJECT_DIR/tools/check-staleness.py\" 2>&1); rc=$?; printf \"%s\\n\" \"$o\" > \"$CLAUDE_PROJECT_DIR/.staleness-report.txt\"; s=$(printf \"%s\" \"$o\" | grep -E \"^(PASS|FAIL)\" | head -2 | tr \"\\n\" \"; \"); if [ -z \"$s\" ]; then s=\"CHECKER CRASHED (exit $rc) - it printed no PASS or FAIL line. Run tools/check-staleness.py directly; the traceback is in .staleness-report.txt\"; fi; jq -n --arg s \"$s\" '{systemMessage: (\"staleness: \" + $s), hookSpecificOutput:{hookEventName:\"PreToolUse\", additionalContext:(\"staleness check: \" + $s + \" Detail is in .staleness/report.txt (NOT .staleness-report.txt, which holds only this summary) - read it when fixing, do not re-run for detail.\")}}'",
             "if": "Bash(git commit *)",
-            "timeout": 30,
+            "timeout": 60,
             "statusMessage": "Checking for stale figures..."
           }
         ]

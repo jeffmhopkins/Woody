@@ -129,10 +129,19 @@ repeating, and record the verification.
 ## Hardware conventions
 
 - Every schematic page is Markdown with ASCII drawings and derivations inline.
-- `hardware/bom.csv` is 11 columns **and CRLF**. Validate column count and
-  duplicate refdes after any edit — `tools/check-staleness.py` does both — and
-  pass `lineterminator="\r\n"` to `csv.writer`, or a three-row change lands as
-  a 130-row diff. Check with `git diff --stat` before committing.
+  One circuit per directory: the page, its `bom.csv` fragment, its
+  `circuit.yaml`, and `notes.md` for what the circuit *used to be*.
+- **`hardware/bom.csv` IS GENERATED.** `tools/merge-bom.py` rebuilds it from
+  the per-circuit `bom.csv` fragments, so **a direct edit survives until the
+  next run of that tool and then disappears without a word** — the same trap
+  as `MANIFEST.csv` in §4, on the most-cited file in this repository. Edit the
+  fragment, then re-run the tool. A row lives with the circuit **whose page
+  derives its value**. `merge-bom.py --check` proves the master still matches,
+  and the commit hook runs it.
+  It is 11 columns **and CRLF**; pass `lineterminator="\r\n"` to `csv.writer`,
+  or a three-row change lands as a 130-row diff.
+  `hardware/unplaced.csv` holds the rows no schematic page names — a count of
+  parts nobody has drawn, not a dumping ground.
 - Mark unresolved things `TBD`/`open` **with what decides them**. Two BOM rows
   are deliberately blocked on a datasheet and say so; that is correct, not a
   defect.
