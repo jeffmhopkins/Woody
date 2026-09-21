@@ -474,6 +474,54 @@ on its contacts and pass a umbilical fault straight through to the rack's rail.
 Input filtering on the +12V rail so the instrument's local buck converter does
 not inject switching noise back into the rack.
 
+### Grounding: one origin, named, before the board is laid out
+
+This is a layout constraint rather than a part, and it is recorded here rather
+than in a review document because that is the difference between a constraint
+and a note nobody reads. It is free at layout and a bodge wire or a respin
+afterwards.
+
+**The origin is the Eurorack power inlet's ground pin.** Every milliamp in the
+module leaves through it, so it is the one point entitled to be called ground.
+Everything else is defined relative to it and joins it *there*, not wherever two
+pours happen to meet.
+
+Four returns arrive at this board and they are not comparable:
+
+| Return | Carries |
+|---|---|
+| `PWR_GND`, from the etherCON | **~360 mA** of instrument current — LEDs, both dev boards, the matrix |
+| `DIG_GND`, from the etherCON | SPI switching current |
+| Module analog return | Op-amps, DAC `AVDD`, the pitch stage's reference |
+| `AGND`, from the etherCON | **Nothing.** It is an in-amp input, not a ground (ADR 0003) |
+
+**The mechanism, so the rule is not cargo cult.** If `PWR_GND` shares copper
+with the analog return for even a centimetre, 360 mA develops an IR drop across
+that shared length and the pitch stage's reference sits on top of it. The
+current varies with the lighting and with what the MCU is doing, so the offset
+varies with it — which is why a review measured this as **5.7–7.2 cents of
+breath-correlated pitch bend** rather than as a fixed error a trimmer would
+remove once. It is the same shape as the shared-Schottky term fixed above, by a
+different path.
+
+So:
+
+- **`PWR_GND` runs from the etherCON to the star point on its own copper**,
+  touching no other return on the way. It is the dirtiest net on the board and
+  it is the one that must be kept to itself.
+- **`DIG_GND` likewise** — its own path to the star.
+- **The analog return is its own region**, joining at the star and nowhere else.
+  The DAC's `AVDD` return and the in-amp's `REF` tie belong in it.
+- **`AGND` is not in this list.** It terminates at the in-amp's IN+ and at the
+  two 1 MΩ bias resistors, and that is all it does. Anything that makes it a
+  return path breaks the reason a 2 m analog run works at all.
+
+**The rack's own bus ground is not ours to fix**, and it contributes a further
+~4.8 cents: the module shares a 16-pin ribbon return with every other module in
+the case. The only lever is which slot the module sits in relative to the noisy
+ones, which is a patching decision. E6 measures it rather than trusting the
+figure.
+
 ### Panel, top to bottom
 
 Connector, power switch and LED — the system's only power switch, since the
