@@ -283,3 +283,144 @@ Recorded so it is not re-litigated by a later reviewer.
   carrying no power current, received by a true in-amp, beats both direct
   wind-instrument precedents — Yamaha BC and Akai EWI both share the return
   with supply current.
+
+## Jack-tapped feedback is published practice — question closed
+
+The repo defends its jack-tapped DC feedback as an unusual choice. **B4
+found three published designs doing it**, by opening and rendering their
+schematics: **Ornament & Crime rev2e** uses the identical split loop (100 k
+DC feedback from after the 220 Ω, 22 pF from the op-amp output);
+**Westlicht PER|FORMER** takes both its 100 k and its 18 pF from after the
+220 Ω; and **Winterbloom Sol** takes its 9.10 k from after a 1 kΩ with *no
+compensation capacitor at all* — the closest relative of Woody's pitch
+stage, and less defended than it.
+
+Also confirmed from primary source: 1 kΩ is the field convention (7 of 12,
+the only value that repeats), and Mutable really does uprate the output
+resistor and nothing else — `≤1 %, ≥200 mW` 0603 on the output 1 kΩ while
+every other resistor on the board is 0402/100 mW, counts matching jack
+counts exactly, verified in four BOM spreadsheets.
+
+Corrected: `bom.csv` says "no surveyed design clamps a CV output to the
+RAILS at all". Erica clamps gate/clock outputs with BAT85, HAGIWO with a
+BAT43 pair behind 470 Ω — both to a rail.
+
+## `R-OUT-PROT` is under-rated — two agents, two ladders
+
+| Agent | Worst case | Against the claim |
+|---|---|---|
+| **A6** | **322 mW** — output-to-output against a 220 Ω source at ±10 V | `bom.csv` states 192 mW; ≥500 mW survives at **1.55×**, not 2.6× |
+| **B4** | **269 / 312 / 464 mW** | Thick-film derating at a 50 °C rack interior leaves a 500 mW 1206 delivering ~350–420 mW → **~1.1×** |
+
+**The only part in the module at real risk from any jack fault**, and only
+because it is under-rated. B4 answers the BOM's open question: a 0.66–1 W
+1206 exists (ERJ-P08 class).
+
+## Passive-multing PITCH never settles
+
+**A6** computed the ring (41.9 % overshoot, 1.84 kHz into BREATH's 330 nF).
+**B4** carried it one step further: the DAC updates every **250 µs** and
+the decay is 184–680 µs, so **the ring never settles.** Not the per-note
+transient `pitch-stage.md` describes — continuous audio-band junk on the
+pitch line for as long as the stackcable is in.
+
+## The umbilical: FOUR agents, and two of them propose the identical swap
+
+**A4** and **A8**, independently, reached the same pin map: `SCLK`+`MOSI`
+on one pair, **`CS` paired with `DIG_GND`**. A8 quantifies what the current
+map costs — intra-pair backward crosstalk, saturated because
+2·T_d = 20 ns ≫ t_r = 2 ns, giving **365–907 mV at the module against
+`CS`'s 678 mV `V_IL` margin** — and notes ADR 0004 asserts *twice* that
+"each signal sits against a ground in its own twisted pair" while its own
+pin table contradicts it. The swap improves `CS` margin from **1.9:1 to
+6200:1** and trades a *sticky* failure (a re-framed DAC word writes the
+software-reset and reference-enable bits, with no `MISO` to read back) for
+one the repo says self-heals in 250 µs.
+
+**A8 also noticed what ADR 0004 spent its reasoning on**: the 13 mm
+untwisted plug region, which costs **15 mV** — 25–60× smaller than the
+effect it missed.
+
+### …but B5 and A4/A8 genuinely conflict, and this needs a decision
+
+**B5** wants `MOSI`/`CS` *off* pins 4/5 entirely, because published
+RJ45-for-other-purposes standards leave those two empty so a misplug into
+PoE or a telephone line destroys nothing. **A4/A8's fix puts `SCLK`/`MOSI`
+there.**
+
+There are exactly 8 conductors and exactly 8 things to carry, so **pins 4/5
+cannot be left empty without deleting a signal.** This is a real design
+tension the wave surfaced and did not resolve, and it is the one item here
+that is a decision rather than a fix.
+
+## `DIG_GND` is named in three documents and drawn in none
+
+**A8**, showstopper. At the instrument end it appears on no drawing:
+`carrier.md` §4 returns `U-TVS-SPI` to `PWR_GND` while §3 returns
+`U-TVS-CHAIN` to `DIG_GND`, a net on no schematic. The two possible
+answers give **opposite failure modes**. ADR 0004 and the ROADMAP's E12
+gate both contradict `power-entry.md`, which A8 judges right on the
+engineering.
+
+## Breath-correlated pitch bend: now THREE routes
+
+| Agent | Segment of the return path | Effect |
+|---|---|---|
+| **A7** | The power ribbon's six ground conductors, ≈17 mΩ | 6.2 mV → **7.4 cents** (24 on a flying bus) |
+| **B3** | ~20–40 mΩ of differential busboard ground to a neighbour | 7–15 mV → **8–18 cents** |
+| **A8** | The cable shield, if the etherCON shell bonds to the 8HP panel: 12–60 % of return current goes home via rack chassis | **~7 cents** |
+
+Three agents, three segments, one shape. Against a stated pitch budget of
+0.42 cents and a module bounded at ~1.2 cents over 0–40 °C. **The
+engineered part of the pitch path is one to two orders below an effect
+documented nowhere**, and because it tracks breath it will sound like an
+intentional feature gone wrong.
+
+## The structural finding
+
+A8's, and it is the reason that review was scoped at all:
+
+> **Eleven of eighteen unretrofittable items are wrong or unspecified, and
+> every one is a connector, a keying choice, a conductor gauge or a
+> ground.** `WIRE-LOOM` is one qty-1 row covering four physically different
+> harnesses; `J-DISP` and `J-LED-L/-R` have no BOM rows at all; the
+> internal etherCON-to-carrier tail loom is in no document and no count.
+> **Every page describes its own end of every cable and no page owns the
+> cable.**
+
+Also: `CABLE-UMB`'s 0.168 Ω/2 m is the **solid-core** figure for a cable
+the BOM insists must be **stranded**; TIA's patch-cord limit gives
+**0.28 Ω**. Everything derived from it is 1.2–1.67× optimistic. A8
+rechecked each — no conclusion flips.
+
+## What A8 confirms is right
+
+- **The analog pair survives by ~80 dB.** `SCLK` → `BREATH` is 57 nV at the
+  jack (0.00007 cents); LED PWM through the shared return is 5.7 µV; the
+  LED DC step 25 µV. **Zero breath counts** — and the ADC reads before the
+  cable anyway. The three choices that earn this (482 Hz filter at the
+  module ahead of the in-amp, `AGND` carrying no power current, `C_diff`
+  10× `C_cm`) should be protected in any rework.
+- **Single-ended-with-sense-return is right, for a reason the repo states
+  only in fragments: it is the system's only fail-silent path.** Digitising
+  at the instrument is *negative* cost (~16 parts, ~$20, and frees the
+  conductor the pin-map fix needs) but converts "cable pulled mid-note =
+  silent" into "loud drone forever".
+- **The alternating-ground ribbon is validated**: 87 mV coupled against a
+  990 mV threshold, 11:1 — versus ADR 0001's own 1.36 V for an ungrounded
+  conductor, which is a failure.
+- **`C-STRIP-BULK` on the carrier is correct** (0.070 Ω of loom against the
+  cap's 0.37 Ω at 2 kHz). Recorded so nobody repeats the check.
+- **Input-LC stability closes with the cable in** — the cable's 0.60 Ω is
+  added damping, Middlebrook margin 42 dB.
+
+## A8 corrects two things other agents got right for the wrong reason
+
+- **ADR 0014's "0.4 % gain compression"** from the LED→`AGND` loop omits
+  the in-amp's CMRR and is **~200× pessimistic** (25 µV, not 40 mV). The
+  fix adopted is still right — for the *other* loop.
+- **A `SH/LD` glitch is not what ADR 0001, `carrier.md` §3 and `WIRE-LOOM`
+  say it is.** It produces a splice of two snapshots ≤32 µs apart, almost
+  always benign — **and the marker pattern cannot see it**, while it *does*
+  catch an `SCK` glitch. This refines C1, which found the same reload
+  passes 11 of 31 times. Decision still right, justification wrong.
