@@ -21,7 +21,6 @@ discretes won (ADR 0006, `R-MODGAIN`), and this page is what they build.
    DAC ch2         [R1 10k 1%]       (ch3, ch4, ch5
    0…5 V                  │           identical)
       │                   │
-   [1k R-OPAMP-IN]        │
       │                   │
       ├──[R3 10k 1%]──┬───┼──────────┐
       │               │   │          │
@@ -49,23 +48,41 @@ discretes won (ADR 0006, `R-MODGAIN`), and this page is what they build.
                                         MOD n jack
 ```
 
-## Why this one *is* a difference amplifier, where pitch is not
+## This does not have to be a difference amplifier — open
 
-Pitch collapsed to two resistors because its `A = 1 + B` landed exactly on the
-single-op-amp boundary. The mods do not: `Vout = 4·Vdac − 4·V_OFF` needs
-**A = 4 and B = 4**, and `A = 1 + B` would require B = 3. So the reference has
-to enter through its own input rather than through the feedback divider, which
-is the four-resistor difference amp above.
+The first version of this page argued that pitch collapsed to two resistors
+because `A = 1 + B` was a boundary its numbers landed on, and that the mods miss
+it. **That reasoning was wrong.** `A = 1 + B` is the defining identity of the
+two-resistor non-inverting form, true for every ratio; the free parameter is
+`V_ref`, not the ratio:
 
-Worth noting side by side, because it is the same designer's instinct producing
-two different right answers:
+```
+k = A − 1          V_ref = offset / (A − 1)
+```
 
-| | Pitch | Mod 1–4 |
-|---|---|---|
-| Wanted | `2·Vdac − 2.5` | `4·Vdac − 10` |
-| A vs 1+B | 2 = 1 + 1 ✓ | 4 ≠ 1 + 3 ✗ |
-| Topology | Non-inverting, 2 matched resistors | Difference amp, 4 resistors |
-| Precision | LT5400, 1:1 | Ordinary 1 %, 1:4 |
+So the mods can take the same two-resistor form: **`k = 3`, with the shared
+offset channel writing 3.3333 V instead of 2.500 V.** Eight resistors instead of
+sixteen, one matching requirement instead of two per channel, and a 1:3 ratio
+that three sections of an LT5400 give directly against the fourth.
+
+**Crucially the safe-state property survives.** On `CLR` both `Vdac` and
+`V_ref` go to zero, so `Vout = 0` — which is the whole reason the offset lives
+on a DAC channel (below).
+
+The four-resistor version drawn above is not wrong, it is just not necessary,
+and it costs twice the parts and a second matching requirement. **Not changed
+unilaterally**, because it moves the offset channel's value and touches a page
+that was settled an hour ago.
+
+*(A third option surfaced in the same research: four of four published designs
+— Ornament & Crime, Westlicht PER|FORMER, Mutable Yarns, MTM Workshop Computer
+— use a **single inverting amp** with the mid-reference on the (+) input, which
+needs no buffer at all because that input draws no current. It inverts, which
+is a firmware sign flip. The catch is that O&C and the PER|FORMER take that
+reference from a passive divider off `VREFOUT`, which does **not** go to zero on
+`CLR` — so all four jacks would slam to +10 V. The PER|FORMER avoids it by
+disabling `CLR` entirely, which Woody cannot. Taking the reference from a DAC
+channel keeps the inverting topology and the safe clear together.)*
 
 ## Values
 
@@ -81,16 +98,48 @@ stops at ±9.75 V, visibly short of the specified ±10. Going slightly over cost
 nothing: an OPA2197 on ±12 V less two Schottky drops reaches ~±11.45 V, so
 ±10.05 V has 1.4 V of margin.
 
-**Matching matters more than absolute value, and barely at all here.** The only
-"common mode" this difference amp sees is the fixed 2.500 V offset, so a ratio
-mismatch between the two sides appears as a *static output offset*, not as
-rejected noise. With 1 % parts the worst case is roughly
-`2.5 V × 2 % × 4 ≈ 50 mV`, which is 0.25 % of the ±10 V span. ADR 0006 is
-explicit that these channels need to be "linear and repeatable, not
-calibrated", and 0.25 % is well inside that.
+**No `R-OPAMP-IN` on these channels** — and an earlier revision of this page
+drew one, which was a real error rather than a redundancy. On pitch the 1 kΩ
+feeds a true high-impedance (+) input and costs nothing. Here **`R3` *is* the
+gain network**, so a 1 kΩ in series with it makes the DAC leg 11 kΩ against the
+reference leg's 10 kΩ, and the stage stops being balanced:
+
+| | With the 1 kΩ | Without |
+|---|---|---|
+| Vdac = 0 | −10.05 V | −10.05 V |
+| Vdac = 2.5 (should be 0) | **−196 mV** | 0.000 V |
+| Vdac = 5.0 | **+9.657 V** | +10.050 V |
+
+A deterministic 196 mV zero error — **more than twice the entire 1 % tolerance
+budget below** — bought for nothing, because the 10 kΩ input resistor already
+limits clamp current. That is exactly what the 24–47 kΩ input resistors do in
+every published design of this shape. `R-OPAMP-IN` drops to qty 3: pitch, the
+offset buffer, and the `VREFOUT` follower — the three places where it really is
+feeding a high-Z node.
+
+**Tolerance, done properly.** An earlier revision said the worst case was
+"2.5 V × 2 % × 4 ≈ 50 mV", which is wrong twice: the arithmetic evaluates to
+**200 mV**, and it models only the zero point. Enumerating all sixteen corners
+of four 1 % resistors gives:
+
+| Term | Worst case | Note |
+|---|---|---|
+| Zero point | ±81 mV | What the old line was trying to compute |
+| **Span** | **19.70–20.51 V** | ±2 % of gain — **the dominant term, and it was unmentioned** |
+
+On a channel that might be assigned to drive a VCO or a quantiser, ±2 % of span
+is about ±24 cents per octave. ADR 0006 says these channels need to be "linear
+and repeatable, not calibrated", and they still are — but "repeatable" is doing
+more work than the old number implied, and anything pitch-like belongs on
+channel 1.
 
 Buying the four sets from one reel makes it much better than worst case for
 free, since reel-adjacent parts track.
+
+**On the range:** ±10.05 V uses the DAC's *full* 0–5 V span. ADR 0006's
+0.25–4.75 V window is a **pitch-channel reserve** — it exists to give firmware
+±600 cents of offset authority on 1 V/oct — and does not apply here. Stated
+because the two numbers look contradictory side by side and are not.
 
 ## The offset is a DAC channel, and that is the whole reason `CLR` works
 
@@ -133,6 +182,38 @@ the `VREFOUT` follower).
 four channels share exactly the same offset error, so a residual appears as a
 common shift across the mod set rather than as four channels disagreeing with
 each other — which is both cheaper and more useful.
+
+## The alternative topology, recorded rather than adopted
+
+Prior-art research found that **four of four published designs** (Ornament &
+Crime, Westlicht PER|FORMER, Mutable Yarns, MTM Workshop Computer) build this
+stage as a **single inverting amplifier** with the mid-reference on the (+)
+input, not as a four-resistor difference amp. It is genuinely simpler:
+
+```
+Vout = −(Rf/Rin)·Vdac + (1 + Rf/Rin)·V+
+     = −4·Vdac + 5·V+        with V+ = 2.000 V  →  +10 V … −10 V
+```
+
+Two precision resistors instead of four, no matching requirement *between* two
+legs, and the offset injection is free because the (+) input draws no current —
+which also means the offset DAC channel would need **no buffer**, returning an
+OPA2197 half.
+
+It inverts, which is a firmware sign flip and costs nothing.
+
+**The one thing to be careful about, and it is the thing that matters here:**
+O&C and the PER|FORMER both take that reference from a *passive divider off
+`VREFOUT`*. On a watchdog `CLR` the channels go to zero and the divider does
+not, so `Vout = 5 × 2.0 = +10 V` — a hard rail on four jacks. The PER|FORMER
+avoids this by disabling `CLR` entirely; Woody cannot, because the watchdog is
+the whole answer to a processor two metres away.
+
+Taking the reference from a **DAC channel** instead keeps the inverting
+topology *and* the safe clear, because `CLR` zeroes it too. That is the version
+worth considering, and it is strictly better than what is drawn above. Not
+adopted unilaterally: it is a redraw of a settled page and the call belongs to
+the author.
 
 ## Still open
 

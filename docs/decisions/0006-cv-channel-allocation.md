@@ -84,11 +84,18 @@ are the de-facto Eurorack conventions; the extra span is headroom, not a default
 > disagree with the prose here, they win — that is the rule the breath page
 > established and the reason it exists.
 >
-> The useful surprise: pitch and the mods want *different* topologies, and the
-> same instinct produces both right answers. A single-op-amp stage giving
-> `Vout = A·Vdac − B·V_ref` can reach at most `A = 1 + B`. Pitch wants
-> A = 2, B = 1 — exactly on the boundary, so it collapses to two resistors. The
-> mods want A = 4, B = 4, which is off it, so they need all four.
+> Pitch is **two matched resistors** in a non-inverting stage with the reference
+> at the bottom of the feedback divider — not the four-resistor difference amp
+> this ADR's prose implies. `gain = 1 + k`, `intercept = k·V_ref`, and the free
+> parameter is `V_ref`, not the ratio. **The mod channels can take the same
+> form** at `k = 3` with the offset channel writing 3.3333 V; whether they do is
+> open (`mod-channels.md`).
+>
+> *(An earlier version of this note called `A = 1 + B` a boundary that pitch
+> luckily landed on. It is the topology's defining identity, true for every
+> ratio — Winterbloom's Sol ships the same circuit with its reference divided
+> to 1.190 V. Recorded because the wrong version made the mod channels look
+> like they needed four resistors, which they do not.)*
 
 ```
 Vout = 4 × (Vdac − 2.5 V)
@@ -330,8 +337,27 @@ to become −2…+7 V is 9/5, which cannot be made from a matched resistor quad.
 external resistor added to reach it puts its absolute tempco inside the ratio —
 exactly the failure the matched network was bought to prevent.
 
-A trimmer solves both directly, which is also why every commercial 1V/oct module
-has scale and offset trimmers.
+A trimmer solves both directly.
+
+**This paragraph used to end "which is also why every commercial 1 V/oct module
+has scale and offset trimmers", and that is false.** Two independent surveys of
+published designs found **zero trimmers** on DAC-derived CV outputs — Yarns,
+Marbles, Stages, Ornament & Crime, Winterbloom Sol, Befaco MIDI Thing, MTM
+Workshop Computer and Westlicht PER|FORMER all calibrate in firmware, typically
+with an 11-point-per-channel table at one point per octave. Trimmers are
+universal on **analog** V/oct *inputs* — expo converters — which is a different
+circuit solving a different problem. Mutable reaches 1–2 cents with plain 1 %
+resistors and no screwdriver anywhere.
+
+Both of the original reasons for Woody's trimmers have since been withdrawn by
+this ADR itself: "firmware has no offset authority" was retracted when the
+per-load affine model went in, and "the ratio is not buildable" was retracted
+when the pitch stage turned out to be an exact 1:1. **Whether the trimmers
+survive is therefore an open question**, not a settled one — and this ADR's own
+sentence that "any external resistor added to reach it puts its absolute tempco
+inside the ratio, exactly the failure the matched network was bought to
+prevent" now argues against `TRIM-GAIN`, which is the largest term in the
+static budget.
 
 ### What it costs, honestly
 
@@ -367,7 +393,9 @@ trimmability.
 - **Firmware handles what trimmers cannot:** DAC integral nonlinearity, which is
   curvature no gain-and-offset adjustment can remove (±4 LSB typical is
   0.66 cents, ±12 LSB is 2.0 cents). Use a **multi-point** table, roughly one
-  point per octave — Mutable's Yarns uses twelve for exactly this reason.
+  point per octave — Mutable's Yarns uses **eleven** (`kNumOctaves = 11`), as do
+  Ornament & Crime and the PER|FORMER. An earlier revision of this line said
+  twelve.
 
 These are complementary, not alternatives. Hardware gets the line straight;
 firmware straightens the bow in it.
