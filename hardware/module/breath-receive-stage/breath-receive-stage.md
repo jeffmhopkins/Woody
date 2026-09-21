@@ -80,13 +80,17 @@ section. The table below is unchanged and still names this circuit's boundary.)*
                                  ┌──▼───────▼──┐               │
                                  │  IN+     IN− │  INA828       │
                                  │              │               │
-                                 │  R_G 42.2k   │◄── G = 2.185  │
+                                 │  R_G 42.2k   │◄── G = 2.185  │   raw
                                  │              │               │
                                  │  REF ◄───────┼── ½ OPA2197 ◄─[TRIM-BREATH-ZERO]
                                  │              │   buffered    from the LM317 5.21 V
                                  └──────┬───────┘   `breath-zero-ref` nulls it
-                                        │  Vout = −2.185·(V_BREATH − V_AGND) + V_REF
-                                        │       = 0 V at rest, −9.94 V at full
+                                        │  Vout = −2.16106·(V_BREATH − V_AGND) + V_REF
+                                        │       = 0 V at rest, `inamp-full-scale` at full
+                                        │  2.16106 is the EFFECTIVE gain: the raw 2.185
+                                        │  times the 1M/(1M+11k) bias divider.
+                                        │  Superseded: this line carried −10.05 V, the
+                                        │  raw gain, which is not the result beside it.
                                         │
                                   ┌─────▼──────────────────────┐
                                   │  INVERTING gain + offset   │

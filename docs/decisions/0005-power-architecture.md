@@ -71,10 +71,11 @@ boards and the LED data level shifter.
 An earlier revision of this ADR specified a 12 V to 3.3 V buck. **That is
 wrong**, and the reason is the breath sensor.
 
-The MPXV4006DP is a 5 V part outputting **0.2–4.7 V** (ADR 0003). A buffer
+The MPXV4006DP is a 5 V part whose output reaches `sensor-full-scale`
+(ADR 0003). A buffer
 running on 3.3 V would clip the top 30% of the breath range. So the analog front
-end needs 5 V, and a rail-to-rail op-amp on 5 V reaches 4.7 V with margin to
-spare.
+end needs 5 V, and a rail-to-rail op-amp on 5 V clears `sensor-full-scale`
+with margin to spare.
 
 Feeding the dev boards 5 V is also the right way round. Both carry their own
 3.3 V regulators and their own USB power paths; driving their `5V`/`VBUS` pins

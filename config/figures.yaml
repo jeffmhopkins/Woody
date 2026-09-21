@@ -28,7 +28,27 @@ figures:
     status: settled
     owner: hardware/interfaces/breath-sense-link/breath-sense-link.md
     derivation: "G = 1 + 50k/42.2k = 2.18483; x 1M/(1M+11k) = 2.16106 effective; x 4.6 V sensor span = 9.941 V"
-    forbidden: ["-9.6 V", "−9.6 V", "-10.05 V", "−10.05 V"]
+    forbidden: ["-9.6 V", "−9.6 V", "-10.05 V", "−10.05 V", "-9.6V", "−9.6V", "to -9.6", "-2.185*(V_BREATH", "−2.185·(V_BREATH"]
+    false_positive_note: >
+      DO NOT add a bare "10.05 V" or "2.185". mod-channels.md carries four
+      legitimate +-10.05 V lines about the MOD CHANNEL range, which is a
+      different quantity and is discussed there as the superseded design;
+      and 2.185 is the correct RAW in-amp gain, stated correctly in four
+      places. Only the combination - the raw gain used to compute this
+      figure - is the defect.
+    escape_note: |
+      THE MISS WAS ONE SPACE, 2026-09-21, AND THE ROW WAS WRONG TWO WAYS.
+      The U-DIFFRX BOM row read "Output is 0V at rest to -9.6V at full
+      (Vout = -2.185*(...))". All four patterns above spell the value WITH a
+      space; the row spells it without. And the formula beside it used the
+      RAW gain 2.185 rather than the effective 2.16106, which yields -10.05 V
+      - also a forbidden value, also spelled without a space, also invisible.
+      So the row disagreed with the register and with itself, and the
+      checker reported PASS.
+      Found independently by the breath-chain slice and the datasheet slice,
+      from opposite ends. It is also in TWO files at once, because
+      hardware/bom.csv is generated from the fragment - one defect, two
+      copies, one edit site.
     note: "-10.05 V is the same gain with the 1M bias divider omitted. -9.6 V is derived from nothing and matches no configuration."
 
   - id: sensor-full-scale
@@ -37,7 +57,31 @@ figures:
     status: settled
     owner: docs/decisions/0003-breath-sensing-path.md
     derivation: "Vout = VS*[(0.1533*P) + 0.053], verbatim from the datasheet. At VS = 5.0 V and P = 6 kPa: 5*(0.9198 + 0.053) = 4.864 V. The PEDESTAL IS 0.265 V, not 0.200 V."
-    forbidden: ["4.7 V output", "0.2-4.7 V", "0.2 – 4.7 V", "0.2 V + 0.766", "0.200 V at rest", "0.2 V at rest", "(0.1533*P) + 0.04", "0.1533 x P) + 0.04", "rest | 0.200 V", "0.2 + 0.766", "0.2-4.80 V", "0.2 – 4.80 V", "0.2–4.80 V", "0.2 → 4.8 V", "0.2 to 4.8 V out", "| 0.200 V |", "| 4.800 V |", "+0.2V pedestal", "+0.200 V pedestal", "typical +0.200 V", "4.7 V × 0.6", "full scale = 4.7 V", "0.1533·P + 0.04", "0.1533 · P + 0.04", "0.7665 V/kPa with 0.20 V", "reach 0.2 V at the bottom", "against the 0.2 V floor"]
+    forbidden: ["4.7 V output", "0.2-4.7 V", "0.2 – 4.7 V", "0.2 V + 0.766", "0.200 V at rest", "0.2 V at rest", "(0.1533*P) + 0.04", "0.1533 x P) + 0.04", "rest | 0.200 V", "0.2 + 0.766", "0.2-4.80 V", "0.2 – 4.80 V", "0.2–4.80 V", "0.2 → 4.8 V", "0.2 to 4.8 V out", "| 0.200 V |", "| 4.800 V |", "+0.2V pedestal", "+0.200 V pedestal", "typical +0.200 V", "4.7 V × 0.6", "full scale = 4.7 V", "0.1533·P + 0.04", "0.1533 · P + 0.04", "0.7665 V/kPa with 0.20 V", "reach 0.2 V at the bottom", "against the 0.2 V floor", "reaches 4.7 V", "reaches 4.7V", "0.2–4.7 V", "0.2-4.7V", "0.2 to 4.7 V", "top of range is 4.7V", "(766mV/kPa, 0.2-4.7V)"]
+    escape_note_3: |
+      THE EIGHTH AND NINTH SPELLINGS, 2026-09-21, FOUND BY A PRE-MERGE WAVE
+      AFTER ALL OF THE BELOW WAS ALREADY WRITTEN.
+        0005:74   "0.2–4.7 V"     en dash, NO SPACES. The list had the ASCII
+                                 hyphen form, the en-dash-WITH-spaces form,
+                                 and the tight en dash for the 4.80 spelling.
+                                 The tight en dash for 4.7 is the one nobody
+                                 wrote.
+        0003:565  "reaches 4.7 V"  IN THE OWNER DOCUMENT AGAIN, four lines
+                                 after the same page states the figure
+                                 correctly. Two cold agents found it
+                                 independently.
+      Plus three BOM rows: R-ADCDIV, U-BREATH and D-TVS-BREATH, each
+      spelling it without the space before the V.
+      SO THE COUNT IS NINE SPELLINGS OF ONE NUMBER, and escape_note below,
+      written after the fourth instance, says the rule that would have caught
+      every one of them: GREP THE CORPUS FOR THE OLD VALUE FIRST. It was
+      followed this time, and it is what found all six - along with FOUR
+      DECOYS that a naive "4.7 V" pattern would have broken: the in-amp's
+      -4.7 V output at a realistic blow (a different quantity, and negative),
+      and the ~4.7 V the 5 V rail arrives at after a diode.
+      D-TVS-BREATH also carried a derived "300mV of margin" off the retired
+      value. The true margin is 140 mV. A derived number moves when its
+      parent does, and nothing checks that either.
     escape_note_2: |
       THE FIFTH RECORDED INSTANCE, 2026-09-21, AND IT WAS IN THE OWNER DOCUMENT.
       The four patterns above were added after a cold agent found that ADR 0003
@@ -88,6 +132,29 @@ figures:
       counts, and neither happened for months. IT IS NOW TRACKED, as
       breath-zero-ref, after a split agent found three values for it in five
       places. This note's own ~0.573 V was the only right one of the three.
+
+  - id: breath-sensor-slope
+    quantity: MPXV4006DP output slope at VS = 5 V
+    value: "0.7665 V/kPa"
+    status: settled
+    owner: docs/decisions/0003-breath-sensing-path.md
+    derivation: "Vout = VS*[(0.1533*P) + 0.053] verbatim from the datasheet; the slope is VS x 0.1533 = 5 x 0.1533 = 0.7665 V/kPa. The datasheet's own sensitivity line says 766 mV/kPa, which is the same number rounded."
+    forbidden: ["0.6 V/kPa", "766.5 mV/kPa at 3.3", "0.5059 V/kPa"]
+    companion: "sensor-full-scale uses the same transfer function; breath-zero-ref uses the 0.265 V pedestal from it."
+    note: |
+      TRACKED 2026-09-21, after a cold slice auditing what the design needs
+      that no document OWNS listed this as load-bearing and unregistered.
+      It is ratiometric with VS, so it is only 0.7665 V/kPa while the sensor
+      runs on 5.00 V - which is why ADR 0003 argues for the 5 V rail rather
+      than 3V3, and why the REF5050 decision sits downstream of it.
+      Three places restate it: 0003:117 (the datasheet comparison table,
+      legitimately quoting 766 mV/kPa for both part variants), 0003:123 (the
+      derivation, which is this figure's home), and breath-adc.md:37, which
+      uses 0.766 in an arithmetic chain. The third is the one that would go
+      stale silently.
+      NOT a candidate for deletion if the sensor changes: the whole ADC
+      divider, the in-amp gain and the playable-span count are all downstream
+      of this number.
 
   - id: breath-zero-ref
     quantity: V_REF the breath trimmer must produce to null a typical pedestal
@@ -154,7 +221,18 @@ figures:
     derivation: "Pressed node sits at 3.3 x 100/(2200+100) = 0.1435 V, NOT 0 V. Charging through 2.2k (tau = 103.40 us): t = -103.40 x ln((3.3-2.31)/(3.3-0.1435)) = 119.9 us"
     threshold_note: "V_IH = 2.31 V = 0.70 x VCC. THIS FIGURE MOVED TWICE ON 2026-09-21 AND THE SECOND MOVE PUT IT BACK. First move: TI's SCLS116E (datasheets/logic/74HC165-ti-scls116e.pdf) has NO 3.3 V row - it tabulates 2 V (1.5/0.5 = 0.75/0.25), 4.5 V and 6 V (both 0.70/0.30) - so the 0.75/0.25 bound was taken on the reasoning that 0.70/0.30 'breaks' at 2 V. Second move: onsemi's MC74HC165A/D Rev. 13 p.4 PUBLISHES A 3.0 V ROW, V_IH 2.1 V / V_IL 0.9 V, which is exactly 0.70/0.30. 3.3 V is therefore bracketed on BOTH sides by published 0.70/0.30 rows and needs no extrapolation through the 2 V point; 2 V is the single exception at the bottom of the family range, not a trend. TI, Nexperia (Rev. 8) and Toshiba agree with onsemi digit for digit at every shared rail, so the 3.0 V row is the family's, not one vendor's. All four PDFs are banked."
     conservative_bound: "If a TI SN74HC165 is the part fitted, its own datasheet guarantees nothing at 3.3 V and the pessimistic bound is V_IH = 2.475 V, giving 138.7 us. Nothing in the design depends on which is used - the release is absorbed by the asymmetric debounce either way. Design margin against 138.7 us if it ever gets tight."
-    forbidden: ["`V_IH` at **125", "release ~93 us", "~93 µs hardware", "93.2 us", "at **138.7", "crosses `V_IH` at **138.7", "0.75 x VCC = 2.475", "0.75 × VCC = 2.475"]
+    forbidden: ["`V_IH` at **125", "release ~93 us", "~93 µs hardware", "93.2 us", "at **138.7", "crosses `V_IH` at **138.7", "0.75 x VCC = 2.475", "0.75 × VCC = 2.475", "release is ~93us", "~93us", "at ~125us", "~125us"]
+    escape_note: |
+      THE CSV SPELLING IS NOT THE MARKDOWN SPELLING, 2026-09-21. Every
+      pattern above was written from a prose page - "`V_IH` at **125" - and
+      the BOM rows spell the same numbers "~125us" and "~93us": no
+      backticks, no asterisks, no space before the unit. Two cold agents
+      found R-KEY-SER and C-KEY still carrying the superseded 10k/10nF
+      network's timings while the checker reported PASS.
+      Worse than stale: C-KEY quoted the CORRECTED thresholds (0.99 V,
+      2.31 V) beside the OLD crossing times, so the row disagreed with
+      itself - and a reader cross-checking the page against the BOM found
+      agreement on one of the two numbers.
     false_positive_note: "A bare 125 us also legitimately means the MEAN SAMPLING PERIOD (0-250 us at 4 kHz) and the 8 kHz LOOP PERIOD. Match the phrase, not the numeral. 138.7 us appears legitimately as the stated conservative bound and in the text recording the two moves - those lines carry refutation wording."
     note: "Starting from 0 V instead of the divider voltage gives 124.5 us, which is the error the 125 us figure came from."
 
@@ -166,7 +244,12 @@ figures:
     derivation: "tau = (2200||100) x 47nF = 4.4957 us; t = -4.4957 x ln((0.99-0.1435)/(3.3-0.1435)) = 5.92 us"
     threshold_note: "V_IL = 0.99 V = 0.30 x VCC, from onsemi MC74HC165A/D Rev. 13 p.4's published 3.0 V row. Same two-move history as key-release-time - see its threshold_note. SEPARATELY AND STILL CORRECT: tau is the PARALLEL combination, 4.4957 us, not 100 ohm x 47 nF = 4.7 us; the page stated 4.7 us beside a crossing time computed from 4.496. That correction is independent of the threshold question and stands."
     conservative_bound: "The TI-only pessimistic bound is V_IL = 0.825 V, giving 6.89 us. Margin inside the 250 us scan is 42x at 5.92 us and 36x at 6.89 us - the same answer."
-    forbidden: ["`V_IL` at **5.7", "~1.4 µs / 176", "176× margin", "176x margin against", "at **6.89", "crosses `V_IL` at **6.89", "0.25 x VCC = 0.825", "0.25 × VCC = 0.825"]
+    forbidden: ["`V_IL` at **5.7", "~1.4 µs / 176", "176× margin", "176x margin against", "at **6.89", "crosses `V_IL` at **6.89", "0.25 x VCC = 0.825", "0.25 × VCC = 0.825", "in ~5.7us", "~5.7us", "44x margin", "press is ~1us"]
+    escape_note: |
+      Same escape as key-release-time, same day: the patterns were written
+      in markdown spelling and the BOM is CSV. "~5.7us" and "44x margin"
+      sat live in hardware/cluster/key-switch-network/bom.csv, and in the
+      generated master, while the checker reported PASS.
 
   - id: marker-bits
     quantity: Marker pattern width
@@ -189,7 +272,21 @@ figures:
     status: settled
     owner: docs/decisions/0001-mcu-and-board-partitioning.md
     derivation: "4 signals + 5 alternating grounds + 3V3 + 2 spare, on a 2x6 IDC"
-    forbidden: ["six conductors per hop", "SIX conductors per hop", "6 conductors per hop", "Six conductors leave", "six conductors leave"]
+    forbidden: ["six conductors per hop", "SIX conductors per hop", "6 conductors per hop", "Six conductors leave", "six conductors leave", "Six conductors per hop", "Six conductors per"]
+    false_positive_note: >
+      key-chain-loom.md:138 says "Six conductors is the SIGNAL count, not the
+      conductor count", which is a correction and is correct.
+      led-strip-drive.md:88's "the LED loom stays at 6 conductors" is a
+      different loom entirely. Neither is this figure.
+    escape_note: |
+      THE MISS WAS ONE LETTER'S CASE, 2026-09-21. ROADMAP:203 read
+      "Six conductors per hop" - Title case - against a list holding the
+      lowercase, the ALL-CAPS and the digit form of the same phrase. Title
+      case HAD been considered, for the other spelling in the same list
+      ("Six conductors leave"), and not for this one.
+      Two cold agents found it independently. The row it sits in is the one
+      that asks "does the chained key loom fit the side channel?" and gates
+      it "before the plate DXF is cut".
 
   - id: chain-connectors
     quantity: J-CHAIN connectors in the system
@@ -292,7 +389,13 @@ figures:
     status: settled
     owner: docs/decisions/0004-cv-interface-module.md
     derivation: "(10 x 5.08) - 0.3, +0/-0.2"
-    forbidden: ["panel is 40.34 mm", "The panel is 8HP", "inside 8HP", "at 8HP this", "Comfortable at 8HP"]
+    forbidden: ["panel is 40.34 mm", "The panel is 8HP", "inside 8HP", "at 8HP this", "Comfortable at 8HP", "good practice at 8HP", "practice at 8HP rather"]
+    false_positive_note: >
+      ADR 0004 and ADR 0009 discuss 6HP and 8HP at length and CORRECTLY - the
+      6HP -> 8HP -> 10HP history is the argument for the current width, and
+      panel.md's "the knob size 8HP was supposed to have bought" is a live
+      comparative. Match the words around the number, never the number.
+      Nine of the eleven live 8HP/6HP hits on 2026-09-21 were legitimate.
 
   - id: panel-height-budget
     quantity: Module panel height used
@@ -301,7 +404,22 @@ figures:
     owner: docs/decisions/0004-cv-interface-module.md
     derivation: "CLEAR HEIGHT FIRST, because the corpus never derived it. Panel 128.5 mm with M3 clearance holes centred 3.0 mm from the top and bottom edges - two independent banked artefacts agree (a FABRICATED 3HP panel, mechanical/EURORACK-3U-3HP-PANEL-apfaudio-pmod-r3.1.kicad_pcb, Edge.Cuts measured 15.000 x 128.500; and mechanical/EURORACK-3U-PANEL-HP-TABLE-make_blanks.py, HEIGHT=128.5, HOLE_Y=(3.0,125.5), HOLE_DIA=3.2, 10HP width 50.50 with holes at x 7.50/43.06). What blocks panel-front components is the SCREW HARDWARE, so the clear full-width height is 128.5 - 2*(3.0 + r): 116.9 mm on a bare ISO 7045 pan head (dk max 5.6), 115.5 mm with a DIN 125 M3 washer (OD 7.0, the assumed case), 112.5 mm with a knurled thumbscrew (OD ~10). CONTENT: label band 5 + three pots across at 14 mm knobs 22 + jacks 3 rows x 2 columns at 13 mm pitch 39 + etherCON flange 31 + toggle row 13 = 110 mm. 5.5 mm spare, i.e. 1.4 mm per row boundary; 2.5 mm even on the thumbscrew assumption. IT FITS ON EVERY HARDWARE ASSUMPTION."
     toggle_row: "THE TOGGLE NEEDS ITS OWN ROW, and this is what the dispute turned on. Beside the etherCON flange (26 mm wide, centred on 50.50) there are two 12.25 mm strips of aluminium. A D6.5 hole centred in one leaves 2.88 mm to the flange and 2.88 mm to the panel edge; the 6.00 mm alternative's D6.2 leaves 3.02 mm. BOTH ARE UNDER THE 3.09 mm THIS ADR ALREADY REJECTED when it went 6HP -> 8HP ('a fit the panel passes and a stiffness test it does not'), on a hole a player flips repeatedly in 2 mm aluminium. So the toggle gets a row and the choice of toggle does not affect this figure. THE LED DOES FIT BESIDE THE FLANGE: a D3.2 bezel leaves 4.52 mm each side. Row height 13 mm: the lever is 10.5 mm at a 25 deg throw, sweeping +/-4.44 mm in the panel plane, against a 7.9 mm body."
-    forbidden: ["107 mm of ~110 mm usable", "Roughly 107 mm of", "97 mm against ~110 mm", "97 mm against ~110", "~115 mm against ~110 mm usable", "115 mm against ~110 mm", "already at 107 mm of ~110 mm usable", "13 mm spare"]
+    forbidden: ["107 mm of ~110 mm usable", "Roughly 107 mm of", "97 mm against ~110 mm", "97 mm against ~110", "~115 mm against ~110 mm usable", "115 mm against ~110 mm", "already at 107 mm of ~110 mm usable", "13 mm spare", "13mm spare", "= 97mm", "107mm of ~110mm", "115mm against ~110mm"]
+    false_positive_note: >
+      panel.md:20 and 0004:736 both NARRATE the review that produced these
+      numbers - "a reviewer rebuilt the panel bottom-up and got ~115 mm
+      against a '~110 mm usable' that was itself never derived". That is
+      history and it is correctly framed as history. The defect was only
+      ever the BOM row restating the retired budget as live.
+    escape_note: |
+      FOUR RETIRED VALUES, FOUR MISSES, EACH BY ONE REMOVED SPACE, 2026-09-21.
+      The PANEL row in hardware/bom.csv and its fragment spelled the budget
+      "97mm", "13mm spare", "115mm against ~110mm usable", "107mm of ~110mm".
+      Every pattern in the list above spells "NN mm". The BOM does not put a
+      space before the unit and never has.
+      This is the most-cited file in the repository, and the same stale text
+      was in it twice - master and fragment - because the master is
+      generated.
     false_positive_note: "The candidates 107 / 97 / 112 / 124 may be quoted in text that explains why they were superseded; such lines carry refutation wording and the checker allows them. docs/review/** is excluded by design and keeps all four as the record of what was believed."
     note: |
       RETIRED FROM DISPUTED 2026-09-21, once wave R8 banked the last control
