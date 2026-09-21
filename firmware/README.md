@@ -63,6 +63,28 @@ pass while five are written**, so the seventh channel fits inside a budget that
 was already paid — and refreshing the reference-enable and clear-code registers
 periodically costs a word every few thousand passes.
 
+## The instrument must stay recoverable
+
+The body is bonded. Everything here exists because a failed flash cannot be
+answered by opening the instrument.
+
+- **Two OTA partitions, with `CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE`.** An
+  image that does not mark itself valid is rolled back by the bootloader on the
+  next boot. Free, and it turns the most likely bricking event into a reboot.
+- **USB MIDI is opt-in, not the default.** On the ESP32-S3 the internal PHY
+  routes to USB-Serial-JTAG *or* USB-OTG, never both. The moment the
+  application claims OTG the `DTR`/`RTS` download-mode path is gone. Leaving
+  MIDI off until the player enables it keeps the serial-JTAG reset path alive
+  through every boot that has not been asked for MIDI.
+- **A hardware fallback exists and must be kept working.** `EN`, `IO0`,
+  `U0TXD`, `U0RXD`, `GND` for both boards come to a header under a screwed
+  cover on the tail underside (ADR 0009). Exercise it at M8, before the body
+  closes, so it is known good rather than assumed.
+- **The display board is the worse case.** It has no external connector of its
+  own and it is the only path from the phone to the real-time board's NVS, so
+  bricking it leaves a working instrument that can never be reconfigured. It
+  gets the same two OTA partitions and the same header pins.
+
 ## Data, not code
 
 Two things are explicitly configuration rather than compiled constants

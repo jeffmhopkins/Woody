@@ -300,6 +300,25 @@ face that measures 57 × 38 mm. Two consequences:
   1:1 paper check covers this face as well as the 8HP panel — and the tail is
   now the tight one of the two.
 
+**And a screwed service cover on the tail underside**, beside the matrix
+window, over a ten-pin header on the carrier: `EN`, `IO0`, `U0TXD`, `U0RXD`,
+`GND` for each board. Roughly 12 × 40 mm, two M2 screws into the plate stack,
+in the same laminated layer as the window.
+
+This is the only opening in the instrument that exists for a failure rather
+than for playing it, and the failure is total. On the ESP32-S3 the internal PHY
+routes to USB-Serial-JTAG **or** USB-OTG, not both, so the moment the
+application claims OTG for USB MIDI the `DTR`/`RTS` download-mode path
+disappears. One bad image — or one brownout corrupting the app partition —
+ends the instrument, inside a body that cannot be opened. The display board is
+worse: it has no external connector at all, and it is the only route from the
+phone to the real-time board's NVS, so a bricked display board leaves a
+*working* instrument that can never be configured again.
+
+USB MIDI is a bring-up tool (README). It should not be what costs the
+instrument its recovery path. Firmware carries the other half of this — OTA
+rollback, and USB MIDI opt-in rather than default — in `firmware/README.md`.
+
 Placing the umbilical at the tail also puts it as far as possible from the
 mouthpiece, so the cable leaves the instrument at the end that hangs low and
 does not foul the player's hands or the strap.
@@ -415,9 +434,14 @@ flat parts, and not blocked.
 
 ## Things that are free now and impossible later
 
-A body that is bonded shut is a body that is never opened again. These four cost
+A body that is bonded shut is a body that is never opened again. These cost
 almost nothing while the stack is apart and cannot be had afterwards at any
 price.
+
+**Cut the service cover and populate its header**, per the tail-face section
+above. It is the only thing standing between a bad flash and a finished
+instrument that will not boot, and both dev boards depend on it — the display
+board has no external connector at all.
 
 **Bond the aluminium plate to `PWR_GND`. Never to `AGND`.** Nothing currently
 bonds it. It floats under the player's hands, one to two millimetres from
@@ -427,6 +451,11 @@ unbonded plate means the instrument fires random notes when touched in a dry
 room, and that will be blamed on firmware forever. The choice of *which* ground
 matters as much as the bonding: tying it to `AGND` would put the player's body
 capacitance straight onto the breath channel's voltage reference.
+
+**Fit the key input networks.** A 74x165's parallel inputs have no internal
+pull-up, so without them every key input floats in a channel shared with 12 V
+LED power and 800 kHz data — 10 kΩ, 100 Ω and 10 nF per switch position on the
+cluster boards (ADR 0001).
 
 **Run two spare conductors in every internal loom.** The looms are hand-built,
 once, into a stack that cannot be reopened. A spare pair costs a few cents and

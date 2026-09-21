@@ -75,7 +75,7 @@ runs — which is what makes 18 inches workable.
 | M5 | Aluminium top plate | Cut, fitted, switches retained solidly, **bonded to `PWR_GND`**. Not before E13 — see the ordering rules below |
 | M6 | Body | Oak top and bottom, frosted acrylic sides, LEDs, strap points, **tail matrix window + diffuser and USB-C slot** (ADR 0009) |
 | M7 | Integration | Electronics mounted in the body, umbilical connector fitted and strain-relieved |
-| M8 | **Pre-bond gate** | Assembled but **not bonded**. Full E11 breath-noise test re-run on the *final* harness, **thermal soak at the lighting clamp, watching temperature *and the breath zero* at the sensor**, two-hour play test, failure injection, self-test. Nothing closes until this passes |
+| M8 | **Pre-bond gate** | Assembled but **not bonded**. Full E11 breath-noise test re-run on the *final* harness, **thermal soak at the lighting clamp, watching temperature *and the breath zero* at the sensor**, two-hour play test, failure injection, self-test, **pitch scoped while the LEDs sweep** (ADR 0006 — the one test the plan was missing), and **recover both boards through the service header** so the last route in is known good, not assumed (ADR 0009). Nothing closes until this passes |
 
 **M1 no longer gates M4.** An earlier revision made the cutout measurement the
 single most important input to the mechanical design, on the assumption it could
