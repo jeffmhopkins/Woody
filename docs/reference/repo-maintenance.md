@@ -8,7 +8,7 @@ thrown away.**
 
 ---
 
-## 1. The four kinds of file
+## §1. The four kinds of file
 
 | Kind | Files | Rule |
 |---|---|---|
@@ -22,7 +22,7 @@ Not tracked, and gitignored: `.staleness/`, `.staleness-report.txt`, `*.tmp`.
 
 ---
 
-## 2. `tools/check-staleness.py` — the mechanical half of the one failure mode
+## §2. `tools/check-staleness.py` — the mechanical half of the one failure mode
 
 Run by a `PreToolUse` hook before every `git commit`, so forgetting it is
 visible rather than silent. It greps the corpus for values `config/figures.yaml`
@@ -68,7 +68,7 @@ found it independently hours apart.
 
 ---
 
-## 3. `datasheets/` — banked, not linked
+## §3. `datasheets/` — banked, not linked
 
 `MANIFEST.csv` has one row per artefact with a SHA-256.
 `tools/verify-datasheets.py` must pass before committing anything under
@@ -93,8 +93,10 @@ order of preference:
 2. **Put it in `hardware/bom.csv`**, if it is a fact about the *part* rather
    than about the *document*.
 3. **Add your own fragment** only if you actually fetched something. Two rows
-   for the same file is tolerated (WS2815 is banked twice under two paths, same
-   SHA) but it is not tidy.
+   for the same file is tolerated — WS2815 has one from each of two researchers,
+   both now pointing at `led/WS2815.pdf` — but it is not tidy. (It used to be
+   two rows at two *paths*; the duplicate under `mechanical/` was de-duplicated
+   by the 2026-09-21 re-filing and has a `deleted` row in the path map.)
 
 ### Closing someone else's `BLOCKED` row
 
@@ -113,18 +115,72 @@ Wave R8 established the convention, and it is in `datasheets/README.md`:
   the LT1641's mirror is a real PDF *of the LT4256*. A Diodes Inc URL found
   searching for a 1N4148W is the **MMST3906**. **Grep the extracted text for
   the part number, always.**
-- **Several key documents have no text layer at all.** Gateron's drawing, both
-  Laird bead drawings, the Neutrik outlines, the TE socket page and both toggle
-  drawings are vector CAD — `pdftotext` returns a byte or two and the
-  dimensions exist only in the picture. They were read by **rendering at
-  150 dpi and looking**. Anything that pulls a dimension out of `datasheets/`
-  programmatically will silently get nothing from these.
-- **`pdftotext` is not installed in every session.** `python3 -c "import pypdf"`
-  works and was used for every extraction in this session.
+- **Text-layer coverage is per-document *and* per-element, so measure it, do
+  not assume it.** One vendor sheet can carry fully extractable prose and fully
+  outlined dimension callouts on the same page. Measured across all 60 banked
+  PDFs, 2026-09-21:
+
+  | Extracts | Documents |
+  |---|---|
+  | **Nothing at all — 0 characters** | `connectors/NE8FDP.pdf`, `connectors/NE8MC.pdf`, `connectors/PJ301M-12.pdf` |
+  | **A title block and no more** | both Laird bead drawings (72 and 170 chars), `connectors/100SP1T2B3M2QEH.pdf` (157), `connectors/NE8MX.pdf` and `connectors/NE8MX6.pdf` (~400) |
+  | **Everything, dimensions included** | `connectors/TE-IDC-SOCKET-CATALOG-82012.pdf` (239 kB) and `connectors/NKK-SERIES-M-TOGGLE.pdf` (49 kB). **This page listed both as textless and was wrong**: `8.89`, `8.9` and `6.5` are all in their text layers |
+  | **Prose yes, drawing callouts no** | `mechanical/GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf` — 11 kB of extractable spec text, and not one occurrence of `1.20` or `14.0`, the dimensions this project reads off sheets 3 and 6 |
+
+  So **search the extracted text for the string you actually want**, not for
+  "some text". The Gateron row is the one that has cost something:
+  `ks33-geometry.md` recorded contact bounce as unpublished through four review
+  waves, and *"Bounce Time: 5msec Max.(at 16 in/sec. actuation speed)"* was
+  sitting in the extractable text of a document already in the bank.
+
+- **The companion file is often the machine-readable one.**
+  `connectors/NE8FDP.pdf` extracts zero characters. `connectors/NE8FDP.dxf`,
+  banked beside it, has a full `TEXT`/`MTEXT` layer carrying every dimension
+  the corpus derives from that connector. Its *geometry* entities are to
+  drawing scale and rotated per view, so read the text layer, not the
+  coordinates.
+
+- **For a number that lives only in a curve, extract the content-stream
+  geometry and calibrate against the gridlines.** Reading a render is the last
+  resort, not the first: a reviewer's eyeball pass on the Laird bias curves was
+  wrong by up to **60 %**, and the vector extraction corrected it.
+
+- **`pdftotext` is not installed in every session, and a bare `import pypdf`
+  raises a Rust panic in this container.** The system `cryptography` package's
+  pyo3 binding fails to load — `ModuleNotFoundError: No module named
+  '_cffi_backend'`, then `pyo3_runtime.PanicException` — and pypdf imports it
+  eagerly although it needs it only for *encrypted* PDFs. Two routes, both
+  verified against the bank on 2026-09-21:
+
+  ```python
+  # 1. pypdf, with the eager cryptography import stubbed out
+  import sys, types
+  for m in ('cryptography', 'cryptography.hazmat', 'cryptography.exceptions',
+            'cryptography.hazmat.primitives', 'cryptography.hazmat.primitives.ciphers',
+            'cryptography.hazmat.primitives.padding', 'cryptography.hazmat.backends'):
+      sys.modules[m] = types.ModuleType(m)
+  import pypdf
+  ```
+
+  ```python
+  # 2. pymupdf - pip install pymupdf. Text AND rendering, and no stub needed
+  import pymupdf
+  doc  = pymupdf.open(path)
+  text = "".join(p.get_text() for p in doc)
+  pix  = doc[5].get_pixmap(dpi=150)        # for when you do have to look
+  ```
+
+  **The stub has one real limit and the bank contains a case.** Stubbing
+  `cryptography` leaves pypdf unable to decrypt an AES-encrypted PDF, so
+  `connectors/NKK-SERIES-M-TOGGLE.pdf` raises `DependencyError: cryptography>=3.1
+  is required for AES algorithm` — on the document whose text layer carries the
+  toggle dimensions. pymupdf opens the same file with an empty password and
+  reads all 28 pages. **Prefer pymupdf**, and keep the stub for a session where
+  pypdf is the only thing installed.
 
 ---
 
-## 4. `hardware/bom.csv` — eleven columns, CRLF, **and generated**
+## §4. `hardware/bom.csv` — eleven columns, CRLF, **and generated**
 
 ```
 ref,category,part,manufacturer,description,package,qty,status,source,adr,notes
@@ -173,7 +229,7 @@ ref,category,part,manufacturer,description,package,qty,status,source,adr,notes
 
 ---
 
-## 5. `config/figures.yaml` — the register
+## §5. `config/figures.yaml` — the register
 
 One entry per shared quantity. The owning document states it; **every other
 document cites it by name and does not restate the number.**
@@ -203,7 +259,7 @@ says "somebody should look at this" is not trackable.
 
 ---
 
-## 6. Running the tools
+## §6. Running the tools
 
 ```
 python3 tools/check-staleness.py      # terse; detail lands in .staleness/report.txt
@@ -233,12 +289,56 @@ were reproduced, not argued:
 
 ---
 
-## 7. The 2026-09-21 restructure
+## §7. The 2026-09-21 restructure
 
 Paths changed. **`path-map-2026-09-21.csv` in this directory maps every old
 path to its new one** — every tracked file has a row, including the ones that
 did not move, because the question a reader actually asks is "did this path
 change?" and a map of only the movers cannot answer it.
+
+> **The as-of points, because they are not the same date and the map is
+> applied at content granularity.**
+>
+> - **Old side** — the `old` column is exactly the tracked tree at `81c081d`,
+>   the commit before A0 wrote the map. 287 paths, and it is a bijection onto
+>   that tree: nothing in it is missing and nothing in it is invented.
+> - **New side** — HEAD. Re-reconciled 2026-09-21 after the pre-merge review
+>   wave, against `git ls-files`.
+>
+> **This sentence was false for most of a day and it is worth saying how.**
+> The map was written at A0 and described Phase A1 only. Phase B then created
+> 122 files it had never heard of, and the datasheet re-filing moved 22 more —
+> leaving 143 tracked files with no row and 22 rows pointing at paths that
+> existed on *neither* side. A reader checking "did this path change?" got
+> `unmoved` for a file that had both moved and been renamed. The map is
+> reconciled now; **the check is four lines and belongs in any future
+> restructure's tooling:**
+>
+> ```
+> tracked = set(git ls-files)
+> rows    = path-map rows
+> assert not (tracked - {r.new for r in rows if r.kind != "deleted"})   # no orphan file
+> assert not ({r.new for r in rows if r.kind != "deleted"} - tracked)   # no dangling row
+> ```
+
+**The `kind` column**, which is the part a reader acts on:
+
+| `kind` | `old` | `new` | Means |
+|---|---|---|---|
+| `unmoved` | path | same path | Corpus file, path unchanged |
+| `unmoved-history` | path | same path | `docs/review/**`, `docs/log/**`, `docs/research/**`. Path unchanged, and **never corrected** (§1) |
+| `moved` | old path | new path | Rewritable: `rewrite-paths.py` reads exactly these rows |
+| `deleted` | old path | *empty* | Gone. The `note` says where its content went, if anywhere |
+| `created` | *empty* | path | Did not exist at the old-side as-of point. The `note` names the commit and, for a Phase B split, the page it was split out of |
+| `created-history` | *empty* | path | Same, under `docs/review/**` — a record written after the map, never corrected |
+
+**A `created` row's `old` is deliberately empty even when the file's text came
+out of a known parent page.** `hardware/module/panel-led/panel-led.md` was
+split out of `hardware/module/power-entry.md`, but power-entry has its own
+`moved` row, and putting a second old→new pair on the same old path would make
+`rewrite-paths.py` rewrite every reference to power-entry into a page about
+the LED. The parent belongs in `note`, where a reader uses it and a tool does
+not.
 
 **References inside `docs/review/**`, `docs/log/**` and `docs/research/**`
 point at the old paths and are deliberately not corrected** (§1, `CLAUDE.md`

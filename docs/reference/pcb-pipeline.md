@@ -55,17 +55,31 @@ need `set ngbehavior=psa` in `.spiceinit` — inside `.control` is too late.
 
 Only the ones that corrupt something no later stage can catch.
 
-**1. Reconcile net names across the six pages first.** `AGND` means the
-umbilical sense conductor *and* the module analog return. `BREATH` means the
-in-amp input *and* the output jack. **Three cold reviewers found this
-independently.** A transcription taking names off the drawings shorts the
-breath in-amp input to the breath output jack — and every downstream check
-passes, because the merge happened before anything could see it.
+**1. Reconcile net names across all 23 circuit pages first** — twelve of them
+on the module. (This said "the six pages" until 2026-09-21; Phase B split the
+six module pages into twelve circuit directories plus the board-crossing
+blocks, and each new page names nets of its own.) **Four collisions are known,
+each a name that denotes two different physical nets:**
+
+| Name | Means | And also means |
+|---|---|---|
+| `AGND` | the umbilical sense conductor | the module analog return |
+| `BREATH` | the in-amp input | the output jack |
+| `OE` | the module's `74AHCT125` output enable, tied to `GND` (`hardware/module/digital-and-supervision/digital-and-supervision.md`) | the carrier's LED-buffer output enable, tied low (`hardware/carrier/led-strip-drive/led-strip-drive.md`) |
+| `CS` | the umbilical SPI chip select, `HDR-DEV` IO34 → `J-UMB` pin 7 → the DAC (`hardware/interfaces/spi-link/spi-link.md`) | the MCP3202's board-local chip select, IO39, which never leaves the carrier (`hardware/carrier/breath-adc/breath-adc.md`) |
+
+**Three cold reviewers found the first two independently**; `OE` and `CS` came
+out of the pre-merge wave. A transcription taking names off the drawings shorts
+the breath in-amp input to the breath output jack — and every downstream check
+passes, because the merge happened before anything could see it. `CS` is the
+worse of the two new ones: **both of its nets are on the carrier**, so it does
+not even need the umbilical to collide, and `carrier.md` already draws the host
+as "SPI2 + 2×CS".
 
 **2. One `rails.py`, and `Net.fetch` only.** `Net("+12V")` *constructs*. Two
 modules naming the same rail give `+12V` and `+12V1`, electrically separate,
-reported as two warnings among hundreds. Seven rails, six modules. Assert no
-net name ends in a digit.
+reported as two warnings among hundreds. Seven rails, and now one SKiDL module
+per circuit page rather than six in total. Assert no net name ends in a digit.
 
 **3. Explicit `ref=` and `tag=` on every part.** Auto-refdes are positional, so
 inserting one resistor renumbers everything after it — and KiCad matches by
@@ -112,9 +126,43 @@ its grounds meet is a decision deferred twice, not once.
 
 ### 1. Netlist — headless, re-runnable
 
-`pcb/src/module/*.py`, one module per schematic page, `module.py` importing the
-six. ERC, then emit `module.net`. Pass `track_abs_path=False` or the generating
-script's absolute path lands in the netlist and two clones differ.
+`pcb/src/module/*.py`, **one SKiDL module per circuit directory — twelve of
+them under `hardware/module/`, not the six pages this said before Phase B** —
+and `module.py` importing all twelve. ERC, then emit `module.net`. Pass
+`track_abs_path=False` or the generating script's absolute path lands in the
+netlist and two clones differ.
+
+> **A page-by-page netlist is not the whole board, and `hardware/unplaced.csv`
+> is the measure of the gap.** A row lives with the circuit whose page derives
+> it; a row nobody has drawn lives in `unplaced.csv`, so anything transcribed
+> from the pages alone omits exactly those rows. **Re-measured against the
+> current tree, 2026-09-21:**
+>
+> | | Rows | Units |
+> |---|---|---|
+> | `hardware/bom.csv`, the generated master | 138 | 388 |
+> | In the 23 per-circuit fragments | 104 | 313 |
+> | **In `hardware/unplaced.csv` — no page names them** | **34** | **75** |
+>
+> Of those 34, five are module-board netlist parts and would be missing from
+> `module.net`: **`J-CV` ×6** (the CV jacks — the module's whole output
+> connector set), `U-TVS-MODULE`, `D-CLAMP-BREATH` ×2, `R-BREATH-SUM` ×2 and
+> `R-BREATH-OFF` ×2. **Thirteen units.** The rest of `unplaced.csv` is the
+> instrument's mechanical and controller rows plus the board blank itself,
+> which no netlist wants.
+>
+> `D-CLAMP-BREATH` is the shape of the problem: it **is drawn**, on
+> `hardware/module/breath-receive-stage/breath-receive-stage.md`, and its row
+> still sits in `unplaced.csv`. Drawn and placed are not the same test, and
+> only the BOM fragment answers the second one.
+>
+> *This warning used to say ~50 rows / 105 units, and that the emitted module
+> would have no DAC8568, no CV jacks, no etherCON and no AVDD rail. Sixteen
+> rows have since been moved into the circuits that derive them, so the DAC
+> (`hardware/module/dac8568/bom.csv`), the etherCON chassis connector and the
+> `U-REG-DAC` AVDD regulator (`hardware/module/power-entry/bom.csv`) are all
+> placed now. **The CV jacks are not**, and neither are the four rows beside
+> them.*
 
 ### 2. Simulate — headless, runs today
 
@@ -123,11 +171,26 @@ what the claim costs if wrong:
 
 | Sim | Why |
 |---|---|
-| **Breath-link CMRR** with the INA828 | 1.7 dB of claimed margin, unretrofittable inside a bonded body. A macromodel exists — same directory as the OPA2197 |
+| **Breath-link CMRR** with the INA828 | 1.7 dB of claimed margin, across two boards. A macromodel exists — same directory as the OPA2197. **See the note below: the premise that used to rank it first is retired** |
 | **`R-ISO-REF` stability** | Already found the drawn circuit is the unstable one: 8.8° unfitted, **8.4° in-loop as drawn**, 75.2° out-of-loop. **And TI publishes the worked answer for this exact circuit** — SBOS737C §8.2.3, `R_ISO` 37.4 Ω with a dual-feedback network, 89° PM, against our 10 Ω. **Blocked on `cref-out-node` first** |
 | **Pitch transient into a passive mult** | Measured 41.8 % overshoot at 82 nF, 65.4 % at 330 nF. **The AC sweep is structurally blind to this** on the same circuit at the same loads |
 | **Power-on / reset transient** | Five power-on claims across three pages, no transient anywhere in the corpus |
 | **Behavioural LT1641** | `power-entry.md` already writes the foldback law as equations, and this is the circuit proven not to start |
+
+> **The CMRR row's stated reason was refuted and the ranking survives on a
+> different one.** It read *"unretrofittable inside a bonded body"*. ADR 0009
+> retired the bonded body — it comes apart on six fasteners — and `R1b`, the
+> part the 60.2 dB term is entirely a statement about, is on the carrier inside
+> that body. So it *is* retrofittable, and the argument that put this sim first
+> is gone.
+>
+> It stays first on three weaker grounds, stated so the next reader can
+> disagree with the real ones: it is the **thinnest claimed margin in the
+> corpus** (1.7 dB, and a worst case over tolerance rather than a typical); its
+> derivation is the only one that **crosses the umbilical**, so a bench
+> iteration on it spans two boards and a 2 m cable rather than one bench; and
+> the sim costs nothing, because the macromodel is already banked. If any of
+> those stops being true, re-rank it.
 
 Not worth running: Monte Carlo on the pitch budget. The dispute is over *what
 the terms are*, not their spread, and the two largest belong to a part with no
@@ -149,8 +212,14 @@ reads ~280–310 Ω, half its nameplate, because a bead's current rating is
 
 ```
 circuit.generate_pcb(...)    # kinet2pcb: footprints placed, nets assigned,
-                             # hierplace groups by module = by schematic page
+                             # hierplace groups by SKiDL module, which is now
+                             # one circuit directory, not one schematic page
 ```
+
+**That grouping is finer than it used to be.** Twelve groups on the module
+instead of six, and the two that a router wants adjacent — `dac8568` and
+`digital-and-supervision` — are now separate groups because they are separate
+directories. Expect to move whole groups by hand once, before routing.
 
 Then `build_board.py` adds what `kinet2pcb` does not:
 
@@ -250,19 +319,40 @@ grounding scheme, so it is upstream of stage 3.
 
 ## One warning about reading `datasheets/` programmatically
 
-**Several key documents have no text layer at all.** Gateron's switch drawing,
-both Laird bead drawings, the Neutrik outlines and the TE socket page are vector
-CAD — `pdftotext` returns a byte or two, and the dimensions exist only in the
-picture. The plate thickness, the bead bias curve and the IDC stack height were
-all obtained by rendering at 150 dpi and looking.
+**Some documents have no text layer, and which ones is not what this page used
+to say.** `repo-maintenance.md` §3 carries the measured survey across all 60
+banked PDFs and the two extraction routes that work in this container; read it
+before writing anything that pulls a dimension out of `datasheets/`. The three
+things that matter here:
 
-So any script that pulls a dimension out of `datasheets/` **will silently get
-nothing** from exactly the documents that carry the mechanical constraints.
-Render and read, or do not automate it.
+- **Genuinely textless**, 0 characters: `datasheets/connectors/NE8FDP.pdf`,
+  `datasheets/connectors/NE8MC.pdf`, `datasheets/connectors/PJ301M-12.pdf`.
+  Both Laird bead drawings give up a title block and nothing else, so the bead
+  bias curve really does only exist as a picture.
+- **The TE socket catalogue and the NKK toggle sheet are fully extractable**,
+  dimensions included. This page said otherwise and was wrong.
+- **Prefer a companion file to a render.** For the etherCON panel cut-out, do
+  **not** send anyone to `NE8FDP.pdf` — it extracts nothing.
+  `datasheets/connectors/NE8FDP.dxf` is banked beside it with a complete
+  `TEXT`/`MTEXT` layer carrying every dimension the corpus derives from that
+  connector: the bore, the two ⌀3,2 clearance holes and their pitch, the flange
+  and both depths behind the panel, all with tolerances, in a decimal-comma
+  German drawing. Every number the corpus took off the render checks out
+  against it. The DXF's *geometry* entities are to drawing scale and rotated
+  per view, so read the text layer, not the coordinates.
 
-Related: `WS2815` is banked twice under two paths with the same SHA-256, from
-two different researchers. Harmless, but manifest-driven tooling should expect
-it.
+  `hardware/module/power-entry/bom.csv`'s `J-UMBILICAL` row is where those
+  dimensions live; this page cites them rather than restating them.
+
+So a script that pulls a dimension out of `datasheets/` **can silently get
+nothing** — from a shrinking, now-named list. Check the document, do not assume
+the class.
+
+Related: `WS2815` has **two manifest rows from two different researchers, both
+now pointing at the same file**, `datasheets/led/WS2815.pdf`. (It used to be two
+rows at two *paths* with the same SHA-256; the duplicate under `mechanical/` was
+de-duplicated by the 2026-09-21 re-filing.) Harmless, but manifest-driven
+tooling should expect a repeated path.
 
 ## Install
 

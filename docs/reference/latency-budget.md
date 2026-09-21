@@ -90,19 +90,49 @@ bottom of this page is the one that settles it.
 
 ## Key path
 
-| Stage | Time |
-|---|---|
-| Switch mechanical actuation | mechanical |
-| 74HC165 chain read | **32 µs** — 32 bits at 1 MHz (ADR 0001). This row said "< 10 µs via SPI DMA"; the chain runs at 1 MHz and cannot be clocked away |
-| Debounce (press) | 0 — fire immediately |
-| Debounce (release) | filtered |
-| Firmware note resolution | < 20 µs |
-| DAC update + settle | ~60 µs |
-| Pitch filter (~10–20 kHz corner) | ~10 µs |
+| Stage | Time | Notes |
+|---|---|---|
+| Switch mechanical actuation | mechanical | Bounce is **not** a press-path term here — see below |
+| Key network RC, press | `key-press-time` | Owned by `hardware/cluster/key-switch-network/key-switch-network.md`. Two orders of magnitude inside the scan period; carried as a line so the table is complete, not because it moves the total |
+| **Sampling period** | **0–250 µs** | The same 4 kHz loop the breath table books. A closure waits up to one period to be seen. Mean 125 µs. **This table omitted it entirely until 2026-09-21** |
+| 74HC165 chain read | **32 µs** | 32 bits at 1 MHz (ADR 0001). This row said "< 10 µs via SPI DMA"; the chain runs at 1 MHz and cannot be clocked away |
+| **Note-on gate — two consecutive agreeing samples** | **+250 µs** | One whole loop period, **required by ADR 0001**. This row read "Debounce (press) — 0, fire immediately", which contradicted the ADR that specifies it |
+| Debounce (release) | filtered | Off the attack path by construction, which is the point of the asymmetry |
+| Firmware note resolution | < 20 µs | |
+| DAC update + settle | ~60 µs | |
+| Pitch filter (~10–20 kHz corner) | ~10 µs | |
+| **Total** | **~0.38–0.63 ms** | |
+
+`[calc]` worst case `0.25 (sampling) + 0.032 (chain) + 0.25 (note-on gate) +
+0.02 (firmware) + 0.06 (DAC) + 0.01 (filter) = 0.622 ms`, plus the RC press
+time; best case is the same sum with the sampling period at zero, 0.372 ms.
+**Against the 5 ms target that is roughly 8× — five times the breath path's
+margin.** The key path is not the one at risk, and now the table says so
+instead of leaving the reader to add it up.
+
+> **This table had no Total and omitted its two largest terms.** The sampling
+> period and the note-on gate are 0.50 ms of a 0.62 ms worst case — **80 % of
+> the path** — and between them they were the difference between a table that
+> closes and a list of small numbers. Found by the 2026-09-21 pre-merge wave;
+> the same omission had already been fixed in the breath tables above, which is
+> the shape this project keeps repeating: the fix lands where the editing is
+> happening and not where the reader looks.
 
 **Debounce asymmetrically.** Fire on the leading edge and filter only the
 release. Symmetric debounce puts its full window directly into the attack, which
 is the one place latency is audible.
+
+> **The note-on gate is not a debounce, and the difference now has a number
+> against it.** Gateron publishes **5 ms max bounce at 16 in/sec** for this
+> exact part — see `ks33-geometry.md` — and ADR 0001's gate is two samples
+> 250 µs apart, **twenty times shorter than that window**. Both samples can
+> fall inside one bounce burst. That is correct for *latency*, and it is the
+> intent: the gate rejects a single corrupted 32-bit frame, not contact
+> chatter. What it means is that **rejecting bounce is entirely the release
+> filter's job**, and the release window has to outlast the bounce burst rather
+> than the 125 µs the key network's RC contributes. `firmware/README.md` sets
+> that window from measured bounce at M1; the vendor maximum is now the number
+> M1 has to come in under, instead of the 20 ms the 2021 firmware guessed.
 
 ## Characterisation — measure these, do not assume them
 
@@ -115,7 +145,7 @@ load-bearing enough that being wrong about them would change the design.
 |---|---|---|
 | **Breath transducer response** | Step the pressure, scope the sensor output, measure rise time | A large term and a datasheet figure. If it is really 3 ms the margin shrinks; if it is 200 µs there is far more headroom than assumed |
 | **Tube delay, ring-down, and the restrictor's time constant** | Step the pressure at the mouthpiece, scope at the sensor. Measure the delay, the ring-down, and — with the plug fitted — the added time constant | Now the **largest single term** at 400 mm, and the one term tunable by design. The restrictor is sized by damping, not by frequency (ADR 0003), and **its time constant is a latency term this budget cannot fill in until E2** |
-| **KS-33 contact bounce** | Scope a switch, measure bounce duration on press *and* release | The 2021 firmware used a flat 20 ms debounce. If these switches settle in 2 ms, setting the window from data buys back 18 ms of the most latency-sensitive path in the instrument |
+| **KS-33 contact bounce** | Scope a switch, measure bounce duration on press *and* release | **No longer an unknown, only an unmeasured maximum.** Gateron's banked drawing publishes **5 ms max at 16 in/sec actuation** (`ks33-geometry.md`); this row used to frame it as unpublished. The 2021 firmware used a flat 20 ms window, so the published maximum alone buys back 15 ms of the release filter — and a measured typical, likely well under it, buys back more. Actuation speed is a player variable, so measure at a musical one |
 | **ADC + SPI round trip** | Logic analyser on the bus | Datasheet conversion time excludes driver overhead. The real number includes it |
 | **SPI over the umbilical at length** | Logic analyser at the module end, cable at full length | Setup/hold margin, ringing, double-clocking. This is where a long cable bites, and it is invisible without an LA. Gates E11 |
 | **DAC settling and filter corners** | Scope a commanded step | Confirm settling to within an LSB, and that the pitch and breath filters actually sit where they were designed to |

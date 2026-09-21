@@ -18,6 +18,7 @@ datasheets/.manifest-R5.csv,datasheets/.manifest-R5.csv,unmoved,datasheets/ move
 datasheets/.manifest-R6.csv,datasheets/.manifest-R6.csv,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
 datasheets/.manifest-R7.csv,datasheets/.manifest-R7.csv,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
 datasheets/.manifest-R8.csv,datasheets/.manifest-R8.csv,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+,datasheets/.moves.csv,created,"created by the datasheet re-filing (b631987): its own old->new record, the source this file's datasheets/ rows were corrected from"
 datasheets/MANIFEST.csv,datasheets/MANIFEST.csv,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
 datasheets/README.md,datasheets/README.md,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
 datasheets/connectors/100SP1T2B3M2QEH.pdf,datasheets/connectors/100SP1T2B3M2QEH.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
@@ -75,28 +76,28 @@ datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-circuitpython-pins.c,datasheets/
 datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-dimensions.jpg,datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-dimensions.jpg,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
 datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-function-block.png,datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-function-block.png,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
 datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-pinout.png,datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-pinout.png,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
-datasheets/mechanical/WS2815-worldsemi-datasheet.pdf,datasheets/mechanical/WS2815-worldsemi-datasheet.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
-datasheets/other-semi/74HC165-nexperia.pdf,datasheets/other-semi/74HC165-nexperia.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
-datasheets/other-semi/74HC165-onsemi.pdf,datasheets/other-semi/74HC165-onsemi.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
-datasheets/other-semi/74HC165-toshiba.pdf,datasheets/other-semi/74HC165-toshiba.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
-datasheets/other-semi/74HC165.pdf,datasheets/other-semi/74HC165.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
-datasheets/other-semi/LT5400.pdf,datasheets/other-semi/LT5400.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
-datasheets/other-semi/MCP3202-CI-SN.pdf,datasheets/other-semi/MCP3202-CI-SN.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
-datasheets/other-semi/ME6217C33M5G.pdf,datasheets/other-semi/ME6217C33M5G.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
-datasheets/other-semi/MPXV4006-AN1646.pdf,datasheets/other-semi/MPXV4006-AN1646.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
-datasheets/other-semi/MPXV4006DP.pdf,datasheets/other-semi/MPXV4006DP.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
-datasheets/other-semi/WS2812B-2020.pdf,datasheets/other-semi/WS2812B-2020.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
-datasheets/other-semi/WS2812B.pdf,datasheets/other-semi/WS2812B.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
-datasheets/other-semi/WS2812C.pdf,datasheets/other-semi/WS2812C.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
-datasheets/other-semi/WS2815.pdf,datasheets/other-semi/WS2815.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
-datasheets/other-semi/XL-0807RGBC-WS2812B-REV2024.pdf,datasheets/other-semi/XL-0807RGBC-WS2812B-REV2024.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
-datasheets/other-semi/XL-0807RGBC-WS2812B.pdf,datasheets/other-semi/XL-0807RGBC-WS2812B.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
-datasheets/texas-instruments/DAC8568CIPW.pdf,datasheets/texas-instruments/DAC8568CIPW.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
-datasheets/texas-instruments/INA828IDR.pdf,datasheets/texas-instruments/INA828IDR.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
-datasheets/texas-instruments/LM317LZ.pdf,datasheets/texas-instruments/LM317LZ.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
-datasheets/texas-instruments/OPA2197.pdf,datasheets/texas-instruments/OPA2197.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
-datasheets/texas-instruments/REF5050.pdf,datasheets/texas-instruments/REF5050.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
-datasheets/texas-instruments/SN74AHCT125.pdf,datasheets/texas-instruments/SN74AHCT125.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/mechanical/WS2815-worldsemi-datasheet.pdf,,deleted,"DE-DUPLICATED by the 2026-09-21 datasheet re-filing (b631987): byte-identical to datasheets/led/WS2815.pdf, sha 72e22d2f740c, which has its own row. An LED IC datasheet was never mechanical."
+datasheets/other-semi/74HC165-nexperia.pdf,datasheets/logic/74HC165-nexperia.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split"
+datasheets/other-semi/74HC165-onsemi.pdf,datasheets/logic/74HC165-onsemi.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split"
+datasheets/other-semi/74HC165-toshiba.pdf,datasheets/logic/74HC165-toshiba-1986-excerpt.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split; name says what it is - 1986 databook excerpt; FILE ALSO RENAMED, the basename is not preserved"
+datasheets/other-semi/74HC165.pdf,datasheets/logic/74HC165-ti-scls116e.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split; name says whose - TI SCLS116E; FILE ALSO RENAMED, the basename is not preserved"
+datasheets/other-semi/LT5400.pdf,datasheets/analog/LT5400.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split; matched resistor network is analog"
+datasheets/other-semi/MCP3202-CI-SN.pdf,datasheets/analog/MCP3202-CI-SN.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split; ADC is analog"
+datasheets/other-semi/ME6217C33M5G.pdf,datasheets/discrete-and-power/ME6217C33M5G.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split; LDO files with the other regulators"
+datasheets/other-semi/MPXV4006-AN1646.pdf,datasheets/analog/MPXV4006-AN1646.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split; travels with MPXV4006DP"
+datasheets/other-semi/MPXV4006DP.pdf,datasheets/analog/MPXV4006DP.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split; pressure sensor is analog"
+datasheets/other-semi/WS2812B-2020.pdf,datasheets/led/WS2812B-2020.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split; WS281x family files together"
+datasheets/other-semi/WS2812B.pdf,datasheets/led/WS2812B.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split; WS281x family files together"
+datasheets/other-semi/WS2812C.pdf,datasheets/led/WS2812C.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split; WS281x family files together"
+datasheets/other-semi/WS2815.pdf,datasheets/led/WS2815.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split; WS281x family files together"
+datasheets/other-semi/XL-0807RGBC-WS2812B-REV2024.pdf,datasheets/led/XL-0807RGBC-WS2812B-REV2024.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split; SURROGATE ONLY row - see datasheets/README.md"
+datasheets/other-semi/XL-0807RGBC-WS2812B.pdf,datasheets/led/XL-0807RGBC-WS2812B.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split; SURROGATE ONLY row - see datasheets/README.md"
+datasheets/texas-instruments/DAC8568CIPW.pdf,datasheets/analog/DAC8568CIPW.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; vendor bucket retired; function axis"
+datasheets/texas-instruments/INA828IDR.pdf,datasheets/analog/INA828IDR.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; vendor bucket retired; function axis"
+datasheets/texas-instruments/LM317LZ.pdf,datasheets/discrete-and-power/LM317LZ.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; vendor bucket retired; regulator files with the other regulators"
+datasheets/texas-instruments/OPA2197.pdf,datasheets/analog/OPA2197.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; vendor bucket retired; function axis"
+datasheets/texas-instruments/REF5050.pdf,datasheets/analog/REF5050.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; vendor bucket retired; function axis"
+datasheets/texas-instruments/SN74AHCT125.pdf,datasheets/logic/SN74AHCT125.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; vendor bucket retired; level shifter files with the logic"
 docs/decisions/0001-mcu-and-board-partitioning.md,docs/decisions/0001-mcu-and-board-partitioning.md,unmoved,
 docs/decisions/0002-key-switches-and-mounting.md,docs/decisions/0002-key-switches-and-mounting.md,unmoved,
 docs/decisions/0003-breath-sensing-path.md,docs/decisions/0003-breath-sensing-path.md,unmoved,
@@ -117,6 +118,7 @@ docs/log/2026-09-20-project-kickoff.md,docs/log/2026-09-20-project-kickoff.md,un
 docs/log/2026-09-20-review-resolution.md,docs/log/2026-09-20-review-resolution.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
 docs/reference/ks33-geometry.md,docs/reference/ks33-geometry.md,unmoved,
 docs/reference/latency-budget.md,docs/reference/latency-budget.md,unmoved,
+,docs/reference/path-map-2026-09-21.csv,created,"created by A0 (8bb7366), the commit that wrote this map - so it has no old-side path here"
 docs/reference/pcb-pipeline.md,docs/reference/pcb-pipeline.md,unmoved,
 docs/reference/repo-maintenance.md,docs/reference/repo-maintenance.md,unmoved,
 docs/research/.gitkeep,docs/research/.gitkeep,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
@@ -212,6 +214,31 @@ docs/review/2026-09-21-pcb-pipeline-review/P8-grounding-implementation.md,docs/r
 docs/review/2026-09-21-pcb-pipeline-review/P9-alternatives-prior-art.md,docs/review/2026-09-21-pcb-pipeline-review/P9-alternatives-prior-art.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
 docs/review/2026-09-21-pcb-pipeline-review/README.md,docs/review/2026-09-21-pcb-pipeline-review/README.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
 docs/review/2026-09-21-pcb-pipeline-review/VERIFIED.md,docs/review/2026-09-21-pcb-pipeline-review/VERIFIED.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+,docs/review/2026-09-21-pre-merge-review/A1-breath-chain.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/A10-mechanical.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/A2-pitch-chain.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/A3-mod-channels.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/A4-module-power.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/A5-instrument-power.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/A6-key-chain.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/A7-digital-link.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/A8-grounding.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/A9-lighting.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/B1-figures-register.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/B2-bom-integrity.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/B3-datasheet-claims.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/B4-adr-vs-drawn.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/B5-firmware-contract.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/B6-roadmap-gates.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/C1-audit-of-fixes.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/C2-tooling-adversarial.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/C3-failure-injection.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/C4-interfaces-tables.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/C5-reader-experience.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/C6-gaps.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/README.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/STATUS.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/VERIFIED.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
 docs/review/2026-09-21-preflight/A1-power-entry.md,docs/review/2026-09-21-preflight/A1-power-entry.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
 docs/review/2026-09-21-preflight/A10-impedance-audit.md,docs/review/2026-09-21-preflight/A10-impedance-audit.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
 docs/review/2026-09-21-preflight/A11-net-reconciliation.md,docs/review/2026-09-21-preflight/A11-net-reconciliation.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
@@ -228,6 +255,8 @@ docs/review/2026-09-21-preflight/A9-current-budget.md,docs/review/2026-09-21-pre
 docs/review/2026-09-21-preflight/README.md,docs/review/2026-09-21-preflight/README.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
 docs/review/2026-09-21-preflight/STATUS.md,docs/review/2026-09-21-preflight/STATUS.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
 docs/review/2026-09-21-preflight/VERIFIED.md,docs/review/2026-09-21-preflight/VERIFIED.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+,docs/review/2026-09-21-restructure-design/COLD-CONSERVATION.md,created-history,created after the map was written: 2026-09-21-restructure-design. Historical record - never corrected.
+,docs/review/2026-09-21-restructure-design/COLD-TOOLING.md,created-history,created after the map was written: 2026-09-21-restructure-design. Historical record - never corrected.
 docs/review/2026-09-21-restructure-design/D1-circuit-inventory.md,docs/review/2026-09-21-restructure-design/D1-circuit-inventory.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
 docs/review/2026-09-21-restructure-design/D2-directory-standard.md,docs/review/2026-09-21-restructure-design/D2-directory-standard.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
 docs/review/2026-09-21-restructure-design/D3-staleness-paradigm.md,docs/review/2026-09-21-restructure-design/D3-staleness-paradigm.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
@@ -236,6 +265,7 @@ docs/review/2026-09-21-restructure-design/D5-migration-mechanics.md,docs/review/
 docs/review/2026-09-21-restructure-design/D6-adr-boundary.md,docs/review/2026-09-21-restructure-design/D6-adr-boundary.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
 docs/review/2026-09-21-restructure-design/PROPOSAL.md,docs/review/2026-09-21-restructure-design/PROPOSAL.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
 docs/review/2026-09-21-restructure-design/README.md,docs/review/2026-09-21-restructure-design/README.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+,docs/review/2026-09-21-restructure-design/STATUS.md,created-history,created after the map was written: 2026-09-21-restructure-design. Historical record - never corrected.
 docs/review/2026-09-21-restructure-design/VERIFIED.md,docs/review/2026-09-21-restructure-design/VERIFIED.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
 docs/review/2026-09-21-schematic-review/A1-break-jack-feedback.md,docs/review/2026-09-21-schematic-review/A1-break-jack-feedback.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
 docs/review/2026-09-21-schematic-review/A2-break-tail-registers.md,docs/review/2026-09-21-schematic-review/A2-break-tail-registers.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
@@ -267,22 +297,114 @@ docs/review/2026-09-21-staleness-sweep/S8-bom-reconciliation.md,docs/review/2026
 docs/review/2026-09-21-staleness-sweep/S9-adr-status.md,docs/review/2026-09-21-staleness-sweep/S9-adr-status.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
 docs/review/2026-09-21-staleness-sweep/VERIFIED.md,docs/review/2026-09-21-staleness-sweep/VERIFIED.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
 firmware/README.md,firmware/README.md,unmoved,
+,hardware/README.md,created,created after the map was written (fcd56e6): an entry point for a directory that had none
 hardware/bom.csv,hardware/bom.csv,unmoved,
+,hardware/carrier/bom.csv,created,"created when hardware/bom.csv became generated (c483829): the BOARD-level BOM fragment, for rows the board page derives rather than a circuit page"
+,hardware/carrier/breath-adc/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/carrier/breath-adc/breath-adc.md,created,Phase B (fbf040c): split out of hardware/controller/carrier.md
+,hardware/carrier/breath-adc/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/carrier/breath-excitation-reference/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/carrier/breath-excitation-reference/breath-excitation-reference.md,created,Phase B (fbf040c): split out of hardware/controller/carrier.md
+,hardware/carrier/breath-excitation-reference/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/carrier/breath-excitation-reference/notes.md,created,Phase B (fbf040c): split out of hardware/controller/carrier.md
+,hardware/carrier/breath-excitation-reference/sim/README.md,created,Phase B (fbf040c): split out of hardware/controller/carrier.md
+,hardware/carrier/display-and-service-uart/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/carrier/display-and-service-uart/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/carrier/display-and-service-uart/display-and-service-uart.md,created,Phase B (fbf040c): split out of hardware/controller/carrier.md
+,hardware/carrier/led-strip-drive/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/carrier/led-strip-drive/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/carrier/led-strip-drive/led-strip-drive.md,created,Phase B (fbf040c): split out of hardware/controller/carrier.md
+,hardware/carrier/led-strip-drive/notes.md,created,Phase B (fbf040c): split out of hardware/controller/carrier.md
+,hardware/carrier/power-entry-instrument/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/carrier/power-entry-instrument/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/carrier/power-entry-instrument/power-entry-instrument.md,created,Phase B (fbf040c): split out of hardware/controller/carrier.md
+,hardware/cluster/bom.csv,created,"created when hardware/bom.csv became generated (c483829): the BOARD-level BOM fragment, for rows the board page derives rather than a circuit page"
+,hardware/cluster/key-marker-and-bits/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/cluster/key-marker-and-bits/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/cluster/key-marker-and-bits/key-marker-and-bits.md,created,Phase B (d88837b): split out of hardware/controller/cluster-boards.md
+,hardware/cluster/key-marker-and-bits/notes.md,created,Phase B (d88837b): split out of hardware/controller/cluster-boards.md
+,hardware/cluster/key-register/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/cluster/key-register/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/cluster/key-register/key-register.md,created,Phase B (d88837b): split out of hardware/controller/cluster-boards.md
+,hardware/cluster/key-register/notes.md,created,Phase B (d88837b): split out of hardware/controller/cluster-boards.md
+,hardware/cluster/key-switch-network/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/cluster/key-switch-network/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/cluster/key-switch-network/key-switch-network.md,created,Phase B (d88837b): split out of hardware/controller/cluster-boards.md
 hardware/controller/.gitkeep,,deleted,hardware/controller/ conflated two different boards and is dissolved into carrier/ and cluster/
 hardware/controller/carrier.md,hardware/carrier/carrier.md,moved,Phase A1; basename preserved
 hardware/controller/cluster-boards.md,hardware/cluster/cluster-boards.md,moved,Phase A1; basename preserved
 hardware/datasheets/.gitkeep,,deleted,"a second, empty home for datasheets next to the real 77-file one at the repo root; referenced nowhere, and verify-datasheets.py walks only ROOT/datasheets so a PDF dropped here would be hashed by nothing"
+,hardware/interfaces/README.md,created,created after the map was written (fcd56e6): an entry point for a directory that had none
+,hardware/interfaces/breath-sense-link/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/interfaces/breath-sense-link/breath-sense-link.md,created,"consolidation (036b182): a board-crossing block gathered from carrier.md, cluster-boards.md, breath-receive-stage.md and digital-and-supervision.md into one directory"
+,hardware/interfaces/breath-sense-link/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/interfaces/breath-sense-link/notes.md,created,"consolidation (036b182): a board-crossing block gathered from carrier.md, cluster-boards.md, breath-receive-stage.md and digital-and-supervision.md into one directory"
+,hardware/interfaces/key-chain-loom/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/interfaces/key-chain-loom/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/interfaces/key-chain-loom/key-chain-loom.md,created,"consolidation (036b182): a board-crossing block gathered from carrier.md, cluster-boards.md, breath-receive-stage.md and digital-and-supervision.md into one directory"
+,hardware/interfaces/key-chain-loom/notes.md,created,"consolidation (036b182): a board-crossing block gathered from carrier.md, cluster-boards.md, breath-receive-stage.md and digital-and-supervision.md into one directory"
+,hardware/interfaces/spi-link/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/interfaces/spi-link/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/interfaces/spi-link/notes.md,created,"consolidation (036b182): a board-crossing block gathered from carrier.md, cluster-boards.md, breath-receive-stage.md and digital-and-supervision.md into one directory"
+,hardware/interfaces/spi-link/spi-link.md,created,"consolidation (036b182): a board-crossing block gathered from carrier.md, cluster-boards.md, breath-receive-stage.md and digital-and-supervision.md into one directory"
 hardware/module/.gitkeep,,deleted,hardware/module/ now holds circuit directories and needs no keep file
+,hardware/module/bom.csv,created,"created when hardware/bom.csv became generated (c483829): the BOARD-level BOM fragment, for rows the board page derives rather than a circuit page"
 hardware/module/breath-output-stage.md,hardware/module/breath-output-stage/breath-output-stage.md,moved,Phase A1; basename preserved
+,hardware/module/breath-output-stage/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/module/breath-output-stage/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
 hardware/module/breath-receive-stage.md,hardware/module/breath-receive-stage/breath-receive-stage.md,moved,Phase A1; basename preserved
+,hardware/module/breath-receive-stage/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/module/breath-receive-stage/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/module/breath-receive-stage/notes.md,created,Phase B (68e9e1a): split out of hardware/module/breath-receive-stage.md
+,hardware/module/breath-receive-stage/sim/README.md,created,Phase B (68e9e1a): split out of hardware/module/breath-receive-stage.md
+,hardware/module/breath-response-shaper/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/module/breath-response-shaper/breath-response-shaper.md,created,Phase B (81fad55): split out of hardware/module/breath-output-stage.md
+,hardware/module/breath-response-shaper/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/module/dac8568/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/module/dac8568/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/module/dac8568/dac8568.md,created,Phase B (453a3b3): split out of hardware/module/digital-and-supervision.md
+,hardware/module/dac8568/notes.md,created,Phase B (453a3b3): split out of hardware/module/digital-and-supervision.md
 hardware/module/digital-and-supervision.md,hardware/module/digital-and-supervision/digital-and-supervision.md,moved,Phase A1; basename preserved
+,hardware/module/digital-and-supervision/bom.csv,created,"created when hardware/bom.csv became generated (c483829), backfilled in 0e68f25: the per-circuit BOM fragment tools/merge-bom.py reads"
+,hardware/module/digital-and-supervision/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/module/digital-and-supervision/notes.md,created,Phase B (453a3b3): split out of hardware/module/digital-and-supervision.md
+,hardware/module/link-supervision/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/module/link-supervision/link-supervision.md,created,Phase B (453a3b3): split out of hardware/module/digital-and-supervision.md
+,hardware/module/link-supervision/notes.md,created,Phase B (453a3b3): split out of hardware/module/digital-and-supervision.md
 hardware/module/mod-channels.md,hardware/module/mod-channels/mod-channels.md,moved,Phase A1; basename preserved
+,hardware/module/mod-channels/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/module/mod-channels/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/module/mod-channels/notes.md,created,Phase B (81fad55): split out of hardware/module/mod-channels.md
+,hardware/module/module.md,created,created after the map was written (fcd56e6): an entry point for a directory that had none
+,hardware/module/panel-led/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/module/panel-led/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/module/panel-led/notes.md,created,Phase B (81fad55): split out of hardware/module/power-entry.md
+,hardware/module/panel-led/panel-led.md,created,Phase B (81fad55): split out of hardware/module/power-entry.md
+,hardware/module/panel/bom.csv,created,"created when hardware/bom.csv became generated (c483829), backfilled in 0e68f25: the per-circuit BOM fragment tools/merge-bom.py reads"
+,hardware/module/panel/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/module/panel/panel.md,created,Phase B (81fad55): split out of hardware/module/breath-output-stage.md
 hardware/module/pitch-stage.md,hardware/module/pitch-stage/pitch-stage.md,moved,Phase A1; basename preserved
+,hardware/module/pitch-stage/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/module/pitch-stage/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/module/pitch-stage/notes.md,created,Phase B pilot (c52ed75): split out of hardware/module/pitch-stage.md
+,hardware/module/pitch-stage/sim/README.md,created,Phase B pilot (c52ed75): split out of hardware/module/pitch-stage.md
 hardware/module/power-entry.md,hardware/module/power-entry/power-entry.md,moved,Phase A1; basename preserved
+,hardware/module/power-entry/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/module/power-entry/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/module/power-entry/sim/README.md,created,Phase B (81fad55): split out of hardware/module/power-entry.md
+,hardware/module/umbilical-load-switch/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/module/umbilical-load-switch/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/module/umbilical-load-switch/notes.md,created,Phase B (81fad55): split out of hardware/module/power-entry.md
+,hardware/module/umbilical-load-switch/sim/README.md,created,Phase B (81fad55): split out of hardware/module/power-entry.md
+,hardware/module/umbilical-load-switch/umbilical-load-switch.md,created,Phase B (81fad55): split out of hardware/module/power-entry.md
+,hardware/unplaced.csv,created,"created when hardware/bom.csv became generated (c483829): the rows no schematic page names - a count of parts nobody has drawn, not a dumping ground"
 mechanical/cad/.gitkeep,mechanical/cad/.gitkeep,unmoved,
 mechanical/drawings/.gitkeep,mechanical/drawings/.gitkeep,unmoved,
 mechanical/export/.gitkeep,mechanical/export/.gitkeep,unmoved,
 tools/.gitkeep,tools/.gitkeep,unmoved,
+,tools/check-conservation.py,created,Phase B pilot (c52ed75): split out of hardware/module/pitch-stage.md
 tools/check-staleness.py,tools/check-staleness.py,unmoved,
+,tools/merge-bom.py,created,created after the map was written (108c633)
 tools/merge-manifests.py,tools/merge-manifests.py,unmoved,
+,tools/rewrite-paths.py,created,"created by A0 (8bb7366), the commit that wrote this map - so it has no old-side path here"
 tools/verify-datasheets.py,tools/verify-datasheets.py,unmoved,
