@@ -46,8 +46,11 @@ negotiable without revisiting those:
 The design review found this by one route and two diagnostics findings arrived
 at it from the opposite direction, so it is worth stating the case once.
 
-The mod channels are `Vout = 4 × (Vdac − Voffset)`, with `Voffset` the shared
-2.5 V from DAC channel 7 — **written once at boot** (ADR 0006). When the module
+The mod channels are `Vout = 4·Vdac − 3·V_ref`, with `V_ref` the shared
+**3.3333 V** from DAC channel 7 — **written once at boot** (ADR 0006). *(The
+value changed with the two-resistor redraw in `mod-channels.md`; writing the
+old 2.5 V into channel 7 against the current 10 k/30 k network gives a
+−7.5…+12.5 V window — wrong span, and it clips positive.)* When the module
 watchdog asserts `CLR`, every DAC channel including channel 7 goes to zero
 scale. Firmware then rewrites the five signal channels, because those are the
 ones it thinks of as signals, and `Voffset` stays at 0. Every mod jack pins at

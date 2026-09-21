@@ -90,12 +90,13 @@ channel keeps the inverting topology and the safe clear together.)*
 
 | Ref | Value | Why |
 |---|---|---|
-| **R1, R3** | 10 kΩ 1 % | |
-| **R2, R4** | **40.2 kΩ 1 %** | Nearest E96 to 40 k. Gain 4.02, so the jack reaches **±10.05 V** |
-| **V_OFF** | 2.500 V from DAC ch7, buffered | Shared by all four |
+| **R1** | 10 kΩ 1 % | To the shared reference |
+| **R2** | **30 kΩ 1 %** | Feedback. `k = 3`, gain `1 + k` = **exactly 4** |
+| **V_ref** | **3.3333 V** from DAC ch7, buffered | Shared by all four. Intercept is `k · V_ref` = 10.000 V |
 | **C-FILT-MOD** | 82 nF C0G | 1.94 kHz, jack side of the 1 kΩ |
 
-**40.2 kΩ rather than 39 kΩ.** E24's 39 k would give gain 3.90 and a jack that
+*(The four-resistor version this replaced used 40.2 kΩ against 10 kΩ, chosen
+because E24's 39 k would have given gain 3.90 and a jack that
 stops at ±9.75 V, visibly short of the specified ±10. Going slightly over costs
 nothing: an OPA2197 on ±12 V less two Schottky drops reaches ~±11.45 V, so
 ±10.05 V has 1.4 V of margin.

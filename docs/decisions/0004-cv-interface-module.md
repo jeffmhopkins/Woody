@@ -348,6 +348,14 @@ analog box — and a stray edge on CS latches a garbage word into the pitch DAC.
   "instrument absent" is a state the hardware knows about rather than one it
   stumbles into.
 
+**It needs a bench override.** ADR 0004 and the ROADMAP both promise the
+module can be brought up standalone from "any dev board with a test pattern and
+a multimeter" (E6–E12), and a dev board on a patch lead drives nothing into the
+breath pair — so the comparator reads "absent" and the buffer stays disabled,
+and the module produces no CV at all. A jumper or a solder link that forces
+`OE` low is two pads. Without it the gating locks out every module milestone
+before the instrument exists.
+
 That OE gating is the reason the power switch had to move to the module
 (ADR 0005). With a switch at the instrument end, "+12 V present on the
 umbilical" would no longer mean "instrument alive", and the gating would fail in
@@ -366,23 +374,31 @@ the breath receiver's own resting behaviour:
 
 | State | At the in-amp |
 |---|---|
-| Cable unplugged | R4/R5 pull both inputs to module `AGND` → output sits **at 0 V** |
-| Instrument alive | Sensor's designed +0.2 V zero-pressure floor → output sits **at −437 mV** |
+**Sense the `BREATH` conductor against `AGND` at the module end**, through the
+10 kΩ protection resistors already there — *ahead* of the in-amp's `REF` trim:
 
-**One comparator against a fixed threshold — say −200 mV — reports all of it at
+| State | At that node |
+|---|---|
+| Cable unplugged | The 1 MΩ bias pair holds it at **0 V** |
+| Instrument alive | The sensor's designed zero-pressure floor puts it at **+0.2 V** |
+
+**One comparator against a fixed threshold — say +100 mV — reports all of it at
 once**: cable connected, +12 V actually reaching the far end, REF5050 alive,
 sensor alive, buffer alive, and both analog conductors intact. Nothing else in
-the design reports any of those, and nothing extra is needed to get them.
+the design reports any of those.
 
-**Fixed is the operative word, and it only became true recently.** While the
-in-amp's `REF` pin was driven by a firmware ambient-zero, both rows of that
-table moved with it — the comparator would have been chasing a threshold that
-the auto-zero was walking, and a slow drift could have tripped it. Grounding
-`REF` (ADR 0003) turns the detect into a comparison against a rail.
+**Sense ahead of the trim, not after it.** An earlier revision watched the
+in-amp's *output*, which rested at −437 mV while `REF` was grounded. Adding the
+commissioning trimmer (ADR 0003) nulls that pedestal by design — so both states
+moved to 0 V and the detect stopped working. Taking it from the conductor
+instead is immune to anything done downstream, and the threshold is positive,
+which also removes the negative reference the output-sensing version needed.
 
-So: an LM393 half, open-collector, pulled to the bus +5 V rail, driving all four
-`OE` pins. Hysteresis from a three-resistor network; the second half of the
-package is spare. The +12 V divider that used to do this job is deleted rather
+So: an **LM311**, open-collector, running on ±12 V with its emitter at ground,
+collector pulled to the buffer's own bus +5 V rail, driving all four `OE` pins,
+with 1 MΩ of hysteresis. **Not an LM393**, which cannot see an input below its
+own V− and whose output emitter is internally tied to V−, so on a split supply
+it would pull the `OE` pins to −12 V. The +12 V divider that used to do this job is deleted rather
 than kept alongside — it answers "is my own switch on", which the panel LED
 already answers.
 

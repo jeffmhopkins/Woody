@@ -136,25 +136,77 @@ the bench. A clocked line that picks up an 800 kHz LED edge gives you a wrong
 note, intermittently, inside a body that never opens again — and it cannot be
 filtered, because filtering a clock is what breaks it.
 
-**The arithmetic, which is decisive.** A 12 V LED edge through ~15 pF of loom
-coupling injects roughly 180 pC. On a switch line that charge lands in
-`C-KEY`:
+**The arithmetic this section used to give was wrong three ways, and it is
+worth correcting rather than quietly deleting**, because a decision was taken
+on it.
 
-```
-ΔV = 180 pC / 10 nF = 18 mV        — nothing
-ΔV = 180 pC / ~40 pF of bare wire  = 4.5 V   — a false key press
-```
+It said: a 12 V LED edge through ~15 pF injects ~180 pC, which is 18 mV into
+`C-KEY` but **4.5 V into a bare wire — a false key press**. Every step of that
+is wrong:
 
-The capacitor is doing all the work, and it is only available because the line
-is DC. Everything that made the clocked version dangerous — termination on a
-multidrop line, chain ordering, the asynchronous `SH/LD` glitch that reloads
-all four registers mid-shift — **stops existing** when the chain never leaves
-the board.
+- **There is no 12 V edge.** The WS2815 rail is held up by 470–1000 µF and its
+  LED current is PWM'd at ~2 kHz (ADR 0014). The fast aggressor is the **data
+  line, at 5 V** from the 74AHCT125.
+- **`Q/C` is the wrong model.** Capacitive coupling is a *divider*:
+  `ΔV = V_agg · C_c/(C_c + C_v)`. It agrees with `Q/C` when `C_v ≫ C_c`, which
+  is why the 18 mV figure survived, and diverges badly when it does not.
+- **So a passive divider cannot exceed the aggressor's own swing.** The
+  published 4.5 V was 37 % above the ceiling of its own mechanism.
 
-What it costs is physical: **about 23 conductors have to fit down a side
-channel described as "narrow, but continuous end to end"** (ADR 0009), as four
-ribbons, one per cluster, thinning as they drop off. That has not been checked
-against the real geometry and is an **M4 CAD item**, not an assumption.
+Corrected:
+
+| Aggressor | Into `C-KEY` 10 nF | Into ~40 pF of bare wire |
+|---|---|---|
+| 5 V data line (real) | 7 mV | **1.36 V** |
+| 12 V rail (hypothetical) | 18 mV | 3.27 V |
+
+A line idling at 3.3 V kicked down by 1.36 V lands at **1.94 V, well above the
+0.8 V input-low threshold**. On these numbers capacitive coupling does not
+produce a false press *even on an unfiltered wire*, and a balanced pulse train
+injects no net charge, so it cannot hold one low either.
+
+**What actually survives as an argument for the tail** is narrower and was
+never stated:
+
+- **Sampling aperture.** A parallel input is sampled for a few nanoseconds once
+  per 250 µs scan. A clock or latch line is sensitive to a glitch **100 % of
+  the time**, and a glitch on `SH/LD` reloads all four registers mid-shift and
+  corrupts the whole 32-bit word rather than one bit.
+- **Blast radius.** A disturbed switch line is one wrong note. A disturbed
+  clock is every key at once.
+
+Those are real, and the second is the one ADR 0001 already calls a top-two
+risk. They are a good deal weaker than "4.5 V versus 18 mV", and the honest
+position is that this is a **judgement about failure modes, not a calculation
+that settles it** — see "What this cost" below.
+
+### What this cost, stated honestly
+
+Three objections survive review and are not answered:
+
+- **It is 32–44 conductors, not 23.** With a ground every four signals and the
+  two spare conductors ADR 0009 mandates, 32 at 1.27 mm pitch is ~41 mm of
+  ribbon width; with this ADR's own "ground return per signal" rule it is 44
+  and ~56 mm — wider than the instrument. It probably still fits folded, in
+  both side channels, but it forces the key ribbons to share channels with the
+  LED runs, which was otherwise a free mitigation. **M4 CAD item.**
+- **Hand joints go from about 4 to about 46**, on a strap-worn instrument, in a
+  body that never reopens. That is the opposite of the usual reliability trade.
+- **"One board versus five" was a false dichotomy.** The switches need a
+  stiffener PCB either way (ADR 0002), so the real comparison is five boards
+  against five boards, four of which would also carry a SOIC-16. The marginal
+  cost of the per-cluster option is one chip per board, not four boards.
+
+**And the per-cluster option was compared against a strawman.** Its hazards —
+reflections, termination, hold margin — are properties of the fast-edged
+74LVC165. This ADR already says **74HC165 "would have been the lower-risk
+choice"** and is a drop-in on the same footprint; with HC edges, 265 mm is a
+lumped load rather than a transmission line and those hazards largely vanish.
+
+The decision stands, but on the failure-mode argument above rather than on the
+arithmetic, and with the objections recorded rather than argued away. If E4
+shows the loom is awkward, per-cluster HC165 is the fallback and it is cheap to
+take.
 
 ### Key-line signal integrity
 
@@ -176,7 +228,7 @@ false level, straight into an asymmetric debounce that fires on the *first*
 closed sample. Three reviewers found this independently and it is unretrofittable.
 
 **Per switch position: 10 kΩ to 3V3, 100 Ω in series, 10 nF to ground**, on the
-cluster board. Press stays instant at ~1 µs; release gains a free ~93 µs
+carrier, at the register inputs. Press stays instant at ~1 µs; release gains a free ~93 µs
 hardware filter; LED coupling drops about 54 dB. Twenty-one sets, so the three
 reserved spare-switch bits are covered too. (`R-KEY-PU`, `R-KEY-SER`, `C-KEY`.)
 

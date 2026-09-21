@@ -367,8 +367,8 @@ and drift specifications**, where the INA134 is an audio part characterised for
 AC feeding what is here a DC-accurate output.
 
 *(A third benefit used to be listed here — the `REF` pin as an injection point
-for a firmware ambient-zero. That mechanism is deleted; `REF` ties to module
-analog ground. It must tie **hard**, or to a buffer: source impedance on an
+for a firmware ambient-zero. That mechanism is deleted; `REF` carries a
+**commissioning trimmer**, buffered, derived from the LM317's 5.21 V rail. It must tie **hard**, or to a buffer: source impedance on an
 in-amp's `REF` pin adds directly to its internal network and degrades CMRR
 one-for-one, so a divider there would have been the same class of mistake as a
 single-ended capacitor on one input leg.)*
@@ -571,8 +571,16 @@ authority can measure the thing it corrects.
 
 Firmware seeds the digital zero from an ADC capture at power-on, exactly as the
 2021 code did, and then keeps tracking it (ADR 0006). The analog path is not
-touched by firmware at all: the in-amp's `REF` pin ties to module analog ground
-and stays there.
+touched by firmware at all: the in-amp's `REF` pin carries a trimmer set once at
+commissioning, and the panel OFFSET knob is the performance control
+(`hardware/module/breath-receive-stage.md`).
+
+**That trimmer is referenced to the LM317's 5.21 V rail, deliberately, and not
+to the DAC's `VREFOUT`.** `VREFOUT` is the DAC8568's internal reference, which
+is *disabled at power-on until firmware writes an enable* — deriving the breath
+zero from it would make the analog breath path depend on a DAC register, which
+is exactly what this section says it does not. The LM317 rail is up whenever
++12 V is.
 
 **An earlier revision drove `REF` from DAC channel 6** and called it "digital
 control of an analog signal path, for the cost of one already-paid-for channel."

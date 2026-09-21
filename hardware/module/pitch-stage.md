@@ -126,13 +126,12 @@ converts the worse error into the better one, for free.
 | Ref | Value | Job |
 |---|---|---|
 | **R1, R2** | 10 kΩ, **1:1 matched** (LT5400) | Sets gain = 2 and the −2.5 V intercept together |
-| **V_ref** | 2.500 V, buffered `VREFOUT` | Shared with nothing else; one op-amp half |
-| **TRIM-GAIN** | 1 kΩ multiturn cermet, **in series** with R2 | **0 → +5 % of ratio, one-sided** — a series trimmer can only add. That is the right direction for the load divider, which only ever reduces gain, but it is not ±5 % and an earlier revision said it was |
-| **TRIM-OFFSET** | 10 kΩ multiturn cermet across `VREFOUT` | Wiper through `R-OFFINJ`. **See the caveat below — this is not yet a clean trim** |
-| **R-OFFINJ** | 470 kΩ 1 % | **Value and topology are wrong as drawn**, see below |
+| **V_ref** | 2.500 V, trimmed then buffered from `VREFOUT` | One op-amp half. `TRIM-OFFSET` sits **ahead** of the buffer |
+| **TRIM-GAIN** | **200 Ω** multiturn cermet, **in series** with R2 | **0 → +2 % of ratio, one-sided** — a series trimmer can only add, which is the right direction. 200 Ω rather than 1 kΩ so its tempco contributes ~2 ppm/°C, comparable to the LT5400 rather than several times it |
+| **TRIM-OFFSET** | 10 kΩ multiturn cermet + range resistors | **Before** the buffer, so it scales `V_ref` and therefore the intercept alone. `R-OFFINJ` is deleted |
 | **R-OPAMP-IN** | 1 kΩ 1 % | Clamp-current protection on the (+) input. No gain error |
-| **R-OUT-PROT** | 1 kΩ 1 % | Short protection. A load divider the gain trim absorbs (ADR 0006) |
-| **C-FILT-PITCH** | 10 nF C0G | 15.9 kHz, **jack side** of the 1 kΩ |
+| **R-OUT-PROT** | 1 kΩ 1 %, **1206 ≥250 mW** | Short protection, **inside the DC feedback loop** |
+| **C-FB-PITCH** | **1 nF C0G** | 15.9 kHz, **across the feedback resistor** — reconstruction pole and compensation in one part. `C-FILT-PITCH` is deleted |
 
 **Headroom.** Full DAC scale 0 → 5.000 V maps to −2.500 → +7.500 V, which is
 the ±600 cents of firmware reserve ADR 0006 describes. An OPA2197 on ±12 V

@@ -102,10 +102,18 @@ keys:
 #
 # This replaces one-register-per-cluster. ADR 0001 and ADR 0013 specified
 # opposite looms and the BOM carried rows for both; the loom is hand-built once
-# into a body that is bonded shut, so it could not stay open. The deciding
-# arithmetic: a 12V LED edge through ~15pF of coupling injects ~180pC, which is
-# 18mV into C-KEY's 10nF and 4.5V into a bare wire. The capacitor does the work
-# and it is only available because the line is DC.
+# into a body that is bonded shut, so it could not stay open.
+#
+# The coupling arithmetic originally given here was WRONG - see ADR 0001. A
+# capacitive divider cannot exceed the aggressor's swing, and the aggressor is
+# the 5V data line, not the 12V rail. What actually decides it is blast radius:
+# a disturbed switch line is one wrong note, a disturbed clock or latch is all
+# 32 bits at once, and a parallel input is only sensitive for nanoseconds per
+# scan where a clock is sensitive always.
+#
+# ONE SENTINEL CONDUCTOR PER RIBBON, grounded at the cluster end and returned
+# to a spare chain bit: without it the marker pattern cannot see the loom at
+# all, because the marker bits are now board-local tie-offs.
 #
 # CHAIN ORDER IS NOW A PCB LAYOUT DETAIL, not a loom decision - four devices,
 # millimetre traces. The order below is kept because firmware needs the bit map,

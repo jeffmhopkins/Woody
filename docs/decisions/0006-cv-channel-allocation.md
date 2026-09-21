@@ -140,8 +140,16 @@ zero scale; B and D reset to midscale.
 Vout = 4 × (Vdac − Voffset) = 4 × (0 − 0) = 0 V
 ```
 
-So specify an **A or C grade** part — zero-scale reset — and the power-on state
-is the best available on every channel at once:
+So specify a **C grade** part — zero-scale reset — and the power-on state is
+the best available on every channel at once:
+
+**Not "A or C", which this line used to say.** The grade letter selects the
+**reference gain** as well as the reset state: A/B are gain 1 (2.500 V full
+scale) and C/D are gain 2 (5.000 V). An A-grade part halves every output —
+pitch becomes −2…+2.25 V, the mods ±5 V, and channel 7 cannot reach its
+reference voltage at all. Only C satisfies both requirements. `bom.csv` is
+locked to `DAC8568CIPW`; **confirm the gain/grade mapping against SBAS430**,
+which no browser in this sandbox could reach.
 
 | Output | At rack power-on, before firmware writes | Why that is right |
 |---|---|---|
