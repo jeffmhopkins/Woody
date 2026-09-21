@@ -191,3 +191,45 @@ a board with no soldermask and a green build.
 **And the plan verifies the wrong object.** Every check in stage 7 reads
 `module.kicad_pcb`. Nothing ever opens a file from the zip, so the entire
 export stage sits downstream of every assertion.
+
+## P11 — the plan hand-routes the robust nets and autoroutes the fragile ones
+
+**Claim:** the `Analog` class is `BREATH` plus the pitch and mod *outputs* —
+every one of which already has 1 kΩ of series isolation and a shunt cap at the
+jack. Meanwhile `VREFOUT`, `V_ref`, the three trimmer wipers and the mods'
+shared 3.3333 V reference are in **no class**, so they fall to `Default` and
+go to Freerouting. On `V_ref`, **1 mV = 1.2 cents**.
+
+**Re-checked, 2026-09-21. CONFIRMED, with one small correction to P11.**
+
+The plan's table (`pcb-pipeline.md:177-181`) is exactly as quoted. The
+references and trimmer wipers appear in no class. The sensitivity is trivially
+right — 1 V/octave means 1200 cents per volt, so 1 mV is 1.2 cents — and
+`pitch-stage.md:112` states the same figure independently: *"Offset, 1 mV |
+1.2 cents"*.
+
+That is **equal to or larger than every candidate** in `figures.yaml`'s
+`pitch-cents-budget` dispute. The plan protects the outputs, which are
+buffered, and leaves the references, which are not.
+
+**P11 is wrong on one detail:** it lists `AVDD` among the unclassed nets.
+`AVDD` *is* in the `Power` class. Recorded so the correction does not get lost
+— the finding stands without it.
+
+## P10 and P11 converge independently on the `AGND` naming defect
+
+Both agents, cold to each other, found that **`AGND` names two different
+nets** — the umbilical sense conductor and the module analog return. P11 adds
+the sharper consequence:
+
+> the plan's own check, "`AGND`, `PWR_GND`, `DIG_GND` still distinct", cannot
+> catch the merge that matters, **because both at-risk nets are called
+> `AGND`**.
+
+And worse, that `verify.py`'s "`AGND` tied exactly once" asserts a property
+ADR 0004:630 says `AGND` does **not** have — so an implementer following the
+plan literally would *create* the tie the rule exists to prevent.
+
+Agreement between agents that cannot see each other is the evidence standard
+this project uses. Two independent confirmations makes this the wave's
+highest-confidence finding.
