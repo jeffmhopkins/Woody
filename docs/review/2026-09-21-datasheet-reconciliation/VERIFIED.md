@@ -52,6 +52,42 @@ thresholds. That is CLAUDE.md §4 happening **inside the commit that was about
 §4** — the fourth recorded instance — and the stale line was the one that was
 right.
 
+## Where the lead was wrong, caught on the same day
+
+**I filed a refuted inference as confirmed, in `bom.csv`'s `U-TVS-SPI` row.**
+While resolving the rebase conflict against `main`, I merged the other
+session's ESD7104 observation — that the ESD7104 specifies pulse ratings only
+and no steady-state dissipation, *"which suggests the reviewer's 0.98W
+sustained-fault figure may be outside what this whole class of array is
+specified for"*, explicitly flagged there as an inference needing confirmation
+against the SP0504BAHT itself — and wrote **"It is confirmed."**
+
+**It is refuted.** The two documents are mirror images:
+
+| | steady-state `P_D` | pulse rating |
+|---|---|---|
+| onsemi ESD7104 | **none stated** | 8/20 µs, IEC 61000-4-2 |
+| Littelfuse SP0504BAHT | **0.225 W** (Abs Max p.2; `PD@70°C .225W` p.7) | **none at all** |
+
+The sentence I wrote contradicted itself inside one clause — *"specifies no
+steady-state or pulse power either — only the 0.225 W package limit"* — because
+the 0.225 W **is** the steady-state specification. The `.manifest-R7.csv` row
+and the table above both had it right; only the merged prose was wrong, and the
+prose is what a reader of `bom.csv` sees.
+
+**What it does to the conclusion: strengthens it.** A sustained-fault rating is
+*not* outside what this part is specified for — it is 0.225 W, a published hard
+ceiling, and the prior review's 0.98 W is refuted by a real sourced number
+4.4× lower rather than by an absence. The fix stays a series resistor or a
+resettable element, not a bigger array.
+
+**Two things worth keeping from this.** It is the failure CLAUDE.md names as
+the worse one — *"a wrong finding gets caught by the next reviewer while a
+finding filed as handled does not"* — and it happened at a **merge**, where two
+correct records were combined into a wrong one. And the correct version was
+already sitting in the manifest row two files away. **A merge is a place to
+re-read the evidence, not just to reconcile two texts.**
+
 ## Where an agent overreached, and was corrected
 
 **`MECH` reported the panel-thickness hedge as simply "wrong".** The Product
