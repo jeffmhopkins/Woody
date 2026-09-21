@@ -241,6 +241,118 @@ def emit(lines, detail_only=False):
 REPORT_LINES = []
 
 
+def load_circuits():
+    """Every circuit.yaml in the tree, keyed by its declared id."""
+    out = {}
+    for dirpath, _, names in os.walk(os.path.join(ROOT, "hardware")):
+        if "circuit.yaml" not in names:
+            continue
+        rel = os.path.relpath(os.path.join(dirpath, "circuit.yaml"), ROOT)
+        try:
+            data = yaml.safe_load(open(os.path.join(ROOT, rel), encoding="utf-8"))
+        except Exception as e:
+            out[rel] = {"_broken": str(e), "_path": rel}
+            continue
+        data = data or {}
+        data["_path"] = rel
+        out[data.get("id", rel)] = data
+    return out
+
+
+def check_circuits(circuits, spec, bom_refs):
+    """Declared dependency edges must resolve. D3's design, zero-false-positive half.
+
+    D3's central measurement is why this checks DECLARED edges only: an
+    INFERRED dependency edge has an unusable noise floor - run raw,
+    check_refdes yields 36 hits of which ~14 are not reference designators at
+    all - and a check that cries wolf gets ignored or deleted. That is exactly
+    what happened to check_refdes, which sat unwired for the tool's whole life.
+
+    So nothing here guesses. Every edge was written down by someone, and the
+    only question asked is whether the thing it names still exists.
+    """
+    problems = []
+    fig_ids = {f["id"] for f in spec["figures"]}
+    provided = set()
+    for c in circuits.values():
+        for p in c.get("provides") or []:
+            provided.add(p)
+
+    for cid, c in sorted(circuits.items()):
+        path = c.get("_path", cid)
+        if "_broken" in c:
+            problems.append(f"{path}: will not parse - {c['_broken'][:80]}")
+            continue
+        # id must match the directory it sits in, or `owner:` and
+        # `depends_on:` point at a name the tree does not have.
+        want = os.path.dirname(path).replace("hardware/", "", 1)
+        if c.get("id") != want:
+            problems.append(f"{path}: id is {c.get('id')!r}, directory says "
+                            f"{want!r}")
+        for dep in c.get("depends_on") or []:
+            if ":" not in str(dep):
+                problems.append(f"{path}: depends_on {dep!r} has no type "
+                                f"prefix (adr:/circuit:/fig:/refdes:/node:)")
+                continue
+            kind, name = str(dep).split(":", 1)
+            if kind == "fig" and name not in fig_ids:
+                problems.append(f"{path}: depends_on fig:{name} - no such "
+                                f"figure in config/figures.yaml")
+            elif kind == "circuit" and name not in circuits:
+                problems.append(f"{path}: depends_on circuit:{name} - no "
+                                f"circuit declares that id")
+            elif kind == "refdes" and name not in bom_refs:
+                problems.append(f"{path}: depends_on refdes:{name} - no BOM "
+                                f"row. Deleted with the part it belonged to?")
+            elif kind == "adr":
+                hits = glob_adr(name)
+                if not hits:
+                    problems.append(f"{path}: depends_on adr:{name} - no such ADR")
+            elif kind == "node" and name not in provided:
+                problems.append(f"{path}: depends_on node:{name} - no circuit "
+                                f"provides it")
+    return problems
+
+
+def glob_adr(num):
+    import glob as _g
+    return _g.glob(os.path.join(ROOT, "docs/decisions", f"{num}-*.md"))
+
+
+def check_verified_against(circuits):
+    """A cited datasheet SHA must still match the manifest.
+
+    Catches a re-bank: someone replaces a PDF with a newer revision, the
+    manifest's hash moves, and every figure read off the old revision is now
+    resting on a document nobody has read.
+    """
+    manifest = os.path.join(ROOT, "datasheets/MANIFEST.csv")
+    if not os.path.exists(manifest):
+        return []
+    have = {}
+    for r in csv.DictReader(open(manifest, newline="", encoding="utf-8")):
+        if r.get("sha256"):
+            have[r["sha256"].strip()] = r.get("part", "")
+    problems = []
+    for cid, c in sorted(circuits.items()):
+        for v in c.get("verified_against") or []:
+            sha = str(v.get("sha256", "")).strip()
+            part = v.get("part", "?")
+            if sha == "BLOCKED":
+                # An honest gap, and it must say what decides it - the same
+                # rule CLAUDE.md applies to a TBD.
+                if not v.get("blocked_on"):
+                    problems.append(f"{c['_path']}: verified_against {part} is "
+                                    f"BLOCKED with no blocked_on: saying what "
+                                    f"decides it")
+                continue
+            if sha and sha not in have:
+                problems.append(f"{c['_path']}: verified_against {part} cites "
+                                f"sha256 {sha[:12]}... which is in no manifest "
+                                f"row - was the document re-banked?")
+    return problems
+
+
 def check_sections(files):
     """A cross-file `page.md §N` reference must find a §N heading in that page.
 
@@ -413,11 +525,20 @@ def main():
     link_problems = check_links(files)
     owner_problems = check_owners(spec)
     section_problems = check_sections(files)
+    circuits = load_circuits()
+    circuit_problems = (check_circuits(circuits, spec, bom_refs)
+                        + check_verified_against(circuits))
 
     emit([f"corpus: {len(files)} files | bom.csv: {nrows} rows x {ncols} cols | "
           f"figures tracked: {len(spec['figures'])}", ""], detail_only=True)
 
     fail = False
+
+    if circuit_problems:
+        fail = True
+        emit([f"CIRCUIT DEPENDENCIES ({len(circuit_problems)})",
+              "  A declared edge naming something that is not there.", ""]
+             + ["  " + p for p in circuit_problems] + [""], detail_only=True)
 
     if section_problems:
         fail = True
@@ -506,12 +627,13 @@ def main():
     n_unres = len(unresolved)
     if fail:
         print(f"FAIL {len(shape_problems)} shape + {len(owner_problems)} owners + {len(link_problems)} links "
-              f"+ {len(section_problems)} sections "
+              f"+ {len(section_problems)} sections + {len(circuit_problems)} deps "
               f"+ {len(live)} stale + {len(bom_problems)} bom "
               f"| corpus {len(files)} files | {n_unres} unresolved (tracked) "
               f"| detail: .staleness/report.txt or --detail")
     else:
-        print(f"PASS no live stale values | corpus {len(files)} files | "
+        print(f"PASS no live stale values | corpus {len(files)} files, "
+              f"{len(circuits)} circuits | "
               f"{n_unres} unresolved (tracked)")
     return 1 if fail else 0
 
