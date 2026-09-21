@@ -59,7 +59,7 @@ Everything above as far as the sensor output — **~2.17 ms** — then:
 | Sampling period | **0–250 µs** | At a 4 kHz loop, a change waits up to one period to be seen. Mean 125 µs |
 | SAR ADC conversion | 50–200 µs | SAR, not delta-sigma — see below |
 | SPI to MCU + firmware | < 20 µs | |
-| SPI to DAC over umbilical | ~112 µs | Seven 32-bit words at 2 MHz. The loop refreshes all of them every pass (`firmware/README.md`), so the whole burst is the latency, not one word |
+| SPI to DAC over umbilical | ~96 µs | Six 32-bit words at 2 MHz. The loop refreshes all of them every pass (`firmware/README.md`), so the whole burst is the latency, not one word |
 | DAC settling | ~10 µs | |
 | Reconstruction filter | ~82 µs | Mod channels, 1.94 kHz. Pitch is 15.9 kHz and costs ~10 µs |
 | **Total** | **~2.9–3.1 ms + restrictor** | |
@@ -143,15 +143,16 @@ a hypothesis; a budget made of measurements is a constraint.
    thresholds, note gating, mod routing and MIDI, not for the breath jack.
 
    **The 8 kHz end of the old "4–8 kHz" range does not close.** Serialised, one
-   pass costs ADC 24 µs + key chain 16 µs + **seven** DAC channels at 2 MHz
-   112 µs = **152 µs**, against a 125 µs period at 8 kHz. At 4 kHz it is 152 µs
-   of 250 µs — 61 % duty, with room for the loop to do work. Three documents
-   used to disagree about this; 4 kHz is the number.
+   pass costs ADC 24 µs + key chain 16 µs + six DAC channels at 2 MHz 96 µs =
+   **136 µs**, against a 125 µs period at 8 kHz. At 4 kHz it is 136 µs of
+   250 µs — 54 % duty, with room for the loop to do work. Three documents used
+   to disagree about this; 4 kHz is the number.
 
-   Seven channels, not six: the loop refreshes the mod offset and the breath
-   ambient zero every pass rather than writing them once
-   (`firmware/README.md`). The old table booked six while writing five, which
-   is how the seventh fits inside a budget that was already paid.
+   Six channels means *all* the populated ones: the loop refreshes the mod
+   offset every pass rather than writing it once (`firmware/README.md`). The
+   old table booked six while writing five, which is how the refresh fits
+   inside a budget that was already paid. The breath ambient-zero channel that
+   briefly made it seven is deleted (ADR 0003).
 2. **SAR ADC, never delta-sigma.** A delta-sigma's decimation filter has real
    group delay — potentially milliseconds — which would consume the entire
    budget on its own.

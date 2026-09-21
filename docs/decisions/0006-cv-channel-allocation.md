@@ -11,15 +11,23 @@
 | **Pitch** | DAC ch 1 | −2 to +7V, 1V/oct | none | Calibrated |
 | **Breath** | **analog, differential over the umbilical** | 0–10V | gain + offset knobs | Trimmed |
 | **Mod 1–4** | DAC ch 2–5 | **−10…+10V** | none — configured on the instrument | Trimmed |
-| *(internal)* | DAC ch 6 | — | — | Breath ambient-zero offset (ADR 0003) |
+| *(internal)* | DAC ch 6 | — | — | **Spare** — was the breath ambient-zero |
 | *(internal)* | DAC ch 7 | — | — | Shared 2.5 V offset for mod 1–4 |
 
 Six jacks on the panel as before, but only five of them come from the DAC.
 **Breath never enters the digital path on its way out** — it is the one channel
 where output steps reach the ear, so it stays analog end to end (ADR 0003).
-Two further DAC channels drive offsets rather than jacks: the firmware-controlled
-ambient zero for the breath stage, and the shared 2.5 V reference point the mod
-channels subtract from. Seven of eight channels used, one spare.
+One further DAC channel drives an offset rather than a jack: the shared 2.5 V
+reference point the mod channels subtract from. **Six of eight channels used,
+two spare.**
+
+**Channel 6 was freed deliberately.** It drove a firmware ambient-zero into the
+breath in-amp's `REF` pin, and firmware reads breath *before* the umbilical
+while that injection happens *after* it — so it was correcting a signal it could
+not measure. The analog path's zero authority is now the panel offset knob,
+which can see the jack; firmware's zero authority is its own ADC copy, which it
+can also see. One authority per representation (ADR 0003). Nothing claims the
+freed channel; leaving it unclaimed is the point.
 
 Use an **octal** 16-bit DAC (DAC8568 or AD5676) and populate six. Eight-channel
 parts cost barely more than quads and occupy the same board area; there is no
@@ -86,8 +94,9 @@ Three things make this cheap rather than awkward:
   from the internal reference. Both routes track the same reference — the gain
   is a resistor ratio and does not involve the reference at all — so the drift
   argument is a wash, and the DAC channel wins on the power-on state below. One
-  buffered channel serves all four mod channels, the same arrangement already
-  used for the breath ambient-zero into the in-amp's REF pin.
+  buffered channel serves all four mod channels. (This is now the *only*
+  offset driven from a DAC channel; the breath ambient-zero that used to share
+  the pattern is deleted.)
 - **Headroom is ample.** ±12 V rails less ~0.35 V of Schottky leaves ±11.65 V,
   and an OPA2197 reaches ~±11.45 V — 1.45 V of margin at ±10 V.
 
@@ -172,7 +181,7 @@ because a slow one is an audible glide on every note; these are different
 channels with different needs, which is the same argument that made them
 dedicated rather than generic in the first place.
 
-### Ambient zero is continuous, not startup-only
+### Ambient zero is continuous, not startup-only — on the digital copy
 
 The breath sensor is a gauge part with a temperature-dependent offset, sitting
 inside a sealed oak-and-acrylic body — both insulators — warmed by breath, by
@@ -180,12 +189,17 @@ the LEDs and by its own electronics. The interior rises on the order of 10–20 
 over the first 10–20 minutes of a session, and the aluminium plate is the only
 real heat path out of it, partly covered by the player's hands.
 
-**A zero captured once at startup is wrong by the time the first piece ends.**
+**A zero captured once at startup is wrong by the time the first piece ends** —
+for the *digital* copy, which is what this section is about. The analog CV at
+the jack is a separate representation with a separate authority (the panel
+offset knob), and its drift is ~23 mV in 10 V over a full warm-up: a quarter
+turn, once, if it bothers you at all. See ADR 0003.
 
-The mechanism already exists: DAC channel 6 drives the ambient-zero offset into
-the in-amp's REF pin. So **decay the zero toward the current reading whenever
-breath has been sub-threshold for about 2 seconds** — slow enough that it cannot
-chase a held note, fast enough to track a warming body.
+The mechanism is a subtraction in software, which needs no converter because the
+digital copy is already a number. **Seed it from an ADC capture at power-on**,
+then **decay it toward the current reading whenever breath has been
+sub-threshold for about 2 seconds** — slow enough that it cannot chase a held
+note, fast enough to track a warming body.
 
 **Sub-threshold is not enough of a condition, and an auto-zero that never
 reports is a fault-concealment machine.** Two reviewers found the same thing
@@ -210,6 +224,12 @@ stand does not.
 allowed to move silently. A running total, visible on the display and in the
 web app, turns all three concealed failures into a number that walks — which is
 the diagnostic the design otherwise does not have.
+
+It is also now an *honest* diagnostic, which it was not before. While the same
+correction was being driven into the analog path, a walking number meant either
+a real fault or an accumulating error between two representations nobody could
+compare. Applied only to the copy firmware actually measures, it can only mean
+the first.
 
 A 96 kHz breath channel was specified before the output went analog, which
 implied sub-10 µs DAC settling and ~6.8 MHz on the umbilical. **Both

@@ -59,9 +59,15 @@ that firmware writes once: the internal-reference enable, and the clear-code
 register itself.
 
 The fix costs nothing. **The latency budget already books six DAC words per
-pass while five are written**, so the seventh channel fits inside a budget that
+pass while five are written**, so the sixth channel fits inside a budget that
 was already paid — and refreshing the reference-enable and clear-code registers
 periodically costs a word every few thousand passes.
+
+**Breath is outside all of this.** It never passes through the DAC, and since
+the in-amp's `REF` pin is grounded rather than driven by a firmware zero
+(ADR 0003), no DAC register touches the breath jack at all. Firmware's breath
+zero is a subtraction applied to its own ADC copy — the representation it can
+actually measure — and never leaves the instrument.
 
 ## The instrument must stay recoverable
 

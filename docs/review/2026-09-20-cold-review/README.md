@@ -591,7 +591,7 @@ raised it** — which is V4's method, and the thing that stopped duplicate
 | **DAC AVDD** | LM317 divider → 150 Ω / 475 Ω 0.1 %, value selected on the bench at E7. The "full scale *is* the supply" premise corrected: it is headroom, not accuracy | S5 |
 | **Breath receive stage** | `hardware/module/breath-receive-stage.md` — inputs swapped, R4/R5 bias return, R_G = 42.2 kΩ, filter ahead of the in-amp | S2, S3, M3 |
 | **Breath ADC branch** | `C-AA-ADC` 220 nF → 47 nF (121 Hz → 564 Hz) | W1 |
-| **Breath auto-zero** | Gated on sub-threshold **and quiet**; accumulated correction logged | W11 |
+| **Breath auto-zero** | Gated on sub-threshold **and quiet**; accumulated correction logged. Then **scoped to the digital copy only** — the DAC injection at `REF` is deleted and `REF` ties to ground | W11, W12 |
 | **Breath pneumatics** | Helmholtz model replaced with a distributed pipe at 214–429 Hz; restrictor restated as damping; bore specified; E2 rewritten | W7 |
 | **Pitch offset reference** | Bare ±12 V divider → buffered `VREFOUT`, which also makes the offset track the DAC's own scale | W3 |
 | **Pitch calibration model** | Per-load presets store an affine `(gain, offset)`, not a scale factor | W2 |
@@ -613,8 +613,8 @@ raised it** — which is V4's method, and the thing that stopped duplicate
 
 | | Why it is still open |
 |---|---|
-| **W12 — the zero correction is open-loop across two representations** | Recorded in the schematic's *Still open*. Needs either a readback or an accepted two-point calibration; both are E10 decisions, not edits |
-| **W13 — nothing mutes breath when the watchdog fires** | Accepted risk pending E10. An analog path cannot latch at a level the player is not producing — it follows the sensor, and the sensor follows the room |
+| ~~**W12 — the zero correction is open-loop**~~ | **Closed.** Not by adding a readback but by deleting the correction: one zero authority per representation, each able to measure what it corrects. The panel offset knob owns the jack, firmware owns its own ADC copy, DAC channel 6 is free |
+| **W13 — nothing mutes breath when the watchdog fires** | Accepted risk pending E10, and smaller than it was: with `REF` grounded, `CLR` no longer removes the breath zero on its way past. An analog path cannot latch at a level the player is not producing — it follows the sensor, and the sensor follows the room |
 | **The module's internal ground, the rack's bus ground** | 5.7–7.2 and ~4.8 cents. Layout items, and there is no module layout yet |
 | **"Every document describes a channel. None describes a note."** | The one finding no circuit review could have produced, and the only one that is not a defect. It needs its own session |
 | **Values marked `open` in the BOM** | `R-ILIM`, `R-PRECISION`'s ratio suffix, `R-PRESENCE`, the PCBs, the mechanical set. Each waits on a measurement or a layout, and each says which |

@@ -48,7 +48,7 @@ existing. Drive it from any dev board with a test pattern and a multimeter.
 | E7 | DAC raw | Commanded codes produce expected voltages on the meter, all six channels |
 | E8 | Pitch channel scaled | Raw analog gain and offset trimmed to target, linear across the span. The 5%-over kludge is deleted — trimmers go both ways (ADR 0006) |
 | E9 | **Pitch calibration** | Two-point fit stored in NVS; 1V/oct verified against a real VCO, not just a meter, loaded the way it will be played (ADR 0006) |
-| E10 | Remaining channels | Analog breath stage: differential receiver, gain/offset knobs, DAC-driven ambient zero. Four mod channels trimmed |
+| E10 | Remaining channels | Analog breath stage: in-amp receiver with `REF` grounded, gain/offset knobs. **Commission the zero with a meter on the jack, not the display** — the analog and digital representations are calibrated separately on purpose (ADR 0003). Four mod channels trimmed |
 | E11 | Umbilical link | SPI **at 2 MHz** (not the stale 0.6 MHz — see ADR 0004; the old figure came from a 2 kHz rate and does not close at 4 kHz) and the analog breath pair over the real cable at length, **on the T568B pin mapping in ADR 0004** — the mapping is reasoned, not measured. Breath output clean while display, LEDs and WiFi are exercised (ADR 0003) |
 | E12 | Module PCB + panel | 8HP panel cut, module assembled and racked. etherCON braced to the PCB — good practice at 8HP rather than the structural necessity it was at 6HP (ADR 0004) |
 | E13 | Carrier PCB | **Passive** carrier: dev boards plug in, carrier holds shift registers, ADC, buffer, level shifter, regulator, connector. No MCU, no USB, no RF on it (ADR 0013) |
@@ -132,7 +132,7 @@ not a release, and should not be filtered as though the phrase were ending.
 | ID | Milestone | Done when |
 |---|---|---|
 | F1 | Key and fingering engine | Custom fingering table driven from config, not hardcoded |
-| F2 | Breath response | Curve shaping, ambient zeroing, threshold and note gating |
+| F2 | Breath response | Curve shaping, ambient zeroing **of the digital copy** (seeded at power-on, then gated on sub-threshold AND quiet), threshold and note gating |
 | F3 | Channel output | Fixed-rate DAC loop, per-channel smoothing in software |
 | F4 | Routing matrix | Four mod channels: source, scale, offset, curve, slew |
 | F5 | **Web config app** | SoftAP, captive portal, web app served from flash. Fingering table, routing matrix, breath curves |

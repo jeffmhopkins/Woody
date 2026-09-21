@@ -51,16 +51,18 @@ analog instead (ADR 0003), the digital link carries only DAC words.
 |---|---|---|
 | Breath digital at 96 kHz + 5 channels | 3.39 Mbit/s | ~6.8 MHz |
 | ~~Breath analog, 5 channels at 2 kHz~~ | ~~0.32 Mbit/s~~ | ~~0.6 MHz~~ |
-| **Breath analog, 7 channels at 4 kHz** | **0.90 Mbit/s** | **≥1.8 MHz → specify 2 MHz** |
+| **Breath analog, 6 channels at 4 kHz** | **0.77 Mbit/s** | **≥1.5 MHz → specify 2 MHz** |
 
 **The 0.6 MHz figure was stale and it did not close.** It came from a 2 kHz mod
 rate that ADR 0006 revised to 4 kHz, and from five channels where the
-statelessness rule in `firmware/README.md` refreshes seven. Seven 32-bit words
-is 224 bits; at 0.6 MHz that is 373 µs against a 250 µs loop period. **The loop
-would simply not have completed.** Five agents found it.
+statelessness rule in `firmware/README.md` refreshes every populated one. Six
+32-bit words is 192 bits; at 0.6 MHz that is 320 µs against a 250 µs loop
+period. **The loop would simply not have completed.** Five agents found it.
 
-At 2 MHz the same seven words take 112 µs, which is 45 % of the period and
-leaves room for the MCP3202 sharing the host.
+At 2 MHz the same six words take 96 µs, which is 38 % of the period and leaves
+room for the MCP3202 sharing the host. (Seven channels were populated until the
+breath ambient-zero was deleted — ADR 0003 — which is slack, not a reason to
+drop the clock: 0.6 MHz still does not close.)
 
 **This number has a deadline.** E11 validates the real cable at the real rate
 and it is a gate before the body bonds — there is no second chance to test 2 m
@@ -364,13 +366,19 @@ the breath receiver's own resting behaviour:
 
 | State | At the in-amp |
 |---|---|
-| Cable unplugged | R4/R5 pull both inputs to module `AGND` → output sits **at `V_REF`** |
-| Instrument alive | Sensor's designed +0.2 V zero-pressure floor → output sits **~437 mV below `V_REF`** |
+| Cable unplugged | R4/R5 pull both inputs to module `AGND` → output sits **at 0 V** |
+| Instrument alive | Sensor's designed +0.2 V zero-pressure floor → output sits **at −437 mV** |
 
-**One comparator against a threshold partway between them reports all of it at
+**One comparator against a fixed threshold — say −200 mV — reports all of it at
 once**: cable connected, +12 V actually reaching the far end, REF5050 alive,
 sensor alive, buffer alive, and both analog conductors intact. Nothing else in
 the design reports any of those, and nothing extra is needed to get them.
+
+**Fixed is the operative word, and it only became true recently.** While the
+in-amp's `REF` pin was driven by a firmware ambient-zero, both rows of that
+table moved with it — the comparator would have been chasing a threshold that
+the auto-zero was walking, and a slow drift could have tripped it. Grounding
+`REF` (ADR 0003) turns the detect into a comparison against a rail.
 
 So: an LM393 half, open-collector, pulled to the bus +5 V rail, driving all four
 `OE` pins. Hysteresis from a three-resistor network; the second half of the

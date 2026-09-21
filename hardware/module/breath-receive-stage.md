@@ -50,10 +50,11 @@ and the ADR gets corrected.
                                  │              │               │
                                  │  R_G 42.2k   │◄── G = 2.185  │
                                  │              │               │
-                                 │  REF ◄───────┼── ½ OPA2197 ◄─ DAC ch6
-                                 │              │   (ambient zero, 0…+5 V)
+                                 │  REF ────────┼── AGND(module), HARD
+                                 │              │   (no divider, no DAC)
                                  └──────┬───────┘
-                                        │  Vout = −2.185·(V_BREATH − V_AGND) + V_REF
+                                        │  Vout = −2.185·(V_BREATH − V_AGND)
+                                        │       = −0.44 V at rest, −10 V at full
                                         │
                                   ┌─────▼──────────────────────┐
                                   │  INVERTING gain + offset   │
@@ -64,25 +65,40 @@ and the ADR gets corrected.
                                    [1k]─┴─[C 330nF]── BREATH jack
 ```
 
-## Why BREATH drives IN− — this is the fix, not a detail
+## `REF` ties to ground, and the polarity question dissolved twice
 
-**This one wiring choice dissolves the polarity showstopper.**
+**The original showstopper.** The MPXV4006DP sits at **+0.2 V at zero pressure
+by design** (spec range 0.152–0.378 V). An in-amp is additive at `REF`:
+`Vout = G·(V+ − V−) + V_REF`. With BREATH on IN+, nulling that pedestal needs
+`V_REF ≈ −0.43 V`, and the DAC channel proposed to drive `REF` is unipolar
+0–5 V — it can only push the floor *up*. That left 4–9 % of full scale standing
+at the jack at rest and an auto-zero with authority in one direction only.
 
-An in-amp is additive at REF: `Vout = G·(V+ − V−) + V_REF`. The MPXV4006DP sits
-at **+0.2 V at zero pressure by design** (spec range 0.152–0.378 V). With BREATH
-on IN+, nulling that pedestal needs `V_REF ≈ −0.43 V` — and DAC channel 6 is
-unipolar 0–5 V and can only push the floor *up*. The result would be 4–9 % of
-full scale standing at the jack at rest, an auto-zero with authority in only one
-direction, and the panel offset knob conscripted into a technical job.
+**The first fix was to swap the inputs.** With BREATH on IN−, a *positive* `REF`
+subtracts, which is what a unipolar DAC can produce.
 
-**With BREATH on IN−, a positive REF subtracts**, which is exactly what the
-unipolar DAC can produce. The in-amp output is then negative-going, and the
-downstream gain/offset stage — which exists anyway for the panel knobs — is made
-inverting. **Zero extra parts.**
+**Then the DAC channel was deleted entirely** — it was correcting a signal
+firmware cannot measure (ADR 0003, ADR 0006) — which removes the premise the
+swap was argued from. So the swap needs a reason of its own, and it has one:
 
-ADR 0003 states both injection points 174 lines apart: "its REF pin is the
-natural injection point" and "into the module's analog summing stage". The REF
-pin is correct, and the input swap is what makes it work.
+**`REF` now ties hard to module analog ground.** The in-amp output is
+`−2.185·(V_BREATH − V_AGND)`: −0.44 V at rest, −10 V at full breath, entirely
+within the −12 V rail. The downstream stage is **inverting**, which is the
+topology that wants a negative-going input — an inverting summer does gain and
+offset with two pots into one virtual ground, where a non-inverting stage would
+have the offset injection interact with the gain setting. One op-amp half
+instead of two, and the panel knobs behave independently, which is what
+"gain first, then offset" (ADR 0006) means physically.
+
+So the swap survives on the downstream stage's topology rather than on the DAC's
+unipolarity. Recorded explicitly because a decision whose original justification
+has been removed is exactly the kind of thing that survives by inertia.
+
+**`REF` must tie *hard*, or to a buffer — never through a divider.** Source
+impedance at an in-amp's `REF` pin adds directly to its internal resistor
+network and degrades CMRR one-for-one. It is the same class of mistake as a
+single-ended capacitor on one input leg, and it is easy to make because `REF`
+looks like an input.
 
 ## Component values
 
@@ -94,6 +110,7 @@ pin is correct, and the input swap is what makes it work.
 | **C_diff** | 15 nF C0G | 531 Hz differential pole, **ahead of the in-amp** |
 | **C_cm** | 1.5 nF C0G ×2 | Common-mode poles, deliberately 1/10 of C_diff |
 | **R_G** | 42.2 kΩ 0.1 % | INA828, `G = 1 + 50k/R_G` = **2.185** |
+| **REF** | hard to `AGND`(module) | Output reference. No DAC, no divider — see above |
 | **Output RC** | 1 kΩ + 330 nF film | ~480 Hz reconstruction at the jack |
 
 ### The gain, derived
@@ -138,7 +155,8 @@ prevent the amplifier slewing on out-of-band energy.
 
 | Finding | Resolution |
 |---|---|
-| Ambient zero has the wrong polarity | **Dissolved** — inputs swapped, downstream stage inverting |
+| Ambient zero has the wrong polarity | **Deleted** — there is no ambient-zero injection. `REF` is grounded and the panel offset knob is the analog path's only zero authority |
+| The zero correction is open-loop across two representations | **Deleted with it** — firmware now zeroes only the copy it measures |
 | No common-mode bias return | **Fixed** — R4, R5 |
 | No in-amp gain resistor | **Fixed** — R_G = 42.2 kΩ, derived above |
 | The 100 kΩ differential pulldown | **Deleted.** R4/R5 do its job without its 1–17 % attenuation, and the review could not agree which figure applied |
@@ -146,17 +164,26 @@ prevent the amplifier slewing on out-of-band energy.
 | Which in-amp | **INA828** — the E96 value lands cleanly and its lower bandwidth suits a 500 Hz channel |
 | Where the 500 Hz pole goes | Ahead of the in-amp, differential-dominant |
 
+## Commissioning
+
+With the body at room temperature and no breath at the mouthpiece, set the
+**panel offset knob** so the jack reads 0 V on a meter, then the **gain knob**
+for the span the patch wants. That is the analog path's zero, and it is the only
+one. Thermal drift afterwards is ~23 mV in 10 V over a full warm-up — a quarter
+turn if it ever bothers you.
+
+**E10 scopes the jack**, not the display. The two representations are calibrated
+separately on purpose, so a flat bar on the screen is no longer evidence about
+the output.
+
 ## Still open
 
-- **The zero correction is open-loop across two representations.** Firmware
-  reads the ADC *before* the umbilical; the zero is injected *after* it. Firmware
-  can null the digital copy perfectly while the jack sits at a standing offset.
-  Not fixable here — it needs either a readback or an acceptance that the two
-  are separately calibrated. Recorded, not solved.
-- **What the jack does when the watchdog fires.** `CLR` reaches the five DAC
-  channels; breath does not pass through the DAC. One reviewer notes the
-  severity collapses once this schematic is built, because an analog path cannot
-  latch at a level the player is not producing — it follows the sensor, and the
-  sensor follows the room. Left as an accepted risk pending E10.
-- **The downstream gain/offset stage** is drawn as a block. Its own values, and
-  whether the gain pot's wiper needs a buffer, are E10 work.
+- **What the jack does when the watchdog fires.** `CLR` reaches the DAC
+  channels; breath touches none of them — and now that `REF` is grounded, it
+  touches the breath stage in no way at all, where previously `CLR` would have
+  yanked the zero out from under it. An analog path cannot latch at a level the
+  player is not producing: it follows the sensor, and the sensor follows the
+  room. Accepted risk pending E10.
+- **The downstream gain/offset stage** is drawn as a block. Its own values, its
+  offset reference (the buffered `VREFOUT` created for pitch is the obvious
+  node), and whether the gain pot's wiper needs a buffer are E10 work.

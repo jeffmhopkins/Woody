@@ -84,9 +84,11 @@ recoverable in hardware:
 - **Curve shaping.** The previous firmware had `breath_gamma` and a `lin_to_log`
   mapping. This is the difference between a breath response that feels like an
   instrument and one that feels like a volume knob.
-- **Ambient zeroing.** The old code sampled `ambient_breath_reading` at startup
-  for good reason — sensor offset and atmospheric pressure both drift. Analog
-  alone means a trim pot adjusted by hand, forever.
+- **Ambient zeroing** — *for the digital copy*. The old code sampled
+  `ambient_breath_reading` at startup for good reason: sensor offset and
+  atmospheric pressure both drift, and note gating fires off a threshold. The
+  analog CV at the jack is zeroed separately, by the panel knob, because that is
+  the representation the knob can actually see (below).
 - **Threshold logic.** Breath crossing a threshold is what starts a note.
 - **Noise.** Filtering in software is free. Amplifying raw sensor noise across an
   entire chain to a jack is not.
@@ -359,12 +361,17 @@ series resistance, and 3.3 kΩ unmatched leaves ~24 dB of CMRR.
 make source impedance irrelevant, so protection resistors can be 10 kΩ and
 unmatched with no CMRR penalty. (Moving the buffer to a +12 V rail, below,
 removes the ≥3.3 kΩ requirement at its source as well. The two fixes attack
-opposite ends of the same conflict and neither depends on the other.) Three further benefits: it **absorbs the ~2.13×
-scaling stage** so net part count is flat or lower; its **REF pin is the natural
-injection point** for the firmware ambient-zero, driven from a low-impedance
-buffer rather than a divider; and it has **real DC offset and drift
-specifications**, where the INA134 is an audio part characterised for AC feeding
-what is here a DC-accurate output.
+opposite ends of the same conflict and neither depends on the other.) Two further benefits: it **absorbs the ~2.13×
+scaling stage** so net part count is flat or lower, and it has **real DC offset
+and drift specifications**, where the INA134 is an audio part characterised for
+AC feeding what is here a DC-accurate output.
+
+*(A third benefit used to be listed here — the `REF` pin as an injection point
+for a firmware ambient-zero. That mechanism is deleted; `REF` ties to module
+analog ground. It must tie **hard**, or to a buffer: source impedance on an
+in-amp's `REF` pin adds directly to its internal network and degrades CMRR
+one-for-one, so a divider there would have been the same class of mistake as a
+single-ended capacitor on one input leg.)*
 
 **The pulldown is deleted and replaced by a common-mode bias return.** The
 original rule — put it differentially across BREATH–AGND, never on one leg,
@@ -552,17 +559,40 @@ idiom, and the panel gain and offset knobs (ADR 0006) are exactly the Pulp
 Logic model. Shaping still applies to the digital copy driving mod channels and
 MIDI.
 
-**Ambient zeroing.** Not lost — solved with a spare DAC channel. The DAC is
-octal with channels going spare, so **one channel drives a firmware-controlled
-DC offset into the module's in-amp `REF` pin.** Firmware measures ambient at
-startup exactly as the 2021 code did, and nulls it by moving that offset. Digital
-control of an analog signal path, for the cost of one already-paid-for channel.
+**Ambient zeroing — one authority per representation.** There are two breath
+signals, not one: the **analog CV at the jack**, and the **digital copy** the
+ADC sees inside the instrument. Each gets exactly one zero authority, and each
+authority can measure the thing it corrects.
 
-*(An earlier version of this sentence said "analog summing stage" while a
-section above said "REF pin" — two mutually exclusive injection points 174 lines
-apart in the ADR that owns the decision. A review built a showstopper on one
-reading. The REF pin is correct;
-[the schematic](../../hardware/module/breath-receive-stage.md) shows how.)*
+| Representation | Zero authority | Can it see what it corrects? |
+|---|---|---|
+| **Analog CV at the jack** | The module's panel **offset knob** | Yes — the player's ear, and a meter at commissioning |
+| **Digital copy** | Firmware, from the ADC reading | Yes — that *is* the ADC reading |
+
+Firmware seeds the digital zero from an ADC capture at power-on, exactly as the
+2021 code did, and then keeps tracking it (ADR 0006). The analog path is not
+touched by firmware at all: the in-amp's `REF` pin ties to module analog ground
+and stays there.
+
+**An earlier revision drove `REF` from DAC channel 6** and called it "digital
+control of an analog signal path, for the cost of one already-paid-for channel."
+The channel was paid for; the control was not. Firmware reads the ADC *before*
+the umbilical and was injecting *after* it, so it could null its own copy
+perfectly while the jack sat at a standing offset — **correcting a signal it
+cannot measure, and reporting success about a different one.** It also put two
+offset authorities in series on the same channel, which this design calls a
+split-brain failure everywhere else (ADR 0006).
+
+What the injection was actually buying: the MPXV4006DP's offset drifts roughly
+0.5 mV/K, so a 20 K interior rise moves the jack about **23 mV out of 10 V —
+0.23 %**, well under any note-gating threshold. That is a quarter-turn of a knob
+you will probably never touch, and it was being paid for with a DAC channel, an
+op-amp half, a word in every loop pass, and an unverifiable correction.
+
+*(A further defect in the old text, kept because it is instructive: it said
+"analog summing stage" in one place and "REF pin" 174 lines away — two mutually
+exclusive injection points in the ADR that owned the decision, and a review
+built a showstopper on one of the readings. Neither is the answer now.)*
 
 ### Parts
 
@@ -628,16 +658,17 @@ made.
 and condensation rather than common-mode noise, and both of those are handled
 above.
 
-### The ambient-zero injection point, for the same reason
+### The ambient-zero injection point, which no longer exists
 
-A review finding proposed doing the zero subtraction *in the instrument*. It is
-not implementable: **the instrument has no DAC** — the ESP32-S3 dropped the
-original's DACs and ADR 0013 puts the only DAC at the module. Building it would
-have needed PWM plus an RC, or a second converter on the carrier.
+A review finding proposed doing the zero subtraction *in the instrument*, and it
+was declined on the grounds that **the instrument has no DAC** — the ESP32-S3
+dropped the original's DACs and ADR 0013 puts the only DAC at the module.
 
-It does not need building. **The zero is injected at the module, into the
-in-amp's `REF` pin, from DAC channel 6** (ADR 0006). That was already the design;
-the finding was aimed at a version of it that no longer existed.
+That reasoning was sound and the conclusion it defended has since been deleted
+anyway. **There is no ambient-zero injection at either end.** Firmware zeroes
+the digital copy, which needs no converter because it is already a number; the
+analog path is zeroed by the panel knob. The finding, the rebuttal and the
+mechanism all went away together.
 
 The claim that let the finding through is worth correcting explicitly, because
 it appears in ADR 0004: the instrument is **not** "purely digital with no analog
