@@ -344,8 +344,9 @@ The module end must sense `BREATH` against `AGND` rather than against local
 ground — that part is not optional, since sensing against local ground puts the
 shared-ground offset straight back in.
 
-**But the receiver is a true instrumentation amplifier (INA821 / INA828), not a
-difference amplifier.** A difference amp's CMRR is set by **source-impedance
+**But the receiver is a true instrumentation amplifier — settled as the
+INA828 (`hardware/module/breath-receive-stage.md`) — not a difference
+amplifier.** A difference amp's CMRR is set by **source-impedance
 balance, not by the chip**: TI's own datasheet states that a 10 Ω mismatch
 degrades the INA134 to ~74 dB, and this design's own protection resistor and
 pulldown would have left roughly **19–34 dB against the 60 dB the scheme needs.**
@@ -405,7 +406,12 @@ than a wide one.
 | | Payload | SPI clock |
 |---|---|---|
 | Breath digital at 96 kHz + 5 channels at 2 kHz | 3.39 Mbit/s | ~6.8 MHz |
-| **Breath analog, 5 channels at 2 kHz** | **0.32 Mbit/s** | **~0.6 MHz** |
+| **Breath analog, 7 channels at 4 kHz** | **0.90 Mbit/s** | **2 MHz** |
+
+*(The 0.6 MHz this table used to give came from a 2 kHz mod rate and five
+channels; ADR 0006 moved to 4 kHz and the loop refreshes seven. It did not
+close. The conclusion below is unaffected — 2 MHz is still a long way from
+6.8 MHz.)*
 
 This **cancels the RS-485 escalation** in ADR 0004 and **removes the sub-10 µs
 DAC settling requirement** in ADR 0006. Both of those existed only to carry a

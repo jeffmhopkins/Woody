@@ -245,8 +245,9 @@ The module panel already carries a rated SPST toggle (ADR 0004), one reach away
 in the same rack the instrument is patched into. That is upgraded rather than
 duplicated.
 
-**The toggle drives a TPS2553-class current-limited load switch on the
-umbilical +12 V feed**, rather than breaking the current itself. That buys two
+**The toggle drives a current-limited load switch on the umbilical +12 V
+feed**, rather than breaking the current itself. (The part is settled below,
+and it is *not* a TPS2553.) That buys two
 things the bare toggle does not have:
 
 - **Inrush limiting.** The instrument's bulk capacitance is a near-short at the

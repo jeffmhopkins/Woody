@@ -422,8 +422,9 @@ rather than 10 or 12.
 
 **The module's power switch is the only power switch in the system.** The
 instrument has none (ADR 0005), so the panel toggle is the single point of
-control — and it does not break the current itself. It drives a **TPS2553-class
-current-limited load switch** on the umbilical +12 V feed, which adds inrush
+control — and it does not break the current itself. It drives a **current-limited
+load switch** on the umbilical +12 V feed — an LT1641-1 and an external FET,
+since every one-chip 12 V eFuse fails the package policy (ADR 0005) — which adds inrush
 limiting into the instrument's bulk capacitance and short-circuit foldback on a
 crushed cable or a half-inserted connector. A bare toggle would take that surge
 on its contacts and pass a umbilical fault straight through to the rack's rail.
