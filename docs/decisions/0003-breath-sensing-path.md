@@ -98,7 +98,9 @@ Different jobs, both kept.
 
 ## Sensor: MPXV4006DP
 
-0–6 kPa, integrated signal conditioning, ~0.2–4.80 V out. Directly usable by a
+0–6 kPa, integrated signal conditioning, **0.265–4.86 V** out — see
+`sensor-full-scale`, and note that the cover page's "0.2 to 4.8 V" contradicts
+the transfer function printed inside the same document. Directly usable by a
 SAR ADC with no instrumentation amplifier.
 
 The old repository contradicted itself — its README said MPXV4006GP while
@@ -113,7 +115,7 @@ technical one.**
 |---|---|---|
 | Lifecycle | **Obsolete**, distributor stock only | **Production**, supported through at least 2028 |
 | Sensitivity | 766 mV/kPa | 766 mV/kPa |
-| Output span | 0.2–4.80 V | 0.2–4.80 V |
+| Output span — **cover-page line, refuted by the transfer function inside the same document; see `sensor-full-scale`** | 0.2–4.80 V | 0.2–4.80 V |
 | Supply | 4.75–5.25 V, 10 mA | 4.75–5.25 V, 10 mA |
 | Case | 1369-01, single side port | **1351-01, dual ports, same side** |
 
@@ -547,7 +549,7 @@ divider for a level shifter. The 0.6× divider below stays.
 
 The sensor's buffered output splits two ways:
 
-- **To the umbilical buffer** — full scale, 0.2–4.80 V, for the CV output.
+- **To the umbilical buffer** — full scale, 0.265–4.86 V, for the CV output.
 - **To the SAR ADC** — for breath threshold and note gating, as a modulation
   source for the mod channels, for the display, and for USB MIDI.
 

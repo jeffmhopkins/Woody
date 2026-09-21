@@ -37,7 +37,23 @@ figures:
     status: settled
     owner: docs/decisions/0003-breath-sensing-path.md
     derivation: "Vout = VS*[(0.1533*P) + 0.053], verbatim from the datasheet. At VS = 5.0 V and P = 6 kPa: 5*(0.9198 + 0.053) = 4.864 V. The PEDESTAL IS 0.265 V, not 0.200 V."
-    forbidden: ["4.7 V output", "0.2-4.7 V", "0.2 – 4.7 V", "0.2 V + 0.766", "0.200 V at rest", "0.2 V at rest", "(0.1533*P) + 0.04", "0.1533 x P) + 0.04", "rest | 0.200 V"]
+    forbidden: ["4.7 V output", "0.2-4.7 V", "0.2 – 4.7 V", "0.2 V + 0.766", "0.200 V at rest", "0.2 V at rest", "(0.1533*P) + 0.04", "0.1533 x P) + 0.04", "rest | 0.200 V", "0.2 + 0.766", "0.2-4.80 V", "0.2 – 4.80 V", "0.2–4.80 V", "0.2 → 4.8 V", "0.2 to 4.8 V out", "| 0.200 V |", "| 4.800 V |", "+0.2V pedestal", "+0.200 V pedestal", "typical +0.200 V", "4.7 V × 0.6", "full scale = 4.7 V"]
+    false_positive_note: "0.2-4.80 V is the datasheet's OWN COVER-PAGE line and may be quoted as such - the ADR 0003 GP-vs-DP comparison row does exactly that, labelled 'cover page, both parts', and carries refutation wording. 4.80 V also appears legitimately in docs/decisions/0005-power-architecture.md about an LM317 rail, which is a different quantity entirely; match the surrounding words, not the number."
+    escape_note: |
+      THESE PATTERNS WERE ADDED 2026-09-21, THE SAME DAY THE FIGURE MOVED, AFTER
+      TWO COLD REVIEWERS INDEPENDENTLY FOUND ELEVEN DERIVED STATEMENTS STILL
+      CARRYING THE OLD VALUE WHILE THE CHECKER SCORED ZERO HITS.
+      This is the project's named failure mode, inside the commit that fixed the
+      figure - the fourth recorded instance. The mechanism was mechanical and
+      worth writing down: the original forbidden list was written by looking at
+      the ONE document being edited, so it matched that document's spelling and
+      no other. The corpus spelled the same number seven other ways - an en dash
+      with no spaces, a table cell with pipes, "0.2 + 0.766" without the " V",
+      "0.2 - 4.80" where the register had "0.2 - 4.7". Each missed by one or two
+      characters against a case-sensitive literal find.
+      THE RULE THAT FOLLOWS: when a figure moves, grep the corpus for the OLD
+      value first and add a pattern per spelling found, rather than writing the
+      forbidden list from the document in front of you.
     note: |
       CORRECTED 2026-09-21 against datasheets/other-semi/MPXV4006DP.pdf, which
       refutes a figure this register had marked SETTLED.

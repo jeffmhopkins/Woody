@@ -90,10 +90,12 @@ subtracts, which is what a unipolar DAC can produce.
 firmware cannot measure (ADR 0003, ADR 0006) — which removes the premise the
 swap was argued from. So the swap needs a reason of its own, and it has one:
 
-**`REF` is driven from a buffered trimmer** set once at commissioning. +0.437 V
-nulls a *typical* +0.200 V pedestal — but the pedestal is a **spec band, not a
+**`REF` is driven from a buffered trimmer** set once at commissioning. +0.579 V
+nulls a *typical* +0.265 V pedestal — but the pedestal is a **spec band, not a
 number**: 0.152–0.378 V, which needs `REF` anywhere from **0.332 V to
-0.826 V**. **Range the trimmer 0 → +1.0 V.** An earlier revision specified
+0.826 V**. The band is the datasheet's own `V_off` min/typ/max
+`[datasheet MPXV4006DP p.4: "Voff 0.152 0.265 0.378 V"]`, and **its typical is
+0.265 V** — see `sensor-full-scale`. **Range the trimmer 0 → +1.0 V.** An earlier revision specified
 0 → +0.6 V, which covers pedestals only to 0.275 V; a sensor at the top of its
 own datasheet band would have been un-nullable, leaving 1.4–5.6 % of span
 standing at the jack — the same band as the polarity showstopper this trimmer
@@ -167,7 +169,7 @@ looks like an input.
 
 | | |
 |---|---|
-| Sensor span, 0.2 → 4.8 V | 4.6 V |
+| Sensor span, 0.265 → 4.86 V | 4.6 V |
 | Jack span wanted | 10 V |
 | Raw gain needed | 2.174 |
 | Loss in the 2 × 1 MΩ bias pair against 2 × 11 kΩ series | ×0.9891 |

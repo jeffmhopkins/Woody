@@ -350,10 +350,12 @@ that way here. Do not add a cap at `R-SER-BREATH-INST`.**
 
 ```
 ratio      = 15k / (10k + 15k) = 0.600
-full scale = 4.7 V × 0.6 = 2.82 V  against VREF 3.3 V → 85 % of range, 3502 counts
-real play  = 2.8 kPa → 0.2 + 0.766 × 2.8 = 2.34 V → 1.40 V → 1743 counts
+full scale = 4.86 V × 0.6 = 2.92 V  against VREF 3.3 V → 88 % of range, 3622 counts
+rest       = 0.265 V         × 0.6 = 0.159 V →  197 counts
+real play  = 2.8 kPa → 0.265 + 0.766 × 2.8 = 2.41 V → 1.447 V → 1795 counts
                                           [2.8 kPa from breath-receive-stage.md]
-playable span above rest ≈ 1594 counts of 4096
+                                          [0.265 and 4.86 from sensor-full-scale]
+playable span above rest ≈ 1598 counts of 4096
 ```
 
 **Why the upper leg is ≥10 kΩ** `[calc]` — the 5 V rail comes up before the dev

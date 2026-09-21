@@ -19,14 +19,22 @@ What arrives from the receiver, with the pedestal nulled at the in-amp's `REF`
 
 | | Sensor | In-amp output |
 |---|---|---|
-| Rest | 0.200 V | **0.00 V** |
-| Hard blow, real playing (~2.8 kPa) | 2.347 V | **−4.69 V** |
-| Sensor full scale (6 kPa) | 4.800 V | −9.94 V |
+| Rest | 0.265 V | **0.00 V** |
+| Hard blow, real playing (~2.8 kPa) | 2.411 V | **−4.64 V** |
+| Sensor full scale (6 kPa) | 4.864 V | −9.94 V |
 
 **Real playing only reaches about 2.8 kPa against the sensor's 6 kPa range**
 (ADR 0003), so the stage's working input is 0 to about −4.7 V. Reaching 10 V at
-the jack from that needs **≈2.13×** — comfortably inside 0.5–4, which is the
+the jack from that needs **≈2.16×** — comfortably inside 0.5–4, which is the
 point of specifying the range from playing rather than from the sensor.
+
+> **Corrected 2026-09-21** against `sensor-full-scale`. The sensor column moved
+> with the pedestal (0.200 → 0.265 V) and the full-scale figure (4.80 → 4.86 V).
+> **The in-amp column moved for a second, independent reason**: −4.69 V was
+> computed with the in-amp's *raw* 2.18483, and the working point is the
+> *effective* 2.1611 that the bias pair leaves — the same gain the −9.94 V in
+> the row below already uses. The span is unchanged, so −9.94 V is untouched.
+> `[calc]` `(2.411 − 0.265) × 2.1611 = 4.638`; `10 / 4.638 = 2.156`.
 
 ## The circuit
 
