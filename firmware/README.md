@@ -35,6 +35,33 @@ negotiable without revisiting those:
   shared rail, handled with separate regulators rather than by scheduling
   ([ADR 0012](../docs/decisions/0012-configuration-interface.md),
   [ADR 0013](../docs/decisions/0013-two-mcu-split.md)).
+- **Refresh everything, every pass. Never write-on-change.** The umbilical is
+  write-only — `MISO` was deleted from the cable (ADR 0004) — so nothing
+  downstream can ever be read back. *With no readback, shared state can only be
+  made safe by being made stateless.* This is the rule, not an optimisation
+  note; see below for the failure that produced it.
+
+### Why statelessness, specifically
+
+The design review found this by one route and two diagnostics findings arrived
+at it from the opposite direction, so it is worth stating the case once.
+
+The mod channels are `Vout = 4 × (Vdac − Voffset)`, with `Voffset` the shared
+2.5 V from DAC channel 7 — **written once at boot** (ADR 0006). When the module
+watchdog asserts `CLR`, every DAC channel including channel 7 goes to zero
+scale. Firmware then rewrites the five signal channels, because those are the
+ones it thinks of as signals, and `Voffset` stays at 0. Every mod jack pins at
+`4 × Vdac` ≈ +11.45 V and stays there.
+
+With no `MISO` this is undetectable, and it survives until the next power
+cycle. The same shape of bug is latent in every other register the DAC holds
+that firmware writes once: the internal-reference enable, and the clear-code
+register itself.
+
+The fix costs nothing. **The latency budget already books six DAC words per
+pass while five are written**, so the seventh channel fits inside a budget that
+was already paid — and refreshing the reference-enable and clear-code registers
+periodically costs a word every few thousand passes.
 
 ## Data, not code
 

@@ -45,16 +45,33 @@ With real Cat5/6 each signal sits against a ground in its own twisted pair.
 
 **Bandwidth is modest again.** A 96 kHz digital breath channel would have
 needed ~6.8 MHz on the wire and probably RS-485 transceivers. With breath going
-analog instead (ADR 0003), the digital link carries only pitch, four mod
-channels and the zero offset at 2 kHz:
+analog instead (ADR 0003), the digital link carries only DAC words.
 
 | | Payload | SPI clock at 50% use |
 |---|---|---|
 | Breath digital at 96 kHz + 5 channels | 3.39 Mbit/s | ~6.8 MHz |
-| **Breath analog, 5 channels at 2 kHz** | **0.32 Mbit/s** | **~0.6 MHz** |
+| ~~Breath analog, 5 channels at 2 kHz~~ | ~~0.32 Mbit/s~~ | ~~0.6 MHz~~ |
+| **Breath analog, 7 channels at 4 kHz** | **0.90 Mbit/s** | **≥1.8 MHz → specify 2 MHz** |
 
-Plain single-ended SPI at well under 1 MHz over twisted pair is unremarkable.
-**RS-485 returns to contingency status**, not a likely requirement.
+**The 0.6 MHz figure was stale and it did not close.** It came from a 2 kHz mod
+rate that ADR 0006 revised to 4 kHz, and from five channels where the
+statelessness rule in `firmware/README.md` refreshes seven. Seven 32-bit words
+is 224 bits; at 0.6 MHz that is 373 µs against a 250 µs loop period. **The loop
+would simply not have completed.** Five agents found it.
+
+At 2 MHz the same seven words take 112 µs, which is 45 % of the period and
+leaves room for the MCP3202 sharing the host.
+
+**This number has a deadline.** E11 validates the real cable at the real rate
+and it is a gate before the body bonds — there is no second chance to test 2 m
+of Cat5 at a speed the instrument turns out to need. `R-MOSI-SER` at 220 Ω with
+~200 pF of cable is a ~7.9 MHz corner, so 2 MHz has margin; if E11 wants more,
+that resistor comes down toward 100 Ω, which is closer to a real source match
+on Cat5's ~100 Ω anyway.
+
+Plain single-ended SPI at a couple of MHz over twisted pair is still
+unremarkable. **RS-485 returns to contingency status**, not a likely
+requirement.
 
 ### Revised conductor budget
 
@@ -228,21 +245,32 @@ through this module.
 Those are different problems and they want separate treatment:
 
 ```
-bus +12V ──[1N5817]──┬──[ferrite]──[bulk]──┬── module analog (op-amps)
-                     │                      │
-                     │                      └──[LM317LZ 5.25V]── DAC AVDD
-                     │
-                     └──[ferrite]──[bulk]──[TPS2553]── umbilical +12V
-                                                    ↑         to the instrument
-                                              panel toggle
+bus +12V ──┬──[1N5817]──[ferrite]──[bulk]──┬── module analog (op-amps)
+           │                                │
+           │                                └──[LM317LZ 5.25V]── DAC AVDD
+           │                                                      │
+           │                                              VREFOUT ─┴─[½ OPA2197]
+           │                                              → pitch offset divider
+           │
+           └──[1N5817]──[ferrite]──[bulk]──[LT1641-1 + FET]── umbilical +12V
+                                                  ↑                to the instrument
+                                            panel toggle (enable only)
 
 bus -12V ──[1N5817]─────[ferrite]──[bulk]── module analog
 bus +5V  ────────────────[ferrite]──[bulk]── 74AHCT125 level shifter only
 ```
 
-**Branch the two +12 V paths after the protection diode, each with its own
-ferrite and bulk capacitance.** That way the buck's pulsed draw is absorbed
-locally instead of modulating the rail the pitch scaling stage is referenced to
+**Branch the two +12 V paths *before* the protection diode, each with its own
+diode, ferrite and bulk capacitance.** An earlier revision of this diagram
+branched *after* a shared 1N5817, and four reviewers arrived at the consequence
+by four different routes: the instrument's current flows through the same diode
+as the module's analog rail, so it modulates that diode's forward voltage by
+~80 mV — about **20 cents of breath-correlated pitch bend**, needing no ground
+path at all and visible by inspection of the diagram itself. The second diode
+costs about twenty cents and is the whole fix. (`D-REVPOL` qty 3, ADR 0006.)
+
+Branching also means the buck's pulsed draw is absorbed locally instead of
+modulating the rail the pitch scaling stage is referenced to
 — which is the whole point, since this module's analog section is precision and
 most modules' are not.
 

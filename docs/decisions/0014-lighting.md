@@ -398,6 +398,31 @@ The breath buffer and sensor now live at the bottom with the real-time board
 off the analog section's local ground at that end, and give the SPI key chain
 its own ground return per signal where it shares a channel with the strips.
 
+### Breath is protected. Pitch is not — so hold the current constant.
+
+`AGND` protects the breath channel and does nothing for pitch, which is two
+metres away in the module and reached through the +12 V rail rather than
+through a ground. Four independent routes were found by which LED current
+reaches the pitch jack — the offset reference divider, a shared reverse-polarity
+diode, the module's internal ground and the rack's bus ground — adding to more
+than every static term in ADR 0006's precision budget put together, and unlike
+those terms **they move while you play**. ADR 0006 fixes the two large ones in
+hardware.
+
+This ADR owns the cheapest fix, and it is a firmware rule:
+
+> **Animate by moving light, not by changing how much of it there is.** Render
+> a dot, a bar or a field whose *total current* is held constant, and move or
+> recolour it. Fades, pulses and whole-field brightness sweeps modulate the
+> supply that pitch is referenced to.
+
+It removes the drive term instead of treating the couplings, it costs one line,
+and it is also what the thermal clamp wants: a constant-current field is a
+budget that is never exceeded rather than one policed after the fact.
+
+Where a fade is genuinely wanted — the boot sequence, a preset change — take it
+while no note is sounding.
+
 ## Open
 
 - **What the side strips actually do.** Breath level is the obvious driver;

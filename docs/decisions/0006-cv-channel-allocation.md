@@ -298,6 +298,11 @@ trimmability.
 ### The division of labour
 
 - **Trimmers set gain and offset.** Two per pitch channel, multiturn cermet.
+  **The offset trimmer divides down the DAC's buffered `VREFOUT`, not a supply
+  rail** — see below. This ADR named the trimmer "the offset authority for
+  pitch" and never said what it divides, and three reviewers independently
+  found that the only source in the committed topology was a bare divider off
+  ±12 V.
 - **Firmware handles what trimmers cannot:** DAC integral nonlinearity, which is
   curvature no gain-and-offset adjustment can remove (±4 LSB typical is
   0.66 cents, ±12 LSB is 2.0 cents). Use a **multi-point** table, roughly one
@@ -336,12 +341,34 @@ Five octaves up, that is 59.4 cents and 117.6 cents respectively.
 
 **The resistor stays at 1 kΩ, and calibration absorbs it.** Two reasons.
 
-**It is a pure gain error, and the gain trimmer has full authority over it.**
-This is the distinction that matters. The offset error that forced trimmers into
-this design in the first place was unrecoverable because nothing implemented
-`b`. A resistive divider is entirely `a` — it multiplies the whole transfer
-function by a constant. Both the trimmer and the firmware scale factor can
-cancel it exactly, at any magnitude. Nothing is lost that cannot be recovered.
+**The trimmer has full authority over it, and firmware needs two numbers to
+match — not one.** The sentence that used to stand here said the divider "is a
+pure gain error", and that is false. The pitch stage generates its own offset
+*upstream* of the 1 kΩ, so the divider scales the offset too:
+
+```
+Vout = k · (2·Vdac − 2.5)        k = R_load / (R_load + 1 k)
+```
+
+Correcting only the slope — scaling the DAC code by `1/k` — recovers the octave
+spacing and leaves the offset short by `(1 − k_new/k_trim) × 2.5 V`. Trimmed
+against 100 kΩ and then played into 50 kΩ, that is **+29 cents sharp on every
+note**; into 33 kΩ, **+59 cents**. A one-number correction therefore converts a
+progressive tracking error into a *constant* transposition, which is worse to
+play than the error it replaced.
+
+The trimmer is unaffected — it is a physical offset adjustment and has always
+had both authorities. The defect is in the calibration *model*, not the
+hardware, and the hardware authority already exists: the 0.25–4.75 V window
+reserves ±600 cents of firmware offset precisely because firmware can shift the
+DAC code. "Nothing implemented `b`" was true of the model and never of the
+part.
+
+**So store an affine `(gain, offset)` pair per load preset, not a scale
+factor.** It is a second stored float and no new hardware.
+
+The 1 kΩ still stays. The decision survives; only its stated reasoning does
+not.
 
 **The alternatives each cost more than they return.** Dropping to 100 Ω gives up
 an order of magnitude of short-circuit protection to reduce, not remove, an
@@ -367,10 +394,73 @@ Three things pay for it, none of them hardware:
   one constant high-impedance load no matter how many oscillators hang off it,
   which makes the whole problem disappear at the patch level. This is the actual
   fix and it costs nothing, because the rack already has the option.
-- **Firmware carries a per-load scale factor.** Firmware could never implement
-  `b`, but it has always been able to implement `a`. A named scale preset per
-  patch — "one VCO", "two multed" — is a stored float and a display line, and it
-  reaches loads the trimmer was not set for without touching a screwdriver.
+- **Firmware carries a per-load affine `(gain, offset)` pair.** A named preset
+  per patch — "one VCO", "two multed" — is two stored floats and a display
+  line, and it reaches loads the trimmer was not set for without touching a
+  screwdriver. **Two numbers, not one**: see above for why a scale factor alone
+  leaves the whole instrument a fixed 29–59 cents sharp.
+
+### The offset reference is `VREFOUT`, buffered — not the rail
+
+This is the largest single pitch error in the design, and the only class of
+pitch error that **moves while you play**.
+
+A trimmer dividing a bare ±12 V rail has a sensitivity of roughly 0.21 V/V, so
+everything that happens to that rail lands on pitch with no rejection at all:
+
+| On the rail | At the pitch jack |
+|---|---|
+| 12 mV of thermal drift | 3.0 cents |
+| 50 mV step when another module powers up | **12.5 cents of transposition** |
+| The WS2815 square wave | **~22 cents p-p of pitch FM** |
+
+ADR 0004 worried about this exact rail and defended the *op-amp's supply pins*
+for 80 dB of PSRR and 0.011 cents, while leaving the offset reference a bare
+divider on the same rail. **Eighty-six decibels off the right node.**
+
+**Divide the offset trimmer from the DAC8568's `VREFOUT` instead**, buffered by
+the spare OPA2197 half. Three things follow, and the third is the good one:
+
+- `VREFOUT` is a 2.5 V reference inside the part, off the LM317's own 5.25 V —
+  it does not carry LED current and it does not move when a neighbouring module
+  powers up.
+- Buffering it matters, and not only for drive. Hanging a *trimmer* directly on
+  `VREFOUT` would make the reference move as the trimmer is turned, coupling
+  the offset adjustment into the DAC's full-scale span. A follower breaks that.
+- **The offset now tracks the DAC's own scale**, because the DAC's full scale
+  *is* `2 × VREFOUT`. A drift in the reference moves gain and offset together,
+  where the trimmer cancels both at once instead of fighting them separately.
+
+Cost: two resistors and the last spare op-amp half in `U-OPA-PITCH`. Free at
+layout, impossible after fab.
+
+### And stop modulating the rail in the first place
+
+Two more mechanisms land on the same jack, and they add to the one above:
+
+| Route | Magnitude |
+|---|---|
+| Offset reference rail + WS2815 ripple (above) | ~22 cents p-p |
+| **The module's analog rail and the umbilical feed share one 1N5817**, so instrument current modulates its V_f by ~80 mV | **~20 cents** |
+| The module's internal ground | 5.7–7.2 cents |
+| The rack's shared bus ground | ~4.8 cents |
+
+Every one of these is larger than every term in this ADR's precision budget,
+and they are the only *dynamic* ones. Two fixes, both free:
+
+- **Separate the Schottkys.** The shared diode is visible by inspection of
+  ADR 0004's own power-tree diagram and needs no ground path to do its damage —
+  the branch point is *downstream* of the diode. `D-REVPOL` goes to three: one
+  for the module's analog +12 V, one for the umbilical feed, one for −12 V.
+- **Drive the lighting as a moving dot or bar on a constant-total-current
+  field**, rather than by modulating brightness (ADR 0014). One firmware line.
+  It removes the drive term from the two mechanisms above rather than treating
+  them.
+
+**And schedule the test that is missing.** The one measurement in the plan for
+this class of problem scopes the *breath* jack — the channel that is immune,
+because it never passes through the DAC or its reference. **Scope pitch while
+sweeping the LEDs**, at E9 and again at M8.
 
 ### Consequence elsewhere
 
@@ -380,6 +470,32 @@ nothing else. Two proposed review fixes were in conflict over that capacitor —
 the in-loop `Cf` and the separate output filter are physically the same part and
 cannot both exist. Declining the in-loop version resolves the conflict rather
 than deferring it.
+
+**Two things about that capacitor have to be written down, and only one of them
+was.** The review found the C of every one of these RCs missing from the BOM,
+with no value anywhere in the repository. It is now there — but the value is
+the easy half:
+
+- **Which side of the 1 kΩ.** The capacitor goes on the **jack side**, so the
+  resistor isolates the op-amp from it. On the op-amp side it is a capacitive
+  load inside the feedback loop and the stage can oscillate. This is the one
+  place in the review where an unspecified *placement* is a functional hazard
+  rather than a tidiness complaint.
+- **Dielectric: C0G or film, never X7R.** X7R's DC-bias coefficient moves the
+  corner by ~30 % at 10 V, and X7R is piezoelectric — in a pitch reconstruction
+  filter that is a literal microphonic detuning element. Same price, same
+  footprint.
+
+| Output | R | C | Corner |
+|---|---|---|---|
+| Pitch | 1 kΩ | 10 nF C0G | 15.9 kHz |
+| Mod 1–4 | 1 kΩ | 82 nF C0G | 1.94 kHz |
+| Breath | 1 kΩ | 330 nF film | ~480 Hz |
+
+Breath is the odd one because it never passes through the DAC: it has no
+zero-order-hold image to attenuate, and it is already a 531 Hz channel by the
+time it reaches the module (`hardware/module/breath-receive-stage.md`). This
+ADR's earlier "~2 kHz for breath" is superseded by that page.
 
 ## Firmware defaults and bring-up rules
 
