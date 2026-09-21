@@ -644,7 +644,7 @@ the easy half:
 | Breath | 1 kΩ | 330 nF film | ~480 Hz |
 
 Breath is the odd one because it never passes through the DAC: it has no
-zero-order-hold image to attenuate, and it is already a 531 Hz channel by the
+zero-order-hold image to attenuate, and it is already a 482 Hz channel by the
 time it reaches the module (`hardware/module/breath-receive-stage.md`). This
 ADR's earlier "~2 kHz for breath" is superseded by that page.
 
