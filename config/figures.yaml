@@ -110,7 +110,8 @@ figures:
     status: settled
     owner: docs/decisions/0004-cv-interface-module.md
     derivation: "CS must have a ground partner: it frames the word, MISO is deleted so a mis-frame is unreadable and sticky. SCLK+MOSI is safe by construction - MOSI is only sampled on a SCLK edge."
-    forbidden: ["MOSI / CS", "4 MOSI", "5 CS", "7 SCLK", "MOSI/CS on 4"]
+    forbidden: ["| MOSI / CS |", "4 MOSI   5 CS", "7 SCLK     8 DIG_GND", "MOSI/CS on 4"]
+    false_positive_note: "'SCLK / MOSI / CS' is a legitimate list of three signals. Match the pin-table cell."
 
   - id: dac-rail
     quantity: LM317 DAC AVDD rail
@@ -118,7 +119,8 @@ figures:
     status: settled
     owner: hardware/module/power-entry.md
     derivation: "1.25 x (1 + 475/150) = 5.208 V"
-    forbidden: ["5.25V", "5.25 V"]
+    forbidden: ["5.25V]", "local 5.25 V regulator", "own 5.25 V regulator", "LM317's own 5.25 V", "5.25V DAC regulator"]
+    false_positive_note: "The MPXV4006DP's supply spec is legitimately 4.75-5.25 V. Match the regulator, not the numeral."
 
   - id: mod-reference
     quantity: Mod channel reference, DAC channel 7
@@ -143,7 +145,7 @@ figures:
     status: settled
     owner: docs/decisions/0004-cv-interface-module.md
     derivation: "(10 x 5.08) - 0.3, +0/-0.2"
-    forbidden: ["40.34 mm", "8HP panel", "inside 8HP", "at 8HP this", "Comfortable at 8HP"]
+    forbidden: ["panel is 40.34 mm", "The panel is 8HP", "inside 8HP", "at 8HP this", "Comfortable at 8HP"]
 
   - id: panel-height-budget
     quantity: Module panel height used
@@ -179,7 +181,8 @@ figures:
     owner: hardware/module/power-entry.md
     candidates: ["365 nF if I_TIMER is 3 uA", "9.25 uF if I_TIMER is 76 uA"]
     decided_by: "Reading I_TIMER off the LT1641 datasheet. analog.com was unreachable through four review waves."
-    forbidden: ["10nF", "10 nF timer", "12x to 300x"]
+    forbidden: ["C-TIMER-LOADSW at 10nF", "10 nF timer", "12x to 300x"]
+    false_positive_note: "10nF is also C-KEY's superseded value and appears in other rows. Match the refdes."
     note: "The '12x to 300x' ratio is itself wrong - the page's own equation gives 37x to 925x, and bom.csv repeats the bad ratio so cross-checking finds false agreement."
 
   - id: loop-budget
@@ -197,7 +200,8 @@ figures:
     status: settled
     owner: docs/decisions/0005-power-architecture.md
     derivation: "226 mA x 5 V / (0.9 x 11.4 V) + 248 mA = 358.1 mA. This is the only derived figure; eight others are asserted."
-    forbidden: ["275 mA", "290 mA", "320 mA", "392 mA", "410-430 mA"]
+    forbidden: ["~275 instrument", "Drop at 290 mA", "+12 V | ~320 mA"]
+    false_positive_note: "392 mA is the MODULE total on +12 V (instrument + module), a DIFFERENT quantity from the 359 mA the instrument draws down the umbilical. Do not conflate. Figures quoted inside text that refutes them are allowed."
 
   - id: diode-split-rationale
     quantity: What the D1/D2 split actually buys

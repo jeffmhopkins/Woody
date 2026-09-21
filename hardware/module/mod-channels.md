@@ -3,10 +3,16 @@
 **Status:** Drawn 2026-09-21. Third module page, after
 [breath](breath-receive-stage.md) and [pitch](pitch-stage.md).
 
-Four identical channels. ADR 0006 specifies `Vout = 4 × (Vdac − 2.5 V)` and
-contradicts itself about how to build it — the topology section offers an
-LT5400 1:4 ratio, the calibration section says ordinary 1 % discretes. The
-discretes won (ADR 0006, `R-MODGAIN`), and this page is what they build.
+Four identical channels at `Vout = 4·Vdac − 3·V_ref`, `V_ref` = **3.3333 V**
+from DAC channel 7, built from `R-MODGAIN` 10k/30k 1 % discretes in a
+two-resistor non-inverting form at **k = 3**.
+
+> ADR 0006 originally specified `Vout = 4 × (Vdac − 2.5 V)` and contradicted
+> itself about how to build it — its topology section offered a superseded
+> LT5400 ratio, its calibration section ordinary 1 % discretes. Both halves are
+> now corrected there. **Writing the old 2.5 V into channel 7 against the
+> current network gives a −7.5…+12.5 V window and clips positive**, which is why
+> `firmware/README.md` states the value rather than deriving it.
 
 ## The circuit — one channel of four
 

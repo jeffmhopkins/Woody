@@ -47,8 +47,8 @@ regulator's location open — see *Still open*.
                   │ 8 conductors, T568B pairs (ADR 0004)
                   │
    ┌──────────────▼──────────────────────────────────────────────────────┐
-   │ J-UMB   1 BREATH   2 AGND   3 +12V   6 PWR_GND   4 MOSI   5 CS      │
-   │         7 SCLK     8 DIG_GND                                        │
+   │ J-UMB   1 BREATH   2 AGND   3 +12V   6 PWR_GND   4 SCLK   5 MOSI      │
+   │         7 CS       8 DIG_GND                                        │
    └───┬──────────┬──────────────┬─────────────────────┬─────────────────┘
        │          │              │                     │
    ┌───▼──────────▼───┐   ┌──────▼──────┐        ┌─────▼──────┐
@@ -176,7 +176,7 @@ parts.**
                                                       │   P2 ◄── OPEN TO CAVITY
                                                       │           never blocked
                                                       │
-              MPXV4006DP Vout  0.2 – 4.7 V ───────────┘
+              MPXV4006DP Vout  0.2 – 4.80 V ───────────┘
                      │
                      ├──[½ OPA2197 buffer]──┬──[R-SER-BREATH-INST 1k]── J-UMB pin 1
                      │   (V+ = +12V)        │        R1                  BREATH
@@ -403,7 +403,7 @@ supply:
    GND  ────────────────────────────────────►  7  GND
    IO40  MISO     ◄─────────────────────────  8  QH      (out of the near one)
    GND  ────────────────────────────────────►  9  GND
-   3V3  ───────[F-CHAIN, see below]─────────► 10  3V3     → 21 pull-ups,
+   3V3  ───────[F-CHAIN, see below]─────────► 10  3V3     → 24 pull-ups,
                                               11  spare      4 × VCC, 4 × 100 nF
                                               12  spare
 
@@ -511,13 +511,15 @@ From `config/key-layout.yaml` `[repo]`:
 | 3 | Genuinely free | **Cluster boards** — must be pulled `[repo] key-layout.yaml` |
 | **32** | | **None of them on this carrier** |
 
-**Which six bits carry the marker and to what pattern is still undecided, and
+**Which eight bits carry the marker, and their levels, was decided 2026-09-21**
+(`cluster-boards.md` §4, `key-layout.yaml`). The mapping inside each device is
+still open, and
 it is now a cluster-board decision** — as is the `H`…`A`-to-switch mapping
 inside each device. Both still have to be settled before *those* boards are
 made, and firmware has to be told about both. They are off this page's critical
 path, not off the project's.
 
-**The option worth costing has got cheaper.** Giving the 5 free bits the full
+**The option worth costing has got cheaper.** Giving the 3 free bits the full
 network too is now 15 passives spread across four boards that already carry
 21 sets, with no extra loom conductors at all — under the tail topology it also
 needed five more wires down the body. If "add a switch later" is worth

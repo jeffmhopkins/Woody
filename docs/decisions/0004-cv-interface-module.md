@@ -66,7 +66,7 @@ drop the clock: 0.6 MHz still does not close.)
 
 **This number has a deadline.** E11 validates the real cable at the real rate
 and it is a gate before the body bonds — there is no second chance to test 2 m
-of Cat5 at a speed the instrument turns out to need. `R-MOSI-SER` at 220 Ω with
+of Cat5 at a speed the instrument turns out to need. `R-SPI-SER` x3 at 100 Ω (superseding a single `R-MOSI-SER` at 220 Ω) with
 ~200 pF of cable is a **3.6 MHz** corner — 7.9 MHz is the 100 Ω case this same
 sentence offers as the fix, which is the wrong way round. 2 MHz still has
 margin, but less than claimed, and transmission-line analysis puts the right
@@ -129,7 +129,7 @@ The cost is that a 5 V DAC wants roughly 3.5 V for a logic high while the
 instrument sends 3.3 V, so SPI needs shifting. That turns out to be free in
 parts terms:
 
-- **A local 5.25 V regulator off the protected +12 V rail** for the DAC's AVDD
+- **A local 5.21 V regulator off the protected +12 V rail** for the DAC's AVDD
   — not the rack's +5 V bus. See below.
 - **74AHCT125** for the shifter, running from the **bus +5 V rail** — the *same
   part* as the instrument's LED data lines (ADR 0014), with a spare gate left
@@ -245,7 +245,7 @@ one draws its own analog current *plus* everything the instrument consumes:
 
 | Rail | Draw |
 |---|---|
-| +12 V | ~320 mA (45 module incl. the DAC regulator, ~275 instrument) — **estimated, and a review put it nearer 410–430 mA. Measure at E6 before sizing the load switch** |
+| +12 V | **~404 mA typical** (45 mA module incl. the DAC regulator + **359 mA** instrument, derived in ADR 0005) — this row said "~320 mA (… ~275 instrument)" until 2026-09-21. Clamp-legal worst is higher. Measure at E6 before sizing the load switch** |
 | −12 V | ~40 mA |
 | +5 V | ~10 mA (level shifter only) |
 
@@ -253,7 +253,7 @@ That is about 15% of a modern rack supply's +12 V capacity — unremarkable, but
 it **rules out the series-resistor variant**, which is harmless at 50 mA and is
 not at 290 mA:
 
-| Series R | Drop at 290 mA |
+| Series R | Drop at 359 mA |
 |---|---|
 | 2.2 Ω | 0.64 V |
 | 10 Ω | 2.90 V |
@@ -279,7 +279,7 @@ Those are different problems and they want separate treatment:
 ```
 bus +12V ──┬──[1N5817]──[ferrite]──[bulk]──┬── module analog (op-amps)
            │                                │
-           │                                └──[LM317LZ 5.25V]── DAC AVDD
+           │                                └──[LM317LZ 5.21V]── DAC AVDD
            │                                                      │
            │                                              VREFOUT ─┴─[½ OPA2197]
            │                                              → pitch offset divider
@@ -297,7 +297,12 @@ diode, ferrite and bulk capacitance.** An earlier revision of this diagram
 branched *after* a shared 1N5817, and four reviewers arrived at the consequence
 by four different routes: the instrument's current flows through the same diode
 as the module's analog rail, so it modulates that diode's forward voltage by
-~80 mV — about **20 cents of breath-correlated pitch bend**, needing no ground
+~80 mV. **This ADR used to call that "about 20 cents of breath-correlated pitch
+bend"; it is 0.00018 cents** (`power-entry.md`) — pitch references the DAC's
+*internal* reference, not this rail, so the path is 75 mV -> LM317 line reg ->
+39 uV on AVDD -> OPA2197 PSRR. Keep both diodes for fault and HF isolation. The
+effect that IS breath-correlated and worth 7-18 cents is the shared ground path,
+needing no ground
 path at all and visible by inspection of the diagram itself. The second diode
 costs about twenty cents and is the whole fix. (`D-REVPOL` qty 3, ADR 0006.)
 

@@ -55,7 +55,7 @@ and the ADR gets corrected.
                                  │              │   buffered    from the LM317 5.21 V
                                  └──────┬───────┘   +0.437 V nulls the pedestal
                                         │  Vout = −2.185·(V_BREATH − V_AGND) + V_REF
-                                        │       = 0 V at rest, −9.6 V at full
+                                        │       = 0 V at rest, −9.94 V at full
                                         │
                                   ┌─────▼──────────────────────┐
                                   │  INVERTING gain + offset   │
@@ -98,7 +98,7 @@ number**: 0.152–0.378 V, which needs `REF` anywhere from **0.332 V to
 own datasheet band would have been un-nullable, leaving 1.4–5.6 % of span
 standing at the jack — the same band as the polarity showstopper this trimmer
 was added to fix. The in-amp then
-rests at 0 V and reaches −9.6 V at full sensor range — about −4.7 V in real
+rests at 0 V and reaches −9.94 V at full sensor range — about −4.7 V in real
 playing.
 
 **The downstream stage is inverting**, which is the topology that wants a

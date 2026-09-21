@@ -20,8 +20,9 @@ VERBOSE = "--verbose" in sys.argv
 # Terse by default: this runs from a PreToolUse hook on every commit, and a
 # 60-line dump on every invocation is a real cost. Detail goes to a file.
 DETAIL = "--detail" in sys.argv or VERBOSE
+os.makedirs(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".staleness"), exist_ok=True)
 REPORT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                      ".staleness-report.txt")
+                      ".staleness/report.txt")
 
 # The design corpus must be self-consistent. Review/log/research are dated
 # historical records and are deliberately excluded - a 2026-09-21 review saying
@@ -33,9 +34,11 @@ EXCLUDE = ("docs/review", "docs/log", "docs/research")
 # A forbidden value on a line that also refutes it is fine - that is how a
 # correction is supposed to read. Only unqualified survivals are failures.
 REFUTATION = re.compile(
-    r"\b(was|were|previously|stale|superseded|withdrawn|refuted|refutes|no longer|"
-    r"used to|earlier|old|not\s+the|instead of|rather than|wrong|incorrect|"
-    r"corrected|deleted|obsolete|against the|NOT\b|historical)\b", re.I)
+    r"\b(was|were|previously|prior|stale|supersed\w+|withdrawn|refuted?|refutes|"
+    r"no longer|used to|earlier|old|former\w*|instead of|rather than|wrong|"
+    r"incorrect|corrected|deleted|obsolete|historical|until \d{4}|"
+    r"this (row|line|page|ADR|file) (said|carried|read)|carried a superseded)\b",
+    re.I)
 
 
 def corpus_files():
@@ -179,7 +182,7 @@ def main():
     n_unres = len(unresolved)
     if fail:
         print(f"FAIL {len(live)} stale + {len(bom_problems)} bom | {n_unres} unresolved (tracked) "
-              f"| detail: .staleness-report.txt or --detail")
+              f"| detail: .staleness/report.txt or --detail")
     else:
         print(f"PASS no live stale values | {n_unres} unresolved (tracked)")
     return 1 if fail else 0

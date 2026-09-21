@@ -52,7 +52,8 @@ module's analog rail and modulated its forward voltage by **~80 mV** (A7
 independently gets 75 mV: 0.305 V at 245 mA → 0.380 V at 612 mA, so the
 figure itself is sound).
 
-**The "20 cents of breath-correlated pitch bend" that followed is not.**
+**The figure that followed it does not survive.** This page used to say the
+modulation was worth "about 20 cents of breath-correlated pitch bend".
 It implies ~21 % pitch sensitivity to the +12 V rail. Pitch full scale is
 set by the DAC's *internal* reference, and AVDD comes from the LM317, so
 the real path is 75 mV → LM317 line regulation (0.52 mV/V) → 39 µV on AVDD
@@ -177,7 +178,7 @@ ramp** (120 V/s, 264 mA of charging).
 The two reviewers who worked from datasheet text disagree about which
 current applies, and a third bracketed real parts at 2–100 uA. **That
 spread is the finding.** The specified **10 nF is wrong under every
-reading** — 12x to 300x too small, giving a 0.16–4 ms timer — but the
+reading** — 37x to 925x too small, giving a 0.16–4 ms timer — but the
 replacement value cannot be taken from a review. `C-GATE` is likewise
 `I_GATE / 120 V/s`, which is ~83 nF at 10 uA.
 

@@ -93,7 +93,7 @@ bottom of this page is the one that settles it.
 | Stage | Time |
 |---|---|
 | Switch mechanical actuation | mechanical |
-| 74HC165 chain read | < 10 µs via SPI DMA |
+| 74HC165 chain read | **32 µs** — 32 bits at 1 MHz (ADR 0001). This row said "< 10 µs via SPI DMA"; the chain runs at 1 MHz and cannot be clocked away |
 | Debounce (press) | 0 — fire immediately |
 | Debounce (release) | filtered |
 | Firmware note resolution | < 20 µs |
@@ -143,7 +143,7 @@ a hypothesis; a budget made of measurements is a constraint.
    thresholds, note gating, mod routing and MIDI, not for the breath jack.
 
    **The 8 kHz end of the old "4–8 kHz" range does not close.** Serialised, one
-   pass costs ADC 24 µs + key chain 16 µs + six DAC channels at 2 MHz 96 µs =
+   pass costs ADC 24 µs + key chain 32 µs + six DAC channels at 2 MHz 96 µs =
    **136 µs**, against a 125 µs period at 8 kHz. At 4 kHz it is 136 µs of
    250 µs — 54 % duty, with room for the loop to do work. Three documents used
    to disagree about this; 4 kHz is the number.

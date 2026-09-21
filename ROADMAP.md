@@ -44,7 +44,7 @@ existing. Drive it from any dev board with a test pattern and a multimeter.
 | E4 | Key scan | 74HC165 chain reads all switches; debounce asymmetric (instant press, filtered release) |
 | E4b | **Inter-MCU link** | Framed UART between the two boards, status flowing, logic-analyser clean (ADR 0013) |
 | E5 | **USB MIDI out** | Plays into a DAW. Fingering table exercised. First playable milestone |
-| E6 | Module power | ±12V from rack via keyed header + reverse protection, local 5.25V DAC regulator and bus +5V logic rail up, input filtering, load switch limits and ramps the umbilical feed, no noise injected back into the rack |
+| E6 | Module power | ±12V from rack via keyed header + reverse protection, local 5.21V DAC regulator and bus +5V logic rail up, input filtering, load switch limits and ramps the umbilical feed, no noise injected back into the rack |
 | E7 | DAC raw | Commanded codes produce expected voltages on the meter, all six channels |
 | E8 | Pitch channel scaled | Raw analog gain and offset trimmed to target, linear across the span. The 5%-over kludge is deleted — trimmers go both ways (ADR 0006) |
 | E9 | **Pitch calibration** | **Multi-point fit** — one point per octave, which is what every surveyed design does (Yarns 11, O&C 11, PER|FORMER 11) and what ADR 0006 asks for; this row said "two-point" and contradicted it. Stored in NVS with a version and a checksum, in its own slot away from presets; 1V/oct verified against a real VCO, not just a meter, loaded the way it will be played (ADR 0006) |
@@ -180,7 +180,7 @@ came out of the analog design review specifically.
 | Measure | At | Why |
 |---|---|---|
 | **Real-time board idle current** | E1 | 64 unlit WS2812C drivers are an estimated ~50 mA and 0.25 W, spent whether or not anything is displayed. The shared lighting budget is sized from this number (ADR 0014) |
-| **1:1 paper fit check, both faces** | M4 | The etherCON flange against a 50.50 mm 10HP panel *and* against the 57 × 38 mm instrument tail beside the USB-C slot. Comfortable at 8HP; the tail is now the tight one (ADR 0004, ADR 0009) |
+| **1:1 paper fit check, both faces** | M4 | The etherCON flange against a 50.50 mm 10HP panel *and* against the 57 × 38 mm instrument tail beside the USB-C slot. Was called comfortable at the superseded 8HP; the tail is now the tight one (ADR 0004, ADR 0009) |
 | **Matrix diffusion prototype** | M6 | Can an 8×8 at 2.6 mm pitch stay pixel-distinct through a window, or only as a blurred bar? Decides whether the 2-D IMU assignment is usable (ADR 0014) |
 | **Interior temperature rise under load** | M8 | The lighting budget is set from an estimated 3 K/W. Soak with strips and matrix at the clamp, and measure at the breath sensor (ADR 0014) |
 | **Cold-start warm-up sweep** | E2 | Run the sensor from cold through 20 minutes of playing. Output that *falls* under warming is a blocked reference chamber; output that *drifts* is ordinary thermal offset (ADR 0003) |

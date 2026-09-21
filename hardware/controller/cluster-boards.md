@@ -351,7 +351,8 @@ resistor, no capacitor. A floating CMOS input is the exact fault `R-KEY-PU`
 exists to fix `[repo] 0001, fix 6`.
 
 > **The first draft of this page did not budget these three.** Its component
-> table, `bom.csv` and `carrier.md` all carried 21 pull-ups for exactly the 21
+> table, `bom.csv` and `carrier.md` all carried a superseded count of 21
+pull-ups for exactly the 21
 > *switch* positions, leaving bits 22, 23 and 31 floating — unretrofittable,
 > and precisely the fault the part exists to prevent. `R-KEY-PU` is now
 > **qty 24**. Found in review.

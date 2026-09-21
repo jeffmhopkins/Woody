@@ -133,7 +133,7 @@ connection is a copper trace. Four conductors plus power leave each board.
 | | **One per cluster** | All four at the tail |
 |---|---|---|
 | Conductors down the body | **12 per hop** — 6 signals-and-supply, 5 grounds, 2 spare | 32–44 |
-| Hand-terminated joints | **~4 connectors** | **~46 individual wires** |
+| Hand-terminated joints | **~8 connectors, 4 ribbon assemblies** | **~46 individual wires** |
 | Boards | 5 | 5 — *the switches need a PCB either way* |
 | Carrier area | as designed | **+41 %**: 4 ICs and 63 passives |
 | Risk | clocked lines in the LED channel | a fat loom, and blast radius if one is hit |
@@ -157,7 +157,7 @@ topology**, and the decision has to be made on something else.
 
 **On the something else, per-cluster wins on three counts and loses on one.**
 It wins on hand-joint count (about 4 connectors against about 46 wires, in a
-strap-worn instrument that is bonded shut), on loom width (6 conductors per hop
+strap-worn instrument that is bonded shut), on loom width (12 conductors per hop
 against 40–56 mm of ribbon sharing channels with the LED strips and the breath
 tube), and on carrier area — the tail version added 4 ICs and 63 passives to a
 two-layer board already about 82 % covered, with a 22 mm hole through it.
@@ -222,8 +222,8 @@ four boards, so the three reserved spare-switch bits are covered too.
 
 | | |
 |---|---|
-| Release, τ = 2.2 kΩ × 47 nF | 103 µs; crosses `V_IH` at **125 µs** |
-| Press, τ = 100 Ω × 47 nF | 4.7 µs; crosses `V_IL` at **5.7 µs** — 44× inside the 250 µs scan |
+| Release, τ = 2.2 kΩ × 47 nF | 103 µs; crosses `V_IH` at **119.9 µs** |
+| Press, τ = 100 Ω × 47 nF | 4.7 µs; crosses `V_IL` at **5.92 µs** — 42× inside the 250 µs scan |
 | Pole | 1.54 kHz → **54 dB** at the WS2815's 800 kHz data rate |
 | Static | **1.43 mA** per closed key; 18 closed = **25.8 mA** |
 
@@ -231,7 +231,8 @@ four boards, so the three reserved spare-switch bits are covered too.
 > 10 kΩ/10 nF pair against LVC thresholds and both parts of that changed. The
 > conclusion does not: press is still instant on the scan's timescale and
 > release is still filtered. `bom.csv` row `C-KEY` carried the stale
-> "~1.4 µs / 176×" pair until this edit and now carries these figures.
+> the superseded "~1.4 us / 176x" pair until this edit and now carries these
+> figures. Neither old value is correct for any part in the current design.
 
 > **25.8 mA is 4.4× the old figure** and it is drawn from the dev board's 3V3
 > LDO, down the loom, as a play-rate step. That LDO is also the MCP3202's
@@ -288,7 +289,7 @@ cost nothing but planning; they cannot be retrofitted into a bonded body.
    A 74x165's output edges brown out a local rail that has no reservoir.
 6. **Tie `CLK INH` low at all four devices, and pull every unused parallel
    input.** Both are permanent and both were sitting only in a review document.
-   The five genuinely free spare bits are floating CMOS inputs — the exact
+   The three genuinely free spare bits are floating CMOS inputs — the exact
    fault `R-KEY-PU` exists to fix.
 
 **On family choice: the part becomes 74HC165, and this ADR said why before it
@@ -334,7 +335,7 @@ single bit each and are only catchable failing in one direction.
 no cutout in the key plate and no switch, and the body bonds shut, so it can
 never become an input. The three genuinely retrofittable positions are the
 reserved spare-switch bits — octave up, octave down, hold/preset — which have
-plate cutouts at M3 and are untouched by this. So the allocation is **6 marker →
+plate cutouts at M3 and are untouched by this. So the allocation went from a superseded 6 marker to
 8 marker, 5 free → 3 free**, and the 3 that remain still get pulled per fix 6.
 
 The bit-by-bit assignment and levels are in

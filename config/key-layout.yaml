@@ -97,7 +97,8 @@ keys:
 # Shift register chain. One 74HC165 per cluster, ON THE BOARD ITS SWITCHES ARE
 # ALREADY ON: 4 devices, 32 bits, 18 used, 14 spare.
 #
-# Six conductors leave each board - VCC, GND, CLK, SH/LD, SER-in, QH-out - with
+# TWELVE conductors leave each board on a 2x6 IDC - 4 signals (SCK, SH/LD, SER,
+# QH), 5 alternating grounds, 3V3, and 2 spares - with
 # a ground return per signal, chained cluster to cluster rather than starred.
 #
 # THE ORDER BELOW IS A LOOM DECISION, not a layout detail. ADR 0001 requires
@@ -128,7 +129,7 @@ chain:
 #   fails its own marker whichever way it broke. See
 #   hardware/controller/cluster-boards.md section 4 for the bit assignment.
 #   3 are reserved for spare switches: octave up, octave down, hold/preset.
-#   The 5 genuinely free bits are FLOATING CMOS INPUTS and must be pulled -
+#   The 3 genuinely free bits are FLOATING CMOS INPUTS and must be pulled -
 #   the exact fault R-KEY-PU exists to fix (ADR 0001).
 #   Those three need CUTOUTS IN THE PLATE DXF at M3 even if the switches are
 #   fitted later (ADR 0010). Placement is decided at M2, with hands on the mule.

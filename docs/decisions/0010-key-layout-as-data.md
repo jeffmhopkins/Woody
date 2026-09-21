@@ -169,8 +169,11 @@ The switches themselves are easily sourced and can be bought later. So:
   the 2021 firmware drove from key combinations and what dedicated inputs
   obviously improve.
 - **Placement is an M2 question**, decided with hands on the mule, not now.
-- **Four to six of the spare chain bits belong to the marker pattern**
-  (ADR 0001) and are not available for switches. Eight to ten remain, which is
+- **Eight of the spare chain bits belong to the marker pattern** (decided
+  2026-09-21; this line said "four to six" until then)
+  (ADR 0001) and are not available for switches. **Six remain** — three reserved
+  spare-switch positions and three genuinely free. This line said "eight to ten"
+  while the marker was four to six; both halves were corrected 2026-09-21. What is
   more than three.
 
 Populating them is optional; cutting them is not.

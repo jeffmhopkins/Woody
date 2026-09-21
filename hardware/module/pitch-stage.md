@@ -26,7 +26,7 @@ Drawing it changes the answer.
                               ┌───────────┤ −           │  │
                               │           └─────────────┘  │
                               │                            │
-                              ├──[C-FB-PITCH 1nF]──────────┤   ← AC feedback
+                              ├──[C-FB-PITCH 2.2nF]──────────┤   ← AC feedback
                               │                            │
                               │                   [D-JACK-CLAMP BAV99]── ±12 V
                               │                            │

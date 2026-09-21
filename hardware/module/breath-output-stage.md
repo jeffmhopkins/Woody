@@ -21,7 +21,7 @@ What arrives from the receiver, with the pedestal nulled at the in-amp's `REF`
 |---|---|---|
 | Rest | 0.200 V | **0.00 V** |
 | Hard blow, real playing (~2.8 kPa) | 2.347 V | **−4.69 V** |
-| Sensor full scale (6 kPa) | 4.800 V | −10.05 V |
+| Sensor full scale (6 kPa) | 4.800 V | −9.94 V |
 
 **Real playing only reaches about 2.8 kPa against the sensor's 6 kPa range**
 (ADR 0003), so the stage's working input is 0 to about −4.7 V. Reaching 10 V at

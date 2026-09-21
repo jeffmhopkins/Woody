@@ -47,7 +47,7 @@ The design review found this by one route and two diagnostics findings arrived
 at it from the opposite direction, so it is worth stating the case once.
 
 The mod channels are `Vout = 4·Vdac − 3·V_ref`, with `V_ref` the shared
-**3.3333 V** from DAC channel 7 — **written once at boot** (ADR 0006). *(The
+**3.3333 V** from DAC channel 7 — **refreshed every pass, like the other five** (ADR 0006, corrected 2026-09-21). *(The
 value changed with the two-resistor redraw in `mod-channels.md`; writing the
 old 2.5 V into channel 7 against the current 10 k/30 k network gives a
 −7.5…+12.5 V window — wrong span, and it clips positive.)* When the module

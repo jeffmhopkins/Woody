@@ -108,8 +108,11 @@ Vout = 4 × (Vdac − 2.5 V)
 
 Three things make this cheap rather than awkward:
 
-- **Gain of 4 is a 1:4 ratio**, which the LT5400 family offers directly — no
-  external resistor, so no absolute tempco leaks into the gain.
+- **Superseded.** This bullet used to claim a gain of 4 from an LT5400 ratio —
+  **superseded 2026-09-21.** The mod channels are built from `R-MODGAIN` 10k/30k
+  1 % discretes in a two-resistor non-inverting form at **k = 3**, referenced to
+  **3.3333 V**. `pitch-stage.md` also shows the LT5400 route is arithmetically
+  impossible here — pitch already uses two of its four sections.
 - **The 2.5 V reference point comes from a buffered DAC channel**, not directly
   from the internal reference. Both routes track the same reference — the gain
   is a resistor ratio and does not involve the reference at all — so the drift
@@ -183,7 +186,7 @@ entire bandwidth budget.
 | Pitch | **4 kHz**, plus **immediate update on note change** | Static between notes; what matters is latency at the transition, not rate |
 | Mod 1–4 | **4 kHz** | See below — 2 kHz leaves an audible image |
 | Breath zero offset | continuous, slow | See the auto-zero rule below |
-| Mod offset | written once at boot | The shared 2.5 V reference point |
+| Mod offset (ch 7) | **refreshed every pass, like the other five** | The shared **3.3333 V** reference. This row said "written once at boot" and "2.5 V" until 2026-09-21; `firmware/README.md` spells out that writing 2.5 V into ch 7 against the current 10k/30k network gives a -7.5...+12.5 V window that clips positive |
 
 Pitch is the subtle one: it needs no *rate*, but it must not wait for its turn
 in a round-robin. Push it the instant the note resolves.
@@ -539,7 +542,7 @@ divider on the same rail. **Sixty-six decibels off the right node** — the rati
 **Divide the offset trimmer from the DAC8568's `VREFOUT` instead**, buffered by
 the spare OPA2197 half. Three things follow, and the third is the good one:
 
-- `VREFOUT` is a 2.5 V reference inside the part, off the LM317's own 5.25 V —
+- `VREFOUT` is a 2.5 V reference inside the part, off the LM317's own 5.21 V —
   it does not carry LED current and it does not move when a neighbouring module
   powers up.
 - Buffering it matters, and not only for drive. Hanging a *trimmer* directly on
@@ -685,7 +688,7 @@ Three items that are cheap, are invisible once the board is fabbed, and cannot
 be added afterwards.
 
 **1 kΩ in series with each op-amp's non-inverting input where the DAC drives
-it.** The DAC runs from its own 5.25 V regulator and the op-amps from ±12 V, so
+it.** The DAC runs from its own 5.21 V regulator and the op-amps from ±12 V, so
 the two supplies do not come up or collapse together. A driven DAC output into
 an op-amp whose rails are absent forces current through the input clamp
 structure; 1 kΩ bounds it, and it is outside the feedback path so it costs
