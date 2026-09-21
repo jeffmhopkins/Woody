@@ -241,3 +241,65 @@ propagated into `config/figures.yaml`.
 fragments' notes through, so the value really is present in the generated
 output. The check proves the text is there. It cannot ask whether the file
 it is in is one a human should edit.
+
+## C1 — the audit of this round's own fixes, and the two findings against me
+
+Every wave this project has run has found the previous round's fixes partial.
+This one found mine partial in the worst available way: **a fix asserted in a
+commit message, in a docstring, and in `STATUS.md`, that does not land.**
+
+### C1-1 — `check_owners`'s tightening is a no-op for the case its own docstring names
+
+| Claim | Check | Verdict |
+|---|---|---|
+| `check_owners` builds its tokens from **digits only**, so "the most distinctive token" for `spi-series-r` is still `100` — the very token the docstring calls the counter-example | Read `tools/check-staleness.py:522-523`; then **reproduced it** in a `git archive HEAD` copy | **Confirmed by reproduction.** `re.findall(r"\d+\.?\d*", value)` discards `R-SPI-SER` before the sort, leaving `100` as the only token ≥3 characters, so "the longest" is trivially it. I repointed `spi-series-r`'s `owner` to `docs/decisions/0009-enclosure-construction.md` — an ADR that derives no SPI resistor — and the checker reported **`PASS`, exit 0**, because that file contains the string `100` at `:521`, inside "10 kΩ, 100 Ω and 10 nF per switch position", a key-switch network on a different board |
+
+The docstring's closing line is *"A check whose own docstring names a case it
+does not catch is worse than no check."* It then does not catch it.
+
+It is not one figure. Enumerating the single token the check actually tests
+for each of the 23 checkable entries:
+
+| Figure | Token actually tested | What that token also spells |
+|---|---|---|
+| `spi-series-r` | `100` | Cat5 line impedance, "not 100 %", a key-network resistor |
+| `loadswitch-gate-cap` | `197` | **`OPA2197`** — B1 found this independently |
+| `cref-out-node` | `5050` | **`REF5050`** — the part number inside its own value string |
+| `pitch-compensation` | `2.2` | 2.2 kΩ, 2.2 mF, the 2.2 k pull-up |
+| `diode-split-rationale` | `392` | the pre-split total current A4 says flows through neither diode |
+
+So a quarter of the settled register passes `check_owners` on a part number
+or on an unrelated component value. **Three owner repointings this session
+were made on this check's evidence**, and `STATUS.md` credits the tightening
+with finding `loop-budget`'s real defect — which it did, but by luck of that
+figure's token, not by the mechanism claimed.
+
+### C1-3 — the path map does not cover the tree, and says it does
+
+| Claim | Check | Verdict |
+|---|---|---|
+| `repo-maintenance.md` §7 says "**every tracked file has a row**, including the ones that did not move" | Compared `git ls-files` against the map's `old` column | **Confirmed false.** 397 tracked files, 287 rows, **143 files with no row** — 121 of them excluding this wave's own reports. The breakdown is the diagnosis: **95 are under `hardware/`** and 22 under `datasheets/` |
+
+The map was written during Phase A and never updated through Phase B, which
+*created* those 95 files. Together with the 22 dangling `unmoved` datasheet
+rows recorded above, the whole of §7 is now wrong in both directions: it
+omits the files the restructure made, and it asserts paths the restructure
+deleted.
+
+**This is the same defect as the one in the corpus, in the document written
+to resolve it.** `CLAUDE.md` §6 tells a reader that historical paths "are not
+to be corrected — resolve them through `repo-maintenance.md` §7", so the rule
+that protects the historical record points at a table that cannot honour it.
+
+### The other C1 findings, not yet checked by hand
+
+C1-2 (the `sim/README.md` fix that half-landed), C1-4 (`key-scan-current`
+says three restatements, there are five in four files), C1-5/6/7 (three stale
+counts, including `pcb-pipeline.md:58`'s "the six pages" against 23 circuit
+pages — debt that `STATUS.md` predicted and nobody closed), C1-8/9.
+
+C1 also re-ran the largest conservation proof at HEAD rather than at the
+split commit — `carrier.md`, 8709 words into 16 files — and found four gaps,
+all four legitimate. **No later commit dropped text**, which is the one claim
+the merge most depends on and the one I could not have checked myself
+without re-running it cold.
