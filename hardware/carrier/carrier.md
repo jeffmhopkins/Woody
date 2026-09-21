@@ -79,83 +79,10 @@ regulator's location open — see *Still open*.
 
 ---
 
-## §1 Power entry
-
-```
- J-UMB pin 3  +12V ──┬──[D-REVSHUNT SS34]──┐
-                     │   cathode to +12V   │
-                     ├──[D-TVS-PWR SMAJ15A]┤
-                     │                     │
-                     ├─────────────────────┼──── WS2815 strips, direct
-                     │                     │     (J-LED-L, J-LED-R)
-                     │                     │     [C-STRIP-BULK 470–1000 µF ×2]
-                     │                     │
-                     ├──[REF5050]──┬────────┼──── §2 analog
-                     │   in  out   │        │
-                     │   │    [C-REF-OUT#2] │
-                     │  [C-REF-OUT#1]       │
-                     │                      │
-                     ├── OPA2197 V+ ────────┤
-                     │                      │
-                     ├──[L-BUCK-IN]──┬──────┼──[R-78E5.0 A]──▷|──┬── dev board 5V
-                     │   10–47 µH    │      │                 D-USBOR  ├── 74AHCT125
-                     │        [C-BUCK-IN    │                         └── (8×8 matrix,
-                     │         100 µF 25V]  │                              via the board)
-                     │               │      │
-                     │               └──────┼──[R-78E5.0 B]──▷|──── J-DISP 5V
-                     │                      │                 D-USBOR   ?? see Still open
- J-UMB pin 6 PWR_GND ┴──────────────────────┴──── PWR_GND pour
-                                             │
-                                             └──[MECH-GNDBOND]── aluminium key plate
-```
-
-**`D-REVSHUNT` goes at the connector, ahead of `L-BUCK-IN`.** Its job is a
-rollover patch lead swapping pins 3 and 6 `[repo] 0004`; it has to conduct
-immediately and let the module's LT1641-1 latch off. An inductor between the
-fault and the diode is the wrong way round.
-
-**There is no fuse and no power switch on this board** (ADR 0005). The current
-limit is at the module.
-
-**`MECH-GNDBOND` ties the aluminium plate to `PWR_GND`, never to `AGND`**
-`[repo] 0009`. This board is the only place that bond can originate.
-
-### Derivations
-
-**The input LC is stable** `[calc]`, which partly closes `power-entry.md`'s
-"damping the input LC" open item — for the instrument end only:
-
-```
-L = 22 µH (mid range), C = 100 µF
-f0 = 1/(2π√LC) = 3.39 kHz
-Z0 = √(L/C)    = 0.469 Ω
-ESR of a 100 µF / 25 V radial ≈ 0.5–1 Ω [from memory] → Q ≈ 0.5–0.9, no peaking
-
-Constant-power load at typical play:
-  226 mA × 5 V = 1.13 W out ÷ 0.90 = 1.26 W in at 11.4 V   [repo] 0005
-  R_neg = −V²/P = −103 Ω
-Margin: |R_neg| / Z0_peak = 103 / 0.47 ≈ 220× (47 dB)
-```
-
-> **This result depends on `C-BUCK-IN` being an electrolytic with real ESR.**
-> Substituting a low-ESR ceramic raises Q and the paragraph stops being true.
-> The BOM row says electrolytic; keep it that way.
-
-**Regulator loading** `[calc]`, from ADR 0005's load table:
-
-```
-Clamp-legal worst on the 5 V rail, total                        928 mA  [repo] 0005
-Less the display board, which is on buck B                  ~150–250 mA  ESTIMATED
-Buck A (real-time board + matrix + 74AHCT125)                ~680–780 mA
-R-78E5.0-1.0 rating                                            1000 mA
-                                                              → 68–78 %
-```
-
-ADR 0005 says "neither is near its rating". Seventy-odd percent, inside a body
-running 10–20 K above ambient, is near enough to want the derating curve.
-**ADR 0005's load table has one 5 V column and the two-regulator decision needs
-it split per buck. That split is not written anywhere and it is what sizes both
-parts.**
+*§1 power entry — the reverse shunt, the TVS, the two R-78E5.0 bucks, the OR
+diodes, the strip bulk, the plate bond and the input-LC damping analysis —
+moved verbatim to
+[`power-entry-instrument/`](power-entry-instrument/power-entry-instrument.md).*
 
 ---
 
@@ -233,83 +160,12 @@ tolerance, inside a body that cannot be reopened.
 > is **73 dB**, set by the 1 MΩ bias pair, so `R1b` buys about **13 dB**.
 > Still worth fitting. The stated reason overstates it.
 
-**`R-ISO-REF` — and without it the reference buffer oscillates.** As a bare
-follower into the sensor's 100 nF decoupler the reference half has **1.5° of
-phase margin** `[sim, A4]` against TI's specified `Zo` = 375 Ω
-`[SBOS737C p.8]`. The part this page originally drew — a 10 Ω resistor with
-feedback taken at `VS` — **does not fix it**: in-loop `R_ISO` buys nothing at
-*any* value, 1.5° at 10 Ω and 1.5° at 37.4 Ω. It is compensated instead with
-TI's own dual-feedback network, and the four parts are drawn above.
-
-**The compensation is TI's Figure 56, adapted.** `[SBOS737C §8.2.3 p.30,
-"Precision Reference Buffer"]`. See `riso-ref-topology` for the full
-derivation, the adaptation, and the simulated margins; the two things worth
-having on this page are *why it transfers* and *what it buys*:
-
-```
-[calc]  R_ISO is set by Zo, NOT by C_L:
-
-          V_A / V_i = (1 + s·R_ISO·C_L) / (1 + s·(Zo + R_ISO)·C_L)
-
-        attenuation = R_ISO/(Zo + R_ISO)    pole/zero = (Zo + R_ISO)/R_ISO
-
-        Both depend only on R_ISO/Zo. C_L moves the two corners together and
-        cancels out of the phase margin. So TI's 37.4 Ω — which is Zo/10 —
-        transfers to our 100 nF unchanged, even though TI's example drives
-        10 µF, 100x more.
-```
-
-**What it buys is the end of the trade this page was stuck in.** The old
-argument was "unstable in-loop" against "2 % of the ratiometric scale factor
-out-of-loop". Dual feedback gives **both**: at DC `C-FB-REF` blocks, so no
-current flows in `R-FBX-REF`; the amplifier's input current is pA, so none
-flows in `R-FB-REF`; the summing node therefore sits at `V(VS)` and the
-amplifier forces `V(VS)` = 5.000 V. **The DC error across `R-ISO-REF` is
-exactly zero by topology, and its value and tolerance stop mattering.**
-
-Two consequences to keep in mind at layout:
-
-- **`R-FB-REF` is 10 kΩ and not TI's 1 MΩ**, because our load draws 10 mA and
-  TI's does not. The handover `1/(2π·R_F·C_F)` must sit *above* the 500 Hz
-  breath channel — 15.9 kHz here, against 4.08 Hz at TI's values — or
-  load-current changes appear at `VS` across `R_ISO`. `VS` **is** the
-  ratiometric scale factor.
-- **The network is robust, which is what makes it a design rather than a tuned
-  point.** Phase margin stays above 76° across TI's whole published `Zo` range
-  and across a 200× range of `C_L` `[sim, A4]`. X7R DC-bias derating cannot
-  destabilise it, and if E13 finds the rail wants stiffening against strip PWM,
-  **10 µF may be added at `VS` later for 2.5° of margin.** The old topology
-  could not have survived that.
-
-> **✅ BOTH BLOCKERS CLOSED 2026-09-21, AND THE HEDGES THAT USED TO LIVE HERE
-> ARE GONE WITH THEM.** `datasheets/texas-instruments/OPA2197.pdf` (SBOS737C,
-> 56 pp) and `datasheets/texas-instruments/REF5050.pdf` (SBOS410O, 52 pp) are
-> both banked. Two earlier notes on this page are superseded rather than
-> amended, and are recorded here because each was a *correct* finding filed the
-> wrong way:
->
-> **1. The "1 nF" IS an OPA2197 figure**, and this page had filed it as refuted
-> on the strength of the INA828 carrying the same headline number by
-> coincidence. It is on the OPA2197's own front page — *"High Capacitive Load
-> Drive Capability: 1 nF"* — and in §7.3.5 p.22. **Per `CLAUDE.md` that is the
-> more dangerous error**: a wrong finding gets caught by the next reviewer; one
-> filed as handled does not.
->
-> **2. `Ro` is specified, and it is 375 Ω, not the 75.8 Ω this page
-> back-solved.** Figure 26 reads ~3.26 kΩ at 0.1 Hz, 482 Ω at 10 Hz, a **375 Ω
-> plateau from 100 Hz to 300 kHz**, 301 Ω at 1 MHz and ~73 Ω at 10 MHz — so
-> 75.8 Ω is about the *10 MHz* value. Every number this page derived from it
-> has been recomputed against 375 Ω, and the published **2.6° / 458 kHz is
-> dead**; the real hazard is ~1.5° at ~206 kHz. Both mean "oscillator".
->
-> **3. `C-REF-OUT`'s node is settled and this page's drawing was right.** See
-> `cref-out-node`. The 10 µF parts are the REF5050's own `VIN` bypass and
-> `VOUT` load capacitor — **neither is on the buffer's output**, where 10 µF
-> would have been 10 000× the OPA2197's rated capacitive load. A consequence
-> nobody had written down: the REF5050's only load is now the buffer's input
-> bias current, ±20 pA max, so its load regulation contributes **zero** to the
-> breath scale factor. On the other topology, 10 mA through 30 ppm/mA would
-> have been 300 ppm — a whole LSB.
+*The `R-ISO-REF` half of this section — the compensation network, why TI's
+Figure 56 transfers, and what it buys — moved verbatim to
+[`breath-excitation-reference/`](breath-excitation-reference/breath-excitation-reference.md),
+along with the record of the two blockers that closed with it. The drawing
+above stays here because it is one connected picture and dividing it would mean
+redrawing it.*
 
 ### Two things this drawing settles that no ADR does
 
@@ -344,65 +200,12 @@ of the in-amp, "because that is the only place it can stop RF rectification", an
 `R-SER-BREATH-INST`'s note says the ADR is superseded `[repo] bom.csv`. **Drawn
 that way here. Do not add a cap at `R-SER-BREATH-INST`.**
 
-### Derivations
+### The key pull-ups and the ADC reference
 
-**Divider** `[calc]`, matching `R-ADCDIV` `[repo] bom.csv`:
-
-```
-ratio      = 15k / (10k + 15k) = 0.600
-full scale = 4.86 V × 0.6 = 2.92 V  against VREF 3.3 V → 88 % of range, 3622 counts
-rest       = 0.265 V         × 0.6 = 0.159 V →  197 counts
-real play  = 2.8 kPa → 0.265 + 0.766 × 2.8 = 2.41 V → 1.447 V → 1795 counts
-                                          [2.8 kPa from breath-receive-stage.md]
-                                          [0.265 and 4.86 from sensor-full-scale]
-playable span above rest ≈ 1598 counts of 4096
-```
-
-**Why the upper leg is ≥10 kΩ** `[calc]` — the 5 V rail comes up before the dev
-board's 3V3, so for a few milliseconds the divider drives the ADC input above its
-own supply:
-
-```
-worst case, 3V3 at 0 and the clamp holding the pin at ~0.7 V:
-  (4.7 − 0.7) / 10 kΩ = 400 µA   against a family-typical ±2 mA  [from memory]
-```
-
-The same resistor covers a saturated buffer: if the sensor or the op-amp fails
-high at +12 V, `(12 − 0.7 − 3.3)/10 kΩ ≈ 800 µA`, still inside the clamp rating.
-
-**Anti-alias** `[calc]`, matching `C-AA-ADC` `[repo] bom.csv`:
-
-```
-R_th = 10k ∥ 15k = 6.0 kΩ
-f_c  = 1/(2π × 6k × 47 nF) = 564 Hz
-τ    = 6 kΩ × 47 nF        = 282 µs
-attenuation at the R-78E5.0's ~330 kHz switching rate = 20·log10(330k/564) = 55 dB
-```
-
-> **τ = 282 µs exceeds the 250 µs loop period, and the note-on threshold is read
-> through it.** `latency-budget.md` and ADR 0003 book "SAR ADC conversion
-> ~50–200 µs" and no RC term at all `[repo]`. About 5.6 % of the 5 ms budget —
-> not fatal, but it belongs in the table that chose 4 kHz over 8 kHz. Found by
-> `R10-keyscan-and-adc.md` §B-2 and still unapplied.
-
-**Sample-cap charge sharing** `[calc]`, from R10's datasheet quote (20 pF sample
-cap, 1.5 clocks of acquisition) `[repo] R10 B-2`:
-
-```
-I_avg = 20 pF × 4 kHz = 80 nA per volt
-ΔV    = 80 nA/V × 6 kΩ = 480 µV/V = 0.048 % — about 2 LSB at full scale,
-        proportional to V_in, therefore a pure constant gain term
-```
-
-Invisible: the zero is auto-tracked in firmware and the span is set by a panel
-knob `[repo] 0003, 0006`.
-
-**`C-ADC-BULK` is new and is proposed, not decided.** The MCP3202 has no `VREF`
-pin — `VDD` *is* the reference `[repo] R10 B4` — so the ADC's scale factor is the
-dev board's LDO output, and it has no anti-alias filter of its own. The repo's
-own `C-STRIP-BULK` note puts the WS2815 PWM rate at ~2 kHz `[repo] bom.csv`,
-which is exactly Nyquist for a 4 kHz sampler. 10 µF plus the existing 100 nF,
-treating that pin as an analog reference rather than a logic supply.
+*The divider, the anti-alias derivation, the charge-sharing derivation and
+`C-ADC-BULK` moved verbatim to [`breath-adc/`](breath-adc/breath-adc.md). This
+argument stayed, because it is owned by neither circuit: it is the key chain
+loading the ADC's reference.*
 
 **Key pull-ups load that same reference, and they are 4.4× heavier than this
 page first costed them** `[calc]` — `R-KEY-PU` is 2.2 kΩ, not the 10 kΩ of the
@@ -435,7 +238,6 @@ and both are board decisions, not firmware ones.
   *Still open*.
 
 ---
-
 ## §3 Chain drive — what is left after the registers went back
 
 **The registers are not on this board.** ADR 0001's *"One register per cluster"*
@@ -680,129 +482,11 @@ rediscovered as a problem.
 
 ---
 
-## §5 LED data
-
-```
-  IO1 ──┬──[R-LED-PD 10k]── GND   ** PROPOSED **
-        │
-        └──►│ 74AHCT125 gate A ├──[R-LED-SER 220R]── J-LED-L  DI   ** R PROPOSED **
-                                                     J-LED-L  BI ──► GND
-                                          (vendor's recommended circuit; gate B SPARE)
-
-  IO2 ──┬──[R-LED-PD 10k]── GND   ** PROPOSED **
-        │
-        └──►│ gate C ├──[220R]── J-LED-R DI
-                                          J-LED-R BI ──► GND   (gate D SPARE)
-
-  74AHCT125 rail = 5 V (TTL thresholds, so 3.3 V in reads high)  [repo] 0014
-  OE ×4 tied LOW
-  [C-DECOUPLE-CARRIER 100 nF] at the package
-```
-
-**`R-LED-PD` is new and it is the fix for a real hole.** ADR 0014's defence
-against latched strips is "blank both strips and the matrix as the first act at
-boot" `[repo] 0014` — a firmware rule that cannot run in the window it matters.
-On reset GPIO1 and GPIO2 are high-impedance inputs for the bootloader window
-(order 100–300 ms `[from memory]`), `OE` is tied low so the buffer is enabled,
-and an AHCT input floating near its threshold does not sit still. The buffer
-squares up whatever it sees into clean 5 V edges and sends it to 25 addressable
-LEDs on a 12 V rail. WS281x has no framing beyond a reset gap, so that is random
-pixel data — the exact state the thermal clamp exists to prevent, at the moment
-no firmware is running to clamp it. Two 0805s, and they cannot be added later.
-
-The module page has the same idea for the same reason: `R-SPI-PULL`, six of them,
-both sides of its 74AHCT125 `[repo] digital-and-supervision.md`. The instrument
-end has none.
-
-**Both open questions here are closed, 2026-09-21**, against the genuine
-Worldsemi WS2815 datasheet V1.1 now at
-`datasheets/other-semi/WS2815.pdf` `[repo, verified]`:
-
-- **Yes, the WS2815 accepts 5 V logic, and the 74AHCT125 is the right part.**
-  The Electrical Characteristics table gives `V_IH ≥ 0.7 VDD` — and **the table
-  declares its own conditions in the header: `VDD = 4.5…5.5 V`.** So `V_IH` is
-  **3.15 V to 3.85 V**, nominally 3.5 V, and the 74AHCT125 at 5 V delivers
-  ~4.4 V minimum into it.
-
-  > **Where "12 V logic" came from.** The datasheet reuses the symbol `VDD` for
-  > two different nets: pin 2 `VDD` is the +12 V LED supply, while the
-  > Electrical Characteristics table's `VDD` is the 4.5–5.5 V logic rail it
-  > names in its own header. Reading `0.7 × VDD` with the pin-2 meaning gives
-  > **8.4 V**, which is how a 12 V part acquires an impossible threshold. The
-  > conditions line governs. *(Absolute Maximum Ratings muddles it further —
-  > "Logic input high voltage VI: VDD−0.5 … VCC+0.5 V" — which is why this
-  > needed reading rather than recalling.)*
-
-- **No, the first pixel's `BI` does not need driving — ground it.** The
-  datasheet's own "Recommended application circuit" ties **L1's pin 6 (`BI`) to
-  pin 5 (`GND`)**. From L2 onward each pixel's `BI` comes from the *previous*
-  pixel's `DI` node, internal to the tape — so the backup line lags the main
-  line by one pixel, which is exactly what lets a dead pixel be bypassed, and
-  the head of the strip has nothing to lag.
-
-  **So gates B and D are not needed**, the BOM's "two spare gates" is right
-  after all, and the LED loom stays at 6 conductors rather than 8. *(The figure
-  is a raster image with no text layer and was read by rendering the page at
-  700 dpi — confirm visually against the PDF before the loom is crimped.)*
-
-  The bypass latch is **sticky until power-off**: *"...make the BIN in state of
-  receiving signal until restart after power-off."*
-
-**`R-LED-SER` is proposed** on the same grounds as §4: each gate drives ~420 mm
-of wire to a strip, and nothing damps it. 100–330 Ω at the buffer.
-
-**`C-STRIP-BULK` (470–1000 µF ×2) sits at the strip feed points**, which are on
-this board — "bulk capacitance belongs where the current swings" `[repo] 0014`.
-Two radial electrolytics are a height item in a ~20 mm cavity; see *Still open*.
-
----
-
-## §6 Display loom and service header
-
-**This section's open question has been answered, against it.** The draft asked
-whether `EN` and `IO0` reach the ESP32-S3-Matrix's headers and said "settle it
-before this board is laid out". `bom.csv` row `HDR-SERVICE` has since settled
-it: **they do not.** The vendor's board definition accounts for every pin on
-both header rows — 3 power and 17 GPIO — and neither appears; `IO0` is under
-the BOOT button and `EN` is on the reset circuit, so reaching either means
-soldering to the dev board, which ends its life as a swappable module and
-breaks `HDR-DEV`'s "sockets, not solder-down" rule `[repo] bom.csv, 0009`.
-
-**`HDR-SERVICE` is therefore 2×3, six pins, not 2×5** — a UART pair and a
-ground for each board, and nothing else. The recovery ladder absorbs the loss:
-OTA rollback first, USB-Serial-JTAG through the tail slot second, this header
-third. A corrupted bootloader ends the instrument, and that is accepted
-`[repo] bom.csv`.
-
-**Two conductors and three passives per line come out of the loom with it:**
-
-```
-  J-DISP  ──  9 conductors, 360 mm, up a side channel
-
-    5 V (or +12 V — see Still open)        1
-    GND                                     1
-    IO5 → display RX, IO6 ← display TX      2      UART1, 921600 baud
-    U0TXD                                   1  ┐  service, per ADR 0009
-    U0RXD                                   1  │  and firmware/README.md
-    GND                                     1  ┘
-    two spare conductors (ADR 0009)         2
-
-  No EN, no IO0, and so no RC networks for them.
-
-
-  HDR-SERVICE  2×3, under the tail-underside cover:
-
-    real-time board:  U0TXD(IO43)  U0RXD(IO44)  GND
-    display board:    U0TXD        U0RXD        GND
-```
-
-**ADR 0013's "four broken-out pins — UART pair and power"** `[repo] 0013` is a
-statement about the display board's *pin* requirement, not about the loom.
-The loom is nine conductors over 360 mm, sharing a side channel with an 800 kHz
-data line and 12 V LED power. What runs in it now is a UART pair and a console
-pair — all four framed, byte-oriented and recoverable by retry, which is
-exactly what `EN` and `IO0` were not. **The proposed RC networks are withdrawn
-along with the lines they protected.**
+*§5 LED data — the 74AHCT125 gates, `R-LED-PD`, `R-LED-SER`, `J-LED-L/R` and
+the WS2815 `V_IH`/`BI` argument — moved verbatim to
+[`led-strip-drive/`](led-strip-drive/led-strip-drive.md). §6 display loom and
+service header — `J-DISP` and `HDR-SERVICE` — moved verbatim to
+[`display-and-service-uart/`](display-and-service-uart/display-and-service-uart.md).*
 
 ---
 
@@ -853,36 +537,26 @@ page and have no BOM entry yet.
 | **`R-CHAIN-SER`** ×3 | **100 Ω** | **Proposed — series at the driving end on `SCK`, `SH/LD` and `SER`. ADR 0001 deleted `R-TERM-CHAIN` because series termination is wrong for a line that drops on four boards; this is edge-rate damping at the source, which is a different job and survives that argument** | proposed |
 | **`U-TVS-CHAIN`** | **4-ch array, SOT-23-6** | **Proposed — the chain's four signals leave the board and run the body. `U-TVS-SPI` does exactly this for the umbilical's three** | proposed |
 | **`F-CHAIN`** | **100 mA polyfuse** | **Proposed — the 3V3 conductor runs 265 mm beside 12 V LED power in a bonded body, and a short on it takes the LDO and the instrument down** | proposed |
-| `U-ADC` | MCP3202-CI/SN | `VDD` **is** `VREF`; 3V3 from the dev board | `[repo]`; clock limit `[from memory]` |
-| `R-ADCDIV` | 10 kΩ / 15 kΩ 1 % | 0.6× after the buffer | `[repo]` + `[calc]` |
-| `C-AA-ADC` | 47 nF C0G | 564 Hz, and the ADC's charge reservoir | `[repo]` + `[calc]` |
-| **`C-ADC-BULK`** | **10 µF X7R** | **Bulk at MCP3202 `VDD`/`VREF`. Proposed — the reference has no anti-alias and the WS2815 PWM is ~2 kHz against a 4 kHz sampler** | proposed, from `[repo] R10 B-3` |
-| `U-REF-BREATH` | REF5050AIDR | 5.000 V for the ratiometric sensor | `[repo]` |
-| `C-REF-OUT` | 10 µF ×2 | REF5050 `VIN` bypass and REF5050 `VOUT` load cap — **not** on the buffer's output | `cref-out-node`, settled |
-| **`R-FB-REF` / `R-FBX-REF` / `C-FB-REF`** | **10 kΩ / 100 Ω / 1 nF** | **The reference buffer's dual feedback. All three instrument-side and unretrofittable** | `riso-ref-topology`, settled |
 | `U-BUF` | OPA2197IDR | ½ reference buffer, ½ breath buffer, both on +12 V | `[repo]` |
 | `U-BREATH` + `SKT-BREATH` | MPXV4006DP, case 1351-01 | P1 to the tube, P2 open to the cavity | `[repo]`; **P1 identity open** |
 | `R-SER-BREATH-INST` | 1 kΩ | Output protection. **No series cap here** | `[repo]` |
 | `D-TVS-BREATH` ×2 | 12 V standoff, SOD-323 | `BREATH` and `AGND` legs | `[repo]` |
 | `R-SPI-SER` ×3 | **100 Ω** | Series at the driving end on `SCLK`, `MOSI`, `CS`. **Was drawn as three refdes that are not in the BOM, at 220 Ω, derived from an RC model** — see §4 | `[repo] bom.csv` |
 | `U-TVS-SPI` | SP0504BAHT, **SOT-23-5** | `SCLK`, `MOSI`, `CS` + spare, to `PWR_GND` | `[repo]` |
-| `U-LVLSHIFT` | 74AHCT125 SOIC-14 | LED data, 5 V rail. **Gate count depends on `BI`** | `[repo]`; `BI` `[from memory]` |
-| **`R-LED-PD`** ×2 | **10 kΩ** | **Proposed — holds the strips' data low through reset** | proposed |
-| **`R-LED-SER`** ×2–4 | **100–330 Ω** | **Proposed — damps ~420 mm to each strip** | proposed |
-| `U-BUCK` ×2 | R-78E5.0-1.0 SIP-3 | One per dev board. **Buck B's location is open** | `[repo]` |
-| `L-BUCK-IN` | 10–47 µH ≥1 A | **Qty 1 against `C-BUCK-IN`'s qty 2 "one per buck" — the two rows describe different topologies** | `[repo]`, contradictory |
-| `C-BUCK-IN` ×2 | 100 µF 25 V electrolytic | **Must have real ESR; a ceramic breaks the damping** | `[repo]` + `[calc]` |
-| `D-USBOR` ×2 | SS14 | **One per regulator output, not "one per source" — the OR node is a dev-board pin** | `[repo]` note is wrong |
-| `D-REVSHUNT` | SS34 | At the connector, ahead of `L-BUCK-IN` | `[repo]` |
-| `D-TVS-PWR` | SMAJ15A | Across the power pair | `[repo]` |
-| `C-STRIP-BULK` ×2 | 470–1000 µF 16 V | At each strip feed point, which is this board | `[repo]` |
-| `HDR-SERVICE` | **2×3** | UART pair + GND per board. `EN`/`IO0` are not on the headers and are not wired — §6 | `[repo] bom.csv`, settled |
 | **`J-CHAIN`** | **2×6 IDC boxed, keyed** | **Chained through four cluster boards. 4 signals, 5 alternating grounds, 3V3, 2 spare. EIGHT of them across five boards — `SER`/`QH` are point-to-point, so every cluster board but the last has an IN and an OUT (qty in `bom.csv`)** | **decided** |
-| **`J-LED-L/-R`** | **4-way each** | **Proposed — 12 V, GND, `DI`, `BI`.** `BI` is a **ground** connection at the head of the strip, not a driven one (§5, verified against the datasheet 2026-09-21) — so it is still a 4-way connector but only three nets, and `BI` can tie to the same GND pin's net at the strip end | proposed |
-| **`J-DISP`** | **9-way** | **Proposed — see §6. Was 11-way before `EN`/`IO0` were withdrawn** | proposed |
 | `MECH-GNDBOND` | Ring terminal + M3 | Plate to `PWR_GND`. Needs a pad and a hole on this board | `[repo]` |
 | `PCB-CARRIER` | 2-layer, **outline TBD** | See *Still open* | `[repo]` says ~100 × 45 mm; not checked |
 | **`TP-*`, `LK-*`** | **TBD** | **Proposed — `D2` asked for test points, shunt links and an LA header on this board and none exist in the BOM** | proposed |
+
+*Rows for the five circuits that now have their own directories moved with them:
+`U-ADC`, `R-ADCDIV`, `C-AA-ADC` and `C-ADC-BULK` to `breath-adc/`;
+`U-REF-BREATH`, `C-REF-OUT` and `R-FB-REF`/`R-FBX-REF`/`C-FB-REF` to
+`breath-excitation-reference/`; `U-LVLSHIFT`, `R-LED-PD`, `R-LED-SER` and
+`J-LED-L/-R` to `led-strip-drive/`; `U-BUCK`, `L-BUCK-IN`, `C-BUCK-IN`,
+`D-USBOR`, `D-REVSHUNT`, `D-TVS-PWR` and `C-STRIP-BULK` to
+`power-entry-instrument/`; `HDR-SERVICE` and `J-DISP` to
+`display-and-service-uart/`. `U-BUF` stayed: one half of it is the reference
+buffer and the other is the breath buffer.*
 
 ---
 
@@ -943,11 +617,6 @@ Ordered by what blocks what. The first four block layout.
   strips, one 8–11 way key loom, the display loom, the breath tube and the
   U-bolt in 49 mm of internal width and ~20 mm of cavity. "~100 × 45 mm" is an
   assumption, not a fit — but a less tight one than the four-ribbon draft had.
-- **Where buck B lives.** ADR 0013's carrier list puts both regulators here;
-  ADR 0013's own reasoning wants the display board's WiFi transients absorbed
-  locally, which a regulator 360 mm away does not do. Either it moves to the
-  display board and +12 V goes up the loom, or `C-BULK-DISP` does the job and
-  the location is arbitrary. Pick one before `J-DISP`'s conductor list is fixed.
 - **`F-CHAIN`** (§3): whether the 3V3 conductor going down the body is fused.
   Two millimetres of board, unretrofittable, and the failure it covers is
   "the instrument is dead and there is no way to look inside".
@@ -974,18 +643,9 @@ Ordered by what blocks what. The first four block layout.
 - **The etherCON variant at the instrument end** `[repo] 0004`, which decides
   whether this board carries an RJ45 jack footprint (~16 × 14 mm, not in the
   BOM) or eight wires. ADR 0004 defers it to E12/M7, which is after E13.
-- ~~**The WS2815's data threshold, and whether `BI` needs driving**~~ —
-  **closed 2026-09-21** against the datasheet, §5. 5 V logic is correct,
-  `BI` is grounded at the head, two gates stay spare.
 - ~~**The MCP3202's maximum clock at 3.3 V**~~ — **closed 2026-09-21**, §4.
   0.9 MHz is not an interpolation; it is the datasheet's *guaranteed* 2.7 V
   maximum, so using it at 3.3 V is conservative rather than approximate.
-- ~~**`C-REF-OUT` qty 2** for one REF5050 — parallel, or input and output?~~
-  **Closed 2026-09-21: input and output, see `cref-out-node`.** The datasheet
-  forces a `C_L` onto the REF5050's own `VOUT`, which accounts for one of the
-  two and leaves nothing for the buffer's output.
-- **`L-BUCK-IN` qty 1 against `C-BUCK-IN` qty 2.** One LC and one bulk cap, or
-  two LCs and a missing inductor.
 - **Test points, shunt links and an LA header.** `D2-missing-testability.md`
   asked for them on this board; the BOM has none. E14 re-runs E1–E11 on this
   board and M8 does failure injection on it, and neither has a documented means
