@@ -489,3 +489,59 @@ It is exactly what `CLAUDE.md` §2's "add one pattern per spelling you find"
 produces when the spelling you find is hard-wrapped across two lines, and no
 document warns about it. A pattern that cannot fire is indistinguishable in
 every report from one that fires and finds nothing.
+
+## B3 — the last slice, and a two-agent convergence
+
+### B3-01 / A1 — `-9.6V`, escaping by one character, in two files
+
+A1 (breath chain) and B3 (datasheets) found this independently, from
+opposite directions.
+
+| Claim | Check | Verdict |
+|---|---|---|
+| `U-DIFFRX`'s row carries the superseded `-9.6 V` in a spelling no pattern matches | Extracted the literal from both files | **Confirmed.** Both `hardware/bom.csv:103` and `hardware/unplaced.csv:15` read *"Output is 0V at rest to **`-9.6V`** at full (Vout = `-2.185*`(V_BRE…"* — **no space**. `inamp-full-scale`'s four patterns are `-9.6 V`, `−9.6 V`, `-10.05 V`, `−10.05 V`, **every one of them with a space** |
+
+The row is wrong twice over: the same sentence computes from the **raw** gain
+`2.185`, which gives −10.05 V — also a forbidden value, also spelled without
+a space, also invisible. So the row contradicts the register *and itself*,
+and the checker reports `PASS`.
+
+And it is in **two files at once**, because `unplaced.csv` is a `merge-bom.py`
+fragment and `bom.csv` is generated from it. One defect, two copies, one edit
+site — which is the arrangement working correctly, on a defect nothing can see.
+
+### B3-02 — the owner document refutes itself four lines later
+
+| Claim | Check | Verdict |
+|---|---|---|
+| `0003-breath-sensing-path.md` — the **owner** of `sensor-full-scale` — states the figure correctly and then contradicts it on the same screen | Read `:561` and `:565` | **Confirmed.** `:561` reads "full scale, **0.265–4.86 V**, for the CV output". `:565` reads "The sensor **reaches 4.7 V** while the ADC runs on 3.3 V". Four lines apart |
+
+None of the 27 patterns matches `reaches 4.7 V`. The list holds `4.7 V
+output`, `full scale = 4.7 V`, `4.7 V × 0.6` — three spellings of the same
+fact, and not this one.
+
+B3 also notes the number matches **nothing in the banked document**: the
+sensor's own cover page reads "0.2 to 4.8 V". So 4.7 V is neither the current
+corpus value nor the datasheet's.
+
+With the tight-en-dash instance in ADR 0005 verified earlier, that is **the
+owner document and the power ADR both carrying the same retired figure, in
+two different unmatched spellings, at the same time.**
+
+### B3's clean results, recorded so they are not re-derived
+
+The half of B3's slice that came back sound is worth as much as the findings:
+**every vector-CAD dimension confirmed** — Gateron 1.20 mm on both citations
+including the hatched plate section, the cutout genuinely `14.00 +0.05/−0.02`,
+the NKK toggle exact on all five dimensions, the Laird bias digitisation
+reproducing to within 3 Ω on all five traces, and both Eurorack panel
+artefacts confirming `panel-height-budget` exactly. **No absolute maximum is
+violated** under any stated condition including power-up. And **no place in
+the corpus cites a surrogate datasheet as the fitted part's spec** — the
+surrogate discipline holds everywhere.
+
+B3 also supplies the extraction route this file got wrong earlier: `pip
+install pymupdf` does both text and rendering, and for a number that lives
+only in a curve it extracted the **content-stream geometry** and calibrated
+against the gridlines — noting that its own first eyeball pass on the Laird
+curves was wrong by up to 60 % and the vector extraction corrected it.
