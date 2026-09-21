@@ -372,3 +372,68 @@ wrong number and cannot protect a missing one.** It is also the cheapest
 missing check in the repository after the one `STATUS.md` already names — both
 are of the form "assert that what is written now resolves", which is the
 principle the restructure's own three new checks were built on.
+
+## C2 — the sixth fail-open, reproduced
+
+C2's brief was to find a sixth instance of the class without being allowed to
+see the first five. It found one, and it is in the check the whole
+restructure's conservation proof rests on.
+
+### The head of a moved passage can be deleted for free
+
+| Claim | Check | Verdict |
+|---|---|---|
+| `check-conservation.py` detects text lost off the **tail** and is blind to text lost off the **head** | Ran the tool three times against `pitch-stage.md`, dropping nothing / the first 6 words / the last 6 words | **Confirmed, reproduced exactly.** Intact: `REAL GAPS: 0, rc=0`. **First six words deleted** — which are `# Pitch stage — schematic **Status:**`, the page's entire H1 and its status label — `seams: 1, REAL GAPS: 0, **rc=0**`. **Last six words deleted**: `TAIL: … rc=1` |
+
+The asymmetry is structural. A shingle walk starting at `i=0` has exactly one
+shingle containing word 0, so losing the first *k* words breaks *k* shingles,
+and `seams = [l for l in lost if l[1] < N]` files any *k* ≤ 7 as a seam. The
+code at `:59-61` compares the final N words explicitly **because** the same
+argument was noticed at the end — and the comment above it reasons "at the
+very end only k shingles exist to break … Verified", without the symmetric
+sentence ever being written.
+
+**Why this one matters more than the other twelve.** Deleting words off the
+front of a passage is not a hypothetical edit here — it is *what a Phase B
+split does*. An agent moves a section to a new page and rewrites its heading.
+So the single check built to prove the seven splits conserved content is blind
+to the most likely way a split loses it. Every "0 REAL GAPS" in `STATUS.md`
+is a weaker claim than I stated it as.
+
+C2 found two more in the same file: a passage the source states **twice** can
+be halved for free, because `have` is a set; and reordering is invisible by
+construction.
+
+### And the fourth-generation instance, again
+
+| Claim | Check | Verdict |
+|---|---|---|
+| `check_bom_generated()` returns on the `merge-manifests` result before it ever looks at `merge-bom`'s | Read `tools/check-staleness.py:199-215` | **Confirmed.** `r` (merge-bom) is computed at `:200`; `:209` returns on `m`'s non-zero exit and `r` is never examined. A manifest problem **masks a hand-edited `hardware/bom.csv` completely.** The filter at `:210-211` keeps only lines containing `PROBLEM:` or `does not match`, which discards every `REFUSING TO WRITE:` message `merge-manifests.py` has — replacing a precise, purpose-written refusal with "it probably crashed", a diagnosis that is simply false |
+
+The comment at `:216-226` is the stdout-plus-stderr fix for exactly this
+failure. It was applied to the `r` branch and not to the `m` branch **six
+lines above it**, in the same function, in the same commit. Its own text
+reads: *"That is the FOURTH instance of the fail-open class in this
+repository, and it was inside the check written to close the third."*
+
+This is the fifth, inside the fourth.
+
+### The rest of C2's list, not individually reproduced by me
+
+Thirteen further fail-opens, every one of which C2 reproduced in a throwaway
+tree: the REFUTATION exemption silenced by the bare word `was` (**23 of 59
+current suppressions ride on it**); `check_owners`' token being an unanchored
+digit substring (`14.863 mm` satisfies `4.86`); `check_checks` asserting a
+substring of `main()`'s source, so `if False and link_problems:` passes;
+`check_sections` keyed on basename across 15 `notes.md`; `check_links` seeing
+inline `](*.md)` only, so broken links to `bom.csv`, `figures.yaml` and a
+`.dxf` all pass; `check_verified_against` accepting a SHA from a different
+part's row; a duplicate `id` evicting a whole circuit; **emptying every
+`forbidden` list producing a PASS line byte-identical to a healthy run**; and
+`merge-bom.py` silently skipping a fragment named in `ORDER` but absent, then
+regenerating a smaller master with everything green.
+
+C2 also recorded what it could **not** fool, which is the more useful half:
+`merge-bom.py`'s five other guards, all of `merge-manifests.py`'s own guards,
+everything `verify-datasheets.py` checks, and `rewrite-paths.py --invert` —
+the strong proof that Phase A changed no content. That one held.
