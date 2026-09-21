@@ -55,17 +55,20 @@ reviewed prose and the checker treats it as such.
 
 This is the part a better sandbox does not fix.
 
-### Module PCB — closest, five blockers
+### Module PCB — closest
 
-| Blocker | Clears when |
+**Assume the datasheets land.** That clears three blockers outright and
+converts a fourth from unknown to arithmetic:
+
+| Blocker | Datasheets clear it? |
 |---|---|
-| `C-TIMER-LOADSW`, `C-GATE-LOADSW` | `164112fc.pdf` — 365 nF or 9.4 µF is an 0805 or an electrolytic. **In flight** |
-| `R-FB-HI` / `R-FB-LO` | Same document. The divider is on no drawing yet |
-| `R-PRECISION` package | `5400fc.pdf` — MS8E may carry an exposed pad the package field does not. **In flight** |
-| `J-UMBILICAL` variant | Chassis vs PCB-mount changes the footprint *and* the board notch |
-| **`TRIM-OFFSET` is not buildable as described** | A redraw. Not a value — the network has to put 2.500 V at mid-travel, which means dividing `VREFOUT` and gaining it back, or injecting a bipolar correction |
+| `C-TIMER-LOADSW`, `C-GATE-LOADSW` | **Yes** — `164112fc.pdf` gives `I_TIMER` and `I_GATE`, so the values and therefore the packages follow |
+| `R-PRECISION` package | **Yes** — `5400fc.pdf` says whether MS8E carries an exposed pad |
+| `R-FB-HI` / `R-FB-LO` | **Values yes, drawing no.** The divider exists on no schematic page; it has to be drawn onto `power-entry.md` |
+| `J-UMBILICAL` variant | **No — this is a decision.** The drawing gives both chassis and PCB-mount dimensions; it cannot tell you which to fit, and the choice changes the footprint *and* the board notch |
+| **`TRIM-OFFSET` is not buildable as described** | **No — this is a redraw.** `V_ref` nominal *is* `VREFOUT` and a divider can only go below it, so the nominal sits at an end stop with no downward authority. The network has to put 2.500 V at mid-travel: divide `VREFOUT` and gain it back, or inject a bipolar correction |
 
-Two more that are layout decisions nobody has made:
+And two layout decisions that no document makes:
 
 - **The two-terminal trimmer's wiper strap.** `pitch-stage.md` says it plainly:
   *"That is a footprint decision, not a value."* Strap the wiper to one end so a
@@ -73,18 +76,27 @@ Two more that are layout decisions nobody has made:
 - **Entry bulk is 4 × 47 µF**, flagged as 2–5× the surveyed norm. Four large
   footprints are at stake, and shrinking them after placement is a re-place.
 
+**So the remaining work is one schematic session, not a research problem:** pick
+the connector variant, redraw `TRIM-OFFSET`, draw the `FB` divider, settle the
+bulk count and the wiper strap. Then the module is layout-ready.
+
 *(Resolved and ready: `R-BIAS-DAC` at the DAC pin, `R-LDAC` to `AVDD`,
 `R-SPI-SER` ×3 at 100 Ω, `R-SPI-PULL` ×6, `D-REVPOL` ×3, `C-DECOUPLE` at 19.)*
 
-### Module panel — blocked on a disputed figure
+### Module panel — disputed, but now derivable
 
-`panel-height-budget` is **disputed** in `config/figures.yaml`, with four
-candidate values from 97 to 124 mm against ~110 mm usable — and the register
-notes ~110 mm is itself derived from nothing. It is decided by *a 1:1 paper
-check at M4 with real parts*, which has not happened.
+`panel-height-budget` is **disputed** in `config/figures.yaml`, four candidates
+from 97 to 124 mm, and ~110 mm usable is derived from nothing.
 
-The panel outline and the ⌀24.0 bore are settled; **the control spacing is
-not.** Cut the outline, place the connector, stop.
+**The datasheets change this too.** It was filed as needing *a 1:1 paper check
+with real parts* because nobody had dimensions. Four of the five control types
+now have them — etherCON flange and depth, PJ398SM body and bushing, RV09 pot
+body and lug span, and a 14 mm knob cap that `bom.csv` already calls the binding
+constraint. The gap is the panel toggle, still `BLOCKED`, where the nearest
+verified part is a usable proxy for row spacing and wrong by 0.35 mm on the hole.
+
+So: **do the arithmetic against 128.5 mm, state a total, retire the dispute.**
+Outline and ⌀24.0 bore are settled and can be cut now either way.
 
 ### Carrier — 11 open items, and one geometric
 

@@ -157,7 +157,7 @@ figures:
     status: disputed
     owner: docs/decisions/0004-cv-interface-module.md
     candidates: ["107 mm (asserted, never derived)", "97 mm (derived, but with no clearance allowance - the same defect)", "112 mm (97 mm with B1's clearances restored)", "124 mm (with the toggle/LED row not assumed to fit beside the flange)"]
-    decided_by: "A 1:1 paper check at M4 with real parts. ~110 mm usable is itself derived nowhere - nothing connects it to the 128.5 mm panel."
+    decided_by: "DERIVABLE ON PAPER NOW, which it was not when this was filed. It said 'a 1:1 paper check at M4 with real parts' because nobody had dimensions. The 2026-09-21 datasheet wave banked them: etherCON flange 26 x 31 mm with 34.55-36.3 mm behind the panel; PJ398SM body 9 x 9 x 8.3 with a D6 bushing and 4.5 mm of thread, 5.5 mm panel face to body front; RV09 pot body 9.8 mm wide, 11.4 mm across the snap-in lugs, 7.0 mm board to shaft; KNOB-BREATH capped at 14 mm, which bom.csv already establishes as the binding constraint. FOUR OF FIVE CONTROL TYPES NOW HAVE REAL NUMBERS. The gap is the panel toggle, still BLOCKED - nearest verified part is the E-Switch 100 series at 12.70 mm body height on a 6.35 mm bushing, which is a usable proxy for row spacing and wrong by 0.35 mm on the hole. Do the arithmetic against a 128.5 mm panel, state the total, and retire this dispute. ~110 mm usable is still derived from nothing and should be replaced rather than reconciled."
     forbidden: []
 
   - id: breath-working-point
