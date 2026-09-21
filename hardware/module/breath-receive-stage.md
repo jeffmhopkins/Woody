@@ -305,3 +305,26 @@ E10 verifies it by pulling the umbilical mid-note with the mouthpiece at rest.
     added to remove, displaced onto the OFFSET knob.
   - **Its gain range is 0.6× to 2.5×**, not unity and a trim — real playing
     tops out near 2.5–2.8 kPa against the sensor's 6 kPa span.
+  - **The OFFSET knob has authority in one direction, and it is the wrong
+    one.** An inverting summer fed from the only reference available (+2.500 V)
+    can push the jack *below* 0 V and not above it. That is the identical
+    defect this page congratulates itself for fixing at the `REF` pin, moved
+    one stage downstream where it is drawn as a block. It needs a −1 inverter
+    from a spare half, or a bipolar reference.
+
+### The instrument-side reference buffer is not stable as connected
+
+Not this page's circuit, but it sets the number this page multiplies. ADR 0003
+buffers the REF5050 with half an OPA2197 straight into the sensor's `VS` pin —
+which carries a 100 nF decoupler and `C-REF-OUT`'s 10 µF. **A unity-gain
+follower driving that has a pole at 21 kHz inside its own loop**, three decades
+below crossover, and no general-purpose precision op-amp is unconditionally
+stable there.
+
+**The obvious fix is the wrong one.** An isolation resistor *outside* the loop
+costs `10 Ω × 10 mA = 100 mV` on 5.000 V — **2 % of the ratiometric scale
+factor**, against a reference specified to 0.05 %.
+
+**`R-ISO-REF` goes inside the loop**, with feedback taken at the sensor's `VS`
+pin, which is the same trick the pitch stage now uses at its jack: DC error
+zero, capacitive load isolated. Instrument-side, so unretrofittable.
