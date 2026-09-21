@@ -13,7 +13,7 @@ entry diode, so most of the prior art stops being applicable halfway down.
   16-pin shrouded keyed IDC (J-PWR-EURO)
        │
   +12V ├───┬──[D1 1N5817]──[FB1]──[C1 47µF]──┬── MODULE ANALOG +12V
-       │   │                                  │   OPA2197 ×6, INA828, LM311
+       │   │                                  │   OPA2197 ×6, INA828
        │   │                                  │
        │   │                                  └──[LM317LZ]──┬── DAC AVDD 5.21V
        │   │                                   150R/475R    │
@@ -25,13 +25,13 @@ entry diode, so most of the prior art stops being applicable halfway down.
        │                          │  [R-ILIM 50mΩ]        │
        │                          │       │               │
        │                          │  ┌────┴────┐          │
-       │                          │  │ LT1641-1│──GATE──┐ │
-       │                          │  │  CS8    │        │ │
-       │              panel ──────┼──┤ ON      │     ┌──┴─┴──┐
-       │              toggle      │  │  TIMER  │     │ N-FET │  DPAK
-       │                          │  └────┬────┘     │       │
-       │                          │    [C_T]         └───┬───┘
-       │                          │       │              │
+       │                          │  │ LT1641-1│──GATE──┬─┐
+       │                          │  │  CS8    │      [C_GATE]
+       │              panel ──────┼──┤ ON      │        │ │   ** WAS MISSING **
+       │              toggle      │  │  TIMER  │     ┌──┴─┴──┐
+       │                          │  └────┬────┘     │ N-FET │  DPAK
+       │                          │  [C-TIMER]       │       │
+       │                          │       │          └───┬───┘
        │                          └───────┴──────────────┼── PWR_GND
        │                                                 │
        │                                        UMBILICAL +12V ──► instrument
@@ -45,15 +45,48 @@ entry diode, so most of the prior art stops being applicable halfway down.
 
 ## Three diodes, not two, and the branch is before them
 
-**`D1` and `D2` are the whole point.** An earlier revision branched the two
-+12 V paths *after* a single shared Schottky, and four reviewers found the
-consequence by four different routes: the instrument's current then flows
-through the same diode as the module's analog rail and modulates its forward
-voltage by ~80 mV. That is about **20 cents of breath-correlated pitch bend**,
-needing no ground path at all, visible by inspection of the diagram.
+**`D1` and `D2` are right, and the reason given for them was wrong.** An
+earlier revision branched the two +12 V paths *after* a single shared
+Schottky, so the instrument's current flowed through the same diode as the
+module's analog rail and modulated its forward voltage by **~80 mV** (A7
+independently gets 75 mV: 0.305 V at 245 mA → 0.380 V at 612 mA, so the
+figure itself is sound).
 
-The second diode costs about twenty cents. There is no prior art for this
-split because there is no prior art for the situation.
+**The "20 cents of breath-correlated pitch bend" that followed is not.**
+It implies ~21 % pitch sensitivity to the +12 V rail. Pitch full scale is
+set by the DAC's *internal* reference, and AVDD comes from the LM317, so
+the real path is 75 mV → LM317 line regulation (0.52 mV/V) → 39 µV on AVDD
+→ OPA2197 PSRR (114 dB) → **0.15 µV = 0.00018 cents** `[calc, A7]`. The
+20-cent figure is a survival from the rail-divider topology ADR 0006
+already deleted. Two reviewers reached this independently.
+
+**Keep both diodes anyway**, for the reasons that do hold: fault isolation
+between the exported rail and the analog rail, and HF isolation (`r_d` is
+69 mΩ at 392 mA). Stated correctly they are still worth twenty cents. Left
+as it was, the next reviewer who checks the arithmetic deletes the part.
+
+> ### The ground path this section dismisses is the real one
+>
+> This page says the diode effect needs "no ground path at all". That was
+> offered as a reason the diode split matters. It is also the reason the
+> **larger** effect was never looked for — and three reviewers found it
+> independently, in three different segments of the return path:
+>
+> | Segment | Effect |
+> |---|---|
+> | The power ribbon's six ground conductors, ≈17 mΩ | 6.2 mV → **7.4 cents** (24 on a flying bus) |
+> | ~20–40 mΩ of busboard ground to a neighbouring module | 7–15 mV → **8–18 cents** |
+> | The cable shield, if the etherCON shell bonds to the 8HP panel | **~7 cents** |
+>
+> All three are **breath-correlated**, because they are driven by the
+> instrument's own supply current. `pitch-stage.md` puts the entire pitch
+> error budget at 0.42 cents. **The carefully engineered part of the pitch
+> path is one to two orders of magnitude below an effect that appears in no
+> document**, and because it tracks breath it will not sound like noise —
+> it will sound like an intentional feature that has gone wrong.
+>
+> Not fixed here. It is a grounding and shield-bonding decision, and the
+> shield policy is sixteen words in the whole repo.
 
 `D3` protects −12 V. The bus +5 V pin gets no diode: the only thing on it is a
 $0.30 buffer, and a reversed ribbon that kills the buffer and nothing else is
@@ -65,55 +98,115 @@ bead is a wire**. Package does not set the rating — the *series* does: within
 one vendor's 0805 600 Ω line there are 600 mA and 2.3 A versions, and another
 "600" part is 60 Ω at 3 A. Read the series, not the footprint.
 
-## The load switch, sized from its own arithmetic
+## The load switch — rebuilt 2026-09-21, because it never started
 
-`R-ILIM` sets the limit against the LT1641's 50 mV sense threshold:
+**Three reviewers independently concluded that this circuit as specified
+latches off at the end of every start attempt.** They reached it from the
+BOM arithmetic, from a sequencing walk-through, and from the datasheet
+equation read against fourteen published module schematics. None of them
+could see the others' work. What follows replaces the previous section.
+
+### Four things the old section had wrong
+
+**1. The limit is 0.940 A, not 1.0 A.** The LT1641's sense threshold is
+**47 mV**, not 50 `[web, two reviewers]`. `R-ILIM` at 50 mΩ gives
+`47 mV / 50 mΩ = 0.940 A` `[calc]`.
+
+**2. Foldback was described backwards, and it fights the start.** The old
+text said foldback acts "while the FET's drain voltage is high". In a
+high-side N-FET the drain is *always* at 12 V — it is the **output** that
+is low, and foldback acts during **the entire start ramp**. It regulates
+the sense drop to about **12 mV at V_out = 0**, i.e. **240 mA** `[calc]` —
+*below* the programmed charging current. **Every start therefore begins in
+current limit.** The old page programmed foldback in one paragraph and
+asserted "a normal start never enters current limit" in the next.
+
+**3. The start table had a charging row and no load row.** The instrument
+draws ~360 mA while it is starting; the table only counted the current
+going into the capacitors.
 
 ```
-R_SENSE = 50 mV / 1.0 A = 50 mΩ
-at 360 mA typical:  18 mV drop, 6 mW
+100 ms ramp:  charging 2.2 mF x 120 V/s = 264 mA
+              plus instrument load        360 mA
+                                        = 624 mA   against a 940 mA limit
 ```
 
-**The instrument's bulk capacitance is ~2.2 mF** — two 100 µF at the buck
-inputs plus up to 2 × 1000 µF at the WS2815 feed points. Everything else
-follows from that number:
+That is 1.5x on the *unfolded* limit — and still above the 240 mA that
+foldback allows at V_out = 0, so the start is current-limited regardless.
 
-| | 50 ms ramp | 100 ms ramp |
-|---|---|---|
-| dV/dt | 240 V/s | 120 V/s |
-| Charging current | 0.53 A | 0.26 A |
-| Peak FET dissipation | 6.3 W | 3.2 W |
-| Energy into the FET | 0.16 J | 0.16 J |
+**4. There was no gate capacitor anywhere.** Not in the drawing, not in
+`bom.csv`. The FET sizing, the boot analysis and ADR 0005's 50–100 ms
+specification all rest on a "programmed ramp" that **did not exist**. With
+the FET's bare C_iss (~1 nF) and ~10 uA of gate current the ramp is
+10 kV/s, which demands `2.2 mF x 10 kV/s = 22 A` `[calc]` — twenty-odd
+times the limit.
 
-**A normal start never enters current limit** — 0.53 A against a 1.0 A limit —
-which is the whole job of the programmed ramp. The energy is the same either
-way, because it is `½CV²` regardless of how long you take; the ramp buys peak
-power, not total.
+### What the start actually takes
 
-**The fault case is what sizes the FET.** A hard short holds 12 V across it at
-the 1.0 A limit — **12 W** — until the timer expires. The timer must be longer
-than a *current-limited* start (1.0 A into 2.2 mF to 12 V is **26 ms**) or the
-instrument will not boot on a cold day. So:
+Integrating the foldback law from V_out = 0 to 12 V, with
+`k = 240 mA / 940 mA = 0.255`:
 
-- **Timer ≈ 50 ms**, comfortably past 26 ms.
-- **The FET must survive 12 W for 50 ms — 0.6 J — as a single pulse.**
+```
+t = C.V / (I.(1-k)) . ln(1/k)
+  = 2.2 mF x 12 V / (0.940 A x 0.745) x ln(3.92)
+  = 51.5 ms                bare
+  ~ 62 ms                  with the strip quiescent and both bucks loading
+```
 
-**This is why the package changed.** An earlier BOM revision said SOT-23, and
-at 0.6 J that is hundreds of degrees of junction rise. **DPAK or SO-8, chosen
-against the part's single-pulse SOA curve**, not against its R_DS(on) — at
-360 mA even 50 mΩ dissipates 6 mW, so conduction loss is irrelevant here and
-SOA is the only specification that matters.
+**The timer must exceed that, not the 26 ms the old page compared against.**
+And the sizing case is not the cold start at all — it is the **hot-plug**,
+because etherCON invites live insertion: 2.2 mF at 0.940 A is 28 ms
+*before* foldback, and the FET is fully enhanced before the plug is even
+inserted, so the ramp cannot help.
 
-**Program the foldback.** The LT1641 family reduces its current limit while the
-FET's drain voltage is high, which holds dissipation roughly flat through a
-fault instead of letting it peak at the worst moment. ADI's own material says
-that is what the feature is for. It was not mentioned anywhere in this project
-until the prior-art review.
+### The two capacitors, and why this page will not name their values
 
-> **What this page cannot pin down:** the LT1641's exact pin names, the
-> foldback network's topology, and whether `-1` needs a reset cycle on `ON`
-> after a latch-off. `analog.com` and `ti.com` were unreachable from this
-> sandbox throughout. **Take those off the datasheet before laying out.**
+```
+C-TIMER  =  I_TIMER x t / 1.233 V          fault timer
+C-GATE   =  I_GATE / (dV/dt)               programmed ramp
+```
+
+**Target: a 150 ms timer** (2.4x the 62 ms loaded start) **and a 100 ms
+ramp** (120 V/s, 264 mA of charging).
+
+| If `I_TIMER` is | `C-TIMER` for 150 ms |
+|---|---|
+| 3 uA | **365 nF** |
+| 76 uA | **9.25 uF** |
+
+The two reviewers who worked from datasheet text disagree about which
+current applies, and a third bracketed real parts at 2–100 uA. **That
+spread is the finding.** The specified **10 nF is wrong under every
+reading** — 12x to 300x too small, giving a 0.16–4 ms timer — but the
+replacement value cannot be taken from a review. `C-GATE` is likewise
+`I_GATE / 120 V/s`, which is ~83 nF at 10 uA.
+
+> **Gate on the datasheet.** `analog.com` and `ti.com` were unreachable
+> from this sandbox throughout three review waves. **Read `I_TIMER`,
+> `I_GATE` and the sense threshold off the LT1641 datasheet and set both
+> capacitors before ordering.** The 0805 C0G package in `bom.csv` is wrong
+> for any value in the table above.
+
+### What sizes the FET
+
+With foldback working, peak fault dissipation is **~4 W at V_out ~ 4 V**,
+not the 12 W the old page assumed — the feature holds dissipation roughly
+flat instead of letting it peak. Ramp energy is `1/2 CV^2` = **0.158 J**
+regardless of ramp time; the ramp buys peak power, not total.
+
+**DPAK or SO-8, chosen against the single-pulse SOA curve** — not against
+R_DS(on), which is irrelevant at 360 mA. And the criterion is not thermal:
+a DPAK is 0.6 C/W at 50 ms, so 12 W is a 7 C rise. **The killer is
+Spirito / linear-mode derating at V_DS = 12 V**, which can put a trench
+part at 2–3 W. The SOA chart must cover 12 V at 10 and 100 ms.
+
+### Still not designed: the `ON` pin
+
+The panel toggle drives it, and the `ON` pin is the LT1641's **UVLO**
+input. There is no divider, no logic level, no supply, no pull-down, no
+debounce and no UVLO threshold specified anywhere — four missing passives
+on the node that decides whether the instrument powers up at all. Route
+the toggle as the bottom leg of an undervoltage divider.
 
 ## `-1`, not `-2`
 
@@ -124,37 +217,35 @@ is the same shape as the polyfuse thermal runaway ADR 0014 describes.
 The cost of latching is that a fault leaves the instrument dark until you
 deliberately cycle the panel toggle, which is why the panel LED matters.
 
-## The panel LED sits on the buffer's rail, not on +12 V
+## The panel LED — superseded, and its job has changed
 
-**Drawing this found a bug.** The LED and the level shifter's `OE` pins share
-one node — the presence comparator's open collector — and the BOM had the LED
-pulled up to **+12 V** while `OE` is an input on a **5 V** part. With the
-comparator off, that node would have been dragged toward 12 V through the LED
-resistor and into the 74AHCT125's input clamp.
+**This whole section described a circuit that no longer exists.** It put
+the LED and the level shifter's `OE` pins on one node — the presence
+comparator's open collector — with `R-OE-PU` 10 kOhm and `R-LED` 820 Ohm
+pulled to bus +5 V. The comparator is deleted, `OE` is tied low and
+permanently enabled, and neither `R-OE-PU` nor `R-LED` ever had a BOM row.
+`bom.csv` carries `R-LED-PANEL` at **2.2 kOhm from +12 V analog** instead,
+and that is the circuit.
 
-Both loads now pull up to the **74AHCT125's own bus +5 V**:
+The bug the old section found was real — pulling a 5 V part's input toward
+12 V through an LED resistor — and it is moot now that nothing shares that
+node.
 
-```
-  bus +5V ──┬──[R-OE-PU 10k]────────┬── OE ×4 (active low)
-            │                       │
-            └──[R-LED 820R]──▷|─────┘
-                            LED      │
-                                     └── LM311 collector (emitter at GND)
-```
+### But the LED has lost the job it was kept for
 
-`(5.21 − 2.0) / 4 mA ≈ 800 Ω → 820 Ω`, and on the 5 V rail it is ~3.8 mA.
+`bom.csv` justifies it: *"with LT1641-1 latching off on a fault, this still
+says why the instrument went dark."* **On +12 V analog it cannot.** That
+rail is live whenever the rack is, so the LED is lit in every one of the
+latching faults above — hot-plug, LED-boot overcurrent, a current-limited
+start, a soft short. The one indication the design has for "the load switch
+has latched" indicates nothing.
 
-Pulling to the buffer's own rail is also the fail-safe arrangement: if bus
-+5 V dies, the buffer is unpowered and its outputs are off anyway, and the LED
-goes out — which is the correct indication. The **comparator and the watchdog
-stay on the LM317's 5.21 V** so that a bus rail failure cannot take the
-supervision with it.
+**Cheapest high-value fix in the review**: drive it from the LT1641's
+`TIMER` node, or from the gate, so that **lit = running and dark =
+latched.** One resistor's worth of rework on a part that is already fitted.
 
-**The LM311 itself runs on ±12 V**, not on 5.21 V — it has to resolve a signal
-near 0 V, and a comparator on a single positive supply cannot, which is
-precisely and only why the LM393 was rejected. Only its **pull-up** sits on a
-5 V rail, via the separate emitter pin that is the LM311's whole reason for
-being here.
+Not applied here: it needs the same datasheet read as `C-TIMER`, because it
+depends on what the `TIMER` pin does after a latch.
 
 ## Grounding
 

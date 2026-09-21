@@ -14,61 +14,102 @@ itself.
 
 ## The circuit
 
+**Redrawn 2026-09-21** after a 20-agent review found this drawing still
+carried two deleted parts, a `CLR` net pulled the wrong way, and the
+superseded umbilical pin map. See *What this redraw changed* below.
+
 ```
-  etherCON ─┬── SCLK ──┬───────────────────────┐
-            │          │                       │
-            ├── MOSI ──┼──┬────────────────────┤
-            │          │  │                    │
-            ├── CS  ───┼──┼──┬─────────────────┤
-            │          │  │  │                 │
-            │      [R-SPI-PULL ×3]        ┌────┴─────────┐
-            │       SCLK↓ MOSI↓ CS↑       │  74AHCT125   │
-            │          │  │  │            │  bus +5V     │
-            │      DIG_GND                │              │
-            │                             │  OE ×4 ◄─────┼──┐
-            │                             └────┬─────────┘  │
-            │                                  │            │
-            │                           [R-SPI-PULL ×3]     │
-            │                            SCLK↓ MOSI↓ CS↑    │
-            │                                  │            │
-            │                   ┌──────────────┴────────┐   │
-            │                   │   DAC8568C            │   │
-            │                   │   AVDD 5.21V          │   │
-            │                   │                       │   │
-            │                   │   CLR ◄───────────────┼─┐ │
-            │                   └───────────────────────┘ │ │
-            │                                   │          │ │
-            │                          [R-CLR-PD 10k]      │ │
-            │                                   │          │ │
-            │                              AGND ┘          │ │
-            │                                              │ │
-            │        ┌──────────────┐    buffered CS       │ │
-            │        │  74HC123     │◄───(DAC side)        │ │
-            │        │  5.21V rail  │                      │ │
-            │        │  1M × 220nF  │──────Q───────────────┘ │
-            │        │  ≈ 99 ms     │                        │
-            │        └──────────────┘                        │
-            │                                                │
-            │   in-amp output ──┐                            │
-            │   (0 V absent,    │   ┌──────────┐             │
-            │    −0.44 V alive) └───┤ LM311    │             │
-            │                       │ ±12 V    │             │
-            │   threshold −200 mV ──┤ EMIT→GND ├──collector──┤
-            │   (from −12 V)        │ 1M hyst  │             │
-            │                       └──────────┘             │
-            │                                                │
-            │                    bus +5V ─┬─[R-OE-PU 10k]────┘
-            │                             └─[820R]─▷|── panel LED
+  etherCON            NEW PIN MAP - see ADR 0004
+  ─┬── 4 SCLK ──┬─────────────────────────┐
+   │            │                         │
+   ├── 5 MOSI ──┼──┬──────────────────────┤     SCLK+MOSI share pair (4,5)
+   │            │  │                      │     CS+DIG_GND share pair (7,8)
+   ├── 7 CS  ───┼──┼──┬───────────────────┤
+   │            │  │  │                   │
+   └── 8 DIG_GND│  │  │              ┌────┴─────────┐
+        │   [R-SPI-PULL x3]          │  74AHCT125   │
+        │    SCLK↓ MOSI↓ CS↑         │  bus +5V     │
+        │        │  │  │             │  OE x4 → GND │  tied ENABLED
+        │    DIG_GND                 └────┬─────────┘
+        │                                 │
+        │                        [R-SPI-PULL x3]
+        │                         SCLK↓ MOSI↓ CS↑
+        │                                 │
+        │                  ┌──────────────┴────────┐
+        │                  │   DAC8568C            │
+        │                  │   AVDD 5.21V          │
+        │                  │                       │
+        │          AVDD ───┤ CLR  ◄── [R-CLR-PU]   │   PULL-UP. Active low.
+        │           5.21V  │          10k          │   Held INACTIVE.
+        │                  │            │          │
+        │                  │      [LK-CLR pad]     │   solder pad to GND,
+        │                  │            │          │   bring-up only
+        │                  └───────────GND─────────┘
+        │
+        └── analog star, single tie (ADR 0004)
+
+   NOT HERE ANY MORE: the 74HC123 frame watchdog and the LM311 presence
+   comparator. Both deleted; see "What this redraw changed".
 ```
 
-## Three rails, on purpose
+## What this redraw changed
 
-| Circuit | Rail | Why |
-|---|---|---|
-| 74AHCT125 | **bus +5 V** | Its job is to clear the DAC's 0.7 × AVDD threshold; the bus rail is a stated requirement (ADR 0005) and the only thing exposed to it |
-| `OE` pull-up and the LED | **bus +5 V** | Same node as the buffer's inputs — pulling them to a *higher* rail would push the AHCT125's input clamps. Also fail-safe: rail dies → buffer unpowered → outputs off, LED out |
-| **LM311, 74HC123** | **LM317 5.21 V / ±12 V** | Supervision must not die with the rail it supervises. A rack +5 V glitch must not be able to clear the outputs mid-phrase |
-| DAC AVDD | **LM317 5.21 V** | Same rail as the watchdog, so `CLR` levels are unambiguous |
+The previous drawing was wrong in four ways, all found independently by
+more than one reviewer in `docs/review/2026-09-21-hardware-and-standards-review/`.
+
+**1. It still drew the deleted watchdog and presence comparator.** The
+74HC123 and LM311 were deleted — in ADR 0004, in `bom.csv`, and in this
+page's own prose two sections below — and were still drawn here, still
+allocated rails in the table below, and still counted in `bom.csv`'s
+`C-DECOUPLE` quantity. **`C-DECOUPLE` drops from 21 to 19.** Neither part
+ever had a BOM row, so a board built from the old drawing would have had
+two footprints and no parts to fit.
+
+**2. `CLR` was drawn as a pull-DOWN on an active-low pin.** `[R-CLR-PD 10k]`
+to `AGND`, against `bom.csv`'s `R-CLR-PU`. With the watchdog deleted
+nothing else drives that pin, so **as drawn `CLR` was asserted permanently:
+six dead CV outputs, and no SPI write able to change them.** This was the
+single cheapest way in the whole design to end up with a module that does
+nothing at all.
+
+**3. `OE` gating is gone.** It was driven from the presence comparator's
+collector, pulled up through `R-OE-PU` to bus +5 V, and shared a node with
+the panel LED through an 820 Ω resistor. With the comparator deleted, `OE`
+is **tied low — permanently enabled** (`bom.csv` `U-LVL-MOD` already says
+so). `R-OE-PU` and the 820 Ω had no BOM rows; `R-LED-PANEL` is 2.2 kΩ from
++12 V analog and is drawn on the power page, not here.
+
+**4. The umbilical pin map is the corrected one.** `SCLK` and `MOSI` now
+share pair (4,5); **`CS` is paired with `DIG_GND` on (7,8)**. Previously
+`MOSI` and `CS` shared a pair with **no return conductor between them** —
+two unrelated fast edges twisted tightly together, which is the most
+efficient possible coupling rather than the cancellation twisting is for.
+Two reviewers independently computed **365–907 mV of saturated intra-pair
+crosstalk against `CS`'s 678 mV `V_IL` margin** and independently proposed
+this exact swap. It improves the margin from about **1.9:1 to 6200:1** and
+costs nothing but the pin assignment.
+
+> **Why `CS` is the one that must not glitch.** It frames the word. A
+> glitch restarts the bit count mid-message, so every bit lands in the
+> wrong field — including the software-reset and internal-reference-enable
+> bits. ADR 0004 deleted `MISO`, so **firmware can never read back what the
+> DAC actually received.** It is the only failure in the digital path that
+> does not self-heal on the next update; everything else is corrected 250 µs
+> later.
+>
+> Pairing `SCLK` with `MOSI` is safe *by construction*: the receiver only
+> samples `MOSI` on a `SCLK` edge, so coupling between them lands where it
+> is not being looked at.
+
+> **Still open — the bus +5 V rail.** Three reviewers independently want it
+> dropped: it is what makes a reversed 16-pin ribbon dangerous (module
+> ground lands on bus +5 V and +12 V), **zero of eight** surveyed published
+> designs take a sub-12 V rail from the bus, and it is the only rail here
+> with no reverse protection — on a branch whose bulk capacitor vents when
+> reverse-biased. It exists for this one 74AHCT125. Deriving it locally from
+> the protected +12 V is one TO-92 and two capacitors, and would allow a
+> 10-pin header. **Not changed here, because it is a rail change and a
+> connector change, not a drawing correction.**
 
 ## Pulls on **both** sides of the buffer — six, not three
 

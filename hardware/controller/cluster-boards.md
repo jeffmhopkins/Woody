@@ -129,16 +129,17 @@ LVC with proper source termination remains the way back if E4 disagrees.
 ```
    3V3 (from the loom, pin 10 of J-CHAIN)
     │
-    ├──[R-KEY-PU 2k2 1%]──┬────────────────────► 74HC165 parallel input
-    │                     │
-    │              [C-KEY 47 nF X7R]
-    │                     │
-    │                    GND
-    │                     │
-    └────── SW ──[R-KEY-SER 100R 1%]────────────┘
-           KS-33
-       shorts to GND
-        when pressed
+    └──[R-KEY-PU 2k2 1%]──┬────────────────────► 74HC165 parallel input
+                          │                 │
+                  [C-KEY 47 nF X7R]  [R-KEY-SER 100R 1%]
+                          │                 │
+                         GND               SW  KS-33
+                                            │
+                                           GND      pressed = pulled LOW
+
+   CORRECTED 2026-09-21. The previous figure ran the switch leg off the
+   3V3 rail, so a press was a 33 mA rail short and the register input
+   never moved - contradicting the figure's own caption. Found in review.
 
    Both passives are AT the register input, millimetres from the switch.
    On this board that is automatic; under the tail topology it was a layout
@@ -152,8 +153,8 @@ LVC with proper source termination remains the way back if E4 disagrees.
 
 | | |
 |---|---|
-| Release, τ = 2.2 kΩ × 47 nF | 103 µs; crosses `V_IH` at **125 µs** |
-| Press, τ = 100 Ω × 47 nF | 4.7 µs; crosses `V_IL` at **5.7 µs** — 44× inside the 250 µs scan |
+| Release, τ = 2.2 kΩ × 47 nF | 103 µs; crosses `V_IH` at **119.9 µs** |
+| Press, τ = 100 Ω × 47 nF | 4.7 µs; crosses `V_IL` at **5.92 µs** — 42× inside the 250 µs scan |
 | Pole | 1.54 kHz → **54 dB** at the WS2815's 800 kHz data rate |
 | Static | **1.43 mA** per closed key; 18 closed = **25.8 mA** off the loom's 3V3 |
 
@@ -316,17 +317,44 @@ Proposed levels:
 |---|---|---|---|---|---|---|---|
 | `right_thumb` | `B` | 6 | **1** | | `A` | 7 | **0** |
 | `right_hand` | `B` | 14 | **0** | | `A` | 15 | **1** |
-| `left_thumb` | `D` | 20 | **1** | | `C` | 21 | **0** |
+| `left_thumb` | `D` | 20 | **0** | | `C` | 21 | **1** |
 | `left_hand` | `C` | 29 | **0** | | `B` | 30 | **1** |
 
-Read in bit order the marker is `1 0 · 0 1 · 1 0 · 0 1`. **Not a constant and
-not a repeating byte** — an all-zeros frame, an all-ones frame, a stuck bus and
-a frame shifted by one position all fail it, and every device fails it on its
-own whichever way it failed.
+Read in bit order the marker is `1 0 · 0 1 · 0 1 · 0 1`.
+
+> **`left_thumb`'s pair was flipped on 2026-09-21, and the reason is worth
+> keeping.** The original pattern was `1 0 · 0 1 · 1 0 · 0 1` — a **repeating
+> nibble**, and the page's own test ("not a repeating *byte*") did not catch
+> that. A falsification agent solved the marker exhaustively, as a symbolic
+> constraint problem over all eight positions against every key state, and
+> found that of the **23 wrong chain permutations exactly one passes
+> undetected: `RT → RH → LH → LT`** — which is the reorder *this very page*
+> proposes to save a body crossing. It passes whenever `LH5` is released, and
+> the result is that the left-hand keys drive the octave keys, `LH5` reads
+> permanently released, and the only symptom is the error counter ticking —
+> so the diagnosis points at the wrong thing.
+>
+> Two proposals, made hours apart, each sound alone and jointly blind.
+> Flipping this one pair kills all 23 permutations and a −5 shift hole while
+> keeping all 24 hard faults caught. **Two straps.**
+
+**What the marker still cannot see**, stated plainly because firmware needs
+it: a single-bit flip is caught **8 times in 32**, and the 24 bits that carry
+the music are never among them — so **the visible error counter undercounts
+true corruption about 4×**. A mid-shift `SH/LD` reload passes at 11 of 31
+reload points. And the straps go direct to the rails, so they share no
+component with the 21 key networks they are read as vouching for.
 
 That leaves **3 free bits**: `left_thumb` `B` and `A` (22, 23) and `left_hand`
-`A` (31). Pull them, per ADR 0001 fix 6 — a floating CMOS input is the exact
-fault `R-KEY-PU` exists to fix `[repo] 0001, key-layout.yaml`.
+`A` (31). **Each gets an `R-KEY-PU` and nothing else** — no switch, no series
+resistor, no capacitor. A floating CMOS input is the exact fault `R-KEY-PU`
+exists to fix `[repo] 0001, fix 6`.
+
+> **The first draft of this page did not budget these three.** Its component
+> table, `bom.csv` and `carrier.md` all carried 21 pull-ups for exactly the 21
+> *switch* positions, leaving bits 22, 23 and 31 floating — unretrofittable,
+> and precisely the fault the part exists to prevent. `R-KEY-PU` is now
+> **qty 24**. Found in review.
 
 > **Marker bits strap straight to the rails — no resistor, no capacitor.** A
 > marker is not a switch: it never changes, so there is nothing to debounce and
@@ -399,7 +427,7 @@ Per board, from `bom.csv` `[repo]` unless marked **proposed**.
 | `U-KEYS` | 74HC165 SOIC-16 | 1 | 1 | 1 | 1 | `CLK INH` low, `QH_bar` open |
 | `C-DECOUPLE-165` | 100 nF X7R 0805 | 1 | 1 | 1 | 1 | At the package |
 | `SW1-n` | Gateron KS-33 Red | 5 | 4 | 6 | 3 | Soldered. `SW-THUMB` lighter springs are an open option for `LT` |
-| `R-KEY-PU` | 2.2 kΩ 1% 0805 | 5 | 4 | 6 | 6 | `RT` carries the 3 reserved spare-switch positions |
+| `R-KEY-PU` | 2.2 kΩ 1% 0805 | **6** | **6** | 6 | 6 | **24, not 21.** `RT` carries the 3 reserved spare-switch positions; `LT` and `LH` each carry a pull-up for their *free* bits (22, 23, 31), which the first draft budgeted for switch positions only |
 | `R-KEY-SER` | 100 Ω 1% 0805 | 5 | 4 | 6 | 6 | |
 | `C-KEY` | 47 nF X7R 0805 | 5 | 4 | 6 | 6 | |
 | `J-CHAIN` | 2×6 IDC boxed, keyed | 1 | 2 | 2 | 2 | `LH` is the chain end and has `IN` only |
@@ -438,6 +466,12 @@ decided 2026-09-21 and recorded in `key-layout.yaml` and ADR 0001.
   recorded on the carrier page as accepted.
 - **Plate-to-PCB standoff, and plate thickness** (§5). Both come from Gateron's
   drawing; the second blocks M4/M5 already.
+- **Whether the last 3 free bits should be marker bits too**, making it 11.
+  The argument that took the marker from 6 to 8 — a free bit has no plate
+  cutout and the body bonds shut, so it can never become a switch — applies to
+  these three unchanged, and strapping them costs *nothing* where pulling them
+  costs three resistors. Against: a pulled bit can still be jumpered at
+  bring-up, and 8 was decided deliberately. Left at 8/3 rather than drifting.
 - **Whether `LT` takes lighter springs** (`SW-THUMB`), which is an M1 decision by
   hand and changes nothing electrically `[repo] bom.csv, 0002`.
 - **Conformal coating.** `MECH-COAT` covers the carrier; nothing says whether

@@ -161,9 +161,13 @@ parts.**
 ## §2 Analog front end — sensor, reference, buffer, ADC
 
 ```
-  +12V ──[REF5050]── 5.000 V ──┬──[½ OPA2197 buffer]──┬── SKT-BREATH pin VS
-             │                 │                      │
-        [C-REF-OUT 10 µF]  [100 nF]                   │   U-BREATH MPXV4006DP
+  +12V ──[REF5050]── 5.000 V ──┬──[½ OPA2197 buffer]──┐
+             │                 │      ▲               │
+        [C-REF-OUT 10 µF]  [100 nF]   │         [R-ISO-REF]  ** WAS MISSING **
+             │                 │      │               │
+            AGND-local    AGND-local  │               ├── SKT-BREATH pin VS
+                                      │               │
+                     feedback tapped ─┴───────────────┤   U-BREATH MPXV4006DP
              │                 │                      │   case 1351-01
             AGND-local        AGND-local              │
                                                       │   P1 ◄── 400 mm tube
@@ -175,7 +179,7 @@ parts.**
               MPXV4006DP Vout  0.2 – 4.7 V ───────────┘
                      │
                      ├──[½ OPA2197 buffer]──┬──[R-SER-BREATH-INST 1k]── J-UMB pin 1
-                     │   (V+ = +12V)        │                            BREATH
+                     │   (V+ = +12V)        │        R1                  BREATH
                      │                      │        [D-TVS-BREATH 12 V standoff]
                      │                      │
                      │                      └──[R-ADCDIV-U 10k]──┬──[R-ADCDIV-L 15k]──┐
@@ -192,9 +196,61 @@ parts.**
                      │                                     └───┬───────────┘
                      │                                    [100 nF] [C-ADC-BULK 10 µF]
                      │                                         │      ** PROPOSED **
-  J-UMB pin 2 AGND ──┴── analog star point ──[single tie]── PWR_GND
-                            [D-TVS-BREATH]
+  J-UMB pin 2 AGND ──[R-SER-BREATH-INST 1k]──┴── analog star point
+                       R1b  ** WAS MISSING **      │
+                                                   └──[single tie]── PWR_GND
+                            [D-TVS-BREATH ×2, AT THE CONNECTOR]
 ```
+
+### Two parts this drawing was missing, both unretrofittable
+
+Both are in `bom.csv`, both are marked instrument-side and unretrofittable
+there, and **neither appeared on this page** — the page that says of itself
+"layout is now". Two reviewers found them independently, from opposite
+directions.
+
+**`R1b` — the twin 1 kΩ in the `AGND` leg.** `bom.csv` carries
+`R-SER-BREATH-INST` at **qty 2**, and `breath-receive-stage.md`'s 482 Hz
+differential pole is derived with 1 kΩ in *both* legs. Only one was drawn.
+
+Its real job is **source-impedance balance on the twisted pair** — 1 kΩ
+against ~0 Ω is what a difference amplifier's CMRR actually responds to —
+and that justification appears nowhere in the repo. Without it the link
+CMRR falls from **70.2 dB to 60.2 dB** `[calc, A2]` against an independently
+derived requirement of 58.5 dB: **1.7 dB of margin**, resting on two parts'
+tolerance, inside a body that cannot be reopened.
+
+> One correction to the receive page's own case for `R1b`: it claims the
+> part buys "fifty times" the rejection. With `R1b` fitted the real floor
+> is **73 dB**, set by the 1 MΩ bias pair, so `R1b` buys about **13 dB**.
+> Still worth fitting. The stated reason overstates it.
+
+**`R-ISO-REF` — and without it the reference buffer oscillates.** Back-
+solving the OPA2197's output impedance from this page's own stated 21 kHz
+pole gives **Ro ≈ 75.8 Ω**, consistent with the part's 1 nF maximum
+capacitive load. The actual load at the sensor's `VS` pin is **100 nF** of
+`C-DECOUPLE-CARRIER`, which leaves **2.6° of phase margin and oscillation
+near 458 kHz** `[calc, A2]`.
+
+**The compensation must be more than the resistor.** Taking feedback at
+`VS` (in-loop, as drawn) puts the R·C pole back *inside* the loop — 159 kHz,
+7.2° of margin, still unstable. The loop needs a feedback zero:
+
+```
+   R_F . C_F  >  R-ISO-REF . C_LOAD        e.g. 10 kΩ + 1 nF against
+                                                10 Ω + 100 nF = 1 µs
+```
+
+Alternative, and cheaper in DC terms: a **series R–C snubber from `VS` to
+the analog star**, which damps the load without putting any resistance in
+the DC path, so the sensor sees the full 5.000 V.
+
+> **`Ro = 75.8 Ω` is back-solved, not read.** `ti.com` was unreachable
+> through three review waves. Confirm the OPA2197's open-loop output
+> impedance and its capacitive-load curve before committing either network.
+> The *existence* of the problem does not depend on the exact figure — any
+> Ro in the tens of ohms against 100 nF is unstable — but the component
+> values do.
 
 ### Two things this drawing settles that no ADR does
 
@@ -451,8 +507,8 @@ From `config/key-layout.yaml` `[repo]`:
 |---|---|---|
 | 18 | Fitted switches | **Cluster boards** — network + trace to the switch |
 | 3 | Reserved spare switches (octave up, octave down, hold/preset) | **Cluster boards** — network fitted, pad unloaded. Plate cutouts at M3 `[repo] 0010` |
-| 6 | Marker pattern | **Cluster boards** — hard-wired at the register input. Unretrofittable |
-| 5 | Genuinely free | **Cluster boards** — must be pulled `[repo] key-layout.yaml` |
+| 8 | Marker pattern | **Cluster boards** — hard-wired at the register input. Unretrofittable. **Decided 2026-09-21: 8, not 6** |
+| 3 | Genuinely free | **Cluster boards** — must be pulled `[repo] key-layout.yaml` |
 | **32** | | **None of them on this carrier** |
 
 **Which six bits carry the marker and to what pattern is still undecided, and
@@ -472,29 +528,43 @@ anything, this is the moment it costs least.
 ## §4 SPI egress to the umbilical
 
 ```
-  IO35 SCK  ──[R-SCLK-SER 220R]──┬──── J-UMB pin 7   ** R PROPOSED **
-  IO36 MOSI ──[R-MOSI-SER 220R]──┼──── J-UMB pin 4
-  IO34 CS   ──[R-CS-SER  220R]───┼──── J-UMB pin 5   ** R PROPOSED **
+  IO35 SCK  ──[R-SPI-SER 100R]───┬──── J-UMB pin 4   ┐ pair (4,5)
+  IO36 MOSI ──[R-SPI-SER 100R]───┼──── J-UMB pin 5   ┘
+  IO34 CS   ──[R-SPI-SER 100R]───┼──── J-UMB pin 7   ┐ pair (7,8)
+                                 │     J-UMB pin 8 ──┘ DIG_GND
                                  │
                         [U-TVS-SPI 4-ch array to PWR_GND]
   IO37 MISO ── MCP3202 DOUT only (never leaves the board)
   IO39 CS   ── MCP3202 CS
 ```
 
-**`R-SCLK-SER` and `R-CS-SER` are new.** `D1-missing-protection.md` finding 10
-said "Series current limiting on `SCLK` and `CS` at the driving end — **ADD**"
-`[repo] D1`; only `R-MOSI-SER` reached the BOM, qty 1 `[repo] bom.csv`. The
-driving end is this board. ADR 0004 calls `SCLK` "the fastest edge in the
-system" and sends it down 2 m of unterminated ~100 Ω twisted pair `[repo] 0004`.
+**All three are `R-SPI-SER`, and the value is 100 Ω.** The refdes matters:
+this page previously drew `R-SCLK-SER`, `R-MOSI-SER` and `R-CS-SER`, **none
+of which exist in `bom.csv`**, while the BOM carries `R-SPI-SER` at qty 3
+used by no schematic. Same three parts, two naming schemes, neither side
+aware of the other. (This page also claimed "only `R-MOSI-SER` reached the
+BOM, qty 1" — it is not in the BOM at all.)
 
-Value follows `R-MOSI-SER` `[repo] 0004`, **but not the arithmetic this page
-first quoted.** 220 Ω into ~200 pF of cable is a **3.62 MHz** corner, not
-7.9 MHz — 7.9 MHz is the 100 Ω case `[calc]`, and ADR 0004 carried the two the
-wrong way round until the schematic review caught it `[repo] 0004, S1, C5`.
-2 MHz still has margin against 3.62 MHz, but less than the ADR claimed.
-**ADR 0004's corrected text puts the transmission-line-right value nearer
-68 Ω** (11.7 MHz corner, and a closer source match to Cat5's ~100 Ω); take all
-three down together if E11 wants the headroom.
+**The value is 100 Ω, not 220, and the old derivation used the wrong
+model.** Two m of Cat5 is a **100 Ω transmission line**: the round trip is
+~20 ns against 2–5 ns edges, so this is a reflection problem, not an RC
+corner. Three reviewers agreed on that and two of them computed what 220 Ω
+costs `[calc]`:
+
+| Source R | First step at the far end | vs `V_IH` 2.0 V |
+|---|---|---|
+| **220 Ω** | **1.83–1.86 V** | **below threshold, dwelling ~20 ns per edge in the forbidden band** |
+| 100 Ω | **2.75 V** | clean single step |
+| 68 Ω | 3.25 V | clean, but **48 mA fault current against a 40 mA pad spec** |
+
+**100 Ω** is the answer: it resolves in one transit and draws 33 mA into a
+clamp. 68 Ω is electrically ideal and exceeds what the pin can source.
+(ADR 0004's old "7.9 MHz corner" was the figure for 100 Ω all along, quoted
+against 220 Ω — the schematic review caught that separately.)
+
+The receiving end has no hysteresis, which is what makes the dwell matter:
+a 74AHCT125 given 20 ns in its indeterminate band on every clock edge is
+being asked to guess.
 
 ### The two SPI hosts, and what claims them
 
@@ -695,9 +765,7 @@ page and have no BOM entry yet.
 | `U-BREATH` + `SKT-BREATH` | MPXV4006DP, case 1351-01 | P1 to the tube, P2 open to the cavity | `[repo]`; **P1 identity open** |
 | `R-SER-BREATH-INST` | 1 kΩ | Output protection. **No series cap here** | `[repo]` |
 | `D-TVS-BREATH` ×2 | 12 V standoff, SOD-323 | `BREATH` and `AGND` legs | `[repo]` |
-| `R-MOSI-SER` | 220 Ω | Series at the driving end | `[repo]` |
-| **`R-SCLK-SER`** | **220 Ω** | **Proposed — `D1` finding 10 was accepted and never landed** | proposed |
-| **`R-CS-SER`** | **220 Ω** | **Proposed — same** | proposed |
+| `R-SPI-SER` ×3 | **100 Ω** | Series at the driving end on `SCLK`, `MOSI`, `CS`. **Was drawn as three refdes that are not in the BOM, at 220 Ω, derived from an RC model** — see §4 | `[repo] bom.csv` |
 | `U-TVS-SPI` | SP0504BAHT, SOT-23-6 | `SCLK`, `MOSI`, `CS` + spare, to `PWR_GND` | `[repo]` |
 | `U-LVLSHIFT` | 74AHCT125 SOIC-14 | LED data, 5 V rail. **Gate count depends on `BI`** | `[repo]`; `BI` `[from memory]` |
 | **`R-LED-PD`** ×2 | **10 kΩ** | **Proposed — holds the strips' data low through reset** | proposed |

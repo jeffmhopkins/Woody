@@ -709,16 +709,59 @@ adjacency at the connector is where crosstalk actually happens.
 |---|---|---|
 | 1, 2 | ✓ | **BREATH / AGND** |
 | 3, 6 | ✓ | +12V / PWR_GND |
-| 4, 5 | ✓ | MOSI / CS |
-| 7, 8 | ✓ | SCLK / DIG_GND |
+| 4, 5 | ✓ | **SCLK / MOSI** — *revised 2026-09-21* |
+| 7, 8 | ✓ | **CS / DIG_GND** — *revised 2026-09-21* |
 
-**The power pair's two DC conductors sit between the analog pair and both
-digital pairs, acting as a guard.** BREATH at pin 1 is adjacent only to its own
-sense return; SCLK, the fastest edge in the system, is at the far end. Nothing
-with a sharp edge is ever adjacent to the analog pair.
+**`SCLK` and `CS` swapped places.** The previous map paired `MOSI` with `CS`,
+which put **two unrelated fast digital signals in one twisted pair with no
+return conductor between them**. Twisting exists to make a pair see identical
+interference so it cancels; twisting two aggressors together instead is the
+most efficient coupling structure available. Two reviewers independently
+computed **365–907 mV of saturated intra-pair crosstalk** (saturated because
+the 20 ns round trip far exceeds the ~2 ns edge) against `CS`'s **678 mV
+`V_IL` margin**, and independently proposed this same swap. It takes the
+margin from about **1.9:1 to 6200:1**.
+
+**It had to be `CS` that got the ground.** `CS` frames the word: a glitch
+restarts the bit count mid-message, so every bit lands in the wrong field —
+including software-reset and internal-reference-enable. This ADR deleted
+`MISO`, so firmware can never read back what the DAC received. **It is the
+only corruption in the digital path that does not self-heal on the next
+250 µs update.**
+
+**Pairing `SCLK` with `MOSI` is safe by construction**, not by luck: the
+receiver samples `MOSI` only on a `SCLK` edge, so whatever they couple into
+each other lands at the moment nobody is looking.
+
+> **What this section got wrong, and it is instructive.** The original
+> reasoning above is about the ~13 mm untwisted region inside an RJ45 plug,
+> and that reasoning is sound — a reviewer costed that effect at **15 mV**.
+> It is 25–60× *smaller* than the intra-pair coupling the same paragraph
+> created by pairing two aggressors. The analysis was careful about the
+> visible mechanism and never asked what the pairs themselves were doing.
+>
+> This ADR also asserted twice that "each signal sits against a ground in its
+> own twisted pair". Its own table never did.
+
+**The power pair still guards the analog pair.** BREATH at pin 1 is adjacent
+only to its own sense return, and the two DC conductors of the power pair sit
+between the analog pair and both digital pairs. That part of the original
+reasoning survives the swap intact, and a reviewer measured the result:
+`SCLK` → `BREATH` is **57 nV at the jack**, which is **zero breath counts**.
+
+**Considered and rejected: moving the SPI signals off pins 4/5 entirely.**
+Published RJ45-for-other-purposes standards leave 4 and 5 unconnected so that
+a misplug into a PoE or telephone source destroys nothing. That is a real
+convention, but it protects against plugging the instrument into a network
+socket — and there are exactly 8 conductors for exactly 8 signals, so 4/5
+cannot be vacated without deleting one. **For a one-off instrument that lives
+beside its own module, the crosstalk fix is the one worth having.** Label the
+lead.
 
 Confirm at E11 with a logic analyser and a scope on the real cable at length —
-that milestone exists precisely to catch what this reasoning gets wrong.
+that milestone exists precisely to catch what this reasoning gets wrong, and
+this time it has something specific to look for: threshold dwell and runt
+pulses on `CS`.
 
 ## Open
 
