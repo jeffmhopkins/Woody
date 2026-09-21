@@ -1,6 +1,6 @@
 # Verified by hand — not agent claims
 
-**In progress. 18 of 20 agents in.**
+**In progress. 19 of 20 agents in.**
 
 Everything below was checked directly against the repo in the main session,
 independently of the agent that reported it. An agent finding is a *claim*
@@ -75,7 +75,7 @@ any single finding, including the ones I verified by hand.
 
 ## The instrument does not power up
 
-Two agents, different scopes, no shared inputs.
+**Three agents now, three routes, no shared inputs.**
 
 **A7** (module power entry, cold design review): `C-TIMER-LOADSW` at 10 nF
 is wrong by 40–400× — `t = 1.233·C/I_TIMER` needs 81 nF to 4.1 µF for
@@ -94,9 +94,24 @@ takes ~62 ms against a ~50 ms timer. It latches at the end of every start.
 Delete foldback and the margin is still 4 %, inside the part's own
 threshold tolerance.
 
+**B3** (comparative practice) went to the datasheet equation instead:
+`C(nF) = 62·t(ms)` gives **~3.1 µF** for 50 ms, and the 3 µA / 1.233 V ramp
+gives **~122 nF**. The specified 10 nF is **12× to 300× too small** — a
+0.16–4 ms fault timer. It independently reached the foldback conflict too:
+the datasheet reduces the limit when `FB` is low, *which is the entire
+duration of the start ramp*.
+
 `power-entry.md` programs foldback in one section and asserts "a normal
-start never enters current limit" in another. Neither agent could have seen
-the other's report.
+start never enters current limit" in another. None of the three agents
+could see the others' reports, and none of them agree on the exact
+replacement value — 81 nF–4.1 µF, ~122 nF, ~3.1 µF — which is itself a
+signal that the value must be derived from a read datasheet, not picked
+from a review.
+
+B3 adds the sizing case nobody had named: **the hot-plug, not the cold
+start.** etherCON invites live insertion; 2.2 mF at 0.94 A is 28 ms against
+a 50 ms timer *before* foldback. That also weakens ADR 0005's stated reason
+for choosing the latching `-1` over the retrying `-2`.
 
 **Consequence:** the first thing that happens at E6 is that nothing
 happens. This is a before-order fix, not a bring-up fix.
@@ -206,3 +221,65 @@ So: **the repo's loop budget is arithmetically correct and structurally
 incomplete.** Both agents are right about what they measured. The number
 to design against is A4's, and the firmware technique it names is not
 optional — it is what makes 4 kHz reachable at all.
+
+
+## Drop the bus +5 V — three agents, three unrelated reasons
+
+| Agent | Reason |
+|---|---|
+| **B1** | The 16-pin header's reversal hazard exists *because* of pins 11–16. Module ground lands on bus +5 V and +12 V; the rail diodes are not in the ground path, so keying is the only protection. A 10-pin header maps ground to ground and the diodes work |
+| **B3** | **0 of 8** published designs that need a sub-12 V rail take it from the bus — 78L05 ×4, LM1117 ×2, AMS1117, R-78E5.0 ×2, ADP150, all local from +12 V. The rail is optional in the standard and absent from many cases |
+| **A7** | It is the only rail in this design with **no reverse protection**, and `bom.csv` already documents that a reversed ribbon on it reaches the DAC's `SYNC` pin. `C-BULK-RAIL` on that branch is a through-hole electrolytic that **vents** when reverse-biased at 12 V |
+
+The rail exists for one 74AHCT125. Deriving it locally is one TO-92 and two
+capacitors, and it deletes the reversal hazard, the unprotected branch and
+the venting capacitor at the same time.
+
+## The instrument's power draw bends the synth's pitch
+
+Two agents, two different segments of the same return path, neither aware
+of the other — and the effect is **larger than the entire pitch budget**.
+
+- **A7**: the 367 mA umbilical current *swing* returns through the power
+  ribbon's six ground conductors, ≈17 mΩ → **6.2 mV of module ground shift
+  = 7.4 cents**, breath-correlated. On a flying bus, 24 cents.
+- **B3**: 360 mA through ~20–40 mΩ of differential busboard ground puts
+  **7–15 mV between this module's 0 V and a neighbour's = 8–18 cents of
+  breath-correlated pitch bend at the receiving module.**
+
+`pitch-stage.md` puts the *whole* pitch error budget at 0.42 cents, and A6
+independently bounds the module at ~1.2 cents over 0–40 °C. So the
+carefully-engineered part of the pitch path is one to two orders below an
+effect that is documented nowhere — and because it tracks breath, it will
+sound like an intentional feature that has gone wrong.
+
+`power-entry.md` explicitly dismisses this path ("needing no ground path at
+all") in the same sentence that introduces the diode argument.
+
+## Where the design genuinely beats published practice
+
+Recorded so it is not re-litigated by a later reviewer.
+
+- **The current-limited, ramped, fault-timed load switch on the exported
+  +12 V.** B3 read 14 published power-entry schematics: hot-swap
+  controllers at the rack entry are **0 of 14**, and a GitHub-wide search
+  for `LT1641 eurorack` returns 16 hits, *all of them this repository*.
+  But the **function is precedented for an exported rail** — Westlicht
+  PER|FORMER uses an STMPS2151 current-limited load switch with `EN` and
+  `FAULT` on the 5 V it sends to its USB host port, structurally the same
+  design one rail down. Exporting 12 V rather than 5 V is what pushed this
+  off the shelf of SOT-23 USB switches. **Justified, not over-engineered**,
+  and B3's verdict is that the field convention would be actively dangerous
+  here.
+- **The ferrite bead current rating is specified**, which none of the 14
+  do. **The SOA-based FET sizing has no equivalent in the set.** The
+  instrument-end shunt-diode-plus-limiter is exactly Mutable's scheme with
+  the load switch as the fuse.
+- **Pitch accuracy** (A6, B2): best in the published field, ~7× inside the
+  VCO's own drift.
+- **Breath latency** (B6): ~2× better than the best published wind
+  controller figure.
+- **The analog breath path itself** (B5, B6): a dedicated sense return
+  carrying no power current, received by a true in-amp, beats both direct
+  wind-instrument precedents — Yamaha BC and Akai EWI both share the return
+  with supply current.
