@@ -81,8 +81,14 @@ subtracts, which is what a unipolar DAC can produce.
 firmware cannot measure (ADR 0003, ADR 0006) — which removes the premise the
 swap was argued from. So the swap needs a reason of its own, and it has one:
 
-**`REF` is driven from a buffered trimmer** set once at commissioning, to
-+0.437 V — which nulls the sensor's +0.200 V pedestal exactly. The in-amp then
+**`REF` is driven from a buffered trimmer** set once at commissioning. +0.437 V
+nulls a *typical* +0.200 V pedestal — but the pedestal is a **spec band, not a
+number**: 0.152–0.378 V, which needs `REF` anywhere from **0.332 V to
+0.826 V**. **Range the trimmer 0 → +1.0 V.** An earlier revision specified
+0 → +0.6 V, which covers pedestals only to 0.275 V; a sensor at the top of its
+own datasheet band would have been un-nullable, leaving 1.4–5.6 % of span
+standing at the jack — the same band as the polarity showstopper this trimmer
+was added to fix. The in-amp then
 rests at 0 V and reaches −9.6 V at full sensor range. The downstream stage is
 **inverting**, which is the topology that wants a negative-going input: an
 inverting summer does gain and offset with two pots into one virtual ground,
@@ -140,7 +146,7 @@ looks like an input.
 | **C_diff** | 15 nF C0G | 531 Hz differential pole, **ahead of the in-amp** |
 | **C_cm** | 1.5 nF C0G ×2 | Common-mode poles, deliberately 1/10 of C_diff |
 | **R_G** | 42.2 kΩ 0.1 % | INA828, `G = 1 + 50k/R_G` = **2.185** |
-| **REF** | +0.437 V, buffered trimmer | Nulls the pedestal *ahead* of the gain pot, which is what makes the panel knobs independent. Never a bare divider — see above |
+| **REF** | buffered trimmer, **0 → +1.0 V** | Nulls the pedestal *ahead* of the gain pot, which is what makes the panel knobs independent. Range covers the sensor's whole 0.152–0.378 V spec band, not just its typical. From the LM317 rail, never `VREFOUT`, and never a bare divider — see above |
 | **Output RC** | 1 kΩ + 330 nF film | ~480 Hz reconstruction at the jack |
 
 ### The gain, derived
