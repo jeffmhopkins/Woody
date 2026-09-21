@@ -1,0 +1,36 @@
+# Seeded 2026-09-21 from what the page already states - the ADRs it
+# cites, the figures it names, and the refdes it draws that the BOM
+# carries. Nothing here was guessed: an edge is listed because the
+# page names the thing.
+#
+# depends_on is the field that can lie. It fails SILENT - an
+# undeclared edge is an unchecked edge - so it is seeded rather than
+# started empty, and tools/check-staleness.py resolves every entry.
+#
+# There is deliberately no `revision`: git holds it exactly and
+# cannot forget. And no `figures_owned`: that would put ownership in
+# two files, which is rule 1 broken in the project's own metadata.
+# config/figures.yaml owner: is the one declaration.
+
+id: interfaces/key-chain-loom
+title: Key chain loom — carrier to four cluster boards
+last_reviewed: '2026-09-21'
+depends_on:
+- adr:0001
+- adr:0002
+- adr:0009
+- fig:chain-conductors
+- fig:chain-connectors
+- fig:free-bits
+- fig:key-pullup-qty
+- fig:marker-bits
+- refdes:F-CHAIN
+- refdes:HDR-DEV
+- refdes:J-CHAIN
+- refdes:LK-SER
+- refdes:R-CHAIN-SER
+- refdes:R-SER-TERM
+- refdes:U-TVS-CHAIN
+- circuit:cluster/key-marker-and-bits
+- circuit:cluster/key-register
+- circuit:cluster/key-switch-network

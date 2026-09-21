@@ -1,0 +1,41 @@
+# Seeded 2026-09-21 from what the page already states - the ADRs it
+# cites, the figures it names, and the refdes it draws that the BOM
+# carries. Nothing here was guessed: an edge is listed because the
+# page names the thing.
+#
+# depends_on is the field that can lie. It fails SILENT - an
+# undeclared edge is an unchecked edge - so it is seeded rather than
+# started empty, and tools/check-staleness.py resolves every entry.
+#
+# There is deliberately no `revision`: git holds it exactly and
+# cannot forget. And no `figures_owned`: that would put ownership in
+# two files, which is rule 1 broken in the project's own metadata.
+# config/figures.yaml owner: is the one declaration.
+
+id: interfaces/breath-sense-link
+title: Breath sense link — the sensor, the pair and the in-amp
+last_reviewed: '2026-09-21'
+depends_on:
+- adr:0003
+- adr:0004
+- fig:breath-working-point
+- fig:breath-zero-ref
+- fig:cref-out-node
+- fig:dac-rail
+- fig:dig-gnd-topology
+- fig:inamp-full-scale
+- fig:opa2197-output-impedance
+- fig:riso-ref-topology
+- fig:sensor-full-scale
+- fig:umbilical-pinmap
+- refdes:D-TVS-BREATH
+- refdes:R-OUT-PROT
+- refdes:R-SER-BREATH-INST
+- refdes:TRIM-BREATH-ZERO
+- refdes:U-BREATH
+- circuit:carrier/breath-adc
+- circuit:carrier/breath-excitation-reference
+- circuit:module/breath-output-stage
+- circuit:module/breath-receive-stage
+- circuit:module/digital-and-supervision
+- circuit:module/power-entry
