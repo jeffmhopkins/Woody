@@ -114,7 +114,8 @@ figures:
     status: settled
     owner: docs/decisions/0004-cv-interface-module.md
     derivation: "CS must have a ground partner: it frames the word, MISO is deleted so a mis-frame is unreadable and sticky. SCLK+MOSI is safe by construction - MOSI is only sampled on a SCLK edge."
-    forbidden: ["| MOSI / CS |", "4 MOSI   5 CS", "7 SCLK     8 DIG_GND", "MOSI/CS on 4"]
+    forbidden: ["| MOSI / CS |", "4 MOSI   5 CS", "7 SCLK     8 DIG_GND", "MOSI/CS on 4", "SCLK      / DIG_GND", "MOSI      / CS"]
+    false_positive_note_2: "The two code-block spellings were added 2026-09-21 after ADR 0004's own 'Revised conductor budget' block was found still carrying the OLD pairing - SCLK/DIG_GND and MOSI/CS - 730 lines above its own corrected table. The pattern list matched the table-cell spelling with pipes and missed the code-block spelling with runs of spaces. Fourth time a forbidden pattern has missed a different formatting of the same value."
     false_positive_note: "'SCLK / MOSI / CS' is a legitimate list of three signals. Match the pin-table cell."
 
   - id: dac-rail

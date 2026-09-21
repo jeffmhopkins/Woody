@@ -94,8 +94,8 @@ requirement.
 
 ```
 +12V      / PWR_GND     power. NOT presence - see below
-SCLK      / DIG_GND     SPI to the DAC, 2 MHz (was ~1 MHz here)
-MOSI      / CS
+SCLK      / MOSI        SPI to the DAC, 2 MHz (was ~1 MHz here)
+CS        / DIG_GND     CS needs the ground partner - see the pin map below
 BREATH    / AGND        analog, band-limited ~500 Hz, sense return
 ```
 
