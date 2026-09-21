@@ -303,14 +303,10 @@ E10 verifies it by pulling the umbilical mid-note with the mouthpiece at rest.
     node; a single inverting summer multiplies any offset at the virtual ground
     by `Rf`, which reintroduces the very interaction the `REF` trimmer was
     added to remove, displaced onto the OFFSET knob.
-  - **Its gain range is 0.6× to 2.5×**, not unity and a trim — real playing
-    tops out near 2.5–2.8 kPa against the sensor's 6 kPa span.
-  - **The OFFSET knob has authority in one direction, and it is the wrong
-    one.** An inverting summer fed from the only reference available (+2.500 V)
-    can push the jack *below* 0 V and not above it. That is the identical
-    defect this page congratulates itself for fixing at the `REF` pin, moved
-    one stage downstream where it is drawn as a block. It needs a −1 inverter
-    from a spare half, or a bipolar reference.
+  - **Drawn**, at last: `hardware/module/breath-output-stage.md`. GAIN 0.5–4×
+    as a buffered attenuator ahead of a fixed ×4; OFFSET ±5 V with zero at
+    centre, from two resistors and no extra op-amp half. Two halves, which
+    settles a count that was wrong twice.
 
 ### The instrument-side reference buffer is not stable as connected
 

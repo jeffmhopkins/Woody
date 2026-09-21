@@ -9,7 +9,7 @@
 | Output | Source | Range | Panel control | Precision |
 |---|---|---|---|---|
 | **Pitch** | DAC ch 1 | −2 to +7V, 1V/oct | none | Calibrated |
-| **Breath** | **analog, differential over the umbilical** | 0–10V | gain + offset knobs | Trimmed |
+| **Breath** | **analog, differential over the umbilical** | 0–10V, **offsettable ±5 V** | GAIN 0.5–4×, OFFSET ±5 V | Trimmed |
 | **Mod 1–4** | DAC ch 2–5 | **−10…+10V** | none — configured on the instrument | Trimmed |
 | *(internal)* | DAC ch 6 | — | — | **Spare** — was the breath ambient-zero |
 | *(internal)* | DAC ch 7 | — | — | Shared **3.3333 V** offset for mod 1–4 |
