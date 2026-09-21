@@ -341,7 +341,7 @@ plate cutouts at M3 and are untouched by this. So the allocation went from a sup
 8 marker, 5 free → 3 free**, and the 3 that remain still get pulled per fix 6.
 
 The bit-by-bit assignment and levels are in
-`hardware/cluster/cluster-boards.md` §4.
+`hardware/cluster/key-marker-and-bits/key-marker-and-bits.md`.
 
 That counter is the point. It is a framing check, not an error-detecting code —
 it cannot correct anything and will miss some corruptions — but it converts an

@@ -241,6 +241,54 @@ def emit(lines, detail_only=False):
 REPORT_LINES = []
 
 
+def check_sections(files):
+    """A cross-file `page.md §N` reference must find a §N heading in that page.
+
+    Added 2026-09-21. A section number is a path with different syntax: it
+    names a POSITION inside another document, and moving positions is exactly
+    what a restructure does. The corpus carries about twenty of these and the
+    Phase B splits invalidated several - ADR 0004 pointed at a §4 that had
+    moved to another file entirely.
+
+    Same principle as check_links and check_owners: do not hunt for spellings
+    already known to be wrong, assert that what is written now RESOLVES.
+    """
+    ref = re.compile(r"`?([a-z0-9][a-z0-9-]*\.md)`?\)?[^.\n]{0,24}?§\s?(\d+)")
+    head = re.compile(r"^#{1,6}\s.*?§\s?(\d+)", re.M)
+
+    declares = {}
+    for path in files:
+        base = os.path.basename(path)
+        if not base.endswith(".md"):
+            continue
+        try:
+            declares.setdefault(base, set()).update(
+                head.findall(open(path, encoding="utf-8").read()))
+        except Exception:
+            continue
+
+    problems = []
+    for path in files:
+        rel = os.path.relpath(path, ROOT)
+        if not rel.endswith(".md"):
+            continue
+        try:
+            text = open(path, encoding="utf-8").read()
+        except Exception:
+            continue
+        for m in ref.finditer(text):
+            target, num = m.group(1), m.group(2)
+            if target == os.path.basename(path):
+                continue                  # self-reference
+            if target not in declares:
+                continue                  # not a corpus page; check_links owns it
+            if num not in declares[target]:
+                line = text[:m.start()].count("\n") + 1
+                problems.append(f"{rel}:{line} points at {target} §{num}, "
+                                f"which that page no longer declares")
+    return problems
+
+
 def check_owners(spec):
     """Rule 1: the owning document STATES the figure. Assert it actually does.
 
@@ -364,11 +412,18 @@ def main():
     drawn_not_bommed = check_refdes(files, bom_refs)
     link_problems = check_links(files)
     owner_problems = check_owners(spec)
+    section_problems = check_sections(files)
 
     emit([f"corpus: {len(files)} files | bom.csv: {nrows} rows x {ncols} cols | "
           f"figures tracked: {len(spec['figures'])}", ""], detail_only=True)
 
     fail = False
+
+    if section_problems:
+        fail = True
+        emit([f"BROKEN SECTION REFERENCES ({len(section_problems)})",
+              "  A section number names a position inside another document.", ""]
+             + ["  " + p for p in section_problems] + [""], detail_only=True)
 
     if owner_problems:
         fail = True
@@ -451,6 +506,7 @@ def main():
     n_unres = len(unresolved)
     if fail:
         print(f"FAIL {len(shape_problems)} shape + {len(owner_problems)} owners + {len(link_problems)} links "
+              f"+ {len(section_problems)} sections "
               f"+ {len(live)} stale + {len(bom_problems)} bom "
               f"| corpus {len(files)} files | {n_unres} unresolved (tracked) "
               f"| detail: .staleness/report.txt or --detail")

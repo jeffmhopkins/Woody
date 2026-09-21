@@ -375,7 +375,7 @@ From `config/key-layout.yaml` `[repo]`:
 | **32** | | **None of them on this carrier** |
 
 **Which eight bits carry the marker, and their levels, was decided 2026-09-21**
-(`cluster-boards.md` §4, `key-layout.yaml`). The mapping inside each device is
+(`key-marker-and-bits.md`, `key-layout.yaml`). The mapping inside each device is
 still open, and
 it is now a cluster-board decision** — as is the `H`…`A`-to-switch mapping
 inside each device. Both still have to be settled before *those* boards are

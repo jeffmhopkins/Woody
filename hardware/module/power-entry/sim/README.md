@@ -28,7 +28,7 @@ something about it asserts it from the settled values.
 
 | | |
 |---|---|
-| Simulator | `ngspice`, per `pcb-pipeline.md` §2 — no allowlist change needed |
+| Simulator | `ngspice`, per `pcb-pipeline.md`'s stage 2, *Simulate* — no allowlist change needed |
 | **Do not use** | PySpice 1.5 — it treats every non-`Warning:` stderr line as fatal and ngspice prints a solver banner to stderr on every run. Raw netlists plus `subprocess` |
 | Models | The LM317 and the entry Schottky. **Bank each model in `datasheets/` with a SHA-256 first**, like every other document. The Schottky's own curve is already banked at `datasheets/discrete-and-power/1N5817.pdf` and is what a model has to reproduce |
 | Stimulus | The bus rails arriving at `J-PWR-EURO`, and the same edge in reverse |

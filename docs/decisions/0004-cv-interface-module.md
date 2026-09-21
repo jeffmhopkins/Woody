@@ -741,7 +741,7 @@ pitch); stacking the pots gives 133 mm. It also found that **this ADR's own
 knobs do not fit side by side in 40.34 mm at all — 16 mm is the ceiling,
 against this ADR's claim of "16–20 mm".
 
-Then `POT-RESP` was added (see `breath-output-stage.md` §4), making three
+Then `POT-RESP` was added (see `hardware/module/breath-response-shaper/breath-response-shaper.md`), making three
 controls.
 
 **10HP is 50.50 mm**, and the win is not the width itself — it is that three

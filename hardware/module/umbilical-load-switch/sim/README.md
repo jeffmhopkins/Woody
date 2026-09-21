@@ -33,7 +33,7 @@ arithmetic — `loadswitch-timer`, `loadswitch-gate-cap`, `loadswitch-fb-divider
 
 | | |
 |---|---|
-| Simulator | `ngspice`, per `pcb-pipeline.md` §2 — no allowlist change needed |
+| Simulator | `ngspice`, per `pcb-pipeline.md`'s stage 2, *Simulate* — no allowlist change needed |
 | **Do not use** | PySpice 1.5 — it treats every non-`Warning:` stderr line as fatal and ngspice prints a solver banner to stderr on every run. Raw netlists plus `subprocess` |
 | Model | **Behavioural.** No LT1641 SPICE model is banked; the part is built from the specified law in `datasheets/discrete-and-power/LT1641.pdf`, with the demo manual banked beside it as the corroborating source. If a vendor model is found, bank it with a SHA-256 first and run both |
 | Cases | The two the page separates and sizes differently: the cold start, where the FET ramps, and the hot-plug, where it is already enhanced |

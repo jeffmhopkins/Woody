@@ -103,7 +103,8 @@ parts.**
 
 ## Strip bulk at the feed points
 
-*Moved verbatim from `carrier.md` §5, where it sat beside the LED data drive.*
+*Moved verbatim from `carrier.md`'s LED section, now `led-strip-drive.md`,
+where it sat beside the LED data drive.*
 
 **`C-STRIP-BULK` (470–1000 µF ×2) sits at the strip feed points**, which are on
 this board — "bulk capacitance belongs where the current swings" `[repo] 0014`.
