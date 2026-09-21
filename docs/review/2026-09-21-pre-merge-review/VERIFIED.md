@@ -303,3 +303,39 @@ split commit — `carrier.md`, 8709 words into 16 files — and found four gaps,
 all four legitimate. **No later commit dropped text**, which is the one claim
 the merge most depends on and the one I could not have checked myself
 without re-running it cold.
+
+## A5 — the level shifter's own supply is out of spec at the guaranteed corner
+
+Three banked documents, none of whose numbers appear anywhere in the corpus.
+
+| Claim | Check | Verdict |
+|---|---|---|
+| The 5 V node feeding the carrier's 74AHCT125 falls below the part's minimum VCC at the worst case | Read all three banked datasheets directly | **Confirmed at the guaranteed corner.** `datasheets/discrete-and-power/R-78E5.0-1.0.pdf` p.2: "Output Accuracy **±3.0 % typ. / ±5.0 % max.**" `datasheets/discrete-and-power/SS14.pdf` p.2: maximum instantaneous forward voltage at I_F = 1.0 A, **V_F = 0.50 V**. `datasheets/logic/SN74AHCT125.pdf` p.3, recommended operating conditions: **V_CC 4.5 V to 5.5 V**. The drawing at `power-entry-instrument.md:42-43` puts the buffer behind `R-78E5.0 A` and `D-USBOR`, so `5.00 × 0.95 − 0.50 = **4.25 V**` `[calc]` — **0.25 V under the minimum** |
+
+Two honest qualifications, because a confident wrong finding is worse than an
+uncertain right one:
+
+- The SS14's 0.50 V is specified **at 1.0 A**. The real load is a fraction of
+  that, so the true drop is smaller — but the datasheet publishes no maximum
+  at a lower current, so 0.50 V is the only *guaranteed* number available.
+- At typical the node sits near 4.8 V and everything works. The finding is
+  that **nothing in the corpus states the worst case at all**, and this is
+  the part whose TTL thresholds are ADR 0014's entire level-shift argument —
+  thresholds that are only specified inside 4.5–5.5 V.
+
+`led-strip-drive.md` derives its noise margin "at 5 V". The power page puts
+the same node at ~4.7 V. Neither number is the guaranteed one.
+
+## B2 — the TVS package correction landed on two of its four locations
+
+| Claim | Check | Verdict |
+|---|---|---|
+| The SP0504BAHT pin-count correction named four locations; two were fixed | Grepped all four | **Confirmed.** `U-TVS-SPI` reads **SOT-23-5** in its fragment, in the generated master and at `carrier.md:292`. `U-TVS-CHAIN` still reads **SOT-23-6** in its fragment (`key-chain-loom/bom.csv:4`), in the master at `:49`, and at `carrier.md:285` |
+
+B2's own caveat is correct and worth keeping: `U-TVS-CHAIN`'s `part` field is
+generic ("4-channel TVS array"), so SOT-23-6 is not wrong in the abstract —
+some four-channel arrays are six-pin. What makes it a defect is that
+`carrier.md:285` justifies the part **by pointing at `U-TVS-SPI`**, which is
+the five-pin one. The row is right by accident and wrong by its own reasoning.
+
+**This is the thesis of every wave this project has run, on a two-row fix.**
