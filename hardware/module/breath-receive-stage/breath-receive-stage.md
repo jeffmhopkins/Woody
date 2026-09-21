@@ -105,9 +105,10 @@ instrument-side, inside a bonded body, and unretrofittable.
 separate premises that were then withdrawn from under the swap — [`notes.md`](notes.md).)*
 
 **`REF` is driven from a buffered trimmer** set once at commissioning.
-`breath-zero-ref` nulls a *typical* +0.265 V pedestal *(this line was wrong at
-+0.579 V until 2026-09-21 — the same gain with the 1 MΩ bias divider omitted,
-which is the error `inamp-full-scale` already records for itself)* — but the pedestal is a **spec band, not a
+**+0.573 V** nulls a *typical* +0.265 V pedestal — this page owns
+`breath-zero-ref` and so states it rather than citing it *(the line was wrong
+at +0.579 V until 2026-09-21: the same gain with the 1 MΩ bias divider
+omitted, which is the error `inamp-full-scale` already records for itself)* — but the pedestal is a **spec band, not a
 number**: 0.152–0.378 V, which needs `REF` anywhere from **0.332 V to
 0.826 V**. The band is the datasheet's own `V_off` min/typ/max
 `[datasheet MPXV4006DP p.4: "Voff 0.152 0.265 0.378 V"]`, and **its typical is

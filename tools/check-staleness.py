@@ -241,6 +241,48 @@ def emit(lines, detail_only=False):
 REPORT_LINES = []
 
 
+def check_owners(spec):
+    """Rule 1: the owning document STATES the figure. Assert it actually does.
+
+    Added 2026-09-21. `owner:` had never been read by anything - not by this
+    tool, not by any other - for the whole life of the register. Four separate
+    Phase B split agents, none of which could see the others, reported the
+    same consequence: a split moves a derivation into a sibling directory and
+    the register goes on naming the file it left, silently.
+
+    Note what a weaker version of this check would have missed. After Phase A
+    rewrote paths, every `owner:` path still RESOLVED - the file existed. What
+    had broken was that the file no longer stated the value. So this checks
+    the claim rule 1 actually makes, not the spelling of a path.
+
+    Matched on the value's numeric tokens, because values are prose as often
+    as numbers ("fault isolation and HF isolation (r_d 69 mohm at 392 mA)").
+    A value with no digits at all is unmatchable and is skipped rather than
+    guessed at.
+    """
+    problems = []
+    for fig in spec["figures"]:
+        value = str(fig.get("value", ""))
+        if value in ("DISPUTED", "BLOCKED") or fig.get("status") != "settled":
+            continue
+        owner = fig.get("owner", "")
+        path = os.path.join(ROOT, owner)
+        if not os.path.exists(path):
+            problems.append(f"[{fig['id']}] owner {owner!r} does not exist")
+            continue
+        toks = re.findall(r"\d+\.?\d*", value)
+        if not toks:
+            continue
+        try:
+            text = open(path, encoding="utf-8").read()
+        except Exception:
+            continue
+        if not any(t in text for t in toks):
+            problems.append(f"[{fig['id']}] owner {owner} does not state its "
+                            f"own value {value!r} - did the derivation move?")
+    return problems
+
+
 def check_links(files):
     """Markdown links in the corpus must resolve to a file that exists.
 
@@ -321,11 +363,18 @@ def main():
     bom_problems, bom_refs, ncols, nrows = check_bom()
     drawn_not_bommed = check_refdes(files, bom_refs)
     link_problems = check_links(files)
+    owner_problems = check_owners(spec)
 
     emit([f"corpus: {len(files)} files | bom.csv: {nrows} rows x {ncols} cols | "
           f"figures tracked: {len(spec['figures'])}", ""], detail_only=True)
 
     fail = False
+
+    if owner_problems:
+        fail = True
+        emit([f"FIGURE OWNERS ({len(owner_problems)})",
+              "  Rule 1: the owning document states the figure. These do not.", ""]
+             + ["  " + p for p in owner_problems] + [""], detail_only=True)
 
     if link_problems:
         fail = True
@@ -401,7 +450,7 @@ def main():
     # unscanned, so the count is what a reader checks, not the verdict.
     n_unres = len(unresolved)
     if fail:
-        print(f"FAIL {len(shape_problems)} shape + {len(link_problems)} links "
+        print(f"FAIL {len(shape_problems)} shape + {len(owner_problems)} owners + {len(link_problems)} links "
               f"+ {len(live)} stale + {len(bom_problems)} bom "
               f"| corpus {len(files)} files | {n_unres} unresolved (tracked) "
               f"| detail: .staleness/report.txt or --detail")

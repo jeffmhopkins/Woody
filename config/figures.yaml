@@ -125,7 +125,7 @@ figures:
     quantity: Key network release, crossing V_IH
     value: "119.9 us"
     status: settled
-    owner: hardware/cluster/cluster-boards.md
+    owner: hardware/cluster/key-switch-network/key-switch-network.md
     derivation: "Pressed node sits at 3.3 x 100/(2200+100) = 0.1435 V, NOT 0 V. Charging through 2.2k (tau = 103.40 us): t = -103.40 x ln((3.3-2.31)/(3.3-0.1435)) = 119.9 us"
     threshold_note: "V_IH = 2.31 V = 0.70 x VCC. THIS FIGURE MOVED TWICE ON 2026-09-21 AND THE SECOND MOVE PUT IT BACK. First move: TI's SCLS116E (datasheets/other-semi/74HC165.pdf) has NO 3.3 V row - it tabulates 2 V (1.5/0.5 = 0.75/0.25), 4.5 V and 6 V (both 0.70/0.30) - so the 0.75/0.25 bound was taken on the reasoning that 0.70/0.30 'breaks' at 2 V. Second move: onsemi's MC74HC165A/D Rev. 13 p.4 PUBLISHES A 3.0 V ROW, V_IH 2.1 V / V_IL 0.9 V, which is exactly 0.70/0.30. 3.3 V is therefore bracketed on BOTH sides by published 0.70/0.30 rows and needs no extrapolation through the 2 V point; 2 V is the single exception at the bottom of the family range, not a trend. TI, Nexperia (Rev. 8) and Toshiba agree with onsemi digit for digit at every shared rail, so the 3.0 V row is the family's, not one vendor's. All four PDFs are banked."
     conservative_bound: "If a TI SN74HC165 is the part fitted, its own datasheet guarantees nothing at 3.3 V and the pessimistic bound is V_IH = 2.475 V, giving 138.7 us. Nothing in the design depends on which is used - the release is absorbed by the asymmetric debounce either way. Design margin against 138.7 us if it ever gets tight."
@@ -137,7 +137,7 @@ figures:
     quantity: Key network press, crossing V_IL
     value: "5.92 us"
     status: settled
-    owner: hardware/cluster/cluster-boards.md
+    owner: hardware/cluster/key-switch-network/key-switch-network.md
     derivation: "tau = (2200||100) x 47nF = 4.4957 us; t = -4.4957 x ln((0.99-0.1435)/(3.3-0.1435)) = 5.92 us"
     threshold_note: "V_IL = 0.99 V = 0.30 x VCC, from onsemi MC74HC165A/D Rev. 13 p.4's published 3.0 V row. Same two-move history as key-release-time - see its threshold_note. SEPARATELY AND STILL CORRECT: tau is the PARALLEL combination, 4.4957 us, not 100 ohm x 47 nF = 4.7 us; the page stated 4.7 us beside a crossing time computed from 4.496. That correction is independent of the threshold question and stands."
     conservative_bound: "The TI-only pessimistic bound is V_IL = 0.825 V, giving 6.89 us. Margin inside the 250 us scan is 42x at 5.92 us and 36x at 6.89 us - the same answer."
@@ -461,7 +461,7 @@ figures:
     quantity: OPA2197 open-loop output impedance
     value: "375 ohm"
     status: settled
-    owner: hardware/carrier/carrier.md
+    owner: hardware/carrier/breath-excitation-reference/breath-excitation-reference.md
     derivation: "SPECIFIED, not derived: SBOS737C EC table p.8 and p.10, 'ZO Open-loop output impedance | f = 1 MHz, IO = 0 A, See Figure 26 | 375 | ohm'. Figure 26 reads ~3.26k at 0.1 Hz, 482 at 10 Hz, a 375 plateau from 100 Hz to 300 kHz, 301 at 1 MHz and ~73 at 10 MHz. Banked at datasheets/texas-instruments/OPA2197.pdf."
     provenance_note: "The corpus BACK-SOLVED 75.8 ohm from its own stated 21 kHz pole and carried it through three review waves because ti.com was unreachable. ti.com is reachable now and the BLOCKED manifest row was a proxy artefact. 75.8 ohm is about the 10 MHz value, so it is defensible as a crossover-region number and was not a wild guess - it is simply not TI's specified figure."
     forbidden: ["Ro ≈ 75.8 Ω**. The actual load", "gives **Ro ≈ 75.8"]
