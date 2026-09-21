@@ -186,3 +186,58 @@ Four of the verifications above were done this way. `repo-maintenance.md` §3
 needs this rider, and that edit is **held pending the merge decision** rather
 than taken now, because the corpus is under a content freeze and making an
 exception for my own convenience is how freezes stop meaning anything.
+
+## A5 / A4 / C3 — the umbilical branch: three cold agents, one topology contradiction
+
+The strongest convergence in this wave. Three agents on three different
+slices, none able to see the others, filed the same defect from three sides.
+
+| Claim | Check | Verdict |
+|---|---|---|
+| Both Interfaces tables say the umbilical branch is taken **before** the entry diodes; the drawing, the part counts and a **settled** tracked figure all require it **after** `D2` | Read both rows, the `D-REVPOL` and `FB-IN` BOM rows, and `ferrite-bias-impedance`'s derivation | **Confirmed, and one side of it is settled.** `power-entry.md:28` and `umbilical-load-switch.md:15` both say "taken **before** the diodes, which is the point of the split". Against that: `D-REVPOL` is **qty 3**; `FB-IN` is qty 4 and its note enumerates "One per branch: +12V analog, **+12V umbilical**, −12V, +5V"; and `ferrite-bias-impedance` — **status settled** — derives FB2's 280–310 Ω from "**FB2 carries `umbilical-current` (359 mA)**", distinct from the module's own 392 mA. If the tables are right, FB2 carries nothing and a settled figure is wrong |
+
+Why it is the wave's most consequential finding rather than one more stale
+sentence:
+
+- **The two halves agree with each other**, because the same sentence was
+  copied into both pages during the split. Cross-checking the two ends —
+  the thing the `## Interfaces` tables exist for — returns agreement.
+- **It is a layout instruction.** Followed at layout it deletes reverse
+  protection on the 359 mA branch and leaves `D2`/`FB2` as dead copper.
+- A5 computed the consequence the other way: with `D2` + `FB2` in the path,
+  the load switch's `FB`-divider worst-case margin falls from the **0.4 V**
+  it was chosen to have to **0.05–0.11 V**.
+- **Both parts are in `unplaced.csv` as well** — `D-REVPOL` and `FB-IN` are
+  in the file that counts "parts nobody has drawn", while being the parts the
+  power-entry drawing is mostly made of.
+
+Nothing here says which topology is correct. It needs a decision, not an edit.
+
+## C4 — two netlist shorts in the tables written to prevent netlist shorts
+
+| Claim | Check | Verdict |
+|---|---|---|
+| **F5** — `module/dac8568`'s `SCLK`/`DIN`/`SYNC` has two declared drivers | Compared the two rows | **Confirmed, and they are byte-identical.** `spi-link.md:42` and `digital-and-supervision.md:27` both read "`SCLK`, `DIN`, `SYNC` … out … `module/dac8568` … Buffer outputs. The DAC-side three of the six `R-SPI-PULL` sit on these". The buffer is physically on `digital-and-supervision` — **`spi-link.md:43` says so itself**, one row later, when explaining why the +5 V open item stayed over there. So `spi-link` claims to source three nets that do not cross its own boundary |
+| **N2** — `bus +5V` has two mutually exclusive sources | Read all three tables and the drawing | **Confirmed.** `power-entry.md:27` exports "bus `+5V` **after `FB4`/`C4`**" to `module/digital-and-supervision`, and its drawing at `:74` shows `+5V ├──[FB4]──[C4 47µF]──── 74AHCT125 only`. Both receiving tables — `digital-and-supervision.md:28` and `spi-link.md:43` — say the rail comes straight from the "Eurorack bus header", naming no bead, no capacitor and no peer circuit. A transcription gets **two nets both called bus +5 V**, one filtered and one not, and no DRC can say which is real. The BOM sides with `power-entry`: `FB-IN` is qty 4 and one of the four is the +5 V branch |
+
+The second one is not only a naming problem. Whether that rail has 47 µF on
+it is what decides how long the buffer stays powered after `AVDD` collapses —
+the sequencing hazard A4 and C3 filed independently.
+
+## B1 / B2 — four tracked figures are owned by the generated file
+
+| Claim | Check | Verdict |
+|---|---|---|
+| Four `figures.yaml` entries name `hardware/bom.csv` as `owner` | Enumerated every entry's `owner` | **Confirmed: `key-pullup-qty`, `panel-toggle-hole`, `ferrite-bias-impedance`, `ref5050-grade`** |
+
+Rule 1 says the owner **states** the figure and everyone else cites it. These
+four point a maintainer at the one file in the repository where a statement
+is deleted without a word on the next `merge-bom.py`. It is the trap
+`CLAUDE.md` §4 names, aimed by the register itself — and it is **mine**,
+created the moment the restructure made that file generated and not
+propagated into `config/figures.yaml`.
+
+`check_owners` passes on all four, because `merge-bom.py` copies the
+fragments' notes through, so the value really is present in the generated
+output. The check proves the text is there. It cannot ask whether the file
+it is in is one a human should edit.
