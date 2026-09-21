@@ -437,3 +437,55 @@ C2 also recorded what it could **not** fool, which is the more useful half:
 `merge-bom.py`'s five other guards, all of `merge-manifests.py`'s own guards,
 everything `verify-datasheets.py` checks, and `rewrite-paths.py --invert` —
 the strong proof that Phase A changed no content. That one held.
+
+## C5 — the newcomer slice, and the finding that decides the merge
+
+### F2 — the documented procedure produces the project's named failure, green
+
+C5 stood in for someone who has never seen this repository. It followed the
+written rules. I re-ran it myself in a throwaway copy.
+
+| Claim | Check | Verdict |
+|---|---|---|
+| Changing a resistor by the documented procedure leaves the corpus inconsistent and every tool reports success | Edited the fragment, regenerated the master, ran the checker — the three documented steps, in order | **Confirmed, reproduced exactly.** Changed `R-SPI-SER` from `100R 1%` to `220R 1%` in `hardware/interfaces/spi-link/bom.csv`. `merge-bom.py`: *"wrote 138 rows from 24 fragments \| **0 problems**"*. `check-staleness.py`: *"**PASS no live stale values**"*, **exit 0**. Meanwhile `config/figures.yaml` still reads `value: "100 ohm, R-SPI-SER, qty 3"` and the owner page still states 100 Ω **six times** |
+
+And 220 Ω is not an arbitrary number. It is **the value that figure's
+derivation exists to reject** — `spi-series-r`'s own `forbidden` list contains
+`R-MOSI-SER at 220`.
+
+**Why it escapes.** Nothing in the toolchain relates a BOM row to the figure
+that governs it. `check_owners` compares the register against the owner page,
+and after this edit those two still agree perfectly — both still say 100. The
+BOM is the third party to that agreement and no check reads it as one.
+
+This is the whole project's stated purpose, failing along the path a new
+contributor is explicitly told to walk, with `0 problems` and `PASS` printed
+at them. It is worse than any individual stale value found in this wave,
+because a stale value is one defect and this is a *generator* of them.
+
+C5 adds the compounding detail, which I verified separately above: three
+tracked figures name the **generated** `hardware/bom.csv` as `owner:`, so for
+those the procedure's first step sends the reader to edit a file that
+silently discards the edit.
+
+### F1 — the restructure's central map is unreachable
+
+| Claim | Check | Verdict |
+|---|---|---|
+| `hardware/README.md` has zero inbound links from anywhere in the corpus | Grepped every markdown link in the tree outside `docs/review/**` | **Confirmed. Zero.** The root `README.md`'s only outbound links are to `docs/decisions/0011-licensing.md`, `docs/decisions/` and `docs/reference/latency-budget.md`. Its "Repository layout" section is a fenced code block, so nothing in it is a link |
+
+The page that explains the `<board>/<circuit>/` scheme — the thing this
+restructure *is* — cannot be reached by following links from the front door.
+The tree is navigable by `grep` and by knowing where to look, which is the
+condition the restructure was meant to end. **This one is squarely mine.**
+
+### F15 — a forbidden pattern that can never fire
+
+| Claim | Check | Verdict |
+|---|---|---|
+| `spi-series-r`'s pattern `"220 Ω with\n~200 pF"` contains a real newline and cannot match the line-joined stream | Read the entry | **Confirmed.** The list is `['R-MOSI-SER at 220', 'R-MOSI-SER` at 220', 'R-SCLK-SER', 'R-CS-SER', '220 Ω with\n~200 pF']` |
+
+It is exactly what `CLAUDE.md` §2's "add one pattern per spelling you find"
+produces when the spelling you find is hard-wrapped across two lines, and no
+document warns about it. A pattern that cannot fire is indistinguishable in
+every report from one that fires and finds nothing.
