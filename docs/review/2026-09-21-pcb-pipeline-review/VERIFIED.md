@@ -107,3 +107,46 @@ happen** — SKiDL exits 0 with errors and writes the netlist anyway;
 out of date (though its output is non-deterministic and cannot be the parity
 artifact); and `check-bom-parity.py` "diffs by refdes" is **impossible** —
 `bom.csv` is role-keyed, and 61 rows are 149 physical parts.
+
+## P12 — Freerouting is non-deterministic, and the reason is wall-clock
+
+**Claim:** the RNG *is* seeded, so the obvious answer is wrong. The real
+non-determinism is `TIME_LIMIT_TO_PREVENT_ENDLESS_LOOP = 1000` ms applied
+inside the routing hot path — geometry becomes a function of how much work the
+CPU got through in one second.
+
+**Re-checked against the working clone, 2026-09-21. CONFIRMED.**
+
+```
+fr/src/main/java/app/freerouting/autoroute/pipeline/BatchAutorouterThread.java:38
+    private static final int TIME_LIMIT_TO_PREVENT_ENDLESS_LOOP = 1000;
+  ...called at :535 and :571
+fr/src/main/java/app/freerouting/autoroute/pipeline/AutoroutePassRunner.java:33
+    same constant
+```
+
+Two files, called from the routing path. **This is the finding that breaks the
+re-runnability promise**, and it is one an agent working from memory would have
+got wrong in the other direction — P12 says so explicitly, which is the right
+way to file it.
+
+### P12's ROADMAP flag — CHECKED AND CLEARED, not a defect
+
+P12 raised `ROADMAP.md:53` as possibly saying the panel is 8HP. It does not.
+The full line reads:
+
+> "**10HP panel cut**, module assembled and racked. etherCON braced to the
+> PCB — good practice at 8HP rather than the structural necessity it was at
+> 6HP."
+
+It states 10HP first and then compares bracing necessity *across* widths as
+history. The phrasing is a fossil of the 8HP era but the claim is true and
+nothing derives from it. Recorded so the next reviewer does not re-raise it.
+
+### The staleness count moving 4 → 5 — EXPECTED
+
+P12 noticed the pre-commit hook go from 4 unresolved to 5 mid-session and
+correctly declined to assume it was theirs. It is the **datasheet session**
+working the same branch: `ref5050-grade` was filed `disputed` when the
+REF5050's A-suffix turned out to be the *worse* grade, and `matrix-led-current`
+was filed `blocked`. Both are deliberate.
