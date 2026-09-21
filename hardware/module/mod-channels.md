@@ -95,8 +95,8 @@ channel keeps the inverting topology and the safe clear together.)*
 | **V_ref** | **3.3333 V** from DAC ch7, buffered | Shared by all four. Intercept is `k · V_ref` = 10.000 V |
 | **C-FILT-MOD** | 82 nF C0G | 1.94 kHz, jack side of the 1 kΩ |
 
-*(The four-resistor version this replaced used 40.2 kΩ against 10 kΩ, chosen
-because E24's 39 k would have given gain 3.90 and a jack that
+*(The four-resistor version this replaced used 40.2 kΩ against 10 kΩ, because
+E24's 39 k would have given gain 3.90 and a jack that
 stops at ±9.75 V, visibly short of the specified ±10. Going slightly over costs
 nothing: an OPA2197 on ±12 V less two Schottky drops reaches ~±11.45 V, so
 ±10.05 V has 1.4 V of margin.
@@ -151,18 +151,18 @@ On a watchdog `CLR`, the C-grade DAC8568 (the grade is **locked** — it selects
 scale (ADR 0006). Channel 7 goes to 0 V with the rest, so:
 
 ```
-Vout = 4.02 × (0 − 0) = 0 V
+Vout = 4 × 0 − 3 × 0 = 0 V
 ```
 
 All four jacks park at 0 V, which is the same state as rack power-on. **Had the
 2.5 V come from a fixed divider or the internal reference directly**, `CLR`
 would zero the signal channels and leave the offset standing, and every mod
-jack would pin at `4.02 × (0 − 2.5) = −10.05 V` — a hard rail on four outputs,
+jack would pin at `4 × 0 − 3 × 3.3333 = −10.00 V` — a hard rail on four outputs,
 indefinitely, with no `MISO` to notice it.
 
 The mirror-image failure is the one the review actually found: firmware
 refreshing the five signal channels after a `CLR` and *not* channel 7, which
-pins the jacks at `4.02 × Vdac` ≈ **+11.45 V**. That is closed by the
+pins the jacks at `4 × Vdac` ≈ **+11.45 V**. That is closed by the
 statelessness rule in `firmware/README.md` — refresh all six populated
 channels every pass — and the latency budget already paid for it.
 

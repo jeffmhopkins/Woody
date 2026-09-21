@@ -60,11 +60,19 @@ and the ADR gets corrected.
                                         │
                                   ┌─────▼──────────────────────┐
                                   │  INVERTING gain + offset   │
-                                  │  POT-GAIN then POT-OFFSET  │
-                                  │  ½ OPA2197                 │
+                                  │  POT-GAIN (buffered        │
+                                  │  attenuator) then          │
+                                  │  POT-OFFSET summing        │
+                                  │  TWO × ½ OPA2197 — one     │
+                                  │  half cannot do both       │
+                                  │  independently             │
                                   └─────┬──────────────────────┘
                                         │
-                                   [1k]─┴─[C 330nF]── BREATH jack
+                                   [1k]─┼─[C 330nF]── AGND(module)
+                                        │
+                                   [BAV99]── ±12 V
+                                        │
+                                   BREATH jack
 ```
 
 ## `REF` ties to ground, and the polarity question dissolved twice

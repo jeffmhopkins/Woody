@@ -31,6 +31,8 @@ readable.
 | **D3** | The breath **OFFSET knob has authority in one direction only, and it is the useless direction**. Same defect class the breath page removed at the in-amp `REF` pin; it moved downstream to the panel. The module has no negative reference to fix it with. | `breath-receive-stage.md` | **High** |
 | ~~D4~~ | The umbilical was not balanced — 1 kΩ on the signal leg, nothing on the `AGND` leg, capping CMRR at **60.2 dB**. **Fixed in the repo while this audit was being written** (`R1b`). Independently derived here; arithmetic confirms the page. **One residual: BOM row 66 still says qty 1, 0805.** | `breath-receive-stage.md` | **Closed → D4b** |
 | **D4b** | `R-SER-BREATH-INST` (BOM row 66) is still **qty 1 in 0805**, while the page now specifies **two** 1 kΩ in **1206 ≥250 mW** (`R1`, `R1b`). Both are instrument-side and therefore unretrofittable. | `bom.csv` row 66 vs `breath-receive-stage.md` | **High** |
+| **D18** | The presence detect now trips at **exactly half the resting pedestal** — 0.10–0.25 kPa of *negative* mouthpiece pressure, i.e. **10–25 mm H₂O**. A trip disables `OE`, stops the DAC refresh, and 99 ms later **clears every CV output**. The threshold sits inside the signal's own range. | `digital-and-supervision.md`, BOM row 100 | **High** |
+| **D19** | The new presence threshold is derived from **stage 10's output**, so a `REF`-buffer failure *to zero* leaves the unplugged state sitting exactly **on** the threshold. The page claims the circuit "degrades correctly"; it does so for a rail failure and **latches at "present" forever** for a low failure. | `digital-and-supervision.md` | Medium |
 | **D5** | The **count is wrong three ways**. BOM row 13 says eleven and lists ten; row 28 contradicts row 13 and makes it nine; the instrument-side buffer is on a different board and was never inside the six; and a **twelfth stage (the REF5050 buffer) is counted nowhere at all**. | `bom.csv` rows 13, 26, 27, 28 | Medium |
 | **D6** | Breath output **clips at the top of the GAIN knob** — saturates above 46 % of sensor range at 2.5×, with 0.4 V of margin on a hard blow *before* the offset knob adds anything, and the saturated level is 1.4 V outside the module's own ±10 V convention. | `breath-receive-stage.md` | Medium |
 | **D7** | **Jack-side feedback makes a shorted PITCH jack saturate the amplifier** where op-amp-side feedback would not. Every patch-cable insertion momentarily shorts tip to sleeve. New failure mode, introduced by the redesign, unmentioned. | `pitch-stage.md` | Medium |
@@ -1120,22 +1122,97 @@ the BOM row that already carries the argument for `R-OUT-PROT` (row 42
   warns about `[repo]`, also resets the internal-reference enable — `[gated]` on
   DAC8568 behaviour. Worth resolving, because *"pitch parks subsonic"* is the
   sentence someone will test against at E9.
-- **Presence-detect threshold, adjacent to the instrument buffer's output.**
-  `digital-and-supervision.md` and BOM row 100 set it at **+100 mV** against the
-  sensor's pedestal `[repo]`, whose spec range is **0.152–0.378 V** `[repo]`.
-  `[calc]`: a part at the bottom of that distribution presents 0.152 ×
-  0.98912 = **150 mV** at the module, i.e. **50 mV of margin**, and the sensor's
-  offset tempco (~0.5 mV/K, which the page already marks unverified `[repo]`)
-  eats 10 mV over a 20 K warm-up. The consequence of a false trip is that `OE`
-  disables the SPI buffer → the DAC refresh stops → the 99 ms watchdog asserts
-  `CLR` → **every CV output clears mid-note**. A performance signal is being
-  used as a presence flag with a threshold 50 mV below its resting value and a
-  failure mode that kills pitch. Also `[calc]`: the row's own values cannot
-  produce the stated threshold — 5.21 V × 10 k/110 k = **474 mV**, not 100 mV;
-  +100 mV from 5.21 V with a 100 kΩ upper leg needs a 1.96 kΩ lower leg. The row
-  says "Final values at E10" `[repo]`, so this is a flagged gap rather than a
-  claimed-and-wrong number, but the 50 mV margin should be part of that
-  calculation.
+- **The presence detect now hangs off stage 10, and that puts it in this
+  audit's scope.** It was redesigned while this was being written. It no longer
+  taps the sensor pedestal; it compares the **INA828's output** against
+  **half the breath `REF`-zero buffer's output** (`digital-and-supervision.md`,
+  BOM row 100 `[repo]`). Two consequences follow that neither file states.
+
+  **D18 — the threshold sits inside the signal's own range.** Write `P` for the
+  sensor's resting pedestal. The trim sets `V_REF = G·P` so the in-amp rests at
+  0 V, and the threshold is `V_REF/2` `[calc]`:
+
+  ```
+  V_out = −G·V_s + G·P            threshold = G·P/2
+  trips  when  −G·V_s + G·P > G·P/2
+         →  V_s < P/2
+  ```
+
+  **The detect trips at exactly half the resting pedestal, whatever the
+  trimmer is set to.** In pressure, at 0.7667 V/kPa `[calc: 4.600 V / 6 kPa]`:
+
+  | Pedestal `P` | Trip at | Margin | In pressure |
+  |---|---|---|---|
+  | 0.152 V (bottom of the spec band) | 0.076 V | 0.076 V | **0.099 kPa ≈ 10 mm H₂O** |
+  | 0.200 V (typical) | 0.100 V | 0.100 V | **0.130 kPa ≈ 13 mm H₂O** |
+  | 0.378 V (top of the band) | 0.189 V | 0.189 V | 0.247 kPa ≈ 25 mm H₂O |
+
+  Blowing moves the in-amp output *negative*, away from the threshold, so no
+  amount of blowing trips it `[calc]`. **Drawing does.** Ten to twenty-five
+  millimetres of water column is a gentle inhale, a released embouchure, or the
+  thermal contraction of a 400 mm tube's dead volume during warm-up.
+
+  The consequence chain is entirely documented, just never joined up `[repo]`:
+  comparator → `OE` high → 74AHCT125 disabled → the DAC's `SCLK`/`DIN`/`SYNC`
+  held by the DAC-side pulls → no `CS` edges → the 74HC123 is not retriggered →
+  **99 ms → `CLR` → every CV output to zero scale, mid-phrase.**
+
+  The "self-centring" property is real and is a genuine improvement over the
+  fixed 100 k/10 k divider it replaced — but it centres the threshold in the
+  **middle of the quiescent signal**, which is the worst available place for a
+  signal that can move in both directions. The sensor is an MPXV4006**DP**; its
+  own floor is only `P/0.7667` ≈ 0.26 kPa of draw below rest, so *any* threshold
+  expressed as a fraction of `P` lands inside the inhale range.
+
+  Moving the divider from 1:1 to **1:4** (threshold at `0.8·V_REF`) buys 1.6×
+  `[calc: margin 0.8P instead of 0.5P]` and still leaves 0.2·`V_REF` ≈ 86 mV on
+  the unplugged side, ~16× the hysteresis. That is a one-resistor improvement,
+  not a cure. **The real decision is whether draw is a supported gesture.** If
+  it is, the detect cannot live on this node at all. If it is not, say so on the
+  page, because nothing currently does and the failure is silent and total.
+
+- **D19 — the detect does not degrade the way the page says.**
+  `digital-and-supervision.md` `[repo]`: *"if the reference dies, the threshold
+  goes with it and the detect reads 'absent'."* Only for one of the two
+  failures `[calc]`:
+
+  ```
+  REF buffer fails HIGH (output at a rail, +11.5 V):
+    threshold = 5.75 V, in-amp output saturates below it → reads ABSENT  ✓
+
+  REF buffer fails LOW (output at 0 V — a dead half, or an open trimmer wiper):
+    V_REF = 0  →  threshold = 0 V
+    unplugged:  in-amp output = G·0 + V_REF = 0 V      ← exactly ON the threshold
+    alive:      in-amp output = −G·P + 0 = −0.432 V    ← below it
+  ```
+
+  With 5.4 mV of hysteresis the comparator simply **latches wherever it was**,
+  and if it was reading "alive" it goes on reading "alive" with the cable
+  unplugged — *"which is the exact fault the detector exists to catch"*, in the
+  page's own words about the version before this one `[repo]`. An open trimmer
+  wiper is the most likely single failure in the whole breath chain, because it
+  is a mechanical contact that is turned once and then never again.
+
+  A commissioning error produces the same state: step 1 of the procedure says
+  only *"until the in-amp output reads 0 V"* `[repo]`, and `V_REF = 0` with the
+  cable unplugged also reads 0 V at the in-amp output. **The procedure does not
+  distinguish the correct setting from the failure.** Step 1 should read: *with
+  the umbilical connected and the mouthpiece at rest*, and should also check
+  that `V_REF` itself is in the 0.33–0.83 V band.
+
+- **D18/D19 collide with D11, and the collision is layout-critical.** The
+  hysteresis is now 5.4 mV `[calc: BOM row 100 gives 54 mV at 1 MΩ, so 10 MΩ
+  gives one tenth]`. §3.4 computed the mod-channel cap-charging transient
+  appearing at the in-amp output as **1.73 mV at 10 mΩ of shared `AGND`
+  copper** — 32 % of the hysteresis, safe. **At 100 mΩ it is 17.3 mV, three
+  times the hysteresis**, and a fast mod-channel step toggles the presence
+  comparator, which stops the SPI, which clears every CV output 99 ms later.
+
+  So the `AGND` return impedance between `C-FILT-MOD` and the in-amp's
+  reference tap is not a layout nicety — **it is the difference between a
+  working module and one whose CV outputs drop out when a modulation channel
+  moves quickly.** Nothing in the repo states a budget for it. It should:
+  **≤ 20 mΩ**, or the separate `AGND_SENSE` net of §3.4.
 
 ---
 
@@ -1166,6 +1243,9 @@ off the datasheets before laying out.**
 | 18 | SOIC-8 θJA | §6.1 |
 | 19 | Cermet trimmer tempco (100 vs 250 ppm/°C) | D8 / §5.3, closing the 6× dispute |
 | 20 | Whether 82 nF C0G exists in 1210 | already flagged by BOM row 67 `[repo]` |
+| 21 | LM311 input bias current and input offset | D18/D19 margins |
+| 22 | LM317 output tempco on the 5.21 V rail | §10, the breath zero's new drift term |
+| 23 | MPXV4006DP behaviour below zero differential pressure | **D18** — how far the output actually falls on a draw |
 
 ---
 
@@ -1220,3 +1300,10 @@ capacitor that nothing in the repo specifies.
    resistor (D10, D6).
 7. Add a row for the −2.500 V inverter, or record that breath OFFSET is
    downward-only by design (D3).
+8. Row 100 (`R-PRESENCE`): state the trip pressure in kPa, not just the
+   voltage ratio, and settle whether draw is a supported gesture (**D18**).
+   Consider 1:4 rather than 1:1.
+9. `breath-receive-stage.md` commissioning step 1: specify *umbilical
+   connected*, and add a check that `V_REF` lands in 0.33–0.83 V (**D19**).
+10. State an `AGND` return-impedance budget (≤ 20 mΩ) or split `AGND_SENSE`
+   (**D11**, and the D18/D19 collision).

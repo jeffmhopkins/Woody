@@ -136,11 +136,18 @@ converts the worse error into the better one, for free.
 | **C-FILT-PITCH** | **10 nF C0G** | Restored at the jack. The low-impedance shunt at the connector, which nothing else provides |
 
 **Power-on is 0.000 V, not "subsonic".** `V_ref` is the DAC's internal
-reference, which is disabled until firmware enables it — so *both* terms are
-zero and the jack sits at **0 V, a VCO's base note**, until that write. After
-it, `CLR` parks at −2.500 V. ADR 0006's power-on table asserts "below −2 V" for
-both and they are different states. Harmless with nothing gated, but it should
-say what it does.
+reference, which is **disabled until firmware writes an enable** — so *both*
+terms are zero and the jack sits at **0 V, a VCO's base note**, until that
+write. After it, `CLR` parks at −2.500 V. ADR 0006's power-on table asserts
+"below −2 V" for both; they are different states, 2.5 V apart.
+
+**This is the same argument that moved the breath zero off `VREFOUT`, and it
+was not applied here.** Pitch cannot move off it — the whole tracking argument
+above depends on referencing the same node the DAC's full scale references —
+so this is an accepted compromise rather than a defect, and it carries a
+firmware requirement: **the reference-enable must be firmware's first DAC
+write**, before any channel data, and it is in the sticky-register set that
+gets periodically refreshed (`firmware/README.md`).
 
 **Headroom.** Full DAC scale 0 → 5.000 V maps to −2.500 → +7.500 V, which is
 the ±600 cents of firmware reserve ADR 0006 describes. An OPA2197 on ±12 V
@@ -310,8 +317,12 @@ the right order of priority: the static budget was never the problem.
   rail during that window. This project already fixed the identical problem on
   the breath in-amp with `R-BIAS-INAMP`. `R-BIAS-DAC` now does it here — at the
   **DAC pin**, not after `R-OPAMP-IN`, where 100 kΩ would cost 1 % of gain.
-- **Whether `TRIM-GAIN` is 1 kΩ or 500 Ω.** ±5 % of a 10 kΩ ratio wants ~1 kΩ
-  of adjustment; whether that is too coarse for a comfortable multiturn feel is
-  a bench question at E9.
+- **Whether 200 Ω is the right `TRIM-GAIN`.** It is 0 → +2 % and one-sided,
+  and with the load divider gone it has no downward authority at all. Whether
+  it should be bipolar (fixed leg slightly under nominal, trimmer bracketing
+  it) or deleted in favour of firmware is an E9 question.
+- **A two-terminal series trimmer fails open to the rail.** Strap the wiper to
+  one end so a dirty track degrades to a known resistance rather than an open
+  circuit. That is a footprint decision, not a value.
 - **The two spare LT5400 resistors.** Available, matched, and currently doing
   nothing. Worth a look when the mod channels are laid out.

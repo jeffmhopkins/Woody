@@ -19,7 +19,7 @@ entry diode, so most of the prior art stops being applicable halfway down.
        │   │                                   150R/475R    │
        │   │                                   0.1%      [C 1µF]
        │   │                                                │
-       │   └──[D2 1N5817]──[FB2]──[C2 47µF]──┬───────────── AGND
+       │   └──[D2 1N5817]──[FB2]──[C2 47µF]──┬──────── PWR_GND (star)
        │                                      │
        │                          ┌───────────┴───────────┐
        │                          │  [R-ILIM 50mΩ]        │
@@ -149,6 +149,12 @@ Pulling to the buffer's own rail is also the fail-safe arrangement: if bus
 goes out — which is the correct indication. The **comparator and the watchdog
 stay on the LM317's 5.21 V** so that a bus rail failure cannot take the
 supervision with it.
+
+**The LM311 itself runs on ±12 V**, not on 5.21 V — it has to resolve a signal
+near 0 V, and a comparator on a single positive supply cannot, which is
+precisely and only why the LM393 was rejected. Only its **pull-up** sits on a
+5 V rail, via the separate emitter pin that is the LM311's whole reason for
+being here.
 
 ## Grounding
 
