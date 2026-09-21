@@ -55,6 +55,69 @@ superseded = [r for r in rows
               if not r[2] and r[6].upper() in ("BLOCKED", "NOT-FETCHED")
               and r[0].strip().lower() in banked]
 
+# Exact part-string match is not enough, and under-reporting is the dangerous
+# direction: a later researcher banks the same part under a more specific name
+# ("Ferrite bead 600R@100MHz 1206 (FB-IN, chosen part)" vs the blocked
+# "Ferrite bead >=1A 600R@100MHz"), the strings differ, and the blocked row
+# goes on reading as a live gap. That happened three times between R7 and R8
+# and nearly cost a wave of agents re-fetching documents already on disk.
+#
+# Two further rules, in order of trust:
+#   DECLARED - an OK row quotes the blocked row's exact part string in its
+#              notes. Zero false positives, and it is the one a researcher can
+#              deliberately opt into: quote the row you are closing.
+#   LIKELY   - shared distinctive tokens. A heuristic, reported as "check",
+#              never as fact, because the tempting near-misses here are
+#              WS2812B-0807 against WS2812B-2020 and the WS2815 strip against
+#              the WS2815 IC - different dies and different products, and
+#              silently conflating them is the exact defect this repo exists
+#              to prevent.
+def _tokens(part):
+    out, cur = set(), []
+    for ch in part.lower():
+        if ch.isalnum():
+            cur.append(ch)
+        elif cur:
+            out.add("".join(cur)); cur = []
+    if cur:
+        out.add("".join(cur))
+    # Structural words describe the KIND of document, not which part it is for.
+    GENERIC = {"drawing", "vendor", "datasheet", "sheet", "series", "route",
+               "second", "source", "alternative", "chosen", "part", "spec",
+               "specification", "manual", "note", "application", "mating",
+               "half", "and", "the", "for", "with", "curve"}
+    return {t for t in out if len(t) >= 3 and t not in GENERIC}
+
+_freq = {}
+for r in rows:
+    for t in _tokens(r[0]):
+        _freq[t] = _freq.get(t, 0) + 1
+
+DISTINCTIVE = 6      # a token in more than this many rows names a category
+_ok = [r for r in rows if r[2] and r[6].upper().startswith("OK")]
+_exact = {id(r) for r in superseded}
+declared, likely = [], []
+for r in rows:
+    if r[2] or r[6].upper() not in ("BLOCKED", "NOT-FETCHED") or id(r) in _exact:
+        continue
+    part = r[0].strip()
+    # "SUPERSEDES" must be present too: plenty of rows legitimately MENTION a
+    # part without closing its gap. The Waveshare schematic names WS2812B-0807
+    # on every one of its 64 symbols and is emphatically not its datasheet.
+    hit = next((o for o in _ok
+                if part and part in o[7] and "SUPERSEDES" in o[7].upper()), None)
+    if hit is not None:
+        declared.append((r, hit)); continue
+    rt = {t for t in _tokens(part) if _freq.get(t, 99) <= DISTINCTIVE}
+    best, shared = None, set()
+    for o in _ok:
+        common = rt & _tokens(o[0])
+        if len(common) > len(shared):
+            best, shared = o, common
+    # Two distinctive tokens, or one token so rare it occurs only in this pair.
+    if best is not None and (len(shared) >= 2 or any(_freq.get(t) == 2 for t in shared)):
+        likely.append((r, best, sorted(shared)))
+
 ok = sum(1 for r in rows if r[6].upper().startswith("OK"))
 blocked = sum(1 for r in rows if r[6].upper() == "BLOCKED")
 print(f"MANIFEST.csv: {len(rows)} rows from {len(glob.glob(os.path.join(ROOT,'datasheets','.manifest-R*.csv')))} fragments "
@@ -64,6 +127,17 @@ if superseded:
           f"elsewhere in this manifest. They are kept as the record of the gap, not as a live gap:")
     for r in superseded:
         print(f"        - {r[0]}")
+if declared:
+    print(f"  SUPERSEDED (declared): {len(declared)} row(s) whose part string a banked row quotes:")
+    for r, o in declared:
+        print(f"        - {r[0]}  ->  {o[2]}")
+if likely:
+    print(f"  CHECK: {len(likely)} BLOCKED/NOT-FETCHED row(s) LOOK superseded by a banked row under a "
+          f"different name. This is a heuristic - confirm the die and the product before believing it:")
+    for r, o, shared in likely:
+        print(f"        - {r[0]}")
+        print(f"            possibly covered by: {o[0]}  ->  {o[2]}")
+        print(f"            shared: {', '.join(shared)}")
 for p in problems:
     print("  PROBLEM:", p)
 sys.exit(1 if problems else 0)

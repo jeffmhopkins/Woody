@@ -28,6 +28,17 @@ read off vendor documents banked in this directory**. Two of the three had been
   footprints, vendor images — because they carry dimensions the design is
   built from. The KS-33's Z stack and the etherCON's screw pattern both came
   from these rather than from a datasheet.
+- **Closing someone else's BLOCKED row: quote it.** When you bank a document
+  that fills an earlier gap, put the blocked row's **exact `part` string** in
+  your own row's notes together with the word **`SUPERSEDES`**.
+  `tools/merge-manifests.py` then reports that row as closed every time it
+  runs. This matters because you must not edit their fragment, so the blocked
+  row goes on existing — and a reader greps `BLOCKED` to find the gaps. In
+  September 2026 three banked documents read as live gaps for exactly this
+  reason, and a session nearly spent a wave of agents re-fetching them. The
+  tool also guesses at renamed matches and prints them under `CHECK:`, but that
+  is a heuristic and it says so: it deliberately will not match `WS2812B-0807`
+  to `WS2812B-2020`, because those are different dies.
 - **Each researcher writes to `.manifest-R<N>.csv`**, and
   `python3 tools/merge-manifests.py` rebuilds `MANIFEST.csv` from the
   fragments. It is idempotent — edit a fragment, re-run, re-verify. Do not
