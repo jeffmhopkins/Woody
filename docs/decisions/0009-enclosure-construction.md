@@ -292,7 +292,8 @@ face that measures 57 × 38 mm. Two consequences:
 - **It shares the face with the USB-C slot**, leaving roughly 31 mm beside the
   flange for it. That fits, but it is not the place to discover a conflict.
   Both openings and the backing plate go into the M4 CAD together, and the
-  1:1 paper check covers this face as well as the 6HP panel.
+  1:1 paper check covers this face as well as the 8HP panel — and the tail is
+  now the tight one of the two.
 
 Placing the umbilical at the tail also puts it as far as possible from the
 mouthpiece, so the cable leaves the instrument at the end that hangs low and

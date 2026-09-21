@@ -94,20 +94,30 @@ keys:
   - { id: RT2, face: bottom, x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb, role: control }
   - { id: RT3, face: bottom, x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb, role: control }
 
-# Shift register chain, ordered by physical position down the body, nearest
-# the MCU first (ADR 0001). One 74HC165 per cluster: 4 devices, 32 bits, 18
-# used, 14 spare.
+# Shift register chain. ORDER IS NOT YET CORRECT: ADR 0001 requires serial data
+# to flow TOWARD the clock source, so that skew eats setup margin (recoverable
+# by clocking slower) rather than hold margin (not recoverable at any speed).
+# The MCU is now at the TAIL (ADR 0007), so the order below - left_hand first,
+# which is at the top - is backwards and must be reversed before the looms are
+# built. One 74x165 per cluster: 4 devices, 32 bits, 18 used, 14 spare.
 chain:
   - cluster: left_hand    # bits 0-7   — 5 used, 3 spare
   - cluster: left_thumb   # bits 8-15  — 4 used, 4 spare
   - cluster: right_hand   # bits 16-23 — 6 used, 2 spare
   - cluster: right_thumb  # bits 24-31 — 3 used, 5 spare
 
-# Spare chain bits are free expansion. Candidates: octave up/down, a mode or
-# menu button, a hold/sustain switch. The 2021 firmware triggered mode changes
-# from key combinations (A[1], A[7], A[8]); dedicated inputs are better and
-# these bits are already paid for.
+# Spare chain bits: 14 total, but NOT all available.
+#   4-6 are claimed by the marker pattern (ADR 0001) - wiring-only, and they
+#   cannot be added after the body is bonded.
+#   3 are reserved for spare switches: octave up, octave down, hold/preset.
+#   Those three need CUTOUTS IN THE PLATE DXF at M3 even if the switches are
+#   fitted later (ADR 0010). Placement is decided at M2, with hands on the mule.
+# The 2021 firmware triggered mode changes from key combinations (A[1], A[7],
+# A[8]); dedicated inputs are better and these bits are already paid for.
 spare_bits: 14
+spare_bits_marker: 6      # reserved, ADR 0001
+spare_bits_switches: 3    # reserved, cutouts required at M3
+spare_bits_free: 5
 
 # Fingering table lives in NVS and is editable at runtime, not compiled in
 # (ADR 0010). This file defines the physical layout only.

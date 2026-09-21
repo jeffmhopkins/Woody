@@ -155,6 +155,44 @@ Worth designing deliberately: rim profile, chamfer versus sharp, and whether
 adjacent keys share a recess or get individual ones. Individual recesses locate
 better; a shared one is easier to sweep across. That is an M2 question.
 
+## Spare inputs are reserved in the plate, not just in the chain
+
+`config/key-layout.yaml` describes 14 spare shift-register bits as "free
+expansion" for octave, mode and hold. **The bits are free. The plate cutouts are
+not**, and a switch that is not in the DXF never exists — a deadline at **M3,
+layout lock**, earlier than anything else in the mechanical track.
+
+The switches themselves are easily sourced and can be bought later. So:
+
+- **Reserve cutouts for three spare switches in the plate DXF** — the expected
+  assignment is octave up, octave down, and a hold/preset input, which is what
+  the 2021 firmware drove from key combinations and what dedicated inputs
+  obviously improve.
+- **Placement is an M2 question**, decided with hands on the mule, not now.
+- **Four to six of the spare chain bits belong to the marker pattern**
+  (ADR 0001) and are not available for switches. Eight to ten remain, which is
+  more than three.
+
+Populating them is optional; cutting them is not.
+
+## Tuning: equal temperament
+
+**The instrument is 12-TET.** Microtonality, alternate temperaments and
+retunable scales are declined — not because they are hard, but because they are
+not wanted, and leaving the door open has a real cost in firmware surface.
+
+So the fingering table stores **a note index**, which is what a MIDI note number
+already is, and the pitch for a fingering is that index against a single
+reference. Two fields stay available and default to zero because they cost
+nothing and serve calibration rather than tuning:
+
+- **A per-entry cents offset**, which is how an alternate fingering that should
+  sound the *same* note gets nudged into agreement.
+- **A master tune**, because A = 440 is a convention and not a law.
+
+The multi-point calibration table (ADR 0006) already works in cents and is
+unaffected — it corrects the *hardware*, not the *tuning*.
+
 ## Open
 
 **Finger assignment within each hand.** Five keys across four left-hand fingers

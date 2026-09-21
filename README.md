@@ -20,14 +20,20 @@ The project splits into two physical deliverables that meet over a single cable:
 
 | | **Controller** | **Interface module** |
 |---|---|---|
-| Form | Laminated wood/aluminium/acrylic body | 6HP Eurorack module |
+| Form | Laminated wood/aluminium/acrylic body | 8HP Eurorack module |
 | Contains | Keys, breath sensor, IMU, display, MCU | DAC, analog scaling, jacks, knobs |
 | Domain | Digital | Analog, ±12V |
 | Primary risk | Mechanical and ergonomic | Analog precision |
 
-The controller is purely digital and carries no analog signal path and no
-battery. It takes power from the rack over the umbilical and sends channel data
-down the same cable as SPI. All analog work happens in the module, inches from
+The controller carries no battery and no output jacks, and all CV **scaling,
+conversion and output** happens in the module. It is **not** purely digital —
+it holds the pressure sensor, a precision reference, two op-amp stages and the
+analog drive onto the umbilical, which is where most of the project's analog
+risk lives (ADR 0003). An earlier version of this sentence said otherwise, and
+ADR 0004 records that the claim let a review finding through unchallenged.
+
+It takes power from the rack over the umbilical and sends channel data
+down the same cable as SPI. The module's analog sits inches from
 the jacks it drives.
 
 These two can be developed and tested independently, and the module can be

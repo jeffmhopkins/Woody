@@ -595,6 +595,43 @@ it appears in ADR 0004: the instrument is **not** "purely digital with no analog
 signal path". It carries the sensor, a precision reference, two op-amp stages
 and the analog drive. It is where most of the project's analog risk lives.
 
+## The mouthpiece
+
+A review found that the mouthpiece **did not exist anywhere in the design** — the
+word appears only as a reference point ("from the mouthpiece", 40 mm of length
+budget, the reason the cable exits at the far end), while ROADMAP E2's acceptance
+test requires one. It is the part the player's mouth touches and it had no part
+number, no dimension and no decision.
+
+**It is deliberately the simplest thing that works.**
+
+- **No bite or lip sensor.** Settled early and unchanged. There is no embouchure
+  axis and none is wanted.
+- **A raw tube end is acceptable**, so the mouthpiece is not a precondition for
+  playing — E2 and E5 can proceed on a bare tube.
+- **A small nib at the end** is the expected final form: a lip locator and a
+  mechanical stop, so the tube cannot slide and the lips have something to
+  register against without looking.
+- **The player vents around the corners of the mouth**, which is what makes
+  circular breathing work on a dead-ended tube. That is a *constraint on the
+  outside diameter*: it must be narrow enough that sealing the centre still
+  leaves the corners open. A tube the lips cannot get around defeats the whole
+  breathing technique.
+- **Removable and cleanable**, for the obvious reason, on a 400 mm tube that runs
+  to a sealed body.
+
+### It also settles the tube bore, which nothing else did
+
+The bore is specified nowhere in this ADR, and two things depend on it: the
+acoustics below, and whether the lips can vent around it.
+
+**Specify the bore at the mouthpiece end and let the tube follow it.** The
+acoustic analysis says the bore moves the tube's first resonance by 20–40 Hz and
+never changes the verdict, so **the bore is a mouth-fit decision, not an acoustic
+one** — which is the useful way round. Settle it at E2 by playing a bare tube in
+two or three sizes and choosing the one the corners of the mouth clear
+comfortably.
+
 ## Condensation, in proportion
 
 **This is a closed, dead-ended system** — the tube terminates at the sensor and

@@ -13,7 +13,7 @@ instrument by a single cable — solves several problems at once.
 
 ## Decision
 
-**A 6HP Eurorack module holding all analog output hardware, connected to the
+**An 8HP Eurorack module holding all analog output hardware, connected to the
 instrument by an 8-conductor ruggedised umbilical.**
 
 The instrument loses its **output** analog: no jacks, no bipolar rails, no
@@ -172,7 +172,7 @@ not worth trusting.
 **1 kΩ series resistors on every CV output.** Standard practice, and it means
 the module survives a short or someone patching output to output.
 
-**The 6HP panel is laser or waterjet cut from DXF — same vendor and ideally the
+**The 8HP panel is laser or waterjet cut from DXF — same vendor and ideally the
 same order as the aluminium key plate** (ADR 0009). Which also disposes of the
 last objection to etherCON: its cutout is more complex than a round hole, and on
 a laser-cut panel complexity is free.
@@ -331,7 +331,8 @@ on diodes, ferrites and reservoir values.
 
 **The module is dumb.** Jacks, knobs, connector, power switch, analog. No menu,
 no encoder, no screen. All UI lives on the instrument, which already has a
-display and a processor. This is what keeps the panel inside 6HP.
+display and a processor. That discipline is what kept the panel inside 8HP
+rather than 10 or 12.
 
 **The module's power switch is the only power switch in the system.** The
 instrument has none (ADR 0005), so the panel toggle is the single point of
@@ -366,12 +367,14 @@ electrical standard and replaces the failure mode.
 
 ### What the alternatives measured
 
-A 6HP panel is **30.18 mm** wide — `(6 × 5.08) − 0.3`, +0/−0.2.
+**The panel is 8HP, not 6HP** — `(8 × 5.08) − 0.3` = **40.34 mm**, +0/−0.2. See
+below for why that changed after the connector was chosen.
 
 | | **etherCON D** | M12 X-coded | Hirose HR10A |
 |---|---|---|---|
 | Panel hole | 23.8 mm | ~16 mm | 10.2 mm |
-| Aluminium left each side | **3.19 mm** | ~7 mm | ~10 mm |
+| Aluminium left each side, at 8HP | **8.27 mm** | ~12 mm | ~15 mm |
+| *(at the original 6HP)* | *3.19 mm* | *~7 mm* | *~10 mm* |
 | Current per contact | ~1.5 A | **0.5 A** | 2 A |
 | Cable | **any Cat5e patch lead** | off-the-shelf M12-X | build it yourself |
 
@@ -393,16 +396,34 @@ afternoon with a crimp tool or for the time it takes to open a drawer.
 **So: etherCON, and treat cable failure as routine.** Keep spares. Replace the
 lead at the first sign of intermittency rather than diagnosing it.
 
-### Which costs two mechanical accommodations, both mandatory
+### The panel went to 8HP because of this connector
 
-**The module panel cannot carry the connector alone.** A 23.8 mm hole in a
-30.18 mm panel leaves two strips of aluminium 3.19 mm wide. That is a fit the
-panel passes and a stiffness test it does not — the cable tugs sideways every
-time the instrument moves. **Brace the connector to the module PCB**, so the
-load path runs into the board rather than into two thin strips. Free on a board
-being designed anyway; impossible to retrofit behind a fabbed panel.
+At 6HP the choice was survivable but ugly: a 23.8 mm hole in a 30.18 mm panel
+leaves two aluminium strips **3.19 mm** wide — a fit the panel passes and a
+stiffness test it does not, with a cable that tugs sideways every time the
+instrument moves. Worse, the connector body extends 30–40 mm behind the panel
+while the jacks put the PCB about 7 mm behind it, so clearing it needs a ~26 mm
+notch in a ≤28 mm board. **That severs the board**, which is why a review
+concluded the module had to become two boards.
 
-**The instrument end needs a backing plate, not oak.** See ADR 0009.
+**8HP dissolves all of it.** The panel is 40.34 mm: **8.27 mm of aluminium each
+side of the bore**, 7.17 mm of visible panel each side of the flange, and enough
+web left at the notch that the module stays one board. It also frees the panel
+height budget, which at 6HP overran by 0.5 mm at a 13 mm jack pitch, and it
+allows a normal 16–20 mm knob instead of the ~13 mm the 15 mm pot centres
+forced.
+
+The cost is **two horizontal pitches** in a rack the design scope calls
+generous, and nothing at the laser cutter — a 2 mm aluminium rectangle costs the
+same whatever its width.
+
+**Brace the connector to the PCB anyway.** It is free on a board being designed
+regardless, and it puts the load path into the board rather than the panel. At
+8HP this is good practice rather than a structural necessity.
+
+**The instrument end still needs a backing plate, not oak** — and the etherCON D
+is rated for a **maximum 4 mm panel thickness**, so it cannot mount through 6 mm
+oak at all. See ADR 0009.
 
 ### Cable specification, which is not "any Ethernet cable"
 
