@@ -51,3 +51,62 @@ pass's findings cannot be used to guide.
 
 `VERIFIED.md` records what was checked by hand afterwards and where an agent
 was wrong. `STATUS.md` records what actually landed versus what was reported.
+
+## Roster
+
+Twenty ran concurrently; two were queued behind the concurrency ceiling and
+launched as slots freed.
+
+### The signal chains and the physics
+
+| ID | Slice |
+|---|---|
+| **A1** | The breath chain end to end, as one transfer function and one error budget |
+| **A2** | The pitch channel, and whether it can actually be tuned |
+| **A3** | The four mod channels and the one reference they share |
+| **A4** | Module power: rails, the load switch, and what powers up in what order |
+| **A5** | The instrument end of the power system, and the cable between |
+| **A6** | The key chain, from finger to firmware |
+| **A7** | The digital path from MCU to DAC output register |
+| **A8** | Grounds and return paths across three boards and the cable |
+| **A9** | Lighting, and every route by which it reaches an analog output |
+| **A10** | Everything physical — does it fit, and can it be built? |
+
+### The cross-cutting registers
+
+| ID | Slice |
+|---|---|
+| **B1** | `config/figures.yaml` itself — all 35 entries, derivation by derivation |
+| **B2** | Can this BOM actually be ordered and built? |
+| **B3** | Every number claimed to be read off a banked document, re-read |
+| **B4** | Do the fourteen ADRs still describe what is drawn? |
+| **B5** | What the hardware requires of firmware, and whether firmware knows |
+| **B6** | Is the plan buildable in the order it states? |
+
+### The restructure itself
+
+| ID | Slice |
+|---|---|
+| **C1** | Audit of this round's own fixes — the rule every wave has vindicated |
+| **C2** | Break the tooling. Five fail-open holes are known; find the sixth |
+| **C3** | Failure injection — what happens when things go wrong |
+| **C4** | The `## Interfaces` tables, the only new content, written by eight agents in parallel and never checked against each other |
+| **C5** | Can someone who has never seen this repository use it? |
+| **C6** | The gaps — what the design needs that no document owns |
+
+## Why these slices and not others
+
+Four of them exist because of a specific property of *this* change rather
+than of the design:
+
+- **C4** audits the one exception to the content freeze. Eight agents wrote
+  those tables independently, the dependency graph was seeded from them, and
+  a PCB netlist would be transcribed from them. If two ends disagree about a
+  net, that is a short.
+- **C1** exists because every wave this project has run found the previous
+  round's fixes partial, and today made roughly forty commits claiming fixes.
+- **C2** is a second adversarial pass that may not see the first one's
+  findings, because a reviewer steered by a prior list checks that list.
+- **C5** stands in for a newcomer. Everyone who has looked at this tree
+  already knew where everything was, so nobody has tested the thing the
+  restructure was *for*.
