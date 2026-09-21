@@ -14,8 +14,9 @@ thrown away.**
 |---|---|---|
 | **Design corpus** | `hardware/**`, `docs/decisions/**`, `docs/reference/**`, `config/**`, `firmware/**`, `README.md`, `ROADMAP.md` | Must be self-consistent. This is what `check-staleness.py` checks. |
 | **Historical record** | `docs/review/**`, `docs/log/**`, `docs/research/**` | **Never "corrected".** A 2026-09-21 review saying "8HP" is right as a record of what was true when written. Excluded from the checker by design. |
-| **Generated** | `datasheets/MANIFEST.csv` | **Edits are silently destroyed.** See §3. |
+| **Generated** | `datasheets/MANIFEST.csv`, **`hardware/bom.csv`** | **Edits are silently destroyed.** See §3 and §4. `bom.csv` joined this row on 2026-09-21 and this table did not say so for several hours. |
 | **Fragments (append-only, per author)** | `datasheets/.manifest-R*.csv` | One per research wave. **Do not edit another wave's fragment** — a `BLOCKED` row is the honest record of a gap *when it was written*. See §3 for how to close someone else's gap without touching it. |
+| **Fragments (per circuit)** | `hardware/**/bom.csv`, `hardware/unplaced.csv` | The source the BOM is generated from. Editable — this is where a part change goes. §4. |
 
 Not tracked, and gitignored: `.staleness/`, `.staleness-report.txt`, `*.tmp`.
 
@@ -123,11 +124,37 @@ Wave R8 established the convention, and it is in `datasheets/README.md`:
 
 ---
 
-## 4. `hardware/bom.csv` — eleven columns, CRLF
+## 4. `hardware/bom.csv` — eleven columns, CRLF, **and generated**
 
 ```
 ref,category,part,manufacturer,description,package,qty,status,source,adr,notes
 ```
+
+> ### The trap: `bom.csv` is generated too, since 2026-09-21
+>
+> **`tools/merge-bom.py` rebuilds it from 24 per-circuit `bom.csv` fragments.
+> A direct edit survives until the next run of that tool and then disappears
+> without a word** — the same trap §3 documents for `MANIFEST.csv`, on the
+> **most-cited file in this repository**.
+>
+> Unlike the manifest's, this one is caught: `merge-bom.py --check`
+> regenerates into memory, byte-compares, and names the first differing line.
+> `check-staleness.py` runs it, so the commit hook fails on a hand edit.
+>
+> **Edit the fragment, then re-run the tool.** A row lives with the circuit
+> **whose page derives its value** — not where it is mentioned, not where it
+> is mounted.
+>
+> **`hardware/unplaced.csv` holds the 50 rows of 138 that no schematic page
+> names.** That is not a dumping ground, it is a count: a part nobody has
+> drawn. Two of its clusters name circuits this corpus has no page for — six
+> identical jack-protection networks drawn three times, and nineteen
+> decoupling capacitors with no home.
+>
+> *This section described `bom.csv` as the file you edit for several hours
+> after it stopped being one. Found by a cold reviewer. It is the project's
+> named failure mode, in the document that exists to record exactly this
+> trap.*
 
 - **The file is CRLF.** Python's `csv.writer` defaults to `\r\n`, but setting
   `lineterminator="\n"` rewrites every line in the file and buries a three-row
@@ -135,7 +162,9 @@ ref,category,part,manufacturer,description,package,qty,status,source,adr,notes
   `git diff --stat` before committing: a BOM edit should touch about as many
   lines as rows you meant to change.
 - **Validate column count and duplicate refdes after any edit** —
-  `check-staleness.py` does both.
+  `merge-bom.py` does both, one level up: it now catches "two circuits both
+  claim this refdes", with both file:line locations named, which the old
+  same-file check could not see.
 - The `notes` column is append-only in practice: corrections are added after a
   ` | ` with a date, and the superseded text is left in place. That is what
   makes the checker's refutation detection work, and it is why rows are long.
@@ -180,6 +209,9 @@ says "somebody should look at this" is not trackable.
 python3 tools/check-staleness.py      # terse; detail lands in .staleness/report.txt
 python3 tools/verify-datasheets.py    # SHA-256 + BOM coverage
 python3 tools/merge-manifests.py      # REGENERATES datasheets/MANIFEST.csv
+python3 tools/merge-bom.py            # REGENERATES hardware/bom.csv
+python3 tools/merge-bom.py --check    # ...or just prove it still matches
+python3 tools/check-conservation.py <rev> <source> <dest>...   # split audit
 python3 tools/rewrite-paths.py        # restructure only; --apply/--verify/--invert
 ```
 
