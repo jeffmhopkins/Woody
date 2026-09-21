@@ -74,10 +74,37 @@ reference, so a re-import silently misassigns downstream footprints.
 **4. ERC does not fail the build.** SKiDL exits 0 with errors and writes the
 netlist anyway. Check `erc_logger.error.count` explicitly.
 
-**5. Decide `dig-gnd-topology`.** Three documents give it three mutually
-exclusive answers and `power-entry.md` states ADR 0004 was corrected when it
-was not. Tracked in `config/figures.yaml`. Downstream of the 2-vs-4-layer
-question.
+**5. `U-TVS-SPI` is SOT-23-**5**, not -6.** The 4-channel SP0504BAHT has five
+pins, so this is a **netlist** change, not just a footprint. `SP0505BAHTG` is
+the genuine -6 with a fifth channel if the footprint matters more than the
+channel count.
+
+**6. `ref5050-grade` is disputed and may change the part.** `REF5050AIDR` is
+the *Standard* grade — ±0.1 %, 8 ppm/°C — not the ±0.05 % / 3 ppm/°C the corpus
+asserts in three places. `REF5050IDR` is the High grade: same package, same
+pinout, one letter. So this blocks precursor 1 for that row, not just the
+figures list.
+
+## Three ground questions that must be decided in one sitting
+
+Each is "which ground does this attach to", each is invisible to
+`check-staleness.py` because it is semantic, and **all three are downstream of
+2-layers-or-4**:
+
+- **`dig-gnd-topology`** — three documents, three mutually exclusive answers,
+  and `power-entry.md` states ADR 0004 was corrected when it was not.
+- **The LT5400's exposed pad.** The part is MS8E with a **1.88 × 1.68 mm
+  exposed pad** the BOM did not know it had. ADI says do not tie it to noisy
+  ground and *"connecting the exposed pad to a quiet AC ground is
+  recommended"* — and **pad-to-resistor coupling is 5.5 pF against only 1.4 pF
+  resistor-to-resistor**, so the pad is the dominant stray on the 1 V/oct
+  network. This plan gives `AGND` no zone and a keepout, so "a quiet AC ground"
+  has to mean something specific here.
+- **`cref-out-node`** — three drawings disagree about which side of the
+  reference buffer `C-REF-OUT` sits on.
+
+A pad told to find "a quiet AC ground" on a board that has not settled where
+its grounds meet is a decision deferred twice, not once.
 
 ---
 
@@ -97,7 +124,7 @@ what the claim costs if wrong:
 | Sim | Why |
 |---|---|
 | **Breath-link CMRR** with the INA828 | 1.7 dB of claimed margin, unretrofittable inside a bonded body. A macromodel exists — same directory as the OPA2197 |
-| **`R-ISO-REF` stability** | Already found the drawn circuit is the unstable one: 8.8° unfitted, **8.4° in-loop as drawn**, 75.2° out-of-loop. Filed `riso-ref-topology` |
+| **`R-ISO-REF` stability** | Already found the drawn circuit is the unstable one: 8.8° unfitted, **8.4° in-loop as drawn**, 75.2° out-of-loop. **And TI publishes the worked answer for this exact circuit** — SBOS737C §8.2.3, `R_ISO` 37.4 Ω with a dual-feedback network, 89° PM, against our 10 Ω. **Blocked on `cref-out-node` first** |
 | **Pitch transient into a passive mult** | Measured 41.8 % overshoot at 82 nF, 65.4 % at 330 nF. **The AC sweep is structurally blind to this** on the same circuit at the same loads |
 | **Power-on / reset transient** | Five power-on claims across three pages, no transient anywhere in the corpus |
 | **Behavioural LT1641** | `power-entry.md` already writes the foldback law as equations, and this is the circuit proven not to start |
@@ -110,6 +137,13 @@ model.
 macromodel runs optimistic against TI's own tabulated figures. Results land in
 `config/figures.yaml`; `.LIB` files get banked in `datasheets/` with SHA-256
 like every other document.
+
+**Two numbers to check any EMC or stability work against**, both corrected since
+the corpus was written: the OPA2197's `Zo` is **375 Ω**, not the 75.8 Ω that was
+back-solved — every pole derived from it moves ~5× the *wrong* way. And `FB-IN`
+is **not 600 Ω where it matters**: `FB2` carries the umbilical at 359 mA and
+reads ~280–310 Ω, half its nameplate, because a bead's current rating is
+**thermal, not magnetic**.
 
 ### 3. Board bring-up — headless, **once per board**
 
@@ -213,6 +247,22 @@ exclusive — `power-entry.md` wants the SPI return directly under its trace whi
 ADR 0004 wants `PWR_GND` on its own copper *and* the analog return as its own
 region. Four layers dissolves it. This is a cost decision and it gates the
 grounding scheme, so it is upstream of stage 3.
+
+## One warning about reading `datasheets/` programmatically
+
+**Several key documents have no text layer at all.** Gateron's switch drawing,
+both Laird bead drawings, the Neutrik outlines and the TE socket page are vector
+CAD — `pdftotext` returns a byte or two, and the dimensions exist only in the
+picture. The plate thickness, the bead bias curve and the IDC stack height were
+all obtained by rendering at 150 dpi and looking.
+
+So any script that pulls a dimension out of `datasheets/` **will silently get
+nothing** from exactly the documents that carry the mechanical constraints.
+Render and read, or do not automate it.
+
+Related: `WS2815` is banked twice under two paths with the same SHA-256, from
+two different researchers. Harmless, but manifest-driven tooling should expect
+it.
 
 ## Install
 

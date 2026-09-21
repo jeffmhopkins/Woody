@@ -211,6 +211,27 @@ figures:
     forbidden: ["R-FB-HI,module,TBD", "R-FB-LO,module,TBD", "VALUES NOT SET"]
     note: "FB was connected to NOTHING, which held the limit at 12 mV / 50 mohm = 240 mA forever and latched the -1 off on every start. ADI describes exactly this as the Figure 9 caption story (p.9). An unconnected FB is indistinguishable, to this part, from a permanently shorted output."
 
+  - id: cref-out-node
+    quantity: Which side of the reference buffer C-REF-OUT sits on
+    value: "DISPUTED"
+    status: disputed
+    owner: hardware/controller/carrier.md
+    candidates:
+      - "The REF5050's output, i.e. the buffer's INPUT (hardware/controller/carrier.md draws it there)"
+      - "The buffer's OUTPUT, i.e. the buffer drives it (hardware/bom.csv and hardware/module/breath-receive-stage.md both say so)"
+    decided_by: "Reading the three drawings together and picking one. It is a one-line answer that nobody has written down, and no simulation can settle it because it is a question about what the circuit IS, not how it behaves."
+    forbidden: []
+    note: |
+      Raised by the datasheet-reconciliation wave 2026-09-21. It blocks
+      riso-ref-topology, because the compensation network depends entirely on
+      which node the capacitance sits on - TI's worked answer for this exact
+      circuit assumes the op-amp DRIVES the load.
+      NO GREP FINDS THIS. It is a topology disagreement between three drawings
+      that each read correctly on their own, which is why three review waves
+      and a mechanical checker all passed over it. Same class as
+      dig-gnd-topology and the LT5400 exposed pad: semantic, invisible to
+      tooling, and cheap to fix once somebody looks.
+
   - id: dig-gnd-topology
     quantity: Where DIG_GND returns to
     value: "DISPUTED"
@@ -233,7 +254,8 @@ figures:
       - "INSIDE the loop, feedback taken at the sensor's VS pin - as drawn and as bom.csv specifies. SIMULATED PHASE MARGIN 8.4 deg, which is WORSE than fitting no resistor at all (8.8 deg)."
       - "OUTSIDE the loop - simulated phase margin 75.2 deg, but bom.csv says it costs 2% of the ratiometric scale factor."
       - "A series R-C snubber from VS to the analog star, already proposed on the page as the cheaper-in-DC-terms alternative. Not simulated."
-    decided_by: "A bench measurement at E1/E13, or a simulation run someone trusts. Raised 2026-09-21 by the SPICE reviewer, which ran the OPA2197 macromodel against the drawn circuit - the first time this loop was evaluated by anything other than algebra."
+      - "TI'S OWN WORKED ANSWER FOR THIS EXACT CIRCUIT, and it is none of the above. SBOS737C section 8.2.3 p.30 Figure 56, 'Precision Reference Buffer' driving 10 uF: R_ISO 37.4 ohm, R_F 1 Mohm taken at VOUT, R_Fx 10 kohm with C_F 39 nF at the op-amp output, 89 deg phase margin. That is a DUAL-feedback network - DC through 1 Mohm from the load, AC through 10k/39nF from the output - which is neither the in-loop nor the out-of-loop option this entry was opened with. R-ISO-REF is currently 10 ohm against TI's 37.4."
+    decided_by: "PROBABLY ALREADY DECIDED, by TI, in the datasheet that was BLOCKED when this circuit was drawn - see the fourth candidate. Confirm the topology transfers (our load is 100 nF at the sensor VS pin, TI's worked example is 10 uF) and then adopt it. Failing that, a bench measurement at E1/E13. *** BUT IT IS BLOCKED ON A PRIOR QUESTION: *** three files disagree about WHICH SIDE OF THE BUFFER C-REF-OUT sits on - see cref-out-node. The compensation network depends entirely on that, so settle the node before simulating or adopting anything."
     forbidden: []
     note: |
       THE DRAWN CIRCUIT IS STILL THE UNSTABLE ONE. bom.csv's R-ISO-REF row chooses
