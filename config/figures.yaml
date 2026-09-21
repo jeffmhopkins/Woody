@@ -203,9 +203,15 @@ figures:
     quantity: R-KEY-PU quantity
     value: "24"
     status: settled
-    owner: hardware/bom.csv
+    owner: hardware/cluster/key-switch-network/key-switch-network.md
     derivation: "21 switch positions + 3 free bits (22, 23, 31) which also need pulling"
-    forbidden: ["21 pull-ups", "Twenty-one sets"]
+    # DROPPED "Twenty-one sets". It matched a sentence that is TRUE: there are
+    # 21 pull-up NETWORKS and 24 pull-UPS, which are different quantities, and
+    # 0001:217 says so correctly. The only thing keeping the checker quiet was
+    # an unrelated "rather than" sharing the line; tightening the refutation
+    # vocabulary exposed it. A pattern whose cheapest fix is to make a correct
+    # sentence wrong is not a pattern, it is a trap.
+    forbidden: ["21 pull-ups"]
 
   - id: spi-series-r
     quantity: SPI series resistor at the driving end
@@ -213,7 +219,20 @@ figures:
     status: settled
     owner: hardware/interfaces/spi-link/spi-link.md
     derivation: "2 m of Cat5 is a 100-ohm transmission line. At 220R the far end's first step is 1.83 V against a 2.0 V V_IH, dwelling ~20 ns per edge in the forbidden band. 68R is ideal but draws 48 mA against a 40 mA pad spec."
-    forbidden: ["R-MOSI-SER at 220", "R-MOSI-SER` at 220", "R-SCLK-SER", "R-CS-SER", "220 Ω with\n~200 pF"]
+    # "220 Ω with\n~200 pF" was carried here as ONE pattern with the corpus's
+    # hard wrap baked into it, so it could never match the line-joined stream
+    # the checker searches - indistinguishable in every report from a pattern
+    # that matches nothing.
+    #
+    # Split at the wrap, and then only the FIRST half kept. "~200 pF" on its
+    # own fired immediately on 0003:405, where it is the breath pair's cable
+    # capacitance - a live, correct, entirely unrelated statement. The second
+    # half of that wrapped phrase was never distinctive; it only looked
+    # distinctive while it was glued to the first.
+    forbidden: ["R-MOSI-SER at 220", "R-MOSI-SER` at 220", "R-SCLK-SER", "R-CS-SER", "220 Ω with"]
+    false_positive_note: >
+      "~200 pF" is NOT a usable pattern for this figure. It is also the
+      breath pair's cable capacitance at 0003:405. Do not re-add it.
 
   - id: umbilical-pinmap
     quantity: Umbilical pin assignment
@@ -306,7 +325,7 @@ figures:
     quantity: SW-POWER panel hole
     value: "6.5 mm diameter with a 5.8 mm D-flat"
     status: settled
-    owner: hardware/bom.csv
+    owner: hardware/module/panel/panel.md
     derivation: "NKK Series M bushing is M6x0.75, which needs a 6.5 mm hole and NOT 6.0 - read off datasheets/connectors/NKK-SERIES-M-TOGGLE.pdf, rendered at 150 dpi because the drawing is vector with no text layer. The D4 option's D-flat is 5.8 mm; the S4 keyway option's flat is 5.6 mm with a 2.2 mm anti-rotation hole at 6.5 mm centres if the locking ring is used instead. THERE IS NO PLAIN ROUND OPTION IN THE METRIC RANGE, so this hole cannot be drilled - it is milled or filed."
     companion: "panel-height-budget establishes that this hole gets its own row rather than sitting beside the etherCON flange, and that conclusion holds for the 6.00 mm alternative too."
     forbidden: ["6mm hole", "6.0 mm hole for the toggle", "a 6 mm round hole", "6.00 and 6.35 need different holes"]
@@ -334,11 +353,15 @@ figures:
     quantity: C-TIMER-LOADSW
     value: "10 uF"
     status: settled
-    owner: hardware/module/power-entry/power-entry.md
+    owner: hardware/module/umbilical-load-switch/umbilical-load-switch.md
     derivation: "C = I_TIMER x t / 1.233 V. The 77 uA net ramp is CONFIRMED VERBATIM in the banked datasheet (164112fc p.8, datasheets/discrete-and-power/LT1641.pdf): TIMER is pulled to GND by a 3 uA source when the current-limit circuit is idle, and an 80 uA pull-up is connected while it is active, giving 77 uA/C_TIMER. ADI's own shorthand C(nF) = 62 x t(ms) gives 9.30 uF for 150 ms; the exact form gives 9.37 uF. SET TO 10 uF, the nearest stock value: 9.4 uF is not orderable, and the pull-up's bounds (-24/-80/-132 uA, p.2) make the fault time 587/160/95.6 ms at 10 uF, so the worst case is 95.6 ms against a 47.5 ms hot-plug start - 2.01x, where 9.4 uF gives 1.89x."
     provenance_note: "BLOCKED for four review waves and one dedicated researcher because analog.com was unreachable. Resolved 2026-09-21 from the Internet Archive's 2019-02-02 capture of analog.com; web.archive.org is reachable from this sandbox and was not in earlier waves. analog.com itself is still unreachable. Corroborated by the DC1354A demo quick-start guide, banked beside it."
     companion: "loadswitch-gate-cap and loadswitch-fb-divider come off the same document and were blocked on it."
-    forbidden: ["C-TIMER-LOADSW at 10nF", "10 nF timer", "12x to 300x", "the reviewers disagree and the datasheet decides", "= 9.4 uF        provisional", "9.4 uF at the net", "2.4x the 62 ms", "2.4x the ~62ms"]
+    # DROPPED "12x to 300x". That string occurs nowhere except INSIDE the
+    # sentence recording the correction - "10nF was wrong by 12x to 300x" -
+    # so the pattern could only ever fire on its own fix. It survived because
+    # the word "was" used to grant an exemption to anything on the same line.
+    forbidden: ["C-TIMER-LOADSW at 10nF", "10 nF timer", "the reviewers disagree and the datasheet decides", "= 9.4 uF        provisional", "9.4 uF at the net", "2.4x the 62 ms", "2.4x the ~62ms"]
     false_positive_note: "10nF is also C-KEY's superseded value and appears in other rows. Match the refdes. 9.4 uF and 9.37 uF appear legitimately in text that explains why 10 uF was chosen instead - those lines carry refutation wording and the checker allows them."
     note: "The '12x to 300x' ratio is itself wrong - the page's own equation gives 37x to 925x, and bom.csv repeats the bad ratio so cross-checking finds false agreement. The '150 ms = 2.4x the 62 ms start' justification is ALSO retired: the 62 ms was integrated across the whole ramp, which is only true while FB is unconnected. With the divider fitted the sizing case is the 47.5 ms hot-plug."
 
@@ -346,7 +369,7 @@ figures:
     quantity: C-GATE-LOADSW and the ramp it programs
     value: "82 nF, ramp 49-197 ms (98 ms typ)"
     status: settled
-    owner: hardware/module/power-entry/power-entry.md
+    owner: hardware/module/umbilical-load-switch/umbilical-load-switch.md
     derivation: "C = I_GATE / (dV/dt). I_GATEUP is -5 / -10 / -20 uA (164112fc p.2), corroborated independently by the DC1354A demo quick-start guide p.1 - the min/max this figure lacked. 82 nF (E24; 83 nF is not orderable) gives dV/dt = 61 / 122 / 244 V/s and a ramp to 12 V of 197 / 98 / 49 ms."
     forbidden: ["= 83 nF         provisional", "so ~83nF", "a ramp spec with an unbounded tolerance", "No min/max established"]
     note: "ADR 0005 specifies a 50-100 ms ramp and THAT SPEC IS NOT ACHIEVABLE with this part: I_GATE is a 4:1 window and no single capacitor holds it inside a 2:1 time window. 82 nF centres the typical inside ADR 0005; the guaranteed envelope is 49-197 ms. Raised against ADR 0005 2026-09-21, not decided."
@@ -355,7 +378,7 @@ figures:
     quantity: LT1641 FB divider, R-FB-HI / R-FB-LO
     value: "35.7 kohm / 5.11 kohm, both 1%"
     status: settled
-    owner: hardware/module/power-entry/power-entry.md
+    owner: hardware/module/umbilical-load-switch/umbilical-load-switch.md
     derivation: "V_FB = 0.5 V (full 47 mV sense threshold) and V_FBH = 1.313 V (PWRGD release) are set by the SAME divider, so V_OUT(full limit) = 0.381 x V_OUT(PWRGD) always - the ratio is fixed by the part, not by the divider. Sized at the PWRGD end: PWRGD must release below the worst-case delivered output of ~11.36 V, so the nominal target is 10.5 V, giving R-FB-HI/R-FB-LO = 1.313/10.5 inverted = 7.00. 35.7k/5.11k is 6.986. PWRGD releases at 10.49 V (10.05-10.93 V worst case over 1% resistors and the 1.280-1.345 V V_FBH window); V_FB reaches 0.5 V at 3.99 V of output."
     provenance_note: "The foldback law is CONFIRMED VERBATIM against the banked 164112fc.pdf p.5 and Figure 7 p.9: 47 mV when V_FB is 0.5 V or higher, decreasing linearly to 12 mV at V_FB = 0 V. It was [web, search-index] until 2026-09-21."
     forbidden: ["R-FB-HI,module,TBD", "R-FB-LO,module,TBD", "VALUES NOT SET"]
@@ -365,7 +388,7 @@ figures:
     quantity: Which side of the reference buffer C-REF-OUT sits on
     value: "REF5050 VOUT, i.e. the buffer's INPUT. The buffer drives 100 nF and nothing else."
     status: settled
-    owner: hardware/carrier/carrier.md
+    owner: hardware/carrier/breath-excitation-reference/breath-excitation-reference.md
     derivation: "The REF5050 cannot be built without a capacitor on its own VOUT, so one of the qty-2 parts is forced there and the other is the VIN bypass - which leaves nothing for the buffer's output. SBOS410O p.26 section 8.4.1, verbatim and re-verified against the banked PDF 2026-09-21: 'Confirm that a output capacitor (CL) is connected from VOUT to GND. For output stability, verify that the equivalent series resistance (ESR) value of CL less than or equal to 1.5 ohm.' Figure 8-6 annotates CL = 1uF to 50uF for REF50xxI, REF50xxAI. Independently: 10 uF on the buffer's output is 10000x the OPA2197's specified 1 nF capacitive-load limit (SBOS737C p.1 and section 7.3.5 p.22), which no document in the corpus ever intended."
     consequence: "The REF5050's only load is now the OPA2197's input bias current - +-5 pA typ, +-20 pA max at 25 C (SBOS737C p.7). Its load regulation (20 ppm/mA typ, 30 max, 50 over temperature, SBOS410O p.7) therefore contributes ZERO to the breath scale factor. On the other topology 10 mA of sensor current through 30 ppm/mA would have been 300 ppm = 1.0 LSB. Settling the node this way deletes an error term rather than budgeting it."
     forbidden: ["100nF + 10uF directly", "a 100 nF decoupler and `C-REF-OUT`'s 10 µF", "100 nF decoupler and C-REF-OUT's 10 µF", "plus C-REF-OUT's 10uF", "settle the node before", "Settle the node, then adopt"]
@@ -401,7 +424,7 @@ figures:
     quantity: R-ISO-REF and the reference buffer's compensation network
     value: "Dual feedback per SBOS737C Figure 56: R_ISO 37.4 ohm, R_F 10 kohm taken at VS, R_Fx 100 ohm + C_F 1 nF at the op-amp output"
     status: settled
-    owner: hardware/carrier/carrier.md
+    owner: hardware/carrier/breath-excitation-reference/breath-excitation-reference.md
     derivation: "TI's Figure 56 (SBOS737C section 8.2.3 p.30, 'Precision Reference Buffer') is the worked answer for this exact circuit: R_ISO 37.4 ohm, R_F 1 Mohm at VOUT, R_Fx 10 kohm + C_F 39 nF at the op-amp output, 89 deg phase margin. IT TRANSFERS TO OUR 100 nF LOAD BECAUSE R_ISO IS SET BY Zo, NOT BY C_L: with feedback taken at the amplifier output above the handover, V_A/V_i = (1 + s.R_ISO.C_L)/(1 + s.(Zo+R_ISO).C_L), so both the attenuation R_ISO/(Zo+R_ISO) and the pole-zero ratio depend only on R_ISO/Zo - C_L moves both corners together and cancels. 37.4 ohm is Zo/10 against the specified Zo = 375 ohm (SBOS737C p.8). Simulated phase margin 85.9 deg at 896 kHz."
     adaptation: "R_F is 10 kohm, NOT TI's 1 Mohm, and R_Fx scales with it to preserve the 100:1 ratio. Two reasons, both absent from TI's circuit. (1) DC error: the guaranteed-over-temperature I_B of 5 nA through 1 Mohm is 5 mV = 1000 ppm = 3.4 LSB on a rail that IS the ratiometric scale factor; through 10 kohm it is 50 uV = 0.034 LSB. (2) Handover: R_F.C_F sets the frequency above which the loop closes on the amplifier's own output rather than on VS. TI's load is a pure capacitor, ours draws 10 mA, so above the handover any load-current change appears at VS across R_ISO. TI's 4.08 Hz would be a disaster; 10 kohm + 1 nF puts it at 15.9 kHz, well above the 500 Hz breath channel. |Z_out| at VS is then 1.20 ohm at 500 Hz against 27.7 ohm at TI's scaling."
     dc_error: "ZERO ACROSS R_ISO, BY TOPOLOGY. C_F blocks at DC so no current flows in R_Fx; input current is pA so none flows in R_F; the summing node therefore sits at V(VS) and the amplifier forces V(VS) = 5.000 V. R-ISO-REF's value and tolerance stop mattering. The 2% ratiometric objection that drove the old in-loop-vs-out-of-loop argument is ANSWERED, not traded away. Total buffer contribution is 0.19 LSB worst case (I_B.R_F 50 uV, V_OS 100 uV, V_OS drift 125 uV over 50 K)."
@@ -529,7 +552,7 @@ figures:
     quantity: FB-IN impedance at 100 MHz under real DC bias
     value: "~580-614 ohm on FB1/FB3/FB4; ~280-310 ohm on FB2"
     status: settled
-    owner: hardware/bom.csv
+    owner: hardware/module/power-entry/power-entry.md
     derivation: "Laird MI1206K601R-10, drawing rev E, banked at datasheets/discrete-and-power/MI1206K601R-10-ferrite-bead.pdf. Read off the drawing's impedance-under-DC-bias curve family (0 / 250 / 500 / 1000 / 1500 mA traces) at 100 MHz: 0 A ~614 ohm, 250 mA ~431, 500 mA ~157, 1000 mA ~72, 1500 mA ~51. FB2 carries umbilical-current (359 mA) and interpolates to ~280-310 ohm; the module +12V total of 392 mA gives ~245-275."
     forbidden: ["Rated >=1A - the common 0805 600R part is ~300mA and a saturated bead is a wire"]
     note: "THE '>=1 A' RULE DOES NOT DO WHAT THE BOM ROW SAID IT DID. A bead's current rating is THERMAL, not magnetic, so it says nothing about saturation. A 3000 mA part in the same package with the same 600 ohm nominal (HI1206N601R-10, banked alongside) reads ~145 ohm at 500 mA - SLIGHTLY WORSE than the 1500 mA part. FB2 gets roughly half the 600 ohm its row specifies and no 1206 600R bead of any rating fixes it: DC bias shifts the impedance peak UP IN FREQUENCY, so the bead does not die, its useful band slides off 100 MHz. Either the FB2 requirement is restated at its real operating current or FB2 becomes a physically larger part. SELECTION CONSTRAINT WORTH PRESERVING: this part was chosen because its datasheet PUBLISHES the bias curve. Murata BLM's PDF does not (that data is in SimSurfing only) and neither does Wurth WE-CBF - an earlier researcher declined to bank a Wurth part for exactly this reason and that judgement is upheld."
@@ -538,7 +561,7 @@ figures:
     quantity: REF5050 grade, initial accuracy and tempco
     value: "DISPUTED"
     status: disputed
-    owner: hardware/bom.csv
+    owner: hardware/carrier/breath-excitation-reference/breath-excitation-reference.md
     candidates: ["REF5050AIDR as currently specified = Standard grade = +/-0.1% and 8 ppm/degC (SBOS410O Table 4-2 p.3)", "REF5050IDR = High grade = +/-0.05% and 3 ppm/degC, which is what the corpus BELIEVES it has and states in three places"]
     decided_by: "Changing one letter in the order code, or accepting 2x the initial error and 2.7x the drift in the ratiometric breath scale-factor budget. Since the whole reason for a separate reference is scale-factor stability, REF5050IDR is almost certainly the right answer - but it is a part change, not a documentation fix, so it is recorded as disputed rather than decided."
     forbidden: ["+-0.05%, 3ppm/degC, ~5ppm/V", "against a reference specified to 0.05%", "5.000 V out at \u00b10.05 % and 3 ppm/\u00b0C", "SOIC-8, 7\u201318 V in"]

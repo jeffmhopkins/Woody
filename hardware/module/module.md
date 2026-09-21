@@ -35,6 +35,10 @@ functions and error budgets cannot be stated from one side.
 - **Two layers or four** is undecided and gates the grounding scheme. It is
   upstream of `power-entry/`'s `dig-gnd-topology`, which is tracked as
   `disputed` for exactly this reason.
-- **`hardware/unplaced.csv` holds this board's principal ICs** — the DAC, the
-  in-amp, the LM317 — because BOM assignment matched on reference designator
-  and these are drawn by part number. Known, recorded, not yet fixed.
+- ~~`hardware/unplaced.csv` holds this board's principal ICs.~~ **Fixed
+  2026-09-21.** The DAC, the in-amp, the LM317, the entry diodes, the beads,
+  the bulk caps, both load-switch capacitors and the level shifter are now
+  filed with the circuits that derive them. The cause was mechanical: BOM
+  assignment matched on reference designator and these are drawn by part
+  number or by a local label, so `hardware/module/dac8568/bom.csv` held two
+  resistors and not the DAC.

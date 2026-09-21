@@ -146,6 +146,22 @@ bead is a wire**. Package does not set the rating — the *series* does: within
 one vendor's 0805 600 Ω line there are 600 mA and 2.3 A versions, and another
 "600" part is 60 Ω at 3 A. Read the series, not the footprint.
 
+**What each bead is actually worth under its own DC bias** — the figure this
+page owns, `ferrite-bias-impedance`. The Laird MI1206K601R-10's "600 Ω" is
+its zero-bias number, and the impedance-under-bias curve family collapses it
+badly at current:
+
+| Bead | Carries | Impedance at 100 MHz |
+|---|---|---|
+| `FB1`, `FB3`, `FB4` | the low-current rails | **~580–614 Ω** |
+| `FB2` | `umbilical-current` | **~280–310 Ω** |
+
+`FB2` is the one that matters and it has roughly **half** the impedance the
+part number advertises, because it is the bead carrying the umbilical's
+current. That is not a reason to change the part — it is a reason not to
+believe "600 Ω" anywhere in this drawing. Read off the banked drawing rev E,
+`datasheets/discrete-and-power/MI1206K601R-10-ferrite-bead.pdf`.
+
 ## Grounding
 
 One origin, at the IDC's ground pin. `PWR_GND` — the ~360 mA umbilical return

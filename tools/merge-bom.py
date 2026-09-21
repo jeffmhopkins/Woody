@@ -39,6 +39,15 @@ HDR = ["ref", "category", "part", "manufacturer", "description", "package",
 # The emission order. Hand-written on purpose - see the module docstring.
 # Shared fragments last, so a reader scanning the generated file meets the
 # circuits in board order before the cross-cutting rows.
+# Circuits that own no BOM rows, and why. A circuit is in here because
+# someone decided it owns nothing - never because a file happened to be
+# missing. See the refusal in load().
+NO_PARTS = {
+    "hardware/module/link-supervision/bom.csv":
+        "the watchdog and presence detect are NOT FITTED - the page exists "
+        "to record what was deleted and what restoring it would cost",
+}
+
 ORDER = [
     "hardware/carrier/power-entry-instrument/bom.csv",
     "hardware/carrier/breath-excitation-reference/bom.csv",
@@ -90,7 +99,19 @@ def load():
     for rel in ORDER:
         path = os.path.join(ROOT, rel)
         if not os.path.exists(path):
-            continue                      # not every circuit owns parts
+            # A FRAGMENT NAMED IN ORDER BUT ABSENT USED TO BE SKIPPED IN
+            # SILENCE, and the master was then regenerated a few rows
+            # shorter with everything green - merge-manifests.py refuses the
+            # analogous case and this did not. "Not every circuit owns parts"
+            # is a real situation, so it has to be SAID rather than inferred
+            # from a missing file.
+            if rel in NO_PARTS:
+                continue
+            problems.append(f"{rel} is in ORDER but is not on disk. If that "
+                            f"circuit genuinely owns no parts, say so in "
+                            f"NO_PARTS in tools/merge-bom.py; otherwise the "
+                            f"master is about to lose its rows silently")
+            continue
         with open(path, newline="", encoding="utf-8") as fh:
             rdr = list(csv.reader(fh))
         if not rdr:

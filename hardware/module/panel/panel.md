@@ -28,6 +28,13 @@ total is the tracked figure `panel-height-budget` — **110 mm of content
 against 115.5 mm of clear panel**, with the usable height finally derived
 rather than asserted, and the toggle on a row of its own.
 
+**The toggle needs a shaped hole, not a round one** — `panel-toggle-hole`,
+the other figure this page owns: **6.5 mm diameter with a 5.8 mm D-flat**.
+The flat is what stops the switch rotating in the panel, and it has to be in
+the DXF because it cannot be added afterwards. The sourced bushing is 6 mm
+metric, so a 6.0 mm round hole is *not* the right cut — that spelling of the
+hole is superseded.
+
 **The cost is knob diameter.** Three pots across 50.50 mm with 3 mm gaps
 needs **≤14 mm knobs**; 15 mm already gives 51 mm and does not fit. So
 10HP buys the height back by spending the knob size 8HP was supposed to
