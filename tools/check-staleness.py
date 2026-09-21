@@ -200,8 +200,17 @@ def check_bom_generated():
         r = subprocess.run([sys.executable,
                             os.path.join(ROOT, "tools/merge-bom.py"), "--check"],
                            capture_output=True, text=True, cwd=ROOT, timeout=60)
+        m = subprocess.run([sys.executable,
+                            os.path.join(ROOT, "tools/merge-manifests.py"),
+                            "--check"],
+                           capture_output=True, text=True, cwd=ROOT, timeout=60)
     except Exception as e:
-        return [f"could not run merge-bom.py --check: {e}"]
+        return [f"could not run a generated-file check: {e}"]
+    if m.returncode != 0:
+        msgs = [l.strip() for l in (m.stdout + "\n" + m.stderr).splitlines()
+                if "PROBLEM:" in l or "does not match" in l]
+        return msgs or [f"merge-manifests.py --check exited {m.returncode} "
+                        f"and said nothing parseable - it probably crashed"]
     if r.returncode == 0:
         return []
     # HARVEST STDERR TOO, AND NEVER RETURN AN EMPTY LIST ON A NON-ZERO EXIT.

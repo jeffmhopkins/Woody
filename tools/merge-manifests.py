@@ -139,7 +139,36 @@ rows.sort(key=lambda r: (r[2] or "zzz", r[0]))
 out = io.StringIO()
 w = csv.writer(out, lineterminator="\n")
 w.writerow(HDR); w.writerows(rows)
-open(os.path.join(ROOT, "datasheets/MANIFEST.csv"), "w", encoding="utf-8").write(out.getvalue())
+# --check: regenerate into memory and byte-compare instead of writing.
+# THIS IS THE FILE THE ACCIDENT ACTUALLY HAPPENED TO - repo-maintenance.md 3
+# records a hand edit to MANIFEST.csv being destroyed by the next run of this
+# tool - and it was the one generated file with no such guard, while bom.csv,
+# which has never had the accident, got one on the day it became generated.
+MANIFEST = os.path.join(ROOT, "datasheets/MANIFEST.csv")
+if "--check" in sys.argv:
+    try:
+        current = open(MANIFEST, encoding="utf-8").read()
+    except Exception as e:
+        problems.append(f"cannot read MANIFEST.csv: {e}")
+        current = None
+    if current is not None and current != out.getvalue():
+        a_, b_ = current.split("\n"), out.getvalue().split("\n")
+        n = next((i for i in range(max(len(a_), len(b_)))
+                  if (a_[i:i+1] or [None]) != (b_[i:i+1] or [None])), 0)
+        problems.append(f"MANIFEST.csv does not match its fragments, first "
+                        f"difference at line {n+1}. It is GENERATED - edit a "
+                        f"fragment (or .moves.csv), not the master")
+else:
+    # PROBLEMS ARE CHECKED BEFORE THE WRITE, not after it. This wrote the
+    # manifest and printed problems thirty lines later, so one bad fragment
+    # header silently dropped that researcher's rows to disk and reported it
+    # afterwards - by which time the damage was on the filesystem.
+    if problems:
+        for p_ in problems:
+            print("  PROBLEM:", p_)
+        sys.exit("REFUSING TO WRITE: a fragment did not parse, and writing "
+                 "now would drop its rows from MANIFEST.csv silently.")
+    open(MANIFEST, "w", encoding="utf-8").write(out.getvalue())
 
 # A BLOCKED row is an honest gap when it is written and a LIE once someone
 # banks the part. The fragments are per-researcher and append-only by
