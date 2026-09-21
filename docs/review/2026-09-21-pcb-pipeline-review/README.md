@@ -56,6 +56,7 @@ a guess, and must be marked as one.**
 | P10 | Audit against this repo's own design corpus |
 | P11 | Layout rules — what is right, and what is missing |
 | P12 | Failure modes, determinism, and re-runnability |
+| P13 | SPICE verification of the analog design |
 
 `VERIFIED.md` records what was checked by hand afterwards and where an agent
 was wrong.

@@ -16,6 +16,8 @@ GUI, no manual step that cannot be replayed.
 | **KiCad 9** (`kicad-cli` + `pcbnew` Python) | Board object model, DRC/ERC, all fab export | apt, needs `*.kicad.org` or `ppa.launchpadcontent.net` allowlisted |
 | **SKiDL** 2.3.0 | **Circuit as Python.** Generates the netlist and runs ERC | pip — *verified downloadable from this sandbox* |
 | **kiutils** 1.4.8 | Reads/writes `.kicad_sch` and `.kicad_pcb` S-expressions where `pcbnew` won't | pip — verified |
+| **ngspice** 42 | Analog verification — the stage that catches what algebra misses | apt, **from the stock archive — no allowlist change needed** |
+| **PySpice** 1.5 | Drives ngspice from Python; SKiDL emits straight into it | pip — verified |
 | **Freerouting** 2.x | Autorouter, Specctra DSN in / SES out | GitHub release `.jar`; Java 21 already present |
 | **xvfb** | Virtual display for the two things that still want GL | apt |
 
@@ -124,7 +126,46 @@ python3 pcb/src/module/module.py      # SKiDL: ERC, then emit module.net
 Fail the build on any ERC error. Then the parity check against the design BOM
 (below) before anything downstream runs.
 
-### 2. Board bring-up — `build_board.py`
+### 2. Simulate — verify the analog before committing to copper
+
+**This stage runs today.** `ngspice` comes from Ubuntu's stock archive and
+`PySpice` from pypi, both reachable under the *current* network policy. It
+depends on nothing downstream and blocks nothing upstream, so it can start
+before KiCad is even installable.
+
+**And it is the stage this project most needs.** The corpus is full of
+hand-derived transfer functions and stability arguments, and the ones that
+turned out wrong were found by a second person doing the algebra again — not by
+a tool. `C-FB-PITCH` took two independent reviewers to establish that a cap in
+the feedback of a *non-inverting* stage is a 6.02 dB shelf and not a pole. An AC
+sweep shows that in one plot.
+
+**Circuit-as-code pays off twice here.** SKiDL emits a PySpice circuit from the
+same source that emits the KiCad netlist, so there is one description of the
+circuit, not two that can drift.
+
+What is worth simulating, in order of what it would cost to get wrong:
+
+| Sim | Settles |
+|---|---|
+| **Loop gain / phase margin**, pitch output into 0, 200 pF, 800 pF, 10 nF and a dead short | The page claims the feedback network is "a lead at every load tried". This is the highest-risk item on that page by its own admission |
+| **`R-ISO-REF` reference buffer** into 100 nF, with and without the resistor | The claim is 2.6° of phase margin and oscillation near 458 kHz without it. Verify the problem *and* the fix |
+| **AC sweep of the OPA2197 macromodel's `Zo`** | `R_o ≈ 75.8 Ω` is **back-solved from a stated pole, not read**, and SBOS737 is `BLOCKED`. TI's own `OPAx197.LIB` is on GitHub and downloads. **This retires a blocked item without the datasheet** |
+| **DC sweeps of every stage's transfer function** — pitch, four mods, breath receive, breath output | Sign errors, gain errors, offset errors. Cheap, and they check the equations the firmware is written against |
+| **Monte Carlo over resistor tolerance and reference drift** on the pitch chain | `pitch-cents-budget` is **disputed** in `config/figures.yaml` — two contradictory tables and no stated total. A distribution settles it |
+| **The breath response shaper** — antiparallel diodes across a pot | The knee position against a real blow. This is exactly the shape of error already made once, where a ÷10 scaling would have put the knee above a hard blow |
+
+**Model availability is the constraint, not the tool.** `OPA2197` is confirmed
+available. `DAC8568`, `MPXV4006` and the reference are behavioural sources and
+need no vendor model. Diodes are standard. **`LT1641` has no model anywhere** —
+a researcher searched GitHub and GitLab and found none — so the load switch is
+not simulable and stays a bench question.
+
+Where no macromodel exists, a generic one-pole op-amp with the right GBW, `A_OL`
+and `R_o` is usually enough for stability work. Say which you used; a stability
+result from a generic model is weaker evidence than one from the vendor's.
+
+### 3. Board bring-up — `build_board.py`
 
 Outline onto `Edge.Cuts` first; Freerouting has no boundary without it.
 Load footprints, assign every pad to its net, place.
@@ -148,7 +189,7 @@ Custom fab rules go in `<project>.kicad_dru`; the basics (clearance, min track,
 via sizes) go in the board's design settings. Both are read by `kicad-cli pcb
 drc`, so what the router obeys and what DRC checks are the same file.
 
-### 3. Hand-route and lock the critical nets
+### 4. Hand-route and lock the critical nets
 
 Specctra cannot express any of these. They are routed before Freerouting sees
 the board, and locked.
@@ -163,7 +204,7 @@ the board, and locked.
   the loop *area* is a layout judgement.
 - **The 1 A load-switch path** and the FET's thermal pad.
 
-### 4. Autoroute the rest
+### 5. Autoroute the rest
 
 ```
 pcbnew.ExportSpecctraDSN(...)
@@ -174,7 +215,7 @@ pcbnew.ImportSpecctraSES(...)
 Then **diff the locked nets against their pre-route geometry** before doing
 anything else.
 
-### 5. Pour — three grounds, two zones, one star
+### 6. Pour — three grounds, two zones, one star
 
 > A single `GND` pour ties `PWR_GND`, `DIG_GND` and `AGND` together. It passes
 > DRC, it fabricates, and it silently destroys ADR 0004's star rule. The
@@ -194,7 +235,7 @@ Freerouting does not do zones, so this happens after the import:
 - `pcbnew.ZONE_FILLER(board).Fill(board.Zones())`, then re-fill after *any*
   later change.
 
-### 6. Verify — DRC is necessary, not sufficient
+### 7. Verify — DRC is necessary, not sufficient
 
 ```
 kicad-cli pcb drc --format json --severity-error --exit-code-violations
@@ -212,7 +253,7 @@ Plus assertions that each pass DRC on their own, in `verify.py`:
 
 Five full iterations, then stop and report rather than thrashing placement.
 
-### 7. Fab output — and what you actually need
+### 8. Fab output — and what you actually need
 
 ```
 kicad-cli pcb export gerbers --layers F.Cu,B.Cu,F.Mask,B.Mask,F.Silkscreen,B.Silkscreen,Edge.Cuts
