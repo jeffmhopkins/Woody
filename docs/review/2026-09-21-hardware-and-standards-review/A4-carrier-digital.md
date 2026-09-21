@@ -1357,7 +1357,7 @@ it.
 see, a toothpick recovers the instrument from every firmware failure short of a
 corrupted bootloader — including the one in D6.**
 
-This converts `bom.csv`'s *"A corrupted BOOTLAODER ends the instrument; that is
+This converts `bom.csv`'s *"A corrupted BOOTLOADER ends the instrument; that is
 accepted"* `[repo]` from an accepted loss into a much narrower one, and it
 converts D6 from High to Low.
 
