@@ -141,7 +141,7 @@ All three are behaviours over the same switches, configured rather than wired.
 
 ## Board: Waveshare ESP32-S3-Matrix
 
-**Selected.** ESP32-S3, onboard **QMI8658C** 6-axis IMU, 16 GPIO broken out
+**Selected.** ESP32-S3, onboard **QMI8658C** 6-axis IMU, 17 GPIO broken out
 against the 14 this role needs, 4 MB flash, 2 MB quad PSRAM, native USB.
 
 **This is not a bring-up convenience.** An earlier revision of this ADR assumed
@@ -178,7 +178,9 @@ board definitions, which have to be correct for the board to work at all:
 
 ### Pin assignment
 
-Broken out: **GPIO 1–7** on one side, **GPIO 34–40, 43, 44** on the other.
+Broken out: **GPIO 1–7** on one side, **GPIO 33–40, 43, 44** on the other.
+**Seventeen, not sixteen** — an earlier revision of this list omitted GPIO33 and
+the error propagated into ADR 0013 and the roadmap.
 
 | Function | Pins | Assigned |
 |---|---|---|
@@ -189,7 +191,7 @@ Broken out: **GPIO 1–7** on one side, **GPIO 34–40, 43, 44** on the other.
 | WS2815 data, two strips | 2 | 1, 2 |
 | UART1 to the display board | 2 | 5, 6 |
 | UART0 console to a carrier test header | 2 | 43, 44 |
-| **Used** | **14 of 16** | spare: 3, 4 |
+| **Used** | **14 of 17** | spare: 3, 4, 33 |
 
 **The inter-MCU link goes on UART1, not on 43/44.** Using UART0 would work and
 would save two pins, but it is the boot console — panic output and bootloader
@@ -197,8 +199,8 @@ chatter would land in the middle of a framed protocol, and the debug console
 would be gone. In a body that cannot be opened, two pins is a cheap price for
 keeping a console, and the design has them.
 
-GPIO 3 and 4 stay free. Both are ADC1 channels, so a spare can become an analog
-input if something later wants one.
+GPIO 3, 4 and 33 stay free. GPIO 3 and 4 are ADC1 channels, so either can
+become an analog input if something later wants one.
 
 ### Two things to carry forward
 
@@ -223,13 +225,22 @@ This also settles the board's position rather than leaving it to convenience:
 *and* where a display wants to be in the player's downward glance. The two
 requirements agree, which is rare enough to take advantage of.
 
-**If the board ships with octal PSRAM, the pin budget collapses to exactly
-enough.** Octal PSRAM consumes GPIO33–37, which would take the 16 broken-out
-pins down to 12 — precisely the number needed if the UART0 console is sacrificed
-and the inter-MCU link moves to 43/44, with nothing spare. Both CircuitPython
-and Zephyr declare **quad** (`qio`) PSRAM, so this should not happen. **Confirm
-at E1 before laying out the carrier**, because the carrier's pin map depends on
-it.
+**The octal-PSRAM worry is settled on paper, not at the bench.** Octal PSRAM
+consumes GPIO33–37, which would take the 17 broken-out pins down to 12 —
+precisely the number needed if the UART0 console is sacrificed and the
+inter-MCU link moves to 43/44, with nothing spare. This was carried as a gate
+on E1 and a blocker on the carrier layout. It is neither:
+
+- **The vendor's own board definition exposes GPIO33–40 as header pins**, which
+  is not possible if octal PSRAM is using 33–37.
+- **The part is the ESP32-S3FH4R2.** Espressif's suffix convention makes `R2`
+  2 MB of **quad** PSRAM; octal parts are `R8`.
+
+Two independent routes to the same answer, neither needing hardware. **The pin
+budget is 17 with three spare, and the carrier layout is not blocked on it.**
+E1 still prints the pin list, because it costs thirty seconds and a silent
+board revision is the one thing that could change it (ADR 0013's honest cost:
+"a discontinued dev board would mean a redesign").
 
 ## Open
 

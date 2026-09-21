@@ -54,7 +54,7 @@ Its pin budget is now comfortable rather than binding:
 
 The distinction in the last column is what decides the board, not the raw count:
 an onboard IMU and a native USB connector cost chip pins but not *header* pins.
-On the selected ESP32-S3-Matrix that is **14 of 16 broken out, two spare** —
+On the selected ESP32-S3-Matrix that is **14 of 17 broken out, three spare** —
 see ADR 0007 for the assignment.
 
 Fourteen chip pins of headroom, against two before.

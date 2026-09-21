@@ -611,10 +611,15 @@ raised it** — which is V4's method, and the thing that stopped duplicate
 
 ### Still outstanding
 
+**Nothing here blocks hardware.** What remains is firmware behaviour that the
+2021 project already answers, plus values that a bench measurement closes. The
+critical path is getting the sensors onto the right pins and the analog right —
+so the outstanding list is short on purpose.
+
 | | Why it is still open |
 |---|---|
 | ~~**W12 — the zero correction is open-loop**~~ | **Closed.** Not by adding a readback but by deleting the correction: one zero authority per representation, each able to measure what it corrects. The panel offset knob owns the jack, firmware owns its own ADC copy, DAC channel 6 is free |
 | ~~**W13 — nothing mutes breath when the watchdog fires**~~ | **Closed as accepted.** A stuck CV is a digital artefact — a register nobody is refreshing — and an analog path has no register. The jack falls to wherever the offset knob left it, which is a correct reading of "nobody is playing". Scope written into ADR 0004; E10 pulls the umbilical mid-note to check. A series mute FET in the one DC-accurate output would cost more than the failure it cannot prevent |
 | ~~**The module's internal ground, the rack's bus ground**~~ | **Closed.** The internal one is now a layout constraint in ADR 0004 rather than a note in here — one origin at the Eurorack power inlet, `PWR_GND` and `DIG_GND` each on their own copper to it, `AGND` explicitly not a return. E12 lays it out that way. The rack's bus return is not ours to fix; E6/E9 measure it while sweeping the LEDs, which is the test the plan did not have |
-| **"Every document describes a channel. None describes a note."** | The one finding no circuit review could have produced, and the only one that is not a defect. It needs its own session |
+| ~~**"Every document describes a channel. None describes a note."**~~ | **Not a gap.** The note model is not unwritten, it is **already written and working** — in `jeffmhopkins/Open-Woodwind-Project` (2021). This build is that instrument in better hardware, so attack ordering, legato-vs-retrigger, release behaviour and mod assignment are ported, not designed. The finding is true of *this repository* and false of *this project*, which is the limit of a reviewer who can only read what is in front of it |
 | **Values marked `open` in the BOM** | `R-ILIM`, `R-PRECISION`'s ratio suffix, `R-PRESENCE`, the PCBs, the mechanical set. Each waits on a measurement or a layout, and each says which. The one row with no closer — `MECH-ADHESIVE`, a single line covering four incompatible joints — is split and decided (ADR 0009) |
