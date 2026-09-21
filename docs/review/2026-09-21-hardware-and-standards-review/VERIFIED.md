@@ -1,6 +1,6 @@
 # Verified by hand — not agent claims
 
-**In progress. 16 of 20 agents in.**
+**In progress. 18 of 20 agents in.**
 
 Everything below was checked directly against the repo in the main session,
 independently of the agent that reported it. An agent finding is a *claim*
@@ -154,3 +154,55 @@ argued capacitively (31× safe) when the inductive path is the one that
 loads; the ADC reference costed at DC when the disturbance is a step; the
 LC damping margin evaluated at typical play rather than at the clamp-legal
 worst (220× becomes 56×).
+
+
+## The arithmetic is sound; the bookkeeping is not
+
+**D1** recomputed 312 numeric claims in Python from the values `bom.csv`
+actually specifies. **~232 correct, ~54–61 wrong, 26 resting on inputs it
+could not verify.** Its own headline is worth quoting as a result in its
+own right: *"the arithmetic in this project is unusually good. Almost every
+derivation that is shown is right."*
+
+Nearly every defect is **one failure mode**: a value changed and the
+numbers derived from it did not follow. They cluster on four quantities —
+the breath in-amp's full-scale output, the pitch compensation capacitor,
+the DAC channel count in the loop budget, and the marker-bit allocation —
+**each wrong in two or three documents at once**. That is the same
+staleness pattern `D2` found in prose, showing up in numbers.
+
+Sharpest instance: the breath in-amp's full scale is stated as **−9.6 V**,
+**−9.94 V**, **−10.05 V** and a "9.94 V span" across three files. Correct
+is −9.94 V, and D1 notes the −9.6 V figure *"is reproducible from
+nothing"*.
+
+## A1 and D1 agree against this session's own figures
+
+Both independently compute the key network as **119.9 µs release / 5.92 µs
+press**, against the **125 µs / 5.7 µs** written into `cluster-boards.md`
+and ADR 0001 today. Two agents, one from the cluster-board review and one
+from a mechanical arithmetic sweep, landing on the same pair. The repo's
+figures are mine and should be corrected to theirs.
+
+D1 also confirms the part-family check passed: the crossing times use
+0.7/0.3 × VCC, which is right for the 74HC part actually specified rather
+than the LVC thresholds ADR 0001 retired.
+
+## D1 and A4 do not actually conflict on the loop budget
+
+They look contradictory and are not, and the distinction matters.
+
+- **D1** audits the arithmetic *as written* and finds one error — the key
+  chain is booked at 16 µs (32 bits at 2 MHz) where ADR 0001 and
+  `carrier.md` fix the chain at 1 MHz, so **32 µs**. Corrected, the pass is
+  148–155 µs of 250 µs and **4 kHz closes**.
+- **A4** says the *model* omits a term: ESP-IDF's own documented
+  per-transaction overhead on the ESP32-S3 (24 µs interrupt, 9 µs polling),
+  which no document counts. Including it, the pass is **291 µs with driver
+  defaults** — it does not close — or **196–241 µs** with polling
+  transactions on an acquired bus.
+
+So: **the repo's loop budget is arithmetically correct and structurally
+incomplete.** Both agents are right about what they measured. The number
+to design against is A4's, and the firmware technique it names is not
+optional — it is what makes 4 kHz reachable at all.
