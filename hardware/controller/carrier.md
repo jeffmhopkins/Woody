@@ -74,7 +74,7 @@ regulator's location open — see *Still open*.
    │ no key networks │   └───────────┘ └──────────┘ └────────────────┘
    └───┬─────────────┘
        │
-   J-CHAIN   ONE 6-way, chained through all four cluster boards (ADR 0001)
+   J-CHAIN   2x6 IDC, chained through all four cluster boards (ADR 0001)
 ```
 
 ---
@@ -328,16 +328,50 @@ and putting the register on it makes every switch-to-chip connection a trace
 `[repo] 0001, 0002`. **This page's first draft drew all four registers and all
 21 networks here.** That was the superseded topology; what follows replaces it.
 
+**Decided: a ground return per signal, laid out as an alternating-ground
+ribbon.** ADR 0001 fix 1 calls this the highest-value item on its list, and it
+is the only thing in the loom that can still be corrupted — a glitch on `SH/LD`
+does not cost one wrong note, it reloads all four registers mid-shift and
+corrupts the whole 32-bit word `[repo] 0001`. Four signals, five grounds, one
+supply:
+
 ```
-  HDR-DEV                                        J-CHAIN  (6-way, one connector)
-   3V3  ───────[F-CHAIN 3V3, see below]──────────► 1  3V3   → 21 pull-ups,
-   GND  ────────────────────────────────────────► 2  GND      4 × VCC, 4 × 100 nF
-   IO38  SPI3 SCK ──[R-CHAIN-SER 100R]──────────► 3  SCK    ** R PROPOSED **
-   IO7   latch    ──[R-CHAIN-SER 100R]──────────► 4  SH/LD  ** R PROPOSED **
-   IO33  SER out  ──[R-CHAIN-SER 100R]──────────► 5  SER    (into the far device)
-   IO40  MISO     ◄───────────────────────────── 6  QH     (out of the near one)
+  HDR-DEV                                   J-CHAIN  (2×6 IDC, 12-way ribbon,
+                                                      10 wired + 2 spare)
+   GND  ────────────────────────────────────►  1  GND
+   IO38  SPI3 SCK ──[R-CHAIN-SER 100R]─────►  2  SCK     ** R PROPOSED **
+   GND  ────────────────────────────────────►  3  GND
+   IO7   latch    ──[R-CHAIN-SER 100R]─────►  4  SH/LD   ** R PROPOSED **
+   GND  ────────────────────────────────────►  5  GND
+   IO33  SER out  ──[R-CHAIN-SER 100R]─────►  6  SER     (into the far device)
+   GND  ────────────────────────────────────►  7  GND
+   IO40  MISO     ◄─────────────────────────  8  QH      (out of the near one)
+   GND  ────────────────────────────────────►  9  GND
+   3V3  ───────[F-CHAIN, see below]─────────► 10  3V3     → 21 pull-ups,
+                                              11  spare      4 × VCC, 4 × 100 nF
+                                              12  spare
 
               [U-TVS-CHAIN 4-ch array to DIG_GND]   ** PROPOSED **
+
+  Every signal has ground on both sides; 3V3 sits against pin 9's ground.
+  The two spares are ADR 0009's rule and they are FREE: IDC comes in 2xN, so
+  a 2x6 costs what a 2x5 costs and the ribbon is 2 mm wider. Under the tail
+  topology a spare conductor bought a spare KEY; under this one it buys a
+  REPAIR - expansion now lands on a spare register BIT, which needs no wire.
+
+  EIGHT connectors, not five. The chain is four hops, and SER/QH cannot be a
+  pass-through bus: each board's QH feeds the PREVIOUS board's SER, which is
+  point-to-point and changes meaning every hop. So every cluster board except
+  the last carries an IN and an OUT - carrier 1, RT 2, RH 2, LT 2, LH 1 - with
+  four ribbon assemblies between them. Same 2x6 pinout at all eight.
+
+  Pin 6 SER is the exception: it IS a pass-through, riding every hop to reach
+  the far device's serial input. ADR 0001 has that input "terminated at the
+  far device", which would make this conductor redundant. Driving it instead
+  costs nothing and buys an end-to-end chain self-test - shift a known pattern
+  in at LH and read it back at RT, with no keys pressed. That distinguishes
+  "the loom is broken" from "one bit is stuck", which the static marker
+  pattern cannot. NOT yet decided; it is a cluster-board question.
 
   Chained, not starred (ADR 0001 fix 2): ONE run leaves this connector and
   passes through right_thumb → right_hand → left_thumb → left_hand in turn.
@@ -557,51 +591,50 @@ Two radial electrolytics are a height item in a ~20 mm cavity; see *Still open*.
 
 ## §6 Display loom and service header
 
+**This section's open question has been answered, against it.** The draft asked
+whether `EN` and `IO0` reach the ESP32-S3-Matrix's headers and said "settle it
+before this board is laid out". `bom.csv` row `HDR-SERVICE` has since settled
+it: **they do not.** The vendor's board definition accounts for every pin on
+both header rows — 3 power and 17 GPIO — and neither appears; `IO0` is under
+the BOOT button and `EN` is on the reset circuit, so reaching either means
+soldering to the dev board, which ends its life as a swappable module and
+breaks `HDR-DEV`'s "sockets, not solder-down" rule `[repo] bom.csv, 0009`.
+
+**`HDR-SERVICE` is therefore 2×3, six pins, not 2×5** — a UART pair and a
+ground for each board, and nothing else. The recovery ladder absorbs the loss:
+OTA rollback first, USB-Serial-JTAG through the tail slot second, this header
+third. A corrupted bootloader ends the instrument, and that is accepted
+`[repo] bom.csv`.
+
+**Two conductors and three passives per line come out of the loom with it:**
+
 ```
-  J-DISP  ──  10–11 conductors, 360 mm, up a side channel
+  J-DISP  ──  9 conductors, 360 mm, up a side channel
 
     5 V (or +12 V — see Still open)        1
     GND                                     1
     IO5 → display RX, IO6 ← display TX      2      UART1, 921600 baud
-    EN                                      1  ┐
-    IO0                                     1  │  service, per ADR 0009
-    U0TXD                                   1  │  and firmware/README.md
-    U0RXD                                   1  │
+    U0TXD                                   1  ┐  service, per ADR 0009
+    U0RXD                                   1  │  and firmware/README.md
     GND                                     1  ┘
     two spare conductors (ADR 0009)         2
 
-  EN and IO0 each get, at this end:
-     [10k to 3V3] + [100R series] + [10 nF to GND]     ** PROPOSED **
-     — same network as a key line, same reason
+  No EN, no IO0, and so no RC networks for them.
 
 
-  HDR-SERVICE  2×5, under the tail-underside cover:
+  HDR-SERVICE  2×3, under the tail-underside cover:
 
-    real-time board:  EN?  IO0?  U0TXD(IO43)  U0RXD(IO44)  GND
-    display board:    EN   IO0   U0TXD        U0RXD        GND
+    real-time board:  U0TXD(IO43)  U0RXD(IO44)  GND
+    display board:    U0TXD        U0RXD        GND
 ```
-
-> **`EN` and `IO0` for the real-time board may not be wireable at all.**
-> CircuitPython's board definition enumerates both header columns of the
-> ESP32-S3-Matrix completely — `5V, GND, 3V3, IO7…IO1` and `IO33…IO40, IO43,
-> IO44`, twenty pins `[board-def] .../waveshare_esp32_s3_matrix/pins.c` — and
-> neither `EN` nor `IO0` is among them. Zephyr puts the BOOT button on `gpio0 0`,
-> i.e. GPIO0 is a button on the board, not a header pin `[board-def]
-> zephyr:.../esp32s3_matrix_esp32s3_procpu.dts`.
->
-> `pins.c` lists MCU GPIOs, so a non-GPIO `EN` pad could exist and not appear
-> there. **This is a meter measurement at E1, not a conclusion.** But if it
-> holds, ADR 0009's "only opening in the instrument that exists for a failure"
-> cannot be wired for the board it matters most for, and the alternatives —
-> flying leads to the button pads, or relying on USB-Serial-JTAG plus OTA
-> rollback — fight `HDR-DEV`'s "SOCKETS not solder-down" rule or weaken the
-> recovery path. **Settle it before this board is laid out.**
 
 **ADR 0013's "four broken-out pins — UART pair and power"** `[repo] 0013` is a
 statement about the display board's *pin* requirement, not about the loom.
-The loom is ten or eleven conductors, over 360 mm, sharing a side channel with an
-800 kHz data line and 12 V LED power — two of them (`EN`, `IO0`) asynchronous,
-level-sensitive and, as documented, unfiltered. Hence the proposed networks.
+The loom is nine conductors over 360 mm, sharing a side channel with an 800 kHz
+data line and 12 V LED power. What runs in it now is a UART pair and a console
+pair — all four framed, byte-oriented and recoverable by retry, which is
+exactly what `EN` and `IO0` were not. **The proposed RC networks are withdrawn
+along with the lines they protected.**
 
 ---
 
@@ -676,10 +709,10 @@ page and have no BOM entry yet.
 | `D-REVSHUNT` | SS34 | At the connector, ahead of `L-BUCK-IN` | `[repo]` |
 | `D-TVS-PWR` | SMAJ15A | Across the power pair | `[repo]` |
 | `C-STRIP-BULK` ×2 | 470–1000 µF 16 V | At each strip feed point, which is this board | `[repo]` |
-| `HDR-SERVICE` | 2×5 | **See §6 — may not be wireable for the real-time board** | `[repo]`; `[board-def]` risk |
-| **`J-CHAIN`** | **2×5 IDC (6 signals + returns)** | **Proposed — ONE connector, chained through four cluster boards. Width TBD by the ground-return rule, not by the signal count** | proposed |
+| `HDR-SERVICE` | **2×3** | UART pair + GND per board. `EN`/`IO0` are not on the headers and are not wired — §6 | `[repo] bom.csv`, settled |
+| **`J-CHAIN`** | **2×6 IDC boxed, keyed** | **Chained through four cluster boards. 4 signals, 5 alternating grounds, 3V3, 2 spare. EIGHT of them across five boards — `SER`/`QH` are point-to-point, so every cluster board but the last has an IN and an OUT (qty in `bom.csv`)** | **decided** |
 | **`J-LED-L/-R`** | **4-way each** | **Proposed — 12 V, GND, DI, BI** | proposed |
-| **`J-DISP`** | **11-way** | **Proposed — see §6** | proposed |
+| **`J-DISP`** | **9-way** | **Proposed — see §6. Was 11-way before `EN`/`IO0` were withdrawn** | proposed |
 | `MECH-GNDBOND` | Ring terminal + M3 | Plate to `PWR_GND`. Needs a pad and a hole on this board | `[repo]` |
 | `PCB-CARRIER` | 2-layer, **outline TBD** | See *Still open* | `[repo]` says ~100 × 45 mm; not checked |
 | **`TP-*`, `LK-*`** | **TBD** | **Proposed — `D2` asked for test points, shunt links and an LA header on this board and none exist in the BOM** | proposed |
@@ -694,26 +727,26 @@ page and have no BOM entry yet.
 | | Conductors |
 |---|---|
 | Chain signals: `SCK`, `SH/LD`, `SER`, `QH` | 4 |
-| Chain power: 3V3, GND | 2 |
-| Extra returns — ADR 0001 fix 1 wants one per clocked signal | 0–3 |
+| Grounds, alternating — one between every pair, **decided** | 5 |
+| Chain supply: 3V3 | 1 |
 | Two spare conductors (ADR 0009) | 2 |
-| **Key loom, all four clusters, chained** | **8–11** |
+| **Key loom, all four clusters, chained — `J-CHAIN` is 2×6** | **12** |
 | WS2815: 12 V, GND, `DI` per strip (+`BI` if needed) | 6–8 |
-| Display loom (§6) | 10–11 |
+| Display loom (§6) — `EN`/`IO0` withdrawn | 9 |
 | Plate ground bond | 1 |
-| **Terminating on this board, excluding the umbilical** | **~25–31** |
+| **Terminating on this board, excluding the umbilical** | **~28–30** |
 | Umbilical (`J-UMB`) | 8 |
 
 **The first draft of this table said ~53 and called the repo's "~23" wrong.**
 `[repo] 0001, WIRE-LOOM, ROADMAP` That was the tail-register arithmetic — 35
 conductors of key loom, one per switch. **On the per-cluster topology the
 repo's figure is approximately right after all**, and this page withdraws the
-objection. ~25–31 against ~23; the gap is the display loom's service pins and
-the spares, not a counting error.
+objection. ~28–30 against ~23; the gap is the spare conductors and the display
+loom's console pair, not a counting error.
 
-**Termination is not the problem.** `[calc]` As IDC boxed headers, ~28
+**Termination is not the problem.** `[calc]` As IDC boxed headers, ~29
 conductors occupy roughly 250 mm² including keepout on a board of ~4500 mm².
-Even single-row 2.54 mm headers would now fit — 28 × 2.54 = 71 mm of board
+Even single-row 2.54 mm headers would now fit — 29 × 2.54 = 74 mm of board
 edge against ~290 mm of perimeter — though IDC is still the right choice for a
 loom that is hand-terminated once and then bonded shut.
 
@@ -736,10 +769,6 @@ a sacrifice and it being an ordinary trade.
 
 Ordered by what blocks what. The first four block layout.
 
-- **Whether `EN` and `IO0` reach the ESP32-S3-Matrix's headers** (§6). A meter
-  at E1. If not, the recovery path ADR 0009 calls "the only opening in the
-  instrument that exists for a failure" has to be redesigned, and the options
-  all cost something the BOM currently forbids.
 - **Which face of the dev board carries the matrix, and its outline and header
   row spacing** (§7). Decides underside-mount versus a ~22 mm cutout, and with
   it the whole board's routing.
@@ -752,18 +781,16 @@ Ordered by what blocks what. The first four block layout.
   locally, which a regulator 360 mm away does not do. Either it moves to the
   display board and +12 V goes up the loom, or `C-BULK-DISP` does the job and
   the location is arbitrary. Pick one before `J-DISP`'s conductor list is fixed.
-- **How wide `J-CHAIN` actually is.** Six signals; ADR 0001's highest-value
-  signal-integrity fix is "a ground return per signal" `[repo] 0001`, which
-  makes it nine or ten. The connector, the loom and the four cluster-board
-  connectors all have to agree, and the body bonds shut over the answer.
-- **Whether the key pull-ups are allowed to share the ADC's reference** (§2, §3).
-  25.8 mA of play-rate load on the rail that *is* the MCP3202's `VREF`, worth
-  3.2 LSB. Tolerable, and the alternatives — a separate 3V3 for the chain, or
-  an ADC with a real `VREF` pin — are both board changes, so the moment to
-  decide is before layout and not after the first odd measurement.
 - **`F-CHAIN`** (§3): whether the 3V3 conductor going down the body is fused.
   Two millimetres of board, unretrofittable, and the failure it covers is
   "the instrument is dead and there is no way to look inside".
+
+> **Two items were decided rather than left open.** `J-CHAIN` is **2×6** with
+> a ground between every signal (§3). And the key pull-ups **may** share the
+> ADC's reference: 25.8 mA of play-rate load worth 3.2 LSB on a ~1594-count
+> playable span, as a gain term rather than an offset. **Accepted, not
+> ignored** — §2 exists so that when the breath reading twitches on a chord,
+> nobody spends a week in the firmware.
 
 > **Two items left this page with the registers.** The **marker pattern**
 > (which six bits, to what levels) and the **`H`…`A`-to-switch mapping** are

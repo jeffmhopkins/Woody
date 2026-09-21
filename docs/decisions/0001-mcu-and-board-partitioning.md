@@ -78,8 +78,9 @@ satellite boards distributed along the body.
 TAIL   dev board on a passive carrier: MCU, IMU, 8×8 matrix, breath sensor,
        ADC, reference, umbilical connector, USB-C. NO shift registers.
         |
-        |  ONE chained run, 6 conductors per hop, passing through each
-        |  cluster board in turn: 3V3, GND, SCK, SH/LD, serial in, serial out
+        |  ONE chained run, 12 conductors per hop (2x6 IDC), passing through
+        |  each cluster board in turn: SCK, SH/LD, serial in, serial out,
+        |  a ground between every signal, 3V3, and two spares
         |
 BODY   four key cluster boards — switches, ONE 74HC165 each, its decoupling,
        and that cluster's key networks. Every switch-to-chip link is a trace.
@@ -131,7 +132,7 @@ connection is a copper trace. Four conductors plus power leave each board.
 
 | | **One per cluster** | All four at the tail |
 |---|---|---|
-| Conductors down the body | **6 per hop** | 32–44 |
+| Conductors down the body | **12 per hop** — 6 signals-and-supply, 5 grounds, 2 spare | 32–44 |
 | Hand-terminated joints | **~4 connectors** | **~46 individual wires** |
 | Boards | 5 | 5 — *the switches need a PCB either way* |
 | Carrier area | as designed | **+41 %**: 4 ICs and 63 passives |
@@ -239,9 +240,27 @@ four boards, so the three reserved spare-switch bits are covered too.
 Five further fixes, in descending order of value. The first four are wiring and
 cost nothing but planning; they cannot be retrofitted into a bonded body.
 
-1. **A ground return per signal.** The highest-value item on this list. Four
-   clocked signals down a 14-inch body sharing one return is a loop antenna
-   next to an 800 kHz LED data line.
+1. **A ground return per signal. DECIDED, 2026-09-21.** The highest-value item
+   on this list. Four clocked signals down a 14-inch body sharing one return is
+   a loop antenna next to an 800 kHz LED data line — and with the key lines now
+   local to their cluster board, these four are the *only* loom signals left to
+   corrupt, at a blast radius of the whole 32-bit word.
+
+   **`J-CHAIN` is a 2×6 IDC on a 12-way ribbon**, alternating ground:
+   `GND SCK GND SH/LD GND SER GND QH GND 3V3 spare spare`. Every signal has
+   ground on both sides and 3V3 sits against a ground. **Eight connectors have
+   to match, across five boards**: the chain is four hops and `SER`/`QH` are
+   point-to-point rather than bus, so every cluster board but the last carries
+   an IN and an OUT — carrier 1, RT 2, RH 2, LT 2, LH 1, with four ribbon
+   assemblies between them.
+
+   The two spares are ADR 0009's rule, and they cost nothing because IDC comes
+   in 2×N: a 2×6 is a 2×5's price and 2 mm more ribbon. **Their job changed
+   with this decision, though.** Under the tail topology a spare conductor
+   bought a spare *key*; here expansion lands on a spare register *bit* and
+   needs no wire at all, so what the spares now buy is **repair** — and that is
+   worth more than it was, because every conductor in this loom is load-bearing
+   for all 32 bits.
 2. **Chain the topology, do not star it.** One run passing through each cluster
    board in turn, not four stubs from a central point.
 3. **Order the chain so serial data flows *toward* the clock source**, which
