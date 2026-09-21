@@ -49,7 +49,83 @@ finished from the outside and is not. This file is the difference.
   anything" is the commit *the move starts from*, not the one the work started
   from.
 
-## Phase B: not started
+## Phase B: the splits have landed
+
+Seven agents, one per source page, each confined to its own subtree. **0 REAL
+GAPS on content conservation for every one of the seven**, verified by me
+before staging, plus the hand-built pilot.
+
+| Source page | Became |
+|---|---|
+| `pitch-stage` (pilot, by hand) | + `notes` + `sim` |
+| `breath-output-stage` | + `breath-response-shaper` + `panel` |
+| `power-entry` | + `umbilical-load-switch` + `panel-led` |
+| `digital-and-supervision` | + `dac8568` + `link-supervision` |
+| `cluster-boards` | + `key-register` + `key-switch-network` + `key-marker-and-bits` |
+| `carrier` | + `power-entry-instrument` + `breath-excitation-reference` + `breath-adc` + `led-strip-drive` + `display-and-service-uart` |
+| `mod-channels`, `breath-receive-stage` | restructured in place |
+
+### What the instruction not to split things bought
+
+Every agent refused at least once to redraw an ASCII figure, and said so.
+`carrier.md` §2's opening drawing contains three different circuits in one
+connected picture; it stayed whole in the board page and both circuits cite
+it. The DAC box excised from the digital drawing left bare columns on both
+sides and they were left exactly as cut. Under a content freeze a redraw is
+not a move, and seven agents held that line without exception.
+
+### Three checks the splits forced into existence
+
+Each was built because something broke that nothing could see:
+
+- **`check_conservation`** — word shingles, not lines. Caught *me*
+  paraphrasing historical text in the pilot instead of moving it verbatim.
+- **`check_owners`** — nothing had ever read `figures.yaml`'s `owner:` field.
+  Four agents that could not see each other reported the same consequence.
+  Note the weaker check would have missed all four: after Phase A every
+  owner path still *resolved*; what had broken is that the file no longer
+  stated the value.
+- **`check_sections`** — seven cross-file `§N` references pointing into files
+  their target had left.
+
+**The principle all three share, and the one worth keeping:** do not hunt for
+spellings already known to be wrong; assert that what is written now
+*resolves*. A forbidden list only knows about breakage someone predicted.
+
+### Four live defects found by agents told not to fix anything
+
+Reported, verified by hand, then fixed by me in separate commits:
+
+1. `mod-channels.md` computed its follower's load current at the superseded
+   2.5 V while its own drawing three sections above said otherwise — in the
+   page that **owns** that figure.
+2. The breath trimmer's null voltage existed as **three values in five
+   places**, and `figures.yaml` was one of them; its own note said the figure
+   "probably should be" tracked, which was correct and unacted-on. `0.579`
+   turned out to be the exact bias-divider omission the register already
+   documents one entry above.
+3. Three figure owners pointing at files their derivations had left.
+4. Seven dead section references.
+
+**The grep-first rule earned itself again** on defect 2: the agent found
+three of five occurrences because it was reading only its own page.
+
+## Still to do
+
+- **Consolidate the three board-crossing blocks** — breath, SPI, key-chain.
+  Each is currently split across a board page and a module page by necessity,
+  and `breath-receive-stage`'s agent supplied the best argument for doing it:
+  six of that page's numbers are derived from parts on the carrier, including
+  a figure it owns.
+- **BOM fragments and the generator**, with the 53 orphan rows to
+  `hardware/unplaced.csv`. Held back from the agents deliberately: ownership
+  across 138 rows and 22 circuits is a global decision, and parallel agents
+  would have produced double-owned rows.
+- **`circuit.yaml` and the dependency layer** (`D3`).
+- **`datasheets/` re-filed by function** via `.moves.csv`.
+- **Cold review**, including one agent whose only job is content conservation.
+
+## Phase B: what was not started
 
 The corpus is moved but **not yet split**. Every page is still whole; the 22
 circuit blocks in `D1-circuit-inventory.md` do not exist as directories yet.
