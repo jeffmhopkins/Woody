@@ -239,6 +239,42 @@ def emit(lines, detail_only=False):
 REPORT_LINES = []
 
 
+def check_links(files):
+    """Markdown links in the corpus must resolve to a file that exists.
+
+    Added 2026-09-21 during the restructure, after three links broke in a way
+    nothing could see. They were written as bare filenames -
+    `](breath-receive-stage.md)` - which resolved while the pages were
+    siblings in one directory and stopped resolving the moment each page got
+    its own. A bare filename is not a path token, so the path rewriter had
+    nothing to match on and reported a clean run.
+
+    This is the general form of that: do not check that known-old spellings
+    are gone, check that what is written now RESOLVES. The first only knows
+    about breakage you predicted.
+    """
+    pat = re.compile(r"\]\(([^)#\s]+\.md)[^)]*\)")
+    problems = []
+    for path in files:
+        rel = os.path.relpath(path, ROOT)
+        if not rel.endswith(".md"):
+            continue
+        try:
+            text = open(path, encoding="utf-8").read()
+        except Exception:
+            continue
+        for m in pat.finditer(text):
+            tgt = m.group(1)
+            if tgt.startswith(("http://", "https://")):
+                continue
+            dest = os.path.normpath(os.path.join(os.path.dirname(path), tgt))
+            if not os.path.exists(dest):
+                line = text[:m.start()].count("\n") + 1
+                problems.append(f"{rel}:{line} links to {tgt!r}, which does "
+                                f"not resolve")
+    return problems
+
+
 def check_checks():
     """Every check in this file must actually be called.
 
@@ -282,11 +318,17 @@ def main():
     live, refuted, spec = check_figures(files)
     bom_problems, bom_refs, ncols, nrows = check_bom()
     drawn_not_bommed = check_refdes(files, bom_refs)
+    link_problems = check_links(files)
 
     emit([f"corpus: {len(files)} files | bom.csv: {nrows} rows x {ncols} cols | "
           f"figures tracked: {len(spec['figures'])}", ""], detail_only=True)
 
     fail = False
+
+    if link_problems:
+        fail = True
+        emit([f"BROKEN LINKS ({len(link_problems)})"]
+             + ["  " + p for p in link_problems] + [""], detail_only=True)
 
     if wiring_problems:
         fail = True
@@ -357,7 +399,8 @@ def main():
     # unscanned, so the count is what a reader checks, not the verdict.
     n_unres = len(unresolved)
     if fail:
-        print(f"FAIL {len(shape_problems)} shape + {len(live)} stale + {len(bom_problems)} bom "
+        print(f"FAIL {len(shape_problems)} shape + {len(link_problems)} links "
+              f"+ {len(live)} stale + {len(bom_problems)} bom "
               f"| corpus {len(files)} files | {n_unres} unresolved (tracked) "
               f"| detail: .staleness/report.txt or --detail")
     else:

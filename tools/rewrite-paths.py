@@ -60,6 +60,16 @@ HAND_EDITED = (
     ".gitignore",
     "docs/reference/path-map-2026-09-21.csv",
     "docs/reference/repo-maintenance.md",
+    # RELATIVE LINKS ARE RECOMPUTED, NOT SUBSTITUTED, so these two cannot be
+    # proven by inversion and are hand-checked instead. Both carried a link
+    # written as a bare filename - `](breath-receive-stage.md)` - which
+    # resolved while the module pages were siblings and stopped resolving when
+    # each got its own directory. The correct new text depends on where the
+    # LINKING file now sits, which a search-and-replace cannot know.
+    # Named here rather than quietly folded into the map, because the point of
+    # the inversion check is that its exclusion list is short and reviewed.
+    "hardware/module/mod-channels/mod-channels.md",
+    "hardware/module/pitch-stage/pitch-stage.md",
 )
 
 TEXT_EXT = (".md", ".csv", ".yaml", ".yml", ".py", ".json", ".txt")

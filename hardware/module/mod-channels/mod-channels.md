@@ -1,7 +1,8 @@
 # Mod channels 1–4 — schematic
 
 **Status:** Drawn 2026-09-21. Third module page, after
-[breath](breath-receive-stage.md) and [pitch](pitch-stage.md).
+[breath](../breath-receive-stage/breath-receive-stage.md) and
+[pitch](../pitch-stage/pitch-stage.md).
 
 Four identical channels at `Vout = 4·Vdac − 3·V_ref`, `V_ref` = **3.3333 V**
 from DAC channel 7, built from `R-MODGAIN` 10k/30k 1 % discretes in a

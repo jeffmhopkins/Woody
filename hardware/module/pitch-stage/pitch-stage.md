@@ -1,7 +1,7 @@
 # Pitch stage — schematic
 
 **Status:** Drawn 2026-09-21. Second module page, after
-[the breath receive stage](breath-receive-stage.md).
+[the breath receive stage](../breath-receive-stage/breath-receive-stage.md).
 
 The ADRs specify this channel's *behaviour* in detail — 1 V/oct, −2 to +7 V,
 trimmers for gain and offset, an LT5400 matched network, an offset reference
