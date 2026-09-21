@@ -21,6 +21,33 @@ sit together, so a change and its record are never in different places.
 | [`module/`](module/module.md) | The 10HP Eurorack module — 12 circuits |
 | [`interfaces/`](interfaces/README.md) | The 3 circuits that cross a board boundary |
 
+## The `## Interfaces` table
+
+Every circuit page carries one: every net that crosses that circuit's
+boundary, one row each. A PCB netlist is transcribed from these, so a row is
+a wiring instruction and two pages disagreeing about a net is a short.
+
+| Column | |
+|---|---|
+| **Node** | The net's name, **qualified** where the same bare name means different things on different boards. `AGND_SENSE`, `AGND_INST` and `AGND_MOD` are three nets; `AGND` alone is a merge waiting to happen. Each row names the drawing's own spelling so a reader can match the two. |
+| **Dir** | This circuit's side of the net: `in`, `out`, `in/out`, `ref` (a return or a reference) or `—` (no connection here — the row is context). |
+| **Peer** | A bare `board/circuit` id when the other end is a circuit in this tree, a reference designator or part name when it is not, `—` when there is nothing on the other end. |
+| **Figure** | A citation into `config/figures.yaml`. The table names nodes; it **does not restate values.** |
+
+**Exactly one page sources a net.** The page holding the part that drives it
+says `out` and "Sourced here"; every other page says `in` and names it. Two
+pages both claiming to source one net is the defect this column exists to
+make visible — it happened to the DAC's `SCLK`/`DIN`/`SYNC`, in two
+byte-identical rows.
+
+The two board-crossing tables (`interfaces/breath-sense-link`,
+`interfaces/spi-link`) carry an extra **End** column naming which side of the
+cable a node sits on, because for those the board is not implied by the page.
+
+*(This definition sat inline in all 23 circuit pages until 2026-09-21 —
+twenty-three copies of one paragraph, in a repository whose first rule is
+state it once and cite it. It is here, and they cite it.)*
+
 ## Two rules that will bite you
 
 **`bom.csv` here is GENERATED.** `tools/merge-bom.py` rebuilds it from the

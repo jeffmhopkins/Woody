@@ -10,11 +10,8 @@ Every net that crosses this circuit's boundary. Quantities appear **only** as a
 citation into `config/figures.yaml` — this table names nodes, it does not
 restate values.
 
-`Dir` is this circuit's side of the net — `in`, `out`, `in/out`, `ref` (a
-return or reference) or `—` (no connection here, the row is context). `Peer`
-is a bare `board/circuit` id when the other end is a circuit in this tree, a
-reference designator or part name when it is not, and `—` when there is
-nothing on the other end.
+The `Dir` and `Peer` columns are defined once in
+[`hardware/README.md`](../../README.md#the-interfaces-table).
 
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|

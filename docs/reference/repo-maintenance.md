@@ -302,24 +302,46 @@ change?" and a map of only the movers cannot answer it.
 > - **Old side** — the `old` column is exactly the tracked tree at `81c081d`,
 >   the commit before A0 wrote the map. 287 paths, and it is a bijection onto
 >   that tree: nothing in it is missing and nothing in it is invented.
-> - **New side** — HEAD. Re-reconciled 2026-09-21 after the pre-merge review
->   wave, against `git ls-files`.
+> - **New side** — HEAD, reconciled against `git ls-files` on 2026-09-21 after
+>   the pre-merge review wave closed. 410 rows: 405 tracked files, plus 4
+>   `deleted` and 1 duplicate destination.
 >
-> **This sentence was false for most of a day and it is worth saying how.**
-> The map was written at A0 and described Phase A1 only. Phase B then created
-> 122 files it had never heard of, and the datasheet re-filing moved 22 more —
-> leaving 143 tracked files with no row and 22 rows pointing at paths that
-> existed on *neither* side. A reader checking "did this path change?" got
-> `unmoved` for a file that had both moved and been renamed. The map is
-> reconciled now; **the check is four lines and belongs in any future
-> restructure's tooling:**
+> **The "every tracked file has a row" sentence above was false for most of a
+> day, and it is worth saying how.** The map was written at A0 and described
+> Phase A1 only. Phase B then created files it had never heard of and the
+> datasheet re-filing moved 22 more, which left **143 tracked files with no row
+> and 22 rows whose `new` path existed on *neither* side**. A reader asking
+> "did this path change?" about the TI 74HC165 sheet — filed under the retired
+> `other-semi/` bucket — got `unmoved`, for a file that had moved directory
+> *and* been renamed.
+>
+> **A map is not a document you keep true by being careful, it is one you
+> assert.** The check is four lines and belongs in any future restructure's
+> tooling; run it whenever files are added, because a new file is an orphan the
+> moment it is committed:
 >
 > ```
 > tracked = set(git ls-files)
-> rows    = path-map rows
-> assert not (tracked - {r.new for r in rows if r.kind != "deleted"})   # no orphan file
-> assert not ({r.new for r in rows if r.kind != "deleted"} - tracked)   # no dangling row
+> placed  = {r.new for r in rows if r.kind != "deleted"}
+> assert not (tracked - placed)      # no tracked file without a row
+> assert not (placed - tracked)      # no row pointing at nothing
 > ```
+>
+> Both assertions hold as of this writing, and the second one is the half that
+> caught the 22: they all pointed at `datasheets/` paths that no longer
+> existed, and nothing had ever looked.
+>
+> **`datasheets/.moves.csv` is the authority for the datasheet rows**, not
+> anyone's memory of the re-filing. It records all 22 moves with a reason each,
+> and two of them **rename the file as well as the directory**: the two
+> 74HC165 sheets that were `74HC165.pdf` and `74HC165-toshiba.pdf` are now
+> `74HC165-ti-scls116e.pdf` and `74HC165-toshiba-1986-excerpt.pdf` under
+> `logic/`. A map corrected from directory names alone gets those two wrong
+> and still looks right. (Paths there are relative to `datasheets/`, the way
+> `.moves.csv` and the `MANIFEST.csv` file column write them — and the way
+> this paragraph has to write them, because `verify-datasheets.py` requires
+> every `datasheets/…` path in the corpus to resolve on disk, which a
+> deliberately retired one does not.)
 
 **The `kind` column**, which is the part a reader acts on:
 

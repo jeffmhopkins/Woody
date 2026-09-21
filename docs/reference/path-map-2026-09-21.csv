@@ -18,6 +18,7 @@ datasheets/.manifest-R5.csv,datasheets/.manifest-R5.csv,unmoved,datasheets/ move
 datasheets/.manifest-R6.csv,datasheets/.manifest-R6.csv,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
 datasheets/.manifest-R7.csv,datasheets/.manifest-R7.csv,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
 datasheets/.manifest-R8.csv,datasheets/.manifest-R8.csv,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+,datasheets/.manifest-R9.csv,created,"created after the map was written (b32c557): wave R9's manifest fragment. A dotfile, so `git mv datasheets/*` leaves it behind - move the directory whole"
 ,datasheets/.moves.csv,created,"created by the datasheet re-filing (b631987): its own old->new record, the source this file's datasheets/ rows were corrected from"
 datasheets/MANIFEST.csv,datasheets/MANIFEST.csv,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
 datasheets/README.md,datasheets/README.md,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
@@ -402,9 +403,9 @@ mechanical/cad/.gitkeep,mechanical/cad/.gitkeep,unmoved,
 mechanical/drawings/.gitkeep,mechanical/drawings/.gitkeep,unmoved,
 mechanical/export/.gitkeep,mechanical/export/.gitkeep,unmoved,
 tools/.gitkeep,tools/.gitkeep,unmoved,
-,tools/check-conservation.py,created,Phase B pilot (c52ed75): split out of hardware/module/pitch-stage.md
+,tools/check-conservation.py,created,"created by the Phase B pilot commit (c52ed75) alongside the pitch-stage split it was written to check - a tool, not a split product"
 tools/check-staleness.py,tools/check-staleness.py,unmoved,
-,tools/merge-bom.py,created,created after the map was written (108c633)
+,tools/merge-bom.py,created,created after the map was written (108c633): the generator that made hardware/bom.csv a generated file
 tools/merge-manifests.py,tools/merge-manifests.py,unmoved,
 ,tools/rewrite-paths.py,created,"created by A0 (8bb7366), the commit that wrote this map - so it has no old-side path here"
 tools/verify-datasheets.py,tools/verify-datasheets.py,unmoved,

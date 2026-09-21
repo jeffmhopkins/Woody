@@ -151,10 +151,12 @@ netlist and two clones differ.
 > instrument's mechanical and controller rows plus the board blank itself,
 > which no netlist wants.
 >
-> `D-CLAMP-BREATH` is the shape of the problem: it **is drawn**, on
-> `hardware/module/breath-receive-stage/breath-receive-stage.md`, and its row
-> still sits in `unplaced.csv`. Drawn and placed are not the same test, and
-> only the BOM fragment answers the second one.
+> `D-CLAMP-BREATH` is the shape of the problem. It **is drawn** — twice, in the
+> ASCII figures on `hardware/module/breath-receive-stage/breath-receive-stage.md`,
+> as *"BAV99 to ±12 V, both legs"* — and its row is still in `unplaced.csv`,
+> because **the drawing never writes the refdes**. Nothing joins the picture to
+> the BOM row, so nothing can notice. Drawn, named and placed are three
+> different tests, and only the circuit's `bom.csv` fragment answers the third.
 >
 > *This warning used to say ~50 rows / 105 units, and that the emitted module
 > would have no DAC8568, no CV jacks, no etherCON and no AVDD rail. Sixteen
@@ -216,10 +218,13 @@ circuit.generate_pcb(...)    # kinet2pcb: footprints placed, nets assigned,
                              # one circuit directory, not one schematic page
 ```
 
-**That grouping is finer than it used to be.** Twelve groups on the module
-instead of six, and the two that a router wants adjacent — `dac8568` and
-`digital-and-supervision` — are now separate groups because they are separate
-directories. Expect to move whole groups by hand once, before routing.
+**That grouping is finer than it used to be** — twelve groups on the module
+instead of six — and finer is not automatically better here. `dac8568` and
+`digital-and-supervision` were one page and are now two directories, so
+hierplace will place them as two groups although the `74AHCT125` exists only
+to drive the DAC's `SCLK`/`MOSI`/`CS` `[repo] spi-link.md`. Expect to drag
+whole groups together by hand once, before routing, and treat the directory
+split as an editorial boundary rather than a placement one.
 
 Then `build_board.py` adds what `kinet2pcb` does not:
 

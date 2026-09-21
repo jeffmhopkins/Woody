@@ -33,11 +33,8 @@ are no longer on this page: they moved to
 with the instrument-side half they depend on — see the pointer below the `REF`
 section. The table below is unchanged and still names this circuit's boundary.)*
 
-`Dir` is this circuit's side of the net — `in`, `out`, `in/out`, `ref` (a
-return or reference) or `—` (no connection here, the row is context). `Peer`
-is a bare `board/circuit` id when the other end is a circuit in this tree, a
-reference designator or part name when it is not, and `—` when there is
-nothing on the other end.
+The `Dir` and `Peer` columns are defined once in
+[`hardware/README.md`](../../README.md#the-interfaces-table).
 
 | Node / part | Dir | Peer | Figure | Note |
 |---|---|---|---|---|

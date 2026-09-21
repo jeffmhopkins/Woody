@@ -43,11 +43,8 @@ transcription reads the Node cell and an `End` column only exists here:
 so they are not one net either. The drawings still spell all of these `AGND`,
 `AGND-local`, `AGND(module)` and `BREATH`; each row says which.
 
-`Dir` is this circuit's side of the net — `in`, `out`, `in/out`, `ref` (a
-return or reference) or `—` (no connection here, the row is context). `Peer`
-is a bare `board/circuit` id when the other end is a circuit in this tree, a
-reference designator or part name when it is not, and `—` when there is
-nothing on the other end.
+The `Dir` and `Peer` columns are defined once in
+[`hardware/README.md`](../../README.md#the-interfaces-table).
 
 | Node / part | End | Dir | Peer | Figure | Note |
 |---|---|---|---|---|---|
