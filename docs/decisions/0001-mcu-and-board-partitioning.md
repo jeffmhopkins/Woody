@@ -118,8 +118,20 @@ elsewhere make a single corrupted read worse than it looks:
 - **`SH/LD` is asynchronous and level-sensitive.** Any glitch below V_IL during
   the 32-clock shift re-loads all four registers and corrupts the whole word.
 
-Five fixes, in descending order of value. The first four are wiring and cost
-nothing but planning; they cannot be retrofitted into a bonded body.
+**Before any of that: the inputs need pull-ups, and there were none.** A 74x165's
+parallel inputs have no internal pull-up, so every key input floated when its
+switch was open — in a side channel shared with WS2815 power and 800 kHz data.
+A 12 V LED edge at ~120 V/µs through ~15 pF of loom coupling injects a full
+false level, straight into an asymmetric debounce that fires on the *first*
+closed sample. Three reviewers found this independently and it is unretrofittable.
+
+**Per switch position: 10 kΩ to 3V3, 100 Ω in series, 10 nF to ground**, on the
+cluster board. Press stays instant at ~1 µs; release gains a free ~93 µs
+hardware filter; LED coupling drops about 54 dB. Twenty-one sets, so the three
+reserved spare-switch bits are covered too. (`R-KEY-PU`, `R-KEY-SER`, `C-KEY`.)
+
+Five further fixes, in descending order of value. The first four are wiring and
+cost nothing but planning; they cannot be retrofitted into a bonded body.
 
 1. **A ground return per signal.** The highest-value item on this list. Four
    signals down a 14-inch body sharing one return is a loop antenna next to an
