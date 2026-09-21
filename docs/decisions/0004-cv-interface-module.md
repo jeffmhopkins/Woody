@@ -32,12 +32,20 @@ it.
 
 Digital down, analog stays in the module:
 
-```
-+12V, GND, GND      power (3.3V derived locally in the instrument, small buck)
-SCLK, MOSI, CS      SPI to the DAC, ~2 MHz
-MISO                unused today — module ID and presence detect
-spare               reserved
-```
+> ~~```~~
+> ~~+12V, GND, GND      power (3.3V derived locally in the instrument, small buck)~~
+> ~~SCLK, MOSI, CS      SPI to the DAC, ~2 MHz~~
+> ~~MISO                unused today — module ID and presence detect~~
+> ~~spare               reserved~~
+> ~~```~~
+>
+> **Superseded 2026-09-21 by the Revised conductor budget below**, which is the
+> authoritative 8-of-8 mapping and the one E11 and E12 build to. Three things
+> changed: `MISO` is deleted, the second `GND` and the `spare` are gone, and
+> the three grounds are named and distinct — `PWR_GND`, `DIG_GND` and `AGND`,
+> which is not an aesthetic distinction (`AGND` carries no power current). The
+> block is kept struck through rather than removed because the rest of this
+> section argues from it.
 
 No −12V goes up the cable; nothing in the instrument is bipolar any more.
 
@@ -66,12 +74,17 @@ drop the clock: 0.6 MHz still does not close.)
 
 **This number has a deadline.** E11 validates the real cable at the real rate
 and it is a gate before the body bonds — there is no second chance to test 2 m
-of Cat5 at a speed the instrument turns out to need. `R-SPI-SER` x3 at 100 Ω (superseding a single `R-MOSI-SER` at 220 Ω) with
-~200 pF of cable is a **3.6 MHz** corner — 7.9 MHz is the 100 Ω case this same
-sentence offers as the fix, which is the wrong way round. 2 MHz still has
-margin, but less than claimed, and transmission-line analysis puts the right
-value nearer 68 Ω, which is closer to a real source match
-on Cat5's ~100 Ω anyway.
+of Cat5 at a speed the instrument turns out to need. > **The RC-corner arithmetic that stood here is refuted, 2026-09-21.** It read
+> "220 Ω with ~200 pF of cable is a 3.6 MHz corner". Two metres of Cat5 is a
+> **100 Ω transmission line**, not a lumped capacitor: the round trip is ~20 ns
+> against 2–5 ns edges, so this is a reflection problem and the RC corner is
+> the wrong model. Three reviewers agreed (`carrier.md`).
+
+The settled part is **`R-SPI-SER` ×3 at 100 Ω** — one each on `SCLK`, `MOSI`
+and `CS` at the driving end, a source match into the cable's own impedance.
+220 Ω drives the far end to **1.83–1.86 V** against the 74AHCT125's 2.0 V
+`V_IH`, dwelling ~20 ns per edge in the forbidden band, so it is not merely
+conservative but wrong.
 
 Plain single-ended SPI at a couple of MHz over twisted pair is still
 unremarkable. **RS-485 returns to contingency status**, not a likely
@@ -80,11 +93,17 @@ requirement.
 ### Revised conductor budget
 
 ```
-+12V      / PWR_GND     power, and the presence signal
-SCLK      / DIG_GND     SPI to the DAC, ~1 MHz
++12V      / PWR_GND     power. NOT presence - see below
+SCLK      / DIG_GND     SPI to the DAC, 2 MHz (was ~1 MHz here)
 MOSI      / CS
 BREATH    / AGND        analog, band-limited ~500 Hz, sense return
 ```
+
+> **This block said `power, and the presence signal` until 2026-09-21.** There
+> is no presence signal. Both presence-detect schemes are deleted further down
+> this ADR and `OE` is tied permanently enabled, so nothing at the module end
+> watches the far end of the cable. `+12 V` on the umbilical is power and
+> nothing else — a conductor is not budgeted for a deleted feature.
 
 Eight of eight, paired to suit Cat5's four twists. **`AGND` carries no power
 current** — it is a sense reference only, which is the whole reason the analog
@@ -300,11 +319,20 @@ as the module's analog rail, so it modulates that diode's forward voltage by
 ~80 mV. **This ADR used to call that "about 20 cents of breath-correlated pitch
 bend"; it is 0.00018 cents** (`power-entry.md`) — pitch references the DAC's
 *internal* reference, not this rail, so the path is 75 mV -> LM317 line reg ->
-39 uV on AVDD -> OPA2197 PSRR. Keep both diodes for fault and HF isolation. The
-effect that IS breath-correlated and worth 7-18 cents is the shared ground path,
-needing no ground
-path at all and visible by inspection of the diagram itself. The second diode
-costs about twenty cents and is the whole fix. (`D-REVPOL` qty 3, ADR 0006.)
+39 uV on AVDD -> OPA2197 PSRR.
+
+**Keep both diodes anyway, on the reasons that hold**: fault isolation between
+the exported umbilical rail and the module's own analog rail, and HF isolation
+between the two branches (`power-entry.md`). The split is visible by inspection
+of the diagram above and needs no ground path to matter, which is why four
+reviewers found it independently. A diode costs about twenty cents.
+(`D-REVPOL` qty 3, ADR 0006.)
+
+**The effect that genuinely *is* breath-correlated is the shared ground path**,
+at 5.7–7.2 cents for the module's internal ground and ~4.8 cents for the rack
+bus — two and three orders of magnitude above the diode term, and still open
+(`power-entry.md`). Ranking the diode above them, as the old figure did,
+inverted the priority order for the grounding work.
 
 Branching also means the buck's pulsed draw is absorbed locally instead of
 modulating the rail the pitch scaling stage is referenced to
@@ -348,12 +376,22 @@ of its life in.
 Floating CMOS inputs oscillate and draw crowbar current — inside the precision
 analog box — and a stray edge on CS latches a garbage word into the pitch DAC.
 
-**So pull them, and gate the buffer:**
-
-- **CS pulled to +5 V; SCLK and MOSI pulled to ground**, at the module end.
-- **Gate the 74AHCT125's output enable from a real presence detect**, so
-  "instrument absent" is a state the hardware knows about rather than one it
-  stumbles into.
+> ~~**So pull them, and gate the buffer:**~~
+>
+> - ~~**CS pulled to +5 V; SCLK and MOSI pulled to ground**, at the module end.~~
+> - ~~**Gate the 74AHCT125's output enable from a real presence detect**, so~~
+>   ~~"instrument absent" is a state the hardware knows about rather than one it~~
+>   ~~stumbles into.~~
+>
+> **Superseded 2026-09-21, both bullets.** The gating is deleted — see "There is
+> no presence detect" fifteen lines below — and `OE` is tied to ground,
+> permanently enabled.
+>
+> **The pulls survive, but not as written.** `bom.csv` specifies `R-SPI-PULL`
+> ×**6**, three at each end, and the cable-side `CS` pulls to **3V3, not +5 V**:
+> pulled to 5 V it drives 430 µA continuously through the unpowered ESP32's
+> input clamp. The floating-input problem this section identifies is real and
+> the pulls are the whole answer to it.
 
 **It needs a bench override.** ADR 0004 and the ROADMAP both promise the
 module can be brought up standalone from "any dev board with a test pattern and
@@ -363,11 +401,19 @@ and the module produces no CV at all. A jumper or a solder link that forces
 `OE` low is two pads. Without it the gating locks out every module milestone
 before the instrument exists.
 
-That OE gating is the reason the power switch had to move to the module
-(ADR 0005). With a switch at the instrument end, "+12 V present on the
-umbilical" would no longer mean "instrument alive", and the gating would fail in
-exactly the state it exists for. The relocation was load-switch-shaped but this
-is what made it necessary.
+> ~~That OE gating is the reason the power switch had to move to the module~~
+> ~~(ADR 0005). With a switch at the instrument end, "+12 V present on the~~
+> ~~umbilical" would no longer mean "instrument alive", and the gating would fail~~
+> ~~in exactly the state it exists for. The relocation was load-switch-shaped but~~
+> ~~this is what made it necessary.~~
+>
+> **Withdrawn 2026-09-21.** With the gating deleted, this paragraph claims to
+> identify what "made it necessary" and points at nothing. **The relocation is
+> unaffected**, because ADR 0005 gives two independent and sufficient reasons
+> that never involved `OE`: the Recom R-78E5.0 **has no enable pin**, so a
+> switch at the instrument end has nothing to switch; and the WS2815 strips run
+> on raw +12 V *upstream* of the buck, so killing the buck would leave an
+> instrument still lit and still drawing current with its logic dead.
 
 ### There is no presence detect, and the buffer runs unconditionally
 
@@ -481,10 +527,18 @@ cannot have.
 umbilical mid-note and watch the jack. If it parks quietly, this paragraph is
 right. If it does not, we find out before anything is bonded.
 
-**220 Ω in series on MOSI at the driving end.** Source termination on the one
-line that runs the full umbilical carrying data. It also makes SYNC-signal
-regeneration at the module unnecessary, which was the alternative under
-consideration.
+**`R-SPI-SER` ×3, 100 Ω, at the driving end** — on `SCLK`, `MOSI` and `CS`
+alike. Source termination into the cable's own ~100 Ω. It also makes
+SYNC-signal regeneration at the module unnecessary, which was the alternative
+under consideration.
+
+> **This read "220 Ω in series on MOSI" until 2026-09-21, and was wrong three
+> ways.** One resistor, not three — which left `SCLK`, the fastest edge on the
+> cable, unterminated. 220 Ω, not 100 Ω — which dwells ~20 ns per edge below
+> the 74AHCT125's `V_IH`. And it was derived from an RC-corner model that does
+> not apply to a 2 m transmission line. The refdes matters too: `carrier.md`
+> previously drew `R-SCLK-SER` / `R-MOSI-SER` / `R-CS-SER`, none of which were
+> ever in `bom.csv`. There is one part, `R-SPI-SER`, qty 3.
 
 Sources: Doepfer's A-100 technical documentation for the bus and supply
 conventions; ModWiggler's module-power-entry threads for the community consensus

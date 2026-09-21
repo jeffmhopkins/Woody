@@ -192,10 +192,19 @@ survivable**, and it is inside the bonded body. `bom.csv` makes exactly this
 argument, in full, for the module-side `R-OUT-PROT` — and it was never carried
 across to the instrument-side twin.
 
-Two consequences nobody had written down: if `R1` opens, the presence detect
-de-asserts and takes the **whole SPI link** with it, so pitch and the mods die
-with breath; and during the fault the jack clips high and *holds* while the
-detect still says "present".
+**And the consequence of an open `R1` is that nothing happens.** Breath dies;
+pitch, the mods and the SPI link are untouched, and **no part of the system
+reports it**. That is a change of kind, not of degree: this paragraph used to
+say an open `R1` de-asserted the presence detect and took the whole SPI link
+with it, which was true while the LM311 existed. The comparator is deleted and
+`OE` is tied enabled (ADR 0004), so nothing at the module end watches the far
+end of the cable any more. An open `R1` is now **silent** rather than
+catastrophic — which ADR 0004 identifies as exactly the loss it accepted, and
+which is worse for diagnosis even though it is better for blast radius.
+
+The `R1`/`R1b` argument does not depend on that. It stands on the two grounds
+above: 139 mW in an 0805 in the fault the design calls survivable, and the
+common-mode term below.
 
 **Symmetry.** `R1` sits in the `BREATH` leg with nothing opposite it in the
 `AGND` leg, and against the 1 MΩ bias pair that asymmetry is a common-mode
@@ -280,16 +289,28 @@ does not break out, and nxp.com was unreachable when this was written.
 separately on purpose, so a flat bar on the screen is no longer evidence about
 the output.
 
-## What the jack does when the watchdog fires — settled
+## What the jack does on a `CLR` — settled
 
 **Nothing, and that is correct.** `CLR` reaches the DAC channels; breath touches
-none of them, and now that `REF` is grounded it touches the breath stage in no
-way at all — where previously `CLR` would have yanked the zero out from under
-it. An analog path cannot latch at a level the player is not producing: it
-follows the sensor, and the sensor follows the room. Reasoning in full in
-ADR 0004, "The watchdog's scope is the DAC channels".
+none of them. `REF` is driven by `TRIM-BREATH-ZERO` through a buffer off the
+LM317 rail — not by a DAC channel — so there is no path by which a `CLR` can
+yank the zero out from under the stage. An analog path cannot latch at a level
+the player is not producing: it follows the sensor, and the sensor follows the
+room.
 
-E10 verifies it by pulling the umbilical mid-note with the mouthpiece at rest.
+> **Two things in this section were stale until 2026-09-21.** It was headed
+> "when the watchdog fires", and the 74HC123 frame watchdog is deleted
+> (`digital-and-supervision.md`) — the surviving sources of a `CLR` are the
+> DAC's own power-on reset and the hand-asserted `LK-CLR` pad. And it said
+> "now that `REF` is grounded", which is the option this page **declines** forty
+> lines above, by name: grounding `REF` makes the panel knobs interact. The
+> conclusion is unchanged under either correction, because it rests on breath
+> never passing through the DAC.
+
+**E10 verifies it** by pulling the umbilical mid-note with the mouthpiece at
+rest — and note that the same pull leaves pitch and the four mod jacks holding
+their last value indefinitely, which is the accepted cost of deleting the
+watchdog (`ROADMAP.md`, E10).
 
 ## Still open
 

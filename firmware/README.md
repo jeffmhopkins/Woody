@@ -50,11 +50,22 @@ The mod channels are `Vout = 4·Vdac − 3·V_ref`, with `V_ref` the shared
 **3.3333 V** from DAC channel 7 — **refreshed every pass, like the other five** (ADR 0006, corrected 2026-09-21). *(The
 value changed with the two-resistor redraw in `mod-channels.md`; writing the
 old 2.5 V into channel 7 against the current 10 k/30 k network gives a
-−7.5…+12.5 V window — wrong span, and it clips positive.)* When the module
-watchdog asserts `CLR`, every DAC channel including channel 7 goes to zero
-scale. Firmware then rewrites the five signal channels, because those are the
-ones it thinks of as signals, and `Voffset` stays at 0. Every mod jack pins at
-`4 × Vdac` ≈ +11.45 V and stays there.
+−7.5…+12.5 V window — wrong span, and it clips positive.)* When `CLR` is
+asserted, every DAC channel including channel 7 goes to zero scale. Firmware
+then rewrites the five signal channels, because those are the ones it thinks of
+as signals, and `Voffset` stays at 0. Every mod jack pins at `4 × Vdac`
+≈ +11.45 V and stays there.
+
+**`CLR` is asserted by two things, and neither of them is optional.** The
+DAC's own **power-on reset**, which fires on every rack power-up — so this is
+not a fault case, it is the boot path. And the **`LK-CLR` solder pad**
+(`bom.csv`), which asserts `CLR` by hand and exists precisely so that E7–E10
+can drive the module into this state deliberately. *(This paragraph said "when
+the module watchdog asserts `CLR`" until 2026-09-21. The 74HC123 frame watchdog
+is deleted — `digital-and-supervision.md` — and the rule below is the most
+load-bearing firmware constraint in the repo, so its stated cause had to be one
+that still exists. A reader who checks the old premise, finds the watchdog
+gone, and relaxes the rule reintroduces +11.45 V on four jacks.)*
 
 With no `MISO` this is undetectable, and it survives until the next power
 cycle. The same shape of bug is latent in every other register the DAC holds

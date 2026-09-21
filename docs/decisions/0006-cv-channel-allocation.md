@@ -89,8 +89,11 @@ are the de-facto Eurorack conventions; the extra span is headroom, not a default
 > at the bottom of the feedback divider — not the four-resistor difference amp
 > this ADR's prose implies. `gain = 1 + k`, `intercept = k·V_ref`, and the free
 > parameter is `V_ref`, not the ratio. **The mod channels can take the same
-> form** at `k = 3` with the offset channel writing 3.3333 V; whether they do is
-> open (`mod-channels.md`).
+> form** at `k = 3` with the offset channel writing 3.3333 V. **They do — it is
+> adopted and drawn** (`mod-channels.md`, "Adopted, and it is drawn above";
+> `R-MODGAIN` is eight 10k/30k discretes in `bom.csv`, not sixteen). This
+> sentence read "whether they do is open" until 2026-09-21, after the question
+> had been settled.
 >
 > *(An earlier version of this note called `A = 1 + B` a boundary that pitch
 > luckily landed on. It is the topology's defining identity, true for every
@@ -99,12 +102,20 @@ are the de-facto Eurorack conventions; the extra span is headroom, not a default
 > like they needed four resistors, which they do not.)*
 
 ```
-Vout = 4 × (Vdac − 2.5 V)
+Vout = 4 × Vdac − 3 × V_ref          V_ref = 3.3333 V, from DAC channel 7
 
   Vdac 0.00 V  →  −10 V
   Vdac 2.50 V  →    0 V
   Vdac 5.00 V  →  +10 V
 ```
+
+> **This block read `Vout = 4 × (Vdac − 2.5 V)` until 2026-09-21.** The three
+> endpoints are unchanged — that is why it survived so long — but the mechanism
+> is not. `4 × (Vdac − V_off)` is the four-resistor difference amp, which
+> `mod-channels.md` replaced with the two-resistor non-inverting form at
+> `k = 3`. Against the built 10k/30k network the offset channel must carry
+> **3.3333 V**; firmware that writes the old 2.5 V there gets a
+> **−7.5 … +12.5 V window and clips positive** (`firmware/README.md`).
 
 Three things make this cheap rather than awkward:
 
@@ -113,8 +124,10 @@ Three things make this cheap rather than awkward:
   1 % discretes in a two-resistor non-inverting form at **k = 3**, referenced to
   **3.3333 V**. `pitch-stage.md` also shows the LT5400 route is arithmetically
   impossible here — pitch already uses two of its four sections.
-- **The 2.5 V reference point comes from a buffered DAC channel**, not directly
-  from the internal reference. Both routes track the same reference — the gain
+- **The 3.3333 V reference point comes from a buffered DAC channel**, not
+  directly from the internal reference. (It was 2.5 V while the mod channels
+  were a four-resistor difference amp; the two-resistor form needs `3 × V_ref`
+  to equal the same 10 V of offset.) Both routes track the same reference — the gain
   is a resistor ratio and does not involve the reference at all — so the drift
   argument is a wash, and the DAC channel wins on the power-on state below. One
   buffered channel serves all four mod channels. (This is now the *only*
@@ -130,21 +143,30 @@ Resolution goes from 153 µV/LSB on a 10 V span to **305 µV/LSB** on 20 V. That
 
 ### Resolved: what the outputs do at power-on
 
-This looked like a conflict. With a fixed 2.5 V offset, `Vout = 4 × (Vdac − 2.5)`
-parks the mod outputs at **−10 V** on a zero-scale reset and at **0 V** on a
-midscale reset — and the DAC8568's reset state is set by its grade, one chip
-shared with pitch, whose preferred reset is the opposite one. A and C reset to
-zero scale; B and D reset to midscale.
+This looked like a conflict. With a fixed offset from a fixed reference, the
+mod outputs park at **−10 V** on a zero-scale reset and at **0 V** on a midscale
+reset — and the DAC8568's reset state is set by its grade, one chip shared with
+pitch, whose preferred reset is the opposite one. A and C reset to zero scale;
+B and D reset to midscale.
 
-**Taking the offset from a DAC channel dissolves it.** On a zero-scale reset
-*both* terms are zero:
+**Taking the offset from a DAC channel dissolves it**, because the offset term
+then resets with everything else. On a zero-scale reset both terms are zero:
 
 ```
-Vout = 4 × (Vdac − Voffset) = 4 × (0 − 0) = 0 V
+Vout = 4 × Vdac − 3 × V_ref = 4 × 0 − 3 × 0 = 0 V
 ```
 
 So specify a **C grade** part — zero-scale reset — and the power-on state is
 the best available on every channel at once:
+
+> **This safety is now topology-dependent, and it was not before.** The
+> four-resistor difference form gave `4X − 4X = 0` for *any* uniform reset
+> state X, so the grade did not matter to it. The two-resistor form gives
+> `4X − 3X = X`. With the locked C grade X is 0 V and the result is identical;
+> a B or D part would put **+2.5 V on all four mod jacks** where the old
+> topology gave 0 V regardless (`mod-channels.md`). The C-grade lock therefore
+> now carries this as well as the reference-gain requirement below — it has
+> two independent reasons, and this is the newer one.
 
 **Not "A or C", which this line used to say.** The grade letter selects the
 **reference gain** as well as the reset state: A/B are gain 1 (2.500 V full
@@ -158,7 +180,26 @@ which no browser in this sandbox could reach.
 |---|---|---|
 | **Pitch** | Bottom of its range, below −2 V | Subsonic. A VCO there is inaudible |
 | **Mod 1–4** | **Exactly 0 V** | Both terms of the difference are zero |
-| **Breath** | 0 V | The receiver's differential pulldown holds it there (ADR 0003) |
+| **Breath** | **Wherever the panel OFFSET knob was left, anywhere in ±5 V** | **Not a defined state — see below.** Breath never passes through the DAC, so no reset reaches it |
+
+> **The breath row said "0 V — the receiver's differential pulldown holds it
+> there" until 2026-09-21, and both halves were wrong.** `R-PD-BREATH` is
+> deleted (ADR 0003 replaced it with the `R-BIAS-INAMP` common-mode return,
+> because a purely differential shunt gives the in-amp's inputs no DC path to
+> ground at all). And the replacement does not produce 0 V at the jack: the two
+> 1 MΩ bias resistors hold the in-amp's *inputs* at module `AGND`, so with the
+> instrument absent the in-amp rests at `V_REF` ≈ +0.437 V — the trimmed null
+> for a sensor pedestal that is not there — and the gain-and-offset stage then
+> puts the jack at the **OFFSET knob's position less 0.2 to 1.7 V**, depending
+> on where GAIN is set (`breath-receive-stage.md`,
+> `breath-output-stage.md`).
+>
+> **Five of six outputs have a defined power-on state; breath does not, and
+> that is accepted.** The alternative is a defeat switch or a relay on the jack,
+> which is a part and a failure mode for a condition — rack powered, instrument
+> absent — in which nothing is being played. What it costs is that a patch left
+> connected can wake with up to 5 V of standing breath CV. E10 is where that
+> gets observed rather than discovered (`ROADMAP.md`).
 
 **Specify the full orderable part number in the BOM**, not "DAC8568". The grade
 letter is the whole decision and it is invisible in the generic name.
@@ -562,11 +603,27 @@ Two more mechanisms land on the same jack, and they add to the one above:
 | Route | Magnitude |
 |---|---|
 | Offset reference rail + WS2815 ripple (above) | ~22 cents p-p |
-| **The module's analog rail and the umbilical feed share one 1N5817**, so instrument current modulates its V_f by ~80 mV | **~20 cents** |
+| ~~**The module's analog rail and the umbilical feed share one 1N5817**, so instrument current modulates its V_f by ~80 mV~~ | ~~**~20 cents**~~ **→ 0.00018 cents, refuted** |
 | The module's internal ground | 5.7–7.2 cents |
 | The rack's shared bus ground | ~4.8 cents |
 
-Every one of these is larger than every term in this ADR's precision budget,
+> **The 1N5817 row is refuted and struck through, 2026-09-21.** The 80 mV of
+> `V_f` modulation is real and independently confirmed
+> (`power-entry.md` computes 75 mV). The **20 cents is not**: it implies ~21 %
+> pitch sensitivity to the +12 V rail, and pitch full scale is set by the DAC's
+> *internal* reference off the LM317, not by +12 V. The real path is
+> 75 mV → LM317 line regulation (0.52 mV/V) → 39 µV on `AVDD` → OPA2197 PSRR
+> (114 dB) → **0.15 µV ≈ 0.00018 cents** — five orders of magnitude below the
+> smallest other term in this table. The figure is a survival from the
+> rail-divider offset topology this ADR itself deleted.
+>
+> **`D-REVPOL` still goes to three, on the reasons that hold**: fault isolation
+> between the exported umbilical rail and the module's own analog rail, so a
+> short in the instrument cannot pull the analog supply down with it, and HF
+> isolation between the two branches (`power-entry.md`). The part was never in
+> doubt; only this justification for it was.
+
+The remaining rows are larger than every term in this ADR's precision budget,
 and they are the only *dynamic* ones. Two fixes, both free:
 
 - **Separate the Schottkys.** The shared diode is visible by inspection of
@@ -611,11 +668,33 @@ capacitor to be stable. All four surveyed DAC-driven designs do both, with a
 single 18–22 pF part. **This ADR declined that as "real stability work" on the
 strength of a conflict that does not exist.**
 
-**Adopted.** Pitch now closes its DC loop at the jack, with `C-FB-PITCH` (1 nF
-across the feedback resistor) taking the loop back to the op-amp output above
-~16 kHz — which is also the reconstruction pole, so it is one part doing both
-jobs. `C-FILT-PITCH` is deleted: a capacitor to ground at the jack would now sit
-inside the DC loop at exactly the handover.
+**Adopted.** Pitch now closes its DC loop at the jack, with `C-FB-PITCH`
+(**2.2 nF, from the op-amp OUTPUT to the (−) input**) taking the loop back to
+the op-amp output above the handover. It is a compensation part, not a filter.
+`C-AA-PITCH` (10 nF against `R-OPAMP-IN`, ahead of the op-amp and outside every
+loop) is the reconstruction filter, and `C-FILT-PITCH` (10 nF) stays at the
+jack as the low-impedance shunt at the connector.
+
+> **This paragraph carried three errors until 2026-09-21, and
+> `pitch-stage.md` wins over all three.**
+>
+> 1. **"1 nF across the feedback resistor"** — wrong net *and* wrong value. With
+>    the DC tap at the jack, `R2` spans jack-to-(−), so a cap *across `R2`*
+>    connects those same two nodes and leaves `R-OUT-PROT` inside the loop at
+>    every frequency: **18° of phase margin with 2 m of cable, under 10° with
+>    four destinations**. The part goes from the op-amp **output** to the (−)
+>    input, and it is **2.2 nF** now that the jack cap is back.
+> 2. **"which is also the reconstruction pole"** — it cannot be. A capacitor in
+>    the feedback of a *non-inverting* stage gives
+>    `G(s) = (2 + sRC)/(1 + sRC)`: a pole with a zero an octave above it,
+>    flattening at unity. **6.02 dB of attenuation, maximum, for any value.**
+>    It is a shelf, not a pole. Two independent reviews found this separately.
+> 3. **"`C-FILT-PITCH` is deleted"** — **the deletion was reversed and this ADR
+>    was not updated.** Two loop analyses put 10 nF at the jack and found phase
+>    margin *unchanged*, because `C-FB-PITCH` ties the (−) input to the op-amp
+>    output so `β(∞) = 1` and `R-OUT-PROT` isolates the jack above the handover.
+>    Deleting it cost 30 dB at 1 MHz and left the connector with no shunt at
+>    all.
 
 Consequences, all good:
 

@@ -176,7 +176,7 @@ So the loop is split, which is the standard arrangement:
 | Path | Frequency | What it does |
 |---|---|---|
 | `R2` + `TRIM-GAIN` from the **jack** | DC to ~16 kHz | Sets the transfer function against the load, whatever it is |
-| `C-FB-PITCH` 1 nF from the **op-amp output** | above ~16 kHz | Takes over before `R-OUT-PROT` and the cable can put phase in the loop |
+| `C-FB-PITCH` **2.2 nF** from the **op-amp output** | above ~12 kHz | Takes over before `R-OUT-PROT` and the cable can put phase in the loop. This row said **1 nF / ~16 kHz** until 2026-09-21; the value went to 2.2 nF when `C-FILT-PITCH` was restored below, and this row did not follow |
 
 **`C-FB-PITCH` is not a filter, and an earlier version of this page said it
 was.** A capacitor across the feedback resistor of a **non-inverting** stage

@@ -327,10 +327,30 @@ the instrument without reaching the rack. For a tethered instrument whose
 outputs go nowhere but that rack, there is nowhere else to be standing (see the
 design scope in the README).
 
-**Pull down the module's breath receive input**, so that an instrument which is
-switched off — or unplugged — presents 0 V rather than a floating buffer output.
-One resistor, and it means powering down the instrument silences the patch
-instead of leaving a stuck level (ADR 0003).
+> ~~**Pull down the module's breath receive input**, so that an instrument which
+> is switched off — or unplugged — presents 0 V rather than a floating buffer
+> output. One resistor, and it means powering down the instrument silences the
+> patch instead of leaving a stuck level (ADR 0003).~~
+>
+> **Withdrawn 2026-09-21. Do not fit this resistor.** `R-PD-BREATH` was a
+> single 100 kΩ element *across* the in-amp's two inputs, and ADR 0003 deleted
+> it for two reasons: it attenuated the signal by 1–17 % depending on where the
+> gain sat, and a purely differential element gives the in-amp's inputs **no DC
+> path to ground at all**, so with the instrument unplugged input bias current
+> ramps both inputs until the amplifier saturates — a rail, not the 0 V this
+> paragraph promised.
+>
+> **What replaces it:** `R-BIAS-INAMP`, two 1 MΩ resistors from each input to
+> module `AGND` — a common-mode return, not a differential shunt
+> (`breath-receive-stage.md`). It gives the bias current its path and costs no
+> signal.
+>
+> **And it does not deliver 0 V at the jack either**, which is the part this
+> paragraph got wrong independently of the part choice. With the instrument
+> absent the in-amp rests at its trimmed `V_REF`, and the panel gain-and-offset
+> stage puts the jack at the OFFSET knob's position, anywhere in ±5 V. That is
+> now recorded as an accepted consequence in ADR 0006's power-on table rather
+> than promised away here.
 
 ### USB power for the bench, not as a feature
 

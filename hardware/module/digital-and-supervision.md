@@ -44,7 +44,11 @@ superseded umbilical pin map. See *What this redraw changed* below.
         │                  │            │          │
         │                  │      [LK-CLR pad]     │   solder pad to GND,
         │                  │            │          │   bring-up only
-        │                  └───────────GND─────────┘
+        │                  │           GND         │
+        │                  │                       │
+        │          AVDD ───┤ LDAC ◄── [R-LDAC]     │   PULL-UP. Active low.
+        │           5.21V  │          10k          │   TIED, not driven.
+        │                  └───────────────────────┘
         │
         └── analog star, single tie (ADR 0004)
 
@@ -185,12 +189,22 @@ leave it disarmed with a note standing, a software-defeasible clear path
 through the DAC's clear-code register, and a 99 ms timeout that would have
 fought every "write a code, read the meter" step of E7 through E10.
 
-### The obvious way to get the link coverage back, for no new parts
+### The obvious way to get the link coverage back — and what it actually costs
 
-`CLR` can be driven from the **presence comparator** instead of from a
-monostable. It already reports cable connected, far-end power, reference alive,
-sensor alive and both analog conductors intact — which is precisely the set of
-failures the watchdog actually covered. Presence drops, outputs park.
+> **This section was headed "for no new parts" and written in the present tense
+> until 2026-09-21.** Both were wrong. The presence comparator is deleted on
+> this same page, so it reports nothing; restoring this coverage means
+> restoring **an LM311, its two decoupling caps, `R-PRESENCE` and a 74AHCT14** —
+> four parts, none of which has a BOM row today. The proposal may well be
+> right. It has to be costed as a restoration, and it has to answer the three
+> faults that deleted the comparator in the first place (ADR 0004), of which
+> the threshold problem below is one.
+
+`CLR` **could** be driven from a **restored presence comparator** instead of
+from a monostable. Such a comparator would report cable connected, far-end
+power, reference alive, sensor alive and both analog conductors intact — which
+is precisely the set of failures the watchdog actually covered. Presence drops,
+outputs park.
 
 **The complication is polarity.** `OE` is active low and wants the comparator
 *asserted* when the instrument is present; `CLR` is active low and wants the
@@ -205,33 +219,39 @@ question rather than separately.
 
 ## Still open
 
-- **The presence tap point**, above. It needs the one-line change described and
-  a corrected `R-PRESENCE` row.
-- **A power-on reset RC on the '123's own `CLR`**, so the power-up safe state is
-  guaranteed rather than probable.
-- **The retrigger question was posed against the wrong numbers.** Six frames
-  per pass means **~2400 retriggers per timeout at ~16 µs intervals**, not ~400
-  at 250 µs — and "empties 220 nF" is the wrong quantity, since only ~83 pC
-  accumulates between retriggers. The real gates are the '123's discharge
-  `R_on` and whether discharge follows the trigger pulse. A dedicated watchdog
-  IC may be the better answer.
-- **`LDAC` is not in this design anywhere**, which leaves a CMOS input floating
-  on the DAC and means six channels cannot update atomically. **Tie it.** The
-  consequence of not having it: every exit from `CLR` — hot-plug, watchdog
-  recovery, reboot, an OTA stall — throws intermediate values at the mod jacks
-  for 100–200 µs, and no write order avoids it.
-- **`SCLK` has no series resistor and `MOSI` does.** That is the wrong way
-  round: `SCLK` is the fastest edge on the cable. Series resistors now go on
-  all three lines at the driving end, which also closes a back-powering path
-  found separately in the power review.
-- **The threshold may sit inside the breath signal's own range.** The sensor is
-  a *differential* part with its reference port open to the cavity, so negative
-  differential pressure drives the output toward the detect threshold. The
-  sensor's own minimum bounds it, but the margin is thin and it would present
-  as `CLR` firing mid-phrase. **The clean answer may be to demote this
-  comparator to LED and health duty and gate `OE` from the link itself** — a
-  decision, not a component change.
+- **Whether to restore link supervision at all**, and at what cost. The section
+  above is the candidate; it is four parts, not zero. This is the one open
+  supervision question, and it subsumes the three that used to stand here.
 - **An ESP32-S3 NVS commit or OTA write disables the instruction cache** and can
-  stall non-IRAM code on both cores. A config save that overruns 99 ms would
-  assert `CLR` mid-note. Measure the real stall before tuning the RC, and put
-  the DAC service routine in IRAM.
+  stall non-IRAM code on both cores. With no watchdog there is no `CLR` to fire
+  mid-note, so the consequence is now a *stalled refresh* rather than a reset:
+  the jacks hold their last value for the duration of the stall, which is the
+  benign direction. Still worth measuring, and the DAC service routine still
+  belongs in IRAM.
+
+### Three bullets retired here, 2026-09-21
+
+All three designed a part that this page deletes 55 lines above. Left standing,
+an engineer working the open list would have sized an RC and a retrigger regime
+for a footprint that is not on the board.
+
+| Retired bullet | Why |
+|---|---|
+| A power-on reset RC on the '123's own `CLR` | There is no '123 |
+| The retrigger arithmetic (~2400 retriggers per timeout, the 220 nF / 83 pC question, "a dedicated watchdog IC may be better") | Same — and if supervision is ever restored, the section above is where that work starts, not here |
+| The presence tap point "needs a corrected `R-PRESENCE` row" | `R-PRESENCE` is in no BOM and never was. Nothing to correct |
+| The comparator threshold "may sit inside the breath signal's own range" | True, and it is one of the **three reasons the comparator was deleted** (ADR 0004), not an open item about tuning it |
+
+### Two bullets closed here, 2026-09-21
+
+- **`LDAC`** — closed. `R-LDAC`, 10 kΩ to `AVDD`, is drawn above and carries a
+  `bom.csv` row. Tied, not driven: a hardware `LDAC` was considered and
+  declined, so the six populated channels update as each word lands rather than
+  together. The cost is real and accepted — every exit from `CLR` throws
+  intermediate values at the mod jacks for 100–200 µs and no write order avoids
+  it. If E10 finds that audible it becomes a GPIO, and the pin is already
+  broken out.
+- **`SCLK` has no series resistor and `MOSI` does** — closed. It is
+  `R-SPI-SER` ×3, 100 Ω, one on each of `SCLK`, `MOSI` and `CS` at the driving
+  end (`carrier.md`, `bom.csv`, and ADR 0004 now agrees). That also closes the
+  back-powering path found separately in the power review.

@@ -153,8 +153,18 @@ because the two numbers look contradictory side by side and are not.
 This is the S4 fix, and it is worth stating where the circuit is, because the
 circuit is what makes it true.
 
-On a watchdog `CLR`, the C-grade DAC8568 (the grade is **locked** — it selects reference gain as well as reset state, ADR 0006) clears **every** channel to zero
-scale (ADR 0006). Channel 7 goes to 0 V with the rest, so:
+On a `CLR`, the C-grade DAC8568 (the grade is **locked** — it selects reference gain as well as reset state, ADR 0006) clears **every** channel to zero
+scale (ADR 0006).
+
+> **What asserts `CLR`, now that the watchdog is gone.** Two things, both of
+> which survive: the DAC's own **power-on reset**, which happens on every rack
+> power-up, and the **`LK-CLR` solder pad** that lets `CLR` be asserted by hand
+> during E7–E10 bring-up (`bom.csv`). This page and the one below used to say
+> "on a watchdog `CLR`", and the 74HC123 frame watchdog is deleted
+> (`digital-and-supervision.md`). Nothing about the argument changes — `CLR`
+> still happens, still clears every channel, and the offset channel still
+> clears with them — but the trigger had to be renamed or the next reader
+> checks the premise, finds no watchdog, and concludes the argument is dead. Channel 7 goes to 0 V with the rest, so:
 
 ```
 Vout = 4 × 0 − 3 × 0 = 0 V
@@ -218,10 +228,19 @@ It inverts, which is a firmware sign flip and costs nothing.
 
 **The one thing to be careful about, and it is the thing that matters here:**
 O&C and the PER|FORMER both take that reference from a *passive divider off
-`VREFOUT`*. On a watchdog `CLR` the channels go to zero and the divider does
-not, so `Vout = 5 × 2.0 = +10 V` — a hard rail on four jacks. The PER|FORMER
-avoids this by disabling `CLR` entirely; Woody cannot, because the watchdog is
-the whole answer to a processor two metres away.
+`VREFOUT`*. On a `CLR` the channels go to zero and the divider does not, so
+`Vout = 5 × 2.0 = +10 V` — a hard rail on four jacks. The PER|FORMER avoids
+this by disabling `CLR` entirely; **Woody cannot, because `CLR` is asserted by
+the DAC itself at every power-on and by `LK-CLR` at every bring-up.** A
+non-clearing offset reference is therefore unsafe here regardless of what
+supervises the link.
+
+> **That last clause said "because the watchdog is the whole answer to a
+> processor two metres away" until 2026-09-21** — a deleted part carrying a live
+> conclusion, and the conclusion happens to be the one that rules out the
+> single-inverting-amp topology four of four surveyed designs use. The
+> conclusion survives the correction intact; it now rests on the DAC's own
+> power-on reset, which no deletion can take away.
 
 Taking the reference from a **DAC channel** instead keeps the inverting
 topology *and* the safe clear, because `CLR` zeroes it too. That is the version
