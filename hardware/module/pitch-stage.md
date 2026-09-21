@@ -287,6 +287,17 @@ used 9 V, 7 V and 2.5 V for the same term.
 | **DAC internal reference** | **0.42 cents** | **The largest term, and untrimmable** |
 | LT5400 ratio tracking | 0.027 cents | |
 | `TRIM-GAIN` tempco | **0.068 cents** | 200 Ω cermet. Second *smallest*, not "the largest line here" — so it does **not** defeat the matched network, costing 0.04 cents |
+
+**The network stays, and the ranking is the reason it needed deciding.** Two
+0.1 % / 10 ppm discretes would give 0.38 cents — fifteen times worse than the
+LT5400 and yet *comparable to the DAC reference term above it*, which cannot be
+trimmed at all. So the network's advantage is real and currently masked.
+
+It is kept anyway, on a one-off: $8 permanently solves the one term in the
+chain that can be permanently solved, on a board built once. If the reference
+term is ever attacked — an external reference is the obvious way — the network
+has to be there already for that to be worth doing, and retrofitting it to a
+populated board is not a five-minute job. The option-code lookup is.
 | LT5400 ratio tracking | ~0.1 cents | The reason it is not two discrete 0.1 % parts, which would be ~1.2 cents |
 | DAC internal reference | ~0.5 cents | A gain term, per above |
 | OPA2197 offset drift | <0.1 cents | An offset term, but a tiny one |
@@ -298,14 +309,9 @@ the right order of priority: the static budget was never the problem.
 
 ## Still open
 
-- **Whether the LT5400 is worth it at all.** The trimmer does not defeat it —
-  but with the DAC reference dominating at 0.42 cents, two 0.1 % / 10 ppm
-  discretes give 0.38 cents, which is *comparable to a term you cannot trim*,
-  for about $0.30 against about $8. The network's advantage is real and it is
-  buried under a larger error. Worth a decision rather than an assumption.
-- **The LT5400 option suffix**, if it stays. A 1:1 quad is the requirement and
-  the orderable code must come off the option table, which this sandbox cannot
-  reach. The claim that two spare sections can build the mod channels' 1:3 is
+- **The LT5400 option suffix.** A 1:1 quad is the requirement and the orderable
+  code must come off the option table, which this sandbox could not reach. The
+  only genuinely open thing about this part. The claim that two spare sections can build the mod channels' 1:3 is
   **arithmetically impossible** — three sections against the fourth is all four.
 - **`TRIM-OFFSET` is not buildable as described.** `V_ref` nominal *is*
   `VREFOUT`, and a divider can only go below it, so the nominal sits at an end
