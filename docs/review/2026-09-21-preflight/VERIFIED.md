@@ -141,3 +141,100 @@ load. **It IS the in-loop topology, with an AC feedback path added.** The
 in-loop-versus-out-of-loop framing the dispute opened with is a false
 dichotomy; the real question is not *which side* but *whether the AC path
 exists*. Entry corrected.
+
+## A4 — both decisions verified at source before landing
+
+A4 decided two things that had been blocking schematic finalisation. Findings
+are claims, so the decisive citation for each was re-read by hand out of the
+banked PDF — not out of A4's report — before anything was edited.
+
+**1. `cref-out-node`. CONFIRMED.** Re-extracted from
+`datasheets/texas-instruments/REF5050.pdf` (SBOS410O, pp. 26 and 29):
+
+> *"Confirm that a output capacitor (CL) is connected from VOUT to GND. For
+> output stability, verify that the equivalent series resistance (ESR) value of
+> CL less than or equal to 1.5 Ω."* — §8.4.1
+>
+> Figure 8-6: *"CL = 1µF to 50µF for REF50xxI, REF50xxAI"*
+>
+> *"A resistor in series with the output capacitor is optional."* — §9.4.1.1
+>
+> *"Add a high-frequency, 1µF capacitor in parallel between the output and
+> ground…"* — §9.4.1.1
+
+The argument is forced rather than preferred, which is what makes it decidable
+on paper: a `C_L` on the REF5050's own `VOUT` exists in **every** valid
+topology of this circuit, so one of the qty-2 parts is spoken for and the other
+is the §8.4.1 supply bypass. Nothing is left over for the buffer's output.
+
+The last clause also confirms A4's §1.5 withdrawal of the "missing series
+1–1.5 Ω resistor" that `bom.csv:76` had asserted — TI calls it optional in so
+many words, and the 1–1.5 Ω window is the *noise* recommendation, not the
+stability bound.
+
+**2. `riso-ref-topology`. CONFIRMED, including the numbers.** Re-extracted from
+`datasheets/texas-instruments/OPA2197.pdf` (SBOS737C):
+
+> *"For the 10-µF ceramic capacitor shown in Figure 56, RISO, a 37.4-Ω
+> isolation resistor, provides separation of two feedback paths for optimal
+> stability. Feedback path number one is through RF and is directly at the
+> output, VOUT."* — §8.2.3 p.30
+>
+> `RF 1 MΩ · CL 10 µF · RISO 37.4 Ω · RFx 10 kΩ · CF 39 nF` — Figure 56
+>
+> *"…a loop gain phase margin of 89°. Any other load capacitances require
+> recalculation of the stability components: RF, RFx, CF, and RISO."*
+>
+> *"ZO Open-loop output impedance | f = 1 MHz, IO = 0 A, See Figure 26 | 375 |
+> Ω"* — EC table, **two occurrences** (p.8 and p.10)
+>
+> *"High Capacitive Load Drive Capability: 1 nF"* — p.1, and §7.3.5 p.22
+
+Every figure A4 built on is in the document as A4 quoted it, and TI's own
+warning that other load capacitances need recalculation is *why* A4 had to
+argue the transfer rather than assume it.
+
+**What was NOT independently verified, and should be said plainly:** A4's phase
+margins are its own behavioural `ngspice` model, not a bench and not TI's
+macromodel. The check that makes them usable is internal to the report — the
+same model run on Figure 56 *as printed* returns 87.4° against TI's published
+89°, and it independently reproduces two results earlier waves got by different
+means (the no-resistor hazard and the out-of-loop case). That is good enough to
+commit a topology and a BOM, and **not** good enough to skip the macromodel run
+before copper. Recorded as a precondition on the PCB pipeline's SPICE stage.
+
+**One thing A4 got right that I had got wrong, and it is the second time in
+this wave:** I filed TI's Figure 56 as a "fourth option" in the dispute. It is
+not an option — it is the in-loop topology with an AC path added. A4 reached
+the same conclusion independently and from the datasheet rather than from my
+note, which is the point of the cold rule.
+
+## A4-10 and A13-4 — the same escape, found twice, hours apart
+
+Both reviewers found that `sensor-full-scale`'s correction had not propagated,
+and that `check-staleness.py` scored **zero** hits against eleven live derived
+statements. A13 named the mechanism exactly: three `forbidden` patterns miss by
+one character each against a case-sensitive literal `find`.
+
+**Verified at source before propagating**, from
+`datasheets/other-semi/MPXV4006DP.pdf`:
+
+> `Voff 0.152 0.265 0.378 V` — Table, p.4. *"Offset (Voff) is defined as the
+> output voltage at the minimum rated pressure."*
+>
+> `VFSS — 4.6 — V`
+>
+> *"Vout = VS*[(0.1533*P) + 0.053]"* — transfer function, p.6
+
+Two things follow that neither reviewer stated and that changed what got
+edited. **The receive page's "spec band" was always correct** — 0.152–0.378 V
+is the datasheet's own min/max, and only its *typical* was wrong. And **the
+span is untouched**, so `inamp-full-scale`, the −9.94 V row and the in-amp gain
+all survive; the only in-amp number that moved did so for an unrelated reason
+(raw 2.18483 used where the effective 2.1611 belongs), which A6 found
+separately.
+
+Eleven statements fixed, twelve patterns added, and the rule that would have
+prevented it written into the entry: **when a figure moves, grep the corpus for
+the OLD value first and add a pattern per spelling found** — not from the
+document in front of you.
