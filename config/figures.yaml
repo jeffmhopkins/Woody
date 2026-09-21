@@ -224,6 +224,33 @@ figures:
     forbidden: []
     note: "power-entry.md states that ADR 0004 was corrected on this point. IT WAS NOT - line 627 still says the opposite. This is the named failure mode exactly: the fix landed where the editing was happening and not where the reader looks. It is SEMANTIC, so tools/check-staleness.py cannot see it, which is why it survived three review waves and is filed here instead."
 
+  - id: riso-ref-topology
+    quantity: Whether R-ISO-REF goes inside or outside the reference buffer's loop
+    value: "DISPUTED"
+    status: disputed
+    owner: hardware/controller/carrier.md
+    candidates:
+      - "INSIDE the loop, feedback taken at the sensor's VS pin - as drawn and as bom.csv specifies. SIMULATED PHASE MARGIN 8.4 deg, which is WORSE than fitting no resistor at all (8.8 deg)."
+      - "OUTSIDE the loop - simulated phase margin 75.2 deg, but bom.csv says it costs 2% of the ratiometric scale factor."
+      - "A series R-C snubber from VS to the analog star, already proposed on the page as the cheaper-in-DC-terms alternative. Not simulated."
+    decided_by: "A bench measurement at E1/E13, or a simulation run someone trusts. Raised 2026-09-21 by the SPICE reviewer, which ran the OPA2197 macromodel against the drawn circuit - the first time this loop was evaluated by anything other than algebra."
+    forbidden: []
+    note: |
+      THE DRAWN CIRCUIT IS STILL THE UNSTABLE ONE. bom.csv's R-ISO-REF row chooses
+      in-loop over out-of-loop because out-of-loop "would cost 2% of the ratiometric
+      scale factor". That trade was made against an assumption that in-loop WORKS.
+      Simulation says it does not: 8.8 deg with no resistor, 8.4 deg with it in-loop,
+      75.2 deg out-of-loop. The 8.4-vs-8.8 difference is inside the error bar; the
+      8-vs-75 difference is not.
+      Two caveats, both from the reviewer. A simulated phase margin is a screen with
+      roughly a +/-10 deg bar - TI's own macromodel runs optimistic against TI's own
+      tabulated figures for the same part and load (54.4 sim vs 45 tabulated). And
+      carrier.md's published 2.6 deg / 458 kHz were traced to the back-solved 75.8
+      ohm Ro that has since been superseded by the datasheet's 375 ohm; the real
+      figures are 8.8 deg and 215 kHz.
+      This is the first defect this project has found by simulation rather than by a
+      second person redoing the algebra. That was the argument for adding the stage.
+
   - id: loop-budget
     quantity: Real-time loop, one pass
     value: "196-241 us of 250 us"
