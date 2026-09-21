@@ -621,21 +621,25 @@ Two more mechanisms land on the same jack, and they add to the one above:
 | Route | Magnitude |
 |---|---|
 | Offset reference rail + WS2815 ripple (above) | ~22 cents p-p |
-| ~~**The module's analog rail and the umbilical feed share one 1N5817**, so instrument current modulates its V_f by ~80 mV~~ | ~~**~20 cents**~~ **→ 0.00018 cents, refuted** |
+| ~~**The module's analog rail and the umbilical feed share one 1N5817**, so instrument current modulates its V_f~~ | ~~**~20 cents**~~ **refuted — see `diode-split-rationale`** |
 | The module's internal ground | 5.7–7.2 cents |
 | The rack's shared bus ground | ~4.8 cents |
 
-> **The 1N5817 row is refuted and struck through, 2026-09-21.** The 80 mV of
-> `V_f` modulation is real and independently confirmed
-> (`power-entry.md` computes 75 mV). The **20 cents is not**: it implies ~21 %
-> pitch sensitivity to the +12 V rail, and pitch full scale is set by the DAC's
-> *internal* reference off the LM317, not by +12 V. The real path is
-> 75 mV → LM317 line regulation (0.52 mV/V) → 39 µV on `AVDD` → OPA2197 PSRR
-> (**110.5 dB worst case** `[SBOS737C p.8]`; this line carried an unsourced
-> 114 dB until 2026-09-21, and TI actually specifies ±1 µV/V typ / ±3 µV/V max)
-> → **0.22 µV ≈ 0.00027 cents** — five orders of magnitude below the
-> smallest other term in this table. The figure is a survival from the
-> rail-divider offset topology this ADR itself deleted.
+> **The 1N5817 row is refuted and struck through, 2026-09-21.** The `V_f`
+> modulation is real and independently confirmed. The **20 cents is not**: it
+> implies ~21 % pitch sensitivity to the +12 V rail, and pitch full scale is
+> set by the DAC's *internal* reference off the LM317, not by +12 V. The real
+> path runs through the LM317's line regulation and the OPA2197's guaranteed
+> worst-case PSRR, and lands **five orders of magnitude below the smallest
+> other term in this table**. Every number in that chain is the tracked figure
+> `diode-split-rationale`, owned by `power-entry.md`, and is deliberately not
+> restated here. The 20 cents was a survival from the rail-divider offset
+> topology this ADR itself deleted.
+>
+> *(This block restated the whole chain — "80 mV", "75 mV", "39 µV",
+> "0.00027 cents" — until 2026-09-21. The modulation was later re-read off the
+> banked 1N5817 curve as a different number, and none of the four terms here
+> followed. Four documents held four different values for one quantity.)*
 >
 > **`D-REVPOL` still goes to three, on the reasons that hold**: fault isolation
 > between the exported umbilical rail and the module's own analog rail, so a

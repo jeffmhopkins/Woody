@@ -37,7 +37,21 @@ figures:
     status: settled
     owner: docs/decisions/0003-breath-sensing-path.md
     derivation: "Vout = VS*[(0.1533*P) + 0.053], verbatim from the datasheet. At VS = 5.0 V and P = 6 kPa: 5*(0.9198 + 0.053) = 4.864 V. The PEDESTAL IS 0.265 V, not 0.200 V."
-    forbidden: ["4.7 V output", "0.2-4.7 V", "0.2 – 4.7 V", "0.2 V + 0.766", "0.200 V at rest", "0.2 V at rest", "(0.1533*P) + 0.04", "0.1533 x P) + 0.04", "rest | 0.200 V", "0.2 + 0.766", "0.2-4.80 V", "0.2 – 4.80 V", "0.2–4.80 V", "0.2 → 4.8 V", "0.2 to 4.8 V out", "| 0.200 V |", "| 4.800 V |", "+0.2V pedestal", "+0.200 V pedestal", "typical +0.200 V", "4.7 V × 0.6", "full scale = 4.7 V"]
+    forbidden: ["4.7 V output", "0.2-4.7 V", "0.2 – 4.7 V", "0.2 V + 0.766", "0.200 V at rest", "0.2 V at rest", "(0.1533*P) + 0.04", "0.1533 x P) + 0.04", "rest | 0.200 V", "0.2 + 0.766", "0.2-4.80 V", "0.2 – 4.80 V", "0.2–4.80 V", "0.2 → 4.8 V", "0.2 to 4.8 V out", "| 0.200 V |", "| 4.800 V |", "+0.2V pedestal", "+0.200 V pedestal", "typical +0.200 V", "4.7 V × 0.6", "full scale = 4.7 V", "0.1533·P + 0.04", "0.1533 · P + 0.04", "0.7665 V/kPa with 0.20 V", "reach 0.2 V at the bottom", "against the 0.2 V floor"]
+    escape_note_2: |
+      THE FIFTH RECORDED INSTANCE, 2026-09-21, AND IT WAS IN THE OWNER DOCUMENT.
+      The four patterns above were added after a cold agent found that ADR 0003
+      - the document this register names as this figure's OWNER - stated the
+      REFUTED transfer function twice as live fact, and computed a buffer
+      headroom margin off the refuted 0.2 V pedestal twice more.
+      The escape was one character. Every pattern in the original list spells
+      the multiply as "*" or "x"; ADR 0003 spells it with a MIDDLE DOT (U+00B7),
+      once tight and once spaced. Both missed.
+      Note what this means: the escape_note below describes the fourth instance
+      and says the corpus spelled one number seven ways. It did - and two of
+      those seven ways were in the owner document, and stayed live through the
+      very commit that wrote the warning. A forbidden list written from the
+      document in front of you cannot catch the document in front of you.
     false_positive_note: "0.2-4.80 V is the datasheet's OWN COVER-PAGE line and may be quoted as such - the ADR 0003 GP-vs-DP comparison row does exactly that, labelled 'cover page, both parts', and carries refutation wording. 4.80 V also appears legitimately in docs/decisions/0005-power-architecture.md about an LM317 rail, which is a different quantity entirely; match the surrounding words, not the number."
     escape_note: |
       THESE PATTERNS WERE ADDED 2026-09-21, THE SAME DAY THE FIGURE MOVED, AFTER
@@ -363,7 +377,25 @@ figures:
     owner: hardware/module/power-entry.md
     derivation: "Vf modulation is 120 mV: 0.24 V at 245 mA -> 0.36 V at 612 mA, digitised off Fig. 2 of Diodes Inc DS23001 Rev.8 (datasheets/discrete-and-power/1N5817.pdf). Reaches the jack as 120 mV -> LM317 line reg 0.52 mV/V -> 62 uV on AVDD -> OPA2197 PSRR 110.5 dB worst case -> 0.00044 cents. Pitch references the DAC's INTERNAL reference, not this rail."
     provenance_note: "This was 75-80 mV from a review agent's estimate until 2026-09-21. The 120 mV is read off the actual curve, and the digitisation is calibrated: the same extraction gives 0.454 V at 1.0 A and 0.746 V at 3.0 A against the datasheet's guaranteed maxima of 0.450 V and 0.750 V, so it is good to about +/-0.01 V - and the plotted curve sits essentially ON the max spec, so read these as typical-to-max. The conclusion is unchanged: 0.00044 cents is still five orders of magnitude below every other term in the table. SEPARATELY, 2026-09-21: the PSRR in this chain was 114 dB and that figure is NOT IN THE OPA2197 DATASHEET - SBOS737C p.8 specifies +-1 uV/V typ and +-3 uV/V max, i.e. 120 dB typ and 110.5 dB worst case. Using the guaranteed maximum scales the result by 1.50x, from 0.00029 to 0.00044 cents, and changes nothing. SBOS737C is banked at datasheets/texas-instruments/OPA2197.pdf."
-    forbidden: ["20 cents of breath-correlated", "20 cents of pitch bend", "about 20 cents", "by ~80mV", "by **~80 mV**", "A7 independently gets 75 mV"]
+    forbidden: ["20 cents of breath-correlated", "20 cents of pitch bend", "about 20 cents", "by ~80mV", "by **~80 mV**", "A7 independently gets 75 mV", "0.00018 cents", "0.00027 cents", "0.00029 cents", "voltage by ~80 mV", "The 80 mV of", "computes 75 mV", "path is 75 mV", "75 mV → LM317", "39 µV on `AVDD`", "39 uV on AVDD"]
+    false_positive_note: "DO NOT add a bare '80 mV' pattern. hardware/module/power-entry.md states 80 mV twice as the LT1641 ON-pin comparator hysteresis (1.233 V falling / 1.313 V rising) - a completely unrelated quantity that happens to share the number. Every pattern here carries enough surrounding words to tell the two apart. power-entry.md's own 'This page said ~80 mV' is its refutation record and is correct as written."
+    escape_note: |
+      FOUR LIVE VALUES FOR ONE QUANTITY, FOUND 2026-09-21 BY A COLD AGENT.
+      0.00044 here and in the owner page; 0.00018 in ADR 0004; 0.00027 in ADR
+      0006; 0.00029 in bom.csv. Two escapes, and neither was carelessness:
+      (1) NO CENTS VALUE WAS EVER IN THIS LIST. The list guarded the 80 mV and
+          the refuted "20 cents" and nothing downstream of them, so every
+          derived cents figure was unguarded from the day it was written.
+      (2) THE REFUTATION EXEMPTION HID THE REST. Three of the four sat inside
+          blocks whose wording refutes the OLD "20 cents" value, so the checker
+          scored them refuted-in-place - correctly, by its own rule - while the
+          NEW value they installed was itself stale. A refutation can carry a
+          wrong replacement, and the exemption cannot tell.
+      ADR 0004 was the sharpest case: it cited power-entry.md by name while
+      disagreeing with it on all four terms of the chain.
+      The fix was not to add more patterns to the prose. Three of the four
+      documents now CITE this figure and state no number at all, which is
+      rule 1 in CLAUDE.md and the only form that cannot go stale again.
 
   - id: plate-thickness
     quantity: Key plate thickness (PLATE-TOP, PLATE-THUMB)

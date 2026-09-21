@@ -315,11 +315,20 @@ bus +5V  ────────────────[ferrite]──[bulk]�
 diode, ferrite and bulk capacitance.** An earlier revision of this diagram
 branched *after* a shared 1N5817, and four reviewers arrived at the consequence
 by four different routes: the instrument's current flows through the same diode
-as the module's analog rail, so it modulates that diode's forward voltage by
-~80 mV. **This ADR used to call that "about 20 cents of breath-correlated pitch
-bend"; it is 0.00018 cents** (`power-entry.md`) — pitch references the DAC's
-*internal* reference, not this rail, so the path is 75 mV -> LM317 line reg ->
-39 uV on AVDD -> OPA2197 PSRR.
+as the module's analog rail, so it modulates that diode's forward voltage.
+**This ADR used to call that "about 20 cents of breath-correlated pitch
+bend"**; the modulation and what it reaches the jack as are the tracked figure
+`diode-split-rationale`, owned by `power-entry.md`, and are not restated here.
+Pitch references the DAC's *internal* reference, not this rail, which is why
+the real number is five orders of magnitude below every other term.
+
+*(Until 2026-09-21 this paragraph restated the chain itself, and every term of
+it was stale: a superseded "0.00018 cents", and with it the superseded ~80 mV,
+75 mV and 39 uV it was derived from. It cited `power-entry.md` by name while
+disagreeing with it on all four. The `V_f` modulation was re-read off the banked 1N5817
+curve and the PSRR off SBOS737C; neither correction reached here. It now cites
+the figure rather than restating it, which is the only form that cannot go
+stale again.)*
 
 **Keep both diodes anyway, on the reasons that hold**: fault isolation between
 the exported umbilical rail and the module's own analog rail, and HF isolation
