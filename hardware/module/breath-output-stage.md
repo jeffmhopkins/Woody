@@ -266,20 +266,25 @@ divider — two more parts per side, piecewise, and no thermal behaviour.
 | Passives | `POT-RESP` 50 k lin (same part as `POT-GAIN`), `R-RESP` 15 k, `D-RESP` ×2 1N4148, R1 20 k, R2 10 k, divider 2 × 10 k |
 | Panel | **A third pot and a third knob** |
 
-> ### This forces the 8HP question, and 10HP is the answer
+> ### The panel goes to 10HP — decided 2026-09-21
 >
 > `B1` reconstructed the panel bottom-up from real component envelopes and
-> got **~115 mm against 110 mm available** — already over *before* this
-> control, and it found that ADR 0004's "107 mm of ~110 mm usable" figure
-> is asserted twice and **derived nowhere**. `B1` also found two 20 mm
-> knobs do not fit side by side in 40.34 mm at all (16 mm is the maximum).
+> got **~115 mm against ~110 mm usable** — already over *before* this
+> control — and found that ADR 0004's "107 mm of ~110 mm usable" figure is
+> asserted twice and **derived nowhere**.
 >
-> **10HP is 50.5 mm wide** — 10.2 mm more, which is the difference between
-> three pots being impossible and being comfortable. For a one-off
-> instrument in the builder's own rack, 2HP is the cheapest fix available
-> to any problem in this review.
+> **10HP is 50.50 mm, and the win is not the extra width.** It is that three
+> pots fit in **one row instead of two**, which deletes a 20+ mm row from a
+> budget that had already overrun. The derived layout is in ADR 0004 and
+> comes to **97 mm against ~110 mm, 13 mm spare**.
 >
-> It also makes room for the op-amp package that the *other* review finding
+> **The cost is knob diameter.** Three pots across 50.50 mm with 3 mm gaps
+> needs **≤14 mm knobs**; 15 mm already gives 51 mm and does not fit. So
+> 10HP buys the height back by spending the knob size 8HP was supposed to
+> have bought. Three controls at 14 mm beats two at 16 mm — but ADR 0004's
+> claim of "16–20 mm knobs" is withdrawn rather than quietly left standing.
+>
+> It also makes room for the op-amp package the *other* review finding
 > needs: `A5` showed `POT-OFFSET`'s wiper is unbuffered, which is why its
 > "zero at centre" actually sits ~20° past centre at +0.605 V. That fix
 > wants a half, and this stage takes the last two.

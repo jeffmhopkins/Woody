@@ -76,7 +76,7 @@ as it was, the next reviewer who checks the arithmetic deletes the part.
 > |---|---|
 > | The power ribbon's six ground conductors, ≈17 mΩ | 6.2 mV → **7.4 cents** (24 on a flying bus) |
 > | ~20–40 mΩ of busboard ground to a neighbouring module | 7–15 mV → **8–18 cents** |
-> | The cable shield, if the etherCON shell bonds to the 8HP panel | **~7 cents** |
+> | The cable shield, if the etherCON shell bonds to the 10HP panel | **~7 cents** |
 >
 > All three are **breath-correlated**, because they are driven by the
 > instrument's own supply current. `pitch-stage.md` puts the entire pitch

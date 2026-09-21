@@ -20,7 +20,7 @@ The project splits into two physical deliverables that meet over a single cable:
 
 | | **Controller** | **Interface module** |
 |---|---|---|
-| Form | Laminated wood/aluminium/acrylic body | 8HP Eurorack module |
+| Form | Laminated wood/aluminium/acrylic body | 10HP Eurorack module |
 | Contains | Keys, breath sensor, IMU, display, MCU | DAC, analog scaling, jacks, knobs |
 | Domain | Digital | Analog, ±12V |
 | Primary risk | Mechanical and ergonomic | Analog precision |

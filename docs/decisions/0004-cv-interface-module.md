@@ -13,7 +13,7 @@ instrument by a single cable — solves several problems at once.
 
 ## Decision
 
-**An 8HP Eurorack module holding all analog output hardware, connected to the
+**A 10HP Eurorack module holding all analog output hardware, connected to the
 instrument by an 8-conductor ruggedised umbilical.**
 
 The instrument loses its **output** analog: no jacks, no bipolar rails, no
@@ -221,7 +221,7 @@ not worth trusting.
 **1 kΩ series resistors on every CV output.** Standard practice, and it means
 the module survives a short or someone patching output to output.
 
-**The 8HP panel is laser or waterjet cut from DXF — same vendor and ideally the
+**The 10HP panel is laser or waterjet cut from DXF — same vendor and ideally the
 same order as the aluminium key plate** (ADR 0009). Which also disposes of the
 last objection to etherCON: its cutout is more complex than a round hole, and on
 a laser-cut panel complexity is free.
@@ -515,7 +515,7 @@ by an octave with room to spare.
 
 **The module is dumb.** Jacks, knobs, connector, power switch, analog. No menu,
 no encoder, no screen. All UI lives on the instrument, which already has a
-display and a processor. That discipline is what kept the panel inside 8HP
+display and a processor. That discipline is what kept the panel inside 10HP
 rather than 10 or 12.
 
 **The module's power switch is the only power switch in the system.** The
@@ -600,13 +600,16 @@ electrical standard and replaces the failure mode.
 
 ### What the alternatives measured
 
-**The panel is 8HP, not 6HP** — `(8 × 5.08) − 0.3` = **40.34 mm**, +0/−0.2. See
-below for why that changed after the connector was chosen.
+**The panel is 10HP** — `(10 × 5.08) − 0.3` = **50.50 mm**, +0/−0.2. It went
+6HP → 8HP when the connector was chosen, and **8HP → 10HP on 2026-09-21** when
+a review found the height budget was over and a third control was added. See
+below.
 
 | | **etherCON D** | M12 X-coded | Hirose HR10A |
 |---|---|---|---|
 | Panel hole | 23.8 mm | ~16 mm | 10.2 mm |
-| Aluminium left each side, at 8HP | **8.27 mm** | ~12 mm | ~15 mm |
+| Aluminium left each side, at 10HP | **13.35 mm** | ~17 mm | ~20 mm |
+| *(at 8HP)* | *8.27 mm* | *~12 mm* | *~15 mm* |
 | *(at the original 6HP)* | *3.19 mm* | *~7 mm* | *~10 mm* |
 | Current per contact | ~1.5 A | **0.5 A** | 2 A |
 | Cable | **any Cat5e patch lead** | off-the-shelf M12-X | build it yourself |
@@ -629,30 +632,71 @@ afternoon with a crimp tool or for the time it takes to open a drawer.
 **So: etherCON, and treat cable failure as routine.** Keep spares. Replace the
 lead at the first sign of intermittency rather than diagnosing it.
 
-### The panel went to 8HP because of this connector
+### The panel is 10HP, and this is the first time the height was derived
 
-At 6HP the choice was survivable but ugly: a 23.8 mm hole in a 30.18 mm panel
+**6HP → 8HP was the connector.** At 6HP a 23.8 mm bore in a 30.18 mm panel
 leaves two aluminium strips **3.19 mm** wide — a fit the panel passes and a
 stiffness test it does not, with a cable that tugs sideways every time the
 instrument moves. Worse, the connector body extends 30–40 mm behind the panel
-while the jacks put the PCB about 7 mm behind it, so clearing it needs a ~26 mm
-notch in a ≤28 mm board. **That severs the board**, which is why a review
-concluded the module had to become two boards.
+while the jacks put the PCB about 7 mm behind it, so clearing it needs a
+~26 mm notch in a ≤28 mm board. **That severs the board**, which is why a
+review concluded the module had to become two boards. 8HP dissolved all of it.
 
-**8HP dissolves all of it.** The panel is 40.34 mm: **8.27 mm of aluminium each
-side of the bore**, 7.17 mm of visible panel each side of the flange, and enough
-web left at the notch that the module stays one board. It also frees the panel
-height budget, which at 6HP overran by 0.5 mm at a 13 mm jack pitch, and it
-allows a normal 16–20 mm knob instead of the ~13 mm the 15 mm pot centres
-forced.
+**8HP → 10HP was the height, and a third knob.** A reviewer rebuilt the panel
+bottom-up from real component envelopes and got **~115 mm against ~110 mm
+usable — already over**, taking every favourable option (toggle and LED
+sharing a row, pots side by side, 13 mm jack pitch); stacking the pots gives
+133 mm. It also found that **this ADR's own "107 mm of ~110 mm usable" figure
+is asserted twice and derived nowhere**, and that two 20 mm knobs do not fit
+side by side in 40.34 mm at all — 16 mm is the ceiling, against this ADR's
+claim of "16–20 mm".
 
-The cost is **two horizontal pitches** in a rack the design scope calls
-generous, and nothing at the laser cutter — a 2 mm aluminium rectangle costs the
-same whatever its width.
+Then `POT-RESP` was added (see `breath-output-stage.md` §4), making three
+controls.
 
-**Brace the connector to the PCB anyway.** It is free on a board being designed
-regardless, and it puts the load path into the board rather than the panel. At
-8HP this is good practice rather than a structural necessity.
+**10HP is 50.50 mm**, and the win is not the width itself — it is that three
+pots fit in **one row instead of two**, which deletes a whole 20+ mm row from
+a budget that was already over. Derived, finally:
+
+| | Height |
+|---|---|
+| Label / title band | 5 mm |
+| **Three pots across** — gain, offset, response | 22 mm |
+| Jacks, 3 rows × 2 columns at 13 mm pitch | 39 mm |
+| etherCON (31 mm tall) with the toggle and LED beside it | 31 mm |
+| **Total** | **97 mm against ~110 mm — 13 mm spare** |
+
+Width: **13.35 mm of aluminium each side of the bore**, 12.25 mm of visible
+panel each side of the flange.
+
+> **The knob size is now the binding constraint, and it is a real cost.**
+> Three pots across 50.50 mm with 3 mm gaps needs **≤14 mm knobs** `[calc]`:
+>
+> | Knob | 3 across + gaps | |
+> |---|---|---|
+> | 20 mm | 66 mm | no |
+> | 16 mm | 54 mm | no |
+> | 15 mm | 51 mm | no |
+> | **14 mm** | **48 mm** | **fits** |
+>
+> So 10HP buys the height back by *spending* the knob size that 8HP was
+> supposed to have bought. That is the honest trade: **three controls at
+> 14 mm beats two controls at 16 mm**, but this ADR should stop claiming
+> 16–20 mm knobs.
+
+The cost is **four horizontal pitches** against the original 6HP, in a rack
+the design scope calls generous, and nothing at the laser cutter — a 2 mm
+aluminium rectangle costs the same whatever its width.
+
+**Brace the connector to the PCB anyway.** It is free on a board being
+designed regardless, and it puts the load path into the board rather than the
+panel. At 10HP this is good practice rather than a structural necessity.
+
+> **Still a 1:1 paper check at M4, and now it has numbers to check against.**
+> The 97 mm above is built from `[from memory]` component envelopes — the
+> Neutrik drawing, the Thonkiconn panel dimension and the pot bushing were all
+> behind a blocked proxy through three review waves. **The layout is credible
+> and it is not verified.** Print it and lay the real parts on it.
 
 **The instrument end still needs a backing plate, not oak** — and the etherCON D
 is rated for a **maximum 4 mm panel thickness**, so it cannot mount through 6 mm
