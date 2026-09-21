@@ -1,0 +1,23 @@
+old_path,new_path,when,why
+texas-instruments/DAC8568CIPW.pdf,analog/DAC8568CIPW.pdf,2026-09-21,vendor bucket retired; function axis
+texas-instruments/INA828IDR.pdf,analog/INA828IDR.pdf,2026-09-21,vendor bucket retired; function axis
+texas-instruments/OPA2197.pdf,analog/OPA2197.pdf,2026-09-21,vendor bucket retired; function axis
+texas-instruments/REF5050.pdf,analog/REF5050.pdf,2026-09-21,vendor bucket retired; function axis
+texas-instruments/SN74AHCT125.pdf,logic/SN74AHCT125.pdf,2026-09-21,vendor bucket retired; level shifter files with the logic
+texas-instruments/LM317LZ.pdf,discrete-and-power/LM317LZ.pdf,2026-09-21,vendor bucket retired; regulator files with the other regulators
+other-semi/MCP3202-CI-SN.pdf,analog/MCP3202-CI-SN.pdf,2026-09-21,junk drawer split; ADC is analog
+other-semi/MPXV4006DP.pdf,analog/MPXV4006DP.pdf,2026-09-21,junk drawer split; pressure sensor is analog
+other-semi/MPXV4006-AN1646.pdf,analog/MPXV4006-AN1646.pdf,2026-09-21,junk drawer split; travels with MPXV4006DP
+other-semi/LT5400.pdf,analog/LT5400.pdf,2026-09-21,junk drawer split; matched resistor network is analog
+other-semi/74HC165.pdf,logic/74HC165-ti-scls116e.pdf,2026-09-21,junk drawer split; name says whose - TI SCLS116E
+other-semi/74HC165-nexperia.pdf,logic/74HC165-nexperia.pdf,2026-09-21,junk drawer split
+other-semi/74HC165-onsemi.pdf,logic/74HC165-onsemi.pdf,2026-09-21,junk drawer split
+other-semi/74HC165-toshiba.pdf,logic/74HC165-toshiba-1986-excerpt.pdf,2026-09-21,junk drawer split; name says what it is - 1986 databook excerpt
+other-semi/WS2812B.pdf,led/WS2812B.pdf,2026-09-21,junk drawer split; WS281x family files together
+other-semi/WS2812B-2020.pdf,led/WS2812B-2020.pdf,2026-09-21,junk drawer split; WS281x family files together
+other-semi/WS2812C.pdf,led/WS2812C.pdf,2026-09-21,junk drawer split; WS281x family files together
+other-semi/WS2815.pdf,led/WS2815.pdf,2026-09-21,junk drawer split; WS281x family files together
+other-semi/XL-0807RGBC-WS2812B.pdf,led/XL-0807RGBC-WS2812B.pdf,2026-09-21,junk drawer split; SURROGATE ONLY row - see datasheets/README.md
+other-semi/XL-0807RGBC-WS2812B-REV2024.pdf,led/XL-0807RGBC-WS2812B-REV2024.pdf,2026-09-21,junk drawer split; SURROGATE ONLY row - see datasheets/README.md
+other-semi/ME6217C33M5G.pdf,discrete-and-power/ME6217C33M5G.pdf,2026-09-21,junk drawer split; LDO files with the other regulators
+mechanical/WS2815-worldsemi-datasheet.pdf,led/WS2815.pdf,2026-09-21,DE-DUPLICATED: byte-identical to other-semi/WS2815.pdf (sha 72e22d2f740c); an LED IC datasheet was never mechanical
