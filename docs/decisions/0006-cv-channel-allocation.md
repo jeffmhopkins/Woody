@@ -12,13 +12,14 @@
 | **Breath** | **analog, differential over the umbilical** | 0–10V | gain + offset knobs | Trimmed |
 | **Mod 1–4** | DAC ch 2–5 | **−10…+10V** | none — configured on the instrument | Trimmed |
 | *(internal)* | DAC ch 6 | — | — | **Spare** — was the breath ambient-zero |
-| *(internal)* | DAC ch 7 | — | — | Shared 2.5 V offset for mod 1–4 |
+| *(internal)* | DAC ch 7 | — | — | Shared **3.3333 V** offset for mod 1–4 |
 
 Six jacks on the panel as before, but only five of them come from the DAC.
 **Breath never enters the digital path on its way out** — it is the one channel
 where output steps reach the ear, so it stays analog end to end (ADR 0003).
-One further DAC channel drives an offset rather than a jack: the shared 2.5 V
-reference point the mod channels subtract from. **Six of eight channels used,
+One further DAC channel drives an offset rather than a jack: the shared
+reference point the mod channels subtract from, **3.3333 V** now that they use
+the two-resistor form (`mod-channels.md`). **Six of eight channels used,
 two spare.**
 
 **Channel 6 was freed deliberately.** It drove a firmware ambient-zero into the
@@ -352,12 +353,22 @@ resistors and no screwdriver anywhere.
 Both of the original reasons for Woody's trimmers have since been withdrawn by
 this ADR itself: "firmware has no offset authority" was retracted when the
 per-load affine model went in, and "the ratio is not buildable" was retracted
-when the pitch stage turned out to be an exact 1:1. **Whether the trimmers
-survive is therefore an open question**, not a settled one — and this ADR's own
-sentence that "any external resistor added to reach it puts its absolute tempco
-inside the ratio, exactly the failure the matched network was bought to
-prevent" now argues against `TRIM-GAIN`, which is the largest term in the
-static budget.
+when the pitch stage turned out to be an exact 1:1. **The trimmers stay**, and the objection is answered by shrinking them rather
+than by deleting them. This ADR's own sentence — "any external resistor added
+to reach it puts its absolute tempco inside the ratio, exactly the failure the
+matched network was bought to prevent" — was a fair charge against a 1 kΩ
+trimmer contributing 5 % of the ratio. At **200 Ω** it contributes 2 %, which
+is ~2 ppm/°C against the LT5400's own drift, and it is no longer the largest
+term in the budget.
+
+Two percent is enough because jack-side feedback removed the load divider,
+which was what the ±5 % range existed to absorb.
+
+The offset trimmer also moved **ahead of the reference buffer**, where it scales
+`V_ref` and therefore the intercept alone. In its first position it injected
+into the inverting node and was never a pure offset at all — in a non-inverting
+stage that node sits at `Vdac`, not at a virtual ground, so it carried about
+1 % of gain with it and its span was half what was claimed.
 
 ### What it costs, honestly
 
@@ -577,7 +588,30 @@ decision below: tapping DC feedback at the jack side removes the divider error
 entirely, and that is exactly the arrangement that needs a feedback lead
 capacitor to be stable. All four surveyed DAC-driven designs do both, with a
 single 18–22 pF part. **This ADR declined that as "real stability work" on the
-strength of a conflict that does not exist.** Open.
+strength of a conflict that does not exist.**
+
+**Adopted.** Pitch now closes its DC loop at the jack, with `C-FB-PITCH` (1 nF
+across the feedback resistor) taking the loop back to the op-amp output above
+~16 kHz — which is also the reconstruction pole, so it is one part doing both
+jobs. `C-FILT-PITCH` is deleted: a capacitor to ground at the jack would now sit
+inside the DC loop at exactly the handover.
+
+Consequences, all good:
+
+- **The load-divider error is gone**, for any load. The −11.9 and −23.5
+  cents/octave figures below become historical.
+- **`TRIM-GAIN` shrinks to 200 Ω** (0 → +2 %), which drops its tempco
+  contribution to ~2 ppm/°C — *comparable to* the LT5400 instead of 4–20× it.
+  That answers this ADR's own objection to its own trimmer.
+- **The per-load affine preset stops being load-bearing.** It stays as a
+  firmware convenience; it is no longer the only thing standing between the
+  player and 59 cents.
+
+**This is the highest-risk change in the module**, and E9's "pitch stability
+into worst-case cable capacitance" row was already in the measurement table. It
+is now a gate rather than a reassurance. The mod channels are unaffected — their
+feedback comes from the op-amp output, so `R-OUT-PROT` isolates their jack-side
+capacitors exactly as intended.
 
 **Two things about that capacitor have to be written down, and only one of them
 was.** The review found the C of every one of these RCs missing from the BOM,

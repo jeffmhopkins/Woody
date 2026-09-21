@@ -11,44 +11,35 @@ discretes won (ADR 0006, `R-MODGAIN`), and this page is what they build.
 ## The circuit — one channel of four
 
 ```
-   DAC ch7 ──[1k]──┬── ½ OPA2197 ──┬── V_OFF = 2.500 V
+   DAC ch7 ──[1k]──┬── ½ OPA2197 ──┬── V_ref = 3.3333 V
    (shared)        │   follower    │   to all four channels
-                   └───────────────┘   (~1 mA total into 4 × 10k)
-                                   │
+                   └───────────────┘   (~1.3 mA total into 4 × 10k)
                                    │
                           ┌────────┴────────┐
                           │                 │
-   DAC ch2         [R1 10k 1%]       (ch3, ch4, ch5
-   0…5 V                  │           identical)
-      │                   │
-      │                   │
-      ├──[R3 10k 1%]──┬───┼──────────┐
-      │               │   │          │
-                      │   │    ┌─────┴──────┐
-                      │   └────┤ −          │
-                      │        │  ½ OPA2197 ├──┬───────────┐
-                      ├────────┤ +          │  │           │
-                      │        └────────────┘  │           │
-              [R4 40.2k 1%]                    │           │
-                      │                        │           │
-                 AGND(module)                  │           │
-                                               │           │
-                      ┌────[R2 40.2k 1%]───────┘           │
-                      │                                    │
-                      └────────────────────────────────────┘
-                                                            │
-                                              ┌─────────────┘
-                                              │
-                                [R-OUT-PROT 1k]
-                                              │
-                                              ├──[C-FILT-MOD 82nF C0G]── AGND
-                                              │
-                                              ├──[D-JACK-CLAMP BAV99]── ±12 V
-                                              │
-                                        MOD n jack
+                     [R1 10k 1%]     (ch3, ch4, ch5
+                          │           identical)
+                          │
+   DAC ch2 ──[1k]──┐      │
+   0…5 V           │      │
+                   │  ┌───┴─────────┐
+                   └──┤ +           │
+                      │  ½ OPA2197  ├──┬── op-amp output
+                   ┌──┤ −           │  │
+                   │  └─────────────┘  │
+                   │                   │
+                   └──[R2 30k 1%]──────┤
+                                       │
+                            [D-JACK-CLAMP BAV99]── ±12 V
+                                       │
+                            [R-OUT-PROT 1k, 1206]
+                                       │
+                                       ├──[C-FILT-MOD 82nF]── AGND
+                                       │
+                                  MOD n jack
 ```
 
-## This does not have to be a difference amplifier — open
+## Two resistors, not four — settled
 
 The first version of this page argued that pitch collapsed to two resistors
 because `A = 1 + B` was a boundary its numbers landed on, and that the mods miss
@@ -69,10 +60,21 @@ that three sections of an LT5400 give directly against the fourth.
 `V_ref` go to zero, so `Vout = 0` — which is the whole reason the offset lives
 on a DAC channel (below).
 
-The four-resistor version drawn above is not wrong, it is just not necessary,
-and it costs twice the parts and a second matching requirement. **Not changed
-unilaterally**, because it moves the offset channel's value and touches a page
-that was settled an hour ago.
+**Adopted, and it is drawn above.** Eight resistors instead of sixteen, and it
+lands on **exactly ±10.000 V** where the four-resistor version needed a 40.2 kΩ
+fudge to reach ±10.05 and still did not hit the number. The offset channel
+writes 3.3333 V instead of 2.500 V, and `R-OPAMP-IN` comes back — correctly
+this time, because the two-resistor form drives a true high-impedance (+) input
+where a 1 kΩ costs nothing, unlike the four-resistor version where the input
+resistor *was* the gain network.
+
+| | Four-resistor difference amp | **Two-resistor, k = 3** |
+|---|---|---|
+| Resistors | 16 | **8** |
+| Matching | two ratios per channel | **one** |
+| Range | ±10.05 V (40.2 kΩ fudge) | **exactly ±10.000 V** |
+| `R-OPAMP-IN` | unbalances it — 196 mV zero error | harmless, feeds a (+) input |
+| Safe on `CLR` | yes | **yes** |
 
 *(A third option surfaced in the same research: four of four published designs
 — Ornament & Crime, Westlicht PER|FORMER, Mutable Yarns, MTM Workshop Computer
@@ -98,24 +100,14 @@ stops at ±9.75 V, visibly short of the specified ±10. Going slightly over cost
 nothing: an OPA2197 on ±12 V less two Schottky drops reaches ~±11.45 V, so
 ±10.05 V has 1.4 V of margin.
 
-**No `R-OPAMP-IN` on these channels** — and an earlier revision of this page
-drew one, which was a real error rather than a redundancy. On pitch the 1 kΩ
-feeds a true high-impedance (+) input and costs nothing. Here **`R3` *is* the
-gain network**, so a 1 kΩ in series with it makes the DAC leg 11 kΩ against the
-reference leg's 10 kΩ, and the stage stops being balanced:
-
-| | With the 1 kΩ | Without |
-|---|---|---|
-| Vdac = 0 | −10.05 V | −10.05 V |
-| Vdac = 2.5 (should be 0) | **−196 mV** | 0.000 V |
-| Vdac = 5.0 | **+9.657 V** | +10.050 V |
-
-A deterministic 196 mV zero error — **more than twice the entire 1 % tolerance
-budget below** — bought for nothing, because the 10 kΩ input resistor already
-limits clamp current. That is exactly what the 24–47 kΩ input resistors do in
-every published design of this shape. `R-OPAMP-IN` drops to qty 3: pitch, the
-offset buffer, and the `VREFOUT` follower — the three places where it really is
-feeding a high-Z node.
+**Why `R-OPAMP-IN` was wrong on the old drawing, kept because it is a good
+trap.** On the four-resistor version the 10 kΩ input resistor *was* the gain
+network, so a 1 kΩ in series made the DAC leg 11 kΩ against the reference leg's
+10 kΩ and the stage stopped being balanced — a deterministic **−196 mV** zero
+error and +9.657 V instead of +10.05, more than twice the whole tolerance
+budget. On the two-resistor form the same part feeds a (+) input that draws no
+current, and costs nothing. Same resistor, same reason for existing, opposite
+consequence, decided entirely by the topology around it.
 
 **Tolerance, done properly.** An earlier revision said the worst case was
 "2.5 V × 2 % × 4 ≈ 50 mV", which is wrong twice: the arithmetic evaluates to

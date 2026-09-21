@@ -50,11 +50,11 @@ and the ADR gets corrected.
                                  │              │               │
                                  │  R_G 42.2k   │◄── G = 2.185  │
                                  │              │               │
-                                 │  REF ────────┼── AGND(module), HARD
-                                 │              │   (no divider, no DAC)
-                                 └──────┬───────┘
-                                        │  Vout = −2.185·(V_BREATH − V_AGND)
-                                        │       = −0.44 V at rest, −10 V at full
+                                 │  REF ◄───────┼── ½ OPA2197 ◄─[TRIM-BREATH-ZERO]
+                                 │              │   buffered      from VREFOUT
+                                 └──────┬───────┘   +0.437 V nulls the pedestal
+                                        │  Vout = −2.185·(V_BREATH − V_AGND) + V_REF
+                                        │       = 0 V at rest, −9.6 V at full
                                         │
                                   ┌─────▼──────────────────────┐
                                   │  INVERTING gain + offset   │
@@ -81,18 +81,48 @@ subtracts, which is what a unipolar DAC can produce.
 firmware cannot measure (ADR 0003, ADR 0006) — which removes the premise the
 swap was argued from. So the swap needs a reason of its own, and it has one:
 
-**`REF` now ties hard to module analog ground.** The in-amp output is
-`−2.185·(V_BREATH − V_AGND)`: −0.44 V at rest, −10 V at full breath, entirely
-within the −12 V rail. The downstream stage is **inverting**, which is the
-topology that wants a negative-going input — an inverting summer does gain and
-offset with two pots into one virtual ground, where a non-inverting stage would
-have the offset injection interact with the gain setting. One op-amp half
-instead of two, and the panel knobs behave independently, which is what
-"gain first, then offset" (ADR 0006) means physically.
+**`REF` is driven from a buffered trimmer** set once at commissioning, to
++0.437 V — which nulls the sensor's +0.200 V pedestal exactly. The in-amp then
+rests at 0 V and reaches −9.6 V at full sensor range. The downstream stage is
+**inverting**, which is the topology that wants a negative-going input: an
+inverting summer does gain and offset with two pots into one virtual ground,
+where a non-inverting stage would have the offset injection interact with the
+gain setting.
 
 So the swap survives on the downstream stage's topology rather than on the DAC's
 unipolarity. Recorded explicitly because a decision whose original justification
 has been removed is exactly the kind of thing that survives by inertia.
+
+### Why `REF` is trimmed rather than grounded
+
+**Grounding it makes the panel knobs interact, and an earlier revision of this
+page claimed the opposite.** With `REF` at 0 V the sensor's pedestal stays in
+the signal, *upstream of the gain pot*, and gets multiplied by it: trim the jack
+to zero at unity gain, turn GAIN to 2.4×, and the jack idles around **+0.6 V —
+into a VCA**. The Yamaha WX5's manual documents this exact interaction on a
+shipping instrument ("Wind Zero may change slightly when Wind Gain is adjusted,
+so you may have to repeat").
+
+Nulling the pedestal *ahead* of the gain stage is what makes "gain first, then
+offset" (ADR 0006) true in hardware rather than only in intent.
+
+**This does not reopen the split-authority rule.** There is still exactly one
+zero authority per representation — what changes is that the analog path's
+authority is now split by *job*, the same way pitch's is:
+
+| | Calibration | Performance |
+|---|---|---|
+| Pitch | `TRIM-OFFSET`, set once | firmware's per-load affine |
+| **Breath** | **`TRIM-BREATH-ZERO`, set once** | **the panel OFFSET knob** |
+| Digital copy | — | firmware, from its own ADC |
+
+What is *not* reintroduced is the DAC channel: firmware still corrects only the
+representation it can measure, which is the finding that closed W12.
+
+**The buffer is not optional.** Source impedance on an in-amp's `REF` pin adds
+directly to its internal network and degrades CMRR one-for-one, so a bare
+trimmer there would spend the entire 60 dB budget. It costs the last spare
+OPA2197 half, and `U-OPA-PITCH` goes to six packages so there is still one.
 
 **`REF` must tie *hard*, or to a buffer — never through a divider.** Source
 impedance at an in-amp's `REF` pin adds directly to its internal resistor
@@ -110,7 +140,7 @@ looks like an input.
 | **C_diff** | 15 nF C0G | 531 Hz differential pole, **ahead of the in-amp** |
 | **C_cm** | 1.5 nF C0G ×2 | Common-mode poles, deliberately 1/10 of C_diff |
 | **R_G** | 42.2 kΩ 0.1 % | INA828, `G = 1 + 50k/R_G` = **2.185** |
-| **REF** | hard to `AGND`(module) | Output reference. No DAC, no divider — see above |
+| **REF** | +0.437 V, buffered trimmer | Nulls the pedestal *ahead* of the gain pot, which is what makes the panel knobs independent. Never a bare divider — see above |
 | **Output RC** | 1 kΩ + 330 nF film | ~480 Hz reconstruction at the jack |
 
 ### The gain, derived
@@ -155,7 +185,7 @@ prevent the amplifier slewing on out-of-band energy.
 
 | Finding | Resolution |
 |---|---|
-| Ambient zero has the wrong polarity | **Deleted** — there is no ambient-zero injection. `REF` is grounded and the panel offset knob is the analog path's only zero authority |
+| Ambient zero has the wrong polarity | **Deleted** — there is no *firmware* injection. `REF` carries a commissioning trimmer, and polarity is a non-issue because a trimmer goes both ways |
 | The zero correction is open-loop across two representations | **Deleted with it** — firmware now zeroes only the copy it measures |
 | No common-mode bias return | **Fixed** — R4, R5 |
 | No in-amp gain resistor | **Fixed** — R_G = 42.2 kΩ, derived above |
@@ -166,11 +196,22 @@ prevent the amplifier slewing on out-of-band energy.
 
 ## Commissioning
 
-With the body at room temperature and no breath at the mouthpiece, set the
-**panel offset knob** so the jack reads 0 V on a meter, then the **gain knob**
-for the span the patch wants. That is the analog path's zero, and it is the only
-one. Thermal drift afterwards is ~23 mV in 10 V over a full warm-up — a quarter
-turn if it ever bothers you.
+With the body at room temperature and no breath at the mouthpiece:
+
+1. **`TRIM-BREATH-ZERO`**, internal, until the in-amp output reads 0 V. Once,
+   at build.
+2. **Panel GAIN** for the span the patch wants. The knob is doing more work
+   than this page used to say: real playing tops out around 2.5–2.8 kPa against
+   the sensor's 6 kPa range, so a hard blow reaches roughly 4.5 V at the in-amp,
+   not 10 V. **The downstream stage needs about 0.6× to 2.5×**, not unity and a
+   trim.
+3. **Panel OFFSET** for where you want the jack to rest. Because step 1 nulled
+   the pedestal ahead of the gain pot, step 2 no longer disturbs this.
+
+Thermal drift afterwards is on the order of 20 mV in 10 V over a full warm-up —
+a quarter turn if it ever bothers you. **That figure is unverified**: it rests
+on an offset tempco of ~0.5 mV/K that the sensor family's datasheet apparently
+does not break out, and nxp.com was unreachable when this was written.
 
 **E10 scopes the jack**, not the display. The two representations are calibrated
 separately on purpose, so a flat bar on the screen is no longer evidence about

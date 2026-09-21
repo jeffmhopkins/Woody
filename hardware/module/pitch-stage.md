@@ -11,39 +11,29 @@ Drawing it changes the answer.
 ## The circuit
 
 ```
-                        buffered VREFOUT, 2.500 V
-                        (½ OPA2197, ADR 0006)
-                                 │
-                                 ├──────────────┐
-                                 │              │
-                          [TRIM-OFFSET]         │
-                            10k cermet          │
-                                 │ wiper        │
-                            [470k R-OFFINJ]     │
-                                 │              │
-                                 │         [R1 10k]  ┐
-                                 │              │    │ LT5400
-                                 │              │    │ 1:1 pair
-   DAC ch1 ──[1k R-OPAMP-IN]──┬──┼──────────────┤    │
-   0.25…4.75 V                │  │              │    │
-                              │  │        ┌─────┴────┴──┐
-                              └──┼────────┤ +           │
-                                 │        │   ½ OPA2197 ├──┬────────┐
-                                 └────────┤ −           │  │        │
-                                     ┌────┴─────────────┘  │        │
-                                     │                     │        │
-                                     └──[R2 10k]──[TRIM-GAIN 1k]───┘
-                                          LT5400    (IN SERIES)
-                                                                    │
-                                          ┌─────────────────────────┘
-                                          │
-                            [R-OUT-PROT 1k]
-                                          │
-                                          ├──[C-FILT-PITCH 10nF C0G]── AGND(module)
-                                          │
-                                          ├──[D-JACK-CLAMP BAV99]── ±12 V
-                                          │
-                                     PITCH jack
+   VREFOUT ──[TRIM-OFFSET 10k]──┬── ½ OPA2197 ──┬── V_ref ≈ 2.500 V
+   (2.500 V)   + range resistors│   follower    │   (trimmed, buffered)
+                                └───────────────┘
+                                                │
+                                          [R1 10k]  ┐ LT5400
+                                                │   │ 1:1 pair
+                                                │   │
+   DAC ch1 ──[1k R-OPAMP-IN]──┐                 │   │
+   0.25…4.75 V                │                 │   │
+                              │           ┌─────┴───┴───┐
+                              └───────────┤ +           │
+                                          │  ½ OPA2197  ├──┬── op-amp output
+                              ┌───────────┤ −           │  │
+                              │           └─────────────┘  │
+                              │                            │
+                              ├──[C-FB-PITCH 1nF]──────────┤   ← AC feedback
+                              │                            │
+                              │                   [D-JACK-CLAMP BAV99]── ±12 V
+                              │                            │
+                              │                  [R-OUT-PROT 1k, 1206]
+                              │                            │
+                              └──[R2 10k]─[TRIM-GAIN 200R]─┴── PITCH jack
+                                  LT5400   (in series)         ← DC feedback
 ```
 
 ## It is a non-inverting amplifier, not a difference amplifier
@@ -149,30 +139,65 @@ the ±600 cents of firmware reserve ADR 0006 describes. An OPA2197 on ±12 V
 less two Schottky drops reaches ~±11.45 V, so the reserve is real and not
 clipped.
 
-## `R-OFFINJ` as drawn is not a pure offset — unresolved
+## Two changes prior art forced, both improvements
 
-The first version of this page claimed the injection "moves offset without
-touching gain". That is true of an *inverting* summer, whose node is a virtual
-ground at 0 V. **This node is not.** In a non-inverting amplifier the (−) input
-sits at `Vdac`, so the current through `R-OFFINJ` depends on `V_wiper − Vdac`
-and the `Vdac` part of it is a **gain** term:
+### DC feedback is tapped at the jack, not at the op-amp output
 
-- Nominal gain becomes **2.0213**, not 2.000 — about +1.06 %.
-- The trim span is **one-sided, 0 → −53.2 mV**, i.e. ±26.6 mV ≈ **±32 cents
-  about a displaced centre** — half the ±64 cents this page and the BOM both
-  claim.
+`R-OUT-PROT` divides against whatever is patched in — −11.9 cents/octave into
+one 100 kΩ VCO, −23.5 into two on a passive mult. ADR 0006 accepted that and
+paid for it with a per-load affine preset, a display page, an operating
+instruction, and most of the gain trimmer's range.
 
-It still *works* — the gain trimmer absorbs the 1 % and the range is adequate —
-but it is not the clean decoupled trim it was described as, and the numbers in
-the BOM are wrong. **Resolve at E10 with the real network**, or reconsider the
-trimmers entirely (see below).
+**All four surveyed DAC-driven designs** — Ornament & Crime, Westlicht
+PER|FORMER, Mutable Yarns, Winterbloom Sol — instead close the DC loop *at the
+jack*, so the divider is inside the feedback and the error is identically zero
+for any load. ADR 0006 declined this as "real stability work… on a board
+without one", on the strength of a claim that the compensation capacitor and
+the output filter were the same part and could not coexist. **They are not the
+same part**, and three of those four designs ship both.
 
-## The two trims interact, and the procedure says so
+So the loop is split, which is the standard arrangement:
 
-Gain and offset are set by the *same* ratio `R2/R1` — gain is `1 + R2/R1`,
-intercept is `−2.5 × R2/R1`. Turning the gain trimmer moves both. That is not a
-defect of this topology; it is true of every 1 V/oct module with a gain and an
-offset pot, which is why they are all trimmed the same way:
+| Path | Frequency | What it does |
+|---|---|---|
+| `R2` + `TRIM-GAIN` from the **jack** | DC to ~16 kHz | Sets the transfer function against the load, whatever it is |
+| `C-FB-PITCH` 1 nF from the **op-amp output** | above ~16 kHz | Takes over before `R-OUT-PROT` and the cable can put phase in the loop |
+
+**`C-FILT-PITCH` is deleted.** A 10 nF to ground at the jack would now sit on
+the feedback node, inside the DC loop, right at the handover — the one place it
+must not be. The 15.9 kHz reconstruction pole comes from `C-FB-PITCH` instead,
+which is the same corner in a better place, and is what the prior art does: no
+DAC-driven module in the corpus puts a capacitor on the jack side of its series
+resistor.
+
+**E9 already has the check** — "pitch stability into worst-case cable
+capacitance" was in the measurement table before this change, and it is now
+load-bearing rather than reassuring. This is the highest-risk item on the page.
+
+*(The mod channels keep their jack-side caps and are unaffected: their feedback
+comes from the op-amp output, so `R-OUT-PROT` isolates the capacitor exactly as
+intended. Only pitch needs load-independence.)*
+
+### The offset trimmer moved ahead of the reference buffer
+
+The first version put it after, injecting through `R-OFFINJ` into the inverting
+node, and claimed that "moves offset without touching gain". That is true of an
+*inverting* summer, whose node is a virtual ground. **This node is not** — in a
+non-inverting stage it sits at `Vdac`, so the injected current depended on
+`V_wiper − Vdac` and the `Vdac` part was a **gain** term: nominal gain 2.0213
+rather than 2.000, and a one-sided span of half what was claimed.
+
+Trimming the reference *before* the buffer fixes it exactly. Offset is
+`k · V_ref` and gain is `1 + k`, so moving `V_ref` moves the intercept and
+touches the gain **not at all**. `R-OFFINJ` is deleted; the trimmer is now two
+parts earlier and does a cleaner job.
+
+## The trims still interact one way, and the procedure says so
+
+**Offset no longer touches gain**, per above. **Gain still touches offset**,
+because both come from the same ratio: gain is `1 + k`, intercept is
+`k · V_ref`. That half of the coupling is intrinsic and is why every 1 V/oct
+module with two pots is trimmed the same way:
 
 1. Play the **highest** note in use. Adjust **gain** until it is in tune.
 2. Play the **lowest** note. Adjust **offset** until it is in tune.
