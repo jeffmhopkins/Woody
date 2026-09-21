@@ -87,17 +87,23 @@ The rack supplies a regulated +5 V rail alongside ±12 V, so sending 5 V up the
 cable and deleting the instrument's buck converter looks attractive. **The drop
 maths says otherwise.**
 
-The instrument's load is roughly 3 W. Over 2 m of 24 AWG, round trip ~0.34 Ω:
+The instrument's load is **~4.1 W in typical play** (the load table below; an
+earlier revision of this ADR said 3 W). Over 2 m of 24 AWG, round trip ~0.34 Ω:
 
 | Delivered at | Current | Drop | Arrives as | Error |
 |---|---|---|---|---|
-| **12 V** | 250 mA | 84 mV | **11.92 V** | **0.7%** |
-| 5 V | 600 mA | 202 mV | 4.80 V | 4.0% |
+| **12 V** | 359 mA | 122 mV cable + 400 mV Schottky + 60 mV | **~11.4 V** | **5%** |
+| 5 V | 862 mA | ~290 mV cable alone | ~4.7 V | 6%+ |
 
 The same power at a lower voltage means proportionally more current, and drop
-scales with current. At 5 V the instrument would see **4.80 V** — inside the
-MPXV4006DP's 5.00 ±0.25 V specification with no margin left, and that sensor is
-**ratiometric**, so supply variation reads directly as breath variation.
+scales with current. At 5 V the instrument would see **~4.7 V** — *outside* the
+MPXV4006DP's 5.00 ±0.25 V specification, and that sensor is **ratiometric**, so
+supply variation reads directly as breath variation. The earlier revision put
+this at 4.80 V, just inside the window, on the 3 W load figure that was wrong.
+
+That argument is now historical rather than load-bearing: the sensor no longer
+runs from the buck's 5 V rail at all (see above; it runs from a REF5050 off
++12 V). What survives is the general point, which still decides the umbilical.
 
 This is simply why power distribution uses higher voltages, and it applies at
 two metres as much as at two kilometres.
@@ -125,6 +131,39 @@ The target rack supplies +5 V, so the level shifter's rail is a **requirement,
 not an option**. No jumper, no unpopulated fallback footprint. A module that
 also worked in cases without a +5 V rail would be engineering for a case this
 instrument is never in (see the design scope in the README).
+
+### The load table, measured against nothing yet
+
+Every number in this section was low. ADR 0005 originally said 250 mA and
+ADR 0004 ~275 mA; five independent rebuilds during review came back between
+390 and 650 mA, and an adjudication pass settled it. **Those figures were a good
+estimate of a different instrument** — one with no 8×8 matrix, no WS2815
+quiescent current, and no lighting clamp.
+
+| State | 5 V rail | 12 V direct | **Umbilical** | Body heat |
+|---|---|---|---|---|
+| Quiescent — booted, radio off, LEDs blanked | 180 mA | 123 mA | **212 mA** | 2.4 W |
+| Typical play | 226 mA | 248 mA | **359 mA** | 4.1 W |
+| Typical + live config over WiFi | 336 mA | 248 mA | **414 mA** | 4.7 W |
+| **Clamp-legal worst** | 928 mA | 119 mA | **579 mA** | 6.5 W |
+| Clamp fails, strips latched full white | 1023 mA | 1023 mA | **1132 mA** | 12.2 W |
+
+**The 5 V rail is where the danger is, not the umbilical.** The same 3 W of
+light costs 531 mA on the umbilical if it is spent on the strips and 579 mA if
+spent on the matrix — a 5 % difference. But on the 5 V rail it is **328 mA
+versus 928 mA**, a factor of three, because the strips run from 12 V directly
+and the matrix runs through the buck. The 1 A regulator lives on that rail.
+
+Two arithmetic conventions to keep: convert at the **arriving** voltage, not
+12.00 V, because the 5 V branch is a constant-power load and only ~11.4 V
+arrives; and the buck is **~90 % efficient** at a 12 V input, not the 85 % this
+document used — 85 % is the 28 V-input figure.
+
+*(ADR 0014's ×0.49 umbilical conversion factor survives by coincidence: two ~6 %
+errors in opposite directions.)*
+
+**None of this is measured.** E6 measures the real draw with a current probe,
+and every number above is superseded the moment it does.
 
 ### Power tree
 
@@ -192,13 +231,56 @@ things the bare toggle does not have:
   time; a load switch ramps the output instead.
 - **Short-circuit foldback.** A fault in the umbilical — a crushed cable, a
   connector half-inserted — is current-limited at the module instead of pulling
-  on the rack's +12 V rail and browning out every other module in the case. This
-  is the same job as the instrument-end polyfuse, done faster and self-resetting,
-  and the two are complementary rather than redundant.
+  on the rack's +12 V rail and browning out every other module in the case.
 
-The part is SOT-23-6, which looks like a step away from the package policy in
-ADR 0013 and is not: at 0.95 mm pitch it is *coarser* than the TSSOP-16 DAC
-already accepted, and it has six leads rather than sixteen.
+### Set the limit at 1.0 A, and delete the polyfuse
+
+**1.0 A, latch-off, with a programmed 50–100 ms ramp.** The window is roughly
+0.9–1.13 A: above the clamp-legal worst case of 630 mA plus ramp current, below
+the 1.13 A a brownout-latched full-white strip set draws, and inside two thirds
+of the etherCON contact's 1.5 A rating.
+
+**500 mA was below typical play**, never mind the clamp-legal worst. Reviewers
+also disagreed about whether it would prevent boot: one showed it would not,
+because available current exceeds demand at every point on the way up so the
+node rises monotonically and the buck starts at ~17 ms. **It boots — in about
+75 ms of constant-current start**, which is long enough to trip a USB-class
+fault timer. The prescription is the same either way: a programmed ramp and a
+fault timer longer than it.
+
+**And the instrument-end polyfuse is deleted.** An earlier revision of this ADR
+called it complementary to the load switch. It is not:
+
+- Its hold current derates to **~350–375 mA** at the documented interior rise —
+  *below typical play*.
+- It sits **downstream of the module's limiter**, so it can never reach its trip
+  current and protects nothing.
+- A polyfuse above hold does not trip cleanly; it creeps into current-limiting,
+  which is the first term in the thermal-runaway loop ADR 0014 describes and
+  believes it deleted. **ADR 0014 added the load switch and never removed the
+  device it named as the problem.**
+- The obvious part number is a 6 V-rated part on a 12 V rail.
+
+Deleting it is a negative-cost change: one fewer part, 50 mW less inside the
+sealed body, and one less nuisance-trip mechanism.
+
+**The part is not a TPS2553.** That is a **2.5–6.5 V USB power switch** with a
+7 V absolute maximum, specified here on a +12 V rail — roughly 66 % over
+abs-max, and it would not survive first power-on. Five review documents found it
+independently. An earlier revision of this ADR defended it on *package* grounds
+and never stated its voltage rating, which is the tell.
+
+The replacement is not a substitution, because **every modern one-chip 12 V
+eFuse checked fails the package policy** — TPS2592Ax is VSON-10, TPS27S100 is
+HTSSOP with a thermal pad, ST's STEF01 is HTSSOP-14 with a pad. So:
+
+**LT1641-1CS8 (SO-8, 9–80 V) driving an external N-FET, with a sense resistor.**
+Note the suffix: **`-1` latches off and `-2` auto-retries**, and auto-retry into
+a persistent fault reproduces the oscillating-protection behaviour this design
+exists to avoid. LM5069MM (MSOP-10) and LTC4210 (MSOP-8) are equally valid.
+
+Programmable ramp rate and a programmable fault timer come with the part, which
+is what the 75 ms start above needs.
 
 The toggle now carries no load current, so its rating stops mattering — it
 drives an enable pin. It stays a rated part anyway because it is already
