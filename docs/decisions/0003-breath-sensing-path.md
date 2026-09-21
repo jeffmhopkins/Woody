@@ -469,9 +469,26 @@ umbilical +12V ──[REF5050 5.000V]──[OPA2197 ½ buffer]──┬── MP
                                                        └── (10 mA available)
 ```
 
-- **REF5050**, SOIC-8, 7–18 V in, 5.000 V out at ±0.05 % and 3 ppm/°C, with line
-  regulation around 5 ppm/V — so a full volt of movement on +12 V shifts the
-  sensor supply by ~25 µV.
+- **REF5050**, SOIC-8, 5.2–18 V in, 5.000 V out, with line regulation around
+  5 ppm/V — so a full volt of movement on +12 V shifts the sensor supply by
+  ~25 µV `[SBOS410O, datasheets/texas-instruments/REF5050.pdf]`.
+
+  > **⚠ The accuracy this line claimed belongs to a grade `bom.csv` does not
+  > order. 2026-09-21.** This read *"±0.05 % and 3 ppm/°C"*. SBOS410O Table 4-2
+  > p.3: **`REF50xxI` = "High" = ±0.05 %, 3 ppm/°C**; **`REF50xxAI` =
+  > "Standard" = ±0.1 %, 8 ppm/°C**. The BOM orders **`REF5050AIDR`** — the
+  > **A** suffix is the *worse* grade, so as specified this reference is
+  > **±0.1 % and 8 ppm/°C**: twice the initial error and 2.7× the drift.
+  > Since scale-factor stability is the entire reason for a separate reference,
+  > `REF5050IDR` is probably the right answer — but it is a part change, so it
+  > is tracked as `ref5050-grade` (**disputed**) in `config/figures.yaml` rather
+  > than decided here. *Caveat: Table 4-2 is new in rev O, so an earlier
+  > revision may have labelled the grades differently and this line may have had
+  > an honest origin.*
+  >
+  > The input range was **"7–18 V"**. 18 V is right; the minimum is specified as
+  > **`V_OUT` + 0.2 V = 5.2 V** `[p.6]`, and 7 V was not from the datasheet.
+  > Safe either way, and now sourced.
 - **Buffered by half an OPA2197** running on +12 V. The reference alone can
   source 10 mA against the sensor's ~10 mA, which is inside its rating and has
   no margin; the buffer removes the question and costs nothing, because the
@@ -501,9 +518,24 @@ linear output range. The umbilical's highest voltage is +12 V, so this covers
 the realistic fault rather than an arbitrary one.
 
 The buffer still has to reach 0.2 V at the bottom of the sensor's range. An
-OPA2197 is rail-to-rail on a single +12 V supply and reaches within ~30 mV of
-ground, so the requirement that drove the original RRIO-on-5 V choice is met
-with far more headroom than before.
+OPA2197 is rail-to-rail on a single +12 V supply and reaches within **125 mV**
+of ground into a 10 kΩ load, so the requirement that drove the original
+RRIO-on-5 V choice is met — but with less headroom than this page claimed.
+
+> **⚠ The "~30 mV" was the NO-LOAD figure. 2026-09-21.** SBOS737C p.8,
+> *"Voltage output swing from rail"*: **no load 5 mV typ / 25 mV max**;
+> **`R_LOAD` = 10 kΩ → 95 typ / 125 max**; **`R_LOAD` = 2 kΩ → 430 typ /
+> 500 max**. An unloaded op-amp is not the case this paragraph is about.
+>
+> **At 10 kΩ the margin is 75 mV against the 0.2 V floor — real, but a third of
+> what was claimed. At 2 kΩ the 500 mV max EXCEEDS the floor outright.** This
+> buffer drives the sensor's ~10 mA excitation, i.e. an equivalent load far
+> heavier than 2 kΩ at 5 V, so **the swing figure that applies here is not
+> obviously any of the three tabulated rows.** The conclusion is probably still
+> safe, because the buffer sits at 5.000 V and not near either rail in normal
+> operation — but the *argument as written* rests on a number measured under
+> conditions this circuit never sees. **Re-argue it against the load, or drop
+> the claim and justify the floor another way.**
 
 **The ADC stays on 3.3 V.** The obvious follow-on — move the ADC to the buffered
 5.000 V rail too, so the digital reading becomes ratiometric — is wrong here.
