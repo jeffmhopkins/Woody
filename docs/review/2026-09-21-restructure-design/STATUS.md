@@ -125,26 +125,19 @@ three of five occurrences because it was reading only its own page.
 - **`datasheets/` re-filed by function** via `.moves.csv`.
 - **Cold review**, including one agent whose only job is content conservation.
 
-## Phase B: what was not started
+## A stale section that sat here, and what it cost to leave it
 
-The corpus is moved but **not yet split**. Every page is still whole; the 22
-circuit blocks in `D1-circuit-inventory.md` do not exist as directories yet.
-What is in place is the tree, the guards, the map, and a proof procedure.
+*This file carried a "Phase B: not started" section saying "the corpus is
+moved but **not yet split**. Every page is still whole" — for one commit
+after all seven splits had landed. I updated the part I was editing and left
+the part a reader reaches next.*
 
-Still to do, in `PROPOSAL.md` order:
-
-- **Split the 8 pages into the 22 circuit directories.** `carrier.md` alone is
-  seven circuits and a board page.
-- **`circuit.yaml` and the dependency checker** (`D3`), including
-  `figures.yaml`'s `owner:` becoming a typed reference — 25 of 33 then stop
-  breaking on a move, and `owner` becomes something a tool validates. Nothing
-  reads it today.
-- **BOM fragments and the generator** (`D4`), with the 53 orphan rows going to
-  `hardware/unplaced.csv`.
-- **`sim/` directories**, empty of results until a run happens.
-- **`datasheets/` re-filed by function** via `.moves.csv` at merge time, which
-  `D4` proved leaves all eight fragments byte-identical.
-- **Cold review**, including one agent whose only job is content conservation.
+*That is this project's named failure mode, in the file whose whole job is to
+record what actually landed, committed by the person who had just written
+three separate checks against it. `CLAUDE.md` says it plainly: "Fixes land
+where the editing is happening; they do not land where the reader looks."
+Recorded rather than quietly deleted, because it is the cheapest possible
+demonstration that the mechanical rules are not optional for anyone.*
 
 ## Debt carried openly, not hidden
 
