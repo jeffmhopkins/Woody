@@ -485,6 +485,32 @@ Sources: Doepfer's A-100 technical documentation for the bus and supply
 conventions; ModWiggler's module-power-entry threads for the community consensus
 on diodes, ferrites and reservoir values.
 
+### Considered and declined: an octave switch on the panel
+
+A three-position toggle for +1 / 0 / −1 octave was proposed and is **not
+built**. Recorded because the reasoning generalises.
+
+**It would have had to be analog**, since the module has no processor and the
+umbilical is write-only — so a panel switch there cannot reach firmware. And an
+analog octave shift is not cheap: the pitch stage is non-inverting, so anything
+injected at its inverting node adds *gain* rather than offset (the defect
+`R-OFFINJ` was deleted for). The only clean point is `V_ref`, which would have
+to switch between 1.500 / 2.500 / 3.500 V — and reaching *above* 2.500 V from a
+2.500 V reference needs an op-amp half and 0.1 % resistors, because 1 % on the
+step is 12 cents. Plus a toggle on a panel already at 107 mm of ~110 mm usable.
+
+**And the instrument already has octave control, twice.** The four left-thumb
+keys are octave/register keys in the conventional woodwind arrangement — the
+2021 firmware used three left-thumb inputs across a four-octave span — and
+ADR 0010 reserves three spare chain bits for dedicated octave up/down switches
+besides.
+
+Doing it in firmware is free, and **the reason it is free is worth stating**
+because it was briefly got wrong: the DAC's 0.25–4.75 V window reserve is
+*calibration* headroom, not a transposition limit. The playable range occupies
+under a third of the 9 V output span, so firmware can shift the whole mapping
+by an octave with room to spare.
+
 ### Module design principles
 
 **The module is dumb.** Jacks, knobs, connector, power switch, analog. No menu,

@@ -423,6 +423,16 @@ firmware straightens the bow in it.
 
 - **The "design the gain 5 % high" kludge is deleted.** It existed only because
   firmware could scale in one direction. A trimmer goes both ways.
+> **What the reserve is, because it is easy to misread.** The 0.25–4.75 V
+> window leaves 0.5 V at each end, and that is **calibration headroom** — room
+> for firmware's per-load affine correction to shift codes without running out
+> at the extremes of the *used musical range*. It is **not** a limit on
+> transposition. The instrument's fingering spans roughly 2.5–3 octaves inside
+> a 9 V output range, so there are six-odd octaves of unused span and firmware
+> can move the whole mapping up or down freely. This was briefly misread as
+> "firmware cannot transpose by a full octave", which is wrong, and it nearly
+> bought an analog octave switch the module does not need.
+
 - **Use the DAC's 0.25–4.75 V window rather than its full 0–5 V span.** That
   leaves 250 mV of headroom at both rails — the DAC8568 at AVDD = 5 V cannot
   reliably swing to its own supply — and the trimmer absorbs the resulting gain
