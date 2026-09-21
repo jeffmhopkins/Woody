@@ -293,24 +293,37 @@ face that measures 57 × 38 mm. Two consequences:
 
 - **It leaves about 7.1 mm of material above and below the cutout** — not the
   3.5 mm this bullet used to claim. **That was the flange, and the flange is
-  not what is cut away.** The D-series chassis bore is the **23.8 mm** punch-out
-  (the same figure the 10HP panel is sized from, `bom.csv`), so on a 38 mm tall
-  face the remaining material is `(38 − 23.8)/2 = 7.1 mm` per side. The 26 × 31
-  flange *overlaps* that face and clamps against it; it removes nothing. Double
-  the material the page thought it had, and it changes the answer below from
-  "marginal" to "fine".
+  not what is cut away.** The chassis bore is **⌀24.0 mm minimum**, read off
+  Neutrik drawing ST-NE8FDP (`datasheets/connectors/NE8FDP.pdf`), so on a 38 mm
+  tall face the remaining material is `(38 − 24.0)/2 = 7.0 mm` per side. The
+  26 × 31 flange *overlaps* that face and clamps against it; it removes
+  nothing. Double the material the page thought it had, and it changes the
+  answer below from "marginal" to "fine".
 
   **Oak is still not what should be carrying it**, and the reason is unchanged
   by the arithmetic. This is the same rule as the U-bolt and the key switches:
   the wood is a shell, not structure (ADR 0002).
 
-- **Orientation is a free variable and worth spending.** The flange is
-  26 × 31 mm on a 57 × 38 mm face. Landscape — 31 across the 57 mm width,
-  26 across the 38 mm height — leaves **6 mm of flange margin** top and bottom
-  instead of 3.5, and puts the four flange screws further from the face's
-  edges. **Proposed, not settled**: the screw pattern is not square, so it
-  depends on where the real drawing puts the holes relative to the bore. Decide
-  it off the drawing at M4, not off this paragraph.
+- **Rotate it 90°. Settled off the drawing.** The flange is 26 × 31 mm on a
+  57 × 38 mm face, and the mounting pattern is two diagonal ⌀3.2 holes at
+  19 × 24 mm — so the orientation is a free variable worth spending:
+
+  | On the tail face | as drawn (portrait) | **rotated 90°** |
+  |---|---|---|
+  | Material above/below the **flange** | 3.50 mm | **6.00 mm** |
+  | Screw-hole edge to face edge, vertically | 5.40 mm | **7.90 mm** |
+  | Material above/below the **bore** | 7.00 mm | 7.00 mm — *rotation-invariant* |
+  | Clear width beside the flange for USB-C | 31 mm | 26 mm |
+
+  Nearly double the flange margin and 2.5 mm more at the screws, for 5 mm of
+  width beside it that the USB-C slot does not need. **Note what it does not
+  fix:** the bore-referenced 7.00 mm is the same either way, so rotating is not
+  what keeps the connector out of thin oak — the internal backing plate is.
+
+  *(On the 10HP module panel both orientations fit: 12.25 mm of panel each side
+  as drawn, 9.75 mm rotated. A review's "the orientation is therefore forced"
+  was a **6HP** statement — at 30.18 mm the rotated case left a 1.49 mm web —
+  and 10HP made it false.)*
   **Mount the connector to an internal backing plate** — aluminium or ply, tied
   into the same stack that carries the keys — and let the oak be the face the
   screws pass through rather than the thing the screws hold.

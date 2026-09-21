@@ -666,10 +666,25 @@ below.
 
 | | **etherCON D** | M12 X-coded | Hirose HR10A |
 |---|---|---|---|
-| Panel hole | 23.8 mm | ~16 mm | 10.2 mm |
-| Aluminium left each side, at 10HP | **13.35 mm** | ~17 mm | ~20 mm |
-| *(at 8HP)* | *8.27 mm* | *~12 mm* | *~15 mm* |
-| *(at the original 6HP)* | *3.19 mm* | *~7 mm* | *~10 mm* |
+| Panel hole | **⌀24.0 mm min** | ~16 mm | 10.2 mm |
+| Aluminium left each side, at 10HP | **13.25 mm** | ~17 mm | ~20 mm |
+| *(at 8HP)* | *8.17 mm* | *~12 mm* | *~15 mm* |
+| *(at the original 6HP)* | *3.09 mm* | *~7 mm* | *~10 mm* |
+
+> **The etherCON column is now read off the vendor drawing**, not estimated:
+> Neutrik **ST-NE8FDP, Aend-Index B**, held in the repo at
+> `datasheets/connectors/NE8FDP.pdf` with its DXF beside it. The bore is
+> **⌀24.0 mm as a minimum**, not the 23.8 mm this table carried — so 23.8 was
+> not merely imprecise, it was **below the specified minimum**. Every
+> derived figure moves by 0.1 mm and none of them changes a decision.
+>
+> The same drawing settles the mounting pattern, which three reviews recorded
+> as unobtainable: **two clearance holes only, diagonally opposite, ⌀3.2 mm
+> min, at 19 ±0.1 mm × 24 ±0.1 mm** — centres at (±9.5, ±12.0) from the bore.
+> The holes sit **inboard of the flange edge** (11.1 mm out against the
+> flange's 13.0 mm), so the flange, not the screw, is the near-edge feature.
+> A review's guess that the web is "≤2.09 mm and probably less" is wrong and
+> is retired.
 | Current per contact | ~1.5 A | **0.5 A** | 2 A |
 | Cable | **any Cat5e patch lead** | off-the-shelf M12-X | build it yourself |
 
@@ -693,8 +708,8 @@ lead at the first sign of intermittency rather than diagnosing it.
 
 ### The panel is 10HP, and this is the first time the height was derived
 
-**6HP → 8HP was the connector.** At 6HP a 23.8 mm bore in a 30.18 mm panel
-leaves two aluminium strips **3.19 mm** wide — a fit the panel passes and a
+**6HP → 8HP was the connector.** At 6HP a 24.0 mm bore in a 30.18 mm panel
+leaves two aluminium strips **3.09 mm** wide — a fit the panel passes and a
 stiffness test it does not, with a cable that tugs sideways every time the
 instrument moves. Worse, the connector body extends 30–40 mm behind the panel
 while the jacks put the PCB about 7 mm behind it, so clearing it needs a
