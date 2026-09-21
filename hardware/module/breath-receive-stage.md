@@ -26,8 +26,7 @@ and the ADR gets corrected.
                  └── 0.6× divider ── C-AA-ADC ── MCP3202 CH0          │
                                                                       │
    analog star ──[R1b 1k]──────────────────────── AGND   (pin 2) ──┐ │
-   (no power current)                       ↑ to IN+, via R2           │ │
-   (no power current)                                               │ │
+   (no power current)                       ↑ to IN+, via R2        │ │
                                                                     │ │
   ──────────────────────────────────────────────────────────────────┼─┼───────
                                                                     │ │
@@ -53,7 +52,7 @@ and the ADR gets corrected.
                                  │  R_G 42.2k   │◄── G = 2.185  │
                                  │              │               │
                                  │  REF ◄───────┼── ½ OPA2197 ◄─[TRIM-BREATH-ZERO]
-                                 │              │   buffered      from VREFOUT
+                                 │              │   buffered    from the LM317 5.21 V
                                  └──────┬───────┘   +0.437 V nulls the pedestal
                                         │  Vout = −2.185·(V_BREATH − V_AGND) + V_REF
                                         │       = 0 V at rest, −9.6 V at full
@@ -75,7 +74,7 @@ and the ADR gets corrected.
                                    BREATH jack
 ```
 
-## `REF` ties to ground, and the polarity question dissolved twice
+## `REF` carries a trimmer, and the polarity question dissolved twice
 
 **The original showstopper.** The MPXV4006DP sits at **+0.2 V at zero pressure
 by design** (spec range 0.152–0.378 V). An in-amp is additive at `REF`:
@@ -99,11 +98,15 @@ number**: 0.152–0.378 V, which needs `REF` anywhere from **0.332 V to
 own datasheet band would have been un-nullable, leaving 1.4–5.6 % of span
 standing at the jack — the same band as the polarity showstopper this trimmer
 was added to fix. The in-amp then
-rests at 0 V and reaches −9.6 V at full sensor range. The downstream stage is
-**inverting**, which is the topology that wants a negative-going input: an
-inverting summer does gain and offset with two pots into one virtual ground,
-where a non-inverting stage would have the offset injection interact with the
-gain setting.
+rests at 0 V and reaches −9.6 V at full sensor range — about −4.7 V in real
+playing.
+
+**The downstream stage is inverting**, which is the topology that wants a
+negative-going input. Now that it is drawn (`breath-output-stage.md`) that is
+a buffered attenuator ahead of a fixed ×4 summer, with the offset injected at
+the summing node — *not* two pots sharing a virtual ground, which is what an
+earlier version of this sentence described and which would have made the knobs
+fight.
 
 So the swap survives on the downstream stage's topology rather than on the DAC's
 unipolarity. Recorded explicitly because a decision whose original justification
@@ -258,13 +261,15 @@ With the body at room temperature and no breath at the mouthpiece:
 
 1. **`TRIM-BREATH-ZERO`**, internal, until the in-amp output reads 0 V. Once,
    at build.
-2. **Panel GAIN** for the span the patch wants. The knob is doing more work
-   than this page used to say: real playing tops out around 2.5–2.8 kPa against
-   the sensor's 6 kPa range, so a hard blow reaches roughly 4.5 V at the in-amp,
-   not 10 V. **The downstream stage needs about 0.6× to 2.5×**, not unity and a
-   trim.
-3. **Panel OFFSET** for where you want the jack to rest. Because step 1 nulled
-   the pedestal ahead of the gain pot, step 2 no longer disturbs this.
+2. **Panel GAIN** for the span the patch wants. The knob does more work than
+   this page used to say: real playing tops out around 2.8 kPa against the
+   sensor's 6 kPa range, so a hard blow reaches about **−4.7 V** at the in-amp,
+   not −10. The downstream stage is **0.5× to 4×**
+   (`breath-output-stage.md`), which puts the working point near 2.1× — in the
+   middle of the knob rather than at an end stop.
+3. **Panel OFFSET** for where you want the jack to rest — **±5 V, zero at
+   centre**. Because step 1 nulled the pedestal ahead of the gain pot, step 2
+   no longer disturbs this.
 
 Thermal drift afterwards is on the order of 20 mV in 10 V over a full warm-up —
 a quarter turn if it ever bothers you. **That figure is unverified**: it rests
