@@ -419,7 +419,17 @@ If the real-time board hangs mid-note, the DAC holds its last written value and
 failure than the module going dark, because it is loud, it is indefinite, and
 the instrument in your hands will not respond to anything you do with it.
 
-**Assert `CLR` at the module when no valid frame has arrived for N milliseconds.**
+> **Withdrawn 2026-09-21.** The mechanism below was built and then deleted,
+> because it could not catch the failure this section describes. It retriggers
+> on `CS` edges, and firmware refreshes every channel every pass — so a hang
+> *above* the output loop emits healthy edges forever. What it could catch was
+> the link going away, and that is now uncovered: **pull the umbilical mid-note
+> and the rack holds the note until the module's toggle is flipped.** The
+> reasoning, the cost and the no-new-parts way to get the link coverage back
+> are in `hardware/module/digital-and-supervision.md`. The paragraphs below are
+> kept because the problem they describe is still real.
+
+~~**Assert `CLR` at the module when no valid frame has arrived for N milliseconds.**~~
 A few gates or a retriggerable monostable, at the module end where it is
 independent of the thing that hung. The DAC's own `CLR` pin already does exactly
 what is wanted — an A/C grade part clears to zero scale, which parks pitch

@@ -131,44 +131,58 @@ One comparator reports cable connected, +12 V reaching the far end, REF5050
 alive, sensor alive, buffer alive, and both analog conductors intact. Nothing
 else in the design reports any of those.
 
-## The frame watchdog
+## There is no frame watchdog
 
-> ### ⚠ It is a **link** watchdog, not a hang watchdog — and this page claimed
-> otherwise
->
-> It retriggers on `CS` edges, and `firmware/README.md` **mandates refreshing
-> every channel every pass**. So a firmware hang *above* the output loop — the
-> exact failure ADR 0004 describes as "the real-time board hangs mid-note and
-> the rack drones forever" — keeps emitting perfectly healthy `CS` edges, and
-> the watchdog never fires.
->
-> What it does catch is **`CS` stopping**: a crash that takes the loop down, a
-> cable unplugged, the instrument losing power, the load switch latching off.
-> Those are real and worth catching. But "SPI stuck" is the stated requirement
-> and is *not* covered, and the two failure modes were being conflated.
->
-> Closing the gap needs a **heartbeat firmware only emits when the whole chain
-> is healthy** — a pattern the '123 cannot get from a stuck loop — rather than
-> a raw edge count. That is a firmware-and-timing decision, not a resistor.
+**Deleted.** A 74HC123 monostable used to assert the DAC's `CLR` when SPI
+traffic stopped. The part, its timing pair and its decoupling are gone; `CLR`
+is pulled **inactive**, with a solder pad beside it so it can be asserted by
+hand.
 
-**Retriggered from the buffered, DAC-side `CS`.** From the cable side a
-floating input could retrigger it forever — though note the six-sided
-`R-SPI-PULL` largely removes that objection, which reopens the cable-side
-option as a way to make `OE` changes land only on frame boundaries.
+**It was deleted because it could not do the job it was named for.** ADR 0004
+built it to catch "the real-time board hangs mid-note and the rack drones
+forever" — and it counts `CS` edges, while `firmware/README.md` mandates
+refreshing every channel every pass. A hang *above* the output loop emits
+healthy edges indefinitely and the watchdog never fires.
 
-`t ≈ 0.45 · R · C` → 1 MΩ × 220 nF ≈ **99 ms**: far above a 250 µs loop period,
-well under a second. X7R is fine here; ±30 % on a 99 ms timeout changes nothing.
+**What it could catch was the link going away**, and that coverage is now
+gone too:
 
-`R-CLR-PD` is a **pull-down**, because `CLR` is active low and low means
-cleared means outputs at zero scale — the safe direction. An earlier revision
-pulled it *up*, justified by a floating-node argument that does not hold: a
-74HC123's `Q` is push-pull and never floats. What the pull is actually for is
-the window before the '123 powers up, and there the safe default is cleared.
+| Failure | Watchdog | Now |
+|---|---|---|
+| Firmware hangs above the output loop | **never caught it** | not caught |
+| Cable unplugged mid-note | caught | **not caught — the DAC holds and the rack drones** |
+| Instrument loses power mid-note | caught | **not caught** |
+| Load switch latches off mid-note | caught | **not caught** |
+| Module powered, instrument off | `OE` gating | `OE` gating, unchanged |
 
-**Scope: the DAC channels only.** Breath never passes through the DAC and now
-that `REF` carries a trimmer rather than a DAC channel, `CLR` touches the
-breath stage in no way at all. An analog path cannot latch at a level the
-player is not producing (ADR 0004).
+So the honest cost of deleting it: **pull the umbilical mid-note and the rack
+holds that note until you flip the module's toggle.** That is the everyday
+case, not an exotic one.
+
+**What it bought back**, which is why the deletion is defensible: a part that
+the cold review found four separate problems with — a retrigger regime nobody
+could size without a datasheet, an undefined power-up `Q` state that could
+leave it disarmed with a note standing, a software-defeasible clear path
+through the DAC's clear-code register, and a 99 ms timeout that would have
+fought every "write a code, read the meter" step of E7 through E10.
+
+### The obvious way to get the link coverage back, for no new parts
+
+`CLR` can be driven from the **presence comparator** instead of from a
+monostable. It already reports cable connected, far-end power, reference alive,
+sensor alive and both analog conductors intact — which is precisely the set of
+failures the watchdog actually covered. Presence drops, outputs park.
+
+**The complication is polarity.** `OE` is active low and wants the comparator
+*asserted* when the instrument is present; `CLR` is active low and wants the
+opposite. One open-collector output cannot serve both senses, so it needs an
+inversion — and the obvious way to get one is a **74AHCT14 hex Schmitt
+inverter**, which two independent reviews already recommended adding as
+baseline for edge cleanup on `SCLK`, `MOSI` and `CS` over 2 m of Cat5.
+
+One part, three jobs. Not adopted here because it is a design decision rather
+than a correction, and because it should be taken with the SPI edge-cleanup
+question rather than separately.
 
 ## Still open
 
