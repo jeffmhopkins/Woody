@@ -143,37 +143,64 @@ real effort, and this comes close to free.
 
 | Zone | Contents |
 |---|---|
-| **Top** | Display board (AMOLED + WiFi), breath sensor + ADC on a short tube, upper key cluster |
-| **Middle** | Real-time MCU |
-| **Bottom** | IMU, umbilical connector, power entry and 3.3 V regulation, protection |
+| **Top** | Display board (AMOLED + WiFi), upper key cluster |
+| **Middle** | Key clusters, wiring looms, the U-bolt |
+| **Bottom (tail)** | **Real-time board** — and with it the **IMU** (soldered to it) and the **8×8 matrix** — plus the **breath sensor and ADC**, the precision reference and buffer, the umbilical connector, power entry, and the USB-C slot |
 
-### Mid-body placement halves the worst-case run
+**This table previously said something physically impossible**, and six review
+documents flagged it: it placed the IMU in the Bottom zone and the real-time MCU
+in the Middle, when the IMU is *soldered to the real-time board*. It also put
+the breath sensor at the top on a short tube, which ADR 0003 reversed, and it
+was the load-bearing premise for a "mid-body placement halves the worst-case
+run" argument that no longer applies.
 
-Centring the MCU is what a star topology buys: nothing is far from it.
+### Everything real-time is at the tail, and three decisions put it there
 
-| Destination | MCU mid-body | MCU at the bottom |
-|---|---|---|
-| Display | 170 mm | 360 mm |
-| Breath ADC | 145 mm | 335 mm |
-| Left-hand cluster | 75 mm | 265 mm |
-| Right-hand cluster | 75 mm | 115 mm |
-| IMU | 175 mm | 15 mm |
-| Umbilical | 205 mm | 15 mm |
-| **Worst case** | **205 mm (8.1 in)** | **360 mm (14.2 in)** |
+The concentration is not an accident of layout; it is where three independent
+arguments landed:
 
-Longest run drops from 14 inches to 8. Nothing in this design *needs* that —
-UART and slow SPI were both fine at 14 inches — but it buys margin on every
-link at once, and margin is what stops intermittent faults.
+- **The IMU wants to be low.** Acceleration is a first-class control and scales
+  with distance from the pivot at the player's hands (ADR 0007).
+- **The breath sensor wants to be with the ADC and its reference**, which means
+  a long pneumatic tube rather than a long analog run — and it wants to be away
+  from the display board's AMOLED, which is the hottest thing in the instrument
+  (ADR 0003).
+- **The 8×8 matrix wants a window in the player's downward glance**, which is
+  the tail underside (ADR 0014).
 
-It also puts the heaviest board near the U-bolt and therefore near the centre of
-gravity, which makes balance more predictable (ADR 0009).
+All three want the same board in the same place, which is rare enough to take
+advantage of.
 
-### Two physical constraints on the middle
+### What it costs: the longest run is 360 mm, not 205
 
-**The U-bolt passes through the inter-hand gap.** That gap is 50 × 57 mm, and
-the strap anchor through-bolts the whole stack right there (ADR 0009). A
-mid-body board shares that window and must route around it. Worth laying out
-together rather than discovering at assembly.
+| Destination | Run from the tail |
+|---|---|
+| Display board | **360 mm** |
+| Left-hand cluster | 265 mm |
+| Right-hand cluster | 115 mm |
+| IMU | on-board |
+| Breath sensor / ADC | on-board |
+| Umbilical | 15 mm |
+
+An earlier version of this ADR preferred mid-body placement because it halved
+the worst case to 205 mm. That advantage is real and it is **spent
+deliberately**: the 360 mm run is the **inter-MCU UART**, the least
+timing-sensitive link in the instrument, running at 921600 baud with 2 % bus
+utilisation. Everything that is timing-sensitive — the sensor, the converter,
+the reference, the IMU — is now on-board with a run of zero.
+
+The analog runs went from 400 mm to zero. The pneumatic run went from 30 mm to
+400 mm. That trade is argued in ADR 0003 and it is the right way round: a tube's
+failure modes are delay and condensation, both bounded and both handled, where a
+400 mm analog pair alongside LED power has failure modes that are neither.
+
+### Two physical constraints, now on the tail rather than the middle
+
+**The tail face is crowded.** It carries the umbilical connector, the USB-C
+slot, and — on the underside just inboard — the matrix window. A ~26 × 31 mm
+etherCON flange on a 57 × 38 mm face leaves little room, the D-series is rated
+for a **4 mm maximum panel thickness** so it cannot mount through 6 mm oak, and
+all of it must be drawn together at M4 (ADR 0009).
 
 **The cavity is not a clear box.** Switch bodies protrude into it along the
 centreline for the full length of both key runs, and thumb switches protrude
@@ -181,26 +208,18 @@ upward from the bottom face. What is actually free is:
 
 - The upper section, above the left-hand key run
 - The inter-hand gap, minus the U-bolt
-- The lower section, below the right-hand key run
+- The lower section, below the right-hand key run — now the busiest zone
 - **Two side channels** either side of the switch column — narrow, but
-  continuous end to end, and the natural route for the wiring looms
+  continuous end to end, and the route for the wiring looms and the LED strips
 
 Board outlines want planning against that shape, not against the raw envelope.
-A long narrow board running alongside the switch column is a legitimate
-alternative to fitting a square one into the inter-hand gap.
 
-### Is the third board worth it?
+### The third board is gone
 
-The alternative is two boards, with the real-time MCU riding on the bottom board
-alongside the power entry, IMU and connector. That saves a board and an
-inter-board connector — fewer things to fail — at the cost of 14-inch runs
-instead of 8-inch ones.
-
-Both work. The three-board split is preferred because the instrument has the
-room, the runs get shorter everywhere at once, and mass lands near the
-suspension point. But if the inter-hand gap turns out too crowded once the
-U-bolt and its backing plate are drawn, collapsing to two boards is a clean
-fallback rather than a redesign.
+An earlier version weighed a three-board split (display, mid-body MCU, bottom
+I/O) against two. **It is two**: a display board at the top and everything else
+at the tail. The third board existed only to hold a mid-body MCU, and the MCU
+moved.
 
 ## Build approach: dev boards as modules on a passive carrier
 

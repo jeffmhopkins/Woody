@@ -209,8 +209,10 @@ stands anyway**, because its real value is isolation: WiFi and display rendering
 on different silicon from the 4 kHz loop is a physical guarantee rather than a
 scheduling discipline. The pin budget was the symptom, not the reason.
 
-Placement reinforces it — the display belongs at the top, the real-time board
-mid-body (ADR 0013).
+Placement reinforces it — the display belongs at the top and the real-time board
+at the tail, with the IMU, the breath sensor and the matrix all on it
+(ADR 0013). They are at opposite ends of the instrument, which is the strongest
+form the separation can take.
 
 ## Alternatives considered
 

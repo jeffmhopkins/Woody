@@ -343,9 +343,24 @@ buffer rather than a divider; and it has **real DC offset and drift
 specifications**, where the INA134 is an audio part characterised for AC feeding
 what is here a DC-accurate output.
 
-Put the pulldown **differentially across BREATH–AGND**, not on one leg. A shunt
-on a single leg does not symmetrise the way a series element does — 100 kΩ on
-the + input alone would cap CMRR near 19 dB.
+**The pulldown is deleted and replaced by a common-mode bias return.** The
+original rule — put it differentially across BREATH–AGND, never on one leg,
+because a single-leg shunt caps CMRR near 19 dB — is correct as far as it goes,
+and it was not far enough. **A purely differential element gives the in-amp's
+inputs no DC path to ground at all.** Unplugged, input bias current ramps both
+inputs until the amplifier saturates, so the breath jack goes to a rail rather
+than to the 0 V ADR 0005 promises.
+
+Two 1 MΩ resistors, one from each input to module analog ground, provide the
+return *and* the differential path, symmetrically, without the 1–17 % signal
+attenuation the 100 kΩ shunt imposed. They divert tens of nanoamps against a
+~350 mA power return — about 0.2 ppm, so the sense-return rule survives in
+substance. **That rule must now be read as "no *power* current", which is what
+it always meant**, because as literally written it forbids the thing that makes
+the receiver work.
+
+Values, derivation and the full topology are in
+[the schematic](../../hardware/module/breath-receive-stage.md).
 
 Full differential signalling was considered and is not needed: it buys about
 6 dB against induced noise, which a twisted pair band-limited to 500 Hz does not
@@ -511,9 +526,15 @@ MIDI.
 
 **Ambient zeroing.** Not lost — solved with a spare DAC channel. The DAC is
 octal with channels going spare, so **one channel drives a firmware-controlled
-DC offset into the module's analog summing stage.** Firmware measures ambient at
+DC offset into the module's in-amp `REF` pin.** Firmware measures ambient at
 startup exactly as the 2021 code did, and nulls it by moving that offset. Digital
 control of an analog signal path, for the cost of one already-paid-for channel.
+
+*(An earlier version of this sentence said "analog summing stage" while a
+section above said "REF pin" — two mutually exclusive injection points 174 lines
+apart in the ADR that owns the decision. A review built a showstopper on one
+reading. The REF pin is correct;
+[the schematic](../../hardware/module/breath-receive-stage.md) shows how.)*
 
 ### Parts
 

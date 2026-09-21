@@ -248,8 +248,13 @@ is no flow carrying saliva into the sensor (ADR 0003). A small dead-volume trap
 at the sensor end handles what accumulates.
 
 The only stack requirement is **access to clear it without disassembly**. Not a
-drain plumbed through the body — just a serviceable path to the sensor end of a
-short tube near the top.
+drain plumbed through the body — just a serviceable path to the sensor end.
+
+**The tube is ~400 mm and the sensor is at the tail**, not the 30 mm near the
+top this section used to assume. The trap therefore sits at the tail alongside
+everything else, and "clearable" means reachable from the tail face rather than
+from the mouthpiece end. The tube runs the length of the body in one of the side
+channels.
 
 ### The tail carries a display window and a USB port
 
