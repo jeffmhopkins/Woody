@@ -27,10 +27,18 @@ meta:
   # file claimed it was NOT the MX figure, which was wrong.
   # The *achieved* cutout may differ by the cutter's kerf: M1 coupon decides.
   plate_cutout: 14.0
-  # OPEN, and it blocks M4/M5. 2 mm defeats the retention clips entirely;
-  # MX standard is 1.5 mm; the reference KS-33 build uses 1.1 mm.
-  # Needs the clip dimension from Gateron's drawing (ADR 0002).
-  plate_thickness: null
+  # SETTLED at 1.20 mm - the tracked figure is `plate-thickness`, read off
+  # Gateron's banked drawing. Do not restate the number here; this field
+  # exists so the generator has it, and `plate-thickness` is where it is
+  # argued.
+  #
+  # This said `null` and "OPEN, and it blocks M4/M5" while the register
+  # said settled, and cluster-boards.md cited THIS FILE as the authority
+  # for calling it open. The citation chain was intact and both ends agreed
+  # with each other - just not with the register. No forbidden pattern can
+  # ever catch that shape: the register protects against a superseded
+  # VALUE, and `null` is the absence of one.
+  plate_thickness: 1.20
 
 counts:
   left_hand: 5

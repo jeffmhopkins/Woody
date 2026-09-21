@@ -41,6 +41,28 @@ checker reported **zero hits**.
 A `PreToolUse` hook runs the checker before every `git commit` and surfaces
 the result, so forgetting step 3 is visible rather than silent.
 
+**Three traps in step 2, all paid for.**
+
+- **Write the pattern in the spelling of the file it must match.** The BOM is
+  CSV and spells `97mm`, `-9.6V` and `~5.7us`; a prose page spells `97 mm`,
+  `−9.6 V` and `` `V_IL` at **5.7 ``. Patterns written from the prose miss the
+  CSV every time, and the same stale text is then in the repository twice,
+  because `hardware/bom.csv` is generated from the fragment.
+- **A pattern containing a hard wrap can never fire.** The checker searches a
+  line-joined stream, so `"220 Ω with\n~200 pF"` sat in the register matching
+  nothing — and reading exactly like a pattern that matches nothing.
+- **A refutation split across an ASCII drawing's gutter does not count.** The
+  lines are joined with the `│` still in them, so "This line │ carried" is not
+  "this line carried". Keep the correction and the value it corrects on one
+  line.
+
+And the counterpart to grepping first: **most hits will be legitimate.** Nine
+of the eleven live `8HP`/`6HP` hits were the ADRs correctly narrating
+6HP → 8HP → 10HP. Four of the six live `4.7 V` hits were a different node
+entirely, one of them negative. A pattern that fires on a correct sentence is
+worse than no pattern, because its cheapest fix is to make the sentence wrong.
+Use `false_positive_note`.
+
 ### 3. Datasheets are banked, not linked
 
 `datasheets/` holds the actual documents, one `MANIFEST.csv` row each with a
@@ -89,11 +111,17 @@ corrected.** Resolve them through `docs/reference/repo-maintenance.md` §7.
 
 ## Review waves
 
-Three have run: `docs/review/2026-09-20-cold-review/`,
-`2026-09-21-hardware-and-standards-review/` (20 agents),
-`2026-09-21-staleness-sweep/` (12 agents). Each directory's `README.md` states
-its method; `VERIFIED.md` records what was checked by hand and where an agent
-was wrong.
+**Nine have run.** `docs/review/` is the index; this list is not kept in sync
+by anything and said "three" for months while the directory held nine. The
+ones with the most transferable method are
+`2026-09-20-cold-review/`, `2026-09-21-hardware-and-standards-review/`
+(20 agents), `2026-09-21-staleness-sweep/` (12 agents) and
+`2026-09-21-pre-merge-review/` (22 agents, and the one that found the checks
+themselves were passing on a corpus with live stale values in it).
+
+Each directory's `README.md` states its method; `VERIFIED.md` records what was
+checked by hand and where an agent was wrong; `STATUS.md`, where a wave has
+one, records what actually landed.
 
 What makes them work, and is worth keeping:
 

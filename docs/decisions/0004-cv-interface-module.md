@@ -206,8 +206,17 @@ and if the selected value lands badly you find out at E7 with a meter, on a
 board with four screws in it.
 
 **The 74AHCT125 stays on the bus +5 V rail.** Its job is to get 3.3 V logic over
-the DAC's 0.7 × AVDD input threshold — 3.65 V at AVDD = 5.21 V. An AHCT gate on
-a rail sagging to 4.75 V still drives 4.6 V, with a volt of margin. Leaving it
+the DAC's `V_INH` input threshold — **0.625 × AVDD = 3.26 V** at AVDD = 5.21 V.
+An AHCT gate on a rail sagging to 4.75 V still drives 4.6 V, with well over a
+volt of margin.
+
+> *This read "0.7 × AVDD — 3.65 V" until 2026-09-21, which is the WRONG ROW.
+> SBAS430E p.4 splits `V_INH` in two: `0.7 × AVDD` applies for
+> 2.7 V ≤ AVDD < 4.5 V, and `0.625 × AVDD` for 4.5 V ≤ AVDD ≤ 5.5 V. The LM317
+> rail is `dac-rail`, which is in the second band. p.53's revision history
+> records TI splitting the parameter into two rows deliberately. The
+> conclusion survives — 3.3 V CMOS still cannot drive it — but the number
+> carrying the argument was 0.39 V wrong, in the ADR that owns the link.* Leaving it
 there keeps its switching current off the DAC's supply, and it means the only
 thing hanging on the unprotected bus +5 V pin is a $0.30 buffer. A reversed or
 row-offset ribbon that puts +12 V onto that pin kills the buffer and nothing

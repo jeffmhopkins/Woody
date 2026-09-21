@@ -131,6 +131,27 @@ ferrite bead is effectively a wire at that frequency (ADR 0004).
 | 30/m (25 LEDs) | 0.50 A | 0.17 A | **0.07 A** |
 | 60/m (50 LEDs) | 1.01 A | 0.34 A | **0.13 A** |
 
+> **This table is computed at ~20.2 mA per LED at full white, and that figure
+> is not the WS2815's.** `datasheets/led/WS2815.pdf` p.3 states *RGB Channel
+> Constant Current **15 mA***, i.e. **45 mA per LED** across three channels
+> — **2.23×** the number above. At 45 mA/LED the 60/m row is **2.25 A**, and
+> the "both strips full white" row below becomes roughly **27 W and ~81 K**
+> rather than 12.1 W and ~36 K.
+>
+> Note the same page's *Quiescent Current **2.1 mA*** reproduces ADR 0005's
+> 123 mA figure exactly, so the two numbers in this corpus came from
+> different sources and only the quiescent one came from the datasheet.
+>
+> **This ADR already says this**, 284 lines below, about the *matrix*: "this
+> is the wrong part's figure and it is at least 2.4× too low". The refutation
+> landed where the editing was happening and not where the reader looks —
+> which is this project's named failure mode, in the ADR that owns lighting.
+> The table is left as drawn rather than silently rewritten, because
+> `matrix-led-current` is `blocked` on a bench measurement and the strip
+> figure needs the same treatment: measured, not re-derived. **What is
+> settled is that the ~3 W clamp was sized against a load case that is 2.23×
+> understated.**
+
 ### The constraint is not the rack. It never really was.
 
 Earlier revisions of this section argued from the rack supply: *"Eurorack

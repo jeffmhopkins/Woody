@@ -173,7 +173,11 @@ the best available on every channel at once:
 scale) and C/D are gain 2 (5.000 V). An A-grade part halves every output —
 pitch becomes −2…+2.25 V, the mods ±5 V, and channel 7 cannot reach its
 reference voltage at all. Only C satisfies both requirements. `bom.csv` is
-locked to `DAC8568CIPW`.
+locked to **`DAC8568ICPW`**. *(This read `DAC8568CIPW` until 2026-09-21. That
+order code does not exist: SBAS430E's own Package Option Addendum lists
+`DAC8568IAPW / IBPW / ICPW / IDPW`, and the transposed spelling appears
+nowhere in the document. The banked file is still named after the transposed
+code; see the `U-DAC` BOM row.)*
 
 > **Confirmed 2026-09-21 against SBAS430E**, now held at
 > `datasheets/analog/DAC8568CIPW.pdf`. This paragraph asked for
@@ -196,9 +200,22 @@ locked to `DAC8568CIPW`.
 
 | Output | At rack power-on, before firmware writes | Why that is right |
 |---|---|---|
-| **Pitch** | Bottom of its range, below −2 V | Subsonic. A VCO there is inaudible |
+| **Pitch** | **Exactly 0 V** — an ordinary, audible note | **Not subsonic. See below.** |
 | **Mod 1–4** | **Exactly 0 V** | Both terms of the difference are zero |
 | **Breath** | **Wherever the panel OFFSET knob was left, anywhere in ±5 V** | **Not a defined state — see below.** Breath never passes through the DAC, so no reset reaches it |
+
+> **The pitch row said "Bottom of its range, below −2 V — subsonic, a VCO
+> there is inaudible" until 2026-09-21, and the refutation was already in this
+> ADR, twenty lines below it.** That row needs the 2.500 V offset to exist,
+> and the offset is derived entirely from `VREFOUT` — which this ADR states,
+> just below, is **off by default** and needs an explicit enable write at
+> boot. With the reference off both terms of `Vout = 2·Vdac − 2.500` are zero,
+> so the jack sits at **0.000 V**, which `pitch-stage.md` derives
+> independently. On a 1 V/oct VCO that is a base note, held for about a second
+> at every rack power-on, not silence.
+>
+> The mod rows are unaffected and were right: both terms of their difference
+> really are zero. Breath never passes through the DAC at all.
 
 > **The breath row said "0 V — the receiver's differential pulldown holds it
 > there" until 2026-09-21, and both halves were wrong.** `R-PD-BREATH` is

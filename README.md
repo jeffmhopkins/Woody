@@ -113,16 +113,31 @@ tools/            Host-side utilities
 ```
 
 *(`docs/review/` and `datasheets/` were missing from this tree until
-2026-09-21. `datasheets/` is 77 banked documents and the largest directory in
-the repository; `docs/review/` is seven waves. Both were invisible in the one
-file a new reader opens first.)*
+2026-09-21. `datasheets/` is the largest directory in the repository;
+`docs/review/` holds nine waves. Both were invisible in the one file a new
+reader opens first. The counts that used to sit in this sentence — "77
+banked documents", "seven waves" — were true when written and wrong within
+the week, which is the whole reason this repository cites rather than
+restates.)*
 
 ## Where to start reading
 
 1. [ROADMAP.md](ROADMAP.md) — the three tracks and what "done" means for each
-2. [docs/decisions/](docs/decisions/) — every choice made so far, and why
-3. [docs/reference/latency-budget.md](docs/reference/latency-budget.md) — the
+2. [hardware/README.md](hardware/README.md) — **how the schematics are
+   organised**: one circuit per directory, what the four files in each are,
+   and the two rules that will bite you. Start here before opening any
+   circuit page.
+3. [docs/decisions/](docs/decisions/) — every choice made so far, and why
+4. [docs/reference/latency-budget.md](docs/reference/latency-budget.md) — the
    constraint that shapes most of the electrical design
+5. [docs/reference/repo-maintenance.md](docs/reference/repo-maintenance.md) —
+   which files are generated, which are history, what each tool owns
+
+*(Entry 2 was missing until 2026-09-21. `hardware/README.md` — the page that
+explains the whole `<board>/<circuit>/` scheme the restructure exists to
+create — had **zero inbound links from anywhere in the corpus**, so the tree
+was navigable by `grep` and by already knowing where things were, which is
+the condition the restructure was meant to end.)*
 
 *(This file carried a second "Licensing" section here saying the licence was
 "not yet decided", contradicting the "Licence" section above it, which states

@@ -164,13 +164,21 @@ coordinates rather than a pitch parameter.
   **put every passive on the far face.** Also budget a **⌀5.25 mm clearance
   hole through both the plate and this board** for the centre pole, which
   protrudes ~2 mm below the PCB.
-- **Plate thickness is still open and blocks M4/M5** `[repo] key-layout.yaml,
-  0002, bom.csv`. The framing has changed: the model shows **no retention clip
-  shoulder at all**, so "2 mm defeats the clips" may be the wrong worry. The
-  real constraint is that **the through-cutout section is only 2.50 mm deep**,
-  of which a 2 mm plate consumes 80 %. MX standard is 1.5 mm and the reference
-  KS-33 build used 1.1 mm. This board does not decide it but it is fitted
-  around the answer.
+- **Plate thickness is settled** — `plate-thickness`, read off Gateron's
+  banked drawing. What is still open is **stiffening**: the settled thickness
+  is thinner than the 1.5 mm MX standard, and nothing has decided whether the
+  plate needs a rib, a backing plate or neither. That is what gates M4/M5.
+
+  The framing changed twice on the way here. The model shows **no retention
+  clip shoulder at all**, so "2 mm defeats the clips" was the wrong worry; the
+  real constraint is that **the through-cutout section is only 2.50 mm deep**.
+  This board does not decide the thickness but it is fitted around it.
+
+  *(This bullet read "Plate thickness is still open and blocks M4/M5" and
+  cited `key-layout.yaml` as its authority — which said `plate_thickness:
+  null`. The citation chain was intact and both ends agreed with each other,
+  and neither agreed with the register. A reader who checked the source got
+  the wrong answer confirmed.)*
 
 ---
 
