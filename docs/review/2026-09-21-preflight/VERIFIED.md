@@ -85,3 +85,59 @@ text-bearing** (2294 chars/page over 104 pages) and should not have been on it �
 while the **Gateron drawing is the dangerous case**, averaging 1841 chars/page
 of spec prose so a script "gets something", with the dimensioned page carrying
 only `0.2/0.4/1.7/3.0`. **Silent partial failure beats a blank.**
+
+## A3 — the sensor transfer function was wrong, and it was a SETTLED figure
+
+**Claim:** the MPXV4006's transfer function is `VS × [(0.1533·P) + 0.053]`, not
+`+ 0.04`. So the pedestal is **0.265 V**, not 0.200 V, and full scale is
+**4.864 V**, not 4.80.
+
+**Re-checked, 2026-09-21. CONFIRMED VERBATIM** from
+`datasheets/other-semi/MPXV4006DP.pdf`:
+
+```
+Transfer Function (kPa):  Vout = VS*[(0.1533*P) + 0.053] ± 5.0% VFSS
+```
+
+`[calc]` at VS = 5.0: P=0 → **0.265 V**; P=6 kPa → **4.864 V**. The corpus had
+0.200 → 4.796.
+
+**Where 0.200 came from:** the datasheet's own **cover-page line**, "0 to
+6 kPa, 0.2 to 4.8 V Output" — which contradicts the transfer function printed
+inside the same document. The sensitivity was always right (5 × 0.1533 =
+0.7665 ≈ 0.766 V/kPa); only the offset coefficient was wrong, and 0.04 belongs
+to the **MPXV5004** family.
+
+`sensor-full-scale` corrected 4.80 → **4.86 V**. This is the first time a
+figure the register marked **settled** has been refuted by a banked document —
+which is the outcome this wave was created to produce.
+
+**What survives:** `inamp-full-scale` (−9.94 V) is derived from the **span**,
+and the span is unchanged — 4.864 − 0.265 = 4.599, the datasheet's 4.6 V VFSS.
+The one sensor number the corpus had right is the one everything downstream
+rests on.
+
+## A10 — two corrections to things I wrote myself
+
+**1. `F-CHAIN`: I used the wrong current, and overstated the objection 3.9×.**
+
+I wrote into `bom.csv` that the polyfuse's 1.0–7.5 Ω gives "0.1 to 0.75 V of
+drop" — computed at the **fuse's 100 mA hold current** rather than the
+circuit's actual draw.
+
+`[calc]` at the real 25.8 mA: **26–194 mV**, not 100–750 mV. And A10 adds the
+reason it is harmless that I missed: the 74HC165's thresholds and the key
+pull-ups are **on the same rail**, so the RC crossing time is independent of
+`VCC` and `key-release-time` does not move.
+
+**Objection withdrawn on the voltage drop.** The confirmed defects remain: the
+package column said 1206 where the drawing says 0805 (already fixed), and a PTC
+does not cover the 12 V short the row names.
+
+**2. `riso-ref-topology`: I filed TI's answer as a "fourth option". It is not.**
+
+SBOS737C Figure 56 takes `R_F` **at `V_OUT`** — so the DC loop closes at the
+load. **It IS the in-loop topology, with an AC feedback path added.** The
+in-loop-versus-out-of-loop framing the dispute opened with is a false
+dichotomy; the real question is not *which side* but *whether the AC path
+exists*. Entry corrected.

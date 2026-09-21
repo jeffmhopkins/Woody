@@ -33,11 +33,28 @@ figures:
 
   - id: sensor-full-scale
     quantity: MPXV4006DP output at full scale
-    value: "4.80 V"
+    value: "4.86 V"
     status: settled
     owner: docs/decisions/0003-breath-sensing-path.md
-    derivation: "0.2 V + 0.766 V/kPa x 6 kPa = 4.796 V"
-    forbidden: ["4.7 V output", "0.2-4.7 V", "0.2 – 4.7 V"]
+    derivation: "Vout = VS*[(0.1533*P) + 0.053], verbatim from the datasheet. At VS = 5.0 V and P = 6 kPa: 5*(0.9198 + 0.053) = 4.864 V. The PEDESTAL IS 0.265 V, not 0.200 V."
+    forbidden: ["4.7 V output", "0.2-4.7 V", "0.2 – 4.7 V", "0.2 V + 0.766", "0.200 V at rest", "0.2 V at rest", "(0.1533*P) + 0.04", "0.1533 x P) + 0.04", "rest | 0.200 V"]
+    note: |
+      CORRECTED 2026-09-21 against datasheets/other-semi/MPXV4006DP.pdf, which
+      refutes a figure this register had marked SETTLED.
+      The old derivation used a 0.200 V pedestal. That number is the
+      datasheet's own COVER-PAGE line - "0 to 6 kPa, 0.2 to 4.8 V Output" -
+      and it CONTRADICTS the transfer function printed inside the same
+      document. Table/transfer function wins over the marketing blurb.
+      The 0.766 V/kPa sensitivity was always right (5 x 0.1533 = 0.7665).
+      Only the offset coefficient was wrong: 0.053, not 0.04. 0.04 is the
+      MPXV5004 family's.
+      WHAT SURVIVES: inamp-full-scale (-9.94 V) is derived from the SPAN,
+      and the span is unchanged - 4.864 - 0.265 = 4.599, the datasheet's
+      4.6 V VFSS typ. The one sensor number the corpus had right is the one
+      everything downstream was built on.
+      WHAT MOVES: V_REF for TRIM-BREATH-ZERO nulls the pedestal, so it
+      follows the pedestal from 0.437 V toward ~0.573 V. Recompute before
+      committing it - it is not a tracked figure yet and probably should be.
 
   - id: key-release-time
     quantity: Key network release, crossing V_IH
@@ -255,7 +272,7 @@ figures:
       - "INSIDE the loop, feedback taken at the sensor's VS pin - as drawn and as bom.csv specifies. SIMULATED PHASE MARGIN 8.4 deg, which is WORSE than fitting no resistor at all (8.8 deg)."
       - "OUTSIDE the loop - simulated phase margin 75.2 deg, but bom.csv says it costs 2% of the ratiometric scale factor."
       - "A series R-C snubber from VS to the analog star, already proposed on the page as the cheaper-in-DC-terms alternative. Not simulated."
-      - "TI'S OWN WORKED ANSWER FOR THIS EXACT CIRCUIT, and it is none of the above. SBOS737C section 8.2.3 p.30 Figure 56, 'Precision Reference Buffer' driving 10 uF: R_ISO 37.4 ohm, R_F 1 Mohm taken at VOUT, R_Fx 10 kohm with C_F 39 nF at the op-amp output, 89 deg phase margin. That is a DUAL-feedback network - DC through 1 Mohm from the load, AC through 10k/39nF from the output - which is neither the in-loop nor the out-of-loop option this entry was opened with. R-ISO-REF is currently 10 ohm against TI's 37.4."
+      - "TI'S OWN WORKED ANSWER FOR THIS EXACT CIRCUIT. *** NOT a fourth option - this entry called it one and that was wrong. *** SBOS737C Figure 56 takes R_F AT V_OUT, so the DC loop closes at the LOAD: it IS the in-loop topology, with an AC feedback path added. The in-loop-vs-out-of-loop framing this entry opened with is a false dichotomy, and the real question is not WHICH SIDE but WHETHER THE AC PATH EXISTS. SBOS737C section 8.2.3 p.30 Figure 56, 'Precision Reference Buffer' driving 10 uF: R_ISO 37.4 ohm, R_F 1 Mohm taken at VOUT, R_Fx 10 kohm with C_F 39 nF at the op-amp output, 89 deg phase margin. That is a DUAL-feedback network - DC through 1 Mohm from the load, AC through 10k/39nF from the output - which is neither the in-loop nor the out-of-loop option this entry was opened with. R-ISO-REF is currently 10 ohm against TI's 37.4."
     decided_by: "PROBABLY ALREADY DECIDED, by TI, in the datasheet that was BLOCKED when this circuit was drawn - see the fourth candidate. Confirm the topology transfers (our load is 100 nF at the sensor VS pin, TI's worked example is 10 uF) and then adopt it. Failing that, a bench measurement at E1/E13. *** BUT IT IS BLOCKED ON A PRIOR QUESTION: *** three files disagree about WHICH SIDE OF THE BUFFER C-REF-OUT sits on - see cref-out-node. The compensation network depends entirely on that, so settle the node before simulating or adopting anything."
     forbidden: []
     note: |
