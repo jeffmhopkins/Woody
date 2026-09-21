@@ -265,7 +265,9 @@ thumb keys and the U-bolt:
 (ADR 0007, ADR 0014). Roughly 22 mm square, facing the player's downward glance
 rather than the audience. It is a through-cut in a flat part, so lamination
 gives it for free — the cost is entirely in planning, because it constrains
-where that board sits and it cannot be added once the stack is bonded.
+where that board sits and it cannot be added once the laminated layers are
+glued. (The body opens — see "The body comes apart" — but the U is one glued
+sub-assembly and a through-cut in it is not a later job.)
 
 Three details that have to be in the CAD from the start:
 
@@ -281,16 +283,34 @@ Three details that have to be in the CAD from the start:
 
 **A USB-C slot at the tail face**, which the instrument needs regardless of the
 window. Flashing and USB MIDI (E5) both require reaching the real-time board's
-own connector, and there is no reaching anything once the body is bonded. Keep
-that edge of the board at the tail.
+own connector. The body opens on six fasteners now, but opening it to flash a
+board is a bench operation, not a thing to do with an instrument in a rack —
+the slot is what makes it a cable. Keep that edge of the board at the tail.
 
 **And the umbilical connector, which is the reason the tail face is now
 crowded.** The etherCON chassis flange (ADR 0004) is roughly 26 × 31 mm on a
 face that measures 57 × 38 mm. Two consequences:
 
-- **It leaves about 3.5 mm of material above and below the cutout**, and
-  **oak is not what should be carrying it.** This is the same rule as the
-  U-bolt and the key switches: the wood is a shell, not structure (ADR 0002).
+- **It leaves about 7.1 mm of material above and below the cutout** — not the
+  3.5 mm this bullet used to claim. **That was the flange, and the flange is
+  not what is cut away.** The D-series chassis bore is the **23.8 mm** punch-out
+  (the same figure the 10HP panel is sized from, `bom.csv`), so on a 38 mm tall
+  face the remaining material is `(38 − 23.8)/2 = 7.1 mm` per side. The 26 × 31
+  flange *overlaps* that face and clamps against it; it removes nothing. Double
+  the material the page thought it had, and it changes the answer below from
+  "marginal" to "fine".
+
+  **Oak is still not what should be carrying it**, and the reason is unchanged
+  by the arithmetic. This is the same rule as the U-bolt and the key switches:
+  the wood is a shell, not structure (ADR 0002).
+
+- **Orientation is a free variable and worth spending.** The flange is
+  26 × 31 mm on a 57 × 38 mm face. Landscape — 31 across the 57 mm width,
+  26 across the 38 mm height — leaves **6 mm of flange margin** top and bottom
+  instead of 3.5, and puts the four flange screws further from the face's
+  edges. **Proposed, not settled**: the screw pattern is not square, so it
+  depends on where the real drawing puts the holes relative to the bore. Decide
+  it off the drawing at M4, not off this paragraph.
   **Mount the connector to an internal backing plate** — aluminium or ply, tied
   into the same stack that carries the keys — and let the oak be the face the
   screws pass through rather than the thing the screws hold.
@@ -319,18 +339,20 @@ why losing the boot-force pins is acceptable:
 1. **OTA rollback.** An image that does not mark itself valid is rolled back by
    the bootloader at the next boot. Covers the likely case — a bad flash.
 2. **USB-Serial-JTAG through the tail USB-C slot**, which is a designed opening
-   and stays reachable with the body bonded. This works *provided the
+   and stays reachable with the body closed. This works *provided the
    application has not claimed USB-OTG*, because the S3's internal PHY routes
    to one or the other and never both. **That is the whole reason USB MIDI is
    opt-in rather than default** (`firmware/README.md`) — it keeps the download
    path alive through every boot that has not been asked for MIDI.
 3. **This console header**, for watching a board that boots but misbehaves.
 
-What is given up is forcing the boot mode by hand when software cannot. A
-spare dev board does not substitute for that once the body is bonded, so the
-honest statement is that a corrupted *bootloader* — as opposed to a corrupted
-application — ends the instrument. That is a narrow case behind two
-mitigations, and it is accepted.
+What is given up is forcing the boot mode by hand when software cannot — and
+that is now **recoverable rather than terminal.** The body opens on six
+fasteners, the dev boards are socketed, and a corrupted *bootloader* means
+taking the lid off and swapping or re-flashing a board on the bench. This
+paragraph used to end "ends the instrument", which was true of a bonded body
+and is not true of this one. Still inconvenient, still behind three
+mitigations, no longer fatal.
 
 **The display board needs none of this.** It is flashed over its UART from the
 real-time board, which closes ADR 0013's open question about how it gets
@@ -372,19 +394,21 @@ Two consequences:
   how it *feels* hanging, not where the model says the centroid is.
 
   An earlier revision asked for a slot or discrete hole positions "so balance
-  can be tuned empirically after assembly." **That is impossible as written**,
-  and a review caught it: the backing plate the U-bolt anchors to sits inside a
-  bonded cavity. Once the stack is closed, there is nothing to move the bolt
-  *to*. An adjustment that requires reaching a part you cannot reach is not an
-  adjustment.
+  can be tuned empirically after assembly." **A review called that impossible**,
+  because the backing plate the U-bolt anchors to sat inside a bonded cavity and
+  an adjustment requiring a part you cannot reach is not an adjustment.
 
-  Two ways to have it, and they are exclusive:
+  **The serviceable body gives it back.** Six fasteners, lid off, move the
+  bolt, lid on — so a slot or a row of positions is now worth cutting, and the
+  balance can be tuned with the instrument on a strap and everything in it.
+  Still do it once at M8 rather than treating it as a user control.
 
-  - **Dry-assemble, hang, balance, then bond.** The stack goes together
-    unbonded with everything in it that contributes mass, it hangs from a
-    temporary strap, the position is marked, and only then does the adhesive
-    come out. This is free, and it folds naturally into the **M8 pre-bond gate**
-    — which exists anyway, for other reasons.
+  Two ways to have it, and they are no longer exclusive:
+
+  - **Dry-assemble, hang, balance, then close.** The stack goes together with
+    everything in it that contributes mass, it hangs from a temporary strap,
+    and the position is marked. This is free, and it folds naturally into the
+    **M8 gate** — which exists anyway, for other reasons.
   - **Or make the anchorage reachable from outside** — a captive plate in a
     machined recess accessible through the bottom face, with the slot in the
     external hardware rather than the internal plate.
@@ -452,9 +476,18 @@ flat parts, and not blocked.
 
 ## Things that are free now and impossible later
 
-A body that is bonded shut is a body that is never opened again. These cost
-almost nothing while the stack is apart and cannot be had afterwards at any
-price.
+**This section is weaker than it was, and deliberately so.** It used to open
+"a body that is bonded shut is a body that is never opened again." The body is
+not bonded shut any more, so the items below are no longer *impossible* later —
+they are merely expensive, because getting at them means lifting the lid,
+disturbing the loom and re-laying a gasket. That is a real cost and it is worth
+avoiding, but it is not the cliff this page was written against.
+
+**Two of them are still genuinely impossible later**, because they are cuts in
+the glued U or in a laminated layer: the matrix window and its carrier cutout,
+and the channels. Those keep the old force. Everything else below: do it now
+because opening a finished instrument is a bad afternoon, not because you
+cannot.
 
 **Cut the service cover and populate its header**, per the tail-face section
 above. It is the only thing standing between a bad flash and a finished
@@ -476,9 +509,10 @@ LED power and 800 kHz data — 10 kΩ, 100 Ω and 10 nF per switch position on t
 cluster boards (ADR 0001).
 
 **Run two spare conductors in every internal loom.** The looms are hand-built,
-once, into a stack that cannot be reopened. A spare pair costs a few cents and
-some crimping now; discovering you need one signal more after bonding costs the
-instrument.
+once, and threaded through channels in a glued sub-assembly. The lid comes off,
+but the looms do not re-route themselves. A spare pair costs a few cents and
+some crimping now; discovering you need one signal more afterwards costs a
+strip-down.
 
 **Conformal-coat the boards.** The instrument is breathed into for hours, behind
 eighteen unsealed switch cutouts, in a body whose interior runs 10–20 K above
@@ -487,7 +521,7 @@ addresses humidity inside the cavity.
 
 **Choose the adhesives before M8, not at M8.** Two products, split by joint —
 see below. Both are cheap and neither is exotic; what is expensive is
-discovering at the pre-bond gate that the one tube in the drawer releases acetic
+discovering at M8 that the one tube in the drawer releases acetic
 acid into a sealed box full of electronics.
 
 **Mask both pressure-sensor ports before coating.** The breath sensor's
@@ -497,9 +531,100 @@ warms — clipping the output to zero and presenting as a dead sensor that works
 from cold and fails ten minutes in (ADR 0003). Adhesive during lamination can do
 the same thing, so orient the part with neither port facing a glue line.
 
-**Dry-assemble and balance before bonding**, per the U-bolt section above. This
-is the M8 gate in the roadmap, and the U-bolt position is one of several things
-it is the last chance to settle.
+**Dry-assemble and balance before final closure**, per the U-bolt section
+above. This is the M8 gate in the roadmap. The U-bolt position is no longer
+something M8 is the *last* chance to settle — the lid comes off — but it is
+still the sensible time, because M8 is when the instrument first has all its
+mass in it.
+
+## The body comes apart
+
+**This supersedes the page's earlier assumption that the stack is bonded shut.**
+The section below the U-bolt already said it in one line — "a body that is
+bonded shut is a body that is never opened again" — and then the construction
+went on bonding it. It does not any more.
+
+### A U, a notch, and six fasteners
+
+```
+        ┌──────────────────────────────┐   aluminium key plate
+        ╞══════════════════════════════╡   oak top   ─┐
+        │                              │              │  the lid
+   ┌────┴──────────────────────────────┴────┐        ─┘
+   │  ╱                                   ╲ │
+   │ ╱        electronics cavity            ╲│   frosted acrylic side  ─┐
+   │╱                                        │   (one side of the U)    │
+   │                                         │                          │ the U
+   └────────────┬──────────┬─────────────────┘   oak bottom            ─┘
+                │  switch  │
+                └──────────┘   thumb plate, inside face
+
+        ▲        ▲        ▲        ▲        ▲        ▲
+        └────────┴────────┴────────┴────────┴────────┘
+         six fasteners, up through the bottom, into the plate
+```
+
+**One side is a U.** The oak bottom and the two frosted acrylic sides are
+assembled as a single channel — glued to each other, once, permanently. That
+sub-assembly is never taken apart again and it carries the LED strips.
+
+**The other side pulls in on a notch.** The lid — aluminium key plate on oak
+top — drops into a rebate cut along the top inside edge of each acrylic side.
+The notch locates the lid laterally and takes the shear, so the fasteners only
+have to hold it down.
+
+**Six fasteners come up from the bottom face, through the whole instrument,
+into the aluminium plate.** They are the only thing holding the instrument
+closed. Six, not four, because the body is 457 mm long and the span between
+fasteners is what sets how much the lid can lift between them; six puts them
+roughly 80 mm apart, clear of the key runs.
+
+**Why this and not a lid that screws down from the top:** the top face is the
+playing surface and the one the hands sit on. Fastener heads there are
+something to feel, something to catch a finger, and six holes through a plate
+whose flatness under the switches is the whole point of it being aluminium.
+From underneath they are invisible in play and land in oak, which takes a
+counterbore for free.
+
+### The two end caps, and what they are made of
+
+The ends are separate parts, not extensions of the top or the bottom.
+
+| End | Material | Why |
+|---|---|---|
+| **Mouthpiece end** | **Acrylic**, with a drilled circle for the tube pass-through | It is the part most likely to want changing. A pass-through diameter that turns out wrong, or a mouthpiece that wants a different mount, is one flat part to re-cut — and acrylic is the material already being cut for the sides |
+| **Tail end** | **Oak**, carrying the etherCON, the USB-C slot and the matrix window | So the wood reads as wrapping from the top face around the bottom and up the back, which is the look. And it is the face with the most openings in it, which wants the material that takes a backing plate |
+
+**If the acrylic mouthpiece end looks wrong on the bench, it becomes oak.**
+Same cut, same fixings, different sheet. That is the reason to make it a
+separate part rather than a lip on the top panel — the decision stays open
+until there is something to look at, and it costs nothing to keep open.
+
+**The etherCON exits the tail end face, axially** — straight out the back along
+the instrument's long axis, the way a flute's foot joint is open at the end.
+Not out of a side, and not out of the bottom face. The cable then leaves in
+line with the body, which is what makes a 2 m tether hang rather than twist
+(ADR 0004).
+
+### What this costs, and what it does not
+
+**It does not weaken anything.** The load paths were never the glue: the keys
+land on the aluminium plate, the plate is the structure, and the U-bolt hangs
+from the same stack. What the glue did was hold the shell together, and six
+M3s do that better because they can be done up again.
+
+**It costs the cavity's seal, and that is fine.** The MPXV4006DP is a
+*differential* part with its reference port open to the cavity, so the cavity
+**must** leak or the breath zero walks with temperature (ADR 0003). A body that
+comes apart on a gasket leaks by construction. The M8 soak still watches the
+zero, but it is now watching for a cavity that seals *too well* rather than
+hoping one was built loose enough.
+
+**It changes what M8 is.** M8 was the pre-bond gate — the last moment before
+the body closed forever. It is now the **pre-assembly gate**: the last moment
+before the instrument is treated as finished, and the point at which every
+measurement is taken on the final loom. The tests do not change. What changes
+is that failing one of them after M8 is now a repair rather than a rebuild.
 
 ### Two adhesives, and which joint gets which
 
@@ -507,17 +632,25 @@ it is the last chance to settle.
 least four joints with incompatible requirements, which is the same defect as
 ordering a ferrite bead and an electrolytic on one row.
 
-| Joint | Adhesive |
-|---|---|
-| Oak ↔ oak — spacer layers, thumb rest lip | **PVA wood glue** |
-| Aluminium key plate ↔ oak top | **RTV silicone** |
-| Frosted acrylic sides ↔ the stack | **RTV silicone** |
-| Matrix diffuser | **RTV silicone**, edges only, clear of the light path |
-| Thumb plate ↔ inside face of the oak bottom | **RTV silicone** |
+| Joint | Adhesive | Permanent? |
+|---|---|---|
+| Oak ↔ oak — spacer layers, thumb rest lip | **PVA wood glue** | Yes |
+| Frosted acrylic sides ↔ oak bottom — **the U** | **PVA is wrong here; use a solvent-free acrylic-to-wood structural adhesive or a mechanical fixing** | Yes — this is the one sub-assembly that stays together |
+| Aluminium key plate ↔ oak top — **the lid** | **RTV silicone**, still — see below | Yes, within the lid |
+| Lid ↔ the U, at the notch | **RTV as a gasket bead, not an adhesive.** Skinned, not fresh, so it seals without sticking | **No — six fasteners** |
+| End caps | **Fasteners into the stack** | **No** |
+| Matrix diffuser | **RTV silicone**, edges only, clear of the light path | Yes |
+| Thumb plate ↔ inside face of the oak bottom | **RTV silicone** | Yes |
+
+**RTV changes job, not product.** It was the adhesive on four joints; it is now
+the adhesive on two and a **gasket** on the one joint that opens. Same
+neutral-cure tube, same two shop rules below. The gasket is laid on one face,
+allowed to skin, and then clamped by the fasteners — which is how it seals a
+joint that has to come apart again.
 
 Wood to wood is wood glue — the strongest, cheapest joint available and the one
-nobody needs to think about. Everything else is RTV, and that is a better answer
-than a structural adhesive for a reason worth stating:
+nobody needs to think about. The plate joint stays RTV for a reason worth
+stating:
 
 **A thin silicone layer is compliant in shear and stiff in compression**,
 because a wide bonded layer cannot squeeze out sideways. On the plate joint that

@@ -87,10 +87,12 @@ four of something different.
 
 ### Accepted consequence
 
-A failed switch in a bonded laminated body (ADR 0009) means taking the
-instrument apart. Accepted — mechanical switches are reliable, this is a
-one-off, and designing the whole build around a failure that probably never
-comes is the wrong trade.
+A failed switch means taking the instrument apart — six fasteners, lid off,
+and the switch is soldered to a plate that is inside the lid (ADR 0009). That
+is an afternoon, not a rebuild; this paragraph said "a bonded laminated body"
+and meant a rebuild. Accepted either way — mechanical switches are reliable,
+this is a one-off, and designing the whole build around a failure that probably
+never comes is the wrong trade.
 
 ## The switch is documented; use the documentation
 

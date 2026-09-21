@@ -75,7 +75,7 @@ runs — which is what makes 18 inches workable.
 | M5 | Aluminium top plate | Cut, fitted, switches retained solidly, **bonded to `PWR_GND`**. Not before E13 — see the ordering rules below |
 | M6 | Body | Oak top and bottom, frosted acrylic sides, LEDs, strap points, **tail matrix window + diffuser and USB-C slot** (ADR 0009) |
 | M7 | Integration | Electronics mounted in the body, umbilical connector fitted and strain-relieved |
-| M8 | **Pre-bond gate** | Assembled but **not bonded**. Full E11 breath-noise test re-run on the *final* harness, **thermal soak at the lighting clamp, watching temperature *and the breath zero* at the sensor**, two-hour play test, failure injection, self-test, **pitch scoped while the LEDs sweep** (ADR 0006 — the one test the plan was missing), and **recover both boards through the service header** so the last route in is known good, not assumed (ADR 0009). Nothing closes until this passes |
+| M8 | **Final-assembly gate** | Assembled, lid on, but not signed off. (This row said **Pre-bond gate / assembled but not bonded** until 2026-09-21. The body is no longer bonded shut — it closes on six fasteners onto an RTV gasket, ADR 0009 — so M8 is the last gate before the instrument is treated as finished rather than the last moment it can be opened.) Full E11 breath-noise test re-run on the *final* harness, **thermal soak at the lighting clamp, watching temperature *and the breath zero* at the sensor**, two-hour play test, failure injection, self-test, **pitch scoped while the LEDs sweep** (ADR 0006 — the one test the plan was missing), and **recover both boards through the service header** so the last route in is known good, not assumed (ADR 0009). Nothing closes until this passes |
 
 **M1 no longer gates M4.** An earlier revision made the cutout measurement the
 single most important input to the mechanical design, on the assumption it could
@@ -97,14 +97,16 @@ carrier layout exists.
 **The body does not close until the carrier is revision-final and burned in.**
 E13 and M7 sat in the same phase with a hard dependency in one direction, and
 the carrier *will* spin at least once — the SPI split alone changes its
-topology. A bonded body around a board that needs a revision is the one
-unrecoverable mistake available in this project.
+topology. A closed body around a board that needs a revision is the most
+expensive mistake available in this project. It stopped being *unrecoverable*
+when the body became serviceable (ADR 0009); the ordering rule stands anyway,
+because "recoverable" here means a full strip-down.
 
 **M8 exists because E11 tests a topology that does not survive to the finished
 instrument.** At E11 the LED strips are not installed — they arrive at M6 — and
-the body is not bonded, so the loom under test is not the final loom. The single
-test that validates the entire analog-breath decision was running against a
-configuration that changes afterwards, and could not be re-run once bonded.
+the body is not closed, so the loom under test is not the final loom. The
+single test that validates the entire analog-breath decision was running
+against a configuration that changes afterwards.
 **This was the most important missing milestone in the project.**
 
 ### Why M1 measures slow presses, not just bounce
@@ -151,7 +153,7 @@ not a release, and should not be filtered as though the phrase were ending.
 | **1** | E1–E5, M1–M2 | Playable USB MIDI instrument on a test plate |
 | **2** | M3, E6–E9 | Layout locked; pitch CV calibrated and accurate |
 | **3** | E10–E12, M4 | Module complete and racked; stack designed. **M5 moves to Phase 4** — the plate is cut after the carrier layout exists |
-| **4** | E13, E14, M5–M7, M8 | Carrier built and re-proven; plate cut; real instrument in a real body, validated before bonding |
+| **4** | E13, E14, M5–M7, M8 | Carrier built and re-proven; plate cut; real instrument in a real body, validated before it is called finished |
 | **5** | F4–F9 | Routing matrix, web config, monitoring, presets, matrix surface |
 
 ## Out-of-order work worth pulling forward
@@ -184,7 +186,7 @@ came out of the analog design review specifically.
 | **Matrix diffusion prototype** | M6 | Can an 8×8 at 2.6 mm pitch stay pixel-distinct through a window, or only as a blurred bar? Decides whether the 2-D IMU assignment is usable (ADR 0014) |
 | **Interior temperature rise under load** | M8 | The lighting budget is set from an estimated 3 K/W. Soak with strips and matrix at the clamp, and measure at the breath sensor (ADR 0014) |
 | **Cold-start warm-up sweep** | E2 | Run the sensor from cold through 20 minutes of playing. Output that *falls* under warming is a blocked reference chamber; output that *drifts* is ordinary thermal offset (ADR 0003) |
-| **Breath zero vs cavity temperature** | M8 | The DP's reference port is open to the cavity, so the cavity must leak. Watch the zero during the same soak — a walking zero means it is sealing more than assumed. **M8 is pre-bond, so a vent can still be added** (ADR 0003) |
+| **Breath zero vs cavity temperature** | M8 | The DP's reference port is open to the cavity, so the cavity must leak. Watch the zero during the same soak — a walking zero means it is sealing more than assumed. **The body opens, so a vent can be added at M8 or afterwards** — and a body that closes on a gasket rather than an adhesive is likelier to leak enough on its own (ADR 0003, ADR 0009) |
 | **PSRAM mode on the ESP32-S3-Matrix** | E1 | **No longer a gate** — settled on paper two ways: the vendor board file exposes GPIO33–40 as headers, which octal PSRAM makes impossible, and `R2` is Espressif's suffix for 2 MB *quad*. 17 broken out, three spare. Print the pin list anyway; it costs thirty seconds and catches a silent board revision (ADR 0007) |
 | **DAC saturation vs AVDD** | E7 | Full scale is 5.000 V from the internal reference at gain 2, *independent* of AVDD — what AVDD decides is whether the output buffer can reach it. Raise the top codes and find where they start compressing; that measurement is also what selects the LM317's divider (ADR 0004, ADR 0005) |
 | **Pitch DC load sweep: open / 100k / 50k / 33k** | E9 | Quantifies the 1 kΩ divider error against the real patch, and tells you how much a re-mult actually shifts tuning (ADR 0006) |
