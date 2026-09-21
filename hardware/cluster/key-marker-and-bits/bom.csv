@@ -1,0 +1,2 @@
+ref,category,part,manufacturer,description,package,qty,status,source,adr,notes
+PLATE-THUMB,mechanical,1.20mm aluminium,,"Thumb switch plate, mounted to the inside face of the oak bottom",n/a,1,selected,,0009,"Carries the 4 left-thumb and 3 right-thumb switches. Same 14.0 x 14.0mm cutout geometry, same vendor and same order as PLATE-TOP | 2026-09-21: follows PLATE-TOP to 1.20mm - same switch, same vendor drawing, same slot. The '~2mm' in this row's part field is 0.8mm outside Gateron's window and must change with it"

@@ -1,0 +1,2 @@
+ref,category,part,manufacturer,description,package,qty,status,source,adr,notes
+J-PWR-EURO,module,16-pin shrouded keyed IDC header,,Eurorack power inlet,THROUGH-HOLE,1,candidate,,0005,Shrouded and keyed - reversed ribbon is the classic eurorack failure. Carries the +5V rail the module REQUIRES

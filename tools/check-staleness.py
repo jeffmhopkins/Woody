@@ -160,6 +160,31 @@ def check_figures(files):
     return live, refuted, spec
 
 
+def check_bom_generated():
+    """hardware/bom.csv is GENERATED. Assert it still matches its fragments.
+
+    The trap this closes has already sprung once in this repo, on
+    MANIFEST.csv: a direct edit to a generated file survives until the next
+    run of its tool and then disappears without a word. bom.csv is the
+    most-cited file here - 37 backtick references - so it is the worst
+    possible place to repeat it.
+
+    A banner comment was considered and rejected: csv.DictReader takes row 0
+    as the header, and two tools already read this file.
+    """
+    import subprocess
+    try:
+        r = subprocess.run([sys.executable,
+                            os.path.join(ROOT, "tools/merge-bom.py"), "--check"],
+                           capture_output=True, text=True, cwd=ROOT, timeout=60)
+    except Exception as e:
+        return [f"could not run merge-bom.py --check: {e}"]
+    if r.returncode == 0:
+        return []
+    return [l.strip() for l in r.stdout.splitlines()
+            if l.strip() and "problems" not in l]
+
+
 def check_bom():
     path = os.path.join(ROOT, "hardware/bom.csv")
     rows = list(csv.reader(open(path, newline="", encoding="utf-8")))
@@ -542,6 +567,7 @@ def main():
     owner_problems, owner_weak = check_owners(spec)
     section_problems = check_sections(files)
     circuits = load_circuits()
+    generated_problems = check_bom_generated()
     circuit_problems = (check_circuits(circuits, spec, bom_refs)
                         + check_verified_against(circuits))
 
@@ -549,6 +575,11 @@ def main():
           f"figures tracked: {len(spec['figures'])}", ""], detail_only=True)
 
     fail = False
+
+    if generated_problems:
+        fail = True
+        emit([f"GENERATED FILE EDITED BY HAND ({len(generated_problems)})"]
+             + ["  " + p for p in generated_problems] + [""], detail_only=True)
 
     if circuit_problems:
         fail = True
@@ -649,6 +680,7 @@ def main():
     if fail:
         print(f"FAIL {len(shape_problems)} shape + {len(owner_problems)} owners + {len(link_problems)} links "
               f"+ {len(section_problems)} sections + {len(circuit_problems)} deps "
+              f"+ {len(generated_problems)} generated "
               f"+ {len(live)} stale + {len(bom_problems)} bom "
               f"| corpus {len(files)} files | {n_unres} unresolved (tracked) "
               f"| detail: .staleness/report.txt or --detail")
