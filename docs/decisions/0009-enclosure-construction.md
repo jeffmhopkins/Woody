@@ -467,6 +467,11 @@ eighteen unsealed switch cutouts, in a body whose interior runs 10–20 K above
 ambient. There is no coating anywhere in the BOM and nothing else in the design
 addresses humidity inside the cavity.
 
+**Choose the adhesives before M8, not at M8.** Two products, split by joint —
+see below. Both are cheap and neither is exotic; what is expensive is
+discovering at the pre-bond gate that the one tube in the drawer releases acetic
+acid into a sealed box full of electronics.
+
 **Mask both pressure-sensor ports before coating.** The breath sensor's
 reference port has to stay open to the cavity, and coating that seals it turns
 the reference chamber into a trapped volume that gains ~5.2 kPa when the body
@@ -477,6 +482,50 @@ the same thing, so orient the part with neither port facing a glue line.
 **Dry-assemble and balance before bonding**, per the U-bolt section above. This
 is the M8 gate in the roadmap, and the U-bolt position is one of several things
 it is the last chance to settle.
+
+### Two adhesives, and which joint gets which
+
+"Structural adhesive for oak/acrylic/aluminium" was one line in the BOM for at
+least four joints with incompatible requirements, which is the same defect as
+ordering a ferrite bead and an electrolytic on one row.
+
+| Joint | Adhesive |
+|---|---|
+| Oak ↔ oak — spacer layers, thumb rest lip | **PVA wood glue** |
+| Aluminium key plate ↔ oak top | **RTV silicone** |
+| Frosted acrylic sides ↔ the stack | **RTV silicone** |
+| Matrix diffuser | **RTV silicone**, edges only, clear of the light path |
+| Thumb plate ↔ inside face of the oak bottom | **RTV silicone** |
+
+Wood to wood is wood glue — the strongest, cheapest joint available and the one
+nobody needs to think about. Everything else is RTV, and that is a better answer
+than a structural adhesive for a reason worth stating:
+
+**A thin silicone layer is compliant in shear and stiff in compression**,
+because a wide bonded layer cannot squeeze out sideways. On the plate joint that
+is exactly the two behaviours wanted at once. Oak moves roughly 1–1.5 % across
+the grain with indoor humidity — **0.6–0.9 mm over the 57 mm width** — against
+an aluminium plate that moves essentially nothing, and a rigid bond would have
+to fight that for the life of the instrument. RTV lets it slide. But press a
+key and the plate is pushing *into* a thin confined layer, which barely gives.
+Epoxy would have bought shear stiffness nobody needs and paid for it by
+fighting the wood.
+
+*(Thermal is the small term here, not the large one. Aluminium over 400 mm and a
+20 K swing is 0.18 mm; wood and water is three to five times that.)*
+
+**Two specifics, because both are easy to get wrong at the shop:**
+
+- **Neutral cure, not acetoxy.** The common hardware-store RTV releases acetic
+  acid as it cures, and this cure is happening inside a sealed cavity holding
+  two dev boards, a carrier, connectors and a pressure sensor. Buy **alkoxy
+  (alcohol) cure**, sold as electronics-safe or low-corrosivity.
+- **Bead it, do not butter it.** RTV cures by taking moisture from the air,
+  inwards at a couple of millimetres a day. A full-face layer trapped between
+  the plate and the oak has no path to cure through. Beads with gaps between
+  them, and real time before the final closure goes on — which also keeps the
+  outgassing away from the breath sensor, alongside the port-masking rule
+  above.
 
 ## Open
 

@@ -153,6 +153,24 @@ design the backer as a structural member rather than a spacer. **Decide with the
 vendor drawing's clip dimension in hand**, which is the one number that settles
 it and the one this project does not yet have.
 
+**The bond is RTV silicone, and that still supports this.** ADR 0009 settles the
+plate-to-oak joint as a compliant silicone layer rather than a rigid adhesive,
+because oak moves 0.6–0.9 mm across the grain with humidity and aluminium does
+not. A first reading says that kills the argument above — a compliant bond
+cannot stiffen a plate.
+
+It does not, because the loads are different in the two directions. The wood
+movement the silicone has to permit is **in-plane shear**, where a silicone
+layer is genuinely compliant. A key press is **normal compression** into a thin
+layer bonded on both faces, which cannot squeeze out sideways and is therefore
+very stiff. The oak backs the plate against exactly the load a key applies,
+while declining to fight the load the seasons apply.
+
+What does change is requirement 2 — *something backs the switch so it cannot
+push through* — which is now being met by a silicone layer rather than by a
+rigid bond, and wants confirming by hand at M1 with a real switch in a real
+offcut rather than by argument.
+
 **There are also no alignment posts.** An MX switch is located by its cutout
 *and* two ⌀1.75 mm posts at ±5.08 mm; the low-profile footprint has neither.
 The cutout is the only lateral location feature there is, which is the evidence
