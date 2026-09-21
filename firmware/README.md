@@ -94,6 +94,24 @@ answered by opening the instrument.
   bricking it leaves a working instrument that can never be reconfigured. It
   gets the same two OTA partitions and the same header pins.
 
+## The lights are instrument-side, and so is everything about them
+
+**The strips and the matrix read the MCU's own digitised breath value.** Not
+the jack, not anything that has been through the module's panel knobs — there
+is no return path for that and no reason to want one. The lights show what the
+player is doing; the knobs scale what the rack receives. See ADR 0014.
+
+Three numbers, all firmware, none of them constants in the source:
+
+- **Zero** — the power-on ADC capture, shared with the note-gating zero.
+- **Deadband** — zero plus a measured noise margin. Without it the bottom LED
+  flickers with nobody blowing, which looks like a fault and is arithmetic.
+  Size it from E2's measured standard deviation; the auto-zero's "quiet" gate
+  needs the same figure.
+- **Span** — where full brightness lands. A setting, because the sensor's range
+  is about twice what real playing produces, so a fixed mapping wastes the top
+  of the display.
+
 ## Data, not code
 
 Two things are explicitly configuration rather than compiled constants

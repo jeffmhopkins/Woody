@@ -85,51 +85,29 @@ software reset, the clear-code register and the internal-reference enable — so
 a mis-framed word is a **sticky** failure that the 4 kHz refresh does not
 clear, unlike a corrupted data bit which self-heals in 250 µs.
 
-## The presence detect, and why it is the breath line
+## There is no presence detect either
 
-**Sensing umbilical +12 V does not detect the instrument** — that node is
-downstream of the module's own load switch, so it reads "present" whenever the
-panel toggle is on, with nothing plugged in. It failed in exactly the state it
-existed for, and part of ADR 0004's argument for moving the power switch rested
-on it.
+Deleted with the watchdog, and for converging reasons. Two versions were built:
+one gating the buffer's `OE` from "+12 V on the umbilical" — a node downstream
+of the module's own load switch, which reads *present* with nothing attached —
+and one watching the breath line through an LM311.
 
-The breath receiver already reports everything, for free:
+The second failed review three ways: its threshold sat **inside the breath
+signal's own range**, because the sensor is differential with its reference
+port open to the cavity and drawing breath moves toward the trip point; it
+**locked out every standalone module milestone**, since a dev board on a patch
+lead drives nothing into that pair; and it **failed toward "present"** on the
+most likely single fault in its own chain.
 
-| State | In-amp output |
-|---|---|
-| Cable unplugged | R4/R5 pull both inputs to `AGND` → **`V_REF` ≈ +0.437 V** |
-| Instrument alive | `REF` trim nulls the pedestal → **0 V** |
+**`OE` is tied enabled**, which is what every surveyed Eurorack module does.
+The floating-CMOS case it was protecting against is what the six `R-SPI-PULL`
+resistors are for. The panel LED becomes an ordinary power indicator.
 
-**Threshold at `V_REF`/2, taken off the trim buffer itself.** That is the whole
-circuit, and it **self-centres**: both ends of the table scale with the trimmer,
-so a sensor anywhere in its 0.152–0.378 V pedestal band gives the same relative
-split without anyone re-picking a number. It also degrades correctly — if the
-reference dies, the threshold goes with it and the detect reads "absent".
-
-**Two earlier versions of this paragraph were wrong, and the second was worse
-than the first.** The first sensed the output against a fixed −200 mV, which
-worked only while `REF` was grounded. The second claimed the trimmer had put
-*both* states at 0 V and moved the tap onto the in-amp's input node. Both
-claims were wrong: the states are 437 mV apart with the **sense inverted**, not
-collapsed — it needed a threshold change, not a new tap. And tapping an input
-node is this design's cardinal sin twice over:
-
-- **It loads one input leg.** Holding 60 dB of CMRR needs the tap to present
-  ≥ 9.75 MΩ; a 100 kΩ network gives **21 dB**.
-- **Comparator bias current lands on the 1 MΩ bias pair.** 100–250 nA × 1 MΩ is
-  **100–250 mV** against a 198 mV discriminating signal — it would have read
-  "present" with nothing plugged in, which is the exact fault the detector
-  exists to catch.
-
-**The LM311 and not an LM393**, which the BOM originally specified: an LM393
-cannot see an input below its own V−, and on a split supply its open-collector
-output pulls to −12 V, because its output emitter is tied internally to V−.
-The LM311's separate emitter pin is exactly why synth circuits use it — Expert
-Sleepers ships this circuit, at this hysteresis value, in two modules.
-
-One comparator reports cable connected, +12 V reaching the far end, REF5050
-alive, sensor alive, buffer alive, and both analog conductors intact. Nothing
-else in the design reports any of those.
+**The knowing moved to the instrument**, which digitises breath anyway and has
+a display to report on. The accepted loss is that the instrument's ADC reads
+*before* the umbilical, so a broken conductor in the cable is invisible to it —
+audible immediately, and in a replaceable part rather than a sealed one. Full
+reasoning in ADR 0004.
 
 ## There is no frame watchdog
 

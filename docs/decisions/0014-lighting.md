@@ -258,6 +258,46 @@ Two fixes, both free:
 The second one is the real fix and it is a single line about which variable
 feeds the animation.
 
+### The lights read the instrument's own copy, and nothing else
+
+Stated explicitly because it was never written down and the alternative is
+tempting: **the strips and the matrix are driven from the MCU's digitised
+breath value, full stop.** They do not — and must not — respond to anything
+that has travelled two metres to the module, through the panel GAIN and OFFSET
+knobs, and back.
+
+There is no path for that anyway: the umbilical is write-only. But the point is
+that there is no *reason* to want one either.
+
+**The lights show what the player is doing, not what the jack is emitting.**
+That is the more useful of the two, and it has a consequence worth stating:
+**turning the panel gain knob does not change the lights.** The knob scales the
+CV for whatever it is patched into; the lights are the instrument's own
+indicator of breath effort and stay put. If the two ever appear to disagree,
+they are answering different questions.
+
+It also means the whole lighting response is firmware, with no hardware in it.
+
+### Zero, deadband and span — all firmware, all settable
+
+| | |
+|---|---|
+| **Zero** | The power-on ADC capture, which firmware already takes (ADR 0006) |
+| **Deadband** | Zero **plus a noise margin**, below which the lights stay dark |
+| **Span** | The breath value that reaches full scale — **a setting**, not a constant |
+
+The deadband is the part that earns its keep. Without it the bottom LED
+flickers on sensor noise with nobody blowing, which reads as a fault and is
+merely arithmetic. Size it from the **measured** noise at E2 — a few times the
+standard deviation — rather than guessing, and the same figure is already
+needed for the auto-zero's "quiet" gate, so it is one measurement serving two
+rules.
+
+Span as a setting matters because the sensor's 6 kPa range is roughly twice
+what real playing produces (ADR 0003), so a fixed full-scale mapping would
+leave the top of the display unreachable. The player sets where full brightness
+lands, on the display or in the web app, like any other per-channel setting.
+
 ## The 8×8 matrix
 
 The real-time board sits at the very bottom tip of the instrument — where

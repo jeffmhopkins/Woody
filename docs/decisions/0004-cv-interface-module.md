@@ -364,53 +364,55 @@ umbilical" would no longer mean "instrument alive", and the gating would fail in
 exactly the state it exists for. The relocation was load-switch-shaped but this
 is what made it necessary.
 
-### Presence detect is a comparator on the breath line, not +12 V on the cable
+### There is no presence detect, and the buffer runs unconditionally
 
-**Sensing umbilical +12 V does not detect the instrument.** That node is
-downstream of the module's *own* load switch, so it is present whenever the
-panel toggle is on — with nothing plugged in at all. It fails in precisely the
-state it exists to detect, and part of the argument above rests on it.
+**Both versions are deleted.** The original gated the level shifter's `OE` from
+"+12 V present on the umbilical", which is downstream of the module's own load
+switch and therefore reads *present* with nothing plugged in — it failed in
+exactly the state it existed to detect. Its replacement watched the breath line
+through an LM311, and review found three independent faults with it: the
+threshold sat **inside the breath signal's own range** (the sensor is a
+differential part with its reference port open to the cavity, so drawing breath
+moves toward the trip point), it **locked out every standalone module
+milestone** because a dev board on a patch lead drives nothing into that pair,
+and it **failed toward "present"** if the reference buffer died or a trimmer
+wiper opened.
 
-A free and much better detect already exists in the circuit, and it comes from
-the breath receiver's own resting behaviour:
+**`OE` is tied enabled.** What the gating was protecting against — floating
+CMOS at the DAC while the instrument is off — is what `R-SPI-PULL`'s six
+resistors are for, and running the buffer unconditionally is what every
+surveyed Eurorack module does.
 
-| State | At the in-amp |
+**The panel LED becomes an ordinary power indicator** off the module's own
+rail, like every other module's.
+
+### Why the module does not need to know, and where the knowing went
+
+The module has no processor and the umbilical is write-only, so anything it
+decides has to be decided from analog signals at its own end. That is all the
+comparator ever was. The question is therefore not *how* it should sense the
+instrument but *whether it needs to* — and each of its three jobs has a better
+home:
+
+| Job | Where it goes |
 |---|---|
-**Sense the `BREATH` conductor against `AGND` at the module end**, through the
-10 kΩ protection resistors already there — *ahead* of the in-amp's `REF` trim:
+| Gating the buffer | Deleted — the idle pulls do it, as they do everywhere else |
+| Panel LED | The module's own rail, which is what a power LED means |
+| Health reporting | **The instrument**, which has a display, a web app and the data |
 
-| State | At that node |
-|---|---|
-| Cable unplugged | The 1 MΩ bias pair holds it at **0 V** |
-| Instrument alive | The sensor's designed zero-pressure floor puts it at **+0.2 V** |
+**The instrument already digitises breath** for note gating, and that copy also
+drives the strips and the matrix (ADR 0014). Nothing about the lights ever
+needed to travel to the module, through the panel knobs, and back.
 
-**One comparator against a fixed threshold — say +100 mV — reports all of it at
-once**: cable connected, +12 V actually reaching the far end, REF5050 alive,
-sensor alive, buffer alive, and both analog conductors intact. Nothing else in
-the design reports any of those.
+**What is genuinely given up**, recorded as accepted rather than dropped: the
+instrument's ADC reads breath *before* the umbilical, so a broken `BREATH` or
+`AGND` conductor is invisible to it. The instrument would report a healthy
+channel while the module received garbage. The comparator was the only thing
+watching the far end of that cable.
 
-**Sense ahead of the trim, not after it.** An earlier revision watched the
-in-amp's *output*, which rested at −437 mV while `REF` was grounded. Adding the
-commissioning trimmer (ADR 0003) nulls that pedestal by design — so both states
-moved to 0 V and the detect stopped working. Taking it from the conductor
-instead is immune to anything done downstream, and the threshold is positive,
-which also removes the negative reference the output-sensing version needed.
-
-So: an **LM311**, open-collector, running on ±12 V with its emitter at ground,
-collector pulled to the buffer's own bus +5 V rail, driving all four `OE` pins,
-with 1 MΩ of hysteresis. **Not an LM393**, which cannot see an input below its
-own V− and whose output emitter is internally tied to V−, so on a split supply
-it would pull the `OE` pins to −12 V. The +12 V divider that used to do this job is deleted rather
-than kept alongside — it answers "is my own switch on", which the panel LED
-already answers.
-
-**The same signal is the module's only health indicator**, so bring it to the
-panel LED too: lit means the instrument is there and its analog front end is
-working, rather than lit means a toggle is up.
-
-**Note the 74AHCT125 is a plain buffer, not a Schmitt trigger.** If the umbilical
-turns out to need edge cleanup at length, that wants a 74AHCT14 — decide it at
-E11 with a logic analyser on the real cable, not now.
+In practice it is audible immediately, and it is a fault in a **replaceable
+cable** rather than in anything sealed into the body — which is the trade that
+makes it acceptable.
 
 ### A stuck CV is worse than a dead one
 
