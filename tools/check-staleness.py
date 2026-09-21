@@ -187,7 +187,9 @@ NOT_REFDES = re.compile(
     r"|^R-78E"
     # CI-SN is the tail of the MCP3202-CI/SN order code; U-BOLT is prose
     # about a strap point, not a part reference.
-    r"|^(CI-SN|U-BOLT)$")
+    r"|^(CI-SN|U-BOLT)$"
+    # SHA-256 is prose about banking a document, not a part.
+    r"|^SHA-")
 
 
 def check_refdes(files, bom_refs):
