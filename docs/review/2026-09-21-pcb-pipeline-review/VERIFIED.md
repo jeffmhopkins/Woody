@@ -306,3 +306,56 @@ Second independent sighting — P2 found the same line.
 **Conclusion: minimise SWIG surface.** Use `kinet2pcb` rather than hand-writing
 footprint loading, and put verify/export behind **KiBot 1.9.1**, so the
 migration is someone else's problem.
+
+## P6 — the Python advice is wrong in this container, all three ways
+
+**Claim:** `python3` is 3.11, not noble's 3.12, while `_pcbnew.kiface` needs
+`libpython3.12.so.1.0`. So "use the system python3" picks the wrong one,
+`venv --system-site-packages` makes a 3.11 venv, and
+`PYTHONPATH=/usr/lib/python3/dist-packages` is *worse than useless* because
+that directory is already on `sys.path` — so `pcbnew.py` is found and then dies
+on an ELF/ABI error instead of a clean `ImportError`.
+
+**Re-checked, 2026-09-21. CONFIRMED, and worse than filed:**
+
+```
+$ which python3   → /usr/local/bin/python3 → Python 3.11.15
+$ /usr/bin/python3 -V → Python 3.11.15      ← the "system" one is 3.11 too
+$ both interpreters: 'dist-packages' already in sys.path → True
+```
+
+P6 said naming `/usr/bin/python3` was the trap and `/usr/bin/python3.12` the
+fix. In this container `/usr/bin/python3` is *also* 3.11 via `alternatives`, so
+the interpreter must be named by **explicit minor version matching the deb** —
+nothing else is safe.
+
+**Three stated gotchas falsified.** "Library tables need a GUI first" — no,
+`FP_LIB_TABLE::LoadGlobalTable()` creates them from the template itself, so the
+`cp` is redundant. **The real hazard is the opposite**: if the template is
+missing it writes an *empty* table and carries on silently, so `kicad` without
+`kicad-library-footprints` gives unresolvable footprints and no error.
+`KICAD9_FOOTPRINT_DIR` is a substitution *inside* the tables, not an
+alternative to them. And `pcb render` needs no GL in KiCad 9 — it is a CPU
+raytracer, so the xvfb advice there is cargo cult that hides the real cost,
+which is CPU minutes.
+
+**The network requirement is two hosts, not one.** `add-apt-repository` needs
+`api.launchpad.net` as well as `ppa.launchpadcontent.net`, because
+`softwareproperties/ppa.py` goes through launchpadlib. Both are blocked, so the
+PPA must be added by hand-written `.sources` plus key. And **containers are
+blocked only at the blob CDN** — the registries answer, but
+`production.cloudfront.docker.com` and `pkg-containers.githubusercontent.com`
+are 403, so `docker pull` fails.
+
+**Disk: there is no per-session quota.** `/` is a shared 252 GiB ext4, and P6
+watched free space move 7.9 → 3.4 → 19 → 23 GiB during its own review, with a
+tool call failing ENOSPC at the low point — consistent with what I saw. So a
+5.4 GiB install cannot be planned against a number; it needs a free-space check
+immediately before unpacking.
+
+**And the sizes split the stages:** `kicad` plus its 46-package closure is
+**695 MiB installed**. `kicad-packages3d` is **5.44 GiB** and is *not* in that
+closure — but `export step` resolves per-footprint 3D models unless
+`--board-only`, and the plan's stated reason for STEP is mechanical fit. So the
+fab deliverable costs 695 MiB and the mechanical check costs 6.3 GiB. Two
+different installs.
