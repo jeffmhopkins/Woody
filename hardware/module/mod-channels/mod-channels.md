@@ -194,7 +194,10 @@ is the page someone will read while stuffing the board.
 ## One buffer, four loads
 
 DAC ch7 drives one OPA2197 half; that half drives four 10 kΩ inputs in
-parallel. At 2.5 V into 2.5 kΩ that is **1 mA**, comfortable for the part.
+parallel. At `mod-reference` into 2.5 kΩ that is **1.33 mA**, comfortable for
+the part. *(This read "At 2.5 V into 2.5 kΩ that is 1 mA" until 2026-09-21 —
+a survival from the four-resistor circuit, on the page that owns the figure,
+contradicting its own drawing three sections above. `[calc: 3.3333/2500]`)*
 
 It wants its own `R-OPAMP-IN` on the way in, like every other DAC-driven
 op-amp input (`R-OPAMP-IN` qty 7 covers pitch, the four mods, this buffer and
