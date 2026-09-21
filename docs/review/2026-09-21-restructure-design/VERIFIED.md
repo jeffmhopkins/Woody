@@ -38,3 +38,31 @@ reaching the same two holes is the strongest signal this wave produced.
 Note the second row cuts against a `CLAUDE.md` review rule — "an unmarked claim
 is a defect in the report" is enforced on *reports* and has never been enforced
 on the corpus itself.
+
+## D6 — ADR boundary
+
+| Claim | Check | Verdict |
+|---|---|---|
+| `sensor-full-scale`'s **owner ADR** states the refuted transfer function twice, and computes a headroom margin off the refuted pedestal | `grep -n` for every spelling, then read `0003:123,434,522,532` | **Confirmed, all four.** The escape is one character: every `forbidden` pattern spells the multiply `*` or `x`; ADR 0003 spells it with a middle dot, once tight and once spaced |
+| `diode-split-rationale` has three different live values | Grepped all spellings across the corpus | **Confirmed and undercounted — there are FOUR.** D6 missed `0006:636`'s `0.00027 cents`. Full set: 0.00044 (register + owner page), 0.00018 (ADR 0004), 0.00027 (ADR 0006), 0.00029 (`bom.csv:37`) |
+| 8 of 33 figures name an ADR as owner, not 3 | `grep "^    owner:" \| sort \| uniq -c` | **Confirmed. D6 is right and I was wrong** — I had told it 3 in its own brief, having misread a per-ADR subtotal as the total. Exposure is 2.7× what the brief said |
+
+Both figures fixed in `c4fb614`, by citation rather than by patching prose.
+
+## D5 — migration mechanics
+
+| Claim | Check | Verdict |
+|---|---|---|
+| `check-staleness.py` **fails open** on a moved corpus directory | `git archive HEAD` to a throwaway tree, `mv docs/decisions docs/adr`, run the tool | **Confirmed, and it is the most important finding of the wave.** 33 files → 18, and it printed `PASS`, exit 0. 45% of the corpus unscanned, commit hook green. The tool that exists to prevent this project's failure mode commits it, during exactly the operation that triggers it |
+| A moved `bom.csv` crashes the tool, and the hook renders the crash as silence | Same throwaway tree, `mv hardware/bom.csv` | **Confirmed.** `FileNotFoundError` traceback; the hook greps stdout for four anchored words and a traceback contains none, so it emits `staleness: ` with nothing after it |
+
+Both closed in the same commit as the guard, and both re-tested against the
+throwaway tree afterwards: the moved directory now gives
+`FAIL 2 shape ... corpus 18 files`, exit 1.
+
+## D4 — BOM and datasheets
+
+| Claim | Check | Verdict |
+|---|---|---|
+| `check_corpus_shape()` was added mid-session **with no call site** | D4 observed the working tree between two of my edits | **Correct at the moment it looked.** It was wired up in the next edit. D4 could not have known that, and filing it was the right call — the report is a snapshot of a moving tree and says so |
+| A four-line test for `def check_*` with no call site would have caught both this and `check_refdes` | Implemented it as `check_checks()` | **Confirmed — it caught `check_refdes` on the first run.** This is the best suggestion the wave produced: it is the *class* fix for unwired checks rather than another instance fix |
