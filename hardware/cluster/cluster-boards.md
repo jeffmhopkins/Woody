@@ -150,20 +150,28 @@ coordinates rather than a pitch parameter.
   shields the key networks from the LED channel for free — and it is also a
   short waiting to happen. Every part on the plate-facing side needs clearance
   to the plate, or the board needs its passives on the far side.
-- **Plate-to-PCB standoff: there is none, and that is the answer**
-  `[repo] docs/reference/ks33-geometry.md, measured off GATERON-KS-33-3D.step`.
-  This bullet said the dimension was `TBD` and would come from the vendor
-  drawing. It came from a solid model instead, and it is tighter than expected:
-  the pins reach **5.10 mm** below the collar seat with only the last **1.9 mm**
-  as narrow blade, so **the PCB top must sit within ~3.2–3.6 mm of the seat**.
-  Against a 1.5–2 mm plate that leaves 1.2–2.1 mm — the board is effectively
-  **hard against the plate underside**.
+- **Plate-to-PCB standoff: 2.0–2.4 mm, and it is a height limit rather than a
+  ban** `[repo] docs/reference/ks33-geometry.md`. The pins reach **5.10 mm**
+  below the collar seat with only the last **1.9 mm** as narrow blade, so
+  **the PCB top must sit within ~3.2–3.6 mm of the seat**. Subtract
+  `plate-thickness` and that is the gap.
 
-  **Which collides with the bullet above it.** "Every part on the plate-facing
-  side needs clearance to the plate" now means *there is no plate-facing side*:
-  **put every passive on the far face.** Also budget a **⌀5.25 mm clearance
-  hole through both the plate and this board** for the centre pole, which
-  protrudes ~2 mm below the PCB.
+  Against a plate that is grounded, the rule that follows is a **height**
+  rule: chip passives and SOT-23 may sit on the plate-facing side; **nothing
+  with a body over about 1.4 mm may** — a SOIC-16 `74HC165` at 1.75 mm leaves
+  ~0.25 mm. That keeps the ICs on the far face, which is where they were
+  going anyway, and stops forcing every decoupling capacitor across to join
+  them.
+
+  Also budget a **⌀5.25 mm clearance hole through both the plate and this
+  board** for the centre pole, which protrudes 0.5–0.9 mm below a 1.6 mm PCB.
+
+  > **This bullet read "there is none, and that is the answer" and derived
+  > *there is no plate-facing side: put every passive on the far face*.**
+  > That was arithmetic applied to a 1.5–2 mm plate, and the vendor drawing
+  > has since ruled out both. The conclusion reversed when `plate-thickness`
+  > settled at 1.20 mm, and it reversed on the page that owns the figure —
+  > this one only cites it. Corrected 2026-09-21.
 - **Plate thickness is settled** — `plate-thickness`, read off Gateron's
   banked drawing. What is still open is **stiffening**: the settled thickness
   is thinner than the 1.5 mm MX standard, and nothing has decided whether the

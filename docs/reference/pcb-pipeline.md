@@ -58,18 +58,28 @@ Only the ones that corrupt something no later stage can catch.
 **1. Reconcile net names across all 23 circuit pages first** — twelve of them
 on the module. (This said "the six pages" until 2026-09-21; Phase B split the
 six module pages into twelve circuit directories plus the board-crossing
-blocks, and each new page names nets of its own.) **Four collisions are known,
-each a name that denotes two different physical nets:**
+blocks, and each new page names nets of its own.) **Five collisions are known,
+each a name that denotes two different physical nets — and `AGND` denotes
+three.** All five are now **qualified in the `## Interfaces` tables**, which
+is the transcription source; the ASCII drawings still carry the bare names, so
+each table row names the drawing's spelling beside the qualified one.
 
-| Name | Means | And also means |
-|---|---|---|
-| `AGND` | the umbilical sense conductor | the module analog return |
-| `BREATH` | the in-amp input | the output jack |
-| `OE` | the module's `74AHCT125` output enable, tied to `GND` (`hardware/module/digital-and-supervision/digital-and-supervision.md`) | the carrier's LED-buffer output enable, tied low (`hardware/carrier/led-strip-drive/led-strip-drive.md`) |
-| `CS` | the umbilical SPI chip select, `HDR-DEV` IO34 → `J-UMB` pin 7 → the DAC (`hardware/interfaces/spi-link/spi-link.md`) | the MCP3202's board-local chip select, IO39, which never leaves the carrier (`hardware/carrier/breath-adc/breath-adc.md`) |
+| Name | Means | And also means | Qualified as |
+|---|---|---|---|
+| `AGND` | the umbilical sense conductor | the module analog return — **and the instrument's own star, a third net, because `R1b` sits between the first two** | `AGND_SENSE` / `AGND_MOD` / `AGND_INST` |
+| `BREATH` | the in-amp input | the output jack | `BREATH_SENSE` / `BREATH_OUT` |
+| `SCLK` | the umbilical conductor from the MCU | **the 74AHCT125's OUTPUT, on the same page's own table** | `SCLK` / `SCLK_DAC` |
+| `OE` | the module's `74AHCT125` output enable, tied to `GND` (`hardware/module/digital-and-supervision/digital-and-supervision.md`) | the carrier's LED-buffer output enable, tied low (`hardware/carrier/led-strip-drive/led-strip-drive.md`) | `OE_MOD` / `OE_INST` |
+| `CS` | the umbilical SPI chip select, `HDR-DEV` IO34 → `J-UMB` pin 7 → the DAC (`hardware/interfaces/spi-link/spi-link.md`) | the MCP3202's board-local chip select, IO39, which never leaves the carrier (`hardware/carrier/breath-adc/breath-adc.md`) | `CS_MOD` / `CS_ADC` |
 
 **Three cold reviewers found the first two independently**; `OE` and `CS` came
-out of the pre-merge wave. A transcription taking names off the drawings shorts
+out of the pre-merge wave, and `SCLK` out of the fix for it.
+
+**`SCLK` is the sharpest of the five**, because both of its nets are on
+**one page's own table** — the umbilical conductor arriving, and the buffer
+output leaving. Merging them shorts a buffer across itself. It was also drawn
+that way: the pulls above and below the 74AHCT125 both carried the labels
+`SCLK↓ MOSI↓ CS↑` until 2026-09-21. A transcription taking names off the drawings shorts
 the breath in-amp input to the breath output jack — and every downstream check
 passes, because the merge happened before anything could see it. `CS` is the
 worse of the two new ones: **both of its nets are on the carrier**, so it does

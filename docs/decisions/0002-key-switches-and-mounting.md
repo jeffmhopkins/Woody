@@ -214,9 +214,19 @@ nominal dimension plus a ladder of steps either side, and find which one retains
 solidly without fighting during assembly. That is a half-hour at the vendor's
 minimum order, not a discovery exercise.
 
-**Contact bounce and the actuation/reset hysteresis gap, which Gateron does not
-publish.** Travel and force are specified; bounce duration and the reset point
-are not, for this switch or for most. These genuinely need a scope, and they set
+**The actuation/reset hysteresis gap, which Gateron does not publish.** Travel
+and force are specified, and so is **contact bounce** — `ks33-contact-bounce`,
+verbatim on sheet 6 of the vendor drawing. What is genuinely unpublished is the
+reset point: sheet 6 marks an operating point and a reset point on the
+force-travel diagram and dimensions neither.
+
+> *This paragraph read "Contact bounce and the actuation/reset hysteresis gap,
+> which Gateron does not publish" until 2026-09-21. The bounce half was wrong
+> the whole time, and it was wrong for a reason worth keeping: the corpus
+> recorded that drawing as having no text layer, which is true of its dimension
+> callouts and false of its prose. The figure was sitting in extractable text.*
+
+The gap still needs a scope, and it sets
 the debounce windows on the most latency-sensitive path in the instrument
 (ADR 0001). Measure on fast press, slow press, fast release, slow release, and a
 worn switch — the slow cases matter because a legato release can park the

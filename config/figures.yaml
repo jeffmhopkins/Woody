@@ -632,12 +632,50 @@ figures:
       documents now CITE this figure and state no number at all, which is
       rule 1 in CLAUDE.md and the only form that cannot go stale again.
 
+  - id: ks33-contact-bounce
+    quantity: Gateron KS-33 published contact bounce
+    value: "5 ms max at 16 in/sec actuation"
+    status: settled
+    owner: docs/reference/ks33-geometry.md
+    derivation: "Verbatim from Gateron's own drawing for the exact part, sheet 6 item 5: 'Bounce Time: 5msec Max.(at 16 in/sec. actuation speed).' Banked at datasheets/mechanical/GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf and in the EXTRACTABLE text layer - no render needed."
+    forbidden: ["does not publish contact bounce", "bounce duration and the reset point", "bounce is not published", "no published bounce figure", "bounce, which Gateron does not"]
+    false_positive_note: >
+      TWO patterns had to be removed from this entry within twenty minutes of
+      writing it, both because they fired on CORRECT sentences. A bare
+      "20 ms" fired on THREE - ADR 0001's "a conventional symmetric 20 ms
+      window would silently absorb it", and two descriptions of the 2021
+      firmware's guess in latency-budget.md and firmware/README.md. All
+      three are comparisons against this figure, which is the right way to
+      write them. And "Gateron does not publish" fired on ADR 0002's
+      "the actuation/reset hysteresis gap, which Gateron does not publish" -
+      which is TRUE; the hysteresis gap really is unpublished, and only the
+      bounce half of that sentence was ever wrong.
+      THE RULE BOTH BREAK: every pattern here must be specific to BOUNCE.
+      Match the words that assert THIS figure is unknown - never the number,
+      and never a phrase about the vendor in general.
+    companion: "latency-budget.md books the release path against it; firmware/README.md sets the release window from measured bounce at M1, and this is the number M1 must come in under."
+    note: |
+      TRACKED 2026-09-21. Three documents asserted that Gateron does not
+      publish this - ks33-geometry.md, ADR 0002 and latency-budget.md - while
+      the figure sat in the banked drawing's extractable text layer. The
+      assertion was downstream of a wrong belief about the FILE: the corpus
+      recorded that drawing as having no text layer at all, which is true of
+      its dimension callouts and false of its prose, and nobody separated the
+      two.
+      WHY IT MATTERS RATHER THAN BEING A CURIOSITY: fingerings are
+      combinational, so a bouncing RELEASE walks the fingering table through
+      different notes for up to this long - not a retrigger, a wrong note.
+      And ADR 0001's note-on gate is two agreeing samples 250 us apart, which
+      is TWENTY TIMES shorter than this window: the gate cannot reject
+      bounce, and nothing in the corpus said so until the latency budget was
+      made to close.
+
   - id: plate-thickness
     quantity: Key plate thickness (PLATE-TOP, PLATE-THUMB)
     value: "1.20 mm"
     status: settled
     owner: docs/reference/ks33-geometry.md
-    derivation: "Read off Gateron's own drawing for the exact part, KS-33H10B050NN-Y24 Version 2 drafted 2023-01-03, banked at datasheets/mechanical/GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf. Sheet 6's elevation dimensions the plate slot 1.20 +/-0.05 mm; sheet 3 section 8 shows the same 1.20 against a hatched plate section. The file is vector CAD - pdftotext extracts almost nothing - so both sheets were rendered at 150 dpi and read by hand."
+    derivation: "Read off Gateron's own drawing for the exact part, KS-33H10B050NN-Y24 Version 2 drafted 2023-01-03, banked at datasheets/mechanical/GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf. Sheet 6's elevation dimensions the plate slot 1.20 +/-0.05 mm; sheet 3 section 8 shows the same 1.20 against a hatched plate section. The file is vector CAD - pdftotext extracts almost nothing - so both sheets were rendered at 150 dpi and read by hand. NOTE WHAT IS AND IS NOT EXTRACTABLE: the file's DIMENSION CALLOUTS are outlined vector and yield nothing, which is why these two numbers needed a render - but the document as a whole yields 9,680 characters of prose, including the 5 ms contact-bounce figure the corpus long said Gateron does not publish. Do not re-conclude the file is unreadable."
     provenance_note: "gateron.com, gateron.co and gateron.cn returned HTTP 000 through four review waves; they answer 200 from this sandbox. Everything the corpus previously held about the KS-33 came from third-party CAD and footprint libraries. The STEP-derived Z stack is confirmed almost exactly by the drawing, which is a good sign for the rest of those measurements."
     forbidden: ["take the plate to 1.5 mm and", "ADR 0009 specifies a ~2 mm aluminium top plate", "1.5 mm with lamination stiffening, or 2 mm with a structural backer", "PLATE-THUMB,mechanical,TBD - ~2mm"]
     false_positive_note: "1.5 mm and 2 mm both appear legitimately all over this corpus - as MX-standard context, as the PCB thickness, as drill diameters, and inside the text that records them being ruled out. Match the phrase, never the numeral."

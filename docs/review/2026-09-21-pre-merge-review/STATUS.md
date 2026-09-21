@@ -4,6 +4,33 @@
 twenty-four findings verified by hand and recorded in `VERIFIED.md`. This
 file is the answer to the question the wave was opened to answer.
 
+## Outcome: all five items done, 2026-09-21
+
+**The recommendation below was acted on in full.** Kept as written, because a
+wave's STATUS is a record of what it found and not of what happened next, and
+because the escape table underneath it is the evidence.
+
+| # | What it asked for | State |
+|---|---|---|
+| 1 | Fix the four checks, then re-run the wave's mechanical claims | **Done.** Each fix is proved by reproducing the attack that defeated it, in a throwaway tree: the documented resistor-change procedure, an owner repointed to an unrelated ADR, a check commented out, a broken link to a non-`.md` file, a BOM hand-edit masked by a manifest problem, a re-introduced stale value, and a deleted page heading. All seven CAUGHT; intact tree still clean |
+| 2 | Add the check nobody has — a value in 3+ files with no register entry | **Done**, as `check_restated`. ADVISORY, because `check_refdes` sat unwired for the tool's whole life after being switched on with an unusable noise floor. 233 today |
+| 3 | Re-run conservation with a head comparison | **Done.** `check-conservation.py` compares both ends and multiplicity |
+| 4 | Link `hardware/README.md` from the front door | **Done**, and the `## Interfaces` definition that sat inline in all 23 circuit pages now lives there once and is cited |
+| 5 | Adjudicate the umbilical topology | **NOT done, and deliberately.** Two live topologies, one of them a settled tracked figure. It needs a decision, not an edit, and inventing one would be worse than leaving it visible |
+
+**Three things the fixes then found that no reviewer had:** a fourth instance
+of the raw-gain error, in a drawing whose stated formula does not produce the
+result written one line below it; the `SCLK` collision, where both nets are on
+**one page's own table**, so merging them shorts a buffer across itself; and
+the Gateron drawing's text layer, which yields 9,680 characters including the
+5 ms contact-bounce figure three documents said the vendor does not publish.
+
+**And three patterns that had to be withdrawn within minutes of being written**,
+each because it fired on a sentence that is true. That is the counterpart to
+grepping first, and it is now in `CLAUDE.md`: most hits will be legitimate, and
+a pattern whose cheapest fix is to make a correct sentence wrong is a trap, not
+a check.
+
 ## Recommendation: merge the tree, do not merge the green light
 
 **The restructure did what it was asked to do.** Content conservation is not

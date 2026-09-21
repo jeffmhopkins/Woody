@@ -64,7 +64,7 @@ The `Dir` and `Peer` columns are defined once in
                                                                     │ │
   ──────────────────────────────────────────────────────────────────┼─┼───────
                                                                     │ │
-                              BAV99 to ±12 V, both legs  ◄──────────┼─┤
+                              [D-CLAMP-BREATH] BAV99 to ±12 V, both legs  ◄──────────┼─┤
                                                                     │ │
                                     ┌───[R2 10k 0.1%]───────────────┘ │
                                     │                                 │
@@ -107,7 +107,7 @@ The `Dir` and `Peer` columns are defined once in
                                         │
                                    [1k]─┼─[C 330nF]── AGND(module)
                                         │
-                                   [BAV99]── ±12 V
+                                   [D-CLAMP-BREATH BAV99]── ±12 V
                                         │
                                    BREATH jack
 ```
