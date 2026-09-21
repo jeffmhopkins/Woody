@@ -78,6 +78,18 @@ are the de-facto Eurorack conventions; the extra span is headroom, not a default
 
 ### The topology falls out neatly
 
+> **Drawn now**, in `hardware/module/`: the
+> [pitch stage](../../hardware/module/pitch-stage.md) and the
+> [mod channels](../../hardware/module/mod-channels.md). Where those pages
+> disagree with the prose here, they win — that is the rule the breath page
+> established and the reason it exists.
+>
+> The useful surprise: pitch and the mods want *different* topologies, and the
+> same instinct produces both right answers. A single-op-amp stage giving
+> `Vout = A·Vdac − B·V_ref` can reach at most `A = 1 + B`. Pitch wants
+> A = 2, B = 1 — exactly on the boundary, so it collapses to two resistors. The
+> mods want A = 4, B = 4, which is off it, so they need all four.
+
 ```
 Vout = 4 × (Vdac − 2.5 V)
 
@@ -279,7 +291,12 @@ Consequences:
 
 - **Use a matched resistor network for the pitch scaling stage** (LT5400 class,
   MSOP-8), not discrete 0.1% parts. This is the single highest-value precision
-  component in the design.
+  component in the design. **The ratio is 1:1** — see
+  [the pitch stage schematic](../../hardware/module/pitch-stage.md), which is
+  where the topology finally got drawn and turned out to be a non-inverting amp
+  with the reference at the bottom of the feedback divider, not the difference
+  amp everyone had been assuming. Two matched resistors, not four, and the
+  easiest ratio there is to match.
 - **The DAC's internal reference is sufficient.** At 0.54 cents over 10 °C it is
   an order of magnitude inside the resistors, so a separate precision reference
   buys nothing measurable. One fewer part.
