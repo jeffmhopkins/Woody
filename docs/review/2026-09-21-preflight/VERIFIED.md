@@ -44,3 +44,44 @@ of which say `SCLK / MOSI` and `CS / DIG_GND`.
 **This is the fourth time a forbidden pattern has missed a different formatting
 of the same value** — and I had edited that exact block earlier today without
 noticing the pairing was wrong.
+
+## A12 — two blind spots in my own tooling, both fixed
+
+**Claim 1:** `verify-datasheets.py` checks rows↔files, so it **cannot see a BOM
+part with no manifest row at all** — which is exactly where the ESP32-S3, the
+QMI8658C and the PESD12VS1UB were hiding.
+
+**CONFIRMED and fixed.** The check now walks `bom.csv` for manufacturer part
+numbers absent from the whole manifest. Two iterations were needed: matching on
+the manifest's `part` column alone gave 8 hits with false positives (a document
+banked as "Gateron KS-33 low-profile switch" does not match a BOM row reading
+"KS-33 Red (linear)"), and a naive token rule flagged values like `330nF` and
+`500mW`. It now searches the whole manifest text and rejects the
+value-with-unit shape. **Three real gaps remain and are now permanently
+visible:** `SW-POWER`, `U-ESD-USB` (USBLC6-2SC6), `D-TVS-BREATH` (PESD12VS1UB).
+
+**Claim 2:** `merge-manifests.py` under-reports historical rows because it uses
+exact lowercase equality. **CONFIRMED and fixed** — it now normalises and
+matches on containment, so "MPXV4006 AN1646" resolves against "MPXV4006DP".
+
+## A12 — three corpus corrections, verified and applied
+
+| Claim | Verified | Fixed |
+|---|---|---|
+| `D-REVSHUNT` SS34 is specified `DO-214AC`; the datasheet says **SMC (DO-214AB)** | `[datasheet SS34.pdf p.1]` — "MECHANICAL DATA / Case: SMC (DO-214AB)", repeated 3× more. DO-214AC is the **SS14** | Package corrected. Wrong footprint on unretrofittable reverse-polarity protection |
+| `0004:743` "13.35 mm of aluminium each side" | `[calc]` (50.50 − 24.0)/2 = **13.25**. 13.35 implies a ⌀23.8 bore, **below the drawing's stated minimum** | Corrected |
+| `carrier.md:847` says `U-TVS-SPI` is SOT-23-6; `bom.csv` says -5 | The 4-channel part is the **-5**. `bom.csv` is right, the schematic page is wrong | Corrected |
+| `F-CHAIN` package column still said 1206 | The row's **own notes** already said 0805 | Corrected — the fix had landed in the prose and not the field |
+
+## A12 — a container fact that invalidates advice I wrote
+
+**`pdftotext` and `pdfinfo` are not installed here.** I had warned in
+`pcb-pipeline.md` that some PDFs have no text layer; the sharper truth is that
+**any script shelling out to `pdftotext` in this container returns nothing from
+every document.** Use `pymupdf`, which is present.
+
+And A12 corrected my own list twice: the **TE socket catalogue is fully
+text-bearing** (2294 chars/page over 104 pages) and should not have been on it —
+while the **Gateron drawing is the dangerous case**, averaging 1841 chars/page
+of spec prose so a script "gets something", with the dimensioned page carrying
+only `0.2/0.4/1.7/3.0`. **Silent partial failure beats a blank.**

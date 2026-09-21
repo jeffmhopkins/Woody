@@ -13,7 +13,7 @@ The rules this enforces, which are the ones datasheets/README.md states:
 It deliberately checks non-PDF artefacts too - drawings, footprints, STEP
 models - because those carry dimensions the design is built from.
 """
-import csv, hashlib, os, sys
+import csv, hashlib, os, re, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DS = os.path.join(ROOT, "datasheets")
@@ -80,8 +80,48 @@ for dirpath, _, names in os.walk(DS):
         else:
             bad.append(f"{rel}: unrecognised file in datasheets/")
 
+# A row-vs-file check is blind to the gap that matters most: a BOM part that
+# has no manifest row AT ALL. The ESP32-S3, the QMI8658C and the PESD12VS1UB
+# were all hiding in exactly that blind spot - named parts, real manufacturers,
+# invisible to every tool because nothing was looking for an absence.
+def _norm(s):
+    return "".join(c for c in (s or "").lower() if c.isalnum())
+
+
+uncovered = []
+bom = os.path.join(ROOT, "hardware/bom.csv")
+if os.path.exists(bom):
+    # Match against the WHOLE manifest, not just its part column: a document is
+    # often banked under a different name from the BOM's ("KS-33 Red (linear)"
+    # vs "Gateron KS-33 low-profile switch"), and its notes name the real MPN.
+    hay = _norm(" ".join(" ".join(r.values()) for r in rows))
+    for r in csv.DictReader(open(bom, newline="", encoding="utf-8")):
+        part = (r.get("part") or "").strip()
+        if not part or part.upper().startswith("TBD") or "(NONE" in part.upper():
+            continue
+        # A manufacturer part number is the thing a datasheet can exist for.
+        # Take the longest alphanumeric-mixed token as the fingerprint; a bare
+        # value like "10k 1%" has none, which is correctly not our problem.
+        # A value with a unit ("330nF", "500mW", "10k") has digits and letters
+        # but is not a part number, and flagging it trains people to ignore the
+        # check. Require length, and reject the value-with-unit shape.
+        toks = [t for t in re.split(r"[^A-Za-z0-9]+", part)
+                if len(t) >= 6 and any(c.isdigit() for c in t)
+                and any(c.isalpha() for c in t)
+                and not re.fullmatch(r"\d+[a-zA-Z]{1,3}", t)]
+        if not toks:
+            continue
+        if not any(_norm(t) in hay for t in toks):
+            uncovered.append(f"{r.get('ref')}: {part}")
+
 print(f"datasheets: {ok} verified, {noted} recorded as blocked or not-fetched, "
       f"{len(bad)} problems")
+if uncovered:
+    print(f"  BOM parts with NO manifest row at all ({len(uncovered)}) - "
+          f"not a failure, but nothing else will ever mention them:")
+    for u in uncovered:
+        print("    " + u)
+    print("  Clear each by banking the document or adding a BLOCKED row.")
 for b in bad:
     print("  " + b)
 sys.exit(1 if bad else 0)

@@ -118,6 +118,22 @@ for r in rows:
     if best is not None and (len(shared) >= 2 or any(_freq.get(t) == 2 for t in shared)):
         likely.append((r, best, sorted(shared)))
 
+def norm(s):
+    # Historical-row detection used exact lowercase equality and under-reported
+    # by three: "MPXV4006 AN1646" never matches "MPXV4006DP", and a row whose
+    # part carries a parenthetical or a suffix never matches its own bank.
+    return "".join(c for c in s.lower() if c.isalnum())
+
+
+banked = {norm(r[0]) for r in rows if r[6].upper().startswith("OK") and r[2]}
+historical = []
+for r in rows:
+    if r[6].upper().startswith("OK") or not r[0]:
+        continue
+    n = norm(r[0])
+    if any(n == b or n in b or b in n for b in banked):
+        historical.append(r[0])
+
 ok = sum(1 for r in rows if r[6].upper().startswith("OK"))
 blocked = sum(1 for r in rows if r[6].upper() == "BLOCKED")
 print(f"MANIFEST.csv: {len(rows)} rows from {len(glob.glob(os.path.join(ROOT,'datasheets','.manifest-R*.csv')))} fragments "

@@ -740,7 +740,7 @@ a budget that was already over. Derived, finally:
 | etherCON (31 mm tall) with the toggle and LED beside it | 31 mm |
 | **Total** | **97 mm against ~110 mm — 13 mm spare** |
 
-Width: **13.35 mm of aluminium each side of the bore**, 12.25 mm of visible
+Width: **13.25 mm of aluminium each side of the bore**, 12.25 mm of visible
 panel each side of the flange.
 
 > **The knob size is now the binding constraint, and it is a real cost.**
