@@ -235,7 +235,10 @@ instrument where none of it is the interesting part.
 at all.** The carrier holds only:
 
 - Headers the dev boards plug into
-- 74LVC165 shift registers
+- **All four 74LVC165 shift registers**, and the 21 sets of pull-up, series
+  resistor and filter capacitor that go with them. ADR 0001 used to put one
+  register in each key cluster; the two ADRs specified opposite looms and this
+  one wins — see ADR 0001 for the arithmetic that decided it
 - MCP3202 ADC, REF5050 5.000 V reference, OPA2197 dual (reference buffer +
   breath buffer, both on +12 V)
 - 74AHCT125 level shifter

@@ -65,14 +65,21 @@ are architectural, not preferences.
 **ESP32-S3**, as a bare module on a custom carrier — not a dev board — with
 satellite boards distributed along the body.
 
-Topology:
+> **Both halves of that sentence are superseded**, by ADR 0013 and by the
+> decision below. The MCU is a **dev board on a passive carrier at the tail**,
+> not a bare module, and there are **no satellite boards**: all four shift
+> registers live on that carrier. The topology diagram that stood here
+> described a three-zone instrument with the MCU at the top, which ADR 0013
+> also replaced. What survives from this ADR is the *family* choice and the
+> signal-integrity reasoning below.
 
 ```
-TOP   ESP32-S3 module + display (SPI, short) + USB-C
-       |  ribbon: power, slow SPI, LED data
-MID   74HC165 key chain, daisy-chained per cluster
-       |
-BOT   IMU, umbilical connector to the rack module
+TAIL   dev boards on a passive carrier: MCU, IMU, 8×8 matrix, breath sensor,
+       ADC, reference, ALL FOUR 74LVC165s, umbilical connector, USB-C
+        |
+        |  four ribbons: one per key cluster, DC switch lines only
+        |
+BODY   key clusters — switches, and nothing else
 ```
 
 The display is the only thing that cannot run far — high-bandwidth SPI with many
@@ -106,9 +113,52 @@ SPI3 needs only SCK and MISO plus the existing latch GPIO. Two extra pins
 against sixteen of headroom — and it has the side benefit the original line was
 after, since a key scan and a CV update no longer contend.
 
-### Key-chain signal integrity
+### The registers live at the tail, not in the clusters
 
-The chain runs the length of the body as four unshielded conductors, alongside
+**Decided after the prior-art review found this ADR and ADR 0013 specifying
+opposite looms** — one register per cluster here, all four on the carrier
+there — with the BOM carrying rows for both. The loom is hand-built once into a
+body that is bonded shut, so this could not stay open.
+
+**All four registers go on the carrier at the tail.** Each switch gets its own
+conductor back to it.
+
+| | Registers at the tail | One per cluster |
+|---|---|---|
+| Conductors down the body | **~23** (18 switches + grounds + spares) | ~10 |
+| What they carry | **DC levels, filtered at 100 µs** | clock, latch and serial data with fast edges |
+| Boards | **1** | 5 |
+| Vulnerable to the LED channel | **No** — see the arithmetic below | Yes, and unfilterable |
+
+**The whole argument is that one option's risk is retrofittable and the
+other's is not.** A fat loom is a nuisance you can see, measure and re-route on
+the bench. A clocked line that picks up an 800 kHz LED edge gives you a wrong
+note, intermittently, inside a body that never opens again — and it cannot be
+filtered, because filtering a clock is what breaks it.
+
+**The arithmetic, which is decisive.** A 12 V LED edge through ~15 pF of loom
+coupling injects roughly 180 pC. On a switch line that charge lands in
+`C-KEY`:
+
+```
+ΔV = 180 pC / 10 nF = 18 mV        — nothing
+ΔV = 180 pC / ~40 pF of bare wire  = 4.5 V   — a false key press
+```
+
+The capacitor is doing all the work, and it is only available because the line
+is DC. Everything that made the clocked version dangerous — termination on a
+multidrop line, chain ordering, the asynchronous `SH/LD` glitch that reloads
+all four registers mid-shift — **stops existing** when the chain never leaves
+the board.
+
+What it costs is physical: **about 23 conductors have to fit down a side
+channel described as "narrow, but continuous end to end"** (ADR 0009), as four
+ribbons, one per cluster, thinning as they drop off. That has not been checked
+against the real geometry and is an **M4 CAD item**, not an assumption.
+
+### Key-line signal integrity
+
+The switch lines run the length of the body as unshielded conductors, alongside
 LED data and LED power, inside a body that cannot be reopened. Two decisions
 elsewhere make a single corrupted read worse than it looks:
 
@@ -133,32 +183,38 @@ reserved spare-switch bits are covered too. (`R-KEY-PU`, `R-KEY-SER`, `C-KEY`.)
 Five further fixes, in descending order of value. The first four are wiring and
 cost nothing but planning; they cannot be retrofitted into a bonded body.
 
-1. **A ground return per signal.** The highest-value item on this list. Four
-   signals down a 14-inch body sharing one return is a loop antenna next to an
-   800 kHz LED data line.
-2. **Chain the topology, do not star it.** One run passing through each cluster
-   board in turn, not four stubs from a central point.
-3. **Order the chain so serial data flows *toward* the clock source.** This
-   makes propagation skew eat **setup** margin rather than **hold** margin.
-   Setup margin is recoverable by clocking slower; hold margin is not
-   recoverable at any speed.
+1. **A ground return every few signals.** Eighteen switch lines down a
+   14-inch body sharing one return is a loop antenna next to an 800 kHz LED
+   data line. One ground per four signals in each ribbon, which a standard
+   ribbon gives for free by alternating.
+2. **Star it from the carrier — one ribbon per cluster.** With the registers at
+   the tail there is nothing to chain, and four short independent runs are
+   easier to build and easier to fault-find than one trunk with taps.
+3. ~~**Order the chain so serial data flows toward the clock source.**~~
+   **Moot.** This was the rule for a clocked loom, and the research found it
+   overstated anyway — the skew between adjacent clusters was ~0.5 ns against a
+   propagation delay of 5–14 ns, so the wrong order degraded hold margin by
+   roughly 12 % rather than violating it. `key-layout.yaml` said it would have
+   put "hold-margin violations" into a bonded body, which was an honesty marker
+   pointing the wrong way. The chain is now four devices on one PCB with
+   millimetre traces, and the question does not arise.
 
-   Concretely, now that the MCU is at the **tail** (ADR 0013): the cluster
-   **physically nearest the MCU** is the one whose `QH` drives MISO, and the
-   cluster **furthest** takes the loom's `SER` end. Walking outward from the
-   tail that is `right_thumb → right_hand → left_thumb → left_hand`. Why it
-   works: each device's clock arrives from the MCU *before* its data source's
-   does, because the source is further out, so data always arrives late
-   relative to the local edge — late is setup, early is hold.
-
-   `config/key-layout.yaml` carries this order, with **bit 0 = the first bit
-   clocked out = the device nearest the MCU**. That definition is the thing
-   that was ambiguous, and it is the thing that decides which way round to
-   build the loom.
-4. **33–68 Ω series termination at the MCU** on the clock and latch lines.
-5. **100 nF at every register**, on its own board. There is no controller-side
-   decoupling in the design at all, and a 74x165's output edges brown out a
-   local rail that has no reservoir.
+   **`bit 0` still means the first bit clocked out**, because firmware needs it
+   defined. It is now a board-layout detail rather than a loom decision.
+4. ~~**33–68 Ω series termination at the MCU** on the clock and latch lines.~~
+   **Also moot, and it was wrong as written**: series termination is a
+   point-to-point technique, and those lines dropped on four boards. On a
+   multidrop line intermediate receivers sit at the incident half-step —
+   at 68 Ω that step could land at 1.96 V against a 2.0 V threshold, so the
+   BOM's own "33–68 Ω" range spanned fine to marginal, in the counterintuitive
+   direction. On one board it is a non-question.
+5. **100 nF at every register.** Still required — a 74x165's output edges brown
+   out a local rail with no reservoir — but now four caps on the carrier rather
+   than one on each of four satellite boards.
+6. **Tie `CLK INH` low at all four devices, and pull every unused parallel
+   input.** Both are permanent, both were sitting only in a review document,
+   and the five "free" spare bits are floating CMOS inputs — the exact fault
+   `R-KEY-PU` exists to fix.
 
 **On family choice: the part stays 74LVC165A, but the recorded reason for it was
 backwards.** The BOM justified LVC as *"better drive over a 14 in chain"*. Over
@@ -211,15 +267,16 @@ during performance.
   that would have to be unlearned later.
 - Custom carrier design needed eventually: USB-C, ESD protection, boot/reset,
   3.3V regulation. Espressif publishes reference designs for this.
-- The 74HC165 chain suits this geometry well — four wires running the length of
-  the body, one register per key cluster. No matrix, no ghosting, no long
-  parallel runs, no per-key wiring back to a central point.
-- **Chain is 4 registers, 32 bits, for 18 switches** (ADR 0010): one device per
-  cluster — left hand, left thumb, right hand, right thumb — ordered down the
-  body. One register per cluster wastes 14 bits but makes every satellite board
-  identical, and the spare bits are free expansion for octave, mode and hold
-  inputs. Full chain reads in ~32 µs at 1 MHz, about 13% of a 250 µs loop
-  period, and it can be clocked considerably faster.
+- The 74x165 chain suits this geometry well. No matrix, no ghosting, no
+  diodes. **It does mean per-key wiring back to a central point**, which an
+  earlier version of this line listed as a thing the chain avoided — that was
+  true of the per-cluster arrangement and is the price of moving the registers
+  to the tail. It is the right price; see above.
+- **Chain is 4 registers, 32 bits, for 18 switches** (ADR 0010), all four on the
+  carrier. The 14 spare bits are free expansion for octave, mode and hold
+  inputs, and 4–6 of them carry the marker pattern. Full chain reads in ~32 µs
+  at 1 MHz, about 13 % of a 250 µs loop period, and it can be clocked
+  considerably faster now that it is all on one board.
 - LED power and data run the length of the body too. Keep their ground return
   separate from the analog section and star-ground at one point, or the LEDs
   will be audible.

@@ -94,32 +94,34 @@ keys:
   - { id: RT2, face: bottom, x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb, role: control }
   - { id: RT3, face: bottom, x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb, role: control }
 
-# Shift register chain. One 74x165 per cluster: 4 devices, 32 bits, 18 used,
-# 14 spare.
+# Shift register chain. Four 74LVC165s, 32 bits, 18 used, 14 spare.
 #
-# BIT NUMBERING, because this was ambiguous and the ambiguity is what made the
-# order wrong: bit 0 is the FIRST bit clocked out, which is the device whose QH
-# drives the MCU's MISO, which is the device PHYSICALLY NEAREST the MCU.
+# ALL FOUR LIVE ON THE CARRIER AT THE TAIL (ADR 0001, ADR 0013). Each switch
+# runs its own conductor back to it - four ribbons, one per cluster, DC levels
+# filtered at ~100us by R-KEY-PU and C-KEY. Nothing clocked goes into the loom.
 #
-# ADR 0001 requires serial data to flow TOWARD the clock source, so that
-# propagation skew eats setup margin (recoverable by clocking slower) rather
-# than hold margin (not recoverable at any speed). The MCU is at the TAIL
-# (ADR 0013), so the chain runs from the tail outward: right_thumb is nearest
-# and reads out first, left_hand is furthest and takes the loom's SER end.
+# This replaces one-register-per-cluster. ADR 0001 and ADR 0013 specified
+# opposite looms and the BOM carried rows for both; the loom is hand-built once
+# into a body that is bonded shut, so it could not stay open. The deciding
+# arithmetic: a 12V LED edge through ~15pF of coupling injects ~180pC, which is
+# 18mV into C-KEY's 10nF and 4.5V into a bare wire. The capacitor does the work
+# and it is only available because the line is DC.
 #
-# This list was the other way round until the cold review. Building the loom
-# to the old order would have put hold-margin violations into a body that
-# cannot be reopened.
+# CHAIN ORDER IS NOW A PCB LAYOUT DETAIL, not a loom decision - four devices,
+# millimetre traces. The order below is kept because firmware needs the bit map,
+# and bit 0 still means THE FIRST BIT CLOCKED OUT.
 chain:
-  - cluster: right_thumb  # bits 0-7   — 3 used, 5 spare — nearest the MCU
+  - cluster: right_thumb  # bits 0-7   — 3 used, 5 spare — first out
   - cluster: right_hand   # bits 8-15  — 6 used, 2 spare
   - cluster: left_thumb   # bits 16-23 — 4 used, 4 spare
-  - cluster: left_hand    # bits 24-31 — 5 used, 3 spare — SER end of the loom
+  - cluster: left_hand    # bits 24-31 — 5 used, 3 spare — last out
 
 # Spare chain bits: 14 total, but NOT all available.
 #   4-6 are claimed by the marker pattern (ADR 0001) - wiring-only, and they
 #   cannot be added after the body is bonded.
 #   3 are reserved for spare switches: octave up, octave down, hold/preset.
+#   The 5 genuinely free bits are FLOATING CMOS INPUTS and must be pulled -
+#   the exact fault R-KEY-PU exists to fix (ADR 0001).
 #   Those three need CUTOUTS IN THE PLATE DXF at M3 even if the switches are
 #   fitted later (ADR 0010). Placement is decided at M2, with hands on the mule.
 # The 2021 firmware triggered mode changes from key combinations (A[1], A[7],
