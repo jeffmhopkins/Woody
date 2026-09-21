@@ -135,6 +135,13 @@ converts the worse error into the better one, for free.
 | **C-AA-PITCH** | **10 nF C0G** | 15.9 kHz against `R-OPAMP-IN`, **ahead of the op-amp**, outside any loop. Filters the DAC before it is amplified |
 | **C-FILT-PITCH** | **10 nF C0G** | Restored at the jack. The low-impedance shunt at the connector, which nothing else provides |
 
+**Power-on is 0.000 V, not "subsonic".** `V_ref` is the DAC's internal
+reference, which is disabled until firmware enables it — so *both* terms are
+zero and the jack sits at **0 V, a VCO's base note**, until that write. After
+it, `CLR` parks at −2.500 V. ADR 0006's power-on table asserts "below −2 V" for
+both and they are different states. Harmless with nothing gated, but it should
+say what it does.
+
 **Headroom.** Full DAC scale 0 → 5.000 V maps to −2.500 → +7.500 V, which is
 the ±600 cents of firmware reserve ADR 0006 describes. An OPA2197 on ±12 V
 less two Schottky drops reaches ~±11.45 V, so the reserve is real and not

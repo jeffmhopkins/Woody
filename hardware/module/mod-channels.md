@@ -74,7 +74,7 @@ resistor *was* the gain network.
 | Matching | two ratios per channel | **one** |
 | Range | ±10.05 V (40.2 kΩ fudge) | **exactly ±10.000 V** |
 | `R-OPAMP-IN` | unbalances it — 196 mV zero error | harmless, feeds a (+) input |
-| Safe on `CLR` | `4Z − 4Z` = **0 exactly** | `4Z − 3Z` = **Z**, one zero-code error |
+| Safe on `CLR` | `4X − 4X` = **0 for ANY uniform state** | `4X − 3X` = **X** — 0 V only because the grade is zero-scale |
 
 *(A third option surfaced in the same research: four of four published designs
 — Ornament & Crime, Westlicht PER|FORMER, Mutable Yarns, MTM Workshop Computer
@@ -165,6 +165,13 @@ refreshing the five signal channels after a `CLR` and *not* channel 7, which
 pins the jacks at `4.02 × Vdac` ≈ **+11.45 V**. That is closed by the
 statelessness rule in `firmware/README.md` — refresh all six populated
 channels every pass — and the latency budget already paid for it.
+
+**The two-resistor form also made the DAC grade safety-critical**, which the
+four-resistor form did not. `4X − 4X` is zero for *any* uniform reset state; 
+`4X − 3X` is `X`. With the locked C grade that is 0 V and correct — but a B/D
+part would put **+2.5 V on all four jacks** where the old topology gave 0 V
+regardless. The grade lock is now load-bearing twice: once for reference gain,
+once for this.
 
 **So the offset channel is load-bearing in both directions**, and neither
 direction is obvious from the schematic alone. It is written here because this

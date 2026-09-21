@@ -413,33 +413,66 @@ undefined node.
 pin-2 conductor. Then redraw `power-entry.md:15-22`, `mod-channels.md:37` and
 `digital-and-supervision.md:41-43` onto it.
 
-### The presence threshold's two unstated requirements
+### The presence threshold — superseded during this review, and one claim in the replacement does not hold
 
-`digital-and-supervision.md:108-113` proposes sensing "the module end of the
-`BREATH` conductor directly against `AGND`", threshold +100 mV.
+`digital-and-supervision.md` replaced its presence detect while this review was
+being written. **The replacement is better and the finding this section
+originally carried is void**; it is recorded here because the residue matters.
 
-- **It must be a differential comparison.** `AGND` is not at module 0 V by
-  definition, so "+100 mV" means +100 mV *above `AGND`*, which needs a threshold
-  source referenced to `AGND`. At µA that is harmless, but it must be drawn and
-  budgeted rather than left implicit — see defect 2.
-- **The hysteresis network must not tap the in-amp's input pin.** The BOM
-  specifies "1M from output to IN+ for hysteresis"
-  `[repo: hardware/bom.csv:100]`. If the LM311's IN+ *is* the `BREATH` node
-  behind R2, a 1 MΩ from a 0/+5 V output injects up to `5 / 1e6 = 5 µA` `[calc]`
-  into a node whose source impedance is the 10 kΩ protection resistor:
-  `5 µA × 10 kΩ = 50 mV` `[calc]` of single-leg error, `× 2.185 = 109 mV` at the
-  in-amp output `[calc]`, about 1 % of full scale, stepping at every plug event.
-  It is also **single-ended on one leg**, which is precisely the CM→DM conversion
-  mechanism `breath-receive-stage.md` rejects a capacitor for.
+The current design `[repo: digital-and-supervision.md:96-122]`:
 
-  **And the margin is now known, because the breath page just published it.** The
-  pedestal's spec band is 0.152–0.378 V `[repo: breath-receive-stage.md:86-89]`,
-  so the worst-case "alive" level at the threshold is 0.152 V against a +100 mV
-  trip point — **52 mV of margin** `[calc]`. The hysteresis injection computed
-  above is **up to 50 mV** `[calc]`. They are the same size. A presence detect
-  whose noise margin equals its own hysteresis error is not a detect. **Buffer
-  the comparator's tap, or take it through a high-value matched pair**, and
-  re-derive the threshold against 0.152 V rather than against the typical 0.2 V.
+| State | In-amp output |
+|---|---|
+| Cable unplugged | R4/R5 pull both inputs to `AGND` → **`V_REF` ≈ +0.437 V** |
+| Instrument alive | `REF` trim nulls the pedestal → **0 V** |
+
+with the threshold at **`V_REF`/2, taken off the trim buffer itself**. Both rows
+check out: unplugged, the differential input is zero so `Vout = V_REF = +0.437 V`
+`[calc]`; alive, `Vout = −2.185 × 0.2 + 0.437 = 0 V` `[calc]`. **The states are
+437 mV apart with the sense inverted, not collapsed** — so the claim this review
+was about to make, and the claim the page itself made two revisions ago, were
+both wrong. The page says so plainly and gives two arithmetic reasons the
+input-node tap it briefly proposed was worse than the fault it was fixing
+`[repo: digital-and-supervision.md:117-122]`. Both are stronger than the version
+this review had derived and point the same way. Nothing to add.
+
+**Two things do remain.**
+
+- **The page's own drawing is now stale twice over.**
+  `digital-and-supervision.md:52-57` still shows "in-amp output ── (0 V absent,
+  **−0.44 V alive**)" into the LM311 with "threshold **−200 mV** (from −12 V)".
+  That contradicts the **current** table at lines 100-101 (+0.437 V absent, 0 V
+  alive) as well as the one before it, and it is the part a builder reads. It has
+  now survived two corrections of the prose above it.
+
+- **"It degrades correctly" needs one more line, because as stated it does not.**
+  The page argues: "if the reference dies, the threshold goes with it and the
+  detect reads 'absent'" `[repo: digital-and-supervision.md:106-107]`. Work it
+  through with `V_REF = 0`:
+
+  ```
+  alive:     Vout = −2.185 × 0.2 + 0 = −0.437 V   threshold = 0 V  →  present
+  unplugged: Vout = 0 V                            threshold = 0 V  →  marginal
+  ```
+  `[calc]`
+
+  The absent case lands exactly **on** the threshold and is decided by hysteresis,
+  not by the circuit — so a dead reference reads *present* when alive and
+  *undecided* when absent, which is the opposite of the stated fail-safe. The
+  self-centring claim against the 0.152–0.378 V pedestal band is correct and is
+  the good part of this design; the fail-safe claim is one sentence ahead of its
+  arithmetic. Either offset the threshold slightly off `V_REF`/2 toward the absent
+  state, or drop the fail-safe sentence.
+
+### The `TRIM-BREATH-ZERO` buffer now has a second consumer — checked, sound
+
+Taking the threshold "off the trim buffer itself" makes that OPA2197 half drive
+both the INA828's `REF` pin and the comparator's threshold divider. **This does
+not reopen the CMRR argument** `[repo: breath-receive-stage.md:130-133]`: what
+that argument forbids is source impedance *at the `REF` pin*, and an op-amp
+output stays low-impedance regardless of what else hangs on it. A divider of
+100 kΩ or more draws `0.437 / 100 kΩ = 4.4 µA` `[calc]`. **Sound — but it is now
+a two-page shared node and neither page says so.** One line on the breath page.
 
 ### One dependency claim that is false
 
@@ -1027,7 +1060,7 @@ Every "see X for Y" in the five pages, checked against X, in the current tree.
 | "`AGND` is not a ground at all (ADR 0003)" | `power-entry.md:161` | **True** — and contradicted by the diagram 140 lines above it |
 | "the bus rail is a stated requirement (ADR 0005)" | `digital-and-supervision.md:68` | **True** `[repo: ADR 0005:142-143]` — but the same ADR line 123 says "**only** for the 74AHCT125", which the page breaks at line 60 |
 | "`CLR` … An analog path cannot latch at a level the player is not producing (ADR 0004)" | `digital-and-supervision.md:145-146` | **True** |
-| "The BOM's `R-PRESENCE` note still describes the old −200 mV arrangement and is wrong" | `digital-and-supervision.md:115-116` | **False — already fixed.** `hardware/bom.csv:100` reads "TAP AHEAD OF THE REF TRIM … Threshold ~+100mV, POSITIVE". Delete the sentence and the matching Still Open at 150-151 |
+| "The BOM's `R-PRESENCE` note … is wrong" | `digital-and-supervision.md` (earlier revision) | **True again, for a new reason.** `hardware/bom.csv:100` was updated to the "+100 mV against `AGND`, tap the `BREATH` node" arrangement — which the page has *since* rejected as worse than the fault it fixed `[repo: digital-and-supervision.md:109-122]`. The BOM row is now one revision behind a page that has moved twice. It must be rewritten to `V_REF`/2 off the trim buffer |
 
 ### The presence detect's stale copies
 
@@ -1035,10 +1068,8 @@ Every "see X for Y" in the five pages, checked against X, in the current tree.
 trimmer-versus-comparator collision. **Three documents still carry the pre-fix
 circuit:**
 
-- **Its own drawing.** `digital-and-supervision.md:52-57` still shows "in-amp
-  output ── (0 V absent, **−0.44 V alive**)" into the LM311 with "threshold
-  **−200 mV** (from −12 V)" — the arrangement the prose forty lines below
-  declares broken. The ASCII is what a builder reads.
+- **Its own drawing.** `digital-and-supervision.md:52-57` — covered above; it is
+  now two revisions behind the prose on the same page.
 - **ADR 0004:355-378** still presents the −437 mV / −200 mV table as the design,
   and its "**Fixed is the operative word**" paragraph rests explicitly on `REF`
   being grounded.
@@ -1124,9 +1155,12 @@ One arithmetic note: `breath-receive-stage.md:57` says the in-amp reaches
    142, 146, 152, 157, 167, 171-172.
 9. **Finish `pitch-stage.md`** — lines 203-205, 212, 228-230, now that the table
    above them has been fixed; and fix the one-sided `TRIM-OFFSET` (defect 9).
-10. **Sweep the six "`REF` is grounded" copies**, including the first clause of
+10. **Sweep the "`REF` is grounded" copies**, including the first clause of
     `ROADMAP.md:51`; rewrite `ROADMAP.md:190`.
-11. **Correct the counts**: OPA2197 halves 11 → 9; BAV99 6 → 8; `R-OPAMP-IN`
+11. **Redraw `digital-and-supervision.md:52-57`** to the presence detect the same
+    page now describes, rewrite `hardware/bom.csv:100` to match, and either fix or
+    drop the "degrades correctly" sentence.
+12. **Correct the counts**: OPA2197 halves 11 → 9; BAV99 6 → 8; `R-OPAMP-IN`
     enumeration; LT5400 spare-section claim deleted in three places; spare AHCT
     gate input tied.
 
@@ -1150,6 +1184,7 @@ because three of them changed the analysis.
 | ADR 0006 "A or C grade" | "a C grade", with the gain/grade reasoning | Removed — but `mod-channels.md:142` still says "A/C-grade" |
 | `breath-receive-stage.md` trim range 0 → +0.6 V | 0 → **+1.0 V**, ranged against the sensor's 0.152–0.378 V spec band | **New divergence** — `hardware/bom.csv:108` still says 0.6 V |
 | Breath umbilical legs asymmetric (1 kΩ on `BREATH` only) | **`R1b` 1 kΩ added in the `AGND` leg** for CMRR | **New divergence** — `R-SER-BREATH-INST` is still qty 1, package 0805 vs the page's 1206 (defect 6b) |
+| Presence detect: "both states sit at 0 V, so move the tap to the `BREATH` node" | **States are 437 mV apart with the sense inverted**; threshold is `V_REF`/2 off the trim buffer `[repo: digital-and-supervision.md:96-122]` | **Supersedes a finding this review was carrying.** The page's own arithmetic is stronger than mine. Residue: its ASCII is now two revisions stale, `hardware/bom.csv:100` is one revision stale, and the "degrades correctly" claim does not survive its own arithmetic |
 
 **Two patterns are worth naming.** First, **every one of these fixes was applied
 to one document and left stale in another** — the same failure mode this review

@@ -133,9 +133,28 @@ else in the design reports any of those.
 
 ## The frame watchdog
 
-**Retriggered from the buffered, DAC-side `CS`** — never the cable side. From
-the cable side a floating input can retrigger it forever and defeat it in
-precisely the state it exists for.
+> ### ⚠ It is a **link** watchdog, not a hang watchdog — and this page claimed
+> otherwise
+>
+> It retriggers on `CS` edges, and `firmware/README.md` **mandates refreshing
+> every channel every pass**. So a firmware hang *above* the output loop — the
+> exact failure ADR 0004 describes as "the real-time board hangs mid-note and
+> the rack drones forever" — keeps emitting perfectly healthy `CS` edges, and
+> the watchdog never fires.
+>
+> What it does catch is **`CS` stopping**: a crash that takes the loop down, a
+> cable unplugged, the instrument losing power, the load switch latching off.
+> Those are real and worth catching. But "SPI stuck" is the stated requirement
+> and is *not* covered, and the two failure modes were being conflated.
+>
+> Closing the gap needs a **heartbeat firmware only emits when the whole chain
+> is healthy** — a pattern the '123 cannot get from a stuck loop — rather than
+> a raw edge count. That is a firmware-and-timing decision, not a resistor.
+
+**Retriggered from the buffered, DAC-side `CS`.** From the cable side a
+floating input could retrigger it forever — though note the six-sided
+`R-SPI-PULL` largely removes that objection, which reopens the cable-side
+option as a way to make `OE` changes land only on frame boundaries.
 
 `t ≈ 0.45 · R · C` → 1 MΩ × 220 nF ≈ **99 ms**: far above a 250 µs loop period,
 well under a second. X7R is fine here; ±30 % on a 99 ms timeout changes nothing.
@@ -157,9 +176,28 @@ player is not producing (ADR 0004).
   a corrected `R-PRESENCE` row.
 - **A power-on reset RC on the '123's own `CLR`**, so the power-up safe state is
   guaranteed rather than probable.
-- **Whether the '123 empties 220 nF in a 250 µs retrigger window.** It is
-  retriggered ~400 times per timeout period. A datasheet question; the vendor
-  sites were unreachable.
+- **The retrigger question was posed against the wrong numbers.** Six frames
+  per pass means **~2400 retriggers per timeout at ~16 µs intervals**, not ~400
+  at 250 µs — and "empties 220 nF" is the wrong quantity, since only ~83 pC
+  accumulates between retriggers. The real gates are the '123's discharge
+  `R_on` and whether discharge follows the trigger pulse. A dedicated watchdog
+  IC may be the better answer.
+- **`LDAC` is not in this design anywhere**, which leaves a CMOS input floating
+  on the DAC and means six channels cannot update atomically. **Tie it.** The
+  consequence of not having it: every exit from `CLR` — hot-plug, watchdog
+  recovery, reboot, an OTA stall — throws intermediate values at the mod jacks
+  for 100–200 µs, and no write order avoids it.
+- **`SCLK` has no series resistor and `MOSI` does.** That is the wrong way
+  round: `SCLK` is the fastest edge on the cable. Series resistors now go on
+  all three lines at the driving end, which also closes a back-powering path
+  found separately in the power review.
+- **The threshold may sit inside the breath signal's own range.** The sensor is
+  a *differential* part with its reference port open to the cavity, so negative
+  differential pressure drives the output toward the detect threshold. The
+  sensor's own minimum bounds it, but the margin is thin and it would present
+  as `CLR` firing mid-phrase. **The clean answer may be to demote this
+  comparator to LED and health duty and gate `OE` from the link itself** — a
+  decision, not a component change.
 - **An ESP32-S3 NVS commit or OTA write disables the instruction cache** and can
   stall non-IRAM code on both cores. A config save that overruns 99 ms would
   assert `CLR` mid-note. Measure the real stall before tuning the RC, and put

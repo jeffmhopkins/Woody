@@ -29,7 +29,8 @@ readable.
 | **D1** | A unity-gain buffer drives **100 nF with no isolation** (REF5050 buffer → MPXV4006DP `VS` + its decoupling cap). This is the one place the part is inadequate *as connected*. | ADR 0003 L468 + BOM `C-DECOUPLE-CARRIER` | **High** |
 | **D2** | The **mod channels keep the load divider** that pitch was redesigned to remove. −1 % to −2 % of span into ordinary Eurorack loads, the same size as the "dominant" tolerance term the page tabulates, and absent from that table. | `mod-channels.md` | **High** |
 | **D3** | The breath **OFFSET knob has authority in one direction only, and it is the useless direction**. Same defect class the breath page removed at the in-amp `REF` pin; it moved downstream to the panel. The module has no negative reference to fix it with. | `breath-receive-stage.md` | **High** |
-| **D4** | The umbilical is **not balanced**: 1 kΩ on the signal leg, nothing on the AGND leg. Caps link CMRR at **60.2 dB** — the entire stated budget — before the INA828 or the `REF` pin contribute anything. | `breath-receive-stage.md` | **High** |
+| ~~D4~~ | The umbilical was not balanced — 1 kΩ on the signal leg, nothing on the `AGND` leg, capping CMRR at **60.2 dB**. **Fixed in the repo while this audit was being written** (`R1b`). Independently derived here; arithmetic confirms the page. **One residual: BOM row 66 still says qty 1, 0805.** | `breath-receive-stage.md` | **Closed → D4b** |
+| **D4b** | `R-SER-BREATH-INST` (BOM row 66) is still **qty 1 in 0805**, while the page now specifies **two** 1 kΩ in **1206 ≥250 mW** (`R1`, `R1b`). Both are instrument-side and therefore unretrofittable. | `bom.csv` row 66 vs `breath-receive-stage.md` | **High** |
 | **D5** | The **count is wrong three ways**. BOM row 13 says eleven and lists ten; row 28 contradicts row 13 and makes it nine; the instrument-side buffer is on a different board and was never inside the six; and a **twelfth stage (the REF5050 buffer) is counted nowhere at all**. | `bom.csv` rows 13, 26, 27, 28 | Medium |
 | **D6** | Breath output **clips at the top of the GAIN knob** — saturates above 46 % of sensor range at 2.5×, with 0.4 V of margin on a hard blow *before* the offset knob adds anything, and the saturated level is 1.4 V outside the module's own ±10 V convention. | `breath-receive-stage.md` | Medium |
 | **D7** | **Jack-side feedback makes a shorted PITCH jack saturate the amplifier** where op-amp-side feedback would not. Every patch-cable insertion momentarily shorts tip to sleeve. New failure mode, introduced by the redesign, unmentioned. | `pitch-stage.md` | Medium |
@@ -65,7 +66,7 @@ Not eleven. **Twelve**, across **two boards** and **seven packages**.
 | 7 | **Mod-offset follower** | module, `U-OPA-PITCH` | DAC ch7 via 1 k | 3.3333 V | four 10 kΩ into four inverting nodes | **+1.33 mA / −0.67 mA**, signal-dependent | **OK, with D16** |
 | 8 | **Breath gain stage** | module, `U-OPA-PITCH` | INA828 output, 0 → −9.94 V | ≈ 0 V | 1 k → 330 nF → jack | 5.0 mA at the corner; 11 mA shorted | **D3, D6, D10** |
 | 9 | **Breath offset stage** | module — **claimed by BOM row 13, denied by BOM row 28** | — | — | — | — | **D5.** May not exist |
-| 10 | **Breath `REF`-zero buffer** | module, `U-OPA-PITCH` | `TRIM-BREATH-ZERO` wiper off `VREFOUT` | ≈ 0.437 V | INA828 `REF` pin | ~9 µA `[gated]` | **OK** |
+| 10 | **Breath `REF`-zero buffer** | module, `U-OPA-PITCH` | `TRIM-BREATH-ZERO` wiper, **off the LM317 5.21 V rail** | 0 – 1.0 V | INA828 `REF` pin | ~9 µA `[gated]` | **OK** — see §10 on the rail's tempco |
 | 11 | **Instrument breath buffer** | **carrier**, `U-BUF` half B, single +12 V | MPXV4006DP OUT | 0.152–4.8 V | 1 k → 2 m Cat5 → 11 kΩ/1 MΩ network; plus 25 kΩ ADC divider + 220 nF | ~8 µA at rest; 4.8 mA if the umbilical shorts | **D4** |
 | 12 | **REF5050 buffer** | **carrier**, `U-BUF` half A, single +12 V | REF5050 OUT, 5.000 V | 5.000 V | MPXV4006DP `VS`, **~10 mA**, **+ 100 nF decoupler, no isolation** | ~10 mA continuous | **D1 — the one real inadequacy** |
 
@@ -127,7 +128,7 @@ The spare count matters because **D3's fix needs exactly one spare half** (a
 | Mod 1–4 | 0–5.000 V | V+ | **6.70 V** |
 | Mod-offset follower | 3.3333 V | V+ | 8.37 V |
 | Pitch V_ref follower | 2.500 V | V+ | 9.20 V |
-| Breath `REF` buffer | 0.437 V | V− | 12.1 V |
+| Breath `REF` buffer | 0 – 1.0 V | V− | ≥ 11.7 V |
 | Breath gain stage | ≈ 0 V | either | ≥ 11.7 V |
 | Instrument buffer (0/+12 V) | 0.152–4.8 V | **V− (ground)** | **0.152 V** |
 | REF5050 buffer (0/+12 V) | 5.000 V | V− | 5.00 V |
@@ -940,19 +941,28 @@ reference, so the rest point does not drift against the signal.
 
 ---
 
-## 9. D4 — the umbilical is not balanced, and it spends the whole CMRR budget
+## 9. D4 — closed in the repo mid-audit; D4b is what is left
 
-`breath-receive-stage.md` `[repo]`:
+**This section was written against the page as it stood, and the page changed
+underneath it.** `R1b` — a matching 1 kΩ in the `AGND` leg — has been added,
+together with the 60.2 dB arithmetic below, a `C_cm` ±1 % tolerance
+requirement, and the 1206 uprating of `R1`. The analysis is retained because it
+was derived independently and **confirms the page's numbers exactly**, and
+because **D4b** — the BOM row that has not followed — is live.
+
+### 9.1 What the defect was, and the arithmetic that confirms the fix
+
+`breath-receive-stage.md`, as originally drawn `[repo]`:
 
 - `R1` = 1 kΩ, **instrument end, on the signal conductor only** (BOM
   `R-SER-BREATH-INST` confirms: *"Series protection on the breath buffer output
   into the umbilical"* `[repo]`)
 - `R2`, `R3` = 10 kΩ 0.1 %, module end, one per leg, **matched**
 - `R4`, `R5` = 1 MΩ, bias return to module `AGND`, one per leg
-- the `AGND` conductor runs **straight from the instrument's analog star to the
-  cable**, with nothing in series
+- the `AGND` conductor ran **straight from the instrument's analog star to the
+  cable**, with nothing in series — **this is what `R1b` now fixes**
 
-So the two legs are **not** symmetric: signal leg = 1 kΩ + 10 kΩ = 11 kΩ,
+So the two legs were **not** symmetric: signal leg = 1 kΩ + 10 kΩ = 11 kΩ,
 `AGND` leg = 10 kΩ. `[calc]`:
 
 ```
@@ -993,17 +1003,45 @@ leg time constants against C_cm 1.5 nF:
 
 which undercuts the stated purpose of making `C_diff` ten times `C_cm`.
 
-**Fix, and it is free:** a matching **1 kΩ in the `AGND` leg at the instrument
-end**. It costs nothing in signal terms because `AGND` is an in-amp input, not
-a return — both `breath-receive-stage.md` and `power-entry.md` say so
-explicitly `[repo]` — so it carries only the ~5 µA of bias current, and 5 µA ×
-1 kΩ = 5 mV of common-mode offset, rejected by the in-amp `[calc]`. It restores
-both the DC balance and the RC balance in one part.
+**The fix, now in the page:** a matching **1 kΩ in the `AGND` leg at the
+instrument end** (`R1b`). It costs nothing in signal terms because `AGND` is an
+in-amp input, not a return — both `breath-receive-stage.md` and
+`power-entry.md` say so explicitly `[repo]` — so it carries only the ~5 µA of
+bias current, and 5 µA × 1 kΩ = 5 mV of common-mode offset, rejected by the
+in-amp `[calc]`. It restores both the DC balance and the RC balance in one part.
 
-(Alternatively move `R1` to the module end and match it there — but `R1`'s
-second job is *"it also isolates the OPA2197 from ~200 pF of cable
-capacitance"* (BOM row 66 `[repo]`), which only works at the instrument end. Add
-the matching resistor; do not move this one.)
+Moving `R1` to the module end instead would **not** have worked: `R1`'s second
+job is *"it also isolates the OPA2197 from ~200 pF of cable capacitance"* (BOM
+row 66 `[repo]`), which only happens at the instrument end. Adding the twin is
+the right call.
+
+### 9.2 D4b — the BOM has not followed
+
+`breath-receive-stage.md` Component values, current `[repo]`:
+
+| Ref | Value |
+|---|---|
+| `R1` | 1 kΩ 1 %, **1206 ≥250 mW** |
+| `R1b` | 1 kΩ 1 %, **1206** |
+
+`bom.csv` row 66, current `[repo]`: `R-SER-BREATH-INST`, **qty 1**, **0805**,
+and the note still describes a single resistor (*"R1 in
+hardware/module/breath-receive-stage.md"*).
+
+**Two mismatches, and both are unretrofittable**: these parts are inside the
+bonded instrument body (the page says so `[repo]`). The quantity must go to
+**2** and the package to **1206**. The page's own power arithmetic is the
+reason `[calc, confirmed]`:
+
+```
+sustained +12 V fault on BREATH — a case ADR 0003 calls designed-safe:
+I = (12 − 0.2) / 1 kΩ = 11.8 mA      P = 11.8 mA × 11.8 V = 139 mW
+against an 0805's ~125 mW
+```
+
+This is the same defect shape as **D9** on the module side, one board away, and
+the BOM row that already carries the argument for `R-OUT-PROT` (row 42
+`[repo]`) is the one that did not carry it across.
 
 ---
 
@@ -1044,14 +1082,44 @@ the matching resistor; do not move this one.)
   and is not on the list. It is **protected by accident** — the 10 kΩ trimmer's
   own source impedance limits any clamp current to ≤ 0.5 mA `[calc]`. Fine in
   substance; the BOM's stated rule and its own list disagree.
-- **`VREFOUT` now carries two 10 kΩ trimmers**, `TRIM-OFFSET` and
-  `TRIM-BREATH-ZERO` `[repo]`, a constant ~500 µA `[calc]`. Constant, because a
-  pot across a reference draws the same current at any wiper position, so the
-  two trims do **not** interact — a real and non-obvious property worth stating,
-  since ADR 0006 L528 worried about exactly this for a series arrangement
-  `[repo]`. The residual is a fixed load-regulation shift in `VREFOUT`, which by
-  the page's own argument is a pure **gain** term and is trimmed out `[repo]`.
-  `[gated]` on the DAC8568's `VREFOUT` output current and load regulation.
+- **`VREFOUT` carries one 10 kΩ trimmer, not two.** `TRIM-BREATH-ZERO` moved to
+  the LM317 5.21 V rail during this audit `[repo]`, for a good reason the BOM
+  states well: `VREFOUT` is disabled at power-on until firmware writes an
+  enable, so the analog breath path must not depend on it. That leaves
+  `TRIM-OFFSET` alone on `VREFOUT`, a constant ~250 µA `[calc]` — constant
+  because a pot across a reference draws the same current at any wiper
+  position, so nothing interacts. The residual is a fixed load-regulation shift,
+  which by the pitch page's own argument is a pure **gain** term and is trimmed
+  out `[repo]`. `[gated]` on the DAC8568's `VREFOUT` output current and load
+  regulation.
+- **The breath `REF` buffer's reference is now a regulator, not a reference**,
+  and that is the right trade but it should be written down. `[calc]`, with an
+  LM317's ~100 ppm/°C of output tempco `[gated]`:
+
+  ```
+  5.21 V × 100 ppm/°C            = 521 µV/°C on the rail
+  scaled to REF (0.437/5.21)     =  44 µV/°C at the INA828 REF pin
+  through the downstream ×2.5    = 110 µV/°C at the breath jack
+  over a 20 °C warm-up           = 2.2 mV on a 10 V output
+  ```
+
+  That is **10× inside** the page's own unverified 20 mV warm-up figure
+  `[repo]`, so it does not change the commissioning story. But `TRIM-OFFSET`
+  (pitch) stayed on `VREFOUT` and this one moved, and the asymmetry is
+  **correct and deliberate** — pitch already depends on the DAC for its signal,
+  breath must not. Someone will eventually try to make the two consistent.
+  Record why they must not.
+- **The power-on state of stage 2 follows from the same fact, and contradicts
+  what two files say about `CLR`.** If `VREFOUT` is disabled until firmware
+  enables it `[repo]`, then in that window the pitch `V_ref` follower sees 0 V
+  and pitch sits at `2·Vdac − 0`; `R-CLR-PD` holds `Vdac` at 0, so the output is
+  **0 V**. Safe `[calc]`. But BOM row 54 and `mod-channels.md` both describe the
+  cleared state as *"pitch subsonic"* — i.e. −2.500 V `[repo]`. **Both are safe;
+  only one is documented.** Which one actually occurs depends on whether a
+  hardware `CLR`, or the mis-framed-word failure `digital-and-supervision.md`
+  warns about `[repo]`, also resets the internal-reference enable — `[gated]` on
+  DAC8568 behaviour. Worth resolving, because *"pitch parks subsonic"* is the
+  sentence someone will test against at E9.
 - **Presence-detect threshold, adjacent to the instrument buffer's output.**
   `digital-and-supervision.md` and BOM row 100 set it at **+100 mV** against the
   sensor's pedestal `[repo]`, whose spec range is **0.152–0.378 V** `[repo]`.
@@ -1145,7 +1213,9 @@ capacitor that nothing in the repo specifies.
    arrangement (D1).
 4. Row 42 (`R-OUT-PROT`): specify a series rated ≥ 400 mW, or state the
    output-to-output fault it does **not** survive (D9).
-5. Row 66 (`R-SER-BREATH-INST`): add the matching 1 kΩ in the `AGND` leg (D4).
+5. Row 66 (`R-SER-BREATH-INST`): **qty 1 → 2** and **0805 → 1206 ≥250 mW**, to
+   match the page's `R1` + `R1b` (**D4b**). Both parts are inside the bonded
+   body.
 6. Add a row for the breath stage's feedback capacitor and its gain-limiting
    resistor (D10, D6).
 7. Add a row for the −2.500 V inverter, or record that breath OFFSET is
