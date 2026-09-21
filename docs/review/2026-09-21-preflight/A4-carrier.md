@@ -12,6 +12,13 @@ datasheet and the claim is **not there**.
 
 **Two decisions are taken here** (§1, §2). Everything else is a finding.
 
+> **The corpus moved while this was being written.** `config/figures.yaml`'s
+> `sensor-full-scale` was corrected from 4.80 V to **4.86 V** (pedestal 0.265 V,
+> not 0.200 V) partway through this review, and `hardware/bom.csv` and
+> `hardware/controller/carrier.md` were touched by a tooling commit. Findings
+> below are against the tree as of that commit; **Finding A4-10 is stated
+> against the new 4.86 V figure** and is the one place it matters.
+
 ---
 
 ## Contents
@@ -546,8 +553,8 @@ absorbed by the panel span knob.)
 `1.23 µV × 1/(1−e^(−250/282)) = 2.1 µV` = **0.0026 LSB**. Negligible. Recorded
 so nobody re-derives it as a worry.
 
-**Headroom, and a full-scale figure this page gets wrong** — see Finding A4-6
-in §5.
+**Headroom, and a transfer function this page gets wrong in both coefficients**
+— see Finding A4-10 in §5.2.
 
 ## 3.4 The level shifter, and a mismatch in the brief
 
@@ -867,38 +874,65 @@ Two findings at once:
 
 **Wrong — and it is the `CLAUDE.md` failure mode exactly:**
 
-> **Finding A4-10.** Line 333: *"full scale = **4.7 V** × 0.6 = 2.82 V against
-> VREF 3.3 V → 85 % of range, 3502 counts"*.
+> **Finding A4-10. `carrier.md`'s entire §2 divider derivation is built on a
+> sensor transfer function that is wrong in both coefficients, and the checker
+> cannot see either.**
 >
-> `config/figures.yaml: sensor-full-scale` is **4.80 V**, `settled`, owned by
-> ADR 0003, derived `0.2 + 0.766 × 6 = 4.796 V` — and the MPXV4006DP cover page
-> confirms **0.2 to 4.8 V** `[datasheet MPXV4006 p.1]`. **The same page draws
-> "0.2 – 4.80 V" correctly in its own §2 schematic, 120 lines above.**
+> Lines 179, 335, 336 read *"MPXV4006DP Vout **0.2 – 4.80 V**"*,
+> *"full scale = **4.7 V** × 0.6 = 2.82 V → 85 % of range, 3502 counts"* and
+> *"real play = 2.8 kPa → **0.2 + 0.766 × 2.8** = 2.34 V → 1743 counts"*.
 >
-> Corrected `[calc]`: 4.80 × 0.6 = **2.88 V** → 2.88/3.3 = **87.3 %** →
-> **3575 counts**, not 2.82 V / 85 % / 3502.
+> **The datasheet prints the transfer function, verbatim, in the captions of
+> both Figure 4 and Figure 5** `[datasheet MPXV4006 p.5]`:
 >
-> **`tools/check-staleness.py` passes on this**, because the `forbidden`
-> strings are `"4.7 V output"` and `"0.2-4.7 V"` and the live text reads
-> `"4.7 V × 0.6"`. **The same escape exists in `bom.csv:46`**, whose
-> `R-ADCDIV` row reads *"Sensor reaches 4.7V into a 3V3 ADC"*. And line 347's
-> clamp calculation inherits it: `(4.7 − 0.7)/10 kΩ = 400 µA` should be
-> `(4.80 − 0.7)/10 kΩ = 410 µA`.
+> ```
+> Transfer Function (kPa):  Vout = VS*[(0.1533*P) + 0.053]
+> ```
+>
+> The sensitivity was always right — 5 × 0.1533 = 0.7665 V/kPa. **The pedestal
+> was not: it is 5 × 0.053 = 0.265 V, not 0.200 V**, which is also exactly the
+> `V_off` typ in Table 1 `[datasheet MPXV4006 p.3]`. The "0.2 to 4.8 V" the page
+> inherited is the datasheet's own **cover-page** line, which contradicts the
+> transfer function printed inside the same document.
+>
+> `config/figures.yaml: sensor-full-scale` **was corrected to 4.86 V while this
+> review was being written**, with `"0.2 V + 0.766"` and `"0.2 V at rest"` added
+> to `forbidden`. **`carrier.md` did not follow, and the checker still passes**,
+> because the live text reads `0.2 + 0.766` (no " V ") and `0.2 – 4.80 V` (not
+> `0.2 – 4.7 V`). **This is the named failure mode, caught in the act: the
+> figure moved this afternoon and the page that consumes it did not.**
+>
+> Corrected `[calc]`, `V_S` = 5.000 V, divider 0.600, `V_REF` = 3.3 V:
+>
+> | | page says | correct |
+> |---|---|---|
+> | rest, P = 0 | 0.2 V → 149 counts | **0.265 V → 197 counts** |
+> | full scale, P = 6 kPa | 4.7 V → 2.82 V, 85 %, 3502 counts | **4.864 V → 2.918 V, 88.4 %, 3622 counts** |
+> | 2.8 kPa working point | 2.34 V → 1.40 V → 1743 counts | **2.411 V → 1.447 V → 1796 counts** |
+> | playable span above rest | 1594 counts | **1599 counts** |
+> | span `V_FSS` | — | 4.864 − 0.265 = **4.599 V**, the datasheet's 4.6 V typ ✓ |
+>
+> **What survives:** the ~1594-count playable span, which is why every
+> downstream "3.2 LSB is 0.2 % of ~1594 counts" sentence still reads correctly
+> at 1599. **What does not:** every headroom number on the page. Line 347's
+> clamp calculation also inherits the error — `(4.7 − 0.7)/10 kΩ = 400 µA`
+> should be `(4.864 − 0.7)/10 kΩ = **416 µA**`.
+>
+> **The same escape exists in `bom.csv:46`**, whose `R-ADCDIV` row reads
+> *"Sensor reaches 4.7V into a 3V3 ADC"*.
 >
 > **Add to `sensor-full-scale`'s `forbidden`:** `"4.7 V × 0.6"`,
-> `"4.7 V x 0.6"`, `"Sensor reaches 4.7V"`, `"(4.7 − 0.7)"`, `"(4.7 - 0.7)"`.
->
-> Note what *survives*: the 1594-count playable span is unaffected, because it
-> is `1743 − 149` and both terms come from the 2.8 kPa working point, not from
-> full scale. So this is a headroom error, not a signal-chain error.
+> `"4.7 V x 0.6"`, `"Sensor reaches 4.7V"`, `"(4.7 − 0.7)"`, `"(4.7 - 0.7)"`,
+> `"0.2 – 4.80 V"`, `"0.2 - 4.80 V"`, `"0.2 + 0.766"`, `"3502 counts"`,
+> `"1743 counts"`.
 
-**A related headroom number nobody has** `[calc]`: `carrier.md` treats 0.2 V as
-the rest output, but `[datasheet MPXV4006 p.3 Table 1]` gives `V_off` =
-**0.152 / 0.265 / 0.378 V** (min/typ/max). At the maximum offset with nominal
-span, the sensor's top output is `0.378 + 4.6 = 4.978 V` → ×0.6 = **2.99 V =
-90.5 % of the 3.3 V reference**. Still no clipping, but the real worst-case
-headroom is 9.5 %, not 15 %. And the offset spread alone is 0.226 V = 168
-counts, which is why the firmware autozero is not optional.
+**A headroom number nobody has** `[calc]`: `[datasheet MPXV4006 p.3 Table 1]`
+gives `V_off` = **0.152 / 0.265 / 0.378 V** (min/typ/max) — a 0.226 V spread,
+which after the divider is **168 counts of pedestal uncertainty**, and is why
+the firmware autozero is not optional. At the maximum offset with nominal span
+the sensor's top output is `0.378 + 4.6 = 4.978 V` → ×0.6 = **2.99 V = 90.5 %
+of the 3.3 V reference**. No clipping, but the real worst-case headroom is
+**9.5 %**, not the 15 % the page's 85 % implies.
 
 ## 5.3 Markings that are now stale in the other direction
 
@@ -1018,7 +1052,7 @@ dev board arriving and is correctly flagged as such.
 | A4-7 | `LED-SIDE` | **high** | WS2815 full white is 47.1 mA/LED → 2355 mA for 50 LEDs, against ADR 0005's 1023 mA |
 | A4-8 | 5 V rail | gap | The per-buck split is blocked on a current probe, not on a document; say so |
 | A4-9 | `V3V3` / `U-ADC` | medium | LDO load regulation is 10 mV typ / **50 mV max**, i.e. **1.07 / 5.35 LSB**, not the `[from memory]` 3.2; the "0.3 % per 100 mA" was the *line* regulation figure |
-| A4-10 | `R-ADCDIV` | **high** | Live `4.7 V` full-scale in `carrier.md:333` and `bom.csv:46`, against a settled 4.80 V. The checker cannot see it. Correct figures: 2.88 V, 87.3 %, 3575 counts |
+| A4-10 | `R-ADCDIV` / `U-BREATH` | **high** | §2's divider derivation uses a 0.2 V pedestal and a 4.7 V full scale. The datasheet prints `Vout = VS*[(0.1533*P)+0.053]` — pedestal **0.265 V**, full scale **4.864 V**. `figures.yaml` was corrected to 4.86 V mid-review and `carrier.md` did not follow; the checker passes. Correct: 197 / 3622 / 1796 counts |
 | A4-11 | `HDR-DEV` | medium | Page says one board's worth, BOM still budgets two. Unclosed, and it is footprints |
 | A4-12 | `U-BREATH` P1 | low | Page lists P1 as open; `bom.csv:5` settled it from the banked datasheet. Page is stale |
 | A4-13 | page header | low | Status block still says "not checked against a single datasheet" and points at a review directory that does not exist |

@@ -71,10 +71,40 @@ def check_figures(files):
                     lines = open(path, encoding="utf-8").read().splitlines()
                 except Exception:
                     continue
+                # Match against a line-JOINED stream, not line by line. The
+                # corpus is hard-wrapped at ~78 columns, so a forbidden phrase
+                # that straddles a line break was invisible - and one was:
+                # "six conductors leave" wrapped across 0001:369-370 while
+                # sitting in its own forbidden list, and the checker passed.
+                #
+                # Lines are joined with ONE space and their internal spacing is
+                # left alone, because several forbidden patterns are code-block
+                # spellings containing runs of spaces ("SCLK      / MOSI").
+                buf, lineof = [], []
                 for i, line in enumerate(lines, 1):
-                    if bad in line:
-                        rec = (fig["id"], fig.get("value"), bad, rel, i, line.strip()[:100])
-                        (refuted if REFUTATION.search(line) else live).append(rec)
+                    s = line.strip()
+                    if buf:
+                        buf.append(" ")
+                        lineof.append(i)
+                    for ch in s:
+                        buf.append(ch)
+                        lineof.append(i)
+                text = "".join(buf)
+
+                start = 0
+                while True:
+                    at = text.find(bad, start)
+                    if at < 0:
+                        break
+                    start = at + 1
+                    first = lineof[at]
+                    last = lineof[min(at + len(bad) - 1, len(lineof) - 1)]
+                    # Judge refutation on every line the match touches, so a
+                    # correction written above or below a wrapped phrase counts.
+                    ctx = " ".join(lines[first - 1:last])
+                    rec = (fig["id"], fig.get("value"), bad, rel, first,
+                           ctx.strip()[:100])
+                    (refuted if REFUTATION.search(ctx) else live).append(rec)
     return live, refuted, spec
 
 

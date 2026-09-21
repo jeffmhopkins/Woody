@@ -366,8 +366,8 @@ during performance.
 - The 74x165 chain suits this geometry well. No matrix, no ghosting, no
   diodes. **And with the registers back on the cluster boards it does not mean
   per-key wiring back to a central point**: every switch-to-chip connection is
-  a trace on the board the switch is already soldered to, and six conductors
-  leave each cluster. An intermediate version of this line called that wiring
+  a trace on the board the switch is already soldered to, and twelve
+  conductors leave each cluster (this line said six; the hop is a 2x6 IDC). An intermediate version of this line called that wiring
   "the right price" for tail-mounted registers. The price is no longer paid.
 - **Chain is 4 registers, 32 bits, for 18 switches** (ADR 0010), **one per
   cluster board**. The 14 spare bits are free expansion for octave, mode and
