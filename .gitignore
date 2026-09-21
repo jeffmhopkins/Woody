@@ -5,3 +5,9 @@
 # rather than the session scratchpad; ignoring them keeps the tree readable
 # without disturbing an agent that is still running.
 *.tmp
+
+# Python bytecode. tools/__pycache__/check-staleness.cpython-311.pyc was
+# TRACKED until 2026-09-21, and the PreToolUse staleness hook rewrites it on
+# every commit - so every commit carried a spurious binary change.
+__pycache__/
+*.py[cod]
