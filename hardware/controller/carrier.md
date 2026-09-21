@@ -227,8 +227,8 @@ tolerance, inside a body that cannot be reopened.
 
 **`R-ISO-REF` — and without it the reference buffer oscillates.** Back-
 solving the OPA2197's output impedance from this page's own stated 21 kHz
-pole gives **Ro ≈ 75.8 Ω**, consistent with the part's 1 nF maximum
-capacitive load. The actual load at the sensor's `VS` pin is **100 nF** of
+pole gives **Ro ≈ 75.8 Ω**. The actual load at the sensor's `VS` pin is
+**100 nF** of
 `C-DECOUPLE-CARRIER`, which leaves **2.6° of phase margin and oscillation
 near 458 kHz** `[calc, A2]`.
 
@@ -244,6 +244,25 @@ near 458 kHz** `[calc, A2]`.
 Alternative, and cheaper in DC terms: a **series R–C snubber from `VS` to
 the analog star**, which damps the load without putting any resistance in
 the DC path, so the sensor sees the full 5.000 V.
+
+> **⚠ The "1 nF maximum capacitive load" that stood here is not a verified
+> OPA2197 figure.** "Stable with 1-nF Capacitive Loads" is a **verbatim
+> feature-list bullet of the INA828** (SBOS792A, first page, now in the repo)
+> — a different part, in a different stage, on a different board. The
+> OPA2197's own capacitive-load limit is **unverified**: SBOS737 is BLOCKED
+> (`datasheets/MANIFEST.csv`), and a researcher found it committed to no
+> public repository on GitHub or GitLab.
+>
+> **The conclusion does not move.** `R-ISO-REF` is justified by the
+> back-solved `Ro` and the 100 nF at `VS`, and the 1 nF was only ever cited
+> as corroboration. But it was corroboration from the wrong datasheet, which
+> is how a number gets believed twice.
+>
+> **There is a way to settle it without the PDF.** TI's own OPAx197 SPICE
+> macromodel is committed on GitHub and downloads, and its Green–Williams–Lis
+> structure models open-loop output impedance versus frequency explicitly. An
+> AC sweep of `Zo` answers this properly. Arithmetic on the netlist does not —
+> the `Zo` network is frequency-shaped.
 
 > **`Ro = 75.8 Ω` is back-solved, not read.** `ti.com` was unreachable
 > through three review waves. Confirm the OPA2197's open-loop output

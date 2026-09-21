@@ -173,8 +173,26 @@ the best available on every channel at once:
 scale) and C/D are gain 2 (5.000 V). An A-grade part halves every output —
 pitch becomes −2…+2.25 V, the mods ±5 V, and channel 7 cannot reach its
 reference voltage at all. Only C satisfies both requirements. `bom.csv` is
-locked to `DAC8568CIPW`; **confirm the gain/grade mapping against SBAS430**,
-which no browser in this sandbox could reach.
+locked to `DAC8568CIPW`.
+
+> **Confirmed 2026-09-21 against SBAS430E**, now held at
+> `datasheets/texas-instruments/DAC8568CIPW.pdf`. This paragraph asked for
+> that check because no browser in the sandbox could reach `ti.com`; the
+> datasheet says what the ADR guessed, verbatim: *"For device grades A and C
+> on power-up, all DAC registers are filled with zeros and the output voltages
+> of all DAC channels are set to zero scale."* A/B are 2.5 V full scale, C/D
+> are 5 V.
+>
+> **And it carries a requirement the ADR did not know: the C grade is
+> specified only for AVDD = 5.0 V to 5.5 V**, where A/B are specified from
+> 2.7 V. The LM317 sits at 5.21 V nominal so this passes — but E7 selects the
+> divider *on the bench* across a 0.66 V worst-case spread, and a selection
+> below 5.00 V puts the part out of spec. **5.00 V is a hard floor on that
+> bench step**, which nothing in the roadmap said. `bom.csv` carries it now.
+>
+> *(A second rider, not binding today: on C/D an external `VREFIN` must stay
+> below AVDD/2. The internal reference is used, so this only forecloses a
+> future external-reference retrofit above ~2.6 V.)*
 
 | Output | At rack power-on, before firmware writes | Why that is right |
 |---|---|---|
