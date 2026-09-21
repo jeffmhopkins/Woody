@@ -211,6 +211,19 @@ figures:
     forbidden: ["R-FB-HI,module,TBD", "R-FB-LO,module,TBD", "VALUES NOT SET"]
     note: "FB was connected to NOTHING, which held the limit at 12 mV / 50 mohm = 240 mA forever and latched the -1 off on every start. ADI describes exactly this as the Figure 9 caption story (p.9). An unconnected FB is indistinguishable, to this part, from a permanently shorted output."
 
+  - id: dig-gnd-topology
+    quantity: Where DIG_GND returns to
+    value: "DISPUTED"
+    status: disputed
+    owner: hardware/module/power-entry.md
+    candidates:
+      - "Its own path to the star (docs/decisions/0004-cv-interface-module.md:627)"
+      - "NOT its own path - the pour directly under its trace, because routing a 2 MHz SPI return to a distant star is the classic split-plane mistake (hardware/module/power-entry.md:495-498)"
+      - "The analog star, single tie (hardware/module/digital-and-supervision.md:53)"
+    decided_by: "The 2-layer vs 4-layer decision, which is upstream of it. On two layers the corpus's own requirements are mutually exclusive - power-entry.md wants the SPI return directly under its trace while ADR 0004 wants PWR_GND on its own copper AND the analog return as its own region, and two disjoint pours on one layer means every boundary-crossing trace loses its return across the moat. Four layers dissolves the conflict. Raised by a cold reviewer 2026-09-21."
+    forbidden: []
+    note: "power-entry.md states that ADR 0004 was corrected on this point. IT WAS NOT - line 627 still says the opposite. This is the named failure mode exactly: the fix landed where the editing was happening and not where the reader looks. It is SEMANTIC, so tools/check-staleness.py cannot see it, which is why it survived three review waves and is filed here instead."
+
   - id: loop-budget
     quantity: Real-time loop, one pass
     value: "196-241 us of 250 us"
