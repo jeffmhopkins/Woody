@@ -614,7 +614,7 @@ raised it** — which is V4's method, and the thing that stopped duplicate
 | | Why it is still open |
 |---|---|
 | ~~**W12 — the zero correction is open-loop**~~ | **Closed.** Not by adding a readback but by deleting the correction: one zero authority per representation, each able to measure what it corrects. The panel offset knob owns the jack, firmware owns its own ADC copy, DAC channel 6 is free |
-| **W13 — nothing mutes breath when the watchdog fires** | Accepted risk pending E10, and smaller than it was: with `REF` grounded, `CLR` no longer removes the breath zero on its way past. An analog path cannot latch at a level the player is not producing — it follows the sensor, and the sensor follows the room |
+| ~~**W13 — nothing mutes breath when the watchdog fires**~~ | **Closed as accepted.** A stuck CV is a digital artefact — a register nobody is refreshing — and an analog path has no register. The jack falls to wherever the offset knob left it, which is a correct reading of "nobody is playing". Scope written into ADR 0004; E10 pulls the umbilical mid-note to check. A series mute FET in the one DC-accurate output would cost more than the failure it cannot prevent |
 | **The module's internal ground, the rack's bus ground** | 5.7–7.2 and ~4.8 cents. Layout items, and there is no module layout yet |
 | **"Every document describes a channel. None describes a note."** | The one finding no circuit review could have produced, and the only one that is not a defect. It needs its own session |
 | **Values marked `open` in the BOM** | `R-ILIM`, `R-PRECISION`'s ratio suffix, `R-PRESENCE`, the PCBs, the mechanical set. Each waits on a measurement or a layout, and each says which |

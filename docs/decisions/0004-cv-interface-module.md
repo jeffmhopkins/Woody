@@ -412,6 +412,40 @@ Size N so a busy loop cannot trip it but a hang is caught in well under a
 second. This also gives umbilical disconnection the same behaviour as a hang,
 which is correct: both mean "the instrument is no longer telling me anything."
 
+#### The watchdog's scope is the DAC channels, and breath is outside it
+
+Stated rather than left implicit, because three reviewers read the omission as a
+hole. `CLR` reaches pitch and the four mod channels. **Breath does not pass
+through the DAC at all** (ADR 0003), so the watchdog has no authority over the
+one jack that is usually driving a VCA — and on the face of it that is the
+failure this section declares unacceptable, happening on exactly the channel the
+mechanism cannot reach.
+
+**It is not the same failure, and the difference is the whole reason breath is
+analog.** A stuck CV is a *digital* artefact: a register holding a number nobody
+is refreshing. An analog path has no register to hold. It follows the sensor,
+the sensor follows the room, and a mouthpiece nobody is blowing into reads
+ambient — so the jack falls to wherever the panel offset knob left it and stays
+there. That is not a drone; it is a correct reading of "nobody is playing."
+
+The same argument covers the second route in: on a sagging cable the buck drops
+out at 8 V while the REF5050 and OPA2197 hold regulation to ~7.2 V, so the MCU
+dies, SPI stops, `CLR` fires, and breath keeps working. Breath *still working*
+when everything else has parked is the designed behaviour, not a gap in it.
+
+**What is accepted, explicitly:** a genuinely stuck *sensor* — a blocked
+restrictor holding pressure, or a part failing to a mid-scale output — would
+drone, and nothing in the design would catch it. That is a sensor-failure mode
+rather than a firmware-hang mode, it is what the logged auto-zero correction
+exists to make visible (ADR 0006), and it does not argue for a mute switch: a
+series FET in the project's one DC-accurate analog output would bring its own
+`R_on`, leakage and charge injection to defend against a failure that path
+cannot have.
+
+**E10 checks it rather than assuming it:** with the mouthpiece at rest, pull the
+umbilical mid-note and watch the jack. If it parks quietly, this paragraph is
+right. If it does not, we find out before anything is bonded.
+
 **220 Ω in series on MOSI at the driving end.** Source termination on the one
 line that runs the full umbilical carrying data. It also makes SYNC-signal
 regeneration at the module unnecessary, which was the alternative under

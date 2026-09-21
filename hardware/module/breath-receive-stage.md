@@ -176,14 +176,19 @@ turn if it ever bothers you.
 separately on purpose, so a flat bar on the screen is no longer evidence about
 the output.
 
+## What the jack does when the watchdog fires — settled
+
+**Nothing, and that is correct.** `CLR` reaches the DAC channels; breath touches
+none of them, and now that `REF` is grounded it touches the breath stage in no
+way at all — where previously `CLR` would have yanked the zero out from under
+it. An analog path cannot latch at a level the player is not producing: it
+follows the sensor, and the sensor follows the room. Reasoning in full in
+ADR 0004, "The watchdog's scope is the DAC channels".
+
+E10 verifies it by pulling the umbilical mid-note with the mouthpiece at rest.
+
 ## Still open
 
-- **What the jack does when the watchdog fires.** `CLR` reaches the DAC
-  channels; breath touches none of them — and now that `REF` is grounded, it
-  touches the breath stage in no way at all, where previously `CLR` would have
-  yanked the zero out from under it. An analog path cannot latch at a level the
-  player is not producing: it follows the sensor, and the sensor follows the
-  room. Accepted risk pending E10.
 - **The downstream gain/offset stage** is drawn as a block. Its own values, its
   offset reference (the buffered `VREFOUT` created for pitch is the obvious
   node), and whether the gain pot's wiper needs a buffer are E10 work.
