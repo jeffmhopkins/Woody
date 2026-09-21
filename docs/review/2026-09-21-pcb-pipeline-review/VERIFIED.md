@@ -233,3 +233,76 @@ plan literally would *create* the tie the rule exists to prevent.
 Agreement between agents that cannot see each other is the evidence standard
 this project uses. Two independent confirmations makes this the wave's
 highest-confidence finding.
+
+## P3, P4, P9 — three cold agents, one recommendation: do not autoroute
+
+**Convergent findings.** Three reviewers who could not see each other reached
+the same conclusion by three different routes.
+
+**P4 has the number.** Against Freerouting's own committed nightly benchmark,
+filtered to 2-layer boards 25–90 cm² with ≥50 components (N = 159): release
+2.4.1 returns a fully routed board **36 %** of the time, and a
+fully-routed-and-clearance-clean board **19 %**. Upstream's own Tier B summary
+says 3.4 % DRC-clean. And it has no star ground, no matched-pair support and no
+per-net via control — upstream's own research doc says the only way to get a
+star ground is hand-route-and-lock, and calls that fragile.
+
+**P3 and P4 independently found the same idempotency bug**, which I did not
+anticipate: **unlocked pre-existing tracks are frozen too.** Freerouting's lexer
+has no `route` keyword, so unlocked copper falls through to `USER_FIXED` — not
+routable, not deletable. P3 proved it by running the router: a deliberate
+4-segment detour survived 10 router and 2 optimizer passes untouched while the
+optimizer demonstrably improved another net in the same run.
+
+**So run *n* freezes run *n−1*'s output and only fills gaps. The stage is not
+re-runnable at all** unless every unlocked track is deleted before each export.
+
+**And the smoke test I proposed proves nothing.** P3: "route one trace, lock it,
+autoroute, diff it" passes *either way*, because locked tracks are held aside as
+C++ objects and re-added byte-identically regardless. It needs a second,
+deliberately ugly *unlocked* trace asserted to have changed.
+
+### The Java claim — CONFIRMED, and it is a one-line fix
+
+**Re-checked, 2026-09-21.** Installed JDK is **21.0.10**. Freerouting 2.2.0
+through the current 2.4.1 target **Java 25** (`build.gradle` `VERSION_25`; P9
+found `freerouting-2.4.1.jar` is class-file major 69 and
+`UnsupportedClassVersionError` on 21).
+
+But `openjdk-25-jre-headless` **is in noble's stock archive** —
+`Candidate: 25.0.4.1+1-1~24.04.4`, `noble-updates/universe`. No allowlist
+change needed. The plan's "Java 21 already present" was wrong; the remedy is
+`apt install`.
+
+### `timeout 1800 java …` destroys the output
+
+P4: the SES is written only when the job reaches a terminal state in-process.
+`SIGTERM` leaves **no `.ses` at all**. The correct form is
+`--router.job_timeout=00:20:00`, and only colon forms parse — `"30m"` silently
+means *no timeout*, which Freerouting's own javadoc documents incorrectly.
+
+### Exit code 0 does not mean routed
+
+`computeCliExitCode` returns 0 for `COMPLETED` *or* `TIMED_OUT` whenever bytes
+were written. A stagnation stop with 40 unrouted connections exits 0. The thing
+to assert on is `--router.result_json`, which carries
+`connections.incompleteCount` and `clearanceViolations.totalCount`.
+
+### P9: `kiutils` is abandoned, and SKiDL already does what I wanted it for
+
+Last pypi release 2024-02-02, last commit 2024-05-02, README says "KiCad 6.0
+and up". I named it as the way to render a schematic — which it cannot do.
+**`Circuit.generate_schematic()` exists in SKiDL** (KiCad 6–9), so
+`--schematic-parity` was never lost. Drop `kiutils` entirely.
+
+### P9: the SWIG bindings are removed in KiCad 11
+
+From official `kicad-python` 0.8.0: *"The SWIG bindings still exist in KiCad 9
+and 10, but are removed in KiCad 11"*, and the IPC successor *"requires
+communication with a running instance of KiCad"*. Stages 3–6 are the plan's
+most custom code and all sit on SWIG, whose replacement is **less** headless.
+Second independent sighting — P2 found the same line.
+
+**Conclusion: minimise SWIG surface.** Use `kinet2pcb` rather than hand-writing
+footprint loading, and put verify/export behind **KiBot 1.9.1**, so the
+migration is someone else's problem.
