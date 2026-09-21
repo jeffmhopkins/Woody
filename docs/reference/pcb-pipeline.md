@@ -1,335 +1,224 @@
-# PCB pipeline — finished design to orderable boards, headless
+# PCB pipeline — schematic to a board you can route
 
-**Status:** Proposed 2026-09-21. Not run. This is the tooling concept, not a
-record.
+**Status:** Proposed 2026-09-21, rewritten after a 13-agent review
+(`docs/review/2026-09-21-pcb-pipeline-review/`). Not run.
 
-The goal: take a settled schematic page set and produce a zip a fab house will
-accept, entirely from a shell, re-runnably, with every script in the repo. No
-GUI, no manual step that cannot be replayed.
+**The handoff is routing.** Everything up to a placed, grouped, rules-configured
+board is headless and re-runnable. You route it in KiCad. Everything after —
+verification, gerbers, drill, the order package — is headless again.
 
----
+That is not a compromise. Three cold reviewers reached it independently, and
+one brought the number: against Freerouting's own benchmark, filtered to boards
+like this one, it returns a fully routed board 36 % of the time and a
+routed-*and*-clearance-clean one **19 %**. It also has no star ground, no
+matched-pair support and no per-net via control — upstream's own documentation
+says the only way to get a star ground is hand-route-and-lock, and calls that
+fragile. There is no representation in the tool for this board's design thesis.
+
+## What dropping the autorouter removes
+
+Everything in this list was a real defect found by the review, and none of it
+exists any more:
+
+- Java 25 vs the installed 21; `--router.job_timeout` colon-format traps;
+  `timeout` destroying the `.ses`; exit code 0 not meaning routed
+- The Specctra round trip: arcs flattened to chords, `.kicad_dru` never
+  exported, an `smd_smd` clearance deliberately 4× looser than DRC checks
+- **Unlocked pre-existing tracks freezing**, so run *n* only fills gaps left by
+  run *n−1* — the stage was never re-runnable
+- A smoke test for locked tracks that passes either way and proves nothing
+- Non-determinism from a 1000 ms wall-clock cutoff inside the routing hot path
+- The router ploughing through the `AGND` star because rule areas were created
+  after the autoroute
 
 ## The stack
 
-| Tool | Job | Install |
+| Tool | Job | Status |
 |---|---|---|
-| **KiCad 9** (`kicad-cli` + `pcbnew` Python) | Board object model, DRC/ERC, all fab export | apt, needs `*.kicad.org` or `ppa.launchpadcontent.net` allowlisted |
-| **SKiDL** 2.3.0 | **Circuit as Python.** Generates the netlist and runs ERC | pip — *verified downloadable from this sandbox* |
-| **kiutils** 1.4.8 | Reads/writes `.kicad_sch` and `.kicad_pcb` S-expressions where `pcbnew` won't | pip — verified |
-| **ngspice** 42 | Analog verification — the stage that catches what algebra misses | apt, **from the stock archive — no allowlist change needed** |
-| **PySpice** 1.5 | Drives ngspice from Python; SKiDL emits straight into it | pip — verified |
-| **Freerouting** 2.x | Autorouter, Specctra DSN in / SES out | GitHub release `.jar`; Java 21 already present |
-| **xvfb** | Virtual display for the two things that still want GL | apt |
+| **SKiDL** 2.3.0 | Circuit as Python → netlist, ERC | Verified: works with **no KiCad installed**, parses KiCad 9 libraries, ad-hoc parts need no library |
+| **kinet2pcb** 1.1.4 + **hierplace** 1.1.0 | Netlist → placed `.kicad_pcb`, **grouped by design hierarchy** | Verified downloadable. This is the "everything in there and placed" step |
+| **ngspice** 42 | Analog verification | Stock Ubuntu archive, no allowlist change |
+| **KiCad 9** | Interactive routing, and `pcbnew` for outline/classes/zones | Needs `*.kicad.org` **and** `api.launchpad.net` allowlisted |
+| **KiBot** 1.9.1 | DRC/ERC preflights, fab output, the zip | Replaces hand-rolled `kicad-cli`, which the review found nobody's commands would even parse |
 
-Ubuntu noble's stock archive has **KiCad 7 only**, which has no
-`kicad-cli pcb drc` — that arrived in KiCad 8, and the verify stage depends on
-it. This is the one hard network requirement.
+**Dropped:** Freerouting (above) and `kiutils` — abandoned since 2024, and named
+for a job SKiDL's own `generate_schematic()` already does.
 
-## The architectural choice: circuit as code, not a parsed drawing
-
-The obvious pipeline is *parse the ASCII schematics into a netlist, then build a
-board*. Don't. A one-shot parse of hand-drawn art is the highest-risk step in
-the whole chain, it produces an artifact nobody can review, and it re-derives
-differently every run.
-
-**Transcribe each schematic page into a SKiDL module instead.** The
-transcription is done once, by hand or by an agent, and after that:
-
-- it is **executable**, so the netlist is *generated*, not *interpreted*
-- it is **diffable**, so a change to a page shows up as a code diff
-- it is **reviewable** by the same cold node-indexed method this project
-  already uses for everything else
-- SKiDL has **`ERC()`** built in — unconnected pins, output-to-output, power
-  pins with no driver
-- it is **re-runnable forever**, which is the whole point
-
-```
-pcb/src/module/
-    power_entry.py        one module per schematic page
-    digital.py
-    pitch.py
-    mods.py
-    breath_rx.py
-    breath_out.py
-    module.py             imports the six, emits module.net
-```
-
-The netlist becomes a build artifact. `hardware/module/*.md` stays the human
-source of truth, and the SKiDL modules are the machine-readable statement of the
-same thing — with a parity check between them (below) so they cannot drift.
-
-**You lose `--schematic-parity`,** because there is no `.kicad_sch`. Replace it
-with something stronger: assert directly in Python that the board's netlist
-equals the SKiDL netlist, ref by ref and net by net. That checks the thing
-parity was a proxy for.
-
-*(If a human-readable schematic is wanted for review, render it with `kiutils`
-after the fact. It is a nice-to-have, not a pipeline dependency.)*
+**Do not use PySpice.** 1.5 fails against ngspice 42: it treats every
+non-`Warning:` stderr line as fatal and ngspice prints a solver banner to
+stderr on every run. Use raw netlists plus `subprocess`. TI macromodels also
+need `set ngbehavior=psa` in `.spiceinit` — inside `.control` is too late.
 
 ---
 
-## Headless gotchas, all of which will bite
+## Precursors that bite at the netlist, not the board
 
-These are the ones that stop a first run dead. Handle them in `setup.sh`.
+Only the ones that corrupt something no later stage can catch.
 
-**`pcbnew` is built against the system interpreter.** It lands at
-`/usr/lib/python3/dist-packages/pcbnew.py` + `_pcbnew.so`. A venv will not see
-it. Either use system `python3`, or create the venv with
-`--system-site-packages`, or set `PYTHONPATH=/usr/lib/python3/dist-packages`.
+**1. Reconcile net names across the six pages first.** `AGND` means the
+umbilical sense conductor *and* the module analog return. `BREATH` means the
+in-amp input *and* the output jack. **Three cold reviewers found this
+independently.** A transcription taking names off the drawings shorts the
+breath in-amp input to the breath output jack — and every downstream check
+passes, because the merge happened before anything could see it.
 
-**The library tables do not exist until a GUI has run once.** `kicad-cli` and
-`pcbnew` resolve footprints through `~/.config/kicad/9.0/fp-lib-table` and
-`sym-lib-table`, which the GUI writes on first launch. Headless, copy the stock
-ones from `/usr/share/kicad/template/` before anything else, and set
-`HOME` to something writable.
+**2. One `rails.py`, and `Net.fetch` only.** `Net("+12V")` *constructs*. Two
+modules naming the same rail give `+12V` and `+12V1`, electrically separate,
+reported as two warnings among hundreds. Seven rails, six modules. Assert no
+net name ends in a digit.
 
-**Two things still want OpenGL**: `kicad-cli pcb render` and, depending on
-version, Freerouting. Run both under `xvfb-run -a` with
-`LIBGL_ALWAYS_SOFTWARE=1`. Everything else — DRC, gerbers, drill, STEP, SVG — is
-genuinely headless.
+**3. Explicit `ref=` and `tag=` on every part.** Auto-refdes are positional, so
+inserting one resistor renumbers everything after it — and KiCad matches by
+reference, so a re-import silently misassigns downstream footprints.
 
-**Probe the API, don't assume it.** The Specctra helpers have changed signature
-across versions. `help(pcbnew.ExportSpecctraDSN)` before writing against it.
+**4. ERC does not fail the build.** SKiDL exits 0 with errors and writes the
+netlist anyway. Check `erc_logger.error.count` explicitly.
 
-**Freerouting wants a bounded run.** Pass `-mp <passes>` *and* wrap it in a
-shell timeout. An unbounded autoroute on a dense analog board will run until the
-session ends.
-
-## Prove the toolchain on a board you can eyeball
-
-**Before touching the real design, push a two-resistor board through every
-stage.** Outline, two footprints, one net, export DSN, route, import SES, pour,
-DRC, gerbers, zip. Ten minutes, and it proves every install, every API
-signature, every export flag, on something where the correct answer is obvious.
-
-`pcb/smoke/` — keep it in the repo and run it first every time. Every failure it
-catches is a failure that would otherwise have surfaced halfway through the real
-board.
-
-**One thing to prove specifically: that locked tracks survive the round trip.**
-The whole hand-route-then-autoroute strategy depends on KiCad marking a track
-locked, the DSN export writing it into the `(wiring …)` section as protected,
-and Freerouting leaving it alone. Route one trace in the smoke board, lock it,
-autoroute, and diff it. If it does not survive, the strategy changes and it is
-much better to learn that on two resistors.
+**5. Decide `dig-gnd-topology`.** Three documents give it three mutually
+exclusive answers and `power-entry.md` states ADR 0004 was corrected when it
+was not. Tracked in `config/figures.yaml`. Downstream of the 2-vs-4-layer
+question.
 
 ---
 
 ## Stages
 
-### 1. Netlist
+### 1. Netlist — headless, re-runnable
 
-```
-python3 pcb/src/module/module.py      # SKiDL: ERC, then emit module.net
-```
+`pcb/src/module/*.py`, one module per schematic page, `module.py` importing the
+six. ERC, then emit `module.net`. Pass `track_abs_path=False` or the generating
+script's absolute path lands in the netlist and two clones differ.
 
-Fail the build on any ERC error. Then the parity check against the design BOM
-(below) before anything downstream runs.
+### 2. Simulate — headless, runs today
 
-### 2. Simulate — verify the analog before committing to copper
+Independent of everything else; `ngspice` needs no allowlist change. Ranked by
+what the claim costs if wrong:
 
-**This stage runs today.** `ngspice` comes from Ubuntu's stock archive and
-`PySpice` from pypi, both reachable under the *current* network policy. It
-depends on nothing downstream and blocks nothing upstream, so it can start
-before KiCad is even installable.
-
-**And it is the stage this project most needs.** The corpus is full of
-hand-derived transfer functions and stability arguments, and the ones that
-turned out wrong were found by a second person doing the algebra again — not by
-a tool. `C-FB-PITCH` took two independent reviewers to establish that a cap in
-the feedback of a *non-inverting* stage is a 6.02 dB shelf and not a pole. An AC
-sweep shows that in one plot.
-
-**Circuit-as-code pays off twice here.** SKiDL emits a PySpice circuit from the
-same source that emits the KiCad netlist, so there is one description of the
-circuit, not two that can drift.
-
-What is worth simulating, in order of what it would cost to get wrong:
-
-| Sim | Settles |
+| Sim | Why |
 |---|---|
-| **Loop gain / phase margin**, pitch output into 0, 200 pF, 800 pF, 10 nF and a dead short | The page claims the feedback network is "a lead at every load tried". This is the highest-risk item on that page by its own admission |
-| **`R-ISO-REF` reference buffer** into 100 nF, with and without the resistor | The claim is 2.6° of phase margin and oscillation near 458 kHz without it. Verify the problem *and* the fix |
-| **AC sweep of the OPA2197 macromodel's `Zo`** | `R_o ≈ 75.8 Ω` is **back-solved from a stated pole, not read**, and SBOS737 is `BLOCKED`. TI's own `OPAx197.LIB` is on GitHub and downloads. **This retires a blocked item without the datasheet** |
-| **DC sweeps of every stage's transfer function** — pitch, four mods, breath receive, breath output | Sign errors, gain errors, offset errors. Cheap, and they check the equations the firmware is written against |
-| **Monte Carlo over resistor tolerance and reference drift** on the pitch chain | `pitch-cents-budget` is **disputed** in `config/figures.yaml` — two contradictory tables and no stated total. A distribution settles it |
-| **The breath response shaper** — antiparallel diodes across a pot | The knee position against a real blow. This is exactly the shape of error already made once, where a ÷10 scaling would have put the knee above a hard blow |
+| **Breath-link CMRR** with the INA828 | 1.7 dB of claimed margin, unretrofittable inside a bonded body. A macromodel exists — same directory as the OPA2197 |
+| **`R-ISO-REF` stability** | Already found the drawn circuit is the unstable one: 8.8° unfitted, **8.4° in-loop as drawn**, 75.2° out-of-loop. Filed `riso-ref-topology` |
+| **Pitch transient into a passive mult** | Measured 41.8 % overshoot at 82 nF, 65.4 % at 330 nF. **The AC sweep is structurally blind to this** on the same circuit at the same loads |
+| **Power-on / reset transient** | Five power-on claims across three pages, no transient anywhere in the corpus |
+| **Behavioural LT1641** | `power-entry.md` already writes the foldback law as equations, and this is the circuit proven not to start |
 
-**Model availability is the constraint, not the tool.** `OPA2197` is confirmed
-available. `DAC8568`, `MPXV4006` and the reference are behavioural sources and
-need no vendor model. Diodes are standard. **`LT1641` has no model anywhere** —
-a researcher searched GitHub and GitLab and found none — so the load switch is
-not simulable and stays a bench question.
+Not worth running: Monte Carlo on the pitch budget. The dispute is over *what
+the terms are*, not their spread, and the two largest belong to a part with no
+model.
 
-Where no macromodel exists, a generic one-pole op-amp with the right GBW, `A_OL`
-and `R_o` is usually enough for stability work. Say which you used; a stability
-result from a generic model is weaker evidence than one from the vendor's.
+**A simulated phase margin is a screen with a ±10° bar**, not a spec — TI's own
+macromodel runs optimistic against TI's own tabulated figures. Results land in
+`config/figures.yaml`; `.LIB` files get banked in `datasheets/` with SHA-256
+like every other document.
 
-### 3. Board bring-up — `build_board.py`
-
-Outline onto `Edge.Cuts` first; Freerouting has no boundary without it.
-Load footprints, assign every pad to its net, place.
-
-**Net classes are how trace widths happen.** Do not try to tell Freerouting
-about power nets directly — define classes on the board, and `ExportSpecctraDSN`
-writes them into the `.dsn` as rules the router honours:
-
-| Class | Nets | Width |
-|---|---|---|
-| `Default` | signal | 0.25 mm |
-| `Power` | `+12V`, `-12V`, `+5V`, `AVDD`, `PWR_GND` | **derive it** — see below |
-| `Analog` | `BREATH`, pitch and mod outputs | 0.25 mm, routed by hand |
-
-**Derive the power width rather than defaulting it.** 0.5 mm of 1 oz copper is
-roughly a 1 A trace at a 10 °C rise, and the load switch's path is specified at
-1.0 A. That is no margin. Compute it from IPC-2221 for the actual current and
-put the arithmetic in the script.
-
-Custom fab rules go in `<project>.kicad_dru`; the basics (clearance, min track,
-via sizes) go in the board's design settings. Both are read by `kicad-cli pcb
-drc`, so what the router obeys and what DRC checks are the same file.
-
-### 4. Hand-route and lock the critical nets
-
-Specctra cannot express any of these. They are routed before Freerouting sees
-the board, and locked.
-
-- **`AGND`** — a sense-only star, never a return. This is what makes the analog
-  breath channel survive 2 m of cable.
-- **`BREATH` / `AGND` pair**, connector to in-amp — matched and parallel. 60 dB
-  of CMRR was already spent on one unmatched resistor.
-- **`PWR_GND` / `DIG_GND`** — separate copper, one tie at the inlet.
-- **Pitch feedback** — tap at the jack, compensation cap from the op-amp
-  *output*, protection resistor inside the DC loop. The netlist gets this right;
-  the loop *area* is a layout judgement.
-- **The 1 A load-switch path** and the FET's thermal pad.
-
-### 5. Autoroute the rest
+### 3. Board bring-up — headless, **once per board**
 
 ```
-pcbnew.ExportSpecctraDSN(...)
-timeout 1800 xvfb-run -a java -jar freerouting.jar -de board.dsn -do board.ses -mp 100
-pcbnew.ImportSpecctraSES(...)
+circuit.generate_pcb(...)    # kinet2pcb: footprints placed, nets assigned,
+                             # hierplace groups by module = by schematic page
 ```
 
-Then **diff the locked nets against their pre-route geometry** before doing
-anything else.
+Then `build_board.py` adds what `kinet2pcb` does not:
 
-### 6. Pour — three grounds, two zones, one star
+- **Board outline** on `Edge.Cuts`
+- **Net classes** — `kinet2pcb` creates none, and they are what makes
+  interactive push-and-shove pleasant. Derive the power width from IPC-2221:
+  0.25 mm is 0.875 A and 0.50 mm is 1.447 A at a 10 °C rise, against a
+  **0.940 A** limit — so the *default* class is the marginal one, not the power
+  class
+- **`.kicad_dru`** — interactive routing honours it, so the rules you route
+  against and the rules DRC checks are the same file
+- **Mechanically fixed parts** — connector, jacks, pots, toggle, LED, locked to
+  panel geometry
+- **Zone outlines, unfilled.** Zone priorities do *not* keep two grounds apart:
+  different-net zones are separated by clearance at any priority, and what
+  priority selects is which zone gets knocked out entirely. **The partition is
+  the outline geometry.** Draw the outlines; leave filling to you
+- **A net tie at the star.** Without one, a track joining two grounds is
+  `DRCE_SHORTING_ITEMS` at ERROR and DRC fails a *correct* board
 
-> A single `GND` pour ties `PWR_GND`, `DIG_GND` and `AGND` together. It passes
-> DRC, it fabricates, and it silently destroys ADR 0004's star rule. The
-> module's own ground is already the largest *live* term in the pitch error
-> budget at 5.7–7.2 cents.
+**Save the project file.** Net classes live in `.kicad_pro`, not the board —
+`SaveBoard(aSkipSettings=True)` silently discards every trace width.
 
-Freerouting does not do zones, so this happens after the import:
+### 4. You route it
 
-- **`PWR_GND` and `DIG_GND` as separate zones**, with explicit **zone
-  priorities** so they do not flood into each other, and a single deliberate tie
-  at the power inlet.
-- **`AGND` gets no zone at all** — a routed star, plus a keepout so neither
-  ground zone floods across it.
-- **Thermal reliefs on every through-hole pad.** This board is hand-soldered.
-  A solid connection from a THT pad into a large pour sinks the iron's heat and
-  gives a cold joint or a lifted pad. Solid pours are for reflow.
-- `pcbnew.ZONE_FILLER(board).Fill(board.Zones())`, then re-fill after *any*
-  later change.
+Open `pcb/module/module.kicad_pcb` in KiCad 9. Everything is in there, grouped
+by schematic page, with the widths and rules already set.
 
-### 7. Verify — DRC is necessary, not sufficient
+**Hand-route these first**, because nothing else in the pipeline protects them:
 
-```
-kicad-cli pcb drc --format json --severity-error --exit-code-violations
-```
+- `VREFOUT`, `V_ref`, the three trimmer wipers, the mods' shared 3.3333 V —
+  **1 mV on `V_ref` is 1.2 cents**, which equals or exceeds every candidate in
+  the disputed pitch budget. These were the nets the old plan left to the router
+- `BREATH` / `AGND` from the connector to the in-amp — one keepout window
+  enclosing **both** legs, not one each, or the pour asymmetry costs the
+  capacitive matching the ±1 % spec exists to control
+- `PWR_GND` as a **trace, not a pour** — it is a two-terminal net whose own IR
+  drop is irrelevant and which must share copper with nothing
+- `SENSE` / `R-ILIM` as a Kelvin pair — 47 mV across 50 mΩ, so 1 mΩ of trace is
+  a 2 % shift in the current limit
+- The pitch feedback loop: tap at the jack, compensation cap from the op-amp
+  *output*, protection resistor inside the DC loop
 
-Plus assertions that each pass DRC on their own, in `verify.py`:
+**Star pad solid, everything else thermal.** A default 4-spoke relief on the
+star pad costs 0.053 cents at 359 mA — a quarter of the tightest pitch-budget
+candidate, from one DRC-passing pad.
 
-- board netlist **equals** the SKiDL netlist, ref by ref, net by net
-- **no two nets merged**; `AGND`, `PWR_GND`, `DIG_GND` still distinct
-- `AGND` tied exactly once
-- locked nets geometrically unchanged by the autoroute
-- every decoupling cap within ~2 mm of the pin it serves
-- zero unrouted
-- no copper under the connector bore or panel cutouts
+### 5. The update loop — and why it works here
 
-Five full iterations, then stop and report rather than thrashing placement.
+Headless netlist import **does not exist**: the updater's only constructor
+takes a `PCB_EDIT_FRAME*`, so it is structurally GUI-bound, and `kicad-cli pcb`
+has no import verb. The SWIG bindings are also removed in KiCad 11.
 
-### 8. Fab output — and what you actually need
+**None of that blocks this workflow, because you are in the GUI.**
+`File → Import → Netlist` updates the board in place and preserves your
+routing. So: change a SKiDL module, re-run stage 1, import the netlist, route
+the delta.
 
-```
-kicad-cli pcb export gerbers --layers F.Cu,B.Cu,F.Mask,B.Mask,F.Silkscreen,B.Silkscreen,Edge.Cuts
-kicad-cli pcb export drill --format excellon --units mm --drill-origin absolute
-kicad-cli pcb export step        # mechanical fit against the panel and enclosure
-kicad-cli pcb export svg         # per layer, for review
-xvfb-run -a kicad-cli pcb render # LIBGL_ALWAYS_SOFTWARE=1
-```
+The `.kicad_pcb` is the **artifact of record** and is committed. Stage 3 runs
+once per board. "Re-runnable" honestly means stages 1, 2 and 5 — all
+read-only or idempotent.
 
-**This board is hand-assembled, and that removes real work.** You do not need a
-pick-and-place file, you do not need the fab's BOM format, and you do not need
-the rotation-correction table that catches everyone doing JLC assembly. **The
-fab needs gerbers and drill.** That is the whole order.
+### 6. Verify and ship — headless again
 
-*(If assembly is ever bought: KiCad's `pos` export gives
-`Ref,Val,Package,PosX,PosY,Rot,Side` and JLC wants
-`Designator,Mid X,Mid Y,Layer,Rotation` — a column transform, plus per-footprint
-rotation offsets. Write it then, not now.)*
+KiBot handles DRC preflights, `check_zone_fills`, fab output and the zip, with
+vendor presets encoding the gerber precision and drill format this document
+cannot currently state. It also already solves the `fp-lib-table` problem.
 
-## BOM: there are three, and two of them must be checked against each other
+Assertions worth keeping beyond DRC, because each passes DRC on its own:
 
-| BOM | Lives | For |
-|---|---|---|
-| **Design** | `hardware/bom.csv`, 11 columns, refdes-keyed, with `status` and reasoning | The source of truth for *what part and why* |
-| **Generated** | from the SKiDL netlist | What the board actually has on it |
-| **Purchasing** | `fab/<board>/order.csv` | Distributor PNs, pack sizes, **spares**, minimum quantities |
+- board netlist **equals** the SKiDL netlist, ref by ref
+- the four returns still distinct — `PWR_GND`, `DIG_GND`, the module analog
+  return, and `AGND` which **is not a ground at all**
+- `DRCE_ISOLATED_COPPER` defaults to **WARNING**, so an orphaned pour survives
+  `--severity-error`; and default island removal *deletes* partly-orphaned fill
+  with no diagnostic
+- **check the output file list** — an invalid `--layers` token is reported and
+  then ignored, exit 0, so a misspelt `F.Mask` gives a board with no soldermask
+  and a green build
+- verify the **zip**, not the board directory; every check in the old plan sat
+  upstream of the thing actually being shipped
 
-**`tools/check-bom-parity.py` diffs the first two by refdes** and fails on any
-part present in one and not the other, or with a different value. Two sources of
-truth drifting is this project's named failure mode, and this is the one place
-in the pipeline where it would otherwise happen silently.
+**The board is hand-assembled**, so no pick-and-place, no fab BOM format, no
+rotation-correction table. Gerbers and drill. Add an interactive HTML BOM —
+that is the artefact that helps *you*, and it runs headless.
 
-The purchasing BOM is a separate artifact because it answers different
-questions: passives come in reels of 100 not 3, the sensor is bought in twos
-because it is a wear part, dev boards are bought with spares, and pot tapers are
-ordered per variant. Generate it from the design BOM, but do not conflate them.
+## Two things that are not this pipeline
 
-**Add a `footprint` column to `hardware/bom.csv`** (12 columns — update
-`CLAUDE.md` and the column check in `tools/check-staleness.py` in the same
-commit). Prefer the footprints already banked in `datasheets/`; `MANIFEST.csv`
-records which are vendor-issued and which are community-authored, and that
-distinction has to survive into the layout.
+**The 10HP panel is 2 mm aluminium**, laser or waterjet from DXF, same vendor
+and order as the key plate. Not a PCB. It belongs with the mechanical work.
 
-## Where things go
+**Open: 2 layers or 4.** On two layers, two corpus requirements are mutually
+exclusive — `power-entry.md` wants the SPI return directly under its trace while
+ADR 0004 wants `PWR_GND` on its own copper *and* the analog return as its own
+region. Four layers dissolves it. This is a cost decision and it gates the
+grounding scheme, so it is upstream of stage 3.
 
-`tools/check-staleness.py` scans `hardware/`, `docs/decisions/`,
-`docs/reference/`, `config/`, `firmware/`, `README.md`, `ROADMAP.md` — so the
-repo root keeps generated files out of the design corpus with no checker change:
+## Install
 
-```
-pcb/
-  setup.sh            toolchain install + the gotchas above
-  smoke/              two-resistor proof board
-  scripts/            build_board.py  route.py  pour.py  verify.py  export.py
-  src/<board>/        SKiDL modules, one per schematic page
-  <board>/            .kicad_pro  .kicad_pcb  .kicad_dru  *.net
-fab/<board>/          gerbers, drill, svg, step, order.csv, <board>-fab.zip
-```
-
-**Nothing generated under `hardware/`.** That directory is reviewed prose.
-
----
-
-## Precursors
-
-Per board, before the pipeline is worth starting:
-
-1. Every BOM row `selected`, with a real package and a footprint. A placement
-   built around a wrong footprint is the one expensive thing to redo here.
-2. No *topological* item left in that page set's **Still open** — values and
-   bench questions are fine, redraws are not.
-3. Tracked figures the layout depends on out of `disputed` in
-   `config/figures.yaml`.
-4. Mechanical inputs settled: panel cutouts, board outline, connector
-   orientation, standoffs.
-
-Then: module PCB and its panel (E12), then carrier and the four cluster boards
-(E13). ROADMAP puts them in that order because the carrier will spin at least
-once.
+`kicad` plus its closure is **695 MiB**. `kicad-packages3d` is **5.44 GiB** and
+is only needed for `export step` and `render` — split those from the fab
+deliverable. Name the Python interpreter by **explicit minor version matching
+the deb**: `python3` here is 3.11 and so is `/usr/bin/python3`, while `pcbnew`
+wants 3.12. Do not set `PYTHONPATH=/usr/lib/python3/dist-packages` — it is
+already on `sys.path`, so it converts a clean `ImportError` into an ELF error.
