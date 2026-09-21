@@ -120,3 +120,63 @@ earlier in this project and did not do:
 > piece of work rather than a habit I can fix by trying harder."
 
 Seven waves of review later, that is still the finding.
+
+---
+
+## S12 audited me. One charge is wrong, one is right.
+
+**"The bus +5 V decline was claimed and never recorded" — WRONG, and I
+checked because it is an honesty charge.** The record exists:
+`digital-and-supervision.md:104`, a *Still open* blockquote giving the
+three reviewers' reasons, what dropping the rail would allow, and why it
+was not done ("a rail change and a connector change, not a drawing
+correction"). **S3 independently found the same note and called the
+handling correct.** Two agents reached opposite conclusions about the same
+artifact; the note is there.
+
+What S12 *is* right about: **ADR 0004's own bus +5 V section is
+untouched**, so it still argues the old position with no pointer to the
+open item. The record exists in one document and the reader of the other
+would never find it — which is S11's citation-direction finding again,
+not a fabricated decline.
+
+**"VERIFIED.md's correction of A6 was itself wrong" — RIGHT, and this one
+is mine.** I wrote that A6 mis-attributed the channel-7 cadence
+contradiction to ADR 0006 — "right defect, wrong parties". Verified:
+**ADR 0006 line 186 reads `| Mod offset | written once at boot |`**. A6
+cited that table precisely and was correct to name it. My only valid point
+was that `firmware/README.md` states *both* rules rather than only the new
+one. So it is a five-way contradiction, A6 named two of the parties
+correctly, and my over-correction had a cost: **I marked the finding
+disputed and nothing got fixed.** Both files still say "written once at
+boot".
+
+That is worse than the original error. A wrong finding gets caught by the
+next reviewer; a finding wrongly marked *disputed* gets filed as handled.
+
+## What the sweep says to do, in order
+
+S12's structural fact decides this: the three post-review commits touched
+ten corpus files and **never opened `pitch-stage.md`, `mod-channels.md`,
+`breath-receive-stage.md`, `firmware/README.md`, `key-layout.yaml`,
+`latency-budget.md`, or ADRs 0001, 0003, 0005, 0006, 0010, 0013 and
+0014.** Ten of the twenty review reports produced no corpus change at all.
+
+And: **the ROADMAP's "Open items blocking work" and "Bench measurements
+the review asked for" tables gained nothing.** A 20-agent review put zero
+new entries in the two places a builder actually looks.
+
+So the repair order is not "work down the findings list":
+
+1. **Build the single-source pages first** — a firmware contract page and
+   a shared-figures register — modelled on USB MIDI opt-in, the one rule
+   with zero staleness findings, which works because everything *cites* it
+   rather than restating it.
+2. **Fix the ADRs**, where almost all surviving staleness lives. Seven were
+   never opened, and they are what a builder and a firmware author read.
+3. **Put the open items into the ROADMAP tables**, so the review's output
+   is visible where work is planned rather than only in `docs/review/`.
+4. **Then** the individual corrections — into the single-source pages, not
+   scattered back across the documents that keep diverging.
+
+Doing (4) first is what produced this sweep.
