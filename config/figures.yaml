@@ -83,8 +83,43 @@ figures:
       4.6 V VFSS typ. The one sensor number the corpus had right is the one
       everything downstream was built on.
       WHAT MOVES: V_REF for TRIM-BREATH-ZERO nulls the pedestal, so it
-      follows the pedestal from 0.437 V toward ~0.573 V. Recompute before
-      committing it - it is not a tracked figure yet and probably should be.
+      follows the pedestal. This note said to recompute it and that it was
+      "not a tracked figure yet and probably should be" - correct on both
+      counts, and neither happened for months. IT IS NOW TRACKED, as
+      breath-zero-ref, after a split agent found three values for it in five
+      places. This note's own ~0.573 V was the only right one of the three.
+
+  - id: breath-zero-ref
+    quantity: V_REF the breath trimmer must produce to null a typical pedestal
+    value: "0.573 V"
+    status: settled
+    owner: hardware/module/breath-receive-stage/breath-receive-stage.md
+    derivation: "0.265 V typical pedestal x 2.16106 EFFECTIVE in-amp gain = 0.5727 V. The effective gain is the one inamp-full-scale uses: G = 1 + 50k/42.2k = 2.18483, times the 1M/(1M+11k) bias divider = 2.16106."
+    forbidden: ["+0.437 V", "~0.437 V", "0.437 V nulls", "to ~0.579 V", "+0.579 V", "0.579 V"]
+    companion: "sensor-full-scale sets the 0.265 V pedestal; inamp-full-scale uses the same 2.16106 effective gain."
+    escape_note: |
+      THREE VALUES FOR ONE QUANTITY, IN FIVE PLACES, FOUND 2026-09-21 BY A
+      PHASE B SPLIT AGENT - AND THIS REGISTER WAS ONE OF THE FIVE.
+        0.437 V  the drawing in breath-receive-stage.md, and ADR 0006
+        0.579 V  the prose on the same page, and bom.csv
+        0.573 V  this file's own note on sensor-full-scale
+      The note said "it is not a tracked figure yet and probably should be",
+      which was correct and is why this entry now exists. An untracked
+      quantity derived from a tracked one has no protection at all: when
+      sensor-full-scale's pedestal moved from 0.200 to 0.265 V, this followed
+      it in two files, half-followed in a third and did not move in two more.
+      WHICH IS RIGHT, AND WHY THE OTHER TWO ARE THE SHAPE THEY ARE:
+        0.573 = 0.265 x 2.16106  effective gain, WITH the 1M bias divider
+        0.579 = 0.265 x 2.18483  same pedestal, divider OMITTED
+        0.437 = 0.200 x 2.18483  OLD pedestal, divider also omitted
+      The 0.579 spelling is the exact error this register already documents
+      for inamp-full-scale, whose own note says "-10.05 V is the same gain
+      with the 1M bias divider omitted". The same omission, on the same page,
+      for a second quantity - which is what an untracked derived figure buys
+      you.
+      The agent that found it saw three of the five. THE FOURTH AND FIFTH -
+      ADR 0006 and bom.csv - CAME OUT OF THE GREP-FIRST RULE IN CLAUDE.md 2,
+      because the agent was reading only its own page.
 
   - id: key-release-time
     quantity: Key network release, crossing V_IH

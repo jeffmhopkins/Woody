@@ -206,7 +206,7 @@ locked to `DAC8568CIPW`.
 > because a purely differential shunt gives the in-amp's inputs no DC path to
 > ground at all). And the replacement does not produce 0 V at the jack: the two
 > 1 MΩ bias resistors hold the in-amp's *inputs* at module `AGND`, so with the
-> instrument absent the in-amp rests at `V_REF` ≈ +0.437 V — the trimmed null
+> instrument absent the in-amp rests at `V_REF` = `breath-zero-ref` — the trimmed null
 > for a sensor pedestal that is not there — and the gain-and-offset stage then
 > puts the jack at the **OFFSET knob's position less 0.2 to 1.7 V**, depending
 > on where GAIN is set (`breath-receive-stage.md`,

@@ -78,7 +78,7 @@ instrument-side, inside a bonded body, and unretrofittable.
                                  │              │               │
                                  │  REF ◄───────┼── ½ OPA2197 ◄─[TRIM-BREATH-ZERO]
                                  │              │   buffered    from the LM317 5.21 V
-                                 └──────┬───────┘   +0.437 V nulls the pedestal
+                                 └──────┬───────┘   `breath-zero-ref` nulls it
                                         │  Vout = −2.185·(V_BREATH − V_AGND) + V_REF
                                         │       = 0 V at rest, −9.94 V at full
                                         │
@@ -104,8 +104,10 @@ instrument-side, inside a bonded body, and unretrofittable.
 *(The showstopper this heading names, the input swap it forced, and the two
 separate premises that were then withdrawn from under the swap — [`notes.md`](notes.md).)*
 
-**`REF` is driven from a buffered trimmer** set once at commissioning. +0.579 V
-nulls a *typical* +0.265 V pedestal — but the pedestal is a **spec band, not a
+**`REF` is driven from a buffered trimmer** set once at commissioning.
+`breath-zero-ref` nulls a *typical* +0.265 V pedestal *(this line was wrong at
++0.579 V until 2026-09-21 — the same gain with the 1 MΩ bias divider omitted,
+which is the error `inamp-full-scale` already records for itself)* — but the pedestal is a **spec band, not a
 number**: 0.152–0.378 V, which needs `REF` anywhere from **0.332 V to
 0.826 V**. The band is the datasheet's own `V_off` min/typ/max
 `[datasheet MPXV4006DP p.4: "Voff 0.152 0.265 0.378 V"]`, and **its typical is
