@@ -14,6 +14,31 @@ of the topology.
 This is the topology. Where it disagrees with ADR 0003's prose, this page wins
 and the ADR gets corrected.
 
+## Interfaces
+
+Every net and every part that crosses this circuit's boundary. Quantities
+appear **only** as a citation into `config/figures.yaml` — this table names
+nodes, it does not restate values.
+
+**This circuit is one half of a chain that crosses two boards.** The sensor,
+its excitation buffer and `R1`/`R1b` sit on the carrier, at the far end of the
+umbilical; the differential pole, the effective gain and the CMRR budget
+derived on this page are derived from them. Every row with a `carrier/…` peer
+is a number this page uses and does not own — and every part in one is
+instrument-side, inside a bonded body, and unretrofittable.
+
+| Node / part | Dir | Peer | Figure | Note |
+|---|---|---|---|---|
+| `BREATH` | in | `carrier/carrier.md`, umbilical | `umbilical-pinmap`, `sensor-full-scale` | The sensor's buffered output, arriving through the instrument-side `R1`. Drives `IN−` through `R3` |
+| `AGND` | in | `carrier/carrier.md`, umbilical | `umbilical-pinmap` | The instrument's analog star, arriving through the instrument-side `R1b`. Drives `IN+` through `R2`: on this page it is **a signal leg, not a local ground**, and the twisted pair's other conductor |
+| `R1`, `R1b` (`R-SER-BREATH-INST`) | — | `carrier/carrier.md` | — | Both legs' series resistance sets the differential pole against `C_diff`, and their match is what the bias pair's balance is measured against. Neither part is on this board |
+| `MPXV4006DP` and its `VS` reference buffer | — | `carrier/carrier.md` | `sensor-full-scale`, `riso-ref-topology`, `cref-out-node`, `opa2197-output-impedance` | Sets the span this page multiplies and the pedestal `TRIM-BREATH-ZERO` nulls. Not this page's circuit — see [`notes.md`](notes.md) |
+| in-amp output | out | `module/breath-output-stage` | `inamp-full-scale` | **Owned here.** Into the panel GAIN/OFFSET stage, which inverts |
+| LM317 rail | in | `module/power-entry` | `dac-rail` | Feeds `TRIM-BREATH-ZERO` and its buffer. Never `VREFOUT`, which is disabled until firmware enables it |
+| `±12 V` | in | `module/power-entry` | — | The INA828, both OPA2197 halves, and the BAV99 legs on the input pair and at the jack |
+| `AGND` (module) | ref | `module/power-entry` | `dig-gnd-topology` | Where `R4`, `R5`, both `C_cm` and the output RC return |
+| `CLR` | — | `module/digital-and-supervision` | — | **Reaches no part of this circuit**, which is the whole of what the `CLR` section below settles |
+
 ## The circuit
 
 ```
@@ -76,19 +101,8 @@ and the ADR gets corrected.
 
 ## `REF` carries a trimmer, and the polarity question dissolved twice
 
-**The original showstopper.** The MPXV4006DP sits at **+0.2 V at zero pressure
-by design** (spec range 0.152–0.378 V). An in-amp is additive at `REF`:
-`Vout = G·(V+ − V−) + V_REF`. With BREATH on IN+, nulling that pedestal needs
-`V_REF ≈ −0.43 V`, and the DAC channel proposed to drive `REF` is unipolar
-0–5 V — it can only push the floor *up*. That left 4–9 % of full scale standing
-at the jack at rest and an auto-zero with authority in one direction only.
-
-**The first fix was to swap the inputs.** With BREATH on IN−, a *positive* `REF`
-subtracts, which is what a unipolar DAC can produce.
-
-**Then the DAC channel was deleted entirely** — it was correcting a signal
-firmware cannot measure (ADR 0003, ADR 0006) — which removes the premise the
-swap was argued from. So the swap needs a reason of its own, and it has one:
+*(The showstopper this heading names, the input swap it forced, and the two
+separate premises that were then withdrawn from under the swap — [`notes.md`](notes.md).)*
 
 **`REF` is driven from a buffered trimmer** set once at commissioning. +0.579 V
 nulls a *typical* +0.265 V pedestal — but the pedestal is a **spec band, not a
@@ -109,10 +123,6 @@ a buffered attenuator ahead of a fixed ×4 summer, with the offset injected at
 the summing node — *not* two pots sharing a virtual ground, which is what an
 earlier version of this sentence described and which would have made the knobs
 fight.
-
-So the swap survives on the downstream stage's topology rather than on the DAC's
-unipolarity. Recorded explicitly because a decision whose original justification
-has been removed is exactly the kind of thing that survives by inertia.
 
 ### Why `REF` is trimmed rather than grounded
 
@@ -253,18 +263,8 @@ the amplifier cannot prevent **RF rectification** at the input stage — and the
 is a 2.4 GHz radio two metres away on the same cable bundle. It also cannot
 prevent the amplifier slewing on out-of-band energy.
 
-## What this settles
-
-| Finding | Resolution |
-|---|---|
-| Ambient zero has the wrong polarity | **Deleted** — there is no *firmware* injection. `REF` carries a commissioning trimmer, and polarity is a non-issue because a trimmer goes both ways |
-| The zero correction is open-loop across two representations | **Deleted with it** — firmware now zeroes only the copy it measures |
-| No common-mode bias return | **Fixed** — R4, R5 |
-| No in-amp gain resistor | **Fixed** — R_G = 42.2 kΩ, derived above |
-| The 100 kΩ differential pulldown | **Deleted.** R4/R5 do its job without its 1–17 % attenuation, and the review could not agree which figure applied |
-| "Six different in-amp gains" | One gain, one derivation, shown |
-| Which in-amp | **INA828** — the E96 value lands cleanly and its lower bandwidth suits a 500 Hz channel |
-| Where the 500 Hz pole goes | Ahead of the in-amp, differential-dominant |
+*(The cold review's findings and the table recording how the drawing closed
+them — [`notes.md`](notes.md).)*
 
 ## Commissioning
 
@@ -300,14 +300,8 @@ yank the zero out from under the stage. An analog path cannot latch at a level
 the player is not producing: it follows the sensor, and the sensor follows the
 room.
 
-> **Two things in this section were stale until 2026-09-21.** It was headed
-> "when the watchdog fires", and the 74HC123 frame watchdog is deleted
-> (`digital-and-supervision.md`) — the surviving sources of a `CLR` are the
-> DAC's own power-on reset and the hand-asserted `LK-CLR` pad. And it said
-> "now that `REF` is grounded", which is the option this page **declines** forty
-> lines above, by name: grounding `REF` makes the panel knobs interact. The
-> conclusion is unchanged under either correction, because it rests on breath
-> never passing through the DAC.
+*(Two statements in this section that were stale until 2026-09-21, and why the
+conclusion is unchanged under either correction — [`notes.md`](notes.md).)*
 
 **E10 verifies it** by pulling the umbilical mid-note with the mouthpiece at
 rest — and note that the same pull leaves pitch and the four mod jacks holding
@@ -336,26 +330,5 @@ watchdog (`ROADMAP.md`, E10).
     centre, from two resistors and no extra op-amp half. Two halves, which
     settles a count that was wrong twice.
 
-### The instrument-side reference buffer — settled 2026-09-21
-
-Not this page's circuit, but it sets the number this page multiplies. ADR 0003
-buffers the REF5050 with half an OPA2197 straight into the sensor's `VS` pin,
-which carries a 100 nF decoupler. That load alone leaves **1.5° of phase
-margin** against the OPA2197's specified 375 Ω `Zo`, so the buffer is
-compensated — and **the compensation is now decided: see `riso-ref-topology`,
-and `hardware/carrier/carrier.md` §2 for the drawing.**
-
-Two things this page used to say about it are superseded, and both mattered to
-the number this page multiplies:
-
-- **The load is 100 nF, not 100 nF + 10 µF.** `C-REF-OUT` sits on the
-  REF5050's own pins, not on the buffer's output — see `cref-out-node`.
-- **The in-loop-versus-out-of-loop trade this page framed has been
-  dissolved, not decided.** It weighed instability against *"2 % of the
-  ratiometric scale factor"*. TI's dual-feedback network gives both: 85.9° of
-  phase margin **and** exactly zero DC error across `R-ISO-REF`, because at DC
-  the only feedback path closes at the sensor pin. In-loop `R_ISO` on its own
-  was never the answer either — it buys nothing at any value.
-
-**What this page keeps:** the buffer is instrument-side and unretrofittable,
-and so are all four compensation parts.
+*(The instrument-side reference buffer, which is not this page's circuit but
+sets the number this page multiplies, settled 2026-09-21 — [`notes.md`](notes.md).)*
