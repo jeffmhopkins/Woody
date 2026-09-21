@@ -74,3 +74,49 @@ one of twelve deletions that landed end to end** — header 2×5 → 2×3, loom
 11-way → 9-way, conductor tally updated, and the RC networks withdrawn
 *by name* in all four documents that mentioned them. Five of the other
 eleven are still **depended on**, not merely mentioned.
+
+---
+
+## The structural finding — why this keeps happening
+
+S11's observation, and it is the most useful output of the sweep so far
+because it describes a **mechanism** rather than another list of instances:
+
+> Corrections have been landing in the hardware pages (`cluster-boards.md`,
+> `carrier.md`, `mod-channels.md`, `digital-and-supervision.md`), which are
+> right about nearly everything — while the ADRs and `firmware/README.md`
+> retain the superseded text. **On all ten highest-ranked facts, the
+> document firmware would actually consult is the one carrying the stale
+> value.**
+
+That is not bad luck. Fixes land where the design work is happening, which
+is the schematic page in front of whoever is editing. They do not land
+where the *consumer* reads. S8 found the same shape from the other side —
+`carrier.md` still says four parts are "not in the BOM" when all four now
+have rows — so the drift runs both ways.
+
+### The one rule in the corpus with zero staleness findings
+
+**USB MIDI opt-in.** S11 checked it and could not fault it. What makes it
+different is the **direction of citation**: the fact is stated once in
+`firmware/README.md`, and ADR 0009, `bom.csv` and `carrier.md` all cite it
+*back by name* rather than restating it. Nothing can drift, because there
+is only one copy.
+
+Every other firmware-facing rule is restated locally in two to five places,
+and every one of them has drifted.
+
+**This is the fix worth making**, and it is worth more than any individual
+correction in this sweep: a firmware-owned contract page holding the facts
+firmware depends on — bit map and marker, loop budget, SPI clocks and write
+order, note-on rule, thresholds — with every hardware page *citing* it
+instead of repeating it. The same discipline would work for the shared
+numbers that keep diverging (the in-amp full scale, the umbilical current,
+the LM317 rail), which is the piece of work I flagged in my own words
+earlier in this project and did not do:
+
+> "Before much more design happens, the shared figures want declaring once
+> and referencing — the filter pole alone lives in five documents. That's a
+> piece of work rather than a habit I can fix by trying harder."
+
+Seven waves of review later, that is still the finding.
