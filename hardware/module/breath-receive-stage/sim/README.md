@@ -16,7 +16,7 @@ result is the same thing with fewer bytes.
 five**, ahead of the reference-buffer stability work, on one argument: the
 margin is thin and the parts that set it cannot be changed afterwards.
 
-`hardware/carrier/carrier.md` puts the link at **60.2 dB** `[calc, A2]` against
+`hardware/interfaces/breath-sense-link/breath-sense-link.md` puts the link at **60.2 dB** `[calc, A2]` against
 an independently derived requirement of **58.5 dB** — **1.7 dB**, resting on
 two parts' tolerance. Both of those parts, `R1` and `R1b`, are instrument-side,
 in the bonded body, and `bom.csv` marks them unretrofittable. So this is not a
@@ -26,8 +26,18 @@ body that does not open.
 **And the corpus does not agree with itself about the size of the term.** The
 page's `### `R1` is a 1206, and it has a twin` argues that the unmatched case
 spends the entire budget and that `R1b` buys "fifty times" the rejection;
-`carrier.md` replies that with `R1b` fitted the floor is **73 dB**, set by the
-bias pair, so `R1b` buys about **13 dB**. Both agree the part must be fitted.
+the carrier-side text replies that with `R1b` fitted the floor is **73 dB**,
+set by the bias pair, so `R1b` buys about **13 dB**. Both agree the part must
+be fitted.
+
+*(Both halves of that disagreement now sit in the SAME file — the
+consolidation moved them together without resolving them, which is what a
+content freeze requires. They are still an order of magnitude apart about
+what `R1b` buys, and this deck is what settles it. Until 2026-09-21 this
+section credited `carrier.md` with all three figures; that page derives none
+of them any more, and nothing could see it: the path still resolved, and
+this file was written during the restructure so it was never a conservation
+source.)*
 They disagree by roughly an order of magnitude about what it is worth, which is
 exactly the kind of disagreement a model settles and a reading does not.
 

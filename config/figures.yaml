@@ -121,6 +121,31 @@ figures:
       ADR 0006 and bom.csv - CAME OUT OF THE GREP-FIRST RULE IN CLAUDE.md 2,
       because the agent was reading only its own page.
 
+  - id: key-scan-current
+    quantity: 3V3 draw of the closed key pull-ups, and the step it puts on the ADC reference
+    value: "1.43 mA per closed key, 25.8 mA at 18 closed"
+    status: settled
+    owner: hardware/cluster/key-switch-network/key-switch-network.md
+    derivation: "3.3 V / (R-KEY-PU 2.2 kohm + R-KEY-SER 100 ohm) = 1.43 mA per closed key; 18 fitted switches closed = 25.8 mA."
+    forbidden: ["10 kOhm pull-ups", "0.33 mA per closed key", "5.9 mA, as a step"]
+    companion: "Its two consequences are stated where they land: the ADC reference droop (0.077 %, 3.2 LSB, ~1594 counts) on hardware/carrier/carrier.md, and the 3V3 rail step on hardware/interfaces/key-chain-loom/key-chain-loom.md."
+    escape_note: |
+      TRACKED 2026-09-21 AFTER A COLD REVIEWER FOUND THE DERIVATION LIVE IN
+      TWO FILES IN FULL, WITH NONE OF ITS FIVE NUMBERS IN THIS REGISTER.
+      1.43 mA, 25.8 mA, 0.077 %, 3.2 LSB and ~1594 counts each appear in two
+      or three corpus files. Nothing could see a divergence between them.
+      THE SPLIT MADE IT WORSE, which is the part worth recording. Before the
+      restructure both copies sat in ONE file, ninety lines apart, where a
+      reader editing one would see the other. They are now on two different
+      boards. A split does not create a duplicate, but it removes the thing
+      that made the duplicate survivable.
+      carrier.md also claims sole ownership of the argument - "owned by
+      neither circuit" - while key-chain-loom.md carries an equally complete
+      copy.
+      Tracking it makes a future divergence mechanical. DEDUPLICATING it is
+      still owed: rule 1 says the owner states it and the other two cite it,
+      and today all three restate it.
+
   - id: key-release-time
     quantity: Key network release, crossing V_IH
     value: "119.9 us"
