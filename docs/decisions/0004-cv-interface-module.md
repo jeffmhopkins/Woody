@@ -152,15 +152,38 @@ it moves with whatever else in the case is drawing from it. Two consequences:
   calibrated once against a real VCO (ADR 0006). A supply that shifts when
   another module powers up shifts the calibration with it.
 
-**So: an LM317LZ set to 5.25 V, fed from +12 V downstream of the module's
-reverse-protection diode.** TO-92, two resistors and two capacitors, a few
-milliamps of load, 135 mW dissipated — the lowest-effort regulator that exists,
-and it buys back both properties. 5.25 V nominal keeps worst-case tolerance
-(±4 % on the LM317 reference) inside the DAC's 5.5 V recommended maximum while
-staying above the 4.75 V top of the used output window (ADR 0006).
+**So: an LM317LZ set to ~5.21 V, fed from +12 V downstream of the module's own
+reverse-protection diode** (its own — see the power tree below). TO-92, two
+resistors and two capacitors, ten-odd milliamps of load, under 100 mW — the
+lowest-effort regulator that exists, and it buys back both properties.
+
+**The tolerance argument here used to be wrong, and the answer is a meter, not
+a better part.** This ADR applied ±4 % to the *output* and ignored both the
+divider tolerance and the adjust-pin current. Done properly the worst-case
+spread is about 0.66 V against a window of roughly 0.55 V — **no nominal value
+fits on paper.** Two reviewers found it independently and both are right.
+
+They proposed an LP2951, or a second REF5050 buffered by an op-amp half. Both
+are declined, because the premise behind "no value fits" is a statistical
+statement about a population, and **this is a population of one**. There is a
+TO-92 regulator, two through-hole resistors, a bench and a voltmeter.
+
+What is adopted is the free part of the fix:
+
+- **Shrink R2** — 150 Ω / 475 Ω instead of 240 Ω / 768 Ω — which halves the
+  I_ADJ contribution to 24–48 mV.
+- **0.1 % divider parts**, which cost pennies and arrive in the same order.
+- **Select R2 on the bench at E7**, against the real DAC: raise the top codes
+  and find where they start compressing against AVDD. That is the floor that
+  actually matters, and it is measured rather than assumed — the "4.95 V floor"
+  the review argued against was never derived from anything.
+
+For one instrument that is strictly better information than a tolerance stack,
+and if the selected value lands badly you find out at E7 with a meter, on a
+board with four screws in it.
 
 **The 74AHCT125 stays on the bus +5 V rail.** Its job is to get 3.3 V logic over
-the DAC's 0.7 × AVDD input threshold — 3.68 V at AVDD = 5.25 V. An AHCT gate on
+the DAC's 0.7 × AVDD input threshold — 3.65 V at AVDD = 5.21 V. An AHCT gate on
 a rail sagging to 4.75 V still drives 4.6 V, with a volt of margin. Leaving it
 there keeps its switching current off the DAC's supply, and it means the only
 thing hanging on the unprotected bus +5 V pin is a $0.30 buffer. A reversed or

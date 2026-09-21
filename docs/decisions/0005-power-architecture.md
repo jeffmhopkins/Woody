@@ -122,10 +122,22 @@ The module sits in the rack on a short ribbon with negligible drop, so the bus
 +5 V rail is free and convenient. It is used — but **only for the 74AHCT125
 level shifter**, around 10 mA.
 
-**The DAC gets its own LM317LZ set to 5.25 V, off the protected +12 V rail.**
-The DAC8568's full-scale output *is* its supply, so a rail the rack is allowed
-to move ±5 % moves the top of the pitch range and the pitch calibration with it.
-That belongs on a regulated supply of its own. Reasoning in full in ADR 0004.
+**The DAC gets its own LM317LZ set to ~5.21 V, off its own reverse-protection
+diode on the +12 V rail.** Its divider value is selected on the bench at E7, not
+from a tolerance stack — see ADR 0004.
+
+**The reason is headroom, not accuracy**, and this ADR said the opposite. It
+claimed "the DAC8568's full-scale output *is* its supply, so a rail the rack is
+allowed to move ±5 % moves the top of the pitch range and the pitch calibration
+with it." That is true of a DAC run from its supply as its reference, and the
+DAC8568 is not run that way: its **internal 2.5 V reference with reference gain
+2** puts full scale at 5.000 V, set by the reference and not by AVDD (ADR 0006).
+
+What AVDD does decide is whether the output buffer can *reach* 5.000 V. The
+rack's +5 V rail at −5 % is 4.75 V, which cannot, and the top of the pitch
+range would quietly compress. So the local regulator stays, and the number that
+matters is a floor with a 5.5 V ceiling above it — which is exactly the thing
+E7 measures, and exactly why a tolerance stack was the wrong tool.
 
 The target rack supplies +5 V, so the level shifter's rail is a **requirement,
 not an option**. No jumper, no unpopulated fallback footprint. A module that
