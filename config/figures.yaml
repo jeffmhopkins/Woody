@@ -45,7 +45,8 @@ figures:
     status: settled
     owner: hardware/controller/cluster-boards.md
     derivation: "Pressed node sits at 3.3 x 100/(2200+100) = 0.1435 V, NOT 0 V. Charging through 2.2k: t = -103.4us x ln((3.3-2.31)/(3.3-0.1435)) = 119.9 us"
-    forbidden: ["125 us", "125 µs", "~93 us", "~93 µs", "93.2 us"]
+    forbidden: ["`V_IH` at **125", "release ~93 us", "~93 µs hardware", "93.2 us"]
+    false_positive_note: "A bare 125 us also legitimately means the MEAN SAMPLING PERIOD (0-250 us at 4 kHz) and the 8 kHz LOOP PERIOD. Match the phrase, not the numeral."
     note: "Starting from 0 V instead of the divider voltage gives 124.5 us, which is the error the 125 us figure came from."
 
   - id: key-press-time
@@ -54,7 +55,7 @@ figures:
     status: settled
     owner: hardware/controller/cluster-boards.md
     derivation: "tau = (2200||100) x 47nF = 4.496 us; t = -4.496 x ln((0.99-0.1435)/(3.3-0.1435)) = 5.92 us"
-    forbidden: ["5.7 us", "5.7 µs", "~1 us release", "1.4 us", "1.4 µs", "176x", "176×"]
+    forbidden: ["`V_IL` at **5.7", "~1.4 µs / 176", "176× margin", "176x margin against"]
 
   - id: marker-bits
     quantity: Marker pattern width
@@ -62,7 +63,7 @@ figures:
     status: settled
     owner: config/key-layout.yaml
     derivation: "Two per device, one high one low, so every device fails its own marker whichever way it breaks. Decided 2026-09-21."
-    forbidden: ["four to six", "Four to six", "4-6 are claimed", "six bits carry the marker", "6 marker"]
+    forbidden: ["Four to six of the", "4-6 are claimed", "six bits carry the marker", "**6 marker"]
 
   - id: free-bits
     quantity: Genuinely free chain bits
@@ -187,7 +188,8 @@ figures:
     status: settled
     owner: docs/reference/latency-budget.md
     derivation: "Bus time 148-155 us PLUS ESP-IDF per-transaction overhead (24 us interrupt / 9 us polling) which no document counted. 291 us with driver defaults - does not close. Polling transactions on an acquired bus are not an optimisation, they are what makes 4 kHz reachable."
-    forbidden: ["16 us", "16 µs", "50-200 us", "50–200 µs", "< 10 µs via SPI DMA"]
+    forbidden: ["key chain 16 µs", "chain read | < 10", "SAR ADC conversion ~50", "ADC 24 µs + key chain 16"]
+    false_positive_note: "50-200 us appears legitimately in text that REFUTES it. Match unrefuted bookings only."
 
   - id: umbilical-current
     quantity: Instrument current down the umbilical, typical play

@@ -17,6 +17,11 @@ import csv, os, re, sys, yaml
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 VERBOSE = "--verbose" in sys.argv
+# Terse by default: this runs from a PreToolUse hook on every commit, and a
+# 60-line dump on every invocation is a real cost. Detail goes to a file.
+DETAIL = "--detail" in sys.argv or VERBOSE
+REPORT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                      ".staleness-report.txt")
 
 # The design corpus must be self-consistent. Review/log/research are dated
 # historical records and are deliberately excluded - a 2026-09-21 review saying
@@ -107,54 +112,76 @@ def check_refdes(files, bom_refs):
     return missing
 
 
+def emit(lines, detail_only=False):
+    """Collect for the report file; print only if detail was asked for."""
+    REPORT_LINES.extend(lines)
+    if DETAIL or not detail_only:
+        for l in lines:
+            print(l)
+
+
+REPORT_LINES = []
+
+
 def main():
     files = corpus_files()
     live, refuted, spec = check_figures(files)
     bom_problems, bom_refs, ncols, nrows = check_bom()
 
-    print(f"corpus: {len(files)} files | bom.csv: {nrows} rows x {ncols} cols | "
-          f"figures tracked: {len(spec['figures'])}")
-    print()
+    emit([f"corpus: {len(files)} files | bom.csv: {nrows} rows x {ncols} cols | "
+          f"figures tracked: {len(spec['figures'])}", ""], detail_only=True)
 
     fail = False
 
     if live:
         fail = True
-        print(f"STALE VALUES STILL LIVE ({len(live)})")
-        print("  A value this quantity no longer has, on a line that does not refute it.\n")
+        body = [f"STALE VALUES STILL LIVE ({len(live)})",
+                "  A value this quantity no longer has, on a line that does not refute it.", ""]
         cur = None
         for fid, val, bad, rel, ln, txt in sorted(live):
             if fid != cur:
-                print(f"  [{fid}] is now: {val}")
+                body.append(f"  [{fid}] is now: {val}")
                 cur = fid
-            print(f"      {rel}:{ln}  found {bad!r}")
+            body.append(f"      {rel}:{ln}  found {bad!r}")
             if VERBOSE:
-                print(f"          {txt}")
-        print()
+                body.append(f"          {txt}")
+        body.append("")
+        emit(body, detail_only=True)
 
     if bom_problems:
         fail = True
-        print(f"BOM INTEGRITY ({len(bom_problems)})")
-        for p in bom_problems:
-            print("  " + p)
-        print()
+        emit([f"BOM INTEGRITY ({len(bom_problems)})"] + ["  " + p for p in bom_problems] + [""],
+             detail_only=True)
 
     unresolved = [f for f in spec["figures"] if f["status"] in ("disputed", "blocked")]
     if unresolved:
-        print(f"UNRESOLVED, tracked deliberately ({len(unresolved)}) - not failures")
+        body = [f"UNRESOLVED, tracked deliberately ({len(unresolved)}) - not failures"]
         for f in unresolved:
-            print(f"  [{f['status']:8s}] {f['id']}: {f['quantity']}")
-            print(f"             decided by: {f.get('decided_by','-')}")
-        print()
+            body.append(f"  [{f['status']:8s}] {f['id']}: {f['quantity']}")
+            body.append(f"             decided by: {f.get('decided_by','-')}")
+        body.append("")
+        emit(body, detail_only=True)
 
     if refuted:
-        print(f"old values present but refuted in place ({len(refuted)}) - OK, this is how a correction reads")
+        body = [f"old values present but refuted in place ({len(refuted)}) - OK, this is how a correction reads"]
         if VERBOSE:
-            for fid, val, bad, rel, ln, txt in sorted(refuted):
-                print(f"  {rel}:{ln}  [{fid}] {bad!r}")
-        print()
+            body += [f"  {rel}:{ln}  [{fid}] {bad!r}" for fid, val, bad, rel, ln, txt in sorted(refuted)]
+        body.append("")
+        emit(body, detail_only=True)
 
-    print("FAIL - stale values are live in the corpus" if fail else "PASS - no live stale values")
+    try:
+        with open(REPORT, "w") as fh:
+            fh.write("\n".join(REPORT_LINES) + "\n")
+    except Exception:
+        pass
+
+    # The one line that always prints.
+    n_unres = len(unresolved)
+    if fail:
+        print(f"FAIL {len(live)} stale + {len(bom_problems)} bom | {n_unres} unresolved (tracked) "
+              f"| detail: .staleness-report.txt or --detail")
+    else:
+        print(f"PASS no live stale values | {n_unres} unresolved (tracked)")
     return 1 if fail else 0
 
 
