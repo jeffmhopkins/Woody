@@ -30,7 +30,7 @@ Seven things worth the owner's time, in order of how much they cost if ignored.
 3. **The FET's SOA requirement is a ~600 ms pulse at 12 V, not "10 and 100 ms".**
    §4.5. The page tabulates the 587 ms max fault time and then does not use it.
 4. **`ΔVGATE` is only guaranteed for `VCC` ≥ 10.8 V, and worst-case `VCC` here is
-   11.04 V.** §3, row 3. 0.25 V of margin on a spec that appears nowhere in the
+   11.085 V.** §3-N1. 0.285 V of margin on a spec that appears nowhere in the
    corpus, and it forces a logic-level FET specified at `V_GS` = 4.5 V.
 5. **The `PWRGD` worst-case margin is 0.06–0.12 V, not 0.4 V.** §4.2. The stated
    11.36 V omits `D2`'s forward drop and `FB2`'s DCR — the two components
@@ -449,7 +449,7 @@ statement and every citation of it inherits the error.
 
 | **New** | Finding | Consequence |
 |---|---|---|
-| **N1** | **`ΔVGATE` (external N-channel gate drive, `V_GATE` − `VCC`) is specified MIN 4.5 V for `VCC` = 10.8 V to 20 V, and MIN 10 V only for `VCC` = 20 V to 80 V** `[datasheet LT1641.pdf p.2, full-temperature row; corroborated in the GATE pin description p.5: "guarantees at least 10V of gate drive for supply voltages above 20V and 4.5V gate drive for supply voltages between 10.8V and 20V"]` | **Two consequences.** (a) The FET must be a **logic-level part with `R_DS(on)` specified at `V_GS` = 4.5 V** — this criterion appears nowhere in the corpus, which sizes the FET only on SOA. (b) **Our worst-case `VCC` is 11.04 V**, only **0.25 V above the 10.8 V floor of that spec**: `VCC` = 11.40 (rack −5 %) − 0.286 (`D2` at 359 mA) − 0.029 (`FB2` DCR at 359 mA) − 0.04 (`R-ILIM` + FET) = **11.045 V** `[calc]`. At a −7.5 % rack, `VCC` = 10.79 V and the datasheet guarantees **no** gate drive at all. |
+| **N1** | **`ΔVGATE` (external N-channel gate drive, `V_GATE` − `VCC`) is specified MIN 4.5 V for `VCC` = 10.8 V to 20 V, and MIN 10 V only for `VCC` = 20 V to 80 V** `[datasheet LT1641.pdf p.2, full-temperature row; corroborated in the GATE pin description p.5: "guarantees at least 10V of gate drive for supply voltages above 20V and 4.5V gate drive for supply voltages between 10.8V and 20V"]` | **Two consequences.** (a) The FET must be a **logic-level part with `R_DS(on)` specified at `V_GS` = 4.5 V** — this criterion appears nowhere in the corpus, which sizes the FET only on SOA. (b) **Our worst-case `VCC` is 11.085 V**, only **0.285 V above the 10.8 V floor of that spec**. `VCC` is pin 8, tapped *upstream* of `R-ILIM`, so it sees `D2` and `FB2` only: `VCC` = 11.400 (rack −5 %) − 0.286 (`D2` at 359 mA) − 0.029 (`FB2` DCR at 359 mA) = **11.085 V** `[calc]`. At a −7.5 % rack it is **10.83 V**; below about −8 % the datasheet guarantees **no** gate drive at all. (The 11.045 V of §4.2 is the switch *output*, one `R-ILIM` and one FET further down — a different node.) |
 | **N2** | **ADI's Figure 5 carries a FOURTH gate-network part that the page's "Three parts the datasheet's own application has and this page did not" does not name: `D1`, a CMPZ5248B (18 V) Zener, cathode to the chip `GATE` node and anode to the FET source** `[datasheet LT1641.pdf p.8 Fig. 5, read from a 6× render]` | It clamps `V_GS` to 18 V, matching `ΔVGATE`'s **18 V maximum** `[p.2]`. **It is only needed if the chosen FET's `V_GS(max)` is below 20 V.** Recommendation in §4.5. |
 | **N3** | **`R-GATE-COMP` decouples `C-GATE` from the fault turn-off path, and that is worth two orders of magnitude** | `I_GATEDN` is 35 / 70 / 100 mA at `V_GATE` = 2 V `[datasheet LT1641.pdf p.2]`. **With `C-GATE` tied straight to ground (the old, wrong drawing)** the pull-down must discharge all 82 nF: 82 nF × 12.5 V / 70 mA = **14.6 µs**, 29 µs on min silicon `[calc]`. **With `R-GATE-COMP` in series as ADI draws it**, the `GATE` node carries only the FET's `C_iss` (~1 nF through `R-GATE-SER`): 1 nF × 12.5 V / 70 mA = **0.18 µs** `[calc]`. `C-GATE` then bleeds out through the 1 kΩ at τ = 82 µs, irrelevant. **`R-GATE-COMP` is not only a compensation zero — it makes the fault turn-off 80× faster.** That is an independent confirmation that ADI's topology is right, and it is a stronger argument than the one `bom.csv` gives. |
 
@@ -840,7 +840,7 @@ supplies the constraint that picks it.
 §3-N1 shows the LT1641's gate-drive specification has a hard floor at `VCC` = 10.8 V,
 and the internal `V_LKO` UVLO tops out at 8.8 V `[datasheet LT1641.pdf p.2]`. An `ON`
 trip at 10.0 V sits **above** the internal UVLO (so the divider governs, which is the
-point of having one) and **below** the 11.04 V worst-case operating `VCC` by 1.0 V
+point of having one) and **below** the 11.085 V worst-case operating `VCC` by 1.0 V
 (so it does not nuisance-trip). It is also 1.84 V above the 8.16 V the umbilical must
 deliver for the R-78E5.0's 8 V input minimum `[datasheet R-78E5.0-1.0.pdf p.2]`.
 
@@ -852,7 +852,7 @@ E96:  R-ON-HI = 34.0 kohm 1 %,  R-ON-LO = 5.11 kohm 1 %  (ratio 6.654)      [cal
   Falling trip (V_ONL 1.233):  1.233 x 7.654 =  9.44 V   -> 0.61 V of hysteresis
   Worst case over 1 % parts and the 1.280-1.345 V V_ONH window:
       1.280 x 7.522 = 9.63 V  ...  1.345 x 7.788 = 10.47 V                  [calc]
-  Both above V_LKO max (8.8 V) and both below worst-case VCC (11.04 V).     [calc]
+  Both above V_LKO max (8.8 V) and both below worst-case VCC (11.085 V).   [calc]
   Divider current at 11.69 V: 0.299 mA = 299x the 1 uA max ON input current [p.2]
 ```
 
