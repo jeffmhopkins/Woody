@@ -25,9 +25,18 @@ other files.
 ### 2. Changing a tracked figure is three steps, not one
 
 1. Update `value` in `config/figures.yaml`.
-2. Move the old value into that entry's `forbidden` list.
+2. **Grep the corpus for the OLD value first**, and move one `forbidden`
+   pattern into that entry **per spelling you find**.
 3. Run `python3 tools/check-staleness.py`. **It then tells you every file to
    fix.** Fix them in the same commit.
+
+Step 2 says "grep first" because writing the list from the document in front of
+you is how the worst recorded instance of this happened. `sensor-full-scale`
+moved, the list was written from its owner ADR, and the corpus spelled the same
+number **seven other ways** — an en dash without spaces, a table cell with
+pipes, a version with no ` V`. Each missed by a character or two against a
+case-sensitive literal match. Eleven derived statements stayed live while the
+checker reported **zero hits**.
 
 A `PreToolUse` hook runs the checker before every `git commit` and surfaces
 the result, so forgetting step 3 is visible rather than silent.
@@ -47,7 +56,16 @@ datasheet has no 3.3 V row, and the 0.7/0.3 ratio *breaks* at 2 V), the
 and the WS2815's `V_IH` (8.4 V from reading `0.7 × VDD` against the wrong
 `VDD`). Mark provenance on every figure so the weak ones are visible.
 
-### 4. What the checker cannot catch
+### 4. Datasheet edits go in a fragment — `MANIFEST.csv` is generated
+
+`tools/merge-manifests.py` rebuilds `datasheets/MANIFEST.csv` from the
+`.manifest-R*.csv` fragments. **A direct edit to `MANIFEST.csv` survives until
+the next run of that tool and then disappears without a word.** Do not edit
+another wave's fragment either — a `BLOCKED` row is the honest record of a gap
+*when it was written*. `docs/reference/repo-maintenance.md` §3 gives the three
+things to do instead.
+
+### 5. What the checker cannot catch
 
 Anything semantic. It greps for values. It cannot see that a page still
 *depends* on a part that was deleted, or that an argument survives its own
@@ -56,7 +74,7 @@ no longer exists, and no grep would find that.
 
 For that, run a review wave (see below). At gates, not per commit.
 
-### 4. `docs/review/`, `docs/log/` and `docs/research/` are historical records
+### 6. `docs/review/`, `docs/log/` and `docs/research/` are historical records
 
 They are **not** the corpus and must never be "corrected". A 2026-09-21 review
 saying "8HP" is right as a record of what was true when it was written. The
@@ -96,11 +114,22 @@ disputed by me — which is worse, because a wrong finding gets caught by the
 next reviewer while a finding filed as handled does not. Verify before
 repeating, and record the verification.
 
+## Where the details live
+
+- **`docs/reference/repo-maintenance.md`** — which files are generated, which
+  are history, what each tool owns, and every trap that has cost time once.
+  Read it before touching `datasheets/`, `bom.csv` or the tools.
+- **`docs/review/<wave>/STATUS.md`**, where a wave has one — what that wave
+  produced versus what actually landed in the corpus. A wave with thirteen
+  reports and four landed slices looks finished from the outside and is not.
+
 ## Hardware conventions
 
 - Every schematic page is Markdown with ASCII drawings and derivations inline.
-- `hardware/bom.csv` is 11 columns. Validate column count and duplicate refdes
-  after any edit — `tools/check-staleness.py` does both.
+- `hardware/bom.csv` is 11 columns **and CRLF**. Validate column count and
+  duplicate refdes after any edit — `tools/check-staleness.py` does both — and
+  pass `lineterminator="\r\n"` to `csv.writer`, or a three-row change lands as
+  a 130-row diff. Check with `git diff --stat` before committing.
 - Mark unresolved things `TBD`/`open` **with what decides them**. Two BOM rows
   are deliberately blocked on a datasheet and say so; that is correct, not a
   defect.
