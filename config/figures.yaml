@@ -179,9 +179,11 @@ figures:
     value: "BLOCKED"
     status: blocked
     owner: hardware/module/power-entry.md
-    candidates: ["365 nF if I_TIMER is 3 uA", "9.25 uF if I_TIMER is 76 uA"]
-    decided_by: "Reading I_TIMER off the LT1641 datasheet. analog.com was unreachable through four review waves."
-    forbidden: ["C-TIMER-LOADSW at 10nF", "10 nF timer", "12x to 300x"]
+    candidates: ["9.4 uF at the net 77 uA ramp - PROVISIONAL, search-index provenance"]
+    decided_by: "Reading I_TIMER off a VERIFIED 164112fc.pdf. The number is now known (3 uA pull-down always, 80 uA pull-up while in current limit, net ~77 uA) but only from datasheet text served in search results, not from a PDF this repo holds. analog.com unreachable through four review waves and one dedicated researcher."
+    blocked_on: "datasheets/MANIFEST.csv - LT1641-1, status BLOCKED"
+    companion: "R-FB-HI / R-FB-LO are blocked on the same PDF, and matter more: FB was connected to nothing, and foldback tracks V_FB not V_OUT, so the part latched off on every start regardless of this capacitor."
+    forbidden: ["C-TIMER-LOADSW at 10nF", "10 nF timer", "12x to 300x", "the reviewers disagree and the datasheet decides"]
     false_positive_note: "10nF is also C-KEY's superseded value and appears in other rows. Match the refdes."
     note: "The '12x to 300x' ratio is itself wrong - the page's own equation gives 37x to 925x, and bom.csv repeats the bad ratio so cross-checking finds false agreement."
 

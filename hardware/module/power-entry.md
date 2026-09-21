@@ -29,10 +29,17 @@ entry diode, so most of the prior art stops being applicable halfway down.
        │                          │  │  CS8    │      [C_GATE]
        │              panel ──────┼──┤ ON      │        │ │   ** WAS MISSING **
        │              toggle      │  │  TIMER  │     ┌──┴─┴──┐
-       │                          │  └────┬────┘     │ N-FET │  DPAK
-       │                          │  [C-TIMER]       │       │
-       │                          │       │          └───┬───┘
-       │                          └───────┴──────────────┼── PWR_GND
+       │                          │  │   FB ◄──┼──┐  │ N-FET │  DPAK
+       │                          │  └────┬────┘  │  │       │
+       │                          │  [C-TIMER]    │  └───┬───┘
+       │                          │       │       │      │
+       │                          └───────┴───────┼──────┼── PWR_GND
+       │                                          │      │
+       │                                    [R-FB-HI]    │   ** ALSO MISSING **
+       │                                          ├──────┤       see below
+       │                                    [R-FB-LO]    │
+       │                                          │      │
+       │                                      PWR_GND    │
        │                                                 │
        │                                        UMBILICAL +12V ──► instrument
        │
@@ -142,6 +149,66 @@ the FET's bare C_iss (~1 nF) and ~10 uA of gate current the ramp is
 10 kV/s, which demands `2.2 mF x 10 kV/s = 22 A` `[calc]` — twenty-odd
 times the limit.
 
+### 5. `FB` was not connected, and that is what stops it starting
+
+**Added 2026-09-21, and it may be the whole answer.** The four items above
+were written on the assumption that foldback tracks the switch *output*. It
+does not. **It tracks the `FB` pin (pin 2)** — a dedicated input, which this
+page did not draw and `bom.csv` had no resistors for.
+
+The consequence is not subtle. With `FB` tied to nothing, the part holds the
+sense-resistor drop at its foldback floor of **12 mV forever**:
+
+```
+V_FB = 0 V  →  limit = 12 mV / 50 mΩ = 240 mA,  permanently
+```
+
+The output never charges, so the current-limit amplifier never releases, so
+the `TIMER` ramp runs continuously — and the **`-1` suffix latches off**. The
+instrument never starts, and **no value of `C-TIMER` fixes it**; a bigger timer
+capacitor only makes the latch take longer. Three reviewers reached "the
+instrument never starts" by three routes and none of them found the mechanism.
+This is it.
+
+**The fix is a divider from the switch output to `FB`**, sized so `V_FB`
+crosses **0.5 V** early in the ramp — above that the threshold is the full
+47 mV and the start proceeds at the programmed rate. `FB` is also the `PWRGD`
+comparator input, threshold 1.233 V, which is the second reason to want the
+divider landing sensibly across the ramp.
+
+> **⚠ Provenance, and it is not good enough to order against.** Every LT1641
+> number in this section is `[web, search-index]` — datasheet *text* served in
+> search results for `analog.com/.../164112fc.pdf`, not read off a verified
+> PDF. `analog.com` has been unreachable through four review waves and a
+> dedicated researcher; the manifest carries the part **BLOCKED**
+> (`datasheets/MANIFEST.csv`). The **pinout below is different** and is
+> `[github, verified]`.
+>
+> **Confirm the foldback law and the `FB` divider against `164112fc.pdf`
+> before the parts order.** If it holds, this is a board that would not have
+> powered up.
+
+**Pin names — settled, `[github, verified]`** against the upstream KiCad
+official symbol library:
+
+```
+1 ON     2 FB     3 PWRGD (open collector)    4 GND
+5 TIMER  6 GATE   7 SENSE                     8 VCC
+```
+
+**The rest of the electrical picture, all `[web, search-index]`:**
+
+| Parameter | Value | Why it matters here |
+|---|---|---|
+| Sense threshold | **47 mV**, and only when `V_FB` ≥ 0.5 V | Confirms the 0.940 A above |
+| Foldback law | **12 mV at `V_FB` = 0**, linear to 47 mV at `V_FB` = 0.5 V, flat above | Linear in `V_FB`, **not** in `V_OUT` — the error this section exists for |
+| `I_TIMER` | **3 µA pull-down** always; **80 µA pull-up** added while in current limit, so **net ≈ 77 µA** ramping | Settles the two-reviewer dispute in favour of the 76 µA camp — but only while in current limit |
+| Fault threshold | `TIMER` reaches **1.233 V** | Then `GATE` to ground, `TIMER` pulled back down at 3 µA |
+| `I_GATE` | **10 µA** typical from the charge pump. **No min/max established** | The ramp spec has an unbounded tolerance until the PDF is read |
+| `-1` vs `-2` | **`-1` latches.** Restored only by interrupting power or pulsing `ON` low. `-2` auto-retries at 3.75 % duty | Answers the open question in the BOM reconciliation: yes, `-1` needs a reset cycle |
+| `ON` pin | Falling threshold **1.233 V** typ (1.221–1.245), **80 mV hysteresis** → rising ≈ **1.313 V**. Input current −1 µA | Sizes the toggle's divider |
+| `VCC` UVLO | 7.5 V min / 8.3 V typ / 9.8 V max, separate from `ON` | The part is independently held off below ~8 V |
+
 ### What the start actually takes
 
 Integrating the foldback law from V_out = 0 to 12 V, with
@@ -175,18 +242,32 @@ ramp** (120 V/s, 264 mA of charging).
 | 3 uA | **365 nF** |
 | 76 uA | **9.25 uF** |
 
-The two reviewers who worked from datasheet text disagree about which
-current applies, and a third bracketed real parts at 2–100 uA. **That
-spread is the finding.** The specified **10 nF is wrong under every
-reading** — 37x to 925x too small, giving a 0.16–4 ms timer — but the
-replacement value cannot be taken from a review. `C-GATE` is likewise
-`I_GATE / 120 V/s`, which is ~83 nF at 10 uA.
+The two reviewers who worked from datasheet text disagreed about which current
+applies, and a third bracketed real parts at 2–100 uA. **The dispute is
+resolved in favour of the 76 uA camp, and both were half right**: `TIMER` is
+pulled *down* at 3 uA whenever the current-limit amplifier is idle, and an
+80 uA pull-up is switched in while it is active — so the ramp that matters runs
+at a net **~77 uA** `[web, search-index]`.
 
-> **Gate on the datasheet.** `analog.com` and `ti.com` were unreachable
-> from this sandbox throughout three review waves. **Read `I_TIMER`,
-> `I_GATE` and the sense threshold off the LT1641 datasheet and set both
-> capacitors before ordering.** The 0805 C0G package in `bom.csv` is wrong
-> for any value in the table above.
+```
+C-TIMER = 77 uA x 150 ms / 1.233 V = 9.4 uF        provisional
+C-GATE  = 10 uA / 120 V/s          = 83 nF         provisional
+```
+
+The specified **10 nF is wrong under every reading** — 37x to 925x too small,
+giving a 0.16–4 ms timer.
+
+> **Still blocked, and the reason has changed.** It was blocked on not knowing
+> the number. It is now blocked on **provenance**: 77 uA and 10 uA are
+> search-index text, not a verified PDF, and `C-GATE` in particular rests on a
+> *typical* with no min/max, which is a ramp spec with an unbounded tolerance.
+> **Read `I_TIMER` and `I_GATE` off `164112fc.pdf` before ordering.**
+>
+> Two things that follow if the numbers hold. The 0805 C0G package in
+> `bom.csv` is wrong for 9.4 uF by three orders of magnitude. And at ~9 uF this
+> is an electrolytic or a large ceramic, where **leakage is a meaningful
+> fraction of the 3 uA pull-down** — specify a low-leakage part, or the timer
+> never resets.
 
 ### What sizes the FET
 
