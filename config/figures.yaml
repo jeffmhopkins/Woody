@@ -26,7 +26,7 @@ figures:
     quantity: In-amp output at full sensor range
     value: "-9.94 V"
     status: settled
-    owner: hardware/module/breath-receive-stage/breath-receive-stage.md
+    owner: hardware/interfaces/breath-sense-link/breath-sense-link.md
     derivation: "G = 1 + 50k/42.2k = 2.18483; x 1M/(1M+11k) = 2.16106 effective; x 4.6 V sensor span = 9.941 V"
     forbidden: ["-9.6 V", "−9.6 V", "-10.05 V", "−10.05 V"]
     note: "-10.05 V is the same gain with the 1M bias divider omitted. -9.6 V is derived from nothing and matches no configuration."
@@ -170,7 +170,7 @@ figures:
     quantity: J-CHAIN connectors in the system
     value: "8"
     status: settled
-    owner: hardware/cluster/cluster-boards.md
+    owner: hardware/interfaces/key-chain-loom/key-chain-loom.md
     derivation: "SER/QH are point-to-point, so every cluster board but the last has IN and OUT: carrier 1, RT 2, RH 2, LT 2, LH 1"
     forbidden: ["five connectors must match", "Five connectors", "~4 connectors"]
 
@@ -186,7 +186,7 @@ figures:
     quantity: SPI series resistor at the driving end
     value: "100 ohm, R-SPI-SER, qty 3"
     status: settled
-    owner: hardware/carrier/carrier.md
+    owner: hardware/interfaces/spi-link/spi-link.md
     derivation: "2 m of Cat5 is a 100-ohm transmission line. At 220R the far end's first step is 1.83 V against a 2.0 V V_IH, dwelling ~20 ns per edge in the forbidden band. 68R is ideal but draws 48 mA against a 40 mA pad spec."
     forbidden: ["R-MOSI-SER at 220", "R-MOSI-SER` at 220", "R-SCLK-SER", "R-CS-SER", "220 Ω with\n~200 pF"]
 

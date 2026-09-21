@@ -420,7 +420,7 @@ def check_owners(spec):
     A value with no digits at all is unmatchable and is skipped rather than
     guessed at.
     """
-    problems = []
+    problems, weak = [], []
     for fig in spec["figures"]:
         value = str(fig.get("value", ""))
         if value in ("DISPUTED", "BLOCKED") or fig.get("status") != "settled":
@@ -430,8 +430,24 @@ def check_owners(spec):
         if not os.path.exists(path):
             problems.append(f"[{fig['id']}] owner {owner!r} does not exist")
             continue
-        toks = re.findall(r"\d+\.?\d*", value)
+        # WHAT THIS CHECK CANNOT DO, stated because a green result here is
+        # otherwise read as more than it is.
+        #
+        # A token must be DISTINCTIVE to be evidence. chain-connectors' value
+        # is "8": it matches almost any prose, so the check would pass
+        # wherever the owner pointed. spi-series-r tokenises to 100 and 3.
+        # Three figures were verified by hand in the 2026-09-21 restructure
+        # and all three had genuinely moved while this check stayed green.
+        #
+        # So a weak value is reported as UNVERIFIABLE rather than passed. The
+        # check then makes exactly one claim - "the owner states something
+        # only this figure would say" - and says so when it cannot.
+        toks = [t for t in re.findall(r"\d+\.?\d*", value) if len(t) >= 3]
         if not toks:
+            if value not in ("DISPUTED", "BLOCKED"):
+                weak.append(f"[{fig['id']}] value {value!r} has no token "
+                            f"distinctive enough to locate - owner "
+                            f"{owner} is UNCHECKED")
             continue
         try:
             text = open(path, encoding="utf-8").read()
@@ -440,7 +456,7 @@ def check_owners(spec):
         if not any(t in text for t in toks):
             problems.append(f"[{fig['id']}] owner {owner} does not state its "
                             f"own value {value!r} - did the derivation move?")
-    return problems
+    return problems, weak
 
 
 def check_links(files):
@@ -523,7 +539,7 @@ def main():
     bom_problems, bom_refs, ncols, nrows = check_bom()
     drawn_not_bommed = check_refdes(files, bom_refs)
     link_problems = check_links(files)
-    owner_problems = check_owners(spec)
+    owner_problems, owner_weak = check_owners(spec)
     section_problems = check_sections(files)
     circuits = load_circuits()
     circuit_problems = (check_circuits(circuits, spec, bom_refs)
@@ -545,6 +561,11 @@ def main():
         emit([f"BROKEN SECTION REFERENCES ({len(section_problems)})",
               "  A section number names a position inside another document.", ""]
              + ["  " + p for p in section_problems] + [""], detail_only=True)
+
+    if owner_weak:
+        emit([f"figure owners this check CANNOT verify ({len(owner_weak)}) "
+              f"- not failures, but not confirmations either"]
+             + ["  " + w for w in owner_weak] + [""], detail_only=True)
 
     if owner_problems:
         fail = True
