@@ -214,5 +214,6 @@ figures:
     value: "fault isolation and HF isolation (r_d 69 mohm at 392 mA)"
     status: settled
     owner: hardware/module/power-entry.md
-    derivation: "The 80 mV Vf modulation is real, but reaches the jack as 75 mV -> LM317 line reg 0.52 mV/V -> 39 uV on AVDD -> OPA2197 PSRR -> 0.00018 cents. Pitch references the DAC's INTERNAL reference, not this rail."
-    forbidden: ["20 cents of breath-correlated", "20 cents of pitch bend", "about 20 cents"]
+    derivation: "Vf modulation is 120 mV: 0.24 V at 245 mA -> 0.36 V at 612 mA, digitised off Fig. 2 of Diodes Inc DS23001 Rev.8 (datasheets/discrete-and-power/1N5817.pdf). Reaches the jack as 120 mV -> LM317 line reg 0.52 mV/V -> 62 uV on AVDD -> OPA2197 PSRR 114 dB -> 0.00029 cents. Pitch references the DAC's INTERNAL reference, not this rail."
+    provenance_note: "This was 75-80 mV from a review agent's estimate until 2026-09-21. The 120 mV is read off the actual curve, and the digitisation is calibrated: the same extraction gives 0.454 V at 1.0 A and 0.746 V at 3.0 A against the datasheet's guaranteed maxima of 0.450 V and 0.750 V, so it is good to about +/-0.01 V - and the plotted curve sits essentially ON the max spec, so read these as typical-to-max. The conclusion is unchanged: 0.00029 cents is still five orders of magnitude below every other term in the table."
+    forbidden: ["20 cents of breath-correlated", "20 cents of pitch bend", "about 20 cents", "by ~80mV", "by **~80 mV**", "A7 independently gets 75 mV"]

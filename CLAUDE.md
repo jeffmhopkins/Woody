@@ -32,7 +32,22 @@ other files.
 A `PreToolUse` hook runs the checker before every `git commit` and surfaces
 the result, so forgetting step 3 is visible rather than silent.
 
-### 3. What the checker cannot catch
+### 3. Datasheets are banked, not linked
+
+`datasheets/` holds the actual documents, one `MANIFEST.csv` row each with a
+SHA-256. `python3 tools/verify-datasheets.py` must pass before committing
+anything under it. A part that could not be fetched gets a row too, with
+`status=BLOCKED` and the exact URLs — an honest gap is useful, a fabricated
+file is not.
+
+**A number read off a banked document beats one from a review.** Three
+figures moved this way in one afternoon: the 74HC165's 3.3 V threshold (the
+datasheet has no 3.3 V row, and the 0.7/0.3 ratio *breaks* at 2 V), the
+1N5817's `V_f` modulation (an estimate at 75–80 mV, 120 mV off the curve),
+and the WS2815's `V_IH` (8.4 V from reading `0.7 × VDD` against the wrong
+`VDD`). Mark provenance on every figure so the weak ones are visible.
+
+### 4. What the checker cannot catch
 
 Anything semantic. It greps for values. It cannot see that a page still
 *depends* on a part that was deleted, or that an argument survives its own

@@ -55,16 +55,26 @@ entry diode, so most of the prior art stops being applicable halfway down.
 **`D1` and `D2` are right, and the reason given for them was wrong.** An
 earlier revision branched the two +12 V paths *after* a single shared
 Schottky, so the instrument's current flowed through the same diode as the
-module's analog rail and modulated its forward voltage by **~80 mV** (A7
-independently gets 75 mV: 0.305 V at 245 mA → 0.380 V at 612 mA, so the
-figure itself is sound).
+module's analog rail and modulated its forward voltage by **120 mV**:
+**0.24 V at 245 mA → 0.36 V at 612 mA** `[repo, digitised from Fig. 2 of
+Diodes Inc DS23001 Rev.8]`.
+
+> **This page said ~80 mV, and a reviewer's independent estimate said 75 mV.**
+> Both were estimates. 120 mV is read off the actual forward-characteristics
+> curve in `datasheets/discrete-and-power/1N5817.pdf`, and the extraction is
+> calibrated against the two points the datasheet *guarantees*: the same
+> method returns 0.454 V at 1.0 A and 0.746 V at 3.0 A against specified
+> maxima of 0.450 V and 0.750 V. So it is good to about ±0.01 V — and the
+> plotted curve sits essentially **on** the max spec, which means these are
+> typical-to-max rather than typical. **60 % larger, and it changes nothing**
+> — see below.
 
 **The figure that followed it does not survive.** This page used to say the
 modulation was worth "about 20 cents of breath-correlated pitch bend".
 It implies ~21 % pitch sensitivity to the +12 V rail. Pitch full scale is
 set by the DAC's *internal* reference, and AVDD comes from the LM317, so
-the real path is 75 mV → LM317 line regulation (0.52 mV/V) → 39 µV on AVDD
-→ OPA2197 PSRR (114 dB) → **0.15 µV = 0.00018 cents** `[calc, A7]`. The
+the real path is 120 mV → LM317 line regulation (0.52 mV/V) → 62 µV on AVDD
+→ OPA2197 PSRR (114 dB) → **0.00029 cents** `[calc]`. The
 20-cent figure is a survival from the rail-divider topology ADR 0006
 already deleted. Two reviewers reached this independently.
 
