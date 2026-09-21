@@ -93,3 +93,96 @@ every extraction in this session" — **that is no longer true here**, and any
 agent told to verify a datasheet claim will hit it. `pdftotext` was already
 recorded as not installed in every session. Whoever re-verifies B3's slice
 needs a working reader first.
+
+## B1 / A4 — the seventh spelling of the refuted sensor transfer function
+
+Two agents that could not see each other filed this independently.
+
+| Claim | Check | Verdict |
+|---|---|---|
+| `docs/decisions/0005-power-architecture.md:74` carries the **refuted** `0.2–4.7 V` sensor output as live fact, in a spelling no `forbidden` pattern matches | Extracted the literal from the line; compared byte for byte against all 27 patterns on `sensor-full-scale` | **Confirmed.** The line holds `0.2–4.7 V` — U+2013, **no spaces**. The register has `0.2-4.7 V` (ASCII hyphen), `0.2 – 4.7 V` (en dash *with* spaces) and `0.2–4.80 V` (tight en dash, but the 4.80 value). The tight-en-dash `4.7` form is the one nobody wrote. Zero hits; checker PASS |
+
+`CLAUDE.md` names `sensor-full-scale` as the worst recorded case of this
+class and says the corpus spelled one number **seven** ways. This is the
+eighth, in the same figure, found after three review waves and a restructure.
+
+## A10 / B1 — two more single-character escapes
+
+| Claim | Check | Verdict |
+|---|---|---|
+| `ROADMAP.md:203` says **"Six conductors per hop"**; `chain-conductors` is **12** | Read the line; compared against all five patterns | **Confirmed.** The list holds `six conductors per hop`, `SIX conductors per hop`, `6 conductors per hop` — and, in Title case, `Six conductors leave`. So Title case *was* considered, for the other spelling. The miss is one letter. The row is the one that asks "does the chained key loom fit the side channel?" and gates it "before the plate DXF is cut" |
+| `hardware/bom.csv:62` and `hardware/module/panel-led/bom.csv:2` carry the **retired** four-row panel budget | Read both rows; compared against `panel-height-budget`'s nine patterns | **Confirmed, four values, four misses, each by one removed space.** The rows spell `~115mm against ~110mm usable`, `107mm of ~110mm`, `= 97mm, 13mm spare`; every pattern spells `NN mm`. And this is the generated master plus its fragment, so the same stale text is in the repository twice |
+
+## A7 / A4 — the DAC threshold is read off the wrong datasheet row
+
+| Claim | Check | Verdict |
+|---|---|---|
+| `0004:209` justifies the level shifter with "the DAC's **0.7 × AVDD** input threshold — **3.65 V** at AVDD = 5.21 V"; SBAS430E splits that parameter and the module is in the other half | Re-read the banked `datasheets/analog/DAC8568CIPW.pdf` p.4 directly | **Confirmed.** p.4 gives `VINH` as **two rows**: `2.7V≤AVDD<4.5V → 0.7×AVDD` and `4.5V≤AVDD≤5.5V → 0.625×AVDD`. The LM317 rail is 5.21 V, so the binding figure is **0.625 × 5.21 = 3.26 V**, not 3.65 V. p.53's own revision history records TI splitting it into two rows. **The conclusion survives** — 3.3 V CMOS still cannot drive it — but the number that carries the argument is wrong by 0.39 V, on the ADR that owns the link |
+
+## B2 — the DAC order code does not exist
+
+| Claim | Check | Verdict |
+|---|---|---|
+| `U-DAC`'s part number `DAC8568CIPW` is not an orderable device | Searched the banked datasheet's own Package Option Addendum | **Confirmed. Zero occurrences of `DAC8568CIPW` in the whole document.** p.54–57 enumerate `DAC8568IAPW / IBPW / **ICPW** / IDPW` and their `R` reel variants. The `I` and the grade letter are transposed; the C grade orders as **`DAC8568ICPW`**, which appears nowhere in this corpus |
+
+This one propagated further than a value normally does: it is in
+`hardware/bom.csv`, in `0006:176` and `:179`, in `datasheets/MANIFEST.csv`,
+and **in the banked file's own name** — so the datasheet is filed under a part
+number that does not exist. The manifest row beside it says the grade table
+was "verified verbatim", which it was. Nobody checked the line above it.
+
+## A9 — the strips' per-LED current, and a refutation that stopped 284 lines short
+
+| Claim | Check | Verdict |
+|---|---|---|
+| The strip power figures rest on a per-LED current that no banked document supports | Read `datasheets/led/WS2815.pdf` p.3 directly; recomputed from `0014:132` | **Confirmed.** `0014:132` gives `60/m (50 LEDs) | 1.01 A` — **20.2 mA/LED** `[calc]`. The banked WS2815 datasheet p.3 states **`RGB Channel Constant Current 15 mA`**, i.e. **45 mA/LED** at full white — **2.23× higher**. The same page's `Quiescent Current 2.1 mA` reproduces ADR 0005's 123 mA exactly, so the two numbers in the corpus have different sources and only one of them is the datasheet |
+| The corpus already knows this class of error | Read `0014:416` | **Confirmed, and this is the finding.** At `:416` the corpus says of the *matrix* figure: "**this is the wrong part's figure and it is at least 2.4× too low**". That refutation is 284 lines below the strip table at `:153`, which still reads `Both strips full white at 60/m | 12.1 W | ~36 K` with no flag. At 45 mA/LED the same row is **≈27 W and ≈81 K** `[calc]` |
+
+`~36 K` is the number the ~3 W lighting clamp was sized to avoid, so the
+strip row is not decorative — it is the load case the clamp exists for.
+**The fix landed where the editing was happening and not where the reader
+looks**, in the ADR that owns lighting.
+
+## A6 — the path map is itself stale, in 22 of 287 rows
+
+| Claim | Check | Verdict |
+|---|---|---|
+| `docs/reference/path-map-2026-09-21.csv` calls the `74HC165` datasheets "unmoved" when they moved | Resolved every `datasheets/…` path cited anywhere in the design corpus | **Confirmed, and it is broader than the three rows filed.** Of 88 distinct `datasheets/` paths cited in the corpus, **22 resolve to nothing — and all 22 are in the path map**, every one with `kind=unmoved` and `old == new`. The files were re-filed by function (`datasheets/logic/`, `/led/`, `/analog/`) and the map was not updated. Two rows are wrong about the filename as well, not just the directory: the map names `74HC165-toshiba.pdf` and `74HC165.pdf`; the bank holds `74HC165-toshiba-1986-excerpt.pdf` and `74HC165-ti-scls116e.pdf` |
+
+This is mine, and it is a new shape. `CLAUDE.md` §6 says paths in the
+historical records "are not to be corrected — resolve them through
+`repo-maintenance.md` §7", and §7 points at this map. **The documented
+mechanism for resolving stale paths is itself stale**, and silently: an
+`unmoved` row has `old == new`, so `rewrite-paths.py --verify` has nothing to
+look for, and `check_links` only reads markdown links, not CSV cells. Every
+check passes.
+
+It is also the same failure as the ones above, one level up: not a value that
+went stale, but **the table that exists to resolve stale values**.
+
+## A2 — a correction to this file
+
+The note at the end of the A2 section says `pypdf` is broken in this
+container. **That is wrong, and it mattered** — it would have told the next
+reader that B3's whole slice was unverifiable.
+
+`pypdf` works. What fails is the system `cryptography` package's Rust
+binding, which `pypdf` imports eagerly and only needs for *encrypted* PDFs.
+Stubbing the module out before the import makes extraction work on every
+banked document:
+
+```python
+import sys, types
+for m in ('cryptography', 'cryptography.hazmat', 'cryptography.exceptions',
+          'cryptography.hazmat.primitives',
+          'cryptography.hazmat.primitives.ciphers',
+          'cryptography.hazmat.primitives.padding',
+          'cryptography.hazmat.backends'):
+    sys.modules[m] = types.ModuleType(m)
+import pypdf
+```
+
+Four of the verifications above were done this way. `repo-maintenance.md` §3
+needs this rider, and that edit is **held pending the merge decision** rather
+than taken now, because the corpus is under a content freeze and making an
+exception for my own convenience is how freezes stop meaning anything.
