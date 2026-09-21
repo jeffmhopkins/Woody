@@ -298,10 +298,22 @@ chain that can be permanently solved, on a board built once. If the reference
 term is ever attacked — an external reference is the obvious way — the network
 has to be there already for that to be worth doing, and retrofitting it to a
 populated board is not a five-minute job. The option-code lookup is.
-| LT5400 ratio tracking | ~0.1 cents | The reason it is not two discrete 0.1 % parts, which would be ~1.2 cents |
-| DAC internal reference | ~0.5 cents | A gain term, per above |
-| OPA2197 offset drift | <0.1 cents | An offset term, but a tiny one |
-| DAC INL, ±4 LSB typical | ~0.4 cents | Curvature; firmware's multi-point correction, not a trimmer's job |
+> **Superseded, and left here rather than deleted. 2026-09-21.** The four rows
+> below are the remains of the accuracy table the section above replaced. They
+> lost their header when the replacement landed, so they read as a continuation
+> of the prose, and **two of them contradict the live table twelve lines up**:
+> LT5400 ratio tracking is **0.027 cents**, not `~0.1`, and the DAC internal
+> reference is **0.42 cents**, not `~0.5`. Neither figure is tracked in
+> `config/figures.yaml`, so `check-staleness.py` is structurally blind to this
+> — it was found by reading, which is what `CLAUDE.md` §5 says a grep cannot
+> replace. They belong in this circuit's `notes.md` once the restructure gives
+> it one; until then they stay marked rather than removed, because a deleted
+> superseded value stops warning the next person.
+>
+> | LT5400 ratio tracking | ~0.1 cents | The reason it is not two discrete 0.1 % parts, which would be ~1.2 cents |
+> | DAC internal reference | ~0.5 cents | A gain term, per above |
+> | OPA2197 offset drift | <0.1 cents | An offset term, but a tiny one |
+> | DAC INL, ±4 LSB typical | ~0.4 cents | Curvature; firmware's multi-point correction, not a trimmer's job |
 
 Nothing here approaches the **20-odd cents** of the dynamic, LED-correlated
 terms that ADR 0006 fixes in the power tree and the ground plan. That remains
