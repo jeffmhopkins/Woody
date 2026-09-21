@@ -148,7 +148,7 @@ Freerouting. Sort the board's analog nets by how much a millivolt on them costs:
 | **`V_ref`** (pitch intercept, 2.500 V) | **1.2 cents** | `[repo hardware/module/pitch-stage.md:116]` |
 | **`VREFOUT`** (DAC internal ref, exported) | a gain term; 1 mV on 2.5 V is 400 ppm ≈ **1–3.4 cents** | `[calc from repo pitch-stage.md:117]` |
 | `INA828 REF` | 1 mV at the breath jack = 0.01 % of span | `[repo breath-receive-stage.md:57]` |
-| `AVDD` | 0.0000024 cents, via LM317 line reg and OPA2197 PSRR | `[calc from repo config/figures.yaml:217]` |
+| `AVDD` | ~0.0000037 cents, via LM317 line reg and OPA2197 PSRR | `[calc: 0.00044 cents per 120 mV, repo config/figures.yaml `diode-split-rationale`]` |
 | **Pitch / mod / breath jack outputs** | nothing — each has 1 kΩ of series isolation and a shunt cap at the jack | `[repo pitch-stage.md:133-136]` |
 
 `V_ref` and `VREFOUT` are **not in any hand-routed class**. The pitch outputs —
@@ -355,15 +355,20 @@ Stitch pitch: `f_knee` = 0.5/`t_r` = 100–250 MHz for the 74AHCT125's edges
 The plan treats the board as a thing that gets fabricated. It also gets
 *commissioned*, and the corpus specifies that commissioning in detail.
 
-**Five parts have values that are chosen by measurement after the board exists:**
+**Two parts have values that are chosen by measurement after the board exists:**
 
 | Part | Package now | When |
 |---|---|---|
 | `R-REG-SET` | 0805 **or through-hole** | "SELECTED ON THE BENCH at E7" `[repo bom.csv:39]` |
-| `R-ILIM` | 0805 or 1206 | "value from E6... selected on the bench like `R-REG-SET`" `[repo bom.csv:64]` |
-| `C-TIMER-LOADSW` | TBD | blocked on a datasheet; "the 0805 C0G package in `bom.csv` is wrong for 9.4 µF by three orders of magnitude" `[repo power-entry.md:276-277]` |
-| `C-GATE-LOADSW` | TBD | same `[repo bom.csv:120]` |
-| `R-FB-HI` / `R-FB-LO` | TBD | blocked; the divider that decides whether the board starts at all `[repo power-entry.md:183-187]` |
+| `R-ILIM` | 0805 or 1206 | `status=open`, "value from E6... selected on the bench like `R-REG-SET`" `[repo bom.csv:64]` |
+
+> **This table said five until the corpus moved under this review.**
+> `C-TIMER-LOADSW`, `C-GATE-LOADSW`, `R-FB-HI` and `R-FB-LO` were `TBD` and
+> `blocked` when this slice began and are now `selected` with real values —
+> 10 µF low-leakage, 82 nF C0G, 35.7 k and 5.11 k `[repo bom.csv:119-122]` —
+> against a **now-verified** `164112fc` `[repo power-entry.md:136-138]`. Recorded
+> rather than silently corrected, because a reviewer citing the blocked state is
+> exactly the staleness this repo exists to catch, and it caught me.
 
 Each will be desoldered and replaced several times, on a hand-assembled board,
 possibly with 100 µF electrolytics and an etherCON body nearby.
@@ -601,6 +606,22 @@ at the LT1641's pin, not at the panel toggle, and the Thevenin impedance is kept
 A high-value divider at the far end of a flying wire to a panel switch is a
 comparator input on an antenna.
 
+## M18b — The gate network is now a compensated loop, and it appeared after the plan was written
+
+`power-entry.md`'s load switch has gained `R-GATE-SER` 10 Ω in series with the
+FET gate and `R-GATE-COMP` 1 kΩ in series with `C-GATE` from `GATE` to
+`PWR_GND`, both "read straight off ADI's typical application"
+`[repo hardware/bom.csv:123-124]`. That is no longer a capacitor hung on a pin —
+it is a compensation network around a charge pump driving a DPAK gate through
+the 1 A switching node.
+
+**Rules to add:** `R-GATE-SER`, `R-GATE-COMP` and `C-GATE` sit at the LT1641's
+`GATE` pin with the FET gate within ~10 mm, and the `GATE`–`PWR_GND` loop is
+kept tight and away from the drain's copper. And `C-TIMER` is now a **10 µF
+low-leakage** part `[repo bom.csv:119]` on a node ramped at ~3 µA — equivalent
+411 kΩ `[calc]` — so its pads and the `TIMER` trace stay small, clean and clear
+of +12 V, per M17.
+
 ## M19 — Creepage and clearance on ±12 V: **no rule needed**
 
 Requested in the slice; the answer is negative and worth recording so it is not
@@ -821,7 +842,7 @@ route and the pour are reviewed by eye, once, against this list, before gerbers*
    ground reference `[calc, order of magnitude]`.
 4. **M3 / W4** — the `AGND` keepout breaks the breath pair's capacitive symmetry,
    into a CMRR budget that is already 0.3 dB short on component tolerance alone.
-5. **M7 / M9** — five parts are chosen on the bench, one test needs a wire to
+5. **M7 / M9** — two parts are chosen on the bench, one test needs a wire to
    clamp a probe around, there are no test points, and two banked mechanical
    numbers put the board plane 4.8 mm apart.
 

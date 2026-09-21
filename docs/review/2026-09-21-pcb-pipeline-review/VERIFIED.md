@@ -150,3 +150,44 @@ correctly declined to assume it was theirs. It is the **datasheet session**
 working the same branch: `ref5050-grade` was filed `disputed` when the
 REF5050's A-suffix turned out to be the *worse* grade, and `matrix-led-current`
 was filed `blocked`. Both are deliberate.
+
+## P7 — the module panel is not a PCB, and the pipeline has no place for it
+
+**Claim:** the 10HP panel is 2 mm aluminium, laser or waterjet cut from a DXF,
+same vendor and order as the key plate. It is not a PCB, not that vendor, not
+that file format — and the pipeline emits no DXF at all.
+
+**Re-checked, 2026-09-21. CONFIRMED, twice over.**
+
+```
+hardware/bom.csv:21
+  PANEL | 2mm aluminium, 10HP x 3U (50.50 x 128.5mm) | n/a
+  "Laser or waterjet from DXF - SAME vendor and order as the key plate"
+
+docs/decisions/0004-cv-interface-module.md:243
+  "The 10HP panel is laser or waterjet cut from DXF - same vendor and ideally
+   the same order as the aluminium key plate (ADR 0009)."
+```
+
+**This is a category error in the plan, not a missing feature.** The panel was
+listed as one of four fabricated items going through KiCad to gerbers. It
+belongs with the key plate in a mechanical DXF workflow that this pipeline does
+not cover and should not try to — the two aluminium parts ship on one order.
+
+Noted while verifying: the same BOM row records that a review *"rebuilt the
+panel bottom-up and got ~115 mm against ~110 mm usable — already over before
+`POT-RESP` was added"*. So `panel-height-budget` is not merely disputed, it is
+disputed with an over-budget result on the table.
+
+**Accepted without re-check, and each changes a script:** `--units mm` is not a
+drill flag (it is `--excellon-units`); X2, netlist attributes and aperture
+macros are **on** by default and all six vendor profiles in GerberZipper turn
+all three **off**; PTH/NPTH default to **merged** while the etherCON's two
+⌀3.2 ±0.1 NPTH clearance holes must not be plated; a `.gbrjob` ships
+unconditionally whether the plan knows it or not; and an invalid `--layers`
+token is **reported and then ignored, exit 0** — so a misspelt `F.Mask` yields
+a board with no soldermask and a green build.
+
+**And the plan verifies the wrong object.** Every check in stage 7 reads
+`module.kicad_pcb`. Nothing ever opens a file from the zip, so the entire
+export stage sits downstream of every assertion.
