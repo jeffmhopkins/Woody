@@ -524,7 +524,7 @@ everything that happens to that rail lands on pitch with no rejection at all:
 
 ADR 0004 worried about this exact rail and defended the *op-amp's supply pins*
 for 80 dB of PSRR and 0.011 cents, while leaving the offset reference a bare
-divider on the same rail. **Eighty-six decibels off the right node.**
+divider on the same rail. **Sixty-six decibels off the right node** — the ratio of 22 cents to 0.011 is 2000, which is 66 dB, not the 86 this line used to claim.
 
 **Divide the offset trimmer from the DAC8568's `VREFOUT` instead**, buffered by
 the spare OPA2197 half. Three things follow, and the third is the good one:

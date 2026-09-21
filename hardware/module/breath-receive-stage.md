@@ -154,7 +154,7 @@ looks like an input.
 | **R1b** | 1 kΩ 1 %, 1206 | **Its twin in the `AGND` leg.** Free, and it is what keeps CMRR from collapsing — see below |
 | **R2, R3** | 10 kΩ 0.1 % | Module-side series protection. **Matched** — but see below |
 | **R4, R5** | 1 MΩ | **Common-mode bias return.** Without these the in-amp's inputs float when the cable is unplugged and it saturates to a rail |
-| **C_diff** | 15 nF C0G | 531 Hz differential pole, **ahead of the in-amp** |
+| **C_diff** | 15 nF C0G | **482 Hz** differential pole (not 531 — `R1b` makes both legs 11 kΩ), **ahead of the in-amp** |
 | **C_cm** | 1.5 nF C0G ×2 | Common-mode poles, deliberately 1/10 of C_diff |
 | **R_G** | 42.2 kΩ 0.1 % | INA828, `G = 1 + 50k/R_G` = **2.185** |
 | **REF** | buffered trimmer, **0 → +1.0 V** | Nulls the pedestal *ahead* of the gain pot, which is what makes the panel knobs independent. Range covers the sensor's whole 0.152–0.378 V spec band, not just its typical. From the LM317 rail, never `VREFOUT`, and never a bare divider — see above |

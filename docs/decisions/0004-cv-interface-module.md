@@ -67,8 +67,10 @@ drop the clock: 0.6 MHz still does not close.)
 **This number has a deadline.** E11 validates the real cable at the real rate
 and it is a gate before the body bonds — there is no second chance to test 2 m
 of Cat5 at a speed the instrument turns out to need. `R-MOSI-SER` at 220 Ω with
-~200 pF of cable is a ~7.9 MHz corner, so 2 MHz has margin; if E11 wants more,
-that resistor comes down toward 100 Ω, which is closer to a real source match
+~200 pF of cable is a **3.6 MHz** corner — 7.9 MHz is the 100 Ω case this same
+sentence offers as the fix, which is the wrong way round. 2 MHz still has
+margin, but less than claimed, and transmission-line analysis puts the right
+value nearer 68 Ω, which is closer to a real source match
 on Cat5's ~100 Ω anyway.
 
 Plain single-ended SPI at a couple of MHz over twisted pair is still

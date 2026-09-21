@@ -98,7 +98,7 @@ Different jobs, both kept.
 
 ## Sensor: MPXV4006DP
 
-0–6 kPa, integrated signal conditioning, ~0.2–4.7 V out. Directly usable by a
+0–6 kPa, integrated signal conditioning, ~0.2–4.80 V out. Directly usable by a
 SAR ADC with no instrumentation amplifier.
 
 The old repository contradicted itself — its README said MPXV4006GP while
@@ -113,7 +113,7 @@ technical one.**
 |---|---|---|
 | Lifecycle | **Obsolete**, distributor stock only | **Production**, supported through at least 2028 |
 | Sensitivity | 766 mV/kPa | 766 mV/kPa |
-| Output span | 0.2–4.7 V | 0.2–4.7 V |
+| Output span | 0.2–4.80 V | 0.2–4.80 V |
 | Supply | 4.75–5.25 V, 10 mA | 4.75–5.25 V, 10 mA |
 | Case | 1369-01, single side port | **1351-01, dual ports, same side** |
 
@@ -515,7 +515,7 @@ divider for a level shifter. The 0.6× divider below stays.
 
 The sensor's buffered output splits two ways:
 
-- **To the umbilical buffer** — full scale, 0.2–4.7 V, for the CV output.
+- **To the umbilical buffer** — full scale, 0.2–4.80 V, for the CV output.
 - **To the SAR ADC** — for breath threshold and note gating, as a modulation
   source for the mod channels, for the display, and for USB MIDI.
 
@@ -530,7 +530,7 @@ the divider drives the ADC input above its own supply and current flows through
 the ESD clamp. A low-impedance divider puts ~2.5 mA into that diode, at or over
 the family-typical ±2 mA limit, on **every power-up**.
 
-**And put a 220 nF cap at the ADC input pin.** This is the highest-value passive
+**And put a 47 nF cap at the ADC input pin.** This is the highest-value passive
 in the breath path and it does three jobs at once:
 
 - **Anti-aliasing, which is otherwise absent.** The *signal* is band-limited by
@@ -540,7 +540,7 @@ in the breath path and it does three jobs at once:
   **2 kHz**, and at 496.1 kHz to **100 Hz — directly into the breath band**,
   indistinguishable from playing. Worse, the alias frequency *moves* with the
   converter's load-dependent switching frequency, so it is a wandering tone
-  rather than a fixed one. 220 nF gives a ~600 Hz corner and **58 dB at
+  rather than a fixed one. 47 nF gives a ~564 Hz corner and **58 dB at
   500 kHz**.
 - **It is the charge reservoir for the MCP3202's sample capacitor**, which fixes
   the source-impedance problem that the ≥10 kΩ divider above would otherwise

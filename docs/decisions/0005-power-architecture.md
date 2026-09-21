@@ -158,11 +158,11 @@ quiescent current, and no lighting clamp.
 | Typical play | 226 mA | 248 mA | **359 mA** | 4.1 W |
 | Typical + live config over WiFi | 336 mA | 248 mA | **414 mA** | 4.7 W |
 | **Clamp-legal worst** | 928 mA | 119 mA | **579 mA** | 6.5 W |
-| Clamp fails, strips latched full white | 1023 mA | 1023 mA | **1132 mA** | 12.2 W |
+| Clamp fails, strips latched full white | 1023 mA | 1023 mA | **~1522 mA** | ~17 W |
 
 **The 5 V rail is where the danger is, not the umbilical.** The same 3 W of
 light costs 531 mA on the umbilical if it is spent on the strips and 579 mA if
-spent on the matrix — a 5 % difference. But on the 5 V rail it is **328 mA
+spent on the matrix — a **9 %** difference. But on the 5 V rail it is **328 mA
 versus 928 mA**, a factor of three, because the strips run from 12 V directly
 and the matrix runs through the buck. The 1 A regulator lives on that rail.
 
@@ -259,10 +259,22 @@ things the bare toggle does not have:
 
 ### Set the limit at 1.0 A, and delete the polyfuse
 
-**1.0 A, latch-off, with a programmed 50–100 ms ramp.** The window is roughly
-0.9–1.13 A: above the clamp-legal worst case of 630 mA plus ramp current, below
-the 1.13 A a brownout-latched full-white strip set draws, and inside two thirds
-of the etherCON contact's 1.5 A rating.
+**1.0 A, latch-off, with a programmed 50–100 ms ramp.**
+
+**The upper bound this used to quote was arithmetic from a broken row.** It said
+0.9–1.13 A, with 1.13 A taken as what a brownout-latched full-white strip set
+draws — but that row of the load table was inconsistent three ways (its two
+component currents summed to 1522 mA, not 1132; and its own power figure did
+not follow from either). Corrected, a latched full-white failure is **~1.5 A**,
+which is *above* the etherCON contact's 1.5 A rating rather than comfortably
+below it.
+
+So the limit is not bracketed from above by that state any more — it is set
+from below, by the clamp-legal worst case of ~630 mA plus ramp current, and
+from above by the connector. **1.0 A sits between them**, and the consequence
+of the correction is that a latched-full-white instrument now *trips the
+limiter* instead of sitting just under it, which is the behaviour wanted. E6
+measures the trip as well as the load.
 
 **500 mA was below typical play**, never mind the clamp-legal worst. Reviewers
 also disagreed about whether it would prevent boot: one showed it would not,

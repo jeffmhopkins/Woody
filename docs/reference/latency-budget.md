@@ -39,9 +39,9 @@ copy — thresholds, note gating, mod routing, MIDI — is sampled, and pays for
 | **Pneumatic restrictor** | **? — sized at E2** | A deliberate low-pass, added to damp the tube's pipe mode (ADR 0003). **Not previously in this budget at all**, and the term most able to break it |
 | Pressure transducer | **~1 ms** | A property of the sensor, not the design |
 | Buffer and cable propagation | < 10 µs | |
-| Receive filter, 531 Hz | **300 µs** | `1/(2πf)`. One pole, not two — the schematic puts the whole filter at the receive end |
+| Receive filter, **482 Hz** | **330 µs** | `1/(2πf)`. **Not 531 Hz** — that assumed 20 kΩ of series resistance, and adding `R1b` to the return leg makes both legs 11 kΩ. One pole, not two |
 | Output RC at the jack, 480 Hz | **332 µs** | |
-| **Total** | **~2.80 ms + restrictor** | |
+| **Total** | **~2.83 ms + restrictor** | |
 
 **The filter line used to read "< 0.2 ms" and it was the design's own
 specified corners that broke it.** Three reviewers found the same thing: a
@@ -57,7 +57,7 @@ Everything above as far as the sensor output — **~2.17 ms** — then:
 |---|---|---|
 | **Anti-alias filter, 564 Hz** | **282 µs** | `C-AA-ADC` against the divider's 6 kΩ. **Omitted entirely before**, like the restrictor |
 | Sampling period | **0–250 µs** | At a 4 kHz loop, a change waits up to one period to be seen. Mean 125 µs |
-| SAR ADC conversion | 50–200 µs | SAR, not delta-sigma — see below |
+| SAR ADC conversion | **~24 µs** | 18 clocks at the MCP3202's ~0.9 MHz ceiling on 3.3 V. **This row said 50–200 µs**, which is a generic SAR allowance and not this part — and it is the same read the loop-duty rule books at 24 µs. See the warning below |
 | SPI to MCU + firmware | < 20 µs | |
 | SPI to DAC over umbilical | ~96 µs | Six 32-bit words at 2 MHz. The loop refreshes all of them every pass (`firmware/README.md`), so the whole burst is the latency, not one word |
 | DAC settling | ~10 µs | |
@@ -147,6 +147,24 @@ a hypothesis; a budget made of measurements is a constraint.
    **136 µs**, against a 125 µs period at 8 kHz. At 4 kHz it is 136 µs of
    250 µs — 54 % duty, with room for the loop to do work. Three documents used
    to disagree about this; 4 kHz is the number.
+
+   > **⚠ This page gave two different figures for the same ADC read, and the
+   > gap decides whether 4 kHz is buildable.** The table above said 50–200 µs
+   > and this rule says 24 µs. At 200 µs a pass costs **312 µs against a
+   > 250 µs period and the loop does not close**; even a mid-range 125 µs
+   > leaves no margin.
+   >
+   > 24 µs is the right number for the specified part — the MCP3202 needs 18
+   > clocks and tops out near 0.9 MHz at 3.3 V, so ~20 µs of conversion plus
+   > framing. 50–200 µs was a generic SAR allowance carried in from nowhere.
+   >
+   > **But the allowance was pointing at something real**, which the
+   > characterisation table already names: *"datasheet conversion time
+   > excludes driver overhead; the real number includes it."* If the measured
+   > round trip comes back near 200 µs, **the answer is not a faster ADC —
+   > it is that 4 kHz does not close and the loop rate has to move.** That
+   > makes the "ADC + SPI round trip" measurement a gate on the architecture,
+   > not a refinement of it.
 
    Six channels means *all* the populated ones: the loop refreshes the mod
    offset every pass rather than writing it once (`firmware/README.md`). The
