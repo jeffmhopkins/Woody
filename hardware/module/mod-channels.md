@@ -74,7 +74,7 @@ resistor *was* the gain network.
 | Matching | two ratios per channel | **one** |
 | Range | ±10.05 V (40.2 kΩ fudge) | **exactly ±10.000 V** |
 | `R-OPAMP-IN` | unbalances it — 196 mV zero error | harmless, feeds a (+) input |
-| Safe on `CLR` | yes | **yes** |
+| Safe on `CLR` | `4Z − 4Z` = **0 exactly** | `4Z − 3Z` = **Z**, one zero-code error |
 
 *(A third option surfaced in the same research: four of four published designs
 — Ornament & Crime, Westlicht PER|FORMER, Mutable Yarns, MTM Workshop Computer
@@ -110,18 +110,26 @@ budget. On the two-resistor form the same part feeds a (+) input that draws no
 current, and costs nothing. Same resistor, same reason for existing, opposite
 consequence, decided entirely by the topology around it.
 
-**Tolerance, done properly.** An earlier revision said the worst case was
-"2.5 V × 2 % × 4 ≈ 50 mV", which is wrong twice: the arithmetic evaluates to
-**200 mV**, and it models only the zero point. Enumerating all sixteen corners
-of four 1 % resistors gives:
+**Tolerance — and this section has now been wrong twice.** The original said
+"2.5 V × 2 % × 4 ≈ 50 mV", which evaluates to 200 mV and modelled only the zero
+point. The replacement enumerated "sixteen corners of four 1 % resistors",
+which is **the four-resistor circuit's answer, kept after the redraw**. There
+are two resistors and four corners, and in two of them same-sign tolerance
+cancels in the ratio:
 
-| Term | Worst case | Note |
+| Term | Worst case | vs the four-resistor version |
 |---|---|---|
-| Zero point | ±81 mV | What the old line was trying to compute |
-| **Span** | **19.70–20.51 V** | ±2 % of gain — **the dominant term, and it was unmentioned** |
+| Zero point | **±50.5 mV** | 1.6× *better* |
+| Span | **19.703–20.303 V** (−1.49 %/+1.52 %) | 1.33× *better* |
 
-On a channel that might be assigned to drive a VCO or a quantiser, ±2 % of span
-is about ±24 cents per octave. ADR 0006 says these channels need to be "linear
+So the redraw improved both and the page claimed neither. About ±18 cents per
+octave if a channel is assigned to something pitch-like.
+
+**"One matching requirement instead of two" is true by count and misleading.**
+The difference amp's zero was `2.5[b/(1+b) − b/(1+b)] = 0` for *any* absolute
+ratio — it depended only on leg-to-leg matching. The two-resistor zero is
+`2.5 − (10/3)k`, directly proportional to the ratio error. Fewer requirements,
+but the deleted one was buying something. ADR 0006 says these channels need to be "linear
 and repeatable, not calibrated", and they still are — but "repeatable" is doing
 more work than the old number implied, and anything pitch-like belongs on
 channel 1.
@@ -139,7 +147,7 @@ because the two numbers look contradictory side by side and are not.
 This is the S4 fix, and it is worth stating where the circuit is, because the
 circuit is what makes it true.
 
-On a watchdog `CLR`, an A/C-grade DAC8568 clears **every** channel to zero
+On a watchdog `CLR`, the C-grade DAC8568 (the grade is **locked** — it selects reference gain as well as reset state, ADR 0006) clears **every** channel to zero
 scale (ADR 0006). Channel 7 goes to 0 V with the rest, so:
 
 ```

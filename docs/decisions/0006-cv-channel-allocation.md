@@ -626,11 +626,12 @@ was.** The review found the C of every one of these RCs missing from the BOM,
 with no value anywhere in the repository. It is now there — but the value is
 the easy half:
 
-- **Which side of the 1 kΩ.** The capacitor goes on the **jack side**, so the
-  resistor isolates the op-amp from it. On the op-amp side it is a capacitive
-  load inside the feedback loop and the stage can oscillate. This is the one
-  place in the review where an unspecified *placement* is a functional hazard
-  rather than a tidiness complaint.
+- **Which side of the 1 kΩ.** On the **mod and breath** outputs the capacitor
+  goes on the **jack side**, so the resistor isolates the op-amp from it; on
+  the op-amp side it is a capacitive load inside the loop. **Pitch is now the
+  exception** — its feedback is tapped at the jack, so that node is the
+  feedback node and carries no capacitor at all. Its filter sits *ahead* of the
+  op-amp instead (`C-AA-PITCH`), on a node with no loop around it.
 - **Dielectric: C0G or film, never X7R.** X7R's DC-bias coefficient moves the
   corner by ~30 % at 10 V, and X7R is piezoelectric — in a pitch reconstruction
   filter that is a literal microphonic detuning element. Same price, same
@@ -638,7 +639,7 @@ the easy half:
 
 | Output | R | C | Corner |
 |---|---|---|---|
-| Pitch | 1 kΩ | 10 nF C0G | 15.9 kHz |
+| Pitch | `R-OPAMP-IN` 1 kΩ, **ahead of the stage** | 10 nF C0G | 15.9 kHz |
 | Mod 1–4 | 1 kΩ | 82 nF C0G | 1.94 kHz |
 | Breath | 1 kΩ | 330 nF film | ~480 Hz |
 

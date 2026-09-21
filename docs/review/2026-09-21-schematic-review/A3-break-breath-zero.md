@@ -2,37 +2,51 @@
 
 **Verdict: BROKEN.**
 
+**State-at-writing note, and it matters.** This repo was edited by at least one
+parallel reviewer *while this document was being written* (`git log`:
+`7b424c6`, plus untracked `A1-break-jack-feedback.md` and `C1-breath-stage.md`
+alongside this file). **Two of the three hard defects below were partially fixed
+mid-review — each in one document, leaving the others stale.** Every claim here
+was re-verified against the files on disk at the end of the pass, and each
+finding is marked **LIVE**, **HALF-FIXED** or **CLOSED**. The fact that two
+independent reviewers converged on §1 and §2 from different directions is itself
+evidence that they were real.
+
 Not the principle — the principle is sound and I could not break it in the
-abstract. What is broken is the thing that was actually committed today. The
-`REF` trimmer, as specified in `hardware/bom.csv` and drawn in
-`hardware/module/breath-receive-stage.md`, cannot do the job it was added for,
-for three independent reasons that are checkable against this repo's own
-numbers without reaching a single vendor site:
+abstract. What is broken is the arrangement as it stands on disk:
 
-1. **Its range does not cover the sensor's own stated offset spread.** The page
-   states the pedestal spec as 0.152–0.378 V; nulling the top of that needs
-   **+0.817 V** at `REF`, and the BOM specifies **0 to ~+0.6 V**. A unit at the
-   top of its own spec cannot be nulled, and the residual at the jack
-   (0.13–0.54 V, **1.3–5.5 % of span**) lands inside the same band as the
-   original showstopper the trimmer replaced ("4–9 % of full scale standing at
-   the jack").
-2. **The trimmer's reference is `VREFOUT`** — the DAC8568's internal reference,
-   which ADR 0006 states twice is **disabled by default and enabled by a
-   firmware write at boot**. So the analog breath zero is now a function of a
-   DAC register, while `breath-receive-stage.md`, `digital-and-supervision.md`
-   and `firmware/README.md` each assert that breath is outside the DAC's scope
-   entirely. The DAC *channel* was deleted; the DAC *dependency* was not.
-3. **The presence comparator is broken for the second time by a change to this
-   node** — and the fix the repo proposes for it is broken too, by the bias
-   current of the comparator the BOM still specifies.
-
-And one framing failure that is not a circuit defect but is load-bearing for
-the whole arrangement: **"each authority can measure what it corrects" is true
-for firmware and false for the trimmer.** Firmware can measure roughly 90 % of
-the analog path's zero error — it shares the sensor — and it is the only thing
-in the design that measures it more than once. The trimmer measures nothing; a
-technician's meter measured once, cold, at a temperature the instrument spends
-most of its life away from.
+1. **§1 CLOSED mid-review — the trimmer's range did not cover the sensor's own stated
+   offset spread.** The page states the pedestal spec as 0.152–0.378 V; nulling
+   the top needs **+0.817 V**, and the range was **0 to ~+0.6 V**. A unit at the
+   top of its own spec could not be nulled, leaving **1.3–5.5 % of span** standing
+   at the jack — inside the same band as the original showstopper the trimmer
+   replaced ("4–9 % of full scale"). **Now corrected to 0 → +1.0 V in both
+   `breath-receive-stage.md` and `hardware/bom.csv`, mid-review. §1 is CLOSED**
+   — the arithmetic is kept below because it is what sets the range, and because
+   one clause of it is still wrong (the new row's "+1.0 V covers 0.458 V" uses
+   the raw gain and omits the bias-pair divider; it is **0.463 V**).
+2. **§2 HALF-FIXED, with a live remainder — the breath jack still depends on a
+   DAC register.** The trimmer was specified "from `VREFOUT`", the DAC8568's
+   internal reference, which ADR 0006 states twice is **disabled until firmware
+   writes an enable**. ADR 0003 and the BOM have since moved it to the LM317
+   5.21 V rail. **The schematic still draws "from VREFOUT"** — on a page that
+   declares "**where it disagrees with ADR 0003's prose, this page wins**". And
+   the remainder is untouched: the same page nominates *"the buffered `VREFOUT`
+   created for pitch"* as the downstream **`OFFSET`** reference, which puts the
+   breath jack's resting position back on the same disabled-at-boot register by
+   a different route — with a larger step (§2b).
+3. **§3 LIVE — the presence comparator is broken for the second time by a change
+   to this node, its diagnosis in the repo is wrong, and the fix the BOM has
+   already adopted is broken too** — by the bias current of the comparator the
+   BOM still specifies, and by a CMRR cost this design's own framework forbids.
+   As written it reads "absent" always, which disables the level shifter's `OE`
+   and takes every CV output with it.
+4. **§4 LIVE — a framing failure that is load-bearing.** "Each authority can
+   measure what it corrects" is true for firmware and **false for the trimmer**.
+   Firmware can measure roughly 90 % of the analog path's zero error — it shares
+   the sensor — and it is the only thing in the design that measures it more than
+   once. The trimmer measures nothing; a technician's meter measured once, cold,
+   at a temperature the instrument spends most of its life away from.
 
 ---
 
@@ -106,7 +120,14 @@ in this document depends on an unreachable datasheet.**
 
 ---
 
-## §1 — BREAK: the trimmer cannot null the sensor it is for
+## §1 — CLOSED during this review: the trimmer could not null the sensor it is for
+
+**Status: corrected in `hardware/module/breath-receive-stage.md` and in
+`hardware/bom.csv` while this document was being written, by a parallel
+reviewer, to the same range this arithmetic gives.** The working is kept in full
+because it is what sets the range, because one clause of the new BOM row is
+still wrong, and because two of the three defects in this section were **not**
+fixed.
 
 `[repo]` The page gives every term needed:
 
@@ -124,123 +145,169 @@ V_REF = G × V_ped × 0.98912
   V_ped = 0.378 V → 2.1848 × 0.378 × 0.98912 = 0.8169 V
 ```
 
-**Required range: 0.33 → 0.82 V. Specified range: 0 → ~+0.6 V**
-`[repo: hardware/bom.csv, TRIM-BREATH-ZERO]`. The trimmer covers pedestals up to
-0.278 V and stops. `[calc]` A unit at 0.378 V is left with
-0.8169 − 0.600 = **0.217 V standing at the in-amp output**, which the downstream
-0.6–2.5× turns into **0.130–0.542 V at the jack — 1.3 % to 5.5 % of the 9.94 V
-span**, permanently, into a VCA.
+**Required range: 0.33 → 0.82 V. Range as specified this morning: 0 → ~+0.6 V.**
+`[calc]` A unit at 0.378 V was left with 0.8169 − 0.600 = **0.217 V standing at
+the in-amp output**, which the downstream 0.6–2.5× turns into **0.130–0.542 V at
+the jack — 1.3 % to 5.5 % of the 9.94 V span**, permanently, into a VCA. The
+showstopper this trimmer replaced was described as leaving "4–9 % of full scale
+standing at the jack at rest" `[repo]`. **The replacement reproduced the bottom
+two-thirds of the defect it was introduced to remove.**
 
-The original showstopper this trimmer replaced was described as leaving "4–9 %
-of full scale standing at the jack at rest" `[repo]`. **The replacement
-reproduces the bottom two-thirds of the defect it was introduced to remove**,
-for any unit near the top of its own specified offset.
+Both `breath-receive-stage.md` and `hardware/bom.csv` now read **0 → +1.0 V**
+with the band given as 0.332–0.826 V `[repo, verified on disk]` — the same
+conclusion, reached independently. **Closed.**
 
-**Second defect in the same row, and it is the honesty marker inverted.** The
-page justifies deleting the polarity finding with: *"polarity is a non-issue
-because a trimmer goes both ways"* `[repo]`. **The specified trimmer does not go
-both ways.** Its range is 0 → +0.6 V — strictly one-sided, exactly like the
-unipolar DAC channel whose one-sidedness was the showstopper. It is in the
-*correct* one-sided direction only because the inputs were swapped, and the page
-itself records that the swap's original justification was deleted. So the swap is
-now load-bearing for the trimmer's polarity, and **the page does not say so**.
-If a future reader un-swaps the inputs on the grounds that the DAC reason is
-gone, the trimmer becomes wrong-direction and unable to null anything.
+`[calc]` One clause of the new BOM row is still wrong: *"+1.0V covers 0.458V
+with margin"*. The pedestal a 1.0 V ceiling can null is
+1.0 / (2.1848 × 0.98912) = **0.4627 V**, not 0.458 V — the 0.458 figure omits
+the bias-pair divider, the same slip as the 0.437-vs-0.432 one below. The
+conclusion (comfortable margin over 0.378 V) is unaffected.
 
-**Third, smaller: the +0.437 V figure in the drawing is arithmetically
-inconsistent with the drawing's own gain derivation.** `[calc]`
-2.1848 × 0.200 = 0.43696 ≈ 0.437 V — the *raw* gain against the *undivided*
-pedestal. The same page derives an **effective** gain of 2.1611 two sections
-earlier and uses it for the span. Using it here gives **0.4322 V**. The 4.8 mV
-difference is small (2.9–12 mV at the jack) but it is 22 % of the entire thermal
-drift budget the design calls negligible, and it means the number in the
-schematic is not the number the trimmer will be set to. Anyone sizing the
-trimmer's divider from 0.437 V inherits the error.
+**Second defect in the same row, still live, and it is an honesty marker
+inverted.** The page justifies deleting the polarity finding with: *"polarity is
+a non-issue because a trimmer goes both ways"* `[repo]`. **The specified trimmer
+does not go both ways.** Its range is 0 → +1.0 V — strictly one-sided, exactly
+like the unipolar DAC channel whose one-sidedness was the showstopper. It is in
+the *correct* one-sided direction only because the inputs were swapped, and the
+page itself records that the swap's original justification was deleted. **The
+swap is now load-bearing for the trimmer's polarity, and the page does not say
+so.** A future reader who un-swaps the inputs on the grounds that the DAC reason
+is gone gets a trimmer that cannot null anything.
 
-**Fix:** specify the range as **0 to +1.0 V** (covers 0.82 V with margin and a
-4 % resolution penalty on a multiturn part), state the nominal as **0.432 V**,
-and record that the input swap is now a precondition for the trimmer's polarity.
+**Third, still live: the +0.437 V figure in the drawing is inconsistent with the
+drawing's own gain derivation.** `[calc]` 2.1848 × 0.200 = 0.43696 ≈ 0.437 V —
+the *raw* gain against the *undivided* pedestal. The same page derives an
+**effective** gain of 2.1611 two sections earlier and uses it for the span. Using
+it here gives **0.4322 V**. The 4.8 mV difference is small (2.9–12 mV at the
+jack) but it is 22 % of the entire thermal drift budget the design calls
+negligible, and it means the number in the schematic is not the number the
+trimmer will be set to. The corrected range band (0.332–0.826 V) carries the same
+error: `[calc]` with the effective gain it is 0.328–0.817 V.
 
----
+**Remaining fix:** update `hardware/bom.csv` row `TRIM-BREATH-ZERO` to
+0 → +1.0 V; state the nominal as **0.432 V** in both places; record that the
+input swap is now a precondition for the trimmer's polarity.
 
-## §2 — BREAK: breath is not outside the DAC's scope, and three files say it is
+## §2 — HALF-FIXED, with a live remainder: the breath jack still depends on a DAC register
 
-`[repo: hardware/bom.csv, TRIM-BREATH-ZERO]` — "**Range 0 to ~+0.6V from
-VREFOUT**".
+### 2a — The `REF` trimmer's reference: fixed in two documents, stale in the governing one
 
-`[repo: docs/decisions/0006-cv-channel-allocation.md]` — "**the internal
-reference is disabled by default** and needs an explicit enable write at boot …
-the outputs sit at 0 V from rack power-on until firmware enables the reference",
-and again under firmware defaults: "**Enable the DAC's internal reference
-explicitly at boot.** It is disabled by default. Nothing works until this write
-happens, and the failure looks like dead hardware."
+`[repo: hardware/bom.csv, TRIM-BREATH-ZERO — as it read this morning]` "Range
+0 to ~+0.6V **from VREFOUT**".
 
-So `V_REF` at the breath in-amp is **zero from rack power-on until the ESP32-S3
-has booted, the umbilical is up, and firmware has written one SPI register.**
+`[repo: docs/decisions/0006-cv-channel-allocation.md]` "**the internal reference
+is disabled by default** and needs an explicit enable write at boot … the outputs
+sit at 0 V from rack power-on until firmware enables the reference", and again
+under firmware defaults: "**Enable the DAC's internal reference explicitly at
+boot.** It is disabled by default. Nothing works until this write happens, and
+the failure looks like dead hardware."
 
-`[calc]` With `V_REF = 0` and a live instrument at rest:
-in-amp output = −2.1611 × 0.200 = **−0.432 V**; through the inverting downstream
-0.6–2.5× the jack sits at **+0.26 V to +1.08 V** — **2.6 % to 10.9 % of span,
-into a VCA**, for the whole boot window, and **indefinitely** if firmware fails
-to boot, is rolled back by `CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE`, or is sitting
-in download mode on the recovery header.
+`[calc]` With `V_REF = 0` and a live instrument at rest: in-amp output
+= −2.1611 × 0.200 = **−0.432 V**; through the inverting downstream 0.6–2.5× the
+jack sits at **+0.26 V to +1.08 V** — **2.6 % to 10.9 % of span, into a VCA** —
+for the whole boot window, and **indefinitely** if firmware fails to boot, is
+rolled back by `CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE`, or sits in download mode
+on the recovery header.
 
-This contradicts, directly, three separate statements in the repo:
+**Status: corrected during this review** in `docs/decisions/0003-breath-sensing-path.md`
+("**That trimmer is referenced to the LM317's 5.21 V rail, deliberately, and not
+to the DAC's `VREFOUT`**") and in `hardware/bom.csv` ("FROM THE LM317'S 5.21V,
+NOT VREFOUT"). Both verified on disk. **That is the right fix** — it is the one
+this review would have recommended, and the LM317 rail is up whenever +12 V is.
 
-| Statement | File |
-|---|---|
-| "now that `REF` carries a trimmer rather than a DAC channel, `CLR` touches the breath stage in no way at all" | `hardware/module/digital-and-supervision.md` |
-| "**Breath is outside all of this.** … no DAC register touches the breath jack at all" | `firmware/README.md` |
-| "**Breath \| 0 V \|** The receiver's differential pulldown holds it there" (power-on table) | `docs/decisions/0006-cv-channel-allocation.md` |
+**But the schematic still says `from VREFOUT`** `[repo:
+hardware/module/breath-receive-stage.md:54, verified on disk]` — and that page
+opens with: *"Where it disagrees with ADR 0003's prose, **this page wins** and
+the ADR gets corrected."* **By the project's own precedence rule, the stale
+drawing beats the corrected ADR and the corrected BOM.** This is not pedantry:
+the whole page exists because "two expert reviewers built two *different*
+schematics from the same ADR prose", and the remedy adopted was to make the
+drawing authoritative. A drawing that is authoritative and wrong is worse than
+prose that is wrong.
+
+**Two consequences worth recording against the new reference, neither fatal:**
+
+- `[calc]` The LM317 rail's own value is **deliberately unspecified and
+  bench-selected per unit**: `[repo: hardware/bom.csv, R-REG-SET]` "R2 is
+  **SELECTED ON THE BENCH at E7** (this is a population of one), and the value
+  here is the starting point", because E7 picks it from where the DAC's top codes
+  compress. So **the breath zero's reference is set at E7 and the breath zero is
+  trimmed at commissioning — and nothing states the order.** If the rail is moved
+  by 100 mV after the trim, `V_REF` moves by 100 mV × (0.432/5.21) = **8.3 mV**,
+  i.e. 5–21 mV at the jack. Small, but it is a free error: **add "after
+  `R-REG-SET` is selected" to the commissioning procedure.**
+- `[calc]` Load regulation is a non-issue and I could not make it one. The DAC's
+  AVDD current swing is a couple of mA against the LM317's rating; at ~0.1 %
+  load regulation over a full-scale load change the rail moves well under 1 mV
+  for that swing, → under 0.1 mV at `REF`. **Concede.**
+
+### 2b — The live remainder: the `OFFSET` knob's reference is still `VREFOUT`
+
+`[repo: hardware/module/breath-receive-stage.md, §Still open, verified on disk]`
+— *"its offset reference (**the buffered `VREFOUT` created for pitch** is the
+obvious node)"*.
+
+**Moving the trimmer off `VREFOUT` while leaving the `OFFSET` injection on it
+does not remove the DAC dependency. It moves it to the larger term.** The
+trimmer contributes 0.432 V at the in-amp. The `OFFSET` knob positions the jack's
+**floor across the usable span** — ADR 0006 defaults breath to 0–8 V with bipolar
+opt-in, so the offset term is volts, not hundreds of millivolts.
+
+`[calc]` If the offset reference is zero until firmware enables `VREFOUT`, then
+at every rack power-on, for the whole ESP32-S3 boot window, **the breath jack
+rests at the gain path's output (≈0 V) instead of wherever the player parked the
+floor** — and steps to the parked position when the enable write lands. For a
+player who has set the floor at +2 V, that is a **2 V step on the breath CV at
+every boot**; for a bipolar patch parked at −5 V, a **5 V step**. Into a VCA, or
+into whatever the breath CV is patched to. That is an order of magnitude larger
+than the 0.26–1.08 V that 2a was about.
+
+And it reopens the watchdog question that `digital-and-supervision.md` and
+`firmware/README.md` both declare settled. `[from memory: on the DAC8568 I
+believe the hardware `CLR` pin loads the clear-code value into the DAC registers
+and does not touch the reference-setup register, while a **software** reset does
+clear it — unverified, ti.com is blocked]`. **Gate:** if `CLR` or a software
+reset clears the reference-setup register, every watchdog event steps the breath
+jack by the parked offset. If it does not, the defect is confined to power-on
+and firmware-not-running — which still falsifies all three of these:
+
+| Statement | File | Verified on disk |
+|---|---|---|
+| "now that `REF` carries a trimmer rather than a DAC channel, `CLR` touches the breath stage in no way at all" | `hardware/module/digital-and-supervision.md` | still present |
+| "**Breath is outside all of this.** … no DAC register touches the breath jack at all" | `firmware/README.md` | still present |
+| "**Breath \| 0 V \|** The receiver's differential pulldown holds it there" (power-on table) | `docs/decisions/0006-cv-channel-allocation.md:158` | still present |
 
 The third row is stale twice over: the differential pulldown was **deleted**
 (replaced by the R4/R5 common-mode bias return `[repo: breath-receive-stage.md]`),
 and the value is wrong.
 
-**It is worse than a boot transient.** `firmware/README.md` itself names the
-class: *"The same shape of bug is latent in every other register the DAC holds
-that firmware writes once: **the internal-reference enable**, and the clear-code
-register itself."* The breath analog zero has just been hung on precisely that
-register. Whether a hardware `CLR` pulse also clears the reference-setup
-register is a DAC8568 question `[from memory: I believe hardware CLR loads the
-clear-code value into the DAC registers and does not touch the reference-setup
-register, while a software reset does clear it — unverified, ti.com is blocked]`.
-**Gate:** if `CLR` or a software reset clears the reference-setup register, then
-every watchdog event steps the breath jack by 0.26–1.08 V and the "the watchdog
-does not touch breath" claim is false in the running instrument, not just at
-boot. If it does not, the defect is confined to the power-on and
-firmware-not-running windows — which is still a contradiction of all three
-statements above.
+`firmware/README.md` itself names the class: *"The same shape of bug is latent in
+every other register the DAC holds that firmware writes once: **the
+internal-reference enable**, and the clear-code register itself."* The breath
+jack's floor is still hung on precisely that register.
 
-**This is the same failure the cold review already resolved once.**
+**And this is the failure the cold review already resolved once.**
 `[repo: docs/review/2026-09-20-cold-review/verification/V4-fix-conflicts.md, C1]`
 found that hanging power-on-critical DC on `VREFOUT` parks a channel wrong
-because the reference is off at reset, and recommended a series REF5025 instead.
-Today's change hangs a different power-on-critical DC on the same node.
+because the reference is off at reset, and recommended a series REF5025.
 
-**And the reason `VREFOUT` is right for pitch is the reason it is wrong for
-breath.** `[repo: hardware/module/pitch-stage.md]`: for pitch,
+**Why `VREFOUT` is right for pitch and wrong for breath — the asymmetry nobody
+states.** `[repo: hardware/module/pitch-stage.md]`: for pitch,
 `Vout = 2·Vdac(1+δ) − 2.500(1+δ) = (1+δ)(2·Vdac − 2.500)` — a reference drift
-becomes a **pure gain error** because both terms ride the same reference. At the
-breath in-amp, the term being nulled (the sensor pedestal) is ratiometric to the
-**REF5050**, and the nulling term is ratiometric to **`VREFOUT`**. They are two
-different references, so there is no cancellation and `VREFOUT` error appears as
-**pure offset**. The BOM row reused the node without reusing the reasoning.
+becomes a **pure gain error** because both terms ride the same reference. On the
+breath channel the signal is ratiometric to the **REF5050** and the offset term
+would be ratiometric to **`VREFOUT`**: two different references, no cancellation,
+so `VREFOUT` error appears as **pure offset**. Whoever nominated the node reused
+it without reusing the reasoning.
 
-`[calc]` In fairness, the *drift* is negligible: `VREFOUT` at 5 ppm/°C over 20 K
-= 2.5 × 5e-6 × 20 = 250 µV, scaled by 0.432/2.5 = **43 µV at `REF`**. REF5050 at
-3 ppm/°C contributes less. **The problem is the reference's absence, not its
-drift.**
+`[calc]` In fairness the *drift* is negligible either way: `VREFOUT` at
+5 ppm/°C over 20 K = 2.5 × 5e-6 × 20 = 250 µV; scaled by 0.432/2.5 that is
+**43 µV** at `REF`. **The problem is the reference's absence, not its drift.**
 
-**Fix (cheap, and it fixes §1 at the same time):** derive `TRIM-BREATH-ZERO`
-from a source that is alive with the rails and independent of firmware — the
-LM317's 5.21 V through a fixed divider, or better a small series reference. A
-0–1.0 V span off 5.21 V is a 5.2:1 divider; the trimmer's own ~100 ppm/K is a
-*ratio* within the divider and largely cancels. Zero op-amp halves added; one
-resistor changed. **Then** `firmware/README.md`'s claim becomes true, and it is
-not true today.
-
----
+**Fix:** (i) correct `breath-receive-stage.md:54` to the LM317 rail; (ii) rule
+out `VREFOUT` for the downstream `OFFSET` reference in the same sentence that
+currently nominates it, and specify the LM317 rail or a series reference there
+too. Only then is `firmware/README.md`'s claim true. It is not true today.
 
 ## §3 — BREAK: the presence comparator, broken a second time, and the proposed fix is broken too
 
@@ -330,11 +397,18 @@ threshold = V_REF/2 − 50 mV      (a 2:1 divider off the trim buffer, plus a sm
 
 `[calc]` It self-centres on whatever the trim was set to — alive ≈ 0 V, unplugged
 = `V_REF`, threshold always midway — so it survives §1's unit-to-unit spread
-(`V_REF` = 0.33 → 0.82 V) with no re-tuning. And it **degrades correctly through
-§2**: if `VREFOUT` is off, `V_REF` = 0, threshold = −50 mV, alive = −0.432 V
-(below → "alive", correct), unplugged = 0 V (above → "absent", correct). One
-divider and one resistor. The threshold is positive in normal operation, so the
-negative reference is still not needed.
+(`V_REF` = 0.33 → 0.82 V) with no re-tuning, which a fixed +100 mV threshold does
+not. Blowing drives the output negative, still below threshold, still "alive". A
+dead sensor, a dead REF5050, a dead buffer or a shorted conductor all collapse
+the differential to zero → output = `V_REF` → "absent", correctly. One divider
+and one resistor, on a low-impedance node. The threshold is positive in normal
+operation, so the negative reference is still not needed.
+
+`[calc]` The −50 mV term is not cosmetic: it is what makes the detector degrade
+correctly if `V_REF` is ever lost (§2a's failure mode, now fixed for `REF` but
+still live for the `OFFSET` reference). With `V_REF` = 0: threshold = −50 mV,
+alive = −0.432 V (below → "alive", correct), unplugged = 0 V (above → "absent",
+correct). Without it the two states meet at zero and the detector is ambiguous.
 
 **Third: the specified `R-PRESENCE` values do not produce the threshold the row
 asks for, on any rail in the module.** `[repo]` "100k / 10k / 1M", threshold
@@ -877,44 +951,48 @@ other things are:
 
 ---
 
-## §10 — Staleness sweep: five places still say `REF` is grounded
+## §10 — Staleness sweep: every file was re-checked on disk at the end of the pass
 
-The trimmer went in today. The claim it replaced did not come out:
+The trimmer went in this morning. Parts of the claim it replaced are still there,
+and the corrections that landed mid-review landed unevenly. **Verified against
+the working tree, not from memory of an earlier read:**
 
-| File | Text |
-|---|---|
-| `hardware/module/breath-receive-stage.md:68` | section heading "**`REF` ties to ground**, and the polarity question dissolved twice" — on the page that introduces the trimmer, 28 lines above the section explaining why it is *not* grounded |
-| `hardware/module/breath-receive-stage.md:223` | "now that `REF` is **grounded** it touches the breath stage in no way at all" — **same file contradicts itself**, and it is the watchdog-scope argument (§2) |
-| `docs/decisions/0003-breath-sensing-path.md:370` | "That mechanism is deleted; `REF` **ties to module analog ground**" |
-| `docs/decisions/0003-breath-sensing-path.md:574` | "the in-amp's `REF` pin **ties to module analog ground and stays there**" |
-| `firmware/README.md:67` | "since the in-amp's `REF` pin is **grounded** rather than driven by a firmware zero (ADR 0003), no DAC register touches the breath jack at all" — **and §2 shows this sentence is now false twice over** |
-| `hardware/bom.csv:28` (`U-DIFFRX`) | "**REF ties HARD to module AGND - no divider**" — the same CSV's row 108 specifies a trimmer plus divider into a buffer on that pin |
+| File | Text | State |
+|---|---|---|
+| `hardware/module/breath-receive-stage.md:68` | section heading "**`REF` ties to ground**, and the polarity question dissolved twice" — on the page that introduces the trimmer, 34 lines above the section titled "Why `REF` is trimmed rather than grounded" | **still present** |
+| `hardware/module/breath-receive-stage.md:223` | "now that `REF` is **grounded** it touches the breath stage in no way at all" — **same file contradicts itself**, and it is the watchdog-scope argument (§2b) | **still present** |
+| `hardware/module/breath-receive-stage.md:54` | trimmer drawn "**from VREFOUT**" after ADR 0003 and the BOM moved it to the LM317 rail — on the page that declares itself authoritative over the ADR | **still present** (§2a) |
+| `hardware/module/breath-receive-stage.md:~234` | downstream `OFFSET` reference nominated as "the buffered `VREFOUT` created for pitch" | **still present** (§2b, §5) |
+| `firmware/README.md:70` | "since the in-amp's `REF` pin is **grounded** rather than driven by a firmware zero (ADR 0003), no DAC register touches the breath jack at all" — **false twice over** per §2b | **still present** |
+| `hardware/bom.csv`, `U-DIFFRX` | "**REF ties HARD to module AGND - no divider**" — the same CSV's `TRIM-BREATH-ZERO` row specifies a trimmer plus divider into a buffer on that pin | **still present** |
+| `hardware/bom.csv`, `TRIM-BREATH-ZERO` | range, and the `VREFOUT` reference | **corrected mid-review** ✓ (§1, §2a) |
+| `docs/decisions/0006-cv-channel-allocation.md:158` | power-on table: "**Breath \| 0 V \|** The receiver's differential pulldown holds it there" — the pulldown was deleted, and the value is wrong | **still present** |
+| `hardware/module/digital-and-supervision.md` | "the BOM's `R-PRESENCE` note still describes the old −200 mV arrangement and is wrong" — the BOM was rewritten to the new tap; the schematic page has not noticed | **still present** (§3) |
+| `docs/decisions/0003-breath-sensing-path.md` | "`REF` ties to module analog ground" ×2 | **corrected mid-review** ✓ |
 
-`hardware/bom.csv` rows 28 and 108 are **directly contradictory rows in the same
-file**. Whichever is read first wins at layout.
+`hardware/bom.csv` rows `U-DIFFRX` and `TRIM-BREATH-ZERO` are **directly
+contradictory rows in the same file**. Whichever is read first wins at layout.
 
 **Two further internal inconsistencies found while checking:**
 
-- `[repo: hardware/bom.csv, U-OPA-PITCH]` claims "Twelve halves, **eleven used**"
-  and then lists ten: pitch, mod 1–4, mod offset buffer, breath gain, breath
-  offset, `VREFOUT` follower, breath `REF`-zero buffer. The count is off by one.
-  Separately, the BOM allocates **two** halves ("breath gain", "breath offset")
-  where `breath-receive-stage.md` draws **one** ("an inverting summer does gain
-  and offset with two pots into one virtual ground … ½ OPA2197"). The schematic's
-  single-half version is also the justification for the input swap, so this is not
-  a bookkeeping detail — and §5(a) raises the possibility that the gain wiper
-  needs a buffer, which would consume the claimed spare.
+- `[repo: hardware/bom.csv, U-OPA-PITCH]` claims "Twelve halves, **eleven
+  used**" and then lists ten: pitch, mod 1–4, mod offset buffer, breath gain,
+  breath offset, `VREFOUT` follower, breath `REF`-zero buffer. The count is off
+  by one. Separately, the BOM allocates **two** halves ("breath gain", "breath
+  offset") where `breath-receive-stage.md` draws **one** ("an inverting summer
+  does gain and offset with two pots into one virtual ground … ½ OPA2197"). The
+  schematic's single-half version is also the justification for the input swap,
+  so this is not bookkeeping — and §5(a) raises the possibility that the gain
+  wiper needs a buffer, which would consume the claimed spare.
 - `[repo: ADR 0003]` justifies firmware zeroing partly on *"sensor offset and
-  **atmospheric pressure** both drift"*. The MPXV4006DP is a **differential** part
-  with its reference port open to the cavity `[repo: ADR 0003, "the reference port
-  stays open to the cavity"]`, so barometric change appears on **both** faces of
-  the diaphragm and cancels. The atmospheric-drift justification is **not valid
-  for this part** — and it was not valid for the gauge variant either, for the
-  same reason. Only the *differential transient* between the tube and the cavity
-  (two leak paths, two time constants, §7b) is real. The stated reason is wrong;
-  the conclusion happens to survive on the other reason.
-
----
+  **atmospheric pressure** both drift"*. The MPXV4006DP is a **differential**
+  part with its reference port open to the cavity `[repo: ADR 0003, "the
+  reference port stays open to the cavity"]`, so barometric change appears on
+  **both** faces of the diaphragm and cancels. The atmospheric-drift
+  justification is **not valid for this part** — and it was not valid for the
+  gauge variant either, for the same reason. Only the *differential transient*
+  between the tube and the cavity (two leak paths, two time constants, §7b) is
+  real. The stated reason is wrong; the conclusion survives on the other reason.
 
 ## §11 — What survives, stated fairly
 
@@ -988,9 +1066,10 @@ That rule is legal only if the trimmer is genuinely fixed and genuinely
 sufficient — which requires, all four:
 
 1. **Range 0 → +1.0 V**, covering the sensor's own specified pedestal spread (§1).
-2. **A reference that is alive with the rails**, not `VREFOUT` (§2) — which is
-   also the only thing that makes `firmware/README.md`'s "no DAC register touches
-   the breath jack" true.
+2. **A reference that is alive with the rails**, not `VREFOUT` — for the trimmer
+   (done, §2a, except in the drawing) **and for the downstream `OFFSET`
+   injection** (not done, §2b). Both, or `firmware/README.md`'s "no DAC register
+   touches the breath jack" stays false.
 3. **Commissioned warm, at a named test point, with the body assembled** (§9).
 4. **Firmware reports the pre-gain zero error it already measures**, in span
    percent, with rate and total, so a drifting fixed null is *visible* without
@@ -1003,15 +1082,16 @@ sufficient — which requires, all four:
 
 | # | Action | Where | Severity |
 |---|---|---|---|
-| 1 | `TRIM-BREATH-ZERO` range **0 → +1.0 V**; nominal **0.432 V** not 0.437 V | `hardware/bom.csv` row 108, `breath-receive-stage.md` | **Showstopper** (§1) |
-| 2 | Move the trimmer's reference **off `VREFOUT`** to a firmware-independent source | `hardware/bom.csv` row 108 | **Showstopper** (§2) |
+| 1 | Rule `VREFOUT` **out** for the downstream `OFFSET` reference — it is still nominated there, and it puts a **volts-scale** step on the breath jack at every boot. This is the largest surviving defect | `breath-receive-stage.md` §Still open | **Showstopper** (§2b) |
+| 2 | Correct the schematic: `TRIM-BREATH-ZERO` is from the **LM317 5.21 V rail**, not `VREFOUT`. The page declares itself authoritative over the ADR, so the stale drawing currently wins | `breath-receive-stage.md:54` | **Showstopper** (§2a) |
+| 2b | Nominal is **0.432 V** not 0.437 V, and 1.0 V covers **0.463 V** of pedestal not 0.458 V — both omit the bias-pair divider the same page derives | `breath-receive-stage.md`, `hardware/bom.csv` | Low (§1) |
 | 3 | Correct `R-PRESENCE`: with 100k/10k the threshold is **0.47 V** against a 0.198 V signal — `OE` stays disabled and the whole module is dead at E7 | `hardware/bom.csv` row 100 | **Showstopper** (§3) |
 | 4 | Presence comparator: keep it on the **in-amp output**, threshold = **`V_REF`/2 − 50 mV** from the trim buffer. Do **not** tap the `IN−` node with an LM311 — Ib × 1 MΩ = 100–250 mV against a 198 mV signal, and the single-leg load costs ~39 dB of CMRR | `digital-and-supervision.md`, `hardware/bom.csv` rows 99–100 | **High** (§3) |
 | 5 | Resolve §0's fork the moment nxp.com is reachable; the 23 mV thermal claim and the trimmer range both depend on it | ADR 0003, `breath-receive-stage.md` | **High** (§0) |
 | 6 | Validate the power-on seed against a plausible-ambient window (**113–281 LSB**); fall back to NVS and say so | `firmware/README.md`, ADR 0006 | **High** (§7) |
 | 7 | Gate the auto-zero decay on **IMU stillness**, not the breath signal's own variance; band the estimator; clamp total and rate | ADR 0006 | **High** (§8) |
 | 8 | Publish the accumulated correction as **pre-gain error in span percent**, with rate — the replacement for the cross-check E10 removed | `firmware/README.md`, ADR 0006 | **High** (§6) |
-| 9 | Commission **warm**, at a named test point, body assembled | `breath-receive-stage.md` §Commissioning | Medium (§9) |
+| 9 | Commission **warm**, at a named test point, body assembled, **and after `R-REG-SET` is bench-selected at E7** | `breath-receive-stage.md` §Commissioning | Medium (§9) |
 | 10 | Specify σ_c, the window W and the decay τ as **numbers**. The rule is not currently a specification | ADR 0006 | Medium (§8) |
 | 11 | Write the downstream stage's decoupling requirement as a **constraint on E10** (gain ahead of the summing resistor; feedback-rheostat gain forbidden), not as an accomplished property | `breath-receive-stage.md` §Still open | Medium (§5) |
 | 12 | Take breath's `OFFSET` reference from raw buffered `VREFOUT`, **not** the pitch-trimmed node; state that `TRIM-BREATH-ZERO` must be wired as a constant-load potentiometer | `breath-receive-stage.md`, `hardware/bom.csv` | Medium (§5) |
@@ -1028,9 +1108,13 @@ sufficient — which requires, all four:
 Stated plainly, because the brief asks for it:
 
 - If `TRIM-BREATH-ZERO`'s range had been ≥ 0.82 V, its reference had been the
-  LM317 rail or a series reference, and the commissioning step had been "after a
-  twenty-minute warm-up, at `TP-BREATH-INAMP`", then §1, §2 and §9 all go away
-  and the trimmer is a genuine fixed null.
+  LM317 rail, the **`OFFSET` knob's reference had been ruled off `VREFOUT` in
+  the same breath**, and the commissioning step had been "after a twenty-minute
+  warm-up, at `TP-BREATH-INAMP`, after E7 selects `R-REG-SET`", then §1, §2 and
+  §9 all go away and the trimmer is a genuine fixed null. **Three of those four
+  were done during this review, by a parallel reviewer, in one document each.
+  The fourth — the `OFFSET` reference — is untouched, and it is the one with a
+  volts-scale consequence.**
 - If the table had said *"one **adjustable** zero authority per representation;
   `TRIM-BREATH-ZERO` is a fixed pre-gain null, not an authority"* — which is the
   language V4's C1 already demanded for pitch — §4 becomes a naming quibble
@@ -1045,4 +1129,6 @@ Stated plainly, because the brief asks for it:
 
 **None of those is expensive.** Three are one line of text and two are a resistor
 value. The arrangement is one honest revision away from surviving, and today it
-does not.
+does not — and the churn this document had to be re-verified against is itself
+the argument for finishing the propagation rather than fixing each claim in
+whichever file the reviewer happened to be reading.

@@ -97,23 +97,29 @@ The breath receiver already reports everything, for free:
 
 | State | In-amp output |
 |---|---|
-| Cable unplugged | R4/R5 pull both inputs to `AGND` → **0 V** |
-| Instrument alive | `REF` trim nulls the pedestal → **0 V**… |
+| Cable unplugged | R4/R5 pull both inputs to `AGND` → **`V_REF` ≈ +0.437 V** |
+| Instrument alive | `REF` trim nulls the pedestal → **0 V** |
 
-**— and that is a problem this drawing created.** Grounding `REF` gave a clean
-0 V / −437 mV split. Now that `TRIM-BREATH-ZERO` nulls the pedestal
-(`breath-receive-stage.md`), *both* states sit at 0 V and the detect stops
-working.
+**Threshold at `V_REF`/2, taken off the trim buffer itself.** That is the whole
+circuit, and it **self-centres**: both ends of the table scale with the trimmer,
+so a sensor anywhere in its 0.152–0.378 V pedestal band gives the same relative
+split without anyone re-picking a number. It also degrades correctly — if the
+reference dies, the threshold goes with it and the detect reads "absent".
 
-**Take the comparator from ahead of the `REF` trim instead** — the in-amp's raw
-difference, before the trim is summed in — or equivalently sense the sensor's
-+0.2 V pedestal at the module end of the `BREATH` conductor directly against
-`AGND`, through the existing 10 kΩ protection resistors. Unplugged that node is
-at 0 V (pulled by R4/R5); alive it is at +0.2 V. Threshold +100 mV, positive,
-which also removes the need for a negative reference the earlier version wanted.
+**Two earlier versions of this paragraph were wrong, and the second was worse
+than the first.** The first sensed the output against a fixed −200 mV, which
+worked only while `REF` was grounded. The second claimed the trimmer had put
+*both* states at 0 V and moved the tap onto the in-amp's input node. Both
+claims were wrong: the states are 437 mV apart with the **sense inverted**, not
+collapsed — it needed a threshold change, not a new tap. And tapping an input
+node is this design's cardinal sin twice over:
 
-That is the simpler circuit and it survives the trim. **The BOM's
-`R-PRESENCE` note still describes the old −200 mV arrangement and is wrong.**
+- **It loads one input leg.** Holding 60 dB of CMRR needs the tap to present
+  ≥ 9.75 MΩ; a 100 kΩ network gives **21 dB**.
+- **Comparator bias current lands on the 1 MΩ bias pair.** 100–250 nA × 1 MΩ is
+  **100–250 mV** against a 198 mV discriminating signal — it would have read
+  "present" with nothing plugged in, which is the exact fault the detector
+  exists to catch.
 
 **The LM311 and not an LM393**, which the BOM originally specified: an LM393
 cannot see an input below its own V−, and on a split supply its open-collector

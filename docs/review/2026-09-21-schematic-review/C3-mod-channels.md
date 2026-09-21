@@ -14,27 +14,39 @@ Cold review, 2026-09-21. Subject: `hardware/module/mod-channels.md`, with
   a `[datasheet]` marker, because no datasheet was reachable.** Every
   conclusion that depends on a device parameter is gated and says so.
 
+## Note on document state
+
+`hardware/module/mod-channels.md`, `hardware/bom.csv`, `docs/decisions/0006-cv-channel-allocation.md`
+and `firmware/README.md` were all edited **during** this review. Everything below
+is written against the state on disk at the end of it. Three findings were
+resolved while the review was in progress and are recorded in
+"What was fixed mid-review" at the end rather than deleted, so the author can see
+they were checked. Two new findings (**C3-19**, **C3-20**) appeared in the edits
+themselves.
+
 ## Severity table
 
 | # | Severity | Finding |
 |---|---|---|
-| **C3-1** | **Critical** | The page documents **two different circuits**. Diagram and top prose are the two-resistor `k = 3` / 3.3333 V form; the **Values table, the tolerance table, the `CLR` arithmetic and the buffer-load section are the superseded four-resistor 40.2 kΩ / 2.500 V design, unchanged**. Building from the page's own parts table against the page's own diagram gives gain 5.02 and clips both rails. |
-| **C3-2** | **Critical** | `hardware/bom.csv` `R-MODGAIN` has **`qty` = 16** while its own note says "EIGHT, not sixteen", and one row carries two different values (10 k and 30 k) with one quantity. The row cannot be ordered from. |
 | **C3-3** | **Major** | **The 1 kΩ output resistor is an uncompensated divider against the destination.** −0.99 % into 100 kΩ, −4.76 % into 20 kΩ. This is precisely the error the pitch stage was redrawn *today* to eliminate with jack-side feedback. The mod page does not mention it, and it dominates the V/oct answer the page gives. |
-| **C3-4** | **Major** | The tolerance section — the part of the page that presents itself as the rigorous one — reports **the old circuit's numbers**. Correct values for the drawn circuit are **zero ±50.5 mV** (page: ±81 mV) and **span 19.703–20.303 V** (page: 19.70–20.51 V). The page understates its own improvement while appearing exact. |
-| **C3-5** | **Major** | `82 nF C0G` is carried on the page with no caveat, while the project's own BOM row for the same part says the package is **probably wrong and unverifiable**. The page is behind the BOM on a part that has no confirmed source. |
+| **C3-4** | **Major** | The tolerance section — the part of the page that presents itself as the rigorous one — still reports **the four-resistor circuit's numbers**. Correct values for the drawn circuit are **zero ±50.5 mV** (page: ±81 mV) and **span 19.703–20.303 V** (page: 19.70–20.51 V). The page understates its own improvement while appearing exact. |
+| **C3-1** | **Major** | The Values table was corrected mid-review, but **four sections below it are still the superseded four-resistor 40.2 kΩ / 2.500 V design**: the tolerance table, the "On the range" line, the whole `CLR` section (gain 4.02, three times) and the buffer-load section. |
+| **C3-5** | **Major** | `82 nF C0G` is carried on the page with no package, no voltage rating and no caveat, while the project's own BOM row for the same part says the package is **probably wrong and unverifiable**. The page is behind its own BOM on the one part with no confirmed source. |
 | **C3-6** | **Major** | **No defined state on the op-amp (+) inputs or on the shared `V_ref` node** if the DAC is unpowered or high-Z while ±12 V is up. Four jacks indeterminate to the op-amp rails. Needs a pulldown, and its **placement is the whole finding**. |
+| **C3-19** | **Moderate** | **NEW.** The page still says the safe clear is a property of an "**A/C-grade** DAC8568". ADR 0006 was corrected today to say **C only** — the grade letter also selects reference gain — and `bom.csv` is grade-locked. **This page is now the last document in the repo still saying A is acceptable**, and it is the page the safe-state argument lives on. |
 | **C3-7** | **Moderate** | **Refresh order / `LDAC` is unspecified.** A non-atomic six-channel refresh drives the mod jacks to `4 × Vdac` (clipping, ~+11.5 V) for the duration of every pass if the signal channels land before channel 7. |
 | **C3-8** | **Moderate** | `R-OUT-PROT` at 250 mW does **not** survive output-to-output patching, which its own BOM note claims it does: **274 mW** against a 220 Ω output, **493 mW** against a stiff one. |
 | **C3-9** | **Moderate** | The buffer-load model is **wrong in kind**, not just in value. The far end of each `R1` sits at `Vdac`, not at ground; the load is bidirectional and signal-dependent (**+1.333 mA to −0.667 mA**), not a static 1 mA. |
 | **C3-10** | **Moderate** | **30.000 kΩ is an E24 value and is not in E96.** An exact 3:1 ratio does not exist in E96 at all. "Exactly ±10.000 V" is contingent on a procurement fact the page never states. |
+| **C3-20** | **Moderate** | **NEW, introduced by the mid-review edit.** The parenthesis opened at *"(The four-resistor version this replaced…"* is **never closed**. It swallows the `R-OPAMP-IN` trap, the entire tolerance analysis and the range note into what reads as a footnote about a superseded circuit — and takes an unterminated `*` with it. |
 | **C3-11** | **Minor** | "Exactly ±10.000 V" and "Exactly 0 V" on `CLR` are both overclaims: **+9.99969 V** at the top code, and the `CLR` park is **1× the DAC's zero-code error**, where the superseded four-resistor version cancelled it to zero. A small, unstated regression. |
 | **C3-12** | **Minor** | The closing "**strictly better**" recommendation for the inverting alternative is not supported, and the page credits the wrong cause for hitting ±10.000 V. |
 | **C3-13** | **Minor** | The shared reference is a **single point of failure for four of six jacks**. The page presents the shared node only as an advantage. |
 | **C3-14** | **Minor** | "less two Schottky drops" — the mechanism is wrong. One Schottky per rail, and the BAV99 clamps are silicon, to the rails, out of the signal path. |
 | **C3-15** | **Minor** | "One matching requirement instead of two" is true by count and misleading in substance. |
-| **C3-16** | **Minor** | Cross-document drift: `firmware/README.md` still says 2.5 V; ADR 0006 calls the mods "Trimmed" with no trimmer; `R-PRECISION`'s note claims two spare LT5400 sections can build a 1:3, which is arithmetically impossible. |
-| **C3-17** | **Minor** | `10/3 V` is **not exactly representable**. The residual is harmless (76 µV, common to all four), but the page writes a truncated decimal where it should write a code. |
+| **C3-16** | **Minor** | Remaining cross-document drift: ADR 0006 still calls the mod offset *"written once at boot"* — **the exact behaviour the statelessness rule exists to forbid** — and still says "2.5 V reference point" in its topology bullet; its channel table calls the mods "Trimmed" with no trimmer. |
+| **C3-2** | **Minor** | `R-MODGAIN` is one BOM row carrying two values (10 k and 30 k) under one quantity and one package. Orderable only by reading the note. *(The qty = 16 error was fixed mid-review — see below.)* |
+| **C3-17** | **Minor** | `10/3 V` is **not exactly representable**. The residual is harmless (76 µV, common to all four), but the page writes a truncated decimal where it should write a code — and then claims that decimal gives an intercept of "10.000 V", which it does not. |
 | **C3-18** | **Minor** | Layout note for E9: four 82 nF at the jack field dump **1.64 µC** into AGND on a full-scale step, next to the pitch jack, whose feedback is now tapped at that jack. |
 
 ---
@@ -118,54 +130,32 @@ nominal endpoints are **−10.00008 V and +9.99962 V**, before any tolerance.
 
 ---
 
-## C3-1 (Critical) — the page describes two circuits
+## C3-1 (Major) — four sections still describe the circuit this replaced
 
-This is the finding that subsumes several others. The redraw was applied to the
-diagram and to the top three sections. **Everything from "## Values" down was
-left as it was.**
+**Partly fixed mid-review.** The Values table now reads `R1` 10 kΩ, `R2` 30 kΩ,
+`V_ref` 3.3333 V `[repo: mod-channels.md]`. That closes the worst of it: the
+build-from-the-parts-table hazard is gone. `[calc]` For the record, what it was
+— stuffing the table's old 40.2 kΩ into the drawn two-resistor topology with the
+drawn 3.3333 V reference gives `k = 4.02`, `gain = 5.02`, and
+`Vout(0) = −13.40 V` / `Vout(5) = +11.70 V`: **both rails clipped on all four
+channels**, from a board built exactly as the page specified.
 
-What the page says, in the same document `[repo: mod-channels.md]`:
+**Four sections below the table were not updated and still describe the
+four-resistor 40.2 kΩ / 2.500 V design** `[repo: mod-channels.md]`:
 
-| Quantity | Diagram + top prose | "Values" table and below |
+| Section | What it still says | Should be |
 |---|---|---|
-| Topology | two-resistor non-inverting | four-resistor difference amp |
-| `R2` | **30 kΩ** (diagram) | **40.2 kΩ** (Values table, twice) |
-| `V_ref` | **3.3333 V** (diagram, twice) | **2.500 V** (`V_OFF` row, `CLR` section) |
-| Gain | **4** | **4.02** |
-| Jack range | **±10.000 V** | **±10.05 V** |
-| `CLR` arithmetic | `Vout = 0` | `Vout = 4.02 × (0 − 0) = 0 V` |
-| Stale-ch7 rail | — | `4.02 × Vdac ≈ +11.45 V` |
-| Tolerance corners | — | "all sixteen corners of four 1 % resistors" |
+| Values footnote | *"±10.05 V has 1.4 V of margin"*, *"less two Schottky drops"* | historical — but see C3-14, C3-20 |
+| **Tolerance** | *"all **sixteen** corners of **four** 1 % resistors"*, ±81 mV, 19.70–20.51 V, ±2 %, ±24 cents/octave | **four corners of two**, ±50.5 mV, 19.703–20.303 V, ±1.5 %, ±18 cents — **C3-4** |
+| "On the range" | *"**±10.05 V** uses the DAC's full 0–5 V span"* | ±10.000 V |
+| **`CLR` section** | `4.02 × (0 − 0)`, `4.02 × (0 − 2.5) = −10.05 V`, `4.02 × Vdac ≈ +11.45 V` | gain **4**, `−3 × 3.3333 = −10.000 V` — **and see C3-19** |
+| **Buffer section** | *"At **2.5 V** into 2.5 kΩ that is **1 mA**"* | 3.3333 V, and the model is wrong anyway — **C3-9** |
 
-The page carries a comparison table whose right-hand column says
-"**exactly ±10.000 V**" and whose row immediately below is a Values table
-saying "Gain 4.02, so the jack reaches **±10.05 V**". Both are bolded. They are
-four lines apart.
-
-**This is not cosmetic.** The Values table is the section a person stuffing the
-board reads — the page says so itself: *"It is written here because this is the
-page someone will read while stuffing the board."* `[repo]` Stuffing 40.2 kΩ
-into the drawn two-resistor topology, with the drawn 3.3333 V reference, gives
-`[calc]`:
-
-```
-k    = 40.2 / 10 = 4.02
-gain = 1 + k     = 5.02
-Vout = 5.02·Vdac − 4.02 × 3.3333
-
-  Vdac = 0 V → −13.40 V   (clips at the negative rail)
-  Vdac = 5 V → +11.70 V   (clips at the positive rail)
-```
-
-**Both rails clipped, on all four channels, from a board built exactly as this
-page's own parts table specifies.** The two errors do not cancel; they compound,
-because the redraw changed the reference in the direction that makes a too-large
-`k` worse.
-
-**Action.** Rewrite `## Values`, `## The offset is a DAC channel`, and
-`## One buffer, four loads` against the drawn circuit. Delete the "40.2 kΩ
-rather than 39 kΩ" paragraph entirely — it argues for a value the circuit no
-longer uses, on a gain the circuit no longer has.
+The tolerance table is the one that matters. It sits under a bolded heading
+**"Tolerance, done properly"**, it corrects a previous revision's arithmetic in
+detail, and every number in it is the wrong circuit's. `[calc]` It is also wrong
+in the direction of pessimism (C3-4), so nobody will catch it by the numbers
+looking bad.
 
 *Note in fairness:* every piece of arithmetic in those stale sections is
 **correct for the circuit it was written about**. Checked: the −196 mV
@@ -174,6 +164,82 @@ longer uses, on a gain the circuit no longer has.
 `[calc: 5 × 0.785156 × 5.02 − 10.05 = +9.6574 V]` ✓, the ±81 mV zero
 `[calc, below]` ✓, the 19.70–20.51 V span `[calc, below]` ✓. The defect is
 entirely that it is the wrong circuit's arithmetic, presented as this one's.
+
+---
+
+## C3-20 (Moderate) — the mid-review edit left an unclosed parenthesis
+
+`[repo: mod-channels.md]` The Values table is now followed by:
+
+```
+*(The four-resistor version this replaced used 40.2 kΩ against 10 kΩ, chosen
+because E24's 39 k would have given gain 3.90 …
+```
+
+**There is no closing `)` and no closing `*` before the next `##` heading.** The
+parenthesis opens immediately under the Values table and runs to the end of the
+section, swallowing:
+
+- the `R-OPAMP-IN` trap explanation,
+- **the entire tolerance analysis**,
+- the "On the range" clarification.
+
+Two consequences. Typographically, the unterminated `*` will either italicise
+the rest of the section or leave a stray asterisk, depending on renderer.
+Substantively — and this is the real problem — **the page's tolerance analysis
+now reads as a parenthetical footnote about a superseded circuit.** Which, by
+C3-4, is exactly what it currently is. The formatting accident is telling the
+truth and the prose is not.
+
+**Action.** Close the parenthesis after *"±10.05 V has 1.4 V of margin"* and pull
+the `R-OPAMP-IN`, tolerance and range material back out to top level, where the
+first two belong (the tolerance section is about the *drawn* circuit once C3-4
+is applied).
+
+---
+
+## C3-19 (Moderate) — "A/C-grade" is now contradicted by every other document
+
+`[repo: mod-channels.md]` The safe-state section still opens:
+
+> *"On a watchdog `CLR`, an **A/C-grade** DAC8568 clears every channel to zero
+> scale (ADR 0006)."*
+
+`[repo: 0006]` ADR 0006 was corrected today and now says the opposite, in bold:
+
+> *"**Not "A or C", which this line used to say.** The grade letter selects the
+> **reference gain** as well as the reset state: A/B are gain 1 (2.500 V full
+> scale) and C/D are gain 2 (5.000 V). … Only C satisfies both requirements."*
+
+`[repo: bom.csv]` `U-DAC` is `DAC8568CIPW`, *"GRADE LOCKED TO C"*.
+
+**`mod-channels.md` is now the only document in the repository still saying an
+A-grade part would do**, and it is the page the whole safe-state argument lives
+on — the page that says of itself *"this is the page someone will read while
+stuffing the board."*
+
+`[calc]` What an A-grade part actually does to **this** stage, which no document
+currently states correctly:
+
+- Full scale becomes 2.500 V, so `Vdac ∈ [0, 2.5]` and channel 7 tops out at
+  2.500 V — **it cannot reach 3.3333 V at all.**
+- If firmware targets the *voltage* 3.3333 V, channel 7 saturates at 2.500 V:
+  `Vout = 4·Vdac − 3×2.5 = 4·Vdac − 7.5` → **−7.500 … +2.500 V.** Wrong span
+  *and* grossly asymmetric; the bipolar window ADR 0006 fought for is gone and
+  firmware cannot recover it.
+- If firmware targets the *code* (43691 regardless of full scale), everything
+  halves: `V_ref = 1.66667 V`, `Vout = 4·Vdac − 5` → **±5 V.** This is the ±5 V
+  ADR 0006 quotes.
+
+Both outcomes are unacceptable and the BOM lock is the right protection. **But
+note the second one:** ADR 0006's "the mods ±5 V" figure is only reachable if
+firmware writes codes rather than voltages, and nothing says which it does. The
+page should state the failure as *"channel 7 cannot reach its reference at
+all"*, which is true under either convention.
+
+**Action.** Change "A/C-grade" to "C-grade" and add one clause on why — the
+reset state is only half the reason, and the half this page cares about is not
+the half that breaks.
 
 ---
 
@@ -326,8 +392,12 @@ the residual is a **common** −76 µV shift across the mod set, not four channe
 disagreeing. This is the one place where the page's shared-node reasoning is
 fully correct and quantitatively supported — it just never supplies the number.
 
-**The real defect is notational.** The page and ADR 0006 both write
-"**3.3333 V**" `[repo: mod-channels.md, 0006]` — a truncated decimal. If firmware
+**The real defect is notational, and the mid-review edit made it slightly
+worse.** The new Values table row reads *"`V_ref` **3.3333 V** … Intercept is
+`k · V_ref` = **10.000 V**"* `[repo: mod-channels.md]`. `[calc]`
+`3 × 3.3333 = 9.99990`, not 10.000 — the table states a product of its own
+stated inputs that its own stated inputs do not give. The page and ADR 0006 both
+write "**3.3333 V**" `[repo: mod-channels.md, 0006]` — a truncated decimal. If firmware
 transcribes that literal it lands on code 43690 and gets +152.6 µV instead of
 −76.3 µV. Still negligible, but the page should specify the **code (43691,
 `0xAAAB`)** or the **exact value `10/3 V`**, not a four-digit decimal that is
@@ -463,10 +533,11 @@ about it that is the defect.
 
 ## Safe states: `CLR`, power-on, stale channel 7
 
-### `CLR` — correct in principle, "exactly" is wrong
+### `CLR` — correct in principle, "exactly" is wrong, and the grade is now wrong
 
 `[repo: 0006, bom.csv]` The part is grade C: `CLR` takes every channel to zero
-scale. `[calc]` `Vout = 4·0 − 3·0 = 0`. ✓ The mechanism is right and the reason
+scale. **The page still says "A/C-grade" — see C3-19, which is the more urgent
+half of this section.** `[calc]` `Vout = 4·0 − 3·0 = 0`. ✓ The mechanism is right and the reason
 the offset lives on a DAC channel is right.
 
 The overclaim is C3-11: the park is `Z`, the DAC's zero-code error, not zero,
@@ -803,17 +874,17 @@ one-off this costs nothing, and it makes the BOM note's own claim true.
 
 ---
 
-## C3-2 (Critical) — BOM rows
+## C3-2 (Minor) and the BOM rows generally
 
 `[repo: bom.csv]`
 
-- **`R-MODGAIN`** — `qty` column reads **16**; the note in the same row reads
-  *"EIGHT, not sixteen."* The quantity was not updated with the note. A BOM is
-  ordered from its quantity column.
-- **`R-MODGAIN`** — one row, `part` = *"10k / 30k 1% metal film"*, one package,
-  one quantity, two values. **Split into two rows** (4 × 10 kΩ and 4 × 30 kΩ, or
-  16 × 10 kΩ if C3-10's series fallback is taken). As written it cannot be
-  turned into a purchase.
+- **`R-MODGAIN`** — `qty` now reads **8** ✓ (was 16; fixed mid-review). `[calc]`
+  8 = 4 × `R1` + 4 × `R2`, correct.
+- **`R-MODGAIN`** (C3-2) — one row, `part` = *"10k / 30k 1% metal film"*, one
+  package, **one quantity for two different values**. A reader cannot tell from
+  the row whether it is 8 of each or 4 of each without reading the note.
+  **Split into two rows** (4 × 10 kΩ and 4 × 30 kΩ, or 16 × 10 kΩ if C3-10's
+  series fallback is taken).
 - **`R-MODGAIN`** note repeats *"Lands on EXACTLY ±10.000 V"* — carries C3-10
   and C3-11 with it.
 - **`C-FILT-MOD`** — `qty` 4 ✓, and the row is **more honest than the page**
@@ -858,18 +929,26 @@ devotes a section to — the page should name the pin (`VOUTG`) alongside
 
 ### Cross-document drift — C3-16
 
-- `[repo: firmware/README.md]` still states *"`Vout = 4 × (Vdac − Voffset)`, with
-  `Voffset` the shared **2.5 V** from DAC channel 7"*. Must become 10/3 V, and
-  ideally the code (C3-17). This is the file firmware is written from.
+- **`[repo: 0006]` update-rate table, and this is the live one.** It still reads
+  *"| Mod offset | **written once at boot** | The shared 2.5 V reference point |"*.
+  **"Written once at boot" is the exact behaviour the statelessness rule exists
+  to forbid, and the exact cause of the S4 bug this page devotes a section to
+  celebrating.** `[repo: firmware/README.md]` The firmware rule says refresh all
+  six populated channels every pass. **ADR 0006 still specifies the bug.** Two
+  errors in one cell — the stale 2.5 V is the lesser of them. Fix the cadence
+  column first.
+- `[repo: 0006]` topology bullet still reads *"The **2.5 V** reference point
+  comes from a buffered DAC channel"*. Stale value; the surrounding argument is
+  still correct.
 - `[repo: 0006]` The channel table lists Mod 1–4 precision as **"Trimmed"**.
   There are no trimmers on the mod channels; the adjustment is firmware
   scale/offset on the display. Should read "Firmware-scaled" or similar —
-  "Trimmed" implies a screwdriver that does not exist.
-- `[repo: 0006]` has been updated to 3.3333 V in its channel table and its
-  drawn-now note ✓, but the body still carries `Vout = 4 × (Vdac − 2.5 V)` and
-  a "2.5 V reference point" bullet. Those are the *behavioural* spec and remain
-  correct as behaviour; they are only confusing next to the topology note. Low
-  priority.
+  "Trimmed" implies a screwdriver that does not exist, and ADR 0006's own
+  trimmer section is emphatic that trimmers and firmware are different
+  authorities.
+- `[repo: 0006]` body still carries `Vout = 4 × (Vdac − 2.5 V)`. That is the
+  *behavioural* law and remains correct; only confusing next to the topology
+  note. Low priority.
 
 ---
 
@@ -935,6 +1014,12 @@ Listed so the author knows these were examined and are not silently endorsed.
   part is picoamps `[from memory]`, giving ~nanovolts across 1 kΩ; if it were a
   bipolar-input part at tens of nA, 1 kΩ into an unbalanced 10 k‖30 k = 7.5 kΩ
   would matter. It is worth one sentence in the page for that reason.
+- **`firmware/README.md`'s wrong-reference arithmetic**, added mid-review:
+  *"the old 2.5 V into channel 7 against the current 10 k/30 k network gives a
+  −7.5…+12.5 V window — wrong span, and it clips positive."* `[repo]`
+  `[calc]` `4 × 0 − 3 × 2.5 = −7.5`; `4 × 5 − 7.5 = +12.5`. ✓ Correct, and it is
+  the right thing to have written down — it is the failure mode of the exact
+  transcription error C3-17 warns about.
 - **The safe-clear mechanism.** Putting the offset on a DAC channel so that
   `CLR` zeroes both terms is correct and is the right call. The fixed-divider
   counter-case (`4 × (0 − 2.5) = −10 V` on four jacks, indefinitely, with no
@@ -988,20 +1073,42 @@ Listed so the author knows these were examined and are not silently endorsed.
 
 ## Suggested order of work
 
-1. **C3-1** — rewrite `## Values` and everything below it against the drawn
-   circuit. Nothing else on this page can be trusted until this is done.
-2. **C3-2** — `R-MODGAIN` quantity and row split.
-3. **C3-6 / C3-7** — one datasheet lookup (`SBAS430`: power-on output state,
+1. **C3-19** — one word ("A/C" → "C"). The page currently contradicts the ADR
+   and the BOM on the part number, on the page the safe-state argument lives on.
+2. **C3-20** — close the parenthesis. It is currently hiding the tolerance
+   analysis inside a footnote about a dead circuit.
+3. **C3-1 / C3-4** — the tolerance table, the `CLR` section, the range line and
+   the buffer section still carry gain 4.02 and 2.500 V. Corrected arithmetic is
+   in C3-4, C3-9 and C3-11 above, ready to paste.
+4. **C3-6 / C3-7** — one datasheet lookup (`SBAS430`: power-on output state,
    zero-code error, `LDAC`) closes both. Add `R-DAC-PD` if needed, **on the DAC
    side of `R-OPAMP-IN`**.
-4. **C3-3** — at minimum, state the load divider in the output spec and in the
+5. **C3-16** — ADR 0006's update-rate table still specifies *"written once at
+   boot"* for the mod offset. That is the bug, still written down as the design.
+6. **C3-3** — at minimum, state the load divider in the output spec and in the
    V/oct paragraph.
-5. **C3-5** — resolve the capacitor to a buyable part; film is the project's own
+7. **C3-5** — resolve the capacitor to a buyable part; film is the project's own
    precedent.
-6. **C3-4 / C3-9 / C3-10 / C3-11** — corrected arithmetic into the page.
-7. **C3-8** — 0.5 W on `R-OUT-PROT`.
-8. **C3-12** — fix or delete the "strictly better" sentence **before** the author
+8. **C3-8 / C3-10 / C3-2** — 0.5 W on `R-OUT-PROT`; confirm 30.0 kΩ is buyable
+   at 1 %; split the `R-MODGAIN` row.
+9. **C3-12** — fix or delete the "strictly better" sentence **before** the author
    acts on it.
+
+## What was fixed mid-review
+
+Recorded so the author knows these were checked against the current files, not
+carried over from an earlier state.
+
+| Was | Now | Note |
+|---|---|---|
+| Values table: `R2` 40.2 kΩ, `V_OFF` 2.500 V, gain 4.02, ±10.05 V | `R1` 10 kΩ, `R2` 30 kΩ, `V_ref` 3.3333 V, gain 4 | **Fixed.** This was the Critical finding — building from the old table against the drawn diagram gave gain 5.02 and clipped both rails. See C3-1 for what remains. |
+| `bom.csv` `R-MODGAIN` `qty` = **16**, note saying "EIGHT, not sixteen" | `qty` = **8** | **Fixed.** Row-split point survives as C3-2 (Minor). |
+| `firmware/README.md`: *"`Voffset` the shared **2.5 V** from DAC channel 7"* | 3.3333 V, with the −7.5…+12.5 V failure arithmetic spelled out | **Fixed, and improved on.** Arithmetic verified ✓. |
+| `0006` grade guidance: "A or C" | "C only", with the reference-gain reasoning | **Fixed in the ADR.** Not yet in `mod-channels.md` — that is C3-19. |
+
+Two findings were **created** by the mid-review edits: **C3-19** (the ADR moved
+and the page did not follow) and **C3-20** (the unclosed parenthesis). Both are
+the ordinary cost of editing under time pressure; both are one-line fixes.
 
 ## Parameters that must come from a datasheet
 

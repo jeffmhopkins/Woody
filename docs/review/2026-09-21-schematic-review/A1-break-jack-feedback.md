@@ -413,7 +413,7 @@ and it is two to three orders of magnitude larger than anything it costs at DC.
   own scale reads high — is now uncorrectable by the screwdriver, where before
   there was a guaranteed 1–2% of headroom in the needed direction. And the same
   decision **shrank** the trimmer from 1 kΩ to 200 Ω `[repo: bom.csv TRIM-GAIN;
-  0006:603]`, halving what remains. Firmware can still scale either way, so this
+  0006:611]`, cutting the remaining range from +5 % to +2 %. Firmware can still scale either way, so this
   is recoverable — but the trimmer now sits at the end of its range by
   construction, and the page still states the obsolete reason for its
   one-sidedness.

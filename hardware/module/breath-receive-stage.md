@@ -20,11 +20,13 @@ and the ADR gets corrected.
   INSTRUMENT (bottom cluster board)                 |  2 m Cat5  |   MODULE
                                                     |            |
    MPXV4006DP ──┬── ½ OPA2197 ───[R1 1k]──────────── BREATH (pin 1) ──┐
+                 │                          ↓ to IN−, via R3            │
    (VS = REF5050 5.000 V)                            (twisted pair)   │
                  │                                                    │
                  └── 0.6× divider ── C-AA-ADC ── MCP3202 CH0          │
                                                                       │
-   analog star ─────────────────────────────────── AGND   (pin 2) ──┐ │
+   analog star ──[R1b 1k]──────────────────────── AGND   (pin 2) ──┐ │
+   (no power current)                       ↑ to IN+, via R2           │ │
    (no power current)                                               │ │
                                                                     │ │
   ──────────────────────────────────────────────────────────────────┼─┼───────
@@ -46,7 +48,7 @@ and the ADR gets corrected.
                     AGND(module)    │       │      AGND(module) │
                                     │       │                  │
                                  ┌──▼───────▼──┐               │
-                                 │  IN−     IN+ │  INA828       │
+                                 │  IN+     IN− │  INA828       │
                                  │              │               │
                                  │  R_G 42.2k   │◄── G = 2.185  │
                                  │              │               │
@@ -140,7 +142,8 @@ looks like an input.
 
 | Ref | Value | Job |
 |---|---|---|
-| **R1** | 1 kΩ | Instrument-side series protection, on the driver's output |
+| **R1** | 1 kΩ 1 %, **1206 ≥250 mW** | Instrument-side series protection, on the driver's output. **Not 0805** — see below |
+| **R1b** | 1 kΩ 1 %, 1206 | **Its twin in the `AGND` leg.** Free, and it is what keeps CMRR from collapsing — see below |
 | **R2, R3** | 10 kΩ 0.1 % | Module-side series protection. **Matched** — but see below |
 | **R4, R5** | 1 MΩ | **Common-mode bias return.** Without these the in-amp's inputs float when the cable is unplugged and it saturates to a rail |
 | **C_diff** | 15 nF C0G | 531 Hz differential pole, **ahead of the in-amp** |
@@ -162,6 +165,47 @@ looks like an input.
 
 The 0.6 % shortfall is absorbed by the panel gain knob, which exists to fit the
 span to the patch. Do not chase it with a non-standard resistor.
+
+### `R1` is a 1206, and it has a twin
+
+**Power.** ADR 0003 names a sustained +12 V fault on the `BREATH` conductor as a
+*designed-safe* case — the buffer runs from +12 V precisely so that fault sits
+at the rail rather than above it. Work out what `R1` then dissipates:
+
+```
+I = (12 − 0.2) / 1 kΩ = 11.8 mA      P = 139 mW
+```
+
+against an 0805's ~125 mW. **The part fails in the fault the design calls
+survivable**, and it is inside the bonded body. `bom.csv` makes exactly this
+argument, in full, for the module-side `R-OUT-PROT` — and it was never carried
+across to the instrument-side twin.
+
+Two consequences nobody had written down: if `R1` opens, the presence detect
+de-asserts and takes the **whole SPI link** with it, so pitch and the mods die
+with breath; and during the fault the jack clips high and *holds* while the
+detect still says "present".
+
+**Symmetry.** `R1` sits in the `BREATH` leg with nothing opposite it in the
+`AGND` leg, and against the 1 MΩ bias pair that asymmetry is a common-mode
+error term on its own:
+
+```
+|1M/1.011M − 1M/1.010M| = 9.79e-4  →  60.2 dB
+```
+
+That is the **entire** 60 dB budget, spent by one unmatched resistor, with
+every other term still to come. The 0.1 % module-side parts buy 94 dB and this
+throws away fifty times that.
+
+**`R1b` fixes it for nothing.** The `AGND` leg carries no signal current — the
+in-amp's input is gigaohms — so a matching 1 kΩ in it changes the differential
+gain not at all and restores the balance the 1 MΩ pair is measured against.
+One resistor, instrument-side, and therefore **unretrofittable**.
+
+**And `C_cm` needs a tolerance, which nothing specifies.** At ±5 % the
+common-mode capacitor mismatch alone gives ~46 dB; ±1 % is needed to clear 60.
+Specify **±1 % C0G** on the two 1.5 nF parts.
 
 ### Why the bias resistors do not break the sense return
 
@@ -236,6 +280,20 @@ E10 verifies it by pulling the umbilical mid-note with the mouthpiece at rest.
 
 ## Still open
 
-- **The downstream gain/offset stage** is drawn as a block. Its own values, its
-  offset reference (the buffered `VREFOUT` created for pitch is the obvious
-  node), and whether the gain pot's wiper needs a buffer are E10 work.
+- **The downstream gain/offset stage** is drawn as a block, and three things
+  about it are open:
+  - **Its offset reference must come from the LM317 rail, not `VREFOUT`.** An
+    earlier version nominated "the buffered `VREFOUT` created for pitch", which
+    would have made the jack's resting position depend on a DAC register that
+    is disabled until firmware enables it — so the jack would rest at ~0 V at
+    every boot and then *step* to where the player parked it, by up to 2 V.
+    Moving the `REF` trimmer off `VREFOUT` fixed the small term and left this,
+    the larger one. It would also have cross-linked the breath zero to the
+    *pitch* offset trimmer, through the same follower.
+  - **It needs two op-amp halves, not one.** Independent gain and offset
+    require the gain realised as a buffered attenuator *ahead* of the summing
+    node; a single inverting summer multiplies any offset at the virtual ground
+    by `Rf`, which reintroduces the very interaction the `REF` trimmer was
+    added to remove, displaced onto the OFFSET knob.
+  - **Its gain range is 0.6× to 2.5×**, not unity and a trim — real playing
+    tops out near 2.5–2.8 kPa against the sensor's 6 kPa span.
