@@ -142,11 +142,26 @@ a hypothesis; a budget made of measurements is a constraint.
    output rate to get wrong and no staircase to filter. The ADC exists for
    thresholds, note gating, mod routing and MIDI, not for the breath jack.
 
-   **The 8 kHz end of the old "4–8 kHz" range does not close.** Serialised, one
-   pass costs ADC 24 µs + key chain 32 µs + six DAC channels at 2 MHz 96 µs =
-   **136 µs**, against a 125 µs period at 8 kHz. At 4 kHz it is 136 µs of
-   250 µs — 54 % duty, with room for the loop to do work. Three documents used
-   to disagree about this; 4 kHz is the number.
+   **The 8 kHz end of the old "4–8 kHz" range does not close.** Serialised,
+   the bus time alone is ADC 24 µs + key chain 32 µs + six DAC channels at
+   2 MHz 96 µs — already over the 125 µs period at 8 kHz before any driver
+   overhead. At 4 kHz one pass is **196–241 µs of 250 µs**, which is this
+   page's tracked figure `loop-budget`. Three documents used to disagree
+   about this; 4 kHz is the number, and it is not comfortable.
+
+   > **Until 2026-09-21 this paragraph was wrong twice over.** It totalled the
+   > bus time as a superseded "136 µs" of 250 µs, and called that a
+   > superseded "54 % duty, with room for the loop to do work". It omitted the **ESP-IDF per-transaction overhead** — 24 µs
+   > interrupt, 9 µs polling — which no document in this corpus counted, and
+   > which takes a pass to **291 µs with driver defaults, i.e. it does not
+   > close at 4 kHz either.** Polling transactions on an acquired bus are not
+   > an optimisation here; they are what makes 4 kHz reachable at all.
+   >
+   > The old figure and the real one are different engineering situations -
+   > half the period against nearly all of it - and this page, the figure's
+   > own owner, carried the comfortable one. Found by
+   > tightening the owner check: the register said 196–241 µs and the owner
+   > stated neither number, passing only on the shared denominator.
 
    > **⚠ This page gave two different figures for the same ADC read, and the
    > gap decides whether 4 kHz is buildable.** The table above said 50–200 µs

@@ -82,6 +82,26 @@ def corpus_files():
     return sorted(set(out))
 
 
+def check_readable(files):
+    """A corpus file that cannot be READ must not silently leave the scan.
+
+    check_figures wraps its open() in try/except and continues, and
+    corpus_files() counts NAMES rather than successful reads - so one
+    non-UTF-8 byte dropped a file out of the staleness scan while the corpus
+    count, the number this tool nominates as the one to trust, still included
+    it. Reported green, scanning less.
+    """
+    problems = []
+    for path in files:
+        try:
+            open(path, encoding="utf-8").read()
+        except Exception as e:
+            problems.append(f"{os.path.relpath(path, ROOT)} cannot be read as "
+                            f"UTF-8 ({type(e).__name__}) - it is being SKIPPED "
+                            f"by every check while still counted in the corpus")
+    return problems
+
+
 def check_corpus_shape(files):
     """Assert the corpus is where the corpus definition says it is.
 
@@ -181,8 +201,22 @@ def check_bom_generated():
         return [f"could not run merge-bom.py --check: {e}"]
     if r.returncode == 0:
         return []
-    return [l.strip() for l in r.stdout.splitlines()
+    # HARVEST STDERR TOO, AND NEVER RETURN AN EMPTY LIST ON A NON-ZERO EXIT.
+    #
+    # This read stdout only. merge-bom.py opens fragments as UTF-8, so one
+    # Latin-1 micro-sign or ohm from a spreadsheet export makes it traceback
+    # to STDERR with empty stdout - and an empty list is indistinguishable
+    # from "no problems". Verified: with a hand-edit live in bom.csv AND one
+    # \xb5 byte in a fragment, this printed PASS, exit 0.
+    #
+    # That is the FOURTH instance of the fail-open class in this repository,
+    # and it was inside the check written to close the third. A non-zero exit
+    # means something is wrong; if it produced no parseable output, say that
+    # rather than nothing.
+    msgs = [l.strip() for l in (r.stdout + "\n" + r.stderr).splitlines()
             if l.strip() and "problems" not in l]
+    return msgs or [f"merge-bom.py --check exited {r.returncode} and said "
+                    f"nothing parseable - it probably crashed. Run it directly"]
 
 
 def check_bom():
@@ -467,7 +501,14 @@ def check_owners(spec):
         # So a weak value is reported as UNVERIFIABLE rather than passed. The
         # check then makes exactly one claim - "the owner states something
         # only this figure would say" - and says so when it cannot.
-        toks = [t for t in re.findall(r"\d+\.?\d*", value) if len(t) >= 3]
+        # THE LONGEST token, not any token. `any()` over everything >= 3
+        # chars still passed spi-series-r on "100" - the very figure this
+        # docstring names as the counter-example - because "100" also spells
+        # the Cat5 line impedance and "not 100 %". A check whose own
+        # docstring names a case it does not catch is worse than no check.
+        alltoks = re.findall(r"\d+\.?\d*", value)
+        toks = sorted((t for t in alltoks if len(t) >= 3), key=len,
+                      reverse=True)[:1]
         if not toks:
             if value not in ("DISPUTED", "BLOCKED"):
                 weak.append(f"[{fig['id']}] value {value!r} has no token "
@@ -546,7 +587,7 @@ def main():
     # Before anything else. A shape problem makes every result below it a
     # statement about the wrong set of files, so it is reported first and it
     # is fatal on its own.
-    shape_problems = check_corpus_shape(files)
+    shape_problems = check_corpus_shape(files) + check_readable(files)
     wiring_problems = check_checks()
 
     # If an input this tool READS is gone, the checks below raise rather than

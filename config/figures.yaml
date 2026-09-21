@@ -432,8 +432,28 @@ figures:
     status: settled
     owner: docs/reference/latency-budget.md
     derivation: "Bus time 148-155 us PLUS ESP-IDF per-transaction overhead (24 us interrupt / 9 us polling) which no document counted. 291 us with driver defaults - does not close. Polling transactions on an acquired bus are not an optimisation, they are what makes 4 kHz reachable."
-    forbidden: ["key chain 16 µs", "chain read | < 10", "SAR ADC conversion ~50", "ADC 24 µs + key chain 16"]
+    forbidden: ["key chain 16 µs", "chain read | < 10", "SAR ADC conversion ~50", "ADC 24 µs + key chain 16", "136 µs", "136 us", "54 % duty"]
     false_positive_note: "50-200 us appears legitimately in text that REFUTES it. Match unrefuted bookings only."
+    escape_note: |
+      THE OWNER DID NOT STATE THIS FIGURE, AND THE CHECK PASSED IT ANYWAY.
+      Found 2026-09-21 by tightening check_owners from "any numeric token of
+      the value appears" to "the most distinctive one does".
+      latency-budget.md - this figure's own owner - contained neither 196 nor
+      241. It contained 250, the DENOMINATOR, which the two values share, and
+      the old any() match was satisfied by that alone.
+      What it stated instead was a superseded 136 us total at "54 % duty,
+      with room for the loop to do work". The real figure is 196-241 us of
+      250 us: 78-96 % duty. Half the period against nearly all of it - a
+      different engineering situation, and the owner carried the comfortable
+      one while the register carried the true one.
+      The 136 us omitted the ESP-IDF per-transaction overhead (24 us
+      interrupt, 9 us polling) that the derivation field names and that NO
+      document in this corpus counted. With driver defaults a pass is 291 us
+      and 4 kHz does not close at all.
+      The lesson is about check design, not about this number: a check that
+      matches ANY token of a multi-token value can be satisfied by the least
+      informative one. The denominator is shared by every candidate value the
+      figure could take, so it is exactly the token that proves nothing.
 
   - id: umbilical-current
     quantity: Instrument current down the umbilical, typical play
