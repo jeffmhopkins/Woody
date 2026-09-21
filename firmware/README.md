@@ -85,14 +85,19 @@ answered by opening the instrument.
   application claims OTG the `DTR`/`RTS` download-mode path is gone. Leaving
   MIDI off until the player enables it keeps the serial-JTAG reset path alive
   through every boot that has not been asked for MIDI.
-- **A hardware fallback exists and must be kept working.** `EN`, `IO0`,
-  `U0TXD`, `U0RXD`, `GND` for both boards come to a header under a screwed
-  cover on the tail underside (ADR 0009). Exercise it at M8, before the body
-  closes, so it is known good rather than assumed.
-- **The display board is the worse case.** It has no external connector of its
-  own and it is the only path from the phone to the real-time board's NVS, so
-  bricking it leaves a working instrument that can never be reconfigured. It
-  gets the same two OTA partitions and the same header pins.
+- **The recovery ladder, in order.** (1) OTA rollback. (2) USB-Serial-JTAG
+  through the tail USB-C slot — which is why MIDI is opt-in. (3) The console
+  header under the service cover (ADR 0009), for watching a board that boots
+  but misbehaves. **There is no hardware boot-force**: `EN` and `IO0` are not
+  broken out on the ESP32-S3-Matrix, and soldering to them would end the dev
+  board's life as a swappable module. A corrupted *bootloader* therefore ends
+  the instrument — narrow, behind two mitigations, accepted.
+- **The display board is flashed over its UART, by the real-time board.** That
+  closes ADR 0013's open question and removes the one case where a board with
+  no external connector of its own needed hardware recovery. It gets the same
+  two OTA partitions.
+- **Exercise the ladder at M8**, before the body closes, so it is known good
+  rather than assumed.
 
 ## The lights are instrument-side, and so is everything about them
 

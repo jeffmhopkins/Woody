@@ -301,23 +301,41 @@ face that measures 57 × 38 mm. Two consequences:
   now the tight one of the two.
 
 **And a screwed service cover on the tail underside**, beside the matrix
-window, over a ten-pin header on the carrier: `EN`, `IO0`, `U0TXD`, `U0RXD`,
-`GND` for each board. Roughly 12 × 40 mm, two M2 screws into the plate stack,
+window, over a **six-pin** header on the carrier: `U0TXD`, `U0RXD` and `GND`
+for each board.
+
+**Not `EN` and `IO0`, which are not available.** The vendor's own board
+definition accounts for every pin on the ESP32-S3-Matrix's two header rows —
+three power and seventeen GPIO — and neither appears. They exist on the board
+(`IO0` under the BOOT button, `EN` on the reset circuit) but reaching them
+means soldering to the dev board, which would end its life as a socketed,
+swappable module. Not worth it, because the header was never the first line of
+defence. Roughly 12 × 40 mm, two M2 screws into the plate stack,
 in the same laminated layer as the window.
 
-This is the only opening in the instrument that exists for a failure rather
-than for playing it, and the failure is total. On the ESP32-S3 the internal PHY
-routes to USB-Serial-JTAG **or** USB-OTG, not both, so the moment the
-application claims OTG for USB MIDI the `DTR`/`RTS` download-mode path
-disappears. One bad image — or one brownout corrupting the app partition —
-ends the instrument, inside a body that cannot be opened. The display board is
-worse: it has no external connector at all, and it is the only route from the
-phone to the real-time board's NVS, so a bricked display board leaves a
-*working* instrument that can never be configured again.
+**There are three lines of defence and this header is the third**, which is
+why losing the boot-force pins is acceptable:
 
-USB MIDI is a bring-up tool (README). It should not be what costs the
-instrument its recovery path. Firmware carries the other half of this — OTA
-rollback, and USB MIDI opt-in rather than default — in `firmware/README.md`.
+1. **OTA rollback.** An image that does not mark itself valid is rolled back by
+   the bootloader at the next boot. Covers the likely case — a bad flash.
+2. **USB-Serial-JTAG through the tail USB-C slot**, which is a designed opening
+   and stays reachable with the body bonded. This works *provided the
+   application has not claimed USB-OTG*, because the S3's internal PHY routes
+   to one or the other and never both. **That is the whole reason USB MIDI is
+   opt-in rather than default** (`firmware/README.md`) — it keeps the download
+   path alive through every boot that has not been asked for MIDI.
+3. **This console header**, for watching a board that boots but misbehaves.
+
+What is given up is forcing the boot mode by hand when software cannot. A
+spare dev board does not substitute for that once the body is bonded, so the
+honest statement is that a corrupted *bootloader* — as opposed to a corrupted
+application — ends the instrument. That is a narrow case behind two
+mitigations, and it is accepted.
+
+**The display board needs none of this.** It is flashed over its UART from the
+real-time board, which closes ADR 0013's open question about how it gets
+programmed and removes the one case where a board with no external connector
+had to be recovered through hardware.
 
 Placing the umbilical at the tail also puts it as far as possible from the
 mouthpiece, so the cable leaves the instrument at the end that hangs low and
