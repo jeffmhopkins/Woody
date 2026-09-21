@@ -84,6 +84,9 @@ The design corpus — the thing that must be self-consistent — is:
 `hardware/**`, `docs/decisions/**`, `docs/reference/**`, `config/**`,
 `firmware/**`, `README.md`, `ROADMAP.md`.
 
+**Paths in those records point at pre-2026-09-21 locations and are not to be
+corrected.** Resolve them through `docs/reference/repo-maintenance.md` §7.
+
 ## Review waves
 
 Three have run: `docs/review/2026-09-20-cold-review/`,

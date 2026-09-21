@@ -10,8 +10,23 @@ import csv, glob, io, os, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HDR = ["part", "manufacturer", "file", "sha256", "source_url", "fetched", "status", "notes"]
 
+FRAGMENTS = sorted(glob.glob(os.path.join(ROOT, "datasheets", ".manifest-R*.csv")))
+
+# FINDING NO FRAGMENTS IS NOT AN EMPTY MERGE, IT IS A BROKEN TREE.
+# Verified 2026-09-21: with zero fragments this wrote a header-only file and
+# exited 0 - MANIFEST.csv went from 99 lines to 1, destroying 98 rows of
+# SHA-256 provenance, silently. The fragments are DOTFILES, so a move written
+# as `git mv datasheets/* elsewhere/` leaves all eight behind and the next run
+# of this tool empties the manifest. Refuse instead, and say what to do.
+if not FRAGMENTS:
+    sys.exit("REFUSING TO WRITE: no .manifest-R*.csv fragments found in "
+             f"{os.path.join(ROOT, 'datasheets')}.\n"
+             "MANIFEST.csv is GENERATED from them and would be emptied.\n"
+             "The fragments are dotfiles - if datasheets/ was moved, move the "
+             "DIRECTORY whole rather than its glob, and update ROOT here.")
+
 rows, seen, problems = [], set(), []
-for frag in sorted(glob.glob(os.path.join(ROOT, "datasheets", ".manifest-R*.csv"))):
+for frag in FRAGMENTS:
     name = os.path.basename(frag)
     with open(frag, newline="", encoding="utf-8") as fh:
         rdr = list(csv.reader(fh))

@@ -180,7 +180,43 @@ says "somebody should look at this" is not trackable.
 python3 tools/check-staleness.py      # terse; detail lands in .staleness/report.txt
 python3 tools/verify-datasheets.py    # SHA-256 + BOM coverage
 python3 tools/merge-manifests.py      # REGENERATES datasheets/MANIFEST.csv
+python3 tools/rewrite-paths.py        # restructure only; --apply/--verify/--invert
 ```
 
 All three are expected to pass before a commit that touches the corpus. The
 staleness hook surfaces the first one automatically.
+
+### What each one refuses to do, and why it now refuses
+
+All three used to fail **open** — they reported success on a tree that had been
+broken underneath them. All three were fixed on 2026-09-21 after the failures
+were reproduced, not argued:
+
+| Tool | Used to | Now |
+|---|---|---|
+| `check-staleness.py` | `os.walk` a missing `CORPUS_DIRS` entry and print `PASS`. Moving `docs/decisions/` took the corpus from 33 files to 18 and still scored green | Asserts its own inputs exist, carries a file-count floor, and **prints the corpus file count on every run** — the count is what you check, not the verdict |
+| `check-staleness.py` | Define `check_refdes()` and never call it — for the tool's whole life | Asserts its own wiring: any `def check_*` with no call site is a failure. It found `check_refdes` on the first run |
+| `merge-manifests.py` | Write a header-only `MANIFEST.csv` from zero fragments, exit 0, destroying 98 rows of provenance | Refuses. The fragments are **dotfiles**, so `git mv datasheets/*` leaves them behind — move the directory whole |
+| `verify-datasheets.py` | Skip BOM coverage silently when `bom.csv` was absent | Refuses to print a summary it cannot stand behind |
+
+---
+
+## 7. The 2026-09-21 restructure
+
+Paths changed. **`path-map-2026-09-21.csv` in this directory maps every old
+path to its new one** — every tracked file has a row, including the ones that
+did not move, because the question a reader actually asks is "did this path
+change?" and a map of only the movers cannot answer it.
+
+**References inside `docs/review/**`, `docs/log/**` and `docs/research/**`
+point at the old paths and are deliberately not corrected** (§1, `CLAUDE.md`
+§6). There are over eight thousand of them, and history outnumbers the corpus
+roughly 24:1 on path references — so any whole-repo `sed` is wrong by that
+factor. A path is a value; rewriting one inside a dated record makes that
+record say something its author did not. Resolve them through the map.
+
+`tools/rewrite-paths.py --invert --baseline <rev>` is the proof that the move
+changed no content: it applies the inverse rewrite to every moved file and
+requires the result byte-identical to the original. A numeric diff is the weak
+form — it cannot see a permutation, a non-numeric fact, or an edit inside a
+path. Byte identity under inversion can.

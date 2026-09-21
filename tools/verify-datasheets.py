@@ -90,6 +90,19 @@ def _norm(s):
 
 uncovered = []
 bom = os.path.join(ROOT, "hardware/bom.csv")
+
+# A MISSING bom.csv SKIPPED THE COVERAGE CHECK SILENTLY. The `if os.path.exists`
+# below was written to tolerate a tree without a BOM, but the effect is that
+# moving or renaming bom.csv turns the whole BOM-coverage half of this tool off
+# and still prints a clean summary. During a restructure that is precisely the
+# wrong default: the one moment coverage most needs checking is the moment the
+# path is most likely to be wrong. Say so loudly instead.
+if not os.path.exists(bom):
+    sys.exit(f"REFUSING TO REPORT: {os.path.relpath(bom, ROOT)} not found, so "
+             f"BOM coverage cannot be checked and a clean summary here would "
+             f"be a lie about half this tool's job. If the BOM moved, update "
+             f"this path.")
+
 if os.path.exists(bom):
     # Match against the WHOLE manifest, not just its part column: a document is
     # often banked under a different name from the BOM's ("KS-33 Red (linear)"
