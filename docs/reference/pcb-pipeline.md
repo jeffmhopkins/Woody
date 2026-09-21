@@ -1,216 +1,226 @@
 # PCB pipeline — headless KiCad, schematic to fab
 
-**Status:** Proposed 2026-09-21. **Not started.** This page is the procedure and
-the objections to it; it is not a record of anything having been run.
+**Status:** Proposed 2026-09-21. **Not started, and not startable yet** — see
+*Readiness* below. This page is the procedure; it is not a record of anything
+having been run.
 
-The pipeline is meant to be re-runnable end to end, with every script in the
-repo. That part is right and is why this page exists rather than a chat message.
+Assumes a sandbox whose network policy allows `*.kicad.org` and
+`ppa.launchpadcontent.net` alongside the vendor domains, so KiCad 9 installs.
+On Ubuntu noble's stock archive you get KiCad **7**, which has no
+`kicad-cli pcb drc` — that arrived in KiCad 8, and step 11 depends on it.
+Freerouting's `.jar` comes from GitHub and is fine either way.
 
 ---
 
-## Before anything: this project is not one board and not one schematic
+## Four boards, not one
 
-The source procedure said "turn the circuit in `schematic.md` into a PCB". There
-is no `schematic.md`. There are **eight schematic pages** describing **six
-physical boards**, and they are fabricated at two different milestones.
+There is no `schematic.md`. Eight schematic pages describe **four fabricated
+items**, at two milestones.
 
-| Board | Pages | Milestone | Size |
+| Item | Source pages | Milestone | Geometry |
 |---|---|---|---|
-| **Module CV interface** | `module/power-entry`, `digital-and-supervision`, `pitch-stage`, `mod-channels`, `breath-receive-stage`, `breath-output-stage` | **E12** | 2-layer, ~45 × 110 mm, 1.6 mm |
-| **Module panel** | ADR 0004 | E12 | 10HP, **50.50 × 128.5 mm** |
-| **Carrier** | `controller/carrier.md` | E13 | 2-layer, passive |
-| **Cluster ×4** | `controller/cluster-boards.md` | E13 | one 74HC165 each |
+| **Module PCB** | `module/` × 6 | E12 | 2-layer, ~45 × 110 mm, 1.6 mm |
+| **Module panel** | ADR 0004 | E12 | 10HP, **50.50 × 128.5 mm**, ⌀24.0 bore, slots 3.2 × 6.2 mm obround at y = 3.0 / 125.5, x = 7.5 |
+| **Carrier** | `controller/carrier.md` | E13 | 2-layer, passive, hard against the key plate |
+| **Cluster ×4** | `controller/cluster-boards.md` | E13 | one 74HC165 each, 14 mm switch cutouts set by the plate DXF |
 
-**Run the pipeline once per board.** ROADMAP is explicit that the carrier *will*
-spin at least once, so the module goes first — it is the one closest to
-layout-ready.
+Run the pipeline **once per item**, module first. ROADMAP is explicit that the
+carrier will spin at least once, and E13 sits after E12 deliberately.
+
+## Where things go
+
+`tools/check-staleness.py` scans `hardware/`, `docs/decisions/`,
+`docs/reference/`, `config/`, `firmware/`, `README.md`, `ROADMAP.md`. Nothing
+else. So putting the pipeline at the repo root keeps generated files out of the
+design corpus **with no checker change**:
+
+```
+pcb/
+  scripts/            shared: extract.py, build_board.py, route.py, verify.py
+  module/             module.kicad_pro .kicad_sch .kicad_pcb netlist.json
+  module-panel/
+  carrier/
+  cluster/
+fab/
+  module/             gerbers, drill, bom.csv, cpl.csv, svg/, module-fab.zip
+  module-panel/  carrier/  cluster/
+```
+
+One rule: **nothing generated goes under `hardware/`.** That directory is
+reviewed prose and the checker treats it as such.
 
 ---
 
-## The gate: a board whose parts are not chosen cannot be laid out
+## Readiness — none of the four is layout-ready today
 
-Counted 2026-09-21 against `hardware/bom.csv`:
+This is the part a better sandbox does not fix.
 
-| | rows | `open` | `candidate` | `selected` | part or package still `TBD` |
-|---|---|---|---|---|---|
-| Module (E12) | 61 | 13 | 45 | 2 | **7** |
-| Controller (E13) | 58 | 17 | 32 | 4 | 3 |
+### Module PCB — closest, five blockers
 
-**Six of the module's seven `TBD` rows are footprint-determining**, and five of
-those are blocked on one document:
-
-| Row | Why it blocks layout |
+| Blocker | Clears when |
 |---|---|
-| `C-TIMER-LOADSW` | 365 nF or 9.4 µF — an 0805 or an electrolytic. Different footprint entirely |
-| `C-GATE-LOADSW` | ~83 nF, on a typical with no min/max |
-| `R-FB-HI` / `R-FB-LO` | Values unset; the divider does not exist on any drawing yet |
-| `J-UMBILICAL` | etherCON **variant** undecided (chassis vs PCB-mount changes the footprint and the board notch) |
-| `R-PRECISION` | **LT5400 MS8E may have an exposed pad.** `bom.csv`'s package field says plain MSOP-8. Layout-blocking and flagged as such |
+| `C-TIMER-LOADSW`, `C-GATE-LOADSW` | `164112fc.pdf` — 365 nF or 9.4 µF is an 0805 or an electrolytic. **In flight** |
+| `R-FB-HI` / `R-FB-LO` | Same document. The divider is on no drawing yet |
+| `R-PRECISION` package | `5400fc.pdf` — MS8E may carry an exposed pad the package field does not. **In flight** |
+| `J-UMBILICAL` variant | Chassis vs PCB-mount changes the footprint *and* the board notch |
+| **`TRIM-OFFSET` is not buildable as described** | A redraw. Not a value — the network has to put 2.500 V at mid-travel, which means dividing `VREFOUT` and gaining it back, or injecting a bipolar correction |
 
-All five clear when `164112fc.pdf` and `5400fc.pdf` land.
+Two more that are layout decisions nobody has made:
 
-**Do not start the module layout until those rows are `selected` and their
-packages are real.** Everything else in this pipeline is cheap to redo; a
-placement built around a wrong footprint is not.
+- **The two-terminal trimmer's wiper strap.** `pitch-stage.md` says it plainly:
+  *"That is a footprint decision, not a value."* Strap the wiper to one end so a
+  dirty track degrades to a known resistance instead of an open circuit.
+- **Entry bulk is 4 × 47 µF**, flagged as 2–5× the surveyed norm. Four large
+  footprints are at stake, and shrinking them after placement is a re-place.
+
+*(Resolved and ready: `R-BIAS-DAC` at the DAC pin, `R-LDAC` to `AVDD`,
+`R-SPI-SER` ×3 at 100 Ω, `R-SPI-PULL` ×6, `D-REVPOL` ×3, `C-DECOUPLE` at 19.)*
+
+### Module panel — blocked on a disputed figure
+
+`panel-height-budget` is **disputed** in `config/figures.yaml`, with four
+candidate values from 97 to 124 mm against ~110 mm usable — and the register
+notes ~110 mm is itself derived from nothing. It is decided by *a 1:1 paper
+check at M4 with real parts*, which has not happened.
+
+The panel outline and the ⌀24.0 bore are settled; **the control spacing is
+not.** Cut the outline, place the connector, stop.
+
+### Carrier — 11 open items, and one geometric
+
+The KS-33 standoff finding says the board sits **hard against the plate
+underside**, so every passive goes on the far face — but plate thickness is
+still open, and that sets the exact offset. E13 is after E12 for good reason.
+
+### Cluster ×4 — blocked upstream
+
+Switch positions come out of the M2/M3 ergonomic iteration and the plate DXF.
+The boards are fitted around an answer that does not exist yet.
 
 ---
 
-## Objection 1 — a single GND pour destroys ADR 0004
+## Procedure
 
-> *"Add a GND pour (bottom layer, or both on 2-layer), fill all zones."*
+### 0. Toolchain
 
-**This board has three grounds that must not be merged.** ADR 0004's star rule:
-one origin at the power inlet, `PWR_GND` and `DIG_GND` each on their own copper,
-and **`AGND` is not a return at all** — it is a sense reference that carries no
-current, which is the whole reason the analog breath channel survives two metres
-of cable (ADR 0003).
+`kicad-cli version`, `kicad-cli pcb drc --help`, `python3 -c "import pcbnew"`,
+`java -version`. All four, before anything else. Stop and name the domain if a
+download is refused.
 
-A naive pour ties all three together. The board would pass DRC, fabricate, and
-quietly throw away the most carefully argued decision in the project — and the
-module's own ground is already the largest *live* error term in the pitch budget
-at 5.7–7.2 cents.
+### 1. Pick one item, and prove it is ready
 
-**So:** pour `PWR_GND` and `DIG_GND` as separate zones with a single deliberate
-tie at the inlet, and give `AGND` a routed star, never a zone. Add a check that
-the three nets are still distinct after every fill.
+Re-check its rows in `hardware/bom.csv`: every part `selected`, every `package`
+real, no `TBD`. Re-read its pages' *Still open* sections and confirm none is
+topological. **Stop here if not** — a placement built around a wrong footprint
+is the one thing in this pipeline that is expensive to redo.
 
-## Objection 2 — the toolchain is not installable here today
+### 2. Extract the netlist
 
-Probed 2026-09-21 from this sandbox:
+`pcb/scripts/extract.py` reads that item's schematic pages and writes
+`netlist.json`: every component (ref, value, package) and every net.
 
-```
-kicad-cli          ABSENT       java               PRESENT
-python3 -c import pcbnew   ModuleNotFoundError
+Where the pages and `bom.csv` disagree, **the pages win on topology and the BOM
+wins on parts** — that is the rule ADR 0006 already sets. Flag every ambiguity
+in one batch rather than asking serially.
 
-kicad.org                  000  blocked
-ppa.launchpadcontent.net   000  blocked   ← where KiCad 8/9 .debs actually live
-archive.ubuntu.com         200  reachable → kicad 7.0.11+dfsg-1build4 ONLY
-github.com / objects.githubusercontent.com   reachable → Freerouting .jar is fine
-```
+### 3. Generate the schematic, then run ERC
 
-**KiCad 7 has no `kicad-cli pcb drc`** — the DRC and ERC CLI arrived in KiCad 8.
-Step 5 as written cannot run on what apt will install.
+`.kicad_sch` **first**, not "if it works out". It buys ERC and
+`--schematic-parity`, and it puts the netlist in the form this project already
+knows how to review. The PCB is downstream of it.
 
-**Fix:** add `*.kicad.org` and `ppa.launchpadcontent.net` to the environment's
-Custom network allowlist, alongside the vendor domains. Then KiCad 9 installs
-normally. Verify `kicad-cli version` **and** `kicad-cli pcb drc --help` before
-writing a line of anything else.
+### 4. GATE — cold netlist review
 
-## Objection 3 — the highest-risk step has no check on it
+One agent that has not seen the extraction, diffing `netlist.json` against the
+schematic pages **node by node**, filing findings node-indexed.
 
-Parsing hand-drawn ASCII schematics into a netlist is the single most
-error-prone thing in this plan, and the procedure treats it as routine. DRC does
-not check it: **DRC checks geometry, not intent.** A board wired wrong passes
-DRC perfectly.
+This gate exists because DRC checks geometry, not intent: a board wired wrong
+passes DRC perfectly. Parsing hand-drawn ASCII into a netlist is the most
+error-prone step here, and this project's history is ninety defects of exactly
+that shape — a DAC clear that would have pinned four jacks to +11.45 V, an `FB`
+pin connected to nothing.
 
-Two changes:
+### 5. Footprints, written down
 
-1. **Generate the `.kicad_sch` first, not "if you can do it reliably".** It is
-   the priority, not the PCB. It buys ERC and `--schematic-parity`, and it puts
-   the netlist in the form this project already knows how to review.
-2. **Gate on a cold netlist review before any copper.** One agent that has not
-   seen the extraction, diffing the netlist against the eight schematic pages
-   node by node. This project files findings node-indexed precisely because that
-   is the unit that matters — and its history is ninety defects of exactly this
-   shape, including a DAC clear that would have pinned four jacks to +11.45 V
-   and an `FB` pin connected to nothing.
-
-## Objection 4 — autorouting is wrong for an enumerable set of nets
-
-Not wrong for the board. Wrong for these, none of which Specctra can express:
-
-- **`AGND`** — must stay a sense-only star. Freerouting will treat it as a net.
-- **`BREATH` / `AGND` pair** from the etherCON to the INA828 — CMRR-critical,
-  wants matched parallel routing. 60 dB of rejection was already spent on one
-  unmatched resistor.
-- **`PWR_GND` vs `DIG_GND`** — see Objection 1.
-- **Pitch feedback** — `R2`/`TRIM-GAIN` tap at the **jack**, `C-FB-PITCH` from
-  the op-amp **output** to the (−) input, `R-OUT-PROT` **inside** the DC loop.
-  The netlist gets this right; the *loop area* is a layout judgement.
-- **The load-switch power path** — 1 A, and the FET's thermal pad.
-
-**So:** hand-route the critical list first, **lock those traces**, then let
-Freerouting do the remainder, then verify the locked nets survived the import.
-
-## Objection 5 — the footprint mapping must be durable
-
-"List your choices" loses the mapping the moment the session ends, and the next
-run re-derives it differently. That is this project's named failure mode.
-
-**Add a `footprint` column to `hardware/bom.csv`** (12 columns; update
-`CLAUDE.md` and `tools/check-staleness.py`'s column check in the same commit).
-The mapping then lives where the part lives and the checker guards it.
-
-**Prefer the footprints already banked in `datasheets/`** over guesses at
-KiCad's standard libraries — several of these parts have no standard footprint:
+Prefer what is already banked in `datasheets/` over KiCad's standard libraries —
+several of these parts have no standard footprint:
 
 | Part | Banked |
 |---|---|
-| Gateron KS-33 | two community footprints + a STEP solid |
-| PJ398SM | `Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical`, pads **named**, cross-checked against Thonk's drawing |
-| Neutrik etherCON | `NE8FDV.kicad_mod` — **community, not vendor data**, flagged in the manifest |
-| Eurorack panel | a real shipped 3HP panel, with the 3.2 × 6.2 mm slot geometry |
+| Gateron KS-33 | two community footprints + a measured STEP solid |
+| PJ398SM | pads **named**, cross-checked against Thonk's drawing |
+| Neutrik etherCON | `NE8FDV.kicad_mod` — **community, not vendor data** |
+| Eurorack panel | a real shipped 3HP panel with the slot geometry |
 
 `MANIFEST.csv` records which are vendor-issued and which are community-authored.
-That distinction has to survive into the layout.
+**That distinction has to survive into the layout**, so put the choice where the
+part lives: add a `footprint` column to `hardware/bom.csv` (12 columns — update
+`CLAUDE.md` and the column check in `tools/check-staleness.py` in the same
+commit). Otherwise the mapping is re-derived differently every run, which is
+this project's named failure mode.
 
-## Objection 6 — "zero DRC errors" is necessary, not sufficient
+### 6. Place
 
-Add explicit post-route assertions, because each of these passes DRC:
+Decoupling within ~2 mm of the pin it serves. Groups follow the schematic pages.
+High-current and switching paths short. Then the item's own notes: etherCON
+braced to the PCB and **rotated 90°**; USB-C and matrix window on the tail face;
+the FET's thermal pad.
 
-- net count matches the netlist; **no two nets merged**
+### 7. Hand-route and **lock** the critical nets
+
+Specctra cannot express any of these, so they are routed before Freerouting sees
+the board and locked after:
+
+- **`AGND`** — a sense-only star. It carries no current and must never become a
+  return. This is what makes the analog breath channel survive 2 m of cable.
+- **`BREATH` / `AGND` pair**, etherCON to INA828 — CMRR-critical, matched and
+  parallel. 60 dB of rejection was already spent on one unmatched resistor.
+- **`PWR_GND` and `DIG_GND`** — separate copper, one tie at the inlet.
+- **Pitch feedback** — `R2`/`TRIM-GAIN` tapped at the **jack**, `C-FB-PITCH`
+  from the op-amp **output** to the (−) input, `R-OUT-PROT` **inside** the DC
+  loop. The netlist gets this right; the loop *area* is a layout judgement.
+- **The load-switch path** — 1.0 A. Note that 0.5 mm of 1 oz copper is about a
+  1 A trace at a 10 °C rise, so **derive this width rather than defaulting it.**
+
+### 8. Autoroute the remainder
+
+`pcbnew.ExportSpecctraDSN` → `java -jar freerouting.jar -de board.dsn -do
+board.ses -mp 100` (under `xvfb-run` if it wants a display) →
+`pcbnew.ImportSpecctraSES`. Then **verify the locked nets survived the import**
+before doing anything else.
+
+### 9. Pour — three grounds, not one
+
+> **A single GND pour ties `PWR_GND`, `DIG_GND` and `AGND` together and destroys
+> ADR 0004.** It would pass DRC, fabricate, and silently throw away the most
+> carefully argued decision in the project. The module's own ground is already
+> the largest *live* term in the pitch error budget at 5.7–7.2 cents.
+
+Pour `PWR_GND` and `DIG_GND` as **separate zones** with a single deliberate tie
+at the power inlet. Give `AGND` a **routed star, never a zone.**
+
+### 10. Verify — DRC is necessary, not sufficient
+
+`kicad-cli pcb drc --format json --severity-error --schematic-parity`, plus ERC,
+plus assertions that each pass DRC on their own:
+
+- net count matches `netlist.json`; **no two nets merged**
 - `AGND`, `PWR_GND`, `DIG_GND` still distinct; `AGND` tied exactly once
-- every decoupling cap within ~2 mm of the pin it serves
-- the locked critical nets unchanged from before the autoroute
+- every decoupling cap within ~2 mm of its pin
+- the locked critical nets byte-identical to before the autoroute
 - no copper under the etherCON bore or the panel cutouts
 
-## Objection 7 — generated output must stay out of the staleness corpus
+Five full iterations, then stop and explain. Export per-layer SVG and a 3D
+render for review.
 
-`hardware/**` is scanned by `tools/check-staleness.py`. Gerbers, `.ses` files and
-netlists dumped there would be scanned as design documents.
+### 11. Fab output
 
-**Put fab output in `fab/<board>/`** at the repo root, or add an `EXCLUDE` entry.
-Decide before the first run, not after.
+Gerbers, drill, BOM, pick-and-place → `fab/<item>/`, zipped. Rules: JLCPCB
+2-layer standard (0.15 mm trace/space, 0.3 mm drill), default trace 0.25 mm,
+power nets derived per step 7.
 
-## Objection 8 — the panel is missing from the plan
+### 12. Report
 
-The module ships a **10HP panel**, 50.50 × 128.5 mm, carrying the ⌀24.0 mm
-etherCON bore, six jacks, three pots, a toggle and an LED. It is a separate
-fabricated item with a mechanical relationship to the PCB, and its mounting
-slots are **3.2 × 6.2 mm obround at y = 3.0 / 125.5, x = 7.5** — measured off a
-real shipped panel, banked in `datasheets/mechanical/`.
-
-It is the same pipeline with an Edge.Cuts job and no routing. Produce it in the
-same run, and check it against the PCB in one assembly.
-
----
-
-## Revised procedure
-
-0. **Check the toolchain installs** (Objection 2). Stop and name the domain if not.
-1. **Pick one board.** Module first.
-2. **Confirm its BOM rows are `selected` with real packages.** Stop if not.
-3. **Extract the netlist** from that board's schematic pages → `netlist.json`.
-   Flag every ambiguity in one batch rather than asking serially.
-4. **Generate `.kicad_sch`**, run ERC.
-5. **GATE: cold netlist review**, node-indexed, against the schematic pages.
-6. **Choose footprints**, write them into `bom.csv`'s new column.
-7. **Place** — decoupling at the pins, groups per the schematic pages, high
-   current and switching paths short.
-8. **Hand-route and lock** the critical nets (Objection 4).
-9. **Autoroute the rest** — Specctra out, Freerouting, Specctra in.
-10. **Pour `PWR_GND` and `DIG_GND` separately; star `AGND`** (Objection 1).
-11. **Verify**: DRC + ERC + parity + the assertions in Objection 6. Five
-    iterations, then stop and explain.
-12. **Export** Gerbers, drill, BOM, pick-and-place, per-layer SVG, 3D render →
-    `fab/<board>/`, zipped.
-13. **Report**: DRC summary, footprint choices, and what a human must check by
-    hand — power paths, the breath pair, the star ground, thermal.
-
-## What the fab rules should say
-
-Not yet decided. `JLCPCB` 2-layer standard (0.15 mm trace/space, 0.3 mm drill) is
-the obvious default and matches the "outsourced, no in-house capability"
-constraint in ADR 0009. Default trace 0.25 mm, power nets 0.5 mm+. **Confirm
-against the load switch's 1 A path before committing** — 0.5 mm of 1 oz copper
-is about a 1 A trace at a 10 °C rise, which is no margin at all.
+DRC summary and warnings. Footprint choices and which were community-authored.
+And what a human must check by hand: the power path, the breath pair, the star
+ground, the FET thermal.
