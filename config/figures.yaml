@@ -231,24 +231,26 @@ figures:
 
   - id: cref-out-node
     quantity: Which side of the reference buffer C-REF-OUT sits on
-    value: "DISPUTED"
-    status: disputed
+    value: "REF5050 VOUT, i.e. the buffer's INPUT. The buffer drives 100 nF and nothing else."
+    status: settled
     owner: hardware/controller/carrier.md
-    candidates:
-      - "The REF5050's output, i.e. the buffer's INPUT (hardware/controller/carrier.md draws it there)"
-      - "The buffer's OUTPUT, i.e. the buffer drives it (hardware/bom.csv and hardware/module/breath-receive-stage.md both say so)"
-    decided_by: "Reading the three drawings together and picking one. It is a one-line answer that nobody has written down, and no simulation can settle it because it is a question about what the circuit IS, not how it behaves."
-    forbidden: []
+    derivation: "The REF5050 cannot be built without a capacitor on its own VOUT, so one of the qty-2 parts is forced there and the other is the VIN bypass - which leaves nothing for the buffer's output. SBOS410O p.26 section 8.4.1, verbatim and re-verified against the banked PDF 2026-09-21: 'Confirm that a output capacitor (CL) is connected from VOUT to GND. For output stability, verify that the equivalent series resistance (ESR) value of CL less than or equal to 1.5 ohm.' Figure 8-6 annotates CL = 1uF to 50uF for REF50xxI, REF50xxAI. Independently: 10 uF on the buffer's output is 10000x the OPA2197's specified 1 nF capacitive-load limit (SBOS737C p.1 and section 7.3.5 p.22), which no document in the corpus ever intended."
+    consequence: "The REF5050's only load is now the OPA2197's input bias current - +-5 pA typ, +-20 pA max at 25 C (SBOS737C p.7). Its load regulation (20 ppm/mA typ, 30 max, 50 over temperature, SBOS410O p.7) therefore contributes ZERO to the breath scale factor. On the other topology 10 mA of sensor current through 30 ppm/mA would have been 300 ppm = 1.0 LSB. Settling the node this way deletes an error term rather than budgeting it."
+    forbidden: ["100nF + 10uF directly", "a 100 nF decoupler and `C-REF-OUT`'s 10 µF", "100 nF decoupler and C-REF-OUT's 10 µF", "plus C-REF-OUT's 10uF", "settle the node before", "Settle the node, then adopt"]
     note: |
-      Raised by the datasheet-reconciliation wave 2026-09-21. It blocks
-      riso-ref-topology, because the compensation network depends entirely on
-      which node the capacitance sits on - TI's worked answer for this exact
-      circuit assumes the op-amp DRIVES the load.
-      NO GREP FINDS THIS. It is a topology disagreement between three drawings
-      that each read correctly on their own, which is why three review waves
-      and a mechanical checker all passed over it. Same class as
-      dig-gnd-topology and the LT5400 exposed pad: semantic, invisible to
-      tooling, and cheap to fix once somebody looks.
+      Raised by the datasheet-reconciliation wave 2026-09-21 and decided the same
+      day by preflight agent A4 (docs/review/2026-09-21-preflight/A4-carrier.md
+      section 1), whose decisive citation was re-verified by hand against
+      datasheets/texas-instruments/REF5050.pdf before this entry was settled.
+      NO GREP FOUND IT. It was a topology disagreement between three drawings that
+      each read correctly on their own, which is why three review waves and a
+      mechanical checker all passed over it. Same class as dig-gnd-topology and the
+      LT5400 exposed pad: semantic, invisible to tooling, cheap once somebody looks.
+      IT BLOCKED riso-ref-topology, which is now also settled.
+      SECOND-ORDER, and landed with it: C-DECOUPLE-CARRIER goes qty 7 -> 8. The
+      same 100 nF was being spent twice (drawn at the REF5050 output AND claimed at
+      the sensor's VS pin) while the row enumerated only seven. Correct allocation
+      is 100 nF at REF5050 VIN, 100 nF at REF5050 VOUT, and 100 nF at SKT-BREATH VS.
 
   - id: dig-gnd-topology
     quantity: Where DIG_GND returns to
@@ -264,33 +266,34 @@ figures:
     note: "power-entry.md states that ADR 0004 was corrected on this point. IT WAS NOT - line 627 still says the opposite. This is the named failure mode exactly: the fix landed where the editing was happening and not where the reader looks. It is SEMANTIC, so tools/check-staleness.py cannot see it, which is why it survived three review waves and is filed here instead."
 
   - id: riso-ref-topology
-    quantity: Whether R-ISO-REF goes inside or outside the reference buffer's loop
-    value: "DISPUTED"
-    status: disputed
+    quantity: R-ISO-REF and the reference buffer's compensation network
+    value: "Dual feedback per SBOS737C Figure 56: R_ISO 37.4 ohm, R_F 10 kohm taken at VS, R_Fx 100 ohm + C_F 1 nF at the op-amp output"
+    status: settled
     owner: hardware/controller/carrier.md
-    candidates:
-      - "INSIDE the loop, feedback taken at the sensor's VS pin - as drawn and as bom.csv specifies. SIMULATED PHASE MARGIN 8.4 deg, which is WORSE than fitting no resistor at all (8.8 deg)."
-      - "OUTSIDE the loop - simulated phase margin 75.2 deg, but bom.csv says it costs 2% of the ratiometric scale factor."
-      - "A series R-C snubber from VS to the analog star, already proposed on the page as the cheaper-in-DC-terms alternative. Not simulated."
-      - "TI'S OWN WORKED ANSWER FOR THIS EXACT CIRCUIT. *** NOT a fourth option - this entry called it one and that was wrong. *** SBOS737C Figure 56 takes R_F AT V_OUT, so the DC loop closes at the LOAD: it IS the in-loop topology, with an AC feedback path added. The in-loop-vs-out-of-loop framing this entry opened with is a false dichotomy, and the real question is not WHICH SIDE but WHETHER THE AC PATH EXISTS. SBOS737C section 8.2.3 p.30 Figure 56, 'Precision Reference Buffer' driving 10 uF: R_ISO 37.4 ohm, R_F 1 Mohm taken at VOUT, R_Fx 10 kohm with C_F 39 nF at the op-amp output, 89 deg phase margin. That is a DUAL-feedback network - DC through 1 Mohm from the load, AC through 10k/39nF from the output - which is neither the in-loop nor the out-of-loop option this entry was opened with. R-ISO-REF is currently 10 ohm against TI's 37.4."
-    decided_by: "PROBABLY ALREADY DECIDED, by TI, in the datasheet that was BLOCKED when this circuit was drawn - see the fourth candidate. Confirm the topology transfers (our load is 100 nF at the sensor VS pin, TI's worked example is 10 uF) and then adopt it. Failing that, a bench measurement at E1/E13. *** BUT IT IS BLOCKED ON A PRIOR QUESTION: *** three files disagree about WHICH SIDE OF THE BUFFER C-REF-OUT sits on - see cref-out-node. The compensation network depends entirely on that, so settle the node before simulating or adopting anything."
-    forbidden: []
+    derivation: "TI's Figure 56 (SBOS737C section 8.2.3 p.30, 'Precision Reference Buffer') is the worked answer for this exact circuit: R_ISO 37.4 ohm, R_F 1 Mohm at VOUT, R_Fx 10 kohm + C_F 39 nF at the op-amp output, 89 deg phase margin. IT TRANSFERS TO OUR 100 nF LOAD BECAUSE R_ISO IS SET BY Zo, NOT BY C_L: with feedback taken at the amplifier output above the handover, V_A/V_i = (1 + s.R_ISO.C_L)/(1 + s.(Zo+R_ISO).C_L), so both the attenuation R_ISO/(Zo+R_ISO) and the pole-zero ratio depend only on R_ISO/Zo - C_L moves both corners together and cancels. 37.4 ohm is Zo/10 against the specified Zo = 375 ohm (SBOS737C p.8). Simulated phase margin 85.9 deg at 896 kHz."
+    adaptation: "R_F is 10 kohm, NOT TI's 1 Mohm, and R_Fx scales with it to preserve the 100:1 ratio. Two reasons, both absent from TI's circuit. (1) DC error: the guaranteed-over-temperature I_B of 5 nA through 1 Mohm is 5 mV = 1000 ppm = 3.4 LSB on a rail that IS the ratiometric scale factor; through 10 kohm it is 50 uV = 0.034 LSB. (2) Handover: R_F.C_F sets the frequency above which the loop closes on the amplifier's own output rather than on VS. TI's load is a pure capacitor, ours draws 10 mA, so above the handover any load-current change appears at VS across R_ISO. TI's 4.08 Hz would be a disaster; 10 kohm + 1 nF puts it at 15.9 kHz, well above the 500 Hz breath channel. |Z_out| at VS is then 1.20 ohm at 500 Hz against 27.7 ohm at TI's scaling."
+    dc_error: "ZERO ACROSS R_ISO, BY TOPOLOGY. C_F blocks at DC so no current flows in R_Fx; input current is pA so none flows in R_F; the summing node therefore sits at V(VS) and the amplifier forces V(VS) = 5.000 V. R-ISO-REF's value and tolerance stop mattering. The 2% ratiometric objection that drove the old in-loop-vs-out-of-loop argument is ANSWERED, not traded away. Total buffer contribution is 0.19 LSB worst case (I_B.R_F 50 uV, V_OS 100 uV, V_OS drift 125 uV over 50 K)."
+    robustness: "Phase margin stays above 76 deg across TI's entire published Zo range (73 ohm at 10 MHz to 3.26 kohm at 0.1 Hz, Figure 26) and across a 200x range of C_L (47 nF to 10 uF). So X7R DC-bias derating cannot destabilise it, and bulk capacitance may be added at VS later without recompensating - a 10 uF there costs 2.5 deg."
+    forbidden: ["INSIDE THE LOOP, with feedback taken at the SENSOR", "R-ISO-REF` goes inside the loop", "2.6° of phase margin", "oscillation near 458 kHz", "R-ISO-REF,controller,10R", "R_F . C_F  >  R-ISO-REF . C_LOAD", "series R–C snubber from `VS`", "8.4 deg", "75.2 deg"]
     note: |
-      THE DRAWN CIRCUIT IS STILL THE UNSTABLE ONE. bom.csv's R-ISO-REF row chooses
-      in-loop over out-of-loop because out-of-loop "would cost 2% of the ratiometric
-      scale factor". That trade was made against an assumption that in-loop WORKS.
-      Simulation says it does not: 8.8 deg with no resistor, 8.4 deg with it in-loop,
-      75.2 deg out-of-loop. The 8.4-vs-8.8 difference is inside the error bar; the
-      8-vs-75 difference is not.
-      Two caveats, both from the reviewer. A simulated phase margin is a screen with
-      roughly a +/-10 deg bar - TI's own macromodel runs optimistic against TI's own
-      tabulated figures for the same part and load (54.4 sim vs 45 tabulated). And
-      carrier.md's published 2.6 deg / 458 kHz were traced to the back-solved 75.8
-      ohm Ro that has since been superseded by the datasheet's 375 ohm; the real
-      figures are 8.8 deg and 215 kHz.
-      This is the first defect this project has found by simulation rather than by a
-      second person redoing the algebra. That was the argument for adding the stage.
-
+      DECIDED by preflight agent A4 2026-09-21
+      (docs/review/2026-09-21-preflight/A4-carrier.md section 2), after
+      cref-out-node unblocked it. The entry's original in-loop-vs-out-of-loop
+      framing was a FALSE DICHOTOMY: Figure 56 takes R_F at VOUT, so it IS the
+      in-loop topology with an AC path added, and the real question was never which
+      side but whether the AC path exists.
+      TWO PRIOR RESULTS CONFIRMED FROM AN INDEPENDENT MODEL, and one generalised.
+      A4's behavioural model reproduces the no-resistor hazard (206 kHz / 1.5 deg
+      against the corpus's 215 kHz / 8.8 deg) and the out-of-loop case (75.8 deg
+      against 75.2). NEW: in-loop R_ISO buys nothing AT ANY VALUE - 1.5 deg at
+      10 ohm and 1.5 deg at 37.4 ohm. The corpus's finding that in-loop is no
+      better than no resistor is confirmed and generalised.
+      MODEL VALIDATION: the same model run on Figure 56 as printed gives 87.4 deg
+      against TI's published 89 deg - 1.6 deg apart. That is the strongest check
+      available without a bench. STILL WORTH DOING before copper: rerun against
+      TI's own OPA2197 macromodel, which models Zo explicitly. Note SPICE needs a
+      leak resistor at the summing node for convergence and a real board does not -
+      the amplifier's input leakage provides it.
   - id: loop-budget
     quantity: Real-time loop, one pass
     value: "196-241 us of 250 us"

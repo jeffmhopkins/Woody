@@ -23,11 +23,25 @@ defect; there should be none.
 `[repo config/figures.yaml]`. Where a finding below *touches* one of those it
 says so.
 
-**Method note on the datasheets.** Three of the strongest findings here came
+**Method note on the datasheets.** Several of the strongest findings here came
 from reading a banked PDF that the corpus cites but whose *neighbouring rows*
 nobody read: the MPXV4006DP's Offset row (§2.1), the Waveshare board's power
 net (§4.1), and the DAC8568's LDAC/command matrix (§1.5, §1.6). The pattern is
 that a page fetched a datasheet to settle one question and stopped.
+
+> **The corpus moved while this was being written, twice, and both moves touch
+> findings below.** `R-LDAC` changed from a 10 kΩ pull-up to `AVDD` into a 0 Ω
+> strap to `GND` `[repo hardware/module/digital-and-supervision.md:49-50,
+> bom.csv R-LDAC, commit a9f9c47]`, and `sensor-full-scale` was corrected in
+> `config/figures.yaml` from 4.80 V to **4.86 V with a 0.265 V pedestal**
+> `[repo config/figures.yaml, commit 6a00ab3]`. I had reached both
+> independently and have rewritten §1.5, §1.6 and §2.1 against what is on
+> disk now. **In both cases the corrected version leaves something behind** —
+> §1.6 an option silently foreclosed, §2.1 eleven unpropagated derived
+> statements the checker scores zero hits against — and those are the
+> findings that survive. They are reported here rather than dropped, because a
+> figure fixed in one place and not the others is the one defect this project
+> says it has.
 
 ---
 
@@ -38,17 +52,16 @@ that a page fetched a datasheet to settle one question and stopped.
 | **1.1** | Bus +5 V powers the buffer that drives the DAC's inputs; AVDD comes from the LM317. No sequencing control, no series resistance, and TI forbids it in words | **High** | `U-LVL-MOD` out, `U-DAC` pins 2/15/16, `AVDD` |
 | **1.2** | Rack power-**down** exists nowhere in the corpus but one BOM note, and the schematic that owns the capacitors contradicts that note's fix. All six jacks are dragged toward −12 V for ~17 ms every time the rack is switched off | **High** | `C-BULK-RAIL` C1/C3, all six jacks |
 | **1.4** | Pitch sits at **0 V — a VCO's base note** — for the whole 200–600 ms boot window and then steps to −2.500 V. ADR 0006's table says "below −2 V, subsonic" and its own next paragraph contradicts it | **High** | `PITCH` jack, `VREFOUT` |
-| **1.5** | `LDAC` tied high + `LDAC` register default `0` ⇒ the plain "write to input register" command **never updates an output**. Written nowhere | **High** | `R-LDAC`, `U-DAC` |
-| **2.1** | `sensor-full-scale` — a tracked, settled, *owned* figure — is wrong against the banked datasheet. The pedestal is **0.265 V typ**, not 0.200 V | **High** | `U-BREATH`, `config/figures.yaml` |
+| **2.1** | `sensor-full-scale` was corrected today and **the fix did not propagate**. Eleven derived statements still carry the old value — four of them in the register's own `owner` document — and `check-staleness.py` scores **zero hits** against all eleven | **High** | `U-BREATH`, ADR 0003, `carrier.md`, `figures.yaml` |
 | **2.3** | `POT-OFFSET`'s "zero at centre" is **+0.60 V**, not the +0.07 V its own page tabulates. The page states both numbers, 250 lines apart | **High** | `POT-OFFSET`, `R-OFF`, `BREATH` jack |
 | **2.4** | The response shaper's restore stage is the chain's **first clip point and it is ahead of the gain knob**. No knob avoids it | **High** | `U-RESP` b-half, `BREATH` jack |
-| **3.1** | The in-amp rests at `+V_REF` when the cable opens, so the breath jack **steps by 0.22–1.73 V**. ADR 0006 has this right; ADR 0005, `ROADMAP.md` E10 and `breath-receive-stage.md` do not | **High** | `R-BIAS-INAMP`, `BREATH` jack |
+| **3.1** | The in-amp rests at `+V_REF` when the cable opens, so the breath jack **steps by 0.29–2.29 V**, up to 3.3 V. ADR 0005, `ROADMAP.md` E10 and `breath-receive-stage.md` say it parks; ADR 0006 has the mechanism right and its number is now stale by today's pedestal change | **High** | `R-BIAS-INAMP`, `BREATH` jack |
 | **3.2** | RJ45 has no make-first/break-last contact. A pin-8-first withdrawal opens **both grounds while +12 V is still mated** | **High** | `J-UMBILICAL` pins 3/6/8, `U-LVL-MOD` in |
 | **4.1** | The dev board's header 5 V pin is `VCC_5V`, **downstream** of the `B5819WS` — so ADR 0014's newly adopted binding constraint does not apply in the instrument's own configuration | **High** | `HDR-DEV` 5 V, `U-MCU-RT` |
 | **4.2** | The 3V3 LDO's input is `VCC_5V`, the same node as the 64 matrix LEDs, and its output is the MCP3202's `VREF`. Breath → matrix → `VREF` → breath is a closed loop | **High** | `VCC_5V`, `U-ADC` `VDD` |
-| **1.6** | "No write order avoids it" is refuted by the part: command `0010` is a software `LDAC` that updates all eight channels at once | Medium | `U-DAC` |
+| **1.6** | Today's `R-LDAC` fix is right and **silently forecloses the atomic six-channel update**. The part's software `LDAC` (command `0010`) needs the pin high; the page retired the escape hatch on hardware grounds that do not reach it | Medium | `R-LDAC`, `U-DAC` |
 | **1.3** | The module's own ±12 V current split is stated three ways, and `C-BULK-RAIL`'s value depends on which is true | Medium | `C-BULK-RAIL`, `D-REVPOL` |
-| **2.2** | `carrier.md` derives the ADC divider from **4.7 V** while its own drawing two inches above says 4.80 V. The checker cannot see it | Medium | `R-ADCDIV` |
+| **1.5** | `LDAC`: the corrected strap is confirmed correct against the datasheet, and the command form firmware must use is still written nowhere | Low | `R-LDAC`, `firmware/README.md` |
 | **2.6** | The analog breath drift figure ("~20 mV in 10 V", unverified) is bounded by the banked datasheet **26× higher**, and the datasheet's validity window is 2–4× narrower than the corpus's own interior temperature rise | Medium | `U-BREATH`, `TRIM-BREATH-ZERO` |
 | **2.8** | `±11.45 V` of op-amp headroom is a **nominal-rail** figure. At Eurorack −5 % the analog rail is 11.25 V. Three pages size margin against the nominal | Medium | `U-OPA-PITCH`, all six jacks |
 | **3.3** | Contact bounce on insertion: the hot-plug analysis assumes the far capacitor starts at 0 V | Medium | `U-LOADSW`, FET |
@@ -57,7 +70,10 @@ that a page fetched a datasheet to settle one question and stopped.
 | **4.5** | With the instrument off and the cable connected — the corpus's *normal resting state* — `CS` at the buffer input sits at ~0.7 V, below `V_IL`, so the DAC's `SYNC` is held **asserted** continuously | Medium | `R-SPI-PULL`, `U-DAC` `SYNC` |
 | **4.3** | `ME6217` load regulation is **50 mV max** over 1–300 mA; `carrier.md`'s `[from memory]` figure understates the max case, and the ESP32-S3's own activity swing is a bigger aggressor than the key pull-ups and is not costed | Medium | `U-ADC` `VDD`/`VREF` |
 | **4.6** | No SPI→`BREATH` pair-to-pair crosstalk figure exists anywhere | Medium | `J-UMBILICAL` pairs (1,2) vs (4,5) |
-| **5.x** | Eleven cross-page quantity disagreements, tabulated in §5 | Mixed | — |
+| **4.4** | ADR 0014 still budgets the matrix against **one** buck shared with both dev boards; the two-buck decision superseded that | Medium | `U-BUCK` A/B |
+| **5.5** | `power-entry.md`'s drawing labels the load switch's own supply node `PWR_GND (star)` | Medium | `D2`/`FB2`/`C2`, `U-LOADSW` `VCC` |
+| **5.7** | The back-powering arithmetic ("behind the 1 k it is 7.6 mA per jack") is false for pitch, whose feedback is now tapped at the jack | Medium | `D-JACK-CLAMP`, `R-PRECISION` |
+| **5.x** | Fourteen cross-page quantity disagreements, tabulated in §5.1 | Mixed | — |
 
 ---
 
@@ -74,10 +90,10 @@ the six jacks at each step.
 | 0 | Rack off | — | 0 V | 0 V | 0 V |
 | 1 | Rack switched on. Bus +12/−12/+5 rise in the PSU's own order | ms | undefined during the ramp — `R-BIAS-DAC` 100 k holds each DAC output node at 0 V and `R-BIAS-INAMP` holds the in-amp's inputs `[repo hardware/bom.csv R-BIAS-DAC, R-BIAS-INAMP]` | as pitch | undefined |
 | 2 | LM317 brings `AVDD` to 5.21 V; DAC's power-on reset fires | ms | **0.000 V** | **0 V** | — |
-| 3 | Analog ±12 V settle; `TRIM-BREATH-ZERO`'s divider (off `AVDD`) settles | ms | 0.000 V | 0 V | **OFFSET knob less 0.2–1.7 V** (§3.1) |
+| 3 | Analog ±12 V settle; `TRIM-BREATH-ZERO`'s divider (off `AVDD`) settles | ms | 0.000 V | 0 V | **OFFSET knob less 0.29–2.29 V** (§3.1) |
 | 4 | Panel toggle on → `LT1641` `ON` above 1.313 V and `VCC` above UVLO `[datasheet LT1641.pdf p.2, via repo hardware/module/power-entry.md]` | — | unchanged | unchanged | unchanged |
 | 5 | Load switch ramps the umbilical: **49–197 ms**, 98 ms typ `[repo config/figures.yaml loadswitch-gate-cap]` | 49–197 ms | unchanged | unchanged | unchanged |
-| 6 | Instrument's buck starts above 8 V in `[repo datasheets/discrete-and-power/R-78E5.0-1.0.pdf via bom.csv U-BUCK]`; ESP32-S3 boot ROM + bootloader window, GPIOs Hi-Z, "order 100–300 ms" `[repo hardware/controller/carrier.md §5, marked [from memory] there]` | +100–300 ms | unchanged | unchanged | **steps up by 0.2–1.7 V** the moment the REF5050 and the sensor are alive — *before* any DAC write |
+| 6 | Instrument's buck starts above 8 V in `[repo datasheets/discrete-and-power/R-78E5.0-1.0.pdf via bom.csv U-BUCK]`; ESP32-S3 boot ROM + bootloader window, GPIOs Hi-Z, "order 100–300 ms" `[repo hardware/controller/carrier.md §5, marked [from memory] there]` | +100–300 ms | unchanged | unchanged | **steps up by 0.29–2.29 V** the moment the REF5050 and the sensor are alive — *before* any DAC write |
 | 7 | Firmware's **first** DAC write: enable internal reference `[repo hardware/module/pitch-stage.md]` | ~1 word | **steps 0 V → −2.500 V** | stays 0 V (ch 7 still zero) | unchanged |
 | 8 | Firmware writes the five signal channels and ch 7 | 100–200 µs `[repo hardware/module/digital-and-supervision.md:250]` | to the note | **transient −10.00 V or +11.45 V** depending on order (§1.6) | unchanged |
 | 9 | Steady state | | note | modulation | breath |
@@ -264,74 +280,94 @@ burst, which shortens the audible window to the boot time rather than removing
 it — there is no hardware fix short of a jack relay, which ADR 0006 already
 declined for breath on the same grounds.
 
-### 1.5 [High] `LDAC` tied high means the ordinary write command never updates an output
+### 1.5 [Low] `LDAC`: the strap is now right, and the command form is still unwritten
 
-**Node:** `R-LDAC`, `U-DAC`.
+**Node:** `R-LDAC`, `U-DAC`, `firmware/README.md`.
 
-`R-LDAC` ties `LDAC` to `AVDD`, inactive, not driven `[repo
+I reached this independently and it **landed while this review was being
+written** `[repo commit a9f9c47]`. `R-LDAC` was a 10 kΩ pull-up to `AVDD`; it
+is now a **0 Ω strap to `GND`** `[repo
 hardware/module/digital-and-supervision.md:49-50, bom.csv R-LDAC]`.
 
-`[datasheet DAC8568CIPW.pdf, LDAC Functionality]`: *"The default value for each
-bit [of the LDAC register], and therefore for each DAC channel, is zero. …
-**if the LDAC register bit is set to '0', the DAC channel is controlled by the
-LDAC pin.**"*
+Confirming it against the document, because a fix is a claim too
+`[datasheet DAC8568CIPW.pdf p.38]`:
 
-And `[datasheet DAC8568CIPW.pdf p.35, Table 11]` the command `C3..C0 = 0000` is
-*"Write to input register — DAC Channel n"* — buffer only, no update.
+> *"In synchronous mode, data are updated with the falling edge of the 32nd
+> SCLK cycle, which follows a falling edge of SYNC. For such synchronous
+> updates, **the LDAC pin is not required and it must be connected to GND
+> permanently.**"*
+> *"The default value for each bit [of the LDAC register] … is zero. The
+> external LDAC pin operates in normal mode. … **if the LDAC register bit is
+> set to '0', the DAC channel is controlled by the LDAC pin.**"*
 
-So on a virgin part with `LDAC` strapped high, **a firmware that uses the
-plain write command loads six data buffers and leaves all six outputs at zero
-scale forever.** Firmware must use `C = 0011` (*"Write to DAC Input Register
-Ch n and update DAC register Ch n"*) or `C = 0010` (see §1.6).
+**The correction is right, and so is the reasoning given for it.** Pin high +
+register at default = the buffer-to-DAC-register transfer gated, with no
+`MISO` to discover it. Verified, recorded, not re-opened.
 
-This is precisely the shape of bring-up trap the corpus already collects — ADR
-0006 records the internal-reference-disabled trap in the same words: *"a board
-that looks dead at E7 with every channel reading 0 V is usually this, not a
-soldering fault"* `[repo docs/decisions/0006-cv-channel-allocation.md:226-228]`.
-The `LDAC` trap sits beside it and is written down nowhere:
-`firmware/README.md` does not mention `LDAC` at all, and
-`digital-and-supervision.md` asserts the *consequence* ("the six populated
-channels update as each word lands") without the command that makes it true.
+**What is still missing** is the other half of the pairing: no document says
+which command form firmware uses. `[datasheet DAC8568CIPW.pdf pp.35-36,
+Table 11]` `C3..C0 = 0000` is *"Write to input register"* (buffer),
+`0011` is *"Write to DAC Input Register Ch n and update DAC register Ch n"*,
+and `0010` is the software `LDAC`. With the pin now at `GND` the ordinary form
+works, so this is no longer a dead-board trap — but the strap and the command
+set are one decision (see §1.6) and `firmware/README.md` does not mention
+`LDAC` at all.
 
-**Recommended:** one line in `firmware/README.md`'s architecture constraints,
-and one line on `digital-and-supervision.md`'s `R-LDAC` bullet.
+**Recommended:** one line in `firmware/README.md`'s architecture constraints
+naming the command form, beside the internal-reference-enable rule that is
+already there.
 
-### 1.6 [Medium] "No write order avoids it" is refuted by the part
+### 1.6 [Medium] The `LDAC` fix silently forecloses the atomic six-channel update
 
-`digital-and-supervision.md:250-253` records, as an accepted cost:
+`digital-and-supervision.md` has carried this as an accepted cost, before and
+after today's correction:
 
 > *"a hardware `LDAC` was considered and declined, so the six populated channels
-> update as each word lands rather than together. The cost is real and accepted
-> — **every exit from `CLR` throws intermediate values at the mod jacks for
-> 100–200 µs and no write order avoids it.**"*
+> update as each word lands rather than together … **every exit from `CLR`
+> throws intermediate values at the mod jacks for 100–200 µs and no write order
+> avoids it.**"* — and, in the new text, *"(The old escape hatch — 'it becomes
+> a GPIO, and the pin is already broken out' — was false twice: there is no
+> pad, and all eight umbilical conductors are allocated, so there is nothing at
+> the module end to drive it.)"* `[repo
+> hardware/module/digital-and-supervision.md:247-261]`
 
-`[datasheet DAC8568CIPW.pdf p.36, Table 11]` — the part has a software `LDAC`:
+Both statements are about a **hardware** `LDAC`, and both are correct about it.
+The part has a second route that neither reaches
+`[datasheet DAC8568CIPW.pdf p.38 and p.36, Table 11]`:
 
+> *"**Alternatively, all DAC outputs can be updated simultaneously using the
+> built-in software function of LDAC.**"*
 > *"Write to Selected DAC Input Register and Update All DAC Registers …
-> `0 X 0 0 1 0 | A3..A0 | Data` — Write to DAC input register Ch n and **update
-> all DAC registers (SW LDAC)**"*
+> `0 X 0 0 1 0 | A3..A0 | Data` — Write to DAC input register Ch n and
+> **update all DAC registers (SW LDAC)**"*
 
-So: five words with `C = 0000` (buffer only), then the sixth with `C = 0010`,
-and **all six outputs change on the same clock edge**. The intermediate values
-are deleted in firmware, for free, with no extra word and no GPIO.
+Under the **old** pull-up strap the atomic update was available and free: five
+words with `C = 0000`, then the sixth with `C = 0010`, and all six outputs move
+on one edge. No GPIO, no pad, no umbilical conductor. Under the **new** `GND`
+strap, TI's synchronous mode is in force — every write lands on the 32nd edge —
+so there is nothing to buffer and the software `LDAC` has nothing to release.
 
-This matters more than 100–200 µs sounds, because §1.0 step 8 shows what the
-intermediates *are*. With `Vout = 4·Vdac − 3·V_ref` `[repo
-hardware/module/mod-channels.md]`:
+**The strap and the update model are one decision and it has now been taken on
+one page without the other being stated.** That is worth saying plainly because
+the thing given up has a measured size. From §1.0 step 8, with
+`Vout = 4·Vdac − 3·V_ref` `[repo hardware/module/mod-channels.md]`:
 
 ```
-[calc] ch 7 written before the signal channels:  4 x 0      - 3 x 3.3333 = -10.00 V on all four
+[calc] ch 7 written before the signal channels:  4 x 0     - 3 x 3.3333 = -10.00 V on all four
        signal channels written before ch 7:      4 x Vdac  - 0          = up to +11.45 V (rails)
 ```
 
-Four jacks slamming to −10 V or to the positive rail, at every boot and every
-`CLR` exit. The corpus knows the magnitudes — `firmware/README.md` and
-`mod-channels.md` both derive them for the *stuck* case — but files the
-transient version as unavoidable.
+Four jacks at −10 V or on the positive rail for 100–200 µs, at every boot and
+every `CLR` exit. `ROADMAP.md` E10 is where that gets judged audible or not.
 
-**Recommended:** adopt the `0010` form, close the open `LDAC`-becomes-a-GPIO
-item in `digital-and-supervision.md`, and delete the "no write order avoids
-it" sentence.
+**Recommended, and it is two pads:** make `R-LDAC` a strap to `GND` **with an
+alternate pad to `AVDD`**, exactly as `LK-CLR` already gives `CLR` a bench
+option on the same drawing. Default it to `GND` as it is now. If E10 finds the
+intermediates audible, the answer is then a resistor move plus `C = 0010` in
+firmware, rather than the GPIO the page has just correctly ruled out. Add one
+sentence to the retired bullet saying that the software `LDAC` exists and what
+it costs, so the next reader does not re-derive the hardware argument and
+conclude there is no route at all.
 
 ### 1.7 [Low] "Exactly 0 V" on the mod jacks is exact to about ±28 mV
 
@@ -355,82 +391,129 @@ sensor → instrument buffer → `R1` 1 k → 2 m Cat5 → `R2`/`R3` 10 k + 1 M 
 pair → INA828 → *(proposed)* response shaper → `POT-GAIN` attenuator + buffer →
 ×4 inverting summer with the offset legs → `R-OUT-PROT` 1 k + 330 nF → jack.
 
-### 2.1 [High] The sensor's pedestal is 0.265 V, not 0.200 V — and `sensor-full-scale` is a tracked figure
+### 2.1 [High] `sensor-full-scale` was corrected today, the fix did not propagate, and the checker says PASS
 
-**Node:** `U-BREATH`; `config/figures.yaml` entry `sensor-full-scale`.
+**Node:** `U-BREATH`; `config/figures.yaml` entry `sensor-full-scale`; its
+`owner` document, ADR 0003.
 
-`config/figures.yaml` owns it:
-
-```
-  - id: sensor-full-scale
-    value: "4.80 V"
-    status: settled
-    derivation: "0.2 V + 0.766 V/kPa x 6 kPa = 4.796 V"
-    forbidden: ["4.7 V output", "0.2-4.7 V", "0.2 – 4.7 V"]
-```
-
-The datasheet is banked and says otherwise, in two independent places on one
-page `[datasheet MPXV4006DP.pdf p.3]`:
+I reached the sensor pedestal independently from
+`[datasheet MPXV4006DP.pdf p.3]`, which states it twice on one page:
 
 > *"Offset … `Voff` … **0.152 / 0.265 / 0.378** V"*
 > *"Transfer Function (kPa): `Vout = VS × [(0.1533 × P) + 0.053]`"*
 
 ```
-[calc] transfer function at P = 0:  5.000 x 0.053           = 0.265 V   (= the typ Offset row)
-       sensitivity:                 5.000 x 0.1533          = 0.7665 V/kPa  (the repo's 766 mV/kPa, confirmed)
-       full scale at 6 kPa:         0.265 + 0.7665 x 6      = 4.864 V
-       full-scale span:             4.864 - 0.265           = 4.599 V   (= the datasheet's VFSS 4.6 V, confirmed)
+[calc] transfer function at P = 0:  5.000 x 0.053       = 0.265 V   (= the typ Offset row)
+       sensitivity:                 5.000 x 0.1533      = 0.7665 V/kPa (the repo's 766 mV/kPa, confirmed)
+       full scale at 6 kPa:         0.265 + 0.7665 x 6  = 4.864 V
+       full-scale span:             4.864 - 0.265       = 4.599 V   (= the datasheet's VFSS 4.6 V, confirmed)
 ```
 
-So the register's **sensitivity is right and its pedestal is wrong**, and the
-error is 65 mV — a third of the value it states. Where 0.200 V came from is
-visible in the register's own `forbidden` list: the corpus moved off the
-marketing range "0.2–4.7 V" by correcting the **top** end to 4.80 V and
-keeping the bottom. The datasheet's own numbers are **0.265–4.864 V**.
+**The register has already been corrected** `[repo config/figures.yaml, commit
+6a00ab3]` — `value: "4.86 V"`, *"The PEDESTAL IS 0.265 V, not 0.200 V"* — and
+its note is a model of how a correction should read, including which downstream
+figures survive and which move. That half is done and I am not re-opening it.
 
-This is exactly the case `CLAUDE.md` §3 legislates for: *"A number read off a
-banked document beats one from a review."* It is a settled, owned, cited
-figure and it is wrong against a document that is in the repo.
-
-**What moves and what does not** — most of the chain is safe, because the
-pedestal is nulled at the in-amp's `REF` and only the *span* propagates:
-
-| Consumer | Effect |
-|---|---|
-| Span, hard blow, in-amp output, jack span | **unchanged** — all derived from Δ, and Δ is set by the sensitivity |
-| `TRIM-BREATH-ZERO` nominal, +0.437 V | should be `0.265 × 2.161 = 0.573 V` `[calc]`. Still inside the 0→1.0 V range, which was correctly derived from the 0.152–0.378 V **band** `[repo hardware/module/breath-receive-stage.md]`. No part changes |
-| ADC headroom, `R-ADCDIV` | moves — see §2.2 |
-| `sensor-full-scale` register entry | **wrong; fix it, and put 4.7 V's relatives in `forbidden` in a form the checker catches** |
-
-### 2.2 [Medium] `carrier.md` derives the ADC divider from a value its own drawing refutes
-
-**Node:** `R-ADCDIV`, `U-ADC` `CH0`.
-
-The drawing says `MPXV4006DP Vout 0.2 – 4.80 V`. Eighty lines below, the
-derivation says `[repo hardware/controller/carrier.md §2 Derivations]`:
+**The finding is what happened next.** With the corrected register in place,
+`python3 tools/check-staleness.py` reported
 
 ```
-full scale = 4.7 V × 0.6 = 2.82 V  against VREF 3.3 V → 85 % of range, 3502 counts
+PASS no live stale values | 8 unresolved (tracked)
 ```
 
-Two errors compound: the 4.7 V is the superseded marketing figure, and even
-4.80 V is wrong per §2.1.
+and **eleven statements in the design corpus still carry the old value**, four
+of them in the document the register names as `owner`. Verified live at commit
+`b13853c`; `carrier.md`'s *drawing* was corrected to `0.265 – 4.86 V` while I
+was writing, and its *derivation* 160 lines below on the same page was not,
+which is the same defect at page scale:
+
+| File:line | Live text | Should be |
+|---|---|---|
+| `docs/decisions/0003-breath-sensing-path.md:101` | *"~0.2–4.80 V out"* | 0.265–4.86 V |
+| `docs/decisions/0003-breath-sensing-path.md:116` | *"\| Output span \| **0.2–4.80 V** \| 0.2–4.80 V \|"* | as above, twice in one row |
+| `docs/decisions/0003-breath-sensing-path.md:550` | *"full scale, **0.2–4.80 V**, for the CV output"* | as above |
+| `docs/decisions/0003-breath-sensing-path.md:554` | *"The sensor reaches **4.7 V** while the ADC runs on 3.3 V"* | 4.86 V |
+| `docs/decisions/0005-power-architecture.md:74` | *"a 5 V part outputting **0.2–4.7 V**"* | 0.265–4.86 V |
+| `hardware/controller/carrier.md:342-343` | *"full scale = **4.7 V** × 0.6 = 2.82 V … 3502 counts"* and *"**0.2 + 0.766** × 2.8 = 2.34 V … 1743 counts"* | see below |
+| `hardware/module/breath-output-stage.md:22-24` | *"\| Rest \| **0.200 V** \| … \| Hard blow … \| **2.347 V** \| … \| Sensor full scale (6 kPa) \| **4.800 V** \|"* | 0.265 / 2.411 / 4.864 V |
+| `hardware/module/breath-receive-stage.md:79, 94` | *"sits at **+0.2 V** at zero pressure by design"*, *"nulls a *typical* **+0.200 V** pedestal"* | 0.265 V |
+
+**And this is not the checker being switched off.** By the end of this review
+it reported `FAIL 6 stale` — every one of those six on `cref-out-node` and
+`riso-ref-topology`, two other figures settled by another change today
+`[repo .staleness/report.txt]`. It is running, it is catching things, and
+`sensor-full-scale` scores **zero hits against eleven live statements**.
+
+**Why it passes over all of them.** `tools/check-staleness.py` matches
+with `text.find(bad, start)` — a **literal, case-sensitive substring** over the
+line-joined file `[repo tools/check-staleness.py:93-101]`. The register's
+patterns are written against the old *derivation string*, not against how the
+number appears in prose. Three misses by one character each:
+
+| `forbidden` pattern | Live text that escapes it | Why |
+|---|---|---|
+| `"0.2-4.7 V"`, `"0.2 – 4.7 V"` | `0.2–4.7 V` (ADR 0005:74) | en dash **without** spaces — neither spelling is in the list |
+| `"rest \| 0.200 V"` | `\| Rest \| 0.200 V \|` | capital **R**, and the checker is case-sensitive |
+| `"0.2 V + 0.766"` | `0.2 + 0.766 × 2.8` (carrier.md:343) | no `" V"` after the `0.2` |
+
+Plus `"4.7 V output"` against a live `4.7 V × 0.6`, and `"0.2 V at rest"` /
+`"0.200 V at rest"` against a live `+0.2 V at zero pressure`. **Not one of the
+nine patterns in that `forbidden` list matches anything anywhere in the
+corpus.**
+
+`CLAUDE.md` says of this mechanism: *"Run `python3 tools/check-staleness.py`.
+**It then tells you every file to fix.**"* Today it told the author there was
+nothing to fix, on the figure that had just changed, while the owner document
+still stated the old value four times. **The failure this project exists to
+prevent happened inside the commit that fixed the figure**, which is the
+pattern `CLAUDE.md` already predicts — *"it has happened inside commits whose
+own message was about it"* — and the mechanical safeguard reported green.
+
+**What actually moves downstream.** The register's own note is right that
+`inamp-full-scale` survives, because it is built on the span and the span is
+unchanged. Three things do move:
 
 ```
-[calc] correct:  4.864 V x 0.600 = 2.918 V ;  2.918 / 3.3 = 88.4 % ;  3623 counts
-       stated:   4.7   V x 0.600 = 2.82  V ;                 85 %  ;  3502 counts
+[calc] ADC divider, carrier.md:342-343
+  full scale:  stated 4.7   x 0.6 = 2.82 V = 85 %   of VREF 3.3 -> 3502 counts
+               actual  4.864 x 0.6 = 2.918 V = 88.4 %              -> 3623 counts
+  real play:   stated 0.2   + 0.766 x 2.8 = 2.34  V -> 1.40  V -> 1743 counts
+               actual  0.265 + 0.7665 x 2.8 = 2.411 V -> 1.447 V -> 1795 counts
+  headroom is still fine; every count in the page is wrong by ~3 %
+
+[calc] TRIM-BREATH-ZERO nominal (breath-receive-stage.md:56, 93; bom.csv)
+  stated  0.200 x 2.1848  = 0.437 V   (and 2.1848 is the raw gain, not the effective one)
+  actual  0.265 x 2.16107 = 0.573 V
+  across the sensor's own 0.152-0.378 V spec band: 0.329 .. 0.817 V
+  the trimmer's range is 0 -> +1.0 V, derived from that same band, so it still
+  covers the whole of it and NO PART CHANGES.  (The register flags the recompute
+  and says "recompute before committing"; the confirmation that the range still
+  covers it is the part worth adding, because that range was sized against the
+  band and not against the typical, which is why it survives.)
+  *** This figure is the input to ADR 0006's unplug number - see 3.1. ***
+
+[calc] the buffer's floor margin, ADR 0003:530 - and it moves the GOOD way
+  stated  "the margin is 75 mV against the 0.2 V floor"  = 0.200 - 0.125
+  actual                                                  = 0.265 - 0.125 = 140 mV
+  1.9x better than the page's pessimistic number.  The 2 kOhm row still exceeds
+  the floor (500 mV max > 265 mV), so that paragraph's warning stands.
 ```
 
-Still comfortably inside range, so nothing breaks — but **the checker cannot
-see this**, and that is the point worth recording. The `forbidden` list holds
-`"4.7 V output"`, `"0.2-4.7 V"` and `"0.2 – 4.7 V"`; the live text is
-`4.7 V × 0.6`, which matches none of them. `[repo, verified: `tools/check-staleness.py`
-reports PASS on this file.]` The same gap lets `docs/decisions/0005-power-architecture.md:74`
-carry *"a 5 V part outputting **0.2–4.7 V**"* — an en dash with no spaces,
-one character away from a forbidden string.
+**Recommended, in this order:**
 
-**Recommended:** when `sensor-full-scale` is corrected, add bare-number
-patterns (`4.7 V ×`, `0.2–4.7`, `4.80 V ×`) to `forbidden`, and re-run.
+1. Fix the eleven statements. `docs/decisions/0003-breath-sensing-path.md` is
+   the `owner` and carries four of them; it is the one a reader goes to.
+2. **Rewrite the `forbidden` patterns against the prose, not the derivation.**
+   Add `0.2–4.7`, `0.2–4.80`, `0.2 – 4.80`, `4.800 V`, `4.7 V ×`, `0.2 + 0.766`,
+   `| Rest | 0.200`. Then re-run and expect eleven hits, which is the checker
+   working.
+3. **Consider making the checker case-insensitive**, or at least reporting how
+   many `forbidden` patterns matched *nothing anywhere* — a pattern with zero
+   hits in the whole corpus is either fully fixed or mis-spelled, and today
+   those two look identical from the outside. That is a one-line diagnostic
+   and it would have caught this.
+4. Promote `TRIM-BREATH-ZERO`'s `V_REF` to a tracked figure, as the register's
+   own note suggests. It is now derived from a pedestal that has moved once.
 
 ### 2.3 [High] `POT-OFFSET`'s "zero at centre" is +0.60 V, and the page states both numbers
 
@@ -712,16 +795,41 @@ zero and the in-amp rests at its `REF`:
 
 ```
 [calc] Vout(in-amp) = -G x (V_BREATH - V_AGND) + V_REF
-  cable present, mouthpiece at rest:  -2.161 x 0.265 + V_REF = 0.000 V   (that is what the trimmer sets)
-  cable open:                          0 + V_REF             = +0.43 V   (the trimmed null, with no pedestal to null)
-  downstream is inverting, total 0.5x .. 4x:
-      jack step = -0.43 x (0.5 .. 4) = -0.22 V .. -1.73 V
+  cable present, mouthpiece at rest:  -2.16107 x pedestal + V_REF = 0.000 V
+                                      (that is exactly what TRIM-BREATH-ZERO is set to do)
+  cable open, both inputs held at module AGND by R4/R5:
+                                       0 + V_REF                  = +V_REF
+  downstream is inverting, total gain 0.5x .. 4x, so the jack steps by -V_REF x that.
 ```
 
-**ADR 0006 has this right**, and says so in the corrected note under its
-power-on table: *"the gain-and-offset stage then puts the jack at the **OFFSET
-knob's position less 0.2 to 1.7 V**, depending on where GAIN is set"* `[repo
-docs/decisions/0006-cv-channel-allocation.md:206-212]`.
+**ADR 0006 states the consequence** in the corrected note under its power-on
+table: *"the gain-and-offset stage then puts the jack at the **OFFSET knob's
+position less 0.2 to 1.7 V**, depending on where GAIN is set"* `[repo
+docs/decisions/0006-cv-channel-allocation.md:206-212]`. That was the right
+mechanism and the right arithmetic **against a 0.200 V pedestal**:
+
+```
+[calc] with V_REF = 0.437 V (the 0.200 V pedestal x the raw 2.1848):
+          0.437 x (0.5 .. 4) = 0.22 .. 1.75 V      <- ADR 0006's "0.2 to 1.7 V"
+
+       with V_REF = 0.573 V (today's 0.265 V pedestal x the effective 2.16107):
+          0.573 x (0.5 .. 4) = 0.29 .. 2.29 V
+
+       across the sensor's whole 0.152-0.378 V spec band, since the trimmer
+       nulls whatever the fitted part does:
+          V_REF = 0.329 .. 0.817 V  ->  step = 0.16 .. 3.27 V
+```
+
+**So ADR 0006's corrected number is now stale too** — by today's pedestal
+change, which the register made and which reached neither ADR 0006 nor any of
+the eleven statements in §2.1. The step is **0.29–2.29 V** for a typical sensor
+and up to **3.3 V** at the top of the sensor's band with GAIN at maximum, on a
+knob whose whole range is ±5 V. That is a third of the offset window, not a
+fifth of a volt.
+
+This is the propagation chain in one object: the pedestal moved, `V_REF` moves
+with it, and `V_REF` is the entire size of the unplug step on an output the
+corpus describes as parking quietly.
 
 **Three other documents do not**, and two of them cite ADR 0006 for the
 uncorrected version:
@@ -753,7 +861,7 @@ the step is not a diagnostic either.
 
 **Recommended:** one sentence, in `ROADMAP.md` E10 and in
 `breath-receive-stage.md`, with the number: *the jack steps down by
-`G_downstream × V_REF`, 0.2–1.7 V, and settles there.* That also makes E10 a
+`G_downstream × V_REF`, 0.29–2.29 V for a typical sensor and up to 3.3 V, and settles there.* That also makes E10 a
 real measurement — the step size confirms `TRIM-BREATH-ZERO` is where it should
 be.
 
@@ -1210,7 +1318,7 @@ nobody has banked.
 
 | Quantity | Values found | Verdict |
 |---|---|---|
-| Sensor pedestal / full scale | 0.2 / 4.80 V `[figures.yaml, ADR 0003]`; 0.2 / 4.7 V `[carrier.md §2, ADR 0005:74]`; **0.265 / 4.864 V** `[datasheet MPXV4006DP.pdf p.3]` | **§2.1 — the register is wrong against a banked document** |
+| Sensor pedestal / full scale | **0.265 / 4.86 V** `[config/figures.yaml, corrected today]`; 0.2 / 4.80 V `[ADR 0003 x4, breath-output-stage.md:22-24]`; 0.2 / 4.7 V `[carrier.md:342-343, ADR 0005:74/76, ADR 0003:554]` | **§2.1 — the register is right, eleven derived statements are not, and the checker scores zero against them** |
 | Hard blow at the in-amp | −4.69 V, 4.64 V `[breath-output-stage.md, two sections]`; "about −4.7 V" `[breath-receive-stage.md]` | **§2.5 — two gains in circulation on one page** |
 | OFFSET knob at centre | +0.07 V `[breath-output-stage.md table]`; +0.605 V `[same file, §4]` | **§2.3 — the page states both** |
 | Module +12 V / −12 V draw | 45/40 mA `[ADR 0004:265]`; 22/10 mA `[bom.csv C-BULK-RAIL]`; 27/13 mA `[calc, §1.2]` | **§1.3 — three splits, one capacitor value depends on it** |
@@ -1222,7 +1330,7 @@ nobody has banked.
 | `R-SPI-PULL` placement | "three at each end" `[ADR 0004:390]`; "BOTH SIDES of the 74AHCT125" — i.e. both at the module `[bom.csv, digital-and-supervision.md]` | Minor; ADR 0004's phrasing reads as one set per *end of the cable*, which is not what is built |
 | `R-FB` (breath summer) | 40 k `[breath-output-stage.md drawing]`; 40.2 kΩ `[same file, Values; bom.csv R-BREATH-SUM]` | Minor; the drawing's 40 k is what the offset table was computed with (§2.3) |
 | In-amp `REF` | "a buffered trimmer … from the LM317 5.21 V" `[breath-receive-stage.md]`; **"grounded"** `[firmware/README.md]` | **§5.4** |
-| Breath jack, instrument absent | "OFFSET less 0.2 to 1.7 V" `[ADR 0006]`; "anywhere in ±5 V" `[ADR 0005:368, ROADMAP.md:51]` | **§3.1** |
+| Breath jack, instrument absent | "OFFSET less 0.2 to 1.7 V" `[ADR 0006]` — itself now stale by today's pedestal change, the real figure is 0.29–2.29 V; "anywhere in ±5 V" `[ADR 0005:368, ROADMAP.md:51]` | **§3.1** |
 | Pitch at power-on | "below −2 V, subsonic" `[ADR 0006 table]`; "0 V, a VCO's base note" `[pitch-stage.md, and ADR 0006's own next paragraph]` | **§1.4** |
 
 ### 5.2 [Medium] The module's op-amp half budget is stated three ways
@@ -1442,18 +1550,23 @@ a 7.6 mA bound for a node that has an unprotected parallel path.
 1. **§1.1** — move `U-LVL-MOD` off bus +5 V, or put 1 kΩ in each of its three
    output lines. It is a datasheet-forbidden condition on the one part in the
    module that cannot be replaced without desoldering a TSSOP.
-2. **§2.1** — correct `sensor-full-scale` to 0.265 / 4.864 V and strengthen its
-   `forbidden` patterns so the checker catches the bare-number forms (§2.2).
-   It is a tracked figure that is wrong against a banked document.
-3. **§1.5 + §1.6** — one paragraph in `firmware/README.md`: use command `0011`
-   or `0010`, never `0000`; use `0010` on the sixth word to make the six-channel
-   update atomic. Fixes a dead-board trap and deletes an accepted cost.
+2. **§2.1** — propagate today's `sensor-full-scale` correction into the eleven
+   places that still carry the old value, four of them in the register's own
+   `owner` document, and rewrite the `forbidden` patterns against the prose so
+   the checker stops reporting PASS over them. This is the project's named
+   failure mode, caught inside the commit that fixed the figure.
+3. **§1.6** — give `R-LDAC` an alternate pad to `AVDD` beside the `GND` strap,
+   and record that the software `LDAC` (command `0010`) exists. Today's fix is
+   right and quietly closed the only remaining route to an atomic six-channel
+   update; two pads keep it open for E10.
 4. **§2.3** — settle whether `POT-OFFSET`'s wiper is buffered, and make the
    offset table match. "Zero at centre" is a commissioning instruction in two
    documents and it is currently 0.6 V out.
 5. **§3.1** — one sentence in `ROADMAP.md` E10 and in `breath-receive-stage.md`
-   saying that the breath jack *steps* on an unplug, with the number. The
-   bench step as written tells the operator to expect the wrong thing.
+   saying that the breath jack *steps* on an unplug, and update ADR 0006's
+   number to follow the corrected pedestal. The bench step as written tells the
+   operator to expect the wrong thing, and the one document that got it right
+   now has the wrong magnitude.
 
 ---
 

@@ -334,19 +334,26 @@ watchdog (`ROADMAP.md`, E10).
     centre, from two resistors and no extra op-amp half. Two halves, which
     settles a count that was wrong twice.
 
-### The instrument-side reference buffer is not stable as connected
+### The instrument-side reference buffer — settled 2026-09-21
 
 Not this page's circuit, but it sets the number this page multiplies. ADR 0003
-buffers the REF5050 with half an OPA2197 straight into the sensor's `VS` pin —
-which carries a 100 nF decoupler and `C-REF-OUT`'s 10 µF. **A unity-gain
-follower driving that has a pole at 21 kHz inside its own loop**, three decades
-below crossover, and no general-purpose precision op-amp is unconditionally
-stable there.
+buffers the REF5050 with half an OPA2197 straight into the sensor's `VS` pin,
+which carries a 100 nF decoupler. That load alone leaves **1.5° of phase
+margin** against the OPA2197's specified 375 Ω `Zo`, so the buffer is
+compensated — and **the compensation is now decided: see `riso-ref-topology`,
+and `hardware/controller/carrier.md` §2 for the drawing.**
 
-**The obvious fix is the wrong one.** An isolation resistor *outside* the loop
-costs `10 Ω × 10 mA = 100 mV` on 5.000 V — **2 % of the ratiometric scale
-factor**, against a reference specified to 0.05 %.
+Two things this page used to say about it are superseded, and both mattered to
+the number this page multiplies:
 
-**`R-ISO-REF` goes inside the loop**, with feedback taken at the sensor's `VS`
-pin, which is the same trick the pitch stage now uses at its jack: DC error
-zero, capacitive load isolated. Instrument-side, so unretrofittable.
+- **The load is 100 nF, not 100 nF + 10 µF.** `C-REF-OUT` sits on the
+  REF5050's own pins, not on the buffer's output — see `cref-out-node`.
+- **The in-loop-versus-out-of-loop trade this page framed has been
+  dissolved, not decided.** It weighed instability against *"2 % of the
+  ratiometric scale factor"*. TI's dual-feedback network gives both: 85.9° of
+  phase margin **and** exactly zero DC error across `R-ISO-REF`, because at DC
+  the only feedback path closes at the sensor pin. In-loop `R_ISO` on its own
+  was never the answer either — it buys nothing at any value.
+
+**What this page keeps:** the buffer is instrument-side and unretrofittable,
+and so are all four compensation parts.

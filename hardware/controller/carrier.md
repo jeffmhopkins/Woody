@@ -92,7 +92,8 @@ regulator's location open — see *Still open*.
                      │                     │
                      ├──[REF5050]──┬────────┼──── §2 analog
                      │   in  out   │        │
-                     │        [C-REF-OUT]   │
+                     │   │    [C-REF-OUT#2] │
+                     │  [C-REF-OUT#1]       │
                      │                      │
                      ├── OPA2197 V+ ────────┤
                      │                      │
@@ -161,22 +162,29 @@ parts.**
 ## §2 Analog front end — sensor, reference, buffer, ADC
 
 ```
-  +12V ──[REF5050]── 5.000 V ──┬──[½ OPA2197 buffer]──┐
-             │                 │      ▲               │
-        [C-REF-OUT 10 µF]  [100 nF]   │         [R-ISO-REF]  ** WAS MISSING **
-             │                 │      │               │
-            AGND-local    AGND-local  │               ├── SKT-BREATH pin VS
-                                      │               │
-                     feedback tapped ─┴───────────────┤   U-BREATH MPXV4006DP
-             │                 │                      │   case 1351-01
-            AGND-local        AGND-local              │
-                                                      │   P1 ◄── 400 mm tube
-                                                      │           + PTFE plug
-                                                      │           + ≤1 mL trap
-                                                      │   P2 ◄── OPEN TO CAVITY
-                                                      │           never blocked
-                                                      │
-              MPXV4006DP Vout  0.2 – 4.80 V ───────────┘
+          REF5050                  ½ OPA2197  "reference buffer"
+  +12V ──┬─┤VIN VOUT├─┬── 5.000 V ─┤+IN                         SKT-BREATH
+         │            │            │              R-ISO-REF     pin VS
+    [C-REF-OUT#1]  [C-REF-OUT#2]   │     OUT ───┬──[37.4 Ω]───┬──── = the
+      10 µF          10 µF   ┌─────┤−IN         │             │     sensor's
+    [100 nF]       [100 nF]  │     └────────────┘             │     excitation
+         │            │      │                                │
+    AGND-local   AGND-local  │                            [100 nF]
+                             │  two feedback                  │
+                             │  paths:                    AGND-local
+                             │                                │
+       DC ─[R-FB-REF 10 kΩ]──┤◄─────────────────┼─────────────┤
+       AC ─[C-FB-REF 1 nF]───┤◄─[R-FBX-REF 100Ω]┘             │
+                                                              │   U-BREATH MPXV4006DP
+                                                              │   case 1351-01
+                                                              │
+                                                              │   P1 ◄── 400 mm tube
+                                                              │           + PTFE plug
+                                                              │           + ≤1 mL trap
+                                                              │   P2 ◄── OPEN TO CAVITY
+                                                              │           never blocked
+                                                              │
+              MPXV4006DP Vout  0.265 – 4.86 V ────────────────┘
                      │
                      ├──[½ OPA2197 buffer]──┬──[R-SER-BREATH-INST 1k]── J-UMB pin 1
                      │   (V+ = +12V)        │        R1                  BREATH
@@ -225,73 +233,83 @@ tolerance, inside a body that cannot be reopened.
 > is **73 dB**, set by the 1 MΩ bias pair, so `R1b` buys about **13 dB**.
 > Still worth fitting. The stated reason overstates it.
 
-**`R-ISO-REF` — and without it the reference buffer oscillates.** This page
-back-solved the OPA2197's output impedance from its own stated 21 kHz pole and
-got **Ro ≈ 75.8 Ω**. **That figure is superseded: TI specifies `Zo` = 375 Ω**
-`[SBOS737C p.8]` — see the note below, which also gives the corrected poles.
-The actual load at the sensor's `VS` pin is **100 nF** of
-`C-DECOUPLE-CARRIER`, which left **2.6° of phase margin and oscillation
-near 458 kHz** on the old figure `[calc, A2]`; at 375 Ω it is worse, and the
-numbers in this paragraph and the next are pending the recomputation the note
-describes.
+**`R-ISO-REF` — and without it the reference buffer oscillates.** As a bare
+follower into the sensor's 100 nF decoupler the reference half has **1.5° of
+phase margin** `[sim, A4]` against TI's specified `Zo` = 375 Ω
+`[SBOS737C p.8]`. The part this page originally drew — a 10 Ω resistor with
+feedback taken at `VS` — **does not fix it**: in-loop `R_ISO` buys nothing at
+*any* value, 1.5° at 10 Ω and 1.5° at 37.4 Ω. It is compensated instead with
+TI's own dual-feedback network, and the four parts are drawn above.
 
-**The compensation must be more than the resistor.** Taking feedback at
-`VS` (in-loop, as drawn) puts the R·C pole back *inside* the loop — 159 kHz,
-7.2° of margin, still unstable. The loop needs a feedback zero:
+**The compensation is TI's Figure 56, adapted.** `[SBOS737C §8.2.3 p.30,
+"Precision Reference Buffer"]`. See `riso-ref-topology` for the full
+derivation, the adaptation, and the simulated margins; the two things worth
+having on this page are *why it transfers* and *what it buys*:
 
 ```
-   R_F . C_F  >  R-ISO-REF . C_LOAD        e.g. 10 kΩ + 1 nF against
-                                                10 Ω + 100 nF = 1 µs
+[calc]  R_ISO is set by Zo, NOT by C_L:
+
+          V_A / V_i = (1 + s·R_ISO·C_L) / (1 + s·(Zo + R_ISO)·C_L)
+
+        attenuation = R_ISO/(Zo + R_ISO)    pole/zero = (Zo + R_ISO)/R_ISO
+
+        Both depend only on R_ISO/Zo. C_L moves the two corners together and
+        cancels out of the phase margin. So TI's 37.4 Ω — which is Zo/10 —
+        transfers to our 100 nF unchanged, even though TI's example drives
+        10 µF, 100x more.
 ```
 
-Alternative, and cheaper in DC terms: a **series R–C snubber from `VS` to
-the analog star**, which damps the load without putting any resistance in
-the DC path, so the sensor sees the full 5.000 V.
+**What it buys is the end of the trade this page was stuck in.** The old
+argument was "unstable in-loop" against "2 % of the ratiometric scale factor
+out-of-loop". Dual feedback gives **both**: at DC `C-FB-REF` blocks, so no
+current flows in `R-FBX-REF`; the amplifier's input current is pA, so none
+flows in `R-FB-REF`; the summing node therefore sits at `V(VS)` and the
+amplifier forces `V(VS)` = 5.000 V. **The DC error across `R-ISO-REF` is
+exactly zero by topology, and its value and tolerance stop mattering.**
 
-> **✅ SETTLED 2026-09-21. SBOS737C IS BANKED, AND BOTH HEDGES ABOVE WERE
-> WRONG IN OPPOSITE DIRECTIONS.** `datasheets/texas-instruments/OPA2197.pdf`,
-> 56 pp, rev C (Jan 2016, revised March 2018). `ti.com` was reachable this
-> session; the BLOCKED row was a proxy artefact and the URL works as written.
+Two consequences to keep in mind at layout:
+
+- **`R-FB-REF` is 10 kΩ and not TI's 1 MΩ**, because our load draws 10 mA and
+  TI's does not. The handover `1/(2π·R_F·C_F)` must sit *above* the 500 Hz
+  breath channel — 15.9 kHz here, against 4.08 Hz at TI's values — or
+  load-current changes appear at `VS` across `R_ISO`. `VS` **is** the
+  ratiometric scale factor.
+- **The network is robust, which is what makes it a design rather than a tuned
+  point.** Phase margin stays above 76° across TI's whole published `Zo` range
+  and across a 200× range of `C_L` `[sim, A4]`. X7R DC-bias derating cannot
+  destabilise it, and if E13 finds the rail wants stiffening against strip PWM,
+  **10 µF may be added at `VS` later for 2.5° of margin.** The old topology
+  could not have survived that.
+
+> **✅ BOTH BLOCKERS CLOSED 2026-09-21, AND THE HEDGES THAT USED TO LIVE HERE
+> ARE GONE WITH THEM.** `datasheets/texas-instruments/OPA2197.pdf` (SBOS737C,
+> 56 pp) and `datasheets/texas-instruments/REF5050.pdf` (SBOS410O, 52 pp) are
+> both banked. Two earlier notes on this page are superseded rather than
+> amended, and are recorded here because each was a *correct* finding filed the
+> wrong way:
 >
-> **1. The "1 nF" IS an OPA2197 figure.** It is on this part's own front page —
-> *"High Capacitive Load Drive Capability: 1 nF"* — in its Description, and in
-> §7.3.5 p.22: *"in a unity-gain configuration, directly drives up to 1 nF of
-> pure capacitive load."* The INA828 carries the same headline number by
-> coincidence, and this page filed a correct figure as refuted on the strength
-> of that coincidence. **Per CLAUDE.md that is the more dangerous error**: a
-> wrong finding gets caught by the next reviewer; one filed as handled does not.
-> Figures 27/28 put ~40 % overshoot at 1 nF in unity gain, so 1 nF is a
-> stable-but-ringing limit rather than a 30 % threshold, and TI recommends a
-> **10–20 Ω** isolation resistor with `R_ISO` tabulated for 45°/60° phase margin
-> in Table 3 p.23 (1000 pF → 24.0/100.0 Ω; 0.1 µF → 6.2/15.8 Ω; 1 µF → 2.0/4.7 Ω).
+> **1. The "1 nF" IS an OPA2197 figure**, and this page had filed it as refuted
+> on the strength of the INA828 carrying the same headline number by
+> coincidence. It is on the OPA2197's own front page — *"High Capacitive Load
+> Drive Capability: 1 nF"* — and in §7.3.5 p.22. **Per `CLAUDE.md` that is the
+> more dangerous error**: a wrong finding gets caught by the next reviewer; one
+> filed as handled does not.
 >
-> **2. `Ro` is specified, and it is 375 Ω, not 75.8 Ω.** EC table p.8 and p.10:
-> *"`ZO` Open-loop output impedance | f = 1 MHz, `IO` = 0 A, See Figure 26 |
-> **375** | Ω"*. Figure 26 reads ~3.26 kΩ at 0.1 Hz, 482 Ω at 10 Hz, a **375 Ω
-> plateau from 100 Hz to 300 kHz**, 301 Ω at 1 MHz and ~73 Ω at 10 MHz. So the
-> back-solved 75.8 Ω is about the *10 MHz* value — defensible as a
-> crossover-region number, and not what TI specifies.
+> **2. `Ro` is specified, and it is 375 Ω, not the 75.8 Ω this page
+> back-solved.** Figure 26 reads ~3.26 kΩ at 0.1 Hz, 482 Ω at 10 Hz, a **375 Ω
+> plateau from 100 Hz to 300 kHz**, 301 Ω at 1 MHz and ~73 Ω at 10 MHz — so
+> 75.8 Ω is about the *10 MHz* value. Every number this page derived from it
+> has been recomputed against 375 Ω, and the published **2.6° / 458 kHz is
+> dead**; the real hazard is ~1.5° at ~206 kHz. Both mean "oscillator".
 >
-> **The problem this page identified is real and roughly five times worse than
-> it drew it.** `[calc]` The pole against 100 nF moves **21 kHz → 4.24 kHz**,
-> and against 10.1 µF **200 Hz → 42 Hz**. Every component value on this page
-> derived from 75.8 Ω must be recomputed; the *case* for `R-ISO-REF` is
-> strengthened, not weakened.
->
-> **TI publishes the worked answer for this exact circuit.** §8.2.3 p.30,
-> Figure 56, *"Precision Reference Buffer"* driving 10 µF: `R_ISO` = **37.4 Ω**,
-> `R_F` 1 MΩ taken at `VOUT`, `R_Fx` 10 kΩ + `C_F` 39 nF at the op-amp output —
-> 89° of phase margin, 4 kHz of bandwidth, and *"any other load capacitances
-> require recalculation."* `R-ISO-REF` at 10 Ω is well under it, and **this
-> page's own feedback-zero inequality fails** if `C-REF-OUT`'s 10 µF sits on
-> this node: 10 Ω × 10.1 µF = 101 µs against 10 kΩ × 1 nF = 10 µs.
->
-> **Not recomputed here, because it is blocked on a prior question.** Three
-> files disagree about which side of the buffer `C-REF-OUT` is on — this page
-> draws its 10 µF on the REF5050 *output*, i.e. the buffer's **input**, while
-> `bom.csv` and `breath-receive-stage.md` both say the buffer **drives** it.
-> No grep finds that, and which is true changes the whole compensation.
-> **Settle the node, then adopt Figure 56's network or recompute against 375 Ω.**
+> **3. `C-REF-OUT`'s node is settled and this page's drawing was right.** See
+> `cref-out-node`. The 10 µF parts are the REF5050's own `VIN` bypass and
+> `VOUT` load capacitor — **neither is on the buffer's output**, where 10 µF
+> would have been 10 000× the OPA2197's rated capacitive load. A consequence
+> nobody had written down: the REF5050's only load is now the buffer's input
+> bias current, ±20 pA max, so its load regulation contributes **zero** to the
+> breath scale factor. On the other topology, 10 mA through 30 ppm/mA would
+> have been 300 ppm — a whole LSB.
 
 ### Two things this drawing settles that no ADR does
 
@@ -838,7 +856,8 @@ page and have no BOM entry yet.
 | `C-AA-ADC` | 47 nF C0G | 564 Hz, and the ADC's charge reservoir | `[repo]` + `[calc]` |
 | **`C-ADC-BULK`** | **10 µF X7R** | **Bulk at MCP3202 `VDD`/`VREF`. Proposed — the reference has no anti-alias and the WS2815 PWM is ~2 kHz against a 4 kHz sampler** | proposed, from `[repo] R10 B-3` |
 | `U-REF-BREATH` | REF5050AIDR | 5.000 V for the ratiometric sensor | `[repo]` |
-| `C-REF-OUT` | 10 µF ×2 | **Qty 2 for one part — say whether that is parallel or in+out** | `[repo]`, ambiguous |
+| `C-REF-OUT` | 10 µF ×2 | REF5050 `VIN` bypass and REF5050 `VOUT` load cap — **not** on the buffer's output | `cref-out-node`, settled |
+| **`R-FB-REF` / `R-FBX-REF` / `C-FB-REF`** | **10 kΩ / 100 Ω / 1 nF** | **The reference buffer's dual feedback. All three instrument-side and unretrofittable** | `riso-ref-topology`, settled |
 | `U-BUF` | OPA2197IDR | ½ reference buffer, ½ breath buffer, both on +12 V | `[repo]` |
 | `U-BREATH` + `SKT-BREATH` | MPXV4006DP, case 1351-01 | P1 to the tube, P2 open to the cavity | `[repo]`; **P1 identity open** |
 | `R-SER-BREATH-INST` | 1 kΩ | Output protection. **No series cap here** | `[repo]` |
@@ -959,8 +978,10 @@ Ordered by what blocks what. The first four block layout.
 - ~~**The MCP3202's maximum clock at 3.3 V**~~ — **closed 2026-09-21**, §4.
   0.9 MHz is not an interpolation; it is the datasheet's *guaranteed* 2.7 V
   maximum, so using it at 3.3 V is conservative rather than approximate.
-- **`C-REF-OUT` qty 2** for one REF5050 — parallel, or input and output?
-  The reference's stability depends on it and nobody has opened the datasheet.
+- ~~**`C-REF-OUT` qty 2** for one REF5050 — parallel, or input and output?~~
+  **Closed 2026-09-21: input and output, see `cref-out-node`.** The datasheet
+  forces a `C_L` onto the REF5050's own `VOUT`, which accounts for one of the
+  two and leaves nothing for the buffer's output.
 - **`L-BUCK-IN` qty 1 against `C-BUCK-IN` qty 2.** One LC and one bulk cap, or
   two LCs and a missing inductor.
 - **Test points, shunt links and an LA header.** `D2-missing-testability.md`
