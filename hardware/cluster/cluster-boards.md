@@ -21,6 +21,15 @@ switches already are `[repo] 0001`. The switches need a rigid PCB regardless
 connection becomes a trace, and six signals leave the board instead of
 twenty-one `[repo] 0002`.
 
+*Split 2026-09-21 into this board page and three circuit directories: the
+device is [`key-register/`](key-register/key-register.md), the switch network
+is [`key-switch-network/`](key-switch-network/key-switch-network.md), and the
+32-bit allocation with its marker straps is
+[`key-marker-and-bits/`](key-marker-and-bits/key-marker-and-bits.md). `§3`, the
+chain bus, stays here because it crosses to the carrier board; `§5` and the
+component table stay here because they are board facts. The section numbers are
+left as they were written.*
+
 ---
 
 ## The four boards, and where they physically are
@@ -83,154 +92,6 @@ M3 `[repo] key-layout.yaml` and the crossing count is an assumption about
 geometry that does not exist yet. **If the order changes, the bit allocation in
 §4 changes with it** — `left_thumb` and `left_hand` swap their eight-bit
 groups. Decide it before the plate DXF is generated, not after. See *Still open*.
-
----
-
-## §1 The device
-
-```
-                        74HC165  SOIC-16          [from memory: pin map]
-                     ┌────────────∪────────────┐
-       SH/LD  ──────►│ 1  SH/LD        VCC  16 │◄──── 3V3 ──┬── [C-DECOUPLE-165
-        SCK   ──────►│ 2  CLK       CLK INH 15 │──── GND     │   100 nF, AT the
-         E    ──────►│ 3  E (D4)       D  14   │◄──  key D   │   package]
-         F    ──────►│ 4  F (D5)       C  13   │◄──  key C  GND
-         G    ──────►│ 5  G (D6)       B  12   │◄──  key B
-         H    ──────►│ 6  H (D7)       A  11   │◄──  key A
-    (no connect) ────│ 7  QH_bar      SER 10   │◄──── serial in
-                GND ─│ 8  GND          QH  9   │─────► serial out
-                     └─────────────────────────┘
-
-  CLK INH (pin 15) is tied LOW, permanently.       [repo] 0001 fix 6
-  QH_bar (pin 7) is an output and is left open — do NOT ground it.
-  C-DECOUPLE-165 goes at the package, on this board, which is the whole
-  point of the part: a 74x165's output edges brown out a local rail that
-  has no reservoir.                                [repo] 0001 fix 5
-```
-
-**Bit order inside the device is `H` first, then `G F E D C B A`.** On the
-falling edge of `SH/LD` the parallel inputs load; `H` (D7) appears at `QH`
-immediately, and each clock shifts the next one toward the output `[from
-memory]`. Combined with ADR 0001's *"bit 0 is the first bit clocked out"*
-`[repo] 0001, key-layout.yaml`, that fixes **bit 0 = the `H` input of the
-`right_thumb` device** and settles the `H`…`A` question the carrier page left
-open — the ordering half of it, anyway. Which *switch* lands on which input is
-§4.
-
-**The part is 74HC, not 74LVC**, and that is load-bearing rather than
-incidental. HC's slow edges make 265 mm of loom an ordinary lumped load instead
-of a transmission line, which is what removed the hazards that briefly sent
-these registers to the tail `[repo] 0001, bom.csv`. Same SOIC-16 footprint, so
-LVC with proper source termination remains the way back if E4 disagrees.
-
----
-
-## §2 The key network — 21 of these, spread across four boards
-
-```
-   3V3 (from the loom, pin 10 of J-CHAIN)
-    │
-    └──[R-KEY-PU 2k2 1%]──┬────────────────────► 74HC165 parallel input
-                          │                 │
-                  [C-KEY 47 nF X7R]  [R-KEY-SER 100R 1%]
-                          │                 │
-                         GND               SW  KS-33
-                                            │
-                                           GND      pressed = pulled LOW
-
-   CORRECTED 2026-09-21. The previous figure ran the switch leg off the
-   3V3 rail, so a press was a 33 mA rail short and the register input
-   never moved - contradicting the figure's own caption. Found in review.
-
-   Both passives are AT the register input, millimetres from the switch.
-   On this board that is automatic; under the tail topology it was a layout
-   rule with a 265 mm loom in between.
-```
-
-### Derivations
-
-`[calc]`, at 3.3 V into 74HC165 thresholds (**`V_IH` = 2.31 V, `V_IL` = 0.99 V**
-— 0.70 / 0.30 × VCC `[datasheet MC74HC165A/D Rev. 13 p.4]`):
-
-> **Corrected 2026-09-21, the same day it was changed the other way.** This
-> page reasoned from TI's SCLS116E, which has no 3.3 V row, that the 0.70/0.30
-> ratio "breaks at 2 V" and that the conservative 2 V ratio 0.75/0.25 was the
-> defensible bound at 3.3 V. **A 3.0 V row is published, and it is 0.70/0.30.**
->
-> | source | 2.0 V | **3.0 V** | 4.5 V | 6.0 V |
-> |---|---|---|---|---|
-> | TI SCLS116E `datasheets/other-semi/74HC165.pdf` | 1.5 / 0.5 | *(absent)* | 3.15 / 1.35 | 4.2 / 1.8 |
-> | Nexperia Rev. 8 `74HC165-nexperia.pdf` | 1.5 / 0.5 | *(absent)* | 3.15 / 1.35 | 4.2 / 1.8 |
-> | Toshiba TC74HC165 `74HC165-toshiba.pdf` | 1.5 / 0.5 | *(absent)* | 3.15 / 1.35 | 4.2 / 1.8 |
-> | **onsemi MC74HC165A Rev. 13** `74HC165-onsemi.pdf` | 1.5 / 0.5 | **2.1 / 0.9** | 3.15 / 1.35 | 4.2 / 1.8 |
->
-> All four agree digit for digit at every shared rail, so onsemi is not a
-> different device — it simply prints the JEDEC HC row the other three omit.
-> **3.3 V is bracketed on both sides by published 0.70/0.30 rows**, so no
-> extrapolation through the 2 V point is needed at all. The 2 V entry is the
-> single exception at the bottom of the family's range, not the start of a
-> trend. Nexperia's own front page claims compliance with **JESD8C** (2.7–3.6 V),
-> whose levels are 0.7/0.3 × VDD `[74HC165-nexperia.pdf p.1]` — a second strike.
->
-> `[calc]` Interpolating in **absolute volts** between onsemi's bracketing rows,
-> assuming no ratio at all:
-> `V_IH`(3.3) = 2.1 + (0.3/1.5)(3.15−2.1) = **2.31 V**;
-> `V_IL`(3.3) = 0.9 + (0.3/1.5)(1.35−0.9) = **0.99 V**. Both land exactly on
-> 0.70/0.30, which is what makes the bracketing argument safe rather than lucky.
->
-> So both crossing times go back to what they were before yesterday's move:
-> **138.7 → 119.9 µs** and **6.89 → 5.92 µs**. Neither ever changed a
-> conclusion — the release is absorbed by the asymmetric debounce either way,
-> and the press clears the scan period by 42× instead of 36×. What was not
-> defensible was stating 0.75/0.25 **as the datasheet threshold** when no
-> datasheet in the corpus gave a threshold at 3.3 V at all.
->
-> **If a TI SN74HC165 is the part actually fitted**, its own datasheet still
-> guarantees nothing at 3.3 V, and the pessimistic bound is 2.475 / 0.825 V,
-> giving 138.7 µs and 6.89 µs. Those are the numbers to design margin against
-> if the margin ever gets tight. It is not tight: 42× and 36× are the same
-> answer.
->
-> *(The press row also said `τ = 100 Ω × 47 nF = 4.7 µs` beside a crossing
-> time computed from the **parallel** combination, 4.496 µs. That correction is
-> independent of the threshold question and **stands** — the pull-up is still
-> connected, so the parallel value is the right one.)*
->
-> The TI datasheet carries a warning worth repeating: operating in the
-> threshold region risks **double-clocking from induced ground bounce**.
-> Another reason not to shave this margin.
-
-| | |
-|---|---|
-| Release, τ = 2.2 kΩ × 47 nF = 103.4 µs | crosses `V_IH` at **119.9 µs** |
-| Press, τ = (2.2 kΩ ∥ 100 Ω) × 47 nF = 4.496 µs | crosses `V_IL` at **5.92 µs** — 42× inside the 250 µs scan |
-| Pole | 1.54 kHz → **54 dB** at the WS2815's 800 kHz data rate |
-| Static | **1.43 mA** per closed key; 18 closed = **25.8 mA** off the loom's 3V3 |
-
-**Press is instant on the scan's timescale and release is filtered**, which is
-the asymmetric-debounce shape ADR 0001 wants — instant attack, filtered release
-`[repo] 0001`. The 125 µs release filter is half a scan period and costs
-nothing musically; note-off is filtered in firmware anyway.
-
-> **Why the network is fitted at all, stated honestly.** The argument that
-> originally bought these parts — a 12 V LED edge through ~15 pF injecting a
-> false level — was wrong, and ADR 0001 now records why: there is no 12 V edge,
-> `Q/C` is the wrong model because coupling is a divider, and a divider cannot
-> exceed its aggressor's swing `[repo] 0001`. **The pull-up is still
-> mandatory**, because a floating CMOS input has no defined state at all — and
-> this cavity is breathed into for hours at 10–20 K above ambient, with the
-> switch contacts open. The 47 nF is a bounce filter and cheap insurance. It is
-> not what makes the topology safe.
-
-**`R-KEY-PU` is 2.2 kΩ and the reason it is no longer 10 kΩ has expired.**
-`bom.csv` says so itself: the 2.2 kΩ was chosen when the node ran 265 mm down an
-uncoated loom, *"that reason is gone now the register is back on the cluster
-board"*, and it was kept as cheap insurance `[repo] bom.csv`. **Keeping it is
-not free any more**, because 25.8 mA of play-rate load lands on the rail that is
-also the MCP3202's voltage reference — worth 3.2 LSB, accepted on the carrier
-page `[repo] carrier.md §2`. Going back to 10 kΩ would cut that to 5.9 mA and
-0.7 LSB, at the price of a 100 µs τ in a humid cavity. **Recorded as a live
-trade, not re-opened here.**
 
 ---
 
@@ -306,116 +167,6 @@ wins through its 100 Ω series resistor against a 10 kΩ pull `[calc]` — a
 divider of 100/10100, so the driven level is within 33 mV of the rail. **The
 self-test becomes a firmware choice rather than a board choice**, at the cost of
 one resistor, and this page recommends fitting it and deciding later.
-
----
-
-## §4 The 32 bits
-
-### Allocation, on the chain order as written today
-
-`H` is the first bit out of each device, so within a cluster the lowest-numbered
-key takes the earliest bit:
-
-| Device | Bits | `H` | `G` | `F` | `E` | `D` | `C` | `B` | `A` |
-|---|---|---|---|---|---|---|---|---|---|
-| `right_thumb` | 0–7 | RT1 | RT2 | RT3 | sw+ | sw− | sw? | **M** | **M** |
-| `right_hand` | 8–15 | RH1 | RH2 | RH3 | RH4 | RH5 | RH6 | **M** | **M** |
-| `left_thumb` | 16–23 | LT1 | LT2 | LT3 | LT4 | **M** | **M** | free | free |
-| `left_hand` | 24–31 | LH1 | LH2 | LH3 | LH4 | LH5 | **M** | **M** | free |
-
-`sw+` `sw−` `sw?` are the three reserved spare-switch positions — octave up,
-octave down, hold/preset `[repo] key-layout.yaml`. **Proposed on `right_thumb`**,
-because RT is already the control cluster (its three fitted keys are `role:
-control`, not fingering inputs `[repo] key-layout.yaml`) and it has the spare
-capacity. They need **plate cutouts at M3 even if the switches are fitted
-later** `[repo] key-layout.yaml, 0010`, and the cutouts go in `PLATE-THUMB`.
-
-**Every position above gets the full `R-KEY-PU`/`R-KEY-SER`/`C-KEY` network**,
-including the three unfitted spares — 21 sets, which is what `bom.csv` budgets
-`[repo]`.
-
-### The marker pattern: 8 bits, not 6 — DECIDED 2026-09-21
-
-`key-layout.yaml` booked 6 marker bits and 5 genuinely free ones. **It now says
-8 and 3** `[repo] key-layout.yaml, 0001`, and the table above shows the 8.
-The argument, for the record:
-
-A marker is a framing check: firmware reads it every scan, and a frame that
-fails it holds the previous frame and increments a visible error counter
-`[repo] 0001`. Its whole value is converting an invisible intermittent fault
-into a number on the display.
-
-**Six bits cannot do that per device in both directions, and eight can.** With
-two marker bits in every device, one wired high and one wired low, a device that
-is dead, unclocked, stuck high or stuck low fails its own marker — whichever way
-it failed, and no matter what the other three are doing. At six, two devices get
-a single marker bit each and are only checkable in one direction.
-
-**The two extra bits cost almost nothing, because "free" bits are not free —
-they are useless.** A free bit has no plate cutout and no switch. The body bonds
-shut. You cannot add a switch to one without cutting the plate, and the plate is
-generated at M3 and fitted before bonding `[repo] 0009, 0010`. The three
-positions that *are* retrofittable are the reserved spare-switch bits, which
-have cutouts and are untouched by this proposal. **So the trade is: two bits
-that could never be used against per-device fault detection in both
-directions.**
-
-Proposed levels:
-
-| Device | Input | Bit | Level | | Input | Bit | Level |
-|---|---|---|---|---|---|---|---|
-| `right_thumb` | `B` | 6 | **1** | | `A` | 7 | **0** |
-| `right_hand` | `B` | 14 | **0** | | `A` | 15 | **1** |
-| `left_thumb` | `D` | 20 | **0** | | `C` | 21 | **1** |
-| `left_hand` | `C` | 29 | **0** | | `B` | 30 | **1** |
-
-Read in bit order the marker is `1 0 · 0 1 · 0 1 · 0 1`.
-
-> **`left_thumb`'s pair was flipped on 2026-09-21, and the reason is worth
-> keeping.** The original pattern was `1 0 · 0 1 · 1 0 · 0 1` — a **repeating
-> nibble**, and the page's own test ("not a repeating *byte*") did not catch
-> that. A falsification agent solved the marker exhaustively, as a symbolic
-> constraint problem over all eight positions against every key state, and
-> found that of the **23 wrong chain permutations exactly one passes
-> undetected: `RT → RH → LH → LT`** — which is the reorder *this very page*
-> proposes to save a body crossing. It passes whenever `LH5` is released, and
-> the result is that the left-hand keys drive the octave keys, `LH5` reads
-> permanently released, and the only symptom is the error counter ticking —
-> so the diagnosis points at the wrong thing.
->
-> Two proposals, made hours apart, each sound alone and jointly blind.
-> Flipping this one pair kills all 23 permutations and a −5 shift hole while
-> keeping all 24 hard faults caught. **Two straps.**
-
-**What the marker still cannot see**, stated plainly because firmware needs
-it: a single-bit flip is caught **8 times in 32**, and the 24 bits that carry
-the music are never among them — so **the visible error counter undercounts
-true corruption about 4×**. A mid-shift `SH/LD` reload passes at 11 of 31
-reload points. And the straps go direct to the rails, so they share no
-component with the 21 key networks they are read as vouching for.
-
-That leaves **3 free bits**: `left_thumb` `B` and `A` (22, 23) and `left_hand`
-`A` (31). **Each gets an `R-KEY-PU` and nothing else** — no switch, no series
-resistor, no capacitor. A floating CMOS input is the exact fault `R-KEY-PU`
-exists to fix `[repo] 0001, fix 6`.
-
-> **The first draft of this page did not budget these three.** Its component
-> table, `bom.csv` and `carrier.md` all carried a superseded count of 21
-pull-ups for exactly the 21
-> *switch* positions, leaving bits 22, 23 and 31 floating — unretrofittable,
-> and precisely the fault the part exists to prevent. `R-KEY-PU` is now
-> **qty 24**. Found in review.
-
-> **Marker bits strap straight to the rails — no resistor, no capacitor.** A
-> marker is not a switch: it never changes, so there is nothing to debounce and
-> no pull-up to lose an argument with. Eight 47 nF caps on a rail that is
-> already the ADC's reference, for eight nodes that are hard-wired, would be
-> eight caps of pure cost. `[calc]` **16 parts saved** against wiring markers as
-> if they were keys, and the network count stays exactly the 21 `bom.csv`
-> budgets `[repo]`.
-
-**This is hard-wired copper on boards that bond into the instrument. It has to
-be right before the boards are ordered, and firmware has to be told the pattern.**
 
 ---
 
@@ -510,34 +261,22 @@ Ordered by what blocks what. The first two block the plate DXF, not just this
 board. **The marker pattern is no longer among them** — 8 bits, two per device,
 decided 2026-09-21 and recorded in `key-layout.yaml` and ADR 0001.
 
+*Four of the items below moved with their circuits, 2026-09-21: the spare-switch
+positions and the last 3 free bits to
+[`key-marker-and-bits/`](key-marker-and-bits/key-marker-and-bits.md), `R-KEY-PU`
+and the `LT` springs to
+[`key-switch-network/`](key-switch-network/key-switch-network.md), and the
+closed 74HC165 item to [`key-register/notes.md`](key-register/notes.md). The
+intro above is as written, and counted them.*
+
 - **The chain order, against the faces** (*The four boards*, above).
   `RT → RH → LH → LT` saves a
   body-thickness crossing over the order in `key-layout.yaml`, at a skew cost
   ADR 0001 itself prices at a few percent of hold margin. **If it changes,
   `left_thumb` and `left_hand` swap bit groups and §4's table moves with them.**
   Needs M3's geometry to confirm the crossing count is real.
-- **Where the 3 reserved spare-switch positions go.** Proposed on `right_thumb`
-  as the control cluster; placement is an M2 decision with hands on the mule
-  `[repo] key-layout.yaml`, and it decides which board carries them **and which
-  plate gets the cutouts.**
-- ~~**The 74HC165 pin map and its 3.3 V thresholds** (§1, §2).~~ **CLOSED
-  2026-09-21.** The pin map is confirmed against Nexperia's Table 2 and the
-  thresholds against onsemi's published 3.0 V row — see §Derivations. It did
-  take rather more than five minutes, and it moved twice.
-- **`R-KEY-PU` at 2.2 kΩ versus 10 kΩ** (§2). The reason for 2.2 kΩ expired when
-  the register moved back to this board, and the cost — 25.8 mA on the ADC's
-  reference rather than 5.9 mA — arrived at the same moment. Live trade,
-  recorded on the carrier page as accepted.
 - **Plate-to-PCB standoff, and plate thickness** (§5). Both come from Gateron's
   drawing; the second blocks M4/M5 already.
-- **Whether the last 3 free bits should be marker bits too**, making it 11.
-  The argument that took the marker from 6 to 8 — a free bit has no plate
-  cutout and the body bonds shut, so it can never become a switch — applies to
-  these three unchanged, and strapping them costs *nothing* where pulling them
-  costs three resistors. Against: a pulled bit can still be jumpered at
-  bring-up, and 8 was decided deliberately. Left at 8/3 rather than drifting.
-- **Whether `LT` takes lighter springs** (`SW-THUMB`), which is an M1 decision by
-  hand and changes nothing electrically `[repo] bom.csv, 0002`.
 - **Conformal coating.** `MECH-COAT` covers the carrier; nothing says whether
   these boards are coated, and they sit under an open switch contact in a cavity
   that is breathed into. Coating a soldered mechanical switch is not obviously
