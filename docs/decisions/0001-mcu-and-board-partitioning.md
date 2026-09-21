@@ -317,11 +317,28 @@ than the output loop if the measurement at M1 says bounce demands it.) Note-*off
 stays filtered as before. This keeps the asymmetric debounce's fast attack while
 removing its single-sample credulity.
 
-**Use 4–6 of the 14 spare chain bits as a fixed marker pattern.** The pins, the
-wires and the devices already exist, so this costs nothing but the decision to
-wire it — and it cannot be added later. Firmware checks the marker on every
-read; a frame that fails it **holds the previous frame** rather than acting on
-garbage, and increments a **visible error counter**.
+**Use 8 of the 14 spare chain bits as a fixed marker pattern. DECIDED,
+2026-09-21** — this line read "4–6" until then. The pins, the wires and the
+devices already exist, so this costs nothing but the decision to wire it — and
+it cannot be added later. Firmware checks the marker on every read; a frame
+that fails it **holds the previous frame** rather than acting on garbage, and
+increments a **visible error counter**.
+
+**Eight, because four devices × two bits is what makes each device checkable on
+its own.** One bit wired high and one wired low per device means a device that
+is dead, unclocked, stuck high or stuck low fails its own marker — whichever way
+it broke, and whatever the other three are doing. At six, two devices get a
+single bit each and are only catchable failing in one direction.
+
+**The two extra bits come out of a pool worth nothing.** A "free" spare bit has
+no cutout in the key plate and no switch, and the body bonds shut, so it can
+never become an input. The three genuinely retrofittable positions are the
+reserved spare-switch bits — octave up, octave down, hold/preset — which have
+plate cutouts at M3 and are untouched by this. So the allocation is **6 marker →
+8 marker, 5 free → 3 free**, and the 3 that remain still get pulled per fix 6.
+
+The bit-by-bit assignment and levels are in
+`hardware/controller/cluster-boards.md` §4.
 
 That counter is the point. It is a framing check, not an error-detecting code —
 it cannot correct anything and will miss some corruptions — but it converts an
@@ -351,7 +368,7 @@ during performance.
   "the right price" for tail-mounted registers. The price is no longer paid.
 - **Chain is 4 registers, 32 bits, for 18 switches** (ADR 0010), **one per
   cluster board**. The 14 spare bits are free expansion for octave, mode and
-  hold inputs, and 4–6 of them carry the marker pattern. Full chain reads in
+  hold inputs, **8 of them carry the marker pattern** and 3 stay free. Full chain reads in
   ~32 µs at 1 MHz, about 13 % of a 250 µs loop period. **1 MHz is the design
   rate and the chain should not be pushed much past it**: it now crosses four
   connectors and ~265 mm of loom, and HC165's slow edges are what make that an

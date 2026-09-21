@@ -121,8 +121,12 @@ chain:
   - cluster: left_hand    # bits 24-31 — 5 used, 3 spare — SER end of the loom
 
 # Spare chain bits: 14 total, but NOT all available.
-#   4-6 are claimed by the marker pattern (ADR 0001) - wiring-only, and they
-#   cannot be added after the body is bonded.
+#   8 are claimed by the marker pattern (ADR 0001) - wiring-only, and they
+#   cannot be added after the body is bonded. DECIDED 2026-09-21: eight, not
+#   the 4-6 this file used to say. Two per device, one wired high and one
+#   wired low, so any device that is dead, unclocked, stuck high or stuck low
+#   fails its own marker whichever way it broke. See
+#   hardware/controller/cluster-boards.md section 4 for the bit assignment.
 #   3 are reserved for spare switches: octave up, octave down, hold/preset.
 #   The 5 genuinely free bits are FLOATING CMOS INPUTS and must be pulled -
 #   the exact fault R-KEY-PU exists to fix (ADR 0001).
@@ -131,9 +135,12 @@ chain:
 # The 2021 firmware triggered mode changes from key combinations (A[1], A[7],
 # A[8]); dedicated inputs are better and these bits are already paid for.
 spare_bits: 14
-spare_bits_marker: 6      # reserved, ADR 0001
+spare_bits_marker: 8      # DECIDED 2026-09-21, ADR 0001 - was 6
 spare_bits_switches: 3    # reserved, cutouts required at M3
-spare_bits_free: 5
+spare_bits_free: 3        # was 5; two went to the marker. A free bit has no
+                          # plate cutout and the body bonds shut, so it could
+                          # never have become a switch anyway. Still must be
+                          # pulled - floating CMOS input (ADR 0001 fix 6)
 
 # Fingering table lives in NVS and is editable at runtime, not compiled in
 # (ADR 0010). This file defines the physical layout only.

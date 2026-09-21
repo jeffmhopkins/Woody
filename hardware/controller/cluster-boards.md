@@ -284,10 +284,11 @@ later** `[repo] key-layout.yaml, 0010`, and the cutouts go in `PLATE-THUMB`.
 including the three unfitted spares — 21 sets, which is what `bom.csv` budgets
 `[repo]`.
 
-### The marker pattern: 8 bits, not 6, and here is the argument
+### The marker pattern: 8 bits, not 6 — DECIDED 2026-09-21
 
-`key-layout.yaml` books 6 marker bits and 5 genuinely free ones `[repo]`.
-**This page proposes 8 and 3.** The table above already shows the 8.
+`key-layout.yaml` booked 6 marker bits and 5 genuinely free ones. **It now says
+8 and 3** `[repo] key-layout.yaml, 0001`, and the table above shows the 8.
+The argument, for the record:
 
 A marker is a framing check: firmware reads it every scan, and a frame that
 fails it holds the previous frame and increments a visible error counter
@@ -404,7 +405,7 @@ Per board, from `bom.csv` `[repo]` unless marked **proposed**.
 | `J-CHAIN` | 2×6 IDC boxed, keyed | 1 | 2 | 2 | 2 | `LH` is the chain end and has `IN` only |
 | **`LK-SER`** | **3-pad solder link** | **B** | **A** | **A** | **A** | **Proposed — position B only on the chain-end board** |
 | **`R-SER-TERM`** | **10 kΩ 0805** | **1** | — | — | — | **Proposed — chain-end board only; makes the self-test a firmware choice** |
-| **marker straps** | **copper, no parts** | **2** | **2** | **2** | **2** | **Proposed — 8-bit marker, §4. Straight to GND or 3V3, no resistor and no cap: the node never changes** |
+| `marker straps` | copper, no parts | 2 | 2 | 2 | 2 | **Decided** — 8-bit marker, §4. Straight to GND or 3V3, no resistor and no cap: the node never changes |
 
 **Totals across the four boards:** 4 ICs, 4 decoupling caps, 18 fitted switches
 in 21 networked positions, 63 network passives, 7 chain connectors — **plus one
@@ -415,7 +416,8 @@ more `J-CHAIN` on the carrier, eight in all** `[repo] carrier.md §3`.
 ## Still open
 
 Ordered by what blocks what. The first two block the plate DXF, not just this
-board.
+board. **The marker pattern is no longer among them** — 8 bits, two per device,
+decided 2026-09-21 and recorded in `key-layout.yaml` and ADR 0001.
 
 - **The chain order, against the faces** (*The four boards*, above).
   `RT → RH → LH → LT` saves a
@@ -423,10 +425,6 @@ board.
   ADR 0001 itself prices at a few percent of hold margin. **If it changes,
   `left_thumb` and `left_hand` swap bit groups and §4's table moves with them.**
   Needs M3's geometry to confirm the crossing count is real.
-- **The marker pattern: 8 bits or 6, and which levels** (§4). Hard-wired copper,
-  unretrofittable, and firmware checks it every scan. This page proposes 8 with
-  one high and one low per device, and argues the 2 extra bits come out of a
-  pool that could never have been used.
 - **Where the 3 reserved spare-switch positions go.** Proposed on `right_thumb`
   as the control cluster; placement is an M2 decision with hands on the mule
   `[repo] key-layout.yaml`, and it decides which board carries them **and which
