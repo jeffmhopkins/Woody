@@ -65,21 +65,24 @@ are architectural, not preferences.
 **ESP32-S3**, as a bare module on a custom carrier — not a dev board — with
 satellite boards distributed along the body.
 
-> **Both halves of that sentence are superseded**, by ADR 0013 and by the
-> decision below. The MCU is a **dev board on a passive carrier at the tail**,
-> not a bare module, and there are **no satellite boards**: all four shift
-> registers live on that carrier. The topology diagram that stood here
-> described a three-zone instrument with the MCU at the top, which ADR 0013
-> also replaced. What survives from this ADR is the *family* choice and the
-> signal-integrity reasoning below.
+> **The first half of that sentence is superseded by ADR 0013**: the MCU is a
+> **dev board on a passive carrier at the tail**, not a bare module. **The
+> second half stands.** It was reversed for a while — an intermediate version
+> of this ADR moved all four shift registers to the carrier and said there were
+> "no satellite boards" — and *"One register per cluster"* below reversed it
+> back. The cluster boards are the satellite boards. The topology diagram that
+> originally stood here described a three-zone instrument with the MCU at the
+> top, which ADR 0013 replaced; the one below is current.
 
 ```
-TAIL   dev boards on a passive carrier: MCU, IMU, 8×8 matrix, breath sensor,
-       ADC, reference, ALL FOUR 74LVC165s, umbilical connector, USB-C
+TAIL   dev board on a passive carrier: MCU, IMU, 8×8 matrix, breath sensor,
+       ADC, reference, umbilical connector, USB-C. NO shift registers.
         |
-        |  four ribbons: one per key cluster, DC switch lines only
+        |  ONE chained run, 6 conductors per hop, passing through each
+        |  cluster board in turn: 3V3, GND, SCK, SH/LD, serial in, serial out
         |
-BODY   key clusters — switches, and nothing else
+BODY   four key cluster boards — switches, ONE 74HC165 each, its decoupling,
+       and that cluster's key networks. Every switch-to-chip link is a trace.
 ```
 
 The display is the only thing that cannot run far — high-bandwidth SPI with many
@@ -196,14 +199,42 @@ elsewhere make a single corrupted read worse than it looks:
 **Before any of that: the inputs need pull-ups, and there were none.** A 74x165's
 parallel inputs have no internal pull-up, so every key input floated when its
 switch was open — in a side channel shared with WS2815 power and 800 kHz data.
-A 12 V LED edge at ~120 V/µs through ~15 pF of loom coupling injects a full
-false level, straight into an asymmetric debounce that fires on the *first*
-closed sample. Three reviewers found this independently and it is unretrofittable.
+Three reviewers found this independently and it is unretrofittable.
 
-**Per switch position: 10 kΩ to 3V3, 100 Ω in series, 10 nF to ground**, on the
-carrier, at the register inputs. Press stays instant at ~1 µs; release gains a free ~93 µs
-hardware filter; LED coupling drops about 54 dB. Twenty-one sets, so the three
-reserved spare-switch bits are covered too. (`R-KEY-PU`, `R-KEY-SER`, `C-KEY`.)
+**The arithmetic those reviewers used was the wrong model** — the one corrected
+above: a 12 V edge through ~15 pF, `Q/C` into a bare wire. There is no 12 V
+edge, coupling is a divider, and the honest figure is 1.36 V of swing, landing
+at 1.94 V — nowhere near `V_IL` on either family (0.8 V for LVC, 0.99 V for the
+74HC165 actually fitted). **The pull-ups are still required**, for the plainer reason that a
+floating CMOS input has no defined state at all and sits wherever leakage,
+humidity and the last edge left it — which in a body that is breathed into for
+hours, at 10–20 K above ambient, is not a hypothetical. What the correction
+removes is the claim that coupling alone produces a false press.
+
+**Per switch position: 2.2 kΩ to 3V3, 100 Ω in series, 47 nF to ground**, on the
+**cluster board**, at the register inputs — which is now a few millimetres of
+trace from the switch rather than 265 mm of loom. Twenty-one sets across the
+four boards, so the three reserved spare-switch bits are covered too.
+(`R-KEY-PU`, `R-KEY-SER`, `C-KEY`; values per `bom.csv`.)
+
+`[calc]`, at 3.3 V into 74HC165 thresholds (`V_IH` 2.31 V, `V_IL` 0.99 V):
+
+| | |
+|---|---|
+| Release, τ = 2.2 kΩ × 47 nF | 103 µs; crosses `V_IH` at **125 µs** |
+| Press, τ = 100 Ω × 47 nF | 4.7 µs; crosses `V_IL` at **5.7 µs** — 44× inside the 250 µs scan |
+| Pole | 1.54 kHz → **54 dB** at the WS2815's 800 kHz data rate |
+| Static | **1.43 mA** per closed key; 18 closed = **25.8 mA** |
+
+> Earlier versions of this line read "~1 µs" and "~93 µs". Those were the
+> 10 kΩ/10 nF pair against LVC thresholds and both parts of that changed. The
+> conclusion does not: press is still instant on the scan's timescale and
+> release is still filtered. `bom.csv` row `C-KEY` carried the stale
+> "~1.4 µs / 176×" pair until this edit and now carries these figures.
+
+> **25.8 mA is 4.4× the old figure** and it is drawn from the dev board's 3V3
+> LDO, down the loom, as a play-rate step. That LDO is also the MCP3202's
+> voltage reference (the part has no `VREF` pin). See `hardware/controller/carrier.md` §2.
 
 Five further fixes, in descending order of value. The first four are wiring and
 cost nothing but planning; they cannot be retrofitted into a bonded body.
@@ -294,15 +325,19 @@ during performance.
 - Custom carrier design needed eventually: USB-C, ESD protection, boot/reset,
   3.3V regulation. Espressif publishes reference designs for this.
 - The 74x165 chain suits this geometry well. No matrix, no ghosting, no
-  diodes. **It does mean per-key wiring back to a central point**, which an
-  earlier version of this line listed as a thing the chain avoided — that was
-  true of the per-cluster arrangement and is the price of moving the registers
-  to the tail. It is the right price; see above.
-- **Chain is 4 registers, 32 bits, for 18 switches** (ADR 0010), all four on the
-  carrier. The 14 spare bits are free expansion for octave, mode and hold
-  inputs, and 4–6 of them carry the marker pattern. Full chain reads in ~32 µs
-  at 1 MHz, about 13 % of a 250 µs loop period, and it can be clocked
-  considerably faster now that it is all on one board.
+  diodes. **And with the registers back on the cluster boards it does not mean
+  per-key wiring back to a central point**: every switch-to-chip connection is
+  a trace on the board the switch is already soldered to, and six conductors
+  leave each cluster. An intermediate version of this line called that wiring
+  "the right price" for tail-mounted registers. The price is no longer paid.
+- **Chain is 4 registers, 32 bits, for 18 switches** (ADR 0010), **one per
+  cluster board**. The 14 spare bits are free expansion for octave, mode and
+  hold inputs, and 4–6 of them carry the marker pattern. Full chain reads in
+  ~32 µs at 1 MHz, about 13 % of a 250 µs loop period. **1 MHz is the design
+  rate and the chain should not be pushed much past it**: it now crosses four
+  connectors and ~265 mm of loom, and HC165's slow edges are what make that an
+  ordinary lumped load. Clocking it hard is how the transmission-line hazards
+  come back.
 - LED power and data run the length of the body too. Keep their ground return
   separate from the analog section and star-ground at one point, or the LEDs
   will be audible.

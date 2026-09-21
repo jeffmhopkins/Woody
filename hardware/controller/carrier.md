@@ -1,7 +1,10 @@
 # Real-time carrier — schematic
 
-**Status:** **First draft, 2026-09-21.** Not reviewed, not checked against a
-single datasheet — `waveshare.com`, `ti.com`, `nxp.com` and `analog.com` were all
+**Status:** **First draft 2026-09-21; §3 rebuilt the same day** after ADR 0001
+moved the shift registers back to the cluster boards. The draft was written
+against the tail-register topology and every figure that depended on it — the
+block diagram, §3, the loom count, the component table — has been redone. Not
+checked against a single datasheet — `waveshare.com`, `ti.com`, `nxp.com` and `analog.com` were all
 blocked from this sandbox. Read it as a proposal with its uncertainties marked,
 not as a design.
 
@@ -66,12 +69,12 @@ regulator's location open — see *Still open*.
       3V3 │  SPI3+latch  SPI2+2×CS   IO1/IO2     IO5/IO6  IO43/IO44
           │      │          │            │           │        │
    ┌──────▼──────▼───┐   ┌──▼────────┐ ┌─▼────────┐ ┌▼────────▼──────┐
-   │ KEY SCAN  §3    │   │ ADC  §2   │ │'125  §5  │ │ J-DISP   §6    │
-   │ 4 × 74LVC165    │   │ MCP3202   │ │ LED data │ │ HDR-SERVICE    │
-   │ 21 RC networks  │   └───────────┘ └──────────┘ └────────────────┘
+   │ CHAIN DRIVE §3  │   │ ADC  §2   │ │'125  §5  │ │ J-DISP   §6    │
+   │ no registers,   │   │ MCP3202   │ │ LED data │ │ HDR-SERVICE    │
+   │ no key networks │   └───────────┘ └──────────┘ └────────────────┘
    └───┬─────────────┘
        │
-   J-KEY-LH / -LT / -RH / -RT      → four ribbons up the body
+   J-CHAIN   ONE 6-way, chained through all four cluster boards (ADR 0001)
 ```
 
 ---
@@ -284,16 +287,24 @@ own `C-STRIP-BULK` note puts the WS2815 PWM rate at ~2 kHz `[repo] bom.csv`,
 which is exactly Nyquist for a 4 kHz sampler. 10 µF plus the existing 100 nF,
 treating that pin as an analog reference rather than a logic supply.
 
-**Key pull-ups load that same reference** `[calc]`:
+**Key pull-ups load that same reference, and they are 4.4× heavier than this
+page first costed them** `[calc]` — `R-KEY-PU` is 2.2 kΩ, not the 10 kΩ of the
+tail-register draft `[repo] bom.csv`:
 
 ```
-3.3 V / (10 kΩ + 100 Ω) = 327 µA per closed key
-18 keys closed = 5.9 mA step on the ADC's reference
-at an LDO load regulation of ~0.3 % per 100 mA [from memory]: 0.018 % = 0.7 LSB
+3.3 V / (2.2 kΩ + 100 Ω) = 1.43 mA per closed key
+18 keys closed           = 25.8 mA step on the ADC's reference
+at an LDO load regulation of ~0.3 % per 100 mA [from memory]: 0.077 % = 3.2 LSB
 ```
 
-Checked and fine. Recorded because the symptom of getting it wrong is "the
-breath reading moves when I press keys", which gets blamed on firmware.
+**Still fine, and no longer negligible.** 3.2 LSB is 0.2 % of the ~1594-count
+playable span, and because it is the reference moving it is a gain error rather
+than an offset — it scales with how hard you are blowing, which is the
+direction that hides it. Recorded because the symptom of getting it wrong is
+"the breath reading moves when I press keys", which gets blamed on firmware.
+See §3 and *Still open*: if this is ever to be removed rather than tolerated,
+the fix is a separate rail for the pull-ups or a real reference for the ADC,
+and both are board decisions, not firmware ones.
 
 ### Mechanical rules that live with this section
 
@@ -308,92 +319,119 @@ breath reading moves when I press keys", which gets blamed on firmware.
 
 ---
 
-## §3 Key scan — four 74LVC165 and 21 networks
+## §3 Chain drive — what is left after the registers went back
+
+**The registers are not on this board.** ADR 0001's *"One register per cluster"*
+put one 74HC165 on each cluster board, with that cluster's 2.2 kΩ/100 Ω/47 nF
+networks beside it, because the switches need a rigid PCB regardless (ADR 0002)
+and putting the register on it makes every switch-to-chip connection a trace
+`[repo] 0001, 0002`. **This page's first draft drew all four registers and all
+21 networks here.** That was the superseded topology; what follows replaces it.
 
 ```
-  3V3 (from the dev board)
-   │
-   ├──[R-KEY-PU 10k]──┬──────────────► 74LVC165 parallel input
-   │                  │
-   │           [C-KEY 10 nF]
-   │                  │
-   │                 GND
-   │                  │
-   └── loom ──[R-KEY-SER 100R]────────┘
-        conductor
-        to the switch, which shorts it to GND when pressed
+  HDR-DEV                                        J-CHAIN  (6-way, one connector)
+   3V3  ───────[F-CHAIN 3V3, see below]──────────► 1  3V3   → 21 pull-ups,
+   GND  ────────────────────────────────────────► 2  GND      4 × VCC, 4 × 100 nF
+   IO38  SPI3 SCK ──[R-CHAIN-SER 100R]──────────► 3  SCK    ** R PROPOSED **
+   IO7   latch    ──[R-CHAIN-SER 100R]──────────► 4  SH/LD  ** R PROPOSED **
+   IO33  SER out  ──[R-CHAIN-SER 100R]──────────► 5  SER    (into the far device)
+   IO40  MISO     ◄───────────────────────────── 6  QH     (out of the near one)
 
-  ×21  (18 fitted switches + 3 reserved spare-switch positions)
+              [U-TVS-CHAIN 4-ch array to DIG_GND]   ** PROPOSED **
 
-
-   SPI3 SCK (IO38) ──┬────────┬────────┬────────┐
-                     │        │        │        │
-   latch    (IO7)  ──┼──┬─────┼──┬─────┼──┬─────┼──┬──  SH/LD, all four
-                     │  │     │  │     │  │     │  │
-                  ┌──▼──▼──┐┌─▼──▼──┐┌─▼──▼──┐┌─▼──▼──┐
-  MISO   ◄────QH──┤ U-KEYS ││U-KEYS ││U-KEYS ││U-KEYS │
-  (IO40)          │   RT   ││  RH   ││  LT   ││  LH   │──SER── 3V3
-                  │bits 0-7││ 8-15  ││ 16-23 ││ 24-31 │
-                  └────────┘└───────┘└───────┘└───────┘
-                  CLK INH tied LOW on all four
-                  [C-DECOUPLE-165 100 nF] × 4, one per device
+  Chained, not starred (ADR 0001 fix 2): ONE run leaves this connector and
+  passes through right_thumb → right_hand → left_thumb → left_hand in turn.
+  bit 0 is the first bit clocked out = QH of right_thumb, the device nearest
+  the MCU (ADR 0001 fix 3, and config/key-layout.yaml).
 ```
 
-**Chain order and `bit 0`** follow `key-layout.yaml` `[repo]`: `bit 0` is the
-first bit clocked out, which is `QH` of the `right_thumb` device. **Which
-parallel input (`H`…`A`) maps to which switch inside each device is not
-specified anywhere** and is a layout decision — see *Still open*.
+**`CLK INH` is tied low and `SER` is terminated at the far device** — both on
+the cluster boards, not here `[repo] 0001`.
 
-### The 100 Ω has to be at the connector, and the 10 nF at the register
+### What this board still owes the chain
 
-ADR 0001's decisive arithmetic is `180 pC / 10 nF = 18 mV` `[repo] 0001`. In the
-topology above the charge lands on the **loom** side of `R-KEY-SER`, not directly
-in `C-KEY`, so the conclusion needs checking. It survives `[calc]`:
+**1. The 3V3 rail, and it is a bigger load than it was** `[calc]`. The pull-ups
+went 10 kΩ → 2.2 kΩ when the register moved back beside its switch `[repo]
+bom.csv`:
 
 ```
-Loom conductor ≈ 40 pF; 180 pC injected → +4.5 V spike at the loom node
-Redistribution into C-KEY through R-KEY-SER:
-  τ = 100 Ω × (40 pF ∥ 10 nF) = 100 Ω × 39.8 pF = 4.0 ns
-  final common voltage = 180 pC / 10.04 nF = 17.9 mV
+3.3 V / (2.2 kΩ + 100 Ω) = 1.43 mA per CLOSED key
+18 closed                = 25.8 mA, as a step, at play rate
+plus 4 × 74HC165 quiescent, negligible
 ```
 
-The loom node spikes for about twenty nanoseconds and the register input never
-moves more than 18 mV. **The mechanism is charge sharing in nanoseconds, not RC
-filtering in microseconds** — which is a layout rule: `C-KEY` must be at the
-register input and `R-KEY-SER` must be short and at the connector. Split them
-across the board and the 4 ns becomes whatever the trace inductance says.
+> **That current comes out of the dev board's 3V3 LDO, which is also the
+> MCP3202's voltage reference** — the part has no `VREF` pin, `VDD` *is* the
+> reference `[repo] R10 B4`. At a load regulation of ~0.3 % per 100 mA
+> `[from memory]`, 25.8 mA moves the reference **0.077 %, about 3.2 LSB**, in
+> step with how many keys are held.
+>
+> 3.2 LSB against a playable breath span of ~1594 counts is 0.2 % — almost
+> certainly inaudible, and it is the *reference* moving, so it scales the
+> reading rather than offsetting it. **Recorded rather than fixed, because the
+> symptom of being wrong about it is "the breath reading moves when I press
+> keys", which gets blamed on firmware for a week.** The first draft costed
+> this at 5.9 mA and 0.7 LSB, against the old 10 kΩ. See *Still open*.
 
-**The other two numbers** `[calc]`, both matching ADR 0001:
+**2. A ground return per clocked signal** `[repo] 0001 fix 1` — the highest
+value item on ADR 0001's list, and now the *only* thing in the loom that can be
+corrupted. With the registers distributed, a disturbed key line no longer
+exists as a loom signal; what runs the body is four clocked lines whose blast
+radius is the whole 32-bit word, and a glitch on `SH/LD` reloads every register
+mid-shift `[repo] 0001`. **Six conductors is the signal count, not the
+conductor count.** Whether this connector is 6-way or 10-way is a decision this
+page cannot take alone — see *Still open*.
 
-```
-Release: τ = 10 kΩ × 10 nF = 100 µs
-         to V_IH = 2.0 V (74LVC165A at 3.3 V [from memory]):
-         t = −100 µs × ln(1 − 2.0/3.3) = 93.2 µs        ✓ "~93 µs"
-Press:   τ = 100 Ω × 10 nF = 1 µs
-         to V_IL = 0.8 V: t = −1 µs × ln(0.8/3.3) = 1.4 µs   ✓ "~1 µs"
-Static:  3.3 V / 10.1 kΩ = 327 µA per closed key; 18 closed = 5.9 mA
-```
+**3. `F-CHAIN`, or not.** The 3V3 conductor leaves this board, runs 265 mm
+through a bonded body next to 12 V LED power, and comes back as nothing. A
+short on it browns out the dev board's LDO and takes the instrument down with
+no diagnosis. A 100 mA polyfuse or a 0603 fuse is two millimetres of board.
+**Proposed, not in the BOM.**
 
-### The 32 bits, accounted for
+### Why the old charge-sharing derivation is gone
 
-From `key-layout.yaml` `[repo]`:
+The first draft carried ADR 0001's `180 pC / 10 nF = 18 mV`, and a companion
+figure of **+4.5 V on the loom node** from `180 pC / 40 pF`. Both are dead, for
+two independent reasons, and neither should be reintroduced:
 
-| Bits | Use | On this board |
+- **The model was wrong.** ADR 0001 now records it: there is no 12 V edge (the
+  WS2815 rail is held by 470–1000 µF and its LED current is PWM'd at ~2 kHz),
+  `Q/C` is the wrong model because coupling is a *divider*, and a passive
+  divider cannot exceed the aggressor's own swing — so 4.5 V was 37 % above
+  the ceiling of its own mechanism. Corrected, an unfiltered wire sees
+  **1.36 V** `[repo] 0001`.
+- **The node no longer exists.** The key network sits on the cluster board, a
+  few millimetres from its switch. There is no loom conductor between the
+  switch and the register input for anything to couple into.
+
+**The key networks are still fitted** — see ADR 0001 for why (a floating CMOS
+input has no defined state, in a cavity that is breathed into for hours) — but
+they are a bounce filter and cheap insurance, not the thing that makes the
+topology safe, and they are not this board's parts.
+
+### The 32 bits, and where each decision now lives
+
+From `config/key-layout.yaml` `[repo]`:
+
+| Bits | Use | Whose board |
 |---|---|---|
-| 18 | Fitted switches | Full `R-KEY-PU` / `R-KEY-SER` / `C-KEY` network + loom conductor |
-| 3 | Reserved spare switches (octave up, octave down, hold/preset) | Same network, same loom conductor. Plate cutouts at M3 `[repo] 0010` |
-| 6 | Marker pattern | **Hard-wired to a fixed level at the register input.** Unretrofittable |
-| 5 | Genuinely free | Must be pulled — "the exact fault `R-KEY-PU` exists to fix" `[repo] key-layout.yaml` |
-| **32** | | 21 networks + 11 tied inputs |
+| 18 | Fitted switches | **Cluster boards** — network + trace to the switch |
+| 3 | Reserved spare switches (octave up, octave down, hold/preset) | **Cluster boards** — network fitted, pad unloaded. Plate cutouts at M3 `[repo] 0010` |
+| 6 | Marker pattern | **Cluster boards** — hard-wired at the register input. Unretrofittable |
+| 5 | Genuinely free | **Cluster boards** — must be pulled `[repo] key-layout.yaml` |
+| **32** | | **None of them on this carrier** |
 
-**Which six bits carry the marker, and to what pattern, is not decided.** It is
-hard-wired copper, so it has to be decided before this board is made. See
-*Still open*.
+**Which six bits carry the marker and to what pattern is still undecided, and
+it is now a cluster-board decision** — as is the `H`…`A`-to-switch mapping
+inside each device. Both still have to be settled before *those* boards are
+made, and firmware has to be told about both. They are off this page's critical
+path, not off the project's.
 
-**An option worth costing:** give the 5 free bits the full network too (26 sets
-instead of 21, +15 passives) and land them on the spare loom conductors ADR 0009
-already requires. That makes "add a switch later" real rather than nominal, at
-the price of fifteen 0805s. It is not what the BOM says today.
+**The option worth costing has got cheaper.** Giving the 5 free bits the full
+network too is now 15 passives spread across four boards that already carry
+21 sets, with no extra loom conductors at all — under the tail topology it also
+needed five more wires down the body. If "add a switch later" is worth
+anything, this is the moment it costs least.
 
 ---
 
@@ -415,16 +453,21 @@ said "Series current limiting on `SCLK` and `CS` at the driving end — **ADD**"
 driving end is this board. ADR 0004 calls `SCLK` "the fastest edge in the
 system" and sends it down 2 m of unterminated ~100 Ω twisted pair `[repo] 0004`.
 
-Value follows `R-MOSI-SER`'s own reasoning `[repo] 0004`: 220 Ω into ~200 pF of
-cable is a 7.9 MHz corner against a 2 MHz clock; if E11 wants faster, all three
-come down toward 100 Ω, which is closer to a real source match on Cat5.
+Value follows `R-MOSI-SER` `[repo] 0004`, **but not the arithmetic this page
+first quoted.** 220 Ω into ~200 pF of cable is a **3.62 MHz** corner, not
+7.9 MHz — 7.9 MHz is the 100 Ω case `[calc]`, and ADR 0004 carried the two the
+wrong way round until the schematic review caught it `[repo] 0004, S1, C5`.
+2 MHz still has margin against 3.62 MHz, but less than the ADR claimed.
+**ADR 0004's corrected text puts the transmission-line-right value nearer
+68 Ω** (11.7 MHz corner, and a closer source match to Cat5's ~100 Ω); take all
+three down together if E11 wants the headroom.
 
 ### The two SPI hosts, and what claims them
 
 | Host | Devices | Clock |
 |---|---|---|
 | **SPI2** | DAC8568 down the umbilical, **and** MCP3202 on this board | **2 MHz for the DAC, 900 kHz for the ADC — not one clock** |
-| **SPI3** | 74LVC165 chain alone, because `QH` is always driven (ADR 0001) | ~1 MHz |
+| **SPI3** | 74HC165 chain alone, because `QH` is always driven (ADR 0001) | **1 MHz, and not much more** — the chain crosses four connectors and ~265 mm of loom, and HC's slow edges are what keep that a lumped load `[repo] 0001` |
 
 > **The MCP3202 cannot run at 2 MHz.** `[from memory]`, via `R10` §B-3: 100 ksps
 > at 5 V and 50 ksps at 2.7 V, 18 clocks per 12-bit conversion → **1.8 MHz at
@@ -445,6 +488,7 @@ SPI2  DAC    6 × 32 bits @ 2.0 MHz =  96.0 µs
 SPI2  ADC    24 clocks    @ 0.9 MHz =  26.7 µs
 SPI2  total                         = 122.7 µs of 250 µs → 49 %
 SPI3  keys   32 bits      @ 1.0 MHz =  32.0 µs, concurrent → 13 %
+             (+ four HC165 propagation delays, tens of ns each — noise)
 ```
 
 **SPI2 cannot use IO_MUX and does not need to.** The S3's FSPI IO_MUX pins are
@@ -604,11 +648,10 @@ page and have no BOM entry yet.
 |---|---|---|---|
 | `U-MCU-RT` | ESP32-S3-Matrix | The instrument. Socketed on `HDR-DEV` | `[repo]` |
 | `HDR-DEV` | 2 × 10-way machined socket | **Qty is one board's worth, not two** — the display board is 360 mm away | `[board-def]` for the pin count |
-| `U-KEYS` ×4 | 74LVC165A SOIC-16 | Key chain, `CLK INH` low, on SPI3 | `[repo]` |
-| `R-KEY-PU` ×21 | 10 kΩ | Pull-up at the register input | `[repo]` + `[calc]` |
-| `R-KEY-SER` ×21 | 100 Ω | In the loom path, at the connector | `[repo]` + `[calc]` |
-| `C-KEY` ×21 | 10 nF X7R | At the register input | `[repo]` + `[calc]` |
-| `C-DECOUPLE-165` ×4 | 100 nF X7R | One per register | `[repo]` |
+| ~~`U-KEYS`, `R-KEY-PU`, `R-KEY-SER`, `C-KEY`, `C-DECOUPLE-165`~~ | — | **Not on this board.** 4 ICs and 63 passives moved to `PCB-CLUSTER` with ADR 0001's per-cluster decision. They are still in the BOM, against the cluster boards | `[repo] 0001, bom.csv` |
+| **`R-CHAIN-SER`** ×3 | **100 Ω** | **Proposed — series at the driving end on `SCK`, `SH/LD` and `SER`. ADR 0001 deleted `R-TERM-CHAIN` because series termination is wrong for a line that drops on four boards; this is edge-rate damping at the source, which is a different job and survives that argument** | proposed |
+| **`U-TVS-CHAIN`** | **4-ch array, SOT-23-6** | **Proposed — the chain's four signals leave the board and run the body. `U-TVS-SPI` does exactly this for the umbilical's three** | proposed |
+| **`F-CHAIN`** | **100 mA polyfuse** | **Proposed — the 3V3 conductor runs 265 mm beside 12 V LED power in a bonded body, and a short on it takes the LDO and the instrument down** | proposed |
 | `U-ADC` | MCP3202-CI/SN | `VDD` **is** `VREF`; 3V3 from the dev board | `[repo]`; clock limit `[from memory]` |
 | `R-ADCDIV` | 10 kΩ / 15 kΩ 1 % | 0.6× after the buffer | `[repo]` + `[calc]` |
 | `C-AA-ADC` | 47 nF C0G | 564 Hz, and the ADC's charge reservoir | `[repo]` + `[calc]` |
@@ -634,7 +677,7 @@ page and have no BOM entry yet.
 | `D-TVS-PWR` | SMAJ15A | Across the power pair | `[repo]` |
 | `C-STRIP-BULK` ×2 | 470–1000 µF 16 V | At each strip feed point, which is this board | `[repo]` |
 | `HDR-SERVICE` | 2×5 | **See §6 — may not be wireable for the real-time board** | `[repo]`; `[board-def]` risk |
-| **`J-KEY-LH/-LT/-RH/-RT`** | **2×5, 2×4, 2×6, 2×4 IDC** | **Proposed — ribbon with alternating grounds, one per cluster** | proposed |
+| **`J-CHAIN`** | **2×5 IDC (6 signals + returns)** | **Proposed — ONE connector, chained through four cluster boards. Width TBD by the ground-return rule, not by the signal count** | proposed |
 | **`J-LED-L/-R`** | **4-way each** | **Proposed — 12 V, GND, DI, BI** | proposed |
 | **`J-DISP`** | **11-way** | **Proposed — see §6** | proposed |
 | `MECH-GNDBOND` | Ring terminal + M3 | Plate to `PWR_GND`. Needs a pad and a hole on this board | `[repo]` |
@@ -650,29 +693,42 @@ page and have no BOM entry yet.
 
 | | Conductors |
 |---|---|
-| Fitted switches | 18 |
-| Reserved spare-switch positions (wire must exist pre-bond) | 3 |
-| Grounds, one per four signals per ribbon | 6 |
-| Two spare conductors per loom × 4 | 8 |
-| **Key looms** | **35** |
+| Chain signals: `SCK`, `SH/LD`, `SER`, `QH` | 4 |
+| Chain power: 3V3, GND | 2 |
+| Extra returns — ADR 0001 fix 1 wants one per clocked signal | 0–3 |
+| Two spare conductors (ADR 0009) | 2 |
+| **Key loom, all four clusters, chained** | **8–11** |
 | WS2815: 12 V, GND, `DI` per strip (+`BI` if needed) | 6–8 |
 | Display loom (§6) | 10–11 |
 | Plate ground bond | 1 |
-| **Terminating on this board, excluding the umbilical** | **~53** |
+| **Terminating on this board, excluding the umbilical** | **~25–31** |
 | Umbilical (`J-UMB`) | 8 |
 
-**Termination is not the problem.** `[calc]` As four IDC boxed headers matching
-the ribbons ADR 0001 already specifies, the key looms occupy roughly 400 mm²
-including keepout on a board of ~4500 mm². Single-row 2.54 mm headers would be
-the problem — 53 × 2.54 = 135 mm of board edge, which this outline does not
-have.
+**The first draft of this table said ~53 and called the repo's "~23" wrong.**
+`[repo] 0001, WIRE-LOOM, ROADMAP` That was the tail-register arithmetic — 35
+conductors of key loom, one per switch. **On the per-cluster topology the
+repo's figure is approximately right after all**, and this page withdraws the
+objection. ~25–31 against ~23; the gap is the display loom's service pins and
+the spares, not a counting error.
+
+**Termination is not the problem.** `[calc]` As IDC boxed headers, ~28
+conductors occupy roughly 250 mm² including keepout on a board of ~4500 mm².
+Even single-row 2.54 mm headers would now fit — 28 × 2.54 = 71 mm of board
+edge against ~290 mm of perimeter — though IDC is still the right choice for a
+loom that is hand-terminated once and then bonded shut.
 
 **Where they go is the problem.** `[calc]` 57 mm external less 2 × 4 mm acrylic
 `[repo] 0009` = **49 mm internal**. `PCB-CARRIER` at 45 mm leaves **2 mm per
 side** for two channels that ADR 0009 and ADR 0014 jointly require to carry two
-WS2815 strips (~10 mm wide each `[from memory]`), four ribbons and the 400 mm
-tube. **A 45 mm-wide carrier and open side channels are mutually exclusive.**
-This is the M4 plan-section item, and the board outline depends on it.
+WS2815 strips (~10 mm wide each `[from memory]`), the key loom and the 400 mm
+tube. **A 45 mm-wide carrier and open side channels are still mutually
+exclusive**, and the board outline still depends on the M4 plan section.
+
+**But the per-cluster decision bought real room here**, which is worth saying
+because the width crunch was one of the arguments in play: the channels now
+carry **one 8–11 way loom instead of four ribbons totalling 40–56 mm of
+width** `[repo] 0001`. That is the difference between a narrower carrier being
+a sacrifice and it being an ordinary trade.
 
 ---
 
@@ -688,18 +744,33 @@ Ordered by what blocks what. The first four block layout.
   row spacing** (§7). Decides underside-mount versus a ~22 mm cutout, and with
   it the whole board's routing.
 - **The board outline, against a plan section at the tail** — carrier, two LED
-  strips, four ribbons, the breath tube and the U-bolt in 49 mm of internal
-  width and ~20 mm of cavity. "~100 × 45 mm" is an assumption, not a fit.
+  strips, one 8–11 way key loom, the display loom, the breath tube and the
+  U-bolt in 49 mm of internal width and ~20 mm of cavity. "~100 × 45 mm" is an
+  assumption, not a fit — but a less tight one than the four-ribbon draft had.
 - **Where buck B lives.** ADR 0013's carrier list puts both regulators here;
   ADR 0013's own reasoning wants the display board's WiFi transients absorbed
   locally, which a regulator 360 mm away does not do. Either it moves to the
   display board and +12 V goes up the loom, or `C-BULK-DISP` does the job and
   the location is arbitrary. Pick one before `J-DISP`'s conductor list is fixed.
-- **The marker pattern: which six bits, and to what levels.** Hard-wired copper
-  on this board, and firmware checks it on every read `[repo] 0001`. Unretrofittable.
-- **The `H`…`A` to switch mapping inside each 74LVC165.** `bit 0` is defined
-  `[repo] key-layout.yaml`; the other 31 are a layout decision that firmware
-  then has to be told about.
+- **How wide `J-CHAIN` actually is.** Six signals; ADR 0001's highest-value
+  signal-integrity fix is "a ground return per signal" `[repo] 0001`, which
+  makes it nine or ten. The connector, the loom and the four cluster-board
+  connectors all have to agree, and the body bonds shut over the answer.
+- **Whether the key pull-ups are allowed to share the ADC's reference** (§2, §3).
+  25.8 mA of play-rate load on the rail that *is* the MCP3202's `VREF`, worth
+  3.2 LSB. Tolerable, and the alternatives — a separate 3V3 for the chain, or
+  an ADC with a real `VREF` pin — are both board changes, so the moment to
+  decide is before layout and not after the first odd measurement.
+- **`F-CHAIN`** (§3): whether the 3V3 conductor going down the body is fused.
+  Two millimetres of board, unretrofittable, and the failure it covers is
+  "the instrument is dead and there is no way to look inside".
+
+> **Two items left this page with the registers.** The **marker pattern**
+> (which six bits, to what levels) and the **`H`…`A`-to-switch mapping** are
+> now `PCB-CLUSTER` decisions `[repo] 0001, 0002`. Both are still
+> unretrofittable, both still have to be told to firmware, and neither is any
+> less urgent — they are just not on this board's critical path. They belong on
+> the cluster-board page, which does not exist yet.
 - **Whether the sensor is reachable after bonding**, which decides whether
   `SKT-BREATH` earns its place. ADR 0003 wants a replaceable wear part and a
   trap "clearable without disassembly"; ADR 0009 gives a 12 × 40 mm cover over a
