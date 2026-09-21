@@ -39,6 +39,54 @@ there. What the number is good for is bracketing: standard MX plates are
 1.5 mm, this KS-33 build used 1.1 mm, and **neither is 2 mm.** See ADR 0002 for
 what that means for an aluminium plate.
 
+## The Z stack, measured off a solid model — 2026-09-21
+
+`datasheets/mechanical/GATERON-KS-33-3D.step` is a five-body STEP solid
+(`PRODUCT('Gateron_KS_33_v3')`), measured with OpenCASCADE rather than read off
+a drawing. **It is third-party CAD, not a Gateron document** — gateron.com and
+the archive are both unreachable and no vendor file exists on GitHub. Treat the
+numbers as the best available bracket, not as specification.
+
+Datum: **z = 0 at the underside of the 15 × 15 mm collar** — the only surface
+on the switch that can seat on a plate.
+
+| Feature | Position |
+|---|---|
+| Collar, the plate seat | 15.0 × 15.0 mm, 0.50 mm thick, z = 0 → +0.50 |
+| **Section that passes through the cutout** | 14.0 × 14.0 mm, **only 2.50 mm deep** |
+| Housing bottom | **−2.50 mm** |
+| Pin blades, narrow through-hole section | −3.2 → **−5.10 mm** |
+| Centre pole, ⌀5.04 mm | tip at **−5.70 mm** |
+| Stem top, MX cross | +7.05 mm |
+| Overall | 15.0 × 15.0 × **12.75 mm** |
+
+### This answers the plate-to-PCB standoff, and the answer is "there isn't one"
+
+The pins reach **5.10 mm** below the seat and only the last **1.9 mm** is the
+narrow blade that goes through a hole. So the PCB top has to sit within roughly
+**3.2–3.6 mm** of the seat for the blade to fill the hole and protrude enough to
+solder. A 2 mm plate leaves 1.2–1.6 mm; a 1.5 mm plate leaves 1.7–2.1 mm.
+
+**Either way the board is effectively hard against the plate underside.**
+`cluster-boards.md` assumes a standoff exists and uses it for component height
+on the plate-facing side. It does not exist. The centre pole also needs a
+**⌀5.25 mm clearance hole through the plate *and* the PCB**, protruding ~2 mm
+below the board.
+
+### And the retention clip may not be a clip
+
+`ks33-geometry.md` and ADR 0002 have both been waiting on "the clip dimension
+from Gateron's drawing". **This model has no horizontal clip shoulder at all.**
+What it has is four tapered flexing arms on the ±X sides, whose outer faces run
+**14.69 mm at the bottom widening to 14.99 mm just under the collar** — 0.35 to
+0.49 mm proud of the 14 mm cutout per side, **widest at the top**. There is no
+downward-facing ledge anywhere.
+
+If that is real geometry rather than CAD simplification, retention is an
+**interference press against flexing arms**, not a snap — and ADR 0002's "at
+2 mm the clips will not engage at all" is the wrong shape of worry. The right
+worry is the 2.50 mm through-section: a 2 mm plate consumes 80 % of it.
+
 ## Pin and pole positions
 
 From `IansLibrary.pretty/gateron-ks27.kicad_mod` (used with KS-33 switches in
@@ -50,6 +98,17 @@ the footprint carries the older name):
 | Centre pole | (0, 0) | ⌀5.0 mm |
 | Pin 1 | (2.6, 5.75) | ⌀1.5 mm drill |
 | Pin 2 | (−4.4, 4.7) | ⌀1.5 mm drill |
+
+**Independently confirmed 2026-09-21** by a second footprint from a different
+library, `datasheets/mechanical/GATERON-KS-33-SW_KS33_1u.kicad_mod`
+(`descr "Footprint for Gateron KS33 switches"`): same two pin positions, drill
+**⌀1.2** rather than ⌀1.5, centre pole **⌀5.25**, and its `Eco2.User` layer
+draws the plate cutout as **14.0 × 14.0 mm with R0.5 corners** — a third
+independent source for the 14 mm cutout, alongside the 47 STL cutouts above.
+
+The STEP model shows why ⌀1.2 is the better number: **the pins are flat blades,
+2.0 × 0.45 mm at the root narrowing to 1.0 × 0.45 mm** through the
+board — not round pins.
 
 **There are no alignment posts.** The repository's combined `gateron-ks27-mx`
 footprint carries MX's two ⌀1.75 mm posts at (±5.08, 0) *and* MX's own pin

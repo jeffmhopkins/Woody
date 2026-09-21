@@ -222,8 +222,8 @@ four boards, so the three reserved spare-switch bits are covered too.
 
 | | |
 |---|---|
-| Release, τ = 2.2 kΩ × 47 nF | 103 µs; crosses `V_IH` at **119.9 µs** |
-| Press, τ = 100 Ω × 47 nF | 4.7 µs; crosses `V_IL` at **5.92 µs** — 42× inside the 250 µs scan |
+| Release, τ = 2.2 kΩ × 47 nF = 103.4 µs | crosses `V_IH` at **138.7 µs** |
+| Press, τ = (2.2 kΩ ∥ 100 Ω) × 47 nF = 4.496 µs | crosses `V_IL` at **6.89 µs** — 36× inside the 250 µs scan |
 | Pole | 1.54 kHz → **54 dB** at the WS2815's 800 kHz data rate |
 | Static | **1.43 mA** per closed key; 18 closed = **25.8 mA** |
 

@@ -41,21 +41,23 @@ figures:
 
   - id: key-release-time
     quantity: Key network release, crossing V_IH
-    value: "119.9 us"
+    value: "138.7 us"
     status: settled
     owner: hardware/controller/cluster-boards.md
-    derivation: "Pressed node sits at 3.3 x 100/(2200+100) = 0.1435 V, NOT 0 V. Charging through 2.2k: t = -103.4us x ln((3.3-2.31)/(3.3-0.1435)) = 119.9 us"
-    forbidden: ["`V_IH` at **125", "release ~93 us", "~93 µs hardware", "93.2 us"]
+    derivation: "Pressed node sits at 3.3 x 100/(2200+100) = 0.1435 V, NOT 0 V. Charging through 2.2k (tau = 103.40 us): t = -103.40 x ln((3.3-2.475)/(3.3-0.1435)) = 138.7 us"
+    threshold_note: "V_IH = 2.475 V = 0.75 x VCC, NOT 0.70 x VCC. The SN74HC165 datasheet (SCLS116E, datasheets/other-semi/74HC165.pdf) has NO 3.3 V row - it tabulates 2 V (1.5/0.5 = 0.75/0.25), 4.5 V (3.15/1.35 = 0.70/0.30) and 6 V (4.2/1.8 = 0.70/0.30). The 0.70/0.30 ratio holds at 4.5 V and above and BREAKS at 2 V, so extrapolating it DOWN to 3.3 V runs through the one datapoint that contradicts it. The conservative bound is the 2 V ratio. Verified against the PDF 2026-09-21; the page carried 2.31 V marked [from memory]."
+    forbidden: ["`V_IH` at **125", "release ~93 us", "~93 µs hardware", "93.2 us", "119.9 us", "119.9 µs", "at **119.9", "0.7 x VCC = 2.31", "0.7 × VCC = 2.31"]
     false_positive_note: "A bare 125 us also legitimately means the MEAN SAMPLING PERIOD (0-250 us at 4 kHz) and the 8 kHz LOOP PERIOD. Match the phrase, not the numeral."
     note: "Starting from 0 V instead of the divider voltage gives 124.5 us, which is the error the 125 us figure came from."
 
   - id: key-press-time
     quantity: Key network press, crossing V_IL
-    value: "5.92 us"
+    value: "6.89 us"
     status: settled
     owner: hardware/controller/cluster-boards.md
-    derivation: "tau = (2200||100) x 47nF = 4.496 us; t = -4.496 x ln((0.99-0.1435)/(3.3-0.1435)) = 5.92 us"
-    forbidden: ["`V_IL` at **5.7", "~1.4 µs / 176", "176× margin", "176x margin against"]
+    derivation: "tau = (2200||100) x 47nF = 4.4957 us; t = -4.4957 x ln((0.825-0.1435)/(3.3-0.1435)) = 6.89 us"
+    threshold_note: "V_IL = 0.825 V = 0.25 x VCC. Same reason as key-release-time - see its threshold_note. Note also that tau is the PARALLEL combination, 4.4957 us, not 100 ohm x 47 nF = 4.7 us; the page stated 4.7 us beside a crossing time computed from 4.496."
+    forbidden: ["`V_IL` at **5.7", "~1.4 µs / 176", "176× margin", "176x margin against", "5.92 us", "5.92 µs", "at **5.92", "0.3 x VCC = 0.99", "0.3 × VCC = 0.99"]
 
   - id: marker-bits
     quantity: Marker pattern width

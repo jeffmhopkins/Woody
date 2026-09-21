@@ -140,7 +140,13 @@ ADR 0009 specifies a ~2 mm aluminium top plate. Standard MX plates are 1.5 mm;
 the reference KS-33 build uses **1.1 mm**. Neither is 2 mm, and a low-profile
 switch has shallower retention tabs than full-height MX to begin with.
 
-At 2 mm the clips will not engage at all. **That is survivable but it changes
+At 2 mm the clips will not engage at all — **though "clips" may be the wrong
+word.** A solid model measured 2026-09-21
+(`docs/reference/ks33-geometry.md`) shows **no horizontal clip shoulder**, only
+four tapered flexing arms that are *widest just under the collar*. If that is
+real, retention is an interference press and there is no ledge to miss. **The
+constraint that does bite either way: the through-cutout section is only
+2.50 mm deep**, so a 2 mm plate consumes 80 % of it and a 1.5 mm plate 60 %. **That is survivable but it changes
 which requirement is load-bearing:** the switch still seats on its top flange,
 the cutout still captures it laterally, and it is still soldered — but
 requirement 2 above, *"something backs the switch so it cannot push through"*,
@@ -196,7 +202,10 @@ plunger in the hysteresis gap and chatter for tens of milliseconds.
 
 ## Open
 
-**Plate thickness**, pending the clip dimension from Gateron's drawing — 1.5 mm
+**Plate thickness**, no longer pending a clip dimension — the best available
+model says there is no clip shoulder, and Gateron's own drawing is unreachable
+from anywhere (`datasheets/MANIFEST.csv`). Decide it against the 2.50 mm
+through-section and the zero standoff instead — 1.5 mm
 with lamination doing the stiffening, or 2 mm with a structural backer. Blocks
 M4 and M5.
 

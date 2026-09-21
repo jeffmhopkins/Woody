@@ -594,16 +594,29 @@ being asked to guess.
 | **SPI2** | DAC8568 down the umbilical, **and** MCP3202 on this board | **2 MHz for the DAC, 900 kHz for the ADC — not one clock** |
 | **SPI3** | 74HC165 chain alone, because `QH` is always driven (ADR 0001) | **1 MHz, and not much more** — the chain crosses four connectors and ~265 mm of loom, and HC's slow edges are what keep that a lumped load `[repo] 0001` |
 
-> **The MCP3202 cannot run at 2 MHz.** `[from memory]`, via `R10` §B-3: 100 ksps
-> at 5 V and 50 ksps at 2.7 V, 18 clocks per 12-bit conversion → **1.8 MHz at
-> 5 V, 0.9 MHz at 2.7 V**, and 3.3 V is not specified, so 0.9 MHz is the number
-> to design to. ADR 0003, ADR 0004, `latency-budget.md` and `power-entry.md` all
-> say "SPI2 at 2 MHz", and ADR 0004 explicitly says that leaves room "for the
-> MCP3202 sharing the host" `[repo]`.
+> **The MCP3202 cannot run at 2 MHz.** `[repo, verified]` against Microchip
+> DS21034F, now at `datasheets/other-semi/MCP3202-CI-SN.pdf`. The Timing
+> Parameters table gives `fCLK` max = **1.8 MHz at VDD = 5 V** and **0.9 MHz at
+> VDD = 2.7 V**. There is no 3.3 V row. ADR 0003, ADR 0004,
+> `latency-budget.md` and `power-entry.md` all say "SPI2 at 2 MHz", and ADR 0004
+> explicitly says that leaves room "for the MCP3202 sharing the host" `[repo]`.
+>
+> **0.9 MHz is safer than this page claimed, not shakier.** Two documents called
+> it "an interpolation from a search summary". It is not an interpolation at
+> all — it is the datasheet's *guaranteed maximum at 2.7 V*, so applying it at
+> 3.3 V is strictly conservative. A straight-line interpolation to 3.3 V would
+> give ≈1.14 MHz, so there is ~25 % of headroom the design is not claiming.
+> Both `fCLK` rows carry Note 2: established by characterisation, not 100 %
+> tested.
+>
+> **And there is a minimum nobody had.** §6.2: the sample capacitor holds
+> charge for at least 1.2 ms at 85 °C, so the end of the sample period to the
+> last data bit must fit inside that — an effective **`fCLK` ≥ ~10 kHz**. Not
+> binding at 900 kHz, but it forecloses "slow the ADC down" as a way to buy
+> loop time.
 >
 > ESP-IDF sets `clock_speed_hz` per *device* on a shared host, so this is a
-> firmware line and not a part change. **It is written nowhere.** Check the
-> MCP3202 datasheet's supply-versus-speed graph before trusting the 0.9 MHz.
+> firmware line and not a part change. **It is written nowhere.**
 
 **Loop budget with the ADC costed properly** `[calc]` — ADR 0004's version left
 it out:
@@ -631,12 +644,13 @@ rediscovered as a problem.
   IO1 ──┬──[R-LED-PD 10k]── GND   ** PROPOSED **
         │
         └──►│ 74AHCT125 gate A ├──[R-LED-SER 220R]── J-LED-L  DI   ** R PROPOSED **
-        └──►│ 74AHCT125 gate B ├──[R-LED-SER 220R]── J-LED-L  BI   ** IF NEEDED **
+                                                     J-LED-L  BI ──► GND
+                                          (vendor's recommended circuit; gate B SPARE)
 
   IO2 ──┬──[R-LED-PD 10k]── GND   ** PROPOSED **
         │
         └──►│ gate C ├──[220R]── J-LED-R DI
-        └──►│ gate D ├──[220R]── J-LED-R BI
+                                          J-LED-R BI ──► GND   (gate D SPARE)
 
   74AHCT125 rail = 5 V (TTL thresholds, so 3.3 V in reads high)  [repo] 0014
   OE ×4 tied LOW
@@ -658,18 +672,39 @@ The module page has the same idea for the same reason: `R-SPI-PULL`, six of them
 both sides of its 74AHCT125 `[repo] digital-and-supervision.md`. The instrument
 end has none.
 
-**Two open questions that change this section's part count:**
+**Both open questions here are closed, 2026-09-21**, against the genuine
+Worldsemi WS2815 datasheet V1.1 now at
+`datasheets/other-semi/WS2815.pdf` `[repo, verified]`:
 
-- **Does the WS2815 accept 5 V logic?** ADR 0014 flags it: "if its logic
-  threshold is referenced to 12 V rather than an internal rail, 5 V shifting will
-  not be enough and the part choice needs revisiting" `[repo] 0014`. If it needs
-  12 V logic, the 74AHCT125 is the wrong part and this section is rebuilt.
-- **Does the first pixel's `BI` need driving?** `[from memory]` the backup path
-  works by each pixel taking the previous-but-one pixel's output, which leaves
-  the head of the strip with nothing to take, so strips bring out four wires —
-  12 V, GND, `DI`, `BI`. If so, **all four gates are used, none spare**, against
-  the BOM's "Two spare gates" `[repo] bom.csv`, and the LED loom is 8 conductors
-  rather than 6. Five minutes with the datasheet or the reel decides it.
+- **Yes, the WS2815 accepts 5 V logic, and the 74AHCT125 is the right part.**
+  The Electrical Characteristics table gives `V_IH ≥ 0.7 VDD` — and **the table
+  declares its own conditions in the header: `VDD = 4.5…5.5 V`.** So `V_IH` is
+  **3.15 V to 3.85 V**, nominally 3.5 V, and the 74AHCT125 at 5 V delivers
+  ~4.4 V minimum into it.
+
+  > **Where "12 V logic" came from.** The datasheet reuses the symbol `VDD` for
+  > two different nets: pin 2 `VDD` is the +12 V LED supply, while the
+  > Electrical Characteristics table's `VDD` is the 4.5–5.5 V logic rail it
+  > names in its own header. Reading `0.7 × VDD` with the pin-2 meaning gives
+  > **8.4 V**, which is how a 12 V part acquires an impossible threshold. The
+  > conditions line governs. *(Absolute Maximum Ratings muddles it further —
+  > "Logic input high voltage VI: VDD−0.5 … VCC+0.5 V" — which is why this
+  > needed reading rather than recalling.)*
+
+- **No, the first pixel's `BI` does not need driving — ground it.** The
+  datasheet's own "Recommended application circuit" ties **L1's pin 6 (`BI`) to
+  pin 5 (`GND`)**. From L2 onward each pixel's `BI` comes from the *previous*
+  pixel's `DI` node, internal to the tape — so the backup line lags the main
+  line by one pixel, which is exactly what lets a dead pixel be bypassed, and
+  the head of the strip has nothing to lag.
+
+  **So gates B and D are not needed**, the BOM's "two spare gates" is right
+  after all, and the LED loom stays at 6 conductors rather than 8. *(The figure
+  is a raster image with no text layer and was read by rendering the page at
+  700 dpi — confirm visually against the PDF before the loom is crimped.)*
+
+  The bypass latch is **sticky until power-off**: *"...make the BIN in state of
+  receiving signal until restart after power-off."*
 
 **`R-LED-SER` is proposed** on the same grounds as §4: each gate drives ~420 mm
 of wire to a strip, and nothing damps it. 100–330 Ω at the buffer.
@@ -800,7 +835,7 @@ page and have no BOM entry yet.
 | `C-STRIP-BULK` ×2 | 470–1000 µF 16 V | At each strip feed point, which is this board | `[repo]` |
 | `HDR-SERVICE` | **2×3** | UART pair + GND per board. `EN`/`IO0` are not on the headers and are not wired — §6 | `[repo] bom.csv`, settled |
 | **`J-CHAIN`** | **2×6 IDC boxed, keyed** | **Chained through four cluster boards. 4 signals, 5 alternating grounds, 3V3, 2 spare. EIGHT of them across five boards — `SER`/`QH` are point-to-point, so every cluster board but the last has an IN and an OUT (qty in `bom.csv`)** | **decided** |
-| **`J-LED-L/-R`** | **4-way each** | **Proposed — 12 V, GND, DI, BI** | proposed |
+| **`J-LED-L/-R`** | **4-way each** | **Proposed — 12 V, GND, `DI`, `BI`.** `BI` is a **ground** connection at the head of the strip, not a driven one (§5, verified against the datasheet 2026-09-21) — so it is still a 4-way connector but only three nets, and `BI` can tie to the same GND pin's net at the strip end | proposed |
 | **`J-DISP`** | **9-way** | **Proposed — see §6. Was 11-way before `EN`/`IO0` were withdrawn** | proposed |
 | `MECH-GNDBOND` | Ring terminal + M3 | Plate to `PWR_GND`. Needs a pad and a hole on this board | `[repo]` |
 | `PCB-CARRIER` | 2-layer, **outline TBD** | See *Still open* | `[repo]` says ~100 × 45 mm; not checked |
@@ -896,10 +931,12 @@ Ordered by what blocks what. The first four block layout.
 - **The etherCON variant at the instrument end** `[repo] 0004`, which decides
   whether this board carries an RJ45 jack footprint (~16 × 14 mm, not in the
   BOM) or eight wires. ADR 0004 defers it to E12/M7, which is after E13.
-- **The WS2815's data threshold, and whether `BI` needs driving** (§5). Decides
-  whether the 74AHCT125 is the right part at all, and whether it has spare gates.
-- **The MCP3202's maximum clock at 3.3 V** (§4). 0.9 MHz is an interpolation
-  from a search summary, not a datasheet reading.
+- ~~**The WS2815's data threshold, and whether `BI` needs driving**~~ —
+  **closed 2026-09-21** against the datasheet, §5. 5 V logic is correct,
+  `BI` is grounded at the head, two gates stay spare.
+- ~~**The MCP3202's maximum clock at 3.3 V**~~ — **closed 2026-09-21**, §4.
+  0.9 MHz is not an interpolation; it is the datasheet's *guaranteed* 2.7 V
+  maximum, so using it at 3.3 V is conservative rather than approximate.
 - **`C-REF-OUT` qty 2** for one REF5050 — parallel, or input and output?
   The reference's stability depends on it and nobody has opened the datasheet.
 - **`L-BUCK-IN` qty 1 against `C-BUCK-IN` qty 2.** One LC and one bulk cap, or

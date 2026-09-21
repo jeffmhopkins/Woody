@@ -98,11 +98,19 @@ supply. A **74AHCT125** is the standard answer — powered from 5 V with TTL inp
 thresholds, so a 3.3 V input reads as high and it outputs a clean 5 V edge. One
 package covers both strips.
 
-**Verify the WS2815's data threshold against its datasheet before committing.**
-It is a 12 V part, and if its logic threshold is referenced to 12 V rather than
-an internal rail, 5 V shifting will not be enough and the part choice needs
-revisiting. Most 12 V addressable strips accept 5 V logic, but "most" is not a
-basis for a sealed build.
+> **Verified 2026-09-21, and the answer is yes.** `V_IH ≥ 0.7 VDD` in a table
+> whose header declares `VDD = 4.5…5.5 V` — so **3.15 to 3.85 V**, and the
+> 74AHCT125 at 5 V clears it (Worldsemi WS2815 V1.1,
+> `datasheets/other-semi/WS2815.pdf`). The worry below was the right worry:
+> reading `0.7 × VDD` with pin 2's +12 V meaning gives **8.4 V**, an impossible
+> threshold, and the datasheet does reuse the symbol for both nets. The
+> conditions line governs. The part choice stands, on a document rather than on
+> "most strips".
+
+It is a 12 V part, and if its logic threshold had been referenced to 12 V
+rather than an internal rail, 5 V shifting would not have been enough and the
+part choice would have needed revisiting. Most 12 V addressable strips accept
+5 V logic, but "most" is not a basis for a sealed build.
 
 This is a classic source of intermittent, maddening LED behaviour — strips that
 work on the bench and glitch in the build — so it is worth getting right rather

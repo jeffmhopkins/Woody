@@ -148,13 +148,41 @@ LVC with proper source termination remains the way back if E4 disagrees.
 
 ### Derivations
 
-`[calc]`, at 3.3 V into 74HC165 thresholds (`V_IH` = 0.7 × VCC = 2.31 V,
-`V_IL` = 0.3 × VCC = 0.99 V `[from memory]`):
+`[calc]`, at 3.3 V into 74HC165 thresholds (**`V_IH` = 0.75 × VCC = 2.475 V,
+`V_IL` = 0.25 × VCC = 0.825 V** `[repo, verified against SCLS116E]`):
+
+> **The datasheet has no 3.3 V row, and the ratio is not constant.** This
+> page carried `0.7 × VCC` / `0.3 × VCC` marked `[from memory]`.
+> `datasheets/other-semi/74HC165.pdf` (SN54/SN74HC165, SCLS116E) tabulates
+> exactly three rails:
+>
+> | `VCC` | `V_IH` min | `V_IL` max | as a ratio |
+> |---|---|---|---|
+> | 2.0 V | 1.5 V | 0.5 V | **0.75 / 0.25** |
+> | 4.5 V | 3.15 V | 1.35 V | 0.70 / 0.30 |
+> | 6.0 V | 4.2 V | 1.8 V | 0.70 / 0.30 |
+>
+> 0.70/0.30 is exact at 4.5 V and above and **breaks at 2 V**. Extrapolating
+> it *down* to 3.3 V therefore runs straight through the one datapoint that
+> contradicts it. **The defensible bound at 3.3 V is the 2 V ratio**, and that
+> is what the numbers below now use. Both crossing times get slower —
+> 119.9 → 138.7 µs and 5.92 → 6.89 µs — and neither changes a conclusion,
+> because the release is absorbed by the asymmetric debounce and the press
+> still clears the scan period by 36×.
+>
+> *(The press row also said `τ = 100 Ω × 47 nF = 4.7 µs` beside a crossing
+> time computed from the **parallel** combination, 4.496 µs. The parallel
+> value is the right one — the pull-up is still connected — and the row now
+> says so.)*
+>
+> The same datasheet carries a warning worth repeating: operating in the
+> threshold region risks **double-clocking from induced ground bounce**.
+> Another reason not to shave this margin.
 
 | | |
 |---|---|
-| Release, τ = 2.2 kΩ × 47 nF | 103 µs; crosses `V_IH` at **119.9 µs** |
-| Press, τ = 100 Ω × 47 nF | 4.7 µs; crosses `V_IL` at **5.92 µs** — 42× inside the 250 µs scan |
+| Release, τ = 2.2 kΩ × 47 nF = 103.4 µs | crosses `V_IH` at **138.7 µs** |
+| Press, τ = (2.2 kΩ ∥ 100 Ω) × 47 nF = 4.496 µs | crosses `V_IL` at **6.89 µs** — 36× inside the 250 µs scan |
 | Pole | 1.54 kHz → **54 dB** at the WS2815's 800 kHz data rate |
 | Static | **1.43 mA** per closed key; 18 closed = **25.8 mA** off the loom's 3V3 |
 
@@ -408,14 +436,27 @@ coordinates rather than a pitch parameter.
   shields the key networks from the LED channel for free — and it is also a
   short waiting to happen. Every part on the plate-facing side needs clearance
   to the plate, or the board needs its passives on the far side.
-- **Plate-to-PCB standoff is `TBD` and it is a real dimension**, set by the
-  KS-33's pin length below its clip shoulder. MX plates sit ~3.4 mm above the
-  PCB; a 12.2 mm low-profile switch will want less `[from memory]`. It has to
-  come from the vendor drawing, and it constrains component height underneath.
+- **Plate-to-PCB standoff: there is none, and that is the answer**
+  `[repo] docs/reference/ks33-geometry.md, measured off GATERON-KS-33-3D.step`.
+  This bullet said the dimension was `TBD` and would come from the vendor
+  drawing. It came from a solid model instead, and it is tighter than expected:
+  the pins reach **5.10 mm** below the collar seat with only the last **1.9 mm**
+  as narrow blade, so **the PCB top must sit within ~3.2–3.6 mm of the seat**.
+  Against a 1.5–2 mm plate that leaves 1.2–2.1 mm — the board is effectively
+  **hard against the plate underside**.
+
+  **Which collides with the bullet above it.** "Every part on the plate-facing
+  side needs clearance to the plate" now means *there is no plate-facing side*:
+  **put every passive on the far face.** Also budget a **⌀5.25 mm clearance
+  hole through both the plate and this board** for the centre pole, which
+  protrudes ~2 mm below the PCB.
 - **Plate thickness is still open and blocks M4/M5** `[repo] key-layout.yaml,
-  0002, bom.csv`. 2 mm defeats the retention clips entirely, MX standard is
-  1.5 mm, the reference KS-33 build used 1.1 mm. This board does not decide it
-  but it is fitted around the answer.
+  0002, bom.csv`. The framing has changed: the model shows **no retention clip
+  shoulder at all**, so "2 mm defeats the clips" may be the wrong worry. The
+  real constraint is that **the through-cutout section is only 2.50 mm deep**,
+  of which a 2 mm plate consumes 80 %. MX standard is 1.5 mm and the reference
+  KS-33 build used 1.1 mm. This board does not decide it but it is fitted
+  around the answer.
 
 ---
 
