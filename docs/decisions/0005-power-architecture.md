@@ -174,11 +174,13 @@ umbilical +12V ──┬── WS2815 LED strips          (direct, no conversion
                  │
                  ├── OPA2197 V+  (½ reference buffer, ½ breath buffer)
                  │
-                 ├── 12V→5V buck ──┬── display board  5V pin
-                 │                 ├── real-time board 5V pin
-                 │                 └── LED data level shifter
+                 ├── 12V→5V buck A ─┬── real-time board 5V pin
+                 │                  ├── 8×8 matrix (via that board)
+                 │                  └── LED data level shifter
                  │
-                 └── polyfuse / input filter at entry
+                 ├── 12V→5V buck B ──── display board 5V pin
+                 │
+                 └── TVS array / LC filter at entry  (no fuse — see below)
 
 real-time board 3V3 out ──┬── 74HC165 chain
                           ├── breath ADC
@@ -189,10 +191,19 @@ real-time board 3V3 out ──┬── 74HC165 chain
 chain (microamps), the ADC (milliamps) and pull-ups, all comfortably inside the
 headroom of the real-time board's onboard regulator.
 
-**Fuse the instrument at the umbilical entry.** A short inside the instrument
-otherwise pulls on the rack's +12 V rail and can brown out every other module in
-the case. A polyfuse is cheap insurance for a fault that takes down more than
-just this project.
+**Two bucks, not one.** ADR 0013 asks for a regulator per board so the display
+board's WiFi bursts are absorbed locally instead of reaching the analog section,
+and the load table above gives the second reason: 928 mA of clamp-legal worst
+case does not fit behind one 1 A part. Split, the real-time side carries the
+matrix and the display side carries its own transients, and neither is near its
+rating. The R-78E5.0 is a three-pin module — the second one costs a footprint.
+
+**There is no fuse at the umbilical entry.** An earlier revision of this ADR put
+a polyfuse here to stop an internal short pulling on the rack's +12 V rail. That
+job is done — better, faster and without the thermal hysteresis — by the
+module's load switch, which sits at the *source* end of the umbilical where the
+instrument's own faults cannot bypass it. See "Set the limit at 1.0 A, and
+delete the polyfuse" below for why keeping both was worse than keeping one.
 
 ### There is no power switch on the instrument. Switching happens at the module.
 

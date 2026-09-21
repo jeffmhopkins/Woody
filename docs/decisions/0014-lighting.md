@@ -198,7 +198,9 @@ clamp anything.
 - **The module's current-limited load switch** (ADR 0005) replaces a slow,
   self-heating, thermally-hysteretic protection device with a fast fixed limit
   that does not run away. The positive feedback term disappears with the
-  thermal one.
+  thermal one. **"Replaces" now means it** — this ADR added the load switch and
+  left the polyfuse in the BOM, so for a while the design carried both and the
+  runaway term with them. The polyfuse is deleted (ADR 0005).
 - **The load switch is at the module, not the instrument**, so the limit holds
   whatever the instrument's MCU is doing — including nothing.
 - **Blank both strips *and the matrix* as the first act at boot**, before

@@ -239,7 +239,9 @@ at all.** The carrier holds only:
 - MCP3202 ADC, REF5050 5.000 V reference, OPA2197 dual (reference buffer +
   breath buffer, both on +12 V)
 - 74AHCT125 level shifter
-- R-78E5.0 regulator module, polyfuse, umbilical connector
+- **Two** R-78E5.0 regulator modules — one per dev board, per the WiFi-isolation
+  argument below and ADR 0005's load table — and the umbilical connector. **No
+  polyfuse:** the current limit lives at the module end (ADR 0005)
 - Passives
 
 Nothing on that board is fast, nothing is RF, and nothing needs more than two
