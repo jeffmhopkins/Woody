@@ -556,7 +556,8 @@ injected at its inverting node adds *gain* rather than offset (the defect
 `R-OFFINJ` was deleted for). The only clean point is `V_ref`, which would have
 to switch between 1.500 / 2.500 / 3.500 V — and reaching *above* 2.500 V from a
 2.500 V reference needs an op-amp half and 0.1 % resistors, because 1 % on the
-step is 12 cents. Plus a toggle on a panel already at 107 mm of ~110 mm usable.
+step is 12 cents. Plus a toggle on a panel with 5.5 mm of slack
+(`panel-height-budget`) and no room for a sixth row.
 
 **And the instrument already has octave control, twice.** The four left-thumb
 keys are octave/register keys in the conventional woodwind arrangement — the
@@ -639,11 +640,17 @@ figure.
 
 ### Panel, top to bottom
 
-Connector, power switch and LED — the system's only power switch, since the
-instrument has none — two breath knobs, then six jacks in two columns: **PITCH** and **BREATH** silkscreened, **MOD 1–4** numbered with a
-write-on strip. Roughly 107 mm of ~110 mm usable height — full but workable.
+Five rows, top to bottom: label band; **three** knobs across (gain, offset,
+response); six jacks in two columns — **PITCH** and **BREATH** silkscreened,
+**MOD 1–4** numbered with a write-on strip; the etherCON **with the power LED
+beside it**; and the power switch on **a row of its own**. It is the system's
+only power switch, since the instrument has none.
+
+**110 mm of content against 115.5 mm of clear panel** — see
+`panel-height-budget`, and the derivation below.
 
 Print the panel at 1:1 on paper and check it is actually usable before cutting.
+5.5 mm over five rows is a real fit, not a comfortable one.
 
 ## Connector: Neutrik etherCON, both ends
 
@@ -717,13 +724,13 @@ while the jacks put the PCB about 7 mm behind it, so clearing it needs a
 review concluded the module had to become two boards. 8HP dissolved all of it.
 
 **8HP → 10HP was the height, and a third knob.** A reviewer rebuilt the panel
-bottom-up from real component envelopes and got **~115 mm against ~110 mm
-usable — already over**, taking every favourable option (toggle and LED
-sharing a row, pots side by side, 13 mm jack pitch); stacking the pots gives
-133 mm. It also found that **this ADR's own "107 mm of ~110 mm usable" figure
-is asserted twice and derived nowhere**, and that two 20 mm knobs do not fit
-side by side in 40.34 mm at all — 16 mm is the ceiling, against this ADR's
-claim of "16–20 mm".
+bottom-up from real component envelopes and got **~115 mm against a "~110 mm
+usable" that was itself never derived — already over**, taking every
+favourable option (toggle and LED sharing a row, pots side by side, 13 mm jack
+pitch); stacking the pots gives 133 mm. It also found that **this ADR's own
+"107 mm" figure was asserted twice and derived nowhere**, and that two 20 mm
+knobs do not fit side by side in 40.34 mm at all — 16 mm is the ceiling,
+against this ADR's claim of "16–20 mm".
 
 Then `POT-RESP` was added (see `breath-output-stage.md` §4), making three
 controls.
@@ -732,16 +739,63 @@ controls.
 pots fit in **one row instead of two**, which deletes a whole 20+ mm row from
 a budget that was already over. Derived, finally:
 
-| | Height |
-|---|---|
-| Label / title band | 5 mm |
-| **Three pots across** — gain, offset, response | 22 mm |
-| Jacks, 3 rows × 2 columns at 13 mm pitch | 39 mm |
-| etherCON (31 mm tall) with the toggle and LED beside it | 31 mm |
-| **Total** | **97 mm against ~110 mm — 13 mm spare** |
+**The usable height had to be derived first, because nothing in this corpus
+ever had.** Two banked artefacts agree and neither is a forum post: a
+*fabricated* 3HP panel whose `Edge.Cuts` measure 15.000 × 128.500 mm, and a
+blank-panel generator carrying the Doepfer table explicitly. Both put the M3
+clearance holes at **y = 3.0 and 125.5 mm**, ⌀3.2, and both give 10HP as
+**50.50 mm** with holes at x = 7.50 / 43.06 — which independently corroborates
+`panel-width`'s `(10 × 5.08) − 0.3`.
+
+What blocks a panel-front component is the **screw hardware**, not the rail:
+
+```
+[calc]  clear full-width height = 128.5 − 2 × (3.0 + r)
+
+        bare ISO 7045 pan head, dk max 5.6   →  116.9 mm
+        DIN 125 M3 washer, OD 7.0            →  115.5 mm   ← assumed
+        knurled thumbscrew head, OD ~10      →  112.5 mm
+```
+
+The hardware occupies only `x ∈ [4.0, 11.0]` and `[39.6, 46.6]`, so the
+**central 28.6 mm of width is clear over the full 128.5 mm**. A budget for a
+full-width row and a budget for a centred component are different numbers, and
+this ADR had been comparing them.
+
+| | Height | From |
+|---|---|---|
+| Label / title band | 5 mm | design choice |
+| **Three pots across** — gain, offset, response | 22 mm | 14 mm knobs, below |
+| Jacks, 3 rows × 2 columns at 13 mm pitch | 39 mm | `[repo]` |
+| etherCON (flange 26 × 31 mm) **with the LED beside it** | 31 mm | `[drawing ST-NE8FDP]` |
+| **The toggle, on a row of its own** | **13 mm** | `[calc]`, below |
+| **Total** | **110 mm against 115.5 mm — 5.5 mm spare** | |
 
 Width: **13.25 mm of aluminium each side of the bore**, 12.25 mm of visible
 panel each side of the flange.
+
+**The toggle does not fit beside the flange, and that is what the four-way
+dispute turned on** `[calc]`:
+
+```
+flange 26 mm centred on 50.50   →  x 12.25 … 38.25, leaving two 12.25 mm strips
+
+  D6.5 hole (NKK M6×0.75)  centred in a strip →  2.88 mm to the flange, 2.88 to the edge
+  D6.2 hole (6.00 mm alt.) centred in a strip →  3.02 mm             , 3.02
+  D3.2 LED bezel           centred in a strip →  4.52 mm             , 4.52
+```
+
+**Both toggles land under the 3.09 mm this ADR already rejected** at 6HP — "a
+fit the panel passes and a stiffness test it does not" — on a hole a player
+flips repeatedly in 2 mm aluminium. So the toggle gets a row, **whichever part
+is chosen**, and the LED stays beside the flange. The row is 13 mm because the
+lever is 10.5 mm at a 25° throw, sweeping ±4.44 mm in the panel plane against a
+7.9 mm body.
+
+> **The old "~110 mm usable" was a coincidence, not a derivation** — it happens
+> to equal the derived *content* height (110 mm), not the derived *usable*
+> height (115.5 mm). Two different quantities that looked like one number, which
+> is why four candidates could all cite it and disagree.
 
 > **The knob size is now the binding constraint, and it is a real cost.**
 > Three pots across 50.50 mm with 3 mm gaps needs **≤14 mm knobs** `[calc]`:

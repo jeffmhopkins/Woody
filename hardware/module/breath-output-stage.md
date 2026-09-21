@@ -277,14 +277,16 @@ divider — two more parts per side, piecewise, and no thermal behaviour.
 > ### The panel goes to 10HP — decided 2026-09-21
 >
 > `B1` reconstructed the panel bottom-up from real component envelopes and
-> got **~115 mm against ~110 mm usable** — already over *before* this
-> control — and found that ADR 0004's "107 mm of ~110 mm usable" figure is
-> asserted twice and **derived nowhere**.
+> got **~115 mm against a "~110 mm usable" that was itself never derived** —
+> already over *before* this control — and found that ADR 0004's "107 mm"
+> figure was asserted twice and **derived nowhere**.
 >
 > **10HP is 50.50 mm, and the win is not the extra width.** It is that three
 > pots fit in **one row instead of two**, which deletes a 20+ mm row from a
-> budget that had already overrun. The derived layout is in ADR 0004 and
-> comes to **97 mm against ~110 mm, 13 mm spare**.
+> budget that had already overrun. The derived layout is in ADR 0004 and the
+> total is the tracked figure `panel-height-budget` — **110 mm of content
+> against 115.5 mm of clear panel**, with the usable height finally derived
+> rather than asserted, and the toggle on a row of its own.
 >
 > **The cost is knob diameter.** Three pots across 50.50 mm with 3 mm gaps
 > needs **≤14 mm knobs**; 15 mm already gives 51 mm and does not fit. So

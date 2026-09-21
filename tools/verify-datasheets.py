@@ -95,6 +95,10 @@ if os.path.exists(bom):
     # often banked under a different name from the BOM's ("KS-33 Red (linear)"
     # vs "Gateron KS-33 low-profile switch"), and its notes name the real MPN.
     hay = _norm(" ".join(" ".join(r.values()) for r in rows))
+    # Same text with word boundaries intact, for the refdes test below. _norm
+    # deletes the delimiters, so a whole-token match is impossible against hay.
+    hay_tok = re.sub(r"[^a-z0-9]+", " ",
+                     " ".join(" ".join(r.values()) for r in rows).lower())
     for r in csv.DictReader(open(bom, newline="", encoding="utf-8")):
         part = (r.get("part") or "").strip()
         if not part or part.upper().startswith("TBD") or "(NONE" in part.upper():
@@ -111,8 +115,21 @@ if os.path.exists(bom):
                 and not re.fullmatch(r"\d+[a-zA-Z]{1,3}", t)]
         if not toks:
             continue
-        if not any(_norm(t) in hay for t in toks):
-            uncovered.append(f"{r.get('ref')}: {part}")
+        if any(_norm(t) in hay for t in toks):
+            continue
+        # A manifest row that names the REFDES it covers is coverage, even when
+        # no part-number token matches. This is the case a part number cannot
+        # reach: the document is a vendor catalogue covering a whole family, and
+        # the specific MPN is chosen later, out of that catalogue. Banking it
+        # under "... (SW-POWER) - NKK Series M" is the right thing to do and the
+        # token test punished it. Require the refdes as a whole token so that
+        # e.g. "D1" does not match "D10".
+        ref = (r.get("ref") or "").strip()
+        ref_tok = re.sub(r"[^a-z0-9]+", " ", ref.lower()).strip()
+        if ref_tok and re.search(r"(?<![a-z0-9])%s(?![a-z0-9])"
+                                 % re.escape(ref_tok), hay_tok):
+            continue
+        uncovered.append(f"{r.get('ref')}: {part}")
 
 print(f"datasheets: {ok} verified, {noted} recorded as blocked or not-fetched, "
       f"{len(bad)} problems")

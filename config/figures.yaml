@@ -189,12 +189,40 @@ figures:
 
   - id: panel-height-budget
     quantity: Module panel height used
-    value: "DISPUTED"
-    status: disputed
+    value: "110 mm of content against 115.5 mm of clear panel"
+    status: settled
     owner: docs/decisions/0004-cv-interface-module.md
-    candidates: ["107 mm (asserted, never derived)", "97 mm (derived, but with no clearance allowance - the same defect)", "112 mm (97 mm with B1's clearances restored)", "124 mm (with the toggle/LED row not assumed to fit beside the flange)"]
-    decided_by: "DERIVABLE ON PAPER NOW, which it was not when this was filed. It said 'a 1:1 paper check at M4 with real parts' because nobody had dimensions. The 2026-09-21 datasheet wave banked them: etherCON flange 26 x 31 mm with 34.55-36.3 mm behind the panel; PJ398SM body 9 x 9 x 8.3 with a D6 bushing and 4.5 mm of thread, 5.5 mm panel face to body front; RV09 pot body 9.8 mm wide, 11.4 mm across the snap-in lugs, 7.0 mm board to shaft; KNOB-BREATH capped at 14 mm, which bom.csv already establishes as the binding constraint. FOUR OF FIVE CONTROL TYPES NOW HAVE REAL NUMBERS. THE PANEL TOGGLE GAP CLOSED 2026-09-21 (wave R8): NKK Series M is banked at datasheets/connectors/NKK-SERIES-M-TOGGLE.pdf and the generic sub-miniature family at MULTICOMP-SUBMIN-TOGGLE.pdf, so ALL FIVE control types now have real numbers and this dispute is fully derivable on paper. Single-pole NKK body is 7.9 mm across and 9.4 mm deep behind the bushing, bushing thread 8.9 mm, toggle 10.5 x 2.8 mm with a 25 degree throw, solder-lug field 13.0 x 2.0 mm - use those for row spacing rather than the E-Switch 100's 12.70 mm, which was a proxy for a part in a different size class. THE PANEL HOLE IS 6.5 mm FOR THE NKK M6x0.75, NOT 6.0, with a 5.6-5.8 mm flat; the 6.00 mm sub-miniature alternative needs a 4.39 mm flat instead. Max panel thickness with standard hardware is 2.6 mm against a 2 mm panel. Do the arithmetic against a 128.5 mm panel, state the total, and retire this dispute. ~110 mm usable is still derived from nothing and should be replaced rather than reconciled."
-    forbidden: []
+    derivation: "CLEAR HEIGHT FIRST, because the corpus never derived it. Panel 128.5 mm with M3 clearance holes centred 3.0 mm from the top and bottom edges - two independent banked artefacts agree (a FABRICATED 3HP panel, mechanical/EURORACK-3U-3HP-PANEL-apfaudio-pmod-r3.1.kicad_pcb, Edge.Cuts measured 15.000 x 128.500; and mechanical/EURORACK-3U-PANEL-HP-TABLE-make_blanks.py, HEIGHT=128.5, HOLE_Y=(3.0,125.5), HOLE_DIA=3.2, 10HP width 50.50 with holes at x 7.50/43.06). What blocks panel-front components is the SCREW HARDWARE, so the clear full-width height is 128.5 - 2*(3.0 + r): 116.9 mm on a bare ISO 7045 pan head (dk max 5.6), 115.5 mm with a DIN 125 M3 washer (OD 7.0, the assumed case), 112.5 mm with a knurled thumbscrew (OD ~10). CONTENT: label band 5 + three pots across at 14 mm knobs 22 + jacks 3 rows x 2 columns at 13 mm pitch 39 + etherCON flange 31 + toggle row 13 = 110 mm. 5.5 mm spare, i.e. 1.4 mm per row boundary; 2.5 mm even on the thumbscrew assumption. IT FITS ON EVERY HARDWARE ASSUMPTION."
+    toggle_row: "THE TOGGLE NEEDS ITS OWN ROW, and this is what the dispute turned on. Beside the etherCON flange (26 mm wide, centred on 50.50) there are two 12.25 mm strips of aluminium. A D6.5 hole centred in one leaves 2.88 mm to the flange and 2.88 mm to the panel edge; the 6.00 mm alternative's D6.2 leaves 3.02 mm. BOTH ARE UNDER THE 3.09 mm THIS ADR ALREADY REJECTED when it went 6HP -> 8HP ('a fit the panel passes and a stiffness test it does not'), on a hole a player flips repeatedly in 2 mm aluminium. So the toggle gets a row and the choice of toggle does not affect this figure. THE LED DOES FIT BESIDE THE FLANGE: a D3.2 bezel leaves 4.52 mm each side. Row height 13 mm: the lever is 10.5 mm at a 25 deg throw, sweeping +/-4.44 mm in the panel plane, against a 7.9 mm body."
+    forbidden: ["107 mm of ~110 mm usable", "Roughly 107 mm of", "97 mm against ~110 mm", "97 mm against ~110", "~115 mm against ~110 mm usable", "115 mm against ~110 mm", "already at 107 mm of ~110 mm usable", "13 mm spare"]
+    false_positive_note: "The candidates 107 / 97 / 112 / 124 may be quoted in text that explains why they were superseded; such lines carry refutation wording and the checker allows them. docs/review/** is excluded by design and keeps all four as the record of what was believed."
+    note: |
+      RETIRED FROM DISPUTED 2026-09-21, once wave R8 banked the last control
+      type. It had four candidates - 107, 97, 112, 124 - and the answer is none
+      of them, because THE FOUR CANDIDATES WERE NOT ALL THE SAME QUANTITY.
+      THE ASSERTED "~110 mm usable" WAS NEVER DERIVED, and the coincidence that
+      it equals the derived CONTENT height (110 mm) rather than the derived
+      USABLE height (115.5 mm) is exactly the kind of false agreement that kept
+      the dispute alive. Two numbers that looked like one.
+      The other thing that split the candidates: the screw hardware blocks only
+      x in [4.0, 11.0] and [39.6, 46.6], so the central 28.6 mm of panel width
+      is clear over the full 128.5 mm. A figure derived for a full-width row and
+      a figure derived for a centred component are different numbers, and the
+      corpus had been comparing them.
+      WHAT IS STILL WORTH DOING, and ADR 0004 already asks for it: print at 1:1
+      and check. 5.5 mm of slack over five rows is a real fit, not a comfortable
+      one - there is no room for a sixth row and no room to grow the knobs past
+      14 mm. That is a layout gate, not an open question about this figure.
+
+  - id: panel-toggle-hole
+    quantity: SW-POWER panel hole
+    value: "6.5 mm diameter with a 5.8 mm D-flat"
+    status: settled
+    owner: hardware/bom.csv
+    derivation: "NKK Series M bushing is M6x0.75, which needs a 6.5 mm hole and NOT 6.0 - read off datasheets/connectors/NKK-SERIES-M-TOGGLE.pdf, rendered at 150 dpi because the drawing is vector with no text layer. The D4 option's D-flat is 5.8 mm; the S4 keyway option's flat is 5.6 mm with a 2.2 mm anti-rotation hole at 6.5 mm centres if the locking ring is used instead. THERE IS NO PLAIN ROUND OPTION IN THE METRIC RANGE, so this hole cannot be drilled - it is milled or filed."
+    companion: "panel-height-budget establishes that this hole gets its own row rather than sitting beside the etherCON flange, and that conclusion holds for the 6.00 mm alternative too."
+    forbidden: ["6mm hole", "6.0 mm hole for the toggle", "a 6 mm round hole", "6.00 and 6.35 need different holes"]
+    note: "THE ROW EXISTED TO GET THIS NUMBER and for three review waves it was unobtainable, because nkkswitches.com was never tried - it answers 200. Max panel thickness with the standard hardware is 2.6 mm against PANEL's 2 mm aluminium, so it fits with 0.6 mm spare; nobody had checked that either. The 2 mm panel leaves 6.9 mm of the 8.9 mm bushing thread for the nut, which is what rules out the 6.00 mm sub-miniature alternative (5.59 mm of thread, 3.59 mm after the panel, marginal for an M6 nut and lock washer)."
 
   - id: breath-working-point
     quantity: Breath pressure at a hard blow
