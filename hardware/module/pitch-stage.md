@@ -309,10 +309,45 @@ the right order of priority: the static budget was never the problem.
 
 ## Still open
 
-- **The LT5400 option suffix.** A 1:1 quad is the requirement and the orderable
-  code must come off the option table, which this sandbox could not reach. The
-  only genuinely open thing about this part. The claim that two spare sections can build the mod channels' 1:3 is
-  **arithmetically impossible** — three sections against the fourth is all four.
+- ~~**The LT5400 option suffix.**~~ **CLOSED 2026-09-21.** `5400fa.pdf` is
+  banked at `datasheets/other-semi/LT5400.pdf`. The option table (p.2) is
+  `-1` 10k 1:1, `-2` 100k 1:1, `-3` 1:10, `-4` 1k 1:1, `-5` 1M 1:1, `-6` 1:5 —
+  so **`-1` is the four-equal-10k 1:1 quad** and **there is no 1:3 option at
+  all**, which the arithmetic below had already concluded from the other
+  direction. Grade A is 0.01 % matching and B is 0.025 %, and ratio tracking is
+  **1 ppm/°C max** (0.2 typ), so the 0.027 cents line in the budget above is
+  conservatively sourced rather than optimistic. The claim that two spare
+  sections can build the mod channels' 1:3 is **arithmetically impossible** —
+  three sections against the fourth is all four.
+  > **But the package was wrong, and it is layout-blocking.** p.2: *"MS8E
+  > PACKAGE / 8-LEAD PLASTIC MSOP / EXPOSED PAD (PIN 9) IS FLOATING"*, and p.8
+  > is headed *"8-Lead Plastic MSOP, Exposed Die Pad"*. `bom.csv` said plain
+  > MSOP-8 with no pad. **The pad is 1.88 × 1.68 mm**, it is not DC-connected to
+  > any resistor, and p.6 says *"do not tie the exposed pad to noisy signals or
+  > noisy grounds"* and that *"connecting the exposed pad to a quiet AC ground
+  > is recommended"*.
+  >
+  > **New, and it lands on this stage's own node:** pad-to-resistor coupling is
+  > **5.5 pF** against only 1.4 pF resistor-to-resistor. The pad is therefore
+  > the dominant stray on the 1 V/oct network, and nothing in this corpus says
+  > where it goes — because the BOM did not know it had one. **Decide it with
+  > the layout, not after.**
+  >
+  > Two more from the same document. **Absolute tolerance is ±7.5 % (A) /
+  > ±15 % (B)** — nobody had written that down, and it means `TRIM-GAIN`'s
+  > "0 → +2 %" is nominal-only; the real authority is 1.86–2.16 % on an A part,
+  > which sharpens the "no downward authority" worry two items below. And the
+  > **LT5400 has no internal ESD diodes, only ±1 kV HBM** (p.6), with Figure 1's
+  > named remedy being a **BAV99** — which `D-JACK-CLAMP` already is. Pitch
+  > feedback is tapped *at the jack*, i.e. exactly the datasheet's "external
+  > connector" case, so check the clamp actually stands between the jack and
+  > every LT5400 pin when this is laid out.
+  >
+  > **Caveat on the revision.** This is rev **fa**, not the **fc** `bom.csv`
+  > names canonical — `analog.com` is still unreachable and this came from an
+  > RS mirror. Rev fa's option table predates the `-7`, so `LT5400-7` is
+  > **not-in-document**, not refuted. Do not "correct" ADR 0006 by citing rev
+  > fa's silence.
 - **`TRIM-OFFSET` is not buildable as described.** `V_ref` nominal *is*
   `VREFOUT`, and a divider can only go below it, so the nominal sits at an end
   stop with no downward authority. The trim network has to put 2.500 V at

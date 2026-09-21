@@ -355,8 +355,68 @@ hard limit rather than a setting.
 
 ### Current: sparse is free, full field is not
 
+> **⚠ 2026-09-21: THE PART IS NOT A WS2812C, AND 960 mA IS OPTIMISTIC BY AT
+> LEAST 2.4×.** The Waveshare schematic was unobtainable through four review
+> waves and is now banked at
+> `datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-SCHEMATIC.pdf`. It carries
+> **64 instances of `WS2812B-0807`**, `U1`–`U64` — verified by hand, 64
+> occurrences in the extracted text, and Waveshare's own wiki says the board
+> "is based on RGB **WS2812B**", never the C.
+>
+> **5 mA per channel is the WS2812C's figure. 12 mA is the WS2812B family's**,
+> and both documents are already in this repo:
+> `datasheets/other-semi/WS2812C.pdf` — *"The working current of each channel is
+> 5mA"*; `datasheets/other-semi/WS2812B-2020.pdf` p.4 — *"Quiescent Current：
+> <0.6mA … Working Current **12mA**"*. Read by hand from both.
+>
+> | per channel | source | 64 LEDs at full white |
+> |---|---|---|
+> | 5 mA | WS2812**C**-2020 — **the wrong part**, and what the table below uses | 960 mA |
+> | **12 mA** | Worldsemi WS2812**B**-2020, banked | **2304 mA** |
+> | **12 mA** | XINGLIGHT XL-0807RGBC-WS2812B (2022 rev), an 0807-package WS2812B-protocol part | **2304 mA** |
+> | 19 mA | same part, 2024 rev — default 19 mA, settable 1.75–19 mA in 16 steps | 3648 mA |
+>
+> **Worldsemi does not publish a WS2812B-0807 datasheet at all**, and that is
+> established rather than assumed: their site's own machine-readable datasheet
+> index enumerates 68 keys covering every published part — `ws2812b-v6/-v7`,
+> `-mini`, `-1313`, `-2020`, `-2427`, `-4020`, all of `ws2812c/d/e` — and **there
+> is no `0807` key**, while the control URL for `ws2812b-2020-v6` returns a real
+> 1.26 MB PDF. The XINGLIGHT parts are banked as **surrogates, named as such**,
+> and must never be cited as the 0807's datasheet. `matrix-led-current` stays
+> **blocked** in `config/figures.yaml`.
+>
+> **This ADR reaches the right conclusion through the wrong number — and the
+> binding constraint is not the one it names.** The 1 A R-78E5.0 is not what
+> stops the matrix first. On the dev board itself, all 64 LEDs draw through a
+> single **`B5819WS` Schottky in SOD-323**, whose datasheet
+> (`datasheets/discrete-and-power/B5819WS.pdf`) gives `I_F(AV)` 1 A but
+> **`P_D` = 200 mW and `RθJA` = 500 °C/W**. `[calc]` At `V_F` ≈ 0.46 V that is
+> **435 mA at 25 °C and 283 mA at a 60 °C interior** — five to thirteen times
+> under the real full-field current, and two to three times under even the
+> 960 mA below. Behind it, the `ME6217C33M5G` LDO's printed 800 mA is
+> *"guaranteed by design"* and not production-tested (its own Note 4), and
+> derates to **~250–500 mA** on a SOT-23-5 at 210 °C/W.
+>
+> **So the brightness cap is right and its justification should change.** It is
+> not "the matrix nearly exhausts the instrument's regulator"; it is "the matrix
+> at full field is several times what the dev board's own power path can pass".
+> Which is exactly what Waveshare's wiki warns, five times on one page: *"the
+> LED brightness should not be set too high, it will cause a rapid temperature
+> increase, which can result in damage to the board."* **Rewrite the argument
+> against the real constraint; measure the actual draw at E1, which now beats
+> any further document hunt.**
+>
+> What the schematic settles firmly: **the 64 LEDs run from 5 V, not 3V3** —
+> every VDD on net `VCC_5V`, no regulator or switch in between. That was a
+> strong inference and is now read off a schematic. But `VCC_5V` is USB `VBUS`
+> through the `B5819WS`, so it is a diode drop below 5 V, and there is **no
+> decoupling anywhere inside the array** — total `VCC_5V` capacitance is
+> 11.1 µF, all clustered on the back.
+
 WS2812C-2020 draws **5 mA per channel**, so 15 mA per LED at full white and
-960 mA for all 64. Converted to the +12 V umbilical through the buck (×0.49):
+960 mA for all 64 — **this is the wrong part's figure and it is at least 2.4×
+too low; see the note above.** Converted to the +12 V umbilical through the
+buck (×0.49):
 
 | Matrix state | mA @ 5 V | ≈ mA @ 12 V |
 |---|---|---|

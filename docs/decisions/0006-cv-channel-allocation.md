@@ -631,7 +631,9 @@ Two more mechanisms land on the same jack, and they add to the one above:
 > pitch sensitivity to the +12 V rail, and pitch full scale is set by the DAC's
 > *internal* reference off the LM317, not by +12 V. The real path is
 > 75 mV → LM317 line regulation (0.52 mV/V) → 39 µV on `AVDD` → OPA2197 PSRR
-> (114 dB) → **0.15 µV ≈ 0.00018 cents** — five orders of magnitude below the
+> (**110.5 dB worst case** `[SBOS737C p.8]`; this line carried an unsourced
+> 114 dB until 2026-09-21, and TI actually specifies ±1 µV/V typ / ±3 µV/V max)
+> → **0.22 µV ≈ 0.00027 cents** — five orders of magnitude below the
 > smallest other term in this table. The figure is a survival from the
 > rail-divider offset topology this ADR itself deleted.
 >

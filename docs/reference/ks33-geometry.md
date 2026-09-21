@@ -39,6 +39,29 @@ there. What the number is good for is bracketing: standard MX plates are
 1.5 mm, this KS-33 build used 1.1 mm, and **neither is 2 mm.** See ADR 0002 for
 what that means for an aluminium plate.
 
+> **✅ SUPERSEDED BY THE VENDOR DRAWING, 2026-09-21. The answer is 1.20 mm.**
+> `gateron.com` answers 200 from this sandbox for the first time — it was
+> HTTP 000 through every earlier wave — and the drawing for the exact part,
+> **KS-33H10B050NN-Y24, Version 2, drafted 2023-01-03**, is banked at
+> `datasheets/mechanical/GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf` (6 pp).
+> Sheet 6's elevation dimensions the plate slot **1.20 ±0.05 mm**; sheet 3 §8
+> shows the same 1.20 against a hatched plate section. Read by rendering both
+> sheets — the file is vector CAD and extracts almost no text.
+>
+> **Every candidate this page bracketed is outside the vendor window.** 1.5 mm
+> is 0.25 mm over the upper limit, 2 mm is 0.75 mm over, and the 1.10 mm this
+> section measured off the third-party build is 0.05 mm *under* the lower limit
+> — close, but not the specification, and the reasoning above for why it might
+> not be doing retention still applies to it.
+>
+> The cutout is **confirmed and tightened**: 14.00 +0.05/−0.02 × 14.00
+> +0.05/−0.02, not a bare 14.0 × 14.0. The Z stack measured off the STEP solid
+> below is confirmed almost exactly — collar 15.00 × 15.00, body 14.00 ±0.05,
+> latch span 14.70, housing bottom 2.50 ±0.05, pin tips 5.10, centre pole
+> ⌀5.05 ±0.05 reaching 5.75 ±0.05, MX cross 1.10 ±0.04 × 4.00 with a second
+> 1.28 ±0.04 arm. **Overall height is NOT-IN-DOCUMENT**: neither the 12.75 mm
+> measured off the STEP nor the BOM's 12.2 mm is confirmed or refuted.
+
 ## The Z stack, measured off a solid model — 2026-09-21
 
 `datasheets/mechanical/GATERON-KS-33-3D.step` is a five-body STEP solid
@@ -74,6 +97,12 @@ on the plate-facing side. It does not exist. The centre pole also needs a
 below the board.
 
 ### And the retention clip may not be a clip
+
+> **The wait is over: the drawing is banked and the slot is 1.20 ±0.05 mm** (see
+> above). What follows was written from the STEP solid while the drawing was
+> unobtainable. It is not refuted — Gateron dimensions the *slot*, not the
+> mechanism that fills it — and the observation below about the 2.50 mm
+> through-section is now moot for 2 mm plates, which are simply out of spec.
 
 `ks33-geometry.md` and ADR 0002 have both been waiting on "the clip dimension
 from Gateron's drawing". **This model has no horizontal clip shoulder at all.**

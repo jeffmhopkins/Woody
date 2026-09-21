@@ -41,23 +41,25 @@ figures:
 
   - id: key-release-time
     quantity: Key network release, crossing V_IH
-    value: "138.7 us"
+    value: "119.9 us"
     status: settled
     owner: hardware/controller/cluster-boards.md
-    derivation: "Pressed node sits at 3.3 x 100/(2200+100) = 0.1435 V, NOT 0 V. Charging through 2.2k (tau = 103.40 us): t = -103.40 x ln((3.3-2.475)/(3.3-0.1435)) = 138.7 us"
-    threshold_note: "V_IH = 2.475 V = 0.75 x VCC, NOT 0.70 x VCC. The SN74HC165 datasheet (SCLS116E, datasheets/other-semi/74HC165.pdf) has NO 3.3 V row - it tabulates 2 V (1.5/0.5 = 0.75/0.25), 4.5 V (3.15/1.35 = 0.70/0.30) and 6 V (4.2/1.8 = 0.70/0.30). The 0.70/0.30 ratio holds at 4.5 V and above and BREAKS at 2 V, so extrapolating it DOWN to 3.3 V runs through the one datapoint that contradicts it. The conservative bound is the 2 V ratio. Verified against the PDF 2026-09-21; the page carried 2.31 V marked [from memory]."
-    forbidden: ["`V_IH` at **125", "release ~93 us", "~93 µs hardware", "93.2 us", "119.9 us", "119.9 µs", "at **119.9", "0.7 x VCC = 2.31", "0.7 × VCC = 2.31"]
-    false_positive_note: "A bare 125 us also legitimately means the MEAN SAMPLING PERIOD (0-250 us at 4 kHz) and the 8 kHz LOOP PERIOD. Match the phrase, not the numeral."
+    derivation: "Pressed node sits at 3.3 x 100/(2200+100) = 0.1435 V, NOT 0 V. Charging through 2.2k (tau = 103.40 us): t = -103.40 x ln((3.3-2.31)/(3.3-0.1435)) = 119.9 us"
+    threshold_note: "V_IH = 2.31 V = 0.70 x VCC. THIS FIGURE MOVED TWICE ON 2026-09-21 AND THE SECOND MOVE PUT IT BACK. First move: TI's SCLS116E (datasheets/other-semi/74HC165.pdf) has NO 3.3 V row - it tabulates 2 V (1.5/0.5 = 0.75/0.25), 4.5 V and 6 V (both 0.70/0.30) - so the 0.75/0.25 bound was taken on the reasoning that 0.70/0.30 'breaks' at 2 V. Second move: onsemi's MC74HC165A/D Rev. 13 p.4 PUBLISHES A 3.0 V ROW, V_IH 2.1 V / V_IL 0.9 V, which is exactly 0.70/0.30. 3.3 V is therefore bracketed on BOTH sides by published 0.70/0.30 rows and needs no extrapolation through the 2 V point; 2 V is the single exception at the bottom of the family range, not a trend. TI, Nexperia (Rev. 8) and Toshiba agree with onsemi digit for digit at every shared rail, so the 3.0 V row is the family's, not one vendor's. All four PDFs are banked."
+    conservative_bound: "If a TI SN74HC165 is the part fitted, its own datasheet guarantees nothing at 3.3 V and the pessimistic bound is V_IH = 2.475 V, giving 138.7 us. Nothing in the design depends on which is used - the release is absorbed by the asymmetric debounce either way. Design margin against 138.7 us if it ever gets tight."
+    forbidden: ["`V_IH` at **125", "release ~93 us", "~93 µs hardware", "93.2 us", "at **138.7", "crosses `V_IH` at **138.7", "0.75 x VCC = 2.475", "0.75 × VCC = 2.475"]
+    false_positive_note: "A bare 125 us also legitimately means the MEAN SAMPLING PERIOD (0-250 us at 4 kHz) and the 8 kHz LOOP PERIOD. Match the phrase, not the numeral. 138.7 us appears legitimately as the stated conservative bound and in the text recording the two moves - those lines carry refutation wording."
     note: "Starting from 0 V instead of the divider voltage gives 124.5 us, which is the error the 125 us figure came from."
 
   - id: key-press-time
     quantity: Key network press, crossing V_IL
-    value: "6.89 us"
+    value: "5.92 us"
     status: settled
     owner: hardware/controller/cluster-boards.md
-    derivation: "tau = (2200||100) x 47nF = 4.4957 us; t = -4.4957 x ln((0.825-0.1435)/(3.3-0.1435)) = 6.89 us"
-    threshold_note: "V_IL = 0.825 V = 0.25 x VCC. Same reason as key-release-time - see its threshold_note. Note also that tau is the PARALLEL combination, 4.4957 us, not 100 ohm x 47 nF = 4.7 us; the page stated 4.7 us beside a crossing time computed from 4.496."
-    forbidden: ["`V_IL` at **5.7", "~1.4 µs / 176", "176× margin", "176x margin against", "5.92 us", "5.92 µs", "at **5.92", "0.3 x VCC = 0.99", "0.3 × VCC = 0.99"]
+    derivation: "tau = (2200||100) x 47nF = 4.4957 us; t = -4.4957 x ln((0.99-0.1435)/(3.3-0.1435)) = 5.92 us"
+    threshold_note: "V_IL = 0.99 V = 0.30 x VCC, from onsemi MC74HC165A/D Rev. 13 p.4's published 3.0 V row. Same two-move history as key-release-time - see its threshold_note. SEPARATELY AND STILL CORRECT: tau is the PARALLEL combination, 4.4957 us, not 100 ohm x 47 nF = 4.7 us; the page stated 4.7 us beside a crossing time computed from 4.496. That correction is independent of the threshold question and stands."
+    conservative_bound: "The TI-only pessimistic bound is V_IL = 0.825 V, giving 6.89 us. Margin inside the 250 us scan is 42x at 5.92 us and 36x at 6.89 us - the same answer."
+    forbidden: ["`V_IL` at **5.7", "~1.4 µs / 176", "176× margin", "176x margin against", "at **6.89", "crosses `V_IL` at **6.89", "0.25 x VCC = 0.825", "0.25 × VCC = 0.825"]
 
   - id: marker-bits
     quantity: Marker pattern width
@@ -180,16 +182,34 @@ figures:
 
   - id: loadswitch-timer
     quantity: C-TIMER-LOADSW
-    value: "BLOCKED"
-    status: blocked
+    value: "10 uF"
+    status: settled
     owner: hardware/module/power-entry.md
-    candidates: ["9.4 uF at the net 77 uA ramp - PROVISIONAL, search-index provenance"]
-    decided_by: "Reading I_TIMER off a VERIFIED 164112fc.pdf. The number is now known (3 uA pull-down always, 80 uA pull-up while in current limit, net ~77 uA) but only from datasheet text served in search results, not from a PDF this repo holds. analog.com unreachable through four review waves and one dedicated researcher."
-    blocked_on: "datasheets/MANIFEST.csv - LT1641-1, status BLOCKED"
-    companion: "R-FB-HI / R-FB-LO are blocked on the same PDF, and matter more: FB was connected to nothing, and foldback tracks V_FB not V_OUT, so the part latched off on every start regardless of this capacitor."
-    forbidden: ["C-TIMER-LOADSW at 10nF", "10 nF timer", "12x to 300x", "the reviewers disagree and the datasheet decides"]
-    false_positive_note: "10nF is also C-KEY's superseded value and appears in other rows. Match the refdes."
-    note: "The '12x to 300x' ratio is itself wrong - the page's own equation gives 37x to 925x, and bom.csv repeats the bad ratio so cross-checking finds false agreement."
+    derivation: "C = I_TIMER x t / 1.233 V. The 77 uA net ramp is CONFIRMED VERBATIM in the banked datasheet (164112fc p.8, datasheets/discrete-and-power/LT1641.pdf): TIMER is pulled to GND by a 3 uA source when the current-limit circuit is idle, and an 80 uA pull-up is connected while it is active, giving 77 uA/C_TIMER. ADI's own shorthand C(nF) = 62 x t(ms) gives 9.30 uF for 150 ms; the exact form gives 9.37 uF. SET TO 10 uF, the nearest stock value: 9.4 uF is not orderable, and the pull-up's bounds (-24/-80/-132 uA, p.2) make the fault time 587/160/95.6 ms at 10 uF, so the worst case is 95.6 ms against a 47.5 ms hot-plug start - 2.01x, where 9.4 uF gives 1.89x."
+    provenance_note: "BLOCKED for four review waves and one dedicated researcher because analog.com was unreachable. Resolved 2026-09-21 from the Internet Archive's 2019-02-02 capture of analog.com; web.archive.org is reachable from this sandbox and was not in earlier waves. analog.com itself is still unreachable. Corroborated by the DC1354A demo quick-start guide, banked beside it."
+    companion: "loadswitch-gate-cap and loadswitch-fb-divider come off the same document and were blocked on it."
+    forbidden: ["C-TIMER-LOADSW at 10nF", "10 nF timer", "12x to 300x", "the reviewers disagree and the datasheet decides", "= 9.4 uF        provisional", "9.4 uF at the net", "2.4x the 62 ms", "2.4x the ~62ms"]
+    false_positive_note: "10nF is also C-KEY's superseded value and appears in other rows. Match the refdes. 9.4 uF and 9.37 uF appear legitimately in text that explains why 10 uF was chosen instead - those lines carry refutation wording and the checker allows them."
+    note: "The '12x to 300x' ratio is itself wrong - the page's own equation gives 37x to 925x, and bom.csv repeats the bad ratio so cross-checking finds false agreement. The '150 ms = 2.4x the 62 ms start' justification is ALSO retired: the 62 ms was integrated across the whole ramp, which is only true while FB is unconnected. With the divider fitted the sizing case is the 47.5 ms hot-plug."
+
+  - id: loadswitch-gate-cap
+    quantity: C-GATE-LOADSW and the ramp it programs
+    value: "82 nF, ramp 49-197 ms (98 ms typ)"
+    status: settled
+    owner: hardware/module/power-entry.md
+    derivation: "C = I_GATE / (dV/dt). I_GATEUP is -5 / -10 / -20 uA (164112fc p.2), corroborated independently by the DC1354A demo quick-start guide p.1 - the min/max this figure lacked. 82 nF (E24; 83 nF is not orderable) gives dV/dt = 61 / 122 / 244 V/s and a ramp to 12 V of 197 / 98 / 49 ms."
+    forbidden: ["= 83 nF         provisional", "so ~83nF", "a ramp spec with an unbounded tolerance", "No min/max established"]
+    note: "ADR 0005 specifies a 50-100 ms ramp and THAT SPEC IS NOT ACHIEVABLE with this part: I_GATE is a 4:1 window and no single capacitor holds it inside a 2:1 time window. 82 nF centres the typical inside ADR 0005; the guaranteed envelope is 49-197 ms. Raised against ADR 0005 2026-09-21, not decided."
+
+  - id: loadswitch-fb-divider
+    quantity: LT1641 FB divider, R-FB-HI / R-FB-LO
+    value: "35.7 kohm / 5.11 kohm, both 1%"
+    status: settled
+    owner: hardware/module/power-entry.md
+    derivation: "V_FB = 0.5 V (full 47 mV sense threshold) and V_FBH = 1.313 V (PWRGD release) are set by the SAME divider, so V_OUT(full limit) = 0.381 x V_OUT(PWRGD) always - the ratio is fixed by the part, not by the divider. Sized at the PWRGD end: PWRGD must release below the worst-case delivered output of ~11.36 V, so the nominal target is 10.5 V, giving R-FB-HI/R-FB-LO = 1.313/10.5 inverted = 7.00. 35.7k/5.11k is 6.986. PWRGD releases at 10.49 V (10.05-10.93 V worst case over 1% resistors and the 1.280-1.345 V V_FBH window); V_FB reaches 0.5 V at 3.99 V of output."
+    provenance_note: "The foldback law is CONFIRMED VERBATIM against the banked 164112fc.pdf p.5 and Figure 7 p.9: 47 mV when V_FB is 0.5 V or higher, decreasing linearly to 12 mV at V_FB = 0 V. It was [web, search-index] until 2026-09-21."
+    forbidden: ["R-FB-HI,module,TBD", "R-FB-LO,module,TBD", "VALUES NOT SET"]
+    note: "FB was connected to NOTHING, which held the limit at 12 mV / 50 mohm = 240 mA forever and latched the -1 off on every start. ADI describes exactly this as the Figure 9 caption story (p.9). An unconnected FB is indistinguishable, to this part, from a permanently shorted output."
 
   - id: loop-budget
     quantity: Real-time loop, one pass
@@ -214,6 +234,60 @@ figures:
     value: "fault isolation and HF isolation (r_d 69 mohm at 392 mA)"
     status: settled
     owner: hardware/module/power-entry.md
-    derivation: "Vf modulation is 120 mV: 0.24 V at 245 mA -> 0.36 V at 612 mA, digitised off Fig. 2 of Diodes Inc DS23001 Rev.8 (datasheets/discrete-and-power/1N5817.pdf). Reaches the jack as 120 mV -> LM317 line reg 0.52 mV/V -> 62 uV on AVDD -> OPA2197 PSRR 114 dB -> 0.00029 cents. Pitch references the DAC's INTERNAL reference, not this rail."
-    provenance_note: "This was 75-80 mV from a review agent's estimate until 2026-09-21. The 120 mV is read off the actual curve, and the digitisation is calibrated: the same extraction gives 0.454 V at 1.0 A and 0.746 V at 3.0 A against the datasheet's guaranteed maxima of 0.450 V and 0.750 V, so it is good to about +/-0.01 V - and the plotted curve sits essentially ON the max spec, so read these as typical-to-max. The conclusion is unchanged: 0.00029 cents is still five orders of magnitude below every other term in the table."
+    derivation: "Vf modulation is 120 mV: 0.24 V at 245 mA -> 0.36 V at 612 mA, digitised off Fig. 2 of Diodes Inc DS23001 Rev.8 (datasheets/discrete-and-power/1N5817.pdf). Reaches the jack as 120 mV -> LM317 line reg 0.52 mV/V -> 62 uV on AVDD -> OPA2197 PSRR 110.5 dB worst case -> 0.00044 cents. Pitch references the DAC's INTERNAL reference, not this rail."
+    provenance_note: "This was 75-80 mV from a review agent's estimate until 2026-09-21. The 120 mV is read off the actual curve, and the digitisation is calibrated: the same extraction gives 0.454 V at 1.0 A and 0.746 V at 3.0 A against the datasheet's guaranteed maxima of 0.450 V and 0.750 V, so it is good to about +/-0.01 V - and the plotted curve sits essentially ON the max spec, so read these as typical-to-max. The conclusion is unchanged: 0.00044 cents is still five orders of magnitude below every other term in the table. SEPARATELY, 2026-09-21: the PSRR in this chain was 114 dB and that figure is NOT IN THE OPA2197 DATASHEET - SBOS737C p.8 specifies +-1 uV/V typ and +-3 uV/V max, i.e. 120 dB typ and 110.5 dB worst case. Using the guaranteed maximum scales the result by 1.50x, from 0.00029 to 0.00044 cents, and changes nothing. SBOS737C is banked at datasheets/texas-instruments/OPA2197.pdf."
     forbidden: ["20 cents of breath-correlated", "20 cents of pitch bend", "about 20 cents", "by ~80mV", "by **~80 mV**", "A7 independently gets 75 mV"]
+
+  - id: plate-thickness
+    quantity: Key plate thickness (PLATE-TOP, PLATE-THUMB)
+    value: "1.20 mm"
+    status: settled
+    owner: docs/reference/ks33-geometry.md
+    derivation: "Read off Gateron's own drawing for the exact part, KS-33H10B050NN-Y24 Version 2 drafted 2023-01-03, banked at datasheets/mechanical/GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf. Sheet 6's elevation dimensions the plate slot 1.20 +/-0.05 mm; sheet 3 section 8 shows the same 1.20 against a hatched plate section. The file is vector CAD - pdftotext extracts almost nothing - so both sheets were rendered at 150 dpi and read by hand."
+    provenance_note: "gateron.com, gateron.co and gateron.cn returned HTTP 000 through four review waves; they answer 200 from this sandbox. Everything the corpus previously held about the KS-33 came from third-party CAD and footprint libraries. The STEP-derived Z stack is confirmed almost exactly by the drawing, which is a good sign for the rest of those measurements."
+    forbidden: ["take the plate to 1.5 mm and", "ADR 0009 specifies a ~2 mm aluminium top plate", "1.5 mm with lamination stiffening, or 2 mm with a structural backer", "PLATE-THUMB,mechanical,TBD - ~2mm"]
+    false_positive_note: "1.5 mm and 2 mm both appear legitimately all over this corpus - as MX-standard context, as the PCB thickness, as drill diameters, and inside the text that records them being ruled out. Match the phrase, never the numeral."
+    note: "BOTH candidates the corpus was choosing between are OUTSIDE the vendor window: 1.5 mm is 0.25 mm over the upper limit and 2 mm is 0.75 mm over. The third-party reference build's 1.10 mm is 0.05 mm under the lower limit. CONSEQUENCE NOT YET DECIDED: at 1.20 mm, lamination stops being the cheap alternative to a structural backer and becomes the floor - ADR 0002's open item is now 'how is a 1.20 mm plate stiffened', not 'which thickness'. Cutout confirmed and tightened to 14.00 +0.05/-0.02 square."
+
+  - id: opa2197-output-impedance
+    quantity: OPA2197 open-loop output impedance
+    value: "375 ohm"
+    status: settled
+    owner: hardware/controller/carrier.md
+    derivation: "SPECIFIED, not derived: SBOS737C EC table p.8 and p.10, 'ZO Open-loop output impedance | f = 1 MHz, IO = 0 A, See Figure 26 | 375 | ohm'. Figure 26 reads ~3.26k at 0.1 Hz, 482 at 10 Hz, a 375 plateau from 100 Hz to 300 kHz, 301 at 1 MHz and ~73 at 10 MHz. Banked at datasheets/texas-instruments/OPA2197.pdf."
+    provenance_note: "The corpus BACK-SOLVED 75.8 ohm from its own stated 21 kHz pole and carried it through three review waves because ti.com was unreachable. ti.com is reachable now and the BLOCKED manifest row was a proxy artefact. 75.8 ohm is about the 10 MHz value, so it is defensible as a crossover-region number and was not a wild guess - it is simply not TI's specified figure."
+    forbidden: ["Ro ≈ 75.8 Ω**. The actual load", "gives **Ro ≈ 75.8"]
+    false_positive_note: "75.8 appears legitimately in the text that records the correction. Match the assertion, not the numeral."
+    note: "EVERY POLE DERIVED FROM 75.8 OHM MOVES BY ~5x IN THE WRONG DIRECTION: 21 kHz -> 4.24 kHz against 100 nF, 200 Hz -> 42 Hz against 10.1 uF. The case for R-ISO-REF is STRENGTHENED, not weakened. Not recomputed yet, because it is blocked on a prior question: three files disagree about which side of the buffer C-REF-OUT sits on, and that changes the whole compensation. TI publishes a worked answer for this exact circuit in SBOS737C section 8.2.3 p.30, Figure 56, with R_ISO = 37.4 ohm."
+
+  - id: matrix-led-current
+    quantity: ESP32-S3-Matrix LED current, full white, 64 LEDs
+    value: "BLOCKED"
+    status: blocked
+    owner: docs/decisions/0014-lighting.md
+    candidates: ["960 mA at 5 mA/ch - DERIVED FROM THE WRONG PART (WS2812C-2020) and optimistic by at least 2.4x", "2304 mA at 12 mA/ch, which is the WS2812B FAMILY figure from the banked WS2812B-2020 p.4 and from the XINGLIGHT 0807 surrogate's 2022 revision", "3648 mA at 19 mA/ch, the XINGLIGHT surrogate's 2024 revision default"]
+    decided_by: "A BENCH MEASUREMENT AT E1, not another document. Worldsemi does not publish a WS2812B-0807 datasheet at all - their site's own machine-readable datasheet index enumerates 68 keys covering every published part and has no 0807 key in either language, while the control URL for ws2812b-2020-v6 returns a real 1.26 MB PDF. The two XINGLIGHT XL-0807RGBC-WS2812B revisions banked as SURROGATES disagree with each other 12 vs 19 mA and 7x on quiescent current, and which one matches the fitted board is unknowable from documents."
+    blocked_on: "datasheets/MANIFEST.csv - WS2812B-0807. Unblocking needs a current probe, not a fetch."
+    supersedes_the_constraint: "THE 1 A R-78E5.0 IS NOT WHAT STOPS THE MATRIX FIRST. All 64 LEDs draw through one B5819WS Schottky in SOD-323 on the dev board, P_D 200 mW and R-thJA 500 degC/W (datasheets/discrete-and-power/B5819WS.pdf), which is ~435 mA at 25 degC and ~283 mA at a 60 degC interior [calc at V_F ~0.46 V]. Behind it the ME6217C33M5G LDO's printed 800 mA is 'guaranteed by design' and not production-tested, derating to ~250-500 mA on SOT-23-5. ADR 0014's brightness cap is RIGHT and its JUSTIFICATION IS WRONG."
+    forbidden: []
+    note: "THIS NUMBER IS LOAD-BEARING. ADR 0014 uses it to argue the matrix alone nearly exhausts the 1 A R-78E5.0, and that argument drives a hard brightness cap that the ADR deliberately makes non-configurable. The argument may well survive - 12 mA/ch would make it far worse, not better - but the figure behind it does not currently have a document. What the schematic DOES settle: the 64 LEDs run from 5 V, not 3V3 - every VDD on net VCC_5V with no regulator or switch between - which was a strong inference and is now read off a schematic. But VCC_5V is USB VBUS through a B5819WS Schottky, so it is a diode drop below 5 V, and there is NO decoupling anywhere inside the array."
+
+  - id: ferrite-bias-impedance
+    quantity: FB-IN impedance at 100 MHz under real DC bias
+    value: "~580-614 ohm on FB1/FB3/FB4; ~280-310 ohm on FB2"
+    status: settled
+    owner: hardware/bom.csv
+    derivation: "Laird MI1206K601R-10, drawing rev E, banked at datasheets/discrete-and-power/MI1206K601R-10-ferrite-bead.pdf. Read off the drawing's impedance-under-DC-bias curve family (0 / 250 / 500 / 1000 / 1500 mA traces) at 100 MHz: 0 A ~614 ohm, 250 mA ~431, 500 mA ~157, 1000 mA ~72, 1500 mA ~51. FB2 carries umbilical-current (359 mA) and interpolates to ~280-310 ohm; the module +12V total of 392 mA gives ~245-275."
+    forbidden: ["Rated >=1A - the common 0805 600R part is ~300mA and a saturated bead is a wire"]
+    note: "THE '>=1 A' RULE DOES NOT DO WHAT THE BOM ROW SAID IT DID. A bead's current rating is THERMAL, not magnetic, so it says nothing about saturation. A 3000 mA part in the same package with the same 600 ohm nominal (HI1206N601R-10, banked alongside) reads ~145 ohm at 500 mA - SLIGHTLY WORSE than the 1500 mA part. FB2 gets roughly half the 600 ohm its row specifies and no 1206 600R bead of any rating fixes it: DC bias shifts the impedance peak UP IN FREQUENCY, so the bead does not die, its useful band slides off 100 MHz. Either the FB2 requirement is restated at its real operating current or FB2 becomes a physically larger part. SELECTION CONSTRAINT WORTH PRESERVING: this part was chosen because its datasheet PUBLISHES the bias curve. Murata BLM's PDF does not (that data is in SimSurfing only) and neither does Wurth WE-CBF - an earlier researcher declined to bank a Wurth part for exactly this reason and that judgement is upheld."
+
+  - id: ref5050-grade
+    quantity: REF5050 grade, initial accuracy and tempco
+    value: "DISPUTED"
+    status: disputed
+    owner: hardware/bom.csv
+    candidates: ["REF5050AIDR as currently specified = Standard grade = +/-0.1% and 8 ppm/degC (SBOS410O Table 4-2 p.3)", "REF5050IDR = High grade = +/-0.05% and 3 ppm/degC, which is what the corpus BELIEVES it has and states in three places"]
+    decided_by: "Changing one letter in the order code, or accepting 2x the initial error and 2.7x the drift in the ratiometric breath scale-factor budget. Since the whole reason for a separate reference is scale-factor stability, REF5050IDR is almost certainly the right answer - but it is a part change, not a documentation fix, so it is recorded as disputed rather than decided."
+    forbidden: []
+    note: "*** THE 'A' SUFFIX IS THE WORSE GRADE. *** SBOS410O Table 4-2 p.3, verbatim: REF50xxI = grade 'High' = 3 ppm/degC, +/-0.05%; REF50xxAI = grade 'Standard' = 8 ppm/degC, +/-0.1%. The corpus says REF5050AIDR is +/-0.05% / 3 ppm/degC in bom.csv (twice) and in ADR 0003. PROVENANCE CAVEAT WORTH KEEPING: Table 4-2 is NEW IN REV O (October 2025), so an earlier revision may have labelled the grades differently and the corpus's belief may have had an honest origin; rev M/N was not fetched. FETCH NOTE: ti.com/lit/ds/symlink/ref5050.pdf is a REAL 404 - TI renamed the folder at rev O and broke the symlink. Use ti.com/lit/ds/sbos410/sbos410.pdf."
+

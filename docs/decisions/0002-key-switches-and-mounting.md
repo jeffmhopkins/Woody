@@ -135,10 +135,13 @@ rather than a nominal box.
 
 Two things, narrower than before.
 
-**The plate thickness, which is now a live question rather than a given.**
-ADR 0009 specifies a ~2 mm aluminium top plate. Standard MX plates are 1.5 mm;
-the reference KS-33 build uses **1.1 mm**. Neither is 2 mm, and a low-profile
-switch has shallower retention tabs than full-height MX to begin with.
+**The plate thickness, which was a live question and is now settled at 1.20 mm
+— see the note below.** ADR 0009 used to specify a ~2 mm aluminium top plate
+and now cites this figure. Standard MX plates are 1.5 mm; the reference KS-33
+build uses **1.1 mm**. Neither matched, and a low-profile switch has shallower
+retention tabs than full-height MX to begin with. What follows is the reasoning
+as it stood before the vendor drawing arrived; it is kept because the
+through-section argument in it still decides how the plate is backed.
 
 At 2 mm the clips will not engage at all — **though "clips" may be the wrong
 word.** A solid model measured 2026-09-21
@@ -154,12 +157,31 @@ stops being belt-and-braces and becomes the only thing resisting push-through.
 That requirement is already flagged as "most commonly forgotten, and the first
 thing to fail."
 
-Two ways out, and the cheap one is available: **take the plate to 1.5 mm and
-recover the stiffness from the lamination**, which is ADR 0009's whole thesis
+Two ways out were on the table, and the cheap one looked available: **thin the
+plate and recover the stiffness from the lamination**, which is ADR 0009's whole thesis
 anyway — a 1.5 mm plate bonded to oak is not a 1.5 mm plate. Or keep 2 mm and
 design the backer as a structural member rather than a spacer. **Decide with the
 vendor drawing's clip dimension in hand**, which is the one number that settles
 it and the one this project does not yet have.
+
+> **✅ 2026-09-21: THE DRAWING IS IN HAND, AND IT SAYS 1.20 mm.** `gateron.com`
+> answers 200 from this sandbox for the first time. The drawing for the exact
+> part — **KS-33H10B050NN-Y24, Version 2, 2023-01-03** — is banked at
+> `datasheets/mechanical/GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf` and dimensions
+> the plate slot **1.20 ±0.05 mm** on sheet 6's elevation, corroborated by a
+> hatched plate section on sheet 3 §8.
+>
+> **Neither way out above is in spec.** 1.5 mm is 0.25 mm over Gateron's upper
+> limit and 2 mm is 0.75 mm over. So the choice is not "1.5 with lamination or
+> 2 with a backer" — it is **1.20 mm, and stiffening is compulsory**. The
+> lamination that was the cheap option is now the minimum, and whether it is
+> sufficient on its own at 1.20 mm is a new question this ADR has not asked.
+>
+> The rest of this section survives intact and matters more, not less: at
+> 1.20 mm the plate consumes only 48 % of the 2.50 mm through-section, which is
+> the comfortable end of that trade — but requirement 2, *"something backs the
+> switch so it cannot push through"*, is load-bearing at any thickness, and a
+> thinner plate resists push-through less on its own.
 
 **The bond is RTV silicone, and that still supports this.** ADR 0009 settles the
 plate-to-oak joint as a compliant silicone layer rather than a rigid adhesive,
@@ -202,12 +224,13 @@ plunger in the hysteresis gap and chatter for tens of milliseconds.
 
 ## Open
 
-**Plate thickness**, no longer pending a clip dimension — the best available
-model says there is no clip shoulder, and Gateron's own drawing is unreachable
-from anywhere (`datasheets/MANIFEST.csv`). Decide it against the 2.50 mm
-through-section and the zero standoff instead — 1.5 mm
-with lamination doing the stiffening, or 2 mm with a structural backer. Blocks
-M4 and M5.
+~~**Plate thickness.**~~ **CLOSED 2026-09-21 at 1.20 mm**, from Gateron's own
+drawing, which is now banked — it was unreachable from anywhere through four
+review waves and `gateron.com` simply answers now. See the note above. What is
+left open in its place is narrower and different: **how the 1.20 mm plate is
+stiffened**, since it is thinner than either option this ADR was choosing
+between and lamination is no longer the cheap alternative but the floor.
+Still blocks M4 and M5.
 
 Otherwise nothing: the cutout is 14.0 mm, the fit comes from a coupon, and the
 timing from a scope.

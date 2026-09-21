@@ -218,12 +218,14 @@ trace from the switch rather than 265 mm of loom. Twenty-one sets across the
 four boards, so the three reserved spare-switch bits are covered too.
 (`R-KEY-PU`, `R-KEY-SER`, `C-KEY`; values per `bom.csv`.)
 
-`[calc]`, at 3.3 V into 74HC165 thresholds (`V_IH` 2.31 V, `V_IL` 0.99 V):
+`[calc]`, at 3.3 V into 74HC165 thresholds (`V_IH` 2.31 V, `V_IL` 0.99 V —
+0.70/0.30 × VCC, from onsemi MC74HC165A Rev. 13's published 3.0 V row; see
+`hardware/controller/cluster-boards.md` for why three other vendors omit it):
 
 | | |
 |---|---|
-| Release, τ = 2.2 kΩ × 47 nF = 103.4 µs | crosses `V_IH` at **138.7 µs** |
-| Press, τ = (2.2 kΩ ∥ 100 Ω) × 47 nF = 4.496 µs | crosses `V_IL` at **6.89 µs** — 36× inside the 250 µs scan |
+| Release, τ = 2.2 kΩ × 47 nF = 103.4 µs | crosses `V_IH` at **119.9 µs** |
+| Press, τ = (2.2 kΩ ∥ 100 Ω) × 47 nF = 4.496 µs | crosses `V_IL` at **5.92 µs** — 42× inside the 250 µs scan |
 | Pole | 1.54 kHz → **54 dB** at the WS2815's 800 kHz data rate |
 | Static | **1.43 mA** per closed key; 18 closed = **25.8 mA** |
 

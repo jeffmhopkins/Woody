@@ -173,7 +173,7 @@ board definitions, which have to be correct for the board to work at all:
   was decisive**: GPIO19 and GPIO20 are not broken out, so had the port gone
   through a CH343P the board could not have done USB MIDI at all and would have
   been disqualified (E5).
-- **The matrix is 64 WS2812C parts on GPIO14**, chained, driven over SPI2 in
+- **The matrix is 64 `WS2812B-0807` parts on GPIO14**, chained, driven over SPI2 in
   Zephyr's configuration. Below.
 
 ### Pin assignment

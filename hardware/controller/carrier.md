@@ -225,12 +225,15 @@ tolerance, inside a body that cannot be reopened.
 > is **73 dB**, set by the 1 MΩ bias pair, so `R1b` buys about **13 dB**.
 > Still worth fitting. The stated reason overstates it.
 
-**`R-ISO-REF` — and without it the reference buffer oscillates.** Back-
-solving the OPA2197's output impedance from this page's own stated 21 kHz
-pole gives **Ro ≈ 75.8 Ω**. The actual load at the sensor's `VS` pin is
-**100 nF** of
-`C-DECOUPLE-CARRIER`, which leaves **2.6° of phase margin and oscillation
-near 458 kHz** `[calc, A2]`.
+**`R-ISO-REF` — and without it the reference buffer oscillates.** This page
+back-solved the OPA2197's output impedance from its own stated 21 kHz pole and
+got **Ro ≈ 75.8 Ω**. **That figure is superseded: TI specifies `Zo` = 375 Ω**
+`[SBOS737C p.8]` — see the note below, which also gives the corrected poles.
+The actual load at the sensor's `VS` pin is **100 nF** of
+`C-DECOUPLE-CARRIER`, which left **2.6° of phase margin and oscillation
+near 458 kHz** on the old figure `[calc, A2]`; at 375 Ω it is worse, and the
+numbers in this paragraph and the next are pending the recomputation the note
+describes.
 
 **The compensation must be more than the resistor.** Taking feedback at
 `VS` (in-loop, as drawn) puts the R·C pole back *inside* the loop — 159 kHz,
@@ -245,31 +248,50 @@ Alternative, and cheaper in DC terms: a **series R–C snubber from `VS` to
 the analog star**, which damps the load without putting any resistance in
 the DC path, so the sensor sees the full 5.000 V.
 
-> **⚠ The "1 nF maximum capacitive load" that stood here is not a verified
-> OPA2197 figure.** "Stable with 1-nF Capacitive Loads" is a **verbatim
-> feature-list bullet of the INA828** (SBOS792A, first page, now in the repo)
-> — a different part, in a different stage, on a different board. The
-> OPA2197's own capacitive-load limit is **unverified**: SBOS737 is BLOCKED
-> (`datasheets/MANIFEST.csv`), and a researcher found it committed to no
-> public repository on GitHub or GitLab.
+> **✅ SETTLED 2026-09-21. SBOS737C IS BANKED, AND BOTH HEDGES ABOVE WERE
+> WRONG IN OPPOSITE DIRECTIONS.** `datasheets/texas-instruments/OPA2197.pdf`,
+> 56 pp, rev C (Jan 2016, revised March 2018). `ti.com` was reachable this
+> session; the BLOCKED row was a proxy artefact and the URL works as written.
 >
-> **The conclusion does not move.** `R-ISO-REF` is justified by the
-> back-solved `Ro` and the 100 nF at `VS`, and the 1 nF was only ever cited
-> as corroboration. But it was corroboration from the wrong datasheet, which
-> is how a number gets believed twice.
+> **1. The "1 nF" IS an OPA2197 figure.** It is on this part's own front page —
+> *"High Capacitive Load Drive Capability: 1 nF"* — in its Description, and in
+> §7.3.5 p.22: *"in a unity-gain configuration, directly drives up to 1 nF of
+> pure capacitive load."* The INA828 carries the same headline number by
+> coincidence, and this page filed a correct figure as refuted on the strength
+> of that coincidence. **Per CLAUDE.md that is the more dangerous error**: a
+> wrong finding gets caught by the next reviewer; one filed as handled does not.
+> Figures 27/28 put ~40 % overshoot at 1 nF in unity gain, so 1 nF is a
+> stable-but-ringing limit rather than a 30 % threshold, and TI recommends a
+> **10–20 Ω** isolation resistor with `R_ISO` tabulated for 45°/60° phase margin
+> in Table 3 p.23 (1000 pF → 24.0/100.0 Ω; 0.1 µF → 6.2/15.8 Ω; 1 µF → 2.0/4.7 Ω).
 >
-> **There is a way to settle it without the PDF.** TI's own OPAx197 SPICE
-> macromodel is committed on GitHub and downloads, and its Green–Williams–Lis
-> structure models open-loop output impedance versus frequency explicitly. An
-> AC sweep of `Zo` answers this properly. Arithmetic on the netlist does not —
-> the `Zo` network is frequency-shaped.
-
-> **`Ro = 75.8 Ω` is back-solved, not read.** `ti.com` was unreachable
-> through three review waves. Confirm the OPA2197's open-loop output
-> impedance and its capacitive-load curve before committing either network.
-> The *existence* of the problem does not depend on the exact figure — any
-> Ro in the tens of ohms against 100 nF is unstable — but the component
-> values do.
+> **2. `Ro` is specified, and it is 375 Ω, not 75.8 Ω.** EC table p.8 and p.10:
+> *"`ZO` Open-loop output impedance | f = 1 MHz, `IO` = 0 A, See Figure 26 |
+> **375** | Ω"*. Figure 26 reads ~3.26 kΩ at 0.1 Hz, 482 Ω at 10 Hz, a **375 Ω
+> plateau from 100 Hz to 300 kHz**, 301 Ω at 1 MHz and ~73 Ω at 10 MHz. So the
+> back-solved 75.8 Ω is about the *10 MHz* value — defensible as a
+> crossover-region number, and not what TI specifies.
+>
+> **The problem this page identified is real and roughly five times worse than
+> it drew it.** `[calc]` The pole against 100 nF moves **21 kHz → 4.24 kHz**,
+> and against 10.1 µF **200 Hz → 42 Hz**. Every component value on this page
+> derived from 75.8 Ω must be recomputed; the *case* for `R-ISO-REF` is
+> strengthened, not weakened.
+>
+> **TI publishes the worked answer for this exact circuit.** §8.2.3 p.30,
+> Figure 56, *"Precision Reference Buffer"* driving 10 µF: `R_ISO` = **37.4 Ω**,
+> `R_F` 1 MΩ taken at `VOUT`, `R_Fx` 10 kΩ + `C_F` 39 nF at the op-amp output —
+> 89° of phase margin, 4 kHz of bandwidth, and *"any other load capacitances
+> require recalculation."* `R-ISO-REF` at 10 Ω is well under it, and **this
+> page's own feedback-zero inequality fails** if `C-REF-OUT`'s 10 µF sits on
+> this node: 10 Ω × 10.1 µF = 101 µs against 10 kΩ × 1 nF = 10 µs.
+>
+> **Not recomputed here, because it is blocked on a prior question.** Three
+> files disagree about which side of the buffer `C-REF-OUT` is on — this page
+> draws its 10 µF on the REF5050 *output*, i.e. the buffer's **input**, while
+> `bom.csv` and `breath-receive-stage.md` both say the buffer **drives** it.
+> No grep finds that, and which is true changes the whole compensation.
+> **Settle the node, then adopt Figure 56's network or recompute against 375 Ω.**
 
 ### Two things this drawing settles that no ADR does
 

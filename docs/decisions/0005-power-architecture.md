@@ -261,6 +261,28 @@ things the bare toggle does not have:
 
 **1.0 A, latch-off, with a programmed 50–100 ms ramp.**
 
+> **⚠ The ramp half of that specification is not achievable with the chosen
+> part, 2026-09-21.** `164112fc.pdf` is now banked
+> (`datasheets/discrete-and-power/LT1641.pdf`) and the LT1641's `GATE` pull-up
+> is specified **−5 / −10 / −20 µA** `[p.2]`, corroborated by the DC1354A demo
+> guide. That is a **4:1** current window, and no single gate capacitor can hold
+> a ramp inside a 2:1 time window when the current that drives it varies 4:1.
+> `C-GATE` at 82 nF centres the *typical* at 98 ms, inside this spec; the
+> **guaranteed envelope is 49–197 ms** (`hardware/module/power-entry.md`).
+>
+> **This ADR has to choose.** Either widen the specification to **50–200 ms**,
+> which costs nothing the analysis below depends on — the 75 ms start it cites
+> is a *current-limited* start, not a ramped one, and the fault timer is sized
+> against the 47.5 ms hot-plug case rather than against the ramp — or program
+> the ramp with something other than the part's internal pull-up. **Not decided
+> here; raised against this ADR by the wave that read the datasheet.**
+>
+> The 1.0 A half is confirmed and sharpened: the sense threshold is
+> **39 / 47 / 55 mV** `[p.2]`, so `R-ILIM` at 50 mΩ gives **0.78 / 0.94 /
+> 1.10 A**. The E6 bench measurement this section already calls for is what
+> closes that, and the ±17 % spread is a stronger reason for it than the one
+> given.
+
 **The upper bound this used to quote was arithmetic from a broken row.** It said
 0.9–1.13 A, with 1.13 A taken as what a brownout-latched full-white strip set
 draws — but that row of the load table was inconsistent three ways (its two
@@ -316,7 +338,12 @@ a persistent fault reproduces the oscillating-protection behaviour this design
 exists to avoid. LM5069MM (MSOP-10) and LTC4210 (MSOP-8) are equally valid.
 
 Programmable ramp rate and a programmable fault timer come with the part, which
-is what the 75 ms start above needs.
+is what the 75 ms start above needs. **Both are now programmed**: `C-GATE` at
+82 nF and `C-TIMER` at 10 µF, sized in `hardware/module/power-entry.md` against
+the datasheet rather than against search results, with the ramp caveat above.
+The fault timer's binding case turned out to be the **hot-plug** — 47.5 ms
+entirely in current limit, against a worst-case timer of 95.6 ms — and not the
+cold start at all.
 
 The toggle now carries no load current, so its rating stops mattering — it
 drives an enable pin. It stays a rated part anyway because it is already

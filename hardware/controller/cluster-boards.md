@@ -1,8 +1,9 @@
 # Key cluster boards — schematic
 
-**Status:** **First draft, 2026-09-21.** The last board in the instrument. No
-datasheet was reachable from this sandbox, so the 74HC165 pin map below is
-`[from memory]` and **must be checked against a vendor drawing before layout.**
+**Status:** **First draft, 2026-09-21.** The last board in the instrument.
+The pin map below was `[from memory]` when this page was drafted, because no
+datasheet was reachable from the sandbox. **Four are banked now** and the map
+is **CONFIRMED pin for pin** `[74HC165-nexperia.pdf Table 2, p.4]`.
 
 Evidence marking follows the other hardware pages: `[repo]` names a file,
 `[calc]` shows the arithmetic, `[from memory]` means I could not open the
@@ -148,41 +149,61 @@ LVC with proper source termination remains the way back if E4 disagrees.
 
 ### Derivations
 
-`[calc]`, at 3.3 V into 74HC165 thresholds (**`V_IH` = 0.75 × VCC = 2.475 V,
-`V_IL` = 0.25 × VCC = 0.825 V** `[repo, verified against SCLS116E]`):
+`[calc]`, at 3.3 V into 74HC165 thresholds (**`V_IH` = 2.31 V, `V_IL` = 0.99 V**
+— 0.70 / 0.30 × VCC `[datasheet MC74HC165A/D Rev. 13 p.4]`):
 
-> **The datasheet has no 3.3 V row, and the ratio is not constant.** This
-> page carried `0.7 × VCC` / `0.3 × VCC` marked `[from memory]`.
-> `datasheets/other-semi/74HC165.pdf` (SN54/SN74HC165, SCLS116E) tabulates
-> exactly three rails:
+> **Corrected 2026-09-21, the same day it was changed the other way.** This
+> page reasoned from TI's SCLS116E, which has no 3.3 V row, that the 0.70/0.30
+> ratio "breaks at 2 V" and that the conservative 2 V ratio 0.75/0.25 was the
+> defensible bound at 3.3 V. **A 3.0 V row is published, and it is 0.70/0.30.**
 >
-> | `VCC` | `V_IH` min | `V_IL` max | as a ratio |
-> |---|---|---|---|
-> | 2.0 V | 1.5 V | 0.5 V | **0.75 / 0.25** |
-> | 4.5 V | 3.15 V | 1.35 V | 0.70 / 0.30 |
-> | 6.0 V | 4.2 V | 1.8 V | 0.70 / 0.30 |
+> | source | 2.0 V | **3.0 V** | 4.5 V | 6.0 V |
+> |---|---|---|---|---|
+> | TI SCLS116E `datasheets/other-semi/74HC165.pdf` | 1.5 / 0.5 | *(absent)* | 3.15 / 1.35 | 4.2 / 1.8 |
+> | Nexperia Rev. 8 `74HC165-nexperia.pdf` | 1.5 / 0.5 | *(absent)* | 3.15 / 1.35 | 4.2 / 1.8 |
+> | Toshiba TC74HC165 `74HC165-toshiba.pdf` | 1.5 / 0.5 | *(absent)* | 3.15 / 1.35 | 4.2 / 1.8 |
+> | **onsemi MC74HC165A Rev. 13** `74HC165-onsemi.pdf` | 1.5 / 0.5 | **2.1 / 0.9** | 3.15 / 1.35 | 4.2 / 1.8 |
 >
-> 0.70/0.30 is exact at 4.5 V and above and **breaks at 2 V**. Extrapolating
-> it *down* to 3.3 V therefore runs straight through the one datapoint that
-> contradicts it. **The defensible bound at 3.3 V is the 2 V ratio**, and that
-> is what the numbers below now use. Both crossing times get slower —
-> 119.9 → 138.7 µs and 5.92 → 6.89 µs — and neither changes a conclusion,
-> because the release is absorbed by the asymmetric debounce and the press
-> still clears the scan period by 36×.
+> All four agree digit for digit at every shared rail, so onsemi is not a
+> different device — it simply prints the JEDEC HC row the other three omit.
+> **3.3 V is bracketed on both sides by published 0.70/0.30 rows**, so no
+> extrapolation through the 2 V point is needed at all. The 2 V entry is the
+> single exception at the bottom of the family's range, not the start of a
+> trend. Nexperia's own front page claims compliance with **JESD8C** (2.7–3.6 V),
+> whose levels are 0.7/0.3 × VDD `[74HC165-nexperia.pdf p.1]` — a second strike.
+>
+> `[calc]` Interpolating in **absolute volts** between onsemi's bracketing rows,
+> assuming no ratio at all:
+> `V_IH`(3.3) = 2.1 + (0.3/1.5)(3.15−2.1) = **2.31 V**;
+> `V_IL`(3.3) = 0.9 + (0.3/1.5)(1.35−0.9) = **0.99 V**. Both land exactly on
+> 0.70/0.30, which is what makes the bracketing argument safe rather than lucky.
+>
+> So both crossing times go back to what they were before yesterday's move:
+> **138.7 → 119.9 µs** and **6.89 → 5.92 µs**. Neither ever changed a
+> conclusion — the release is absorbed by the asymmetric debounce either way,
+> and the press clears the scan period by 42× instead of 36×. What was not
+> defensible was stating 0.75/0.25 **as the datasheet threshold** when no
+> datasheet in the corpus gave a threshold at 3.3 V at all.
+>
+> **If a TI SN74HC165 is the part actually fitted**, its own datasheet still
+> guarantees nothing at 3.3 V, and the pessimistic bound is 2.475 / 0.825 V,
+> giving 138.7 µs and 6.89 µs. Those are the numbers to design margin against
+> if the margin ever gets tight. It is not tight: 42× and 36× are the same
+> answer.
 >
 > *(The press row also said `τ = 100 Ω × 47 nF = 4.7 µs` beside a crossing
-> time computed from the **parallel** combination, 4.496 µs. The parallel
-> value is the right one — the pull-up is still connected — and the row now
-> says so.)*
+> time computed from the **parallel** combination, 4.496 µs. That correction is
+> independent of the threshold question and **stands** — the pull-up is still
+> connected, so the parallel value is the right one.)*
 >
-> The same datasheet carries a warning worth repeating: operating in the
+> The TI datasheet carries a warning worth repeating: operating in the
 > threshold region risks **double-clocking from induced ground bounce**.
 > Another reason not to shave this margin.
 
 | | |
 |---|---|
-| Release, τ = 2.2 kΩ × 47 nF = 103.4 µs | crosses `V_IH` at **138.7 µs** |
-| Press, τ = (2.2 kΩ ∥ 100 Ω) × 47 nF = 4.496 µs | crosses `V_IL` at **6.89 µs** — 36× inside the 250 µs scan |
+| Release, τ = 2.2 kΩ × 47 nF = 103.4 µs | crosses `V_IH` at **119.9 µs** |
+| Press, τ = (2.2 kΩ ∥ 100 Ω) × 47 nF = 4.496 µs | crosses `V_IL` at **5.92 µs** — 42× inside the 250 µs scan |
 | Pole | 1.54 kHz → **54 dB** at the WS2815's 800 kHz data rate |
 | Static | **1.43 mA** per closed key; 18 closed = **25.8 mA** off the loom's 3V3 |
 
@@ -499,9 +520,10 @@ decided 2026-09-21 and recorded in `key-layout.yaml` and ADR 0001.
   as the control cluster; placement is an M2 decision with hands on the mule
   `[repo] key-layout.yaml`, and it decides which board carries them **and which
   plate gets the cutouts.**
-- **The 74HC165 pin map and its 3.3 V thresholds** (§1, §2). Every number in
-  this page's timing table rests on `V_IH` = 0.7 × VCC and `V_IL` = 0.3 × VCC
-  `[from memory]`. Five minutes with a datasheet.
+- ~~**The 74HC165 pin map and its 3.3 V thresholds** (§1, §2).~~ **CLOSED
+  2026-09-21.** The pin map is confirmed against Nexperia's Table 2 and the
+  thresholds against onsemi's published 3.0 V row — see §Derivations. It did
+  take rather more than five minutes, and it moved twice.
 - **`R-KEY-PU` at 2.2 kΩ versus 10 kΩ** (§2). The reason for 2.2 kΩ expired when
   the register moved back to this board, and the cost — 25.8 mA on the ADC's
   reference rather than 5.9 mA — arrived at the same moment. Live trade,

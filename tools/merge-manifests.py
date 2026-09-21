@@ -43,10 +43,27 @@ w = csv.writer(out, lineterminator="\n")
 w.writerow(HDR); w.writerows(rows)
 open(os.path.join(ROOT, "datasheets/MANIFEST.csv"), "w", encoding="utf-8").write(out.getvalue())
 
+# A BLOCKED row is an honest gap when it is written and a LIE once someone
+# banks the part. The fragments are per-researcher and append-only by
+# convention - an earlier researcher's fragment is their record and is not
+# edited - so the same part legitimately appears twice, once BLOCKED with no
+# file and once OK with one. That is fine in the fragments and misleading in
+# the generated MANIFEST, where a reader greps for BLOCKED to find the gaps.
+# Report it rather than rewriting it: the row stays, the reader is told.
+banked = {r[0].strip().lower() for r in rows if r[2] and r[6].upper().startswith("OK")}
+superseded = [r for r in rows
+              if not r[2] and r[6].upper() in ("BLOCKED", "NOT-FETCHED")
+              and r[0].strip().lower() in banked]
+
 ok = sum(1 for r in rows if r[6].upper().startswith("OK"))
 blocked = sum(1 for r in rows if r[6].upper() == "BLOCKED")
 print(f"MANIFEST.csv: {len(rows)} rows from {len(glob.glob(os.path.join(ROOT,'datasheets','.manifest-R*.csv')))} fragments "
       f"| {ok} ok, {blocked} blocked, {len(rows)-ok-blocked} other")
+if superseded:
+    print(f"  NOTE: {len(superseded)} BLOCKED/NOT-FETCHED row(s) name a part that is now banked "
+          f"elsewhere in this manifest. They are kept as the record of the gap, not as a live gap:")
+    for r in superseded:
+        print(f"        - {r[0]}")
 for p in problems:
     print("  PROBLEM:", p)
 sys.exit(1 if problems else 0)

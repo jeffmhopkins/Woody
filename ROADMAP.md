@@ -115,9 +115,14 @@ The release window was being sized from the wrong number. For an MX-style switch
 the dominant release-side effect is not contact bounce — it is the **gap between
 the actuation point and the reset point**. A slow, deliberate release, which is
 exactly what a woodwind player does on a legato phrase, can park the plunger
-inside that gap and chatter for tens of milliseconds. Gateron publishes neither
-figure for the KS-33, so both have to be measured, on a worn switch as well as a
-fresh one.
+inside that gap and chatter for tens of milliseconds. **Partly refuted
+2026-09-21, now that the vendor drawing is banked** (`datasheets/mechanical/
+GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf`): Gateron *does* publish a bounce figure
+— **5 ms max at 16 in/sec** — and plots both the operating and reset points on
+an undimensioned Force-Travel diagram, off which the gap scales to roughly
+0.3 mm. The **hysteresis gap is still not stated numerically**, and a figure
+scaled off an undimensioned chart brackets the problem rather than settling it,
+so both still have to be measured, on a worn switch as well as a fresh one.
 
 **And release latency is not free on a woodwind.** On a keyboard, filtering the
 release costs nothing because the note is already sounding. Here fingerings are
@@ -181,7 +186,7 @@ came out of the analog design review specifically.
 
 | Measure | At | Why |
 |---|---|---|
-| **Real-time board idle current** | E1 | 64 unlit WS2812C drivers are an estimated ~50 mA and 0.25 W, spent whether or not anything is displayed. The shared lighting budget is sized from this number (ADR 0014) |
+| **Real-time board idle current** | E1 | 64 unlit `WS2812B-0807` drivers are an estimated ~50 mA and 0.25 W. **The part number is now read off the banked Waveshare schematic and the estimate is still an estimate** — Worldsemi publishes no WS2812B-0807 datasheet at all. Bracketing surrogates give 22 mA (XINGLIGHT 2022, 0.35 mA/device), <38 mA (Worldsemi WS2812B-2020, <0.6 mA) and **160 mA** (XINGLIGHT 2024, 2.5 mA/device), so ~50 mA is plausible but could be 3× low. E1 measures it, spent whether or not anything is displayed. The shared lighting budget is sized from this number (ADR 0014) |
 | **1:1 paper fit check, both faces** | M4 | The etherCON flange against a 50.50 mm 10HP panel *and* against the 57 × 38 mm instrument tail beside the USB-C slot. Was called comfortable at the superseded 8HP; the tail is now the tight one (ADR 0004, ADR 0009) |
 | **Matrix diffusion prototype** | M6 | Can an 8×8 at 2.6 mm pitch stay pixel-distinct through a window, or only as a blurred bar? Decides whether the 2-D IMU assignment is usable (ADR 0014) |
 | **Interior temperature rise under load** | M8 | The lighting budget is set from an estimated 3 K/W. Soak with strips and matrix at the clamp, and measure at the breath sensor (ADR 0014) |
@@ -220,7 +225,7 @@ spurious note, made countable by the marker pattern (ADR 0001).
 
 | Blocks | Question | Tracked in |
 |---|---|---|
-| M4, M5 | **Plate thickness** — 1.5 mm with lamination stiffening, or 2 mm with a structural backer. Needs the clip dimension from Gateron's drawing | [ADR 0002](docs/decisions/0002-key-switches-and-mounting.md) |
+| M4, M5 | **Plate stiffening** — the thickness is **settled at 1.20 mm** by Gateron's own drawing (2026-09-21), which puts both 1.5 mm and 2 mm out of spec and makes stiffening a **requirement, not an option**. What remains is how: lamination, a structural backer, or a ribbed sub-frame | [ADR 0002](docs/decisions/0002-key-switches-and-mounting.md) |
 | M4 | CAD tool — Fusion, FreeCAD, or neutral STEP in `mechanical/cad/` | [ADR 0009](docs/decisions/0009-enclosure-construction.md) |
 | M4 | Oak thickness for the bottom panel, which sets thumb key travel | [ADR 0009](docs/decisions/0009-enclosure-construction.md) |
 | E4b | Inter-MCU frame format and protocol versioning | [ADR 0013](docs/decisions/0013-two-mcu-split.md) |
