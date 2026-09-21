@@ -572,13 +572,49 @@ that a stated number in this repository is not yet a verified one.
 
 ---
 
-## Not yet applied
+## What has been applied
 
-**Nothing in this register has been applied to the design.** Edits were held for
-the whole wave so that agents were not reviewing a moving target and so that
-duplicates could be collapsed against a stable text.
+Edits were held for the whole wave so that agents were not reviewing a moving
+target. They are no longer held. This section is the live status; the findings
+above are kept as written so the reasoning is still readable.
 
-Three items are the natural first block because everything else is downstream of
-them: **S1** (the load switch blocks the module PCB), **S7** (the current budget
-sizes both protective devices and the thermal clamp), and the **ADR 0013 zone
-table**, which four other findings reference for geometry that gets bonded shut.
+**Indexed by the node or resource each change touches, not by the document that
+raised it** — which is V4's method, and the thing that stopped duplicate
+*figures* hiding behind collapsed duplicate *findings*.
+
+| Node / resource | What changed | From |
+|---|---|---|
+| **Umbilical +12 V, module end** | TPS2553 (7 V abs max) → LT1641-1CS8 + FET + sense R, latch-off, 1.0 A, 50–100 ms ramp | S1, S7 |
+| **Umbilical +12 V, instrument end** | Polyfuse deleted outright; shunt SS34 added against a rollover lead | S7, W8 |
+| **The 5 V rail** | Two R-78E5.0s, one per dev board — 928 mA of clamp-legal worst case does not fit behind one 1 A part | S7, F12 |
+| **Module +12 V entry** | Analog rail and umbilical feed split onto separate Schottkys; `D-REVPOL` → 3 | W4 |
+| **DAC AVDD** | LM317 divider → 150 Ω / 475 Ω 0.1 %, value selected on the bench at E7. The "full scale *is* the supply" premise corrected: it is headroom, not accuracy | S5 |
+| **Breath receive stage** | `hardware/module/breath-receive-stage.md` — inputs swapped, R4/R5 bias return, R_G = 42.2 kΩ, filter ahead of the in-amp | S2, S3, M3 |
+| **Breath ADC branch** | `C-AA-ADC` 220 nF → 47 nF (121 Hz → 564 Hz) | W1 |
+| **Breath auto-zero** | Gated on sub-threshold **and quiet**; accumulated correction logged | W11 |
+| **Breath pneumatics** | Helmholtz model replaced with a distributed pipe at 214–429 Hz; restrictor restated as damping; bore specified; E2 rewritten | W7 |
+| **Pitch offset reference** | Bare ±12 V divider → buffered `VREFOUT`, which also makes the offset track the DAC's own scale | W3 |
+| **Pitch calibration model** | Per-load presets store an affine `(gain, offset)`, not a scale factor | W2 |
+| **All six CV outputs** | Reconstruction caps specified — value, dielectric, and **which side of the 1 kΩ** | M1 |
+| **Mod channels** | `R-MODGAIN` ×16; the offset is refreshed every pass rather than written at boot | M2, S4 |
+| **The output loop** | Statelessness rule in `firmware/README.md`; SPI 0.6 MHz → 2 MHz in ADR 0004 and E11 | S4, W5 |
+| **Level shifter OE** | +12 V-presence divider deleted; driven by a comparator on the breath line that actually detects the instrument | W10 |
+| **Umbilical protection** | SP3012 (obsolete, uDFN-14) split into three orderable rows; BREATH gets 12 V standoff, never 5 V | S6 |
+| **Key chain inputs** | 10 kΩ / 100 Ω / 10 nF per switch position — there were no pull-ups anywhere | W14 |
+| **Key chain order** | Reversed; bit 0 defined as the device nearest the MCU | A2 |
+| **Instrument recoverability** | Service header + screwed cover, OTA rollback, USB MIDI opt-in | W10, C5 |
+| **The lighting** | Animate at constant total current — removes the drive term behind W3 and W4 rather than treating them | W4 |
+| **Physical zones** | ADR 0013's zone table rebuilt; it had the IMU in a different zone from the board it is soldered to | A1, A2 |
+| **Panel width** | 6HP → 8HP | V7 Part 3 §1 |
+| **The BOM** | 67 rows → 107. The project's ICs were all present and almost none of the networks around them were | M4, A3 |
+| **The latency budget** | Rebuilt with the filter poles the design specifies; "10× margin" was 1.6× | W6 |
+
+### Still outstanding
+
+| | Why it is still open |
+|---|---|
+| **W12 — the zero correction is open-loop across two representations** | Recorded in the schematic's *Still open*. Needs either a readback or an accepted two-point calibration; both are E10 decisions, not edits |
+| **W13 — nothing mutes breath when the watchdog fires** | Accepted risk pending E10. An analog path cannot latch at a level the player is not producing — it follows the sensor, and the sensor follows the room |
+| **The module's internal ground, the rack's bus ground** | 5.7–7.2 and ~4.8 cents. Layout items, and there is no module layout yet |
+| **"Every document describes a channel. None describes a note."** | The one finding no circuit review could have produced, and the only one that is not a defect. It needs its own session |
+| **Values marked `open` in the BOM** | `R-ILIM`, `R-PRECISION`'s ratio suffix, `R-PRESENCE`, the PCBs, the mechanical set. Each waits on a measurement or a layout, and each says which |
