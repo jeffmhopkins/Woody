@@ -15,6 +15,21 @@ two-resistor non-inverting form at **k = 3**.
 > current network gives a −7.5…+12.5 V window and clips positive**, which is why
 > `firmware/README.md` states the value rather than deriving it.
 
+## Interfaces
+
+Every net that crosses this circuit's boundary. Quantities appear **only** as a
+citation into `config/figures.yaml` — this table names nodes, it does not
+restate values.
+
+| Node | Dir | Peer | Figure | Note |
+|---|---|---|---|---|
+| `DAC ch7` | in | `module/digital-and-supervision` | `mod-reference` | The shared offset reference. Through `R-OPAMP-IN` into the follower's (+) input, and from there to all four channels |
+| `DAC ch2`–`ch5` | in | `module/digital-and-supervision` | `dac-rail` | One signal channel per mod channel, through `R-OPAMP-IN` into the (+) input |
+| `CLR` | in | `module/digital-and-supervision` | — | Not a net inside this circuit — it acts on the DAC. Listed because this stage's park-at-0 V property is entirely downstream of it, including for channel 7 |
+| `MOD 1`–`MOD 4` | out | panel jack | — | Feedback is taken at the op-amp output, not at the jack, so `R-OUT-PROT` isolates `C-FILT-MOD` from the loop |
+| `±12 V` | in | `module/power-entry` | — | `D-JACK-CLAMP` returns to both rails |
+| `AGND` | ref | `module/power-entry` | `dig-gnd-topology` | `C-FILT-MOD` shunts to it. Not a return path — see the figure |
+
 ## The circuit — one channel of four
 
 ```
@@ -48,15 +63,15 @@ two-resistor non-inverting form at **k = 3**.
 
 ## Two resistors, not four — settled
 
-The first version of this page argued that pitch collapsed to two resistors
-because `A = 1 + B` was a boundary its numbers landed on, and that the mods miss
-it. **That reasoning was wrong.** `A = 1 + B` is the defining identity of the
-two-resistor non-inverting form, true for every ratio; the free parameter is
-`V_ref`, not the ratio:
+`A = 1 + B` is the defining identity of the two-resistor non-inverting form,
+true for every ratio; the free parameter is `V_ref`, not the ratio:
 
 ```
 k = A − 1          V_ref = offset / (A − 1)
 ```
+
+*(The version of this argument that called `A = 1 + B` a boundary the mods
+miss is in [`notes.md`](notes.md).)*
 
 So the mods can take the same two-resistor form: **`k = 3`, with the shared
 offset channel writing 3.3333 V instead of 2.500 V.** Eight resistors instead of
@@ -83,15 +98,9 @@ resistor *was* the gain network.
 | `R-OPAMP-IN` | unbalances it — 196 mV zero error | harmless, feeds a (+) input |
 | Safe on `CLR` | `4X − 4X` = **0 for ANY uniform state** | `4X − 3X` = **X** — 0 V only because the grade is zero-scale |
 
-*(A third option surfaced in the same research: four of four published designs
-— Ornament & Crime, Westlicht PER|FORMER, Mutable Yarns, MTM Workshop Computer
-— use a **single inverting amp** with the mid-reference on the (+) input, which
-needs no buffer at all because that input draws no current. It inverts, which
-is a firmware sign flip. The catch is that O&C and the PER|FORMER take that
-reference from a passive divider off `VREFOUT`, which does **not** go to zero on
-`CLR` — so all four jacks would slam to +10 V. The PER|FORMER avoids it by
-disabling `CLR` entirely, which Woody cannot. Taking the reference from a DAC
-channel keeps the inverting topology and the safe clear together.)*
+*(The third option that surfaced in the same research — a single inverting
+amp, recorded rather than adopted, and still the author's call — is in
+[`notes.md`](notes.md).)*
 
 ## Values
 
@@ -102,20 +111,8 @@ channel keeps the inverting topology and the safe clear together.)*
 | **V_ref** | **3.3333 V** from DAC ch7, buffered | Shared by all four. Intercept is `k · V_ref` = 10.000 V |
 | **C-FILT-MOD** | 82 nF C0G | 1.94 kHz, jack side of the 1 kΩ |
 
-*(The four-resistor version this replaced used 40.2 kΩ against 10 kΩ, because
-E24's 39 k would have given gain 3.90 and a jack that
-stops at ±9.75 V, visibly short of the specified ±10. Going slightly over costs
-nothing: an OPA2197 on ±12 V less two Schottky drops reaches ~±11.45 V, so
-±10.05 V has 1.4 V of margin.
-
-**Why `R-OPAMP-IN` was wrong on the old drawing, kept because it is a good
-trap.** On the four-resistor version the 10 kΩ input resistor *was* the gain
-network, so a 1 kΩ in series made the DAC leg 11 kΩ against the reference leg's
-10 kΩ and the stage stopped being balanced — a deterministic **−196 mV** zero
-error and +9.657 V instead of +10.05, more than twice the whole tolerance
-budget. On the two-resistor form the same part feeds a (+) input that draws no
-current, and costs nothing. Same resistor, same reason for existing, opposite
-consequence, decided entirely by the topology around it.
+*(The four-resistor version this replaced, and the `R-OPAMP-IN` trap that only
+it had, are in [`notes.md`](notes.md).)*
 
 **Tolerance — and this section has now been wrong twice.** The original said
 "2.5 V × 2 % × 4 ≈ 50 mV", which evaluates to 200 mV and modelled only the zero
@@ -207,47 +204,6 @@ the `VREFOUT` follower).
 four channels share exactly the same offset error, so a residual appears as a
 common shift across the mod set rather than as four channels disagreeing with
 each other — which is both cheaper and more useful.
-
-## The alternative topology, recorded rather than adopted
-
-Prior-art research found that **four of four published designs** (Ornament &
-Crime, Westlicht PER|FORMER, Mutable Yarns, MTM Workshop Computer) build this
-stage as a **single inverting amplifier** with the mid-reference on the (+)
-input, not as a four-resistor difference amp. It is genuinely simpler:
-
-```
-Vout = −(Rf/Rin)·Vdac + (1 + Rf/Rin)·V+
-     = −4·Vdac + 5·V+        with V+ = 2.000 V  →  +10 V … −10 V
-```
-
-Two precision resistors instead of four, no matching requirement *between* two
-legs, and the offset injection is free because the (+) input draws no current —
-which also means the offset DAC channel would need **no buffer**, returning an
-OPA2197 half.
-
-It inverts, which is a firmware sign flip and costs nothing.
-
-**The one thing to be careful about, and it is the thing that matters here:**
-O&C and the PER|FORMER both take that reference from a *passive divider off
-`VREFOUT`*. On a `CLR` the channels go to zero and the divider does not, so
-`Vout = 5 × 2.0 = +10 V` — a hard rail on four jacks. The PER|FORMER avoids
-this by disabling `CLR` entirely; **Woody cannot, because `CLR` is asserted by
-the DAC itself at every power-on and by `LK-CLR` at every bring-up.** A
-non-clearing offset reference is therefore unsafe here regardless of what
-supervises the link.
-
-> **That last clause said "because the watchdog is the whole answer to a
-> processor two metres away" until 2026-09-21** — a deleted part carrying a live
-> conclusion, and the conclusion happens to be the one that rules out the
-> single-inverting-amp topology four of four surveyed designs use. The
-> conclusion survives the correction intact; it now rests on the DAC's own
-> power-on reset, which no deletion can take away.
-
-Taking the reference from a **DAC channel** instead keeps the inverting
-topology *and* the safe clear, because `CLR` zeroes it too. That is the version
-worth considering, and it is strictly better than what is drawn above. Not
-adopted unilaterally: it is a redraw of a settled page and the call belongs to
-the author.
 
 ## Still open
 
