@@ -33,3 +33,37 @@ that ADR 0004 was corrected on this point. IT WAS NOT — line 627 still says
 the opposite."* That note is right about the substance and wrong about the
 line, which is the failure mode one level up: **the record of the defect has
 itself gone stale.**
+
+## A1 — breath chain
+
+| Claim | Check | Verdict |
+|---|---|---|
+| `U-DIFFRX`'s BOM row carries a live `-9.6V`, a **forbidden** value of `inamp-full-scale`, escaping because the list spells it with a space | Read the row; compared to the four patterns | **Confirmed, and worse than reported.** The row says *"Output is 0V at rest to **-9.6V** at full"*. The forbidden patterns are `-9.6 V`, `−9.6 V`, `-10.05 V`, `−10.05 V` — all four carry a space before the `V`. **The corpus spells it without one.** The register's own note says −9.6 V "is derived from nothing and matches no configuration", and it is live on the in-amp's own row while `check-staleness.py` reports PASS |
+
+**This is the sixth recorded escape of this class, and the second found
+today.** The mechanism is identical every time and is written down in two
+places in this repository: a forbidden pattern is a case-sensitive literal,
+and the corpus spells its numbers more ways than the person writing the list
+imagines. Today the spelling was one absent space.
+
+## B5 — firmware contract
+
+| Claim | Check | Verdict |
+|---|---|---|
+| `firmware/README.md` contradicts itself about where the display runs, inside the list it calls "not negotiable" | Read both bullets | **Confirmed.** Bullet 2: "Display renders on the other core, on its own SPI host." Bullet 5, three lines later: "WiFi and the display are on the other MCU." Both are in the same non-negotiable list |
+
+Not yet checked: the twelve absent obligations, the SPI-host exhaustion
+claim, the IMU I2C arithmetic, and the four further staleness escapes B5
+reports.
+
+## Cross-cutting, from four reports that could not see each other
+
+Three agents independently report the same structural cause: **BOM rows were
+assigned by matching reference-designator strings, so parts the drawings
+label differently fell into `unplaced.csv`** — `U-DIFFRX`, `R-GAIN-INAMP`,
+`C-FILT-BREATH` and others are *drawn* and filed as undrawn. A1 adds the
+consequence that matters: **every staleness escape it found is in a file the
+chain's own pages do not reach.** The misfiling did not create the stale
+values, but it put them where no reader of the breath chain would look.
+
+That assignment rule is mine, from this session.
