@@ -1,2 +1,7 @@
 .staleness/
 .staleness-report.txt
+
+# Scratch. Review agents occasionally drop working files in the repo root
+# rather than the session scratchpad; ignoring them keeps the tree readable
+# without disturbing an agent that is still running.
+*.tmp
