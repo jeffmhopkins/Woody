@@ -94,17 +94,27 @@ keys:
   - { id: RT2, face: bottom, x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb, role: control }
   - { id: RT3, face: bottom, x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb, role: control }
 
-# Shift register chain. ORDER IS NOT YET CORRECT: ADR 0001 requires serial data
-# to flow TOWARD the clock source, so that skew eats setup margin (recoverable
-# by clocking slower) rather than hold margin (not recoverable at any speed).
-# The MCU is now at the TAIL (ADR 0007), so the order below - left_hand first,
-# which is at the top - is backwards and must be reversed before the looms are
-# built. One 74x165 per cluster: 4 devices, 32 bits, 18 used, 14 spare.
+# Shift register chain. One 74x165 per cluster: 4 devices, 32 bits, 18 used,
+# 14 spare.
+#
+# BIT NUMBERING, because this was ambiguous and the ambiguity is what made the
+# order wrong: bit 0 is the FIRST bit clocked out, which is the device whose QH
+# drives the MCU's MISO, which is the device PHYSICALLY NEAREST the MCU.
+#
+# ADR 0001 requires serial data to flow TOWARD the clock source, so that
+# propagation skew eats setup margin (recoverable by clocking slower) rather
+# than hold margin (not recoverable at any speed). The MCU is at the TAIL
+# (ADR 0013), so the chain runs from the tail outward: right_thumb is nearest
+# and reads out first, left_hand is furthest and takes the loom's SER end.
+#
+# This list was the other way round until the cold review. Building the loom
+# to the old order would have put hold-margin violations into a body that
+# cannot be reopened.
 chain:
-  - cluster: left_hand    # bits 0-7   — 5 used, 3 spare
-  - cluster: left_thumb   # bits 8-15  — 4 used, 4 spare
-  - cluster: right_hand   # bits 16-23 — 6 used, 2 spare
-  - cluster: right_thumb  # bits 24-31 — 3 used, 5 spare
+  - cluster: right_thumb  # bits 0-7   — 3 used, 5 spare — nearest the MCU
+  - cluster: right_hand   # bits 8-15  — 6 used, 2 spare
+  - cluster: left_thumb   # bits 16-23 — 4 used, 4 spare
+  - cluster: left_hand    # bits 24-31 — 5 used, 3 spare — SER end of the loom
 
 # Spare chain bits: 14 total, but NOT all available.
 #   4-6 are claimed by the marker pattern (ADR 0001) - wiring-only, and they

@@ -130,6 +130,19 @@ nothing but planning; they cannot be retrofitted into a bonded body.
    makes propagation skew eat **setup** margin rather than **hold** margin.
    Setup margin is recoverable by clocking slower; hold margin is not
    recoverable at any speed.
+
+   Concretely, now that the MCU is at the **tail** (ADR 0013): the cluster
+   **physically nearest the MCU** is the one whose `QH` drives MISO, and the
+   cluster **furthest** takes the loom's `SER` end. Walking outward from the
+   tail that is `right_thumb → right_hand → left_thumb → left_hand`. Why it
+   works: each device's clock arrives from the MCU *before* its data source's
+   does, because the source is further out, so data always arrives late
+   relative to the local edge — late is setup, early is hold.
+
+   `config/key-layout.yaml` carries this order, with **bit 0 = the first bit
+   clocked out = the device nearest the MCU**. That definition is the thing
+   that was ambiguous, and it is the thing that decides which way round to
+   build the loom.
 4. **33–68 Ω series termination at the MCU** on the clock and latch lines.
 5. **100 nF at every register**, on its own board. There is no controller-side
    decoupling in the design at all, and a 74x165's output edges brown out a
