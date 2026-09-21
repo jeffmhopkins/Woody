@@ -553,12 +553,31 @@ sweeping the LEDs**, at E9 and again at M8.
 
 ### Consequence elsewhere
 
-**The pitch output filter stays an ordinary series RC.** With no in-loop
-compensation capacitor, the filter's corner is set by its own R and C and
-nothing else. Two proposed review fixes were in conflict over that capacitor —
-the in-loop `Cf` and the separate output filter are physically the same part and
-cannot both exist. Declining the in-loop version resolves the conflict rather
-than deferring it.
+**The pitch output filter stays an ordinary series RC** — for now, and on
+weaker ground than this section used to claim.
+
+**The claim that "the in-loop `Cf` and the separate output filter are
+physically the same part and cannot both exist" is false**, and a decision was
+built on it. They are different parts in different places:
+
+| Placement | What it is | Verdict |
+|---|---|---|
+| Cap to ground **at the op-amp output**, before the series R | A capacitive load inside the loop | Genuinely dangerous; correctly avoided |
+| Cap **across the feedback resistor** | A *lead* network — it **raises** phase margin | Not the same thing, and not in conflict with anything |
+| Cap to ground **at the jack**, after the series R | What this design currently specifies | Safe, but see below |
+
+Seven surveyed designs carry **both** a feedback lead capacitor and a bare
+series resistor at the jack, and two annotate both corners on the drawing.
+Meanwhile **no DAC-driven module in the corpus puts a capacitor on the jack
+side of the series resistor** — where prior art filters hard it does so
+upstream of the output stage or actively.
+
+This matters beyond tidiness because it is entangled with the load-divider
+decision below: tapping DC feedback at the jack side removes the divider error
+entirely, and that is exactly the arrangement that needs a feedback lead
+capacitor to be stable. All four surveyed DAC-driven designs do both, with a
+single 18–22 pF part. **This ADR declined that as "real stability work" on the
+strength of a conflict that does not exist.** Open.
 
 **Two things about that capacitor have to be written down, and only one of them
 was.** The review found the C of every one of these RCs missing from the BOM,
