@@ -137,28 +137,11 @@ moved verbatim to
                             [D-TVS-BREATH ×2, AT THE CONNECTOR]
 ```
 
-### Two parts this drawing was missing, both unretrofittable
-
-Both are in `bom.csv`, both are marked instrument-side and unretrofittable
-there, and **neither appeared on this page** — the page that says of itself
-"layout is now". Two reviewers found them independently, from opposite
-directions.
-
-**`R1b` — the twin 1 kΩ in the `AGND` leg.** `bom.csv` carries
-`R-SER-BREATH-INST` at **qty 2**, and `breath-receive-stage.md`'s 482 Hz
-differential pole is derived with 1 kΩ in *both* legs. Only one was drawn.
-
-Its real job is **source-impedance balance on the twisted pair** — 1 kΩ
-against ~0 Ω is what a difference amplifier's CMRR actually responds to —
-and that justification appears nowhere in the repo. Without it the link
-CMRR falls from **70.2 dB to 60.2 dB** `[calc, A2]` against an independently
-derived requirement of 58.5 dB: **1.7 dB of margin**, resting on two parts'
-tolerance, inside a body that cannot be reopened.
-
-> One correction to the receive page's own case for `R1b`: it claims the
-> part buys "fifty times" the rejection. With `R1b` fitted the real floor
-> is **73 dB**, set by the 1 MΩ bias pair, so `R1b` buys about **13 dB**.
-> Still worth fitting. The stated reason overstates it.
+*The `R1b` half of this section — the twin in the `AGND` leg, the link-CMRR
+argument for it, and the correction it files against the receive page's own
+case for the part — moved verbatim to
+[`../interfaces/breath-sense-link/`](../interfaces/breath-sense-link/breath-sense-link.md),
+which holds both ends of the breath sense chain. The drawing above stays here.*
 
 *The `R-ISO-REF` half of this section — the compensation network, why TI's
 Figure 56 transfers, and what it buys — moved verbatim to
@@ -167,38 +150,12 @@ along with the record of the two blockers that closed with it. The drawing
 above stays here because it is one connected picture and dividing it would mean
 redrawing it.*
 
-### Two things this drawing settles that no ADR does
-
-**1. The analog star point is on this board, and `AGND` is sense-only.**
-ADR 0003 names the star point as "the analog ground pour on the bottom cluster
-board" `[repo] 0003` — a board that does not exist; it means this one. What it
-leaves open is whether the analog section's supply return goes home on `AGND` or
-on `PWR_GND`.
-
-**Proposed: `PWR_GND`.** `AGND` leaves the board carrying nothing but the in-amp
-sense reference, which is what ADR 0004's rule says and what makes the 2 m run
-work `[repo] 0004`. The local analog pour joins `PWR_GND` at **one** tie, at the
-umbilical connector.
-
-The cost of getting it the other way `[calc]`, using ADR 0003's own cable figure
-(0.168 Ω for 2 m of 24 AWG, implied by its 8.4 µV / 50 µA row):
-
-```
-REF5050 ~1 mA + OPA2197 2 × ~1 mA + MPXV4006DP 10 mA = ~13 mA   [repo] 0003
-13 mA × 0.168 Ω = 2.2 mV on the sense pair
-× the in-amp's G = 2.185 → 4.8 mV at the breath jack = 0.048 % of 10 V
-```
-
-Survivable either way, because it is DC-constant and `TRIM-BREATH-ZERO` nulls it
-at commissioning `[repo] breath-receive-stage.md`. **`PWR_GND` anyway**, because
-it is free and it keeps the rule true instead of approximately true.
-
-**2. There is no band-limit capacitor at the instrument end of `BREATH`.**
-ADR 0003 says "band-limit at both ends, around 500 Hz" `[repo] 0003`;
-`breath-receive-stage.md` puts the whole 500 Hz filter at the receive end, ahead
-of the in-amp, "because that is the only place it can stop RF rectification", and
-`R-SER-BREATH-INST`'s note says the ADR is superseded `[repo] bom.csv`. **Drawn
-that way here. Do not add a cap at `R-SER-BREATH-INST`.**
+*"Two things this drawing settles that no ADR does" — the analog star point
+with `AGND` as sense-only, and the absent band-limit capacitor at the
+instrument end of `BREATH` — moved verbatim to
+[`../interfaces/breath-sense-link/`](../interfaces/breath-sense-link/breath-sense-link.md)
+as well. Both are statements about the conductor pair rather than about this
+board alone, and the second is answered at the other end of it.*
 
 ### The key pull-ups and the ADC reference
 
@@ -240,153 +197,13 @@ and both are board decisions, not firmware ones.
 ---
 ## §3 Chain drive — what is left after the registers went back
 
-**The registers are not on this board.** ADR 0001's *"One register per cluster"*
-put one 74HC165 on each cluster board, with that cluster's 2.2 kΩ/100 Ω/47 nF
-networks beside it, because the switches need a rigid PCB regardless (ADR 0002)
-and putting the register on it makes every switch-to-chip connection a trace
-`[repo] 0001, 0002`. **This page's first draft drew all four registers and all
-21 networks here.** That was the superseded topology; what follows replaces it.
-
-**Decided: a ground return per signal, laid out as an alternating-ground
-ribbon.** ADR 0001 fix 1 calls this the highest-value item on its list, and it
-is the only thing in the loom that can still be corrupted — a glitch on `SH/LD`
-does not cost one wrong note, it reloads all four registers mid-shift and
-corrupts the whole 32-bit word `[repo] 0001`. Four signals, five grounds, one
-supply:
-
-```
-  HDR-DEV                                   J-CHAIN  (2×6 IDC, 12-way ribbon,
-                                                      10 wired + 2 spare)
-   GND  ────────────────────────────────────►  1  GND
-   IO38  SPI3 SCK ──[R-CHAIN-SER 100R]─────►  2  SCK     ** R PROPOSED **
-   GND  ────────────────────────────────────►  3  GND
-   IO7   latch    ──[R-CHAIN-SER 100R]─────►  4  SH/LD   ** R PROPOSED **
-   GND  ────────────────────────────────────►  5  GND
-   IO33  SER out  ──[R-CHAIN-SER 100R]─────►  6  SER     (into the far device)
-   GND  ────────────────────────────────────►  7  GND
-   IO40  MISO     ◄─────────────────────────  8  QH      (out of the near one)
-   GND  ────────────────────────────────────►  9  GND
-   3V3  ───────[F-CHAIN, see below]─────────► 10  3V3     → 24 pull-ups,
-                                              11  spare      4 × VCC, 4 × 100 nF
-                                              12  spare
-
-              [U-TVS-CHAIN 4-ch array to DIG_GND]   ** PROPOSED **
-
-  Every signal has ground on both sides; 3V3 sits against pin 9's ground.
-  The two spares are ADR 0009's rule and they are FREE: IDC comes in 2xN, so
-  a 2x6 costs what a 2x5 costs and the ribbon is 2 mm wider. Under the tail
-  topology a spare conductor bought a spare KEY; under this one it buys a
-  REPAIR - expansion now lands on a spare register BIT, which needs no wire.
-
-  EIGHT connectors, not five. The chain is four hops, and SER/QH cannot be a
-  pass-through bus: each board's QH feeds the PREVIOUS board's SER, which is
-  point-to-point and changes meaning every hop. So every cluster board except
-  the last carries an IN and an OUT - carrier 1, RT 2, RH 2, LT 2, LH 1 - with
-  four ribbon assemblies between them. Same 2x6 pinout at all eight.
-
-  Pin 6 SER is the exception: it IS a pass-through, riding every hop to reach
-  the far device's serial input. ADR 0001 has that input "terminated at the
-  far device", which would make this conductor redundant. Driving it instead
-  costs nothing and buys an end-to-end chain self-test - shift a known pattern
-  in at LH and read it back at RT, with no keys pressed. That distinguishes
-  "the loom is broken" from "one bit is stuck", which the static marker
-  pattern cannot. NOT yet decided; it is a cluster-board question.
-
-  Chained, not starred (ADR 0001 fix 2): ONE run leaves this connector and
-  passes through right_thumb → right_hand → left_thumb → left_hand in turn.
-  bit 0 is the first bit clocked out = QH of right_thumb, the device nearest
-  the MCU (ADR 0001 fix 3, and config/key-layout.yaml).
-```
-
-**`CLK INH` is tied low and `SER` is terminated at the far device** — both on
-the cluster boards, not here `[repo] 0001`.
-
-### What this board still owes the chain
-
-**1. The 3V3 rail, and it is a bigger load than it was** `[calc]`. The pull-ups
-went 10 kΩ → 2.2 kΩ when the register moved back beside its switch `[repo]
-bom.csv`:
-
-```
-3.3 V / (2.2 kΩ + 100 Ω) = 1.43 mA per CLOSED key
-18 closed                = 25.8 mA, as a step, at play rate
-plus 4 × 74HC165 quiescent, negligible
-```
-
-> **That current comes out of the dev board's 3V3 LDO, which is also the
-> MCP3202's voltage reference** — the part has no `VREF` pin, `VDD` *is* the
-> reference `[repo] R10 B4`. At a load regulation of ~0.3 % per 100 mA
-> `[from memory]`, 25.8 mA moves the reference **0.077 %, about 3.2 LSB**, in
-> step with how many keys are held.
->
-> 3.2 LSB against a playable breath span of ~1594 counts is 0.2 % — almost
-> certainly inaudible, and it is the *reference* moving, so it scales the
-> reading rather than offsetting it. **Recorded rather than fixed, because the
-> symptom of being wrong about it is "the breath reading moves when I press
-> keys", which gets blamed on firmware for a week.** The first draft costed
-> this at 5.9 mA and 0.7 LSB, against the old 10 kΩ. See *Still open*.
-
-**2. A ground return per clocked signal** `[repo] 0001 fix 1` — the highest
-value item on ADR 0001's list, and now the *only* thing in the loom that can be
-corrupted. With the registers distributed, a disturbed key line no longer
-exists as a loom signal; what runs the body is four clocked lines whose blast
-radius is the whole 32-bit word, and a glitch on `SH/LD` reloads every register
-mid-shift `[repo] 0001`. **Six conductors is the signal count, not the
-conductor count.** Whether this connector is 6-way or 10-way is a decision this
-page cannot take alone — see *Still open*.
-
-**3. `F-CHAIN`, or not.** The 3V3 conductor leaves this board, runs 265 mm
-through a bonded body next to 12 V LED power, and comes back as nothing. A
-short on it browns out the dev board's LDO and takes the instrument down with
-no diagnosis. A 100 mA polyfuse or a 0603 fuse is two millimetres of board.
-**Proposed, not in the BOM.**
-
-### Why the old charge-sharing derivation is gone
-
-The first draft carried ADR 0001's `180 pC / 10 nF = 18 mV`, and a companion
-figure of **+4.5 V on the loom node** from `180 pC / 40 pF`. Both are dead, for
-two independent reasons, and neither should be reintroduced:
-
-- **The model was wrong.** ADR 0001 now records it: there is no 12 V edge (the
-  WS2815 rail is held by 470–1000 µF and its LED current is PWM'd at ~2 kHz),
-  `Q/C` is the wrong model because coupling is a *divider*, and a passive
-  divider cannot exceed the aggressor's own swing — so 4.5 V was 37 % above
-  the ceiling of its own mechanism. Corrected, an unfiltered wire sees
-  **1.36 V** `[repo] 0001`.
-- **The node no longer exists.** The key network sits on the cluster board, a
-  few millimetres from its switch. There is no loom conductor between the
-  switch and the register input for anything to couple into.
-
-**The key networks are still fitted** — see ADR 0001 for why (a floating CMOS
-input has no defined state, in a cavity that is breathed into for hours) — but
-they are a bounce filter and cheap insurance, not the thing that makes the
-topology safe, and they are not this board's parts.
-
-### The 32 bits, and where each decision now lives
-
-From `config/key-layout.yaml` `[repo]`:
-
-| Bits | Use | Whose board |
-|---|---|---|
-| 18 | Fitted switches | **Cluster boards** — network + trace to the switch |
-| 3 | Reserved spare switches (octave up, octave down, hold/preset) | **Cluster boards** — network fitted, pad unloaded. Plate cutouts at M3 `[repo] 0010` |
-| 8 | Marker pattern | **Cluster boards** — hard-wired at the register input. Unretrofittable. **Decided 2026-09-21: 8, not 6** |
-| 3 | Genuinely free | **Cluster boards** — must be pulled `[repo] key-layout.yaml` |
-| **32** | | **None of them on this carrier** |
-
-**Which eight bits carry the marker, and their levels, was decided 2026-09-21**
-(`key-marker-and-bits.md`, `key-layout.yaml`). The mapping inside each device is
-still open, and
-it is now a cluster-board decision** — as is the `H`…`A`-to-switch mapping
-inside each device. Both still have to be settled before *those* boards are
-made, and firmware has to be told about both. They are off this page's critical
-path, not off the project's.
-
-**The option worth costing has got cheaper.** Giving the 3 free bits the full
-network too is now 15 passives spread across four boards that already carry
-21 sets, with no extra loom conductors at all — under the tail topology it also
-needed five more wires down the body. If "add a switch later" is worth
-anything, this is the moment it costs least.
+*§3 moved verbatim to
+[`../interfaces/key-chain-loom/`](../interfaces/key-chain-loom/key-chain-loom.md),
+together with `cluster-boards.md` §3, because the chain is one circuit with an
+end on each board — the conductor count and the fusing are decided here, the
+pinout and the chain-end link there, and neither half states what runs down the
+body. Both pages' drawings went with it whole. The section number is kept
+because other pages cite `carrier.md` §3.*
 
 ---
 
@@ -403,82 +220,12 @@ anything, this is the moment it costs least.
   IO39 CS   ── MCP3202 CS
 ```
 
-**All three are `R-SPI-SER`, and the value is 100 Ω.** The refdes matters:
-this page previously drew `R-SCLK-SER`, `R-MOSI-SER` and `R-CS-SER`, **none
-of which exist in `bom.csv`**, while the BOM carries `R-SPI-SER` at qty 3
-used by no schematic. Same three parts, two naming schemes, neither side
-aware of the other. (This page also claimed "only `R-MOSI-SER` reached the
-BOM, qty 1" — it is not in the BOM at all.)
-
-**The value is 100 Ω, not 220, and the old derivation used the wrong
-model.** Two m of Cat5 is a **100 Ω transmission line**: the round trip is
-~20 ns against 2–5 ns edges, so this is a reflection problem, not an RC
-corner. Three reviewers agreed on that and two of them computed what 220 Ω
-costs `[calc]`:
-
-| Source R | First step at the far end | vs `V_IH` 2.0 V |
-|---|---|---|
-| **220 Ω** | **1.83–1.86 V** | **below threshold, dwelling ~20 ns per edge in the forbidden band** |
-| 100 Ω | **2.75 V** | clean single step |
-| 68 Ω | 3.25 V | clean, but **48 mA fault current against a 40 mA pad spec** |
-
-**100 Ω** is the answer: it resolves in one transit and draws 33 mA into a
-clamp. 68 Ω is electrically ideal and exceeds what the pin can source.
-(ADR 0004's old "7.9 MHz corner" was the figure for 100 Ω all along, quoted
-against 220 Ω — the schematic review caught that separately.)
-
-The receiving end has no hysteresis, which is what makes the dwell matter:
-a 74AHCT125 given 20 ns in its indeterminate band on every clock edge is
-being asked to guess.
-
-### The two SPI hosts, and what claims them
-
-| Host | Devices | Clock |
-|---|---|---|
-| **SPI2** | DAC8568 down the umbilical, **and** MCP3202 on this board | **2 MHz for the DAC, 900 kHz for the ADC — not one clock** |
-| **SPI3** | 74HC165 chain alone, because `QH` is always driven (ADR 0001) | **1 MHz, and not much more** — the chain crosses four connectors and ~265 mm of loom, and HC's slow edges are what keep that a lumped load `[repo] 0001` |
-
-> **The MCP3202 cannot run at 2 MHz.** `[repo, verified]` against Microchip
-> DS21034F, now at `datasheets/analog/MCP3202-CI-SN.pdf`. The Timing
-> Parameters table gives `fCLK` max = **1.8 MHz at VDD = 5 V** and **0.9 MHz at
-> VDD = 2.7 V**. There is no 3.3 V row. ADR 0003, ADR 0004,
-> `latency-budget.md` and `power-entry.md` all say "SPI2 at 2 MHz", and ADR 0004
-> explicitly says that leaves room "for the MCP3202 sharing the host" `[repo]`.
->
-> **0.9 MHz is safer than this page claimed, not shakier.** Two documents called
-> it "an interpolation from a search summary". It is not an interpolation at
-> all — it is the datasheet's *guaranteed maximum at 2.7 V*, so applying it at
-> 3.3 V is strictly conservative. A straight-line interpolation to 3.3 V would
-> give ≈1.14 MHz, so there is ~25 % of headroom the design is not claiming.
-> Both `fCLK` rows carry Note 2: established by characterisation, not 100 %
-> tested.
->
-> **And there is a minimum nobody had.** §6.2: the sample capacitor holds
-> charge for at least 1.2 ms at 85 °C, so the end of the sample period to the
-> last data bit must fit inside that — an effective **`fCLK` ≥ ~10 kHz**. Not
-> binding at 900 kHz, but it forecloses "slow the ADC down" as a way to buy
-> loop time.
->
-> ESP-IDF sets `clock_speed_hz` per *device* on a shared host, so this is a
-> firmware line and not a part change. **It is written nowhere.**
-
-**Loop budget with the ADC costed properly** `[calc]` — ADR 0004's version left
-it out:
-
-```
-SPI2  DAC    6 × 32 bits @ 2.0 MHz =  96.0 µs
-SPI2  ADC    24 clocks    @ 0.9 MHz =  26.7 µs
-SPI2  total                         = 122.7 µs of 250 µs → 49 %
-SPI3  keys   32 bits      @ 1.0 MHz =  32.0 µs, concurrent → 13 %
-             (+ four HC165 propagation delays, tens of ns each — noise)
-```
-
-**SPI2 cannot use IO_MUX and does not need to.** The S3's FSPI IO_MUX pins are
-GPIO9–14 `[from memory]`, and the board spends GPIO10–13 on the QMI8658C and
-GPIO14 on the matrix `[board-def] circuitpython .../pins.c`. SPI2 on
-GPIO35/36/37 therefore routes through the GPIO matrix, capped around 40 MHz
-rather than 80 `[from memory]`. Irrelevant at 2 MHz; recorded so it is not
-rediscovered as a problem.
+*The rest of §4 — `R-SPI-SER` and the 100 Ω derivation, the two SPI hosts and
+what claims them, the loop budget and the IO_MUX note — moved verbatim to
+[`../interfaces/spi-link/`](../interfaces/spi-link/spi-link.md), which holds
+both ends of the link. The drawing above stays here: it also carries the
+MCP3202's board-local `MISO` and `CS`, and dividing it would mean redrawing it.
+The section number is kept because other pages cite `carrier.md` §4.*
 
 ---
 

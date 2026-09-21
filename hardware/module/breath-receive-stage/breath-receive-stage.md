@@ -27,6 +27,12 @@ derived on this page are derived from them. Every row with a `carrier/…` peer
 is a number this page uses and does not own — and every part in one is
 instrument-side, inside a bonded body, and unretrofittable.
 
+*(That paragraph is as it was written earlier on 2026-09-21. Those derivations
+are no longer on this page: they moved to
+[`../../interfaces/breath-sense-link/`](../../interfaces/breath-sense-link/breath-sense-link.md)
+with the instrument-side half they depend on — see the pointer below the `REF`
+section. The table below is unchanged and still names this circuit's boundary.)*
+
 | Node / part | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
 | `BREATH` | in | `carrier/carrier.md`, umbilical | `umbilical-pinmap`, `sensor-full-scale` | The sensor's buffered output, arriving through the instrument-side `R1`. Drives `IN−` through `R3` |
@@ -164,107 +170,15 @@ network and degrades CMRR one-for-one. It is the same class of mistake as a
 single-ended capacitor on one input leg, and it is easy to make because `REF`
 looks like an input.
 
-## Component values
-
-| Ref | Value | Job |
-|---|---|---|
-| **R1** | 1 kΩ 1 %, **1206 ≥250 mW** | Instrument-side series protection, on the driver's output. **Not 0805** — see below |
-| **R1b** | 1 kΩ 1 %, 1206 | **Its twin in the `AGND` leg.** Free, and it is what keeps CMRR from collapsing — see below |
-| **R2, R3** | 10 kΩ 0.1 % | Module-side series protection. **Matched** — but see below |
-| **R4, R5** | 1 MΩ | **Common-mode bias return.** Without these the in-amp's inputs float when the cable is unplugged and it saturates to a rail |
-| **C_diff** | 15 nF C0G | **482 Hz** differential pole (not 531 — `R1b` makes both legs 11 kΩ), **ahead of the in-amp** |
-| **C_cm** | 1.5 nF C0G ×2 | Common-mode poles, deliberately 1/10 of C_diff |
-| **R_G** | 42.2 kΩ 0.1 % | INA828, `G = 1 + 50k/R_G` = **2.185** |
-| **REF** | buffered trimmer, **0 → +1.0 V** | Nulls the pedestal *ahead* of the gain pot, which is what makes the panel knobs independent. Range covers the sensor's whole 0.152–0.378 V spec band, not just its typical. From the LM317 rail, never `VREFOUT`, and never a bare divider — see above |
-| **Output RC** | 1 kΩ + 330 nF film | ~480 Hz reconstruction at the jack |
-
-### The gain, derived
-
-| | |
-|---|---|
-| Sensor span, 0.265 → 4.86 V | 4.6 V |
-| Jack span wanted | 10 V |
-| Raw gain needed | 2.174 |
-| Loss in the 2 × 1 MΩ bias pair against 2 × 11 kΩ series | ×0.9891 |
-| Gain needed at the in-amp | 2.198 |
-| **R_G = 42.2 kΩ → G = 2.1848, effective 2.1611** | **jack span 9.94 V** |
-
-The 0.6 % shortfall is absorbed by the panel gain knob, which exists to fit the
-span to the patch. Do not chase it with a non-standard resistor.
-
-### `R1` is a 1206, and it has a twin
-
-**Power.** ADR 0003 names a sustained +12 V fault on the `BREATH` conductor as a
-*designed-safe* case — the buffer runs from +12 V precisely so that fault sits
-at the rail rather than above it. Work out what `R1` then dissipates:
-
-```
-I = (12 − 0.2) / 1 kΩ = 11.8 mA      P = 139 mW
-```
-
-against an 0805's ~125 mW. **The part fails in the fault the design calls
-survivable**, and it is inside the bonded body. `bom.csv` makes exactly this
-argument, in full, for the module-side `R-OUT-PROT` — and it was never carried
-across to the instrument-side twin.
-
-**And the consequence of an open `R1` is that nothing happens.** Breath dies;
-pitch, the mods and the SPI link are untouched, and **no part of the system
-reports it**. That is a change of kind, not of degree: this paragraph used to
-say an open `R1` de-asserted the presence detect and took the whole SPI link
-with it, which was true while the LM311 existed. The comparator is deleted and
-`OE` is tied enabled (ADR 0004), so nothing at the module end watches the far
-end of the cable any more. An open `R1` is now **silent** rather than
-catastrophic — which ADR 0004 identifies as exactly the loss it accepted, and
-which is worse for diagnosis even though it is better for blast radius.
-
-The `R1`/`R1b` argument does not depend on that. It stands on the two grounds
-above: 139 mW in an 0805 in the fault the design calls survivable, and the
-common-mode term below.
-
-**Symmetry.** `R1` sits in the `BREATH` leg with nothing opposite it in the
-`AGND` leg, and against the 1 MΩ bias pair that asymmetry is a common-mode
-error term on its own:
-
-```
-|1M/1.011M − 1M/1.010M| = 9.79e-4  →  60.2 dB
-```
-
-That is the **entire** 60 dB budget, spent by one unmatched resistor, with
-every other term still to come. The 0.1 % module-side parts buy 94 dB and this
-throws away fifty times that.
-
-**`R1b` fixes it for nothing.** The `AGND` leg carries no signal current — the
-in-amp's input is gigaohms — so a matching 1 kΩ in it changes the differential
-gain not at all and restores the balance the 1 MΩ pair is measured against.
-One resistor, instrument-side, and therefore **unretrofittable**.
-
-**And `C_cm` needs a tolerance, which nothing specifies.** At ±5 % the
-common-mode capacitor mismatch alone gives ~46 dB; ±1 % is needed to clear 60.
-Specify **±1 % C0G** on the two 1.5 nF parts.
-
-### Why the bias resistors do not break the sense return
-
-ADR 0003's rule is that `AGND` carries no power current. 1 MΩ to module analog
-ground diverts tens of nanoamps against a ~350 mA power return — about 0.2 ppm.
-The rule survives in substance. **But the rule as written in ADR 0003 forbids
-the thing that makes the receiver work, and must be restated** to mean "no
-*power* current", which is what it always meant.
-
-### Why C_diff is ten times C_cm
-
-A single-ended capacitor to ground on one leg is a common-mode-to-differential
-converter, and the review found a proposal to do exactly that — it would cap
-effective CMRR at about 15 dB at 100 Hz, which is worse than every other term in
-the design combined. Making the differential capacitor dominant means a
-mismatch between the two common-mode capacitors is divided by the ratio before
-it reaches the difference signal.
-
-### Why the filter is ahead of the in-amp, not after it
-
-Two reasons, and one proposal in the review got this backwards. A filter after
-the amplifier cannot prevent **RF rectification** at the input stage — and there
-is a 2.4 GHz radio two metres away on the same cable bundle. It also cannot
-prevent the amplifier slewing on out-of-band energy.
+*Component values, the gain derivation, the `R1`/`R1b` argument, the bias
+return, the `C_diff`/`C_cm` ratio and the filter's position moved verbatim to
+[`../../interfaces/breath-sense-link/`](../../interfaces/breath-sense-link/breath-sense-link.md)
+on 2026-09-21. Every one of them is derived from parts fitted on the other
+board, and they now sit beside the instrument-side half they depend on,
+together with `carrier.md` §2's own account of `R1b` — including the
+disagreement between the two, which was moved and flagged rather than settled.
+The drawing above stays here: it spans the ADC divider and the output stage as
+well as this link, and dividing it would mean redrawing it.*
 
 *(The cold review's findings and the table recording how the drawing closed
 them — [`notes.md`](notes.md).)*

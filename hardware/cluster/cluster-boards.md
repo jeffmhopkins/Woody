@@ -30,6 +30,12 @@ chain bus, stays here because it crosses to the carrier board; `§5` and the
 component table stay here because they are board facts. The section numbers are
 left as they were written.*
 
+*(That paragraph is as it was written earlier on 2026-09-21. `§3` has since
+moved, for the reason it names — it crosses to the carrier board — to
+[`../interfaces/key-chain-loom/`](../interfaces/key-chain-loom/key-chain-loom.md),
+which holds both ends of the chain. This page keeps the heading and the
+component table.)*
+
 ---
 
 ## The four boards, and where they physically are
@@ -97,76 +103,12 @@ groups. Decide it before the plate DXF is generated, not after. See *Still open*
 
 ## §3 The two connectors, and the one link that makes all four boards identical
 
-`J-CHAIN` is a 2×6 IDC boxed header on a 12-way ribbon, alternating ground,
-decided 2026-09-21 `[repo] 0001, bom.csv`:
-
-```
-   1 GND    2 SCK      3 GND    4 SH/LD    5 GND    6 SER
-   7 GND    8 QH       9 GND   10 3V3     11 spare 12 spare
-```
-
-Boxed and keyed at all eight positions, because a reversed connector puts 3V3
-onto the `QH` net.
-
-```
-   J-CHAIN-IN                                          J-CHAIN-OUT
-   (toward the carrier)                        (away, to the next board)
-
-    2 SCK   ─────────────┬──────────────────────────────► 2 SCK
-    4 SH/LD ─────────────┼──┬───────────────────────────► 4 SH/LD
-   10 3V3   ─────────────┼──┼──┬────────────────────────► 10 3V3
-   GND ×5   ─────────────┼──┼──┼──┬─────────────────────► GND ×5
-    6 SER   ─────────────┼──┼──┼──┼──┬──────────────────► 6 SER
-                         │  │  │  │  │
-                    ┌────▼──▼──▼──▼──┴─────┐
-                    │  74HC165             │
-                    │  CLK  SH/LD  VCC GND │
-                    │                      │
-    8 QH   ◄────────┤ QH (pin 9)           │
-                    │                      │        ┌──── 8 QH
-                    │  SER (pin 10) ◄──────┼──[LK-SER]
-                    └──────────────────────┘        └──── from pin 6 above
-                                                      ▲
-                          LK-SER: a 3-pad solder link.
-                          Position A (boards 1-3): SER comes from OUT pin 8,
-                            i.e. the next board's QH. Normal chaining.
-                          Position B (last board): SER comes from the IN pin 6
-                            passthrough, which reaches all the way back to the
-                            carrier.
-```
-
-**`SCK`, `SH/LD`, `3V3` and the five grounds are a straight bus** — IN to OUT,
-1:1, so a plain straight-through ribbon works between any two boards.
-
-**`QH` and `SER` are not a bus, and that is what forces two connectors.** Each
-board's `QH` goes *toward* the carrier on `IN` pin 8; the *next* board's `QH`
-arrives on `OUT` pin 8 and becomes this board's serial input. Pin 8 therefore
-carries a different net on each side of the board, which is why the chain is
-eight connectors across five boards rather than five `[repo] carrier.md §3`.
-
-### `LK-SER` and `R-SER-TERM` close the self-test question for free
-
-The carrier page raised whether the far device's serial input should be tied off
-(ADR 0001) or driven from the carrier, which would let firmware shift a known
-pattern through all 32 bits and distinguish *"the loom is broken"* from *"one
-bit is stuck"* — something the static marker cannot do `[repo] carrier.md §3`.
-
-**It does not have to be decided in copper.** Fit, on the last board only:
-
-```
-   IN pin 6 (SER passthrough) ──┬──[LK-SER position B]──► 74HC165 SER (pin 10)
-                                │
-                        [R-SER-TERM 10k]
-                                │
-                               3V3
-```
-
-`R-SER-TERM` holds the input high if nothing drives it, which is the tied-off
-case ADR 0001 specified. If firmware *does* drive `IO33`, the carrier's output
-wins through its 100 Ω series resistor against a 10 kΩ pull `[calc]` — a
-divider of 100/10100, so the driven level is within 33 mV of the rail. **The
-self-test becomes a firmware choice rather than a board choice**, at the cost of
-one resistor, and this page recommends fitting it and deciding later.
+*§3 moved verbatim to
+[`../interfaces/key-chain-loom/`](../interfaces/key-chain-loom/key-chain-loom.md),
+together with `carrier.md` §3, because the chain is one circuit with an end on
+each board. The connector pinout, the `QH`/`SER` split and the `LK-SER`
+self-test argument are all there, with the drawings, unchanged. The section
+number is kept here because four sibling pages cite `cluster-boards.md` §3.*
 
 ---
 

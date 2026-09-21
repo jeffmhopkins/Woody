@@ -69,32 +69,12 @@ block below is where the DAC box was.*
 record of the pin map being corrected is in [`notes.md`](notes.md); the
 reasoning below is live, so it stayed here.*
 
-> **Why `CS` is the one that must not glitch.** It frames the word. A
-> glitch restarts the bit count mid-message, so every bit lands in the
-> wrong field — including the software-reset and internal-reference-enable
-> bits. ADR 0004 deleted `MISO`, so **firmware can never read back what the
-> DAC actually received.** It is the only failure in the digital path that
-> does not self-heal on the next update; everything else is corrected 250 µs
-> later.
->
-> Pairing `SCLK` with `MOSI` is safe *by construction*: the receiver only
-> samples `MOSI` on a `SCLK` edge, so coupling between them lands where it
-> is not being looked at.
-
-## Pulls on **both** sides of the buffer — six, not three
-
-The original three were on the cable side, to stop the buffer's inputs floating
-and drawing crowbar current when the instrument is absent. Correct, and
-incomplete: **with `OE` disabled the buffer's outputs are Hi-Z**, so the pins
-actually floating in that state are the **DAC's** `SCLK`, `DIN` and `SYNC` —
-which is the state the pulls were bought for, and the cable-side three do not
-reach it.
-
-Polarity is the same on both sides: `CS` up, `SCLK` and `MOSI` down. A stray
-edge on `CS` re-frames the 32-bit word, and a DAC8568 frame carries the
-software reset, the clear-code register and the internal-reference enable — so
-a mis-framed word is a **sticky** failure that the 4 kHz refresh does not
-clear, unlike a corrupted data bit which self-heals in 250 µs.
+*The line above is as it was written earlier on 2026-09-21, when the blockquote
+it introduces was still here. That blockquote moved verbatim to
+[`../../interfaces/spi-link/`](../../interfaces/spi-link/spi-link.md) on
+2026-09-21, with the six pulls, and now sits beside `carrier.md` §4's driving
+end: the pairing is an argument about what couples into what inside the cable,
+and neither end of a cable states it alone. The drawing above stays here.*
 
 ## Still open
 

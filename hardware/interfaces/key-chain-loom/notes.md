@@ -1,0 +1,13 @@
+# Key chain loom — consolidation record
+
+**Past tense only, and no live value.** Every live value is in
+[`key-chain-loom.md`](key-chain-loom.md), in the pages it was assembled from, or in
+`config/figures.yaml`. If a number appeared here it would be in the wrong file.
+
+This directory did not exist before 2026-09-21. Until then the circuit was
+described twice — once in `hardware/carrier/carrier.md` §3 and once in
+`hardware/cluster/cluster-boards.md` §3 —
+and each half derived statements from parts that were drawn only in the other.
+The consolidation moved text and did nothing else: no value was edited, no
+contradiction between the two halves was reconciled and no open question was
+closed.
