@@ -117,11 +117,19 @@ def main():
         per.append((len(r["notes"]), c["HIST"] + c["BOTH"], r["ref"], c))
 
     if regrown:
-        bad = [p for p in per if p[1] >= 3 or p[0] > 1200]
-        bad.sort(reverse=True)
+        # THE TRIGGER IS HISTORY SEGMENTS, NOT LENGTH, and the first version of
+        # this got that wrong: `>= 3 or len > 1200` flagged twelve rows that
+        # had just been trimmed correctly, because a dense SPEC is long too.
+        # U-DAC is 1,891 characters of AVDD floors, grade-dependent tempco and
+        # an order code that does not exist, with zero history in it. A
+        # threshold that fires on correct rows is the trap CLAUDE.md names, in
+        # the tool written to enforce the rule. Length is reported as context;
+        # it decides nothing.
+        bad = [p for p in per if p[1] >= 2]
+        bad.sort(key=lambda p: (-p[1], -p[0]))
         for n, h, ref, c in bad:
-            print(f"  {ref:22} {n:>6,} chars  {h:>2} history/ambiguous segments")
-        print(f"\n{len(bad)} row(s) reading like a log rather than a spec")
+            print(f"  {ref:22} {h:>2} history/ambiguous segment(s)   ({n:,} chars)")
+        print(f"\n{len(bad)} row(s) still narrating rather than specifying")
         return 1 if bad else 0
 
     chars = sum(len(r["notes"]) for r in rs)
