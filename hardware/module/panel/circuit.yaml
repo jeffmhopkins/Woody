@@ -1,0 +1,27 @@
+# depends_on is a dependency graph with FOUR KINDS OF EDGE THAT ARE NOT
+# EQUALLY TRUSTWORTHY. circuit: edges are verified; adr:, fig: and refdes:
+# are seeded from co-mention and three are known false. The rules, the
+# known-false list and what IS guaranteed for every edge are stated once, in
+# hardware/README.md, "circuit.yaml and its depends_on edges". Read that
+# before adding or trusting an edge here.
+
+id: module/panel
+title: Module panel — geometry and control layout
+last_reviewed: '2026-09-21'
+depends_on:
+- adr:0004
+- fig:panel-height-budget
+- fig:panel-toggle-hole
+- fig:panel-width
+- refdes:LED-PANEL
+- refdes:PANEL
+- refdes:POT-GAIN
+- refdes:POT-OFFSET
+- refdes:POT-RESP
+- refdes:SW-POWER
+- circuit:module/breath-output-stage
+- circuit:module/breath-response-shaper
+- circuit:module/mod-channels
+- circuit:module/panel-led
+- circuit:module/pitch-stage
+- circuit:module/umbilical-load-switch

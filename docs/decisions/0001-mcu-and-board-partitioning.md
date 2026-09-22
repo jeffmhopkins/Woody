@@ -157,7 +157,7 @@ topology**, and the decision has to be made on something else.
 
 **On the something else, per-cluster wins on three counts and loses on one.**
 It wins on hand-joint count (about 4 connectors against about 46 wires, in a
-strap-worn instrument that is bonded shut), on loom width (12 conductors per hop
+strap-worn instrument that is not opened casually), on loom width (12 conductors per hop
 against 40–56 mm of ribbon sharing channels with the LED strips and the breath
 tube), and on carrier area — the tail version added 4 ICs and 63 passives to a
 two-layer board already about 82 % covered, with a 22 mm hole through it.
@@ -188,7 +188,8 @@ are the fallback and LVC is the other way to go.
 ### Key-line signal integrity
 
 The switch lines run the length of the body as unshielded conductors, alongside
-LED data and LED power, inside a body that cannot be reopened. Two decisions
+LED data and LED power, inside a body that is stripped down to reach
+(ADR 0009). Two decisions
 elsewhere make a single corrupted read worse than it looks:
 
 - **Asymmetric debounce fires on the first closed sample** (below), so one
@@ -220,7 +221,7 @@ four boards, so the three reserved spare-switch bits are covered too.
 
 `[calc]`, at 3.3 V into 74HC165 thresholds (`V_IH` 2.31 V, `V_IL` 0.99 V —
 0.70/0.30 × VCC, from onsemi MC74HC165A Rev. 13's published 3.0 V row; see
-`hardware/controller/cluster-boards.md` for why three other vendors omit it):
+`hardware/cluster/cluster-boards.md` for why three other vendors omit it):
 
 | | |
 |---|---|
@@ -238,10 +239,12 @@ four boards, so the three reserved spare-switch bits are covered too.
 
 > **25.8 mA is 4.4× the old figure** and it is drawn from the dev board's 3V3
 > LDO, down the loom, as a play-rate step. That LDO is also the MCP3202's
-> voltage reference (the part has no `VREF` pin). See `hardware/controller/carrier.md` §2.
+> voltage reference (the part has no `VREF` pin). See `hardware/carrier/carrier.md` §2.
 
 Five further fixes, in descending order of value. The first four are wiring and
-cost nothing but planning; they cannot be retrofitted into a bonded body.
+cost nothing but planning, and retrofitting any of them means opening the
+body and re-laying the loom (ADR 0009) - expensive rather than impossible,
+which is still reason enough to do them now.
 
 1. **A ground return per signal. DECIDED, 2026-09-21.** The highest-value item
    on this list. Four clocked signals down a 14-inch body sharing one return is
@@ -341,7 +344,7 @@ plate cutouts at M3 and are untouched by this. So the allocation went from a sup
 8 marker, 5 free → 3 free**, and the 3 that remain still get pulled per fix 6.
 
 The bit-by-bit assignment and levels are in
-`hardware/controller/cluster-boards.md` §4.
+`hardware/cluster/key-marker-and-bits/key-marker-and-bits.md`.
 
 That counter is the point. It is a framing check, not an error-detecting code —
 it cannot correct anything and will miss some corruptions — but it converts an

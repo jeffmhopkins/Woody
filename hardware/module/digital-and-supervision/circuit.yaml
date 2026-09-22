@@ -1,0 +1,20 @@
+# depends_on is a dependency graph with FOUR KINDS OF EDGE THAT ARE NOT
+# EQUALLY TRUSTWORTHY. circuit: edges are verified; adr:, fig: and refdes:
+# are seeded from co-mention and three are known false. The rules, the
+# known-false list and what IS guaranteed for every edge are stated once, in
+# hardware/README.md, "circuit.yaml and its depends_on edges". Read that
+# before adding or trusting an edge here.
+
+id: module/digital-and-supervision
+title: Digital path and supervision — schematic
+last_reviewed: '2026-09-21'
+depends_on:
+- adr:0004
+- fig:dig-gnd-topology
+- fig:spi-series-r
+- fig:umbilical-pinmap
+- refdes:R-SPI-PULL
+- circuit:interfaces/spi-link
+- circuit:module/dac8568
+- circuit:module/link-supervision
+- circuit:module/power-entry

@@ -80,8 +80,8 @@ are the de-facto Eurorack conventions; the extra span is headroom, not a default
 ### The topology falls out neatly
 
 > **Drawn now**, in `hardware/module/`: the
-> [pitch stage](../../hardware/module/pitch-stage.md) and the
-> [mod channels](../../hardware/module/mod-channels.md). Where those pages
+> [pitch stage](../../hardware/module/pitch-stage/pitch-stage.md) and the
+> [mod channels](../../hardware/module/mod-channels/mod-channels.md). Where those pages
 > disagree with the prose here, they win — that is the rule the breath page
 > established and the reason it exists.
 >
@@ -173,10 +173,14 @@ the best available on every channel at once:
 scale) and C/D are gain 2 (5.000 V). An A-grade part halves every output —
 pitch becomes −2…+2.25 V, the mods ±5 V, and channel 7 cannot reach its
 reference voltage at all. Only C satisfies both requirements. `bom.csv` is
-locked to `DAC8568CIPW`.
+locked to **`DAC8568ICPW`**. *(This read `DAC8568CIPW` until 2026-09-21. That
+order code does not exist: SBAS430E's own Package Option Addendum lists
+`DAC8568IAPW / IBPW / ICPW / IDPW`, and the transposed spelling appears
+nowhere in the document. The banked file is still named after the transposed
+code; see the `U-DAC` BOM row.)*
 
 > **Confirmed 2026-09-21 against SBAS430E**, now held at
-> `datasheets/texas-instruments/DAC8568CIPW.pdf`. This paragraph asked for
+> `datasheets/analog/DAC8568CIPW.pdf`. This paragraph asked for
 > that check because no browser in the sandbox could reach `ti.com`; the
 > datasheet says what the ADR guessed, verbatim: *"For device grades A and C
 > on power-up, all DAC registers are filled with zeros and the output voltages
@@ -196,9 +200,22 @@ locked to `DAC8568CIPW`.
 
 | Output | At rack power-on, before firmware writes | Why that is right |
 |---|---|---|
-| **Pitch** | Bottom of its range, below −2 V | Subsonic. A VCO there is inaudible |
+| **Pitch** | **Exactly 0 V** — an ordinary, audible note | **Not subsonic. See below.** |
 | **Mod 1–4** | **Exactly 0 V** | Both terms of the difference are zero |
 | **Breath** | **Wherever the panel OFFSET knob was left, anywhere in ±5 V** | **Not a defined state — see below.** Breath never passes through the DAC, so no reset reaches it |
+
+> **The pitch row said "Bottom of its range, below −2 V — subsonic, a VCO
+> there is inaudible" until 2026-09-21, and the refutation was already in this
+> ADR, twenty lines below it.** That row needs the 2.500 V offset to exist,
+> and the offset is derived entirely from `VREFOUT` — which this ADR states,
+> just below, is **off by default** and needs an explicit enable write at
+> boot. With the reference off both terms of `Vout = 2·Vdac − 2.500` are zero,
+> so the jack sits at **0.000 V**, which `pitch-stage.md` derives
+> independently. On a 1 V/oct VCO that is a base note, held for about a second
+> at every rack power-on, not silence.
+>
+> The mod rows are unaffected and were right: both terms of their difference
+> really are zero. Breath never passes through the DAC at all.
 
 > **The breath row said "0 V — the receiver's differential pulldown holds it
 > there" until 2026-09-21, and both halves were wrong.** `R-PD-BREATH` is
@@ -206,7 +223,7 @@ locked to `DAC8568CIPW`.
 > because a purely differential shunt gives the in-amp's inputs no DC path to
 > ground at all). And the replacement does not produce 0 V at the jack: the two
 > 1 MΩ bias resistors hold the in-amp's *inputs* at module `AGND`, so with the
-> instrument absent the in-amp rests at `V_REF` ≈ +0.437 V — the trimmed null
+> instrument absent the in-amp rests at `V_REF` = `breath-zero-ref` — the trimmed null
 > for a sensor pedestal that is not there — and the gain-and-offset stage then
 > puts the jack at the **OFFSET knob's position less 0.2 to 1.7 V**, depending
 > on where GAIN is set (`breath-receive-stage.md`,
@@ -370,7 +387,7 @@ Consequences:
 - **Use a matched resistor network for the pitch scaling stage** (LT5400 class,
   MSOP-8), not discrete 0.1% parts. This is the single highest-value precision
   component in the design. **The ratio is 1:1** — see
-  [the pitch stage schematic](../../hardware/module/pitch-stage.md), which is
+  [the pitch stage schematic](../../hardware/module/pitch-stage/pitch-stage.md), which is
   where the topology finally got drawn and turned out to be a non-inverting amp
   with the reference at the bottom of the feedback divider, not the difference
   amp everyone had been assuming. Two matched resistors, not four, and the
@@ -621,21 +638,25 @@ Two more mechanisms land on the same jack, and they add to the one above:
 | Route | Magnitude |
 |---|---|
 | Offset reference rail + WS2815 ripple (above) | ~22 cents p-p |
-| ~~**The module's analog rail and the umbilical feed share one 1N5817**, so instrument current modulates its V_f by ~80 mV~~ | ~~**~20 cents**~~ **→ 0.00018 cents, refuted** |
+| ~~**The module's analog rail and the umbilical feed share one 1N5817**, so instrument current modulates its V_f~~ | ~~**~20 cents**~~ **refuted — see `diode-split-rationale`** |
 | The module's internal ground | 5.7–7.2 cents |
 | The rack's shared bus ground | ~4.8 cents |
 
-> **The 1N5817 row is refuted and struck through, 2026-09-21.** The 80 mV of
-> `V_f` modulation is real and independently confirmed
-> (`power-entry.md` computes 75 mV). The **20 cents is not**: it implies ~21 %
-> pitch sensitivity to the +12 V rail, and pitch full scale is set by the DAC's
-> *internal* reference off the LM317, not by +12 V. The real path is
-> 75 mV → LM317 line regulation (0.52 mV/V) → 39 µV on `AVDD` → OPA2197 PSRR
-> (**110.5 dB worst case** `[SBOS737C p.8]`; this line carried an unsourced
-> 114 dB until 2026-09-21, and TI actually specifies ±1 µV/V typ / ±3 µV/V max)
-> → **0.22 µV ≈ 0.00027 cents** — five orders of magnitude below the
-> smallest other term in this table. The figure is a survival from the
-> rail-divider offset topology this ADR itself deleted.
+> **The 1N5817 row is refuted and struck through, 2026-09-21.** The `V_f`
+> modulation is real and independently confirmed. The **20 cents is not**: it
+> implies ~21 % pitch sensitivity to the +12 V rail, and pitch full scale is
+> set by the DAC's *internal* reference off the LM317, not by +12 V. The real
+> path runs through the LM317's line regulation and the OPA2197's guaranteed
+> worst-case PSRR, and lands **five orders of magnitude below the smallest
+> other term in this table**. Every number in that chain is the tracked figure
+> `diode-split-rationale`, owned by `power-entry.md`, and is deliberately not
+> restated here. The 20 cents was a survival from the rail-divider offset
+> topology this ADR itself deleted.
+>
+> *(This block restated the whole chain — "80 mV", "75 mV", "39 µV",
+> "0.00027 cents" — until 2026-09-21. The modulation was later re-read off the
+> banked 1N5817 curve as a different number, and none of the four terms here
+> followed. Four documents held four different values for one quantity.)*
 >
 > **`D-REVPOL` still goes to three, on the reasons that hold**: fault isolation
 > between the exported umbilical rail and the module's own analog rail, so a
@@ -757,7 +778,7 @@ the easy half:
 
 Breath is the odd one because it never passes through the DAC: it has no
 zero-order-hold image to attenuate, and it is already a 482 Hz channel by the
-time it reaches the module (`hardware/module/breath-receive-stage.md`). This
+time it reaches the module (`hardware/module/breath-receive-stage/breath-receive-stage.md`). This
 ADR's earlier "~2 kHz for breath" is superseded by that page.
 
 ## Firmware defaults and bring-up rules

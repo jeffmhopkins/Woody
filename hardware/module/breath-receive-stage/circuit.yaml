@@ -1,0 +1,33 @@
+# depends_on is a dependency graph with FOUR KINDS OF EDGE THAT ARE NOT
+# EQUALLY TRUSTWORTHY. circuit: edges are verified; adr:, fig: and refdes:
+# are seeded from co-mention and three are known false. The rules, the
+# known-false list and what IS guaranteed for every edge are stated once, in
+# hardware/README.md, "circuit.yaml and its depends_on edges". Read that
+# before adding or trusting an edge here.
+
+id: module/breath-receive-stage
+title: Breath receive stage — schematic
+last_reviewed: '2026-09-21'
+depends_on:
+- adr:0003
+- adr:0006
+- fig:breath-zero-ref
+- fig:cref-out-node
+- fig:dac-rail
+- fig:dig-gnd-topology
+- fig:inamp-full-scale
+- fig:opa2197-output-impedance
+- fig:riso-ref-topology
+- fig:sensor-full-scale
+- fig:umbilical-pinmap
+- refdes:C-AA-ADC
+- refdes:POT-GAIN
+- refdes:POT-OFFSET
+- refdes:R-SER-BREATH-INST
+- refdes:TRIM-BREATH-ZERO
+- refdes:TRIM-OFFSET
+- refdes:U-OPA-PITCH
+- circuit:interfaces/breath-sense-link
+- circuit:module/breath-output-stage
+- circuit:module/breath-response-shaper
+- circuit:module/power-entry

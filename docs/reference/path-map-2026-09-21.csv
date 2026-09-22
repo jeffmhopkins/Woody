@@ -1,0 +1,411 @@
+old,new,kind,note
+.claude/settings.json,.claude/settings.json,unmoved,
+.gitignore,.gitignore,unmoved,
+CLAUDE.md,CLAUDE.md,unmoved,
+LICENSE,LICENSE,unmoved,
+LICENSES/CC-BY-SA-4.0.txt,LICENSES/CC-BY-SA-4.0.txt,unmoved,
+LICENSES/CERN-OHL-S-2.0.txt,LICENSES/CERN-OHL-S-2.0.txt,unmoved,
+LICENSES/GPL-3.0-only.txt,LICENSES/GPL-3.0-only.txt,unmoved,
+README.md,README.md,unmoved,
+ROADMAP.md,ROADMAP.md,unmoved,
+config/figures.yaml,config/figures.yaml,unmoved,
+config/key-layout.yaml,config/key-layout.yaml,unmoved,
+datasheets/.manifest-R1.csv,datasheets/.manifest-R1.csv,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/.manifest-R2.csv,datasheets/.manifest-R2.csv,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/.manifest-R3.csv,datasheets/.manifest-R3.csv,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/.manifest-R4.csv,datasheets/.manifest-R4.csv,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/.manifest-R5.csv,datasheets/.manifest-R5.csv,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/.manifest-R6.csv,datasheets/.manifest-R6.csv,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/.manifest-R7.csv,datasheets/.manifest-R7.csv,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/.manifest-R8.csv,datasheets/.manifest-R8.csv,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+,datasheets/.manifest-R9.csv,created,"created after the map was written (b32c557): wave R9's manifest fragment. A dotfile, so `git mv datasheets/*` leaves it behind - move the directory whole"
+,datasheets/.moves.csv,created,"created by the datasheet re-filing (b631987): its own old->new record, the source this file's datasheets/ rows were corrected from"
+datasheets/MANIFEST.csv,datasheets/MANIFEST.csv,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/README.md,datasheets/README.md,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/connectors/100SP1T2B3M2QEH.pdf,datasheets/connectors/100SP1T2B3M2QEH.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/connectors/3M-303-SERIES-BOXED-HEADER.pdf,datasheets/connectors/3M-303-SERIES-BOXED-HEADER.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/connectors/MULTICOMP-SUBMIN-TOGGLE.pdf,datasheets/connectors/MULTICOMP-SUBMIN-TOGGLE.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/connectors/NE8FDP-DATASHEET.pdf,datasheets/connectors/NE8FDP-DATASHEET.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/connectors/NE8FDP.dxf,datasheets/connectors/NE8FDP.dxf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/connectors/NE8FDP.pdf,datasheets/connectors/NE8FDP.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/connectors/NE8FDV-DATASHEET.pdf,datasheets/connectors/NE8FDV-DATASHEET.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/connectors/NE8FDV.kicad_mod,datasheets/connectors/NE8FDV.kicad_mod,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/connectors/NE8MC-DATASHEET.pdf,datasheets/connectors/NE8MC-DATASHEET.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/connectors/NE8MC.pdf,datasheets/connectors/NE8MC.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/connectors/NE8MX.pdf,datasheets/connectors/NE8MX.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/connectors/NE8MX6.pdf,datasheets/connectors/NE8MX6.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/connectors/NEUTRIK-PG-DATA-CONNECTOR.pdf,datasheets/connectors/NEUTRIK-PG-DATA-CONNECTOR.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/connectors/NKK-SERIES-M-TOGGLE.pdf,datasheets/connectors/NKK-SERIES-M-TOGGLE.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/connectors/PJ301M-12.pdf,datasheets/connectors/PJ301M-12.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/connectors/PJ398SM-drawing.jpg,datasheets/connectors/PJ398SM-drawing.jpg,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/connectors/PJ398SM.kicad_mod,datasheets/connectors/PJ398SM.kicad_mod,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/connectors/R0904N-thonk.pdf,datasheets/connectors/R0904N-thonk.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/connectors/R0904N.pdf,datasheets/connectors/R0904N.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/connectors/RV09AF-40.pdf,datasheets/connectors/RV09AF-40.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/connectors/TE-IDC-SOCKET-CATALOG-82012.pdf,datasheets/connectors/TE-IDC-SOCKET-CATALOG-82012.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/connectors/WR-BHD-61201621621.pdf,datasheets/connectors/WR-BHD-61201621621.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/discrete-and-power/1N4148.pdf,datasheets/discrete-and-power/1N4148.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/discrete-and-power/1N4148W-DIOTEC.pdf,datasheets/discrete-and-power/1N4148W-DIOTEC.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/discrete-and-power/1N4148W.pdf,datasheets/discrete-and-power/1N4148W.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/discrete-and-power/1N5817.pdf,datasheets/discrete-and-power/1N5817.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/discrete-and-power/1N5822.pdf,datasheets/discrete-and-power/1N5822.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/discrete-and-power/B5819WS.pdf,datasheets/discrete-and-power/B5819WS.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/discrete-and-power/BAV99.pdf,datasheets/discrete-and-power/BAV99.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/discrete-and-power/ERA-3A-thin-film-0p1pct.pdf,datasheets/discrete-and-power/ERA-3A-thin-film-0p1pct.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/discrete-and-power/HI1206N601R-10-ferrite-bead.pdf,datasheets/discrete-and-power/HI1206N601R-10-ferrite-bead.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/discrete-and-power/LT1641-DC1354A-demo-manual.pdf,datasheets/discrete-and-power/LT1641-DC1354A-demo-manual.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/discrete-and-power/LT1641.pdf,datasheets/discrete-and-power/LT1641.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/discrete-and-power/MF-PSMF010X-polyfuse.pdf,datasheets/discrete-and-power/MF-PSMF010X-polyfuse.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/discrete-and-power/MI1206K601R-10-ferrite-bead.pdf,datasheets/discrete-and-power/MI1206K601R-10-ferrite-bead.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/discrete-and-power/R-78E5.0-1.0.pdf,datasheets/discrete-and-power/R-78E5.0-1.0.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/discrete-and-power/SMAJ15A.pdf,datasheets/discrete-and-power/SMAJ15A.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/discrete-and-power/SP0504BAHT.pdf,datasheets/discrete-and-power/SP0504BAHT.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/discrete-and-power/SS14.pdf,datasheets/discrete-and-power/SS14.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/discrete-and-power/SS34.pdf,datasheets/discrete-and-power/SS34.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/mechanical/EURORACK-3U-3HP-PANEL-apfaudio-pmod-r3.1.kicad_pcb,datasheets/mechanical/EURORACK-3U-3HP-PANEL-apfaudio-pmod-r3.1.kicad_pcb,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/mechanical/EURORACK-3U-PANEL-HP-TABLE-make_blanks.py,datasheets/mechanical/EURORACK-3U-PANEL-HP-TABLE-make_blanks.py,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/mechanical/GATERON-KS-33-3D.step,datasheets/mechanical/GATERON-KS-33-3D.step,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/mechanical/GATERON-KS-33-SW_KS33_1u.kicad_mod,datasheets/mechanical/GATERON-KS-33-SW_KS33_1u.kicad_mod,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/mechanical/GATERON-KS-33-SW_KS33_HS_KS-2P02B01-02_HS_1u.kicad_mod,datasheets/mechanical/GATERON-KS-33-SW_KS33_HS_KS-2P02B01-02_HS_1u.kicad_mod,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/mechanical/GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf,datasheets/mechanical/GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/mechanical/GATERON-KS-33-ergogen-footprint.js,datasheets/mechanical/GATERON-KS-33-ergogen-footprint.js,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/mechanical/LILYGO-T-DISPLAY-S3-AMOLED-3D.stp,datasheets/mechanical/LILYGO-T-DISPLAY-S3-AMOLED-3D.stp,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/mechanical/LILYGO-T-DISPLAY-S3-AMOLED-OUTLINE.dxf,datasheets/mechanical/LILYGO-T-DISPLAY-S3-AMOLED-OUTLINE.dxf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/mechanical/LILYGO-T-DISPLAY-S3-AMOLED-SCHEMATIC.pdf,datasheets/mechanical/LILYGO-T-DISPLAY-S3-AMOLED-SCHEMATIC.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-SCHEMATIC.pdf,datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-SCHEMATIC.pdf,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-circuitpython-pins.c,datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-circuitpython-pins.c,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-dimensions.jpg,datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-dimensions.jpg,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-function-block.png,datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-function-block.png,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-pinout.png,datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-pinout.png,unmoved,datasheets/ moves whole or not at all; MANIFEST file column is relative to it
+datasheets/mechanical/WS2815-worldsemi-datasheet.pdf,,deleted,"DE-DUPLICATED by the 2026-09-21 datasheet re-filing (b631987): byte-identical to datasheets/led/WS2815.pdf, sha 72e22d2f740c, which has its own row. An LED IC datasheet was never mechanical."
+datasheets/other-semi/74HC165-nexperia.pdf,datasheets/logic/74HC165-nexperia.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split"
+datasheets/other-semi/74HC165-onsemi.pdf,datasheets/logic/74HC165-onsemi.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split"
+datasheets/other-semi/74HC165-toshiba.pdf,datasheets/logic/74HC165-toshiba-1986-excerpt.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split; name says what it is - 1986 databook excerpt; FILE ALSO RENAMED, the basename is not preserved"
+datasheets/other-semi/74HC165.pdf,datasheets/logic/74HC165-ti-scls116e.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split; name says whose - TI SCLS116E; FILE ALSO RENAMED, the basename is not preserved"
+datasheets/other-semi/LT5400.pdf,datasheets/analog/LT5400.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split; matched resistor network is analog"
+datasheets/other-semi/MCP3202-CI-SN.pdf,datasheets/analog/MCP3202-CI-SN.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split; ADC is analog"
+datasheets/other-semi/ME6217C33M5G.pdf,datasheets/discrete-and-power/ME6217C33M5G.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split; LDO files with the other regulators"
+datasheets/other-semi/MPXV4006-AN1646.pdf,datasheets/analog/MPXV4006-AN1646.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split; travels with MPXV4006DP"
+datasheets/other-semi/MPXV4006DP.pdf,datasheets/analog/MPXV4006DP.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split; pressure sensor is analog"
+datasheets/other-semi/WS2812B-2020.pdf,datasheets/led/WS2812B-2020.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split; WS281x family files together"
+datasheets/other-semi/WS2812B.pdf,datasheets/led/WS2812B.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split; WS281x family files together"
+datasheets/other-semi/WS2812C.pdf,datasheets/led/WS2812C.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split; WS281x family files together"
+datasheets/other-semi/WS2815.pdf,datasheets/led/WS2815.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split; WS281x family files together"
+datasheets/other-semi/XL-0807RGBC-WS2812B-REV2024.pdf,datasheets/led/XL-0807RGBC-WS2812B-REV2024.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split; SURROGATE ONLY row - see datasheets/README.md"
+datasheets/other-semi/XL-0807RGBC-WS2812B.pdf,datasheets/led/XL-0807RGBC-WS2812B.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; junk drawer split; SURROGATE ONLY row - see datasheets/README.md"
+datasheets/texas-instruments/DAC8568CIPW.pdf,datasheets/analog/DAC8568CIPW.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; vendor bucket retired; function axis"
+datasheets/texas-instruments/INA828IDR.pdf,datasheets/analog/INA828IDR.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; vendor bucket retired; function axis"
+datasheets/texas-instruments/LM317LZ.pdf,datasheets/discrete-and-power/LM317LZ.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; vendor bucket retired; regulator files with the other regulators"
+datasheets/texas-instruments/OPA2197.pdf,datasheets/analog/OPA2197.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; vendor bucket retired; function axis"
+datasheets/texas-instruments/REF5050.pdf,datasheets/analog/REF5050.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; vendor bucket retired; function axis"
+datasheets/texas-instruments/SN74AHCT125.pdf,datasheets/logic/SN74AHCT125.pdf,moved,"datasheet re-filing (b631987), AFTER this map was first written; vendor bucket retired; level shifter files with the logic"
+docs/decisions/0001-mcu-and-board-partitioning.md,docs/decisions/0001-mcu-and-board-partitioning.md,unmoved,
+docs/decisions/0002-key-switches-and-mounting.md,docs/decisions/0002-key-switches-and-mounting.md,unmoved,
+docs/decisions/0003-breath-sensing-path.md,docs/decisions/0003-breath-sensing-path.md,unmoved,
+docs/decisions/0004-cv-interface-module.md,docs/decisions/0004-cv-interface-module.md,unmoved,
+docs/decisions/0005-power-architecture.md,docs/decisions/0005-power-architecture.md,unmoved,
+docs/decisions/0006-cv-channel-allocation.md,docs/decisions/0006-cv-channel-allocation.md,unmoved,
+docs/decisions/0007-imu-selection.md,docs/decisions/0007-imu-selection.md,unmoved,
+docs/decisions/0008-display-selection.md,docs/decisions/0008-display-selection.md,unmoved,
+docs/decisions/0009-enclosure-construction.md,docs/decisions/0009-enclosure-construction.md,unmoved,
+docs/decisions/0010-key-layout-as-data.md,docs/decisions/0010-key-layout-as-data.md,unmoved,
+docs/decisions/0011-licensing.md,docs/decisions/0011-licensing.md,unmoved,
+docs/decisions/0012-configuration-interface.md,docs/decisions/0012-configuration-interface.md,unmoved,
+docs/decisions/0013-two-mcu-split.md,docs/decisions/0013-two-mcu-split.md,unmoved,
+docs/decisions/0014-lighting.md,docs/decisions/0014-lighting.md,unmoved,
+docs/decisions/README.md,docs/decisions/README.md,unmoved,
+docs/log/2026-09-20-instrument-specification.md,docs/log/2026-09-20-instrument-specification.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/log/2026-09-20-project-kickoff.md,docs/log/2026-09-20-project-kickoff.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/log/2026-09-20-review-resolution.md,docs/log/2026-09-20-review-resolution.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/reference/ks33-geometry.md,docs/reference/ks33-geometry.md,unmoved,
+docs/reference/latency-budget.md,docs/reference/latency-budget.md,unmoved,
+,docs/reference/path-map-2026-09-21.csv,created,"created by A0 (8bb7366), the commit that wrote this map - so it has no old-side path here"
+docs/reference/pcb-pipeline.md,docs/reference/pcb-pipeline.md,unmoved,
+docs/reference/repo-maintenance.md,docs/reference/repo-maintenance.md,unmoved,
+docs/research/.gitkeep,docs/research/.gitkeep,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/research/2026-09-21-eurorack-prior-art/R1-pitch-output-stages.md,docs/research/2026-09-21-eurorack-prior-art/R1-pitch-output-stages.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/research/2026-09-21-eurorack-prior-art/R10-keyscan-and-adc.md,docs/research/2026-09-21-eurorack-prior-art/R10-keyscan-and-adc.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/research/2026-09-21-eurorack-prior-art/R2-bipolar-cv-outputs.md,docs/research/2026-09-21-eurorack-prior-art/R2-bipolar-cv-outputs.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/research/2026-09-21-eurorack-prior-art/R3-power-entry.md,docs/research/2026-09-21-eurorack-prior-art/R3-power-entry.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/research/2026-09-21-eurorack-prior-art/R4-jack-protection.md,docs/research/2026-09-21-eurorack-prior-art/R4-jack-protection.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/research/2026-09-21-eurorack-prior-art/R5-offboard-links.md,docs/research/2026-09-21-eurorack-prior-art/R5-offboard-links.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/research/2026-09-21-eurorack-prior-art/R6-breath-control.md,docs/research/2026-09-21-eurorack-prior-art/R6-breath-control.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/research/2026-09-21-eurorack-prior-art/R7-multichannel-dac.md,docs/research/2026-09-21-eurorack-prior-art/R7-multichannel-dac.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/research/2026-09-21-eurorack-prior-art/R8-calibration-practice.md,docs/research/2026-09-21-eurorack-prior-art/R8-calibration-practice.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/research/2026-09-21-eurorack-prior-art/R9-failsafe-supervision.md,docs/research/2026-09-21-eurorack-prior-art/R9-failsafe-supervision.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/research/2026-09-21-eurorack-prior-art/README.md,docs/research/2026-09-21-eurorack-prior-art/README.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-analog-design-review.md,docs/review/2026-09-20-analog-design-review.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/A1-contradictions.md,docs/review/2026-09-20-cold-review/A1-contradictions.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/A2-staleness.md,docs/review/2026-09-20-cold-review/A2-staleness.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/A3-bom-consistency.md,docs/review/2026-09-20-cold-review/A3-bom-consistency.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/B1-breath-frontend.md,docs/review/2026-09-20-cold-review/B1-breath-frontend.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/B10-fault-abuse.md,docs/review/2026-09-20-cold-review/B10-fault-abuse.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/B2-breath-link.md,docs/review/2026-09-20-cold-review/B2-breath-link.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/B3-pitch-chain.md,docs/review/2026-09-20-cold-review/B3-pitch-chain.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/B4-mod-channels.md,docs/review/2026-09-20-cold-review/B4-mod-channels.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/B5-module-power.md,docs/review/2026-09-20-cold-review/B5-module-power.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/B6-instrument-power.md,docs/review/2026-09-20-cold-review/B6-instrument-power.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/B7-grounding.md,docs/review/2026-09-20-cold-review/B7-grounding.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/B8-noise-emi.md,docs/review/2026-09-20-cold-review/B8-noise-emi.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/B9-amp-stability.md,docs/review/2026-09-20-cold-review/B9-amp-stability.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/C1-active-parts.md,docs/review/2026-09-20-cold-review/C1-active-parts.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/C2-passives.md,docs/review/2026-09-20-cold-review/C2-passives.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/C3-electromechanical.md,docs/review/2026-09-20-cold-review/C3-electromechanical.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/C4-sourcing.md,docs/review/2026-09-20-cold-review/C4-sourcing.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/C5-mcu-boards.md,docs/review/2026-09-20-cold-review/C5-mcu-boards.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/D1-missing-protection.md,docs/review/2026-09-20-cold-review/D1-missing-protection.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/D2-missing-testability.md,docs/review/2026-09-20-cold-review/D2-missing-testability.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/D3-missing-conditioning.md,docs/review/2026-09-20-cold-review/D3-missing-conditioning.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/D4-missing-diagnostics.md,docs/review/2026-09-20-cold-review/D4-missing-diagnostics.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/D5-musical-gaps.md,docs/review/2026-09-20-cold-review/D5-musical-gaps.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/README.md,docs/review/2026-09-20-cold-review/README.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/verification/README.md,docs/review/2026-09-20-cold-review/verification/README.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/verification/V1-showstoppers.md,docs/review/2026-09-20-cold-review/verification/V1-showstoppers.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/verification/V2-load-budget.md,docs/review/2026-09-20-cold-review/verification/V2-load-budget.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/verification/V3-provenance.md,docs/review/2026-09-20-cold-review/verification/V3-provenance.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/verification/V4-fix-conflicts.md,docs/review/2026-09-20-cold-review/verification/V4-fix-conflicts.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/verification/V5-pitch.md,docs/review/2026-09-20-cold-review/verification/V5-pitch.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/verification/V6-breath.md,docs/review/2026-09-20-cold-review/verification/V6-breath.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/verification/V7-proportionality.md,docs/review/2026-09-20-cold-review/verification/V7-proportionality.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-20-cold-review/verification/V8-meta.md,docs/review/2026-09-20-cold-review/verification/V8-meta.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-datasheet-reconciliation/ADILF.md,docs/review/2026-09-21-datasheet-reconciliation/ADILF.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-datasheet-reconciliation/BEAD.md,docs/review/2026-09-21-datasheet-reconciliation/BEAD.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-datasheet-reconciliation/HANDOFF-R8.md,docs/review/2026-09-21-datasheet-reconciliation/HANDOFF-R8.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-datasheet-reconciliation/HANDOFF.md,docs/review/2026-09-21-datasheet-reconciliation/HANDOFF.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-datasheet-reconciliation/LED.md,docs/review/2026-09-21-datasheet-reconciliation/LED.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-datasheet-reconciliation/LOGIC.md,docs/review/2026-09-21-datasheet-reconciliation/LOGIC.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-datasheet-reconciliation/MECH.md,docs/review/2026-09-21-datasheet-reconciliation/MECH.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-datasheet-reconciliation/README.md,docs/review/2026-09-21-datasheet-reconciliation/README.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-datasheet-reconciliation/TI.md,docs/review/2026-09-21-datasheet-reconciliation/TI.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-datasheet-reconciliation/VERIFIED.md,docs/review/2026-09-21-datasheet-reconciliation/VERIFIED.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-hardware-and-standards-review/A1-cluster-boards.md,docs/review/2026-09-21-hardware-and-standards-review/A1-cluster-boards.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-hardware-and-standards-review/A2-carrier-analog.md,docs/review/2026-09-21-hardware-and-standards-review/A2-carrier-analog.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-hardware-and-standards-review/A3-carrier-power.md,docs/review/2026-09-21-hardware-and-standards-review/A3-carrier-power.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-hardware-and-standards-review/A4-carrier-digital.md,docs/review/2026-09-21-hardware-and-standards-review/A4-carrier-digital.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-hardware-and-standards-review/A5-module-breath.md,docs/review/2026-09-21-hardware-and-standards-review/A5-module-breath.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-hardware-and-standards-review/A6-module-pitch-mod.md,docs/review/2026-09-21-hardware-and-standards-review/A6-module-pitch-mod.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-hardware-and-standards-review/A7-module-power.md,docs/review/2026-09-21-hardware-and-standards-review/A7-module-power.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-hardware-and-standards-review/A8-interconnect.md,docs/review/2026-09-21-hardware-and-standards-review/A8-interconnect.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-hardware-and-standards-review/B1-eurorack-standards.md,docs/review/2026-09-21-hardware-and-standards-review/B1-eurorack-standards.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-hardware-and-standards-review/B2-cv-level-standards.md,docs/review/2026-09-21-hardware-and-standards-review/B2-cv-level-standards.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-hardware-and-standards-review/B3-power-entry-practice.md,docs/review/2026-09-21-hardware-and-standards-review/B3-power-entry-practice.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-hardware-and-standards-review/B4-jack-protection-practice.md,docs/review/2026-09-21-hardware-and-standards-review/B4-jack-protection-practice.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-hardware-and-standards-review/B5-tethered-link-practice.md,docs/review/2026-09-21-hardware-and-standards-review/B5-tethered-link-practice.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-hardware-and-standards-review/B6-wind-controller-prior-art.md,docs/review/2026-09-21-hardware-and-standards-review/B6-wind-controller-prior-art.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-hardware-and-standards-review/C1-break-key-chain.md,docs/review/2026-09-21-hardware-and-standards-review/C1-break-key-chain.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-hardware-and-standards-review/C2-break-breath-path.md,docs/review/2026-09-21-hardware-and-standards-review/C2-break-breath-path.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-hardware-and-standards-review/C3-break-sequencing.md,docs/review/2026-09-21-hardware-and-standards-review/C3-break-sequencing.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-hardware-and-standards-review/C4-break-shared-reference.md,docs/review/2026-09-21-hardware-and-standards-review/C4-break-shared-reference.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-hardware-and-standards-review/D1-arithmetic.md,docs/review/2026-09-21-hardware-and-standards-review/D1-arithmetic.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-hardware-and-standards-review/D2-consistency.md,docs/review/2026-09-21-hardware-and-standards-review/D2-consistency.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-hardware-and-standards-review/README.md,docs/review/2026-09-21-hardware-and-standards-review/README.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-hardware-and-standards-review/VERIFIED.md,docs/review/2026-09-21-hardware-and-standards-review/VERIFIED.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-pcb-pipeline-review/P1-kicad-cli-surface.md,docs/review/2026-09-21-pcb-pipeline-review/P1-kicad-cli-surface.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-pcb-pipeline-review/P10-corpus-audit.md,docs/review/2026-09-21-pcb-pipeline-review/P10-corpus-audit.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-pcb-pipeline-review/P11-layout-rules.md,docs/review/2026-09-21-pcb-pipeline-review/P11-layout-rules.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-pcb-pipeline-review/P12-determinism.md,docs/review/2026-09-21-pcb-pipeline-review/P12-determinism.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-pcb-pipeline-review/P13-spice-verification.md,docs/review/2026-09-21-pcb-pipeline-review/P13-spice-verification.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-pcb-pipeline-review/P2-pcbnew-api.md,docs/review/2026-09-21-pcb-pipeline-review/P2-pcbnew-api.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-pcb-pipeline-review/P3-specctra-roundtrip.md,docs/review/2026-09-21-pcb-pipeline-review/P3-specctra-roundtrip.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-pcb-pipeline-review/P4-freerouting.md,docs/review/2026-09-21-pcb-pipeline-review/P4-freerouting.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-pcb-pipeline-review/P5-skidl-viability.md,docs/review/2026-09-21-pcb-pipeline-review/P5-skidl-viability.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-pcb-pipeline-review/P6-headless-environment.md,docs/review/2026-09-21-pcb-pipeline-review/P6-headless-environment.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-pcb-pipeline-review/P7-fab-deliverables.md,docs/review/2026-09-21-pcb-pipeline-review/P7-fab-deliverables.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-pcb-pipeline-review/P8-grounding-implementation.md,docs/review/2026-09-21-pcb-pipeline-review/P8-grounding-implementation.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-pcb-pipeline-review/P9-alternatives-prior-art.md,docs/review/2026-09-21-pcb-pipeline-review/P9-alternatives-prior-art.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-pcb-pipeline-review/README.md,docs/review/2026-09-21-pcb-pipeline-review/README.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-pcb-pipeline-review/VERIFIED.md,docs/review/2026-09-21-pcb-pipeline-review/VERIFIED.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+,docs/review/2026-09-21-pre-merge-review/A1-breath-chain.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/A10-mechanical.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/A2-pitch-chain.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/A3-mod-channels.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/A4-module-power.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/A5-instrument-power.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/A6-key-chain.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/A7-digital-link.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/A8-grounding.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/A9-lighting.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/B1-figures-register.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/B2-bom-integrity.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/B3-datasheet-claims.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/B4-adr-vs-drawn.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/B5-firmware-contract.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/B6-roadmap-gates.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/C1-audit-of-fixes.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/C2-tooling-adversarial.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/C3-failure-injection.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/C4-interfaces-tables.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/C5-reader-experience.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/C6-gaps.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/README.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/STATUS.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+,docs/review/2026-09-21-pre-merge-review/VERIFIED.md,created-history,created after the map was written: 2026-09-21-pre-merge-review. Historical record - never corrected.
+docs/review/2026-09-21-preflight/A1-power-entry.md,docs/review/2026-09-21-preflight/A1-power-entry.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-preflight/A10-impedance-audit.md,docs/review/2026-09-21-preflight/A10-impedance-audit.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-preflight/A11-net-reconciliation.md,docs/review/2026-09-21-preflight/A11-net-reconciliation.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-preflight/A12-datasheet-coverage.md,docs/review/2026-09-21-preflight/A12-datasheet-coverage.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-preflight/A13-integration.md,docs/review/2026-09-21-preflight/A13-integration.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-preflight/A2-pitch-stage.md,docs/review/2026-09-21-preflight/A2-pitch-stage.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-preflight/A3-breath-receive.md,docs/review/2026-09-21-preflight/A3-breath-receive.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-preflight/A4-carrier.md,docs/review/2026-09-21-preflight/A4-carrier.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-preflight/A5-mod-channels.md,docs/review/2026-09-21-preflight/A5-mod-channels.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-preflight/A6-breath-output.md,docs/review/2026-09-21-preflight/A6-breath-output.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-preflight/A7-digital-supervision.md,docs/review/2026-09-21-preflight/A7-digital-supervision.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-preflight/A8-cluster-boards.md,docs/review/2026-09-21-preflight/A8-cluster-boards.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-preflight/A9-current-budget.md,docs/review/2026-09-21-preflight/A9-current-budget.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-preflight/README.md,docs/review/2026-09-21-preflight/README.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-preflight/STATUS.md,docs/review/2026-09-21-preflight/STATUS.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-preflight/VERIFIED.md,docs/review/2026-09-21-preflight/VERIFIED.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+,docs/review/2026-09-21-restructure-design/COLD-CONSERVATION.md,created-history,created after the map was written: 2026-09-21-restructure-design. Historical record - never corrected.
+,docs/review/2026-09-21-restructure-design/COLD-TOOLING.md,created-history,created after the map was written: 2026-09-21-restructure-design. Historical record - never corrected.
+docs/review/2026-09-21-restructure-design/D1-circuit-inventory.md,docs/review/2026-09-21-restructure-design/D1-circuit-inventory.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-restructure-design/D2-directory-standard.md,docs/review/2026-09-21-restructure-design/D2-directory-standard.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-restructure-design/D3-staleness-paradigm.md,docs/review/2026-09-21-restructure-design/D3-staleness-paradigm.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-restructure-design/D4-bom-and-datasheets.md,docs/review/2026-09-21-restructure-design/D4-bom-and-datasheets.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-restructure-design/D5-migration-mechanics.md,docs/review/2026-09-21-restructure-design/D5-migration-mechanics.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-restructure-design/D6-adr-boundary.md,docs/review/2026-09-21-restructure-design/D6-adr-boundary.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-restructure-design/PROPOSAL.md,docs/review/2026-09-21-restructure-design/PROPOSAL.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-restructure-design/README.md,docs/review/2026-09-21-restructure-design/README.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+,docs/review/2026-09-21-restructure-design/STATUS.md,created-history,created after the map was written: 2026-09-21-restructure-design. Historical record - never corrected.
+docs/review/2026-09-21-restructure-design/VERIFIED.md,docs/review/2026-09-21-restructure-design/VERIFIED.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-schematic-review/A1-break-jack-feedback.md,docs/review/2026-09-21-schematic-review/A1-break-jack-feedback.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-schematic-review/A2-break-tail-registers.md,docs/review/2026-09-21-schematic-review/A2-break-tail-registers.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-schematic-review/A3-break-breath-zero.md,docs/review/2026-09-21-schematic-review/A3-break-breath-zero.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-schematic-review/C1-breath-stage.md,docs/review/2026-09-21-schematic-review/C1-breath-stage.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-schematic-review/C2-pitch-stage.md,docs/review/2026-09-21-schematic-review/C2-pitch-stage.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-schematic-review/C3-mod-channels.md,docs/review/2026-09-21-schematic-review/C3-mod-channels.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-schematic-review/C4-power-entry.md,docs/review/2026-09-21-schematic-review/C4-power-entry.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-schematic-review/C5-digital-supervision.md,docs/review/2026-09-21-schematic-review/C5-digital-supervision.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-schematic-review/S1-arithmetic.md,docs/review/2026-09-21-schematic-review/S1-arithmetic.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-schematic-review/S2-gaps.md,docs/review/2026-09-21-schematic-review/S2-gaps.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-schematic-review/S3-carrier.md,docs/review/2026-09-21-schematic-review/S3-carrier.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-schematic-review/X1-shared-nodes.md,docs/review/2026-09-21-schematic-review/X1-shared-nodes.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-schematic-review/X2-sequencing.md,docs/review/2026-09-21-schematic-review/X2-sequencing.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-schematic-review/X3-opamp-budget.md,docs/review/2026-09-21-schematic-review/X3-opamp-budget.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-schematic-review/X4-regressions.md,docs/review/2026-09-21-schematic-review/X4-regressions.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-schematic-review/X5-bom-reconciliation.md,docs/review/2026-09-21-schematic-review/X5-bom-reconciliation.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-staleness-sweep/S1-panel-mechanical.md,docs/review/2026-09-21-staleness-sweep/S1-panel-mechanical.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-staleness-sweep/S10-regression.md,docs/review/2026-09-21-staleness-sweep/S10-regression.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-staleness-sweep/S11-firmware-facing.md,docs/review/2026-09-21-staleness-sweep/S11-firmware-facing.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-staleness-sweep/S12-findings-reconciliation.md,docs/review/2026-09-21-staleness-sweep/S12-findings-reconciliation.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-staleness-sweep/S2-umbilical.md,docs/review/2026-09-21-staleness-sweep/S2-umbilical.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-staleness-sweep/S3-power.md,docs/review/2026-09-21-staleness-sweep/S3-power.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-staleness-sweep/S4-breath-chain.md,docs/review/2026-09-21-staleness-sweep/S4-breath-chain.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-staleness-sweep/S5-pitch-mod.md,docs/review/2026-09-21-staleness-sweep/S5-pitch-mod.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-staleness-sweep/S6-key-chain.md,docs/review/2026-09-21-staleness-sweep/S6-key-chain.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-staleness-sweep/S7-deletions.md,docs/review/2026-09-21-staleness-sweep/S7-deletions.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-staleness-sweep/S8-bom-reconciliation.md,docs/review/2026-09-21-staleness-sweep/S8-bom-reconciliation.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-staleness-sweep/S9-adr-status.md,docs/review/2026-09-21-staleness-sweep/S9-adr-status.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+docs/review/2026-09-21-staleness-sweep/VERIFIED.md,docs/review/2026-09-21-staleness-sweep/VERIFIED.md,unmoved-history,Historical record; its path references are stale by design (CLAUDE.md 6)
+firmware/README.md,firmware/README.md,unmoved,
+,hardware/README.md,created,created after the map was written (fcd56e6): an entry point for a directory that had none
+hardware/bom.csv,hardware/bom.csv,unmoved,
+,hardware/carrier/bom.csv,created,"created when hardware/bom.csv became generated (c483829): the BOARD-level BOM fragment, for rows the board page derives rather than a circuit page"
+,hardware/carrier/breath-adc/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/carrier/breath-adc/breath-adc.md,created,Phase B (fbf040c): split out of hardware/controller/carrier.md
+,hardware/carrier/breath-adc/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/carrier/breath-excitation-reference/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/carrier/breath-excitation-reference/breath-excitation-reference.md,created,Phase B (fbf040c): split out of hardware/controller/carrier.md
+,hardware/carrier/breath-excitation-reference/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/carrier/breath-excitation-reference/notes.md,created,Phase B (fbf040c): split out of hardware/controller/carrier.md
+,hardware/carrier/breath-excitation-reference/sim/README.md,created,Phase B (fbf040c): split out of hardware/controller/carrier.md
+,hardware/carrier/display-and-service-uart/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/carrier/display-and-service-uart/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/carrier/display-and-service-uart/display-and-service-uart.md,created,Phase B (fbf040c): split out of hardware/controller/carrier.md
+,hardware/carrier/led-strip-drive/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/carrier/led-strip-drive/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/carrier/led-strip-drive/led-strip-drive.md,created,Phase B (fbf040c): split out of hardware/controller/carrier.md
+,hardware/carrier/led-strip-drive/notes.md,created,Phase B (fbf040c): split out of hardware/controller/carrier.md
+,hardware/carrier/power-entry-instrument/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/carrier/power-entry-instrument/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/carrier/power-entry-instrument/power-entry-instrument.md,created,Phase B (fbf040c): split out of hardware/controller/carrier.md
+,hardware/cluster/bom.csv,created,"created when hardware/bom.csv became generated (c483829): the BOARD-level BOM fragment, for rows the board page derives rather than a circuit page"
+,hardware/cluster/key-marker-and-bits/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/cluster/key-marker-and-bits/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/cluster/key-marker-and-bits/key-marker-and-bits.md,created,Phase B (d88837b): split out of hardware/controller/cluster-boards.md
+,hardware/cluster/key-marker-and-bits/notes.md,created,Phase B (d88837b): split out of hardware/controller/cluster-boards.md
+,hardware/cluster/key-register/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/cluster/key-register/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/cluster/key-register/key-register.md,created,Phase B (d88837b): split out of hardware/controller/cluster-boards.md
+,hardware/cluster/key-register/notes.md,created,Phase B (d88837b): split out of hardware/controller/cluster-boards.md
+,hardware/cluster/key-switch-network/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/cluster/key-switch-network/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/cluster/key-switch-network/key-switch-network.md,created,Phase B (d88837b): split out of hardware/controller/cluster-boards.md
+hardware/controller/.gitkeep,,deleted,hardware/controller/ conflated two different boards and is dissolved into carrier/ and cluster/
+hardware/controller/carrier.md,hardware/carrier/carrier.md,moved,Phase A1; basename preserved
+hardware/controller/cluster-boards.md,hardware/cluster/cluster-boards.md,moved,Phase A1; basename preserved
+hardware/datasheets/.gitkeep,,deleted,"a second, empty home for datasheets next to the real 77-file one at the repo root; referenced nowhere, and verify-datasheets.py walks only ROOT/datasheets so a PDF dropped here would be hashed by nothing"
+,hardware/interfaces/README.md,created,created after the map was written (fcd56e6): an entry point for a directory that had none
+,hardware/interfaces/breath-sense-link/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/interfaces/breath-sense-link/breath-sense-link.md,created,"consolidation (036b182): a board-crossing block gathered from carrier.md, cluster-boards.md, breath-receive-stage.md and digital-and-supervision.md into one directory"
+,hardware/interfaces/breath-sense-link/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/interfaces/breath-sense-link/notes.md,created,"consolidation (036b182): a board-crossing block gathered from carrier.md, cluster-boards.md, breath-receive-stage.md and digital-and-supervision.md into one directory"
+,hardware/interfaces/key-chain-loom/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/interfaces/key-chain-loom/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/interfaces/key-chain-loom/key-chain-loom.md,created,"consolidation (036b182): a board-crossing block gathered from carrier.md, cluster-boards.md, breath-receive-stage.md and digital-and-supervision.md into one directory"
+,hardware/interfaces/key-chain-loom/notes.md,created,"consolidation (036b182): a board-crossing block gathered from carrier.md, cluster-boards.md, breath-receive-stage.md and digital-and-supervision.md into one directory"
+,hardware/interfaces/spi-link/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/interfaces/spi-link/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/interfaces/spi-link/notes.md,created,"consolidation (036b182): a board-crossing block gathered from carrier.md, cluster-boards.md, breath-receive-stage.md and digital-and-supervision.md into one directory"
+,hardware/interfaces/spi-link/spi-link.md,created,"consolidation (036b182): a board-crossing block gathered from carrier.md, cluster-boards.md, breath-receive-stage.md and digital-and-supervision.md into one directory"
+hardware/module/.gitkeep,,deleted,hardware/module/ now holds circuit directories and needs no keep file
+,hardware/module/bom.csv,created,"created when hardware/bom.csv became generated (c483829): the BOARD-level BOM fragment, for rows the board page derives rather than a circuit page"
+hardware/module/breath-output-stage.md,hardware/module/breath-output-stage/breath-output-stage.md,moved,Phase A1; basename preserved
+,hardware/module/breath-output-stage/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/module/breath-output-stage/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+hardware/module/breath-receive-stage.md,hardware/module/breath-receive-stage/breath-receive-stage.md,moved,Phase A1; basename preserved
+,hardware/module/breath-receive-stage/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/module/breath-receive-stage/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/module/breath-receive-stage/notes.md,created,Phase B (68e9e1a): split out of hardware/module/breath-receive-stage.md
+,hardware/module/breath-receive-stage/sim/README.md,created,Phase B (68e9e1a): split out of hardware/module/breath-receive-stage.md
+,hardware/module/breath-response-shaper/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/module/breath-response-shaper/breath-response-shaper.md,created,Phase B (81fad55): split out of hardware/module/breath-output-stage.md
+,hardware/module/breath-response-shaper/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/module/dac8568/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/module/dac8568/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/module/dac8568/dac8568.md,created,Phase B (453a3b3): split out of hardware/module/digital-and-supervision.md
+,hardware/module/dac8568/notes.md,created,Phase B (453a3b3): split out of hardware/module/digital-and-supervision.md
+hardware/module/digital-and-supervision.md,hardware/module/digital-and-supervision/digital-and-supervision.md,moved,Phase A1; basename preserved
+,hardware/module/digital-and-supervision/bom.csv,created,"created when hardware/bom.csv became generated (c483829), backfilled in 0e68f25: the per-circuit BOM fragment tools/merge-bom.py reads"
+,hardware/module/digital-and-supervision/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/module/digital-and-supervision/notes.md,created,Phase B (453a3b3): split out of hardware/module/digital-and-supervision.md
+,hardware/module/link-supervision/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/module/link-supervision/link-supervision.md,created,Phase B (453a3b3): split out of hardware/module/digital-and-supervision.md
+,hardware/module/link-supervision/notes.md,created,Phase B (453a3b3): split out of hardware/module/digital-and-supervision.md
+hardware/module/mod-channels.md,hardware/module/mod-channels/mod-channels.md,moved,Phase A1; basename preserved
+,hardware/module/mod-channels/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/module/mod-channels/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/module/mod-channels/notes.md,created,Phase B (81fad55): split out of hardware/module/mod-channels.md
+,hardware/module/module.md,created,created after the map was written (fcd56e6): an entry point for a directory that had none
+,hardware/module/panel-led/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/module/panel-led/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/module/panel-led/notes.md,created,Phase B (81fad55): split out of hardware/module/power-entry.md
+,hardware/module/panel-led/panel-led.md,created,Phase B (81fad55): split out of hardware/module/power-entry.md
+,hardware/module/panel/bom.csv,created,"created when hardware/bom.csv became generated (c483829), backfilled in 0e68f25: the per-circuit BOM fragment tools/merge-bom.py reads"
+,hardware/module/panel/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/module/panel/panel.md,created,Phase B (81fad55): split out of hardware/module/breath-output-stage.md
+hardware/module/pitch-stage.md,hardware/module/pitch-stage/pitch-stage.md,moved,Phase A1; basename preserved
+,hardware/module/pitch-stage/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/module/pitch-stage/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/module/pitch-stage/notes.md,created,Phase B pilot (c52ed75): split out of hardware/module/pitch-stage.md
+,hardware/module/pitch-stage/sim/README.md,created,Phase B pilot (c52ed75): split out of hardware/module/pitch-stage.md
+hardware/module/power-entry.md,hardware/module/power-entry/power-entry.md,moved,Phase A1; basename preserved
+,hardware/module/power-entry/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/module/power-entry/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/module/power-entry/sim/README.md,created,Phase B (81fad55): split out of hardware/module/power-entry.md
+,hardware/module/umbilical-load-switch/bom.csv,created,created when hardware/bom.csv became generated (c483829): the per-circuit BOM fragment tools/merge-bom.py reads
+,hardware/module/umbilical-load-switch/circuit.yaml,created,"created by the dependency layer (07c7ae8): this circuit's declared edges, machine-seeded"
+,hardware/module/umbilical-load-switch/notes.md,created,Phase B (81fad55): split out of hardware/module/power-entry.md
+,hardware/module/umbilical-load-switch/sim/README.md,created,Phase B (81fad55): split out of hardware/module/power-entry.md
+,hardware/module/umbilical-load-switch/umbilical-load-switch.md,created,Phase B (81fad55): split out of hardware/module/power-entry.md
+,hardware/unplaced.csv,created,"created when hardware/bom.csv became generated (c483829): the rows no schematic page names - a count of parts nobody has drawn, not a dumping ground"
+mechanical/cad/.gitkeep,mechanical/cad/.gitkeep,unmoved,
+mechanical/drawings/.gitkeep,mechanical/drawings/.gitkeep,unmoved,
+mechanical/export/.gitkeep,mechanical/export/.gitkeep,unmoved,
+tools/.gitkeep,tools/.gitkeep,unmoved,
+,tools/check-conservation.py,created,"created by the Phase B pilot commit (c52ed75) alongside the pitch-stage split it was written to check - a tool, not a split product"
+tools/check-staleness.py,tools/check-staleness.py,unmoved,
+,tools/merge-bom.py,created,created after the map was written (108c633): the generator that made hardware/bom.csv a generated file
+tools/merge-manifests.py,tools/merge-manifests.py,unmoved,
+,tools/rewrite-paths.py,created,"created by A0 (8bb7366), the commit that wrote this map - so it has no old-side path here"
+tools/verify-datasheets.py,tools/verify-datasheets.py,unmoved,

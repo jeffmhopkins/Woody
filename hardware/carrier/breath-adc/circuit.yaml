@@ -1,0 +1,24 @@
+# depends_on is a dependency graph with FOUR KINDS OF EDGE THAT ARE NOT
+# EQUALLY TRUSTWORTHY. circuit: edges are verified; adr:, fig: and refdes:
+# are seeded from co-mention and three are known false. The rules, the
+# known-false list and what IS guaranteed for every edge are stated once, in
+# hardware/README.md, "circuit.yaml and its depends_on edges". Read that
+# before adding or trusting an edge here.
+
+id: carrier/breath-adc
+title: Breath ADC — schematic
+last_reviewed: '2026-09-21'
+depends_on:
+- adr:0003
+- fig:breath-working-point
+- fig:loop-budget
+- fig:sensor-full-scale
+- refdes:C-AA-ADC
+- refdes:C-STRIP-BULK
+- refdes:HDR-DEV
+- refdes:R-ADCDIV
+- refdes:U-ADC
+- circuit:carrier/power-entry-instrument
+- circuit:interfaces/breath-sense-link
+- circuit:interfaces/key-chain-loom
+- circuit:interfaces/spi-link

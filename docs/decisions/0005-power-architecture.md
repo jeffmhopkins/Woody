@@ -71,10 +71,11 @@ boards and the LED data level shifter.
 An earlier revision of this ADR specified a 12 V to 3.3 V buck. **That is
 wrong**, and the reason is the breath sensor.
 
-The MPXV4006DP is a 5 V part outputting **0.2–4.7 V** (ADR 0003). A buffer
+The MPXV4006DP is a 5 V part whose output reaches `sensor-full-scale`
+(ADR 0003). A buffer
 running on 3.3 V would clip the top 30% of the breath range. So the analog front
-end needs 5 V, and a rail-to-rail op-amp on 5 V reaches 4.7 V with margin to
-spare.
+end needs 5 V, and a rail-to-rail op-amp on 5 V clears `sensor-full-scale`
+with margin to spare.
 
 Feeding the dev boards 5 V is also the right way round. Both carry their own
 3.3 V regulators and their own USB power paths; driving their `5V`/`VBUS` pins
@@ -235,7 +236,7 @@ lit, still drawing current, with its logic dead.
 
 The version that actually works is a high-side P-FET on raw +12 V, which means a
 FET, a gate network, and a fat conductor routed to a panel location inside a
-bonded body that cannot be reopened to change the decision.
+body that has to be opened up to change the decision (ADR 0009).
 
 **So `SW-PWR-INST` is deleted.** Nothing on the instrument switches anything.
 
@@ -259,7 +260,15 @@ things the bare toggle does not have:
 
 ### Set the limit at 1.0 A, and delete the polyfuse
 
-**1.0 A, latch-off, with a programmed 50–100 ms ramp.**
+**1.0 A, latch-off, with a programmed ramp — and the ramp is the tracked
+figure `loadswitch-gate-cap`, not a number stated here.**
+
+> This line specified **50–100 ms** until 2026-09-22. It was not achievable
+> with the chosen part and had not been since the datasheet was banked; the
+> warning below said so while the specification above it went on asserting
+> it. A decision record that states a spec its own next paragraph refutes
+> has two readers: one who stops at the bold line, and one who does not.
+> The bold line now cites the figure, so it cannot drift again.
 
 > **⚠ The ramp half of that specification is not achievable with the chosen
 > part, 2026-09-21.** `164112fc.pdf` is now banked
@@ -268,7 +277,7 @@ things the bare toggle does not have:
 > guide. That is a **4:1** current window, and no single gate capacitor can hold
 > a ramp inside a 2:1 time window when the current that drives it varies 4:1.
 > `C-GATE` at 82 nF centres the *typical* at 98 ms, inside this spec; the
-> **guaranteed envelope is 49–197 ms** (`hardware/module/power-entry.md`).
+> **guaranteed envelope is 49–197 ms** (`hardware/module/power-entry/power-entry.md`).
 >
 > **This ADR has to choose.** Either widen the specification to **50–200 ms**,
 > which costs nothing the analysis below depends on — the 75 ms start it cites
@@ -335,11 +344,29 @@ HTSSOP with a thermal pad, ST's STEF01 is HTSSOP-14 with a pad. So:
 **LT1641-1CS8 (SO-8, 9–80 V) driving an external N-FET, with a sense resistor.**
 Note the suffix: **`-1` latches off and `-2` auto-retries**, and auto-retry into
 a persistent fault reproduces the oscillating-protection behaviour this design
-exists to avoid. LM5069MM (MSOP-10) and LTC4210 (MSOP-8) are equally valid.
+exists to avoid.
+
+> **⚠ LM5069MM and LTC4210 are NOT interchangeable with the LT1641 any more,
+> 2026-09-22 — this line used to say they were "equally valid".** That was
+> true while this was a package-policy survey and false from the moment the
+> design started taking numbers out of one datasheet. **Every constant in the
+> load switch is LT1641-specific**: `C-GATE-LOADSW` from `I_GATE` −5/−10/−20 µA
+> `[p.2]`, `C-TIMER-LOADSW` from the 3 µA/80 µA TIMER pair into a 1.233 V
+> threshold `[p.8]`, `R-FB-HI`/`R-FB-LO` from `V_FB` 0.5 V and `V_FBH` 1.313 V
+> being set by the *same* divider, `R-ILIM` from the 39/47/55 mV sense window,
+> and the 240 mA foldback floor from the 47 mV → 12 mV law `[p.5, Fig. 7 p.9]`.
+> The LTC4210 has no FB foldback pin in this form, so the fixed 0.381 ratio
+> does not exist for it; the LM5069's thresholds and timer currents are
+> different numbers entirely. **Swapping the part discards all five values and
+> silently re-opens the ramp arithmetic.** Neither alternative is banked in
+> `datasheets/MANIFEST.csv`, and this sentence was the only mention of either
+> part anywhere in the corpus.
 
 Programmable ramp rate and a programmable fault timer come with the part, which
-is what the 75 ms start above needs. **Both are now programmed**: `C-GATE` at
-82 nF and `C-TIMER` at 10 µF, sized in `hardware/module/power-entry.md` against
+is what the 75 ms start above needs. **Both are now programmed**:
+`C-GATE-LOADSW` and `C-TIMER-LOADSW` — the tracked figures
+`loadswitch-gate-cap` and `loadswitch-timer`, sized in
+`hardware/module/umbilical-load-switch/umbilical-load-switch.md` against
 the datasheet rather than against search results, with the ramp caveat above.
 The fault timer's binding case turned out to be the **hot-plug** — 47.5 ms
 entirely in current limit, against a worst-case timer of 95.6 ms — and not the

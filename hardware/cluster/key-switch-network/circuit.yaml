@@ -1,0 +1,24 @@
+# depends_on is a dependency graph with FOUR KINDS OF EDGE THAT ARE NOT
+# EQUALLY TRUSTWORTHY. circuit: edges are verified; adr:, fig: and refdes:
+# are seeded from co-mention and three are known false. The rules, the
+# known-false list and what IS guaranteed for every edge are stated once, in
+# hardware/README.md, "circuit.yaml and its depends_on edges". Read that
+# before adding or trusting an edge here.
+
+id: cluster/key-switch-network
+title: Key switch network — schematic
+last_reviewed: '2026-09-21'
+depends_on:
+- adr:0001
+- fig:free-bits
+- fig:key-press-time
+- fig:key-pullup-qty
+- fig:key-release-time
+- refdes:C-KEY
+- refdes:J-CHAIN
+- refdes:R-KEY-PU
+- refdes:R-KEY-SER
+- refdes:SW-THUMB
+- circuit:cluster/key-marker-and-bits
+- circuit:cluster/key-register
+- circuit:interfaces/key-chain-loom

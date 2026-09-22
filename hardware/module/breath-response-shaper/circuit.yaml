@@ -1,0 +1,26 @@
+# depends_on is a dependency graph with FOUR KINDS OF EDGE THAT ARE NOT
+# EQUALLY TRUSTWORTHY. circuit: edges are verified; adr:, fig: and refdes:
+# are seeded from co-mention and three are known false. The rules, the
+# known-false list and what IS guaranteed for every edge are stated once, in
+# hardware/README.md, "circuit.yaml and its depends_on edges". Read that
+# before adding or trusting an edge here.
+
+id: module/breath-response-shaper
+title: §4 Response control — `POT-RESP`, log ← linear → exp
+last_reviewed: '2026-09-21'
+depends_on:
+- fig:breath-working-point
+- fig:dig-gnd-topology
+- fig:inamp-full-scale
+- fig:panel-height-budget
+- fig:panel-width
+- refdes:D-RESP
+- refdes:POT-GAIN
+- refdes:POT-OFFSET
+- refdes:POT-RESP
+- refdes:R-RESP
+- refdes:U-RESP
+- circuit:module/breath-output-stage
+- circuit:module/breath-receive-stage
+- circuit:module/panel
+- circuit:module/power-entry

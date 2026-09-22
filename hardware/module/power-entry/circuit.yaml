@@ -1,0 +1,39 @@
+# depends_on is a dependency graph with FOUR KINDS OF EDGE THAT ARE NOT
+# EQUALLY TRUSTWORTHY. circuit: edges are verified; adr:, fig: and refdes:
+# are seeded from co-mention and three are known false. The rules, the
+# known-false list and what IS guaranteed for every edge are stated once, in
+# hardware/README.md, "circuit.yaml and its depends_on edges". Read that
+# before adding or trusting an edge here.
+
+id: module/power-entry
+title: Module power entry — schematic
+last_reviewed: '2026-09-21'
+depends_on:
+- adr:0003
+- adr:0004
+- adr:0005
+- adr:0006
+- fig:dac-rail
+- fig:dig-gnd-topology
+- fig:ferrite-bias-impedance
+- fig:umbilical-current
+- refdes:J-PWR-EURO
+- refdes:L-BUCK-IN
+- refdes:R-FB-HI
+- refdes:R-FB-LO
+- refdes:R-GATE-COMP
+- refdes:R-GATE-SER
+- refdes:R-ILIM
+- refdes:R-LED-PANEL
+- refdes:U-LOADSW
+- circuit:carrier/power-entry-instrument
+- circuit:interfaces/spi-link
+- circuit:module/breath-output-stage
+- circuit:module/breath-receive-stage
+- circuit:module/breath-response-shaper
+- circuit:module/dac8568
+- circuit:module/digital-and-supervision
+- circuit:module/mod-channels
+- circuit:module/panel-led
+- circuit:module/pitch-stage
+- circuit:module/umbilical-load-switch

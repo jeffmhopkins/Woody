@@ -1,0 +1,34 @@
+# depends_on is a dependency graph with FOUR KINDS OF EDGE THAT ARE NOT
+# EQUALLY TRUSTWORTHY. circuit: edges are verified; adr:, fig: and refdes:
+# are seeded from co-mention and three are known false. The rules, the
+# known-false list and what IS guaranteed for every edge are stated once, in
+# hardware/README.md, "circuit.yaml and its depends_on edges". Read that
+# before adding or trusting an edge here.
+
+id: carrier/power-entry-instrument
+title: Instrument power entry — schematic
+last_reviewed: '2026-09-21'
+depends_on:
+- adr:0005
+- adr:0013
+- fig:dig-gnd-topology
+- fig:matrix-led-current
+- fig:umbilical-current
+- fig:umbilical-pinmap
+- refdes:C-BUCK-IN
+- refdes:C-BULK-DISP
+- refdes:C-REF-OUT
+- refdes:C-STRIP-BULK
+- refdes:D-REVSHUNT
+- refdes:D-TVS-PWR
+- refdes:D-USBOR
+- refdes:HDR-DEV
+- refdes:L-BUCK-IN
+- refdes:MECH-GNDBOND
+- refdes:U-BUCK
+- circuit:carrier/breath-adc
+- circuit:carrier/breath-excitation-reference
+- circuit:carrier/display-and-service-uart
+- circuit:carrier/led-strip-drive
+- circuit:module/power-entry
+- circuit:module/umbilical-load-switch

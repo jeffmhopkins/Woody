@@ -1,0 +1,17 @@
+# depends_on is a dependency graph with FOUR KINDS OF EDGE THAT ARE NOT
+# EQUALLY TRUSTWORTHY. circuit: edges are verified; adr:, fig: and refdes:
+# are seeded from co-mention and three are known false. The rules, the
+# known-false list and what IS guaranteed for every edge are stated once, in
+# hardware/README.md, "circuit.yaml and its depends_on edges". Read that
+# before adding or trusting an edge here.
+
+id: carrier/display-and-service-uart
+title: Display loom and service UART — schematic
+last_reviewed: '2026-09-21'
+depends_on:
+- adr:0009
+- adr:0013
+- fig:dig-gnd-topology
+- refdes:HDR-DEV
+- refdes:HDR-SERVICE
+- circuit:carrier/power-entry-instrument

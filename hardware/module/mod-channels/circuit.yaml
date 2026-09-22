@@ -1,0 +1,23 @@
+# depends_on is a dependency graph with FOUR KINDS OF EDGE THAT ARE NOT
+# EQUALLY TRUSTWORTHY. circuit: edges are verified; adr:, fig: and refdes:
+# are seeded from co-mention and three are known false. The rules, the
+# known-false list and what IS guaranteed for every edge are stated once, in
+# hardware/README.md, "circuit.yaml and its depends_on edges". Read that
+# before adding or trusting an edge here.
+
+id: module/mod-channels
+title: Mod channels 1–4 — schematic
+last_reviewed: '2026-09-21'
+depends_on:
+- adr:0006
+- fig:dac-rail
+- fig:dig-gnd-topology
+- fig:mod-reference
+- refdes:C-FILT-MOD
+- refdes:D-JACK-CLAMP
+- refdes:R-MODGAIN
+- refdes:R-OPAMP-IN
+- refdes:R-OUT-PROT
+- circuit:module/dac8568
+- circuit:module/panel
+- circuit:module/power-entry

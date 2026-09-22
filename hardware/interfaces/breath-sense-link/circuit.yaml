@@ -1,0 +1,33 @@
+# depends_on is a dependency graph with FOUR KINDS OF EDGE THAT ARE NOT
+# EQUALLY TRUSTWORTHY. circuit: edges are verified; adr:, fig: and refdes:
+# are seeded from co-mention and three are known false. The rules, the
+# known-false list and what IS guaranteed for every edge are stated once, in
+# hardware/README.md, "circuit.yaml and its depends_on edges". Read that
+# before adding or trusting an edge here.
+
+id: interfaces/breath-sense-link
+title: Breath sense link — the sensor, the pair and the in-amp
+last_reviewed: '2026-09-21'
+depends_on:
+- adr:0003
+- adr:0004
+- fig:breath-working-point
+- fig:breath-zero-ref
+- fig:cref-out-node
+- fig:dac-rail
+- fig:dig-gnd-topology
+- fig:inamp-full-scale
+- fig:opa2197-output-impedance
+- fig:riso-ref-topology
+- fig:sensor-full-scale
+- fig:umbilical-pinmap
+- refdes:D-TVS-BREATH
+- refdes:R-OUT-PROT
+- refdes:R-SER-BREATH-INST
+- refdes:TRIM-BREATH-ZERO
+- refdes:U-BREATH
+- circuit:carrier/breath-adc
+- circuit:carrier/breath-excitation-reference
+- circuit:module/breath-output-stage
+- circuit:module/breath-receive-stage
+- circuit:module/link-supervision

@@ -206,8 +206,17 @@ and if the selected value lands badly you find out at E7 with a meter, on a
 board with four screws in it.
 
 **The 74AHCT125 stays on the bus +5 V rail.** Its job is to get 3.3 V logic over
-the DAC's 0.7 × AVDD input threshold — 3.65 V at AVDD = 5.21 V. An AHCT gate on
-a rail sagging to 4.75 V still drives 4.6 V, with a volt of margin. Leaving it
+the DAC's `V_INH` input threshold — **0.625 × AVDD = 3.26 V** at AVDD = 5.21 V.
+An AHCT gate on a rail sagging to 4.75 V still drives 4.6 V, with well over a
+volt of margin.
+
+> *This read "0.7 × AVDD — 3.65 V" until 2026-09-21, which is the WRONG ROW.
+> SBAS430E p.4 splits `V_INH` in two: `0.7 × AVDD` applies for
+> 2.7 V ≤ AVDD < 4.5 V, and `0.625 × AVDD` for 4.5 V ≤ AVDD ≤ 5.5 V. The LM317
+> rail is `dac-rail`, which is in the second band. p.53's revision history
+> records TI splitting the parameter into two rows deliberately. The
+> conclusion survives — 3.3 V CMOS still cannot drive it — but the number
+> carrying the argument was 0.39 V wrong, in the ADR that owns the link.* Leaving it
 there keeps its switching current off the DAC's supply, and it means the only
 thing hanging on the unprotected bus +5 V pin is a $0.30 buffer. A reversed or
 row-offset ribbon that puts +12 V onto that pin kills the buffer and nothing
@@ -228,7 +237,7 @@ distinction is the whole design: a difference amp's input impedance is its
 resistor network, so source-impedance mismatch caps its effective CMRR, while
 an in-amp's gigaohm inputs remove that coupling entirely and let the protection
 resistors be whatever the filter wants. Topology, values and derivation are in
-`hardware/module/breath-receive-stage.md`, which supersedes this paragraph and
+`hardware/module/breath-receive-stage/breath-receive-stage.md`, which supersedes this paragraph and
 ADR 0003's prose where they disagree.
 
 **Standard eurorack hardware elsewhere:** PJ398SM jacks, Alpha 9 mm vertical
@@ -270,12 +279,20 @@ one draws its own analog current *plus* everything the instrument consumes:
 
 That is about 15% of a modern rack supply's +12 V capacity — unremarkable, but
 it **rules out the series-resistor variant**, which is harmless at 50 mA and is
-not at 290 mA:
+not at the module's real draw:
 
-| Series R | Drop at 359 mA |
+| Series R | Drop at `umbilical-current` |
 |---|---|
-| 2.2 Ω | 0.64 V |
-| 10 Ω | 2.90 V |
+| 2.2 Ω | 0.79 V |
+| 10 Ω | 3.59 V |
+
+> **Both cells were computed at 290 mA under a header that had already been
+> corrected to 359 mA, until 2026-09-22.** `[calc]` 2.2 × 0.290 = 0.638 and
+> 10 × 0.290 = 2.90 — the old numbers exactly. The header moved and the
+> arithmetic under it did not, which is this repository's named failure with
+> the two halves one line apart. The column now names the figure instead of a
+> number, so the next change to `umbilical-current` cannot leave the cells
+> behind: recompute them from it.
 
 **So: ferrite beads, not resistors.** A 1N5817 drops roughly 0.3–0.4 V at this
 current, leaving ~11.5 V at the instrument after cable drop, against a buck that
@@ -315,11 +332,20 @@ bus +5V  ────────────────[ferrite]──[bulk]�
 diode, ferrite and bulk capacitance.** An earlier revision of this diagram
 branched *after* a shared 1N5817, and four reviewers arrived at the consequence
 by four different routes: the instrument's current flows through the same diode
-as the module's analog rail, so it modulates that diode's forward voltage by
-~80 mV. **This ADR used to call that "about 20 cents of breath-correlated pitch
-bend"; it is 0.00018 cents** (`power-entry.md`) — pitch references the DAC's
-*internal* reference, not this rail, so the path is 75 mV -> LM317 line reg ->
-39 uV on AVDD -> OPA2197 PSRR.
+as the module's analog rail, so it modulates that diode's forward voltage.
+**This ADR used to call that "about 20 cents of breath-correlated pitch
+bend"**; the modulation and what it reaches the jack as are the tracked figure
+`diode-split-rationale`, owned by `power-entry.md`, and are not restated here.
+Pitch references the DAC's *internal* reference, not this rail, which is why
+the real number is five orders of magnitude below every other term.
+
+*(Until 2026-09-21 this paragraph restated the chain itself, and every term of
+it was stale: a superseded "0.00018 cents", and with it the superseded ~80 mV,
+75 mV and 39 uV it was derived from. It cited `power-entry.md` by name while
+disagreeing with it on all four. The `V_f` modulation was re-read off the banked 1N5817
+curve and the PSRR off SBOS737C; neither correction reached here. It now cites
+the figure rather than restating it, which is the only form that cannot go
+stale again.)*
 
 **Keep both diodes anyway, on the reasons that hold**: fault isolation between
 the exported umbilical rail and the module's own analog rail, and HF isolation
@@ -479,7 +505,7 @@ the instrument in your hands will not respond to anything you do with it.
 > the link going away, and that is now uncovered: **pull the umbilical mid-note
 > and the rack holds the note until the module's toggle is flipped.** The
 > reasoning, the cost and the no-new-parts way to get the link coverage back
-> are in `hardware/module/digital-and-supervision.md`. The paragraphs below are
+> are in `hardware/module/digital-and-supervision/digital-and-supervision.md`. The paragraphs below are
 > kept because the problem they describe is still real.
 
 ~~**Assert `CLR` at the module when no valid frame has arrived for N milliseconds.**~~
@@ -732,7 +758,7 @@ pitch); stacking the pots gives 133 mm. It also found that **this ADR's own
 knobs do not fit side by side in 40.34 mm at all — 16 mm is the ceiling,
 against this ADR's claim of "16–20 mm".
 
-Then `POT-RESP` was added (see `breath-output-stage.md` §4), making three
+Then `POT-RESP` was added (see `hardware/module/breath-response-shaper/breath-response-shaper.md`), making three
 controls.
 
 **10HP is 50.50 mm**, and the win is not the width itself — it is that three
@@ -821,7 +847,8 @@ designed regardless, and it puts the load path into the board rather than the
 panel. At 10HP this is good practice rather than a structural necessity.
 
 > **Still a 1:1 paper check at M4, and now it has numbers to check against.**
-> The 97 mm above is built from `[from memory]` component envelopes — the
+> The stack above is the tracked figure `panel-height-budget`, and its
+> component envelopes are `[from memory]` — the
 > Neutrik drawing, the Thonkiconn panel dimension and the pot bushing were all
 > behind a blocked proxy through three review waves. **The layout is credible
 > and it is not verified.** Print it and lay the real parts on it.
@@ -861,7 +888,7 @@ likely to be swapped in a hurry, in the dark, from a drawer.
 - The crossover case is covered *by design*. ADR 0003 put the breath buffer on
   +12 V precisely so that a sustained +12 V fault on that line sits at the rail
   rather than above it, and the instrument-side 1 kΩ plus the module-side 10 kΩ
-  and BAV99 bound the rest (`hardware/module/breath-receive-stage.md`).
+  and BAV99 bound the rest (`hardware/module/breath-receive-stage/breath-receive-stage.md`).
 - The rollover case needs **one shunt SS34 at the instrument's power entry**,
   cathode to the +12 V pin. Reversed, it conducts hard, the module's LT1641-1
   sees a short, **latches off**, and the panel LED goes out. The load switch

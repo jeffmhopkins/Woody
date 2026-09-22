@@ -50,7 +50,7 @@ Three ways to wire two runs:
 cavity at one end of the runs, and **both ends are the congested ones** — the
 display board and breath sensor at the top, the real-time board, IMU and
 umbilical connector at the bottom. Adding a signal wire across either, inside a
-bonded stack that cannot be reopened, is a liability for no benefit.
+stack that is stripped down to reach (ADR 0009), is a liability for no benefit.
 
 Two data lines cost one extra GPIO, against roughly 17 broken out and 12 needed
 on the real-time board (ADR 0007). The ESP32-S3 drives both on separate RMT
@@ -79,8 +79,9 @@ counts:
 - **Half the current** for the same light, because the power arrives at 12 V
   rather than 5 V.
 - **Backup data line.** WS2815 carries a redundant data path, so a single failed
-  LED does not kill everything downstream of it. In a bonded laminated body that
-  cannot be opened casually (ADR 0002), that matters more than it would in a
+  LED does not kill everything downstream of it. In a body that is not opened
+  casually — six fasteners, a loom and a gasket (ADR 0009) — that matters more
+  than it would in a
   serviceable build.
 
 Against: slightly less common and a little more expensive than WS2812B/SK6812.
@@ -101,7 +102,7 @@ package covers both strips.
 > **Verified 2026-09-21, and the answer is yes.** `V_IH ≥ 0.7 VDD` in a table
 > whose header declares `VDD = 4.5…5.5 V` — so **3.15 to 3.85 V**, and the
 > 74AHCT125 at 5 V clears it (Worldsemi WS2815 V1.1,
-> `datasheets/other-semi/WS2815.pdf`). The worry below was the right worry:
+> `datasheets/led/WS2815.pdf`). The worry below was the right worry:
 > reading `0.7 × VDD` with pin 2's +12 V meaning gives **8.4 V**, an impossible
 > threshold, and the datasheet does reuse the symbol for both nets. The
 > conditions line governs. The part choice stands, on a document rather than on
@@ -130,6 +131,27 @@ ferrite bead is effectively a wire at that frequency (ADR 0004).
 |---|---|---|---|
 | 30/m (25 LEDs) | 0.50 A | 0.17 A | **0.07 A** |
 | 60/m (50 LEDs) | 1.01 A | 0.34 A | **0.13 A** |
+
+> **This table is computed at ~20.2 mA per LED at full white, and that figure
+> is not the WS2815's.** `datasheets/led/WS2815.pdf` p.3 states *RGB Channel
+> Constant Current **15 mA***, i.e. **45 mA per LED** across three channels
+> — **2.23×** the number above. At 45 mA/LED the 60/m row is **2.25 A**, and
+> the "both strips full white" row below becomes roughly **27 W and ~81 K**
+> rather than 12.1 W and ~36 K.
+>
+> Note the same page's *Quiescent Current **2.1 mA*** reproduces ADR 0005's
+> 123 mA figure exactly, so the two numbers in this corpus came from
+> different sources and only the quiescent one came from the datasheet.
+>
+> **This ADR already says this**, 284 lines below, about the *matrix*: "this
+> is the wrong part's figure and it is at least 2.4× too low". The refutation
+> landed where the editing was happening and not where the reader looks —
+> which is this project's named failure mode, in the ADR that owns lighting.
+> The table is left as drawn rather than silently rewritten, because
+> `matrix-led-current` is `blocked` on a bench measurement and the strip
+> figure needs the same treatment: measured, not re-derived. **What is
+> settled is that the ~3 W clamp was sized against a load case that is 2.23×
+> understated.**
 
 ### The constraint is not the rack. It never really was.
 
@@ -365,8 +387,8 @@ hard limit rather than a setting.
 >
 > **5 mA per channel is the WS2812C's figure. 12 mA is the WS2812B family's**,
 > and both documents are already in this repo:
-> `datasheets/other-semi/WS2812C.pdf` — *"The working current of each channel is
-> 5mA"*; `datasheets/other-semi/WS2812B-2020.pdf` p.4 — *"Quiescent Current：
+> `datasheets/led/WS2812C.pdf` — *"The working current of each channel is
+> 5mA"*; `datasheets/led/WS2812B-2020.pdf` p.4 — *"Quiescent Current：
 > <0.6mA … Working Current **12mA**"*. Read by hand from both.
 >
 > | per channel | source | 64 LEDs at full white |

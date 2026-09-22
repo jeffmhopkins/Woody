@@ -8,20 +8,21 @@ thrown away.**
 
 ---
 
-## 1. The four kinds of file
+## §1. The four kinds of file
 
 | Kind | Files | Rule |
 |---|---|---|
 | **Design corpus** | `hardware/**`, `docs/decisions/**`, `docs/reference/**`, `config/**`, `firmware/**`, `README.md`, `ROADMAP.md` | Must be self-consistent. This is what `check-staleness.py` checks. |
 | **Historical record** | `docs/review/**`, `docs/log/**`, `docs/research/**` | **Never "corrected".** A 2026-09-21 review saying "8HP" is right as a record of what was true when written. Excluded from the checker by design. |
-| **Generated** | `datasheets/MANIFEST.csv` | **Edits are silently destroyed.** See §3. |
+| **Generated** | `datasheets/MANIFEST.csv`, **`hardware/bom.csv`** | **Edits are silently destroyed.** See §3 and §4. `bom.csv` joined this row on 2026-09-21 and this table did not say so for several hours. |
 | **Fragments (append-only, per author)** | `datasheets/.manifest-R*.csv` | One per research wave. **Do not edit another wave's fragment** — a `BLOCKED` row is the honest record of a gap *when it was written*. See §3 for how to close someone else's gap without touching it. |
+| **Fragments (per circuit)** | `hardware/**/bom.csv`, `hardware/unplaced.csv` | The source the BOM is generated from. Editable — this is where a part change goes. §4. |
 
 Not tracked, and gitignored: `.staleness/`, `.staleness-report.txt`, `*.tmp`.
 
 ---
 
-## 2. `tools/check-staleness.py` — the mechanical half of the one failure mode
+## §2. `tools/check-staleness.py` — the mechanical half of the one failure mode
 
 Run by a `PreToolUse` hook before every `git commit`, so forgetting it is
 visible rather than silent. It greps the corpus for values `config/figures.yaml`
@@ -67,7 +68,7 @@ found it independently hours apart.
 
 ---
 
-## 3. `datasheets/` — banked, not linked
+## §3. `datasheets/` — banked, not linked
 
 `MANIFEST.csv` has one row per artefact with a SHA-256.
 `tools/verify-datasheets.py` must pass before committing anything under
@@ -92,8 +93,10 @@ order of preference:
 2. **Put it in `hardware/bom.csv`**, if it is a fact about the *part* rather
    than about the *document*.
 3. **Add your own fragment** only if you actually fetched something. Two rows
-   for the same file is tolerated (WS2815 is banked twice under two paths, same
-   SHA) but it is not tidy.
+   for the same file is tolerated — WS2815 has one from each of two researchers,
+   both now pointing at `led/WS2815.pdf` — but it is not tidy. (It used to be
+   two rows at two *paths*; the duplicate under `mechanical/` was de-duplicated
+   by the 2026-09-21 re-filing and has a `deleted` row in the path map.)
 
 ### Closing someone else's `BLOCKED` row
 
@@ -112,22 +115,107 @@ Wave R8 established the convention, and it is in `datasheets/README.md`:
   the LT1641's mirror is a real PDF *of the LT4256*. A Diodes Inc URL found
   searching for a 1N4148W is the **MMST3906**. **Grep the extracted text for
   the part number, always.**
-- **Several key documents have no text layer at all.** Gateron's drawing, both
-  Laird bead drawings, the Neutrik outlines, the TE socket page and both toggle
-  drawings are vector CAD — `pdftotext` returns a byte or two and the
-  dimensions exist only in the picture. They were read by **rendering at
-  150 dpi and looking**. Anything that pulls a dimension out of `datasheets/`
-  programmatically will silently get nothing from these.
-- **`pdftotext` is not installed in every session.** `python3 -c "import pypdf"`
-  works and was used for every extraction in this session.
+- **Text-layer coverage is per-document *and* per-element, so measure it, do
+  not assume it.** One vendor sheet can carry fully extractable prose and fully
+  outlined dimension callouts on the same page. Measured across all 60 banked
+  PDFs, 2026-09-21:
+
+  | Extracts | Documents |
+  |---|---|
+  | **Nothing at all — 0 characters** | `connectors/NE8FDP.pdf`, `connectors/NE8MC.pdf`, `connectors/PJ301M-12.pdf` |
+  | **A title block and no more** | both Laird bead drawings (72 and 170 chars), `connectors/100SP1T2B3M2QEH.pdf` (157), `connectors/NE8MX.pdf` and `connectors/NE8MX6.pdf` (~400) |
+  | **Everything, dimensions included** | `connectors/TE-IDC-SOCKET-CATALOG-82012.pdf` (239 kB) and `connectors/NKK-SERIES-M-TOGGLE.pdf` (49 kB). **This page listed both as textless and was wrong**: `8.89`, `8.9` and `6.5` are all in their text layers |
+  | **Prose yes, drawing callouts no** | `mechanical/GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf` — 11 kB of extractable spec text, and not one occurrence of `1.20` or `14.0`, the dimensions this project reads off sheets 3 and 6 |
+
+  So **search the extracted text for the string you actually want**, not for
+  "some text". The Gateron row is the one that has cost something:
+  `ks33-geometry.md` recorded contact bounce as unpublished through four review
+  waves, and *"Bounce Time: 5msec Max.(at 16 in/sec. actuation speed)"* was
+  sitting in the extractable text of a document already in the bank.
+
+- **The companion file is often the machine-readable one.**
+  `connectors/NE8FDP.pdf` extracts zero characters. `connectors/NE8FDP.dxf`,
+  banked beside it, has a full `TEXT`/`MTEXT` layer carrying every dimension
+  the corpus derives from that connector. Its *geometry* entities are to
+  drawing scale and rotated per view, so read the text layer, not the
+  coordinates.
+
+- **For a number that lives only in a curve, extract the content-stream
+  geometry and calibrate against the gridlines.** Reading a render is the last
+  resort, not the first: a reviewer's eyeball pass on the Laird bias curves was
+  wrong by up to **60 %**, and the vector extraction corrected it.
+
+- **`pdftotext` is not installed in every session, and a bare `import pypdf`
+  raises a Rust panic in this container.** The system `cryptography` package's
+  pyo3 binding fails to load — `ModuleNotFoundError: No module named
+  '_cffi_backend'`, then `pyo3_runtime.PanicException` — and pypdf imports it
+  eagerly although it needs it only for *encrypted* PDFs. Two routes, both
+  verified against the bank on 2026-09-21:
+
+  ```python
+  # 1. pypdf, with the eager cryptography import stubbed out
+  import sys, types
+  for m in ('cryptography', 'cryptography.hazmat', 'cryptography.exceptions',
+            'cryptography.hazmat.primitives', 'cryptography.hazmat.primitives.ciphers',
+            'cryptography.hazmat.primitives.padding', 'cryptography.hazmat.backends'):
+      sys.modules[m] = types.ModuleType(m)
+  import pypdf
+  ```
+
+  ```python
+  # 2. pymupdf - pip install pymupdf. Text AND rendering, and no stub needed
+  import pymupdf
+  doc  = pymupdf.open(path)
+  text = "".join(p.get_text() for p in doc)
+  pix  = doc[5].get_pixmap(dpi=150)        # for when you do have to look
+  ```
+
+  **The stub has one real limit and the bank contains a case.** Stubbing
+  `cryptography` leaves pypdf unable to decrypt an AES-encrypted PDF, so
+  `connectors/NKK-SERIES-M-TOGGLE.pdf` raises `DependencyError: cryptography>=3.1
+  is required for AES algorithm` — on the document whose text layer carries the
+  toggle dimensions. pymupdf opens the same file with an empty password and
+  reads all 28 pages. **Prefer pymupdf**, and keep the stub for a session where
+  pypdf is the only thing installed.
 
 ---
 
-## 4. `hardware/bom.csv` — eleven columns, CRLF
+## §4. `hardware/bom.csv` — eleven columns, CRLF, **and generated**
 
 ```
 ref,category,part,manufacturer,description,package,qty,status,source,adr,notes
 ```
+
+> ### The trap: `bom.csv` is generated too, since 2026-09-21
+>
+> **`tools/merge-bom.py` rebuilds it from the per-circuit `bom.csv`
+> fragments — `merge-bom.py --check` prints the live fragment and row count
+> on every run, so no number is written here.
+> A direct edit survives until the next run of that tool and then disappears
+> without a word** — the same trap §3 documents for `MANIFEST.csv`, on the
+> **most-cited file in this repository**.
+>
+> Unlike the manifest's, this one is caught: `merge-bom.py --check`
+> regenerates into memory, byte-compares, and names the first differing line.
+> `check-staleness.py` runs it, so the commit hook fails on a hand edit.
+>
+> **Edit the fragment, then re-run the tool.** A row lives with the circuit
+> **whose page derives its value** — not where it is mentioned, not where it
+> is mounted.
+>
+> **`hardware/unplaced.csv` holds the rows that no schematic page names.**
+> That is not a dumping ground, it is a count: a part nobody has drawn. The
+> number is `wc -l` on that file against `merge-bom.py --check`'s row total;
+> this paragraph carried "50 rows of 138" until 2026-09-22, when it was 32 of
+> 140, and the §4 closing note already admitted this section had gone stale
+> once before. Two of its clusters name circuits this corpus has no page for — six
+> identical jack-protection networks drawn three times, and nineteen
+> decoupling capacitors with no home.
+>
+> *This section described `bom.csv` as the file you edit for several hours
+> after it stopped being one. Found by a cold reviewer. It is the project's
+> named failure mode, in the document that exists to record exactly this
+> trap.*
 
 - **The file is CRLF.** Python's `csv.writer` defaults to `\r\n`, but setting
   `lineterminator="\n"` rewrites every line in the file and buries a three-row
@@ -135,7 +223,9 @@ ref,category,part,manufacturer,description,package,qty,status,source,adr,notes
   `git diff --stat` before committing: a BOM edit should touch about as many
   lines as rows you meant to change.
 - **Validate column count and duplicate refdes after any edit** —
-  `check-staleness.py` does both.
+  `merge-bom.py` does both, one level up: it now catches "two circuits both
+  claim this refdes", with both file:line locations named, which the old
+  same-file check could not see.
 - The `notes` column is append-only in practice: corrections are added after a
   ` | ` with a date, and the superseded text is left in place. That is what
   makes the checker's refutation detection work, and it is why rows are long.
@@ -144,7 +234,7 @@ ref,category,part,manufacturer,description,package,qty,status,source,adr,notes
 
 ---
 
-## 5. `config/figures.yaml` — the register
+## §5. `config/figures.yaml` — the register
 
 One entry per shared quantity. The owning document states it; **every other
 document cites it by name and does not restate the number.**
@@ -174,13 +264,134 @@ says "somebody should look at this" is not trackable.
 
 ---
 
-## 6. Running the tools
+## §6. Running the tools
 
 ```
 python3 tools/check-staleness.py      # terse; detail lands in .staleness/report.txt
 python3 tools/verify-datasheets.py    # SHA-256 + BOM coverage
 python3 tools/merge-manifests.py      # REGENERATES datasheets/MANIFEST.csv
+python3 tools/merge-bom.py            # REGENERATES hardware/bom.csv
+python3 tools/merge-bom.py --check    # ...or just prove it still matches
+python3 tools/check-conservation.py <rev> <source> <dest>...   # split audit
+python3 tools/audit-notes.py          # BOM notes: live content vs accumulated history
+python3 tools/audit-notes.py --regrown  # ...rows that have turned back into logs
+python3 tools/audit-notes.py <REF>    # ...one row, classified segment by segment
+python3 tools/rewrite-paths.py        # restructure only; --apply/--verify/--invert
 ```
 
-All three are expected to pass before a commit that touches the corpus. The
-staleness hook surfaces the first one automatically.
+The first four are expected to pass before a commit that touches the corpus.
+The staleness hook surfaces `check-staleness.py` automatically — though note
+`CLAUDE.md` §2: it runs before *every* `Bash` call rather than before `git
+commit`, and it never blocks, it only tells you.
+
+`audit-notes.py` is the odd one out: it is an ADVISORY, it changes nothing,
+and it exists because the defect it looks for is one no other check can see.
+A BOM notes cell that has grown back into a dated running log is not wrong
+yet — it is wrong *later*, when one of the values in it moves and the
+supersession segments disagree. `--regrown` is what catches it while it is
+still cheap. Its threshold is HISTORY SEGMENTS, not length: the first version
+also fired above 1,200 characters and flagged twelve rows that had just been
+trimmed correctly, because a dense spec is long too (`U-DAC` is 1,891
+characters with zero history in it). A threshold that fires on correct rows is
+`CLAUDE.md` §2's own trap, and it was in the tool written to enforce the rule.
+
+### What each one refuses to do, and why it now refuses
+
+All three used to fail **open** — they reported success on a tree that had been
+broken underneath them. All three were fixed on 2026-09-21 after the failures
+were reproduced, not argued:
+
+| Tool | Used to | Now |
+|---|---|---|
+| `check-staleness.py` | `os.walk` a missing `CORPUS_DIRS` entry and print `PASS`. Moving `docs/decisions/` took the corpus from 33 files to 18 and still scored green | Asserts its own inputs exist, carries a file-count floor, and **prints the corpus file count on every run** — the count is what you check, not the verdict |
+| `check-staleness.py` | Define `check_refdes()` and never call it — for the tool's whole life | Asserts its own wiring: any `def check_*` with no call site is a failure. It found `check_refdes` on the first run |
+| `merge-manifests.py` | Write a header-only `MANIFEST.csv` from zero fragments, exit 0, destroying 98 rows of provenance | Refuses. The fragments are **dotfiles**, so `git mv datasheets/*` leaves them behind — move the directory whole |
+| `verify-datasheets.py` | Skip BOM coverage silently when `bom.csv` was absent | Refuses to print a summary it cannot stand behind |
+
+---
+
+## §7. The 2026-09-21 restructure
+
+Paths changed. **`path-map-2026-09-21.csv` in this directory maps every old
+path to its new one** — every tracked file has a row, including the ones that
+did not move, because the question a reader actually asks is "did this path
+change?" and a map of only the movers cannot answer it.
+
+> **The as-of points, because they are not the same date and the map is
+> applied at content granularity.**
+>
+> - **Old side** — the `old` column is exactly the tracked tree at `81c081d`,
+>   the commit before A0 wrote the map. 287 paths, and it is a bijection onto
+>   that tree: nothing in it is missing and nothing in it is invented.
+> - **New side** — HEAD, reconciled against `git ls-files` on 2026-09-21 after
+>   the pre-merge review wave closed. 410 rows: 405 tracked files, plus 4
+>   `deleted` and 1 duplicate destination.
+>
+> **The "every tracked file has a row" sentence above was false for most of a
+> day, and it is worth saying how.** The map was written at A0 and described
+> Phase A1 only. Phase B then created files it had never heard of and the
+> datasheet re-filing moved 22 more, which left **143 tracked files with no row
+> and 22 rows whose `new` path existed on *neither* side**. A reader asking
+> "did this path change?" about the TI 74HC165 sheet — filed under the retired
+> `other-semi/` bucket — got `unmoved`, for a file that had moved directory
+> *and* been renamed.
+>
+> **A map is not a document you keep true by being careful, it is one you
+> assert.** The check is four lines and belongs in any future restructure's
+> tooling; run it whenever files are added, because a new file is an orphan the
+> moment it is committed:
+>
+> ```
+> tracked = set(git ls-files)
+> placed  = {r.new for r in rows if r.kind != "deleted"}
+> assert not (tracked - placed)      # no tracked file without a row
+> assert not (placed - tracked)      # no row pointing at nothing
+> ```
+>
+> Both assertions hold as of this writing, and the second one is the half that
+> caught the 22: they all pointed at `datasheets/` paths that no longer
+> existed, and nothing had ever looked.
+>
+> **`datasheets/.moves.csv` is the authority for the datasheet rows**, not
+> anyone's memory of the re-filing. It records all 22 moves with a reason each,
+> and two of them **rename the file as well as the directory**: the two
+> 74HC165 sheets that were `74HC165.pdf` and `74HC165-toshiba.pdf` are now
+> `74HC165-ti-scls116e.pdf` and `74HC165-toshiba-1986-excerpt.pdf` under
+> `logic/`. A map corrected from directory names alone gets those two wrong
+> and still looks right. (Paths there are relative to `datasheets/`, the way
+> `.moves.csv` and the `MANIFEST.csv` file column write them — and the way
+> this paragraph has to write them, because `verify-datasheets.py` requires
+> every `datasheets/…` path in the corpus to resolve on disk, which a
+> deliberately retired one does not.)
+
+**The `kind` column**, which is the part a reader acts on:
+
+| `kind` | `old` | `new` | Means |
+|---|---|---|---|
+| `unmoved` | path | same path | Corpus file, path unchanged |
+| `unmoved-history` | path | same path | `docs/review/**`, `docs/log/**`, `docs/research/**`. Path unchanged, and **never corrected** (§1) |
+| `moved` | old path | new path | Rewritable: `rewrite-paths.py` reads exactly these rows |
+| `deleted` | old path | *empty* | Gone. The `note` says where its content went, if anywhere |
+| `created` | *empty* | path | Did not exist at the old-side as-of point. The `note` names the commit and, for a Phase B split, the page it was split out of |
+| `created-history` | *empty* | path | Same, under `docs/review/**` — a record written after the map, never corrected |
+
+**A `created` row's `old` is deliberately empty even when the file's text came
+out of a known parent page.** `hardware/module/panel-led/panel-led.md` was
+split out of `hardware/module/power-entry.md`, but power-entry has its own
+`moved` row, and putting a second old→new pair on the same old path would make
+`rewrite-paths.py` rewrite every reference to power-entry into a page about
+the LED. The parent belongs in `note`, where a reader uses it and a tool does
+not.
+
+**References inside `docs/review/**`, `docs/log/**` and `docs/research/**`
+point at the old paths and are deliberately not corrected** (§1, `CLAUDE.md`
+§6). There are over eight thousand of them, and history outnumbers the corpus
+roughly 24:1 on path references — so any whole-repo `sed` is wrong by that
+factor. A path is a value; rewriting one inside a dated record makes that
+record say something its author did not. Resolve them through the map.
+
+`tools/rewrite-paths.py --invert --baseline <rev>` is the proof that the move
+changed no content: it applies the inverse rewrite to every moved file and
+requires the result byte-identical to the original. A numeric diff is the weak
+form — it cannot see a permutation, a non-numeric fact, or an edit inside a
+path. Byte identity under inversion can.

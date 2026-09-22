@@ -90,6 +90,19 @@ def _norm(s):
 
 uncovered = []
 bom = os.path.join(ROOT, "hardware/bom.csv")
+
+# A MISSING bom.csv SKIPPED THE COVERAGE CHECK SILENTLY. The `if os.path.exists`
+# below was written to tolerate a tree without a BOM, but the effect is that
+# moving or renaming bom.csv turns the whole BOM-coverage half of this tool off
+# and still prints a clean summary. During a restructure that is precisely the
+# wrong default: the one moment coverage most needs checking is the moment the
+# path is most likely to be wrong. Say so loudly instead.
+if not os.path.exists(bom):
+    sys.exit(f"REFUSING TO REPORT: {os.path.relpath(bom, ROOT)} not found, so "
+             f"BOM coverage cannot be checked and a clean summary here would "
+             f"be a lie about half this tool's job. If the BOM moved, update "
+             f"this path.")
+
 if os.path.exists(bom):
     # Match against the WHOLE manifest, not just its part column: a document is
     # often banked under a different name from the BOM's ("KS-33 Red (linear)"
@@ -139,6 +152,57 @@ if uncovered:
     for u in uncovered:
         print("    " + u)
     print("  Clear each by banking the document or adding a BLOCKED row.")
+# --------------------------------------------------------------------------
+# THE CORPUS HALF. This tool checked the manifest against the disk and the
+# disk against the manifest, and never the CORPUS against either - so a
+# document citing a datasheet that was never banked, or that has since moved,
+# read as clean forever.
+#
+# It cost something real: hardware/bom.csv cited
+# datasheets/discrete-and-power/MF-PSMF010X.pdf, which has never existed (the
+# banked file carries a -polyfuse suffix). Every run of this tool passed. It
+# was found by a researcher reading, not by a check.
+#
+# Same principle as check_links, check_owners and check_sections in
+# check-staleness.py: do not hunt for spellings already known to be wrong;
+# assert that what is written now RESOLVES.
+CORPUS = ["README.md", "ROADMAP.md", "CLAUDE.md", "hardware", "config",
+          "firmware", "docs/decisions", "docs/reference"]
+PATH_RE = re.compile(r"datasheets/[A-Za-z0-9_][A-Za-z0-9_./-]*"
+                     r"\.(?:pdf|dxf|step|stp|kicad_mod|kicad_pcb|jpg|png|js|py|csv|c)"
+                     r"(?![A-Za-z0-9])")
+
+dangling, checked = [], 0
+for top in CORPUS:
+    full = os.path.join(ROOT, top)
+    walk = ([(os.path.dirname(full), None, [os.path.basename(full)])]
+            if os.path.isfile(full) else os.walk(full))
+    for dirpath, _, names in walk:
+        for n in names:
+            if not n.endswith((".md", ".csv", ".yaml", ".yml")):
+                continue
+            p = os.path.join(dirpath, n)
+            try:
+                text = open(p, encoding="utf-8").read()
+            except Exception:
+                continue
+            rel = os.path.relpath(p, ROOT)
+            # The map is the record of where things USED to be; its old-side
+            # column is supposed to name paths that no longer resolve.
+            if rel.startswith("docs/reference/path-map-"):
+                continue
+            for m in PATH_RE.finditer(text):
+                checked += 1
+                if not os.path.exists(os.path.join(ROOT, m.group(0))):
+                    line = text[:m.start()].count("\n") + 1
+                    dangling.append(f"{rel}:{line} cites {m.group(0)}, "
+                                    f"which is not on disk")
+
+if dangling:
+    print(f"  CORPUS PATHS THAT DO NOT RESOLVE ({len(dangling)}) of {checked} cited:")
+    for d in dangling:
+        print("    " + d)
+
 for b in bad:
     print("  " + b)
-sys.exit(1 if bad else 0)
+sys.exit(1 if (bad or dangling) else 0)

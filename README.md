@@ -97,22 +97,56 @@ docs/decisions/   Architecture decision records — the important stuff
 docs/log/         Dated build log
 docs/reference/   Latency budgets, fingering notes, specs
 docs/research/    Component comparisons and datasheet notes
-hardware/         BOM, schematics, PCB, split by board
+docs/review/      Cold review waves. A dated record, never corrected
+datasheets/       The actual vendor PDFs, one MANIFEST.csv row each
+hardware/         Schematics, split by CIRCUIT under each board:
+                    <board>/<circuit>/<circuit>.md  the drawing + derivations
+                                      bom.csv       fragment; generates the BOM
+                                      circuit.yaml  declared dependencies
+                                      notes.md      what it used to be
+                  interfaces/  the three circuits that cross a board boundary
+                  bom.csv      GENERATED from the fragments - do not edit
 firmware/         ESP32-S3 firmware (PlatformIO)
 mechanical/       CAD source, 2D cut exports, drawings
-config/           Key layout and routing, as data
+config/           figures.yaml - THE SHARED-FIGURE REGISTER, the single
+                  source of truth for every value used in more than one
+                  document; plus key layout and routing, as data
 tools/            Host-side utilities
+CLAUDE.md         THE WORKING RULES. Read this before editing anything -
+                  it is short, and every rule in it was paid for once
 ```
+
+*(`docs/review/` and `datasheets/` were missing from this tree until
+2026-09-21. `datasheets/` is the largest directory in the repository;
+`docs/review/` holds a wave per directory — `ls -d docs/review/*/` is the
+count, and there is deliberately no number in this sentence. Both were
+invisible in the one file a new reader opens first. The counts that used to
+sit here — "77 banked documents", "seven waves", then "nine waves" — were
+each true when written and wrong within the week, which is the whole reason
+this repository cites rather than
+restates.)*
 
 ## Where to start reading
 
 1. [ROADMAP.md](ROADMAP.md) — the three tracks and what "done" means for each
-2. [docs/decisions/](docs/decisions/) — every choice made so far, and why
-3. [docs/reference/latency-budget.md](docs/reference/latency-budget.md) — the
+2. [hardware/README.md](hardware/README.md) — **how the schematics are
+   organised**: one circuit per directory, what the four files in each are,
+   and the two rules that will bite you. Start here before opening any
+   circuit page.
+3. [docs/decisions/](docs/decisions/) — every choice made so far, and why
+4. [docs/reference/latency-budget.md](docs/reference/latency-budget.md) — the
    constraint that shapes most of the electrical design
+5. [docs/reference/repo-maintenance.md](docs/reference/repo-maintenance.md) —
+   which files are generated, which are history, what each tool owns
 
-## Licensing
+*(Entry 2 was missing until 2026-09-21. `hardware/README.md` — the page that
+explains the whole `<board>/<circuit>/` scheme the restructure exists to
+create — had **zero inbound links from anywhere in the corpus**, so the tree
+was navigable by `grep` and by already knowing where things were, which is
+the condition the restructure was meant to end.)*
 
-Not yet decided — see
-[ADR 0011](docs/decisions/0011-licensing.md). The previous project's firmware
-was GPLv3.
+*(This file carried a second "Licensing" section here saying the licence was
+"not yet decided", contradicting the "Licence" section above it, which states
+the three that were chosen. ADR 0011 has read `Accepted` since it was written
+and `LICENSE` has held the mapping the whole time. Deleted 2026-09-21 — the
+licence is stated once, above, and nowhere else.)*

@@ -1,0 +1,2 @@
+ref,category,part,manufacturer,description,package,qty,status,source,adr,notes
+PANEL,module,"2mm aluminium, 10HP x 3U (50.50 x 128.5mm)",,Eurorack front panel,n/a,1,candidate,,0004,"Laser or waterjet from DXF - SAME vendor and order as the key plate. 10HP (ADR 0004); this row said 8HP until 2026-09-22, which was the retired width. THE HEIGHT BUDGET IS THE TRACKED FIGURE panel-height-budget - do not restate it here, and note it was already over before POT-RESP was added"

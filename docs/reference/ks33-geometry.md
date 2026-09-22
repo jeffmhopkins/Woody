@@ -4,10 +4,19 @@
 an open-source 52-key split keyboard built on Gateron KS-33 switches — its
 published STL top cases and KiCad footprints, not a datasheet and not a caliper.
 
-Gateron's own datasheet and STEP model are the better source and are linked at
-the bottom. They are unreachable from this project's sandbox (the egress proxy
-rejects `gateron.com` and `gateron.co`), so this file records what could be
-obtained, and **the vendor drawing supersedes it wherever the two disagree.**
+**Both better sources have since been obtained and are banked**, so the
+third-party measurements below are kept as the working record and as a check on
+each other, and **the vendor drawing supersedes them wherever the two
+disagree**:
+
+| | |
+|---|---|
+| Vendor specification and drawing, 6 pp | `datasheets/mechanical/GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf` |
+| Solid model, five bodies | `datasheets/mechanical/GATERON-KS-33-3D.step` |
+
+*This paragraph said both were "unreachable from this project's sandbox"
+until 2026-09-21. `gateron.com` answers 200 now and the drawing is in the
+bank; the sentence outlived its own refutation by the length of this page.*
 
 ## Plate cutout: 14.0 × 14.0 mm
 
@@ -45,8 +54,10 @@ what that means for an aluminium plate.
 > **KS-33H10B050NN-Y24, Version 2, drafted 2023-01-03**, is banked at
 > `datasheets/mechanical/GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf` (6 pp).
 > Sheet 6's elevation dimensions the plate slot **1.20 ±0.05 mm**; sheet 3 §8
-> shows the same 1.20 against a hatched plate section. Read by rendering both
-> sheets — the file is vector CAD and extracts almost no text.
+> shows the same 1.20 against a hatched plate section. **Read by rendering both
+> sheets, and that was necessary for these two numbers specifically**: the
+> file's *dimension callouts* are outlined vector and yield nothing to a text
+> extractor. Its *prose* is a different matter — see the bounce figure below.
 >
 > **Every candidate this page bracketed is outside the vendor window.** 1.5 mm
 > is 0.25 mm over the upper limit, 2 mm is 0.75 mm over, and the 1.10 mm this
@@ -83,18 +94,52 @@ on the switch that can seat on a plate.
 | Stem top, MX cross | +7.05 mm |
 | Overall | 15.0 × 15.0 × **12.75 mm** |
 
-### This answers the plate-to-PCB standoff, and the answer is "there isn't one"
+### This answers the plate-to-PCB standoff, and at the settled thickness there is one
 
 The pins reach **5.10 mm** below the seat and only the last **1.9 mm** is the
 narrow blade that goes through a hole. So the PCB top has to sit within roughly
 **3.2–3.6 mm** of the seat for the blade to fill the hole and protrude enough to
-solder. A 2 mm plate leaves 1.2–1.6 mm; a 1.5 mm plate leaves 1.7–2.1 mm.
+solder. Subtract the plate `[calc]`:
 
-**Either way the board is effectively hard against the plate underside.**
-`cluster-boards.md` assumes a standoff exists and uses it for component height
-on the plate-facing side. It does not exist. The centre pole also needs a
-**⌀5.25 mm clearance hole through the plate *and* the PCB**, protruding ~2 mm
-below the board.
+| Plate | Gap between plate underside and PCB top |
+|---|---|
+| 2 mm — over the vendor window, ruled out | 1.2–1.6 mm |
+| 1.5 mm, the MX standard — over the vendor window, ruled out | 1.7–2.1 mm |
+| **1.20 mm — `plate-thickness`, settled, and this page owns it** | **2.0–2.4 mm** |
+
+> **⚠ THIS SECTION'S CONCLUSION IS REVERSED, 2026-09-21, AND SO IS THE LAYOUT
+> RULE DERIVED FROM IT.** It read *"the answer is 'there isn't one'"* and
+> *"either way the board is effectively hard against the plate underside"* —
+> but it only ever computed the gap at 1.5 mm and 2 mm, **both of which the
+> vendor drawing has since ruled out**. At the settled 1.20 mm the gap is
+> **2.0–2.4 mm**, which is a standoff, not the absence of one. The old
+> conclusion was arithmetic applied to two thicknesses that are no longer
+> candidates.
+
+**What that clearance actually buys**, taken at the tight end of the range and
+against a plate that is grounded through `MECH-GNDBOND` and is therefore a
+short waiting to happen:
+
+| Part | Height | Clearance, worst case |
+|---|---|---|
+| 0402 / 0603 chip passive | ~0.5–0.6 mm | ~1.4–1.5 mm — comfortable |
+| SOT-23 | ~1.1–1.45 mm | ~0.55–0.9 mm — workable |
+| SOIC-16 (the `74HC165`) | 1.75 mm max | **~0.25 mm — do not** |
+
+So the rule is **not** "there is no plate-facing side". It is: **chip passives
+and SOT-23 may sit on the plate-facing side; nothing with a body over about
+1.4 mm may.** That keeps the ICs on the far face, which is where they were
+going anyway, and stops forcing every decoupling capacitor across to join them.
+
+The centre pole still needs a **⌀5.25 mm clearance hole through the plate *and*
+the PCB**: its tip is at −5.70 mm against a PCB top at −3.2 to −3.6 mm, so on a
+1.6 mm board it protrudes **0.5–0.9 mm** below the underside `[calc]`.
+
+> **`hardware/cluster/cluster-boards.md` §"Three layout rules that are not
+> obvious" still carries the reversed conclusion** — *"there is no plate-facing
+> side: put every passive on the far face"*, cited to this page, and computed
+> against the same withdrawn 1.5–2 mm bracket. **That page has to follow this
+> one**; it is outside this file to change.
 
 ### And the retention clip may not be a clip
 
@@ -158,19 +203,54 @@ and this is why.
 | Total travel | 3.00 mm |
 | Pins | 3-pin, SMD LED support |
 | Materials | POM stem, PC top housing, nylon bottom |
+| **Contact bounce** | **5 ms max, at 16 in/sec actuation speed** |
+| Operating force | 50 ±15 gf |
+| Electrical rating | 12 V AC/DC max, 2 V DC min; 10 mA max, 10 µA min |
+| Contact / insulation resistance | 200 mΩ max / 100 MΩ min at 100 V DC |
+
+> **The bounce figure is vendor-published and was recorded here as
+> unobtainable for four review waves.** It is item 5 of the specification block
+> on sheet 6 of `datasheets/mechanical/GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf`,
+> verbatim: *"Bounce Time: 5msec Max.(at 16 in/sec. actuation speed)"* — and
+> it is in that sheet's **extractable text layer**, not only in the picture.
+> This page, `repo-maintenance.md` §3 and `pcb-pipeline.md` all described that
+> document as vector CAD that yields no text. It yields 11 kB of it; what it
+> does not yield is the *dimension callouts*, which is why the plate thickness
+> genuinely did have to be read off a render and the bounce time never did.
+>
+> **It is a maximum at a stated actuation speed, not a typical**, and 16 in/sec
+> (≈0.41 m/s) is a brisk keystroke. Milestone M1's job changes from "find out
+> whether there is a number" to "measure the typical at a musical actuation
+> speed, and confirm it comes in under the published maximum."
+>
+> **The consequence is in `docs/reference/latency-budget.md`**, which books the
+> release-filter window and now states what this bound does to it. ADR 0001's
+> note-on gate is two samples 250 µs apart — twenty times shorter than this
+> window — so the gate does not reject bounce and was never meant to; the
+> asymmetric release filter does.
 
 ## Not available anywhere, still needs a scope
 
-Contact bounce duration and the actuation/reset hysteresis gap. Gateron
-publishes travel and force but neither of these, for this switch or most others.
-Milestone M1.
+The actuation/reset **hysteresis gap**. Sheet 6 draws a force-travel diagram
+with an *operating point* and a *reset point* marked, and dimensions neither:
+pretravel is given (1.70 mm), the reset travel is not, so the gap cannot be
+derived from the published numbers. Milestone M1.
 
-## Sources to pull when the network allows
+## Sources — all four reached, both artefacts banked
 
 - Gateron 3D models: <https://www.gateron.com/pages/3d>
 - KS-33 Low Profile 2.0 datasheet: <https://www.gateron.co/pages/gateron-ks-33-low-profile-2-0-mechanical-switch-datasheet>
 - Product specification index: <https://www.gateron.com/pages/product-specification>
 - GrabCAD community model: <https://grabcad.com/library/gateron-low-profile-ks-33-1>
 
-Drop the STEP into `mechanical/` when obtained, and model the stack against the
-real solid rather than the numbers above.
+*This section was headed "Sources to pull when the network allows" and ended
+"drop the STEP into `mechanical/` when obtained". It has been obtained:
+`datasheets/mechanical/GATERON-KS-33-3D.step` is the solid the Z-stack section
+above is measured from, and the vendor drawing is banked beside it. The stack
+has been modelled against the real solid; the instruction is done.*
+
+**What is still third-party** and should be treated as a bracket rather than
+specification: the 14.0 mm cutout evidence from `ianmaclarty/ik`'s STL cases,
+the 1.10 mm web measured in that build, and the pin/pole positions from the two
+KiCad footprints. Each is confirmed by the vendor drawing where the drawing
+says anything, and each is the only source where it does not.

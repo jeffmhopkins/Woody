@@ -120,8 +120,10 @@ technical one.**
 | Case | 1369-01, single side port | **1351-01, dual ports, same side** |
 
 **The transfer function is identical**, and it verifies against this ADR's own
-figures: `Vout = VS × (0.1533·P + 0.04)` at VS = 5 V is 0.7665 V/kPa with 0.20 V
-at zero — the DP's published numbers exactly. Same die, same datasheet, same
+figures: `Vout = VS × (0.1533·P + 0.053)` at VS = 5 V is 0.7665 V/kPa with
+0.265 V at zero — the DP's published numbers exactly. *(This line carried
+`+ 0.04` and a 0.20 V pedestal until 2026-09-21, when the banked datasheet
+refuted both. The tracked figure is `sensor-full-scale`.)* Same die, same datasheet, same
 ratiometric behaviour, so nothing downstream changes: the REF5050 supply
 decision, the 400 mm tube, the in-amp receiver and the analog path are all
 untouched.
@@ -243,7 +245,8 @@ With that gone, three things push the sensor down:
   offset whose zero is captured once at cold startup.** Putting it next to the
   heat source is the worst available placement for both.
 - **Serviceability.** The sensor is moisture-sensitive (below), and the
-  most likely part to fail, in a body that cannot be reopened. At the bottom it
+  most likely part to fail, in a body that is costly to open (ADR 0009). At the
+  bottom it
   is at least near the one face that is not a key surface.
 
 ### The cost, and why it is affordable
@@ -349,7 +352,7 @@ ground — that part is not optional, since sensing against local ground puts th
 shared-ground offset straight back in.
 
 **But the receiver is a true instrumentation amplifier — settled as the
-INA828 (`hardware/module/breath-receive-stage.md`) — not a difference
+INA828 (`hardware/module/breath-receive-stage/breath-receive-stage.md`) — not a difference
 amplifier.** A difference amp's CMRR is set by **source-impedance
 balance, not by the chip**: TI's own datasheet states that a 10 Ω mismatch
 degrades the INA134 to ~74 dB, and this design's own protection resistor and
@@ -392,7 +395,7 @@ it always meant**, because as literally written it forbids the thing that makes
 the receiver work.
 
 Values, derivation and the full topology are in
-[the schematic](../../hardware/module/breath-receive-stage.md).
+[the schematic](../../hardware/module/breath-receive-stage/breath-receive-stage.md).
 
 Full differential signalling was considered and is not needed: it buys about
 6 dB against induced noise, which a twisted pair band-limited to 500 Hz does not
@@ -431,8 +434,11 @@ DAC settling requirement** in ADR 0006. Both of those existed only to carry a
 **The MPXV4006DP is ratiometric by specification:**
 
 ```
-Vout = VS × (0.1533 · P + 0.04)
+Vout = VS × (0.1533 · P + 0.053)
 ```
+
+*(The offset coefficient read `0.04` until 2026-09-21; it is `0.053` verbatim
+from the datasheet — `sensor-full-scale`.)*
 
 Its output is a *fraction of its own supply*. Put it on a rail that moves, and
 the breath CV moves with it — and since the output path is analog end to end,
@@ -473,7 +479,7 @@ umbilical +12V ──[REF5050 5.000V]──[OPA2197 ½ buffer]──┬── MP
 
 - **REF5050**, SOIC-8, 5.2–18 V in, 5.000 V out, with line regulation around
   5 ppm/V — so a full volt of movement on +12 V shifts the sensor supply by
-  ~25 µV `[SBOS410O, datasheets/texas-instruments/REF5050.pdf]`.
+  ~25 µV `[SBOS410O, datasheets/analog/REF5050.pdf]`.
 
   > **⚠ The accuracy this line claimed belongs to a grade `bom.csv` does not
   > order. 2026-09-21.** This read *"±0.05 % and 3 ppm/°C"*. SBOS410O Table 4-2
@@ -519,7 +525,8 @@ wants, and the worst case is the op-amp sinking a few milliamps within its
 linear output range. The umbilical's highest voltage is +12 V, so this covers
 the realistic fault rather than an arbitrary one.
 
-The buffer still has to reach 0.2 V at the bottom of the sensor's range. An
+The buffer still has to reach 0.265 V at the bottom of the sensor's range
+(`sensor-full-scale`; this paragraph said 0.2 V until 2026-09-21). An
 OPA2197 is rail-to-rail on a single +12 V supply and reaches within **125 mV**
 of ground into a 10 kΩ load, so the requirement that drove the original
 RRIO-on-5 V choice is met — but with less headroom than this page claimed.
@@ -529,8 +536,11 @@ RRIO-on-5 V choice is met — but with less headroom than this page claimed.
 > **`R_LOAD` = 10 kΩ → 95 typ / 125 max**; **`R_LOAD` = 2 kΩ → 430 typ /
 > 500 max**. An unloaded op-amp is not the case this paragraph is about.
 >
-> **At 10 kΩ the margin is 75 mV against the 0.2 V floor — real, but a third of
-> what was claimed. At 2 kΩ the 500 mV max EXCEEDS the floor outright.** This
+> **At 10 kΩ the margin is 140 mV against the 0.265 V floor** `[calc: 265 − 125]`
+> **— real, but well under the 240 mV the no-load max would have implied. At
+> 2 kΩ the 500 mV max EXCEEDS the floor outright.** *(This read "75 mV against
+> the 0.2 V floor" until 2026-09-21. It was computed off the refuted pedestal,
+> so both terms moved — `sensor-full-scale`.)* This
 > buffer drives the sensor's ~10 mA excitation, i.e. an equivalent load far
 > heavier than 2 kΩ at 5 V, so **the swing figure that applies here is not
 > obviously any of the three tabulated rows.** The conclusion is probably still
@@ -553,7 +563,8 @@ The sensor's buffered output splits two ways:
 - **To the SAR ADC** — for breath threshold and note gating, as a modulation
   source for the mod channels, for the display, and for USB MIDI.
 
-**The ADC branch needs attenuating.** The sensor reaches 4.7 V while the ADC
+**The ADC branch needs attenuating.** The sensor reaches `sensor-full-scale`
+while the ADC
 runs on 3.3 V, so that branch takes a divided copy — roughly 0.6× — to land
 inside the converter's input range. The umbilical branch stays full scale.
 Divide *after* the buffer, not before, so the divider does not load the sensor.
@@ -607,7 +618,7 @@ Firmware seeds the digital zero from an ADC capture at power-on, exactly as the
 2021 code did, and then keeps tracking it (ADR 0006). The analog path is not
 touched by firmware at all: the in-amp's `REF` pin carries a trimmer set once at
 commissioning, and the panel OFFSET knob is the performance control
-(`hardware/module/breath-receive-stage.md`).
+(`hardware/module/breath-receive-stage/breath-receive-stage.md`).
 
 **That trimmer is referenced to the LM317's 5.21 V rail, deliberately, and not
 to the DAC's `VREFOUT`.** `VREFOUT` is the DAC8568's internal reference, which

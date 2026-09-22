@@ -1,0 +1,22 @@
+# depends_on is a dependency graph with FOUR KINDS OF EDGE THAT ARE NOT
+# EQUALLY TRUSTWORTHY. circuit: edges are verified; adr:, fig: and refdes:
+# are seeded from co-mention and three are known false. The rules, the
+# known-false list and what IS guaranteed for every edge are stated once, in
+# hardware/README.md, "circuit.yaml and its depends_on edges". Read that
+# before adding or trusting an edge here.
+
+id: module/panel-led
+title: Panel LED — schematic
+last_reviewed: '2026-09-21'
+depends_on:
+- fig:dig-gnd-topology
+- fig:loadswitch-timer
+- fig:panel-height-budget
+- refdes:LED-PANEL
+- refdes:PANEL
+- refdes:R-LED-PANEL
+- refdes:U-LOADSW
+- circuit:module/link-supervision
+- circuit:module/panel
+- circuit:module/power-entry
+- circuit:module/umbilical-load-switch
