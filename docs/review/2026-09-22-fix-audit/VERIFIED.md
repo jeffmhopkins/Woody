@@ -674,3 +674,55 @@ found, in the same figure. Two slices, no contact, same silent YAML defect.
 the cheapest fix to that sentence would break the half that is right. And
 `0004:842`'s bare *"The 97 mm above"* is the **fifth** escape from an entry
 whose `escape_note` already records four.
+
+## D13 — lighting and breath. My annotation contains fabricated arithmetic, and the clamp inverts.
+
+| Claim | Check | Verdict |
+|---|---|---|
+| **`0014:141` — my own sentence — is wrong.** I wrote that the WS2815's "Quiescent Current **2.1 mA** reproduces ADR 0005's 123 mA figure **exactly**" | Multiplied it | **Confirmed. 2.1 × 50 = 105 mA, not 123. 15 % out.** And I used that claimed exactness as the *evidence* for the conclusion that "the two numbers came from different sources and only the quiescent one came from the datasheet." **The evidence was arithmetic I did not do** |
+| **The clamp's conclusion does not survive the correction.** "Realistic use" is the single-hue-40 % cell, 0.13 A = 1.56 W, reproducing the table's ~1.5 W exactly. At 15 mA/channel it is 0.30 A | Computed both | **Confirmed. 3.60 W** — so the ~3 W clamp is **0.83× realistic use, not twice it.** It would clip ordinary playing. "A sixth of the pathological case" becomes a thirteenth |
+| **`bom.csv`'s `U-BREATH` row asserts "Full scale CONFIRMED as 0.2 to 4.8V"** — the retired span, asserted as *settled*, escaping all 37 patterns on the no-space `4.8V` spelling | Read the row | **Confirmed, and it is in the same row whose `4.7V` half I fixed in that very commit.** I edited that row, corrected one retired spelling in it, and left another four fields away |
+| ADR 0014's annotation corrects **one use of four** — `:174`, `:175`, `:198`, `:257` all still run on 20.2 mA/LED, measured at **1,012 / 2,200 / 5,401 characters** from the annotation against a 300-character window | Accepted | The annotation cannot reach them even in principle |
+
+**Both datasheet claims verified**, with three caveats my annotation omitted:
+the 15 mA figure carries **no conditions at all** (the `VDD=4.5~5.5V` headers
+on that page belong to the logic rail, not pin 2's +12 V LED supply); and the
+document has **no thermal resistance, no P_D and no derating curve in all
+eight pages**, so 27 W cannot be bounded from it. 20 °C + 81 K = 101 °C
+exceeds the WS2815's own `Topt` of +85 °C *and* the breath sensor's +60 °C.
+
+**Was leaving the table as drawn right? Half right.** The reasoning was sound
+and rewriting would have been worse — but the `matrix-led-current` precedent I
+cited has **three** parts: a blocked register entry, a ROADMAP measurement
+row, and a marker at each use. The strip fix has a partial third and nothing
+else. **No register entry, no patterns, no measurement row anywhere** — E1
+cannot do it and the strips do not arrive until M6. "Annotated" carries no
+enforcement. And the precedent is itself partial: the matrix's 960 mA survives
+unmarked 197 lines above its own refutation, and `matrix-led-current` has
+`forbidden: []`.
+
+**Downstream, traced properly** — including the parts that are *not* affected,
+stated so nobody re-reports them: buck sizing, the clamp-legal rows and
+ROADMAP E1 are all upstream of the strips and unaffected. What is affected:
+the load table's latched current → ~2.8 A, **1.8× the etherCON contact
+rating on a single conductor**. And one that cannot be resolved:
+`umbilical-current` (settled, tracked, 359 mA) is probably **1.47× low at
+~528 mA**, but the `12 V direct` column is asserted with no decomposition, so
+it is uncheckable — with eight statements riding on it, including
+`ferrite-bias-impedance` and a breath-correlated pitch term that would go from
+5.7–7.2 cents to ~12.7–16.1 against a 0.42–1.35 cent budget.
+
+**`3 K/W` is not tracked, not owned, and circular**: ADR 0007 and ADR 0005
+both cite the "documented 10–20 K" as independent fact when it is the *input*
+to the 3 K/W estimate. The checker's own advisory already flags `20 K` across
+12 files.
+
+**The 140 mV re-derives** (5.000 − 4.864 = 0.136) — but it is
+typical-against-nominal, and the sensor's own ±2.46 % FSS is ±113 mV, taking
+the margin to **23 mV**, or negative without autozero. And "a 5V array's
+V_RWM" is ambiguous between two parts the repo has documented.
+
+D13 also recorded **16 legitimate `4.7`/`4.8` hits with a warning not to add a
+bare pattern**, and wrote its suggested patterns in the spelling of the files
+they must match. That is the rule being followed by a reviewer rather than
+broken by me.
