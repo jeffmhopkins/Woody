@@ -95,15 +95,35 @@ REFUTATION = re.compile(
     r"corrected|deleted|obsolete|historical|retired|deprecated|"
     r"until \d{4}|this (row|line|page|ADR|file) (said|carried|read)|"
     r"carried a superseded)\b"
-    # The dated correction marker this corpus writes by hand - "2026-09-21:
-    # 8HP -> 10HP", "*** 2026-09-21 THE PANEL HOLE IS NOT 6.0mm ***" - the
-    # arrow form that usually accompanies it, and the shouted NOT this
-    # corpus uses for a correction it wants a reader to trip over. NOT is
-    # matched case-SENSITIVELY, so ordinary prose "not" does not qualify.
-    r"|\d{4}-\d{2}-\d{2}|->|\u2192",
+    # "An earlier revision ..." is this corpus's dominant house style for an
+    # ADR refutation - 60 such openers, 41 of them with no other marker in
+    # range. The bare word `earlier` was dropped (correctly: 380
+    # non-correction uses), so the BIGRAM is restored instead.
+    r"|an earlier (revision|version|draft)"
+    r"|this (field|row|line|page|ADR|file) (said|carried|read|used to)",
     re.I)
 
-REFUTATION_SHOUT = re.compile(r"\bNOT\b")
+# WITHDRAWN 2026-09-22: a bare ISO date, a bare "->", a bare "\u2192" and a
+# case-sensitive bare NOT were all added here as correction markers, and all
+# four are ORDINARY PROSE.
+#
+# Demonstrated by injection, byte-identical but for one token:
+#     "Bench session 2026-08-14 covered the jack layout"   -> PASS
+#     "Bench session covered the jack layout"              -> FAIL
+#
+# The exempt region went from 33.9 % to 48.4 % of corpus characters; three
+# cold slices measured that independently. All 68 forbidden-pattern matches
+# in the corpus were exempted and the live list was EMPTY, which means the
+# stale-value half of this checker was reporting nothing at all.
+#
+# WIRE-LOOM is the case that settles it: the commit that added these markers
+# NAMES that row as one of the two escapes it was closing. It dropped the
+# "rather than" the row used to ride on, and the row then rode on the date
+# the same commit added, 222 characters away. Its sibling FB-IN is genuinely
+# closed - because that one was fixed by editing the TEXT rather than the
+# regex.
+#
+# A correction says it is a correction. It does not merely carry a date.
 
 
 def corpus_files():
@@ -227,9 +247,8 @@ def check_figures(files):
                     near = text[lo:hi]
                     rec = (fig["id"], fig.get("value"), bad, rel, first,
                            ctx.strip()[:100])
-                    exempt = (REFUTATION.search(near)
-                              or REFUTATION_SHOUT.search(near))
-                    (refuted if exempt else live).append(rec)
+                    (refuted if REFUTATION.search(near)
+                     else live).append(rec)
     return live, refuted, spec
 
 
@@ -257,6 +276,15 @@ def check_patterns(spec):
                 problems.append(f"[{fig['id']}] pattern {bad!r} contains a "
                                 f"newline and can never match the joined "
                                 f"stream - split it at the wrap")
+            # A PATTERN THAT CARRIES ITS OWN REFUTATION MARKER CAN NEVER FIRE
+            # ANYWHERE, because the exemption window always contains the
+            # match. Three slices found this independently; three patterns
+            # were in that state, one of them belonging to the figure
+            # CLAUDE.md names as the worst recorded case.
+            if REFUTATION.search(bad):
+                problems.append(f"[{fig['id']}] pattern {bad!r} contains a "
+                                f"refutation marker, so it exempts itself and "
+                                f"can never fire - reword it")
         if not pats and fig.get("status") == "settled":
             thin.append(f"[{fig['id']}] is settled with an EMPTY forbidden "
                         f"list - it contributes nothing to any run")
@@ -434,7 +462,13 @@ REPORT_LINES = []
 def load_circuits():
     """Every circuit.yaml in the tree, keyed by its declared id."""
     out = {}
-    for dirpath, _, names in os.walk(os.path.join(ROOT, "hardware")):
+    # followlinks=True HERE TOO. The fix went into corpus_files() and not
+    # into this walk, so a circuit reachable only through a symlink joined
+    # the corpus while the circuit count stayed put - and "a circuit
+    # reachable only through a symlinked directory" is the stated reason the
+    # change was made.
+    for dirpath, _, names in os.walk(os.path.join(ROOT, "hardware"),
+                                     followlinks=True):
         if "circuit.yaml" not in names:
             continue
         rel = os.path.relpath(os.path.join(dirpath, "circuit.yaml"), ROOT)
@@ -677,10 +711,20 @@ def check_datasheets():
         return [f"could not run verify-datasheets.py: {e}"]
     if r.returncode == 0:
         return []
-    msgs = [l.rstrip() for l in (r.stdout + "\n" + r.stderr).splitlines()
-            if l.strip() and not l.strip().startswith(("OK", "PASS"))]
-    return msgs[:40] or [f"verify-datasheets.py exited {r.returncode} and "
-                         f"said nothing parseable. Run it directly"]
+    # msgs[:40] TRUNCATED PAST THE REAL PROBLEMS. verify-datasheets.py prints
+    # its "not a failure" BOM-coverage advisory BEFORE the list of actual
+    # defects, so at 37+ uncovered parts a genuine SHA mismatch fell off the
+    # end - reproduced with a flipped byte in a banked PDF. Put the lines
+    # that name a real defect first, and keep the cap generous.
+    lines = [l.rstrip() for l in (r.stdout + "\n" + r.stderr).splitlines()
+             if l.strip() and not l.strip().startswith(("OK", "PASS"))]
+    hot = [l for l in lines if any(k in l for k in
+           ("sha256", "MISMATCH", "does not resolve", "not on disk",
+            "REFUSING", "Traceback", "Error", "problems"))]
+    rest = [l for l in lines if l not in hot]
+    msgs = hot + rest
+    return msgs[:120] or [f"verify-datasheets.py exited {r.returncode} and "
+                          f"said nothing parseable. Run it directly"]
 
 
 def check_bom_figures(spec, bom_rows):
@@ -861,8 +905,26 @@ def check_owners(spec):
                                       value) if len(t) >= 3]
         idents = [t for t in re.findall(r"\b[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+\b",
                                         value) if len(t) >= 5]
-        toks = sorted(set(idents), key=len, reverse=True)[:2] or \
-            sorted(set(nums), key=len, reverse=True)[:1]
+        # TWO DEFECTS HERE, BOTH FOUND BY A COLD AUDIT ON 2026-09-22.
+        #
+        # (1) `or` IS EXCLUSIVE. For any figure whose value contains a
+        #     hyphenated identifier the numbers were never looked at at all -
+        #     so spi-series-r was verified against "R-SPI-SER" and its value
+        #     100 was NOT CHECKED. That is a REGRESSION: the version before
+        #     this one would have caught the very case this one was written
+        #     for. The docstring above says "take EVERY distinctive token,
+        #     numeric and symbolic", and `or` is not how you take every one.
+        #
+        # (2) `sorted(..., key=len)` IS NONDETERMINISTIC. Ties break on set
+        #     iteration order, i.e. on PYTHONHASHSEED. loop-budget's tested
+        #     token came out 196, 241 or 250 at random; end to end, with a
+        #     real rule-1 violation live, ten identical runs gave 6 PASS and
+        #     4 FAIL. That is worse than a hole: it means no run of this tool
+        #     proves anything, because the next run may disagree.
+        #
+        # So: union, not alternation; and a total order on the sort key.
+        toks = (sorted(set(idents), key=lambda t: (-len(t), t))[:2]
+                + sorted(set(nums), key=lambda t: (-len(t), t))[:1])
 
         if not toks:
             weak.append(f"[{fig['id']}] value {value!r} has no token "
@@ -900,7 +962,13 @@ def check_links(files):
     # missing: broken links to bom.csv, config/figures.yaml and a .dxf all
     # passed, and so did every reference-style link. A link is a path, and a
     # path either resolves or it does not; the extension is not the point.
-    pat = re.compile(r"\]\(([^)#\s]+)(?:\s+\"[^\"]*\")?\)")
+    # THE CHARACTER CLASS EXCLUDED `#`, so the regex failed outright on any
+    # link carrying an anchor and the split("#") below was unreachable. 23 of
+    # 166 inline links were out of coverage - all 23 circuit pages'
+    # `](../../README.md#the-interfaces-table)`, i.e. the anchor added in the
+    # same batch, pointing at the one heading a restructure is most likely to
+    # move. Single-quoted titles were unmatched too.
+    pat = re.compile(r"\]\(([^)\s]+)(?:\s+[\"'][^\"']*[\"'])?\)")
     refpat = re.compile(r"^\s{0,3}\[[^\]]+\]:\s*(\S+)", re.M)
     problems = []
     for path in files:

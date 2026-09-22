@@ -175,14 +175,44 @@ def invert_targets(pairs):
 
 
 def cmd_invert(pairs, baseline):
-    """THE PROOF. invert(HEAD:new) must equal baseline:old, byte for byte."""
-    bad, checked, skipped = [], 0, 0
+    """THE PROOF, AND IT IS POINT-IN-TIME. invert(HEAD:new) must equal
+    baseline:old, byte for byte.
+
+    IT IS ONLY MEANINGFUL WHEN RUN AT THE COMMIT UNDER TEST. This proved
+    "Phase A changed no content" at the Phase A commit, where the only
+    difference between the two trees WAS the path rewrite. Every later commit
+    adds real content changes, and each one shows up here as a MISMATCH that
+    is not a defect - a regenerated BOM with rows in a new order, a corrected
+    value, a paragraph rewritten.
+
+    So a non-zero MISMATCH against an old baseline says "the tree has moved
+    since then", which is expected and uninteresting. It does NOT say the
+    rewrite was wrong. Quoting a stale run of this as current evidence is an
+    error that was made in the pre-merge recommendation, where it was cited
+    as "the strong check"; by then it had stopped deciding anything.
+    """
+    bad, checked, skipped, born = [], 0, 0, 0
     for old, new in invert_targets(pairs).items():
         try:
             was = subprocess.run(["git", "show", f"{baseline}:{old}"], cwd=ROOT,
                                  capture_output=True, check=True).stdout
         except subprocess.CalledProcessError:
-            bad.append(f"{old}: not present at baseline {baseline}")
+            # A FILE THAT DID NOT EXIST AT THE BASELINE IS NOT A MISMATCH.
+            #
+            # This check reported 112 MISMATCH on a healthy tree, and 92 of
+            # them were files created AFTER the baseline - most of them the
+            # circuit directories Phase B made, plus every report written
+            # since. The map marks them `created`, and this loop never read
+            # the kind column.
+            #
+            # That mattered beyond the noise: this is the check cited in the
+            # pre-merge recommendation as "the strong check, what makes
+            # 'Phase A changed no content' decidable", and it had quietly
+            # stopped deciding anything. An inversion proof is a statement
+            # about files that existed on BOTH sides; a file that did not
+            # exist at the baseline is outside its domain, and saying so is
+            # not the same as passing it.
+            born += 1
             continue
         p = os.path.join(ROOT, new)
         if not os.path.exists(p):
@@ -211,7 +241,8 @@ def cmd_invert(pairs, baseline):
     for b in bad:
         print("  " + b)
     print(f"invert: {checked} file(s) byte-identical under inversion, "
-          f"{skipped} hand-edited/skipped, {len(bad)} MISMATCH")
+          f"{skipped} hand-edited/skipped, {born} created after the baseline "
+          f"(outside the proof's domain), {len(bad)} MISMATCH")
     return 1 if bad else 0
 
 

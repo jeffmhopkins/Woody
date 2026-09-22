@@ -172,6 +172,23 @@ def main():
                 f"difference at line {n+1}. It is GENERATED - edit the "
                 f"fragment, not the master, then re-run this tool")
     else:
+        # PROBLEMS BEFORE THE WRITE. This wrote the master and THEN printed
+        # the problems, so a fragment with a corrupt header produced a
+        # truncated hardware/bom.csv on disk before anyone saw the error -
+        # verified: one renamed fragment header gave "wrote 137 rows" and a
+        # two-row deletion in the master.
+        #
+        # It is the exact bug e30d3d8 fixed in merge-manifests.py, whose own
+        # comment reads "by which time the damage was on the filesystem",
+        # left unfixed here - on the file CLAUDE.md calls the most-cited in
+        # the repository.
+        if problems:
+            for p in problems:
+                print("  " + p)
+            print(f"REFUSING TO WRITE: {len(problems)} problem(s) above. "
+                  f"hardware/bom.csv is unchanged. Fix the fragments and "
+                  f"re-run.")
+            return 1
         with open(MASTER, "w", encoding="utf-8", newline="") as fh:
             fh.write(text)
 
