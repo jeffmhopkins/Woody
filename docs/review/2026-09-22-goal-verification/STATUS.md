@@ -51,14 +51,19 @@ down. `forbidden` lists protect the input; nothing protects the output.
 | **G5-25** | the KS-33 footprint table duplicated and **already diverged on drill diameter** | `4641a25` — de-duplicated; the page a board is laid out from was the stale one |
 | **G5-1, G5-10** | `README.md` never mentioned `config/figures.yaml` or `CLAUDE.md` | `4641a25` — both named in the tree |
 | **G5-2, G5-3, G7-21, G7-22, G7-23, G7-24, G12-5** | four stale counts in the files that exist to explain the repo | `4641a25` — replaced with the command that produces them, not with new numbers |
+| **G6-1** | `J-DISP`, `J-LED-L`, `J-LED-R`, `C-ADC-BULK` drawn on a page and in **no BOM at all** | `bbcf6d4` — four rows added, each `open` with what decides it |
+| **G6-7** | `U-TVS-CHAIN` asked for 4 channels in SOT-23-6, which that family does not make | `749ae1b` — SOT-23-5 per the banked ordering table, read directly. The same correction had been made three rows away and never crossed |
+| **G6-3** | `R-PRECISION` `selected` with two unchosen order-code letters | `749ae1b` — `open`, both deciders named |
+| **G6-2** | `J-UMBILICAL` a product family under `candidate` | `749ae1b` — `open`; everything variant-independent is settled |
+| **G6-4** | 82 nF C0G contradicted between two rows carrying the same value | `749ae1b` — both now 1210-or-film, both open on the same unbanked question |
+| **G6-6** | `D-TVS-BREATH` SOD-323 vs SOD-523 | `749ae1b` — **recorded, not acted on**: the part is BLOCKED, the conflict is `[web]` only, and the decider is to bank the datasheet |
 
 ## Open, and named rather than quietly dropped
 
-**Ordering blockers (G6).** `J-DISP`, `J-LED-L`, `J-LED-R` and `C-ADC-BULK`
-are drawn and have **no BOM row at all**; `J-UMBILICAL` is a product family
-with `status: candidate`; `R-PRECISION` is `selected` with two unchosen
-order-code letters; and the 82 nF C0G package is contradicted between two
-rows. These stop an order today and should lead the next batch.
+**Ordering blockers (G6) — closed, see above.** All six landed. What remains
+is not a documentation question: several rows are `open` *because the
+engineering decision has not been made*, each with its decider named, which
+is the convention working rather than failing.
 
 **Page-vs-BOM disagreements (G9).** Sixteen of them — `R-FB` 40 k drawn
 against 40.2 k tabled, `C-BULK-RAIL`, `R-LED-SER`, `R-OUT-PROT`, four refdes

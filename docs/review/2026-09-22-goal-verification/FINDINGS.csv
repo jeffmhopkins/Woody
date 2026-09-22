@@ -242,7 +242,7 @@ G5-6,G5,220,,NOT ADDRESSED,G5-6 — §4's explanation of what is in unplaced.csv
 G5-7,G5,234,,NOT ADDRESSED,"G5-7 — repo-maintenance.md §7 asserts ""every tracked file has a row""; 35 tracked files have no row"
 G5-8,G5,263,,NOT ADDRESSED,G5-8 — §7's row arithmetic no longer decomposes
 G5-9,G5,278,,NOT ADDRESSED,G5-9 — README.md 's docs/reference/ description promises a file that does not exist and omits three that do
-G6-1,G6,87,,NOT ADDRESSED,"G6-1. Four parts are drawn, marked ""proposed"" on their own pages, and have no"
+G6-1,G6,87,,recorded,"G6-1. Four parts are drawn, marked ""proposed"" on their own pages, and have no"
 G6-10,G6,305,,NOT ADDRESSED,G6-10. U-REG-DAC names a part number that does not exist from the
 G6-11,G6,325,,NOT ADDRESSED,"G6-11. U-OPA-PITCH 's part field is not an order code, and it is the row"
 G6-12,G6,338,,NOT ADDRESSED,G6-12. Four rows carry a logic family where every other IC row carries an
@@ -253,7 +253,7 @@ G6-16,G6,383,,NOT ADDRESSED,"G6-16. FB-IN 's package field admits a size the nam
 G6-17,G6,399,,NOT ADDRESSED,G6-17. C-BULK-RAIL says 100 µF on +12 V; the schematic draws 47 µF on all
 G6-18,G6,427,,NOT ADDRESSED,"G6-18. C-REG-ADJ buys two capacitors; the schematic draws one, and it is not"
 G6-19,G6,446,,NOT ADDRESSED,G6-19. R-LED-SER : the BOM says 330 Ω × 2; the schematic draws 220 Ω and its
-G6-2,G6,129,,NOT ADDRESSED,"G6-2. J-UMBILICAL is a product family, not an orderable part, and one row"
+G6-2,G6,129,,recorded,"G6-2. J-UMBILICAL is a product family, not an orderable part, and one row"
 G6-20,G6,464,,NOT ADDRESSED,G6-20. R-BREATH-SUM 's feedback resistor is drawn as 40 kΩ and specified as
 G6-21,G6,471,,NOT ADDRESSED,G6-21. SW1-n + SW-THUMB order 25 switches for 21 positions.
 G6-22,G6,484,,NOT ADDRESSED,G6-22. CAP1-n is purchased and its notes say not to order it yet.
@@ -264,12 +264,12 @@ G6-26,G6,575,,NOT ADDRESSED,"G6-26. No pot order code exists anywhere, on three 
 G6-27,G6,603,,NOT ADDRESSED,G6-27. R-BREATH-SUM and R-BREATH-OFF are derived by a schematic page and
 G6-28,G6,622,,NOT ADDRESSED,G6-28. hardware/README.md:112 states a count that has moved under it.
 G6-29,G6,631,,NOT ADDRESSED,G6-29. The rest of unplaced.csv is honest. I checked all 32. The
-G6-3,G6,156,,NOT ADDRESSED,G6-3. R-PRECISION is status selected on a part number that is two
+G6-3,G6,156,,recorded,G6-3. R-PRECISION is status selected on a part number that is two
 G6-30,G6,642,,NOT ADDRESSED,G6-30. Nothing in the placed fragments belongs in unplaced.csv . The six
-G6-4,G6,169,,NOT ADDRESSED,"G6-4. 82 nF C0G/NP0 has two mutually exclusive packages in two rows, and one"
+G6-4,G6,169,,recorded,"G6-4. 82 nF C0G/NP0 has two mutually exclusive packages in two rows, and one"
 G6-5,G6,198,,NOT ADDRESSED,"G6-5. U-RESP double-counts an OPA2197 package. One physical part, two"
-G6-6,G6,237,,NOT ADDRESSED,G6-6. D-TVS-BREATH names a SOD-523 part and specifies a SOD-323 footprint.
-G6-7,G6,260,,NOT ADDRESSED,"G6-7. U-TVS-CHAIN asks for a 4-channel array in SOT-23-6, and the row three"
+G6-6,G6,237,,recorded,G6-6. D-TVS-BREATH names a SOD-523 part and specifies a SOD-323 footprint.
+G6-7,G6,260,,recorded,"G6-7. U-TVS-CHAIN asks for a 4-channel array in SOT-23-6, and the row three"
 G6-8,G6,278,,NOT ADDRESSED,G6-8. U-REF-BREATH orders the grade the corpus believes is wrong.
 G6-9,G6,294,,NOT ADDRESSED,G6-9. U-LOADSW orders the commercial temperature grade and its own notes say
 G7-1,G7,90,,recorded,"G7-1 4 body construction, ~20 files ADR 0009 retired the bonded body; ~20 live arguments still rest on it"
