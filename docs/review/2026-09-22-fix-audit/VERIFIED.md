@@ -145,3 +145,62 @@ Across 39 changed files it reported ~180 gap/head/tail/thinned hits and **not
 one survived inspection**. All four of D19's positive findings came from hand
 comparison and census scripts. The new head/tail and multiplicity checks fire
 correctly; they just found nothing here.
+
+## D2 — the two new checks, and the flagship fix reaches one figure of thirty-seven
+
+I called `check_bom_figures()` "the one that matters" in its own commit
+message. It is correct, it has no false positives, and it is very nearly
+inert.
+
+| Claim | Check | Verdict |
+|---|---|---|
+| **Coverage is 1 of 37 figures.** `REFDES_IN_VALUE` reads `fig["value"]` only; just `spi-series-r` names a BOM refdes there. **18 figures name a real BOM refdes somewhere in their entry** — in `derivation`, `note` or `owner`, fields the check never opens | Enumerated every figure's fields against the BOM's refdes set | **Confirmed exactly. 1 in `value`, 18 anywhere.** The check reaches one of the eighteen figures it is about |
+| **The documented failure reproduces green on a different part.** `C-GATE-LOADSW` 82 nF → 100 nF by the documented procedure | Ran the three steps in a `git archive HEAD` copy | **Confirmed. `merge-bom.py`: "0 problems". `check-staleness.py`: `PASS`, byte-identical to baseline** — while the register and the owner page still derive 49/98/197 ms from 82 nF |
+
+**So the exact failure I built that check to prevent still reproduces on the
+next part anyone tries.** I proved the fix against the one case that motivated
+it and never measured its reach.
+
+D2 names the seventh fail-open, and it is this: **coverage is unreported.**
+Every other check in that file carries a coverage number on purpose — the
+commit message says "a run with no coverage used to print the same PASS line
+as a healthy one" — and this one carries none. Rewording `spi-series-r`'s
+value from `"100 ohm, R-SPI-SER, qty 3"` to `"100 ohm on SCLK, MOSI and CS,
+qty 3"`, no change of meaning, takes coverage 1 → 0 **silently**.
+
+And the obvious repair does not work. D2 moved the refdes into `value` for
+the 7 settled figures that name one, leaving the BOM correct: **5 of 7
+false-fail.** `primary = max(nums, key=len)` picks `197` out of
+`"82 nF, ramp 49-197 ms (98 ms typ)"`; one `primary` is compared against
+*every* refdes, so a multi-part figure can never pass; and a count (`24`) is
+not a part value (`2k2 1%`). Each one's cheapest fix is to damage a correct
+sentence — the anti-pattern `CLAUDE.md` names.
+
+It also recommits trap 1 from `CLAUDE.md` §2 **inside the new check**:
+register `2.2 kohm` against BOM `2k2 1%` false-fails, and `37.4 ohm` versus
+`37.4R` passes only because the digits coincide.
+
+### `check_restated()` — ~50 % signal, and the holes are not where I looked
+
+| Finding | Verdict |
+|---|---|
+| Sample of 40, classified against real occurrences: **53 % real**, the rest collisions, datasheet quotes, one footprint (`1.25 mm`, rank 2, 17 files), one mathematical invariant | Plausible and carefully done |
+| **Raising the threshold does not help**: 3→233, 4→128, 5→73, 6→39, 10→10, and the ≥6 band is still ~50 % real. The noise is at the **head**, not the tail | The measurement I should have made before shipping it |
+| **The biggest hole is silent**: `if n in known` matches bare digits, not number+unit, so **93 of 146 suppressions are spurious** — `5 V` hidden in **38 files** because the digit `5` appears in the umbilical pinmap; `250 µs` hidden by a `us`/`µs` spelling mismatch | This makes the advisory itself wrong, not merely noisy |
+| **`NUM_UNIT` cannot see R-notation at all** — `10k` in 29 files, 30 distinct such tokens. Resistors are the most-changed part class here and the check's own worked example | Trap 1 for the third time in one day |
+| Parse bug: the trailing guard permits `/`, so `0.7665 V/kPa` is filed as `0.7665 V` and `3 ppm/°C` as `3 ppm`. **A rate recorded as a level** | Real |
+
+D2's verdict — keep it advisory — is right, and its reasoning is better than
+mine was: ~50 % precision with no knob that improves it means ~117 hand-written
+exemptions before the first green build, and that list is itself a derived
+document that fails **open** when a number moves.
+
+### Three claims handed to other slices
+
+- **`360 mA` in 6 corpus files against a register that says `359 mA`**
+  (`umbilical-current`, derivation 358.1 mA).
+- **`0.265 V` in 6 files** — the sensor pedestal, tracked only inside another
+  figure's free-text `derivation`, while its predecessor `0.200 V` has eleven
+  forbidden patterns against it.
+- **`120 mV`** — one of the three figures `CLAUDE.md` §3 names as corrected off
+  a banked datasheet, restated in 3 files, still not in the register.
