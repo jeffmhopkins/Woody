@@ -111,10 +111,23 @@ REFUTATION = re.compile(
 #     "Bench session 2026-08-14 covered the jack layout"   -> PASS
 #     "Bench session covered the jack layout"              -> FAIL
 #
-# The exempt region went from 33.9 % to 48.4 % of corpus characters; three
-# cold slices measured that independently. All 68 forbidden-pattern matches
-# in the corpus were exempted and the live list was EMPTY, which means the
-# stale-value half of this checker was reporting nothing at all.
+# The exempt region went from 33.9 % to 48.4 % of corpus characters. ONE
+# slice measured that pair, not three: this comment said "three cold slices
+# measured that independently" and there is no third measurement in the
+# twenty reports - D5 states the pair, D3 measured only the new side. A
+# number travelling further than its evidence, inside the fix for that exact
+# failure mode, caught by the re-verification slice (E1) that read it.
+#
+# And the pair conflates two changes, which matters to anyone repeating the
+# work: new vocabulary at the whole-line geometry is 29.3 %, old vocabulary
+# at the +-300 window is 63.2 %. THE WINDOW IS WHAT WIDENED THE SURFACE;
+# the vocabulary narrowed it at either geometry. So withdrawing markers moves
+# this number far less than the pair suggests, and a repeat run that sees it
+# barely move has NOT refuted the diagnosis.
+#
+# All 68 forbidden-pattern matches in the corpus were exempted and the live
+# list was EMPTY, which means the stale-value half of this checker was
+# reporting nothing at all.
 #
 # WIRE-LOOM is the case that settles it: the commit that added these markers
 # NAMES that row as one of the two escapes it was closing. It dropped the
