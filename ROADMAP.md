@@ -222,6 +222,70 @@ on firmware for years. All three fixes are firmware and all three are free.
 A fourth is hardware and already handled: a corrupted key-chain read becoming a
 spurious note, made countable by the marker pattern (ADR 0001).
 
+## TODO: netlists, and the drawings stop being the source of truth
+
+**Every schematic page that carries a drawing needs a machine-readable
+netlist beside it. The netlist becomes authoritative; the ASCII drawing
+becomes a representation of it.**
+
+**16 of 26 schematic pages carry a drawing** — 243 drawn lines naming 48
+reference designators. `ls hardware/**/*.md` and look for box characters, or
+re-run the count; it is not restated here.
+
+| Page | Drawn lines | Refdes named |
+|---|---|---|
+| `module/power-entry` | 29 | 10 |
+| `carrier/carrier` | 48 | 7 |
+| `module/breath-output-stage` | 16 | 7 |
+| `carrier/power-entry-instrument` | 14 | 6 |
+| `module/pitch-stage` | 12 | 4 |
+| `module/dac8568` | 14 | 3 |
+| the other ten | 96 | 11 |
+
+**Why this is the fix and not a tidy-up.** Every page-vs-BOM conflict found
+in the 2026-09-22 review exists *because a drawing is authoritative by
+accident and unreadable by any tool*:
+
+- `R-FB` drawn **40 kΩ** against 40.2 kΩ in the parts list and the BOM — and
+  40 kΩ is not an E96 value, so a layout taken off the drawing specifies a
+  part that cannot be bought.
+- Entry bulk drawn **4 × 47 µF** against a BOM row that opens "NOT 47uF on
+  every rail". A stuffing list off that drawing under-fits +12 V by half.
+- `R-LED-SER` drawn **220R** where the BOM says 330R and the prose says a
+  range.
+- An **unlabelled `N-FET`** where the BOM has `Q-LOADSW`.
+
+None of these was reachable by `check-staleness.py`, `merge-bom.py` or any
+other tool, because **a drawing is a picture**. Every one of them would have
+been a one-line diff against a netlist.
+
+**What it buys, concretely:** `merge-bom.py --check` already proves the BOM
+master matches its fragments. A netlist makes the same proof possible for the
+drawings — every refdes in a netlist must exist in `bom.csv` with a matching
+value, every net must have at least two endpoints, and the drawing can be
+checked against the netlist or regenerated from it. The whole class stops
+being something a review has to find by reading.
+
+**Open, and worth deciding before writing sixteen files:**
+
+1. **Format.** KiCad `.net` is the obvious target since the boards get laid
+   out there and it would round-trip; a small YAML of `nets:` and
+   `components:` is far easier to write by hand and to diff, and matches
+   `circuit.yaml` already sitting in each directory. **The tie-breaker is
+   whether these are authored by hand or exported from the EDA tool**, which
+   is really the question of which comes first — and that is an ADR, not a
+   preference.
+2. **Whether the drawing is then generated.** If it is, the alignment drift
+   recorded against five pages stops being possible. If it is not, a check
+   that the drawing's refdes set matches the netlist's is most of the value
+   for a fraction of the work.
+3. **Where it sits.** One `netlist.yaml` (or `.net`) per circuit directory,
+   beside the page, its `bom.csv` fragment and its `circuit.yaml`.
+
+**Not started.** Blocks nothing today; the drawings are correct as of
+2026-09-22. It is the structural answer to the defect class that has cost
+the most review time, and it should land before the first board is laid out.
+
 ## Open items blocking work
 
 | Blocks | Question | Tracked in |

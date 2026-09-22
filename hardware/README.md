@@ -12,7 +12,27 @@ sit together, so a change and its record are never in different places.
                   circuit.yaml     declared dependencies. SEEDED, NOT VERIFIED
                   notes.md         past tense only. No live value belongs here
                   sim/             an ngspice deck and its contract. No results
+                  netlist.yaml     PLANNED, see ROADMAP. Will be the source of
+                                   truth for connectivity; the drawing becomes
+                                   a representation of it
 ```
+
+> ### The drawing is not the source of truth, and until a netlist exists there isn't one
+>
+> **An ASCII drawing is a picture.** No tool in this repository can read one,
+> so nothing checks that a value in a drawing matches the BOM row for the same
+> refdes — and on 2026-09-22 a review found four that did not, including
+> `R-FB` drawn at a resistance that is not a purchasable E96 value and an
+> entry capacitor drawn at half the BOM's value on the rail that matters.
+>
+> **Where they disagree today, `bom.csv` wins.** It is generated from
+> fragments, `merge-bom.py --check` proves the master matches them, and the
+> commit hook runs it. A drawing has none of that behind it.
+>
+> **This is temporary and the fix is planned**: one netlist per circuit,
+> authoritative for connectivity, with the drawing checked against it or
+> generated from it. See the netlist TODO in `ROADMAP.md`. Until then, treat a
+> drawing as a diagram of intent and confirm every value against the row.
 
 | Directory | |
 |---|---|
