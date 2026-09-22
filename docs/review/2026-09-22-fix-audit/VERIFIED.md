@@ -108,3 +108,40 @@ carry a sixth `End` column, so a fixed column index gives three false
 mismatches; and `module/panel` is a substring of `module/panel-led`, so naive
 matching invents four edges. Both are traps for the next person who measures
 this.
+
+## D19 — conservation. MANDATORY SLICE, and the batch passes it
+
+| Claim | Check | Verdict |
+|---|---|---|
+| **Nothing was lost.** Zero distinct numeric tokens left the corpus (998 → 1,041; the *gone* set is empty). All 18 rows that left `unplaced.csv` landed. No `figures.yaml` entry or field removed. No file deleted or renamed. The history rule held — the only `docs/review/**` change is a pure `+27/−0` append | Re-measured the counts | **Confirmed.** This is the one thing the batch did cleanly, and it is the thing that most needed to be clean |
+
+**But six findings, and two are mine and concrete.**
+
+| Claim | Check | Verdict |
+|---|---|---|
+| **An ASCII drawing was corrupted by my own fix.** `breath-receive-stage.md:67` — prefixing `[D-CLAMP-BREATH] ` pushed that line's rails from columns 68/70 to **85/87** while every neighbouring line stayed at 68/70 | Measured the rail column on lines 63–71 | **Confirmed exactly.** Lines 63, 64, 65, 66, 68 all have rails at 68/70; line 67 has them at 85/87. **The clamp now connects to nothing and the sense pair has a one-row break.** I lengthened a line inside a picture and did not re-check the picture |
+| `repo-maintenance.md:204` still says `unplaced.csv` "holds the **50 rows of 138**" | Read the line; counted the files | **Confirmed. It is 32 of 139.** `hardware/README.md`'s duplicate of that same paragraph *was* rewritten in this batch; this one was not — in the document that owns `bom.csv`, four lines from a note about exactly this failure |
+| **Every count written in the batch is already wrong**: 34 vs **32** rows, 75 vs **67** units, master 138/388 vs **139/390**, "Sixteen" moved vs **18**. And `pcb-pipeline.md` still names `J-CV ×6` and `D-CLAMP-BREATH ×2` as unplaced — *this same batch placed both* | Spot-checked the row counts | **Confirmed on the counts I checked.** The numbers were written mid-batch and the batch kept moving under them |
+
+Two more worth keeping:
+
+- **The only genuinely lost content in the whole batch**: the `circuit.yaml`
+  header rationale, deleted identically from all 23 files and relocated
+  nowhere — why there is deliberately no `revision` key, why no
+  `figures_owned` ("that would put ownership in two files, which is rule 1
+  broken in the project's own metadata"), and why `depends_on` is seeded
+  rather than empty ("it fails SILENT"). It survives only in a review
+  directory, which cold reviewers may not read. **A future editor adding
+  `figures_owned:` will find no objection anywhere in the corpus.**
+- **`hardware/README.md:47` narrates a deduplication that did not happen.**
+  No circuit page ever *defined* `Dir`/`Peer`; the columns were used and
+  undefined. The new section is a real improvement — only its history is
+  invented. That matters because this corpus uses those parentheticals as its
+  record of what was wrong before.
+
+D19's method caveat is worth passing on: it treated `check-conservation.py` as
+evidence rather than proof, because that tool was itself changed in the batch.
+Across 39 changed files it reported ~180 gap/head/tail/thinned hits and **not
+one survived inspection**. All four of D19's positive findings came from hand
+comparison and census scripts. The new head/tail and multiplicity checks fire
+correctly; they just found nothing here.
