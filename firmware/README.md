@@ -23,9 +23,15 @@ negotiable without revisiting those:
 - **Display renders on the other core, on its own SPI host.** A display refresh
   must never block the output loop.
 - **Asymmetric key debounce** — fire immediately on press, filter only the
-  release. A symmetric window puts its full length into the attack. The release
-  window is set from **measured** KS-33 bounce (milestone M1), not from the
-  conventional 20 ms the 2021 firmware used.
+  release. A symmetric window puts its full length into the attack. The
+  release window is sized against `ks33-contact-bounce`, which is now a
+  tracked figure read verbatim off Gateron's own drawing for this exact part
+  — so the starting number is published, not guessed, and is deliberately not
+  restated here. M1 still measures it, because a vendor maximum at a stated
+  actuation speed is not this keyboard's bounce at a player's speed; what M1
+  changed is that it now confirms or moves a documented figure instead of
+  supplying the only one. Either way, not the conventional 20 ms the 2021
+  firmware used.
 - **Per-channel smoothing in software**, not in the analog filter. The analog
   filter is fixed; firmware knows what each channel carries.
 - **Nothing expressive touches the ESP32's internal ADC.** It is noisy and

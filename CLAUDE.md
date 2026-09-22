@@ -38,8 +38,18 @@ pipes, a version with no ` V`. Each missed by a character or two against a
 case-sensitive literal match. Eleven derived statements stayed live while the
 checker reported **zero hits**.
 
-A `PreToolUse` hook runs the checker before every `git commit` and surfaces
-the result, so forgetting step 3 is visible rather than silent.
+A `PreToolUse` hook runs the checker and surfaces the result, so forgetting
+step 3 is visible rather than silent. **It does not do what this paragraph
+used to say it does, in two ways, and both are worth knowing before you rely
+on it.** It runs before *every* `Bash` call, not before `git commit`: the
+entry carries `"matcher": "Bash"` and an `"if": "Bash(git commit *)"` that
+gates nothing, so `ls` pays a full corpus scan too — which is why a loop of
+twenty tool calls can blow the 60 s timeout. And it emits only
+`additionalContext`, never a `permissionDecision`, so **a FAIL never blocks
+a commit**; it tells you, and you are the one who has to stop. Found by the
+2026-09-22 coverage slice (E2-8), behaviourally — three earlier slices named
+the hook, one retyped its shell pipeline, and none of them tested *when* it
+fires.
 
 **Three traps in step 2, all paid for.**
 
