@@ -79,13 +79,38 @@ Use `false_positive_note`.
 refutation wording — **in `.md` files only.** In a `.csv` or a `.yaml` a
 forbidden value is a defect, full stop: no window, no vocabulary, no argument.
 
-**Why the exemption was nearly fatal.** It used to apply everywhere. It made
-48 % of the corpus unfalsifiable and hid eight live stale values through a
-twenty-agent review that reported `PASS`. Every attempt to fix it argued
-about the *window* (300 characters? the line? the cell?) or the *vocabulary*
-(is a bare date a refutation? is `| 2026-09-21:`?) — and every answer was
-wrong somewhere, including the one that withdrew four markers and then
-asserted six failures against correct text.
+**Why the exemption was nearly fatal.** It used to apply everywhere, and it
+hid eight live stale values through a twenty-agent review that reported
+`PASS`. Every attempt to fix it argued about the *window* (300 characters?
+the line? the cell?) or the *vocabulary* (is a bare date a refutation? is
+`| 2026-09-21:`?) — and every answer was wrong somewhere, including the one
+that withdrew four markers and then asserted six failures against correct
+text.
+
+> **This paragraph used to say the exemption "made 48 % of the corpus
+> unfalsifiable", and that number was wrong when it was written here.** It
+> described the old vocabulary *plus* the ±300 window — a configuration that
+> no longer existed by the time it was written down. Measured directly: the
+> prose-only rule removed **7.2 points**, 26.6 % → 19.4 %, because the trim
+> had already done most of the work. **19.4 % of the corpus is still
+> excusable, 27.5 % inside `.md`.** A number travelling further than its
+> evidence, in the rule about numbers travelling further than their evidence.
+> Corrected 2026-09-22 by the slice sent to attack this rule.
+
+**Structure counts, not just the filename.** Inside a `.md`, a **table row**
+or a **fenced block** is data wearing prose, and the window is measured on a
+line-joined stream — so it used to reach across neighbouring table rows and
+across unrelated columns of an ASCII drawing. In those two places the
+refutation must now be on the **same line**, which is what the drawing trap
+below has always demanded anyway.
+
+> Denying the exemption outright in tables and fences was tried first and
+> **withdrawn within the hour**: it reported five failures and all five were
+> legitimate corrections-in-place — "Superseded: this line carried −10.05 V",
+> and a table whose *label* column refutes both of its value columns. A check
+> that fires on correct sentences is worse than no check, and the slice that
+> recommended the rule had already verified all 24 exemptions as legitimate.
+> Scope the refutation; do not deny it.
 
 Both questions only exist **when a retired value and a live one share a
 line.** In `hardware/bom.csv` they shared a line 48 times.

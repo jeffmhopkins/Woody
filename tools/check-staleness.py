@@ -70,7 +70,17 @@ TOOL_INPUTS = ["config/figures.yaml", "hardware/bom.csv"]
 #
 # A correction reads NEXT TO the thing it corrects. This window is what makes
 # that the rule rather than the hope.
-REFUTATION_WINDOW = 300
+# 120, not 300. THE CORPUS NEVER USES MORE THAN 93 CHARACTERS.
+#
+# Measured across the whole corpus: the greatest distance between a live
+# forbidden value and the refutation excusing it is 93 characters, median
+# under 10. Sweeping the window 400 / 300 / 200 / 150 / 120 / 100 gives the
+# IDENTICAL verdict every time - 0 live, 24 exempted - so 300 was carrying
+# ~180 characters of pure slack, and slack here is reachable: an unrelated
+# refutation 250 characters away excused a live stale value in a probe, where
+# the same probe at 400 characters failed. Narrowed on evidence, at zero cost
+# today. Do not widen it without re-running that sweep.
+REFUTATION_WINDOW = 120
 
 # THE VOCABULARY IS WHAT ACTUALLY LEAKED, not the distance. Measured on the
 # live corpus: of 59 exemptions, 23 rode on a bare "was" and 4 on "old" -
@@ -230,6 +240,43 @@ def check_figures(files):
                 # Lines are joined with ONE space and their internal spacing is
                 # left alone, because several forbidden patterns are code-block
                 # spellings containing runs of spaces ("SCLK      / MOSI").
+                # *** IN STRUCTURED .md, THE REFUTATION MUST BE LOCAL. ***
+                #
+                # A markdown TABLE ROW and a FENCED BLOCK are data that happen
+                # to live in a .md. The +-window is measured on the LINE-JOINED
+                # stream, so in a table it reaches across neighbouring rows and
+                # in an ASCII drawing it reaches across unrelated columns -
+                # "superseded" in the left box excusing a stale value in the
+                # right box. An adversarial slice demonstrated both by
+                # injection.
+                #
+                # SO THE FIX IS SCOPE, NOT DENIAL, and the first attempt got
+                # that wrong: denying the exemption outright in tables and
+                # fences immediately reported 5 failures, and reading them
+                # showed ALL FIVE were legitimate corrections-in-place -
+                # "Superseded: this line carried -10.05 V", "This row said
+                # ... until 2026-09-21". That is a check firing on correct
+                # sentences, which CLAUDE.md 2 names as worse than no check,
+                # and the same slice that recommended the rule had already
+                # verified all 24 exemptions as legitimate. Withdrawn within
+                # the hour and replaced with:
+                #
+                #   table row -> the refutation must be in the SAME CELL
+                #   fenced    -> the refutation must be on the SAME LINE
+                #
+                # Both keep every real correction and both close the reach the
+                # injections exploited.
+                structural = set()
+                fenced = False
+                for i, line in enumerate(lines, 1):
+                    st = line.strip()
+                    if st.startswith("```"):
+                        fenced = not fenced
+                        structural.add(i)
+                        continue
+                    if fenced or (st.startswith("|") and st.endswith("|")):
+                        structural.add(i)
+
                 buf, lineof = [], []
                 for i, line in enumerate(lines, 1):
                     s = line.strip()
@@ -295,6 +342,23 @@ def check_figures(files):
                     # exemption in data files is the only version of this that
                     # closes that case, because it stops asking whether the
                     # prose is honest and starts requiring that there be none.
+                    # In a table row or a fence, the refutation must be on
+                    # THE SAME LINE - which is exactly what CLAUDE.md 2
+                    # already requires of an ASCII drawing ("keep the
+                    # correction and the value it corrects on one line").
+                    #
+                    # Same-CELL was tried first and is too strict: a table
+                    # whose LABEL column carries the refutation for the whole
+                    # row is a normal, clear design, and 0003:118 does exactly
+                    # that - "Output span - cover-page line, refuted by the
+                    # transfer function inside the same document" labelling
+                    # two value columns. Scoping to the cell reported both
+                    # values as live. Same-line keeps it and still removes the
+                    # reach that mattered: the +-window is measured on the
+                    # LINE-JOINED stream, so before this it spanned
+                    # neighbouring table rows and unrelated drawing lines.
+                    if first in structural:
+                        near = lines[first - 1]
                     prose = rel.endswith(".md")
                     (refuted if (prose and REFUTATION.search(near))
                      else live).append(rec)
