@@ -406,3 +406,60 @@ k-word deletion at position p hides from the shingle walk, and a 30-case
 sweep caught 30/30. Both real Phase B splits in history still pass clean.
 `--apply` is safe with the map's 123 empty-`old` rows. CRLF handling is exact,
 `ORDER` is complete and correctly ordered, and master hand-edits are caught.
+
+## D11 — the datasheets. The order code is right; the reason I gave for not renaming the file is false.
+
+| Claim | Check | Verdict |
+|---|---|---|
+| **`DAC8568ICPW` is correct** and the whole C-grade argument holds for it — 5 V full scale, clear-to-zero, the 2/5 ppm tempco, `VREFIN ≤ AVDD/2`, all verified page by page against SBAS430E. `DAC8568CIPW` occurs **0 times** in the document, `DAC8568ICPW` 12 times | Accepted; it matches my own earlier extraction | **Sound.** The fix itself is right |
+| **The recorded reason for not renaming the banked file is false.** It is stated as "renaming would mean editing another wave's fragment, which CLAUDE.md §4 forbids" | Read `merge-manifests.py`'s own header and `.moves.csv` | **Confirmed, and it is worse than a wrong reason.** `merge-manifests.py:12-13` says `.moves.csv` is "an established, documented, **sanctioned** transformation that **does not count as editing a fragment**" — and `.moves.csv:2` **already rewrites this exact file's path**. The mechanism was sanctioned, documented, and in use on that very file |
+| The false reason is in three places including the BOM | Grepped all three | **Confirmed.** `hardware/bom.csv` says "editing another wave's **manifest** fragment" — different wording, which is why my first grep missed it and D11's did not |
+| **`MANIFEST.csv:2` still asserts `DAC8568CIPW` as a live `OK` part, sorted above its own correction** | Read the first three lines | **Confirmed.** Two `OK` rows for one document disagreeing about the part name. And R9's `SUPERSEDES` keyword is invisible **by construction**: the declared-supersession rule skips any row that names a file, so an `OK` row can never be reported as superseded |
+
+**Teaching a false constraint is worse than leaving a stale value**, because a
+stale value is one defect and a false rule generates them. I wrote that
+`CLAUDE.md` §4 forbade a thing the tooling explicitly sanctions, put it in the
+generated BOM and in the manifest, and a future maintainer reading either will
+believe the bank cannot be re-filed.
+
+Ten more findings. The ones I would act on:
+
+- **`D-TVS-BREATH`'s three unsourced numbers are still unmarked** in
+  `hardware/bom.csv`. The caveat exists only in the `notes` column of a 127 kB
+  generated CSV — while `U-TVS-SPI`, **two rows away in the same file**,
+  carries its unsourced-number caveat inline correctly. Same commit, same
+  file, opposite treatment.
+- **The BLOCKED row misattributes its own case.** Of the "three numeric claims
+  about this part", the 5 V `V_RWM` is a property of the *rejected* part and
+  the 140 mV is `[calc] 5.00 − 4.86` off a tracked figure. The Nexperia
+  datasheet can settle neither. What it *would* settle — the leakage, the
+  package, and whether the part is 12 V-standoff at all — is what `blocked_on`
+  should name.
+- **"78 verified" counts rows, not documents** — 76 distinct files, and the DAC
+  PDF is now hashed and counted twice. R9 raised the headline by one while
+  banking nothing.
+- **The coverage claim tests 26 of 139 BOM rows.** `ESP32-S3-Matrix` — one of
+  the three parts the tool's own comment says were hiding in that blind spot —
+  is still skipped by the ≥6-character token filter, along with `SS34`,
+  `R-78E5.0-1.0` and `KS-33`. Zero uncovered is true today, not by
+  construction.
+- **Wiring `verify-datasheets.py` in captured the exit code and discarded the
+  report.** `check_datasheets()` returns `[]` on exit 0, and that tool exits 0
+  on a clean-but-incomplete tree by design, so its whole advisory half never
+  reaches the hook. The enforcement gain is real; the reporting gain is zero.
+- **`check_verified_against()` has zero inputs.** The union of keys across all
+  23 `circuit.yaml` is `[depends_on, id, last_reviewed, title]`. This batch
+  rewrote all 23 and added none. **The SHA-256 bank has no machine link to any
+  figure**, and `figures.yaml` has no provenance field on any of its 37.
+
+**And the provenance spot-check is the good news**: 11 figures checked against
+their cited documents, **10 fully confirmed** — including `loadswitch-timer`
+with 51 `LT1641` hits and **0** `LT4256`, which clears the mislabelled-mirror
+trap `repo-maintenance.md` warns about. `dac-rail`'s 5.00 V floor is right but
+one clause of its provenance overstates: only two rows carry the C/D 5 V
+condition, not the whole EC table.
+
+Also: **141 corpus citations of a `datasheets/` path, 0 dangling**, and 76
+manifest rows against 76 files on disk both ways. That half is genuinely
+honest — D11 had to instrument the tool's own walk to get the denominator it
+hides on success.
