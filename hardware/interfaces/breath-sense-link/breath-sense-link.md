@@ -11,7 +11,8 @@ This circuit has a directory of its own because it crosses a board boundary.
 The differential pole, the effective gain and `inamp-full-scale` with it, the
 sensor span and pedestal, the CMRR term and the `R1` power argument are all
 derived at the module end from parts fitted at the instrument end, 2 m away,
-inside a body that cannot be reopened.
+inside a body that opens only by lifting the lid, disturbing the loom and
+re-laying the gasket (ADR 0009).
 
 **Neither schematic is redrawn here.** The instrument end is drawn in
 [`carrier.md`](../../carrier/carrier.md) §2, in one connected picture that also
@@ -88,7 +89,7 @@ against ~0 Ω is what a difference amplifier's CMRR actually responds to —
 and that justification appears nowhere in the repo. Without it the link
 CMRR falls from **70.2 dB to 60.2 dB** `[calc, A2]` against an independently
 derived requirement of 58.5 dB: **1.7 dB of margin**, resting on two parts'
-tolerance, inside a body that cannot be reopened.
+tolerance, inside a body that is expensive to reopen (ADR 0009).
 
 > One correction to the receive page's own case for `R1b`: it claims the
 > part buys "fifty times" the rejection. With `R1b` fitted the real floor
@@ -178,7 +179,8 @@ I = (12 − 0.2) / 1 kΩ = 11.8 mA      P = 139 mW
 ```
 
 against an 0805's ~125 mW. **The part fails in the fault the design calls
-survivable**, and it is inside the bonded body. `bom.csv` makes exactly this
+survivable**, and it is instrument-side, behind a gasket and a loom.
+`bom.csv` makes exactly this
 argument, in full, for the module-side `R-OUT-PROT` — and it was never carried
 across to the instrument-side twin.
 

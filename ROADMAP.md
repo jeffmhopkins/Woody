@@ -204,7 +204,8 @@ came out of the analog design review specifically.
 | **Restrictor sizing by ring-down** | E2 | The tube is a distributed pipe at 214–429 Hz, below the filter corner and **independent of trap volume** — no orifice size places it, so size the plug for *damping* and measure the time constant it adds, which is a latency term the budget cannot fill in until then (ADR 0003) |
 
 **The key-chain and restrictor measurements are the time-critical ones** — both
-inform wiring and plumbing that get sealed inside a bonded body at M6.
+inform wiring and plumbing that get closed up at M6 and are awkward to reach
+afterwards.
 
 ## Failures that are silent, and what makes them loud
 

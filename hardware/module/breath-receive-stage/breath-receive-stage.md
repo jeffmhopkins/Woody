@@ -25,7 +25,9 @@ its excitation buffer and `R1`/`R1b` sit on the carrier, at the far end of the
 umbilical; the differential pole, the effective gain and the CMRR budget
 derived on this page are derived from them. Every row with a `carrier/…` peer
 is a number this page uses and does not own — and every part in one is
-instrument-side, inside a bonded body, and unretrofittable.
+instrument-side, and replacing one means opening the body (ADR 0009):
+expensive rather than impossible, which is still a reason to get it right
+first.
 
 *(That paragraph is as it was written earlier on 2026-09-21. Those derivations
 are no longer on this page: they moved to

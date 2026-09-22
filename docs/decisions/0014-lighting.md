@@ -50,7 +50,7 @@ Three ways to wire two runs:
 cavity at one end of the runs, and **both ends are the congested ones** — the
 display board and breath sensor at the top, the real-time board, IMU and
 umbilical connector at the bottom. Adding a signal wire across either, inside a
-bonded stack that cannot be reopened, is a liability for no benefit.
+stack that is stripped down to reach (ADR 0009), is a liability for no benefit.
 
 Two data lines cost one extra GPIO, against roughly 17 broken out and 12 needed
 on the real-time board (ADR 0007). The ESP32-S3 drives both on separate RMT
@@ -79,8 +79,9 @@ counts:
 - **Half the current** for the same light, because the power arrives at 12 V
   rather than 5 V.
 - **Backup data line.** WS2815 carries a redundant data path, so a single failed
-  LED does not kill everything downstream of it. In a bonded laminated body that
-  cannot be opened casually (ADR 0002), that matters more than it would in a
+  LED does not kill everything downstream of it. In a body that is not opened
+  casually — six fasteners, a loom and a gasket (ADR 0009) — that matters more
+  than it would in a
   serviceable build.
 
 Against: slightly less common and a little more expensive than WS2812B/SK6812.

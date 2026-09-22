@@ -245,7 +245,8 @@ With that gone, three things push the sensor down:
   offset whose zero is captured once at cold startup.** Putting it next to the
   heat source is the worst available placement for both.
 - **Serviceability.** The sensor is moisture-sensitive (below), and the
-  most likely part to fail, in a body that cannot be reopened. At the bottom it
+  most likely part to fail, in a body that is costly to open (ADR 0009). At the
+  bottom it
   is at least near the one face that is not a key surface.
 
 ### The cost, and why it is affordable

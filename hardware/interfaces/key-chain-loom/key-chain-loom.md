@@ -143,7 +143,7 @@ conductor count.** Whether this connector is 6-way or 10-way is a decision this
 page cannot take alone — see *Still open*.
 
 **3. `F-CHAIN`, or not.** The 3V3 conductor leaves this board, runs 265 mm
-through a bonded body next to 12 V LED power, and comes back as nothing. A
+through the body next to 12 V LED power, and comes back as nothing. A
 short on it browns out the dev board's LDO and takes the instrument down with
 no diagnosis. A 100 mA polyfuse or a 0603 fuse is two millimetres of board.
 **Proposed, not in the BOM.**

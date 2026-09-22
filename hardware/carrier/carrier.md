@@ -283,7 +283,7 @@ page and have no BOM entry yet.
 | ~~`U-KEYS`, `R-KEY-PU`, `R-KEY-SER`, `C-KEY`, `C-DECOUPLE-165`~~ | — | **Not on this board.** 4 ICs and 63 passives moved to `PCB-CLUSTER` with ADR 0001's per-cluster decision. They are still in the BOM, against the cluster boards | `[repo] 0001, bom.csv` |
 | **`R-CHAIN-SER`** ×3 | **100 Ω** | **Proposed — series at the driving end on `SCK`, `SH/LD` and `SER`. ADR 0001 deleted `R-TERM-CHAIN` because series termination is wrong for a line that drops on four boards; this is edge-rate damping at the source, which is a different job and survives that argument** | proposed |
 | **`U-TVS-CHAIN`** | **4-ch array, SOT-23-6** | **Proposed — the chain's four signals leave the board and run the body. `U-TVS-SPI` does exactly this for the umbilical's three** | proposed |
-| **`F-CHAIN`** | **100 mA polyfuse** | **Proposed — the 3V3 conductor runs 265 mm beside 12 V LED power in a bonded body, and a short on it takes the LDO and the instrument down** | proposed |
+| **`F-CHAIN`** | **100 mA polyfuse** | **Proposed — the 3V3 conductor runs 265 mm beside 12 V LED power through the body, and a short on it takes the LDO and the instrument down** | proposed |
 | `U-BUF` | OPA2197IDR | ½ reference buffer, ½ breath buffer, both on +12 V | `[repo]` |
 | `U-BREATH` + `SKT-BREATH` | MPXV4006DP, case 1351-01 | P1 to the tube, P2 open to the cavity | `[repo]`; **P1 identity open** |
 | `R-SER-BREATH-INST` | 1 kΩ | Output protection. **No series cap here** | `[repo]` |
@@ -336,7 +336,7 @@ loom's console pair, not a counting error.
 conductors occupy roughly 250 mm² including keepout on a board of ~4500 mm².
 Even single-row 2.54 mm headers would now fit — 29 × 2.54 = 74 mm of board
 edge against ~290 mm of perimeter — though IDC is still the right choice for a
-loom that is hand-terminated once and then bonded shut.
+loom that is hand-terminated once and then closed up.
 
 **Where they go is the problem.** `[calc]` 57 mm external less 2 × 4 mm acrylic
 `[repo] 0009` = **49 mm internal**. `PCB-CARRIER` at 45 mm leaves **2 mm per

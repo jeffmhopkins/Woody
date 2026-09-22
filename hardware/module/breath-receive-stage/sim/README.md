@@ -19,7 +19,7 @@ margin is thin and the parts that set it cannot be changed afterwards.
 `hardware/interfaces/breath-sense-link/breath-sense-link.md` puts the link at **60.2 dB** `[calc, A2]` against
 an independently derived requirement of **58.5 dB** — **1.7 dB**, resting on
 two parts' tolerance. Both of those parts, `R1` and `R1b`, are instrument-side,
-in the bonded body, and `bom.csv` marks them unretrofittable. So this is not a
+behind the lid, and `bom.csv` marks them unretrofittable. So this is not a
 number that gets checked at E9 and adjusted: if it is wrong, it is wrong in a
 body that does not open.
 

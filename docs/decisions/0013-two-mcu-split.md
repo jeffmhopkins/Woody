@@ -291,6 +291,7 @@ the S3 turns out to struggle with loop determinism, which is not expected at
 - Frame format and protocol versioning.
 - ~~Whether the display board is flashed over its own USB or via the real-time
   board.~~ **Settled: via the real-time board, over the UART that already joins
-  them.** Its own USB is inside a bonded body and reaches nothing, so "simpler"
+  them.** Its own USB is inside the body and reaches nothing in normal use, so
+  "simpler"
   was only true on the bench. This also removes the one case where a board with
   no external connector had to be recovered through hardware (ADR 0009).

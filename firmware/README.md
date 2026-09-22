@@ -91,8 +91,9 @@ actually measure — and never leaves the instrument.
 
 ## The instrument must stay recoverable
 
-The body is bonded. Everything here exists because a failed flash cannot be
-answered by opening the instrument.
+The body comes apart on six fasteners (ADR 0009), but answering a failed
+flash that way means lifting the lid, disturbing the loom and re-laying the
+gasket. Everything here exists so that it never has to be the answer.
 
 - **Two OTA partitions, with `CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE`.** An
   image that does not mark itself valid is rolled back by the bootloader on the
@@ -107,8 +108,10 @@ answered by opening the instrument.
   header under the service cover (ADR 0009), for watching a board that boots
   but misbehaves. **There is no hardware boot-force**: `EN` and `IO0` are not
   broken out on the ESP32-S3-Matrix, and soldering to them would end the dev
-  board's life as a swappable module. A corrupted *bootloader* therefore ends
-  the instrument — narrow, behind two mitigations, accepted.
+  board's life as a swappable module. A corrupted *bootloader* therefore means
+  opening the body to get at the board — narrow, behind two mitigations,
+  accepted. **This used to read "ends the instrument", which was true of a
+  bonded body and is not true of this one** (ADR 0009).
 - **The display board is flashed over its UART, by the real-time board.** That
   closes ADR 0013's open question and removes the one case where a board with
   no external connector of its own needed hardware recovery. It gets the same

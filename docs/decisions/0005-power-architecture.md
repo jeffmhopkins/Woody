@@ -236,7 +236,7 @@ lit, still drawing current, with its logic dead.
 
 The version that actually works is a high-side P-FET on raw +12 V, which means a
 FET, a gate network, and a fat conductor routed to a panel location inside a
-bonded body that cannot be reopened to change the decision.
+body that has to be opened up to change the decision (ADR 0009).
 
 **So `SW-PWR-INST` is deleted.** Nothing on the instrument switches anything.
 
