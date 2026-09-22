@@ -1,0 +1,111 @@
+id,slice,line,severity,verdict,headline
+D11-11,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D11-12,E3,408,,NOT ADDRESSED,"- D11-12 — the two BLOCKED rows record candidate URLs ""with no attempt"
+D11-6,E3,403,,NOT ADDRESSED,- D11-6 — BLOCKED written into the sha256 column of the two new manifest
+D11-7,E3,268,,NOT ADDRESSED,"D11-7 is itself slightly under-stated: it names the DAC PDF as the double, and"
+D11-9,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D12-1,E1|E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D12-10,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D12-2,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D12-7,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D12-9,E3|E4,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D13-1,E1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D13-2,E3,152,,NOT ADDRESSED,D13-2's recommendation — a blocked register entry plus a ROADMAP measurement
+D13-3,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D13-8,E3,411,,NOT ADDRESSED,"- D13-8 — D-TVS-BREATH 's three unsourced numbers. The gap is recorded,"
+D13-9,E1|E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D14-1,E1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D14-6,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D14-7,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D14-9,E3|E4,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D15-1,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D15-11,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D15-2,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D16-1,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D16-10,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D16-2,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D2-1,E3,636,,NOT ADDRESSED,"- D2-1 reproduces exactly, both halves — the 1-of-37 coverage and the"
+D4-18,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D4-21,E3,638,,NOT ADDRESSED,- D4.21 reproduces to the digit.
+D4-22,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D6-1,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D6-4,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D7-11,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D7-12,E4,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D7-2,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D7-3,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D7-4,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D8-1,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D8-2,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D8-6,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D8-9,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D9-1,E1|E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D9-2,E1|E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E1-0,E1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E1-1,E1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E1-10,E1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E1-11,E1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E1-12,E1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E1-13,E1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E1-14,E1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E1-15,E1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E1-16,E1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E1-17,E1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E1-18,E1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E1-19,E1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E1-2,E1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E1-20,E1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E1-21,E1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E1-3,E1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E1-4,E1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E1-5,E1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E1-6,E1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E1-7,E1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E1-8,E1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E1-9,E1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E2-1,E2,646,,recorded,"E2-1 all 23 circuit.yaml headers ""five rows"" is seven"
+E2-10,E2,654,,recorded,E2-10 tools/check-conservation.py multiplicity test exits 1 on the deduplication rule 1 requires
+E2-11,E2,636,,recorded,- E2-11 ( eight escapes ): whether the author counts
+E2-12,E2,656,,recorded,E2-12 firmware/README.md ks33-contact-bounce did not reach it
+E2-13,E2,657,,recorded,E2-13 datasheets/MANIFEST.csv 78 rows / 76 files; STATUS.md restates it as 76/76
+E2-14,E2,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E2-2,E2,631,,recorded,- E2-2 ( 27 of 49 ): the pre-merge wave's own report of that count.
+E2-3,E2,648,,recorded,"E2-3 Interfaces tables, all 23 inline links deleted; check_links cannot see it"
+E2-4,E2,649,,NOT ADDRESSED,E2-4 docs/review/2026-09-21-pre-merge-review/STATUS.md heading contradicts its table; excluded from every slice by the cold rule
+E2-5,E2,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E2-6,E2,650,,recorded,"E2-6 tools/check-staleness.py @ HEAD FAIL 8 stale, deterministic; round 2's premises are stale"
+E2-7,E2,633,,recorded,- E2-7 ( loadswitch-timer ): a decision on <date : as a refutation
+E2-8,E2,638,,recorded,- E2-8 (the hook if ): the harness's own hook schema. My evidence is
+E2-9,E2,653,,recorded,"E2-9 tools/merge-bom.py , tools/check-conservation.py docstring figures stale and unreachable by any check"
+E3-1,E3,659,,NOT ADDRESSED,- E3-1. Bank an ESP32-S3 datasheet and record V_OH . Until then neither
+E3-10,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E3-11,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E3-12,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E3-13,E3,665,,NOT ADDRESSED,- E3-13. One sentence: does the cluster PCB seat against the switch housing
+E3-14,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E3-15,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E3-16,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E3-2,E3,663,,NOT ADDRESSED,- E3-2. One current probe on one strip's +12 V feed at commanded full
+E3-3,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E3-4,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E3-5,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E3-6,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E3-7,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E3-8,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E3-9,E3,667,,NOT ADDRESSED,- E3-9 (D1-F3's 12 vs 11). Re-run the field census with the denominator
+E4-1,E4,596,high,NOT ADDRESSED,"E4-1 No finding ledger. ~250 numbered findings across twenty reports; VERIFIED.md and STATUS.md cite zero by ID, and carry 58 bolded verdicts (~25 % coverage). This is the mechanical reason ten consecutive rounds have be"
+E4-10,E4,605,low,NOT ADDRESSED,"E4-10 Two independent measurements were reconciled silently in synthesis. D3 47.9 % / D5 48.4 %, presented as one number ""measured independently""; D1 1 of 32 / D2 1 of 37 , 37 adopted without note low-medium repo D3:548,"
+E4-11,E4,606,medium,NOT ADDRESSED,"E4-11 STATUS.md :9 — ""every one of them hand-verified"" is true of reports and false of findings (58 of ~250) medium test verdict count in VERIFIED.md"
+E4-12,E4,607,low,NOT ADDRESSED,"E4-12 D17 and D16 assert counts with almost no calc — one marker each in 635 and 656 lines, against findings built on edge and row arithmetic. D19 runs four conservation proofs with zero calc low-medium test marker count"
+E4-13,E4,608,medium,NOT ADDRESSED,"E4-13 The review apparatus is 8.4× the artefact. 138,093 lines under docs/review/ against a 16,450-line corpus; four of the last five waves wrote 6–18 lines of review per line of corpus changed medium (process) test git "
+E4-14,E4,609,,NOT ADDRESSED,"E4-14 The defect class has genuinely converged even as the apparatus has not. Wave 1–3: live wrong values in the design. Wave 10: 0 of 19 at the site of an edit, 15 of 19 on a page citing the page that was fixed — (conve"
+E4-15,E4,610,medium,NOT ADDRESSED,E4-15 The fixer's uncommitted intermediate state is unauditable and the only record of it is his own note medium (structural) repo D7:72-82
+E4-2,E4,597,high,NOT ADDRESSED,E4-2 The wave's twenty test baselines stopped reproducing six minutes after round 2 opened. 566159e landed at 03:07 against a round opened 03:01 whose README says the corpus is frozen; tools/ was not named either way hig
+E4-3,E4,598,,NOT ADDRESSED,"E4-3 The fix-audit's two headline findings are confirmed by the repair. Deterministic across 8 hash seeds and 10 repeat runs, and 8 live stale values including WIRE-LOOM 's five connectors must match — the exact row D3 p"
+E4-4,E4,599,medium,NOT ADDRESSED,"E4-4 CLAUDE.md :114 says nine waves; the directory holds eleven. The sentence explaining this project's named failure commits it, for the third recorded time medium repo CLAUDE.md:114-115; test ls -d docs/review/ / → 11"
+E4-5,E4,600,low,NOT ADDRESSED,"E4-5 Five of twenty reports never declare cold status (D1, D2, D3, D4, D7) — all five tooling/register slices, all five declaring corpus-untouched instead. A template gap, not five lapses low repo heads of all twenty"
+E4-6,E4,601,high,NOT ADDRESSED,E4-6 No accidental contamination detectable. All 190 report pairs shingled at n=8; every high-overlap pair is co-quotation of a corpus source — (the rule held) test shingle intersection over fence-stripped text
+E4-7,E4,602,,NOT ADDRESSED,"E4-7 Deliberate cross-seeding paid. ~12 passed claims → 6 confirmed, 3 confirmed-and-widened, 1 refuted (D10's 360 mA , preventing a pattern that would have broken a correct page), 1 brief shown wrong (D7-12) — (keep it)"
+E4-8,E4,603,medium,NOT ADDRESSED,"E4-8 Node-indexing produced the wave's best evidence — WIRE-LOOM reached by four slices independently, check_bom_figures by three, C-GATE-LOADSW by five, the duplicate YAML key by two. The rule as written (""circuit node "
+E4-9,E4,604,medium,NOT ADDRESSED,"E4-9 Every headline is unmarked, and STATUS.md is assembled from headlines. Same shape as the wave's own worst finding — ADR 0014's ""123 mA exactly"", which was arithmetic nobody did medium test paragraph scan + sample re"
+Z0-9,E3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
