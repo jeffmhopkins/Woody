@@ -25,14 +25,14 @@ Usage:  python3 tools/extract-findings.py <wave-dir> [--check]
 """
 import csv, os, re, sys
 
-ID = re.compile(r"\b([A-Z]\d{1,2}[-.]\d{1,2})\b")
+ID = re.compile(r"\b([A-Z]\d{1,2}[-.]\d{1,3})\b")
 SEV = re.compile(r"\b(high|critical|blocking|medium|low|advisory)\b", re.I)
 
 # A finding is INTRODUCED where its id leads a line or a bold run, and merely
 # CITED anywhere else. Both matter and they are different numbers: the first
 # is what a round has to answer, the second is how much the slices reached
 # across each other.
-INTRO = re.compile(r"^\s*(?:[-*>|]\s*)*\**\[?([A-Z]\d{1,2}[-.]\d{1,2})\b")
+INTRO = re.compile(r"^\s*(?:[-*>|]\s*)*\**\[?([A-Z]\d{1,2}[-.]\d{1,3})\b")
 
 
 def harvest(path):
@@ -82,11 +82,29 @@ def main():
 
     # Has this finding been answered anywhere in the wave's own verification?
     # BY ID. Prose restatement is what let a quarter look like a whole.
-    verified = ""
+    verified_text = ""
     for name in ("VERIFIED.md", "STATUS.md"):
         p = os.path.join(wave, name)
         if os.path.exists(p):
-            verified += open(p, encoding="utf-8").read()
+            verified_text += open(p, encoding="utf-8").read()
+
+    # *** MATCH WHOLE IDS, NOT SUBSTRINGS. ***
+    #
+    # This was `r["id"] in verified_text`, a plain substring test, so "G1-1"
+    # was marked addressed because the document somewhere said "G1-11". In
+    # any wave with more than nine findings in a slice, the low-numbered
+    # findings closed themselves for free - G1-1 rode on G1-10..G1-19, G1-2
+    # on G1-20..G1-29, and so on.
+    #
+    # This is the tool built to stop findings being closed by prose rather
+    # than by id, and it was closing them by accident on the strength of a
+    # DIFFERENT finding's id. It inflated the previous wave's "addressed"
+    # count by an amount nobody could see, in the one number whose whole
+    # purpose is to be trustworthy. Found by the tools slice, 2026-09-22.
+    #
+    # The ID regex is \b-anchored at both ends, so extracting into a set and
+    # testing membership is exact where a substring search never can be.
+    verified = set(ID.findall(verified_text))
     for r in rows:
         r["verdict"] = "recorded" if r["id"] in verified else "NOT ADDRESSED"
 

@@ -46,8 +46,25 @@ LIVE = [
     (r"\bmin/max\b|\bworst case\b|\btolerance\b|\bderate", "limit"),
 ]
 # A sentence that records what the row used to say. These are what git holds.
+# *** EVERY PATTERN HERE IS MATCHED CASE-INSENSITIVELY. ***
+# They were not, and it made this tool's green worthless. segments() splits on
+# sentence boundaries, so every segment it yields STARTS WITH A CAPITAL - while
+# the markers below were written lowercase. `classify("This row said DO-214AC,
+# which is the SS14's package")` returned PLAIN: that sentence is verbatim the
+# example in CLAUDE.md 2b of what must be cut, verbatim the example in this
+# file's own docstring, it is live in hardware/bom.csv at D-REVSHUNT, and the
+# tool called it neutral prose. Ten of eighteen markers were unreachable at
+# sentence start for the same reason. Found by the tools slice, 2026-09-22;
+# "--regrown: 0 rows" had been quoted in three commit messages as evidence a
+# trim was complete.
 HIST = [
-    (r"\|\s*\d{4}-\d{2}-\d{2}", "dated supersession segment"),
+    # ANCHORED AT SEGMENT START, not on a "|" - because segments() CONSUMES the
+    # "|" it splits on, so the old pattern `\|\s*\d{4}-\d{2}-\d{2}` could
+    # never fire on anything classify() was ever handed. 12 dated markers live
+    # in the corpus, 0 classified. A segment that BEGINS with a date is a dated
+    # log entry by construction, which is narrower than the bare-date marker
+    # that check-staleness.py rightly withdrew as ordinary prose.
+    (r"^\**\s*\d{4}-\d{2}-\d{2}", "dated supersession segment"),
     (r"\bused to\b|\bthis row said\b|\bthis row carried\b|\bwas wrong\b", "self-narration"),
     (r"\bREPLACES\b|\bsuperseded\b|\bSUPERSEDED\b|\bretired\b|\bRETIRED\b", "supersession"),
     (r"\bREFUTED\b|\brefuted\b|\bwas never\b|\bno longer\b", "refutation"),
@@ -68,8 +85,8 @@ def segments(notes):
 
 
 def classify(s):
-    live = [n for p, n in LIVE if re.search(p, s)]
-    hist = [n for p, n in HIST if re.search(p, s)]
+    live = [n for p, n in LIVE if re.search(p, s, re.I)]
+    hist = [n for p, n in HIST if re.search(p, s, re.I)]
     # History wins ties: a sentence that narrates a change and also shouts an
     # imperative is usually narrating the imperative someone USED to follow.
     # Reported as BOTH so a human decides, never silently dropped.
@@ -145,4 +162,15 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    # Piping this to `head` closes the pipe under us and Python turns that into
+    # a BrokenPipeError traceback on exit - noise that looks like a tool
+    # failure and can bury the last line of real output. Exit quietly instead,
+    # the way every well-behaved CLI does.
+    try:
+        sys.exit(main())
+    except BrokenPipeError:
+        try:
+            sys.stdout.close()
+        except BrokenPipeError:
+            pass
+        os._exit(0)
