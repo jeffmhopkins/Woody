@@ -49,3 +49,62 @@ Its measurement is the thing nobody had done: **429 distinct path tokens in
 the review and log records, 6,027 occurrences, 91.4 % resolving with no
 effort and 96.1 % resolving at all.** That is the only number that says
 whether the mechanism works.
+
+## D3 — the refutation exemptions, and the worst finding of the wave so far
+
+| Claim | Check | Verdict |
+|---|---|---|
+| **All 68 forbidden-pattern matches are exempted; the live list is empty** | Ran the checker verbose | **Confirmed.** The `STALE VALUES` section does not print at all. `PASS no live stale values` currently means *nothing fired*, not *nothing matched* |
+| `WIRE-LOOM` still says "five connectors must match" against `chain-connectors` = **8**, and `0e68f25`'s own commit message names that row as one of the two escapes it was closing | Read the row; measured the marker distance | **Confirmed, and it is mine.** The pattern `"five connectors must match"` is in the register and it *matches*. The old exemption was an unrelated `rather than` at 24 characters, which that commit dropped — and the new exemption is the dated marker `DECIDED 2026-09-21:` at **222 characters**, a clause I added in the same commit. `J-CHAIN`, two rows away in the same generated file, says "EIGHT of them, not five" |
+
+**I narrowed the vocabulary and added a looser marker in one edit, named this
+exact row in the commit message, and the row survived.** Net effect on the
+case I claimed to close: zero. The other named case, `FB-IN`, *is* closed —
+because it was fixed by editing the text rather than the regex. That contrast
+is the lesson.
+
+D3's measurements, which nobody had:
+
+- **47.9 % of the corpus lies within 300 characters of some marker** — that
+  much of it is a place where no pattern can ever fire. Concentrated exactly
+  where stale values live: every `notes.md` is 85–100 %, BOM fragments 85–93 %.
+- **`REFUTATION_SHOUT` is dead weight.** Deleting it changes nothing: 68 → 68.
+  It appears in 12 windows and **only 2 are corrections**; the rest are design
+  rules like "must NOT share a diode". `DO NOT CUT THE PANEL HOLE` sits 57
+  characters from a match in `bom.csv`.
+- **The window does not bite at all.** Exempt at w=300 and exempt at
+  whole-file are both 68. The data supports **[166, 221]**: the largest
+  legitimate distance is 165, the smallest bad one is 222.
+- **Three patterns self-exempt and can never fire anywhere**, because they
+  contain a marker themselves — `VALUES NOT SET`, `0.2 → 4.8 V`,
+  `75 mV → LM317`. One belongs to `sensor-full-scale`. `check_patterns()`
+  looks only for newlines and passes all three.
+- **Something was lost after all.** The corpus's house style for an ADR
+  refutation is "**An earlier revision** …", and `earlier` was dropped: 60
+  such openers, **41 with no surviving marker within 300 characters**.
+
+## D17 — the dependency graph
+
+| Claim | Check | Verdict |
+|---|---|---|
+| The rebuild's numbers are exactly as claimed, and the stated rule is followed without exception | Re-measured | **Confirmed.** 96/48/0/0, 23 ids all matching their directories |
+| **Five of 48 edges point at `module/link-supervision`, which is NOT FITTED** | Counted the declaring circuits; read the page | **Confirmed.** Five circuits declare it; the page opens "**NOT FITTED. Nothing in this directory is on the board**", all five of its Interfaces rows begin "Not fitted", and it is the only circuit directory with no `bom.csv`. Its degree is higher than `pitch-stage` or `mod-channels`, which exist |
+| The one-source rule is violated by `in-amp output`, and commit `6645fb7` verified that invariant on the DAC's SPI nets only | Grepped both tables | **Confirmed.** `breath-sense-link.md:59` and `breath-receive-stage.md:45` both declare it `out`. I checked the rule where the defect had been reported and did not re-run it generally |
+
+**"Matches the tables" is not "verified", and the header says verified.** The
+commit message for `6645fb7` says plainly *"it was seeded from them"*;
+`hardware/README.md:12` still says `SEEDED, NOT VERIFIED`. Three wordings,
+one graph.
+
+D17 also finds the reciprocity model wrong on its own terms: `Dir` was
+present in every row and was discarded when the edges were rebuilt from
+`Peer` alone, so every edge is now a 2-cycle and **no topological order
+exists** — a bring-up order gets nothing rather than an imperfect answer. And
+the three known-false `refdes:` edges are **at least eleven**, two of them
+carrying the literal sentence "the part is not here".
+
+Its methodological note is worth keeping: the three `interfaces/**` tables
+carry a sixth `End` column, so a fixed column index gives three false
+mismatches; and `module/panel` is a substring of `module/panel-led`, so naive
+matching invents four edges. Both are traps for the next person who measures
+this.
