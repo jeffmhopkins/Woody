@@ -7,10 +7,15 @@ source, the root file is GENERATED, and a direct edit to the generated file
 survives until the next run of this tool and then disappears without a word.
 That trap is documented in repo-maintenance.md 3 because it has already
 happened once with the manifest. bom.csv is the most-cited file in the
-repository - 37 backtick references - so it is the worst possible place to
-repeat it. Hence --check, wired into check-staleness.py.
+repository by a wide margin - so it is the worst possible place to repeat
+it. (This used to say "37 backtick references". It is not 37, and it was
+not 37 for a long time, because tools/ is outside CORPUS_DIRS by
+construction and no check can reach a number written in here. A figure with
+no instrument behind it is the thing this repository exists to prevent, so
+the number is gone rather than corrected: measure it if you need it.) Hence --check, wired into check-staleness.py.
 
-THE ASSIGNMENT RULE, from D4:
+THE ASSIGNMENT RULE, from D4 of the 2026-09-21 pre-merge review (the
+2026-09-22 fix-audit wave also has a D4; this is not that one):
 
     A row lives in the fragment for the circuit WHOSE PAGE DERIVES ITS VALUE.
     Not where it is mentioned, not where it is mounted - where the number
@@ -22,8 +27,10 @@ named once in the whole corpus - on the PITCH page, as a contrast.
 
 ORDERING is a hand-written list, not a glob and not a sort. Adding a circuit
 is then a visible one-line diff in this file rather than a silent re-sort of
-138 rows, and a fragment on disk but missing from ORDER is an error rather
-than a silent omission.
+the whole master, and a fragment on disk but missing from ORDER is an error
+rather than a silent omission. (The row count lived here too and went stale
+the moment this batch moved it, for the same unreachable-by-any-check reason
+as above; --check prints the live count every time it runs.)
 
 Usage:  python3 tools/merge-bom.py [--check]
         --check  regenerate into memory and byte-compare; do not write

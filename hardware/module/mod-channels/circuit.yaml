@@ -2,10 +2,11 @@
 #
 # circuit: edges are VERIFIED. They were rebuilt, in one pass across all 23
 # circuits, from the `## Interfaces` tables after a 22-slice cold review found
-# the machine-seeded set both wrong and one-sided: five rows named
-# module/digital-and-supervision for nets that come from module/dac8568, and
-# 26 of the 50 declared edges existed at only one end (the review counted
-# 27 of 49 before the day's other edits; the count was re-measured here). Nine
+# the machine-seeded set both wrong and one-sided: SEVEN rows named
+# module/digital-and-supervision for nets that come from module/dac8568
+# (breath-sense-link:52, breath-receive-stage:46, mod-channels:26/27/28,
+# pitch-stage:19/20 - dac8568:16 is correct and is not one of them), and
+# 26 of the 50 declared edges existed at only one end. Nine
 # circuits - all of carrier/**, all of cluster/** and module/panel - declared
 # no circuit: edge at all, because their tables wrote peers as prose.
 # The graph is now 48 edges, every one declared from both ends, and no

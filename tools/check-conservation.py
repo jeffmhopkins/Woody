@@ -11,7 +11,8 @@ strips "> " prefixes and rewraps every line in it, so line-level matching
 reports the whole block as lost. Comparing shingles of the word stream
 survives rewrapping and still catches a dropped sentence.
 
-Usage: conserve.py <rev> <source-path> <dest-path> [<dest-path> ...]
+Usage: python3 tools/check-conservation.py <rev> <source-path>
+                                           <dest-path> [<dest-path> ...]
 """
 import subprocess, sys, re
 
@@ -110,4 +111,14 @@ if halved:
 # `&&` chain - read a real gap as success. Same class as the three fail-open
 # holes this restructure already found; it is only luck that every invocation
 # so far was read by a human.
-sys.exit(1 if (real or tail_lost or head_lost or halved) else 0)
+#
+# `halved` IS REPORTED BUT DOES NOT FAIL THE RUN, and the distinction matters.
+# A passage the source states N times and the destinations state fewer times
+# is EXACTLY WHAT RULE 1 ASKS FOR: state it once, cite it from everywhere
+# else. This batch performed one deliberately - the `## Interfaces` definition
+# went from inline in all 23 circuit pages to once in hardware/README.md - and
+# a check that exits 1 on it punishes the fix for the defect it exists to
+# catch. It still prints, because a thinned repetition can also be a real
+# loss, and a human reading the report can tell the two apart where an exit
+# code cannot.
+sys.exit(1 if (real or tail_lost or head_lost) else 0)

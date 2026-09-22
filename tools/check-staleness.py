@@ -310,8 +310,10 @@ def check_bom_generated():
     The trap this closes has already sprung once in this repo, on
     MANIFEST.csv: a direct edit to a generated file survives until the next
     run of its tool and then disappears without a word. bom.csv is the
-    most-cited file here - 37 backtick references - so it is the worst
-    possible place to repeat it.
+    most-cited file here by a wide margin, so it is the worst possible place
+    to repeat it. (A count of those citations used to be stated here and in
+    merge-bom.py, and both went stale: tools/ is outside CORPUS_DIRS, so
+    nothing could ever check it.)
 
     A banner comment was considered and rejected: csv.DictReader takes row 0
     as the header, and two tools already read this file.
