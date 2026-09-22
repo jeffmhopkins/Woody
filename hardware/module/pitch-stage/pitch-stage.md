@@ -129,7 +129,8 @@ converts the worse error into the better one, for free.
 | **TRIM-GAIN** | **200 Ω** multiturn cermet, **in series** with R2 | 0 → +2 % of ratio, **one-sided and now pointing the wrong way**: the justification was that the load divider only ever *reduces* gain, and the jack-side tap deleted the divider. Nominal is dead on 2.000 and the trimmer has no downward authority. Firmware's affine covers it, but the stated reason is stale — resolve at E9 |
 | **TRIM-OFFSET** | 10 kΩ multiturn cermet + range resistors | **Before** the buffer, so it scales `V_ref` and therefore the intercept alone. `R-OFFINJ` is deleted |
 | **R-OPAMP-IN** | 1 kΩ 1 % | Clamp-current protection on the (+) input. No gain error |
-| **R-OUT-PROT** | 1 kΩ 1 %, **1206 ≥250 mW** | Short protection, **inside the DC feedback loop** |
+| **R-OUT-PROT** | 1 kΩ 1 %, **1206 ≥500 mW** (shared spec, qty 6 — ≥250 mW here until
+2026-09-22, which is `R-SER-BREATH-INST`'s rating, a different part) | Short protection, **inside the DC feedback loop** |
 | **C-FB-PITCH** | **2.2 nF C0G** | **From the op-amp OUTPUT to the (−) input — NOT "across R2".** See the warning below; this is the net that decides whether the stage is stable |
 | **C-AA-PITCH** | **10 nF C0G** | 15.9 kHz against `R-OPAMP-IN`, **ahead of the op-amp**, outside any loop. Filters the DAC before it is amplified |
 | **C-FILT-PITCH** | **10 nF C0G** | Restored at the jack. The low-impedance shunt at the connector, which nothing else provides |
