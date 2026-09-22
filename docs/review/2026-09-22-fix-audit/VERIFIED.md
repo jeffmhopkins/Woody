@@ -204,3 +204,59 @@ document that fails **open** when a number moves.
   forbidden patterns against it.
 - **`120 mV`** — one of the three figures `CLAUDE.md` §3 names as corrected off
   a banked datasheet, restated in 3 files, still not in the register.
+
+## D20 — completeness. MANDATORY SLICE. Ten for ten.
+
+Nine waves had found the previous round's fixes partial. **The tenth is
+partial too: nineteen defects.**
+
+The shape is the finding. All four tools are green at HEAD, and **every one of
+the nineteen is invisible to all four**. Not one is a wrong value at the site
+of an edit — **fifteen of nineteen are on a page that cites the page that was
+fixed.** The fixes are *correct* and they have not *arrived*.
+
+| Claim | Check | Verdict |
+|---|---|---|
+| **A refuted claim is live in the ADR that cites the ADR which refuted it.** `0004:506-510` says an A/C grade part "parks pitch subsonic and the mod channels at 0 V (ADR 0006), **the same safe state as rack power-on**" | Read the lines | **Confirmed.** Yesterday I established in ADR 0006 that power-on is **0.000 V** and the CLR park is **−2.500 V** — *"different states, 2.5 V apart."* This ADR now asserts the exact equivalence that fix destroyed, and cites the document I fixed as its authority. Qualified fairly by D20: "parks pitch subsonic" is defensible in the watchdog context; the equivalence is not |
+| **`0004:842` carries a retired `97 mm`**, 52 lines under a table that now totals 110 mm, and **no pattern matches a bare `97 mm`** | Read the line; tested all twelve patterns against it | **Confirmed. Zero matches.** The list holds `= 97mm` and `97 mm against ~110 mm`; the live spelling is neither. Tenth spelling of that figure's family |
+| **`config/figures.yaml` has a duplicate `false_positive_note` key** on `panel-height-budget`, and `yaml.safe_load` silently keeps the last | Counted the keys; loaded the file | **Confirmed. Two keys, at :408 and :423.** `safe_load` keeps :423. **The note I wrote yesterday is silently discarded** — the one recording that `panel.md:20` and `0004:736` legitimately narrate the review. Sole instance in the file, and a new member of the YAML class I had recorded as caught |
+
+**Seven meta-document counts are wrong at HEAD**, every one of them a number
+restated in prose rather than cited — which is to say a forbidden pattern
+nobody wrote. Among them: `repo-maintenance.md:204`'s "50 rows of 138" (never
+updated at all), `pcb-pipeline.md`'s BOM table whose master count went 138→139
+**inside the commit that wrote the table**, and `hardware/README.md:43`'s "the
+two board-crossing tables" contradicting line 22 of the same file.
+
+**And three assertions that a defect is still live, where it has been fixed:**
+`pcb-pipeline.md:176` says the CV jacks are unplaced (placed seven minutes
+later, same session); `ks33-geometry.md:139` says `cluster-boards.md` "still
+carries the reversed conclusion" (fixed in the next commit). The corpus now
+reports defects that do not exist, which costs a reader exactly as much as one
+that does.
+
+**Even this wave's own README is wrong**: it says "85 corpus files changed"
+where the corpus figure is **79** — 85 counts everything outside
+`docs/review/`, and the line counts beside it are the all-files numbers.
+
+### On my four self-recorded errors, taken as classes rather than items
+
+- **Pattern-fires-on-a-true-sentence** — genuinely closed. No new instances;
+  every decoy set correctly excluded.
+- **`git add -A`** — clean at HEAD.
+- **Citation to something that does not exist** — **not closed.** It
+  generalises past figure ids to sections, anchors and line numbers: three
+  dangling `*Still open*` references to a section that `git log -S` shows
+  never existed on that page, and a probable broken anchor replicated 23×
+  (`#the-interfaces-table` against a heading that slugs to
+  `#the--interfaces-table`, which `check_links` never resolves because it
+  splits the fragment off first).
+- **YAML** — **one new silent instance**, above.
+
+### D20's mechanical reading, which is the useful part
+
+**A count restated in prose is a forbidden pattern nobody wrote.** Seven of
+the nineteen would fall to a check that re-derives a stated count from the
+tree — something `check-staleness.py` already does for the corpus file count,
+and which `repo-maintenance.md` §7 already writes out in four lines for the
+path map and then does not run.
