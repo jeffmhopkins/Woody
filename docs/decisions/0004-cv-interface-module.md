@@ -279,12 +279,20 @@ one draws its own analog current *plus* everything the instrument consumes:
 
 That is about 15% of a modern rack supply's +12 V capacity — unremarkable, but
 it **rules out the series-resistor variant**, which is harmless at 50 mA and is
-not at 290 mA:
+not at the module's real draw:
 
-| Series R | Drop at 359 mA |
+| Series R | Drop at `umbilical-current` |
 |---|---|
-| 2.2 Ω | 0.64 V |
-| 10 Ω | 2.90 V |
+| 2.2 Ω | 0.79 V |
+| 10 Ω | 3.59 V |
+
+> **Both cells were computed at 290 mA under a header that had already been
+> corrected to 359 mA, until 2026-09-22.** `[calc]` 2.2 × 0.290 = 0.638 and
+> 10 × 0.290 = 2.90 — the old numbers exactly. The header moved and the
+> arithmetic under it did not, which is this repository's named failure with
+> the two halves one line apart. The column now names the figure instead of a
+> number, so the next change to `umbilical-current` cannot leave the cells
+> behind: recompute them from it.
 
 **So: ferrite beads, not resistors.** A 1N5817 drops roughly 0.3–0.4 V at this
 current, leaving ~11.5 V at the instrument after cable drop, against a buck that
@@ -839,7 +847,8 @@ designed regardless, and it puts the load path into the board rather than the
 panel. At 10HP this is good practice rather than a structural necessity.
 
 > **Still a 1:1 paper check at M4, and now it has numbers to check against.**
-> The 97 mm above is built from `[from memory]` component envelopes — the
+> The stack above is the tracked figure `panel-height-budget`, and its
+> component envelopes are `[from memory]` — the
 > Neutrik drawing, the Thonkiconn panel dimension and the pot bushing were all
 > behind a blocked proxy through three review waves. **The layout is credible
 > and it is not verified.** Print it and lay the real parts on it.
