@@ -1,0 +1,226 @@
+# AUTHORITATIVE for connectivity. The drawing in power-entry.md is a
+# representation of this file.
+#
+# SCOPE. That drawing shows the whole load switch - LT1641, R-ILIM, the timer
+# and gate capacitors, the FB divider and Q-LOADSW - so the export path can be
+# read in one place. THOSE ARE module/umbilical-load-switch's PARTS and are
+# declared `foreign:` here. This circuit owns the rail entry, the four
+# bead-and-bulk branches and the LM317.
+
+circuit: module/power-entry
+title: Module power entry
+page: power-entry.md
+
+ports:
+  BUS_POS12_RAW:       {dir: out, to: module/umbilical-load-switch}
+  MODULE_ANALOG_POS12: {dir: out, to: module/breath-receive-stage}
+  MODULE_ANALOG_NEG12: {dir: out, to: module/breath-receive-stage}
+  BUS_5V:              {dir: out, to: module/digital-and-supervision}
+  DAC_AVDD:            {dir: out, to: module/dac8568, figure: dac-rail}
+  AGND_MOD:            {dir: ref, to: module/breath-receive-stage}
+  DIG_GND:             {dir: ref, to: module/digital-and-supervision}
+  PWR_GND:             {dir: ref, to: module/umbilical-load-switch}
+
+foreign:
+  R-ILIM:       {owner: module/umbilical-load-switch, row: R-ILIM}
+  R-GATE-SER:   {owner: module/umbilical-load-switch, row: R-GATE-SER}
+  R-GATE-COMP:  {owner: module/umbilical-load-switch, row: R-GATE-COMP}
+  C-TIMER:      {owner: module/umbilical-load-switch, row: C-TIMER-LOADSW}
+  C-GATE:       {owner: module/umbilical-load-switch, row: C-GATE-LOADSW}
+  R-FB-HI:      {owner: module/umbilical-load-switch, row: R-FB-HI}
+  R-FB-LO:      {owner: module/umbilical-load-switch, row: R-FB-LO}
+
+components:
+
+  J-PWR-EURO:
+    value: "16-pin shrouded keyed IDC header"
+    pins: [POS12, NEG12, POS5, GND]
+    note: "Keyed. The rack's -12 V is pin 1 by convention and reversing it is what D-REVPOL exists for"
+
+  D1:
+    of: D-REVPOL                 # qty 3: D1, D2, D3
+    value: "1N5817"
+    drawn_as: D1
+    pins: [A, K]
+    note: "Reverse protection, module analog +12 V branch"
+  D2:
+    of: D-REVPOL
+    value: "1N5817"
+    drawn_as: D2
+    pins: [A, K]
+    note: "Reverse protection, EXPORTED +12 V branch. Separate from D1 on purpose - see diode-split-rationale"
+  D3:
+    of: D-REVPOL
+    value: "1N5817"
+    drawn_as: D3
+    pins: [A, K]
+    note: "Reverse protection, -12 V branch"
+
+  FB1:
+    of: FB-IN                    # qty 4: FB1..FB4
+    value: "600R @ 100MHz"
+    drawn_as: FB1
+    pins: [1, 2]
+  FB2:
+    of: FB-IN
+    value: "600R @ 100MHz"
+    drawn_as: FB2
+    pins: [1, 2]
+    note: "THE UMBILICAL BRANCH. At its real operating current this bead gives roughly half its nameplate impedance - see the FB-IN row, which is the only one of the four where that matters"
+  FB3:
+    of: FB-IN
+    value: "600R @ 100MHz"
+    drawn_as: FB3
+    pins: [1, 2]
+  FB4:
+    of: FB-IN
+    value: "600R @ 100MHz"
+    drawn_as: FB4
+    pins: [1, 2]
+
+  C1:
+    of: C-BULK-RAIL              # qty 4: C1..C4
+    value: "100uF"
+    drawn_as: C1
+    pins: [1, 2]
+    note: "100uF on +12 V, NOT 47uF - the other three are 47uF and this one is not"
+  C2:
+    of: C-BULK-RAIL
+    value: "47uF"
+    drawn_as: C2
+    pins: [1, 2]
+  C3:
+    of: C-BULK-RAIL
+    value: "47uF"
+    drawn_as: C3
+    pins: [1, 2]
+  C4:
+    of: C-BULK-RAIL
+    value: "47uF"
+    drawn_as: C4
+    pins: [1, 2]
+
+  U-REG-DAC:
+    value: "LM317LZ"
+    drawn_as: LM317LZ
+    pins: [IN, OUT, ADJ]
+    note: "Minimum load current differs by manufacturer - see the row. The ~13mA here clears every reading"
+
+  R-REG-SET-HI:
+    value: "475R 0.1%"
+    pins: [1, 2]
+  R-REG-SET-LO:
+    value: "150R 0.1%"
+    pins: [1, 2]
+
+  C-REG-ADJ:
+    value: "10uF"
+    pins: [1, 2]
+    note: "ON THE ADJUSTMENT PIN, and THE DRAWING DOES NOT SHOW IT. The rail's ripple-rejection claim depends on it being fitted"
+  C-REG-OUT:
+    value: "1uF"
+    drawn_as: C
+    pins: [1, 2]
+
+nets:
+
+  BUS_POS12_RAW:
+    - J-PWR-EURO.POS12
+    - D1.A
+    - D2.A
+    - port: BUS_POS12_RAW
+
+  POS12_D1:
+    - D1.K
+    - FB1.1
+  MODULE_ANALOG_POS12:
+    - FB1.2
+    - C1.1
+    - U-REG-DAC.IN
+    - port: MODULE_ANALOG_POS12
+
+  POS12_D2:
+    - D2.K
+    - FB2.1
+  # The D2 branch. WHERE IT TERMINATES IS NOT DECIDABLE FROM THE DRAWING and
+  # is deliberately not asserted here - see the note at the foot of this file.
+  PWR_EXPORT:
+    - FB2.2
+    - C2.1
+
+  NEG12_D3:
+    - J-PWR-EURO.NEG12
+    - D3.A
+  NEG12_FB:
+    - D3.K
+    - FB3.1
+  MODULE_ANALOG_NEG12:
+    - FB3.2
+    - C3.1
+    - port: MODULE_ANALOG_NEG12
+
+  BUS_5V_IN:
+    - J-PWR-EURO.POS5
+    - FB4.1
+  BUS_5V:
+    - FB4.2
+    - C4.1
+    - port: BUS_5V
+
+  REG_ADJ:
+    - U-REG-DAC.ADJ
+    - R-REG-SET-HI.2
+    - R-REG-SET-LO.1
+    - C-REG-ADJ.1
+
+  DAC_AVDD:
+    - U-REG-DAC.OUT
+    - R-REG-SET-HI.1
+    - C-REG-OUT.1
+    - port: DAC_AVDD
+
+  AGND_MOD:
+    - port: AGND_MOD
+    - C1.2
+    - C3.2
+    - R-REG-SET-LO.2
+    - C-REG-ADJ.2
+    - C-REG-OUT.2
+
+  DIG_GND:
+    - port: DIG_GND
+    - C4.2
+
+  PWR_GND:
+    - port: PWR_GND
+    - J-PWR-EURO.GND
+    - C2.2
+
+# ----------------------------------------------------------------------
+# OPEN, AND NOT GUESSED AT.
+#
+# `BUS_POS12_RAW` is taken BEFORE D1/D2. Both Interfaces tables say so in the
+# same words - power-entry.md:31 "The branch is taken **before** the diodes"
+# and umbilical-load-switch.md:18 "Taken before the..." - so two independent
+# statements agree and this file follows them.
+#
+# THE DRAWING CANNOT BE READ THAT WAY WITH CONFIDENCE. It shows the D2 branch
+# running into the load-switch block, and the left-hand spine is the
+# connector body rather than a rail, so the two readings are not
+# distinguishable from the ASCII. That is the whole argument for this file
+# existing: A PICTURE CAN BE AMBIGUOUS AND A NETLIST CANNOT.
+#
+# So the D2 branch's far end is left unasserted. It is one of:
+#   - the exported rail's reverse protection, with the load switch upstream
+#     on the raw bus, which is what both tables describe; or
+#   - in series with the load switch output, which is what the drawing looks
+#     like and which would give the exported rail protection the tables do
+#     not credit it with.
+# The difference is what reverse-polarity protection the instrument actually
+# has. Resolve it on the page, then state it here - do not resolve it here
+# from a reading of the picture.
+#
+# The load switch's own parts (R-ILIM, the timer and gate network, the FB
+# divider) are `foreign:` above so the drawing checks, and are NOT netted
+# here: a part belongs to one circuit's netlist, or two files can disagree
+# about one connection and both look right.

@@ -162,9 +162,20 @@ def drawing_labels(page_path):
     return out
 
 
+# Unit spellings that mean the same thing. THIS IS CLAUDE.md 2's SPELLING TRAP
+# IN UNIT FORM: a drawing types the real micro sign and a CSV types "u", and a
+# comparison that does not fold them reports every capacitor on the page as a
+# contradiction. Folding them is right; folding anything that changes a
+# MAGNITUDE would not be.
+UNITS = {"\u00b5": "u", "\u03bc": "u", "\u2126": "ohm", "\u03a9": "ohm", "\u00b0": "deg"}
+
+
 def norm(v):
-    """Compare values the way a human does: case and spacing are noise."""
-    return re.sub(r"\s+", "", (v or "").lower()).rstrip(",")
+    """Compare values the way a human does: case, spacing and unit spelling."""
+    s = (v or "").lower()
+    for a, b in UNITS.items():
+        s = s.replace(a, b)
+    return re.sub(r"\s+", "", s).rstrip(",")
 
 
 VALTOK = re.compile(r"\d+(?:\.\d+)?\s*[a-zA-Z%\u03a9\u00b5]*")
