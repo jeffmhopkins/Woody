@@ -358,3 +358,51 @@ figures this slice reviews.** And its `known` set is polluted by single digits
 from `umbilical-pinmap`'s pin list, which silently suppresses **`4 kHz` (15
 files)**, **`5 ms` (10 files)** and **`250 µs` (9 files)** from the advisory
 entirely.
+
+## D4 — the other five tools. Two findings undercut things I cited as proof.
+
+| Claim | Check | Verdict |
+|---|---|---|
+| **`rewrite-paths.py --invert` is no longer a valid proof.** 112 MISMATCH on a healthy tree, because 92 of them are files the map explicitly marks `created` and `invert_targets()` never reads the `kind` column | Ran it against the recorded baseline | **Confirmed: `55 byte-identical, 2 skipped, 112 MISMATCH`**, with messages of the form "not present at baseline 81c081d" |
+| **`merge-bom.py` writes the truncated master to disk before reporting problems** — the exact bug `e30d3d8` fixed in `merge-manifests.py`, whose own comment says "by which time the damage was on the filesystem", left unfixed on "the most-cited file in this repository" | Read `main()` | **Confirmed.** In the non-`--check` branch the write happens, *then* `for p in problems: print(...)`. A fragment with a corrupt header yields a short master on disk before anyone sees the error |
+| **`--check` is byte-exact and cannot see the assignment rule.** Moving `D-CLAMP-BREATH` between two ORDER-adjacent fragments leaves the concatenation byte-identical → `0 problems`, rc=0, hook green | Accepted; the mechanism is obvious from the code | The rule `CLAUDE.md` states — a row lives with the circuit whose page derives it — has no mechanical check at all |
+
+**The `--invert` one matters beyond the tool.** I cited it in the pre-merge
+`STATUS.md` as "the strong check … what makes *Phase A changed no content*
+decidable", and a cold tooling slice reported it as the one thing it could not
+fool. **It is broken now, and I broke it** — by growing the path map with
+`created` rows whose `old` column is empty. Worse, D4 shows the proof is not
+even reproducible against itself: the same tree gives 0 MISMATCH with the
+old map and 21 with today's.
+
+So the strongest evidence in the merge recommendation no longer stands as
+written. Phase A's conservation is still supported — by the per-file blob
+hashes checked by hand at the time, and by the cold conservation re-run at
+HEAD — but not by this.
+
+**D4's candidate seventh fail-open is in my wiring, not in the tool:**
+`check_datasheets()` truncates with `msgs[:40]`, and `verify-datasheets.py`
+prints its "not a failure" coverage advisory *before* the real `bad` list. At
+37+ uncovered parts a genuine SHA mismatch falls off the end entirely —
+reproduced with a flipped byte in a banked PDF. Today `uncovered` is 0, so it
+is latent. And the wiring discards the whole advisory on success, so the one
+output whose stated justification is "nothing else will ever mention them"
+now reaches nobody.
+
+Two more worth acting on:
+
+- **`check-conservation.py`'s head check is switched back off by this repo's
+  own `notes.md` convention.** Delete a page's H1 and add a line of the form
+  "Moved verbatim from …" quoting it — which `mod-channels/notes.md` literally
+  carries — and rc=0 with a seam count identical to a clean split.
+- **The `Counter` check exits 1 on a formatting-only edit.** A markdown
+  table-alignment change reports `REPEATED PASSAGES THINNED (3): 4x -> 1x:
+  --- --- --- ---`. 24 corpus files carry repeated 8-grams of pure table and
+  drawing furniture, and the cheapest fix is to undo a correct change.
+
+**What D4 proved sound, by construction rather than by sampling:** the
+head/tail comparison *is* symmetric — it derived the condition under which a
+k-word deletion at position p hides from the shingle walk, and a 30-case
+sweep caught 30/30. Both real Phase B splits in history still pass clean.
+`--apply` is safe with the map's 123 empty-`old` rows. CRLF handling is exact,
+`ORDER` is complete and correctly ordered, and master hand-edits are caught.
