@@ -27,6 +27,25 @@ Every circuit page carries one: every net that crosses that circuit's
 boundary, one row each. A PCB netlist is transcribed from these, so a row is
 a wiring instruction and two pages disagreeing about a net is a short.
 
+**Four drawing shorthands, and they are shorthands — not missing parts.** The
+ASCII drawings use a short spelling where the full refdes would break column
+alignment. When transcribing a netlist, expand them:
+
+| Drawn as | BOM row |
+|---|---|
+| `C-TIMER` | `C-TIMER-LOADSW` |
+| `C-GATE` | `C-GATE-LOADSW` |
+| `J-UMB` | `J-UMBILICAL` |
+
+A cold reviewer filed all three as refdes that "match nothing in `bom.csv`",
+which was fair — nothing said otherwise. They are listed here once rather
+than expanded in ~40 drawing sites, because widening a label inside a drawing
+shifts every column to its right, and that drift is itself a recorded defect
+on these pages. A fourth, an unlabelled `N-FET`, was **not** a shorthand: it
+is `Q-LOADSW`, a row created after that drawing was last touched, and it is
+now labelled.
+
+
 | Column | |
 |---|---|
 | **Node** | The net's name, **qualified** where the same bare name means different things on different boards. `AGND_SENSE`, `AGND_INST` and `AGND_MOD` are three nets; `AGND` alone is a merge waiting to happen. Each row names the drawing's own spelling so a reader can match the two. |

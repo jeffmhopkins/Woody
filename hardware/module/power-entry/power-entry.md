@@ -39,7 +39,7 @@ The `Dir` and `Peer` columns are defined once in
 ```
   16-pin shrouded keyed IDC (J-PWR-EURO)
        │
-  +12V ├───┬──[D1 1N5817]──[FB1]──[C1 47µF]──┬── MODULE ANALOG +12V
+  +12V ├───┬──[D1 1N5817]──[FB1]──[C1 100µF]──┬── MODULE ANALOG +12V
        │   │                                  │   OPA2197 ×6, INA828
        │   │                                  │
        │   │                                  └──[LM317LZ]──┬── DAC AVDD 5.21V
@@ -59,7 +59,7 @@ The `Dir` and `Peer` columns are defined once in
        │                    │       │ TIMER GATE├──┬──[R-GATE-SER 10Ω]──┐
        │                    │       │  FB      │   │                    │
        │                    │       └──┬────┬──┘   │             ┌──────┴──┐
-       │                    │          │    │  [R-GATE-COMP 1k]  │  N-FET  │ DPAK
+       │                    │          │    │  [R-GATE-COMP 1k]  │ Q-LOADSW│ DPAK
        │                    │  [C-TIMER 10µF]│      │            │         │
        │                    │          │    │  [C-GATE 82nF]     └────┬────┘
        │                    └──────────┴────┼──────┴──────────────────┼── PWR_GND
@@ -187,6 +187,6 @@ are in [`umbilical-load-switch.md`](../umbilical-load-switch/umbilical-load-swit
   branch. Mutable, Telex and others fit PTCs on their entry rails; ADR 0005's
   deletion argument was about the *instrument-end* polyfuse and does not reach
   these. Deliberately left open rather than silently omitted.
-- **Entry bulk is 4 × 47 µF**, which is 2–5× the surveyed norm of 10–22 µF.
+- **Entry bulk is 100 µF on +12 V and 47 µF on the other three**, which is 2–5× the surveyed norm of 10–22 µF.
   Harmless except for case-wide inrush at rack power-on, where it adds to
   everything else in the case.
