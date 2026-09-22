@@ -50,7 +50,35 @@ nets:
     receivers:
       - module/panel
 
+  BREATH_SENSE:
+    kind: signal
+    domain: analog
+    carries: "The sensor's buffered output, down the umbilical through the instrument-side R1"
+    figure: sensor-full-scale
+    driver: interfaces/breath-sense-link
+    receivers:
+      - module/breath-receive-stage
+
+  AGND_SENSE:
+    kind: signal
+    domain: analog
+    carries: >
+      The instrument's analog star, arriving through the instrument-side R1b.
+      A SIGNAL, NOT A GROUND - it drives the in-amp's IN+ through R2 and is
+      what makes the measurement differential. Do not merge it with AGND.
+    figure: umbilical-pinmap
+    driver: interfaces/breath-sense-link
+    receivers:
+      - module/breath-receive-stage
+
   # ---- power and reference ----------------------------------------------
+
+  V_POS12:
+    kind: power
+    carries: "Module +12 V rail from the Eurorack bus"
+    driver: module/power-entry
+    receivers:
+      - module/breath-receive-stage
   DAC_AVDD:
     kind: power
     carries: "Local regulated analog supply for the DAC and the offset pot"
@@ -58,6 +86,7 @@ nets:
     driver: module/power-entry
     receivers:
       - module/breath-output-stage
+      - module/breath-receive-stage
       - module/dac8568
 
   V_NEG12:
@@ -66,6 +95,7 @@ nets:
     driver: module/power-entry
     receivers:
       - module/breath-output-stage
+      - module/breath-receive-stage
 
   AGND:
     kind: reference
@@ -74,6 +104,7 @@ nets:
     driver: module/power-entry
     reference:
       - module/breath-output-stage
+      - module/breath-receive-stage
     note: >
       Where AGND and DIG_GND meet is the tracked figure dig-gnd-topology and is
       DISPUTED. This file records which circuits reference AGND; it does not

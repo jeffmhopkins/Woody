@@ -198,6 +198,32 @@ def check_one(d, bom, problems, seen):
             problems.append(f"{rel}: {ref} value {c['value']!r} does not appear "
                             f"in its BOM part field {bom[row_ref]['part']!r}")
 
+    # --- NO CIRCUIT MAY USE MORE OF A PART THAN THE BOM BUYS.
+    #
+    # Several rows are qty 2 or 6 and their instances are distinguished here
+    # with `of:` - R2/R3 both map to R-SER-BREATH, R4/R5 to R-BIAS-INAMP. That
+    # is the right way to netlist them, and it makes over-use checkable for
+    # the first time: a page that quietly drew a third instance would ship a
+    # board short of a part. The op-amp half-count that three pages disagreed
+    # about is this same defect in the form nobody could measure.
+    from collections import Counter
+    used_of = Counter(c.get("of", ref) for ref, c in comps.items())
+    for row, n in used_of.items():
+        if row not in bom:
+            continue
+        # a package supplying sections counts once per SECTION, not per package
+        sections = sum(1 for c in comps.values()
+                       if c.get("of") == row and c.get("section"))
+        try:
+            have = int(bom[row]["qty"])
+        except (ValueError, KeyError):
+            continue
+        if sections:
+            continue          # half-counting is the op-amp case, tracked in prose
+        if n > have:
+            problems.append(f"{rel}: uses {n} instance(s) of {row} and the BOM "
+                            f"buys {have}")
+
     # --- nets: endpoints, and pins that exist
     declared_pins = {(r, str(p)) for r, c in comps.items()
                      for p in (c.get("pins") or [])}
@@ -245,9 +271,22 @@ def check_one(d, bom, problems, seen):
     # the authoritative file - is better than the prose table it replaces,
     # because the checker can enforce it.
     alias = {c["drawn_as"]: ref for ref, c in comps.items() if c.get("drawn_as")}
+    # Parts drawn for context and owned by another circuit. A page whose
+    # drawing deliberately spans two boards - to derive a pole or a CMRR
+    # budget in one place - would otherwise report every foreign part as a
+    # missing component, and the fix for THAT would be to stop drawing the
+    # context, which is worse than the warning.
+    foreign = spec.get("foreign") or {}
+    for fr, f in foreign.items():
+        row = f.get("row")
+        if row and row not in bom:
+            problems.append(f"{rel}: foreign {fr!r} claims BOM row {row!r}, "
+                            f"which does not exist")
     page = os.path.join(d, spec.get("page") or "")
     for lineno, ref, val in drawing_labels(page):
         ref = alias.get(ref, ref)
+        if ref in foreign:
+            continue
         if ref not in comps:
             if ref in bom or any(c.get("of") == ref for c in comps.values()):
                 continue                  # a package or a shorthand, not a net node
