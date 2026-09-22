@@ -17,7 +17,7 @@ G1-6,G1,191,,NOT ADDRESSED,G1-6 — D-USBOR : unbalanced bracket introduced.
 G1-7,G1,197,,NOT ADDRESSED,G1-7 — J-CHAIN : three secondary mechanical numbers went and are not anywhere.
 G1-8,G1,220,,NOT ADDRESSED,"G1-8 — SW-POWER 's S4 keyway dimensions survive. The deleted ""5.6mm flat"
 G1-9,G1,228,,NOT ADDRESSED,"G1-9 — U-LOADSW 's TPS2553 rejection survives. ""Would not survive first"
-G10-1,G10,37,,NOT ADDRESSED,"G10-1 — check_checks() proves a check was CALLED, never that its result"
+G10-1,G10,37,,recorded,"G10-1 — check_checks() proves a check was CALLED, never that its result"
 G10-10,G10,224,,NOT ADDRESSED,G10-10 — MIN_CORPUS_FILES ' justifying comment states a corpus size that has
 G10-11,G10,233,,NOT ADDRESSED,G10-11 — an empty hardware/bom.csv crashes check_bom() rather than being
 G10-12,G10,249,,NOT ADDRESSED,"G10-12 — determinism: clean. test , clone, PYTHONHASHSEED ∈"
@@ -28,10 +28,10 @@ G10-16,G10,297,,NOT ADDRESSED,"G10-16 — rule 2b holds exactly as written. test
 G10-17,G10,314,,NOT ADDRESSED,G10-17 — the corpus half has no shape assertion: rename a CORPUS entry and
 G10-18,G10,336,,NOT ADDRESSED,"G10-18 — the coverage number prints only on failure, so a run that checked"
 G10-19,G10,345,,NOT ADDRESSED,G10-19 — ARTEFACT and PATH_RE are two hand-maintained extension lists in
-G10-2,G10,65,,NOT ADDRESSED,"G10-2 — same outcome from a wrong argument. test , clone. Change the"
+G10-2,G10,65,,recorded,"G10-2 — same outcome from a wrong argument. test , clone. Change the"
 G10-20,G10,363,,NOT ADDRESSED,"G10-20 — a third definition of ""the corpus"", differing from the other two."
 G10-21,G10,378,,NOT ADDRESSED,"G10-21 — the HIST vocabulary is case-sensitive, while segments()"
-G10-22,G10,403,,NOT ADDRESSED,G10-22 — consequence: the canonical example from CLAUDE.md and from this
+G10-22,G10,403,,recorded,G10-22 — consequence: the canonical example from CLAUDE.md and from this
 G10-23,G10,428,,NOT ADDRESSED,"G10-23 — the dated YYYY-MM-DD rule — the first HIST pattern, and the"
 G10-24,G10,456,,NOT ADDRESSED,G10-24 — --regrown reports zero while seventeen rows carry a history or
 G10-25,G10,472,,NOT ADDRESSED,"G10-25 — it does have the ""fires on correct rows"" problem its own --regrown"
@@ -40,8 +40,8 @@ G10-27,G10,507,,NOT ADDRESSED,"G10-27 — history the vocabulary misses entirely
 G10-28,G10,533,,NOT ADDRESSED,G10-28 — --regrown is silently ignored when a REF is also given.
 G10-29,G10,538,,NOT ADDRESSED,G10-29 — an unknown REF prints nothing and exits 0. test
 G10-3,G10,75,,NOT ADDRESSED,G10-3 — renaming a check off the check_ prefix makes it invisible to
-G10-30,G10,552,,NOT ADDRESSED,"G10-30 — the verdict is a substring test, so one finding's id closes"
-G10-31,G10,571,,NOT ADDRESSED,G10-31 — a finding introduced as a Markdown heading is never introduced.
+G10-30,G10,552,,recorded,"G10-30 — the verdict is a substring test, so one finding's id closes"
+G10-31,G10,571,,recorded,G10-31 — a finding introduced as a Markdown heading is never introduced.
 G10-32,G10,588,,NOT ADDRESSED,G10-32 — finding ids at 100 and above vanish from the ledger entirely.
 G10-33,G10,605,,NOT ADDRESSED,G10-33 — the docstring's own count disagrees with CLAUDE.md.
 G10-34,G10,612,,NOT ADDRESSED,"G10-34 — minor, --check . The mismatch branch prints a hard-coded"
@@ -53,13 +53,13 @@ G10-39,G10,671,,NOT ADDRESSED,G10-39 — rewrite-paths.py --verify excludes five
 G10-4,G10,92,,NOT ADDRESSED,G10-4 — judgement: the self-verification was never designed to reach
 G10-40,G10,697,,NOT ADDRESSED,G10-40 — --apply and --verify see only tracked files. repo :95-98 —
 G10-41,G10,702,,NOT ADDRESSED,"G10-41 — only one tool is wired to anything automated. test , grepping"
-G10-42,G10,716,,NOT ADDRESSED,G10-42 — this wave's freeze clause bound the orchestrator and not the
+G10-42,G10,716,,recorded,G10-42 — this wave's freeze clause bound the orchestrator and not the
 G10-5,G10,132,,NOT ADDRESSED,"G10-5 — CONFIRMED (independently, from a sibling's claim relayed to me):"
 G10-6,G10,159,,NOT ADDRESSED,"G10-6 — the refutation-exemption list is counted but not printed, including"
 G10-7,G10,184,,NOT ADDRESSED,G10-7 — the detail report goes stale on the one path the tool calls fatal.
 G10-8,G10,205,,NOT ADDRESSED,G10-8 — verify-datasheets.py output is truncated at 120 lines silently.
 G10-9,G10,213,,NOT ADDRESSED,"G10-9 — EXCLUDE is dead code, and would misfire if it ever woke up."
-G11-1,G11,22,,NOT ADDRESSED,G11-1 — ADR 0005 still specifies a ramp no capacitor can deliver (confirmed)
+G11-1,G11,22,,recorded,G11-1 — ADR 0005 still specifies a ramp no capacitor can deliver (confirmed)
 G11-10,G11,168,,NOT ADDRESSED,G11-10 — ADR 0003 puts the analog star point on a board that carries no analog
 G11-11,G11,185,,NOT ADDRESSED,"G11-11 — ADR 0003 calls the restrictor ""the Helmholtz restrictor"" after deleting the Helmholtz model"
 G11-12,G11,196,,NOT ADDRESSED,"G11-12 — ADR 0003 refers to ""Option A"", which no longer exists in the document"
@@ -80,7 +80,7 @@ G11-25,G11,451,,NOT ADDRESSED,"G11-25 — supersessions are recorded in one dire
 G11-26,G11,476,,NOT ADDRESSED,G11-26 — the index table's known defect is still there
 G11-27,G11,491,,NOT ADDRESSED,"G11-27 — no gaps, no stubs"
 G11-28,G11,529,,NOT ADDRESSED,"- G11-28 chain-conductors = 12 repo figures.yaml:269–272 , owner"
-G11-29,G11,538,,NOT ADDRESSED,"- G11-29 panel-height-budget , in the ADR that owns it . repo"
+G11-29,G11,538,,recorded,"- G11-29 panel-height-budget , in the ADR that owns it . repo"
 G11-3,G11,57,,NOT ADDRESSED,G11-3 — ADR 0005 gives two different clamp-legal worst cases
 G11-30,G11,550,,NOT ADDRESSED,- G11-30 the key-input network in ADR 0009 — G11-6 above.
 G11-31,G11,552,,NOT ADDRESSED,- G11-31 panel-height-budget / panel-width consequence text.
@@ -102,13 +102,13 @@ G11-45,G11,685,,NOT ADDRESSED,"- G11-45 repo 0006:742–743 ""The −11.9 and �
 G11-46,G11,689,,NOT ADDRESSED,- G11-46 repo 0010:174–177 ends a bullet mid-sentence:
 G11-47,G11,701,,NOT ADDRESSED,"- G11-47 repo 0001:340–341 ""So the allocation went from a superseded 6"
 G11-48,G11,706,,NOT ADDRESSED,"- G11-48 (outside the ADRs, found while checking one) repo"
-G11-49,G11,713,,NOT ADDRESSED,"G11-49 — ADR 0005 offers two ""equally valid"" alternatives that would invalidate five BOM rows and three settled figures"
+G11-49,G11,713,,recorded,"G11-49 — ADR 0005 offers two ""equally valid"" alternatives that would invalidate five BOM rows and three settled figures"
 G11-5,G11,82,,NOT ADDRESSED,G11-5 — ADR 0001's Consequences instruct the build ADR 0013 rejected
 G11-6,G11,104,,NOT ADDRESSED,G11-6 — ADR 0009 states the superseded key-input network and attributes it to ADR 0001
 G11-7,G11,120,,NOT ADDRESSED,G11-7 — ADR 0014 still assumes one 5 V regulator shared by both dev boards
 G11-8,G11,136,,NOT ADDRESSED,G11-8 — ADR 0014 lists a refuted coupling route as one of four live ones
 G11-9,G11,154,,NOT ADDRESSED,G11-9 — ADR 0013's carrier holds headers and a regulator for a board 360 mm away
-G12-1,G12,57,,NOT ADDRESSED,"G12-1. firmware/README.md:94 — ""The body is bonded."" It is not, and ADR 0009"
+G12-1,G12,57,,recorded,"G12-1. firmware/README.md:94 — ""The body is bonded."" It is not, and ADR 0009"
 G12-10,G12,373,,NOT ADDRESSED,"G12-10. docs/reference/repo-maintenance.md:339-348 — ""Both assertions hold"
 G12-11,G12,407,,NOT ADDRESSED,"G12-11. docs/reference/repo-maintenance.md:323 — ""405 tracked files, plus 4"
 G12-12,G12,418,,NOT ADDRESSED,"G12-12. README.md:117 — "" docs/review/ holds nine waves"", in the sentence"
@@ -162,7 +162,7 @@ G2-6,G2,193,,NOT ADDRESSED,G2-6 — …and the note that justifies the dispute i
 G2-7,G2,206,,NOT ADDRESSED,"G2-7 — 2.8 kPa is attributed to ADR 0003, which says 0–5 kPa"
 G2-8,G2,241,,NOT ADDRESSED,G2-8 — A quotation attributed to ADR 0001 appears nowhere in ADR 0001
 G2-9,G2,269,,NOT ADDRESSED,G2-9 — key-scan-current 's companion field describes a deduplication that did not happen
-G3-1,G3,90,,NOT ADDRESSED,"G3-1 (a) docs/decisions/0004-cv-interface-module.md:282,286–287 — the table header was corrected to 359 mA and both of its values are still computed at 290 mA."
+G3-1,G3,90,,recorded,"G3-1 (a) docs/decisions/0004-cv-interface-module.md:282,286–287 — the table header was corrected to 359 mA and both of its values are still computed at 290 mA."
 G3-10,G3,268,,NOT ADDRESSED,"G3-10 (a) hardware/unplaced.csv:19 / hardware/bom.csv:127 ( PCB-MODULE ) — a live 8HP derivation inside a .csv , where rule 2b allows no refutation exemption."
 G3-11,G3,286,,NOT ADDRESSED,G3-11 (a) The playable breath span is 1598 counts on one page and ~1594 on three others.
 G3-12,G3,298,,NOT ADDRESSED,"G3-12 (a) hardware/module/power-entry/bom.csv:8 / hardware/bom.csv:61 ( FB-IN ) — a number has been deleted from the branch list, leaving a bare unit."
@@ -203,18 +203,18 @@ G4-11,G4,354,,NOT ADDRESSED,"G4-11. 300 is three times wider than anything the c
 G4-12,G4,19,,NOT ADDRESSED,"G4-12, G4-13, G4-14, G4-17 are read-only analysis of /home/user/Woody ."
 G4-13,G4,451,,NOT ADDRESSED,G4-13. The sanctioned destination for retired values is the least falsifiable
 G4-14,G4,469,,NOT ADDRESSED,"G4-14. The hole was not moved by this change — the trim went to git, not to"
-G4-15,G4,481,,NOT ADDRESSED,G4-15. An injection slice cannot share a working tree with cold reviewers.
+G4-15,G4,481,,recorded,G4-15. An injection slice cannot share a working tree with cold reviewers.
 G4-16,G4,516,,NOT ADDRESSED,G4-16. I reverted another agent's in-flight edit. Carrying out step 1 of the
 G4-17,G4,525,,NOT ADDRESSED,G4-17. The wave README's freeze names a4b80b1 ; HEAD was already 25cc740
 G4-2,G4,20,,NOT ADDRESSED,G4-2 and part of G4-7 were first taken in the shared tree and are marked
 G4-3,G4,106,,NOT ADDRESSED,G4-3. .md files that are really data get the prose exemption. This is the
 G4-4,G4,146,,NOT ADDRESSED,"G4-4. Inside an ASCII drawing, a refutation in one column exempts a value in"
 G4-5,G4,174,,NOT ADDRESSED,G4-5. Both the generated hardware/bom.csv and all its fragments are
-G4-6,G4,181,,NOT ADDRESSED,G4-6. Eight file extensions fall through the scan entirely — neither strict
+G4-6,G4,181,,recorded,G4-6. Eight file extensions fall through the scan entirely — neither strict
 G4-7,G4,40,,NOT ADDRESSED,"G4-7, G4-12."
 G4-8,G4,235,,NOT ADDRESSED,G4-8. All 24 are legitimate corrections-in-place. None is a stale value
 G4-9,G4,270,,NOT ADDRESSED,"G4-9. A refutation carrying a wrong replacement escapes, reproduced."
-G5-0,G5,24,,NOT ADDRESSED,"G5-0 — The freeze is broken again, live, by a concurrent slice"
+G5-0,G5,24,,recorded,"G5-0 — The freeze is broken again, live, by a concurrent slice"
 G5-1,G5,83,,NOT ADDRESSED,"G5-1 — README.md never names config/figures.yaml , and misdescribes the directory it is in"
 G5-10,G5,301,,NOT ADDRESSED,"G5-10 — README.md never mentions CLAUDE.md , and the layout tree omits LICENSES/"
 G5-11,G5,321,,NOT ADDRESSED,G5-11 — Three board-level bom.csv fragments exist and no corpus document mentions them
@@ -272,7 +272,7 @@ G6-6,G6,237,,NOT ADDRESSED,G6-6. D-TVS-BREATH names a SOD-523 part and specifies
 G6-7,G6,260,,NOT ADDRESSED,"G6-7. U-TVS-CHAIN asks for a 4-channel array in SOT-23-6, and the row three"
 G6-8,G6,278,,NOT ADDRESSED,G6-8. U-REF-BREATH orders the grade the corpus believes is wrong.
 G6-9,G6,294,,NOT ADDRESSED,G6-9. U-LOADSW orders the commercial temperature grade and its own notes say
-G7-1,G7,90,,NOT ADDRESSED,"G7-1 4 body construction, ~20 files ADR 0009 retired the bonded body; ~20 live arguments still rest on it"
+G7-1,G7,90,,recorded,"G7-1 4 body construction, ~20 files ADR 0009 retired the bonded body; ~20 live arguments still rest on it"
 G7-10,G7,419,,NOT ADDRESSED,G7-10 — ks33-geometry.md still points at a cluster-board fix that has landed
 G7-11,G7,439,,NOT ADDRESSED,G7-11 — ADR 0005's 3V3 argument predates key-scan-current
 G7-12,G7,464,,NOT ADDRESSED,G7-12 — R-KEY-PU 's own row restates the pre- R-KEY-SER current
@@ -299,7 +299,7 @@ G7-6,G7,324,,NOT ADDRESSED,G7-6 — ADR 0014 argues the 1 A regulator case on a 
 G7-7,G7,351,,NOT ADDRESSED,G7-7 — The KS-33 bounce figure is published; ROADMAP says twice that it is not
 G7-8,G7,95,,NOT ADDRESSED,"G7-8 1 free-bits 5 → 3 free bits; ""15 passives"" is the 5-bit number, in the same sentence as ""the 3 free bits"""
 G7-9,G7,398,,NOT ADDRESSED,"G7-9 — breath-adc.md says a fix is ""still unapplied"" after it landed"
-G8-1,G8,54,high,NOT ADDRESSED,G8-1 high Duplicate YAML key silently drops a false_positive_note
+G8-1,G8,54,high,recorded,G8-1 high Duplicate YAML key silently drops a false_positive_note
 G8-10,G8,63,medium,NOT ADDRESSED,G8-10 medium pitch-cents-budget 's decided_by describes a page state that no longer exists; candidate list is missing a term
 G8-11,G8,64,low,NOT ADDRESSED,"G8-11 low loadswitch-fb-divider 's stated arithmetic does not reproduce (right answer, wrong working)"
 G8-12,G8,65,low,NOT ADDRESSED,"G8-12 low loadswitch-timer 's ""worst case"" mixes a max bound with a typical"
@@ -317,7 +317,7 @@ G8-22,G8,75,,NOT ADDRESSED,G8-22 — What I verified against banked documents an
 G8-23,G8,53,high,NOT ADDRESSED,"G8-23 high LIVE STALE VALUE — ADR 0004:842 says ""The 97 mm above"" where the derivation above it totals 110 mm; no pattern covers this spelling"
 G8-3,G8,56,high,NOT ADDRESSED,G8-3 high diode-split-rationale : r_d 69 mΩ is refuted by its own entry and by the datasheet
 G8-4,G8,57,medium,NOT ADDRESSED,G8-4 medium umbilical-current : value 359 mA ≠ its own derivation 's 358.1 mA
-G8-5,G8,58,high,NOT ADDRESSED,G8-5 high 57/217 patterns never matched any revision — 26 % of the guard is decorative
+G8-5,G8,58,high,recorded,G8-5 high 57/217 patterns never matched any revision — 26 % of the guard is decorative
 G8-6,G8,59,high,NOT ADDRESSED,"G8-6 high sensor-full-scale : 12 of 34 patterns never matched, in the entry that preaches grep-first"
 G8-7,G8,60,medium,NOT ADDRESSED,G8-7 medium ks33-contact-bounce : 4 of 5 patterns are paraphrases that miss the real sentences
 G8-8,G8,61,medium,NOT ADDRESSED,G8-8 medium breath-working-point 's decided_by names M1; the breath gate is E2
@@ -333,7 +333,7 @@ G9-16,G9,355,,NOT ADDRESSED,"G9-16 — breath-output-stage.md : a stray box bott
 G9-17,G9,365,,NOT ADDRESSED,G9-17 — POT-OFFSET 's lower track end is not drawn
 G9-18,G9,379,,NOT ADDRESSED,"G9-18 — carrier.md still says the marker is six bits, and the checker's forbidden patterns miss it by one word"
 G9-19,G9,403,,NOT ADDRESSED,"G9-19 — ""63 network passives"" in four live places; the count is 66"
-G9-2,G9,73,,NOT ADDRESSED,"G9-2 — POT-OFFSET does not sit at zero at centre; it sits at +0.60 V, and the page that says otherwise dismisses the reason"
+G9-2,G9,73,,recorded,"G9-2 — POT-OFFSET does not sit at zero at centre; it sits at +0.60 V, and the page that says otherwise dismisses the reason"
 G9-20,G9,434,,NOT ADDRESSED,G9-20 — hardware/README.md says unplaced.csv is 34 rows; it is 32
 G9-21,G9,451,,NOT ADDRESSED,G9-21 — hardware/README.md says two tables carry the End column; three do
 G9-22,G9,462,,NOT ADDRESSED,G9-22 — the playable ADC span is 1598 counts on the page that derives it and 1594 on the two that cite it
@@ -366,9 +366,9 @@ G9-7,G9,176,,NOT ADDRESSED,G9-7 — the four resistors breath-output-stage.md de
 G9-8,G9,193,,NOT ADDRESSED,G9-8 — R-BIAS-INAMP 's BOM row lives with the circuit whose dependency on it was proved false
 G9-9,G9,211,,NOT ADDRESSED,"G9-9 — the BREATH jack clamp is two different parts on two pages, and one of them has no quantity for it"
 P0-75,G6,,,NOT ADDRESSED,CITED ONLY - introduced in no report
-X1-1,G10,559,high,NOT ADDRESSED,"X1-1,X1,3,high,recorded,""X1-1 bold run at line start, high severity."""
-X1-100,G10,,,NOT ADDRESSED,CITED ONLY - introduced in no report
-X1-11,G10,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+X1-1,G10,559,high,recorded,"X1-1,X1,3,high,recorded,""X1-1 bold run at line start, high severity."""
+X1-100,G10,,,recorded,CITED ONLY - introduced in no report
+X1-11,G10,,,recorded,CITED ONLY - introduced in no report
 X1-12,G10,555,,NOT ADDRESSED,"X1-12 by hand. Also X1-4."" :"
 X1-2,G10,,,NOT ADDRESSED,CITED ONLY - introduced in no report
 X1-4,G10,576,critical,NOT ADDRESSED,"X1-4,X1,,,recorded,CITED ONLY - introduced in no report <- was "" X1-4 heading introduction, critical"""
