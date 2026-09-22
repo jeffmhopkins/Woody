@@ -463,3 +463,62 @@ Also: **141 corpus citations of a `datasheets/` path, 0 dangling**, and 76
 manifest rows against 76 files on disk both ways. That half is genuinely
 honest — D11 had to instrument the tool's own walk to get the denominator it
 hides on success.
+
+## D5 — the regression audit. My "narrowing" of the refutation vocabulary was a net WIDENING.
+
+D5 built the control this needed: three trees — `old` (`0e68f25~1`), `new`
+(HEAD), and **`mixed`** (HEAD corpus with the old tools). Every regression
+reproduces on `mixed`, so it is attributable to the tool change and not to the
+85-file corpus diff.
+
+| Claim | Check | Verdict |
+|---|---|---|
+| **A bare ISO date exempts a live stale value.** The new vocabulary added `\d{4}-\d{2}-\d{2}`, a bare `->`, a bare `→` and a case-sensitive `NOT` — all of which are ordinary prose | Injected `"The panel is 8HP this"` (a live forbidden pattern) into ADR 0004, preceded on a different line by ordinary prose, and toggled one thing | **Confirmed, decisively.** With `"Bench session 2026-08-14 covered the jack layout"` → **PASS**. Delete just the date, everything else byte-identical → **FAIL**. Same for a bare `->` and a bare capital `NOT` |
+| **The exempt region grew from 33.9 % to 48.4 % of corpus characters** | Accepted; consistent with D3's independent 47.9 % | **Nearly half the corpus is now ground where no pattern can fire** |
+
+**I removed ten weak words and added four that are more common than the ones I
+removed.** The commit message says "Dropped the past-tense words, kept the
+ones that mean a correction was made" — and a date means nothing of the kind.
+D3, D5 and D7 reached this from three directions without seeing each other.
+
+**Six regressions total**, four in `check_figures` and two in `check_links`.
+The link ones: `](page.md#anchor)` never matches because the character class
+excludes `#`, so **23 links dropped out of coverage** — all 23 circuit pages'
+`](../../README.md#the-interfaces-table)`, the anchor I added, which is
+exactly what a restructure moves. And `](path 'Title')` is unmatched too.
+
+**Runtime, measured, which I had not done:** 8.64 s → 11.12 s against the
+hook's 60 s. Of the +2.48 s, **+1.96 s is corpus and register growth** and only
++0.5 s is the rebuild; all three subprocesses together are **0.31 s of 11.1 s**.
+`check_figures` is 10.51 s, re-reading every file once per pattern, exactly
+linear at **0.049 s/pattern** — so the timeout arrives at **~1,220 patterns**.
+The register went 184 → 218 in one commit and rule 2 mandates adding more.
+Inverting the loops is a ~40× I/O reduction.
+
+**23 defect classes still caught in both trees, and 9 newly caught** — the
+rebuild is not a net loss, and D5 says so explicitly. Latin-1 under
+`hardware/**` used to **traceback** and now reports; reference-style links, a
+SHA belonging to another part, a tampered PDF, a deleted PDF, a commented-out
+check and a typo'd `depends_on` prefix are all new wins.
+
+## D7 — the register side of the same root cause
+
+| Claim | Verdict |
+|---|---|
+| **The commit named "the eight forbidden-list escapes, fixed by grepping first" does not close those escapes in the checker.** Of its 31 added patterns: 14 produce a live hit, **13 match the stale text but every match is exempted**, 4 match nothing at any commit | **Accepted, and the test is the right one** — D7 put the HEAD register in front of the pre-fix tree and ran the HEAD checker: **19 live hits from only 14 patterns** |
+| Three of the silent ones are the very escapes the register was edited to close — `U-DIFFRX` (whose `escape_note` says "THE MISS WAS ONE SPACE", and whose space-less spellings are now exempted by `until 2026-09-21` 180 chars away, about a *different* prior value), `C-KEY`, and `D-TVS-BREATH` | **Accepted.** The patterns are right; the exemption swallows them |
+| **The ±300-char window crosses CSV record boundaries** — an identical injected row goes from 1 stale to 0 once an unrelated neighbouring row containing "deleted" is added | **Accepted, and it explains a thing I had noted and not understood**: why `13mm spare` and `= 97mm` were exempt in `hardware/bom.csv` and live in its own fragment |
+| **Three patterns can never fire anywhere** because they contain a marker themselves — `"0.2 → 4.8 V"`, `"75 mV → LM317"`, `"VALUES NOT SET"`. Injected verbatim with nothing correcting them: PASS, exit 0 | **Accepted; third slice to find this independently** |
+| `"0.5059 V/kPa"` forbids an **arithmetically correct** number — the true slope at 3V3 — and the same entry's note gives the reason someone will write that sentence | **Accepted.** A trap one sentence early, in a pattern I wrote |
+| 9 added patterns match nothing at any commit; 8 never existed in corpus history — including **all three** of `breath-sensor-slope`'s | **Accepted.** Invented rather than grepped |
+
+D7's coverage measurement is the one to carry forward: **`dac-rail` is past
+the nine-spelling benchmark already — 36 restatements across 17 files, in both
+`5.21 V` and `5.21V`, two of them inside ASCII drawing gutters.** Then
+`cref-out-node` 35/15, `panel-toggle-hole` 30/7, `loadswitch-gate-cap` 30/11.
+
+And the structural observation: **pattern count is inversely correlated with
+restatement count.** The best-patterned figures (`key-press-time`,
+`key-release-time`, twelve patterns each) are restated three times.
+`ferrite-bias-impedance` has one 78-character pattern for a value restated 17
+times across 8 files.
