@@ -1,0 +1,156 @@
+# AUTHORITATIVE for connectivity. The ASCII drawing in breath-output-stage.md
+# is a REPRESENTATION of this file, not the other way round.
+#
+# Hand-authored YAML is the first step and KiCad is generated from it later,
+# so this is the file to edit. If this and the drawing disagree, THIS WINS and
+# the drawing is the defect - see hardware/README.md.
+#
+# tools/check-netlist.py proves: every refdes here exists in bom.csv with a
+# matching value; every net has at least two endpoints; every declared pin is
+# used exactly once; and every `[REFDES value]` label in the page's drawing
+# agrees with this file.
+
+circuit: module/breath-output-stage
+title: Breath output stage
+page: breath-output-stage.md
+
+# Nets that cross this circuit's boundary. These must match the page's
+# ## Interfaces table - that table is how a reader matches the two.
+ports:
+  BREATH_INAMP_OUT: {dir: in,  from: module/breath-receive-stage, note: "0 to inamp-full-scale, rest at 0"}
+  DAC_AVDD:         {dir: in,  from: module/power-entry, figure: dac-rail}
+  V_NEG12:          {dir: in,  from: module/power-entry}
+  AGND:             {dir: ref, from: module/power-entry}
+  BREATH_JACK:      {dir: out, to: module/panel}
+
+components:
+
+  POT-GAIN:
+    value: "50k"
+    pins: [CW, W, CCW]          # CW = signal end, CCW = floor end
+    note: "Attenuator, not a feedback rheostat. 0.125 to 1.000 with R-GAIN-FLOOR"
+
+  R-GAIN-FLOOR:
+    value: "7.15k 1%"
+    pins: [1, 2]
+    note: "Sets the 0.5x floor: 7.15/(50+7.15) = 0.125"
+
+  U-BREATH-BUF:                 # 1/2 OPA2197, package counted on U-OPA-PITCH
+    part: OPA2197
+    section: A
+    of: U-OPA-PITCH
+    pins: [IN+, IN-, OUT]
+    note: "Unity follower. Buffers the wiper so R-IN does not load the pot"
+
+  R-BREATH-IN:
+    value: "10k 1%"
+    drawn_as: R-IN
+    pins: [1, 2]
+
+  POT-OFFSET:
+    value: "10k linear"
+    pins: [CW, W, CCW]
+    note: "Wiper UNBUFFERED - its R/4 source impedance is why zero sits ~20 deg past centre"
+
+  R-BREATH-OFF:
+    value: "21.0k 1%"
+    drawn_as: R-OFF
+    pins: [1, 2]
+
+  R-BREATH-OFFNEG:
+    value: "95.3k 1%"
+    drawn_as: R-OFFNEG
+    pins: [1, 2]
+
+  U-BREATH-SUM:                 # the other 1/2 of the same package
+    part: OPA2197
+    section: B
+    of: U-OPA-PITCH
+    pins: [IN+, IN-, OUT]
+    note: "Inverting summer, fixed x4 = R-FB/R-IN"
+
+  R-BREATH-FB:
+    value: "40.2k 1%"
+    drawn_as: R-FB
+    pins: [1, 2]
+    note: "40.2k, NOT 40k - 40k is not an E96 value and cannot be ordered"
+
+  D-JACK-CLAMP:
+    value: "BAV99"
+    pins: [A, K, C]             # dual series diode: anode, cathode, common
+    note: "One of qty 6, one per CV output"
+
+  R-OUT-PROT:
+    value: "1k 1%, >=500mW"
+    pins: [1, 2]
+    note: "The only part at real risk from a jack fault - see its BOM row"
+
+  C-OUT-BREATH:
+    value: "330nF film"
+    pins: [1, 2]
+
+nets:
+
+  BREATH_INAMP_OUT:
+    - port: BREATH_INAMP_OUT
+    - POT-GAIN.CW
+
+  GAIN_FLOOR:
+    - POT-GAIN.CCW
+    - R-GAIN-FLOOR.1
+
+  GAIN_WIPER:
+    - POT-GAIN.W
+    - U-BREATH-BUF.IN+
+
+  BUF_OUT:
+    - U-BREATH-BUF.OUT
+    - U-BREATH-BUF.IN-             # unity follower: output tied to inverting input
+    - R-BREATH-IN.1
+
+  DAC_AVDD:
+    - port: DAC_AVDD
+    - POT-OFFSET.CW
+
+  OFFSET_WIPER:
+    - POT-OFFSET.W
+    - R-BREATH-OFF.1
+
+  V_NEG12:
+    - port: V_NEG12
+    - R-BREATH-OFFNEG.1
+
+  SUM_NODE:
+    - R-BREATH-IN.2
+    - R-BREATH-OFF.2
+    - R-BREATH-OFFNEG.2
+    - R-BREATH-FB.1
+    - U-BREATH-SUM.IN-
+
+  BREATH_OUT:
+    - U-BREATH-SUM.OUT
+    - R-BREATH-FB.2
+    - D-JACK-CLAMP.C
+    - R-OUT-PROT.1
+
+  JACK_TIP:
+    - R-OUT-PROT.2
+    - C-OUT-BREATH.1
+    - port: BREATH_JACK
+
+  AGND:
+    - port: AGND
+    - R-GAIN-FLOOR.2
+    - POT-OFFSET.CCW
+    - U-BREATH-SUM.IN+
+    - C-OUT-BREATH.2
+
+  RAIL_POS:                      # clamp to +12 V
+    - D-JACK-CLAMP.K
+  RAIL_NEG:                      # clamp to -12 V
+    - D-JACK-CLAMP.A
+
+# Endpoints deliberately outside this circuit's scope. Without this the
+# two-endpoint rule would fire on the clamp rails, which terminate on the
+# module's supply rather than inside this circuit.
+external_endpoints: [RAIL_POS, RAIL_NEG]

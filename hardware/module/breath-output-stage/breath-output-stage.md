@@ -83,7 +83,7 @@ point of specifying the range from playing rather than from the sensor.
                                                  │
                                     [D-JACK-CLAMP BAV99]── ±12 V
                                                  │
-                                   [R-OUT-PROT 1k, 1206]
+                                   [R-OUT-PROT 1k 500mW]
                                                  │
                                                  ├──[C-OUT-BREATH 330nF film]── AGND
                                                  │

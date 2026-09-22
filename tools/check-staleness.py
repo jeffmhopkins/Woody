@@ -427,6 +427,13 @@ def check_bom_generated():
                             os.path.join(ROOT, "tools/merge-manifests.py"),
                             "--check"],
                            capture_output=True, text=True, cwd=ROOT, timeout=60)
+        # THE NETLIST IS AUTHORITATIVE FOR CONNECTIVITY, so it is gated here
+        # rather than left to a human remembering to run it. A tool nothing
+        # calls is a tool whose exit code reaches nobody - that is a recorded
+        # finding against four tools in this directory.
+        nl = subprocess.run([sys.executable,
+                             os.path.join(ROOT, "tools/check-netlist.py")],
+                            capture_output=True, text=True, cwd=ROOT, timeout=60)
     except Exception as e:
         return [f"could not run a generated-file check: {e}"]
     # BOTH RESULTS, ALWAYS. This returned on the manifest result before it
@@ -436,7 +443,8 @@ def check_bom_generated():
     # applied to one branch and not to this one, six lines apart, in the same
     # function, in the same commit.
     out = []
-    for tool, res in (("merge-manifests.py", m), ("merge-bom.py", r)):
+    for tool, res in (("merge-manifests.py", m), ("merge-bom.py", r),
+                      ("check-netlist.py", nl)):
         if res.returncode == 0:
             continue
         # Keep every line the tool chose to print. The old filter kept only
