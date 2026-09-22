@@ -25,16 +25,16 @@ G10-13,G10,245,,NOT ADDRESSED,"G10-13) — so it is a robustness defect, not a h
 G10-14,G10,279,,NOT ADDRESSED,G10-14 — exit codes are used where it matters. repo
 G10-15,G10,291,,NOT ADDRESSED,"G10-15 — the documented masking bug is genuinely fixed. test , clone,"
 G10-16,G10,297,,NOT ADDRESSED,"G10-16 — rule 2b holds exactly as written. test , clone, three"
-G10-17,G10,314,,NOT ADDRESSED,G10-17 — the corpus half has no shape assertion: rename a CORPUS entry and
+G10-17,G10,314,,recorded,G10-17 — the corpus half has no shape assertion: rename a CORPUS entry and
 G10-18,G10,336,,NOT ADDRESSED,"G10-18 — the coverage number prints only on failure, so a run that checked"
 G10-19,G10,345,,NOT ADDRESSED,G10-19 — ARTEFACT and PATH_RE are two hand-maintained extension lists in
 G10-2,G10,65,,recorded,"G10-2 — same outcome from a wrong argument. test , clone. Change the"
 G10-20,G10,363,,NOT ADDRESSED,"G10-20 — a third definition of ""the corpus"", differing from the other two."
 G10-21,G10,378,,NOT ADDRESSED,"G10-21 — the HIST vocabulary is case-sensitive, while segments()"
 G10-22,G10,403,,recorded,G10-22 — consequence: the canonical example from CLAUDE.md and from this
-G10-23,G10,428,,NOT ADDRESSED,"G10-23 — the dated YYYY-MM-DD rule — the first HIST pattern, and the"
+G10-23,G10,428,,recorded,"G10-23 — the dated YYYY-MM-DD rule — the first HIST pattern, and the"
 G10-24,G10,456,,NOT ADDRESSED,G10-24 — --regrown reports zero while seventeen rows carry a history or
-G10-25,G10,472,,NOT ADDRESSED,"G10-25 — it does have the ""fires on correct rows"" problem its own --regrown"
+G10-25,G10,472,,recorded,"G10-25 — it does have the ""fires on correct rows"" problem its own --regrown"
 G10-26,G10,500,,NOT ADDRESSED,G10-26 — LIVE 's imperative rule is uppercase-only for DO NOT while its
 G10-27,G10,507,,NOT ADDRESSED,"G10-27 — history the vocabulary misses entirely. test , clone, 13"
 G10-28,G10,533,,NOT ADDRESSED,G10-28 — --regrown is silently ignored when a REF is also given.
@@ -52,7 +52,7 @@ G10-38,G10,655,,NOT ADDRESSED,G10-38 — merge-manifests.py states the fragment 
 G10-39,G10,671,,NOT ADDRESSED,G10-39 — rewrite-paths.py --verify excludes five §6-corpus documents by
 G10-4,G10,92,,NOT ADDRESSED,G10-4 — judgement: the self-verification was never designed to reach
 G10-40,G10,697,,NOT ADDRESSED,G10-40 — --apply and --verify see only tracked files. repo :95-98 —
-G10-41,G10,702,,NOT ADDRESSED,"G10-41 — only one tool is wired to anything automated. test , grepping"
+G10-41,G10,702,,recorded,"G10-41 — only one tool is wired to anything automated. test , grepping"
 G10-42,G10,716,,recorded,G10-42 — this wave's freeze clause bound the orchestrator and not the
 G10-5,G10,132,,NOT ADDRESSED,"G10-5 — CONFIRMED (independently, from a sibling's claim relayed to me):"
 G10-6,G10,159,,NOT ADDRESSED,"G10-6 — the refutation-exemption list is counted but not printed, including"
@@ -67,7 +67,7 @@ G11-13,G11,204,,NOT ADDRESSED,G11-13 — ADR 0009 prices a width change against 
 G11-14,G11,216,,NOT ADDRESSED,G11-14 — ADR 0002 still instructs the reader to fetch documents that are banked
 G11-15,G11,234,,NOT ADDRESSED,G11-15 — ADR 0012 still recommends the display ADR 0008 rejected
 G11-16,G11,246,,NOT ADDRESSED,G11-16 — the bonded body survives in six ADRs after ADR 0009 made it serviceable
-G11-17,G11,281,,NOT ADDRESSED,"G11-17 — ADR 0005 cites the wrong schematic page for the load-switch sizing, twice"
+G11-17,G11,281,,recorded,"G11-17 — ADR 0005 cites the wrong schematic page for the load-switch sizing, twice"
 G11-18,G11,301,,NOT ADDRESSED,G11-18 — ADR 0009's key-network citation
 G11-19,G11,306,,NOT ADDRESSED,G11-19 — citations I checked and that do resolve (recorded so the next round need not redo them)
 G11-2,G11,43,,NOT ADDRESSED,G11-2 — ADR 0005's Decision paragraph specifies the 3.3 V buck its own next section calls wrong
@@ -101,7 +101,7 @@ G11-44,G11,679,,NOT ADDRESSED,"- G11-44 repo 0006:141–142 ""Resolution goes fr
 G11-45,G11,685,,NOT ADDRESSED,"- G11-45 repo 0006:742–743 ""The −11.9 and −23.5 cents/octave figures"
 G11-46,G11,689,,NOT ADDRESSED,- G11-46 repo 0010:174–177 ends a bullet mid-sentence:
 G11-47,G11,701,,NOT ADDRESSED,"- G11-47 repo 0001:340–341 ""So the allocation went from a superseded 6"
-G11-48,G11,706,,NOT ADDRESSED,"- G11-48 (outside the ADRs, found while checking one) repo"
+G11-48,G11,706,,recorded,"- G11-48 (outside the ADRs, found while checking one) repo"
 G11-49,G11,713,,recorded,"G11-49 — ADR 0005 offers two ""equally valid"" alternatives that would invalidate five BOM rows and three settled figures"
 G11-5,G11,82,,NOT ADDRESSED,G11-5 — ADR 0001's Consequences instruct the build ADR 0013 rejected
 G11-6,G11,104,,NOT ADDRESSED,G11-6 — ADR 0009 states the superseded key-input network and attributes it to ADR 0001
@@ -119,7 +119,7 @@ G12-16,G12,537,,NOT ADDRESSED,"G12-16. ROADMAP.md:153-162 — the phase view omi
 G12-17,G12,554,,NOT ADDRESSED,G12-17. firmware/README.md:81-83 states the pre-fix DAC behaviour in the
 G12-18,G12,576,,NOT ADDRESSED,"G12-18. DAC statelessness argument — verified against the banked datasheet,"
 G12-19,G12,603,,NOT ADDRESSED,G12-19. config/key-layout.yaml:150-151 — the free-bit argument rests on the
-G12-2,G12,94,,NOT ADDRESSED,"G12-2. The retired ""bonded body"" premise is live in ~25 places. One fact,"
+G12-2,G12,94,,recorded,"G12-2. The retired ""bonded body"" premise is live in ~25 places. One fact,"
 G12-20,G12,624,,NOT ADDRESSED,"G12-20. Milestones nothing depends on, and one that exists only in its own"
 G12-21,G12,663,,NOT ADDRESSED,"G12-21. ROADMAP.md:71 — ""the four thumb keys"". There are seven :"
 G12-22,G12,672,,NOT ADDRESSED,G12-22. Commit-log claims: sampled 12 recent messages against the tree. All
@@ -129,7 +129,7 @@ G12-25,G12,743,,NOT ADDRESSED,G12-25. tools/check-staleness.py reports PASS and 
 G12-26,G12,800,,NOT ADDRESSED,G12-26. The freeze did not hold. README.md was modified twice by another
 G12-3,G12,148,,NOT ADDRESSED,"G12-3. firmware/README.md:23-24 describes the pre-ADR-0013 architecture, and"
 G12-4,G12,179,,NOT ADDRESSED,"G12-4. config/figures.yaml:471 — a disputed, load-bearing figure is assigned"
-G12-5,G12,217,,NOT ADDRESSED,G12-5. ROADMAP.md:71 (M1) tells a builder the bounce figure is unpublished.
+G12-5,G12,217,,recorded,G12-5. ROADMAP.md:71 (M1) tells a builder the bounce figure is unpublished.
 G12-6,G12,249,,NOT ADDRESSED,G12-6. docs/reference/repo-maintenance.md:27 states the hook behaviour the
 G12-7,G12,282,,NOT ADDRESSED,G12-7. docs/reference/repo-maintenance.md:204 — both numbers in the
 G12-8,G12,313,,NOT ADDRESSED,"G12-8. docs/reference/pcb-pipeline.md:152-176 — a four-number table, all"
@@ -157,7 +157,7 @@ G2-27,G2,631,,NOT ADDRESSED,G2-27 — ADR 0009 cites ADR 0001 for three componen
 G2-28,G2,693,,NOT ADDRESSED,"G2-28 — The corollary, which is a method note rather than a finding. A"
 G2-3,G2,124,,NOT ADDRESSED,"G2-3 — pcb-pipeline.md files a settled figure as one of three undecided ""ground questions"""
 G2-4,G2,143,,NOT ADDRESSED,"G2-4 — The same page's sim ranking is stale in two independent ways, and the corpus already says so"
-G2-5,G2,169,,NOT ADDRESSED,"G2-5 — All three of dig-gnd-topology 's candidate citations are wrong, and one points past end-of-file"
+G2-5,G2,169,,recorded,"G2-5 — All three of dig-gnd-topology 's candidate citations are wrong, and one points past end-of-file"
 G2-6,G2,193,,NOT ADDRESSED,G2-6 — …and the note that justifies the dispute is wrong about the same line
 G2-7,G2,206,,NOT ADDRESSED,"G2-7 — 2.8 kPa is attributed to ADR 0003, which says 0–5 kPa"
 G2-8,G2,241,,NOT ADDRESSED,G2-8 — A quotation attributed to ADR 0001 appears nowhere in ADR 0001
@@ -173,7 +173,7 @@ G3-16,G3,352,,NOT ADDRESSED,G3-16 (a) hardware/unplaced.csv:17 ( CABLE-UMB ) —
 G3-17,G3,366,,NOT ADDRESSED,G3-17 (a) key-pullup-qty 's owner document never states the value.
 G3-18,G3,380,,NOT ADDRESSED,"G3-18 (a, minor) docs/decisions/0005-power-architecture.md:157-162 — the load table is not reproducible from the conversion convention the same section states."
 G3-19,G3,401,,NOT ADDRESSED,"G3-19 (a, minor) docs/reference/latency-budget.md:65 — the digital breath total is ~0.2 ms above the sum of its own rows."
-G3-2,G3,116,,NOT ADDRESSED,"G3-2 (a) The module's own +12 V total is 404 mA in the ADR and 392 mA in the hardware pages, the BOM and figures.yaml 's own derivation."
+G3-2,G3,116,,recorded,"G3-2 (a) The module's own +12 V total is 404 mA in the ADR and 392 mA in the hardware pages, the BOM and figures.yaml 's own derivation."
 G3-20,G3,411,,NOT ADDRESSED,"G3-20 (a, register) pitch-cents-budget 's candidates list no longer corresponds to the owner page's table."
 G3-21,G3,432,,NOT ADDRESSED,G3-21 (b) dac-rail (5.21 V) is written out in 17 files.
 G3-22,G3,442,,NOT ADDRESSED,"G3-22 (b) key-scan-current 's derivation is duplicated verbatim, not cited, in five files besides the owner."
@@ -199,24 +199,24 @@ G3-8,G3,44,,NOT ADDRESSED,G3-8) and the row/unit counts — were both re-run ins
 G3-9,G3,250,,NOT ADDRESSED,G3-9 (a) hardware/carrier/breath-adc/breath-adc.md:52 — the ADC clamp-current worst case is still computed from the retired 4.7 V sensor full scale.
 G4-1,G4,52,,NOT ADDRESSED,G4-1. The file-kind test is one line and it is correct for the four
 G4-10,G4,295,,NOT ADDRESSED,G4-10. A live instance in the .md corpus: the DAC internal reference is
-G4-11,G4,354,,NOT ADDRESSED,"G4-11. 300 is three times wider than anything the corpus uses, and the slack"
-G4-12,G4,19,,NOT ADDRESSED,"G4-12, G4-13, G4-14, G4-17 are read-only analysis of /home/user/Woody ."
+G4-11,G4,354,,recorded,"G4-11. 300 is three times wider than anything the corpus uses, and the slack"
+G4-12,G4,19,,recorded,"G4-12, G4-13, G4-14, G4-17 are read-only analysis of /home/user/Woody ."
 G4-13,G4,451,,NOT ADDRESSED,G4-13. The sanctioned destination for retired values is the least falsifiable
 G4-14,G4,469,,NOT ADDRESSED,"G4-14. The hole was not moved by this change — the trim went to git, not to"
 G4-15,G4,481,,recorded,G4-15. An injection slice cannot share a working tree with cold reviewers.
 G4-16,G4,516,,NOT ADDRESSED,G4-16. I reverted another agent's in-flight edit. Carrying out step 1 of the
 G4-17,G4,525,,NOT ADDRESSED,G4-17. The wave README's freeze names a4b80b1 ; HEAD was already 25cc740
 G4-2,G4,20,,NOT ADDRESSED,G4-2 and part of G4-7 were first taken in the shared tree and are marked
-G4-3,G4,106,,NOT ADDRESSED,G4-3. .md files that are really data get the prose exemption. This is the
-G4-4,G4,146,,NOT ADDRESSED,"G4-4. Inside an ASCII drawing, a refutation in one column exempts a value in"
+G4-3,G4,106,,recorded,G4-3. .md files that are really data get the prose exemption. This is the
+G4-4,G4,146,,recorded,"G4-4. Inside an ASCII drawing, a refutation in one column exempts a value in"
 G4-5,G4,174,,NOT ADDRESSED,G4-5. Both the generated hardware/bom.csv and all its fragments are
 G4-6,G4,181,,recorded,G4-6. Eight file extensions fall through the scan entirely — neither strict
 G4-7,G4,40,,NOT ADDRESSED,"G4-7, G4-12."
 G4-8,G4,235,,NOT ADDRESSED,G4-8. All 24 are legitimate corrections-in-place. None is a stale value
 G4-9,G4,270,,NOT ADDRESSED,"G4-9. A refutation carrying a wrong replacement escapes, reproduced."
 G5-0,G5,24,,recorded,"G5-0 — The freeze is broken again, live, by a concurrent slice"
-G5-1,G5,83,,NOT ADDRESSED,"G5-1 — README.md never names config/figures.yaml , and misdescribes the directory it is in"
-G5-10,G5,301,,NOT ADDRESSED,"G5-10 — README.md never mentions CLAUDE.md , and the layout tree omits LICENSES/"
+G5-1,G5,83,,recorded,"G5-1 — README.md never names config/figures.yaml , and misdescribes the directory it is in"
+G5-10,G5,301,,recorded,"G5-10 — README.md never mentions CLAUDE.md , and the layout tree omits LICENSES/"
 G5-11,G5,321,,NOT ADDRESSED,G5-11 — Three board-level bom.csv fragments exist and no corpus document mentions them
 G5-12,G5,354,,NOT ADDRESSED,G5-12 — hardware/README.md claims the Interfaces definition was de-duplicated; all 23 pages still restate it
 G5-13,G5,417,,NOT ADDRESSED,G5-13 — notes.md is absent in 8 of 23 and nothing says it is optional
@@ -226,16 +226,16 @@ G5-16,G5,502,,NOT ADDRESSED,G5-16 — Two sibling review directories whose names
 G5-17,G5,515,,NOT ADDRESSED,"G5-17 — One wave is a loose file, so the documented way to count waves undercounts"
 G5-18,G5,525,,NOT ADDRESSED,G5-18 — .staleness-report.txt and .staleness/report.txt are different files with near-identical names
 G5-19,G5,539,,NOT ADDRESSED,G5-19 — path-map-2026-09-21.csv is a historical record filed in the design corpus
-G5-2,G5,114,,NOT ADDRESSED,"G5-2 — "" docs/review/ holds nine waves"" is wrong, in the paragraph that exists to explain why counts are not restated"
+G5-2,G5,114,,recorded,"G5-2 — "" docs/review/ holds nine waves"" is wrong, in the paragraph that exists to explain why counts are not restated"
 G5-20,G5,562,,NOT ADDRESSED,G5-20 — Two vestigial .gitkeep files
 G5-21,G5,572,,NOT ADDRESSED,G5-21 — module/panel/ and module/panel-led/ are adjacent and easily confused
 G5-22,G5,596,,NOT ADDRESSED,G5-22 — The Interfaces definition: 23 copies
 G5-23,G5,600,,NOT ADDRESSED,"G5-23 — sim/README.md boilerplate: 5 copies, two blocks"
 G5-24,G5,623,,NOT ADDRESSED,"G5-24 — The notes.md ""superseded shelf"" preamble: 7 copies in two spellings"
-G5-25,G5,645,,NOT ADDRESSED,"G5-25 — The KS-33 footprint table: 2 copies, and they have already gone out of sync"
+G5-25,G5,645,,recorded,"G5-25 — The KS-33 footprint table: 2 copies, and they have already gone out of sync"
 G5-26,G5,675,,NOT ADDRESSED,G5-26 — The Phase B split banner: 4 copies
 G5-27,G5,690,,NOT ADDRESSED,G5-27 — The repository's own tool reports 211 restated-not-cited values
-G5-3,G5,148,,NOT ADDRESSED,"G5-3 — Three documents give three different sizes for hardware/unplaced.csv , and none is right"
+G5-3,G5,148,,recorded,"G5-3 — Three documents give three different sizes for hardware/unplaced.csv , and none is right"
 G5-4,G5,177,,NOT ADDRESSED,"G5-4 — repo-maintenance.md contradicts itself about the hook, within one file"
 G5-5,G5,199,,NOT ADDRESSED,"G5-5 — ""24 per-circuit bom.csv fragments"" matches nothing"
 G5-6,G5,220,,NOT ADDRESSED,G5-6 — §4's explanation of what is in unplaced.csv describes contents that are not there
@@ -273,7 +273,7 @@ G6-7,G6,260,,NOT ADDRESSED,"G6-7. U-TVS-CHAIN asks for a 4-channel array in SOT-
 G6-8,G6,278,,NOT ADDRESSED,G6-8. U-REF-BREATH orders the grade the corpus believes is wrong.
 G6-9,G6,294,,NOT ADDRESSED,G6-9. U-LOADSW orders the commercial temperature grade and its own notes say
 G7-1,G7,90,,recorded,"G7-1 4 body construction, ~20 files ADR 0009 retired the bonded body; ~20 live arguments still rest on it"
-G7-10,G7,419,,NOT ADDRESSED,G7-10 — ks33-geometry.md still points at a cluster-board fix that has landed
+G7-10,G7,419,,recorded,G7-10 — ks33-geometry.md still points at a cluster-board fix that has landed
 G7-11,G7,439,,NOT ADDRESSED,G7-11 — ADR 0005's 3V3 argument predates key-scan-current
 G7-12,G7,464,,NOT ADDRESSED,G7-12 — R-KEY-PU 's own row restates the pre- R-KEY-SER current
 G7-13,G7,96,,NOT ADDRESSED,G7-13 2 diode-split-rationale The derivation chain is ~2000× off the value it states
@@ -285,10 +285,10 @@ G7-18,G7,589,,NOT ADDRESSED,G7-18 — opa2197-output-impedance 's note is blocke
 G7-19,G7,609,,NOT ADDRESSED,G7-19 — latency-budget.md 's own correction sentence gets the sum wrong
 G7-2,G7,91,,NOT ADDRESSED,"G7-2 1 R-KEY-PU / key-pullup-qty 21 → 24 pull-ups; ""63 passives"" in four files never followed. It is 66"
 G7-20,G7,623,,NOT ADDRESSED,G7-20 — the digital-copy total does not reproduce from its own rows
-G7-21,G7,644,,NOT ADDRESSED,"G7-21 — README.md:117 : "" docs/review/ holds nine waves"""
-G7-22,G7,661,,NOT ADDRESSED,"G7-22 — hardware/README.md:112 : ""It was 50 rows and is now 34. Sixteen of them were drawn all along"""
-G7-23,G7,674,,NOT ADDRESSED,"G7-23 — repo-maintenance.md:204 : ""the 50 rows of 138"""
-G7-24,G7,687,,NOT ADDRESSED,"G7-24 — repo-maintenance.md:191 : ""24 per-circuit bom.csv fragments"""
+G7-21,G7,644,,recorded,"G7-21 — README.md:117 : "" docs/review/ holds nine waves"""
+G7-22,G7,661,,recorded,"G7-22 — hardware/README.md:112 : ""It was 50 rows and is now 34. Sixteen of them were drawn all along"""
+G7-23,G7,674,,recorded,"G7-23 — repo-maintenance.md:204 : ""the 50 rows of 138"""
+G7-24,G7,687,,recorded,"G7-24 — repo-maintenance.md:191 : ""24 per-circuit bom.csv fragments"""
 G7-25,G7,703,,NOT ADDRESSED,"G7-25 — repo-maintenance.md:311 + :322 : ""every tracked file has a row"", ""405 tracked files"""
 G7-26,G7,729,,NOT ADDRESSED,"G7-26 — U-RESP is counted twice, and its two halves are allocated twice"
 G7-27,G7,758,,NOT ADDRESSED,"G7-27 — ROADMAP.md:71 : ""the four thumb keys … the eleven finger keys"""
@@ -315,7 +315,7 @@ G8-20,G8,14,,NOT ADDRESSED,"G8-20 ), so every mechanical result below was re-run
 G8-21,G8,74,low,NOT ADDRESSED,G8-21 low check_restated builds its exclusion set from value + forbidden only
 G8-22,G8,75,,NOT ADDRESSED,G8-22 — What I verified against banked documents and found correct
 G8-23,G8,53,high,NOT ADDRESSED,"G8-23 high LIVE STALE VALUE — ADR 0004:842 says ""The 97 mm above"" where the derivation above it totals 110 mm; no pattern covers this spelling"
-G8-3,G8,56,high,NOT ADDRESSED,G8-3 high diode-split-rationale : r_d 69 mΩ is refuted by its own entry and by the datasheet
+G8-3,G8,56,high,recorded,G8-3 high diode-split-rationale : r_d 69 mΩ is refuted by its own entry and by the datasheet
 G8-4,G8,57,medium,NOT ADDRESSED,G8-4 medium umbilical-current : value 359 mA ≠ its own derivation 's 358.1 mA
 G8-5,G8,58,high,recorded,G8-5 high 57/217 patterns never matched any revision — 26 % of the guard is decorative
 G8-6,G8,59,high,NOT ADDRESSED,"G8-6 high sensor-full-scale : 12 of 34 patterns never matched, in the entry that preaches grep-first"
