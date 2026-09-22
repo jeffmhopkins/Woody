@@ -864,6 +864,70 @@ definition has not kept up with the tables.
 
 ---
 
+## F. Sibling-reported items, checked independently from the page side
+
+The coordinator relayed six claims from other slices. I did not adopt any of
+them; each was re-derived from the pinned pages. **Two are confirmed and newly
+filed, three I had already found independently, one is refuted for my scope.**
+
+| Relayed claim | Verdict from the pages |
+|---|---|
+| `breath-adc.md:52` derives clamp current from the retired 4.7 V | **Confirmed**, and the 4.7 V is provably the retired `sensor-full-scale` and not the escape-note decoy — **G9-42** |
+| ADR 0004 still reasons *"`CLR` fires"* against the deleted watchdog | **Not reproduced on any schematic page**, but a worse instance of the same shape *is* on one — **G9-43**. See below |
+| `latency-budget.md:49`'s 632 µs reproduces only from the superseded 531 Hz | **Refuted for `hardware/**`** — no schematic page carries it. See below |
+| OPA2197 spare-half count contradictory across pages | Already filed independently — **G9-27**, with the half-by-half recount, plus **G9-11** (the BOM adds a seventh package nobody's page knows about) |
+| `C-BULK-RAIL` 47 µF drawn vs 100 µF tabled | Already filed — **G9-3**, judged from the page side: the drawing labels all four, and *Still open* restates it |
+| `R-LED-SER` 220R page vs 330R BOM; `R-FB` 40k drawn vs 40.2k tabled | Already filed — **G9-4** (three values, not two) and **G9-1** (and the offset table is computed at the drawing's 40k) |
+| No `ADJ` bypass in `power-entry.md` though a PSRR claim depends on one | **Confirmed** — **G9-41** |
+
+**On the watchdog (`[test]` `grep -rn "watchdog" hardware/ --include=*.md`, eight
+hits, all read):** no live schematic page reasons from a watchdog that exists.
+`digital-and-supervision.md:87` is correctly premised (*"With no watchdog there
+is no `CLR` to fire mid-note"*); `breath-receive-stage.md:233` names the
+deletion as an accepted cost; `mod-channels.md:160-168` is the repaired case.
+So the ADR-side finding does not propagate into the drawings. What it *did*
+lead me to is `digital-and-supervision.md`'s opening two paragraphs, which
+justify the whole section on supervision the same board deletes — a different
+sentence, the same defect, and one a grep for "watchdog" does find but a grep
+for a value never would.
+
+**On 632 µs / 531 Hz (`[test]` `grep -rn "632\|531" hardware/`, three hits):**
+`hardware/` is clean. The only 531s are correct refutations, and both are
+written in the spelling of the file they sit in — `breath-sense-link.md:150`
+*"**482 Hz** differential pole (not 531 — `R1b` makes both legs 11 kΩ)"*, and
+`C-FILT-BREATH`'s BOM note *"482Hz differential (NOT 531Hz - that assumed 20k
+of series resistance…)"* `[repo]`. No hit for 632 anywhere under `hardware/`.
+I recomputed the live pole `[calc]`: `1/(2π · 22 kΩ · 15 nF) = 482.3 Hz`, and
+531 Hz back-solves to 20.0 kΩ, exactly as the refutations say. If
+`latency-budget.md:49` is wrong it is wrong on its own; the schematic pages
+that own the pole state it correctly. **`docs/reference/latency-budget.md` is
+outside my slice and I did not audit it.**
+
+**On the tree disturbance and untracked artifacts:** re-checked against the
+coordinator's narrowing. Only two findings in this report touch a tool or an
+untracked snapshot, and neither rests on one:
+
+- **G9-18** cites a `PASS` from the staleness hook. The finding is that
+  `carrier.md:379`'s *"(which six bits, to what levels)"* evades every
+  `forbidden` pattern in `marker-bits`. That is demonstrable by reading
+  `config/figures.yaml:260` against `carrier.md:379` — both tracked, both
+  pinned-verified — and does not need the tool to have run. The hook line is
+  corroboration, not evidence.
+- The `merge-bom.py --check` result quoted at the top is from a moment when
+  `git status --short` showed no tracked corpus modification, and
+  `tools/merge-bom.py` was never among the reported-modified files. Nothing in
+  §A–§E depends on it; it is stated as a *positive* result so the next wave
+  need not re-run it.
+
+No finding in this report cites `.staleness/report.txt` or
+`.staleness-report.txt` as its evidence. The coordinator's earlier warning
+about `hardware/module/pitch-stage/circuit.yaml` is withdrawn on their own
+say-so and independently by my own pinned read (`git show
+a4b80b1:hardware/module/pitch-stage/circuit.yaml`, identical) — nothing in
+G9-23, G9-25, G9-26 or G9-37 depended on it in any case.
+
+---
+
 ## What I could not check
 
 - **`key-marker-and-bits.md:93` — *"A mid-shift `SH/LD` reload passes at 11 of
@@ -944,19 +1008,26 @@ G9-10 (`C_cm` tolerance absent), G9-11 (seventh OPA2197).
 
 **Would break a netlist transcription:** G9-6 (four refdes that do not exist),
 G9-9 (two clamp parts on one jack), G9-13 and G9-14 (drawings whose rails do
-not connect), G9-17 (`POT-OFFSET` end undrawn).
+not connect), G9-17 (`POT-OFFSET` end undrawn), G9-41 (LM317 `ADJ` bypass
+undrawn).
 
 **Live stale values:** G9-18 (six/eight marker bits — and the checker passes),
 G9-19 (63 vs 66, four places, two of them `.csv`), G9-20 (34 vs 32),
 G9-21 (two vs three End columns), G9-22 (1594 vs 1598), G9-23 (15.9 kHz at
 1 nF), G9-26 (0.54 vs 0.42), G9-27 (one vs two spare halves), G9-29 (125 vs
-119.9 µs).
+119.9 µs), G9-42 (clamp current at the retired 4.7 V).
 
-**Arguments whose premise has moved:** G9-8 (`R-BIAS-INAMP` filed on a
-refuted edge), G9-25 (a `disputed` figure quoted as a settled total),
-G9-28 (*"same part as `R-MODGAIN`"*), G9-33 (*"no datasheet was reachable"*),
-G9-36 (a live, adverse proposal on the history shelf), G9-37 (a live
-correction only in `notes.md`).
+**Arguments whose premise has moved:** G9-43 (`digital-and-supervision.md`
+justifies itself on supervision its own board deletes — the strongest of
+these), G9-8 (`R-BIAS-INAMP` filed on a refuted edge), G9-25 (a `disputed`
+figure quoted as a settled total), G9-28 (*"same part as `R-MODGAIN`"*),
+G9-33 (*"no datasheet was reachable"*), G9-36 (a live, adverse proposal on the
+history shelf), G9-37 (a live correction only in `notes.md`).
+
+**Findings by number:** G9-1 … G9-43, all filed. Section order is by severity,
+not by number — G9-41, G9-42 and G9-43 were added after a coordinator
+follow-up relayed sibling claims (see §F) and sit in the severity sections
+they belong to.
 
 **Arithmetic:** G9-24 (~2000×, conclusion unaffected), G9-31 (1.9×, and the
 page uses two figures two sentences apart), G9-32 (10× vs 30×).

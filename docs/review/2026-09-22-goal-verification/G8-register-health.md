@@ -22,12 +22,27 @@ never used the checker**; it is a 40-line reimplementation of `check_figures`'
 line-joining loop, which is why the `check_links([])` patch could not have
 touched it.
 
+**Checker output is untracked and I re-derived it.** `.staleness/report.txt`,
+`.staleness-report.txt` and the `staleness check:` line that precedes every
+Bash call are snapshots of whatever the working tree held when the hook last
+ran — `git ls-files .staleness` is empty. Three of my citations rest on that
+report (the 8 unverifiable owners, the 211-entry restated advisory, the
+17-entry drawn-not-bommed list). **All three were regenerated inside the
+pinned clone** `[test] cd <pin> && python3 tools/check-staleness.py --detail`
+with `git status --short` empty, and reproduce identically, including the
+summary line `PASS … 123 files, 23 circuits, 37 figures / 217 patterns |
+5 unresolved | 211 restated`. My pattern verdicts (§4) never used the checker
+at all.
+
 **Headline.** The register is *factually* in very good shape — I re-derived 30
 derivations and re-read six banked datasheets and found the physics almost
 entirely right. What is not in good shape is the **enforcement half**:
 **57 of 217 forbidden patterns (26 %) have never matched any revision of this
-repository, ever**, and one entry silently loses a field to a duplicate YAML
-key. Two entries contain a number that contradicts their own derivation.
+repository, ever**; one entry silently loses a field to a duplicate YAML key;
+two entries contain a number that contradicts their own derivation; and
+**there is a live stale value in the corpus right now that the checker passes
+over** (G8-23) — the fifth escape of the same figure, in a spelling nobody
+listed.
 
 ---
 
@@ -35,6 +50,7 @@ key. Two entries contain a number that contradicts their own derivation.
 
 | # | Severity | What |
 |---|---|---|
+| G8-23 | **high** | **LIVE STALE VALUE** — ADR 0004:842 says "The 97 mm above" where the derivation above it totals 110 mm; no pattern covers this spelling |
 | G8-1 | **high** | Duplicate YAML key silently drops a `false_positive_note` |
 | G8-2 | **high** | `key-pullup-qty`'s owner does not state its own value — rule 1 broken at the root |
 | G8-3 | **high** | `diode-split-rationale`: `r_d 69 mΩ` is refuted by its own entry and by the datasheet |
@@ -65,12 +81,24 @@ key. Two entries contain a number that contradicts their own derivation.
 **G8-1 — `panel-height-budget` defines `false_positive_note` twice, and PyYAML
 silently drops the first one.**
 
-`[test] [pinned]` A duplicate-key-detecting loader over the pinned file:
+`[test] [pinned]` Confirmed by **two independent methods** over the pinned
+file. First, a `SafeLoader` subclass instrumenting `construct_mapping`. Second
+— because a loader-level hook only sees mappings the loader chooses to
+construct — a raw `yaml.compose()` node walk over the whole document,
+recursing through every `MappingNode` and `SequenceNode` at every depth:
 
 ```
-entries: 37   unique ids: 37
-DUPLICATE KEYS: [('false_positive_note', 408, 423)]
+mapping nodes walked: 38   keys walked: 342
+DUPLICATE KEYS: 1
+  at /figures[18]: key 'false_positive_note' first line 408,
+                   REDEFINED line 423 (first is discarded)
+
+entries 37, unique ids 37
+duplicate-pattern scan done       (no entry repeats a forbidden pattern)
 ```
+
+`figures[18]` is `panel-height-budget`. **One duplicate in the file, and no
+others at any depth** — so this is a single defect, not a pattern of them.
 
 `[repo] config/figures.yaml:408` and `:423`. `yaml.safe_load` keeps the **last**
 occurrence, so the entry that loads carries only `:423` — "The candidates
@@ -586,6 +614,75 @@ All three are still named in a schematic page's prose
 Asymmetric coverage of one retirement event — small, but it is the exact
 shape the file's other escape notes describe.
 
+### G8-23 — A live stale value the checker passes over: `panel-height-budget`, fifth escape, new shape
+
+**This is the only finding in my slice where the corpus asserts a retired
+number as live fact today.** A sibling slice flagged it; I verified it
+independently on the pinned clone and it holds, and the mechanism is a
+stricter case than reported.
+
+`[repo] [pinned] docs/decisions/0004-cv-interface-module.md:841-845`:
+
+```
+> **Still a 1:1 paper check at M4, and now it has numbers to check against.**
+> The 97 mm above is built from `[from memory]` component envelopes — the
+> Neutrik drawing, the Thonkiconn panel dimension and the pot bushing were all
+> behind a blocked proxy through three review waves. **The layout is credible
+> and it is not verified.** Print it and lay the real parts on it.
+```
+
+**There is no 97 mm above.** `[repo] [pinned] 0004:783-790` is the content
+stack this sentence points back at, and it totals **110 mm**:
+
+```
+| Label / title band                         | 5 mm  |
+| Three pots across                          | 22 mm |
+| Jacks, 3 rows × 2 columns at 13 mm pitch   | 39 mm |
+| etherCON (flange 26 × 31 mm) with the LED  | 31 mm |
+| The toggle, on a row of its own            | 13 mm |
+| **Total** | **110 mm against 115.5 mm — 5.5 mm spare** |
+```
+
+`[calc]` `5 + 22 + 39 + 31 + 13 = 110`, which is exactly
+`panel-height-budget`'s `value`. 97 mm is one of the four retired candidates
+the entry's own `note` lists as superseded
+`[repo] config/figures.yaml:426-427`.
+
+**Why every pattern misses it.** `[test] [pinned]` All twelve
+`panel-height-budget` patterns are dead against the current corpus, and the
+three that mention 97 are:
+
+```
+"97 mm against ~110 mm"      "97 mm against ~110"      "= 97mm"
+```
+
+Every one assumes the retired number appears **next to its comparison
+clause**. The live sentence is `The 97 mm above` — the number with no
+comparison at all, referring backwards. The previous four escapes of this
+figure were spelling variants of the *same phrase* (the `escape_note` records
+"97mm", "13mm spare", "115mm against ~110mm usable", "107mm of ~110mm", each
+missed by a removed space). **This one is a different shape entirely: a bare
+back-reference.** No amount of respacing the existing patterns reaches it,
+which is why four rounds of fixing the spacing did not.
+
+**And it is not refuted in place.** The line does not correct the 97; it
+*asserts* it and then adds a provenance caveat about it. `[test]` The
+checker's `REFUTATION` vocabulary finds nothing in the ±300-character window
+that would exempt it even if a pattern did fire — so this is a genuine
+`live`, not a scored exemption. The checker reports `PASS` because no pattern
+matches, which is the failure mode CLAUDE.md §2 describes verbatim: *"Eleven
+derived statements stayed live while the checker reported zero hits."*
+
+**What it costs.** The sentence books the M4 1:1 paper check against a figure
+that is not in the document, and tells a reader the layout is "credible and
+not verified" about a number that has been superseded rather than
+unverified — so the gate reads as satisfiable by measuring the wrong thing.
+
+The minimal correct fix is to change `97` to `110` in that sentence. The
+pattern to add is **not** another 97-with-a-clause variant; `"The 97 mm"` is
+the distinctive string, and `[test] [pinned]` it occurs exactly once in the
+corpus, so it will not fire on anything else.
+
 ### Spelling coverage: where a superseded value could still hide
 
 `[test] [pinned]` I extracted every retired numeral from every `forbidden`
@@ -892,10 +989,28 @@ Stated plainly, because a silent gap reads as a clean result.
   rule, including this wave's own `README.md`. If the wave README pins a
   revision or a method that contradicts what I did above, I would not know.
 
+**Two claims reached me second-hand from sibling slices, via the
+coordinator.** I did not read their reports; I treated both as unverified
+claims and re-derived each from the pinned corpus before adopting it. The
+duplicate `false_positive_note` I had already found independently before
+being told (it is in my first pass), and I then confirmed it by a second
+method. The `97 mm` claim I had **not** found — my spelling sweep extracted
+retired numerals from `forbidden` lists and `97` is in three of them, but I
+filtered the hit list on lines containing `mm`-shaped comparisons and
+`0004:842` reads `The 97 mm above`, which I passed over. **That is a miss on
+my part, of exactly the kind this slice exists to catch**, and it is worth
+recording that the finding came from another reviewer rather than from my
+method. My contribution is the verification and the mechanism (§G8-23): that
+it is a new escape *shape*, not a fifth spelling.
+
 ## What a fix pass should do first
 
 In order, by ratio of risk removed to effort:
 
+0. **G8-23** — change `97` to `110` at `0004:842`. It is the one place the
+   corpus states a retired figure as live fact, it is a one-character-class
+   edit, and the checker will go on reporting `PASS` until somebody does it
+   by hand.
 1. **G8-1** — delete one of the two `false_positive_note` keys (merge the
    text). One-line edit; until it is done, the loaded register is not the
    file on disk.
