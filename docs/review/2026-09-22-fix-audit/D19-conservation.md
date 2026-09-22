@@ -398,7 +398,7 @@ landed.
 
 ### D8. `check-conservation.py` — used as evidence, not proof
 
-`[test]` Run with `<rev> <path> <path>` on all 28 rewritten `.md` files. It
+`[test]` Run with `<rev> <path> <path>` on all 39 changed corpus `.md` files. It
 reported 8 "REAL GAPS" on `pcb-pipeline.md`, 8 on `ks33-geometry.md`, 8 on
 `repo-maintenance.md`, 6 on `cluster-boards.md`, 3 on `latency-budget.md`, a
 `HEAD` loss on `panel.md`, a `TAIL` loss on `module.md` and `ks33-geometry.md`,
@@ -449,6 +449,14 @@ of any historical record was changed or removed. `docs/log/` and
   same batch. The rewrite removed one restated count and left another, already
   stale on arrival. Dropping the number entirely is the fix the sentence itself
   argues for.
+- `[repo] CLAUDE.md:114` — the same shape, one file up. The batch corrected
+  "Three have run" to "**Nine have run**" and added, in the same sentence,
+  *"this list is not kept in sync by anything and said 'three' for months while
+  the directory held nine."* `[test] ls -d docs/review/*/` → **10**: commit
+  `092b364`, in this batch, made it ten while the paragraph was being written.
+  The correction is right about the mechanism and off by one about the count,
+  the same day. `[test]` The rest of the `CLAUDE.md` diff is pure addition —
+  `check-conservation.py` reports 2 gaps, both this rewrite, and no other loss.
 - `[repo] hardware/carrier/breath-adc/breath-adc.md:29` and the other rewritten
   `AGND` rows now say "drawn `AGND-local` in `carrier.md` §2" — the drawings
   themselves still carry the unqualified names, as `pcb-pipeline.md` §1 now
@@ -468,7 +476,9 @@ of any historical record was changed or removed. `docs/log/` and
   not that the new text is true. `latency-budget.md`'s rebuilt totals,
   `ks33-geometry.md`'s reversed standoff conclusion and `figures.yaml`'s two new
   figures are D12–D15's and D6–D8's.
-- `tools/**`. Not deletions, and D1–D5's.
+- `tools/**`. Not deletions, and D1–D5's. (`CLAUDE.md` is not in the corpus
+  list `CLAUDE.md` §6 gives, but it changed in this batch, so I ran the same
+  checks on it — see §F.)
 
 ## Findings a fixer could act on, ranked
 
