@@ -710,6 +710,127 @@ once. The struck-through item must keep its number.
   and `panel.md:20` legitimately narrate the retired numbers) is discarded at
   parse time. Worth a look from whoever owns `tools/check-staleness.py`.
 
+### G11-49 — ADR 0005 offers two "equally valid" alternatives that would invalidate five BOM rows and three settled figures
+
+Flagged to me by the coordinator as independently reported; **verified here against pinned blobs, not taken on report.**
+
+`[repo, pinned] git show a4b80b1:docs/decisions/0005-power-architecture.md:336–339`:
+
+> **LT1641-1CS8 (SO-8, 9–80 V) driving an external N-FET, with a sense resistor.**
+> Note the suffix: **`-1` latches off and `-2` auto-retries**… **LM5069MM
+> (MSOP-10) and LTC4210 (MSOP-8) are equally valid.**
+
+That sentence was true when the choice was a package-policy survey. It is not
+true now, because the entire load-switch design has since been dimensioned from
+**LT1641-only** datasheet constants, all of them confirmed verbatim against one
+banked document (`datasheets/discrete-and-power/LT1641.pdf`, MANIFEST row
+`LT1641-1CS8` with SHA-256 `00aa5309…`):
+
+| Design value | LT1641-only constant it comes from | `[repo, pinned]` |
+|---|---|---|
+| `C-GATE-LOADSW` **82 nF** | `I_GATE` = −5 / −10 / −20 µA, p.2 | `figures.yaml:504` |
+| `C-TIMER-LOADSW` **10 µF** | TIMER 3 µA down / 80 µA up = 77 µA net into a **1.233 V** threshold, p.8 | `figures.yaml:488` |
+| `R-FB-HI / R-FB-LO` **35.7 k / 5.11 k** | `V_FB` = 0.5 V for full sense threshold **and** `V_FBH` = 1.313 V for PWRGD release, *set by the same divider* | `figures.yaml:513` |
+| `R-ILIM` **50 mΩ** | sense threshold **39 / 47 / 55 mV**, p.2 | `0005:282` |
+| foldback floor **240 mA** | 47 mV at `V_FB` ≥ 0.5 V falling linearly to **12 mV** at `V_FB` = 0, p.5 / Fig. 7 p.9 | `figures.yaml:514, 516` |
+| the `-1` vs `-2` argument | an ADI suffix convention | `0005:337–338` |
+
+And five BOM rows name the part in their own text `[repo, pinned]
+git show a4b80b1:hardware/bom.csv`:
+
+- `U-LOADSW,module,**LT1641-1CS8**`
+- `R-FB-HI … "Upper leg of **the LT1641 FB divider**, umbilical +12V to FB"`
+- `R-FB-LO … "Lower leg of **the LT1641 FB divider**"`
+- `R-GATE-SER … "Series gate resistor between **LT1641 GATE** and the N-FET gate"`
+- `C-GATE-LOADSW`, `C-TIMER-LOADSW` — both `selected`, both sized above
+
+Neither alternative carries that pin set: the LTC4210 has no `FB` foldback pin
+and no `PWRGD` in this form, so `R-FB-HI/R-FB-LO` have nothing to divide and
+the 0.381 ratio `figures.yaml:513` calls *"fixed by the part, not by the
+divider"* does not exist; the LM5069's thresholds and timer currents are
+different numbers entirely. **Swapping to either "equally valid" part
+invalidates 82 nF, 10 µF, 35.7 k/5.11 k, 50 mΩ and the latch-vs-retry
+reasoning at once** — and would silently re-open G11-1, since the ramp
+arithmetic is `I_GATE`-specific.
+
+`[test] grep -rn "LM5069\|LTC4210"` across `docs/decisions`, `hardware`,
+`config`, `docs/reference`, `README.md`, `ROADMAP.md` (tree clean, verified
+`== a4b80b1` for all those paths) → **exactly one hit, this sentence.** Neither
+part is banked; `datasheets/MANIFEST.csv` has no row for either. So this is a
+claim of equivalence with no document behind it, in the ADR that owns the
+decision, pointing at parts nothing else in the corpus has ever costed.
+
+**This is the same shape as G11-1 and belongs with it.** Both are ADR 0005
+sentences that were written before the LT1641 datasheet was banked and that the
+banked datasheet has since made false. Fixing G11-1 without fixing this one
+leaves the next reader free to "solve" the ramp problem by reaching for
+LM5069MM — which the ADR currently tells them is equally valid, and which would
+discard every number on the page.
+
+---
+
+## Provenance addendum — the working tree moved during this wave
+
+After my first pass I was told that another slice had been editing corpus files
+**and `tools/check-staleness.py`** in place, uncommitted, while the read-only
+slices worked, and that the staleness hook was seen flipping
+PASS → FAIL → PASS → FAIL. I re-verified rather than assuming my exposure was
+nil. What I did:
+
+**1. Tree state, stated rather than assumed.** `[test] git status --short` at
+the time of the re-check: clean apart from five untracked slice reports under
+`docs/review/2026-09-22-goal-verification/` (mine among them). `[test] git diff
+--stat a4b80b1 -- docs/ config/ hardware/ README.md ROADMAP.md firmware/
+tools/` → the only entry is this wave's `README.md` (+81). So `tools/` is at
+`a4b80b1` too, and **every corpus path I cite is byte-identical at `a4b80b1`,
+`25cc740` and the working tree.**
+
+**2. Every load-bearing quote re-checked against the pinned blob.** `[test]`
+28 fixed-string greps of `git show a4b80b1:<file>`, one per finding that quotes
+text. **All 28 present.** Three appeared absent on the first run — G11-13,
+G11-36, G11-38 — and all three were **my own hard-wrap error**, the trap
+`CLAUDE.md` §2 documents: the quoted phrase spans a line break in the source,
+so a fixed-string match against the raw file cannot fire. Re-running against a
+line-joined stream (`tr '\n' ' '`) found all three, and I confirmed the raw
+context by line number (`0009:203–204`, `0013:286–287`, `0001:94–95`). Worth
+recording that the trap catches a *reviewer* verifying a finding just as
+readily as an author writing a pattern.
+
+**3. The two checker-dependent findings were made checker-independent.**
+G11-6 and G11-29 originally cited the PreToolUse hook's *"PASS no live stale
+values"* — which is precisely the output that was observed flipping, so it was
+worthless as evidence. I replaced it with a direct comparison that runs no
+tool: parse the `forbidden` lists out of `git show a4b80b1:config/figures.yaml`
+and string-match them against the line-joined pinned ADR text. `[test]`
+
+| figure | offending text present at `a4b80b1`? | patterns | any that fire |
+|---|---|---|---|
+| `panel-height-budget` vs `0004` ("The 97 mm above") | yes | 12 | **none** |
+| `key-scan-current` vs `0009` ("10 kΩ, 100 Ω and 10 nF per switch position") | yes | 3 | **none** |
+| `key-press-time` vs `0009` (same text) | yes | 12 | **none** |
+
+Both findings now rest on pinned text and the pinned pattern lists alone. They
+would stand even if `check-staleness.py` were deleted.
+
+**4. What this does and does not settle.** It settles that the *text* I
+reviewed is the frozen text. It does **not** settle whether some intermediate
+read of mine hit a modified file and I formed a wrong impression I then failed
+to quote — findings that rest on *absence* are the exposed ones. The two I
+would treat as weakest on that basis, and how I re-grounded them:
+
+- **G11-16** (twelve "bonded body" survivals) — re-derived from pinned blobs;
+  every one of the twelve line references reproduces.
+- **G11-27** ("no gaps, no stubs") and **G11-25** (no ADR carries
+  `Superseded`) — `[test] grep -n "^\*\*Status:\*\*" docs/decisions/*.md`
+  returns fourteen files, 0001–0014 consecutive, **all `Accepted`**, run on a
+  tree verified clean at that moment.
+
+**Findings resting on pinned reads:** G11-1 through G11-16, G11-20, G11-24,
+G11-25, G11-27, G11-29, G11-33 through G11-47, and G11-49 — i.e. every finding
+that quotes ADR text. **Not re-pinned**, because they are arithmetic over
+figures already pinned above and re-checking them adds nothing: G11-17 through
+G11-19, G11-21 through G11-23, G11-26, G11-28, G11-30 through G11-32, G11-48.
+
 ---
 
 ## What I could not check
@@ -743,11 +864,13 @@ once. The struck-through item must keep its number.
 
 ## Summary
 
-48 numbered findings. The ones I would fix first, in order:
+49 numbered findings. The ones I would fix first, in order:
 
-1. **G11-1** — ADR 0005's ramp spec. It is the only finding where an
-   **Accepted** ADR, a **settled** register figure and a drawn schematic all
-   disagree and the ADR knows it. Two words in one line close it.
+1. **G11-1 with G11-49** — ADR 0005's load-switch section. G11-1 is the only
+   finding where an **Accepted** ADR, a **settled** register figure and a drawn
+   schematic all disagree and the ADR knows it. G11-49 is the sentence three
+   lines below it that would let someone "fix" G11-1 by changing the part and
+   discarding every number on the page. They are one edit, not two.
 2. **G11-29** and **G11-6** — two live stale values sitting inside ADRs while
    `check-staleness.py` reports PASS, both missed by the spelling of the
    pattern rather than by its absence. G11-29 is in the document that *owns*

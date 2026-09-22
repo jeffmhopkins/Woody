@@ -13,8 +13,23 @@ that printed only path tokens and counts, never prose: the path-map resolution
 test (G12-10) and the review-wave directory count (G12-12). I did not read any
 report.
 
-**Baseline, taken from a pristine export of the frozen revision** because the
-working tree moved under me twice mid-run (see G12-25):
+**PINNING — read this before trusting any figure below.** The working tree was
+being mutated by another slice during this wave (G12-26, and the coordinator's
+mid-wave correction confirms it: corpus files *and* `tools/check-staleness.py`
+were edited in place and later reverted, all uncommitted, so `git log` shows
+none of it). **Every quotation, line number and `[test]` result in this report
+has been re-verified against pinned content**, either a `git archive a4b80b1`
+export or a fresh `git clone` checked out at `25cc740`.
+
+`[test]` at the close of this slice: `git status --short --untracked-files=no`
+in `/home/user/Woody` → **empty**; `diff` of `README.md`,
+`tools/check-staleness.py` and `.claude/settings.json` against the pinned clone
+→ **identical**. The tree had been fully reverted by then, so the pinned and
+live readings agree. `README.md` in particular — mutated during the wave with an
+appended broken link — is **byte-identical to `a4b80b1:README.md`**, so G12-12,
+G12-13 and G12-14 stand on pinned content, not on what I happened to see.
+
+**Baseline, taken from a pristine export of the frozen revision:**
 
 ```
 [test] git archive a4b80b1 | tar -x -C <tmp> && cd <tmp>
@@ -725,7 +740,64 @@ ends Phase 0. Not a defect; an unclosed loop.
 
 ### Process
 
-**G12-25. The freeze did not hold. `README.md` was modified twice by another
+**G12-25. `tools/check-staleness.py` reports `PASS` and `0 unwired` with a live
+broken link, if any one check is called with an empty file list. Demonstrated,
+and it is what produced this wave's flapping verdicts.**
+
+`[repo] tools/check-staleness.py:1048-1074`, `instrument()`, is the hardening
+that closed the `check_refdes` hole. Its docstring is precise about the attack
+it was built to stop:
+
+> This assertion used to read the SOURCE TEXT of `main()` and look for the
+> substring `"check_links("`. That is satisfied by a call that never happens …
+> **A check that does not run reads exactly like one that passes** — which is
+> the whole reason this assertion exists — so the assertion itself must not be
+> satisfiable by anything short of the call actually being made.
+
+It now wraps each check so that `RAN.add(nm)` fires on invocation
+(`[repo] …:1066-1071`), and `check_checks()` (`[repo] …:1076-1090`) reports any
+`check_*` not in `RAN`. **That closes "never called" and leaves "called with
+nothing to check" wide open** — the wrapper records the call without looking at
+its arguments.
+
+`[test]`, in a **disposable clone** (`git clone /home/user/Woody /tmp/g12-check`,
+`git checkout 25cc740`), never in the real repository, and reverted afterwards:
+
+```
+# control: append a broken link to README.md, unpatched checker
+$ printf '\nSee [nothing](g12-does-not-exist.md).\n' >> README.md
+$ python3 tools/check-staleness.py
+FAIL 0 shape + 0 owners + 1 links + ... + 0 unwired + 0 stale + 0 bom
+     | corpus 123 files, 23 circuits, 37 figures / 217 patterns
+
+# one character class of edit, at line 1115: check_links(files) -> check_links([])
+$ python3 tools/check-staleness.py
+PASS no live stale values | corpus 123 files, 23 circuits, 37 figures / 217 patterns
+     | 5 unresolved (tracked) | 211 restated-not-cited (advisory)
+
+$ python3 tools/check-staleness.py | grep -i 'unwired\|never called'
+(nothing)
+```
+
+**The broken link is still in the file.** The verdict flips to `PASS`, the
+unwired count stays at zero, and — this is the part that matters —
+`corpus 123 files` **does not move**. `[repo]
+docs/reference/repo-maintenance.md:301` tells a reader that the file count is
+the thing to check rather than the verdict: *"prints the corpus file count on
+every run — the count is what you check, not the verdict"*. Against this edit
+the count is as green as the verdict. Both instruments read normal.
+
+This is not hypothetical: the coordinator reports an injection slice ran
+precisely `check_links([])` in the shared tree during this wave, and other
+slices watched the hook flip `PASS -> FAIL(1 links) -> PASS -> FAIL(1 stale)`
+across read-only calls. **The tool's own docstring names the class of defect and
+the current guard does not cover it.** A per-check assertion that the file list
+it was handed is non-empty, or simply that it is the same `files` object
+`main()` computed, would be a few lines and would have caught it.
+
+---
+
+**G12-26. The freeze did not hold. `README.md` was modified twice by another
 agent while I was reading it.**
 
 `[test]` `git status --short` during this slice: `M README.md` at one point,
@@ -743,15 +815,32 @@ At one point `README.md` carried an appended line `See [the missing
 page](g10-does-not-exist.md).` — evidently a probe from another slice, not a
 corpus defect. **I did not touch it and did not revert it.**
 
+**Confirmed mid-wave by the coordinator**, who identifies the cause: an
+injection-testing slice was briefed to edit corpus files *and*
+`tools/check-staleness.py` in place and revert them, in the same tree as eleven
+read-only reviewers. `README.md` gained a broken link;
+`tools/check-staleness.py` was patched to `check_links([])` (G12-25);
+`hardware/module/pitch-stage/circuit.yaml` was modified.
+
 `[repo] CLAUDE.md` § *Review waves* asks a wave to "Name the revision a wave
-measures against, and pin `tools/` or say you are not", because last wave's
+measures against, and **pin `tools/`** or say you are not", because last wave's
 orchestrator broke exactly this and "every `[test]` baseline in twenty reports
 stopped reproducing". The freeze clause was written and committed **first** this
-time (`c46487d`, `25cc740`), and it still broke — not by the orchestrator, but
-by a **concurrent slice mutating the corpus it is reviewing**. Every `[test]`
-baseline in this wave taken against the working tree, rather than against a
-clean export, is suspect. Mine are from `git archive a4b80b1`; recommend the
-wave README require that.
+time (`c46487d`, `25cc740`) — and it still broke, in the half the clause does not
+reach. The clause binds what gets **committed**; the damage was entirely in the
+**uncommitted layer**, which `git log` cannot show and `git diff a4b80b1 HEAD`
+cannot show either. `[test] git diff --stat a4b80b1 HEAD` → one file, this
+wave's README: **the commit-level freeze is provably intact and was never the
+thing at risk.**
+
+**This is the sharpest finding available about the project's method.** The
+repository's entire defence — "git holds every version of every cell and cannot
+go stale" (`[repo] CLAUDE.md` §2b) — assumes changes reach git. A tool patched
+and reverted between two agents' reads is a change to the corpus's *measured
+behaviour* that leaves no trace anywhere. Two mitigations, both cheap: give
+injection slices their own clone, and have every slice record
+`git status --short` beside each `[test]` result. I have done the second
+throughout; see the pinning note at the top.
 
 ---
 
@@ -784,8 +873,27 @@ wave README require that.
 
 ## Suggested ledger seeds
 
-The four findings a fix must not stop at: **G12-1** (firmware), **G12-2**
-(the other 24 bonded-body sites), **G12-4** (`breath-working-point` → E2) and
-**G12-5** (M1's "neither is published"). G12-2 in particular is a single fact
-across twelve files; fixing the firmware line alone reproduces the pattern this
-wave exists to find.
+**Fix these first, and do not let the fix stop at the first file:** **G12-1**
+(firmware's bonded body), **G12-2** (the other 24 bonded-body sites), **G12-4**
+(`breath-working-point` is decided by E2, not M1) and **G12-5** (M1's "neither
+is published"). G12-2 is a single fact across twelve files; fixing the firmware
+line alone reproduces the exact pattern this wave exists to find.
+
+**Fix before the next wave runs at all:** **G12-25** — a check called with an
+empty file list reads as `PASS` with `0 unwired` and an unchanged corpus count.
+Every slice in this wave is reporting `[test]` results from a tool that was
+demonstrably in that state at some point during the wave.
+
+**Cheapest high-value fix in the report:** **G12-6** — one sentence at
+`docs/reference/repo-maintenance.md:27`, in the section a reader opens to learn
+what the checker does, which tells them a FAIL will stop a commit. It will not.
+
+**Counting defects, all the same shape, all mechanical:** G12-7, G12-8, G12-9,
+G12-10, G12-11, G12-12, G12-17. Seven stale counts across four documents, six of
+them in the two files whose stated job is to tell you how this repository works.
+None is catchable by `config/figures.yaml`, because a count is a value nobody
+registered. If one structural change comes out of this wave, it is that
+`repo-maintenance.md` and `pcb-pipeline.md` should **print** their counts from
+the tools rather than restate them — `merge-bom.py --check`,
+`verify-datasheets.py` and `check-staleness.py` already emit every one of the
+seven on every run.

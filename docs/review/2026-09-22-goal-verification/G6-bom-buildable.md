@@ -10,13 +10,49 @@ holds at `a4b80b1`. `tools/` was **not** pinned and I did not touch it.
 One near-miss: `tools/merge-bom.py`'s docstring quotes "D4 of the 2026-09-21
 pre-merge review" verbatim — I read the tool, not the review.
 
-**Method.** Parsed `hardware/bom.csv` (`[test] python3 -c "import csv; …"` →
-141 lines, 140 data rows, 11 columns, CRLF), walked every row, and rebuilt the
-ref → fragment map from the 26 fragments directly so every finding is filed
-against the fragment a fix would go in. `[test] python3 tools/merge-bom.py --check`
-→ `bom.csv: checked 140 rows from 26 fragments | 0 problems`, exit 0, so the
-master does match its fragments and reading the master for analysis is safe.
-Package claims were checked against the banked PDFs with `pymupdf`.
+**Method.** Parsed `hardware/bom.csv` (141 lines, 140 data rows, 11 columns,
+CRLF), walked every row, and rebuilt the ref → fragment map from the 26
+fragments directly so every finding is filed against the fragment a fix would
+go in. Package claims were checked against the banked PDFs with `pymupdf`.
+
+> ### ⚠ All findings below were RE-VERIFIED AGAINST A PINNED CLONE
+>
+> The wave orchestrator reported mid-wave that the working tree at
+> `/home/user/Woody` was being edited in place by an injection-testing slice —
+> uncommitted, so invisible to `git log`. **My first-pass reads were taken from
+> the live tree and one of them caught injected content** (see *Correction*, at
+> the end — the only finding affected, now withdrawn).
+>
+> Everything that remains was re-derived from:
+>
+> ```
+> git clone /home/user/Woody <scratch>/g6 && cd <scratch>/g6 && git checkout 25cc740
+> ```
+>
+> `[test] git status --short` in the clone → **empty**. `[test] git log --oneline -1`
+> → `25cc740`. `[test] git diff --stat a4b80b1 25cc740` → one file, this wave's
+> own README, so the corpus is identical at both revisions.
+>
+> I also byte-compared the live tree against the pin for every file this report
+> cites — all 26 BOM fragments, `hardware/bom.csv`, `hardware/unplaced.csv`,
+> `hardware/README.md`, `README.md`, `config/figures.yaml`,
+> `datasheets/MANIFEST.csv`, `tools/merge-bom.py`, `tools/check-staleness.py`,
+> the eleven schematic pages quoted, `pitch-stage/circuit.yaml`, and the
+> thirteen datasheet PDFs read — with `cmp -s`. **Every one reports SAME**, and
+> `[test] python3 tools/verify-datasheets.py` on the pin gives
+> `78 verified, 23 recorded as blocked or not-fetched, 0 problems`. So the
+> `[repo]` and `[datasheet]` citations are sound.
+>
+> Re-run **on the pinned clone**, tree clean at the moment of each:
+>
+> - `[test] python3 tools/merge-bom.py --check` →
+>   `bom.csv: checked 140 rows from 26 fragments | 0 problems`, exit 0.
+> - `[test] python3 -c "import csv; …"` → 140 data rows × 11 columns; **zero
+>   duplicate refdes**; `hardware/unplaced.csv` = **32** data rows.
+>
+> **What this means for the reader:** every finding G6-1 … G6-30 rests on a
+> pinned read and reproduces at `25cc740`. One item that did *not* is withdrawn
+> below rather than silently dropped.
 
 ---
 
@@ -59,17 +95,27 @@ no row under any name.
 | `C-ADC-BULK` | `[repo] hardware/carrier/breath-adc/breath-adc.md:103` | **10 µF X7R**, bulk at MCP3202 `VDD`/`VREF`, "proposed" | none |
 
 `[repo] hardware/carrier/carrier.md:59,72,132,232,299,302` draws all four in the
-board-level figure. `[test] python3` regex over `hardware/**`, `docs/decisions/**`,
-`docs/reference/**`, `config/**`, `firmware/**`, `README.md`, `ROADMAP.md` for
-each of the 140 refdes confirms none of these four strings is a BOM ref.
-`tools/check-staleness.py` already reports them — `[test] python3 tools/merge-bom.py --check`
-fired the `PreToolUse` hook, whose report lists them under *"drawn in a
-schematic, no BOM row (17) — ADVISORY, not a failure"*
-(`[repo] .staleness/report.txt:62-79`). Thirteen of those seventeen are deleted
+board-level figure (`J-LED-L`/`J-LED-R` appear there in the slash form
+`J-LED-L/R`).
+
+**Re-derived on the pinned clone, independently of any tool.**
+`[test] python3` over `hardware/**/*.md`, matching every backticked
+refdes-shaped token against the 140 BOM refs:
+
+```
+J-DISP      in BOM? False | carrier.md, display-and-service-uart.md, power-entry-instrument.md
+J-LED-L     in BOM? False | led-strip-drive.md
+J-LED-R     in BOM? False | led-strip-drive.md
+C-ADC-BULK  in BOM? False | breath-adc.md, carrier.md
+```
+
+That sweep returns 22 such names in total. Thirteen of them are deleted
 names (`R-OFFINJ`, `R-TERM-CHAIN`, `R-PRESENCE`, `R-OE-PU`, `R-CLR-PD`, `LK-CLR`)
 or local aliases already covered by a row (`J-UMB`→`J-UMBILICAL`,
 `R-CS-SER`/`R-MOSI-SER`/`R-SCLK-SER`→`R-SPI-SER`, `R-IN`/`R-OFF`/`R-OFFNEG`→
-`R-BREATH-SUM`/`R-BREATH-OFF`). **These four are not.** Fragment for a fix:
+`R-BREATH-SUM`/`R-BREATH-OFF`), and the remainder are part numbers or partial
+tokens caught by the pattern (`LT1641-1CS8`, `LT1641-1IS8`, `LT5400-7`,
+`C-GATE`, `C-TIMER`, `R-LED`). **These four are not.** Fragment for a fix:
 `hardware/carrier/display-and-service-uart/bom.csv`,
 `hardware/carrier/led-strip-drive/bom.csv`, `hardware/carrier/breath-adc/bom.csv`.
 
@@ -671,14 +717,48 @@ best-specified row in the BOM and is worth using as the template for the others.
 - **Anything under `docs/review/`, `docs/log/` or `docs/research/`** — cold, by
   the brief.
 
-## One observation outside my slice
+## Correction — one observation WITHDRAWN
 
-`tools/check-staleness.py` returned `PASS` on my first Bash call of the session
-and `FAIL … 1 links` on the second, with no intervening write from me. The
-failure is `[repo] .staleness/report.txt:14` — "README.md:148 links to
-'g10-does-not-exist.md', which does not resolve", and `[repo] README.md:148`
-does read `See [the missing page](g10-does-not-exist.md).` I did not
-investigate further; it is not a BOM matter and the slice name in the filename
-suggests it belongs to someone else. I note only the **non-determinism**, since
-`CLAUDE.md` records a previous wave where two slices running one command twenty
-minutes apart got opposite verdicts.
+**I reported a broken link in `README.md` that does not exist in this
+repository. It was injected content in the live working tree, and it has since
+been reverted. The finding is withdrawn.**
+
+What I originally wrote: that `tools/check-staleness.py` returned `PASS` on my
+first Bash call and `FAIL … 1 links` on the second with no write from me, and
+that `README.md:148` read `See [the missing page](g10-does-not-exist.md).`
+
+That read was real — I took it from the live tree — but the content was not the
+repository's. On the pinned clone at `25cc740`:
+
+- `[test] sed -n '146,150p' README.md` → line 148 is blank; line 147 ends
+  `licence is stated once, above, and nowhere else.)*`. There is no link.
+- `[test] grep -rn "g10-does-not-exist" <pinned clone>/` → **no match anywhere**.
+- `[test] grep -rn "g10-does-not-exist" /home/user/Woody/README.md` → **no match
+  now either**. The live tree has been restored.
+
+So the string existed only in an uncommitted state of the working tree, during
+the window I happened to read it. The `PASS → FAIL → PASS` flapping I observed
+has the same cause: `.staleness/report.txt` is a **regenerated, untracked
+artifact** (`[test] git ls-files .staleness` → empty), so it reflects whatever
+the tree held at the moment the hook last ran, not the corpus.
+
+**Two things follow, and the second matters more than the first.**
+
+1. `README.md` has no broken link. Nobody should go looking for one.
+2. **`.staleness/report.txt` is not a citable source in a review.** My first
+   draft of G6-1 cited it for the "drawn in a schematic, no BOM row" list. That
+   citation is gone: G6-1 now rests on a sweep I ran myself over the pinned
+   clone, and it reproduces. Every other finding in this report cites tracked
+   files only, and all of those byte-compare clean against `25cc740`.
+
+I am recording this rather than quietly deleting it because `CLAUDE.md` says a
+finding filed as handled does not get caught by the next reviewer, and because
+the failure is instructive: **a read of a working tree is not a read of a
+revision**, and nothing in a bare `git log` or a hook summary would have shown
+the difference. The commit-level freeze held throughout; only the uncommitted
+layer moved.
+
+*(For the orchestrator: no BOM file, no schematic page and no datasheet this
+report depends on was disturbed — I verified all 40-odd of them with `cmp -s`
+against the pin and every one reports SAME. The disturbance touched my report
+in exactly one place, and that place is this section.)*

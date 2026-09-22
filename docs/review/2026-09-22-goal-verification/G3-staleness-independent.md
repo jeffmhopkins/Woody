@@ -8,7 +8,50 @@ evidence.
 corpus at `HEAD` (`25cc740`): `[test] git diff --stat a4b80b1 HEAD` → one file
 changed, `docs/review/2026-09-22-goal-verification/README.md`, +81 lines. No
 corpus file differs, so every finding below reproduces at either revision.
-`tools/` is **not** pinned by me and I did not modify it.
+I did not modify `tools/`.
+
+### Every finding below rests on a pinned read. Here is exactly what that means
+
+Mid-slice the orchestrator warned that another slice had been editing corpus
+files **and `tools/check-staleness.py`** in the shared working tree,
+uncommitted, while this slice was grepping it. For a slice whose whole job is
+to find stale values by grep, an injected probe carrying a real `forbidden`
+value is indistinguishable from a genuine find. So I re-did the evidence.
+
+`[test] git clone /home/user/Woody /tmp/g3-check && git checkout 25cc740` —
+a private copy of the pinned revision. `[test] git status --short` in the
+clone: clean.
+
+`[test]` `diff -rq` of the clone against the live tree, over
+`hardware/`, `docs/decisions/`, `docs/reference/`, `config/`, `firmware/`,
+`README.md`, `ROADMAP.md` **and `tools/`** → the only difference reported
+anywhere is `Only in /home/user/Woody/tools: __pycache__`. So at the moment I
+re-checked, the live tree was byte-identical to the pin, including the checker,
+and `git status --short` on the live tree showed no tracked modifications (only
+five untracked slice reports, one of them this file).
+
+**I then re-ran the evidence for every class-(a) finding, and every file-spread
+count in classes (b) and (c), inside `/tmp/g3-check`.** All of it reproduced.
+Two counts came back slightly different from my first pass and are corrected
+below — G3-29 (the 11.45 V group is 5 files, not 6; the three-value union is
+10 files, not 9) and G3-22 (`1.43 mA` is in 6 files including the owner). Those
+two corrections came from re-running a script rather than from the injection,
+but I record them because I cannot prove which pass was disturbed and the
+pinned pass is the one to trust.
+
+**Nothing in this report is quoted from a tool run against a tree I had not
+just checked.** The two tool outputs I quote — `merge-bom.py --check` (G3-7,
+G3-8) and the row/unit counts — were both re-run inside the clone and returned
+the same values. The one artefact I read from the live tree rather than the
+clone is `.staleness/report.txt`, which is generated and gitignored so it has
+no pinned version; I use it only in the class-(c) preamble to say how my census
+differs from the checker's advisory, and no finding depends on it.
+
+**A caveat I cannot close.** I cannot rule out that an injected value passed
+through an *early* grep of mine and shaped where I looked next. What I can say
+is that no finding survived into this report without being re-confirmed against
+the pin, and that a finding planted by injection would have vanished at that
+step. None did.
 
 **Cold compliance:** I read nothing under `docs/review/`, `docs/log/` or
 `docs/research/`. I did not open the wave README that `c46487d` added. I did
@@ -396,13 +439,15 @@ BOM fragments and their generated master copies. The owner is
 figure in the corpus and the largest single staleness surface it has: a change
 to `R-REG-SET` moves 36 strings across 17 files.
 
-### G3-22 **(b) `key-scan-current`'s derivation is duplicated verbatim, not cited, in four files besides the owner.**
+### G3-22 **(b) `key-scan-current`'s derivation is duplicated verbatim, not cited, in five files besides the owner.**
 
-`[test]` `1.43 mA` appears in `hardware/cluster/key-switch-network/key-switch-network.md:108`
-(owner), `docs/decisions/0001-mcu-and-board-partitioning.md:230`,
+`[test]` (pinned) `1.43 mA` → 6 hits in 6 files:
+`hardware/cluster/key-switch-network/key-switch-network.md:108` (owner),
+`docs/decisions/0001-mcu-and-board-partitioning.md:230`,
 `hardware/carrier/carrier.md:172`,
 `hardware/interfaces/key-chain-loom/key-chain-loom.md:118`, and the `F-CHAIN`
-BOM note (`hardware/interfaces/key-chain-loom/bom.csv:5` + master). Three of
+BOM note (`hardware/interfaces/key-chain-loom/bom.csv:5` + its generated copy
+in `hardware/bom.csv:52`). Three of
 them reproduce the *whole* derivation line
 `3.3 V / (2.2 kΩ + 100 Ω) = 1.43 mA per closed key` / `18 closed = 25.8 mA`,
 character for character. `[calc]` both are right today:
@@ -483,14 +528,14 @@ rather than for raw file count.
 
 ### G3-29 **(c) The OPA2197's output swing on ±12 V is 11.9 V, 11.5 V and 11.45 V in different places, with no owner.**
 
-`[test]` normalised search:
-- `11.9 V` — `docs/decisions/0004-cv-interface-module.md:229` (“on ±12 V it
-  reaches roughly 11.9 V”), `U-OPA-PITCH` BOM note ×2 copies (“~11.9V swing on
-  +/-12V”).
-- `11.5 V` — `docs/decisions/0005-power-architecture.md:48`,
+`[test]` normalised search, pinned — three spellings, **10 files in union**:
+- `11.9 V` — **3 files**: `docs/decisions/0004-cv-interface-module.md:229`
+  (“on ±12 V it reaches roughly 11.9 V”) and the `U-OPA-PITCH` BOM note
+  (“~11.9V swing on +/-12V”) in its fragment plus the generated master.
+- `11.5 V` — **3 files**: `docs/decisions/0005-power-architecture.md:48`,
   `hardware/module/breath-output-stage/breath-output-stage.md:164,170` (“the
   OPA2197 stops at about ±11.5 V”), `0004:290`.
-- `11.45 V` — `docs/decisions/0006-cv-channel-allocation.md:137`,
+- `11.45 V` — **5 files**: `docs/decisions/0006-cv-channel-allocation.md:137`,
   `firmware/README.md:63,74`, `hardware/module/mod-channels/mod-channels.md:182`,
   `hardware/module/mod-channels/notes.md:53`,
   `hardware/module/pitch-stage/pitch-stage.md:153`.
@@ -498,7 +543,7 @@ rather than for raw file count.
 The 11.45 V sites all qualify it as “less two Schottky drops”, so they are
 probably a different condition — but nothing says so at the 11.5 V sites, and
 `breath-output-stage.md` uses ±11.5 V to decide a *clipping* headroom rule that
-the mod pages solve at ±11.45 V. Three numbers, one part, nine files, no
+the mod pages solve at ±11.45 V. Three numbers, one part, ten files, no
 register entry. This is the shape that produces a class-(a) finding in the next
 wave.
 
@@ -574,8 +619,15 @@ it looked and found nothing.
 - **The key-path latency table** reproduces exactly (see G3-23/G3-19), as does
   the analog breath table.
 - **The 8.4 V WS2815 `V_IH`** that CLAUDE.md §3 records as wrong is dead: all
-  four corpus hits are refutations (`0014:105`, `led-strip-drive.md:78` and two
-  BOM copies), none live.
+  four corpus hits are refutations (`0014:105`, `led-strip-drive.md:78` and the
+  `U-LVLSHIFT` BOM note ×2 copies), none live. **One §2b note in passing:** the
+  two BOM hits are a history segment inside a `.csv` — “The 8.4V figure that
+  worried three documents came from substituting the +12V LED rail into that
+  table” `[repo] hardware/carrier/led-strip-drive/bom.csv:2`. Under the cut
+  line that is *what someone used to think*, and belongs in `notes.md` or git.
+  It is correct, so it is not a staleness defect and I do not number it; I flag
+  it because it is exactly the class the 2026-09-22 trim was supposed to have
+  emptied, and `tools/audit-notes.py --regrown` is the tool that should see it.
 - **USB MIDI opt-in — the corpus's one clean fact — is still clean.** `[repo]`
   it is stated once, `firmware/README.md:100`, and the other sites cite it by
   document: `docs/decisions/0009-enclosure-construction.md:357-358` (“That is
@@ -621,6 +673,15 @@ it looked and found nothing.
   I did not look. Several of these read like they *should* have been caught
   before — G3-7 and G3-8 especially — which is itself worth someone checking
   against the previous rounds' ledgers.
+- **Whether an injected value steered my search order** before the
+  orchestrator's warning. See the pinning section at the top: every finding was
+  re-confirmed against the clone and none vanished, but "I looked here because
+  of something I saw" is not a thing I can reconstruct. The practical
+  consequence is a possible *false negative* — a place I did not look — not a
+  false positive.
+- **The injection slice's own edits.** I did not attempt to reconstruct what
+  was changed or when. `git status` cannot show it and I have no record of the
+  tree's state during my first pass.
 
 ---
 
