@@ -260,7 +260,43 @@ def check_figures(files):
                     near = text[lo:hi]
                     rec = (fig["id"], fig.get("value"), bad, rel, first,
                            ctx.strip()[:100])
-                    (refuted if REFUTATION.search(near)
+                    # *** THE EXEMPTION IS PROSE-ONLY. IN A DATA FILE A
+                    # FORBIDDEN VALUE IS A DEFECT, FULL STOP. ***
+                    #
+                    # This used to apply everywhere, and it is the single
+                    # largest hole this checker has ever had: it made 48 % of
+                    # the corpus unfalsifiable and hid EIGHT live stale values
+                    # through a twenty-agent review that reported PASS. Every
+                    # attempt to fix it argued about the WINDOW (300 characters?
+                    # the line? the cell?) or the VOCABULARY (is a bare date a
+                    # refutation? is `| 2026-09-21:` one?), and each answer was
+                    # wrong somewhere, because both questions only exist when a
+                    # retired value and a live one share a line.
+                    #
+                    # In hardware/bom.csv they shared a line 48 times, and the
+                    # trim of 2026-09-22 ended that: the notes cells went from
+                    # 118,198 characters to 81,000, the history moved to git,
+                    # and exemptions inside .csv and .yaml went 60 -> 0. So the
+                    # question is not "how wide a window" any more. It is "is
+                    # this a document that narrates, or a record that states".
+                    #
+                    # An ADR narrating its own supersession is CORRECT - that
+                    # is what a decision record is for, and notes.md exists to
+                    # hold exactly that. A bom.csv cell doing it is the defect.
+                    # So the test is the file kind, which cannot drift, rather
+                    # than a character distance, which always could.
+                    #
+                    # WHY THIS IS NOT JUST A NARROWER HEURISTIC: a refutation
+                    # can carry a WRONG REPLACEMENT, and no window or wordlist
+                    # can tell. TRIM-BREATH-ZERO proved it - the cell carried
+                    # refutation wording for the OLD pedestal, so it scored
+                    # refuted-in-place while the NEW value it installed was
+                    # itself stale, and the checker said nothing. Denying the
+                    # exemption in data files is the only version of this that
+                    # closes that case, because it stops asking whether the
+                    # prose is honest and starts requiring that there be none.
+                    prose = rel.endswith(".md")
+                    (refuted if (prose and REFUTATION.search(near))
                      else live).append(rec)
     return live, refuted, spec
 
