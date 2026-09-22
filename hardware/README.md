@@ -48,6 +48,46 @@ cable a node sits on, because for those the board is not implied by the page.
 twenty-three copies of one paragraph, in a repository whose first rule is
 state it once and cite it. It is here, and they cite it.)*
 
+## `circuit.yaml` and its `depends_on` edges
+
+Every circuit directory carries a `circuit.yaml` whose `depends_on` list is
+the dependency graph. Four kinds of edge, and **they are not equally
+trustworthy** — this section is the one place that says which:
+
+**`circuit:` edges are VERIFIED.** The rule is mechanical, so any edge can be
+checked against the two tables it comes from:
+
+> ONE `circuit:` edge per distinct `board/circuit` id in the **Peer** column of
+> this circuit's `## Interfaces` table, AND every such edge is declared from
+> **both** ends. A peer that is not a circuit in this tree — a connector, the
+> Eurorack bus board, a dev board header — is named in the Peer column by its
+> reference designator or its name, and creates no edge.
+
+**`adr:`, `fig:` and `refdes:` edges are SEEDED FROM CO-MENTION and are NOT
+VERIFIED.** An edge of those three kinds means *"this page mentions this
+thing"*, which is a useful starting graph and a bad finished one. Three were
+verified false by a cold reviewer, by reading:
+
+| edge | what it really is |
+|---|---|
+| `pitch-stage` → `R-BIAS-INAMP` | the page names it as an explicit **contrast** |
+| `breath-adc` → `C-STRIP-BULK` | a citation of a note about the LED strip |
+| `breath-receive` → `U-OPA-PITCH` | a package-count consequence, not a use |
+
+All three are still declared. **Expect more of that shape.**
+
+**Direction is not recorded.** Several pairs are mutual, which is honest for a
+net shared between two circuits and useless for ordering anything.
+
+**What IS guaranteed for every edge, verified or seeded: it RESOLVES.** A
+`refdes:` names a BOM row that exists, a `fig:` names a register entry, a
+`circuit:` names a declared id. That is what catches a dependency on a deleted
+part — the semantic half `CLAUDE.md` §5 says a grep cannot reach.
+
+*(This sat as a 39-line comment header inside all 23 `circuit.yaml` files —
+byte-identical, twenty-three copies — until 2026-09-22. Same defect as the
+`## Interfaces` definition above, found the same way, fixed the same way.)*
+
 ## Two rules that will bite you
 
 **`bom.csv` here is GENERATED.** `tools/merge-bom.py` rebuilds it from the

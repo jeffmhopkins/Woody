@@ -1,42 +1,9 @@
-# STATUS OF THE EDGES BELOW, 2026-09-21.
-#
-# circuit: edges are VERIFIED. They were rebuilt, in one pass across all 23
-# circuits, from the `## Interfaces` tables after a 22-slice cold review found
-# the machine-seeded set both wrong and one-sided: SEVEN rows named
-# module/digital-and-supervision for nets that come from module/dac8568
-# (breath-sense-link:52, breath-receive-stage:46, mod-channels:26/27/28,
-# pitch-stage:19/20 - dac8568:16 is correct and is not one of them), and
-# 26 of the 50 declared edges existed at only one end. Nine
-# circuits - all of carrier/**, all of cluster/** and module/panel - declared
-# no circuit: edge at all, because their tables wrote peers as prose.
-# The graph is now 48 edges, every one declared from both ends, and no
-# circuit is isolated.
-#
-# The rule is now mechanical, so an edge can be checked against the two tables
-# it comes from:
-#
-#   ONE circuit: edge per distinct `board/circuit` id in the Peer column of
-#   this circuit's Interfaces table, AND every such edge is declared from BOTH
-#   ends. A peer that is not a circuit in this tree - a connector, the Eurorack
-#   bus board, a dev board header - is named in the Peer column by its
-#   reference designator or its name, and creates no edge.
-#
-# adr:, fig: and refdes: edges are STILL SEEDED FROM CO-MENTION and are NOT
-# VERIFIED. An edge of those three kinds means "this page mentions this thing",
-# which is a useful starting graph and a bad finished one. A cold reviewer
-# verified three refdes edges as false by reading:
-#   pitch-stage -> R-BIAS-INAMP   the page names it as an explicit CONTRAST
-#   breath-adc  -> C-STRIP-BULK   a citation of a note about the LED strip
-#   breath-receive -> U-OPA-PITCH a package-count consequence, not a use
-# Those three are still declared. Expect more of that shape.
-#
-# Direction is still not recorded: several pairs are mutual, which is honest
-# for a net shared between two circuits and useless for ordering anything.
-#
-# WHAT IS GUARANTEED FOR EVERY EDGE, verified or seeded: it RESOLVES. A refdes
-# names a BOM row that exists, a fig names a register entry, a circuit names a
-# declared id. That is what catches a dependency on a deleted part, which is
-# the semantic half CLAUDE.md 5 says a grep cannot reach.
+# depends_on is a dependency graph with FOUR KINDS OF EDGE THAT ARE NOT
+# EQUALLY TRUSTWORTHY. circuit: edges are verified; adr:, fig: and refdes:
+# are seeded from co-mention and three are known false. The rules, the
+# known-false list and what IS guaranteed for every edge are stated once, in
+# hardware/README.md, "circuit.yaml and its depends_on edges". Read that
+# before adding or trusting an edge here.
 
 id: module/breath-response-shaper
 title: §4 Response control — `POT-RESP`, log ← linear → exp
