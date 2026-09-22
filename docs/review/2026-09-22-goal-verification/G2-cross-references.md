@@ -620,6 +620,87 @@ finding.)*
 
 ---
 
+## E. Added after a mid-wave lead — verified independently before repeating
+
+The coordinator relayed that another slice had found ADR 0009 citing ADR 0001
+for key-network values ADR 0001 contradicts. CLAUDE.md says findings are claims
+and several have been wrong, so I did not take it on trust. I re-derived it from
+the pinned tree, and it holds — and the *mechanism* by which it survived is
+worth more than the finding.
+
+### G2-27 — ADR 0009 cites ADR 0001 for three component values; ADR 0001 gives different values for two of them
+
+`docs/decisions/0009-enclosure-construction.md:519–522` `[repo]`, verbatim:
+
+> **Fit the key input networks.** A 74x165's parallel inputs have no internal
+> pull-up, so without them every key input floats in a channel shared with 12 V
+> LED power and 800 kHz data — **10 kΩ, 100 Ω and 10 nF per switch position** on
+> the cluster boards (ADR 0001).
+
+`docs/decisions/0001-mcu-and-board-partitioning.md:215` `[repo]`, verbatim:
+
+> **Per switch position: 2.2 kΩ to 3V3, 100 Ω in series, 47 nF to ground**, on
+> the cluster boards.
+
+`[repo]` `hardware/bom.csv` agrees with ADR 0001: `R-KEY-PU` `2k2 1%`,
+`R-KEY-SER` `100R 1%`, `C-KEY` `47nF X7R`.
+
+**Node:** key input node / `R-KEY-PU`, `R-KEY-SER`, `C-KEY`.
+The citation resolves and names the right document, the right section's subject
+and the right placement ("on the cluster boards" is ADR 0001's own phrase).
+**Two of the three values are the superseded ones.** A reader cross-checking
+ADR 0009 against ADR 0001 gets agreement on 100 Ω and has every reason to stop
+there — the same trap `key-release-time`'s `escape_note` records for `C-KEY`
+("the row disagreed with itself … and a reader cross-checking the page against
+the BOM found agreement on one of the two numbers"), now between two ADRs.
+
+**Why nothing caught it, and why nothing could have.** Three independent
+reasons, all of which are worth knowing before anyone writes a check for this:
+
+1. **`key-scan-current`'s forbidden list already has a pattern for this value,
+   and it is spelled differently.** `config/figures.yaml:197` `[repo]` carries
+   `"10 kOhm pull-ups"`. ADR 0009 spells it `10 kΩ`, with the Greek omega and
+   no word "pull-ups". That is the **tenth** recorded instance of a forbidden
+   pattern missing a different spelling of the same number, and the first one
+   recorded between two ADRs.
+2. **`10 nF` can never be a forbidden pattern.** It is `C-KEY`'s own superseded
+   value quoted legitimately in its refutation, it is `loadswitch-timer`'s
+   superseded value, and `loadswitch-timer`'s `false_positive_note` says so in
+   as many words. A pattern for it would fire on correct sentences, which
+   CLAUDE.md §2 calls a trap rather than a pattern.
+3. **A value-presence sweep cannot see it either.** `[test]` I wrote one — for
+   every corpus line citing `ADR NNNN`, check whether each number-plus-unit on
+   that line occurs anywhere in the cited ADR — and it **passes ADR 0009:521**,
+   because `0001:233` does contain `10 kΩ/10 nF`… **inside the sentence that
+   retires them**: "Those were the 10 kΩ/10 nF pair against LVC thresholds and
+   both parts of that changed." So the mechanical check finds the token, in the
+   one place that proves the citing line wrong, and scores a pass. Rule 2b's
+   prose exemption is doing exactly what it is designed to do for `0001:233`,
+   which is correct — and there is no corresponding shelter for `0009:521`,
+   which carries no refutation wording and states the values as live fact in a
+   `.md` file where they read as current.
+
+**So this defect is reachable only by reading**, which is why it belongs in this
+slice and not in a tool. My sweep's full output flagged 71 lines, and I checked
+the plausible ones by hand: **all of them are false positives** — package
+dimensions, datasheet figures, and BOM notes cells where the `adr` column value
+and the numbers in the notes are unrelated. `carrier.md:30` (360 mm → ADR 0013's
+zone table, `0013:178`), `carrier.md:249` (2.6 mm pitch → `0014:475`), and
+`0007:155` (leadless packages → `0013:253–259`) all check out. The sweep's yield
+on the real defect was zero, and I am recording that as a negative result rather
+than dropping it, because a future wave will otherwise write the same sweep.
+
+**G2-28 — The corollary, which is a method note rather than a finding.** A
+grep-based check over a corpus that keeps its own history in prose has a
+structural blind spot: *the refutation of a value is the best possible evidence
+that the value is present*, so any "is this token in the cited document"
+check is strongest exactly where the document is most likely to be
+mis-cited. `G2-3`, `G2-4`, `G2-9` and `G2-27` are all this shape. The cut line
+in CLAUDE.md §2b removes the ambiguity for `.csv` and `.yaml`. For `.md` it
+cannot, and cross-references into `.md` history are where these live.
+
+---
+
 ## What I could NOT check
 
 - **Whether `check_links` and `check_sections` actually do what they claim.** I
@@ -652,14 +733,15 @@ finding.)*
 
 ## One structural observation
 
-Nine of the thirteen defects above are **correct information that exists
+Ten of the fourteen defects above are **correct information that exists
 somewhere in the corpus and is contradicted somewhere else in the corpus**.
 `sim/README.md` knows `cref-out-node` is settled while `pcb-pipeline.md` does
 not. `figures.yaml` knows 2.8 kPa is not in ADR 0003 while
 `breath-output-stage.md` cites it there. `key-scan-current`'s `escape_note`
 knows the deduplication is owed while its `companion` says it happened.
 `hardware/README.md` knows `pitch-stage → R-BIAS-INAMP` is a false edge while
-`pitch-stage/bom.csv` holds the row.
+`pitch-stage/bom.csv` holds the row. ADR 0001 retires `10 kΩ/10 nF` in its own
+text while ADR 0009 cites ADR 0001 for them.
 
 In every one of those, **the correction was written as a new statement beside
 the old one rather than as an edit to it.** That is the honest instinct — it
@@ -668,5 +750,5 @@ produced 118 kB of BOM logs. But in prose the same instinct produces a corpus
 where the true version and the false version are both live, both cite-able, and
 distinguishable only by date. The cut line ("KEEP what tells a builder WHAT TO
 DO / CUT what tells them WHAT SOMEONE USED TO THINK") resolves this cleanly for
-`.csv` cells. It has no counterpart for a cross-reference, and these nine are
+`.csv` cells. It has no counterpart for a cross-reference, and these ten are
 what that gap costs.
