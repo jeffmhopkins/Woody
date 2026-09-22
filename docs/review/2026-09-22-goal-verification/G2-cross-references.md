@@ -26,6 +26,21 @@ slices, which I did not open). **I quote no tool output from
 `tools/check-staleness.py` as evidence for any finding** — every check below is
 one I wrote and ran myself, in the pinned tree.
 
+**Nothing here rests on an untracked artefact, and I have checked that
+specifically.** `git ls-files .staleness .staleness-report.txt` is empty, so
+`.staleness/report.txt`, `.staleness-report.txt` and the `staleness check:`
+banner the hook prints before each Bash call are all untracked snapshots of
+whatever the tree held when the hook last ran. I read `.staleness/report.txt`
+exactly once, to work out *why* the hook had started failing — which is how I
+noticed the tree was moving — and **no finding in this report cites it, or the
+banner, or any other untracked file.** Every `[test]` claim is a script of mine
+over tracked files in `/tmp/g2-check` at `a4b80b1`. **I therefore have nothing
+to withdraw.** For completeness: `diff -rq` over `hardware/`,
+`docs/decisions/`, `docs/reference/`, `config/`, `firmware/` plus `cmp` on
+`README.md`, `ROADMAP.md` and `datasheets/MANIFEST.csv`, live against the pin,
+reports **no differences** — so the working tree I originally read from and the
+pin are byte-identical for everything I cite.
+
 ---
 
 ## Summary
@@ -33,7 +48,7 @@ one I wrote and ran myself, in the pinned tree.
 | | |
 |---|---|
 | References that **do not resolve** | 4 (`G2-5`, `G2-13`, and the two halves of `G2-14`) |
-| References that **resolve but are false** | 9 |
+| References that **resolve but are false** | 10 (9 in section A, plus `G2-27` in section E) |
 | Structural claims tested and found **true** | 8 (listed at the end — a cold slice's negatives are evidence too) |
 
 The distinction the brief asks for holds up in the data: **the resolving-but-false
