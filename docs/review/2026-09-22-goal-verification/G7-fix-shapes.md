@@ -75,7 +75,15 @@ only as strings I read *inside corpus files* (`figures.yaml` cites
 
 ## Summary
 
-24 findings. The ones that matter most, in order:
+**27 findings**, `G7-1` … `G7-27`, no gaps and no duplicates
+`[test] grep -oE "G7-[0-9]+ —" G7-fix-shapes.md | sort -u | wc -l` → 27.
+
+*(This line said "24" in the first draft, written before the last three
+findings were added and not updated when they were. Caught by counting instead
+of reading — which is this slice's whole method, applied to this slice. Shape 3
+is not a defect other people have.)*
+
+The ones that matter most, in order:
 
 | | Shape | Node | One line |
 |---|---|---|---|
@@ -87,8 +95,17 @@ only as strings I read *inside corpus files* (`figures.yaml` cites
 | **G7-8** | 1 | `free-bits` | 5 → 3 free bits; "15 passives" is the 5-bit number, in the same sentence as "the 3 free bits" |
 | **G7-13** | 2 | `diode-split-rationale` | The derivation chain is ~2000× off the value it states |
 
-Shape counts: Shape 1 — 8; Shape 2 — 6; Shape 3 — 7; Shape 4 — 6 (some findings
-carry two shapes; they are filed under the dominant one).
+Shape counts, `[calc]` 6 + 8 + 6 + 7 = 27:
+
+| Shape | n | IDs |
+|---|---|---|
+| **4** — a conclusion its own corrected number refutes | 6 | G7-1 … G7-6 |
+| **1** — a fix that did not reach the pages citing it | 8 | G7-7 … G7-12, G7-14, G7-15 |
+| **2** — a fix whose own explanation restates the wrong value | 6 | G7-13, G7-16 … G7-20 |
+| **3** — a stated count that has moved under the sentence | 7 | G7-21 … G7-27 |
+
+Several findings carry two shapes; each is filed under the dominant one and the
+second is named in the text.
 
 ---
 
@@ -459,7 +476,7 @@ Low severity — the conclusion ("is nothing") is unaffected — but it is a row
 the most-cited file restating two tracked figures instead of citing them, and
 one of them at its superseded value.
 
-### G7-13 is filed under Shape 2. Shape 1 continues:
+*(`G7-13` is filed under Shape 2, below.)*
 
 ### G7-14 — `pcb-pipeline.md`'s re-measured table is stale on every number
 
