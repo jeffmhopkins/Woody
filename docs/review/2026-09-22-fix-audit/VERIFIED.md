@@ -522,3 +522,48 @@ restatement count.** The best-patterned figures (`key-press-time`,
 `key-release-time`, twelve patterns each) are restated three times.
 `ferrite-bias-impedance` has one 78-character pattern for a value restated 17
 times across 8 files.
+
+## D10 — the BOM. Mechanics clean; the rule I applied to one row I did not apply to the rest.
+
+| Claim | Check | Verdict |
+|---|---|---|
+| **The mechanics pass**, verified with D10's own concatenator and byte comparator rather than `merge-bom.py --check`: 131,725 bytes, 139 rows, 140 CRLF / 0 bare LF, 11 columns everywhere, exact header in all 25 fragments, no duplicate refdes, nothing on disk outside `ORDER` | Accepted; matches D9's independent rebuild to the byte | **Sound** |
+| `U-DAC`'s order code change is **correct and complete** — no corpus file spells the old code as an order code any more | Accepted | **Sound** |
+| Every multi-quantity row re-derived correctly; the `C-KEY`/`R-KEY-SER` rewrite left no number behind | Accepted | **Sound** |
+| **"The batch answered *placed* and not *named*."** Of the rows moved out of `unplaced.csv`, almost none is named by any hardware page | Counted, per refdes, across every `hardware/**/*.md` | **Confirmed, and worse than stated: 14 of 18 are named by ZERO pages.** Only `R-SER-BREATH` (3), `U-LVL-MOD` (2) and `D-CLAMP-BREATH` (1) — and the last only because I edited that drawing, which D9 shows I did wrongly |
+
+**This is the wave's pattern in one finding.** `unplaced.csv` is "the rows no
+schematic page names". I emptied 16 of them on the grounds that the parts were
+*drawn*, and left 14 with no page naming them — so the join between the
+picture and the BOM row still does not exist. `pcb-pipeline.md:167` states the
+three tests, **drawn, named and placed**, and I applied all three to exactly
+one row.
+
+| Claim | Verdict |
+|---|---|
+| **`pcb-pipeline.md:150-176` is stale on six numbers, and went stale inside the commit that placed the parts** — which edited that same file twenty lines above, in the collision table, without touching the block | **Accepted. Four documents state this BOM's size and all four are wrong, three different ways** — `pcb-pipeline.md`, `hardware/README.md:72`, `repo-maintenance.md:204`, and the batch's own commit messages. All three files were edited in this batch |
+| **`C-BULK-RAIL`'s new owner contradicts it twice** — the row says 100 µF on +12 V, the page draws C1/C2 at 47 µF and states "Entry bulk is 4 × 47 µF". Its 22 mA justification also counts the **deleted** LM311 | Accepted; D9 found the same from the other side |
+| Three hard ordering blockers — `U-LOADSW` (no FET part number, sense resistor double-counted), `D-RESP` (a DO-35 axial part in a SOD-123 package), `D-USBOR` ("1N5817 **or SS14**" in DO-41, where SS14 is SMA) | **Accepted, and the third one stings**: that is the exact fact the same batch used to fix `D-REVSHUNT`, three rows below it in the same file |
+| One order code correctable from a banked document today: `SP0504BAHT` is listed only as `SP0504BAHT**G**` | Accepted |
+| **17 of 34 `open` rows name nothing that decides them.** `R-LED-PD` — added in this batch — does, and is the best-formed row in it; four of the five rows added beside it name no decider | Accepted |
+| `merge-bom.py:20` gives `R-BIAS-INAMP` as its **worked example** of why "where it is mentioned" fails — and that row is filed in `pitch-stage/bom.csv` | **Accepted.** Two fragment assignments are wrong by the tool's own documentation, by name |
+
+### D10's handling of a sibling claim is the model, and it reversed it
+
+A sibling slice reported **`360 mA` in 6 files against a register that says
+`359 mA`**. D10 confirmed the occurrences and **refuted the staleness**: the
+register's value has been `"359 mA"` in **all 20 recorded versions** of
+`figures.yaml`, so it never moved — this is a rounding, not a stale value. It
+is also used in correct arithmetic (940−360=580 mA, 47.5 ms total; at 359 mA
+the answer is 47.4 ms and the conclusion is unchanged).
+
+**A `forbidden` pattern there would be exactly the `CLAUDE.md` §2 trap** — its
+cheapest fix would make a correct sentence wrong. The right action is a
+rounding note on `umbilical-current`. D10 also found a **third** spelling
+(`~350 mA`, three files) that the original claim missed, and noted the CSV
+forms are `360mA`/`350mA` with no space.
+
+It also recorded a near-miss rather than filing it: `U-BREATH` qty 2 against
+one drawn sensor looks wrong until you find the rationale on the **neighbouring
+row** — "ADR 0003 calls the sensor a wear part and buys two". Correct, not a
+defect, written down so the next reviewer does not file it.
