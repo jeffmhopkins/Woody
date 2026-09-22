@@ -266,7 +266,22 @@ value, every net must have at least two endpoints, and the drawing can be
 checked against the netlist or regenerated from it. The whole class stops
 being something a review has to find by reading.
 
-**Open, and worth deciding before writing sixteen files:**
+**Decided and started (2026-09-22):** hand-authored YAML is authoritative;
+KiCad is generated from it later. `tools/check-netlist.py` gates it through
+the commit hook. One circuit converted as a pilot,
+`module/breath-output-stage`, and it found a real defect on its first run.
+
+**`hardware/nets.yaml` is the MASTER, and it is the piece a per-circuit file
+cannot provide.** A circuit's `netlist.yaml` can only declare *its own side*
+of a boundary-crossing net. Across 23 circuits that is up to 23
+half-declarations with nobody owning the net, so two circuits can spell it
+differently, two can both claim to drive it, and one can name a peer that
+never names it back — none of which is visible from inside either circuit.
+The master owns the net; each circuit's `ports:` must resolve to it; and the
+check runs **both ways**, which is what made the `circuit:` dependency edges
+trustworthy when it was applied to them.
+
+**Open, and worth deciding before writing the remaining sixteen files:**
 
 1. **Format.** KiCad `.net` is the obvious target since the boards get laid
    out there and it would round-trip; a small YAML of `nets:` and

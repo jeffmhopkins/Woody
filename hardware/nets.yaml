@@ -1,0 +1,87 @@
+# THE MASTER NET LIST. Authoritative for every net that crosses a circuit
+# boundary.
+#
+# WHY THIS EXISTS AND WHY IT IS AT THIS LEVEL. A per-circuit netlist.yaml can
+# only declare its own side of a boundary-crossing net. With 23 circuits that
+# is up to 23 half-declarations of one net and NOBODY OWNING IT - so two
+# circuits can spell the same net differently, two can both claim to drive it,
+# and one can declare a peer that never declares it back. None of that is
+# visible from inside either circuit.
+#
+# That is the same shape as every other defect this repository has: a fact
+# stated in several places and owned in none. The `## Interfaces` table on each
+# page is the prose version of this file, and there are 23 of those.
+#
+# THE RULES, all enforced by tools/check-netlist.py:
+#   - every `ports:` entry in a circuit netlist must name a net here
+#   - a port with dir `out` must come from this net's `driver`
+#   - a port with dir `in` must be listed in `receivers`
+#   - a port with dir `ref` must be listed in `reference`
+#   - every net needs exactly one driver, unless `multi_driver: true`
+#   - every circuit named here must declare the matching port
+# The last rule is the bidirectional half, and it is what made the
+# `circuit:` dependency edges trustworthy when it was applied to them.
+#
+# VALUES LIVE IN config/figures.yaml. `figure:` cites; it does not restate.
+
+version: 1
+
+nets:
+
+  # ---- analog signal ----------------------------------------------------
+  BREATH_INAMP_OUT:
+    kind: signal
+    domain: analog
+    carries: "In-amp output, the receiver's recovered breath signal"
+    figure: inamp-full-scale
+    driver: module/breath-receive-stage
+    receivers:
+      - module/breath-output-stage
+    note: >
+      module/breath-response-shaper also reads this node and is `open` - add it
+      to receivers when that circuit is fitted, not before, or this file
+      asserts a connection the board does not have.
+
+  BREATH_JACK:
+    kind: signal
+    domain: analog
+    carries: "The breath CV output at the panel jack"
+    driver: module/breath-output-stage
+    receivers:
+      - module/panel
+
+  # ---- power and reference ----------------------------------------------
+  DAC_AVDD:
+    kind: power
+    carries: "Local regulated analog supply for the DAC and the offset pot"
+    figure: dac-rail
+    driver: module/power-entry
+    receivers:
+      - module/breath-output-stage
+      - module/dac8568
+
+  V_NEG12:
+    kind: power
+    carries: "Module -12 V rail from the Eurorack bus"
+    driver: module/power-entry
+    receivers:
+      - module/breath-output-stage
+
+  AGND:
+    kind: reference
+    carries: "Module analog return"
+    figure: dig-gnd-topology
+    driver: module/power-entry
+    reference:
+      - module/breath-output-stage
+    note: >
+      Where AGND and DIG_GND meet is the tracked figure dig-gnd-topology and is
+      DISPUTED. This file records which circuits reference AGND; it does not
+      settle the topology, and it must not be read as settling it.
+
+# Nets that cross a boundary and are not yet in this file. The rollout is
+# incomplete BY DESIGN - one circuit has a netlist so far - and the checker
+# prints how many circuits still have none on every run so this cannot stall
+# unnoticed. Do not add a net here speculatively: a net in this file asserts a
+# connection, and an asserted connection that does not exist is worse than a
+# missing one.

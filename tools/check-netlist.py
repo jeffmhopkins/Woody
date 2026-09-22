@@ -57,6 +57,64 @@ BOX = set("│┬┴├┤┼└┘┌┐─►")
 LABEL = re.compile(r"\[([A-Z][A-Z0-9-]*[A-Z0-9])\s*([^\]]*)\]")
 
 
+MASTER = os.path.join(ROOT, "hardware/nets.yaml")
+
+
+def master_nets():
+    """The authoritative list of boundary-crossing nets, or {} if absent."""
+    if not os.path.exists(MASTER):
+        return {}
+    return (yaml.safe_load(open(MASTER, encoding="utf-8")) or {}).get("nets") or {}
+
+
+def check_master(master, seen, problems, have_netlist, deferred):
+    """Both halves of every inter-circuit net.
+
+    `seen` maps net -> {circuit: dir}, collected from the per-circuit ports.
+
+    THE BIDIRECTIONAL HALF IS THE POINT. A per-circuit file can only ever
+    declare its own side, so without this a circuit can name a peer that never
+    names it back - which is exactly the defect that made the `circuit:`
+    dependency edges untrustworthy until they were checked from both ends.
+    """
+    for net, spec in master.items():
+        drv = spec.get("driver")
+        rcv = list(spec.get("receivers") or [])
+        ref = list(spec.get("reference") or [])
+        if not drv and not spec.get("multi_driver"):
+            problems.append(f"nets.yaml: {net!r} has no driver")
+        if not rcv and not ref:
+            problems.append(f"nets.yaml: {net!r} has no receivers and no "
+                            f"reference circuits - it crosses no boundary")
+        # every circuit this file names must declare the port back
+        for circ, role in [(drv, "out")] + [(c, "in") for c in rcv] + \
+                          [(c, "ref") for c in ref]:
+            if not circ:
+                continue
+            got = seen.get(net, {}).get(circ)
+            if got is None:
+                # A CIRCUIT WITH NO NETLIST YET IS PENDING, NOT WRONG. Failing
+                # on it would make the master unusable until the last of 23
+                # circuits was converted, which is the kind of all-or-nothing
+                # gate that gets switched off. It is counted and printed
+                # instead, so the rollout cannot stall quietly.
+                if circ in have_netlist:
+                    problems.append(f"nets.yaml: {net!r} names {circ} as {role}, "
+                                    f"and that circuit's netlist declares no "
+                                    f"such port")
+                else:
+                    deferred.append((net, circ, role))
+            elif got != role:
+                problems.append(f"nets.yaml: {net!r} names {circ} as {role}, "
+                                f"but that circuit declares dir {got!r}")
+    # and the other direction: a port naming a net nobody owns
+    for net, by in seen.items():
+        if net not in master:
+            who = ", ".join(sorted(by))
+            problems.append(f"{who}: port {net!r} is in no master net "
+                            f"(add it to hardware/nets.yaml)")
+
+
 def bom_rows():
     p = os.path.join(ROOT, "hardware/bom.csv")
     with open(p, newline="", encoding="utf-8") as fh:
@@ -121,7 +179,7 @@ def value_tokens(v):
     return {norm(m) for m in VALTOK.findall(v or "") if any(c.isdigit() for c in m)}
 
 
-def check_one(d, bom, problems):
+def check_one(d, bom, problems, seen):
     rel = os.path.relpath(d, ROOT)
     spec = yaml.safe_load(open(os.path.join(d, "netlist.yaml"), encoding="utf-8"))
     comps = spec.get("components") or {}
@@ -170,6 +228,9 @@ def check_one(d, bom, problems):
     for rp in sorted({u for u in used if used.count(u) > 1}):
         problems.append(f"{rel}: {rp[0]}.{rp[1]} appears in more than one net")
 
+    circ_id = spec.get("circuit") or rel
+    for pn, pspec in ports.items():
+        seen.setdefault(pn, {})[circ_id] = (pspec or {}).get("dir")
     for pn in ports:
         if not any(isinstance(e, dict) and e.get("port") == pn
                    for eps in nets.values() for e in eps):
@@ -225,17 +286,26 @@ def main():
             pending.append(os.path.relpath(page, ROOT))
 
     bom = bom_rows()
+    master = master_nets()
+    seen = {}
     problems, comps, nets = [], 0, 0
     for d in dirs:
-        c, n = check_one(d, bom, problems)
+        c, n = check_one(d, bom, problems, seen)
         comps += c
         nets += n
 
+    deferred = []
+    have_netlist = {(yaml.safe_load(open(os.path.join(d, 'netlist.yaml'),
+                     encoding='utf-8')) or {}).get('circuit') for d in dirs}
+    if master and not args:
+        check_master(master, seen, problems, have_netlist, deferred)
+
     for p in problems:
         print("  " + p)
-    print(f"netlist: {len(dirs)} circuit(s), {comps} components, {nets} nets | "
+    print(f"netlist: {len(dirs)} circuit(s), {comps} components, {nets} nets, "
+          f"{len(master)} master net(s) | "
           f"{len(problems)} problem(s) | {len(pending)} drawing page(s) still "
-          f"without a netlist")
+          f"without a netlist | {len(deferred)} master endpoint(s) awaiting one")
     if pending and not args:
         for p in sorted(pending):
             print(f"    pending: {p}")
