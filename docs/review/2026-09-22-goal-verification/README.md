@@ -27,7 +27,16 @@ this file and nothing else, so the corpus and `tools/` at `HEAD` are
 byte-identical to `a4b80b1`. Measure at either; they are the same tree apart
 from this directory. Prove it if you like:
 
-    git diff a4b80b1 HEAD --stat        # one file, this README
+    # The invariant that matters: the CORPUS AND tools/ have not moved.
+    git diff a4b80b1 HEAD --stat -- . ':(exclude)docs/review/'   # must be EMPTY
+
+*(The first form of this check was `git diff a4b80b1 HEAD --stat`, expecting
+one file. That stopped being true the moment reports started landing in this
+directory — reports are committed as they arrive so they cannot be lost. The
+check above excludes this directory, which reviewers may not read anyway, and
+so stays true for the whole wave. Corrected mid-wave, and recorded rather than
+quietly swapped, because a verification command that has silently stopped
+verifying is worse than none.)*
 
 *(Stated because the first draft of this README named `a4b80b1` and then
 committing it moved `HEAD` — a wave document wrong about its own revision, in
