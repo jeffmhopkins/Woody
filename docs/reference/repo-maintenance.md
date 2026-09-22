@@ -268,11 +268,27 @@ python3 tools/merge-manifests.py      # REGENERATES datasheets/MANIFEST.csv
 python3 tools/merge-bom.py            # REGENERATES hardware/bom.csv
 python3 tools/merge-bom.py --check    # ...or just prove it still matches
 python3 tools/check-conservation.py <rev> <source> <dest>...   # split audit
+python3 tools/audit-notes.py          # BOM notes: live content vs accumulated history
+python3 tools/audit-notes.py --regrown  # ...rows that have turned back into logs
+python3 tools/audit-notes.py <REF>    # ...one row, classified segment by segment
 python3 tools/rewrite-paths.py        # restructure only; --apply/--verify/--invert
 ```
 
-All three are expected to pass before a commit that touches the corpus. The
-staleness hook surfaces the first one automatically.
+The first four are expected to pass before a commit that touches the corpus.
+The staleness hook surfaces `check-staleness.py` automatically — though note
+`CLAUDE.md` §2: it runs before *every* `Bash` call rather than before `git
+commit`, and it never blocks, it only tells you.
+
+`audit-notes.py` is the odd one out: it is an ADVISORY, it changes nothing,
+and it exists because the defect it looks for is one no other check can see.
+A BOM notes cell that has grown back into a dated running log is not wrong
+yet — it is wrong *later*, when one of the values in it moves and the
+supersession segments disagree. `--regrown` is what catches it while it is
+still cheap. Its threshold is HISTORY SEGMENTS, not length: the first version
+also fired above 1,200 characters and flagged twelve rows that had just been
+trimmed correctly, because a dense spec is long too (`U-DAC` is 1,891
+characters with zero history in it). A threshold that fires on correct rows is
+`CLAUDE.md` §2's own trap, and it was in the tool written to enforce the rule.
 
 ### What each one refuses to do, and why it now refuses
 

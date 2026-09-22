@@ -64,7 +64,7 @@ fires.
 - **A refutation split across an ASCII drawing's gutter does not count.** The
   lines are joined with the `│` still in them, so "This line │ carried" is not
   "this line carried". Keep the correction and the value it corrects on one
-  line.
+  line. **This applies to prose only now** — see rule 2b.
 
 And the counterpart to grepping first: **most hits will be legitimate.** Nine
 of the eleven live `8HP`/`6HP` hits were the ADRs correctly narrating
@@ -72,6 +72,57 @@ of the eleven live `8HP`/`6HP` hits were the ADRs correctly narrating
 entirely, one of them negative. A pattern that fires on a correct sentence is
 worse than no pattern, because its cheapest fix is to make the sentence wrong.
 Use `false_positive_note`.
+
+### 2b. A refutation only counts in prose. Data files carry no history.
+
+`tools/check-staleness.py` exempts a forbidden value that sits next to
+refutation wording — **in `.md` files only.** In a `.csv` or a `.yaml` a
+forbidden value is a defect, full stop: no window, no vocabulary, no argument.
+
+**Why the exemption was nearly fatal.** It used to apply everywhere. It made
+48 % of the corpus unfalsifiable and hid eight live stale values through a
+twenty-agent review that reported `PASS`. Every attempt to fix it argued
+about the *window* (300 characters? the line? the cell?) or the *vocabulary*
+(is a bare date a refutation? is `| 2026-09-21:`?) — and every answer was
+wrong somewhere, including the one that withdrew four markers and then
+asserted six failures against correct text.
+
+Both questions only exist **when a retired value and a live one share a
+line.** In `hardware/bom.csv` they shared a line 48 times.
+
+**And no narrower heuristic could have worked**, because a refutation can
+carry a *wrong replacement*. `TRIM-BREATH-ZERO` carried refutation wording
+for the old pedestal, scored refuted-in-place, and the new value it installed
+was itself stale. The checker said nothing. The only version that catches
+that is one that stops asking whether the prose is honest and requires that
+there be none.
+
+**So: THE CUT LINE, and it is the only rule.**
+
+> **KEEP what tells a builder WHAT TO DO.**
+> **CUT what tells them WHAT SOMEONE USED TO THINK.**
+
+"CONTACT MATERIAL G, GOLD, NEVER W — silver goes intermittent at 1 µA and the
+fault passes every bench test" stays. "This row said DO-214AC, which is the
+SS14's package" goes to git, which holds every version of every cell and
+cannot go stale.
+
+`python3 tools/audit-notes.py` classifies each segment of a BOM notes cell
+against that line; `--regrown` flags rows that have turned back into logs. It
+never trims anything — a human decides, and its *ambiguous* class exists so
+nothing is dropped silently.
+
+**Where history goes instead:** `hardware/**/notes.md`, which is prose and
+keeps the exemption, or git. On 2026-09-22 the BOM's notes went 118,198 →
+~81,000 characters and exemptions inside `.csv`/`.yaml` went 60 → 0. Do not
+put them back.
+
+**A restated fact is not a defect until it goes stale, so no check can find
+one.** Three verbatim duplications were found by reading rows next to each
+other, and all three had been invisible for months: the OPA2197 datasheet
+paragraph in three rows, the RV09 order-code block in three more, and a
+39-line `circuit.yaml` header in all 23 copies. If you find yourself pasting,
+you are writing the next defect.
 
 ### 3. Datasheets are banked, not linked
 
