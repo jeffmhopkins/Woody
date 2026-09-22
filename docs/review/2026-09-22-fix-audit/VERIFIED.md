@@ -567,3 +567,58 @@ It also recorded a near-miss rather than filing it: `U-BREATH` qty 2 against
 one drawn sensor looks wrong until you find the rationale on the **neighbouring
 row** — "ADR 0003 calls the sensor a wear part and buys two". Correct, not a
 defect, written down so the next reviewer does not file it.
+
+## D15 — the latency budget. Correct where it is arithmetic, wrong where it is argument.
+
+| Claim | Check | Verdict |
+|---|---|---|
+| **`latency-budget.md:133` carries a stale `125 µs` against a tracked 119.9 µs, and the sentence was added in THIS batch** | `git log -S` on both | **Confirmed. Added by `c65083d`** — "docs/reference/ catches up with the restructure", my own commit — while `119.9 us` has been tracked since `cfcdc6e`, Wave R7, long before. **I wrote a stale value into the file I was fixing**, in the paragraph carrying the bounce consequence |
+| The same stale value sits on `key-switch-network.md:112`, **that figure's own owner page**, and survived a batch that rewrote its consumer | Accepted | And it mislabels the RC as "the release filter", which the same page says is firmware's job |
+| The caution was right and is the useful part: six `125 µs` occurrences, **four legitimate**. Two safe RC-specific patterns each hit exactly one stale line and nothing else | Accepted | This is how a pattern should be proposed |
+| **The `~1 ms` transducer response is called "a datasheet figure" and the banked datasheet has no such row** | Extracted all 22 pages myself | **Confirmed. 19,412 characters, and `response`, `rise time`, `10% to 90` each occur ZERO times.** The second-largest breath term, unsourced, on a document that is already banked and already readable — a `CLAUDE.md` §3 case |
+
+**And the finding the slice was not handed, which is the important one:**
+
+> **The key path that does not close was left unbooked.** The table says
+> release debounce is "off the attack path by construction"; `ROADMAP.md:127`
+> refutes exactly that — "lifting a finger is how you start the next note".
+> A release-initiated note change is W + 0.418 ms, and at the **published
+> 5 ms** bounce maximum that is **5.67 ms against a 5 ms target. It fails.**
+
+And the page's own summary reads *"The key path is not the one at risk."* This
+is the same defect shape I repaired — largest term omitted, no total — left
+sitting on the sibling path.
+
+Three more that matter:
+
+- **ADR 0003 still carries a complete stale copy of this budget**, untouched
+  by the batch, with **three mutually inconsistent breath totals in one file**
+  (`<1.5 ms`, `~2.6 ms`, `~3.1 ms`). Its `50–200 µs` **is** a `loop-budget`
+  forbidden pattern and cannot match, because the value sits in a **table cell
+  with pipes** while the pattern was written in prose spelling — §2's trap in
+  markdown-table form. The same list proves the author knew: a neighbouring
+  pattern carries the pipe.
+- **The release filter is 41.7× too small** for the job the page assigns it,
+  and D15 supplies the three-line proof the page is missing: to span 5 ms the
+  RC needs C ≈ 1.96 µF, which pushes the **press** to 246 µs — the whole scan
+  period — destroying the asymmetry the design depends on. The page's
+  conclusion is right; it never showed why.
+- **`loop-budget`'s 196–241 µs is not reproducible from its own derivation.**
+  The 291 µs default pins about six transactions (148 + 6×24 = 292), and six
+  polling transactions give 202–209.
+
+**`ks33-contact-bounce` completeness: 1 of 6 followed.** ADR 0002 cites it
+correctly. Not followed: `latency-budget.md` (restates it twice),
+`firmware/README.md` (carries neither half of the relationship the register's
+own `companion` field claims it carries), ADR 0001 (never mentions it, still
+argues from 20 ms), `key-switch-network/` (calls the 47 nF "a bounce filter"
+unqualified), `ROADMAP.md:71` (flatly contradicts it).
+
+**D15's cross-cutting note is the sharpest diagnosis in the wave.** Of every
+quantity this page books, exactly **one** is tracked with this page as owner.
+**Every divergence in its report is in an untracked quantity** — the DAC
+burst, the tube delay, the filter corners, the transducer response, the
+umbilical rate, the 5 ms target itself, and all four path totals.
+
+> The fix was correct arithmetic in one file, and the register was not extended
+> to hold any of it in place.
