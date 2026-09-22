@@ -293,7 +293,7 @@ low-leakage part, or the timer never resets.
 page drew as a bare capacitor:
 
 ```
-GATE ──┬──[R-GATE-SER 10Ω]── FET gate
+GATE ──┬──[R-GATE-SER 10Ω]── Q-LOADSW gate
        │
     [R-GATE-COMP 1k]
        │
@@ -314,7 +314,12 @@ judgement call; both are read straight off the manufacturer's reference circuit,
 and the loop they compensate is the one that has to hold 940 mA steady for 47 ms
 on every hot-plug.
 
-### What sizes the FET
+### What sizes the FET — `Q-LOADSW`
+
+The pass FET is its own BOM row, `Q-LOADSW`, and **the part is not chosen**.
+It was carried inside `U-LOADSW`'s `part` field as "DPAK/SO-8 N-FET" until
+2026-09-22, which is a description and cannot be ordered. This section is
+what decides it; the row cites this section rather than restating it.
 
 With foldback working, peak fault dissipation is **~4 W at V_out ~ 4 V**,
 not the 12 W the old page assumed — the feature holds dissipation roughly
