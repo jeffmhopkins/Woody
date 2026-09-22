@@ -1,0 +1,203 @@
+id,slice,line,severity,verdict,headline
+D11-1,D11,30,high,NOT ADDRESSED,D11-1 The stated reason for not renaming the banked file is false — .moves.csv exists for exactly this and already rewrites this file's path. Repeated in three places. High
+D11-10,D11,39,medium,NOT ADDRESSED,D11-10 check_verified_against() has zero inputs . No circuit.yaml in the tree declares verified_against ; all 23 were rewritten in this batch and none gained one. The SHA-256 bank has no machine link to any figure. Mediu
+D11-11,D11,40,low,NOT ADDRESSED,"D11-11 ""Package Option Addendum (p.54-57)"" — it is p.54–55. Restated in four places. Low"
+D11-12,D11,41,low,NOT ADDRESSED,"D11-12 The two BLOCKED rows record candidate URLs with no attempt evidence, unlike every other blocked row in the manifest. Low"
+D11-13,D11,42,low,NOT ADDRESSED,"D11-13 panel-toggle-hole 's derivation says the NKK drawing has ""no text layer"". repo-maintenance.md §3 already corrects that claim for this exact document. Low"
+D11-2,D11,31,high,NOT ADDRESSED,"D11-2 MANIFEST.csv still carries DAC8568CIPW as a live OK row with no marker, sorted above the corrected one; R9's SUPERSEDES keyword is invisible to merge-manifests.py by construction. High"
+D11-3,D11,32,high,NOT ADDRESSED,D11-3 D-TVS-BREATH 's three unsourced numbers are still unmarked in hardware/bom.csv . The caveat exists only inside a 127 kB generated CSV. The U-TVS-SPI row two lines away does it correctly. High
+D11-4,D11,33,medium,NOT ADDRESSED,D11-4 The new BLOCKED row misattributes those numbers: two of the three are about a rejected part and one is calc off a tracked figure. The datasheet it blocks on can never settle them. Medium
+D11-5,D11,34,medium,NOT ADDRESSED,"D11-5 datasheets/README.md §""What is still missing"" was not updated; the new highest-consequence gap is absent while three lesser ones are listed. Its ""one row per part"" rule is now contradicted. Medium"
+D11-6,D11,35,medium,NOT ADDRESSED,"D11-6 Both new rows put the literal string BLOCKED in the sha256 column. Schema violation, unchecked, inconsistent with all 21 other no-file rows. Medium"
+D11-7,D11,36,medium,NOT ADDRESSED,"D11-7 verify-datasheets.py 's ""78 verified"" counts rows, not documents : 76 files, two counted twice. R9 raised that number by one while banking nothing. Medium"
+D11-8,D11,37,medium,NOT ADDRESSED,D11-8 The BOM-coverage claim is true but weak: 26 of 139 BOM rows are tested . ESP32-S3-Matrix — one of the three parts the tool's own comment says were hiding in this blind spot — is still skipped. Medium
+D11-9,D11,38,advisory,NOT ADDRESSED,"D11-9 check_datasheets() returns on exit 0, so the advisory half of verify-datasheets ' output never reaches the commit hook . Wiring it in captured the exit code and discarded the report. Medium"
+D12-1,D12,659,,NOT ADDRESSED,- D12-1 is arithmetic and I am confident in it. What is a judgement call is
+D12-10,D12,486,,NOT ADDRESSED,D12-10.)
+D12-2,D12,653,,NOT ADDRESSED,- D12-2's severity is the part I am least sure of. The nominal case is
+D12-3,D12,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D12-4,D12,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D12-5,D12,664,,NOT ADDRESSED,- D12-5 does not unlock the grade and should not be read as proposing that.
+D12-6,D12,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D12-7,D12,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D12-8,D12,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D12-9,D12,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D13-1,D13,690,high,NOT ADDRESSED,"D13-1 ADR 0014 clamp, :193 – :201 , :257 At 45 mA/LED, ""realistic use"" is 3.6 W and the ~3 W clamp is below it, not twice it. Four headroom claims invert. Untouched. high calc , datasheet WS2815 p.3"
+D13-10,D13,699,medium,NOT ADDRESSED,"D13-10 ADR 0014 :131 – :132 Five of six table cells uncorrected, incl. the whole 30/m row and the 0.13 A cell the rest of the corpus reads. medium calc"
+D13-11,D13,700,medium,NOT ADDRESSED,"D13-11 ADR 0005 :162 , :288 – :298 Latched-full-white is ~2.8 A, not ~1.5 A — 1.8× the etherCON contact rating on a single conductor, not marginally over. Conclusion strengthens; magnitude understated. medium calc , repo"
+D13-12,D13,701,low,NOT ADDRESSED,"D13-12 ADR 0014 :122 , C-STRIP-BULK ""hundreds of milliamps"" of PWM swing is up to 2.25 A. Conclusion strengthens; the 470–1000 µF has no written derivation. low-medium calc , repo"
+D13-13,D13,702,low,NOT ADDRESSED,"D13-13 D-TVS-BREATH prose The refutation clause was spliced mid-sentence; ""on the project's DC-accurate output"" now modifies the wrong noun. low repo"
+D13-14,D13,703,low,NOT ADDRESSED,D13-14 unplaced.csv:5 ( LED-SIDE ) The WS2815 tape's only BOM row carries no current figure and no marker — where somebody ordering the part looks. low repo
+D13-15,D13,704,low,NOT ADDRESSED,"D13-15 ADR 0014 :182 , matrix-led-current The precedent this fix copied is itself partial: 960 mA survives unmarked 197 lines above its own refutation, and the register entry has forbidden: . Corroborates D13-2's mechani"
+D13-2,D13,691,high,NOT ADDRESSED,"D13-2 strip-led-current (no such figure) The refuted figure got a prose annotation but no register entry, no forbidden patterns and no ROADMAP measurement row — so the checker cannot see it and the annotation's own ""need"
+D13-3,D13,692,high,NOT ADDRESSED,"D13-3 hardware/bom.csv:42 / breath-sense-link/bom.csv:2 ( U-BREATH ) ""Full scale CONFIRMED as 0.2 to 4.8V"" — the retired value asserted as settled, in the most-cited file, escaping all 37 patterns on the no-space spellin"
+D13-4,D13,693,high,NOT ADDRESSED,"D13-4 ADR 0014 :174 , :175 Thermal table unmarked; :175 (~17.7 W / ~53 K) is not mentioned by the annotation and becomes ~40.5 W / ~122 K. :174 's state exceeds the WS2815's own +85 °C Topt and the sensor's +60 °C. high "
+D13-5,D13,694,low,NOT ADDRESSED,"D13-5 umbilical-current (359 mA) Probably 1.47× low (~528 mA) if the strip realistic-use term propagates — and cannot be checked , because the 12 V direct column is asserted with no written decomposition. Eight downstrea"
+D13-6,D13,695,medium,NOT ADDRESSED,"D13-6 3 K/W , 10–20 K Neither is tracked or owned; restated in 12 files; the pair is circular (two ADRs cite the model's output as evidence for its input); and 3 K/W is read 2.2× past its fitting point. medium-high repo "
+D13-7,D13,696,medium,NOT ADDRESSED,"D13-7 breath-adc.md:52 Retired 4.7 V live in an arithmetic chain, 15 lines below a line the same commit fixed; the register's ""4.7 V × 0.6"" pattern was written from that fixed line. U+2212 minus. medium repo , test"
+D13-8,D13,697,medium,NOT ADDRESSED,"D13-8 D-TVS-BREATH Three unsourced numbers, status: candidate , no marker in the row. The gap is recorded fully — in the manifest, not where the reader is. Two of three blocked-on-datasheet rows say so; this is the third"
+D13-9,D13,698,medium,NOT ADDRESSED,"D13-9 ADR 0014 :141 – :143 ""2.1 mA reproduces ADR 0005's 123 mA figure exactly "" is false: 2.1 × 50 = 105 mA , 15 % out. The annotation's own corroborating sentence. medium calc , datasheet WS2815 p.3"
+D14-1,D14,542,high,NOT ADDRESSED,"D14-1 The −3.2 mm blade transition is not in the solid (it is −3.00), so the only input to the published window is wrong High — step , reproducible Re-run §1.5"
+D14-10,D14,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D14-2,D14,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D14-3,D14,538,high,NOT ADDRESSED,"D14-3 The standoff is 1.30 mm (2.50 − 1.20), not 2.0–2.4 mm. The published range's upper end is impossible; its premise (⌀1.2 holes) contradicts Gateron's recommended ⌀3.00 pattern; and the stood-off reading it needs vio"
+D14-4,D14,544,,NOT ADDRESSED,"D14-4 Sheet 3's recommended-plate tolerance is +0.01/−0.05 , not ±0.05; four documents compute ""0.25 mm over"" from the wrong band while the manifest has it right Certain — datasheet —"
+D14-5,D14,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D14-6,D14,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D14-7,D14,539,high,NOT ADDRESSED,"D14-7 / D14-5 / D14-6 The height rule is unsafe as written. At 1.20–1.30 mm, SOT-23 and high-cap 0805 interfere; the cutoff (1.4) is below the SOT-23 max (1.45) it permits; the table's packages are 0402/0603 and SOT-23 w"
+D14-8,D14,543,high,NOT ADDRESSED,"D14-8 The M4/M5 gate is real and tracked but names nothing that decides it , and one site ( cluster-boards.md:236 ) still names the closed question as the gate High Name the decider: the t³ calc against M3's span, plus t"
+D14-9,D14,540,,NOT ADDRESSED,"D14-9 / D14-10 ROADMAP.md:71 and :84 still say the bounce figure is unpublished — a fourth and fifth spelling, both unmatched by all five patterns, in the row that defines M1 Certain — test grep —"
+D15-1,D15,413,high,NOT ADDRESSED,D15-1 high key-release-time latency-budget.md:133 stale 125 µs written inside this fix batch against a tracked 119.9 µs; uncaught by all 12 patterns
+D15-10,D15,423,medium,NOT ADDRESSED,"D15-10 medium-high ks33-contact-bounce latency-budget.md:134-135,148 the 5 ms max does not size the release window — ROADMAP:114-125 and ADR 0002:230-234 both say the unpublished reset gap does"
+D15-11,D15,424,high,NOT ADDRESSED,"D15-11 high ks33-contact-bounce ROADMAP.md:71 ""neither is published"" — live stale assertion, refuted 49 lines later, checker at PASS"
+D15-12,D15,425,medium,NOT ADDRESSED,D15-12 medium-high note-on gate latency-budget.md:125-135 bounce stalling the gate is unanalysed; ADR 0001:318-319 anticipates it
+D15-13,D15,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D15-14,D15,292,,NOT ADDRESSED,D15-14 — but 196–241 µs is not reproducible from anything the corpus states.
+D15-15,D15,307,,NOT ADDRESSED,D15-15 — the coupling between the two budgets is not stated. calc
+D15-2,D15,414,high,NOT ADDRESSED,"D15-2 high key-release-time key-switch-network.md:112 same stale 125 µs on the figure's owner page , and it mislabels the RC as ""the release filter"""
+D15-3,D15,415,high,NOT ADDRESSED,"D15-3 high key path, release edge latency-budget.md:100,109,121-123 release-initiated note change unbooked and does not close — 5.67 ms on the published bounce maximum alone"
+D15-4,D15,417,high,NOT ADDRESSED,"D15-4 high DAC8568 update latency-budget.md:102 60 µs vs the same operation booked at 106 µs four lines up, against the page's own stated rule"
+D15-5,D15,418,high,NOT ADDRESSED,"D15-5 high loop-budget 0003-breath-sensing-path.md:18-27 a complete stale copy of this budget, untouched by the batch; 50–200 µs is a forbidden pattern the checker cannot match through table pipes"
+D15-6,D15,88,,NOT ADDRESSED,D15-6 — the breath digital total does not follow from its rows.
+D15-7,D15,101,,NOT ADDRESSED,"D15-7 — line 49 contradicts the table above it. The prose says ""The real"
+D15-8,D15,112,,NOT ADDRESSED,"D15-8 — the analog total omits a row, the same way the key path used to."
+D15-9,D15,123,,NOT ADDRESSED,D15-9 — the transducer's ~1 ms is called a datasheet figure and the banked
+D16-1,D16,22,high,NOT ADDRESSED,D16-1 The per-row drawing mapping is missing on 23 of 29 qualified rows High — this is the mitigation the decision rests on
+D16-10,D16,31,medium,NOT ADDRESSED,D16-10 The dac-rail value is still restated in two derived drawings; the fix landed on one of three Medium
+D16-11,D16,32,medium,NOT ADDRESSED,"D16-11 Six rows attribute the DAC-side R-SPI-PULL to the cable-side net, which is the merged reading the rename exists to remove Medium"
+D16-12,D16,33,low,NOT ADDRESSED,D16-12 spi-link.md:46 uses the retired bare CS for a third net ( SYNC ) Low
+D16-13,D16,34,low,NOT ADDRESSED,D16-13 Suffix convention mixes a board axis and a device axis; SCLK is the only collision where the bare name was kept Low
+D16-14,D16,35,low,NOT ADDRESSED,"D16-14 hardware/bom.csv , ADR 0004, ADR 0003, ROADMAP.md and umbilical-pinmap are all still in the bare namespace Low-Medium, judgement call"
+D16-15,D16,36,low,NOT ADDRESSED,"D16-15 OE_INST / OE_MOD cannot short — both are ground ties. pcb-pipeline.md 's ""two different physical nets"" is loose for that row Low"
+D16-16,D16,37,high,NOT ADDRESSED,"D16-16 Nothing mechanical checks any of this High , as a cause"
+D16-2,D16,23,high,NOT ADDRESSED,D16-2 pitch-stage.md 's mapping is false : AGND appears nowhere in that page's drawing High
+D16-3,D16,24,high,NOT ADDRESSED,D16-3 carrier.md §2 spells two different nets AGND inside one drawing; the ADC row's named spelling AGND-local is split across two lines at exactly that node High — this is the short
+D16-4,D16,25,high,NOT ADDRESSED,D16-4 breath-output-stage.md 's mapping is right for 1 of the 3 nodes it names; the other two are drawn bare AGND High
+D16-5,D16,26,high,NOT ADDRESSED,"D16-5 carrier.md §4 labels the umbilical SPI clock SCK , which is another circuit's net name ( J-CHAIN pin 2, the key chain clock) High — unlisted collision"
+D16-6,D16,27,medium,NOT ADDRESSED,D16-6 SER and QH are self-declared multi-net names that were never qualified Medium
+D16-7,D16,28,medium,NOT ADDRESSED,D16-7 Bare +12V and bare 5 V each denote two or three different physical nets across the tables Medium
+D16-8,D16,29,medium,NOT ADDRESSED,D16-8 AGND_INST is cited as a net by three pages and declared as a row by none Medium
+D16-9,D16,30,medium,NOT ADDRESSED,"D16-9 breath-output-stage.md 's DAC AVDD row still describes a drawing label that was fixed the same day Medium — the repo's named failure, inside the rename work"
+D17-1,D17,620,high,NOT ADDRESSED,"D17-1 Edges 19, 32, 36, 38, 39 declare dependencies on module/link-supervision , which is NOT FITTED, has no bom.csv , and whose five Interfaces rows all begin ""Not fitted."" 10 of 96 directed edges. high"
+D17-10,D17,629,high,NOT ADDRESSED,"D17-10 Nothing enforces reciprocity, isolation or table-vs-YAML agreement. 96/48/0/0 is a one-off hand measurement. high"
+D17-11,D17,630,high,NOT ADDRESSED,"D17-11 Reciprocity-by-construction is the wrong model: Dir already had the direction, and the symmetric graph has 48 two-cycles and no topological order. high"
+D17-12,D17,631,high,NOT ADDRESSED,"D17-12 provides: and verified_against: are still empty in all 23 files; both checks over them remain unfalsifiable, and the node: branch will reject the first node: edge anyone writes. high"
+D17-13,D17,632,high,NOT ADDRESSED,D17-13 All 23 id s match their directories; no duplicates. Clean. high
+D17-14,D17,633,medium,NOT ADDRESSED,"D17-14 key-chain-loom.md:80 draws U-TVS-CHAIN to DIG_GND , a module-side net the carrier↔cluster loom does not reach. Either the net name is wrong or an edge is missing. medium"
+D17-15,D17,634,medium,NOT ADDRESSED,"D17-15 power-entry.md redraws the whole of umbilical-load-switch inline, which is what generates six of its refdes: edges. A duplicated drawing feeding a transcribed netlist. medium (outside slice)"
+D17-16,D17,635,medium,NOT ADDRESSED,"D17-16 L-BUCK-IN has three homes: a BOM row under carrier/power-entry-instrument , a sentence in power-entry.md saying it moved to umbilical-load-switch , and a Still open proposal on that page. medium (outside slice)"
+D17-2,D17,621,high,NOT ADDRESSED,D17-2 Edge 17 exists only because in-amp output has two declared out rows — the one net in the corpus still violating hardware/README.md 's one-source rule. Commit 6645fb7 verified that rule on the DAC's nets only. high
+D17-3,D17,622,high,NOT ADDRESSED,D17-3 Edge 46 ( panel-led — umbilical-load-switch ) has Dir: — at both ends and both notes say the connection is proposed and not drawn. high
+D17-4,D17,623,high,NOT ADDRESSED,"D17-4 Missing: interfaces/breath-sense-link — module/power-entry . Its own rows name power-entry as the source of AGND_MOD , ±12 V and DAC AVDD , but put breath-receive-stage in Peer ; power-entry 's consumer lists omit "
+D17-5,D17,624,high,NOT ADDRESSED,D17-5 Missing: interfaces/spi-link — carrier/power-entry-instrument . U-TVS-SPI returns to PWR_GND ; spi-link declares no PWR_GND row. high
+D17-6,D17,625,high,NOT ADDRESSED,"D17-6 The graph has no node for carrier/carrier.md §2/§4, the source of BREATH_SENSE . Two Peer cells name a file rather than a circuit — the only two in the corpus. high"
+D17-7,D17,626,high,NOT ADDRESSED,"D17-7 The header says circuit: edges are VERIFIED; commit 6645fb7 says they were seeded from the tables; hardware/README.md:12 still says SEEDED, NOT VERIFIED. Three documents, two answers. high"
+D17-8,D17,627,high,NOT ADDRESSED,"D17-8 Eight further refdes: edges are false by the same test as the three the header names; two are the identical ""the part is not here"" sentence shape. Total ≥11, not 3. high"
+D17-9,D17,628,medium,NOT ADDRESSED,D17-9 The U-OPA-PITCH finding the header repeats as proved-false is now arguable — the part is in breath-receive-stage 's own BOM fragment. A finding filed as settled stops being re-checked. medium
+D18-1,D18,499,low,NOT ADDRESSED,"D18-1 repo-maintenance.md:298 asserts ""every tracked file has a row""; false at HEAD ( docs/review/2026-09-22-fix-audit/README.md has no row) low, high signal test confirmed"
+D18-2,D18,500,low,NOT ADDRESSED,"D18-2 §7's ""410 rows: 405 tracked files, plus 4 deleted and 1 duplicate destination"" — actually 406 + 4, and zero duplicate destinations low test confirmed"
+D18-3,D18,501,low,NOT ADDRESSED,"D18-3 §7's ""143 tracked files with no row"" — actually 144; 143 is the count the fix landed, and the 144th is the file it missed low test confirmed"
+D18-4,D18,502,medium,NOT ADDRESSED,"D18-4 §7's created -row rationale states a mechanism ( rewrite-paths.py would rewrite) that a dict-keyed load_map does not exhibit, and names the one example where the hazard is inert; the real hazard is a silent order-d"
+D18-5,D18,503,,NOT ADDRESSED,D18-5 §7's table promises created-history notes name a commit; all 28 name a wave directory nit test confirmed
+D18-6,D18,504,medium,NOT ADDRESSED,"D18-6 Nothing in the repo runs §7's four-line check, though check-staleness.py already composes three sibling tools and the commit hook already calls it medium, structural test confirmed"
+D2-1,D2,498,high,NOT ADDRESSED,D2-1 check_bom_figures reaches 1 of 37 figures / 1 of 139 BOM rows; the same defect on C-GATE-LOADSW reproduces green test high
+D2-10,D2,507,low,NOT ADDRESSED,D2-10 46 % of the 233 reach 3 files only via the generated master and co-located circuit files test low (presentation)
+D2-11,D2,508,,NOT ADDRESSED,D2-11 360 mA in 6 files against tracked 359 mA ; 0.265 V in 6 files tracked only inside another figure's derivation ; 120 mV untracked repo for other slices
+D2-12,D2,509,low,NOT ADDRESSED,"D2-12 qty / package / description / status columns unread by check_bom_figures test low, given D2-1"
+D2-2,D2,499,high,NOT ADDRESSED,D2-2 Coverage is unreported; rewording one figure takes it to 0 coverage with a byte-identical PASS line — the seventh fail-open test high
+D2-3,D2,500,high,NOT ADDRESSED,"D2-3 primary = max(nums, key=len) picks the longest token, not the value; 5 of 7 coverage-extension trials false-fail on a correct corpus test high — blocks the fix for D2-1"
+D2-4,D2,501,high,NOT ADDRESSED,D2-4 One primary compared against every refdes: multi-part figures cannot pass high
+D2-5,D2,502,medium,NOT ADDRESSED,D2-5 2.2 kohm vs BOM 2k2 false-fails — CLAUDE.md trap 1 inside the new check test medium
+D2-6,D2,503,high,NOT ADDRESSED,D2-6 check_restated 's n in known suppresses on bare digits: 93 spurious suppressions including 5 V in 38 files test high (silent)
+D2-7,D2,504,high,NOT ADDRESSED,D2-7 NUM_UNIT cannot see R-notation; 10k in 29 files invisible test high
+D2-8,D2,505,medium,NOT ADDRESSED,"D2-8 NUM_UNIT misses 67 further ≥3-file values ( cents , kPa , V/oct , LSB , counts), including the units of 5 tracked figures test medium"
+D2-9,D2,506,medium,NOT ADDRESSED,"D2-9 Trailing / accepted: 244 V/s → 244 V , 0.7665 V/kPa → 0.7665 V , 3 ppm/°C → 3 ppm calc medium"
+D3-0,D3,606,,NOT ADDRESSED,D3-0 68 of 68 forbidden-pattern matches are exempted; the stale-value check reports nothing on this corpus certain test
+D3-1,D3,607,,NOT ADDRESSED,"D3-1 WIRE-LOOM 's ""five connectors must match"" is live and false against chain-connectors = 8, exempted by a date 222 chars away; it is the escape 0e68f25 's message says it closed certain repo + test"
+D3-2,D3,608,high,NOT ADDRESSED,"D3-2 D-REVPOL 's ""modulates its Vf by ~80mV"" is a live stale value; the nearby correction is about the cents high — depends on whether a \ -appended dated segment strikes the text above it"
+D3-3,D3,609,medium,NOT ADDRESSED,"D3-3 C-TIMER-LOADSW 's 2.4x the ~62ms and the reviewers disagree… stand un-struck; the register records the first as retired medium-high, same dependency"
+D3-4,D3,610,,NOT ADDRESSED,D3-4 3 of 218 patterns self-exempt and can never fire; check_patterns() does not catch them certain test
+D3-5,D3,611,,NOT ADDRESSED,D3-5 REFUTATION_SHOUT is the sole support for 0 exemptions; 2 of its 12 appearances are corrections certain test
+D3-6,D3,612,,NOT ADDRESSED,"D3-6 The dated marker is sole support for 6 exemptions, and all 6 are D3-1 and D3-3 certain test"
+D3-7,D3,613,,NOT ADDRESSED,"D3-7 41 house-style ""An earlier revision…"" refutation blocks no longer qualify; adding a pattern per CLAUDE.md §2 near one will report a true sentence certain test for the count; the consequence is prospective"
+D3-8,D3,614,,NOT ADDRESSED,"D3-8 The 300-char window excludes nothing; 200 excludes the defects and costs nothing; legitimate max is 165, bad min is 222 certain test"
+D3-9,D3,615,,NOT ADDRESSED,"D3-9 47.9 % of the corpus is unfalsifiable at w=300, concentrated in notes.md and BOM fragments certain test"
+D4-1,D4,744,,NOT ADDRESSED,D4.1 check-conservation head/tail comparison is symmetric and complete for end deletions — the fix is correct —
+D4-10,D4,753,high,NOT ADDRESSED,D4.10 merge-bom --check is byte-exact but blind to a row moved between ORDER-adjacent fragments; THE ASSIGNMENT RULE is unenforced HIGH
+D4-11,D4,755,,NOT ADDRESSED,"D4.11 merge-bom repo-maintenance.md:191 says 24 fragments; 0e68f25 made it 26. Plus ""All three"" over five tools, and no table row for the fixes MED"
+D4-12,D4,756,high,NOT ADDRESSED,"D4.12 merge-manifests dedup guard keyed (part, file) ; R9's part-string edit turns off the only report that names a two-row file HIGH"
+D4-13,D4,757,,NOT ADDRESSED,D4.13 merge-manifests R9's SUPERSEDES is inert — declared only reads BLOCKED/NOT-FETCHED rows MED
+D4-14,D4,758,,NOT ADDRESSED,"D4.14 merge-manifests MANIFEST.csv:2 is now the withdrawn DAC8568CIPW code, unannotated, sorting above its correction MED"
+D4-15,D4,759,low,NOT ADDRESSED,D4.15 merge-manifests R9 writes BLOCKED into the sha256 column; nothing validates the column LOW
+D4-16,D4,760,,NOT ADDRESSED,"D4.16 merge-manifests norm() / historical dead code: would report 14 vs 10, and two of the extras are the conflations the file forbids MED"
+D4-17,D4,761,,NOT ADDRESSED,D4.17 verify-datasheets exit-code semantics coherent: uncovered is not in the exit expression — correct —
+D4-18,D4,762,advisory,NOT ADDRESSED,"D4.18 verify-datasheets wiring discards the advisory block on success, and msgs :40 hides real failures behind ≥37 advisory lines HIGH (latent)"
+D4-19,D4,763,,NOT ADDRESSED,"D4.19 verify-datasheets what a green run now means, and that BOM coverage is not part of it —"
+D4-2,D4,745,,NOT ADDRESSED,D4.2 check-conservation Counter check exits 1 on a table-alignment-only edit; 24 corpus files carry repeated 8-grams MED
+D4-20,D4,764,,NOT ADDRESSED,"D4.20 rewrite-paths --apply safe with the empty old column: 29 pairs from 410 rows, 0 files touched — correct —"
+D4-21,D4,765,high,NOT ADDRESSED,D4.21 rewrite-paths --invert reports 112 MISMATCH on a healthy tree; 92/92 are map- created rows the tool does not consult HIGH
+D4-22,D4,766,high,NOT ADDRESSED,D4.22 rewrite-paths the proof is not reproducible: today's map gives 21 MISMATCH on the A2 tree that scored 0 HIGH
+D4-23,D4,767,low,NOT ADDRESSED,D4.23 rewrite-paths unrewrite() orders by len(old) while substituting on new LOW
+D4-3,D4,746,high,NOT ADDRESSED,"D4.3 check-conservation head check defeated by a notes.md ""Moved verbatim from …"" provenance line; rc=0, seams unchanged HIGH"
+D4-4,D4,747,high,NOT ADDRESSED,"D4.4 check-conservation passage moved between destinations, or destinations swapped wholesale, is invisible; rc=0 HIGH"
+D4-5,D4,748,,NOT ADDRESSED,"D4.5 check-conservation source passed as its own destination → 0 seams , rc=0 MED"
+D4-6,D4,749,,NOT ADDRESSED,D4.6 check-conservation source under 8 words → total loss reads green MED
+D4-7,D4,750,,NOT ADDRESSED,"D4.7 check-conservation N=8 is tight for the walk and too short for the multiset check; one constant, two needs MED"
+D4-8,D4,751,,NOT ADDRESSED,"D4.8 check-conservation not invoked by any hook, check or documented gate MED"
+D4-9,D4,752,high,NOT ADDRESSED,D4.9 merge-bom writes the truncated master to disk before reporting problems — the bug e30d3d8 fixed in the sibling tool HIGH
+D6-1,D6,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D6-10,D6,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D6-11,D6,445,,NOT ADDRESSED,"- D6-11 ( marker-bits , free-bits ) is a judgement about whether a"
+D6-12,D6,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D6-13,D6,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D6-14,D6,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D6-15,D6,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D6-16,D6,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D6-2,D6,439,,NOT ADDRESSED,- D6-2 ( inamp-full-scale ) is the only finding where I am not certain
+D6-3,D6,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D6-4,D6,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D6-5,D6,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D6-6,D6,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D6-7,D6,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D6-8,D6,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D6-9,D6,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D7-1,D7,24,high,NOT ADDRESSED,"D7-1 13 of the 31 patterns added in df22096 match the stale text they were written for, and the checker exempts every one of those matches. The commit's own headline case — -9.6V in the U-DIFFRX BOM row, the escape escap"
+D7-10,D7,33,low,NOT ADDRESSED,"D7-10 182 of 218 patterns match nothing at HEAD. Most are legitimately spent, but at least 5 are dead against text deleted in cfcdc6e and 3 more are dead on a u / µ spelling. check_patterns() reports 0 dead-patterns for "
+D7-11,D7,34,medium,NOT ADDRESSED,"D7-11 Coverage: dac-rail is the next sensor-full-scale . 36 restatements across 17 files in two canonical spellings, two of them inside ASCII drawings. The nine-spellings benchmark is already exceeded. medium"
+D7-12,D7,35,,NOT ADDRESSED,D7-12 The slice brief names four entries that lost patterns. The committed diff shows three . ks33-contact-bounce 's two removals happened before the commit and exist only in its false_positive_note — they are not audita
+D7-2,D7,25,high,NOT ADDRESSED,"D7-2 The exemption window leaks across record boundaries. A refutation word in the next, unrelated bom.csv row excuses a live forbidden value in this one. Demonstrated at HEAD: identical row, 1 stale alone, 0 stale with "
+D7-3,D7,26,high,NOT ADDRESSED,"D7-3 Three patterns contain a refutation marker inside themselves and can therefore never fire anywhere. sensor-full-scale ""0.2 → 4.8 V"" , diode-split-rationale ""75 mV → LM317"" , loadswitch-fb-divider ""VALUES NOT SET"" . "
+D7-4,D7,27,high,NOT ADDRESSED,"D7-4 The ks33-contact-bounce fix is incomplete and no pattern catches the survivor. ROADMAP.md:71 still asserts bounce and the hysteresis gap are both unpublished — contradicting ROADMAP.md:118-121 , fifty lines below it"
+D7-5,D7,28,medium,NOT ADDRESSED,D7-5 9 of the 36 added patterns match nothing at any commit ; 8 of those never existed anywhere in the corpus's git history. breath-sensor-slope 's entire list (3 of 3) and 4 of ks33-contact-bounce 's 5. medium
+D7-6,D7,29,medium,NOT ADDRESSED,"D7-6 breath-sensor-slope 's ""0.5059 V/kPa"" forbids the arithmetically correct slope at 3.3 V — and the same entry's note gives the reason someone will write that sentence. A trap primed, not sprung. medium"
+D7-7,D7,30,medium,NOT ADDRESSED,"D7-7 Four added patterns are bare numerals ( ""~93us"" , ""~125us"" , ""~5.7us"" , ""= 97mm"" ) that currently match only correction prose and survive on the exemption. Cheapest fix on a future false positive is to make a true s"
+D7-8,D7,31,medium,NOT ADDRESSED,"D7-8 The ""12x to 300x"" removal was mechanically defensible but left a known-wrong ratio live in two files with nothing tracking it. calc the real range is 37× to 925×. medium"
+D7-9,D7,32,medium,NOT ADDRESSED,"D7-9 CSV-spelling gaps in three entries, including in the two figures newly tracked on 2026-09-22 — the same trap CLAUDE.md §2 bullet 1 describes, repeated in the commit that cites it. medium"
+D8-1,D8,21,high,NOT ADDRESSED,"D8-1 ROADMAP.md :71 still says bounce is not published — a live contradiction of ks33-contact-bounce and of the ROADMAP's own §112, missed by all five of the entry's patterns high"
+D8-10,D8,30,advisory,NOT ADDRESSED,"D8-10 Ranked list of untracked load-bearing quantities, and the two reasons the advisory cannot nominate the best of them advisory"
+D8-2,D8,22,high,NOT ADDRESSED,"D8-2 key-release-time is restated as a stale 125 µs in two live places, one of them the fix batch's own new paragraph and one the owner page high"
+D8-3,D8,23,medium,NOT ADDRESSED,"D8-3 bounce duration and the reset point is a pattern that will fire on a true sentence — it matches M1's own job description, and breaks the rule its own false_positive_note states medium"
+D8-4,D8,24,medium,NOT ADDRESSED,"D8-4 The bounce consequence did not land in ADR 0001, whose parenthetical about scanning faster is now backwards; nor in firmware/README.md or ADR 0002 medium"
+D8-5,D8,25,medium,NOT ADDRESSED,"D8-5 breath-adc.md :40 still restates 0.766 uncited — the register's own note names it as ""the one that would go stale silently"" and it was not fixed medium"
+D8-6,D8,26,medium,NOT ADDRESSED,"D8-6 bom.csv :42 asserts ""Full scale CONFIRMED as 0.2 to 4.8V"" — the refuted cover-page span, live and unguarded in the generated master medium"
+D8-7,D8,27,low,NOT ADDRESSED,D8-7 ks33-contact-bounce 's owner claim is UNCHECKED by check_owners ; its value has no token ≥3 characters low
+D8-8,D8,28,low,NOT ADDRESSED,"D8-8 Three breath-sensor-slope patterns that never existed in the corpus, guarding nothing, while the one real restatement has no pattern low"
+D8-9,D8,29,low,NOT ADDRESSED,"D8-9 Two corpus files give two sizes for the drawing's text layer (9,680 vs 11 kB); the measured figure is 11,053 low"
+D9-1,D9,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D9-10,D9,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D9-11,D9,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D9-12,D9,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D9-13,D9,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D9-14,D9,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D9-2,D9,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D9-3,D9,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D9-4,D9,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D9-5,D9,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D9-6,D9,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D9-7,D9,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D9-8,D9,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+D9-9,D9,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+P0-75,D11|D6,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+V1-0,D13,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+V1-1,D13,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+Z0-9,D1,,,NOT ADDRESSED,CITED ONLY - introduced in no report

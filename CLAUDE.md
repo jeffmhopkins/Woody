@@ -111,8 +111,12 @@ corrected.** Resolve them through `docs/reference/repo-maintenance.md` §7.
 
 ## Review waves
 
-**Nine have run.** `docs/review/` is the index; this list is not kept in sync
-by anything and said "three" for months while the directory held nine. The
+**`ls -d docs/review/*/` is the count.** There is deliberately no number in
+this sentence. It said "three" for months while the directory held nine, was
+corrected to "nine" on 2026-09-21, and was wrong again within a day — the
+third recorded instance of this repository's named failure, in the paragraph
+that exists to describe that failure. A restated count is a forbidden pattern
+nobody wrote. Rule 1 applies to this file too. The
 ones with the most transferable method are
 `2026-09-20-cold-review/`, `2026-09-21-hardware-and-standards-review/`
 (20 agents), `2026-09-21-staleness-sweep/` (12 agents) and
@@ -136,7 +140,30 @@ What makes them work, and is worth keeping:
 - **Node-indexed findings**, filed against a circuit node or BOM reference
   rather than a file and line.
 - **At least one agent auditing the previous round's fixes.** Every wave has
-  found that the last round's fixes were partial.
+  found that the last round's fixes were partial — ten for ten, which is no
+  longer a finding but a standing assumption. Slice for the four recorded
+  shapes instead: a fix that did not reach the pages citing it, a fix whose
+  own explanation restates the wrong value, a stated count that has moved
+  under the sentence stating it, and a conclusion that its own corrected
+  number refutes.
+
+- **A finding ledger, generated.** `tools/extract-findings.py <wave>` builds
+  `FINDINGS.csv` from the reports. It exists because a cold slice measured the
+  reason ten consecutive rounds were judged partial and it was not diligence:
+  **202 numbered findings in the last wave, and zero of them referenced by id
+  in either `VERIFIED.md` or `STATUS.md`.** Verification answered findings by
+  restating them in prose, so "every one hand-verified" was true of *reports*
+  and false of *findings* — about a quarter were checked — and the next round
+  had no list to be complete against. Close the ledger by id, and the
+  unchecked count is visible instead of inferred.
+
+- **Name the revision a wave measures against, and pin `tools/` or say you
+  are not.** The last wave's own orchestrator declared a freeze and then
+  committed a tooling fix while round 2 was running, so two slices running one
+  command twenty minutes apart got opposite verdicts, and every `[test]`
+  baseline in twenty reports stopped reproducing. `tools/` is not in the §6
+  corpus, so the freeze held on the letter and broke on the substance. One
+  line in the wave README would have cost nothing.
 
 ## Checking an agent's work
 
