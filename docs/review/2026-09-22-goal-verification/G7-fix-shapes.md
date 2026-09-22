@@ -1,33 +1,75 @@
 # G7 — the four fix shapes
 
 **Slice:** G7, cold. **Wave:** 2026-09-22-goal-verification.
-**Revision measured:** the wave README names `a4b80b1` as the frozen corpus.
-Working tree was at `25cc740`; `git diff --stat a4b80b1 HEAD` shows the only
-difference is `docs/review/2026-09-22-goal-verification/README.md` (+81), which
-is outside the §6 corpus, so every finding below holds at `a4b80b1` unless the
-finding says otherwise `[test] git diff --stat a4b80b1 HEAD`.
+## Provenance of every measurement in this report — READ FIRST
 
-**`tools/` not pinned.** I ran `tools/check-staleness.py`, `tools/merge-bom.py
---check` and the path-map assertion from `repo-maintenance.md` §7 as they stood
-in the working tree. I did not modify them.
+**The working tree moved under this slice.** Another slice was injecting
+defects into corpus files *and* into `tools/check-staleness.py` in the same
+checkout, uncommitted, so `git log` shows none of it. I saw it directly:
+`README.md` gained a line `See [the missing page](g10-does-not-exist.md).` at
+line 148 mid-slice, and the `PreToolUse` hook reported `FAIL … 1 stale` on two
+of my read-only Bash calls while my own direct runs of the checker returned
+`PASS` on either side of them.
+
+**So every count, tool run and quoted line in this report was re-taken from a
+pinned clone after the coordinator's warning:**
+
+```
+git clone /home/user/Woody /tmp/claude-0/g7pin
+cd /tmp/claude-0/g7pin && git checkout a4b80b1
+git status --short          # empty — TREE CLEAN
+```
+
+All `[test]` and `[calc]` results below are from that clone, using **its own**
+`tools/` at `a4b80b1`, with the tree verified clean immediately before each run.
+Every line I quote was re-read from it and reproduces byte-for-byte; the check
+is at the bottom of this section. **The first-pass numbers taken from the live
+tree were identical in every case except one**, noted below.
+
+| Measured at `a4b80b1`, clean tree | Value |
+|---|---|
+| `find hardware -name circuit.yaml \| wc -l` | **23** |
+| `grep -c "^  - id:" config/figures.yaml` | **37** |
+| `ls -d docs/review/*/ \| wc -l` | **11** |
+| `git ls-files \| wc -l` | **440** |
+| `python3 tools/merge-bom.py --check` | `checked 140 rows from 26 fragments \| 0 problems` |
+| `python3 tools/check-staleness.py` | `PASS … corpus 123 files, 23 circuits, 37 figures / 217 patterns` |
+| `hardware/bom.csv` | **140 rows, 391 units, 11 columns** |
+| `hardware/unplaced.csv` | **32 rows, 67 units** |
+| non-`unplaced` rows | **108 rows, 324 units** |
+| fragment files | **25** (22 circuit-level + 3 board-level); 26 counting `unplaced.csv` |
+| `R-KEY-PU` / `R-KEY-SER` / `C-KEY` / `C-DECOUPLE-165` | **24 / 21 / 21 / 4** |
+| `J-CHAIN` / `U-OPA-PITCH` / `U-RESP` / `SW-THUMB` | **8 / 6 / 1 / 4** |
+| path-map assertion, tracked with no row | **34** |
+
+**The one number that differed** is the review-wave count: **11** at `a4b80b1`,
+**12** in the live tree (this wave's own directory), and the path-map orphan
+count moved with it, **34** pinned against **35** live. G7-21 and G7-25 are
+written against the pinned figures. Neither finding turns on the difference —
+the corpus says "nine" and "405".
+
+**Line-quote verification.** All 26 lines quoted as `[repo] file:line` in the
+findings below were re-read with `sed -n "<n>p"` from the pinned clone and match
+what this report attributes to them — including every line in files the
+injecting slice is known to have touched (`README.md`,
+`hardware/module/pitch-stage/circuit.yaml` is cited nowhere here).
+
+**Revision:** `a4b80b1` is the last commit touching anything under review;
+`git diff --stat a4b80b1 HEAD` at the time of writing shows only this wave's own
+`docs/review/2026-09-22-goal-verification/` files, which are outside the §6
+corpus.
+
+**`tools/` freeze:** the wave README does not pin `tools/`. I used the pinned
+clone's copy, which is `tools/` **as of `a4b80b1`**, and modified nothing. If a
+later slice's `[test]` baselines disagree with mine, the pinned-tools question is
+where to look first.
 
 **Cold:** I opened nothing under `docs/review/`. Two review paths appear below
 only as strings I read *inside corpus files* (`figures.yaml` cites
 `docs/review/2026-09-21-preflight/A4-carrier.md`; `pcb-pipeline.md` cites
 `R10-keyscan-and-adc.md`) — I did not open either.
 
-**Two things happened during the run that were not mine and are not findings
-about the design, but the next reader needs them:**
-
-- `README.md` changed on disk mid-slice. A line `See [the missing
-  page](g10-does-not-exist.md).` was appended at line 148. I did not write it
-  and did not remove it. It looks like another slice's probe. **The corpus was
-  not actually frozen while this wave ran.**
-- Consistent with that, the `PreToolUse` hook reported `FAIL … 1 stale` on two
-  Bash calls while my own direct runs of `check-staleness.py` reported `PASS`
-  both before and after `[test] python3 tools/check-staleness.py` → `PASS no
-  live stale values | corpus 123 files, 23 circuits, 37 figures / 217
-  patterns`. Transient, from a concurrent edit.
+---
 
 ---
 
@@ -183,7 +225,9 @@ Two conclusions that only followed from the old table are still live above it:
 This is the exact shape the brief names: the number was corrected in one
 paragraph and the argument above it kept the retired one. **`loop-budget`'s
 `forbidden` list already holds `"SAR ADC conversion ~50"`** and the checker
-reports PASS `[test] python3 tools/check-staleness.py`, because `0003:22` spells
+reports PASS — pinned clone at `a4b80b1`, tree clean, its own `tools/`
+`[test] python3 tools/check-staleness.py` → `PASS no live stale values` —
+because `0003:22` spells
 it in a table cell with pipes and an en dash — `| SAR ADC conversion | ~50–200 µs |`
 — the same table-cell-with-pipes escape `sensor-full-scale`'s `escape_note`
 records as the fourth recorded instance.
@@ -422,9 +466,9 @@ one of them at its superseded value.
 **Node:** `hardware/unplaced.csv`, `docs/reference/pcb-pipeline.md:150-168`.
 
 The blockquote is headed *"**Re-measured against the current tree,
-2026-09-21**"* and is live guidance, not history. Measured now
-`[test] python3` over `hardware/bom.csv`, `hardware/unplaced.csv` and
-`hardware/**/bom.csv`:
+2026-09-21**"* and is live guidance, not history. Re-measured in the pinned
+clone at `a4b80b1`, tree clean `[test] python3` over `hardware/bom.csv`,
+`hardware/unplaced.csv` and `hardware/**/bom.csv`:
 
 | `pcb-pipeline.md:153-155` says | Actual |
 |---|---|
@@ -432,14 +476,16 @@ The blockquote is headed *"**Re-measured against the current tree,
 | in the **23** per-circuit fragments: **104** / **313** | **22** circuit-level fragments (25 fragment files, 26 counting `unplaced.csv`); **108** / **324** |
 | `unplaced.csv`: **34** rows / **75** units | **32** / **67** |
 
-And the consequence drawn from it, `:158-166`, has moved under it: of the five
-named module-board parts, **`J-CV` is now placed** (`hardware/module/bom.csv`)
-and **`D-CLAMP-BREATH` is now placed**
-(`hardware/module/breath-receive-stage/bom.csv`) `[test] python3` search of the
-fragments. So "five … **Thirteen units**" is now three parts and **five units**
-— and `:164-168`, which uses `D-CLAMP-BREATH` as *"the shape of the problem …
-its row is **still in `unplaced.csv`**"*, names a row that is no longer there.
-The illustration that survives is `J-CV` ×6, which also moved.
+And the consequence drawn from it, `:158-166`, has moved under it. Searching
+every fragment in the pinned clone `[test] python3`, of the five named
+module-board parts only three are still in `unplaced.csv`
+(`U-TVS-MODULE`, `R-BREATH-SUM` ×2, `R-BREATH-OFF` ×2). **`J-CV` is now placed**
+in `hardware/module/bom.csv` and **`D-CLAMP-BREATH` is now placed** in
+`hardware/module/breath-receive-stage/bom.csv`. So "five … **Thirteen units**"
+is now three parts and `[calc]` **five units** — and `:164-168`, which uses
+`D-CLAMP-BREATH` as *"the shape of the problem … its row is **still in
+`unplaced.csv`**"*, names a row that is no longer there. The illustration that
+survives is `J-CV` ×6, which also moved.
 
 ### Shape 1, minor: G7-15 — the `~1594` count and the `1598` that derives it
 
@@ -580,8 +626,9 @@ Every count below was measured, not read.
 
 ### G7-21 — `README.md:117`: "`docs/review/` holds nine waves"
 
-`[test] ls -d docs/review/*/ | wc -l` → **12** at HEAD, **11** at the frozen
-`a4b80b1` `[test] git ls-tree -d --name-only a4b80b1 docs/review/ | wc -l`.
+`[test]` pinned clone at `a4b80b1`, tree clean, `ls -d docs/review/*/ | wc -l`
+→ **11**. (The live tree read **12**, this wave's own directory; the corpus says
+nine either way.)
 
 The sentence containing it is the one that explains why counts do not belong
 there: *"The counts that used to sit in this sentence — '77 banked documents',
@@ -596,9 +643,9 @@ equivalent sentence *"There is deliberately no number in this sentence."*
 
 ### G7-22 — `hardware/README.md:112`: "It was 50 rows and is now 34. Sixteen of them were drawn all along"
 
-`[test] python3 csv` on `hardware/unplaced.csv` → **32 data rows**, and 32 at
-`a4b80b1` too `[test] git show a4b80b1:hardware/unplaced.csv | wc -l` → 33 lines
-= 32 + header. So `[calc] 50 − 32 = 18`, not sixteen.
+`[test]` pinned clone at `a4b80b1`, tree clean, `csv.DictReader` over
+`hardware/unplaced.csv` → **32 data rows**. So `[calc] 50 − 32 = 18`, not
+sixteen. **Both numbers in the sentence are wrong.**
 
 Both numbers in one sentence, and the sentence's own subject is a count. The
 trim commits `c4109ec` / `192d03e` moved rows out after `0e68f25` wrote "34"
@@ -611,8 +658,9 @@ along" — or a pointer, since this will move again.
 
 Live guidance inside §4's `> The trap` blockquote — **not** framed as history;
 the italic line at `:212` only records that the section once described `bom.csv`
-as hand-edited. Actual: **32 of 140** `[test] python3 tools/merge-bom.py --check`
-→ `checked 140 rows from 26 fragments`.
+as hand-edited. Actual: **32 of 140**, from the pinned clone at `a4b80b1`, tree
+clean `[test] python3 tools/merge-bom.py --check` → `checked 140 rows from 26
+fragments | 0 problems`.
 
 The two clusters it names are also gone: *"six identical jack-protection
 networks drawn three times, and **nineteen decoupling capacitors with no home**"*
@@ -621,8 +669,9 @@ networks drawn three times, and **nineteen decoupling capacitors with no home**"
 
 ### G7-24 — `repo-maintenance.md:191`: "24 per-circuit `bom.csv` fragments"
 
-`[test] python3 tools/merge-bom.py --check` → *"checked 140 rows from **26**
-fragments"*. `[test] find hardware -name bom.csv` → 26 files, of which one is the
+Pinned clone at `a4b80b1`, tree clean `[test] python3 tools/merge-bom.py
+--check` → *"checked 140 rows from **26** fragments"*.
+`[test] find hardware -name bom.csv | wc -l` → 26 files, of which one is the
 generated master: **25 fragments** (22 circuit-level + 3 board-level), plus
 `hardware/unplaced.csv`, which `merge-bom.py` also reads `[repo] tools/merge-bom.py:85,97`
 — hence 26.
@@ -636,17 +685,18 @@ Three files, three counts, one set of fragments.
 
 ### G7-25 — `repo-maintenance.md:311` + `:322`: "every tracked file has a row", "405 tracked files"
 
-I ran the file's own four-line assertion, quoted at `:334-338`
-`[test] python3`:
+I ran the file's own four-line assertion, quoted at `:334-338`, in the pinned
+clone at `a4b80b1` with the tree verified clean `[test] python3`:
 
 ```
-rows 410 | distinct new(non-deleted) 406 | deleted 4
-TRACKED WITH NO ROW: 35        ROWS POINTING AT NOTHING: 0
+rows 410  deleted 4     tracked files 440
+TRACKED WITH NO ROW: 34        ROWS POINTING AT NOTHING: 0
 ```
 
-`[test] git ls-files | wc -l` → **441** (440 at `a4b80b1`), against the stated
-**405**. The 35 orphans are the `2026-09-22-fix-audit/`,
-`2026-09-22-fix-audit-review/` and `2026-09-22-goal-verification/` directories.
+**440 tracked files against the stated 405**, and **34 orphans** against "every
+tracked file has a row" — the `2026-09-22-fix-audit/` and
+`2026-09-22-fix-audit-review/` directories. (In the live tree it reads 441 / 35,
+the extra being this wave's own directory.)
 
 The section's own italic warning says this sentence *"was false for most of a
 day, and it is worth saying how"*, diagnoses it (Phase B created files the map
@@ -779,9 +829,16 @@ measured or `[calc]`:
 - **`docs/reference/path-map-2026-09-21.csv`'s `old` side** — the 288 distinct
   old paths were not checked against `81c081d`; I checked only the `new` side,
   which is what G7-25 rests on.
+- **Whether any finding here was already injected rather than original.** A
+  slice was planting defects in this same checkout. Everything I report was
+  re-read from a clean `a4b80b1` clone, so nothing here is an injected string —
+  but I cannot rule out that a defect I found is one an injection slice *also*
+  found and reported independently.
 - **Whether the 24 "refuted in place" exemptions hide a wrong replacement.**
   `[test] python3 tools/check-staleness.py --detail` reports *"old values present
-  but refuted in place (24)"*. Rule 2b's own worked example
+  but refuted in place (24)"* — this one run was taken from the live tree before
+  the pinning warning and has **not** been re-taken from the clone, so treat the
+  count as approximate. Rule 2b's own worked example
   (`TRIM-BREATH-ZERO`) is a refutation carrying a stale replacement, and the
   checker cannot see that class. I read several but not all 24; a slice that
   reads exactly those 24 windows would be well spent.
