@@ -726,3 +726,56 @@ D13 also recorded **16 legitimate `4.7`/`4.8` hits with a warning not to add a
 bare pattern**, and wrote its suggested patterns in the spelling of the files
 they must match. That is the rule being followed by a reviewer rather than
 broken by me.
+
+## D14 — the plate reversal. Right in direction, wrong in magnitude, and the corpus already held the right number next door.
+
+| Claim | Check | Verdict |
+|---|---|---|
+| **"The PCB top must sit within ~3.2–3.6 mm of the seat" is arithmetically impossible at its upper end.** On the corpus's own 1.6 mm PCB, protrusion = 5.10 − d − 1.6 | Computed across the range | **Confirmed. At d = 3.5 the protrusion is exactly 0.00 mm; at 3.6 it is −0.10 — the pin never emerges.** So "protrude enough to solder" is false across most of the range I asserted, and the 2.4 mm end of the gap is impossible |
+| **The real standoff is the simple subtraction: 2.50 − 1.20 = 1.30 mm** | Computed | **Confirmed** |
+| **ADR 0002:181 already states it** — "at 1.20 mm the plate consumes only 48 % of the 2.50 mm through-section" | Read the line | **Confirmed, and it was written in the same batch.** The corpus held the right number one document away while I derived 2.0–2.4 from a premise that does not close |
+| **The height rule's ~1.4 mm cutoff is below the SOT-23 maximum it explicitly permits** (1.45 mm) | Checked the package spec | **Confirmed.** The rule permits a package its own threshold excludes |
+
+**So I reversed a conclusion that deserved reversing and got the new number
+wrong.** The direction was right — there *is* a standoff, the old "hard against
+the plate" reading was false — but 2.0–2.4 mm came from a 3.2–3.6 mm mounting
+window that D14 reconstructs as two *board thicknesses* (5.10 − 1.90 and
+5.10 − 1.50) misread as a clearance range.
+
+And the premise under it is contradicted by the vendor: Gateron's own
+recommended PCB pattern is **⌀3.00 holes**, which takes the pin's 2.00 mm
+root, so the vendor expects the board against the housing bottom. My premise —
+"only the narrow blade may enter the hole" — came from a third-party ⌀1.2
+footprint.
+
+**The height rule is unsafe as written.** Its table lists 0402/0603 and SOT-23
+while **every passive on this board is 0805 and there is no SOT-23**; it omits
+`J-CHAIN`'s 9.10 mm shroud, which dominates; and it takes part height at max
+against gap at nominal under a heading that says "worst case". At 1.30 mm,
+SOT-23 and tall 0805 interfere and SOIC-16 interferes by 0.45–0.55 mm. With
+the plate bonded to `PWR_GND`, contact is a short. **The decoupling capacitor
+the new rule was written to rescue is the one part it turns on.**
+
+**Completeness: 7 live statements in 5 files still read the pre-reversal
+answers** — including `cluster-boards.md:236`, *in the very file whose §5 I
+fixed*, contradicting itself 60 lines apart; and `0009:68`'s "thumb switch
+plate ~2 mm" when the BOM already says 1.20 mm. The checker passes on all
+seven. The new value is restated in **eight** files, and the
+`RESTATED, NOT CITED` advisory **structurally cannot see it**, because it only
+reports values with no register entry.
+
+**The bounce contradiction is a fifth spelling, not a fourth.** `ROADMAP.md:71`
+says "neither is published" and `:84` says "the two timing figures nobody
+publishes" — thirteen lines apart, both live, both refuted at `:118`. The
+hysteresis half is **verified still right**.
+
+And D14 flags the batch's *other* reversal — ADR 0009 retiring the bonded body
+— with **six unfollowed sites**, in at least two of which the bonded body is
+the load-bearing premise of an argument. That is the `CLAUDE.md` §5 shape no
+grep finds.
+
+**Its closing line is the one I would put on the whole wave:**
+
+> Nothing in the corpus records whether the cluster PCB seats against the
+> switch housing bottom. The entire standoff number, the height rule, and ADR
+> 0002 requirement 2 all hang on that one line.
