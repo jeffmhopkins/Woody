@@ -19,8 +19,8 @@ page: breath-output-stage.md
 ports:
   BREATH_INAMP_OUT: {dir: in,  from: module/breath-receive-stage, note: "0 to inamp-full-scale, rest at 0"}
   DAC_AVDD:         {dir: in,  from: module/power-entry, figure: dac-rail}
-  V_NEG12:          {dir: in,  from: module/power-entry}
-  AGND:             {dir: ref, from: module/power-entry}
+  MODULE_ANALOG_NEG12:          {dir: in,  from: module/power-entry}
+  AGND_MOD:             {dir: ref, from: module/power-entry}
   BREATH_JACK:      {dir: out, to: module/panel}
 
 components:
@@ -40,6 +40,7 @@ components:
     section: A
     of: U-OPA-PITCH
     pins: [IN+, IN-, OUT]
+    rails: [MODULE_ANALOG_POS12, MODULE_ANALOG_NEG12]
     note: "Unity follower. Buffers the wiper so R-IN does not load the pot"
 
   R-BREATH-IN:
@@ -67,6 +68,7 @@ components:
     section: B
     of: U-OPA-PITCH
     pins: [IN+, IN-, OUT]
+    rails: [MODULE_ANALOG_POS12, MODULE_ANALOG_NEG12]
     note: "Inverting summer, fixed x4 = R-FB/R-IN"
 
   R-BREATH-FB:
@@ -116,8 +118,8 @@ nets:
     - POT-OFFSET.W
     - R-BREATH-OFF.1
 
-  V_NEG12:
-    - port: V_NEG12
+  MODULE_ANALOG_NEG12:
+    - port: MODULE_ANALOG_NEG12
     - R-BREATH-OFFNEG.1
 
   SUM_NODE:
@@ -138,8 +140,8 @@ nets:
     - C-OUT-BREATH.1
     - port: BREATH_JACK
 
-  AGND:
-    - port: AGND
+  AGND_MOD:
+    - port: AGND_MOD
     - R-GAIN-FLOOR.2
     - POT-OFFSET.CCW
     - U-BREATH-SUM.IN+

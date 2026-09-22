@@ -81,8 +81,15 @@ def check_master(master, seen, problems, have_netlist, deferred):
         drv = spec.get("driver")
         rcv = list(spec.get("receivers") or [])
         ref = list(spec.get("reference") or [])
-        if not drv and not spec.get("multi_driver"):
+        if not drv and not (spec.get("multi_driver") or spec.get("undriven")):
             problems.append(f"nets.yaml: {net!r} has no driver")
+        if spec.get("undriven") and not spec.get("pull"):
+            # An undriven net is a real thing - CLR is held inactive by
+            # R-CLR-PU and the watchdog that once drove it is deleted - but an
+            # undriven net with nothing holding it is a floating input, which
+            # is a defect rather than a design.
+            problems.append(f"nets.yaml: {net!r} is undriven and declares no "
+                            f"`pull:` - a net with neither is floating")
         if not rcv and not ref:
             problems.append(f"nets.yaml: {net!r} has no receivers and no "
                             f"reference circuits - it crosses no boundary")
@@ -254,10 +261,22 @@ def check_one(d, bom, problems, seen):
     for rp in sorted({u for u in used if used.count(u) > 1}):
         problems.append(f"{rel}: {rp[0]}.{rp[1]} appears in more than one net")
 
+    # IMPLICIT POWER PINS. An op-amp needs its rails whether or not the
+    # drawing shows them, and drawings here mostly do not - hand-wiring V+
+    # and V- into every section would add noise without adding truth. A
+    # component declares `rails:` instead, and that counts as this circuit
+    # receiving those nets. Without this the master's power entries look
+    # unsatisfied on exactly the circuits that obviously consume them.
+    for ref, c in comps.items():
+        for rail in (c.get("rails") or []):
+            ports.setdefault(rail, {"dir": "in", "implicit": True})
+
     circ_id = spec.get("circuit") or rel
     for pn, pspec in ports.items():
         seen.setdefault(pn, {})[circ_id] = (pspec or {}).get("dir")
-    for pn in ports:
+    for pn, pspec in ports.items():
+        if (pspec or {}).get("implicit"):
+            continue
         if not any(isinstance(e, dict) and e.get("port") == pn
                    for eps in nets.values() for e in eps):
             problems.append(f"{rel}: port {pn!r} is declared and used by no net")

@@ -16,9 +16,9 @@ ports:
   AGND_SENSE:       {dir: in,  from: interfaces/breath-sense-link}
   BREATH_INAMP_OUT: {dir: out, to: module/breath-output-stage, figure: inamp-full-scale}
   DAC_AVDD:         {dir: in,  from: module/power-entry, figure: dac-rail}
-  V_POS12:          {dir: in,  from: module/power-entry}
-  V_NEG12:          {dir: in,  from: module/power-entry}
-  AGND:             {dir: ref, from: module/power-entry}
+  MODULE_ANALOG_POS12:          {dir: in,  from: module/power-entry}
+  MODULE_ANALOG_NEG12:          {dir: in,  from: module/power-entry}
+  AGND_MOD:             {dir: ref, from: module/power-entry}
 
 # Parts this page DRAWS for context and does not own. The drawing spans two
 # boards on purpose, so R1/R1b and the sensor appear in it; they are
@@ -157,20 +157,20 @@ nets:
     - port: DAC_AVDD
     - TRIM-BREATH-ZERO.CW
 
-  V_POS12:
-    - port: V_POS12
+  MODULE_ANALOG_POS12:
+    - port: MODULE_ANALOG_POS12
     - U-DIFFRX.V+
     - D-CLAMP-IN+.K
     - D-CLAMP-IN-.K
 
-  V_NEG12:
-    - port: V_NEG12
+  MODULE_ANALOG_NEG12:
+    - port: MODULE_ANALOG_NEG12
     - U-DIFFRX.V-
     - D-CLAMP-IN+.A
     - D-CLAMP-IN-.A
 
-  AGND:
-    - port: AGND
+  AGND_MOD:
+    - port: AGND_MOD
     - R4.2
     - R5.2
     - C-CM-IN+.2
