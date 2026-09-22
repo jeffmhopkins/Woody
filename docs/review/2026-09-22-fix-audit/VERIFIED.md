@@ -622,3 +622,55 @@ umbilical rate, the 5 ms target itself, and all four path totals.
 
 > The fix was correct arithmetic in one file, and the register was not extended
 > to hold any of it in place.
+
+## D12 — the DAC threshold and the pitch power-on state. **The corrected number refutes the conclusion I kept.**
+
+| Claim | Check | Verdict |
+|---|---|---|
+| The datasheet claim is **correct, verbatim** — p.4 splits `V_INH` at 4.5 V, `dac-rail` is in the upper band, and p.53's revision history confirms TI split it deliberately. D12 checked by **word coordinates** that both values sit in the MIN column, because the extracted text does not preserve columns | Accepted | **Sound, and better evidenced than my own version** |
+| **ADR 0004's "conclusion survives — 3.3 V CMOS still cannot drive it" is FALSE at nominal** | Computed it | **Confirmed. 0.625 × 5.21 = 3.2563 V, and 3.3 V exceeds it by 44 mV.** Break-even is AVDD = 3.3/0.625 = **5.28 V**, above the 5.21 V nominal and well above the 5.00 V hard floor E7 may select to |
+
+**I corrected the threshold and asserted, in the same blockquote, a conclusion
+that the corrected threshold makes false.** `0004:218`. Not a quiet weakening
+— a stated one.
+
+The buffer is still the right part, and D12 supplies three reasons that are
+already in the repo and that my sentence did not give: `spi-link.md`'s 2.75 V
+far-end first step, `V_INH` being a **MIN over −40…+125 °C** rather than a
+single number, and the fact that **no ESP32-S3 `V_OH` figure exists anywhere
+in the corpus**. D12 also notes the threshold on a bench-selected rail is a
+**band, 3.125–3.44 V** — which is the same shape of error I was correcting.
+
+| Claim | Check | Verdict |
+|---|---|---|
+| **The two documents now cite each other in opposite directions across the same fix** | Read both lines | **Confirmed.** `pitch-stage.md:141` still says *"ADR 0006's power-on table asserts 'below −2 V' for both"* — it no longer does, I changed it — while `0006:213` says the jack sits at 0.000 V *"which `pitch-stage.md` derives independently"* |
+| The 0.000 V reasoning holds, **by a stronger route than I gave** | Accepted | p.31: with the reference disabled the pin is an **input**, loaded only by the pitch stage's 10 kΩ trimmer to AGND, so every channel is `code/65536 × 2 × 0` = 0 V **for any code and any grade** — stronger than my "codes reset to zero scale" |
+
+D12 also found an **undocumented state** nobody had described: the pitch jack
+steps **0 V → −2.500 V** the instant firmware's reference-enable write lands,
+before the first pitch write. The mods do not move.
+
+Three more found cold:
+
+- **A second abs-max hazard the corpus already argues one component over.**
+  p.2: digital input voltage to GND is −0.3 to **AVDD + 0.3 V**. The buffer
+  runs from the rack bus, the DAC from the LM317, **with no series element
+  between them** — 0.15 V of headroom at the corners, and a reversed ribbon
+  drives the DAC's inputs ~6.5 V over abs max. `R-SPI-PULL`'s own note rejects
+  a bus-rail pull-up for exactly this reason: *"turns a $0.30 buffer failure
+  into a DAC failure."* So "kills the buffer and nothing else" is asserted,
+  not derived.
+- **My blockquote has no blank line after it**, so four lines of live rail
+  justification are lazy-continuation and now render *inside* the italic
+  historical correction, with their antecedent six lines away.
+- **`0004:147` still says a 5 V DAC wants "roughly 3.5 V for a logic high"** —
+  0.7 × 5, the retired row — **62 lines above its own correction.**
+
+And D12 independently found the duplicate `false_positive_note` key that D20
+found, in the same figure. Two slices, no contact, same silent YAML defect.
+
+**Both sibling claims confirmed, with a nuance neither sibling had:**
+`0004:506`'s *"parks pitch subsonic"* **is correct** for a runtime `CLR` — so
+the cheapest fix to that sentence would break the half that is right. And
+`0004:842`'s bare *"The 97 mm above"* is the **fifth** escape from an entry
+whose `escape_note` already records four.
