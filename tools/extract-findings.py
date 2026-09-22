@@ -32,7 +32,23 @@ SEV = re.compile(r"\b(high|critical|blocking|medium|low|advisory)\b", re.I)
 # CITED anywhere else. Both matter and they are different numbers: the first
 # is what a round has to answer, the second is how much the slices reached
 # across each other.
-INTRO = re.compile(r"^\s*(?:[-*>|]\s*)*\**\[?([A-Z]\d{1,2}[-.]\d{1,3})\b")
+# "#" IS IN THE CLASS BECAUSE A HEADING IS THE COMMONEST WAY TO INTRODUCE A
+# FINDING, and it was the one form this regex could not see. "### G11-1 - ADR
+# 0005 still specifies a ramp no capacitor can deliver" was classified as a
+# mere citation, so the finding it introduces became a ghost row reading
+# "CITED ONLY - introduced in no report". 168 of 377 rows in the first run of
+# this wave's ledger were that, 45 %, and every one of them is a real finding
+# with a real heading. A denominator tool that cannot see the commonest
+# heading style is not a denominator. Found 2026-09-22 while generating the
+# goal-verification ledger.
+INTRO = re.compile(r"^\s*(?:[-*>|#]\s*)*\**\[?([A-Z]\d{1,2}[-.]\d{1,3})\b")
+# A HEADING INTRODUCES ITS FINDING WHEREVER THE ID SITS IN IT. Headings are
+# short, and a finding id in one is an introduction rather than a passing
+# citation - but INTRO above requires the id to come FIRST, so
+# "### Shape 1, minor: G7-15 - the ~1594 count" read as a citation and G7-15
+# became a ghost. Found while auditing the 13 ghosts that survived the
+# heading fix above.
+INTRO_HEAD = re.compile(r"^\s*#{1,6}\s.*?\b([A-Z]\d{1,2}[-.]\d{1,3})\b")
 
 
 def harvest(path):
@@ -44,7 +60,7 @@ def harvest(path):
         return out
     slice_id = os.path.basename(path).split("-")[0]
     for n, line in enumerate(lines, 1):
-        intro = INTRO.match(line)
+        intro = INTRO.match(line) or INTRO_HEAD.match(line)
         for fid in {m.replace(".", "-") for m in ID.findall(line)}:
             rec = out.setdefault(fid, {"id": fid, "slice": slice_id,
                                        "line": "", "severity": "",
