@@ -260,3 +260,101 @@ the nineteen would fall to a check that re-derives a stated count from the
 tree — something `check-staleness.py` already does for the corpus file count,
 and which `repo-maintenance.md` §7 already writes out in four lines for the
 path map and then does not run.
+
+## D1 — the checker, attacked again. Two findings make every run of it suspect.
+
+| Claim | Check | Verdict |
+|---|---|---|
+| **`check_owners` stopped checking values.** `toks = sorted(set(idents))[:2] or sorted(set(nums))[:1]` — the `or` is **exclusive**, so for any figure whose value contains a hyphenated identifier the numbers are never looked at | Read line 864; enumerated what token each settled figure is actually tested on | **Confirmed. `spi-series-r` is tested on `['R-SPI-SER']` and its value `100` is NEVER CHECKED.** The docstring two lines above says "take EVERY distinctive token, numeric and symbolic" — and the same docstring condemns precisely what the code now does: "asking whether the owner page mentions a part … proves nothing" |
+| **`check_owners` is nondeterministic.** `sorted(set(...), key=len)` breaks ties on set iteration order, i.e. `PYTHONHASHSEED` | Ran `loop-budget`'s token selection across eight seeds | **Confirmed: `196 241 196 241 250 241 250 196`.** D1 took it end to end with a real rule-1 violation live and got **6 PASS / 4 FAIL over ten identical runs** |
+
+**F2 is the worst thing this wave found, and it is not a missed defect — it is
+a defect in the instrument.** A check whose verdict flaps on the same tree
+means no run of it means anything precise, and the failure mode is new for
+this repo: not always-green, but green *often enough that a re-run clears a
+surprising FAIL.* Every PASS I have quoted in the last two days was a sample
+from a distribution I did not know existed.
+
+F1 is mine and it is a **regression**: the pre-`0e68f25` version would have
+caught the case I built the new one to catch. I widened the token set to
+include identifiers and wrote `or` where I meant "and also".
+
+Eleven more findings, the ones I would act on first:
+
+- **Any inline link with a `#fragment` is completely unchecked.** `[^)#\s]+`
+  refuses to cross the `#`, so the regex fails outright and the `split("#")`
+  in the body is unreachable. **23 of 166 inline links (14 %)** — twelve of
+  them the `](../../README.md#the-interfaces-table)` I added to every circuit
+  page, which is also the broken anchor D20 found.
+- **`check_sections` is defeated by the corpus's own hard wrap.** Its gap
+  pattern forbids a newline, and `check_figures` was rebuilt *in this same
+  commit* to search a line-joined stream for exactly that reason.
+  `check_sections` was not. **8 of 68 real cross-file references invisible.**
+- **`followlinks=True` plus a symlink loop hangs indefinitely** — 60 s, zero
+  output, against a 60 s hook budget, so the commit is simply not gated. And
+  the symlink fix went into one of the *two* `os.walk`s: `load_circuits()`
+  never got it, so a symlinked circuit joins the corpus while the circuit
+  count stays 23.
+- **The wiring assertion records the call, not the consequence.** Five tokens
+  of edit give `UNWIRED CHECKS = 0`, PASS, exit 0, with a broken link and a
+  registered stale value live — and the coverage line is byte-identical to a
+  healthy run, because it counts **inputs**, never findings.
+- **The tool tells you to read a report it did not write.** `.staleness/report.txt`
+  is written at the end of `main()`, after the early return and after any
+  traceback, so on those paths it holds the *previous* run's content — while
+  the hook says "read it when fixing, do not re-run for detail."
+
+D1's honest counterpoint, recorded because it matters: the 300-char widening
+causes only 4 exemptions today and all 4 are legitimate. **The commit's thesis
+— vocabulary, not distance — was right. It just swapped `was` for a date.**
+
+## D6 — the repointed owners. Two of nine landed on a page that never states the figure.
+
+| Claim | Check | Verdict |
+|---|---|---|
+| `key-pullup-qty`'s new owner never states 24 | `grep -c 24` on the page | **Confirmed. Zero occurrences.** It says "21 of these" and its Interfaces row *cites* the figure. The page that derives it is `key-marker-and-bits.md:107` — "**qty 24**. Found in review." — which is the register's derivation verbatim. It passed only because `"24"` is reported UNCHECKED |
+| `inamp-full-scale` has **two** owners | Grepped both | **Confirmed.** `breath-receive-stage.md:45` says "Owned here."; the register names `breath-sense-link.md`. "Owned here" was written at 19:46 and the owner moved away at 20:15, never reconciled. Both files contain an unglued `9.94`, so the check is blind either way |
+| `chain-conductors`' owner states a breakdown that sums to **13** | Read `0001:135` | **Confirmed. "12 per hop — 6 signals-and-supply, 5 grounds, 2 spare."** Its own pin list gives 5+5+2. No grep reaches an arithmetic error |
+
+`ref5050-grade`'s repoint was verified by nothing — it is `disputed`, so
+`check_owners` skips it, and the new owner mentions only a part number while
+the dispute is derived in ADR 0003.
+
+**The ferrite numbers I added are right** — D6 extracted the curve geometry
+and got 610–620 / 426–439 / 155–161 / 71–75 / 50–54 Ω against my
+614/431/157/72/51. But the addition is **assertion, not derivation**: no bias
+currents, no interpolation, and the real derivation is still in the `FB-IN`
+BOM row. Same for the toggle paragraph — numbers correct against the NKK PDF,
+but inserted **inside a block that declares itself "moved verbatim"**, with a
+reason that is a non-sequitur, and it contains the word "superseded", which
+pre-exempts the whole paragraph inside the checker's own refutation window.
+
+## D9 — the eighteen moved rows. Eleven clean, seven with findings, and the worst is the one I did last.
+
+| Claim | Verdict |
+|---|---|
+| **The `D-CLAMP-BREATH` drawing edit labelled the wrong part.** Line 110 is at the BREATH output **jack**, where every other jack on the module labels that identical structure `D-JACK-CLAMP`. `D-CLAMP-BREATH` is qty 2 and describes itself as "at the in-amp inputs" — both accounted for by line 67 | **Accepted as high-confidence.** So the breath jack now has no `D-JACK-CLAMP` drawn, the part appears three times for a qty of two, **and the wrong claim ("drawn … TWICE") is now recorded in `hardware/bom.csv`'s own note** |
+| `J-UMBILICAL` → `power-entry/` derives nothing about it; the page never names the part and draws no etherCON. qty 2 spans two boards | Accepted; my stated reason was wrong |
+| `C-BULK-RAIL`'s new owner **refutes** it — the row says 100 µF and "NOT 47uF on every rail"; the page draws C1–C4 all at 47 µF | Accepted. Not caused by the move, but the move made the refuting page the owning page |
+| Two of the 32 remaining rows are drawn **and** derived — `R-BREATH-SUM` and `R-BREATH-OFF`, both in `breath-output-stage.md`'s Values table. They sit in the same `pcb-pipeline.md` sentence as `J-CV` and `D-CLAMP-BREATH`, which I fixed | Accepted, and the spelling trap is the lesson: the row says `40.2k`, the page says `40.2 kΩ` |
+
+**D9 proved the BOM's mechanical consistency independently** rather than
+trusting `merge-bom.py --check`: multiset union exact, no orphans either way,
+rebuild byte-identical at 131,725 bytes, all 27 files 11-column CRLF. That
+part holds.
+
+## D8 — the two new figures. Both values right; the completeness is not.
+
+| Claim | Verdict |
+|---|---|
+| **Both values verified against the banked documents** — MPXV4006DP p.5 gives the transfer function character for character; the Gateron drawing sheet 6 item 5 gives the bounce line, confirmed by extraction *and* a 150 dpi render | **Accepted.** The two figures themselves are sound |
+| **`ROADMAP.md:71`, the M1 row, still says bounce is "neither is published"** — and all five of the new entry's patterns match **zero** places in the corpus | **Accepted, and it is the grep-first failure one commit after a commit titled "fixed by grepping first."** The patterns were written from the three documents I edited and missed the fourth spelling |
+| `key-release-time` is restated as a stale **125 µs** in two live places, one of them written **inside this fix batch** (`latency-budget.md:133`) and the other on that figure's own owner page | **Accepted.** And D8's warning is the useful part: `"125 µs"` must **not** become a pattern — it is also the true mean sampling latency in two places |
+| All three `breath-sensor-slope` patterns **never existed in the corpus** — invented rather than grepped, guarding nothing while counting toward "218 patterns" | **Accepted.** I wrote that entry's patterns from the document in front of me, which is the exact practice `CLAUDE.md` §2 exists to forbid |
+
+D8's structural finding is the one to keep: **`NUM_UNIT` has no `kPa`, `gf` or
+`in/sec`, so `check_restated` could never have nominated either of the two
+figures this slice reviews.** And its `known` set is polluted by single digits
+from `umbilical-pinmap`'s pin list, which silently suppresses **`4 kHz` (15
+files)**, **`5 ms` (10 files)** and **`250 µs` (9 files)** from the advisory
+entirely.
