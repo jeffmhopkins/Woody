@@ -122,14 +122,16 @@ entire build"*, and the reason is in the geometry file: **a KS-33 is located by
 its cutout alone.** There are no alignment posts, unlike MX `[repo]
 ks33-geometry.md`.
 
-**Footprint** `[repo] ks33-geometry.md`, from the `gateron-ks27` KiCad footprint
-used with KS-33 in that build:
+**Footprint: see `docs/reference/ks33-geometry.md`, and do not copy it here.**
 
-| Feature | Position | Size |
-|---|---|---|
-| Centre pole | (0, 0) | ⌀5.0 mm |
-| Pin 1 | (2.6, 5.75) | ⌀1.5 mm drill |
-| Pin 2 | (−4.4, 4.7) | ⌀1.5 mm drill |
+> This page carried its own copy of that table until 2026-09-22, and **the two
+> had already diverged on the drill diameter** — the geometry page was
+> independently re-confirmed against a second library and a STEP model
+> (⌀1.2 mm drill, centre pole ⌀5.25 mm, because the pins are flat blades
+> 2.0 × 0.45 mm at the root rather than round pins), and this copy still said
+> ⌀1.5 / ⌀5.0 with no hint that anything had moved. **Two pages, one fact,
+> and the one a board gets laid out from was the stale one.** Rule 1 exists
+> for exactly this; the table lives in one place now.
 
 > **Use Gateron's own drawing and STEP model, not this table.** The geometry
 > file says so itself — it was measured out of an open-source keyboard project

@@ -108,16 +108,22 @@ hardware/         Schematics, split by CIRCUIT under each board:
                   bom.csv      GENERATED from the fragments - do not edit
 firmware/         ESP32-S3 firmware (PlatformIO)
 mechanical/       CAD source, 2D cut exports, drawings
-config/           Key layout and routing, as data
+config/           figures.yaml - THE SHARED-FIGURE REGISTER, the single
+                  source of truth for every value used in more than one
+                  document; plus key layout and routing, as data
 tools/            Host-side utilities
+CLAUDE.md         THE WORKING RULES. Read this before editing anything -
+                  it is short, and every rule in it was paid for once
 ```
 
 *(`docs/review/` and `datasheets/` were missing from this tree until
 2026-09-21. `datasheets/` is the largest directory in the repository;
-`docs/review/` holds nine waves. Both were invisible in the one file a new
-reader opens first. The counts that used to sit in this sentence — "77
-banked documents", "seven waves" — were true when written and wrong within
-the week, which is the whole reason this repository cites rather than
+`docs/review/` holds a wave per directory — `ls -d docs/review/*/` is the
+count, and there is deliberately no number in this sentence. Both were
+invisible in the one file a new reader opens first. The counts that used to
+sit here — "77 banked documents", "seven waves", then "nine waves" — were
+each true when written and wrong within the week, which is the whole reason
+this repository cites rather than
 restates.)*
 
 ## Where to start reading

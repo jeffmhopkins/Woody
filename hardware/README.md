@@ -109,7 +109,9 @@ and the three-step procedure for changing a tracked figure.
 `hardware/unplaced.csv` holds the BOM rows **no schematic page derives**.
 That is a count, not a dumping ground: a part nobody has drawn.
 
-It was 50 rows and is now 34. Sixteen of them were drawn all along — the
+It has shrunk twice; `wc -l hardware/unplaced.csv` is the count, and a
+number written here goes stale the next time a row is placed. Sixteen rows
+were drawn all along — the
 DAC, the in-amp, the LM317 and its divider, the entry diodes, the four
 beads, the bulk capacitors, both load-switch capacitors, the module's level
 shifter and the LT5400 — and were sitting in the undrawn pile because

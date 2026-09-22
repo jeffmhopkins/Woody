@@ -188,7 +188,9 @@ ref,category,part,manufacturer,description,package,qty,status,source,adr,notes
 
 > ### The trap: `bom.csv` is generated too, since 2026-09-21
 >
-> **`tools/merge-bom.py` rebuilds it from 24 per-circuit `bom.csv` fragments.
+> **`tools/merge-bom.py` rebuilds it from the per-circuit `bom.csv`
+> fragments — `merge-bom.py --check` prints the live fragment and row count
+> on every run, so no number is written here.
 > A direct edit survives until the next run of that tool and then disappears
 > without a word** — the same trap §3 documents for `MANIFEST.csv`, on the
 > **most-cited file in this repository**.
@@ -201,9 +203,12 @@ ref,category,part,manufacturer,description,package,qty,status,source,adr,notes
 > **whose page derives its value** — not where it is mentioned, not where it
 > is mounted.
 >
-> **`hardware/unplaced.csv` holds the 50 rows of 138 that no schematic page
-> names.** That is not a dumping ground, it is a count: a part nobody has
-> drawn. Two of its clusters name circuits this corpus has no page for — six
+> **`hardware/unplaced.csv` holds the rows that no schematic page names.**
+> That is not a dumping ground, it is a count: a part nobody has drawn. The
+> number is `wc -l` on that file against `merge-bom.py --check`'s row total;
+> this paragraph carried "50 rows of 138" until 2026-09-22, when it was 32 of
+> 140, and the §4 closing note already admitted this section had gone stale
+> once before. Two of its clusters name circuits this corpus has no page for — six
 > identical jack-protection networks drawn three times, and nineteen
 > decoupling capacitors with no home.
 >
