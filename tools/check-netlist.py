@@ -81,7 +81,14 @@ def check_master(master, seen, problems, have_netlist, deferred):
         drv = spec.get("driver")
         rcv = list(spec.get("receivers") or [])
         ref = list(spec.get("reference") or [])
-        if not drv and not (spec.get("multi_driver") or spec.get("undriven")):
+        # A REFERENCE NET HAS AN ORIGIN, NOT A DRIVER. Nobody drives a ground:
+        # the circuit that defines the star point references the net exactly
+        # like every circuit that returns to it, so it belongs in `reference`
+        # rather than being a driver with a mismatched direction.
+        if spec.get("origin"):
+            ref = [spec["origin"]] + [c for c in ref if c != spec["origin"]]
+        if not drv and not (spec.get("multi_driver") or spec.get("undriven")
+                            or spec.get("origin")):
             problems.append(f"nets.yaml: {net!r} has no driver")
         if spec.get("undriven") and not spec.get("pull"):
             # An undriven net is a real thing - CLR is held inactive by

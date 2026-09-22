@@ -45,7 +45,7 @@ nets:
     kind: reference
     carries: "Chain return, five alternating grounds on J-CHAIN pins 1/3/5/7/9"
     figure: chain-conductors
-    driver: interfaces/key-chain-loom
+    origin: interfaces/key-chain-loom
     reference: [cluster/key-register, cluster/key-switch-network, cluster/key-marker-and-bits]
 
   CHAIN_SCK:
@@ -108,7 +108,7 @@ nets:
     kind: reference
     carries: "Instrument analog star. Carries no power current - that is the whole point of it"
     figure: dig-gnd-topology
-    driver: carrier/power-entry-instrument
+    origin: carrier/power-entry-instrument
     reference: [carrier/breath-adc, carrier/breath-excitation-reference]
 
   BREATH_SENSE:
@@ -160,7 +160,7 @@ nets:
     kind: reference
     carries: "Digital return, instrument to module"
     figure: dig-gnd-topology
-    driver: module/power-entry
+    origin: module/power-entry
     reference: [interfaces/spi-link, module/digital-and-supervision]
 
   UMBILICAL_POS12:
@@ -173,7 +173,7 @@ nets:
   PWR_GND:
     kind: reference
     carries: "Power return for the exported rail"
-    driver: module/power-entry
+    origin: module/power-entry
     reference: [module/umbilical-load-switch, carrier/power-entry-instrument]
 
   # ======================================================================
@@ -227,7 +227,7 @@ nets:
     kind: reference
     carries: "Module analog star"
     figure: dig-gnd-topology
-    driver: module/power-entry
+    origin: module/power-entry
     reference:
       - module/breath-output-stage
       - module/breath-receive-stage
