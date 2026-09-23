@@ -69,7 +69,12 @@ BOX = set("│┬┴├┤┼└┘┌┐─►")
 # and `[R_G 42.2k]` are how the breath pages spell a subscript in ASCII, and a
 # class without `_` in it matched just the `C`, turning three correct labels
 # into three unknown refdes. The refdes token now runs to the first space.
-LABEL = re.compile(r"\[([A-Z][A-Za-z0-9_-]*)\s*([^\]]*)\]")
+# AND A DOT INSIDE A PART NUMBER IS PART OF IT. `[R-78E5.0 A]` labels the
+# buck by its order code, and a class without `.` split it into a refdes
+# `R-78E5` and a value `.0 A` - one unknown refdes and one value token that
+# means nothing. Only between alphanumerics, so a label ending in a full stop
+# is still a label ending in a full stop.
+LABEL = re.compile(r"\[([A-Z][A-Za-z0-9_-]*(?:\.[A-Za-z0-9][A-Za-z0-9_-]*)*)\s*([^\]]*)\]")
 
 
 MASTER = os.path.join(ROOT, "hardware/nets.yaml")
@@ -505,6 +510,20 @@ def check_one(d, bom, problems, seen, elsewhere=None):
                                 f"which the netlist's {want!r} does not support "
                                 f"({', '.join(sorted(extra))})")
 
+    # A LABEL SPLIT ACROSS TWO LINES IS NOT A LABEL AT ALL.
+    #
+    # `[C-BUCK-IN` opens on one drawing line and `100 uF 25V]` closes on the
+    # next, and every regex here works a line at a time, so the part was
+    # invisible - not skipped with a reason, invisible. On key-register.md the
+    # same thing made the WHOLE PAGE invisible: its only bracketed label was a
+    # broken one, so the page reported zero labels and never appeared in the
+    # rollout's list of drawings still to convert.
+    for lineno, line in drawing_lines(page):
+        if line.count("[") != line.count("]"):
+            problems.append(f"{rel}: drawing line {lineno} has an unclosed "
+                            f"bracket, so any label on it is invisible to every "
+                            f"check here - a label has to fit on one line")
+
     # A LABEL THE PARSER CANNOT READ IS NOT A LABEL THAT PASSES.
     known = set(comps) | set(alias) | set(foreign) | set(bom)
     for lineno, text in unparsed_brackets(page):
@@ -532,7 +551,10 @@ def main():
     for page in glob.glob(os.path.join(ROOT, "hardware/**/*.md"), recursive=True):
         if os.path.basename(page) in ("README.md", "notes.md"):
             continue
-        if not drawing_labels(page):
+        # A DRAWING PAGE IS ONE WITH A DRAWING ON IT, not one with a
+        # parseable label on it. Judging by labels excluded key-register.md
+        # entirely, because its single label was split across two lines.
+        if not drawing_lines(page):
             continue
         if not os.path.exists(os.path.join(os.path.dirname(page), "netlist.yaml")):
             pending.append(os.path.relpath(page, ROOT))

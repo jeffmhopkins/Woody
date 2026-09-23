@@ -30,9 +30,9 @@ The `Dir` and `Peer` columns are defined once in
 ```
                         74HC165  SOIC-16          [from memory: pin map]
                      ┌────────────∪────────────┐
-       SH/LD  ──────►│ 1  SH/LD        VCC  16 │◄──── 3V3 ──┬── [C-DECOUPLE-165
-        SCK   ──────►│ 2  CLK       CLK INH 15 │──── GND     │   100 nF, AT the
-         E    ──────►│ 3  E (D4)       D  14   │◄──  key D   │   package]
+       SH/LD  ──────►│ 1  SH/LD        VCC  16 │◄──── 3V3 ──┬── [C-DECOUPLE-165 100nF]
+        SCK   ──────►│ 2  CLK       CLK INH 15 │──── GND     │   AT the package,
+         E    ──────►│ 3  E (D4)       D  14   │◄──  key D   │   not near it
          F    ──────►│ 4  F (D5)       C  13   │◄──  key C  GND
          G    ──────►│ 5  G (D6)       B  12   │◄──  key B
          H    ──────►│ 6  H (D7)       A  11   │◄──  key A

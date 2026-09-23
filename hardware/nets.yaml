@@ -96,6 +96,23 @@ nets:
   # INSTRUMENT: breath front end and the carrier
   # ======================================================================
 
+  # --- the carrier board's own supply tree -------------------------------
+
+  INST_5V_A:
+    kind: power
+    carries: "Buck A, through D-USBOR onto the dev board's 5 V pin"
+    figure: matrix-led-current
+    driver: carrier/power-entry-instrument
+    receivers: [carrier/led-strip-drive]
+    note: "It also lands on HDR-DEV's 5 V pin and on the 8x8 matrix through the dev board. HDR-DEV is a connector row, not a circuit, so it is not a receiver here - which is a limit of this file, not a fact about the board"
+
+  INST_5V_B:
+    kind: power
+    carries: "Buck B, to the display board on J-DISP"
+    driver: carrier/power-entry-instrument
+    receivers: [carrier/display-and-service-uart]
+    note: "WHERE BUCK B LIVES IS OPEN. If it moves to the display board this net becomes +12 V up the loom instead, and J-DISP's conductor list changes with it"
+
   SENSOR_BUFFERED_OUT:
     kind: signal
     domain: analog
@@ -165,16 +182,33 @@ nets:
 
   UMBILICAL_POS12:
     kind: power
-    carries: "The +12 V exported to the instrument, downstream of the load switch"
+    carries: "The +12 V exported to the instrument, downstream of the load switch. ONE NODE all the way to the strips and the REF5050"
     figure: umbilical-current
     driver: module/umbilical-load-switch
-    receivers: [carrier/power-entry-instrument, module/link-supervision]
+    receivers:
+      - carrier/power-entry-instrument
+      - module/link-supervision
+      - carrier/led-strip-drive
+      - carrier/breath-excitation-reference
+    note: >
+      The carrier's "+12V strip feed" and "+12V analog" are not separate nets:
+      D-REVSHUNT is a shunt across the pair and D-TVS-PWR is a clamp, so
+      nothing is in series between J-UMB pin 3 and either tap. They were two
+      more entries here until the netlist had to name both ends of each and
+      there was only one node to name.
 
   PWR_GND:
     kind: reference
-    carries: "Power return for the exported rail"
+    carries: "Power return for the exported rail, and the carrier's whole pour"
     origin: module/power-entry
-    reference: [module/umbilical-load-switch, carrier/power-entry-instrument]
+    reference:
+      - module/umbilical-load-switch
+      - carrier/power-entry-instrument
+      - carrier/breath-adc
+      - carrier/breath-excitation-reference
+      - carrier/display-and-service-uart
+      - carrier/led-strip-drive
+    note: "The aluminium key plate bonds to this net through MECH-GNDBOND and NEVER to AGND, and carrier/power-entry-instrument is the only board that bond can originate on"
 
   # ======================================================================
   # MODULE: power
