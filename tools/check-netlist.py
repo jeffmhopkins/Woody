@@ -571,7 +571,7 @@ def main():
 
     # Pages that carry a drawing and have no netlist yet - the rollout's
     # denominator, printed every run so it cannot stall unnoticed.
-    pending = []
+    pending, not_a_circuit = [], []
     for page in glob.glob(os.path.join(ROOT, "hardware/**/*.md"), recursive=True):
         if os.path.basename(page) in ("README.md", "notes.md"):
             continue
@@ -579,6 +579,17 @@ def main():
         # parseable label on it. Judging by labels excluded key-register.md
         # entirely, because its single label was split across two lines.
         if not drawing_lines(page):
+            continue
+        # NOT EVERY DRAWING IS A CIRCUIT. cluster-boards.md draws where the
+        # four boards sit inside the instrument - box characters, no nets, no
+        # refdes. A netlist is the wrong artefact for it, and the page says so
+        # in a marker a tool can read rather than leaving it to sit in the
+        # pending list forever looking like work nobody got to.
+        head = open(page, encoding="utf-8").read()
+        m = re.search(r"<!--\s*netlist:\s*none\b(.*?)-->", head, re.S)
+        if m:
+            not_a_circuit.append((os.path.relpath(page, ROOT),
+                                  " ".join(m.group(1).split()).strip(" ()")))
             continue
         if not os.path.exists(os.path.join(os.path.dirname(page), "netlist.yaml")):
             pending.append(os.path.relpath(page, ROOT))
@@ -642,6 +653,9 @@ def main():
           f"{len(master)} master net(s) | "
           f"{len(problems)} problem(s) | {len(pending)} drawing page(s) still "
           f"without a netlist | {len(deferred)} master endpoint(s) awaiting one")
+    if not_a_circuit and not args:
+        for pg, why in sorted(not_a_circuit):
+            print(f"    not a circuit: {pg}" + (f" - {why}" if why else ""))
     if per_board:
         print(f"per-board bundles not resolved to single nets: "
               f"{', '.join(sorted(per_board))}")

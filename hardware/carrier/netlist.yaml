@@ -1,0 +1,212 @@
+# AUTHORITATIVE for connectivity of the CARRIER BOARD ITSELF - the dev board,
+# its sockets, and the SPI egress drawn in carrier.md §4.
+#
+# THIS FILE SITS AT hardware/carrier/, not in a circuit directory, because
+# carrier.md is the board page rather than a circuit page: its bom.csv
+# fragment holds the dev board, the sockets, the PCB and the loom, and its
+# drawings show four OTHER circuits' parts for context.
+#
+# §2's ANALOG FRONT END IS NOT HERE. The reference, the buffer, the sensor and
+# the ADC are drawn on this page and owned by carrier/breath-excitation-
+# reference, carrier/breath-adc and interfaces/breath-sense-link. They are
+# declared `foreign:` so the drawing stays checkable without this file
+# pretending to own them, and they are netlisted in their own directories
+# against this page.
+
+circuit: carrier/carrier
+title: Real-time carrier board
+page: carrier.md
+
+ports:
+  # to the cluster chain
+  IO38:      {dir: out, to: interfaces/key-chain-loom}
+  IO7:       {dir: out, to: interfaces/key-chain-loom}
+  IO33:      {dir: out, to: interfaces/key-chain-loom}
+  IO40:      {dir: in,  from: interfaces/key-chain-loom}
+  # to the LED strips
+  IO1:       {dir: out, to: carrier/led-strip-drive}
+  IO2:       {dir: out, to: carrier/led-strip-drive}
+  # to the display board and the service header
+  IO5:       {dir: out, to: carrier/display-and-service-uart}
+  IO6:       {dir: in,  from: carrier/display-and-service-uart}
+  U0TXD:     {dir: out, to: carrier/display-and-service-uart}
+  U0RXD:     {dir: in,  from: carrier/display-and-service-uart}
+  # the shared SPI host: the ADC on this board, the DAC two metres away
+  IO34:      {dir: out, to: carrier/breath-adc}
+  IO35:      {dir: out, to: carrier/breath-adc}
+  IO36:      {dir: out, to: carrier/breath-adc}
+  IO37:      {dir: in,  from: carrier/breath-adc}
+  IO39:      {dir: out, to: carrier/breath-adc}
+  SCLK:      {dir: out, to: interfaces/spi-link, figure: spi-series-r}
+  MOSI:      {dir: out, to: interfaces/spi-link, figure: spi-series-r}
+  CS_MOD:    {dir: out, to: interfaces/spi-link, figure: spi-series-r}
+  # supply
+  DEV_3V3:   {dir: out, to: interfaces/key-chain-loom, figure: key-pullup-qty}
+  INST_5V_A: {dir: in,  from: carrier/power-entry-instrument, figure: matrix-led-current}
+  PWR_GND:   {dir: ref, from: module/power-entry, figure: dig-gnd-topology}
+
+foreign:
+  C-REF-OUT:         {owner: carrier/breath-excitation-reference, row: C-REF-OUT}
+  R-FB-REF:          {owner: carrier/breath-excitation-reference, row: R-FB-REF}
+  C-FB-REF:          {owner: carrier/breath-excitation-reference, row: C-FB-REF}
+  R-FBX-REF:         {owner: carrier/breath-excitation-reference, row: R-FBX-REF}
+  R-ADCDIV-U:        {owner: carrier/breath-adc, row: R-ADCDIV-U}
+  R-ADCDIV-L:        {owner: carrier/breath-adc, row: R-ADCDIV-L}
+  C-AA-ADC:          {owner: carrier/breath-adc, row: C-AA-ADC}
+  C-ADC-BULK:        {owner: carrier/breath-adc, row: C-ADC-BULK}
+  R-SER-BREATH-INST: {owner: interfaces/breath-sense-link, row: R-SER-BREATH-INST}
+  D-TVS-BREATH:      {owner: interfaces/breath-sense-link, row: D-TVS-BREATH}
+
+components:
+
+  U-MCU-RT:
+    value: "ESP32-S3-Matrix"
+    pins: [IO1, IO2, IO5, IO6, IO7, IO33, IO34, IO35, IO36, IO37, IO38, IO39,
+           IO40, IO43, IO44, P3V3, P5V, GND]
+    note: "SOCKETED, NOT SOLDERED, which is HDR-DEV's whole rule. Its own LDO is the instrument's only 3V3, and EN and IO0 are NOT on its headers - IO0 is under the BOOT button and EN is on the reset circuit, so reaching either ends the board's life as a swappable module"
+
+  HDR-DEV:
+    value: "2.54mm female header strip"
+    note: "SOCKETS, NOT SOLDER-DOWN. Six strips for one dev board, which is why the instance count reads HDR-DEV 1/6: one mating part, six pieces bought. Every U-MCU-RT pin above lands through them, so they carry no net of their own and declare no pins"
+
+  SKT-BREATH:
+    value: "Machined SIP socket strip"
+    note: "The MPXV4006DP's socket. Same rule: a mating part, not a node"
+
+  R-SPI-SER-SCLK:
+    of: R-SPI-SER
+    value: "100R 1%"
+    drawn_as: R-SPI-SER
+    pins: [1, 2]
+    note: "At the DRIVING end, which is this board. The far end's threshold is the 74AHCT125's TTL V_IH, not a ratio of its rail"
+
+  R-SPI-SER-MOSI:
+    of: R-SPI-SER
+    value: "100R 1%"
+    pins: [1, 2]
+
+  R-SPI-SER-CS:
+    of: R-SPI-SER
+    value: "100R 1%"
+    pins: [1, 2]
+
+  U-TVS-SPI:
+    value: "SP0504BAHT or equivalent 4-channel 5V array"
+    pins: [CH1, CH2, CH3, CH4, GND]
+    note: "On the umbilical side of the series resistors, where the cable's energy arrives"
+
+nets:
+
+  # --- the shared SPI host, at the MCU pins --------------------------
+  #
+  # ONE HOST, TWO DEVICES. The same clock and data reach the MCP3202 on this
+  # board and the DAC8568 two metres away; only the chip selects differ. So
+  # the MCU pin and the umbilical conductor are DIFFERENT NETS with the
+  # series resistor between them, and the ADC hangs on the MCU side.
+
+  IO35:
+    - U-MCU-RT.IO35
+    - R-SPI-SER-SCLK.1
+    - port: IO35
+
+  IO36:
+    - U-MCU-RT.IO36
+    - R-SPI-SER-MOSI.1
+    - port: IO36
+
+  IO34:
+    - U-MCU-RT.IO34
+    - R-SPI-SER-CS.1
+    - port: IO34
+
+  SCLK:
+    - R-SPI-SER-SCLK.2
+    - U-TVS-SPI.CH1
+    - port: SCLK
+
+  MOSI:
+    - R-SPI-SER-MOSI.2
+    - U-TVS-SPI.CH2
+    - port: MOSI
+
+  CS_MOD:
+    - R-SPI-SER-CS.2
+    - U-TVS-SPI.CH3
+    - port: CS_MOD
+
+  IO37:
+    - port: IO37
+    - U-MCU-RT.IO37
+
+  IO39:
+    - U-MCU-RT.IO39
+    - port: IO39
+
+  # --- the cluster chain ---------------------------------------------
+
+  IO38:
+    - U-MCU-RT.IO38
+    - port: IO38
+
+  IO7:
+    - U-MCU-RT.IO7
+    - port: IO7
+
+  IO33:
+    - U-MCU-RT.IO33
+    - port: IO33
+
+  IO40:
+    - port: IO40
+    - U-MCU-RT.IO40
+
+  # --- the LED strips --------------------------------------------------
+
+  IO1:
+    - U-MCU-RT.IO1
+    - port: IO1
+
+  IO2:
+    - U-MCU-RT.IO2
+    - port: IO2
+
+  # --- the display loom and the service header --------------------------
+
+  IO5:
+    - U-MCU-RT.IO5
+    - port: IO5
+
+  IO6:
+    - port: IO6
+    - U-MCU-RT.IO6
+
+  U0TXD:
+    - U-MCU-RT.IO43
+    - port: U0TXD
+
+  U0RXD:
+    - port: U0RXD
+    - U-MCU-RT.IO44
+
+  # --- supply ----------------------------------------------------------
+
+  INST_5V_A:
+    - port: INST_5V_A
+    - U-MCU-RT.P5V
+
+  DEV_3V3:
+    - U-MCU-RT.P3V3
+    - port: DEV_3V3
+
+  PWR_GND:
+    - port: PWR_GND
+    - U-MCU-RT.GND
+    - U-TVS-SPI.GND
+
+  # The fourth clamp channel has no fourth signal: J-UMB pin 8 is DIG_GND,
+  # which is a return rather than something to clamp.
+  TVS_SPARE:
+    - U-TVS-SPI.CH4
+
+external_endpoints:
+  - TVS_SPARE

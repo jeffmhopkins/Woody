@@ -106,6 +106,42 @@ nets:
 
   # --- the dev board's pins that drive the chain ------------------------
 
+  IO34:
+    kind: signal
+    domain: digital
+    carries: "CS toward the module, ahead of its series resistor"
+    driver: carrier/carrier
+    receivers: [carrier/breath-adc]
+    note: "SHARED HOST. The same three pins clock the MCP3202 on this board and the DAC8568 two metres away; only the chip selects differ, IO34 for the module and IO39 for the ADC"
+
+  IO35:
+    kind: signal
+    domain: digital
+    carries: "SPI2 SCK at the MCU pin, to the ADC and to the umbilical's series resistor"
+    driver: carrier/carrier
+    receivers: [carrier/breath-adc]
+
+  IO36:
+    kind: signal
+    domain: digital
+    carries: "SPI2 MOSI at the MCU pin, to the ADC and to the umbilical's series resistor"
+    driver: carrier/carrier
+    receivers: [carrier/breath-adc]
+
+  IO37:
+    kind: signal
+    domain: digital
+    carries: "SPI2 MISO - the MCP3202's DOUT, and it never leaves the board"
+    driver: carrier/breath-adc
+    receivers: [carrier/carrier]
+
+  IO39:
+    kind: signal
+    domain: digital
+    carries: "The MCP3202's own chip select. NOT CS_MOD, which leaves on J-UMB"
+    driver: carrier/carrier
+    receivers: [carrier/breath-adc]
+
   IO38:
     kind: signal
     domain: digital
@@ -199,8 +235,8 @@ nets:
     carries: "Buck A, through D-USBOR onto the dev board's 5 V pin"
     figure: matrix-led-current
     driver: carrier/power-entry-instrument
-    receivers: [carrier/led-strip-drive]
-    note: "It also lands on HDR-DEV's 5 V pin and on the 8x8 matrix through the dev board. HDR-DEV is a connector row, not a circuit, so it is not a receiver here - which is a limit of this file, not a fact about the board"
+    receivers: [carrier/led-strip-drive, carrier/carrier]
+    note: "It reaches the 8x8 matrix through the dev board, so carrier/carrier is where it lands and HDR-DEV is the socket it lands through"
 
   INST_5V_B:
     kind: power
@@ -252,22 +288,25 @@ nets:
     domain: digital
     carries: "SPI clock, instrument to module, through R-SPI-SER"
     figure: spi-series-r
-    driver: interfaces/spi-link
-    receivers: [module/digital-and-supervision]
+    driver: carrier/carrier
+    receivers: [interfaces/spi-link, module/digital-and-supervision]
+    note: "THE DRIVER IS THE DEV BOARD, not the link. R-SPI-SER and U-TVS-SPI are drawn on carrier.md and placed by carrier/carrier, and interfaces/spi-link is the connector and the cable in between - a pass-through, which this schema records as a receiver"
 
   MOSI:
     kind: signal
     domain: digital
     carries: "SPI data, instrument to module"
-    driver: interfaces/spi-link
-    receivers: [module/digital-and-supervision]
+    figure: spi-series-r
+    driver: carrier/carrier
+    receivers: [interfaces/spi-link, module/digital-and-supervision]
 
   CS_MOD:
     kind: signal
     domain: digital
     carries: "Module chip select"
-    driver: interfaces/spi-link
-    receivers: [module/digital-and-supervision]
+    figure: spi-series-r
+    driver: carrier/carrier
+    receivers: [interfaces/spi-link, module/digital-and-supervision]
 
   DIG_GND:
     kind: reference
@@ -304,6 +343,7 @@ nets:
       - carrier/breath-excitation-reference
       - carrier/display-and-service-uart
       - carrier/led-strip-drive
+      - carrier/carrier
     note: "The aluminium key plate bonds to this net through MECH-GNDBOND and NEVER to AGND, and carrier/power-entry-instrument is the only board that bond can originate on"
 
   # ======================================================================

@@ -88,6 +88,17 @@ moved verbatim to
 
 ## §2 Analog front end — sensor, reference, buffer, ADC
 
+*Connectivity for **this board itself** — the dev board, its sockets and the
+SPI egress in §4 — is [`netlist.yaml`](netlist.yaml), beside this page. The
+analog front end drawn below is **three other circuits' parts**, declared
+`foreign:` there and netlisted in
+[`breath-excitation-reference/`](breath-excitation-reference/breath-excitation-reference.md),
+[`breath-adc/`](breath-adc/breath-adc.md) and
+[`../interfaces/breath-sense-link/`](../interfaces/breath-sense-link/breath-sense-link.md)
+against this drawing. Where a netlist and this drawing disagree, the netlist
+wins.*
+
+
 ```
           REF5050                  ½ OPA2197  "reference buffer"
   +12V ──┬─┤VIN VOUT├─┬── 5.000 V ─┤+IN                         SKT-BREATH
@@ -296,7 +307,8 @@ page and have no BOM entry yet.
 | **`TP-*`, `LK-*`** | **TBD** | **Proposed — `D2` asked for test points, shunt links and an LA header on this board and none exist in the BOM** | proposed |
 
 *Rows for the five circuits that now have their own directories moved with them:
-`U-ADC`, `R-ADCDIV`, `C-AA-ADC` and `C-ADC-BULK` to `breath-adc/`;
+`U-ADC`, `R-ADCDIV-U`/`R-ADCDIV-L`, `C-AA-ADC` and `C-ADC-BULK` to
+`breath-adc/`;
 `U-REF-BREATH`, `C-REF-OUT` and `R-FB-REF`/`R-FBX-REF`/`C-FB-REF` to
 `breath-excitation-reference/`; `U-LVLSHIFT`, `R-LED-PD`, `R-LED-SER` and
 `J-LED-L/-R` to `led-strip-drive/`; `U-BUCK`, `L-BUCK-IN`, `C-BUCK-IN`,

@@ -1,5 +1,10 @@
 # Key cluster boards — schematic
 
+<!-- netlist: none (this page's drawing is a physical layout - where the four
+     boards sit inside the instrument - not a schematic. The circuits are
+     key-register/, key-switch-network/ and key-marker-and-bits/, and the two
+     that carry nets have netlist.yaml beside them.) -->
+
 **Status:** **First draft, 2026-09-21.** The last board in the instrument.
 The pin map below was `[from memory]` when this page was drafted, because no
 datasheet was reachable from the sandbox. **Four are banked now** and the map
