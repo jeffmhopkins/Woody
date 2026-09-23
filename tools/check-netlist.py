@@ -324,14 +324,20 @@ def norm(v):
     # without this the gate resistor reads as a contradiction with itself.
     # Only after a digit, and only when nothing wordlike follows, so `0R strap`
     # and every refdes with an r in it are left alone.
-    return re.sub(r"(?<=\d)r(?![a-z])", "ohm", s)
+    s = re.sub(r"(?<=\d)r(?![a-z])", "ohm", s)
+    # And a metric prefix makes the ohm redundant: a drawing types `10 kohm`
+    # where the BOM types `10k`, and both mean the same resistor. Only after a
+    # prefix - a bare `10ohm` stays, so it still matches `10R` above.
+    return re.sub(r"(?<=\d)([kmg])ohm", r"\1", s)
 
 
 VALTOK = re.compile(r"\d+(?:\.\d+)?\s*[a-zA-Z%\u03a9\u2126\u00b5\u03bc]*")
 # A MULTIPLIER IS A COUNT, NOT A MAGNITUDE. `[R-SPI-PULL x3]` and
 # `[C-REF-OUT 10uF x2]` say how many, and reading the 3 or the 2 as a value
 # turns a correct label into a contradiction.
-COUNT = re.compile(r"[x\u00d7]\s*\d+", re.I)
+# AND SO IS AN INSTANCE INDEX. `[C-REF-OUT#1]` and `[C-REF-OUT#2]` are the two
+# 10 uF, not a 1 uF and a 2 uF.
+COUNT = re.compile(r"[x\u00d7#]\s*\d+", re.I)
 
 
 def value_tokens(v):
@@ -486,6 +492,15 @@ def check_one(d, bom, problems, seen, elsewhere=None):
                 other = index.get("__by_row__", {}).get(foreign[ref]["row"])
             if other is None and ref not in foreign:
                 other = index.get(ref)
+            # ONE PAGE, SEVERAL NETLISTS. carrier.md §2 is the page of three
+            # circuits at once, so without this every label on it is reported
+            # three times - once by each netlist that names the page. A label
+            # is this netlist's business when it declares the part `foreign:`
+            # or when the part is its own; otherwise the circuit that owns it
+            # reports it.
+            if other and other["circuit"] != (spec.get("circuit") or rel) \
+                    and ref not in foreign:
+                continue
             if other:
                 row = bom.get(other["row"], {})
                 allowed = value_tokens(other["value"]) | value_tokens(row.get("package"))

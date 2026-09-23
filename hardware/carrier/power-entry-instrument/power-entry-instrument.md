@@ -22,7 +22,7 @@ The `Dir` and `Peer` columns are defined once in
 | `+12V` analog | out | `carrier/breath-excitation-reference` | — | REF5050 `VIN`, and the V+ of both OPA2197 halves. **Also the same net**, for the same reason |
 | 5 V, buck A | out | `HDR-DEV`, `carrier/led-strip-drive` | `matrix-led-current` | Through `D-USBOR` onto the dev board's 5 V pin, and on to the 74AHCT125 |
 | 5 V, buck B | out | `carrier/display-and-service-uart` | — | On `J-DISP`. Buck B's location is open — see *Still open* |
-| `PWR_GND` pour | ref | `carrier/breath-adc`, `carrier/breath-excitation-reference`, `carrier/display-and-service-uart`, `carrier/led-strip-drive` | `dig-gnd-topology` | The whole board returns here, and the aluminium key plate through `MECH-GNDBOND`, which can only originate here. `AGND_INST` reaches it on a single tie |
+| `PWR_GND` pour | ref | `carrier/display-and-service-uart`, `carrier/led-strip-drive`, `carrier/carrier` | `dig-gnd-topology` | The whole board returns here, and the aluminium key plate through `MECH-GNDBOND`, which can only originate here. **`carrier/breath-adc` and `carrier/breath-excitation-reference` are no longer listed**: both of those pages say their return is `AGND_INST`, which reaches this pour on the **single tie** and is a different node everywhere else — and that distinction is the whole point of the star |
 
 ## §1 Power entry
 

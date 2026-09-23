@@ -1,0 +1,98 @@
+# AUTHORITATIVE for connectivity. THE DRAWING IS ON ANOTHER PAGE - carrier.md
+# §2 draws the whole breath path in one picture. This circuit is the divider
+# and the MCP3202 at the end of it.
+
+circuit: carrier/breath-adc
+title: Breath ADC
+page: ../carrier.md
+
+ports:
+  SENSOR_BUFFERED_OUT: {dir: in,  from: carrier/breath-excitation-reference, figure: sensor-full-scale}
+  AGND_INST:           {dir: ref, from: carrier/power-entry-instrument}
+  DEV_3V3:             {dir: in,  from: carrier/carrier}
+  IO35:                {dir: in,  from: carrier/carrier}
+  IO36:                {dir: in,  from: carrier/carrier}
+  IO37:                {dir: out, to: carrier/carrier}
+  IO39:                {dir: in,  from: carrier/carrier}
+
+components:
+
+  R-ADCDIV-U:
+    value: "10k 1%"
+    pins: [1, 2]
+    note: "UPPER LEG, AND >=10k IS A SPEC RATHER THAN A VALUE: below that, 5V-before-3V3 sequencing pushes about 2.5 mA into the ADC's ESD clamp on every power-up. DIVIDE AFTER THE BUFFER, never before"
+
+  R-ADCDIV-L:
+    value: "15k 1%"
+    pins: [1, 2]
+    note: "Lower leg, to the analog star. 15k against 10k is the 0.6x that lands the sensor's full scale inside a 3V3 ADC"
+
+  C-AA-ADC:
+    value: "47nF C0G/NP0"
+    pins: [1, 2]
+    note: "Anti-alias at the divider node. It has to settle inside the sample window, which is what stops the upper leg going higher still"
+
+  U-ADC:
+    value: "MCP3202-CI/SN"
+    drawn_as: MCP3202
+    pins: [CS, CH0, CH1, VSS, DIN, DOUT, CLK, VDD]
+    note: "NO VREF PIN - VDD IS THE REFERENCE, and that reference is the dev board's LDO, the same rail the 24 key pull-ups load. CH1 is spare"
+
+  C-ADC-BULK:
+    value: "10uF"
+    pins: [1, 2]
+    note: "Local reservoir on the reference rail"
+
+  C-DEC-ADC:
+    of: C-DECOUPLE-CARRIER
+    value: "100nF"
+    pins: [1, 2]
+
+nets:
+
+  SENSOR_BUFFERED_OUT:
+    - port: SENSOR_BUFFERED_OUT
+    - R-ADCDIV-U.1
+
+  ADC_IN:
+    - R-ADCDIV-U.2
+    - R-ADCDIV-L.1
+    - C-AA-ADC.1
+    - U-ADC.CH0
+
+  DEV_3V3:
+    - port: DEV_3V3
+    - U-ADC.VDD
+    - C-ADC-BULK.1
+    - C-DEC-ADC.1
+
+  IO35:
+    - port: IO35
+    - U-ADC.CLK
+
+  IO36:
+    - port: IO36
+    - U-ADC.DIN
+
+  IO37:
+    - U-ADC.DOUT
+    - port: IO37
+
+  IO39:
+    - port: IO39
+    - U-ADC.CS
+
+  AGND_INST:
+    - port: AGND_INST
+    - R-ADCDIV-L.2
+    - C-AA-ADC.2
+    - U-ADC.VSS
+    - C-ADC-BULK.2
+    - C-DEC-ADC.2
+
+  # Spare input, unconnected by decision - the Interfaces table says so.
+  ADC_CH1:
+    - U-ADC.CH1
+
+external_endpoints:
+  - ADC_CH1

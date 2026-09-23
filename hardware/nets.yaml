@@ -106,13 +106,11 @@ nets:
 
   # --- the dev board's pins that drive the chain ------------------------
 
-  IO34:
-    kind: signal
-    domain: digital
-    carries: "CS toward the module, ahead of its series resistor"
-    driver: carrier/carrier
-    receivers: [carrier/breath-adc]
-    note: "SHARED HOST. The same three pins clock the MCP3202 on this board and the DAC8568 two metres away; only the chip selects differ, IO34 for the module and IO39 for the ADC"
+  # SHARED HOST. The same clock and data reach the MCP3202 on this board and
+  # the DAC8568 two metres away; only the chip selects differ, IO34 for the
+  # module and IO39 for the ADC. IO34 is not here because it crosses no
+  # boundary: it runs from the MCU pin to a series resistor that
+  # carrier/carrier also owns.
 
   IO35:
     kind: signal
@@ -245,6 +243,23 @@ nets:
     receivers: [carrier/display-and-service-uart]
     note: "WHERE BUCK B LIVES IS OPEN. If it moves to the display board this net becomes +12 V up the loom instead, and J-DISP's conductor list changes with it"
 
+  VS:
+    kind: signal
+    domain: analog
+    carries: "The sensor's excitation, 5.000 V through R-ISO-REF"
+    figure: riso-ref-topology
+    driver: carrier/breath-excitation-reference
+    receivers: [interfaces/breath-sense-link]
+    note: "DC FEEDBACK IS TAKEN HERE, at the far side of R-ISO-REF, which is what makes the DC error across it zero"
+
+  SENSOR_RAW:
+    kind: signal
+    domain: analog
+    carries: "The MPXV4006DP's own output, before the buffer"
+    figure: sensor-full-scale
+    driver: interfaces/breath-sense-link
+    receivers: [carrier/breath-excitation-reference]
+
   SENSOR_BUFFERED_OUT:
     kind: signal
     domain: analog
@@ -258,7 +273,10 @@ nets:
     carries: "Instrument analog star. Carries no power current - that is the whole point of it"
     figure: dig-gnd-topology
     origin: carrier/power-entry-instrument
-    reference: [carrier/breath-adc, carrier/breath-excitation-reference]
+    reference:
+      - carrier/breath-adc
+      - carrier/breath-excitation-reference
+      - interfaces/breath-sense-link
 
   BREATH_SENSE:
     kind: signal
@@ -339,12 +357,20 @@ nets:
     reference:
       - module/umbilical-load-switch
       - carrier/power-entry-instrument
-      - carrier/breath-adc
-      - carrier/breath-excitation-reference
       - carrier/display-and-service-uart
       - carrier/led-strip-drive
       - carrier/carrier
-    note: "The aluminium key plate bonds to this net through MECH-GNDBOND and NEVER to AGND, and carrier/power-entry-instrument is the only board that bond can originate on"
+    note: >
+      The aluminium key plate bonds to this net through MECH-GNDBOND and NEVER
+      to AGND, and carrier/power-entry-instrument is the only board that bond
+      can originate on.
+      IT DOES NOT LIST THE TWO ANALOG CIRCUITS. power-entry-instrument.md's
+      Interfaces table names carrier/breath-adc and
+      carrier/breath-excitation-reference as returning to the pour, and both of
+      those pages say their return is AGND_INST - which reaches PWR_GND on the
+      single tie and is a different node everywhere else. The circuits' own
+      declarations win, because that distinction is the entire point of having
+      an instrument analog star.
 
   # ======================================================================
   # MODULE: power

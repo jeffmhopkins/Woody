@@ -32,7 +32,6 @@ ports:
   U0TXD:     {dir: out, to: carrier/display-and-service-uart}
   U0RXD:     {dir: in,  from: carrier/display-and-service-uart}
   # the shared SPI host: the ADC on this board, the DAC two metres away
-  IO34:      {dir: out, to: carrier/breath-adc}
   IO35:      {dir: out, to: carrier/breath-adc}
   IO36:      {dir: out, to: carrier/breath-adc}
   IO37:      {dir: in,  from: carrier/breath-adc}
@@ -114,10 +113,11 @@ nets:
     - R-SPI-SER-MOSI.1
     - port: IO36
 
+  # Local: the MCU pin to its series resistor, and nothing else. It crosses
+  # no boundary, so it is not in hardware/nets.yaml.
   IO34:
     - U-MCU-RT.IO34
     - R-SPI-SER-CS.1
-    - port: IO34
 
   SCLK:
     - R-SPI-SER-SCLK.2
