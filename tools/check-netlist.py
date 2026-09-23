@@ -217,7 +217,7 @@ def check_global(specs, bom, problems):
             used[row] += n
             if c.get("section"):
                 sections[row] += n
-    exact = short = 0
+    exact, short = 0, []
     for row, n in sorted(used.items()):
         if row not in bom:
             continue
@@ -233,7 +233,7 @@ def check_global(specs, bom, problems):
         elif n == have:
             exact += 1
         else:
-            short += 1
+            short.append(f"{row} {n}/{have}")
     return exact, short, sum(1 for r in used if sections[r])
 
 
@@ -647,8 +647,13 @@ def main():
               f"{', '.join(sorted(per_board))}")
     if counted:
         exact, short, sectioned = counted
-        print(f"instances: {exact} row(s) placed exactly to BOM qty, {short} still "
-              f"short while the rollout runs, {sectioned} counted by section")
+        # NAMED, NOT COUNTED. A bare "5 still short" reads like five
+        # unfinished conversions; every one of them so far has a reason
+        # written down somewhere, and printing the rows is what lets a reader
+        # check that rather than take it on trust.
+        print(f"instances: {exact} row(s) placed exactly to BOM qty, "
+              f"{sectioned} counted by section, {len(short)} short"
+              + (": " + ", ".join(short) if short else ""))
     if pending and not args:
         for p in sorted(pending):
             print(f"    pending: {p}")
