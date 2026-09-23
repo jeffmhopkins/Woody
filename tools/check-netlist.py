@@ -107,8 +107,13 @@ def check_master(master, seen, problems, have_netlist, deferred):
         # rather than being a driver with a mismatched direction.
         if spec.get("origin"):
             ref = [spec["origin"]] + [c for c in ref if c != spec["origin"]]
+        # `external_driver:` is for a net driven from OUTSIDE this corpus - the
+        # display board has no page, and whatever is plugged into the service
+        # header is not a part of this instrument at all. Saying so is better
+        # than either inventing a driver or calling the net undriven, which
+        # would mean something else entirely.
         if not drv and not (spec.get("multi_driver") or spec.get("undriven")
-                            or spec.get("origin")):
+                            or spec.get("origin") or spec.get("external_driver")):
             problems.append(f"nets.yaml: {net!r} has no driver")
         if spec.get("undriven") and not spec.get("pull"):
             # An undriven net is a real thing - CLR is held inactive by

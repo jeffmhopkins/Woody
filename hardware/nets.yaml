@@ -116,6 +116,34 @@ nets:
     receivers: [carrier/led-strip-drive]
     note: "Same bootloader-window hazard as IO1"
 
+  IO5:
+    kind: signal
+    domain: digital
+    carries: "UART1 TX, real-time board to the display board on J-DISP"
+    driver: carrier/carrier
+    receivers: [carrier/display-and-service-uart]
+
+  IO6:
+    kind: signal
+    domain: digital
+    carries: "UART1 RX, display board to the real-time board"
+    external_driver: "the display board, which has no page in this corpus"
+    receivers: [carrier/carrier, carrier/display-and-service-uart]
+
+  U0TXD:
+    kind: signal
+    domain: digital
+    carries: "The real-time board's console transmit, IO43, to HDR-SERVICE"
+    driver: carrier/carrier
+    receivers: [carrier/display-and-service-uart]
+
+  U0RXD:
+    kind: signal
+    domain: digital
+    carries: "The real-time board's console receive, IO44, from HDR-SERVICE"
+    external_driver: "whatever is plugged into the service header"
+    receivers: [carrier/carrier, carrier/display-and-service-uart]
+
   INST_5V_A:
     kind: power
     carries: "Buck A, through D-USBOR onto the dev board's 5 V pin"
