@@ -24,7 +24,10 @@ WHAT IT CHECKS, per circuit that has a netlist.yaml:
     pins       every declared pin is used exactly once; no net references a
                pin a component does not declare
     drawing    every `[REFDES value]` label in the page's ASCII drawing names
-               a component in the netlist AND agrees with it
+               a component in the netlist AND agrees with it, against the
+               row's `part` and `package` fields together; a bracketed label
+               that names a known refdes in some OTHER order is reported
+               rather than silently skipped
     ports      every port is used by a net, and every net port is declared
 
 A circuit with no netlist.yaml is REPORTED, NOT FAILED, while the rollout is
@@ -54,7 +57,17 @@ BOX = set("│┬┴├┤┼└┘┌┐─►")
 # on a drawing with a deliberately injected R-FB 40k in it. A fail-open in the
 # tool written to close fail-opens, caught by testing it against the defect it
 # exists for rather than by reading it.
-LABEL = re.compile(r"\[([A-Z][A-Z0-9-]*[A-Z0-9])\s*([^\]]*)\]")
+# AND A REFDES MAY BE ONE CHARACTER. The second version required at least
+# two, so `[C 1uF]` on the power-entry page - the LM317's output capacitor,
+# drawn `C` because the column has no room for C-REG-OUT - was invisible on a
+# page that had already been converted and had already reported clean. Found
+# by the unparsed-bracket check below, which exists precisely because a label
+# the parser cannot read looks exactly like a label that passed.
+# AND IT MAY CARRY AN UNDERSCORE SUBSCRIPT. `[C_cm 1.5nF]`, `[C_diff 15nF]`
+# and `[R_G 42.2k]` are how the breath pages spell a subscript in ASCII, and a
+# class without `_` in it matched just the `C`, turning three correct labels
+# into three unknown refdes. The refdes token now runs to the first space.
+LABEL = re.compile(r"\[([A-Z][A-Za-z0-9_-]*)\s*([^\]]*)\]")
 
 
 MASTER = os.path.join(ROOT, "hardware/nets.yaml")
@@ -135,8 +148,8 @@ def bom_rows():
         return {r["ref"]: r for r in csv.DictReader(fh)}
 
 
-def drawing_labels(page_path):
-    """Every [REFDES value] sitting inside an ASCII drawing on that page.
+def drawing_lines(page_path):
+    """Every line of that page that is inside an ASCII drawing.
 
     A FENCED BLOCK CONTAINING BOX CHARACTERS IS A DRAWING, and every line in
     it counts. Judging line by line on a box-character threshold missed the
@@ -144,12 +157,10 @@ def drawing_labels(page_path):
     and `[R-OUT-PROT 1k, 1206]` has none, because they hang off a rail rather
     than sitting in it. Those are exactly the rows a stuffing list gets wrong.
     """
-    out = []
     try:
         lines = open(page_path, encoding="utf-8").read().split("\n")
     except OSError:
-        return out
-    # First pass: which fenced blocks are drawings?
+        return []
     fence, start, blocks = False, 0, []
     for n, line in enumerate(lines, 1):
         if line.lstrip().startswith("```"):
@@ -161,11 +172,36 @@ def drawing_labels(page_path):
         body = lines[a:b - 1]
         if sum(sum(ch in BOX for ch in L) for L in body) >= 3:
             drawing.update(range(a + 1, b))
-    for n, line in enumerate(lines, 1):
-        if n not in drawing and sum(ch in BOX for ch in line) < 3:
-            continue
-        for ref, val in LABEL.findall(line):
-            out.append((n, ref, val.strip()))
+    return [(n, line) for n, line in enumerate(lines, 1)
+            if n in drawing or sum(ch in BOX for ch in line) >= 3]
+
+
+def drawing_labels(page_path):
+    """Every [REFDES value] sitting inside an ASCII drawing on that page."""
+    return [(n, ref, val.strip())
+            for n, line in drawing_lines(page_path)
+            for ref, val in LABEL.findall(line)]
+
+
+BRACKET = re.compile(r"\[[^\]]*\]")
+
+
+def unparsed_brackets(page_path):
+    """Bracketed drawing labels that LABEL could not read as [REFDES value].
+
+    WHY THIS IS A CHECK AND NOT A SHRUG. `[1k R-OPAMP-IN]` on the pitch page
+    is a label written value-first. It is not a defect in the drawing - it
+    reads perfectly well - but it is INVISIBLE to the comparison above, which
+    is the fail-open shape this whole tool exists to stop: the checker says
+    nothing and the silence reads like agreement. One spelling has to win, and
+    refdes-first is the one the other pages use.
+    """
+    out = []
+    for n, line in drawing_lines(page_path):
+        spans = {m.span() for m in LABEL.finditer(line)}
+        for m in BRACKET.finditer(line):
+            if m.span() not in spans:
+                out.append((n, m.group(0)))
     return out
 
 
@@ -332,11 +368,29 @@ def check_one(d, bom, problems, seen):
             continue
         want = comps[ref].get("value")
         if want and val:
-            extra = value_tokens(val) - value_tokens(want)
+            # THE PACKAGE IS PART OF WHAT THE ROW SAYS. `[R-OUT-PROT 1k, 1206]`
+            # states a resistance and a footprint; the resistance is in the
+            # BOM's `part` field and the footprint is in its `package` field,
+            # and comparing against only the first reports a correct drawing
+            # as a contradiction. That is the false-positive shape CLAUDE.md 2
+            # warns about - the cheapest fix for a check that fires on a
+            # correct label is to make the label wrong.
+            row = bom.get(comps[ref].get("of", ref), {})
+            allowed = value_tokens(want) | value_tokens(row.get("package"))
+            extra = value_tokens(val) - allowed
             if extra:
                 problems.append(f"{rel}: drawing line {lineno} shows {ref} as {val!r}, "
                                 f"which the netlist's {want!r} does not support "
                                 f"({', '.join(sorted(extra))})")
+
+    # A LABEL THE PARSER CANNOT READ IS NOT A LABEL THAT PASSES.
+    known = set(comps) | set(alias) | set(foreign) | set(bom)
+    for lineno, text in unparsed_brackets(page):
+        if any(re.fullmatch(r"[A-Z][A-Z0-9-]*", tok) and tok in known
+               for tok in re.split(r"[^A-Za-z0-9-]+", text)):
+            problems.append(f"{rel}: drawing line {lineno} label {text!r} names a "
+                            f"known refdes but is not in [REFDES value] order, so "
+                            f"nothing checks it")
     return len(comps), len(nets)
 
 

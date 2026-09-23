@@ -28,6 +28,7 @@ ports:
 foreign:
   R1:   {owner: interfaces/breath-sense-link, row: R-SER-BREATH-INST}
   R1b:  {owner: interfaces/breath-sense-link, row: R-SER-BREATH-INST}
+  C:    {owner: module/breath-output-stage,   row: C-OUT-BREATH}
 
 components:
 
@@ -62,15 +63,18 @@ components:
   C-CM-IN+:
     of: C-CM-BREATH             # qty 2, one per leg
     value: "1.5nF"
+    drawn_as: C_cm              # the drawing spells a subscript with _
     pins: [1, 2]
 
   C-CM-IN-:
     of: C-CM-BREATH
     value: "1.5nF"
+    drawn_as: C_cm              # both legs carry the same label and value
     pins: [1, 2]
 
   C-DIFF-BREATH:
     value: "15nF"
+    drawn_as: C_diff
     pins: [1, 2]
 
   D-CLAMP-IN+:

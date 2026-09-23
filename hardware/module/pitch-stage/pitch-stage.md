@@ -35,7 +35,7 @@ The `Dir` and `Peer` columns are defined once in
                                           [R1 10k]  ┐ LT5400
                                                 │   │ 1:1 pair
                                                 │   │
-   DAC ch1 ──[1k R-OPAMP-IN]──┐                 │   │
+   DAC ch1 ──[R-OPAMP-IN 1k]──┐                 │   │
    0.25…4.75 V                │                 │   │
                               │           ┌─────┴───┴───┐
                               └───────────┤ +           │
