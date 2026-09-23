@@ -211,7 +211,8 @@ nets:
     kind: power
     carries: "Eurorack +5 V after FB4/C4. The level shifter only - the one rail with no local regulation"
     driver: module/power-entry
-    receivers: [module/digital-and-supervision, interfaces/spi-link]
+    receivers: [module/digital-and-supervision]
+    note: "interfaces/spi-link names this rail in its Interfaces table with Dir '-' and says it 'reaches no part of this circuit'. A '-' row is context, not a connection, and it was seeded here as one"
 
   DAC_AVDD:
     kind: power
@@ -222,6 +223,7 @@ nets:
       - module/dac8568
       - module/breath-output-stage
       - module/breath-receive-stage
+      - module/digital-and-supervision   # the DAC-side SYNC pull-up returns here, not to bus +5V
 
   AGND_MOD:
     kind: reference
@@ -254,7 +256,7 @@ nets:
     domain: digital
     carries: "Buffered serial clock, level shifter to DAC"
     driver: module/digital-and-supervision
-    receivers: [module/dac8568, interfaces/spi-link]
+    receivers: [module/dac8568]
     note: "NOT SCLK, which is the umbilical conductor on the buffer's input side"
 
   DIN:
@@ -262,14 +264,14 @@ nets:
     domain: digital
     carries: "Buffered serial data, level shifter to DAC"
     driver: module/digital-and-supervision
-    receivers: [module/dac8568, interfaces/spi-link]
+    receivers: [module/dac8568]
 
   SYNC:
     kind: signal
     domain: digital
     carries: "Buffered frame sync (the DAC's chip select), level shifter to DAC"
     driver: module/digital-and-supervision
-    receivers: [module/dac8568, interfaces/spi-link]
+    receivers: [module/dac8568]
 
   CLR:
     kind: signal

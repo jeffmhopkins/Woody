@@ -33,6 +33,11 @@ The `Dir` and `Peer` columns are defined once in
 
 ## The circuit
 
+*Connectivity is **[`netlist.yaml`](netlist.yaml)**, not this drawing.
+The drawing is a representation of it, `tools/check-netlist.py` checks that
+the two agree, and where they do not the netlist wins.*
+
+
 **Redrawn 2026-09-21** after a 20-agent review found this drawing still
 carried two deleted parts, a `CLR` net pulled the wrong way, and the
 superseded umbilical pin map. See *What this redraw changed* below.
@@ -82,6 +87,20 @@ end: the pairing is an argument about what couples into what inside the cable,
 and neither end of a cable states it alone. The drawing above stays here.*
 
 ## Still open
+
+- **The cable-side `CS` pull-up has no rail on this board.** `R-SPI-PULL`'s
+  row says it pulls to **3V3, not +5 V**, and gives the reason: at 5 V it
+  drives 430 µA continuously through the unpowered ESP32's input clamp in the
+  design's *normal* resting state, and the node sits at ~0.7 V so "`CS` idle
+  high" is not achieved at all. The reasoning holds and **the rail does not
+  exist here** — the umbilical carries `BREATH`/`AGND`, `+12V`/`PWR_GND`,
+  `SCLK`/`MOSI` and `CS`/`DIG_GND`, and this board makes ±12 V, bus +5 V and
+  `DAC AVDD`. So either that resistor belongs at the **instrument** end, where
+  3V3 exists and where its own argument about the ESP32's clamp is measured,
+  or the row's "at the module" is right and the rail has to come from
+  somewhere. **Decided by:** which end it sits at — a placement question, and
+  the other five pulls are unaffected either way. `netlist.yaml` leaves that
+  one endpoint unasserted rather than inventing a rail; the checker prints it.
 
 - **An ESP32-S3 NVS commit or OTA write disables the instruction cache** and can
   stall non-IRAM code on both cores. With no watchdog there is no `CLR` to fire
