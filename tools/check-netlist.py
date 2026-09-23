@@ -261,13 +261,28 @@ UNITS = {"\u00b5": "u", "\u03bc": "u", "\u2126": "ohm", "\u03a9": "ohm", "\u00b0
 
 def norm(v):
     """Compare values the way a human does: case, spacing and unit spelling."""
-    s = (v or "").lower()
+    # FOLD BEFORE LOWERING. lower() turns the ohm sign into a lowercase omega,
+    # which is in no table here, so folding afterwards never fired and every
+    # `10ohm` against a `10R` read as a contradiction. The one unit spelling
+    # the case change touches was the one the table was written for.
+    s = v or ""
     for a, b in UNITS.items():
         s = s.replace(a, b)
-    return re.sub(r"\s+", "", s).rstrip(",")
+    s = s.lower()
+    s = re.sub(r"\s+", "", s).rstrip(",")
+    # `10R` and `10 ohm` are one value. The drawing types the ohm sign and the
+    # BOM types R, which is ordinary resistor notation on both sides - and
+    # without this the gate resistor reads as a contradiction with itself.
+    # Only after a digit, and only when nothing wordlike follows, so `0R strap`
+    # and every refdes with an r in it are left alone.
+    return re.sub(r"(?<=\d)r(?![a-z])", "ohm", s)
 
 
-VALTOK = re.compile(r"\d+(?:\.\d+)?\s*[a-zA-Z%\u03a9\u00b5]*")
+VALTOK = re.compile(r"\d+(?:\.\d+)?\s*[a-zA-Z%\u03a9\u2126\u00b5\u03bc]*")
+# A MULTIPLIER IS A COUNT, NOT A MAGNITUDE. `[R-SPI-PULL x3]` and
+# `[C-REF-OUT 10uF x2]` say how many, and reading the 3 or the 2 as a value
+# turns a correct label into a contradiction.
+COUNT = re.compile(r"[x\u00d7]\s*\d+", re.I)
 
 
 def value_tokens(v):
@@ -283,10 +298,11 @@ def value_tokens(v):
     So the test is SUBSET, not equality and not substring: every magnitude the
     drawing states must appear in the netlist's value.
     """
-    return {norm(m) for m in VALTOK.findall(v or "") if any(c.isdigit() for c in m)}
+    return {norm(m) for m in VALTOK.findall(COUNT.sub(" ", v or ""))
+            if any(c.isdigit() for c in m)}
 
 
-def check_one(d, bom, problems, seen):
+def check_one(d, bom, problems, seen, elsewhere=None):
     rel = os.path.relpath(d, ROOT)
     spec = yaml.safe_load(open(os.path.join(d, "netlist.yaml"), encoding="utf-8"))
     comps = spec.get("components") or {}
@@ -404,11 +420,51 @@ def check_one(d, bom, problems, seen):
     page = os.path.join(d, spec.get("page") or "")
     for lineno, ref, val in drawing_labels(page):
         ref = alias.get(ref, ref)
-        if ref in foreign:
-            continue
         if ref not in comps:
-            if ref in bom or any(c.get("of") == ref for c in comps.values()):
-                continue                  # a package or a shorthand, not a net node
+            if any(c.get("of") == ref for c in comps.values()):
+                continue                  # a package, not a net node
+            # A PART DRAWN ON A PAGE THAT DOES NOT OWN IT WAS SKIPPED
+            # ENTIRELY. power-entry.md draws the whole load switch inside one
+            # drawing - that is deliberate, it is one board - but every one of
+            # those labels resolved to "a BOM row, not a component here" and
+            # nothing compared its value. The circuit that owns it has a
+            # netlist now, so the value is checkable across the page boundary.
+            # A foreign part resolves BY ROW, because its label is a local
+            # name on a page that does not own it.
+            index = elsewhere or {}
+            other = None
+            if ref in foreign and foreign[ref].get("row"):
+                other = index.get("__by_row__", {}).get(foreign[ref]["row"])
+            if other is None and ref not in foreign:
+                other = index.get(ref)
+            if other:
+                row = bom.get(other["row"], {})
+                allowed = value_tokens(other["value"]) | value_tokens(row.get("package"))
+                extra = value_tokens(val) - allowed if val else set()
+                if extra:
+                    problems.append(f"{rel}: drawing line {lineno} shows {ref} as "
+                                    f"{val!r}, which {other['circuit']}'s netlist "
+                                    f"value {other['value']!r} does not support "
+                                    f"({', '.join(sorted(extra))})")
+                continue
+            # A FOREIGN PART WHOSE OWNER HAS NO NETLIST YET stays skipped -
+            # declaring it is what keeps a deliberately cross-board drawing
+            # checkable without pretending the part is ours. Once the owner is
+            # converted the branch above checks it, which is the whole point:
+            # `foreign:` used to be an unconditional skip, so power-entry.md's
+            # seven load-switch labels were exempt from every check in this
+            # file even after that circuit had a netlist.
+            if ref in foreign:
+                continue
+            if ref in bom:
+                # A BOM ROW ON ITS OWN IS NOT ENOUGH TO CHECK AGAINST. Several
+                # rows carry a spec rather than a value - R-ILIM's part field
+                # is "Sense resistor, value from E6", deliberately blocked on
+                # a bench step - and tokenising that finds the 6 in E6. A
+                # label is checked once the circuit that OWNS the part has a
+                # netlist, which is the `elsewhere` branch above; until then
+                # it is skipped exactly as it always was.
+                continue
             problems.append(f"{rel}: drawing line {lineno} labels {ref!r}, "
                             f"which is not in this netlist")
             continue
@@ -464,17 +520,49 @@ def main():
     bom = bom_rows()
     master = master_nets()
     seen = {}
-    problems, comps, nets = [], 0, 0
-    for d in dirs:
-        c, n = check_one(d, bom, problems, seen)
-        comps += c
-        nets += n
 
     all_specs = [yaml.safe_load(open(os.path.join(d, "netlist.yaml"),
                                      encoding="utf-8")) or {}
                  for d in sorted({os.path.dirname(p) for p in
                                   glob.glob(os.path.join(ROOT, "hardware/**/netlist.yaml"),
                                             recursive=True)})]
+    # Every component anyone has netlisted, by the name a drawing might use
+    # for it - its refdes and its `drawn_as`. This is what lets one page's
+    # drawing be checked against another circuit's netlist.
+    #
+    # A GENERIC LOCAL NAME IS NOT A GLOBAL ONE. `R1` is the LT5400 element on
+    # pitch-stage, the 10k input leg on mod-channels and an instrument-side
+    # series resistor drawn for context on breath-receive-stage - three parts,
+    # three values. A name that resolves to more than one BOM row is recorded
+    # as AMBIGUOUS and never used to check anything; the by-row index below is
+    # how a `foreign:` label resolves, and it does not go through the name at
+    # all.
+    elsewhere, by_row = {}, {}
+    for spec in all_specs:
+        circ = spec.get("circuit", "?")
+        for ref, c in (spec.get("components") or {}).items():
+            if not c.get("value"):
+                continue
+            entry = {"circuit": circ, "row": c.get("of", ref),
+                     "value": c["value"]}
+            by_row.setdefault(entry["row"], entry)
+            for name in (ref, c.get("drawn_as")):
+                if not name:
+                    continue
+                if name in elsewhere and elsewhere[name] and \
+                        elsewhere[name]["row"] != entry["row"]:
+                    elsewhere[name] = None        # ambiguous
+                else:
+                    elsewhere.setdefault(name, entry)
+    elsewhere = {k: v for k, v in elsewhere.items() if v}
+    elsewhere["__by_row__"] = by_row
+
+    problems, comps, nets = [], 0, 0
+    for d in dirs:
+        c, n = check_one(d, bom, problems, seen, elsewhere)
+        comps += c
+        nets += n
+
     counted = check_global(all_specs, bom, problems) if not args else None
 
     deferred = []

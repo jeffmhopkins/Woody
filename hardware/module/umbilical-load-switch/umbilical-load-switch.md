@@ -4,6 +4,11 @@
 2026-09-21. It is drawn there, inside the module entry drawing, because that is
 one drawing; every word below moved across unchanged.
 
+*Connectivity is **[`netlist.yaml`](netlist.yaml)**, not either drawing, and
+`tools/check-netlist.py` checks both against it — the entry drawing on
+`power-entry.md` as well as the gate network below, because a label is resolved
+against every netlist rather than only the one beside the page.*
+
 ## Interfaces
 
 Every net that crosses this circuit's boundary. Quantities appear **only** as a
@@ -16,7 +21,7 @@ The `Dir` and `Peer` columns are defined once in
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
 | `+12V` ahead of `D1`/`D2` | in | `module/power-entry` | — | `U-LOADSW`'s `VCC` and the top of `R-ILIM`. Taken before the entry diodes, which is the point of the split |
-| `ON` | in | `module/panel` | — | The panel toggle `SW-POWER`. The LT1641's undervoltage-lockout input; the divider around it is **still not designed** — see below |
+| `ON` | — | `module/panel` | — | **Not a crossing.** `SW-POWER` is this circuit's row and its net is this circuit's; [`panel.md`](../panel/panel.md) owns only the shaped hole and says so. The LT1641's undervoltage-lockout input; the divider around it is **still not designed** — see below, and `netlist.yaml` leaves the switch's second terminal unasserted because of it |
 | `UMBILICAL +12V` | out | `carrier/power-entry-instrument`, `module/link-supervision` | `umbilical-current` | The FET's source, down the Cat5 umbilical. What the far end needs is what sizes the `FB` divider. `module/link-supervision`'s deleted presence detect gated `OE_MOD` from this node |
 | `PWR_GND` | ref | `module/power-entry` | — | `C-TIMER`, `C-GATE`, `R-FB-LO` and the FET source return here, to the star at the IDC |
 | `TIMER` / `GATE` | — | `module/panel-led` | `loadswitch-timer` | **Proposed only, nothing is drawn on it.** The indicator's missing "latched" signal would come from here — see [`panel-led.md`](../panel-led/panel-led.md) |
