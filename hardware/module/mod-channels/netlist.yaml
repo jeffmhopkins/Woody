@@ -1,0 +1,412 @@
+# AUTHORITATIVE for connectivity. The ASCII drawing in mod-channels.md is a
+# REPRESENTATION of this file.
+#
+# THE DRAWING SHOWS ONE CHANNEL OF FOUR and says so. This file writes all
+# four out, because four identical channels sharing one reference buffer is
+# exactly the shape where "identical" hides a defect: three channels wired one
+# way and the fourth not is invisible in a drawing of one.
+#
+# THE SHARED REFERENCE IS THE SAFETY ARGUMENT. V_ref comes from DAC channel 7,
+# so a CLR zeroes it along with the signal channels and every jack parks at
+# 0 V. A fixed divider in its place would leave the offset standing and pin
+# all four jacks at -10 V indefinitely, with no MISO to notice. That is why
+# DAC_CH7 is a port here and not a local net.
+
+circuit: module/mod-channels
+title: Mod channels 1-4
+page: mod-channels.md
+
+ports:
+  DAC_CH7:             {dir: in,  from: module/dac8568, figure: mod-reference}
+  DAC_CH2:             {dir: in,  from: module/dac8568, figure: dac-rail}
+  DAC_CH3:             {dir: in,  from: module/dac8568, figure: dac-rail}
+  DAC_CH4:             {dir: in,  from: module/dac8568, figure: dac-rail}
+  DAC_CH5:             {dir: in,  from: module/dac8568, figure: dac-rail}
+  MODULE_ANALOG_POS12: {dir: in,  from: module/power-entry}
+  MODULE_ANALOG_NEG12: {dir: in,  from: module/power-entry}
+  AGND_MOD:            {dir: ref, from: module/power-entry, figure: dig-gnd-topology}
+  MOD1_JACK:           {dir: out, to: module/panel}
+  MOD2_JACK:           {dir: out, to: module/panel}
+  MOD3_JACK:           {dir: out, to: module/panel}
+  MOD4_JACK:           {dir: out, to: module/panel}
+
+components:
+
+  # --- the shared offset reference -----------------------------------
+  #
+  # R-OPAMP-IN AND R-BIAS-DAC ARE NOT DRAWN ON THIS PAGE UNDER THEIR NAMES.
+  # The drawing spells the series resistors `[1k]`, which no checker can bind
+  # to a refdes, and R-BIAS-DAC appears on no drawing at all - its row says
+  # "at every DAC output pin" and there are six populated channels. Both are
+  # netted here, which is the first time either is in a file a tool reads.
+
+  R-OPAMP-IN-REF:
+    of: R-OPAMP-IN
+    value: "1k 1%"
+    pins: [1, 2]
+    note: "Clamp-current protection into the reference buffer's (+) input"
+
+  R-BIAS-DAC-CH7:
+    of: R-BIAS-DAC
+    value: "100k 1%"
+    pins: [1, 2]
+    note: "DC path to ground at the DAC pin, for the window before power-on reset"
+
+  U-MOD-REFBUF:
+    part: OPA2197
+    of: U-OPA-PITCH
+    section: half
+    pins: [IN+, IN-, OUT]
+    rails: [MODULE_ANALOG_POS12, MODULE_ANALOG_NEG12]
+    note: "ONE buffer, four loads, deliberately. A shared node makes a residual offset a common shift across the mod set rather than four channels disagreeing. Do not split it into four"
+
+  # --- mod channel 1, from DAC ch2 -----------------------------------
+
+  R-OPAMP-IN-1:
+    of: R-OPAMP-IN
+    value: "1k 1%"
+    pins: [1, 2]
+
+  R-BIAS-DAC-1:
+    of: R-BIAS-DAC
+    value: "100k 1%"
+    pins: [1, 2]
+
+  U-MOD-1:
+    part: OPA2197
+    of: U-OPA-PITCH
+    section: half
+    pins: [IN+, IN-, OUT]
+    rails: [MODULE_ANALOG_POS12, MODULE_ANALOG_NEG12]
+
+  R1-1:
+    of: R-MODGAIN-IN
+    value: "10k 1%"
+    drawn_as: R1
+    pins: [1, 2]
+    note: "To the shared reference. R2/R1 = k = 3, so gain is 1 + k = exactly 4"
+
+  R2-1:
+    of: R-MODGAIN-FB
+    value: "30k 1%"
+    drawn_as: R2
+    pins: [1, 2]
+
+  C-FILT-MOD-1:
+    of: C-FILT-MOD
+    value: "82nF"
+    drawn_as: C-FILT-MOD
+    pins: [1, 2]
+    note: "Jack side of R-OUT-PROT, so it is outside the loop - unlike pitch, whose loop closes at the jack"
+
+  D-JACK-CLAMP-1:
+    of: D-JACK-CLAMP
+    value: "BAV99"
+    drawn_as: D-JACK-CLAMP
+    pins: [A, K, C]
+
+  R-OUT-PROT-1:
+    of: R-OUT-PROT
+    value: "1k 1%, >=500mW"
+    drawn_as: R-OUT-PROT
+    pins: [1, 2]
+
+  # --- mod channel 2, from DAC ch3 -----------------------------------
+
+  R-OPAMP-IN-2:
+    of: R-OPAMP-IN
+    value: "1k 1%"
+    pins: [1, 2]
+
+  R-BIAS-DAC-2:
+    of: R-BIAS-DAC
+    value: "100k 1%"
+    pins: [1, 2]
+
+  U-MOD-2:
+    part: OPA2197
+    of: U-OPA-PITCH
+    section: half
+    pins: [IN+, IN-, OUT]
+    rails: [MODULE_ANALOG_POS12, MODULE_ANALOG_NEG12]
+
+  R1-2:
+    of: R-MODGAIN-IN
+    value: "10k 1%"
+    drawn_as: R1
+    pins: [1, 2]
+    note: "To the shared reference. R2/R1 = k = 3, so gain is 1 + k = exactly 4"
+
+  R2-2:
+    of: R-MODGAIN-FB
+    value: "30k 1%"
+    drawn_as: R2
+    pins: [1, 2]
+
+  C-FILT-MOD-2:
+    of: C-FILT-MOD
+    value: "82nF"
+    drawn_as: C-FILT-MOD
+    pins: [1, 2]
+    note: "Jack side of R-OUT-PROT, so it is outside the loop - unlike pitch, whose loop closes at the jack"
+
+  D-JACK-CLAMP-2:
+    of: D-JACK-CLAMP
+    value: "BAV99"
+    drawn_as: D-JACK-CLAMP
+    pins: [A, K, C]
+
+  R-OUT-PROT-2:
+    of: R-OUT-PROT
+    value: "1k 1%, >=500mW"
+    drawn_as: R-OUT-PROT
+    pins: [1, 2]
+
+  # --- mod channel 3, from DAC ch4 -----------------------------------
+
+  R-OPAMP-IN-3:
+    of: R-OPAMP-IN
+    value: "1k 1%"
+    pins: [1, 2]
+
+  R-BIAS-DAC-3:
+    of: R-BIAS-DAC
+    value: "100k 1%"
+    pins: [1, 2]
+
+  U-MOD-3:
+    part: OPA2197
+    of: U-OPA-PITCH
+    section: half
+    pins: [IN+, IN-, OUT]
+    rails: [MODULE_ANALOG_POS12, MODULE_ANALOG_NEG12]
+
+  R1-3:
+    of: R-MODGAIN-IN
+    value: "10k 1%"
+    drawn_as: R1
+    pins: [1, 2]
+    note: "To the shared reference. R2/R1 = k = 3, so gain is 1 + k = exactly 4"
+
+  R2-3:
+    of: R-MODGAIN-FB
+    value: "30k 1%"
+    drawn_as: R2
+    pins: [1, 2]
+
+  C-FILT-MOD-3:
+    of: C-FILT-MOD
+    value: "82nF"
+    drawn_as: C-FILT-MOD
+    pins: [1, 2]
+    note: "Jack side of R-OUT-PROT, so it is outside the loop - unlike pitch, whose loop closes at the jack"
+
+  D-JACK-CLAMP-3:
+    of: D-JACK-CLAMP
+    value: "BAV99"
+    drawn_as: D-JACK-CLAMP
+    pins: [A, K, C]
+
+  R-OUT-PROT-3:
+    of: R-OUT-PROT
+    value: "1k 1%, >=500mW"
+    drawn_as: R-OUT-PROT
+    pins: [1, 2]
+
+  # --- mod channel 4, from DAC ch5 -----------------------------------
+
+  R-OPAMP-IN-4:
+    of: R-OPAMP-IN
+    value: "1k 1%"
+    pins: [1, 2]
+
+  R-BIAS-DAC-4:
+    of: R-BIAS-DAC
+    value: "100k 1%"
+    pins: [1, 2]
+
+  U-MOD-4:
+    part: OPA2197
+    of: U-OPA-PITCH
+    section: half
+    pins: [IN+, IN-, OUT]
+    rails: [MODULE_ANALOG_POS12, MODULE_ANALOG_NEG12]
+
+  R1-4:
+    of: R-MODGAIN-IN
+    value: "10k 1%"
+    drawn_as: R1
+    pins: [1, 2]
+    note: "To the shared reference. R2/R1 = k = 3, so gain is 1 + k = exactly 4"
+
+  R2-4:
+    of: R-MODGAIN-FB
+    value: "30k 1%"
+    drawn_as: R2
+    pins: [1, 2]
+
+  C-FILT-MOD-4:
+    of: C-FILT-MOD
+    value: "82nF"
+    drawn_as: C-FILT-MOD
+    pins: [1, 2]
+    note: "Jack side of R-OUT-PROT, so it is outside the loop - unlike pitch, whose loop closes at the jack"
+
+  D-JACK-CLAMP-4:
+    of: D-JACK-CLAMP
+    value: "BAV99"
+    drawn_as: D-JACK-CLAMP
+    pins: [A, K, C]
+
+  R-OUT-PROT-4:
+    of: R-OUT-PROT
+    value: "1k 1%, >=500mW"
+    drawn_as: R-OUT-PROT
+    pins: [1, 2]
+
+nets:
+
+  DAC_CH7:
+    - port: DAC_CH7
+    - R-BIAS-DAC-CH7.1
+    - R-OPAMP-IN-REF.1
+
+  REF_PLUS:
+    - R-OPAMP-IN-REF.2
+    - U-MOD-REFBUF.IN+
+
+  # V_ref, buffered once and shared by all four channels. The one node whose
+  # error appears as a common shift rather than as four channels disagreeing.
+  VREF_MOD:
+    - U-MOD-REFBUF.OUT
+    - U-MOD-REFBUF.IN-
+    - R1-1.1
+    - R1-2.1
+    - R1-3.1
+    - R1-4.1
+
+  DAC_CH2:
+    - port: DAC_CH2
+    - R-BIAS-DAC-1.1
+    - R-OPAMP-IN-1.1
+
+  PLUS_1:
+    - R-OPAMP-IN-1.2
+    - U-MOD-1.IN+
+
+  MINUS_1:
+    - R1-1.2
+    - R2-1.1
+    - U-MOD-1.IN-
+
+  OUT_1:
+    - U-MOD-1.OUT
+    - R2-1.2
+    - D-JACK-CLAMP-1.C
+    - R-OUT-PROT-1.1
+
+  MOD1_JACK:
+    - R-OUT-PROT-1.2
+    - C-FILT-MOD-1.1
+    - port: MOD1_JACK
+
+  DAC_CH3:
+    - port: DAC_CH3
+    - R-BIAS-DAC-2.1
+    - R-OPAMP-IN-2.1
+
+  PLUS_2:
+    - R-OPAMP-IN-2.2
+    - U-MOD-2.IN+
+
+  MINUS_2:
+    - R1-2.2
+    - R2-2.1
+    - U-MOD-2.IN-
+
+  OUT_2:
+    - U-MOD-2.OUT
+    - R2-2.2
+    - D-JACK-CLAMP-2.C
+    - R-OUT-PROT-2.1
+
+  MOD2_JACK:
+    - R-OUT-PROT-2.2
+    - C-FILT-MOD-2.1
+    - port: MOD2_JACK
+
+  DAC_CH4:
+    - port: DAC_CH4
+    - R-BIAS-DAC-3.1
+    - R-OPAMP-IN-3.1
+
+  PLUS_3:
+    - R-OPAMP-IN-3.2
+    - U-MOD-3.IN+
+
+  MINUS_3:
+    - R1-3.2
+    - R2-3.1
+    - U-MOD-3.IN-
+
+  OUT_3:
+    - U-MOD-3.OUT
+    - R2-3.2
+    - D-JACK-CLAMP-3.C
+    - R-OUT-PROT-3.1
+
+  MOD3_JACK:
+    - R-OUT-PROT-3.2
+    - C-FILT-MOD-3.1
+    - port: MOD3_JACK
+
+  DAC_CH5:
+    - port: DAC_CH5
+    - R-BIAS-DAC-4.1
+    - R-OPAMP-IN-4.1
+
+  PLUS_4:
+    - R-OPAMP-IN-4.2
+    - U-MOD-4.IN+
+
+  MINUS_4:
+    - R1-4.2
+    - R2-4.1
+    - U-MOD-4.IN-
+
+  OUT_4:
+    - U-MOD-4.OUT
+    - R2-4.2
+    - D-JACK-CLAMP-4.C
+    - R-OUT-PROT-4.1
+
+  MOD4_JACK:
+    - R-OUT-PROT-4.2
+    - C-FILT-MOD-4.1
+    - port: MOD4_JACK
+
+  MODULE_ANALOG_POS12:
+    - port: MODULE_ANALOG_POS12
+    - D-JACK-CLAMP-1.K
+    - D-JACK-CLAMP-2.K
+    - D-JACK-CLAMP-3.K
+    - D-JACK-CLAMP-4.K
+
+  MODULE_ANALOG_NEG12:
+    - port: MODULE_ANALOG_NEG12
+    - D-JACK-CLAMP-1.A
+    - D-JACK-CLAMP-2.A
+    - D-JACK-CLAMP-3.A
+    - D-JACK-CLAMP-4.A
+
+  AGND_MOD:
+    - port: AGND_MOD
+    - C-FILT-MOD-1.2
+    - C-FILT-MOD-2.2
+    - C-FILT-MOD-3.2
+    - C-FILT-MOD-4.2
+    - R-BIAS-DAC-CH7.2
+    - R-BIAS-DAC-1.2
+    - R-BIAS-DAC-2.2
+    - R-BIAS-DAC-3.2
+    - R-BIAS-DAC-4.2

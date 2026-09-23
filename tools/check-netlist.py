@@ -29,6 +29,8 @@ WHAT IT CHECKS, per circuit that has a netlist.yaml:
                that names a known refdes in some OTHER order is reported
                rather than silently skipped
     ports      every port is used by a net, and every net port is declared
+    instances  no row is placed more times ACROSS ALL netlists than the BOM
+               buys - the count a per-circuit check structurally cannot do
 
 A circuit with no netlist.yaml is REPORTED, NOT FAILED, while the rollout is
 in progress - the count of pages still without one is printed on every run so
@@ -140,6 +142,50 @@ def check_master(master, seen, problems, have_netlist, deferred):
             who = ", ".join(sorted(by))
             problems.append(f"{who}: port {net!r} is in no master net "
                             f"(add it to hardware/nets.yaml)")
+
+
+def check_global(specs, bom, problems):
+    """Every instance of every row, summed ACROSS circuits.
+
+    THE PER-CIRCUIT COUNT CANNOT SEE THIS. R-OUT-PROT is qty 6 and six
+    different circuits each place one; each of them passes its own check
+    while the board could still be short. The row that pays for this is
+    R-OPAMP-IN: qty 7, and the six placed instances are pitch, the four mods
+    and the mod reference buffer. The seventh is claimed by a sentence on
+    mod-channels.md for the VREFOUT follower, which no drawing shows and no
+    netlist places - so it is a real open question rather than a miscount, and
+    it is one nothing in this repository could ask before.
+
+    OVER-USE IS A DEFECT. UNDER-USE IS NOT, YET: circuits without a netlist
+    place nothing, so every row would report short until the last conversion.
+    It is printed rather than failed, and `--strict` is where that flips.
+    """
+    from collections import Counter
+    used, sections = Counter(), Counter()
+    for spec in specs:
+        for ref, c in (spec.get("components") or {}).items():
+            row = c.get("of", ref)
+            used[row] += 1
+            if c.get("section"):
+                sections[row] += 1
+    exact = short = 0
+    for row, n in sorted(used.items()):
+        if row not in bom:
+            continue
+        try:
+            have = int(bom[row]["qty"])
+        except (ValueError, KeyError):
+            continue
+        if sections[row]:
+            continue          # a package supplying sections is counted in prose
+        if n > have:
+            problems.append(f"instances: {row} is placed {n} time(s) across all "
+                            f"netlists and the BOM buys {have}")
+        elif n == have:
+            exact += 1
+        else:
+            short += 1
+    return exact, short, sum(1 for r in used if sections[r])
 
 
 def bom_rows():
@@ -424,9 +470,15 @@ def main():
         comps += c
         nets += n
 
+    all_specs = [yaml.safe_load(open(os.path.join(d, "netlist.yaml"),
+                                     encoding="utf-8")) or {}
+                 for d in sorted({os.path.dirname(p) for p in
+                                  glob.glob(os.path.join(ROOT, "hardware/**/netlist.yaml"),
+                                            recursive=True)})]
+    counted = check_global(all_specs, bom, problems) if not args else None
+
     deferred = []
-    have_netlist = {(yaml.safe_load(open(os.path.join(d, 'netlist.yaml'),
-                     encoding='utf-8')) or {}).get('circuit') for d in dirs}
+    have_netlist = {s.get("circuit") for s in all_specs}
     if master and not args:
         check_master(master, seen, problems, have_netlist, deferred)
 
@@ -436,6 +488,10 @@ def main():
           f"{len(master)} master net(s) | "
           f"{len(problems)} problem(s) | {len(pending)} drawing page(s) still "
           f"without a netlist | {len(deferred)} master endpoint(s) awaiting one")
+    if counted:
+        exact, short, sectioned = counted
+        print(f"instances: {exact} row(s) placed exactly to BOM qty, {short} still "
+              f"short while the rollout runs, {sectioned} counted by section")
     if pending and not args:
         for p in sorted(pending):
             print(f"    pending: {p}")

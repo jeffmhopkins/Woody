@@ -23,7 +23,7 @@ depends_on:
 - refdes:POT-GAIN
 - refdes:POT-OFFSET
 - refdes:R-GAIN-FLOOR
-- refdes:R-MODGAIN
+- refdes:R-MODGAIN-FB
 - refdes:R-OUT-PROT
 - refdes:TRIM-BREATH-ZERO
 - circuit:interfaces/breath-sense-link

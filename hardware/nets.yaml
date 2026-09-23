@@ -367,10 +367,34 @@ nets:
     driver: module/pitch-stage
     receivers: [module/panel]
 
-  MOD_JACKS:
+  # FOUR JACKS, FOUR NETS. MOD_JACKS was one entry for four panel outputs,
+  # which is a drawing convention rather than a connection.
+
+  MOD1_JACK:
     kind: signal
     domain: analog
-    carries: "The four mod CV outputs at the panel jacks"
+    carries: "Mod 1 CV at the panel jack"
+    driver: module/mod-channels
+    receivers: [module/panel]
+
+  MOD2_JACK:
+    kind: signal
+    domain: analog
+    carries: "Mod 2 CV at the panel jack"
+    driver: module/mod-channels
+    receivers: [module/panel]
+
+  MOD3_JACK:
+    kind: signal
+    domain: analog
+    carries: "Mod 3 CV at the panel jack"
+    driver: module/mod-channels
+    receivers: [module/panel]
+
+  MOD4_JACK:
+    kind: signal
+    domain: analog
+    carries: "Mod 4 CV at the panel jack"
     driver: module/mod-channels
     receivers: [module/panel]
 

@@ -332,5 +332,14 @@ the right order of priority: the static budget was never the problem.
 - **A two-terminal series trimmer fails open to the rail.** Strap the wiper to
   one end so a dirty track degrades to a known resistance rather than an open
   circuit. That is a footprint decision, not a value.
+- **The seventh `R-OPAMP-IN` has no home.** The row is qty 7 and
+  [`mod-channels.md`](../mod-channels/mod-channels.md) allocates it as pitch,
+  the four mods, the mod reference buffer and *the `VREFOUT` follower* — but
+  the follower's input is drawn straight off `TRIM-OFFSET`'s wiper with no
+  series resistor, and the value table above does not list one. Six are placed
+  in netlists and `tools/check-netlist.py` prints the shortfall every run.
+  **Decided by:** whether that (+) input needs clamp-current protection when
+  the DAC pin reaches it through a 10 kΩ trimmer. If it does, the part belongs
+  here and the drawing gains a label; if it does not, the row is qty 6.
 - **The two spare LT5400 resistors.** Available, matched, and currently doing
   nothing. Worth a look when the mod channels are laid out.

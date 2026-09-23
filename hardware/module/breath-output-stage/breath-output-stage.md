@@ -165,7 +165,7 @@ strips run from +12 V.
 | **POT-GAIN** | 50 kΩ, **taper from the bench** | Attenuator, 0.125 → 1.000 |
 | **R-GAIN-FLOOR** | 7.15 kΩ 1 % | Sets the 0.5× floor |
 | **R-IN** | 10 kΩ 1 % | Summer input |
-| **R-FB** | 40.2 kΩ 1 % | Fixed ×4. **Not** the same value as `R-MODGAIN`, which is 10k/30k — this row claimed a shared reel until 2026-09-22 |
+| **R-FB** | 40.2 kΩ 1 % | Fixed ×4. **Not** the same value as `R-MODGAIN-IN`/`R-MODGAIN-FB`, which are 10k/30k — this row claimed a shared reel until 2026-09-22 |
 | **POT-OFFSET** | 10 kΩ linear | ±5 V; **zero sits ~20° past centre**, see above |
 | **R-OFF** | 21.0 kΩ 1 % | Variable positive leg |
 | **R-OFFNEG** | 95.3 kΩ 1 % | Fixed negative leg from −12 V |

@@ -91,7 +91,8 @@ are the de-facto Eurorack conventions; the extra span is headroom, not a default
 > parameter is `V_ref`, not the ratio. **The mod channels can take the same
 > form** at `k = 3` with the offset channel writing 3.3333 V. **They do — it is
 > adopted and drawn** (`mod-channels.md`, "Adopted, and it is drawn above";
-> `R-MODGAIN` is eight 10k/30k discretes in `bom.csv`, not sixteen). This
+> `R-MODGAIN-IN` and `R-MODGAIN-FB` are eight 10k/30k discretes in `bom.csv`,
+> not sixteen). This
 > sentence read "whether they do is open" until 2026-09-21, after the question
 > had been settled.
 >
@@ -120,8 +121,8 @@ Vout = 4 × Vdac − 3 × V_ref          V_ref = 3.3333 V, from DAC channel 7
 Three things make this cheap rather than awkward:
 
 - **Superseded.** This bullet used to claim a gain of 4 from an LT5400 ratio —
-  **superseded 2026-09-21.** The mod channels are built from `R-MODGAIN` 10k/30k
-  1 % discretes in a two-resistor non-inverting form at **k = 3**, referenced to
+  **superseded 2026-09-21.** The mod channels are built from `R-MODGAIN-IN` and
+  `R-MODGAIN-FB`, 10k/30k 1 % discretes, in a two-resistor non-inverting form at **k = 3**, referenced to
   **3.3333 V**. `pitch-stage.md` also shows the LT5400 route is arithmetically
   impossible here — pitch already uses two of its four sections.
 - **The 3.3333 V reference point comes from a buffered DAC channel**, not

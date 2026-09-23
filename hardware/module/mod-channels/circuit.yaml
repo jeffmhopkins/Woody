@@ -15,7 +15,8 @@ depends_on:
 - fig:mod-reference
 - refdes:C-FILT-MOD
 - refdes:D-JACK-CLAMP
-- refdes:R-MODGAIN
+- refdes:R-MODGAIN-FB
+- refdes:R-MODGAIN-IN
 - refdes:R-OPAMP-IN
 - refdes:R-OUT-PROT
 - circuit:module/dac8568

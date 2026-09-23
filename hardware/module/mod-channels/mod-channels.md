@@ -5,7 +5,7 @@
 [pitch](../pitch-stage/pitch-stage.md).
 
 Four identical channels at `Vout = 4·Vdac − 3·V_ref`, `V_ref` = **3.3333 V**
-from DAC channel 7, built from `R-MODGAIN` 10k/30k 1 % discretes in a
+from DAC channel 7, built from `R-MODGAIN-IN` and `R-MODGAIN-FB`, 10k/30k 1 % discretes, in a
 two-resistor non-inverting form at **k = 3**.
 
 > ADR 0006 originally specified `Vout = 4 × (Vdac − 2.5 V)` and contradicted
@@ -34,6 +34,12 @@ The `Dir` and `Peer` columns are defined once in
 | `AGND_MOD` | ref | `module/power-entry` | `dig-gnd-topology` | The module analog star, drawn `AGND`. `C-FILT-MOD` shunts to it. Not a return path — see the figure |
 
 ## The circuit — one channel of four
+
+*Connectivity is **[`netlist.yaml`](netlist.yaml)**, not this drawing.
+The drawing is a representation of it, `tools/check-netlist.py` checks that
+the two agree, and where they do not the netlist wins. The drawing shows one
+channel; the netlist writes out all four.*
+
 
 ```
    DAC ch7 ──[1k]──┬── ½ OPA2197 ──┬── V_ref = 3.3333 V
