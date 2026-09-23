@@ -43,6 +43,14 @@ The `Dir` and `Peer` columns are defined once in
 
 ## From the carrier end — `carrier.md` §3
 
+*Connectivity is **[`netlist.yaml`](netlist.yaml)**, not this drawing — for the
+carrier end, which is what the drawing shows. **The chain itself is not in that
+file yet**: eight connectors and four ribbons, with `SER`/`QH` point-to-point
+and changing meaning at every hop, and the hop map is prose here and in no file
+a tool reads. `tools/check-netlist.py` prints `J-CHAIN 1/8` rather than
+pretending otherwise.*
+
+
 *Moved verbatim from `hardware/carrier/carrier.md` §3, 2026-09-21. "This board"
 and "this page" throughout mean `carrier.md` as it stood before the move, and
 `carrier.md` keeps its `## §3` heading because other pages cite it by number.*
@@ -274,3 +282,29 @@ wins through its 100 Ω series resistor against a 10 kΩ pull `[calc]` — a
 divider of 100/10100, so the driven level is within 33 mV of the rail. **The
 self-test becomes a firmware choice rather than a board choice**, at the cost of
 one resistor, and this page recommends fitting it and deciding later.
+
+---
+
+## Still open
+
+- **The chain's hop map is not in any file a tool reads.** Eight connectors
+  and four ribbons — carrier 1, RT 2, RH 2, LT 2, LH 1 — with `SCK`, `SH/LD`,
+  `3V3` and the five grounds a straight bus across all of them, and `SER`/`QH`
+  point-to-point, changing meaning at every hop. That map is the paragraphs
+  above and nothing else. [`netlist.yaml`](netlist.yaml) places the carrier's
+  `J-CHAIN` and the parts around it; `LK-SER` and `R-SER-TERM` are not placed,
+  and `tools/check-netlist.py` prints `J-CHAIN 1/8` every run so the gap is a
+  number rather than a silence. **Decided by:** whether the four cluster
+  boards become four netlists or one with a hop table — the same question the
+  eight per-board register inputs raise.
+
+- **The chain TVS's return is drawn as `DIG_GND`, which is the module's net.**
+  In this corpus `DIG_GND` is the instrument-to-module digital return, and it
+  does not reach this board: `hardware/nets.yaml` gives it origin
+  `module/power-entry` and only the two SPI circuits reference it. The chain's
+  return here is the five alternating grounds, `GND_CHAIN`, which is the
+  carrier's `PWR_GND` pour arriving on `HDR-DEV`'s ground pins.
+  [`netlist.yaml`](netlist.yaml) nets `U-TVS-CHAIN`'s return to `GND_CHAIN`
+  on that reading. **Decided by:** the `dig-gnd-topology` figure, which is
+  disputed and owns exactly this question — so the label is flagged rather
+  than rewritten.

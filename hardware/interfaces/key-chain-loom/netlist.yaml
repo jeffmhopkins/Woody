@@ -1,0 +1,135 @@
+# AUTHORITATIVE for connectivity - OF THE CARRIER END, which is what the
+# drawing on this page shows.
+#
+# *** THE CHAIN ITSELF IS NOT IN THIS FILE YET. *** Eight connectors and four
+# ribbon assemblies: carrier 1, RT 2, RH 2, LT 2, LH 1. SCK, SH/LD, 3V3 and
+# the five grounds are a straight bus across all of them, but SER and QH are
+# POINT TO POINT and change meaning at every hop - each board's QH feeds the
+# PREVIOUS board's SER - which is the whole reason the chain needs eight
+# connectors rather than five. Modelling that means naming which board's OUT
+# reaches which board's IN, and that hop map is prose on this page and in no
+# file a tool reads. Until it is, this netlist places the carrier's J-CHAIN
+# and the parts around it, LK-SER and R-SER-TERM are not placed, and
+# check-netlist prints J-CHAIN 1/8 rather than claiming the chain is drawn.
+
+circuit: interfaces/key-chain-loom
+title: Key chain loom (carrier end)
+page: key-chain-loom.md
+
+ports:
+  IO38:        {dir: in,  from: carrier/carrier}
+  IO7:         {dir: in,  from: carrier/carrier}
+  IO33:        {dir: in,  from: carrier/carrier}
+  IO40:        {dir: out, to: carrier/carrier}
+  DEV_3V3:     {dir: in,  from: carrier/carrier, figure: key-pullup-qty}
+  CHAIN_SCK:   {dir: out, to: cluster/key-register, figure: chain-conductors}
+  CHAIN_SHLD:  {dir: out, to: cluster/key-register, figure: chain-conductors}
+  CHAIN_SER:   {dir: out, to: cluster/key-register, figure: chain-connectors}
+  CHAIN_QH:    {dir: in,  from: cluster/key-register, figure: chain-connectors}
+  V3V3_CHAIN:  {dir: out, to: cluster/key-register}
+  GND_CHAIN:   {dir: ref, from: interfaces/key-chain-loom, figure: chain-conductors}
+
+components:
+
+  J-CHAIN:
+    value: "2x6"
+    pins: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    note: "THE CARRIER'S ONE, of eight identical positions. 10 wired and 2 spare, and the spares are FREE because IDC comes in 2xN - a 2x6 costs what a 2x5 costs and the ribbon is 2 mm wider"
+
+  R-CHAIN-SER-SCK:
+    of: R-CHAIN-SER
+    value: "100R 1%"
+    drawn_as: R-CHAIN-SER
+    pins: [1, 2]
+    note: "At the DRIVING end, which is the only end that can have one on a bus"
+
+  R-CHAIN-SER-SHLD:
+    of: R-CHAIN-SER
+    value: "100R 1%"
+    pins: [1, 2]
+
+  R-CHAIN-SER-SER:
+    of: R-CHAIN-SER
+    value: "100R 1%"
+    pins: [1, 2]
+
+  F-CHAIN:
+    value: "100mA polyfuse"
+    pins: [1, 2]
+    note: "In the 3V3 feed, so a short anywhere down 265 mm of loom does not take the dev board's LDO with it"
+
+  U-TVS-CHAIN:
+    value: "SP0504BAHTG 4-channel 5V array"
+    pins: [CH1, CH2, CH3, CH4, GND]
+    note: "Four channels for four signals. ITS RETURN IS NETTED TO GND_CHAIN, and the drawing labels it DIG_GND - a name this corpus gives to the module's umbilical digital return, which does not reach this board. See the page note under the drawing"
+
+nets:
+
+  IO38:
+    - port: IO38
+    - R-CHAIN-SER-SCK.1
+
+  IO7:
+    - port: IO7
+    - R-CHAIN-SER-SHLD.1
+
+  IO33:
+    - port: IO33
+    - R-CHAIN-SER-SER.1
+
+  CHAIN_SCK:
+    - R-CHAIN-SER-SCK.2
+    - U-TVS-CHAIN.CH1
+    - J-CHAIN.2
+    - port: CHAIN_SCK
+
+  CHAIN_SHLD:
+    - R-CHAIN-SER-SHLD.2
+    - U-TVS-CHAIN.CH2
+    - J-CHAIN.4
+    - port: CHAIN_SHLD
+
+  CHAIN_SER:
+    - R-CHAIN-SER-SER.2
+    - U-TVS-CHAIN.CH3
+    - J-CHAIN.6
+    - port: CHAIN_SER
+
+  # ONE NET, TWO BOUNDARIES: nothing sits between the connector and the MCU
+  # pin but the clamp, so QH arriving from the clusters and IO40 going into
+  # the dev board are the same node.
+  CHAIN_QH:
+    - J-CHAIN.8
+    - U-TVS-CHAIN.CH4
+    - port: CHAIN_QH
+    - port: IO40
+
+  DEV_3V3:
+    - port: DEV_3V3
+    - F-CHAIN.1
+
+  V3V3_CHAIN:
+    - F-CHAIN.2
+    - J-CHAIN.10
+    - port: V3V3_CHAIN
+
+  GND_CHAIN:
+    - port: GND_CHAIN
+    - J-CHAIN.1
+    - J-CHAIN.3
+    - J-CHAIN.5
+    - J-CHAIN.7
+    - J-CHAIN.9
+    - U-TVS-CHAIN.GND
+
+  # ADR 0009's rule. Unallocated by decision, and under this topology a spare
+  # conductor buys a REPAIR rather than a spare key - expansion lands on a
+  # spare register bit, which needs no wire.
+  CHAIN_SPARE_1:
+    - J-CHAIN.11
+  CHAIN_SPARE_2:
+    - J-CHAIN.12
+
+external_endpoints:
+  - CHAIN_SPARE_1
+  - CHAIN_SPARE_2

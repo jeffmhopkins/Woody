@@ -46,6 +46,7 @@ nets:
     carries: "Chain return, five alternating grounds on J-CHAIN pins 1/3/5/7/9"
     figure: chain-conductors
     origin: interfaces/key-chain-loom
+    note: "It is the carrier's PWR_GND pour arriving on HDR-DEV's ground pins - a separate name for the five conductors in the ribbon, not a separate node"
     reference: [cluster/key-register, cluster/key-switch-network, cluster/key-marker-and-bits]
 
   CHAIN_SCK:
@@ -102,6 +103,44 @@ nets:
     receivers: [cluster/key-register]
     per_board: true
     note: "Two per device, one high and one low, and they sit on different inputs on every board - see KEY_BITS"
+
+  # --- the dev board's pins that drive the chain ------------------------
+
+  IO38:
+    kind: signal
+    domain: digital
+    carries: "SPI3 SCK out of the MCU, into the chain's series resistor"
+    driver: carrier/carrier
+    receivers: [interfaces/key-chain-loom]
+
+  IO7:
+    kind: signal
+    domain: digital
+    carries: "SH/LD latch out of the MCU. A GLITCH HERE RELOADS ALL FOUR REGISTERS mid-shift and corrupts the whole 32-bit word"
+    driver: carrier/carrier
+    receivers: [interfaces/key-chain-loom]
+
+  IO33:
+    kind: signal
+    domain: digital
+    carries: "SER out of the MCU, riding every hop to the far device's serial input"
+    driver: carrier/carrier
+    receivers: [interfaces/key-chain-loom]
+
+  IO40:
+    kind: signal
+    domain: digital
+    carries: "MISO into the MCU: the chain's QH, out of the nearest register"
+    driver: interfaces/key-chain-loom
+    receivers: [carrier/carrier]
+
+  DEV_3V3:
+    kind: power
+    carries: "The dev board's own LDO, the only 3V3 on the instrument"
+    figure: key-pullup-qty
+    driver: carrier/carrier
+    receivers: [interfaces/key-chain-loom, carrier/breath-adc]
+    note: "IT IS ALSO THE MCP3202'S REFERENCE, which is what makes the 24 pull-ups' static draw a live trade rather than a free one"
 
   # ======================================================================
   # INSTRUMENT: breath front end and the carrier
