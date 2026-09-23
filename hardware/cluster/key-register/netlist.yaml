@@ -1,0 +1,95 @@
+# AUTHORITATIVE for connectivity. The ASCII drawing in key-register.md is a
+# REPRESENTATION of this file.
+#
+# ONE SCHEMATIC, FOUR BOARDS. `replicated: 4` is what says so, and it is what
+# makes the BOM arithmetic come out: one 74HC165 and one decoupler per board,
+# four rows' worth in hardware/bom.csv.
+#
+# THE EIGHT PARALLEL INPUTS ARE NOT NETTED, AND THAT IS THE HONEST ANSWER.
+# Which of A..H is a switch, a marker strap or a free bit is DIFFERENT ON
+# EVERY BOARD - key-marker-and-bits.md's allocation table has four different
+# rows against this one schematic - so no assignment written here would be
+# true of all four. They are declared as eight endpoints, hardware/nets.yaml
+# marks KEY_BITS and MARKER_BITS `per_board:`, and the checker prints that
+# rather than passing over it. Resolving it means four board variants, which
+# is a decision and not a transcription job.
+
+circuit: cluster/key-register
+title: Key shift register
+page: key-register.md
+replicated: 4
+
+ports:
+  CHAIN_SCK:   {dir: in,  from: interfaces/key-chain-loom, figure: chain-conductors}
+  CHAIN_SHLD:  {dir: in,  from: interfaces/key-chain-loom, figure: chain-conductors}
+  CHAIN_SER:   {dir: in,  from: interfaces/key-chain-loom, figure: chain-connectors}
+  CHAIN_QH:    {dir: out, to: interfaces/key-chain-loom, figure: chain-connectors}
+  V3V3_CHAIN:  {dir: in,  from: interfaces/key-chain-loom}
+  GND_CHAIN:   {dir: ref, from: interfaces/key-chain-loom, figure: chain-conductors}
+
+components:
+
+  U-KEYS:
+    value: "74HC165"
+    pins: [SHLD, CLK, CLKINH, QH_BAR, GND, SER, QH, VCC, A, B, C, D, E, F, G, H]
+    note: "74HC AND NOT 74LVC, and that is load-bearing: HC's slow edges make 265 mm of loom an ordinary lumped load. Bit order out is H first, then G F E D C B A"
+
+  C-DECOUPLE-165:
+    value: "100nF"
+    pins: [1, 2]
+    note: "AT the package, on this board. A 74x165's output edges brown out a local rail with no reservoir, and the chain bus is the only other source"
+
+nets:
+
+  CHAIN_SHLD:
+    - port: CHAIN_SHLD
+    - U-KEYS.SHLD
+
+  CHAIN_SCK:
+    - port: CHAIN_SCK
+    - U-KEYS.CLK
+
+  CHAIN_SER:
+    - port: CHAIN_SER
+    - U-KEYS.SER
+
+  CHAIN_QH:
+    - U-KEYS.QH
+    - port: CHAIN_QH
+
+  V3V3_CHAIN:
+    - port: V3V3_CHAIN
+    - U-KEYS.VCC
+    - C-DECOUPLE-165.1
+
+  # CLK INH IS TIED LOW, PERMANENTLY.
+  GND_CHAIN:
+    - port: GND_CHAIN
+    - U-KEYS.GND
+    - U-KEYS.CLKINH
+    - C-DECOUPLE-165.2
+
+  # QH_BAR IS AN OUTPUT. DO NOT GROUND IT.
+  QH_BAR:
+    - U-KEYS.QH_BAR
+
+  # The eight per-board inputs - see the header.
+  KEY_IN_A: [U-KEYS.A]
+  KEY_IN_B: [U-KEYS.B]
+  KEY_IN_C: [U-KEYS.C]
+  KEY_IN_D: [U-KEYS.D]
+  KEY_IN_E: [U-KEYS.E]
+  KEY_IN_F: [U-KEYS.F]
+  KEY_IN_G: [U-KEYS.G]
+  KEY_IN_H: [U-KEYS.H]
+
+external_endpoints:
+  - QH_BAR
+  - KEY_IN_A
+  - KEY_IN_B
+  - KEY_IN_C
+  - KEY_IN_D
+  - KEY_IN_E
+  - KEY_IN_F
+  - KEY_IN_G
+  - KEY_IN_H

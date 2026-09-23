@@ -83,6 +83,15 @@ nets:
     carries: "The parallel switch bits into the shift registers, within a cluster board"
     driver: cluster/key-switch-network
     receivers: [cluster/key-register]
+    per_board: true
+    note: >
+      EIGHT NETS PER DEVICE, NOT ONE, and which of the eight is a switch is
+      different on all four boards - key-marker-and-bits.md's allocation table
+      has four different rows against one schematic. So no port assignment on
+      the shared cluster netlist is true of every board, and key-register's
+      netlist declares the eight inputs as unasserted endpoints. Resolving
+      this means four board variants, which is a real decision and not a
+      transcription job.
 
   MARKER_BITS:
     kind: signal
@@ -91,6 +100,8 @@ nets:
     figure: marker-bits
     driver: cluster/key-marker-and-bits
     receivers: [cluster/key-register]
+    per_board: true
+    note: "Two per device, one high and one low, and they sit on different inputs on every board - see KEY_BITS"
 
   # ======================================================================
   # INSTRUMENT: breath front end and the carrier

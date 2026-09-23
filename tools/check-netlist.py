@@ -87,7 +87,7 @@ def master_nets():
     return (yaml.safe_load(open(MASTER, encoding="utf-8")) or {}).get("nets") or {}
 
 
-def check_master(master, seen, problems, have_netlist, deferred):
+def check_master(master, seen, problems, have_netlist, deferred, per_board=None):
     """Both halves of every inter-circuit net.
 
     `seen` maps net -> {circuit: dir}, collected from the per-circuit ports.
@@ -98,6 +98,20 @@ def check_master(master, seen, problems, have_netlist, deferred):
     dependency edges untrustworthy until they were checked from both ends.
     """
     for net, spec in master.items():
+        # A PER-BOARD BUNDLE IS NOT ONE NET AND CANNOT BE PORTED.
+        #
+        # KEY_BITS and MARKER_BITS are eight parallel inputs per 74HC165, and
+        # WHICH of the eight is a switch, a marker strap or a free bit differs
+        # on all four cluster boards - the allocation table on
+        # key-marker-and-bits.md gives four different rows. One schematic, four
+        # strappings, so no port assignment on the shared netlist is true of
+        # every board. The receiving circuit declares those pins as unasserted
+        # endpoints instead, and this is counted and printed so the gap is a
+        # number rather than a silence.
+        if spec.get("per_board"):
+            if per_board is not None:
+                per_board.append(net)
+            continue
         drv = spec.get("driver")
         rcv = list(spec.get("receivers") or [])
         ref = list(spec.get("reference") or [])
@@ -193,11 +207,16 @@ def check_global(specs, bom, problems):
     from collections import Counter
     used, sections = Counter(), Counter()
     for spec in specs:
+        # A CIRCUIT CAN BE BUILT MORE THAN ONCE. The four cluster boards are
+        # one schematic and four PCBs, so one netlist accounts for four of
+        # every part on it. Without this the 74HC165 reports 1 placed against
+        # a qty of 4 and the shortfall looks like an unfinished conversion.
+        n = int(spec.get("replicated") or 1)
         for ref, c in (spec.get("components") or {}).items():
             row = c.get("of", ref)
-            used[row] += 1
+            used[row] += n
             if c.get("section"):
-                sections[row] += 1
+                sections[row] += n
     exact = short = 0
     for row, n in sorted(used.items()):
         if row not in bom:
@@ -612,10 +631,10 @@ def main():
 
     counted = check_global(all_specs, bom, problems) if not args else None
 
-    deferred = []
+    deferred, per_board = [], []
     have_netlist = {s.get("circuit") for s in all_specs}
     if master and not args:
-        check_master(master, seen, problems, have_netlist, deferred)
+        check_master(master, seen, problems, have_netlist, deferred, per_board)
 
     for p in problems:
         print("  " + p)
@@ -623,6 +642,9 @@ def main():
           f"{len(master)} master net(s) | "
           f"{len(problems)} problem(s) | {len(pending)} drawing page(s) still "
           f"without a netlist | {len(deferred)} master endpoint(s) awaiting one")
+    if per_board:
+        print(f"per-board bundles not resolved to single nets: "
+              f"{', '.join(sorted(per_board))}")
     if counted:
         exact, short, sectioned = counted
         print(f"instances: {exact} row(s) placed exactly to BOM qty, {short} still "

@@ -27,6 +27,14 @@ The `Dir` and `Peer` columns are defined once in
 
 ## §1 The device
 
+*Connectivity is **[`netlist.yaml`](netlist.yaml)**, not this drawing, and that
+file is one schematic for four boards — `replicated: 4`. The eight parallel
+inputs are deliberately not netted there: which of `A`…`H` is a switch, a
+marker strap or a free bit is different on every board, so no assignment
+would be true of all four. The allocation table lives on
+[`../key-marker-and-bits/key-marker-and-bits.md`](../key-marker-and-bits/key-marker-and-bits.md).*
+
+
 ```
                         74HC165  SOIC-16          [from memory: pin map]
                      ┌────────────∪────────────┐
