@@ -12,9 +12,9 @@ sit together, so a change and its record are never in different places.
                   circuit.yaml     declared dependencies. SEEDED, NOT VERIFIED
                   notes.md         past tense only. No live value belongs here
                   sim/             an ngspice deck and its contract. No results
-                  netlist.yaml     AUTHORITATIVE for connectivity where it
-                                   exists. The drawing is a representation of
-                                   it. The rollout is partial - see below
+                  netlist.yaml     AUTHORITATIVE for connectivity. The
+                                   drawing is a representation of it, and
+                                   every circuit that carries nets has one
 
 nets.yaml                          at hardware/ root: THE MASTER NET LIST,
                                    which owns every net that crosses a circuit
@@ -30,17 +30,17 @@ nets.yaml                          at hardware/ root: THE MASTER NET LIST,
 > `R-FB` drawn at a resistance that is not a purchasable E96 value and an
 > entry capacitor drawn at half the BOM's value on the rail that matters.
 >
-> **Where they disagree and there is no netlist, `bom.csv` wins.** It is
-> generated from fragments, `merge-bom.py --check` proves the master matches
-> them, and the commit hook runs it. A drawing has none of that behind it.
+> **`tools/check-netlist.py` checks the drawing against the netlist**, and
+> the netlist against `bom.csv` and against `nets.yaml`. It runs `--strict`
+> from the commit gate, so a page that gains a drawing and no netlist is a
+> failure rather than an entry on a list. It resolves a label against EVERY
+> netlist, not only the one beside the page, because several pages draw parts
+> they do not own.
 >
-> **Where a `netlist.yaml` sits beside the page, the drawing is checked
-> against it** by `tools/check-netlist.py`, which also proves the netlist
-> against `bom.csv` and against `nets.yaml`. **The rollout is partial**: run
-> that tool with no arguments and it prints every drawing page still without
-> one, by name. Do not restate the count here or anywhere else - that is how
-> it goes stale. On a page with no netlist yet, treat the drawing as a diagram
-> of intent and confirm every value against the row.
+> **Where a drawing and a row disagree and no netlist covers them, `bom.csv`
+> wins.** It is generated from fragments, `merge-bom.py --check` proves the
+> master matches them, and the commit hook runs it. A drawing has none of
+> that behind it.
 
 | Directory | |
 |---|---|

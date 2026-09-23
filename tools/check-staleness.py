@@ -431,8 +431,15 @@ def check_bom_generated():
         # rather than left to a human remembering to run it. A tool nothing
         # calls is a tool whose exit code reaches nobody - that is a recorded
         # finding against four tools in this directory.
+        #
+        # --strict SINCE 2026-09-23, because the rollout is done: every page
+        # with a drawing has a netlist, and the one page with a drawing and
+        # no netlist declares that its drawing is not a circuit. Without the
+        # flag, a NEW drawing page would join a pending list that nothing
+        # fails on - which is how a rollout stalls at 95 percent forever.
         nl = subprocess.run([sys.executable,
-                             os.path.join(ROOT, "tools/check-netlist.py")],
+                             os.path.join(ROOT, "tools/check-netlist.py"),
+                             "--strict"],
                             capture_output=True, text=True, cwd=ROOT, timeout=60)
     except Exception as e:
         return [f"could not run a generated-file check: {e}"]

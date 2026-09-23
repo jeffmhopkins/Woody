@@ -222,17 +222,19 @@ on firmware for years. All three fixes are firmware and all three are free.
 A fourth is hardware and already handled: a corrupted key-chain read becoming a
 spurious note, made countable by the marker pattern (ADR 0001).
 
-## TODO: netlists, and the drawings stop being the source of truth
+## Netlists — done, and what they found
 
-**Every schematic page that carries a drawing needs a machine-readable
-netlist beside it. The netlist becomes authoritative; the ASCII drawing
-becomes a representation of it.**
+**Every schematic page that carries a drawing has a machine-readable netlist
+beside it. The netlist is authoritative; the ASCII drawing is a
+representation of it.** `tools/check-netlist.py --strict` runs from the
+commit gate, so a new drawing page with no netlist is now a failure rather
+than an entry on a list.
 
-**How many pages carry a drawing, how many are converted, and which are
-left: `python3 tools/check-netlist.py` prints all three on every run** and
-names each pending page. There is deliberately no count in this sentence —
-a restated count is the defect this whole file is trying to stop, and the
-first version of this paragraph carried three of them.
+**Counts are the tool's, not this file's.** Run it: it prints the circuits,
+components, nets and master nets, every row whose placed instances differ
+from what the BOM buys, and the pages it is deliberately not asking for a
+netlist from. There is no number in this section for the same reason there is
+no number in the review-wave sentence.
 
 **Why this is the fix and not a tidy-up.** Every page-vs-BOM conflict found
 in the 2026-09-22 review exists *because a drawing is authoritative by
@@ -258,13 +260,35 @@ value, every net must have at least two endpoints, and the drawing can be
 checked against the netlist or regenerated from it. The whole class stops
 being something a review has to find by reading.
 
-**Decided and in progress (2026-09-22):** hand-authored YAML is
-authoritative; KiCad is generated from it later. `tools/check-netlist.py`
-gates it through the commit hook. Circuits are converted one at a time and
-**every one so far has forced a corpus change** — a drawing value the BOM
-contradicted, an aggregate BOM row that could not be netlisted because one
-`part` field held two values, a bundled master net that no layout could have
-used, and a part drawn on four pages with no BOM row behind it.
+**Hand-authored YAML is authoritative; KiCad is generated from it later.**
+Circuits were converted one at a time and **nearly every one forced a corpus
+change.** The recurring shapes, each of which had survived every review:
+
+- **Aggregate BOM rows** — one `part` field holding two values, so no
+  instance could state a value that matched it. `R-MODGAIN` and `R-ADCDIV`
+  split; five others had already gone the same way.
+- **Parts drawn and never listed** — `LK-CLR` on four pages, and `R1`, `R2`
+  and the 2 × 10 k divider in a cost table, none with a `bom.csv` row.
+- **Master nets that were bundles** — `SPI_DAC` standing for three
+  conductors, `DAC_CH2_5` for four channels, `MOD_JACKS` for four jacks. No
+  layout could have used any of them.
+- **Nets that were not nets** — the carrier's "+12 V strip feed" and "+12 V
+  analog" are the same node as the umbilical's, and `PITCH_JACK` and its five
+  siblings cross no boundary at all: the far end is a `J-CV`, which is a part.
+- **Two halves of one boundary disagreeing** — `ON` declared as crossing into
+  `module/panel` where `panel.md` claims only the hole; `PWR_GND` claiming two
+  analog circuits that return to `AGND_INST`; four master receivers seeded
+  from Interfaces rows whose own text says the net "reaches no part of this
+  circuit".
+- **A rail that does not exist.** `R-SPI-PULL`'s row says the cable-side `CS`
+  pull goes to 3V3, and there is no 3V3 on the module board.
+
+**And the checker kept failing open.** Seven fixes to the label parser alone,
+each found by a correct label being reported wrong or an injected defect not
+being reported at all: a refdes may be one character, may carry `_`, may
+carry `.`; a label written value-first or split across two lines is reported
+rather than skipped; `foreign:` was an unconditional skip; `10R`, `10 Ω` and
+`10 kΩ` are one value; `×2` and `#1` are counts, not magnitudes.
 
 **`hardware/nets.yaml` is the MASTER, and it is the piece a per-circuit file
 cannot provide.** A circuit's `netlist.yaml` can only declare *its own side*
@@ -276,17 +300,32 @@ The master owns the net; each circuit's `ports:` must resolve to it; and the
 check runs **both ways**, which is what made the `circuit:` dependency edges
 trustworthy when it was applied to them.
 
-**Settled, and no longer open.** Format: hand-authored YAML, `components:`
-and `nets:`, matching the `circuit.yaml` already in each directory — the
-tie-breaker was that these are authored by hand and KiCad is generated from
-them, not the other way round. Where it sits: one `netlist.yaml` per circuit
-directory, beside the page, its `bom.csv` fragment and its `circuit.yaml`.
+**Settled.** Format: hand-authored YAML, `components:` and `nets:`, matching
+the `circuit.yaml` already in each directory — the tie-breaker was that these
+are authored by hand and KiCad is generated from them, not the other way
+round. Where it sits: one `netlist.yaml` per circuit directory, beside the
+page, its `bom.csv` fragment and its `circuit.yaml`.
 
-**Still open: whether the drawing is then generated.** If it is, the
-alignment drift recorded against five pages stops being possible. If it is
-not, the drawing-vs-netlist check that `check-netlist.py` already runs is
-most of the value for a fraction of the work, and it has been catching
-things since the first circuit.
+**Still open, and each is a decision rather than a transcription job:**
+
+1. **Whether the drawing is then generated.** If it is, the alignment drift
+   recorded against five pages stops being possible. If it is not, the
+   drawing-vs-netlist check `check-netlist.py` already runs is most of the
+   value for a fraction of the work, and it has been catching things since
+   the first circuit.
+2. **The four cluster boards are one schematic with four strappings.** Which
+   of a 74HC165's `A`…`H` carries a switch, a marker or a free bit differs on
+   every board, so `KEY_BITS` and `MARKER_BITS` are marked `per_board:` and
+   those inputs are declared unasserted. Resolving it means four board
+   variants. The checker names the two nets on every run.
+3. **The key chain's hop map is prose.** Eight connectors, four ribbons,
+   `SER`/`QH` point-to-point and changing meaning at every hop. Only the
+   carrier's connector is placed; the tool prints `J-CHAIN 1/8`.
+4. **Decoupling is not netted.** Supply pins arrive through `rails:`, so the
+   per-pin decouplers have no pin to hang on and `C-DECOUPLE` and
+   `C-DECOUPLE-CARRIER` will read short until that changes.
+5. **The seventh `R-OPAMP-IN` has no home** — `pitch-stage.md`'s "Still
+   open".
 
 ## Open items blocking work
 

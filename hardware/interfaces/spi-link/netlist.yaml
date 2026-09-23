@@ -1,0 +1,92 @@
+# AUTHORITATIVE for connectivity: THE UMBILICAL ITSELF.
+#
+# This circuit is named for the SPI half and it carries all eight conductors.
+# J-UMBILICAL is one connector with one pin map - umbilical-pinmap - and four
+# of its eight belong to other circuits' nets: the breath pair is
+# interfaces/breath-sense-link's and the power pair is the load switch's and
+# the module's star's. They are declared here because the CONNECTOR is here,
+# not because the nets are.
+#
+# THE CABLE IS NOT A COMPONENT. CABLE-UMB is a straight Cat5e patch lead: pin
+# N to pin N, with no pin map of its own to get wrong. Netting sixteen
+# conductor ends to say "1 goes to 1" would add length and no truth.
+#
+# THIS CIRCUIT'S OWN THREE BOM ROWS ARE PLACED ELSEWHERE, and that is correct:
+# it derives R-SPI-PULL's values and R-SPI-SER's 100 ohm, but the six pulls
+# are on the module board (module/digital-and-supervision) and the three
+# series resistors are on the carrier (carrier/carrier). Owning a row and
+# placing an instance are different things.
+
+circuit: interfaces/spi-link
+title: SPI link and umbilical
+page: spi-link.md
+
+ports:
+  SCLK:            {dir: in,  from: carrier/carrier, figure: umbilical-pinmap}
+  MOSI:            {dir: in,  from: carrier/carrier, figure: umbilical-pinmap}
+  CS_MOD:          {dir: in,  from: carrier/carrier, figure: umbilical-pinmap}
+  DIG_GND:         {dir: ref, from: module/power-entry, figure: umbilical-pinmap}
+  BREATH_SENSE:    {dir: in,  from: interfaces/breath-sense-link, figure: umbilical-pinmap}
+  AGND_SENSE:      {dir: in,  from: interfaces/breath-sense-link, figure: umbilical-pinmap}
+  UMBILICAL_POS12: {dir: in,  from: module/umbilical-load-switch, figure: umbilical-current}
+  PWR_GND:         {dir: ref, from: module/power-entry, figure: umbilical-pinmap}
+
+components:
+
+  J-UMB-MOD:
+    of: J-UMBILICAL
+    value: "Neutrik etherCON D-series chassis"
+    pins: [1, 2, 3, 4, 5, 6, 7, 8]
+    note: "The module panel's. BORE IS D24.0 mm MINIMUM, which in a 50.50 mm 10HP panel leaves 13.25 mm each side - that is a panel constraint before it is a connector choice"
+
+  J-UMB-INST:
+    of: J-UMBILICAL
+    value: "Neutrik etherCON D-series chassis"
+    pins: [1, 2, 3, 4, 5, 6, 7, 8]
+    note: "The instrument's, at the tail"
+
+nets:
+
+  # THE PAIRING IS THE ARGUMENT, not the numbering. Each signal travels with
+  # its own return in a twisted pair: BREATH with AGND, +12V with PWR_GND,
+  # SCLK with MOSI, CS with DIG_GND.
+
+  BREATH_SENSE:
+    - port: BREATH_SENSE
+    - J-UMB-INST.1
+    - J-UMB-MOD.1
+
+  AGND_SENSE:
+    - port: AGND_SENSE
+    - J-UMB-INST.2
+    - J-UMB-MOD.2
+
+  UMBILICAL_POS12:
+    - port: UMBILICAL_POS12
+    - J-UMB-MOD.3
+    - J-UMB-INST.3
+
+  SCLK:
+    - port: SCLK
+    - J-UMB-INST.4
+    - J-UMB-MOD.4
+
+  MOSI:
+    - port: MOSI
+    - J-UMB-INST.5
+    - J-UMB-MOD.5
+
+  PWR_GND:
+    - port: PWR_GND
+    - J-UMB-MOD.6
+    - J-UMB-INST.6
+
+  CS_MOD:
+    - port: CS_MOD
+    - J-UMB-INST.7
+    - J-UMB-MOD.7
+
+  DIG_GND:
+    - port: DIG_GND
+    - J-UMB-MOD.8
+    - J-UMB-INST.8

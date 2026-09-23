@@ -17,7 +17,6 @@ ports:
   MODULE_ANALOG_POS12: {dir: in,  from: module/power-entry}
   MODULE_ANALOG_NEG12: {dir: in,  from: module/power-entry}
   AGND_MOD:            {dir: ref, from: module/power-entry, figure: dig-gnd-topology}
-  PITCH_JACK:          {dir: out, to: module/panel, figure: pitch-cents-budget}
 
 components:
 
@@ -93,6 +92,12 @@ components:
     pins: [1, 2]
     note: "INSIDE the DC feedback loop, because the loop is tapped at the jack"
 
+  J-CV-PITCH:
+    of: J-CV
+    value: "PJ398SM"
+    pins: [TIP, SLEEVE]
+    note: "THE JACK IS THIS CIRCUIT'S PART. module/panel owns the 6 mm hole and says the net is ours. Its third pin, the normalling switch contact, is unused and not netted"
+
   C-FILT-PITCH:
     value: "10nF"
     pins: [1, 2]
@@ -148,7 +153,7 @@ nets:
     - R-OUT-PROT.2
     - C-FILT-PITCH.1
     - TRIM-GAIN.CCW
-    - port: PITCH_JACK
+    - J-CV-PITCH.TIP
 
   MODULE_ANALOG_POS12:
     - port: MODULE_ANALOG_POS12
@@ -163,6 +168,7 @@ nets:
     - C-AA-PITCH.2
     - C-FILT-PITCH.2
     - R-BIAS-DAC.2
+    - J-CV-PITCH.SLEEVE
 
   # ------------------------------------------------------------------
   # THE TWO HOLES, AND THEY ARE THE PAGE'S OWN OPEN ITEMS.

@@ -1,0 +1,73 @@
+# AUTHORITATIVE for connectivity - and this circuit is mostly COPPER.
+#
+# The marker straps are traces to a rail: two per device, one high and one
+# low, eight across the four boards, and not one of them is a part. The free
+# bits are an R-KEY-PU and nothing else - no switch, no series resistor, no
+# capacitor. So there are three components here and eight strap connections
+# with no component to hang on.
+#
+# AND THEIR FAR ENDS ARE PER BOARD. Which of a device's A..H carries a marker
+# is different on every board - the allocation table on this page has four
+# different rows - so the strap ends and the pull-up ends cannot be named in a
+# file shared by all four. hardware/nets.yaml marks MARKER_BITS and KEY_BITS
+# `per_board:` and check-netlist prints both on every run.
+
+circuit: cluster/key-marker-and-bits
+title: Marker straps and free bits
+page: key-marker-and-bits.md
+
+ports:
+  V3V3_CHAIN: {dir: in,  from: interfaces/key-chain-loom, figure: key-pullup-qty}
+  GND_CHAIN:  {dir: ref, from: interfaces/key-chain-loom, figure: chain-conductors}
+
+components:
+
+  R-KEY-PU-FREE1:
+    of: R-KEY-PU
+    value: "2k2 1%"
+    pins: [1, 2]
+    note: "One of the three FREE bits. The same part the key networks use, and the reason 'free' bits are not free: each one costs the same static draw as a key"
+
+  R-KEY-PU-FREE2:
+    of: R-KEY-PU
+    value: "2k2 1%"
+    pins: [1, 2]
+
+  R-KEY-PU-FREE3:
+    of: R-KEY-PU
+    value: "2k2 1%"
+    pins: [1, 2]
+
+nets:
+
+  V3V3_CHAIN:
+    - port: V3V3_CHAIN
+    - R-KEY-PU-FREE1.1
+    - R-KEY-PU-FREE2.1
+    - R-KEY-PU-FREE3.1
+
+  # The four HIGH straps. Copper from the rail to a register input, and which
+  # input is per board.
+  MARKER_HIGH:
+    - port: V3V3_CHAIN
+
+  # The four LOW straps, the same in the other direction. THE STRAPS LAND
+  # DIRECTLY ON THE RAILS and share no component with the key networks they
+  # are read as vouching for - which is what makes a marker a framing check
+  # rather than a second opinion about the same parts.
+  MARKER_LOW:
+    - port: GND_CHAIN
+
+  FREE_BIT_1:
+    - R-KEY-PU-FREE1.2
+  FREE_BIT_2:
+    - R-KEY-PU-FREE2.2
+  FREE_BIT_3:
+    - R-KEY-PU-FREE3.2
+
+external_endpoints:
+  - MARKER_HIGH
+  - MARKER_LOW
+  - FREE_BIT_1
+  - FREE_BIT_2
+  - FREE_BIT_3

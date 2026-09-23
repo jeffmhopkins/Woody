@@ -25,10 +25,6 @@ ports:
   MODULE_ANALOG_POS12: {dir: in,  from: module/power-entry}
   MODULE_ANALOG_NEG12: {dir: in,  from: module/power-entry}
   AGND_MOD:            {dir: ref, from: module/power-entry, figure: dig-gnd-topology}
-  MOD1_JACK:           {dir: out, to: module/panel}
-  MOD2_JACK:           {dir: out, to: module/panel}
-  MOD3_JACK:           {dir: out, to: module/panel}
-  MOD4_JACK:           {dir: out, to: module/panel}
 
 components:
 
@@ -105,6 +101,11 @@ components:
     drawn_as: D-JACK-CLAMP
     pins: [A, K, C]
 
+  J-CV-MOD1:
+    of: J-CV
+    value: "PJ398SM"
+    pins: [TIP, SLEEVE]
+
   R-OUT-PROT-1:
     of: R-OUT-PROT
     value: "1k 1%, >=500mW"
@@ -155,6 +156,11 @@ components:
     value: "BAV99"
     drawn_as: D-JACK-CLAMP
     pins: [A, K, C]
+
+  J-CV-MOD2:
+    of: J-CV
+    value: "PJ398SM"
+    pins: [TIP, SLEEVE]
 
   R-OUT-PROT-2:
     of: R-OUT-PROT
@@ -207,6 +213,11 @@ components:
     drawn_as: D-JACK-CLAMP
     pins: [A, K, C]
 
+  J-CV-MOD3:
+    of: J-CV
+    value: "PJ398SM"
+    pins: [TIP, SLEEVE]
+
   R-OUT-PROT-3:
     of: R-OUT-PROT
     value: "1k 1%, >=500mW"
@@ -258,6 +269,11 @@ components:
     drawn_as: D-JACK-CLAMP
     pins: [A, K, C]
 
+  J-CV-MOD4:
+    of: J-CV
+    value: "PJ398SM"
+    pins: [TIP, SLEEVE]
+
   R-OUT-PROT-4:
     of: R-OUT-PROT
     value: "1k 1%, >=500mW"
@@ -308,7 +324,7 @@ nets:
   MOD1_JACK:
     - R-OUT-PROT-1.2
     - C-FILT-MOD-1.1
-    - port: MOD1_JACK
+    - J-CV-MOD1.TIP
 
   DAC_CH3:
     - port: DAC_CH3
@@ -333,7 +349,7 @@ nets:
   MOD2_JACK:
     - R-OUT-PROT-2.2
     - C-FILT-MOD-2.1
-    - port: MOD2_JACK
+    - J-CV-MOD2.TIP
 
   DAC_CH4:
     - port: DAC_CH4
@@ -358,7 +374,7 @@ nets:
   MOD3_JACK:
     - R-OUT-PROT-3.2
     - C-FILT-MOD-3.1
-    - port: MOD3_JACK
+    - J-CV-MOD3.TIP
 
   DAC_CH5:
     - port: DAC_CH5
@@ -383,7 +399,7 @@ nets:
   MOD4_JACK:
     - R-OUT-PROT-4.2
     - C-FILT-MOD-4.1
-    - port: MOD4_JACK
+    - J-CV-MOD4.TIP
 
   MODULE_ANALOG_POS12:
     - port: MODULE_ANALOG_POS12
@@ -402,9 +418,13 @@ nets:
   AGND_MOD:
     - port: AGND_MOD
     - C-FILT-MOD-1.2
+    - J-CV-MOD1.SLEEVE
     - C-FILT-MOD-2.2
+    - J-CV-MOD2.SLEEVE
     - C-FILT-MOD-3.2
+    - J-CV-MOD3.SLEEVE
     - C-FILT-MOD-4.2
+    - J-CV-MOD4.SLEEVE
     - R-BIAS-DAC-CH7.2
     - R-BIAS-DAC-1.2
     - R-BIAS-DAC-2.2

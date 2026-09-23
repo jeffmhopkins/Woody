@@ -1,0 +1,40 @@
+# AUTHORITATIVE for connectivity. There is no drawing of this circuit
+# anywhere in the corpus - two parts and one series path - so this file is
+# the first statement of it that a tool can read.
+
+circuit: module/panel-led
+title: Panel power indicator
+page: panel-led.md
+
+ports:
+  MODULE_ANALOG_POS12: {dir: in,  from: module/power-entry}
+  AGND_MOD:            {dir: ref, from: module/power-entry, figure: dig-gnd-topology}
+
+components:
+
+  R-LED-PANEL:
+    value: "2k2 1%"
+    pins: [1, 2]
+
+  LED-PANEL:
+    value: "3mm LED"
+    pins: [A, K]
+    note: "AN ORDINARY POWER INDICATOR NOW. It was kept to show the presence comparator's collector node, and that comparator is not fitted - so it says the rack is on and nothing else. It is live whenever the rack is, which is the whole of the page's open item"
+
+nets:
+
+  MODULE_ANALOG_POS12:
+    - port: MODULE_ANALOG_POS12
+    - R-LED-PANEL.1
+
+  LED_ANODE:
+    - R-LED-PANEL.2
+    - LED-PANEL.A
+
+  # WHICH GROUND IT LANDS ON IS THE DISPUTED FIGURE. The page says so: the
+  # rail it comes from is the analog one, and dig-gnd-topology owns where
+  # analog and digital returns meet. AGND_MOD is the reading that matches the
+  # rail; if the figure settles the other way this line moves with it.
+  AGND_MOD:
+    - port: AGND_MOD
+    - LED-PANEL.K

@@ -271,7 +271,23 @@ repeating, and record the verification.
 
 - Every schematic page is Markdown with ASCII drawings and derivations inline.
   One circuit per directory: the page, its `bom.csv` fragment, its
-  `circuit.yaml`, and `notes.md` for what the circuit *used to be*.
+  `circuit.yaml`, `netlist.yaml`, and `notes.md` for what the circuit *used to
+  be*.
+- **`netlist.yaml` IS AUTHORITATIVE FOR CONNECTIVITY, not the drawing.** The
+  drawing is a representation of it. `hardware/nets.yaml` is the master list
+  of every net that crosses a circuit boundary, because a per-circuit file can
+  only declare its own side. `tools/check-netlist.py --strict` runs from the
+  commit gate and proves all of it: refdes and value against `bom.csv`, both
+  halves of every boundary net, pins used exactly once, placed instances
+  against what the BOM buys, and **every `[REFDES value]` label in a drawing
+  against the netlist that owns the part** — resolved across pages, because
+  several drawings deliberately show parts they do not own.
+  **It found what no reader had**: aggregate BOM rows that could not be
+  netlisted, parts drawn on four pages with no row at all, master nets that
+  were bundles, "nets" that turned out to be one node, and a pull-up whose
+  rail does not exist on that board. Writing one is how a page gets read.
+  A drawing label must be `[REFDES value]`, on one line — a label the parser
+  cannot read is reported, because silence reads like agreement.
 - **`hardware/bom.csv` IS GENERATED.** `tools/merge-bom.py` rebuilds it from
   the per-circuit `bom.csv` fragments, so **a direct edit survives until the
   next run of that tool and then disappears without a word** — the same trap
