@@ -56,6 +56,10 @@ point of specifying the range from playing rather than from the sensor.
 
 ## The circuit
 
+*Connectivity is **[`netlist.yaml`](netlist.yaml)**, not this drawing.
+The drawing is a representation of it, `tools/check-netlist.py` checks that
+the two agree, and where they do not the netlist wins.*
+
 ```
    from the INA828                    ┌──────────────┐
    0 … −4.7 V ──────[POT-GAIN 50k]────┤ +            │

@@ -36,6 +36,10 @@ The `Dir` and `Peer` columns are defined once in
 
 ## The circuit
 
+*Connectivity is **[`netlist.yaml`](netlist.yaml)**, not this drawing.
+The drawing is a representation of it, `tools/check-netlist.py` checks that
+the two agree, and where they do not the netlist wins.*
+
 ```
   16-pin shrouded keyed IDC (J-PWR-EURO)
        │

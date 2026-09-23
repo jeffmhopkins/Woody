@@ -231,6 +231,7 @@ nets:
     reference:
       - module/breath-output-stage
       - module/breath-receive-stage
+      - module/dac8568
       - module/mod-channels
       - module/pitch-stage
     note: >
@@ -242,13 +243,33 @@ nets:
   # MODULE: DAC and CV
   # ======================================================================
 
-  SPI_DAC:
+  # THREE NETS, NOT ONE BUNDLE. They were one entry, SPI_DAC, with a note
+  # saying to split them when a page needed them separately; the DAC netlist
+  # is that page - each lands on its own pin and they cannot share a net.
+  # interfaces/spi-link is a receiver on all three because the DAC-side three
+  # of the six R-SPI-PULL sit on them and are that circuit's rows.
+
+  SCLK_DAC:
     kind: signal
     domain: digital
-    carries: "Buffered SCLK_DAC, DIN and SYNC from the level shifter to the DAC"
+    carries: "Buffered serial clock, level shifter to DAC"
     driver: module/digital-and-supervision
-    receivers: [module/dac8568]
-    note: "Three conductors travelling together; split into one net each if the DAC page ever needs them separately"
+    receivers: [module/dac8568, interfaces/spi-link]
+    note: "NOT SCLK, which is the umbilical conductor on the buffer's input side"
+
+  DIN:
+    kind: signal
+    domain: digital
+    carries: "Buffered serial data, level shifter to DAC"
+    driver: module/digital-and-supervision
+    receivers: [module/dac8568, interfaces/spi-link]
+
+  SYNC:
+    kind: signal
+    domain: digital
+    carries: "Buffered frame sync (the DAC's chip select), level shifter to DAC"
+    driver: module/digital-and-supervision
+    receivers: [module/dac8568, interfaces/spi-link]
 
   CLR:
     kind: signal
@@ -278,10 +299,34 @@ nets:
     driver: module/dac8568
     receivers: [module/pitch-stage]
 
-  DAC_CH2_5:
+  # FOUR NETS, NOT ONE. They were one entry, DAC_CH2_5, which no layout could
+  # have used: each channel drives its own mod channel's R-OPAMP-IN.
+
+  DAC_CH2:
     kind: signal
     domain: analog
-    carries: "The four mod channels"
+    carries: "Mod 1 channel"
+    driver: module/dac8568
+    receivers: [module/mod-channels]
+
+  DAC_CH3:
+    kind: signal
+    domain: analog
+    carries: "Mod 2 channel"
+    driver: module/dac8568
+    receivers: [module/mod-channels]
+
+  DAC_CH4:
+    kind: signal
+    domain: analog
+    carries: "Mod 3 channel"
+    driver: module/dac8568
+    receivers: [module/mod-channels]
+
+  DAC_CH5:
+    kind: signal
+    domain: analog
+    carries: "Mod 4 channel"
     driver: module/dac8568
     receivers: [module/mod-channels]
 

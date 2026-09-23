@@ -1,0 +1,160 @@
+# AUTHORITATIVE for connectivity. The ASCII drawing in dac8568.md is a
+# REPRESENTATION of this file.
+#
+# THE DRAWING SHOWS TWO PINS OF SIXTEEN. It was split out of
+# digital-and-supervision.md to carry the CLR and LDAC corrections, and those
+# are all it draws - the SPI pins, the rail, the ground and all six live
+# outputs are prose in the ## Interfaces table and nowhere in the picture.
+# They are netted here. That gap is the reason a netlist is worth more than a
+# redraw: a picture of two pins cannot be wrong about the other fourteen, and
+# it cannot be right about them either.
+
+circuit: module/dac8568
+title: DAC8568C
+page: dac8568.md
+
+ports:
+  SCLK_DAC:  {dir: in,  from: module/digital-and-supervision}
+  DIN:       {dir: in,  from: module/digital-and-supervision}
+  SYNC:      {dir: in,  from: module/digital-and-supervision}
+  DAC_AVDD:  {dir: in,  from: module/power-entry, figure: dac-rail}
+  CLR:       {dir: in,  from: module/link-supervision}
+  VREFOUT:   {dir: out, to: module/pitch-stage}
+  DAC_CH1:   {dir: out, to: module/pitch-stage}
+  DAC_CH2:   {dir: out, to: module/mod-channels}
+  DAC_CH3:   {dir: out, to: module/mod-channels}
+  DAC_CH4:   {dir: out, to: module/mod-channels}
+  DAC_CH5:   {dir: out, to: module/mod-channels}
+  DAC_CH7:   {dir: out, to: module/mod-channels, figure: mod-reference}
+  AGND_MOD:  {dir: ref, from: module/power-entry, figure: dig-gnd-topology}
+
+components:
+
+  U-DAC:
+    value: "DAC8568ICPW"
+    # Pin names are SBAS430E's own, from the 16-pin TSSOP PIN DESCRIPTIONS
+    # table of the banked datasheets/analog/DAC8568CIPW.pdf [datasheet]:
+    #   1 LDAC   2 SYNC   3 AVDD   4 VOUTA  5 VOUTC  6 VOUTE  7 VOUTG
+    #   8 VREFIN/VREFOUT  9 CLR   10 VOUTH 11 VOUTF 12 VOUTD 13 VOUTB
+    #   14 GND  15 DIN   16 SCLK
+    #
+    # CHANNEL NUMBER TO DATASHEET LETTER IS ORDINAL HERE: ch1=VOUTA through
+    # ch8=VOUTH, so the two spares are VOUTF and VOUTH. NO DOCUMENT IN THIS
+    # CORPUS STATES THAT MAP [derived, not cited] - ADR 0006 allocates by
+    # number and the datasheet names by letter, and nothing joins them. It is
+    # the only reading consistent with "channels 6 and 8 spare", and it
+    # decides which two pins a layout leaves unconnected, so it is asserted
+    # here rather than left implied. Contradict it in ADR 0006 if it is wrong
+    # and this file follows.
+    pins:
+      - LDAC
+      - SYNC
+      - AVDD
+      - VOUTA
+      - VOUTB
+      - VOUTC
+      - VOUTD
+      - VOUTE
+      - VOUTF
+      - VOUTG
+      - VOUTH
+      - VREFIN/VREFOUT
+      - CLR
+      - GND
+      - DIN
+      - SCLK
+    note: "Grade C: gain-2 reference, clears to ZERO scale, and AVDD 5.0-5.5 V is a condition of the grade rather than a preference. The BOM row carries the order code, which is not the banked file's name"
+
+  R-CLR-PU:
+    value: "10k 1%"
+    pins: [1, 2]
+    note: "PULL-UP. CLR is active low and nothing drives it, so this holds it inactive"
+
+  R-LDAC:
+    value: "0R strap"
+    pins: [1, 2]
+    note: "STRAP TO GND, NOT A PULL-UP. Pin high gates the buffer-to-DAC-register transfer and no MISO exists to discover it"
+
+  LK-CLR:
+    value: "2-pad solder link"
+    drawn_as: LK-CLR
+    pins: [1, 2]
+    note: "NORMALLY OPEN, and copper rather than a part. Shorted by hand it asserts CLR - the only way to assert it"
+
+nets:
+
+  DAC_AVDD:
+    - port: DAC_AVDD
+    - U-DAC.AVDD
+    - R-CLR-PU.1
+
+  CLR:
+    - port: CLR
+    - R-CLR-PU.2
+    - LK-CLR.1
+    - U-DAC.CLR
+
+  # LOCAL, and it crosses no boundary: the pin and its strap, nothing else.
+  # That is the whole content of the LDAC correction.
+  LDAC:
+    - U-DAC.LDAC
+    - R-LDAC.1
+
+  SCLK_DAC:
+    - port: SCLK_DAC
+    - U-DAC.SCLK
+
+  DIN:
+    - port: DIN
+    - U-DAC.DIN
+
+  SYNC:
+    - port: SYNC
+    - U-DAC.SYNC
+
+  VREFOUT:
+    - U-DAC.VREFIN/VREFOUT
+    - port: VREFOUT
+
+  DAC_CH1:
+    - U-DAC.VOUTA
+    - port: DAC_CH1
+
+  DAC_CH2:
+    - U-DAC.VOUTB
+    - port: DAC_CH2
+
+  DAC_CH3:
+    - U-DAC.VOUTC
+    - port: DAC_CH3
+
+  DAC_CH4:
+    - U-DAC.VOUTD
+    - port: DAC_CH4
+
+  DAC_CH5:
+    - U-DAC.VOUTE
+    - port: DAC_CH5
+
+  DAC_CH7:
+    - U-DAC.VOUTG
+    - port: DAC_CH7
+
+  # THE TWO SPARES, NAMED SO THEY ARE NO-CONNECT BY DECISION RATHER THAN BY
+  # OMISSION. An unlisted pin and a pin listed as going nowhere read the same
+  # in a picture and not at all the same in a layout review.
+  DAC_CH6_UNUSED:
+    - U-DAC.VOUTF
+  DAC_CH8_UNUSED:
+    - U-DAC.VOUTH
+
+  AGND_MOD:
+    - port: AGND_MOD
+    - U-DAC.GND
+    - R-LDAC.2
+    - LK-CLR.2
+
+# Nets with one endpoint on purpose.
+external_endpoints:
+  - DAC_CH6_UNUSED
+  - DAC_CH8_UNUSED

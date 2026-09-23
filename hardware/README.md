@@ -12,12 +12,17 @@ sit together, so a change and its record are never in different places.
                   circuit.yaml     declared dependencies. SEEDED, NOT VERIFIED
                   notes.md         past tense only. No live value belongs here
                   sim/             an ngspice deck and its contract. No results
-                  netlist.yaml     PLANNED, see ROADMAP. Will be the source of
-                                   truth for connectivity; the drawing becomes
-                                   a representation of it
+                  netlist.yaml     AUTHORITATIVE for connectivity where it
+                                   exists. The drawing is a representation of
+                                   it. The rollout is partial - see below
+
+nets.yaml                          at hardware/ root: THE MASTER NET LIST,
+                                   which owns every net that crosses a circuit
+                                   boundary. A netlist.yaml declares only its
+                                   own side; this file owns the net
 ```
 
-> ### The drawing is not the source of truth, and until a netlist exists there isn't one
+> ### The drawing is not the source of truth. Where a `netlist.yaml` exists, that is.
 >
 > **An ASCII drawing is a picture.** No tool in this repository can read one,
 > so nothing checks that a value in a drawing matches the BOM row for the same
@@ -25,14 +30,17 @@ sit together, so a change and its record are never in different places.
 > `R-FB` drawn at a resistance that is not a purchasable E96 value and an
 > entry capacitor drawn at half the BOM's value on the rail that matters.
 >
-> **Where they disagree today, `bom.csv` wins.** It is generated from
-> fragments, `merge-bom.py --check` proves the master matches them, and the
-> commit hook runs it. A drawing has none of that behind it.
+> **Where they disagree and there is no netlist, `bom.csv` wins.** It is
+> generated from fragments, `merge-bom.py --check` proves the master matches
+> them, and the commit hook runs it. A drawing has none of that behind it.
 >
-> **This is temporary and the fix is planned**: one netlist per circuit,
-> authoritative for connectivity, with the drawing checked against it or
-> generated from it. See the netlist TODO in `ROADMAP.md`. Until then, treat a
-> drawing as a diagram of intent and confirm every value against the row.
+> **Where a `netlist.yaml` sits beside the page, the drawing is checked
+> against it** by `tools/check-netlist.py`, which also proves the netlist
+> against `bom.csv` and against `nets.yaml`. **The rollout is partial**: run
+> that tool with no arguments and it prints every drawing page still without
+> one, by name. Do not restate the count here or anywhere else - that is how
+> it goes stale. On a page with no netlist yet, treat the drawing as a diagram
+> of intent and confirm every value against the row.
 
 | Directory | |
 |---|---|
@@ -50,6 +58,10 @@ a wiring instruction and two pages disagreeing about a net is a short.
 **Four drawing shorthands, and they are shorthands — not missing parts.** The
 ASCII drawings use a short spelling where the full refdes would break column
 alignment. When transcribing a netlist, expand them:
+
+A netlist declares its own alias with `drawn_as:`, which is what makes the
+shorthand checkable rather than merely documented; this table is for the
+pages that have no netlist yet.
 
 | Drawn as | BOM row |
 |---|---|

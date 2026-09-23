@@ -228,19 +228,11 @@ spurious note, made countable by the marker pattern (ADR 0001).
 netlist beside it. The netlist becomes authoritative; the ASCII drawing
 becomes a representation of it.**
 
-**16 of 26 schematic pages carry a drawing** — 243 drawn lines naming 48
-reference designators. `ls hardware/**/*.md` and look for box characters, or
-re-run the count; it is not restated here.
-
-| Page | Drawn lines | Refdes named |
-|---|---|---|
-| `module/power-entry` | 29 | 10 |
-| `carrier/carrier` | 48 | 7 |
-| `module/breath-output-stage` | 16 | 7 |
-| `carrier/power-entry-instrument` | 14 | 6 |
-| `module/pitch-stage` | 12 | 4 |
-| `module/dac8568` | 14 | 3 |
-| the other ten | 96 | 11 |
+**How many pages carry a drawing, how many are converted, and which are
+left: `python3 tools/check-netlist.py` prints all three on every run** and
+names each pending page. There is deliberately no count in this sentence —
+a restated count is the defect this whole file is trying to stop, and the
+first version of this paragraph carried three of them.
 
 **Why this is the fix and not a tidy-up.** Every page-vs-BOM conflict found
 in the 2026-09-22 review exists *because a drawing is authoritative by
@@ -266,10 +258,13 @@ value, every net must have at least two endpoints, and the drawing can be
 checked against the netlist or regenerated from it. The whole class stops
 being something a review has to find by reading.
 
-**Decided and started (2026-09-22):** hand-authored YAML is authoritative;
-KiCad is generated from it later. `tools/check-netlist.py` gates it through
-the commit hook. One circuit converted as a pilot,
-`module/breath-output-stage`, and it found a real defect on its first run.
+**Decided and in progress (2026-09-22):** hand-authored YAML is
+authoritative; KiCad is generated from it later. `tools/check-netlist.py`
+gates it through the commit hook. Circuits are converted one at a time and
+**every one so far has forced a corpus change** — a drawing value the BOM
+contradicted, an aggregate BOM row that could not be netlisted because one
+`part` field held two values, a bundled master net that no layout could have
+used, and a part drawn on four pages with no BOM row behind it.
 
 **`hardware/nets.yaml` is the MASTER, and it is the piece a per-circuit file
 cannot provide.** A circuit's `netlist.yaml` can only declare *its own side*
@@ -281,25 +276,17 @@ The master owns the net; each circuit's `ports:` must resolve to it; and the
 check runs **both ways**, which is what made the `circuit:` dependency edges
 trustworthy when it was applied to them.
 
-**Open, and worth deciding before writing the remaining sixteen files:**
+**Settled, and no longer open.** Format: hand-authored YAML, `components:`
+and `nets:`, matching the `circuit.yaml` already in each directory — the
+tie-breaker was that these are authored by hand and KiCad is generated from
+them, not the other way round. Where it sits: one `netlist.yaml` per circuit
+directory, beside the page, its `bom.csv` fragment and its `circuit.yaml`.
 
-1. **Format.** KiCad `.net` is the obvious target since the boards get laid
-   out there and it would round-trip; a small YAML of `nets:` and
-   `components:` is far easier to write by hand and to diff, and matches
-   `circuit.yaml` already sitting in each directory. **The tie-breaker is
-   whether these are authored by hand or exported from the EDA tool**, which
-   is really the question of which comes first — and that is an ADR, not a
-   preference.
-2. **Whether the drawing is then generated.** If it is, the alignment drift
-   recorded against five pages stops being possible. If it is not, a check
-   that the drawing's refdes set matches the netlist's is most of the value
-   for a fraction of the work.
-3. **Where it sits.** One `netlist.yaml` (or `.net`) per circuit directory,
-   beside the page, its `bom.csv` fragment and its `circuit.yaml`.
-
-**Not started.** Blocks nothing today; the drawings are correct as of
-2026-09-22. It is the structural answer to the defect class that has cost
-the most review time, and it should land before the first board is laid out.
+**Still open: whether the drawing is then generated.** If it is, the
+alignment drift recorded against five pages stops being possible. If it is
+not, the drawing-vs-netlist check that `check-netlist.py` already runs is
+most of the value for a fraction of the work, and it has been catching
+things since the first circuit.
 
 ## Open items blocking work
 
