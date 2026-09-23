@@ -136,12 +136,32 @@ def check_master(master, seen, problems, have_netlist, deferred):
             elif got != role:
                 problems.append(f"nets.yaml: {net!r} names {circ} as {role}, "
                                 f"but that circuit declares dir {got!r}")
-    # and the other direction: a port naming a net nobody owns
+    # and the other direction: a port naming a net nobody owns, or naming one
+    # that does not name it back.
+    #
+    # THIS HALF WAS MISSING. The forward loop walks the master's own lists, so
+    # a circuit could declare a port on a net the master never associates with
+    # it and nothing said a word - which is the same one-sided declaration the
+    # master exists to stop, arriving from the other side.
     for net, by in seen.items():
         if net not in master:
             who = ", ".join(sorted(by))
             problems.append(f"{who}: port {net!r} is in no master net "
                             f"(add it to hardware/nets.yaml)")
+            continue
+        spec = master[net]
+        named = {spec.get("driver"), spec.get("origin")}
+        named |= set(spec.get("receivers") or [])
+        named |= set(spec.get("reference") or [])
+        named |= set(spec.get("multi_driver") or [])
+        # `proposed:` is how a circuit that is DRAWN BUT NOT ADOPTED declares
+        # a port without the master asserting the board has that connection.
+        named |= set(spec.get("proposed") or [])
+        for circ in by:
+            if circ not in named:
+                problems.append(f"{circ}: declares a port on {net!r} and "
+                                f"hardware/nets.yaml does not name it on that "
+                                f"net")
 
 
 def check_global(specs, bom, problems):

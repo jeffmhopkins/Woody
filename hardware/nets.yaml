@@ -196,6 +196,7 @@ nets:
       - module/mod-channels
       - module/pitch-stage
       - module/panel-led
+    proposed: [module/breath-response-shaper]
 
   MODULE_ANALOG_NEG12:
     kind: power
@@ -206,6 +207,7 @@ nets:
       - module/breath-receive-stage
       - module/mod-channels
       - module/pitch-stage
+    proposed: [module/breath-response-shaper]
 
   BUS_5V:
     kind: power
@@ -236,6 +238,7 @@ nets:
       - module/dac8568
       - module/mod-channels
       - module/pitch-stage
+    proposed: [module/breath-response-shaper]
     note: >
       Where AGND_MOD and DIG_GND meet is the tracked figure dig-gnd-topology
       and is DISPUTED. This file records which circuits reference the net; it
@@ -347,9 +350,12 @@ nets:
     figure: inamp-full-scale
     driver: module/breath-receive-stage
     receivers: [module/breath-output-stage]
+    proposed: [module/breath-response-shaper]
     note: >
-      module/breath-response-shaper also reads this node and is `open` - add
-      it to receivers when that circuit is fitted, not before.
+      `proposed:` means DRAWN BUT NOT ADOPTED. That circuit reads this node in
+      its drawing and every one of its BOM rows is `open`, so it declares the
+      port and this file does NOT claim the board has the connection. Move it
+      into receivers when it is fitted, not before.
 
   # ======================================================================
   # MODULE: panel

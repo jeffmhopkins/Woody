@@ -33,6 +33,13 @@ The `Dir` and `Peer` columns are defined once in
 
 ## The property the circuit is built around
 
+*Connectivity is **[`netlist.yaml`](netlist.yaml)**, not this drawing — for the
+half of the circuit that is drawn. That file states, and
+`tools/check-netlist.py` enforces, that this stage is **proposed**:
+`hardware/nets.yaml` carries it under `proposed:` on the three nets it reads,
+which declares the ports without claiming the board has the connection.*
+
+
 An inverting stage sits at a virtual ground. Span a pot between **a signal
 that is `+V/2`** and **the stage's own output, which is `−V/2`**, and the
 wiper voltage is
@@ -131,6 +138,15 @@ divider — two more parts per side, piecewise, and no thermal behaviour.
 
 ## Open before layout
 
+- **The restoring half is costed and not drawn.** The cost table above
+  spends *both* remaining OPA2197 halves — one shaping at ÷2, one restoring
+  ×2 to put scale and polarity back — and only the shaping half is in the
+  drawing. The restore stage has no drawing and no passives in any `bom.csv`
+  row, so `netlist.yaml` stops at `V_shaped` rather than inventing it.
+  **Decided by:** drawing it, at which point its two resistors get rows like
+  `R-RESP-IN` and `R-RESP-FB` just did — those three (R1, R2 and the 2 × 10 k
+  divider) were in this page's cost table and in no BOM row at all until
+  2026-09-23.
 - **The extra inversion.** This stage inverts twice, so polarity is
   restored — but the existing chain's polarity was never re-derived with a
   stage inserted. Check it end to end before layout, not after.
