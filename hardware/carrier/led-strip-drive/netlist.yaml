@@ -1,0 +1,140 @@
+# AUTHORITATIVE for connectivity. The ASCII drawing in led-strip-drive.md is
+# a REPRESENTATION of this file.
+#
+# THE STRIPS ARE NOT IN THIS FILE and cannot be: they are two lengths of tape
+# on the far side of a connector, 25 addressable LEDs with their own supply.
+# J-LED-L and J-LED-R are the boundary, and the nets stop at their pins.
+
+circuit: carrier/led-strip-drive
+title: LED strip drive
+page: led-strip-drive.md
+
+ports:
+  IO1:             {dir: in,  from: carrier/carrier}
+  IO2:             {dir: in,  from: carrier/carrier}
+  INST_5V_A:       {dir: in,  from: carrier/power-entry-instrument, figure: matrix-led-current}
+  UMBILICAL_POS12: {dir: in,  from: module/umbilical-load-switch, figure: umbilical-current}
+  PWR_GND:         {dir: ref, from: module/power-entry, figure: dig-gnd-topology}
+
+components:
+
+  U-LVLSHIFT:
+    value: "74AHCT125"
+    pins: [1A, 1Y, 1OE, 2A, 2Y, 2OE, 3A, 3Y, 3OE, 4A, 4Y, 4OE, VCC, GND]
+    note: "ON THE 5 V RAIL, and that is the point: TTL thresholds mean a 3.3 V input reads high, and the output is ~4.4 V minimum into a WS2815 that wants 3.15-3.85 V. Gates B and D are spare - the head of each strip grounds its BI rather than being driven"
+
+  C-DECOUPLE-LED:
+    of: C-DECOUPLE-CARRIER
+    value: "100nF"
+    drawn_as: C-DECOUPLE-CARRIER
+    pins: [1, 2]
+    note: "AT the package, not near it"
+
+  R-LED-PD-1:
+    of: R-LED-PD
+    value: "10k 1%"
+    pins: [1, 2]
+    note: "PULL-DOWN, and it cannot be added later. GPIO1 is high-impedance for the bootloader window, OE is tied low, and an AHCT input floating near its threshold becomes clean 5 V edges into 25 LEDs on a 12 V rail before any firmware runs"
+
+  R-LED-PD-2:
+    of: R-LED-PD
+    value: "10k 1%"
+    pins: [1, 2]
+    note: "Same, on GPIO2"
+
+  R-LED-SER-L:
+    of: R-LED-SER
+    value: "330R"
+    drawn_as: R-LED-SER
+    pins: [1, 2]
+    note: "Series into the strip's DI, the vendor's recommended circuit"
+
+  R-LED-SER-R:
+    of: R-LED-SER
+    value: "330R"
+    pins: [1, 2]
+
+  J-LED-L:
+    value: "4-way"
+    pins: [POS12, GND, DI, BI]
+    note: "Strip power passes through this connector and is carrier/power-entry-instrument's net, not this circuit's"
+
+  J-LED-R:
+    value: "4-way"
+    pins: [POS12, GND, DI, BI]
+
+nets:
+
+  IO1:
+    - port: IO1
+    - R-LED-PD-1.1
+    - U-LVLSHIFT.1A
+
+  IO2:
+    - port: IO2
+    - R-LED-PD-2.1
+    - U-LVLSHIFT.3A
+
+  GATE_A_OUT:
+    - U-LVLSHIFT.1Y
+    - R-LED-SER-L.1
+
+  GATE_C_OUT:
+    - U-LVLSHIFT.3Y
+    - R-LED-SER-R.1
+
+  LED_DI_L:
+    - R-LED-SER-L.2
+    - J-LED-L.DI
+
+  LED_DI_R:
+    - R-LED-SER-R.2
+    - J-LED-R.DI
+
+  INST_5V_A:
+    - port: INST_5V_A
+    - U-LVLSHIFT.VCC
+    - C-DECOUPLE-LED.1
+
+  UMBILICAL_POS12:
+    - port: UMBILICAL_POS12
+    - J-LED-L.POS12
+    - J-LED-R.POS12
+
+  # THE FOUR ENABLES ARE TIED LOW, which is why the pull-downs are needed
+  # rather than optional - the buffer is live through the whole bootloader
+  # window. The two spare gates' inputs are tied for the reason the module's
+  # spare is: an enabled CMOS gate with a floating input is the one wrong
+  # answer, and the part's own row says to tie every unused input.
+  #
+  # BI IS A GROUND CONNECTION, NOT A DRIVEN ONE. The datasheet's recommended
+  # circuit ties the first pixel's BI to its GND; from the second pixel on,
+  # BI comes from the previous pixel's DI inside the tape. The head has
+  # nothing to lag, so there is nothing to drive - which is what keeps the LED
+  # loom at 6 conductors and leaves gates B and D spare.
+  PWR_GND:
+    - port: PWR_GND
+    - U-LVLSHIFT.GND
+    - U-LVLSHIFT.1OE
+    - U-LVLSHIFT.2OE
+    - U-LVLSHIFT.3OE
+    - U-LVLSHIFT.4OE
+    - U-LVLSHIFT.2A
+    - U-LVLSHIFT.4A
+    - C-DECOUPLE-LED.2
+    - R-LED-PD-1.2
+    - R-LED-PD-2.2
+    - J-LED-L.GND
+    - J-LED-R.GND
+    - J-LED-L.BI
+    - J-LED-R.BI
+
+  # The two spare gates drive nothing, which is fine.
+  SPARE_GATE_B_OUT:
+    - U-LVLSHIFT.2Y
+  SPARE_GATE_D_OUT:
+    - U-LVLSHIFT.4Y
+
+external_endpoints:
+  - SPARE_GATE_B_OUT
+  - SPARE_GATE_D_OUT

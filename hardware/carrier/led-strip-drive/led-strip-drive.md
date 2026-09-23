@@ -29,6 +29,11 @@ The `Dir` and `Peer` columns are defined once in
 
 ## §5 LED data
 
+*Connectivity is **[`netlist.yaml`](netlist.yaml)**, not this drawing.
+The drawing is a representation of it, `tools/check-netlist.py` checks that
+the two agree, and where they do not the netlist wins.*
+
+
 ```
   IO1 ──┬──[R-LED-PD 10k]── GND   ** PROPOSED **
         │
@@ -38,7 +43,7 @@ The `Dir` and `Peer` columns are defined once in
 
   IO2 ──┬──[R-LED-PD 10k]── GND   ** PROPOSED **
         │
-        └──►│ gate C ├──[330R]── J-LED-R DI
+        └──►│ gate C ├──[R-LED-SER 330R]── J-LED-R DI
                                           J-LED-R BI ──► GND   (gate D SPARE)
 
   74AHCT125 rail = 5 V (TTL thresholds, so 3.3 V in reads high)  [repo] 0014

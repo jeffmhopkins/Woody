@@ -98,6 +98,24 @@ nets:
 
   # --- the carrier board's own supply tree -------------------------------
 
+  # --- the dev board's GPIO, where it leaves carrier/carrier ------------
+
+  IO1:
+    kind: signal
+    domain: digital
+    carries: "LED data to the left WS2815 strip, ESP32 GPIO1 to the level shifter"
+    driver: carrier/carrier
+    receivers: [carrier/led-strip-drive]
+    note: "HIGH-IMPEDANCE THROUGH THE BOOTLOADER WINDOW, which is why R-LED-PD exists: OE is tied low, so a floating AHCT input becomes clean 5 V edges into 25 addressable LEDs before any firmware runs"
+
+  IO2:
+    kind: signal
+    domain: digital
+    carries: "LED data to the right WS2815 strip, ESP32 GPIO2 to the level shifter"
+    driver: carrier/carrier
+    receivers: [carrier/led-strip-drive]
+    note: "Same bootloader-window hazard as IO1"
+
   INST_5V_A:
     kind: power
     carries: "Buck A, through D-USBOR onto the dev board's 5 V pin"
