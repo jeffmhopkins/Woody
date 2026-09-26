@@ -737,10 +737,23 @@ strip_l = cb_x[1] - lighting_strip_inset - strip_x0;
 // side of the cavity and back in under the key board; its length is set by
 // the lid flipped open over the far edge (drc.echo).
 ffc_sz = [boards_ffc_conn_l, boards_ffc_conn_w];   // along x, across y
-kb_ffc_y = W / 2 - tube_side * (switch_cluster_pcb_w / 2 - boards_ffc_conn_w / 2 - 0.5);
-mb_ffc_y = cb_y[tube_side < 0 ? 1 : 0] + tube_side * (boards_ffc_conn_w / 2 + 1.5);
-function ffc_clear(x, cl) = min([for (k = cluster_keys(cl))
-    max(abs(key_xy(k)[0] - x) - boards_ffc_conn_l / 2, abs(key_xy(k)[1] - kb_ffc_y) - boards_ffc_conn_w / 2)]) >= ks33_stub + 0.3;
+ffc_s = tube_side < 0 ? 1 : -1;                  // the far side, where the ribbons are
+kb_ffc_y = W / 2 + ffc_s * (switch_cluster_pcb_w / 2 - boards_ffc_conn_w / 2 - 0.5);
+kb_ffc_z = top_z - boards_ffc_conn_h;           // underside of the key board's connector
+mb_ffc_z = cb_top + boards_ffc_conn_h;          // top of the main board's connector
+// A C: both connectors take the ribbon from the far side, level, and it
+// runs out of one, round a semicircle toward the side wall, and into the
+// other. The semicircle spans the two entry heights; the main board's
+// connector stands in from the wall by it.
+ffc_zk = kb_ffc_z + boards_ffc_conn_h / 2;      // entry heights
+ffc_zm = cb_top + boards_ffc_conn_h / 2;
+ffc_r = (ffc_zk - ffc_zm) / 2;
+ffc_yc = (ffc_s > 0 ? W - u_y0 : u_y0) - ffc_s * (boards_board_clear + ffc_r);   // the C's centre, and the main connector's mouth
+mb_ffc_y = ffc_yc - ffc_s * boards_ffc_conn_w / 2;
+// Clear of the key board's switch pins above and the thumb switches' pins
+// through the main board below.
+function ffc_clear(x, cl) = min([for (k = concat(cluster_keys(cl), bottom_keys)) let(y = key_face(k) == "top" ? kb_ffc_y : mb_ffc_y)
+    max(abs(key_xy(k)[0] - x) - boards_ffc_conn_l / 2, abs(key_xy(k)[1] - y) - boards_ffc_conn_w / 2)]) >= ks33_stub + 0.3;
 // Along the key board: the clear place nearest its middle, from its keys'
 // positions and the midpoints between them.
 function ffc_x(cl) = let(t = [for (k = cluster_keys(cl)) key_xy(k)[0]], m = (min(t) + max(t)) / 2,
@@ -750,27 +763,31 @@ function ffc_x(cl) = let(t = [for (k = cluster_keys(cl)) key_xy(k)[0]], m = (min
 ribbon_cls = ["left_hand", "right_hand"];
 function kb_ffc(cl) = [ffc_x(cl), kb_ffc_y];
 function mb_ffc(cl) = [ffc_x(cl), mb_ffc_y];
-kb_ffc_z = top_z - boards_ffc_conn_h;           // underside of the key board's connector
-mb_ffc_z = cb_top + boards_ffc_conn_h;          // top of the main board's connector
-// The fold, in (y, z) at the connector's x: up the far side, over, down,
-// up and down again beside the key board's edge (the length the open lid
-// needs), and in under the edge into its connector.
-function ffc_path(cl) = let(ym = mb_ffc_y, yk = kb_ffc_y, s = tube_side < 0 ? 1 : -1,
-                            yw = W - u_y0 - 1.5, ye = W / 2 + s * (switch_cluster_pcb_w / 2 + 1.5),
-                            zt = z_lid_bot - 2.5, zl = cb_top + boards_smt_h + 1, zk = kb_ffc_z + boards_ffc_conn_h / 2)
-    [[ym, mb_ffc_z], [ym, zt], [s > 0 ? yw : W - yw, zt], [s > 0 ? yw : W - yw, zl], [ye + s * 2, zl],
-     [ye + s * 2, zt - 2], [ye, zt - 2], [ye, zk], [yk + s * boards_ffc_conn_w / 2, zk]];
+// ONE CLEAN ARC (owner, 2026-09-26: "a clean arc instead of whatever that
+// is"), in (y, z) at the connector's x: out of the key board's connector,
+// round the C toward the side wall, into the main board's. Its length is
+// what one arc can have in that space, so the lid tilts only a little with
+// the ribbons attached; to take it off, flip the two ZIF latches first
+// (drc.echo gives the angle).
+function ffc_path(cl) = let(zc = (ffc_zk + ffc_zm) / 2)
+    concat([[kb_ffc_y + ffc_s * boards_ffc_conn_w / 2, ffc_zk]],
+           [for (a = [90 : -7.5 : -90]) [ffc_yc + ffc_s * ffc_r * cos(a), zc + ffc_r * sin(a)]]);
 function path_len(p) = sum([for (i = [0 : len(p) - 2]) norm(p[i + 1] - p[i])]);
-// Opened: the lid flipped 180 degrees over the far top edge.
-function ffc_open_len() = let(s = tube_side < 0 ? 1 : -1, ye = s > 0 ? W : 0, yk = kb_ffc_y, zk = kb_ffc_z)
-    norm([2 * ye - yk - mb_ffc_y, 2 * T - zk - mb_ffc_z]);
+// The lid hinged on its far top edge and opened by phi: where the key
+// board's connector goes, and how far that is from the main board's.
+function ffc_need(phi) = let(s = tube_side < 0 ? 1 : -1, hy = s > 0 ? W : 0, a = s * (kb_ffc_y - hy), b = kb_ffc_z - T,
+                             q = [a * cos(-phi) - b * sin(-phi), a * sin(-phi) + b * cos(-phi)])
+    norm([hy + s * q[0] - mb_ffc_y, T + q[1] - mb_ffc_z]);
+function ffc_open_angle(l, phi = 0) = phi < 180 && ffc_need(phi + 1) <= l - 3 ? ffc_open_angle(l, phi + 1) : phi;
 module ribbons_3d() {
-    for (cl = ribbon_cls) let(k = kb_ffc(cl), m = mb_ffc(cl)) {
+    for (cl = ribbon_cls) let(k = kb_ffc(cl), m = mb_ffc(cl), p = ffc_path(cl)) {
         P([0.85, 0.85, 0.80], false, str("ZIF ", cl, " key board")) translate([k[0] - ffc_sz[0] / 2, k[1] - ffc_sz[1] / 2, kb_ffc_z])
             cube([ffc_sz[0], ffc_sz[1], boards_ffc_conn_h]);
         P([0.85, 0.85, 0.80], false, str("ZIF ", cl, " main board")) translate([m[0] - ffc_sz[0] / 2, m[1] - ffc_sz[1] / 2, cb_top])
             cube([ffc_sz[0], ffc_sz[1], boards_ffc_conn_h]);
-        P([0.80, 0.55, 0.20], false, str("ribbon ", cl)) ribbon([for (q = ffc_path(cl)) [k[0], q[0], q[1]]], routing_ffc_w, routing_ffc_t);
+        // Swept as a strip of the ribbon's width along x, bending in (y, z).
+        P([0.80, 0.55, 0.20], false, str("ribbon ", cl)) for (i = [0 : len(p) - 2])
+            hull() for (q = [p[i], p[i + 1]]) translate([k[0], q[0], q[1]]) cube([routing_ffc_w, routing_ffc_t, routing_ffc_t], center = true);
     }
 }
 
@@ -816,6 +833,9 @@ module centre_board_3d() {
     P([0.35, 0.55, 0.40], false, "parts main board") translate([0, 0, cb_top]) linear_extrude(boards_smt_h) difference() {
         offset(-0.5) cb_2d();
         for (cl = ribbon_cls) translate(mb_ffc(cl)) square(ffc_sz + [1, 1], center = true);
+        // and nothing under the C, between the connector and the wall
+        for (cl = ribbon_cls) translate([mb_ffc(cl)[0] - routing_ffc_w / 2 - 0.5, ffc_s > 0 ? ffc_yc : 0])
+            square([routing_ffc_w + 1, ffc_s > 0 ? W : ffc_yc]);
         translate(sensor_c) square([boards_sensor_body + 1, boards_sensor_leads + 1], center = true);
         for (c = tall_c) translate(c) square(tall_sz + [1, 1], center = true);
         for (c = cb_standoffs) translate(c) circle(d = boards_standoff_d + 1);
@@ -1042,9 +1062,10 @@ module drc_report() {
             " [approx: key board footprints as squares; clash.txt is the check] - negative means low-profile parts"));
     for (cl = ribbon_cls) drc(ffc_x(cl) != undef, str("ribbon connector on the ", cl, " key board clear of its switches"),
                               ffc_x(cl) == undef ? "none found" : ffc_x(cl), "mm along the body");
-    drc(path_len(ffc_path(ribbon_cls[0])) >= ffc_open_len() + 5, "ribbon long enough to open the lid",
-        [path_len(ffc_path(ribbon_cls[0])), ffc_open_len()],
-        "mm folded as drawn vs mm needed with the lid flipped over the far edge (plus 5 mm slack)");
+    rp = ffc_path(ribbon_cls[0]);
+    drc(max([for (q = rp) q[1]]) <= z_lid_bot - 1, "ribbon arc clear of the lid", z_lid_bot - max([for (q = rp) q[1]]), "mm under the lid at its peak");
+    drc(undef, "ribbon arc length, and the lid tilt it allows attached", [path_len(rp), ffc_open_angle(path_len(rp))],
+        "mm, and degrees the lid opens on its far edge before the ribbon is taut (3 mm slack) - beyond that, flip the ZIF latches");
 
     mw = plate_x1 - (top_last + plate_cutout / 2);
     drc(mw >= 3, "key plate beyond the last key cutout", mw, "mm of aluminium; the plate stops short of the Matrix");

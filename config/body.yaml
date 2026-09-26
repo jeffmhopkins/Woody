@@ -315,7 +315,7 @@ boards:
   ffc_conn_l:
     value: 17.0
     status: tbd
-    source: "a 12-way 1.0 mm pitch ZIF FFC connector, along the body [from memory]"
+    source: "a 12-way 1.0 mm pitch right-angle (side-entry) ZIF FFC connector, along the body [from memory]"
     decided_by: "M4, with the part"
   ffc_conn_w:
     value: 5.5

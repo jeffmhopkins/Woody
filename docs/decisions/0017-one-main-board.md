@@ -38,10 +38,12 @@ one big long board?")
   centre board had, so the regulator block fits anywhere on it.
 - **The key boards connect to it by ribbon** (owner, same day, after asking
   how they connected): one 12-way flat flex ribbon per key board, ZIF
-  connectors on both boards, folded up the far side of the cavity when
-  closed. The key boards hang from the lid, so blind-mating stacking headers
-  would have unplugged every time the lid came off; the ribbons let it open
-  with them attached. Flat flex rather than IDC because an IDC box header and
+  connectors on both boards, the ribbon a single clean C toward the far side
+  wall (the owner's choice over a longer folded ribbon). The key boards hang
+  from the lid, so blind-mating stacking headers would have had to re-mate
+  blind every time it closed; with ribbons the lid tilts open a little with
+  them attached (`mechanical/drc.echo`), and comes off after flipping two ZIF
+  latches - no tools, and nothing to line up on the way back. Flat flex rather than IDC because an IDC box header and
   plug are too tall for the gap with parts on both boards
   (`mechanical/DESIGN.md`).
 - **The breath sensor moves to the mouth end** (owner's choice between the

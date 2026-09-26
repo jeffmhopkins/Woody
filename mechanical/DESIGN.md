@@ -214,11 +214,13 @@ only as good as those envelopes. Group the report's lines by these causes
 1. **Each key board is on a ribbon** (owner, 2026-09-26, ADR 0017), not a
    blind-mating header: a 12-way flat flex ribbon from a low ZIF connector on
    the key board's underside, beside its switches' pins on the side away from
-   the tube, to one on the main board's far edge below it. Closed, it folds up
-   the far side of the cavity and back in under the key board's edge
-   (`renders/section-ribbon.png`); its length is set by the lid flipped open
-   over the far edge (*"ribbon long enough to open the lid"*), so the lid
-   comes off with the key boards still connected. A 2.54 IDC box header and
+   the tube, to one on the main board below it; both connectors are placed
+   clear of the switch pins above and below. **One clean arc** (owner, same
+   day): both connectors take the ribbon from the far side, and it runs round
+   a C toward the side wall (`renders/section-ribbon.png`). One arc is short,
+   so the lid only tilts a little with the ribbons attached (*"ribbon arc
+   length, and the lid tilt it allows attached"*); to take the lid off, flip
+   the two ZIF latches first. A 2.54 IDC box header and
    plug stand ~12-13 mm [from memory] in a 17 mm gap with parts on both
    boards, which is why it is flat flex.
 2. **The hardware pages do not follow yet:** `hardware/interfaces/key-chain-loom/`, the J-CHAIN,
