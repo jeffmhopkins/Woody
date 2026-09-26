@@ -81,7 +81,14 @@ Three things can claim each end, and the largest wins:
   against the tail cap. In practice the matrix sets it.
 - **The carrier's height is derived** from the Matrix standing on it: plate
   underside, diffuser gap, LEDs, board, header, carrier.
-- **Between:** the key gaps, and `layout.gap` between the hands.
+- **Between:** the key gaps, and the space between the hands.
+
+**Equal bands (owner, 2026-09-26).** The space before the left hand, between
+the hands and after the right hand are made the same: the largest any of
+the three needs, measured as the plan drawing labels them (body end to first
+key centre, last left key to first right key, last key to tail face).
+`layout.equal_bands` switches it; `layout.gap` is then only a minimum.
+`drc.echo` prints the band and which end set it.
 
 Every render aims at the body's centre or tail (`origin` in `outputs.yaml`),
 so a length change reframes nothing.

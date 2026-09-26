@@ -160,10 +160,19 @@ layout:
     status: tbd
     source: "RH1-3 on the centreline; RH4 / RH5 the little finger's side-by-side pair, centred as LH4 / LH5; RH6 the single key below it, IN LINE with RH4 - the pair key on the player's right, the recorder's direction (owner, 2026-09-26)"
     decided_by: "M2 - hands on the mule; the sign too"
+  # EQUAL BANDS (owner, 2026-09-26): the space before the left hand, between
+  # the hands and after the right hand are made the same - the largest that
+  # any one of them needs (the display sets the mouth end's need, the LED
+  # matrix and connector the tail's). drc.echo prints the band and which set
+  # it. `gap` is then only a minimum for the space between the hands.
+  equal_bands:
+    value: true
+    status: settled
+    source: "owner, 2026-09-26: 'copy the same space above the left keys to between the hands and at the bottom'"
   gap:
     value: 50.0
     status: nominal
-    source: "[adr] ADR 0009 length table - the U-bolt band"
+    source: "[adr] ADR 0009 length table - the U-bolt band. A MINIMUM while equal_bands is on"
   rh_gaps:
     value: [20.0, 20.0, 18.0, 0.0, 18.0]
     status: nominal

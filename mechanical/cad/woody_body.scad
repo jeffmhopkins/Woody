@@ -111,10 +111,31 @@ disp_x0 = x_in0 + layout_mouth_extra;
 disp_x1 = disp_x0 + disp_board[0];
 // The left-thumb cluster's extent relative to LH1 (x_lh0 = 0), recesses included.
 lt_rel = concat([for (i = [0 : 3]) layout_lt_arc_start + i * layout_lt_arc_length / 3], [layout_lt_arc_start, layout_lt_arc_start + layout_lt_arc_length]);
-x_lh0 = max(x_in0 + layout_mouth_extra + switch_keycap / 2 + stack_cap_clear,  // the first top cap
-            disp_x1 + 0.5 + layout_underside_clear - (min(lt_rel) - rc / 2));  // the first thumb recess (display cut is +0.5)
+mouth_req = max(x_in0 + layout_mouth_extra + switch_keycap / 2 + stack_cap_clear,  // the first top cap
+                disp_x1 + 0.5 + layout_underside_clear - (min(lt_rel) - rc / 2));  // the first thumb recess (display cut is +0.5)
+
+// The TAIL's needs, measured from the last top key's centre. Everything at
+// the tail hangs off the right hand, so it can be worked out in the right
+// hand's own frame (x_rh0 = 0) before the right hand is placed.
+rt_rest_rel = [layout_rt_rest_at * rh_run, W / 2];
+function rt_rel(i) = i == 0 ? rt_rest_rel + [layout_rt_offset, 0]
+                   : rt_rest_rel + [-0.6 * layout_rt_offset, (i == 1 ? -1 : 1) * 0.6 * layout_rt_offset];
+top_last_rel = max([for (i = [0 : len(layout_rh_gaps)]) cum(layout_rh_gaps, i)]);
+rt_last_rel = max([for (i = [0 : count("right_thumb") - 1]) rt_rel(i)[0]]);
+tail_claims_rel = [
+    top_last_rel + plate_cutout / 2 + cluster_margin + layout_tail_clear + boards_matrix_board + layout_tail_clear + ethercon_depth,
+    rt_last_rel + rc / 2 + layout_underside_clear + openings_service_cover_w + 2 * layout_tail_clear + ethercon_depth,
+    rt_last_rel + rc / 2 + layout_underside_clear + ends_tail_cap_t];
+tail_req = max(tail_claims_rel) - top_last_rel;
+
+// EQUAL BANDS (owner, 2026-09-26): the space before the left hand, between
+// the hands and after the right hand are the same - the largest any of them
+// needs. Measured as the plan drawing labels them: body end to the first
+// key centre, last left key to the first right key, last key to the tail.
+band = layout_equal_bands ? max(mouth_req, tail_req, layout_gap) : undef;
+x_lh0 = layout_equal_bands ? band : mouth_req;
 x_gap0 = x_lh0 + lh_run;
-x_rh0 = x_gap0 + layout_gap;
+x_rh0 = x_gap0 + (layout_equal_bands ? band : layout_gap);
 x_tail0 = x_rh0 + rh_run;
 // -------------------------------------------------------------- keys ------
 function key_id(k) = k[0];
@@ -135,11 +156,10 @@ function prov_xy(k) =
 // (ADR 0010). A half-sine bulge of lt_arc_lateral across a lt_arc_length run.
 function lt_arc(t) = [x_lh0 + layout_lt_arc_start + t * layout_lt_arc_length,
                       W / 2 - layout_lt_arc_lateral / 2 + layout_lt_arc_lateral * sin(180 * t)];
-rt_rest = [x_rh0 + layout_rt_rest_at * rh_run, W / 2];
+rt_rest = [x_rh0, 0] + rt_rest_rel;
 // Right-thumb control switches, offset from the rest (ADR 0010): one toward
 // the tail, two flanking it toward the mouthpiece. Placeholder geometry.
-function rt_xy(i) = i == 0 ? rt_rest + [layout_rt_offset, 0]
-                  : rt_rest + [-0.6 * layout_rt_offset, (i == 1 ? -1 : 1) * 0.6 * layout_rt_offset];
+function rt_xy(i) = [x_rh0, 0] + rt_rel(i);
 // Three spare-switch cutouts, required in the DXF by M3 (ADR 0010): octave
 // up and down extend the left-thumb arc, hold sits before the right thumb.
 // Straight extensions of the arc's end keys - the half-sine is not
@@ -163,9 +183,7 @@ tail_fastener_x = matrix_xy[0];
 // The tail underside after the right-thumb cluster: the service cover,
 // turned across the body, under the carrier - which ends before the etherCON.
 service_xy = [rt_last + rc / 2 + layout_underside_clear + openings_service_cover_w / 2, W / 2];
-L = max(matrix_xy[0] + boards_matrix_board / 2 + layout_tail_clear + ethercon_depth,
-        service_xy[0] + openings_service_cover_w / 2 + 2 * layout_tail_clear + ethercon_depth,
-        rt_last + rc / 2 + layout_underside_clear + ends_tail_cap_t);
+L = top_last + (layout_equal_bands ? band : tail_req);
 x_in1 = L - ends_tail_cap_t;
 
 function placed(k) = !is_undef(k[2]) && !is_undef(k[3]);
@@ -574,17 +592,18 @@ module drc_report() {
 
     echo("DRC", "INFO", "overall length (derived)", L, str("mm = ", L / 25.4, " in; mouth cap to LH1 ", x_lh0,
          ", keys ", top_last - x_lh0, " centre to centre, last key to tail face ", L - top_last));
-    drc(undef, "what sets the mouth end", x_lh0 - (x_in0 + layout_mouth_extra + switch_keycap / 2 + stack_cap_clear) > 0.01
+    drc(undef, "what the mouth end needs", mouth_req - (x_in0 + layout_mouth_extra + switch_keycap / 2 + stack_cap_clear) > 0.01
         ? "the display on the underside (it must clear the left-thumb recesses)" : "the first top key",
         str("display occupies X ", disp_x0, " to ", disp_x1));
-    tail_claims = [matrix_xy[0] + boards_matrix_board / 2 + layout_tail_clear + ethercon_depth,
-                   service_xy[0] + openings_service_cover_w / 2 + 2 * layout_tail_clear + ethercon_depth,
-                   rt_last + rc / 2 + layout_underside_clear + ends_tail_cap_t];
     tail_names = ["last key board, the LED matrix on the top face, then the etherCON depth",
                   "right-thumb cluster, the service cover, then the etherCON depth",
                   "the right-thumb cluster against the tail cap"];
-    drc(undef, "what sets the tail end", tail_names[search(max(tail_claims), tail_claims)[0]],
-        str("claims ", tail_claims, " - the largest is the length"));
+    drc(undef, "what the tail end needs", tail_names[search(max(tail_claims_rel), tail_claims_rel)[0]],
+        str(tail_req, " mm after the last key"));
+    if (layout_equal_bands)
+        drc(undef, "equal bands (mouth = between hands = tail)", band,
+            str("mm each; set by the ", band == mouth_req ? "mouth end" : band == tail_req ? "tail" : "minimum gap",
+                " - mouth needs ", mouth_req, ", tail needs ", tail_req, ", gap minimum ", layout_gap));
     drc(strip_l >= strip_run_adr, "LED strips at ADR 0014's length", strip_l,
         str("mm per side against ", strip_run_adr, " in ADR 0014 - fewer LEDs per side if shorter"));
     // Each run's end keys put half a cap into the neighbouring band - the
