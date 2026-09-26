@@ -131,6 +131,28 @@ slice rendered p.4 at 12x to confirm that the recommended circuit ties the first
 pixel's `BI` to `GND`, which is the claim the "two spare gates" argument rests
 on. It is correct.
 
+## N2 — grounds and references
+
+17 findings over all 26 `dir: ref` ports and every pin on every net they name.
+Four verified.
+
+| id | verdict | verification |
+|---|---|---|
+| **N2-1** | **CONFIRMED — all six jack sleeves bond the module analog star to rack ground** | Enumerated: `J-CV-PITCH.SLEEVE`, `J-CV-BREATH.SLEEVE` and `J-CV-MOD1..4.SLEEVE` are all on `AGND_MOD`, across three netlists. `pitch-stage.md` and `mod-channels.md` both say of that net *"Not a return path"*, and ADR 0004 has the analog region joining the star *"and nowhere else"*. The only occurrence of "sleeve" in any page is about a plug shorting tip to sleeve on insertion — **no page states where a sleeve returns**, so these three netlists are the first and only assertion of it, and all three picked the star without flagging the choice. `[test]` `[repo]` |
+| **N2-2** | **CONFIRMED — `DIG_GND` has no instrument end, and both halves of my own check stayed silent** | `carrier/carrier` declares 20 ports and `DIG_GND` is not one of them; `spi-link/netlist.yaml` nets `J-UMB-INST.8` and stops; the master's `DIG_GND` lists `origin: module/power-entry` and references only `interfaces/spi-link` and `module/digital-and-supervision`. So `CS_MOD`'s ground partner — the whole derivation of `umbilical-pinmap` — is open-circuit at the driving end, and the SPI clamp on that board goes to `PWR_GND` instead. **This is the gap in the bidirectional check**: a net that is simply *missing* a participant stays invisible, because the forward pass walks only circuits the master names and the reverse pass walks only ports the netlists declare. Neither side can miss what neither side mentions. `[test]` |
+| **N2-3** | **CONFIRMED — same as N6-1, found independently** | Third cold slice to arrive at `carrier/carrier` having neither a `## Interfaces` table nor a `circuit.yaml`. N2 adds why it matters here: it is the circuit N2-2 needs, which is what makes N2-2 invisible. |
+| **N2-11** | **CONFIRMED in substance, overstated in detail** | Slice says all three `candidates:` citations in `dig-gnd-topology` point at wrong lines, one past the end of a 196-line file. Checked: `power-entry.md:495` against a **197**-line file — past the end, confirmed; `digital-and-supervision.md:53` lands on a blank drawing gutter (`│  │  │`) — wrong line, confirmed; but `0004-cv-interface-module.md:627` lands on *"…so it is the one point entitled to be called ground"*, which is on topic. So **two of three**, not three, and the file is 197 lines not 196. Recorded corrected rather than repeated. `[test]` |
+
+**Not yet verified, not to be repeated:** N2-4 through N2-10, N2-12 through N2-17. The slice marks N2-14 and N2-16 weak by construction.
+
+**Clean, and the most reassuring result in the wave:** the corpus's
+most-warned-about merge **did not happen**. `AGND_SENSE`, `AGND_INST` and
+`AGND_MOD` are never merged; `AGND_SENSE` is `in`/`out` in all three netlists
+and never `ref`; `R1b` sits between the star and the conductor exactly as
+required; `MECH-GNDBOND` is on `PWR_GND` and nowhere near AGND. The slice's
+summary of the whole claim type: **no netlist makes a reference tie the corpus
+does not place — the defect is omission, not misplacement.**
+
 ## Slices still running
 
-N2, N8.
+N8.
