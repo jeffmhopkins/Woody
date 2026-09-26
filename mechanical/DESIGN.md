@@ -73,9 +73,14 @@ Three things can claim each end, and the largest wins:
 - **Mouth end:** the first top cap plus `layout.mouth_extra`; or the
   **underside display**, which sits nearest the mouthpiece and must clear the
   left-thumb recesses — and in practice it is the display that sets it.
-- **Tail end:** the last key board, a fastener pair and the etherCON's depth;
-  or the underside chain after the right thumb — service cover, Matrix window,
-  then the connector; or the right-thumb cluster against the tail cap.
+- **Tail end:** the last key board, then the **LED matrix on the top face**
+  (owner, 2026-09-26) with the last fastener pair beside it, then the
+  etherCON's depth — the connector cannot sit under the Matrix, which stands
+  on the carrier just under the plate; or the underside chain after the right
+  thumb (service cover, then the connector); or the right-thumb cluster
+  against the tail cap. In practice the matrix sets it.
+- **The carrier's height is derived** from the Matrix standing on it: plate
+  underside, diffuser gap, LEDs, board, header, carrier.
 - **Between:** the key gaps, and `layout.gap` between the hands.
 
 Every render aims at the body's centre or tail (`origin` in `outputs.yaml`),

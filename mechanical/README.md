@@ -86,7 +86,7 @@ of a superseded value. Instead:
 
 | | |
 |---|---|
-| ![Underside](renders/underside.png) Underside: thumb recesses, spares (magenta), U-bolt, matrix window, service cover | ![Exploded](renders/exploded.png) The stack, pulled apart |
+| ![Underside](renders/underside.png) Underside: display, thumb recesses, spares (magenta), U-bolt, service cover | ![Exploded](renders/exploded.png) The stack, pulled apart |
 | ![Internals](renders/internals.png) Lid off | ![Tail](renders/tail-detail.png) The tail from inside |
 
 ![Plan from above, with the length budget](renders/plan-top.png)

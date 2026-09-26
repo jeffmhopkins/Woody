@@ -260,18 +260,32 @@ boards:
     status: tbd
     source: "hardware/bom.csv PCB-CARRIER"
     decided_by: "M4"
-  carrier_z:
-    value: 20.0
+  # THE LED MATRIX IS ON THE TOP FACE, just past the last key (owner,
+  # 2026-09-26), seen through a window in the oak top and the plate. The
+  # Matrix board sits face up on headers on the carrier, so the carrier's
+  # height follows from the stack under the plate - it is derived, not set.
+  matrix_header_h:
+    value: 8.5
     status: tbd
-    source: "[calc] oak bottom 8 + diffuser gap 2 + Matrix board 1.6 + machined header ~8.5 [from memory], with the Matrix hung under the carrier per carrier.md section 7"
-    decided_by: "M4, from the real header stack height"
+    source: "machined 2.54 mm female header on the carrier plus the board's male pins, seated [from memory]"
+    decided_by: "M4, from the header actually bought"
+  matrix_gap:
+    value: 1.0
+    status: tbd
+    source: "LED tops to the diffuser under the plate. ADR 0014: thin and close to the LEDs keeps pixels distinct"
+    decided_by: "M6 diffusion prototype"
+  matrix_led_h:
+    value: 1.0
+    status: tbd
+    source: "WS2812B-0807 package height above the board [from memory]"
+    decided_by: "the banked WS2812B-0807 datasheet, if one is found"
 
 # ------------------------------------------------------------- openings ----
 openings:
   matrix_window:
     value: 22.0
     status: nominal
-    source: "[adr] ADR 0009 - 'Roughly 22 mm square'"
+    source: "[adr] ADR 0009 - 'Roughly 22 mm square'; now through the oak top and the plate, on the top face after the keys"
   usb_slot_w:
     value: 12.5
     status: tbd

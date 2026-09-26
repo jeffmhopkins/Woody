@@ -212,7 +212,9 @@ interior rise, near a temperature-sensitive gauge sensor.
 
 This ADR originally recorded that as pure waste, with cutting the supply trace
 as the only remedy. **It is now the instrument's second display**: the board
-faces out through a window in the oak underside at the tail, and the matrix is a
+faces out through a window at the tail — the oak underside originally, the top
+face just past the keys since 2026-09-26 (ADR 0009), which puts the board face
+up and so flips the IMU's Z axis in the firmware's mounting transform — and the matrix is a
 generic assignable surface defaulting to breath (ADR 0014). The idle current is
 being spent either way, and sparse content costs single-digit milliamps on top
 of it.

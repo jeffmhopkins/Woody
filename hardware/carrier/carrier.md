@@ -250,6 +250,13 @@ service header — `J-DISP` and `HDR-SERVICE` — moved verbatim to
 
 ## §7 Dev board mounting and the matrix window
 
+> **Superseded 2026-09-26: the matrix is on the TOP face** (owner, ADR 0009).
+> The ESP32-S3-Matrix stands face up on the carrier's top side under a window
+> in the lid, so there is no cutout to argue about and the underside
+> mounting below is not needed. The carrier's height now follows from that
+> stack (`mechanical/drc.echo`, "carrier height"). Kept as the record of the
+> arithmetic that was.
+
 **Proposed: mount the ESP32-S3-Matrix on the carrier's *underside*, LED face
 outward, and delete the cutout.** ADR 0009 and ADR 0014 both name underside
 mounting as the fallback `[repo]`; this page proposes it as the default, for a

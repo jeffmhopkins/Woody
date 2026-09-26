@@ -74,7 +74,7 @@ the tail — by the body CAD (`mechanical/drc.echo`, "overall length"). It was
 | M3 | Layout locked | Ergonomics settled after 2–3 iterations of M2. No aluminium cut before this |
 | M4 | Stack design | Full laminated stack in CAD, every layer a 2D part, **modelled against the real KS-33 STEP solid** rather than a nominal box (ADR 0002) |
 | M5 | Aluminium top plate | Cut, fitted, switches retained solidly, **bonded to `PWR_GND`**. Not before E13 — see the ordering rules below |
-| M6 | Body | Oak top and bottom, frosted acrylic sides, LEDs, strap points, **tail matrix window + diffuser and USB-C slot** (ADR 0009) |
+| M6 | Body | Oak top and bottom, frosted acrylic sides, LEDs, strap points, **matrix window + diffuser on the top face after the keys, and the USB-C slot** (ADR 0009) |
 | M7 | Integration | Electronics mounted in the body, umbilical connector fitted and strain-relieved |
 | M8 | **Final-assembly gate** | Assembled, lid on, but not signed off. (This row said **Pre-bond gate / assembled but not bonded** until 2026-09-21. The body is no longer bonded shut — it closes on six fasteners onto an RTV gasket, ADR 0009 — so M8 is the last gate before the instrument is treated as finished rather than the last moment it can be opened.) Full E11 breath-noise test re-run on the *final* harness, **thermal soak at the lighting clamp, watching temperature *and the breath zero* at the sensor**, two-hour play test, failure injection, self-test, **pitch scoped while the LEDs sweep** (ADR 0006 — the one test the plan was missing), and **recover both boards through the service header** so the last route in is known good, not assumed (ADR 0009). Nothing closes until this passes |
 

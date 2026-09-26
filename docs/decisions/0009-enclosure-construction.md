@@ -309,6 +309,14 @@ channels.
 Two openings in the tail section, below the right-hand key run, clear of the
 thumb keys and the U-bolt:
 
+> **Superseded 2026-09-26 (owner): the matrix is on the TOP face, just past
+> the last key**, through a window in the oak top and the key plate, with a
+> diffuser under the plate. The Matrix board stands face up on the carrier,
+> so **the carrier cutout below is no longer needed** and which face carries
+> the LEDs stops being a risk — it faces up, away from the carrier. The body
+> CAD derives the carrier's height from that stack (`mechanical/drc.echo`).
+> The paragraphs below are the original underside design.
+
 **A window in the oak underside for the 8×8 matrix** on the real-time board
 (ADR 0007, ADR 0014). Roughly 22 mm square, facing the player's downward glance
 rather than the audience. It is a through-cut in a flat part, so lamination
@@ -545,8 +553,8 @@ disturbing the loom and re-laying a gasket. That is a real cost and it is worth
 avoiding, but it is not the cliff this page was written against.
 
 **Two of them are still genuinely impossible later**, because they are cuts in
-the glued U or in a laminated layer: the matrix window and its carrier cutout,
-and the channels. Those keep the old force. Everything else below: do it now
+the glued U or in a laminated layer: the matrix window (now through the lid —
+oak top and plate — rather than the U) and the channels. Those keep the old force. Everything else below: do it now
 because opening a finished instrument is a bad afternoon, not because you
 cannot.
 
@@ -668,7 +676,7 @@ The ends are separate parts, not extensions of the top or the bottom.
 | End | Material | Why |
 |---|---|---|
 | **Mouthpiece end** | **Acrylic**, with a drilled circle for the tube pass-through | It is the part most likely to want changing. A pass-through diameter that turns out wrong, or a mouthpiece that wants a different mount, is one flat part to re-cut — and acrylic is the material already being cut for the sides |
-| **Tail end** | **Oak**, carrying the etherCON, the USB-C slot and the matrix window | So the wood reads as wrapping from the top face around the bottom and up the back, which is the look. And it is the face with the most openings in it, which wants the material that takes a backing plate |
+| **Tail end** | **Oak**, carrying the etherCON and the USB-C slot (the matrix window is on the top face since 2026-09-26) | So the wood reads as wrapping from the top face around the bottom and up the back, which is the look. And it is the face with the most openings in it, which wants the material that takes a backing plate |
 
 **If the acrylic mouthpiece end looks wrong on the bench, it becomes oak.**
 Same cut, same fixings, different sheet. That is the reason to make it a

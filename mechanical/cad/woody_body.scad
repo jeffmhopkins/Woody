@@ -155,19 +155,16 @@ spare_xy = [lt_arc(0) + [0, lt_step], lt_arc(1) + [0, lt_step], rt_rest - [1.6 *
 // underside's right-thumb cluster must also be inside.
 top_last = max([for (k = keys) if (k[1] == "top") key_xy(k)[0]]);
 rt_last = max([for (k = keys) if (k[1] == "bottom") key_xy(k)[0]]);
-// The tail also holds the last fastener pair, between the key board and the
-// connector - so its counterbore is part of the length, not squeezed in.
-tail_fastener_x = top_last + plate_cutout / 2 + cluster_margin + layout_tail_clear + hardware_fastener_cbore_d / 2;
-// The tail underside, in order after the right-thumb cluster: the service
-// cover, turned across the body, then the Matrix window, centred. The Matrix
-// board hangs under the carrier, which must end before the etherCON body -
-// so this chain is a third claim on the length.
+// THE LED MATRIX IS ON THE TOP FACE, after the last key (owner, 2026-09-26):
+// the Matrix board face up under the plate, past the last key board, and the
+// last fastener pair beside it rather than in front of it.
+matrix_xy = [top_last + plate_cutout / 2 + cluster_margin + layout_tail_clear + boards_matrix_board / 2, W / 2];
+tail_fastener_x = matrix_xy[0];
+// The tail underside after the right-thumb cluster: the service cover,
+// turned across the body, under the carrier - which ends before the etherCON.
 service_xy = [rt_last + rc / 2 + layout_underside_clear + openings_service_cover_w / 2, W / 2];
-matrix_xy = [service_xy[0] + openings_service_cover_w / 2 + layout_underside_clear
-             + max(openings_matrix_window, boards_matrix_board) / 2, W / 2];
-tail_chain_x = matrix_xy[0] + boards_matrix_board / 2 + layout_tail_clear;
-L = max(tail_fastener_x + hardware_fastener_cbore_d / 2 + layout_tail_clear + ethercon_depth,
-        tail_chain_x + layout_tail_clear + ethercon_depth,
+L = max(matrix_xy[0] + boards_matrix_board / 2 + layout_tail_clear + ethercon_depth,
+        service_xy[0] + openings_service_cover_w / 2 + 2 * layout_tail_clear + ethercon_depth,
         rt_last + rc / 2 + layout_underside_clear + ends_tail_cap_t);
 x_in1 = L - ends_tail_cap_t;
 
@@ -242,6 +239,7 @@ module plate_top_2d() {
         translate([0, stack_groove_clear]) square([x_in1 - x_in0, u_w - 2 * stack_groove_clear]);
         translate([-plate_x0, -plate_y0]) {
             for (k = top_keys) cutout_at(key_xy(k), key_rot(k), plate_cutout);
+            translate(matrix_xy) square(openings_matrix_window, center = true);
             for (f = fasteners()) translate(f) circle(d = tap_d_m3);
         }
     }
@@ -262,11 +260,12 @@ module oak_top_2d() {
             else
                 for (k = top_keys) translate(key_xy(k)) rotate(key_rot(k))
                     square(switch_keycap + 2 * stack_cap_clear, center = true);
+        translate([-x_in0, 0]) translate(matrix_xy) square(openings_matrix_window, center = true);
     }
 }
 
 // The U's floor. Thumb recesses are the through-cuts (ADR 0009: "oak
-// thickness sets the inset depth"); matrix window; service opening;
+// thickness sets the inset depth"); the display; service opening;
 // fastener and U-bolt holes. Full width; grooves as for the oak top.
 // Frame: model XY minus [x_in0, 0].
 module oak_bottom_2d() {
@@ -276,7 +275,6 @@ module oak_bottom_2d() {
             for (k = bottom_keys) translate(key_xy(k)) rotate(key_rot(k))
                 square(switch_keycap + 2 * thumb_recess_clear, center = true);
             for (s = spare_xy) translate(s) square(switch_keycap + 2 * thumb_recess_clear, center = true);
-            translate(matrix_xy) square(openings_matrix_window, center = true);
             display_board_cut_2d();
             translate(service_xy) square([openings_service_cover_w, openings_service_cover_l], center = true);
             for (f = fasteners()) translate(f) circle(d = hardware_fastener_clear_d);
@@ -387,6 +385,11 @@ module cluster_window_2d(ks) {
 
 // Tail equipment. The Matrix hangs under the carrier (carrier.md section 7)
 // with its LEDs facing the window in the oak bottom.
+// The carrier's height is set by the Matrix standing on it: plate underside,
+// the diffuser gap, the LEDs, the board, the header, then the carrier.
+matrix_top_z = z_plate_bot - boards_matrix_gap;               // LED tops
+matrix_board_z = matrix_top_z - boards_matrix_led_h - switch_pcb_t;
+carrier_z = matrix_board_z - boards_matrix_header_h - switch_pcb_t;
 // The carrier ends where the etherCON body begins, less a clearance.
 carrier_x1 = L - ethercon_depth - layout_tail_clear;
 carrier_x0 = carrier_x1 - boards_carrier_l;
@@ -484,13 +487,15 @@ module display_board() {
 }
 
 module tail_equipment() {
-    // Carrier and the Matrix hung under it.
-    P(C_PCB) translate([carrier_x0, W / 2 - boards_carrier_w / 2, boards_carrier_z]) cube([boards_carrier_l, boards_carrier_w, switch_pcb_t]);
-    P([0.10, 0.10, 0.12]) translate([matrix_xy[0], matrix_xy[1], z_floor + 2 + 0.8])
-        cube([boards_matrix_board, boards_matrix_board, 1.6], center = true);
-    P(C_LED) translate([matrix_xy[0], matrix_xy[1], z_floor + 2 - 0.3])
-        cube([boards_matrix_emitters, boards_matrix_emitters, 0.6], center = true);
-    P(C_DIFFUSER) translate([0, 0, z_floor]) linear_extrude(1) diffuser_2d();
+    // Carrier, and the Matrix standing face up on it under the top window.
+    P(C_PCB) translate([carrier_x0, W / 2 - boards_carrier_w / 2, carrier_z]) cube([boards_carrier_l, boards_carrier_w, switch_pcb_t]);
+    P([0.10, 0.10, 0.12]) translate([matrix_xy[0] - boards_matrix_board / 2, matrix_xy[1] - boards_matrix_board / 2, matrix_board_z])
+        cube([boards_matrix_board, boards_matrix_board, switch_pcb_t]);
+    P(C_LED) translate([matrix_xy[0] - boards_matrix_emitters / 2, matrix_xy[1] - boards_matrix_emitters / 2, matrix_board_z + switch_pcb_t])
+        cube([boards_matrix_emitters, boards_matrix_emitters, boards_matrix_led_h]);
+    for (dy = [-1, 1]) P([0.15, 0.15, 0.15]) translate([matrix_xy[0] - 12.7, matrix_xy[1] + dy * 11.43 - 1.25, carrier_z + switch_pcb_t])
+        cube([25.4, 2.5, boards_matrix_header_h]);   // the two header rows, 22.86 apart [ds]
+    P(C_DIFFUSER) translate([0, 0, z_plate_bot - 1]) linear_extrude(1) diffuser_2d();
     // Tail backplate and the etherCON body behind it.
     P(C_ALU) translate([x_in1 - hardware_backplate_t, 0, 0]) rotate([90, 0, 90])
         linear_extrude(hardware_backplate_t) tail_backplate_2d();
@@ -560,11 +565,14 @@ module drc_report() {
     drc(undef, "what sets the mouth end", x_lh0 - (x_in0 + layout_mouth_extra + switch_keycap / 2 + stack_cap_clear) > 0.01
         ? "the display on the underside (it must clear the left-thumb recesses)" : "the first top key",
         str("display occupies X ", disp_x0, " to ", disp_x1));
-    drc(undef, "what sets the tail end",
-        L == tail_chain_x + layout_tail_clear + ethercon_depth ? "right-thumb cluster, service cover, Matrix window, then the etherCON depth"
-        : L == tail_fastener_x + hardware_fastener_cbore_d / 2 + layout_tail_clear + ethercon_depth ? "last key board, tail fastener pair, then the etherCON depth"
-        : "the right-thumb cluster against the tail cap",
-        str("etherCON depth ", ethercon_depth));
+    tail_claims = [matrix_xy[0] + boards_matrix_board / 2 + layout_tail_clear + ethercon_depth,
+                   service_xy[0] + openings_service_cover_w / 2 + 2 * layout_tail_clear + ethercon_depth,
+                   rt_last + rc / 2 + layout_underside_clear + ends_tail_cap_t];
+    tail_names = ["last key board, the LED matrix on the top face, then the etherCON depth",
+                  "right-thumb cluster, the service cover, then the etherCON depth",
+                  "the right-thumb cluster against the tail cap"];
+    drc(undef, "what sets the tail end", tail_names[search(max(tail_claims), tail_claims)[0]],
+        str("claims ", tail_claims, " - the largest is the length"));
     drc(strip_l >= strip_run_adr, "LED strips at ADR 0014's length", strip_l,
         str("mm per side against ", strip_run_adr, " in ADR 0014 - fewer LEDs per side if shorter"));
     // Each run's end keys put half a cap into the neighbouring band - the
@@ -607,8 +615,7 @@ module drc_report() {
     rc = switch_keycap + 2 * thumb_recess_clear;
     feats = concat([for (k = bottom_keys) [k[0], key_xy(k), [rc, rc]]],
                    [for (i = [0 : 2]) [str("spare ", i + 1), spare_xy[i], [rc, rc]]],
-                   [["matrix window", matrix_xy, [openings_matrix_window, openings_matrix_window]],
-                    ["service opening", service_xy, [openings_service_cover_w, openings_service_cover_l]],
+                   [                    ["service opening", service_xy, [openings_service_cover_w, openings_service_cover_l]],
                     ["display", disp_c, [disp_board[0] + 1, disp_board[1] + 1]],
                     for (u = ubolt_legs()) ["U-bolt leg", u, [hardware_ubolt_rod_d, hardware_ubolt_rod_d]]],
                    [for (i = [0 : len(fasteners()) - 1]) [str("M3 #", i + 1), fasteners()[i], [hardware_fastener_cbore_d, hardware_fastener_cbore_d]]]);
@@ -635,7 +642,7 @@ module drc_report() {
     z_pole = z_plate_top - switch_pole_tip_below_seat;
     drc(undef, "top switch pole tip below the lid", z_lid_bot - z_pole, "mm into the cavity");
     z_pcb_bot = z_plate_top - switch_pcb_below_seat - switch_pcb_t;
-    drc(boards_carrier_z + switch_pcb_t < z_pcb_bot, "carrier clears the top cluster boards", z_pcb_bot - boards_carrier_z - switch_pcb_t,
+    drc(carrier_z + switch_pcb_t < z_pcb_bot, "carrier clears the top cluster boards", z_pcb_bot - carrier_z - switch_pcb_t,
         "mm between the carrier's top face and the cluster boards' underside, for components on both");
     dz_disp = boards_display_recess + 6.6;
     drc(undef, "display board height above the floor", dz_disp - z_floor,
@@ -648,14 +655,18 @@ module drc_report() {
     // Carrier
     drc(boards_carrier_w <= u_w - 2 * (lighting_strip_gap + 1), "carrier fits between the LED strips",
         u_w - 2 * (lighting_strip_gap + 1) - boards_carrier_w, "mm spare across");
-    drc(boards_carrier_z + switch_pcb_t < z_lid_bot, "carrier under the lid", z_lid_bot - boards_carrier_z - switch_pcb_t,
+    drc(carrier_z + switch_pcb_t < z_lid_bot, "carrier under the lid", z_lid_bot - carrier_z - switch_pcb_t,
         "mm of component height above the carrier");
     rt_top = z_floor + switch_pole_tip_below_seat;
     rt_in = max([for (k = cluster_keys("right_thumb")) key_xy(k)[0]]) > carrier_x0;
-    drc(!rt_in || boards_carrier_z > rt_top, "carrier clears the right-thumb switch bodies", boards_carrier_z - rt_top, "mm");
+    drc(!rt_in || carrier_z > rt_top, "carrier clears the right-thumb switch bodies", carrier_z - rt_top, "mm");
 
     drc(matrix_xy[0] + boards_matrix_board / 2 <= carrier_x1 && matrix_xy[0] - boards_matrix_board / 2 >= carrier_x0,
-        "Matrix board under the carrier", carrier_x1 - matrix_xy[0] - boards_matrix_board / 2, "mm of carrier past the board's tail edge");
+        "Matrix board over the carrier", carrier_x1 - matrix_xy[0] - boards_matrix_board / 2, "mm of carrier past the board's tail edge");
+    echo("DRC", "INFO", "carrier height (derived from the Matrix stack)", carrier_z,
+         "mm = plate underside - diffuser gap - LEDs - Matrix board - header - carrier");
+    mw = min([for (k = top_keys) sq_gap(key_xy(k), matrix_xy, (plate_cutout + openings_matrix_window) / 2)]);
+    drc(mw >= 3, "key plate web between the last key cutout and the matrix window", mw, "mm of aluminium");
 
     // Tail face
     ec_in = x_in1 - (ethercon_depth - ends_tail_cap_t);

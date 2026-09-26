@@ -166,7 +166,7 @@ arguments landed:
   from the display board's AMOLED, which is the hottest thing in the instrument
   (ADR 0003).
 - **The 8×8 matrix wants a window in the player's downward glance**, which is
-  the tail underside (ADR 0014).
+  the tail underside (ADR 0014). (Since 2026-09-26 the matrix is on the TOP face, just past the keys — owner's decision, ADR 0009.)
 
 All three want the same board in the same place, which is rare enough to take
 advantage of.
@@ -197,7 +197,8 @@ failure modes are delay and condensation, both bounded and both handled, where a
 ### Two physical constraints, now on the tail rather than the middle
 
 **The tail face is crowded.** It carries the umbilical connector, the USB-C
-slot, and — on the underside just inboard — the matrix window. A ~26 × 31 mm
+slot, and — on the underside just inboard — the matrix window (on the top
+face since 2026-09-26). A ~26 × 31 mm
 etherCON flange on a 57 × 38 mm face leaves little room, the D-series is rated
 for a **4 mm maximum panel thickness** so it cannot mount through 6 mm oak, and
 all of it must be drawn together at M4 (ADR 0009).

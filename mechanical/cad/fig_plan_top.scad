@@ -23,6 +23,7 @@ for (i = [0 : len(bands) - 1]) let(b = bands[i], y = yb - (i % 2) * 12) {
 seg([L, 0, z], [L, yb - 14, z], r = 0.05);
 dim([0, W + 12, z], [L, W + 12, z], str("overall length ", L, " (derived)"), [0, 6, 0], size = s);
 dim([L + 12, 0, z], [L + 12, W, z], str("W ", W), [12, 0, 0], size = s);
+label([matrix_xy[0], matrix_xy[1] - 17, z], "LED matrix", size = 3.5, c = "DarkRed");
 for (k = top_keys) label([key_xy(k)[0], key_xy(k)[1] - 13, z], k[0], size = 3.5, c = "DarkRed");
 label([L / 2, W + 30, z], keys_placed == len(keys) ? "LAYOUT FROM config/key-layout.yaml"
       : str("PROVISIONAL: ", len(keys) - keys_placed, " of ", len(keys), " keys unplaced - length derived from the provisional layout"),

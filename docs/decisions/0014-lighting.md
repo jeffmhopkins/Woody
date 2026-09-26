@@ -10,7 +10,7 @@ other instrument state, diffused through the frosted acrylic side panels
 
 **Two light sources, not one.** The side strips above, and the **8×8 RGB matrix
 on the real-time board** (ADR 0007), which faces out through a window in the
-underside at the tail. The matrix was originally counted as dead weight — 64 LED
+underside at the tail. (Since 2026-09-26 the matrix is on the TOP face, just past the keys — owner's decision, ADR 0009.) The matrix was originally counted as dead weight — 64 LED
 drivers that would never be lit, costing current and heat for nothing. Pointing
 it at a window turns that into the instrument's only two-dimensional display.
 
