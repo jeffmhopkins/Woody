@@ -123,6 +123,22 @@ renders:
     camera: [0, 40, 14, 50, 0, 150, 360]
     defines: {origin: "centre", show_lid: false, show_caps: false, show_u: false,
               highlight: ["ribbon *", "ZIF *", "board left_hand", "board right_hand"]}
+  - name: breakdown-tail-wiring
+    title: "Breakdown: the Matrix's ribbon and the etherCON's patch lead onto the main board's tail end - lid, sides and oak bottom off"
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/breakdown-tail-wiring.png
+    imgsize: [1400, 900]
+    camera: [-50, 22, 16, 62, 0, 320, 190]
+    defines: {origin: "tail", show_lid: false, show_caps: false, show_u: false,
+              highlight: ["Matrix ribbon", "patch lead", "J-MCU", "J-UMB", "RJ45 plug", "Matrix board", "Matrix LEDs"]}
+  - name: breakdown-tail-wiring-far
+    title: "The same from the far side - the Matrix ribbon's drop and its run into J-MCU"
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/breakdown-tail-wiring-far.png
+    imgsize: [1400, 900]
+    camera: [-50, 30, 18, 60, 0, 145, 190]
+    defines: {origin: "tail", show_lid: false, show_caps: false, show_u: false,
+              highlight: ["Matrix ribbon", "patch lead", "J-MCU", "J-UMB", "RJ45 plug", "Matrix board", "Matrix LEDs"]}
   - name: tail-detail
     title: The tail, lid off, from inside
     src: mechanical/cad/woody_body.scad

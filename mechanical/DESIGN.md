@@ -235,7 +235,19 @@ only as good as those envelopes. Group the report's lines by these causes
 4. **The middle M3 pair** runs through the U-bolt backplate, which also
    overlaps the thumb plates. (The stations ran through the side strips until
    ADR 0016 removed them.)
-5. **The tail is clear.** The etherCON, its rear socket, the patch plug,
+5. **The Matrix and the umbilical are wired onto the main board's tail
+   end** (owner, 2026-09-26). The Matrix, on the lid, has a flat 20-way
+   ribbon soldered to its two pad rows (its 12 used GPIO, 5V, 3V3 and six
+   grounds): out past its mouth edge above the patch plug, down in the gap
+   between the right-hand key board's end and the plug, and level into
+   J-MCU beside the regulator block; it unplugs there when the lid comes
+   off. The etherCON's patch lead runs from its plug in an S-bend at the
+   lead's minimum bend radius (`routing.umb_bend_r_per_od`) into J-UMB, which
+   the model places as far in as that bend needs (*"J-UMB on the main
+   board…"*). The LED strip stops short of J-MCU. `HDR-DEV` (sockets for a
+   dev board on a carrier) no longer describes anything and is on the
+   hardware rework list with the chain pages.
+6. **The tail is clear.** The etherCON, its rear socket, the patch plug,
    the USB-C plug, receptacle and lead, the Matrix and the last fastener pair
    meet nothing, and the connector fits the cavity without cutting the oak.
 

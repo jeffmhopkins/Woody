@@ -52,6 +52,10 @@ one big long board?")
   beside the breath trap. The thumb switches' pins stand through the board in
   two bands along the body, the LED strip takes the band between them, and
   the sensor is too wide to sit beside the strip anywhere along it.
+- **The Matrix and the umbilical plug into its tail end** (owner, same day):
+  a flat 20-way ribbon from the Matrix's pad rows to J-MCU, unplugged when
+  the lid comes off; the etherCON's patch lead to J-UMB, placed where the
+  lead's minimum bend radius lands it (`mechanical/DESIGN.md`).
 - **The LED strip runs down the centreline** (ADR 0016's strip, moved from the
   board's edge), from past the sensor to the board's tail end.
 - **Holes in the board over the U-bolt's nuts**, which stand above its

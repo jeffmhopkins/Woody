@@ -725,7 +725,9 @@ sensor_room = under_keys(sensor_c, [boards_sensor_body, boards_sensor_leads]) ? 
 // pins, from past the sensor to the board's tail end.
 strip_y = W / 2 - lighting_strip_w / 2;
 strip_x0 = sensor_c[0] + 5.1 + boards_board_clear;
-strip_l = cb_x[1] - lighting_strip_inset - strip_x0;
+jm_x1 = cb_x[1] - 1;                               // J-MCU's mouth, at the main board's tail edge
+jm_x0 = jm_x1 - boards_mcu_conn_w;
+strip_l = min(cb_x[1] - lighting_strip_inset, jm_x0 - boards_board_clear) - strip_x0;
 
 // THE KEY BOARDS ARE ON RIBBONS (owner, 2026-09-26: ribbons rather than
 // blind-mating stacking headers, so the lid comes off with them attached -
@@ -791,12 +793,36 @@ module ribbons_3d() {
     }
 }
 
+// THE MATRIX AND THE UMBILICAL (owner, 2026-09-26: "what about matrix led
+// esp32 and ethercon wire connections?"), both onto the main board's tail
+// end. The Matrix: a flat 20-way ribbon soldered to its two pad rows, down
+// just inside its mouth edge, one bend, and level beside the patch plug
+// into J-MCU - the Matrix is on the lid,
+// so it unplugs there like the key boards. The umbilical: the slim patch
+// lead from the etherCON's rear socket, in an S-bend at its legal radius
+// down into J-UMB, which stands in from the plug by what that bend needs.
+// An S-bend in (x, z), moving toward -x, level at both ends, radius r:
+// two arcs, with a vertical run between them if the drop is more than 2r.
+function sbend(a, e, r, n = 8) = let(h = a[1] - e[1], sg = h >= 0 ? 1 : -1, H = abs(h),
+                                     th = H >= 2 * r ? 90 : acos(1 - H / (2 * r)), dx = 2 * r * sin(th), xs = e[0] + dx)
+    concat([a], [for (i = [0 : n]) let(t = 90 + th * i / n) [xs + r * cos(t), a[1] + sg * (-r + r * sin(t))]],
+           [for (i = [0 : n]) let(t = 270 + th * (n - i) / n) [e[0] + r * cos(t), e[1] + sg * (r + r * sin(t))]], [e]);
+function sbend_dx(h, r) = abs(h) >= 2 * r ? 2 * r : 2 * r * sin(acos(1 - abs(h) / (2 * r)));
+module tail_wiring_3d() {
+    P([0.85, 0.85, 0.80], false, "J-MCU") translate([jm_x0, jm_y - jm_sz[1] / 2, cb_top]) cube([jm_sz[0], jm_sz[1], boards_mcu_conn_h]);
+    P([0.85, 0.85, 0.80], false, "J-UMB") translate([ju_x1 - ju_sz[0], ec_sock_c[0] - ju_sz[1] / 2, cb_top]) cube([ju_sz[0], ju_sz[1], boards_umb_conn_h]);
+    P([0.30, 0.30, 0.80], false, "Matrix ribbon") for (i = [0 : len(mcu_path) - 2])
+        hull() for (q = [mcu_path[i], mcu_path[i + 1]]) translate([q[0], jm_y, q[1]]) cube([routing_mcu_ribbon_t, routing_mcu_ribbon_w, routing_mcu_ribbon_t], center = true);
+    P([0.25, 0.45, 0.75], false, "patch lead") run([for (q = umb_path) [q[0], ec_sock_c[0], q[1]]], routing_umb_cable_od);
+}
+
 // The regulator block (a module and its bulk capacitors, for the one dev
 // board left - ADR 0015), turned across the body at the board's tail end, on
-// the far side - drc.echo says whether it fits where it stands.
+// the far side, in front of J-MCU - drc.echo says whether it fits where it
+// stands.
 tall_sz = [boards_tall_w, boards_tall_l];   // along x, across y
 far_y = cb_y[tube_side < 0 ? 1 : 0] + tube_side * (boards_tall_l / 2 + 0.5);
-tall_c = [[cb_x[1] - boards_tall_w / 2 - 1, far_y]];
+tall_c = [[jm_x0 - boards_board_clear - boards_tall_w / 2, far_y]];   // just in front of J-MCU
 // Is any key board overhead? Each key's board footprint taken as a
 // cluster_pcb_w square, unrotated - the window's gap-closing is ignored, so
 // this errs towards "clear"; the clash check has the real outline.
@@ -816,6 +842,25 @@ module cb_2d() {
         for (u = ubolt_legs()) translate(u) circle(r = ubolt_hole_r);
     }
 }
+// J-MCU: on the tube side of the regulator block, at the board's tail edge.
+jm_sz = [boards_mcu_conn_w, boards_mcu_conn_l];
+// Across: the ribbon clear of the patch plug beside it.
+jm_y = ec_sock_c[0] + ffc_s * (ec_plug[0] / 2 + boards_board_clear + routing_mcu_ribbon_w / 2);
+jm_z = cb_top + boards_mcu_conn_h / 2;
+mcu_r = 4;   // drawing convention: the ribbon's bends
+// Down just inside the Matrix's mouth edge (its USB-C plug leaves that
+// edge), one bend, and level into J-MCU.
+mcu_x = matrix_xy[0] - boards_matrix_board / 2 + 1.5;
+mcu_path = concat([[mcu_x, matrix_board_z - boards_matrix_harness_h]],
+                  [for (i = [0 : 8]) let(t = 180 * 0 + 90 * i / 8) [mcu_x - mcu_r + mcu_r * cos(t), jm_z + mcu_r - mcu_r * sin(t)]],
+                  [[jm_x1, jm_z]]);
+// J-UMB: in line with the patch plug, where its bend lands.
+pb_x = ec_panel_x - ethercon_depth - ethercon_rj45_plug_l;     // the patch plug's cable end
+umb_r = routing_umb_cable_od * routing_umb_bend_r_per_od;
+ju_z = cb_top + boards_umb_conn_h / 2;
+ju_x1 = pb_x - 1 - sbend_dx(ec_sock_c[1] - ju_z, umb_r);       // J-UMB's mouth
+ju_sz = [boards_umb_conn_w, boards_umb_conn_l];
+umb_path = sbend([pb_x, ec_sock_c[1]], [ju_x1, ju_z], umb_r);
 // Standoffs off the oak: candidates along both edge bands and at the thumb
 // rests, kept where nothing else is - the soldered thumb switches, clipped
 // into their plates, carry the board between them.
@@ -825,14 +870,19 @@ function so_clear(p) = let(r = boards_standoff_d / 2 + 0.5)
     && min([for (u = ubolt_legs()) norm(p - u)]) >= ubolt_hole_r + r
     && max(abs(p[0] - sensor_c[0]) - boards_sensor_body / 2, abs(p[1] - sensor_c[1]) - boards_sensor_leads / 2) >= r
     && max(abs(p[0] - tall_c[0][0]) - tall_sz[0] / 2, abs(p[1] - tall_c[0][1]) - tall_sz[1] / 2) >= r
-    && min([for (cl = ribbon_cls) max(abs(p[0] - mb_ffc(cl)[0]) - boards_ffc_conn_l / 2, abs(p[1] - mb_ffc_y) - boards_ffc_conn_w / 2)]) >= r + 3;
-cb_standoffs = [for (x = [cb_x[0] + 4, lt_rest_xy[0], (gap_x[0] + gap_x[1]) / 2, rt_rest[0], cb_x[1] - 4],
+    && min([for (cl = ribbon_cls) max(abs(p[0] - mb_ffc(cl)[0]) - boards_ffc_conn_l / 2, abs(p[1] - mb_ffc_y) - boards_ffc_conn_w / 2)]) >= r + 3
+    && max(abs(p[0] - (jm_x0 + jm_x1) / 2) - jm_sz[0] / 2, abs(p[1] - jm_y) - jm_sz[1] / 2) >= r
+    && max(abs(p[0] - (ju_x1 - ju_sz[0] / 2)) - ju_sz[0] / 2, abs(p[1] - ec_sock_c[0]) - ju_sz[1] / 2) >= r + routing_umb_cable_od;
+cb_standoffs = [for (x = [cb_x[0] + 4, lt_rest_xy[0], (gap_x[0] + gap_x[1]) / 2, rt_rest[0], (rt_rest[0] + jm_x0) / 2, cb_x[1] - 4],
                      y = [cb_y[0] + 4, cb_y[1] - 4]) if (so_clear([x, y])) [x, y]];
 module centre_board_3d() {
     P(C_PCB, false, "main board") translate([0, 0, cb_z]) linear_extrude(switch_pcb_t) cb_2d();
     P([0.35, 0.55, 0.40], false, "parts main board") translate([0, 0, cb_top]) linear_extrude(boards_smt_h) difference() {
         offset(-0.5) cb_2d();
         for (cl = ribbon_cls) translate(mb_ffc(cl)) square(ffc_sz + [1, 1], center = true);
+        translate([jm_x0 - 0.5, jm_y - jm_sz[1] / 2 - 0.5]) square(jm_sz + [1, 1]);
+        translate([ju_x1 - ju_sz[0] - 0.5, ec_sock_c[0] - ju_sz[1] / 2 - 0.5]) square(ju_sz + [1, 1]);
+        translate([ju_x1, ec_sock_c[0] - routing_umb_cable_od / 2 - 0.5]) square([cb_x[1] - ju_x1 + 1, routing_umb_cable_od + 1]);   // under the lead
         // and nothing under the C, between the connector and the wall
         for (cl = ribbon_cls) translate([mb_ffc(cl)[0] - routing_ffc_w / 2 - 0.5, ffc_s > 0 ? ffc_yc : 0])
             square([routing_ffc_w + 1, ffc_s > 0 ? W : ffc_yc]);
@@ -916,7 +966,7 @@ module assembly() {
     if (show_boards) { cluster_boards(); tail_equipment(); }
     if (show_strips) translate([0, 0, explode * 0.1]) led_strips();
     if (show_routing) routing_3d();
-    if (show_boards) { parts_3d(); translate([0, 0, explode * 0.1]) { sensor_3d(); centre_board_3d(); } ribbons_3d(); }
+    if (show_boards) { parts_3d(); translate([0, 0, explode * 0.1]) { sensor_3d(); centre_board_3d(); } ribbons_3d(); tail_wiring_3d(); }
     if (show_hardware) hardware_3d();
 }
 
@@ -1062,6 +1112,9 @@ module drc_report() {
             " [approx: key board footprints as squares; clash.txt is the check] - negative means low-profile parts"));
     for (cl = ribbon_cls) drc(ffc_x(cl) != undef, str("ribbon connector on the ", cl, " key board clear of its switches"),
                               ffc_x(cl) == undef ? "none found" : ffc_x(cl), "mm along the body");
+    drc(ju_x1 - ju_sz[0] >= cb_x[0] && ju_x1 <= cb_x[1], "J-UMB on the main board, the patch lead at its bend radius", [ju_x1, umb_r],
+        "mm along the body (its mouth), and the lead's bend radius in mm (routing.umb_bend_r_per_od x the diameter)");
+    drc(undef, "Matrix ribbon length", path_len(mcu_path), "mm from the Matrix's edge to J-MCU, as drawn");
     rp = ffc_path(ribbon_cls[0]);
     drc(max([for (q = rp) q[1]]) <= z_lid_bot - 1, "ribbon arc clear of the lid", z_lid_bot - max([for (q = rp) q[1]]), "mm under the lid at its peak");
     drc(undef, "ribbon arc length, and the lid tilt it allows attached", [path_len(rp), ffc_open_angle(path_len(rp))],

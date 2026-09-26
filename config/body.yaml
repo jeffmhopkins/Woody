@@ -327,6 +327,42 @@ boards:
     status: tbd
     source: "the same connector's height above the board [from memory]"
     decided_by: "M4, with the part"
+  # THE MATRIX AND THE UMBILICAL, onto the main board's tail end (owner,
+  # 2026-09-26: "what about matrix led esp32 and ethercon wire connections?").
+  # The Matrix: a flat ribbon soldered to its two pad rows (the board is on
+  # the lid, so it unplugs at the main board like the key boards). The
+  # umbilical: a slim patch lead from the etherCON's rear socket to a latching
+  # connector, far enough in that the cable's bend is legal.
+  mcu_conn_l:
+    value: 16.0
+    status: tbd
+    source: "a 2 x 10 1.27 mm box header, side entry, across the body [from memory]"
+    decided_by: "M4, with the part"
+  mcu_conn_w:
+    value: 6.0
+    status: tbd
+    source: "the same header along the body, with its latch [from memory]"
+    decided_by: "M4, with the part"
+  mcu_conn_h:
+    value: 5.0
+    status: tbd
+    source: "the same header's height [from memory]"
+    decided_by: "M4, with the part"
+  umb_conn_l:
+    value: 12.0
+    status: tbd
+    source: "an 8-way latching wire-to-board header, side entry, across the body [from memory]"
+    decided_by: "M4, with the part"
+  umb_conn_w:
+    value: 7.0
+    status: tbd
+    source: "the same header along the body [from memory]"
+    decided_by: "M4, with the part"
+  umb_conn_h:
+    value: 6.0
+    status: tbd
+    source: "the same header's height [from memory]"
+    decided_by: "M4, with the part"
   # ONE MAIN BOARD (ADR 0017): the thumb switches, their registers and the
   # carrier's circuits on one board at the thumb level, mouth cap to the end
   # of the right hand. Its size and the height its parts have are derived;
@@ -592,6 +628,26 @@ routing:
     decided_by: "M4"
   # STANDARD FLAT RIBBON (owner, 2026-09-26), lying FLAT down the centreline
   # (on edge it does not fit between the boards' part layers - clash check).
+  mcu_ribbon_w:
+    value: 12.7
+    status: tbd
+    source: "20-way 0.635 mm ribbon for a 1.27 mm dual-row header [calc]: the Matrix's 12 used GPIO, 5V, 3V3 and six grounds (hardware/carrier/netlist.yaml U-MCU-RT)"
+    decided_by: "M4"
+  mcu_ribbon_t:
+    value: 0.8
+    status: tbd
+    source: "fine-pitch ribbon thickness [from memory]"
+    decided_by: "M4"
+  umb_cable_od:
+    value: 4.0
+    status: tbd
+    source: "a slim Cat6 patch lead [from memory]; the patch plug is J-UMBILICAL-CABLE's rear end inside the body"
+    decided_by: "M4, with the lead bought"
+  umb_bend_r_per_od:
+    value: 4.0
+    status: tbd
+    source: "minimum bend radius as a multiple of the cable's diameter, the usual rule for twisted-pair patch cable [from memory]"
+    decided_by: "M4, with the lead's datasheet"
   ffc_w:
     value: 13.0
     status: tbd
