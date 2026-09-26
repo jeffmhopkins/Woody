@@ -293,7 +293,7 @@ figures:
     quantity: J-CHAIN connectors in the system
     value: "8"
     status: blocked
-    blocked_on: "The key-chain loom rework for the stacking-header layout and one main board (ADR 0017): the thumb clusters are on the main board and the key boards plug into it on stacking headers, so this count of IDC connectors describes hardware no longer in the design. Re-derive it on hardware/interfaces/key-chain-loom/ rather than guessing it here."
+    blocked_on: "The key-chain loom rework for one main board and flat flex ribbons (ADR 0017): the thumb clusters are on the main board and each key board connects by a 12-way ribbon - four ZIF connectors in all - so this count of IDC connectors describes hardware no longer in the design. Re-derive it on hardware/interfaces/key-chain-loom/ rather than guessing it here."
     owner: hardware/interfaces/key-chain-loom/key-chain-loom.md
     derivation: "SER/QH are point-to-point, so every cluster board but the last has IN and OUT: carrier 1, RT 2, RH 2, LT 2, LH 1"
     forbidden: ["five connectors must match", "Five connectors", "~4 connectors"]

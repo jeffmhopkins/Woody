@@ -41,7 +41,7 @@ ghost_shell = false;  // draw the shell translucent to see inside
 // 2D ones for anything dimensioned; OpenCSG loses part colours on 3D cuts.
 cut = "none";
 cut_at = 0;
-cut_key = "";         // or name a key (or "matrix"): the cut goes through its centre
+cut_key = "";         // or name a key (or "matrix", or "ribbon" for the left key board's): the cut goes through its centre
 cut_depth = 1000;     // "x" keeps a slab this deep beyond the cut
 figure = false;       // set true by a figure that includes this file
 // Where X = 0 sits in the rendered picture: "mouth" (the model's own frame),
@@ -247,7 +247,7 @@ x_in1 = L - ends_tail_cap_t;
 matrix_xy = [matrix_x(L), W / 2];
 // Where an X section cuts: a number, a key id, or "matrix" for its centre.
 // A Y cut through a named key goes through its Y (its row along the body).
-cut_pos = cut_key == "" ? cut_at : cut_key == "matrix" ? matrix_xy[0]
+function cut_pos() = cut_key == "" ? cut_at : cut_key == "matrix" ? matrix_xy[0] : cut_key == "ribbon" ? ffc_x("left_hand")
         : key_xy(key_by_id(cut_key))[cut == "y" || cut == "y2d" ? 1 : 0];
 
 function placed(k) = !is_undef(k[2]) && !is_undef(k[3]);
@@ -276,8 +276,8 @@ C_FROSTED = [0.94, 0.95, 0.97, 0.85];
 // ----------------------------------------------------------- clipping -----
 module clip_space() {
     big = 4 * L;
-    if (cut == "y") translate([-big / 2, cut_pos - big, -big / 2]) cube(big);
-    else if (cut == "x") translate([cut_pos, -big / 2, -big / 2]) cube([cut_depth, big, big]);
+    if (cut == "y") translate([-big / 2, cut_pos() - big, -big / 2]) cube(big);
+    else if (cut == "x") translate([cut_pos(), -big / 2, -big / 2]) cube([cut_depth, big, big]);
 }
 // Every solid goes through P() WITH A NAME, so colour survives a section cut
 // and the clash check can pull any one solid out on its own:
@@ -300,9 +300,9 @@ module P(c, shell = false, id = "") {
     if (only == "" || only == id) color(cc)
         if (cut == "none") children();
         else if (cut == "y2d")
-            mirror([0, 1]) section_2d() rotate([90, 0, 0]) translate([0, -cut_pos, 0]) children();
+            mirror([0, 1]) section_2d() rotate([90, 0, 0]) translate([0, -cut_pos(), 0]) children();
         else if (cut == "x2d")
-            rotate(-90) section_2d() rotate([0, -90, 0]) translate([-cut_pos, 0, 0]) children();
+            rotate(-90) section_2d() rotate([0, -90, 0]) translate([-cut_pos(), 0, 0]) children();
         else intersection() { children(); clip_space(); }
 }
 
@@ -662,8 +662,7 @@ tube_y = lane_y(routing_tube_lane, routing_tube_od);
 // the body, on edge only where it drops to a socket. Stood on edge along the
 // body, a 15 mm ribbon does not fit the 12-13 mm between the thumb boards'
 // parts and the key boards' parts (found by the clash check, 2026-09-26).
-module ribbon(pts, w) {
-    t = routing_ribbon_t;
+module ribbon(pts, w, t = routing_ribbon_t) {
     for (i = [0 : len(pts) - 2]) let(a = pts[i], b = pts[i + 1], dv = [abs(b[0] - a[0]), abs(b[1] - a[1]), abs(b[2] - a[2])],
                                    ax = dv[0] >= dv[1] && dv[0] >= dv[2] ? 0 : dv[1] >= dv[2] ? 1 : 2,
                                    sec = ax == 0 ? [0.01, w, t] : ax == 1 ? [w, 0.01, t] : [w, t, 0.01])
@@ -684,7 +683,7 @@ function xspan(cl) = [min(xs(cluster_keys(cl))), max(xs(cluster_keys(cl)))];
 // ONE flat board at the thumb boards' level carries the thumb switches, both
 // thumb registers and everything the carrier did, from the mouth cap to the
 // end of the right hand. Its parts face up, under the key boards; the key
-// boards plug into it on stacking headers. At this level it has more room
+// boards connect to it by ribbons. At this level it has more room
 // than the centre board had: drc.echo prints it. The cb_ names
 // are kept from the centre board it replaced.
 function tspan(cl) = let(p = [for (q = thumb_pts(cl)) q[0]]) [min(p) - (switch_keycap + 4) / 2, max(p) + (switch_keycap + 4) / 2];
@@ -728,22 +727,52 @@ strip_y = W / 2 - lighting_strip_w / 2;
 strip_x0 = sensor_c[0] + 5.1 + boards_board_clear;
 strip_l = cb_x[1] - lighting_strip_inset - strip_x0;
 
-// STACKING HEADERS, 2 x 6 at 2.0 mm pitch (2.54 will not fit between two
-// switches' pins, 19 mm apart): main board -> key board above, midway
-// between two thumb keys, clear of every switch's pole and pins on both
-// boards (which stand proud of them), at the key board's edge away from the
-// tube, nearest the middle of their overlap.
-stack_pairs = [["right_thumb", "right_hand"], ["left_thumb", "left_hand"]];
-stack_y = W / 2 - tube_side * (switch_cluster_pcb_w / 2 - boards_conn_w / 2 - 0.5);
-function conn_clear(x, cl) = min([for (k = cluster_keys(cl))
-    max(abs(key_xy(k)[0] - x) - boards_conn_l / 2, abs(key_xy(k)[1] - stack_y) - boards_conn_w / 2)]) >= ks33_stub + 0.3;
-function stack_x(pr) = let(a = xspan(pr[0]), b = xspan(pr[1]), m = (max(a[0], b[0]) + min(a[1], b[1])) / 2,
-                           t = [for (k = cluster_keys(pr[0])) key_xy(k)[0]],
-                           mids = [for (i = [0 : len(t) - 2]) (t[i] + t[i + 1]) / 2],
-                           ok = [for (x = mids) if (conn_clear(x, pr[0]) && conn_clear(x, pr[1])) x],
-                           d = [for (x = ok) abs(x - m)])
+// THE KEY BOARDS ARE ON RIBBONS (owner, 2026-09-26: ribbons rather than
+// blind-mating stacking headers, so the lid comes off with them attached -
+// ADR 0017). One 12-way flat flex ribbon per key board, the chain's 12
+// conductors (ADR 0001's pinout), between two low ZIF connectors: one on the
+// key board's underside in the band beside its switches' pins, away from
+// the tube, and one on the main board's far edge band below it, where
+// nothing is overhead but the plate. Closed, the ribbon folds up the far
+// side of the cavity and back in under the key board; its length is set by
+// the lid flipped open over the far edge (drc.echo).
+ffc_sz = [boards_ffc_conn_l, boards_ffc_conn_w];   // along x, across y
+kb_ffc_y = W / 2 - tube_side * (switch_cluster_pcb_w / 2 - boards_ffc_conn_w / 2 - 0.5);
+mb_ffc_y = cb_y[tube_side < 0 ? 1 : 0] + tube_side * (boards_ffc_conn_w / 2 + 1.5);
+function ffc_clear(x, cl) = min([for (k = cluster_keys(cl))
+    max(abs(key_xy(k)[0] - x) - boards_ffc_conn_l / 2, abs(key_xy(k)[1] - kb_ffc_y) - boards_ffc_conn_w / 2)]) >= ks33_stub + 0.3;
+// Along the key board: the clear place nearest its middle, from its keys'
+// positions and the midpoints between them.
+function ffc_x(cl) = let(t = [for (k = cluster_keys(cl)) key_xy(k)[0]], m = (min(t) + max(t)) / 2,
+                         c = concat(t, [for (i = [0 : len(t) - 2]) (t[i] + t[i + 1]) / 2], [m]),
+                         ok = [for (x = c) if (ffc_clear(x, cl)) x], d = [for (x = ok) abs(x - m)])
     len(ok) > 0 ? ok[search(min(d), d)[0]] : undef;
-function stack_of(cl) = [for (pr = stack_pairs) if (pr[0] == cl || pr[1] == cl) [stack_x(pr), stack_y]];
+ribbon_cls = ["left_hand", "right_hand"];
+function kb_ffc(cl) = [ffc_x(cl), kb_ffc_y];
+function mb_ffc(cl) = [ffc_x(cl), mb_ffc_y];
+kb_ffc_z = top_z - boards_ffc_conn_h;           // underside of the key board's connector
+mb_ffc_z = cb_top + boards_ffc_conn_h;          // top of the main board's connector
+// The fold, in (y, z) at the connector's x: up the far side, over, down,
+// up and down again beside the key board's edge (the length the open lid
+// needs), and in under the edge into its connector.
+function ffc_path(cl) = let(ym = mb_ffc_y, yk = kb_ffc_y, s = tube_side < 0 ? 1 : -1,
+                            yw = W - u_y0 - 1.5, ye = W / 2 + s * (switch_cluster_pcb_w / 2 + 1.5),
+                            zt = z_lid_bot - 2.5, zl = cb_top + boards_smt_h + 1, zk = kb_ffc_z + boards_ffc_conn_h / 2)
+    [[ym, mb_ffc_z], [ym, zt], [s > 0 ? yw : W - yw, zt], [s > 0 ? yw : W - yw, zl], [ye + s * 2, zl],
+     [ye + s * 2, zt - 2], [ye, zt - 2], [ye, zk], [yk + s * boards_ffc_conn_w / 2, zk]];
+function path_len(p) = sum([for (i = [0 : len(p) - 2]) norm(p[i + 1] - p[i])]);
+// Opened: the lid flipped 180 degrees over the far top edge.
+function ffc_open_len() = let(s = tube_side < 0 ? 1 : -1, ye = s > 0 ? W : 0, yk = kb_ffc_y, zk = kb_ffc_z)
+    norm([2 * ye - yk - mb_ffc_y, 2 * T - zk - mb_ffc_z]);
+module ribbons_3d() {
+    for (cl = ribbon_cls) let(k = kb_ffc(cl), m = mb_ffc(cl)) {
+        P([0.85, 0.85, 0.80], false, str("ZIF ", cl, " key board")) translate([k[0] - ffc_sz[0] / 2, k[1] - ffc_sz[1] / 2, kb_ffc_z])
+            cube([ffc_sz[0], ffc_sz[1], boards_ffc_conn_h]);
+        P([0.85, 0.85, 0.80], false, str("ZIF ", cl, " main board")) translate([m[0] - ffc_sz[0] / 2, m[1] - ffc_sz[1] / 2, cb_top])
+            cube([ffc_sz[0], ffc_sz[1], boards_ffc_conn_h]);
+        P([0.80, 0.55, 0.20], false, str("ribbon ", cl)) ribbon([for (q = ffc_path(cl)) [k[0], q[0], q[1]]], routing_ffc_w, routing_ffc_t);
+    }
+}
 
 // The regulator block (a module and its bulk capacitors, for the one dev
 // board left - ADR 0015), turned across the body at the board's tail end, on
@@ -779,14 +808,14 @@ function so_clear(p) = let(r = boards_standoff_d / 2 + 0.5)
     && min([for (u = ubolt_legs()) norm(p - u)]) >= ubolt_hole_r + r
     && max(abs(p[0] - sensor_c[0]) - boards_sensor_body / 2, abs(p[1] - sensor_c[1]) - boards_sensor_leads / 2) >= r
     && max(abs(p[0] - tall_c[0][0]) - tall_sz[0] / 2, abs(p[1] - tall_c[0][1]) - tall_sz[1] / 2) >= r
-    && min([for (pr = stack_pairs) max(abs(p[0] - stack_x(pr)) - boards_conn_l / 2, abs(p[1] - stack_y) - boards_conn_w / 2)]) >= r;
+    && min([for (cl = ribbon_cls) max(abs(p[0] - mb_ffc(cl)[0]) - boards_ffc_conn_l / 2, abs(p[1] - mb_ffc_y) - boards_ffc_conn_w / 2)]) >= r + 3;
 cb_standoffs = [for (x = [cb_x[0] + 4, lt_rest_xy[0], (gap_x[0] + gap_x[1]) / 2, rt_rest[0], cb_x[1] - 4],
                      y = [cb_y[0] + 4, cb_y[1] - 4]) if (so_clear([x, y])) [x, y]];
 module centre_board_3d() {
     P(C_PCB, false, "main board") translate([0, 0, cb_z]) linear_extrude(switch_pcb_t) cb_2d();
     P([0.35, 0.55, 0.40], false, "parts main board") translate([0, 0, cb_top]) linear_extrude(boards_smt_h) difference() {
         offset(-0.5) cb_2d();
-        for (pr = stack_pairs) translate([stack_x(pr), stack_y]) square([boards_conn_l + 1, boards_conn_w + 1], center = true);
+        for (cl = ribbon_cls) translate(mb_ffc(cl)) square(ffc_sz + [1, 1], center = true);
         translate(sensor_c) square([boards_sensor_body + 1, boards_sensor_leads + 1], center = true);
         for (c = tall_c) translate(c) square(tall_sz + [1, 1], center = true);
         for (c = cb_standoffs) translate(c) circle(d = boards_standoff_d + 1);
@@ -804,11 +833,6 @@ function on_thumb_plate(p) = len([for (cl = ["left_thumb", "right_thumb"])
         && p[1] >= min([for (a = q) a[1]]) - h && p[1] <= max([for (a = q) a[1]]) + h) 1]) > 0;
 function floor_at(x) = abs(x - ubolt_c[0]) <= ubolt_bp[0] / 2 ? z_floor + hardware_backplate_t + hardware_ubolt_nut_h : z_floor;
 
-module headers_3d() {
-    for (pr = stack_pairs)
-        P([0.12, 0.12, 0.14], false, str("J-STACK ", pr[0], " to ", pr[1]))
-            translate([stack_x(pr) - boards_conn_l / 2, stack_y - boards_conn_w / 2, thumb_z]) cube([boards_conn_l, boards_conn_w, top_z - thumb_z]);
-}
 
 // PARTS ON THE BOARDS, as envelopes. Cluster boards: a component layer on
 // the cavity side (the plate side cannot take a SOIC - ks33-geometry.md).
@@ -818,7 +842,7 @@ module parts_3d() {
         P([0.35, 0.55, 0.40], false, str("parts ", cl)) translate([0, 0, top_z - boards_cluster_smt_h])
             linear_extrude(boards_cluster_smt_h) difference() {
                 offset(-0.5) cluster_window_2d(cluster_keys(cl));
-                for (h = stack_of(cl)) translate(h) square([boards_conn_l + 1, boards_conn_w + 1], center = true);
+                translate(kb_ffc(cl)) square(ffc_sz + [1, 1], center = true);
             }
     P([0.20, 0.20, 0.22], false, "Matrix underside parts") translate([matrix_xy[0] - 9.5, matrix_xy[1] - 9.5, matrix_board_z - boards_matrix_under_h])
         cube([19, 19, boards_matrix_under_h]);
@@ -872,7 +896,7 @@ module assembly() {
     if (show_boards) { cluster_boards(); tail_equipment(); }
     if (show_strips) translate([0, 0, explode * 0.1]) led_strips();
     if (show_routing) routing_3d();
-    if (show_boards) { parts_3d(); translate([0, 0, explode * 0.1]) { sensor_3d(); headers_3d(); centre_board_3d(); } }
+    if (show_boards) { parts_3d(); translate([0, 0, explode * 0.1]) { sensor_3d(); centre_board_3d(); } ribbons_3d(); }
     if (show_hardware) hardware_3d();
 }
 
@@ -1016,8 +1040,11 @@ module drc_report() {
     drc(boards_tall_h <= tall_room, "regulator block fits where it stands", tall_room - boards_tall_h,
         str("mm spare, ", under_keys(tall_c[0], tall_sz) ? "under a key board" : "beside the key boards, clear to the lid",
             " [approx: key board footprints as squares; clash.txt is the check] - negative means low-profile parts"));
-    for (pr = stack_pairs) drc(stack_x(pr) != undef, str("stacking header ", pr[0], " to ", pr[1], " clear of both boards' switches"),
-                               stack_x(pr) == undef ? "none found" : stack_x(pr), "mm along the body, midway between two thumb keys");
+    for (cl = ribbon_cls) drc(ffc_x(cl) != undef, str("ribbon connector on the ", cl, " key board clear of its switches"),
+                              ffc_x(cl) == undef ? "none found" : ffc_x(cl), "mm along the body");
+    drc(path_len(ffc_path(ribbon_cls[0])) >= ffc_open_len() + 5, "ribbon long enough to open the lid",
+        [path_len(ffc_path(ribbon_cls[0])), ffc_open_len()],
+        "mm folded as drawn vs mm needed with the lid flipped over the far edge (plus 5 mm slack)");
 
     mw = plate_x1 - (top_last + plate_cutout / 2);
     drc(mw >= 3, "key plate beyond the last key cutout", mw, "mm of aluminium; the plate stops short of the Matrix");

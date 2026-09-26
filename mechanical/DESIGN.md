@@ -116,8 +116,8 @@ Several things can claim each end, and the largest wins:
   maybe we can do one big long board?"). The thumb switches, both thumb
   registers and the carrier's circuits are on one board at the thumb level,
   from the mouth cap to the end of the right hand, the full width inside the
-  sides. Its parts face up; the two key boards plug into it on stacking
-  headers; the Matrix's pigtail and the patch lead end on it. It has holes
+  sides. Its parts face up; the two key boards connect to it by ribbons (below);
+  the Matrix's pigtail and the patch lead end on it. It has holes
   over the U-bolt's nuts, notches at the screws, and standoffs off the oak or
   the thumb plates wherever nothing else is (*"main board standoffs found
   clear of everything"*); the soldered thumb switches carry it between them.
@@ -194,9 +194,9 @@ decision, not a correction.
 6. **The regulator block** fits wherever it stands on the main board.
    *Rule: "regulator block fits where it stands".*
 7. **The main board is placed by the layout** — its length by the mouth cap
-   and the right hand, its width by the sides — and its stacking headers
-   are placed between two thumb keys, clear of both boards' switches, by the
-   model (*"stacking header … clear of both boards' switches"*).
+   and the right hand, its width by the sides — and each key board's ribbon
+   connector is placed clear of its switches by the model (*"ribbon connector
+   on the … key board clear of its switches"*).
 8. **M3 into a 1.20 mm plate** is about two threads. The BOM already says
    "insert or tapped boss"; the model says plain tapping is not one of the
    options.
@@ -211,17 +211,22 @@ an envelope — many sizes are tbd in `config/body.yaml` — so a clean pair is
 only as good as those envelopes. Group the report's lines by these causes
 (read the counts there, not here):
 
-1. **No cluster board faces another's connector any more.** Each key board
-   plugs into the main board below it through one 2 × 6 stacking header at
-   2.0 mm pitch (2.54 will not fit between two switches' pins, 19 mm apart),
-   placed between two thumb keys. It engages as the lid closes,
-   so it must blind-mate, and its height is the board gap, not a stock size.
-2. **No ribbons remain inside the body.** **The hardware pages do not
-   follow yet:** `hardware/interfaces/key-chain-loom/`, the J-CHAIN,
+1. **Each key board is on a ribbon** (owner, 2026-09-26, ADR 0017), not a
+   blind-mating header: a 12-way flat flex ribbon from a low ZIF connector on
+   the key board's underside, beside its switches' pins on the side away from
+   the tube, to one on the main board's far edge below it. Closed, it folds up
+   the far side of the cavity and back in under the key board's edge
+   (`renders/section-ribbon.png`); its length is set by the lid flipped open
+   over the far edge (*"ribbon long enough to open the lid"*), so the lid
+   comes off with the key boards still connected. A 2.54 IDC box header and
+   plug stand ~12-13 mm [from memory] in a 17 mm gap with parts on both
+   boards, which is why it is flat flex.
+2. **The hardware pages do not follow yet:** `hardware/interfaces/key-chain-loom/`, the J-CHAIN,
    WIRE-LOOM and HDR-DEV rows, and the register's `chain-connectors` still
    describe IDC ribbons, four cluster boards and a dev board plugged into one
-   carrier. ADR 0017 makes that rework concrete: two key boards, one main
-   board, the thumb chain in traces. `chain-connectors` is marked blocked on it.
+   carrier. ADR 0017 makes that rework concrete: two key boards on flat flex
+   ribbons, one main board, the thumb chain in traces. `chain-connectors` is
+   marked blocked on it.
 3. **The breath tube** is short: mouth cap, trap, then across over the strip
    and back onto the sensor's port, all in the mouth band; the board has a
    slot in front of the sensor's lower port.

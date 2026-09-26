@@ -308,17 +308,24 @@ boards:
     value: [8.5, 1.4]
     status: nominal
     source: "port centres above the seating plane, upper (P1, marked side - p.6 Table 3) and lower; scaled off the p.7 drawing"
-  # STACKING HEADERS: one per key board, from the main board up into it
-  # (ADR 0017). The chain runs main board -> key board -> main board -> key board.
-  conn_l:
-    value: 12.0
+  # RIBBONS, NOT STACKING HEADERS (owner, 2026-09-26, ADR 0017): one 12-way
+  # flat flex ribbon per key board, so the lid comes off with the key boards
+  # still connected. Low ZIF connectors, because a 2.54 IDC box header and
+  # plug stand ~12-13 mm [from memory] in a 17 mm gap with parts both sides.
+  ffc_conn_l:
+    value: 17.0
     status: tbd
-    source: "a stacking header: 2 x 6 at 2.0 mm pitch, 6 x 2.0 [calc]; it sits between two switches' pins, 19 mm apart, where 2.54 pitch (15.24) would not"
+    source: "a 12-way 1.0 mm pitch ZIF FFC connector, along the body [from memory]"
     decided_by: "M4, with the part"
-  conn_w:
-    value: 4.0
+  ffc_conn_w:
+    value: 5.5
     status: tbd
-    source: "2 rows at 2.0 mm pitch [calc]"
+    source: "the same connector, across the body [from memory]"
+    decided_by: "M4, with the part"
+  ffc_conn_h:
+    value: 2.5
+    status: tbd
+    source: "the same connector's height above the board [from memory]"
     decided_by: "M4, with the part"
   # ONE MAIN BOARD (ADR 0017): the thumb switches, their registers and the
   # carrier's circuits on one board at the thumb level, mouth cap to the end
@@ -585,6 +592,16 @@ routing:
     decided_by: "M4"
   # STANDARD FLAT RIBBON (owner, 2026-09-26), lying FLAT down the centreline
   # (on edge it does not fit between the boards' part layers - clash check).
+  ffc_w:
+    value: 13.0
+    status: tbd
+    source: "12-way 1.0 mm pitch flat flex cable: 11 x 1.0 between outer conductors plus the edges [calc]; ADR 0001's 12 conductors"
+    decided_by: "M4, with the part"
+  ffc_t:
+    value: 0.3
+    status: tbd
+    source: "flat flex cable thickness [from memory]"
+    decided_by: "M4, with the part"
   ribbon_t:
     value: 1.0
     status: nominal

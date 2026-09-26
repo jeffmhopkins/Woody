@@ -105,6 +105,10 @@ of a superseded value. Instead:
 
 ![Section through the thumb row](renders/section-thumb-row.png)
 
+| | |
+|---|---|
+| ![Ribbons](renders/breakdown-ribbons.png) The key boards' ribbons and connectors, lid, sides and oak bottom off | ![Ribbon fold](renders/section-ribbon.png) Section through the left ribbon, closed: the fold up the far side |
+
 ![Plan from above, with the length budget](renders/plan-top.png)
 
 ![Top-key spacing, now against the alternatives](renders/key-layouts.png)

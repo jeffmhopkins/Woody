@@ -21,4 +21,4 @@ lv(ec_sock_c[1] + ec_sock[1] / 2, str("etherCON rear socket top ", ec_sock_c[1] 
 lv(z_floor, str("floor ", z_floor));
 lv(0, "bottom face 0");
 label([W / 2, -8, 1], str("cavity here ", z_oak_top_bot - z_floor, " x ", u_w, " mm   sides ", stack_side_t, " in ", stack_groove_depth, " mm grooves (tbd)"), size = 1.6);
-label([W / 2, -11.5, 1], str("section at X = ", cut_pos, " (LED matrix centre), seen from the tail"), size = 1.4);
+label([W / 2, -11.5, 1], str("section at X = ", cut_pos(), " (LED matrix centre), seen from the tail"), size = 1.4);

@@ -16,7 +16,7 @@ or analog.
 > **There is no carrier board (owner, 2026-09-26).** These circuits are built
 > on **the main board** (ADR 0017): one long board at the thumb level that
 > also carries the thumb switches and their registers, with the key boards
-> plugged into it on stacking headers (`mechanical/DESIGN.md`). The block
+> connected to it by flat flex ribbons (`mechanical/DESIGN.md`). The block
 > diagram and §§ below describe the circuits, which have not changed; where a
 > line talks about "the board", read the main board. Its size and the room its
 > parts have are in `mechanical/drc.echo`. The breath sensor is at its mouth

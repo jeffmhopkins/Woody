@@ -81,8 +81,9 @@ boards_sensor_leads = 17.8;  // settled; [ds] MPXV4006DP p.7 - across the lead t
 boards_sensor_port_l = 6.6;  // settled; [ds] MPXV4006DP p.7 - ports protrude 6.10-6.60 from one face
 boards_sensor_port_d = 3.3;  // settled; [ds] MPXV4006DP p.7 - barb OD 2.79-3.30
 boards_sensor_port_z = [8.5, 1.4];  // nominal; port centres above the seating plane, upper (P1, marked side - p.6 Table 3) and lower; scaled off the p.7 drawing
-boards_conn_l = 12.0;  // tbd; a stacking header: 2 x 6 at 2.0 mm pitch, 6 x 2.0 [calc]; it sits between two switches' pins, 19 mm apart, where 2.54 pitch (15.24) would not
-boards_conn_w = 4.0;  // tbd; 2 rows at 2.0 mm pitch [calc]
+boards_ffc_conn_l = 17.0;  // tbd; a 12-way 1.0 mm pitch ZIF FFC connector, along the body [from memory]
+boards_ffc_conn_w = 5.5;  // tbd; the same connector, across the body [from memory]
+boards_ffc_conn_h = 2.5;  // tbd; the same connector's height above the board [from memory]
 boards_board_clear = 1.5;  // tbd; clearance between a board and the parts on the board facing it, and between parts: board flex, solder fillets and height tolerance, hand assembly [drawing convention]. 0.5 was a drawing clearance and the owner rejected it (2026-09-26: 'once components are installed you'd have issues')
 boards_standoff_d = 5.5;  // tbd; M3 hex standoff across flats, 5.5 [from memory]
 boards_matrix_harness_h = 2.5;  // tbd; below the Matrix: a pigtail soldered straight to its pads, wires bent flat [from memory]. Crimp housings on a pin header stood ~16.5 and put a row across the patch plug
@@ -129,6 +130,8 @@ routing_tube_od = 5.0;  // tbd; breath tube outside diameter; ADR 0003 assumes a
 routing_trap_d = 10.0;  // tbd; dead-volume trap diameter; ADR 0003 caps the trap at 1 mL
 routing_trap_l = 12.0;  // tbd; trap length: 10 mm bore x 12 mm = 0.94 mL, inside ADR 0003's 1 mL [calc]
 routing_tube_lane = "left";  // tbd; which side channel the tube runs in (ADR 0009: 'in one of the side channels'); the looms take the other
+routing_ffc_w = 13.0;  // tbd; 12-way 1.0 mm pitch flat flex cable: 11 x 1.0 between outer conductors plus the edges [calc]; ADR 0001's 12 conductors
+routing_ffc_t = 0.3;  // tbd; flat flex cable thickness [from memory]
 routing_ribbon_t = 1.0;  // nominal; flat ribbon thickness, 1.27 mm pitch PVC ribbon [from memory]
 routing_lane_z = 19.0;  // tbd; height of the side-channel runs, between the thumb boards below and the key boards above
 lighting_strip_w = 10.0;  // tbd; hardware/carrier/carrier.md '~10 mm' [from memory there]; the strip geometry row is BLOCKED in datasheets/MANIFEST.csv
@@ -138,5 +141,5 @@ lighting_strip_per_m = 60;  // tbd; LEDs per metre; hardware/unplaced.csv LED-ST
 
 // Every value above with status tbd - a placeholder, not a number any
 // document gives. The DRC report lists these so no result hides one.
-tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_mouth_extra", "layout_tail_clear", "layout_underside_clear", "layout_lh_offsets", "layout_rh_offsets", "layout_lt_rest_under", "layout_lt_rest", "layout_rt_rest_under", "layout_rt_rest", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_tall_l", "boards_tall_w", "boards_tall_h", "boards_conn_l", "boards_conn_w", "boards_board_clear", "boards_standoff_d", "boards_matrix_harness_h", "boards_matrix_under_h", "boards_matrix_led_h", "openings_matrix_lip", "openings_matrix_acrylic_t", "openings_usb_slot_w", "openings_usb_slot_h", "openings_usb_plug_l", "openings_matrix_usb_to_tail", "openings_usb_ext_depth", "ethercon_socket_toward_centre", "ethercon_rj45_plug_l", "ethercon_rj45_plug_w", "ethercon_rj45_plug_h", "ethercon_offset_y", "hardware_fastener_inset", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_ubolt_nut_af", "hardware_ubolt_nut_h", "hardware_backplate_t", "routing_tube_od", "routing_trap_d", "routing_trap_l", "routing_tube_lane", "routing_lane_z", "lighting_strip_w", "lighting_strip_t", "lighting_strip_per_m"];
+tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_mouth_extra", "layout_tail_clear", "layout_underside_clear", "layout_lh_offsets", "layout_rh_offsets", "layout_lt_rest_under", "layout_lt_rest", "layout_rt_rest_under", "layout_rt_rest", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_tall_l", "boards_tall_w", "boards_tall_h", "boards_ffc_conn_l", "boards_ffc_conn_w", "boards_ffc_conn_h", "boards_board_clear", "boards_standoff_d", "boards_matrix_harness_h", "boards_matrix_under_h", "boards_matrix_led_h", "openings_matrix_lip", "openings_matrix_acrylic_t", "openings_usb_slot_w", "openings_usb_slot_h", "openings_usb_plug_l", "openings_matrix_usb_to_tail", "openings_usb_ext_depth", "ethercon_socket_toward_centre", "ethercon_rj45_plug_l", "ethercon_rj45_plug_w", "ethercon_rj45_plug_h", "ethercon_offset_y", "hardware_fastener_inset", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_ubolt_nut_af", "hardware_ubolt_nut_h", "hardware_backplate_t", "routing_tube_od", "routing_trap_d", "routing_trap_l", "routing_tube_lane", "routing_ffc_w", "routing_ffc_t", "routing_lane_z", "lighting_strip_w", "lighting_strip_t", "lighting_strip_per_m"];
 

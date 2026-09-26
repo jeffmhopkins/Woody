@@ -36,8 +36,14 @@ one big long board?")
   key boards' parts, and more where no key board is overhead — both are in
   `mechanical/drc.echo` ("main board parts room …"). That is more than the
   centre board had, so the regulator block fits anywhere on it.
-- **The key boards plug straight into it** on the same stacking headers; there
-  is no board for them to pass through.
+- **The key boards connect to it by ribbon** (owner, same day, after asking
+  how they connected): one 12-way flat flex ribbon per key board, ZIF
+  connectors on both boards, folded up the far side of the cavity when
+  closed. The key boards hang from the lid, so blind-mating stacking headers
+  would have unplugged every time the lid came off; the ribbons let it open
+  with them attached. Flat flex rather than IDC because an IDC box header and
+  plug are too tall for the gap with parts on both boards
+  (`mechanical/DESIGN.md`).
 - **The breath sensor moves to the mouth end** (owner's choice between the
   mouth end, the middle with the strip jumpered around it, and keeping
   separate boards): on the far side from the tube, ports towards the tail,
@@ -73,8 +79,8 @@ one big long board?")
   tube and get easier; the ROADMAP re-derivation item stands.
 - **Four cluster boards become two key boards plus the main board.**
   `PCB-CLUSTER` drops to two and `PCB-CARRIER` is the main board. The key
-  chain is now on-board traces for the thumbs and stacking headers to the key
-  boards, so the chain connector count (`chain-connectors` in
+  chain is now on-board traces for the thumbs and two flat flex ribbons to
+  the key boards (four connectors), so the chain connector count (`chain-connectors` in
   `config/figures.yaml`) and the key-chain loom pages describe hardware that
   is no longer in the design. They are marked for rework, not restated here.
 - **The main board is long** — its size is in `mechanical/drc.echo` "main
