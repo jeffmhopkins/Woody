@@ -31,6 +31,7 @@ show_keys = true;
 show_boards = true;
 show_hardware = true;
 show_strips = true;
+highlight = [];   // solid ids to draw bright yellow, the rest faded (fig_carrier.scad)
 show_routing = true;
 ghost_shell = false;  // draw the shell translucent to see inside
 // Sections. "y" / "x" clip every part with a half-space (keep Y < cut, or
@@ -264,7 +265,12 @@ list_solids = false;
 module P(c, shell = false, id = "") {
     assert(id != "", "every solid needs an id - the clash check cannot see an unnamed one");
     if (list_solids) echo("SOLID", id);
-    cc = (shell && ghost_shell) ? [c[0], c[1], c[2], 0.25] : c;
+    // highlight: solids named in it are drawn bright yellow and the rest
+    // faded, so one assembly can be picked out of the body in a render.
+    hl = len(highlight) > 0;
+    cc = hl && len([for (h = highlight) if (h == id) 1]) > 0 ? [1.0, 0.85, 0.0]
+       : hl ? [c[0], c[1], c[2], 0.18]
+       : (shell && ghost_shell) ? [c[0], c[1], c[2], 0.25] : c;
     if (only == "" || only == id) color(cc)
         if (cut == "none") children();
         else if (cut == "y2d")

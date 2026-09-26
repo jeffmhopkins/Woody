@@ -9,8 +9,9 @@ blocked from this sandbox. Read it as a proposal with its uncertainties marked,
 not as a design.
 
 The one board inside the instrument. It has no MCU on it (ADR 0013): a
-Waveshare ESP32-S3-Matrix plugs into it and everything else on the board is
-passive, slow, or analog.
+Waveshare ESP32-S3-Matrix connects to it — by a soldered pigtail since
+2026-09-26, the Matrix sitting under its window at the tail (§7) — and
+everything else on the board is passive, slow, or analog.
 
 Evidence marking follows the module pages: `[repo]` names a file, `[calc]` shows
 the arithmetic, `[from memory]` means **I could not open the datasheet and you
@@ -251,11 +252,12 @@ service header — `J-DISP` and `HDR-SERVICE` — moved verbatim to
 ## §7 Dev board mounting and the matrix window
 
 > **Superseded 2026-09-26: the matrix is on the TOP face** (owner, ADR 0009).
-> The ESP32-S3-Matrix stands face up on the carrier's top side under a window
-> in the lid, so there is no cutout to argue about and the underside
-> mounting below is not needed. The carrier's height now follows from that
-> stack (`mechanical/drc.echo`, "carrier height"). Kept as the record of the
-> arithmetic that was.
+> The ESP32-S3-Matrix is **no longer on this board at all**: it sits face up
+> against the oak top under a window at the tail, wired to the carrier by a
+> soldered pigtail (ADR 0009, `mechanical/DESIGN.md`), so there is no cutout
+> to argue about and the underside mounting below is not needed. Where the
+> carrier itself goes is open — `mechanical/renders/carrier.png` shows it
+> picked out. Kept as the record of the arithmetic that was.
 
 **Proposed: mount the ESP32-S3-Matrix on the carrier's *underside*, LED face
 outward, and delete the cutout.** ADR 0009 and ADR 0014 both name underside
