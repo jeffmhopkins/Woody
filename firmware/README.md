@@ -104,16 +104,12 @@ key boards' ribbons from the main board (ADR 0017), and re-laying the gasket. Ev
   through the tail USB-C slot — which is why MIDI is opt-in. (3) The console
   header on the main board, with the lid off (ADR 0009 — there is no
   service cover since 2026-09-26), for watching a board that boots
-  but misbehaves. **There is no hardware boot-force yet**: `EN` and `IO0` are
-  not broken out on the ESP32-S3-Matrix's pad rows, so the ribbon to `J-MCU`
-  does not carry them. The old reason for leaving them alone — that soldering
-  to them would end the board's life as a socketed module — is gone since
-  ADR 0017 (the ribbon is soldered to the Matrix anyway), so whether to wire
-  them is open (ADR 0009; `hardware/carrier/service-uart/`). Until that is
-  decided, a corrupted *bootloader* means
-  opening the body to get at the board — narrow, behind two mitigations,
-  accepted. **This used to read "ends the instrument", which was true of a
-  bonded body and is not true of this one** (ADR 0009).
+  but misbehaves. (4) **Hardware boot-force on the same header**: `EN` and
+  `IO0` are not on the ESP32-S3-Matrix's pad rows, so two ribbon conductors
+  are soldered to its RESET and BOOT button pads and brought to
+  `HDR-SERVICE` (ADR 0018; `hardware/carrier/service-uart/`). Hold `IO0` low,
+  pulse `EN`, and the ROM download mode takes a UART flash — so a corrupted
+  *bootloader* is recovered with the lid off and the Matrix still in place.
 - **Exercise the ladder at M8**, before the body closes, so it is known good
   rather than assumed.
 

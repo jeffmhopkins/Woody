@@ -241,9 +241,9 @@ only as good as those envelopes. Group the report's lines by these causes
    overlaps the thumb plates. (The stations ran through the side strips until
    ADR 0016 removed them.)
 5. **The Matrix and the umbilical are wired onto the main board's tail
-   end** (owner, 2026-09-26). The Matrix, on the lid, has a flat 20-way
-   ribbon soldered to its two pad rows (its 12 used GPIO, 5V, 3V3 and its
-   one GND pad; the other five positions are open on `CBL-MCU-RIBBON`): out past its mouth edge above the patch plug, down in the gap
+   end** (owner, 2026-09-26). The Matrix, on the lid, has a flat 24-way
+   ribbon soldered to its pad rows, two test points and two button pads
+   (allocation on `CBL-MCU-RIBBON`, ADR 0018): out past its mouth edge above the patch plug, down in the gap
    between the right-hand key board's end and the plug, and level into
    J-MCU beside the regulator block; it unplugs there when the lid comes
    off. The etherCON's patch lead runs from its plug in an S-bend at the

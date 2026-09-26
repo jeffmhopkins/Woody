@@ -88,7 +88,7 @@ boards_sensor_lead_h = 1.2;  // tbd; height of the block standing in for the lea
 boards_ffc_conn_l = 17.0;  // tbd; a 12-way 1.0 mm pitch right-angle (side-entry) ZIF FFC connector, along the body [from memory]
 boards_ffc_conn_w = 5.5;  // tbd; the same connector, across the body [from memory]
 boards_ffc_conn_h = 2.5;  // tbd; the same connector's height above the board [from memory]
-boards_mcu_conn_l = 16.0;  // tbd; a 2 x 10 1.27 mm box header, side entry, across the body [from memory]
+boards_mcu_conn_l = 18.5;  // tbd; a 2 x 12 1.27 mm box header, side entry, across the body: 11 x 1.27 = 13.97 between end pins [calc] plus the shroud's end walls [from memory] (ADR 0018)
 boards_mcu_conn_w = 6.0;  // tbd; the same header along the body, with its latch [from memory]
 boards_mcu_conn_h = 5.0;  // tbd; the same header's height [from memory]
 boards_umb_conn_l = 12.0;  // tbd; an 8-way latching wire-to-board header, side entry, across the body [from memory]
@@ -140,7 +140,7 @@ routing_tube_od = 5.0;  // tbd; breath tube outside diameter; ADR 0003 assumes a
 routing_trap_d = 10.0;  // tbd; dead-volume trap diameter; ADR 0003 caps the trap at 1 mL
 routing_trap_l = 12.0;  // tbd; trap length: 10 mm bore x 12 mm = 0.94 mL, inside ADR 0003's 1 mL [calc]
 routing_tube_lane = "left";  // tbd; which side the tube and trap run on inside the mouth band (ADR 0017: sensor on the far side from the tube); there are no looms since ADR 0017
-routing_mcu_ribbon_w = 12.7;  // tbd; 20-way 0.635 mm ribbon for a 1.27 mm dual-row header [calc]: the Matrix's 12 used GPIO, 5V, 3V3 and GND, and five positions open (hardware/carrier/bom.csv CBL-MCU-RIBBON)
+routing_mcu_ribbon_w = 15.24;  // tbd; 24-way 0.635 mm ribbon for a 1.27 mm dual-row header [calc: 24 x 0.635]: allocation in hardware/carrier/bom.csv CBL-MCU-RIBBON (ADR 0018)
 routing_mcu_ribbon_t = 0.8;  // tbd; fine-pitch ribbon thickness [from memory]
 routing_umb_cable_od = 4.0;  // tbd; a slim Cat6 patch lead [from memory]; the patch plug is CBL-UMB-PATCH's plug in the etherCON's rear socket
 routing_umb_bend_r_per_od = 4.0;  // tbd; minimum bend radius as a multiple of the cable's diameter, the usual rule for twisted-pair patch cable [from memory]

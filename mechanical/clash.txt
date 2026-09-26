@@ -74,7 +74,7 @@ ALLOWED 96 (by rule in mechanical/clash-allow.yaml)
         11.0 mm3  parts main board  x  switch LT1   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts main board  x  switch RT1   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts main board  x  switch RT3   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
-         4.1 mm3  J-MCU  x  Matrix ribbon   - the ribbon's end goes into its connector
+         4.9 mm3  J-MCU  x  Matrix ribbon   - the ribbon's end goes into its connector
          1.7 mm3  M3 #3  x  key plate   - the fastener threads into the plate - an insert or tapped boss (hardware/bom.csv MECH-FASTENER); the tap hole is drawn at the tap drill
          1.7 mm3  M3 #4  x  key plate   - the fastener threads into the plate - an insert or tapped boss (hardware/bom.csv MECH-FASTENER); the tap hole is drawn at the tap drill
          1.7 mm3  M3 #5  x  key plate   - the fastener threads into the plate - an insert or tapped boss (hardware/bom.csv MECH-FASTENER); the tap hole is drawn at the tap drill

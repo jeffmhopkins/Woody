@@ -61,5 +61,6 @@ why it was deleted is worth keeping.
 | [0013](0013-two-mcu-split.md) | Two-MCU split | Superseded by 0015 |
 | [0015](0015-one-mcu-no-display.md) | One MCU, no display board | Accepted |
 | [0016](0016-one-strip-on-the-centre-board.md) | One LED strip, on the centre board | Accepted (placement amended by 0017) |
-| [0017](0017-one-main-board.md) | One main board | Accepted |
+| [0017](0017-one-main-board.md) | One main board | Accepted (wiring details in 0018) |
+| [0018](0018-main-board-wiring-decisions.md) | Main board wiring: five decisions | Accepted |
 | [0014](0014-lighting.md) | Lighting | Accepted (geometry amended by 0016) |

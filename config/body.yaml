@@ -359,9 +359,9 @@ boards:
   # umbilical: a slim patch lead from the etherCON's rear socket to a latching
   # connector, far enough in that the cable's bend is legal.
   mcu_conn_l:
-    value: 16.0
+    value: 18.5
     status: tbd
-    source: "a 2 x 10 1.27 mm box header, side entry, across the body [from memory]"
+    source: "a 2 x 12 1.27 mm box header, side entry, across the body: 11 x 1.27 = 13.97 between end pins [calc] plus the shroud's end walls [from memory] (ADR 0018)"
     decided_by: "M4, with the part"
   mcu_conn_w:
     value: 6.0
@@ -404,7 +404,7 @@ boards:
     decided_by: "M4, with the standoff bought"
   # THE LED MATRIX IS ON THE TOP FACE, just past the last key (owner,
   # 2026-09-26), face up against the oak top under its window, the key plate
-  # ending short of it; the connectors pass beneath it. A 20-way ribbon soldered to
+  # ending short of it; the connectors pass beneath it. A 24-way ribbon soldered to
   # its pads runs to J-MCU on the main board (hardware/carrier/bom.csv
   # CBL-MCU-RIBBON).
   matrix_harness_h:
@@ -655,9 +655,9 @@ routing:
   # STANDARD FLAT RIBBON (owner, 2026-09-26), lying FLAT down the centreline
   # (on edge it does not fit between the boards' part layers - clash check).
   mcu_ribbon_w:
-    value: 12.7
+    value: 15.24
     status: tbd
-    source: "20-way 0.635 mm ribbon for a 1.27 mm dual-row header [calc]: the Matrix's 12 used GPIO, 5V, 3V3 and GND, and five positions open (hardware/carrier/bom.csv CBL-MCU-RIBBON)"
+    source: "24-way 0.635 mm ribbon for a 1.27 mm dual-row header [calc: 24 x 0.635]: allocation in hardware/carrier/bom.csv CBL-MCU-RIBBON (ADR 0018)"
     decided_by: "M4"
   mcu_ribbon_t:
     value: 0.8

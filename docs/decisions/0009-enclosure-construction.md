@@ -450,8 +450,8 @@ three power and seventeen GPIO — and neither appears. They exist on the board
 means soldering to the dev board, which would end its life as a socketed,
 swappable module. *(Amended 2026-09-26: since ADR 0017 the ribbon is
 soldered to the Matrix anyway and nothing is socketed, so this reason is
-gone; whether to wire `EN` and `IO0` is open again —
-`hardware/carrier/service-uart/`.)* Not worth it, because the header was never the first line of
+gone; `EN` and `IO0` are wired to the service header since
+[ADR 0018](0018-main-board-wiring-decisions.md) — `hardware/carrier/service-uart/`.)* Not worth it, because the header was never the first line of
 defence. Roughly 12 × 40 mm, two M2 screws into the plate stack,
 in the same laminated layer as the window.
 

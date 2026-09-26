@@ -816,7 +816,7 @@ module ribbons_3d() {
 
 // THE MATRIX AND THE UMBILICAL (owner, 2026-09-26: "what about matrix led
 // esp32 and ethercon wire connections?"), both onto the main board's tail
-// end. The Matrix: a flat 20-way ribbon soldered to its two pad rows, down
+// end. The Matrix: a flat 24-way ribbon soldered to its pads (ADR 0018), down
 // just inside its mouth edge, one bend, and level beside the patch plug
 // into J-MCU - the Matrix is on the lid,
 // so it unplugs there like the key boards. The umbilical: the slim patch
