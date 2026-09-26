@@ -349,7 +349,7 @@ figures:
     derivation: "1.25 x (1 + 475/150) = 5.208 V"
     forbidden: ["5.25V]", "local 5.25 V regulator", "own 5.25 V regulator", "LM317's own 5.25 V", "5.25V DAC regulator", "set to 5.25V", "LDO set to 5.25"]
     false_positive_note: "The MPXV4006DP's supply spec is legitimately 4.75-5.25 V. Match the regulator, not the numeral."
-    floor: "5.00 V, HARD. The DAC8568's C grade is specified only for AVDD 5.0-5.5 V (SBAS430E, datasheets/analog/DAC8568CIPW.pdf). E7 selects R-REG-SET on the bench across a 0.66 V worst-case spread and must not land below 5.00 V. Added 2026-09-21; nothing in the roadmap knew this."
+    floor: "5.00 V, HARD. The DAC8568's C grade is specified only for AVDD 5.0-5.5 V (SBAS430E, datasheets/analog/DAC8568CIPW.pdf). E7 selects R-REG-SET-ADJGND on the bench across a 0.66 V worst-case spread and must not land below 5.00 V. Added 2026-09-21; nothing in the roadmap knew this."
     note: "bom.csv's U-REG-DAC DESCRIPTION field said 'set to 5.25V' until 2026-09-21 - the forbidden list matched the notes field's phrasings and not this one, which is why it survived. Both phrasings are listed now."
 
   - id: mod-reference

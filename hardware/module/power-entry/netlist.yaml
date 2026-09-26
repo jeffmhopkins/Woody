@@ -106,12 +106,28 @@ components:
     pins: [IN, OUT, ADJ]
     note: "Minimum load current differs by manufacturer - see the row. The ~13mA here clears every reading"
 
-  R-REG-SET-HI:
-    value: "475R 0.1%"
-    pins: [1, 2]
-  R-REG-SET-LO:
+  # *** THESE TWO WERE WIRED BACKWARDS UNTIL 2026-09-26 *** and the rail was
+  # 1.65 V, below the DAC8568's absolute minimum. They were called -HI and -LO,
+  # which can only be read by resistance, so the netlist put the bigger one on
+  # the OUT-to-ADJ leg. The names now carry the nodes, and a wiring that
+  # contradicts them contradicts itself.
+  #
+  #   V_OUT = 1.25 x (1 + R_ADJGND / R_OUTADJ) + I_ADJ x R_ADJGND
+  #         = 1.25 x (1 + 475/150) + 50uA x 475  =  5.23 V   [calc]
+  #
+  # dac-rail's own derivation is 1.25 x (1 + 475/150) = 5.208 V (it omits the
+  # I_ADJ term), and ADR 0004 writes the pair as R1/R2 = OUT-ADJ/ADJ-GND:
+  # "150 ohm / 475 ohm instead of 240 ohm / 768 ohm".
+
+  R-REG-SET-OUTADJ:
     value: "150R 0.1%"
     pins: [1, 2]
+    note: "R1: OUT to ADJ. Also carries 1.25/150 = 8.3 mA, most of the minimum load"
+
+  R-REG-SET-ADJGND:
+    value: "475R 0.1%"
+    pins: [1, 2]
+    note: "R2: ADJ to GND. This is the leg that programs the rail"
 
   C-REG-ADJ:
     value: "10uF"
@@ -169,13 +185,13 @@ nets:
 
   REG_ADJ:
     - U-REG-DAC.ADJ
-    - R-REG-SET-HI.2
-    - R-REG-SET-LO.1
+    - R-REG-SET-OUTADJ.2
+    - R-REG-SET-ADJGND.1
     - C-REG-ADJ.1
 
   DAC_AVDD:
     - U-REG-DAC.OUT
-    - R-REG-SET-HI.1
+    - R-REG-SET-OUTADJ.1
     - C-REG-OUT.1
     - port: DAC_AVDD
 
@@ -183,7 +199,7 @@ nets:
     - port: AGND_MOD
     - C1.2
     - C3.2
-    - R-REG-SET-LO.2
+    - R-REG-SET-ADJGND.2
     - C-REG-ADJ.2
     - C-REG-OUT.2
 
