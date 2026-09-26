@@ -141,9 +141,10 @@ mouth_req = max(x_in0 + layout_mouth_extra + switch_keycap / 2 + stack_cap_clear
 // the tail hangs off the right hand, so it can be worked out in the right
 // hand's own frame (x_rh0 = 0) before the right hand is placed.
 rt_rest_rel = [run_rel(layout_rt_rest_under), W / 2];
-// RT1 a half rest below the rest, RT2 / RT3 side by side a half rest above.
-function rt_rel(i) = i == 0 ? rt_rest_rel + [layout_rt_rest / 2, 0]
-                   : rt_rest_rel + [-layout_rt_rest / 2, (i == 1 ? -1 : 1) * thumb_pitch / 2];
+// Like the left thumb (owner, 2026-09-26: "four keys right thumb too"):
+// RT1 / RT2 side by side a half rest toward the mouth, RT3 / RT4 a half rest
+// toward the tail.
+function rt_rel(i) = rt_rest_rel + [(i < 2 ? -1 : 1) * layout_rt_rest / 2, (i % 2 == 0 ? -1 : 1) * thumb_pitch / 2];
 top_last_rel = max([for (i = [0 : len(layout_rh_gaps)]) cum(layout_rh_gaps, i)]);
 rt_last_rel = max([for (i = [0 : count("right_thumb") - 1]) rt_rel(i)[0]]);
 // BEHIND THE MATRIX, IN ORDER (2026-09-26): the USB-C extension's plug off
@@ -217,9 +218,7 @@ rt_rest = [x_rh0, 0] + rt_rest_rel;
 function thumb_slots() = [for (cl = ["left_thumb", "right_thumb"])
     let(r = cl == "left_thumb" ? lt_rest_xy[0] : rt_rest[0], ks = cluster_keys(cl))
     for (before = [true, false]) let(g = [for (k = ks) if ((key_xy(k)[0] < r) == before) k]) if (len(g) > 0) g];
-// Right-thumb control switches, offset from the rest (ADR 0010): two side by
-// side toward the mouthpiece, in one row across the body, and one toward the
-// tail (owner, 2026-09-26: "two up, one down"). Placeholder geometry.
+// Right-thumb control switches, either side of the rest (ADR 0010).
 function rt_xy(i) = [x_rh0, 0] + rt_rel(i);
 // NO SPARE-SWITCH CUTOUTS (owner, 2026-09-26: the right thumb is "only the
 // three", the left thumb the four in a line). ADR 0010 reserved three; the

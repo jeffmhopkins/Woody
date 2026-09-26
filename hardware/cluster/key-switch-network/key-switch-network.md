@@ -111,7 +111,7 @@ else; `tools/check-netlist.py` prints that shortfall by name every run.*
 | Release, τ = 2.2 kΩ × 47 nF = 103.4 µs | crosses `V_IH` at **119.9 µs** |
 | Press, τ = (2.2 kΩ ∥ 100 Ω) × 47 nF = 4.496 µs | crosses `V_IL` at **5.92 µs** — 42× inside the 250 µs scan |
 | Pole | 1.54 kHz → **54 dB** at the WS2815's 800 kHz data rate |
-| Static | **1.43 mA** per closed key; 18 closed = **25.8 mA** off the loom's 3V3 |
+| Static | **1.43 mA** per closed key; 19 closed = **27.3 mA** off the loom's 3V3 |
 
 **Press is instant on the scan's timescale and release is filtered**, which is
 the asymmetric-debounce shape ADR 0001 wants — instant attack, filtered release
@@ -132,10 +132,10 @@ nothing musically; note-off is filtered in firmware anyway.
 `bom.csv` says so itself: the 2.2 kΩ was chosen when the node ran 265 mm down an
 uncoated loom, *"that reason is gone now the register is back on the cluster
 board"*, and it was kept as cheap insurance `[repo] bom.csv`. **Keeping it is
-not free any more**, because 25.8 mA of play-rate load lands on the rail that is
-also the MCP3202's voltage reference — worth 3.2 LSB, accepted on the carrier
-page `[repo] carrier.md §2`. Going back to 10 kΩ would cut that to 5.9 mA and
-0.7 LSB, at the price of a 100 µs τ in a humid cavity. **Recorded as a live
+not free any more**, because 27.3 mA of play-rate load lands on the rail that is
+also the MCP3202's voltage reference — worth 3.4 LSB, accepted on the carrier
+page `[repo] carrier.md §2`. Going back to 10 kΩ would cut that to 6.2 mA and
+0.8 LSB, at the price of a 100 µs τ in a humid cavity. **Recorded as a live
 trade, not re-opened here.**
 
 ---
@@ -146,8 +146,8 @@ trade, not re-opened here.**
 circuit, moved verbatim 2026-09-21. `§2` is this page.*
 
 - **`R-KEY-PU` at 2.2 kΩ versus 10 kΩ** (§2). The reason for 2.2 kΩ expired when
-  the register moved back to this board, and the cost — 25.8 mA on the ADC's
-  reference rather than 5.9 mA — arrived at the same moment. Live trade,
+  the register moved back to this board, and the cost — 27.3 mA on the ADC's
+  reference rather than 6.2 mA — arrived at the same moment. Live trade,
   recorded on the carrier page as accepted.
 - **Whether `LT` takes lighter springs** (`SW-THUMB`), which is an M1 decision by
   hand and changes nothing electrically `[repo] bom.csv, 0002`.

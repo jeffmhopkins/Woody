@@ -185,11 +185,11 @@ tail-register draft `[repo] bom.csv`:
 
 ```
 3.3 V / (2.2 kΩ + 100 Ω) = 1.43 mA per closed key
-18 keys closed           = 25.8 mA step on the ADC's reference
-at an LDO load regulation of ~0.3 % per 100 mA [from memory]: 0.077 % = 3.2 LSB
+19 keys closed           = 27.3 mA step on the ADC's reference
+at an LDO load regulation of ~0.3 % per 100 mA [from memory]: 0.082 % = 3.4 LSB
 ```
 
-**Still fine, and no longer negligible.** 3.2 LSB is 0.2 % of the ~1594-count
+**Still fine, and no longer negligible.** 3.4 LSB is 0.2 % of the ~1594-count
 playable span, and because it is the reference moving it is a gain error rather
 than an offset — it scales with how hard you are blowing, which is the
 direction that hides it. Recorded because the symptom of getting it wrong is
@@ -388,7 +388,7 @@ Ordered by what blocks what. The first four block layout.
 
 > **Two items were decided rather than left open.** `J-CHAIN` is **2×6** with
 > a ground between every signal (§3). And the key pull-ups **may** share the
-> ADC's reference: 25.8 mA of play-rate load worth 3.2 LSB on a ~1594-count
+> ADC's reference: 27.3 mA of play-rate load worth 3.4 LSB on a ~1594-count
 > playable span, as a gain term rather than an offset. **Accepted, not
 > ignored** — §2 exists so that when the breath reading twitches on a chord,
 > nobody spends a week in the firmware.

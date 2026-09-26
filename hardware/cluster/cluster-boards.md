@@ -205,8 +205,8 @@ Per board, from `bom.csv` `[repo]` unless marked **proposed**.
 |---|---|---|---|---|---|---|
 | `U-KEYS` | 74HC165 SOIC-16 | 1 | 1 | 1 | 1 | `CLK INH` low, `QH_bar` open |
 | `C-DECOUPLE-165` | 100 nF X7R 0805 | 1 | 1 | 1 | 1 | At the package |
-| `SW1-n` | Gateron KS-33 Red | 5 | 4 | 6 | 3 | Soldered. `SW-THUMB` lighter springs are an open option for `LT` |
-| `R-KEY-PU` | 2.2 kΩ 1% 0805 | **6** | **6** | 6 | 6 | **24, not 21.** `RT` carries the 3 reserved spare-switch positions; `LT` and `LH` each carry a pull-up for their *free* bits (22, 23, 31), which the first draft budgeted for switch positions only |
+| `SW1-n` | Gateron KS-33 Red | 5 | 4 | 6 | 4 | Soldered. `SW-THUMB` lighter springs are an open option for `LT` |
+| `R-KEY-PU` | 2.2 kΩ 1% 0805 | **6** | **6** | 6 | 6 | **24, not 21.** `RT` carries its 4 keys and the 2 reserved spare-switch positions; `LT` and `LH` each carry a pull-up for their *free* bits (22, 23, 31), which the first draft budgeted for switch positions only |
 | `R-KEY-SER` | 100 Ω 1% 0805 | 5 | 4 | 6 | 6 | |
 | `C-KEY` | 47 nF X7R 0805 | 5 | 4 | 6 | 6 | |
 | `J-CHAIN` | 2×6 IDC boxed, keyed | 1 | 2 | 2 | 2 | `LH` is the chain end and has `IN` only |
@@ -214,7 +214,7 @@ Per board, from `bom.csv` `[repo]` unless marked **proposed**.
 | **`R-SER-TERM`** | **10 kΩ 0805** | **1** | — | — | — | **Proposed — chain-end board only; makes the self-test a firmware choice** |
 | `marker straps` | copper, no parts | 2 | 2 | 2 | 2 | **Decided** — 8-bit marker, §4. Straight to GND or 3V3, no resistor and no cap: the node never changes |
 
-**Totals across the four boards:** 4 ICs, 4 decoupling caps, 18 fitted switches
+**Totals across the four boards:** 4 ICs, 4 decoupling caps, 19 fitted switches
 in 21 networked positions, 63 network passives, 7 chain connectors — **plus one
 more `J-CHAIN` on the carrier, eight in all** `[repo] carrier.md §3`.
 

@@ -204,13 +204,12 @@ layout:
     status: tbd
     source: "the right thumb rest is directly under the middle-finger key (owner, 2026-09-26); RH2 on the same assumption as lt_rest_under"
     decided_by: "M2 - finger assignment"
-  # THE RIGHT THUMB: two side by side toward the mouth, the rest, one below
-  # (owner, 2026-09-26: "two up, one down, the up are horizontally same row";
-  # "more gap for resting right thumb").
+  # THE RIGHT THUMB: two rows across the body with the rest between them,
+  # like the left (owner, 2026-09-26: "four keys right thumb too").
   rt_rest:
     value: 40.0
     status: tbd
-    source: "RT2/RT3's row to RT1, centre to centre, across the thumb rest - the same as the left thumb's rest. RT2 to RT3 is the top keys' pitch (owner, 2026-09-26)"
+    source: "the RT1/RT2 row to the RT3/RT4 row, centre to centre, across the thumb rest - the same as the left thumb's. Each row's two keys are at the top keys' pitch (owner, 2026-09-26)"
     decided_by: "M2"
 
 # -------------------------------------------------------------- switches ----

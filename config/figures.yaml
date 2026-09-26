@@ -190,16 +190,17 @@ figures:
 
   - id: key-scan-current
     quantity: 3V3 draw of the closed key pull-ups, and the step it puts on the ADC reference
-    value: "1.43 mA per closed key, 25.8 mA at 18 closed"
+    value: "1.43 mA per closed key, 27.3 mA at 19 closed"
     status: settled
     owner: hardware/cluster/key-switch-network/key-switch-network.md
-    derivation: "3.3 V / (R-KEY-PU 2.2 kohm + R-KEY-SER 100 ohm) = 1.43 mA per closed key; 18 fitted switches closed = 25.8 mA."
-    forbidden: ["10 kOhm pull-ups", "0.33 mA per closed key", "5.9 mA, as a step"]
-    companion: "Its two consequences are stated where they land: the ADC reference droop (0.077 %, 3.2 LSB, ~1594 counts) on hardware/carrier/carrier.md, and the 3V3 rail step on hardware/interfaces/key-chain-loom/key-chain-loom.md."
+    derivation: "3.3 V / (R-KEY-PU 2.2 kohm + R-KEY-SER 100 ohm) = 1.43 mA per closed key; 19 fitted switches closed = 27.3 mA (19 since the right thumb went to four keys, 2026-09-26)."
+    forbidden: ["10 kOhm pull-ups", "0.33 mA per closed key", "5.9 mA, as a step", "25.8 mA", "25.8mA", "18 closed", "18 keys closed", "0.077 %", "3.2 LSB"]
+    companion: "Its two consequences are stated where they land: the ADC reference droop (0.082 %, 3.4 LSB, ~1594 counts) on hardware/carrier/carrier.md, and the 3V3 rail step on hardware/interfaces/key-chain-loom/key-chain-loom.md."
     escape_note: |
       TRACKED 2026-09-21 AFTER A COLD REVIEWER FOUND THE DERIVATION LIVE IN
       TWO FILES IN FULL, WITH NONE OF ITS FIVE NUMBERS IN THIS REGISTER.
-      1.43 mA, 25.8 mA, 0.077 %, 3.2 LSB and ~1594 counts each appear in two
+      The per-key current, the all-closed current, the droop, its LSB and
+      ~1594 counts each appear in two
       or three corpus files. Nothing could see a divergence between them.
       THE SPLIT MADE IT WORSE, which is the part worth recording. Before the
       restructure both copies sat in ONE file, ninety lines apart, where a

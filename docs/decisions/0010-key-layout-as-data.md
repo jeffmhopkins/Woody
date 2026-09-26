@@ -42,18 +42,18 @@ source, scale, offset, curve and slew, defined as data rather than code.
 
 ## Key count
 
-**18 switches**, decided:
+**18 switches**, decided *(19 since 2026-09-26: the right thumb has four — owner, "let's go consistent"; RT4 took the hold/preset spare's bit)*:
 
 | Group | Count | Face | Role |
 |---|---|---|---|
 | Left hand | 5 | top | note |
 | Right hand | 6 | top | note |
 | Left thumb | 4 | bottom, inset (ADR 0009) | note |
-| Right thumb | 3 | bottom, offset from the rest | **control** |
+| Right thumb | 3 → **4** | bottom, either side of the rest | **control** |
 
 ## Not every switch is a note key
 
-The right thumb's three switches are **control inputs, not fingering inputs** —
+The right thumb's switches (four since 2026-09-26) are **control inputs, not fingering inputs** —
 modulation and IMU gating (ADR 0007). The fingering table covers 15 keys, not
 18, and the layout file carries a `role` field so firmware and the plate
 generator both know the difference.

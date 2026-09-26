@@ -216,7 +216,8 @@ removes is the claim that coupling alone produces a false press.
 **Per switch position: 2.2 kΩ to 3V3, 100 Ω in series, 47 nF to ground**, on the
 **cluster board**, at the register inputs — which is now a few millimetres of
 trace from the switch rather than 265 mm of loom. Twenty-one sets across the
-four boards, so the three reserved spare-switch bits are covered too.
+four boards, so the reserved spare-switch bits are covered too *(three until
+2026-09-26, two since RT4 took one — the 21 positions are unchanged)*.
 (`R-KEY-PU`, `R-KEY-SER`, `C-KEY`; values per `bom.csv`.)
 
 `[calc]`, at 3.3 V into 74HC165 thresholds (`V_IH` 2.31 V, `V_IL` 0.99 V —
@@ -228,7 +229,7 @@ four boards, so the three reserved spare-switch bits are covered too.
 | Release, τ = 2.2 kΩ × 47 nF = 103.4 µs | crosses `V_IH` at **119.9 µs** |
 | Press, τ = (2.2 kΩ ∥ 100 Ω) × 47 nF = 4.496 µs | crosses `V_IL` at **5.92 µs** — 42× inside the 250 µs scan |
 | Pole | 1.54 kHz → **54 dB** at the WS2815's 800 kHz data rate |
-| Static | **1.43 mA** per closed key; 18 closed = **25.8 mA** |
+| Static | **1.43 mA** per closed key; 19 closed = **27.3 mA** |
 
 > Earlier versions of this line read "~1 µs" and "~93 µs". Those were the
 > 10 kΩ/10 nF pair against LVC thresholds and both parts of that changed. The
@@ -237,7 +238,7 @@ four boards, so the three reserved spare-switch bits are covered too.
 > the superseded "~1.4 us / 176x" pair until this edit and now carries these
 > figures. Neither old value is correct for any part in the current design.
 
-> **25.8 mA is 4.4× the old figure** and it is drawn from the dev board's 3V3
+> **27.3 mA is 4.4× what 10 kΩ pull-ups would draw** and it is drawn from the dev board's 3V3
 > LDO, down the loom, as a play-rate step. That LDO is also the MCP3202's
 > voltage reference (the part has no `VREF` pin). See `hardware/carrier/carrier.md` §2.
 
@@ -340,7 +341,8 @@ single bit each and are only catchable failing in one direction.
 no cutout in the key plate and no switch, and the body bonds shut, so it can
 never become an input. The three genuinely retrofittable positions are the
 reserved spare-switch bits — octave up, octave down, hold/preset — which have
-plate cutouts at M3 and are untouched by this. So the allocation went from a superseded 6 marker to
+plate cutouts at M3 and are untouched by this. *(Since 2026-09-26 there are two, octave up and down,
+with networks and no cutouts; hold/preset became RT4 — ADR 0010.)* So the allocation went from a superseded 6 marker to
 8 marker, 5 free → 3 free**, and the 3 that remain still get pulled per fix 6.
 
 The bit-by-bit assignment and levels are in

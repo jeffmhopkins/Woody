@@ -136,6 +136,8 @@ condition under which the accelerometer is actually measuring gravity.
 
 ### What the three right-thumb switches should support
 
+*(Four since 2026-09-26, ADR 0010: the fourth took the reserved hold/preset bit.)*
+
 - **Momentary gate** — hold to enable, capturing zero on press. The default.
 - **Latch** — press to enable and capture, press again to release.
 - **Source or destination select** — which mod channel the IMU drives (ADR 0006).

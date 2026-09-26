@@ -124,17 +124,17 @@ bom.csv`:
 
 ```
 3.3 V / (2.2 kΩ + 100 Ω) = 1.43 mA per CLOSED key
-18 closed                = 25.8 mA, as a step, at play rate
+19 closed                = 27.3 mA, as a step, at play rate
 plus 4 × 74HC165 quiescent, negligible
 ```
 
 > **That current comes out of the dev board's 3V3 LDO, which is also the
 > MCP3202's voltage reference** — the part has no `VREF` pin, `VDD` *is* the
 > reference `[repo] R10 B4`. At a load regulation of ~0.3 % per 100 mA
-> `[from memory]`, 25.8 mA moves the reference **0.077 %, about 3.2 LSB**, in
+> `[from memory]`, 27.3 mA moves the reference **0.082 %, about 3.4 LSB**, in
 > step with how many keys are held.
 >
-> 3.2 LSB against a playable breath span of ~1594 counts is 0.2 % — almost
+> 3.4 LSB against a playable breath span of ~1594 counts is 0.2 % — almost
 > certainly inaudible, and it is the *reference* moving, so it scales the
 > reading rather than offsetting it. **Recorded rather than fixed, because the
 > symptom of being wrong about it is "the breath reading moves when I press
@@ -183,8 +183,8 @@ From `config/key-layout.yaml` `[repo]`:
 
 | Bits | Use | Whose board |
 |---|---|---|
-| 18 | Fitted switches | **Cluster boards** — network + trace to the switch |
-| 3 | Reserved spare switches (octave up, octave down, hold/preset) | **Cluster boards** — network fitted, pad unloaded. **No cutouts** since 2026-09-26 (owner, ADR 0010): fitting one means recutting the thumb plate and oak bottom `[repo] 0010` |
+| 19 | Fitted switches | **Cluster boards** — network + trace to the switch |
+| 2 | Reserved spare switches (octave up, octave down; hold/preset became RT4, 2026-09-26) | **Cluster boards** — network fitted, pad unloaded. **No cutouts** since 2026-09-26 (owner, ADR 0010): fitting one means recutting the thumb plate and oak bottom `[repo] 0010` |
 | 8 | Marker pattern | **Cluster boards** — hard-wired at the register input. Unretrofittable. **Decided 2026-09-21: 8, not 6** |
 | 3 | Genuinely free | **Cluster boards** — must be pulled `[repo] key-layout.yaml` |
 | **32** | | **None of them on this carrier** |

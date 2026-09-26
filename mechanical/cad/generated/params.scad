@@ -30,10 +30,11 @@ keys = [
   ["RH6", "top", undef, undef, 0, "right", "right_hand", "note"],
   ["RT1", "bottom", undef, undef, 0, "right", "right_thumb", "control"],
   ["RT2", "bottom", undef, undef, 0, "right", "right_thumb", "control"],
-  ["RT3", "bottom", undef, undef, 0, "right", "right_thumb", "control"]
+  ["RT3", "bottom", undef, undef, 0, "right", "right_thumb", "control"],
+  ["RT4", "bottom", undef, undef, 0, "right", "right_thumb", "control"]
 ];
-keys_placed = 0;  // of 18
-spare_switch_cutouts = 3;
+keys_placed = 0;  // of 19
+spare_switch_cutouts = 2;
 
 // ---- config/body.yaml
 stack_cap_clear = 0.75;  // tbd; keycap to oak-top hole, per side. Must beat oak's cross-grain movement across one hole, which ADR 0009 puts at 1-1.5 % [calc: 1.5 % of 18 mm = 0.27 mm]
@@ -59,7 +60,7 @@ layout_rh_gaps = [20.0, 20.0, 18.0, 0.0, 18.0];  // nominal; [research] as lh_ga
 layout_lt_rest_under = "LH2";  // tbd; the left thumb rest is directly under the middle-finger key (owner, 2026-09-26); LH2 is the middle finger on the index-middle-ring order key-layout.yaml assumes until M2 assigns fingers
 layout_lt_rest = 40.0;  // tbd; the LT1/LT2 row to the LT3/LT4 row, centre to centre, across the thumb rest: about a thumb pad clear between the cap holes. Each row's two keys are at the top keys' pitch (owner, 2026-09-26)
 layout_rt_rest_under = "RH2";  // tbd; the right thumb rest is directly under the middle-finger key (owner, 2026-09-26); RH2 on the same assumption as lt_rest_under
-layout_rt_rest = 40.0;  // tbd; RT2/RT3's row to RT1, centre to centre, across the thumb rest - the same as the left thumb's rest. RT2 to RT3 is the top keys' pitch (owner, 2026-09-26)
+layout_rt_rest = 40.0;  // tbd; the RT1/RT2 row to the RT3/RT4 row, centre to centre, across the thumb rest - the same as the left thumb's. Each row's two keys are at the top keys' pitch (owner, 2026-09-26)
 switch_pole_tip_below_seat = 5.75;  // settled; [ds] Gateron KS-33H10B050NN-Y24 sheet 6, 5.75 +/-0.05 (the STEP says 5.70; the vendor wins)
 switch_pcb_below_seat = 3.4;  // settled; [calc] docs/reference/ks33-geometry.md: PCB top 3.2-3.6 below the seat; the middle
 switch_keycap_top_above_seat = 9.0;  // tbd; MT165 height is unpublished (hardware/bom.csv MT165 row). Stem top is +7.05 [ds STEP]; the cap adds a guess

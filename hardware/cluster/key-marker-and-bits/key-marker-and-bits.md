@@ -31,20 +31,21 @@ key takes the earliest bit:
 
 | Device | Bits | `H` | `G` | `F` | `E` | `D` | `C` | `B` | `A` |
 |---|---|---|---|---|---|---|---|---|---|
-| `right_thumb` | 0–7 | RT1 | RT2 | RT3 | sw+ | sw− | sw? | **M** | **M** |
+| `right_thumb` | 0–7 | RT1 | RT2 | RT3 | RT4 | sw+ | sw− | **M** | **M** |
 | `right_hand` | 8–15 | RH1 | RH2 | RH3 | RH4 | RH5 | RH6 | **M** | **M** |
 | `left_thumb` | 16–23 | LT1 | LT2 | LT3 | LT4 | **M** | **M** | free | free |
 | `left_hand` | 24–31 | LH1 | LH2 | LH3 | LH4 | LH5 | **M** | **M** | free |
 
-`sw+` `sw−` `sw?` are the three reserved spare-switch positions — octave up,
-octave down, hold/preset `[repo] key-layout.yaml`. **Proposed on `right_thumb`**,
-because RT is already the control cluster (its three fitted keys are `role:
-control`, not fingering inputs `[repo] key-layout.yaml`) and it has the spare
-capacity. They need **plate cutouts at M3 even if the switches are fitted
-later** `[repo] key-layout.yaml, 0010`, and the cutouts go in `PLATE-THUMB`.
+`sw+` `sw−` are the two reserved spare-switch positions — octave up and
+octave down `[repo] key-layout.yaml`. **On `right_thumb`**, because RT is the
+control cluster (its four fitted keys are `role: control`, not fingering
+inputs `[repo] key-layout.yaml`). There was a third, hold/preset, until
+2026-09-26: the right thumb went to four keys and RT4 took its bit. They have
+their networks and **no cutouts** since the same day (owner, ADR 0010), so
+fitting one means recutting `PLATE-THUMB` and the oak bottom.
 
 **Every position above gets the full `R-KEY-PU`/`R-KEY-SER`/`C-KEY` network**,
-including the three unfitted spares — 21 sets, which is what `bom.csv` budgets
+including the two unfitted spares — 21 sets, which is what `bom.csv` budgets
 `[repo]`.
 
 ### The marker pattern: 8 bits, not 6 — DECIDED 2026-09-21
