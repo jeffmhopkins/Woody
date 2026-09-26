@@ -42,6 +42,10 @@ pitch:
 | **Available** | **457** |
 | **Slack** | **31 (1.2 in)** |
 
+*(2026-09-26: the key runs have since been tightened — ADR 0010 — so this
+table is now the conservative case. The working budget, and the slack it
+leaves, are in `config/body.yaml` and `mechanical/drc.echo`.)*
+
 It closes with 1.2 inches of slack, and more at a tighter pitch — the MT165 caps
 at 16.5 mm allow roughly 18–20 mm before caps collide, against standard 18 mm MX
 spacing. Not constrained, but the layout wants designing rather than

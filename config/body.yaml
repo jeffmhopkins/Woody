@@ -45,10 +45,10 @@ stack:
     source: "keycap to oak-top hole, per side. Must beat oak's cross-grain movement across one hole, which ADR 0009 puts at 1-1.5 % [calc: 1.5 % of 18 mm = 0.27 mm]"
     decided_by: "M2 - the mule, with a real cap in a real oak hole"
   cap_holes:
-    value: "individual"
+    value: "slot"
     status: tbd
     source: "individual = one hole per cap in the oak top; slot = one slot per hand, so pitch is limited by cap-to-cap clearance rather than by an oak web between holes"
-    decided_by: "the pitch chosen - below about 20 mm an individual-hole web is too thin to survive (drc.echo)"
+    decided_by: "the pitch chosen - at 18 mm an individual-hole web is zero, so the tightened layout needs slots (drc.echo); revisit if M2 widens it"
   # THE OAK BOTTOM HAS NO THICKNESS OF ITS OWN EITHER. Decided 2026-09-26:
   # thumb keys are flush with the bottom face at full travel too. The thumb
   # plate is on the oak bottom's inside face, so the oak is the same
@@ -120,19 +120,26 @@ layout:
     value: 60.0
     status: nominal
     source: "[adr] ADR 0009 length table (grew from 30 with ADR 0008)"
+  # 2026-09-26: tightened from 24 mm, which the finger-spacing research
+  # (docs/research/2026-09-26-finger-spacing/) puts at the wide end. Graded
+  # as real instruments are: comfortable pitch under index-middle-ring,
+  # tighter to and between the little-finger keys, because a single straight
+  # line cannot offset the little-finger hole sideways the way a recorder
+  # does. Finger assignment is still M2's (ADR 0010); these gaps assume the
+  # first three keys of each hand are index, middle, ring.
   lh_gaps:
-    value: [24.0, 24.0, 24.0, 24.0]
+    value: [20.0, 20.0, 18.0, 18.0]
     status: nominal
-    source: "[adr] ADR 0009 length table - 5 keys at 24 mm, first to last key centre"
+    source: "[research] soprano recorder L1-L2-L3 21.0/22.3, D whistle 20/20; pad widths put touching fingers 15-22 apart (P5 F - P95 M). 18 to and between the little-finger keys: soprano R3-R4 18.0, and 1.5 mm between MT165 caps"
     decided_by: "M2 - replaced key by key by x/y in config/key-layout.yaml"
   gap:
     value: 50.0
     status: nominal
     source: "[adr] ADR 0009 length table - the U-bolt band"
   rh_gaps:
-    value: [24.0, 24.0, 24.0, 24.0, 24.0]
+    value: [20.0, 20.0, 18.0, 18.0, 18.0]
     status: nominal
-    source: "[adr] ADR 0009 length table - 6 keys at 24 mm, first to last key centre"
+    source: "[research] as lh_gaps; soprano R1-R2-R3 20.8/20.1, R3-R4 18.0. The last three are the little-finger reach keys ADR 0010 expects to cluster tighter"
     decided_by: "M2 - replaced key by key by x/y in config/key-layout.yaml"
   tail:
     value: 40.0

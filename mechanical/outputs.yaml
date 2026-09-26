@@ -61,7 +61,7 @@ renders:
     out: mechanical/renders/plan-top.png
     imgsize: [2000, 560]
     projection: o
-    camera: [228, 12, 0, 0, 0, 0, 380]
+    camera: [228, 22, 0, 0, 0, 0, 420]
   - name: plan-bottom
     title: Plan from below
     src: mechanical/cad/fig_plan_bottom.scad
@@ -91,6 +91,19 @@ renders:
     imgsize: [1200, 900]
     projection: o
     camera: [457, 28, 12, 90, 0, 90, 190]
+  - name: key-layouts
+    title: Top-key spacing, current config against the alternatives, to scale
+    src: mechanical/cad/fig_key_layouts.scad
+    out: mechanical/renders/key-layouts.png
+    imgsize: [2000, 900]
+    projection: o
+    camera: [125, -60, 0, 0, 0, 0, 540]
+    layout_sensitive: false
+    defines:
+      options:
+        - ["was: 24 uniform (ADR 0009)", [24, 24, 24, 24], [24, 24, 24, 24, 24]]
+        - ["20 uniform (soprano recorder)", [20, 20, 20, 20], [20, 20, 20, 20, 20]]
+        - ["18 uniform (towards sopranino)", [18, 18, 18, 18], [18, 18, 18, 18, 18]]
 
 # Flat parts as they go to the cutter (ADR 0009: "CAD produces DXF as the
 # primary export"), plus the design-rule report.

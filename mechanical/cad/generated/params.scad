@@ -37,7 +37,7 @@ spare_switch_cutouts = 3;
 
 // ---- config/body.yaml
 stack_cap_clear = 0.75;  // tbd; keycap to oak-top hole, per side. Must beat oak's cross-grain movement across one hole, which ADR 0009 puts at 1-1.5 % [calc: 1.5 % of 18 mm = 0.27 mm]
-stack_cap_holes = "individual";  // tbd; individual = one hole per cap in the oak top; slot = one slot per hand, so pitch is limited by cap-to-cap clearance rather than by an oak web between holes
+stack_cap_holes = "slot";  // tbd; individual = one hole per cap in the oak top; slot = one slot per hand, so pitch is limited by cap-to-cap clearance rather than by an oak web between holes
 stack_side_t = 4.0;  // nominal; [adr] ADR 0009 mass table - 'Acrylic sides, 2 x 4 mm'. Now a single sheet standing in the oak grooves
 stack_side_inset = 2.0;  // tbd; oak lip outside each groove. Every mm here comes off the interior width twice
 stack_groove_depth = 3.0;  // tbd; placeholder - half the oak panel, leaving half under the groove
@@ -48,9 +48,9 @@ ends_tube_hole_d = 6.0;  // tbd; ADR 0003: tube bore and OD are settled at E2
 layout_margin_mouth = 10.0;  // nominal; [adr] ADR 0009 'End margins 20' - split evenly between the ends, which the ADR does not say
 layout_mouthpiece = 40.0;  // nominal; [adr] ADR 0009 length table
 layout_display_band = 60.0;  // nominal; [adr] ADR 0009 length table (grew from 30 with ADR 0008)
-layout_lh_gaps = [24.0, 24.0, 24.0, 24.0];  // nominal; [adr] ADR 0009 length table - 5 keys at 24 mm, first to last key centre
+layout_lh_gaps = [20.0, 20.0, 18.0, 18.0];  // nominal; [research] soprano recorder L1-L2-L3 21.0/22.3, D whistle 20/20; pad widths put touching fingers 15-22 apart (P5 F - P95 M). 18 to and between the little-finger keys: soprano R3-R4 18.0, and 1.5 mm between MT165 caps
 layout_gap = 50.0;  // nominal; [adr] ADR 0009 length table - the U-bolt band
-layout_rh_gaps = [24.0, 24.0, 24.0, 24.0, 24.0];  // nominal; [adr] ADR 0009 length table - 6 keys at 24 mm, first to last key centre
+layout_rh_gaps = [20.0, 20.0, 18.0, 18.0, 18.0];  // nominal; [research] as lh_gaps; soprano R1-R2-R3 20.8/20.1, R3-R4 18.0. The last three are the little-finger reach keys ADR 0010 expects to cluster tighter
 layout_tail = 40.0;  // nominal; [adr] ADR 0009 length table
 layout_margin_tail = 10.0;  // nominal; [adr] ADR 0009 'End margins 20', the other half
 layout_slack_to = "tail";  // tbd; ADR 0009 leaves the 31 mm of slack unassigned. The tail holds the etherCON, carrier, matrix and USB-C, so it gets it

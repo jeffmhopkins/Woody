@@ -33,7 +33,7 @@ module row(i, name, lg, rg) {
     label([max(xs_all) + 24, y, 2], str("LH ", sum(lg), " + RH ", sum(rg), " = ", sum(lg) + sum(rg), " mm"), size = 3.2, halign = "left");
 }
 
-all = concat([["current config", layout_lh_gaps, layout_rh_gaps]], options);
+all = concat([["now in config/body.yaml", layout_lh_gaps, layout_rh_gaps]], options);
 for (i = [0 : len(all) - 1]) row(i, all[i][0], all[i][1], all[i][2]);
 label([sum(layout_lh_gaps) + hand_gap / 2, row_h * 0.62, 2],
       "gaps key centre to key centre, mm - hands drawn closer together than on the body", size = 3.2);

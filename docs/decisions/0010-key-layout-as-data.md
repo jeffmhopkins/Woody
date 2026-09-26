@@ -97,6 +97,17 @@ clustered tighter at the end of the run.
 So the pitch should vary along the line: comfortable spacing under
 index/middle/ring, tighter grouping for the keys the pinky reaches.
 
+**Tightened 2026-09-26.** The owner judged 24 mm too wide, and the research
+agrees: pad-played instruments put adjacent holes about 20–23 mm apart, and
+adult finger pads touch at roughly 15–22 mm centre to centre
+(`docs/research/2026-09-26-finger-spacing/`). The provisional layout is now
+graded, wider under index-middle-ring and tighter to and between the
+little-finger keys, because a single line cannot offset the little-finger key
+sideways the way a recorder offsets its hole. The gaps are
+`layout.lh_gaps` / `rh_gaps` in `config/body.yaml`, and the body CAD draws
+them against the alternatives (`mechanical/renders/key-layouts.png`). Still
+provisional: M2 replaces them with measured positions.
+
 **The layout file already supports this**, and it is a good example of why it is
 structured the way it is. Keys carry explicit `x`/`y` positions rather than a
 pitch parameter, so non-uniform spacing needs no schema change — it is just

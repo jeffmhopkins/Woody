@@ -91,6 +91,13 @@ of a superseded value. Instead:
 
 ![Plan from above, with the length budget](renders/plan-top.png)
 
+![Top-key spacing, now against the alternatives](renders/key-layouts.png)
+
+Top-key spacing comes from `docs/research/2026-09-26-finger-spacing/`:
+graded, wider under index-middle-ring and tighter to the little finger. At
+the tightest gap an oak web between individual cap holes would be zero, so
+the oak top has **one slot per hand** (`stack.cap_holes`).
+
 ![Plan from below](renders/plan-bottom.png)
 
 ![Longitudinal section](renders/section-long.png)
