@@ -97,14 +97,12 @@ renders:
     out: mechanical/renders/key-layouts.png
     imgsize: [2000, 900]
     projection: o
-    camera: [125, -60, 0, 0, 0, 0, 540]
+    camera: [110, -66, 0, 0, 0, 0, 540]
     layout_sensitive: false
     defines:
       options:
-        - ["was: 24 uniform (ADR 0009)", [24, 24, 24, 24], [24, 24, 24, 24, 24]]
-        - ["20 uniform (soprano recorder)", [20, 20, 20, 20], [20, 20, 20, 20, 20]]
-        - ["18 uniform (towards sopranino)", [18, 18, 18, 18], [18, 18, 18, 18, 18]]
-
+        - ["was: 24 in line (ADR 0009)", [24, 24, 24, 24], [24, 24, 24, 24, 24], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]]
+        - ["20/18 in line", [20, 20, 18, 18], [20, 20, 18, 18, 18], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]]
 # Flat parts as they go to the cutter (ADR 0009: "CAD produces DXF as the
 # primary export"), plus the design-rule report.
 exports:

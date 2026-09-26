@@ -113,9 +113,9 @@ function lerp(a, b, t) = a + (b - a) * t;
 
 // Provisional positions, used only while a key's x/y is null.
 function prov_xy(k) =
-    let(cl = k[6], i = key_n(k) - 1, n = count(cl), c = W / 2 + layout_lateral_inset)
-    cl == "left_hand"  ? [x_lh0 + cum(layout_lh_gaps, i), c] :
-    cl == "right_hand" ? [x_rh0 + cum(layout_rh_gaps, i), c] :
+    let(cl = k[6], i = key_n(k) - 1, n = count(cl), c = W / 2)
+    cl == "left_hand"  ? [x_lh0 + cum(layout_lh_gaps, i), c + layout_lh_offsets[i]] :
+    cl == "right_hand" ? [x_rh0 + cum(layout_rh_gaps, i), c + layout_rh_offsets[i]] :
     cl == "left_thumb" ? lt_arc(i / (n - 1)) :
     cl == "right_thumb" ? rt_xy(i) : [0, 0];
 
@@ -222,8 +222,7 @@ module oak_top_2d() {
         square([x_in1 - x_in0, W]);
         translate([-x_in0, 0])
             if (stack_cap_holes == "slot")
-                for (cl = ["left_hand", "right_hand"]) hull() for (k = cluster_keys(cl))
-                    translate(key_xy(k)) rotate(key_rot(k)) square(switch_keycap + 2 * stack_cap_clear, center = true);
+                for (cl = ["left_hand", "right_hand"]) chain_2d(cluster_keys(cl), switch_keycap + 2 * stack_cap_clear);
             else
                 for (k = top_keys) translate(key_xy(k)) rotate(key_rot(k))
                     square(switch_keycap + 2 * stack_cap_clear, center = true);
@@ -337,11 +336,18 @@ module display_board_outline_2d() {
     translate(disp_c) rotate(-90) translate([-disp_board[1] / 2, -disp_board[0] / 2]) import(DISP_DXF, layer = "KeepOutLayer");
 }
 module display_board_cut_2d() { offset(0.5) display_board_outline_2d(); }
+// Hull each key's square with the next one's, in key order: a slot or a
+// board that follows the keys round an offset or a side-by-side pair
+// instead of swallowing everything between them as one hull would.
+module chain_2d(ks, s) {
+    for (i = [0 : len(ks) - 2]) hull() for (k = [ks[i], ks[i + 1]])
+        translate(key_xy(k)) rotate(key_rot(k)) square(s, center = true);
+}
 cluster_margin = 4;   // drawing convention: board edge past the outermost switch body
+// A top cluster board: the switch footprints, chained, grown to the board
+// width over a single line (switch.cluster_pcb_w). Outline is an M3 output.
 module cluster_window_2d(ks) {
-    x = xs(ks);
-    translate([min(x) - plate_cutout / 2 - cluster_margin, W / 2 - switch_cluster_pcb_w / 2])
-        square([max(x) - min(x) + plate_cutout + 2 * cluster_margin, switch_cluster_pcb_w]);
+    offset(delta = (switch_cluster_pcb_w - plate_cutout) / 2) chain_2d(ks, plate_cutout);
 }
 
 // Tail equipment. The Matrix hangs under the carrier (carrier.md section 7)
@@ -512,15 +518,28 @@ module drc_report() {
     // Each run's end keys put half a cap into the neighbouring band - the
     // ADR 0009 table counts runs centre to centre.
     lh = xs(cluster_keys("left_hand")); rh = xs(cluster_keys("right_hand"));
-    gaps = concat(layout_lh_gaps, layout_rh_gaps);
-    drc(undef, "top key gaps, centre to centre (LH then RH)", [layout_lh_gaps, layout_rh_gaps], str("mm; runs ", lh_run, " + ", rh_run));
-    drc(min(gaps) - switch_keycap >= 1.0, "cap-to-cap gap, tightest pair", min(gaps) - switch_keycap,
+    // Square caps and cutouts, axis-aligned: the clear gap between two is the
+    // larger of the per-axis gaps. Over EVERY pair of top keys, so an offset
+    // key or a side-by-side pair is measured the same as a neighbour in line.
+    function sq_gap(a, b, s) = max(abs(a[0] - b[0]) - s, abs(a[1] - b[1]) - s);
+    function min_pair(s) = min([for (i = [0 : len(top_keys) - 1], j = [i + 1 : 1 : len(top_keys) - 1])
+                                sq_gap(key_xy(top_keys[i]), key_xy(top_keys[j]), s)]);
+    drc(undef, "top key gaps along the body (LH then RH)", [layout_lh_gaps, layout_rh_gaps], str("mm; runs ", lh_run, " + ", rh_run, "; a 0 is a side-by-side pair"));
+    drc(undef, "top key offsets across the body (LH then RH)", [layout_lh_offsets, layout_rh_offsets], "mm from the centreline, + toward the player's left");
+    cap_gap = min_pair(switch_keycap);
+    drc(cap_gap >= 1.0, "cap-to-cap gap, tightest pair", cap_gap,
         "mm between adjacent MT165 caps; under ~1 mm a pad pressing one catches the next");
-    drc(stack_cap_holes == "slot" || min(gaps) - switch_keycap - 2 * stack_cap_clear >= 2.0,
+    drc(stack_cap_holes == "slot" || cap_gap - 2 * stack_cap_clear >= 2.0,
         str("oak web between cap holes (", stack_cap_holes, ")"),
-        stack_cap_holes == "slot" ? "n/a - one slot per hand" : min(gaps) - switch_keycap - 2 * stack_cap_clear,
+        stack_cap_holes == "slot" ? "n/a - one slot per hand" : cap_gap - 2 * stack_cap_clear,
         "mm of oak between adjacent holes; under 2 mm, cross-grain, it will not survive - use slots");
-    drc(min(gaps) - plate_cutout >= 2.0, "key plate web between cutouts", min(gaps) - plate_cutout, "mm of aluminium");
+    drc(min_pair(plate_cutout) >= 2.0, "key plate web between cutouts", min_pair(plate_cutout), "mm of aluminium");
+    edge_web = min([for (k = top_keys) min(key_xy(k)[1] - plate_cutout / 2 - (u_y0 + stack_groove_clear),
+                                            (W - u_y0 - stack_groove_clear) - key_xy(k)[1] - plate_cutout / 2)]);
+    drc(edge_web >= 3, "key plate web from a cutout to the plate edge", edge_web,
+        "mm; the switch's latch arms need plate round them, and the plate edge sits in the side grooves' shadow");
+    edge_cap = min([for (k = top_keys) min(key_xy(k)[1] - switch_keycap / 2 - stack_cap_clear, W - key_xy(k)[1] - switch_keycap / 2 - stack_cap_clear)]);
+    drc(edge_cap >= 4, "oak between a cap slot and the body's long edge", edge_cap, "mm of oak top outside the slot");
     echo("DRC", "INFO", "oak top thickness (flush at full travel)", oak_top_t,
          "mm = keycap_top_above_seat - total_travel; keycap height is tbd, so this is too");
     drc(undef, "key cap stands proud of the top face at rest", switch_total_travel, "mm = the travel");

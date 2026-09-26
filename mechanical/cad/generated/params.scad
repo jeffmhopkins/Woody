@@ -49,8 +49,10 @@ layout_margin_mouth = 10.0;  // nominal; [adr] ADR 0009 'End margins 20' - split
 layout_mouthpiece = 40.0;  // nominal; [adr] ADR 0009 length table
 layout_display_band = 60.0;  // nominal; [adr] ADR 0009 length table (grew from 30 with ADR 0008)
 layout_lh_gaps = [20.0, 20.0, 18.0, 18.0];  // nominal; [research] soprano recorder L1-L2-L3 21.0/22.3, D whistle 20/20; pad widths put touching fingers 15-22 apart (P5 F - P95 M). 18 to and between the little-finger keys: soprano R3-R4 18.0, and 1.5 mm between MT165 caps
+layout_lh_offsets = [0.0, 0.0, 0.0, 6.0, 6.0];  // tbd; LH1-3 on the centreline; LH4-5 (little finger) offset toward the player's left. The amount is a placeholder of about a third of a cap
+layout_rh_offsets = [0.0, 0.0, 0.0, -6.0, -9.0, 9.0];  // tbd; RH1-3 on the centreline; RH4 offset toward the player's right; RH5 / RH6 the side-by-side pair, one cap pitch apart across the body and centred so both switch bodies stay inside the plate
 layout_gap = 50.0;  // nominal; [adr] ADR 0009 length table - the U-bolt band
-layout_rh_gaps = [20.0, 20.0, 18.0, 18.0, 18.0];  // nominal; [research] as lh_gaps; soprano R1-R2-R3 20.8/20.1, R3-R4 18.0. The last three are the little-finger reach keys ADR 0010 expects to cluster tighter
+layout_rh_gaps = [20.0, 20.0, 18.0, 18.0, 0.0];  // nominal; [research] as lh_gaps; soprano R1-R2-R3 20.8/20.1, R3-R4 18.0. The LAST GAP IS 0: RH5 and RH6 are a side-by-side pair at one position along the body (owner, 2026-09-26), separated across it by rh_offsets
 layout_tail = 40.0;  // nominal; [adr] ADR 0009 length table
 layout_margin_tail = 10.0;  // nominal; [adr] ADR 0009 'End margins 20', the other half
 layout_slack_to = "tail";  // tbd; ADR 0009 leaves the 31 mm of slack unassigned. The tail holds the etherCON, carrier, matrix and USB-C, so it gets it
@@ -59,7 +61,6 @@ layout_lt_arc_lateral = 20.0;  // nominal; [adr] ADR 0010 'perhaps 15-25 mm of l
 layout_lt_arc_start = 10.0;  // tbd; ADR 0010 puts the arc 'underneath the left-hand key run' and a grip patch clear of it; the offset from the run's first key is a placeholder, small enough that the arc and its two spare cutouts stay under the run
 layout_rt_rest_at = 0.35;  // tbd; ADR 0010: the right thumb rests, and its three switches sit offset from the rest. Fraction of the RH run from its first key
 layout_rt_offset = 20.0;  // tbd; placeholder - distance from the rest to each RT switch
-layout_lateral_inset = 0.0;  // nominal; [adr] ADR 0010: single line down the centre; an outer-key offset is an M2 option
 switch_pole_tip_below_seat = 5.75;  // settled; [ds] Gateron KS-33H10B050NN-Y24 sheet 6, 5.75 +/-0.05 (the STEP says 5.70; the vendor wins)
 switch_pcb_below_seat = 3.4;  // settled; [calc] docs/reference/ks33-geometry.md: PCB top 3.2-3.6 below the seat; the middle
 switch_keycap_top_above_seat = 9.0;  // tbd; MT165 height is unpublished (hardware/bom.csv MT165 row). Stem top is +7.05 [ds STEP]; the cap adds a guess
@@ -105,5 +106,5 @@ lighting_strip_gap = 3.0;  // tbd; ADR 0009 / ADR 0014: the diffusion gap is a p
 
 // Every value above with status tbd - a placeholder, not a number any
 // document gives. The DRC report lists these so no result hides one.
-tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_slack_to", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_carrier_l", "boards_carrier_w", "boards_carrier_z", "boards_carrier_from_tail", "openings_usb_slot_w", "openings_usb_slot_h", "ethercon_body_d", "ethercon_offset_y", "hardware_fastener_inset", "hardware_fastener_end", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_backplate_t", "lighting_strip_w", "lighting_strip_gap"];
+tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_lh_offsets", "layout_rh_offsets", "layout_slack_to", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_carrier_l", "boards_carrier_w", "boards_carrier_z", "boards_carrier_from_tail", "openings_usb_slot_w", "openings_usb_slot_h", "ethercon_body_d", "ethercon_offset_y", "hardware_fastener_inset", "hardware_fastener_end", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_backplate_t", "lighting_strip_w", "lighting_strip_gap"];
 

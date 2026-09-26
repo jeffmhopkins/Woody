@@ -108,6 +108,15 @@ sideways the way a recorder offsets its hole. The gaps are
 them against the alternatives (`mechanical/renders/key-layouts.png`). Still
 provisional: M2 replaces them with measured positions.
 
+**The little-finger keys leave the line (owner, same date).** The keys stay
+close together, but the little-finger keys sit off the centreline, as a
+recorder offsets its little-finger hole, and the right little finger gets a
+**side-by-side pair** — two keys at one position along the body, across it —
+where a straight run would have put its last two keys one behind the other.
+So "single line" now means the index, middle and ring keys; the offsets are
+`layout.lh_offsets` / `rh_offsets` in `config/body.yaml`, and which way they
+go is an assumption M2 confirms.
+
 **The layout file already supports this**, and it is a good example of why it is
 structured the way it is. Keys carry explicit `x`/`y` positions rather than a
 pitch parameter, so non-uniform spacing needs no schema change — it is just
