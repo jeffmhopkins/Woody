@@ -43,6 +43,7 @@ ports:
   DEV_3V3:   {dir: out, to: interfaces/key-chain-loom, figure: key-pullup-qty}
   INST_5V_A: {dir: in,  from: carrier/power-entry-instrument, figure: matrix-led-current}
   PWR_GND:   {dir: ref, from: module/power-entry, figure: dig-gnd-topology}
+  DIG_GND:   {dir: ref, from: module/power-entry, figure: umbilical-pinmap}
 
 foreign:
   C-REF-OUT:         {owner: carrier/breath-excitation-reference, row: C-REF-OUT}
@@ -198,8 +199,25 @@ nets:
     - U-MCU-RT.P3V3
     - port: DEV_3V3
 
+  # DIG_GND HAD NO INSTRUMENT END AT ALL until 2026-09-26: spi-link netted
+  # J-UMB-INST.8 and stopped, and this circuit declared no such port - so
+  # CS_MOD's ground partner, which is the whole derivation of umbilical-pinmap,
+  # was open-circuit at the driving end. Both halves of the master check stayed
+  # silent, because a net MISSING a participant is invisible to both: the
+  # forward pass walks only circuits the master names and the reverse pass only
+  # ports the netlists declare.
+  #
+  # ASSERTED: at this board DIG_GND and PWR_GND are ONE NODE. This carrier has
+  # a single power ground pour and no separate digital ground, so a return
+  # conductor arriving on J-UMB pin 8 has nowhere else to land. That is why the
+  # umbilical carries two grounds that meet here - "one between every signal"
+  # is the pin map's rule, and the pair is the point.
+  # What would overturn it: a second ground region on this board. There is
+  # none. The dig-gnd-topology dispute is about where DIG_GND meets AGND_MOD at
+  # the MODULE end, and is untouched by this.
   PWR_GND:
     - port: PWR_GND
+    - port: DIG_GND
     - U-MCU-RT.GND
     - U-TVS-SPI.GND
 

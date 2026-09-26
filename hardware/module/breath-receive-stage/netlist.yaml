@@ -109,7 +109,8 @@ components:
     section: A
     of: U-OPA-PITCH
     pins: [IN+, IN-, OUT]
-    note: "Buffers the trimmer wiper into the in-amp REF pin. A bare divider there degrades CMRR one-for-one"
+    rails: [MODULE_ANALOG_POS12, MODULE_ANALOG_NEG12]
+    note: "Buffers the trimmer wiper into the in-amp REF pin. A bare divider there degrades CMRR one-for-one. IT HAD NO `rails:` AT ALL until 2026-09-26 - the only one of the module's ten placed OPA2197 halves with no supply in the authoritative file, and invisible because U-DIFFRX already satisfies both rail ports for this circuit"
 
 nets:
 

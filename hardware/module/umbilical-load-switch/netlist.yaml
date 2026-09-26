@@ -126,7 +126,11 @@ nets:
     - R-FB-LO.1
     - U-LOADSW.FB
 
-  ON:
+  # QUOTED, because YAML 1.1 reads a bare ON as the boolean true - and this
+  # file quoted the 'ON' and 'NO' PINS two lines further up, with a comment
+  # explaining that exact trap, and then named the net itself `ON:`. A KiCad
+  # export would have emitted a net called True.
+  'ON':
     - SW-POWER.COM
     - U-LOADSW.ON
 

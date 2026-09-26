@@ -685,6 +685,13 @@ def main():
     # Pages that carry a drawing and have no netlist yet - the rollout's
     # denominator, printed every run so it cannot stall unnoticed.
     pending, not_a_circuit = [], []
+    covered = set()
+    for d in sorted({os.path.dirname(p) for p in
+                     glob.glob(os.path.join(ROOT, "hardware/**/netlist.yaml"),
+                               recursive=True)}):
+        spec = yaml.safe_load(open(os.path.join(d, "netlist.yaml"), encoding="utf-8")) or {}
+        if spec.get("page"):
+            covered.add(os.path.realpath(os.path.join(d, spec["page"])))
     for page in glob.glob(os.path.join(ROOT, "hardware/**/*.md"), recursive=True):
         if os.path.basename(page) in ("README.md", "notes.md"):
             continue
@@ -704,7 +711,12 @@ def main():
             not_a_circuit.append((os.path.relpath(page, ROOT),
                                   " ".join(m.group(1).split()).strip(" ()")))
             continue
-        if not os.path.exists(os.path.join(os.path.dirname(page), "netlist.yaml")):
+        # A PAGE IS COVERED BY ANY NETLIST THAT NAMES IT, not only by one
+        # sitting in its own directory. Several circuits are drawn on a board
+        # page and point at it with `page: ../carrier.md`; looking only beside
+        # the page reported carrier.md as unconverted the moment its own
+        # netlist moved into a circuit directory, while four netlists named it.
+        if os.path.realpath(page) not in covered:
             pending.append(os.path.relpath(page, ROOT))
 
     bom = bom_rows()

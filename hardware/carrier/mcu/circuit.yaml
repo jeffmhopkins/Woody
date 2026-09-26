@@ -1,0 +1,33 @@
+# depends_on is a dependency graph with FOUR KINDS OF EDGE THAT ARE NOT
+# EQUALLY TRUSTWORTHY. circuit: edges are verified; adr:, fig: and refdes:
+# are seeded from co-mention and three are known false. The rules, the
+# known-false list and what IS guaranteed for every edge are stated once, in
+# hardware/README.md, "circuit.yaml and its depends_on edges". Read that
+# before adding or trusting an edge here.
+#
+# THIS FILE DID NOT EXIST UNTIL 2026-09-26, and hardware/carrier/netlist.yaml
+# used the id `carrier/carrier` anyway - so the master's most-connected
+# endpoint, 20 assertions with driver on 14 of them, was an id that existed in
+# exactly one file and in no circuit.yaml at all. Three cold slices arrived at
+# it independently. hardware/README.md's mechanical rule for a `circuit:` edge
+# - one per distinct Peer, declared from both ends - could not be satisfied at
+# either end, because one end was not a circuit.
+
+id: carrier/mcu
+title: Real-time carrier board — dev board, sockets and SPI egress
+last_reviewed: '2026-09-26'
+depends_on:
+- circuit:carrier/breath-adc
+- circuit:carrier/breath-excitation-reference
+- circuit:carrier/display-and-service-uart
+- circuit:carrier/led-strip-drive
+- circuit:carrier/power-entry-instrument
+- circuit:interfaces/breath-sense-link
+- circuit:interfaces/key-chain-loom
+- circuit:interfaces/spi-link
+- circuit:module/power-entry
+- fig:dig-gnd-topology
+- fig:key-pullup-qty
+- fig:matrix-led-current
+- fig:spi-series-r
+- fig:umbilical-pinmap

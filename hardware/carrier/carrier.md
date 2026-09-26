@@ -22,6 +22,47 @@ There are more of those here than is comfortable. That is the correct state for
 a page written on a day when nothing could be verified; the gap list is
 `docs/review/2026-09-21-schematic-review/S3-carrier.md`.
 
+## Interfaces
+
+Every net that crosses this circuit's boundary. Quantities appear **only** as a
+citation into `config/figures.yaml` — this table names nodes, it does not
+restate values.
+
+The `Dir` and `Peer` columns are defined once in
+[`hardware/README.md`](../README.md#the-interfaces-table).
+
+*This circuit is the dev board, its sockets and the SPI egress drawn in §4 —
+`carrier/mcu`. **This table did not exist until 2026-09-26**, and neither did a
+`circuit.yaml` for it, while `hardware/nets.yaml` carried twenty assertions
+against the id and named it the driver of fourteen nets. Three independent
+reviewers arrived at that gap. The analog front end drawn in §2 belongs to
+three other circuits and has its own tables; the parts this page draws for
+them are declared `foreign:` in [`mcu/netlist.yaml`](mcu/netlist.yaml).*
+
+| Node | Dir | Peer | Figure | Note |
+|---|---|---|---|---|
+| `IO38` | out | `interfaces/key-chain-loom` | — | SPI3 SCK out of the MCU, into `R-CHAIN-SER`. §3 moved to `interfaces/key-chain-loom` |
+| `IO7` | out | `interfaces/key-chain-loom` | — | The chain latch. **A glitch here reloads all four registers mid-shift** and corrupts the whole 32-bit word |
+| `IO33` | out | `interfaces/key-chain-loom` | — | `SER` out, riding every hop to the far device's serial input |
+| `IO40` | in | `interfaces/key-chain-loom` | — | `MISO`: the chain's `QH`, out of the nearest register. One node with `CHAIN_QH` — nothing sits between the connector and this pin but the clamp |
+| `IO1` | out | `carrier/led-strip-drive` | — | LED data, left strip. **High-impedance through the bootloader window**, which is why `R-LED-PD` exists |
+| `IO2` | out | `carrier/led-strip-drive` | — | LED data, right strip. Same hazard |
+| `IO5` | out | `carrier/display-and-service-uart` | — | UART1 TX to the display board, on `J-DISP` |
+| `IO6` | in | `carrier/display-and-service-uart` | — | UART1 RX. The far end is undrawn — the display board has no page |
+| `U0TXD` | out | `carrier/display-and-service-uart` | — | IO43. The console pair, to `HDR-SERVICE` |
+| `U0RXD` | in | `carrier/display-and-service-uart` | — | IO44. Driven by whatever is plugged into the service header |
+| `IO35` | out | `carrier/breath-adc` | — | SPI2 SCK **at the MCU pin**. The shared host: this pin reaches the MCP3202 here AND the DAC two metres away, with `R-SPI-SER` between the two nets |
+| `IO36` | out | `carrier/breath-adc` | — | SPI2 MOSI at the MCU pin, same sharing |
+| `IO37` | in | `carrier/breath-adc` | — | SPI2 MISO — the MCP3202's `DOUT`, and **it never leaves the board** |
+| `IO39` | out | `carrier/breath-adc` | — | The MCP3202's own chip select. **Not `CS_MOD`**, which leaves on `J-UMB` |
+| `SCLK` | out | `interfaces/spi-link` | `spi-series-r` | The umbilical conductor, on the far side of `R-SPI-SER`. **Sourced here** — the series resistors and `U-TVS-SPI` are this circuit's parts |
+| `MOSI` | out | `interfaces/spi-link` | `spi-series-r` | Sourced here, same network |
+| `CS_MOD` | out | `interfaces/spi-link` | `spi-series-r` | Sourced here. `IO34` runs from the MCU pin to its series resistor and crosses no boundary, so it is not a master net |
+| `DEV_3V3` | out | `interfaces/key-chain-loom` | `key-pullup-qty` | The dev board's own LDO — **the only 3V3 on the instrument**, and also the MCP3202's reference, which is what makes the 24 key pull-ups a live trade |
+| `INST_5V_A` | in | `carrier/power-entry-instrument` | `matrix-led-current` | Buck A, onto the dev board's 5 V pin through `D-USBOR`, and on to the 8×8 matrix |
+| `PWR_GND` | ref | `module/power-entry` | `dig-gnd-topology` | The board pour. `U-TVS-SPI` returns here |
+| `DIG_GND` | ref | `module/power-entry` | `umbilical-pinmap` | `CS_MOD`'s return partner off the umbilical. **One node with `PWR_GND` at this board** — there is no second ground region here. The `dig-gnd-topology` dispute is about the module end |
+
 ## One dev board, not two
 
 ADR 0013's build-approach section says the carrier holds "headers the dev boards
@@ -89,7 +130,7 @@ moved verbatim to
 ## §2 Analog front end — sensor, reference, buffer, ADC
 
 *Connectivity for **this board itself** — the dev board, its sockets and the
-SPI egress in §4 — is [`netlist.yaml`](netlist.yaml), beside this page. The
+SPI egress in §4 — is [`mcu/netlist.yaml`](mcu/netlist.yaml). The
 analog front end drawn below is **three other circuits' parts**, declared
 `foreign:` there and netlisted in
 [`breath-excitation-reference/`](breath-excitation-reference/breath-excitation-reference.md),

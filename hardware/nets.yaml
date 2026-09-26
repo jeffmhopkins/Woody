@@ -339,7 +339,8 @@ nets:
     carries: "Digital return, instrument to module"
     figure: dig-gnd-topology
     origin: module/power-entry
-    reference: [interfaces/spi-link, module/digital-and-supervision]
+    reference: [interfaces/spi-link, module/digital-and-supervision, carrier/carrier]
+    note: "carrier/carrier joined on 2026-09-26. Before that this net had NO INSTRUMENT END: spi-link netted J-UMB pin 8 and stopped, and nothing declared the far side, so CS_MOD's ground partner was open-circuit at the driving end. At the carrier it is one node with PWR_GND - that board has a single power ground pour"
 
   UMBILICAL_POS12:
     kind: power
