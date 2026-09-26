@@ -5,7 +5,7 @@
 
 // ---- config/key-layout.yaml :: meta
 envelope_length = undef;
-envelope_width = 57;
+envelope_width = 62;
 envelope_thickness = 39;
 plate_cutout = 14.0;
 plate_thickness = 1.2;  // `plate-thickness`, config/figures.yaml
@@ -54,6 +54,7 @@ layout_rh_offsets = [0.0, 0.0, 0.0, -9.0, 9.0, -9.0];  // tbd; RH1-3 on the cent
 layout_equal_bands = true;  // settled; owner, 2026-09-26: 'copy the same space above the left keys to between the hands and at the bottom'. Since the matrix was centred (same day) it equalizes the mouth end and the space between the hands only; the tail is sized by its own contents
 layout_gap_matches_matrix = true;  // settled; owner, 2026-09-26: the gap between the key groups is the same as the gap from the last keys to the LED matrix - clear space, cap edge to cap edge and cap edge to window edge. Overrides equal_bands for the gap; equal_bands then only sets the mouth end, and gap stays a minimum
 layout_matrix_centred = true;  // settled; owner, 2026-09-26: centre the LED matrix in the space after the keys, and let only the tail grow for it
+layout_axis_offset = 2.5;  // settled; owner, 2026-09-26: the body 5 mm wider, all of it on the spine's side - so the keys, thumbs, display, matrix and U-bolt stay put against the tube's side and sit half of that off the body's centreline
 layout_gap = 50.0;  // nominal; [adr] ADR 0009 length table - the U-bolt band. A MINIMUM while equal_bands is on
 layout_rh_gaps = [20.0, 20.0, 18.0, 0.0, 18.0];  // nominal; [research] as lh_gaps; soprano R1-R2-R3 20.8/20.1, R3-R4 18.0. A 0 GAP IS A SIDE-BY-SIDE PAIR: RH4 / RH5 share the first little-finger position, RH6 is the single key one step further down (owner, 2026-09-26)
 layout_lt_arc_length = 57.0;  // nominal; [adr] ADR 0010 'roughly 57 mm of travel down the body'
@@ -87,6 +88,7 @@ boards_conn_l = 12.0;  // tbd; a spine header: 2 x 6 at 2.0 mm pitch, 6 x 2.0 [c
 boards_conn_w = 4.0;  // tbd; 2 rows at 2.0 mm pitch [calc]; it stands off the spine's face by this much
 boards_disp_socket_h = 8.5;  // tbd; HDR-DEV female socket strips on the display board's back, 1 x 14 [from memory]
 boards_board_clear = 1.5;  // tbd; clearance between a board and the parts on the board facing it, and between parts: board flex, solder fillets and height tolerance, hand assembly [drawing convention]. 0.5 was a drawing clearance and the owner rejected it (2026-09-26: 'once components are installed you'd have issues')
+boards_edge_trim = 1.0;  // tbd; a key or thumb board's edge past its outermost switch cutout, on the spine's side only - elsewhere they keep the full margin [drawing convention]
 boards_standoff_d = 5.5;  // tbd; M3 hex standoff across flats, 5.5 [from memory]
 boards_zif_disp_l = 15.0;  // tbd; 10-way 1.0 mm FFC connector for the display link (UART, power, grounds), length [from memory]
 boards_zif_w = 5.5;  // tbd; the same, depth from the board edge [from memory]
@@ -146,5 +148,5 @@ lighting_strip_gap = 3.0;  // tbd; ADR 0009 / ADR 0014: the diffusion gap is a p
 
 // Every value above with status tbd - a placeholder, not a number any
 // document gives. The DRC report lists these so no result hides one.
-tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_mouth_extra", "layout_tail_clear", "layout_underside_clear", "layout_lh_offsets", "layout_rh_offsets", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_tall_l", "boards_tall_w", "boards_tall_h", "boards_conn_l", "boards_conn_w", "boards_disp_socket_h", "boards_board_clear", "boards_standoff_d", "boards_zif_disp_l", "boards_zif_w", "boards_zif_h", "boards_matrix_harness_h", "boards_matrix_under_h", "boards_matrix_led_h", "openings_matrix_lip", "openings_matrix_acrylic_t", "openings_usb_slot_w", "openings_usb_slot_h", "openings_usb_plug_l", "openings_matrix_usb_to_tail", "openings_usb_ext_depth", "ethercon_socket_toward_centre", "ethercon_rj45_plug_l", "ethercon_rj45_plug_w", "ethercon_rj45_plug_h", "ethercon_offset_y", "hardware_fastener_inset", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_ubolt_nut_af", "hardware_ubolt_nut_h", "hardware_backplate_t", "routing_tube_od", "routing_trap_d", "routing_trap_l", "routing_tube_lane", "routing_ffc_disp_w", "routing_lane_z", "lighting_strip_w", "lighting_strip_t", "lighting_strip_gap"];
+tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_mouth_extra", "layout_tail_clear", "layout_underside_clear", "layout_lh_offsets", "layout_rh_offsets", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_tall_l", "boards_tall_w", "boards_tall_h", "boards_conn_l", "boards_conn_w", "boards_disp_socket_h", "boards_board_clear", "boards_edge_trim", "boards_standoff_d", "boards_zif_disp_l", "boards_zif_w", "boards_zif_h", "boards_matrix_harness_h", "boards_matrix_under_h", "boards_matrix_led_h", "openings_matrix_lip", "openings_matrix_acrylic_t", "openings_usb_slot_w", "openings_usb_slot_h", "openings_usb_plug_l", "openings_matrix_usb_to_tail", "openings_usb_ext_depth", "ethercon_socket_toward_centre", "ethercon_rj45_plug_l", "ethercon_rj45_plug_w", "ethercon_rj45_plug_h", "ethercon_offset_y", "hardware_fastener_inset", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_ubolt_nut_af", "hardware_ubolt_nut_h", "hardware_backplate_t", "routing_tube_od", "routing_trap_d", "routing_trap_l", "routing_tube_lane", "routing_ffc_disp_w", "routing_lane_z", "lighting_strip_w", "lighting_strip_t", "lighting_strip_gap"];
 

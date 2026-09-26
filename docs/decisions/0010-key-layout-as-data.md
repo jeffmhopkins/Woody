@@ -154,7 +154,7 @@ longer a preference, it is the mechanism.
 
 **That arc runs along the body, not across it.** Four 16.5 mm caps laid
 laterally would need 66 mm of cap width before margins, which exceeds the
-instrument's 57 mm width (ADR 0009). So the arc is primarily longitudinal —
+instrument's width (`body-width`, ADR 0009). So the arc is primarily longitudinal —
 roughly 57 mm of travel down the body with perhaps 15–25 mm of lateral
 deviation, sitting underneath the left-hand key run rather than beside it. It
 consumes length in that region, not width.

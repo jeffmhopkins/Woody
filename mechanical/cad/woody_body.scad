@@ -119,7 +119,12 @@ mouth_req = max(x_in0 + layout_mouth_extra + switch_keycap / 2 + stack_cap_clear
 // The TAIL's needs, measured from the last top key's centre. Everything at
 // the tail hangs off the right hand, so it can be worked out in the right
 // hand's own frame (x_rh0 = 0) before the right hand is placed.
-rt_rest_rel = [layout_rt_rest_at * rh_run, W / 2];
+// THE KEY AXIS (owner, 2026-09-26: the body 5 mm wider, all of it on the
+// spine's side). The keys, the thumbs, the display, the matrix and the U-bolt
+// stay where they were against the tube's side, so they sit this far off the
+// body's centreline, towards the tube.
+axis_y = W / 2 + (routing_tube_lane == "left" ? -1 : 1) * layout_axis_offset;
+rt_rest_rel = [layout_rt_rest_at * rh_run, axis_y];
 function rt_rel(i) = i == 0 ? rt_rest_rel + [layout_rt_offset, 0]
                    : rt_rest_rel + [-0.6 * layout_rt_offset, (i == 1 ? -1 : 1) * 0.6 * layout_rt_offset];
 top_last_rel = max([for (i = [0 : len(layout_rh_gaps)]) cum(layout_rh_gaps, i)]);
@@ -182,7 +187,7 @@ function lerp(a, b, t) = a + (b - a) * t;
 
 // Provisional positions, used only while a key's x/y is null.
 function prov_xy(k) =
-    let(cl = k[6], i = key_n(k) - 1, n = count(cl), c = W / 2)
+    let(cl = k[6], i = key_n(k) - 1, n = count(cl), c = axis_y)
     cl == "left_hand"  ? [x_lh0 + cum(layout_lh_gaps, i), c + layout_lh_offsets[i]] :
     cl == "right_hand" ? [x_rh0 + cum(layout_rh_gaps, i), c + layout_rh_offsets[i]] :
     cl == "left_thumb" ? lt_arc(i / (n - 1)) :
@@ -191,7 +196,7 @@ function prov_xy(k) =
 // The left thumb's four keys lie on the tip's sweep, mostly along the body
 // (ADR 0010). A half-sine bulge of lt_arc_lateral across a lt_arc_length run.
 function lt_arc(t) = [x_lh0 + layout_lt_arc_start + t * layout_lt_arc_length,
-                      W / 2 - layout_lt_arc_lateral / 2 + layout_lt_arc_lateral * sin(180 * t)];
+                      axis_y - layout_lt_arc_lateral / 2 + layout_lt_arc_lateral * sin(180 * t)];
 rt_rest = [x_rh0, 0] + rt_rest_rel;
 // Right-thumb control switches, offset from the rest (ADR 0010): one toward
 // the tail, two flanking it toward the mouthpiece. Placeholder geometry.
@@ -219,10 +224,10 @@ function matrix_x(l) = layout_matrix_centred ? (top_last + cap_edge_rel + l) / 2
 
 // The tail underside after the right-thumb cluster: the service cover,
 // turned across the body.
-service_xy = [rt_last + rc / 2 + layout_underside_clear + openings_service_cover_w / 2, W / 2];
+service_xy = [rt_last + rc / 2 + layout_underside_clear + openings_service_cover_w / 2, axis_y];
 L = top_last + tail_req;
 x_in1 = L - ends_tail_cap_t;
-matrix_xy = [matrix_x(L), W / 2];
+matrix_xy = [matrix_x(L), axis_y];
 // Where an X section cuts: a number, a key id, or "matrix" for its centre.
 cut_pos = cut_key == "" ? cut_at : cut_key == "matrix" ? matrix_xy[0] : key_xy(key_by_id(cut_key))[0];
 
@@ -354,11 +359,21 @@ module oak_bottom_2d() {
 // The outline a thumb cluster's plate and board share, before cutouts.
 function thumb_pts(cl) = concat([for (k = cluster_keys(cl)) key_xy(k)],
                                 cl == "left_thumb" ? [spare_xy[0], spare_xy[1]] : [spare_xy[2]]);
+// On the spine's side it stops boards.edge_trim past the outermost switch,
+// and reaches on under the spine only where its header goes up into it.
+function side_reach(pts) = max([for (p = pts) ssg * (p[1] - axis_y)]) + plate_cutout / 2 + boards_edge_trim;
+module spine_side_trim(reach) {
+    translate([x_in0 - 1, ssg > 0 ? axis_y + reach - 200 : axis_y - reach]) square([L + 2, 200]);
+}
 module thumb_outline_2d(cl) {
     intersection() {
         hull() for (p = thumb_pts(cl)) translate(p) square(switch_keycap + 4, center = true);
         translate([x_in0, u_y0 + 0.5]) square([x_in1 - x_in0, u_w - 1]);
+        spine_side_trim(side_reach(thumb_pts(cl)));
     }
+    edge = axis_y + ssg * (side_reach(thumb_pts(cl)) - 1);
+    if (ssg * (spine_y - edge) > 0)
+        translate([conn_x(cl) - boards_conn_l / 2 - 1, min(edge, spine_back)]) square([boards_conn_l + 2, abs(spine_back - edge)]);
 }
 // One thumb plate per thumb cluster, on the oak bottom's inside face.
 // Frame: model XY.
@@ -389,7 +404,7 @@ module mouth_cap_2d() {
         translate(tube_yz) circle(d = ends_tube_hole_d);
     }
 }
-tube_yz = [W / 2, z_floor + cavity_h / 2];
+tube_yz = [axis_y, z_floor + cavity_h / 2];
 
 // The NE8FDP's rear envelope, rotated with the connector: [across Y, height Z].
 ec_house = ethercon_rotated ? [ethercon_housing_h, ethercon_housing_w] : [ethercon_housing_w, ethercon_housing_h];
@@ -401,12 +416,12 @@ ec_clear = 0.3;    // drawing convention: connector envelope to the floor, and i
 // thickness rather than pocket the oak bottom). Its axis is derived: the
 // envelope sits ec_clear above the oak bottom, and the body is made thick
 // enough that the rear socket still passes under the Matrix (drc.echo).
-ec_c = [W / 2 + ethercon_offset_y, z_floor + ec_clear + ec_env[1] / 2];    // etherCON centre on the tail face
+ec_c = [axis_y + ethercon_offset_y, z_floor + ec_clear + ec_env[1] / 2];    // etherCON centre on the tail face
 ec_sock = ethercon_rotated ? [ethercon_socket_h, ethercon_socket_w] : [ethercon_socket_w, ethercon_socket_h];
 ec_plug = ethercon_rotated ? [ethercon_rj45_plug_h, ethercon_rj45_plug_w] : [ethercon_rj45_plug_w, ethercon_rj45_plug_h];
 // The rear socket sits off the axis: 0.35 + half its height, on the side away from the latch.
 ec_sock_off_mag = 0.35 + ethercon_socket_h / 2;
-ec_sock_dir = (W / 2 - ec_c[0] >= 0 ? 1 : -1) * (ethercon_socket_toward_centre ? 1 : -1);
+ec_sock_dir = (axis_y - ec_c[0] >= 0 ? 1 : -1) * (ethercon_socket_toward_centre ? 1 : -1);
 ec_panel_x = L - ends_tail_cap_t;                  // flange and chassis sit behind the tail cap's inside face
 ec_sock_c = ethercon_rotated ? ec_c + [ec_sock_dir * ec_sock_off_mag, 0] : ec_c - [0, ec_sock_off_mag];
 ec_holes = [for (s = [-1, 1]) ec_c + s * (ethercon_rotated ? [ethercon_hole_dy, ethercon_hole_dx] : [ethercon_hole_dx, ethercon_hole_dy]) / 2];
@@ -449,7 +464,7 @@ module service_cover_2d() {
 }
 
 // --------------------------------------------------------- features ------
-disp_c = [(disp_x0 + disp_x1) / 2, W / 2];
+disp_c = [(disp_x0 + disp_x1) / 2, axis_y];
 // The board lies lengthwise (ADR 0008) on the UNDERSIDE, glass down, in a
 // through-cut in the oak bottom (decided 2026-09-26).
 // Its outline is the vendor's own DXF, not retyped numbers.
@@ -469,8 +484,12 @@ module keys_2d(ks, s, close = 1.5) {
    // drawing convention: board edge past the outermost switch body
 // A top cluster board: the switch footprints, chained, grown to the board
 // width over a single line (switch.cluster_pcb_w). Outline is an M3 output.
+// On the spine's side it stops boards.edge_trim past the outermost switch.
 module cluster_window_2d(ks) {
-    offset(delta = (switch_cluster_pcb_w - plate_cutout) / 2) keys_2d(ks, plate_cutout, close = 3);
+    intersection() {
+        offset(delta = (switch_cluster_pcb_w - plate_cutout) / 2) keys_2d(ks, plate_cutout, close = 3);
+        spine_side_trim(max(switch_cluster_pcb_w / 2, side_reach([for (k = ks) key_xy(k)])));
+    }
 }
 
 // Tail equipment: the Matrix, the etherCON and the USB-C extension.
@@ -502,7 +521,7 @@ function fasteners() =
 
 // U-bolt in the inter-hand gap on the bottom face (ADR 0009); legs ACROSS the
 // body, since the shortened gap has no room along it beside the thumb arc.
-ubolt_c = [(x_gap0 + x_rh0) / 2, W / 2];
+ubolt_c = [(x_gap0 + x_rh0) / 2, axis_y];
 function ubolt_legs() = [for (s = [-1, 1]) ubolt_c + [0, s * hardware_ubolt_span / 2]];
 
 // ================================================================ 3D ======
@@ -711,20 +730,24 @@ function xspan(cl) = [min(xs(cluster_keys(cl))), max(xs(cluster_keys(cl)))];
 // display's AMOLED as the body allows (ADR 0003).
 spine_side = routing_tube_lane == "left" ? "right" : "left";
 ssg = sgn(spine_side);
-// The strip's inner face, then a clearance, then the board; its component
-// face is the inward one.
+// ONE RECTANGLE (owner, 2026-09-26: "basically one size, and large, ran
+// down the length"): its component face a clearance outboard of the key
+// boards' trimmed edge, so it runs from over the thumb boards' parts up to
+// under the plate the whole way. The owner widened the body to make that
+// room; drc.echo checks the strip still fits outboard of it.
 strip_inner = ssg > 0 ? W - u_y0 - lighting_strip_gap - lighting_strip_t : u_y0 + lighting_strip_gap + lighting_strip_t;
-spine_y = strip_inner - ssg * (boards_board_clear + switch_pcb_t);   // component face
+key_reach = max([for (cl = ["left_hand", "right_hand"]) side_reach([for (k = cluster_keys(cl)) key_xy(k)])]);
+spine_y = axis_y + ssg * (max(key_reach, switch_cluster_pcb_w / 2) + boards_board_clear);   // component face
 spine_back = spine_y + ssg * switch_pcb_t;
 function tspan(cl) = let(p = [for (q = thumb_pts(cl)) q[0]]) [min(p) - (switch_keycap + 4) / 2, max(p) + (switch_keycap + 4) / 2];
 function kspan(cl) = xspan(cl) + [-1, 1] * (plate_cutout / 2 + cluster_margin);
 spine_x = [x_in0 + boards_board_clear, tail_equip_x - boards_board_clear];
-spine_z = [z_floor + 0.5, z_lid_bot - boards_board_clear];   // a bare edge 0.5 over bare oak; under the plate
+spine_z = [thumb_z + boards_cluster_smt_h + boards_board_clear, z_lid_bot - boards_board_clear];   // over the thumb boards' parts; under the plate
 // The band between the cluster boards' parts, where the tall blocks go.
 spine_zb = thumb_z + boards_cluster_smt_h + boards_board_clear;
 spine_zt = top_z - boards_cluster_smt_h - boards_board_clear;
 spine_tab_x0 = tspan("right_thumb")[1] + boards_board_clear;          // no thumb board past here
-spine_tab_zb = spine_z[0];
+spine_tab_zb = z_floor + 0.5;   // the sensor's drop: a bare edge 0.5 over bare oak
 // Everything that reaches the side channel, with the clearance round it.
 module spine_keepouts() {
     c = boards_board_clear;
@@ -733,7 +756,7 @@ module spine_keepouts() {
     for (cl = ["left_hand", "right_hand"])
         translate([0, 0, top_z - boards_cluster_smt_h - c]) linear_extrude(T) offset(r = c) cluster_window_2d(cluster_keys(cl));
     translate([0, 0, -1]) linear_extrude(disp_sock_top + c + 1) offset(r = c)
-        translate([disp_x0, W / 2 - disp_board[1] / 2]) square([disp_x1 - disp_x0, disp_board[1]]);
+        translate([disp_x0, axis_y - disp_board[1] / 2]) square([disp_x1 - disp_x0, disp_board[1]]);
     translate([0, 0, -1]) linear_extrude(z_floor + hardware_backplate_t + hardware_ubolt_nut_h + c + 1) offset(r = c)
         translate(ubolt_c) square(ubolt_bp, center = true);
 }
@@ -747,8 +770,12 @@ module keepout_xz(ya, yb) {
 }
 module spine_2d() {   // in the spine's own plane: (X, Z)
     difference() {
-        translate([spine_x[0], spine_z[0]]) square([spine_x[1] - spine_x[0], spine_z[1] - spine_z[0]]);
-        keepout_xz(spine_y, spine_back);
+        union() {
+            translate([spine_x[0], spine_z[0]]) square([spine_x[1] - spine_x[0], spine_z[1] - spine_z[0]]);
+            // The one exception: a drop behind the right-thumb board, where
+            // nothing is under it, for the breath sensor's leads.
+            translate([spine_tab_x0, spine_tab_zb]) square([sensor_c[0] + boards_sensor_body / 2 + 2 - spine_tab_x0, spine_z[0] - spine_tab_zb + EPS]);
+        }
         // A slot in front of the sensor's lower port (see below).
         translate([sensor_face_x - boards_sensor_port_l - 2, p2_z - boards_sensor_port_d / 2 - 1])
             square([boards_sensor_port_l + 2 + EPS, boards_sensor_port_d + 2]);
@@ -770,7 +797,7 @@ module on_spine(d, board = false) {
 // pole and pins (which stand proud of the board), nearest its middle.
 ks33_stub = 2.6;   // half-width of the KS-33's pole and pins where they stand proud of a board [clash.txt, off the vendor STEP]
 conn_yc = spine_y - ssg * boards_conn_w / 2;
-key_edge = W / 2 + ssg * switch_cluster_pcb_w / 2;
+key_edge = axis_y + ssg * switch_cluster_pcb_w / 2;
 function conn_clear(x, cl) = min([for (k = cluster_keys(cl))
     max(abs(key_xy(k)[0] - x) - boards_conn_l / 2, abs(key_xy(k)[1] - conn_yc) - boards_conn_w / 2)]) >= ks33_stub + 0.3;
 function conn_x(cl) = let(t = [for (k = cluster_keys(cl)) key_xy(k)[0]], m = (min(t) + max(t)) / 2,
@@ -831,9 +858,9 @@ module spine_3d() {
     for (i = [0, 1]) P([0.30, 0.30, 0.55], false, str("tall parts spine ", i == 0 ? "mouth" : "tail"))
         on_spine(boards_tall_h) translate(tall_c[i]) square(tall_face, center = true);
     P([0.85, 0.85, 0.80], false, "ZIF display link") on_spine(boards_zif_h) translate(zif_disp) square([boards_zif_disp_l, boards_zif_w], center = true);
-    // Brackets off the oak at the two ends, where the spine stands on the floor.
+    // Brackets off the oak at the two ends.
     for (i = [0 : len(spine_brackets) - 1]) P(C_STEEL, false, str("spine bracket ", i + 1))
-        on_spine(6) translate([spine_brackets[i] - 3, z_floor]) square([6, 6]);
+        on_spine(6) translate([spine_brackets[i] - 3, z_floor]) square([6, spine_z[0] - z_floor + 6]);
 }
 function mean(v) = (v[0] + v[1]) / 2;
 spine_brackets = [spine_x[0] + 3, spine_x[1] - 3];
@@ -1066,10 +1093,13 @@ module drc_report() {
     drc(undef, "thumb switch pole tip height in the cavity", th_pole, "mm above the bottom face");
 
     // The spine (no carrier, 2026-09-26)
-    drc(undef, "spine (derived)", [spine_x[1] - spine_x[0], spine_z[1] - spine_z[0], spine_zt - spine_zb],
-        "mm long; tall where nothing reaches the side channel; tall over the thumb boards and under the pinky keys - its outline is what the keep-outs leave");
-    drc(undef, "spine's face to the key boards' edge", abs(spine_y - key_edge),
-        str("mm across the channel; SMT needs ", boards_smt_h + boards_board_clear, " there, so the model keeps it off the face under the key boards - narrower key boards (switch.cluster_pcb_w) would give that strip back"));
+    drc(undef, "spine (derived)", [spine_x[1] - spine_x[0], spine_z[1] - spine_z[0]],
+        "mm, one rectangle, long x tall: from over the thumb boards' parts to under the plate, with a drop only for the breath sensor");
+    drc(ssg * (strip_inner - spine_back) >= boards_board_clear - 0.01, "LED strip fits outboard of the spine", ssg * (strip_inner - spine_back),
+        "mm between the spine's back and the strip - the body's width (envelope.width) makes this room");
+    drc(undef, "spine's face to the key boards' edge", [abs(spine_y - key_edge), ssg * (spine_y - axis_y) - key_reach],
+        str("mm across the channel, to the main edge and to the pinky keys' trimmed edge; SMT needs ", boards_smt_h + boards_board_clear,
+            ", so the model keeps it off the face beside the pinky keys"));
     for (cl = chain) drc(conn_x(cl) != undef, str("spine header to ", cl, " clear of its switches"),
                          conn_x(cl) == undef ? "none found" : conn_x(cl), "mm along the body, midway between two keys");
     room_in = abs(spine_y - (tube_y + ssg * (routing_tube_od / 2 + boards_board_clear)));

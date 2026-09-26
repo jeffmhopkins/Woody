@@ -294,7 +294,7 @@ is now a gate on the board outline. Draw the oak window either way; draw the PCB
 cutout as the fallback.
 
 **The USB-C edge must align with the tail-face slot** `[repo] 0009`, on a face
-that also carries a ~26 × 31 mm etherCON flange on a face 57 mm wide and `body-thickness` tall. That is a 1:1
+that also carries a ~26 × 31 mm etherCON flange on a face `body-width` wide and `body-thickness` tall. That is a 1:1
 paper check at M4, and the ROADMAP already lists it.
 
 ---
@@ -367,12 +367,12 @@ Even single-row 2.54 mm headers would now fit — 29 × 2.54 = 74 mm of board
 edge against ~290 mm of perimeter — though IDC is still the right choice for a
 loom that is hand-terminated once and then closed up.
 
-**Where they go is the problem.** `[calc]` 57 mm external less 2 × 4 mm acrylic
-`[repo] 0009` = **49 mm internal**. `PCB-CARRIER` at 45 mm leaves **2 mm per
-side** for two channels that ADR 0009 and ADR 0014 jointly require to carry two
-WS2815 strips (~10 mm wide each `[from memory]`), the key loom and the 400 mm
-tube. **A 45 mm-wide carrier and open side channels are still mutually
-exclusive**, and the board outline still depends on the M4 plan section.
+**Where they go was the problem.** A flat carrier nearly as wide as the
+interior (`mechanical/drc.echo`, "interior width between the acrylic sides")
+left no room for the two side channels that ADR 0009 and ADR 0014 require for
+the WS2815 strips, the loom and the tube. **That is why there is no flat
+carrier:** the circuits are on the spine, standing in one side channel
+(`mechanical/DESIGN.md`).
 
 **But the per-cluster decision bought real room here**, which is worth saying
 because the width crunch was one of the arguments in play: the channels now
