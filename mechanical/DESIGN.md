@@ -76,8 +76,8 @@ Three things can claim each end, and the largest wins:
 - **Tail end:** the **LED matrix on the top face, centred** after the keys
   (owner, 2026-09-26), with the etherCON's housing behind it; or the key
   board, the last fastener pair, the patch plug and the etherCON's depth in a
-  row; or the underside chain after the right thumb (service cover, then the
-  connector); or the right-thumb cluster against the tail cap.
+  row; or the right-thumb cluster against the tail cap. (There is no service
+  cover since 2026-09-26.)
 - **The tail is stacked** (owner, 2026-09-26: "it's unacceptable to go this
   long" and "the matrix can be up higher out of the way and still allow the
   connectors"). The Matrix **sits against the oak top** under its window,

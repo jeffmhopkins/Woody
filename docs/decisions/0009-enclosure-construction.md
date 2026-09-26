@@ -432,6 +432,12 @@ consequences:
   1:1 paper check covers this face as well as the 10HP panel — and the tail is
   now the tight one of the two.
 
+> **Superseded (2026-09-26, owner: "service cover is for to remove"): there is no service cover.** The console header
+> stays, on the centre board inside the body, and is reached by taking the
+> lid off (six fasteners). USB-Serial-JTAG through the tail USB-C port is
+> the recovery path that works with the body closed. The underside past the
+> right thumb is plain oak.
+
 **And a screwed service cover on the tail underside**, beside the matrix
 window, over a **six-pin** header on the carrier: `U0TXD`, `U0RXD` and `GND`
 for each board.
@@ -606,9 +612,10 @@ oak top and plate — rather than the U) and the channels. Those keep the old fo
 because opening a finished instrument is a bad afternoon, not because you
 cannot.
 
-**Cut the service cover and populate its header**, per the tail-face section
-above. It is the only thing standing between a bad flash and a finished
-instrument that will not boot, and the one dev board depends on it (ADR 0015).
+**Populate the console header** on the centre board. *(There is no service
+cover to cut since 2026-09-26; the header is reached with the lid off.)* It
+is the last line of defence between a bad flash and an instrument that will
+not boot, and the one dev board depends on it (ADR 0015).
 
 **Bond the aluminium plate to `PWR_GND`. Never to `AGND`.** Nothing currently
 bonds it. It floats under the player's hands, one to two millimetres from

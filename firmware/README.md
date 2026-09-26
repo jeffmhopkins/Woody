@@ -102,7 +102,8 @@ gasket. Everything here exists so that it never has to be the answer.
   through every boot that has not been asked for MIDI.
 - **The recovery ladder, in order.** (1) Rollback to the other app slot. (2) USB-Serial-JTAG
   through the tail USB-C slot — which is why MIDI is opt-in. (3) The console
-  header under the service cover (ADR 0009), for watching a board that boots
+  header on the centre board, with the lid off (ADR 0009 — there is no
+  service cover since 2026-09-26), for watching a board that boots
   but misbehaves. **There is no hardware boot-force**: `EN` and `IO0` are not
   broken out on the ESP32-S3-Matrix, and soldering to them would end the dev
   board's life as a swappable module. A corrupted *bootloader* therefore means

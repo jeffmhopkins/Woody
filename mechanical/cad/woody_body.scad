@@ -51,7 +51,7 @@ origin = "mouth";
 
 LAYERS = ["plate_top", "oak_top", "oak_bottom", "oak_grooves", "thumb_plate", "side",
           "mouth_cap", "tail_cap", "ubolt_backplate",
-          "matrix_window", "oak_rebates", "service_cover"];
+          "matrix_window", "oak_rebates"];
 
 $fn = 40;
 EPS = 0.01;           // drawing convention: coplanar-face nudge
@@ -126,8 +126,9 @@ mouth_req = max(x_in0 + layout_mouth_extra + switch_keycap / 2 + stack_cap_clear
 // the tail hangs off the right hand, so it can be worked out in the right
 // hand's own frame (x_rh0 = 0) before the right hand is placed.
 rt_rest_rel = [layout_rt_rest_at * rh_run, W / 2];
-function rt_rel(i) = i == 0 ? rt_rest_rel + [layout_rt_offset, 0]
-                   : rt_rest_rel + [-0.6 * layout_rt_offset, (i == 1 ? -1 : 1) * 0.6 * layout_rt_offset];
+// RT1 a half rest below the rest, RT2 / RT3 side by side a half rest above.
+function rt_rel(i) = i == 0 ? rt_rest_rel + [layout_rt_rest / 2, 0]
+                   : rt_rest_rel + [-layout_rt_rest / 2, (i == 1 ? -1 : 1) * layout_rt_pair_pitch / 2];
 top_last_rel = max([for (i = [0 : len(layout_rh_gaps)]) cum(layout_rh_gaps, i)]);
 rt_last_rel = max([for (i = [0 : count("right_thumb") - 1]) rt_rel(i)[0]]);
 // BEHIND THE MATRIX, IN ORDER (2026-09-26): the USB-C extension's plug off
@@ -148,7 +149,6 @@ equip_start_rel = plate_cutout / 2 + cluster_margin + layout_tail_clear + tail_f
 tail_claims_rel = [
     top_last_rel + equip_start_rel + ethercon_rj45_plug_l + ethercon_depth + ends_tail_cap_t,
     top_last_rel + plate_cutout / 2 + cluster_margin + layout_tail_clear + boards_matrix_board + behind_matrix,
-    rt_last_rel + rc / 2 + layout_underside_clear + openings_service_cover_w + 2 * layout_tail_clear + ethercon_depth,
     rt_last_rel + rc / 2 + layout_underside_clear + ends_tail_cap_t];
 // The LED matrix CENTRED in the space after the keys (owner, 2026-09-26):
 // midway between the last cap's slot edge and the tail face. The connector
@@ -218,9 +218,6 @@ rt_last = max([for (k = keys) if (k[1] == "bottom") key_xy(k)[0]]);
 matrix_near_x = top_last + plate_cutout / 2 + cluster_margin + layout_tail_clear + boards_matrix_board / 2;
 function matrix_x(l) = layout_matrix_centred ? (top_last + cap_edge_rel + l) / 2 : matrix_near_x;
 
-// The tail underside after the right-thumb cluster: the service cover,
-// turned across the body.
-service_xy = [rt_last + rc / 2 + layout_underside_clear + openings_service_cover_w / 2, W / 2];
 L = top_last + tail_req;
 x_in1 = L - ends_tail_cap_t;
 matrix_xy = [matrix_x(L), W / 2];
@@ -334,7 +331,7 @@ module oak_top_2d() {
 }
 
 // The U's floor. Thumb recesses are the through-cuts (ADR 0009: "oak
-// thickness sets the inset depth"); service opening;
+// thickness sets the inset depth"), plus the
 // fastener and U-bolt holes. Full width; grooves as for the oak top.
 // Frame: model XY minus [x_in0, 0].
 module oak_bottom_2d() {
@@ -344,7 +341,6 @@ module oak_bottom_2d() {
             for (k = bottom_keys) translate(key_xy(k)) rotate(key_rot(k))
                 square(switch_keycap + 2 * thumb_recess_clear, center = true);
             for (s = spare_xy) translate(s) square(switch_keycap + 2 * thumb_recess_clear, center = true);
-            translate(service_xy) square([openings_service_cover_w, openings_service_cover_l], center = true);
             for (f = fasteners()) translate(f) circle(d = hardware_fastener_clear_d);
             for (u = ubolt_legs()) translate(u) circle(d = hardware_ubolt_rod_d + 0.5);
         }
@@ -438,12 +434,6 @@ module matrix_window_2d() { translate(matrix_xy) offset(r = 0.5) offset(delta = 
 // Rebates in the oak top's upper face - a router pass, like the grooves, so
 // exported on their own. Frame: as the oak panels.
 module oak_rebates_2d() { translate([-x_in0, 0]) translate(matrix_xy) square(matrix_rebate, center = true); }
-module service_cover_2d() {
-    translate(service_xy) rotate(90) difference() {
-        square([openings_service_cover_l + 6, openings_service_cover_w + 6], center = true);
-        for (s = [-1, 1]) translate([s * (openings_service_cover_l / 2 + 1.5), 0]) circle(d = 2.4);
-    }
-}
 
 // --------------------------------------------------------- features ------
 // Each key's square, unioned, then CLOSED (grow, shrink) so squares closer
@@ -844,7 +834,6 @@ module hardware_3d() {
         translate([ubolt_legs()[i][0], ubolt_legs()[i][1], z_floor + hardware_backplate_t - explode])
             cylinder(d = hardware_ubolt_nut_af / cos(30), h = hardware_ubolt_nut_h, $fn = 6);
     lam(z_floor, hardware_backplate_t, C_ALU, false, "U-bolt backplate") ubolt_backplate_2d();
-    lam(-1.5 - explode, 1.5, C_ACRYLIC, false, "service cover") service_cover_2d();
 }
 
 module assembly() {
@@ -882,7 +871,6 @@ module drc_report() {
     drc(undef, "what the mouth end needs", mouth_names[search(max(mouth_claims), mouth_claims)[0]], str(mouth_req, " mm from the mouth cap to LH1"));
     tail_names = ["last key board, the last fastener pair, then the patch plug and the etherCON depth",
                   "last key board, the LED matrix on the top face, then the etherCON depth (matrix not centred)",
-                  "right-thumb cluster, the service cover, then the etherCON depth",
                   "the right-thumb cluster against the tail cap"];
     drc(undef, "what the tail end needs", layout_matrix_centred && matrix_centred_req >= max(tail_claims_rel) - top_last_rel
         ? str("the LED matrix centred after the keys, with ", cap_edge_rel + 2 * (boards_matrix_board / 2 + behind_matrix)
@@ -959,14 +947,13 @@ module drc_report() {
     rc = switch_keycap + 2 * thumb_recess_clear;
     feats = concat([for (k = bottom_keys) [k[0], key_xy(k), [rc, rc]]],
                    [for (i = [0 : 1 : len(spare_xy) - 1]) [str("spare ", i + 1), spare_xy[i], [rc, rc]]],
-                   [                    ["service opening", service_xy, [openings_service_cover_w, openings_service_cover_l]],
-                    for (u = ubolt_legs()) ["U-bolt leg", u, [hardware_ubolt_rod_d, hardware_ubolt_rod_d]]],
+                   [for (u = ubolt_legs()) ["U-bolt leg", u, [hardware_ubolt_rod_d, hardware_ubolt_rod_d]]],
                    [for (i = [0 : len(fasteners()) - 1]) [str("M3 #", i + 1), fasteners()[i], [hardware_fastener_cbore_d, hardware_fastener_cbore_d]]]);
     function gap(a, b) = max(abs(a[1][0] - b[1][0]) - (a[2][0] + b[2][0]) / 2,
                              abs(a[1][1] - b[1][1]) - (a[2][1] + b[2][1]) / 2);
     clashes = [for (i = [0 : len(feats) - 1], j = [i + 1 : 1 : len(feats) - 1])
                if (gap(feats[i], feats[j]) < 3) str(feats[i][0], " / ", feats[j][0], " ", gap(feats[i], feats[j]))];
-    drc(len(clashes) == 0, "oak-bottom cuts at least 3 mm apart (thumb recesses, spares, service, U-bolt, counterbores)",
+    drc(len(clashes) == 0, "oak-bottom cuts at least 3 mm apart (thumb recesses, U-bolt, counterbores)",
         clashes, "pairs closer than 3 mm, with the web between them (negative = overlap)");
     // Through-cuts only: a fastener's counterbore is partial depth from the
     // outside face, so its clearance hole is what meets the side.
@@ -1059,7 +1046,6 @@ module part_2d(p) {
     else if (p == "ubolt_backplate") ubolt_backplate_2d();
     else if (p == "matrix_window") matrix_window_2d();
     else if (p == "oak_rebates") oak_rebates_2d();
-    else if (p == "service_cover") service_cover_2d();
     else assert(false, str("unknown part ", p));
 }
 

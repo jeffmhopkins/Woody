@@ -209,10 +209,18 @@ layout:
     status: tbd
     source: "ADR 0010: the right thumb rests, and its three switches sit offset from the rest - two side by side towards the mouth, one below (owner, 2026-09-26). Fraction of the RH run from its first key"
     decided_by: "M2"
-  rt_offset:
-    value: 20.0
+  # THE RIGHT THUMB: two side by side toward the mouth, the rest, one below
+  # (owner, 2026-09-26: "two up, one down, the up are horizontally same row";
+  # "more gap for resting right thumb").
+  rt_rest:
+    value: 40.0
     status: tbd
-    source: "placeholder - distance from the rest to each RT switch"
+    source: "RT2/RT3's row to RT1, centre to centre, across the thumb rest - the same ~21.5 mm clear as the left thumb's rest [calc]"
+    decided_by: "M2"
+  rt_pair_pitch:
+    value: 24.0
+    status: tbd
+    source: "RT2 to RT3 across the body, centre to centre: a recess and a 3 mm web, rounded up [calc]"
     decided_by: "M2"
 
 # -------------------------------------------------------------- switches ----
@@ -408,14 +416,6 @@ openings:
     status: tbd
     source: "the extension receptacle's body behind the panel [from memory]"
     decided_by: "M4, against the extension bought"
-  service_cover_w:
-    value: 12.0
-    status: nominal
-    source: "[adr] ADR 0009 - 'Roughly 12 x 40 mm, two M2 screws'"
-  service_cover_l:
-    value: 40.0
-    status: nominal
-    source: "[adr] ADR 0009"
 
 ethercon:
   # Neutrik NE8FDP, read off the banked drawing (datasheets/connectors/NE8FDP.*)

@@ -5,7 +5,8 @@
 loom went with the display board, and the service header is what is left.
 The page as it was is in git.
 
-`HDR-SERVICE`, a 1×3 console header under the tail-underside service cover:
+`HDR-SERVICE`, a 1×3 console header on the centre board, reached with the
+lid off — there is no service cover since 2026-09-26 (ADR 0009):
 the real-time board's console pair and a ground.
 
 ## Interfaces
@@ -30,7 +31,7 @@ The drawing is a representation of it and `tools/check-netlist.py` checks the
 two agree.*
 
 ```
-  HDR-SERVICE  1×3, under the tail-underside cover:
+  HDR-SERVICE  1×3, on the centre board (lid off):
 
     real-time board:  U0TXD(IO43)  U0RXD(IO44)  GND
 ```

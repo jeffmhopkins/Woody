@@ -88,7 +88,7 @@ of a superseded value. Instead:
 
 | | |
 |---|---|
-| ![Underside](renders/underside.png) Underside: thumb recesses, U-bolt, service cover | ![Exploded](renders/exploded.png) The stack, pulled apart |
+| ![Underside](renders/underside.png) Underside: thumb recesses, both thumb rests, U-bolt | ![Exploded](renders/exploded.png) The stack, pulled apart |
 | ![Internals](renders/internals.png) Lid off | ![Tail](renders/tail-detail.png) The tail from inside |
 | ![Centre board](renders/centre-board-3d.png) The centre board that replaces the carrier, in yellow | |
 

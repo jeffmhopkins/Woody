@@ -144,7 +144,8 @@ Three things follow, and they constrain the layout more than the key count does:
 the thumb bears down while gripping, they will trigger constantly. The thumb has
 to *deliberately move* to reach them. This is the same principle as the right
 thumb's rest-versus-switches offset (two side by side toward the mouth in one
-row, one toward the tail — owner, 2026-09-26), and it means the plate needs a defined
+row, the rest, one toward the tail, with the same ~21.5 mm of clear rest as
+the left thumb — owner, 2026-09-26; `config/body.yaml` `layout.rt_*`), and it means the plate needs a defined
 grip area that has no switches in it.
 
 > **Superseded 2026-09-26 (owner): the four keys are a STRAIGHT LINE down
