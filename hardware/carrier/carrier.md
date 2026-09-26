@@ -105,8 +105,8 @@ wins.*
 
 ```
           REF5050                  ½ OPA2197  "reference buffer"
-  +12V ──┬─┤VIN VOUT├─┬── 5.000 V ─┤+IN                         SKT-BREATH
-         │            │            │              R-ISO-REF     pin VS
+  +12V ──┬─┤VIN VOUT├─┬── 5.000 V ─┤+IN                         U-BREATH
+         │            │            │              R-ISO-REF     pin 2 VS
     [C-REF-OUT#1]  [C-REF-OUT#2]   │     OUT ───┬──[37.4 Ω]───┬──── = the
       10 µF          10 µF   ┌─────┤−IN         │             │     sensor's
     [100 nF]       [100 nF]  │     └────────────┘             │     excitation
@@ -118,9 +118,9 @@ wins.*
        DC ─[R-FB-REF 10 kΩ]──┤◄─────────────────┼─────────────┤
        AC ─[C-FB-REF 1 nF]───┤◄─[R-FBX-REF 100Ω]┘             │
                                                               │   U-BREATH MPXV4006DP
-                                                              │   case 1351-01
-                                                              │
-                                                              │   P1 ◄── 400 mm tube
+                                                              │   case 1351-01, SMT,
+                                                              │   soldered down
+                                                              │   P1 ◄── breath tube
                                                               │           + PTFE plug
                                                               │           + ≤1 mL trap
                                                               │   P2 ◄── OPEN TO CAVITY
@@ -200,14 +200,18 @@ and both are board decisions, not firmware ones.
 
 ### Mechanical rules that live with this section
 
-- **Both ports on the same side** (case 1351-01) `[repo] 0003`. Route the tube
-  so it cannot cover, kink or blow adhesive across the reference port.
+- **The sensor is surface-mount and solders straight to the board — no
+  socket.** At the board's mouth end, far side from the tube, ports towards
+  the tail (ADR 0017). Land pattern, pinout, the swap procedure and why not a
+  breakout board: [`breath-sense-link.md`](../interfaces/breath-sense-link/breath-sense-link.md),
+  *Mounting*.
+- **Both ports on the same face** (case 1351-01) `[ds MPXV4006DP p.7]`. Route
+  the tube so it cannot cover, kink or blow adhesive across the reference port,
+  and so it does not pull on P1.
+- **P1 is the side with the part marking** `[ds MPXV4006DP p.6, Table 3]`:
+  marked face up, P1 is the upper port.
 - **Mask both ports before `MECH-COAT`** `[repo] 0009`. A sealed reference
   chamber gains ~5.2 kPa when the body warms and the sensor reads as dead.
-- **Which port is P1 is still open** `[repo] 0003` — "confirm before layout", and
-  layout is now.
-- **`SKT-BREATH` only earns its place if the sensor is reachable.** See
-  *Still open*.
 
 ---
 ## §3 Chain drive — what is left after the registers went back
@@ -307,7 +311,7 @@ page and have no BOM entry yet.
 | **`U-TVS-CHAIN`** | **4-ch array, SOT-23-6** | **Proposed — the chain's four signals leave the board and run the body. `U-TVS-SPI` does exactly this for the umbilical's three** | proposed |
 | **`F-CHAIN`** | **100 mA polyfuse** | **Proposed — the 3V3 conductor runs 265 mm beside 12 V LED power through the body, and a short on it takes the LDO and the instrument down** | proposed |
 | `U-BUF` | OPA2197IDR | ½ reference buffer, ½ breath buffer, both on +12 V | `[repo]` |
-| `U-BREATH` + `SKT-BREATH` | MPXV4006DP, case 1351-01 | P1 to the tube, P2 open to the cavity | `[repo]`; **P1 identity open** |
+| `U-BREATH` | MPXV4006DP, case 1351-01, surface mount, soldered down | P1 to the tube, P2 open to the cavity | `[ds]` pp.1, 6, 7 |
 | `R-SER-BREATH-INST` | 1 kΩ | Output protection. **No series cap here** | `[repo]` |
 | `D-TVS-BREATH` ×2 | 12 V standoff, SOD-323 | `BREATH` and `AGND` legs | `[repo]` |
 | `R-SPI-SER` ×3 | **100 Ω** | Series at the driving end on `SCLK`, `MOSI`, `CS`. **Was drawn as three refdes that are not in the BOM, at 220 Ω, derived from an RC model** — see §4 | `[repo] bom.csv` |
@@ -399,15 +403,13 @@ Ordered by what blocks what. The first four block layout.
 > unretrofittable, both still have to be told to firmware, and neither is any
 > less urgent — they are just not on this board's critical path. They are now
 > on `hardware/cluster/cluster-boards.md`, which proposes an answer to both.
-- **Whether the sensor is reachable after bonding**, which decides whether
-  `SKT-BREATH` earns its place. ADR 0003 wants a replaceable wear part and a
-  trap "clearable without disassembly"; ADR 0009 gives a 12 × 40 mm cover over a
-  2×5 header. Those do not meet. Either the cover becomes a real hatch with the
-  sensor and trap under it, or the socket is decoration.
-- **Which port of the MPXV4006DP is P1** `[repo] 0003`. Needed for layout.
 - **The etherCON variant at the instrument end** `[repo] 0004`, which decides
   whether this board carries an RJ45 jack footprint (~16 × 14 mm, not in the
   BOM) or eight wires. ADR 0004 defers it to E12/M7, which is after E13.
+- **The breath trap "clearable without disassembly"** (ADR 0003). The sensor
+  is reached with the lid off and replaced with an iron (`breath-sense-link.md`,
+  *Mounting*); the trap is a separate question, decided with the trap's own
+  design.
 - ~~**The MCP3202's maximum clock at 3.3 V**~~ — **closed 2026-09-21**, §4.
   0.9 MHz is not an interpolation; it is the datasheet's *guaranteed* 2.7 V
   maximum, so using it at 3.3 V is conservative rather than approximate.
@@ -416,5 +418,6 @@ Ordered by what blocks what. The first four block layout.
   board and M8 does failure injection on it, and neither has a documented means
   of measurement. One-shot.
 - **Conformal coating and the sensor ports.** `MECH-COAT` must mask both
-  `[repo] 0009`, and the part is socketed, which makes masking easier and
-  retention worse.
+  `[repo] 0009`. The sensor is soldered down and coated with the board, so a
+  swap breaks the coating at its joints and the ports are re-masked before it
+  is touched up.

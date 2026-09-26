@@ -65,10 +65,6 @@ components:
     value: "2.54mm female header strip"
     note: "SOCKETS, NOT SOLDER-DOWN. Four strips for one dev board, which is why the instance count reads HDR-DEV 1/4: one mating part, four pieces bought. Every U-MCU-RT pin above lands through them, so they carry no net of their own and declare no pins"
 
-  SKT-BREATH:
-    value: "Machined SIP socket strip"
-    note: "The MPXV4006DP's socket. Same rule: a mating part, not a node"
-
   R-SPI-SER-SCLK:
     of: R-SPI-SER
     value: "100R 1%"

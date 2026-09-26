@@ -24,7 +24,7 @@ components:
   U-BREATH:
     value: "MPXV4006DP"
     pins: [VS, VOUT, GND]
-    note: "P1 takes the 400 mm tube with its PTFE plug and its <=1 mL trap; P2 IS OPEN TO THE CAVITY AND MUST NEVER BE BLOCKED. Neither is a net, so neither is here - which is exactly the kind of fact a netlist cannot carry and the page must"
+    note: "SOLDERED TO THE MAIN BOARD, no socket (case 1351-01 is surface mount). Pin 2 VS, pin 3 GND, pin 4 VOUT; pins 1 and 5-8 are N/C and carry no net (Style 2 - breath-sense-link.md, Mounting). P1 takes the breath tube with its PTFE plug and its <=1 mL trap; P2 IS OPEN TO THE CAVITY AND MUST NEVER BE BLOCKED. Neither is a net, so neither is here - which is exactly the kind of fact a netlist cannot carry and the page must"
 
   R1:
     of: R-SER-BREATH-INST
