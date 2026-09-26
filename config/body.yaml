@@ -286,16 +286,25 @@ openings:
     value: 22.0
     status: nominal
     source: "[adr] ADR 0009 - 'Roughly 22 mm square'; now through the oak top and the plate, on the top face after the keys"
+  # USB-C REACHES THE TAIL THROUGH A PANEL-MOUNT EXTENSION (owner,
+  # 2026-09-26): the Matrix board sits under the top window, a few cm inboard
+  # of the tail face, and a short USB-C extension brings its port to a
+  # receptacle in the tail cap. The slot is the receptacle's panel cutout.
   usb_slot_w:
     value: 12.5
     status: tbd
-    source: "no document - a USB-C plug overmould [from memory]"
-    decided_by: "M4, against the cable chosen"
+    source: "panel cutout for a panel-mount USB-C extension receptacle [from memory]"
+    decided_by: "M4, against the extension bought"
   usb_slot_h:
     value: 7.0
     status: tbd
-    source: "no document [from memory]"
+    source: "as usb_slot_w [from memory]"
     decided_by: "M4"
+  usb_ext_depth:
+    value: 20.0
+    status: tbd
+    source: "the extension receptacle's body behind the panel [from memory]"
+    decided_by: "M4, against the extension bought"
   service_cover_w:
     value: 12.0
     status: nominal

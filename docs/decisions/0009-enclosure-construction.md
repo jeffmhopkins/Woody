@@ -343,6 +343,15 @@ own connector. The body opens on six fasteners now, but opening it to flash a
 board is a bench operation, not a thing to do with an instrument in a rack —
 the slot is what makes it a cable. Keep that edge of the board at the tail.
 
+**Decided 2026-09-26 (owner): a panel-mount USB-C extension.** With the matrix
+on the top face the Matrix board sits a few centimetres inboard of the tail,
+and the etherCON fills the tail's depth, so its own port cannot reach the
+face. A short extension brings it to a receptacle in the tail cap beside the
+etherCON (`CBL-USB-EXT`). The ESP32-S3's USB is full-speed, which a short
+extension carries without a second thought; USB-Serial-JTAG recovery through
+it is unchanged. The body CAD checks the receptacle fits beside the connector
+and reports the cable run (`mechanical/drc.echo`).
+
 **And the umbilical connector, which is the reason the tail face is now
 crowded.** The etherCON chassis flange (ADR 0004) is roughly 26 × 31 mm on a
 face that measures 57 × 38 mm. Two consequences:

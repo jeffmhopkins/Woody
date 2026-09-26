@@ -323,7 +323,12 @@ tube_yz = [W / 2, z_floor + cavity_h / 2];
 ec_c = [W / 2 + ethercon_offset_y, T / 2];                 // etherCON centre on the tail face
 ec_fl = ethercon_rotated ? [ethercon_flange_h, ethercon_flange_w] : [ethercon_flange_w, ethercon_flange_h];
 ec_holes = [for (s = [-1, 1]) ec_c + s * (ethercon_rotated ? [ethercon_hole_dy, ethercon_hole_dx] : [ethercon_hole_dx, ethercon_hole_dy]) / 2];
-usb_c = [ec_c[0] + ec_fl[0] / 2 + (W - ec_c[0] - ec_fl[0] / 2) / 2, z_floor + 1.6 + 1.6];
+// The USB-C extension's receptacle (owner, 2026-09-26): beside the
+// etherCON, 2 mm of oak clear of its flange on the tail face, inside the
+// sides, at the cavity's mid height.
+usb_web_min = 2;   // drawing convention: oak between two tail-face cutouts
+usb_c = [min(ec_c[0] + ec_fl[0] / 2 + usb_web_min + openings_usb_slot_w / 2, W - u_y0 - openings_usb_slot_w / 2),
+         z_floor + cavity_h / 2];
 
 module tail_cap_2d() {
     difference() {
@@ -503,7 +508,14 @@ module tail_equipment() {
         cylinder(d = ethercon_body_d, h = ethercon_depth);
         translate([0, 0, -2]) linear_extrude(2) square([ec_fl[1], ec_fl[0]], center = true);
     }
-    P(C_PCB) translate([x_in1 - 20, usb_c[0], z_floor + 1.6]) cube([20, 9, 1.6], center = false);
+    // The USB-C extension: receptacle body behind the tail cap, and a cable
+    // run to the Matrix board's edge (drawn straight; it is a flexible lead).
+    P(C_CONN) translate([x_in1 - openings_usb_ext_depth, usb_c[0] - openings_usb_slot_w / 2, usb_c[1] - openings_usb_slot_h / 2])
+        cube([openings_usb_ext_depth, openings_usb_slot_w, openings_usb_slot_h]);
+    P([0.15, 0.15, 0.15]) hull() {
+        translate([x_in1 - openings_usb_ext_depth, usb_c[0], usb_c[1]]) sphere(d = 4, $fn = 12);
+        translate([matrix_xy[0] + boards_matrix_board / 2, matrix_xy[1], matrix_board_z - 2]) sphere(d = 4, $fn = 12);
+    }
 }
 
 // ADR 0014 sized the strips at 420 mm for a 457 mm body. They now run the
@@ -679,12 +691,15 @@ module drc_report() {
         panel, str("mm (tail cap + backplate) vs ", ethercon_max_panel_t, " max for the NE8FDP"));
     fl_margin = (T - ec_fl[1]) / 2;
     drc(fl_margin >= 5, "etherCON flange margin on the tail face", fl_margin, "mm above and below (ADR 0009: 6.00 rotated)");
-    usb_x = matrix_xy[0] + boards_matrix_board / 2;
-    drc(x_in1 - usb_x < 5, "Matrix USB-C at the tail face (ADR 0009: 'Keep that edge of the board at the tail')",
-        x_in1 - usb_x, "mm from the board edge to the tail cap; more than a few = a panel-mount USB-C extension");
-    beside = u_w - (ec_c[0] - u_y0 + ethercon_body_d / 2);
-    drc(beside >= boards_matrix_board + 1, "room beside the etherCON body for the Matrix board at the tail",
-        beside, str("mm across, vs ", boards_matrix_board, " board"));
+    // USB-C by panel-mount extension (owner, 2026-09-26).
+    usb_room = (W - u_y0) - (ec_c[0] + ethercon_body_d / 2);
+    drc(usb_room >= openings_usb_slot_w + 2, "USB-C extension receptacle beside the etherCON body", usb_room - openings_usb_slot_w,
+        str("mm spare across, inside the sides, for a ", openings_usb_slot_w, " mm receptacle"));
+    usb_web = (usb_c[0] - openings_usb_slot_w / 2) - (ec_c[0] + ec_fl[0] / 2);
+    drc(usb_web >= 2, "tail cap web between the USB-C cutout and the etherCON flange", usb_web, "mm of oak on the tail face");
+    usb_run = norm([x_in1 - openings_usb_ext_depth - (matrix_xy[0] + boards_matrix_board / 2), usb_c[0] - matrix_xy[1], usb_c[1] - (matrix_board_z - 2)]);
+    echo("DRC", "INFO", "USB-C extension cable run, Matrix edge to receptacle", usb_run,
+         "mm straight line; buy the shortest extension that reaches, with slack for the tail cap to come off");
 
     // Plate
     drc(undef, "M3 thread engagement in the key plate", plate_thickness,

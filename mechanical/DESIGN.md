@@ -103,11 +103,12 @@ decision, not a correction.
    that) reaches into the oak top and bottom. *Rule: "etherCON body inside the
    cavity height".* The lamination can take through-cuts at the tail, but they
    must be in the DXF before gluing.
-3. **The Matrix's USB-C cannot reach the tail face.** ADR 0009 says "keep that
-   edge of the board at the tail", but the etherCON body fills the tail's
-   depth and there is not room beside it for the Matrix board. *Rules: "Matrix
-   USB-C at the tail face", "room beside the etherCON body".* A short
-   panel-mount USB-C extension is the obvious answer; it is a BOM line.
+3. **The Matrix's USB-C reaches the tail through an extension** (owner,
+   2026-09-26). Its port cannot reach the face — the etherCON fills the
+   tail's depth — so a panel-mount USB-C extension runs to a receptacle
+   beside the connector (`CBL-USB-EXT`). *Rules: "USB-C extension receptacle
+   beside the etherCON body", "tail cap web between the USB-C cutout and the
+   etherCON flange"; the cable run is an INFO line.*
 4. **The display is what sets the mouth end.** On the underside it cannot
    share the space under the left-hand run with the thumb arc, so it adds
    roughly its own length in front of the keys. *Rule: "what sets the mouth
