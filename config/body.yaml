@@ -189,11 +189,11 @@ layout:
   # THE LEFT THUMB IS A STRAIGHT LINE down the body's centreline (owner,
   # 2026-09-26: "the vertical line of two keys, gap, two keys"; "thumb rest
   # is between the keys, two above, two below"). LT1 LT2, the rest, LT3 LT4.
-  lt_start:
-    value: -16.0
+  lt_rest_under:
+    value: "LH2"
     status: tbd
-    source: "LT1's position along the body from LH1 (negative = towards the mouth); placed so the rest sits under the first left-hand keys and LT4 clears the U-bolt"
-    decided_by: "M2 - hands on the mule"
+    source: "the left thumb rest is directly under the middle-finger key (owner, 2026-09-26); LH2 is the middle finger on the index-middle-ring order key-layout.yaml assumes until M2 assigns fingers"
+    decided_by: "M2 - finger assignment"
   lt_pitch:
     value: 22.0
     status: tbd
@@ -204,11 +204,11 @@ layout:
     status: tbd
     source: "LT2 to LT3 centre to centre, across the thumb rest: ~21.5 mm clear between the recesses, about a thumb pad [calc]; longer and LT4 meets the U-bolt legs (drc.echo)"
     decided_by: "M2"
-  rt_rest_at:
-    value: 0.35
+  rt_rest_under:
+    value: "RH2"
     status: tbd
-    source: "ADR 0010: the right thumb rests, and its three switches sit offset from the rest - two side by side towards the mouth, one below (owner, 2026-09-26). Fraction of the RH run from its first key"
-    decided_by: "M2"
+    source: "the right thumb rest is directly under the middle-finger key (owner, 2026-09-26); RH2 on the same assumption as lt_rest_under"
+    decided_by: "M2 - finger assignment"
   # THE RIGHT THUMB: two side by side toward the mouth, the rest, one below
   # (owner, 2026-09-26: "two up, one down, the up are horizontally same row";
   # "more gap for resting right thumb").

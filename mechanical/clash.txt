@@ -3,9 +3,7 @@
 # Excuses: mechanical/clash-allow.yaml. Every solid is a modelled envelope - many sizes are tbd
 # (config/body.yaml), so a clean result is only as good as those envelopes.
 
-CLASH 4
-        95.5 mm3  U-bolt backplate  x  thumb plates   [X 123.0-128.2  Y 18.2-38.8  Z 6.0-7.2]
-        53.6 mm3  U-bolt backplate  x  switch LT4   [X 123.0-125.5  Y 21.5-35.5  Z 6.0-8.5]
+CLASH 2
         10.6 mm3  M3 #4  x  U-bolt backplate   [X 129.2-132.2  Y 46.5-48.0  Z 6.0-9.0]
         10.6 mm3  M3 #3  x  U-bolt backplate   [X 129.2-132.2  Y 9.0-10.5  Z 6.0-9.0]
 
@@ -15,24 +13,24 @@ ALLOWED 87 (by rule in mechanical/clash-allow.yaml)
         76.8 mm3  J-STACK right_thumb to right_hand  x  centre board   - each stacking header passes through the centre board - a pass-through header, or a hole with a header on each face
         76.8 mm3  J-STACK left_thumb to left_hand  x  centre board   - each stacking header passes through the centre board - a pass-through header, or a hole with a header on each face
         64.8 mm3  USB-C lead  x  USB-C plug   - the extension's cable enters its own plug and receptacle
+        32.5 mm3  board left_thumb  x  switch LT1   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board left_hand  x  switch LH2   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board left_hand  x  switch LH3   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board left_thumb  x  switch LT3   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board left_hand  x  switch LH1   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board left_thumb  x  switch LT2   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
-        32.5 mm3  board left_thumb  x  switch LT1   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board left_hand  x  switch LH4   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board left_thumb  x  switch LT4   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board left_hand  x  switch LH5   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
-        32.5 mm3  board right_thumb  x  switch RT2   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
-        32.5 mm3  board right_thumb  x  switch RT1   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
-        32.5 mm3  board right_thumb  x  switch RT3   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board right_hand  x  switch RH1   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board right_hand  x  switch RH4   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board right_hand  x  switch RH3   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board right_hand  x  switch RH2   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board right_hand  x  switch RH6   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
+        32.5 mm3  board right_thumb  x  switch RT2   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
+        32.5 mm3  board right_thumb  x  switch RT1   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board right_hand  x  switch RH5   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
+        32.5 mm3  board right_thumb  x  switch RT3   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         31.0 mm3  breath trap  x  breath tube   - the tube enters the trap at both ends - one air path
         30.1 mm3  breath sensor  x  breath tube to sensor   - the tube pushes onto the sensor's P1 barb
         20.4 mm3  cap LT4  x  switch LT4   - the MX stem enters the cap's cross socket; the socket is not modelled
@@ -48,8 +46,8 @@ ALLOWED 87 (by rule in mechanical/clash-allow.yaml)
         20.4 mm3  cap RH3  x  switch RH3   - the MX stem enters the cap's cross socket; the socket is not modelled
         20.4 mm3  cap RH5  x  switch RH5   - the MX stem enters the cap's cross socket; the socket is not modelled
         20.4 mm3  cap LT3  x  switch LT3   - the MX stem enters the cap's cross socket; the socket is not modelled
-        20.4 mm3  cap LT2  x  switch LT2   - the MX stem enters the cap's cross socket; the socket is not modelled
         20.4 mm3  cap LT1  x  switch LT1   - the MX stem enters the cap's cross socket; the socket is not modelled
+        20.4 mm3  cap LT2  x  switch LT2   - the MX stem enters the cap's cross socket; the socket is not modelled
         20.4 mm3  cap LH3  x  switch LH3   - the MX stem enters the cap's cross socket; the socket is not modelled
         20.4 mm3  cap LH2  x  switch LH2   - the MX stem enters the cap's cross socket; the socket is not modelled
         20.4 mm3  cap LH1  x  switch LH1   - the MX stem enters the cap's cross socket; the socket is not modelled
@@ -59,20 +57,20 @@ ALLOWED 87 (by rule in mechanical/clash-allow.yaml)
         11.0 mm3  parts left_hand  x  switch LH2   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts left_hand  x  switch LH1   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts left_thumb  x  switch LT3   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
-        11.0 mm3  parts left_thumb  x  switch LT2   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts left_thumb  x  switch LT1   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts left_hand  x  switch LH5   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts left_hand  x  switch LH4   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts right_hand  x  switch RH5   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
+        11.0 mm3  parts right_hand  x  switch RH3   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts right_hand  x  switch RH4   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts right_hand  x  switch RH2   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts right_hand  x  switch RH1   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
-        11.0 mm3  parts right_hand  x  switch RH3   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts right_hand  x  switch RH6   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts left_thumb  x  switch LT4   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts right_thumb  x  switch RT2   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts right_thumb  x  switch RT3   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts right_thumb  x  switch RT1   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
+        11.0 mm3  parts left_thumb  x  switch LT2   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
          1.7 mm3  M3 #3  x  key plate   - the fastener threads into the plate - an insert or tapped boss (hardware/bom.csv MECH-FASTENER); the tap hole is drawn at the tap drill
          1.7 mm3  M3 #4  x  key plate   - the fastener threads into the plate - an insert or tapped boss (hardware/bom.csv MECH-FASTENER); the tap hole is drawn at the tap drill
          1.7 mm3  M3 #5  x  key plate   - the fastener threads into the plate - an insert or tapped boss (hardware/bom.csv MECH-FASTENER); the tap hole is drawn at the tap drill
@@ -80,19 +78,19 @@ ALLOWED 87 (by rule in mechanical/clash-allow.yaml)
          1.7 mm3  M3 #1  x  key plate   - the fastener threads into the plate - an insert or tapped boss (hardware/bom.csv MECH-FASTENER); the tap hole is drawn at the tap drill
          1.7 mm3  M3 #2  x  key plate   - the fastener threads into the plate - an insert or tapped boss (hardware/bom.csv MECH-FASTENER); the tap hole is drawn at the tap drill
          1.0 mm3  key plate  x  switch RH5   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
+         1.0 mm3  switch RT3  x  thumb plates   - as the key plate - the thumb switches clip into their plates
          1.0 mm3  key plate  x  switch RH1   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
          1.0 mm3  key plate  x  switch RH2   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
          1.0 mm3  key plate  x  switch RH3   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
-         1.0 mm3  switch RT3  x  thumb plates   - as the key plate - the thumb switches clip into their plates
          1.0 mm3  key plate  x  switch RH4   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
          1.0 mm3  key plate  x  switch RH6   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
-         1.0 mm3  key plate  x  switch LH5   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
          1.0 mm3  switch RT1  x  thumb plates   - as the key plate - the thumb switches clip into their plates
          1.0 mm3  switch RT2  x  thumb plates   - as the key plate - the thumb switches clip into their plates
+         1.0 mm3  key plate  x  switch LH5   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
          1.0 mm3  key plate  x  switch LH4   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
          1.0 mm3  switch LT4  x  thumb plates   - as the key plate - the thumb switches clip into their plates
-         1.0 mm3  switch LT3  x  thumb plates   - as the key plate - the thumb switches clip into their plates
          1.0 mm3  key plate  x  switch LH3   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
+         1.0 mm3  switch LT3  x  thumb plates   - as the key plate - the thumb switches clip into their plates
          1.0 mm3  key plate  x  switch LH2   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
          1.0 mm3  key plate  x  switch LH1   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
          1.0 mm3  switch LT2  x  thumb plates   - as the key plate - the thumb switches clip into their plates

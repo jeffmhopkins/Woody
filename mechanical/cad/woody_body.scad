@@ -111,7 +111,14 @@ cluster_margin = 4;        // drawing convention: board edge past the outermost 
 // the inside face of the mouth cap.
 // The left-thumb cluster's extent relative to LH1 (x_lh0 = 0), recesses included.
 // A straight line: a pair, the thumb rest, a pair (owner, 2026-09-26).
-lt_rel = [for (i = [0 : 3]) layout_lt_start + (i < 2 ? i * layout_lt_pitch : layout_lt_pitch + layout_lt_rest + (i - 2) * layout_lt_pitch)];
+// THE THUMB RESTS ARE DIRECTLY UNDER THE MIDDLE-FINGER KEYS (owner,
+// 2026-09-26): layout.lt_rest_under / rt_rest_under name the key. Measured
+// along its hand's provisional gaps, so it is known before the hands are
+// placed; when key-layout.yaml gets real x/y this wants the key's own x.
+function run_rel(id) = cum(id[0] == "L" ? layout_lh_gaps : layout_rh_gaps, ord(id[2]) - 49);
+lt_rest_rel = run_rel(layout_lt_rest_under);
+lt_rel = [for (i = [0 : 3]) lt_rest_rel + (i < 2 ? -layout_lt_rest / 2 - (1 - i) * layout_lt_pitch
+                                                  : layout_lt_rest / 2 + (i - 2) * layout_lt_pitch)];
 // The breath trap sits mid-height, above the left thumb board's parts, so
 // it has to clear the first KEY board and the centre board, not the thumb
 // board (which starts further towards the mouth since the thumb line did):
@@ -125,7 +132,7 @@ mouth_req = max(x_in0 + layout_mouth_extra + switch_keycap / 2 + stack_cap_clear
 // The TAIL's needs, measured from the last top key's centre. Everything at
 // the tail hangs off the right hand, so it can be worked out in the right
 // hand's own frame (x_rh0 = 0) before the right hand is placed.
-rt_rest_rel = [layout_rt_rest_at * rh_run, W / 2];
+rt_rest_rel = [run_rel(layout_rt_rest_under), W / 2];
 // RT1 a half rest below the rest, RT2 / RT3 side by side a half rest above.
 function rt_rel(i) = i == 0 ? rt_rest_rel + [layout_rt_rest / 2, 0]
                    : rt_rest_rel + [-layout_rt_rest / 2, (i == 1 ? -1 : 1) * layout_rt_pair_pitch / 2];

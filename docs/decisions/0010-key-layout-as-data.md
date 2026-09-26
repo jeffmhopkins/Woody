@@ -152,7 +152,10 @@ grip area that has no switches in it.
 > the centreline — a pair, the thumb rest, a pair** ("the vertical line of two
 > keys, gap, two keys"; "thumb rest is between the keys, two above, two
 > below"). The rest is the defined grip area the paragraph above asks for,
-> with the switches on either side of it rather than swept around it. The arc
+> with the switches on either side of it rather than swept around it.
+> **Both thumb rests sit directly under the middle-finger key** of their hand
+> (owner, same day) — `config/body.yaml` `layout.lt_rest_under` /
+> `rt_rest_under`, LH2 and RH2 until M2 assigns fingers. The arc
 > argument below is the record of the earlier layout; M2 tests the line.
 > Positions: `config/body.yaml` `layout.lt_*`.
 
