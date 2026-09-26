@@ -733,6 +733,10 @@ The ends are separate parts, not extensions of the top or the bottom.
 | **Mouthpiece end** | **Acrylic**, with a drilled circle for the tube pass-through | It is the part most likely to want changing. A pass-through diameter that turns out wrong, or a mouthpiece that wants a different mount, is one flat part to re-cut — and acrylic is the material already being cut for the sides |
 | **Tail end** | **Oak**, carrying the etherCON and the USB-C slot (the matrix window is on the top face since 2026-09-26) | So the wood reads as wrapping from the top face around the bottom and up the back, which is the look. And it is the face with the most openings in it, which wants the material that takes a backing plate |
 
+> **Decided 2026-09-26 (owner): the mouthpiece end is oak**, the same stock
+> as the tail cap - the wood now wraps both ends. The table above is the
+> record of the acrylic reasoning.
+
 **If the acrylic mouthpiece end looks wrong on the bench, it becomes oak.**
 Same cut, same fixings, different sheet. That is the reason to make it a
 separate part rather than a lip on the top panel — the decision stays open

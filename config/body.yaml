@@ -81,9 +81,9 @@ stack:
 # ----------------------------------------------------------------- ends ----
 ends:
   mouth_cap_t:
-    value: 4.0
+    value: 6.0
     status: tbd
-    source: "ADR 0009 end-cap table: acrylic, 'the material already being cut for the sides' - so the side sheet's thickness"
+    source: "OAK since 2026-09-26 (owner: replace the acrylic mouth cap with the wood; ADR 0009 kept that open - 'same cut, same fixings, different sheet') - the oak top's stock, as the tail cap"
     decided_by: "M4"
   tail_cap_t:
     value: 6.0

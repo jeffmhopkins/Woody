@@ -552,7 +552,7 @@ module u_channel() {
 }
 
 module caps() {
-    P(C_ACRYLIC, true, "mouth cap") translate([ends_mouth_cap_t - explode / 3, 0, 0]) rotate([90, 0, 90]) mirror([0, 0, 1])
+    P(C_OAK_DARK, true, "mouth cap") translate([ends_mouth_cap_t - explode / 3, 0, 0]) rotate([90, 0, 90]) mirror([0, 0, 1])
         linear_extrude(ends_mouth_cap_t) mouth_cap_2d();
     P(C_OAK_DARK, true, "tail cap") translate([x_in1 + explode / 3, 0, 0]) rotate([90, 0, 90])
         linear_extrude(ends_tail_cap_t) tail_cap_2d();
