@@ -125,7 +125,6 @@ exports:
   - {name: dxf-oak-grooves, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-grooves.dxf, defines: {part: "oak_grooves"}}
   - {name: dxf-mouth-cap, src: mechanical/cad/woody_body.scad, out: mechanical/export/mouth-cap.dxf, defines: {part: "mouth_cap"}}
   - {name: dxf-tail-cap, src: mechanical/cad/woody_body.scad, out: mechanical/export/tail-cap.dxf, defines: {part: "tail_cap"}}
-  - {name: dxf-tail-backplate, src: mechanical/cad/woody_body.scad, out: mechanical/export/tail-backplate.dxf, defines: {part: "tail_backplate"}}
   - {name: dxf-ubolt-backplate, src: mechanical/cad/woody_body.scad, out: mechanical/export/ubolt-backplate.dxf, defines: {part: "ubolt_backplate"}}
   - {name: dxf-matrix-window, src: mechanical/cad/woody_body.scad, out: mechanical/export/matrix-window.dxf, defines: {part: "matrix_window"}}
   - {name: dxf-oak-rebates, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-rebates.dxf, defines: {part: "oak_rebates"}}

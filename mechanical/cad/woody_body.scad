@@ -49,7 +49,7 @@ figure = false;       // set true by a figure that includes this file
 origin = "mouth";
 
 LAYERS = ["plate_top", "oak_top", "oak_bottom", "oak_grooves", "thumb_plate", "side",
-          "mouth_cap", "tail_cap", "tail_backplate", "ubolt_backplate",
+          "mouth_cap", "tail_cap", "ubolt_backplate",
           "matrix_window", "oak_rebates", "service_cover"];
 
 $fn = 40;
@@ -130,7 +130,7 @@ rt_last_rel = max([for (i = [0 : count("right_thumb") - 1]) rt_rel(i)[0]]);
 // share one height band with the carrier and the Matrix, so they queue.
 usb_behind = openings_matrix_usb_to_tail ? openings_usb_plug_l : 0;
 // ethercon.depth is measured from the PANEL's rear face, the tail cap's inside.
-behind_matrix = usb_behind + layout_tail_clear + ethercon_rj45_drop + ethercon_rj45_plug_l + ethercon_depth + ends_tail_cap_t + hardware_backplate_t;
+behind_matrix = usb_behind + layout_tail_clear + ethercon_rj45_drop + ethercon_rj45_plug_l + ethercon_depth + ends_tail_cap_t;
 tail_claims_rel = [
     top_last_rel + plate_cutout / 2 + cluster_margin + layout_tail_clear + boards_matrix_board + behind_matrix,
     rt_last_rel + rc / 2 + layout_underside_clear + openings_service_cover_w + 2 * layout_tail_clear + ethercon_depth,
@@ -385,7 +385,7 @@ ec_sock = ethercon_rotated ? [ethercon_socket_h, ethercon_socket_w] : [ethercon_
 // The rear socket sits off the axis: 0.35 + half its height, on the side away from the latch.
 ec_sock_off_mag = 0.35 + ethercon_socket_h / 2;
 ec_sock_dir = (W / 2 - ec_c[0] >= 0 ? 1 : -1) * (ethercon_socket_toward_centre ? 1 : -1);
-ec_panel_x = L - ends_tail_cap_t - hardware_backplate_t;           // the connector's panel: the backplate's inner face
+ec_panel_x = L - ends_tail_cap_t;                  // flange and chassis sit behind the tail cap's inside face
 ec_sock_c = ethercon_rotated ? ec_c + [ec_sock_dir * ec_sock_off_mag, 0] : ec_c - [0, ec_sock_off_mag];
 ec_fl = ethercon_rotated ? [ethercon_flange_h, ethercon_flange_w] : [ethercon_flange_w, ethercon_flange_h];
 ec_holes = [for (s = [-1, 1]) ec_c + s * (ethercon_rotated ? [ethercon_hole_dy, ethercon_hole_dx] : [ethercon_hole_dx, ethercon_hole_dy]) / 2];
@@ -406,14 +406,6 @@ module tail_cap_2d() {
 }
 // Behind the tail cap: carries the connector (ADR 0009: "let the oak be the
 // face the screws pass through rather than the thing the screws hold").
-module tail_backplate_2d() {
-    difference() {
-        translate([u_y0, z_floor]) square([u_w, cavity_h]);
-        translate(ec_c) circle(d = ethercon_bore_d);
-        for (h = ec_holes) translate(h) circle(d = ethercon_hole_d);
-        translate(usb_c) square([openings_usb_slot_w, openings_usb_slot_h], center = true);
-    }
-}
 ubolt_bp = [hardware_ubolt_span, u_w - 6];
 module ubolt_backplate_2d() {
     difference() {
@@ -587,15 +579,13 @@ module tail_equipment() {
         translate([matrix_xy[0] - 12.7, matrix_xy[1] + (i == 0 ? -1 : 1) * 11.43 - 1.25, carrier_z + switch_pcb_t])
             cube([25.4, 2.5, boards_matrix_header_h]);   // the two header rows, 22.86 apart [ds]
     P(C_FROSTED, false, "matrix window") translate([0, 0, T - openings_matrix_acrylic_t + explode]) linear_extrude(openings_matrix_acrylic_t) matrix_window_2d();
-    // Tail backplate and the etherCON body behind it.
-    P(C_ALU, false, "tail backplate") translate([x_in1 - hardware_backplate_t, 0, 0]) rotate([90, 0, 90])
-        linear_extrude(hardware_backplate_t) tail_backplate_2d();
+    // The etherCON: flange and chassis behind the tail cap (mounting is free).
     // The NE8FDP as drawn (NE8FDP.dxf): flange outside the tail cap, main
     // housing behind the panel, rear RJ45 socket beyond it, off the axis.
-    // The panel it clamps to is the tail backplate (ADR 0009); what passes
-    // through the backplate and the tail cap is the bore, not the housing.
+    // Its front passes through the cap's bore; the flange sits against the
+    // cap's inside face; housing and rear socket stand inboard of it.
     P(C_CONN, false, "etherCON") union() {
-        translate([L, ec_c[0] - ec_fl[0] / 2, ec_c[1] - ec_fl[1] / 2]) cube([2, ec_fl[0], ec_fl[1]]);
+        translate([ec_panel_x - 2, ec_c[0] - ec_fl[0] / 2, ec_c[1] - ec_fl[1] / 2]) cube([2, ec_fl[0], ec_fl[1]]);
         translate([ec_panel_x - EPS, ec_c[0], ec_c[1]]) rotate([0, 90, 0]) cylinder(d = ethercon_bore_d - 0.2, h = L - ec_panel_x + 2 * EPS);
         translate([ec_panel_x - ethercon_housing_d, ec_c[0] - ec_house[0] / 2, ec_c[1] - ec_house[1] / 2])
             cube([ethercon_housing_d, ec_house[0], ec_house[1]]);
@@ -641,7 +631,19 @@ function lane_y(side, d) = side == "left" ? u_y0 + lighting_strip_gap + lighting
                                           : W - u_y0 - lighting_strip_gap - lighting_strip_t - 1 - d / 2;
 tube_y = lane_y(routing_tube_lane, routing_tube_od);
 loom_side = routing_tube_lane == "left" ? "right" : "left";
-loom_y = lane_y(loom_side, routing_loom_d);
+loom_y = lane_y(loom_side, routing_ribbon_t);
+// A FLAT RIBBON through points: each segment is swept with the ribbon's
+// cross-section turned to suit its direction - lying FLAT along and across
+// the body, on edge only where it drops to a socket. Stood on edge along the
+// body, a 15 mm ribbon does not fit the 12-13 mm between the thumb boards'
+// parts and the key boards' parts (found by the clash check, 2026-09-26).
+module ribbon(pts, w) {
+    t = routing_ribbon_t;
+    for (i = [0 : len(pts) - 2]) let(a = pts[i], b = pts[i + 1], dv = [abs(b[0] - a[0]), abs(b[1] - a[1]), abs(b[2] - a[2])],
+                                   ax = dv[0] >= dv[1] && dv[0] >= dv[2] ? 0 : dv[1] >= dv[2] ? 1 : 2,
+                                   sec = ax == 0 ? [0.01, w, t] : ax == 1 ? [w, 0.01, t] : [w, t, 0.01])
+        hull() { translate(a) cube(sec, center = true); translate(b) cube(sec, center = true); }
+}
 // A run through points, as a chain of hulled spheres.
 module run(pts, d) {
     for (i = [0 : len(pts) - 2]) hull() { translate(pts[i]) sphere(d = d, $fn = 16); translate(pts[i + 1]) sphere(d = d, $fn = 16); }
@@ -756,27 +758,31 @@ module routing_3d() {
     P([0.95, 0.60, 0.45], false, "breath tube to sensor") run([
         [trap_x0 + routing_trap_l, trap_y, routing_lane_z], [p1_tip[0] - 2, p1_tip[1], p1_tip[2]],
         [p1_tip[0] + 2, p1_tip[1], p1_tip[2]]], routing_tube_od * 0.8);
-    // Key chain: out of the side of each IDC socket (the ribbon leaves a
-    // long side, near the socket's top), into the loom lane, in chain order.
+    // Both ribbons lie FLAT down the body's centreline, stacked - the
+    // display's at lane height, the key chain's just above - and fold off to
+    // each socket's side. Key chain in chain order (config/key-layout.yaml).
     d = routing_loom_d;
-    function side_pt(h, z) = [h[0], h[1] + sgn(loom_side) * (boards_idc_w / 2 + d / 2 + 0.2), z];
-    exit_z = min(carrier_top + boards_idc_mated_h - 3, z_plate_bot - routing_loom_d / 2 - 0.5);
+    dd = routing_disp_loom_d;
+    t = routing_ribbon_t;
+    kz = routing_lane_z + t + 0.2;
+    ry = W / 2 + sgn(loom_side) * 2;                  // 2 mm off the centreline, clear of the trap
+    over_z = z_plate_bot - t / 2 - 0.3;               // crossing the carrier top, just under the plate
+    function side_pt(h, z) = [h[0], h[1] + sgn(loom_side) * (boards_idc_w / 2 + t / 2 + 0.2), z];
+    exit_z = min(carrier_top + boards_idc_mated_h - 3, z_plate_bot - d / 2 - 0.5);
     carrier_exit = side_pt(carrier_hdr[0], exit_z);
     P([0.30, 0.30, 0.75], false, "key-chain loom") union() {
-        run([carrier_exit, [carrier_exit[0], loom_y, carrier_exit[2]], [carrier_x0 - 8, loom_y, routing_lane_z],
-             [mid_x("left_hand"), loom_y, routing_lane_z]], d);
-        for (cl = chain) for (h = hdrs(cl)) let(ez = hdr_end_z(cl) + (is_top(cl) ? 3 : -3))
-            run([[h[0], loom_y, routing_lane_z], [h[0], loom_y, ez], side_pt(h, ez)], d);
+        ribbon([carrier_exit, [carrier_exit[0], carrier_exit[1], over_z], [carrier_exit[0], ry, over_z],
+                [carrier_x0 - 2, ry, over_z], [carrier_x0 - 20, ry, kz],
+                [mid_x("left_hand") - boards_idc_l6, ry, kz]], d);
+        for (cl = chain) for (h = hdrs(cl)) let(ez = hdr_end_z(cl) + (is_top(cl) ? 3 : -3), sp = side_pt(h, ez))
+            ribbon([[h[0], ry, kz], [h[0], sp[1], kz], sp], d);
     }
-    // Display loom: off J-DISP's mouth-side face, down past the carrier's
-    // edge, then along the body's CENTRELINE - clear between the thumb
-    // boards' parts below and the key boards' parts above - to the display.
-    dd = routing_disp_loom_d;
-    disp_exit = [carrier_hdr[1][0] - boards_idc_w / 2 - dd / 2 - 0.2, carrier_hdr[1][1],
+    disp_exit = [carrier_hdr[1][0] - boards_idc_w / 2 - t / 2 - 0.2, carrier_hdr[1][1],
                  min(carrier_top + boards_idc_mated_h - 3, z_plate_bot - dd / 2 - 0.5)];
-    P([0.30, 0.60, 0.30], false, "display loom") run([
-        disp_exit, [carrier_x0 - 8, W / 2, routing_lane_z], [disp_x1 + 4, W / 2, routing_lane_z],
-        [disp_c[0] + 6, W / 2, boards_display_recess + 6.6 + boards_disp_socket_h + dd / 2]], dd);
+    P([0.30, 0.60, 0.30], false, "display loom") ribbon([
+        disp_exit, [disp_exit[0], disp_exit[1], routing_lane_z], [disp_exit[0] - 4, ry, routing_lane_z],
+        [disp_x1 + 4, ry, routing_lane_z],
+        [disp_c[0] + 6, ry, boards_display_recess + 6.6 + boards_disp_socket_h + t / 2]], dd);
 }
 
 module hardware_3d() {
@@ -957,16 +963,13 @@ module drc_report() {
         "mm - frosted acrylic this far above the LEDs softens the pixels; the owner chose it (2026-09-26)");
 
     // Tail face
-    ec_in = x_in1 - (ethercon_depth - ends_tail_cap_t);
+    ec_in = ec_panel_x - ethercon_depth;
     drc(carrier_x1 < ec_in, "carrier clears the etherCON body", ec_in - carrier_x1, "mm along X");
     ec_lo = ec_c[1] - ec_house[1] / 2; ec_hi = ec_c[1] + ec_house[1] / 2;
     drc(ec_lo >= z_floor && ec_hi <= z_lid_bot, "etherCON body inside the cavity height",
         [ec_lo, ec_hi, z_floor, z_lid_bot], "body Z range vs cavity Z range; outside = through-cuts in the oak at the tail");
-    panel = ends_tail_cap_t + hardware_backplate_t;
-    drc(panel <= ethercon_max_panel_t, "etherCON panel stack within the connector's maximum",
-        panel, str("mm (tail cap + backplate) vs ", ethercon_max_panel_t, " max for the NE8FDP"));
     fl_margin = (T - ec_fl[1]) / 2;
-    drc(fl_margin >= 5, "etherCON flange margin on the tail face", fl_margin, "mm above and below (ADR 0009: 6.00 rotated)");
+    drc(fl_margin >= 0, "etherCON flange fits behind the tail cap", fl_margin, "mm above and below the flange, inside the cap's height");
     // USB-C by panel-mount extension (owner, 2026-09-26).
     usb_room = (W - u_y0) - (ec_c[0] + ec_house[0] / 2);
     drc(usb_room >= openings_usb_slot_w + 2, "USB-C extension receptacle beside the etherCON body", usb_room - openings_usb_slot_w,
@@ -996,7 +999,6 @@ module part_2d(p) {
     else if (p == "side") side_2d();
     else if (p == "mouth_cap") mouth_cap_2d();
     else if (p == "tail_cap") tail_cap_2d();
-    else if (p == "tail_backplate") tail_backplate_2d();
     else if (p == "ubolt_backplate") ubolt_backplate_2d();
     else if (p == "matrix_window") matrix_window_2d();
     else if (p == "oak_rebates") oak_rebates_2d();

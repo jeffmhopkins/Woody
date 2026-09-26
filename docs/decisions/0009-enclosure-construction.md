@@ -395,6 +395,10 @@ face that measures 57 × 38 mm. Two consequences:
   **Mount the connector to an internal backing plate** — aluminium or ply, tied
   into the same stack that carries the keys — and let the oak be the face the
   screws pass through rather than the thing the screws hold.
+  *(Superseded 2026-09-26, owner: the etherCON need not be panel mounted. It
+  now sits with flange and chassis behind the tail cap, its front through the
+  cap's bore — the drawing's "both behind" depths — and the backing plate and
+  its 4 mm panel limit no longer apply to it. The U-bolt keeps its plate.)*
 - **It shares the face with the USB-C slot**, leaving roughly 31 mm beside the
   flange for it. That fits, but it is not the place to discover a conflict.
   Both openings and the backing plate go into the M4 CAD together, and the

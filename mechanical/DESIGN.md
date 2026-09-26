@@ -195,10 +195,17 @@ only as good as those envelopes. Group the report's lines by these causes
    the strips before it.
 5. **The M3 stations** run through the LED strips, the carrier (tail pair)
    and the U-bolt backplate (middle pair).
-6. **The etherCON's real housing** (NE8FDP.dxf: 25.5 x 27.64) reaches the key
-   plate and the left side at the current placement.
-7. **The loom lane is under the pinky pairs:** the side-by-side keys widen the
-   top boards out over the side channel the key-chain loom uses.
+6. **The etherCON's housing is taller than the cavity.** Its mounting is free
+   now (owner, 2026-09-26 — flange and chassis behind the tail cap, no
+   backing plate), and it has moved clear of the side, but the housing is
+   25.5 mm across its short side and the cavity between the floor and the key
+   plate is less. Ending the key plate before the tail, so the oak top is the
+   ceiling there, would clear it.
+
+**The ribbons are standard flat ribbon, lying flat** down the body just off
+its centreline, stacked, folding off to each socket (owner asked for standard
+ribbon, 2026-09-26). Stood on edge, a 15 mm ribbon does not fit between the
+thumb boards' parts and the key boards' parts — the check showed that too.
 
 Found by the check and fixed as model bugs, not findings: the oak bottom's
 missing counterbores, thumb boards drawn with switch holes, the display cut

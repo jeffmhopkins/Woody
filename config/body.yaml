@@ -465,10 +465,15 @@ ethercon:
     value: 3.2
     status: settled
     source: "[ds] NE8FDP"
+  # MOUNTING IS FREE (owner, 2026-09-26: "don't care if the etherCON is
+  # panel mounted"). So the flange-on-backplate mount and its 4 mm maximum
+  # panel are gone; the connector sits with flange AND chassis behind the
+  # tail cap, its front through the cap's bore - the drawing's second set of
+  # depths. Screws through the cap into the flange; hardware is M4's.
   depth:
-    value: 34.55
+    value: 36.3
     status: settled
-    source: "[ds] NE8FDP - behind the panel, flange in front (hardware/bom.csv)"
+    source: "[ds] NE8FDP.dxf - cap's inside face to the back of the rear RJ45 socket, flange and chassis both behind"
   # The rear envelope, read off the banked drawing's own labels (NE8FDP.dxf;
   # assignment from the dimension defpoints, 2026-09-26 datasheet read):
   # a main housing, then the rear RJ45 socket, which sits off-axis.
@@ -481,9 +486,9 @@ ethercon:
     status: settled
     source: "[ds] NE8FDP.dxf - main housing height (drawn portrait)"
   housing_d:
-    value: 18.05
+    value: 19.8
     status: settled
-    source: "[ds] NE8FDP.dxf - panel rear face to the back of the main housing"
+    source: "[ds] NE8FDP.dxf - cap's inside face to the back of the main housing, flange and chassis both behind"
   socket_w:
     value: 15.9
     status: settled
@@ -522,16 +527,12 @@ ethercon:
     status: tbd
     source: "length for the lead to turn down under the carrier after the boot [from memory: small-OD patch lead]"
     decided_by: "M4, with the lead's OD and bend radius"
-  max_panel_t:
-    value: 4.0
-    status: settled
-    source: "[ds] NE8FDP maximum panel thickness (hardware/bom.csv)"
   rotated:
     value: true
     status: settled
     source: "[adr] ADR 0009 - 'Rotate it 90 degrees. Settled off the drawing.'"
   offset_y:
-    value: -9.0
+    value: -7.0
     status: tbd
     source: "placeholder - off-centre so the USB-C slot fits beside it"
     decided_by: "M4 tail-face paper check (ADR 0009)"
@@ -615,16 +616,20 @@ routing:
     status: tbd
     source: "which side channel the tube runs in (ADR 0009: 'in one of the side channels'); the looms take the other"
     decided_by: "M4"
+  # STANDARD FLAT RIBBON (owner, 2026-09-26), lying FLAT down the centreline
+  # (on edge it does not fit between the boards' part layers - clash check).
   loom_d:
-    value: 6.0
-    status: tbd
-    source: "key-chain loom bundle: 12 conductors (2x6 IDC), ribbon folded or twisted pairs, as a round envelope [from memory]"
-    decided_by: "M4, with the loom built"
+    value: 15.24
+    status: settled
+    source: "[calc] 12-way ribbon at 1.27 mm pitch (J-CHAIN, 2x6 IDC) = 12 x 1.27"
   disp_loom_d:
-    value: 5.0
-    status: tbd
-    source: "display loom bundle: 9 conductors (J-DISP, 2x5 IDC) [from memory]"
-    decided_by: "M4"
+    value: 12.7
+    status: settled
+    source: "[calc] 10-way ribbon at 1.27 mm pitch (J-DISP, 2x5 IDC) = 10 x 1.27"
+  ribbon_t:
+    value: 1.0
+    status: nominal
+    source: "flat ribbon thickness, 1.27 mm pitch PVC ribbon [from memory]"
   lane_z:
     value: 19.0
     status: tbd

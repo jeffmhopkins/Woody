@@ -111,10 +111,10 @@ ethercon_flange_h = 31.0;  // settled; [ds] NE8FDP
 ethercon_hole_dx = 19.0;  // settled; [ds] NE8FDP - two diagonal 3.2 holes at 19 x 24
 ethercon_hole_dy = 24.0;  // settled; [ds] NE8FDP
 ethercon_hole_d = 3.2;  // settled; [ds] NE8FDP
-ethercon_depth = 34.55;  // settled; [ds] NE8FDP - behind the panel, flange in front (hardware/bom.csv)
+ethercon_depth = 36.3;  // settled; [ds] NE8FDP.dxf - cap's inside face to the back of the rear RJ45 socket, flange and chassis both behind
 ethercon_housing_w = 25.5;  // settled; [ds] NE8FDP.dxf - main housing width (drawn portrait)
 ethercon_housing_h = 27.64;  // settled; [ds] NE8FDP.dxf - main housing height (drawn portrait)
-ethercon_housing_d = 18.05;  // settled; [ds] NE8FDP.dxf - panel rear face to the back of the main housing
+ethercon_housing_d = 19.8;  // settled; [ds] NE8FDP.dxf - cap's inside face to the back of the main housing, flange and chassis both behind
 ethercon_socket_w = 15.9;  // settled; [ds] NE8FDP.dxf - rear RJ45 socket width
 ethercon_socket_h = 13.2;  // settled; [ds] NE8FDP.dxf - rear RJ45 socket height; it runs from 0.35 off the axis to the housing's face, on the side away from the latch
 ethercon_socket_toward_centre = true;  // tbd; with the 90-degree rotation the socket's offset lies across the body; toward the body's centre is assumed
@@ -122,9 +122,8 @@ ethercon_rj45_plug_l = 30.0;  // tbd; mated RJ45 plug + strain-relief boot, beyo
 ethercon_rj45_plug_w = 14.0;  // tbd; RJ45 boot envelope across [from memory]
 ethercon_rj45_plug_h = 12.0;  // tbd; RJ45 boot envelope, height [from memory]
 ethercon_rj45_drop = 10.0;  // tbd; length for the lead to turn down under the carrier after the boot [from memory: small-OD patch lead]
-ethercon_max_panel_t = 4.0;  // settled; [ds] NE8FDP maximum panel thickness (hardware/bom.csv)
 ethercon_rotated = true;  // settled; [adr] ADR 0009 - 'Rotate it 90 degrees. Settled off the drawing.'
-ethercon_offset_y = -9.0;  // tbd; placeholder - off-centre so the USB-C slot fits beside it
+ethercon_offset_y = -7.0;  // tbd; placeholder - off-centre so the USB-C slot fits beside it
 hardware_fastener_count = 6;  // settled; [adr] ADR 0009 - six M3 from the bottom into the plate
 hardware_fastener_clear_d = 3.4;  // nominal; M3 clearance, medium fit [from memory]
 hardware_fastener_cbore_d = 6.0;  // nominal; M3 socket head is 5.5 [from memory]; counterbore with clearance
@@ -140,8 +139,9 @@ routing_tube_od = 5.0;  // tbd; breath tube outside diameter; ADR 0003 assumes a
 routing_trap_d = 10.0;  // tbd; dead-volume trap diameter; ADR 0003 caps the trap at 1 mL
 routing_trap_l = 12.0;  // tbd; trap length: 10 mm bore x 12 mm = 0.94 mL, inside ADR 0003's 1 mL [calc]
 routing_tube_lane = "left";  // tbd; which side channel the tube runs in (ADR 0009: 'in one of the side channels'); the looms take the other
-routing_loom_d = 6.0;  // tbd; key-chain loom bundle: 12 conductors (2x6 IDC), ribbon folded or twisted pairs, as a round envelope [from memory]
-routing_disp_loom_d = 5.0;  // tbd; display loom bundle: 9 conductors (J-DISP, 2x5 IDC) [from memory]
+routing_loom_d = 15.24;  // settled; [calc] 12-way ribbon at 1.27 mm pitch (J-CHAIN, 2x6 IDC) = 12 x 1.27
+routing_disp_loom_d = 12.7;  // settled; [calc] 10-way ribbon at 1.27 mm pitch (J-DISP, 2x5 IDC) = 10 x 1.27
+routing_ribbon_t = 1.0;  // nominal; flat ribbon thickness, 1.27 mm pitch PVC ribbon [from memory]
 routing_lane_z = 19.0;  // tbd; height of the side-channel runs, between the thumb boards below and the key boards above
 lighting_strip_w = 10.0;  // tbd; hardware/carrier/carrier.md '~10 mm' [from memory there]; the strip geometry row is BLOCKED in datasheets/MANIFEST.csv
 lighting_strip_t = 2.5;  // tbd; WS2815 strip thickness, bare IP30 [from memory]; the MANIFEST strip-geometry row is BLOCKED
@@ -149,5 +149,5 @@ lighting_strip_gap = 3.0;  // tbd; ADR 0009 / ADR 0014: the diffusion gap is a p
 
 // Every value above with status tbd - a placeholder, not a number any
 // document gives. The DRC report lists these so no result hides one.
-tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_mouth_extra", "layout_tail_clear", "layout_underside_clear", "layout_lh_offsets", "layout_rh_offsets", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_tall_l", "boards_tall_w", "boards_tall_h", "boards_disp_socket_h", "boards_carrier_l", "boards_carrier_w", "boards_matrix_header_h", "boards_matrix_under_h", "boards_matrix_gap", "boards_matrix_led_h", "openings_matrix_lip", "openings_matrix_acrylic_t", "openings_usb_slot_w", "openings_usb_slot_h", "openings_usb_plug_l", "openings_matrix_usb_to_tail", "openings_usb_ext_depth", "ethercon_socket_toward_centre", "ethercon_rj45_plug_l", "ethercon_rj45_plug_w", "ethercon_rj45_plug_h", "ethercon_rj45_drop", "ethercon_offset_y", "hardware_fastener_inset", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_ubolt_nut_af", "hardware_ubolt_nut_h", "hardware_backplate_t", "routing_tube_od", "routing_trap_d", "routing_trap_l", "routing_tube_lane", "routing_loom_d", "routing_disp_loom_d", "routing_lane_z", "lighting_strip_w", "lighting_strip_t", "lighting_strip_gap"];
+tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_mouth_extra", "layout_tail_clear", "layout_underside_clear", "layout_lh_offsets", "layout_rh_offsets", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_tall_l", "boards_tall_w", "boards_tall_h", "boards_disp_socket_h", "boards_carrier_l", "boards_carrier_w", "boards_matrix_header_h", "boards_matrix_under_h", "boards_matrix_gap", "boards_matrix_led_h", "openings_matrix_lip", "openings_matrix_acrylic_t", "openings_usb_slot_w", "openings_usb_slot_h", "openings_usb_plug_l", "openings_matrix_usb_to_tail", "openings_usb_ext_depth", "ethercon_socket_toward_centre", "ethercon_rj45_plug_l", "ethercon_rj45_plug_w", "ethercon_rj45_plug_h", "ethercon_rj45_drop", "ethercon_offset_y", "hardware_fastener_inset", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_ubolt_nut_af", "hardware_ubolt_nut_h", "hardware_backplate_t", "routing_tube_od", "routing_trap_d", "routing_trap_l", "routing_tube_lane", "routing_lane_z", "lighting_strip_w", "lighting_strip_t", "lighting_strip_gap"];
 
