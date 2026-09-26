@@ -44,11 +44,11 @@ stack:
     status: tbd
     source: "keycap to oak-top hole, per side. Must beat oak's cross-grain movement across one hole, which ADR 0009 puts at 1-1.5 % [calc: 1.5 % of 18 mm = 0.27 mm]"
     decided_by: "M2 - the mule, with a real cap in a real oak hole"
-  oak_bottom_t:
-    value: 8.0
-    status: nominal
-    source: "[adr] ADR 0009 - '~8 mm <- sets thumb key inset depth'"
-    decided_by: "M4 (ADR 0009 Open, ROADMAP M4): it is the thumb-key inset, read off the thumb-cap figure"
+  # THE OAK BOTTOM HAS NO THICKNESS OF ITS OWN EITHER. Decided 2026-09-26:
+  # thumb keys are flush with the bottom face at full travel too. The thumb
+  # plate is on the oak bottom's inside face, so the oak is the same
+  # `keycap_top_above_seat - total_travel` as the oak top. ADR 0009's
+  # "~8 mm <- sets thumb key inset depth" is superseded by this rule.
   side_t:
     value: 4.0
     status: nominal
@@ -172,7 +172,7 @@ switch:
     value: 9.0
     status: tbd
     source: "MT165 height is unpublished (hardware/bom.csv MT165 row). Stem top is +7.05 [ds STEP]; the cap adds a guess"
-    decided_by: "M1 - measure a cap on a switch with calipers. It now SETS the oak top thickness (flush rule, stack above)"
+    decided_by: "M1 - measure a cap on a switch with calipers. It now SETS BOTH oak panel thicknesses (flush rule, stack above)"
   total_travel:
     value: 3.0
     status: settled

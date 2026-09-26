@@ -64,7 +64,7 @@ transceivers stay a contingency rather than a likely requirement.
   oak top                   = cap height above the seat - travel  <- flush rule, below
   aluminium key plate       1.20 mm <- SETTLED by Gateron's drawing, see ADR 0002
   ---- cavity ----          remainder
-  oak bottom                ~8 mm   <- sets thumb key inset depth
+  oak bottom                = the same rule, for the thumb keys (below)
   thumb switch plate        ~2 mm
 ```
 
@@ -251,6 +251,11 @@ What changes, and what does not:
 - **The display is on the underside** (same date), glass down, in a through-cut
   in the oak bottom — still in the display band at the mouthpiece end. Nothing
   is cut in the plate for it any more.
+- **Thumb keys follow the same rule** (same date): flush with the bottom face at
+  full travel. The thumb plate stays on the oak bottom's inside face, so the
+  oak bottom is the same thickness as the oak top and **"oak thickness sets the
+  inset depth" becomes "the flush rule sets the oak thickness"** — the open
+  question below is closed by it.
 - **The plate is no longer under the player's hands**, but it is still a
   floating conductor a few millimetres from eighteen switch pins, so the
   bonding rule below stands unchanged.
@@ -730,4 +735,5 @@ fighting the wood.
   above are the feasibility argument; `config/body.yaml` holds the working
   values the model draws, each citing this page, and `mechanical/drc.echo`
   reports what the model found against them (`mechanical/DESIGN.md`).
-- Oak thickness for the bottom panel, which sets thumb key travel.
+- ~~Oak thickness for the bottom panel~~ — **closed 2026-09-26** by the flush
+  rule above: it is derived from the cap height, which M1 measures.

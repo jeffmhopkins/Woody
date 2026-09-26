@@ -37,7 +37,6 @@ spare_switch_cutouts = 3;
 
 // ---- config/body.yaml
 stack_cap_clear = 0.75;  // tbd; keycap to oak-top hole, per side. Must beat oak's cross-grain movement across one hole, which ADR 0009 puts at 1-1.5 % [calc: 1.5 % of 18 mm = 0.27 mm]
-stack_oak_bottom_t = 8.0;  // nominal; [adr] ADR 0009 - '~8 mm <- sets thumb key inset depth'
 stack_side_t = 4.0;  // nominal; [adr] ADR 0009 mass table - 'Acrylic sides, 2 x 4 mm'
 stack_rebate_w = 2.0;  // tbd; no document dimensions the notch (ADR 0009 'A U, a notch, and six fasteners')
 ends_mouth_cap_t = 4.0;  // tbd; ADR 0009 end-cap table: acrylic, 'the material already being cut for the sides' - so the side sheet's thickness

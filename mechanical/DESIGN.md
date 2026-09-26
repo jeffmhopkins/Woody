@@ -38,6 +38,9 @@ the DXF's own DIMENSION entities.
   nothing else; the fasteners stop in the plate. The top cluster boards hang
   under the plate in the cavity, at the depth the KS-33's pins set
   (`docs/reference/ks33-geometry.md`; `switch.pcb_below_seat`).
+- **Thumb keys are flush with the bottom face at full travel** too (same date).
+  The thumb plate is on the oak bottom's inside face, so the oak bottom is
+  derived by the same rule as the oak top.
 - **The display is on the underside** (decided 2026-09-26), glass down in a
   through-cut in the oak bottom, recessed by `boards.display_recess`, still in
   the display band at the mouthpiece end.

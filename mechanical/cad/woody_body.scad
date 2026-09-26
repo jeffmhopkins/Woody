@@ -60,11 +60,14 @@ T = envelope_thickness;
 // is exactly as thick as the cap stands above the seat at the bottom of its
 // stroke. At rest each cap stands proud by the travel.
 oak_top_t = switch_keycap_top_above_seat - switch_total_travel;
+// Thumb keys too (same date): the thumb plate is on the oak bottom's inside
+// face, so the same rule sets the oak bottom from below.
+oak_bottom_t = switch_keycap_top_above_seat - switch_total_travel;
 z_oak_top_bot = T - oak_top_t;                  // underside of the oak = plate top face
 z_plate_top = z_oak_top_bot;                    // the switch seat
 z_plate_bot = z_plate_top - plate_thickness;
 z_lid_bot = z_plate_bot;                        // the lid's underside is the plate's
-z_floor = stack_oak_bottom_t;                   // inside face of the oak bottom
+z_floor = oak_bottom_t;                   // inside face of the oak bottom
 z_thumb_top = z_floor + plate_thickness;        // thumb plate, on the inside face
 cavity_h = z_lid_bot - z_floor;
 
@@ -356,7 +359,7 @@ module lid(dz = 0) {
 }
 
 module u_channel() {
-    lam(-explode, stack_oak_bottom_t, C_OAK) translate([x_in0, u_y0]) oak_bottom_2d();
+    lam(-explode, oak_bottom_t, C_OAK) translate([x_in0, u_y0]) oak_bottom_2d();
     // The two laminae of each side: outer full height, inner to the lid.
     for (s = [0, 1]) {
         y_out = s == 0 ? 0 : W - lid_y0;
@@ -526,11 +529,10 @@ module drc_report() {
     drc(boards_carrier_z + switch_pcb_t < z_pcb_bot, "carrier clears the top cluster boards", z_pcb_bot - boards_carrier_z - switch_pcb_t,
         "mm between the carrier's top face and the cluster boards' underside, for components on both");
     dz_disp = boards_display_recess + 6.6;
-    drc(dz_disp <= z_floor, "display board within the oak bottom", z_floor - dz_disp,
-        "mm below the floor; 6.6 = the vendor STEP's full stack. Negative = it stands into the cavity");
-    cap_out = switch_keycap_top_above_seat - stack_oak_bottom_t;
-    drc(undef, "thumb cap protrusion past the bottom face", cap_out,
-        "mm (negative = inset). keycap height is tbd; ADR 0009 sets this with the oak bottom thickness");
+    drc(undef, "display board height above the floor", dz_disp - z_floor,
+        "mm it stands into the cavity (6.6 = the vendor STEP's full stack); keep the thumb plate and looms off it");
+    echo("DRC", "INFO", "oak bottom thickness (thumb keys flush at full travel)", oak_bottom_t,
+         "mm, the same rule as the oak top; thumb caps stand proud of the bottom face by the travel at rest");
     th_pole = z_floor + switch_pole_tip_below_seat;
     drc(undef, "thumb switch pole tip height in the cavity", th_pole, "mm above the bottom face");
 

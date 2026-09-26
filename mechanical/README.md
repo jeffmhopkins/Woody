@@ -4,7 +4,8 @@
 > position in `config/key-layout.yaml` is still `null` (they are M2/M3
 > outputs), so keys are placed on ADR 0009's length budget and every render
 > says so in its footer. Keys are **flush with the top face at full travel**
-> and the display is on the **underside** (both decided 2026-09-26).
+> — thumb keys included, on the bottom face — and the display is on the
+> **underside** (decided 2026-09-26).
 
 The body described in [ADR 0009](../docs/decisions/0009-enclosure-construction.md)
 — a laminated stack of flat parts, every layer a 2D through-cut — as an
