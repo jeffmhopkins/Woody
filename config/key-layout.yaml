@@ -111,17 +111,16 @@ keys:
   - { id: RT4, face: bottom, x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb, role: control }
 
 # Shift register chain. One 74HC165 per cluster, ON THE BOARD ITS SWITCHES ARE
-# ALREADY ON: 4 devices, 32 bits, 19 used, 13 spare.
+# ALREADY ON: 4 devices, 32 bits, 19 used, 13 spare. The two thumb registers
+# are on the main board; each key board's register reaches it by one 12-way
+# flat flex ribbon carrying its SER in and QH out (ADR 0017,
+# hardware/interfaces/key-chain-loom/).
 #
-# TWELVE conductors leave each board on a 2x6 IDC - 4 signals (SCK, SH/LD, SER,
-# QH), 5 alternating grounds, 3V3, and 2 spares - with
-# a ground return per signal, chained cluster to cluster rather than starred.
-#
-# THE ORDER BELOW IS A LOOM DECISION, not a layout detail. ADR 0001 requires
+# THE ORDER BELOW IS A CHAIN DECISION, not a layout detail. ADR 0001 requires
 # serial data to flow TOWARD the clock source so that propagation skew eats
 # SETUP margin (recoverable by clocking slower) rather than HOLD margin (not
 # recoverable at any speed). The MCU is at the tail, so right_thumb is nearest
-# and reads out first; left_hand is furthest and takes the loom's SER end.
+# and reads out first; left_hand takes the chain's SER end.
 #
 # BIT 0 IS THE FIRST BIT CLOCKED OUT - the device nearest the MCU. That
 # definition was ambiguous once and the ambiguity is what got the order wrong.

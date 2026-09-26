@@ -229,12 +229,11 @@ only as good as those envelopes. Group the report's lines by these causes
    the two ZIF latches first. A 2.54 IDC box header and
    plug stand ~12-13 mm [from memory] in a 17 mm gap with parts on both
    boards, which is why it is flat flex.
-2. **The hardware pages do not follow yet:** `hardware/interfaces/key-chain-loom/`, the J-CHAIN,
-   WIRE-LOOM and HDR-DEV rows, and the register's `chain-connectors` still
-   describe IDC ribbons, four cluster boards and a dev board plugged into one
-   carrier. ADR 0017 makes that rework concrete: two key boards on flat flex
-   ribbons, one main board, the thumb chain in traces. `chain-connectors` is
-   marked blocked on it.
+2. **The hardware pages follow** (2026-09-26): `hardware/interfaces/key-chain-loom/`
+   describes the two flat flex ribbons (`J-CHAIN`, `FFC-CHAIN`) and the thumb
+   chain in traces, and `chain-connectors` is derived from them. The
+   key-board connector is the main board's part mounted upside down, so its
+   pinout is mirrored — `key-chain-loom.md` says how.
 3. **The breath tube** is short: mouth cap, trap, then across over the strip
    and back onto the sensor's port, all in the mouth band; the board has a
    slot in front of the sensor's lower port.
@@ -250,9 +249,9 @@ only as good as those envelopes. Group the report's lines by these causes
    off. The etherCON's patch lead runs from its plug in an S-bend at the
    lead's minimum bend radius (`routing.umb_bend_r_per_od`) into J-UMB, which
    the model places as far in as that bend needs (*"J-UMB on the main
-   board…"*). The LED strip stops short of J-MCU. `HDR-DEV` (sockets for a
-   dev board on a carrier) no longer describes anything and is on the
-   hardware rework list with the chain pages.
+   board…"*). The LED strip stops short of J-MCU. The rows are `J-MCU` and
+   `CBL-MCU-RIBBON` (`hardware/carrier/`), `J-UMB` and `CBL-UMB-PATCH`
+   (`hardware/interfaces/spi-link/`).
 6. **The tail is clear.** The etherCON, its rear socket, the patch plug,
    the USB-C plug, receptacle and lead, the Matrix and the last fastener pair
    meet nothing, and the connector fits the cavity without cutting the oak.

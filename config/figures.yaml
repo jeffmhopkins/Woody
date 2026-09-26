@@ -293,18 +293,11 @@ figures:
     status: settled
     owner: hardware/interfaces/key-chain-loom/key-chain-loom.md
     derivation: "The thumb clusters are on the main board, so their part of the chain is traces (ADR 0017). Each of the two key boards has one 12-way flat flex ribbon with a ZIF connector at each end, carrying that board's SER in and QH out: 2 key boards x 2 ends = 4"
-    # The value moved 8 -> 4 on 2026-09-26 (ADR 0017). Old spellings found by
-    # grepping the corpus, and only those whose every hit was fixed in the
-    # same commit are listed. Four more are live in files outside that
-    # commit's reach - "Eight connectors" (ADR 0001, ROADMAP), "RT 2, RH 2,
-    # LT 2, LH 1" (ADR 0001), "J-CHAIN 1/8" (ROADMAP) and "every cluster board
-    # but the last" (ADR 0001, WIRE-LOOM) - and belong here once those are
-    # rewritten or refuted in place.
-    #
-    # "~4 connectors" WAS DROPPED from this list: it guarded an older wrong
-    # value, and 4 is now the right one. A pattern that fires on a correct
-    # sentence is worse than none.
-    forbidden: ["five connectors must match", "Five connectors", "eight connectors", "EIGHT connectors", "EIGHT of them across five boards", "eight in all", "7 chain connectors"]
+    # ADR 0001 keeps the IDC version ("Eight connectors ... carrier 1, RT 2,
+    # RH 2, LT 2, LH 1") as its record under an amendment note; those
+    # spellings are deliberately not patterns here. "~4 connectors" is not a
+    # pattern either: 4 is the right value now.
+    forbidden: ["five connectors must match", "Five connectors", "eight connectors", "EIGHT connectors", "EIGHT of them across five boards", "eight in all", "7 chain connectors", "J-CHAIN 1/8"]
 
   - id: key-pullup-qty
     quantity: R-KEY-PU quantity

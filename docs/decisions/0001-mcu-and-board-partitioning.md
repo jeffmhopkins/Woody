@@ -79,6 +79,7 @@ satellite boards distributed along the body.
 TAIL   dev board on a passive carrier: MCU, IMU, 8×8 matrix, breath sensor,
        ADC, reference, umbilical connector, USB-C. NO shift registers.
         |
+        |  (since ADR 0017: thumbs on traces, key boards on 12-way FFC)
         |  ONE chained run, 12 conductors per hop (2x6 IDC), passing through
         |  each cluster board in turn: SCK, SH/LD, serial in, serial out,
         |  a ground between every signal, 3V3, and two spares
@@ -134,7 +135,7 @@ connection is a copper trace. Four conductors plus power leave each board.
 | | **One per cluster** | All four at the tail |
 |---|---|---|
 | Conductors down the body | **12 per hop** — 6 signals-and-supply, 5 grounds, 2 spare | 32–44 |
-| Hand-terminated joints | **~8 connectors, 4 ribbon assemblies** | **~46 individual wires** |
+| Hand-terminated joints | **~8 connectors, 4 ribbon assemblies** (since ADR 0017: `chain-connectors`, two flat flex) | **~46 individual wires** |
 | Boards | 5 | 5 — *the switches need a PCB either way* |
 | Carrier area | as designed | **+41 %**: 4 ICs and 63 passives |
 | Risk | clocked lines in the LED channel | a fat loom, and blast radius if one is hit |
@@ -253,6 +254,14 @@ which is still reason enough to do them now.
    a loop antenna next to an 800 kHz LED data line — and with the key lines now
    local to their cluster board, these four are the *only* loom signals left to
    corrupt, at a blast radius of the whole 32-bit word.
+
+   *(Amended 2026-09-26, [ADR 0017](0017-one-main-board.md): the thumb
+   clusters are on the main board, so their hops are traces, and each key
+   board has one 12-way flat flex ribbon on ZIF connectors carrying its `SER`
+   in and `QH` out. The pinout, the alternating grounds, the two spares and
+   the chain order below are kept; the connector count is `chain-connectors`
+   and the hop map is `hardware/interfaces/key-chain-loom/`. What follows is
+   the IDC version as decided.)*
 
    **`J-CHAIN` is a 2×6 IDC on a 12-way ribbon**, alternating ground:
    `GND SCK GND SH/LD GND SER GND QH GND 3V3 spare spare`. Every signal has

@@ -86,9 +86,17 @@ one big long board?")
 - **Four cluster boards become two key boards plus the main board.**
   `PCB-CLUSTER` drops to two and `PCB-CARRIER` is the main board. The key
   chain is now on-board traces for the thumbs and two flat flex ribbons to
-  the key boards (four connectors), so the chain connector count (`chain-connectors` in
-  `config/figures.yaml`) and the key-chain loom pages describe hardware that
-  is no longer in the design. They are marked for rework, not restated here.
+  the key boards. *(Done 2026-09-26: `hardware/interfaces/key-chain-loom/`
+  now describes the ribbons, and `chain-connectors` in `config/figures.yaml`
+  is re-derived from them. The chain order and its 32-bit map are unchanged.)*
+- **The dev board is not socketed, and there is no loom.** The Matrix's
+  ribbon unplugs at `J-MCU` and is desoldered to swap the board
+  (`hardware/carrier/carrier.md`); the patch lead plugs into `J-UMB`
+  (`hardware/interfaces/spi-link/`). The Matrix's pad rows have one ground
+  pad, so how the ribbon's five spare positions are used — spare GPIO or
+  extra grounds — is open until M4 and E11. The breath sensor is surface
+  mount and is soldered down (`hardware/interfaces/breath-sense-link/`,
+  *Mounting*).
 - **The main board is long** — its size is in `mechanical/drc.echo` "main
   board (derived)". Worth checking against the board house's panel and the
   cost of a long, narrow 2-layer board before M4.
