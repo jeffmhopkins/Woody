@@ -79,6 +79,29 @@ four console-pair nets, `ON_DIVIDER`, `TRIM_OFFSET_BOTTOM`, `TVS_SPARE`, and
 `DAC_CH6/CH8_UNUSED`, whose `[derived, not cited]` disclosure the slice calls
 the right way to write a derived assertion.
 
+## N3 — rails, supplies, decoupling
+
+13 findings. Four verified. Its N3-1 is N1-1 found independently — **the second
+cold slice to reach the LM317 divider**, with two corroborating sources the
+first did not have.
+
+| id | verdict | verification |
+|---|---|---|
+| **N3-1** | **CONFIRMED, and this is now two independent cold slices plus my own check of three files** | Same defect as N1-1. N3 adds two sources I had not used: ADR 0004's *"150 Ω / 475 Ω instead of 240 Ω / 768 Ω … halves the I_ADJ contribution"* requires R2 = 475 on ADJ→GND, and `U-REG-DAC`'s *"~13 mA load including the divider"* only works at 1.25/150 = 8.3 mA, against 2.6 mA if 475 were the OUT→ADJ leg. It also names the one place that is right — **the drawing**, which reads `150R/475R`. And it establishes the provenance: both rows say *"SPLIT OUT 2026-09-22 FROM AN AGGREGATE ROW THAT COULD NOT BE NETLISTED"*, so the split invented the positions, assigned the values to the wrong ones, and the netlist transcribed it faithfully. `[calc]` `[repo docs/decisions/0004-cv-interface-module.md]` `[repo hardware/bom.csv]` |
+| **N3-3** | **CONFIRMED — the decoupling count includes a pin that does not exist** | `C-DECOUPLE`'s enumeration reads *"DAC8568 AVDD+DVDD = 2"*. In the banked SBAS430E, `DVDD` occurs **0** times (`AVDD` occurs 130); the PIN DESCRIPTIONS table lists exactly one supply row, `3 / 2 / AVDD`; and the netlist's own 16-pin list for `U-DAC` has only `AVDD`. Pre-existing corpus prose, and precisely the class the netlists make checkable for the first time — a row's enumeration can now be reconciled against the pins that exist. `[datasheet datasheets/analog/DAC8568CIPW.pdf, PIN DESCRIPTIONS]` `[test]` |
+| **N3-6** | **CONFIRMED — a net in my netlist is named the boolean `True`** | `yaml.safe_load` on `hardware/module/umbilical-load-switch/netlist.yaml` returns net keys `[… 'FB', True, 'PWR_GND', …]`. The net written as `ON:` is parsed as a bool under YAML 1.1. The same file quotes the **pins** `'ON'` and `'NO'` two lines earlier *with a comment explaining this exact trap* — and then falls into it on the net name. A KiCad export would emit a net called `True`. `[test]` |
+| **N3-13** | **CONFIRMED as a characterisation of `rails:`** | Matches what I know of the code: a rail the circuit already receives is accepted whatever it is, a rail the board lacks is caught, and omitting `rails:` entirely is silent. That third case is N3-2 — `U-REF-BUF` is the only one of ten placed OPA2197 halves with no `rails:` and no supply pins, so per the authoritative file it has no supply. Not separately re-tested; recorded as CONFIRMED-BY-READING. `[repo tools/check-netlist.py]` |
+
+**Not yet verified, not to be repeated:** N3-2 (read, not tested), N3-4, N3-5, N3-7 through N3-12.
+
+**Clean and checked rather than assumed**, which is worth as much as a finding:
+the slice attacked the single-supply assertion on the carrier's OPA2197 halves
+and found it correct from four directions, then produced a number no document
+states — `[calc]` against SBOS737C the breath buffer's worst-case output floor
+is ~125 mV against the sensor's 0.152 V minimum pedestal, **≥27 mV of margin**,
+real but thinner than anything written, and silently broken by a non-RRIO
+substitution.
+
 ## Slices still running
 
-N2, N3, N4, N8.
+N2, N4, N8.
