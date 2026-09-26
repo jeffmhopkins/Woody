@@ -259,6 +259,10 @@ boards:
     status: tbd
     source: "placeholder - glass face back from the bottom face, so the glass is not what the instrument rests on"
     decided_by: "M4, with how the board is retained and whether a clear cover goes over it"
+  display_cut_clear:
+    value: 1.5
+    status: nominal
+    source: "[ds] the vendor STEP's glass and flex overhang the DXF board outline by 1.18 mm at the flex end (LILYGO-T-DISPLAY-S3-AMOLED-3D.stp, found by the clash check); cut clears that"
   matrix_board:
     value: 25.0
     status: settled
@@ -468,11 +472,62 @@ hardware:
     status: tbd
     source: "placeholder - how far the loop stands below the bottom face"
     decided_by: "M4"
+  ubolt_nut_af:
+    value: 8.0
+    status: tbd
+    source: "hex nut across flats for the U-bolt legs - an M5 nut is 8 mm [from memory]; follows ubolt_rod_d"
+    decided_by: "M4, with the U-bolt bought"
+  ubolt_nut_h:
+    value: 4.0
+    status: tbd
+    source: "M5 nut height [from memory]"
+    decided_by: "M4"
   backplate_t:
     value: 3.0
     status: tbd
     source: "hardware/bom.csv MECH-BACKPLATE - aluminium or ply, thickness open"
     decided_by: "M4; at the etherCON it must satisfy ethercon.max_panel_t"
+
+# -------------------------------------------------------------- routing ----
+# THINGS THAT RUN THROUGH THE CAVITY (modelled 2026-09-26 for the clash
+# check). Where they run is a MODEL CHOICE, not a document's - each is a
+# lane the design must keep free, and the clash check reports what is in it.
+routing:
+  tube_od:
+    value: 5.0
+    status: tbd
+    source: "breath tube outside diameter; ADR 0003 assumes a 3 mm bore, the wall is a guess [from memory]"
+    decided_by: "E2 - tube bore by playing (ADR 0003), then the tube bought"
+  trap_d:
+    value: 10.0
+    status: tbd
+    source: "dead-volume trap diameter; ADR 0003 caps the trap at 1 mL"
+    decided_by: "E2"
+  trap_l:
+    value: 12.0
+    status: tbd
+    source: "trap length: 10 mm bore x 12 mm = 0.94 mL, inside ADR 0003's 1 mL [calc]"
+    decided_by: "E2"
+  tube_lane:
+    value: "left"
+    status: tbd
+    source: "which side channel the tube runs in (ADR 0009: 'in one of the side channels'); the looms take the other"
+    decided_by: "M4"
+  loom_d:
+    value: 6.0
+    status: tbd
+    source: "key-chain loom bundle: 12 conductors (2x6 IDC), ribbon folded or twisted pairs, as a round envelope [from memory]"
+    decided_by: "M4, with the loom built"
+  disp_loom_d:
+    value: 5.0
+    status: tbd
+    source: "display loom bundle: 9 conductors (J-DISP, 2x5 IDC) [from memory]"
+    decided_by: "M4"
+  lane_z:
+    value: 18.0
+    status: tbd
+    source: "height of the side-channel runs, between the thumb boards below and the key boards above"
+    decided_by: "M4"
 
 # ------------------------------------------------------------ lighting ----
 lighting:

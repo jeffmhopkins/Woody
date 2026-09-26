@@ -31,6 +31,7 @@ show_keys = true;
 show_boards = true;
 show_hardware = true;
 show_strips = true;
+show_routing = true;
 ghost_shell = false;  // draw the shell translucent to see inside
 // Sections. "y" / "x" clip every part with a half-space (keep Y < cut, or
 // a slab X > cut) and stay 3D. "y2d" / "x2d" are true section DRAWINGS: each
@@ -244,10 +245,17 @@ module clip_space() {
     if (cut == "y") translate([-big / 2, cut_pos - big, -big / 2]) cube(big);
     else if (cut == "x") translate([cut_pos, -big / 2, -big / 2]) cube([cut_depth, big, big]);
 }
-// Every visible part goes through P(), so colour survives a section cut.
-module P(c, shell = false) {
+// Every solid goes through P() WITH A NAME, so colour survives a section cut
+// and the clash check can pull any one solid out on its own:
+//   only = "<id>"      draw just that solid (tools/cad.py clash)
+//   list_solids = true  echo every solid's id (the clash check's inventory)
+only = "";
+list_solids = false;
+module P(c, shell = false, id = "") {
+    assert(id != "", "every solid needs an id - the clash check cannot see an unnamed one");
+    if (list_solids) echo("SOLID", id);
     cc = (shell && ghost_shell) ? [c[0], c[1], c[2], 0.25] : c;
-    color(cc)
+    if (only == "" || only == id) color(cc)
         if (cut == "none") children();
         else if (cut == "y2d")
             mirror([0, 1]) section_2d() rotate([90, 0, 0]) translate([0, -cut_pos, 0]) children();
@@ -329,18 +337,21 @@ module oak_bottom_2d() {
     }
 }
 
+// The outline a thumb cluster's plate and board share, before cutouts.
+function thumb_pts(cl) = concat([for (k = cluster_keys(cl)) key_xy(k)],
+                                cl == "left_thumb" ? [spare_xy[0], spare_xy[1]] : [spare_xy[2]]);
+module thumb_outline_2d(cl) {
+    intersection() {
+        hull() for (p = thumb_pts(cl)) translate(p) square(switch_keycap + 4, center = true);
+        translate([x_in0, u_y0 + 0.5]) square([x_in1 - x_in0, u_w - 1]);
+    }
+}
 // One thumb plate per thumb cluster, on the oak bottom's inside face.
 // Frame: model XY.
 module thumb_plate_2d(cl) {
-    ks = cluster_keys(cl);
-    pts = concat([for (k = ks) key_xy(k)],
-                 cl == "left_thumb" ? [spare_xy[0], spare_xy[1]] : [spare_xy[2]]);
     difference() {
-        intersection() {
-            hull() for (p = pts) translate(p) square(switch_keycap + 4, center = true);
-            translate([x_in0, u_y0 + 0.5]) square([x_in1 - x_in0, u_w - 1]);
-        }
-        for (k = ks) cutout_at(key_xy(k), key_rot(k), plate_cutout);
+        thumb_outline_2d(cl);
+        for (k = cluster_keys(cl)) cutout_at(key_xy(k), key_rot(k), plate_cutout);
         for (s = (cl == "left_thumb" ? [spare_xy[0], spare_xy[1]] : [spare_xy[2]]))
             cutout_at(s, 0, plate_cutout);
     }
@@ -424,7 +435,7 @@ DISP_DXF = "../../datasheets/mechanical/LILYGO-T-DISPLAY-S3-AMOLED-OUTLINE.dxf";
 module display_board_outline_2d() {
     translate(disp_c) rotate(-90) translate([-disp_board[1] / 2, -disp_board[0] / 2]) import(DISP_DXF, layer = "KeepOutLayer");
 }
-module display_board_cut_2d() { offset(0.5) display_board_outline_2d(); }
+module display_board_cut_2d() { offset(delta = boards_display_cut_clear) display_board_outline_2d(); }
 // Each key's square, unioned, then CLOSED (grow, shrink) so squares closer
 // than 2 x close merge into one outline that follows the keys round an
 // offset or a side-by-side pair. Hulling key to key instead left diagonal
@@ -469,111 +480,123 @@ function ubolt_legs() = [for (s = [-1, 1]) ubolt_c + [0, s * hardware_ubolt_span
 
 // ================================================================ 3D ======
 
-module lam(z, t, c, shell = true) {
-    P(c, shell) translate([0, 0, z]) linear_extrude(t) children();
+module lam(z, t, c, shell = true, id = "") {
+    P(c, shell, id) translate([0, 0, z]) linear_extrude(t) children();
 }
 
 module lid(dz = 0) {
     translate([0, 0, dz]) {
-        P(C_OAK, true) translate([x_in0, 0, z_oak_top_bot + explode]) difference() {
+        P(C_OAK, true, "oak top") translate([x_in0, 0, z_oak_top_bot + explode]) difference() {
             linear_extrude(oak_top_t) oak_top_2d();
             translate([0, 0, -EPS]) linear_extrude(stack_groove_depth + EPS) oak_grooves_2d();
             translate([0, 0, oak_top_t - openings_matrix_acrylic_t]) linear_extrude(openings_matrix_acrylic_t + EPS) oak_rebates_2d();
         }
-        lam(z_plate_bot + explode / 2, plate_thickness, C_ALU, false)
+        lam(z_plate_bot + explode / 2, plate_thickness, C_ALU, false, "key plate")
             translate([plate_x0, plate_y0]) plate_top_2d();
     }
 }
 
 module u_channel() {
-    P(C_OAK, true) translate([x_in0, 0, -explode]) difference() {
+    P(C_OAK, true, "oak bottom") translate([x_in0, 0, -explode]) difference() {
         linear_extrude(oak_bottom_t) oak_bottom_2d();
         translate([0, 0, oak_bottom_t - stack_groove_depth]) linear_extrude(stack_groove_depth + EPS) oak_grooves_2d();
+        // Fastener counterbores from the bottom face (a drill, not a cut:
+        // the DXF carries the clearance hole, the drawing the counterbore).
+        translate([-x_in0, 0, -EPS]) for (f = fasteners()) translate(f)
+            cylinder(d = hardware_fastener_cbore_d, h = hardware_fastener_cbore_depth + EPS);
     }
     // Each side: one sheet, bottom edge in the bottom groove, top edge in the top.
-    for (y = side_y)
-        P(C_ACRYLIC, true) translate([x_in0, y + stack_side_t, z_side0 + explode * 0.3]) rotate([90, 0, 0])
+    for (i = [0, 1])
+        P(C_ACRYLIC, true, str("side ", i == 0 ? "left" : "right")) translate([x_in0, side_y[i] + stack_side_t, z_side0 + explode * 0.3]) rotate([90, 0, 0])
             linear_extrude(stack_side_t) side_2d();
 }
 
 module caps() {
-    P(C_ACRYLIC, true) translate([ends_mouth_cap_t - explode / 3, 0, 0]) rotate([90, 0, 90]) mirror([0, 0, 1])
+    P(C_ACRYLIC, true, "mouth cap") translate([ends_mouth_cap_t - explode / 3, 0, 0]) rotate([90, 0, 90]) mirror([0, 0, 1])
         linear_extrude(ends_mouth_cap_t) mouth_cap_2d();
-    P(C_OAK_DARK, true) translate([x_in1 + explode / 3, 0, 0]) rotate([90, 0, 90])
+    P(C_OAK_DARK, true, "tail cap") translate([x_in1 + explode / 3, 0, 0]) rotate([90, 0, 90])
         linear_extrude(ends_tail_cap_t) tail_cap_2d();
 }
 
-module switch_at(xy, rot, top, spare = false) {
+module switch_at(xy, rot, top, name, spare = false) {
     // Seat (collar underside) on the plate's key face.
     tf = top ? [xy[0], xy[1], z_plate_top + explode / 2] : [xy[0], xy[1], z_floor - explode];
     // P() OUTSIDE the placement: a section cuts in world coordinates, and a
     // P() inside translate() cut every switch in its own frame instead.
-    P(C_SWITCH) translate(tf) rotate([top ? 0 : 180, 0, rot]) import("vendor/ks33.stl");
-    P(spare ? C_SPARE : C_CAP) translate(tf) rotate([top ? 0 : 180, 0, rot])
+    P(C_SWITCH, false, str("switch ", name)) translate(tf) rotate([top ? 0 : 180, 0, rot]) import("vendor/ks33.stl");
+    P(spare ? C_SPARE : C_CAP, false, str("cap ", name)) translate(tf) rotate([top ? 0 : 180, 0, rot])
         translate([0, 0, switch_keycap_top_above_seat - 2.5])
             linear_extrude(2.5, scale = 0.85) square(switch_keycap, center = true);
+    // The cap's TRAVEL: the space it sweeps when pressed. Only for the clash
+    // check - drawn nowhere else - so a cap that would hit something at the
+    // bottom of its stroke is caught, not just one that hits at rest.
+    if (only == str("travel ", name) || list_solids)
+        P(C_CAP, false, str("travel ", name)) translate(tf) rotate([top ? 0 : 180, 0, rot])
+            translate([0, 0, switch_keycap_top_above_seat - 2.5 - switch_total_travel])
+                linear_extrude(switch_total_travel) difference() {
+                    square(switch_keycap * 0.85, center = true);
+                    // The stem and actuator move WITH the cap: measured off the
+                    // mesh, 11.0 x 5.6 above the housing top at +3.2.
+                    square([11.4, 6.0], center = true);
+                }
 }
 
 module keys_3d() {
-    for (k = keys) switch_at(key_xy(k), key_rot(k), key_face(k) == "top");
-    for (s = spare_xy) switch_at(s, 0, false, true);
+    for (k = keys) switch_at(key_xy(k), key_rot(k), key_face(k) == "top", k[0]);
+    for (i = [0 : len(spare_xy) - 1]) switch_at(spare_xy[i], 0, false, str("spare ", i + 1), true);
 }
 
 module thumb_plates_3d() {
-    lam(z_floor - explode * 0.5, plate_thickness, C_ALU, false) thumb_plate_both_2d();
+    lam(z_floor - explode * 0.5, plate_thickness, C_ALU, false, "thumb plates") thumb_plate_both_2d();
 }
 
 module cluster_boards() {
     for (cl = ["left_hand", "right_hand"])
-        P(C_PCB) translate([0, 0, z_plate_top - switch_pcb_below_seat - switch_pcb_t + explode * 0.25])
+        P(C_PCB, false, str("board ", cl)) translate([0, 0, z_plate_top - switch_pcb_below_seat - switch_pcb_t + explode * 0.25])
             linear_extrude(switch_pcb_t) offset(-0.5) cluster_window_2d(cluster_keys(cl));
     for (cl = ["left_thumb", "right_thumb"])
-        P(C_PCB) translate([0, 0, z_floor + switch_pcb_below_seat - explode * 0.25])
-            linear_extrude(switch_pcb_t) offset(-3) thumb_plate_2d(cl);
+        P(C_PCB, false, str("board ", cl)) translate([0, 0, z_floor + switch_pcb_below_seat - explode * 0.25])
+            linear_extrude(switch_pcb_t) offset(-3) thumb_outline_2d(cl);
 }
 
 module display_board() {
     // Vendor STEP, meshed; its frame matches the DXF: x across, y along, glass
     // at z = 5.5. Flipped glass-down, glass at boards_display_recess.
-    P([0.22, 0.24, 0.30]) translate([disp_c[0], disp_c[1], boards_display_recess + 5.5 - explode])
+    P([0.22, 0.24, 0.30], false, "display board") translate([disp_c[0], disp_c[1], boards_display_recess + 5.5 - explode])
         rotate([180, 0, 0]) rotate([0, 0, -90]) translate([-disp_board[1] / 2, -disp_board[0] / 2, 0])
-            intersection() {
-                import("vendor/t-display-s3-amoled.stl");
-                // The STEP models the display flex unfolded 20 mm past the board;
-                // in the instrument it folds under, so it is clipped for drawing.
-                translate([-1, -1.2, -2]) cube([28, 61, 9]);
-            }
+            import("vendor/t-display-s3-amoled.stl");   // flex clipped at mesh time (outputs.yaml)
 }
 
 module tail_equipment() {
     // Carrier, and the Matrix standing face up on it under the top window.
-    P(C_PCB) translate([carrier_x0, W / 2 - boards_carrier_w / 2, carrier_z]) cube([boards_carrier_l, boards_carrier_w, switch_pcb_t]);
-    P([0.10, 0.10, 0.12]) translate([matrix_xy[0] - boards_matrix_board / 2, matrix_xy[1] - boards_matrix_board / 2, matrix_board_z])
+    P(C_PCB, false, "carrier") translate([carrier_x0, W / 2 - boards_carrier_w / 2, carrier_z]) cube([boards_carrier_l, boards_carrier_w, switch_pcb_t]);
+    P([0.10, 0.10, 0.12], false, "Matrix board") translate([matrix_xy[0] - boards_matrix_board / 2, matrix_xy[1] - boards_matrix_board / 2, matrix_board_z])
         cube([boards_matrix_board, boards_matrix_board, switch_pcb_t]);
-    P(C_LED) translate([matrix_xy[0] - boards_matrix_emitters / 2, matrix_xy[1] - boards_matrix_emitters / 2, matrix_board_z + switch_pcb_t])
+    P(C_LED, false, "Matrix LEDs") translate([matrix_xy[0] - boards_matrix_emitters / 2, matrix_xy[1] - boards_matrix_emitters / 2, matrix_board_z + switch_pcb_t])
         cube([boards_matrix_emitters, boards_matrix_emitters, boards_matrix_led_h]);
-    for (dy = [-1, 1]) P([0.15, 0.15, 0.15]) translate([matrix_xy[0] - 12.7, matrix_xy[1] + dy * 11.43 - 1.25, carrier_z + switch_pcb_t])
-        cube([25.4, 2.5, boards_matrix_header_h]);   // the two header rows, 22.86 apart [ds]
-    P(C_FROSTED) translate([0, 0, T - openings_matrix_acrylic_t + explode]) linear_extrude(openings_matrix_acrylic_t) matrix_window_2d();
+    for (i = [0, 1]) P([0.15, 0.15, 0.15], false, str("Matrix header ", i + 1))
+        translate([matrix_xy[0] - 12.7, matrix_xy[1] + (i == 0 ? -1 : 1) * 11.43 - 1.25, carrier_z + switch_pcb_t])
+            cube([25.4, 2.5, boards_matrix_header_h]);   // the two header rows, 22.86 apart [ds]
+    P(C_FROSTED, false, "matrix window") translate([0, 0, T - openings_matrix_acrylic_t + explode]) linear_extrude(openings_matrix_acrylic_t) matrix_window_2d();
     // Tail backplate and the etherCON body behind it.
-    P(C_ALU) translate([x_in1 - hardware_backplate_t, 0, 0]) rotate([90, 0, 90])
+    P(C_ALU, false, "tail backplate") translate([x_in1 - hardware_backplate_t, 0, 0]) rotate([90, 0, 90])
         linear_extrude(hardware_backplate_t) tail_backplate_2d();
-    P(C_CONN) translate([L, ec_c[0], ec_c[1]]) rotate([0, -90, 0]) {
+    P(C_CONN, false, "etherCON") translate([L, ec_c[0], ec_c[1]]) rotate([0, -90, 0]) {
         cylinder(d = ethercon_body_d, h = ethercon_depth);
         translate([0, 0, -2]) linear_extrude(2) square([ec_fl[1], ec_fl[0]], center = true);
     }
-    // The USB-C extension: receptacle body behind the tail cap, and a cable
-    // run to the Matrix board's edge (drawn straight; it is a flexible lead).
     // The RJ45 patch lead's plug and boot, mated into the etherCON's rear.
-    P([0.55, 0.70, 0.85]) translate([L - ethercon_depth - ethercon_rj45_plug_l, ec_c[0] - ethercon_rj45_plug_w / 2, ec_c[1] - ethercon_rj45_plug_h / 2])
+    P([0.55, 0.70, 0.85], false, "RJ45 plug") translate([L - ethercon_depth - ethercon_rj45_plug_l, ec_c[0] - ethercon_rj45_plug_w / 2, ec_c[1] - ethercon_rj45_plug_h / 2])
         cube([ethercon_rj45_plug_l, ethercon_rj45_plug_w, ethercon_rj45_plug_h]);
     // The USB-C extension's plug in the Matrix's tail edge, under the board.
     if (openings_matrix_usb_to_tail)
-        P([0.35, 0.35, 0.38]) translate([matrix_xy[0] + boards_matrix_board / 2, matrix_xy[1] - openings_usb_slot_w / 2, matrix_board_z - openings_usb_slot_h])
+        P([0.35, 0.35, 0.38], false, "USB-C plug") translate([matrix_xy[0] + boards_matrix_board / 2, matrix_xy[1] - openings_usb_slot_w / 2, matrix_board_z - openings_usb_slot_h])
             cube([openings_usb_plug_l, openings_usb_slot_w, openings_usb_slot_h]);
-    P(C_CONN) translate([x_in1 - openings_usb_ext_depth, usb_c[0] - openings_usb_slot_w / 2, usb_c[1] - openings_usb_slot_h / 2])
+    // The USB-C extension: receptacle body behind the tail cap, and a cable
+    // run to the Matrix board's edge (drawn straight; it is a flexible lead).
+    P(C_CONN, false, "USB-C receptacle") translate([x_in1 - openings_usb_ext_depth, usb_c[0] - openings_usb_slot_w / 2, usb_c[1] - openings_usb_slot_h / 2])
         cube([openings_usb_ext_depth, openings_usb_slot_w, openings_usb_slot_h]);
-    P([0.15, 0.15, 0.15]) hull() {
+    P([0.15, 0.15, 0.15], false, "USB-C lead") hull() {
         translate([x_in1 - openings_usb_ext_depth, usb_c[0], usb_c[1]]) sphere(d = 4, $fn = 12);
         translate([matrix_xy[0] + boards_matrix_board / 2 + usb_behind, matrix_xy[1], matrix_board_z - openings_usb_slot_h / 2]) sphere(d = 4, $fn = 12);
     }
@@ -586,26 +609,87 @@ strip_l = min(strip_run_adr, x_in1 - x_in0 - 20);
 module led_strips() {
     for (s = [0, 1]) {
         y = s == 0 ? u_y0 + lighting_strip_gap : W - u_y0 - lighting_strip_gap - 1;
-        P(C_LED) translate([(L - strip_l) / 2, y, z_floor + cavity_h / 2 - lighting_strip_w / 2])
+        P(C_LED, false, str("LED strip ", s == 0 ? "left" : "right")) translate([(L - strip_l) / 2, y, z_floor + cavity_h / 2 - lighting_strip_w / 2])
             cube([strip_l, 1, lighting_strip_w]);
     }
 }
 
+// ------------------------------------------------------------ routing -----
+// The tube and the looms run along the two side channels at routing_lane_z,
+// inside the LED strips, and drop to what they serve. Lanes are a model
+// choice (config/body.yaml routing): the clash check reports what is in them.
+function lane_y(side, d) = side == "left" ? u_y0 + lighting_strip_gap + 1 + 1 + d / 2
+                                          : W - u_y0 - lighting_strip_gap - 1 - 1 - d / 2;
+tube_y = lane_y(routing_tube_lane, routing_tube_od);
+loom_side = routing_tube_lane == "left" ? "right" : "left";
+loom_y = lane_y(loom_side, routing_loom_d);
+// A run through points, as a chain of hulled spheres.
+module run(pts, d) {
+    for (i = [0 : len(pts) - 2]) hull() { translate(pts[i]) sphere(d = d, $fn = 16); translate(pts[i + 1]) sphere(d = d, $fn = 16); }
+}
+// The sensor sits on the carrier's top face at its mouth end, on the tube's
+// side; the trap is just before it (ADR 0003). The carrier fills the
+// interior's width, so NOTHING runs beside it: every lane ends at its
+// mouth-end edge and climbs onto its top face.
+sensor_xy = [carrier_x0 + 8, tube_y];
+carrier_top = carrier_z + switch_pcb_t;
+module routing_3d() {
+    trap_y = u_y0 + lighting_strip_gap + 1 + 1 + routing_trap_d / 2;
+    trap_x0 = carrier_x0 - 3 - routing_trap_l;
+    over = carrier_top + 4;                       // height the runs cross onto the carrier at
+    P([0.95, 0.60, 0.45], false, "breath tube") run([
+        [0, tube_yz[0], tube_yz[1]], [x_in0 + 3, tube_yz[0], tube_yz[1]],
+        [x_in0 + 20, tube_y, routing_lane_z],
+        [trap_x0 - 8, tube_y, routing_lane_z], [trap_x0, trap_y, routing_lane_z]], routing_tube_od);
+    P([0.95, 0.60, 0.45], false, "breath trap") translate([trap_x0, trap_y, routing_lane_z]) rotate([0, 90, 0])
+        cylinder(d = routing_trap_d, h = routing_trap_l);
+    P([0.95, 0.60, 0.45], false, "breath tube to sensor") run([
+        [trap_x0 + routing_trap_l, trap_y, routing_lane_z], [carrier_x0 - 1, trap_y, over],
+        [sensor_xy[0] - 5, sensor_xy[1], over]], routing_tube_od * 0.8);
+    // Key chain: carrier -> right thumb -> right hand -> left thumb -> left
+    // hand (config/key-layout.yaml chain), along the loom lane, dropping to
+    // each board's face at its own middle.
+    function mid_x(cl) = (min(xs(cluster_keys(cl))) + max(xs(cluster_keys(cl)))) / 2;
+    top_z = z_plate_top - switch_pcb_below_seat - switch_pcb_t;   // top boards' underside
+    thumb_z = z_floor + switch_pcb_below_seat + switch_pcb_t;     // thumb boards' top face
+    d = routing_loom_d;
+    stops = [["right_thumb", thumb_z + d / 2], ["right_hand", top_z - d / 2], ["left_thumb", thumb_z + d / 2], ["left_hand", top_z - d / 2]];
+    P([0.30, 0.30, 0.75], false, "key-chain loom") union() {
+        run([[carrier_x0 + 6, loom_y, carrier_top + d / 2], [carrier_x0 + 6, loom_y, over], [carrier_x0 - 2, loom_y, over],
+             [carrier_x0 - 8, loom_y, routing_lane_z], [mid_x("left_hand"), loom_y, routing_lane_z]], d);
+        for (st = stops) run([[mid_x(st[0]), loom_y, routing_lane_z], [mid_x(st[0]), loom_y, st[1]]], d);
+    }
+    // Display loom: carrier to the display board's back, BESIDE the key chain
+    // (inboard of it, so the chain's drops do not cross it), then down to
+    // the board at the mouth end.
+    dd = routing_disp_loom_d;
+    dy = loom_y + (loom_side == "right" ? -1 : 1) * ((d + dd) / 2 + 0.5);
+    disp_back_z = boards_display_recess + 6.6;
+    P([0.30, 0.60, 0.30], false, "display loom") run([
+        [carrier_x0 + 12, dy, carrier_top + dd / 2], [carrier_x0 + 12, dy, over], [carrier_x0 - 2, dy, over],
+        [carrier_x0 - 8, dy, routing_lane_z], [disp_x1 + 4, dy, routing_lane_z],
+        [disp_x1 - 6, dy, disp_back_z + dd / 2]], dd);
+}
+
 module hardware_3d() {
     // Fasteners: M3 socket caps from the bottom face into the plate.
-    for (f = fasteners()) P(C_STEEL) translate([f[0], f[1], -explode]) {
+    for (i = [0 : len(fasteners()) - 1]) let(f = fasteners()[i]) P(C_STEEL, false, str("M3 #", i + 1)) translate([f[0], f[1], -explode]) {
         translate([0, 0, hardware_fastener_cbore_depth - 3]) cylinder(d = 5.5, h = 3);
         cylinder(d = 3, h = z_plate_top - 0.4 + explode * 2);
     }
-    // U-bolt: loop below, legs through the floor to the backing plate.
-    P(C_STEEL) translate([0, 0, -explode]) {
+    // U-bolt: loop below, legs through the floor to the backing plate, a nut
+    // on each leg above the plate.
+    P(C_STEEL, false, "U-bolt") translate([0, 0, -explode]) {
         for (u = ubolt_legs()) translate([u[0], u[1], -hardware_ubolt_drop + hardware_ubolt_span / 2])
-            cylinder(d = hardware_ubolt_rod_d, h = z_floor + hardware_backplate_t + 6 + hardware_ubolt_drop - hardware_ubolt_span / 2);
+            cylinder(d = hardware_ubolt_rod_d, h = z_floor + hardware_backplate_t + hardware_ubolt_nut_h + hardware_ubolt_drop - hardware_ubolt_span / 2);
         translate([ubolt_c[0], ubolt_c[1], -hardware_ubolt_drop + hardware_ubolt_span / 2]) rotate([0, 0, 90]) rotate([-90, 0, 0])
             rotate_extrude(angle = 180) translate([hardware_ubolt_span / 2, 0]) circle(d = hardware_ubolt_rod_d);
     }
-    lam(z_floor, hardware_backplate_t, C_ALU, false) ubolt_backplate_2d();
-    lam(-1.5 - explode, 1.5, C_ACRYLIC, false) service_cover_2d();
+    for (i = [0, 1]) P(C_STEEL, false, str("U-bolt nut ", i + 1))
+        translate([ubolt_legs()[i][0], ubolt_legs()[i][1], z_floor + hardware_backplate_t - explode])
+            cylinder(d = hardware_ubolt_nut_af / cos(30), h = hardware_ubolt_nut_h, $fn = 6);
+    lam(z_floor, hardware_backplate_t, C_ALU, false, "U-bolt backplate") ubolt_backplate_2d();
+    lam(-1.5 - explode, 1.5, C_ACRYLIC, false, "service cover") service_cover_2d();
 }
 
 module assembly() {
@@ -615,6 +699,7 @@ module assembly() {
     if (show_keys) { keys_3d(); thumb_plates_3d(); }
     if (show_boards) { cluster_boards(); display_board(); tail_equipment(); }
     if (show_strips) led_strips();
+    if (show_routing) routing_3d();
     if (show_hardware) hardware_3d();
 }
 

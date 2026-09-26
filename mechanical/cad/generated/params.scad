@@ -69,6 +69,7 @@ switch_keycap = 16.5;  // settled; [adr] ADR 0002 - MT165 16.5 x 16.5
 switch_cluster_pcb_w = 22.0;  // tbd; hardware/cluster/cluster-boards.md: outlines are undrawable until M3
 switch_pcb_t = 1.6;  // settled; [adr] hardware/bom.csv PCB-CLUSTER and PCB-CARRIER, 1.6 mm
 boards_display_recess = 1.0;  // tbd; placeholder - glass face back from the bottom face, so the glass is not what the instrument rests on
+boards_display_cut_clear = 1.5;  // nominal; [ds] the vendor STEP's glass and flex overhang the DXF board outline by 1.18 mm at the flex end (LILYGO-T-DISPLAY-S3-AMOLED-3D.stp, found by the clash check); cut clears that
 boards_matrix_board = 25.0;  // settled; [ds] datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-dimensions.jpg - 25.00 x 25.00, R1.0
 boards_matrix_emitters = 20.8;  // nominal; ADR 0014 / carrier.md - 8 x 2.6 mm pitch [from memory there]
 boards_carrier_l = 100.0;  // tbd; hardware/bom.csv PCB-CARRIER '~100 x 45' - carrier.md: 'an assumption, not a fit'
@@ -109,11 +110,20 @@ hardware_fastener_inset = 3.0;  // tbd; placeholder - distance from the inside f
 hardware_ubolt_rod_d = 5.0;  // tbd; ADR 0009 gives no U-bolt size
 hardware_ubolt_span = 20.0;  // tbd; placeholder - leg centre to leg centre, legs across the body; narrow enough to clear the gap fasteners
 hardware_ubolt_drop = 18.0;  // tbd; placeholder - how far the loop stands below the bottom face
+hardware_ubolt_nut_af = 8.0;  // tbd; hex nut across flats for the U-bolt legs - an M5 nut is 8 mm [from memory]; follows ubolt_rod_d
+hardware_ubolt_nut_h = 4.0;  // tbd; M5 nut height [from memory]
 hardware_backplate_t = 3.0;  // tbd; hardware/bom.csv MECH-BACKPLATE - aluminium or ply, thickness open
+routing_tube_od = 5.0;  // tbd; breath tube outside diameter; ADR 0003 assumes a 3 mm bore, the wall is a guess [from memory]
+routing_trap_d = 10.0;  // tbd; dead-volume trap diameter; ADR 0003 caps the trap at 1 mL
+routing_trap_l = 12.0;  // tbd; trap length: 10 mm bore x 12 mm = 0.94 mL, inside ADR 0003's 1 mL [calc]
+routing_tube_lane = "left";  // tbd; which side channel the tube runs in (ADR 0009: 'in one of the side channels'); the looms take the other
+routing_loom_d = 6.0;  // tbd; key-chain loom bundle: 12 conductors (2x6 IDC), ribbon folded or twisted pairs, as a round envelope [from memory]
+routing_disp_loom_d = 5.0;  // tbd; display loom bundle: 9 conductors (J-DISP, 2x5 IDC) [from memory]
+routing_lane_z = 18.0;  // tbd; height of the side-channel runs, between the thumb boards below and the key boards above
 lighting_strip_w = 10.0;  // tbd; hardware/carrier/carrier.md '~10 mm' [from memory there]; the strip geometry row is BLOCKED in datasheets/MANIFEST.csv
 lighting_strip_gap = 3.0;  // tbd; ADR 0009 / ADR 0014: the diffusion gap is a prototype question
 
 // Every value above with status tbd - a placeholder, not a number any
 // document gives. The DRC report lists these so no result hides one.
-tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_mouth_extra", "layout_tail_clear", "layout_underside_clear", "layout_lh_offsets", "layout_rh_offsets", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_carrier_l", "boards_carrier_w", "boards_matrix_header_h", "boards_matrix_gap", "boards_matrix_led_h", "openings_matrix_lip", "openings_matrix_acrylic_t", "openings_usb_slot_w", "openings_usb_slot_h", "openings_usb_plug_l", "openings_matrix_usb_to_tail", "openings_usb_ext_depth", "ethercon_body_d", "ethercon_rj45_plug_l", "ethercon_rj45_plug_w", "ethercon_rj45_plug_h", "ethercon_rj45_drop", "ethercon_offset_y", "hardware_fastener_inset", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_backplate_t", "lighting_strip_w", "lighting_strip_gap"];
+tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_mouth_extra", "layout_tail_clear", "layout_underside_clear", "layout_lh_offsets", "layout_rh_offsets", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_carrier_l", "boards_carrier_w", "boards_matrix_header_h", "boards_matrix_gap", "boards_matrix_led_h", "openings_matrix_lip", "openings_matrix_acrylic_t", "openings_usb_slot_w", "openings_usb_slot_h", "openings_usb_plug_l", "openings_matrix_usb_to_tail", "openings_usb_ext_depth", "ethercon_body_d", "ethercon_rj45_plug_l", "ethercon_rj45_plug_w", "ethercon_rj45_plug_h", "ethercon_rj45_drop", "ethercon_offset_y", "hardware_fastener_inset", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_ubolt_nut_af", "hardware_ubolt_nut_h", "hardware_backplate_t", "routing_tube_od", "routing_trap_d", "routing_trap_l", "routing_tube_lane", "routing_loom_d", "routing_disp_loom_d", "routing_lane_z", "lighting_strip_w", "lighting_strip_gap"];
 

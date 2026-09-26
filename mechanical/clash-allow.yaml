@@ -1,0 +1,35 @@
+# Interference the design INTENDS. tools/cad.py's clash check reports every
+# pair of solids that overlap; a pair listed here is reported as ALLOWED,
+# with its reason, instead of as a CLASH. Globs (fnmatch) on solid ids; the
+# order of a and b does not matter.
+#
+# The rule for adding one: the overlap must be physical and deliberate - one
+# part going INTO another by design - and `why` must say so. "It is only a
+# placeholder" is not a reason; fix the placeholder. A rule that stops
+# matching anything is reported as UNUSED: delete it.
+
+allow:
+  - a: "switch *"
+    b: "key plate"
+    why: "the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3"
+  - a: "switch *"
+    b: "thumb plates"
+    why: "as the key plate - the thumb switches clip into their plates"
+  - a: "switch *"
+    b: "board *"
+    why: "the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled"
+  - a: "M3 #*"
+    b: "key plate"
+    why: "the fastener threads into the plate - an insert or tapped boss (hardware/bom.csv MECH-FASTENER); the tap hole is drawn at the tap drill"
+  - a: "U-bolt"
+    b: "U-bolt nut *"
+    why: "the nuts thread onto the legs"
+  - a: "cap *"
+    b: "switch *"
+    why: "the MX stem enters the cap's cross socket; the socket is not modelled"
+  - a: "USB-C lead"
+    b: "USB-C *"
+    why: "the extension's cable enters its own plug and receptacle"
+  - a: "breath tube*"
+    b: "breath trap"
+    why: "the tube enters the trap at both ends - one air path"

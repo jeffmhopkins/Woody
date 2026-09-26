@@ -57,12 +57,12 @@ BODY = "config/body.yaml"
 # Directories whose every file must be an output this tool owns. A PNG that
 # nobody can regenerate is exactly the artefact this tool exists to prevent.
 OWNED_DIRS = [f"{MECH}/renders", f"{MECH}/export", f"{MECH}/cad/vendor"]
-OWNED_EXT = (".png", ".dxf", ".svg", ".stl", ".echo")
+OWNED_EXT = (".png", ".dxf", ".svg", ".stl", ".echo", ".txt")
 
 # Bump when the way an output is MADE changes (stamp layout, mesh settings,
 # render flags) - it is part of every fingerprint, so a bump marks every
 # output stale, which is the truth.
-RECIPE = "5"
+RECIPE = "6"
 
 LEDGER_COLS = ["name", "kind", "out", "fingerprint", "out_sha256", "provisional",
                "built", "tool", "inputs"]
@@ -222,6 +222,8 @@ def output_inputs(o):
         deps = {o["from"]}
     else:
         deps = scad_deps(o["src"])
+    if o["kind"] == "clash":
+        deps.add(o["allow"])
     return sorted(deps)
 
 
@@ -239,7 +241,7 @@ def fingerprint(o, inputs):
 def load_spec():
     spec = yaml.safe_load(open(os.path.join(ROOT, SPEC), encoding="utf-8"))
     outs = []
-    for kind, key in (("mesh", "meshes"), ("render", "renders"), ("export", "exports")):
+    for kind, key in (("mesh", "meshes"), ("render", "renders"), ("export", "exports"), ("clash", "clashes")):
         for o in spec.get(key) or []:
             o = dict(o)
             o["kind"] = kind
@@ -383,6 +385,123 @@ def mesh_step(o, out_abs):
     return f"gmsh {gmsh.__version__}"
 
 
+# ----------------------------------------------------------------- clash ----
+#
+# THE INTERFERENCE CHECK. Every solid in the model is named (P(c, shell, id)
+# in woody_body.scad). This asks OpenSCAD for the list, renders each solid on
+# its own to a mesh, and intersects every pair exactly (manifold3d). A pair
+# that overlaps by more than CLASH_EPS mm^3 is a CLASH unless a rule in the
+# allow file names it and says why - parts meant to nest, like a switch's
+# latch arms in the plate cutout they clip into. An allow rule that matches
+# nothing is reported too: a stale excuse reads exactly like a live one.
+
+CLASH_EPS = 0.05   # mm^3 - below this, two faces touching, not two parts overlapping
+
+
+def run_scad(src, out, defines_, deps=None):
+    cmd = ["openscad", "-o", out] + (["-d", deps] if deps else []) + defines_ + [os.path.join(ROOT, src)]
+    r = subprocess.run(cmd, capture_output=True, text=True, cwd=ROOT)
+    return r.returncode, r.stdout + r.stderr
+
+
+def clash_step(o, out_abs, inputs):
+    import fnmatch
+    import concurrent.futures as cf
+    try:
+        import manifold3d as mf
+        import trimesh
+        import numpy as np
+    except Exception as e:
+        raise SystemExit(f"cad.py: the clash check needs manifold3d and trimesh ({e}). "
+                         f"`pip install manifold3d trimesh`")
+    allow = yaml.safe_load(open(os.path.join(ROOT, o["allow"]), encoding="utf-8")) or {}
+    rules = allow.get("allow") or []
+    base = ["-D", "explode=0", "-D", 'cut="none"', "-D", "ghost_shell=false"] + defines(o)
+    with tempfile.TemporaryDirectory() as td:
+        ids_echo = os.path.join(td, "ids.echo")
+        rc, log = run_scad(o["src"], ids_echo, base + ["-D", "list_solids=true"], os.path.join(td, "deps"))
+        if rc != 0:
+            raise SystemExit(f"cad.py: could not list solids:\n{log[-2000:]}")
+        check_depfile(o, os.path.join(td, "deps"), inputs)
+        ids = []
+        for line in open(ids_echo, encoding="utf-8"):
+            m = re.match(r'ECHO: "SOLID", "(.*)"$', line.strip())
+            if m and m.group(1) not in ids:
+                ids.append(m.group(1))
+
+        def one(i_id):
+            i, sid = i_id
+            stl = os.path.join(td, f"{i}.stl")
+            rc, log = run_scad(o["src"], stl, base + ["-D", f"only={json.dumps(sid)}"])
+            if rc != 0 or not os.path.exists(stl):
+                if "top level object is empty" in log.lower() or "empty" in log.lower():
+                    return sid, None, "empty"
+                return sid, None, log[-800:]
+            return sid, stl, None
+
+        meshes, empty = {}, []
+        with cf.ThreadPoolExecutor(max_workers=os.cpu_count() or 2) as ex:
+            for sid, stl, err in ex.map(one, list(enumerate(ids))):
+                if err == "empty":
+                    empty.append(sid)
+                    continue
+                if err:
+                    raise SystemExit(f"cad.py: could not render solid {sid!r}:\n{err}")
+                tm = trimesh.load(stl, force="mesh")
+                if not tm.is_watertight:
+                    raise SystemExit(f"cad.py: solid {sid!r} is not a closed mesh - it cannot be intersected; fix it")
+                m = mf.Manifold(mf.Mesh(vert_properties=np.asarray(tm.vertices, dtype=np.float32),
+                                        tri_verts=np.asarray(tm.faces, dtype=np.uint32)))
+                meshes[sid] = (m, tm.bounds)
+
+    def allowed(a, b):
+        for n, r in enumerate(rules):
+            if ((fnmatch.fnmatch(a, r["a"]) and fnmatch.fnmatch(b, r["b"])) or
+                    (fnmatch.fnmatch(b, r["a"]) and fnmatch.fnmatch(a, r["b"]))):
+                return n
+        return None
+
+    names = sorted(meshes)
+    clashes, excused, used = [], [], set()
+    for i, a in enumerate(names):
+        ma, ba = meshes[a]
+        for b in names[i + 1:]:
+            mb, bb = meshes[b]
+            if (ba[1] <= bb[0]).any() or (bb[1] <= ba[0]).any():
+                continue
+            inter = ma ^ mb
+            v = inter.volume()
+            if v <= CLASH_EPS:
+                continue
+            bx = inter.bounding_box()
+            where = "X %.1f-%.1f  Y %.1f-%.1f  Z %.1f-%.1f" % (bx[0], bx[3], bx[1], bx[4], bx[2], bx[5])
+            n = allowed(a, b)
+            if n is None:
+                clashes.append((v, a, b, where))
+            else:
+                used.add(n)
+                excused.append((v, a, b, rules[n]["why"]))
+    dead = [r for n, r in enumerate(rules) if n not in used]
+    L = [f"# Interference check - GENERATED by tools/cad.py from {o['src']}",
+         f"# {len(names)} solids, {len(names) * (len(names) - 1) // 2} pairs; overlap > {CLASH_EPS} mm^3 counts.",
+         f"# Excuses: {o['allow']}. Every solid is a modelled envelope - many sizes are tbd",
+         f"# (config/body.yaml), so a clean result is only as good as those envelopes.", ""]
+    L.append(f"CLASH {len(clashes)}" + ("" if clashes else " - none"))
+    for v, a, b, where in sorted(clashes, reverse=True):
+        L.append(f"  {v:10.1f} mm3  {a}  x  {b}   [{where}]")
+    L += ["", f"ALLOWED {len(excused)} (by rule in {o['allow']})"]
+    for v, a, b, why in sorted(excused, reverse=True):
+        L.append(f"  {v:10.1f} mm3  {a}  x  {b}   - {why}")
+    L += ["", f"UNUSED ALLOW RULES {len(dead)}" + (" - delete them or they will excuse the next clash" if dead else "")]
+    for r in dead:
+        L.append(f"  {r['a']}  x  {r['b']}   - {r['why']}")
+    if empty:
+        L += ["", f"EMPTY SOLIDS {len(empty)} (named, but drew nothing)"] + ["  " + e for e in empty]
+    open(out_abs, "w", encoding="utf-8", newline="\n").write("\n".join(L) + "\n")
+    print(f"      {len(names)} solids: {len(clashes)} clash(es), {len(excused)} allowed, {len(dead)} unused rule(s)")
+    return f"{openscad_version()}; manifold3d"
+
+
 def build_one(o, provisional):
     inputs = output_inputs(o)
     fp = fingerprint(o, inputs)
@@ -390,6 +509,8 @@ def build_one(o, provisional):
     os.makedirs(os.path.dirname(out_abs), exist_ok=True)
     if o["kind"] == "mesh":
         tool = mesh_step(o, out_abs)
+    elif o["kind"] == "clash":
+        tool = clash_step(o, out_abs, inputs)
     else:
         with tempfile.TemporaryDirectory() as td:
             deps_abs = os.path.join(td, "deps")
@@ -407,7 +528,7 @@ def build_one(o, provisional):
 
 def order(outs):
     # Meshes first: renders import them, so their fingerprints depend on them.
-    return sorted(outs, key=lambda o: {"mesh": 0, "export": 1, "render": 2}[o["kind"]])
+    return sorted(outs, key=lambda o: {"mesh": 0, "export": 1, "render": 2, "clash": 3}[o["kind"]])
 
 
 def cmd_build(names, all_):

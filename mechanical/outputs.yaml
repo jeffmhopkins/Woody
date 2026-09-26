@@ -130,3 +130,11 @@ exports:
   - {name: dxf-matrix-window, src: mechanical/cad/woody_body.scad, out: mechanical/export/matrix-window.dxf, defines: {part: "matrix_window"}}
   - {name: dxf-oak-rebates, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-rebates.dxf, defines: {part: "oak_rebates"}}
   - {name: dxf-service-cover, src: mechanical/cad/woody_body.scad, out: mechanical/export/service-cover.dxf, defines: {part: "service_cover"}}
+
+# The interference check: every named solid against every other. Report
+# only - clashes are design findings, like drc.echo, not build failures.
+clashes:
+  - name: clash
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/clash.txt
+    allow: mechanical/clash-allow.yaml
