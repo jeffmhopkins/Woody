@@ -188,10 +188,11 @@ decision, not a correction.
    (ADR 0015), and the mouth end is now the equal band. *Rule: "what the
    mouth end needs".*
 5. **Thumb recesses and the oak between them.** *Rule: "oak-bottom cuts at
-   least 3 mm apart".* Since the left thumb became a straight line with the
-   rest in the middle and the spare cutouts went (owner, 2026-09-26), every
-   pair passes; the line's length is limited by the U-bolt legs at its tail
-   end (*"U-bolt legs clear of the thumb recesses"*). The arc and spares
+   least 3 mm apart".* Since the thumb keys went to two rows across the body
+   either side of each rest, at the top keys' pitch with one oak slot per row,
+   and the spare cutouts went (owner, 2026-09-26), every cut passes. The
+   left thumb's tail row is what nears the U-bolt legs (*"U-bolt legs clear
+   of the thumb recesses"*). The arc and spares
    before it left 0.5 mm webs; that history is in git.
 6. **The regulator block** stands beside the key boards since the board
    widened (ADR 0016), with the height to the lid. *Rule: "regulator block

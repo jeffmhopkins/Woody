@@ -122,8 +122,11 @@ cluster_margin = 4;        // drawing convention: board edge past the outermost 
 // placed; when key-layout.yaml gets real x/y this wants the key's own x.
 function run_rel(id) = cum(id[0] == "L" ? layout_lh_gaps : layout_rh_gaps, ord(id[2]) - 49);
 lt_rest_rel = run_rel(layout_lt_rest_under);
-lt_rel = [for (i = [0 : 3]) lt_rest_rel + (i < 2 ? -layout_lt_rest / 2 - (1 - i) * thumb_pitch
-                                                  : layout_lt_rest / 2 + (i - 2) * thumb_pitch)];
+// TWO ROWS ACROSS THE BODY, the rest between them (owner, 2026-09-26: "left
+// thumb with dual horizontal rows too, with gap still in the middle"): LT1 /
+// LT2 side by side toward the mouth, LT3 / LT4 side by side toward the tail.
+lt_rel = [for (i = [0 : 3]) lt_rest_rel + (i < 2 ? -1 : 1) * layout_lt_rest / 2];
+lt_dy = [for (i = [0 : 3]) (i % 2 == 0 ? -1 : 1) * thumb_pitch / 2];   // across, from the centreline
 // The breath trap sits mid-height, above the left thumb board's parts, so
 // it has to clear the first KEY board and the centre board, not the thumb
 // board (which starts further towards the mouth since the thumb line did):
@@ -203,7 +206,7 @@ function prov_xy(k) =
     let(cl = k[6], i = key_n(k) - 1, n = count(cl), c = W / 2)
     cl == "left_hand"  ? [x_lh0 + cum(layout_lh_gaps, i), c + layout_lh_offsets[i]] :
     cl == "right_hand" ? [x_rh0 + cum(layout_rh_gaps, i), c + layout_rh_offsets[i]] :
-    cl == "left_thumb" ? [x_lh0 + lt_rel[i], c] :
+    cl == "left_thumb" ? [x_lh0 + lt_rel[i], c + lt_dy[i]] :
     cl == "right_thumb" ? rt_xy(i) : [0, 0];
 
 // The thumb rest: the gap in the middle of the left-thumb line.

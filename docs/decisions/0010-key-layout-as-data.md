@@ -161,6 +161,10 @@ grip area that has no switches in it.
 > side of a rest, as the top has one per hand (`stack.cap_holes`). The arc
 > argument below is the record of the earlier layout; M2 tests the line.
 > Positions: `config/body.yaml` `layout.lt_*`.
+> **Revised the same day (owner): two rows ACROSS the body instead of a
+> line** — LT1/LT2 side by side, the rest, LT3/LT4 side by side, matching the
+> right thumb's pair ("dual horizontal rows too, with gap still in the
+> middle").
 
 **The four keys lie on the thumb tip's sweep, not in a line.** The tip traces an
 arc as the thumb extends and rotates away from the grip. Laying the keys along
