@@ -263,9 +263,9 @@ too tight for the STEP's glass overhang, the etherCON housing drawn through
 the tail cap, and several of the check's own first routings.
 
 **Also found, outside the model:** the MPXV4006DP (case 1351-01) is a
-**surface-mount** part (its datasheet's p.2 ordering table), not the THT part
-`hardware/bom.csv` U-BREATH and SKT-BREATH describe — and a SIP socket cannot
-hold it. That is a BOM decision, not a CAD one, and is left open here.
+**surface-mount** part (its datasheet's p.1 ordering table). It is now
+soldered to the main board, with no socket; how it is fitted and swapped is in
+`hardware/interfaces/breath-sense-link/breath-sense-link.md`, "Mounting".
 
 ## Not modelled yet
 

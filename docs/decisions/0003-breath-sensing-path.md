@@ -136,6 +136,11 @@ for a part that gets breathed into for years.
 The cost is a different footprint, and it is free because the carrier has not
 been laid out. **Design for case 1351-01.**
 
+*(Amended 2026-09-26: case 1351-01 is **surface mount** — the datasheet's
+p.1 ordering table — an 8-lead gull-wing package at 2.54 mm pitch. It cannot
+be socketed. It is soldered to the main board and swapped with an iron, lid
+off: `hardware/interfaces/breath-sense-link/breath-sense-link.md`, "Mounting".)*
+
 The 0–6 kPa range was well chosen in 2021 and stands. Normal wind-controller
 playing sits around 0–5 kPa.
 
@@ -816,6 +821,9 @@ handling is three partial measures rather than one fix:
   plug rather than a drilled orifice.
 - **The restrictor limits the pumping itself**, since the ~6 % volume exchange
   per note has to pass through it.
+- *(Amended 2026-09-26: the sensor is surface mount, so "socketed" is out;
+  it is soldered down and replaceable with an iron — breath-sense-link,
+  "Mounting". The spare and the clearable trap stand.)*
 - **Treat the sensor as a wear part.** It is socketed or otherwise replaceable,
   and the trap is clearable without disassembly. **Buy two** — ordinary spares
   for a part that gets breathed into for years.
