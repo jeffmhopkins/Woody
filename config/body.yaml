@@ -47,7 +47,7 @@ stack:
   cap_holes:
     value: "slot"
     status: tbd
-    source: "individual = one hole per cap in the oak top; slot = one slot per hand, so pitch is limited by cap-to-cap clearance rather than by an oak web between holes"
+    source: "individual = one hole per cap in the oak top; slot = one slot per hand (and in the oak bottom one per thumb group either side of a rest), so pitch is limited by cap-to-cap clearance rather than by an oak web between holes"
     decided_by: "the pitch chosen - at 18 mm an individual-hole web is zero, so the tightened layout needs slots (drc.echo); revisit if M2 widens it"
   # THE OAK BOTTOM HAS NO THICKNESS OF ITS OWN EITHER. Decided 2026-09-26:
   # thumb keys are flush with the bottom face at full travel too. The thumb
@@ -194,15 +194,10 @@ layout:
     status: tbd
     source: "the left thumb rest is directly under the middle-finger key (owner, 2026-09-26); LH2 is the middle finger on the index-middle-ring order key-layout.yaml assumes until M2 assigns fingers"
     decided_by: "M2 - finger assignment"
-  lt_pitch:
-    value: 22.0
-    status: tbd
-    source: "centre to centre within each pair: a thumb recess (keycap + clearance) and a 3 mm oak web, rounded up [calc]"
-    decided_by: "M2"
   lt_rest:
     value: 40.0
     status: tbd
-    source: "LT2 to LT3 centre to centre, across the thumb rest: ~21.5 mm clear between the recesses, about a thumb pad [calc]; longer and LT4 meets the U-bolt legs (drc.echo)"
+    source: "LT2 to LT3 centre to centre, across the thumb rest: about a thumb pad clear between the cap holes. The keys either side are at the top keys' pitch (owner, 2026-09-26)"
     decided_by: "M2"
   rt_rest_under:
     value: "RH2"
@@ -215,12 +210,7 @@ layout:
   rt_rest:
     value: 40.0
     status: tbd
-    source: "RT2/RT3's row to RT1, centre to centre, across the thumb rest - the same ~21.5 mm clear as the left thumb's rest [calc]"
-    decided_by: "M2"
-  rt_pair_pitch:
-    value: 24.0
-    status: tbd
-    source: "RT2 to RT3 across the body, centre to centre: a recess and a 3 mm web, rounded up [calc]"
+    source: "RT2/RT3's row to RT1, centre to centre, across the thumb rest - the same as the left thumb's rest. RT2 to RT3 is the top keys' pitch (owner, 2026-09-26)"
     decided_by: "M2"
 
 # -------------------------------------------------------------- switches ----

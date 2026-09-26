@@ -155,7 +155,10 @@ grip area that has no switches in it.
 > with the switches on either side of it rather than swept around it.
 > **Both thumb rests sit directly under the middle-finger key** of their hand
 > (owner, same day) — `config/body.yaml` `layout.lt_rest_under` /
-> `rt_rest_under`, LH2 and RH2 until M2 assigns fingers. The arc
+> `rt_rest_under`, LH2 and RH2 until M2 assigns fingers.
+> **The thumb keys are spaced and cut like the top keys** (owner, same day):
+> the top's pitch between adjacent keys, and one oak slot per group either
+> side of a rest, as the top has one per hand (`stack.cap_holes`). The arc
 > argument below is the record of the earlier layout; M2 tests the line.
 > Positions: `config/body.yaml` `layout.lt_*`.
 

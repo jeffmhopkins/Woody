@@ -99,8 +99,13 @@ function sum(v, i = 0) = i >= len(v) ? 0 : v[i] + sum(v, i + 1);
 function cum(v, i) = i <= 0 ? 0 : sum([for (j = [0 : i - 1]) v[j]]);
 lh_run = sum(layout_lh_gaps);
 rh_run = sum(layout_rh_gaps);
-thumb_recess_clear = 1.0;  // drawing convention: cap-to-recess clearance, an M2 question (ADR 0010)
+// THE THUMB KEYS ARE SPACED AND CUT LIKE THE TOP (owner, 2026-09-26: "spacing
+// between keys need to be right like the top"): the top's pitch between
+// adjacent keys, the top's cap-to-oak clearance, and - when the top uses one
+// slot per hand - one slot per group of thumb keys either side of a rest.
+thumb_recess_clear = stack_cap_clear;
 rc = switch_keycap + 2 * thumb_recess_clear;    // a thumb recess, square
+thumb_pitch = layout_lh_gaps[0];                 // the top's index-to-middle pitch
 cluster_margin = 4;        // drawing convention: board edge past the outermost switch body
 
 // The MOUTH END. There is no display (owner, 2026-09-26: "remove the upper
@@ -117,8 +122,8 @@ cluster_margin = 4;        // drawing convention: board edge past the outermost 
 // placed; when key-layout.yaml gets real x/y this wants the key's own x.
 function run_rel(id) = cum(id[0] == "L" ? layout_lh_gaps : layout_rh_gaps, ord(id[2]) - 49);
 lt_rest_rel = run_rel(layout_lt_rest_under);
-lt_rel = [for (i = [0 : 3]) lt_rest_rel + (i < 2 ? -layout_lt_rest / 2 - (1 - i) * layout_lt_pitch
-                                                  : layout_lt_rest / 2 + (i - 2) * layout_lt_pitch)];
+lt_rel = [for (i = [0 : 3]) lt_rest_rel + (i < 2 ? -layout_lt_rest / 2 - (1 - i) * thumb_pitch
+                                                  : layout_lt_rest / 2 + (i - 2) * thumb_pitch)];
 // The breath trap sits mid-height, above the left thumb board's parts, so
 // it has to clear the first KEY board and the centre board, not the thumb
 // board (which starts further towards the mouth since the thumb line did):
@@ -135,7 +140,7 @@ mouth_req = max(x_in0 + layout_mouth_extra + switch_keycap / 2 + stack_cap_clear
 rt_rest_rel = [run_rel(layout_rt_rest_under), W / 2];
 // RT1 a half rest below the rest, RT2 / RT3 side by side a half rest above.
 function rt_rel(i) = i == 0 ? rt_rest_rel + [layout_rt_rest / 2, 0]
-                   : rt_rest_rel + [-layout_rt_rest / 2, (i == 1 ? -1 : 1) * layout_rt_pair_pitch / 2];
+                   : rt_rest_rel + [-layout_rt_rest / 2, (i == 1 ? -1 : 1) * thumb_pitch / 2];
 top_last_rel = max([for (i = [0 : len(layout_rh_gaps)]) cum(layout_rh_gaps, i)]);
 rt_last_rel = max([for (i = [0 : count("right_thumb") - 1]) rt_rel(i)[0]]);
 // BEHIND THE MATRIX, IN ORDER (2026-09-26): the USB-C extension's plug off
@@ -204,6 +209,11 @@ function prov_xy(k) =
 // The thumb rest: the gap in the middle of the left-thumb line.
 lt_rest_xy = [x_lh0 + (lt_rel[1] + lt_rel[2]) / 2, W / 2];
 rt_rest = [x_rh0, 0] + rt_rest_rel;
+// The thumb keys either side of each rest, as groups: one oak slot each
+// when stack.cap_holes is "slot", as the top has one per hand.
+function thumb_slots() = [for (cl = ["left_thumb", "right_thumb"])
+    let(r = cl == "left_thumb" ? lt_rest_xy[0] : rt_rest[0], ks = cluster_keys(cl))
+    for (before = [true, false]) let(g = [for (k = ks) if ((key_xy(k)[0] < r) == before) k]) if (len(g) > 0) g];
 // Right-thumb control switches, offset from the rest (ADR 0010): two side by
 // side toward the mouthpiece, in one row across the body, and one toward the
 // tail (owner, 2026-09-26: "two up, one down"). Placeholder geometry.
@@ -345,8 +355,10 @@ module oak_bottom_2d() {
     difference() {
         square([x_in1 - x_in0, W]);
         translate([-x_in0, 0]) {
-            for (k = bottom_keys) translate(key_xy(k)) rotate(key_rot(k))
-                square(switch_keycap + 2 * thumb_recess_clear, center = true);
+            if (stack_cap_holes == "slot")
+                for (g = thumb_slots()) keys_2d(g, rc);
+            else
+                for (k = bottom_keys) translate(key_xy(k)) rotate(key_rot(k)) square(rc, center = true);
             for (s = spare_xy) translate(s) square(switch_keycap + 2 * thumb_recess_clear, center = true);
             for (f = fasteners()) translate(f) circle(d = hardware_fastener_clear_d);
             for (u = ubolt_legs()) translate(u) circle(d = hardware_ubolt_rod_d + 0.5);
@@ -951,8 +963,11 @@ module drc_report() {
     drc(d_uv >= 2, "U-bolt legs clear of the thumb recesses", d_uv, "mm, worst case");
 
     // Everything cut through the oak bottom, pairwise: [name, centre, size].
-    rc = switch_keycap + 2 * thumb_recess_clear;
-    feats = concat([for (k = bottom_keys) [k[0], key_xy(k), [rc, rc]]],
+    feats = concat(stack_cap_holes == "slot"
+                       ? [for (g = thumb_slots()) let(p = [for (k = g) key_xy(k)], x = [for (q = p) q[0]], y = [for (q = p) q[1]])
+                          [str(g[0][0], len(g) > 1 ? str("-", g[len(g) - 1][0], " slot") : ""),
+                           [(min(x) + max(x)) / 2, (min(y) + max(y)) / 2], [max(x) - min(x) + rc, max(y) - min(y) + rc]]]
+                       : [for (k = bottom_keys) [k[0], key_xy(k), [rc, rc]]],
                    [for (i = [0 : 1 : len(spare_xy) - 1]) [str("spare ", i + 1), spare_xy[i], [rc, rc]]],
                    [for (u = ubolt_legs()) ["U-bolt leg", u, [hardware_ubolt_rod_d, hardware_ubolt_rod_d]]],
                    [for (i = [0 : len(fasteners()) - 1]) [str("M3 #", i + 1), fasteners()[i], [hardware_fastener_cbore_d, hardware_fastener_cbore_d]]]);
