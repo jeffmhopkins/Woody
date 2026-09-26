@@ -102,6 +102,35 @@ is ~125 mV against the sensor's 0.152 V minimum pedestal, **≥27 mV of margin**
 real but thinner than anything written, and silently broken by a non-RRIO
 substitution.
 
+## N4 — pin identity against the banked datasheets
+
+11 findings. Both commissioned claims answered, and the largest finding is one
+neither question asked for. Three verified.
+
+| id | verdict | verification |
+|---|---|---|
+| **N4 claim 1** | **CONFIRMED, and the warning is on the wrong half** | The letter map is fine: all 16 `U-DAC` pin names are exact against SBAS430E, the ordinal map is the only reading available, and my `[derived, not cited]` disclosure was right that no corpus document states it. But the exposure is the **address**, not the letter. Extracted from the command table: `0 0 0 0` → *"DAC Channel A"*, `0 0 0 1` → B, `0 0 1 0` → C — the address is **0-based** — and the datasheet never numbers a channel at all (`"Channel 1"` and `"DAC Channel 1"`: 0 hits each). So firmware writing `address = N` for "channel N" selects letter N+1 and rotates every output by one pin: pitch (ch1) leaves on `VOUTB`, which this netlist wires to **mod 1's jack**, and the 3.3333 V shared reference (ch7) leaves on `VOUTH`, declared `DAC_CH8_UNUSED` — producing exactly the all-four-mod-jacks-at-`4·Vdac` failure `firmware/README.md` names for a different cause. `[datasheet datasheets/analog/DAC8568CIPW.pdf, command table]` `[test]` |
+| **N4-2** | **CONFIRMED — eleven op-amp halves resolve to no pin, and nobody marked it** | Enumerated across all 22 netlists: `U-OPA-PITCH section A` is claimed by **three** circuits (`pitch-stage/U-PITCH-REFBUF`, `breath-output-stage/U-BREATH-BUF`, `breath-receive-stage/U-REF-BUF`), `section B` by **two**, and five more carry `section: half`, which is not a section. No package instance is named anywhere, and on an OPA2197 SOIC-8 the letter **is** the pin set. Invisible to the checker because `section` is only read as a truthiness test to skip BOM counting. `[test]` |
+| **N4 claim 2** | **CONFIRMED as harmless, with two real problems beside it** | The gate assignment is unfalsifiable and fine — the gates are identical. Recorded unverified but worth the fixer's attention: `led-strip-drive` names gates with **letters the device does not have** while `digital-and-supervision` uses numbers, the same unjoined naming shape; and all four `OE` are tied to GND on both parts against the datasheet's explicit recommendation to pull `OE` to VCC for guaranteed Hi-Z through power-up, with neither note recording the departure. |
+
+**Not yet verified, not to be repeated:** N4-1, N4-3 through N4-11.
+
+**The slice's closing observation, which I think is the most useful sentence
+this wave has produced:** four times a netlist had to join a logical name the
+corpus uses (channel 7, gate D, section A, R1) to a physical name the silicon
+uses (VOUTG, 3Y, +IN A, pins 2 and 7). Twice I noticed and wrote
+`[derived, not cited]`, and **those two are the safe ones, because they are
+declared.** The two nobody marked are the two that bite. The marker went on the
+visible half.
+
+**Two traps recorded for whoever fixes these:** INA828 SBOS792A §8.1 prose
+calls `REF` "pin 6" while its own Pin Functions table says REF=5, OUT=6 — the
+table is right and the prose is a datasheet typo, so do not "correct" the
+netlist from §8.1. And the banked WS2815 PDF has no text layer at all; the
+slice rendered p.4 at 12x to confirm that the recommended circuit ties the first
+pixel's `BI` to `GND`, which is the claim the "two spare gates" argument rests
+on. It is correct.
+
 ## Slices still running
 
-N2, N4, N8.
+N2, N8.
