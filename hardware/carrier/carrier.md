@@ -14,13 +14,13 @@ under its window at the tail (§7), and everything else here is passive, slow,
 or analog.
 
 > **There is no carrier board (owner, 2026-09-26).** These circuits are built
-> on **the centre board**: one flat board between the thumb boards and the
-> key boards, the stacking headers between them passing through it (ADR
-> 0013's build-approach note, `mechanical/DESIGN.md`). The block diagram and
-> §§ below describe the circuits, which have not changed; where a line talks
-> about "the board", read the centre board. Its size and the room its parts
-> have are in `mechanical/drc.echo` — little under the keys, so the regulators
-> must be low-profile.
+> on **the main board** (ADR 0017): one long board at the thumb level that
+> also carries the thumb switches and their registers, with the key boards
+> plugged into it on stacking headers (`mechanical/DESIGN.md`). The block
+> diagram and §§ below describe the circuits, which have not changed; where a
+> line talks about "the board", read the main board. Its size and the room its
+> parts have are in `mechanical/drc.echo`. The breath sensor is at its mouth
+> end, so the buffered breath signal runs the board's length (ADR 0017).
 
 Evidence marking follows the module pages: `[repo]` names a file, `[calc]` shows
 the arithmetic, `[from memory]` means **I could not open the datasheet and you
@@ -255,7 +255,7 @@ the WS2815 `V_IH`/`BI` argument — moved verbatim to
 
 > **Superseded 2026-09-26: the matrix is on the TOP face** (owner, ADR 0009).
 > The ESP32-S3-Matrix is **not on a carrier at all**: it sits face up
-> against the oak top under a window at the tail, wired to the centre board
+> against the oak top under a window at the tail, wired to the main board
 > by a soldered pigtail (ADR 0009, `mechanical/DESIGN.md`), so there is no
 > cutout to argue about and the underside mounting below is not needed.
 > `mechanical/renders/centre-board.png` shows where the circuits went.
@@ -359,10 +359,10 @@ single-row 2.54 mm headers would fit — 20 × 2.54 = 51 mm of board edge — th
 loom that is hand-terminated once and then closed up.
 
 **Where they go was the problem, and the body CAD has answered it.** There is
-no side strip since ADR 0016: the one strip lies on the centre board itself,
-and the board's outline, the tube lane beside it and what each keeps from the
-other are derived in `mechanical/` — `mechanical/drc.echo` "centre board
-(derived)" gives the size.
+no side strip since ADR 0016: the one strip lies on the main board itself
+(ADR 0017), and the board's outline and what it keeps from everything else
+are derived in `mechanical/` — `mechanical/drc.echo` "main board (derived)"
+gives the size.
 
 **But the per-cluster decision bought real room here**, which is worth saying
 because the width crunch was one of the arguments in play: the channels now
@@ -379,8 +379,8 @@ Ordered by what blocks what. The first four block layout.
 - **Which face of the dev board carries the matrix, and its outline and header
   row spacing** (§7). Decides underside-mount versus a ~22 mm cutout, and with
   it the whole board's routing.
-- **The board outline** is now derived by the body CAD (the centre board,
-  `mechanical/DESIGN.md`), with the strip on it (ADR 0016). What is still open
+- **The board outline** is now derived by the body CAD (the main board,
+  ADR 0017, `mechanical/DESIGN.md`), with the strip on it (ADR 0016). What is still open
   is the routing inside that outline.
 - **`F-CHAIN`** (§3): whether the 3V3 conductor going down the body is fused.
   Two millimetres of board, unretrofittable, and the failure it covers is

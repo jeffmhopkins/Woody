@@ -1,6 +1,8 @@
 # 0016 — One LED strip, on the centre board
 
-**Status:** Accepted
+**Status:** Accepted. Placement amended by [ADR 0017](0017-one-main-board.md): the
+centre board became the main board, and the strip runs down its centreline
+with the breath sensor at the mouth end.
 
 Amends [ADR 0014](0014-lighting.md): its geometry ("two runs, one chain") and
 its wiring choice (two independent data lines). Everything else in ADR 0014 —

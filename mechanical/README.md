@@ -90,9 +90,9 @@ of a superseded value. Instead:
 |---|---|
 | ![Underside](renders/underside.png) Underside: thumb recesses, both thumb rests, U-bolt | ![Exploded](renders/exploded.png) The stack, pulled apart |
 | ![Internals](renders/internals.png) Lid off | ![Tail](renders/tail-detail.png) The tail from inside |
-| ![Centre board](renders/centre-board-3d.png) The centre board that replaces the carrier, in yellow | |
+| ![Main board](renders/main-board-3d.png) The main board: thumb switches and carrier circuits on one board, in yellow | |
 
-![The centre board, labelled](renders/centre-board.png)
+![The main board, labelled](renders/main-board.png)
 
 ![Plan from above, with the length budget](renders/plan-top.png)
 

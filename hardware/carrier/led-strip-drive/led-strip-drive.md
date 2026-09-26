@@ -2,7 +2,7 @@
 
 **Status:** Split out of `carrier.md` 2026-09-21 (Phase B). **One strip since
 2026-09-26** ([ADR 0016](../../../docs/decisions/0016-one-strip-on-the-centre-board.md)):
-it lies on the centre board and lights both acrylic sides, so there is one
+it lies on the main board and lights both acrylic sides, so there is one
 data line, one connector and one set of parts. The two-strip version is in
 [`notes.md`](notes.md).
 

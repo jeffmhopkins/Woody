@@ -1,6 +1,7 @@
 # 0001 — MCU selection and board partitioning
 
-**Status:** Accepted. One MCU since [ADR 0015](0015-one-mcu-no-display.md). Partitioning revised by
+**Status:** Accepted. The two thumb clusters are on the main board since
+[ADR 0017](0017-one-main-board.md). One MCU since [ADR 0015](0015-one-mcu-no-display.md). Partitioning revised by
 [ADR 0013](0013-two-mcu-split.md) — display and WiFi moved to a second MCU. The
 family choice below still holds for the real-time board, and the C6 analysis
 still applies to *that* role; a C6 is fine as the display board.

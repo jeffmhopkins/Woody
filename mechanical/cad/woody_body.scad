@@ -127,15 +127,20 @@ lt_rest_rel = run_rel(layout_lt_rest_under);
 // LT2 side by side toward the mouth, LT3 / LT4 side by side toward the tail.
 lt_rel = [for (i = [0 : 3]) lt_rest_rel + (i < 2 ? -1 : 1) * layout_lt_rest / 2];
 lt_dy = [for (i = [0 : 3]) (i % 2 == 0 ? -1 : 1) * thumb_pitch / 2];   // across, from the centreline
-// The breath trap sits mid-height, above the left thumb board's parts, so
-// it has to clear the first KEY board and the centre board, not the thumb
-// board (which starts further towards the mouth since the thumb line did):
-// clash.txt checks the trap against the thumb board.
+// The breath trap sits mid-height, above the main board's parts, so it has
+// to clear the first KEY board: clash.txt checks it against the main board.
+// The breath sensor is at the mouth end too (ADR 0017), and its leads must
+// stop short of the first thumb row's pins.
+ks33_stub = 2.6;   // half-width of the KS-33's pole and pins where they stand proud of a board [clash.txt, off the vendor STEP]
 board_lead = plate_cutout / 2 + cluster_margin;   // first key board edge before LH1
 trap_band = boards_board_clear + routing_trap_l + boards_board_clear;
-mouth_req = max(x_in0 + layout_mouth_extra + switch_keycap / 2 + stack_cap_clear,   // the first top cap
-                x_in0 + layout_underside_clear - (min(lt_rel) - rc / 2),              // the first thumb recess
-                x_in0 + trap_band + board_lead);                                     // the breath trap, before the boards
+mouth_names = ["the first top key", "the first thumb recess", "the breath trap before the first boards",
+               "the breath sensor before the first thumb row"];
+mouth_claims = [x_in0 + layout_mouth_extra + switch_keycap / 2 + stack_cap_clear,
+                x_in0 + layout_underside_clear - (min(lt_rel) - rc / 2),
+                x_in0 + trap_band + board_lead,
+                x_in0 + boards_board_clear + 0.5 + boards_sensor_body / 2 + 5.1 + ks33_stub + 0.5 - min(lt_rel)];
+mouth_req = max(mouth_claims);
 
 // The TAIL's needs, measured from the last top key's centre. Everything at
 // the tail hangs off the right hand, so it can be worked out in the right
@@ -495,12 +500,8 @@ fastener_notch = 1.5 + boards_board_clear;   // an M3's radius and a clearance: 
 // Three stations of two, one each side: in the mouth band before the first
 // boards, in the gap between the hands, and between the last key board and
 // the connector. ADR 0009's "~80 mm apart" was for a 457 mm body; on the
-// derived body the stations fall where the keys are not. The gap station
-// stands in front of the breath sensor's leads if the middle of the gap is
-// too close to them: the far-side screw passes through the centre board's
-// edge there (ADR 0016 put the sensor on that side).
-function sensor_x() = kspan("right_hand")[0] - boards_board_clear - boards_sensor_body / 2;
-fastener_x = [(x_in0 + x_lh0 - board_lead) / 2, min((x_gap0 + x_rh0) / 2, sensor_x() - 5.1 - fastener_notch - 0.5), tail_fastener_x];
+// derived body the stations fall where the keys are not.
+fastener_x = [(x_in0 + x_lh0 - board_lead) / 2, (x_gap0 + x_rh0) / 2, tail_fastener_x];
 function fasteners() =
     [for (x = fastener_x, sd = [0, 1]) [x, sd == 0 ? u_y0 + hardware_fastener_inset : W - u_y0 - hardware_fastener_inset]];
 
@@ -587,9 +588,6 @@ module cluster_boards() {
     for (cl = ["left_hand", "right_hand"])
         P(C_PCB, false, str("board ", cl)) translate([0, 0, z_plate_top - switch_pcb_below_seat - switch_pcb_t + explode * 0.25])
             linear_extrude(switch_pcb_t) offset(-0.5) cluster_window_2d(cluster_keys(cl));
-    for (cl = ["left_thumb", "right_thumb"])
-        P(C_PCB, false, str("board ", cl)) translate([0, 0, z_floor + switch_pcb_below_seat - explode * 0.25])
-            linear_extrude(switch_pcb_t) offset(-3) thumb_outline_2d(cl);
 }
 
 module tail_equipment() {
@@ -599,7 +597,7 @@ module tail_equipment() {
     P(C_LED, false, "Matrix LEDs") translate([matrix_xy[0] - boards_matrix_emitters / 2, matrix_xy[1] - boards_matrix_emitters / 2, matrix_board_z + switch_pcb_t])
         cube([boards_matrix_emitters, boards_matrix_emitters, boards_matrix_led_h]);
     // The Matrix's pigtail where it leaves the two pad rows, below the board;
-    // the wires run on to the centre board (not drawn - thin wires).
+    // the wires run on to the main board (not drawn - thin wires).
     for (i = [0, 1]) P([0.15, 0.15, 0.15], false, str("Matrix harness ", i + 1))
         translate([matrix_xy[0] - 12.7, matrix_xy[1] + (i == 0 ? -1 : 1) * 11.43 - 1.27, matrix_board_z - boards_matrix_harness_h])
             cube([25.4, 2.54, boards_matrix_harness_h]);   // rows 22.86 apart [ds]
@@ -635,10 +633,11 @@ module tail_equipment() {
         [x_in1 - openings_usb_ext_depth - 4, usb_c[0], usb_c[1]], [x_in1 - openings_usb_ext_depth, usb_c[0], usb_c[1]]], 4);
 }
 
-// ONE LED STRIP, lying on the centre board (owner, 2026-09-26: "one led
+// ONE LED STRIP, lying on the main board (owner, 2026-09-26: "one led
 // strip, on the center board. It'll diffuse to both sides" - ADR 0016). It
-// runs the board's length along its tube-side edge, LEDs up, and lights
-// both acrylic sides through the cavity. Placed with the centre board below.
+// runs down the board's centreline, between the thumb switches' two rows of
+// pins, LEDs up, and lights both acrylic sides through the cavity. Placed
+// with the main board below.
 module led_strips() {
     P(C_LED, false, "LED strip") translate([strip_x0, strip_y, cb_top]) cube([strip_l, lighting_strip_w, lighting_strip_t]);
 }
@@ -669,51 +668,65 @@ module run(pts, d) {
     for (i = [0 : len(pts) - 2]) hull() { translate(pts[i]) sphere(d = d, $fn = 16); translate(pts[i + 1]) sphere(d = d, $fn = 16); }
 }
 top_z = z_plate_top - switch_pcb_below_seat - switch_pcb_t;     // top cluster boards' underside
-thumb_z = z_floor + switch_pcb_below_seat + switch_pcb_t;       // thumb boards' top face
+thumb_z = z_floor + switch_pcb_below_seat + switch_pcb_t;       // the main board's top face, where the thumb switches solder
 function mid_x(cl) = (min(xs(cluster_keys(cl))) + max(xs(cluster_keys(cl)))) / 2;
 function sgn(side) = side == "right" ? 1 : -1;
 function xspan(cl) = [min(xs(cluster_keys(cl))), max(xs(cluster_keys(cl)))];
 
-// THE CENTRE BOARD (owner, 2026-09-26: "a center board that stacks between
-// the upper and lower key boards", after trying one board on edge down the
-// side and a wider body for it). There is no carrier: the carrier's circuits
-// are on ONE flat board lying between the thumb boards and the key boards,
-// from the start of the left hand to the end of the right, across the gap between
-// the hands. The owner asked for real clearances (boards.board_clear) after
-// rejecting an earlier stack at 0.5 mm, so under the key boards its parts
-// have only what drc.echo prints; in the gap between the hands, where no key
-// board is overhead, they have up to the plate - so the breath sensor and
-// the tall parts go there. Each thumb board plugs into the key board above
-// it through a stacking header that passes through the centre board, so the
-// chain runs RT -> RH -> LT -> LH through all three, and every other cable
-// (the Matrix's pigtail, the patch lead) ends on it.
+// THE MAIN BOARD (owner, 2026-09-26: "instead of individual bottom boards,
+// and the center board, maybe we can do one big long board" - ADR 0017).
+// ONE flat board at the thumb boards' level carries the thumb switches, both
+// thumb registers and everything the carrier did, from the mouth cap to the
+// end of the right hand. Its parts face up, under the key boards; the key
+// boards plug into it on stacking headers. At this level it has more room
+// than the centre board had: drc.echo prints it. The cb_ names
+// are kept from the centre board it replaced.
 function tspan(cl) = let(p = [for (q = thumb_pts(cl)) q[0]]) [min(p) - (switch_keycap + 4) / 2, max(p) + (switch_keycap + 4) / 2];
 function kspan(cl) = xspan(cl) + [-1, 1] * (plate_cutout / 2 + cluster_margin);
 tube_side = sgn(routing_tube_lane);
-// Across: from the tube lane to the far side, a clearance from each.
-cb_y = tube_side < 0 ? [tube_y + routing_tube_od / 2 + boards_board_clear, W - u_y0 - boards_board_clear]
-                     : [u_y0 + boards_board_clear, tube_y - routing_tube_od / 2 - boards_board_clear];
-cb_x = [kspan("left_hand")[0], kspan("right_hand")[1]];
-cb_z = thumb_z + boards_cluster_smt_h + boards_board_clear;          // underside
-cb_top = cb_z + switch_pcb_t;
+// Across: the full width inside the sides; the tube runs above it.
+cb_y = [u_y0 + boards_board_clear, W - u_y0 - boards_board_clear];
+cb_x = [x_in0 + boards_board_clear, max(kspan("right_hand")[1], tspan("right_thumb")[1])];
+cb_z = thumb_z - switch_pcb_t;          // underside: where the thumb boards were
+cb_top = thumb_z;
 cb_room = top_z - boards_cluster_smt_h - boards_board_clear - cb_top;   // parts height under the key boards
-// The strip: the board's length less an inset at each end, along the tube-
-// side edge; the breath sensor and the regulator take the far side.
-strip_x0 = cb_x[0] + lighting_strip_inset;
-strip_l = cb_x[1] - lighting_strip_inset - strip_x0;
-strip_y = tube_side < 0 ? cb_y[0] + lighting_strip_inset : cb_y[1] - lighting_strip_inset - lighting_strip_w;
-strip_in = tube_side < 0 ? strip_y + lighting_strip_w : strip_y;   // its inner edge
 gap_x = [kspan("left_hand")[1] + boards_board_clear, kspan("right_hand")[0] - boards_board_clear];   // nothing overhead
 gap_room = z_lid_bot - boards_board_clear - cb_top;
 chain = ["right_thumb", "right_hand", "left_thumb", "left_hand"];
 function is_top(cl) = cl == "left_hand" || cl == "right_hand";
+// Where the thumb switches' pins stand through the board's top face.
+function pins_at(p, r) = len([for (k = bottom_keys) if (max(abs(key_xy(k)[0] - p[0]), abs(key_xy(k)[1] - p[1])) < ks33_stub + r) 1]) > 0;
+
+// THE BREATH SENSOR: MPXV4006DP case 1351-01, SURFACE MOUNT (datasheet p.2),
+// AT THE MOUTH END (owner, 2026-09-26, with the main board): on the far side
+// from the tube, ports towards the tail, beside the breath trap - the
+// shortest tube this body can have. The lower barb reaches the board's
+// surface (p.7), so the board has a slot in front of it.
+sensor_c = [cb_x[0] + 0.5 + boards_sensor_body / 2, cb_y[tube_side < 0 ? 1 : 0] + tube_side * (boards_sensor_leads / 2 + 0.5)];
+sensor_face_x = sensor_c[0] + boards_sensor_body / 2;
+p2_y = sensor_c[1] + 2.1;
+p1_tip = [sensor_face_x + boards_sensor_port_l, sensor_c[1] - 2.1, cb_top + boards_sensor_port_z[0]];
+module sensor_3d() {
+    P([0.20, 0.20, 0.22], false, "breath sensor") union() {
+        translate([sensor_c[0] - boards_sensor_body / 2, sensor_c[1] - boards_sensor_body / 2, cb_top])
+            cube([boards_sensor_body, boards_sensor_body, boards_sensor_h]);
+        translate([sensor_c[0] - 5.1, sensor_c[1] - boards_sensor_leads / 2, cb_top]) cube([10.2, boards_sensor_leads, 1.2]);
+        for (i = [0, 1]) translate([sensor_face_x - EPS, sensor_c[1] + (i == 0 ? -2.1 : 2.1), cb_top + boards_sensor_port_z[i]])
+            rotate([0, 90, 0]) cylinder(d = boards_sensor_port_d, h = boards_sensor_port_l);
+    }
+}
+sensor_room = under_keys(sensor_c, [boards_sensor_body, boards_sensor_leads]) ? cb_room : gap_room;
+// The strip: the centreline band between the thumb switches' two rows of
+// pins, from past the sensor to the board's tail end.
+strip_y = W / 2 - lighting_strip_w / 2;
+strip_x0 = sensor_c[0] + 5.1 + boards_board_clear;
+strip_l = cb_x[1] - lighting_strip_inset - strip_x0;
 
 // STACKING HEADERS, 2 x 6 at 2.0 mm pitch (2.54 will not fit between two
-// switches' pins, 19 mm apart): thumb board -> through the centre board ->
-// key board above, midway between two thumb keys, clear of every switch's
-// pole and pins on both boards (which stand proud of them), at the key
-// board's edge away from the tube, nearest the middle of their overlap.
-ks33_stub = 2.6;   // half-width of the KS-33's pole and pins where they stand proud of a board [clash.txt, off the vendor STEP]
+// switches' pins, 19 mm apart): main board -> key board above, midway
+// between two thumb keys, clear of every switch's pole and pins on both
+// boards (which stand proud of them), at the key board's edge away from the
+// tube, nearest the middle of their overlap.
 stack_pairs = [["right_thumb", "right_hand"], ["left_thumb", "left_hand"]];
 stack_y = W / 2 - tube_side * (switch_cluster_pcb_w / 2 - boards_conn_w / 2 - 0.5);
 function conn_clear(x, cl) = min([for (k = cluster_keys(cl))
@@ -726,27 +739,9 @@ function stack_x(pr) = let(a = xspan(pr[0]), b = xspan(pr[1]), m = (max(a[0], b[
     len(ok) > 0 ? ok[search(min(d), d)[0]] : undef;
 function stack_of(cl) = [for (pr = stack_pairs) if (pr[0] == cl || pr[1] == cl) [stack_x(pr), stack_y]];
 
-// THE BREATH SENSOR: MPXV4006DP case 1351-01, SURFACE MOUNT (datasheet p.2),
-// on the centre board in the gap between the hands - the one place with
-// height for it - ports towards the mouth, on the tube's side. The lower barb
-// reaches the board's surface (p.7), so the board has a slot in front of it.
-// Mid-body, on the far side from the tube: the strip has the tube's side.
-sensor_c = [sensor_x(), cb_y[tube_side < 0 ? 1 : 0] + tube_side * (boards_sensor_leads / 2 + 0.5)];
-sensor_face_x = sensor_c[0] - boards_sensor_body / 2;
-p2_y = sensor_c[1] + 2.1;
-p1_tip = [sensor_face_x - boards_sensor_port_l, sensor_c[1] - 2.1, cb_top + boards_sensor_port_z[0]];
-module sensor_3d() {
-    P([0.20, 0.20, 0.22], false, "breath sensor") union() {
-        translate([sensor_c[0] - boards_sensor_body / 2, sensor_c[1] - boards_sensor_body / 2, cb_top])
-            cube([boards_sensor_body, boards_sensor_body, boards_sensor_h]);
-        translate([sensor_c[0] - 5.1, sensor_c[1] - boards_sensor_leads / 2, cb_top]) cube([10.2, boards_sensor_leads, 1.2]);
-        for (i = [0, 1]) translate([sensor_face_x + EPS, sensor_c[1] + (i == 0 ? -2.1 : 2.1), cb_top + boards_sensor_port_z[i]])
-            rotate([0, -90, 0]) cylinder(d = boards_sensor_port_d, h = boards_sensor_port_l);
-    }
-}
 // The regulator block (a module and its bulk capacitors, for the one dev
-// board left - ADR 0015), turned across the body at the board's tail end,
-// under the right-hand key board - drc.echo says whether it fits there.
+// board left - ADR 0015), turned across the body at the board's tail end, on
+// the far side - drc.echo says whether it fits where it stands.
 tall_sz = [boards_tall_w, boards_tall_l];   // along x, across y
 far_y = cb_y[tube_side < 0 ? 1 : 0] + tube_side * (boards_tall_l / 2 + 0.5);
 tall_c = [[cb_x[1] - boards_tall_w / 2 - 1, far_y]];
@@ -756,23 +751,34 @@ tall_c = [[cb_x[1] - boards_tall_w / 2 - 1, far_y]];
 function under_keys(c, sz) = len([for (cl = ["left_hand", "right_hand"], k = cluster_keys(cl))
     if (abs(key_xy(k)[0] - c[0]) < (switch_cluster_pcb_w + sz[0]) / 2 && abs(key_xy(k)[1] - c[1]) < (switch_cluster_pcb_w + sz[1]) / 2) 1]) > 0;
 tall_room = under_keys(tall_c[0], tall_sz) ? cb_room : gap_room;
+ubolt_hole_r = hardware_ubolt_nut_af / cos(30) / 2 + boards_board_clear;   // the U-bolt's nuts stand above the board's underside
 module cb_2d() {
     difference() {
         translate([cb_x[0], cb_y[0]]) square([cb_x[1] - cb_x[0], cb_y[1] - cb_y[0]]);
         // The slot in front of the sensor's lower port.
-        translate([sensor_face_x - boards_sensor_port_l - 2, p2_y - boards_sensor_port_d / 2 - 1])
-            square([boards_sensor_port_l + 2 + EPS, boards_sensor_port_d + 2]);
-        // A notch for each screw the board's edge reaches.
+        translate([sensor_face_x - EPS, p2_y - boards_sensor_port_d / 2 - 1])
+            square([boards_sensor_port_l + 2, boards_sensor_port_d + 2]);
+        // A notch for each screw the board's edge reaches, a hole over each
+        // U-bolt nut.
         for (f = fasteners()) translate(f) circle(r = fastener_notch);
+        for (u = ubolt_legs()) translate(u) circle(r = ubolt_hole_r);
     }
 }
-// Inboard of the strip on its side, 4 mm in from the far edge.
-cb_standoffs = [for (x = [cb_x[0] + 4, gap_x[0] + 4, cb_x[1] - 4])
-                for (y = [strip_in - tube_side * (1.5 + boards_standoff_d / 2), cb_y[tube_side < 0 ? 1 : 0] + tube_side * 4]) [x, y]];
-function over_thumb(p) = len([for (cl = ["left_thumb", "right_thumb"]) if (p[0] >= tspan(cl)[0] && p[0] <= tspan(cl)[1]) 1]) > 0;
+// Standoffs off the oak: candidates along both edge bands and at the thumb
+// rests, kept where nothing else is - the soldered thumb switches, clipped
+// into their plates, carry the board between them.
+function so_clear(p) = let(r = boards_standoff_d / 2 + 0.5)
+    !pins_at(p, r) && abs(p[1] - W / 2) >= lighting_strip_w / 2 + r
+    && min([for (f = fasteners()) norm(p - f)]) >= fastener_notch + r
+    && min([for (u = ubolt_legs()) norm(p - u)]) >= ubolt_hole_r + r
+    && max(abs(p[0] - sensor_c[0]) - boards_sensor_body / 2, abs(p[1] - sensor_c[1]) - boards_sensor_leads / 2) >= r
+    && max(abs(p[0] - tall_c[0][0]) - tall_sz[0] / 2, abs(p[1] - tall_c[0][1]) - tall_sz[1] / 2) >= r
+    && min([for (pr = stack_pairs) max(abs(p[0] - stack_x(pr)) - boards_conn_l / 2, abs(p[1] - stack_y) - boards_conn_w / 2)]) >= r;
+cb_standoffs = [for (x = [cb_x[0] + 4, lt_rest_xy[0], (gap_x[0] + gap_x[1]) / 2, rt_rest[0], cb_x[1] - 4],
+                     y = [cb_y[0] + 4, cb_y[1] - 4]) if (so_clear([x, y])) [x, y]];
 module centre_board_3d() {
-    P(C_PCB, false, "centre board") translate([0, 0, cb_z]) linear_extrude(switch_pcb_t) cb_2d();
-    P([0.35, 0.55, 0.40], false, "parts centre board") translate([0, 0, cb_top]) linear_extrude(boards_smt_h) difference() {
+    P(C_PCB, false, "main board") translate([0, 0, cb_z]) linear_extrude(switch_pcb_t) cb_2d();
+    P([0.35, 0.55, 0.40], false, "parts main board") translate([0, 0, cb_top]) linear_extrude(boards_smt_h) difference() {
         offset(-0.5) cb_2d();
         for (pr = stack_pairs) translate([stack_x(pr), stack_y]) square([boards_conn_l + 1, boards_conn_w + 1], center = true);
         translate(sensor_c) square([boards_sensor_body + 1, boards_sensor_leads + 1], center = true);
@@ -780,13 +786,16 @@ module centre_board_3d() {
         for (c = cb_standoffs) translate(c) circle(d = boards_standoff_d + 1);
         translate([strip_x0 - 0.5, strip_y - 0.5]) square([strip_l + 1, lighting_strip_w + 1]);
     }
-    P([0.30, 0.30, 0.55], false, "tall parts centre board")
+    P([0.30, 0.30, 0.55], false, "tall parts main board")
         translate([tall_c[0][0] - tall_sz[0] / 2, tall_c[0][1] - tall_sz[1] / 2, cb_top]) cube([tall_sz[0], tall_sz[1], boards_tall_h]);
-    // Standoffs off the oak where nothing is under the board; spacers onto a
-    // thumb board where one is.
-    for (i = [0 : len(cb_standoffs) - 1]) let(c = cb_standoffs[i], f = over_thumb(c) ? thumb_z : floor_at(c[0]))
-        P(C_STEEL, false, str("centre board standoff ", i + 1)) translate([c[0], c[1], f]) cylinder(d = boards_standoff_d, h = cb_z - f, $fn = 6);
+    // Off the oak, or off a thumb plate where one is under it.
+    for (i = [0 : 1 : len(cb_standoffs) - 1]) let(c = cb_standoffs[i], f = on_thumb_plate(c) ? z_thumb_top : floor_at(c[0]))
+        P(C_STEEL, false, str("main board standoff ", i + 1)) translate([c[0], c[1], f]) cylinder(d = boards_standoff_d, h = cb_z - f, $fn = 6);
 }
+function on_thumb_plate(p) = len([for (cl = ["left_thumb", "right_thumb"])
+    let(q = thumb_pts(cl), h = (switch_keycap + 4) / 2)
+    if (p[0] >= min([for (a = q) a[0]]) - h && p[0] <= max([for (a = q) a[0]]) + h
+        && p[1] >= min([for (a = q) a[1]]) - h && p[1] <= max([for (a = q) a[1]]) + h) 1]) > 0;
 function floor_at(x) = abs(x - ubolt_c[0]) <= ubolt_bp[0] / 2 ? z_floor + hardware_backplate_t + hardware_ubolt_nut_h : z_floor;
 
 module headers_3d() {
@@ -797,7 +806,7 @@ module headers_3d() {
 
 // PARTS ON THE BOARDS, as envelopes. Cluster boards: a component layer on
 // the cavity side (the plate side cannot take a SOIC - ks33-geometry.md).
-// The Matrix: its back-side parts. The centre board's parts are with it.
+// The Matrix: its back-side parts. The main board's parts are with it.
 module parts_3d() {
     for (cl = ["left_hand", "right_hand"])
         P([0.35, 0.55, 0.40], false, str("parts ", cl)) translate([0, 0, top_z - boards_cluster_smt_h])
@@ -805,23 +814,16 @@ module parts_3d() {
                 offset(-0.5) cluster_window_2d(cluster_keys(cl));
                 for (h = stack_of(cl)) translate(h) square([boards_conn_l + 1, boards_conn_w + 1], center = true);
             }
-    for (cl = ["left_thumb", "right_thumb"])
-        P([0.35, 0.55, 0.40], false, str("parts ", cl)) translate([0, 0, thumb_z])
-            linear_extrude(boards_cluster_smt_h) difference() {
-                offset(-3) thumb_outline_2d(cl);
-                for (h = stack_of(cl)) translate(h) square([boards_conn_l + 1, boards_conn_w + 1], center = true);
-                for (c = cb_standoffs) if (over_thumb(c)) translate(c) circle(d = boards_standoff_d + 1);
-            }
     P([0.20, 0.20, 0.22], false, "Matrix underside parts") translate([matrix_xy[0] - 9.5, matrix_xy[1] - 9.5, matrix_board_z - boards_matrix_under_h])
         cube([19, 19, boards_matrix_under_h]);
 }
 
 module routing_3d() {
     trap_y = lane_y(routing_tube_lane, routing_trap_d);   // inboard of the fastener line, like the tube
-    // The trap sits in the mouth band, before the first key and thumb boards
-    // (between them there is no height for it). From it the tube runs down the
-    // tube lane beside the centre board, between the cluster boards' parts,
-    // to the gap between the hands, and turns in onto the sensor's port.
+    // The trap sits in the mouth band, above the main board and before the
+    // first key board. The sensor is beside it on the far side (ADR 0017):
+    // from the trap the tube turns across, over the strip, and back onto the
+    // sensor's port, which faces the tail.
     trap_x0 = x_lh0 - board_lead - boards_board_clear - routing_trap_l;
     trap_z = z_floor + cavity_h / 2;
     P([0.95, 0.60, 0.45], false, "breath tube") run([
@@ -831,10 +833,9 @@ module routing_3d() {
     P([0.95, 0.60, 0.45], false, "breath trap") translate([trap_x0, trap_y, trap_z]) rotate([0, 90, 0])
         cylinder(d = routing_trap_d, h = routing_trap_l);
     P([0.95, 0.60, 0.45], false, "breath tube to sensor") run([
-        [trap_x0 + routing_trap_l, trap_y, trap_z], [trap_x0 + routing_trap_l + 10, tube_y, routing_lane_z],
-        // Up to the port's height first, so it crosses the strip clear of it.
-        [gap_x[0] + 2, tube_y, routing_lane_z], [gap_x[0] + 6, tube_y, p1_tip[2]], [p1_tip[0] - routing_tube_od - 1, p1_tip[1], p1_tip[2]],
-        [p1_tip[0] + 2, p1_tip[1], p1_tip[2]]], routing_tube_od * 0.8);
+        [trap_x0 + routing_trap_l, trap_y, trap_z], [trap_x0 + routing_trap_l + 4, trap_y, p1_tip[2]],
+        [trap_x0 + routing_trap_l + 4, p1_tip[1], p1_tip[2]], [p1_tip[0] + routing_tube_od + 1, p1_tip[1], p1_tip[2]],
+        [p1_tip[0] - 2, p1_tip[1], p1_tip[2]]], routing_tube_od * 0.8);
 }
 
 module hardware_3d() {
@@ -886,9 +887,6 @@ module drc_report() {
 
     echo("DRC", "INFO", "overall length (derived)", L, str("mm = ", L / 25.4, " in; mouth cap to LH1 ", x_lh0,
          ", keys ", top_last - x_lh0, " centre to centre, last key to tail face ", L - top_last));
-    mouth_names = ["the first top key", "the first thumb recess", "the breath trap before the first boards"];
-    mouth_claims = [x_in0 + layout_mouth_extra + switch_keycap / 2 + stack_cap_clear,
-                    x_in0 + layout_underside_clear - (min(lt_rel) - rc / 2), x_in0 + trap_band + board_lead];
     drc(undef, "what the mouth end needs", mouth_names[search(max(mouth_claims), mouth_claims)[0]], str(mouth_req, " mm from the mouth cap to LH1"));
     tail_names = ["last key board, the last fastener pair, then the patch plug and the etherCON depth",
                   "last key board, the LED matrix on the top face, then the etherCON depth (matrix not centred)",
@@ -924,7 +922,7 @@ module drc_report() {
         drc(undef, "equal bands (mouth = between hands)", band,
             str("mm each; set by the ", band == mouth_req ? "mouth end" : "minimum gap",
                 " - mouth needs ", mouth_req, ", gap minimum ", layout_gap, "; the tail is sized on its own"));
-    drc(undef, "LED strip on the centre board (derived)", strip_l,
+    drc(undef, "LED strip on the main board (derived)", strip_l,
         str("mm, one strip lighting both sides (ADR 0016) - ", floor(strip_l * lighting_strip_per_m / 1000), " LEDs at ", lighting_strip_per_m, "/m"));
     drc(p1_tip[2] - routing_tube_od * 0.4 >= cb_top + lighting_strip_t + boards_board_clear, "breath tube crosses the strip clear of it",
         p1_tip[2] - routing_tube_od * 0.4 - cb_top - lighting_strip_t, "mm above the strip's top face");
@@ -1000,14 +998,15 @@ module drc_report() {
     th_pole = z_floor + switch_pole_tip_below_seat;
     drc(undef, "thumb switch pole tip height in the cavity", th_pole, "mm above the bottom face");
 
-    // The centre board (no carrier, 2026-09-26)
-    drc(undef, "centre board (derived)", [cb_x[1] - cb_x[0], cb_y[1] - cb_y[0]],
-        str("mm long x wide, underside at ", cb_z, " mm - the length of the hands, from the tube lane to the far side"));
-    drc(cb_room >= boards_smt_h, "centre board parts room under the key boards", cb_room,
+    // The main board (ADR 0017)
+    drc(undef, "main board (derived)", [cb_x[1] - cb_x[0], cb_y[1] - cb_y[0]],
+        str("mm long x wide, underside at ", cb_z, " mm - mouth cap to the end of the right hand, the full width inside the sides"));
+    drc(cb_room >= boards_smt_h, "main board parts room under the key boards", cb_room,
         "mm from its top face to the key boards' parts, less the clearances - every part there must fit this");
-    drc(undef, "centre board parts room in the gap between the hands", [gap_x[1] - gap_x[0], gap_room],
-        "mm long x high, nothing overhead but the plate: the sensor and the tall parts go here");
-    drc(boards_sensor_h <= gap_room, "breath sensor fits in the gap", gap_room - boards_sensor_h, "mm spare above it");
+    drc(undef, "main board parts room where no key board is overhead", gap_room, "mm, up to the plate");
+    drc(boards_sensor_h <= sensor_room, "breath sensor fits at the mouth end", sensor_room - boards_sensor_h, "mm spare above it");
+    drc(len(cb_standoffs) >= 4, "main board standoffs found clear of everything", len(cb_standoffs),
+        "standoffs off the oak; the soldered thumb switches carry the board between them");
     drc(boards_tall_h <= tall_room, "regulator block fits where it stands", tall_room - boards_tall_h,
         str("mm spare, ", under_keys(tall_c[0], tall_sz) ? "under a key board" : "beside the key boards, clear to the lid",
             " [approx: key board footprints as squares; clash.txt is the check] - negative means low-profile parts"));

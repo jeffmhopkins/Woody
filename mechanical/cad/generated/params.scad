@@ -70,7 +70,7 @@ switch_cluster_pcb_w = 22.0;  // tbd; hardware/cluster/cluster-boards.md: outlin
 switch_pcb_t = 1.6;  // settled; [adr] hardware/bom.csv PCB-CLUSTER and PCB-CARRIER, 1.6 mm
 boards_matrix_board = 25.0;  // settled; [ds] datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-dimensions.jpg - 25.00 x 25.00, R1.0
 boards_matrix_emitters = 20.8;  // nominal; ADR 0014 / carrier.md - 8 x 2.6 mm pitch [from memory there]
-boards_smt_h = 2.3;  // nominal; tallest SMT part on the centre board: SMA/SMC diodes 2.29-2.62 [ds SMAJ15A p.3, SS34 p.3]; SOIC 1.75
+boards_smt_h = 2.3;  // nominal; tallest SMT part on the main board: SMA/SMC diodes 2.29-2.62 [ds SMAJ15A p.3, SS34 p.3]; SOIC 1.75
 boards_cluster_smt_h = 1.8;  // nominal; cluster boards: SOIC-16 74HC165 1.75 [from memory, JEDEC MS-012] and 0805 passives
 boards_tall_l = 15.0;  // tbd; ONE regulator block, the long side across the body - an R-78E5.0 SIP-3 (11.6 x 8.5 x 10.4 [ds R-78E5.0-1.0 p.4]), its C-BUCK-IN 6.3 x 11 and a C-STRIP-BULK 8-10 x 12.5-20 [from memory]; one block per dev board (ADR 0013)
 boards_tall_w = 10.0;  // tbd; the regulator block's other side: an R-78E5.0 SIP-3 (11.6 x 8.5 on the board), capacitors beside it [ds R-78E5.0-1.0 p.4; caps from memory]
@@ -133,7 +133,7 @@ routing_ribbon_t = 1.0;  // nominal; flat ribbon thickness, 1.27 mm pitch PVC ri
 routing_lane_z = 19.0;  // tbd; height of the side-channel runs, between the thumb boards below and the key boards above
 lighting_strip_w = 10.0;  // tbd; hardware/carrier/carrier.md '~10 mm' [from memory there]; the strip geometry row is BLOCKED in datasheets/MANIFEST.csv
 lighting_strip_t = 2.5;  // tbd; WS2815 strip thickness, bare IP30 [from memory]; the MANIFEST strip-geometry row is BLOCKED
-lighting_strip_inset = 1.0;  // nominal; the strip's edge and ends in from the centre board's edges - a model choice
+lighting_strip_inset = 1.0;  // nominal; the strip's tail end in from the main board's end - a model choice
 lighting_strip_per_m = 60;  // tbd; LEDs per metre; hardware/unplaced.csv LED-STRIP orders 60/m
 
 // Every value above with status tbd - a placeholder, not a number any

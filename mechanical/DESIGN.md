@@ -68,11 +68,12 @@ Since 2026-09-26 the owner's rule is *minimize total length*: the body is the
 keys, a little at the mouth, and room for the connector at the tail. So the
 model computes the length rather than reading it (`config/key-layout.yaml`'s
 `envelope.length` is null), and `drc.echo` prints it with what set each end.
-Three things can claim each end, and the largest wins:
+Several things can claim each end, and the largest wins:
 
 - **Mouth end:** the first top cap plus `layout.mouth_extra`; the first
-  thumb recess; or the breath trap, which sits across the mouth band before
-  the first key and thumb boards — and then the equal bands (below).
+  thumb recess; the breath trap, which sits across the mouth band before the
+  first key board; or the breath sensor, which must stop short of the first
+  thumb row's pins — and then the equal bands (below).
 - **Tail end:** the **LED matrix on the top face, centred** after the keys
   (owner, 2026-09-26), with the etherCON's housing behind it; or the key
   board, the last fastener pair, the patch plug and the etherCON's depth in a
@@ -98,13 +99,11 @@ Three things can claim each end, and the largest wins:
   right-angle (`openings.usb_plug_l`).
 - **The last fastener pair** stands just in front of the tail equipment,
   where the patch plug is not yet in the side lane.
-- **One LED strip, on the centre board** (ADR 0016): LEDs up along the
-  board's tube-side edge, the board's length less an inset, lighting both
-  sides through the cavity. There are no side strips, so the tube lane runs
-  just inboard of the fastener line and the board widens to the far side;
-  the breath sensor takes the far side, and the tube rises to its port
-  before it crosses the strip (*"breath tube crosses the strip clear of it"*).
-  How evenly the cavity lights the sides is an M6 prototype question.
+- **One LED strip, on the main board** (ADR 0016, ADR 0017): LEDs up down
+  the board's centreline, between the thumb switches' two rows of pins, from
+  past the breath sensor to the board's tail end, lighting both sides through
+  the cavity. How evenly the cavity lights the sides is an M6 prototype
+  question.
 - **The matrix window is frosted acrylic, flush with the oak top, on a lip of
   oak** (owner, 2026-09-26): a rebate in the oak top's upper face as deep as
   the acrylic, over a smaller opening through the oak lip. Like the
@@ -112,27 +111,25 @@ Three things can claim each end, and the largest wins:
   own (`export/oak-rebates.dxf`); the acrylic is `export/matrix-window.dxf`.
   `drc.echo` reports the lip and the LED-to-window distance, which is what
   decides how soft the pixels look. In practice the matrix sets it.
-- **There is no carrier board** (owner, 2026-09-26: "we don't need a
-  carrier"): the carrier's circuits are on **the centre board**, one flat
-  board lying between the thumb boards and the key boards, the length of the
-  hands and across the gap between them
-  (owner, same day: "a center board that stacks between the upper and lower
-  key boards", after trying a board on edge down the side and a wider body
-  for it, and going back to 57 mm). Each thumb board plugs into the key board
-  above it through a stacking header that passes through the centre board,
-  so the key chain runs through all three, and the Matrix's pigtail and the
-  patch lead end on it. It sits between the tube
-  lane and the far LED strip, on spacers onto the thumb boards and
-  standoffs off the oak.
-- **Its parts have little height under the keys**, because the board is
-  stacked between two others with real clearances (`boards.board_clear`):
-  `drc.echo` prints the room. **In the gap between the hands, where no key
-  board is overhead**, they have up to the plate, so the breath sensor goes
-  there — mid-body, not at the tail end the owner had confirmed for the side
-  board: under the right-hand keys there is no height for it. The regulator
-  block (one, for the one dev board left) does not fit under the keys as
-  specified — *rule "regulator block fits under the key boards"* — so it
-  needs low-profile parts.
+- **There is no carrier board, and one main board** (ADR 0017; owner,
+  2026-09-26: "instead of individual bottom boards, and the center board,
+  maybe we can do one big long board?"). The thumb switches, both thumb
+  registers and the carrier's circuits are on one board at the thumb level,
+  from the mouth cap to the end of the right hand, the full width inside the
+  sides. Its parts face up; the two key boards plug into it on stacking
+  headers; the Matrix's pigtail and the patch lead end on it. It has holes
+  over the U-bolt's nuts, notches at the screws, and standoffs off the oak or
+  the thumb plates wherever nothing else is (*"main board standoffs found
+  clear of everything"*); the soldered thumb switches carry it between them.
+  (Before it: a centre board stacked between the thumb boards and the key
+  boards — that history is in git and ADR 0017.)
+- **Its parts have room** — `drc.echo` prints the height under the key boards
+  and where none is overhead, and both clear the regulator block and the
+  breath sensor. **The breath sensor is at the mouth end** (owner, with this
+  board), beside the breath trap, ports toward the tail: the thumb switches'
+  pins leave the strip the centreline band, and the sensor is too wide to sit
+  beside it (*"breath sensor fits at the mouth end"*; the mouth end also
+  claims room for it, *"what the mouth end needs"*).
 - **Board clearances are real ones** (`boards.board_clear`): the owner
   rejected a model that put one board 0.5 mm over another's parts
   (2026-09-26: "once components are installed you'd have issues").
@@ -194,11 +191,10 @@ decision, not a correction.
    left thumb's tail row is what nears the U-bolt legs (*"U-bolt legs clear
    of the thumb recesses"*). The arc and spares
    before it left 0.5 mm webs; that history is in git.
-6. **The regulator block** stands beside the key boards since the board
-   widened (ADR 0016), with the height to the lid. *Rule: "regulator block
-   fits where it stands".* Under a key board it would need low-profile parts.
-7. **The centre board is placed by the layout** — its length by the key
-   runs, its width by the tube lane and the far side — and its stacking headers
+6. **The regulator block** fits wherever it stands on the main board.
+   *Rule: "regulator block fits where it stands".*
+7. **The main board is placed by the layout** — its length by the mouth cap
+   and the right hand, its width by the sides — and its stacking headers
    are placed between two thumb keys, clear of both boards' switches, by the
    model (*"stacking header … clear of both boards' switches"*).
 8. **M3 into a 1.20 mm plate** is about two threads. The BOM already says
@@ -215,19 +211,20 @@ an envelope — many sizes are tbd in `config/body.yaml` — so a clean pair is
 only as good as those envelopes. Group the report's lines by these causes
 (read the counts there, not here):
 
-1. **No cluster board faces another's connector any more.** Each thumb
-   board plugs into the key board above it through one 2 × 6 stacking header
-   at 2.0 mm pitch (2.54 will not fit between two switches' pins, 19 mm
-   apart), passing through the centre board. It engages as the lid closes,
+1. **No cluster board faces another's connector any more.** Each key board
+   plugs into the main board below it through one 2 × 6 stacking header at
+   2.0 mm pitch (2.54 will not fit between two switches' pins, 19 mm apart),
+   placed between two thumb keys. It engages as the lid closes,
    so it must blind-mate, and its height is the board gap, not a stock size.
 2. **No ribbons remain inside the body.** **The hardware pages do not
    follow yet:** `hardware/interfaces/key-chain-loom/`, the J-CHAIN,
    WIRE-LOOM and HDR-DEV rows, and the register's `chain-connectors` still
-   describe IDC ribbons and a dev board plugged into one carrier, and change
-   when the owner confirms this layout.
-3. **The breath tube** runs the tube lane beside the centre board, between
-   the cluster boards' parts, to the gap between the hands and onto the
-   sensor's port; the board has a slot in front of the lower port.
+   describe IDC ribbons, four cluster boards and a dev board plugged into one
+   carrier. ADR 0017 makes that rework concrete: two key boards, one main
+   board, the thumb chain in traces. `chain-connectors` is marked blocked on it.
+3. **The breath tube** is short: mouth cap, trap, then across over the strip
+   and back onto the sensor's port, all in the mouth band; the board has a
+   slot in front of the sensor's lower port.
 4. **The middle M3 pair** runs through the U-bolt backplate, which also
    overlaps the thumb plates. (The stations ran through the side strips until
    ADR 0016 removed them.)
@@ -249,5 +246,5 @@ hold it. That is a BOM decision, not a CAD one, and is left open here.
 
 The thumb rest lip, gasket beads, plate stiffening (ADR 0002 — open, and it changes the lid),
 and the diffuser standoff. The
-centre board and cluster boards are rectangles, because their outlines are
+main board and the key boards are rectangles, because their outlines are
 M3/M4 outputs.

@@ -60,5 +60,6 @@ why it was deleted is worth keeping.
 | [0012](0012-configuration-interface.md) | Configuration interface | Superseded by 0015 |
 | [0013](0013-two-mcu-split.md) | Two-MCU split | Superseded by 0015 |
 | [0015](0015-one-mcu-no-display.md) | One MCU, no display board | Accepted |
-| [0016](0016-one-strip-on-the-centre-board.md) | One LED strip, on the centre board | Accepted |
+| [0016](0016-one-strip-on-the-centre-board.md) | One LED strip, on the centre board | Accepted (placement amended by 0017) |
+| [0017](0017-one-main-board.md) | One main board | Accepted |
 | [0014](0014-lighting.md) | Lighting | Accepted (geometry amended by 0016) |

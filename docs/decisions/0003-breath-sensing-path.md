@@ -234,7 +234,11 @@ The stated reason for the short tube did not exist.
 
 With that gone, three things push the sensor down:
 
-- **Routing.** At the top, the analog pair must traverse the whole body through
+- *(Amended 2026-09-26, [ADR 0017](0017-one-main-board.md): the sensor is at
+  the MOUTH end, on the main board, and the buffered breath signal runs the
+  board's length to the umbilical as a PCB trace. The argument below is the
+  record; ADR 0017 says what replaces it.)*
+  **Routing.** At the top, the analog pair must traverse the whole body through
   side channels shared with pulsed LED current. At the bottom it sits where the
   umbilical leaves, and **there is no internal analog run at all.** That deletes
   the problem rather than managing it — and the internal equivalent of the AGND
