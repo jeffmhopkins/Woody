@@ -1,0 +1,125 @@
+id,slice,line,severity,verdict,headline
+C1-2,N2,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+C2-1,N3,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+C2-2,N2,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+C3-2,N2,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+C4-2,N2,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+N1-1,N1,57,,recorded,"N1-1 — module/power-entry . REG_ADJ / DAC_AVDD : the LM317's two divider legs are on the wrong pins, and the rail is 1.65 V, not 5.21 V"
+N1-2,N1,175,,recorded,"N1-2 — module/breath-output-stage . RAIL_NEG / RAIL_POS : the output clamp's rail terminals are on nets that exist nowhere, while the rail itself is a port of the same circuit"
+N1-3,N1,249,,recorded,"N1-3 — module/pitch-stage . GAIN_TRIM_MID / TRIM-GAIN : the page states two different nominal gains for the same network, and the netlist cannot say which"
+N1-4,N1,309,,NOT ADDRESSED,"N1-4 — module/pitch-stage . MINUS_NODE / C-FB-PITCH : the shelf's stated pole and zero are the 1 nF pair, not the netlist's 2.2 nF pair"
+N1-5,N1,354,,NOT ADDRESSED,"N1-5 — module/breath-output-stage . SUM_NODE / R-BREATH-FB : the summer's fixed gain is 4.02 from the netlist, not 4"
+N1-6,N1,389,,NOT ADDRESSED,N1-6 — carrier/breath-excitation-reference . U-REFBUF / U-BREATHBUF : the negative rail of both halves is asserted only in prose
+N1-7,N1,417,,NOT ADDRESSED,N1-7 — module/breath-receive-stage . U-REF-BUF : the only OPA2197 half on the module with no rails: at all
+N1-8,N1,443,,NOT ADDRESSED,N1-8 — module/breath-receive-stage . AGND_SENSE / D-CLAMP-IN+ : the clamp's note names a node the net is not
+N1-9,N1,471,,recorded,N1-9 — module/breath-response-shaper . V_SHAPED : an Interfaces row that no netlist and no master net backs
+N2-1,N2,53,,recorded,"N2-1 — AGND_MOD is the return path for all six CV jack sleeves, on a net two of its own pages call ""Not a return path"""
+N2-10,N2,510,,recorded,"N2-10 — the two single-supply OPA2197 halves return V- to the analog star in prose and to nothing in the netlist, and the schema cannot express it"
+N2-11,N2,566,,recorded,N2-11 — the DISPUTED figure that owns every ground question cites three locations and all three are wrong
+N2-12,N2,598,,recorded,"N2-12 — digital-and-supervision.md 's drawing picks a side of the disputed figure in prose, where nothing checks it"
+N2-13,N2,632,,NOT ADDRESSED,"N2-13 — nets.yaml settles which ground the panel LED lands on, in the entry that says it does not settle topology"
+N2-14,N2,672,,recorded,N2-14 — every page that enumerates what returns to AGND_MOD is missing items the netlist puts there
+N2-15,N2,711,,NOT ADDRESSED,"N2-15 — the figure cited on a reference port is inconsistent across the circuits that share the net, and one of them is the wrong figure"
+N2-16,N2,754,,recorded,"N2-16 — cluster/key-marker-and-bits declares a GND_CHAIN port that no net of that name exists for, and nothing on the board returns to"
+N2-17,N2,795,,recorded,"N2-17 — module/power-entry 's Interfaces row for PWR_GND names two of the six circuits that reference it, and three of them have no dependency edge"
+N2-2,N2,115,,recorded,"N2-2 — DIG_GND has no instrument end: J-UMB-INST.8 lands on nothing, and the page that names its peer names a circuit with no such port"
+N2-3,N2,171,,recorded,"N2-3 — carrier/carrier is the one netlisted circuit with no Interfaces table and no circuit.yaml , and it is the circuit N2-2 needs"
+N2-4,N2,213,,recorded,"N2-4 — on the module, all three reference nets originate at module/power-entry and none of them reaches J-PWR-EURO.GND"
+N2-5,N2,279,,NOT ADDRESSED,"N2-5 — GND_CHAIN and PWR_GND are one node under two names, and no netlist joins them: the whole key chain has no return"
+N2-6,N2,335,,NOT ADDRESSED,"N2-6 — AGND_INST ""carries no power current"" is ADR 0004's rule about AGND_SENSE , restated against the wrong net"
+N2-7,N2,386,,NOT ADDRESSED,"N2-7 — J-LED-L.BI / J-LED-R.BI are tied to the carrier pour; the page, the BOM row and the datasheet reading all put that tie at the strip head"
+N2-8,N2,430,,NOT ADDRESSED,N2-8 — led-strip-drive nets the strip power pins that its own page and its own component note say belong to another circuit
+N2-9,N2,472,,NOT ADDRESSED,"N2-9 — umbilical-load-switch.md says the FET source returns to PWR_GND and, two rows up, that it is the exported rail; the netlist chose silently"
+N3-1,N3,47,critical,recorded,"N3-1 critical module/power-entry REG_ADJ / DAC_AVDD LM317 divider inverted: 1.65 V, not dac-rail 's 5.21 V"
+N3-10,N3,56,low,NOT ADDRESSED,N3-10 low-med U-DAC.VREFIN/VREFOUT no load capacitor anywhere; SBAS430E recommends =150 nF
+N3-11,N3,57,low,NOT ADDRESSED,N3-11 low MODULE_ANALOG_POS12 R-OFFNEG 's stated reason for −12 V is false on both halves
+N3-12,N3,58,low,recorded,N3-12 low C-BULK-RAIL / MODULE_ANALOG_POS12 the 2.2x decay argument counts a deleted comparator and omits the op-amps
+N3-13,N3,59,,recorded,"N3-13 method rails: demonstrated fail-open: a wrong rail set, and a missing one, both pass"
+N3-2,N3,48,high,recorded,N3-2 high U-REF-BUF (breath-receive-stage) the only OPA2197 half in the corpus with no rails: — no supply at all
+N3-3,N3,49,high,recorded,N3-3 high C-DECOUPLE qty 19 counts a DAC8568 DVDD pin that does not exist; 18
+N3-4,N3,50,medium,recorded,"N3-4 medium C-DECOUPLE , C-DECOUPLE-CARRIER rails: makes per-pin decoupling unplaceable: 15 of 27 caps have no pin"
+N3-5,N3,51,medium,recorded,N3-5 medium MODULE_ANALOG_POS12 @ breath-output-stage port omitted; D-JACK-CLAMP.K dumped into an invented RAIL_POS
+N3-6,N3,52,medium,recorded,"N3-6 medium ON net, umbilical-load-switch unquoted ON: — YAML parses the net name as boolean True"
+N3-7,N3,53,medium,recorded,N3-7 medium C-BUCK-IN netlist settled the one-LC topology; row and page still say ×2
+N3-8,N3,54,medium,NOT ADDRESSED,"N3-8 medium PWR_EXPORT ( FB2 , C2 ) the bead whose whole selection is the umbilical current is netted to a dead end"
+N3-9,N3,55,low,NOT ADDRESSED,"N3-9 low-med C-ADC-BULK a row whose own note says PROPOSED, NOT DECIDED is asserted unconditionally"
+N4-1,N4,64,,recorded,"N4-1 — U-MCU-RT.IO43 , U-MCU-RT.IO44 (and .P3V3 , .P5V ): pins the board does not have under those names"
+N4-10,N4,549,,NOT ADDRESSED,"N4-10 — U-DIFFRX.RG1 / .RG2 (INA828): a pin name the device does not have, twice"
+N4-11,N4,594,,recorded,N4-11 — U-DAC.AVDD : no decoupling capacitor on the net
+N4-2,N4,122,,recorded,"N4-2 — U-OPA-PITCH : section: A is claimed by three circuits and section: B by two, on a six-package row"
+N4-3,N4,174,,recorded,N4-3 — U-OPA-PITCH pin 8 ( V+ ) and pin 4 ( V– ): supply pins that appear in no net anywhere
+N4-4,N4,41,,NOT ADDRESSED,N4-4.
+N4-5,N4,275,,NOT ADDRESSED,N4-5 — U-DAC : the channel→letter map (commissioned claim 1)
+N4-6,N4,359,,NOT ADDRESSED,"N4-6 — U-LVL-MOD / U-LVLSHIFT (74AHCT125): gate assignment, gate letters , and OE (commissioned claim 2)"
+N4-7,N4,441,,NOT ADDRESSED,"N4-7 — U-REF-BREATH (REF5050AIDR): three pins declared of eight, two of them DNC"
+N4-8,N4,482,,NOT ADDRESSED,"N4-8 — U-TVS-SPI / U-TVS-CHAIN (SP0504BAHTG): right pin count, invented names, and the common pin cannot be read from the banked document"
+N4-9,N4,513,,NOT ADDRESSED,"N4-9 — J-CV-PITCH , J-CV-BREATH , J-CV-MOD1 – 4 (PJ398SM): the third pad, named once out of six"
+N5-1,N5,80,high,recorded,N5-1 — module/breath-output-stage · D-JACK-CLAMP.K / D-JACK-CLAMP.A · HIGH
+N5-10,N5,528,low,NOT ADDRESSED,N5-10 — module/pitch-stage · TRIM-GAIN.CW · LOW
+N5-11,N5,559,low,NOT ADDRESSED,N5-11 — module/breath-response-shaper · V_SHAPED · LOW
+N5-12,N5,594,low,recorded,"N5-12 — J-LED-L / J-LED-R · LOW, suspicion, adjacent to my slice"
+N5-2,N5,149,medium,recorded,N5-2 — carrier/display-and-service-uart · J-DISP.SUPPLY · MEDIUM
+N5-3,N5,205,medium,recorded,N5-3 — cluster/key-register · U-KEYS.A..H and KEY_BITS / MARKER_BITS · MEDIUM
+N5-4,N5,265,medium,recorded,"N5-4 — cluster/key-marker-and-bits · FREE_BIT_1..3 , MARKER_HIGH , MARKER_LOW · MEDIUM"
+N5-5,N5,315,medium,recorded,"N5-5 — cluster/key-marker-and-bits · MARKER_HIGH ≡ V3V3_CHAIN , MARKER_LOW ≡ GND_CHAIN · MEDIUM"
+N5-6,N5,359,medium,recorded,N5-6 — carrier/power-entry-instrument · AGND_INST · MEDIUM
+N5-7,N5,414,medium,NOT ADDRESSED,N5-7 — module/umbilical-load-switch · U-LOADSW.PWRGD · MEDIUM
+N5-8,N5,460,low,NOT ADDRESSED,N5-8 — module/panel-led · LED-PANEL.K · LOW–MEDIUM
+N5-9,N5,498,low,NOT ADDRESSED,N5-9 — module/dac8568 · CLR port provenance · LOW–MEDIUM
+N6-1,N6,75,high,recorded,"N6-1 — HIGH — carrier/carrier : 20 endpoint assertions, 14 of them driver claims, and no Interfaces table or circuit.yaml anywhere"
+N6-10,N6,457,medium,NOT ADDRESSED,N6-10 — MEDIUM — V3V3_CHAIN at key-marker-and-bits is ref on the page and in everywhere else
+N6-11,N6,484,medium,NOT ADDRESSED,"N6-11 — MEDIUM — AGND_MOD at module/panel-led is asserted by the master, disclaimed by the circuit and absent from the origin's page"
+N6-12,N6,523,medium,NOT ADDRESSED,N6-12 — MEDIUM — PWR_GND : the origin page names 2 of the 6 circuits the master does
+N6-13,N6,553,medium,NOT ADDRESSED,"N6-13 — MEDIUM — AGND_INST : the origin's page has no row for it, and one reference: circuit has none either"
+N6-14,N6,582,medium,NOT ADDRESSED,N6-14 — MEDIUM — SENSOR_RAW is named by no Interfaces table at either end
+N6-15,N6,610,medium,NOT ADDRESSED,"N6-15 — MEDIUM — BREATH_INAMP_OUT : three pages put interfaces/breath-sense-link on it, including one claiming out"
+N6-16,N6,644,medium,NOT ADDRESSED,N6-16 — MEDIUM — key-chain-loom.md 's four signal rows carry one Dir each across two master nets
+N6-17,N6,680,low,NOT ADDRESSED,N6-17 — LOW (suspicion) — GND_CHAIN and PWR_GND : the master's own note says they are not separate nodes
+N6-18,N6,711,low,NOT ADDRESSED,"N6-18 — LOW (suspicion) — CHAIN_SER and CHAIN_QH are per-hop nets modelled as single nets, where KEY_BITS got per_board:"
+N6-19,N6,744,low,NOT ADDRESSED,N6-19 — LOW — key-marker-and-bits.md has two rows whose far ends say —
+N6-2,N6,129,high,recorded,N6-2 — HIGH — SCLK / MOSI / CS_MOD : spi-link.md says out on three nets the master says it receives
+N6-20,N6,769,low,NOT ADDRESSED,"N6-20 — LOW — from: / to: in the netlists is unchecked, and 11 ports disagree with the master"
+N6-21,N6,809,low,NOT ADDRESSED,N6-21 — LOW — breath-response-shaper 's netlist says the master carries it on three nets; the master carries it on four
+N6-22,N6,842,low,recorded,"N6-22 — LOW — breath-output-stage 's netlist carries MODULE_ANALOG_NEG12 twice, once as an external_endpoint"
+N6-3,N6,165,high,recorded,"N6-3 — HIGH — SENSOR_BUFFERED_OUT : the driver's page never mentions it, and the two pages that do name the wrong source"
+N6-4,N6,211,high,recorded,"N6-4 — HIGH — DAC_AVDD : the receiver moved from spi-link to digital-and-supervision , and power-entry.md now explicitly denies the receiver the master asserts"
+N6-5,N6,257,medium,recorded,"N6-5 — MEDIUM-HIGH — CHAIN_QH and IO40 are two master nets for one node, and the netlist says so"
+N6-6,N6,303,medium,NOT ADDRESSED,"N6-6 — MEDIUM-HIGH — interfaces/spi-link : 8 master assertions, 1 confirmed by its table, 4 with no row at all"
+N6-7,N6,350,medium,NOT ADDRESSED,N6-7 — MEDIUM — UMBILICAL_POS12 : the merge landed in the netlists and in none of the three pages
+N6-8,N6,393,medium,NOT ADDRESSED,N6-8 — MEDIUM — nets.yaml 's own comment says spi-link is a receiver on SCLK_DAC / DIN / SYNC ; none of the three entries names it
+N6-9,N6,423,medium,NOT ADDRESSED,N6-9 — MEDIUM — led-strip-drive.md 's one — row covers two nets that both have declared ports
+N7-1,N7,210,,recorded,"N7-1 — module/umbilical-load-switch / C-DECOUPLE — 18 of 19 module decoupling capacitors are placed by nothing, and no file says why"
+N7-10,N7,671,,recorded,"N7-10 — tools/check-netlist.py — two of the seven shortfalls have no written reason, against a source comment that says every one does; and the docstring misstates which thing is unplaced"
+N7-11,N7,709,,recorded,N7-11 — interfaces/breath-sense-link / U-BREATH — the reason qty is 2 is written only on a different row
+N7-12,N7,742,,NOT ADDRESSED,"N7-12 — carrier/power-entry-instrument / D-USBOR — the two instances declare no value: , so the BOM-value check passes them vacuously"
+N7-13,N7,774,,NOT ADDRESSED,N7-13 — C-DECOUPLE and C-DECOUPLE-CARRIER — both board-wide rows live with a circuit that places a small minority of them
+N7-14,N7,810,,NOT ADDRESSED,"N7-14 — cluster/key-switch-network / SW-THUMB — 25 switches are budgeted for 21 positions, and the model cannot express the either/or"
+N7-15,N7,835,,recorded,"N7-15 — R1 / R2 — the same instance name denotes three different BOM rows, and the cross-page resolver nulls it"
+N7-2,N7,254,,NOT ADDRESSED,N7-2 — carrier/ / C-DECOUPLE-CARRIER — 3 of 8 are missing from circuits that already place the IC they bypass
+N7-3,N7,298,,NOT ADDRESSED,"N7-3 — carrier / HDR-DEV — qty 6 is described three incompatible ways, and carrier.md refutes its own fragment"
+N7-4,N7,352,,NOT ADDRESSED,"N7-4 — module/breath-response-shaper / U-RESP and module/breath-receive-stage / U-OPA-PITCH — the module's OPA2197 package count is asserted two ways, and section: records nothing that could settle it"
+N7-5,N7,420,,NOT ADDRESSED,"N7-5 — module/breath-response-shaper / U-RESP — the second half has two incompatible jobs, and the netlist places neither"
+N7-6,N7,471,,NOT ADDRESSED,"N7-6 — module/power-entry / C-BULK-RAIL — the value string enumerates three rails for four placed capacitors, and the one it omits is a +12 V branch at 47 µF"
+N7-7,N7,517,,recorded,"N7-7 — module/pitch-stage / R-BIAS-INAMP — the row lives in a fragment whose page only mentions it as a contrast, and places none of it"
+N7-8,N7,553,,recorded,"N7-8 — tools/check-netlist.py check_global — one section: token anywhere on a row exempts that row from over-use and shortfall detection, globally"
+N7-9,N7,615,,recorded,"N7-9 — check_global — a row placed zero times is invisible, and twelve rows are in that state"
+N8-1,N8,88,,NOT ADDRESSED,"N8-1 — R-RESP-IN / R-RESP-FB / R-RESP-DIV and R_G : an unbracketed value in a drawing is checked by nothing, and nothing says so"
+N8-10,N8,487,,NOT ADDRESSED,N8-10 — sensor-full-scale : a dated escape record was edited to name two rows that did not exist on that date
+N8-11,N8,522,,NOT ADDRESSED,"N8-11 — ROADMAP.md ""Seven fixes to the label parser alone"" enumerates eight, and omits the first one"
+N8-12,N8,555,,NOT ADDRESSED,"N8-12 — the instance line names seven short rows; the reader-facing list explains five, and its stated reason is wrong for one of those"
+N8-13,N8,583,,NOT ADDRESSED,"N8-13 — R-BREATH-OFF and C-REG-ADJ : history pasted back into the BOM notes column, four rows at a time, with the retired aggregate's name reused for a live child"
+N8-14,N8,627,,NOT ADDRESSED,"N8-14 — ""the pending list just grew from five to eight"": the checker printed seven in that commit"
+N8-15,N8,655,,NOT ADDRESSED,"N8-15 — R-ILIM , LK-SER , R-SER-TERM : three bracketed labels whose values are silently never compared"
+N8-2,N8,143,,NOT ADDRESSED,"N8-2 — C-BULK-RAIL : the eighth aggregate row, on the page the exercise started from, survived because the value test is a substring match"
+N8-3,N8,193,,NOT ADDRESSED,"N8-3 — the global instance count cannot see a row placed zero times, and J-CV ""from unplaced to 6/6"" records a transition nothing measured"
+N8-4,N8,243,,NOT ADDRESSED,N8-4 — AGND_INST : the PWR_GND fix removed two peers and left the boundary declared from one side only
+N8-5,N8,287,,NOT ADDRESSED,"N8-5 — carrier/carrier : a circuit id with no circuit.yaml , named as a Peer, where the README's own mechanical rule cannot be applied"
+N8-6,N8,327,,NOT ADDRESSED,N8-6 — HDR-DEV : the netlist note written to explain 1/6 contradicts the row it is checked against and both statements on its own page
+N8-7,N8,365,,NOT ADDRESSED,"N8-7 — hardware/README.md : the paragraph a reader hits first says nothing checks a drawing, directly above the paragraph saying a tool does"
+N8-8,N8,410,,NOT ADDRESSED,N8-8 — R-SPI-PULL : the fix's own explanation quotes the row in the wording the same commit deleted
+N8-9,N8,441,,NOT ADDRESSED,"N8-9 — ""runs from the commit gate"": there is no gate that blocks, and one netlist problem is reported as five"
+R2-1,N1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+R2-2,N1|N5,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+R3-1,N1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+R4-1,N1,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+Z0-9,N8,,,NOT ADDRESSED,CITED ONLY - introduced in no report

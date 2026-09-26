@@ -153,6 +153,31 @@ required; `MECH-GNDBOND` is on `PWR_GND` and nowhere near AGND. The slice's
 summary of the whole claim type: **no netlist makes a reference tie the corpus
 does not place — the defect is omission, not misplacement.**
 
-## Slices still running
+## N8 — the author's own claims
 
-N8.
+16 findings. **Its verdict on the substance is that the asserted defects are
+real**: 19 before-states reconstructed with no fabricated finding, citations
+following in the same commit where checked (`R-MODGAIN` all 7 sites,
+`R-ADCDIV` all 8), and all nine reproduced injections firing for the reason
+claimed. What fails is the **coverage** the conversion claimed for itself.
+Three verified.
+
+| id | verdict | verification |
+|---|---|---|
+| **N8-2** | **CONFIRMED — there is an eighth aggregate row, and my stated criterion for finding the seven was false** | `C-BULK-RAIL` is `'100uF (+12V) / 47uF (-12V, +5V) 25V electrolytic'` at qty 4 — on the very page whose `4 × 47 µF` drawing defect started this exercise. It survives because the value test at `check-netlist.py:375` is a **substring** match: `norm('100uF')` and `norm('47uF')` are *both* inside that part field, so an instance may claim either and pass. So "no instance could state a value that matched it" is **not** what selected the seven rows I split — the checker's silence was. A two-value aggregate row is unfalsifiable by construction under a substring test. `[test]` `[repo hardware/bom.csv]` |
+| **N8-1** | **CONFIRMED by reading the comparison** | The drawing check only reaches `[REFDES value]` brackets. `breath-response-shaper.md` draws `R1 20k` and `R2 10k` as **bare text**, so the three BOM rows commit `8d66e2d` created *because* "a netlist cannot be written without noticing" have drawn values that nothing compares — and the netlist's `drawn_as: R1`/`R2` aliases point at labels that exist in no bracket. Meanwhile `CLAUDE.md` and `hardware/README.md` both claim "every `[REFDES value]` label in a drawing" is checked, unqualified. Five such bare-text sites corpus-wide, all currently correct, so latent. `[repo]` |
+| **N8-14** | **CONFIRMED** | Commit `cfaa6a7`'s body says the pending list "just grew from five to eight". The denominator change did take it to 8, and then the same commit converted one page, so the checker's own output at that commit prints **7**. A stated count that moved under the sentence stating it, in a commit whose subject line is about an honest denominator. `[test]` |
+
+**Not yet verified, not to be repeated:** N8-3 through N8-13, N8-15.
+
+**N8 checked specifically for new fail-opens introduced by my fixes and found
+none** — `norm()` collapsing `50mΩ`/`50MΩ` comes from the `.lower()` that was
+always there, `COUNT`'s `re.I` strips `x7` out of `X7R` symmetrically on both
+sides so nothing is misjudged, and the box-glyph drawing detector would miss a
+pure-ASCII schematic but no live page is affected. Latent risk, recorded.
+
+**And it names the best artefact in the branch**: `a4eaa23`, the commit that
+corrected the previous one for claiming 0 problems when the checker said 3.
+It reproduces to the digit.
+
+## All eight slices are in. Wave closed for reporting; fixes not started.
