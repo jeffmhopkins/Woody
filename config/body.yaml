@@ -289,7 +289,7 @@ boards:
   matrix_gap:
     value: 1.0
     status: tbd
-    source: "LED tops to the diffuser under the plate. ADR 0014: thin and close to the LEDs keeps pixels distinct"
+    source: "LED tops to the key plate's underside, under the window opening"
     decided_by: "M6 diffusion prototype"
   matrix_led_h:
     value: 1.0
@@ -302,7 +302,22 @@ openings:
   matrix_window:
     value: 22.0
     status: nominal
-    source: "[adr] ADR 0009 - 'Roughly 22 mm square'; now through the oak top and the plate, on the top face after the keys"
+    source: "[adr] ADR 0009 - 'Roughly 22 mm square'; the clear opening through the plate and the oak LIP under the acrylic window"
+  # THE MATRIX WINDOW IS FROSTED ACRYLIC, FLUSH WITH THE OAK TOP, SITTING ON
+  # A LIP OF OAK (owner, 2026-09-26). The oak top has a rebate from its top
+  # face as deep as the acrylic, a lip wider than the opening below; the
+  # acrylic drops in flush. Frosted was chosen knowingly: it softens pixels
+  # at this distance from the LEDs (drc.echo prints the distance).
+  matrix_lip:
+    value: 2.0
+    status: tbd
+    source: "oak lip the acrylic rests on, per side - the rebate is the opening plus twice this"
+    decided_by: "M4, with the acrylic's cut size"
+  matrix_acrylic_t:
+    value: 3.0
+    status: tbd
+    source: "frosted acrylic window thickness [from memory: common sheet]; must leave an oak lip under it"
+    decided_by: "M6, with the diffusion prototype"
   # USB-C REACHES THE TAIL THROUGH A PANEL-MOUNT EXTENSION (owner,
   # 2026-09-26): the Matrix board sits under the top window, a few cm inboard
   # of the tail face, and a short USB-C extension brings its port to a

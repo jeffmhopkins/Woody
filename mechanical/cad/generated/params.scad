@@ -74,9 +74,11 @@ boards_matrix_emitters = 20.8;  // nominal; ADR 0014 / carrier.md - 8 x 2.6 mm p
 boards_carrier_l = 100.0;  // tbd; hardware/bom.csv PCB-CARRIER '~100 x 45' - carrier.md: 'an assumption, not a fit'
 boards_carrier_w = 45.0;  // tbd; hardware/bom.csv PCB-CARRIER
 boards_matrix_header_h = 8.5;  // tbd; machined 2.54 mm female header on the carrier plus the board's male pins, seated [from memory]
-boards_matrix_gap = 1.0;  // tbd; LED tops to the diffuser under the plate. ADR 0014: thin and close to the LEDs keeps pixels distinct
+boards_matrix_gap = 1.0;  // tbd; LED tops to the key plate's underside, under the window opening
 boards_matrix_led_h = 1.0;  // tbd; WS2812B-0807 package height above the board [from memory]
-openings_matrix_window = 22.0;  // nominal; [adr] ADR 0009 - 'Roughly 22 mm square'; now through the oak top and the plate, on the top face after the keys
+openings_matrix_window = 22.0;  // nominal; [adr] ADR 0009 - 'Roughly 22 mm square'; the clear opening through the plate and the oak LIP under the acrylic window
+openings_matrix_lip = 2.0;  // tbd; oak lip the acrylic rests on, per side - the rebate is the opening plus twice this
+openings_matrix_acrylic_t = 3.0;  // tbd; frosted acrylic window thickness [from memory: common sheet]; must leave an oak lip under it
 openings_usb_slot_w = 12.5;  // tbd; panel cutout for a panel-mount USB-C extension receptacle [from memory]
 openings_usb_slot_h = 7.0;  // tbd; as usb_slot_w [from memory]
 openings_usb_ext_depth = 20.0;  // tbd; the extension receptacle's body behind the panel [from memory]
@@ -107,5 +109,5 @@ lighting_strip_gap = 3.0;  // tbd; ADR 0009 / ADR 0014: the diffusion gap is a p
 
 // Every value above with status tbd - a placeholder, not a number any
 // document gives. The DRC report lists these so no result hides one.
-tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_mouth_extra", "layout_tail_clear", "layout_underside_clear", "layout_lh_offsets", "layout_rh_offsets", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_carrier_l", "boards_carrier_w", "boards_matrix_header_h", "boards_matrix_gap", "boards_matrix_led_h", "openings_usb_slot_w", "openings_usb_slot_h", "openings_usb_ext_depth", "ethercon_body_d", "ethercon_offset_y", "hardware_fastener_inset", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_backplate_t", "lighting_strip_w", "lighting_strip_gap"];
+tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_mouth_extra", "layout_tail_clear", "layout_underside_clear", "layout_lh_offsets", "layout_rh_offsets", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_carrier_l", "boards_carrier_w", "boards_matrix_header_h", "boards_matrix_gap", "boards_matrix_led_h", "openings_matrix_lip", "openings_matrix_acrylic_t", "openings_usb_slot_w", "openings_usb_slot_h", "openings_usb_ext_depth", "ethercon_body_d", "ethercon_offset_y", "hardware_fastener_inset", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_backplate_t", "lighting_strip_w", "lighting_strip_gap"];
 

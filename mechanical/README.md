@@ -107,3 +107,4 @@ the oak top has **one slot per hand** (`stack.cap_holes`).
 | | |
 |---|---|
 | ![Cross-section through RH3](renders/section-key.png) | ![Tail face](renders/tail-face.png) |
+| ![Cross-section through the LED matrix](renders/section-matrix.png) The frosted window, flush on its oak lip | |

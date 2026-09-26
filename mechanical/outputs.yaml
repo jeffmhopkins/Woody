@@ -87,6 +87,13 @@ renders:
     imgsize: [1200, 900]
     projection: o
     camera: [16, 18, 0, 0, 0, 0, 190]
+  - name: section-matrix
+    title: Cross-section through the LED matrix - the flush frosted window on its oak lip
+    src: mechanical/cad/fig_section_matrix.scad
+    out: mechanical/renders/section-matrix.png
+    imgsize: [1200, 900]
+    projection: o
+    camera: [8, 18, 0, 0, 0, 0, 205]
   - name: tail-face
     title: The tail face - etherCON rotated, USB-C beside it
     src: mechanical/cad/fig_tail_face.scad
@@ -120,5 +127,6 @@ exports:
   - {name: dxf-tail-cap, src: mechanical/cad/woody_body.scad, out: mechanical/export/tail-cap.dxf, defines: {part: "tail_cap"}}
   - {name: dxf-tail-backplate, src: mechanical/cad/woody_body.scad, out: mechanical/export/tail-backplate.dxf, defines: {part: "tail_backplate"}}
   - {name: dxf-ubolt-backplate, src: mechanical/cad/woody_body.scad, out: mechanical/export/ubolt-backplate.dxf, defines: {part: "ubolt_backplate"}}
-  - {name: dxf-diffuser, src: mechanical/cad/woody_body.scad, out: mechanical/export/diffuser.dxf, defines: {part: "diffuser"}}
+  - {name: dxf-matrix-window, src: mechanical/cad/woody_body.scad, out: mechanical/export/matrix-window.dxf, defines: {part: "matrix_window"}}
+  - {name: dxf-oak-rebates, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-rebates.dxf, defines: {part: "oak_rebates"}}
   - {name: dxf-service-cover, src: mechanical/cad/woody_body.scad, out: mechanical/export/service-cover.dxf, defines: {part: "service_cover"}}

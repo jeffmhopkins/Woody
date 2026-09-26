@@ -310,8 +310,11 @@ Two openings in the tail section, below the right-hand key run, clear of the
 thumb keys and the U-bolt:
 
 > **Superseded 2026-09-26 (owner): the matrix is on the TOP face, just past
-> the last key**, through a window in the oak top and the key plate, with a
-> diffuser under the plate. The Matrix board stands face up on the carrier,
+> the last key**, through a window in the oak top and the key plate. The
+> window is **frosted acrylic, flush with the oak top, sitting on a lip of
+> oak** (a rebate in the oak's upper face) — the owner's choice, made knowing
+> frosted material softens pixels at this distance from the LEDs, which the
+> diffuser guidance below warned against. The Matrix board stands face up on the carrier,
 > so **the carrier cutout below is no longer needed** and which face carries
 > the LEDs stops being a risk — it faces up, away from the carrier. The body
 > CAD derives the carrier's height from that stack (`mechanical/drc.echo`).

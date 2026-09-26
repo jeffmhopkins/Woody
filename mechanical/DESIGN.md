@@ -78,7 +78,14 @@ Three things can claim each end, and the largest wins:
   etherCON's depth — the connector cannot sit under the Matrix, which stands
   on the carrier just under the plate; or the underside chain after the right
   thumb (service cover, then the connector); or the right-thumb cluster
-  against the tail cap. In practice the matrix sets it.
+  against the tail cap.
+- **The matrix window is frosted acrylic, flush with the oak top, on a lip of
+  oak** (owner, 2026-09-26): a rebate in the oak top's upper face as deep as
+  the acrylic, over a smaller opening through the oak and the plate. Like the
+  side grooves it is a router pass, not a through-cut, so it exports on its
+  own (`export/oak-rebates.dxf`); the acrylic is `export/matrix-window.dxf`.
+  `drc.echo` reports the lip and the LED-to-window distance, which is what
+  decides how soft the pixels look. In practice the matrix sets it.
 - **The carrier's height is derived** from the Matrix standing on it: plate
   underside, diffuser gap, LEDs, board, header, carrier.
 - **Between:** the key gaps, and the space between the hands.

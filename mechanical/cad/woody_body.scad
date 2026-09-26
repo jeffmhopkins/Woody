@@ -39,7 +39,7 @@ ghost_shell = false;  // draw the shell translucent to see inside
 // 2D ones for anything dimensioned; OpenCSG loses part colours on 3D cuts.
 cut = "none";
 cut_at = 0;
-cut_key = "";         // or name a key: the X cut goes through its centre
+cut_key = "";         // or name a key (or "matrix"): the X cut goes through its centre
 cut_depth = 1000;     // "x" keeps a slab this deep beyond the cut
 figure = false;       // set true by a figure that includes this file
 // Where X = 0 sits in the rendered picture: "mouth" (the model's own frame),
@@ -49,7 +49,7 @@ origin = "mouth";
 
 LAYERS = ["plate_top", "oak_top", "oak_bottom", "oak_grooves", "thumb_plate", "side",
           "mouth_cap", "tail_cap", "tail_backplate", "ubolt_backplate",
-          "diffuser", "service_cover"];
+          "matrix_window", "oak_rebates", "service_cover"];
 
 $fn = 40;
 EPS = 0.01;           // drawing convention: coplanar-face nudge
@@ -205,6 +205,8 @@ L = top_last + tail_req;
 x_in1 = L - ends_tail_cap_t;
 matrix_xy = [matrix_x(L), W / 2];
 tail_fastener_x = matrix_xy[0];
+// Where an X section cuts: a number, a key id, or "matrix" for its centre.
+cut_pos = cut_key == "" ? cut_at : cut_key == "matrix" ? matrix_xy[0] : key_xy(key_by_id(cut_key))[0];
 
 function placed(k) = !is_undef(k[2]) && !is_undef(k[3]);
 function key_xy(k) = placed(k) ? [plate_x0 + k[3], plate_y0 + k[2]] : prov_xy(k);
@@ -214,7 +216,6 @@ bottom_keys = [for (k = keys) if (key_face(k) == "bottom") k];
 function cluster_keys(cl) = [for (k = keys) if (k[6] == cl) k];
 function xs(list) = [for (k = list) key_xy(k)[0]];
 function key_by_id(id) = [for (k = keys) if (k[0] == id) k][0];
-cut_pos = cut_key == "" ? cut_at : key_xy(key_by_id(cut_key))[0];
 
 // ----------------------------------------------------------- colours ------
 C_OAK = [0.71, 0.53, 0.33];
@@ -228,7 +229,7 @@ C_SPARE = [0.85, 0.20, 0.60];
 C_STEEL = [0.55, 0.57, 0.60];
 C_CONN = [0.25, 0.25, 0.27];
 C_LED = [1.0, 0.75, 0.30];
-C_DIFFUSER = [1, 1, 1, 0.6];
+C_FROSTED = [0.94, 0.95, 0.97, 0.85];
 
 // ----------------------------------------------------------- clipping -----
 module clip_space() {
@@ -393,7 +394,13 @@ module ubolt_backplate_2d() {
         for (u = ubolt_legs()) translate(u) circle(d = hardware_ubolt_rod_d + 0.5);
     }
 }
-module diffuser_2d() { translate(matrix_xy) square(openings_matrix_window + 4, center = true); }
+// The matrix window: frosted acrylic, flush with the oak top, on an oak lip
+// (owner, 2026-09-26). The acrylic is the rebate's size less a fit clearance.
+matrix_rebate = openings_matrix_window + 2 * openings_matrix_lip;
+module matrix_window_2d() { translate(matrix_xy) offset(r = 0.5) offset(delta = -0.6) square(matrix_rebate, center = true); }
+// Rebates in the oak top's upper face - a router pass, like the grooves, so
+// exported on their own. Frame: as the oak panels.
+module oak_rebates_2d() { translate([-x_in0, 0]) translate(matrix_xy) square(matrix_rebate, center = true); }
 module service_cover_2d() {
     translate(service_xy) rotate(90) difference() {
         square([openings_service_cover_l + 6, openings_service_cover_w + 6], center = true);
@@ -429,7 +436,7 @@ module cluster_window_2d(ks) {
 // Tail equipment. The Matrix hangs under the carrier (carrier.md section 7)
 // with its LEDs facing the window in the oak bottom.
 // The carrier's height is set by the Matrix standing on it: plate underside,
-// the diffuser gap, the LEDs, the board, the header, then the carrier.
+// the gap under it, the LEDs, the board, the header, then the carrier.
 matrix_top_z = z_plate_bot - boards_matrix_gap;               // LED tops
 matrix_board_z = matrix_top_z - boards_matrix_led_h - switch_pcb_t;
 carrier_z = matrix_board_z - boards_matrix_header_h - switch_pcb_t;
@@ -463,6 +470,7 @@ module lid(dz = 0) {
         P(C_OAK, true) translate([x_in0, 0, z_oak_top_bot + explode]) difference() {
             linear_extrude(oak_top_t) oak_top_2d();
             translate([0, 0, -EPS]) linear_extrude(stack_groove_depth + EPS) oak_grooves_2d();
+            translate([0, 0, oak_top_t - openings_matrix_acrylic_t]) linear_extrude(openings_matrix_acrylic_t + EPS) oak_rebates_2d();
         }
         lam(z_plate_bot + explode / 2, plate_thickness, C_ALU, false)
             translate([plate_x0, plate_y0]) plate_top_2d();
@@ -538,7 +546,7 @@ module tail_equipment() {
         cube([boards_matrix_emitters, boards_matrix_emitters, boards_matrix_led_h]);
     for (dy = [-1, 1]) P([0.15, 0.15, 0.15]) translate([matrix_xy[0] - 12.7, matrix_xy[1] + dy * 11.43 - 1.25, carrier_z + switch_pcb_t])
         cube([25.4, 2.5, boards_matrix_header_h]);   // the two header rows, 22.86 apart [ds]
-    P(C_DIFFUSER) translate([0, 0, z_plate_bot - 1]) linear_extrude(1) diffuser_2d();
+    P(C_FROSTED) translate([0, 0, T - openings_matrix_acrylic_t + explode]) linear_extrude(openings_matrix_acrylic_t) matrix_window_2d();
     // Tail backplate and the etherCON body behind it.
     P(C_ALU) translate([x_in1 - hardware_backplate_t, 0, 0]) rotate([90, 0, 90])
         linear_extrude(hardware_backplate_t) tail_backplate_2d();
@@ -724,9 +732,15 @@ module drc_report() {
     drc(matrix_xy[0] + boards_matrix_board / 2 <= carrier_x1 && matrix_xy[0] - boards_matrix_board / 2 >= carrier_x0,
         "Matrix board over the carrier", carrier_x1 - matrix_xy[0] - boards_matrix_board / 2, "mm of carrier past the board's tail edge");
     echo("DRC", "INFO", "carrier height (derived from the Matrix stack)", carrier_z,
-         "mm = plate underside - diffuser gap - LEDs - Matrix board - header - carrier");
+         "mm = plate underside - gap - LEDs - Matrix board - header - carrier");
     mw = min([for (k = top_keys) sq_gap(key_xy(k), matrix_xy, (plate_cutout + openings_matrix_window) / 2)]);
     drc(mw >= 3, "key plate web between the last key cutout and the matrix window", mw, "mm of aluminium");
+    lip_t = oak_top_t - openings_matrix_acrylic_t;
+    drc(lip_t >= 2, "oak lip under the frosted window", lip_t, str("mm thick, ", openings_matrix_lip, " mm wide; the acrylic sits flush on it"));
+    rw = min([for (k = top_keys) sq_gap(key_xy(k), matrix_xy, (switch_keycap + 2 * stack_cap_clear + matrix_rebate) / 2)]);
+    drc(rw >= 3, "oak between the last cap slot and the window rebate", rw, "mm on the top face");
+    drc(undef, "LED tops to the frosted window's top face", T - matrix_top_z,
+        "mm - frosted acrylic this far above the LEDs softens the pixels; the owner chose it (2026-09-26)");
 
     // Tail face
     ec_in = x_in1 - (ethercon_depth - ends_tail_cap_t);
@@ -770,7 +784,8 @@ module part_2d(p) {
     else if (p == "tail_cap") tail_cap_2d();
     else if (p == "tail_backplate") tail_backplate_2d();
     else if (p == "ubolt_backplate") ubolt_backplate_2d();
-    else if (p == "diffuser") diffuser_2d();
+    else if (p == "matrix_window") matrix_window_2d();
+    else if (p == "oak_rebates") oak_rebates_2d();
     else if (p == "service_cover") service_cover_2d();
     else assert(false, str("unknown part ", p));
 }
