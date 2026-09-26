@@ -388,7 +388,7 @@ module oak_bottom_2d() {
                 for (k = bottom_keys) translate(key_xy(k)) rotate(key_rot(k)) square(rc, center = true);
             for (s = spare_xy) translate(s) square(switch_keycap + 2 * thumb_recess_clear, center = true);
             for (f = fasteners()) translate(f) circle(d = hardware_fastener_clear_d);
-            for (u = ubolt_legs()) translate(u) circle(d = hardware_ubolt_rod_d + 0.5);
+            for (u = ubolt_legs()) translate(u) circle(d = ubolt_hole_d);
         }
     }
 }
@@ -467,13 +467,17 @@ module tail_cap_2d() {
         translate(usb_c) square(usb_sz, center = true);
     }
 }
-// Behind the tail cap: carries the connector (ADR 0009: "let the oak be the
-// face the screws pass through rather than the thing the screws hold").
-ubolt_bp = [hardware_ubolt_span, u_w - 6];
+// The U-bolt's backplate, on the oak bottom's inside face under the nuts: it
+// spreads the strap load over the oak (ADR 0009: "let the oak be the face the
+// screws pass through rather than the thing the screws hold"). The gap
+// fastener pair stands at the same station, so across the body the plate
+// stops at their clearance circle - the oak's own clearance round the screw -
+// and is located by the legs alone; the screws never pass through it.
+ubolt_bp = [hardware_ubolt_span, u_w - 2 * (hardware_fastener_inset + hardware_fastener_clear_d / 2)];
 module ubolt_backplate_2d() {
     difference() {
         translate(ubolt_c) square(ubolt_bp, center = true);
-        for (u = ubolt_legs()) translate(u) circle(d = hardware_ubolt_rod_d + 0.5);
+        for (u = ubolt_legs()) translate(u) circle(d = ubolt_hole_d);
     }
 }
 // The matrix window: frosted acrylic, flush with the oak top, on an oak lip
@@ -532,6 +536,7 @@ function fasteners() =
 // body, since the shortened gap has no room along it beside the left thumb line.
 ubolt_c = [(x_gap0 + x_rh0) / 2, W / 2];
 function ubolt_legs() = [for (s = [-1, 1]) ubolt_c + [0, s * hardware_ubolt_span / 2]];
+ubolt_hole_d = hardware_ubolt_rod_d + 0.5;   // drawing convention: the legs' clearance hole in the oak and the backplate
 
 // ================================================================ 3D ======
 
@@ -1109,6 +1114,18 @@ module drc_report() {
     function thru_w(f) = f[0][0] == "M" ? hardware_fastener_clear_d : f[2][1];
     edge = min([for (f = feats) min(f[1][1] - thru_w(f) / 2 - u_y0, W - u_y0 - f[1][1] - thru_w(f) / 2)]);
     drc(edge >= 2, "oak-bottom cuts inside the U", edge, "mm, smallest web to the inside of a side");
+    // The counterbore comes up from the outside face and the side groove down
+    // from the inside face; where their depths overlap, the oak between them
+    // across the body is all that keeps the counterbore out of the groove.
+    cbore_share = hardware_fastener_cbore_depth - (oak_bottom_t - stack_groove_depth);
+    cbore_web = hardware_fastener_inset - hardware_fastener_cbore_d / 2 - stack_groove_clear;
+    drc(cbore_share <= 0 || cbore_web > 0, "fastener counterbores clear of the side grooves", cbore_share <= 0 ? "n/a - they do not share a depth" : cbore_web,
+        cbore_share <= 0 ? "" : str("mm of oak across the body, over the ", cbore_share, " mm of depth the counterbore and the groove share; negative breaks through"));
+    // The U-bolt's backplate: its nuts on it, and clear of the gap fasteners.
+    bp_nut = ubolt_bp[1] / 2 - hardware_ubolt_span / 2 - hardware_ubolt_nut_af / cos(30) / 2;
+    bp_web = ubolt_bp[1] / 2 - hardware_ubolt_span / 2 - ubolt_hole_d / 2;
+    drc(bp_nut >= 0 && bp_web >= 2, "U-bolt nuts bear on the backplate, which stops at the gap fasteners' clearance",
+        [bp_nut, bp_web], "mm, a nut's corners inside the plate end, and plate beyond each leg hole");
 
     // Sides in grooves
     drc(undef, "interior width between the acrylic sides", u_w, "mm - was the full width less two sides; the oak lips now come off it too");

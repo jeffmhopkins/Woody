@@ -603,10 +603,10 @@ hardware:
     status: nominal
     source: "M3 socket head height 3.0 [from memory] + 0.5 below flush"
   fastener_inset:
-    value: 3.0
+    value: 3.75
     status: tbd
-    source: "placeholder - distance from the inside face of each acrylic side; small, so the holes pass outside the side-by-side key pairs"
-    decided_by: "M4"
+    source: "distance from the inside face of each acrylic side to the fastener centre. A window, not a placeholder [calc]: at least fastener_clear_d / 2 + 2, for 2 mm of oak between the clearance hole and the side (drc 'oak-bottom cuts inside the U'); at most half the interior width - ubolt_span / 2 - (the leg's clearance hole + fastener_cbore_d) / 2 - 3, for the gap pair's counterbores to stay 3 mm from the U-bolt leg holes (drc 'oak-bottom cuts at least 3 mm apart', which measures to the rod, so it passes with a little more). The U-bolt backplate stops at the fasteners' clearance circle, so its width follows this too"
+    decided_by: "M4, with the U-bolt and the fasteners bought - the window moves with ubolt_span, ubolt_rod_d, fastener_clear_d and fastener_cbore_d"
   ubolt_rod_d:
     value: 5.0
     status: tbd

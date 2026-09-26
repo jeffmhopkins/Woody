@@ -244,9 +244,20 @@ only as good as those envelopes. Group the report's lines by these causes
 3. **The breath tube** is short: mouth cap, trap, then across over the strip
    and back onto the sensor's port, all in the mouth band; the board has a
    slot in front of the sensor's lower port.
-4. **The middle M3 pair** runs through the U-bolt backplate, which also
-   overlaps the thumb plates. (The stations ran through the side strips until
-   ADR 0016 removed them.)
+4. **The middle M3 pair and the U-bolt backplate share a station**, the
+   middle of the gap between the hands. Across the body the plate stops at
+   the pair's clearance circle and is located by the U-bolt's legs alone, so
+   the screws never pass through it and it comes out with the U-bolt
+   (*"U-bolt nuts bear on the backplate, which stops at the gap fasteners'
+   clearance"*). How far the fasteners stand in from the sides
+   (`hardware.fastener_inset`) is a window between two rules: the oak between
+   each clearance hole and the side (*"oak-bottom cuts inside the U"*), and
+   the middle pair's counterbores against the U-bolt's leg holes
+   (*"oak-bottom cuts at least 3 mm apart"*). The counterbore also reaches
+   the depth of the side groove from below (*"fastener counterbores clear of
+   the side grooves"*). A wider U-bolt or a bigger screw closes the window;
+   `config/body.yaml` gives both bounds. (The stations ran through the side
+   strips until ADR 0016 removed them.)
 5. **The Matrix and the umbilical are wired onto the main board's tail
    end** (owner, 2026-09-26). The Matrix, on the lid, has a flat 24-way
    ribbon soldered to its pad rows, two test points and two button pads
