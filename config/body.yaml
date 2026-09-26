@@ -149,9 +149,9 @@ layout:
     source: "LH1-3 on the centreline; LH4 / LH5 the little finger's side-by-side pair, one cap pitch apart across the body, centred so both switch bodies stay inside the plate"
     decided_by: "M2 - hands on the mule; the sign too"
   rh_offsets:
-    value: [0.0, 0.0, 0.0, -9.0, 9.0, -6.0]
+    value: [0.0, 0.0, 0.0, -9.0, 9.0, -9.0]
     status: tbd
-    source: "RH1-3 on the centreline; RH4 / RH5 the little finger's side-by-side pair, centred as LH4 / LH5; RH6 the single key below it, offset toward the player's right (the recorder's direction). The offset amount is a placeholder"
+    source: "RH1-3 on the centreline; RH4 / RH5 the little finger's side-by-side pair, centred as LH4 / LH5; RH6 the single key below it, IN LINE with RH4 - the pair key on the player's right, the recorder's direction (owner, 2026-09-26)"
     decided_by: "M2 - hands on the mule; the sign too"
   gap:
     value: 50.0

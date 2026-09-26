@@ -111,8 +111,9 @@ provisional: M2 replaces them with measured positions.
 **The little-finger keys leave the line (owner, same date).** The keys stay
 close together, but each little finger's first position is a **side-by-side
 pair** — two keys at one position along the body, across it — and the right
-little finger has one more, single key below its pair, off centre as a
-recorder offsets its little-finger hole. So "single line" now means the
+little finger has one more, single key below its pair, in line with the
+pair's key on the player's right — off centre as a recorder offsets its
+little-finger hole. So "single line" now means the
 index, middle and ring keys; the offsets are `layout.lh_offsets` /
 `rh_offsets` in `config/body.yaml`, and which way the single key goes is an
 assumption M2 confirms.
