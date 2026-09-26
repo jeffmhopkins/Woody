@@ -72,23 +72,23 @@ boards_display_recess = 1.0;  // tbd; placeholder - glass face back from the bot
 boards_display_cut_clear = 1.5;  // nominal; [ds] the vendor STEP's glass and flex overhang the DXF board outline by 1.18 mm at the flex end (LILYGO-T-DISPLAY-S3-AMOLED-3D.stp, found by the clash check); cut clears that
 boards_matrix_board = 25.0;  // settled; [ds] datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-dimensions.jpg - 25.00 x 25.00, R1.0
 boards_matrix_emitters = 20.8;  // nominal; ADR 0014 / carrier.md - 8 x 2.6 mm pitch [from memory there]
-boards_smt_h = 2.3;  // nominal; tallest SMT part on the mezzanines: SMA/SMC diodes 2.29-2.62 [ds SMAJ15A p.3, SS34 p.3]; SOIC 1.75
+boards_smt_h = 2.3;  // nominal; tallest SMT part on the spine: SMA/SMC diodes 2.29-2.62 [ds SMAJ15A p.3, SS34 p.3]; SOIC 1.75
 boards_cluster_smt_h = 1.8;  // nominal; cluster boards: SOIC-16 74HC165 1.75 [from memory, JEDEC MS-012] and 0805 passives
-boards_tall_l = 15.0;  // tbd; footprint of ONE mezzanine's tall parts - an R-78E5.0 SIP-3 (11.6 x 8.5 x 10.4 [ds R-78E5.0-1.0 p.4]), its C-BUCK-IN 6.3 x 11 and a C-STRIP-BULK 8-10 x 12.5-20 [from memory]; one set per mezzanine, one regulator per dev board (ADR 0013)
-boards_tall_w = 20.0;  // tbd; as tall_l
-boards_tall_h = 12.5;  // tbd; the shortest the bulk electrolytics come, upright [from memory]; lay them down if this does not fit
+boards_tall_l = 15.0;  // tbd; ONE regulator block's length along the spine - an R-78E5.0 SIP-3 (11.6 x 8.5 x 10.4 [ds R-78E5.0-1.0 p.4]), its C-BUCK-IN 6.3 x 11 and a C-STRIP-BULK 8-10 x 12.5-20 [from memory]; one block per dev board (ADR 0013)
+boards_tall_w = 10.0;  // tbd; the regulator block's extent up the spine's face: an R-78E5.0 SIP-3 laid with its 11.6 x 8.5 side on the board, capacitors beside it [ds R-78E5.0-1.0 p.4; caps from memory]
+boards_tall_h = 12.5;  // tbd; the shortest the bulk electrolytics come, upright [from memory]; on the spine they stand sideways, into the body's width
 boards_sensor_body = 12.3;  // settled; [ds] MPXV4006DP p.7, case 1351-01 - body 11.81-12.32 square. SURFACE MOUNT (p.2 ordering table), not THT
 boards_sensor_h = 9.9;  // settled; [ds] MPXV4006DP p.7 - overall height 9.40-9.91
 boards_sensor_leads = 17.8;  // settled; [ds] MPXV4006DP p.7 - across the lead tips 17.27-17.78
 boards_sensor_port_l = 6.6;  // settled; [ds] MPXV4006DP p.7 - ports protrude 6.10-6.60 from one face
 boards_sensor_port_d = 3.3;  // settled; [ds] MPXV4006DP p.7 - barb OD 2.79-3.30
 boards_sensor_port_z = [8.5, 1.4];  // nominal; port centres above the seating plane, upper (P1, marked side - p.6 Table 3) and lower; scaled off the p.7 drawing
-boards_stack_l = 12.0;  // tbd; 2 x 6 at 2.0 mm pitch, 6 x 2.0 [calc]. At 2.54 pitch (15.24) it cannot sit between two thumb switches' pins, 19 mm apart - found by the clash check
-boards_stack_w = 4.0;  // tbd; 2 rows at 2.0 mm pitch [calc]
+boards_conn_l = 12.0;  // tbd; a spine header: 2 x 6 at 2.0 mm pitch, 6 x 2.0 [calc]; it sits between two switches' pins, 19 mm apart, where 2.54 pitch (15.24) would not
+boards_conn_w = 4.0;  // tbd; 2 rows at 2.0 mm pitch [calc]; it stands off the spine's face by this much
 boards_disp_socket_h = 8.5;  // tbd; HDR-DEV female socket strips on the display board's back, 1 x 14 [from memory]
-boards_mezz_clear = 0.5;  // tbd; clearance between a mezzanine and the parts on the boards above and below it, and to the LED strips [drawing convention]
+boards_board_clear = 1.5;  // tbd; clearance between a board and the parts on the board facing it, and between parts: board flex, solder fillets and height tolerance, hand assembly [drawing convention]. 0.5 was a drawing clearance and the owner rejected it (2026-09-26: 'once components are installed you'd have issues')
+boards_spine_off = 8.0;  // tbd; the spine's component face, off the centreline on the side away from the tube: under the key boards' and thumb boards' edge so a short header reaches each
 boards_standoff_d = 5.5;  // tbd; M3 hex standoff across flats, 5.5 [from memory]
-boards_zif_l = 19.0;  // tbd; 14-way 1.0 mm FFC connector, right-angle ZIF, length [from memory]; the link between the hands carries the chain, the display UART, +12 V and grounds
 boards_zif_disp_l = 15.0;  // tbd; 10-way 1.0 mm FFC connector for the display link (UART, power, grounds), length [from memory]
 boards_zif_w = 5.5;  // tbd; the same, depth from the board edge [from memory]
 boards_zif_h = 2.5;  // tbd; the same, height above the board [from memory]
@@ -138,7 +138,6 @@ routing_tube_od = 5.0;  // tbd; breath tube outside diameter; ADR 0003 assumes a
 routing_trap_d = 10.0;  // tbd; dead-volume trap diameter; ADR 0003 caps the trap at 1 mL
 routing_trap_l = 12.0;  // tbd; trap length: 10 mm bore x 12 mm = 0.94 mL, inside ADR 0003's 1 mL [calc]
 routing_tube_lane = "left";  // tbd; which side channel the tube runs in (ADR 0009: 'in one of the side channels'); the looms take the other
-routing_ffc_w = 15.0;  // tbd; 14-way FFC at 1.0 mm pitch, width [calc: 14 x 1.0 + margins]; the link between the mezzanines
 routing_ffc_disp_w = 11.0;  // tbd; 10-way FFC at 1.0 mm pitch, width [calc: 10 x 1.0 + margins]
 routing_ribbon_t = 1.0;  // nominal; flat ribbon thickness, 1.27 mm pitch PVC ribbon [from memory]
 routing_lane_z = 19.0;  // tbd; height of the side-channel runs, between the thumb boards below and the key boards above
@@ -148,5 +147,5 @@ lighting_strip_gap = 3.0;  // tbd; ADR 0009 / ADR 0014: the diffusion gap is a p
 
 // Every value above with status tbd - a placeholder, not a number any
 // document gives. The DRC report lists these so no result hides one.
-tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_mouth_extra", "layout_tail_clear", "layout_underside_clear", "layout_lh_offsets", "layout_rh_offsets", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_tall_l", "boards_tall_w", "boards_tall_h", "boards_stack_l", "boards_stack_w", "boards_disp_socket_h", "boards_mezz_clear", "boards_standoff_d", "boards_zif_l", "boards_zif_disp_l", "boards_zif_w", "boards_zif_h", "boards_matrix_harness_h", "boards_matrix_under_h", "boards_matrix_led_h", "openings_matrix_lip", "openings_matrix_acrylic_t", "openings_usb_slot_w", "openings_usb_slot_h", "openings_usb_plug_l", "openings_matrix_usb_to_tail", "openings_usb_ext_depth", "ethercon_socket_toward_centre", "ethercon_rj45_plug_l", "ethercon_rj45_plug_w", "ethercon_rj45_plug_h", "ethercon_offset_y", "hardware_fastener_inset", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_ubolt_nut_af", "hardware_ubolt_nut_h", "hardware_backplate_t", "routing_tube_od", "routing_trap_d", "routing_trap_l", "routing_tube_lane", "routing_ffc_w", "routing_ffc_disp_w", "routing_lane_z", "lighting_strip_w", "lighting_strip_t", "lighting_strip_gap"];
+tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_mouth_extra", "layout_tail_clear", "layout_underside_clear", "layout_lh_offsets", "layout_rh_offsets", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_tall_l", "boards_tall_w", "boards_tall_h", "boards_conn_l", "boards_conn_w", "boards_disp_socket_h", "boards_board_clear", "boards_spine_off", "boards_standoff_d", "boards_zif_disp_l", "boards_zif_w", "boards_zif_h", "boards_matrix_harness_h", "boards_matrix_under_h", "boards_matrix_led_h", "openings_matrix_lip", "openings_matrix_acrylic_t", "openings_usb_slot_w", "openings_usb_slot_h", "openings_usb_plug_l", "openings_matrix_usb_to_tail", "openings_usb_ext_depth", "ethercon_socket_toward_centre", "ethercon_rj45_plug_l", "ethercon_rj45_plug_w", "ethercon_rj45_plug_h", "ethercon_offset_y", "hardware_fastener_inset", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_ubolt_nut_af", "hardware_ubolt_nut_h", "hardware_backplate_t", "routing_tube_od", "routing_trap_d", "routing_trap_l", "routing_tube_lane", "routing_ffc_disp_w", "routing_lane_z", "lighting_strip_w", "lighting_strip_t", "lighting_strip_gap"];
 

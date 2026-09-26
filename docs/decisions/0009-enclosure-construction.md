@@ -336,7 +336,7 @@ thumb keys and the U-bolt:
 > USB-C plug, so only the connector's housing queues behind it; the connector
 > stands on the floor, and the body is thick enough for that
 > (`body-thickness`). There is no carrier board any more: its circuits
-> are on two mezzanines between the thumb and key boards (ADR 0013). The
+> are on one board standing on its edge down the side, the spine (ADR 0013). The
 > paragraphs below are the original underside design.
 
 **A window in the oak underside for the 8×8 matrix** on the real-time board

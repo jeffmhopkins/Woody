@@ -107,18 +107,24 @@ Three things can claim each end, and the largest wins:
   `drc.echo` reports the lip and the LED-to-window distance, which is what
   decides how soft the pixels look. In practice the matrix sets it.
 - **There is no carrier board** (owner, 2026-09-26: "we don't need a
-  carrier" — "standoffs off the oak, and standoffs / attaching headers on
-  PCBs"). Its circuits go on **two mezzanines**, one in each gap between a
-  thumb board and the key board above it, threaded on that pair's stacking
-  header, on spacers down to the thumb board and standoffs down to the oak
-  where a mezzanine runs past the thumb board. The **right** one carries the
-  breath sensor with its reference and ADC, the umbilical, the SPI out to the
-  module and the Matrix's regulator; the **left** one the display's
-  regulator, the display link and the LED-strip drive — one regulator per
-  dev board (ADR 0013), and the breath sensor as far from the display's
-  AMOLED as the mezzanines allow (ADR 0003). A flat-flex cable joins them
-  across the gap between the hands; another runs to the display. Their size
-  and the height above them are derived; `drc.echo` prints them.
+  carrier"): the carrier's circuits are on ONE board standing on
+  its edge down the side of the body away from the tube, from under the left
+  hand to the end of the right — **the spine** (owner, 2026-09-26: "turning it
+  on the side, and connecting via 90 degree header — one longer board that
+  connects everything down one side"). Its components stand sideways off its
+  inward face into the body's width, so they cost no height; flat between the
+  thumb and key boards, the same circuits had a few millimetres. Each cluster
+  board plugs into it through one short header — on its top edge for a key
+  board, its bottom edge for a thumb board — so the chain runs through the
+  spine's traces, and the Matrix's pigtail, the patch lead and the display
+  link all end on it. Behind the right-thumb board, where nothing is under
+  it, it drops towards the floor, and the breath sensor stands there, as far
+  from the display's AMOLED as the body allows (ADR 0003). One regulator per
+  dev board (ADR 0013), each a block at its end. It stands on the headers and
+  on standoffs off the oak. `drc.echo` prints its size and every clearance.
+- **Board clearances are real ones** (`boards.board_clear`): the owner
+  rejected a model that put one board 0.5 mm over another's parts
+  (2026-09-26: "once components are installed you'd have issues").
 - **Between:** the key gaps, and the space between the hands.
 
 **Equal bands (owner, 2026-09-26).** The space before the left hand and the
@@ -176,12 +182,15 @@ decision, not a correction.
    already asks shared-versus-individual as an M2 question; the model says
    individual recesses need the arc spread further. The same rule catches
    placeholder fasteners landing on placeholder spares — move one.
-6. **The mezzanines' tall parts do not fit upright.** The room above a
-   mezzanine is set by the key board's parts overhead; the regulator module
-   fits, the bulk capacitors do not. *Rule: "tall parts fit on the
-   mezzanines".* Lay them down or use SMD polymer capacitors.
-7. **The mezzanines follow the key boards' length**, so a key layout change
-   resizes them. The left one starts past the display's socket strips.
+6. **The spine is short where it runs between the boards** — the height
+   between the thumb boards' parts and the key boards' parts, less the
+   clearances. Its parts do not care (they stand sideways), but its SMT has
+   that height of board to sit on, and the breath sensor only fits where the
+   spine drops. *Rules: "spine (derived)", "breath sensor fits on the spine
+   where it drops".*
+7. **The spine follows the key boards' length**, so a key layout change
+   resizes it, and its headers are placed between two switches of each
+   cluster board by the model (*"spine header to … clear of its switches"*).
 8. **M3 into a 1.20 mm plate** is about two threads. The BOM already says
    "insert or tapped boss"; the model says plain tapping is not one of the
    options.
@@ -196,22 +205,20 @@ an envelope — many sizes are tbd in `config/body.yaml` — so a clean pair is
 only as good as those envelopes. Group the report's lines by these causes
 (read the counts there, not here):
 
-1. **Stacking headers replace the ribbons to the thumb boards** (owner,
-   2026-09-26: "tighter vertically with stacking headers"). The chain's
-   RT → RH and LT → LH hops plug straight through the mezzanine between
-   them, one 2 × 6 header spanning the gap. At 2.54 mm pitch it cannot sit
-   between two thumb switches' pins, so it is 2.0 mm pitch, along the key
-   board's edge, midway between two thumb keys. It engages as the lid closes,
-   so it must blind-mate, and its height is the board gap, not a stock size.
-2. **No IDC headers remain.** The only cables are two flat-flex runs: the
-   link between the hands and the display link, in ZIF connectors on the
-   mezzanines. **The hardware pages do not follow yet:**
-   `hardware/interfaces/key-chain-loom/`, the J-CHAIN, J-DISP, WIRE-LOOM and
-   HDR-DEV rows, and the register's `chain-connectors` still describe IDC
-   ribbons and dev boards plugged into one carrier, and change when the owner
-   confirms this layout.
-3. **The mezzanines' tall parts** reach the key boards' parts overhead — the
-   capacitor-height finding above.
+1. **No cluster board faces another's connector any more.** Each plugs
+   into the spine through one 2 × 6 header at 2.0 mm pitch (2.54 will not
+   fit between two switches' pins, 19 mm apart), placed by the model midway
+   between two keys. A key board's header engages as the lid closes, so it
+   must blind-mate.
+2. **No ribbons remain inside the body** except the display link, a short
+   flat-flex from the spine's mouth end. **The hardware pages do not follow
+   yet:** `hardware/interfaces/key-chain-loom/`, the J-CHAIN, J-DISP,
+   WIRE-LOOM and HDR-DEV rows, and the register's `chain-connectors` still
+   describe IDC ribbons and dev boards plugged into one carrier, and change
+   when the owner confirms this layout.
+3. **The breath tube** runs the tube lane opposite the spine, the length of
+   both hands, and turns across behind the right-thumb board onto the
+   sensor's port; the spine has a slot in front of the lower port.
 4. **The M3 stations** run through the LED strips, and the middle pair
    through the U-bolt backplate, which also overlaps the thumb plates.
 5. **The tail is clear.** The etherCON, its rear socket, the patch plug,
@@ -232,5 +239,5 @@ hold it. That is a BOM decision, not a CAD one, and is left open here.
 
 The thumb rest lip, gasket beads, plate stiffening (ADR 0002 — open, and it changes the lid),
 the diffuser standoff, and anything in the display band beyond the board. The
-mezzanines and cluster boards are rectangles, because their outlines are
-M3/M4 outputs.
+spine and cluster boards are rectangles, because their outlines are M3/M4
+outputs.

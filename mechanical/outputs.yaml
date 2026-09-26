@@ -51,18 +51,18 @@ renders:
     imgsize: [1600, 700]
     camera: [0, 28, 12, 50, 0, 340, 440]
     defines: {origin: "centre", show_lid: false, ghost_shell: true}
-  - name: mezzanines
-    title: The mezzanines that replace the carrier - from above, lid off, in yellow, labelled
-    src: mechanical/cad/fig_mezzanines.scad
-    out: mechanical/renders/mezzanines.png
-    imgsize: [2000, 900]
+  - name: spine
+    title: The spine that replaces the carrier - square onto its face, lid off, in yellow, labelled
+    src: mechanical/cad/fig_spine.scad
+    out: mechanical/renders/spine.png
+    imgsize: [2000, 760]
     projection: o
-    camera: [0, 10, 0, 0, 0, 0, 400]
-    defines: {}
-  - name: mezzanines-3d
-    title: The mezzanines that replace the carrier - lid off, in yellow
-    src: mechanical/cad/fig_mezzanines.scad
-    out: mechanical/renders/mezzanines-3d.png
+    camera: [0, 0, 8, 90, 0, 0, 380]
+    defines: {show_u: false, show_strips: false, show_caps: false}
+  - name: spine-3d
+    title: The spine that replaces the carrier - lid off, in yellow
+    src: mechanical/cad/fig_spine.scad
+    out: mechanical/renders/spine-3d.png
     imgsize: [1600, 800]
     camera: [0, 28, 0, 38, 0, 340, 400]
     defines: {fig_view: "3d", show_caps: false, show_keys: false}

@@ -224,21 +224,19 @@ moved.
 
 ## Build approach: dev boards as modules on a passive carrier
 
-> **No carrier board (owner, 2026-09-26: "we don't need a carrier" —
-> "standoffs off the oak, and standoffs / attaching headers on PCBs").** The
-> carrier's circuits below are unchanged, and "the carrier" still names them,
-> but they are built as **two mezzanines**, one in each gap between a thumb
-> board and the key board above it, threaded on the stacking headers that join
-> those two boards and standing on spacers and standoffs. The **right** one
-> takes the breath sensor, reference and ADC, the umbilical, the SPI out to the
-> module and the Matrix's regulator; the **left** one the display's regulator,
-> the display link and the LED-strip drive — still one regulator per dev
-> board, and the breath sensor kept away from the AMOLED (ADR 0003). The dev
-> boards no longer plug into it: the Matrix is under its window at the tail on
-> a soldered pigtail, the display at the mouth on a flat-flex cable
-> (ADR 0009, `mechanical/DESIGN.md`). The placement table above still holds
-> for the Matrix and the IMU; the breath sensor, ADC and power are now
-> mid-body, under the right hand.
+> **No carrier board (owner, 2026-09-26: "we don't need a carrier", then
+> "turning it on the side, and connecting via 90 degree header — one longer
+> board that connects everything down one side").** The carrier's circuits
+> below are unchanged, and "the carrier" still names them, but they are built
+> on **the spine**: one board standing on its edge down the side of the body,
+> its parts standing sideways into the body's width, with a short header to
+> each cluster board, so the key chain runs through its traces. Still one
+> regulator per dev board, and the breath sensor at the spine's far end from
+> the AMOLED (ADR 0003). The dev boards no longer plug into it: the Matrix is
+> under its window at the tail on a soldered pigtail, the display at the
+> mouth on a flat-flex cable (ADR 0009, `mechanical/DESIGN.md`). The
+> placement table above still holds for the Matrix and the IMU; the breath
+> sensor, ADC and power are now down the side, under the hands.
 
 Optimising for ease of construction changes the shape of the final build, so it
 is worth stating rather than leaving implied by milestone E13.

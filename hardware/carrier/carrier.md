@@ -14,15 +14,12 @@ under its window at the tail (§7), and everything else here is passive, slow,
 or analog.
 
 > **There is no carrier board (owner, 2026-09-26).** These circuits are built
-> as **two mezzanines**, one in each gap between a thumb board and the key
-> board above it, threaded on the stacking headers that join those boards
-> (ADR 0013's build-approach note, `mechanical/DESIGN.md`). The **right**
-> mezzanine takes §1's power entry for the Matrix, §2's analog front end, and
-> §4's SPI egress with the umbilical; the **left** one the display's
-> regulator, the display link and the LED-strip drive. The block diagram and
-> §§ below describe the circuits, which have not changed; where a line talks
-> about "the board", read the mezzanine that carries that section. Part
-> heights are limited by the key board overhead — `mechanical/drc.echo`.
+> on **the spine**: one board standing on its edge down the side of the body,
+> its parts standing sideways into the body's width, with a short header to
+> each cluster board (ADR 0013's build-approach note, `mechanical/DESIGN.md`).
+> The block diagram and §§ below describe the circuits, which have not
+> changed; where a line talks about "the board", read the spine. Its size and
+> the room its parts have are in `mechanical/drc.echo`.
 
 Evidence marking follows the module pages: `[repo]` names a file, `[calc]` shows
 the arithmetic, `[from memory]` means **I could not open the datasheet and you
@@ -264,10 +261,10 @@ service header — `J-DISP` and `HDR-SERVICE` — moved verbatim to
 
 > **Superseded 2026-09-26: the matrix is on the TOP face** (owner, ADR 0009).
 > The ESP32-S3-Matrix is **not on a carrier at all**: it sits face up
-> against the oak top under a window at the tail, wired to the right
-> mezzanine by a soldered pigtail (ADR 0009, `mechanical/DESIGN.md`), so
-> there is no cutout to argue about and the underside mounting below is not
-> needed. `mechanical/renders/mezzanines.png` shows where the circuits went.
+> against the oak top under a window at the tail, wired to the spine by a
+> soldered pigtail (ADR 0009, `mechanical/DESIGN.md`), so there is no cutout
+> to argue about and the underside mounting below is not needed.
+> `mechanical/renders/spine.png` shows where the circuits went.
 > Kept as the record of the arithmetic that was.
 
 **Proposed: mount the ESP32-S3-Matrix on the carrier's *underside*, LED face
