@@ -14,6 +14,8 @@ proves each one still shows the model it names.
 
 ![The instrument, key face up](renders/hero.png)
 
+![The mouth end close up: oak cap and sanded edges](renders/detail-mouth-end.png)
+
 ## The one rule
 
 **Change the YAML, run the build, commit what it produced.** Never draw a

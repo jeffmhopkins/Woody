@@ -63,6 +63,16 @@ stack:
   # groove in both, set in from the edge by an oak lip. Glued into the bottom
   # grooves (the U is still one glued sub-assembly), a sliding fit in the top
   # grooves - which now locate the lid, the job ADR 0009's notch did.
+  # SANDED EDGES (owner, 2026-09-26: "the outer edges of all wood should be
+  # rounded like I sanded it"): every outer edge of the oak - the top and
+  # bottom panels' long edges, including the lips beside the acrylic, and the
+  # end caps' outer faces and corners. A roundover after assembly, not a cut:
+  # the DXFs carry the outlines, this radius goes on by hand or router.
+  edge_r:
+    value: 1.5
+    status: tbd
+    source: "a sanded roundover [owner]; under the 2 mm lip outside each groove (side_inset), so the lip keeps a flat beside the acrylic"
+    decided_by: "M5, on the first cut parts"
   side_inset:
     value: 2.0
     status: tbd

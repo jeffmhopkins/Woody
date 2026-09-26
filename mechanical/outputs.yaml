@@ -24,6 +24,13 @@ renders:
     imgsize: [1600, 700]
     camera: [0, 28, 12, 60, 0, 335, 470]
     defines: {origin: "centre"}
+  - name: detail-mouth-end
+    title: The mouth end close up - oak cap, sanded edges, the breath tube's pass-through
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/detail-mouth-end.png
+    imgsize: [1400, 800]
+    camera: [15, 28, 20, 55, 0, 320, 110]
+    defines: {origin: "mouth"}
   - name: underside
     title: The underside - thumb keys, U-bolt, matrix window, fasteners
     src: mechanical/cad/woody_body.scad

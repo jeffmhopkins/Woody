@@ -104,6 +104,12 @@ Several things can claim each end, and the largest wins:
   past the breath sensor to the board's tail end, lighting both sides through
   the cavity. How evenly the cavity lights the sides is an M6 prototype
   question.
+- **Every outer oak edge is rounded, as if sanded** (owner, 2026-09-26):
+  the top and bottom panels' long edges, the lips beside the acrylic, and
+  both end caps' outer faces and corners, at `stack.edge_r`. It goes on after
+  cutting (router or sandpaper), so the DXFs carry square outlines except
+  the caps' corners. The radius stays under the lip width
+  (*"sanded edge radius leaves the lips a flat"*). Both end caps are oak.
 - **The matrix window is frosted acrylic, flush with the oak top, on a lip of
   oak** (owner, 2026-09-26): a rebate in the oak top's upper face as deep as
   the acrylic, over a smaller opening through the oak lip. Like the

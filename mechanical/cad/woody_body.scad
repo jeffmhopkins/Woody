@@ -325,6 +325,21 @@ module section_2d() {
 module rrect(x, y, r = 0.5) {
     offset(r) offset(-r) square([x, y]);
 }
+// SANDED EDGES (stack.edge_r). A panel's long edges: its (y, z) section
+// with every corner rounded, run the panel's length. A cap's outer face:
+// rounded all round, the inner face square where it meets the body.
+module sanded_panel(len, t) {
+    rotate([90, 0, 90]) linear_extrude(len) rrect(W, t, stack_edge_r);
+}
+module sanded_cap(t) {
+    hull() {
+        linear_extrude(t - stack_edge_r) rrect(W, T, stack_edge_r);
+        translate([0, 0, t - stack_edge_r]) minkowski() {
+            linear_extrude(EPS) offset(-stack_edge_r) square([W, T]);
+            sphere(stack_edge_r, $fn = 16);
+        }
+    }
+}
 module cutout_at(xy, rot, s) {
     translate(xy) rotate(rot) square([s, s], center = true);
 }
@@ -409,7 +424,7 @@ module oak_grooves_2d() { for (y = side_y) translate([0, y - stack_groove_clear]
 // End caps, full cross-section. Frame: X = model Y, Y = model Z.
 module mouth_cap_2d() {
     difference() {
-        rrect(W, T, 1);
+        rrect(W, T, stack_edge_r);
         translate(tube_yz) circle(d = ends_tube_hole_d);
     }
 }
@@ -443,7 +458,7 @@ usb_c = [min(max(ec_c[0] + ec_fl[0] / 2, ec_c[0] + ec_house[0] / 2) + usb_web_mi
 
 module tail_cap_2d() {
     difference() {
-        rrect(W, T, 1);
+        rrect(W, T, stack_edge_r);
         translate(ec_c) circle(d = ethercon_bore_d);
         for (h = ec_holes) translate(h) circle(d = ethercon_hole_d);
         translate(usb_c) square([openings_usb_slot_w, openings_usb_slot_h], center = true);
@@ -525,25 +540,25 @@ module lam(z, t, c, shell = true, id = "") {
 
 module lid(dz = 0) {
     translate([0, 0, dz]) {
-        P(C_OAK, true, "oak top") translate([x_in0, 0, z_oak_top_bot + explode]) difference() {
+        P(C_OAK, true, "oak top") translate([x_in0, 0, z_oak_top_bot + explode]) intersection() { sanded_panel(x_in1 - x_in0, oak_top_t); difference() {
             linear_extrude(oak_top_t) oak_top_2d();
             translate([0, 0, -EPS]) linear_extrude(stack_groove_depth + EPS) oak_grooves_2d();
             translate([0, 0, oak_top_t - openings_matrix_acrylic_t]) linear_extrude(openings_matrix_acrylic_t + EPS) oak_rebates_2d();
-        }
+        } }
         lam(z_plate_bot + explode / 2, plate_thickness, C_ALU, false, "key plate")
             translate([plate_x0, plate_y0]) plate_top_2d();
     }
 }
 
 module u_channel() {
-    P(C_OAK, true, "oak bottom") translate([x_in0, 0, -explode]) difference() {
+    P(C_OAK, true, "oak bottom") translate([x_in0, 0, -explode]) intersection() { sanded_panel(x_in1 - x_in0, oak_bottom_t); difference() {
         linear_extrude(oak_bottom_t) oak_bottom_2d();
         translate([0, 0, oak_bottom_t - stack_groove_depth]) linear_extrude(stack_groove_depth + EPS) oak_grooves_2d();
         // Fastener counterbores from the bottom face (a drill, not a cut:
         // the DXF carries the clearance hole, the drawing the counterbore).
         translate([-x_in0, 0, -EPS]) for (f = fasteners()) translate(f)
             cylinder(d = hardware_fastener_cbore_d, h = hardware_fastener_cbore_depth + EPS);
-    }
+    } }
     // Each side: one sheet, bottom edge in the bottom groove, top edge in the top.
     // Exploded, the sides move out and down so the boards between them show.
     for (i = [0, 1])
@@ -553,9 +568,9 @@ module u_channel() {
 
 module caps() {
     P(C_OAK_DARK, true, "mouth cap") translate([ends_mouth_cap_t - explode / 3, 0, 0]) rotate([90, 0, 90]) mirror([0, 0, 1])
-        linear_extrude(ends_mouth_cap_t) mouth_cap_2d();
+        intersection() { linear_extrude(ends_mouth_cap_t) mouth_cap_2d(); sanded_cap(ends_mouth_cap_t); }
     P(C_OAK_DARK, true, "tail cap") translate([x_in1 + explode / 3, 0, 0]) rotate([90, 0, 90])
-        linear_extrude(ends_tail_cap_t) tail_cap_2d();
+        intersection() { linear_extrude(ends_tail_cap_t) tail_cap_2d(); sanded_cap(ends_tail_cap_t); }
 }
 
 module switch_at(xy, rot, top, name, spare = false) {
@@ -1095,6 +1110,8 @@ module drc_report() {
     drc(stack_groove_depth <= min(oak_top_t, oak_bottom_t) / 2, "groove leaves at least half the oak under it",
         min(oak_top_t, oak_bottom_t) - stack_groove_depth, "mm of oak under the groove in the thinner panel");
     drc(stack_side_inset >= 2, "oak lip outside each groove", stack_side_inset, "mm - thinner and it splits off along the grain");
+    drc(stack_edge_r < stack_side_inset && stack_edge_r <= min(oak_top_t, oak_bottom_t) / 2, "sanded edge radius leaves the lips a flat",
+        stack_side_inset - stack_edge_r, "mm of flat left on the lip beside the acrylic");
 
     // Z stack
     drc(cavity_h > 0, "cavity height", cavity_h, "mm between the key plate and the oak bottom");
