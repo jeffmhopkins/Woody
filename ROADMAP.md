@@ -38,7 +38,7 @@ existing. Drive it from any dev board with a test pattern and a multimeter.
 
 | ID | Milestone | Done when |
 |---|---|---|
-| E1 | Board bring-up | Waveshare ESP32-S3-Matrix, the only MCU (ADR 0015). Running; **PSRAM confirmed quad, not octal**, and **idle current measured** before the carrier is laid out (ADR 0007) |
+| E1 | Board bring-up | Waveshare ESP32-S3-Matrix, the only MCU (ADR 0015). Running; **PSRAM quad, not octal** (settled on the schematic — see the PSRAM row below; print it anyway), and **idle current measured** before the carrier is laid out (ADR 0007) |
 | E2 | Breath sensing | **Port orientation confirmed with a syringe first** — a reversed DP reads zero, not backwards. Then **a human plays it for 20 minutes** through a real mouthpiece, tube and trap — not a syringe. Ambient zeroing tracks, no condensation artefacts. **The restrictor is sized by ring-down, not by frequency**: tap the mouthpiece end and watch the sensor settle — one time constant, or a decaying oscillation that needs a denser plug. The 214–429 Hz pipe mode is below the filter corner and independent of trap volume, so it is damped, not placed (ADR 0003). **Also settles the tube bore** by playing a bare tube in two or three sizes. Sensor + ADC at the bottom with the real-time board |
 | E3 | IMU | Tilt and roll angles read reliably at rate |
 | E4 | Key scan | 74HC165 chain reads all switches; debounce asymmetric (instant press, filtered release) |
@@ -105,7 +105,7 @@ because "recoverable" here means a full strip-down.
 
 **M8 exists because E11 tests a topology that does not survive to the finished
 instrument.** At E11 the LED strips are not installed — they arrive at M6 — and
-the body is not closed, so the loom under test is not the final loom. The
+the body is not closed, so the boards and ribbons under test are not in their final, closed-body configuration (there is no loom since ADR 0017). The
 single test that validates the entire analog-breath decision was running
 against a configuration that changes afterwards.
 **This was the most important missing milestone in the project.**
@@ -193,7 +193,7 @@ came out of the analog design review specifically.
 | **Interior temperature rise under load** | M8 | The lighting budget is set from an estimated 3 K/W. Soak with the strip and matrix at the clamp, and measure at the breath sensor (ADR 0014) |
 | **Cold-start warm-up sweep** | E2 | Run the sensor from cold through 20 minutes of playing. Output that *falls* under warming is a blocked reference chamber; output that *drifts* is ordinary thermal offset (ADR 0003) |
 | **Breath zero vs cavity temperature** | M8 | The DP's reference port is open to the cavity, so the cavity must leak. Watch the zero during the same soak — a walking zero means it is sealing more than assumed. **The body opens, so a vent can be added at M8 or afterwards** — and a body that closes on a gasket rather than an adhesive is likelier to leak enough on its own (ADR 0003, ADR 0009) |
-| **PSRAM mode on the ESP32-S3-Matrix** | E1 | **No longer a gate** — settled on paper two ways: the vendor board file exposes GPIO33–40 as headers, which octal PSRAM makes impossible, and `R2` is Espressif's suffix for 2 MB *quad*. 17 broken out, three spare. Print the pin list anyway; it costs thirty seconds and catches a silent board revision (ADR 0007) |
+| **PSRAM mode on the ESP32-S3-Matrix** | E1 | **No longer a gate** — settled on paper two ways: the vendor board file exposes GPIO33–40 as headers, which octal PSRAM makes impossible, and `R2` is Espressif's suffix for 2 MB *quad*; and the vendor schematic (`datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-SCHEMATIC.pdf`) marks `U66` as `ESP32-S3FH4R2`, quad PSRAM in the package. 17 broken out; the spares are ADR 0007's pin table. Print the pin list anyway; it costs thirty seconds and catches a silent board revision (ADR 0007) |
 | **DAC saturation vs AVDD** | E7 | Full scale is 5.000 V from the internal reference at gain 2, *independent* of AVDD — what AVDD decides is whether the output buffer can reach it. Raise the top codes and find where they start compressing; that measurement is also what selects the LM317's divider (ADR 0004, ADR 0005) |
 | **Pitch DC load sweep: open / 100k / 50k / 33k** | E9 | Quantifies the 1 kΩ divider error against the real patch, and tells you how much a re-mult actually shifts tuning (ADR 0006) |
 | **Pitch stability into worst-case cable capacitance** | E9 | **A GATE, not a reassurance** — and this row used to say the opposite. The pitch stage now *is* the in-loop version: DC feedback is tapped at the jack, so the 1 kΩ and the patch cable are inside the loop and `C-FB-PITCH` is what compensates it. Sweep the load: open, 100 kΩ, a passive mult, a short (ADR 0006) |

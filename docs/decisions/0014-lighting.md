@@ -87,7 +87,7 @@ counts:
   rather than 5 V.
 - **Backup data line.** WS2815 carries a redundant data path, so a single failed
   LED does not kill everything downstream of it. In a body that is not opened
-  casually — six fasteners, a loom and a gasket (ADR 0009) — that matters more
+  casually — six fasteners, a loom *(since ADR 0017: ribbons, no loom)* and a gasket (ADR 0009) — that matters more
   than it would in a
   serviceable build.
 
@@ -418,7 +418,7 @@ hard limit rather than a setting.
 >
 > **This ADR reaches the right conclusion through the wrong number — and the
 > binding constraint is not the one it names.** The 1 A R-78E5.0 is not what
-> stops the matrix first. On the dev board itself, all 64 LEDs draw through a
+> stops the matrix first. On the dev board itself *(on USB power only — see the 2026-09-26 amendment below)*, all 64 LEDs draw through a
 > single **`B5819WS` Schottky in SOD-323**, whose datasheet
 > (`datasheets/discrete-and-power/B5819WS.pdf`) gives `I_F(AV)` 1 A but
 > **`P_D` = 200 mW and `RθJA` = 500 °C/W**. `[calc]` At `V_F` ≈ 0.46 V that is
@@ -443,6 +443,18 @@ hard limit rather than a setting.
 > through the `B5819WS`, so it is a diode drop below 5 V, and there is **no
 > decoupling anywhere inside the array** — total `VCC_5V` capacitance is
 > 11.1 µF, all clustered on the back.
+>
+> *(Amended 2026-09-26, read off
+> `datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-SCHEMATIC.pdf`: pad row
+> `P1` pin 1 is `VCC_5V` itself, and `D1` (`B5819WS`) runs `VBUS` → `VCC_5V`.
+> So the diode is in the LEDs' path **only when the board runs from USB**. In
+> the instrument the Matrix is powered from the 5 V pad through the ribbon
+> into `J-MCU` (ADR 0017), which feeds `VCC_5V` directly and bypasses `D1`;
+> there the limits are the firmware brightness clamp and the R-78E5.0-1.0's
+> rating and loading (`hardware/carrier/power-entry-instrument/`). The
+> B5819WS argument above still governs a Matrix on the bench on USB, and the
+> cap still stands; its binding constraint in the instrument is the one this
+> note names, and E1/E6 measure it.)*
 
 WS2812C-2020 draws **5 mA per channel**, so 15 mA per LED at full white and
 960 mA for all 64 — **this is the wrong part's figure and it is at least 2.4×

@@ -112,7 +112,7 @@ cluster_margin = 4;        // drawing convention: board edge past the outermost 
 // display ... we can do all this with the matrix led"; ADR 0015), so the
 // keys start where the first top cap clears the mouth cap, the first thumb
 // recess clears it too, and the breath trap fits across the mouth band
-// before the first key and thumb boards. Everything is measured from x_in0,
+// before the first key board and thumb row. Everything is measured from x_in0,
 // the inside face of the mouth cap.
 // The left-thumb cluster's extent relative to LH1 (x_lh0 = 0), recesses included.
 // A straight line: a pair, the thumb rest, a pair (owner, 2026-09-26).
@@ -139,7 +139,7 @@ mouth_names = ["the first top key", "the first thumb recess", "the breath trap b
 mouth_claims = [x_in0 + layout_mouth_extra + switch_keycap / 2 + stack_cap_clear,
                 x_in0 + layout_underside_clear - (min(lt_rel) - rc / 2),
                 x_in0 + trap_band + board_lead,
-                x_in0 + boards_board_clear + 0.5 + boards_sensor_body / 2 + 5.1 + ks33_stub + 0.5 - min(lt_rel)];
+                x_in0 + boards_board_clear + 0.5 + boards_sensor_body / 2 + boards_sensor_lead_row / 2 + ks33_stub + 0.5 - min(lt_rel)];
 mouth_req = max(mouth_claims);
 
 // The TAIL's needs, measured from the last top key's centre. Everything at
@@ -664,10 +664,11 @@ module led_strips() {
 }
 
 // ------------------------------------------------------------ routing -----
-// The tube and the looms run along the two side channels at routing_lane_z,
-// against the sides (there are no side strips since ADR 0016), and drop to
-// what they serve. Lanes are a model choice (config/body.yaml routing): the
-// clash check reports what is in them.
+// The breath tube runs from the mouth cap to the trap and the sensor inside
+// the mouth band, against one side (routing_tube_lane); there are no looms
+// since ADR 0017 - the key boards are on flat flex and the Matrix on a
+// ribbon, both drawn below. The lane is a model choice (config/body.yaml
+// routing): the clash check reports what is in it.
 // Inboard of the fastener line, which is close to the sides.
 function lane_y(side, d) = let(e = hardware_fastener_inset + fastener_notch + d / 2)
     side == "left" ? u_y0 + e : W - u_y0 - e;
@@ -676,6 +677,7 @@ tube_y = lane_y(routing_tube_lane, routing_tube_od);
 // cross-section turned to suit its direction - lying FLAT along and across
 // the body, on edge only where it drops to a socket. Stood on edge along the
 // body, a 15 mm ribbon does not fit the 12-13 mm between the thumb boards'
+// (now the main board's)
 // parts and the key boards' parts (found by the clash check, 2026-09-26).
 module ribbon(pts, w, t = routing_ribbon_t) {
     for (i = [0 : len(pts) - 2]) let(a = pts[i], b = pts[i + 1], dv = [abs(b[0] - a[0]), abs(b[1] - a[1]), abs(b[2] - a[2])],
@@ -724,14 +726,14 @@ function pins_at(p, r) = len([for (k = bottom_keys) if (max(abs(key_xy(k)[0] - p
 // surface (p.7), so the board has a slot in front of it.
 sensor_c = [cb_x[0] + 0.5 + boards_sensor_body / 2, cb_y[tube_side < 0 ? 1 : 0] + tube_side * (boards_sensor_leads / 2 + 0.5)];
 sensor_face_x = sensor_c[0] + boards_sensor_body / 2;
-p2_y = sensor_c[1] + 2.1;
-p1_tip = [sensor_face_x + boards_sensor_port_l, sensor_c[1] - 2.1, cb_top + boards_sensor_port_z[0]];
+p2_y = sensor_c[1] + boards_sensor_port_offset;
+p1_tip = [sensor_face_x + boards_sensor_port_l, sensor_c[1] - boards_sensor_port_offset, cb_top + boards_sensor_port_z[0]];
 module sensor_3d() {
     P([0.20, 0.20, 0.22], false, "breath sensor") union() {
         translate([sensor_c[0] - boards_sensor_body / 2, sensor_c[1] - boards_sensor_body / 2, cb_top])
             cube([boards_sensor_body, boards_sensor_body, boards_sensor_h]);
-        translate([sensor_c[0] - 5.1, sensor_c[1] - boards_sensor_leads / 2, cb_top]) cube([10.2, boards_sensor_leads, 1.2]);
-        for (i = [0, 1]) translate([sensor_face_x - EPS, sensor_c[1] + (i == 0 ? -2.1 : 2.1), cb_top + boards_sensor_port_z[i]])
+        translate([sensor_c[0] - boards_sensor_lead_row / 2, sensor_c[1] - boards_sensor_leads / 2, cb_top]) cube([boards_sensor_lead_row, boards_sensor_leads, boards_sensor_lead_h]);
+        for (i = [0, 1]) translate([sensor_face_x - EPS, sensor_c[1] + (i == 0 ? -1 : 1) * boards_sensor_port_offset, cb_top + boards_sensor_port_z[i]])
             rotate([0, 90, 0]) cylinder(d = boards_sensor_port_d, h = boards_sensor_port_l);
     }
 }
@@ -739,7 +741,7 @@ sensor_room = under_keys(sensor_c, [boards_sensor_body, boards_sensor_leads]) ? 
 // The strip: the centreline band between the thumb switches' two rows of
 // pins, from past the sensor to the board's tail end.
 strip_y = W / 2 - lighting_strip_w / 2;
-strip_x0 = sensor_c[0] + 5.1 + boards_board_clear;
+strip_x0 = sensor_c[0] + boards_sensor_lead_row / 2 + boards_board_clear;
 jm_x1 = cb_x[1] - 1;                               // J-MCU's mouth, at the main board's tail edge
 jm_x0 = jm_x1 - boards_mcu_conn_w;
 strip_l = min(cb_x[1] - lighting_strip_inset, jm_x0 - boards_board_clear) - strip_x0;

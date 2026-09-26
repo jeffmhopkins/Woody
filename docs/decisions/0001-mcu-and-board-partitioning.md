@@ -78,6 +78,9 @@ satellite boards distributed along the body.
 ```
 TAIL   dev board on a passive carrier: MCU, IMU, 8×8 matrix, breath sensor,
        ADC, reference, umbilical connector, USB-C. NO shift registers.
+       (since ADR 0017: sensor, reference and buffer at the main board's
+       mouth end; the Matrix is on the lid, 20-way ribbon to J-MCU; the
+       umbilical is etherCON -> patch lead -> J-UMB on the main board)
         |
         |  (since ADR 0017: thumbs on traces, key boards on 12-way FFC)
         |  ONE chained run, 12 conductors per hop (2x6 IDC), passing through
@@ -382,14 +385,14 @@ during performance.
   diodes. **And with the registers back on the cluster boards it does not mean
   per-key wiring back to a central point**: every switch-to-chip connection is
   a trace on the board the switch is already soldered to, and twelve
-  conductors leave each cluster (this line said six; the hop is a 2x6 IDC). An intermediate version of this line called that wiring
+  conductors leave each cluster (this line said six; the hop was a 2x6 IDC — *(Amended 2026-09-26, ADR 0017: a 12-way flat-flex ribbon per key board, the thumbs' registers on main-board traces)*). An intermediate version of this line called that wiring
   "the right price" for tail-mounted registers. The price is no longer paid.
 - **Chain is 4 registers, 32 bits, for 18 switches** (ADR 0010), **one per
   cluster board**. The 14 spare bits are free expansion for octave, mode and
-  hold inputs, **8 of them carry the marker pattern** and 3 stay free. Full chain reads in
+  hold inputs, **8 of them carry the marker pattern** and 3 stay free. *(Amended 2026-09-26: hold/preset became switch RT4, so the used and spare counts each moved by one — `config/key-layout.yaml` `chain` and `spare_bits*` own them; and since ADR 0017 the four registers sit two on the key boards and two on the main board.)* Full chain reads in
   ~32 µs at 1 MHz, about 13 % of a 250 µs loop period. **1 MHz is the design
-  rate and the chain should not be pushed much past it**: it now crosses four
-  connectors and ~265 mm of loom, and HC165's slow edges are what make that an
+  rate and the chain should not be pushed much past it**: it crossed four
+  connectors and ~265 mm of loom when this was written *(Amended 2026-09-26, ADR 0017: now main-board traces plus two flat-flex ribbons; the length is `mechanical/drc.echo` "main board (derived)")*, and HC165's slow edges are what make that an
   ordinary lumped load. Clocking it hard is how the transmission-line hazards
   come back.
 - LED power and data run the length of the body too. Keep their ground return

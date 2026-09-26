@@ -282,7 +282,7 @@ boards:
   tall_l:
     value: 15.0
     status: tbd
-    source: "ONE regulator block, the long side across the body - an R-78E5.0 SIP-3 (11.6 x 8.5 x 10.4 [ds R-78E5.0-1.0 p.4]), its C-BUCK-IN 6.3 x 11 and a C-STRIP-BULK 8-10 x 12.5-20 [from memory]; one block per dev board (ADR 0013)"
+    source: "ONE regulator block, the long side across the body - an R-78E5.0 SIP-3 (11.6 x 8.5 x 10.4 [ds R-78E5.0-1.0 p.4]), its C-BUCK-IN 6.3 x 11 and a C-STRIP-BULK 8-10 x 12.5-20 [from memory]; one block, on the main board (ADR 0017)"
     decided_by: "M4 main board layout"
   tall_w:
     value: 10.0
@@ -297,11 +297,11 @@ boards:
   sensor_body:
     value: 12.3
     status: settled
-    source: "[ds] MPXV4006DP p.7, case 1351-01 - body 11.81-12.32 square. SURFACE MOUNT (p.2 ordering table), not THT"
+    source: "[ds] MPXV4006DP p.7, case 1351-01 - body 11.81-12.32 square. SURFACE MOUNT (p.1 ordering table), not THT"
   sensor_h:
     value: 9.9
     status: settled
-    source: "[ds] MPXV4006DP p.7 - overall height 9.40-9.91"
+    source: "[ds] MPXV4006DP p.20 case 1351-01 table, dim A - overall height 9.39-9.91"
   sensor_leads:
     value: 17.8
     status: settled
@@ -318,6 +318,21 @@ boards:
     value: [8.5, 1.4]
     status: nominal
     source: "port centres above the seating plane, upper (P1, marked side - p.6 Table 3) and lower; scaled off the p.7 drawing"
+  sensor_port_offset:
+    value: 2.1
+    status: tbd
+    source: "[ds] MPXV4006DP p.7 end view, case 1351-01 dim N (p.20 table) 4.06-4.57 - the two ports' centres are offset across the body by N, so each sits N/2 = 2.03-2.29 either side of the body's centre [calc]; 2.1 is a pick inside that range"
+    decided_by: "the part in hand at M4"
+  sensor_lead_row:
+    value: 10.2
+    status: tbd
+    source: "length along the body of the block standing in for the leads. NOT a datasheet dimension: the p.20 table gives e 2.54 BSC and b 0.96-1.07, so 4 leads per side span 3 x 2.54 + 1.07 = 8.69 max [calc]; 10.2 is a modelling envelope over that [from memory]"
+    decided_by: "M4 footprint"
+  sensor_lead_h:
+    value: 1.2
+    status: tbd
+    source: "height of the block standing in for the lead forms. NOT a datasheet dimension: the p.20 table gives only A1 0.05-0.25 (standoff) and L 1.02-1.52 (foot length); the lead's rise to the body is drawn (p.7 Detail G) but not dimensioned [from memory]"
+    decided_by: "M4 footprint"
   # RIBBONS, NOT STACKING HEADERS (owner, 2026-09-26, ADR 0017): one 12-way
   # flat flex ribbon per key board, so the lid comes off with the key boards
   # still connected. Low ZIF connectors, because a 2.54 IDC box header and
@@ -635,7 +650,7 @@ routing:
   tube_lane:
     value: "left"
     status: tbd
-    source: "which side channel the tube runs in (ADR 0009: 'in one of the side channels'); the looms take the other"
+    source: "which side the tube and trap run on inside the mouth band (ADR 0017: sensor on the far side from the tube); there are no looms since ADR 0017"
     decided_by: "M4"
   # STANDARD FLAT RIBBON (owner, 2026-09-26), lying FLAT down the centreline
   # (on edge it does not fit between the boards' part layers - clash check).
@@ -673,11 +688,6 @@ routing:
     value: 1.0
     status: nominal
     source: "flat ribbon thickness, 1.27 mm pitch PVC ribbon [from memory]"
-  lane_z:
-    value: 19.0
-    status: tbd
-    source: "height of the side-channel runs, between the thumb boards below and the key boards above"
-    decided_by: "M4"
 
 # ------------------------------------------------------------ lighting ----
 lighting:

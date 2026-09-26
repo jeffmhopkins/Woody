@@ -706,10 +706,14 @@ It exists now, and moving the sensor to the bottom is what made it trivial:
 
 > **The star point is the analog ground pour on the bottom cluster board, at the
 > sensor and reference, immediately adjacent to the umbilical connector.**
+> *(Amended 2026-09-26, ADR 0017: the board is the main board, and the sensor
+> is at its mouth end, far from `J-UMB` at its tail; where `AGND_SENSE` is
+> taken — at the star or at the connector — is open for M4 layout,
+> `hardware/interfaces/breath-sense-link/breath-sense-link.md`.)*
 
 Everything analog in the instrument — the sensor, the REF5050, both halves of
 the OPA2197, the ADC divider — sits on that one board within a few centimetres
-of each other and of the connector. `AGND` leaves the board straight into the
+of each other and of the connector *(since ADR 0017: sensor, reference and buffer at the main board's mouth end, `J-UMB` at its tail — see the amendment above)*. `AGND` leaves the board straight into the
 umbilical.
 
 **The same problem used to exist inside the body and was never addressed.** With
@@ -824,7 +828,7 @@ handling is three partial measures rather than one fix:
 - *(Amended 2026-09-26: the sensor is surface mount, so "socketed" is out;
   it is soldered down and replaceable with an iron — breath-sense-link,
   "Mounting". The spare and the clearable trap stand.)*
-- **Treat the sensor as a wear part.** It is socketed or otherwise replaceable,
+- **Treat the sensor as a wear part.** It is replaceable with an iron (`hardware/interfaces/breath-sense-link/`, Mounting),
   and the trap is clearable without disassembly. **Buy two** — ordinary spares
   for a part that gets breathed into for years.
 

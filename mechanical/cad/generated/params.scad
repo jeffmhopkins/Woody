@@ -73,15 +73,18 @@ boards_matrix_board = 25.0;  // settled; [ds] datasheets/mechanical/WAVESHARE-ES
 boards_matrix_emitters = 20.8;  // nominal; ADR 0014 / carrier.md - 8 x 2.6 mm pitch [from memory there]
 boards_smt_h = 2.3;  // nominal; tallest SMT part on the main board: SMA/SMC diodes 2.29-2.62 [ds SMAJ15A p.3, SS34 p.3]; SOIC 1.75
 boards_cluster_smt_h = 1.8;  // nominal; cluster boards: SOIC-16 74HC165 1.75 [from memory, JEDEC MS-012] and 0805 passives
-boards_tall_l = 15.0;  // tbd; ONE regulator block, the long side across the body - an R-78E5.0 SIP-3 (11.6 x 8.5 x 10.4 [ds R-78E5.0-1.0 p.4]), its C-BUCK-IN 6.3 x 11 and a C-STRIP-BULK 8-10 x 12.5-20 [from memory]; one block per dev board (ADR 0013)
+boards_tall_l = 15.0;  // tbd; ONE regulator block, the long side across the body - an R-78E5.0 SIP-3 (11.6 x 8.5 x 10.4 [ds R-78E5.0-1.0 p.4]), its C-BUCK-IN 6.3 x 11 and a C-STRIP-BULK 8-10 x 12.5-20 [from memory]; one block, on the main board (ADR 0017)
 boards_tall_w = 10.0;  // tbd; the regulator block's other side: an R-78E5.0 SIP-3 (11.6 x 8.5 on the board), capacitors beside it [ds R-78E5.0-1.0 p.4; caps from memory]
 boards_tall_h = 12.5;  // tbd; the shortest the bulk electrolytics come, upright [from memory]; lay them down or use SMD polymer where drc.echo says they do not fit
-boards_sensor_body = 12.3;  // settled; [ds] MPXV4006DP p.7, case 1351-01 - body 11.81-12.32 square. SURFACE MOUNT (p.2 ordering table), not THT
-boards_sensor_h = 9.9;  // settled; [ds] MPXV4006DP p.7 - overall height 9.40-9.91
+boards_sensor_body = 12.3;  // settled; [ds] MPXV4006DP p.7, case 1351-01 - body 11.81-12.32 square. SURFACE MOUNT (p.1 ordering table), not THT
+boards_sensor_h = 9.9;  // settled; [ds] MPXV4006DP p.20 case 1351-01 table, dim A - overall height 9.39-9.91
 boards_sensor_leads = 17.8;  // settled; [ds] MPXV4006DP p.7 - across the lead tips 17.27-17.78
 boards_sensor_port_l = 6.6;  // settled; [ds] MPXV4006DP p.7 - ports protrude 6.10-6.60 from one face
 boards_sensor_port_d = 3.3;  // settled; [ds] MPXV4006DP p.7 - barb OD 2.79-3.30
 boards_sensor_port_z = [8.5, 1.4];  // nominal; port centres above the seating plane, upper (P1, marked side - p.6 Table 3) and lower; scaled off the p.7 drawing
+boards_sensor_port_offset = 2.1;  // tbd; [ds] MPXV4006DP p.7 end view, case 1351-01 dim N (p.20 table) 4.06-4.57 - the two ports' centres are offset across the body by N, so each sits N/2 = 2.03-2.29 either side of the body's centre [calc]; 2.1 is a pick inside that range
+boards_sensor_lead_row = 10.2;  // tbd; length along the body of the block standing in for the leads. NOT a datasheet dimension: the p.20 table gives e 2.54 BSC and b 0.96-1.07, so 4 leads per side span 3 x 2.54 + 1.07 = 8.69 max [calc]; 10.2 is a modelling envelope over that [from memory]
+boards_sensor_lead_h = 1.2;  // tbd; height of the block standing in for the lead forms. NOT a datasheet dimension: the p.20 table gives only A1 0.05-0.25 (standoff) and L 1.02-1.52 (foot length); the lead's rise to the body is drawn (p.7 Detail G) but not dimensioned [from memory]
 boards_ffc_conn_l = 17.0;  // tbd; a 12-way 1.0 mm pitch right-angle (side-entry) ZIF FFC connector, along the body [from memory]
 boards_ffc_conn_w = 5.5;  // tbd; the same connector, across the body [from memory]
 boards_ffc_conn_h = 2.5;  // tbd; the same connector's height above the board [from memory]
@@ -136,7 +139,7 @@ hardware_backplate_t = 3.0;  // tbd; hardware/bom.csv MECH-BACKPLATE - aluminium
 routing_tube_od = 5.0;  // tbd; breath tube outside diameter; ADR 0003 assumes a 3 mm bore, the wall is a guess [from memory]
 routing_trap_d = 10.0;  // tbd; dead-volume trap diameter; ADR 0003 caps the trap at 1 mL
 routing_trap_l = 12.0;  // tbd; trap length: 10 mm bore x 12 mm = 0.94 mL, inside ADR 0003's 1 mL [calc]
-routing_tube_lane = "left";  // tbd; which side channel the tube runs in (ADR 0009: 'in one of the side channels'); the looms take the other
+routing_tube_lane = "left";  // tbd; which side the tube and trap run on inside the mouth band (ADR 0017: sensor on the far side from the tube); there are no looms since ADR 0017
 routing_mcu_ribbon_w = 12.7;  // tbd; 20-way 0.635 mm ribbon for a 1.27 mm dual-row header [calc]: the Matrix's 12 used GPIO, 5V, 3V3 and GND, and five positions open (hardware/carrier/bom.csv CBL-MCU-RIBBON)
 routing_mcu_ribbon_t = 0.8;  // tbd; fine-pitch ribbon thickness [from memory]
 routing_umb_cable_od = 4.0;  // tbd; a slim Cat6 patch lead [from memory]; the patch plug is CBL-UMB-PATCH's plug in the etherCON's rear socket
@@ -144,7 +147,6 @@ routing_umb_bend_r_per_od = 4.0;  // tbd; minimum bend radius as a multiple of t
 routing_ffc_w = 13.0;  // tbd; 12-way 1.0 mm pitch flat flex cable: 11 x 1.0 between outer conductors plus the edges [calc]; ADR 0001's 12 conductors
 routing_ffc_t = 0.3;  // tbd; flat flex cable thickness [from memory]
 routing_ribbon_t = 1.0;  // nominal; flat ribbon thickness, 1.27 mm pitch PVC ribbon [from memory]
-routing_lane_z = 19.0;  // tbd; height of the side-channel runs, between the thumb boards below and the key boards above
 lighting_strip_w = 10.0;  // tbd; hardware/carrier/carrier.md '~10 mm' [from memory there]; the strip geometry row is BLOCKED in datasheets/MANIFEST.csv
 lighting_strip_t = 2.5;  // tbd; WS2815 strip thickness, bare IP30 [from memory]; the MANIFEST strip-geometry row is BLOCKED
 lighting_strip_inset = 1.0;  // nominal; the strip's tail end in from the main board's end - a model choice
@@ -152,5 +154,5 @@ lighting_strip_per_m = 60;  // tbd; LEDs per metre; hardware/unplaced.csv LED-ST
 
 // Every value above with status tbd - a placeholder, not a number any
 // document gives. The DRC report lists these so no result hides one.
-tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_edge_r", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_mouth_extra", "layout_tail_clear", "layout_underside_clear", "layout_lh_offsets", "layout_rh_offsets", "layout_lt_rest_under", "layout_lt_rest", "layout_rt_rest_under", "layout_rt_rest", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_tall_l", "boards_tall_w", "boards_tall_h", "boards_ffc_conn_l", "boards_ffc_conn_w", "boards_ffc_conn_h", "boards_mcu_conn_l", "boards_mcu_conn_w", "boards_mcu_conn_h", "boards_umb_conn_l", "boards_umb_conn_w", "boards_umb_conn_h", "boards_board_clear", "boards_standoff_d", "boards_matrix_harness_h", "boards_matrix_under_h", "boards_matrix_led_h", "openings_matrix_lip", "openings_matrix_acrylic_t", "openings_usb_slot_w", "openings_usb_slot_h", "openings_usb_plug_l", "openings_matrix_usb_to_tail", "openings_usb_ext_depth", "ethercon_socket_toward_centre", "ethercon_rj45_plug_l", "ethercon_rj45_plug_w", "ethercon_rj45_plug_h", "ethercon_offset_y", "hardware_fastener_inset", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_ubolt_nut_af", "hardware_ubolt_nut_h", "hardware_backplate_t", "routing_tube_od", "routing_trap_d", "routing_trap_l", "routing_tube_lane", "routing_mcu_ribbon_w", "routing_mcu_ribbon_t", "routing_umb_cable_od", "routing_umb_bend_r_per_od", "routing_ffc_w", "routing_ffc_t", "routing_lane_z", "lighting_strip_w", "lighting_strip_t", "lighting_strip_per_m"];
+tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_edge_r", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_mouth_extra", "layout_tail_clear", "layout_underside_clear", "layout_lh_offsets", "layout_rh_offsets", "layout_lt_rest_under", "layout_lt_rest", "layout_rt_rest_under", "layout_rt_rest", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_tall_l", "boards_tall_w", "boards_tall_h", "boards_sensor_port_offset", "boards_sensor_lead_row", "boards_sensor_lead_h", "boards_ffc_conn_l", "boards_ffc_conn_w", "boards_ffc_conn_h", "boards_mcu_conn_l", "boards_mcu_conn_w", "boards_mcu_conn_h", "boards_umb_conn_l", "boards_umb_conn_w", "boards_umb_conn_h", "boards_board_clear", "boards_standoff_d", "boards_matrix_harness_h", "boards_matrix_under_h", "boards_matrix_led_h", "openings_matrix_lip", "openings_matrix_acrylic_t", "openings_usb_slot_w", "openings_usb_slot_h", "openings_usb_plug_l", "openings_matrix_usb_to_tail", "openings_usb_ext_depth", "ethercon_socket_toward_centre", "ethercon_rj45_plug_l", "ethercon_rj45_plug_w", "ethercon_rj45_plug_h", "ethercon_offset_y", "hardware_fastener_inset", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_ubolt_nut_af", "hardware_ubolt_nut_h", "hardware_backplate_t", "routing_tube_od", "routing_trap_d", "routing_trap_l", "routing_tube_lane", "routing_mcu_ribbon_w", "routing_mcu_ribbon_t", "routing_umb_cable_od", "routing_umb_bend_r_per_od", "routing_ffc_w", "routing_ffc_t", "lighting_strip_w", "lighting_strip_t", "lighting_strip_per_m"];
 

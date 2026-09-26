@@ -196,7 +196,8 @@ the error propagated into ADR 0013 and the roadmap.
 | WS2815 data, one strip (ADR 0016; was two) | 1 | 1 — 2 spare |
 | ~~UART1 to the display board~~ — spare since ADR 0015 | 0 | (5, 6) |
 | UART0 console to a carrier test header | 2 | 43, 44 |
-| **Used** | **11 of 17** | spare: 2, 3, 4, 5, 6, 33 |
+| 74x165 chain end, the last register's `SER` *(Amended 2026-09-26: `hardware/interfaces/key-chain-loom/`)* | 1 | 33 |
+| **Used** | **12 of 17** *(Amended 2026-09-26: was 11, before IO33 became the chain end)* | spare: 2, 3, 4, 5, 6 |
 
 *(The inter-MCU link below no longer exists (2026-09-26, [ADR 0015](0015-one-mcu-no-display.md)); the console reasoning
 still holds for UART0.)*

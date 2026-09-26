@@ -21,7 +21,7 @@ register's `body-thickness`, stated here.
 > set it by the etherCON rather than pocket the oak bottom for it. The
 > connector stands on the floor with its rear socket and patch plug under the
 > LED matrix; the matrix sits against the oak top, the key plate ending short
-> of it, and the key and thumb boards join by stacking headers (owner, same
+> of it, and the key and thumb boards join by stacking headers *(since ADR 0017: one main board, key boards on 12-way flat-flex ribbons)* (owner, same
 > day: "tighter vertically"). `mechanical/drc.echo` ("body thickness takes
 > the etherCON on the floor") gives the thinnest body that allows it — the
 > connector's flange, floor to oak top — and this figure is that rounded up
@@ -126,7 +126,7 @@ the centreline for the whole length of both key runs, and thumb switches
 protrude upward from the bottom face. The genuinely free volume is the upper
 section, the inter-hand gap (minus the U-bolt), the lower section, and two
 narrow side channels flanking the switch column — which are the natural route
-for wiring looms. Board outlines belong on that plan, not on the raw envelope
+for wiring looms *(since ADR 0017 there are none; the tube and ribbons use them)*. Board outlines belong on that plan, not on the raw envelope
 (ADR 0013).
 
 ### The thickness suits the grip
@@ -310,11 +310,11 @@ at the sensor end handles what accumulates.
 The only stack requirement is **access to clear it without disassembly**. Not a
 drain plumbed through the body — just a serviceable path to the sensor end.
 
-**The tube is ~400 mm and the sensor is at the tail**, not the 30 mm near the
-top this section used to assume. The trap therefore sits at the tail alongside
-everything else, and "clearable" means reachable from the tail face rather than
-from the mouthpiece end. The tube runs the length of the body in one of the side
-channels.
+**The tube is ~400 mm and the sensor is at the tail** *(Amended 2026-09-26, ADR 0017: no longer — the sensor is on the main board at the mouth end beside the trap, and the tube is short, within the mouth band)*, not the 30 mm near the
+top this section used to assume. The trap therefore sat at the tail alongside
+everything else *(since ADR 0017: at the mouth end)*, and "clearable" meant reachable from the tail face *(since ADR 0017: from the mouthpiece end)* rather than
+from the mouthpiece end. The tube ran the length of the body in one of the side
+channels *(since ADR 0017: it does not)*.
 
 ### The tail carries a display window and a USB port
 
@@ -338,7 +338,7 @@ thumb keys and the U-bolt:
 > USB-C plug, so only the connector's housing queues behind it; the connector
 > stands on the floor, and the body is thick enough for that
 > (`body-thickness`). There is no carrier board any more: its circuits
-> are on one flat board between the thumb and key boards, the centre board (ADR 0013). The
+> were on one flat board between the thumb and key boards, the centre board (ADR 0013) *(since ADR 0017: on the main board, which replaced the centre and thumb boards, under the key boards)*. The
 > paragraphs below are the original underside design.
 
 **A window in the oak underside for the 8×8 matrix** on the real-time board
@@ -582,6 +582,8 @@ flat parts, and not blocked.
   in, not retrofitted (ADR 0005).
 - *(Superseded (2026-09-26, [ADR 0016](0016-one-strip-on-the-centre-board.md)): there are no side strips; the one strip lies on the
   centre board, and the side channels carry the tube and the looms.)*
+  *(Amended 2026-09-26, ADR 0017: the strip is on the main board, there are no
+  looms, and the tube stays in the mouth band.)*
   **The two side channels are shared: LED strips on both sides, looms alongside.**
   An earlier revision assigned the channels to the wiring looms while ADR 0014
   assigned the same two to the LED strips — a direct contradiction between two
@@ -589,7 +591,7 @@ flat parts, and not blocked.
   runs away from the breath wiring") unsatisfiable.
 
   **It is resolved by the sensor moving to the bottom** (ADR 0003). The analog
-  breath pair no longer runs the length of the body at all, so what shares the
+  breath pair no longer runs the length of the body at all *(Amended 2026-09-26, ADR 0017: it does again — the sensor is at the mouth end and the buffered signal runs the main board as a trace over its own ground; E11 is the test)*, so what shares the
   channels with pulsed LED current is the SPI key chain, the UART and power —
   all digital and all tolerant. Digital beside pulsed LED current is a far weaker
   objection than analog beside it would have been.
@@ -608,7 +610,7 @@ flat parts, and not blocked.
 "a body that is bonded shut is a body that is never opened again." The body is
 not bonded shut any more, so the items below are no longer *impossible* later —
 they are merely expensive, because getting at them means lifting the lid,
-disturbing the loom and re-laying a gasket. That is a real cost and it is worth
+disturbing the loom *(since ADR 0017: unlatching two ZIF ribbons and unplugging J-MCU)* and re-laying a gasket. That is a real cost and it is worth
 avoiding, but it is not the cliff this page was written against.
 
 **Two of them are still genuinely impossible later**, because they are cuts in
@@ -646,7 +648,7 @@ some crimping now; discovering you need one signal more afterwards costs a
 strip-down.
 
 **Conformal-coat the boards.** The instrument is breathed into for hours, behind
-eighteen unsealed switch cutouts, in a body whose interior runs 10–20 K above
+eighteen unsealed switch cutouts *(Amended 2026-09-26: one more since hold/preset became RT4 — `config/key-layout.yaml`)*, in a body whose interior runs 10–20 K above
 ambient. There is no coating anywhere in the BOM and nothing else in the design
 addresses humidity inside the cavity.
 
@@ -773,7 +775,7 @@ hoping one was built loose enough.
 **It changes what M8 is.** M8 was the pre-bond gate — the last moment before
 the body closed forever. It is now the **pre-assembly gate**: the last moment
 before the instrument is treated as finished, and the point at which every
-measurement is taken on the final loom. The tests do not change. What changes
+measurement is taken on the final loom *(since ADR 0017: the final boards and ribbons)*. The tests do not change. What changes
 is that failing one of them after M8 is now a repair rather than a rebuild.
 
 ### Two adhesives, and which joint gets which
