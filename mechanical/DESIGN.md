@@ -74,21 +74,26 @@ Three things can claim each end, and the largest wins:
   **underside display**, which sits nearest the mouthpiece and must clear the
   left-thumb recesses — and in practice it is the display that sets it.
 - **Tail end:** the **LED matrix on the top face, centred** after the keys
-  (owner, 2026-09-26) with the last fastener pair beside it, then the
-  etherCON's depth — the connector cannot sit under the Matrix, which stands
-  on the carrier just under the plate; or the underside chain after the right
-  thumb (service cover, then the connector); or the right-thumb cluster
-  against the tail cap.
-- **Behind the Matrix are two plugs** (modelled 2026-09-26): the USB-C
-  extension's plug off the Matrix's tail edge, and — because the NE8FDP is a
-  feedthrough with an RJ45 socket at its back — a patch lead's plug and boot,
-  whose lead then drops under the carrier. They share the height band of the
-  carrier and the Matrix, so they queue along the body; `drc.echo` itemises
-  "behind the Matrix". **With the matrix centred, everything behind it counts
-  twice, and the gap between the hands copies the result** — so every
-  millimetre of plug costs about three of body. A PCB-mount etherCON and a
-  right-angle USB-C plug are the levers (`ethercon.rj45_*`,
-  `openings.usb_plug_l`).
+  (owner, 2026-09-26), with the etherCON's housing behind it; or the key
+  board, the last fastener pair, the patch plug and the etherCON's depth in a
+  row; or the underside chain after the right thumb (service cover, then the
+  connector); or the right-thumb cluster against the tail cap.
+- **The tail is stacked** (owner, 2026-09-26: "it's unacceptable to go this
+  long" and "the matrix can be up higher out of the way and still allow the
+  connectors"). The Matrix **hangs from the lid** under its window, wired by a
+  pigtail. Under it, side by side: the extension's **right-angle USB-C plug**
+  off its mouth edge, and — because the NE8FDP is a feedthrough with an RJ45
+  socket at its back — the etherCON's rear socket and a patch lead's plug,
+  down the left side lane. Only the connector's full-height housing queues
+  behind the Matrix, and it sits in a pocket in the oak bottom. `drc.echo`
+  itemises "behind the Matrix", confirms the socket passes under, and gives
+  the pocket's depth. **With the matrix centred, anything in front of or
+  behind it counts twice, and the gap between the hands copies the result** —
+  a straight USB-C plug cost about 24 mm of body, which is why the plug is
+  right-angle (`openings.usb_plug_l`).
+- **The last fastener pair** stands just in front of the tail equipment,
+  where the patch plug is not yet in the side lane; the LED strips stop short
+  of it, because the tail equipment fills their channels.
 - **The matrix window is frosted acrylic, flush with the oak top, on a lip of
   oak** (owner, 2026-09-26): a rebate in the oak top's upper face as deep as
   the acrylic, over a smaller opening through the oak and the plate. Like the
@@ -96,8 +101,9 @@ Three things can claim each end, and the largest wins:
   own (`export/oak-rebates.dxf`); the acrylic is `export/matrix-window.dxf`.
   `drc.echo` reports the lip and the LED-to-window distance, which is what
   decides how soft the pixels look. In practice the matrix sets it.
-- **The carrier's height is derived** from the Matrix standing on it: plate
-  underside, diffuser gap, LEDs, board, header, carrier.
+- **The carrier's height is derived** from what it must pass over: the thumb
+  boards' parts, then its own underside parts. It is centred on the gap
+  between the hands **as a placeholder** — where it goes is open (below).
 - **Between:** the key gaps, and the space between the hands.
 
 **Equal bands (owner, 2026-09-26).** The space before the left hand and the
@@ -130,11 +136,11 @@ the questions M4 has to answer, and several contradict something an ADR
 currently says. None has been fixed by editing a document: fixing them is a
 decision, not a correction.
 
-1. **The etherCON panel stack.** ADR 0009 puts the connector's screws through
-   the oak tail cap into a backing plate. The NE8FDP's maximum panel thickness
-   is smaller than the oak cap alone. *Rule: "etherCON panel stack within the
-   connector's maximum".* Options: pocket the oak around the flange so only the
-   backing plate is clamped, or a thinner cap.
+1. **The etherCON panel stack — resolved by the owner.** ADR 0009 put the
+   connector's screws through the oak tail cap into a backing plate, which
+   exceeded the NE8FDP's maximum panel. The owner freed the mounting
+   (2026-09-26): flange and chassis sit behind the tail cap, and the panel
+   limit no longer applies.
 2. **The etherCON body is taller than the cavity.** Centred on the tail face,
    the connector body (taken at the bore diameter — the real body is at least
    that) reaches into the oak top and bottom. *Rule: "etherCON body inside the
@@ -148,8 +154,8 @@ decision, not a correction.
    etherCON flange"; the cable run is an INFO line.*
 4. **The display is what sets the mouth end.** On the underside it cannot
    share the space under the left-hand run with the thumb arc, so it adds
-   roughly its own length in front of the keys. *Rule: "what sets the mouth
-   end".* Moving it is the largest remaining length lever.
+   roughly its own length in front of the keys. *Rule: "what the mouth end
+   needs".* Moving it is the largest remaining length lever.
 5. **Individual thumb recesses leave almost no oak between them** at the
    ADR 0010 arc spacing. *Rule: "oak-bottom cuts at least 3 mm apart".* ADR 0010
    already asks shared-versus-individual as an M2 question; the model says
@@ -188,19 +194,21 @@ only as good as those envelopes. Group the report's lines by these causes
    9.1 mm width lands under a switch, and its pin tails stand 3 mm off the
    far face into a 2.2 mm gap to the key plate (or the thumb plate). SMT or
    board-end headers, or a wider board.
-3. **The carrier's headers are too tall for the lid.** Mated J-CHAIN and
-   J-DISP reach the key plate's underside.
-4. **The carrier fills the interior, so it collides with both LED strips**
-   (and with the sensor and trap near its edge). Narrow the carrier, or end
-   the strips before it.
-5. **The M3 stations** run through the LED strips, the carrier (tail pair)
-   and the U-bolt backplate (middle pair).
-6. **The etherCON's housing is taller than the cavity.** Its mounting is free
-   now (owner, 2026-09-26 — flange and chassis behind the tail cap, no
-   backing plate), and it has moved clear of the side, but the housing is
-   25.5 mm across its short side and the cavity between the floor and the key
-   plate is less. Ending the key plate before the tail, so the oak top is the
-   ceiling there, would clear it.
+3. **The carrier has nowhere to go on a short body.** Since the tail was
+   stacked it is off the tail, centred on the gap between the hands — but at
+   its BOM size it is several times that gap, so it runs under both key
+   runs and over both thumb clusters, into their parts and headers; its
+   mated J-CHAIN and J-DISP reach the key plate. It also fills the interior
+   width, so it collides with both LED strips. A smaller carrier, a split
+   one, or boards that carry what it carries: an owner decision.
+4. **The looms and the breath sensor** were routed to the carrier's old
+   place under the Matrix; they follow wherever it goes.
+5. **The M3 stations** run through the LED strips, and the middle pair
+   through the carrier and the U-bolt backplate. The tail pair is clear.
+6. **The tail is clear.** The etherCON, its rear socket, the patch plug,
+   the USB-C plug, receptacle and lead, the Matrix and the last fastener pair
+   meet nothing. The housing is taller than the cavity, so it takes a pocket
+   in the oak bottom — cut before the U is glued.
 
 **The ribbons are standard flat ribbon, lying flat** down the body just off
 its centreline, stacked, folding off to each socket (owner asked for standard

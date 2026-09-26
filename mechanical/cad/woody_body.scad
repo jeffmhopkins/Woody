@@ -129,9 +129,18 @@ rt_last_rel = max([for (i = [0 : count("right_thumb") - 1]) rt_rel(i)[0]]);
 // etherCON's rear socket, then the etherCON body to the tail face. The plugs
 // share one height band with the carrier and the Matrix, so they queue.
 usb_behind = openings_matrix_usb_to_tail ? openings_usb_plug_l : 0;
-// ethercon.depth is measured from the PANEL's rear face, the tail cap's inside.
-behind_matrix = usb_behind + layout_tail_clear + ethercon_rj45_drop + ethercon_rj45_plug_l + ethercon_depth + ends_tail_cap_t;
+// STACKED (owner, 2026-09-26): the rear socket and the patch plug pass UNDER
+// the Matrix, so behind it only the etherCON's full-height housing queues.
+behind_matrix = usb_behind + layout_tail_clear + ethercon_housing_d + ends_tail_cap_t;
+// IN FRONT OF IT: the USB-C plug off the mouth edge (if that edge faces the
+// mouth) and the patch plug both reach forward, and the last fastener pair
+// stands in front of whichever is first; all of it must clear the right-hand
+// key board. Measured from the last key centre to where the equipment starts.
+usb_front = openings_matrix_usb_to_tail ? 0 : openings_usb_plug_l;
+tail_fastener_back = 3;    // drawing convention: last fastener centre to the tail equipment
+equip_start_rel = plate_cutout / 2 + cluster_margin + layout_tail_clear + tail_fastener_back + 3 / 2;
 tail_claims_rel = [
+    top_last_rel + equip_start_rel + ethercon_rj45_plug_l + ethercon_depth + ends_tail_cap_t,
     top_last_rel + plate_cutout / 2 + cluster_margin + layout_tail_clear + boards_matrix_board + behind_matrix,
     rt_last_rel + rc / 2 + layout_underside_clear + openings_service_cover_w + 2 * layout_tail_clear + ethercon_depth,
     rt_last_rel + rc / 2 + layout_underside_clear + ends_tail_cap_t];
@@ -141,7 +150,8 @@ tail_claims_rel = [
 // centre = (edge + tail) / 2, and centre + half board + clearance + depth
 // <= tail, so tail >= edge + 2 x (half board + clearance + depth).
 cap_edge_rel = switch_keycap / 2 + stack_cap_clear;
-matrix_centred_req = cap_edge_rel + 2 * (boards_matrix_board / 2 + behind_matrix);
+matrix_centred_req = max(cap_edge_rel + 2 * (boards_matrix_board / 2 + behind_matrix),
+                         2 * (equip_start_rel + usb_front + boards_matrix_board / 2) - cap_edge_rel);
 tail_req = max(max(tail_claims_rel) - top_last_rel, layout_matrix_centred ? matrix_centred_req : 0);
 
 // EQUAL BANDS (owner, 2026-09-26): the space before the left hand, between
@@ -202,8 +212,8 @@ spare_xy = [lt_arc(0) + [0, lt_step], lt_arc(1) + [0, lt_step], rt_rest - [1.6 *
 top_last = max([for (k = keys) if (k[1] == "top") key_xy(k)[0]]);
 rt_last = max([for (k = keys) if (k[1] == "bottom") key_xy(k)[0]]);
 // THE LED MATRIX IS ON THE TOP FACE, after the last key (owner, 2026-09-26):
-// the Matrix board face up under the plate, past the last key board, and the
-// last fastener pair beside it rather than in front of it.
+// the Matrix board face up under the plate, past the last key board. The
+// last fastener pair stands in front of the tail equipment (see below).
 matrix_near_x = top_last + plate_cutout / 2 + cluster_margin + layout_tail_clear + boards_matrix_board / 2;
 function matrix_x(l) = layout_matrix_centred ? (top_last + cap_edge_rel + l) / 2 : matrix_near_x;
 
@@ -213,7 +223,6 @@ service_xy = [rt_last + rc / 2 + layout_underside_clear + openings_service_cover
 L = top_last + tail_req;
 x_in1 = L - ends_tail_cap_t;
 matrix_xy = [matrix_x(L), W / 2];
-tail_fastener_x = matrix_xy[0];
 // Where an X section cuts: a number, a key id, or "matrix" for its centre.
 cut_pos = cut_key == "" ? cut_at : cut_key == "matrix" ? matrix_xy[0] : key_xy(key_by_id(cut_key))[0];
 
@@ -378,10 +387,11 @@ module mouth_cap_2d() {
 }
 tube_yz = [W / 2, z_floor + cavity_h / 2];
 
-ec_c = [W / 2 + ethercon_offset_y, T / 2];                 // etherCON centre on the tail face
+ec_c = [W / 2 + ethercon_offset_y, ethercon_centre_z];    // etherCON centre on the tail face
 // The NE8FDP's rear envelope, rotated with the connector: [across Y, height Z].
 ec_house = ethercon_rotated ? [ethercon_housing_h, ethercon_housing_w] : [ethercon_housing_w, ethercon_housing_h];
 ec_sock = ethercon_rotated ? [ethercon_socket_h, ethercon_socket_w] : [ethercon_socket_w, ethercon_socket_h];
+ec_plug = ethercon_rotated ? [ethercon_rj45_plug_h, ethercon_rj45_plug_w] : [ethercon_rj45_plug_w, ethercon_rj45_plug_h];
 // The rear socket sits off the axis: 0.35 + half its height, on the side away from the latch.
 ec_sock_off_mag = 0.35 + ethercon_socket_h / 2;
 ec_sock_dir = (W / 2 - ec_c[0] >= 0 ? 1 : -1) * (ethercon_socket_toward_centre ? 1 : -1);
@@ -458,11 +468,21 @@ module cluster_window_2d(ks) {
 // the gap under it, the LEDs, the board, the header, then the carrier.
 matrix_top_z = z_plate_bot - boards_matrix_gap;               // LED tops
 matrix_board_z = matrix_top_z - boards_matrix_led_h - switch_pcb_t;
-carrier_z = matrix_board_z - boards_matrix_header_h - switch_pcb_t;
+// The USB-C extension's plug, in the Matrix's mouth or tail edge.
+usb_plug_x0 = openings_matrix_usb_to_tail ? matrix_xy[0] + boards_matrix_board / 2 : matrix_xy[0] - boards_matrix_board / 2 - openings_usb_plug_l;
+// The tail equipment starts at the first of that plug and the patch plug.
+// The last fastener pair stands just in front of it - beside the Matrix the
+// patch plug runs down the side lane - and the LED strips stop short of that.
+tail_equip_x = min(usb_plug_x0, L - ends_tail_cap_t - ethercon_depth - ethercon_rj45_plug_l);
+tail_fastener_x = tail_equip_x - tail_fastener_back;
+// The carrier no longer carries the Matrix. It sits in the GAP between the
+// hands (nothing above it there, so its tall parts fit), extending under
+// both hands' ends at low height, just over the thumb boards' parts.
+carrier_z = z_floor + switch_pcb_below_seat + switch_pcb_t + boards_cluster_smt_h + boards_smt_h + 0.5;
 // The carrier ends where the etherCON body begins, less a clearance.
-// The carrier ends under the Matrix's tail edge: past it are the plugs.
-carrier_x1 = L - behind_matrix;
-carrier_x0 = carrier_x1 - boards_carrier_l;
+// The carrier is centred on the gap between the hands (stacked, 2026-09-26).
+carrier_x0 = (x_gap0 + x_rh0) / 2 - boards_carrier_l / 2;
+carrier_x1 = carrier_x0 + boards_carrier_l;
 
 // Six fasteners up from the bottom into the plate, zig-zagging between the
 // long edges ~80 mm apart (ADR 0009).
@@ -480,6 +500,16 @@ ubolt_c = [(x_gap0 + x_rh0) / 2, W / 2];
 function ubolt_legs() = [for (s = [-1, 1]) ubolt_c + [0, s * hardware_ubolt_span / 2]];
 
 // ================================================================ 3D ======
+
+// The etherCON housing's bottom below the floor, if the connector is low.
+// The housing and the flange behind the cap both reach below the floor.
+ec_env = [max(ec_house[0], ec_fl[0]), max(ec_house[1], ec_fl[1])];
+ec_pocket_d = max(0, z_floor - (ethercon_centre_z - ec_env[1] / 2) + 0.3);
+module ec_pocket_2d() {
+    if (ec_pocket_d > 0) translate([L - ends_tail_cap_t - ethercon_housing_d - 0.5, ec_c[0] - ec_env[0] / 2 - 0.5])
+        square([ethercon_housing_d + 0.5 + EPS, ec_env[0] + 1]);
+}
+module ec_pocket_3d() { if (ec_pocket_d > 0) translate([0, 0, z_floor - ec_pocket_d]) linear_extrude(ec_pocket_d + EPS) ec_pocket_2d(); }
 
 module lam(z, t, c, shell = true, id = "") {
     P(c, shell, id) translate([0, 0, z]) linear_extrude(t) children();
@@ -501,6 +531,8 @@ module u_channel() {
     P(C_OAK, true, "oak bottom") translate([x_in0, 0, -explode]) difference() {
         linear_extrude(oak_bottom_t) oak_bottom_2d();
         translate([0, 0, oak_bottom_t - stack_groove_depth]) linear_extrude(stack_groove_depth + EPS) oak_grooves_2d();
+        // The pocket the lowered etherCON housing sits in (router pass).
+        translate([-x_in0, 0, 0]) ec_pocket_3d();
         // Fastener counterbores from the bottom face (a drill, not a cut:
         // the DXF carries the clearance hole, the drawing the counterbore).
         translate([-x_in0, 0, -EPS]) for (f = fasteners()) translate(f)
@@ -575,9 +607,11 @@ module tail_equipment() {
         cube([boards_matrix_board, boards_matrix_board, switch_pcb_t]);
     P(C_LED, false, "Matrix LEDs") translate([matrix_xy[0] - boards_matrix_emitters / 2, matrix_xy[1] - boards_matrix_emitters / 2, matrix_board_z + switch_pcb_t])
         cube([boards_matrix_emitters, boards_matrix_emitters, boards_matrix_led_h]);
-    for (i = [0, 1]) P([0.15, 0.15, 0.15], false, str("Matrix header ", i + 1))
-        translate([matrix_xy[0] - 12.7, matrix_xy[1] + (i == 0 ? -1 : 1) * 11.43 - 1.25, carrier_z + switch_pcb_t])
-            cube([25.4, 2.5, boards_matrix_header_h]);   // the two header rows, 22.86 apart [ds]
+    // The Matrix's pigtail where it leaves the two pad rows, below the board;
+    // the wires run on to the carrier (not drawn - thin wires).
+    for (i = [0, 1]) P([0.15, 0.15, 0.15], false, str("Matrix harness ", i + 1))
+        translate([matrix_xy[0] - 12.7, matrix_xy[1] + (i == 0 ? -1 : 1) * 11.43 - 1.27, matrix_board_z - boards_matrix_harness_h])
+            cube([25.4, 2.54, boards_matrix_harness_h]);   // rows 22.86 apart [ds]
     P(C_FROSTED, false, "matrix window") translate([0, 0, T - openings_matrix_acrylic_t + explode]) linear_extrude(openings_matrix_acrylic_t) matrix_window_2d();
     // The etherCON: flange and chassis behind the tail cap (mounting is free).
     // The NE8FDP as drawn (NE8FDP.dxf): flange outside the tail cap, main
@@ -593,30 +627,36 @@ module tail_equipment() {
             cube([ethercon_depth - ethercon_housing_d + EPS, ec_sock[0], ec_sock[1]]);
     }
     // The RJ45 patch lead's plug and boot, mated into that rear socket.
-    P([0.55, 0.70, 0.85], false, "RJ45 plug") translate([ec_panel_x - ethercon_depth - ethercon_rj45_plug_l, ec_sock_c[0] - ethercon_rj45_plug_w / 2, ec_sock_c[1] - ethercon_rj45_plug_h / 2])
-        cube([ethercon_rj45_plug_l, ethercon_rj45_plug_w, ethercon_rj45_plug_h]);
+    // It turns with the connector, as the socket does.
+    P([0.55, 0.70, 0.85], false, "RJ45 plug") translate([ec_panel_x - ethercon_depth - ethercon_rj45_plug_l, ec_sock_c[0] - ec_plug[0] / 2, ec_sock_c[1] - ec_plug[1] / 2])
+        cube([ethercon_rj45_plug_l, ec_plug[0], ec_plug[1]]);
     // The USB-C extension's plug in the Matrix's tail edge, under the board.
-    if (openings_matrix_usb_to_tail)
-        P([0.35, 0.35, 0.38], false, "USB-C plug") translate([matrix_xy[0] + boards_matrix_board / 2, matrix_xy[1] - openings_usb_slot_w / 2, matrix_board_z - openings_usb_slot_h])
-            cube([openings_usb_plug_l, openings_usb_slot_w, openings_usb_slot_h]);
+    P([0.35, 0.35, 0.38], false, "USB-C plug") translate([usb_plug_x0, matrix_xy[1] - openings_usb_slot_w / 2, matrix_board_z - openings_usb_slot_h])
+        cube([openings_usb_plug_l, openings_usb_slot_w, openings_usb_slot_h]);
     // The USB-C extension: receptacle body behind the tail cap, and a cable
     // run to the Matrix board's edge (drawn straight; it is a flexible lead).
     P(C_CONN, false, "USB-C receptacle") translate([x_in1 - openings_usb_ext_depth, usb_c[0] - openings_usb_slot_w / 2, usb_c[1] - openings_usb_slot_h / 2])
         cube([openings_usb_ext_depth, openings_usb_slot_w, openings_usb_slot_h]);
     // Routed beside the etherCON, on the receptacle's side.
-    usb_from = [matrix_xy[0] + boards_matrix_board / 2 + usb_behind, matrix_xy[1], matrix_board_z - openings_usb_slot_h / 2];
+    usb_from = [openings_matrix_usb_to_tail ? matrix_xy[0] + boards_matrix_board / 2 + usb_behind : usb_plug_x0,
+                matrix_xy[1], matrix_board_z - openings_usb_slot_h / 2];
     P([0.15, 0.15, 0.15], false, "USB-C lead") run([usb_from, [usb_from[0] + 4, usb_c[0], usb_from[2]],
         [x_in1 - openings_usb_ext_depth - 4, usb_c[0], usb_c[1]], [x_in1 - openings_usb_ext_depth, usb_c[0], usb_c[1]]], 4);
 }
 
-// ADR 0014 sized the strips at 420 mm for a 457 mm body. They now run the
-// cavity, less 10 mm at each end; drc.echo reports the shortfall.
+// ADR 0014 sized the strips at 420 mm for a 457 mm body. They now start
+// 10 mm in from the mouth cap and stop 3 mm short of the last fastener pair,
+// in front of the tail equipment - the USB-C plug and lead, the patch plug,
+// the etherCON - which fills the strips' side channels; drc.echo reports the
+// shortfall.
+strip_x0 = x_in0 + 10;
+strip_x1 = tail_fastener_x - 1.5 - 3;
 strip_run_adr = 420;
-strip_l = min(strip_run_adr, x_in1 - x_in0 - 20);
+strip_l = min(strip_run_adr, strip_x1 - strip_x0);
 module led_strips() {
     for (s = [0, 1]) {
         y = s == 0 ? u_y0 + lighting_strip_gap : W - u_y0 - lighting_strip_gap - lighting_strip_t;
-        P(C_LED, false, str("LED strip ", s == 0 ? "left" : "right")) translate([(L - strip_l) / 2, y, z_floor + cavity_h / 2 - lighting_strip_w / 2])
+        P(C_LED, false, str("LED strip ", s == 0 ? "left" : "right")) translate([strip_x0, y, z_floor + cavity_h / 2 - lighting_strip_w / 2])
             cube([strip_l, lighting_strip_t, lighting_strip_w]);
     }
 }
@@ -838,17 +878,23 @@ module drc_report() {
     drc(undef, "what the mouth end needs", mouth_req - (x_in0 + layout_mouth_extra + switch_keycap / 2 + stack_cap_clear) > 0.01
         ? "the display on the underside (it must clear the left-thumb recesses)" : "the first top key",
         str("display occupies X ", disp_x0, " to ", disp_x1));
-    tail_names = ["last key board, the LED matrix on the top face, then the etherCON depth (matrix not centred)",
+    tail_names = ["last key board, the last fastener pair, then the patch plug and the etherCON depth",
+                  "last key board, the LED matrix on the top face, then the etherCON depth (matrix not centred)",
                   "right-thumb cluster, the service cover, then the etherCON depth",
                   "the right-thumb cluster against the tail cap"];
     drc(undef, "what the tail end needs", layout_matrix_centred && matrix_centred_req >= max(tail_claims_rel) - top_last_rel
-        ? "the LED matrix centred after the keys, with the etherCON behind it" : tail_names[search(max(tail_claims_rel), tail_claims_rel)[0]],
+        ? str("the LED matrix centred after the keys, with ", cap_edge_rel + 2 * (boards_matrix_board / 2 + behind_matrix)
+            >= 2 * (equip_start_rel + usb_front + boards_matrix_board / 2) - cap_edge_rel
+            ? "the etherCON behind it" : "its USB-C plug and the last fastener pair in front of it, clear of the key board") : tail_names[search(max(tail_claims_rel), tail_claims_rel)[0]],
         str(tail_req, " mm after the last key"));
     echo("DRC", "INFO", "behind the Matrix, to the tail face", behind_matrix,
-         str("mm = USB-C plug ", usb_behind, " + clearance ", layout_tail_clear, " + patch-lead drop ", ethercon_rj45_drop,
-             " + RJ45 plug and boot ", ethercon_rj45_plug_l, " + etherCON body ", ethercon_depth));
-    rj_gap = (L - ethercon_depth - ethercon_rj45_plug_l) - (matrix_xy[0] + boards_matrix_board / 2 + usb_behind);
-    drc(rj_gap >= layout_tail_clear, "RJ45 boot clear of the Matrix and its USB-C plug", rj_gap, "mm along X");
+         str("mm = USB-C plug ", usb_behind, " + clearance ", layout_tail_clear, " + etherCON housing ", ethercon_housing_d,
+             " + tail cap ", ends_tail_cap_t, " - the rear socket and patch plug pass under the Matrix"));
+    under_m = matrix_board_z - boards_matrix_under_h;
+    drc(ec_sock_c[1] + ec_sock[1] / 2 <= under_m && ec_sock_c[1] + ec_plug[1] / 2 <= under_m,
+        "etherCON rear socket and patch plug pass under the Matrix", under_m - max(ec_sock_c[1] + ec_sock[1] / 2, ec_sock_c[1] + ec_plug[1] / 2),
+        "mm below the Matrix's underside parts");
+    drc(undef, "etherCON housing pocket in the oak bottom", ec_pocket_d, "mm deep (0 = none needed)");
     mc = (top_last + cap_edge_rel + L) / 2 - matrix_xy[0];
     drc(abs(mc) < 0.01 || !layout_matrix_centred, "LED matrix centred between the last cap and the tail face", mc, "mm off centre");
     if (layout_gap_matches_matrix)
@@ -949,10 +995,8 @@ module drc_report() {
     rt_in = max([for (k = cluster_keys("right_thumb")) key_xy(k)[0]]) > carrier_x0;
     drc(!rt_in || carrier_z > rt_top, "carrier clears the right-thumb switch bodies", carrier_z - rt_top, "mm");
 
-    drc(matrix_xy[0] + boards_matrix_board / 2 <= carrier_x1 && matrix_xy[0] - boards_matrix_board / 2 >= carrier_x0,
-        "Matrix board over the carrier", carrier_x1 - matrix_xy[0] - boards_matrix_board / 2, "mm of carrier past the board's tail edge");
-    echo("DRC", "INFO", "carrier height (derived from the Matrix stack)", carrier_z,
-         "mm = plate underside - gap - LEDs - Matrix board - header - carrier");
+    echo("DRC", "INFO", "carrier height (derived)", carrier_z,
+         "mm = just over the thumb boards' parts, with its own underside parts; it sits in the gap between the hands");
     mw = min([for (k = top_keys) sq_gap(key_xy(k), matrix_xy, (plate_cutout + openings_matrix_window) / 2)]);
     drc(mw >= 3, "key plate web between the last key cutout and the matrix window", mw, "mm of aluminium");
     lip_t = oak_top_t - openings_matrix_acrylic_t;

@@ -3,133 +3,177 @@
 # Excuses: mechanical/clash-allow.yaml. Every solid is a modelled envelope - many sizes are tbd
 # (config/body.yaml), so a clean result is only as good as those envelopes.
 
-CLASH 62
+CLASH 110
       2759.5 mm3  J-CHAIN left_hand 1  x  J-CHAIN left_thumb 1   [X 93.1-113.0  Y 29.9-39.0  Z 11.4-26.6]
-      2144.0 mm3  J-CHAIN right_hand 2  x  J-CHAIN right_thumb 2   [X 304.6-320.1  Y 29.9-39.0  Z 11.4-26.6]
-      2144.0 mm3  J-CHAIN right_hand 1  x  J-CHAIN right_thumb 1   [X 279.7-295.2  Y 29.9-39.0  Z 11.4-26.6]
-       746.9 mm3  J-CHAIN right_hand 1  x  J-CHAIN right_thumb 2   [X 297.2-302.6  Y 29.9-39.0  Z 11.4-26.6]
-       541.3 mm3  etherCON  x  key plate   [X 576.4-596.2  Y 6.2-37.0  Z 30.8-32.0]
-       400.0 mm3  LED strip left  x  carrier   [X 388.9-488.9  Y 9.0-11.5  Z 14.6-16.2]
-       400.0 mm3  LED strip right  x  carrier   [X 388.9-488.9  Y 45.5-48.0  Z 14.6-16.2]
-       300.0 mm3  LED strip right  x  parts carrier underside   [X 388.9-488.9  Y 45.5-48.0  Z 13.4-14.6]
-       300.0 mm3  LED strip left  x  parts carrier underside   [X 388.9-488.9  Y 9.0-11.5  Z 13.4-14.6]
+      2144.0 mm3  J-CHAIN right_hand 2  x  J-CHAIN right_thumb 2   [X 222.5-238.0  Y 29.9-39.0  Z 11.4-26.6]
+      2144.0 mm3  J-CHAIN right_hand 1  x  J-CHAIN right_thumb 1   [X 197.6-213.1  Y 29.9-39.0  Z 11.4-26.6]
+      1059.0 mm3  J-CHAIN left_thumb 2  x  carrier tall parts   [X 124.8-137.9  Y 29.9-38.5  Z 17.2-26.6]
+       746.9 mm3  J-CHAIN right_hand 1  x  J-CHAIN right_thumb 2   [X 215.1-220.5  Y 29.9-39.0  Z 11.4-26.6]
+       691.2 mm3  carrier tall parts  x  parts left_hand   [X 124.8-144.0  Y 18.5-38.5  Z 25.2-27.0]
+       614.4 mm3  board left_hand  x  carrier tall parts   [X 124.8-144.0  Y 18.5-38.5  Z 27.0-28.6]
+       575.2 mm3  J-CHAIN left_hand 1  x  J-DISP carrier   [X 109.5-116.0  Y 29.9-39.0  Z 17.2-27.0]
+       550.0 mm3  LED strip right  x  parts carrier underside   [X 108.5-208.5  Y 45.5-48.0  Z 13.4-15.6]
+       550.0 mm3  LED strip left  x  parts carrier underside   [X 108.5-208.5  Y 9.0-11.5  Z 13.4-15.6]
+       479.3 mm3  J-CHAIN left_thumb 2  x  parts carrier underside   [X 115.0-137.9  Y 29.9-39.0  Z 13.3-15.6]
+       400.0 mm3  LED strip left  x  carrier   [X 108.5-208.5  Y 9.0-11.5  Z 15.6-17.2]
+       400.0 mm3  LED strip right  x  carrier   [X 108.5-208.5  Y 45.5-48.0  Z 15.6-17.2]
+       383.0 mm3  J-CHAIN right_thumb 1  x  parts carrier underside   [X 190.2-208.5  Y 29.9-39.0  Z 13.3-15.6]
+       333.4 mm3  J-CHAIN left_thumb 2  x  carrier   [X 115.0-137.9  Y 29.9-39.0  Z 15.6-17.2]
+       330.8 mm3  J-DISP carrier  x  switch LH3   [X 109.5-118.6  Y 24.9-36.0  Z 26.3-32.8]
+       307.9 mm3  J-CHAIN left_thumb 2  x  J-DISP carrier   [X 115.0-118.6  Y 29.9-39.0  Z 17.2-26.6]
+       299.4 mm3  J-CHAIN left_thumb 1  x  J-DISP carrier   [X 109.5-113.0  Y 29.9-39.0  Z 17.2-26.6]
        273.3 mm3  J-CHAIN left_thumb 2  x  parts left_hand   [X 116.5-137.9  Y 29.9-39.0  Z 25.2-26.6]
-       221.4 mm3  LED strip left  x  breath sensor   [X 388.9-401.2  Y 9.0-11.5  Z 16.2-23.4]
-       208.4 mm3  J-CHAIN carrier  x  key plate   [X 439.2-462.1  Y 24.7-33.8  Z 30.8-31.8]
-       185.3 mm3  J-DISP carrier  x  key plate   [X 389.9-399.0  Y 24.9-45.3  Z 30.8-31.8]
+       266.4 mm3  J-CHAIN right_thumb 1  x  carrier   [X 190.2-208.5  Y 29.9-39.0  Z 15.6-17.2]
+       228.1 mm3  J-CHAIN right_hand 1  x  parts carrier underside   [X 197.6-208.5  Y 29.9-39.0  Z 13.3-15.6]
+       205.3 mm3  J-DISP carrier  x  board left_hand   [X 109.5-118.6  Y 24.9-39.0  Z 27.0-28.6]
+       193.3 mm3  J-CHAIN carrier  x  key plate   [X 158.8-176.5  Y 24.7-33.8  Z 30.8-32.0]
+       190.7 mm3  LED strip left  x  breath sensor   [X 108.5-120.8  Y 9.0-11.5  Z 17.2-23.4]
+       180.3 mm3  U-bolt backplate  x  thumb plates   [X 148.5-168.5  Y 9.0-47.8  Z 6.0-7.2]
+       165.6 mm3  carrier tall parts  x  key-chain loom   [X 124.8-154.8  Y 22.9-38.5  Z 19.7-29.7]
+       158.7 mm3  J-CHAIN right_hand 1  x  carrier   [X 197.6-208.5  Y 29.9-39.0  Z 15.6-17.2]
+       155.9 mm3  J-CHAIN left_hand 1  x  parts carrier underside   [X 108.5-116.0  Y 29.9-39.0  Z 13.3-15.6]
+       153.9 mm3  key-chain loom  x  switch LH3   [X 108.1-122.9  Y 22.9-35.5  Z 29.5-30.5]
+       143.2 mm3  J-CHAIN carrier  x  switch RH1   [X 176.0-181.7  Y 24.7-33.8  Z 26.3-32.8]
+       142.5 mm3  J-CHAIN carrier  x  parts right_hand   [X 173.0-181.7  Y 24.7-33.8  Z 25.2-27.0]
        131.4 mm3  J-CHAIN left_hand 1  x  J-CHAIN left_thumb 2   [X 115.0-116.0  Y 29.9-39.0  Z 11.4-26.6]
-        87.9 mm3  J-CHAIN right_thumb 1  x  parts right_hand   [X 272.3-279.2  Y 29.9-39.0  Z 25.2-26.6]
+       126.7 mm3  J-CHAIN carrier  x  board right_hand   [X 173.0-181.7  Y 24.7-33.8  Z 27.0-28.6]
+       114.3 mm3  J-CHAIN carrier  x  oak top   [X 158.8-174.5  Y 24.7-33.8  Z 32.0-32.8]
+       110.9 mm3  J-DISP carrier  x  parts left_hand   [X 109.5-118.6  Y 24.9-39.0  Z 25.2-27.0]
+       108.5 mm3  J-CHAIN left_hand 1  x  carrier   [X 108.5-116.0  Y 29.9-39.0  Z 15.6-17.2]
+       106.6 mm3  J-DISP carrier  x  key plate   [X 109.5-118.6  Y 35.5-45.3  Z 30.8-32.0]
+        99.6 mm3  key-chain loom  x  switch LH5   [X 126.1-140.9  Y 30.5-38.1  Z 29.5-30.5]
+        94.2 mm3  J-CHAIN left_thumb 1  x  parts carrier underside   [X 108.5-113.0  Y 29.9-39.0  Z 13.3-15.6]
+        87.9 mm3  J-CHAIN right_thumb 1  x  parts right_hand   [X 190.2-197.1  Y 29.9-39.0  Z 25.2-26.6]
+        86.8 mm3  J-CHAIN left_hand 1  x  J-DISP carrier tails   [X 112.5-115.7  Y 29.9-39.0  Z 12.6-15.6]
         80.9 mm3  J-CHAIN left_thumb 2 tails  x  switch LT3   [X 119.8-131.0  Y 32.9-36.0  Z 6.4-9.4]
         80.9 mm3  J-CHAIN left_thumb 1 tails  x  switch LT2   [X 97.1-108.3  Y 32.9-36.0  Z 6.4-9.4]
-        51.7 mm3  J-CHAIN right_thumb 2 tails  x  switch RT1   [X 305.2-315.3  Y 32.9-35.5  Z 6.4-9.4]
-        38.9 mm3  J-CHAIN right_hand 2 tails  x  switch RH5   [X 316.1-322.7  Y 32.9-36.0  Z 28.6-31.6]
-        35.2 mm3  LED strip right  x  M3 #4   [X 198.1-201.1  Y 46.5-48.0  Z 13.4-23.4]
-        35.2 mm3  LED strip left  x  M3 #3   [X 198.1-201.1  Y 9.0-10.5  Z 13.4-23.4]
-        35.2 mm3  LED strip right  x  M3 #6   [X 474.9-477.9  Y 46.5-48.0  Z 13.4-23.4]
-        35.2 mm3  LED strip left  x  M3 #5   [X 474.9-477.9  Y 9.0-10.5  Z 13.4-23.4]
+        69.7 mm3  breath sensor  x  parts left_hand   [X 108.5-120.8  Y 18.0-21.1  Z 25.2-27.0]
+        68.4 mm3  carrier tall parts  x  switch LH5   [X 126.2-140.9  Y 30.5-38.5  Z 26.3-29.7]
+        65.5 mm3  J-CHAIN left_thumb 1  x  carrier   [X 108.5-113.0  Y 29.9-39.0  Z 15.6-17.2]
+        63.6 mm3  carrier tall parts  x  switch LH4   [X 126.2-140.9  Y 18.5-26.5  Z 26.3-29.7]
+        56.5 mm3  J-DISP carrier  x  oak top   [X 109.5-118.6  Y 37.5-45.3  Z 32.0-32.8]
+        51.7 mm3  J-CHAIN right_thumb 2 tails  x  switch RT1   [X 223.1-233.3  Y 32.9-35.5  Z 6.4-9.4]
+        45.0 mm3  board left_hand  x  key-chain loom   [X 100.1-104.9  Y 22.9-38.1  Z 27.0-28.6]
+        38.9 mm3  J-CHAIN right_hand 2 tails  x  switch RH5   [X 234.1-240.7  Y 32.9-36.0  Z 28.6-31.6]
+        35.2 mm3  LED strip right  x  M3 #4   [X 157.0-160.0  Y 46.5-48.0  Z 13.4-23.4]
+        35.2 mm3  LED strip left  x  M3 #3   [X 157.0-160.0  Y 9.0-10.5  Z 13.4-23.4]
+        35.2 mm3  LED strip right  x  M3 #2   [X 41.9-44.9  Y 46.5-48.0  Z 13.4-23.4]
+        35.2 mm3  LED strip left  x  M3 #1   [X 41.9-44.9  Y 9.0-10.5  Z 13.4-23.4]
+        33.5 mm3  key-chain loom  x  switch LH4   [X 126.1-140.9  Y 22.9-26.5  Z 29.5-30.5]
         31.2 mm3  J-CHAIN left_thumb 1  x  parts left_hand   [X 90.1-92.6  Y 29.9-39.0  Z 25.2-26.6]
-        30.7 mm3  J-CHAIN right_thumb 1 tails  x  switch RT3   [X 277.1-287.6  Y 33.5-36.0  Z 6.4-8.5]
-        29.5 mm3  J-CHAIN right_hand 1 tails  x  switch RH2   [X 284.5-293.0  Y 32.9-35.5  Z 29.5-31.6]
+        30.7 mm3  J-CHAIN right_thumb 1 tails  x  switch RT3   [X 195.0-205.6  Y 33.5-36.0  Z 6.4-8.5]
+        29.5 mm3  J-CHAIN right_hand 1 tails  x  switch RH2   [X 202.4-211.0  Y 32.9-35.5  Z 29.5-31.6]
         23.5 mm3  J-CHAIN left_hand 1 tails  x  switch LH2   [X 97.9-103.0  Y 32.9-35.5  Z 29.5-31.6]
+        21.7 mm3  key-chain loom  x  parts left_hand   [X 96.8-101.9  Y 22.9-29.4  Z 25.2-27.0]
+        18.6 mm3  U-bolt backplate  x  switch spare 2   [X 148.5-150.0  Y 30.5-44.5  Z 6.0-8.5]
+        18.6 mm3  U-bolt backplate  x  switch LT4   [X 148.5-150.0  Y 11.5-25.5  Z 6.0-8.5]
         18.4 mm3  J-CHAIN left_hand 1 tails  x  key plate   [X 97.9-111.2  Y 32.9-36.0  Z 30.8-31.6]
-        16.8 mm3  J-CHAIN right_hand 1 tails  x  key plate   [X 284.5-297.8  Y 32.9-36.0  Z 30.8-31.6]
-        16.2 mm3  M3 #5  x  parts carrier underside   [X 474.9-477.9  Y 7.5-10.5  Z 12.3-14.6]
-        16.2 mm3  M3 #6  x  parts carrier underside   [X 474.9-477.9  Y 46.5-49.5  Z 12.3-14.6]
-        15.5 mm3  J-CHAIN right_hand 2 tails  x  switch RH3   [X 309.4-313.0  Y 32.9-35.5  Z 29.5-31.6]
-        13.4 mm3  J-CHAIN right_thumb 1 tails  x  thumb plates   [X 277.1-290.4  Y 32.9-36.0  Z 6.4-7.2]
+        17.5 mm3  J-CHAIN left_thumb 2  x  J-DISP carrier tails   [X 115.0-115.7  Y 29.9-39.0  Z 12.6-15.6]
+        17.1 mm3  carrier  x  key-chain loom   [X 108.5-208.5  Y 39.2-40.2  Z 15.6-17.2]
+        16.8 mm3  J-CHAIN right_hand 1 tails  x  key plate   [X 202.4-215.8  Y 32.9-36.0  Z 30.8-31.6]
+        16.2 mm3  M3 #3  x  parts carrier underside   [X 157.0-160.0  Y 7.5-10.5  Z 13.3-15.6]
+        16.2 mm3  M3 #4  x  parts carrier underside   [X 157.0-160.0  Y 46.5-49.5  Z 13.3-15.6]
+        15.9 mm3  J-CHAIN left_hand 1 tails  x  J-DISP carrier   [X 109.5-111.2  Y 32.9-36.0  Z 28.6-31.6]
+        15.5 mm3  J-CHAIN right_hand 2 tails  x  switch RH3   [X 227.3-231.0  Y 32.9-35.5  Z 29.5-31.6]
+        14.7 mm3  J-CHAIN left_thumb 1  x  J-DISP carrier tails   [X 112.5-113.0  Y 29.9-39.0  Z 12.6-15.6]
+        13.4 mm3  J-CHAIN right_thumb 1 tails  x  thumb plates   [X 195.0-208.4  Y 32.9-36.0  Z 6.4-7.2]
+        12.9 mm3  key-chain loom  x  parts carrier underside   [X 108.5-208.5  Y 39.2-40.2  Z 14.4-15.6]
+        12.7 mm3  J-CHAIN right_hand 1  x  parts right_thumb   [X 213.6-214.6  Y 29.9-39.0  Z 11.4-12.8]
         12.7 mm3  J-CHAIN left_hand 1  x  parts left_thumb   [X 113.5-114.5  Y 29.9-39.0  Z 11.4-12.8]
-        12.7 mm3  J-CHAIN right_hand 1  x  parts right_thumb   [X 295.7-296.7  Y 29.9-39.0  Z 11.4-12.8]
-        12.7 mm3  J-CHAIN right_thumb 2  x  parts right_hand   [X 303.1-304.1  Y 29.9-39.0  Z 25.2-26.6]
-        12.6 mm3  J-CHAIN right_thumb 2 tails  x  thumb plates   [X 302.0-315.3  Y 32.9-36.0  Z 6.4-7.2]
+        12.7 mm3  J-CHAIN right_thumb 2  x  parts right_hand   [X 221.0-222.0  Y 29.9-39.0  Z 25.2-26.6]
+        12.6 mm3  J-CHAIN right_thumb 2 tails  x  thumb plates   [X 219.9-233.3  Y 32.9-36.0  Z 6.4-7.2]
         12.4 mm3  J-CHAIN left_hand 1 tails  x  switch LH3   [X 108.1-111.2  Y 32.9-35.5  Z 29.5-31.6]
-        11.6 mm3  J-CHAIN right_hand 2 tails  x  key plate   [X 309.4-316.6  Y 32.9-36.0  Z 30.8-31.6]
-        11.3 mm3  M3 #5  x  carrier   [X 474.9-477.9  Y 7.5-10.5  Z 14.6-16.2]
-        11.3 mm3  M3 #6  x  carrier   [X 474.9-477.9  Y 46.5-49.5  Z 14.6-16.2]
+        11.6 mm3  J-CHAIN right_hand 2 tails  x  key plate   [X 227.3-234.5  Y 32.9-36.0  Z 30.8-31.6]
+        11.3 mm3  M3 #3  x  carrier   [X 157.0-160.0  Y 7.5-10.5  Z 15.6-17.2]
+        11.3 mm3  M3 #4  x  carrier   [X 157.0-160.0  Y 46.5-49.5  Z 15.6-17.2]
         11.0 mm3  J-CHAIN left_thumb 1  x  switch LT2   [X 102.1-107.1  Y 33.3-38.3  Z 11.0-11.7]
         11.0 mm3  J-CHAIN left_thumb 2  x  switch LT3   [X 121.1-126.1  Y 33.3-38.3  Z 11.0-11.7]
-        10.6 mm3  M3 #4  x  U-bolt backplate   [X 198.1-201.1  Y 46.5-48.0  Z 6.0-9.0]
-        10.6 mm3  M3 #3  x  U-bolt backplate   [X 198.1-201.1  Y 9.0-10.5  Z 6.0-9.0]
-         9.8 mm3  J-CHAIN right_hand 2  x  switch RH5   [X 319.2-326.5  Y 31.9-39.0  Z 26.3-27.0]
+        10.6 mm3  M3 #4  x  U-bolt backplate   [X 157.0-160.0  Y 46.5-48.0  Z 6.0-9.0]
+        10.6 mm3  M3 #3  x  U-bolt backplate   [X 157.0-160.0  Y 9.0-10.5  Z 6.0-9.0]
+         9.8 mm3  J-CHAIN right_hand 2  x  switch RH5   [X 237.1-244.4  Y 31.9-39.0  Z 26.3-27.0]
+         9.7 mm3  display loom  x  key-chain loom   [X 102.5-112.2  Y 34.6-35.6  Z 19.7-20.7]
+         8.8 mm3  key-chain loom  x  parts right_hand   [X 173.0-177.9  Y 34.0-35.0  Z 25.2-27.0]
+         7.8 mm3  board right_hand  x  key-chain loom   [X 173.0-177.9  Y 34.0-35.0  Z 27.0-28.6]
          6.7 mm3  J-CHAIN left_thumb 2 tails  x  thumb plates   [X 130.5-133.2  Y 32.9-36.0  Z 6.4-7.2]
          6.7 mm3  J-CHAIN left_thumb 1 tails  x  thumb plates   [X 94.9-97.5  Y 32.9-36.0  Z 6.4-7.2]
+         4.7 mm3  key-chain loom  x  switch RH1   [X 176.1-177.9  Y 30.5-35.0  Z 29.5-30.5]
          3.9 mm3  J-CHAIN left_hand 1  x  switch LT2   [X 102.3-106.8  Y 33.7-38.0  Z 11.4-11.7]
+         3.9 mm3  board left_hand  x  breath sensor   [X 108.5-120.8  Y 18.0-21.1  Z 27.0-27.1]
+         3.9 mm3  J-CHAIN carrier tails  x  parts right_thumb   [X 170.9-177.0  Y 27.6-30.8  Z 12.6-12.8]
          3.6 mm3  J-CHAIN left_thumb 2  x  switch LH5   [X 131.3-135.8  Y 35.3-39.0  Z 26.3-26.6]
-         1.5 mm3  J-CHAIN right_thumb 2  x  switch RT1   [X 307.8-315.1  Y 29.9-34.1  Z 11.0-11.7]
+         2.6 mm3  J-DISP carrier tails  x  parts left_thumb   [X 112.5-115.7  Y 29.7-40.5  Z 12.6-12.8]
+         1.5 mm3  J-CHAIN right_thumb 2  x  switch RT1   [X 225.7-233.0  Y 29.9-34.1  Z 11.0-11.7]
          1.4 mm3  J-CHAIN left_hand 1  x  switch LH2   [X 93.5-97.6  Y 29.9-31.0  Z 26.3-27.0]
-         1.4 mm3  J-CHAIN right_hand 1  x  switch RH2   [X 283.5-287.6  Y 29.9-31.0  Z 26.3-27.0]
-         1.2 mm3  J-CHAIN right_hand 2  x  switch RH3   [X 304.6-307.6  Y 29.9-31.0  Z 26.3-27.0]
-         1.2 mm3  J-CHAIN right_thumb 1  x  switch RT3   [X 278.2-282.1  Y 38.0-39.0  Z 11.0-11.7]
+         1.4 mm3  J-CHAIN right_hand 1  x  switch RH2   [X 201.5-205.6  Y 29.9-31.0  Z 26.3-27.0]
+         1.2 mm3  J-CHAIN right_hand 2  x  switch RH3   [X 222.5-225.6  Y 29.9-31.0  Z 26.3-27.0]
+         1.2 mm3  J-CHAIN right_thumb 1  x  switch RT3   [X 196.1-200.1  Y 38.0-39.0  Z 11.0-11.7]
          1.0 mm3  J-CHAIN left_hand 1  x  switch LH3   [X 113.5-116.0  Y 29.9-31.0  Z 26.3-27.0]
          0.4 mm3  J-CHAIN left_thumb 1  x  switch LH2   [X 93.8-97.2  Y 29.9-30.7  Z 26.3-26.6]
-         0.4 mm3  J-CHAIN right_thumb 2  x  switch RH3   [X 303.9-307.3  Y 29.9-30.7  Z 26.3-26.6]
-         0.4 mm3  J-CHAIN right_thumb 1  x  switch RH2   [X 283.9-287.3  Y 29.9-30.7  Z 26.3-26.6]
-         0.4 mm3  J-CHAIN right_hand 2  x  switch RT1   [X 310.5-313.9  Y 29.9-30.7  Z 11.4-11.7]
+         0.4 mm3  J-CHAIN right_thumb 2  x  switch RH3   [X 221.8-225.2  Y 29.9-30.7  Z 26.3-26.6]
+         0.4 mm3  J-CHAIN right_thumb 1  x  switch RH2   [X 201.8-205.2  Y 29.9-30.7  Z 26.3-26.6]
+         0.4 mm3  J-CHAIN right_hand 2  x  switch RT1   [X 228.4-231.8  Y 29.9-30.7  Z 11.4-11.7]
          0.3 mm3  J-CHAIN left_thumb 2  x  switch LH3   [X 115.0-117.2  Y 29.9-30.7  Z 26.3-26.6]
-         0.2 mm3  J-CHAIN right_hand 1  x  switch RT3   [X 279.7-281.8  Y 38.3-39.0  Z 11.4-11.7]
+         0.2 mm3  J-CHAIN right_hand 1  x  switch RT3   [X 197.6-199.7  Y 38.3-39.0  Z 11.4-11.7]
 
-ALLOWED 114 (by rule in mechanical/clash-allow.yaml)
-       206.4 mm3  J-CHAIN right_thumb 2  x  key-chain loom   - each loom leaves its IDC socket - the socket is inside the header's solid
-       206.4 mm3  J-CHAIN right_hand 1  x  key-chain loom   - each loom leaves its IDC socket - the socket is inside the header's solid
-       205.0 mm3  J-CHAIN right_thumb 1  x  key-chain loom   - each loom leaves its IDC socket - the socket is inside the header's solid
-       205.0 mm3  J-CHAIN right_hand 2  x  key-chain loom   - each loom leaves its IDC socket - the socket is inside the header's solid
-       204.2 mm3  J-CHAIN left_hand 1  x  key-chain loom   - each loom leaves its IDC socket - the socket is inside the header's solid
-       204.2 mm3  J-CHAIN left_thumb 1  x  key-chain loom   - each loom leaves its IDC socket - the socket is inside the header's solid
-       201.6 mm3  J-CHAIN left_thumb 2  x  key-chain loom   - each loom leaves its IDC socket - the socket is inside the header's solid
-       159.2 mm3  J-CHAIN left_thumb 2  x  display loom   - each loom leaves its IDC socket - the socket is inside the header's solid
-       159.2 mm3  J-CHAIN left_hand 1  x  display loom   - each loom leaves its IDC socket - the socket is inside the header's solid
-       159.2 mm3  J-CHAIN right_thumb 2  x  display loom   - each loom leaves its IDC socket - the socket is inside the header's solid
-       159.2 mm3  J-CHAIN right_thumb 1  x  display loom   - each loom leaves its IDC socket - the socket is inside the header's solid
-       159.2 mm3  J-CHAIN right_hand 2  x  display loom   - each loom leaves its IDC socket - the socket is inside the header's solid
-       159.2 mm3  J-CHAIN right_hand 1  x  display loom   - each loom leaves its IDC socket - the socket is inside the header's solid
-       159.2 mm3  J-CHAIN left_thumb 1  x  display loom   - each loom leaves its IDC socket - the socket is inside the header's solid
+ALLOWED 111 (by rule in mechanical/clash-allow.yaml)
+       238.6 mm3  J-CHAIN left_thumb 1  x  key-chain loom   - each loom leaves its IDC socket - the socket is inside the header's solid
+       220.3 mm3  J-CHAIN left_hand 1  x  key-chain loom   - each loom leaves its IDC socket - the socket is inside the header's solid
+       186.9 mm3  J-CHAIN left_thumb 1  x  display loom   - each loom leaves its IDC socket - the socket is inside the header's solid
+       179.2 mm3  J-CHAIN left_hand 1  x  display loom   - each loom leaves its IDC socket - the socket is inside the header's solid
+       175.5 mm3  J-CHAIN right_hand 1  x  key-chain loom   - each loom leaves its IDC socket - the socket is inside the header's solid
+       175.5 mm3  J-CHAIN right_thumb 2  x  key-chain loom   - each loom leaves its IDC socket - the socket is inside the header's solid
+       162.2 mm3  J-CHAIN right_thumb 1  x  key-chain loom   - each loom leaves its IDC socket - the socket is inside the header's solid
+       162.2 mm3  J-CHAIN right_hand 2  x  key-chain loom   - each loom leaves its IDC socket - the socket is inside the header's solid
+       151.6 mm3  J-DISP carrier  x  key-chain loom   - each loom leaves its IDC socket - the socket is inside the header's solid
+       129.6 mm3  J-CHAIN left_thumb 2  x  key-chain loom   - each loom leaves its IDC socket - the socket is inside the header's solid
        129.1 mm3  J-CHAIN carrier  x  key-chain loom   - each loom leaves its IDC socket - the socket is inside the header's solid
-       120.3 mm3  J-DISP carrier  x  key-chain loom   - each loom leaves its IDC socket - the socket is inside the header's solid
         97.6 mm3  J-CHAIN carrier tails  x  parts carrier underside   - a header's pin tails come through where the underside parts would be; the parts layer is an envelope, not a placement
         79.0 mm3  J-DISP carrier tails  x  parts carrier underside   - a header's pin tails come through where the underside parts would be; the parts layer is an envelope, not a placement
         78.2 mm3  U-bolt  x  U-bolt nut 2   - the nuts thread onto the legs
         78.2 mm3  U-bolt  x  U-bolt nut 1   - the nuts thread onto the legs
+        64.8 mm3  USB-C lead  x  USB-C plug   - the extension's cable enters its own plug and receptacle
         43.4 mm3  J-DISP carrier  x  display loom   - each loom leaves its IDC socket - the socket is inside the header's solid
         32.5 mm3  board left_thumb  x  switch LT1   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board left_hand  x  switch LH2   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board left_hand  x  switch LH1   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board left_thumb  x  switch spare 1   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
+        32.5 mm3  board right_hand  x  switch RH6   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board left_thumb  x  switch LT3   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board left_thumb  x  switch LT2   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
-        32.5 mm3  board right_thumb  x  switch spare 3   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board right_thumb  x  switch RT2   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
+        32.5 mm3  board right_thumb  x  switch spare 3   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board right_thumb  x  switch RT1   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
+        32.5 mm3  board right_thumb  x  switch RT3   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board left_thumb  x  switch LT4   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board left_hand  x  switch LH4   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
-        32.5 mm3  board right_thumb  x  switch RT3   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
-        32.5 mm3  board left_hand  x  switch LH3   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
-        32.5 mm3  board left_hand  x  switch LH5   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
-        32.5 mm3  board left_thumb  x  switch spare 2   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
+        32.5 mm3  board right_hand  x  switch RH1   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board right_hand  x  switch RH2   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
-        32.5 mm3  board right_hand  x  switch RH6   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board right_hand  x  switch RH3   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board right_hand  x  switch RH4   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
-        32.5 mm3  board right_hand  x  switch RH1   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
+        32.5 mm3  board left_hand  x  switch LH3   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         32.5 mm3  board right_hand  x  switch RH5   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
+        32.5 mm3  board left_hand  x  switch LH5   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
+        32.5 mm3  board left_thumb  x  switch spare 2   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         30.8 mm3  breath trap  x  breath tube   - the tube enters the trap at both ends - one air path
         30.1 mm3  breath sensor  x  breath tube to sensor   - the tube pushes onto the sensor's P1 barb
-        28.8 mm3  USB-C lead  x  USB-C plug   - the extension's cable enters its own plug and receptacle
-        26.4 mm3  breath trap  x  breath tube to sensor   - the tube enters the trap at both ends - one air path
+        27.2 mm3  breath trap  x  breath tube to sensor   - the tube enters the trap at both ends - one air path
+        23.1 mm3  J-CHAIN left_hand 1 tails  x  key-chain loom   - each loom leaves its IDC socket - the socket is inside the header's solid
+        20.4 mm3  cap RH6  x  switch RH6   - the MX stem enters the cap's cross socket; the socket is not modelled
         20.4 mm3  cap RT2  x  switch RT2   - the MX stem enters the cap's cross socket; the socket is not modelled
-        20.4 mm3  cap spare 3  x  switch spare 3   - the MX stem enters the cap's cross socket; the socket is not modelled
         20.4 mm3  cap RT1  x  switch RT1   - the MX stem enters the cap's cross socket; the socket is not modelled
+        20.4 mm3  cap spare 3  x  switch spare 3   - the MX stem enters the cap's cross socket; the socket is not modelled
         20.4 mm3  cap RT3  x  switch RT3   - the MX stem enters the cap's cross socket; the socket is not modelled
         20.4 mm3  cap LT4  x  switch LT4   - the MX stem enters the cap's cross socket; the socket is not modelled
         20.4 mm3  cap spare 2  x  switch spare 2   - the MX stem enters the cap's cross socket; the socket is not modelled
         20.4 mm3  cap LT2  x  switch LT2   - the MX stem enters the cap's cross socket; the socket is not modelled
         20.4 mm3  cap LT3  x  switch LT3   - the MX stem enters the cap's cross socket; the socket is not modelled
+        20.4 mm3  cap RH2  x  switch RH2   - the MX stem enters the cap's cross socket; the socket is not modelled
+        20.4 mm3  cap RH1  x  switch RH1   - the MX stem enters the cap's cross socket; the socket is not modelled
         20.4 mm3  cap LH4  x  switch LH4   - the MX stem enters the cap's cross socket; the socket is not modelled
-        20.4 mm3  cap LH3  x  switch LH3   - the MX stem enters the cap's cross socket; the socket is not modelled
-        20.4 mm3  cap LH5  x  switch LH5   - the MX stem enters the cap's cross socket; the socket is not modelled
-        20.4 mm3  cap RH6  x  switch RH6   - the MX stem enters the cap's cross socket; the socket is not modelled
         20.4 mm3  cap RH4  x  switch RH4   - the MX stem enters the cap's cross socket; the socket is not modelled
         20.4 mm3  cap RH3  x  switch RH3   - the MX stem enters the cap's cross socket; the socket is not modelled
-        20.4 mm3  cap RH1  x  switch RH1   - the MX stem enters the cap's cross socket; the socket is not modelled
-        20.4 mm3  cap RH2  x  switch RH2   - the MX stem enters the cap's cross socket; the socket is not modelled
+        20.4 mm3  cap LH3  x  switch LH3   - the MX stem enters the cap's cross socket; the socket is not modelled
+        20.4 mm3  cap LH5  x  switch LH5   - the MX stem enters the cap's cross socket; the socket is not modelled
         20.4 mm3  cap RH5  x  switch RH5   - the MX stem enters the cap's cross socket; the socket is not modelled
         20.4 mm3  cap LT1  x  switch LT1   - the MX stem enters the cap's cross socket; the socket is not modelled
         20.4 mm3  cap spare 1  x  switch spare 1   - the MX stem enters the cap's cross socket; the socket is not modelled
@@ -139,20 +183,20 @@ ALLOWED 114 (by rule in mechanical/clash-allow.yaml)
         11.0 mm3  parts left_hand  x  switch LH1   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts left_thumb  x  switch LT1   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts left_thumb  x  switch spare 1   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
+        11.0 mm3  parts right_hand  x  switch RH6   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts left_hand  x  switch LH5   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
+        11.0 mm3  parts right_hand  x  switch RH1   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts left_hand  x  switch LH4   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
+        11.0 mm3  parts right_hand  x  switch RH4   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts left_thumb  x  switch LT4   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts left_thumb  x  switch spare 2   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts right_thumb  x  switch RT2   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts right_thumb  x  switch spare 3   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
-        11.0 mm3  parts right_hand  x  switch RH1   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
-        11.0 mm3  parts right_hand  x  switch RH6   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
-        11.0 mm3  parts right_hand  x  switch RH4   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
          8.8 mm3  parts left_hand  x  switch LH3   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
          8.5 mm3  parts right_thumb  x  switch RT3   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
          8.5 mm3  parts right_hand  x  switch RH3   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
-         8.3 mm3  parts left_hand  x  switch LH2   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
          8.3 mm3  parts right_hand  x  switch RH2   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
+         8.3 mm3  parts left_hand  x  switch LH2   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
          8.2 mm3  parts right_thumb  x  switch RT1   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
          1.7 mm3  M3 #3  x  key plate   - the fastener threads into the plate - an insert or tapped boss (hardware/bom.csv MECH-FASTENER); the tap hole is drawn at the tap drill
          1.7 mm3  M3 #4  x  key plate   - the fastener threads into the plate - an insert or tapped boss (hardware/bom.csv MECH-FASTENER); the tap hole is drawn at the tap drill
@@ -161,26 +205,27 @@ ALLOWED 114 (by rule in mechanical/clash-allow.yaml)
          1.7 mm3  M3 #1  x  key plate   - the fastener threads into the plate - an insert or tapped boss (hardware/bom.csv MECH-FASTENER); the tap hole is drawn at the tap drill
          1.7 mm3  M3 #2  x  key plate   - the fastener threads into the plate - an insert or tapped boss (hardware/bom.csv MECH-FASTENER); the tap hole is drawn at the tap drill
          1.0 mm3  switch LT3  x  thumb plates   - as the key plate - the thumb switches clip into their plates
-         1.0 mm3  switch RT3  x  thumb plates   - as the key plate - the thumb switches clip into their plates
-         1.0 mm3  switch spare 3  x  thumb plates   - as the key plate - the thumb switches clip into their plates
          1.0 mm3  key plate  x  switch RH5   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
          1.0 mm3  switch spare 2  x  thumb plates   - as the key plate - the thumb switches clip into their plates
          1.0 mm3  key plate  x  switch LH5   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
          1.0 mm3  key plate  x  switch LH3   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
-         1.0 mm3  switch RT1  x  thumb plates   - as the key plate - the thumb switches clip into their plates
-         1.0 mm3  key plate  x  switch RH3   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
-         1.0 mm3  key plate  x  switch RH2   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
          1.0 mm3  key plate  x  switch RH1   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
-         1.0 mm3  switch RT2  x  thumb plates   - as the key plate - the thumb switches clip into their plates
-         1.0 mm3  key plate  x  switch RH6   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
+         1.0 mm3  key plate  x  switch RH2   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
+         1.0 mm3  key plate  x  switch RH3   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
          1.0 mm3  key plate  x  switch RH4   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
          1.0 mm3  key plate  x  switch LH4   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
          1.0 mm3  switch LT4  x  thumb plates   - as the key plate - the thumb switches clip into their plates
+         1.0 mm3  switch RT3  x  thumb plates   - as the key plate - the thumb switches clip into their plates
+         1.0 mm3  switch spare 3  x  thumb plates   - as the key plate - the thumb switches clip into their plates
+         1.0 mm3  switch RT1  x  thumb plates   - as the key plate - the thumb switches clip into their plates
+         1.0 mm3  switch RT2  x  thumb plates   - as the key plate - the thumb switches clip into their plates
+         1.0 mm3  key plate  x  switch RH6   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
          1.0 mm3  switch LT2  x  thumb plates   - as the key plate - the thumb switches clip into their plates
          1.0 mm3  key plate  x  switch LH2   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
          1.0 mm3  switch spare 1  x  thumb plates   - as the key plate - the thumb switches clip into their plates
          1.0 mm3  key plate  x  switch LH1   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
          1.0 mm3  switch LT1  x  thumb plates   - as the key plate - the thumb switches clip into their plates
+         0.8 mm3  J-CHAIN left_thumb 2  x  display loom   - each loom leaves its IDC socket - the socket is inside the header's solid
          0.3 mm3  parts right_hand  x  switch RH5   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
 
 UNUSED ALLOW RULES 0

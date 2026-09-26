@@ -314,11 +314,16 @@ thumb keys and the U-bolt:
 > window is **frosted acrylic, flush with the oak top, sitting on a lip of
 > oak** (a rebate in the oak's upper face) — the owner's choice, made knowing
 > frosted material softens pixels at this distance from the LEDs, which the
-> diffuser guidance below warned against. The Matrix board stands face up on the carrier,
-> so **the carrier cutout below is no longer needed** and which face carries
-> the LEDs stops being a risk — it faces up, away from the carrier. The body
-> CAD derives the carrier's height from that stack (`mechanical/drc.echo`).
-> The paragraphs below are the original underside design.
+> diffuser guidance below warned against. **The Matrix board hangs face up
+> from the lid under the window** (owner, 2026-09-26: "the matrix can be up
+> higher out of the way and still allow the connectors"), wired to the
+> carrier by a pigtail soldered to its pads, so **the carrier cutout below is
+> no longer needed** and which face carries the LEDs stops being a risk. The
+> etherCON's rear socket and the patch plug pass **under** it, beside its
+> USB-C plug, so only the connector's housing queues behind it; the housing
+> sits in a pocket in the oak bottom. The carrier is no longer under the
+> Matrix — where it goes is open (`mechanical/DESIGN.md`, the interference
+> check). The paragraphs below are the original underside design.
 
 **A window in the oak underside for the 8×8 matrix** on the real-time board
 (ADR 0007, ADR 0014). Roughly 22 mm square, facing the player's downward glance

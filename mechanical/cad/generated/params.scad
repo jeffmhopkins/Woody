@@ -91,7 +91,7 @@ boards_idc_tail = 3.0;  // settled; [ds] WR-BHD p.1 - pin tail below the board
 boards_disp_socket_h = 8.5;  // tbd; HDR-DEV female socket strips on the display board's back, 1 x 14 [from memory]
 boards_carrier_l = 100.0;  // tbd; hardware/bom.csv PCB-CARRIER '~100 x 45' - carrier.md: 'an assumption, not a fit'
 boards_carrier_w = 45.0;  // tbd; hardware/bom.csv PCB-CARRIER
-boards_matrix_header_h = 11.0;  // tbd; seated stack: 8.5 female socket on the carrier + 2.5 plastic spacer of the Matrix's male header [from memory; the earlier 8.5 left out the spacer]
+boards_matrix_harness_h = 2.5;  // tbd; below the Matrix: a pigtail soldered straight to its pads, wires bent flat [from memory]. Crimp housings on a pin header stood ~16.5 and put a row across the patch plug
 boards_matrix_under_h = 3.2;  // tbd; the Matrix's back-side parts (ESP32-S3, USB-C, IMU) below its board [from memory]
 boards_matrix_gap = 1.0;  // tbd; LED tops to the key plate's underside, under the window opening
 boards_matrix_led_h = 1.0;  // tbd; WS2812B-0807 package height above the board [from memory]
@@ -100,8 +100,8 @@ openings_matrix_lip = 2.0;  // tbd; oak lip the acrylic rests on, per side - the
 openings_matrix_acrylic_t = 3.0;  // tbd; frosted acrylic window thickness [from memory: common sheet]; must leave an oak lip under it
 openings_usb_slot_w = 12.5;  // tbd; panel cutout for a panel-mount USB-C extension receptacle [from memory]
 openings_usb_slot_h = 7.0;  // tbd; as usb_slot_w [from memory]
-openings_usb_plug_l = 28.0;  // tbd; USB-C cable plug moulding, 25-30 long [from memory, datasheet read 2026-09-26], standing off the Matrix board's USB-C edge
-openings_matrix_usb_to_tail = true;  // tbd; the Matrix's USB-C edge faces the tail - the worst case; datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-dimensions.jpg shows the port overhanging one edge
+openings_usb_plug_l = 15.0;  // tbd; RIGHT-ANGLE USB-C plug on the extension (2026-09-26): the Matrix's edge to the far side of the moulding, where the lead turns across the body [from memory]. A straight plug is 25-30 and, doubled by the centred Matrix, added ~24 mm of body
+openings_matrix_usb_to_tail = false;  // tbd; false = the Matrix's USB-C edge faces the MOUTH, so its plug runs under the key boards instead of into the connector's housing; datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-dimensions.jpg shows the port overhanging one edge
 openings_usb_ext_depth = 20.0;  // tbd; the extension receptacle's body behind the panel [from memory]
 openings_service_cover_w = 12.0;  // nominal; [adr] ADR 0009 - 'Roughly 12 x 40 mm, two M2 screws'
 openings_service_cover_l = 40.0;  // nominal; [adr] ADR 0009
@@ -117,12 +117,13 @@ ethercon_housing_h = 27.64;  // settled; [ds] NE8FDP.dxf - main housing height (
 ethercon_housing_d = 19.8;  // settled; [ds] NE8FDP.dxf - cap's inside face to the back of the main housing, flange and chassis both behind
 ethercon_socket_w = 15.9;  // settled; [ds] NE8FDP.dxf - rear RJ45 socket width
 ethercon_socket_h = 13.2;  // settled; [ds] NE8FDP.dxf - rear RJ45 socket height; it runs from 0.35 off the axis to the housing's face, on the side away from the latch
-ethercon_socket_toward_centre = true;  // tbd; with the 90-degree rotation the socket's offset lies across the body; toward the body's centre is assumed
+ethercon_socket_toward_centre = false;  // tbd; with the 90-degree rotation the socket's offset lies across the body; AWAY from the centre, so the patch plug runs beside the Matrix's USB-C plug, not under it - the two cannot stack in the height under the Matrix
 ethercon_rj45_plug_l = 30.0;  // tbd; mated RJ45 plug + strain-relief boot, beyond the etherCON's rear face [from memory: plug ~21, boot ~10-15]
 ethercon_rj45_plug_w = 14.0;  // tbd; RJ45 boot envelope across [from memory]
 ethercon_rj45_plug_h = 12.0;  // tbd; RJ45 boot envelope, height [from memory]
 ethercon_rj45_drop = 10.0;  // tbd; length for the lead to turn down under the carrier after the boot [from memory: small-OD patch lead]
 ethercon_rotated = true;  // settled; [adr] ADR 0009 - 'Rotate it 90 degrees. Settled off the drawing.'
+ethercon_centre_z = 16.0;  // tbd; connector axis height: low enough that the rear socket passes under the Matrix's underside parts
 ethercon_offset_y = -7.0;  // tbd; placeholder - off-centre so the USB-C slot fits beside it
 hardware_fastener_count = 6;  // settled; [adr] ADR 0009 - six M3 from the bottom into the plate
 hardware_fastener_clear_d = 3.4;  // nominal; M3 clearance, medium fit [from memory]
@@ -149,5 +150,5 @@ lighting_strip_gap = 3.0;  // tbd; ADR 0009 / ADR 0014: the diffusion gap is a p
 
 // Every value above with status tbd - a placeholder, not a number any
 // document gives. The DRC report lists these so no result hides one.
-tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_mouth_extra", "layout_tail_clear", "layout_underside_clear", "layout_lh_offsets", "layout_rh_offsets", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_tall_l", "boards_tall_w", "boards_tall_h", "boards_disp_socket_h", "boards_carrier_l", "boards_carrier_w", "boards_matrix_header_h", "boards_matrix_under_h", "boards_matrix_gap", "boards_matrix_led_h", "openings_matrix_lip", "openings_matrix_acrylic_t", "openings_usb_slot_w", "openings_usb_slot_h", "openings_usb_plug_l", "openings_matrix_usb_to_tail", "openings_usb_ext_depth", "ethercon_socket_toward_centre", "ethercon_rj45_plug_l", "ethercon_rj45_plug_w", "ethercon_rj45_plug_h", "ethercon_rj45_drop", "ethercon_offset_y", "hardware_fastener_inset", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_ubolt_nut_af", "hardware_ubolt_nut_h", "hardware_backplate_t", "routing_tube_od", "routing_trap_d", "routing_trap_l", "routing_tube_lane", "routing_lane_z", "lighting_strip_w", "lighting_strip_t", "lighting_strip_gap"];
+tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_mouth_extra", "layout_tail_clear", "layout_underside_clear", "layout_lh_offsets", "layout_rh_offsets", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_tall_l", "boards_tall_w", "boards_tall_h", "boards_disp_socket_h", "boards_carrier_l", "boards_carrier_w", "boards_matrix_harness_h", "boards_matrix_under_h", "boards_matrix_gap", "boards_matrix_led_h", "openings_matrix_lip", "openings_matrix_acrylic_t", "openings_usb_slot_w", "openings_usb_slot_h", "openings_usb_plug_l", "openings_matrix_usb_to_tail", "openings_usb_ext_depth", "ethercon_socket_toward_centre", "ethercon_rj45_plug_l", "ethercon_rj45_plug_w", "ethercon_rj45_plug_h", "ethercon_rj45_drop", "ethercon_centre_z", "ethercon_offset_y", "hardware_fastener_inset", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_ubolt_nut_af", "hardware_ubolt_nut_h", "hardware_backplate_t", "routing_tube_od", "routing_trap_d", "routing_trap_l", "routing_tube_lane", "routing_lane_z", "lighting_strip_w", "lighting_strip_t", "lighting_strip_gap"];
 

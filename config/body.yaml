@@ -359,11 +359,15 @@ boards:
   # 2026-09-26), seen through a window in the oak top and the plate. The
   # Matrix board sits face up on headers on the carrier, so the carrier's
   # height follows from the stack under the plate - it is derived, not set.
-  matrix_header_h:
-    value: 11.0
+  # THE MATRIX HANGS FROM THE LID under its window (owner, 2026-09-26), not
+  # on the carrier: the connectors pass beneath it. Its two pin-header rows
+  # take crimp housings on a short harness to the carrier; the rows straddle
+  # the patch plug.
+  matrix_harness_h:
+    value: 2.5
     status: tbd
-    source: "seated stack: 8.5 female socket on the carrier + 2.5 plastic spacer of the Matrix's male header [from memory; the earlier 8.5 left out the spacer]"
-    decided_by: "M4, from the header actually bought"
+    source: "below the Matrix: a pigtail soldered straight to its pads, wires bent flat [from memory]. Crimp housings on a pin header stood ~16.5 and put a row across the patch plug"
+    decided_by: "M4, with the harness built"
   matrix_under_h:
     value: 3.2
     status: tbd
@@ -416,14 +420,14 @@ openings:
     source: "as usb_slot_w [from memory]"
     decided_by: "M4"
   usb_plug_l:
-    value: 28.0
+    value: 15.0
     status: tbd
-    source: "USB-C cable plug moulding, 25-30 long [from memory, datasheet read 2026-09-26], standing off the Matrix board's USB-C edge"
-    decided_by: "M4, against the extension bought; a right-angle plug would remove most of it"
+    source: "RIGHT-ANGLE USB-C plug on the extension (2026-09-26): the Matrix's edge to the far side of the moulding, where the lead turns across the body [from memory]. A straight plug is 25-30 and, doubled by the centred Matrix, added ~24 mm of body"
+    decided_by: "M4, against the extension bought"
   matrix_usb_to_tail:
-    value: true
+    value: false
     status: tbd
-    source: "the Matrix's USB-C edge faces the tail - the worst case; datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-dimensions.jpg shows the port overhanging one edge"
+    source: "false = the Matrix's USB-C edge faces the MOUTH, so its plug runs under the key boards instead of into the connector's housing; datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-dimensions.jpg shows the port overhanging one edge"
     decided_by: "M4, board orientation on the carrier"
   usb_ext_depth:
     value: 20.0
@@ -498,9 +502,9 @@ ethercon:
     status: settled
     source: "[ds] NE8FDP.dxf - rear RJ45 socket height; it runs from 0.35 off the axis to the housing's face, on the side away from the latch"
   socket_toward_centre:
-    value: true
+    value: false
     status: tbd
-    source: "with the 90-degree rotation the socket's offset lies across the body; toward the body's centre is assumed"
+    source: "with the 90-degree rotation the socket's offset lies across the body; AWAY from the centre, so the patch plug runs beside the Matrix's USB-C plug, not under it - the two cannot stack in the height under the Matrix"
     decided_by: "M4, with the latch direction chosen on the tail face"
   # THE NE8FDP IS A FEEDTHROUGH: its back is an RJ45 socket, so inside the
   # instrument a short patch lead plugs into it (hardware/bom.csv
@@ -531,6 +535,17 @@ ethercon:
     value: true
     status: settled
     source: "[adr] ADR 0009 - 'Rotate it 90 degrees. Settled off the drawing.'"
+  # STACKED UNDER THE MATRIX (owner, 2026-09-26: "the matrix can be up
+  # higher out of the way and still allow the connectors"). The rear socket
+  # and the patch plug pass UNDER the Matrix; only the housing, the full
+  # cavity's height, has to stay behind it. The connector is lowered so the
+  # socket clears the Matrix's underside; the housing then sits in a shallow
+  # pocket in the oak bottom (a router pass, like the grooves).
+  centre_z:
+    value: 16.0
+    status: tbd
+    source: "connector axis height: low enough that the rear socket passes under the Matrix's underside parts"
+    decided_by: "M4, with the Matrix's real underside height"
   offset_y:
     value: -7.0
     status: tbd
