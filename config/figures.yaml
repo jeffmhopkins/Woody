@@ -272,13 +272,11 @@ figures:
     value: "12"
     status: settled
     owner: docs/decisions/0001-mcu-and-board-partitioning.md
-    derivation: "4 signals + 5 alternating grounds + 3V3 + 2 spare, on a 2x6 IDC"
+    derivation: "4 signals + 5 alternating grounds + 3V3 + 2 spare, on a 12-way 1.0 mm flat flex ribbon per key board (ADR 0017)"
     forbidden: ["six conductors per hop", "SIX conductors per hop", "6 conductors per hop", "Six conductors leave", "six conductors leave", "Six conductors per hop", "Six conductors per"]
     false_positive_note: >
-      key-chain-loom.md:138 says "Six conductors is the SIGNAL count, not the
-      conductor count", which is a correction and is correct.
-      led-strip-drive.md:88's "the LED loom stays at 6 conductors" is a
-      different loom entirely. Neither is this figure.
+      led-strip-drive.md's "the LED loom stays at 6 conductors" is a
+      different loom entirely, and is not this figure.
     escape_note: |
       THE MISS WAS ONE LETTER'S CASE, 2026-09-21. ROADMAP:203 read
       "Six conductors per hop" - Title case - against a list holding the
@@ -291,12 +289,22 @@ figures:
 
   - id: chain-connectors
     quantity: J-CHAIN connectors in the system
-    value: "8"
-    status: blocked
-    blocked_on: "The key-chain loom rework for one main board and flat flex ribbons (ADR 0017): the thumb clusters are on the main board and each key board connects by a 12-way ribbon - four ZIF connectors in all - so this count of IDC connectors describes hardware no longer in the design. Re-derive it on hardware/interfaces/key-chain-loom/ rather than guessing it here."
+    value: "4"
+    status: settled
     owner: hardware/interfaces/key-chain-loom/key-chain-loom.md
-    derivation: "SER/QH are point-to-point, so every cluster board but the last has IN and OUT: carrier 1, RT 2, RH 2, LT 2, LH 1"
-    forbidden: ["five connectors must match", "Five connectors", "~4 connectors"]
+    derivation: "The thumb clusters are on the main board, so their part of the chain is traces (ADR 0017). Each of the two key boards has one 12-way flat flex ribbon with a ZIF connector at each end, carrying that board's SER in and QH out: 2 key boards x 2 ends = 4"
+    # The value moved 8 -> 4 on 2026-09-26 (ADR 0017). Old spellings found by
+    # grepping the corpus, and only those whose every hit was fixed in the
+    # same commit are listed. Four more are live in files outside that
+    # commit's reach - "Eight connectors" (ADR 0001, ROADMAP), "RT 2, RH 2,
+    # LT 2, LH 1" (ADR 0001), "J-CHAIN 1/8" (ROADMAP) and "every cluster board
+    # but the last" (ADR 0001, WIRE-LOOM) - and belong here once those are
+    # rewritten or refuted in place.
+    #
+    # "~4 connectors" WAS DROPPED from this list: it guarded an older wrong
+    # value, and 4 is now the right one. A pattern that fires on a correct
+    # sentence is worse than none.
+    forbidden: ["five connectors must match", "Five connectors", "eight connectors", "EIGHT connectors", "EIGHT of them across five boards", "eight in all", "7 chain connectors"]
 
   - id: key-pullup-qty
     quantity: R-KEY-PU quantity

@@ -45,7 +45,7 @@ nets.yaml                          at hardware/ root: THE MASTER NET LIST,
 | Directory | |
 |---|---|
 | [`carrier/`](carrier/carrier.md) | The instrument's real-time board — 5 circuits |
-| [`cluster/`](cluster/cluster-boards.md) | Four identical key boards — 3 circuits |
+| [`cluster/`](cluster/cluster-boards.md) | The four key clusters — two key boards and the main board's two thumb clusters — 3 circuits |
 | [`module/`](module/module.md) | The 10HP Eurorack module — 12 circuits |
 | [`interfaces/`](interfaces/README.md) | The 3 circuits that cross a board boundary |
 

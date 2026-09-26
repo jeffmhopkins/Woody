@@ -123,7 +123,7 @@ being asked to guess.
 | Host | Devices | Clock |
 |---|---|---|
 | **SPI2** | DAC8568 down the umbilical, **and** MCP3202 on this board | **2 MHz for the DAC, 900 kHz for the ADC — not one clock** |
-| **SPI3** | 74HC165 chain alone, because `QH` is always driven (ADR 0001) | **1 MHz, and not much more** — the chain crosses four connectors and ~265 mm of loom, and HC's slow edges are what keep that a lumped load `[repo] 0001` |
+| **SPI3** | 74HC165 chain alone, because `QH` is always driven (ADR 0001) | **1 MHz, and not much more** — the serial path crosses both key-board ribbons out and back and runs the main board's length, and HC's slow edges are what keep each hop a lumped load `[repo] 0001, key-chain-loom.md` |
 
 > **The MCP3202 cannot run at 2 MHz.** `[repo, verified]` against Microchip
 > DS21034F, now at `datasheets/analog/MCP3202-CI-SN.pdf`. The Timing

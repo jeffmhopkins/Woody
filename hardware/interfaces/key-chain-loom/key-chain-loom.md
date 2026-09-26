@@ -1,310 +1,339 @@
-# Key chain loom — carrier to four cluster boards
+# Key chain — main board to two key boards
 
-**Status:** Consolidated 2026-09-21 from the two pages that described one
-circuit from opposite ends of the loom — `hardware/carrier/carrier.md` §3 and
-`hardware/cluster/cluster-boards.md` §3. Everything below the `## Interfaces`
-table was **moved verbatim**: nothing was reworded, no value was edited and no
-open question was closed.
+**Status:** Rewritten 2026-09-26 for the one-main-board design
+([ADR 0017](../../../docs/decisions/0017-one-main-board.md)). The directory
+keeps its old name so that paths into it do not break; there is no loom any
+more. What this page described before — a carrier and four cluster boards on
+IDC ribbons — is summarised in [`notes.md`](notes.md) and is whole in git.
 
-One ribbon leaves the carrier and passes through four cluster boards in turn.
-The conductor count, the alternating grounds, the series resistors and the
-fusing are decided at the carrier end; the connector pinout, the bus-versus-
-point-to-point split and the chain-end link are decided at the cluster end; and
-neither half is a complete statement of what runs down the body.
+The four 74HC165s are still one chain of 32 bits, **in the same order**, so the
+bit map ([`key-marker-and-bits`](../../cluster/key-marker-and-bits/key-marker-and-bits.md))
+and the firmware do not change. What changed is where the registers sit:
 
-The drawings came here whole. Each is wholly this circuit — a carrier header
-to a chain connector, a chain connector to a register, and the chain-end link
-between them — so none had to be divided and none was redrawn.
+- **Two on the main board**, `right_thumb` and `left_thumb`, with their
+  switches and networks (ADR 0017). Their part of the chain is traces.
+- **Two on the key boards**, `right_hand` and `left_hand`, which hang from the
+  lid under the top plate (`PCB-CLUSTER`). Each key board connects to the main
+  board by **one 12-way flat flex ribbon** (`FFC-CHAIN`) with a ZIF connector
+  (`J-CHAIN`) at each end — `chain-connectors` in all.
+
+Evidence marking as on the other hardware pages: `[repo]` names a file,
+`[calc]` shows the arithmetic, `[from memory]` means no datasheet was read for
+it.
 
 ## Interfaces
 
-Every net that crosses this circuit's boundary, and **which end of the loom
-each one is on**. Quantities appear **only** as a citation into
-`config/figures.yaml` — this table names nodes, it does not restate values.
+Every net that crosses this circuit's boundary, and **which board each end is
+on**. Quantities appear **only** as a citation into `config/figures.yaml` —
+this table names nodes, it does not restate values.
 
 The `Dir` and `Peer` columns are defined once in
 [`hardware/README.md`](../../README.md#the-interfaces-table).
 
 | Node | End | Dir | Peer | Figure | Note |
 |---|---|---|---|---|---|
-| `SCK` (`J-CHAIN` pin 2) | carrier → clusters | out | `HDR-DEV` IO38 → `cluster/key-register` | `chain-conductors` | Series resistor at the driving end. Straight bus, IN to OUT, at every board |
-| `SH/LD` (`J-CHAIN` pin 4) | carrier → clusters | out | `HDR-DEV` IO7 → `cluster/key-register` | `chain-conductors` | Straight bus. A glitch here reloads every register mid-shift, which is the whole 32-bit word |
-| `SER` (`J-CHAIN` pin 6) | carrier → clusters | out | `HDR-DEV` IO33 → `cluster/key-register` | `chain-conductors` | The one pass-through: it rides every hop to the chain-end board's serial input, through `LK-SER` |
-| `QH` (`J-CHAIN` pin 8) | clusters → carrier | in | `cluster/key-register` → `HDR-DEV` IO40 | `chain-conductors`, `marker-bits`, `free-bits` | **Point to point, and a different net on each side of every board.** That is what makes the chain eight connectors rather than five |
-| `GND` ×5 (pins 1, 3, 5, 7, 9) | carrier ↔ clusters | ref | `HDR-DEV` → `cluster/key-register` | `chain-conductors` | One between every signal, and against pin 10 |
-| `3V3` (`J-CHAIN` pin 10) | carrier → clusters | out | `HDR-DEV` → `cluster/key-switch-network`, `cluster/key-register`, `carrier/breath-adc` | `key-pullup-qty` | The dev board's LDO feeds the pull-ups, four `VCC` pins and four decouplers. **It is also the MCP3202's reference**, which is what makes the static draw a live trade — that argument is owned by neither end and stayed in `carrier.md` §2 |
-| spare ×2 (pins 11, 12) | carrier ↔ clusters | — | — | `chain-conductors` | ADR 0009's rule, free in a 2×6 |
-| `J-CHAIN` | both | — | — | `chain-connectors` | This circuit's own connector. Same pinout at all eight positions, boxed and keyed at every one |
-| `LK-SER`, `R-SER-TERM` | clusters | — | — | — | This circuit's own parts, chain-end board only. Proposed |
-| `CLK INH`, register `SER` termination | clusters | — | `cluster/key-register` | — | On the cluster boards, not on the carrier |
-| the 32 bits | clusters | — | `cluster/key-marker-and-bits` | `marker-bits`, `free-bits` | What the loom carries, allocated in `config/key-layout.yaml`. **None of the allocation is a carrier decision** |
+| `SCK` (pin 2) | main → all four registers | out | MCU IO38 → `cluster/key-register` | `chain-conductors` | One net: two registers by trace, two over the ribbons. `R-CHAIN-SER` at the driving end |
+| `SH/LD` (pin 4) | main → all four registers | out | MCU IO7 → `cluster/key-register` | `chain-conductors` | One net, like `SCK`. A glitch here reloads every register mid-shift — the whole 32-bit word |
+| `SER` (pin 6) | main → key board | out | → `cluster/key-register` | `chain-connectors` | **The key board's own serial input**, on both ribbons. On the `right_hand` ribbon it is `left_thumb`'s `QH`; on the `left_hand` ribbon it is the chain end, `IO33` and `R-SER-TERM` |
+| `QH` (pin 8) | key board → main | in | `cluster/key-register` → | `chain-connectors` | **The key board's own serial output**, on both ribbons. `right_hand`'s goes to `right_thumb`'s `SER`; `left_hand`'s to `left_thumb`'s |
+| `QH` of `right_thumb` | main board only | in → out | `cluster/key-register` → MCU IO40 | `marker-bits`, `free-bits` | Bit 0 onward. **Reaches no connector** — a trace from the register to the MCU's pins |
+| `GND` ×5 (pins 1, 3, 5, 7, 9) | both | ref | `cluster/key-register`, `cluster/key-switch-network`, `cluster/key-marker-and-bits` | `chain-conductors` | One between every signal, and against pin 10 |
+| `3V3` (pin 10) | main → key boards | out | MCU board's 3V3 → `F-CHAIN` → `cluster/key-register`, `cluster/key-switch-network`, `cluster/key-marker-and-bits`; shared with `carrier/breath-adc` | `key-pullup-qty` | **It is also the MCP3202's reference** — `carrier.md` §2 carries that argument |
+| spare ×2 (pins 11, 12) | both | — | — | `chain-conductors` | ADR 0009's rule, free in a 12-way part |
+| `J-CHAIN`, `FFC-CHAIN` | both | — | — | `chain-connectors` | This circuit's connectors and cables |
+| `R-CHAIN-SER`, `R-SER-TERM`, `U-TVS-CHAIN`, `F-CHAIN` | main | — | — | — | This circuit's parts, all on the main board |
+| the 32 bits | all four registers | — | `cluster/key-marker-and-bits` | `marker-bits`, `free-bits` | Allocated in `config/key-layout.yaml`. The chain order is unchanged |
+
+Pin numbers in this table are the **main-board** connector's. The key board's
+connector numbers the same conductors in reverse — see *The ribbon*, below.
 
 ---
 
-## From the carrier end — `carrier.md` §3
+## The chain
 
-*Connectivity is **[`netlist.yaml`](netlist.yaml)**, not this drawing — for the
-carrier end, which is what the drawing shows. **The chain itself is not in that
-file yet**: eight connectors and four ribbons, with `SER`/`QH` point-to-point
-and changing meaning at every hop, and the hop map is prose here and in no file
-a tool reads. `tools/check-netlist.py` prints `J-CHAIN 1/8` rather than
-pretending otherwise.*
+*Connectivity is **[`netlist.yaml`](netlist.yaml)**, not these drawings. It
+holds the hop map — which register's `QH` feeds which register's `SER`, and
+over which ribbon — as named nets. The register itself is one schematic built
+four times ([`key-register`](../../cluster/key-register/netlist.yaml),
+`replicated: 4`), so its side of each hop is per instance, and
+`hardware/nets.yaml` marks those nets `per_board:`.*
 
-
-*Moved verbatim from `hardware/carrier/carrier.md` §3, 2026-09-21. "This board"
-and "this page" throughout mean `carrier.md` as it stood before the move, and
-`carrier.md` keeps its `## §3` heading because other pages cite it by number.*
-
-**The registers are not on this board.** ADR 0001's *"One register per cluster"*
-put one 74HC165 on each cluster board, with that cluster's 2.2 kΩ/100 Ω/47 nF
-networks beside it, because the switches need a rigid PCB regardless (ADR 0002)
-and putting the register on it makes every switch-to-chip connection a trace
-`[repo] 0001, 0002`. **This page's first draft drew all four registers and all
-21 networks here.** That was the superseded topology; what follows replaces it.
-
-**Decided: a ground return per signal, laid out as an alternating-ground
-ribbon.** ADR 0001 fix 1 calls this the highest-value item on its list, and it
-is the only thing in the loom that can still be corrupted — a glitch on `SH/LD`
-does not cost one wrong note, it reloads all four registers mid-shift and
-corrupts the whole 32-bit word `[repo] 0001`. Four signals, five grounds, one
-supply:
+The order is `config/key-layout.yaml`'s, unchanged: **bit 0 is the first bit
+clocked out**, the `QH` of `right_thumb`, the device nearest the MCU, and
+serial data flows toward the clock source (ADR 0001 fix 3) `[repo]`:
 
 ```
-  HDR-DEV                                   J-CHAIN  (2×6 IDC, 12-way ribbon,
-                                                      10 wired + 2 spare)
-   GND  ────────────────────────────────────►  1  GND
-   IO38  SPI3 SCK ──[R-CHAIN-SER 100R]─────►  2  SCK     ** R PROPOSED **
-   GND  ────────────────────────────────────►  3  GND
-   IO7   latch    ──[R-CHAIN-SER 100R]─────►  4  SH/LD   ** R PROPOSED **
-   GND  ────────────────────────────────────►  5  GND
-   IO33  SER out  ──[R-CHAIN-SER 100R]─────►  6  SER     (into the far device)
-   GND  ────────────────────────────────────►  7  GND
-   IO40  MISO     ◄─────────────────────────  8  QH      (out of the near one)
-   GND  ────────────────────────────────────►  9  GND
-   3V3  ───────[F-CHAIN, see below]─────────► 10  3V3     → 24 pull-ups,
-                                              11  spare      4 × VCC, 4 × 100 nF
-                                              12  spare
+   MCU ◄── right_thumb ◄── right_hand ◄── left_thumb ◄── left_hand ◄── chain end
+            (main)          (key board)     (main)         (key board)   IO33 / pull-up
 
-              [U-TVS-CHAIN 4-ch array to DIG_GND]   ** PROPOSED **
+   ┌─────────────────────────── MAIN BOARD ──────────────────────────────┐
+   │                                                                     │
+   │  IO40 ◄─ QH (RT) SER ◄─┐        ┌─► SER (LT) QH ─┐      IO33 ─┐     │
+   │                        │        │                │   + pull-up│     │
+   │             ┌─ pin 8 ──┘        └── pin 8 ─┐     │            │     │
+   │             │  pin 6 ◄─────────────────────┼─────┘            │     │
+   │             │  (right_hand J-CHAIN)        │  pin 6 ◄─────────┘     │
+   │             │                              │  (left_hand J-CHAIN)   │
+   └─────────────┼──────────────────────────────┼────────────────────────┘
+          FFC-CHAIN, 6 out / 8 back       FFC-CHAIN, 6 out / 8 back
+   ┌─────────────┴─────────────┐    ┌───────────┴───────────────┐
+   │ KEY BOARD right_hand      │    │ KEY BOARD left_hand       │
+   │  6 ──► SER (RH) QH ──► 8  │    │  6 ──► SER (LH) QH ──► 8  │
+   └───────────────────────────┘    └───────────────────────────┘
 
-  Every signal has ground on both sides; 3V3 sits against pin 9's ground.
-  The two spares are ADR 0009's rule and they are FREE: IDC comes in 2xN, so
-  a 2x6 costs what a 2x5 costs and the ribbon is 2 mm wider. Under the tail
-  topology a spare conductor bought a spare KEY; under this one it buys a
-  REPAIR - expansion now lands on a spare register BIT, which needs no wire.
-
-  EIGHT connectors, not five. The chain is four hops, and SER/QH cannot be a
-  pass-through bus: each board's QH feeds the PREVIOUS board's SER, which is
-  point-to-point and changes meaning every hop. So every cluster board except
-  the last carries an IN and an OUT - carrier 1, RT 2, RH 2, LT 2, LH 1 - with
-  four ribbon assemblies between them. Same 2x6 pinout at all eight.
-
-  Pin 6 SER is the exception: it IS a pass-through, riding every hop to reach
-  the far device's serial input. ADR 0001 has that input "terminated at the
-  far device", which would make this conductor redundant. Driving it instead
-  costs nothing and buys an end-to-end chain self-test - shift a known pattern
-  in at LH and read it back at RT, with no keys pressed. That distinguishes
-  "the loom is broken" from "one bit is stuck", which the static marker
-  pattern cannot. NOT yet decided; it is a cluster-board question.
-
-  Chained, not starred (ADR 0001 fix 2): ONE run leaves this connector and
-  passes through right_thumb → right_hand → left_thumb → left_hand in turn.
-  bit 0 is the first bit clocked out = QH of right_thumb, the device nearest
-  the MCU (ADR 0001 fix 3, and config/key-layout.yaml).
+   SCK, SH/LD, 3V3 and the grounds are one net each, on every register and
+   on both ribbons. Each ribbon carries its key board's SER IN on pin 6 and
+   its QH OUT on pin 8 — the same two pins the old IN connector used.
 ```
 
-**`CLK INH` is tied low and `SER` is terminated at the far device** — both on
-the cluster boards, not here `[repo] 0001`.
+**The existing 12-way pinout already does this, and is kept.** Each ribbon is
+a single hop out and a single hop back: the key board's serial input on pin 6
+and its serial output on pin 8, with a ground either side of both. The old
+design used pin 6 for a pass-through and pin 8 for the output; the pin
+assignments are the same, only pin 6's job got simpler.
 
-### What this board still owes the chain
+**No serial-input link is needed on any board.** The four-board design had a
+solder link on every cluster board to choose where `SER` came from, because
+the chain-end board was different ([`notes.md`](notes.md)). Now each key board
+has one connector and its `SER` is **always** pin 6, whatever drives pin 6 on
+the main board. Both key boards are identical in the chain;
+the difference between the right-hand and left-hand hop is two traces on the
+main board, which is one board with one layout anyway.
 
-**1. The 3V3 rail, and it is a bigger load than it was** `[calc]`. The pull-ups
-went 10 kΩ → 2.2 kΩ when the register moved back beside its switch `[repo]
-bom.csv`:
+**The chain order no longer costs anything to follow.** Every key board's hop
+is its own ribbon and back, so any order of the four devices uses the same two
+ribbons and the same four connectors. The earlier proposal to swap `left_thumb`
+and `left_hand` to save a body-thickness crossing has nothing left to save,
+and `key-layout.yaml`'s order stands.
+
+### The main-board end
+
+```
+  from the MCU                  J-CHAIN, main board, BOTH ribbons
+  (MCU board pins)              (12-way 1.0 mm FFC ZIF)
+
+   IO38  ──[R-CHAIN-SER 100R]──┬──► 2 SCK    both ribbons, and RT/LT CLK
+   IO7   ──[R-CHAIN-SER 100R]──┼──► 4 SH/LD  both ribbons, and RT/LT SH/LD
+   IO33  ──[R-CHAIN-SER 100R]──┼──► 6 SER    LEFT_HAND ribbon only
+                               │     (right_hand ribbon: 6 = LT's QH)
+                     ┌─────────┘
+              [R-SER-TERM 10k] to 3V3 on the left_hand ribbon's pin 6
+
+   IO40  ◄───────────────────────── RT's QH  (a trace; no connector)
+                                     8 QH    right_hand ribbon: RT's SER
+                                             left_hand ribbon:  LT's SER
+
+   3V3   ───[F-CHAIN 100mA polyfuse]────► 10 3V3  both ribbons, and RT/LT
+   GND   ─────────────────────────────►  1 3 5 7 9  both ribbons
+                                         11 12  spare
+
+   [U-TVS-CHAIN SP0504BAHTG] on SCK, SH/LD and the chain-end SER, to GND_CHAIN;
+   its fourth channel is spare.
+```
+
+### The key-board end
+
+```
+   J-CHAIN, key board              74HC165 on this key board
+   (conductor numbers; see
+    the ribbon, below)
+   conductor 2  SCK   ─────────────►  CLK
+   conductor 4  SH/LD ─────────────►  SH/LD
+   conductor 6  SER   ─────────────►  SER (pin 10)
+   conductor 8  QH    ◄─────────────  QH  (pin 9)
+   conductor 10 3V3   ─────────────►  VCC, pull-ups, marker straps
+   conductors 1 3 5 7 9  GND
+   conductors 11 12      spare, unconnected
+
+   No link, no pull-up, no choice: both key boards are this drawing.
+```
+
+---
+
+## The ribbon — contact side, connector type and pin numbering
+
+The geometry is in `mechanical/DESIGN.md` and the model: the key board's
+connector is on its **underside**, the main board's on its **top**, both
+**side-entry, taking the ribbon from the same side** (toward the side wall),
+and the ribbon joins them in one **180° C** `[repo]`. That fixes two things
+about the parts, and neither needs a datasheet.
+
+**1. Contact side: use the same connector at all four positions, and a
+same-side-contact cable.** `[calc]`, from the geometry alone. Put the main
+board's connector with its contacts facing **down** (toward its board —
+"bottom contact"), so the ribbon enters with its conductors facing down. Going
+round a 180° bend turns the ribbon over: the face that looked down now looks
+**up** — toward the key board, which is above it. The key board's connector is
+the same part mounted upside down, so its contacts face **up**, toward the key
+board. The conductors meet the contacts at both ends, on **the same face of the
+ribbon**. That is a same-side cable. (Start from top-contact instead and every
+"down" and "up" swaps — same answer.) The other combination that works is an
+opposite-side cable with **one** top-contact and **one** bottom-contact
+connector per ribbon: two parts to stock and two to get wrong, for nothing.
+
+**2. Pin numbering: the key board's connector reads the ribbon backwards.**
+`[calc]`. The bend turns the ribbon over about an axis along the body, so each
+conductor keeps its place along the body. The key board's connector is the main
+board's part turned upside down with its entry still toward the side wall —
+which is a half-turn about the axis *across* the body, and that reverses its
+row of pins along the body. So:
+
+```
+   conductor k   =   main-board J-CHAIN pin k   =   key-board J-CHAIN pin 13 − k
+
+   k:        1    2    3    4    5    6    7    8    9   10   11   12
+   signal:  GND  SCK  GND SH/LD GND  SER  GND  QH   GND  3V3  sp   sp
+   key pin: 12   11   10    9    8    7    6    5    4    3    2    1
+```
+
+**Lay the key boards' footprint out to the bottom row, never to the main
+board's numbers.** Get it wrong and pin 10's 3V3 lands on the key board's
+ground. This holds for any part whose pins are numbered along its row, which is
+all of them, but **check it against the chosen part's pin-1 drawing** at M4 —
+it is derived here, not read.
+
+**Why this pinout survives a skewed insertion reasonably well, and where it
+does not.** A ZIF slot the width of the ribbon (`routing.ffc_w` in
+`config/body.yaml`) will not take it one full pitch off-centre, but a ribbon
+pushed in at an angle can bridge neighbours. Every signal has a ground on
+both sides, so a bridge takes a signal to ground rather than to another
+signal — except pin 10, whose neighbours are a ground and a spare. **A 3V3–GND
+bridge at pin 9/10 is the short this design can have**, and it is a service
+event: the ribbons are re-seated every time the lid goes back on. That is what
+`F-CHAIN` is now for (below).
+
+---
+
+## The chain-end serial input, and the self-test
+
+`R-SER-TERM` moves to the **main board**, on the `left_hand` ribbon's pin 6,
+on the connector side of `IO33`'s `R-CHAIN-SER`:
+
+```
+   IO33 ──[R-CHAIN-SER 100R]──┬──► left_hand ribbon pin 6 ──► LH register SER
+                              │
+                      [R-SER-TERM 10k]
+                              │
+                             3V3
+```
+
+**Decided: the main board, because that keeps the two key boards identical.**
+On a key board it would have to be fitted on one and not the other — a board
+variant, which is what the old solder link existed to avoid.
+
+It still does what it did. Undriven, it holds the chain-end input high — the
+tied-off case ADR 0001 specified. **Driven**, `IO33` wins through 100 Ω
+against 10 kΩ `[calc]`: `3.3 V × 100 / 10 100 = 33 mV` from the rail. So an
+end-to-end chain self-test — shift a known pattern in at `left_hand` and read
+it back at `right_thumb` with no keys pressed — is **a firmware choice, not a
+board choice**. It is worth more than it was: the pattern now crosses **both
+ribbons in both directions**, so it tells "a ribbon is out of its latch" from
+"one bit is stuck", which the static marker cannot. Fit the resistor; E4
+decides whether firmware uses it.
+
+---
+
+## What the three protection parts are for now
+
+All three were proposed against a 265 mm loom that ran beside the LED strip's
+12 V feed. That loom is gone (ADR 0016 moved the strip onto the main board;
+ADR 0017 put the thumbs there too), so each was re-derived against the chain
+as it now is. **None is decided here**; each says what decides it.
+
+**`R-CHAIN-SER` — still has a job, for a different reason.** `[calc]`, with two
+inputs `[from memory]`: an MCU output edge of ~2 ns, and ~6 ns/m on FR-4 and
+flat flex. A net behaves as a lump while its one-way delay is under about a
+sixth of the edge:
+
+```
+   2 ns / 6 = 0.33 ns    →    0.33 ns / (6 ns/m) = 56 mm
+```
+
+`SCK` and `SH/LD` are single nets that run the main board — its length is
+`mechanical/drc.echo` "main board (derived)", several times 56 mm — to two
+registers and two ribbons (each a few centimetres: `drc.echo` "ribbon arc
+length"). A fast edge sees that as a branched line, and a ring through the
+74HC165's threshold on `SCK` is a double clock that shifts the whole word. The
+100 Ω at the source slows the edge and damps the ring; it is not series
+termination, which ADR 0001 rejected for a line that drops on several loads.
+**Open, decided at E14**: scope `SCK` at the `left_hand` register on the real
+main board and ribbons. It is three 0805s either way.
+
+*(The registers' own `QH` edges are 74HC edges, several times slower
+`[from memory]`, and each hop is a ribbon plus part of the main board — the
+old "HC's slow edges keep it a lumped load" argument still covers them.)*
+
+**`U-TVS-CHAIN` — the exposure moved from play to service.** The ribbons never
+leave the body and sit under the grounded plate, so in play nothing reaches
+them. The contacts are handled when the ZIF latches are flipped to lift the
+lid, and a main-board `J-CHAIN` then exposes three MCU pins through their
+100 Ω — `SCK`, `SH/LD` and the chain-end `SER` — which is where the array is
+drawn and netted. The chain's `QH` into the MCU is `right_thumb`'s and reaches
+no connector. **Open, decided by the owner**: protect service by procedure
+(instrument off, a wrist strap) or by the part.
+
+**`F-CHAIN` — the short it covers is now at re-assembly.** It still keeps a
+short from browning out the MCU board's LDO, which is the instrument's only
+3V3 and the MCP3202's reference. What changed is where the short comes from:
+not a loom chafing inside a closed body, but a ribbon seated skewed at pin
+9/10 (above). Its drop is harmless for the reason the BOM row gives — the
+thresholds and the pull-ups share the rail. **Open, decided by**: fit it, or
+protect at the source.
+
+---
+
+## What the main board still owes the chain
+
+**The 3V3 rail, and it is a real load on the ADC's reference** `[calc]`:
 
 ```
 3.3 V / (2.2 kΩ + 100 Ω) = 1.43 mA per CLOSED key
 19 closed                = 27.3 mA, as a step, at play rate
-plus 4 × 74HC165 quiescent, negligible
 ```
 
-> **That current comes out of the dev board's 3V3 LDO, which is also the
-> MCP3202's voltage reference** — the part has no `VREF` pin, `VDD` *is* the
-> reference `[repo] R10 B4`. At a load regulation of ~0.3 % per 100 mA
-> `[from memory]`, 27.3 mA moves the reference **0.082 %, about 3.4 LSB**, in
-> step with how many keys are held.
->
-> 3.4 LSB against a playable breath span of ~1594 counts is 0.2 % — almost
-> certainly inaudible, and it is the *reference* moving, so it scales the
-> reading rather than offsetting it. **Recorded rather than fixed, because the
-> symptom of being wrong about it is "the breath reading moves when I press
-> keys", which gets blamed on firmware for a week.** The first draft costed
-> this at 5.9 mA and 0.7 LSB, against the old 10 kΩ. See *Still open*.
+Unchanged by this rework — the same pull-ups (`key-pullup-qty`) on the same
+rail. It lands on the MCP3202's reference and is accepted as a gain term; the
+argument is `carrier.md` §2's, and the numbers are
+[`key-switch-network`](../../cluster/key-switch-network/key-switch-network.md)'s.
 
-**2. A ground return per clocked signal** `[repo] 0001 fix 1` — the highest
-value item on ADR 0001's list, and now the *only* thing in the loom that can be
-corrupted. With the registers distributed, a disturbed key line no longer
-exists as a loom signal; what runs the body is four clocked lines whose blast
-radius is the whole 32-bit word, and a glitch on `SH/LD` reloads every register
-mid-shift `[repo] 0001`. **Six conductors is the signal count, not the
-conductor count.** Whether this connector is 6-way or 10-way is a decision this
-page cannot take alone — see *Still open*.
+**A ground return per clocked signal** `[repo] 0001 fix 1`, on the main board
+as on the ribbons: route `SCK` and `SH/LD` over unbroken ground, away from the
+strip's data and 12 V feed and the breath signal (ADR 0017's routing note).
 
-**3. `F-CHAIN`, or not.** The 3V3 conductor leaves this board, runs 265 mm
-through the body next to 12 V LED power, and comes back as nothing. A
-short on it browns out the dev board's LDO and takes the instrument down with
-no diagnosis. A 100 mA polyfuse or a 0603 fuse is two millimetres of board.
-**Proposed, not in the BOM.**
-
-### Why the old charge-sharing derivation is gone
-
-The first draft carried ADR 0001's `180 pC / 10 nF = 18 mV`, and a companion
-figure of **+4.5 V on the loom node** from `180 pC / 40 pF`. Both are dead, for
-two independent reasons, and neither should be reintroduced:
-
-- **The model was wrong.** ADR 0001 now records it: there is no 12 V edge (the
-  WS2815 rail is held by 470–1000 µF and its LED current is PWM'd at ~2 kHz),
-  `Q/C` is the wrong model because coupling is a *divider*, and a passive
-  divider cannot exceed the aggressor's own swing — so 4.5 V was 37 % above
-  the ceiling of its own mechanism. Corrected, an unfiltered wire sees
-  **1.36 V** `[repo] 0001`.
-- **The node no longer exists.** The key network sits on the cluster board, a
-  few millimetres from its switch. There is no loom conductor between the
-  switch and the register input for anything to couple into.
-
-**The key networks are still fitted** — see ADR 0001 for why (a floating CMOS
-input has no defined state, in a cavity that is breathed into for hours) — but
-they are a bounce filter and cheap insurance, not the thing that makes the
-topology safe, and they are not this board's parts.
-
-### The 32 bits, and where each decision now lives
+### The 32 bits, and which board each is on
 
 From `config/key-layout.yaml` `[repo]`:
 
-| Bits | Use | Whose board |
+| Device | Bits | Board |
 |---|---|---|
-| 19 | Fitted switches | **Cluster boards** — network + trace to the switch |
-| 2 | Reserved spare switches (octave up, octave down; hold/preset became RT4, 2026-09-26) | **Cluster boards** — network fitted, pad unloaded. **No cutouts** since 2026-09-26 (owner, ADR 0010): fitting one means recutting the thumb plate and oak bottom `[repo] 0010` |
-| 8 | Marker pattern | **Cluster boards** — hard-wired at the register input. Unretrofittable. **Decided 2026-09-21: 8, not 6** |
-| 3 | Genuinely free | **Cluster boards** — must be pulled `[repo] key-layout.yaml` |
-| **32** | | **None of them on this carrier** |
+| `right_thumb` | 0–7 | **Main board** |
+| `right_hand` | 8–15 | Key board, right-hand ribbon |
+| `left_thumb` | 16–23 | **Main board** |
+| `left_hand` | 24–31 | Key board, left-hand ribbon |
 
-**Which eight bits carry the marker, and their levels, was decided 2026-09-21**
-(`key-marker-and-bits.md`, `key-layout.yaml`). The mapping inside each device is
-still open, and
-it is now a cluster-board decision** — as is the `H`…`A`-to-switch mapping
-inside each device. Both still have to be settled before *those* boards are
-made, and firmware has to be told about both. They are off this page's critical
-path, not off the project's.
-
-**The option worth costing has got cheaper.** Giving the 3 free bits the full
-network too is now 15 passives spread across four boards that already carry
-21 sets, with no extra loom conductors at all — under the tail topology it also
-needed five more wires down the body. If "add a switch later" is worth
-anything, this is the moment it costs least.
-
----
-
-## From the cluster end — `cluster-boards.md` §3
-
-*Moved verbatim from
-[`cluster-boards.md`](../../cluster/cluster-boards.md) §3, 2026-09-21. "This
-page" throughout means that page as it stood before the move, and it keeps its
-`## §3` heading because four sibling pages cite it by number.*
-
-`J-CHAIN` is a 2×6 IDC boxed header on a 12-way ribbon, alternating ground,
-decided 2026-09-21 `[repo] 0001, bom.csv`:
-
-```
-   1 GND    2 SCK      3 GND    4 SH/LD    5 GND    6 SER
-   7 GND    8 QH       9 GND   10 3V3     11 spare 12 spare
-```
-
-Boxed and keyed at all eight positions, because a reversed connector puts 3V3
-onto the `QH` net.
-
-```
-   J-CHAIN-IN                                          J-CHAIN-OUT
-   (toward the carrier)                        (away, to the next board)
-
-    2 SCK   ─────────────┬──────────────────────────────► 2 SCK
-    4 SH/LD ─────────────┼──┬───────────────────────────► 4 SH/LD
-   10 3V3   ─────────────┼──┼──┬────────────────────────► 10 3V3
-   GND ×5   ─────────────┼──┼──┼──┬─────────────────────► GND ×5
-    6 SER   ─────────────┼──┼──┼──┼──┬──────────────────► 6 SER
-                         │  │  │  │  │
-                    ┌────▼──▼──▼──▼──┴─────┐
-                    │  74HC165             │
-                    │  CLK  SH/LD  VCC GND │
-                    │                      │
-    8 QH   ◄────────┤ QH (pin 9)           │
-                    │                      │        ┌──── 8 QH
-                    │  SER (pin 10) ◄──────┼──[LK-SER]
-                    └──────────────────────┘        └──── from pin 6 above
-                                                      ▲
-                          LK-SER: a 3-pad solder link.
-                          Position A (boards 1-3): SER comes from OUT pin 8,
-                            i.e. the next board's QH. Normal chaining.
-                          Position B (last board): SER comes from the IN pin 6
-                            passthrough, which reaches all the way back to the
-                            carrier.
-```
-
-**`SCK`, `SH/LD`, `3V3` and the five grounds are a straight bus** — IN to OUT,
-1:1, so a plain straight-through ribbon works between any two boards.
-
-**`QH` and `SER` are not a bus, and that is what forces two connectors.** Each
-board's `QH` goes *toward* the carrier on `IN` pin 8; the *next* board's `QH`
-arrives on `OUT` pin 8 and becomes this board's serial input. Pin 8 therefore
-carries a different net on each side of the board, which is why the chain is
-eight connectors across five boards rather than five `[repo] carrier.md §3`.
-
-### `LK-SER` and `R-SER-TERM` close the self-test question for free
-
-The carrier page raised whether the far device's serial input should be tied off
-(ADR 0001) or driven from the carrier, which would let firmware shift a known
-pattern through all 32 bits and distinguish *"the loom is broken"* from *"one
-bit is stuck"* — something the static marker cannot do `[repo] carrier.md §3`.
-
-**It does not have to be decided in copper.** Fit, on the last board only:
-
-```
-   IN pin 6 (SER passthrough) ──┬──[LK-SER position B]──► 74HC165 SER (pin 10)
-                                │
-                        [R-SER-TERM 10k]
-                                │
-                               3V3
-```
-
-`R-SER-TERM` holds the input high if nothing drives it, which is the tied-off
-case ADR 0001 specified. If firmware *does* drive `IO33`, the carrier's output
-wins through its 100 Ω series resistor against a 10 kΩ pull `[calc]` — a
-divider of 100/10100, so the driven level is within 33 mV of the rail. **The
-self-test becomes a firmware choice rather than a board choice**, at the cost of
-one resistor, and this page recommends fitting it and deciding later.
+The allocation within each device — switches, the two reserved spare-switch
+positions, the marker straps and the free bits — is
+[`key-marker-and-bits`](../../cluster/key-marker-and-bits/key-marker-and-bits.md)'s,
+and none of it moved.
 
 ---
 
 ## Still open
 
-- **The chain's hop map is not in any file a tool reads.** Eight connectors
-  and four ribbons — carrier 1, RT 2, RH 2, LT 2, LH 1 — with `SCK`, `SH/LD`,
-  `3V3` and the five grounds a straight bus across all of them, and `SER`/`QH`
-  point-to-point, changing meaning at every hop. That map is the paragraphs
-  above and nothing else. [`netlist.yaml`](netlist.yaml) places the carrier's
-  `J-CHAIN` and the parts around it; `LK-SER` and `R-SER-TERM` are not placed,
-  and `tools/check-netlist.py` prints `J-CHAIN 1/8` every run so the gap is a
-  number rather than a silence. **Decided by:** whether the four cluster
-  boards become four netlists or one with a hop table — the same question the
-  eight per-board register inputs raise.
-
-- **The chain TVS's return is drawn as `DIG_GND`, which is the module's net.**
-  In this corpus `DIG_GND` is the instrument-to-module digital return, and it
-  does not reach this board: `hardware/nets.yaml` gives it origin
-  `module/power-entry` and only the two SPI circuits reference it. The chain's
-  return here is the five alternating grounds, `GND_CHAIN`, which is the
-  carrier's `PWR_GND` pour arriving on `HDR-DEV`'s ground pins.
-  [`netlist.yaml`](netlist.yaml) nets `U-TVS-CHAIN`'s return to `GND_CHAIN`
-  on that reading. **Decided by:** the `dig-gnd-topology` figure, which is
-  disputed and owns exactly this question — so the label is flagged rather
-  than rewritten.
+- **The `J-CHAIN` part**, decided at M4 with the part: a 12-way 1.0 mm
+  side-entry ZIF that fits `boards.ffc_conn_h`, the same part at all four
+  positions, top- or bottom-contact either way. With it, the key board's
+  mirrored footprint numbering is confirmed against the part's own pin-1
+  drawing.
+- **The `FFC-CHAIN` length**, decided at M4: `drc.echo` "ribbon arc length"
+  plus the two insertion depths off the chosen connector's drawing, rounded up
+  to a stock length. Same-side contacts, per *The ribbon*.
+- **`R-CHAIN-SER`** (E14), **`U-TVS-CHAIN`** (owner) and **`F-CHAIN`**
+  (fit or protect at source) — above.
+- **The main board's hop inputs float with the lid off.** With a ribbon out,
+  `right_thumb`'s or `left_thumb`'s `SER` — the main-board end of that
+  ribbon's pin 8 — has nothing on it. It costs nothing in play (the lid is on)
+  and the markers show the missing board as a failed frame, not a wrong note.
+  **Decided by** whether the main board is ever run with the lid off at
+  bring-up for long enough to care; if so, a pull-up on each ribbon's pin 8 at
+  the main board.
