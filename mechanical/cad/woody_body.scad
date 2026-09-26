@@ -142,9 +142,17 @@ tail_req = max(max(tail_claims_rel) - top_last_rel, layout_matrix_centred ? matr
 // The tail is sized by its own contents (above) and is NOT one of the equal
 // bands since the matrix was centred in it (owner, 2026-09-26).
 band = layout_equal_bands ? max(mouth_req, layout_gap) : undef;
+// THE GAP BETWEEN THE HANDS MATCHES THE KEYS-TO-MATRIX GAP (owner, same
+// day): the clear space from the last left cap to the first right cap equals
+// the clear space from the last cap to the matrix window's near edge. The
+// matrix is centred in the tail, so that space is known before the right
+// hand is placed: (cap slot edge + tail) / 2 - half window - half cap.
+matrix_clear = (cap_edge_rel + tail_req) / 2 - openings_matrix_window / 2 - switch_keycap / 2;
+gap_c2c = layout_gap_matches_matrix ? max(layout_gap, matrix_clear + switch_keycap)
+        : layout_equal_bands ? band : layout_gap;
 x_lh0 = layout_equal_bands ? band : mouth_req;
 x_gap0 = x_lh0 + lh_run;
-x_rh0 = x_gap0 + (layout_equal_bands ? band : layout_gap);
+x_rh0 = x_gap0 + gap_c2c;
 x_tail0 = x_rh0 + rh_run;
 // -------------------------------------------------------------- keys ------
 function key_id(k) = k[0];
@@ -615,7 +623,13 @@ module drc_report() {
         str(tail_req, " mm after the last key"));
     mc = (top_last + cap_edge_rel + L) / 2 - matrix_xy[0];
     drc(abs(mc) < 0.01 || !layout_matrix_centred, "LED matrix centred between the last cap and the tail face", mc, "mm off centre");
-    if (layout_equal_bands)
+    if (layout_gap_matches_matrix)
+        drc(abs((x_rh0 - x_gap0 - switch_keycap) - (matrix_xy[0] - openings_matrix_window / 2 - top_last - switch_keycap / 2)) < 0.01
+            || gap_c2c == layout_gap,
+            "clear gap between the hands = clear gap from the last key to the matrix window",
+            [x_rh0 - x_gap0 - switch_keycap, matrix_xy[0] - openings_matrix_window / 2 - top_last - switch_keycap / 2],
+            str("mm cap edge to cap edge, and cap edge to window edge; ", gap_c2c, " centre to centre (minimum ", layout_gap, ")"));
+    if (layout_equal_bands && !layout_gap_matches_matrix)
         drc(undef, "equal bands (mouth = between hands)", band,
             str("mm each; set by the ", band == mouth_req ? "mouth end" : "minimum gap",
                 " - mouth needs ", mouth_req, ", gap minimum ", layout_gap, "; the tail is sized on its own"));

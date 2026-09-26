@@ -89,6 +89,13 @@ the plan drawing labels them (body end to first key centre, last left key to
 first right key). `layout.equal_bands` switches it; `layout.gap` is then only
 a minimum.
 
+**The gap between the hands matches the keys-to-matrix gap (owner, same
+date)** — the clear space from the last left cap to the first right cap equals
+the clear space from the last cap to the matrix window's near edge
+(`layout.gap_matches_matrix`). It overrides the equal bands for the gap, so
+the mouth end and the gap are no longer equal; `layout.gap` stays a minimum,
+for the U-bolt and thumb rest underneath. `drc.echo` prints both clear gaps.
+
 **The LED matrix is centred after the keys (owner, same date)** — midway
 between the last cap's slot edge and the tail face — and **only the tail
 grows for it** (`layout.matrix_centred`). The connector still has to fit

@@ -169,6 +169,10 @@ layout:
     value: true
     status: settled
     source: "owner, 2026-09-26: 'copy the same space above the left keys to between the hands and at the bottom'. Since the matrix was centred (same day) it equalizes the mouth end and the space between the hands only; the tail is sized by its own contents"
+  gap_matches_matrix:
+    value: true
+    status: settled
+    source: "owner, 2026-09-26: the gap between the key groups is the same as the gap from the last keys to the LED matrix - clear space, cap edge to cap edge and cap edge to window edge. Overrides equal_bands for the gap; equal_bands then only sets the mouth end, and gap stays a minimum"
   matrix_centred:
     value: true
     status: settled
