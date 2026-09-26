@@ -44,11 +44,14 @@ the DXF's own DIMENSION entities.
 - **The display is on the underside** (decided 2026-09-26), glass down in a
   through-cut in the oak bottom, recessed by `boards.display_recess`, still in
   the display band at the mouthpiece end.
-- **The U** is the oak bottom and two acrylic sides. **Each side is two
-  laminae**: the outer full height, the inner stopping at the lid. That is how
-  ADR 0009's rebate becomes two through-cuts instead of a routed step, which
-  the ADR's own rule ("if a part needs 3D machining, the design is wrong")
-  would not allow.
+- **The sides sit between the oak panels, in grooves** (decided 2026-09-26).
+  Oak top and bottom run the full width; each acrylic side is one sheet
+  standing in a groove along each panel's inner face, behind an oak lip
+  (`stack.side_inset`, `groove_depth`, `groove_clear`). Glued into the bottom
+  grooves, the U is still one sub-assembly; the top grooves locate the lid.
+  **The grooves are the one cut in the stack that is not a through-cut** — a
+  saw or router pass, exported on their own as `export/oak-grooves.dxf` so
+  the through-cut outlines stay clean. The plate sits between the sides.
 - **Thumb keys** mount upside down in a thumb plate on the oak bottom's inside
   face; the through-cut in the oak is the recess (ADR 0009). Each thumb
   cluster has its own plate.
@@ -93,7 +96,9 @@ decision, not a correction.
    already asks shared-versus-individual as an M2 question; the model says
    individual recesses need the arc spread further. The same rule catches
    placeholder fasteners landing on placeholder spares — move one.
-6. **The carrier and the LED strips.** the carrier at the BOM's assumed width
+6. **The carrier and the LED strips**, made worse by the grooves, whose oak
+   lips come off the interior width twice (*"interior width between the
+   acrylic sides"*). The carrier at the BOM's assumed width
    does not fit between strips in the side channels at the placeholder
    diffusion gap. *Rule: "carrier fits between the LED strips".*
 7. **The carrier runs under the right-hand cluster board** with little height
