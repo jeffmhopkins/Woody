@@ -46,7 +46,7 @@ ends_mouth_cap_t = 4.0;  // tbd; ADR 0009 end-cap table: acrylic, 'the material 
 ends_tail_cap_t = 6.0;  // tbd; ADR 0009 end-cap table: oak - so the oak top's stock
 ends_tube_hole_d = 6.0;  // tbd; ADR 0003: tube bore and OD are settled at E2
 layout_mouth_extra = 10.0;  // tbd; owner: 'a little extra near the mouth' - oak between the mouth cap's inside face and the first thing (the underside display, or the first cap if the display moves)
-layout_tail_clear = 3.0;  // tbd; clearance from the last key board, and from the carrier, to the etherCON body - the connector space the owner asked for is its depth plus this
+layout_tail_clear = 3.0;  // tbd; clearance from the last key board to the etherCON body - the connector space the owner asked for is its depth plus this
 layout_underside_clear = 3.0;  // tbd; clearance between the underside display and the first thumb recess, and from the last thumb recess to the tail cap
 layout_lh_gaps = [20.0, 20.0, 18.0, 0.0];  // nominal; [research] soprano recorder L1-L2-L3 21.0/22.3, D whistle 20/20; pad widths put touching fingers 15-22 apart (P5 F - P95 M). 18 to the little-finger keys (soprano R3-R4 18.0; 1.5 mm between MT165 caps). The final 0 is the side-by-side pair LH4 / LH5 (owner, 2026-09-26)
 layout_lh_offsets = [0.0, 0.0, 0.0, -9.0, 9.0];  // tbd; LH1-3 on the centreline; LH4 / LH5 the little finger's side-by-side pair, one cap pitch apart across the body, centred so both switch bodies stay inside the plate
@@ -72,9 +72,9 @@ boards_display_recess = 1.0;  // tbd; placeholder - glass face back from the bot
 boards_display_cut_clear = 1.5;  // nominal; [ds] the vendor STEP's glass and flex overhang the DXF board outline by 1.18 mm at the flex end (LILYGO-T-DISPLAY-S3-AMOLED-3D.stp, found by the clash check); cut clears that
 boards_matrix_board = 25.0;  // settled; [ds] datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-dimensions.jpg - 25.00 x 25.00, R1.0
 boards_matrix_emitters = 20.8;  // nominal; ADR 0014 / carrier.md - 8 x 2.6 mm pitch [from memory there]
-boards_smt_h = 2.3;  // nominal; tallest SMT part on the carrier: SMA/SMC diodes 2.29-2.62 [ds SMAJ15A p.3, SS34 p.3]; SOIC 1.75
+boards_smt_h = 2.3;  // nominal; tallest SMT part on the mezzanines: SMA/SMC diodes 2.29-2.62 [ds SMAJ15A p.3, SS34 p.3]; SOIC 1.75
 boards_cluster_smt_h = 1.8;  // nominal; cluster boards: SOIC-16 74HC165 1.75 [from memory, JEDEC MS-012] and 0805 passives
-boards_tall_l = 30.0;  // tbd; footprint of the carrier's tall parts together - 2 x R-78E5.0 SIP-3 (11.6 x 8.5 x 10.4 [ds R-78E5.0-1.0 p.4]), 2 x C-BUCK-IN 6.3 x 11, 2 x C-STRIP-BULK 8-10 x 12.5-20 [from memory]
+boards_tall_l = 15.0;  // tbd; footprint of ONE mezzanine's tall parts - an R-78E5.0 SIP-3 (11.6 x 8.5 x 10.4 [ds R-78E5.0-1.0 p.4]), its C-BUCK-IN 6.3 x 11 and a C-STRIP-BULK 8-10 x 12.5-20 [from memory]; one set per mezzanine, one regulator per dev board (ADR 0013)
 boards_tall_w = 20.0;  // tbd; as tall_l
 boards_tall_h = 12.5;  // tbd; the shortest the bulk electrolytics come, upright [from memory]; lay them down if this does not fit
 boards_sensor_body = 12.3;  // settled; [ds] MPXV4006DP p.7, case 1351-01 - body 11.81-12.32 square. SURFACE MOUNT (p.2 ordering table), not THT
@@ -83,16 +83,15 @@ boards_sensor_leads = 17.8;  // settled; [ds] MPXV4006DP p.7 - across the lead t
 boards_sensor_port_l = 6.6;  // settled; [ds] MPXV4006DP p.7 - ports protrude 6.10-6.60 from one face
 boards_sensor_port_d = 3.3;  // settled; [ds] MPXV4006DP p.7 - barb OD 2.79-3.30
 boards_sensor_port_z = [8.5, 1.4];  // nominal; port centres above the seating plane, upper (P1, marked side - p.6 Table 3) and lower; scaled off the p.7 drawing
-boards_idc_w = 9.1;  // settled; [ds] WR-BHD 61201621621 p.1 - boxed header width and height 9.10
-boards_idc_l6 = 22.9;  // settled; [ds] WR-BHD p.1 - L = pin span + 10.20 [calc]; 2x6 = 22.90 (matches hardware/bom.csv J-CHAIN)
-boards_idc_l5 = 20.36;  // settled; [ds] WR-BHD p.1 [calc] - 2x5 (J-DISP)
-boards_idc_mated_h = 15.6;  // nominal; [calc] mated header + TE 622 socket 13.10 (WR-BHD 9.10 + socket 10.5 - cavity 6.5; TE catalog 82012 p.52) + ~2.5 for the ribbon's bend
-boards_idc_tail = 3.0;  // settled; [ds] WR-BHD p.1 - pin tail below the board
-boards_stack_l = 15.24;  // tbd; 2 x 6 at 2.54 pitch, body length 6 x 2.54 [calc]
-boards_stack_w = 5.08;  // tbd; 2 rows at 2.54 pitch [calc]
+boards_stack_l = 12.0;  // tbd; 2 x 6 at 2.0 mm pitch, 6 x 2.0 [calc]. At 2.54 pitch (15.24) it cannot sit between two thumb switches' pins, 19 mm apart - found by the clash check
+boards_stack_w = 4.0;  // tbd; 2 rows at 2.0 mm pitch [calc]
 boards_disp_socket_h = 8.5;  // tbd; HDR-DEV female socket strips on the display board's back, 1 x 14 [from memory]
-boards_carrier_l = 100.0;  // tbd; hardware/bom.csv PCB-CARRIER '~100 x 45' - carrier.md: 'an assumption, not a fit'
-boards_carrier_w = 45.0;  // tbd; hardware/bom.csv PCB-CARRIER
+boards_mezz_clear = 0.5;  // tbd; clearance between a mezzanine and the parts on the boards above and below it, and to the LED strips [drawing convention]
+boards_standoff_d = 5.5;  // tbd; M3 hex standoff across flats, 5.5 [from memory]
+boards_zif_l = 19.0;  // tbd; 14-way 1.0 mm FFC connector, right-angle ZIF, length [from memory]; the link between the hands carries the chain, the display UART, +12 V and grounds
+boards_zif_disp_l = 15.0;  // tbd; 10-way 1.0 mm FFC connector for the display link (UART, power, grounds), length [from memory]
+boards_zif_w = 5.5;  // tbd; the same, depth from the board edge [from memory]
+boards_zif_h = 2.5;  // tbd; the same, height above the board [from memory]
 boards_matrix_harness_h = 2.5;  // tbd; below the Matrix: a pigtail soldered straight to its pads, wires bent flat [from memory]. Crimp housings on a pin header stood ~16.5 and put a row across the patch plug
 boards_matrix_under_h = 3.2;  // tbd; the Matrix's back-side parts (ESP32-S3, USB-C, IMU) below its board [from memory]
 boards_matrix_led_h = 1.0;  // tbd; WS2812B-0807 package height above the board [from memory]
@@ -122,7 +121,6 @@ ethercon_socket_toward_centre = false;  // tbd; with the 90-degree rotation the 
 ethercon_rj45_plug_l = 30.0;  // tbd; mated RJ45 plug + strain-relief boot, beyond the etherCON's rear face [from memory: plug ~21, boot ~10-15]
 ethercon_rj45_plug_w = 14.0;  // tbd; RJ45 boot envelope across [from memory]
 ethercon_rj45_plug_h = 12.0;  // tbd; RJ45 boot envelope, height [from memory]
-ethercon_rj45_drop = 10.0;  // tbd; length for the lead to turn down under the carrier after the boot [from memory: small-OD patch lead]
 ethercon_rotated = true;  // settled; [adr] ADR 0009 - 'Rotate it 90 degrees. Settled off the drawing.'
 ethercon_offset_y = -7.0;  // tbd; placeholder - off-centre so the USB-C slot fits beside it
 hardware_fastener_count = 6;  // settled; [adr] ADR 0009 - six M3 from the bottom into the plate
@@ -136,13 +134,12 @@ hardware_ubolt_drop = 18.0;  // tbd; placeholder - how far the loop stands below
 hardware_ubolt_nut_af = 8.0;  // tbd; hex nut across flats for the U-bolt legs - an M5 nut is 8 mm [from memory]; follows ubolt_rod_d
 hardware_ubolt_nut_h = 4.0;  // tbd; M5 nut height [from memory]
 hardware_backplate_t = 3.0;  // tbd; hardware/bom.csv MECH-BACKPLATE - aluminium or ply, thickness open
-routing_chain_stack = true;  // tbd; owner, 2026-09-26: 'push things tighter vertically with stacking headers' - thumb board to the key board above it by stacking header, not ribbon
 routing_tube_od = 5.0;  // tbd; breath tube outside diameter; ADR 0003 assumes a 3 mm bore, the wall is a guess [from memory]
 routing_trap_d = 10.0;  // tbd; dead-volume trap diameter; ADR 0003 caps the trap at 1 mL
 routing_trap_l = 12.0;  // tbd; trap length: 10 mm bore x 12 mm = 0.94 mL, inside ADR 0003's 1 mL [calc]
 routing_tube_lane = "left";  // tbd; which side channel the tube runs in (ADR 0009: 'in one of the side channels'); the looms take the other
-routing_loom_d = 15.24;  // settled; [calc] 12-way ribbon at 1.27 mm pitch (J-CHAIN, 2x6 IDC) = 12 x 1.27
-routing_disp_loom_d = 12.7;  // settled; [calc] 10-way ribbon at 1.27 mm pitch (J-DISP, 2x5 IDC) = 10 x 1.27
+routing_ffc_w = 15.0;  // tbd; 14-way FFC at 1.0 mm pitch, width [calc: 14 x 1.0 + margins]; the link between the mezzanines
+routing_ffc_disp_w = 11.0;  // tbd; 10-way FFC at 1.0 mm pitch, width [calc: 10 x 1.0 + margins]
 routing_ribbon_t = 1.0;  // nominal; flat ribbon thickness, 1.27 mm pitch PVC ribbon [from memory]
 routing_lane_z = 19.0;  // tbd; height of the side-channel runs, between the thumb boards below and the key boards above
 lighting_strip_w = 10.0;  // tbd; hardware/carrier/carrier.md '~10 mm' [from memory there]; the strip geometry row is BLOCKED in datasheets/MANIFEST.csv
@@ -151,5 +148,5 @@ lighting_strip_gap = 3.0;  // tbd; ADR 0009 / ADR 0014: the diffusion gap is a p
 
 // Every value above with status tbd - a placeholder, not a number any
 // document gives. The DRC report lists these so no result hides one.
-tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_mouth_extra", "layout_tail_clear", "layout_underside_clear", "layout_lh_offsets", "layout_rh_offsets", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_tall_l", "boards_tall_w", "boards_tall_h", "boards_stack_l", "boards_stack_w", "boards_disp_socket_h", "boards_carrier_l", "boards_carrier_w", "boards_matrix_harness_h", "boards_matrix_under_h", "boards_matrix_led_h", "openings_matrix_lip", "openings_matrix_acrylic_t", "openings_usb_slot_w", "openings_usb_slot_h", "openings_usb_plug_l", "openings_matrix_usb_to_tail", "openings_usb_ext_depth", "ethercon_socket_toward_centre", "ethercon_rj45_plug_l", "ethercon_rj45_plug_w", "ethercon_rj45_plug_h", "ethercon_rj45_drop", "ethercon_offset_y", "hardware_fastener_inset", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_ubolt_nut_af", "hardware_ubolt_nut_h", "hardware_backplate_t", "routing_chain_stack", "routing_tube_od", "routing_trap_d", "routing_trap_l", "routing_tube_lane", "routing_lane_z", "lighting_strip_w", "lighting_strip_t", "lighting_strip_gap"];
+tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_mouth_extra", "layout_tail_clear", "layout_underside_clear", "layout_lh_offsets", "layout_rh_offsets", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_tall_l", "boards_tall_w", "boards_tall_h", "boards_stack_l", "boards_stack_w", "boards_disp_socket_h", "boards_mezz_clear", "boards_standoff_d", "boards_zif_l", "boards_zif_disp_l", "boards_zif_w", "boards_zif_h", "boards_matrix_harness_h", "boards_matrix_under_h", "boards_matrix_led_h", "openings_matrix_lip", "openings_matrix_acrylic_t", "openings_usb_slot_w", "openings_usb_slot_h", "openings_usb_plug_l", "openings_matrix_usb_to_tail", "openings_usb_ext_depth", "ethercon_socket_toward_centre", "ethercon_rj45_plug_l", "ethercon_rj45_plug_w", "ethercon_rj45_plug_h", "ethercon_offset_y", "hardware_fastener_inset", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_ubolt_nut_af", "hardware_ubolt_nut_h", "hardware_backplate_t", "routing_tube_od", "routing_trap_d", "routing_trap_l", "routing_tube_lane", "routing_ffc_w", "routing_ffc_disp_w", "routing_lane_z", "lighting_strip_w", "lighting_strip_t", "lighting_strip_gap"];
 

@@ -31,7 +31,7 @@ show_keys = true;
 show_boards = true;
 show_hardware = true;
 show_strips = true;
-highlight = [];   // solid ids to draw bright yellow, the rest faded (fig_carrier.scad)
+highlight = [];   // solid ids to draw bright yellow, the rest faded (fig_mezzanines.scad)
 show_routing = true;
 ghost_shell = false;  // draw the shell translucent to see inside
 // Sections. "y" / "x" clip every part with a half-space (keep Y < cut, or
@@ -126,9 +126,8 @@ top_last_rel = max([for (i = [0 : len(layout_rh_gaps)]) cum(layout_rh_gaps, i)])
 rt_last_rel = max([for (i = [0 : count("right_thumb") - 1]) rt_rel(i)[0]]);
 // BEHIND THE MATRIX, IN ORDER (2026-09-26): the USB-C extension's plug off
 // the Matrix's tail edge (if that edge faces the tail), a clearance, the
-// patch lead's drop under the carrier, the RJ45 plug and boot mated into the
-// etherCON's rear socket, then the etherCON body to the tail face. The plugs
-// share one height band with the carrier and the Matrix, so they queue.
+// RJ45 plug and boot mated into the etherCON's rear socket, then the
+// etherCON body to the tail face.
 usb_behind = openings_matrix_usb_to_tail ? openings_usb_plug_l : 0;
 // STACKED (owner, 2026-09-26): the rear socket and the patch plug pass UNDER
 // the Matrix, so behind it only the etherCON's full-height housing queues.
@@ -219,7 +218,7 @@ matrix_near_x = top_last + plate_cutout / 2 + cluster_margin + layout_tail_clear
 function matrix_x(l) = layout_matrix_centred ? (top_last + cap_edge_rel + l) / 2 : matrix_near_x;
 
 // The tail underside after the right-thumb cluster: the service cover,
-// turned across the body, under the carrier - which ends before the etherCON.
+// turned across the body.
 service_xy = [rt_last + rc / 2 + layout_underside_clear + openings_service_cover_w / 2, W / 2];
 L = top_last + tail_req;
 x_in1 = L - ends_tail_cap_t;
@@ -474,10 +473,7 @@ module cluster_window_2d(ks) {
     offset(delta = (switch_cluster_pcb_w - plate_cutout) / 2) keys_2d(ks, plate_cutout, close = 3);
 }
 
-// Tail equipment. The Matrix hangs under the carrier (carrier.md section 7)
-// with its LEDs facing the window in the oak bottom.
-// The carrier's height is set by the Matrix standing on it: plate underside,
-// the gap under it, the LEDs, the board, the header, then the carrier.
+// Tail equipment: the Matrix, the etherCON and the USB-C extension.
 // TIGHT TO THE WINDOW (owner, 2026-09-26: "led matrix tighter to the
 // acrylic"). The key plate stops short of the Matrix, so the board's top
 // face sits against the oak top's underside and its LEDs stand up into the
@@ -493,14 +489,6 @@ usb_plug_x0 = openings_matrix_usb_to_tail ? matrix_xy[0] + boards_matrix_board /
 // patch plug runs down the side lane - and the LED strips stop short of that.
 tail_equip_x = min(usb_plug_x0, L - ends_tail_cap_t - ethercon_depth - ethercon_rj45_plug_l);
 tail_fastener_x = tail_equip_x - tail_fastener_back;
-// The carrier no longer carries the Matrix. It sits in the GAP between the
-// hands (nothing above it there, so its tall parts fit), extending under
-// both hands' ends at low height, just over the thumb boards' parts.
-carrier_z = z_floor + switch_pcb_below_seat + switch_pcb_t + boards_cluster_smt_h + boards_smt_h + 0.5;
-// The carrier ends where the etherCON body begins, less a clearance.
-// The carrier is centred on the gap between the hands (stacked, 2026-09-26).
-carrier_x0 = (x_gap0 + x_rh0) / 2 - boards_carrier_l / 2;
-carrier_x1 = carrier_x0 + boards_carrier_l;
 
 // Six fasteners up from the bottom into the plate, zig-zagging between the
 // long edges ~80 mm apart (ADR 0009).
@@ -609,14 +597,13 @@ module display_board() {
 }
 
 module tail_equipment() {
-    // Carrier, and the Matrix standing face up on it under the top window.
-    P(C_PCB, false, "carrier") translate([carrier_x0, W / 2 - boards_carrier_w / 2, carrier_z]) cube([boards_carrier_l, boards_carrier_w, switch_pcb_t]);
+    // The Matrix, face up under the top window.
     P([0.10, 0.10, 0.12], false, "Matrix board") translate([matrix_xy[0] - boards_matrix_board / 2, matrix_xy[1] - boards_matrix_board / 2, matrix_board_z])
         cube([boards_matrix_board, boards_matrix_board, switch_pcb_t]);
     P(C_LED, false, "Matrix LEDs") translate([matrix_xy[0] - boards_matrix_emitters / 2, matrix_xy[1] - boards_matrix_emitters / 2, matrix_board_z + switch_pcb_t])
         cube([boards_matrix_emitters, boards_matrix_emitters, boards_matrix_led_h]);
     // The Matrix's pigtail where it leaves the two pad rows, below the board;
-    // the wires run on to the carrier (not drawn - thin wires).
+    // the wires run on to the right mezzanine (not drawn - thin wires).
     for (i = [0, 1]) P([0.15, 0.15, 0.15], false, str("Matrix harness ", i + 1))
         translate([matrix_xy[0] - 12.7, matrix_xy[1] + (i == 0 ? -1 : 1) * 11.43 - 1.27, matrix_board_z - boards_matrix_harness_h])
             cube([25.4, 2.54, boards_matrix_harness_h]);   // rows 22.86 apart [ds]
@@ -678,8 +665,6 @@ module led_strips() {
 function lane_y(side, d) = side == "left" ? u_y0 + lighting_strip_gap + lighting_strip_t + 1 + d / 2
                                           : W - u_y0 - lighting_strip_gap - lighting_strip_t - 1 - d / 2;
 tube_y = lane_y(routing_tube_lane, routing_tube_od);
-loom_side = routing_tube_lane == "left" ? "right" : "left";
-loom_y = lane_y(loom_side, routing_ribbon_t);
 // A FLAT RIBBON through points: each segment is swept with the ribbon's
 // cross-section turned to suit its direction - lying FLAT along and across
 // the body, on edge only where it drops to a socket. Stood on edge along the
@@ -696,113 +681,162 @@ module ribbon(pts, w) {
 module run(pts, d) {
     for (i = [0 : len(pts) - 2]) hull() { translate(pts[i]) sphere(d = d, $fn = 16); translate(pts[i + 1]) sphere(d = d, $fn = 16); }
 }
-// The carrier fills the interior's width, so NOTHING runs beside it: every
-// lane ends at its mouth-end edge and climbs onto its top face.
-carrier_top = carrier_z + switch_pcb_t;
+// The display's two header-socket strips (LilyGO DXF), standing into the cavity.
+disp_sock_x0 = disp_c[0] + 35.433 - disp_board[0] / 2 - 17.78;
+disp_sock_x1 = disp_sock_x0 + 35.56;
+disp_sock_top = boards_display_recess + 6.6 + boards_disp_socket_h;
 top_z = z_plate_top - switch_pcb_below_seat - switch_pcb_t;     // top cluster boards' underside
 thumb_z = z_floor + switch_pcb_below_seat + switch_pcb_t;       // thumb boards' top face
 function mid_x(cl) = (min(xs(cluster_keys(cl))) + max(xs(cluster_keys(cl)))) / 2;
 function sgn(side) = side == "right" ? 1 : -1;
+function xspan(cl) = [min(xs(cluster_keys(cl))), max(xs(cluster_keys(cl)))];
+
+// STACKING HEADERS (owner, 2026-09-26: "tighter vertically with stacking
+// headers"). Where the chain hops from a thumb board to the key board
+// straight above it (RT -> RH, LT -> LH), one 2 x 6 header runs from the
+// thumb board's top face to the key board's underside, where the two
+// overlap along the body, on the side away from the tube. It passes through
+// the mezzanine between them. It engages as the lid closes, so it must
+// blind-mate; its height is the board gap, not a stock size.
+stack_pairs = [["right_thumb", "right_hand"], ["left_thumb", "left_hand"]];
+// It lies along the body at the key board's edge (clear of the top
+// switches' pins, which are on the centreline), midway between two thumb
+// keys (clear of theirs), at the mid nearest the middle of where the two
+// boards overlap, on the side away from the tube.
+function thumb_mids(cl) = let(t = xs(cluster_keys(cl))) [for (i = [0 : len(t) - 2]) (t[i] + t[i + 1]) / 2];
+function stack_mid(pr) = let(a = xspan(pr[0]), b = xspan(pr[1]), m = (max(a[0], b[0]) + min(a[1], b[1])) / 2,
+                             mids = thumb_mids(pr[0]), d = [for (x = mids) abs(x - m)]) mids[search(min(d), d)[0]];
+function stack_c(pr) = [stack_mid(pr), W / 2 - sgn(routing_tube_lane) * (switch_cluster_pcb_w / 2 - boards_stack_w / 2 - 0.5)];
+stack_sz = [boards_stack_l, boards_stack_w];   // along the body
+function stack_of(cl) = [for (pr = stack_pairs) if (pr[0] == cl || pr[1] == cl) stack_c(pr)];
+
+// NO CARRIER (owner, 2026-09-26: "we don't need a carrier" - "standoffs off
+// the oak, and standoffs / attaching headers on PCBs"). Its circuits go on
+// two MEZZANINES, one in each gap between a thumb board and the key board
+// above it, threaded on that pair's stacking header and standing on
+// standoffs off the oak bottom. RIGHT: the breath sensor with its reference
+// and ADC, the umbilical, the SPI out to the module, and the Matrix's
+// regulator. LEFT: the display's regulator, the display link and the
+// LED-strip drive - one regulator per dev board (ADR 0013), and the breath
+// sensor as far from the display's AMOLED as the mezzanines allow, because
+// it is the hottest thing in the instrument (ADR 0003). Each runs its key board's length
+// (the left one starts past the display) and the width between the strips;
+// it is single-sided, parts up, and the key board's parts are its ceiling.
+// The chain runs through them: Matrix -> right mezzanine -> RT, RH through
+// the right stack -> the link between the hands -> left mezzanine -> LT, LH.
+mezz_z = thumb_z + boards_cluster_smt_h + boards_mezz_clear;          // underside
+mezz_top = mezz_z + switch_pcb_t;
+mezz_room = top_z - boards_cluster_smt_h - boards_mezz_clear - mezz_top;   // parts height above it
+mezz_w = u_w - 2 * (lighting_strip_gap + lighting_strip_t + boards_mezz_clear);
+function mezz_side(pr) = pr[1] == "left_hand" ? "left" : "right";
+function mezz_x(pr) = let(k = xspan(pr[1]), e = plate_cutout / 2 + cluster_margin)
+    [pr[1] == "left_hand" ? max(k[0] - e, disp_sock_x1 + boards_mezz_clear) : k[0] - e, k[1] + e];
+function mezz_y() = [W / 2 - mezz_w / 2, W / 2 + mezz_w / 2];
+mz_l = mezz_x(stack_pairs[1]);
+mz_r = mezz_x(stack_pairs[0]);
+// SUPPORTS (owner: "standoffs off the oak, and standoffs / attaching
+// headers on PCBs"): spacers down onto the thumb board, midway between two
+// of its keys (clear of their pins) wherever the stacking header is not;
+// and standoffs down to the oak at an end of the mezzanine that runs well
+// past the thumb board.
+// A spacer is placed only where it clears every thumb switch's footprint
+// (a right-thumb key off the centreline sits under the board's edge, so
+// there it moves to the centreline).
+ks33_stub = 2.6;   // half-width of the KS-33's pole and pins where they stand proud of a board [clash.txt, off the vendor STEP]
+function clear_of_thumbs(p, cl) = min([for (k = cluster_keys(cl)) max(abs(key_xy(k)[0] - p[0]), abs(key_xy(k)[1] - p[1]))])
+                                  >= ks33_stub + boards_standoff_d / 2 + 0.3;
+function spacers(pr) = let(y = mezz_y(), i = boards_standoff_d / 2 + 1)
+    [for (xx = thumb_mids(pr[0])) if (xx != stack_mid(pr))
+        let(edge = [for (yy = [y[0] + i, y[1] - i]) if (clear_of_thumbs([xx, yy], pr[0])) [xx, yy]])
+        each (len(edge) > 0 ? edge : clear_of_thumbs([xx, W / 2], pr[0]) ? [[xx, W / 2]] : [])];
+function standoffs(pr) = let(x = mezz_x(pr), t = xspan(pr[0]), y = mezz_y(), i = boards_standoff_d / 2 + 1, reach = rc / 2 + 16)
+    [for (xx = [x[0] + i, x[1] - i], yy = [y[0] + i, y[1] - i]) if (xx < t[0] - reach || xx > t[1] + reach) [xx, yy]];
 
 // THE BREATH SENSOR: MPXV4006DP case 1351-01, SURFACE MOUNT (datasheet p.2),
-// on the carrier's top face at its mouth-end edge, ports facing the mouth
-// and overhanging the edge (the lower barb reaches the board's surface, so
-// the ports must overhang it - p.7). Lead rows run along X, leads out to +-Y.
-sensor_c = [carrier_x0 + boards_sensor_body / 2, tube_y];      // port face flush with the carrier's edge
+// on the right mezzanine at its mouth-end edge, ports facing the mouth and
+// overhanging the edge (the lower barb reaches the board's surface, so the
+// ports must overhang it - p.7). Lead rows run along X, leads out to +-Y.
+sensor_c = [mz_r[0] + boards_sensor_body / 2,
+            routing_tube_lane == "left" ? mezz_y()[0] + boards_sensor_leads / 2 + 0.5 : mezz_y()[1] - boards_sensor_leads / 2 - 0.5];
 sensor_face_x = sensor_c[0] - boards_sensor_body / 2;
-p1_tip = [sensor_face_x - boards_sensor_port_l, sensor_c[1] - 2.1, carrier_top + boards_sensor_port_z[0]];
+p1_tip = [sensor_face_x - boards_sensor_port_l, sensor_c[1] - 2.1, mezz_top + boards_sensor_port_z[0]];
 module sensor_3d() {
     P([0.20, 0.20, 0.22], false, "breath sensor") union() {
-        translate([sensor_c[0] - boards_sensor_body / 2, sensor_c[1] - boards_sensor_body / 2, carrier_top])
+        translate([sensor_c[0] - boards_sensor_body / 2, sensor_c[1] - boards_sensor_body / 2, mezz_top])
             cube([boards_sensor_body, boards_sensor_body, boards_sensor_h]);
-        translate([sensor_c[0] - 5.1, sensor_c[1] - boards_sensor_leads / 2, carrier_top]) cube([10.2, boards_sensor_leads, 1.2]);
-        for (i = [0, 1]) translate([sensor_face_x + EPS, sensor_c[1] + (i == 0 ? -2.1 : 2.1), carrier_top + boards_sensor_port_z[i]])
+        translate([sensor_c[0] - 5.1, sensor_c[1] - boards_sensor_leads / 2, mezz_top]) cube([10.2, boards_sensor_leads, 1.2]);
+        for (i = [0, 1]) translate([sensor_face_x + EPS, sensor_c[1] + (i == 0 ? -2.1 : 2.1), mezz_top + boards_sensor_port_z[i]])
             rotate([0, -90, 0]) cylinder(d = boards_sensor_port_d, h = boards_sensor_port_l);
     }
 }
+// FFC connectors (right-angle ZIF), all on the side away from the tube: the
+// link between the hands - at the left mezzanine's tail end, and just behind
+// the sensor on the right one, its cable passing beside the sensor - and the
+// display link at the left one's mouth end.
+function zif_y(l) = W / 2 - sgn(routing_tube_lane) * (mezz_w / 2 - l / 2 - 0.3);
+zif_link = [[mz_l[1] - boards_zif_w / 2, zif_y(boards_zif_l)], [mz_r[0] + boards_sensor_body + 1 + boards_zif_w / 2, zif_y(boards_zif_l)]];
+zif_disp = [mz_l[0] + boards_zif_w / 2, zif_y(boards_zif_disp_l)];
+// Each mezzanine's tall parts - a regulator module and its bulk capacitors:
+// the right one's at its tail end, the left one's just behind the display
+// link, both clear of the stacking header.
+tall_c = [[mz_l[0] + boards_zif_w + 1 + boards_tall_l / 2, W / 2], [mz_r[1] - 2 - boards_tall_l / 2, W / 2]];
 
-// IDC BOXED HEADERS (WR-BHD) with their mated sockets and the ribbon's bend,
-// one solid each; the pin tails on the board's far side are a solid too,
-// because on a cluster board the far side is the key plate a few mm away.
-// dir = +1: stands up from a board face at z; -1: hangs down from it.
-module idc(name, c, l, z, dir, board_t, along_y = false) {
-    sz = along_y ? [boards_idc_w, l] : [l, boards_idc_w];
-    P([0.12, 0.12, 0.14], false, name) translate([c[0] - sz[0] / 2, c[1] - sz[1] / 2, dir > 0 ? z : z - boards_idc_mated_h])
-        cube([sz[0], sz[1], boards_idc_mated_h]);
-    span = l - 10.2 + 0.64;
-    tz = along_y ? [2.54 + 0.64, span] : [span, 2.54 + 0.64];
-    P([0.75, 0.65, 0.20], false, str(name, " tails")) translate([c[0] - tz[0] / 2, c[1] - tz[1] / 2,
-                                                                 dir > 0 ? z - board_t - boards_idc_tail : z + board_t])
-        cube([tz[0], tz[1], boards_idc_tail]);
+module mezzanines_3d() {
+    for (pr = stack_pairs) let(x = mezz_x(pr), y = mezz_y(), sd = mezz_side(pr)) {
+        P(C_PCB, false, str("mezzanine ", sd)) translate([x[0], y[0], mezz_z]) cube([x[1] - x[0], mezz_w, switch_pcb_t]);
+        for (i = [0 : len(standoffs(pr)) - 1]) if (len(standoffs(pr)) > 0) let(c = standoffs(pr)[i]) P(C_STEEL, false, str("standoff ", sd, " ", i + 1))
+            translate([c[0], c[1], z_floor]) cylinder(d = boards_standoff_d, h = mezz_z - z_floor, $fn = 6);
+        for (i = [0 : len(spacers(pr)) - 1]) if (len(spacers(pr)) > 0) let(c = spacers(pr)[i]) P(C_STEEL, false, str("spacer ", sd, " ", i + 1))
+            translate([c[0], c[1], thumb_z]) cylinder(d = boards_standoff_d, h = mezz_z - thumb_z, $fn = 6);
+        // SMT parts over the whole top face, less what stands on it.
+        P([0.35, 0.55, 0.40], false, str("parts mezzanine ", sd)) translate([0, 0, mezz_top]) linear_extrude(boards_smt_h) difference() {
+            translate([x[0] + 0.5, y[0] + 0.5]) square([x[1] - x[0] - 1, mezz_w - 1]);
+            translate(stack_c(pr)) square(stack_sz + [1, 1], center = true);
+            for (c = concat(standoffs(pr), spacers(pr))) translate(c) circle(d = boards_standoff_d + 0.5);
+            translate(tall_c[sd == "left" ? 0 : 1]) square([boards_tall_l + 1, boards_tall_w + 1], center = true);
+            if (sd == "left") {
+                translate(zif_link[0]) square([boards_zif_w + 1, boards_zif_l + 1], center = true);
+                translate(zif_disp) square([boards_zif_w + 1, boards_zif_disp_l + 1], center = true);
+            } else {
+                translate(sensor_c) square([boards_sensor_body + 1, boards_sensor_leads + 1], center = true);
+                translate(zif_link[1]) square([boards_zif_w + 1, boards_zif_l + 1], center = true);
+            }
+        }
+    }
+    for (i = [0, 1]) P([0.30, 0.30, 0.55], false, str("tall parts mezzanine ", i == 0 ? "left" : "right"))
+        translate([tall_c[i][0] - boards_tall_l / 2, tall_c[i][1] - boards_tall_w / 2, mezz_top])
+            cube([boards_tall_l, boards_tall_w, boards_tall_h]);
+    for (z = [["link left", zif_link[0], boards_zif_l], ["link right", zif_link[1], boards_zif_l], ["display link", zif_disp, boards_zif_disp_l]])
+        P([0.85, 0.85, 0.80], false, str("ZIF ", z[0])) translate([z[1][0] - boards_zif_w / 2, z[1][1] - z[2] / 2, mezz_top])
+            cube([boards_zif_w, z[2], boards_zif_h]);
 }
-// Where each board's headers go: at the board's middle, on its edge nearest
-// the loom lane. The chain runs carrier -> RT -> RH -> LT -> LH, so each
-// board but the last has an IN and an OUT (config/key-layout.yaml chain).
-chain = ["right_thumb", "right_hand", "left_thumb", "left_hand"];
-function hdr_y(cl) = W / 2 + sgn(loom_side) * (switch_cluster_pcb_w / 2 - boards_idc_w / 2 - 0.5);
-function hdrs_ribbon(cl) = cl == "left_hand" ? [[mid_x(cl), hdr_y(cl)]]
-                  : [[mid_x(cl) - boards_idc_l6 / 2 - 1, hdr_y(cl)], [mid_x(cl) + boards_idc_l6 / 2 + 1, hdr_y(cl)]];
-// STACKED (routing.chain_stack): the thumb -> key-board hops plug straight
-// through, where the two boards overlap along the body, on the side away from
-// the ribbon lane. Each board then keeps one ribbon header at its far end
-// from the stack - RT's IN from the carrier, RH's OUT and LT's IN for the hop
-// between the hands - and LH needs none.
-stack_pairs = [["right_thumb", "right_hand"], ["left_thumb", "left_hand"]];
-function xspan(cl) = [min(xs(cluster_keys(cl))), max(xs(cluster_keys(cl)))];
-function stack_c(pr) = let(a = xspan(pr[0]), b = xspan(pr[1]))
-    [(max(a[0], b[0]) + min(a[1], b[1])) / 2, W / 2 - sgn(loom_side) * (switch_cluster_pcb_w / 2 - boards_stack_w / 2 - 0.5)];
-function stack_of(cl) = [for (pr = stack_pairs) if (pr[0] == cl || pr[1] == cl) stack_c(pr)];
-function hdrs(cl) = !routing_chain_stack ? hdrs_ribbon(cl)
-                  : cl == "left_hand" ? []
-                  : [[stack_of(cl)[0][0] < mid_x(cl) ? mid_x(cl) + boards_idc_l6 / 2 + 1 : mid_x(cl) - boards_idc_l6 / 2 - 1, hdr_y(cl)]];
-function is_top(cl) = cl == "left_hand" || cl == "right_hand";
-function hdr_end_z(cl) = is_top(cl) ? top_z - boards_idc_mated_h : thumb_z + boards_idc_mated_h;
-// Carrier top, from its mouth edge (a placeholder layout, M4's to make):
-// the sensor on the tube's side; J-DISP beside it, turned across the body so
-// its ribbon leaves straight off the mouth edge; the tall parts; then J-CHAIN
-// on the loom side, inboard enough for its ribbon to leave beside it.
-carrier_hdr = [[carrier_x0 + boards_sensor_body + 4 + boards_tall_l + 4 + boards_idc_l6 / 2,
-                W / 2 + sgn(loom_side) * (boards_carrier_w / 2 - boards_idc_w / 2 - routing_loom_d - 2)],
-               [carrier_x0 + 1 + boards_idc_w / 2,
-                sensor_c[1] - sgn(routing_tube_lane) * (boards_sensor_leads / 2 + 1 + boards_idc_l5 / 2)]];
+
 module headers_3d() {
-    for (cl = chain) if (len(hdrs(cl)) > 0) for (i = [0 : len(hdrs(cl)) - 1])
-        idc(str("J-CHAIN ", cl, " ", i + 1), hdrs(cl)[i], boards_idc_l6, is_top(cl) ? top_z : thumb_z - 0,
-            is_top(cl) ? -1 : 1, switch_pcb_t);
     // Stacking headers: one solid from the thumb board's top face to the key
-    // board's underside, named for the pair.
-    if (routing_chain_stack) for (pr = stack_pairs) let(c = stack_c(pr))
+    // board's underside, through the mezzanine, named for the pair.
+    for (pr = stack_pairs) let(c = stack_c(pr))
         P([0.12, 0.12, 0.14], false, str("J-STACK ", pr[0], " to ", pr[1]))
-            translate([c[0] - boards_stack_l / 2, c[1] - boards_stack_w / 2, thumb_z]) cube([boards_stack_l, boards_stack_w, top_z - thumb_z]);
-    idc("J-CHAIN carrier", carrier_hdr[0], boards_idc_l6, carrier_top, 1, switch_pcb_t);
-    idc("J-DISP carrier", carrier_hdr[1], boards_idc_l5, carrier_top, 1, switch_pcb_t, along_y = true);
+            translate([c[0] - stack_sz[0] / 2, c[1] - stack_sz[1] / 2, thumb_z]) cube([stack_sz[0], stack_sz[1], top_z - thumb_z]);
 }
 
 // PARTS ON THE BOARDS, as envelopes. Cluster boards: a component layer on
 // the cavity side (the plate side cannot take a SOIC - ks33-geometry.md).
-// Carrier: SMT underneath, and its tall parts (bucks, electrolytics) as one
-// block on top, between the sensor and the Matrix. The Matrix: its back-side
-// parts. The display board: its two header-socket strips, standing up.
-tall_c = [carrier_x0 + boards_sensor_body + 4 + boards_tall_l / 2, W / 2];
+// The Matrix: its back-side parts. The display board: its two header-socket
+// strips, standing up. The mezzanines' parts are with the mezzanines.
 module parts_3d() {
     for (cl = ["left_hand", "right_hand"])
         P([0.35, 0.55, 0.40], false, str("parts ", cl)) translate([0, 0, top_z - boards_cluster_smt_h])
             linear_extrude(boards_cluster_smt_h) difference() {
                 offset(-0.5) cluster_window_2d(cluster_keys(cl));
-                for (h = hdrs(cl)) translate(h) square([boards_idc_l6 + 1, boards_idc_w + 1], center = true);
-                if (routing_chain_stack) for (h = stack_of(cl)) translate(h) square([boards_stack_l + 1, boards_stack_w + 1], center = true);
+                for (h = stack_of(cl)) translate(h) square(stack_sz + [1, 1], center = true);
             }
     for (cl = ["left_thumb", "right_thumb"])
         P([0.35, 0.55, 0.40], false, str("parts ", cl)) translate([0, 0, thumb_z])
             linear_extrude(boards_cluster_smt_h) difference() {
                 offset(-3) thumb_outline_2d(cl);
-                for (h = hdrs(cl)) translate(h) square([boards_idc_l6 + 1, boards_idc_w + 1], center = true);
-                if (routing_chain_stack) for (h = stack_of(cl)) translate(h) square([boards_stack_l + 1, boards_stack_w + 1], center = true);
+                for (h = stack_of(cl)) translate(h) square(stack_sz + [1, 1], center = true);
+                for (pr = stack_pairs) if (pr[0] == cl) for (c = spacers(pr)) translate(c) circle(d = boards_standoff_d + 1);
             }
-    P([0.35, 0.55, 0.40], false, "parts carrier underside") translate([carrier_x0, W / 2 - boards_carrier_w / 2, carrier_z - boards_smt_h])
-        cube([boards_carrier_l, boards_carrier_w, boards_smt_h]);
-    P([0.30, 0.30, 0.55], false, "carrier tall parts") translate([tall_c[0] - boards_tall_l / 2, tall_c[1] - boards_tall_w / 2, carrier_top])
-        cube([boards_tall_l, boards_tall_w, boards_tall_h]);
     P([0.20, 0.20, 0.22], false, "Matrix underside parts") translate([matrix_xy[0] - 9.5, matrix_xy[1] - 9.5, matrix_board_z - boards_matrix_under_h])
         cube([19, 19, boards_matrix_under_h]);
     // Display board frame (LilyGO DXF): rows at x = 1.289 / 24.149, centred
@@ -814,43 +848,36 @@ module parts_3d() {
 
 module routing_3d() {
     trap_y = u_y0 + lighting_strip_gap + lighting_strip_t + 1 + routing_trap_d / 2;
-    trap_x0 = carrier_x0 - boards_sensor_port_l - 4 - routing_trap_l;   // clear of the sensor's barbs
-    over = carrier_top + boards_idc_mated_h + 1;          // height the runs cross onto the carrier at
+    // The trap sits over the display's socket strips, ending before the left
+    // mezzanine and the left-hand key board (the two leave it no height); from it the tube runs down the tube lane over the left
+    // mezzanine's parts, across the gap, onto the sensor on the right one.
+    trap_x0 = min(mz_l[0], xspan("left_hand")[0] - plate_cutout / 2 - cluster_margin) - boards_mezz_clear - routing_trap_l;
+    run_z = mezz_top + boards_smt_h + routing_tube_od / 2 + boards_mezz_clear;
+    // The trap rides over the display's socket strips.
+    trap_z = max(routing_lane_z, disp_sock_top + routing_trap_d / 2 + boards_mezz_clear);
     P([0.95, 0.60, 0.45], false, "breath tube") run([
         [0, tube_yz[0], tube_yz[1]], [x_in0 + 3, tube_yz[0], tube_yz[1]],
-        [x_in0 + 20, tube_y, routing_lane_z],
-        [trap_x0 - 8, tube_y, routing_lane_z], [trap_x0, trap_y, routing_lane_z]], routing_tube_od);
-    P([0.95, 0.60, 0.45], false, "breath trap") translate([trap_x0, trap_y, routing_lane_z]) rotate([0, 90, 0])
+        [x_in0 + 12, tube_y, trap_z],
+        [trap_x0 - 6, tube_y, trap_z], [trap_x0, trap_y, trap_z]], routing_tube_od);
+    P([0.95, 0.60, 0.45], false, "breath trap") translate([trap_x0, trap_y, trap_z]) rotate([0, 90, 0])
         cylinder(d = routing_trap_d, h = routing_trap_l);
     // Onto the sensor's P1 barb (the upper port, datasheet p.6 Table 3).
     P([0.95, 0.60, 0.45], false, "breath tube to sensor") run([
-        [trap_x0 + routing_trap_l, trap_y, routing_lane_z], [p1_tip[0] - 2, p1_tip[1], p1_tip[2]],
-        [p1_tip[0] + 2, p1_tip[1], p1_tip[2]]], routing_tube_od * 0.8);
-    // Both ribbons lie FLAT down the body's centreline, stacked - the
-    // display's at lane height, the key chain's just above - and fold off to
-    // each socket's side. Key chain in chain order (config/key-layout.yaml).
-    d = routing_loom_d;
-    dd = routing_disp_loom_d;
+        [trap_x0 + routing_trap_l, trap_y, trap_z], [mz_l[0] + 4, tube_y, run_z], [mz_l[1], tube_y, run_z],
+        [p1_tip[0] - 6, p1_tip[1], p1_tip[2]], [p1_tip[0] + 2, p1_tip[1], p1_tip[2]]], routing_tube_od * 0.8);
+    // FLAT FLEX: the link between the hands, straight across the gap from
+    // ZIF to ZIF; and the display link, from the left mezzanine's mouth end
+    // down onto the display's socket strips.
     t = routing_ribbon_t;
-    kz = routing_lane_z + t + 0.2;
-    ry = W / 2 + sgn(loom_side) * 2;                  // 2 mm off the centreline, clear of the trap
-    over_z = z_plate_bot - t / 2 - 0.3;               // crossing the carrier top, just under the plate
-    function side_pt(h, z) = [h[0], h[1] + sgn(loom_side) * (boards_idc_w / 2 + t / 2 + 0.2), z];
-    exit_z = min(carrier_top + boards_idc_mated_h - 3, z_plate_bot - d / 2 - 0.5);
-    carrier_exit = side_pt(carrier_hdr[0], exit_z);
-    P([0.30, 0.30, 0.75], false, "key-chain loom") union() {
-        ribbon([carrier_exit, [carrier_exit[0], carrier_exit[1], over_z], [carrier_exit[0], ry, over_z],
-                [carrier_x0 - 2, ry, over_z], [carrier_x0 - 20, ry, kz],
-                [min([for (cl = chain) for (h = hdrs(cl)) h[0]]) - boards_idc_l6 / 2, ry, kz]], d);
-        for (cl = chain) for (h = hdrs(cl)) let(ez = hdr_end_z(cl) + (is_top(cl) ? 3 : -3), sp = side_pt(h, ez))
-            ribbon([[h[0], ry, kz], [h[0], sp[1], kz], sp], d);
-    }
-    disp_exit = [carrier_hdr[1][0] - boards_idc_w / 2 - t / 2 - 0.2, carrier_hdr[1][1],
-                 min(carrier_top + boards_idc_mated_h - 3, z_plate_bot - dd / 2 - 0.5)];
-    P([0.30, 0.60, 0.30], false, "display loom") ribbon([
-        disp_exit, [disp_exit[0], disp_exit[1], routing_lane_z], [disp_exit[0] - 4, ry, routing_lane_z],
-        [disp_x1 + 4, ry, routing_lane_z],
-        [disp_c[0] + 6, ry, boards_display_recess + 6.6 + boards_disp_socket_h + t / 2]], dd);
+    lz = mezz_top + boards_zif_h / 2;
+    lz_over = mezz_top + max(boards_zif_h, boards_smt_h) + t / 2 + 0.2;
+    P([0.80, 0.60, 0.25], false, "FFC between the hands") ribbon([
+        [zif_link[0][0] + boards_zif_w / 2, zif_link[0][1], lz], [mz_r[0] - 3, zif_link[0][1], lz],
+        [mz_r[0] - 0.5, zif_link[1][1], lz_over], [zif_link[1][0] - boards_zif_w / 2, zif_link[1][1], lz_over]], routing_ffc_w);
+    P([0.80, 0.60, 0.25], false, "FFC to the display") ribbon([
+        // over the mezzanine's own parts, then down onto the display's sockets
+        [zif_disp[0] - boards_zif_w / 2, zif_disp[1], lz_over], [disp_sock_x1 + 3, zif_disp[1], lz_over],
+        [disp_sock_x1 + 1, zif_disp[1], disp_sock_top + t / 2 + 0.3], [disp_c[0] + 6, zif_disp[1], disp_sock_top + t / 2 + 0.3]], routing_ffc_disp_w);
 }
 
 module hardware_3d() {
@@ -882,7 +909,7 @@ module assembly() {
     if (show_boards) { cluster_boards(); display_board(); tail_equipment(); }
     if (show_strips) led_strips();
     if (show_routing) routing_3d();
-    if (show_boards) { sensor_3d(); headers_3d(); parts_3d(); }
+    if (show_boards) { sensor_3d(); headers_3d(); parts_3d(); mezzanines_3d(); }
     if (show_hardware) hardware_3d();
 }
 
@@ -1009,9 +1036,6 @@ module drc_report() {
     drc(cavity_h > 0, "cavity height", cavity_h, "mm between the key plate and the oak bottom");
     z_pole = z_plate_top - switch_pole_tip_below_seat;
     drc(undef, "top switch pole tip below the lid", z_lid_bot - z_pole, "mm into the cavity");
-    z_pcb_bot = z_plate_top - switch_pcb_below_seat - switch_pcb_t;
-    drc(carrier_z + switch_pcb_t < z_pcb_bot, "carrier clears the top cluster boards", z_pcb_bot - carrier_z - switch_pcb_t,
-        "mm between the carrier's top face and the cluster boards' underside, for components on both");
     dz_disp = boards_display_recess + 6.6;
     drc(undef, "display board height above the floor", dz_disp - z_floor,
         "mm it stands into the cavity (6.6 = the vendor STEP's full stack); keep the thumb plate and looms off it");
@@ -1020,19 +1044,21 @@ module drc_report() {
     th_pole = z_floor + switch_pole_tip_below_seat;
     drc(undef, "thumb switch pole tip height in the cavity", th_pole, "mm above the bottom face");
 
-    // Carrier
-    drc(boards_carrier_w <= u_w - 2 * (lighting_strip_gap + 1), "carrier fits between the LED strips",
-        u_w - 2 * (lighting_strip_gap + 1) - boards_carrier_w, "mm spare across");
-    drc(carrier_z + switch_pcb_t < z_lid_bot, "carrier under the lid", z_lid_bot - carrier_z - switch_pcb_t,
-        "mm of component height above the carrier");
-    rt_top = z_floor + switch_pole_tip_below_seat;
-    rt_in = max([for (k = cluster_keys("right_thumb")) key_xy(k)[0]]) > carrier_x0;
-    drc(!rt_in || carrier_z > rt_top, "carrier clears the right-thumb switch bodies", carrier_z - rt_top, "mm");
+    // Mezzanines (no carrier, 2026-09-26)
+    for (pr = stack_pairs) let(x = mezz_x(pr))
+        echo("DRC", "INFO", str("mezzanine ", mezz_side(pr), " (derived)"), [x[1] - x[0], mezz_w],
+             str("mm long x wide, at ", mezz_z, " mm up; the key board's run and the width between the strips"));
+    drc(mezz_room >= boards_smt_h, "mezzanine parts room under the key boards", mezz_room,
+        "mm from its top face to the key board's parts, less clearances - the height every mezzanine part must fit");
+    drc(boards_sensor_h <= mezz_room, "breath sensor fits on the right mezzanine", mezz_room - boards_sensor_h, "mm spare above it");
+    drc(boards_tall_h <= mezz_room, "tall parts fit on the mezzanines", mezz_room - boards_tall_h,
+        "mm spare - negative means the bulk capacitors lie down or go SMD polymer, and the bucks lie flat");
+    drc(boards_stack_l + 2 <= mz_r[1] - mz_r[0], "stacking header lands on the mezzanine", mz_r[1] - mz_r[0], "mm of board along the body");
+    echo("DRC", "INFO", "FFC link between the hands", zif_link[1][0] - zif_link[0][0],
+         "mm, ZIF centre to ZIF centre; buy it with a service loop so the lid opens");
 
-    echo("DRC", "INFO", "carrier height (derived)", carrier_z,
-         "mm = just over the thumb boards' parts, with its own underside parts; it sits in the gap between the hands");
-    mw = min([for (k = top_keys) sq_gap(key_xy(k), matrix_xy, (plate_cutout + openings_matrix_window) / 2)]);
-    drc(mw >= 3, "key plate web between the last key cutout and the matrix window", mw, "mm of aluminium");
+    mw = plate_x1 - (top_last + plate_cutout / 2);
+    drc(mw >= 3, "key plate beyond the last key cutout", mw, "mm of aluminium; the plate stops short of the Matrix");
     lip_t = oak_top_t - openings_matrix_acrylic_t;
     drc(lip_t >= 2, "oak lip under the frosted window", lip_t, str("mm thick, ", openings_matrix_lip, " mm wide; the acrylic sits flush on it"));
     rw = min([for (k = top_keys) sq_gap(key_xy(k), matrix_xy, (switch_keycap + 2 * stack_cap_clear + matrix_rebate) / 2)]);
@@ -1041,8 +1067,6 @@ module drc_report() {
         "mm - frosted acrylic this far above the LEDs softens the pixels; the owner chose it (2026-09-26)");
 
     // Tail face
-    ec_in = ec_panel_x - ethercon_depth;
-    drc(carrier_x1 < ec_in, "carrier clears the etherCON body", ec_in - carrier_x1, "mm along X");
     ec_lo = ec_c[1] - ec_env[1] / 2; ec_hi = ec_c[1] + ec_env[1] / 2;
     drc(ec_lo >= z_floor && ec_hi <= z_oak_top_bot, "etherCON body inside the cavity height",
         [ec_lo, ec_hi, z_floor, z_oak_top_bot], "body Z range vs cavity Z range at the tail, where the key plate has ended");

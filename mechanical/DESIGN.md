@@ -106,9 +106,19 @@ Three things can claim each end, and the largest wins:
   own (`export/oak-rebates.dxf`); the acrylic is `export/matrix-window.dxf`.
   `drc.echo` reports the lip and the LED-to-window distance, which is what
   decides how soft the pixels look. In practice the matrix sets it.
-- **The carrier's height is derived** from what it must pass over: the thumb
-  boards' parts, then its own underside parts. It is centred on the gap
-  between the hands **as a placeholder** — where it goes is open (below).
+- **There is no carrier board** (owner, 2026-09-26: "we don't need a
+  carrier" — "standoffs off the oak, and standoffs / attaching headers on
+  PCBs"). Its circuits go on **two mezzanines**, one in each gap between a
+  thumb board and the key board above it, threaded on that pair's stacking
+  header, on spacers down to the thumb board and standoffs down to the oak
+  where a mezzanine runs past the thumb board. The **right** one carries the
+  breath sensor with its reference and ADC, the umbilical, the SPI out to the
+  module and the Matrix's regulator; the **left** one the display's
+  regulator, the display link and the LED-strip drive — one regulator per
+  dev board (ADR 0013), and the breath sensor as far from the display's
+  AMOLED as the mezzanines allow (ADR 0003). A flat-flex cable joins them
+  across the gap between the hands; another runs to the display. Their size
+  and the height above them are derived; `drc.echo` prints them.
 - **Between:** the key gaps, and the space between the hands.
 
 **Equal bands (owner, 2026-09-26).** The space before the left hand and the
@@ -166,14 +176,12 @@ decision, not a correction.
    already asks shared-versus-individual as an M2 question; the model says
    individual recesses need the arc spread further. The same rule catches
    placeholder fasteners landing on placeholder spares — move one.
-6. **The carrier and the LED strips**, made worse by the grooves, whose oak
-   lips come off the interior width twice (*"interior width between the
-   acrylic sides"*). The carrier at the BOM's assumed width
-   does not fit between strips in the side channels at the placeholder
-   diffusion gap. *Rule: "carrier fits between the LED strips".*
-7. **The carrier runs under the right-hand cluster board** with little height
-   between them for components on both. *Rule: "carrier clears the top
-   cluster boards".* It passes; it is the tightest pass in the report.
+6. **The mezzanines' tall parts do not fit upright.** The room above a
+   mezzanine is set by the key board's parts overhead; the regulator module
+   fits, the bulk capacitors do not. *Rule: "tall parts fit on the
+   mezzanines".* Lay them down or use SMD polymer capacitors.
+7. **The mezzanines follow the key boards' length**, so a key layout change
+   resizes them. The left one starts past the display's socket strips.
 8. **M3 into a 1.20 mm plate** is about two threads. The BOM already says
    "insert or tapped boss"; the model says plain tapping is not one of the
    options.
@@ -188,41 +196,27 @@ an envelope — many sizes are tbd in `config/body.yaml` — so a clean pair is
 only as good as those envelopes. Group the report's lines by these causes
 (read the counts there, not here):
 
-1. **IDC sockets faced each other across the cavity** where a key board sits
-   over a thumb board. **Now stacking headers** (owner, 2026-09-26: "tighter
-   vertically with stacking headers"; `routing.chain_stack`): the chain's
-   RT → RH and LT → LH hops plug straight through, one 2 × 6 header spanning
-   the gap, and those ribbons go away. The ribbon hops left — carrier → RT
-   and RH → LT — still stand a mated IDC off each board into the board
-   opposite; low-profile or right-angle headers are the lever. **The hardware
-   pages do not follow yet:** `hardware/interfaces/key-chain-loom/` and
-   J-CHAIN's quantity still describe a ribbon for every hop, and change when
-   the owner confirms this. The stacking header engages as the lid closes, so
-   it must blind-mate; its height is the board gap, not a stock size.
-2. **A through-hole boxed header does not fit on a key board at all.** The
-   board is `switch.cluster_pcb_w` wide under 14 mm switches; the header's
-   9.1 mm width lands under a switch, and its pin tails stand 3 mm off the
-   far face into a 2.2 mm gap to the key plate (or the thumb plate). SMT or
-   board-end headers, or a wider board.
-3. **The carrier has nowhere to go on a short body.** Since the tail was
-   stacked it is off the tail, centred on the gap between the hands — but at
-   its BOM size it is several times that gap, so it runs under both key
-   runs and over both thumb clusters, into their parts and headers; its
-   mated J-CHAIN and J-DISP reach the key plate. It also fills the interior
-   width, so it collides with both LED strips. A smaller carrier, a split
-   one, or boards that carry what it carries: an owner decision.
-4. **The looms and the breath sensor** were routed to the carrier's old
-   place under the Matrix; they follow wherever it goes.
-5. **The M3 stations** run through the LED strips, and the middle pair
-   through the carrier and the U-bolt backplate. The tail pair is clear.
-6. **The tail is clear.** The etherCON, its rear socket, the patch plug,
+1. **Stacking headers replace the ribbons to the thumb boards** (owner,
+   2026-09-26: "tighter vertically with stacking headers"). The chain's
+   RT → RH and LT → LH hops plug straight through the mezzanine between
+   them, one 2 × 6 header spanning the gap. At 2.54 mm pitch it cannot sit
+   between two thumb switches' pins, so it is 2.0 mm pitch, along the key
+   board's edge, midway between two thumb keys. It engages as the lid closes,
+   so it must blind-mate, and its height is the board gap, not a stock size.
+2. **No IDC headers remain.** The only cables are two flat-flex runs: the
+   link between the hands and the display link, in ZIF connectors on the
+   mezzanines. **The hardware pages do not follow yet:**
+   `hardware/interfaces/key-chain-loom/`, the J-CHAIN, J-DISP, WIRE-LOOM and
+   HDR-DEV rows, and the register's `chain-connectors` still describe IDC
+   ribbons and dev boards plugged into one carrier, and change when the owner
+   confirms this layout.
+3. **The mezzanines' tall parts** reach the key boards' parts overhead — the
+   capacitor-height finding above.
+4. **The M3 stations** run through the LED strips, and the middle pair
+   through the U-bolt backplate, which also overlaps the thumb plates.
+5. **The tail is clear.** The etherCON, its rear socket, the patch plug,
    the USB-C plug, receptacle and lead, the Matrix and the last fastener pair
    meet nothing, and the connector fits the cavity without cutting the oak.
-
-**The ribbons are standard flat ribbon, lying flat** down the body just off
-its centreline, stacked, folding off to each socket (owner asked for standard
-ribbon, 2026-09-26). Stood on edge, a 15 mm ribbon does not fit between the
-thumb boards' parts and the key boards' parts — the check showed that too.
 
 Found by the check and fixed as model bugs, not findings: the oak bottom's
 missing counterbores, thumb boards drawn with switch holes, the display cut
@@ -238,5 +232,5 @@ hold it. That is a BOM decision, not a CAD one, and is left open here.
 
 The thumb rest lip, gasket beads, plate stiffening (ADR 0002 — open, and it changes the lid),
 the diffuser standoff, and anything in the display band beyond the board. The
-carrier and cluster boards are rectangles, because their outlines are M3/M4
-outputs.
+mezzanines and cluster boards are rectangles, because their outlines are
+M3/M4 outputs.

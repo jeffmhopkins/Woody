@@ -51,18 +51,18 @@ renders:
     imgsize: [1600, 700]
     camera: [0, 28, 12, 50, 0, 340, 440]
     defines: {origin: "centre", show_lid: false, ghost_shell: true}
-  - name: carrier
-    title: The carrier picked out - from above, lid off, carrier in yellow, labelled
-    src: mechanical/cad/fig_carrier.scad
-    out: mechanical/renders/carrier.png
-    imgsize: [2000, 820]
+  - name: mezzanines
+    title: The mezzanines that replace the carrier - from above, lid off, in yellow, labelled
+    src: mechanical/cad/fig_mezzanines.scad
+    out: mechanical/renders/mezzanines.png
+    imgsize: [2000, 900]
     projection: o
-    camera: [0, 16, 0, 0, 0, 0, 400]
+    camera: [0, 10, 0, 0, 0, 0, 400]
     defines: {}
-  - name: carrier-3d
-    title: The carrier picked out - lid off, carrier in yellow
-    src: mechanical/cad/fig_carrier.scad
-    out: mechanical/renders/carrier-3d.png
+  - name: mezzanines-3d
+    title: The mezzanines that replace the carrier - lid off, in yellow
+    src: mechanical/cad/fig_mezzanines.scad
+    out: mechanical/renders/mezzanines-3d.png
     imgsize: [1600, 800]
     camera: [0, 28, 0, 38, 0, 340, 400]
     defines: {fig_view: "3d", show_caps: false, show_keys: false}

@@ -335,9 +335,9 @@ thumb keys and the U-bolt:
 > etherCON's rear socket and the patch plug pass **under** it, beside its
 > USB-C plug, so only the connector's housing queues behind it; the connector
 > stands on the floor, and the body is thick enough for that
-> (`body-thickness`). The carrier is no longer under the
-> Matrix — where it goes is open (`mechanical/DESIGN.md`, the interference
-> check). The paragraphs below are the original underside design.
+> (`body-thickness`). There is no carrier board any more: its circuits
+> are on two mezzanines between the thumb and key boards (ADR 0013). The
+> paragraphs below are the original underside design.
 
 **A window in the oak underside for the 8×8 matrix** on the real-time board
 (ADR 0007, ADR 0014). Roughly 22 mm square, facing the player's downward glance

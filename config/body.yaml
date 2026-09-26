@@ -114,7 +114,7 @@ layout:
   tail_clear:
     value: 3.0
     status: tbd
-    source: "clearance from the last key board, and from the carrier, to the etherCON body - the connector space the owner asked for is its depth plus this"
+    source: "clearance from the last key board to the etherCON body - the connector space the owner asked for is its depth plus this"
     decided_by: "M4, with the connector's real rear envelope"
   underside_clear:
     value: 3.0
@@ -276,21 +276,21 @@ boards:
   smt_h:
     value: 2.3
     status: nominal
-    source: "tallest SMT part on the carrier: SMA/SMC diodes 2.29-2.62 [ds SMAJ15A p.3, SS34 p.3]; SOIC 1.75"
+    source: "tallest SMT part on the mezzanines: SMA/SMC diodes 2.29-2.62 [ds SMAJ15A p.3, SS34 p.3]; SOIC 1.75"
   cluster_smt_h:
     value: 1.8
     status: nominal
     source: "cluster boards: SOIC-16 74HC165 1.75 [from memory, JEDEC MS-012] and 0805 passives"
   tall_l:
-    value: 30.0
+    value: 15.0
     status: tbd
-    source: "footprint of the carrier's tall parts together - 2 x R-78E5.0 SIP-3 (11.6 x 8.5 x 10.4 [ds R-78E5.0-1.0 p.4]), 2 x C-BUCK-IN 6.3 x 11, 2 x C-STRIP-BULK 8-10 x 12.5-20 [from memory]"
-    decided_by: "M4 carrier layout"
+    source: "footprint of ONE mezzanine's tall parts - an R-78E5.0 SIP-3 (11.6 x 8.5 x 10.4 [ds R-78E5.0-1.0 p.4]), its C-BUCK-IN 6.3 x 11 and a C-STRIP-BULK 8-10 x 12.5-20 [from memory]; one set per mezzanine, one regulator per dev board (ADR 0013)"
+    decided_by: "M4 mezzanine layout"
   tall_w:
     value: 20.0
     status: tbd
     source: "as tall_l"
-    decided_by: "M4 carrier layout"
+    decided_by: "M4 mezzanine layout"
   tall_h:
     value: 12.5
     status: tbd
@@ -320,64 +320,65 @@ boards:
     value: [8.5, 1.4]
     status: nominal
     source: "port centres above the seating plane, upper (P1, marked side - p.6 Table 3) and lower; scaled off the p.7 drawing"
-  idc_w:
-    value: 9.1
-    status: settled
-    source: "[ds] WR-BHD 61201621621 p.1 - boxed header width and height 9.10"
-  idc_l6:
-    value: 22.9
-    status: settled
-    source: "[ds] WR-BHD p.1 - L = pin span + 10.20 [calc]; 2x6 = 22.90 (matches hardware/bom.csv J-CHAIN)"
-  idc_l5:
-    value: 20.36
-    status: settled
-    source: "[ds] WR-BHD p.1 [calc] - 2x5 (J-DISP)"
-  idc_mated_h:
-    value: 15.6
-    status: nominal
-    source: "[calc] mated header + TE 622 socket 13.10 (WR-BHD 9.10 + socket 10.5 - cavity 6.5; TE catalog 82012 p.52) + ~2.5 for the ribbon's bend"
-  idc_tail:
-    value: 3.0
-    status: settled
-    source: "[ds] WR-BHD p.1 - pin tail below the board"
   # STACKING HEADERS (owner, 2026-09-26). Where the chain hops from a thumb
   # board to the key board straight above it (RT -> RH, LT -> LH), the two
-  # boards plug into each other: a 2 x 6 female header on one and long pins
-  # on the other, spanning the gap between them. The ribbons for those hops,
-  # and the IDC pair that faced each other across the cavity, go away.
+  # boards plug into each other through the mezzanine between them: a 2 x 6
+  # header spanning the gap.
   stack_l:
-    value: 15.24
+    value: 12.0
     status: tbd
-    source: "2 x 6 at 2.54 pitch, body length 6 x 2.54 [calc]"
-    decided_by: "M4, with the part - its height is the board gap the model reports, which is not a stock size"
+    source: "2 x 6 at 2.0 mm pitch, 6 x 2.0 [calc]. At 2.54 pitch (15.24) it cannot sit between two thumb switches' pins, 19 mm apart - found by the clash check"
+    decided_by: "M4, with the part - its height is the board gap, which is not a stock size"
   stack_w:
-    value: 5.08
+    value: 4.0
     status: tbd
-    source: "2 rows at 2.54 pitch [calc]"
+    source: "2 rows at 2.0 mm pitch [calc]"
     decided_by: "M4, with the part"
   disp_socket_h:
     value: 8.5
     status: tbd
     source: "HDR-DEV female socket strips on the display board's back, 1 x 14 [from memory]"
     decided_by: "M4, with the header bought"
-  carrier_l:
-    value: 100.0
+  # NO CARRIER (owner, 2026-09-26: "we don't need a carrier - standoffs and
+  # stacking headers"). Its circuits go on two MEZZANINE boards, one in each
+  # gap between a thumb board and the key board above it, threaded on that
+  # pair's stacking header and standing on standoffs off the oak bottom.
+  # Their length and width are derived (the key board's run, the width
+  # between the LED strips); drc.echo prints both and the height left above.
+  mezz_clear:
+    value: 0.5
     status: tbd
-    source: "hardware/bom.csv PCB-CARRIER '~100 x 45' - carrier.md: 'an assumption, not a fit'"
-    decided_by: "M4 - this model is where it gets fitted"
-  carrier_w:
-    value: 45.0
+    source: "clearance between a mezzanine and the parts on the boards above and below it, and to the LED strips [drawing convention]"
+    decided_by: "M4"
+  standoff_d:
+    value: 5.5
     status: tbd
-    source: "hardware/bom.csv PCB-CARRIER"
+    source: "M3 hex standoff across flats, 5.5 [from memory]"
+    decided_by: "M4, with the standoff bought"
+  zif_l:
+    value: 19.0
+    status: tbd
+    source: "14-way 1.0 mm FFC connector, right-angle ZIF, length [from memory]; the link between the hands carries the chain, the display UART, +12 V and grounds"
+    decided_by: "M4, with the connector bought - the link's conductor count sets it"
+  zif_disp_l:
+    value: 15.0
+    status: tbd
+    source: "10-way 1.0 mm FFC connector for the display link (UART, power, grounds), length [from memory]"
+    decided_by: "M4, with the connector bought"
+  zif_w:
+    value: 5.5
+    status: tbd
+    source: "the same, depth from the board edge [from memory]"
+    decided_by: "M4"
+  zif_h:
+    value: 2.5
+    status: tbd
+    source: "the same, height above the board [from memory]"
     decided_by: "M4"
   # THE LED MATRIX IS ON THE TOP FACE, just past the last key (owner,
-  # 2026-09-26), seen through a window in the oak top and the plate. The
-  # Matrix board sits face up on headers on the carrier, so the carrier's
-  # height follows from the stack under the plate - it is derived, not set.
-  # THE MATRIX HANGS FROM THE LID under its window (owner, 2026-09-26), not
-  # on the carrier: the connectors pass beneath it. Its two pin-header rows
-  # take crimp housings on a short harness to the carrier; the rows straddle
-  # the patch plug.
+  # 2026-09-26), face up against the oak top under its window, the key plate
+  # ending short of it; the connectors pass beneath it. A pigtail soldered to
+  # its pads runs to the right mezzanine.
   matrix_harness_h:
     value: 2.5
     status: tbd
@@ -438,7 +439,7 @@ openings:
     value: false
     status: tbd
     source: "false = the Matrix's USB-C edge faces the MOUTH, so its plug runs under the key boards instead of into the connector's housing; datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-dimensions.jpg shows the port overhanging one edge"
-    decided_by: "M4, board orientation on the carrier"
+    decided_by: "M4, the Matrix's orientation under its window"
   usb_ext_depth:
     value: 20.0
     status: tbd
@@ -519,8 +520,7 @@ ethercon:
   # THE NE8FDP IS A FEEDTHROUGH: its back is an RJ45 socket, so inside the
   # instrument a short patch lead plugs into it (hardware/bom.csv
   # J-UMBILICAL-CABLE). The mated plug and boot stand inboard of the body,
-  # and the lead then drops under the carrier. Modelled 2026-09-26 on the
-  # owner's question "is there enough space between etherCON and LED board?"
+  # and the lead runs on to the right mezzanine.
   rj45_plug_l:
     value: 30.0
     status: tbd
@@ -536,11 +536,6 @@ ethercon:
     status: tbd
     source: "RJ45 boot envelope, height [from memory]"
     decided_by: "M4"
-  rj45_drop:
-    value: 10.0
-    status: tbd
-    source: "length for the lead to turn down under the carrier after the boot [from memory: small-OD patch lead]"
-    decided_by: "M4, with the lead's OD and bend radius"
   rotated:
     value: true
     status: settled
@@ -617,11 +612,6 @@ hardware:
 # check). Where they run is a MODEL CHOICE, not a document's - each is a
 # lane the design must keep free, and the clash check reports what is in it.
 routing:
-  chain_stack:
-    value: true
-    status: tbd
-    source: "owner, 2026-09-26: 'push things tighter vertically with stacking headers' - thumb board to the key board above it by stacking header, not ribbon"
-    decided_by: "M4, with a blind-mating header that engages as the lid closes"
   tube_od:
     value: 5.0
     status: tbd
@@ -644,14 +634,16 @@ routing:
     decided_by: "M4"
   # STANDARD FLAT RIBBON (owner, 2026-09-26), lying FLAT down the centreline
   # (on edge it does not fit between the boards' part layers - clash check).
-  loom_d:
-    value: 15.24
-    status: settled
-    source: "[calc] 12-way ribbon at 1.27 mm pitch (J-CHAIN, 2x6 IDC) = 12 x 1.27"
-  disp_loom_d:
-    value: 12.7
-    status: settled
-    source: "[calc] 10-way ribbon at 1.27 mm pitch (J-DISP, 2x5 IDC) = 10 x 1.27"
+  ffc_w:
+    value: 15.0
+    status: tbd
+    source: "14-way FFC at 1.0 mm pitch, width [calc: 14 x 1.0 + margins]; the link between the mezzanines"
+    decided_by: "M4, with the conductor count"
+  ffc_disp_w:
+    value: 11.0
+    status: tbd
+    source: "10-way FFC at 1.0 mm pitch, width [calc: 10 x 1.0 + margins]"
+    decided_by: "M4, with the conductor count"
   ribbon_t:
     value: 1.0
     status: nominal
