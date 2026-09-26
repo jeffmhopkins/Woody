@@ -129,7 +129,8 @@ rt_last_rel = max([for (i = [0 : count("right_thumb") - 1]) rt_rel(i)[0]]);
 // etherCON's rear socket, then the etherCON body to the tail face. The plugs
 // share one height band with the carrier and the Matrix, so they queue.
 usb_behind = openings_matrix_usb_to_tail ? openings_usb_plug_l : 0;
-behind_matrix = usb_behind + layout_tail_clear + ethercon_rj45_drop + ethercon_rj45_plug_l + ethercon_depth;
+// ethercon.depth is measured from the PANEL's rear face, the tail cap's inside.
+behind_matrix = usb_behind + layout_tail_clear + ethercon_rj45_drop + ethercon_rj45_plug_l + ethercon_depth + ends_tail_cap_t + hardware_backplate_t;
 tail_claims_rel = [
     top_last_rel + plate_cutout / 2 + cluster_margin + layout_tail_clear + boards_matrix_board + behind_matrix,
     rt_last_rel + rc / 2 + layout_underside_clear + openings_service_cover_w + 2 * layout_tail_clear + ethercon_depth,
@@ -378,13 +379,21 @@ module mouth_cap_2d() {
 tube_yz = [W / 2, z_floor + cavity_h / 2];
 
 ec_c = [W / 2 + ethercon_offset_y, T / 2];                 // etherCON centre on the tail face
+// The NE8FDP's rear envelope, rotated with the connector: [across Y, height Z].
+ec_house = ethercon_rotated ? [ethercon_housing_h, ethercon_housing_w] : [ethercon_housing_w, ethercon_housing_h];
+ec_sock = ethercon_rotated ? [ethercon_socket_h, ethercon_socket_w] : [ethercon_socket_w, ethercon_socket_h];
+// The rear socket sits off the axis: 0.35 + half its height, on the side away from the latch.
+ec_sock_off_mag = 0.35 + ethercon_socket_h / 2;
+ec_sock_dir = (W / 2 - ec_c[0] >= 0 ? 1 : -1) * (ethercon_socket_toward_centre ? 1 : -1);
+ec_panel_x = L - ends_tail_cap_t - hardware_backplate_t;           // the connector's panel: the backplate's inner face
+ec_sock_c = ethercon_rotated ? ec_c + [ec_sock_dir * ec_sock_off_mag, 0] : ec_c - [0, ec_sock_off_mag];
 ec_fl = ethercon_rotated ? [ethercon_flange_h, ethercon_flange_w] : [ethercon_flange_w, ethercon_flange_h];
 ec_holes = [for (s = [-1, 1]) ec_c + s * (ethercon_rotated ? [ethercon_hole_dy, ethercon_hole_dx] : [ethercon_hole_dx, ethercon_hole_dy]) / 2];
 // The USB-C extension's receptacle (owner, 2026-09-26): beside the
 // etherCON, 2 mm of oak clear of its flange on the tail face, inside the
 // sides, at the cavity's mid height.
 usb_web_min = 2;   // drawing convention: oak between two tail-face cutouts
-usb_c = [min(ec_c[0] + ec_fl[0] / 2 + usb_web_min + openings_usb_slot_w / 2, W - u_y0 - openings_usb_slot_w / 2),
+usb_c = [min(max(ec_c[0] + ec_fl[0] / 2, ec_c[0] + ec_house[0] / 2) + usb_web_min + openings_usb_slot_w / 2, W - u_y0 - openings_usb_slot_w / 2),
          z_floor + cavity_h / 2];
 
 module tail_cap_2d() {
@@ -581,12 +590,20 @@ module tail_equipment() {
     // Tail backplate and the etherCON body behind it.
     P(C_ALU, false, "tail backplate") translate([x_in1 - hardware_backplate_t, 0, 0]) rotate([90, 0, 90])
         linear_extrude(hardware_backplate_t) tail_backplate_2d();
-    P(C_CONN, false, "etherCON") translate([L, ec_c[0], ec_c[1]]) rotate([0, -90, 0]) {
-        cylinder(d = ethercon_body_d, h = ethercon_depth);
-        translate([0, 0, -2]) linear_extrude(2) square([ec_fl[1], ec_fl[0]], center = true);
+    // The NE8FDP as drawn (NE8FDP.dxf): flange outside the tail cap, main
+    // housing behind the panel, rear RJ45 socket beyond it, off the axis.
+    // The panel it clamps to is the tail backplate (ADR 0009); what passes
+    // through the backplate and the tail cap is the bore, not the housing.
+    P(C_CONN, false, "etherCON") union() {
+        translate([L, ec_c[0] - ec_fl[0] / 2, ec_c[1] - ec_fl[1] / 2]) cube([2, ec_fl[0], ec_fl[1]]);
+        translate([ec_panel_x - EPS, ec_c[0], ec_c[1]]) rotate([0, 90, 0]) cylinder(d = ethercon_bore_d - 0.2, h = L - ec_panel_x + 2 * EPS);
+        translate([ec_panel_x - ethercon_housing_d, ec_c[0] - ec_house[0] / 2, ec_c[1] - ec_house[1] / 2])
+            cube([ethercon_housing_d, ec_house[0], ec_house[1]]);
+        translate([ec_panel_x - ethercon_depth, ec_sock_c[0] - ec_sock[0] / 2, ec_sock_c[1] - ec_sock[1] / 2])
+            cube([ethercon_depth - ethercon_housing_d + EPS, ec_sock[0], ec_sock[1]]);
     }
-    // The RJ45 patch lead's plug and boot, mated into the etherCON's rear.
-    P([0.55, 0.70, 0.85], false, "RJ45 plug") translate([L - ethercon_depth - ethercon_rj45_plug_l, ec_c[0] - ethercon_rj45_plug_w / 2, ec_c[1] - ethercon_rj45_plug_h / 2])
+    // The RJ45 patch lead's plug and boot, mated into that rear socket.
+    P([0.55, 0.70, 0.85], false, "RJ45 plug") translate([ec_panel_x - ethercon_depth - ethercon_rj45_plug_l, ec_sock_c[0] - ethercon_rj45_plug_w / 2, ec_sock_c[1] - ethercon_rj45_plug_h / 2])
         cube([ethercon_rj45_plug_l, ethercon_rj45_plug_w, ethercon_rj45_plug_h]);
     // The USB-C extension's plug in the Matrix's tail edge, under the board.
     if (openings_matrix_usb_to_tail)
@@ -596,10 +613,10 @@ module tail_equipment() {
     // run to the Matrix board's edge (drawn straight; it is a flexible lead).
     P(C_CONN, false, "USB-C receptacle") translate([x_in1 - openings_usb_ext_depth, usb_c[0] - openings_usb_slot_w / 2, usb_c[1] - openings_usb_slot_h / 2])
         cube([openings_usb_ext_depth, openings_usb_slot_w, openings_usb_slot_h]);
-    P([0.15, 0.15, 0.15], false, "USB-C lead") hull() {
-        translate([x_in1 - openings_usb_ext_depth, usb_c[0], usb_c[1]]) sphere(d = 4, $fn = 12);
-        translate([matrix_xy[0] + boards_matrix_board / 2 + usb_behind, matrix_xy[1], matrix_board_z - openings_usb_slot_h / 2]) sphere(d = 4, $fn = 12);
-    }
+    // Routed beside the etherCON, on the receptacle's side.
+    usb_from = [matrix_xy[0] + boards_matrix_board / 2 + usb_behind, matrix_xy[1], matrix_board_z - openings_usb_slot_h / 2];
+    P([0.15, 0.15, 0.15], false, "USB-C lead") run([usb_from, [usb_from[0] + 4, usb_c[0], usb_from[2]],
+        [x_in1 - openings_usb_ext_depth - 4, usb_c[0], usb_c[1]], [x_in1 - openings_usb_ext_depth, usb_c[0], usb_c[1]]], 4);
 }
 
 // ADR 0014 sized the strips at 420 mm for a 457 mm body. They now run the
@@ -608,9 +625,9 @@ strip_run_adr = 420;
 strip_l = min(strip_run_adr, x_in1 - x_in0 - 20);
 module led_strips() {
     for (s = [0, 1]) {
-        y = s == 0 ? u_y0 + lighting_strip_gap : W - u_y0 - lighting_strip_gap - 1;
+        y = s == 0 ? u_y0 + lighting_strip_gap : W - u_y0 - lighting_strip_gap - lighting_strip_t;
         P(C_LED, false, str("LED strip ", s == 0 ? "left" : "right")) translate([(L - strip_l) / 2, y, z_floor + cavity_h / 2 - lighting_strip_w / 2])
-            cube([strip_l, 1, lighting_strip_w]);
+            cube([strip_l, lighting_strip_t, lighting_strip_w]);
     }
 }
 
@@ -618,8 +635,10 @@ module led_strips() {
 // The tube and the looms run along the two side channels at routing_lane_z,
 // inside the LED strips, and drop to what they serve. Lanes are a model
 // choice (config/body.yaml routing): the clash check reports what is in them.
-function lane_y(side, d) = side == "left" ? u_y0 + lighting_strip_gap + 1 + 1 + d / 2
-                                          : W - u_y0 - lighting_strip_gap - 1 - 1 - d / 2;
+// The strip sits on the side's inside face; strip_gap is the diffusion gap
+// between them (ADR 0014), so the strip stands strip_gap in from the side.
+function lane_y(side, d) = side == "left" ? u_y0 + lighting_strip_gap + lighting_strip_t + 1 + d / 2
+                                          : W - u_y0 - lighting_strip_gap - lighting_strip_t - 1 - d / 2;
 tube_y = lane_y(routing_tube_lane, routing_tube_od);
 loom_side = routing_tube_lane == "left" ? "right" : "left";
 loom_y = lane_y(loom_side, routing_loom_d);
@@ -627,48 +646,137 @@ loom_y = lane_y(loom_side, routing_loom_d);
 module run(pts, d) {
     for (i = [0 : len(pts) - 2]) hull() { translate(pts[i]) sphere(d = d, $fn = 16); translate(pts[i + 1]) sphere(d = d, $fn = 16); }
 }
-// The sensor sits on the carrier's top face at its mouth end, on the tube's
-// side; the trap is just before it (ADR 0003). The carrier fills the
-// interior's width, so NOTHING runs beside it: every lane ends at its
-// mouth-end edge and climbs onto its top face.
-sensor_xy = [carrier_x0 + 8, tube_y];
+// The carrier fills the interior's width, so NOTHING runs beside it: every
+// lane ends at its mouth-end edge and climbs onto its top face.
 carrier_top = carrier_z + switch_pcb_t;
+top_z = z_plate_top - switch_pcb_below_seat - switch_pcb_t;     // top cluster boards' underside
+thumb_z = z_floor + switch_pcb_below_seat + switch_pcb_t;       // thumb boards' top face
+function mid_x(cl) = (min(xs(cluster_keys(cl))) + max(xs(cluster_keys(cl)))) / 2;
+function sgn(side) = side == "right" ? 1 : -1;
+
+// THE BREATH SENSOR: MPXV4006DP case 1351-01, SURFACE MOUNT (datasheet p.2),
+// on the carrier's top face at its mouth-end edge, ports facing the mouth
+// and overhanging the edge (the lower barb reaches the board's surface, so
+// the ports must overhang it - p.7). Lead rows run along X, leads out to +-Y.
+sensor_c = [carrier_x0 + boards_sensor_body / 2, tube_y];      // port face flush with the carrier's edge
+sensor_face_x = sensor_c[0] - boards_sensor_body / 2;
+p1_tip = [sensor_face_x - boards_sensor_port_l, sensor_c[1] - 2.1, carrier_top + boards_sensor_port_z[0]];
+module sensor_3d() {
+    P([0.20, 0.20, 0.22], false, "breath sensor") union() {
+        translate([sensor_c[0] - boards_sensor_body / 2, sensor_c[1] - boards_sensor_body / 2, carrier_top])
+            cube([boards_sensor_body, boards_sensor_body, boards_sensor_h]);
+        translate([sensor_c[0] - 5.1, sensor_c[1] - boards_sensor_leads / 2, carrier_top]) cube([10.2, boards_sensor_leads, 1.2]);
+        for (i = [0, 1]) translate([sensor_face_x + EPS, sensor_c[1] + (i == 0 ? -2.1 : 2.1), carrier_top + boards_sensor_port_z[i]])
+            rotate([0, -90, 0]) cylinder(d = boards_sensor_port_d, h = boards_sensor_port_l);
+    }
+}
+
+// IDC BOXED HEADERS (WR-BHD) with their mated sockets and the ribbon's bend,
+// one solid each; the pin tails on the board's far side are a solid too,
+// because on a cluster board the far side is the key plate a few mm away.
+// dir = +1: stands up from a board face at z; -1: hangs down from it.
+module idc(name, c, l, z, dir, board_t, along_y = false) {
+    sz = along_y ? [boards_idc_w, l] : [l, boards_idc_w];
+    P([0.12, 0.12, 0.14], false, name) translate([c[0] - sz[0] / 2, c[1] - sz[1] / 2, dir > 0 ? z : z - boards_idc_mated_h])
+        cube([sz[0], sz[1], boards_idc_mated_h]);
+    span = l - 10.2 + 0.64;
+    tz = along_y ? [2.54 + 0.64, span] : [span, 2.54 + 0.64];
+    P([0.75, 0.65, 0.20], false, str(name, " tails")) translate([c[0] - tz[0] / 2, c[1] - tz[1] / 2,
+                                                                 dir > 0 ? z - board_t - boards_idc_tail : z + board_t])
+        cube([tz[0], tz[1], boards_idc_tail]);
+}
+// Where each board's headers go: at the board's middle, on its edge nearest
+// the loom lane. The chain runs carrier -> RT -> RH -> LT -> LH, so each
+// board but the last has an IN and an OUT (config/key-layout.yaml chain).
+chain = ["right_thumb", "right_hand", "left_thumb", "left_hand"];
+function hdr_y(cl) = W / 2 + sgn(loom_side) * (switch_cluster_pcb_w / 2 - boards_idc_w / 2 - 0.5);
+function hdrs(cl) = cl == "left_hand" ? [[mid_x(cl), hdr_y(cl)]]
+                  : [[mid_x(cl) - boards_idc_l6 / 2 - 1, hdr_y(cl)], [mid_x(cl) + boards_idc_l6 / 2 + 1, hdr_y(cl)]];
+function is_top(cl) = cl == "left_hand" || cl == "right_hand";
+function hdr_end_z(cl) = is_top(cl) ? top_z - boards_idc_mated_h : thumb_z + boards_idc_mated_h;
+// Carrier top, from its mouth edge (a placeholder layout, M4's to make):
+// the sensor on the tube's side; J-DISP beside it, turned across the body so
+// its ribbon leaves straight off the mouth edge; the tall parts; then J-CHAIN
+// on the loom side, inboard enough for its ribbon to leave beside it.
+carrier_hdr = [[carrier_x0 + boards_sensor_body + 4 + boards_tall_l + 4 + boards_idc_l6 / 2,
+                W / 2 + sgn(loom_side) * (boards_carrier_w / 2 - boards_idc_w / 2 - routing_loom_d - 2)],
+               [carrier_x0 + 1 + boards_idc_w / 2,
+                sensor_c[1] - sgn(routing_tube_lane) * (boards_sensor_leads / 2 + 1 + boards_idc_l5 / 2)]];
+module headers_3d() {
+    for (cl = chain) for (i = [0 : len(hdrs(cl)) - 1])
+        idc(str("J-CHAIN ", cl, " ", i + 1), hdrs(cl)[i], boards_idc_l6, is_top(cl) ? top_z : thumb_z - 0,
+            is_top(cl) ? -1 : 1, switch_pcb_t);
+    idc("J-CHAIN carrier", carrier_hdr[0], boards_idc_l6, carrier_top, 1, switch_pcb_t);
+    idc("J-DISP carrier", carrier_hdr[1], boards_idc_l5, carrier_top, 1, switch_pcb_t, along_y = true);
+}
+
+// PARTS ON THE BOARDS, as envelopes. Cluster boards: a component layer on
+// the cavity side (the plate side cannot take a SOIC - ks33-geometry.md).
+// Carrier: SMT underneath, and its tall parts (bucks, electrolytics) as one
+// block on top, between the sensor and the Matrix. The Matrix: its back-side
+// parts. The display board: its two header-socket strips, standing up.
+tall_c = [carrier_x0 + boards_sensor_body + 4 + boards_tall_l / 2, W / 2];
+module parts_3d() {
+    for (cl = ["left_hand", "right_hand"])
+        P([0.35, 0.55, 0.40], false, str("parts ", cl)) translate([0, 0, top_z - boards_cluster_smt_h])
+            linear_extrude(boards_cluster_smt_h) difference() {
+                offset(-0.5) cluster_window_2d(cluster_keys(cl));
+                for (h = hdrs(cl)) translate(h) square([boards_idc_l6 + 1, boards_idc_w + 1], center = true);
+            }
+    for (cl = ["left_thumb", "right_thumb"])
+        P([0.35, 0.55, 0.40], false, str("parts ", cl)) translate([0, 0, thumb_z])
+            linear_extrude(boards_cluster_smt_h) difference() {
+                offset(-3) thumb_outline_2d(cl);
+                for (h = hdrs(cl)) translate(h) square([boards_idc_l6 + 1, boards_idc_w + 1], center = true);
+            }
+    P([0.35, 0.55, 0.40], false, "parts carrier underside") translate([carrier_x0, W / 2 - boards_carrier_w / 2, carrier_z - boards_smt_h])
+        cube([boards_carrier_l, boards_carrier_w, boards_smt_h]);
+    P([0.30, 0.30, 0.55], false, "carrier tall parts") translate([tall_c[0] - boards_tall_l / 2, tall_c[1] - boards_tall_w / 2, carrier_top])
+        cube([boards_tall_l, boards_tall_w, boards_tall_h]);
+    P([0.20, 0.20, 0.22], false, "Matrix underside parts") translate([matrix_xy[0] - 9.5, matrix_xy[1] - 9.5, matrix_board_z - boards_matrix_under_h])
+        cube([19, 19, boards_matrix_under_h]);
+    // Display board frame (LilyGO DXF): rows at x = 1.289 / 24.149, centred
+    // y = 35.433, 14 pins; mapped to the body as display_board() places it.
+    for (bx = [1.289, 24.149]) P([0.12, 0.12, 0.14], false, str("display socket ", bx < 10 ? 1 : 2))
+        translate([disp_c[0] + 35.433 - disp_board[0] / 2 - 17.78, disp_c[1] + bx - disp_board[1] / 2 - 1.27, boards_display_recess + 6.6])
+            cube([35.56, 2.54, boards_disp_socket_h]);
+}
+
 module routing_3d() {
-    trap_y = u_y0 + lighting_strip_gap + 1 + 1 + routing_trap_d / 2;
-    trap_x0 = carrier_x0 - 3 - routing_trap_l;
-    over = carrier_top + 4;                       // height the runs cross onto the carrier at
+    trap_y = u_y0 + lighting_strip_gap + lighting_strip_t + 1 + routing_trap_d / 2;
+    trap_x0 = carrier_x0 - boards_sensor_port_l - 4 - routing_trap_l;   // clear of the sensor's barbs
+    over = carrier_top + boards_idc_mated_h + 1;          // height the runs cross onto the carrier at
     P([0.95, 0.60, 0.45], false, "breath tube") run([
         [0, tube_yz[0], tube_yz[1]], [x_in0 + 3, tube_yz[0], tube_yz[1]],
         [x_in0 + 20, tube_y, routing_lane_z],
         [trap_x0 - 8, tube_y, routing_lane_z], [trap_x0, trap_y, routing_lane_z]], routing_tube_od);
     P([0.95, 0.60, 0.45], false, "breath trap") translate([trap_x0, trap_y, routing_lane_z]) rotate([0, 90, 0])
         cylinder(d = routing_trap_d, h = routing_trap_l);
+    // Onto the sensor's P1 barb (the upper port, datasheet p.6 Table 3).
     P([0.95, 0.60, 0.45], false, "breath tube to sensor") run([
-        [trap_x0 + routing_trap_l, trap_y, routing_lane_z], [carrier_x0 - 1, trap_y, over],
-        [sensor_xy[0] - 5, sensor_xy[1], over]], routing_tube_od * 0.8);
-    // Key chain: carrier -> right thumb -> right hand -> left thumb -> left
-    // hand (config/key-layout.yaml chain), along the loom lane, dropping to
-    // each board's face at its own middle.
-    function mid_x(cl) = (min(xs(cluster_keys(cl))) + max(xs(cluster_keys(cl)))) / 2;
-    top_z = z_plate_top - switch_pcb_below_seat - switch_pcb_t;   // top boards' underside
-    thumb_z = z_floor + switch_pcb_below_seat + switch_pcb_t;     // thumb boards' top face
+        [trap_x0 + routing_trap_l, trap_y, routing_lane_z], [p1_tip[0] - 2, p1_tip[1], p1_tip[2]],
+        [p1_tip[0] + 2, p1_tip[1], p1_tip[2]]], routing_tube_od * 0.8);
+    // Key chain: out of the side of each IDC socket (the ribbon leaves a
+    // long side, near the socket's top), into the loom lane, in chain order.
     d = routing_loom_d;
-    stops = [["right_thumb", thumb_z + d / 2], ["right_hand", top_z - d / 2], ["left_thumb", thumb_z + d / 2], ["left_hand", top_z - d / 2]];
+    function side_pt(h, z) = [h[0], h[1] + sgn(loom_side) * (boards_idc_w / 2 + d / 2 + 0.2), z];
+    exit_z = min(carrier_top + boards_idc_mated_h - 3, z_plate_bot - routing_loom_d / 2 - 0.5);
+    carrier_exit = side_pt(carrier_hdr[0], exit_z);
     P([0.30, 0.30, 0.75], false, "key-chain loom") union() {
-        run([[carrier_x0 + 6, loom_y, carrier_top + d / 2], [carrier_x0 + 6, loom_y, over], [carrier_x0 - 2, loom_y, over],
-             [carrier_x0 - 8, loom_y, routing_lane_z], [mid_x("left_hand"), loom_y, routing_lane_z]], d);
-        for (st = stops) run([[mid_x(st[0]), loom_y, routing_lane_z], [mid_x(st[0]), loom_y, st[1]]], d);
+        run([carrier_exit, [carrier_exit[0], loom_y, carrier_exit[2]], [carrier_x0 - 8, loom_y, routing_lane_z],
+             [mid_x("left_hand"), loom_y, routing_lane_z]], d);
+        for (cl = chain) for (h = hdrs(cl)) let(ez = hdr_end_z(cl) + (is_top(cl) ? 3 : -3))
+            run([[h[0], loom_y, routing_lane_z], [h[0], loom_y, ez], side_pt(h, ez)], d);
     }
-    // Display loom: carrier to the display board's back, BESIDE the key chain
-    // (inboard of it, so the chain's drops do not cross it), then down to
-    // the board at the mouth end.
+    // Display loom: off J-DISP's mouth-side face, down past the carrier's
+    // edge, then along the body's CENTRELINE - clear between the thumb
+    // boards' parts below and the key boards' parts above - to the display.
     dd = routing_disp_loom_d;
-    dy = loom_y + (loom_side == "right" ? -1 : 1) * ((d + dd) / 2 + 0.5);
-    disp_back_z = boards_display_recess + 6.6;
+    disp_exit = [carrier_hdr[1][0] - boards_idc_w / 2 - dd / 2 - 0.2, carrier_hdr[1][1],
+                 min(carrier_top + boards_idc_mated_h - 3, z_plate_bot - dd / 2 - 0.5)];
     P([0.30, 0.60, 0.30], false, "display loom") run([
-        [carrier_x0 + 12, dy, carrier_top + dd / 2], [carrier_x0 + 12, dy, over], [carrier_x0 - 2, dy, over],
-        [carrier_x0 - 8, dy, routing_lane_z], [disp_x1 + 4, dy, routing_lane_z],
-        [disp_x1 - 6, dy, disp_back_z + dd / 2]], dd);
+        disp_exit, [carrier_x0 - 8, W / 2, routing_lane_z], [disp_x1 + 4, W / 2, routing_lane_z],
+        [disp_c[0] + 6, W / 2, boards_display_recess + 6.6 + boards_disp_socket_h + dd / 2]], dd);
 }
 
 module hardware_3d() {
@@ -700,6 +808,7 @@ module assembly() {
     if (show_boards) { cluster_boards(); display_board(); tail_equipment(); }
     if (show_strips) led_strips();
     if (show_routing) routing_3d();
+    if (show_boards) { sensor_3d(); headers_3d(); parts_3d(); }
     if (show_hardware) hardware_3d();
 }
 
@@ -850,7 +959,7 @@ module drc_report() {
     // Tail face
     ec_in = x_in1 - (ethercon_depth - ends_tail_cap_t);
     drc(carrier_x1 < ec_in, "carrier clears the etherCON body", ec_in - carrier_x1, "mm along X");
-    ec_lo = ec_c[1] - ethercon_body_d / 2; ec_hi = ec_c[1] + ethercon_body_d / 2;
+    ec_lo = ec_c[1] - ec_house[1] / 2; ec_hi = ec_c[1] + ec_house[1] / 2;
     drc(ec_lo >= z_floor && ec_hi <= z_lid_bot, "etherCON body inside the cavity height",
         [ec_lo, ec_hi, z_floor, z_lid_bot], "body Z range vs cavity Z range; outside = through-cuts in the oak at the tail");
     panel = ends_tail_cap_t + hardware_backplate_t;
@@ -859,7 +968,7 @@ module drc_report() {
     fl_margin = (T - ec_fl[1]) / 2;
     drc(fl_margin >= 5, "etherCON flange margin on the tail face", fl_margin, "mm above and below (ADR 0009: 6.00 rotated)");
     // USB-C by panel-mount extension (owner, 2026-09-26).
-    usb_room = (W - u_y0) - (ec_c[0] + ethercon_body_d / 2);
+    usb_room = (W - u_y0) - (ec_c[0] + ec_house[0] / 2);
     drc(usb_room >= openings_usb_slot_w + 2, "USB-C extension receptacle beside the etherCON body", usb_room - openings_usb_slot_w,
         str("mm spare across, inside the sides, for a ", openings_usb_slot_w, " mm receptacle"));
     usb_web = (usb_c[0] - openings_usb_slot_w / 2) - (ec_c[0] + ec_fl[0] / 2);

@@ -271,6 +271,80 @@ boards:
     value: 20.8
     status: nominal
     source: "ADR 0014 / carrier.md - 8 x 2.6 mm pitch [from memory there]"
+  # Part envelopes on the boards (datasheet read 2026-09-26). Heights are
+  # above the board face they sit on.
+  smt_h:
+    value: 2.3
+    status: nominal
+    source: "tallest SMT part on the carrier: SMA/SMC diodes 2.29-2.62 [ds SMAJ15A p.3, SS34 p.3]; SOIC 1.75"
+  cluster_smt_h:
+    value: 1.8
+    status: nominal
+    source: "cluster boards: SOIC-16 74HC165 1.75 [from memory, JEDEC MS-012] and 0805 passives"
+  tall_l:
+    value: 30.0
+    status: tbd
+    source: "footprint of the carrier's tall parts together - 2 x R-78E5.0 SIP-3 (11.6 x 8.5 x 10.4 [ds R-78E5.0-1.0 p.4]), 2 x C-BUCK-IN 6.3 x 11, 2 x C-STRIP-BULK 8-10 x 12.5-20 [from memory]"
+    decided_by: "M4 carrier layout"
+  tall_w:
+    value: 20.0
+    status: tbd
+    source: "as tall_l"
+    decided_by: "M4 carrier layout"
+  tall_h:
+    value: 12.5
+    status: tbd
+    source: "the shortest the bulk electrolytics come, upright [from memory]; lay them down if this does not fit"
+    decided_by: "part selection and layout at M4"
+  sensor_body:
+    value: 12.3
+    status: settled
+    source: "[ds] MPXV4006DP p.7, case 1351-01 - body 11.81-12.32 square. SURFACE MOUNT (p.2 ordering table), not THT"
+  sensor_h:
+    value: 9.9
+    status: settled
+    source: "[ds] MPXV4006DP p.7 - overall height 9.40-9.91"
+  sensor_leads:
+    value: 17.8
+    status: settled
+    source: "[ds] MPXV4006DP p.7 - across the lead tips 17.27-17.78"
+  sensor_port_l:
+    value: 6.6
+    status: settled
+    source: "[ds] MPXV4006DP p.7 - ports protrude 6.10-6.60 from one face"
+  sensor_port_d:
+    value: 3.3
+    status: settled
+    source: "[ds] MPXV4006DP p.7 - barb OD 2.79-3.30"
+  sensor_port_z:
+    value: [8.5, 1.4]
+    status: nominal
+    source: "port centres above the seating plane, upper (P1, marked side - p.6 Table 3) and lower; scaled off the p.7 drawing"
+  idc_w:
+    value: 9.1
+    status: settled
+    source: "[ds] WR-BHD 61201621621 p.1 - boxed header width and height 9.10"
+  idc_l6:
+    value: 22.9
+    status: settled
+    source: "[ds] WR-BHD p.1 - L = pin span + 10.20 [calc]; 2x6 = 22.90 (matches hardware/bom.csv J-CHAIN)"
+  idc_l5:
+    value: 20.36
+    status: settled
+    source: "[ds] WR-BHD p.1 [calc] - 2x5 (J-DISP)"
+  idc_mated_h:
+    value: 15.6
+    status: nominal
+    source: "[calc] mated header + TE 622 socket 13.10 (WR-BHD 9.10 + socket 10.5 - cavity 6.5; TE catalog 82012 p.52) + ~2.5 for the ribbon's bend"
+  idc_tail:
+    value: 3.0
+    status: settled
+    source: "[ds] WR-BHD p.1 - pin tail below the board"
+  disp_socket_h:
+    value: 8.5
+    status: tbd
+    source: "HDR-DEV female socket strips on the display board's back, 1 x 14 [from memory]"
+    decided_by: "M4, with the header bought"
   carrier_l:
     value: 100.0
     status: tbd
@@ -286,10 +360,15 @@ boards:
   # Matrix board sits face up on headers on the carrier, so the carrier's
   # height follows from the stack under the plate - it is derived, not set.
   matrix_header_h:
-    value: 8.5
+    value: 11.0
     status: tbd
-    source: "machined 2.54 mm female header on the carrier plus the board's male pins, seated [from memory]"
+    source: "seated stack: 8.5 female socket on the carrier + 2.5 plastic spacer of the Matrix's male header [from memory; the earlier 8.5 left out the spacer]"
     decided_by: "M4, from the header actually bought"
+  matrix_under_h:
+    value: 3.2
+    status: tbd
+    source: "the Matrix's back-side parts (ESP32-S3, USB-C, IMU) below its board [from memory]"
+    decided_by: "calipers on the board"
   matrix_gap:
     value: 1.0
     status: tbd
@@ -337,9 +416,9 @@ openings:
     source: "as usb_slot_w [from memory]"
     decided_by: "M4"
   usb_plug_l:
-    value: 18.0
+    value: 28.0
     status: tbd
-    source: "USB-C cable plug moulding plus the straight lead before it can bend, standing off the Matrix board's USB-C edge [from memory]"
+    source: "USB-C cable plug moulding, 25-30 long [from memory, datasheet read 2026-09-26], standing off the Matrix board's USB-C edge"
     decided_by: "M4, against the extension bought; a right-angle plug would remove most of it"
   matrix_usb_to_tail:
     value: true
@@ -390,11 +469,34 @@ ethercon:
     value: 34.55
     status: settled
     source: "[ds] NE8FDP - behind the panel, flange in front (hardware/bom.csv)"
-  body_d:
-    value: 24.0
+  # The rear envelope, read off the banked drawing's own labels (NE8FDP.dxf;
+  # assignment from the dimension defpoints, 2026-09-26 datasheet read):
+  # a main housing, then the rear RJ45 socket, which sits off-axis.
+  housing_w:
+    value: 25.5
+    status: settled
+    source: "[ds] NE8FDP.dxf - main housing width (drawn portrait)"
+  housing_h:
+    value: 27.64
+    status: settled
+    source: "[ds] NE8FDP.dxf - main housing height (drawn portrait)"
+  housing_d:
+    value: 18.05
+    status: settled
+    source: "[ds] NE8FDP.dxf - panel rear face to the back of the main housing"
+  socket_w:
+    value: 15.9
+    status: settled
+    source: "[ds] NE8FDP.dxf - rear RJ45 socket width"
+  socket_h:
+    value: 13.2
+    status: settled
+    source: "[ds] NE8FDP.dxf - rear RJ45 socket height; it runs from 0.35 off the axis to the housing's face, on the side away from the latch"
+  socket_toward_centre:
+    value: true
     status: tbd
-    source: "the rear body's envelope is not dimensioned where this model can read it; the bore is the lower bound"
-    decided_by: "the NE8FDP drawing's side view, or calipers on the part"
+    source: "with the 90-degree rotation the socket's offset lies across the body; toward the body's centre is assumed"
+    decided_by: "M4, with the latch direction chosen on the tail face"
   # THE NE8FDP IS A FEEDTHROUGH: its back is an RJ45 socket, so inside the
   # instrument a short patch lead plugs into it (hardware/bom.csv
   # J-UMBILICAL-CABLE). The mated plug and boot stand inboard of the body,
@@ -524,7 +626,7 @@ routing:
     source: "display loom bundle: 9 conductors (J-DISP, 2x5 IDC) [from memory]"
     decided_by: "M4"
   lane_z:
-    value: 18.0
+    value: 19.0
     status: tbd
     source: "height of the side-channel runs, between the thumb boards below and the key boards above"
     decided_by: "M4"
@@ -535,6 +637,11 @@ lighting:
     value: 10.0
     status: tbd
     source: "hardware/carrier/carrier.md '~10 mm' [from memory there]; the strip geometry row is BLOCKED in datasheets/MANIFEST.csv"
+    decided_by: "the strip in hand"
+  strip_t:
+    value: 2.5
+    status: tbd
+    source: "WS2815 strip thickness, bare IP30 [from memory]; the MANIFEST strip-geometry row is BLOCKED"
     decided_by: "the strip in hand"
   strip_gap:
     value: 3.0

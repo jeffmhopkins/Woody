@@ -78,6 +78,8 @@ of a superseded value. Instead:
 | [`outputs.yaml`](outputs.yaml) | Every output: cameras, defines, paths. The build does exactly this list |
 | [`OUTPUTS.csv`](OUTPUTS.csv) | **Generated.** The fingerprint ledger |
 | [`drc.echo`](drc.echo) | **Generated.** The design-rule report — read it after every change |
+| [`clash.txt`](clash.txt) | **Generated.** The interference check: every named solid against every other |
+| [`clash-allow.yaml`](clash-allow.yaml) | Interference the design intends, each with its reason |
 | `export/*.dxf` | **Generated.** One file per flat part, as it goes to the cutter |
 | `renders/*.png` | **Generated.** Every image on these pages |
 | [DESIGN.md](DESIGN.md) | How the stack is built, where each number comes from, and what the first model found |

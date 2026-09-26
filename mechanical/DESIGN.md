@@ -167,10 +167,52 @@ decision, not a correction.
    "insert or tapped boss"; the model says plain tapping is not one of the
    options.
 
+## The interference check
+
+`mechanical/clash.txt` is every named solid in the model intersected with
+every other (`tools/cad.py`, manifold3d), regenerated on every build. Parts
+that go INTO each other by design are excused in `mechanical/clash-allow.yaml`,
+each with its reason; a rule that stops matching is reported. Every solid is
+an envelope — many sizes are tbd in `config/body.yaml` — so a clean pair is
+only as good as those envelopes. Group the report's lines by these causes
+(read the counts there, not here):
+
+1. **IDC sockets face each other across the cavity.** A mated boxed header
+   with its ribbon stands ~15.6 mm off its board, and the gap between a top
+   key board and a thumb board is barely more. Where a key board sits over a
+   thumb board — the whole left hand, and the right hand over the right
+   thumb — their headers collide. Stagger them along the body, use
+   low-profile or right-angle headers, or solder the loom.
+2. **A through-hole boxed header does not fit on a key board at all.** The
+   board is `switch.cluster_pcb_w` wide under 14 mm switches; the header's
+   9.1 mm width lands under a switch, and its pin tails stand 3 mm off the
+   far face into a 2.2 mm gap to the key plate (or the thumb plate). SMT or
+   board-end headers, or a wider board.
+3. **The carrier's headers are too tall for the lid.** Mated J-CHAIN and
+   J-DISP reach the key plate's underside.
+4. **The carrier fills the interior, so it collides with both LED strips**
+   (and with the sensor and trap near its edge). Narrow the carrier, or end
+   the strips before it.
+5. **The M3 stations** run through the LED strips, the carrier (tail pair)
+   and the U-bolt backplate (middle pair).
+6. **The etherCON's real housing** (NE8FDP.dxf: 25.5 x 27.64) reaches the key
+   plate and the left side at the current placement.
+7. **The loom lane is under the pinky pairs:** the side-by-side keys widen the
+   top boards out over the side channel the key-chain loom uses.
+
+Found by the check and fixed as model bugs, not findings: the oak bottom's
+missing counterbores, thumb boards drawn with switch holes, the display cut
+too tight for the STEP's glass overhang, the etherCON housing drawn through
+the tail cap, and several of the check's own first routings.
+
+**Also found, outside the model:** the MPXV4006DP (case 1351-01) is a
+**surface-mount** part (its datasheet's p.2 ordering table), not the THT part
+`hardware/bom.csv` U-BREATH and SKT-BREATH describe — and a SIP socket cannot
+hold it. That is a BOM decision, not a CAD one, and is left open here.
+
 ## Not modelled yet
 
-The breath tube and its route, the sensor and trap, the looms, the thumb rest
-lip, gasket beads, plate stiffening (ADR 0002 — open, and it changes the lid),
+The thumb rest lip, gasket beads, plate stiffening (ADR 0002 — open, and it changes the lid),
 the diffuser standoff, and anything in the display band beyond the board. The
 carrier and cluster boards are rectangles, because their outlines are M3/M4
 outputs.
