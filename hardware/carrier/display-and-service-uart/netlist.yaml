@@ -1,0 +1,98 @@
+# AUTHORITATIVE for connectivity. This circuit is two connectors and the
+# conductors between them, and the conductor list in the page is a
+# REPRESENTATION of this file.
+#
+# THE FAR END IS UNDRAWN, twice over: the display board has no page in this
+# corpus, and whatever is plugged into the service header is not part of the
+# instrument. hardware/nets.yaml marks both with `external_driver:` rather
+# than inventing a driver or calling the nets undriven, which would mean
+# something else.
+
+circuit: carrier/display-and-service-uart
+title: Display loom and service header
+page: display-and-service-uart.md
+
+ports:
+  IO5:       {dir: in,  from: carrier/carrier}
+  IO6:       {dir: in,  from: carrier/carrier}
+  U0TXD:     {dir: in,  from: carrier/carrier}
+  U0RXD:     {dir: in,  from: carrier/carrier}
+  INST_5V_B: {dir: in,  from: carrier/power-entry-instrument}
+  PWR_GND:   {dir: ref, from: module/power-entry, figure: dig-gnd-topology}
+
+components:
+
+  J-DISP:
+    value: "2x5"
+    pins: [SUPPLY, GND_SUPPLY, IO5, IO6, SVC_TXD, SVC_RXD, GND_SVC, SPARE1, SPARE2, NC]
+    note: "NINE OF TEN USED. Two grounds on purpose - one with the supply, one with the UART pairs - and two spare conductors per ADR 0009. EN and IO0 are NOT here: they are not on the dev board's headers, so the RC networks proposed for them are withdrawn with them"
+
+  HDR-SERVICE:
+    value: "2x3"
+    pins: [RT_TXD, RT_RXD, RT_GND, DISP_TXD, DISP_RXD, DISP_GND]
+    note: "2x3, NOT 2x5. A UART pair and a ground per board and nothing else. The recovery ladder absorbs what was dropped: OTA rollback first, USB-Serial-JTAG through the tail slot second, this header third - and a corrupted bootloader ends the instrument, which is accepted"
+
+nets:
+
+  IO5:
+    - port: IO5
+    - J-DISP.IO5
+
+  IO6:
+    - port: IO6
+    - J-DISP.IO6
+
+  U0TXD:
+    - port: U0TXD
+    - HDR-SERVICE.RT_TXD
+
+  U0RXD:
+    - port: U0RXD
+    - HDR-SERVICE.RT_RXD
+
+  INST_5V_B:
+    - port: INST_5V_B
+    - J-DISP.SUPPLY
+
+  PWR_GND:
+    - port: PWR_GND
+    - J-DISP.GND_SUPPLY
+    - J-DISP.GND_SVC
+    - HDR-SERVICE.RT_GND
+    - HDR-SERVICE.DISP_GND
+
+  # ------------------------------------------------------------------
+
+  # *** WHOSE CONSOLE PAIR RUNS UP THE LOOM IS NOT DECIDED BY THIS PAGE. ***
+  #
+  # The Interfaces table says the real-time board's U0TXD/U0RXD go "to
+  # HDR-SERVICE and up J-DISP", and also that the DISPLAY board's U0TXD/U0RXD
+  # arrive at HDR-SERVICE with the far end undrawn. There is one service trio
+  # in the loom and there are two boards' console pairs, so at most one of
+  # those readings can be true of it. Nothing here is asserted until the page
+  # says which.
+  SVC_TXD_LOOM:
+    - J-DISP.SVC_TXD
+  SVC_RXD_LOOM:
+    - J-DISP.SVC_RXD
+  DISP_CONSOLE_TXD:
+    - HDR-SERVICE.DISP_TXD
+  DISP_CONSOLE_RXD:
+    - HDR-SERVICE.DISP_RXD
+
+  # Unallocated per ADR 0009, and the tenth way is not used at all.
+  SPARE1:
+    - J-DISP.SPARE1
+  SPARE2:
+    - J-DISP.SPARE2
+  J_DISP_NC:
+    - J-DISP.NC
+
+external_endpoints:
+  - SVC_TXD_LOOM
+  - SVC_RXD_LOOM
+  - DISP_CONSOLE_TXD
+  - DISP_CONSOLE_RXD
+  - SPARE1
+  - SPARE2
+  - J_DISP_NC

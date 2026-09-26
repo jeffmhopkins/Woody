@@ -12,7 +12,35 @@ sit together, so a change and its record are never in different places.
                   circuit.yaml     declared dependencies. SEEDED, NOT VERIFIED
                   notes.md         past tense only. No live value belongs here
                   sim/             an ngspice deck and its contract. No results
+                  netlist.yaml     AUTHORITATIVE for connectivity. The
+                                   drawing is a representation of it, and
+                                   every circuit that carries nets has one
+
+nets.yaml                          at hardware/ root: THE MASTER NET LIST,
+                                   which owns every net that crosses a circuit
+                                   boundary. A netlist.yaml declares only its
+                                   own side; this file owns the net
 ```
+
+> ### The drawing is not the source of truth. Where a `netlist.yaml` exists, that is.
+>
+> **An ASCII drawing is a picture.** No tool in this repository can read one,
+> so nothing checks that a value in a drawing matches the BOM row for the same
+> refdes — and on 2026-09-22 a review found four that did not, including
+> `R-FB` drawn at a resistance that is not a purchasable E96 value and an
+> entry capacitor drawn at half the BOM's value on the rail that matters.
+>
+> **`tools/check-netlist.py` checks the drawing against the netlist**, and
+> the netlist against `bom.csv` and against `nets.yaml`. It runs `--strict`
+> from the commit gate, so a page that gains a drawing and no netlist is a
+> failure rather than an entry on a list. It resolves a label against EVERY
+> netlist, not only the one beside the page, because several pages draw parts
+> they do not own.
+>
+> **Where a drawing and a row disagree and no netlist covers them, `bom.csv`
+> wins.** It is generated from fragments, `merge-bom.py --check` proves the
+> master matches them, and the commit hook runs it. A drawing has none of
+> that behind it.
 
 | Directory | |
 |---|---|
@@ -26,6 +54,29 @@ sit together, so a change and its record are never in different places.
 Every circuit page carries one: every net that crosses that circuit's
 boundary, one row each. A PCB netlist is transcribed from these, so a row is
 a wiring instruction and two pages disagreeing about a net is a short.
+
+**Four drawing shorthands, and they are shorthands — not missing parts.** The
+ASCII drawings use a short spelling where the full refdes would break column
+alignment. When transcribing a netlist, expand them:
+
+A netlist declares its own alias with `drawn_as:`, which is what makes the
+shorthand checkable rather than merely documented; this table is for the
+pages that have no netlist yet.
+
+| Drawn as | BOM row |
+|---|---|
+| `C-TIMER` | `C-TIMER-LOADSW` |
+| `C-GATE` | `C-GATE-LOADSW` |
+| `J-UMB` | `J-UMBILICAL` |
+
+A cold reviewer filed all three as refdes that "match nothing in `bom.csv`",
+which was fair — nothing said otherwise. They are listed here once rather
+than expanded in ~40 drawing sites, because widening a label inside a drawing
+shifts every column to its right, and that drift is itself a recorded defect
+on these pages. A fourth, an unlabelled `N-FET`, was **not** a shorthand: it
+is `Q-LOADSW`, a row created after that drawing was last touched, and it is
+now labelled.
+
 
 | Column | |
 |---|---|

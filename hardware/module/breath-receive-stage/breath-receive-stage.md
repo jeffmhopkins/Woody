@@ -52,6 +52,10 @@ The `Dir` and `Peer` columns are defined once in
 
 ## The circuit
 
+*Connectivity is **[`netlist.yaml`](netlist.yaml)**, not this drawing.
+The drawing is a representation of it, `tools/check-netlist.py` checks that
+the two agree, and where they do not the netlist wins.*
+
 ```
   INSTRUMENT (bottom cluster board)                 |  2 m Cat5  |   MODULE
                                                     |            |
@@ -109,7 +113,7 @@ The `Dir` and `Peer` columns are defined once in
                                         │
                                    [1k]─┼─[C 330nF]── AGND(module)
                                         │
-                                   [D-CLAMP-BREATH BAV99]── ±12 V
+                                   [D-JACK-CLAMP BAV99]── ±12 V
                                         │
                                    BREATH jack
 ```

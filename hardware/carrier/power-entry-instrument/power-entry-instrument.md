@@ -18,13 +18,18 @@ The `Dir` and `Peer` columns are defined once in
 |---|---|---|---|---|
 | `UMBILICAL +12V` at `J-UMB` | in | `module/umbilical-load-switch` | `umbilical-pinmap`, `umbilical-current` | Arrives down the umbilical from the module's load switch. `D-REVSHUNT` sits at the connector, ahead of `L-BUCK-IN` |
 | `PWR_GND` at `J-UMB` | ref | `module/power-entry` | `umbilical-pinmap` | This board's only supply return, down the umbilical to the module star |
-| `+12V` strip feed | out | `carrier/led-strip-drive` | — | Taken direct off the input node. `C-STRIP-BULK` is this circuit's part |
-| `+12V` analog | out | `carrier/breath-excitation-reference` | — | REF5050 `VIN`, and the V+ of both OPA2197 halves |
+| `+12V` strip feed | out | `carrier/led-strip-drive` | — | Taken direct off the input node. `C-STRIP-BULK` is this circuit's part. **The same net as the row above** — `D-REVSHUNT` is a shunt and `D-TVS-PWR` a clamp, so nothing is in series between `J-UMB` pin 3 and this tap |
+| `+12V` analog | out | `carrier/breath-excitation-reference` | — | REF5050 `VIN`, and the V+ of both OPA2197 halves. **Also the same net**, for the same reason |
 | 5 V, buck A | out | `HDR-DEV`, `carrier/led-strip-drive` | `matrix-led-current` | Through `D-USBOR` onto the dev board's 5 V pin, and on to the 74AHCT125 |
 | 5 V, buck B | out | `carrier/display-and-service-uart` | — | On `J-DISP`. Buck B's location is open — see *Still open* |
-| `PWR_GND` pour | ref | `carrier/breath-adc`, `carrier/breath-excitation-reference`, `carrier/display-and-service-uart`, `carrier/led-strip-drive` | `dig-gnd-topology` | The whole board returns here, and the aluminium key plate through `MECH-GNDBOND`, which can only originate here. `AGND_INST` reaches it on a single tie |
+| `PWR_GND` pour | ref | `carrier/display-and-service-uart`, `carrier/led-strip-drive`, `carrier/carrier` | `dig-gnd-topology` | The whole board returns here, and the aluminium key plate through `MECH-GNDBOND`, which can only originate here. **`carrier/breath-adc` and `carrier/breath-excitation-reference` are no longer listed**: both of those pages say their return is `AGND_INST`, which reaches this pour on the **single tie** and is a different node everywhere else — and that distinction is the whole point of the star |
 
 ## §1 Power entry
+
+*Connectivity is **[`netlist.yaml`](netlist.yaml)**, not this drawing.
+The drawing is a representation of it, `tools/check-netlist.py` checks that
+the two agree, and where they do not the netlist wins.*
+
 
 ```
  J-UMB pin 3  +12V ──┬──[D-REVSHUNT SS34]──┐
@@ -44,8 +49,8 @@ The `Dir` and `Peer` columns are defined once in
                      │                      │
                      ├──[L-BUCK-IN]──┬──────┼──[R-78E5.0 A]──▷|──┬── dev board 5V
                      │   10–47 µH    │      │                 D-USBOR  ├── 74AHCT125
-                     │        [C-BUCK-IN    │                         └── (8×8 matrix,
-                     │         100 µF 25V]  │                              via the board)
+                     │   [C-BUCK-IN 100µF]  │                         └── (8×8 matrix,
+                     │      25V, real ESR   │                              via the board)
                      │               │      │
                      │               └──────┼──[R-78E5.0 B]──▷|──── J-DISP 5V
                      │                      │                 D-USBOR   ?? see Still open

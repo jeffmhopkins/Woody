@@ -1,0 +1,168 @@
+# AUTHORITATIVE for connectivity. The ASCII drawing in
+# digital-and-supervision.md is a REPRESENTATION of this file.
+#
+# ALL SIX R-SPI-PULL INSTANCES ARE PLACED HERE. The row lives in
+# interfaces/spi-link's bom.csv because that page derives the values, but the
+# resistors are on the module board on both sides of this buffer, and the
+# drawing above shows both triples. Owning a row and placing an instance are
+# different things; `of:` is what says so.
+#
+# ONE OF THE SIX HAS NOWHERE TO GO - see CS_PULLUP_TOP at the bottom.
+
+circuit: module/digital-and-supervision
+title: Digital path and supervision
+page: digital-and-supervision.md
+
+ports:
+  SCLK:      {dir: in,  from: interfaces/spi-link, figure: spi-series-r}
+  MOSI:      {dir: in,  from: interfaces/spi-link, figure: spi-series-r}
+  CS_MOD:    {dir: in,  from: interfaces/spi-link, figure: spi-series-r}
+  BUS_5V:    {dir: in,  from: module/power-entry}
+  DAC_AVDD:  {dir: in,  from: module/power-entry, figure: dac-rail}
+  DIG_GND:   {dir: ref, from: module/power-entry, figure: dig-gnd-topology}
+  SCLK_DAC:  {dir: out, to: module/dac8568}
+  DIN:       {dir: out, to: module/dac8568}
+  SYNC:      {dir: out, to: module/dac8568}
+
+components:
+
+  U-LVL-MOD:
+    value: "74AHCT125"
+    # WHICH SIGNAL GETS WHICH GATE IS ASSIGNED HERE AND NOWHERE ELSE
+    # [derived, not cited]. No page states it; a netlist has to. Gate 4 is the
+    # spare the BOM row mentions. Contradict this in the page and the file
+    # follows.
+    pins: [1A, 1Y, 1OE, 2A, 2Y, 2OE, 3A, 3Y, 3OE, 4A, 4Y, 4OE, VCC, GND]
+    note: "OE IS TIED ENABLED AND MUST STAY THAT WAY - the presence comparator that gated it is deleted. Inputs are TTL thresholds, V_IH 2.0V min, not ratioed to VCC, and there is NO INPUT CLAMP TO VCC, which is what makes back-driving an unpowered module safe"
+
+  # --- cable side: the three pulls that hold the BUFFER's inputs ------
+
+  R-PULL-SCLK:
+    of: R-SPI-PULL
+    value: "10k 1%"
+    pins: [1, 2]
+    note: "PULL-DOWN. Holds the buffer input low when the instrument is absent"
+
+  R-PULL-MOSI:
+    of: R-SPI-PULL
+    value: "10k 1%"
+    pins: [1, 2]
+    note: "PULL-DOWN"
+
+  R-PULL-CS:
+    of: R-SPI-PULL
+    value: "10k 1%"
+    pins: [1, 2]
+    note: "PULL-UP, and the only one of the six whose top end this file cannot assert - see CS_PULLUP_TOP"
+
+  # --- DAC side: the three that hold the DAC's inputs ----------------
+  #
+  # These were bought for the state the cable-side three do not reach:
+  # module alive, instrument off, which is NORMAL and not a fault.
+
+  R-PULL-SCLK-DAC:
+    of: R-SPI-PULL
+    value: "10k 1%"
+    pins: [1, 2]
+    note: "PULL-DOWN"
+
+  R-PULL-DIN:
+    of: R-SPI-PULL
+    value: "10k 1%"
+    pins: [1, 2]
+    note: "PULL-DOWN"
+
+  R-PULL-SYNC:
+    of: R-SPI-PULL
+    value: "10k 1%"
+    pins: [1, 2]
+    note: "PULL-UP TO DAC_AVDD, the LM317's rail, NOT bus +5V: a pull-up belongs on its consumer's rail, and on the bus rail a reversed ribbon reaches the DAC's SYNC pin and turns a buffer failure into a DAC failure"
+
+nets:
+
+  SCLK:
+    - port: SCLK
+    - R-PULL-SCLK.1
+    - U-LVL-MOD.1A
+
+  MOSI:
+    - port: MOSI
+    - R-PULL-MOSI.1
+    - U-LVL-MOD.2A
+
+  CS_MOD:
+    - port: CS_MOD
+    - R-PULL-CS.1
+    - U-LVL-MOD.3A
+
+  SCLK_DAC:
+    - U-LVL-MOD.1Y
+    - R-PULL-SCLK-DAC.1
+    - port: SCLK_DAC
+
+  DIN:
+    - U-LVL-MOD.2Y
+    - R-PULL-DIN.1
+    - port: DIN
+
+  SYNC:
+    - U-LVL-MOD.3Y
+    - R-PULL-SYNC.1
+    - port: SYNC
+
+  BUS_5V:
+    - port: BUS_5V
+    - U-LVL-MOD.VCC
+
+  DAC_AVDD:
+    - port: DAC_AVDD
+    - R-PULL-SYNC.2
+
+  # THE FOUR ENABLES ARE TIED, NOT DRIVEN. OE_MOD is in hardware/nets.yaml's
+  # `retired:` section for exactly this reason: the comparator that gated it
+  # is not fitted, so there is no net crossing a boundary - just four pins on
+  # the local ground.
+  DIG_GND:
+    - port: DIG_GND
+    - U-LVL-MOD.GND
+    - U-LVL-MOD.1OE
+    - U-LVL-MOD.2OE
+    - U-LVL-MOD.3OE
+    - U-LVL-MOD.4OE
+    - U-LVL-MOD.4A
+    - R-PULL-SCLK.2
+    - R-PULL-MOSI.2
+    - R-PULL-SCLK-DAC.2
+    - R-PULL-DIN.2
+
+  # ------------------------------------------------------------------
+
+  # THE SPARE GATE'S INPUT IS TIED, and it is tied because the BOM row says
+  # "TIE EVERY UNUSED INPUT TO VCC OR GND" - a floating CMOS input on an
+  # enabled gate is the one wrong answer. GND is chosen over VCC because the
+  # part has no input clamp to VCC and the ground tie cannot inject current
+  # into an unpowered rail. Its output drives nothing, which is fine.
+  SPARE_GATE_OUT:
+    - U-LVL-MOD.4Y
+
+  # *** THE CABLE-SIDE CS PULL-UP HAS NO RAIL ON THIS BOARD. ***
+  #
+  # R-SPI-PULL's own row says "CABLE-SIDE CS PULLS TO 3V3, NOT +5V", with the
+  # reason: at 5 V it drives 430 uA continuously through the unpowered ESP32's
+  # input clamp in the design's normal resting state, and the node sits at
+  # ~0.7 V so "CS idle high" is not achieved at all. The reasoning is sound
+  # and the rail does not exist here - the umbilical carries BREATH/AGND,
+  # +12V/PWR_GND, SCLK/MOSI and CS/DIG_GND, and the module makes +12, -12,
+  # bus +5 and DAC AVDD. There is no 3V3 anywhere on this board.
+  #
+  # So either this resistor belongs at the INSTRUMENT end, where 3V3 exists
+  # and where its own argument about the ESP32's clamp is measured, or the
+  # row's "at the module" description is right and the rail has to come from
+  # somewhere. Both cannot be true. Nothing is asserted until it is decided;
+  # digital-and-supervision.md's "Still open" carries the question.
+  CS_PULLUP_TOP:
+    - R-PULL-CS.2
+
+external_endpoints:
+  - SPARE_GATE_OUT
+  - CS_PULLUP_TOP

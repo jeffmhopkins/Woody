@@ -1,0 +1,153 @@
+# AUTHORITATIVE for connectivity. The ASCII drawing in
+# power-entry-instrument.md is a REPRESENTATION of this file.
+#
+# THE STRIP FEED AND THE ANALOG FEED ARE NOT SEPARATE NETS. The Interfaces
+# table names them separately because they leave toward different circuits,
+# but D-REVSHUNT is a shunt across the pair and D-TVS-PWR is a clamp, so
+# nothing sits in series between J-UMB pin 3 and either tap. One node:
+# UMBILICAL_POS12, all the way from the module's load switch to the WS2815
+# feed points and the REF5050's VIN. hardware/nets.yaml carried two extra
+# entries for it until this file had to name both ends of each.
+
+circuit: carrier/power-entry-instrument
+title: Instrument power entry
+page: power-entry-instrument.md
+
+ports:
+  UMBILICAL_POS12: {dir: in,  from: module/umbilical-load-switch, figure: umbilical-current}
+  PWR_GND:         {dir: ref, from: module/power-entry, figure: umbilical-pinmap}
+  INST_5V_A:       {dir: out, to: carrier/led-strip-drive, figure: matrix-led-current}
+  INST_5V_B:       {dir: out, to: carrier/display-and-service-uart}
+  AGND_INST:       {dir: ref, from: carrier/power-entry-instrument, figure: dig-gnd-topology}
+
+# Drawn here for context, owned by carrier/breath-excitation-reference: the
+# REF5050 and its two 10 uF. They are in this drawing because the +12 V node
+# feeds them, not because this circuit contains them.
+foreign:
+  REF5050:    {owner: carrier/breath-excitation-reference, row: U-REF-BREATH}
+  C-REF-OUT:  {owner: carrier/breath-excitation-reference, row: C-REF-OUT}
+
+components:
+
+  D-REVSHUNT:
+    value: "SS34"
+    pins: [A, K]
+    note: "AT THE CONNECTOR, AHEAD OF L-BUCK-IN. Its job is a rollover patch lead swapping pins 3 and 6: it has to conduct at once and let the module's LT1641 latch off, and an inductor between the fault and the diode is the wrong way round"
+
+  D-TVS-PWR:
+    value: "SMAJ15A"
+    pins: [A, K]
+    note: "Across the power pair"
+
+  C-STRIP-BULK-L:
+    of: C-STRIP-BULK
+    value: "470-1000uF"
+    pins: [1, 2]
+    note: "At the J-LED-L feed point. Bulk belongs where the current swings, and the swing is at the strip"
+
+  C-STRIP-BULK-R:
+    of: C-STRIP-BULK
+    value: "470-1000uF"
+    pins: [1, 2]
+    note: "At the J-LED-R feed point"
+
+  L-BUCK-IN:
+    value: "10-47uH"
+    pins: [1, 2]
+    note: "QTY 1 HERE AND THE BOM BUYS 1, against C-BUCK-IN's qty 2 - the two rows describe different topologies and the page says so. This file draws the one-inductor version because that is what the drawing shows"
+
+  C-BUCK-IN:
+    value: "100uF"
+    pins: [1, 2]
+    note: "ELECTROLYTIC, AND THE ESR IS THE POINT: the input LC's damping calculation assumes real ESR, and a low-ESR ceramic raises Q until the paragraph stops being true"
+
+  U-BUCK-A:
+    of: U-BUCK
+    value: "R-78E5.0-1.0"
+    drawn_as: R-78E5.0
+    pins: [IN, OUT, GND]
+    note: "Buck A: the real-time board, the 8x8 matrix and the 74AHCT125. Loaded to 68-78 percent of its 1 A rating inside a body running 10-20 K above ambient"
+
+  U-BUCK-B:
+    of: U-BUCK
+    value: "R-78E5.0-1.0"
+    pins: [IN, OUT, GND]
+    note: "Buck B: the display board on J-DISP. WHERE IT LIVES IS OPEN - if it moves to the display board, +12 V goes up the loom instead and J-DISP's conductor list changes"
+
+  D-USBOR-A:
+    of: D-USBOR
+    pins: [A, K]
+    # NO `value:` - the row is open and offers 1N5817 or SS14, one of the two.
+    note: "ONE PER REGULATOR OUTPUT, not one per source: the OR node is a dev-board pin, and USB can back-feed it"
+
+  D-USBOR-B:
+    of: D-USBOR
+    pins: [A, K]
+
+  MECH-GNDBOND:
+    value: "Ring terminal"
+    pins: [1, 2]
+    note: "THE ALUMINIUM KEY PLATE BONDS TO PWR_GND, NEVER TO AGND, and this board is the only place that bond can originate"
+
+nets:
+
+  # One node: the umbilical's +12 V, the two shunts across it, the strip feed
+  # points, the REF5050 and both OPA2197 halves, and the buck inductor.
+  UMBILICAL_POS12:
+    - port: UMBILICAL_POS12
+    - D-REVSHUNT.K
+    - D-TVS-PWR.K
+    - C-STRIP-BULK-L.1
+    - C-STRIP-BULK-R.1
+    - L-BUCK-IN.1
+
+  BUCK_IN:
+    - L-BUCK-IN.2
+    - C-BUCK-IN.1
+    - U-BUCK-A.IN
+    - U-BUCK-B.IN
+
+  BUCK_A_OUT:
+    - U-BUCK-A.OUT
+    - D-USBOR-A.A
+
+  INST_5V_A:
+    - D-USBOR-A.K
+    - port: INST_5V_A
+
+  BUCK_B_OUT:
+    - U-BUCK-B.OUT
+    - D-USBOR-B.A
+
+  INST_5V_B:
+    - D-USBOR-B.K
+    - port: INST_5V_B
+
+  PWR_GND:
+    - port: PWR_GND
+    - D-REVSHUNT.A
+    - D-TVS-PWR.A
+    - C-STRIP-BULK-L.2
+    - C-STRIP-BULK-R.2
+    - C-BUCK-IN.2
+    - U-BUCK-A.GND
+    - U-BUCK-B.GND
+    - MECH-GNDBOND.1
+
+  # ------------------------------------------------------------------
+
+  # THE SINGLE TIE, and it is copper rather than a part. AGND_INST reaches
+  # PWR_GND at exactly one point on this board - that is the whole content of
+  # the instrument half of dig-gnd-topology - so there is nothing here to give
+  # the net a second endpoint. Declared because this circuit is the net's
+  # origin and the master has to have a side to check against.
+  AGND_INST:
+    - port: AGND_INST
+
+  # The far end is a 3 mm hole in an aluminium plate, not a net.
+  PLATE_BOND:
+    - MECH-GNDBOND.2
+
+external_endpoints:
+  - AGND_INST
+  - PLATE_BOND

@@ -1,0 +1,84 @@
+# AUTHORITATIVE for connectivity. THE DRAWING IS ON ANOTHER PAGE - carrier.md
+# §2 - and the module half of this link is drawn again on
+# module/breath-receive-stage, which declares these same parts `foreign:`
+# because the pole and the CMRR budget are derived there.
+#
+# R-SER-BREATH IS NOT HERE. The 10k 0.1% pair is the MODULE-side series
+# protection and module/breath-receive-stage places it; this circuit's rows
+# are the instrument-side 1k pair and the sensor.
+
+circuit: interfaces/breath-sense-link
+title: Breath sense link (instrument end)
+page: ../../carrier/carrier.md
+
+ports:
+  VS:            {dir: in,  from: carrier/breath-excitation-reference, figure: riso-ref-topology}
+  SENSOR_RAW:    {dir: out, to: carrier/breath-excitation-reference, figure: sensor-full-scale}
+  SENSOR_BUFFERED_OUT: {dir: in, from: carrier/breath-excitation-reference, figure: sensor-full-scale}
+  BREATH_SENSE:  {dir: out, to: module/breath-receive-stage, figure: sensor-full-scale}
+  AGND_SENSE:    {dir: out, to: module/breath-receive-stage, figure: umbilical-pinmap}
+  AGND_INST:     {dir: ref, from: carrier/power-entry-instrument}
+
+components:
+
+  U-BREATH:
+    value: "MPXV4006DP"
+    pins: [VS, VOUT, GND]
+    note: "P1 takes the 400 mm tube with its PTFE plug and its <=1 mL trap; P2 IS OPEN TO THE CAVITY AND MUST NEVER BE BLOCKED. Neither is a net, so neither is here - which is exactly the kind of fact a netlist cannot carry and the page must"
+
+  R1:
+    of: R-SER-BREATH-INST
+    value: "1k 1%"
+    drawn_as: R-SER-BREATH-INST
+    pins: [1, 2]
+    note: "Instrument-side series protection on the BREATH leg. 1206 and >=250mW because a jack fault has to land somewhere"
+
+  R1b:
+    of: R-SER-BREATH-INST
+    value: "1k 1%"
+    pins: [1, 2]
+    note: "THE TWIN IN THE AGND LEG, and it was missing until 2026-09-21. Without it the return is not matched to the signal leg and the link's CMRR is set by that asymmetry rather than by the in-amp"
+
+  D-TVS-BREATH-SIG:
+    of: D-TVS-BREATH
+    value: "PESD12VS1UB or equivalent 12V-standoff ESD diode"
+    drawn_as: D-TVS-BREATH
+    pins: [A, K]
+    note: "AT THE CONNECTOR, 12 V standoff - above the sensor's full scale so it never conducts in play"
+
+  D-TVS-BREATH-RET:
+    of: D-TVS-BREATH
+    value: "PESD12VS1UB or equivalent 12V-standoff ESD diode"
+    pins: [A, K]
+    note: "The second of the pair, on the AGND conductor"
+
+nets:
+
+  VS:
+    - port: VS
+    - U-BREATH.VS
+
+  SENSOR_RAW:
+    - U-BREATH.VOUT
+    - port: SENSOR_RAW
+
+  SENSOR_BUFFERED_OUT:
+    - port: SENSOR_BUFFERED_OUT
+    - R1.1
+
+  BREATH_SENSE:
+    - R1.2
+    - D-TVS-BREATH-SIG.K
+    - port: BREATH_SENSE
+
+  AGND_SENSE:
+    - R1b.2
+    - D-TVS-BREATH-RET.K
+    - port: AGND_SENSE
+
+  AGND_INST:
+    - port: AGND_INST
+    - R1b.1
+    - U-BREATH.GND
+    - D-TVS-BREATH-SIG.A
+    - D-TVS-BREATH-RET.A

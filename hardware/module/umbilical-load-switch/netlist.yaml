@@ -1,0 +1,159 @@
+# AUTHORITATIVE for connectivity.
+#
+# THIS CIRCUIT IS DRAWN ON ANOTHER PAGE. The load switch sits inside
+# power-entry.md's entry drawing, deliberately, because that is one board and
+# one drawing; this page carries only the gate-network detail. So the labels
+# that describe these parts are on a page whose netlist does not own them -
+# which is why tools/check-netlist.py resolves a drawing label against EVERY
+# netlist, not just the one beside the page. Before that, every load-switch
+# label on power-entry.md was skipped as "a BOM row, not a component here"
+# and its value was never compared to anything.
+
+circuit: module/umbilical-load-switch
+title: Umbilical load switch
+page: umbilical-load-switch.md
+
+ports:
+  BUS_POS12_RAW:   {dir: in,  from: module/power-entry}
+  UMBILICAL_POS12: {dir: out, to: carrier/power-entry-instrument, figure: umbilical-current}
+  PWR_GND:         {dir: ref, from: module/power-entry}
+
+components:
+
+  U-LOADSW:
+    value: "LT1641-1CS8"
+    pins: [VCC, SENSE, GATE, FB, TIMER, 'ON', PWRGD, GND]   # quoted: YAML reads a bare ON as true
+    note: "Hot-swap controller. FOLDBACK TRACKS THE FB PIN, NOT THE OUTPUT - with FB unconnected the part holds the sense drop at its 12 mV floor forever and the start never completes"
+
+  R-ILIM:
+    pins: [1, 2]
+    # NO `value:` ON PURPOSE. The row is open and says the value is selected
+    # on the bench at E6 with a current probe, because the +-11% window the
+    # page wants is narrower than the LT1641's own sense-threshold tolerance.
+    # The 50 mohm in power-entry.md's drawing is the WORKING figure the
+    # 0.940 A limit is computed from, not a chosen part.
+    note: "Sets the limit with V_SENSETRIP, which is 39/47/55 mV - so the limit has a spread whatever this resistor is"
+
+  Q-LOADSW:
+    pins: [D, G, S]
+    # NO `value:` - the part is not chosen, and the single-pulse SOA curve at
+    # V_DS = 12 V decides it, not R_DS(on).
+    note: "Pass FET, high side. Its drain is always at 12 V, which is why foldback acts on the OUTPUT and not on the drain"
+
+  R-GATE-SER:
+    value: "10R 5%"
+    pins: [1, 2]
+    note: "Prevents high-frequency oscillation in the FET. In SERIES with the gate, from the datasheet's own application circuit"
+
+  R-GATE-COMP:
+    value: "1k 5%"
+    pins: [1, 2]
+    note: "Current-limit loop compensation, IN SERIES WITH C-GATE - not in parallel with anything. C-GATE straight to ground removes the compensation zero"
+
+  C-GATE-LOADSW:
+    value: "82nF"
+    drawn_as: C-GATE
+    pins: [1, 2]
+    note: "The programmed ramp. Without it the bare C_iss gives 10 kV/s, which would demand more than twenty times the current limit"
+
+  C-TIMER-LOADSW:
+    value: "10uF"
+    drawn_as: C-TIMER
+    pins: [1, 2]
+    note: "LOW LEAKAGE, and that is a specification not a preference: leakage is a meaningful fraction of the 3 uA pull-down, and if it wins the timer never resets"
+
+  R-FB-HI:
+    value: "35.7k 1%"
+    pins: [1, 2]
+    note: "Top of the foldback divider, from the OUTPUT. Sized so foldback releases before the instrument's load arrives"
+
+  R-FB-LO:
+    value: "5.11k 1%"
+    pins: [1, 2]
+    note: "Bottom of the foldback divider. k = R-FB-LO/(R-FB-HI + R-FB-LO) = 0.1250"
+
+  C-DECOUPLE-LOADSW:
+    of: C-DECOUPLE
+    value: "100nF"
+    pins: [1, 2]
+    note: "VCC to GND at the pin, which is the datasheet's supply transient protection. One of the board-wide C-DECOUPLE row"
+
+  SW-POWER:
+    value: "NKK M2011SD4G01"
+    pins: [COM, 'NO']                # quoted: YAML reads a bare NO as false
+    note: "THE SWITCH IS THIS CIRCUIT'S PART. module/panel owns only the shaped hole and says so. Its other terminal waits on the UVLO divider - see ON_DIVIDER"
+
+nets:
+
+  BUS_POS12_RAW:
+    - port: BUS_POS12_RAW
+    - U-LOADSW.VCC
+    - R-ILIM.1
+    - C-DECOUPLE-LOADSW.1
+
+  # The sense resistor's far end IS the FET drain, and the pin that watches it.
+  SENSE_NODE:
+    - R-ILIM.2
+    - U-LOADSW.SENSE
+    - Q-LOADSW.D
+
+  GATE_DRIVE:
+    - U-LOADSW.GATE
+    - R-GATE-SER.1
+    - R-GATE-COMP.1
+
+  GATE_NODE:
+    - R-GATE-SER.2
+    - Q-LOADSW.G
+
+  # R-GATE-COMP and C-GATE in SERIES to ground. The series pair is the
+  # compensation zero; the capacitor alone is not.
+  GATE_COMP_MID:
+    - R-GATE-COMP.2
+    - C-GATE-LOADSW.1
+
+  TIMER:
+    - U-LOADSW.TIMER
+    - C-TIMER-LOADSW.1
+
+  UMBILICAL_POS12:
+    - Q-LOADSW.S
+    - R-FB-HI.1
+    - port: UMBILICAL_POS12
+
+  FB:
+    - R-FB-HI.2
+    - R-FB-LO.1
+    - U-LOADSW.FB
+
+  ON:
+    - SW-POWER.COM
+    - U-LOADSW.ON
+
+  PWR_GND:
+    - port: PWR_GND
+    - U-LOADSW.GND
+    - C-GATE-LOADSW.2
+    - C-TIMER-LOADSW.2
+    - R-FB-LO.2
+    - C-DECOUPLE-LOADSW.2
+
+  # ------------------------------------------------------------------
+
+  # THE UNDERVOLTAGE-LOCKOUT DIVIDER IS NOT DESIGNED, and the page says so.
+  # ON is a threshold input, not a switch input: it needs a divider from the
+  # rail so the part knows the supply is up, and the toggle interrupts or
+  # pulls that divider. Until the divider exists there is nothing to say the
+  # switch's second terminal lands on.
+  ON_DIVIDER:
+    - SW-POWER.NO
+
+  # PWRGD IS NOT USED. The presence detect that would have read it is
+  # deleted, and the panel indicator's "latched" signal is proposed only -
+  # the Interfaces table marks TIMER/GATE the same way, with nothing drawn.
+  PWRGD:
+    - U-LOADSW.PWRGD
+
+external_endpoints:
+  - ON_DIVIDER
+  - PWRGD

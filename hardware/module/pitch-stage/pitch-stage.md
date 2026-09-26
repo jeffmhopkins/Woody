@@ -35,7 +35,7 @@ The `Dir` and `Peer` columns are defined once in
                                           [R1 10k]  ┐ LT5400
                                                 │   │ 1:1 pair
                                                 │   │
-   DAC ch1 ──[1k R-OPAMP-IN]──┐                 │   │
+   DAC ch1 ──[R-OPAMP-IN 1k]──┐                 │   │
    0.25…4.75 V                │                 │   │
                               │           ┌─────┴───┴───┐
                               └───────────┤ +           │
@@ -129,7 +129,8 @@ converts the worse error into the better one, for free.
 | **TRIM-GAIN** | **200 Ω** multiturn cermet, **in series** with R2 | 0 → +2 % of ratio, **one-sided and now pointing the wrong way**: the justification was that the load divider only ever *reduces* gain, and the jack-side tap deleted the divider. Nominal is dead on 2.000 and the trimmer has no downward authority. Firmware's affine covers it, but the stated reason is stale — resolve at E9 |
 | **TRIM-OFFSET** | 10 kΩ multiturn cermet + range resistors | **Before** the buffer, so it scales `V_ref` and therefore the intercept alone. `R-OFFINJ` is deleted |
 | **R-OPAMP-IN** | 1 kΩ 1 % | Clamp-current protection on the (+) input. No gain error |
-| **R-OUT-PROT** | 1 kΩ 1 %, **1206 ≥250 mW** | Short protection, **inside the DC feedback loop** |
+| **R-OUT-PROT** | 1 kΩ 1 %, **1206 ≥500 mW** (shared spec, qty 6 — ≥250 mW here until
+2026-09-22, which is `R-SER-BREATH-INST`'s rating, a different part) | Short protection, **inside the DC feedback loop** |
 | **C-FB-PITCH** | **2.2 nF C0G** | **From the op-amp OUTPUT to the (−) input — NOT "across R2".** See the warning below; this is the net that decides whether the stage is stable |
 | **C-AA-PITCH** | **10 nF C0G** | 15.9 kHz against `R-OPAMP-IN`, **ahead of the op-amp**, outside any loop. Filters the DAC before it is amplified |
 | **C-FILT-PITCH** | **10 nF C0G** | Restored at the jack. The low-impedance shunt at the connector, which nothing else provides |
@@ -331,5 +332,14 @@ the right order of priority: the static budget was never the problem.
 - **A two-terminal series trimmer fails open to the rail.** Strap the wiper to
   one end so a dirty track degrades to a known resistance rather than an open
   circuit. That is a footprint decision, not a value.
+- **The seventh `R-OPAMP-IN` has no home.** The row is qty 7 and
+  [`mod-channels.md`](../mod-channels/mod-channels.md) allocates it as pitch,
+  the four mods, the mod reference buffer and *the `VREFOUT` follower* — but
+  the follower's input is drawn straight off `TRIM-OFFSET`'s wiper with no
+  series resistor, and the value table above does not list one. Six are placed
+  in netlists and `tools/check-netlist.py` prints the shortfall every run.
+  **Decided by:** whether that (+) input needs clamp-current protection when
+  the DAC pin reaches it through a 10 kΩ trimmer. If it does, the part belongs
+  here and the drawing gains a label; if it does not, the row is qty 6.
 - **The two spare LT5400 resistors.** Available, matched, and currently doing
   nothing. Worth a look when the mod channels are laid out.

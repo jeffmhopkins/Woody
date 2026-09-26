@@ -56,6 +56,10 @@ point of specifying the range from playing rather than from the sensor.
 
 ## The circuit
 
+*Connectivity is **[`netlist.yaml`](netlist.yaml)**, not this drawing.
+The drawing is a representation of it, `tools/check-netlist.py` checks that
+the two agree, and where they do not the netlist wins.*
+
 ```
    from the INA828                    ┌──────────────┐
    0 … −4.7 V ──────[POT-GAIN 50k]────┤ +            │
@@ -79,11 +83,11 @@ point of specifying the range from playing rather than from the sensor.
                                             │ +          └───┤
                                             └────┬───────────┘
                                           AGND   │
-                                                 ├──[R-FB 40k]── (to −)
+                                                 ├──[R-FB 40.2k]── (to −)
                                                  │
                                     [D-JACK-CLAMP BAV99]── ±12 V
                                                  │
-                                   [R-OUT-PROT 1k, 1206]
+                                   [R-OUT-PROT 1k 500mW]
                                                  │
                                                  ├──[C-OUT-BREATH 330nF film]── AGND
                                                  │
@@ -119,11 +123,26 @@ beyond the summer.
 The summing node takes two more currents — one fixed and negative, one variable
 and positive — and their sum crosses zero at mid-rotation:
 
-| Pot | Wiper | Offset at the jack |
-|---|---|---|
-| Full CCW | 0 V | **+5.04 V** |
-| **Centre** | 2.605 V | **+0.07 V** |
-| Full CW | 5.21 V | **−4.89 V** |
+| Pot | Wiper | Wiper source R | Offset at the jack |
+|---|---|---|---|
+| Full CCW | 0 V | 0 | **+5.06 V** |
+| **Centre** | 2.605 V | **2.5 kΩ** | **+0.61 V** |
+| Full CW | 5.21 V | 0 | **−4.91 V** |
+| **True zero** | — | 2.5 kΩ | **0 V at ~20° past centre** |
+
+> **The centre row is not zero, and the reason is in the third column.**
+> `POT-OFFSET`'s wiper is unbuffered, so its own source impedance —
+> `R_pot·p·(1−p)`, zero at both ends and **R/4 = 2.5 kΩ at centre** — sits in
+> series with `R-OFF`. The endpoints are exact because that term vanishes
+> there; the middle does not. `[calc]` `−40.2k × (2.605/(21.0k + 2.5k) −
+> 12/95.3k)` = **+0.606 V**, and the zero crossing lands at p = 0.567,
+> **+20.1° on a 300° pot**. This matches `panel.md`'s independent derivation.
+>
+> This table omitted the source-impedance term and read **+0.07 V at centre**
+> until 2026-09-22, and the paragraph below dismissed that impedance as "feel,
+> not error". **A centre detent would therefore click 20° away from actual
+> zero**, which is worse than no detent — see `U-RESP`, which buffers this
+> wiper and is `open` for that reason.
 
 `R-OFFNEG` pulls a constant from −12 V; `R-OFF` pushes a variable from the
 buffered 5.21 V. **No extra op-amp half, and no negative reference to
@@ -135,7 +154,7 @@ slightly non-linear in rotation. For an offset knob that is feel, not error.
 
 **Why −12 V is acceptable here and would not be on pitch.** ADR 0006 moved the
 *pitch* offset off a rail divider because 50 mV of rail movement is 12.5 cents
-of transposition. Here 50 mV moves the jack by `40k/95.3k × 50 mV` = **21 mV,
+of transposition. Here 50 mV moves the jack by `40.2k/95.3k × 50 mV` = **21 mV,
 0.21 % of span** — and the −12 V rail carries no LED current, because the
 strips run from +12 V.
 
@@ -146,8 +165,8 @@ strips run from +12 V.
 | **POT-GAIN** | 50 kΩ, **taper from the bench** | Attenuator, 0.125 → 1.000 |
 | **R-GAIN-FLOOR** | 7.15 kΩ 1 % | Sets the 0.5× floor |
 | **R-IN** | 10 kΩ 1 % | Summer input |
-| **R-FB** | 40.2 kΩ 1 % | Fixed ×4. Same E96 part as `R-MODGAIN` |
-| **POT-OFFSET** | 10 kΩ linear | ±5 V, zero at centre |
+| **R-FB** | 40.2 kΩ 1 % | Fixed ×4. **Not** the same value as `R-MODGAIN-IN`/`R-MODGAIN-FB`, which are 10k/30k — this row claimed a shared reel until 2026-09-22 |
+| **POT-OFFSET** | 10 kΩ linear | ±5 V; **zero sits ~20° past centre**, see above |
 | **R-OFF** | 21.0 kΩ 1 % | Variable positive leg |
 | **R-OFFNEG** | 95.3 kΩ 1 % | Fixed negative leg from −12 V |
 | **R-OUT-PROT** | 1 kΩ, 1206 ≥500 mW | Shared spec with the other five outputs |

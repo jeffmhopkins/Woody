@@ -22,16 +22,16 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| buffered sensor output | in | `interfaces/breath-sense-link` | `sensor-full-scale`, `breath-working-point` | The breath buffer, drawn in `carrier.md` §2. Arrives at `R-ADCDIV`'s upper leg; the same node feeds `R1` and the umbilical |
+| buffered sensor output | in | `interfaces/breath-sense-link` | `sensor-full-scale`, `breath-working-point` | The breath buffer, drawn in `carrier.md` §2. Arrives at `R-ADCDIV-U`; the same node feeds `R1` and the umbilical |
 | `VDD`/`VREF` 3V3 | in | `HDR-DEV`, `interfaces/key-chain-loom` | — | The dev board's LDO. The MCP3202 has no `VREF` pin. **The key pull-ups load this same node** — that argument stays in `carrier.md` §2 |
 | SPI2 `SCLK`, `MOSI`, `DOUT` | in/out | `HDR-DEV`, `interfaces/spi-link` | `loop-budget` | One host shared with the DAC8568, clocked slower than the DAC, per `carrier.md` §4 |
 | `CS_ADC` (IO39) | in | `HDR-DEV` | — | This device's own chip select on the shared host, and a carrier-local net. **Not `CS_MOD`**, the DAC's, which leaves on `J-UMB` |
-| `AGND_INST` | ref | `carrier/power-entry-instrument` | — | The instrument analog star, drawn `AGND-local` in `carrier.md` §2 and tied to `PWR_GND` at one point. `R-ADCDIV`'s lower leg and `C-AA-ADC` return here. **Not `AGND_SENSE`** (the umbilical conductor) and **not `AGND_MOD`** |
+| `AGND_INST` | ref | `carrier/power-entry-instrument` | — | The instrument analog star, drawn `AGND-local` in `carrier.md` §2 and tied to `PWR_GND` at one point. `R-ADCDIV-L` and `C-AA-ADC` return here. **Not `AGND_SENSE`** (the umbilical conductor) and **not `AGND_MOD`** |
 | CH1 | — | — | — | Spare input, unconnected |
 
 ### Derivations
 
-**Divider** `[calc]`, matching `R-ADCDIV` `[repo] bom.csv`:
+**Divider** `[calc]`, matching `R-ADCDIV-U`/`R-ADCDIV-L` `[repo] bom.csv`:
 
 ```
 ratio      = 15k / (10k + 15k) = 0.600
@@ -98,6 +98,6 @@ treating that pin as an analog reference rather than a logic supply.
 | Ref | Value | Job | Confidence |
 |---|---|---|---|
 | `U-ADC` | MCP3202-CI/SN | `VDD` **is** `VREF`; 3V3 from the dev board | `[repo]`; clock limit `[from memory]` |
-| `R-ADCDIV` | 10 kΩ / 15 kΩ 1 % | 0.6× after the buffer | `[repo]` + `[calc]` |
+| `R-ADCDIV-U`, `R-ADCDIV-L` | 10 kΩ / 15 kΩ 1 % | 0.6× after the buffer | `[repo]` + `[calc]` |
 | `C-AA-ADC` | 47 nF C0G | 564 Hz, and the ADC's charge reservoir | `[repo]` + `[calc]` |
 | **`C-ADC-BULK`** | **10 µF X7R** | **Bulk at MCP3202 `VDD`/`VREF`. Proposed — the reference has no anti-alias and the WS2815 PWM is ~2 kHz against a 4 kHz sampler** | proposed, from `[repo] R10 B-3` |

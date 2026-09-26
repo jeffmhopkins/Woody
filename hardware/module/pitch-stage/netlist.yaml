@@ -1,0 +1,195 @@
+# AUTHORITATIVE for connectivity. The ASCII drawing in pitch-stage.md is a
+# REPRESENTATION of this file.
+#
+# TWO ENDPOINTS ARE DELIBERATELY NOT ASSERTED - the bottom of TRIM-OFFSET and
+# the third terminal of TRIM-GAIN. Both are named in the page's "Still open",
+# both are listed in external_endpoints below with the reason, and neither is
+# a transcription gap. hardware/nets.yaml says it in one line: an asserted
+# connection the board does not have is worse than a missing one.
+
+circuit: module/pitch-stage
+title: Pitch stage
+page: pitch-stage.md
+
+ports:
+  VREFOUT:             {dir: in,  from: module/dac8568}
+  DAC_CH1:             {dir: in,  from: module/dac8568, figure: dac-rail}
+  MODULE_ANALOG_POS12: {dir: in,  from: module/power-entry}
+  MODULE_ANALOG_NEG12: {dir: in,  from: module/power-entry}
+  AGND_MOD:            {dir: ref, from: module/power-entry, figure: dig-gnd-topology}
+
+components:
+
+  TRIM-OFFSET:
+    value: "10k multiturn cermet"
+    pins: [CW, W, CCW]
+    note: "AHEAD of the follower, so it scales V_ref and therefore the intercept alone. Its span needs R-TRIM-RANGE, which is undecided - see external_endpoints"
+
+  U-PITCH-REFBUF:
+    part: OPA2197
+    section: A
+    of: U-OPA-PITCH
+    pins: [IN+, IN-, OUT]
+    rails: [MODULE_ANALOG_POS12, MODULE_ANALOG_NEG12]
+    note: "Unity follower on the trimmed reference. The buffer is what lets a divider drive the bottom of the feedback network"
+
+  R1:
+    of: R-PRECISION
+    section: A
+    value: "10k"
+    drawn_as: R1
+    pins: [1, 2]
+    note: "One element of the LT5400 1:1 quad. R1 = R2 is what makes gain exactly 2 and the intercept exactly -2.500 V from the same ratio"
+
+  R2:
+    of: R-PRECISION
+    section: B
+    value: "10k"
+    drawn_as: R2
+    pins: [1, 2]
+    note: "The other matched element. The quad's remaining two are spare"
+
+  TRIM-GAIN:
+    value: "200R multiturn cermet"
+    pins: [CW, W, CCW]
+    note: "IN SERIES with R2, between R2 and the jack. One-sided 0 to +2 percent"
+
+  R-OPAMP-IN:
+    value: "1k 1%"
+    pins: [1, 2]
+    note: "Clamp-current protection into an op-amp (+) input, which draws no current - so it costs no gain error. It is also the R of the anti-alias pole with C-AA-PITCH"
+
+  C-AA-PITCH:
+    value: "10nF"
+    pins: [1, 2]
+    note: "Shunt at the (+) input, so the pole is against R-OPAMP-IN. Ahead of the op-amp and outside every loop"
+
+  R-BIAS-DAC:
+    value: "100k 1%"
+    pins: [1, 2]
+    note: "One of qty 6, one per populated DAC channel. AT THE DAC PIN, not after R-OPAMP-IN, where it would cost 1 percent of gain. Not drawn on the page"
+
+  U-PITCH-AMP:
+    part: OPA2197
+    section: B
+    of: U-OPA-PITCH
+    pins: [IN+, IN-, OUT]
+    rails: [MODULE_ANALOG_POS12, MODULE_ANALOG_NEG12]
+    note: "Non-inverting, gain 1 + R2/R1 = 2, with the reference at the bottom of the divider"
+
+  C-FB-PITCH:
+    value: "2.2nF"
+    pins: [1, 2]
+    note: "FROM THE OP-AMP OUTPUT TO THE (-) INPUT, not across R2. Across R2 would leave R-OUT-PROT inside the loop at every frequency, which is the capacitive-load-in-the-loop case at 18 degrees of phase margin"
+
+  D-JACK-CLAMP:
+    value: "BAV99"
+    pins: [A, K, C]
+    note: "On the DRIVER side of R-OUT-PROT. One of qty 6, one per CV output"
+
+  R-OUT-PROT:
+    value: "1k 1%, >=500mW"
+    pins: [1, 2]
+    note: "INSIDE the DC feedback loop, because the loop is tapped at the jack"
+
+  J-CV-PITCH:
+    of: J-CV
+    value: "PJ398SM"
+    pins: [TIP, SLEEVE]
+    note: "THE JACK IS THIS CIRCUIT'S PART. module/panel owns the 6 mm hole and says the net is ours. Its third pin, the normalling switch contact, is unused and not netted"
+
+  C-FILT-PITCH:
+    value: "10nF"
+    pins: [1, 2]
+    note: "The low-impedance shunt at the connector. Restored 2026-09-22 with C-FB-PITCH at 2.2nF"
+
+nets:
+
+  VREFOUT:
+    - port: VREFOUT
+    - TRIM-OFFSET.CW
+
+  TRIM_WIPER:
+    - TRIM-OFFSET.W
+    - U-PITCH-REFBUF.IN+
+
+  # V_ref, the buffered and trimmed reference. It is the bottom of the
+  # feedback divider, which is where a non-inverting stage's offset belongs.
+  VREF_BUFFERED:
+    - U-PITCH-REFBUF.OUT
+    - U-PITCH-REFBUF.IN-
+    - R1.1
+
+  DAC_CH1:
+    - port: DAC_CH1
+    - R-BIAS-DAC.1
+    - R-OPAMP-IN.1
+
+  PLUS_NODE:
+    - R-OPAMP-IN.2
+    - C-AA-PITCH.1
+    - U-PITCH-AMP.IN+
+
+  MINUS_NODE:
+    - R1.2
+    - R2.1
+    - C-FB-PITCH.2
+    - U-PITCH-AMP.IN-
+
+  # R2 and TRIM-GAIN in series, (-) input to jack. THE DC LOOP CLOSES AT THE
+  # JACK, so R-OUT-PROT sits inside it and the divider it forms against a
+  # patched load is corrected exactly.
+  GAIN_TRIM_MID:
+    - R2.2
+    - TRIM-GAIN.W
+
+  AMP_OUT:
+    - U-PITCH-AMP.OUT
+    - C-FB-PITCH.1
+    - D-JACK-CLAMP.C
+    - R-OUT-PROT.1
+
+  JACK_TIP:
+    - R-OUT-PROT.2
+    - C-FILT-PITCH.1
+    - TRIM-GAIN.CCW
+    - J-CV-PITCH.TIP
+
+  MODULE_ANALOG_POS12:
+    - port: MODULE_ANALOG_POS12
+    - D-JACK-CLAMP.K
+
+  MODULE_ANALOG_NEG12:
+    - port: MODULE_ANALOG_NEG12
+    - D-JACK-CLAMP.A
+
+  AGND_MOD:
+    - port: AGND_MOD
+    - C-AA-PITCH.2
+    - C-FILT-PITCH.2
+    - R-BIAS-DAC.2
+    - J-CV-PITCH.SLEEVE
+
+  # ------------------------------------------------------------------
+  # THE TWO HOLES, AND THEY ARE THE PAGE'S OWN OPEN ITEMS.
+  # ------------------------------------------------------------------
+
+  # A PLAIN DIVIDER TO AGND IS THE ONE TOPOLOGY THE PAGE RULES OUT. V_ref
+  # nominal IS VREFOUT, a divider can only go below it, so the nominal would
+  # sit at an end stop with no downward authority. The fix divides VREFOUT and
+  # gains it back, or injects a small bipolar correction, and needs
+  # R-TRIM-RANGE - E10. Wiring CCW to AGND here would assert the broken one.
+  TRIM_OFFSET_BOTTOM:
+    - TRIM-OFFSET.CCW
+
+  # A two-terminal series trimmer fails OPEN, and open here is the rail. The
+  # page wants the wiper strapped to one end so a dirty track degrades to a
+  # known resistance - but which end, and whether it is a footprint option, is
+  # open. The series path above runs W to CCW; CW is the strap terminal and
+  # this file does not yet say where it goes.
+  TRIM_GAIN_STRAP:
+    - TRIM-GAIN.CW
+
+external_endpoints:
+  - TRIM_OFFSET_BOTTOM
+  - TRIM_GAIN_STRAP

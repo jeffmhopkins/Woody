@@ -27,6 +27,12 @@ The `Dir` and `Peer` columns are defined once in
 
 ## §2 The key network — 21 of these, spread across four boards
 
+*Connectivity is **[`netlist.yaml`](netlist.yaml)**, not this drawing, and that
+file says `replicated: 21` — one network, built twenty-one times. `R-KEY-PU`
+is bought 24 times because the three free bits carry a pull-up and nothing
+else; `tools/check-netlist.py` prints that shortfall by name every run.*
+
+
 ```
    3V3 (from the loom, pin 10 of J-CHAIN)
     │

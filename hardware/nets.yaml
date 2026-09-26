@@ -1,0 +1,585 @@
+# THE MASTER NET LIST. Authoritative for every net that crosses a circuit
+# boundary.
+#
+# WHY IT IS AT THIS LEVEL. A per-circuit netlist.yaml can only declare its own
+# side of a boundary-crossing net. Across 23 circuits that is up to 23
+# half-declarations with NOBODY OWNING THE NET - so two circuits can spell it
+# differently, two can both claim to drive it, and one can name a peer that
+# never names it back. None of that is visible from inside either circuit. It
+# is the same shape as every other defect here: a fact stated in several
+# places and owned in none.
+#
+# SEEDED FROM THE 23 `## Interfaces` TABLES, which are the prose version of
+# this file: 164 rows, 114 distinct node spellings, 29 nets named by more than
+# one circuit. Those tables stay - they carry the reasoning - but this file is
+# what a tool reads.
+#
+# THE RULES, enforced by tools/check-netlist.py:
+#   - every `ports:` entry in a circuit netlist must name a net here
+#   - dir `out` must come from this net's `driver`; `in` from `receivers`;
+#     `ref` from `reference`
+#   - every net needs exactly one driver unless `multi_driver` or `undriven`
+#   - every circuit named here must declare the matching port
+# The last rule is the bidirectional half, and it is what made the `circuit:`
+# dependency edges trustworthy when it was applied to them.
+#
+# VALUES LIVE IN config/figures.yaml. `figure:` cites; it does not restate.
+# A NET HERE ASSERTS A CONNECTION. Do not add one speculatively - an asserted
+# connection the board does not have is worse than a missing one.
+
+version: 1
+
+nets:
+
+  # ======================================================================
+  # INSTRUMENT: the key chain, carrier to cluster boards
+  # ======================================================================
+
+  V3V3_CHAIN:
+    kind: power
+    carries: "3V3 to the cluster boards, J-CHAIN pin 10"
+    driver: interfaces/key-chain-loom
+    receivers: [cluster/key-register, cluster/key-switch-network, cluster/key-marker-and-bits]
+
+  GND_CHAIN:
+    kind: reference
+    carries: "Chain return, five alternating grounds on J-CHAIN pins 1/3/5/7/9"
+    figure: chain-conductors
+    origin: interfaces/key-chain-loom
+    note: "It is the carrier's PWR_GND pour arriving on HDR-DEV's ground pins - a separate name for the five conductors in the ribbon, not a separate node"
+    reference: [cluster/key-register, cluster/key-switch-network, cluster/key-marker-and-bits]
+
+  CHAIN_SCK:
+    kind: signal
+    domain: digital
+    carries: "Shift clock to the 74HC165 chain"
+    driver: interfaces/key-chain-loom
+    receivers: [cluster/key-register]
+
+  CHAIN_SHLD:
+    kind: signal
+    domain: digital
+    carries: "Shift/load to the 74HC165 chain"
+    driver: interfaces/key-chain-loom
+    receivers: [cluster/key-register]
+
+  CHAIN_SER:
+    kind: signal
+    domain: digital
+    carries: "Serial in at the far end of the chain. POINT TO POINT, not a bus - which is why the connector count is 8 and not one per board"
+    figure: chain-connectors
+    driver: interfaces/key-chain-loom
+    receivers: [cluster/key-register]
+
+  CHAIN_QH:
+    kind: signal
+    domain: digital
+    carries: "Serial out, back toward the MCU. Point to point, like SER"
+    driver: cluster/key-register
+    receivers: [interfaces/key-chain-loom]
+
+  KEY_BITS:
+    kind: signal
+    domain: digital
+    carries: "The parallel switch bits into the shift registers, within a cluster board"
+    driver: cluster/key-switch-network
+    receivers: [cluster/key-register]
+    per_board: true
+    note: >
+      EIGHT NETS PER DEVICE, NOT ONE, and which of the eight is a switch is
+      different on all four boards - key-marker-and-bits.md's allocation table
+      has four different rows against one schematic. So no port assignment on
+      the shared cluster netlist is true of every board, and key-register's
+      netlist declares the eight inputs as unasserted endpoints. Resolving
+      this means four board variants, which is a real decision and not a
+      transcription job.
+
+  MARKER_BITS:
+    kind: signal
+    domain: digital
+    carries: "Board-identity bits wired high or low at each cluster"
+    figure: marker-bits
+    driver: cluster/key-marker-and-bits
+    receivers: [cluster/key-register]
+    per_board: true
+    note: "Two per device, one high and one low, and they sit on different inputs on every board - see KEY_BITS"
+
+  # --- the dev board's pins that drive the chain ------------------------
+
+  # SHARED HOST. The same clock and data reach the MCP3202 on this board and
+  # the DAC8568 two metres away; only the chip selects differ, IO34 for the
+  # module and IO39 for the ADC. IO34 is not here because it crosses no
+  # boundary: it runs from the MCU pin to a series resistor that
+  # carrier/carrier also owns.
+
+  IO35:
+    kind: signal
+    domain: digital
+    carries: "SPI2 SCK at the MCU pin, to the ADC and to the umbilical's series resistor"
+    driver: carrier/carrier
+    receivers: [carrier/breath-adc]
+
+  IO36:
+    kind: signal
+    domain: digital
+    carries: "SPI2 MOSI at the MCU pin, to the ADC and to the umbilical's series resistor"
+    driver: carrier/carrier
+    receivers: [carrier/breath-adc]
+
+  IO37:
+    kind: signal
+    domain: digital
+    carries: "SPI2 MISO - the MCP3202's DOUT, and it never leaves the board"
+    driver: carrier/breath-adc
+    receivers: [carrier/carrier]
+
+  IO39:
+    kind: signal
+    domain: digital
+    carries: "The MCP3202's own chip select. NOT CS_MOD, which leaves on J-UMB"
+    driver: carrier/carrier
+    receivers: [carrier/breath-adc]
+
+  IO38:
+    kind: signal
+    domain: digital
+    carries: "SPI3 SCK out of the MCU, into the chain's series resistor"
+    driver: carrier/carrier
+    receivers: [interfaces/key-chain-loom]
+
+  IO7:
+    kind: signal
+    domain: digital
+    carries: "SH/LD latch out of the MCU. A GLITCH HERE RELOADS ALL FOUR REGISTERS mid-shift and corrupts the whole 32-bit word"
+    driver: carrier/carrier
+    receivers: [interfaces/key-chain-loom]
+
+  IO33:
+    kind: signal
+    domain: digital
+    carries: "SER out of the MCU, riding every hop to the far device's serial input"
+    driver: carrier/carrier
+    receivers: [interfaces/key-chain-loom]
+
+  IO40:
+    kind: signal
+    domain: digital
+    carries: "MISO into the MCU: the chain's QH, out of the nearest register"
+    driver: interfaces/key-chain-loom
+    receivers: [carrier/carrier]
+
+  DEV_3V3:
+    kind: power
+    carries: "The dev board's own LDO, the only 3V3 on the instrument"
+    figure: key-pullup-qty
+    driver: carrier/carrier
+    receivers: [interfaces/key-chain-loom, carrier/breath-adc]
+    note: "IT IS ALSO THE MCP3202'S REFERENCE, which is what makes the 24 pull-ups' static draw a live trade rather than a free one"
+
+  # ======================================================================
+  # INSTRUMENT: breath front end and the carrier
+  # ======================================================================
+
+  # --- the carrier board's own supply tree -------------------------------
+
+  # --- the dev board's GPIO, where it leaves carrier/carrier ------------
+
+  IO1:
+    kind: signal
+    domain: digital
+    carries: "LED data to the left WS2815 strip, ESP32 GPIO1 to the level shifter"
+    driver: carrier/carrier
+    receivers: [carrier/led-strip-drive]
+    note: "HIGH-IMPEDANCE THROUGH THE BOOTLOADER WINDOW, which is why R-LED-PD exists: OE is tied low, so a floating AHCT input becomes clean 5 V edges into 25 addressable LEDs before any firmware runs"
+
+  IO2:
+    kind: signal
+    domain: digital
+    carries: "LED data to the right WS2815 strip, ESP32 GPIO2 to the level shifter"
+    driver: carrier/carrier
+    receivers: [carrier/led-strip-drive]
+    note: "Same bootloader-window hazard as IO1"
+
+  IO5:
+    kind: signal
+    domain: digital
+    carries: "UART1 TX, real-time board to the display board on J-DISP"
+    driver: carrier/carrier
+    receivers: [carrier/display-and-service-uart]
+
+  IO6:
+    kind: signal
+    domain: digital
+    carries: "UART1 RX, display board to the real-time board"
+    external_driver: "the display board, which has no page in this corpus"
+    receivers: [carrier/carrier, carrier/display-and-service-uart]
+
+  U0TXD:
+    kind: signal
+    domain: digital
+    carries: "The real-time board's console transmit, IO43, to HDR-SERVICE"
+    driver: carrier/carrier
+    receivers: [carrier/display-and-service-uart]
+
+  U0RXD:
+    kind: signal
+    domain: digital
+    carries: "The real-time board's console receive, IO44, from HDR-SERVICE"
+    external_driver: "whatever is plugged into the service header"
+    receivers: [carrier/carrier, carrier/display-and-service-uart]
+
+  INST_5V_A:
+    kind: power
+    carries: "Buck A, through D-USBOR onto the dev board's 5 V pin"
+    figure: matrix-led-current
+    driver: carrier/power-entry-instrument
+    receivers: [carrier/led-strip-drive, carrier/carrier]
+    note: "It reaches the 8x8 matrix through the dev board, so carrier/carrier is where it lands and HDR-DEV is the socket it lands through"
+
+  INST_5V_B:
+    kind: power
+    carries: "Buck B, to the display board on J-DISP"
+    driver: carrier/power-entry-instrument
+    receivers: [carrier/display-and-service-uart]
+    note: "WHERE BUCK B LIVES IS OPEN. If it moves to the display board this net becomes +12 V up the loom instead, and J-DISP's conductor list changes with it"
+
+  VS:
+    kind: signal
+    domain: analog
+    carries: "The sensor's excitation, 5.000 V through R-ISO-REF"
+    figure: riso-ref-topology
+    driver: carrier/breath-excitation-reference
+    receivers: [interfaces/breath-sense-link]
+    note: "DC FEEDBACK IS TAKEN HERE, at the far side of R-ISO-REF, which is what makes the DC error across it zero"
+
+  SENSOR_RAW:
+    kind: signal
+    domain: analog
+    carries: "The MPXV4006DP's own output, before the buffer"
+    figure: sensor-full-scale
+    driver: interfaces/breath-sense-link
+    receivers: [carrier/breath-excitation-reference]
+
+  SENSOR_BUFFERED_OUT:
+    kind: signal
+    domain: analog
+    carries: "The MPXV4006DP output, buffered by half an OPA2197 on the carrier"
+    figure: sensor-full-scale
+    driver: carrier/breath-excitation-reference
+    receivers: [carrier/breath-adc, interfaces/breath-sense-link]
+
+  AGND_INST:
+    kind: reference
+    carries: "Instrument analog star. Carries no power current - that is the whole point of it"
+    figure: dig-gnd-topology
+    origin: carrier/power-entry-instrument
+    reference:
+      - carrier/breath-adc
+      - carrier/breath-excitation-reference
+      - interfaces/breath-sense-link
+
+  BREATH_SENSE:
+    kind: signal
+    domain: analog
+    carries: "The sensor's buffered output down the umbilical, through the instrument-side R1"
+    figure: sensor-full-scale
+    driver: interfaces/breath-sense-link
+    receivers: [module/breath-receive-stage, interfaces/spi-link]
+
+  AGND_SENSE:
+    kind: signal
+    domain: analog
+    carries: >
+      The instrument's analog star arriving through the instrument-side R1b.
+      A SIGNAL, NOT A GROUND - it drives the in-amp's IN+ through R2 and is
+      what makes the measurement differential. DO NOT MERGE IT WITH AGND_MOD.
+    figure: umbilical-pinmap
+    driver: interfaces/breath-sense-link
+    receivers: [module/breath-receive-stage, interfaces/spi-link]
+
+  # ======================================================================
+  # UMBILICAL: SPI and power
+  # ======================================================================
+
+  SCLK:
+    kind: signal
+    domain: digital
+    carries: "SPI clock, instrument to module, through R-SPI-SER"
+    figure: spi-series-r
+    driver: carrier/carrier
+    receivers: [interfaces/spi-link, module/digital-and-supervision]
+    note: "THE DRIVER IS THE DEV BOARD, not the link. R-SPI-SER and U-TVS-SPI are drawn on carrier.md and placed by carrier/carrier, and interfaces/spi-link is the connector and the cable in between - a pass-through, which this schema records as a receiver"
+
+  MOSI:
+    kind: signal
+    domain: digital
+    carries: "SPI data, instrument to module"
+    figure: spi-series-r
+    driver: carrier/carrier
+    receivers: [interfaces/spi-link, module/digital-and-supervision]
+
+  CS_MOD:
+    kind: signal
+    domain: digital
+    carries: "Module chip select"
+    figure: spi-series-r
+    driver: carrier/carrier
+    receivers: [interfaces/spi-link, module/digital-and-supervision]
+
+  DIG_GND:
+    kind: reference
+    carries: "Digital return, instrument to module"
+    figure: dig-gnd-topology
+    origin: module/power-entry
+    reference: [interfaces/spi-link, module/digital-and-supervision]
+
+  UMBILICAL_POS12:
+    kind: power
+    carries: "The +12 V exported to the instrument, downstream of the load switch. ONE NODE all the way to the strips and the REF5050"
+    figure: umbilical-current
+    driver: module/umbilical-load-switch
+    receivers:
+      - carrier/power-entry-instrument
+      - carrier/led-strip-drive
+      - carrier/breath-excitation-reference
+      - interfaces/spi-link
+    note: >
+      module/link-supervision was a receiver here and is not one: its page says
+      "Not fitted" against every row, including the presence detect that gated
+      OE_MOD from this node. A deleted circuit is not a receiver.
+
+      The carrier's "+12V strip feed" and "+12V analog" are not separate nets:
+      D-REVSHUNT is a shunt across the pair and D-TVS-PWR is a clamp, so
+      nothing is in series between J-UMB pin 3 and either tap. They were two
+      more entries here until the netlist had to name both ends of each and
+      there was only one node to name.
+
+  PWR_GND:
+    kind: reference
+    carries: "Power return for the exported rail, and the carrier's whole pour"
+    origin: module/power-entry
+    reference:
+      - module/umbilical-load-switch
+      - carrier/power-entry-instrument
+      - interfaces/spi-link
+      - carrier/display-and-service-uart
+      - carrier/led-strip-drive
+      - carrier/carrier
+    note: >
+      The aluminium key plate bonds to this net through MECH-GNDBOND and NEVER
+      to AGND, and carrier/power-entry-instrument is the only board that bond
+      can originate on.
+      IT DOES NOT LIST THE TWO ANALOG CIRCUITS. power-entry-instrument.md's
+      Interfaces table names carrier/breath-adc and
+      carrier/breath-excitation-reference as returning to the pour, and both of
+      those pages say their return is AGND_INST - which reaches PWR_GND on the
+      single tie and is a different node everywhere else. The circuits' own
+      declarations win, because that distinction is the entire point of having
+      an instrument analog star.
+
+  # ======================================================================
+  # MODULE: power
+  # ======================================================================
+
+  BUS_POS12_RAW:
+    kind: power
+    carries: "Eurorack +12 V as it arrives, ahead of D1/D2"
+    driver: module/power-entry
+    receivers: [module/umbilical-load-switch]
+
+  MODULE_ANALOG_POS12:
+    kind: power
+    carries: "Module analog +12 V, downstream of D1 and FB1"
+    driver: module/power-entry
+    receivers:
+      - module/breath-output-stage
+      - module/breath-receive-stage
+      - module/mod-channels
+      - module/pitch-stage
+      - module/panel-led
+    proposed: [module/breath-response-shaper]
+
+  MODULE_ANALOG_NEG12:
+    kind: power
+    carries: "Module analog -12 V, downstream of D3 and FB3"
+    driver: module/power-entry
+    receivers:
+      - module/breath-output-stage
+      - module/breath-receive-stage
+      - module/mod-channels
+      - module/pitch-stage
+    proposed: [module/breath-response-shaper]
+
+  BUS_5V:
+    kind: power
+    carries: "Eurorack +5 V after FB4/C4. The level shifter only - the one rail with no local regulation"
+    driver: module/power-entry
+    receivers: [module/digital-and-supervision]
+    note: "interfaces/spi-link names this rail in its Interfaces table with Dir '-' and says it 'reaches no part of this circuit'. A '-' row is context, not a connection, and it was seeded here as one"
+
+  DAC_AVDD:
+    kind: power
+    carries: "Local LM317 rail. Decouples DAC full scale from the rack's +/-5% +5 V"
+    figure: dac-rail
+    driver: module/power-entry
+    receivers:
+      - module/dac8568
+      - module/breath-output-stage
+      - module/breath-receive-stage
+      - module/digital-and-supervision   # the DAC-side SYNC pull-up returns here, not to bus +5V
+
+  AGND_MOD:
+    kind: reference
+    carries: "Module analog star"
+    figure: dig-gnd-topology
+    origin: module/power-entry
+    reference:
+      - module/breath-output-stage
+      - module/breath-receive-stage
+      - module/dac8568
+      - module/mod-channels
+      - module/panel-led
+      - module/pitch-stage
+    proposed: [module/breath-response-shaper]
+    note: >
+      Where AGND_MOD and DIG_GND meet is the tracked figure dig-gnd-topology
+      and is DISPUTED. This file records which circuits reference the net; it
+      does NOT settle the topology and must not be read as settling it.
+
+  # ======================================================================
+  # MODULE: DAC and CV
+  # ======================================================================
+
+  # THREE NETS, NOT ONE BUNDLE. They were one entry, SPI_DAC, with a note
+  # saying to split them when a page needed them separately; the DAC netlist
+  # is that page - each lands on its own pin and they cannot share a net.
+  # interfaces/spi-link is a receiver on all three because the DAC-side three
+  # of the six R-SPI-PULL sit on them and are that circuit's rows.
+
+  SCLK_DAC:
+    kind: signal
+    domain: digital
+    carries: "Buffered serial clock, level shifter to DAC"
+    driver: module/digital-and-supervision
+    receivers: [module/dac8568]
+    note: "NOT SCLK, which is the umbilical conductor on the buffer's input side"
+
+  DIN:
+    kind: signal
+    domain: digital
+    carries: "Buffered serial data, level shifter to DAC"
+    driver: module/digital-and-supervision
+    receivers: [module/dac8568]
+
+  SYNC:
+    kind: signal
+    domain: digital
+    carries: "Buffered frame sync (the DAC's chip select), level shifter to DAC"
+    driver: module/digital-and-supervision
+    receivers: [module/dac8568]
+
+  CLR:
+    kind: signal
+    domain: digital
+    carries: "DAC asynchronous clear, active low"
+    undriven: true
+    pull: "R-CLR-PU holds it inactive"
+    receivers: [module/dac8568]
+    note: >
+      NOTHING DRIVES THIS NET. The watchdog that once did is deleted, and the
+      DAC page says so. It is listed because four other pages name CLR in
+      their Interfaces tables to record that it reaches no part of them -
+      which is a real fact about the design and the reason the net is here.
+
+  VREFOUT:
+    kind: signal
+    domain: analog
+    carries: "The DAC's own reference output, buffered before use"
+    driver: module/dac8568
+    receivers: [module/pitch-stage]
+
+  DAC_CH1:
+    kind: signal
+    domain: analog
+    carries: "Pitch channel"
+    figure: dac-rail
+    driver: module/dac8568
+    receivers: [module/pitch-stage]
+
+  # FOUR NETS, NOT ONE. They were one entry, DAC_CH2_5, which no layout could
+  # have used: each channel drives its own mod channel's R-OPAMP-IN.
+
+  DAC_CH2:
+    kind: signal
+    domain: analog
+    carries: "Mod 1 channel"
+    driver: module/dac8568
+    receivers: [module/mod-channels]
+
+  DAC_CH3:
+    kind: signal
+    domain: analog
+    carries: "Mod 2 channel"
+    driver: module/dac8568
+    receivers: [module/mod-channels]
+
+  DAC_CH4:
+    kind: signal
+    domain: analog
+    carries: "Mod 3 channel"
+    driver: module/dac8568
+    receivers: [module/mod-channels]
+
+  DAC_CH5:
+    kind: signal
+    domain: analog
+    carries: "Mod 4 channel"
+    driver: module/dac8568
+    receivers: [module/mod-channels]
+
+  DAC_CH7:
+    kind: signal
+    domain: analog
+    carries: "Shared mod offset reference"
+    figure: mod-reference
+    driver: module/dac8568
+    receivers: [module/mod-channels]
+
+  BREATH_INAMP_OUT:
+    kind: signal
+    domain: analog
+    carries: "In-amp output, the receiver's recovered breath signal"
+    figure: inamp-full-scale
+    driver: module/breath-receive-stage
+    receivers: [module/breath-output-stage]
+    proposed: [module/breath-response-shaper]
+    note: >
+      `proposed:` means DRAWN BUT NOT ADOPTED. That circuit reads this node in
+      its drawing and every one of its BOM rows is `open`, so it declares the
+      port and this file does NOT claim the board has the connection. Move it
+      into receivers when it is fitted, not before.
+
+  # ======================================================================
+  # MODULE: panel
+  # ======================================================================
+  #
+  # THERE ARE NO PANEL NETS. BREATH_JACK, PITCH_JACK and MOD1..4_JACK were
+  # six entries here with module/panel as their receiver, and panel.md says
+  # plainly of every one of them: "A panel cutout. The net is that circuit's."
+  # The far end of each is a J-CV, which is a PART - so the net ends inside
+  # the circuit that drives it, and the six jacks are now placed in
+  # pitch-stage, breath-output-stage and mod-channels. The panel owns holes.
+
+# ----------------------------------------------------------------------
+# RETIRED. Kept so that a page naming one of these is understood rather than
+# treated as a missing net, and so nobody re-adds it from an old drawing.
+# ----------------------------------------------------------------------
+retired:
+  OE_MOD:
+    was: "Four buffer enables, gated by a presence comparator"
+    why: >
+      NOT FITTED. The comparator is deleted - its threshold sat inside the
+      breath signal's own range, it locked out every standalone-module
+      milestone, and it failed toward 'present'. OE is tied enabled. What it
+      was protecting against is what R-SPI-PULL's six resistors are for.
+    named_by: [module/link-supervision, module/digital-and-supervision, interfaces/spi-link]

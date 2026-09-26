@@ -16,7 +16,8 @@ depends_on:
 - refdes:C-AA-ADC
 - refdes:C-STRIP-BULK
 - refdes:HDR-DEV
-- refdes:R-ADCDIV
+- refdes:R-ADCDIV-L
+- refdes:R-ADCDIV-U
 - refdes:U-ADC
 - circuit:carrier/power-entry-instrument
 - circuit:interfaces/breath-sense-link

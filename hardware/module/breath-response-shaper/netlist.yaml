@@ -1,0 +1,126 @@
+# AUTHORITATIVE for connectivity - of the half of this circuit that is drawn.
+#
+# *** THIS CIRCUIT IS PROPOSED, NOT ADOPTED. *** Every one of its BOM rows is
+# `open`. hardware/nets.yaml carries it under `proposed:` on the three nets it
+# reads, which declares the port without claiming the board has the
+# connection. Nothing here asserts that this stage is fitted.
+#
+# AND ONLY HALF OF IT IS DRAWN. The page's own cost table spends BOTH
+# remaining OPA2197 halves - "one shapes at /2 inverting, one restores x2
+# inverting to put scale and polarity back" - and the drawing shows the
+# shaping half only. The restoring half has no drawing and no passives in any
+# BOM row, so it is not netlisted: writing it would be inventing it. That gap
+# is now a bullet in the page's "Open before layout".
+#
+# THREE PASSIVES WERE DRAWN AND NEVER LISTED. R1 20k, R2 10k and the 2 x 10k
+# divider are in the page's cost table and were in no bom.csv row until
+# 2026-09-23. They are R-RESP-IN, R-RESP-FB and R-RESP-DIV now.
+
+circuit: module/breath-response-shaper
+title: Response control (PROPOSED)
+page: breath-response-shaper.md
+
+ports:
+  BREATH_INAMP_OUT:    {dir: in,  from: module/breath-receive-stage, figure: inamp-full-scale}
+  # The two rails arrive through U-RESP-A's `rails:` - there is no clamp or
+  # divider on them here, so there is no net to declare them in.
+  AGND_MOD:            {dir: ref, from: module/power-entry, figure: dig-gnd-topology}
+
+components:
+
+  R-RESP-IN:
+    value: "20k 1%"
+    drawn_as: R1
+    pins: [1, 2]
+
+  R-RESP-FB:
+    value: "10k 1%"
+    drawn_as: R2
+    pins: [1, 2]
+
+  R-RESP-DIV-HI:
+    of: R-RESP-DIV
+    value: "10k 1%"
+    pins: [1, 2]
+    note: "Top leg. These two MATCH rather than being accurate - the centre-detent null holds only while the divider gives exactly half of what the inverting stage returns"
+
+  R-RESP-DIV-LO:
+    of: R-RESP-DIV
+    value: "10k 1%"
+    pins: [1, 2]
+    note: "Bottom leg, to the star"
+
+  U-RESP-A:
+    part: OPA2197
+    of: U-RESP
+    section: half
+    pins: [IN+, IN-, OUT]
+    rails: [MODULE_ANALOG_POS12, MODULE_ANALOG_NEG12]
+    note: "The shaping half, inverting at /2. The restoring half is the page's other one and is not drawn"
+
+  POT-RESP:
+    value: "50k linear"
+    pins: [CW, W, CCW]
+    note: "CW end at V_in/2, CCW end at V_shaped. At centre the wiper is at exactly 0 V FOR ANY INPUT, so the diode branch carries no current and the stage is linear by topology rather than by tolerance"
+
+  R-RESP:
+    value: "15k 1%"
+    pins: [1, 2]
+    note: "Sets how hard the curve bends. 15k is a FIRST SIZING for about 1.5x at a hard blow and wants a bench pass with a player"
+
+  D-RESP-A:
+    of: D-RESP
+    value: "1N4148"
+    pins: [A, K]
+    note: "One of an ANTIPARALLEL pair. Breath is unipolar so only one ever conducts in play; the other is for power-on and fault excursions"
+
+  D-RESP-B:
+    of: D-RESP
+    value: "1N4148"
+    pins: [A, K]
+
+nets:
+
+  BREATH_INAMP_OUT:
+    - port: BREATH_INAMP_OUT
+    - R-RESP-IN.1
+    - R-RESP-DIV-HI.1
+
+  # V_in/2, the pot's fixed end. The divider is what makes the null exact.
+  V_IN_HALF:
+    - R-RESP-DIV-HI.2
+    - R-RESP-DIV-LO.1
+    - POT-RESP.CW
+
+  # X, the virtual ground. R-RESP-IN in, R-RESP-FB back, and the diode branch
+  # injecting into it either way.
+  VIRTUAL_GND:
+    - R-RESP-IN.2
+    - R-RESP-FB.1
+    - U-RESP-A.IN-
+    - D-RESP-A.A
+    - D-RESP-B.K
+
+  WIPER:
+    - POT-RESP.W
+    - R-RESP.1
+
+  DIODE_BRANCH:
+    - R-RESP.2
+    - D-RESP-A.K
+    - D-RESP-B.A
+
+  AGND_MOD:
+    - port: AGND_MOD
+    - R-RESP-DIV-LO.2
+    - U-RESP-A.IN+
+
+  # V_shaped. WHERE THIS INSERTS IS OPEN and the x2 restoring stage that
+  # belongs between it and anything downstream is not drawn, so this file
+  # stops here rather than asserting a path into module/breath-output-stage.
+  V_SHAPED:
+    - U-RESP-A.OUT
+    - R-RESP-FB.2
+    - POT-RESP.CCW
+
+external_endpoints: []

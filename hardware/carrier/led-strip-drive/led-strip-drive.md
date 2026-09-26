@@ -29,16 +29,21 @@ The `Dir` and `Peer` columns are defined once in
 
 ## §5 LED data
 
+*Connectivity is **[`netlist.yaml`](netlist.yaml)**, not this drawing.
+The drawing is a representation of it, `tools/check-netlist.py` checks that
+the two agree, and where they do not the netlist wins.*
+
+
 ```
   IO1 ──┬──[R-LED-PD 10k]── GND   ** PROPOSED **
         │
-        └──►│ 74AHCT125 gate A ├──[R-LED-SER 220R]── J-LED-L  DI   ** R PROPOSED **
+        └──►│ 74AHCT125 gate A ├──[R-LED-SER 330R]── J-LED-L  DI   ** R PROPOSED **
                                                      J-LED-L  BI ──► GND
                                           (vendor's recommended circuit; gate B SPARE)
 
   IO2 ──┬──[R-LED-PD 10k]── GND   ** PROPOSED **
         │
-        └──►│ gate C ├──[220R]── J-LED-R DI
+        └──►│ gate C ├──[R-LED-SER 330R]── J-LED-R DI
                                           J-LED-R BI ──► GND   (gate D SPARE)
 
   74AHCT125 rail = 5 V (TTL thresholds, so 3.3 V in reads high)  [repo] 0014
@@ -96,7 +101,9 @@ Worldsemi WS2815 datasheet V1.1 now at
   receiving signal until restart after power-off."*
 
 **`R-LED-SER` is proposed** on the same grounds as §4: each gate drives ~420 mm
-of wire to a strip, and nothing damps it. 100–330 Ω at the buffer.
+of wire to a strip, and nothing damps it. The useful range is 100–330 Ω at
+the buffer; **the BOM carries 330 Ω, the top of it**, and the drawings show
+that value — do not re-introduce a different number into the drawing.
 
 *(The record of the two questions that closed here on 2026-09-21 is in
 [`notes.md`](notes.md).)*
@@ -111,5 +118,5 @@ of wire to a strip, and nothing damps it. 100–330 Ω at the buffer.
 |---|---|---|---|
 | `U-LVLSHIFT` | 74AHCT125 SOIC-14 | LED data, 5 V rail. **Gate count depends on `BI`** | `[repo]`; `BI` `[from memory]` |
 | **`R-LED-PD`** ×2 | **10 kΩ** | **Proposed — holds the strips' data low through reset** | proposed |
-| **`R-LED-SER`** ×2–4 | **100–330 Ω** | **Proposed — damps ~420 mm to each strip** | proposed |
+| **`R-LED-SER`** ×2 | **330 Ω** (useful range 100–330) | **Proposed — damps ~420 mm to each strip** | proposed |
 | **`J-LED-L/-R`** | **4-way each** | **Proposed — 12 V, GND, `DI`, `BI`.** `BI` is a **ground** connection at the head of the strip, not a driven one (§5, verified against the datasheet 2026-09-21) — so it is still a 4-way connector but only three nets, and `BI` can tie to the same GND pin's net at the strip end | proposed |

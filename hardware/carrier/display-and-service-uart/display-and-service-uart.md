@@ -35,6 +35,11 @@ The `Dir` and `Peer` columns are defined once in
 
 ## §6 Display loom and service header
 
+*Connectivity is **[`netlist.yaml`](netlist.yaml)**, not the conductor list
+below. The list is a representation of it and `tools/check-netlist.py` checks
+the two agree.*
+
+
 **This section's open question has been answered, against it.** The draft asked
 whether `EN` and `IO0` reach the ESP32-S3-Matrix's headers and said "settle it
 before this board is laid out". `bom.csv` row `HDR-SERVICE` has since settled
@@ -90,3 +95,18 @@ along with the lines they protected.**
 |---|---|---|---|
 | `HDR-SERVICE` | **2×3** | UART pair + GND per board. `EN`/`IO0` are not on the headers and are not wired — §6 | `[repo] bom.csv`, settled |
 | **`J-DISP`** | **9-way** | **Proposed — see §6. Was 11-way before `EN`/`IO0` were withdrawn** | proposed |
+
+---
+
+## Still open
+
+- **Whose console pair runs up the loom.** The Interfaces table says the
+  real-time board's `U0TXD`/`U0RXD` go "to `HDR-SERVICE` **and up `J-DISP`**",
+  and it also says the **display board's** `U0TXD`/`U0RXD` arrive at
+  `HDR-SERVICE` with the far end undrawn. There is **one** service trio in the
+  nine-conductor loom and **two** boards' console pairs, so at most one of
+  those readings can be true of it. **Decided by:** which board's console the
+  service header is for when only one can travel — and it changes nothing
+  else, because the conductor count is the same either way.
+  [`netlist.yaml`](netlist.yaml) leaves those four pins unasserted rather than
+  picking.
