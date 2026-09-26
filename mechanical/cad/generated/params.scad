@@ -6,7 +6,7 @@
 // ---- config/key-layout.yaml :: meta
 envelope_length = undef;
 envelope_width = 57;
-envelope_thickness = 42;
+envelope_thickness = 39;
 plate_cutout = 14.0;
 plate_thickness = 1.2;  // `plate-thickness`, config/figures.yaml
 
@@ -88,12 +88,13 @@ boards_idc_l6 = 22.9;  // settled; [ds] WR-BHD p.1 - L = pin span + 10.20 [calc]
 boards_idc_l5 = 20.36;  // settled; [ds] WR-BHD p.1 [calc] - 2x5 (J-DISP)
 boards_idc_mated_h = 15.6;  // nominal; [calc] mated header + TE 622 socket 13.10 (WR-BHD 9.10 + socket 10.5 - cavity 6.5; TE catalog 82012 p.52) + ~2.5 for the ribbon's bend
 boards_idc_tail = 3.0;  // settled; [ds] WR-BHD p.1 - pin tail below the board
+boards_stack_l = 15.24;  // tbd; 2 x 6 at 2.54 pitch, body length 6 x 2.54 [calc]
+boards_stack_w = 5.08;  // tbd; 2 rows at 2.54 pitch [calc]
 boards_disp_socket_h = 8.5;  // tbd; HDR-DEV female socket strips on the display board's back, 1 x 14 [from memory]
 boards_carrier_l = 100.0;  // tbd; hardware/bom.csv PCB-CARRIER '~100 x 45' - carrier.md: 'an assumption, not a fit'
 boards_carrier_w = 45.0;  // tbd; hardware/bom.csv PCB-CARRIER
 boards_matrix_harness_h = 2.5;  // tbd; below the Matrix: a pigtail soldered straight to its pads, wires bent flat [from memory]. Crimp housings on a pin header stood ~16.5 and put a row across the patch plug
 boards_matrix_under_h = 3.2;  // tbd; the Matrix's back-side parts (ESP32-S3, USB-C, IMU) below its board [from memory]
-boards_matrix_gap = 1.0;  // tbd; LED tops to the key plate's underside, under the window opening
 boards_matrix_led_h = 1.0;  // tbd; WS2812B-0807 package height above the board [from memory]
 openings_matrix_window = 22.0;  // nominal; [adr] ADR 0009 - 'Roughly 22 mm square'; the clear opening through the plate and the oak LIP under the acrylic window
 openings_matrix_lip = 2.0;  // tbd; oak lip the acrylic rests on, per side - the rebate is the opening plus twice this
@@ -135,6 +136,7 @@ hardware_ubolt_drop = 18.0;  // tbd; placeholder - how far the loop stands below
 hardware_ubolt_nut_af = 8.0;  // tbd; hex nut across flats for the U-bolt legs - an M5 nut is 8 mm [from memory]; follows ubolt_rod_d
 hardware_ubolt_nut_h = 4.0;  // tbd; M5 nut height [from memory]
 hardware_backplate_t = 3.0;  // tbd; hardware/bom.csv MECH-BACKPLATE - aluminium or ply, thickness open
+routing_chain_stack = true;  // tbd; owner, 2026-09-26: 'push things tighter vertically with stacking headers' - thumb board to the key board above it by stacking header, not ribbon
 routing_tube_od = 5.0;  // tbd; breath tube outside diameter; ADR 0003 assumes a 3 mm bore, the wall is a guess [from memory]
 routing_trap_d = 10.0;  // tbd; dead-volume trap diameter; ADR 0003 caps the trap at 1 mL
 routing_trap_l = 12.0;  // tbd; trap length: 10 mm bore x 12 mm = 0.94 mL, inside ADR 0003's 1 mL [calc]
@@ -149,5 +151,5 @@ lighting_strip_gap = 3.0;  // tbd; ADR 0009 / ADR 0014: the diffusion gap is a p
 
 // Every value above with status tbd - a placeholder, not a number any
 // document gives. The DRC report lists these so no result hides one.
-tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_mouth_extra", "layout_tail_clear", "layout_underside_clear", "layout_lh_offsets", "layout_rh_offsets", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_tall_l", "boards_tall_w", "boards_tall_h", "boards_disp_socket_h", "boards_carrier_l", "boards_carrier_w", "boards_matrix_harness_h", "boards_matrix_under_h", "boards_matrix_gap", "boards_matrix_led_h", "openings_matrix_lip", "openings_matrix_acrylic_t", "openings_usb_slot_w", "openings_usb_slot_h", "openings_usb_plug_l", "openings_matrix_usb_to_tail", "openings_usb_ext_depth", "ethercon_socket_toward_centre", "ethercon_rj45_plug_l", "ethercon_rj45_plug_w", "ethercon_rj45_plug_h", "ethercon_rj45_drop", "ethercon_offset_y", "hardware_fastener_inset", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_ubolt_nut_af", "hardware_ubolt_nut_h", "hardware_backplate_t", "routing_tube_od", "routing_trap_d", "routing_trap_l", "routing_tube_lane", "routing_lane_z", "lighting_strip_w", "lighting_strip_t", "lighting_strip_gap"];
+tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_mouth_extra", "layout_tail_clear", "layout_underside_clear", "layout_lh_offsets", "layout_rh_offsets", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_tall_l", "boards_tall_w", "boards_tall_h", "boards_stack_l", "boards_stack_w", "boards_disp_socket_h", "boards_carrier_l", "boards_carrier_w", "boards_matrix_harness_h", "boards_matrix_under_h", "boards_matrix_led_h", "openings_matrix_lip", "openings_matrix_acrylic_t", "openings_usb_slot_w", "openings_usb_slot_h", "openings_usb_plug_l", "openings_matrix_usb_to_tail", "openings_usb_ext_depth", "ethercon_socket_toward_centre", "ethercon_rj45_plug_l", "ethercon_rj45_plug_w", "ethercon_rj45_plug_h", "ethercon_rj45_drop", "ethercon_offset_y", "hardware_fastener_inset", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_ubolt_nut_af", "hardware_ubolt_nut_h", "hardware_backplate_t", "routing_chain_stack", "routing_tube_od", "routing_trap_d", "routing_trap_l", "routing_tube_lane", "routing_lane_z", "lighting_strip_w", "lighting_strip_t", "lighting_strip_gap"];
 

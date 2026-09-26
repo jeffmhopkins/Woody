@@ -14,15 +14,18 @@ feels right.
 
 ## Envelope
 
-**Width 2.25 inches (57 mm); thickness 42.0 mm, about 1.65 inches** — the
+**Width 2.25 inches (57 mm); thickness 39.0 mm, about 1.54 inches** — the
 register's `body-thickness`, stated here.
 
-> **The thickness was 1.5 inches until 2026-09-26**, when the owner raised it
-> by a few millimetres rather than pocket the oak bottom for the etherCON. The
-> connector now stands on the floor with its rear socket and patch plug under
-> the LED matrix, which hangs from the lid; `mechanical/drc.echo` ("body
-> thickness takes the etherCON on the floor") gives the thinnest body that
-> allows it, and this figure is that rounded up to a whole millimetre.
+> **The thickness was 1.5 inches until 2026-09-26**, when the owner chose to
+> set it by the etherCON rather than pocket the oak bottom for it. The
+> connector stands on the floor with its rear socket and patch plug under the
+> LED matrix; the matrix sits against the oak top, the key plate ending short
+> of it, and the key and thumb boards join by stacking headers (owner, same
+> day: "tighter vertically"). `mechanical/drc.echo` ("body thickness takes
+> the etherCON on the floor") gives the thinnest body that allows it — the
+> connector's flange, floor to oak top — and this figure is that rounded up
+> to a whole millimetre.
 
 > **The length is no longer set here (owner, 2026-09-26: "minimize total
 > length").** It is derived by the body CAD from the key layout, a little at
@@ -318,13 +321,15 @@ Two openings in the tail section, below the right-hand key run, clear of the
 thumb keys and the U-bolt:
 
 > **Superseded 2026-09-26 (owner): the matrix is on the TOP face, just past
-> the last key**, through a window in the oak top and the key plate. The
+> the last key**, through a window in the oak top. The
 > window is **frosted acrylic, flush with the oak top, sitting on a lip of
 > oak** (a rebate in the oak's upper face) — the owner's choice, made knowing
 > frosted material softens pixels at this distance from the LEDs, which the
-> diffuser guidance below warned against. **The Matrix board hangs face up
-> from the lid under the window** (owner, 2026-09-26: "the matrix can be up
-> higher out of the way and still allow the connectors"), wired to the
+> diffuser guidance below warned against. **The Matrix board sits face up
+> against the oak top under the window**, the key plate ending short of it and
+> its LEDs standing up into the opening (owner, 2026-09-26: "the matrix can
+> be up higher out of the way and still allow the connectors", then "tighter
+> to the acrylic"), wired to the
 > carrier by a pigtail soldered to its pads, so **the carrier cutout below is
 > no longer needed** and which face carries the LEDs stops being a risk. The
 > etherCON's rear socket and the patch plug pass **under** it, beside its

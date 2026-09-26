@@ -80,16 +80,19 @@ Three things can claim each end, and the largest wins:
   connector); or the right-thumb cluster against the tail cap.
 - **The tail is stacked** (owner, 2026-09-26: "it's unacceptable to go this
   long" and "the matrix can be up higher out of the way and still allow the
-  connectors"). The Matrix **hangs from the lid** under its window, wired by a
-  pigtail. Under it, side by side: the extension's **right-angle USB-C plug**
+  connectors"). The Matrix **sits against the oak top** under its window,
+  wired by a pigtail: the key plate stops short of it, so the board's top
+  face is on the oak and its LEDs stand up into the window opening, under the
+  acrylic (owner, same day: "led matrix tighter to the acrylic"). Under it, side by side: the extension's **right-angle USB-C plug**
   off its mouth edge, and — because the NE8FDP is a feedthrough with an RJ45
   socket at its back — the etherCON's rear socket and a patch lead's plug,
   down the left side lane. Only the connector's full-height housing queues
   behind the Matrix. The connector **stands on the floor**, and the body is
-  thick enough for its socket to clear the Matrix (owner, same day: raise the
-  body rather than pocket the oak — `body-thickness`, ADR 0009). `drc.echo`
-  itemises "behind the Matrix", confirms the socket passes under, and gives
-  the thinnest body that works. **With the matrix centred, anything in front of or
+  thick enough for it (owner, same day: set the body rather than pocket the
+  oak — `body-thickness`, ADR 0009). Past the plate's end the ceiling is the
+  oak top, so it is the connector's flange, floor to oak, that sets the
+  thickness. `drc.echo` itemises "behind the Matrix", confirms the socket
+  passes under, and gives the thinnest body that works. **With the matrix centred, anything in front of or
   behind it counts twice, and the gap between the hands copies the result** —
   a straight USB-C plug cost about 24 mm of body, which is why the plug is
   right-angle (`openings.usb_plug_l`).
@@ -98,7 +101,7 @@ Three things can claim each end, and the largest wins:
   of it, because the tail equipment fills their channels.
 - **The matrix window is frosted acrylic, flush with the oak top, on a lip of
   oak** (owner, 2026-09-26): a rebate in the oak top's upper face as deep as
-  the acrylic, over a smaller opening through the oak and the plate. Like the
+  the acrylic, over a smaller opening through the oak lip. Like the
   side grooves it is a router pass, not a through-cut, so it exports on its
   own (`export/oak-rebates.dxf`); the acrylic is `export/matrix-window.dxf`.
   `drc.echo` reports the lip and the LED-to-window distance, which is what
@@ -185,12 +188,17 @@ an envelope — many sizes are tbd in `config/body.yaml` — so a clean pair is
 only as good as those envelopes. Group the report's lines by these causes
 (read the counts there, not here):
 
-1. **IDC sockets face each other across the cavity.** A mated boxed header
-   with its ribbon stands ~15.6 mm off its board, and the gap between a top
-   key board and a thumb board is barely more. Where a key board sits over a
-   thumb board — the whole left hand, and the right hand over the right
-   thumb — their headers collide. Stagger them along the body, use
-   low-profile or right-angle headers, or solder the loom.
+1. **IDC sockets faced each other across the cavity** where a key board sits
+   over a thumb board. **Now stacking headers** (owner, 2026-09-26: "tighter
+   vertically with stacking headers"; `routing.chain_stack`): the chain's
+   RT → RH and LT → LH hops plug straight through, one 2 × 6 header spanning
+   the gap, and those ribbons go away. The ribbon hops left — carrier → RT
+   and RH → LT — still stand a mated IDC off each board into the board
+   opposite; low-profile or right-angle headers are the lever. **The hardware
+   pages do not follow yet:** `hardware/interfaces/key-chain-loom/` and
+   J-CHAIN's quantity still describe a ribbon for every hop, and change when
+   the owner confirms this. The stacking header engages as the lid closes, so
+   it must blind-mate; its height is the board gap, not a stock size.
 2. **A through-hole boxed header does not fit on a key board at all.** The
    board is `switch.cluster_pcb_w` wide under 14 mm switches; the header's
    9.1 mm width lands under a switch, and its pin tails stand 3 mm off the

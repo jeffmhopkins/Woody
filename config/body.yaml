@@ -340,6 +340,21 @@ boards:
     value: 3.0
     status: settled
     source: "[ds] WR-BHD p.1 - pin tail below the board"
+  # STACKING HEADERS (owner, 2026-09-26). Where the chain hops from a thumb
+  # board to the key board straight above it (RT -> RH, LT -> LH), the two
+  # boards plug into each other: a 2 x 6 female header on one and long pins
+  # on the other, spanning the gap between them. The ribbons for those hops,
+  # and the IDC pair that faced each other across the cavity, go away.
+  stack_l:
+    value: 15.24
+    status: tbd
+    source: "2 x 6 at 2.54 pitch, body length 6 x 2.54 [calc]"
+    decided_by: "M4, with the part - its height is the board gap the model reports, which is not a stock size"
+  stack_w:
+    value: 5.08
+    status: tbd
+    source: "2 rows at 2.54 pitch [calc]"
+    decided_by: "M4, with the part"
   disp_socket_h:
     value: 8.5
     status: tbd
@@ -373,11 +388,6 @@ boards:
     status: tbd
     source: "the Matrix's back-side parts (ESP32-S3, USB-C, IMU) below its board [from memory]"
     decided_by: "calipers on the board"
-  matrix_gap:
-    value: 1.0
-    status: tbd
-    source: "LED tops to the key plate's underside, under the window opening"
-    decided_by: "M6 diffusion prototype"
   matrix_led_h:
     value: 1.0
     status: tbd
@@ -607,6 +617,11 @@ hardware:
 # check). Where they run is a MODEL CHOICE, not a document's - each is a
 # lane the design must keep free, and the clash check reports what is in it.
 routing:
+  chain_stack:
+    value: true
+    status: tbd
+    source: "owner, 2026-09-26: 'push things tighter vertically with stacking headers' - thumb board to the key board above it by stacking header, not ribbon"
+    decided_by: "M4, with a blind-mating header that engages as the lid closes"
   tube_od:
     value: 5.0
     status: tbd

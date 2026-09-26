@@ -300,10 +300,9 @@ module cutout_at(xy, rot, s) {
 // Key plate: lid footprint, in the plate's own frame = model XY minus origin.
 module plate_top_2d() {
     difference() {
-        translate([0, stack_groove_clear]) square([x_in1 - x_in0, u_w - 2 * stack_groove_clear]);
+        translate([0, stack_groove_clear]) square([plate_x1 - x_in0, u_w - 2 * stack_groove_clear]);
         translate([-plate_x0, -plate_y0]) {
             for (k = top_keys) cutout_at(key_xy(k), key_rot(k), plate_cutout);
-            translate(matrix_xy) square(openings_matrix_window, center = true);
             for (f = fasteners()) translate(f) circle(d = tap_d_m3);
         }
     }
@@ -473,8 +472,14 @@ module cluster_window_2d(ks) {
 // with its LEDs facing the window in the oak bottom.
 // The carrier's height is set by the Matrix standing on it: plate underside,
 // the gap under it, the LEDs, the board, the header, then the carrier.
-matrix_top_z = z_plate_bot - boards_matrix_gap;               // LED tops
-matrix_board_z = matrix_top_z - boards_matrix_led_h - switch_pcb_t;
+// TIGHT TO THE WINDOW (owner, 2026-09-26: "led matrix tighter to the
+// acrylic"). The key plate stops short of the Matrix, so the board's top
+// face sits against the oak top's underside and its LEDs stand up into the
+// window opening through the oak lip, under the acrylic.
+matrix_board_z = z_oak_top_bot - switch_pcb_t;
+matrix_top_z = z_oak_top_bot + boards_matrix_led_h;              // LED tops
+// The key plate ends before the Matrix, so past it the lid is the oak alone.
+plate_x1 = matrix_xy[0] - boards_matrix_board / 2 - 1;
 // The USB-C extension's plug, in the Matrix's mouth or tail edge.
 usb_plug_x0 = openings_matrix_usb_to_tail ? matrix_xy[0] + boards_matrix_board / 2 : matrix_xy[0] - boards_matrix_board / 2 - openings_usb_plug_l;
 // The tail equipment starts at the first of that plug and the patch plug.
@@ -729,8 +734,21 @@ module idc(name, c, l, z, dir, board_t, along_y = false) {
 // board but the last has an IN and an OUT (config/key-layout.yaml chain).
 chain = ["right_thumb", "right_hand", "left_thumb", "left_hand"];
 function hdr_y(cl) = W / 2 + sgn(loom_side) * (switch_cluster_pcb_w / 2 - boards_idc_w / 2 - 0.5);
-function hdrs(cl) = cl == "left_hand" ? [[mid_x(cl), hdr_y(cl)]]
+function hdrs_ribbon(cl) = cl == "left_hand" ? [[mid_x(cl), hdr_y(cl)]]
                   : [[mid_x(cl) - boards_idc_l6 / 2 - 1, hdr_y(cl)], [mid_x(cl) + boards_idc_l6 / 2 + 1, hdr_y(cl)]];
+// STACKED (routing.chain_stack): the thumb -> key-board hops plug straight
+// through, where the two boards overlap along the body, on the side away from
+// the ribbon lane. Each board then keeps one ribbon header at its far end
+// from the stack - RT's IN from the carrier, RH's OUT and LT's IN for the hop
+// between the hands - and LH needs none.
+stack_pairs = [["right_thumb", "right_hand"], ["left_thumb", "left_hand"]];
+function xspan(cl) = [min(xs(cluster_keys(cl))), max(xs(cluster_keys(cl)))];
+function stack_c(pr) = let(a = xspan(pr[0]), b = xspan(pr[1]))
+    [(max(a[0], b[0]) + min(a[1], b[1])) / 2, W / 2 - sgn(loom_side) * (switch_cluster_pcb_w / 2 - boards_stack_w / 2 - 0.5)];
+function stack_of(cl) = [for (pr = stack_pairs) if (pr[0] == cl || pr[1] == cl) stack_c(pr)];
+function hdrs(cl) = !routing_chain_stack ? hdrs_ribbon(cl)
+                  : cl == "left_hand" ? []
+                  : [[stack_of(cl)[0][0] < mid_x(cl) ? mid_x(cl) + boards_idc_l6 / 2 + 1 : mid_x(cl) - boards_idc_l6 / 2 - 1, hdr_y(cl)]];
 function is_top(cl) = cl == "left_hand" || cl == "right_hand";
 function hdr_end_z(cl) = is_top(cl) ? top_z - boards_idc_mated_h : thumb_z + boards_idc_mated_h;
 // Carrier top, from its mouth edge (a placeholder layout, M4's to make):
@@ -742,9 +760,14 @@ carrier_hdr = [[carrier_x0 + boards_sensor_body + 4 + boards_tall_l + 4 + boards
                [carrier_x0 + 1 + boards_idc_w / 2,
                 sensor_c[1] - sgn(routing_tube_lane) * (boards_sensor_leads / 2 + 1 + boards_idc_l5 / 2)]];
 module headers_3d() {
-    for (cl = chain) for (i = [0 : len(hdrs(cl)) - 1])
+    for (cl = chain) if (len(hdrs(cl)) > 0) for (i = [0 : len(hdrs(cl)) - 1])
         idc(str("J-CHAIN ", cl, " ", i + 1), hdrs(cl)[i], boards_idc_l6, is_top(cl) ? top_z : thumb_z - 0,
             is_top(cl) ? -1 : 1, switch_pcb_t);
+    // Stacking headers: one solid from the thumb board's top face to the key
+    // board's underside, named for the pair.
+    if (routing_chain_stack) for (pr = stack_pairs) let(c = stack_c(pr))
+        P([0.12, 0.12, 0.14], false, str("J-STACK ", pr[0], " to ", pr[1]))
+            translate([c[0] - boards_stack_l / 2, c[1] - boards_stack_w / 2, thumb_z]) cube([boards_stack_l, boards_stack_w, top_z - thumb_z]);
     idc("J-CHAIN carrier", carrier_hdr[0], boards_idc_l6, carrier_top, 1, switch_pcb_t);
     idc("J-DISP carrier", carrier_hdr[1], boards_idc_l5, carrier_top, 1, switch_pcb_t, along_y = true);
 }
@@ -761,12 +784,14 @@ module parts_3d() {
             linear_extrude(boards_cluster_smt_h) difference() {
                 offset(-0.5) cluster_window_2d(cluster_keys(cl));
                 for (h = hdrs(cl)) translate(h) square([boards_idc_l6 + 1, boards_idc_w + 1], center = true);
+                if (routing_chain_stack) for (h = stack_of(cl)) translate(h) square([boards_stack_l + 1, boards_stack_w + 1], center = true);
             }
     for (cl = ["left_thumb", "right_thumb"])
         P([0.35, 0.55, 0.40], false, str("parts ", cl)) translate([0, 0, thumb_z])
             linear_extrude(boards_cluster_smt_h) difference() {
                 offset(-3) thumb_outline_2d(cl);
                 for (h = hdrs(cl)) translate(h) square([boards_idc_l6 + 1, boards_idc_w + 1], center = true);
+                if (routing_chain_stack) for (h = stack_of(cl)) translate(h) square([boards_stack_l + 1, boards_stack_w + 1], center = true);
             }
     P([0.35, 0.55, 0.40], false, "parts carrier underside") translate([carrier_x0, W / 2 - boards_carrier_w / 2, carrier_z - boards_smt_h])
         cube([boards_carrier_l, boards_carrier_w, boards_smt_h]);
@@ -810,7 +835,7 @@ module routing_3d() {
     P([0.30, 0.30, 0.75], false, "key-chain loom") union() {
         ribbon([carrier_exit, [carrier_exit[0], carrier_exit[1], over_z], [carrier_exit[0], ry, over_z],
                 [carrier_x0 - 2, ry, over_z], [carrier_x0 - 20, ry, kz],
-                [mid_x("left_hand") - boards_idc_l6, ry, kz]], d);
+                [min([for (cl = chain) for (h = hdrs(cl)) h[0]]) - boards_idc_l6 / 2, ry, kz]], d);
         for (cl = chain) for (h = hdrs(cl)) let(ez = hdr_end_z(cl) + (is_top(cl) ? 3 : -3), sp = side_pt(h, ez))
             ribbon([[h[0], ry, kz], [h[0], sp[1], kz], sp], d);
     }
@@ -895,7 +920,7 @@ module drc_report() {
     // socket under the Matrix, and its envelope under the key plate. Every
     // term above moves one for one with T, so the shortfall adds directly.
     t_min = T + max(ec_sock_c[1] + max(ec_sock[1], ec_plug[1]) / 2 + ec_clear - under_m,
-                    ec_c[1] + ec_env[1] / 2 + ec_clear - z_lid_bot);
+                    ec_c[1] + ec_env[1] / 2 + ec_clear - z_oak_top_bot);
     drc(T >= t_min, "body thickness takes the etherCON on the floor, its rear socket under the Matrix", T - t_min,
         str("mm spare; the thinnest body that does is ", t_min, " mm (envelope.thickness)"));
     mc = (top_last + cap_edge_rel + L) / 2 - matrix_xy[0];
@@ -1013,8 +1038,14 @@ module drc_report() {
     ec_in = ec_panel_x - ethercon_depth;
     drc(carrier_x1 < ec_in, "carrier clears the etherCON body", ec_in - carrier_x1, "mm along X");
     ec_lo = ec_c[1] - ec_env[1] / 2; ec_hi = ec_c[1] + ec_env[1] / 2;
-    drc(ec_lo >= z_floor && ec_hi <= z_lid_bot, "etherCON body inside the cavity height",
-        [ec_lo, ec_hi, z_floor, z_lid_bot], "body Z range vs cavity Z range; outside = through-cuts in the oak at the tail");
+    drc(ec_lo >= z_floor && ec_hi <= z_oak_top_bot, "etherCON body inside the cavity height",
+        [ec_lo, ec_hi, z_floor, z_oak_top_bot], "body Z range vs cavity Z range at the tail, where the key plate has ended");
+    drc(plate_x1 - (tail_fastener_x + tap_d_m3 / 2) >= 2, "key plate reaches past the last fastener pair",
+        plate_x1 - (tail_fastener_x + tap_d_m3 / 2), "mm of plate beyond the tap hole; the plate stops short of the Matrix");
+    drc(T - openings_matrix_acrylic_t - matrix_top_z >= 0.3, "LED tops under the frosted window",
+        T - openings_matrix_acrylic_t - matrix_top_z, "mm, LED tops to the acrylic's underside - the board's top face is against the oak");
+    drc(boards_matrix_emitters <= openings_matrix_window - 0.5, "LED array fits the window opening it stands in",
+        openings_matrix_window - boards_matrix_emitters, "mm across, opening less the array");
     fl_margin = min(ec_c[1] - ec_fl[1] / 2, T - (ec_c[1] + ec_fl[1] / 2));
     drc(fl_margin >= 0, "etherCON flange fits behind the tail cap", fl_margin, "mm, the smaller of above and below the flange, inside the cap's height");
     // The bore is what is cut from the cap; the flange only clamps against it.
