@@ -19,8 +19,8 @@ The `Dir` and `Peer` columns are defined once in
 | marker straps | out | `cluster/key-register` | `marker-bits` | Into the parallel inputs. Copper straight to a rail, two per device, one high and one low |
 | free-bit pull-ups | out | `cluster/key-register` | `free-bits`, `key-pullup-qty` | Into the parallel inputs. An `R-KEY-PU` and nothing else — no switch, no series resistor, no capacitor |
 | switch positions | in | `cluster/key-switch-network` | — | The networked positions, fitted and reserved, take the rest of the allocation |
-| the serial bit stream | out | `interfaces/key-chain-loom` | `chain-connectors` | The allocation rides on the chain order, which `cluster-boards.md` fixes and may yet change |
-| `3V3`, `GND` | ref | `interfaces/key-chain-loom` | — | The chain bus, `cluster-boards.md` §3. The straps land directly on the rails and share no component with the key networks they are read as vouching for |
+| the serial bit stream | out | `interfaces/key-chain-loom` | — | The allocation rides on the chain order, `config/key-layout.yaml`'s. Since ADR 0017 no reordering saves any wiring, so it is not expected to change |
+| `3V3`, `GND` | ref | `interfaces/key-chain-loom` | — | The chain's rails — main-board copper for `right_thumb` and `left_thumb`, the ribbon on a key board. The straps land directly on the rails and share no component with the key networks they are read as vouching for |
 
 ## §4 The 32 bits
 

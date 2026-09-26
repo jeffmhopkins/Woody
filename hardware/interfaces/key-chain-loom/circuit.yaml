@@ -6,21 +6,22 @@
 # before adding or trusting an edge here.
 
 id: interfaces/key-chain-loom
-title: Key chain loom — carrier to four cluster boards
-last_reviewed: '2026-09-21'
+title: Key chain — main board to two key boards
+last_reviewed: '2026-09-26'
 depends_on:
 - adr:0001
-- adr:0002
 - adr:0009
+- adr:0016
+- adr:0017
 - fig:chain-conductors
 - fig:chain-connectors
 - fig:free-bits
 - fig:key-pullup-qty
 - fig:marker-bits
 - refdes:F-CHAIN
-- refdes:HDR-DEV
+- refdes:FFC-CHAIN
 - refdes:J-CHAIN
-- refdes:LK-SER
+- refdes:PCB-CLUSTER
 - refdes:R-CHAIN-SER
 - refdes:R-SER-TERM
 - refdes:U-TVS-CHAIN

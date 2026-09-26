@@ -1,7 +1,7 @@
 # AUTHORITATIVE for connectivity - and this circuit is mostly COPPER.
 #
 # The marker straps are traces to a rail: two per device, one high and one
-# low, eight across the four boards, and not one of them is a part. The free
+# low, eight across the four devices, and not one of them is a part. The free
 # bits are an R-KEY-PU and nothing else - no switch, no series resistor, no
 # capacitor. So there are three components here and eight strap connections
 # with no component to hang on.

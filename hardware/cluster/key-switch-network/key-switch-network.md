@@ -2,7 +2,8 @@
 
 *`## §2` of [`../cluster-boards.md`](../cluster-boards.md), moved verbatim
 2026-09-21 when that page was split into a board page and its circuits. One
-network per switch position, repeated across the four boards; the section
+network per switch position, repeated across the four clusters — two on the
+main board, one on each key board (ADR 0017); the section
 number is left as it was written. The switch's plate cutout and the footprint
 it solders into are `§5 Mechanical` on the board page.*
 
@@ -17,15 +18,15 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `3V3` | in | `interfaces/key-chain-loom` | `key-pullup-qty` | Chain bus pin 10 of `J-CHAIN`, `cluster-boards.md` §3. What `R-KEY-PU` pulls to. It is also the MCP3202's reference, which is what makes the static draw a live trade rather than a free one |
+| `3V3` | in | `interfaces/key-chain-loom` | `key-pullup-qty` | The chain's 3V3 rail: a trace on the main board, ribbon pin 10 on a key board. What `R-KEY-PU` pulls to. It is also the MCP3202's reference, which is what makes the static draw a live trade rather than a free one |
 | key input node | out | `cluster/key-register` | `key-release-time`, `key-press-time` | Both passives sit **at the register input**, millimetres from the switch |
 | `SW` | in | `SW-THUMB` | — | The KS-33 in its plate cutout, `cluster-boards.md` §5. Pressed = pulled LOW, through `R-KEY-SER` |
-| `GND` | ref | `interfaces/key-chain-loom` | — | The chain bus, five alternating grounds. `C-KEY` and the closed switch both return here |
+| `GND` | ref | `interfaces/key-chain-loom` | — | The main board's ground; on a key board, the ribbon's five alternating grounds. `C-KEY` and the closed switch both return here |
 | unfitted positions | — | `cluster/key-marker-and-bits` | `free-bits` | The reserved spare-switch positions carry the full network; the free bits carry a pull-up only, and the marker straps carry nothing |
 
 ---
 
-## §2 The key network — 21 of these, spread across four boards
+## §2 The key network — 21 of these, spread across the four clusters
 
 *Connectivity is **[`netlist.yaml`](netlist.yaml)**, not this drawing, and that
 file says `replicated: 21` — one network, built twenty-one times. `R-KEY-PU`
@@ -34,7 +35,7 @@ else; `tools/check-netlist.py` prints that shortfall by name every run.*
 
 
 ```
-   3V3 (from the loom, pin 10 of J-CHAIN)
+   3V3 (the chain rail: a main-board trace, or ribbon pin 10)
     │
     └──[R-KEY-PU 2k2 1%]──┬────────────────────► 74HC165 parallel input
                           │                 │
@@ -111,7 +112,7 @@ else; `tools/check-netlist.py` prints that shortfall by name every run.*
 | Release, τ = 2.2 kΩ × 47 nF = 103.4 µs | crosses `V_IH` at **119.9 µs** |
 | Press, τ = (2.2 kΩ ∥ 100 Ω) × 47 nF = 4.496 µs | crosses `V_IL` at **5.92 µs** — 42× inside the 250 µs scan |
 | Pole | 1.54 kHz → **54 dB** at the WS2815's 800 kHz data rate |
-| Static | **1.43 mA** per closed key; 19 closed = **27.3 mA** off the loom's 3V3 |
+| Static | **1.43 mA** per closed key; 19 closed = **27.3 mA** off the chain's 3V3 |
 
 **Press is instant on the scan's timescale and release is filtered**, which is
 the asymmetric-debounce shape ADR 0001 wants — instant attack, filtered release

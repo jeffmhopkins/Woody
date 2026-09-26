@@ -1,7 +1,8 @@
 # AUTHORITATIVE for connectivity. The ASCII drawing in key-switch-network.md
 # is a REPRESENTATION of this file.
 #
-# ONE NETWORK, BUILT 21 TIMES, spread across four boards - `replicated: 21`.
+# ONE NETWORK, BUILT 21 TIMES, spread across the four clusters (two on the
+# main board, one on each key board) - `replicated: 21`.
 # That is the number the BOM buys of R-KEY-SER and C-KEY. R-KEY-PU is 24
 # because the three FREE BITS carry a pull-up and nothing else, and those
 # three belong to cluster/key-marker-and-bits rather than here; the global

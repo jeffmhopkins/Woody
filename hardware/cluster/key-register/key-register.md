@@ -2,9 +2,10 @@
 
 *The device itself: `## §1` of [`../cluster-boards.md`](../cluster-boards.md),
 moved verbatim 2026-09-21 when that page was split into a board page and its
-circuits. One of these sits on each of the four cluster boards. The chain bus
-it clocks from is `§3` of the board page, and the section number is left as it
-was written.*
+circuits. There are four: `right_thumb` and `left_thumb` on the main board,
+`right_hand` and `left_hand` on the key boards (ADR 0017). The chain that
+clocks them is [`key-chain-loom`](../../interfaces/key-chain-loom/key-chain-loom.md),
+which holds the hop map; the section number is left as it was written.*
 
 ## Interfaces
 
@@ -17,13 +18,13 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `SCK` | in | `interfaces/key-chain-loom` | `chain-conductors` | The chain bus, `cluster-boards.md` §3. Straight bus, IN to OUT, so any two boards take a plain straight-through ribbon |
+| `SCK` | in | `interfaces/key-chain-loom` | `chain-conductors` | One net to all four devices: a trace on the main board, pin 2 of the ribbon on a key board |
 | `SH/LD` | in | `interfaces/key-chain-loom` | `chain-conductors` | The chain bus. Falling edge loads the parallel inputs |
-| `SER` | in | `interfaces/key-chain-loom` | `chain-connectors` | The next board's `QH`, or the carrier through `LK-SER`. Point to point, not a bus — which is what forces two connectors on most boards |
-| `QH` | out | `interfaces/key-chain-loom` | `chain-connectors` | Toward the carrier, on `IN` pin 8. Bit 0 is the `H` input of the `right_thumb` device |
+| `SER` | in | `interfaces/key-chain-loom` | `chain-connectors` | Point to point: the next device's `QH`, or at the chain end `IO33` and its pull-up. On a key board it is always ribbon pin 6. Which device feeds which is the hop map in the key-chain netlist |
+| `QH` | out | `interfaces/key-chain-loom` | `chain-connectors` | Toward the MCU: on a key board, ribbon pin 8; `right_thumb`'s is a trace to the MCU. Bit 0 is the `H` input of the `right_thumb` device |
 | `A`…`H` | in | `cluster/key-switch-network`, `cluster/key-marker-and-bits` | `marker-bits`, `free-bits` | Eight parallel inputs per device: a switch network, a marker strap or a free bit |
-| `3V3` | in | `interfaces/key-chain-loom` | — | Chain bus pin 10, `cluster-boards.md` §3. `C-DECOUPLE-165` is the local reservoir this input has no other source for |
-| `GND` | ref | `interfaces/key-chain-loom` | `chain-conductors` | The chain bus, five alternating grounds. `C-DECOUPLE-165` returns here, at the package |
+| `3V3` | in | `interfaces/key-chain-loom` | — | The chain's 3V3 rail: a trace on the main board, ribbon pin 10 on a key board. `C-DECOUPLE-165` is the local reservoir this input has no other source for |
+| `GND` | ref | `interfaces/key-chain-loom` | `chain-conductors` | The main board's ground; on a key board, the ribbon's five alternating grounds. `C-DECOUPLE-165` returns here, at the package |
 
 ## §1 The device
 
@@ -65,7 +66,8 @@ open — the ordering half of it, anyway. Which *switch* lands on which input is
 §4.
 
 **The part is 74HC, not 74LVC**, and that is load-bearing rather than
-incidental. HC's slow edges make 265 mm of loom an ordinary lumped load instead
+incidental. HC's slow edges keep each hop — a ribbon and part of the main board — an
+ordinary lumped load instead
 of a transmission line, which is what removed the hazards that briefly sent
 these registers to the tail `[repo] 0001, bom.csv`. Same SOIC-16 footprint, so
 LVC with proper source termination remains the way back if E4 disagrees.

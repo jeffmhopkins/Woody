@@ -32,51 +32,132 @@ version: 1
 nets:
 
   # ======================================================================
-  # INSTRUMENT: the key chain, carrier to cluster boards
+  # INSTRUMENT: the key chain, main board to the two key boards (ADR 0017)
   # ======================================================================
 
   V3V3_CHAIN:
     kind: power
-    carries: "3V3 to the cluster boards, J-CHAIN pin 10"
+    carries: "3V3 to all four registers - main-board traces to right_thumb and left_thumb, J-CHAIN pin 10 of each ribbon to the key boards"
     driver: interfaces/key-chain-loom
     receivers: [cluster/key-register, cluster/key-switch-network, cluster/key-marker-and-bits]
 
   GND_CHAIN:
     kind: reference
-    carries: "Chain return, five alternating grounds on J-CHAIN pins 1/3/5/7/9"
+    carries: "Chain return: the main board's ground, and five alternating grounds on J-CHAIN pins 1/3/5/7/9 of each ribbon"
     figure: chain-conductors
     origin: interfaces/key-chain-loom
-    note: "It is the carrier's PWR_GND pour arriving on HDR-DEV's ground pins - a separate name for the five conductors in the ribbon, not a separate node"
+    note: "It is the main board's ground pour, carried to each key board by its ribbon's five grounds - a separate name for those conductors, not a separate node"
     reference: [cluster/key-register, cluster/key-switch-network, cluster/key-marker-and-bits]
 
   CHAIN_SCK:
     kind: signal
     domain: digital
-    carries: "Shift clock to the 74HC165 chain"
+    carries: "Shift clock to all four 74HC165s - one net, two by trace and two over the ribbons"
     driver: interfaces/key-chain-loom
     receivers: [cluster/key-register]
 
   CHAIN_SHLD:
     kind: signal
     domain: digital
-    carries: "Shift/load to the 74HC165 chain"
+    carries: "Shift/load to all four 74HC165s, one net like CHAIN_SCK"
     driver: interfaces/key-chain-loom
     receivers: [cluster/key-register]
+
+  # --- SER and QH: point to point, one hop per net ------------------------
+  #
+  # cluster/key-register is ONE schematic built four times, so it declares a
+  # generic CHAIN_SER in and CHAIN_QH out. WHICH INSTANCE SITS ON WHICH HOP is
+  # the hop map, and it lives in interfaces/key-chain-loom/netlist.yaml, which
+  # declares one port per instance pin (the _RT/_RH/_LT/_LH nets below) and
+  # joins them hop by hop. Neither side can be checked against the other while
+  # the register is one replicated schematic, so all ten are `per_board:` and
+  # the checker prints them by name. Chain order MCU <- RT <- RH <- LT <- LH.
 
   CHAIN_SER:
     kind: signal
     domain: digital
-    carries: "Serial in at the far end of the chain. POINT TO POINT, not a bus - which is why the connector count is 8 and not one per board"
+    carries: "A register's serial input - generic, one per instance; resolved per instance by the CHAIN_SER_* nets"
     figure: chain-connectors
     driver: interfaces/key-chain-loom
     receivers: [cluster/key-register]
+    per_board: true
 
   CHAIN_QH:
     kind: signal
     domain: digital
-    carries: "Serial out, back toward the MCU. Point to point, like SER"
+    carries: "A register's serial output - generic, one per instance; resolved per instance by the CHAIN_QH_* nets"
+    figure: chain-connectors
     driver: cluster/key-register
     receivers: [interfaces/key-chain-loom]
+    per_board: true
+
+  CHAIN_SER_RT:
+    kind: signal
+    domain: digital
+    carries: "right_thumb's SER, on the main board: right_hand's QH arriving on the right_hand ribbon's pin 8"
+    driver: interfaces/key-chain-loom
+    receivers: [cluster/key-register]
+    per_board: true
+
+  CHAIN_SER_RH:
+    kind: signal
+    domain: digital
+    carries: "right_hand's SER: left_thumb's QH, out on the right_hand ribbon's pin 6"
+    figure: chain-connectors
+    driver: interfaces/key-chain-loom
+    receivers: [cluster/key-register]
+    per_board: true
+
+  CHAIN_SER_LT:
+    kind: signal
+    domain: digital
+    carries: "left_thumb's SER, on the main board: left_hand's QH arriving on the left_hand ribbon's pin 8"
+    driver: interfaces/key-chain-loom
+    receivers: [cluster/key-register]
+    per_board: true
+
+  CHAIN_SER_LH:
+    kind: signal
+    domain: digital
+    carries: "left_hand's SER, the chain end: IO33 through R-CHAIN-SER, held high by R-SER-TERM, out on the left_hand ribbon's pin 6"
+    figure: chain-connectors
+    driver: interfaces/key-chain-loom
+    receivers: [cluster/key-register]
+    per_board: true
+
+  CHAIN_QH_RT:
+    kind: signal
+    domain: digital
+    carries: "right_thumb's QH - bit 0 onward, a main-board trace to the MCU (IO40). Reaches no connector"
+    driver: cluster/key-register
+    receivers: [interfaces/key-chain-loom]
+    per_board: true
+
+  CHAIN_QH_RH:
+    kind: signal
+    domain: digital
+    carries: "right_hand's QH, back on its ribbon's pin 8 to right_thumb's SER"
+    figure: chain-connectors
+    driver: cluster/key-register
+    receivers: [interfaces/key-chain-loom]
+    per_board: true
+
+  CHAIN_QH_LT:
+    kind: signal
+    domain: digital
+    carries: "left_thumb's QH, on the main board, out to the right_hand ribbon's pin 6"
+    driver: cluster/key-register
+    receivers: [interfaces/key-chain-loom]
+    per_board: true
+
+  CHAIN_QH_LH:
+    kind: signal
+    domain: digital
+    carries: "left_hand's QH, back on its ribbon's pin 8 to left_thumb's SER"
+    figure: chain-connectors
+    driver: cluster/key-register
+    receivers: [interfaces/key-chain-loom]
+    per_board: true
 
   KEY_BITS:
     kind: signal
@@ -157,14 +238,14 @@ nets:
   IO33:
     kind: signal
     domain: digital
-    carries: "SER out of the MCU, riding every hop to the far device's serial input"
+    carries: "SER out of the MCU to the chain end - left_hand's serial input, over its ribbon - for the self-test"
     driver: carrier/carrier
     receivers: [interfaces/key-chain-loom]
 
   IO40:
     kind: signal
     domain: digital
-    carries: "MISO into the MCU: the chain's QH, out of the nearest register"
+    carries: "MISO into the MCU: right_thumb's QH, the nearest register, by a main-board trace"
     driver: interfaces/key-chain-loom
     receivers: [carrier/carrier]
 

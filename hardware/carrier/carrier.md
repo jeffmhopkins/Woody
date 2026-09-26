@@ -74,11 +74,11 @@ instrument's only display). This page draws its one socket pair.
           │      │          │            │           │        │
    ┌──────▼──────▼───┐   ┌──▼────────┐ ┌─▼────────┐ ┌▼────────▼──────┐
    │ CHAIN DRIVE §3  │   │ ADC  §2   │ │'125  §5  │ │ SERVICE  §6    │
-   │ no registers,   │   │ MCP3202   │ │ LED data │ │ HDR-SERVICE    │
-   │ no key networks │   └───────────┘ └──────────┘ └────────────────┘
+   │ + RT, LT thumb  │   │ MCP3202   │ │ LED data │ │ HDR-SERVICE    │
+   │   registers     │   └───────────┘ └──────────┘ └────────────────┘
    └───┬─────────────┘
        │
-   J-CHAIN   2x6 IDC, chained through all four cluster boards (ADR 0001)
+   right_thumb, left_thumb registers on this board; J-CHAIN to each key board
 ```
 
 ---
@@ -210,15 +210,15 @@ and both are board decisions, not firmware ones.
   *Still open*.
 
 ---
-## §3 Chain drive — what is left after the registers went back
+## §3 Chain drive
 
-*§3 moved verbatim to
+*§3 is
 [`../interfaces/key-chain-loom/`](../interfaces/key-chain-loom/key-chain-loom.md),
-together with `cluster-boards.md` §3, because the chain is one circuit with an
-end on each board — the conductor count and the fusing are decided here, the
-pinout and the chain-end link there, and neither half states what runs down the
-body. Both pages' drawings went with it whole. The section number is kept
-because other pages cite `carrier.md` §3.*
+which holds the whole chain: the `right_thumb` and `left_thumb` registers on
+this board, the two flat flex ribbons to the key boards, and this board's
+chain parts — `R-CHAIN-SER`, `R-SER-TERM`, `U-TVS-CHAIN`, `F-CHAIN` and its two
+`J-CHAIN`. The section number is kept because other pages cite `carrier.md`
+§3.*
 
 ---
 
@@ -302,17 +302,17 @@ page and have no BOM entry yet.
 |---|---|---|---|
 | `U-MCU-RT` | ESP32-S3-Matrix | The instrument. Socketed on `HDR-DEV` | `[repo]` |
 | `HDR-DEV` | 2 × 10-way machined socket | **One board's worth** — there is one dev board (ADR 0015) | `[board-def]` for the pin count |
-| ~~`U-KEYS`, `R-KEY-PU`, `R-KEY-SER`, `C-KEY`, `C-DECOUPLE-165`~~ | — | **Not on this board.** 4 ICs and 63 passives moved to `PCB-CLUSTER` with ADR 0001's per-cluster decision. They are still in the BOM, against the cluster boards | `[repo] 0001, bom.csv` |
-| **`R-CHAIN-SER`** ×3 | **100 Ω** | **Proposed — series at the driving end on `SCK`, `SH/LD` and `SER`. ADR 0001 deleted `R-TERM-CHAIN` because series termination is wrong for a line that drops on four boards; this is edge-rate damping at the source, which is a different job and survives that argument** | proposed |
-| **`U-TVS-CHAIN`** | **4-ch array, SOT-23-6** | **Proposed — the chain's four signals leave the board and run the body. `U-TVS-SPI` does exactly this for the umbilical's three** | proposed |
-| **`F-CHAIN`** | **100 mA polyfuse** | **Proposed — the 3V3 conductor runs 265 mm beside 12 V LED power through the body, and a short on it takes the LDO and the instrument down** | proposed |
+| `U-KEYS`, `R-KEY-PU`, `R-KEY-SER`, `C-KEY`, `C-DECOUPLE-165` | — | **Half of them are on this board since ADR 0017**: the `right_thumb` and `left_thumb` clusters. The other two clusters are on the key boards. Counts per cluster are `cluster-boards.md`'s component table | `[repo] 0017, bom.csv` |
+| **`R-CHAIN-SER`** ×3 | **100 Ω** | **Open — series at the driving end on `SCK`, `SH/LD` and the chain-end `SER`. Edge-rate damping, not termination; E14 decides. `key-chain-loom.md`** | open |
+| **`U-TVS-CHAIN`** | **4-ch array, SOT-23-5** | **Open — the three MCU nets the ribbon connectors expose, for service handling with the lid off. The owner decides. `key-chain-loom.md`** | open |
+| **`F-CHAIN`** | **100 mA polyfuse** | **Open — the chain's 3V3 feed; the short it covers is a ribbon seated skewed at re-assembly, which would take the LDO and the instrument down. `key-chain-loom.md`** | open |
 | `U-BUF` | OPA2197IDR | ½ reference buffer, ½ breath buffer, both on +12 V | `[repo]` |
 | `U-BREATH` + `SKT-BREATH` | MPXV4006DP, case 1351-01 | P1 to the tube, P2 open to the cavity | `[repo]`; **P1 identity open** |
 | `R-SER-BREATH-INST` | 1 kΩ | Output protection. **No series cap here** | `[repo]` |
 | `D-TVS-BREATH` ×2 | 12 V standoff, SOD-323 | `BREATH` and `AGND` legs | `[repo]` |
 | `R-SPI-SER` ×3 | **100 Ω** | Series at the driving end on `SCLK`, `MOSI`, `CS`. **Was drawn as three refdes that are not in the BOM, at 220 Ω, derived from an RC model** — see §4 | `[repo] bom.csv` |
 | `U-TVS-SPI` | SP0504BAHT, **SOT-23-5** | `SCLK`, `MOSI`, `CS` + spare, to `PWR_GND` | `[repo]` |
-| **`J-CHAIN`** | **2×6 IDC boxed, keyed** | **Chained through four cluster boards. 4 signals, 5 alternating grounds, 3V3, 2 spare. EIGHT of them across five boards — `SER`/`QH` are point-to-point, so every cluster board but the last has an IN and an OUT (qty in `bom.csv`)** | **decided** |
+| **`J-CHAIN`** ×2 here | **12-way 1.0 mm FFC ZIF** | **One per key-board ribbon (`FFC-CHAIN`); the mates are on the key boards (`chain-connectors` in all). 4 signals, 5 alternating grounds, 3V3, 2 spare. Part open until M4. `key-chain-loom.md`** | ribbon decided (ADR 0017), part open |
 | `MECH-GNDBOND` | Ring terminal + M3 | Plate to `PWR_GND`. Needs a pad and a hole on this board | `[repo]` |
 | `PCB-CARRIER` | 2-layer, **outline TBD** | See *Still open* | `[repo]` says ~100 × 45 mm; not checked |
 | **`TP-*`, `LK-*`** | **TBD** | **Proposed — `D2` asked for test points, shunt links and an LA header on this board and none exist in the BOM** | proposed |
@@ -340,7 +340,7 @@ buffer and the other is the breath buffer.*
 | Grounds, alternating — one between every pair, **decided** | 5 |
 | Chain supply: 3V3 | 1 |
 | Two spare conductors (ADR 0009) | 2 |
-| **Key loom, all four clusters, chained — `J-CHAIN` is 2×6** | **12** |
+| **Key chain, per key-board ribbon — `J-CHAIN` is 12-way** | **12** |
 | WS2815: 12 V, GND, `DI`, `BI` to ground — one strip, on this board (ADR 0016) | 4 |
 | Plate ground bond | 1 |
 | **Terminating on this board, excluding the umbilical** | **~18** |
@@ -382,12 +382,12 @@ Ordered by what blocks what. The first four block layout.
 - **The board outline** is now derived by the body CAD (the main board,
   ADR 0017, `mechanical/DESIGN.md`), with the strip on it (ADR 0016). What is still open
   is the routing inside that outline.
-- **`F-CHAIN`** (§3): whether the 3V3 conductor going down the body is fused.
-  Two millimetres of board, unretrofittable, and the failure it covers is
-  "the instrument is dead and there is no way to look inside".
+- **`F-CHAIN`** (§3): whether the chain's 3V3 feed to the key-board ribbons
+  is fused. Two millimetres of board; the short it covers is a ribbon seated
+  skewed when the lid goes back on (`key-chain-loom.md`).
 
-> **Two items were decided rather than left open.** `J-CHAIN` is **2×6** with
-> a ground between every signal (§3). And the key pull-ups **may** share the
+> **Two items were decided rather than left open.** `J-CHAIN` is **12-way**
+> with a ground between every signal (§3). And the key pull-ups **may** share the
 > ADC's reference: 27.3 mA of play-rate load worth 3.4 LSB on a ~1594-count
 > playable span, as a gain term rather than an offset. **Accepted, not
 > ignored** — §2 exists so that when the breath reading twitches on a chord,

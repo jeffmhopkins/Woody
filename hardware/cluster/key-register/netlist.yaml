@@ -1,9 +1,14 @@
 # AUTHORITATIVE for connectivity. The ASCII drawing in key-register.md is a
 # REPRESENTATION of this file.
 #
-# ONE SCHEMATIC, FOUR BOARDS. `replicated: 4` is what says so, and it is what
-# makes the BOM arithmetic come out: one 74HC165 and one decoupler per board,
-# four rows' worth in hardware/bom.csv.
+# ONE SCHEMATIC, FOUR INSTANCES - right_thumb and left_thumb on the main
+# board, right_hand and left_hand on the key boards (ADR 0017). `replicated: 4`
+# is what says so, and it is what makes the BOM arithmetic come out: one
+# 74HC165 and one decoupler per cluster.
+#
+# CHAIN_SER AND CHAIN_QH ARE GENERIC, one per instance. Which instance sits on
+# which hop is interfaces/key-chain-loom/netlist.yaml's hop map, and
+# hardware/nets.yaml marks both `per_board:` for that reason.
 #
 # THE EIGHT PARALLEL INPUTS ARE NOT NETTED, AND THAT IS THE HONEST ANSWER.
 # Which of A..H is a switch, a marker strap or a free bit is DIFFERENT ON
@@ -32,12 +37,12 @@ components:
   U-KEYS:
     value: "74HC165"
     pins: [SHLD, CLK, CLKINH, QH_BAR, GND, SER, QH, VCC, A, B, C, D, E, F, G, H]
-    note: "74HC AND NOT 74LVC, and that is load-bearing: HC's slow edges make 265 mm of loom an ordinary lumped load. Bit order out is H first, then G F E D C B A"
+    note: "74HC AND NOT 74LVC, and that is load-bearing: HC's slow edges keep each hop an ordinary lumped load. Bit order out is H first, then G F E D C B A"
 
   C-DECOUPLE-165:
     value: "100nF"
     pins: [1, 2]
-    note: "AT the package, on this board. A 74x165's output edges brown out a local rail with no reservoir, and the chain bus is the only other source"
+    note: "AT the package, on this board. A 74x165's output edges brown out a local rail with no reservoir, and on a key board the ribbon is the only other source"
 
 nets:
 
