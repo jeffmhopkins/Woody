@@ -159,7 +159,7 @@ quiescent current, and no lighting clamp.
 | Typical play | 226 mA | 248 mA | **359 mA** | 4.1 W |
 | Typical + live config over WiFi | 336 mA | 248 mA | **414 mA** | 4.7 W |
 | **Clamp-legal worst** | 928 mA | 119 mA | **579 mA** | 6.5 W |
-| Clamp fails, strips latched full white | 1023 mA | 1023 mA | **~1522 mA** | ~17 W |
+| Clamp fails, strips latched full white (two runs — one since ADR 0016) | 1023 mA | 1023 mA | **~1522 mA** | ~17 W |
 
 **The 5 V rail is where the danger is, not the umbilical.** The same 3 W of
 light costs 531 mA on the umbilical if it is spent on the strips and 579 mA if
@@ -187,7 +187,7 @@ and every number above is superseded the moment it does.
 ### Power tree
 
 ```
-umbilical +12V ──┬── WS2815 LED strips          (direct, no conversion)
+umbilical +12V ──┬── WS2815 LED strip (one, ADR 0016; direct, no conversion)
                  │
                  ├── REF5050 5.000V ──[OPA2197 ½]── MPXV4006DP breath sensor
                  │

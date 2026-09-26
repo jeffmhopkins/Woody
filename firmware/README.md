@@ -3,7 +3,7 @@
 **One image** ([ADR 0015](../docs/decisions/0015-one-mcu-no-display.md)):
 
 - `realtime/` — the ESP32-S3-Matrix. Keys, breath, IMU, DAC loop, the LED
-  strips and the 8×8 matrix (the only display), USB MIDI and USB
+  strip (one, ADR 0016) and the 8×8 matrix (the only display), USB MIDI and USB
   configuration. Owns all state and persistence. This is the instrument.
 
 There is no display board and no radio: WiFi and BLE stay off.
@@ -114,7 +114,7 @@ gasket. Everything here exists so that it never has to be the answer.
 
 ## The lights are instrument-side, and so is everything about them
 
-**The strips and the matrix read the MCU's own digitised breath value.** Not
+**The strip and the matrix read the MCU's own digitised breath value.** Not
 the jack, not anything that has been through the module's panel knobs — there
 is no return path for that and no reason to want one. The lights show what the
 player is doing; the knobs scale what the rack receives. See ADR 0014.

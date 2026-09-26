@@ -614,8 +614,14 @@ lighting:
     status: tbd
     source: "WS2815 strip thickness, bare IP30 [from memory]; the MANIFEST strip-geometry row is BLOCKED"
     decided_by: "the strip in hand"
-  strip_gap:
-    value: 3.0
+  # ONE STRIP, ON THE CENTRE BOARD (ADR 0016): LEDs up, lighting both acrylic
+  # sides through the cavity. There is no side strip and no diffusion gap.
+  strip_inset:
+    value: 1.0
+    status: nominal
+    source: "the strip's edge and ends in from the centre board's edges - a model choice"
+  strip_per_m:
+    value: 60
     status: tbd
-    source: "ADR 0009 / ADR 0014: the diffusion gap is a prototype question"
-    decided_by: "M6 prototype"
+    source: "LEDs per metre; hardware/unplaced.csv LED-STRIP orders 60/m"
+    decided_by: "M6 prototype - how evenly the cavity diffuses decides whether 30/m is enough"

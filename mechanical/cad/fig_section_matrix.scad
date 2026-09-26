@@ -7,7 +7,6 @@ use <lib/annot.scad>
 figure = true;
 cut = "x2d";
 cut_key = "matrix";
-show_strips = false;
 assembly();
 xr = -4;
 module lv(zv, s, dz = 0) {

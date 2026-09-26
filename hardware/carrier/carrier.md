@@ -60,17 +60,17 @@ instrument's only display). This page draws its one socket pair.
    │  §2              │   │  §1         │        │  §4        │
    └──────────────────┘   └──────┬──────┘        └─────┬──────┘
                                  │                     │
-              +12V ──────────────┼─────────────────────┼──── J-LED-L/R (strips)
+              +12V ──────────────┼─────────────────────┼──── J-LED (strip)      
                5V ───────────────┤                     │
                                  │                     │
        ┌─────────────────────────▼─────────────────────▼──────────────┐
        │              HDR-DEV  —  ESP32-S3-Matrix socket              │
-       │   5V GND 3V3 | IO7 IO6 IO5 IO4 IO3 IO2 IO1                   │
+       │   5V GND 3V3 | IO7 IO6 IO5 IO4 IO3 IO2 IO1  (IO2 IO5 IO6 spare)│
        │   IO33 … IO40 | IO43 IO44                                    │
        │   (onboard: IMU GPIO10-13, 8×8 matrix GPIO14, USB GPIO19/20) │
        └──┬──────┬──────────┬────────────┬───────────┬────────────────┘
           │      │          │            │           │
-      3V3 │  SPI3+latch  SPI2+2×CS   IO1/IO2              IO43/IO44
+      3V3 │  SPI3+latch  SPI2+2×CS   IO1                  IO43/IO44
           │      │          │            │           │        │
    ┌──────▼──────▼───┐   ┌──▼────────┐ ┌─▼────────┐ ┌▼────────▼──────┐
    │ CHAIN DRIVE §3  │   │ ADC  §2   │ │'125  §5  │ │ SERVICE  §6    │
@@ -244,7 +244,7 @@ The section number is kept because other pages cite `carrier.md` §4.*
 
 ---
 
-*§5 LED data — the 74AHCT125 gates, `R-LED-PD`, `R-LED-SER`, `J-LED-L/R` and
+*§5 LED data — the 74AHCT125 gates, `R-LED-PD`, `R-LED-SER`, `J-LED` and
 the WS2815 `V_IH`/`BI` argument — moved verbatim to
 [`led-strip-drive/`](led-strip-drive/led-strip-drive.md). §6 service header —
 `HDR-SERVICE` — is in [`service-uart/`](service-uart/service-uart.md).*
@@ -322,7 +322,7 @@ page and have no BOM entry yet.
 `breath-adc/`;
 `U-REF-BREATH`, `C-REF-OUT` and `R-FB-REF`/`R-FBX-REF`/`C-FB-REF` to
 `breath-excitation-reference/`; `U-LVLSHIFT`, `R-LED-PD`, `R-LED-SER` and
-`J-LED-L/-R` to `led-strip-drive/`; `U-BUCK`, `L-BUCK-IN`, `C-BUCK-IN`,
+`J-LED` to `led-strip-drive/`; `U-BUCK`, `L-BUCK-IN`, `C-BUCK-IN`,
 `D-USBOR`, `D-REVSHUNT`, `D-TVS-PWR` and `C-STRIP-BULK` to
 `power-entry-instrument/`; `HDR-SERVICE` to `service-uart/`. `U-BUF` stayed: one half of it is the reference
 buffer and the other is the breath buffer.*
@@ -341,29 +341,28 @@ buffer and the other is the breath buffer.*
 | Chain supply: 3V3 | 1 |
 | Two spare conductors (ADR 0009) | 2 |
 | **Key loom, all four clusters, chained — `J-CHAIN` is 2×6** | **12** |
-| WS2815: 12 V, GND, `DI` per strip (+`BI` if needed) | 6–8 |
+| WS2815: 12 V, GND, `DI`, `BI` to ground — one strip, on this board (ADR 0016) | 4 |
 | Plate ground bond | 1 |
-| **Terminating on this board, excluding the umbilical** | **~19–21** |
+| **Terminating on this board, excluding the umbilical** | **~18** |
 | Umbilical (`J-UMB`) | 8 |
 
 **The first draft of this table said ~53 and called the repo's "~23" wrong.**
 `[repo] 0001, WIRE-LOOM, ROADMAP` That was the tail-register arithmetic — 35
 conductors of key loom, one per switch. **On the per-cluster topology the
 repo's figure is approximately right after all**, and this page withdraws the
-objection. ~19–21 against ~23, since the display loom went with the display
-board (ADR 0015).
+objection. ~18 against ~23, since the display loom went with the display
+board (ADR 0015) and the second strip went with ADR 0016.
 
 **Termination is not the problem.** `[calc]` As IDC boxed headers, ~20
 conductors occupy roughly 170 mm² including keepout (250 mm² × 20/29). Even
 single-row 2.54 mm headers would fit — 20 × 2.54 = 51 mm of board edge — though IDC is still the right choice for a
 loom that is hand-terminated once and then closed up.
 
-**Where they go is the problem.** `[calc]` 57 mm external less 2 × 4 mm acrylic
-`[repo] 0009` = **49 mm internal**. `PCB-CARRIER` at 45 mm leaves **2 mm per
-side** for two channels that ADR 0009 and ADR 0014 jointly require to carry two
-WS2815 strips (~10 mm wide each `[from memory]`), the key loom and the 400 mm
-tube. **A 45 mm-wide carrier and open side channels are still mutually
-exclusive**, and the board outline still depends on the M4 plan section.
+**Where they go was the problem, and the body CAD has answered it.** There is
+no side strip since ADR 0016: the one strip lies on the centre board itself,
+and the board's outline, the tube lane beside it and what each keeps from the
+other are derived in `mechanical/` — `mechanical/drc.echo` "centre board
+(derived)" gives the size.
 
 **But the per-cluster decision bought real room here**, which is worth saying
 because the width crunch was one of the arguments in play: the channels now
@@ -380,10 +379,9 @@ Ordered by what blocks what. The first four block layout.
 - **Which face of the dev board carries the matrix, and its outline and header
   row spacing** (§7). Decides underside-mount versus a ~22 mm cutout, and with
   it the whole board's routing.
-- **The board outline, against a plan section at the tail** — carrier, two LED
-  strips, one 8–11 way key loom, the breath tube and the
-  U-bolt in 49 mm of internal width and ~20 mm of cavity. "~100 × 45 mm" is an
-  assumption, not a fit — but a less tight one than the four-ribbon draft had.
+- **The board outline** is now derived by the body CAD (the centre board,
+  `mechanical/DESIGN.md`), with the strip on it (ADR 0016). What is still open
+  is the routing inside that outline.
 - **`F-CHAIN`** (§3): whether the 3V3 conductor going down the body is fused.
   Two millimetres of board, unretrofittable, and the failure it covers is
   "the instrument is dead and there is no way to look inside".

@@ -477,17 +477,22 @@ plate_x1 = matrix_xy[0] - boards_matrix_board / 2 - 1;
 usb_plug_x0 = openings_matrix_usb_to_tail ? matrix_xy[0] + boards_matrix_board / 2 : matrix_xy[0] - boards_matrix_board / 2 - openings_usb_plug_l;
 // The tail equipment starts at the first of that plug and the patch plug.
 // The last fastener pair stands just in front of it - beside the Matrix the
-// patch plug runs down the side lane - and the LED strips stop short of that.
+// patch plug runs down the side lane.
 tail_equip_x = min(usb_plug_x0, L - ends_tail_cap_t - ethercon_depth - ethercon_rj45_plug_l);
 tail_fastener_x = tail_equip_x - tail_fastener_back;
+fastener_notch = 1.5 + boards_board_clear;   // an M3's radius and a clearance: what a board or a run keeps from a screw
 
 // Six fasteners up from the bottom into the plate, zig-zagging between the
 // long edges ~80 mm apart (ADR 0009).
 // Three stations of two, one each side: in the mouth band before the first
 // boards, in the gap between the hands, and between the last key board and
 // the connector. ADR 0009's "~80 mm apart" was for a 457 mm body; on the
-// derived body the stations fall where the keys are not.
-fastener_x = [(x_in0 + x_lh0 - board_lead) / 2, (x_gap0 + x_rh0) / 2, tail_fastener_x];
+// derived body the stations fall where the keys are not. The gap station
+// stands in front of the breath sensor's leads if the middle of the gap is
+// too close to them: the far-side screw passes through the centre board's
+// edge there (ADR 0016 put the sensor on that side).
+function sensor_x() = kspan("right_hand")[0] - boards_board_clear - boards_sensor_body / 2;
+fastener_x = [(x_in0 + x_lh0 - board_lead) / 2, min((x_gap0 + x_rh0) / 2, sensor_x() - 5.1 - fastener_notch - 0.5), tail_fastener_x];
 function fasteners() =
     [for (x = fastener_x, sd = [0, 1]) [x, sd == 0 ? u_y0 + hardware_fastener_inset : W - u_y0 - hardware_fastener_inset]];
 
@@ -622,31 +627,22 @@ module tail_equipment() {
         [x_in1 - openings_usb_ext_depth - 4, usb_c[0], usb_c[1]], [x_in1 - openings_usb_ext_depth, usb_c[0], usb_c[1]]], 4);
 }
 
-// ADR 0014 sized the strips at 420 mm for a 457 mm body. They now start
-// 10 mm in from the mouth cap and stop 3 mm short of the last fastener pair,
-// in front of the tail equipment - the USB-C plug and lead, the patch plug,
-// the etherCON - which fills the strips' side channels; drc.echo reports the
-// shortfall.
-strip_x0 = x_in0 + 10;
-strip_x1 = tail_fastener_x - 1.5 - 3;
-strip_run_adr = 420;
-strip_l = min(strip_run_adr, strip_x1 - strip_x0);
+// ONE LED STRIP, lying on the centre board (owner, 2026-09-26: "one led
+// strip, on the center board. It'll diffuse to both sides" - ADR 0016). It
+// runs the board's length along its tube-side edge, LEDs up, and lights
+// both acrylic sides through the cavity. Placed with the centre board below.
 module led_strips() {
-    for (s = [0, 1]) {
-        y = s == 0 ? u_y0 + lighting_strip_gap : W - u_y0 - lighting_strip_gap - lighting_strip_t;
-        P(C_LED, false, str("LED strip ", s == 0 ? "left" : "right")) translate([strip_x0, y, z_floor + cavity_h / 2 - lighting_strip_w / 2])
-            cube([strip_l, lighting_strip_t, lighting_strip_w]);
-    }
+    P(C_LED, false, "LED strip") translate([strip_x0, strip_y, cb_top]) cube([strip_l, lighting_strip_w, lighting_strip_t]);
 }
 
 // ------------------------------------------------------------ routing -----
 // The tube and the looms run along the two side channels at routing_lane_z,
-// inside the LED strips, and drop to what they serve. Lanes are a model
-// choice (config/body.yaml routing): the clash check reports what is in them.
-// The strip sits on the side's inside face; strip_gap is the diffusion gap
-// between them (ADR 0014), so the strip stands strip_gap in from the side.
-function lane_y(side, d) = side == "left" ? u_y0 + lighting_strip_gap + lighting_strip_t + 1 + d / 2
-                                          : W - u_y0 - lighting_strip_gap - lighting_strip_t - 1 - d / 2;
+// against the sides (there are no side strips since ADR 0016), and drop to
+// what they serve. Lanes are a model choice (config/body.yaml routing): the
+// clash check reports what is in them.
+// Inboard of the fastener line, which is close to the sides.
+function lane_y(side, d) = let(e = hardware_fastener_inset + fastener_notch + d / 2)
+    side == "left" ? u_y0 + e : W - u_y0 - e;
 tube_y = lane_y(routing_tube_lane, routing_tube_od);
 // A FLAT RIBBON through points: each segment is swept with the ribbon's
 // cross-section turned to suit its direction - lying FLAT along and across
@@ -686,13 +682,19 @@ function xspan(cl) = [min(xs(cluster_keys(cl))), max(xs(cluster_keys(cl)))];
 function tspan(cl) = let(p = [for (q = thumb_pts(cl)) q[0]]) [min(p) - (switch_keycap + 4) / 2, max(p) + (switch_keycap + 4) / 2];
 function kspan(cl) = xspan(cl) + [-1, 1] * (plate_cutout / 2 + cluster_margin);
 tube_side = sgn(routing_tube_lane);
-// Across: between the tube lane and the far LED strip, a clearance from each.
-cb_y = tube_side < 0 ? [tube_y + routing_tube_od / 2 + boards_board_clear, W - u_y0 - lighting_strip_gap - lighting_strip_t - boards_board_clear]
-                     : [u_y0 + lighting_strip_gap + lighting_strip_t + boards_board_clear, tube_y - routing_tube_od / 2 - boards_board_clear];
+// Across: from the tube lane to the far side, a clearance from each.
+cb_y = tube_side < 0 ? [tube_y + routing_tube_od / 2 + boards_board_clear, W - u_y0 - boards_board_clear]
+                     : [u_y0 + boards_board_clear, tube_y - routing_tube_od / 2 - boards_board_clear];
 cb_x = [kspan("left_hand")[0], kspan("right_hand")[1]];
 cb_z = thumb_z + boards_cluster_smt_h + boards_board_clear;          // underside
 cb_top = cb_z + switch_pcb_t;
 cb_room = top_z - boards_cluster_smt_h - boards_board_clear - cb_top;   // parts height under the key boards
+// The strip: the board's length less an inset at each end, along the tube-
+// side edge; the breath sensor and the regulator take the far side.
+strip_x0 = cb_x[0] + lighting_strip_inset;
+strip_l = cb_x[1] - lighting_strip_inset - strip_x0;
+strip_y = tube_side < 0 ? cb_y[0] + lighting_strip_inset : cb_y[1] - lighting_strip_inset - lighting_strip_w;
+strip_in = tube_side < 0 ? strip_y + lighting_strip_w : strip_y;   // its inner edge
 gap_x = [kspan("left_hand")[1] + boards_board_clear, kspan("right_hand")[0] - boards_board_clear];   // nothing overhead
 gap_room = z_lid_bot - boards_board_clear - cb_top;
 chain = ["right_thumb", "right_hand", "left_thumb", "left_hand"];
@@ -720,8 +722,8 @@ function stack_of(cl) = [for (pr = stack_pairs) if (pr[0] == cl || pr[1] == cl) 
 // on the centre board in the gap between the hands - the one place with
 // height for it - ports towards the mouth, on the tube's side. The lower barb
 // reaches the board's surface (p.7), so the board has a slot in front of it.
-// Mid-body.
-sensor_c = [gap_x[1] - boards_sensor_body / 2, cb_y[tube_side < 0 ? 0 : 1] - tube_side * (boards_sensor_leads / 2 + 0.5)];
+// Mid-body, on the far side from the tube: the strip has the tube's side.
+sensor_c = [sensor_x(), cb_y[tube_side < 0 ? 1 : 0] + tube_side * (boards_sensor_leads / 2 + 0.5)];
 sensor_face_x = sensor_c[0] - boards_sensor_body / 2;
 p2_y = sensor_c[1] + 2.1;
 p1_tip = [sensor_face_x - boards_sensor_port_l, sensor_c[1] - 2.1, cb_top + boards_sensor_port_z[0]];
@@ -740,15 +742,25 @@ module sensor_3d() {
 tall_sz = [boards_tall_w, boards_tall_l];   // along x, across y
 far_y = cb_y[tube_side < 0 ? 1 : 0] + tube_side * (boards_tall_l / 2 + 0.5);
 tall_c = [[cb_x[1] - boards_tall_w / 2 - 1, far_y]];
+// Is any key board overhead? Each key's board footprint taken as a
+// cluster_pcb_w square, unrotated - the window's gap-closing is ignored, so
+// this errs towards "clear"; the clash check has the real outline.
+function under_keys(c, sz) = len([for (cl = ["left_hand", "right_hand"], k = cluster_keys(cl))
+    if (abs(key_xy(k)[0] - c[0]) < (switch_cluster_pcb_w + sz[0]) / 2 && abs(key_xy(k)[1] - c[1]) < (switch_cluster_pcb_w + sz[1]) / 2) 1]) > 0;
+tall_room = under_keys(tall_c[0], tall_sz) ? cb_room : gap_room;
 module cb_2d() {
     difference() {
         translate([cb_x[0], cb_y[0]]) square([cb_x[1] - cb_x[0], cb_y[1] - cb_y[0]]);
         // The slot in front of the sensor's lower port.
         translate([sensor_face_x - boards_sensor_port_l - 2, p2_y - boards_sensor_port_d / 2 - 1])
             square([boards_sensor_port_l + 2 + EPS, boards_sensor_port_d + 2]);
+        // A notch for each screw the board's edge reaches.
+        for (f = fasteners()) translate(f) circle(r = fastener_notch);
     }
 }
-cb_standoffs = [for (x = [cb_x[0] + 4, gap_x[0] + 4, cb_x[1] - 4]) for (y = cb_y + [4, -4]) [x, y]];
+// Inboard of the strip on its side, 4 mm in from the far edge.
+cb_standoffs = [for (x = [cb_x[0] + 4, gap_x[0] + 4, cb_x[1] - 4])
+                for (y = [strip_in - tube_side * (1.5 + boards_standoff_d / 2), cb_y[tube_side < 0 ? 1 : 0] + tube_side * 4]) [x, y]];
 function over_thumb(p) = len([for (cl = ["left_thumb", "right_thumb"]) if (p[0] >= tspan(cl)[0] && p[0] <= tspan(cl)[1]) 1]) > 0;
 module centre_board_3d() {
     P(C_PCB, false, "centre board") translate([0, 0, cb_z]) linear_extrude(switch_pcb_t) cb_2d();
@@ -758,6 +770,7 @@ module centre_board_3d() {
         translate(sensor_c) square([boards_sensor_body + 1, boards_sensor_leads + 1], center = true);
         for (c = tall_c) translate(c) square(tall_sz + [1, 1], center = true);
         for (c = cb_standoffs) translate(c) circle(d = boards_standoff_d + 1);
+        translate([strip_x0 - 0.5, strip_y - 0.5]) square([strip_l + 1, lighting_strip_w + 1]);
     }
     P([0.30, 0.30, 0.55], false, "tall parts centre board")
         translate([tall_c[0][0] - tall_sz[0] / 2, tall_c[0][1] - tall_sz[1] / 2, cb_top]) cube([tall_sz[0], tall_sz[1], boards_tall_h]);
@@ -796,7 +809,7 @@ module parts_3d() {
 }
 
 module routing_3d() {
-    trap_y = u_y0 + lighting_strip_gap + lighting_strip_t + 1 + routing_trap_d / 2;
+    trap_y = u_y0 + boards_board_clear + routing_trap_d / 2;
     // The trap sits in the mouth band, before the first key and thumb boards
     // (between them there is no height for it). From it the tube runs down the
     // tube lane beside the centre board, between the cluster boards' parts,
@@ -811,7 +824,8 @@ module routing_3d() {
         cylinder(d = routing_trap_d, h = routing_trap_l);
     P([0.95, 0.60, 0.45], false, "breath tube to sensor") run([
         [trap_x0 + routing_trap_l, trap_y, trap_z], [trap_x0 + routing_trap_l + 10, tube_y, routing_lane_z],
-        [gap_x[0] + 2, tube_y, routing_lane_z], [p1_tip[0] - routing_tube_od - 1, p1_tip[1], p1_tip[2]],
+        // Up to the port's height first, so it crosses the strip clear of it.
+        [gap_x[0] + 2, tube_y, routing_lane_z], [gap_x[0] + 6, tube_y, p1_tip[2]], [p1_tip[0] - routing_tube_od - 1, p1_tip[1], p1_tip[2]],
         [p1_tip[0] + 2, p1_tip[1], p1_tip[2]]], routing_tube_od * 0.8);
 }
 
@@ -904,8 +918,10 @@ module drc_report() {
         drc(undef, "equal bands (mouth = between hands)", band,
             str("mm each; set by the ", band == mouth_req ? "mouth end" : "minimum gap",
                 " - mouth needs ", mouth_req, ", gap minimum ", layout_gap, "; the tail is sized on its own"));
-    drc(strip_l >= strip_run_adr, "LED strips at ADR 0014's length", strip_l,
-        str("mm per side against ", strip_run_adr, " in ADR 0014 - fewer LEDs per side if shorter"));
+    drc(undef, "LED strip on the centre board (derived)", strip_l,
+        str("mm, one strip lighting both sides (ADR 0016) - ", floor(strip_l * lighting_strip_per_m / 1000), " LEDs at ", lighting_strip_per_m, "/m"));
+    drc(p1_tip[2] - routing_tube_od * 0.4 >= cb_top + lighting_strip_t + boards_board_clear, "breath tube crosses the strip clear of it",
+        p1_tip[2] - routing_tube_od * 0.4 - cb_top - lighting_strip_t, "mm above the strip's top face");
     // Each run's end keys put half a cap into the neighbouring band - the
     // ADR 0009 table counts runs centre to centre.
     lh = xs(cluster_keys("left_hand")); rh = xs(cluster_keys("right_hand"));
@@ -978,14 +994,15 @@ module drc_report() {
 
     // The centre board (no carrier, 2026-09-26)
     drc(undef, "centre board (derived)", [cb_x[1] - cb_x[0], cb_y[1] - cb_y[0]],
-        str("mm long x wide, underside at ", cb_z, " mm - the length of the hands, between the tube lane and the far strip"));
+        str("mm long x wide, underside at ", cb_z, " mm - the length of the hands, from the tube lane to the far side"));
     drc(cb_room >= boards_smt_h, "centre board parts room under the key boards", cb_room,
         "mm from its top face to the key boards' parts, less the clearances - every part there must fit this");
     drc(undef, "centre board parts room in the gap between the hands", [gap_x[1] - gap_x[0], gap_room],
         "mm long x high, nothing overhead but the plate: the sensor and the tall parts go here");
     drc(boards_sensor_h <= gap_room, "breath sensor fits in the gap", gap_room - boards_sensor_h, "mm spare above it");
-    drc(boards_tall_h <= cb_room, "regulator block fits under the key boards", cb_room - boards_tall_h,
-        "mm spare - negative means low-profile parts: the bulk capacitors laid down or SMD polymer, the regulator an SMD module");
+    drc(boards_tall_h <= tall_room, "regulator block fits where it stands", tall_room - boards_tall_h,
+        str("mm spare, ", under_keys(tall_c[0], tall_sz) ? "under a key board" : "beside the key boards, clear to the lid",
+            " [approx: key board footprints as squares; clash.txt is the check] - negative means low-profile parts"));
     for (pr = stack_pairs) drc(stack_x(pr) != undef, str("stacking header ", pr[0], " to ", pr[1], " clear of both boards' switches"),
                                stack_x(pr) == undef ? "none found" : stack_x(pr), "mm along the body, midway between two thumb keys");
 

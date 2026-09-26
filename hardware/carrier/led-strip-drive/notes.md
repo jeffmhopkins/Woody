@@ -21,3 +21,11 @@ already struck through as closed. The argument it closes on is live and is in
 - ~~**The WS2815's data threshold, and whether `BI` needs driving**~~ —
   **closed 2026-09-21** against the datasheet, §5. 5 V logic is correct,
   `BI` is grounded at the head, two gates stay spare.
+
+## Two strips, until 2026-09-26
+
+Until ADR 0016 there were two WS2815 runs, one against each acrylic side,
+~420 mm each, on two data lines (GPIO1 and GPIO2, gates A and C) with a
+connector, a series resistor and a pull-down each (`J-LED-L`/`J-LED-R`). The
+owner moved to one strip lying on the centre board, lighting both sides
+through the cavity; GPIO2 and gate C became spare.

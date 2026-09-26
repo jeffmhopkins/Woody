@@ -88,7 +88,7 @@ renders:
     imgsize: [2000, 380]
     projection: o
     camera: [0, 22, 0, 0, 0, 0, 250]
-    defines: {origin: "centre", cut: "y2d", cut_at: 28.5, show_strips: false}
+    defines: {origin: "centre", cut: "y2d", cut_at: 28.5}
   - name: section-key
     title: Cross-section through RH3, seen from the tail
     src: mechanical/cad/fig_section_key.scad

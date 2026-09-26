@@ -40,9 +40,9 @@ the two agree, and where they do not the netlist wins.*
                      │   cathode to +12V   │
                      ├──[D-TVS-PWR SMAJ15A]┤
                      │                     │
-                     ├─────────────────────┼──── WS2815 strips, direct
-                     │                     │     (J-LED-L, J-LED-R)
-                     │                     │     [C-STRIP-BULK 470–1000 µF ×2]
+                     ├─────────────────────┼──── WS2815 strip, direct
+                     │                     │     (J-LED)
+                     │                     │     [C-STRIP-BULK 470–1000 µF]
                      │                     │
                      ├──[REF5050]──┬────────┼──── §2 analog
                      │   in  out   │        │
@@ -114,9 +114,11 @@ estimated**, so the figure is a range until E6 measures the rail.
 *Moved verbatim from `carrier.md`'s LED section, now `led-strip-drive.md`,
 where it sat beside the LED data drive.*
 
-**`C-STRIP-BULK` (470–1000 µF ×2) sits at the strip feed points**, which are on
+**`C-STRIP-BULK` (470–1000 µF) sits at the strip feed point**, which is on
 this board — "bulk capacitance belongs where the current swings" `[repo] 0014`.
-Two radial electrolytics are a height item in a ~20 mm cavity; see *Still open*.
+One strip since ADR 0016, so one capacitor. A radial electrolytic is a height
+item; it goes in the regulator block (`config/body.yaml` `boards.tall_h`) and
+`mechanical/drc.echo` says whether that fits.
 
 ---
 
@@ -133,7 +135,7 @@ named as they stand; **proposed** rows have no BOM entry yet.*
 | `D-USBOR` | SS14 | **Between the buck and the dev board's 5V pin** — the OR node is that pin, and USB can back-feed it | `[repo]` |
 | `D-REVSHUNT` | SS34 | At the connector, ahead of `L-BUCK-IN` | `[repo]` |
 | `D-TVS-PWR` | SMAJ15A | Across the power pair | `[repo]` |
-| `C-STRIP-BULK` ×2 | 470–1000 µF 16 V | At each strip feed point, which is this board | `[repo]` |
+| `C-STRIP-BULK` | 470–1000 µF 16 V | At the strip feed point, which is this board (one strip, ADR 0016) | `[repo]` |
 
 ---
 

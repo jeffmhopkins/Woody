@@ -23,9 +23,8 @@ ports:
   IO7:       {dir: out, to: interfaces/key-chain-loom}
   IO33:      {dir: out, to: interfaces/key-chain-loom}
   IO40:      {dir: in,  from: interfaces/key-chain-loom}
-  # to the LED strips
+  # to the LED strip
   IO1:       {dir: out, to: carrier/led-strip-drive}
-  IO2:       {dir: out, to: carrier/led-strip-drive}
   # to the service header
   U0TXD:     {dir: out, to: carrier/service-uart}
   U0RXD:     {dir: in,  from: carrier/service-uart}
@@ -58,9 +57,9 @@ components:
 
   U-MCU-RT:
     value: "ESP32-S3-Matrix"
-    pins: [IO1, IO2, IO7, IO33, IO34, IO35, IO36, IO37, IO38, IO39,
+    pins: [IO1, IO7, IO33, IO34, IO35, IO36, IO37, IO38, IO39,
            IO40, IO43, IO44, P3V3, P5V, GND]
-    note: "SOCKETED, NOT SOLDERED, which is HDR-DEV's whole rule. Its own LDO is the instrument's only 3V3, and EN and IO0 are NOT on its headers - IO0 is under the BOOT button and EN is on the reset circuit, so reaching either ends the board's life as a swappable module. IO5 and IO6 are SPARE (ADR 0015)"
+    note: "SOCKETED, NOT SOLDERED, which is HDR-DEV's whole rule. Its own LDO is the instrument's only 3V3, and EN and IO0 are NOT on its headers - IO0 is under the BOOT button and EN is on the reset circuit, so reaching either ends the board's life as a swappable module. IO5 and IO6 are SPARE (ADR 0015), and IO2 (ADR 0016)"
 
   HDR-DEV:
     value: "2.54mm female header strip"
@@ -158,15 +157,11 @@ nets:
     - port: IO40
     - U-MCU-RT.IO40
 
-  # --- the LED strips --------------------------------------------------
+  # --- the LED strip ---------------------------------------------------
 
   IO1:
     - U-MCU-RT.IO1
     - port: IO1
-
-  IO2:
-    - U-MCU-RT.IO2
-    - port: IO2
 
   # --- the service header ----------------------------------------------
 

@@ -2,8 +2,8 @@
 // resolve against the top-level file, which is why figures sit beside it.
 // The centre board - the one flat board between the thumb boards and the
 // key boards that carries the carrier's circuits - picked out: the lid off,
-// the board, its parts, the stacking headers, standoffs and the breath
-// sensor in bright yellow, everything else faded, each
+// the board, its parts, the LED strip, the stacking headers, standoffs and the
+// breath sensor in bright yellow, everything else faded, each
 // labelled from the same variables that place it. fig_view = "plan" is the
 // labelled view from above; "3d" is a perspective with only the title.
 include <woody_body.scad>
@@ -14,7 +14,7 @@ origin = "centre";
 fig_view = "plan";
 // A literal list: an override is evaluated where the model first assigns
 // highlight, before the model's own variables exist.
-highlight = ["centre board", "parts centre board", "tall parts centre board", "breath sensor",
+highlight = ["centre board", "parts centre board", "tall parts centre board", "breath sensor", "LED strip",
              "J-STACK right_thumb to right_hand", "J-STACK left_thumb to left_hand",
              "centre board standoff 1", "centre board standoff 2", "centre board standoff 3",
              "centre board standoff 4", "centre board standoff 5", "centre board standoff 6"];
@@ -32,6 +32,7 @@ module fig() {
         offset(-0.4) cb_2d();
     }
     if (fig_view == "plan") {
+        callout([strip_x0 + 24, strip_y + lighting_strip_w / 2, z], [strip_x0 + 20, top, z], "LED strip - lights both sides", size = s2, halign = "left");
         callout([tall_c[0][0], tall_c[0][1], z], [tall_c[0][0] - 2, top, z], "regulator + bulk caps", size = s2, halign = "right");
         callout([stack_x(stack_pairs[1]), stack_y, z], [stack_x(stack_pairs[1]) - 2, bot, z], "stacking header LT-LH", size = s2, halign = "right");
         callout([sensor_c[0], sensor_c[1], z], [sensor_c[0] + 2, bot, z], "breath sensor (gap)", size = s2);

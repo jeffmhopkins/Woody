@@ -569,7 +569,9 @@ flat parts, and not blocked.
   and mounts to the body at a few points.
 - Strap attachment points are hard points through the oak and must be designed
   in, not retrofitted (ADR 0005).
-- **The two side channels are shared: LED strips on both sides, looms alongside.**
+- *(Superseded (2026-09-26, [ADR 0016](0016-one-strip-on-the-centre-board.md)): there are no side strips; the one strip lies on the
+  centre board, and the side channels carry the tube and the looms.)*
+  **The two side channels are shared: LED strips on both sides, looms alongside.**
   An earlier revision assigned the channels to the wiring looms while ADR 0014
   assigned the same two to the LED strips — a direct contradiction between two
   accepted decisions, and one that made ADR 0014's own instruction ("keep the LED
@@ -692,7 +694,8 @@ went on bonding it. It does not any more.
 
 **One side is a U.** The oak bottom and the two frosted acrylic sides are
 assembled as a single channel — glued to each other, once, permanently. That
-sub-assembly is never taken apart again and it carries the LED strips.
+sub-assembly is never taken apart again. *(It carried the LED strips until
+ADR 0016 moved the one strip onto the centre board.)*
 
 **The other side pulls in on a notch.** The lid — oak top on the aluminium key
 plate — drops into a rebate cut along the top inside edge of each acrylic side.

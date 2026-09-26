@@ -38,17 +38,10 @@ components:
     pins: [A, K]
     note: "Across the power pair"
 
-  C-STRIP-BULK-L:
-    of: C-STRIP-BULK
+  C-STRIP-BULK:
     value: "470-1000uF"
     pins: [1, 2]
-    note: "At the J-LED-L feed point. Bulk belongs where the current swings, and the swing is at the strip"
-
-  C-STRIP-BULK-R:
-    of: C-STRIP-BULK
-    value: "470-1000uF"
-    pins: [1, 2]
-    note: "At the J-LED-R feed point"
+    note: "At the J-LED feed point. Bulk belongs where the current swings, and the swing is at the strip. One strip (ADR 0016)"
 
   L-BUCK-IN:
     value: "10-47uH"
@@ -86,8 +79,7 @@ nets:
     - port: UMBILICAL_POS12
     - D-REVSHUNT.K
     - D-TVS-PWR.K
-    - C-STRIP-BULK-L.1
-    - C-STRIP-BULK-R.1
+    - C-STRIP-BULK.1
     - L-BUCK-IN.1
 
   BUCK_IN:
@@ -107,8 +99,7 @@ nets:
     - port: PWR_GND
     - D-REVSHUNT.A
     - D-TVS-PWR.A
-    - C-STRIP-BULK-L.2
-    - C-STRIP-BULK-R.2
+    - C-STRIP-BULK.2
     - C-BUCK-IN.2
     - U-BUCK-A.GND
     - MECH-GNDBOND.1

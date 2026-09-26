@@ -1,6 +1,7 @@
 # 0014 — Lighting
 
-**Status:** Accepted
+**Status:** Accepted. Geometry and data-line wiring amended by
+[ADR 0016](0016-one-strip-on-the-centre-board.md): one strip, on the centre board.
 
 ## Requirement
 
@@ -19,6 +20,12 @@ and a blank-at-boot rule, and because the easiest way to get those wrong is to
 design them separately.
 
 ## Geometry: two runs, one chain
+
+> **Amended (2026-09-26, [ADR 0016](0016-one-strip-on-the-centre-board.md)): one strip, lying on the centre board, lighting both
+> sides through the cavity.** The centre board put a clear flat surface down
+> the middle of the body, which the "switch bodies occupy the centreline"
+> argument below predates. This section and the next are the record of the
+> two-run design.
 
 A single strip "down the middle" is not available — switch bodies occupy the
 centreline for the full length of both key runs (ADR 0009, ADR 0013). The free

@@ -97,8 +97,14 @@ Three things can claim each end, and the largest wins:
   a straight USB-C plug cost about 24 mm of body, which is why the plug is
   right-angle (`openings.usb_plug_l`).
 - **The last fastener pair** stands just in front of the tail equipment,
-  where the patch plug is not yet in the side lane; the LED strips stop short
-  of it, because the tail equipment fills their channels.
+  where the patch plug is not yet in the side lane.
+- **One LED strip, on the centre board** (ADR 0016): LEDs up along the
+  board's tube-side edge, the board's length less an inset, lighting both
+  sides through the cavity. There are no side strips, so the tube lane runs
+  just inboard of the fastener line and the board widens to the far side;
+  the breath sensor takes the far side, and the tube rises to its port
+  before it crosses the strip (*"breath tube crosses the strip clear of it"*).
+  How evenly the cavity lights the sides is an M6 prototype question.
 - **The matrix window is frosted acrylic, flush with the oak top, on a lip of
   oak** (owner, 2026-09-26): a rebate in the oak top's upper face as deep as
   the acrylic, over a smaller opening through the oak lip. Like the
@@ -186,11 +192,11 @@ decision, not a correction.
    already asks shared-versus-individual as an M2 question; the model says
    individual recesses need the arc spread further. The same rule catches
    placeholder fasteners landing on placeholder spares — move one.
-6. **The regulator blocks are too tall for the centre board under the
-   keys.** *Rule: "regulator blocks fit under the key boards".* The bulk
-   capacitors laid down or SMD polymer, the regulators SMD modules.
+6. **The regulator block** stands beside the key boards since the board
+   widened (ADR 0016), with the height to the lid. *Rule: "regulator block
+   fits where it stands".* Under a key board it would need low-profile parts.
 7. **The centre board is placed by the layout** — its length by the key
-   runs, its width by the tube lane and the strips — and its stacking headers
+   runs, its width by the tube lane and the far side — and its stacking headers
    are placed between two thumb keys, clear of both boards' switches, by the
    model (*"stacking header … clear of both boards' switches"*).
 8. **M3 into a 1.20 mm plate** is about two threads. The BOM already says
@@ -220,8 +226,9 @@ only as good as those envelopes. Group the report's lines by these causes
 3. **The breath tube** runs the tube lane beside the centre board, between
    the cluster boards' parts, to the gap between the hands and onto the
    sensor's port; the board has a slot in front of the lower port.
-4. **The M3 stations** run through the LED strips, and the middle pair
-   through the U-bolt backplate, which also overlaps the thumb plates.
+4. **The middle M3 pair** runs through the U-bolt backplate, which also
+   overlaps the thumb plates. (The stations ran through the side strips until
+   ADR 0016 removed them.)
 5. **The tail is clear.** The etherCON, its rear socket, the patch plug,
    the USB-C plug, receptacle and lead, the Matrix and the last fastener pair
    meet nothing, and the connector fits the cavity without cutting the oak.
