@@ -143,8 +143,17 @@ Three things follow, and they constrain the layout more than the key count does:
 **The grip patch and the key cluster must be separate.** If the keys sit where
 the thumb bears down while gripping, they will trigger constantly. The thumb has
 to *deliberately move* to reach them. This is the same principle as the right
-thumb's rest-versus-switches offset, and it means the plate needs a defined
+thumb's rest-versus-switches offset (two side by side toward the mouth in one
+row, one toward the tail — owner, 2026-09-26), and it means the plate needs a defined
 grip area that has no switches in it.
+
+> **Superseded 2026-09-26 (owner): the four keys are a STRAIGHT LINE down
+> the centreline — a pair, the thumb rest, a pair** ("the vertical line of two
+> keys, gap, two keys"; "thumb rest is between the keys, two above, two
+> below"). The rest is the defined grip area the paragraph above asks for,
+> with the switches on either side of it rather than swept around it. The arc
+> argument below is the record of the earlier layout; M2 tests the line.
+> Positions: `config/body.yaml` `layout.lt_*`.
 
 **The four keys lie on the thumb tip's sweep, not in a line.** The tip traces an
 arc as the thumb extends and rotates away from the grip. Laying the keys along
@@ -185,7 +194,12 @@ layout lock**, earlier than anything else in the mechanical track.
 
 The switches themselves are easily sourced and can be bought later. So:
 
-- **Reserve cutouts for three spare switches in the plate DXF** — the expected
+- *(Superseded in part 2026-09-26, owner: **no spare-switch cutouts.** The
+  right thumb is "only the three" and the left thumb its four in a line. The
+  three bits stay reserved and their networks stay fitted; a spare switch now
+  means recutting the thumb plate and the oak bottom, which the body allows
+  because it opens on six fasteners (ADR 0009).)*
+  **Reserve cutouts for three spare switches in the plate DXF** — the expected
   assignment is octave up, octave down, and a hold/preset input, which is what
   the 2021 firmware drove from key combinations and what dedicated inputs
   obviously improve.

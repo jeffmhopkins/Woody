@@ -69,7 +69,7 @@ component table.)*
 clusters are the ones near the carrier.
 
 **The two thumb clusters share one plate but cannot share one board.** ADR 0009
-puts the U-bolt in the ~50 mm band between the left thumb arc and the right
+puts the U-bolt in the ~50 mm band between the left thumb line and the right
 thumb rest `[repo] 0009` — exactly where a single bottom board would have to
 span. Two boards it is, and the four-board count in ADR 0001 survives for a
 mechanical reason rather than an electrical one.

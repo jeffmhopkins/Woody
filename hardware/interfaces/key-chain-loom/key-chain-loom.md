@@ -184,7 +184,7 @@ From `config/key-layout.yaml` `[repo]`:
 | Bits | Use | Whose board |
 |---|---|---|
 | 18 | Fitted switches | **Cluster boards** — network + trace to the switch |
-| 3 | Reserved spare switches (octave up, octave down, hold/preset) | **Cluster boards** — network fitted, pad unloaded. Plate cutouts at M3 `[repo] 0010` |
+| 3 | Reserved spare switches (octave up, octave down, hold/preset) | **Cluster boards** — network fitted, pad unloaded. **No cutouts** since 2026-09-26 (owner, ADR 0010): fitting one means recutting the thumb plate and oak bottom `[repo] 0010` |
 | 8 | Marker pattern | **Cluster boards** — hard-wired at the register input. Unretrofittable. **Decided 2026-09-21: 8, not 6** |
 | 3 | Genuinely free | **Cluster boards** — must be pulled `[repo] key-layout.yaml` |
 | **32** | | **None of them on this carrier** |

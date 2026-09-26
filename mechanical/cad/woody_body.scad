@@ -110,8 +110,13 @@ cluster_margin = 4;        // drawing convention: board edge past the outermost 
 // before the first key and thumb boards. Everything is measured from x_in0,
 // the inside face of the mouth cap.
 // The left-thumb cluster's extent relative to LH1 (x_lh0 = 0), recesses included.
-lt_rel = concat([for (i = [0 : 3]) layout_lt_arc_start + i * layout_lt_arc_length / 3], [layout_lt_arc_start, layout_lt_arc_start + layout_lt_arc_length]);
-board_lead = max(plate_cutout / 2 + cluster_margin, (switch_keycap + 4) / 2 - min(lt_rel));   // first key board / thumb board edge before LH1
+// A straight line: a pair, the thumb rest, a pair (owner, 2026-09-26).
+lt_rel = [for (i = [0 : 3]) layout_lt_start + (i < 2 ? i * layout_lt_pitch : layout_lt_pitch + layout_lt_rest + (i - 2) * layout_lt_pitch)];
+// The breath trap sits mid-height, above the left thumb board's parts, so
+// it has to clear the first KEY board and the centre board, not the thumb
+// board (which starts further towards the mouth since the thumb line did):
+// clash.txt checks the trap against the thumb board.
+board_lead = plate_cutout / 2 + cluster_margin;   // first key board edge before LH1
 trap_band = boards_board_clear + routing_trap_l + boards_board_clear;
 mouth_req = max(x_in0 + layout_mouth_extra + switch_keycap / 2 + stack_cap_clear,   // the first top cap
                 x_in0 + layout_underside_clear - (min(lt_rel) - rc / 2),              // the first thumb recess
@@ -186,25 +191,20 @@ function prov_xy(k) =
     let(cl = k[6], i = key_n(k) - 1, n = count(cl), c = W / 2)
     cl == "left_hand"  ? [x_lh0 + cum(layout_lh_gaps, i), c + layout_lh_offsets[i]] :
     cl == "right_hand" ? [x_rh0 + cum(layout_rh_gaps, i), c + layout_rh_offsets[i]] :
-    cl == "left_thumb" ? lt_arc(i / (n - 1)) :
+    cl == "left_thumb" ? [x_lh0 + lt_rel[i], c] :
     cl == "right_thumb" ? rt_xy(i) : [0, 0];
 
-// The left thumb's four keys lie on the tip's sweep, mostly along the body
-// (ADR 0010). A half-sine bulge of lt_arc_lateral across a lt_arc_length run.
-function lt_arc(t) = [x_lh0 + layout_lt_arc_start + t * layout_lt_arc_length,
-                      W / 2 - layout_lt_arc_lateral / 2 + layout_lt_arc_lateral * sin(180 * t)];
+// The thumb rest: the gap in the middle of the left-thumb line.
+lt_rest_xy = [x_lh0 + (lt_rel[1] + lt_rel[2]) / 2, W / 2];
 rt_rest = [x_rh0, 0] + rt_rest_rel;
-// Right-thumb control switches, offset from the rest (ADR 0010): one toward
-// the tail, two flanking it toward the mouthpiece. Placeholder geometry.
+// Right-thumb control switches, offset from the rest (ADR 0010): two side by
+// side toward the mouthpiece, in one row across the body, and one toward the
+// tail (owner, 2026-09-26: "two up, one down"). Placeholder geometry.
 function rt_xy(i) = [x_rh0, 0] + rt_rel(i);
-// Three spare-switch cutouts, required in the DXF by M3 (ADR 0010): octave
-// up and down extend the left-thumb arc, hold sits before the right thumb.
-// Straight extensions of the arc's end keys - the half-sine is not
-// extrapolated, it leaves the body.
-lt_step = layout_lt_arc_length / (count("left_thumb") - 1);
-// Beside the arc's end keys, across the body - extending the arc along it
-// cost length the owner asked to remove (2026-09-26). Placeholders for M2.
-spare_xy = [lt_arc(0) + [0, lt_step], lt_arc(1) + [0, lt_step], rt_rest - [1.6 * layout_rt_offset, 0]];
+// NO SPARE-SWITCH CUTOUTS (owner, 2026-09-26: the right thumb is "only the
+// three", the left thumb the four in a line). ADR 0010 reserved three; the
+// chain bits stay reserved (config/key-layout.yaml), the cutouts do not.
+spare_xy = [];
 
 // THE TAIL END, and so the length. Past the last top key: its cluster board's
 // overhang, a clearance, and the etherCON's depth behind the tail face - the
@@ -352,8 +352,7 @@ module oak_bottom_2d() {
 }
 
 // The outline a thumb cluster's plate and board share, before cutouts.
-function thumb_pts(cl) = concat([for (k = cluster_keys(cl)) key_xy(k)],
-                                cl == "left_thumb" ? [spare_xy[0], spare_xy[1]] : [spare_xy[2]]);
+function thumb_pts(cl) = [for (k = cluster_keys(cl)) key_xy(k)];
 module thumb_outline_2d(cl) {
     intersection() {
         hull() for (p = thumb_pts(cl)) translate(p) square(switch_keycap + 4, center = true);
@@ -366,8 +365,6 @@ module thumb_plate_2d(cl) {
     difference() {
         thumb_outline_2d(cl);
         for (k = cluster_keys(cl)) cutout_at(key_xy(k), key_rot(k), plate_cutout);
-        for (s = (cl == "left_thumb" ? [spare_xy[0], spare_xy[1]] : [spare_xy[2]]))
-            cutout_at(s, 0, plate_cutout);
     }
 }
 module thumb_plate_both_2d() { thumb_plate_2d("left_thumb"); thumb_plate_2d("right_thumb"); }
@@ -497,7 +494,7 @@ function fasteners() =
     [for (x = fastener_x, sd = [0, 1]) [x, sd == 0 ? u_y0 + hardware_fastener_inset : W - u_y0 - hardware_fastener_inset]];
 
 // U-bolt in the inter-hand gap on the bottom face (ADR 0009); legs ACROSS the
-// body, since the shortened gap has no room along it beside the thumb arc.
+// body, since the shortened gap has no room along it beside the left thumb line.
 ubolt_c = [(x_gap0 + x_rh0) / 2, W / 2];
 function ubolt_legs() = [for (s = [-1, 1]) ubolt_c + [0, s * hardware_ubolt_span / 2]];
 
@@ -568,7 +565,7 @@ module switch_at(xy, rot, top, name, spare = false) {
 
 module keys_3d() {
     for (k = keys) switch_at(key_xy(k), key_rot(k), key_face(k) == "top", k[0]);
-    for (i = [0 : len(spare_xy) - 1]) switch_at(spare_xy[i], 0, false, str("spare ", i + 1), true);
+    for (i = [0 : 1 : len(spare_xy) - 1]) switch_at(spare_xy[i], 0, false, str("spare ", i + 1), true);
 }
 
 module thumb_plates_3d() {
@@ -809,7 +806,7 @@ module parts_3d() {
 }
 
 module routing_3d() {
-    trap_y = u_y0 + boards_board_clear + routing_trap_d / 2;
+    trap_y = lane_y(routing_tube_lane, routing_trap_d);   // inboard of the fastener line, like the tube
     // The trap sits in the mouth band, before the first key and thumb boards
     // (between them there is no height for it). From it the tube runs down the
     // tube lane beside the centre board, between the cluster boards' parts,
@@ -961,7 +958,7 @@ module drc_report() {
     // Everything cut through the oak bottom, pairwise: [name, centre, size].
     rc = switch_keycap + 2 * thumb_recess_clear;
     feats = concat([for (k = bottom_keys) [k[0], key_xy(k), [rc, rc]]],
-                   [for (i = [0 : 2]) [str("spare ", i + 1), spare_xy[i], [rc, rc]]],
+                   [for (i = [0 : 1 : len(spare_xy) - 1]) [str("spare ", i + 1), spare_xy[i], [rc, rc]]],
                    [                    ["service opening", service_xy, [openings_service_cover_w, openings_service_cover_l]],
                     for (u = ubolt_legs()) ["U-bolt leg", u, [hardware_ubolt_rod_d, hardware_ubolt_rod_d]]],
                    [for (i = [0 : len(fasteners()) - 1]) [str("M3 #", i + 1), fasteners()[i], [hardware_fastener_cbore_d, hardware_fastener_cbore_d]]]);

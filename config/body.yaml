@@ -186,23 +186,28 @@ layout:
     status: nominal
     source: "[research] as lh_gaps; soprano R1-R2-R3 20.8/20.1, R3-R4 18.0. A 0 GAP IS A SIDE-BY-SIDE PAIR: RH4 / RH5 share the first little-finger position, RH6 is the single key one step further down (owner, 2026-09-26)"
     decided_by: "M2 - replaced key by key by x/y in config/key-layout.yaml"
-  lt_arc_length:
-    value: 57.0
-    status: nominal
-    source: "[adr] ADR 0010 'roughly 57 mm of travel down the body'"
-  lt_arc_lateral:
-    value: 20.0
-    status: nominal
-    source: "[adr] ADR 0010 'perhaps 15-25 mm of lateral deviation' - the middle of it"
-  lt_arc_start:
-    value: 10.0
+  # THE LEFT THUMB IS A STRAIGHT LINE down the body's centreline (owner,
+  # 2026-09-26: "the vertical line of two keys, gap, two keys"; "thumb rest
+  # is between the keys, two above, two below"). LT1 LT2, the rest, LT3 LT4.
+  lt_start:
+    value: -16.0
     status: tbd
-    source: "ADR 0010 puts the arc 'underneath the left-hand key run' and a grip patch clear of it; the offset from the run's first key is a placeholder, small enough that the arc and its two spare cutouts stay under the run"
+    source: "LT1's position along the body from LH1 (negative = towards the mouth); placed so the rest sits under the first left-hand keys and LT4 clears the U-bolt"
     decided_by: "M2 - hands on the mule"
+  lt_pitch:
+    value: 22.0
+    status: tbd
+    source: "centre to centre within each pair: a thumb recess (keycap + clearance) and a 3 mm oak web, rounded up [calc]"
+    decided_by: "M2"
+  lt_rest:
+    value: 40.0
+    status: tbd
+    source: "LT2 to LT3 centre to centre, across the thumb rest: ~21.5 mm clear between the recesses, about a thumb pad [calc]; longer and LT4 meets the U-bolt legs (drc.echo)"
+    decided_by: "M2"
   rt_rest_at:
     value: 0.35
     status: tbd
-    source: "ADR 0010: the right thumb rests, and its three switches sit offset from the rest. Fraction of the RH run from its first key"
+    source: "ADR 0010: the right thumb rests, and its three switches sit offset from the rest - two side by side towards the mouth, one below (owner, 2026-09-26). Fraction of the RH run from its first key"
     decided_by: "M2"
   rt_offset:
     value: 20.0

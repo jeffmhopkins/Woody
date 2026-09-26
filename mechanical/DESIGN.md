@@ -187,11 +187,12 @@ decision, not a correction.
 4. **The display set the mouth end — resolved by the owner.** It is gone
    (ADR 0015), and the mouth end is now the equal band. *Rule: "what the
    mouth end needs".*
-5. **Individual thumb recesses leave almost no oak between them** at the
-   ADR 0010 arc spacing. *Rule: "oak-bottom cuts at least 3 mm apart".* ADR 0010
-   already asks shared-versus-individual as an M2 question; the model says
-   individual recesses need the arc spread further. The same rule catches
-   placeholder fasteners landing on placeholder spares — move one.
+5. **Thumb recesses and the oak between them.** *Rule: "oak-bottom cuts at
+   least 3 mm apart".* Since the left thumb became a straight line with the
+   rest in the middle and the spare cutouts went (owner, 2026-09-26), every
+   pair passes; the line's length is limited by the U-bolt legs at its tail
+   end (*"U-bolt legs clear of the thumb recesses"*). The arc and spares
+   before it left 0.5 mm webs; that history is in git.
 6. **The regulator block** stands beside the key boards since the board
    widened (ADR 0016), with the height to the lid. *Rule: "regulator block
    fits where it stands".* Under a key board it would need low-profile parts.

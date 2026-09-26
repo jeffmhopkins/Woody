@@ -69,7 +69,9 @@ they are useless.** A free bit has no plate cutout and no switch. The body bonds
 shut. You cannot add a switch to one without cutting the plate, and the plate is
 generated at M3 and fitted before bonding `[repo] 0009, 0010`. The three
 positions that *are* retrofittable are the reserved spare-switch bits, which
-have cutouts and are untouched by this proposal. **So the trade is: two bits
+have their networks fitted and are untouched by this proposal. *(They had
+cutouts too until 2026-09-26; the owner removed them, ADR 0010, so fitting
+one now means recutting the thumb plate and oak bottom.)* **So the trade is: two bits
 that could never be used against per-device fault detection in both
 directions.**
 
@@ -126,8 +128,8 @@ circuit, moved verbatim 2026-09-21. `§4` is this page.*
 
 - **Where the 3 reserved spare-switch positions go.** Proposed on `right_thumb`
   as the control cluster; placement is an M2 decision with hands on the mule
-  `[repo] key-layout.yaml`, and it decides which board carries them **and which
-  plate gets the cutouts.**
+  `[repo] key-layout.yaml`, and it decides which board carries them. There
+  are no cutouts for them (owner, 2026-09-26, ADR 0010).
 - **Whether the last 3 free bits should be marker bits too**, making it 11.
   The argument that took the marker from 6 to 8 — a free bit has no plate
   cutout and the body bonds shut, so it can never become a switch — applies to
