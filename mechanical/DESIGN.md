@@ -82,7 +82,7 @@ Several things can claim each end, and the largest wins:
 - **The tail is stacked** (owner, 2026-09-26: "it's unacceptable to go this
   long" and "the matrix can be up higher out of the way and still allow the
   connectors"). The Matrix **sits against the oak top** under its window,
-  wired by a pigtail: the key plate stops short of it, so the board's top
+  wired by a ribbon: the key plate stops short of it, so the board's top
   face is on the oak and its LEDs stand up into the window opening, under the
   acrylic (owner, same day: "led matrix tighter to the acrylic"). Under it, side by side: the extension's **right-angle USB-C plug**
   off its mouth edge, and — because the NE8FDP is a feedthrough with an RJ45
@@ -123,7 +123,7 @@ Several things can claim each end, and the largest wins:
   registers and the carrier's circuits are on one board at the thumb level,
   from the mouth cap to the end of the right hand, the full width inside the
   sides. Its parts face up; the two key boards connect to it by ribbons (below);
-  the Matrix's pigtail and the patch lead end on it. It has holes
+  the Matrix's ribbon and the patch lead end on it. It has holes
   over the U-bolt's nuts, notches at the screws, and standoffs off the oak or
   the thumb plates wherever nothing else is (*"main board standoffs found
   clear of everything"*); the soldered thumb switches carry it between them.
@@ -243,8 +243,8 @@ only as good as those envelopes. Group the report's lines by these causes
    ADR 0016 removed them.)
 5. **The Matrix and the umbilical are wired onto the main board's tail
    end** (owner, 2026-09-26). The Matrix, on the lid, has a flat 20-way
-   ribbon soldered to its two pad rows (its 12 used GPIO, 5V, 3V3 and six
-   grounds): out past its mouth edge above the patch plug, down in the gap
+   ribbon soldered to its two pad rows (its 12 used GPIO, 5V, 3V3 and its
+   one GND pad; the other five positions are open on `CBL-MCU-RIBBON`): out past its mouth edge above the patch plug, down in the gap
    between the right-hand key board's end and the plug, and level into
    J-MCU beside the regulator block; it unplugs there when the lid comes
    off. The etherCON's patch lead runs from its plug in an S-bend at the

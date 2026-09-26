@@ -617,8 +617,8 @@ module tail_equipment() {
         cube([boards_matrix_board, boards_matrix_board, switch_pcb_t]);
     P(C_LED, false, "Matrix LEDs") translate([matrix_xy[0] - boards_matrix_emitters / 2, matrix_xy[1] - boards_matrix_emitters / 2, matrix_board_z + switch_pcb_t])
         cube([boards_matrix_emitters, boards_matrix_emitters, boards_matrix_led_h]);
-    // The Matrix's pigtail where it leaves the two pad rows, below the board;
-    // the wires run on to the main board (not drawn - thin wires).
+    // The Matrix's ribbon where it leaves the two pad rows, below the board;
+    // it runs on to J-MCU (drawn with the tail wiring).
     for (i = [0, 1]) P([0.15, 0.15, 0.15], false, str("Matrix harness ", i + 1))
         translate([matrix_xy[0] - 12.7, matrix_xy[1] + (i == 0 ? -1 : 1) * 11.43 - 1.27, matrix_board_z - boards_matrix_harness_h])
             cube([25.4, 2.54, boards_matrix_harness_h]);   // rows 22.86 apart [ds]

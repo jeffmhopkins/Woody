@@ -335,7 +335,7 @@ of the power pads is ground `[repo] datasheets/mechanical/WAVESHARE-ESP32-S3-MAT
 
 - **the spare GPIO pads, IO2–IO6** — ADR 0009's spare conductors reach this
   board, and one conductor returns the Matrix's LED current and every signal;
-- **five more grounds** — what ADR 0017's "six grounds" needs. They have to be
+- **five more grounds** — what the body model's first sizing of this ribbon assumed. They have to be
   soldered to ground points on the Matrix off its pad rows, and the ribbon
   then carries no spares.
 

@@ -331,7 +331,8 @@ thumb keys and the U-bolt:
 > its LEDs standing up into the opening (owner, 2026-09-26: "the matrix can
 > be up higher out of the way and still allow the connectors", then "tighter
 > to the acrylic"), wired to the
-> carrier by a pigtail soldered to its pads, so **the carrier cutout below is
+> carrier by a pigtail soldered to its pads *(since ADR 0017: a 20-way
+> ribbon, soldered to its pads, into J-MCU on the main board)*, so **the carrier cutout below is
 > no longer needed** and which face carries the LEDs stops being a risk. The
 > etherCON's rear socket and the patch plug pass **under** it, beside its
 > USB-C plug, so only the connector's housing queues behind it; the connector
@@ -447,7 +448,10 @@ definition accounts for every pin on the ESP32-S3-Matrix's two header rows —
 three power and seventeen GPIO — and neither appears. They exist on the board
 (`IO0` under the BOOT button, `EN` on the reset circuit) but reaching them
 means soldering to the dev board, which would end its life as a socketed,
-swappable module. Not worth it, because the header was never the first line of
+swappable module. *(Amended 2026-09-26: since ADR 0017 the ribbon is
+soldered to the Matrix anyway and nothing is socketed, so this reason is
+gone; whether to wire `EN` and `IO0` is open again —
+`hardware/carrier/service-uart/`.)* Not worth it, because the header was never the first line of
 defence. Roughly 12 × 40 mm, two M2 screws into the plate stack,
 in the same laminated layer as the window.
 
@@ -469,7 +473,8 @@ why losing the boot-force pins is acceptable:
 
 What is given up is forcing the boot mode by hand when software cannot — and
 that is now **recoverable rather than terminal.** The body opens on six
-fasteners, the dev boards are socketed, and a corrupted *bootloader* means
+fasteners, the dev boards are socketed *(since ADR 0017: the Matrix unplugs
+at J-MCU and its ribbon is desoldered)*, and a corrupted *bootloader* means
 taking the lid off and swapping or re-flashing a board on the bench. This
 paragraph used to end "ends the instrument", which was true of a bonded body
 and is not true of this one. Still inconvenient, still behind three
@@ -631,6 +636,9 @@ pull-up, so without them every key input floats in a channel shared with 12 V
 LED power and 800 kHz data — 10 kΩ, 100 Ω and 10 nF per switch position on the
 cluster boards (ADR 0001).
 
+*(Amended 2026-09-26: since ADRs 0016 and 0017 there is no hand-built loom.
+The key boards are on flat flex and the Matrix on a 20-way ribbon; how its
+spare positions are used is open on `CBL-MCU-RIBBON`.)*
 **Run two spare conductors in every internal loom.** The looms are hand-built,
 once, and threaded through channels in a glued sub-assembly. The lid comes off,
 but the looms do not re-route themselves. A spare pair costs a few cents and

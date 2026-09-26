@@ -389,12 +389,13 @@ boards:
     decided_by: "M4, with the standoff bought"
   # THE LED MATRIX IS ON THE TOP FACE, just past the last key (owner,
   # 2026-09-26), face up against the oak top under its window, the key plate
-  # ending short of it; the connectors pass beneath it. A pigtail soldered to
-  # its pads runs to the main board.
+  # ending short of it; the connectors pass beneath it. A 20-way ribbon soldered to
+  # its pads runs to J-MCU on the main board (hardware/carrier/bom.csv
+  # CBL-MCU-RIBBON).
   matrix_harness_h:
     value: 2.5
     status: tbd
-    source: "below the Matrix: a pigtail soldered straight to its pads, wires bent flat [from memory]. Crimp housings on a pin header stood ~16.5 and put a row across the patch plug"
+    source: "below the Matrix: the ribbon soldered straight to its pads, wires bent flat [from memory]. Crimp housings on a pin header stood ~16.5 and put a row across the patch plug"
     decided_by: "M4, with the harness built"
   matrix_under_h:
     value: 3.2
@@ -523,7 +524,7 @@ ethercon:
     decided_by: "M4, with the latch direction chosen on the tail face"
   # THE NE8FDP IS A FEEDTHROUGH: its back is an RJ45 socket, so inside the
   # instrument a short patch lead plugs into it (hardware/bom.csv
-  # J-UMBILICAL-CABLE). The mated plug and boot stand inboard of the body,
+  # CBL-UMB-PATCH). The mated plug and boot stand inboard of the body,
   # and the lead runs on to the main board.
   rj45_plug_l:
     value: 30.0
@@ -641,7 +642,7 @@ routing:
   mcu_ribbon_w:
     value: 12.7
     status: tbd
-    source: "20-way 0.635 mm ribbon for a 1.27 mm dual-row header [calc]: the Matrix's 12 used GPIO, 5V, 3V3 and six grounds (hardware/carrier/netlist.yaml U-MCU-RT)"
+    source: "20-way 0.635 mm ribbon for a 1.27 mm dual-row header [calc]: the Matrix's 12 used GPIO, 5V, 3V3 and GND, and five positions open (hardware/carrier/bom.csv CBL-MCU-RIBBON)"
     decided_by: "M4"
   mcu_ribbon_t:
     value: 0.8
@@ -651,7 +652,7 @@ routing:
   umb_cable_od:
     value: 4.0
     status: tbd
-    source: "a slim Cat6 patch lead [from memory]; the patch plug is J-UMBILICAL-CABLE's rear end inside the body"
+    source: "a slim Cat6 patch lead [from memory]; the patch plug is CBL-UMB-PATCH's plug in the etherCON's rear socket"
     decided_by: "M4, with the lead bought"
   umb_bend_r_per_od:
     value: 4.0
