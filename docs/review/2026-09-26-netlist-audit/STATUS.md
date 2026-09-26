@@ -12,7 +12,25 @@ them, because a restated count is this repository's named failure and the last
 wave's ledger was never closed by id at all.
 
 **`VERIFIED.md` closes findings BY ID.** Anything not listed there is marked
-unverified and must not be acted on or repeated. That is the whole point: the
+unverified and must not be acted on or repeated.
+
+> **`addressed by id` IS AN UPPER BOUND, NOT A COUNT OF CLOSURES — found by
+> using the ledger.** `tools/extract-findings.py` marks a finding `recorded`
+> when its id appears anywhere in `VERIFIED.md` or `STATUS.md`. This wave's
+> `VERIFIED.md` ends each section with an explicit
+> *"Not yet verified, not to be repeated: N8-3 through N8-13"* line — and the
+> tool reads those ids as addressed, flipping six N8 rows from
+> `NOT ADDRESSED` to `recorded` the moment that line was written. So a
+> **disclaimer** of verification counts as verification.
+>
+> That is the same defect the ledger was built to end, one level up: the last
+> wave answered findings by restating them and called it verification; this
+> tool answers them by *mentioning* them. **The real closure count is the
+> number of rows in `VERIFIED.md`'s tables**, which is smaller and is stated
+> per slice there.
+>
+> Not fixed here. `tools/` is frozen until this wave's reports stop needing to
+> reproduce, and a tool change is its own commit with its own injection test. That is the whole point: the
 previous wave's 377 findings were answered by restating them in prose, so
 "every one hand-verified" was true of the reports and false of the findings.
 

@@ -103,15 +103,15 @@ N7-6,N7,471,,NOT ADDRESSED,"N7-6 — module/power-entry / C-BULK-RAIL — the va
 N7-7,N7,517,,recorded,"N7-7 — module/pitch-stage / R-BIAS-INAMP — the row lives in a fragment whose page only mentions it as a contrast, and places none of it"
 N7-8,N7,553,,recorded,"N7-8 — tools/check-netlist.py check_global — one section: token anywhere on a row exempts that row from over-use and shortfall detection, globally"
 N7-9,N7,615,,recorded,"N7-9 — check_global — a row placed zero times is invisible, and twelve rows are in that state"
-N8-1,N8,88,,NOT ADDRESSED,"N8-1 — R-RESP-IN / R-RESP-FB / R-RESP-DIV and R_G : an unbracketed value in a drawing is checked by nothing, and nothing says so"
+N8-1,N8,88,,recorded,"N8-1 — R-RESP-IN / R-RESP-FB / R-RESP-DIV and R_G : an unbracketed value in a drawing is checked by nothing, and nothing says so"
 N8-10,N8,487,,NOT ADDRESSED,N8-10 — sensor-full-scale : a dated escape record was edited to name two rows that did not exist on that date
 N8-11,N8,522,,NOT ADDRESSED,"N8-11 — ROADMAP.md ""Seven fixes to the label parser alone"" enumerates eight, and omits the first one"
 N8-12,N8,555,,NOT ADDRESSED,"N8-12 — the instance line names seven short rows; the reader-facing list explains five, and its stated reason is wrong for one of those"
-N8-13,N8,583,,NOT ADDRESSED,"N8-13 — R-BREATH-OFF and C-REG-ADJ : history pasted back into the BOM notes column, four rows at a time, with the retired aggregate's name reused for a live child"
-N8-14,N8,627,,NOT ADDRESSED,"N8-14 — ""the pending list just grew from five to eight"": the checker printed seven in that commit"
-N8-15,N8,655,,NOT ADDRESSED,"N8-15 — R-ILIM , LK-SER , R-SER-TERM : three bracketed labels whose values are silently never compared"
-N8-2,N8,143,,NOT ADDRESSED,"N8-2 — C-BULK-RAIL : the eighth aggregate row, on the page the exercise started from, survived because the value test is a substring match"
-N8-3,N8,193,,NOT ADDRESSED,"N8-3 — the global instance count cannot see a row placed zero times, and J-CV ""from unplaced to 6/6"" records a transition nothing measured"
+N8-13,N8,583,,recorded,"N8-13 — R-BREATH-OFF and C-REG-ADJ : history pasted back into the BOM notes column, four rows at a time, with the retired aggregate's name reused for a live child"
+N8-14,N8,627,,recorded,"N8-14 — ""the pending list just grew from five to eight"": the checker printed seven in that commit"
+N8-15,N8,655,,recorded,"N8-15 — R-ILIM , LK-SER , R-SER-TERM : three bracketed labels whose values are silently never compared"
+N8-2,N8,143,,recorded,"N8-2 — C-BULK-RAIL : the eighth aggregate row, on the page the exercise started from, survived because the value test is a substring match"
+N8-3,N8,193,,recorded,"N8-3 — the global instance count cannot see a row placed zero times, and J-CV ""from unplaced to 6/6"" records a transition nothing measured"
 N8-4,N8,243,,NOT ADDRESSED,N8-4 — AGND_INST : the PWR_GND fix removed two peers and left the boundary declared from one side only
 N8-5,N8,287,,NOT ADDRESSED,"N8-5 — carrier/carrier : a circuit id with no circuit.yaml , named as a Peer, where the README's own mechanical rule cannot be applied"
 N8-6,N8,327,,NOT ADDRESSED,N8-6 — HDR-DEV : the netlist note written to explain 1/6 contradicts the row it is checked against and both statements on its own page
