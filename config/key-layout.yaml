@@ -2,6 +2,7 @@
 #
 # Consumed by:
 #   - mechanical: key positions generate plate DXF cutout geometry
+#                 (tools/cad.py -> mechanical/cad/generated/params.scad)
 #   - firmware:   key ids generate 74HC165 bit mapping and fingering table
 #
 # When a key moves, both stay in sync by construction. Do not hand-edit the

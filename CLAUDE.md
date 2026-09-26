@@ -190,7 +190,7 @@ checker excludes them by design.
 
 The design corpus — the thing that must be self-consistent — is:
 `hardware/**`, `docs/decisions/**`, `docs/reference/**`, `config/**`,
-`firmware/**`, `README.md`, `ROADMAP.md`.
+`firmware/**`, `mechanical/**`, `README.md`, `ROADMAP.md`.
 
 **Paths in those records point at pre-2026-09-21 locations and are not to be
 corrected.** Resolve them through `docs/reference/repo-maintenance.md` §7.
@@ -299,6 +299,15 @@ repeating, and record the verification.
   or a three-row change lands as a 130-row diff.
   `hardware/unplaced.csv` holds the rows no schematic page names — a count of
   parts nobody has drawn, not a dumping ground.
+- **The body CAD is parametric and its pictures are generated.** Numbers go in
+  `config/body.yaml` (each with `status` and `source`) or
+  `config/key-layout.yaml`, never into `mechanical/cad/*.scad`. `python3
+  tools/cad.py build` regenerates what is stale; every render and DXF is
+  fingerprinted against the git blob ids of everything it was built from, and
+  the fingerprint is stamped in the image, because no grep can read a PNG.
+  `check-staleness.py` fails on a stale, hand-edited or orphan output.
+  **Pages do not restate `mechanical/drc.echo`** — name the rule, the value
+  moves. `mechanical/README.md`.
 - Mark unresolved things `TBD`/`open` **with what decides them**. Two BOM rows
   are deliberately blocked on a datasheet and say so; that is correct, not a
   defect.

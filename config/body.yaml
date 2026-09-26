@@ -1,0 +1,362 @@
+# Body geometry - the CAD's inputs (ADR 0009, ADR 0010)
+#
+# Consumed by tools/cad.py, which writes mechanical/cad/generated/params.scad
+# from this file and config/key-layout.yaml. Every render and cut file built
+# from the model is fingerprinted against both, so a change here marks every
+# picture of the old value STALE until `python3 tools/cad.py build` runs.
+#
+# WHAT IS NOT HERE, ON PURPOSE. The envelope, the plate thickness and the
+# switch cutout live in config/key-layout.yaml `meta` (the plate thickness is
+# the register's `plate-thickness`); key positions live there too. Do not
+# restate them here - params.scad takes them from there.
+#
+# EVERY LEAF CARRIES A STATUS, and the status is the point of this file:
+#   settled  - read off a banked document or decided in an ADR; cite it
+#   nominal  - an ADR's working estimate; the CAD uses it until measured
+#   tbd      - NO document gives a number. The value is a placeholder so the
+#              model can be drawn, and `decided_by` says what replaces it.
+#              A tbd value in a render is a question, not an answer.
+# Provenance tags follow the review convention: [ds] banked datasheet,
+# [adr] decision record, [calc] arithmetic shown, [from memory] unverified.
+#
+# COORDINATES (the model's, not the key plate's):
+#   X along the body, 0 at the mouthpiece end's outer face, + toward the tail
+#   Y across, 0 at the left edge seen from above with the mouthpiece at the top
+#   Z up, 0 at the bottom face, the key plate's top face at the envelope thickness
+# config/key-layout.yaml's key-plate frame (+x right, +y down, mouthpiece up)
+# maps as X = plate origin + y, Y = plate origin + x.
+
+meta:
+  owner: docs/decisions/0009-enclosure-construction.md
+  model: mechanical/cad/woody_body.scad
+
+# ---------------------------------------------------------------- stack ----
+stack:
+  oak_top_t:
+    value: 6.0
+    status: nominal
+    source: "[adr] ADR 0009 'Thickness is bounded by switch bodies' - '~6 mm'"
+  oak_bottom_t:
+    value: 8.0
+    status: nominal
+    source: "[adr] ADR 0009 - '~8 mm <- sets thumb key inset depth'"
+    decided_by: "M4 (ADR 0009 Open, ROADMAP M4): it is the thumb-key inset, read off the thumb-cap figure"
+  side_t:
+    value: 4.0
+    status: nominal
+    source: "[adr] ADR 0009 mass table - 'Acrylic sides, 2 x 4 mm'"
+  rebate_w:
+    value: 2.0
+    status: tbd
+    source: "no document dimensions the notch (ADR 0009 'A U, a notch, and six fasteners')"
+    decided_by: "M4, with the gasket bead - half the side thickness is a drawing placeholder"
+
+# ----------------------------------------------------------------- ends ----
+ends:
+  mouth_cap_t:
+    value: 4.0
+    status: tbd
+    source: "ADR 0009 end-cap table: acrylic, 'the material already being cut for the sides' - so the side sheet's thickness"
+    decided_by: "M4"
+  tail_cap_t:
+    value: 6.0
+    status: tbd
+    source: "ADR 0009 end-cap table: oak - so the oak top's stock"
+    decided_by: "M4, together with the etherCON panel-thickness question in mechanical/DESIGN.md"
+  tube_hole_d:
+    value: 6.0
+    status: tbd
+    source: "ADR 0003: tube bore and OD are settled at E2"
+    decided_by: "E2 (tube bore by playing), then the tube's OD plus clearance"
+
+# ------------------------------------------------------ provisional layout --
+# USED ONLY WHILE config/key-layout.yaml HAS null POSITIONS. The first key
+# with a real x/y overrides this for that key. Every render made while any
+# key is still provisional is stamped PROVISIONAL LAYOUT by tools/cad.py.
+layout:
+  # The length budget, mouthpiece to tail. ADR 0009's table is the feasibility
+  # argument; these are the numbers the model draws. Runs are key CENTRE to
+  # key CENTRE, and the key pitch FOLLOWS from them: ADR 0009's 24 mm pitch is
+  # 96 / 4 and 120 / 5 [calc]. There is deliberately no separate pitch value -
+  # two numbers for one quantity is the defect this repository keeps finding.
+  # Pitch is expected to go non-uniform at M2 (ADR 0010), which is when real
+  # x/y positions in config/key-layout.yaml replace this block key by key.
+  margin_mouth:
+    value: 10.0
+    status: nominal
+    source: "[adr] ADR 0009 'End margins 20' - split evenly between the ends, which the ADR does not say"
+  mouthpiece:
+    value: 40.0
+    status: nominal
+    source: "[adr] ADR 0009 length table"
+  display_band:
+    value: 60.0
+    status: nominal
+    source: "[adr] ADR 0009 length table (grew from 30 with ADR 0008)"
+  lh_run:
+    value: 96.0
+    status: nominal
+    source: "[adr] ADR 0009 length table"
+  gap:
+    value: 50.0
+    status: nominal
+    source: "[adr] ADR 0009 length table - the U-bolt band"
+  rh_run:
+    value: 120.0
+    status: nominal
+    source: "[adr] ADR 0009 length table"
+  tail:
+    value: 40.0
+    status: nominal
+    source: "[adr] ADR 0009 length table"
+  margin_tail:
+    value: 10.0
+    status: nominal
+    source: "[adr] ADR 0009 'End margins 20', the other half"
+  slack_to:
+    value: "tail"
+    status: tbd
+    source: "ADR 0009 leaves the 31 mm of slack unassigned. The tail holds the etherCON, carrier, matrix and USB-C, so it gets it"
+    decided_by: "M2 - where the hands land decides where the slack is"
+  lt_arc_length:
+    value: 57.0
+    status: nominal
+    source: "[adr] ADR 0010 'roughly 57 mm of travel down the body'"
+  lt_arc_lateral:
+    value: 20.0
+    status: nominal
+    source: "[adr] ADR 0010 'perhaps 15-25 mm of lateral deviation' - the middle of it"
+  lt_arc_start:
+    value: 10.0
+    status: tbd
+    source: "ADR 0010 puts the arc 'underneath the left-hand key run' and a grip patch clear of it; the offset from the run's first key is a placeholder, small enough that the arc and its two spare cutouts stay under the run"
+    decided_by: "M2 - hands on the mule"
+  rt_rest_at:
+    value: 0.35
+    status: tbd
+    source: "ADR 0010: the right thumb rests, and its three switches sit offset from the rest. Fraction of the RH run from its first key"
+    decided_by: "M2"
+  rt_offset:
+    value: 20.0
+    status: tbd
+    source: "placeholder - distance from the rest to each RT switch"
+    decided_by: "M2"
+  lateral_inset:
+    value: 0.0
+    status: nominal
+    source: "[adr] ADR 0010: single line down the centre; an outer-key offset is an M2 option"
+
+# -------------------------------------------------------------- switches ----
+switch:
+  # z = 0 at the underside of the 15 x 15 collar = the plate's top face
+  # (docs/reference/ks33-geometry.md). The model imports the real solid
+  # (mechanical/cad/vendor/ks33.stl, meshed from the banked STEP); these are
+  # for the arithmetic and the clearance checks.
+  pole_tip_below_seat:
+    value: 5.75
+    status: settled
+    source: "[ds] Gateron KS-33H10B050NN-Y24 sheet 6, 5.75 +/-0.05 (the STEP says 5.70; the vendor wins)"
+  pcb_below_seat:
+    value: 3.4
+    status: settled
+    source: "[calc] docs/reference/ks33-geometry.md: PCB top 3.2-3.6 below the seat; the middle"
+  keycap_top_above_seat:
+    value: 9.0
+    status: tbd
+    source: "MT165 height is unpublished (hardware/bom.csv MT165 row). Stem top is +7.05 [ds STEP]; the cap adds a guess"
+    decided_by: "M1 - measure a cap on a switch with calipers"
+  keycap:
+    value: 16.5
+    status: settled
+    source: "[adr] ADR 0002 - MT165 16.5 x 16.5"
+  cluster_pcb_w:
+    value: 22.0
+    status: tbd
+    source: "hardware/cluster/cluster-boards.md: outlines are undrawable until M3"
+    decided_by: "M3"
+  pcb_t:
+    value: 1.6
+    status: settled
+    source: "[adr] hardware/bom.csv PCB-CLUSTER and PCB-CARRIER, 1.6 mm"
+
+# ---------------------------------------------------------------- boards ----
+boards:
+  # The display board's outline and 3D come from the vendor files directly
+  # (datasheets/mechanical/LILYGO-T-DISPLAY-S3-AMOLED-*); nothing is retyped.
+  display_active_w:
+    value: 19.8
+    status: settled
+    source: "[adr] ADR 0008 - AMOLED active area 44.22 x 19.8"
+  display_active_l:
+    value: 44.22
+    status: settled
+    source: "[adr] ADR 0008"
+  display_window_margin:
+    value: 1.5
+    status: tbd
+    source: "no document - the plate and oak-top window clearance around the active area; the active area's offset on the glass is assumed centred"
+    decided_by: "M4, against the board in hand"
+  matrix_board:
+    value: 25.0
+    status: settled
+    source: "[ds] datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-dimensions.jpg - 25.00 x 25.00, R1.0"
+  matrix_emitters:
+    value: 20.8
+    status: nominal
+    source: "ADR 0014 / carrier.md - 8 x 2.6 mm pitch [from memory there]"
+  carrier_l:
+    value: 100.0
+    status: tbd
+    source: "hardware/bom.csv PCB-CARRIER '~100 x 45' - carrier.md: 'an assumption, not a fit'"
+    decided_by: "M4 - this model is where it gets fitted"
+  carrier_w:
+    value: 45.0
+    status: tbd
+    source: "hardware/bom.csv PCB-CARRIER"
+    decided_by: "M4"
+  carrier_z:
+    value: 20.0
+    status: tbd
+    source: "[calc] oak bottom 8 + diffuser gap 2 + Matrix board 1.6 + machined header ~8.5 [from memory], with the Matrix hung under the carrier per carrier.md section 7"
+    decided_by: "M4, from the real header stack height"
+  carrier_from_tail:
+    value: 42.0
+    status: tbd
+    source: "placeholder - clears the etherCON's depth behind the tail face"
+    decided_by: "M4"
+
+# ------------------------------------------------------------- openings ----
+openings:
+  matrix_window:
+    value: 22.0
+    status: nominal
+    source: "[adr] ADR 0009 - 'Roughly 22 mm square'"
+  usb_slot_w:
+    value: 12.5
+    status: tbd
+    source: "no document - a USB-C plug overmould [from memory]"
+    decided_by: "M4, against the cable chosen"
+  usb_slot_h:
+    value: 7.0
+    status: tbd
+    source: "no document [from memory]"
+    decided_by: "M4"
+  service_cover_w:
+    value: 12.0
+    status: nominal
+    source: "[adr] ADR 0009 - 'Roughly 12 x 40 mm, two M2 screws'"
+  service_cover_l:
+    value: 40.0
+    status: nominal
+    source: "[adr] ADR 0009"
+
+ethercon:
+  # Neutrik NE8FDP, read off the banked drawing (datasheets/connectors/NE8FDP.*)
+  bore_d:
+    value: 24.0
+    status: settled
+    source: "[ds] Neutrik ST-NE8FDP - chassis bore 24.0 min (ADR 0009)"
+  flange_w:
+    value: 26.0
+    status: settled
+    source: "[ds] NE8FDP flange 26 x 31"
+  flange_h:
+    value: 31.0
+    status: settled
+    source: "[ds] NE8FDP"
+  hole_dx:
+    value: 19.0
+    status: settled
+    source: "[ds] NE8FDP - two diagonal 3.2 holes at 19 x 24"
+  hole_dy:
+    value: 24.0
+    status: settled
+    source: "[ds] NE8FDP"
+  hole_d:
+    value: 3.2
+    status: settled
+    source: "[ds] NE8FDP"
+  depth:
+    value: 34.55
+    status: settled
+    source: "[ds] NE8FDP - behind the panel, flange in front (hardware/bom.csv)"
+  body_d:
+    value: 24.0
+    status: tbd
+    source: "the rear body's envelope is not dimensioned where this model can read it; the bore is the lower bound"
+    decided_by: "the NE8FDP drawing's side view, or calipers on the part"
+  max_panel_t:
+    value: 4.0
+    status: settled
+    source: "[ds] NE8FDP maximum panel thickness (hardware/bom.csv)"
+  rotated:
+    value: true
+    status: settled
+    source: "[adr] ADR 0009 - 'Rotate it 90 degrees. Settled off the drawing.'"
+  offset_y:
+    value: -9.0
+    status: tbd
+    source: "placeholder - off-centre so the USB-C slot fits beside it"
+    decided_by: "M4 tail-face paper check (ADR 0009)"
+
+# ------------------------------------------------------------- hardware ----
+hardware:
+  fastener_count:
+    value: 6
+    status: settled
+    source: "[adr] ADR 0009 - six M3 from the bottom into the plate"
+  fastener_clear_d:
+    value: 3.4
+    status: nominal
+    source: "M3 clearance, medium fit [from memory]"
+  fastener_cbore_d:
+    value: 6.0
+    status: nominal
+    source: "M3 socket head is 5.5 [from memory]; counterbore with clearance"
+  fastener_cbore_depth:
+    value: 3.5
+    status: nominal
+    source: "M3 socket head height 3.0 [from memory] + 0.5 below flush"
+  fastener_inset:
+    value: 7.0
+    status: tbd
+    source: "placeholder - distance from each long edge, inside the acrylic sides, clear of the switch column"
+    decided_by: "M4"
+  fastener_end:
+    value: 30.0
+    status: tbd
+    source: "placeholder - distance of the first and last stations from the ends; stations zig-zag between the edges ~80 apart as ADR 0009 says"
+    decided_by: "M4"
+  ubolt_rod_d:
+    value: 5.0
+    status: tbd
+    source: "ADR 0009 gives no U-bolt size"
+    decided_by: "M4, from the strap hardware chosen"
+  ubolt_span:
+    value: 24.0
+    status: tbd
+    source: "placeholder - leg centre to leg centre"
+    decided_by: "M4"
+  ubolt_drop:
+    value: 18.0
+    status: tbd
+    source: "placeholder - how far the loop stands below the bottom face"
+    decided_by: "M4"
+  backplate_t:
+    value: 3.0
+    status: tbd
+    source: "hardware/bom.csv MECH-BACKPLATE - aluminium or ply, thickness open"
+    decided_by: "M4; at the etherCON it must satisfy ethercon.max_panel_t"
+
+# ------------------------------------------------------------ lighting ----
+lighting:
+  strip_w:
+    value: 10.0
+    status: tbd
+    source: "hardware/carrier/carrier.md '~10 mm' [from memory there]; the strip geometry row is BLOCKED in datasheets/MANIFEST.csv"
+    decided_by: "the strip in hand"
+  strip_gap:
+    value: 3.0
+    status: tbd
+    source: "ADR 0009 / ADR 0014: the diffusion gap is a prototype question"
+    decided_by: "M6 prototype"

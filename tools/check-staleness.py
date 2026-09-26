@@ -27,7 +27,11 @@ REPORT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))
 # The design corpus must be self-consistent. Review/log/research are dated
 # historical records and are deliberately excluded - a 2026-09-21 review saying
 # "8HP" is CORRECT as a record of what was true when it was written.
-CORPUS_DIRS = ["hardware", "docs/decisions", "docs/reference", "config", "firmware"]
+CORPUS_DIRS = ["hardware", "docs/decisions", "docs/reference", "config", "firmware",
+               # Added 2026-09-26 with the body CAD. Its pages narrate the
+               # same figures as everything else; its renders cannot be
+               # grepped, which is what check_cad() below is for.
+               "mechanical"]
 CORPUS_FILES = ["README.md", "ROADMAP.md"]
 EXCLUDE = ("docs/review", "docs/log", "docs/research")
 
@@ -1169,6 +1173,29 @@ def check_checks():
             and callable(f) and n not in RAN]
 
 
+def check_cad():
+    """Every render and cut file must still show the CAD it claims to.
+
+    No forbidden pattern can read a PNG, so the body CAD fingerprints each
+    output against the git blob ids of every file it was built from
+    (tools/cad.py). This asks that tool, and harvests stdout AND stderr for
+    the reason check_bom_generated() records: an empty list on a non-zero
+    exit is indistinguishable from "no problems".
+    """
+    import subprocess
+    try:
+        r = subprocess.run([sys.executable, os.path.join(ROOT, "tools/cad.py"), "check"],
+                           capture_output=True, text=True, cwd=ROOT, timeout=60)
+    except Exception as e:
+        return [f"could not run tools/cad.py check: {e}"]
+    if r.returncode == 0:
+        return []
+    msgs = [l.rstrip() for l in (r.stdout + "\n" + r.stderr).splitlines()
+            if l.strip() and not l.strip().startswith("PASS")]
+    return msgs or [f"tools/cad.py check exited {r.returncode} and said nothing "
+                    f"parseable - it probably crashed. Run it directly"]
+
+
 def main():
     files = corpus_files()
 
@@ -1196,6 +1223,7 @@ def main():
     section_problems = check_sections(files)
     circuits = load_circuits()
     generated_problems = check_bom_generated()
+    cad_problems = check_cad()
     datasheet_problems = check_datasheets()
     pattern_problems, thin_patterns = check_patterns(spec)
     bomfig_problems = check_bom_figures(spec, bom_rows)
@@ -1215,6 +1243,13 @@ def main():
         fail = True
         emit([f"GENERATED FILE EDITED BY HAND ({len(generated_problems)})"]
              + ["  " + p for p in generated_problems] + [""], detail_only=True)
+
+    if cad_problems:
+        fail = True
+        emit([f"CAD OUTPUTS STALE OR EDITED ({len(cad_problems)})",
+              "  A render or cut file that no longer shows the model it names. "
+              "Run `python3 tools/cad.py build`; `explain <name>` says what moved.", ""]
+             + ["  " + p for p in cad_problems] + [""], detail_only=True)
 
     if bomfig_problems:
         fail = True
@@ -1366,7 +1401,8 @@ def main():
     if fail:
         print(f"FAIL {len(shape_problems)} shape + {len(owner_problems)} owners + {len(link_problems)} links "
               f"+ {len(section_problems)} sections + {len(circuit_problems)} deps "
-              f"+ {len(generated_problems)} generated + {len(bomfig_problems)} register-vs-bom "
+              f"+ {len(generated_problems)} generated + {len(cad_problems)} cad "
+              f"+ {len(bomfig_problems)} register-vs-bom "
               f"+ {len(datasheet_problems)} datasheets + {len(pattern_problems)} dead-patterns "
               f"+ {len(wiring_problems)} unwired "
               f"+ {len(live)} stale + {len(bom_problems)} bom "

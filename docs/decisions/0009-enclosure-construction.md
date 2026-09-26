@@ -693,6 +693,11 @@ fighting the wood.
 
 ## Open
 
-- CAD tool, which decides whether `mechanical/cad/` holds Fusion, FreeCAD or
-  neutral STEP.
+- ~~CAD tool~~ — **decided 2026-09-26: OpenSCAD, parametric, in
+  `mechanical/cad/`**, driven by `config/body.yaml` and `config/key-layout.yaml`
+  through `tools/cad.py`, which also fingerprints every render and DXF against
+  its sources (`mechanical/README.md`). The length table and the stack sketch
+  above are the feasibility argument; `config/body.yaml` holds the working
+  values the model draws, each citing this page, and `mechanical/drc.echo`
+  reports what the model found against them (`mechanical/DESIGN.md`).
 - Oak thickness for the bottom panel, which sets thumb key travel.

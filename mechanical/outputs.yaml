@@ -1,0 +1,110 @@
+# Every file tools/cad.py builds. Nothing under mechanical/renders/,
+# mechanical/export/ or mechanical/cad/vendor/ may exist unless it is named here.
+# `python3 tools/cad.py build` rebuilds what is stale; `check` proves the rest.
+#
+# A render's fingerprint covers its recipe (every field below except title
+# and caption) and the git blob id of every file its source reads. Change a
+# camera and that render is stale; change config/body.yaml and all of them are.
+
+meshes:
+  # The banked vendor solids, meshed so OpenSCAD can import them. Datum is
+  # the vendor's: KS-33 z = 0 at the collar underside (ks33-geometry.md).
+  - name: ks33-mesh
+    from: datasheets/mechanical/GATERON-KS-33-3D.step
+    out: mechanical/cad/vendor/ks33.stl
+  - name: tdisplay-mesh
+    from: datasheets/mechanical/LILYGO-T-DISPLAY-S3-AMOLED-3D.stp
+    out: mechanical/cad/vendor/t-display-s3-amoled.stl
+    # The STEP draws the display flex unfolded, 20 mm past the board edge
+    # (y < -1.18); fitted, it folds under. Board frame x 0..25.49, y 0..58.78.
+    clip: [-1, -1.2, -2, 27, 60, 7]
+
+# Cameras: [tx, ty, tz, rx, ry, rz, distance]. The body's centre is about
+# [228, 28, 19]; it is 457 long, so a whole-body view wants ~500-600.
+renders:
+  - name: hero
+    title: The instrument, key face up
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/hero.png
+    imgsize: [1600, 700]
+    camera: [228, 28, 12, 60, 0, 335, 640]
+  - name: underside
+    title: The underside - thumb keys, U-bolt, matrix window, fasteners
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/underside.png
+    imgsize: [1600, 700]
+    camera: [228, 28, 12, 125, 0, 335, 640]
+  - name: exploded
+    title: The laminated stack, pulled apart
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/exploded.png
+    imgsize: [1600, 900]
+    camera: [228, 28, 28, 62, 0, 330, 700]
+    defines: {explode: 22}
+  - name: internals
+    title: Lid off - boards, strips, tail equipment
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/internals.png
+    imgsize: [1600, 700]
+    camera: [228, 28, 12, 50, 0, 340, 600]
+    defines: {show_lid: false, ghost_shell: true}
+  - name: tail-detail
+    title: The tail, lid off, from inside
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/tail-detail.png
+    imgsize: [1200, 800]
+    camera: [400, 28, 15, 55, 0, 300, 190]
+    defines: {show_lid: false, ghost_shell: true}
+  - name: plan-top
+    title: Plan from above, with the length budget
+    src: mechanical/cad/fig_plan_top.scad
+    out: mechanical/renders/plan-top.png
+    imgsize: [2000, 560]
+    projection: o
+    camera: [228, 12, 0, 0, 0, 0, 380]
+  - name: plan-bottom
+    title: Plan from below
+    src: mechanical/cad/fig_plan_bottom.scad
+    out: mechanical/renders/plan-bottom.png
+    imgsize: [2000, 420]
+    projection: o
+    camera: [228, 28, 0, 180, 0, 0, 330]
+  - name: section-long
+    title: Longitudinal section on the centreline, looking from the +Y side
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/section-long.png
+    imgsize: [2000, 380]
+    projection: o
+    camera: [228, 22, 0, 0, 0, 0, 330]
+    defines: {cut: "y2d", cut_at: 28.5, show_strips: false}
+  - name: section-key
+    title: Cross-section through RH3, seen from the tail
+    src: mechanical/cad/fig_section_key.scad
+    out: mechanical/renders/section-key.png
+    imgsize: [1200, 900]
+    projection: o
+    camera: [16, 18, 0, 0, 0, 0, 190]
+  - name: tail-face
+    title: The tail face - etherCON rotated, USB-C beside it
+    src: mechanical/cad/fig_tail_face.scad
+    out: mechanical/renders/tail-face.png
+    imgsize: [1200, 900]
+    projection: o
+    camera: [457, 28, 12, 90, 0, 90, 190]
+
+# Flat parts as they go to the cutter (ADR 0009: "CAD produces DXF as the
+# primary export"), plus the design-rule report.
+exports:
+  - {name: drc, src: mechanical/cad/woody_body.scad, out: mechanical/drc.echo, defines: {part: "drc"}}
+  - {name: dxf-plate-top, src: mechanical/cad/woody_body.scad, out: mechanical/export/plate-top.dxf, defines: {part: "plate_top"}}
+  - {name: dxf-oak-top, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-top.dxf, defines: {part: "oak_top"}}
+  - {name: dxf-oak-bottom, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-bottom.dxf, defines: {part: "oak_bottom"}}
+  - {name: dxf-thumb-plate, src: mechanical/cad/woody_body.scad, out: mechanical/export/thumb-plate.dxf, defines: {part: "thumb_plate"}}
+  - {name: dxf-side-outer, src: mechanical/cad/woody_body.scad, out: mechanical/export/side-outer.dxf, defines: {part: "side_outer"}}
+  - {name: dxf-side-inner, src: mechanical/cad/woody_body.scad, out: mechanical/export/side-inner.dxf, defines: {part: "side_inner"}}
+  - {name: dxf-mouth-cap, src: mechanical/cad/woody_body.scad, out: mechanical/export/mouth-cap.dxf, defines: {part: "mouth_cap"}}
+  - {name: dxf-tail-cap, src: mechanical/cad/woody_body.scad, out: mechanical/export/tail-cap.dxf, defines: {part: "tail_cap"}}
+  - {name: dxf-tail-backplate, src: mechanical/cad/woody_body.scad, out: mechanical/export/tail-backplate.dxf, defines: {part: "tail_backplate"}}
+  - {name: dxf-ubolt-backplate, src: mechanical/cad/woody_body.scad, out: mechanical/export/ubolt-backplate.dxf, defines: {part: "ubolt_backplate"}}
+  - {name: dxf-diffuser, src: mechanical/cad/woody_body.scad, out: mechanical/export/diffuser.dxf, defines: {part: "diffuser"}}
+  - {name: dxf-service-cover, src: mechanical/cad/woody_body.scad, out: mechanical/export/service-cover.dxf, defines: {part: "service_cover"}}

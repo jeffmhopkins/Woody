@@ -12,9 +12,10 @@ thrown away.**
 
 | Kind | Files | Rule |
 |---|---|---|
-| **Design corpus** | `hardware/**`, `docs/decisions/**`, `docs/reference/**`, `config/**`, `firmware/**`, `README.md`, `ROADMAP.md` | Must be self-consistent. This is what `check-staleness.py` checks. |
+| **Design corpus** | `hardware/**`, `docs/decisions/**`, `docs/reference/**`, `config/**`, `firmware/**`, `mechanical/**` (since 2026-09-26), `README.md`, `ROADMAP.md` | Must be self-consistent. This is what `check-staleness.py` checks. |
 | **Historical record** | `docs/review/**`, `docs/log/**`, `docs/research/**` | **Never "corrected".** A 2026-09-21 review saying "8HP" is right as a record of what was true when written. Excluded from the checker by design. |
 | **Generated** | `datasheets/MANIFEST.csv`, **`hardware/bom.csv`** | **Edits are silently destroyed.** See §3 and §4. `bom.csv` joined this row on 2026-09-21 and this table did not say so for several hours. |
+| **Generated, fingerprinted** | `mechanical/cad/generated/params.scad`, `mechanical/cad/vendor/*.stl`, `mechanical/renders/*.png`, `mechanical/export/*.dxf`, `mechanical/drc.echo`, `mechanical/OUTPUTS.csv` | Built by `tools/cad.py build` from `config/body.yaml`, `config/key-layout.yaml` and the model. **An edit is not destroyed — it is detected**: `cad.py check` (run by `check-staleness.py`) fails on any output whose inputs moved, whose bytes no longer match the ledger, or that no spec entry builds. `mechanical/README.md`. |
 | **Fragments (append-only, per author)** | `datasheets/.manifest-R*.csv` | One per research wave. **Do not edit another wave's fragment** — a `BLOCKED` row is the honest record of a gap *when it was written*. See §3 for how to close someone else's gap without touching it. |
 | **Fragments (per circuit)** | `hardware/**/bom.csv`, `hardware/unplaced.csv` | The source the BOM is generated from. Editable — this is where a part change goes. §4. |
 
@@ -277,6 +278,9 @@ python3 tools/audit-notes.py          # BOM notes: live content vs accumulated h
 python3 tools/audit-notes.py --regrown  # ...rows that have turned back into logs
 python3 tools/audit-notes.py <REF>    # ...one row, classified segment by segment
 python3 tools/rewrite-paths.py        # restructure only; --apply/--verify/--invert
+python3 tools/cad.py build            # body CAD: params, then every STALE render/DXF
+python3 tools/cad.py check            # ...or prove every output still matches its sources
+python3 tools/cad.py explain <name>   # which input moved since an output was built
 ```
 
 The first four are expected to pass before a commit that touches the corpus.

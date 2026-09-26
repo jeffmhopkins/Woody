@@ -332,6 +332,6 @@ page, its `bom.csv` fragment and its `circuit.yaml`.
 | Blocks | Question | Tracked in |
 |---|---|---|
 | M4, M5 | **Plate stiffening** — the thickness is **settled at 1.20 mm** by Gateron's own drawing (2026-09-21), which puts both 1.5 mm and 2 mm out of spec and makes stiffening a **requirement, not an option**. What remains is how: lamination, a structural backer, or a ribbed sub-frame | [ADR 0002](docs/decisions/0002-key-switches-and-mounting.md) |
-| M4 | CAD tool — Fusion, FreeCAD, or neutral STEP in `mechanical/cad/` | [ADR 0009](docs/decisions/0009-enclosure-construction.md) |
+| M4 | **The first body model's design-rule failures** — etherCON panel stack and body height at the tail, Matrix USB-C reach, display band vs LH1, thumb recess spacing, carrier vs LED strips. Current values in `mechanical/drc.echo`. (The CAD tool itself was decided 2026-09-26: OpenSCAD, `mechanical/`) | [mechanical/DESIGN.md](mechanical/DESIGN.md) |
 | M4 | Oak thickness for the bottom panel, which sets thumb key travel | [ADR 0009](docs/decisions/0009-enclosure-construction.md) |
 | E4b | Inter-MCU frame format and protocol versioning | [ADR 0013](docs/decisions/0013-two-mcu-split.md) |
