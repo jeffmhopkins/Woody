@@ -81,6 +81,8 @@ openings_matrix_lip = 2.0;  // tbd; oak lip the acrylic rests on, per side - the
 openings_matrix_acrylic_t = 3.0;  // tbd; frosted acrylic window thickness [from memory: common sheet]; must leave an oak lip under it
 openings_usb_slot_w = 12.5;  // tbd; panel cutout for a panel-mount USB-C extension receptacle [from memory]
 openings_usb_slot_h = 7.0;  // tbd; as usb_slot_w [from memory]
+openings_usb_plug_l = 18.0;  // tbd; USB-C cable plug moulding plus the straight lead before it can bend, standing off the Matrix board's USB-C edge [from memory]
+openings_matrix_usb_to_tail = true;  // tbd; the Matrix's USB-C edge faces the tail - the worst case; datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-dimensions.jpg shows the port overhanging one edge
 openings_usb_ext_depth = 20.0;  // tbd; the extension receptacle's body behind the panel [from memory]
 openings_service_cover_w = 12.0;  // nominal; [adr] ADR 0009 - 'Roughly 12 x 40 mm, two M2 screws'
 openings_service_cover_l = 40.0;  // nominal; [adr] ADR 0009
@@ -92,6 +94,10 @@ ethercon_hole_dy = 24.0;  // settled; [ds] NE8FDP
 ethercon_hole_d = 3.2;  // settled; [ds] NE8FDP
 ethercon_depth = 34.55;  // settled; [ds] NE8FDP - behind the panel, flange in front (hardware/bom.csv)
 ethercon_body_d = 24.0;  // tbd; the rear body's envelope is not dimensioned where this model can read it; the bore is the lower bound
+ethercon_rj45_plug_l = 30.0;  // tbd; mated RJ45 plug + strain-relief boot, beyond the etherCON's rear face [from memory: plug ~21, boot ~10-15]
+ethercon_rj45_plug_w = 14.0;  // tbd; RJ45 boot envelope across [from memory]
+ethercon_rj45_plug_h = 12.0;  // tbd; RJ45 boot envelope, height [from memory]
+ethercon_rj45_drop = 10.0;  // tbd; length for the lead to turn down under the carrier after the boot [from memory: small-OD patch lead]
 ethercon_max_panel_t = 4.0;  // settled; [ds] NE8FDP maximum panel thickness (hardware/bom.csv)
 ethercon_rotated = true;  // settled; [adr] ADR 0009 - 'Rotate it 90 degrees. Settled off the drawing.'
 ethercon_offset_y = -9.0;  // tbd; placeholder - off-centre so the USB-C slot fits beside it
@@ -109,5 +115,5 @@ lighting_strip_gap = 3.0;  // tbd; ADR 0009 / ADR 0014: the diffusion gap is a p
 
 // Every value above with status tbd - a placeholder, not a number any
 // document gives. The DRC report lists these so no result hides one.
-tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_mouth_extra", "layout_tail_clear", "layout_underside_clear", "layout_lh_offsets", "layout_rh_offsets", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_carrier_l", "boards_carrier_w", "boards_matrix_header_h", "boards_matrix_gap", "boards_matrix_led_h", "openings_matrix_lip", "openings_matrix_acrylic_t", "openings_usb_slot_w", "openings_usb_slot_h", "openings_usb_ext_depth", "ethercon_body_d", "ethercon_offset_y", "hardware_fastener_inset", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_backplate_t", "lighting_strip_w", "lighting_strip_gap"];
+tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_mouth_extra", "layout_tail_clear", "layout_underside_clear", "layout_lh_offsets", "layout_rh_offsets", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_carrier_l", "boards_carrier_w", "boards_matrix_header_h", "boards_matrix_gap", "boards_matrix_led_h", "openings_matrix_lip", "openings_matrix_acrylic_t", "openings_usb_slot_w", "openings_usb_slot_h", "openings_usb_plug_l", "openings_matrix_usb_to_tail", "openings_usb_ext_depth", "ethercon_body_d", "ethercon_rj45_plug_l", "ethercon_rj45_plug_w", "ethercon_rj45_plug_h", "ethercon_rj45_drop", "ethercon_offset_y", "hardware_fastener_inset", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_backplate_t", "lighting_strip_w", "lighting_strip_gap"];
 

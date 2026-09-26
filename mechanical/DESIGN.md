@@ -79,6 +79,16 @@ Three things can claim each end, and the largest wins:
   on the carrier just under the plate; or the underside chain after the right
   thumb (service cover, then the connector); or the right-thumb cluster
   against the tail cap.
+- **Behind the Matrix are two plugs** (modelled 2026-09-26): the USB-C
+  extension's plug off the Matrix's tail edge, and — because the NE8FDP is a
+  feedthrough with an RJ45 socket at its back — a patch lead's plug and boot,
+  whose lead then drops under the carrier. They share the height band of the
+  carrier and the Matrix, so they queue along the body; `drc.echo` itemises
+  "behind the Matrix". **With the matrix centred, everything behind it counts
+  twice, and the gap between the hands copies the result** — so every
+  millimetre of plug costs about three of body. A PCB-mount etherCON and a
+  right-angle USB-C plug are the levers (`ethercon.rj45_*`,
+  `openings.usb_plug_l`).
 - **The matrix window is frosted acrylic, flush with the oak top, on a lip of
   oak** (owner, 2026-09-26): a rebate in the oak top's upper face as deep as
   the acrylic, over a smaller opening through the oak and the plate. Like the

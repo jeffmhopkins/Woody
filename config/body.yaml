@@ -332,6 +332,16 @@ openings:
     status: tbd
     source: "as usb_slot_w [from memory]"
     decided_by: "M4"
+  usb_plug_l:
+    value: 18.0
+    status: tbd
+    source: "USB-C cable plug moulding plus the straight lead before it can bend, standing off the Matrix board's USB-C edge [from memory]"
+    decided_by: "M4, against the extension bought; a right-angle plug would remove most of it"
+  matrix_usb_to_tail:
+    value: true
+    status: tbd
+    source: "the Matrix's USB-C edge faces the tail - the worst case; datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-dimensions.jpg shows the port overhanging one edge"
+    decided_by: "M4, board orientation on the carrier"
   usb_ext_depth:
     value: 20.0
     status: tbd
@@ -381,6 +391,31 @@ ethercon:
     status: tbd
     source: "the rear body's envelope is not dimensioned where this model can read it; the bore is the lower bound"
     decided_by: "the NE8FDP drawing's side view, or calipers on the part"
+  # THE NE8FDP IS A FEEDTHROUGH: its back is an RJ45 socket, so inside the
+  # instrument a short patch lead plugs into it (hardware/bom.csv
+  # J-UMBILICAL-CABLE). The mated plug and boot stand inboard of the body,
+  # and the lead then drops under the carrier. Modelled 2026-09-26 on the
+  # owner's question "is there enough space between etherCON and LED board?"
+  rj45_plug_l:
+    value: 30.0
+    status: tbd
+    source: "mated RJ45 plug + strain-relief boot, beyond the etherCON's rear face [from memory: plug ~21, boot ~10-15]"
+    decided_by: "M4 - calipers on the patch lead actually used"
+  rj45_plug_w:
+    value: 14.0
+    status: tbd
+    source: "RJ45 boot envelope across [from memory]"
+    decided_by: "M4"
+  rj45_plug_h:
+    value: 12.0
+    status: tbd
+    source: "RJ45 boot envelope, height [from memory]"
+    decided_by: "M4"
+  rj45_drop:
+    value: 10.0
+    status: tbd
+    source: "length for the lead to turn down under the carrier after the boot [from memory: small-OD patch lead]"
+    decided_by: "M4, with the lead's OD and bend radius"
   max_panel_t:
     value: 4.0
     status: settled

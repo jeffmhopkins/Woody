@@ -122,8 +122,15 @@ function rt_rel(i) = i == 0 ? rt_rest_rel + [layout_rt_offset, 0]
                    : rt_rest_rel + [-0.6 * layout_rt_offset, (i == 1 ? -1 : 1) * 0.6 * layout_rt_offset];
 top_last_rel = max([for (i = [0 : len(layout_rh_gaps)]) cum(layout_rh_gaps, i)]);
 rt_last_rel = max([for (i = [0 : count("right_thumb") - 1]) rt_rel(i)[0]]);
+// BEHIND THE MATRIX, IN ORDER (2026-09-26): the USB-C extension's plug off
+// the Matrix's tail edge (if that edge faces the tail), a clearance, the
+// patch lead's drop under the carrier, the RJ45 plug and boot mated into the
+// etherCON's rear socket, then the etherCON body to the tail face. The plugs
+// share one height band with the carrier and the Matrix, so they queue.
+usb_behind = openings_matrix_usb_to_tail ? openings_usb_plug_l : 0;
+behind_matrix = usb_behind + layout_tail_clear + ethercon_rj45_drop + ethercon_rj45_plug_l + ethercon_depth;
 tail_claims_rel = [
-    top_last_rel + plate_cutout / 2 + cluster_margin + layout_tail_clear + boards_matrix_board + layout_tail_clear + ethercon_depth,
+    top_last_rel + plate_cutout / 2 + cluster_margin + layout_tail_clear + boards_matrix_board + behind_matrix,
     rt_last_rel + rc / 2 + layout_underside_clear + openings_service_cover_w + 2 * layout_tail_clear + ethercon_depth,
     rt_last_rel + rc / 2 + layout_underside_clear + ends_tail_cap_t];
 // The LED matrix CENTRED in the space after the keys (owner, 2026-09-26):
@@ -132,7 +139,7 @@ tail_claims_rel = [
 // centre = (edge + tail) / 2, and centre + half board + clearance + depth
 // <= tail, so tail >= edge + 2 x (half board + clearance + depth).
 cap_edge_rel = switch_keycap / 2 + stack_cap_clear;
-matrix_centred_req = cap_edge_rel + 2 * (boards_matrix_board / 2 + layout_tail_clear + ethercon_depth);
+matrix_centred_req = cap_edge_rel + 2 * (boards_matrix_board / 2 + behind_matrix);
 tail_req = max(max(tail_claims_rel) - top_last_rel, layout_matrix_centred ? matrix_centred_req : 0);
 
 // EQUAL BANDS (owner, 2026-09-26): the space before the left hand, between
@@ -441,7 +448,8 @@ matrix_top_z = z_plate_bot - boards_matrix_gap;               // LED tops
 matrix_board_z = matrix_top_z - boards_matrix_led_h - switch_pcb_t;
 carrier_z = matrix_board_z - boards_matrix_header_h - switch_pcb_t;
 // The carrier ends where the etherCON body begins, less a clearance.
-carrier_x1 = L - ethercon_depth - layout_tail_clear;
+// The carrier ends under the Matrix's tail edge: past it are the plugs.
+carrier_x1 = L - behind_matrix;
 carrier_x0 = carrier_x1 - boards_carrier_l;
 
 // Six fasteners up from the bottom into the plate, zig-zagging between the
@@ -556,11 +564,18 @@ module tail_equipment() {
     }
     // The USB-C extension: receptacle body behind the tail cap, and a cable
     // run to the Matrix board's edge (drawn straight; it is a flexible lead).
+    // The RJ45 patch lead's plug and boot, mated into the etherCON's rear.
+    P([0.55, 0.70, 0.85]) translate([L - ethercon_depth - ethercon_rj45_plug_l, ec_c[0] - ethercon_rj45_plug_w / 2, ec_c[1] - ethercon_rj45_plug_h / 2])
+        cube([ethercon_rj45_plug_l, ethercon_rj45_plug_w, ethercon_rj45_plug_h]);
+    // The USB-C extension's plug in the Matrix's tail edge, under the board.
+    if (openings_matrix_usb_to_tail)
+        P([0.35, 0.35, 0.38]) translate([matrix_xy[0] + boards_matrix_board / 2, matrix_xy[1] - openings_usb_slot_w / 2, matrix_board_z - openings_usb_slot_h])
+            cube([openings_usb_plug_l, openings_usb_slot_w, openings_usb_slot_h]);
     P(C_CONN) translate([x_in1 - openings_usb_ext_depth, usb_c[0] - openings_usb_slot_w / 2, usb_c[1] - openings_usb_slot_h / 2])
         cube([openings_usb_ext_depth, openings_usb_slot_w, openings_usb_slot_h]);
     P([0.15, 0.15, 0.15]) hull() {
         translate([x_in1 - openings_usb_ext_depth, usb_c[0], usb_c[1]]) sphere(d = 4, $fn = 12);
-        translate([matrix_xy[0] + boards_matrix_board / 2, matrix_xy[1], matrix_board_z - 2]) sphere(d = 4, $fn = 12);
+        translate([matrix_xy[0] + boards_matrix_board / 2 + usb_behind, matrix_xy[1], matrix_board_z - openings_usb_slot_h / 2]) sphere(d = 4, $fn = 12);
     }
 }
 
@@ -629,6 +644,11 @@ module drc_report() {
     drc(undef, "what the tail end needs", layout_matrix_centred && matrix_centred_req >= max(tail_claims_rel) - top_last_rel
         ? "the LED matrix centred after the keys, with the etherCON behind it" : tail_names[search(max(tail_claims_rel), tail_claims_rel)[0]],
         str(tail_req, " mm after the last key"));
+    echo("DRC", "INFO", "behind the Matrix, to the tail face", behind_matrix,
+         str("mm = USB-C plug ", usb_behind, " + clearance ", layout_tail_clear, " + patch-lead drop ", ethercon_rj45_drop,
+             " + RJ45 plug and boot ", ethercon_rj45_plug_l, " + etherCON body ", ethercon_depth));
+    rj_gap = (L - ethercon_depth - ethercon_rj45_plug_l) - (matrix_xy[0] + boards_matrix_board / 2 + usb_behind);
+    drc(rj_gap >= layout_tail_clear, "RJ45 boot clear of the Matrix and its USB-C plug", rj_gap, "mm along X");
     mc = (top_last + cap_edge_rel + L) / 2 - matrix_xy[0];
     drc(abs(mc) < 0.01 || !layout_matrix_centred, "LED matrix centred between the last cap and the tail face", mc, "mm off centre");
     if (layout_gap_matches_matrix)
