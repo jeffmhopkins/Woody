@@ -38,10 +38,10 @@ The `Dir` and `Peer` columns are defined once in
 | `QH` (pin 8) | key board → main | in | `cluster/key-register` → | `chain-connectors` | **The key board's own serial output**, on both ribbons. `right_hand`'s goes to `right_thumb`'s `SER`; `left_hand`'s to `left_thumb`'s |
 | `QH` of `right_thumb` | main board only | in → out | `cluster/key-register` → MCU IO40 | `marker-bits`, `free-bits` | Bit 0 onward. **Reaches no connector** — a trace from the register to the MCU's pins |
 | `GND` ×5 (pins 1, 3, 5, 7, 9) | both | ref | `cluster/key-register`, `cluster/key-switch-network`, `cluster/key-marker-and-bits` | `chain-conductors` | One between every signal, and against pin 10 |
-| `3V3` (pin 10) | main → key boards | out | MCU board's 3V3 → `F-CHAIN` → `cluster/key-register`, `cluster/key-switch-network`, `cluster/key-marker-and-bits`; shared with `carrier/breath-adc` | `key-pullup-qty` | **It is also the MCP3202's reference** — `carrier.md` §2 carries that argument |
+| `3V3` (pin 10) | main → key boards | out | MCU board's 3V3 (`DEV_3V3`) → `right_thumb`/`left_thumb` direct, and → one `FB-CHAIN` per ribbon → the key board's `cluster/key-register`, `cluster/key-switch-network`, `cluster/key-marker-and-bits`; shared with `carrier/breath-adc` | `key-pullup-qty` | **It is also the MCP3202's reference** — `carrier.md` §2 carries that argument. No fuse (ADR 0018) |
 | spare ×2 (pins 11, 12) | both | — | — | `chain-conductors` | ADR 0009's rule, free in a 12-way part |
 | `J-CHAIN`, `FFC-CHAIN` | both | — | — | `chain-connectors` | This circuit's connectors and cables |
-| `R-CHAIN-SER`, `R-SER-TERM`, `U-TVS-CHAIN`, `F-CHAIN` | main | — | — | — | This circuit's parts, all on the main board |
+| `R-CHAIN-SER`, `R-SER-TERM`, `U-TVS-CHAIN`, `FB-CHAIN` | main | — | — | — | This circuit's parts, all on the main board |
 | the 32 bits | all four registers | — | `cluster/key-marker-and-bits` | `marker-bits`, `free-bits` | Allocated in `config/key-layout.yaml`. The chain order is unchanged |
 
 Pin numbers in this table are the **main-board** connector's. The key board's
@@ -127,12 +127,14 @@ and `key-layout.yaml`'s order stands.
                                      8 QH    right_hand ribbon: RT's SER
                                              left_hand ribbon:  LT's SER
 
-   3V3   ───[F-CHAIN 100mA polyfuse]────► 10 3V3  both ribbons, and RT/LT
+   3V3   ──┬─────────────────────────► RT/LT VCC and R-SER-TERM (DEV_3V3)
+           ├──[FB-CHAIN 600R]──────────► 10 3V3  right_hand ribbon
+           └──[FB-CHAIN 600R]──────────► 10 3V3  left_hand ribbon
    GND   ─────────────────────────────►  1 3 5 7 9  both ribbons
                                          11 12  spare
 
-   [U-TVS-CHAIN SP0504BAHTG] on SCK, SH/LD and the chain-end SER, to GND_CHAIN;
-   its fourth channel is spare.
+   [U-TVS-CHAIN SP0504BAHTG] on SCK, SH/LD and the chain-end SER, to GND_CHAIN,
+   at the left_hand J-CHAIN; its fourth channel is spare. Fitted (ADR 0018).
 ```
 
 ### The key-board end
@@ -205,8 +207,8 @@ pushed in at an angle can bridge neighbours. Every signal has a ground on
 both sides, so a bridge takes a signal to ground rather than to another
 signal — except pin 10, whose neighbours are a ground and a spare. **A 3V3–GND
 bridge at pin 9/10 is the short this design can have**, and it is a service
-event: the ribbons are re-seated every time the lid goes back on. That is what
-`F-CHAIN` is now for (below).
+event: the ribbons are re-seated every time the lid goes back on. What covers
+it is the source's own current limit (below).
 
 ---
 
@@ -239,12 +241,14 @@ decides whether firmware uses it.
 
 ---
 
-## What the three protection parts are for now
+## The protection parts, and the fuse that is not there
 
 All three were proposed against a 265 mm loom that ran beside the LED strip's
 12 V feed. That loom is gone (ADR 0016 moved the strip onto the main board;
 ADR 0017 put the thumbs there too), so each was re-derived against the chain
-as it now is. **None is decided here**; each says what decides it.
+as it now is ([`notes.md`](notes.md)). The owner decided two of them on
+2026-09-26 ([ADR 0018](../../../docs/decisions/0018-main-board-wiring-decisions.md));
+`R-CHAIN-SER` is still E14's.
 
 **`R-CHAIN-SER` — still has a job, for a different reason.** `[calc]`, with two
 inputs `[from memory]`: an MCU output edge of ~2 ns, and ~6 ns/m on FR-4 and
@@ -269,22 +273,46 @@ main board and ribbons. It is three 0805s either way.
 `[from memory]`, and each hop is a ribbon plus part of the main board — the
 old "HC's slow edges keep it a lumped load" argument still covers them.)*
 
-**`U-TVS-CHAIN` — the exposure moved from play to service.** The ribbons never
-leave the body and sit under the grounded plate, so in play nothing reaches
-them. The contacts are handled when the ZIF latches are flipped to lift the
-lid, and a main-board `J-CHAIN` then exposes three MCU pins through their
-100 Ω — `SCK`, `SH/LD` and the chain-end `SER` — which is where the array is
-drawn and netted. The chain's `QH` into the MCU is `right_thumb`'s and reaches
-no connector. **Open, decided by the owner**: protect service by procedure
-(instrument off, a wrist strap) or by the part.
+**`U-TVS-CHAIN` — fitted, for service.** The ribbons never leave the body
+and sit under the grounded plate, so in play nothing reaches them. The
+contacts are handled when the ZIF latches are flipped to lift the lid, and a
+main-board `J-CHAIN` then exposes three MCU pins through their 100 Ω — `SCK`,
+`SH/LD` and the chain-end `SER` — which is where the array is netted, at the
+`left_hand` `J-CHAIN`, which carries all three. The chain's `QH` into the MCU
+is `right_thumb`'s and reaches no connector. **Decided: fit it** (ADR 0018).
+The exposure is real every time the lid is off, the part cannot be added once
+the board is made, and it costs pennies.
 
-**`F-CHAIN` — the short it covers is now at re-assembly.** It still keeps a
-short from browning out the MCU board's LDO, which is the instrument's only
-3V3 and the MCP3202's reference. What changed is where the short comes from:
-not a loom chafing inside a closed body, but a ribbon seated skewed at pin
-9/10 (above). Its drop is harmless for the reason the BOM row gives — the
-thresholds and the pull-ups share the rail. **Open, decided by**: fit it, or
-protect at the source.
+**No fuse — the short is protected at its source.** The chain's 3V3 is the
+Matrix's 3V3 pad, from its ME6217C33M5G LDO (`DEV_3V3`, the instrument's only
+3V3 and the MCP3202's reference) `[repo] datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-SCHEMATIC.pdf`,
+[`netlist.yaml`](netlist.yaml). The short this design can have is a ribbon
+seated skewed across pins 9/10 at reassembly (above). **What limits it is the
+LDO itself** `[ds ME6217C33M5G p.1, p.4]`: p.1 describes "a built-in
+overcurrent protector" and thermal shutdown at 160 °C, and the p.4
+electrical characteristics give a short-circuit current `Ishort` of **350 mA
+typical at `VOUT` = 0 V — typical only, with no minimum or maximum.** So the
+limit is stated but not guaranteed. **Verify at E1:** short one ribbon's 3V3
+to ground through 1 Ω at a main-board `J-CHAIN` (≈ 0.35 V across it at the
+typical limit `[calc]`), confirm the rail limits rather than the LDO failing,
+and confirm the Matrix restarts once the short is removed.
+
+The symptom is immediate and on the bench: the whole 3V3 rail collapses, so
+the Matrix does not start at all — not a dead key board — and it is seen
+before the lid is screwed down.
+
+**`FB-CHAIN`, one per ribbon, is isolation, not protection** (ADR 0018). A
+ferrite bead in series with each ribbon's conductor 10 on the main board keeps
+a key board's register edges off the rail that is also the ADC's reference;
+`right_thumb`, `left_thumb` and `R-SER-TERM` stay on `DEV_3V3` directly. It is
+chosen for a low `DCR` — at the chain's whole 27.3 mA a 0.1 Ω bead drops
+2.7 mV `[calc]` — and for a rated current above the LDO's short-circuit
+current, because during a short it carries that. `≥ 600 Ω` at 100 MHz is
+`[from memory]`, and the part is open. **Check at E14:** a bead is inductive
+below its resistive band, and ~1 µH `[from memory]` against the key board's
+100 nF `C-DECOUPLE-165` resonates near `1 / (2π √(1 µH × 100 nF))` ≈ 0.5 MHz
+`[calc]`, close to the chain's clock — scope the key board's VCC while
+shifting, and add a damping bulk capacitor on the key board if it rings.
 
 ---
 
@@ -333,8 +361,9 @@ and none of it moved.
 - **The `FFC-CHAIN` length**, decided at M4: `drc.echo` "ribbon arc length"
   plus the two insertion depths off the chosen connector's drawing, rounded up
   to a stock length. Same-side contacts, per *The ribbon*.
-- **`R-CHAIN-SER`** (E14), **`U-TVS-CHAIN`** (owner) and **`F-CHAIN`**
-  (fit or protect at source) — above.
+- **`R-CHAIN-SER`** (E14) — above. **`U-TVS-CHAIN`** and the fuse are
+  decided (ADR 0018); what is left of them is two tests — the LDO's short
+  limit at E1 and `FB-CHAIN`'s ring at E14 — and the bead's part number.
 - **The main board's hop inputs float with the lid off.** With a ribbon out,
   `right_thumb`'s or `left_thumb`'s `SER` — the main-board end of that
   ribbon's pin 8 — has nothing on it. It costs nothing in play (the lid is on)

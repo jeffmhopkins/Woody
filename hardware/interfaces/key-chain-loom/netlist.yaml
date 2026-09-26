@@ -22,6 +22,14 @@
 # THE CABLE IS NOT A COMPONENT HERE. FFC-CHAIN is a straight conductor per
 # pin, so each ribbon is modelled as the nets it joins: a main-board pin and
 # the key-board pin it reaches are on the same net.
+#
+# THE CHAIN'S 3V3 IS DEV_3V3 ON THE MAIN BOARD, and each ribbon's conductor 10
+# is behind its own ferrite bead (ADR 0018). So V3V3_CHAIN - the name the
+# replicated cluster schematics use - is the same node as DEV_3V3 for the two
+# registers on the main board, and each key board's rail is its own net past
+# its bead (V3V3_CHAIN_RH, V3V3_CHAIN_LH), `per_board:` in hardware/nets.yaml
+# like the hop nets. There is no fuse: short-circuit protection is the
+# Matrix LDO's own current limit (key-chain-loom.md).
 
 circuit: interfaces/key-chain-loom
 title: Key chain (main board to two key boards)
@@ -36,6 +44,8 @@ ports:
   CHAIN_SCK:     {dir: out, to: cluster/key-register, figure: chain-conductors}
   CHAIN_SHLD:    {dir: out, to: cluster/key-register, figure: chain-conductors}
   V3V3_CHAIN:    {dir: out, to: cluster/key-register}
+  V3V3_CHAIN_RH: {dir: out, to: cluster/key-register}
+  V3V3_CHAIN_LH: {dir: out, to: cluster/key-register}
   GND_CHAIN:     {dir: ref, from: interfaces/key-chain-loom, figure: chain-conductors}
   # one per register instance - see the header
   CHAIN_SER_RT:  {dir: out, to: cluster/key-register}
@@ -95,15 +105,23 @@ components:
     pins: [1, 2]
     note: "On the MAIN board at the left_hand ribbon's pin 6, so the key boards stay identical. Holds the chain end high; IO33 overrides it through 100R for the self-test"
 
-  F-CHAIN:
-    value: "100mA polyfuse"
+  FB-CHAIN-RH:
+    of: FB-CHAIN
+    value: "Ferrite bead 600R @ 100MHz"
+    drawn_as: FB-CHAIN
     pins: [1, 2]
-    note: "In the 3V3 feed to the whole chain rail. The short it covers is a ribbon seated skewed across pins 9/10"
+    note: "In series with the right_hand ribbon's conductor 10. Isolation, not protection - the LDO's current limit is the protection"
+
+  FB-CHAIN-LH:
+    of: FB-CHAIN
+    value: "Ferrite bead 600R @ 100MHz"
+    pins: [1, 2]
+    note: "In series with the left_hand ribbon's conductor 10"
 
   U-TVS-CHAIN:
     value: "SP0504BAHTG 4-channel 5V array"
     pins: [CH1, CH2, CH3, CH4, GND]
-    note: "On the three MCU nets the ribbon connectors expose. The fourth channel is spare"
+    note: "FITTED (ADR 0018). On the three MCU nets the ribbon connectors expose, at the left_hand J-CHAIN. The fourth channel is spare"
 
 nets:
 
@@ -176,18 +194,27 @@ nets:
     - port: CHAIN_QH_RT
     - port: IO40
 
+  # ONE NET, TWO BOUNDARIES: the Matrix's 3V3 arriving from carrier/carrier,
+  # and the chain rail the main-board registers and R-SER-TERM sit on.
   DEV_3V3:
     - port: DEV_3V3
-    - F-CHAIN.1
-
-  V3V3_CHAIN:
-    - F-CHAIN.2
+    - port: V3V3_CHAIN
     - R-SER-TERM.2
+    - FB-CHAIN-RH.1
+    - FB-CHAIN-LH.1
+
+  # Each key board's rail, past its ribbon's bead.
+  V3V3_CHAIN_RH:
+    - FB-CHAIN-RH.2
     - J-CHAIN-MAIN-RH.10
     - J-CHAIN-KEY-RH.3
+    - port: V3V3_CHAIN_RH
+
+  V3V3_CHAIN_LH:
+    - FB-CHAIN-LH.2
     - J-CHAIN-MAIN-LH.10
     - J-CHAIN-KEY-LH.3
-    - port: V3V3_CHAIN
+    - port: V3V3_CHAIN_LH
 
   GND_CHAIN:
     - port: GND_CHAIN

@@ -38,7 +38,7 @@ The `Dir` and `Peer` columns are defined once in
 | `SCLK` | instrument → module | out | `J-MCU` IO35 → `module/digital-and-supervision` | `umbilical-pinmap`, `spi-series-r` | On `J-UMB`. Series resistor at the driving end, pulled **down** on both sides of the buffer. Shares a pair with `MOSI`. **Not `SCLK_DAC`**, which is the buffer's output |
 | `MOSI` | instrument → module | out | `J-MCU` IO36 → `module/digital-and-supervision` | `umbilical-pinmap`, `spi-series-r` | On `J-UMB`. Pulled **down**, both sides. Sampled only on a `SCLK` edge, which is why it shares that pair |
 | `CS_MOD` | instrument → module | out | `J-MCU` IO34 → `module/digital-and-supervision` | `umbilical-pinmap`, `spi-series-r` | On `J-UMB`. Pulled **up**, both sides. The one that must not glitch. Shares a pair with `DIG_GND`. **Not `CS_ADC`**, the MCP3202's, which never leaves the carrier |
-| `DIG_GND` | instrument ↔ module | ref | **open at the instrument end** ↔ `module/power-entry` | `umbilical-pinmap`, `dig-gnd-topology` | On `J-UMB` pin 8. `CS_MOD`'s return partner. **Nothing on the instrument side is connected to it yet** — the netlist stops at `J-UMB.8`, and `carrier.md` draws it only as the pin. Where it ties is the disputed figure, not a fact either end settles; decided by `dig-gnd-topology` |
+| `DIG_GND` | instrument ↔ module | ref | `carrier/carrier` (its `PWR_GND`, at `J-UMB`) ↔ `module/power-entry` | `umbilical-pinmap`, `dig-gnd-topology` | On `J-UMB` pin 8. `CS_MOD`'s return partner. **Tied to the main board's ground at `J-UMB`** (ADR 0018). Where it ties at the **module** end is `dig-gnd-topology`, still disputed |
 | `U-TVS-SPI` | instrument | — | — | — | This circuit's own part: on all three signals, to `PWR_GND`, at the connector |
 | `J-UMB`, `CBL-UMB-PATCH` | instrument | — | — | `umbilical-pinmap` | This circuit's own parts: the umbilical's connector on the main board and the straight patch lead to it from the etherCON's rear socket. See *The instrument's connector*, below |
 | `MISO` | instrument | — | `carrier/breath-adc` | — | IO37 is the MCP3202's `DOUT` and **never leaves the board**. ADR 0004 deleted `MISO` from the umbilical, which is why nothing reads the DAC back |
@@ -76,11 +76,19 @@ on the main board's tail end, straight, pin N to pin N. So:
   under the trip, which the load switch carries indefinitely. A 1.25 mm-pitch
   latching family is ~1.0 A per contact `[from memory]` and may fail that;
   decided at M4 with the part.
-- **`J-UMB` pin 8, `DIG_GND`, reaches nothing on the instrument side yet.**
-  The netlist joins it to both etherCONs and stops: no instrument part or
-  pour is on it. **Open, decided by `dig-gnd-topology`** (disputed in
-  `config/figures.yaml`) — where `DIG_GND` returns to is the question, and the
-  instrument end of it is not drawn until that is settled.
+- **`J-UMB` pin 8, `DIG_GND`, is the main board's ground at the instrument
+  end** (owner, 2026-09-26,
+  [ADR 0018](../../../docs/decisions/0018-main-board-wiring-decisions.md)): a
+  short, wide connection from the pin to `PWR_GND` at `J-UMB`, copper rather
+  than a part. `carrier/carrier` declares `DIG_GND` on its `PWR_GND` net; the
+  name is kept because at the module end conductor 8 is its own net.
+  **The layout rule that makes it a return:** route `SCLK`, `MOSI` and
+  `CS_MOD` from the MCU side of `J-MCU`, through `R-SPI-SER`, to `J-UMB` over
+  unbroken ground, so each edge's return runs under its trace to pin 8 and
+  the pour; and keep `AGND_SENSE` (pin 2, the analog star's sense leg) off
+  this return — it is a signal, not a ground. The module end is still
+  `dig-gnd-topology` (disputed in `config/figures.yaml`); the instrument end
+  does not settle it.
 
 **Netlisted here, beside both etherCONs**, because it carries this circuit's
 pin map and all eight of its nets: each net is `J-UMB`, `J-UMB-INST` and

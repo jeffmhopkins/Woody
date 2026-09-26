@@ -108,8 +108,13 @@ key boards' ribbons from the main board (ADR 0017), and re-laying the gasket. Ev
   `IO0` are not on the ESP32-S3-Matrix's pad rows, so two ribbon conductors
   are soldered to its RESET and BOOT button pads and brought to
   `HDR-SERVICE` (ADR 0018; `hardware/carrier/service-uart/`). Hold `IO0` low,
-  pulse `EN`, and the ROM download mode takes a UART flash — so a corrupted
-  *bootloader* is recovered with the lid off and the Matrix still in place.
+  pulse `EN`, and the ROM download mode takes a UART flash over the console
+  pair — so a corrupted *bootloader* is recovered with the lid off and the
+  Matrix still in place. **Only pull `EN` and `IO0` to ground** (open-drain or
+  a switch to GND), never drive them high: the Matrix's own buttons short them
+  to GND. The two spare GPIO on the ribbon (`IO2`, `IO3`) sit beside fast
+  lines as shields; drive them low after boot (`IO3` is a strapping pin
+  [from memory], harmless once booted) — pin map in `hardware/carrier/carrier.md`.
 - **Exercise the ladder at M8**, before the body closes, so it is known good
   rather than assumed.
 

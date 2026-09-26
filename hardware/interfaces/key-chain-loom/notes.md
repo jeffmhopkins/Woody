@@ -48,3 +48,19 @@ while the netlist had it on `GND_CHAIN`; the redrawn page uses `GND_CHAIN`.
 ADR 0017 put the thumb clusters on the main board and gave each key board one
 flat flex ribbon with a ZIF connector at each end. The chain order and the
 12-way pinout were kept, so the bit map and firmware did not change.
+
+## 2026-09-26 — `F-CHAIN` dropped, `U-TVS-CHAIN` fitted
+
+Until ADR 0018 the chain's 3V3 fed all four registers through `F-CHAIN`, a
+100 mA polyfuse in 0805 (Bourns MF-PSMF010X was the nearest banked part), on a
+rail called `V3V3_CHAIN` that was a separate node from `DEV_3V3`. Its row
+argued that the polyfuse's 1.0–7.5 Ω series resistance was harmless because
+the 74HC165 thresholds and the pull-ups shared the rail, and left open whether
+to fit it or to protect at the source. The owner chose the source: the
+Matrix LDO's own current limit, with a ferrite bead per ribbon for isolation.
+`V3V3_CHAIN` became the same node as `DEV_3V3` on the main board, and each key
+board's rail got its own net past its bead.
+
+`U-TVS-CHAIN` had been `open`, with "protect service by procedure (instrument
+off, a wrist strap) or by the part" left to the owner. The owner chose the
+part.

@@ -22,7 +22,8 @@ only by the firmware clamp and the regulator (`U-BUCK`), so it all crosses
 1. **The Matrix ribbon is 24-way, and its extra conductors carry power and
    ground.** `J-MCU` becomes a 2 × 12 1.27 mm box header and `CBL-MCU-RIBBON`
    a 24-way ribbon: the twelve used GPIO, three 5 V, four ground, 3V3, `EN`,
-   `IO0` and two spare GPIO. The extra 5 V and ground conductors are soldered
+   `IO0` and two spare GPIO, in a pin order that puts a ground or a quiet
+   line beside every fast signal. The extra 5 V and ground conductors are soldered
    to the Matrix's pads and to its test points `TP2` (`VCC_5V`) and `TP3`
    (`GND`). This shares the regulator's full current across several contacts,
    and cuts how far the Matrix's ground, and with it the breath ADC's reference,
@@ -33,10 +34,12 @@ only by the firmware clamp and the regulator (`U-BUCK`), so it all crosses
    array cannot be added after the board is made, and costs pennies.
 3. **No fuse on the chain's 3V3 (`F-CHAIN` goes); protect at the source.**
    The chain's 3V3 comes from the Matrix's own LDO. The one fault a fuse would
-   cover, a ribbon seated skewed at reassembly, happens on the bench and shows
-   at once as a dead key board. A series ferrite per ribbon isolates each key
-   board's supply instead. What limits a short, and how it is tested, is in
-   `hardware/interfaces/key-chain-loom/`.
+   cover, a ribbon seated skewed at reassembly, happens on the bench, before
+   the lid goes on, and shows at once: the short pulls down the Matrix's own
+   3V3, so the instrument does not start. A series ferrite per ribbon isolates
+   each key board's supply. The LDO's short-circuit limit is typical-only on
+   its datasheet, so E1 shorts a ribbon's 3V3 to prove it; how, and the
+   ferrite's rating, are in `hardware/interfaces/key-chain-loom/`.
 4. **Wire `EN` and `IO0` to the service header.** They are not on the
    Matrix's pad rows, so two conductors of the ribbon are soldered to its
    RESET and BOOT button pads and brought to `HDR-SERVICE`. The reason for

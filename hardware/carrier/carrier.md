@@ -66,12 +66,12 @@ the ribbon to it (*The Matrix and the umbilical at the tail end*, below).
                                  │                     │
        ┌─────────────────────────▼─────────────────────▼──────────────┐
        │  J-MCU — CBL-MCU-RIBBON to the ESP32-S3-Matrix, on the lid   │
-       │   5V GND 3V3 | IO7 … IO1  (IO2–IO6 spare)                    │
-       │   IO33 … IO40 | IO43 IO44                                    │
+       │   5V×3 GND×4 3V3 | IO7 … IO1 | IO33 … IO40 | IO43 IO44       │
+       │   EN IO0 (button pads) | IO2 IO3 spare — 24 conductors       │
        │   (onboard: IMU GPIO10-13, 8×8 matrix GPIO14, USB GPIO19/20) │
        └──┬──────┬──────────┬────────────┬───────────┬────────────────┘
           │      │          │            │           │
-      3V3 │  SPI3+latch  SPI2+2×CS   IO1                  IO43/IO44
+      3V3 │  SPI3+latch  SPI2+2×CS   IO1          IO43/IO44, EN/IO0
           │      │          │            │           │        │
    ┌──────▼──────▼───┐   ┌──▼────────┐ ┌─▼────────┐ ┌▼────────▼──────┐
    │ CHAIN DRIVE §3  │   │ ADC  §2   │ │'125  §5  │ │ SERVICE  §6    │
@@ -196,8 +196,8 @@ drops there on top of the LDO's regulation `[calc]`, on the
 [tail-end section](#the-matrix-and-the-umbilical-at-the-tail-end)'s
 `[from memory]` ~34 mΩ per conductor: `key-scan-current` at 19 closed ×
 34 mΩ ≈ 0.93 mV ≈ **1.1 LSB** full scale (0.806 mV per LSB). Its return on
-the ribbon's ground is that section's ~4 LSB per 100 mA again — about another
-1.1 on one ground. Same kind of error, same E11 test.
+the ribbon's four grounds is a quarter of that — about another 0.3 `[calc:
+27.3 mA × 8.5 mΩ = 0.23 mV]`. Same kind of error, same E11 test.
 
 **Still fine, and no longer negligible.** 3.4 LSB is 0.2 % of the ~1594-count
 playable span, and because it is the reference moving it is a gain error rather
@@ -230,8 +230,8 @@ and both are board decisions, not firmware ones.
 [`../interfaces/key-chain-loom/`](../interfaces/key-chain-loom/key-chain-loom.md),
 which holds the whole chain: the `right_thumb` and `left_thumb` registers on
 this board, the two flat flex ribbons to the key boards, and this board's
-chain parts — `R-CHAIN-SER`, `R-SER-TERM`, `U-TVS-CHAIN`, `F-CHAIN` and its two
-`J-CHAIN`. The section number is kept because other pages cite `carrier.md`
+chain parts — `R-CHAIN-SER`, `R-SER-TERM`, `U-TVS-CHAIN`, the two `FB-CHAIN`
+and its two `J-CHAIN`. The section number is kept because other pages cite `carrier.md`
 §3.*
 
 ---
@@ -242,7 +242,7 @@ chain parts — `R-CHAIN-SER`, `R-SER-TERM`, `U-TVS-CHAIN`, `F-CHAIN` and its tw
   IO35 SCK  ──[R-SPI-SER 100R]───┬──── J-UMB pin 4   ┐ pair (4,5)
   IO36 MOSI ──[R-SPI-SER 100R]───┼──── J-UMB pin 5   ┘
   IO34 CS   ──[R-SPI-SER 100R]───┼──── J-UMB pin 7   ┐ pair (7,8)
-                                 │     J-UMB pin 8 ──┘ DIG_GND
+                                 │     J-UMB pin 8 ──┘ DIG_GND ── PWR_GND at J-UMB
                                  │
                         [U-TVS-SPI 4-ch array to PWR_GND]
   IO37 MISO ── MCP3202 DOUT only (never leaves the board)
@@ -318,72 +318,101 @@ Two connectors on this board's tail end, one for each thing that is not on it
 ```
   ON THE LID                                  IN THE TAIL CAP
   U-MCU-RT  ESP32-S3-Matrix                   J-UMBILICAL  etherCON, a feedthrough
-    two pad rows, ten pads each                 rear RJ45 socket
+    two pad rows, TP2/TP3, Key1/Key2            rear RJ45 socket
         │                                           │
-        │ CBL-MCU-RIBBON                            │ CBL-UMB-PATCH
+        │ CBL-MCU-RIBBON, 24-way                    │ CBL-UMB-PATCH
         │ soldered to the pads                      │ straight, pin N to pin N,
         │                                           │ S-bend at its minimum bend radius
         ▼                                           ▼
-  J-MCU  2 × 10, 1.27 mm ──── main board, tail end ──── J-UMB  8-way, latching
+  J-MCU  2 × 12, 1.27 mm ──── main board, tail end ──── J-UMB  8-way, latching
 ```
 
 **`J-MCU` replaces the dev-board sockets.** The Matrix is on the lid, so it
-cannot plug into this board; its ribbon is soldered to its pad rows and
-plugs in here, and it unplugs when the lid comes off. A dead Matrix is
-still a bench job and not a strip-down: unplug `J-MCU`, take the lid off,
-desolder the ribbon from the pad rows and solder it to the replacement —
-nothing on this board is touched. The ribbon's length is `mechanical/drc.echo`
-*"Matrix ribbon length"* plus build slack; the builder's notes are on the
-`CBL-MCU-RIBBON` row.
+cannot plug into this board; its ribbon is soldered to it and plugs in here,
+and it unplugs when the lid comes off. A dead Matrix is still a bench job and
+not a strip-down: unplug `J-MCU`, take the lid off, desolder the ribbon and
+solder it to the replacement — nothing on this board is touched. The ribbon's
+length is `mechanical/drc.echo` *"Matrix ribbon length"* plus build slack;
+the builder's notes are on the `CBL-MCU-RIBBON` row.
 
-**Twenty conductors, and the Matrix has one ground pad.** Fifteen are fixed by
-[`netlist.yaml`](netlist.yaml): the twelve GPIO the instrument uses, 5V, 3V3
-and GND. The pad rows carry three power pads and seventeen GPIO, and only one
-of the power pads is ground `[repo] datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-pinout.png`
-(`5V GND 3V3 GP7…GP1 | GP33…GP40 TX RX`). So the other five are **open**:
+**Twenty-four conductors, allocated** (owner, 2026-09-26,
+[ADR 0018](../../docs/decisions/0018-main-board-wiring-decisions.md)):
 
-- **(a) the spare GPIO pads, IO2–IO6** — ADR 0009's spare conductors reach
-  this board, and one conductor carries the Matrix's 5 V and one returns its
-  LED current and every signal;
-- **(b) more 5 V and ground** — what the body model's first sizing of this
-  ribbon assumed (as five grounds). They have to be soldered to points on the
-  Matrix off its pad rows — the vendor schematic has extension pads `TP2` =
-  `VCC_5V` and `TP3` = `GND` `[repo] datasheets/MANIFEST.csv, the schematic's
-  row` — and the ribbon then carries no spares.
+| Conductors | Count | At the Matrix | Why |
+|---|---|---|---|
+| GPIO the instrument uses | 12 | their pads | [`netlist.yaml`](netlist.yaml) |
+| 5V | 3 | two on the 5V pad, one on `TP2` (`VCC_5V`) | current, below |
+| GND | 4 | one on the GND pad, three on `TP3` (`GND`) | current, and the ADC's reference, below |
+| 3V3 | 1 | the 3V3 pad | the Matrix's LDO: the chain's rail and the ADC's reference |
+| `EN`, `IO0` | 2 | `Key1` and `Key2` (BOOT), the terminal on the pull-up side | in-place recovery at `HDR-SERVICE` ([`service-uart`](service-uart/service-uart.md)) |
+| spare GPIO `IO2`, `IO3` | 2 | their pads | ADR 0009's spare conductors; `IO2`–`IO6` are spare (ADR 0007) |
 
-**The lean is (b), and current decides it before noise does.** Fed from the
-5 V pad, the Matrix's LEDs bypass its USB diode (`matrix-led-current`,
-`power_path`), so nothing on the Matrix limits their draw short of the
-firmware clamp. The 5 V and GND contacts and conductors must therefore be
-rated against what the regulator can deliver — `U-BUCK`'s 1 A (R-78E5.0-1.0,
+The pad rows carry one ground pad and one 5 V pad
+`[repo] datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-pinout.png`, so the
+extra ones land on the vendor schematic's extension pads, `TP2` = `VCC_5V` and
+`TP3` = `GND` `[repo] datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-SCHEMATIC.pdf`.
+If `TP3` will not take three joints, the three conductors are twisted and
+tinned as one joint; each is still its own path to `J-MCU`.
+
+**Current decides the power count.** Fed from the 5 V pad, the Matrix's LEDs
+bypass its USB diode (`matrix-led-current`, `power_path`), so nothing on the
+Matrix limits their draw short of the firmware clamp. The 5 V and GND
+contacts are therefore rated against what the regulator can deliver —
+`U-BUCK`'s 1 A (R-78E5.0-1.0,
 [`power-entry-instrument`](power-entry-instrument/power-entry-instrument.md))
-— not against `matrix-led-current`. A 1.27 mm box-header contact is ~1 A
-`[from memory]`, so a single 5 V and a single GND position sit at their
-limit; a 0.635 mm ribbon conductor carries that without heating to speak of
-`[from memory]`, but its resistance matters, below. So some of the five go to
-extra 5 V and extra GND. **Still decided at M4** with the Matrix and the
-header in hand, and **E11** — breath output clean while the matrix is
-exercised.
+— not against `matrix-led-current`. `[calc]`, sharing equally: 1 A ÷ 3 ≈
+**0.33 A per 5 V contact** and 1 A ÷ 4 = 0.25 A per ground, against ~1 A per
+1.27 mm box-header contact `[from memory]`. One of each would have sat at the
+limit.
 
-The reason it reaches the breath channel: the Matrix's 3V3 is the MCP3202's
+**The ground count is also the ADC's.** The Matrix's 3V3 is the MCP3202's
 reference (`carrier/breath-adc`), regulated against the *Matrix's* ground, so
-return current in the ribbon's ground conductor moves that reference against
-this board's — a gain error. `[calc]`, on `[from memory]` inputs — a
+return current in the ribbon's grounds moves that reference against this
+board's — a gain error. `[calc]`, on `[from memory]` inputs — a
 0.635 mm-pitch ribbon conductor is ~30 AWG, ~0.34 Ω/m; the length is
 illustrative, not the model's:
 
 ```
 100 mm × 0.34 Ω/m          = 34 mΩ per ground conductor
 100 mA of return current   → 3.4 mV of ground shift
-3.4 mV / 3.3 V × 4096      = 4.2 LSB full scale on the breath ADC, per 100 mA
+3.4 mV / 3.3 V × 4096      = 4.2 LSB full scale on the breath ADC, per 100 mA, one ground
+
+at the regulator's 1 A:
+  one ground    1 A × 34 mΩ          = 34 mV   → 34 mV / 3.3 V × 4096  = 42 LSB
+  four grounds  1 A × (34 mΩ ÷ 4)    = 8.5 mV  → 8.5 mV / 3.3 V × 4096 = 10.5 LSB
 ```
 
-**~4 LSB full scale per 100 mA, moving with the display: up to ~40 at the
-regulator's 1 A on one ground, ~7 on six** `[calc: 1 A × 34 mΩ = 34 mV =
-42 LSB; ÷ 6 = 7.0]`. Under option (b), `J-MCU` should also put a ground
-between the SPI clock (`IO35`) and the chain clock (`IO38`). Under (a) there
-is none to put there: the Matrix's only ground pad is on the other pad row
-from both (`5V GND 3V3 GP7…GP1 | GP33…GP40 TX RX`).
+**~42 LSB full scale on one ground, ~10 on four**, moving with the display.
+The four-way split assumes the conductors share equally, which needs equal
+lengths and sound joints; E11 — breath output clean while the matrix is
+exercised — is what confirms it.
+
+**The pin map** — ribbon conductor n is `J-MCU` pin n
+`[from memory: IDC numbering; confirm on the socket's drawing]`, and
+[`netlist.yaml`](netlist.yaml) is authoritative:
+
+```
+  pin  1 5V     2 GND    3 5V     4 IO1    5 IO2    6 IO7
+  pin  7 IO3    8 IO38   9 GND   10 IO35  11 GND   12 IO36
+  pin 13 3V3   14 IO34  15 GND   16 IO39  17 5V    18 IO37
+  pin 19 IO33  20 IO40  21 IO44  22 IO43  23 IO0   24 EN
+```
+
+The order is for the ribbon's length, where conductors sit side by side for
+~100 mm; at the header they are millimetres apart. **Every fast line has a
+ground, a supply or a static line on both sides**: `IO35` (`SCLK`) between
+two grounds; `IO38` (chain `SCK`) between spare `IO3` and ground, and pin 9
+is **the ground between the SPI clock and the chain clock**; `IO36`
+(`MOSI`) between ground and 3V3; `IO34` (`CS_MOD`) between 3V3 and ground;
+`IO7` (`SH/LD`) between the two spares. The board-local lines are covered
+the same way — `IO39` between ground and 5V, `IO37` between 5V and `IO33`,
+`IO1` (LED data) between 5V and `IO2` — using lines that are quiet in play:
+`IO33` moves only for the chain self-test, and `IO44` (`RX`) only with
+something on the service header. `IO43` (`TX`) sits between `RX` and `IO0`.
+**`EN` is on the edge with only `IO0` beside it**, because the Matrix has no
+capacitor on `EN` — `R8` and `Key1` are all that is on its `RESET` net — and
+a glitch there is a reset. **The spares must be quiet to shield:** firmware
+drives `IO2` and `IO3` low (`firmware/README.md`).
 
 **`J-UMB` is where the umbilical reaches this board.** `J-UMBILICAL` is a
 feedthrough, and `CBL-UMB-PATCH` runs straight from its rear RJ45 socket to
@@ -420,14 +449,14 @@ page and have no BOM entry yet.
 | Ref | Value | Job | Confidence |
 |---|---|---|---|
 | `U-MCU-RT` | ESP32-S3-Matrix | The instrument. On the lid, not on this board; wired by `CBL-MCU-RIBBON` | `[repo]` |
-| `J-MCU` | 2 × 10, 1.27 mm shrouded box header, right-angle | The Matrix's connector, at the tail end. **Five of its twenty positions open** — see *The Matrix and the umbilical at the tail end* | `[from memory]`; part **open**, M4 |
-| `CBL-MCU-RIBBON` | 20-way flat ribbon, 0.635 mm | Soldered to the Matrix's pad rows, IDC socket into `J-MCU` | `[repo]` pad map; `[from memory]` ribbon; **open**, M4 |
+| `J-MCU` | 2 × 12, 1.27 mm shrouded box header, right-angle | The Matrix's connector, at the tail end. Pin map decided (ADR 0018) — *The Matrix and the umbilical at the tail end* | pin map decided; `[from memory]` part; part **open**, M4 |
+| `CBL-MCU-RIBBON` | 24-way flat ribbon, 0.635 mm | Soldered to the Matrix's pad rows, `TP2`/`TP3` and its two button pads; IDC socket into `J-MCU` | `[repo]` pad map and schematic; `[from memory]` ribbon; part **open**, M4 |
 | `J-UMB` | 8-way latching wire-to-board header | Where the umbilical reaches this board; `interfaces/spi-link`'s row | `[from memory]`; part **open**, M4 |
 | `CBL-UMB-PATCH` | Short Cat5e/Cat6 patch lead, RJ45 to crimp housing | etherCON rear socket to `J-UMB`, straight; `interfaces/spi-link`'s row | `[from memory]`; **open**, M4 |
 | `U-KEYS`, `R-KEY-PU`, `R-KEY-SER`, `C-KEY`, `C-DECOUPLE-165` | — | **Half of them are on this board since ADR 0017**: the `right_thumb` and `left_thumb` clusters. The other two clusters are on the key boards. Counts per cluster are `cluster-boards.md`'s component table | `[repo] 0017, bom.csv` |
 | **`R-CHAIN-SER`** ×3 | **100 Ω** | **Open — series at the driving end on `SCK`, `SH/LD` and the chain-end `SER`. Edge-rate damping, not termination; E14 decides. `key-chain-loom.md`** | open |
-| **`U-TVS-CHAIN`** | **4-ch array, SOT-23-5** | **Open — the three MCU nets the ribbon connectors expose, for service handling with the lid off. The owner decides. `key-chain-loom.md`** | open |
-| **`F-CHAIN`** | **100 mA polyfuse** | **Open — the chain's 3V3 feed; the short it covers is a ribbon seated skewed at re-assembly, which would take the LDO and the instrument down. `key-chain-loom.md`** | open |
+| `U-TVS-CHAIN` | SP0504BAHTG, 4-ch array, SOT-23-5 | **Fitted** (ADR 0018) — the three MCU nets the ribbon connectors expose, for service handling with the lid off; fourth channel spare. `key-chain-loom.md` | candidate |
+| `FB-CHAIN` ×2 | Ferrite bead, 0805, low DCR | One per key-board ribbon on its 3V3 conductor: isolation. **No fuse** — a skewed ribbon's short is limited by the Matrix LDO itself (ADR 0018). `key-chain-loom.md` | part **open** |
 | `U-BUF` | OPA2197IDR | ½ reference buffer, ½ breath buffer, both on +12 V | `[repo]` |
 | `U-BREATH` | MPXV4006DP, case 1351-01, surface mount, soldered down | P1 to the tube, P2 open to the cavity | `[ds]` pp.1, 6, 7 |
 | `R-SER-BREATH-INST` | 1 kΩ | Output protection. **No series cap here** | `[repo]` |
@@ -460,10 +489,10 @@ it, and power arrives down the umbilical. What terminates here:
 | From | Conductors | Connector |
 |---|---|---|
 | The two key boards, one flat flex ribbon each (`FFC-CHAIN`) | 12 each: four chain signals, five alternating grounds, 3V3, two spare — `key-chain-loom.md` | `J-CHAIN` ZIF, one per ribbon here; `chain-connectors` counts both ends |
-| The Matrix, on the lid | 20 | `J-MCU` |
+| The Matrix, on the lid | 24 | `J-MCU` |
 | The umbilical, from the tail cap | 8 | `J-UMB` |
 | WS2815 strip — on this board (ADR 0016): 12 V, GND, `DI`, `BI` to ground | 4 | `J-LED` |
-| The console | 3 | `HDR-SERVICE` |
+| The console, and the Matrix's `EN` and `IO0` | 5 | `HDR-SERVICE` |
 | The key plate's ground bond | 1 | `MECH-GNDBOND` |
 
 The Matrix and the umbilical are the section above. The board's outline and
@@ -474,22 +503,23 @@ what it keeps clear of are derived in `mechanical/` — `mechanical/drc.echo`
 
 ## Still open
 
-Ordered by what blocks what. The first four block layout.
+Ordered by what blocks what. The first two block layout.
 
-- **The Matrix ribbon's last five conductors**: extra 5 V and GND (option
-  (b), the lean, because the 5 V and GND positions carry up to `U-BUCK`'s
-  rating) or the spare GPIO IO2–IO6 (*The Matrix and the umbilical at the tail
-  end*). Decides `J-MCU`'s pinout. Decided at M4 with the Matrix in hand,
-  checked by E11.
 - **`J-MCU`, `J-UMB` and their mates are envelopes, not parts** — the
   envelopes in `config/body.yaml` are `[from memory]`. Decided at M4 with the
   parts; `J-UMB`'s contacts against `R-ILIM`, not only `umbilical-current`.
 - **The board outline** is now derived by the body CAD (the main board,
   ADR 0017, `mechanical/DESIGN.md`), with the strip on it (ADR 0016). What is still open
   is the routing inside that outline.
-- **`F-CHAIN`** (§3): whether the chain's 3V3 feed to the key-board ribbons
-  is fused. Two millimetres of board; the short it covers is a ribbon seated
-  skewed when the lid goes back on (`key-chain-loom.md`).
+- **E11 on the real ribbon**: breath output clean while the matrix is
+  exercised, which is what shows the four grounds share the return as
+  *The Matrix and the umbilical at the tail end* assumes.
+
+> **Decided 2026-09-26 (ADR 0018):** the Matrix ribbon's allocation and
+> `J-MCU`'s pin map; `U-TVS-CHAIN` fitted; no fuse on the chain's 3V3, one
+> `FB-CHAIN` per ribbon instead; `EN` and `IO0` wired to `HDR-SERVICE`; and
+> `DIG_GND` tied to this board's ground at `J-UMB` (§4,
+> [`spi-link`](../interfaces/spi-link/spi-link.md)).
 
 > **Two items were decided rather than left open.** `J-CHAIN` is **12-way**
 > with a ground between every signal (§3). And the key pull-ups **may** share the

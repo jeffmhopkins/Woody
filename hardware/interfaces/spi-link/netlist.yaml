@@ -107,10 +107,10 @@ nets:
     - J-UMB-INST.7
     - J-UMB-MOD.7
 
-  # OPEN AT THE INSTRUMENT END: nothing on the instrument side is on this
-  # net - it stops at J-UMB.8. Where DIG_GND ties there is the register's
-  # dig-gnd-topology (disputed); it is deliberately not connected until that
-  # is decided, rather than guessed onto PWR_GND.
+  # TIED TO THE MAIN BOARD'S GROUND AT J-UMB (ADR 0018). carrier/carrier
+  # declares DIG_GND on its PWR_GND net: the tie is copper at pin 8, not a
+  # part. The net keeps its name because at the module end conductor 8 is its
+  # own net, and where it meets AGND_MOD there is dig-gnd-topology (disputed).
   DIG_GND:
     - port: DIG_GND
     - J-UMB-MOD.8

@@ -37,9 +37,27 @@ nets:
 
   V3V3_CHAIN:
     kind: power
-    carries: "3V3 to all four registers - main-board traces to right_thumb and left_thumb, conductor 10 of each ribbon to the key boards (main-board J-CHAIN pin 10, key-board pin 3)"
+    carries: "The chain's 3V3 as the replicated cluster schematics name it. On the main board it IS DEV_3V3 - right_thumb and left_thumb by trace, with no fuse (ADR 0018); each key board's instance is on V3V3_CHAIN_RH or V3V3_CHAIN_LH, past its ribbon's bead"
     driver: interfaces/key-chain-loom
     receivers: [cluster/key-register, cluster/key-switch-network, cluster/key-marker-and-bits]
+
+  # Each key board's 3V3, past the FB-CHAIN bead on its ribbon's conductor 10.
+  # `per_board:` like the hop nets below: the replicated schematic declares
+  # only the generic V3V3_CHAIN, so which instance sits on which is the key
+  # chain's to say.
+  V3V3_CHAIN_RH:
+    kind: power
+    carries: "right_hand key board's 3V3: FB-CHAIN on the main board, then conductor 10 of its ribbon (main-board J-CHAIN pin 10, key-board pin 3)"
+    driver: interfaces/key-chain-loom
+    receivers: [cluster/key-register, cluster/key-switch-network, cluster/key-marker-and-bits]
+    per_board: true
+
+  V3V3_CHAIN_LH:
+    kind: power
+    carries: "left_hand key board's 3V3: FB-CHAIN on the main board, then conductor 10 of its ribbon (main-board J-CHAIN pin 10, key-board pin 3)"
+    driver: interfaces/key-chain-loom
+    receivers: [cluster/key-register, cluster/key-switch-network, cluster/key-marker-and-bits]
+    per_board: true
 
   GND_CHAIN:
     kind: reference
@@ -289,13 +307,29 @@ nets:
     external_driver: "whatever is plugged into the service header"
     receivers: [carrier/carrier, carrier/service-uart]
 
+  EN:
+    kind: signal
+    domain: digital
+    carries: "The Matrix's EN (its RESET net, CHIP_PU), from Key1's RESET-side terminal down CBL-MCU-RIBBON (J-MCU pin 24) to HDR-SERVICE pin 4 (ADR 0018)"
+    external_driver: "whatever is plugged into the service header, pulling to ground only"
+    receivers: [carrier/carrier, carrier/service-uart]
+    note: "Held up on the Matrix by R8, 10k to its 3V3, with no capacitor on it; Key1 pulls it to GND. Nothing in series"
+
+  IO0:
+    kind: signal
+    domain: digital
+    carries: "The Matrix's GPIO0 (boot strap), from Key2's IO0-side terminal down CBL-MCU-RIBBON (J-MCU pin 23) to HDR-SERVICE pin 5 (ADR 0018)"
+    external_driver: "whatever is plugged into the service header, pulling to ground only"
+    receivers: [carrier/carrier, carrier/service-uart]
+    note: "Held up on the Matrix by R10, 10k to its 3V3; Key2 (BOOT) pulls it to GND. Nothing in series"
+
   INST_5V_A:
     kind: power
     carries: "Buck A, through D-USBOR onto the dev board's 5 V pin"
     figure: matrix-led-current
     driver: carrier/power-entry-instrument
     receivers: [carrier/led-strip-drive, carrier/carrier]
-    note: "It reaches the 8x8 matrix through the dev board, so carrier/carrier is where it lands, through J-MCU and one conductor of CBL-MCU-RIBBON"
+    note: "It reaches the 8x8 matrix through the dev board, so carrier/carrier is where it lands, through J-MCU and three conductors of CBL-MCU-RIBBON (two on the 5V pad, one on TP2)"
 
   VS:
     kind: signal
@@ -382,10 +416,16 @@ nets:
 
   DIG_GND:
     kind: reference
-    carries: "Digital return, instrument to module"
+    carries: "Digital return, instrument to module - J-UMB pin 8, CS_MOD's pair partner"
     figure: dig-gnd-topology
     origin: module/power-entry
-    reference: [interfaces/spi-link, module/digital-and-supervision]
+    reference: [interfaces/spi-link, module/digital-and-supervision, carrier/carrier]
+    note: >
+      AT THE INSTRUMENT END IT IS THE MAIN BOARD'S GROUND: tied to PWR_GND at
+      J-UMB (ADR 0018), which carrier/carrier declares by putting this port on
+      its PWR_GND net. The name is kept because at the module end conductor 8
+      is its own net, and where it meets AGND_MOD there is dig-gnd-topology,
+      which is still disputed and is not settled by the instrument end.
 
   UMBILICAL_POS12:
     kind: power

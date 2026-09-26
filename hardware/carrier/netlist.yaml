@@ -10,8 +10,15 @@
 # soldered to its pad rows and plugged into J-MCU on the main board: one
 # conductor per pad, straight, with no pin map of its own. So each Matrix pin
 # and its J-MCU pin are ONE NET here, exactly as interfaces/spi-link treats
-# the umbilical cable. J-MCU's pins are named by the conductor they carry,
-# because its numbering is open with the ribbon's allocation (CBL-MCU-RIBBON).
+# the umbilical cable. J-MCU's pins are numbered: ribbon conductor n is
+# J-MCU pin n, allocated by ADR 0018 (the J-MCU row gives the map).
+#
+# PARALLEL CONDUCTORS ARE SEPARATE J-MCU PINS ON ONE NET. Three conductors
+# carry 5V and four carry GND, for current and for the ground shift under the
+# ADC's reference (carrier.md, "The Matrix and the umbilical at the tail
+# end"). On the Matrix two of the 5V conductors share the 5V pad, and three of
+# the grounds land on test pad TP3 - so U-MCU-RT.P5V and U-MCU-RT.TP2 are both
+# its VCC_5V, and U-MCU-RT.GND and U-MCU-RT.TP3 both its GND.
 #
 # §2's ANALOG FRONT END IS NOT HERE. The reference, the buffer, the sensor and
 # the ADC are drawn on this page and owned by carrier/breath-excitation-
@@ -35,6 +42,8 @@ ports:
   # to the service header
   U0TXD:     {dir: out, to: carrier/service-uart}
   U0RXD:     {dir: in,  from: carrier/service-uart}
+  EN:        {dir: in,  from: carrier/service-uart}
+  IO0:       {dir: in,  from: carrier/service-uart}
   # the shared SPI host: the ADC on this board, the DAC two metres away
   IO35:      {dir: out, to: carrier/breath-adc}
   IO36:      {dir: out, to: carrier/breath-adc}
@@ -47,6 +56,8 @@ ports:
   DEV_3V3:   {dir: out, to: interfaces/key-chain-loom, figure: key-pullup-qty}
   INST_5V_A: {dir: in,  from: carrier/power-entry-instrument, figure: matrix-led-current}
   PWR_GND:   {dir: ref, from: module/power-entry, figure: dig-gnd-topology}
+  # J-UMB pin 8 arrives here and is this board's ground (ADR 0018)
+  DIG_GND:   {dir: ref, from: module/power-entry, figure: umbilical-pinmap}
 
 foreign:
   C-REF-OUT:         {owner: carrier/breath-excitation-reference, row: C-REF-OUT}
@@ -64,15 +75,15 @@ components:
 
   U-MCU-RT:
     value: "ESP32-S3-Matrix"
-    pins: [IO1, IO7, IO33, IO34, IO35, IO36, IO37, IO38, IO39,
-           IO40, IO43, IO44, P3V3, P5V, GND]
-    note: "On the lid, wired by CBL-MCU-RIBBON soldered to its pad rows. Its own LDO is the instrument's only 3V3, and EN and IO0 are NOT on its pad rows - IO0 is under the BOOT button and EN is on the reset circuit. IO2 to IO6 are SPARE (IO5 and IO6 since ADR 0015, IO2 since ADR 0016; IO3 and IO4 have no assignment). Its single GND pad is the only ground on its pad rows"
+    pins: [IO1, IO2, IO3, IO7, IO33, IO34, IO35, IO36, IO37, IO38, IO39,
+           IO40, IO43, IO44, P3V3, P5V, GND, TP2, TP3, EN, IO0]
+    note: "On the lid, wired by CBL-MCU-RIBBON. Its own LDO is the instrument's only 3V3. Pins are its pads as the ribbon reaches them: the pad rows; TP2 (VCC_5V) and TP3 (GND), its extension test pads; EN at Key1's RESET-side terminal and IO0 at Key2's (BOOT) IO0-side terminal - the sides on R8/R10, not on GND [datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-SCHEMATIC.pdf]. IO2 to IO6 are SPARE (IO5 and IO6 since ADR 0015, IO2 since ADR 0016; IO3 and IO4 have no assignment); IO2 and IO3 reach J-MCU, IO4 to IO6 do not"
 
   J-MCU:
-    value: "2x10 1.27mm shrouded box header"
-    pins: [IO1, IO7, IO33, IO34, IO35, IO36, IO37, IO38, IO39,
-           IO40, IO43, IO44, P3V3, P5V, GND]
-    note: "The Matrix's ribbon lands here. Fifteen conductors are fixed and netted below; the other five of its twenty positions are OPEN - five more grounds or the spare GPIO IO2-IO6, decided with CBL-MCU-RIBBON - and are not netted until that is decided, because a net here asserts a connection"
+    value: "2x12 1.27mm shrouded box header"
+    pins: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+           13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+    note: "The Matrix's ribbon lands here, conductor n on pin n (ADR 0018). Every fast line has a ground, a supply or a static line on both sides, and pin 9 (GND) separates SCLK (pin 10) from the chain clock (pin 8)"
 
   R-SPI-SER-SCLK:
     of: R-SPI-SER
@@ -107,13 +118,13 @@ nets:
 
   IO35:
     - U-MCU-RT.IO35
-    - J-MCU.IO35
+    - J-MCU.10
     - R-SPI-SER-SCLK.1
     - port: IO35
 
   IO36:
     - U-MCU-RT.IO36
-    - J-MCU.IO36
+    - J-MCU.12
     - R-SPI-SER-MOSI.1
     - port: IO36
 
@@ -121,7 +132,7 @@ nets:
   # no boundary, so it is not in hardware/nets.yaml.
   IO34:
     - U-MCU-RT.IO34
-    - J-MCU.IO34
+    - J-MCU.14
     - R-SPI-SER-CS.1
 
   SCLK:
@@ -142,71 +153,114 @@ nets:
   IO37:
     - port: IO37
     - U-MCU-RT.IO37
-    - J-MCU.IO37
+    - J-MCU.18
 
   IO39:
     - U-MCU-RT.IO39
-    - J-MCU.IO39
+    - J-MCU.16
     - port: IO39
 
   # --- the cluster chain ---------------------------------------------
 
   IO38:
     - U-MCU-RT.IO38
-    - J-MCU.IO38
+    - J-MCU.8
     - port: IO38
 
   IO7:
     - U-MCU-RT.IO7
-    - J-MCU.IO7
+    - J-MCU.6
     - port: IO7
 
   IO33:
     - U-MCU-RT.IO33
-    - J-MCU.IO33
+    - J-MCU.19
     - port: IO33
 
   IO40:
     - port: IO40
     - U-MCU-RT.IO40
-    - J-MCU.IO40
+    - J-MCU.20
 
   # --- the LED strip ---------------------------------------------------
 
   IO1:
     - U-MCU-RT.IO1
-    - J-MCU.IO1
+    - J-MCU.4
     - port: IO1
 
   # --- the service header ----------------------------------------------
 
   U0TXD:
     - U-MCU-RT.IO43
-    - J-MCU.IO43
+    - J-MCU.22
     - port: U0TXD
 
   U0RXD:
     - port: U0RXD
     - U-MCU-RT.IO44
-    - J-MCU.IO44
+    - J-MCU.21
 
   # --- supply ----------------------------------------------------------
 
+  # Three conductors: two on the Matrix's 5V pad, one on TP2.
   INST_5V_A:
     - port: INST_5V_A
     - U-MCU-RT.P5V
-    - J-MCU.P5V
+    - U-MCU-RT.TP2
+    - J-MCU.1
+    - J-MCU.3
+    - J-MCU.17
 
   DEV_3V3:
     - U-MCU-RT.P3V3
-    - J-MCU.P3V3
+    - J-MCU.13
     - port: DEV_3V3
 
+  # Four conductors: one on the Matrix's GND pad, three on TP3.
+  #
+  # ONE NET, TWO BOUNDARIES: DIG_GND, J-UMB pin 8 (interfaces/spi-link), ties
+  # to this board's ground at J-UMB - a short, wide connection at the pin,
+  # copper and not a part (ADR 0018). The name is kept because at the module
+  # end conductor 8 is its own net, and where it meets AGND_MOD there is
+  # dig-gnd-topology, still disputed.
   PWR_GND:
     - port: PWR_GND
+    - port: DIG_GND
     - U-MCU-RT.GND
-    - J-MCU.GND
+    - U-MCU-RT.TP3
+    - J-MCU.2
+    - J-MCU.9
+    - J-MCU.11
+    - J-MCU.15
     - U-TVS-SPI.GND
+
+  # --- reset and boot, to the service header (ADR 0018) -----------------
+  #
+  # Pulled up on the Matrix by R8 / R10 (10k to its 3V3) and pulled down by
+  # its buttons. Nothing in series; whatever is on HDR-SERVICE pulls to
+  # ground only.
+  EN:
+    - U-MCU-RT.EN
+    - J-MCU.24
+    - port: EN
+
+  IO0:
+    - U-MCU-RT.IO0
+    - J-MCU.23
+    - port: IO0
+
+  # --- the two spare GPIO the ribbon carries -----------------------------
+  #
+  # Local: they reach J-MCU and nothing else on this board (two test pads
+  # beside it, per the J-MCU row).
+  IO2:
+    - U-MCU-RT.IO2
+    - J-MCU.5
+
+  IO3:
+    - U-MCU-RT.IO3
+    - J-MCU.7
 
   # The fourth clamp channel has no fourth signal: J-UMB pin 8 is DIG_GND,
   # which is a return rather than something to clamp.
