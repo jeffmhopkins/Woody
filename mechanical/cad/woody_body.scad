@@ -450,18 +450,21 @@ ec_panel_x = L - ends_tail_cap_t;                  // flange and chassis sit beh
 ec_sock_c = ethercon_rotated ? ec_c + [ec_sock_dir * ec_sock_off_mag, 0] : ec_c - [0, ec_sock_off_mag];
 ec_holes = [for (s = [-1, 1]) ec_c + s * (ethercon_rotated ? [ethercon_hole_dy, ethercon_hole_dx] : [ethercon_hole_dx, ethercon_hole_dy]) / 2];
 // The USB-C extension's receptacle (owner, 2026-09-26): beside the
-// etherCON, 2 mm of oak clear of its flange on the tail face, inside the
-// sides, at the cavity's mid height.
+// etherCON, inside the sides, at the cavity's mid height. Stood on end
+// (openings.usb_slot_portrait) it fits the lane between the etherCON's
+// flange and the side, and sits centred in it, so the oak web to the flange
+// and the room to the side share what the lane has spare.
 usb_web_min = 2;   // drawing convention: oak between two tail-face cutouts
-usb_c = [min(max(ec_c[0] + ec_fl[0] / 2, ec_c[0] + ec_house[0] / 2) + usb_web_min + openings_usb_slot_w / 2, W - u_y0 - openings_usb_slot_w / 2),
-         z_floor + cavity_h / 2];
+usb_sz = openings_usb_slot_portrait ? [openings_usb_slot_h, openings_usb_slot_w] : [openings_usb_slot_w, openings_usb_slot_h];   // [across Y, height Z]
+usb_lane = [max(ec_c[0] + ec_fl[0] / 2, ec_c[0] + ec_house[0] / 2), W - u_y0];   // flange edge to the side's inside face
+usb_c = [(usb_lane[0] + usb_lane[1]) / 2, z_floor + cavity_h / 2];
 
 module tail_cap_2d() {
     difference() {
         rrect(W, T, stack_edge_r);
         translate(ec_c) circle(d = ethercon_bore_d);
         for (h = ec_holes) translate(h) circle(d = ethercon_hole_d);
-        translate(usb_c) square([openings_usb_slot_w, openings_usb_slot_h], center = true);
+        translate(usb_c) square(usb_sz, center = true);
     }
 }
 // Behind the tail cap: carries the connector (ADR 0009: "let the oak be the
@@ -645,8 +648,8 @@ module tail_equipment() {
         cube([openings_usb_plug_l, openings_usb_slot_w, openings_usb_slot_h]);
     // The USB-C extension: receptacle body behind the tail cap, and a cable
     // run to the Matrix board's edge (drawn straight; it is a flexible lead).
-    P(C_CONN, false, "USB-C receptacle") translate([x_in1 - openings_usb_ext_depth, usb_c[0] - openings_usb_slot_w / 2, usb_c[1] - openings_usb_slot_h / 2])
-        cube([openings_usb_ext_depth, openings_usb_slot_w, openings_usb_slot_h]);
+    P(C_CONN, false, "USB-C receptacle") translate([x_in1 - openings_usb_ext_depth, usb_c[0] - usb_sz[0] / 2, usb_c[1] - usb_sz[1] / 2])
+        cube([openings_usb_ext_depth, usb_sz[0], usb_sz[1]]);
     // Routed beside the etherCON, on the receptacle's side.
     usb_from = [openings_matrix_usb_to_tail ? matrix_xy[0] + boards_matrix_board / 2 + usb_behind : usb_plug_x0,
                 matrix_xy[1], matrix_board_z - openings_usb_slot_h / 2];
@@ -1172,10 +1175,10 @@ module drc_report() {
         [ec_c[1] - ethercon_bore_d / 2, T - (ec_c[1] + ethercon_bore_d / 2)], "mm - the connector stands on the floor, so it is not centred");
     // USB-C by panel-mount extension (owner, 2026-09-26).
     usb_room = (W - u_y0) - (ec_c[0] + ec_house[0] / 2);
-    drc(usb_room >= openings_usb_slot_w + 2, "USB-C extension receptacle beside the etherCON body", usb_room - openings_usb_slot_w,
-        str("mm spare across, inside the sides, for a ", openings_usb_slot_w, " mm receptacle"));
-    usb_web = (usb_c[0] - openings_usb_slot_w / 2) - (ec_c[0] + ec_fl[0] / 2);
-    drc(usb_web >= 2, "tail cap web between the USB-C cutout and the etherCON flange", usb_web, "mm of oak on the tail face");
+    drc(usb_room >= usb_sz[0] + usb_web_min, "USB-C extension receptacle beside the etherCON body", usb_room - usb_sz[0],
+        str("mm spare across, inside the sides, for a receptacle ", usb_sz[0], " mm across (", openings_usb_slot_portrait ? "on end" : "flat", ")"));
+    usb_web = (usb_c[0] - usb_sz[0] / 2) - (ec_c[0] + ec_fl[0] / 2);
+    drc(usb_web >= usb_web_min, "tail cap web between the USB-C cutout and the etherCON flange", usb_web, "mm of oak on the tail face");
     usb_run = norm([x_in1 - openings_usb_ext_depth - (matrix_xy[0] + boards_matrix_board / 2), usb_c[0] - matrix_xy[1], usb_c[1] - (matrix_board_z - 2)]);
     echo("DRC", "INFO", "USB-C extension cable run, Matrix edge to receptacle", usb_run,
          "mm straight line; buy the shortest extension that reaches, with slack for the tail cap to come off");

@@ -458,6 +458,17 @@ openings:
     status: tbd
     source: "as usb_slot_w [from memory]"
     decided_by: "M4"
+  # THE RECEPTACLE STANDS ON END (2026-09-26). Landscape, the tail face
+  # could not hold it: the rotated etherCON's flange already sits against
+  # one side, and flange + web + a landscape slot is wider than the interior,
+  # so the slot was pinned to the other side short of its web (drc.echo,
+  # "tail cap web between the USB-C cutout and the etherCON flange"). USB-C
+  # is reversible, so the receptacle's orientation costs the user nothing.
+  usb_slot_portrait:
+    value: true
+    status: tbd
+    source: "[calc] portrait takes usb_slot_h across instead of usb_slot_w: landscape was flange 31 + web 2 + slot 12.5 = 45.5 in a 45 interior; portrait is 31 + 2 + 7 = 40, and 12.5 tall in the cavity's height. Chosen over moving the etherCON (already against the side, and its rotation is ADR 0009's), widening the body, or a backing plate"
+    decided_by: "M4, against the extension bought - its screw ears, if any, then run up and down the tail face"
   usb_plug_l:
     value: 15.0
     status: tbd

@@ -184,8 +184,15 @@ decision, not a correction.
 3. **The Matrix's USB-C reaches the tail through an extension** (owner,
    2026-09-26). Its port cannot reach the face — the etherCON fills the
    tail's depth — so a panel-mount USB-C extension runs to a receptacle
-   beside the connector (`CBL-USB-EXT`). *Rules: "USB-C extension receptacle
-   beside the etherCON body", "tail cap web between the USB-C cutout and the
+   beside the connector (`CBL-USB-EXT`). **The receptacle stands on end**
+   (`openings.usb_slot_portrait`, 2026-09-26): the rotated etherCON's flange
+   already sits against one side, and a landscape slot beside it left too
+   little oak to the flange on the face the cables plug into. On end it sits
+   centred in the lane between the flange and the other side; USB-C is
+   reversible, so the user never sees the difference. Moving the etherCON
+   (no room, and its rotation is ADR 0009's), widening the body or a backing
+   plate were the alternatives. *Rules: "USB-C extension receptacle beside
+   the etherCON body", "tail cap web between the USB-C cutout and the
    etherCON flange"; the cable run is an INFO line.*
 4. **The display set the mouth end — resolved by the owner.** It is gone
    (ADR 0015), and the mouth end is now the equal band. *Rule: "what the
