@@ -109,13 +109,13 @@ them against the alternatives (`mechanical/renders/key-layouts.png`). Still
 provisional: M2 replaces them with measured positions.
 
 **The little-finger keys leave the line (owner, same date).** The keys stay
-close together, but the little-finger keys sit off the centreline, as a
-recorder offsets its little-finger hole, and the right little finger gets a
-**side-by-side pair** — two keys at one position along the body, across it —
-where a straight run would have put its last two keys one behind the other.
-So "single line" now means the index, middle and ring keys; the offsets are
-`layout.lh_offsets` / `rh_offsets` in `config/body.yaml`, and which way they
-go is an assumption M2 confirms.
+close together, but each little finger's first position is a **side-by-side
+pair** — two keys at one position along the body, across it — and the right
+little finger has one more, single key below its pair, off centre as a
+recorder offsets its little-finger hole. So "single line" now means the
+index, middle and ring keys; the offsets are `layout.lh_offsets` /
+`rh_offsets` in `config/body.yaml`, and which way the single key goes is an
+assumption M2 confirms.
 
 **The layout file already supports this**, and it is a good example of why it is
 structured the way it is. Keys carry explicit `x`/`y` positions rather than a

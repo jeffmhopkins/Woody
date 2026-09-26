@@ -128,37 +128,39 @@ layout:
   # does. Finger assignment is still M2's (ADR 0010); these gaps assume the
   # first three keys of each hand are index, middle, ring.
   lh_gaps:
-    value: [20.0, 20.0, 18.0, 18.0]
+    value: [20.0, 20.0, 18.0, 0.0]
     status: nominal
-    source: "[research] soprano recorder L1-L2-L3 21.0/22.3, D whistle 20/20; pad widths put touching fingers 15-22 apart (P5 F - P95 M). 18 to and between the little-finger keys: soprano R3-R4 18.0, and 1.5 mm between MT165 caps"
+    source: "[research] soprano recorder L1-L2-L3 21.0/22.3, D whistle 20/20; pad widths put touching fingers 15-22 apart (P5 F - P95 M). 18 to the little-finger keys (soprano R3-R4 18.0; 1.5 mm between MT165 caps). The final 0 is the side-by-side pair LH4 / LH5 (owner, 2026-09-26)"
     decided_by: "M2 - replaced key by key by x/y in config/key-layout.yaml"
   # SIDEWAYS OFFSETS, per key, mm from the centreline (owner, 2026-09-26):
-  # the little-finger keys go off centre, as a recorder offsets its
-  # little-finger hole, and the right little finger gets a side-by-side PAIR.
+  # each little finger's first position is a side-by-side PAIR (a 0 in the
+  # gaps list); the right little finger then has a single key below it, off
+  # centre as a recorder offsets its little-finger hole.
   # SIGN: + is toward the model's Y = W edge. Seen from the key face with the
   # mouthpiece up - the audience's view - that edge is on the viewer's right,
   # so the PLAYER's left. The assumption below is that each little finger is
   # offset toward the side its hand wraps from: left hand +, right hand -.
   # A recorder offsets only its right-hand holes, and toward the player's
-  # right, which agrees. Confirm on the mule.
+  # right, which agrees. Only RH6 depends on it now - the pairs are centred.
+  # Confirm on the mule.
   lh_offsets:
-    value: [0.0, 0.0, 0.0, 6.0, 6.0]
+    value: [0.0, 0.0, 0.0, -9.0, 9.0]
     status: tbd
-    source: "LH1-3 on the centreline; LH4-5 (little finger) offset toward the player's left. The amount is a placeholder of about a third of a cap"
+    source: "LH1-3 on the centreline; LH4 / LH5 the little finger's side-by-side pair, one cap pitch apart across the body, centred so both switch bodies stay inside the plate"
     decided_by: "M2 - hands on the mule; the sign too"
   rh_offsets:
-    value: [0.0, 0.0, 0.0, -6.0, -9.0, 9.0]
+    value: [0.0, 0.0, 0.0, -9.0, 9.0, -6.0]
     status: tbd
-    source: "RH1-3 on the centreline; RH4 offset toward the player's right; RH5 / RH6 the side-by-side pair, one cap pitch apart across the body and centred so both switch bodies stay inside the plate"
+    source: "RH1-3 on the centreline; RH4 / RH5 the little finger's side-by-side pair, centred as LH4 / LH5; RH6 the single key below it, offset toward the player's right (the recorder's direction). The offset amount is a placeholder"
     decided_by: "M2 - hands on the mule; the sign too"
   gap:
     value: 50.0
     status: nominal
     source: "[adr] ADR 0009 length table - the U-bolt band"
   rh_gaps:
-    value: [20.0, 20.0, 18.0, 18.0, 0.0]
+    value: [20.0, 20.0, 18.0, 0.0, 18.0]
     status: nominal
-    source: "[research] as lh_gaps; soprano R1-R2-R3 20.8/20.1, R3-R4 18.0. The LAST GAP IS 0: RH5 and RH6 are a side-by-side pair at one position along the body (owner, 2026-09-26), separated across it by rh_offsets"
+    source: "[research] as lh_gaps; soprano R1-R2-R3 20.8/20.1, R3-R4 18.0. A 0 GAP IS A SIDE-BY-SIDE PAIR: RH4 / RH5 share the first little-finger position, RH6 is the single key one step further down (owner, 2026-09-26)"
     decided_by: "M2 - replaced key by key by x/y in config/key-layout.yaml"
   tail:
     value: 40.0

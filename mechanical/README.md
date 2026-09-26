@@ -95,8 +95,8 @@ of a superseded value. Instead:
 
 Top-key spacing comes from `docs/research/2026-09-26-finger-spacing/`:
 graded, wider under index-middle-ring and tighter to the little finger. The
-little-finger keys sit off centre, and the right little finger has a
-side-by-side pair (ADR 0010). At
+little finger starts on a side-by-side pair, and the right little finger has
+a single off-centre key below its pair (ADR 0010). At
 the tightest gap an oak web between individual cap holes would be zero, so
 the oak top has **one slot per hand** (`stack.cap_holes`).
 
