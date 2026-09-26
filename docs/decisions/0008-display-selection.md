@@ -170,7 +170,7 @@ Boards are being bought new, so this is a free choice rather than a constraint.
 **The aspect ratio is close to purpose-made for a narrow instrument.** 536 × 240
 is a 2.2:1 strip, and a 44 × 20 mm active area is exactly the shape of a status
 bar — current note, breath meter, channel indicators in a row. Squarer panels
-waste area on a body this narrow (`body-width`, ADR 0009), and the display's job here is status
+waste area on a body only 57 mm wide, and the display's job here is status
 rather than a navigable UI (ADR 0012).
 
 **Pin breakout is generous** — 18 GPIO against the 4 this role needs.
@@ -222,7 +222,7 @@ form the separation can take.
 **Waveshare ESP32-S3-Touch-AMOLED-1.8** — 368 × 448, SH8601, capacitive touch,
 7 GPIO broken out on 1.27 mm pads, onboard PMIC and 6-axis IMU. Perfectly
 capable, and the pin breakout clears the requirement. Rejected on shape: a
-nearly square panel suits a narrow instrument less well than a strip, and
+nearly square panel suits a 57 mm-wide instrument less well than a strip, and
 the PMIC, battery support and IMU are all unused here. Worth revisiting if a
 larger, denser display turns out to be wanted.
 

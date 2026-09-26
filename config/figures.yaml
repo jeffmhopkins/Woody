@@ -683,15 +683,6 @@ figures:
       bounce, and nothing in the corpus said so until the latency budget was
       made to close.
 
-  - id: body-width
-    quantity: Instrument body width, acrylic side to acrylic side (config/key-layout.yaml envelope.width)
-    value: "62.0 mm"
-    status: settled
-    owner: docs/decisions/0009-enclosure-construction.md
-    derivation: "Owner, 2026-09-26: 5 mm wider than the original 57, all of it on the spine's side, so the one board carrying the carrier's circuits runs the body's length as a single rectangle clear of the pinky keys' board, with the LED strip still outboard of it. mechanical/drc.echo ('LED strip fits outboard of the spine') checks the room; config/body.yaml layout.axis_offset keeps the keys where they were."
-    forbidden: ["Width 2.25", "Width: 2.25", "57 mm wide", "57 mm width", "57 mm-wide", "57 mm external", "width: 57", "set at 2.25 in"]
-    false_positive_note: "57 mm is also ADR 0010's left-thumb arc length ('57 mm of travel down the body'), and 457 mm the original body length. Match the phrase, never the numeral."
-
   - id: body-thickness
     quantity: Instrument body thickness, oak top face to oak bottom face (config/key-layout.yaml envelope.thickness)
     value: "39.0 mm"

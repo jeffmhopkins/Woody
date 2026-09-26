@@ -177,10 +177,6 @@ layout:
     value: true
     status: settled
     source: "owner, 2026-09-26: centre the LED matrix in the space after the keys, and let only the tail grow for it"
-  axis_offset:
-    value: 2.5
-    status: settled
-    source: "owner, 2026-09-26: the body 5 mm wider, all of it on the spine's side - so the keys, thumbs, display, matrix and U-bolt stay put against the tube's side and sit half of that off the body's centreline"
   gap:
     value: 50.0
     status: nominal
@@ -352,11 +348,6 @@ boards:
     status: tbd
     source: "clearance between a board and the parts on the board facing it, and between parts: board flex, solder fillets and height tolerance, hand assembly [drawing convention]. 0.5 was a drawing clearance and the owner rejected it (2026-09-26: 'once components are installed you'd have issues')"
     decided_by: "M4, with the boards laid out"
-  edge_trim:
-    value: 1.0
-    status: tbd
-    source: "a key or thumb board's edge past its outermost switch cutout, on the spine's side only - elsewhere they keep the full margin [drawing convention]"
-    decided_by: "M4, with the board outlines"
   standoff_d:
     value: 5.5
     status: tbd

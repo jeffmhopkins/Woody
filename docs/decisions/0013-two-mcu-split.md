@@ -199,7 +199,7 @@ failure modes are delay and condensation, both bounded and both handled, where a
 **The tail face is crowded.** It carries the umbilical connector, the USB-C
 slot, and — on the underside just inboard — the matrix window (on the top
 face since 2026-09-26). A ~26 × 31 mm
-etherCON flange on the tail face (ADR 0009: `body-width` by `body-thickness`) leaves little room, the D-series is rated
+etherCON flange on a 57 mm wide face (ADR 0009, `body-thickness` tall) leaves little room, the D-series is rated
 for a **4 mm maximum panel thickness** so it cannot mount through 6 mm oak, and
 all of it must be drawn together at M4 (ADR 0009).
 

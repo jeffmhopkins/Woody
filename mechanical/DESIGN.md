@@ -113,17 +113,14 @@ Three things can claim each end, and the largest wins:
   "turning it on the side, and connecting via 90 degree header — one longer
   board that connects everything down one side", then "on the outside, to
   get more area — between side of boards and acrylic", keeping the strip).
-  **It is one rectangle down the length** (owner, same day: "basically one
-  size, and large, ran down the length"), from over the thumb boards' parts
-  up to under the plate, with a drop only behind the right-thumb board for
-  the breath sensor's leads. To make that room the owner **widened the body
-  5 mm, all on the spine's side** (`body-width`, ADR 0009): the keys, thumbs,
-  display, matrix and U-bolt stay where they were against the tube's side
-  (`layout.axis_offset`), and the key and thumb boards stop just past their
-  switches on the spine's side (`boards.edge_trim`). Its SMT goes wherever
-  the face is clear by the parts' height and the clearance; its tall blocks
-  — one regulator per dev board (ADR 0013) — stand sideways into the band
-  between the boards' parts.
+  **Its outline is not drawn; it is what is left** of the channel from floor
+  to lid once everything that reaches into it is cut away with the board
+  clearance round it: the thumb boards, which span nearly the full width, so
+  over them it stands on their parts; the key boards where a pinky key
+  overhangs; the display; the U-bolt's plate and nuts. So it follows any
+  layout change by itself. Its SMT goes wherever the face is clear by the
+  parts' height and the clearance; its tall blocks — one regulator per dev
+  board (ADR 0013) — stand sideways into the band between the boards' parts.
   Each cluster board plugs into it through one short header: a right-angle
   one from a key board's edge across the channel, a straight one up from a
   thumb board into its bottom edge. So the key chain runs through its traces,
@@ -192,10 +189,11 @@ decision, not a correction.
    already asks shared-versus-individual as an M2 question; the model says
    individual recesses need the arc spread further. The same rule catches
    placeholder fasteners landing on placeholder spares — move one.
-6. **Beside the pinky keys the spine's face is one clearance from the key
-   board's trimmed edge** — too little for SMT, so the model keeps parts off
-   that strip of the face. *Rule: "spine's face to the key boards' edge".*
-7. **The spine is placed by the layout**, and its headers are placed
+6. **Under the key boards the spine's face is only a few millimetres from
+   their edge** — too little for SMT plus the clearance, so the model keeps
+   parts off that strip of the face. *Rule: "spine's face to the key boards'
+   edge".* Narrower key boards (`switch.cluster_pcb_w`) would give it back.
+7. **The spine follows the layout by itself**, and its headers are placed
    between two switches of each cluster board by the model (*"spine header
    to … clear of its switches"*). The breath sensor only fits where nothing
    is under the spine (*"breath sensor fits on the spine where it drops"*).

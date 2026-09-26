@@ -61,7 +61,7 @@ being wrong (ADR 0006).
 
 ## Track M — Mechanical
 
-Width and thickness are set at `body-width` and `body-thickness` (ADR 0009). **The length is
+Width is set at 2.25 in and thickness at `body-thickness` (ADR 0009). **The length is
 derived** — minimized around the keys, a little at the mouth, the connector at
 the tail — by the body CAD (`mechanical/drc.echo`, "overall length"). It was
 18 in until 2026-09-26.

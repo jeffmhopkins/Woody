@@ -14,15 +14,8 @@ feels right.
 
 ## Envelope
 
-**Width 62.0 mm, about 2.44 inches; thickness 39.0 mm, about 1.54 inches** —
-the register's `body-width` and `body-thickness`, both stated here.
-
-> **The width was 57 mm until 2026-09-26**, when the owner added 5 mm, all
-> of it on the spine's side, so that the one board carrying the carrier's
-> circuits can run down the body as a single rectangle clear of the pinky
-> keys (`mechanical/DESIGN.md`). The keys, thumbs, display, matrix and U-bolt
-> stayed where they were against the other side, so they sit 2.5 mm off the
-> centreline.
+**Width 2.25 inches (57 mm); thickness 39.0 mm, about 1.54 inches** — the
+register's `body-thickness`, stated here.
 
 > **The thickness was 1.5 inches until 2026-09-26**, when the owner chose to
 > set it by the etherCON rather than pocket the oak bottom for it. The
@@ -158,12 +151,9 @@ anchors the strap to the aluminium plate, which is the strongest element in the
 sandwich, and it adds clamping force to the lamination at mid-span where it is
 otherwise held only by adhesive.
 
-## Width
+## Width: 2.25 inches
 
-**`body-width`.** It was 57 mm (2.25 in), in the middle of the 50–60 mm
-window originally sketched here, until 2026-09-26, when the owner widened it
-for the spine (above). The grip argument below was made at 57 mm and holds at
-the current width.
+**57 mm**, in the middle of the 50–60 mm window originally sketched here.
 
 ### Why the grip concern is smaller than the heuristic implied
 
@@ -191,25 +181,20 @@ something needed lateral room that does not.
   width.
 
 What is left is grip feel, display legibility, PCB area, cavity volume, and
-enough side-panel height for the edge lighting to read. None of those was
-tight at the original width, so it was set by how the instrument should *feel*
-— until the one board down the side (the spine) became the clearance that
-set it.
+enough side-panel height for the edge lighting to read. None of those is tight
+at 57 mm, so the width is set by how the instrument should *feel* rather than by
+a clearance anywhere.
 
-The original 2.25 inches — the width until 2026-09-26 — sat between the
-slender flute-like 2 inches and the roomier 2.5; the current width is nearer
-2.5 and still comfortably inside the span where the thumb can oppose the
-fingers.
+2.25 inches sits between the slender flute-like 2 inches and the roomier 2.5,
+and it is comfortably inside the span where the thumb can oppose the fingers.
 
 ### Mass
 
 | Width | Mass |
 |---|---|
 | 2.00 in | ~735 g (1.62 lb) |
-| 2.25 in | ~778 g (1.72 lb) |
+| **2.25 in** | **~778 g (1.72 lb)** |
 | 2.50 in | ~825 g (1.82 lb) |
-
-The current width, about 2.44 in, lands between the last two rows.
 
 Aluminium plate, oak top and bottom, acrylic sides, plus ~200 g of electronics
 and hardware. All three land in EWI territory (~1.5–2 lb); the width barely
@@ -391,7 +376,7 @@ and reports the cable run (`mechanical/drc.echo`).
 
 **And the umbilical connector, which is the reason the tail face is now
 crowded.** The etherCON chassis flange (ADR 0004)
-is roughly 26 × 31 mm on a face `body-width` wide and `body-thickness` tall. Two
+is roughly 26 × 31 mm on a face 57 mm wide and `body-thickness` tall. Two
 consequences:
 
 - **What is cut away is the bore, not the flange.** The chassis bore is
@@ -795,7 +780,7 @@ stating:
 **A thin silicone layer is compliant in shear and stiff in compression**,
 because a wide bonded layer cannot squeeze out sideways. On the plate joint that
 is exactly the two behaviours wanted at once. Oak moves roughly 1–1.5 % across
-the grain with indoor humidity — **0.6–0.9 mm over the body's width** (`body-width`) — against
+the grain with indoor humidity — **0.6–0.9 mm over the 57 mm width** — against
 an aluminium plate that moves essentially nothing, and a rigid bond would have
 to fight that for the life of the instrument. RTV lets it slide. But press a
 key and the plate is pushing *into* a thin confined layer, which barely gives.
