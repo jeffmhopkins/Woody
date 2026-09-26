@@ -27,6 +27,33 @@ not be acted on or repeated until they are.
 
 **Not yet verified, not to be repeated:** N6-3, N6-5 through N6-22.
 
+## N1 — feedback and loop topology
+
+Slice reports 9 findings over all 14 feedback-bearing devices, and states
+explicitly which circuits contain no feedback network rather than leaving the
+gap silent. Two verified so far.
+
+| id | verdict | verification |
+|---|---|---|
+| **N1-1** | **CONFIRMED — the LM317's divider legs are swapped and the DAC rail is 1.65 V** | `hardware/module/power-entry/netlist.yaml`: `DAC_AVDD` (the OUT node) carries `R-REG-SET-HI.1` = **475 Ω**, and `AGND_MOD` carries `R-REG-SET-LO.2` = **150 Ω**, so OUT→ADJ is 475 and ADJ→GND is 150. `[calc] 1.25 x (1 + 150/475) + 50 uA x 150 = 1.652 V`. `config/figures.yaml:349` states the settled derivation as `1.25 x (1 + 475/150) = 5.208 V`, which requires the opposite assignment — 475 on ADJ→GND. The figure is `status: settled`, owns the quantity, and carries `floor: 5.00 V, HARD` because the DAC8568's C grade is specified only for AVDD 5.0–5.5 V. **And the BOM says what the netlist says:** `R-REG-SET-HI` (475R) is described *"LM317 divider, ADJ to OUT"* and `R-REG-SET-LO` (150R) *"ADJ to GND"*. So the netlist transcribed the BOM faithfully and the BOM contradicts the figure register. `[test]` `[calc]` `[repo config/figures.yaml:349]` `[repo hardware/bom.csv]` |
+| N1-2 | **CONFIRMED by reading, not yet by injection** | `breath-output-stage`'s `RAIL_POS`/`RAIL_NEG` are single-endpoint nets in `external_endpoints` whose stated reason is that the clamp rails terminate outside the circuit — while `MODULE_ANALOG_NEG12` is a declared port of that same circuit, already carrying `R-BREATH-OFFNEG.1`. Every other circuit with the same BAV99 nets it to the rail ports. `[repo hardware/module/breath-output-stage/netlist.yaml]` |
+
+**Not yet verified, not to be repeated:** N1-3 through N1-9.
+
+## N7 — instances, `replicated:`, `section:`, `of:`
+
+Slice reports 15 findings and closes its own item list with arithmetic. Three
+verified, two of them fail-opens in the check I described in PR #2 as *"the
+count a per-circuit check structurally cannot do"*.
+
+| id | verdict | verification |
+|---|---|---|
+| **N7-8** | **CONFIRMED BY INJECTION — one `section:` token exempts a whole row from over-use detection** | `tools/check-netlist.py:228` puts `if sections[row]: continue` **before** the `if n > have` test. In a clone at `d1f0cb7`, nine instances of `R-OUT-PROT` against a qty of 6 report `instances: R-OUT-PROT is placed 9 time(s) across all netlists and the BOM buys 6`; adding `section: half` to **one** of the nine makes that line vanish and the summary reads `101 row(s) placed exactly to BOM qty, 5 counted by section` — a board three parts short, reported clean. Latent on 4 rows today. `[test]` |
+| **N7-9** | **CONFIRMED — a row placed zero times is invisible** | `used` is a Counter over placed instances, so a row nobody places never appears in either the exact count or the short list. Census by hand: 155 BOM rows = **113 placed + 30 in `unplaced.csv` + 12 placed nowhere and in neither list** — `C-BULK-DISP`, `LK-SER`, `MECH-COAT`, `PANEL`, `PCB-CARRIER`, `PCB-CLUSTER`, `PLATE-THUMB`, `PLATE-TOP`, `R-SER-TERM`, `R-TRIM-RANGE`, `SW-THUMB`, `WIRE-LOOM`. Several are mechanical and belong in no netlist, which is the real gap: there is no third category for them. `[test]` |
+| **N7-10(b)** | **CONFIRMED — the tool's own docstring restates a wrong fact** | `tools/check-netlist.py:199` says the seventh `R-OPAMP-IN` is claimed for *"the VREFOUT follower, which no drawing shows and no netlist places"*. The follower **is** placed — `U-PITCH-REFBUF` at `hardware/module/pitch-stage/netlist.yaml:28` — and **is** drawn, `pitch-stage.md:31` shows `½ OPA2197`. The unplaced part is the resistor, not the follower. A restated fact gone wrong inside the tool written to catch restated facts. `[test]` `[repo]` |
+
+**Not yet verified, not to be repeated:** N7-1 through N7-7, N7-10(a), N7-11 through N7-15.
+
 ## Slices still running
 
-N1, N2, N3, N4, N5, N7, N8.
+N2, N3, N4, N5, N8.
