@@ -73,7 +73,7 @@ Three things can claim each end, and the largest wins:
 - **Mouth end:** the first top cap plus `layout.mouth_extra`; or the
   **underside display**, which sits nearest the mouthpiece and must clear the
   left-thumb recesses — and in practice it is the display that sets it.
-- **Tail end:** the last key board, then the **LED matrix on the top face**
+- **Tail end:** the **LED matrix on the top face, centred** after the keys
   (owner, 2026-09-26) with the last fastener pair beside it, then the
   etherCON's depth — the connector cannot sit under the Matrix, which stands
   on the carrier just under the plate; or the underside chain after the right
@@ -83,12 +83,18 @@ Three things can claim each end, and the largest wins:
   underside, diffuser gap, LEDs, board, header, carrier.
 - **Between:** the key gaps, and the space between the hands.
 
-**Equal bands (owner, 2026-09-26).** The space before the left hand, between
-the hands and after the right hand are made the same: the largest any of
-the three needs, measured as the plan drawing labels them (body end to first
-key centre, last left key to first right key, last key to tail face).
-`layout.equal_bands` switches it; `layout.gap` is then only a minimum.
-`drc.echo` prints the band and which end set it.
+**Equal bands (owner, 2026-09-26).** The space before the left hand and the
+space between the hands are the same: the larger either needs, measured as
+the plan drawing labels them (body end to first key centre, last left key to
+first right key). `layout.equal_bands` switches it; `layout.gap` is then only
+a minimum.
+
+**The LED matrix is centred after the keys (owner, same date)** — midway
+between the last cap's slot edge and the tail face — and **only the tail
+grows for it** (`layout.matrix_centred`). The connector still has to fit
+behind the matrix, so the tail must be at least the cap edge plus twice
+(half the board + clearance + connector depth). That makes the tail the
+longest band; `drc.echo` prints what the tail needs and confirms the centring.
 
 Every render aims at the body's centre or tail (`origin` in `outputs.yaml`),
 so a length change reframes nothing.

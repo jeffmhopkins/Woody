@@ -160,15 +160,19 @@ layout:
     status: tbd
     source: "RH1-3 on the centreline; RH4 / RH5 the little finger's side-by-side pair, centred as LH4 / LH5; RH6 the single key below it, IN LINE with RH4 - the pair key on the player's right, the recorder's direction (owner, 2026-09-26)"
     decided_by: "M2 - hands on the mule; the sign too"
-  # EQUAL BANDS (owner, 2026-09-26): the space before the left hand, between
-  # the hands and after the right hand are made the same - the largest that
-  # any one of them needs (the display sets the mouth end's need, the LED
-  # matrix and connector the tail's). drc.echo prints the band and which set
-  # it. `gap` is then only a minimum for the space between the hands.
+  # EQUAL BANDS (owner, 2026-09-26): the space before the left hand and
+  # between the hands are made the same - the larger that either needs (the
+  # display sets the mouth end's). The TAIL is sized on its own since the LED
+  # matrix is centred in it (matrix_centred). drc.echo prints the band and
+  # which set it. `gap` is then only a minimum for the space between the hands.
   equal_bands:
     value: true
     status: settled
-    source: "owner, 2026-09-26: 'copy the same space above the left keys to between the hands and at the bottom'"
+    source: "owner, 2026-09-26: 'copy the same space above the left keys to between the hands and at the bottom'. Since the matrix was centred (same day) it equalizes the mouth end and the space between the hands only; the tail is sized by its own contents"
+  matrix_centred:
+    value: true
+    status: settled
+    source: "owner, 2026-09-26: centre the LED matrix in the space after the keys, and let only the tail grow for it"
   gap:
     value: 50.0
     status: nominal
