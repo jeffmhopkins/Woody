@@ -1,4 +1,5 @@
-// The tail face from outside: etherCON (rotated, ADR 0009), USB-C slot, and
+// The tail face from outside: etherCON (rotated, ADR 0009), the USB-C slot in
+// its overmould pocket, and
 // the margins the ADR argues from.
 include <woody_body.scad>
 use <lib/annot.scad>
@@ -13,7 +14,9 @@ d([ec_c[0] - ec_fl[0] / 2 - 4, 0], [ec_c[0] - ec_fl[0] / 2 - 4, fl_lo], str(fl_l
 d([ec_c[0] - ec_fl[0] / 2 - 4, fl_hi], [ec_c[0] - ec_fl[0] / 2 - 4, T], str(T - fl_hi), [-4, 0]);
 d([ec_c[0] - ec_fl[0] / 2, -5], [ec_c[0] + ec_fl[0] / 2, -5], str("flange ", ec_fl[0], " x ", ec_fl[1]), [0, -3]);
 d([0, -14], [W, -14], str("W ", W), [0, -3]);
-label([x, usb_c[0], usb_c[1] + usb_sz[1] / 2 + 2], "USB-C (tbd)", view = "right", size = 1.8);
+label([x, usb_c[0], usb_c[1] + max(usb_sz[1], usb_om[1]) / 2 + 2], "USB-C (tbd)", view = "right", size = 1.8);
+// The overmould pocket's floor is oak, the colour of the face, so dimension it.
+d([usb_c[0] - usb_om[0] / 2, usb_c[1] - usb_om[1] / 2], [usb_c[0] + usb_om[0] / 2, usb_c[1] - usb_om[1] / 2], str("pocket ", usb_om[0], " x ", usb_om[1]), [0, -3]);
 label([x, ec_c[0], ec_c[1]], str("bore ", ethercon_bore_d), view = "right", size = 1.8, c = "White");
 }
 at_origin() fig();

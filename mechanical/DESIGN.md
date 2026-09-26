@@ -124,7 +124,8 @@ Several things can claim each end, and the largest wins:
   from the mouth cap to the end of the right hand, the full width inside the
   sides. Its parts face up; the two key boards connect to it by ribbons (below);
   the Matrix's ribbon and the patch lead end on it. It has holes
-  over the U-bolt's nuts, notches at the screws, and standoffs off the oak or
+  over the U-bolt's nuts, notches at the screws (one bite where a notch and a
+  hole would leave a sliver between them), and standoffs off the oak or
   the thumb plates wherever nothing else is (*"main board standoffs found
   clear of everything"*); the soldered thumb switches carry it between them.
   (Before it: a centre board stacked between the thumb boards and the key
@@ -190,10 +191,25 @@ decision, not a correction.
    little oak to the flange on the face the cables plug into. On end it sits
    centred in the lane between the flange and the other side; USB-C is
    reversible, so the user never sees the difference. Moving the etherCON
-   (no room, and its rotation is ADR 0009's), widening the body or a backing
-   plate were the alternatives. *Rules: "USB-C extension receptacle beside
-   the etherCON body", "tail cap web between the USB-C cutout and the
-   etherCON flange"; the cable run is an INFO line.*
+   (already against the side), widening the body or a backing plate were
+   the alternatives; un-rotating it would give the width back but stand its
+   flange taller than the cavity behind the cap.
+   **The plug has to reach it, and it has no screw ears** (2026-09-26). The
+   tail cap is much thicker than the panel a panel-mount receptacle is made
+   for, and a plug's overmould is bigger than the receptacle's cutout, so the
+   cap is **pocketed from the tail face**, overmould-sized, down to a thin
+   panel; the receptacle's nose passes that panel's slot, its face level with
+   the pocket floor (`openings.usb_overmold`, `usb_panel_t`, `usb_nose_l`).
+   The pocket is a router pass: `export/tail-cap.dxf` carries the slot, the
+   render shows the pocket. On end, a receptacle's screw ears would run up
+   and down the face and land outside the cavity, so it is **earless**,
+   clamped against the panel from behind (`openings.usb_mount`) — the clamp
+   is not modelled. A front-mounted receptacle was the alternative; its
+   flange would need the tail face's width that the lane does not have.
+   *Rules: "USB-C extension receptacle beside the etherCON flange", "tail cap
+   web between the USB-C cutout and the etherCON flange", "USB-C plug
+   overmould reaches the receptacle", "USB-C receptacle mount inside the
+   cavity"; the cable run is an INFO line.*
 4. **The display set the mouth end — resolved by the owner.** It is gone
    (ADR 0015), and the mouth end is now the equal band. *Rule: "what the
    mouth end needs".*
@@ -245,19 +261,29 @@ only as good as those envelopes. Group the report's lines by these causes
    and back onto the sensor's port, all in the mouth band; the board has a
    slot in front of the sensor's lower port.
 4. **The middle M3 pair and the U-bolt backplate share a station**, the
-   middle of the gap between the hands. Across the body the plate stops at
-   the pair's clearance circle and is located by the U-bolt's legs alone, so
-   the screws never pass through it and it comes out with the U-bolt
+   middle of the gap between the hands. Across the body the plate stops
+   short of the pair's clearance circle, by more than it floats on its legs
+   (`hardware.backplate_clear`), and is located by the U-bolt's legs alone,
+   so the screws never pass through it and it comes out with the U-bolt
    (*"U-bolt nuts bear on the backplate, which stops at the gap fasteners'
    clearance"*). How far the fasteners stand in from the sides
    (`hardware.fastener_inset`) is a window between two rules: the oak between
-   each clearance hole and the side (*"oak-bottom cuts inside the U"*), and
-   the middle pair's counterbores against the U-bolt's leg holes
-   (*"oak-bottom cuts at least 3 mm apart"*). The counterbore also reaches
-   the depth of the side groove from below (*"fastener counterbores clear of
-   the side grooves"*). A wider U-bolt or a bigger screw closes the window;
-   `config/body.yaml` gives both bounds. (The stations ran through the side
-   strips until ADR 0016 removed them.)
+   each clearance hole and the side groove's wall, where the oak ends
+   (*"oak-bottom cuts inside the U"*), and the middle pair's counterbores
+   against the U-bolt's leg holes (*"oak-bottom cuts at least 3 mm apart"*).
+   A wider U-bolt or a bigger screw closes the window; `config/body.yaml`
+   gives both bounds. **The screws are low-head** (`hardware.fastener_head_h`):
+   the counterbore comes up beside the side groove, and a standard socket
+   head's counterbore would share the groove's depth across a sliver of oak
+   (*"fastener counterbores clear of the side grooves"*, *"fastener heads at
+   or below the bottom face"*). **The U-bolt is M3, and the main board sized
+   it**, not the load: its nuts stand up through holes in the main board
+   beside the LED strip, an M4 or M5 nut's hole reaches under the strip, and
+   widening the span to clear it closes the fastener window
+   (`hardware.ubolt_rod_d` has the arithmetic; *"LED strip clear of the U-bolt
+   nut holes"*, *"main board neck at the U-bolt station"* — the strip of board
+   every trace between the two halves must pass). (The stations ran through
+   the side strips until ADR 0016 removed them.)
 5. **The Matrix and the umbilical are wired onto the main board's tail
    end** (owner, 2026-09-26). The Matrix, on the lid, has a flat 24-way
    ribbon soldered to its pad rows, two test points and two button pads

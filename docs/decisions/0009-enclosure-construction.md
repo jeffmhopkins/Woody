@@ -409,10 +409,11 @@ consequences:
   | Material above/below the **flange** | 3.50 mm | **6.00 mm** |
   | Screw-hole edge to face edge, vertically | 5.40 mm | **7.90 mm** |
   | Material above/below the **bore** | 7.00 mm | 7.00 mm — *rotation-invariant* |
-  | Clear width beside the flange for USB-C | 31 mm | 26 mm |
+  | Clear width beside the flange for USB-C | 31 mm | 26 mm — *amended 2026-09-26: the body CAD's lane, flange edge to the side's inside face, is about half this once the oak lips and acrylic sides come off the width and the connector is off-centre (`mechanical/drc.echo`, "USB-C extension receptacle beside the etherCON flange")* |
 
-  Nearly double the flange margin and 2.5 mm more at the screws, for 5 mm of
-  width beside it that the USB-C slot does not need. **Note what it does not
+  Nearly double the flange margin and 2.5 mm more at the screws,
+  for 5 mm of width beside it that the USB-C slot does not need — *amended 2026-09-26: it did need it. A flat slot, 12.5 mm plus a 2 mm web to the rotated flange, did not fit the lane beside it, and that forced the receptacle on end (`config/body.yaml` `openings.usb_slot_portrait`; `mechanical/drc.echo`, "tail cap web between the USB-C cutout and the etherCON flange"). Un-rotating is not the way back: the flange would then stand 31 mm tall, taller than the cavity behind the cap (`drc.echo`, "etherCON body inside the cavity height").*
+  **Note what it does not
   fix:** the bore-referenced 7.00 mm is the same either way, so rotating is not
   what keeps the connector out of thin oak — the internal backing plate is.
 
@@ -427,8 +428,9 @@ consequences:
   now sits with flange and chassis behind the tail cap, its front through the
   cap's bore — the drawing's "both behind" depths — and the backing plate and
   its 4 mm panel limit no longer apply to it. The U-bolt keeps its plate.)*
-- **It shares the face with the USB-C slot**, leaving roughly 31 mm beside the
-  flange for it. That fits, but it is not the place to discover a conflict.
+- **It shares the face with the USB-C slot**,
+  leaving roughly 31 mm beside the flange for it. That fits — *amended 2026-09-26: 31 mm was the unrotated column of the table above; the model's lane is about half the rotated one, and the receptacle fits it only on end, earless, behind an overmould pocket in the tail face (`config/body.yaml` `openings.usb_mount`; `mechanical/drc.echo`, "USB-C extension receptacle beside the etherCON flange", "USB-C plug overmould reaches the receptacle", "USB-C receptacle mount inside the cavity").*
+  But it is not the place to discover a conflict.
   Both openings and the backing plate go into the M4 CAD together, and the
   1:1 paper check covers this face as well as the 10HP panel — and the tail is
   now the tight one of the two.

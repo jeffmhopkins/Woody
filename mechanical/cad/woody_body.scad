@@ -458,6 +458,13 @@ usb_web_min = 2;   // drawing convention: oak between two tail-face cutouts
 usb_sz = openings_usb_slot_portrait ? [openings_usb_slot_h, openings_usb_slot_w] : [openings_usb_slot_w, openings_usb_slot_h];   // [across Y, height Z]
 usb_lane = [max(ec_c[0] + ec_fl[0] / 2, ec_c[0] + ec_house[0] / 2), W - u_y0];   // flange edge to the side's inside face
 usb_c = [(usb_lane[0] + usb_lane[1]) / 2, z_floor + cavity_h / 2];
+// THE OVERMOULD POCKET (openings.usb_overmold): from the tail face down to a
+// thin panel, so the plug's overmould reaches the receptacle, whose nose
+// passes the panel's slot with its face level with the pocket floor. A
+// router pass, like the counterbores: the DXF carries the through-cut slot.
+usb_om = openings_usb_slot_portrait ? [openings_usb_overmold[1], openings_usb_overmold[0]] : openings_usb_overmold;   // [across Y, height Z]
+usb_pocket_d = ends_tail_cap_t - openings_usb_panel_t;
+usb_cut_y = max(usb_sz[0], usb_om[0]);   // the widest USB-C cutout on the tail face, across
 
 module tail_cap_2d() {
     difference() {
@@ -471,9 +478,9 @@ module tail_cap_2d() {
 // spreads the strap load over the oak (ADR 0009: "let the oak be the face the
 // screws pass through rather than the thing the screws hold"). The gap
 // fastener pair stands at the same station, so across the body the plate
-// stops at their clearance circle - the oak's own clearance round the screw -
+// stops short of their clearance circle, by more than it floats on its legs,
 // and is located by the legs alone; the screws never pass through it.
-ubolt_bp = [hardware_ubolt_span, u_w - 2 * (hardware_fastener_inset + hardware_fastener_clear_d / 2)];
+ubolt_bp = [hardware_ubolt_span, u_w - 2 * (hardware_fastener_inset + hardware_fastener_clear_d / 2 + hardware_backplate_clear)];
 module ubolt_backplate_2d() {
     difference() {
         translate(ubolt_c) square(ubolt_bp, center = true);
@@ -536,7 +543,7 @@ function fasteners() =
 // body, since the shortened gap has no room along it beside the left thumb line.
 ubolt_c = [(x_gap0 + x_rh0) / 2, W / 2];
 function ubolt_legs() = [for (s = [-1, 1]) ubolt_c + [0, s * hardware_ubolt_span / 2]];
-ubolt_hole_d = hardware_ubolt_rod_d + 0.5;   // drawing convention: the legs' clearance hole in the oak and the backplate
+ubolt_hole_d = hardware_ubolt_rod_d + hardware_ubolt_hole_clear;   // the legs' clearance hole in the oak and the backplate
 
 // ================================================================ 3D ======
 
@@ -574,11 +581,17 @@ module u_channel() {
             linear_extrude(stack_side_t) side_2d();
 }
 
+// render(): the preview renderer (OpenCSG) drops the cut-outs of an
+// intersection() it has to draw as CSG, so without it the tail face showed
+// neither the USB-C slot nor the flange screw holes.
 module caps() {
     P(C_OAK_DARK, true, "mouth cap") translate([ends_mouth_cap_t - explode / 3, 0, 0]) rotate([90, 0, 90]) mirror([0, 0, 1])
-        intersection() { linear_extrude(ends_mouth_cap_t) mouth_cap_2d(); sanded_cap(ends_mouth_cap_t); }
+        render() intersection() { linear_extrude(ends_mouth_cap_t) mouth_cap_2d(); sanded_cap(ends_mouth_cap_t); }
     P(C_OAK_DARK, true, "tail cap") translate([x_in1 + explode / 3, 0, 0]) rotate([90, 0, 90])
-        intersection() { linear_extrude(ends_tail_cap_t) tail_cap_2d(); sanded_cap(ends_tail_cap_t); }
+        render() difference() {
+            intersection() { linear_extrude(ends_tail_cap_t) tail_cap_2d(); sanded_cap(ends_tail_cap_t); }
+            translate([usb_c[0] - usb_om[0] / 2, usb_c[1] - usb_om[1] / 2, openings_usb_panel_t]) cube([usb_om[0], usb_om[1], usb_pocket_d + EPS]);
+        }
 }
 
 module switch_at(xy, rot, top, name, spare = false) {
@@ -653,8 +666,10 @@ module tail_equipment() {
         cube([openings_usb_plug_l, openings_usb_slot_w, openings_usb_slot_h]);
     // The USB-C extension: receptacle body behind the tail cap, and a cable
     // run to the Matrix board's edge (drawn straight; it is a flexible lead).
+    // Its nose passes the panel under the overmould pocket, face level with
+    // the pocket floor; an earless body, clamped from behind (openings.usb_mount).
     P(C_CONN, false, "USB-C receptacle") translate([x_in1 - openings_usb_ext_depth, usb_c[0] - usb_sz[0] / 2, usb_c[1] - usb_sz[1] / 2])
-        cube([openings_usb_ext_depth, usb_sz[0], usb_sz[1]]);
+        cube([openings_usb_ext_depth + openings_usb_panel_t, usb_sz[0], usb_sz[1]]);
     // Routed beside the etherCON, on the receptacle's side.
     usb_from = [openings_matrix_usb_to_tail ? matrix_xy[0] + boards_matrix_board / 2 + usb_behind : usb_plug_x0,
                 matrix_xy[1], matrix_board_z - openings_usb_slot_h / 2];
@@ -866,9 +881,12 @@ module cb_2d() {
         translate([sensor_face_x - EPS, p2_y - boards_sensor_port_d / 2 - 1])
             square([boards_sensor_port_l + 2, boards_sensor_port_d + 2]);
         // A notch for each screw the board's edge reaches, a hole over each
-        // U-bolt nut.
+        // U-bolt nut - one bite where the two would leave a sliver of board
+        // narrower than a clearance between them.
         for (f = fasteners()) translate(f) circle(r = fastener_notch);
         for (u = ubolt_legs()) translate(u) circle(r = ubolt_hole_r);
+        for (f = fasteners(), u = ubolt_legs()) if (norm(f - u) < fastener_notch + ubolt_hole_r + boards_board_clear)
+            hull() { translate(f) circle(r = fastener_notch); translate(u) circle(r = ubolt_hole_r); }
     }
 }
 // J-MCU: on the tube side of the regulator block, at the board's tail edge.
@@ -968,9 +986,9 @@ module routing_3d() {
 }
 
 module hardware_3d() {
-    // Fasteners: M3 socket caps from the bottom face into the plate.
+    // Fasteners: M3 low-head cap screws from the bottom face into the plate.
     for (i = [0 : len(fasteners()) - 1]) let(f = fasteners()[i]) P(C_STEEL, false, str("M3 #", i + 1)) translate([f[0], f[1], -explode]) {
-        translate([0, 0, hardware_fastener_cbore_depth - 3]) cylinder(d = 5.5, h = 3);
+        translate([0, 0, hardware_fastener_cbore_depth - hardware_fastener_head_h]) cylinder(d = hardware_fastener_head_d, h = hardware_fastener_head_h);
         cylinder(d = 3, h = z_plate_top - 0.4 + explode * 2);
     }
     // U-bolt: loop below, legs through the floor to the backing plate, a nut
@@ -1101,7 +1119,7 @@ module drc_report() {
                            [(min(x) + max(x)) / 2, (min(y) + max(y)) / 2], [max(x) - min(x) + rc, max(y) - min(y) + rc]]]
                        : [for (k = bottom_keys) [k[0], key_xy(k), [rc, rc]]],
                    [for (i = [0 : 1 : len(spare_xy) - 1]) [str("spare ", i + 1), spare_xy[i], [rc, rc]]],
-                   [for (u = ubolt_legs()) ["U-bolt leg", u, [hardware_ubolt_rod_d, hardware_ubolt_rod_d]]],
+                   [for (u = ubolt_legs()) ["U-bolt leg", u, [ubolt_hole_d, ubolt_hole_d]]],
                    [for (i = [0 : len(fasteners()) - 1]) [str("M3 #", i + 1), fasteners()[i], [hardware_fastener_cbore_d, hardware_fastener_cbore_d]]]);
     function gap(a, b) = max(abs(a[1][0] - b[1][0]) - (a[2][0] + b[2][0]) / 2,
                              abs(a[1][1] - b[1][1]) - (a[2][1] + b[2][1]) / 2);
@@ -1110,22 +1128,48 @@ module drc_report() {
     drc(len(clashes) == 0, "oak-bottom cuts at least 3 mm apart (thumb recesses, U-bolt, counterbores)",
         clashes, "pairs closer than 3 mm, with the web between them (negative = overlap)");
     // Through-cuts only: a fastener's counterbore is partial depth from the
-    // outside face, so its clearance hole is what meets the side.
+    // outside face, so its clearance hole is what meets the side. The oak
+    // ends at the groove's wall, groove_clear outside the acrylic - the same
+    // edge the key plate rules measure to.
     function thru_w(f) = f[0][0] == "M" ? hardware_fastener_clear_d : f[2][1];
-    edge = min([for (f = feats) min(f[1][1] - thru_w(f) / 2 - u_y0, W - u_y0 - f[1][1] - thru_w(f) / 2)]);
-    drc(edge >= 2, "oak-bottom cuts inside the U", edge, "mm, smallest web to the inside of a side");
+    oak_y0 = u_y0 + stack_groove_clear;
+    edge = min([for (f = feats) min(f[1][1] - thru_w(f) / 2 - oak_y0, W - oak_y0 - f[1][1] - thru_w(f) / 2)]);
+    drc(edge >= 2, "oak-bottom cuts inside the U", edge, "mm, smallest web to the side groove's wall");
     // The counterbore comes up from the outside face and the side groove down
     // from the inside face; where their depths overlap, the oak between them
-    // across the body is all that keeps the counterbore out of the groove.
+    // across the body is all that keeps the counterbore out of the groove, and
+    // a sliver of it beside a glued side is inside drill and router tolerance.
     cbore_share = hardware_fastener_cbore_depth - (oak_bottom_t - stack_groove_depth);
     cbore_web = hardware_fastener_inset - hardware_fastener_cbore_d / 2 - stack_groove_clear;
-    drc(cbore_share <= 0 || cbore_web > 0, "fastener counterbores clear of the side grooves", cbore_share <= 0 ? "n/a - they do not share a depth" : cbore_web,
-        cbore_share <= 0 ? "" : str("mm of oak across the body, over the ", cbore_share, " mm of depth the counterbore and the groove share; negative breaks through"));
-    // The U-bolt's backplate: its nuts on it, and clear of the gap fasteners.
+    drc(cbore_share <= 0 || cbore_web >= 1.5, "fastener counterbores clear of the side grooves", [cbore_share, cbore_web],
+        "mm of depth the counterbore and the groove share (must be 0 or less - or else 1.5 mm of oak across the body between them), and that oak");
+    drc(hardware_fastener_cbore_depth >= hardware_fastener_head_h, "fastener heads at or below the bottom face",
+        hardware_fastener_cbore_depth - hardware_fastener_head_h, "mm below flush - the counterbore less the screw's head height");
+    // The U-bolt's backplate: its nuts on it, and short of the gap fasteners
+    // by more than it floats on its legs, so it can never touch a screw.
     bp_nut = ubolt_bp[1] / 2 - hardware_ubolt_span / 2 - hardware_ubolt_nut_af / cos(30) / 2;
     bp_web = ubolt_bp[1] / 2 - hardware_ubolt_span / 2 - ubolt_hole_d / 2;
-    drc(bp_nut >= 0 && bp_web >= 2, "U-bolt nuts bear on the backplate, which stops at the gap fasteners' clearance",
-        [bp_nut, bp_web], "mm, a nut's corners inside the plate end, and plate beyond each leg hole");
+    bp_screw = (W / 2 - ubolt_bp[1] / 2) - (u_y0 + hardware_fastener_inset + hardware_fastener_clear_d / 2);
+    bp_float = (ubolt_hole_d - hardware_ubolt_rod_d) / 2;
+    drc(bp_nut >= 0 && bp_web >= 2 && bp_screw > bp_float, "U-bolt nuts bear on the backplate, which stops at the gap fasteners' clearance",
+        [bp_nut, bp_web, bp_screw], str("mm: a nut's corners inside the plate end; plate beyond each leg hole; plate end short of the screws' clearance circle, which must beat the ",
+            bp_float, " mm the plate floats on its legs"));
+    // The main board at the U-bolt station: the notches at the middle screws
+    // and the holes over the nuts leave strips of board that every trace
+    // crossing the station must pass. The widest is the neck. A strip
+    // narrower than a clearance is not left (cb_2d joins the two cuts).
+    cuts_y = concat([for (f = fasteners()) if (abs(f[0] - ubolt_c[0]) < fastener_notch) [f[1] - fastener_notch, f[1] + fastener_notch]],
+                    [for (u = ubolt_legs()) [u[1] - ubolt_hole_r, u[1] + ubolt_hole_r]]);
+    function first_by_lo(v) = [for (c = v) if (c[0] == min([for (d = v) d[0]])) c][0];
+    function sort_lo(v) = len(v) == 0 ? [] : let(f = first_by_lo(v)) concat([f], sort_lo([for (c = v) if (c != f) c]));
+    function strips(cs, from, to, i = 0) = i >= len(cs) ? (to - from >= boards_board_clear ? [to - from] : [])
+        : concat(min(cs[i][0], to) - from >= boards_board_clear ? [min(cs[i][0], to) - from] : [], strips(cs, max(from, cs[i][1]), to, i + 1));
+    neck = strips(sort_lo(cuts_y), cb_y[0], cb_y[1]);
+    drc(max(neck) >= boards_main_neck_min, "main board neck at the U-bolt station", neck,
+        str("mm of board across the station, strip by strip; the widest carries every trace from one half to the other (boards.main_neck_min ", boards_main_neck_min, ")"));
+    strip_hole = min([for (u = ubolt_legs()) abs(u[1] - W / 2) - ubolt_hole_r - lighting_strip_w / 2]);
+    drc(strip_hole >= 0, "LED strip clear of the U-bolt nut holes", [strip_hole, strip_hole + boards_board_clear],
+        "mm, the strip's edge to the nearest nut hole's edge (negative = the strip bridges the hole), and to the nut's corners");
 
     // Sides in grooves
     drc(undef, "interior width between the acrylic sides", u_w, "mm - was the full width less two sides; the oak lips now come off it too");
@@ -1190,12 +1234,24 @@ module drc_report() {
     // The bore is what is cut from the cap; the flange only clamps against it.
     drc(undef, "tail cap material below and above the etherCON bore",
         [ec_c[1] - ethercon_bore_d / 2, T - (ec_c[1] + ethercon_bore_d / 2)], "mm - the connector stands on the floor, so it is not centred");
-    // USB-C by panel-mount extension (owner, 2026-09-26).
-    usb_room = (W - u_y0) - (ec_c[0] + ec_house[0] / 2);
-    drc(usb_room >= usb_sz[0] + usb_web_min, "USB-C extension receptacle beside the etherCON body", usb_room - usb_sz[0],
-        str("mm spare across, inside the sides, for a receptacle ", usb_sz[0], " mm across (", openings_usb_slot_portrait ? "on end" : "flat", ")"));
-    usb_web = (usb_c[0] - usb_sz[0] / 2) - (ec_c[0] + ec_fl[0] / 2);
-    drc(usb_web >= usb_web_min, "tail cap web between the USB-C cutout and the etherCON flange", usb_web, "mm of oak on the tail face");
+    // USB-C by panel-mount extension (owner, 2026-09-26). The receptacle sits
+    // behind the cap beside the flange, so its room is the lane from the
+    // flange's edge to the side's inside face, not the space beside the housing.
+    usb_room = usb_lane[1] - usb_lane[0];
+    drc(usb_room >= usb_sz[0] + usb_web_min, "USB-C extension receptacle beside the etherCON flange", usb_room - usb_sz[0],
+        str("mm spare across the ", usb_room, " mm lane from the flange's edge to the side, for a receptacle ", usb_sz[0], " mm across (",
+            openings_usb_slot_portrait ? "on end" : "flat", ")"));
+    usb_web = (usb_c[0] - usb_cut_y / 2) - (ec_c[0] + ec_fl[0] / 2);
+    drc(usb_web >= usb_web_min, "tail cap web between the USB-C cutout and the etherCON flange", usb_web,
+        str("mm of oak on the tail face, from the widest USB-C cutout (", usb_cut_y, " mm across: the overmould pocket or the slot)"));
+    drc(usb_om[0] >= usb_sz[0] && usb_om[1] >= usb_sz[1] && openings_usb_panel_t <= openings_usb_nose_l,
+        "USB-C plug overmould reaches the receptacle", [usb_pocket_d, openings_usb_panel_t, openings_usb_nose_l],
+        "mm: the overmould pocket's depth from the tail face; the panel left under it; the receptacle's nose, which must pass that panel so its face is level with the pocket floor");
+    ear_z = [usb_c[1] - openings_usb_ear_pitch / 2, usb_c[1] + openings_usb_ear_pitch / 2];
+    ears_fit = ear_z[0] >= z_floor && ear_z[1] <= z_oak_top_bot;
+    drc(openings_usb_mount != "ears" || ears_fit, "USB-C receptacle mount inside the cavity", [openings_usb_mount, ear_z, [z_floor, z_oak_top_bot]],
+        str("the mount; where screw ears at ", openings_usb_ear_pitch, " mm pitch would put their centres on end; the cavity's height behind the cap - ",
+            ears_fit ? "ears would fit" : "ears would not, so the receptacle is earless, clamped from behind (openings.usb_mount)"));
     usb_run = norm([x_in1 - openings_usb_ext_depth - (matrix_xy[0] + boards_matrix_board / 2), usb_c[0] - matrix_xy[1], usb_c[1] - (matrix_board_z - 2)]);
     echo("DRC", "INFO", "USB-C extension cable run, Matrix edge to receptacle", usb_run,
          "mm straight line; buy the shortest extension that reaches, with slack for the tail cap to come off");

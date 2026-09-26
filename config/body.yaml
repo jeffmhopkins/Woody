@@ -397,6 +397,14 @@ boards:
     status: tbd
     source: "clearance between a board and the parts on the board facing it, and between parts: board flex, solder fillets and height tolerance, hand assembly [drawing convention]. 0.5 was a drawing clearance and the owner rejected it (2026-09-26: 'once components are installed you'd have issues')"
     decided_by: "M4, with the boards laid out"
+  # THE MAIN BOARD'S NECK at the U-bolt station (2026-09-26): the notches at
+  # the middle screws and the holes over the U-bolt's nuts leave one strip of
+  # board that every trace from the mouth half to the tail half must pass.
+  main_neck_min:
+    value: 8.0
+    status: tbd
+    source: "[calc] ~20 nets cross the station (the key chain's 12 conductors, the breath sensor's lines, the strip's data, power) at 0.25 track / 0.25 gap is 10 mm on one layer, 5 mm on two; plus 0.5 mm copper keep-out from each cut edge is 6; 8 leaves room for a ground return beside them"
+    decided_by: "M4 main board layout - the real net count and track widths"
   standoff_d:
     value: 5.5
     status: tbd
@@ -467,8 +475,8 @@ openings:
   usb_slot_portrait:
     value: true
     status: tbd
-    source: "[calc] portrait takes usb_slot_h across instead of usb_slot_w: landscape was flange 31 + web 2 + slot 12.5 = 45.5 in a 45 interior; portrait is 31 + 2 + 7 = 40, and 12.5 tall in the cavity's height. Chosen over moving the etherCON (already against the side, and its rotation is ADR 0009's), widening the body, or a backing plate"
-    decided_by: "M4, against the extension bought - its screw ears, if any, then run up and down the tail face"
+    source: "[calc] portrait takes usb_slot_h across instead of usb_slot_w: landscape was flange 31 + web 2 + slot 12.5 = 45.5 in a 45 interior; portrait is 31 + 2 + 7 = 40, and 12.5 tall in the cavity's height. Chosen over moving the etherCON (already against the side), widening the body, or a backing plate. Un-rotating the etherCON would give 5 mm back across, but its flange would then stand 31 tall in a cavity 27 tall behind the cap (drc 'etherCON body inside the cavity height')"
+    decided_by: "M4, against the extension bought - its screw ears, if any, would run up and down the tail face, which is why it is earless (usb_mount)"
   usb_plug_l:
     value: 15.0
     status: tbd
@@ -483,6 +491,46 @@ openings:
     value: 20.0
     status: tbd
     source: "the extension receptacle's body behind the panel [from memory]"
+    decided_by: "M4, against the extension bought"
+  # THE PLUG HAS TO REACH THE RECEPTACLE (2026-09-26). The tail cap is 6 mm
+  # of oak, thicker than the 1-2 mm panel a panel-mount receptacle is made
+  # for [from memory], and a plug's overmould is bigger than the receptacle's
+  # cutout, so behind a plain slot the plug would stop short. The cap is
+  # POCKETED from the tail face, overmould-sized, down to a thin panel; the
+  # receptacle's nose passes that panel's slot (usb_slot_w x usb_slot_h), its
+  # face level with the pocket floor. drc 'USB-C plug overmould reaches the
+  # receptacle'. The alternative, a receptacle mounted from the front, would
+  # put its flange on the tail face, where the lane has no room for one.
+  usb_overmold:
+    value: [15.0, 9.0]
+    status: tbd
+    source: "the plug's overmould, [wide, thick], plus clearance: common USB-C cables are ~12-14.5 x 6.5-8.5 [from memory]. Stood on end the thick side is across the body, and the lane beside the etherCON flange takes up to 10 with a 2 mm web (drc 'tail cap web between the USB-C cutout and the etherCON flange') - a cable fatter than that does not fit this face"
+    decided_by: "M4, calipers on the cables the instrument will actually be used with"
+  usb_panel_t:
+    value: 1.5
+    status: tbd
+    source: "oak left under the overmould pocket, the panel the receptacle clamps to [from memory: panel-mount USB-C is made for ~1-2 mm panels]"
+    decided_by: "M4, against the receptacle bought - it must not exceed usb_nose_l"
+  usb_nose_l:
+    value: 2.0
+    status: tbd
+    source: "how far the receptacle's shell stands proud of its clamping shoulder, i.e. the thickest panel it can sit flush in [from memory]"
+    decided_by: "M4, against the receptacle bought"
+  # EARLESS (2026-09-26). Stood on end, a receptacle's two screw ears run up
+  # and down the tail face, and at the usual pitch they land outside the
+  # cavity behind the cap (drc 'USB-C receptacle mount inside the cavity'
+  # prints where). So the receptacle is an earless one, held against the
+  # panel by a clamp plate across its body, screwed to the cap's inside face
+  # in the lane above and below it - or bonded, if the part has no shoulder.
+  usb_mount:
+    value: "earless"
+    status: tbd
+    source: "earless | ears. 'ears' is checked against usb_ear_pitch and fails at this cavity height; see the note above"
+    decided_by: "M4, against the extension bought"
+  usb_ear_pitch:
+    value: 29.0
+    status: tbd
+    source: "screw-ear pitch of a typical panel-mount USB-C extension, ~28-30 [from memory]; used only to show why the ears do not fit on end"
     decided_by: "M4, against the extension bought"
 
 ethercon:
@@ -594,28 +642,62 @@ hardware:
     value: 3.4
     status: nominal
     source: "M3 clearance, medium fit [from memory]"
+  # LOW-HEAD SCREWS (2026-09-26): the counterbore comes up from the bottom
+  # face beside the side groove, which comes down from the inside face. An
+  # ISO 4762 socket head (3.0 high [from memory]) needs a 3.5 counterbore,
+  # which shares 0.5 mm of depth with the groove across a web of about half a
+  # millimetre - inside drill and router tolerance beside a glued side. A
+  # DIN 7984 low head needs 2.5, which shares none.
+  fastener_head_d:
+    value: 5.5
+    status: tbd
+    source: "DIN 7984 M3 low-head cap screw, head diameter 5.5 [from memory]"
+    decided_by: "M4, with the screws bought"
+  fastener_head_h:
+    value: 2.0
+    status: tbd
+    source: "DIN 7984 M3 low-head cap screw, head height 2.0 [from memory] (ISO 4762 is 3.0, and would share the groove's depth)"
+    decided_by: "M4, with the screws bought"
   fastener_cbore_d:
     value: 6.0
     status: nominal
-    source: "M3 socket head is 5.5 [from memory]; counterbore with clearance"
+    source: "fastener_head_d plus clearance"
   fastener_cbore_depth:
-    value: 3.5
+    value: 2.5
     status: nominal
-    source: "M3 socket head height 3.0 [from memory] + 0.5 below flush"
+    source: "fastener_head_h + 0.5 below flush. Must stay at or under the oak left under the side groove (oak bottom - stack.groove_depth), so the counterbore and the groove share no depth (drc 'fastener counterbores clear of the side grooves')"
   fastener_inset:
-    value: 3.75
+    value: 4.3
     status: tbd
-    source: "distance from the inside face of each acrylic side to the fastener centre. A window, not a placeholder [calc]: at least fastener_clear_d / 2 + 2, for 2 mm of oak between the clearance hole and the side (drc 'oak-bottom cuts inside the U'); at most half the interior width - ubolt_span / 2 - (the leg's clearance hole + fastener_cbore_d) / 2 - 3, for the gap pair's counterbores to stay 3 mm from the U-bolt leg holes (drc 'oak-bottom cuts at least 3 mm apart', which measures to the rod, so it passes with a little more). The U-bolt backplate stops at the fasteners' clearance circle, so its width follows this too"
+    source: "distance from the inside face of each acrylic side to the fastener centre. A window, not a placeholder [calc]: at least stack.groove_clear + fastener_clear_d / 2 + 2 = 0.2 + 1.7 + 2 = 3.9, for 2 mm of oak between the clearance hole and the groove wall - the oak ends there, not at the acrylic (drc 'oak-bottom cuts inside the U'); at most half the interior width - ubolt_span / 2 - (the leg's clearance hole + fastener_cbore_d) / 2 - 3 = 22.5 - 10 - (3.5 + 6) / 2 - 3 = 4.75, for the gap pair's counterbores to stay 3 mm from the U-bolt leg holes (drc 'oak-bottom cuts at least 3 mm apart'). 4.3 is the middle of 3.9-4.75. The U-bolt backplate stops short of the fasteners' clearance circle, so its width follows this too"
     decided_by: "M4, with the U-bolt and the fasteners bought - the window moves with ubolt_span, ubolt_rod_d, fastener_clear_d and fastener_cbore_d"
+  # THE U-BOLT IS M3 (2026-09-26), sized by the main board, not by the load.
+  # Its nuts stand up through holes in the main board (nut corner +
+  # boards.board_clear), beside the LED strip on the centreline. Measured
+  # [calc], interior 45, strip 10 wide on the centreline, span 20:
+  #   M5 (nut 8 AF):   hole edge 1.12 mm UNDER the strip; board neck 7.76
+  #   M4 (nut 7 AF):   hole edge 0.54 under the strip. Clearing it needs a
+  #                    span of 21.1+, and that closes the fastener_inset
+  #                    window (upper bound 3.65 < lower bound 3.9)
+  #   M3 (nut 5.5 AF): hole edge 0.33 clear of the strip; neck 10.65
+  # Load: ADR 0009's mass table puts the body at ~825 g, ~8 N on the strap;
+  # a factor of 10 for a jerk is 80 N. An M3 leg of 4.6 steel proofs at
+  # ~1.1 kN [from memory: 5.03 mm2 stress area x 225 MPa], and there are two.
+  # The oak under the backplate is the weak link, not the rod (ADR 0009).
   ubolt_rod_d:
-    value: 5.0
+    value: 3.0
     status: tbd
-    source: "ADR 0009 gives no U-bolt size"
-    decided_by: "M4, from the strap hardware chosen"
+    source: "M3 [calc above]. ADR 0009 gives no U-bolt size; M4/M5 put the nut holes under the LED strip (drc 'LED strip clear of the U-bolt nut holes')"
+    decided_by: "M4, from the strap hardware chosen - small M3 U-bolts are sold for model and tube clamps [from memory]; a bent M3 rod or a stainless M3 threaded rod does the same job"
+  ubolt_hole_clear:
+    value: 0.5
+    status: tbd
+    source: "clearance on the leg's diameter, in the oak bottom and the backplate: the plate floats +/- half this on the legs"
+    decided_by: "M4, with the U-bolt bought"
   ubolt_span:
     value: 20.0
     status: tbd
-    source: "placeholder - leg centre to leg centre, legs across the body; narrow enough to clear the gap fasteners"
+    source: "leg centre to leg centre, legs across the body. Bounded both ways [calc]: wider closes the fastener_inset window, narrower pulls the nut holes toward the LED strip"
     decided_by: "M4"
   ubolt_drop:
     value: 18.0
@@ -623,20 +705,25 @@ hardware:
     source: "placeholder - how far the loop stands below the bottom face"
     decided_by: "M4"
   ubolt_nut_af:
-    value: 8.0
+    value: 5.5
     status: tbd
-    source: "hex nut across flats for the U-bolt legs - an M5 nut is 8 mm [from memory]; follows ubolt_rod_d"
+    source: "hex nut across flats for the U-bolt legs - an M3 nut is 5.5 mm [from memory, ISO 4032]; follows ubolt_rod_d"
     decided_by: "M4, with the U-bolt bought"
   ubolt_nut_h:
     value: 4.0
     status: tbd
-    source: "M5 nut height [from memory]"
+    source: "M3 nyloc (DIN 985) height, ~4.0 [from memory] - hardware/unplaced.csv MECH-UBOLT orders nylocs; a plain ISO 4032 nut is 2.4"
     decided_by: "M4"
   backplate_t:
     value: 3.0
     status: tbd
     source: "hardware/bom.csv MECH-BACKPLATE - aluminium or ply, thickness open"
     decided_by: "M4, with the U-bolt bought: the plate spreads its nuts' clamp (mechanical/drc.echo, U-bolt nuts bear on the backplate)"
+  backplate_clear:
+    value: 0.5
+    status: tbd
+    source: "the backplate's edge short of the gap fasteners' clearance circle, across the body. The plate floats on its legs by ubolt_hole_clear / 2 each way, so at zero it would touch the screws"
+    decided_by: "M4, with the plate cut"
 
 # -------------------------------------------------------------- routing ----
 # THINGS THAT RUN THROUGH THE CAVITY (modelled 2026-09-26 for the clash
