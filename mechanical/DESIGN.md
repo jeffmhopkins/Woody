@@ -93,7 +93,7 @@ decision, not a correction.
    already asks shared-versus-individual as an M2 question; the model says
    individual recesses need the arc spread further. The same rule catches
    placeholder fasteners landing on placeholder spares — move one.
-6. **The carrier and the LED strips.** The carrier at the BOM's assumed width
+6. **The carrier and the LED strips.** the carrier at the BOM's assumed width
    does not fit between strips in the side channels at the placeholder
    diffusion gap. *Rule: "carrier fits between the LED strips".*
 7. **The carrier runs under the right-hand cluster board** with little height

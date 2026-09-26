@@ -38,8 +38,10 @@ spare_switch_cutouts = 3;
 // ---- config/body.yaml
 stack_cap_clear = 0.75;  // tbd; keycap to oak-top hole, per side. Must beat oak's cross-grain movement across one hole, which ADR 0009 puts at 1-1.5 % [calc: 1.5 % of 18 mm = 0.27 mm]
 stack_cap_holes = "individual";  // tbd; individual = one hole per cap in the oak top; slot = one slot per hand, so pitch is limited by cap-to-cap clearance rather than by an oak web between holes
-stack_side_t = 4.0;  // nominal; [adr] ADR 0009 mass table - 'Acrylic sides, 2 x 4 mm'
-stack_rebate_w = 2.0;  // tbd; no document dimensions the notch (ADR 0009 'A U, a notch, and six fasteners')
+stack_side_t = 4.0;  // nominal; [adr] ADR 0009 mass table - 'Acrylic sides, 2 x 4 mm'. Now a single sheet standing in the oak grooves
+stack_side_inset = 2.0;  // tbd; oak lip outside each groove. Every mm here comes off the interior width twice
+stack_groove_depth = 3.0;  // tbd; placeholder - half the oak panel, leaving half under the groove
+stack_groove_clear = 0.2;  // tbd; per side of the acrylic, so the lid lifts off; acrylic sheet thickness varies [from memory]
 ends_mouth_cap_t = 4.0;  // tbd; ADR 0009 end-cap table: acrylic, 'the material already being cut for the sides' - so the side sheet's thickness
 ends_tail_cap_t = 6.0;  // tbd; ADR 0009 end-cap table: oak - so the oak top's stock
 ends_tube_hole_d = 6.0;  // tbd; ADR 0003: tube bore and OD are settled at E2
@@ -92,7 +94,7 @@ hardware_fastener_count = 6;  // settled; [adr] ADR 0009 - six M3 from the botto
 hardware_fastener_clear_d = 3.4;  // nominal; M3 clearance, medium fit [from memory]
 hardware_fastener_cbore_d = 6.0;  // nominal; M3 socket head is 5.5 [from memory]; counterbore with clearance
 hardware_fastener_cbore_depth = 3.5;  // nominal; M3 socket head height 3.0 [from memory] + 0.5 below flush
-hardware_fastener_inset = 7.0;  // tbd; placeholder - distance from each long edge, inside the acrylic sides, clear of the switch column
+hardware_fastener_inset = 7.0;  // tbd; placeholder - distance from the inside face of each acrylic side, clear of the switch column
 hardware_fastener_end = 30.0;  // tbd; placeholder - distance of the first and last stations from the ends; stations zig-zag between the edges ~80 apart as ADR 0009 says
 hardware_ubolt_rod_d = 5.0;  // tbd; ADR 0009 gives no U-bolt size
 hardware_ubolt_span = 24.0;  // tbd; placeholder - leg centre to leg centre
@@ -103,5 +105,5 @@ lighting_strip_gap = 3.0;  // tbd; ADR 0009 / ADR 0014: the diffusion gap is a p
 
 // Every value above with status tbd - a placeholder, not a number any
 // document gives. The DRC report lists these so no result hides one.
-tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_rebate_w", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_slack_to", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_carrier_l", "boards_carrier_w", "boards_carrier_z", "boards_carrier_from_tail", "openings_usb_slot_w", "openings_usb_slot_h", "ethercon_body_d", "ethercon_offset_y", "hardware_fastener_inset", "hardware_fastener_end", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_backplate_t", "lighting_strip_w", "lighting_strip_gap"];
+tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_slack_to", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_carrier_l", "boards_carrier_w", "boards_carrier_z", "boards_carrier_from_tail", "openings_usb_slot_w", "openings_usb_slot_h", "ethercon_body_d", "ethercon_offset_y", "hardware_fastener_inset", "hardware_fastener_end", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_backplate_t", "lighting_strip_w", "lighting_strip_gap"];
 

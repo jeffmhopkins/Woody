@@ -57,13 +57,27 @@ stack:
   side_t:
     value: 4.0
     status: nominal
-    source: "[adr] ADR 0009 mass table - 'Acrylic sides, 2 x 4 mm'"
-  rebate_w:
+    source: "[adr] ADR 0009 mass table - 'Acrylic sides, 2 x 4 mm'. Now a single sheet standing in the oak grooves"
+  # THE SIDES SIT BETWEEN THE OAK PANELS, IN GROOVES (decided 2026-09-26).
+  # Oak top and oak bottom run the full width; each acrylic side stands in a
+  # groove in both, set in from the edge by an oak lip. Glued into the bottom
+  # grooves (the U is still one glued sub-assembly), a sliding fit in the top
+  # grooves - which now locate the lid, the job ADR 0009's notch did.
+  side_inset:
     value: 2.0
     status: tbd
-    source: "no document dimensions the notch (ADR 0009 'A U, a notch, and six fasteners')"
-    decided_by: "M4, with the gasket bead - half the side thickness is a drawing placeholder"
-
+    source: "oak lip outside each groove. Every mm here comes off the interior width twice"
+    decided_by: "M4 - the thinnest lip the oak and the saw will hold"
+  groove_depth:
+    value: 3.0
+    status: tbd
+    source: "placeholder - half the oak panel, leaving half under the groove"
+    decided_by: "M4, with the oak panel thickness (which the flush rule sets)"
+  groove_clear:
+    value: 0.2
+    status: tbd
+    source: "per side of the acrylic, so the lid lifts off; acrylic sheet thickness varies [from memory]"
+    decided_by: "M4, against the sheet actually bought"
 # ----------------------------------------------------------------- ends ----
 ends:
   mouth_cap_t:
@@ -334,7 +348,7 @@ hardware:
   fastener_inset:
     value: 7.0
     status: tbd
-    source: "placeholder - distance from each long edge, inside the acrylic sides, clear of the switch column"
+    source: "placeholder - distance from the inside face of each acrylic side, clear of the switch column"
     decided_by: "M4"
   fastener_end:
     value: 30.0

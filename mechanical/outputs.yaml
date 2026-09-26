@@ -100,8 +100,8 @@ exports:
   - {name: dxf-oak-top, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-top.dxf, defines: {part: "oak_top"}}
   - {name: dxf-oak-bottom, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-bottom.dxf, defines: {part: "oak_bottom"}}
   - {name: dxf-thumb-plate, src: mechanical/cad/woody_body.scad, out: mechanical/export/thumb-plate.dxf, defines: {part: "thumb_plate"}}
-  - {name: dxf-side-outer, src: mechanical/cad/woody_body.scad, out: mechanical/export/side-outer.dxf, defines: {part: "side_outer"}}
-  - {name: dxf-side-inner, src: mechanical/cad/woody_body.scad, out: mechanical/export/side-inner.dxf, defines: {part: "side_inner"}}
+  - {name: dxf-side, src: mechanical/cad/woody_body.scad, out: mechanical/export/side.dxf, defines: {part: "side"}}
+  - {name: dxf-oak-grooves, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-grooves.dxf, defines: {part: "oak_grooves"}}
   - {name: dxf-mouth-cap, src: mechanical/cad/woody_body.scad, out: mechanical/export/mouth-cap.dxf, defines: {part: "mouth_cap"}}
   - {name: dxf-tail-cap, src: mechanical/cad/woody_body.scad, out: mechanical/export/tail-cap.dxf, defines: {part: "tail_cap"}}
   - {name: dxf-tail-backplate, src: mechanical/cad/woody_body.scad, out: mechanical/export/tail-backplate.dxf, defines: {part: "tail_backplate"}}

@@ -612,6 +612,18 @@ went on bonding it. It does not any more.
          six fasteners, up through the bottom, into the plate
 ```
 
+> **Superseded in part, 2026-09-26: the sides sit BETWEEN the oak panels, in
+> grooves, not on the outside of them.** Oak top and oak bottom both run the
+> full width; each frosted acrylic side stands in a groove cut along the
+> inner face of each panel, set in from the edge behind an oak lip. The U is
+> still one glued sub-assembly — the sides are glued into the **bottom**
+> grooves — and the lid now drops onto the sides' top edges, which slide into
+> the **top** grooves. **That groove replaces the notch below**: it locates the
+> lid laterally and takes the shear, and the gasket bead goes in it. Two
+> costs, both measured by the body CAD (`mechanical/drc.echo`): the grooves are
+> a saw or router pass, the one cut in the stack that is not a through-cut;
+> and the oak lips come off the interior width twice.
+
 **One side is a U.** The oak bottom and the two frosted acrylic sides are
 assembled as a single channel — glued to each other, once, permanently. That
 sub-assembly is never taken apart again and it carries the LED strips.

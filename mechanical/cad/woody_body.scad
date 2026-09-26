@@ -43,8 +43,8 @@ cut_key = "";         // or name a key: the X cut goes through its centre
 cut_depth = 1000;     // "x" keeps a slab this deep beyond the cut
 figure = false;       // set true by a figure that includes this file
 
-LAYERS = ["plate_top", "oak_top", "oak_bottom", "thumb_plate", "side_outer",
-          "side_inner", "mouth_cap", "tail_cap", "tail_backplate", "ubolt_backplate",
+LAYERS = ["plate_top", "oak_top", "oak_bottom", "oak_grooves", "thumb_plate", "side",
+          "mouth_cap", "tail_cap", "tail_backplate", "ubolt_backplate",
           "diffuser", "service_cover"];
 
 $fn = 40;
@@ -72,16 +72,20 @@ z_thumb_top = z_floor + plate_thickness;        // thumb plate, on the inside fa
 cavity_h = z_lid_bot - z_floor;
 
 lid_t = T - z_lid_bot;
-lid_y0 = stack_side_t - stack_rebate_w;         // lid sits in the rebates
-lid_w = W - 2 * lid_y0;
-u_y0 = stack_side_t;                            // inside face of each side
-u_w = W - 2 * stack_side_t;
+// The sides stand BETWEEN the oak panels, in grooves (decided 2026-09-26):
+// oak top and bottom are full width, each side is set in by an oak lip.
+side_y = [stack_side_inset, W - stack_side_inset - stack_side_t];   // outer face of each side
+groove_w = stack_side_t + 2 * stack_groove_clear;
+u_y0 = stack_side_inset + stack_side_t;         // inside face of the left side
+u_w = W - 2 * u_y0;                             // the interior, between the sides
+z_side0 = z_floor - stack_groove_depth;         // side's bottom edge, in the bottom groove
+z_side1 = z_oak_top_bot + stack_groove_depth;   // side's top edge, in the top groove
 x_in0 = ends_mouth_cap_t;                       // between the end caps
 x_in1 = L - ends_tail_cap_t;
 
 // The key plate's origin (config/key-layout.yaml: "top-left of key plate").
 plate_x0 = x_in0;
-plate_y0 = lid_y0;
+plate_y0 = u_y0;                                // the plate sits between the sides
 
 // ------------------------------------------------------- length budget ----
 function sum(v, i = 0) = i >= len(v) ? 0 : v[i] + sum(v, i + 1);
@@ -199,7 +203,7 @@ module cutout_at(xy, rot, s) {
 // Key plate: lid footprint, in the plate's own frame = model XY minus origin.
 module plate_top_2d() {
     difference() {
-        square([x_in1 - x_in0, lid_w]);
+        translate([0, stack_groove_clear]) square([x_in1 - x_in0, u_w - 2 * stack_groove_clear]);
         translate([-plate_x0, -plate_y0]) {
             for (k = top_keys) cutout_at(key_xy(k), key_rot(k), plate_cutout);
             for (f = fasteners()) translate(f) circle(d = tap_d_m3);
@@ -208,13 +212,15 @@ module plate_top_2d() {
 }
 tap_d_m3 = 2.5;   // drawing convention: M3 tap drill; see the DRC on thread engagement
 
-// Oak top: the lid's wood, ON TOP of the plate. One hole per key, which the
-// cap travels in. No fastener holes - the fasteners stop in the plate, so the
-// playing face is unbroken oak. Frame: as the plate.
+// Oak top: the lid's wood, ON TOP of the plate, full width. One hole per key
+// (or one slot per hand), which the cap travels in. No fastener holes - the
+// fasteners stop in the plate, so the playing face is unbroken oak. The side
+// grooves are NOT in this outline: they are a saw cut, not a through-cut,
+// and export separately (oak_grooves_2d). Frame: model XY minus [x_in0, 0].
 module oak_top_2d() {
     difference() {
-        square([x_in1 - x_in0, lid_w]);
-        translate([-plate_x0, -plate_y0])
+        square([x_in1 - x_in0, W]);
+        translate([-x_in0, 0])
             if (stack_cap_holes == "slot")
                 for (cl = ["left_hand", "right_hand"]) hull() for (k = cluster_keys(cl))
                     translate(key_xy(k)) rotate(key_rot(k)) square(switch_keycap + 2 * stack_cap_clear, center = true);
@@ -226,11 +232,12 @@ module oak_top_2d() {
 
 // The U's floor. Thumb recesses are the through-cuts (ADR 0009: "oak
 // thickness sets the inset depth"); matrix window; service opening;
-// fastener and U-bolt holes. Frame: model XY minus [x_in0, u_y0].
+// fastener and U-bolt holes. Full width; grooves as for the oak top.
+// Frame: model XY minus [x_in0, 0].
 module oak_bottom_2d() {
     difference() {
-        square([x_in1 - x_in0, u_w]);
-        translate([-x_in0, -u_y0]) {
+        square([x_in1 - x_in0, W]);
+        translate([-x_in0, 0]) {
             for (k = bottom_keys) translate(key_xy(k)) rotate(key_rot(k))
                 square(switch_keycap + 2 * thumb_recess_clear, center = true);
             for (s = spare_xy) translate(s) square(switch_keycap + 2 * thumb_recess_clear, center = true);
@@ -262,11 +269,15 @@ module thumb_plate_2d(cl) {
 }
 module thumb_plate_both_2d() { thumb_plate_2d("left_thumb"); thumb_plate_2d("right_thumb"); }
 
-// The acrylic side is TWO laminae, which is how a rebate becomes a pair of
-// through-cuts: the outer one full height, the inner one stopping short of
-// the lid. Frame: X along, Y = model Z.
-module side_outer_2d() { square([x_in1 - x_in0, T]); }
-module side_inner_2d() { square([x_in1 - x_in0, z_lid_bot]); }
+// The acrylic side: one sheet, standing in a groove in each oak panel.
+// Frame: X along, Y = model Z from the side's bottom edge.
+module side_2d() { square([x_in1 - x_in0, z_side1 - z_side0]); }
+
+// The grooves, for the shop: one line pair per side, groove_depth deep, cut
+// along each oak panel's inner face. A saw or router pass - the ONE operation
+// in the stack that is not a through-cut, and deliberately so: it is what
+// holds the sides between the oak. Frame: as the oak panels.
+module oak_grooves_2d() { for (y = side_y) translate([0, y - stack_groove_clear]) square([x_in1 - x_in0, groove_w]); }
 
 // End caps, full cross-section. Frame: X = model Y, Y = model Z.
 module mouth_cap_2d() {
@@ -345,7 +356,7 @@ service_xy = [matrix_xy[0] - boards_matrix_board / 2 - openings_service_cover_l 
 function fasteners() =
     let(n = hardware_fastener_count, a = x_in0 + hardware_fastener_end, b = x_in1 - hardware_fastener_end)
     [for (i = [0 : n - 1]) [lerp(a, b, i / (n - 1)),
-                            i % 2 == 0 ? lid_y0 + hardware_fastener_inset : W - lid_y0 - hardware_fastener_inset]];
+                            i % 2 == 0 ? u_y0 + hardware_fastener_inset : W - u_y0 - hardware_fastener_inset]];
 
 // U-bolt in the inter-hand gap on the bottom face (ADR 0009); legs along X.
 ubolt_c = [(x_gap0 + x_rh0) / 2, W / 2];
@@ -359,24 +370,24 @@ module lam(z, t, c, shell = true) {
 
 module lid(dz = 0) {
     translate([0, 0, dz]) {
-        lam(z_oak_top_bot + explode, oak_top_t, C_OAK)
-            translate([plate_x0, plate_y0]) oak_top_2d();
+        P(C_OAK, true) translate([x_in0, 0, z_oak_top_bot + explode]) difference() {
+            linear_extrude(oak_top_t) oak_top_2d();
+            translate([0, 0, -EPS]) linear_extrude(stack_groove_depth + EPS) oak_grooves_2d();
+        }
         lam(z_plate_bot + explode / 2, plate_thickness, C_ALU, false)
             translate([plate_x0, plate_y0]) plate_top_2d();
     }
 }
 
 module u_channel() {
-    lam(-explode, oak_bottom_t, C_OAK) translate([x_in0, u_y0]) oak_bottom_2d();
-    // The two laminae of each side: outer full height, inner to the lid.
-    for (s = [0, 1]) {
-        y_out = s == 0 ? 0 : W - lid_y0;
-        y_in = s == 0 ? lid_y0 : u_y0 + u_w;
-        P(C_ACRYLIC, true) translate([x_in0, y_out + lid_y0, 0]) rotate([90, 0, 0])
-            linear_extrude(lid_y0) side_outer_2d();
-        P(C_ACRYLIC, true) translate([x_in0, y_in + stack_rebate_w, 0]) rotate([90, 0, 0])
-            linear_extrude(stack_rebate_w) side_inner_2d();
+    P(C_OAK, true) translate([x_in0, 0, -explode]) difference() {
+        linear_extrude(oak_bottom_t) oak_bottom_2d();
+        translate([0, 0, oak_bottom_t - stack_groove_depth]) linear_extrude(stack_groove_depth + EPS) oak_grooves_2d();
     }
+    // Each side: one sheet, bottom edge in the bottom groove, top edge in the top.
+    for (y = side_y)
+        P(C_ACRYLIC, true) translate([x_in0, y + stack_side_t, z_side0 + explode * 0.3]) rotate([90, 0, 0])
+            linear_extrude(stack_side_t) side_2d();
 }
 
 module caps() {
@@ -538,6 +549,12 @@ module drc_report() {
     edge = min([for (f = feats) min(f[1][1] - f[2][1] / 2 - u_y0, W - u_y0 - f[1][1] - f[2][1] / 2)]);
     drc(edge >= 2, "oak-bottom cuts inside the U", edge, "mm, smallest web to the inside of a side");
 
+    // Sides in grooves
+    drc(undef, "interior width between the acrylic sides", u_w, "mm - was the full width less two sides; the oak lips now come off it too");
+    drc(stack_groove_depth <= min(oak_top_t, oak_bottom_t) / 2, "groove leaves at least half the oak under it",
+        min(oak_top_t, oak_bottom_t) - stack_groove_depth, "mm of oak under the groove in the thinner panel");
+    drc(stack_side_inset >= 2, "oak lip outside each groove", stack_side_inset, "mm - thinner and it splits off along the grain");
+
     // Z stack
     drc(cavity_h > 0, "cavity height", cavity_h, "mm between the key plate and the oak bottom");
     z_pole = z_plate_top - switch_pole_tip_below_seat;
@@ -594,8 +611,8 @@ module part_2d(p) {
     else if (p == "oak_top") oak_top_2d();
     else if (p == "oak_bottom") oak_bottom_2d();
     else if (p == "thumb_plate") thumb_plate_both_2d();
-    else if (p == "side_outer") side_outer_2d();
-    else if (p == "side_inner") side_inner_2d();
+    else if (p == "oak_grooves") oak_grooves_2d();
+    else if (p == "side") side_2d();
     else if (p == "mouth_cap") mouth_cap_2d();
     else if (p == "tail_cap") tail_cap_2d();
     else if (p == "tail_backplate") tail_backplate_2d();

@@ -22,5 +22,5 @@ lv(z_plate_top - switch_pole_tip_below_seat, str("pole tip ", z_plate_top - swit
 
 lv(z_floor, str("floor ", z_floor));
 lv(0, "bottom face 0");
-label([W / 2, -8, 1], str("cavity ", cavity_h, " mm   side ", stack_side_t, " = two laminae, rebate ", stack_rebate_w, " (tbd)"), size = 1.6);
+label([W / 2, -8, 1], str("cavity ", cavity_h, " x ", u_w, " mm   sides ", stack_side_t, " in ", stack_groove_depth, " mm grooves (tbd)"), size = 1.6);
 label([W / 2, -11.5, 1], str("section at X = ", cut_pos, " (RH3), seen from the tail"), size = 1.4);
