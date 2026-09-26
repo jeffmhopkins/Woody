@@ -90,9 +90,9 @@ of a superseded value. Instead:
 |---|---|
 | ![Underside](renders/underside.png) Underside: display, thumb recesses, spares (magenta), U-bolt, service cover | ![Exploded](renders/exploded.png) The stack, pulled apart |
 | ![Internals](renders/internals.png) Lid off | ![Tail](renders/tail-detail.png) The tail from inside |
-| ![Spine](renders/spine-3d.png) The spine that replaces the carrier, in yellow | |
+| ![Centre board](renders/centre-board-3d.png) The centre board that replaces the carrier, in yellow | |
 
-![The spine, labelled, square onto its face](renders/spine.png)
+![The centre board, labelled](renders/centre-board.png)
 
 ![Plan from above, with the length budget](renders/plan-top.png)
 

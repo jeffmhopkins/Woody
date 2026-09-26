@@ -225,19 +225,18 @@ moved.
 ## Build approach: dev boards as modules on a passive carrier
 
 > **No carrier board (owner, 2026-09-26: "we don't need a carrier", then
-> "turning it on the side, and connecting via 90 degree header — one longer
-> board that connects everything down one side", then "on the outside, to
-> get more area").** The carrier's circuits below are unchanged, and "the
-> carrier" still names them, but they are built on **the spine**: one board
-> standing on its edge in the side channel, inboard of that side's LED strip
-> (ADR 0014's strips are kept), with a short header to each cluster board, so
-> the key chain runs through its traces. Still one
-> regulator per dev board, and the breath sensor at the spine's far end from
-> the AMOLED (ADR 0003). The dev boards no longer plug into it: the Matrix is
-> under its window at the tail on a soldered pigtail, the display at the
-> mouth on a flat-flex cable (ADR 0009, `mechanical/DESIGN.md`). The
-> placement table above still holds for the Matrix and the IMU; the breath
-> sensor, ADC and power are now down the side, under the hands.
+> "a center board that stacks between the upper and lower key boards").** The
+> carrier's circuits below are unchanged, and "the carrier" still names them,
+> but they are built on **the centre board**: one flat board between the
+> thumb boards and the key boards, with each thumb board's stacking header to
+> the key board above passing through it, so the key chain runs through it.
+> Still one regulator per dev board. The breath sensor sits in the gap
+> between the hands, the one place on the board with height for it —
+> mid-body, well away from the AMOLED (ADR 0003). The dev boards no longer
+> plug into it: the Matrix is under its window at the tail on a soldered
+> pigtail, the display at the mouth on a flat-flex cable (ADR 0009,
+> `mechanical/DESIGN.md`). The placement table above still holds for the
+> Matrix and the IMU; the breath sensor, ADC and power are now mid-body.
 
 Optimising for ease of construction changes the shape of the final build, so it
 is worth stating rather than leaving implied by milestone E13.

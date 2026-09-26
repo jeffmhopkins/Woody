@@ -14,12 +14,13 @@ under its window at the tail (§7), and everything else here is passive, slow,
 or analog.
 
 > **There is no carrier board (owner, 2026-09-26).** These circuits are built
-> on **the spine**: one board standing on its edge in the side channel,
-> inboard of that side's LED strip, from the mouth cap to the tail, with a
-> short header to each cluster board (ADR 0013's build-approach note, `mechanical/DESIGN.md`).
-> The block diagram and §§ below describe the circuits, which have not
-> changed; where a line talks about "the board", read the spine. Its size and
-> the room its parts have are in `mechanical/drc.echo`.
+> on **the centre board**: one flat board between the thumb boards and the
+> key boards, the stacking headers between them passing through it (ADR
+> 0013's build-approach note, `mechanical/DESIGN.md`). The block diagram and
+> §§ below describe the circuits, which have not changed; where a line talks
+> about "the board", read the centre board. Its size and the room its parts
+> have are in `mechanical/drc.echo` — little under the keys, so the regulators
+> must be low-profile.
 
 Evidence marking follows the module pages: `[repo]` names a file, `[calc]` shows
 the arithmetic, `[from memory]` means **I could not open the datasheet and you
@@ -261,10 +262,10 @@ service header — `J-DISP` and `HDR-SERVICE` — moved verbatim to
 
 > **Superseded 2026-09-26: the matrix is on the TOP face** (owner, ADR 0009).
 > The ESP32-S3-Matrix is **not on a carrier at all**: it sits face up
-> against the oak top under a window at the tail, wired to the spine by a
-> soldered pigtail (ADR 0009, `mechanical/DESIGN.md`), so there is no cutout
-> to argue about and the underside mounting below is not needed.
-> `mechanical/renders/spine.png` shows where the circuits went.
+> against the oak top under a window at the tail, wired to the centre board
+> by a soldered pigtail (ADR 0009, `mechanical/DESIGN.md`), so there is no
+> cutout to argue about and the underside mounting below is not needed.
+> `mechanical/renders/centre-board.png` shows where the circuits went.
 > Kept as the record of the arithmetic that was.
 
 **Proposed: mount the ESP32-S3-Matrix on the carrier's *underside*, LED face
