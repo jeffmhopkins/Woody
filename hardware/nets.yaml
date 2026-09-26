@@ -46,8 +46,16 @@ nets:
     carries: "Chain return, five alternating grounds on J-CHAIN pins 1/3/5/7/9"
     figure: chain-conductors
     origin: interfaces/key-chain-loom
-    note: "It is the carrier's PWR_GND pour arriving on HDR-DEV's ground pins - a separate name for the five conductors in the ribbon, not a separate node"
-    reference: [cluster/key-register, cluster/key-switch-network, cluster/key-marker-and-bits]
+    note: >
+      It is the carrier's PWR_GND pour arriving on HDR-DEV's ground pins - a
+      separate name for the five conductors in the ribbon, not a separate node.
+      cluster/key-marker-and-bits is NOT in `reference:` any more: its four low
+      straps do join this net to a register input, but the input is per-board,
+      so that connection sits inside the KEY_BITS / MARKER_BITS `per_board:`
+      gap rather than being a second omission of its own. It used to be listed,
+      and the netlist satisfied it with a net whose only endpoint was the port -
+      a second name for a node rather than a net.
+    reference: [cluster/key-register, cluster/key-switch-network]
 
   CHAIN_SCK:
     kind: signal

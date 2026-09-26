@@ -18,7 +18,14 @@ page: key-marker-and-bits.md
 
 ports:
   V3V3_CHAIN: {dir: in,  from: interfaces/key-chain-loom, figure: key-pullup-qty}
-  GND_CHAIN:  {dir: ref, from: interfaces/key-chain-loom, figure: chain-conductors}
+
+# NO GND_CHAIN PORT, and that is a correction. This file used to declare one and
+# use it in a net called MARKER_LOW whose only endpoint WAS that port - a second
+# name for a node, not a net, and the same for MARKER_HIGH against V3V3_CHAIN.
+# The four low straps really do join GND_CHAIN to a register input, but the
+# input is per-board and unassertable, so the connection lives inside the
+# KEY_BITS/MARKER_BITS `per_board:` gap that check-netlist prints on every run
+# rather than being a second, separate omission here.
 
 components:
 
@@ -46,17 +53,13 @@ nets:
     - R-KEY-PU-FREE2.1
     - R-KEY-PU-FREE3.1
 
-  # The four HIGH straps. Copper from the rail to a register input, and which
-  # input is per board.
-  MARKER_HIGH:
-    - port: V3V3_CHAIN
-
-  # The four LOW straps, the same in the other direction. THE STRAPS LAND
-  # DIRECTLY ON THE RAILS and share no component with the key networks they
-  # are read as vouching for - which is what makes a marker a framing check
-  # rather than a second opinion about the same parts.
-  MARKER_LOW:
-    - port: GND_CHAIN
+  # THE EIGHT STRAPS ARE NOT HERE. Four join V3V3_CHAIN and four join
+  # GND_CHAIN to a register input, they are copper with no part, and the input
+  # they land on is per-board - so there is nothing this file can name. What
+  # makes them a framing check rather than a second opinion about the same
+  # parts is that they touch the rails DIRECTLY and share no component with the
+  # key networks they vouch for; and the fact that distinguishes all four
+  # boards is the marker LEVEL map, not the input map.
 
   FREE_BIT_1:
     - R-KEY-PU-FREE1.2
@@ -66,8 +69,6 @@ nets:
     - R-KEY-PU-FREE3.2
 
 external_endpoints:
-  - MARKER_HIGH
-  - MARKER_LOW
   - FREE_BIT_1
   - FREE_BIT_2
   - FREE_BIT_3

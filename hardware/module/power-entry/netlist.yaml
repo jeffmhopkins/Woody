@@ -79,23 +79,23 @@ components:
     pins: [1, 2]
 
   C1:
-    of: C-BULK-RAIL              # qty 4: C1..C4
+    of: C-BULK-RAIL-100U         # the only 100uF; the other three are 47uF
     value: "100uF"
     drawn_as: C1
     pins: [1, 2]
     note: "100uF on +12 V, NOT 47uF - the other three are 47uF and this one is not"
   C2:
-    of: C-BULK-RAIL
+    of: C-BULK-RAIL-47U
     value: "47uF"
     drawn_as: C2
     pins: [1, 2]
   C3:
-    of: C-BULK-RAIL
+    of: C-BULK-RAIL-47U
     value: "47uF"
     drawn_as: C3
     pins: [1, 2]
   C4:
-    of: C-BULK-RAIL
+    of: C-BULK-RAIL-47U
     value: "47uF"
     drawn_as: C4
     pins: [1, 2]

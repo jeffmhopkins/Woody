@@ -225,8 +225,27 @@ def check_global(specs, bom, problems):
             have = int(bom[row]["qty"])
         except (ValueError, KeyError):
             continue
+        # N7-8. THIS SKIP USED TO COME FIRST, so ONE `section:` token anywhere
+        # exempted a whole row from over-use detection in both directions.
+        # Demonstrated: nine instances of a qty-6 row reported over-use, and
+        # adding `section: half` to one of the nine made the line vanish - a
+        # board three parts short, reported clean.
+        #
+        # A package supplying sections still cannot be counted by instances,
+        # because nothing here knows how many sections a package has. But the
+        # UNSECTIONED instances can be, and a row with a MIX of sectioned and
+        # unsectioned instances is a modelling error rather than an exemption.
         if sections[row]:
-            continue          # a package supplying sections is counted in prose
+            plain = n - sections[row]
+            if plain and plain > have:
+                problems.append(f"instances: {row} has {plain} unsectioned "
+                                f"instance(s) across all netlists and the BOM "
+                                f"buys {have}")
+            elif plain:
+                problems.append(f"instances: {row} mixes {sections[row]} "
+                                f"sectioned and {plain} unsectioned instance(s) "
+                                f"- a row is one or the other")
+            continue
         if n > have:
             problems.append(f"instances: {row} is placed {n} time(s) across all "
                             f"netlists and the BOM buys {have}")
@@ -234,7 +253,49 @@ def check_global(specs, bom, problems):
             exact += 1
         else:
             short.append(f"{row} {n}/{have}")
-    return exact, short, sum(1 for r in used if sections[r])
+
+    # N7-9 / N8-3. A ROW PLACED ZERO TIMES WAS INVISIBLE, because this loop
+    # walks `used` and a row nobody places is not in it. Census at the time:
+    # 155 rows = 113 placed + 30 in unplaced.csv + 12 in neither list, four of
+    # those electrical and named on schematic pages. `unplaced.csv` is the
+    # repository's own word for "no schematic page names this", so a row in
+    # neither place is unaccounted for rather than deliberately unplaced.
+    unplaced = set()
+    up = os.path.join(ROOT, "hardware/unplaced.csv")
+    if os.path.exists(up):
+        with open(up, newline="", encoding="utf-8") as fh:
+            unplaced = {r["ref"] for r in csv.DictReader(fh)}
+    nowhere = sorted(set(bom) - set(used) - unplaced)
+    return exact, short, sum(1 for r in used if sections[r]), nowhere
+
+
+# A `/` BETWEEN TWO MAGNITUDES OF THE SAME UNIT IS AN AGGREGATE ROW, and a
+# `-` between them is a range. That is not a guess about notation: it is what
+# all eight aggregate rows in this repository's history did
+# ("10k / 30k 1% metal film", "100uF (+12V) / 47uF (-12V, +5V)") against every
+# range row ("470-1000uF electrolytic, 16V", "10-47uH power inductor").
+#
+# Only the units that denote the part's OWN value count. A row legitimately
+# names several voltages (a rating, a rail, a standoff) and several percentages,
+# so F / H / ohm are the dimensions that make two values two parts.
+AGG_UNIT = re.compile(r"(\d+(?:\.\d+)?)\s*([munpk]?)(f|h|r|k|m)\b", re.I)
+
+
+def aggregate(part):
+    """True when one `part` field names two different values of one dimension."""
+    if "/" not in (part or ""):
+        return False
+    left, _, right = part.partition("/")
+    def dims(txt):
+        out = {}
+        # NOT norm() - it strips the spaces, and then `30k 1%` becomes `30k1%`
+        # where the \b after the k disappears and the match is lost. That bug
+        # made the detector miss R-MODGAIN, the first row it was written for.
+        for mag, pre, unit in AGG_UNIT.findall((txt or "").lower()):
+            out.setdefault(unit.lower(), set()).add(pre.lower() + mag)
+        return out
+    a, b = dims(left), dims(right)
+    return any(u in b and a[u] - b[u] and b[u] - a[u] for u in a)
 
 
 def bom_rows():
@@ -375,6 +436,19 @@ def check_one(d, bom, problems, seen, elsewhere=None):
         if "value" in c and norm(c["value"]) not in norm(bom[row_ref]["part"]):
             problems.append(f"{rel}: {ref} value {c['value']!r} does not appear "
                             f"in its BOM part field {bom[row_ref]['part']!r}")
+        elif "value" in c and aggregate(bom[row_ref]["part"]):
+            # N8-2. THE TEST ABOVE IS A SUBSTRING MATCH, so a row naming TWO
+            # values passes whichever one an instance claims - both are
+            # substrings of its own part field. Seven aggregate rows were split
+            # during the conversion on the stated grounds that "no instance
+            # could state a value that matched", and that was never the
+            # criterion: the checker's silence was. C-BULK-RAIL,
+            # "100uF (+12V) / 47uF (-12V, +5V) 25V electrolytic", survived on
+            # the very page whose 4 x 47uF drawing defect started the exercise.
+            problems.append(f"{rel}: {ref} draws on {row_ref}, whose part field "
+                            f"names more than one value of the same kind "
+                            f"({bom[row_ref]['part']!r}) - an aggregate row "
+                            f"cannot be netlisted, split it")
 
     # --- NO CIRCUIT MAY USE MORE OF A PART THAN THE BOM BUYS.
     #
@@ -426,6 +500,30 @@ def check_one(d, bom, problems, seen, elsewhere=None):
                 problems.append(f"{rel}: {ref} has no pin {pin!r} "
                                 f"(declares {comps[ref].get('pins')})")
             used.append((ref, pin))
+
+    # N5-5. A `port:` IS NOT COUNTED BY THE PIN CHECK - `used` only collects
+    # REF.PIN endpoints, so two nets in one file can share a port silently.
+    # That is deliberate for a bundle boundary, where a port stands for several
+    # conductors leaving together. It is a defect when a net's ONLY endpoint is
+    # a port another net already carries: that is not a net, it is a second
+    # name for a node. `key-marker-and-bits`'s MARKER_HIGH was exactly that.
+    port_use = {}
+    for net, eps in nets.items():
+        for ep in eps:
+            if isinstance(ep, dict) and ep.get("port"):
+                port_use.setdefault(ep["port"], []).append(net)
+    for net, eps in nets.items():
+        if len(eps) != 1:
+            continue
+        ep = eps[0]
+        if not isinstance(ep, dict) or not ep.get("port"):
+            continue
+        others = [n for n in port_use.get(ep["port"], []) if n != net]
+        if others:
+            problems.append(f"{rel}: net {net!r} has one endpoint, the port "
+                            f"{ep['port']!r}, which {', '.join(sorted(others))} "
+                            f"already carries - that is a second name for a "
+                            f"node, not a net")
 
     for rp in sorted(declared_pins - set(used)):
         problems.append(f"{rel}: {rp[0]}.{rp[1]} is declared and connected to nothing")
@@ -675,7 +773,10 @@ def main():
         print(f"per-board bundles not resolved to single nets: "
               f"{', '.join(sorted(per_board))}")
     if counted:
-        exact, short, sectioned = counted
+        exact, short, sectioned, nowhere = counted
+        if nowhere:
+            print(f"placed nowhere and not in unplaced.csv ({len(nowhere)}): "
+                  + ", ".join(nowhere))
         # NAMED, NOT COUNTED. A bare "5 still short" reads like five
         # unfinished conversions; every one of them so far has a reason
         # written down somewhere, and printing the rows is what lets a reader
