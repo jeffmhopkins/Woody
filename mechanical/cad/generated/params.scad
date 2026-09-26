@@ -37,6 +37,7 @@ spare_switch_cutouts = 3;
 
 // ---- config/body.yaml
 stack_cap_clear = 0.75;  // tbd; keycap to oak-top hole, per side. Must beat oak's cross-grain movement across one hole, which ADR 0009 puts at 1-1.5 % [calc: 1.5 % of 18 mm = 0.27 mm]
+stack_cap_holes = "individual";  // tbd; individual = one hole per cap in the oak top; slot = one slot per hand, so pitch is limited by cap-to-cap clearance rather than by an oak web between holes
 stack_side_t = 4.0;  // nominal; [adr] ADR 0009 mass table - 'Acrylic sides, 2 x 4 mm'
 stack_rebate_w = 2.0;  // tbd; no document dimensions the notch (ADR 0009 'A U, a notch, and six fasteners')
 ends_mouth_cap_t = 4.0;  // tbd; ADR 0009 end-cap table: acrylic, 'the material already being cut for the sides' - so the side sheet's thickness
@@ -45,9 +46,9 @@ ends_tube_hole_d = 6.0;  // tbd; ADR 0003: tube bore and OD are settled at E2
 layout_margin_mouth = 10.0;  // nominal; [adr] ADR 0009 'End margins 20' - split evenly between the ends, which the ADR does not say
 layout_mouthpiece = 40.0;  // nominal; [adr] ADR 0009 length table
 layout_display_band = 60.0;  // nominal; [adr] ADR 0009 length table (grew from 30 with ADR 0008)
-layout_lh_run = 96.0;  // nominal; [adr] ADR 0009 length table
+layout_lh_gaps = [24.0, 24.0, 24.0, 24.0];  // nominal; [adr] ADR 0009 length table - 5 keys at 24 mm, first to last key centre
 layout_gap = 50.0;  // nominal; [adr] ADR 0009 length table - the U-bolt band
-layout_rh_run = 120.0;  // nominal; [adr] ADR 0009 length table
+layout_rh_gaps = [24.0, 24.0, 24.0, 24.0, 24.0];  // nominal; [adr] ADR 0009 length table - 6 keys at 24 mm, first to last key centre
 layout_tail = 40.0;  // nominal; [adr] ADR 0009 length table
 layout_margin_tail = 10.0;  // nominal; [adr] ADR 0009 'End margins 20', the other half
 layout_slack_to = "tail";  // tbd; ADR 0009 leaves the 31 mm of slack unassigned. The tail holds the etherCON, carrier, matrix and USB-C, so it gets it
@@ -102,5 +103,5 @@ lighting_strip_gap = 3.0;  // tbd; ADR 0009 / ADR 0014: the diffusion gap is a p
 
 // Every value above with status tbd - a placeholder, not a number any
 // document gives. The DRC report lists these so no result hides one.
-tbd_params = ["stack_cap_clear", "stack_rebate_w", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_slack_to", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_carrier_l", "boards_carrier_w", "boards_carrier_z", "boards_carrier_from_tail", "openings_usb_slot_w", "openings_usb_slot_h", "ethercon_body_d", "ethercon_offset_y", "hardware_fastener_inset", "hardware_fastener_end", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_backplate_t", "lighting_strip_w", "lighting_strip_gap"];
+tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_rebate_w", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_slack_to", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_carrier_l", "boards_carrier_w", "boards_carrier_z", "boards_carrier_from_tail", "openings_usb_slot_w", "openings_usb_slot_h", "ethercon_body_d", "ethercon_offset_y", "hardware_fastener_inset", "hardware_fastener_end", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_backplate_t", "lighting_strip_w", "lighting_strip_gap"];
 

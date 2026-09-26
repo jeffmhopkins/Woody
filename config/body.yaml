@@ -44,6 +44,11 @@ stack:
     status: tbd
     source: "keycap to oak-top hole, per side. Must beat oak's cross-grain movement across one hole, which ADR 0009 puts at 1-1.5 % [calc: 1.5 % of 18 mm = 0.27 mm]"
     decided_by: "M2 - the mule, with a real cap in a real oak hole"
+  cap_holes:
+    value: "individual"
+    status: tbd
+    source: "individual = one hole per cap in the oak top; slot = one slot per hand, so pitch is limited by cap-to-cap clearance rather than by an oak web between holes"
+    decided_by: "the pitch chosen - below about 20 mm an individual-hole web is too thin to survive (drc.echo)"
   # THE OAK BOTTOM HAS NO THICKNESS OF ITS OWN EITHER. Decided 2026-09-26:
   # thumb keys are flush with the bottom face at full travel too. The thumb
   # plate is on the oak bottom's inside face, so the oak is the same
@@ -83,12 +88,12 @@ ends:
 # key is still provisional is stamped PROVISIONAL LAYOUT by tools/cad.py.
 layout:
   # The length budget, mouthpiece to tail. ADR 0009's table is the feasibility
-  # argument; these are the numbers the model draws. Runs are key CENTRE to
-  # key CENTRE, and the key pitch FOLLOWS from them: ADR 0009's 24 mm pitch is
-  # 96 / 4 and 120 / 5 [calc]. There is deliberately no separate pitch value -
-  # two numbers for one quantity is the defect this repository keeps finding.
-  # Pitch is expected to go non-uniform at M2 (ADR 0010), which is when real
-  # x/y positions in config/key-layout.yaml replace this block key by key.
+  # argument; these are the numbers the model draws. Each hand is a LIST OF
+  # GAPS, key centre to key centre from the mouthpiece end, so spacing can be
+  # non-uniform as ADR 0010 expects; the run length is their sum and there is
+  # deliberately no separate run or pitch value - two numbers for one
+  # quantity is the defect this repository keeps finding. Real x/y positions
+  # in config/key-layout.yaml replace this block key by key at M2.
   margin_mouth:
     value: 10.0
     status: nominal
@@ -101,18 +106,20 @@ layout:
     value: 60.0
     status: nominal
     source: "[adr] ADR 0009 length table (grew from 30 with ADR 0008)"
-  lh_run:
-    value: 96.0
+  lh_gaps:
+    value: [24.0, 24.0, 24.0, 24.0]
     status: nominal
-    source: "[adr] ADR 0009 length table"
+    source: "[adr] ADR 0009 length table - 5 keys at 24 mm, first to last key centre"
+    decided_by: "M2 - replaced key by key by x/y in config/key-layout.yaml"
   gap:
     value: 50.0
     status: nominal
     source: "[adr] ADR 0009 length table - the U-bolt band"
-  rh_run:
-    value: 120.0
+  rh_gaps:
+    value: [24.0, 24.0, 24.0, 24.0, 24.0]
     status: nominal
-    source: "[adr] ADR 0009 length table"
+    source: "[adr] ADR 0009 length table - 6 keys at 24 mm, first to last key centre"
+    decided_by: "M2 - replaced key by key by x/y in config/key-layout.yaml"
   tail:
     value: 40.0
     status: nominal

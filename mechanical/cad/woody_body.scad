@@ -84,16 +84,20 @@ plate_x0 = x_in0;
 plate_y0 = lid_y0;
 
 // ------------------------------------------------------- length budget ----
+function sum(v, i = 0) = i >= len(v) ? 0 : v[i] + sum(v, i + 1);
+function cum(v, i) = i <= 0 ? 0 : sum([for (j = [0 : i - 1]) v[j]]);
+lh_run = sum(layout_lh_gaps);
+rh_run = sum(layout_rh_gaps);
 seg_sum = layout_margin_mouth + layout_mouthpiece + layout_display_band
-        + layout_lh_run + layout_gap + layout_rh_run + layout_tail + layout_margin_tail;
+        + lh_run + layout_gap + rh_run + layout_tail + layout_margin_tail;
 slack = L - seg_sum;
 function grow(s) = layout_slack_to == s ? slack : 0;
 x_mouth0 = layout_margin_mouth;
 x_disp0 = x_mouth0 + layout_mouthpiece + grow("mouth");
 x_lh0 = x_disp0 + layout_display_band;
-x_gap0 = x_lh0 + layout_lh_run;
+x_gap0 = x_lh0 + lh_run;
 x_rh0 = x_gap0 + layout_gap + grow("gap");
-x_tail0 = x_rh0 + layout_rh_run;
+x_tail0 = x_rh0 + rh_run;
 x_tail1 = x_tail0 + layout_tail + grow("tail");
 
 // -------------------------------------------------------------- keys ------
@@ -106,8 +110,8 @@ function lerp(a, b, t) = a + (b - a) * t;
 // Provisional positions, used only while a key's x/y is null.
 function prov_xy(k) =
     let(cl = k[6], i = key_n(k) - 1, n = count(cl), c = W / 2 + layout_lateral_inset)
-    cl == "left_hand"  ? [x_lh0 + i * layout_lh_run / (n - 1), c] :
-    cl == "right_hand" ? [x_rh0 + i * layout_rh_run / (n - 1), c] :
+    cl == "left_hand"  ? [x_lh0 + cum(layout_lh_gaps, i), c] :
+    cl == "right_hand" ? [x_rh0 + cum(layout_rh_gaps, i), c] :
     cl == "left_thumb" ? lt_arc(i / (n - 1)) :
     cl == "right_thumb" ? rt_xy(i) : [0, 0];
 
@@ -115,7 +119,7 @@ function prov_xy(k) =
 // (ADR 0010). A half-sine bulge of lt_arc_lateral across a lt_arc_length run.
 function lt_arc(t) = [x_lh0 + layout_lt_arc_start + t * layout_lt_arc_length,
                       W / 2 - layout_lt_arc_lateral / 2 + layout_lt_arc_lateral * sin(180 * t)];
-rt_rest = [x_rh0 + layout_rt_rest_at * layout_rh_run, W / 2];
+rt_rest = [x_rh0 + layout_rt_rest_at * rh_run, W / 2];
 // Right-thumb control switches, offset from the rest (ADR 0010): one toward
 // the tail, two flanking it toward the mouthpiece. Placeholder geometry.
 function rt_xy(i) = i == 0 ? rt_rest + [layout_rt_offset, 0]
@@ -211,8 +215,12 @@ module oak_top_2d() {
     difference() {
         square([x_in1 - x_in0, lid_w]);
         translate([-plate_x0, -plate_y0])
-            for (k = top_keys) translate(key_xy(k)) rotate(key_rot(k))
-                square(switch_keycap + 2 * stack_cap_clear, center = true);
+            if (stack_cap_holes == "slot")
+                for (cl = ["left_hand", "right_hand"]) hull() for (k = cluster_keys(cl))
+                    translate(key_xy(k)) rotate(key_rot(k)) square(switch_keycap + 2 * stack_cap_clear, center = true);
+            else
+                for (k = top_keys) translate(key_xy(k)) rotate(key_rot(k))
+                    square(switch_keycap + 2 * stack_cap_clear, center = true);
     }
 }
 
@@ -493,6 +501,15 @@ module drc_report() {
     // Each run's end keys put half a cap into the neighbouring band - the
     // ADR 0009 table counts runs centre to centre.
     lh = xs(cluster_keys("left_hand")); rh = xs(cluster_keys("right_hand"));
+    gaps = concat(layout_lh_gaps, layout_rh_gaps);
+    drc(undef, "top key gaps, centre to centre (LH then RH)", [layout_lh_gaps, layout_rh_gaps], str("mm; runs ", lh_run, " + ", rh_run));
+    drc(min(gaps) - switch_keycap >= 1.0, "cap-to-cap gap, tightest pair", min(gaps) - switch_keycap,
+        "mm between adjacent MT165 caps; under ~1 mm a pad pressing one catches the next");
+    drc(stack_cap_holes == "slot" || min(gaps) - switch_keycap - 2 * stack_cap_clear >= 2.0,
+        str("oak web between cap holes (", stack_cap_holes, ")"),
+        stack_cap_holes == "slot" ? "n/a - one slot per hand" : min(gaps) - switch_keycap - 2 * stack_cap_clear,
+        "mm of oak between adjacent holes; under 2 mm, cross-grain, it will not survive - use slots");
+    drc(min(gaps) - plate_cutout >= 2.0, "key plate web between cutouts", min(gaps) - plate_cutout, "mm of aluminium");
     echo("DRC", "INFO", "oak top thickness (flush at full travel)", oak_top_t,
          "mm = keycap_top_above_seat - total_travel; keycap height is tbd, so this is too");
     drc(undef, "key cap stands proud of the top face at rest", switch_total_travel, "mm = the travel");
