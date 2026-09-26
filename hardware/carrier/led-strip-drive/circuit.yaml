@@ -10,10 +10,11 @@ title: LED strip drive — schematic
 last_reviewed: '2026-09-21'
 depends_on:
 - adr:0014
+- circuit:carrier/mcu
+- circuit:carrier/power-entry-instrument
 - refdes:C-DECOUPLE-CARRIER
 - refdes:C-STRIP-BULK
 - refdes:HDR-DEV
 - refdes:R-LED-SER
 - refdes:R-SPI-PULL
 - refdes:U-LVLSHIFT
-- circuit:carrier/power-entry-instrument

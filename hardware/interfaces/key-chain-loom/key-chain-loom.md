@@ -27,12 +27,12 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | End | Dir | Peer | Figure | Note |
 |---|---|---|---|---|---|
-| `SCK` (`J-CHAIN` pin 2) | carrier → clusters | out | `HDR-DEV` IO38 → `cluster/key-register` | `chain-conductors` | Series resistor at the driving end. Straight bus, IN to OUT, at every board |
-| `SH/LD` (`J-CHAIN` pin 4) | carrier → clusters | out | `HDR-DEV` IO7 → `cluster/key-register` | `chain-conductors` | Straight bus. A glitch here reloads every register mid-shift, which is the whole 32-bit word |
-| `SER` (`J-CHAIN` pin 6) | carrier → clusters | out | `HDR-DEV` IO33 → `cluster/key-register` | `chain-conductors` | The one pass-through: it rides every hop to the chain-end board's serial input, through `LK-SER` |
+| `SCK` (`J-CHAIN` pin 2) | carrier → clusters | out | `carrier/mcu` IO38 → `cluster/key-register` | `chain-conductors` | Series resistor at the driving end. Straight bus, IN to OUT, at every board |
+| `SH/LD` (`J-CHAIN` pin 4) | carrier → clusters | out | `carrier/mcu` IO7 → `cluster/key-register` | `chain-conductors` | Straight bus. A glitch here reloads every register mid-shift, which is the whole 32-bit word |
+| `SER` (`J-CHAIN` pin 6) | carrier → clusters | out | `carrier/mcu` IO33 → `cluster/key-register` | `chain-conductors` | The one pass-through: it rides every hop to the chain-end board's serial input, through `LK-SER` |
 | `QH` (`J-CHAIN` pin 8) | clusters → carrier | in | `cluster/key-register` → `HDR-DEV` IO40 | `chain-conductors`, `marker-bits`, `free-bits` | **Point to point, and a different net on each side of every board.** That is what makes the chain eight connectors rather than five |
 | `GND` ×5 (pins 1, 3, 5, 7, 9) | carrier ↔ clusters | ref | `HDR-DEV` → `cluster/key-register` | `chain-conductors` | One between every signal, and against pin 10 |
-| `3V3` (`J-CHAIN` pin 10) | carrier → clusters | out | `HDR-DEV` → `cluster/key-switch-network`, `cluster/key-register`, `carrier/breath-adc` | `key-pullup-qty` | The dev board's LDO feeds the pull-ups, four `VCC` pins and four decouplers. **It is also the MCP3202's reference**, which is what makes the static draw a live trade — that argument is owned by neither end and stayed in `carrier.md` §2 |
+| `3V3` (`J-CHAIN` pin 10) | carrier → clusters | out | `carrier/mcu` → `cluster/key-switch-network`, `cluster/key-register`, `carrier/breath-adc` | `key-pullup-qty` | The dev board's LDO feeds the pull-ups, four `VCC` pins and four decouplers. **It is also the MCP3202's reference**, which is what makes the static draw a live trade — that argument is owned by neither end and stayed in `carrier.md` §2 |
 | spare ×2 (pins 11, 12) | carrier ↔ clusters | — | — | `chain-conductors` | ADR 0009's rule, free in a 2×6 |
 | `J-CHAIN` | both | — | — | `chain-connectors` | This circuit's own connector. Same pinout at all eight positions, boxed and keyed at every one |
 | `LK-SER`, `R-SER-TERM` | clusters | — | — | — | This circuit's own parts, chain-end board only. Proposed |

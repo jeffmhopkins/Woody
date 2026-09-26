@@ -13,7 +13,7 @@
 # pretending to own them, and they are netlisted in their own directories
 # against this page.
 
-circuit: carrier/carrier
+circuit: carrier/mcu
 title: Real-time carrier board
 page: carrier.md
 

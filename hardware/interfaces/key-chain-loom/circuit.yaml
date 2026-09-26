@@ -12,6 +12,11 @@ depends_on:
 - adr:0001
 - adr:0002
 - adr:0009
+- circuit:carrier/breath-adc
+- circuit:carrier/mcu
+- circuit:cluster/key-marker-and-bits
+- circuit:cluster/key-register
+- circuit:cluster/key-switch-network
 - fig:chain-conductors
 - fig:chain-connectors
 - fig:free-bits
@@ -24,7 +29,3 @@ depends_on:
 - refdes:R-CHAIN-SER
 - refdes:R-SER-TERM
 - refdes:U-TVS-CHAIN
-- circuit:carrier/breath-adc
-- circuit:cluster/key-marker-and-bits
-- circuit:cluster/key-register
-- circuit:cluster/key-switch-network

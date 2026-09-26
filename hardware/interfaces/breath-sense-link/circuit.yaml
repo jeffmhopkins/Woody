@@ -11,6 +11,12 @@ last_reviewed: '2026-09-21'
 depends_on:
 - adr:0003
 - adr:0004
+- circuit:carrier/breath-adc
+- circuit:carrier/breath-excitation-reference
+- circuit:carrier/power-entry-instrument
+- circuit:module/breath-output-stage
+- circuit:module/breath-receive-stage
+- circuit:module/link-supervision
 - fig:breath-working-point
 - fig:breath-zero-ref
 - fig:cref-out-node
@@ -26,8 +32,3 @@ depends_on:
 - refdes:R-SER-BREATH-INST
 - refdes:TRIM-BREATH-ZERO
 - refdes:U-BREATH
-- circuit:carrier/breath-adc
-- circuit:carrier/breath-excitation-reference
-- circuit:module/breath-output-stage
-- circuit:module/breath-receive-stage
-- circuit:module/link-supervision

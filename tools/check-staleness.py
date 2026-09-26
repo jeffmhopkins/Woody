@@ -441,6 +441,15 @@ def check_bom_generated():
                              os.path.join(ROOT, "tools/check-netlist.py"),
                              "--strict"],
                             capture_output=True, text=True, cwd=ROOT, timeout=60)
+        # AND THE TABLES THE MASTER WAS SEEDED FROM. nets.yaml's header says it
+        # came from the `## Interfaces` tables; then 22 netlists were written and
+        # nothing compared the result back, so the netlists and the master were
+        # made to agree with each other while the pages were left behind. A cold
+        # slice found 22 defects that way and said 14 would fall to a check that
+        # read the Dir and Peer cells.
+        ifc = subprocess.run([sys.executable,
+                              os.path.join(ROOT, "tools/check-interfaces.py")],
+                             capture_output=True, text=True, cwd=ROOT, timeout=60)
     except Exception as e:
         return [f"could not run a generated-file check: {e}"]
     # BOTH RESULTS, ALWAYS. This returned on the manifest result before it
@@ -451,7 +460,7 @@ def check_bom_generated():
     # function, in the same commit.
     out = []
     for tool, res in (("merge-manifests.py", m), ("merge-bom.py", r),
-                      ("check-netlist.py", nl)):
+                      ("check-netlist.py", nl), ("check-interfaces.py", ifc)):
         if res.returncode == 0:
             continue
         # Keep every line the tool chose to print. The old filter kept only

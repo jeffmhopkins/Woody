@@ -14,7 +14,7 @@
 # THIS CIRCUIT'S OWN THREE BOM ROWS ARE PLACED ELSEWHERE, and that is correct:
 # it derives R-SPI-PULL's values and R-SPI-SER's 100 ohm, but the six pulls
 # are on the module board (module/digital-and-supervision) and the three
-# series resistors are on the carrier (carrier/carrier). Owning a row and
+# series resistors are on the carrier (carrier/mcu). Owning a row and
 # placing an instance are different things.
 
 circuit: interfaces/spi-link
@@ -22,9 +22,9 @@ title: SPI link and umbilical
 page: spi-link.md
 
 ports:
-  SCLK:            {dir: in,  from: carrier/carrier, figure: umbilical-pinmap}
-  MOSI:            {dir: in,  from: carrier/carrier, figure: umbilical-pinmap}
-  CS_MOD:          {dir: in,  from: carrier/carrier, figure: umbilical-pinmap}
+  SCLK:            {dir: in,  from: carrier/mcu, figure: umbilical-pinmap}
+  MOSI:            {dir: in,  from: carrier/mcu, figure: umbilical-pinmap}
+  CS_MOD:          {dir: in,  from: carrier/mcu, figure: umbilical-pinmap}
   DIG_GND:         {dir: ref, from: module/power-entry, figure: umbilical-pinmap}
   BREATH_SENSE:    {dir: in,  from: interfaces/breath-sense-link, figure: umbilical-pinmap}
   AGND_SENSE:      {dir: in,  from: interfaces/breath-sense-link, figure: umbilical-pinmap}

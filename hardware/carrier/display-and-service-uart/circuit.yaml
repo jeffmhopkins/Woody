@@ -11,7 +11,8 @@ last_reviewed: '2026-09-21'
 depends_on:
 - adr:0009
 - adr:0013
+- circuit:carrier/mcu
+- circuit:carrier/power-entry-instrument
 - fig:dig-gnd-topology
 - refdes:HDR-DEV
 - refdes:HDR-SERVICE
-- circuit:carrier/power-entry-instrument

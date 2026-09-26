@@ -12,6 +12,11 @@ depends_on:
 - adr:0001
 - adr:0003
 - adr:0004
+- circuit:carrier/breath-adc
+- circuit:carrier/mcu
+- circuit:module/dac8568
+- circuit:module/digital-and-supervision
+- circuit:module/power-entry
 - fig:dig-gnd-topology
 - fig:loop-budget
 - fig:spi-series-r
@@ -20,7 +25,3 @@ depends_on:
 - refdes:R-SPI-PULL
 - refdes:R-SPI-SER
 - refdes:U-TVS-SPI
-- circuit:carrier/breath-adc
-- circuit:module/dac8568
-- circuit:module/digital-and-supervision
-- circuit:module/power-entry

@@ -10,8 +10,8 @@ title: LED strip drive
 page: led-strip-drive.md
 
 ports:
-  IO1:             {dir: in,  from: carrier/carrier}
-  IO2:             {dir: in,  from: carrier/carrier}
+  IO1:             {dir: in,  from: carrier/mcu}
+  IO2:             {dir: in,  from: carrier/mcu}
   INST_5V_A:       {dir: in,  from: carrier/power-entry-instrument, figure: matrix-led-current}
   UMBILICAL_POS12: {dir: in,  from: module/umbilical-load-switch, figure: umbilical-current}
   PWR_GND:         {dir: ref, from: module/power-entry, figure: dig-gnd-topology}

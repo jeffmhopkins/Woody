@@ -24,6 +24,8 @@ a page written on a day when nothing could be verified; the gap list is
 
 ## Interfaces
 
+<!-- interfaces: carrier/mcu -->
+
 Every net that crosses this circuit's boundary. Quantities appear **only** as a
 citation into `config/figures.yaml` — this table names nodes, it does not
 restate values.

@@ -10,6 +10,11 @@ title: Breath ADC — schematic
 last_reviewed: '2026-09-21'
 depends_on:
 - adr:0003
+- circuit:carrier/mcu
+- circuit:carrier/power-entry-instrument
+- circuit:interfaces/breath-sense-link
+- circuit:interfaces/key-chain-loom
+- circuit:interfaces/spi-link
 - fig:breath-working-point
 - fig:loop-budget
 - fig:sensor-full-scale
@@ -19,7 +24,3 @@ depends_on:
 - refdes:R-ADCDIV-L
 - refdes:R-ADCDIV-U
 - refdes:U-ADC
-- circuit:carrier/power-entry-instrument
-- circuit:interfaces/breath-sense-link
-- circuit:interfaces/key-chain-loom
-- circuit:interfaces/spi-link

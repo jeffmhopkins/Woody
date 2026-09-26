@@ -20,7 +20,7 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| IO1, IO2 | in | `HDR-DEV` | — | High-impedance through the bootloader window; `R-LED-PD` is what holds them down in it |
+| IO1, IO2 | in | `carrier/mcu` through `HDR-DEV` | — | High-impedance through the bootloader window; `R-LED-PD` is what holds them down in it |
 | 5 V | in | `carrier/power-entry-instrument` | — | Buck A. The 74AHCT125's rail; TTL thresholds on this rail are why 3.3 V in reads high |
 | `J-LED-L` `DI`, `J-LED-R` `DI` | out | the two WS2815 strips | — | Through `R-LED-SER` |
 | `J-LED-L` `BI`, `J-LED-R` `BI` | ref | the head of each strip | — | A **ground** connection, not a driven one — see below |

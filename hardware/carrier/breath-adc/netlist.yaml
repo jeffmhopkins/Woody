@@ -9,11 +9,11 @@ page: ../carrier.md
 ports:
   SENSOR_BUFFERED_OUT: {dir: in,  from: carrier/breath-excitation-reference, figure: sensor-full-scale}
   AGND_INST:           {dir: ref, from: carrier/power-entry-instrument}
-  DEV_3V3:             {dir: in,  from: carrier/carrier}
-  IO35:                {dir: in,  from: carrier/carrier}
-  IO36:                {dir: in,  from: carrier/carrier}
-  IO37:                {dir: out, to: carrier/carrier}
-  IO39:                {dir: in,  from: carrier/carrier}
+  DEV_3V3:             {dir: in,  from: carrier/mcu}
+  IO35:                {dir: in,  from: carrier/mcu}
+  IO36:                {dir: in,  from: carrier/mcu}
+  IO37:                {dir: out, to: carrier/mcu}
+  IO39:                {dir: in,  from: carrier/mcu}
 
 components:
 

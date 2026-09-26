@@ -29,7 +29,7 @@ The `Dir` and `Peer` columns are defined once in
 | `DAC AVDD` | out | `module/dac8568`, `module/breath-receive-stage`, `module/breath-output-stage`, `interfaces/spi-link` | `dac-rail` | The LM317 output. Selected on the bench, per the figure's floor. **Not `module/digital-and-supervision`**, whose 74AHCT125 runs from bus `+5V` |
 | bus `+5V` after `FB4`/`C4` | out | `module/digital-and-supervision` | — | The level shifter only, and it is the one rail with no diode |
 | `+12V` ahead of `D1`/`D2` | out | `module/umbilical-load-switch` | — | The branch is taken **before** the diodes; `U-LOADSW`'s `VCC` and the top of `R-ILIM` hang off it |
-| `PWR_GND` | ref | `module/umbilical-load-switch`, `carrier/power-entry-instrument` | `umbilical-current` | The umbilical return, on its own copper to the star |
+| `PWR_GND` | ref | `module/umbilical-load-switch`, `carrier/power-entry-instrument`, `carrier/mcu`, `interfaces/spi-link` | `umbilical-current` | The umbilical return, on its own copper to the star |
 | `AGND_MOD` | ref | `module/dac8568`, `module/pitch-stage`, `module/breath-receive-stage`, `module/breath-output-stage`, `module/breath-response-shaper`, `module/mod-channels` | `dig-gnd-topology` | The module analog star. Where it returns is the disputed part — see the figure |
 | `DIG_GND` | ref | `module/digital-and-supervision`, `interfaces/spi-link` | `umbilical-pinmap`, `dig-gnd-topology` | `CS_MOD`'s return partner, down the umbilical. Where it ties is the disputed part — see the figure |
 | `FB1`–`FB4` | — | — | `ferrite-bias-impedance` | One bead per rail; the impedance each actually has under its own DC bias is the figure |

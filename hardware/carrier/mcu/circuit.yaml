@@ -6,7 +6,7 @@
 # before adding or trusting an edge here.
 #
 # THIS FILE DID NOT EXIST UNTIL 2026-09-26, and hardware/carrier/netlist.yaml
-# used the id `carrier/carrier` anyway - so the master's most-connected
+# used the id `carrier/mcu` anyway - so the master's most-connected
 # endpoint, 20 assertions with driver on 14 of them, was an id that existed in
 # exactly one file and in no circuit.yaml at all. Three cold slices arrived at
 # it independently. hardware/README.md's mechanical rule for a `circuit:` edge
@@ -18,14 +18,17 @@ title: Real-time carrier board — dev board, sockets and SPI egress
 last_reviewed: '2026-09-26'
 depends_on:
 - circuit:carrier/breath-adc
-- circuit:carrier/breath-excitation-reference
 - circuit:carrier/display-and-service-uart
 - circuit:carrier/led-strip-drive
 - circuit:carrier/power-entry-instrument
-- circuit:interfaces/breath-sense-link
 - circuit:interfaces/key-chain-loom
 - circuit:interfaces/spi-link
 - circuit:module/power-entry
+# NO EDGE to carrier/breath-excitation-reference or interfaces/breath-sense-link.
+# This circuit's page DRAWS their parts in §2 and declares them `foreign:` in
+# netlist.yaml, and hardware/README.md's rule builds a `circuit:` edge from the
+# Peer column - which does not name them, because nothing crosses this
+# circuit's boundary to reach them. Drawing a part is not depending on it.
 - fig:dig-gnd-topology
 - fig:key-pullup-qty
 - fig:matrix-led-current

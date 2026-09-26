@@ -17,11 +17,11 @@ title: Key chain loom (carrier end)
 page: key-chain-loom.md
 
 ports:
-  IO38:        {dir: in,  from: carrier/carrier}
-  IO7:         {dir: in,  from: carrier/carrier}
-  IO33:        {dir: in,  from: carrier/carrier}
-  IO40:        {dir: out, to: carrier/carrier}
-  DEV_3V3:     {dir: in,  from: carrier/carrier, figure: key-pullup-qty}
+  IO38:        {dir: in,  from: carrier/mcu}
+  IO7:         {dir: in,  from: carrier/mcu}
+  IO33:        {dir: in,  from: carrier/mcu}
+  IO40:        {dir: out, to: carrier/mcu}
+  DEV_3V3:     {dir: in,  from: carrier/mcu, figure: key-pullup-qty}
   CHAIN_SCK:   {dir: out, to: cluster/key-register, figure: chain-conductors}
   CHAIN_SHLD:  {dir: out, to: cluster/key-register, figure: chain-conductors}
   CHAIN_SER:   {dir: out, to: cluster/key-register, figure: chain-connectors}

@@ -25,8 +25,8 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| IO5, IO6 | in/out | `HDR-DEV` | — | UART1, out to the display board on `J-DISP`. **Far end undrawn** |
-| `U0TXD` (IO43), `U0RXD` (IO44) | in/out | `HDR-DEV` | — | The real-time board's console pair, to `HDR-SERVICE` and up `J-DISP` |
+| IO5, IO6 | in/out | `carrier/mcu` through `HDR-DEV` | — | UART1, out to the display board on `J-DISP`. **Far end undrawn** |
+| `U0TXD` (IO43), `U0RXD` (IO44) | in/out | `carrier/mcu` through `HDR-DEV` | — | The real-time board's console pair, to `HDR-SERVICE` and up `J-DISP` |
 | display board `U0TXD`, `U0RXD` | in/out | `HDR-SERVICE` | — | **Far end undrawn** — three of `HDR-SERVICE`'s six pins belong to a board with no page |
 | 5 V (or `+12V`) on `J-DISP` | in | `carrier/power-entry-instrument` | — | Buck B, and it leaves this circuit again on `J-DISP`. Which of the two rails it is depends on where buck B lives, which is open in `carrier.md` |
 | GND ×2 on `J-DISP` | ref | `carrier/power-entry-instrument` | `dig-gnd-topology` | The `PWR_GND` pour. One with the supply, one with the UART pairs |

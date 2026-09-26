@@ -13,10 +13,10 @@ title: Display loom and service header
 page: display-and-service-uart.md
 
 ports:
-  IO5:       {dir: in,  from: carrier/carrier}
-  IO6:       {dir: in,  from: carrier/carrier}
-  U0TXD:     {dir: in,  from: carrier/carrier}
-  U0RXD:     {dir: in,  from: carrier/carrier}
+  IO5:       {dir: in,  from: carrier/mcu}
+  IO6:       {dir: in,  from: carrier/mcu}
+  U0TXD:     {dir: in,  from: carrier/mcu}
+  U0RXD:     {dir: in,  from: carrier/mcu}
   INST_5V_B: {dir: in,  from: carrier/power-entry-instrument}
   PWR_GND:   {dir: ref, from: module/power-entry, figure: dig-gnd-topology}
 

@@ -11,6 +11,14 @@ last_reviewed: '2026-09-21'
 depends_on:
 - adr:0005
 - adr:0013
+- circuit:carrier/breath-adc
+- circuit:carrier/breath-excitation-reference
+- circuit:carrier/display-and-service-uart
+- circuit:carrier/led-strip-drive
+- circuit:carrier/mcu
+- circuit:interfaces/breath-sense-link
+- circuit:module/power-entry
+- circuit:module/umbilical-load-switch
 - fig:dig-gnd-topology
 - fig:matrix-led-current
 - fig:umbilical-current
@@ -26,9 +34,3 @@ depends_on:
 - refdes:L-BUCK-IN
 - refdes:MECH-GNDBOND
 - refdes:U-BUCK
-- circuit:carrier/breath-adc
-- circuit:carrier/breath-excitation-reference
-- circuit:carrier/display-and-service-uart
-- circuit:carrier/led-strip-drive
-- circuit:module/power-entry
-- circuit:module/umbilical-load-switch

@@ -118,20 +118,20 @@ nets:
   # the DAC8568 two metres away; only the chip selects differ, IO34 for the
   # module and IO39 for the ADC. IO34 is not here because it crosses no
   # boundary: it runs from the MCU pin to a series resistor that
-  # carrier/carrier also owns.
+  # carrier/mcu also owns.
 
   IO35:
     kind: signal
     domain: digital
     carries: "SPI2 SCK at the MCU pin, to the ADC and to the umbilical's series resistor"
-    driver: carrier/carrier
+    driver: carrier/mcu
     receivers: [carrier/breath-adc]
 
   IO36:
     kind: signal
     domain: digital
     carries: "SPI2 MOSI at the MCU pin, to the ADC and to the umbilical's series resistor"
-    driver: carrier/carrier
+    driver: carrier/mcu
     receivers: [carrier/breath-adc]
 
   IO37:
@@ -139,34 +139,34 @@ nets:
     domain: digital
     carries: "SPI2 MISO - the MCP3202's DOUT, and it never leaves the board"
     driver: carrier/breath-adc
-    receivers: [carrier/carrier]
+    receivers: [carrier/mcu]
 
   IO39:
     kind: signal
     domain: digital
     carries: "The MCP3202's own chip select. NOT CS_MOD, which leaves on J-UMB"
-    driver: carrier/carrier
+    driver: carrier/mcu
     receivers: [carrier/breath-adc]
 
   IO38:
     kind: signal
     domain: digital
     carries: "SPI3 SCK out of the MCU, into the chain's series resistor"
-    driver: carrier/carrier
+    driver: carrier/mcu
     receivers: [interfaces/key-chain-loom]
 
   IO7:
     kind: signal
     domain: digital
     carries: "SH/LD latch out of the MCU. A GLITCH HERE RELOADS ALL FOUR REGISTERS mid-shift and corrupts the whole 32-bit word"
-    driver: carrier/carrier
+    driver: carrier/mcu
     receivers: [interfaces/key-chain-loom]
 
   IO33:
     kind: signal
     domain: digital
     carries: "SER out of the MCU, riding every hop to the far device's serial input"
-    driver: carrier/carrier
+    driver: carrier/mcu
     receivers: [interfaces/key-chain-loom]
 
   IO40:
@@ -174,13 +174,13 @@ nets:
     domain: digital
     carries: "MISO into the MCU: the chain's QH, out of the nearest register"
     driver: interfaces/key-chain-loom
-    receivers: [carrier/carrier]
+    receivers: [carrier/mcu]
 
   DEV_3V3:
     kind: power
     carries: "The dev board's own LDO, the only 3V3 on the instrument"
     figure: key-pullup-qty
-    driver: carrier/carrier
+    driver: carrier/mcu
     receivers: [interfaces/key-chain-loom, carrier/breath-adc]
     note: "IT IS ALSO THE MCP3202'S REFERENCE, which is what makes the 24 pull-ups' static draw a live trade rather than a free one"
 
@@ -190,13 +190,13 @@ nets:
 
   # --- the carrier board's own supply tree -------------------------------
 
-  # --- the dev board's GPIO, where it leaves carrier/carrier ------------
+  # --- the dev board's GPIO, where it leaves carrier/mcu ------------
 
   IO1:
     kind: signal
     domain: digital
     carries: "LED data to the left WS2815 strip, ESP32 GPIO1 to the level shifter"
-    driver: carrier/carrier
+    driver: carrier/mcu
     receivers: [carrier/led-strip-drive]
     note: "HIGH-IMPEDANCE THROUGH THE BOOTLOADER WINDOW, which is why R-LED-PD exists: OE is tied low, so a floating AHCT input becomes clean 5 V edges into 25 addressable LEDs before any firmware runs"
 
@@ -204,7 +204,7 @@ nets:
     kind: signal
     domain: digital
     carries: "LED data to the right WS2815 strip, ESP32 GPIO2 to the level shifter"
-    driver: carrier/carrier
+    driver: carrier/mcu
     receivers: [carrier/led-strip-drive]
     note: "Same bootloader-window hazard as IO1"
 
@@ -212,7 +212,7 @@ nets:
     kind: signal
     domain: digital
     carries: "UART1 TX, real-time board to the display board on J-DISP"
-    driver: carrier/carrier
+    driver: carrier/mcu
     receivers: [carrier/display-and-service-uart]
 
   IO6:
@@ -220,13 +220,13 @@ nets:
     domain: digital
     carries: "UART1 RX, display board to the real-time board"
     external_driver: "the display board, which has no page in this corpus"
-    receivers: [carrier/carrier, carrier/display-and-service-uart]
+    receivers: [carrier/mcu, carrier/display-and-service-uart]
 
   U0TXD:
     kind: signal
     domain: digital
     carries: "The real-time board's console transmit, IO43, to HDR-SERVICE"
-    driver: carrier/carrier
+    driver: carrier/mcu
     receivers: [carrier/display-and-service-uart]
 
   U0RXD:
@@ -234,15 +234,15 @@ nets:
     domain: digital
     carries: "The real-time board's console receive, IO44, from HDR-SERVICE"
     external_driver: "whatever is plugged into the service header"
-    receivers: [carrier/carrier, carrier/display-and-service-uart]
+    receivers: [carrier/mcu, carrier/display-and-service-uart]
 
   INST_5V_A:
     kind: power
     carries: "Buck A, through D-USBOR onto the dev board's 5 V pin"
     figure: matrix-led-current
     driver: carrier/power-entry-instrument
-    receivers: [carrier/led-strip-drive, carrier/carrier]
-    note: "It reaches the 8x8 matrix through the dev board, so carrier/carrier is where it lands and HDR-DEV is the socket it lands through"
+    receivers: [carrier/led-strip-drive, carrier/mcu]
+    note: "It reaches the 8x8 matrix through the dev board, so carrier/mcu is where it lands and HDR-DEV is the socket it lands through"
 
   INST_5V_B:
     kind: power
@@ -314,16 +314,16 @@ nets:
     domain: digital
     carries: "SPI clock, instrument to module, through R-SPI-SER"
     figure: spi-series-r
-    driver: carrier/carrier
+    driver: carrier/mcu
     receivers: [interfaces/spi-link, module/digital-and-supervision]
-    note: "THE DRIVER IS THE DEV BOARD, not the link. R-SPI-SER and U-TVS-SPI are drawn on carrier.md and placed by carrier/carrier, and interfaces/spi-link is the connector and the cable in between - a pass-through, which this schema records as a receiver"
+    note: "THE DRIVER IS THE DEV BOARD, not the link. R-SPI-SER and U-TVS-SPI are drawn on carrier.md and placed by carrier/mcu, and interfaces/spi-link is the connector and the cable in between - a pass-through, which this schema records as a receiver"
 
   MOSI:
     kind: signal
     domain: digital
     carries: "SPI data, instrument to module"
     figure: spi-series-r
-    driver: carrier/carrier
+    driver: carrier/mcu
     receivers: [interfaces/spi-link, module/digital-and-supervision]
 
   CS_MOD:
@@ -331,7 +331,7 @@ nets:
     domain: digital
     carries: "Module chip select"
     figure: spi-series-r
-    driver: carrier/carrier
+    driver: carrier/mcu
     receivers: [interfaces/spi-link, module/digital-and-supervision]
 
   DIG_GND:
@@ -339,8 +339,8 @@ nets:
     carries: "Digital return, instrument to module"
     figure: dig-gnd-topology
     origin: module/power-entry
-    reference: [interfaces/spi-link, module/digital-and-supervision, carrier/carrier]
-    note: "carrier/carrier joined on 2026-09-26. Before that this net had NO INSTRUMENT END: spi-link netted J-UMB pin 8 and stopped, and nothing declared the far side, so CS_MOD's ground partner was open-circuit at the driving end. At the carrier it is one node with PWR_GND - that board has a single power ground pour"
+    reference: [interfaces/spi-link, module/digital-and-supervision, carrier/mcu]
+    note: "carrier/mcu joined on 2026-09-26. Before that this net had NO INSTRUMENT END: spi-link netted J-UMB pin 8 and stopped, and nothing declared the far side, so CS_MOD's ground partner was open-circuit at the driving end. At the carrier it is one node with PWR_GND - that board has a single power ground pour"
 
   UMBILICAL_POS12:
     kind: power
@@ -373,7 +373,7 @@ nets:
       - interfaces/spi-link
       - carrier/display-and-service-uart
       - carrier/led-strip-drive
-      - carrier/carrier
+      - carrier/mcu
     note: >
       The aluminium key plate bonds to this net through MECH-GNDBOND and NEVER
       to AGND, and carrier/power-entry-instrument is the only board that bond
