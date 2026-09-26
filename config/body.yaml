@@ -636,7 +636,7 @@ hardware:
     value: 3.0
     status: tbd
     source: "hardware/bom.csv MECH-BACKPLATE - aluminium or ply, thickness open"
-    decided_by: "M4; at the etherCON it must satisfy ethercon.max_panel_t"
+    decided_by: "M4, with the U-bolt bought: the plate spreads its nuts' clamp (mechanical/drc.echo, U-bolt nuts bear on the backplate)"
 
 # -------------------------------------------------------------- routing ----
 # THINGS THAT RUN THROUGH THE CAVITY (modelled 2026-09-26 for the clash
