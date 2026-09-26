@@ -16,7 +16,9 @@ depends_on:
 - fig:loop-budget
 - fig:spi-series-r
 - fig:umbilical-pinmap
-- refdes:HDR-DEV
+- refdes:CBL-UMB-PATCH
+- refdes:J-MCU
+- refdes:J-UMB
 - refdes:R-SPI-PULL
 - refdes:R-SPI-SER
 - refdes:U-TVS-SPI

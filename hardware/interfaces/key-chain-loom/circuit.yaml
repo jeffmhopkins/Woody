@@ -18,8 +18,8 @@ depends_on:
 - fig:key-pullup-qty
 - fig:marker-bits
 - refdes:F-CHAIN
-- refdes:HDR-DEV
 - refdes:J-CHAIN
+- refdes:J-MCU
 - refdes:LK-SER
 - refdes:R-CHAIN-SER
 - refdes:R-SER-TERM

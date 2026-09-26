@@ -2,8 +2,9 @@
 
 **Status:** Split out of `carrier.md` 2026-09-21 (Phase B). Every line below was
 moved verbatim; nothing was reworded and no value was touched in the move. The
-board-level context this circuit sits in — the one dev-board socket, the block
-diagram, the board outline — stays on [`carrier.md`](../carrier.md).
+board-level context this circuit sits in — the dev board's connector `J-MCU`,
+the umbilical's `J-UMB`, the block diagram, the board outline — stays on
+[`carrier.md`](../carrier.md).
 
 > **One buck, not two (2026-09-26, ADR 0015).** The second regulator ("buck
 > B") fed the display board, which was removed; its row, its diode, its
@@ -25,7 +26,7 @@ The `Dir` and `Peer` columns are defined once in
 | `PWR_GND` at `J-UMB` | ref | `module/power-entry` | `umbilical-pinmap` | This board's only supply return, down the umbilical to the module star |
 | `+12V` strip feed | out | `carrier/led-strip-drive` | — | Taken direct off the input node. `C-STRIP-BULK` is this circuit's part. **The same net as the row above** — `D-REVSHUNT` is a shunt and `D-TVS-PWR` a clamp, so nothing is in series between `J-UMB` pin 3 and this tap |
 | `+12V` analog | out | `carrier/breath-excitation-reference` | — | REF5050 `VIN`, and the V+ of both OPA2197 halves. **Also the same net**, for the same reason |
-| 5 V, buck A | out | `HDR-DEV`, `carrier/led-strip-drive` | `matrix-led-current` | Through `D-USBOR` onto the dev board's 5 V pin, and on to the 74AHCT125 |
+| 5 V, buck A | out | `J-MCU`, `carrier/led-strip-drive` | `matrix-led-current` | Through `D-USBOR` and `J-MCU`, down one conductor of `CBL-MCU-RIBBON` onto the dev board's 5 V pad, and on to the 74AHCT125 |
 | `PWR_GND` pour | ref | `carrier/service-uart`, `carrier/led-strip-drive`, `carrier/carrier` | `dig-gnd-topology` | The whole board returns here, and the aluminium key plate through `MECH-GNDBOND`, which can only originate here. **`carrier/breath-adc` and `carrier/breath-excitation-reference` are no longer listed**: both of those pages say their return is `AGND_INST`, which reaches this pour on the **single tie** and is a different node everywhere else — and that distinction is the whole point of the star |
 
 ## §1 Power entry

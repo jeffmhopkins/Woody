@@ -9,9 +9,9 @@ blocked from this sandbox. Read it as a proposal with its uncertainties marked,
 not as a design.
 
 The instrument's support circuits. They have no MCU (ADR 0013): a Waveshare
-ESP32-S3-Matrix connects to them by a soldered pigtail, the Matrix sitting
-under its window at the tail (§7), and everything else here is passive, slow,
-or analog.
+ESP32-S3-Matrix on the lid, under its window at the tail (§7), connects to
+them by a flat ribbon soldered to its pad rows and plugged into `J-MCU` on
+this board (ADR 0017), and everything else here is passive, slow, or analog.
 
 > **There is no carrier board (owner, 2026-09-26).** These circuits are built
 > on **the main board** (ADR 0017): one long board at the thumb level that
@@ -36,7 +36,8 @@ a page written on a day when nothing could be verified; the gap list is
 
 **There is one dev board, the ESP32-S3-Matrix, and one regulator** (owner,
 2026-09-26, ADR 0015: the display board was removed, and the 8×8 matrix is the
-instrument's only display). This page draws its one socket pair.
+instrument's only display). This page draws its one connector, `J-MCU`, and
+the ribbon to it (*The Matrix and the umbilical at the tail end*, below).
 
 ---
 
@@ -45,10 +46,10 @@ instrument's only display). This page draws its one socket pair.
 ```
                               TAIL FACE
    ┌─────────────────────────────────────────────────────────────┐
-   │  etherCON (on the plate stack, NOT on this PCB — ADR 0009)  │
-   │  USB-C slot ── aligned to the dev board's own connector     │
+   │  etherCON J-UMBILICAL, in the tail cap, NOT on this PCB     │
+   │  USB-C receptacle ── CBL-USB-EXT to the Matrix's own port   │
    └──────────────┬──────────────────────────────────────────────┘
-                  │ 8 conductors, T568B pairs (ADR 0004)
+                  │ CBL-UMB-PATCH, straight: 8 conductors, T568B pairs (ADR 0004)
                   │
    ┌──────────────▼──────────────────────────────────────────────────────┐
    │ J-UMB   1 BREATH   2 AGND   3 +12V   6 PWR_GND   4 SCLK   5 MOSI      │
@@ -64,8 +65,8 @@ instrument's only display). This page draws its one socket pair.
                5V ───────────────┤                     │
                                  │                     │
        ┌─────────────────────────▼─────────────────────▼──────────────┐
-       │              HDR-DEV  —  ESP32-S3-Matrix socket              │
-       │   5V GND 3V3 | IO7 IO6 IO5 IO4 IO3 IO2 IO1  (IO2 IO5 IO6 spare)│
+       │  J-MCU — CBL-MCU-RIBBON to the ESP32-S3-Matrix, on the lid   │
+       │   5V GND 3V3 | IO7 … IO1  (IO2–IO6 spare)                    │
        │   IO33 … IO40 | IO43 IO44                                    │
        │   (onboard: IMU GPIO10-13, 8×8 matrix GPIO14, USB GPIO19/20) │
        └──┬──────┬──────────┬────────────┬───────────┬────────────────┘
@@ -92,7 +93,7 @@ moved verbatim to
 
 ## §2 Analog front end — sensor, reference, buffer, ADC
 
-*Connectivity for **this board itself** — the dev board, its sockets and the
+*Connectivity for **this board itself** — the dev board, `J-MCU` and the
 SPI egress in §4 — is [`netlist.yaml`](netlist.yaml), beside this page. The
 analog front end drawn below is **three other circuits' parts**, declared
 `foreign:` there and netlisted in
@@ -260,10 +261,12 @@ the WS2815 `V_IH`/`BI` argument — moved verbatim to
 > **Superseded 2026-09-26: the matrix is on the TOP face** (owner, ADR 0009).
 > The ESP32-S3-Matrix is **not on a carrier at all**: it sits face up
 > against the oak top under a window at the tail, wired to the main board
-> by a soldered pigtail (ADR 0009, `mechanical/DESIGN.md`), so there is no
-> cutout to argue about and the underside mounting below is not needed.
-> `mechanical/renders/centre-board.png` shows where the circuits went.
-> Kept as the record of the arithmetic that was.
+> by a ribbon soldered to its pad rows and plugged into `J-MCU` (ADR 0017,
+> *The Matrix and the umbilical at the tail end* below), so there is no
+> cutout to argue about and the underside mounting below is not needed. Its
+> USB-C port reaches the tail face through `CBL-USB-EXT`, so no board edge
+> has to align with a slot either. `mechanical/renders/main-board.png` shows
+> where the circuits went. Kept as the record of the arithmetic that was.
 
 **Proposed: mount the ESP32-S3-Matrix on the carrier's *underside*, LED face
 outward, and delete the cutout.** ADR 0009 and ADR 0014 both name underside
@@ -297,6 +300,88 @@ paper check at M4, and the ROADMAP already lists it.
 
 ---
 
+## The Matrix and the umbilical at the tail end
+
+Two connectors on this board's tail end, one for each thing that is not on it
+(owner, 2026-09-26, ADR 0017; `mechanical/DESIGN.md`, clash list item 5;
+`mechanical/renders/breakdown-tail-wiring.png`):
+
+```
+  ON THE LID                                  IN THE TAIL CAP
+  U-MCU-RT  ESP32-S3-Matrix                   J-UMBILICAL  etherCON, a feedthrough
+    two pad rows, ten pads each                 rear RJ45 socket
+        │                                           │
+        │ CBL-MCU-RIBBON                            │ CBL-UMB-PATCH
+        │ soldered to the pads                      │ straight, pin N to pin N,
+        │                                           │ S-bend at its minimum bend radius
+        ▼                                           ▼
+  J-MCU  2 × 10, 1.27 mm ──── main board, tail end ──── J-UMB  8-way, latching
+```
+
+**`J-MCU` replaces the dev-board sockets.** The Matrix is on the lid, so it
+cannot plug into this board; its ribbon is soldered to its pad rows and
+plugs in here, and it unplugs when the lid comes off. A dead Matrix is
+still a bench job and not a strip-down: unplug `J-MCU`, take the lid off,
+desolder the ribbon from the pad rows and solder it to the replacement —
+nothing on this board is touched. The ribbon's length is `mechanical/drc.echo`
+*"Matrix ribbon length"* plus build slack; the builder's notes are on the
+`CBL-MCU-RIBBON` row.
+
+**Twenty conductors, and the Matrix has one ground pad.** Fifteen are fixed by
+[`netlist.yaml`](netlist.yaml): the twelve GPIO the instrument uses, 5V, 3V3
+and GND. The pad rows carry three power pads and seventeen GPIO, and only one
+of the power pads is ground `[repo] datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-pinout.png`
+(`5V GND 3V3 GP7…GP1 | GP33…GP40 TX RX`). So the other five are **open**:
+
+- **the spare GPIO pads, IO2–IO6** — ADR 0009's spare conductors reach this
+  board, and one conductor returns the Matrix's LED current and every signal;
+- **five more grounds** — what ADR 0017's "six grounds" needs. They have to be
+  soldered to ground points on the Matrix off its pad rows, and the ribbon
+  then carries no spares.
+
+**What decides it:** M4 with the Matrix in hand (where a ground can be
+soldered), and E11 — breath output clean while the matrix is exercised. The
+reason it reaches the breath channel: the Matrix's 3V3 is the MCP3202's
+reference (`carrier/breath-adc`), regulated against the *Matrix's* ground, so
+LED return current in the ribbon's ground conductor moves that reference
+against this board's. `[calc]`, on `[from memory]` inputs — a 0.635 mm-pitch
+ribbon conductor is ~30 AWG, ~0.34 Ω/m; the length is illustrative, not the
+model's:
+
+```
+100 mm × 0.34 Ω/m          = 34 mΩ per ground conductor
+100 mA of LED current      → 3.4 mV of ground shift
+3.4 mV / 3.3 V × 4096      = 4.2 LSB on the breath ADC, moving with the display
+```
+
+Six grounds in parallel divide that by six. Whatever the allocation, `J-MCU`
+should put a ground between the SPI clock (`IO35`) and the chain clock
+(`IO38`).
+
+**`J-UMB` is where the umbilical reaches this board.** `J-UMBILICAL` is a
+feedthrough, and `CBL-UMB-PATCH` runs straight from its rear RJ45 socket to
+`J-UMB`, pin N to pin N — so every "`J-UMB` pin N" on these pages is this
+board's connector *and* the same conductor as the etherCON's pin N, and the
+pin map is `umbilical-pinmap` either way. `J-UMB` sits as far in as the
+patch lead's bend needs (`mechanical/drc.echo` *"J-UMB on the main board, the
+patch lead at its bend radius"*). The clamps and the reverse shunt drawn "at
+the connector" on these pages are at `J-UMB`. Its contacts must be rated
+above the module's current limit (`R-ILIM`,
+[`umbilical-load-switch`](../module/umbilical-load-switch/umbilical-load-switch.md)),
+not only `umbilical-current`: a short is carried at the limit until the load
+switch times out.
+
+**Netlisted where the connector's pin map is.** `J-MCU` is in this board's
+[`netlist.yaml`](netlist.yaml), in series with every Matrix net. `J-UMB` is in
+[`../interfaces/spi-link/netlist.yaml`](../interfaces/spi-link/netlist.yaml)
+beside both etherCONs, because it carries the umbilical's pin map and all
+eight of its nets; the carrier's nets reach it as that circuit's ports, as
+they reached the etherCON before. Neither cable is a component: each is
+straight, with no pin map of its own, so each connector pin shares a net with
+the pin at the cable's other end.
+
+---
+
 ## Component table
 
 Existing BOM rows are named as they stand; **proposed** rows are new to this
@@ -304,8 +389,11 @@ page and have no BOM entry yet.
 
 | Ref | Value | Job | Confidence |
 |---|---|---|---|
-| `U-MCU-RT` | ESP32-S3-Matrix | The instrument. Socketed on `HDR-DEV` | `[repo]` |
-| `HDR-DEV` | 2 × 10-way machined socket | **One board's worth** — there is one dev board (ADR 0015) | `[board-def]` for the pin count |
+| `U-MCU-RT` | ESP32-S3-Matrix | The instrument. On the lid, not on this board; wired by `CBL-MCU-RIBBON` | `[repo]` |
+| `J-MCU` | 2 × 10, 1.27 mm shrouded box header, right-angle | The Matrix's connector, at the tail end. **Five of its twenty positions open** — see *The Matrix and the umbilical at the tail end* | `[from memory]`; part **open**, M4 |
+| `CBL-MCU-RIBBON` | 20-way flat ribbon, 0.635 mm | Soldered to the Matrix's pad rows, IDC socket into `J-MCU` | `[repo]` pad map; `[from memory]` ribbon; **open**, M4 |
+| `J-UMB` | 8-way latching wire-to-board header | Where the umbilical reaches this board; `interfaces/spi-link`'s row | `[from memory]`; part **open**, M4 |
+| `CBL-UMB-PATCH` | Short Cat5e/Cat6 patch lead, RJ45 to crimp housing | etherCON rear socket to `J-UMB`, straight; `interfaces/spi-link`'s row | `[from memory]`; **open**, M4 |
 | ~~`U-KEYS`, `R-KEY-PU`, `R-KEY-SER`, `C-KEY`, `C-DECOUPLE-165`~~ | — | **Not on this board.** 4 ICs and 63 passives moved to `PCB-CLUSTER` with ADR 0001's per-cluster decision. They are still in the BOM, against the cluster boards | `[repo] 0001, bom.csv` |
 | **`R-CHAIN-SER`** ×3 | **100 Ω** | **Proposed — series at the driving end on `SCK`, `SH/LD` and `SER`. ADR 0001 deleted `R-TERM-CHAIN` because series termination is wrong for a line that drops on four boards; this is edge-rate damping at the source, which is a different job and survives that argument** | proposed |
 | **`U-TVS-CHAIN`** | **4-ch array, SOT-23-6** | **Proposed — the chain's four signals leave the board and run the body. `U-TVS-SPI` does exactly this for the umbilical's three** | proposed |
@@ -333,46 +421,24 @@ buffer and the other is the breath buffer.*
 
 ---
 
-## Loom conductor count
+## What plugs into this board
 
-`[calc]`, built from the repo's own rules — **not** the "~23" that ADR 0001,
-`WIRE-LOOM` and the ROADMAP all carry `[repo]`:
+**There are no internal looms** (ADR 0017). The key chain is flat flex
+ribbon, the LED strip is on this board (ADR 0016), the console is a header on
+it, and power arrives down the umbilical. What terminates here:
 
-| | Conductors |
-|---|---|
-| Chain signals: `SCK`, `SH/LD`, `SER`, `QH` | 4 |
-| Grounds, alternating — one between every pair, **decided** | 5 |
-| Chain supply: 3V3 | 1 |
-| Two spare conductors (ADR 0009) | 2 |
-| **Key loom, all four clusters, chained — `J-CHAIN` is 2×6** | **12** |
-| WS2815: 12 V, GND, `DI`, `BI` to ground — one strip, on this board (ADR 0016) | 4 |
-| Plate ground bond | 1 |
-| **Terminating on this board, excluding the umbilical** | **~18** |
-| Umbilical (`J-UMB`) | 8 |
+| From | Conductors | Connector |
+|---|---|---|
+| The two key boards, by flat flex ribbon | the key-chain flat flex row in `hardware/interfaces/key-chain-loom/bom.csv`; the count is `chain-connectors`, blocked on that rework | ZIF, `hardware/interfaces/key-chain-loom/` |
+| The Matrix, on the lid | 20 | `J-MCU` |
+| The umbilical, from the tail cap | 8 | `J-UMB` |
+| WS2815 strip — on this board (ADR 0016): 12 V, GND, `DI`, `BI` to ground | 4 | `J-LED` |
+| The console | 3 | `HDR-SERVICE` |
+| The key plate's ground bond | 1 | `MECH-GNDBOND` |
 
-**The first draft of this table said ~53 and called the repo's "~23" wrong.**
-`[repo] 0001, WIRE-LOOM, ROADMAP` That was the tail-register arithmetic — 35
-conductors of key loom, one per switch. **On the per-cluster topology the
-repo's figure is approximately right after all**, and this page withdraws the
-objection. ~18 against ~23, since the display loom went with the display
-board (ADR 0015) and the second strip went with ADR 0016.
-
-**Termination is not the problem.** `[calc]` As IDC boxed headers, ~20
-conductors occupy roughly 170 mm² including keepout (250 mm² × 20/29). Even
-single-row 2.54 mm headers would fit — 20 × 2.54 = 51 mm of board edge — though IDC is still the right choice for a
-loom that is hand-terminated once and then closed up.
-
-**Where they go was the problem, and the body CAD has answered it.** There is
-no side strip since ADR 0016: the one strip lies on the main board itself
-(ADR 0017), and the board's outline and what it keeps from everything else
-are derived in `mechanical/` — `mechanical/drc.echo` "main board (derived)"
-gives the size.
-
-**But the per-cluster decision bought real room here**, which is worth saying
-because the width crunch was one of the arguments in play: the channels now
-carry **one 8–11 way loom instead of four ribbons totalling 40–56 mm of
-width** `[repo] 0001`. That is the difference between a narrower carrier being
-a sacrifice and it being an ordinary trade.
+The Matrix and the umbilical are the section above. The board's outline and
+what it keeps clear of are derived in `mechanical/` — `mechanical/drc.echo`
+"main board (derived)" gives the size.
 
 ---
 
@@ -380,9 +446,12 @@ a sacrifice and it being an ordinary trade.
 
 Ordered by what blocks what. The first four block layout.
 
-- **Which face of the dev board carries the matrix, and its outline and header
-  row spacing** (§7). Decides underside-mount versus a ~22 mm cutout, and with
-  it the whole board's routing.
+- **The Matrix ribbon's last five conductors**: five more grounds or the spare
+  GPIO IO2–IO6 (*The Matrix and the umbilical at the tail end*). Decides
+  `J-MCU`'s pinout. Decided at M4 with the Matrix in hand, checked by E11.
+- **`J-MCU`, `J-UMB` and their mates are envelopes, not parts** — the
+  envelopes in `config/body.yaml` are `[from memory]`. Decided at M4 with the
+  parts; `J-UMB`'s contacts against `R-ILIM`, not only `umbilical-current`.
 - **The board outline** is now derived by the body CAD (the main board,
   ADR 0017, `mechanical/DESIGN.md`), with the strip on it (ADR 0016). What is still open
   is the routing inside that outline.
@@ -403,9 +472,11 @@ Ordered by what blocks what. The first four block layout.
 > unretrofittable, both still have to be told to firmware, and neither is any
 > less urgent — they are just not on this board's critical path. They are now
 > on `hardware/cluster/cluster-boards.md`, which proposes an answer to both.
-- **The etherCON variant at the instrument end** `[repo] 0004`, which decides
-  whether this board carries an RJ45 jack footprint (~16 × 14 mm, not in the
-  BOM) or eight wires. ADR 0004 defers it to E12/M7, which is after E13.
+- **The etherCON variant at the instrument end** `[repo] 0004`, deferred by
+  ADR 0004 to E12/M7. It no longer decides this board's footprint — that is
+  `J-UMB` either way — but `CBL-UMB-PATCH`'s plug end assumes a feedthrough
+  with an RJ45 socket at the back, as the body model draws the NE8FDP. A
+  variant without one changes the patch lead, not this board.
 - **The breath trap "clearable without disassembly"** (ADR 0003). The sensor
   is reached with the lid off and replaced with an iron (`breath-sense-link.md`,
   *Mounting*); the trap is a separate question, decided with the trap's own

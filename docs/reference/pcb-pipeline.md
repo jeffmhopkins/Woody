@@ -70,7 +70,7 @@ each table row names the drawing's spelling beside the qualified one.
 | `BREATH` | the in-amp input | the output jack | `BREATH_SENSE` / `BREATH_OUT` |
 | `SCLK` | the umbilical conductor from the MCU | **the 74AHCT125's OUTPUT, on the same page's own table** | `SCLK` / `SCLK_DAC` |
 | `OE` | the module's `74AHCT125` output enable, tied to `GND` (`hardware/module/digital-and-supervision/digital-and-supervision.md`) | the carrier's LED-buffer output enable, tied low (`hardware/carrier/led-strip-drive/led-strip-drive.md`) | `OE_MOD` / `OE_INST` |
-| `CS` | the umbilical SPI chip select, `HDR-DEV` IO34 → `J-UMB` pin 7 → the DAC (`hardware/interfaces/spi-link/spi-link.md`) | the MCP3202's board-local chip select, IO39, which never leaves the carrier (`hardware/carrier/breath-adc/breath-adc.md`) | `CS_MOD` / `CS_ADC` |
+| `CS` | the umbilical SPI chip select, `J-MCU` IO34 → `J-UMB` pin 7 → the DAC (`hardware/interfaces/spi-link/spi-link.md`) | the MCP3202's board-local chip select, IO39, which never leaves the carrier (`hardware/carrier/breath-adc/breath-adc.md`) | `CS_MOD` / `CS_ADC` |
 
 **Three cold reviewers found the first two independently**; `OE` and `CS` came
 out of the pre-merge wave, and `SCLK` out of the fix for it.

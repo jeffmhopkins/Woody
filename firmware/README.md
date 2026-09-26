@@ -88,8 +88,8 @@ actually measure — and never leaves the instrument.
 ## The instrument must stay recoverable
 
 The body comes apart on six fasteners (ADR 0009), but answering a failed
-flash that way means lifting the lid, disturbing the loom and re-laying the
-gasket. Everything here exists so that it never has to be the answer.
+flash that way means lifting the lid, unplugging the Matrix's ribbon and the
+key boards' ribbons from the main board (ADR 0017), and re-laying the gasket. Everything here exists so that it never has to be the answer.
 
 - **Two app partitions, with `CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE`.** There
   is no OTA — no radio — but an image flashed over USB into the inactive slot

@@ -12,5 +12,5 @@ depends_on:
 - adr:0009
 - adr:0015
 - fig:dig-gnd-topology
-- refdes:HDR-DEV
 - refdes:HDR-SERVICE
+- refdes:J-MCU

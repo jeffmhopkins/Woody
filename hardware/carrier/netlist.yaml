@@ -1,10 +1,17 @@
 # AUTHORITATIVE for connectivity of the CARRIER BOARD ITSELF - the dev board,
-# its sockets, and the SPI egress drawn in carrier.md §4.
+# its connector J-MCU, and the SPI egress drawn in carrier.md §4.
 #
 # THIS FILE SITS AT hardware/carrier/, not in a circuit directory, because
 # carrier.md is the board page rather than a circuit page: its bom.csv
-# fragment holds the dev board, the sockets, the PCB and the loom, and its
+# fragment holds the dev board, its ribbon and connector, and the PCB, and its
 # drawings show four OTHER circuits' parts for context.
+#
+# THE RIBBON IS NOT A COMPONENT. U-MCU-RT is on the lid and CBL-MCU-RIBBON is
+# soldered to its pad rows and plugged into J-MCU on the main board: one
+# conductor per pad, straight, with no pin map of its own. So each Matrix pin
+# and its J-MCU pin are ONE NET here, exactly as interfaces/spi-link treats
+# the umbilical cable. J-MCU's pins are named by the conductor they carry,
+# because its numbering is open with the ribbon's allocation (CBL-MCU-RIBBON).
 #
 # §2's ANALOG FRONT END IS NOT HERE. The reference, the buffer, the sensor and
 # the ADC are drawn on this page and owned by carrier/breath-excitation-
@@ -59,11 +66,13 @@ components:
     value: "ESP32-S3-Matrix"
     pins: [IO1, IO7, IO33, IO34, IO35, IO36, IO37, IO38, IO39,
            IO40, IO43, IO44, P3V3, P5V, GND]
-    note: "SOCKETED, NOT SOLDERED, which is HDR-DEV's whole rule. Its own LDO is the instrument's only 3V3, and EN and IO0 are NOT on its headers - IO0 is under the BOOT button and EN is on the reset circuit, so reaching either ends the board's life as a swappable module. IO5 and IO6 are SPARE (ADR 0015), and IO2 (ADR 0016)"
+    note: "On the lid, wired by CBL-MCU-RIBBON soldered to its pad rows. Its own LDO is the instrument's only 3V3, and EN and IO0 are NOT on its pad rows - IO0 is under the BOOT button and EN is on the reset circuit. IO2 to IO6 are SPARE (IO5 and IO6 since ADR 0015, IO2 since ADR 0016; IO3 and IO4 have no assignment). Its single GND pad is the only ground on its pad rows"
 
-  HDR-DEV:
-    value: "2.54mm female header strip"
-    note: "SOCKETS, NOT SOLDER-DOWN. Four strips for one dev board, which is why the instance count reads HDR-DEV 1/4: one mating part, four pieces bought. Every U-MCU-RT pin above lands through them, so they carry no net of their own and declare no pins"
+  J-MCU:
+    value: "2x10 1.27mm shrouded box header"
+    pins: [IO1, IO7, IO33, IO34, IO35, IO36, IO37, IO38, IO39,
+           IO40, IO43, IO44, P3V3, P5V, GND]
+    note: "The Matrix's ribbon lands here. Fifteen conductors are fixed and netted below; the other five of its twenty positions are OPEN - five more grounds or the spare GPIO IO2-IO6, decided with CBL-MCU-RIBBON - and are not netted until that is decided, because a net here asserts a connection"
 
   R-SPI-SER-SCLK:
     of: R-SPI-SER
@@ -98,11 +107,13 @@ nets:
 
   IO35:
     - U-MCU-RT.IO35
+    - J-MCU.IO35
     - R-SPI-SER-SCLK.1
     - port: IO35
 
   IO36:
     - U-MCU-RT.IO36
+    - J-MCU.IO36
     - R-SPI-SER-MOSI.1
     - port: IO36
 
@@ -110,6 +121,7 @@ nets:
   # no boundary, so it is not in hardware/nets.yaml.
   IO34:
     - U-MCU-RT.IO34
+    - J-MCU.IO34
     - R-SPI-SER-CS.1
 
   SCLK:
@@ -130,58 +142,70 @@ nets:
   IO37:
     - port: IO37
     - U-MCU-RT.IO37
+    - J-MCU.IO37
 
   IO39:
     - U-MCU-RT.IO39
+    - J-MCU.IO39
     - port: IO39
 
   # --- the cluster chain ---------------------------------------------
 
   IO38:
     - U-MCU-RT.IO38
+    - J-MCU.IO38
     - port: IO38
 
   IO7:
     - U-MCU-RT.IO7
+    - J-MCU.IO7
     - port: IO7
 
   IO33:
     - U-MCU-RT.IO33
+    - J-MCU.IO33
     - port: IO33
 
   IO40:
     - port: IO40
     - U-MCU-RT.IO40
+    - J-MCU.IO40
 
   # --- the LED strip ---------------------------------------------------
 
   IO1:
     - U-MCU-RT.IO1
+    - J-MCU.IO1
     - port: IO1
 
   # --- the service header ----------------------------------------------
 
   U0TXD:
     - U-MCU-RT.IO43
+    - J-MCU.IO43
     - port: U0TXD
 
   U0RXD:
     - port: U0RXD
     - U-MCU-RT.IO44
+    - J-MCU.IO44
 
   # --- supply ----------------------------------------------------------
 
   INST_5V_A:
     - port: INST_5V_A
     - U-MCU-RT.P5V
+    - J-MCU.P5V
 
   DEV_3V3:
     - U-MCU-RT.P3V3
+    - J-MCU.P3V3
     - port: DEV_3V3
 
   PWR_GND:
     - port: PWR_GND
     - U-MCU-RT.GND
+    - J-MCU.GND
     - U-TVS-SPI.GND
 
   # The fourth clamp channel has no fourth signal: J-UMB pin 8 is DIG_GND,

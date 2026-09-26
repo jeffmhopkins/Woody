@@ -35,17 +35,52 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | End | Dir | Peer | Figure | Note |
 |---|---|---|---|---|---|
-| `SCLK` | instrument → module | out | `HDR-DEV` IO35 → `module/digital-and-supervision` | `umbilical-pinmap`, `spi-series-r` | On `J-UMB`. Series resistor at the driving end, pulled **down** on both sides of the buffer. Shares a pair with `MOSI`. **Not `SCLK_DAC`**, which is the buffer's output |
-| `MOSI` | instrument → module | out | `HDR-DEV` IO36 → `module/digital-and-supervision` | `umbilical-pinmap`, `spi-series-r` | On `J-UMB`. Pulled **down**, both sides. Sampled only on a `SCLK` edge, which is why it shares that pair |
-| `CS_MOD` | instrument → module | out | `HDR-DEV` IO34 → `module/digital-and-supervision` | `umbilical-pinmap`, `spi-series-r` | On `J-UMB`. Pulled **up**, both sides. The one that must not glitch. Shares a pair with `DIG_GND`. **Not `CS_ADC`**, the MCP3202's, which never leaves the carrier |
+| `SCLK` | instrument → module | out | `J-MCU` IO35 → `module/digital-and-supervision` | `umbilical-pinmap`, `spi-series-r` | On `J-UMB`. Series resistor at the driving end, pulled **down** on both sides of the buffer. Shares a pair with `MOSI`. **Not `SCLK_DAC`**, which is the buffer's output |
+| `MOSI` | instrument → module | out | `J-MCU` IO36 → `module/digital-and-supervision` | `umbilical-pinmap`, `spi-series-r` | On `J-UMB`. Pulled **down**, both sides. Sampled only on a `SCLK` edge, which is why it shares that pair |
+| `CS_MOD` | instrument → module | out | `J-MCU` IO34 → `module/digital-and-supervision` | `umbilical-pinmap`, `spi-series-r` | On `J-UMB`. Pulled **up**, both sides. The one that must not glitch. Shares a pair with `DIG_GND`. **Not `CS_ADC`**, the MCP3202's, which never leaves the carrier |
 | `DIG_GND` | instrument ↔ module | ref | `carrier/carrier.md` ↔ `module/power-entry` | `umbilical-pinmap`, `dig-gnd-topology` | On `J-UMB`. `CS_MOD`'s return partner. Where it ties is the disputed figure, not a fact either end settles |
 | `U-TVS-SPI` | instrument | — | — | — | This circuit's own part: on all three signals, to `PWR_GND`, at the connector |
+| `J-UMB`, `CBL-UMB-PATCH` | instrument | — | — | `umbilical-pinmap` | This circuit's own parts: the umbilical's connector on the main board and the straight patch lead to it from the etherCON's rear socket. See *The instrument's connector*, below |
 | `MISO` | instrument | — | `carrier/breath-adc` | — | IO37 is the MCP3202's `DOUT` and **never leaves the board**. ADR 0004 deleted `MISO` from the umbilical, which is why nothing reads the DAC back |
 | SPI2 host | instrument | — | `carrier/breath-adc`, `module/dac8568` | `loop-budget` | One host, two devices, two clocks. The ADC's limit is a fact about a part on the instrument board that constrains the link's budget |
 | `SCLK_DAC`, `DIN`, `SYNC` | module | — | `module/digital-and-supervision` → `module/dac8568` | — | **Not sourced here.** The 74AHCT125 is on `module/digital-and-supervision`, which owns that row; these three are a module-board net and do not cross the umbilical. The DAC-side three of the six `R-SPI-PULL` — this circuit's `bom.csv` — sit on them |
 | `DAC AVDD` | module | in | `module/power-entry` | `dac-rail` | What the DAC-side `CS` pull returns to, **not** bus `+5V`: on the bus rail a reversed ribbon reaches the DAC's `SYNC` pin. See this circuit's `bom.csv` |
 | bus `+5V` after `FB4`/`C4` | module | — | `module/power-entry` → `module/digital-and-supervision` | — | Supplies the 74AHCT125 and nothing else, and reaches no part of this circuit. **Open**, and the item stayed on `module/digital-and-supervision` because it is a rail and connector question about that board, not about this link |
 | `OE_MOD` ×4 | module | — | `module/digital-and-supervision` | — | The module buffer's four enables, tied to `GND` and permanently enabled. On that circuit's part, so they reach nothing here; the circuit that used to gate them, `module/link-supervision`, is not fitted. **Not `OE_INST`** |
+
+## The instrument's connector — `J-UMB` and the patch lead
+
+*Added 2026-09-26 with ADR 0017; not part of the verbatim consolidation below.*
+
+The etherCON at the instrument end, `J-UMB-INST` in
+[`netlist.yaml`](netlist.yaml), is in the tail cap and is a feedthrough: its
+back is an RJ45 socket. `CBL-UMB-PATCH` runs from that socket to **`J-UMB`**
+on the main board's tail end, straight, pin N to pin N. So:
+
+- **"`J-UMB` pin N" on every instrument page is the main board's connector,
+  and the same conductor as the etherCON's pin N.** The pin map is
+  `umbilical-pinmap` at every connector in the chain, and the patch lead has
+  none of its own to get wrong — the same argument this circuit makes for
+  `CABLE-UMB`.
+- **The pairs stay twisted to the housing.** The pairing is the argument on
+  this page, and the patch lead is the last stretch of the same line; a few
+  millimetres untwisted at the housing is all a crimp needs.
+- **`J-UMB` sits where the lead's minimum bend radius lands it**
+  (`mechanical/drc.echo` *"J-UMB on the main board, the patch lead at its bend
+  radius"*), and the clamps drawn "at the connector" — `U-TVS-SPI` here,
+  `D-REVSHUNT` and `D-TVS-PWR` on
+  [`power-entry-instrument`](../../carrier/power-entry-instrument/power-entry-instrument.md) — are at `J-UMB`.
+- **Its contacts are rated against the module's current limit** (`R-ILIM`),
+  not only `umbilical-current`, because a short is carried at the limit until
+  the load switch times out.
+
+**Netlisted here, beside both etherCONs**, because it carries this circuit's
+pin map and all eight of its nets: each net is `J-UMB`, `J-UMB-INST` and
+`J-UMB-MOD` pin N, and the carrier's nets reach it as this circuit's ports,
+as they reached the etherCON before. Both parts are open — `J-UMB` is an
+envelope in `config/body.yaml` `[from memory]`, and the lead is a length and a
+bend radius — and are decided at M4 with the parts (the rows in this
+circuit's [`bom.csv`](bom.csv)).
 
 ---
 
