@@ -68,8 +68,9 @@ a single marker bit each and are only checkable in one direction.
 **The two extra bits cost almost nothing, because "free" bits are not free —
 they are useless.** A free bit has no plate cutout and no switch. The body bonds
 shut. You cannot add a switch to one without cutting the plate, and the plate is
-generated at M3 and fitted before bonding `[repo] 0009, 0010`. The three
-positions that *are* retrofittable are the reserved spare-switch bits, which
+generated at M3 and fitted before bonding `[repo] 0009, 0010`. The
+positions that *are* retrofittable are the reserved spare-switch bits
+(`config/key-layout.yaml` `spare_bits_switches`), which
 have their networks fitted and are untouched by this proposal. *(They had
 cutouts too until 2026-09-26; the owner removed them, ADR 0010, so fitting
 one now means recutting the thumb plate and oak bottom.)* **So the trade is: two bits

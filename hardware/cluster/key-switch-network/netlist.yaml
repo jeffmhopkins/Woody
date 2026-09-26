@@ -37,7 +37,7 @@ components:
   C-KEY:
     value: "47nF"
     pins: [1, 2]
-    note: "Also AT the register input. On this board that is automatic; under the tail topology it was a layout rule with 265 mm of loom in between"
+    note: "Also AT the register input - automatic, because every register sits beside its own switches (main board or key board)"
 
   SW1-n:
     value: "KS-33"

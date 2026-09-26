@@ -417,8 +417,9 @@ hard limit rather than a setting.
 > **blocked** in `config/figures.yaml`.
 >
 > **This ADR reaches the right conclusion through the wrong number — and the
-> binding constraint is not the one it names.** The 1 A R-78E5.0 is not what
-> stops the matrix first. On the dev board itself *(on USB power only — see the 2026-09-26 amendment below)*, all 64 LEDs draw through a
+> binding constraint is not the one it names** — *on USB power; in the
+> instrument the regulator is the binding one again (amendment below).* On
+> USB the 1 A R-78E5.0 is not what stops the matrix first. On the dev board itself *(on USB power only — see the 2026-09-26 amendment below)*, all 64 LEDs draw through a
 > single **`B5819WS` Schottky in SOD-323**, whose datasheet
 > (`datasheets/discrete-and-power/B5819WS.pdf`) gives `I_F(AV)` 1 A but
 > **`P_D` = 200 mW and `RθJA` = 500 °C/W**. `[calc]` At `V_F` ≈ 0.46 V that is
@@ -439,8 +440,8 @@ hard limit rather than a setting.
 >
 > What the schematic settles firmly: **the 64 LEDs run from 5 V, not 3V3** —
 > every VDD on net `VCC_5V`, no regulator or switch in between. That was a
-> strong inference and is now read off a schematic. But `VCC_5V` is USB `VBUS`
-> through the `B5819WS`, so it is a diode drop below 5 V, and there is **no
+> strong inference and is now read off a schematic. On USB, `VCC_5V` is `VBUS`
+> through the `B5819WS`, so it is a diode drop below 5 V (from the 5 V pad it is the pad itself), and there is **no
 > decoupling anywhere inside the array** — total `VCC_5V` capacitance is
 > 11.1 µF, all clustered on the back.
 >
@@ -454,7 +455,8 @@ hard limit rather than a setting.
 > rating and loading (`hardware/carrier/power-entry-instrument/`). The
 > B5819WS argument above still governs a Matrix on the bench on USB, and the
 > cap still stands; its binding constraint in the instrument is the one this
-> note names, and E1/E6 measure it.)*
+> note names, and E1/E6 measure it. The register's `matrix-led-current`
+> records both paths under `power_path`.)*
 
 WS2812C-2020 draws **5 mA per channel**, so 15 mA per LED at full white and
 960 mA for all 64 — **this is the wrong part's figure and it is at least 2.4×

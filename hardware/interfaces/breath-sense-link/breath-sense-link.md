@@ -11,7 +11,7 @@ This circuit has a directory of its own because it crosses a board boundary.
 The differential pole, the effective gain and `inamp-full-scale` with it, the
 sensor span and pedestal, the CMRR term and the `R1` power argument are all
 derived at the module end from parts fitted at the instrument end, 2 m away,
-inside a body that opens only by lifting the lid, disturbing the loom and
+inside a body that opens only by lifting the lid off its key-board ribbons and
 re-laying the gasket (ADR 0009).
 
 **Neither schematic is redrawn here.** The instrument end is drawn in
@@ -79,9 +79,9 @@ are the sheet's own.
 |---|---|
 | MPXV4006DP, case 1351, is ticked **Surface Mount** in the ordering table; the through-hole cases are 1560, 482B and 482C | `[ds p.1]`; p.2 files case 1351-01 under "Small Outline Package Surface Mount" |
 | Case 1351-01 is an 8-lead gull-wing small outline package: body 11.81–12.32 mm square, lead pitch `e` 2.54 mm BSC, lead width `b` 0.96–1.07 mm, tip-to-tip `E` 17.27–17.78 mm, foot `L` 1.02–1.52 mm, height `A` 9.39–9.91 mm, both ports on one face, `F` 6.10–6.60 mm long | `[ds p.7]` outline (drawn, not in the text layer), `[ds p.20]` the same with its dimension table |
-| Pinout **Style 2**: pin 2 `VS`, pin 3 `GND`, pin 4 `VOUT`, pins 1 and 5–8 N/C | `[ds p.8, p.20]`. The sheet does not say which style the DP uses; Style 2 is the only one with a single output, and Style 1's `+Vout`/`−Vout` is an uncompensated bridge. **Buzz it out on arrival before the board is cut** |
+| Pinout **Style 2**: pin 2 `VS`, pin 3 `GND`, pin 4 `VOUT`, pins 1 and 5–8 N/C | `[ds p.4]` Figure 1, the MPXV4006's own schematic: `VS` pin 2, `GND` pin 3, `Vout` pin 4, *"Pins 1, 5, 6, 7, and 8 are NO CONNECTS for small outline package device"* — which is Style 2 of the case outline `[ds p.8, p.20]`. Buzz it out on arrival as a check, not as the source |
 | P1 is the **side with the part marking** | `[ds p.6]` Table 3 |
-| The ports stack one above the other on the port face, `M` 6.86–7.37 mm apart | `[ds p.7]` end view. With the marking on top as mounted, **P1 is the upper port and P2 the one nearest the board** — an inference, the same one `config/body.yaml` `boards.sensor_port_z` models. Check the marking on the part in hand |
+| The ports are **staggered** on the port face: `M` 6.86–7.37 mm apart vertically and `N` 4.06–4.57 mm apart laterally | `[ds p.7]` — `M` is dimensioned in the **side** view, `N` in the **end** view; both in the p.20 table. With the marking on top as mounted, **P1 is the upper port and P2 the one nearest the board** — an inference, the same one `config/body.yaml` `boards.sensor_port_z` models (and `boards.sensor_port_offset` the stagger). Check the marking on the part in hand |
 | The recommended footprint, Figure 6, is drawn for **case 482**, not 1351 | `[ds p.6]` |
 | No reflow profile, no hand-soldering guidance and no soldering temperature anywhere in the sheet | `[ds pp.1–22]`, searched. p.6 says only that the packages self-align under reflow on the right footprint |
 | Mounting stress and position shift the zero; the output must be auto-zeroed after installation | `[ds p.3]` Note 5 |
@@ -93,20 +93,31 @@ Figure 6 is 8 pads of 2.54 × 1.52 mm (along × across the lead) at 2.54 mm
 pitch, the two rows 16.76 mm apart **centre to centre** `[ds p.6]` — read off
 the figure's vector geometry, whose dimension lines land on the pad centres.
 That spacing fits case 482's wider lead span (`S` 18.01–18.41 mm `[ds p.11]`).
-For case 1351 the pads keep Figure 6's size and the rows close up to the feet
-`[calc]`:
+For case 1351 the rows close up to the feet, and the pads are lengthened
+inward so the heel gets at least the toe's margin `[calc]`:
 
 ```
 foot centre to foot centre = E_nom − L_nom = 17.525 − 1.27 = 16.26 mm   [ds p.20]
-pads 2.54 long, centred at ±8.13  →  copper spans 13.72 … 18.80 mm
 feet can occupy  E_min − 2·L_max … E_max  =  14.23 … 17.78 mm
-toe margin (18.80 − 17.78)/2 = 0.51 mm   heel margin (14.23 − 13.72)/2 = 0.25 mm
+
+Figure 6's 2.54 mm pad centred on the feet (±8.13):
+   copper 13.72 … 18.80   toe (18.80 − 17.78)/2 = 0.51   heel (14.23 − 13.72)/2 = 0.25
+
+lengthened inward to 2.80 mm, outer edge kept at ±9.40:
+   inner edge 9.40 − 2.80 = 6.60   →  copper 13.20 … 18.80
+   pad centre (9.40 + 6.60)/2 = 8.00  →  rows 16.00 mm centre to centre
+   toe  (18.80 − 17.78)/2 = 0.51 mm   heel (14.23 − 13.20)/2 = 0.515 mm
+   clear of the body: 6.60 − E1_max/2 = 6.60 − 6.16 = 0.44 mm
 pad gap across the pitch: 2.54 − 1.52 = 1.02 mm of solder mask
 ```
 
-Figure 6 as printed would still put every 1351 foot on copper, but centred
-0.25 mm outboard of the feet on each side. **Use 16.26 mm.** Solder mask
-between pads, as p.6 asks.
+A 0.25 mm heel is thin against the ~0.35 mm IPC-7351 nominal heel for
+gull-wing leads `[from memory]`, and the heel fillet is the one that holds a
+gull-wing joint, so the pad grows inward — the toe and the outer edge do not
+move, and the pad still stops short of the body. Figure 6 as printed would
+still put every 1351 foot on copper, but centred 0.25 mm outboard of the feet
+on each side. **Use 2.80 × 1.52 mm pads, rows 16.00 mm centre to centre.**
+Solder mask between pads, as p.6 asks.
 
 ### Where it sits
 
@@ -293,7 +304,7 @@ I = (12 − 0.2) / 1 kΩ = 11.8 mA      P = 139 mW
 ```
 
 against an 0805's ~125 mW. **The part fails in the fault the design calls
-survivable**, and it is instrument-side, behind a gasket and a loom.
+survivable**, and it is instrument-side, behind a gasket and a lid.
 `bom.csv` makes exactly this
 argument, in full, for the module-side `R-OUT-PROT` — and it was never carried
 across to the instrument-side twin.

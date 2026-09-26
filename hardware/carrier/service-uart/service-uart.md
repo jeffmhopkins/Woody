@@ -43,9 +43,14 @@ pad rows: the vendor's board definition accounts for every pad on both rows —
 this header through `CBL-MCU-RIBBON` and `J-MCU` (`carrier.md`). The recovery
 ladder absorbs the loss: USB-Serial-JTAG through the tail USB-C receptacle
 (`CBL-USB-EXT`) first, a reflash over the same port second, this header
-third. A corrupted bootloader ends the instrument, and that is accepted.
+third. A corrupted bootloader cannot be recovered **in place** — with no
+`EN` or `IO0` here, nothing on the main board can force download mode — but it
+does not end the instrument: lid off, unplug `J-MCU`, and the Matrix is
+reflashed on the bench with its own BOOT button and USB-C, or swapped for a
+spare (`carrier.md`, *The Matrix and the umbilical at the tail end*). That
+bench trip is what is accepted.
 
-**Open: whether that still has to be accepted.** The reason for leaving
+**Open: whether in-place recovery is worth two wires.** The reason for leaving
 `EN` and `IO0` alone was that reaching them meant soldering to a socketed,
 swappable dev board. Its ribbon is soldered to it now anyway (ADR 0017), so
 two more wires — to the BOOT button's `IO0` side and to `EN` — would cost a

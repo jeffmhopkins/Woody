@@ -75,28 +75,29 @@ serial data flows toward the clock source (ADR 0001 fix 3) `[repo]`:
    │             │  (right_hand J-CHAIN)        │  pin 6 ◄─────────┘     │
    │             │                              │  (left_hand J-CHAIN)   │
    └─────────────┼──────────────────────────────┼────────────────────────┘
-          FFC-CHAIN, 6 out / 8 back       FFC-CHAIN, 6 out / 8 back
+       FFC-CHAIN, cond. 6 out / 8 back  FFC-CHAIN, cond. 6 out / 8 back
    ┌─────────────┴─────────────┐    ┌───────────┴───────────────┐
    │ KEY BOARD right_hand      │    │ KEY BOARD left_hand       │
-   │  6 ──► SER (RH) QH ──► 8  │    │  6 ──► SER (LH) QH ──► 8  │
+   │  7 ──► SER (RH) QH ──► 5  │    │  7 ──► SER (LH) QH ──► 5  │
    └───────────────────────────┘    └───────────────────────────┘
+   (pin numbers inside the key-board boxes are the KEY BOARD's own J-CHAIN
+    pins, 13 − k; everything above them is main-board numbering)
 
    SCK, SH/LD, 3V3 and the grounds are one net each, on every register and
-   on both ribbons. Each ribbon carries its key board's SER IN on pin 6 and
-   its QH OUT on pin 8 — the same two pins the old IN connector used.
+   on both ribbons. Each ribbon carries its key board's SER IN on conductor 6
+   (key-board J-CHAIN pin 7) and its QH OUT on conductor 8 (key-board pin 5).
 ```
 
 **The existing 12-way pinout already does this, and is kept.** Each ribbon is
-a single hop out and a single hop back: the key board's serial input on pin 6
-and its serial output on pin 8, with a ground either side of both. The old
-design used pin 6 for a pass-through and pin 8 for the output; the pin
-assignments are the same, only pin 6's job got simpler.
+a single hop out and a single hop back: the key board's serial input on
+conductor 6 (key-board `J-CHAIN` pin 7) and its serial output on conductor 8
+(key-board pin 5), with a ground either side of both.
 
 **No serial-input link is needed on any board.** The four-board design had a
 solder link on every cluster board to choose where `SER` came from, because
 the chain-end board was different ([`notes.md`](notes.md)). Now each key board
-has one connector and its `SER` is **always** pin 6, whatever drives pin 6 on
-the main board. Both key boards are identical in the chain;
+has one connector and its `SER` is **always** conductor 6 — key-board
+`J-CHAIN` pin 7 — whatever drives main-board pin 6. Both key boards are identical in the chain;
 the difference between the right-hand and left-hand hop is two traces on the
 main board, which is one board with one layout anyway.
 
@@ -112,12 +113,15 @@ and `key-layout.yaml`'s order stands.
   from the MCU                  J-CHAIN, main board, BOTH ribbons
   (MCU board pins)              (12-way 1.0 mm FFC ZIF)
 
-   IO38  ──[R-CHAIN-SER 100R]──┬──► 2 SCK    both ribbons, and RT/LT CLK
-   IO7   ──[R-CHAIN-SER 100R]──┼──► 4 SH/LD  both ribbons, and RT/LT SH/LD
-   IO33  ──[R-CHAIN-SER 100R]──┼──► 6 SER    LEFT_HAND ribbon only
+   IO38  ──[R-CHAIN-SER 100R]──────► 2 SCK    both ribbons, and RT/LT CLK
+
+   IO7   ──[R-CHAIN-SER 100R]──────► 4 SH/LD  both ribbons, and RT/LT SH/LD
+
+   IO33  ──[R-CHAIN-SER 100R]──┬───► 6 SER    LEFT_HAND ribbon only
                                │     (right_hand ribbon: 6 = LT's QH)
-                     ┌─────────┘
-              [R-SER-TERM 10k] to 3V3 on the left_hand ribbon's pin 6
+                        [R-SER-TERM 10k]
+                               │
+                              3V3     (the pull-up is on this net only)
 
    IO40  ◄───────────────────────── RT's QH  (a trace; no connector)
                                      8 QH    right_hand ribbon: RT's SER
@@ -135,15 +139,14 @@ and `key-layout.yaml`'s order stands.
 
 ```
    J-CHAIN, key board              74HC165 on this key board
-   (conductor numbers; see
-    the ribbon, below)
-   conductor 2  SCK   ─────────────►  CLK
-   conductor 4  SH/LD ─────────────►  SH/LD
-   conductor 6  SER   ─────────────►  SER (pin 10)
-   conductor 8  QH    ◄─────────────  QH  (pin 9)
-   conductor 10 3V3   ─────────────►  VCC, pull-ups, marker straps
-   conductors 1 3 5 7 9  GND
-   conductors 11 12      spare, unconnected
+   conductor k = key-board pin 13 − k (see the ribbon, below)
+   cond. 2  = pin 11  SCK   ───────►  CLK
+   cond. 4  = pin 9   SH/LD ───────►  SH/LD
+   cond. 6  = pin 7   SER   ───────►  SER (pin 10)
+   cond. 8  = pin 5   QH    ◄───────  QH  (pin 9)
+   cond. 10 = pin 3   3V3   ───────►  VCC, pull-ups, marker straps
+   cond. 1 3 5 7 9  = pins 12 10 8 6 4   GND
+   cond. 11 12      = pins 2 1           spare, unconnected
 
    No link, no pull-up, no choice: both key boards are this drawing.
 ```
@@ -186,9 +189,12 @@ row of pins along the body. So:
    key pin: 12   11   10    9    8    7    6    5    4    3    2    1
 ```
 
-**Lay the key boards' footprint out to the bottom row, never to the main
-board's numbers.** Get it wrong and pin 10's 3V3 lands on the key board's
-ground. This holds for any part whose pins are numbered along its row, which is
+**Net the key board's `J-CHAIN` by 13 − k — the bottom row — and place the
+standard footprint on the key board's bottom side; do not hand-mirror it.**
+The part's own pin numbers are what reverse, so the reversal lives in the
+netlist, not in a custom footprint (mirroring the footprint as well would undo
+it). Net it by the main board's numbers instead and conductor 10's 3V3 lands on
+the key board's ground. This holds for any part whose pins are numbered along its row, which is
 all of them, but **check it against the chosen part's pin-1 drawing** at M4 —
 it is derived here, not read.
 
@@ -210,7 +216,7 @@ event: the ribbons are re-seated every time the lid goes back on. That is what
 on the connector side of `IO33`'s `R-CHAIN-SER`:
 
 ```
-   IO33 ──[R-CHAIN-SER 100R]──┬──► left_hand ribbon pin 6 ──► LH register SER
+   IO33 ──[R-CHAIN-SER 100R]──┬──► left_hand conductor 6 ──► LH register SER
                               │
                       [R-SER-TERM 10k]
                               │
@@ -323,8 +329,7 @@ and none of it moved.
 - **The `J-CHAIN` part**, decided at M4 with the part: a 12-way 1.0 mm
   side-entry ZIF that fits `boards.ffc_conn_h`, the same part at all four
   positions, top- or bottom-contact either way. With it, the key board's
-  mirrored footprint numbering is confirmed against the part's own pin-1
-  drawing.
+  13 − k netting is confirmed against the part's own pin-1 drawing.
 - **The `FFC-CHAIN` length**, decided at M4: `drc.echo` "ribbon arc length"
   plus the two insertion depths off the chosen connector's drawing, rounded up
   to a stock length. Same-side contacts, per *The ribbon*.

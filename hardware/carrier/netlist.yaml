@@ -21,7 +21,7 @@
 # against this page.
 
 circuit: carrier/carrier
-title: Real-time carrier board
+title: Main board - carrier circuits (dev board, J-MCU, SPI egress)
 page: carrier.md
 
 ports:

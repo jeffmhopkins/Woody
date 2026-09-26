@@ -18,7 +18,7 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `3V3` | in | `interfaces/key-chain-loom` | `key-pullup-qty` | The chain's 3V3 rail: a trace on the main board, ribbon pin 10 on a key board. What `R-KEY-PU` pulls to. It is also the MCP3202's reference, which is what makes the static draw a live trade rather than a free one |
+| `3V3` | in | `interfaces/key-chain-loom` | `key-pullup-qty` | The chain's 3V3 rail: a trace on the main board; on a key board, ribbon conductor 10 = key-board `J-CHAIN` pin 3. What `R-KEY-PU` pulls to. It is also the MCP3202's reference, which is what makes the static draw a live trade rather than a free one |
 | key input node | out | `cluster/key-register` | `key-release-time`, `key-press-time` | Both passives sit **at the register input**, millimetres from the switch |
 | `SW` | in | `SW-THUMB` | — | The KS-33 in its plate cutout, `cluster-boards.md` §5. Pressed = pulled LOW, through `R-KEY-SER` |
 | `GND` | ref | `interfaces/key-chain-loom` | — | The main board's ground; on a key board, the ribbon's five alternating grounds. `C-KEY` and the closed switch both return here |
@@ -35,7 +35,7 @@ else; `tools/check-netlist.py` prints that shortfall by name every run.*
 
 
 ```
-   3V3 (the chain rail: a main-board trace, or ribbon pin 10)
+   3V3 (the chain rail: a main-board trace, or ribbon conductor 10 = key-board J-CHAIN pin 3)
     │
     └──[R-KEY-PU 2k2 1%]──┬────────────────────► 74HC165 parallel input
                           │                 │
@@ -50,8 +50,8 @@ else; `tools/check-netlist.py` prints that shortfall by name every run.*
    never moved - contradicting the figure's own caption. Found in review.
 
    Both passives are AT the register input, millimetres from the switch.
-   On this board that is automatic; under the tail topology it was a layout
-   rule with a 265 mm loom in between.
+   That is automatic: every register sits beside its own switches, on the
+   main board or a key board.
 ```
 
 ### Derivations
@@ -130,10 +130,10 @@ nothing musically; note-off is filtered in firmware anyway.
 > not what makes the topology safe.
 
 **`R-KEY-PU` is 2.2 kΩ and the reason it is no longer 10 kΩ has expired.**
-`bom.csv` says so itself: the 2.2 kΩ was chosen when the node ran 265 mm down an
-uncoated loom, *"that reason is gone now the register is back on the cluster
-board"*, and it was kept as cheap insurance `[repo] bom.csv`. **Keeping it is
-not free any more**, because 27.3 mA of play-rate load lands on the rail that is
+It was chosen when each key node ran a long uncoated loom to a register at the
+tail; every register now sits beside its switches, on the main board or a key
+board, and the 2.2 kΩ was kept as cheap insurance ([`notes.md`](notes.md)).
+**Keeping it is not free any more**, because 27.3 mA of play-rate load lands on the rail that is
 also the MCP3202's voltage reference — worth 3.4 LSB, accepted on the carrier
 page `[repo] carrier.md §2`. Going back to 10 kΩ would cut that to 6.2 mA and
 0.8 LSB, at the price of a 100 µs τ in a humid cavity. **Recorded as a live

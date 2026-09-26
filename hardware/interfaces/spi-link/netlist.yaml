@@ -107,6 +107,10 @@ nets:
     - J-UMB-INST.7
     - J-UMB-MOD.7
 
+  # OPEN AT THE INSTRUMENT END: nothing on the instrument side is on this
+  # net - it stops at J-UMB.8. Where DIG_GND ties there is the register's
+  # dig-gnd-topology (disputed); it is deliberately not connected until that
+  # is decided, rather than guessed onto PWR_GND.
   DIG_GND:
     - port: DIG_GND
     - J-UMB-MOD.8

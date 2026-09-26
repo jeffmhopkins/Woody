@@ -29,8 +29,9 @@ The four clusters differ only in how many switch positions are fitted and which
 of their eight register bits are switches, markers or free. The device, the
 decoupling, the network and the chain wiring are identical, and they should be
 laid out from one schematic with a variant table. **The two key boards are
-identical in the chain** — one connector each, `SER` in on pin 6 and `QH` out
-on pin 8 — so they differ only in switch count and strapping.
+identical in the chain** — one connector each, `SER` in on conductor 6 and `QH` out
+on conductor 8 (key-board `J-CHAIN` pins 7 and 5; conductor k is key-board
+pin 13 − k, `key-chain-loom.md`) — so they differ only in switch count and strapping.
 
 These registers sit where their switches already are because ADR 0001 put
 them there `[repo] 0001`: the switches need a rigid PCB regardless (ADR 0002),

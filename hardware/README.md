@@ -55,7 +55,7 @@ Every circuit page carries one: every net that crosses that circuit's
 boundary, one row each. A PCB netlist is transcribed from these, so a row is
 a wiring instruction and two pages disagreeing about a net is a short.
 
-**Four drawing shorthands, and they are shorthands — not missing parts.** The
+**Two drawing shorthands, and they are shorthands — not missing parts.** The
 ASCII drawings use a short spelling where the full refdes would break column
 alignment. When transcribing a netlist, expand them:
 
@@ -73,13 +73,15 @@ ADR 0017 put a real connector of that name on the main board: `J-UMB` is now
 its own row, wired to the etherCON by a straight patch lead, so "`J-UMB` pin
 N" on an instrument page is that connector and the same conductor as the
 etherCON's pin N (`hardware/interfaces/spi-link/spi-link.md`). On a module
-page, the umbilical connector is `J-UMBILICAL`.
+page the umbilical connector is `J-UMBILICAL` — netlisted as `J-UMB-MOD`, as
+the instrument's etherCON is `J-UMB-INST` — and never `J-UMB`.
 
-A cold reviewer filed all three as refdes that "match nothing in `bom.csv`",
-which was fair — nothing said otherwise. They are listed here once rather
+A cold reviewer filed these two, and `J-UMB` when it was a shorthand, as
+refdes that "match nothing in `bom.csv`", which was fair — nothing said
+otherwise. They are listed here once rather
 than expanded in ~40 drawing sites, because widening a label inside a drawing
 shifts every column to its right, and that drift is itself a recorded defect
-on these pages. A fourth, an unlabelled `N-FET`, was **not** a shorthand: it
+on these pages. One more, an unlabelled `N-FET`, was **not** a shorthand: it
 is `Q-LOADSW`, a row created after that drawing was last touched, and it is
 now labelled.
 

@@ -40,7 +40,7 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node / part | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `BREATH_SENSE` | in | `interfaces/breath-sense-link` | `umbilical-pinmap`, `sensor-full-scale` | The sensor's buffered output, arriving on `J-UMB` through the instrument-side `R1`. Drives `IN−` through `R3`. **Not `BREATH_OUT`**, the module's jack |
+| `BREATH_SENSE` | in | `interfaces/breath-sense-link` | `umbilical-pinmap`, `sensor-full-scale` | The sensor's buffered output, arriving on `J-UMBILICAL` (`J-UMB-MOD` in the spi-link netlist) through the instrument-side `R1`. Drives `IN−` through `R3`. **Not `BREATH_OUT`**, the module's jack |
 | `AGND_SENSE` | in | `interfaces/breath-sense-link` | `umbilical-pinmap` | The instrument's analog star, arriving through the instrument-side `R1b`. Drives `IN+` through `R2`: on this page it is **a signal leg, not a local ground**, and the twisted pair's other conductor. The drawing labels it `AGND (pin 2)`. **Not `AGND_MOD`** |
 | `R1`, `R1b` (`R-SER-BREATH-INST`) | — | `interfaces/breath-sense-link` | — | Both legs' series resistance sets the differential pole against `C_diff`, and their match is what the bias pair's balance is measured against. Neither part is on this board |
 | `MPXV4006DP` and its `VS` reference buffer | — | `interfaces/breath-sense-link` | `sensor-full-scale`, `riso-ref-topology`, `cref-out-node`, `opa2197-output-impedance` | Sets the span this page multiplies and the pedestal `TRIM-BREATH-ZERO` nulls. Not this page's circuit — see [`notes.md`](notes.md) |
@@ -57,7 +57,7 @@ The drawing is a representation of it, `tools/check-netlist.py` checks that
 the two agree, and where they do not the netlist wins.*
 
 ```
-  INSTRUMENT (bottom cluster board)                 |  2 m Cat5  |   MODULE
+  INSTRUMENT (main board)                           |  2 m Cat5  |   MODULE
                                                     |            |
    MPXV4006DP ──┬── ½ OPA2197 ───[R1 1k]──────────── BREATH (pin 1) ──┐
                  │                          ↓ to IN−, via R3            │

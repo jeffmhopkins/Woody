@@ -23,9 +23,9 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `SCLK` | in | `interfaces/spi-link` | `umbilical-pinmap`, `spi-series-r` | From the carrier on `J-UMB`. Pulled **down**, cable side and DAC side. **Not `SCLK_DAC`**, this buffer's output |
-| `MOSI` | in | `interfaces/spi-link` | `umbilical-pinmap`, `spi-series-r` | From the carrier on `J-UMB`. Pulled **down**, both sides. Shares a pair with `SCLK` |
-| `CS_MOD` | in | `interfaces/spi-link` | `umbilical-pinmap`, `spi-series-r` | From the carrier on `J-UMB`. Pulled **up**, both sides. Shares a pair with `DIG_GND` |
+| `SCLK` | in | `interfaces/spi-link` | `umbilical-pinmap`, `spi-series-r` | From the instrument, arriving on `J-UMBILICAL` (`J-UMB-MOD` in the spi-link netlist). Pulled **down**, cable side and DAC side. **Not `SCLK_DAC`**, this buffer's output |
+| `MOSI` | in | `interfaces/spi-link` | `umbilical-pinmap`, `spi-series-r` | From the instrument, arriving on `J-UMBILICAL` (`J-UMB-MOD` in the spi-link netlist). Pulled **down**, both sides. Shares a pair with `SCLK` |
+| `CS_MOD` | in | `interfaces/spi-link` | `umbilical-pinmap`, `spi-series-r` | From the instrument, arriving on `J-UMBILICAL` (`J-UMB-MOD` in the spi-link netlist). Pulled **up**, both sides. Shares a pair with `DIG_GND` |
 | `DIG_GND` | ref | `interfaces/spi-link`, `module/power-entry` | `umbilical-pinmap`, `dig-gnd-topology` | `CS_MOD`'s return partner. Where it ties is the disputed figure, not a fact this page settles |
 | `SCLK_DAC`, `DIN`, `SYNC` | out | `module/dac8568`, `interfaces/spi-link` | — | **Sourced here** — the 74AHCT125 (`U-LVL-MOD`) is this circuit's part. The DAC-side three of the six `R-SPI-PULL` sit on these |
 | bus `+5V` after `FB4`/`C4` | in | `module/power-entry` | — | Through `FB4` and `C4`. Supplies the 74AHCT125 and nothing else, and it is the one rail with no diode. Open — see below |

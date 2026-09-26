@@ -37,7 +37,7 @@ nets:
 
   V3V3_CHAIN:
     kind: power
-    carries: "3V3 to all four registers - main-board traces to right_thumb and left_thumb, J-CHAIN pin 10 of each ribbon to the key boards"
+    carries: "3V3 to all four registers - main-board traces to right_thumb and left_thumb, conductor 10 of each ribbon to the key boards (main-board J-CHAIN pin 10, key-board pin 3)"
     driver: interfaces/key-chain-loom
     receivers: [cluster/key-register, cluster/key-switch-network, cluster/key-marker-and-bits]
 
@@ -94,7 +94,7 @@ nets:
   CHAIN_SER_RT:
     kind: signal
     domain: digital
-    carries: "right_thumb's SER, on the main board: right_hand's QH arriving on the right_hand ribbon's pin 8"
+    carries: "right_thumb's SER, on the main board: right_hand's QH arriving on the right_hand ribbon's conductor 8"
     driver: interfaces/key-chain-loom
     receivers: [cluster/key-register]
     per_board: true
@@ -102,7 +102,7 @@ nets:
   CHAIN_SER_RH:
     kind: signal
     domain: digital
-    carries: "right_hand's SER: left_thumb's QH, out on the right_hand ribbon's pin 6"
+    carries: "right_hand's SER: left_thumb's QH, out on the right_hand ribbon's conductor 6"
     figure: chain-connectors
     driver: interfaces/key-chain-loom
     receivers: [cluster/key-register]
@@ -111,7 +111,7 @@ nets:
   CHAIN_SER_LT:
     kind: signal
     domain: digital
-    carries: "left_thumb's SER, on the main board: left_hand's QH arriving on the left_hand ribbon's pin 8"
+    carries: "left_thumb's SER, on the main board: left_hand's QH arriving on the left_hand ribbon's conductor 8"
     driver: interfaces/key-chain-loom
     receivers: [cluster/key-register]
     per_board: true
@@ -119,7 +119,7 @@ nets:
   CHAIN_SER_LH:
     kind: signal
     domain: digital
-    carries: "left_hand's SER, the chain end: IO33 through R-CHAIN-SER, held high by R-SER-TERM, out on the left_hand ribbon's pin 6"
+    carries: "left_hand's SER, the chain end: IO33 through R-CHAIN-SER, held high by R-SER-TERM, out on the left_hand ribbon's conductor 6"
     figure: chain-connectors
     driver: interfaces/key-chain-loom
     receivers: [cluster/key-register]
@@ -136,7 +136,7 @@ nets:
   CHAIN_QH_RH:
     kind: signal
     domain: digital
-    carries: "right_hand's QH, back on its ribbon's pin 8 to right_thumb's SER"
+    carries: "right_hand's QH, back on its ribbon's conductor 8 (key-board J-CHAIN pin 5, main-board pin 8) to right_thumb's SER"
     figure: chain-connectors
     driver: cluster/key-register
     receivers: [interfaces/key-chain-loom]
@@ -145,7 +145,7 @@ nets:
   CHAIN_QH_LT:
     kind: signal
     domain: digital
-    carries: "left_thumb's QH, on the main board, out to the right_hand ribbon's pin 6"
+    carries: "left_thumb's QH, on the main board, out to the right_hand ribbon's conductor 6"
     driver: cluster/key-register
     receivers: [interfaces/key-chain-loom]
     per_board: true
@@ -153,7 +153,7 @@ nets:
   CHAIN_QH_LH:
     kind: signal
     domain: digital
-    carries: "left_hand's QH, back on its ribbon's pin 8 to left_thumb's SER"
+    carries: "left_hand's QH, back on its ribbon's conductor 8 (key-board J-CHAIN pin 5, main-board pin 8) to left_thumb's SER"
     figure: chain-connectors
     driver: cluster/key-register
     receivers: [interfaces/key-chain-loom]
@@ -162,18 +162,20 @@ nets:
   KEY_BITS:
     kind: signal
     domain: digital
-    carries: "The parallel switch bits into the shift registers, within a cluster board"
+    carries: "The parallel switch bits into the shift registers, on the board each register is on - the main board for right_thumb and left_thumb, a key board for right_hand and left_hand"
     driver: cluster/key-switch-network
     receivers: [cluster/key-register]
     per_board: true
     note: >
       EIGHT NETS PER DEVICE, NOT ONE, and which of the eight is a switch is
-      different on all four boards - key-marker-and-bits.md's allocation table
-      has four different rows against one schematic. So no port assignment on
-      the shared cluster netlist is true of every board, and key-register's
-      netlist declares the eight inputs as unasserted endpoints. Resolving
-      this means four board variants, which is a real decision and not a
-      transcription job.
+      different for each of the four register instances -
+      key-marker-and-bits.md's allocation table has four different rows
+      against one schematic. So no port assignment on the shared register
+      netlist is true of every instance, and key-register's netlist declares
+      the eight inputs as unasserted endpoints. Resolving it means four
+      instance variants - two register placements on the main board
+      (right_thumb, left_thumb) and two key-board variants (right_hand,
+      left_hand) - which is a real decision and not a transcription job.
 
   MARKER_BITS:
     kind: signal
@@ -183,7 +185,7 @@ nets:
     driver: cluster/key-marker-and-bits
     receivers: [cluster/key-register]
     per_board: true
-    note: "Two per device, one high and one low, and they sit on different inputs on every board - see KEY_BITS"
+    note: "Two per device, one high and one low, and they sit on different inputs on every device - see KEY_BITS"
 
   # --- the dev board's pins that drive the chain ------------------------
 

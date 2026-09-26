@@ -130,7 +130,7 @@ named as they stand; **proposed** rows have no BOM entry yet.*
 
 | Ref | Value | Job | Confidence |
 |---|---|---|---|
-| `U-BUCK` | R-78E5.0-1.0 SIP-3 | The one dev board, the matrix, the level shifter. **10.4 mm tall upright** — the centre board has less than that under the keys (`mechanical/drc.echo`) | `[repo]` |
+| `U-BUCK` | R-78E5.0-1.0 SIP-3 | The one dev board, the matrix, the level shifter. **10.4 mm tall upright**, which fits anywhere on the main board, under the key boards included (`mechanical/drc.echo` "main board parts room under the key boards", and "regulator block fits where it stands") | `[repo]` |
 | `L-BUCK-IN` | 10–47 µH ≥1 A | **Qty 1 against `C-BUCK-IN`'s qty 2 "one per buck" — the two rows describe different topologies** | `[repo]`, contradictory |
 | `C-BUCK-IN` | 100 µF 25 V electrolytic | **Must have real ESR; a ceramic breaks the damping** | `[repo]` + `[calc]` |
 | `D-USBOR` | SS14 | **Between the buck and the dev board's 5V pin** — the OR node is that pin, and USB can back-feed it | `[repo]` |
@@ -144,6 +144,7 @@ named as they stand; **proposed** rows have no BOM entry yet.*
 
 *Moved verbatim from `carrier.md`'s `Still open` list.*
 
-- **A low-profile regulator.** The R-78E stands 10.4 mm upright and the centre
-  board has less than that under the key boards (`mechanical/drc.echo`,
-  "regulator block fits under the key boards"): an SMD module, or laid flat.
+- ~~**A low-profile regulator.**~~ **Closed by ADR 0017**: on the one main
+  board the R-78E fits upright where it stands, under a key board included
+  (`mechanical/drc.echo` "regulator block fits where it stands"). Re-open only
+  if that rule fails.

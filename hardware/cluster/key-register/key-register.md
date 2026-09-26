@@ -18,12 +18,12 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `SCK` | in | `interfaces/key-chain-loom` | `chain-conductors` | One net to all four devices: a trace on the main board, pin 2 of the ribbon on a key board |
-| `SH/LD` | in | `interfaces/key-chain-loom` | `chain-conductors` | The chain bus. Falling edge loads the parallel inputs |
-| `SER` | in | `interfaces/key-chain-loom` | `chain-connectors` | Point to point: the next device's `QH`, or at the chain end `IO33` and its pull-up. On a key board it is always ribbon pin 6. Which device feeds which is the hop map in the key-chain netlist |
-| `QH` | out | `interfaces/key-chain-loom` | `chain-connectors` | Toward the MCU: on a key board, ribbon pin 8; `right_thumb`'s is a trace to the MCU. Bit 0 is the `H` input of the `right_thumb` device |
+| `SCK` | in | `interfaces/key-chain-loom` | `chain-conductors` | One net to all four devices: a trace on the main board; on a key board, ribbon conductor 2 = key-board `J-CHAIN` pin 11 |
+| `SH/LD` | in | `interfaces/key-chain-loom` | `chain-conductors` | The chain bus: a trace on the main board; on a key board, ribbon conductor 4 = key-board `J-CHAIN` pin 9. Falling edge loads the parallel inputs |
+| `SER` | in | `interfaces/key-chain-loom` | `chain-connectors` | Point to point: the next device's `QH`, or at the chain end `IO33` and its pull-up. On a key board it is always ribbon conductor 6 = key-board `J-CHAIN` pin 7. Which device feeds which is the hop map in the key-chain netlist |
+| `QH` | out | `interfaces/key-chain-loom` | `chain-connectors` | Toward the MCU: on a key board, ribbon conductor 8 = key-board `J-CHAIN` pin 5; `right_thumb`'s is a trace to the MCU. Bit 0 is the `H` input of the `right_thumb` device |
 | `A`…`H` | in | `cluster/key-switch-network`, `cluster/key-marker-and-bits` | `marker-bits`, `free-bits` | Eight parallel inputs per device: a switch network, a marker strap or a free bit |
-| `3V3` | in | `interfaces/key-chain-loom` | — | The chain's 3V3 rail: a trace on the main board, ribbon pin 10 on a key board. `C-DECOUPLE-165` is the local reservoir this input has no other source for |
+| `3V3` | in | `interfaces/key-chain-loom` | — | The chain's 3V3 rail: a trace on the main board; on a key board, ribbon conductor 10 = key-board `J-CHAIN` pin 3. `C-DECOUPLE-165` is the local reservoir this input has no other source for |
 | `GND` | ref | `interfaces/key-chain-loom` | `chain-conductors` | The main board's ground; on a key board, the ribbon's five alternating grounds. `C-DECOUPLE-165` returns here, at the package |
 
 ## §1 The device
