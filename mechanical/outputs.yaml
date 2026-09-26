@@ -60,6 +60,53 @@ renders:
     imgsize: [1600, 800]
     camera: [0, 28, 0, 38, 0, 340, 400]
     defines: {fig_view: "3d", show_caps: false, show_keys: false}
+  - name: exploded-stack
+    title: The stack pulled apart, shell ghosted - oak, thumb plate, main board, key boards, plate, lid
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/exploded-stack.png
+    imgsize: [1600, 900]
+    camera: [0, 28, 16, 58, 0, 335, 640]
+    defines: {origin: "centre", explode: 36, ghost_shell: true}
+  - name: breakdown-electronics
+    title: "Breakdown: the electronics - main board, key boards, switches, sensor, strip, Matrix, connectors"
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/breakdown-electronics.png
+    imgsize: [1600, 800]
+    camera: [0, 28, 10, 50, 0, 340, 440]
+    defines: {origin: "centre", show_lid: false, show_caps: false,
+              highlight: ["main board*", "parts *", "tall parts*", "breath sensor", "LED strip", "J-STACK*", "board *",
+                          "switch *", "Matrix*", "etherCON", "USB-C*", "RJ45 plug"]}
+  - name: breakdown-breath
+    title: "Breakdown: the breath path - mouth cap, tube, trap, sensor, at the mouth end"
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/breakdown-breath.png
+    imgsize: [1400, 900]
+    camera: [28, 28, 12, 38, 0, 330, 150]
+    defines: {origin: "mouth", show_lid: false, show_caps: false, highlight: ["breath*", "mouth cap"]}
+  - name: breakdown-structure
+    title: "Breakdown: the structure, pulled apart - oak, plates, sides, end caps, fasteners, U-bolt"
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/breakdown-structure.png
+    imgsize: [1600, 900]
+    camera: [0, 28, 28, 62, 0, 330, 540]
+    defines: {origin: "centre", explode: 22,
+              highlight: ["oak top", "oak bottom", "key plate", "thumb plates", "side *", "mouth cap", "tail cap",
+                          "M3 *", "U-bolt*", "matrix window"]}
+  - name: section-thumb-row
+    title: Longitudinal section through the thumb row with LT1 - thumb switches, main board, key boards
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/section-thumb-row.png
+    imgsize: [2000, 380]
+    projection: o
+    camera: [0, 22, 0, 0, 0, 0, 250]
+    defines: {origin: "centre", cut: "y2d", cut_key: "LT1"}
+  - name: view-tail
+    title: From the tail end, lid off - Matrix, etherCON, USB-C, and the main board's tail
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/view-tail.png
+    imgsize: [1400, 900]
+    camera: [-40, 28, 14, 50, 0, 125, 200]
+    defines: {origin: "tail", show_lid: false, ghost_shell: true}
   - name: tail-detail
     title: The tail, lid off, from inside
     src: mechanical/cad/woody_body.scad

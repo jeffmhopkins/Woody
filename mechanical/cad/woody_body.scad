@@ -41,7 +41,7 @@ ghost_shell = false;  // draw the shell translucent to see inside
 // 2D ones for anything dimensioned; OpenCSG loses part colours on 3D cuts.
 cut = "none";
 cut_at = 0;
-cut_key = "";         // or name a key (or "matrix"): the X cut goes through its centre
+cut_key = "";         // or name a key (or "matrix"): the cut goes through its centre
 cut_depth = 1000;     // "x" keeps a slab this deep beyond the cut
 figure = false;       // set true by a figure that includes this file
 // Where X = 0 sits in the rendered picture: "mouth" (the model's own frame),
@@ -246,7 +246,9 @@ L = top_last + tail_req;
 x_in1 = L - ends_tail_cap_t;
 matrix_xy = [matrix_x(L), W / 2];
 // Where an X section cuts: a number, a key id, or "matrix" for its centre.
-cut_pos = cut_key == "" ? cut_at : cut_key == "matrix" ? matrix_xy[0] : key_xy(key_by_id(cut_key))[0];
+// A Y cut through a named key goes through its Y (its row along the body).
+cut_pos = cut_key == "" ? cut_at : cut_key == "matrix" ? matrix_xy[0]
+        : key_xy(key_by_id(cut_key))[cut == "y" || cut == "y2d" ? 1 : 0];
 
 function placed(k) = !is_undef(k[2]) && !is_undef(k[3]);
 function key_xy(k) = placed(k) ? [plate_x0 + k[3], plate_y0 + k[2]] : prov_xy(k);
@@ -283,13 +285,16 @@ module clip_space() {
 //   list_solids = true  echo every solid's id (the clash check's inventory)
 only = "";
 list_solids = false;
+function id_match(h, id) = h == id || (h[len(h) - 1] == "*" && len(id) >= len(h) - 1
+    && (len(h) == 1 || [for (i = [0 : len(h) - 2]) id[i]] == [for (i = [0 : len(h) - 2]) h[i]]));
 module P(c, shell = false, id = "") {
     assert(id != "", "every solid needs an id - the clash check cannot see an unnamed one");
     if (list_solids) echo("SOLID", id);
     // highlight: solids named in it are drawn bright yellow and the rest
-    // faded, so one assembly can be picked out of the body in a render.
+    // faded, so one assembly can be picked out of the body in a render. An
+    // entry ending in "*" matches every id that starts with the rest of it.
     hl = len(highlight) > 0;
-    cc = hl && len([for (h = highlight) if (h == id) 1]) > 0 ? [1.0, 0.85, 0.0]
+    cc = hl && len([for (h = highlight) if (id_match(h, id)) 1]) > 0 ? [1.0, 0.85, 0.0]
        : hl ? [c[0], c[1], c[2], 0.18]
        : (shell && ghost_shell) ? [c[0], c[1], c[2], 0.25] : c;
     if (only == "" || only == id) color(cc)
@@ -540,8 +545,9 @@ module u_channel() {
             cylinder(d = hardware_fastener_cbore_d, h = hardware_fastener_cbore_depth + EPS);
     }
     // Each side: one sheet, bottom edge in the bottom groove, top edge in the top.
+    // Exploded, the sides move out and down so the boards between them show.
     for (i = [0, 1])
-        P(C_ACRYLIC, true, str("side ", i == 0 ? "left" : "right")) translate([x_in0, side_y[i] + stack_side_t, z_side0 + explode * 0.3]) rotate([90, 0, 0])
+        P(C_ACRYLIC, true, str("side ", i == 0 ? "left" : "right")) translate([x_in0, side_y[i] + stack_side_t + (i == 0 ? -1 : 1) * explode * 1.5, z_side0 - explode * 0.6]) rotate([90, 0, 0])
             linear_extrude(stack_side_t) side_2d();
 }
 
@@ -864,9 +870,9 @@ module assembly() {
     if (show_lid) lid(explode);
     if (show_keys) { keys_3d(); thumb_plates_3d(); }
     if (show_boards) { cluster_boards(); tail_equipment(); }
-    if (show_strips) led_strips();
+    if (show_strips) translate([0, 0, explode * 0.1]) led_strips();
     if (show_routing) routing_3d();
-    if (show_boards) { sensor_3d(); headers_3d(); parts_3d(); centre_board_3d(); }
+    if (show_boards) { parts_3d(); translate([0, 0, explode * 0.1]) { sensor_3d(); headers_3d(); centre_board_3d(); } }
     if (show_hardware) hardware_3d();
 }
 

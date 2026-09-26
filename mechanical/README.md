@@ -94,6 +94,17 @@ of a superseded value. Instead:
 
 ![The main board, labelled](renders/main-board.png)
 
+### Breakdowns
+
+![The stack pulled apart, shell ghosted](renders/exploded-stack.png)
+
+| | |
+|---|---|
+| ![Electronics](renders/breakdown-electronics.png) The electronics in yellow | ![Structure](renders/breakdown-structure.png) The structure in yellow, pulled apart |
+| ![Breath path](renders/breakdown-breath.png) The breath path at the mouth end | ![From the tail](renders/view-tail.png) The tail from outside, lid off |
+
+![Section through the thumb row](renders/section-thumb-row.png)
+
 ![Plan from above, with the length budget](renders/plan-top.png)
 
 ![Top-key spacing, now against the alternatives](renders/key-layouts.png)
