@@ -67,7 +67,13 @@ pages that have no netlist yet.
 |---|---|
 | `C-TIMER` | `C-TIMER-LOADSW` |
 | `C-GATE` | `C-GATE-LOADSW` |
-| `J-UMB` | `J-UMBILICAL` |
+
+**`J-UMB` is no longer a shorthand.** It was one, for `J-UMBILICAL`, until
+ADR 0017 put a real connector of that name on the main board: `J-UMB` is now
+its own row, wired to the etherCON by a straight patch lead, so "`J-UMB` pin
+N" on an instrument page is that connector and the same conductor as the
+etherCON's pin N (`hardware/interfaces/spi-link/spi-link.md`). On a module
+page, the umbilical connector is `J-UMBILICAL`.
 
 A cold reviewer filed all three as refdes that "match nothing in `bom.csv`",
 which was fair — nothing said otherwise. They are listed here once rather

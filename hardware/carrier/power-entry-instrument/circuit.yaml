@@ -21,7 +21,8 @@ depends_on:
 - refdes:D-REVSHUNT
 - refdes:D-TVS-PWR
 - refdes:D-USBOR
-- refdes:HDR-DEV
+- refdes:J-MCU
+- refdes:J-UMB
 - refdes:L-BUCK-IN
 - refdes:MECH-GNDBOND
 - refdes:U-BUCK

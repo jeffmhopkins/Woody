@@ -22,7 +22,7 @@ The `Dir` and `Peer` columns are defined once in
 |---|---|---|---|---|
 | `U0TXD` (IO43), `U0RXD` (IO44) | in/out | `carrier/carrier` | — | The real-time board's console pair, to `HDR-SERVICE` |
 | GND | ref | `carrier/power-entry-instrument` | `dig-gnd-topology` | The `PWR_GND` pour |
-| `EN`, `IO0` | — | — | — | **Not wired.** They are not on the dev board's headers |
+| `EN`, `IO0` | — | — | — | **Not wired.** They are not on the dev board's pad rows, so `CBL-MCU-RIBBON` does not carry them |
 
 ## The service header
 
@@ -37,13 +37,21 @@ two agree.*
 ```
 
 **Why only three pins.** `EN` and `IO0` do not reach the ESP32-S3-Matrix's
-headers: the vendor's board definition accounts for every pin on both header
-rows — 3 power and 17 GPIO — and neither appears; `IO0` is under the BOOT
-button and `EN` is on the reset circuit, so reaching either means soldering to
-the dev board `[repo] bom.csv, 0009`. The recovery ladder absorbs the loss:
-USB-Serial-JTAG through the tail USB-C slot first, a reflash over the same
-port second, this header third. A corrupted bootloader ends the instrument,
-and that is accepted.
+pad rows: the vendor's board definition accounts for every pad on both rows —
+3 power and 17 GPIO — and neither appears; `IO0` is under the BOOT button and
+`EN` is on the reset circuit `[repo] bom.csv, 0009`. The console pair reaches
+this header through `CBL-MCU-RIBBON` and `J-MCU` (`carrier.md`). The recovery
+ladder absorbs the loss: USB-Serial-JTAG through the tail USB-C receptacle
+(`CBL-USB-EXT`) first, a reflash over the same port second, this header
+third. A corrupted bootloader ends the instrument, and that is accepted.
+
+**Open: whether that still has to be accepted.** The reason for leaving
+`EN` and `IO0` alone was that reaching them meant soldering to a socketed,
+swappable dev board. Its ribbon is soldered to it now anyway (ADR 0017), so
+two more wires — to the BOOT button's `IO0` side and to `EN` — would cost a
+fiddly joint, not the board's swappability; the ribbon has no conductor for
+them unless the five open ones carry them. Decided by the owner, with the
+ribbon's allocation at M4 (`CBL-MCU-RIBBON`).
 
 ---
 

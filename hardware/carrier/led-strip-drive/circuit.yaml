@@ -12,7 +12,7 @@ depends_on:
 - adr:0014
 - refdes:C-DECOUPLE-CARRIER
 - refdes:C-STRIP-BULK
-- refdes:HDR-DEV
+- refdes:J-MCU
 - refdes:R-LED-SER
 - refdes:R-SPI-PULL
 - refdes:U-LVLSHIFT
