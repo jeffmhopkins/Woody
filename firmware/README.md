@@ -1,14 +1,12 @@
 # Firmware
 
-**Two images** ([ADR 0013](../docs/decisions/0013-two-mcu-split.md)):
+**One image** ([ADR 0015](../docs/decisions/0015-one-mcu-no-display.md)):
 
-- `realtime/` — ESP32-S3. Keys, breath, IMU, DAC loop, USB MIDI. Owns all
-  state and persistence. This is the instrument.
-- `display/` — the AMOLED board. Panel, WiFi, web app. Renders what it is told
-  and forwards what the user does. **Persists nothing.**
+- `realtime/` — the ESP32-S3-Matrix. Keys, breath, IMU, DAC loop, the LED
+  strips and the 8×8 matrix (the only display), USB MIDI and USB
+  configuration. Owns all state and persistence. This is the instrument.
 
-Joined by a framed UART. Put a protocol version in the frame header from the
-first commit — two images that can drift apart need a way to notice.
+There is no display board and no radio: WiFi and BLE stay off.
 
 PlatformIO, ESP-IDF underneath. Nothing here yet — Track F follows Track E
 (see [ROADMAP.md](../ROADMAP.md)).
@@ -20,7 +18,7 @@ and [the latency budget](../docs/reference/latency-budget.md), and they are not
 negotiable without revisiting those:
 
 - **4 kHz loop** for sensor read and DAC update, pinned to one core.
-- **Display renders on the other core, on its own SPI host.** A display refresh
+- **Lighting renders on the other core, through RMT.** A matrix or strip update
   must never block the output loop.
 - **Asymmetric key debounce** — fire immediately on press, filter only the
   release. A symmetric window puts its full length into the attack. The
@@ -36,11 +34,9 @@ negotiable without revisiting those:
   filter is fixed; firmware knows what each channel carries.
 - **Nothing expressive touches the ESP32's internal ADC.** It is noisy and
   nonlinear, and breath drives a 0–10V output where that shows.
-- **WiFi and the display are on the other MCU.** They cannot preempt the output
-  loop. What remains is the current transient a transmit burst puts on the
-  shared rail, handled with separate regulators rather than by scheduling
-  ([ADR 0012](../docs/decisions/0012-configuration-interface.md),
-  [ADR 0013](../docs/decisions/0013-two-mcu-split.md)).
+- **There is no radio.** WiFi and BLE are never started, so no transmit burst
+  can preempt the output loop or land on the rail the breath path shares
+  ([ADR 0015](../docs/decisions/0015-one-mcu-no-display.md)).
 - **Refresh everything, every pass. Never write-on-change.** The umbilical is
   write-only — `MISO` was deleted from the cable (ADR 0004) — so nothing
   downstream can ever be read back. *With no readback, shared state can only be
@@ -95,15 +91,16 @@ The body comes apart on six fasteners (ADR 0009), but answering a failed
 flash that way means lifting the lid, disturbing the loom and re-laying the
 gasket. Everything here exists so that it never has to be the answer.
 
-- **Two OTA partitions, with `CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE`.** An
-  image that does not mark itself valid is rolled back by the bootloader on the
-  next boot. Free, and it turns the most likely bricking event into a reboot.
+- **Two app partitions, with `CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE`.** There
+  is no OTA — no radio — but an image flashed over USB into the inactive slot
+  that does not mark itself valid is still rolled back by the bootloader on the
+  next boot. It turns the most likely bricking event into a reboot.
 - **USB MIDI is opt-in, not the default.** On the ESP32-S3 the internal PHY
   routes to USB-Serial-JTAG *or* USB-OTG, never both. The moment the
   application claims OTG the `DTR`/`RTS` download-mode path is gone. Leaving
   MIDI off until the player enables it keeps the serial-JTAG reset path alive
   through every boot that has not been asked for MIDI.
-- **The recovery ladder, in order.** (1) OTA rollback. (2) USB-Serial-JTAG
+- **The recovery ladder, in order.** (1) Rollback to the other app slot. (2) USB-Serial-JTAG
   through the tail USB-C slot — which is why MIDI is opt-in. (3) The console
   header under the service cover (ADR 0009), for watching a board that boots
   but misbehaves. **There is no hardware boot-force**: `EN` and `IO0` are not
@@ -112,10 +109,6 @@ gasket. Everything here exists so that it never has to be the answer.
   opening the body to get at the board — narrow, behind two mitigations,
   accepted. **This used to read "ends the instrument", which was true of a
   bonded body and is not true of this one** (ADR 0009).
-- **The display board is flashed over its UART, by the real-time board.** That
-  closes ADR 0013's open question and removes the one case where a board with
-  no external connector of its own needed hardware recovery. It gets the same
-  two OTA partitions.
 - **Exercise the ladder at M8**, before the body closes, so it is known good
   rather than assumed.
 
@@ -150,25 +143,31 @@ Two things are explicitly configuration rather than compiled constants
 - **Routing matrix** — four mod channels, each with source, scale, offset, curve
   and slew.
 
-Both live in NVS and are editable from the display and over USB.
+Both live in NVS and are edited over USB.
 
 ## Bring-up fixtures
 
 Throwaway test firmware for E-track milestones belongs in `fixtures/`, not in
 the instrument firmware. It is a tool, not a deliverable.
 
-## Configuration lives on a phone
+## Configuration is over USB
 
-Config is a web app served from the display board's flash over SoftAP, not a
-menu system ([ADR 0012](../docs/decisions/0012-configuration-interface.md)). The
-display shows status only.
+Config is a page on a computer, talking to the instrument over its own USB-C
+port, not a menu system and not a phone
+([ADR 0015](../docs/decisions/0015-one-mcu-no-display.md)). The matrix shows
+status only.
 
-**Single source of truth:** every config edit round-trips. The phone edits, the
-display board forwards, the real-time board validates, applies, persists and
-echoes back. The display board never writes authoritative state — two
-authorities that can disagree is the failure mode worth designing out.
+**The transport follows the USB PHY rule above.** With MIDI off — the default —
+the only USB function is USB-Serial-JTAG, so configuration rides it (Web Serial
+from a browser, or a host tool). With MIDI on, the same framed messages go as
+SysEx, which Web MIDI can reach. One message format, two carriers; do not let
+configuration be the reason MIDI stops being opt-in.
 
-Build the live-telemetry WebSocket early — it is a test instrument for the
+**Single source of truth:** every config edit round-trips. The page edits, the
+instrument validates, applies, persists and echoes back. The page never holds
+authoritative state.
+
+Build live telemetry over the same link early — it is a test instrument for the
 mechanical and calibration work, not just a configuration convenience.
 
 ## USB MIDI

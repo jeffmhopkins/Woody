@@ -1,6 +1,7 @@
 # 0008 — Display selection
 
-**Status:** Accepted. Board selected: LilyGO T-Display-S3 AMOLED (base, not Plus).
+**Status:** Superseded by [ADR 0015](0015-one-mcu-no-display.md) (2026-09-26): there is no display board;
+the 8×8 LED matrix is the only display.
 
 ## Context
 

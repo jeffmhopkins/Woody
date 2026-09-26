@@ -46,17 +46,18 @@ why it was deleted is worth keeping.
 
 | # | Title | Status |
 |---|---|---|
-| [0001](0001-mcu-and-board-partitioning.md) | MCU selection and board partitioning | Accepted (partitioning revised by 0013) |
+| [0001](0001-mcu-and-board-partitioning.md) | MCU selection and board partitioning | Accepted (partitioning revised by 0013, one MCU since 0015) |
 | [0002](0002-key-switches-and-mounting.md) | Key switches and mounting | Accepted |
 | [0003](0003-breath-sensing-path.md) | Breath sensing signal path | Accepted |
 | [0004](0004-cv-interface-module.md) | CV interface module and umbilical | Accepted |
 | [0005](0005-power-architecture.md) | Power architecture | Accepted |
 | [0006](0006-cv-channel-allocation.md) | CV channel allocation and calibration | Accepted |
 | [0007](0007-imu-selection.md) | IMU selection | Accepted. Board selected: Waveshare ESP32-S3-Matrix |
-| [0008](0008-display-selection.md) | Display selection | Accepted. Board selected: LilyGO T-Display-S3 AMOLED |
+| [0008](0008-display-selection.md) | Display selection | Superseded by 0015 |
 | [0009](0009-enclosure-construction.md) | Enclosure construction | Accepted |
 | [0010](0010-key-layout-as-data.md) | Key layout as data | Accepted |
 | [0011](0011-licensing.md) | Licensing | Accepted |
-| [0012](0012-configuration-interface.md) | Configuration interface | Accepted |
-| [0013](0013-two-mcu-split.md) | Two-MCU split | Accepted |
+| [0012](0012-configuration-interface.md) | Configuration interface | Superseded by 0015 |
+| [0013](0013-two-mcu-split.md) | Two-MCU split | Superseded by 0015 |
+| [0015](0015-one-mcu-no-display.md) | One MCU, no display board | Accepted |
 | [0014](0014-lighting.md) | Lighting | Accepted |

@@ -12,12 +12,6 @@ meshes:
   - name: ks33-mesh
     from: datasheets/mechanical/GATERON-KS-33-3D.step
     out: mechanical/cad/vendor/ks33.stl
-  - name: tdisplay-mesh
-    from: datasheets/mechanical/LILYGO-T-DISPLAY-S3-AMOLED-3D.stp
-    out: mechanical/cad/vendor/t-display-s3-amoled.stl
-    # The STEP draws the display flex unfolded, 20 mm past the board edge
-    # (y < -1.18); fitted, it folds under. Board frame x 0..25.49, y 0..58.78.
-    clip: [-1, -1.2, -2, 27, 60, 7]
 
 # Cameras: [tx, ty, tz, rx, ry, rz, distance]. The LENGTH IS DERIVED, so no
 # camera aims at a fixed X: each render sets `origin` (centre or tail) and

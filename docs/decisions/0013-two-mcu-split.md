@@ -1,6 +1,8 @@
 # 0013 — Two-MCU split
 
-**Status:** Accepted
+**Status:** Superseded by [ADR 0015](0015-one-mcu-no-display.md) (2026-09-26): one MCU, the
+real-time board. Its build approach — dev board as a module, a passive board
+for the rest — still holds.
 
 Revises the board partitioning in [ADR 0001](0001-mcu-and-board-partitioning.md).
 The MCU family choice there still holds for the real-time board.

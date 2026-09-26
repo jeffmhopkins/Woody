@@ -60,7 +60,7 @@ ORDER = [
     "hardware/carrier/breath-excitation-reference/bom.csv",
     "hardware/carrier/breath-adc/bom.csv",
     "hardware/carrier/led-strip-drive/bom.csv",
-    "hardware/carrier/display-and-service-uart/bom.csv",
+    "hardware/carrier/service-uart/bom.csv",
     "hardware/carrier/bom.csv",
     "hardware/cluster/key-register/bom.csv",
     "hardware/cluster/key-switch-network/bom.csv",

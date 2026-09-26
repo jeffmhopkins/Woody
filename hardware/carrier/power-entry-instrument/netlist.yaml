@@ -17,7 +17,6 @@ ports:
   UMBILICAL_POS12: {dir: in,  from: module/umbilical-load-switch, figure: umbilical-current}
   PWR_GND:         {dir: ref, from: module/power-entry, figure: umbilical-pinmap}
   INST_5V_A:       {dir: out, to: carrier/led-strip-drive, figure: matrix-led-current}
-  INST_5V_B:       {dir: out, to: carrier/display-and-service-uart}
   AGND_INST:       {dir: ref, from: carrier/power-entry-instrument, figure: dig-gnd-topology}
 
 # Drawn here for context, owned by carrier/breath-excitation-reference: the
@@ -54,7 +53,7 @@ components:
   L-BUCK-IN:
     value: "10-47uH"
     pins: [1, 2]
-    note: "QTY 1 HERE AND THE BOM BUYS 1, against C-BUCK-IN's qty 2 - the two rows describe different topologies and the page says so. This file draws the one-inductor version because that is what the drawing shows"
+    note: "One inductor, one buck input capacitor, one buck"
 
   C-BUCK-IN:
     value: "100uF"
@@ -66,23 +65,13 @@ components:
     value: "R-78E5.0-1.0"
     drawn_as: R-78E5.0
     pins: [IN, OUT, GND]
-    note: "Buck A: the real-time board, the 8x8 matrix and the 74AHCT125. Loaded to 68-78 percent of its 1 A rating inside a body running 10-20 K above ambient"
-
-  U-BUCK-B:
-    of: U-BUCK
-    value: "R-78E5.0-1.0"
-    pins: [IN, OUT, GND]
-    note: "Buck B: the display board on J-DISP. WHERE IT LIVES IS OPEN - if it moves to the display board, +12 V goes up the loom instead and J-DISP's conductor list changes"
+    note: "The one buck: the real-time board, the 8x8 matrix and the 74AHCT125. Loaded to 68-78 percent of its 1 A rating inside a body running 10-20 K above ambient"
 
   D-USBOR-A:
     of: D-USBOR
     pins: [A, K]
     # NO `value:` - the row is open and offers 1N5817 or SS14, one of the two.
-    note: "ONE PER REGULATOR OUTPUT, not one per source: the OR node is a dev-board pin, and USB can back-feed it"
-
-  D-USBOR-B:
-    of: D-USBOR
-    pins: [A, K]
+    note: "Between the buck and the dev board's 5V pin: the OR node is that pin, and USB can back-feed it"
 
   MECH-GNDBOND:
     value: "Ring terminal"
@@ -105,7 +94,6 @@ nets:
     - L-BUCK-IN.2
     - C-BUCK-IN.1
     - U-BUCK-A.IN
-    - U-BUCK-B.IN
 
   BUCK_A_OUT:
     - U-BUCK-A.OUT
@@ -115,14 +103,6 @@ nets:
     - D-USBOR-A.K
     - port: INST_5V_A
 
-  BUCK_B_OUT:
-    - U-BUCK-B.OUT
-    - D-USBOR-B.A
-
-  INST_5V_B:
-    - D-USBOR-B.K
-    - port: INST_5V_B
-
   PWR_GND:
     - port: PWR_GND
     - D-REVSHUNT.A
@@ -131,7 +111,6 @@ nets:
     - C-STRIP-BULK-R.2
     - C-BUCK-IN.2
     - U-BUCK-A.GND
-    - U-BUCK-B.GND
     - MECH-GNDBOND.1
 
   # ------------------------------------------------------------------

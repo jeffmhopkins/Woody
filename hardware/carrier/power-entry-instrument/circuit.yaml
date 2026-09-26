@@ -16,7 +16,6 @@ depends_on:
 - fig:umbilical-current
 - fig:umbilical-pinmap
 - refdes:C-BUCK-IN
-- refdes:C-BULK-DISP
 - refdes:C-REF-OUT
 - refdes:C-STRIP-BULK
 - refdes:D-REVSHUNT
@@ -28,7 +27,6 @@ depends_on:
 - refdes:U-BUCK
 - circuit:carrier/breath-adc
 - circuit:carrier/breath-excitation-reference
-- circuit:carrier/display-and-service-uart
 - circuit:carrier/led-strip-drive
 - circuit:module/power-entry
 - circuit:module/umbilical-load-switch

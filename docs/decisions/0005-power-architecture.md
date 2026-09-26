@@ -175,6 +175,12 @@ document used — 85 % is the 28 V-input figure.
 *(ADR 0014's ×0.49 umbilical conversion factor survives by coincidence: two ~6 %
 errors in opposite directions.)*
 
+> **Every row above includes the display board, which no longer exists (2026-09-26, [ADR 0015](0015-one-mcu-no-display.md)).**
+> Its share was only ever estimated, so the table is now an **upper bound**, and
+> the "live config over WiFi" row describes nothing — there is no radio. The
+> register's `umbilical-current` is blocked on E6 rather than re-derived from
+> a guess.
+
 **None of this is measured.** E6 measures the real draw with a current probe,
 and every number above is superseded the moment it does.
 
@@ -187,11 +193,9 @@ umbilical +12V ──┬── WS2815 LED strips          (direct, no conversion
                  │
                  ├── OPA2197 V+  (½ reference buffer, ½ breath buffer)
                  │
-                 ├── 12V→5V buck A ─┬── real-time board 5V pin
+                 ├── 12V→5V buck ───┬── real-time board 5V pin
                  │                  ├── 8×8 matrix (via that board)
                  │                  └── LED data level shifter
-                 │
-                 ├── 12V→5V buck B ──── display board 5V pin
                  │
                  └── TVS array / LC filter at entry  (no fuse — see below)
 
@@ -204,7 +208,12 @@ real-time board 3V3 out ──┬── 74HC165 chain
 chain (microamps), the ADC (milliamps) and pull-ups, all comfortably inside the
 headroom of the real-time board's onboard regulator.
 
-**Two bucks, not one.** ADR 0013 asks for a regulator per board so the display
+> **Superseded (2026-09-26, [ADR 0015](0015-one-mcu-no-display.md)): one buck.** There is no display board for buck B to
+> feed. The clamp-legal-worst 5 V figure above assumed both boards; without the
+> display it is the matrix and the real-time board behind one 1 A part, and
+> ADR 0014's lighting clamp is what keeps it there. E6 measures it.
+
+~~**Two bucks, not one.**~~ ADR 0013 asked for a regulator per board so the display
 board's WiFi bursts are absorbed locally instead of reaching the analog section,
 and the load table above gives the second reason: 928 mA of clamp-legal worst
 case does not fit behind one 1 A part. Split, the real-time side carries the

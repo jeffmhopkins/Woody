@@ -610,9 +610,10 @@ figures:
       figure could take, so it is exactly the token that proves nothing.
 
   - id: umbilical-current
-    quantity: Instrument current down the umbilical, typical play
+    quantity: Instrument current down the umbilical, typical play (upper bound since ADR 0015)
     value: "359 mA"
-    status: settled
+    status: blocked
+    blocked_on: "An E6 current-probe measurement. The derivation below includes the display board, which ADR 0015 removed; its share was only ever estimated, so the figure is an upper bound and is not re-derived from a guess."
     owner: docs/decisions/0005-power-architecture.md
     derivation: "226 mA x 5 V / (0.9 x 11.4 V) + 248 mA = 358.1 mA. This is the only derived figure; eight others are asserted."
     forbidden: ["~275 instrument", "Drop at 290 mA", "+12 V | ~320 mA"]

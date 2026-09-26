@@ -5,6 +5,11 @@ moved verbatim; nothing was reworded and no value was touched in the move. The
 board-level context this circuit sits in — the one dev-board socket, the block
 diagram, the board outline — stays on [`carrier.md`](../carrier.md).
 
+> **One buck, not two (2026-09-26, ADR 0015).** The second regulator ("buck
+> B") fed the display board, which was removed; its row, its diode, its
+> input capacitor and `C-BULK-DISP` went with it. What is below is the one
+> that is left.
+
 ## Interfaces
 
 Every net that crosses this circuit's boundary. Quantities appear **only** as a
@@ -21,8 +26,7 @@ The `Dir` and `Peer` columns are defined once in
 | `+12V` strip feed | out | `carrier/led-strip-drive` | — | Taken direct off the input node. `C-STRIP-BULK` is this circuit's part. **The same net as the row above** — `D-REVSHUNT` is a shunt and `D-TVS-PWR` a clamp, so nothing is in series between `J-UMB` pin 3 and this tap |
 | `+12V` analog | out | `carrier/breath-excitation-reference` | — | REF5050 `VIN`, and the V+ of both OPA2197 halves. **Also the same net**, for the same reason |
 | 5 V, buck A | out | `HDR-DEV`, `carrier/led-strip-drive` | `matrix-led-current` | Through `D-USBOR` onto the dev board's 5 V pin, and on to the 74AHCT125 |
-| 5 V, buck B | out | `carrier/display-and-service-uart` | — | On `J-DISP`. Buck B's location is open — see *Still open* |
-| `PWR_GND` pour | ref | `carrier/display-and-service-uart`, `carrier/led-strip-drive`, `carrier/carrier` | `dig-gnd-topology` | The whole board returns here, and the aluminium key plate through `MECH-GNDBOND`, which can only originate here. **`carrier/breath-adc` and `carrier/breath-excitation-reference` are no longer listed**: both of those pages say their return is `AGND_INST`, which reaches this pour on the **single tie** and is a different node everywhere else — and that distinction is the whole point of the star |
+| `PWR_GND` pour | ref | `carrier/service-uart`, `carrier/led-strip-drive`, `carrier/carrier` | `dig-gnd-topology` | The whole board returns here, and the aluminium key plate through `MECH-GNDBOND`, which can only originate here. **`carrier/breath-adc` and `carrier/breath-excitation-reference` are no longer listed**: both of those pages say their return is `AGND_INST`, which reaches this pour on the **single tie** and is a different node everywhere else — and that distinction is the whole point of the star |
 
 ## §1 Power entry
 
@@ -51,9 +55,7 @@ the two agree, and where they do not the netlist wins.*
                      │   10–47 µH    │      │                 D-USBOR  ├── 74AHCT125
                      │   [C-BUCK-IN 100µF]  │                         └── (8×8 matrix,
                      │      25V, real ESR   │                              via the board)
-                     │               │      │
-                     │               └──────┼──[R-78E5.0 B]──▷|──── J-DISP 5V
-                     │                      │                 D-USBOR   ?? see Still open
+                     │                      │
  J-UMB pin 6 PWR_GND ┴──────────────────────┴──── PWR_GND pour
                                              │
                                              └──[MECH-GNDBOND]── aluminium key plate
@@ -94,18 +96,16 @@ Margin: |R_neg| / Z0_peak = 103 / 0.47 ≈ 220× (47 dB)
 **Regulator loading** `[calc]`, from ADR 0005's load table:
 
 ```
-Clamp-legal worst on the 5 V rail, total                        928 mA  [repo] 0005
-Less the display board, which is on buck B                  ~150–250 mA  ESTIMATED
-Buck A (real-time board + matrix + 74AHCT125)                ~680–780 mA
+Clamp-legal worst on the 5 V rail, as ADR 0005 tabled it         928 mA  [repo] 0005
+Less the display board's share (removed, ADR 0015)          ~150–250 mA  ESTIMATED
+The one buck (real-time board + matrix + 74AHCT125)          ~680–780 mA
 R-78E5.0-1.0 rating                                            1000 mA
                                                               → 68–78 %
 ```
 
-ADR 0005 says "neither is near its rating". Seventy-odd percent, inside a body
-running 10–20 K above ambient, is near enough to want the derating curve.
-**ADR 0005's load table has one 5 V column and the two-regulator decision needs
-it split per buck. That split is not written anywhere and it is what sizes both
-parts.**
+Seventy-odd percent, inside a body running 10–20 K above ambient, is near
+enough to want the derating curve. **The display board's share was only ever
+estimated**, so the figure is a range until E6 measures the rail.
 
 ---
 
@@ -127,10 +127,10 @@ named as they stand; **proposed** rows have no BOM entry yet.*
 
 | Ref | Value | Job | Confidence |
 |---|---|---|---|
-| `U-BUCK` ×2 | R-78E5.0-1.0 SIP-3 | One per dev board. **Buck B's location is open** | `[repo]` |
+| `U-BUCK` | R-78E5.0-1.0 SIP-3 | The one dev board, the matrix, the level shifter. **10.4 mm tall upright** — the centre board has less than that under the keys (`mechanical/drc.echo`) | `[repo]` |
 | `L-BUCK-IN` | 10–47 µH ≥1 A | **Qty 1 against `C-BUCK-IN`'s qty 2 "one per buck" — the two rows describe different topologies** | `[repo]`, contradictory |
-| `C-BUCK-IN` ×2 | 100 µF 25 V electrolytic | **Must have real ESR; a ceramic breaks the damping** | `[repo]` + `[calc]` |
-| `D-USBOR` ×2 | SS14 | **One per regulator output, not "one per source" — the OR node is a dev-board pin** | `[repo]` note is wrong |
+| `C-BUCK-IN` | 100 µF 25 V electrolytic | **Must have real ESR; a ceramic breaks the damping** | `[repo]` + `[calc]` |
+| `D-USBOR` | SS14 | **Between the buck and the dev board's 5V pin** — the OR node is that pin, and USB can back-feed it | `[repo]` |
 | `D-REVSHUNT` | SS34 | At the connector, ahead of `L-BUCK-IN` | `[repo]` |
 | `D-TVS-PWR` | SMAJ15A | Across the power pair | `[repo]` |
 | `C-STRIP-BULK` ×2 | 470–1000 µF 16 V | At each strip feed point, which is this board | `[repo]` |
@@ -141,10 +141,6 @@ named as they stand; **proposed** rows have no BOM entry yet.*
 
 *Moved verbatim from `carrier.md`'s `Still open` list.*
 
-- **Where buck B lives.** ADR 0013's carrier list puts both regulators here;
-  ADR 0013's own reasoning wants the display board's WiFi transients absorbed
-  locally, which a regulator 360 mm away does not do. Either it moves to the
-  display board and +12 V goes up the loom, or `C-BULK-DISP` does the job and
-  the location is arbitrary. Pick one before `J-DISP`'s conductor list is fixed.
-- **`L-BUCK-IN` qty 1 against `C-BUCK-IN` qty 2.** One LC and one bulk cap, or
-  two LCs and a missing inductor.
+- **A low-profile regulator.** The R-78E stands 10.4 mm upright and the centre
+  board has less than that under the key boards (`mechanical/drc.echo`,
+  "regulator block fits under the key boards"): an SMD module, or laid flat.

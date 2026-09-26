@@ -200,33 +200,19 @@ nets:
     receivers: [carrier/led-strip-drive]
     note: "Same bootloader-window hazard as IO1"
 
-  IO5:
-    kind: signal
-    domain: digital
-    carries: "UART1 TX, real-time board to the display board on J-DISP"
-    driver: carrier/carrier
-    receivers: [carrier/display-and-service-uart]
-
-  IO6:
-    kind: signal
-    domain: digital
-    carries: "UART1 RX, display board to the real-time board"
-    external_driver: "the display board, which has no page in this corpus"
-    receivers: [carrier/carrier, carrier/display-and-service-uart]
-
   U0TXD:
     kind: signal
     domain: digital
     carries: "The real-time board's console transmit, IO43, to HDR-SERVICE"
     driver: carrier/carrier
-    receivers: [carrier/display-and-service-uart]
+    receivers: [carrier/service-uart]
 
   U0RXD:
     kind: signal
     domain: digital
     carries: "The real-time board's console receive, IO44, from HDR-SERVICE"
     external_driver: "whatever is plugged into the service header"
-    receivers: [carrier/carrier, carrier/display-and-service-uart]
+    receivers: [carrier/carrier, carrier/service-uart]
 
   INST_5V_A:
     kind: power
@@ -235,13 +221,6 @@ nets:
     driver: carrier/power-entry-instrument
     receivers: [carrier/led-strip-drive, carrier/carrier]
     note: "It reaches the 8x8 matrix through the dev board, so carrier/carrier is where it lands and HDR-DEV is the socket it lands through"
-
-  INST_5V_B:
-    kind: power
-    carries: "Buck B, to the display board on J-DISP"
-    driver: carrier/power-entry-instrument
-    receivers: [carrier/display-and-service-uart]
-    note: "WHERE BUCK B LIVES IS OPEN. If it moves to the display board this net becomes +12 V up the loom instead, and J-DISP's conductor list changes with it"
 
   VS:
     kind: signal
@@ -362,7 +341,7 @@ nets:
       - module/umbilical-load-switch
       - carrier/power-entry-instrument
       - interfaces/spi-link
-      - carrier/display-and-service-uart
+      - carrier/service-uart
       - carrier/led-strip-drive
       - carrier/carrier
     note: >

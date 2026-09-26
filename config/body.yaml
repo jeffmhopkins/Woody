@@ -109,7 +109,7 @@ layout:
   mouth_extra:
     value: 10.0
     status: tbd
-    source: "owner: 'a little extra near the mouth' - oak between the mouth cap's inside face and the first thing (the underside display, or the first cap if the display moves)"
+    source: "owner: 'a little extra near the mouth' - oak between the mouth cap's inside face and the first cap"
     decided_by: "M2 - where the lips and the mouthpiece mount land"
   tail_clear:
     value: 3.0
@@ -119,7 +119,7 @@ layout:
   underside_clear:
     value: 3.0
     status: tbd
-    source: "clearance between the underside display and the first thumb recess, and from the last thumb recess to the tail cap"
+    source: "clearance between the mouth cap and the first thumb recess, and from the last thumb recess to the tail cap"
     decided_by: "M4"
   # KEY SPACING. Each hand is a LIST OF
   # GAPS, key centre to key centre from the mouthpiece end, so spacing can be
@@ -161,8 +161,8 @@ layout:
     source: "RH1-3 on the centreline; RH4 / RH5 the little finger's side-by-side pair, centred as LH4 / LH5; RH6 the single key below it, IN LINE with RH4 - the pair key on the player's right, the recorder's direction (owner, 2026-09-26)"
     decided_by: "M2 - hands on the mule; the sign too"
   # EQUAL BANDS (owner, 2026-09-26): the space before the left hand and
-  # between the hands are made the same - the larger that either needs (the
-  # display sets the mouth end's). The TAIL is sized on its own since the LED
+  # between the hands are made the same - the larger that either needs.
+  # The TAIL is sized on its own since the LED
   # matrix is centred in it (matrix_centred). drc.echo prints the band and
   # which set it. `gap` is then only a minimum for the space between the hands.
   equal_bands:
@@ -249,20 +249,6 @@ switch:
 
 # ---------------------------------------------------------------- boards ----
 boards:
-  # The display board's outline and 3D come from the vendor files directly
-  # (datasheets/mechanical/LILYGO-T-DISPLAY-S3-AMOLED-*); nothing is retyped.
-  # The display is on the UNDERSIDE (decided 2026-09-26), glass down, in a
-  # through-cut in the oak bottom. Still in the display band at the
-  # mouthpiece end - ADR 0008's "top" is that end of the instrument.
-  display_recess:
-    value: 1.0
-    status: tbd
-    source: "placeholder - glass face back from the bottom face, so the glass is not what the instrument rests on"
-    decided_by: "M4, with how the board is retained and whether a clear cover goes over it"
-  display_cut_clear:
-    value: 1.5
-    status: nominal
-    source: "[ds] the vendor STEP's glass and flex overhang the DXF board outline by 1.18 mm at the flex end (LILYGO-T-DISPLAY-S3-AMOLED-3D.stp, found by the clash check); cut clears that"
   matrix_board:
     value: 25.0
     status: settled
@@ -332,15 +318,10 @@ boards:
     status: tbd
     source: "2 rows at 2.0 mm pitch [calc]"
     decided_by: "M4, with the part"
-  disp_socket_h:
-    value: 8.5
-    status: tbd
-    source: "HDR-DEV female socket strips on the display board's back, 1 x 14 [from memory]"
-    decided_by: "M4, with the header bought"
   # NO CARRIER: THE CENTRE BOARD (owner, 2026-09-26: "a center board that
   # stacks between the upper and lower key boards"). The carrier's circuits
-  # are on one flat board between the thumb boards and the key boards, from
-  # past the display to the end of the right hand. Its size and the height
+  # are on one flat board between the thumb boards and the key boards, the
+  # length of the hands. Its size and the height
   # its parts have are derived; drc.echo prints them.
   board_clear:
     value: 1.5
@@ -352,21 +333,6 @@ boards:
     status: tbd
     source: "M3 hex standoff across flats, 5.5 [from memory]"
     decided_by: "M4, with the standoff bought"
-  zif_disp_l:
-    value: 15.0
-    status: tbd
-    source: "10-way 1.0 mm FFC connector for the display link (UART, power, grounds), length [from memory]"
-    decided_by: "M4, with the connector bought"
-  zif_w:
-    value: 5.5
-    status: tbd
-    source: "the same, depth from the board edge [from memory]"
-    decided_by: "M4"
-  zif_h:
-    value: 2.5
-    status: tbd
-    source: "the same, height above the board [from memory]"
-    decided_by: "M4"
   # THE LED MATRIX IS ON THE TOP FACE, just past the last key (owner,
   # 2026-09-26), face up against the oak top under its window, the key plate
   # ending short of it; the connectors pass beneath it. A pigtail soldered to
@@ -566,7 +532,7 @@ hardware:
   fastener_inset:
     value: 3.0
     status: tbd
-    source: "placeholder - distance from the inside face of each acrylic side; small, so the holes pass outside the underside display and the side-by-side key pairs"
+    source: "placeholder - distance from the inside face of each acrylic side; small, so the holes pass outside the side-by-side key pairs"
     decided_by: "M4"
   ubolt_rod_d:
     value: 5.0
@@ -626,11 +592,6 @@ routing:
     decided_by: "M4"
   # STANDARD FLAT RIBBON (owner, 2026-09-26), lying FLAT down the centreline
   # (on edge it does not fit between the boards' part layers - clash check).
-  ffc_disp_w:
-    value: 11.0
-    status: tbd
-    source: "10-way FFC at 1.0 mm pitch, width [calc: 10 x 1.0 + margins]"
-    decided_by: "M4, with the conductor count"
   ribbon_t:
     value: 1.0
     status: nominal

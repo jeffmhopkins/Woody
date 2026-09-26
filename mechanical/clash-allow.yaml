@@ -42,6 +42,3 @@ allow:
   - a: "J-STACK *"
     b: "centre board"
     why: "each stacking header passes through the centre board - a pass-through header, or a hole with a header on each face"
-  - a: "FFC *"
-    b: "ZIF *"
-    why: "the flat-flex cable is seated in its ZIF connector"

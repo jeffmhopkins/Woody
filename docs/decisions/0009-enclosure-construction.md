@@ -272,7 +272,8 @@ What changes, and what does not:
   checks.
 - **The playing face is unbroken oak.** The six fasteners stop in the plate
   from below, so no hole in the oak top carries one.
-- **The display is on the underside** (same date), glass down, in a through-cut
+- **Superseded (2026-09-26, [ADR 0015](0015-one-mcu-no-display.md)): there is no display.** The display band is gone
+  and the CAD derives a shorter mouth end. Record: **the display was on the underside** (same date), glass down, in a through-cut
   in the oak bottom — still in the display band at the mouthpiece end. Nothing
   is cut in the plate for it any more.
 - **Thumb keys follow the same rule** (same date): flush with the bottom face at
@@ -447,6 +448,9 @@ in the same laminated layer as the window.
 **There are three lines of defence and this header is the third**, which is
 why losing the boot-force pins is acceptable:
 
+> **(2026-09-26, [ADR 0015](0015-one-mcu-no-display.md)): no radio, so no OTA.** The first line of defence below is
+> gone; USB-Serial-JTAG is now the first, and this header the second.
+
 1. **OTA rollback.** An image that does not mark itself valid is rolled back by
    the bootloader at the next boot. Covers the likely case — a bad flash.
 2. **USB-Serial-JTAG through the tail USB-C slot**, which is a designed opening
@@ -465,7 +469,7 @@ paragraph used to end "ends the instrument", which was true of a bonded body
 and is not true of this one. Still inconvenient, still behind three
 mitigations, no longer fatal.
 
-**The display board needs none of this.** It is flashed over its UART from the
+*(Superseded (2026-09-26, [ADR 0015](0015-one-mcu-no-display.md)): there is no display board.)* ~~The display board needs none of this.~~ It was flashed over its UART from the
 real-time board, which closes ADR 0013's open question about how it gets
 programmed and removes the one case where a board with no external connector
 had to be recovered through hardware.
@@ -602,8 +606,7 @@ cannot.
 
 **Cut the service cover and populate its header**, per the tail-face section
 above. It is the only thing standing between a bad flash and a finished
-instrument that will not boot, and both dev boards depend on it — the display
-board has no external connector at all.
+instrument that will not boot, and the one dev board depends on it (ADR 0015).
 
 **Bond the aluminium plate to `PWR_GND`. Never to `AGND`.** Nothing currently
 bonds it. It floats under the player's hands, one to two millimetres from

@@ -48,7 +48,7 @@ Three ways to wire two runs:
 
 **B.** The deciding factor is physical: chaining needs a data wire crossing the
 cavity at one end of the runs, and **both ends are the congested ones** — the
-display board and breath sensor at the top, the real-time board, IMU and
+display board (removed by ADR 0015) and breath sensor at the top, the real-time board, IMU and
 umbilical connector at the bottom. Adding a signal wire across either, inside a
 stack that is stripped down to reach (ADR 0009), is a liability for no benefit.
 
@@ -326,7 +326,8 @@ rules.
 Span as a setting matters because the sensor's 6 kPa range is roughly twice
 what real playing produces (ADR 0003), so a fixed full-scale mapping would
 leave the top of the display unreachable. The player sets where full brightness
-lands, on the display or in the web app, like any other per-channel setting.
+lands, over the USB configuration interface (ADR 0015), like any other
+per-channel setting.
 
 ## The 8×8 matrix
 
@@ -338,7 +339,8 @@ run. Facing the player's downward glance, not the audience.
 ### It is a generic assignable surface, defaulting to breath
 
 The same shape as the mod channels in ADR 0006: a **sink with a configurable
-source**, set from the display and the web app rather than wired to one thing.
+source**, set over the USB configuration interface (ADR 0015) rather than wired
+to one thing.
 
 | | |
 |---|---|
@@ -352,8 +354,8 @@ source**, set from the display and the web app rather than wired to one thing.
 rotate a PCB to fix a display that reads sideways. One config field.
 
 **What it can do that nothing else in the instrument can is two dimensions.**
-The AMOLED at the top is text, and you are not looking at the far end mid-phrase;
-the side strips are a one-dimensional glow. Tilt and roll are two axes, and
+*(ADR 0015: there is no AMOLED; the matrix is the only display, and also
+carries the status role.)* The side strips are a one-dimensional glow. Tilt and roll are two axes, and
 ADR 0007's capture-on-press gating means there is a captured zero and a live
 deviation from it — which is a dot moving against a centre mark, **with the
 deadband drawn on the grid.** That is the assignment to reach for once breath

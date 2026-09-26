@@ -22,11 +22,9 @@ Three kinds, and `config/body.yaml` marks every leaf with one:
   a `decided_by`. `drc.echo`'s second line lists every one in play, so no
   result can quietly rest on a guess.
 
-Vendor geometry is **imported, not retyped**: the KS-33 and the display board
-are the banked STEP solids meshed by `tools/cad.py`, and the display board's
-outline is the vendor's own DXF. The one exception is the display board's
-overall size, used only to centre it (OpenSCAD cannot measure an import); it is
-the DXF's own DIMENSION entities.
+Vendor geometry is **imported, not retyped**: the KS-33 is the banked STEP
+solid meshed by `tools/cad.py`, and the etherCON is drawn from its banked
+drawing.
 
 ## How the stack is modelled
 
@@ -41,9 +39,11 @@ the DXF's own DIMENSION entities.
 - **Thumb keys are flush with the bottom face at full travel** too (same date).
   The thumb plate is on the oak bottom's inside face, so the oak bottom is
   derived by the same rule as the oak top.
-- **The display is on the underside** (decided 2026-09-26), glass down in a
-  through-cut in the oak bottom, recessed by `boards.display_recess`, still in
-  the display band at the mouthpiece end.
+- **There is no display board** (owner, 2026-09-26: "remove the upper
+  display ... we can do all this with the matrix led, keep things more
+  compact and cleaner"; ADR 0015). The LED matrix on the top face is the
+  instrument's only display, configuration is over USB, and the body lost the
+  display band at the mouth end.
 - **The sides sit between the oak panels, in grooves** (decided 2026-09-26).
   Oak top and bottom run the full width; each acrylic side is one sheet
   standing in a groove along each panel's inner face, behind an oak lip
@@ -70,9 +70,9 @@ model computes the length rather than reading it (`config/key-layout.yaml`'s
 `envelope.length` is null), and `drc.echo` prints it with what set each end.
 Three things can claim each end, and the largest wins:
 
-- **Mouth end:** the first top cap plus `layout.mouth_extra`; or the
-  **underside display**, which sits nearest the mouthpiece and must clear the
-  left-thumb recesses — and in practice it is the display that sets it.
+- **Mouth end:** the first top cap plus `layout.mouth_extra`; the first
+  thumb recess; or the breath trap, which sits across the mouth band before
+  the first key and thumb boards — and then the equal bands (below).
 - **Tail end:** the **LED matrix on the top face, centred** after the keys
   (owner, 2026-09-26), with the etherCON's housing behind it; or the key
   board, the last fastener pair, the patch plug and the etherCON's depth in a
@@ -108,26 +108,25 @@ Three things can claim each end, and the largest wins:
   decides how soft the pixels look. In practice the matrix sets it.
 - **There is no carrier board** (owner, 2026-09-26: "we don't need a
   carrier"): the carrier's circuits are on **the centre board**, one flat
-  board lying between the thumb boards and the key boards, from past the
-  display to the end of the right hand and across the gap between the hands
+  board lying between the thumb boards and the key boards, the length of the
+  hands and across the gap between them
   (owner, same day: "a center board that stacks between the upper and lower
   key boards", after trying a board on edge down the side and a wider body
   for it, and going back to 57 mm). Each thumb board plugs into the key board
   above it through a stacking header that passes through the centre board,
-  so the key chain runs through all three, and the Matrix's pigtail, the
-  patch lead and the display link all end on it. It sits between the tube
+  so the key chain runs through all three, and the Matrix's pigtail and the
+  patch lead end on it. It sits between the tube
   lane and the far LED strip, on spacers onto the thumb boards and
   standoffs off the oak.
 - **Its parts have little height under the keys**, because the board is
   stacked between two others with real clearances (`boards.board_clear`):
   `drc.echo` prints the room. **In the gap between the hands, where no key
   board is overhead**, they have up to the plate, so the breath sensor goes
-  there — mid-body, well away from the display's AMOLED (ADR 0003), but not
-  at the tail end the owner had confirmed for the side board: under the
-  right-hand keys there is no height for it. The two regulator blocks (one
-  per dev board, ADR 0013) do not fit under the keys as specified — *rule
-  "regulator blocks fit under the key boards"* — so they need low-profile
-  parts.
+  there — mid-body, not at the tail end the owner had confirmed for the side
+  board: under the right-hand keys there is no height for it. The regulator
+  block (one, for the one dev board left) does not fit under the keys as
+  specified — *rule "regulator block fits under the key boards"* — so it
+  needs low-profile parts.
 - **Board clearances are real ones** (`boards.board_clear`): the owner
   rejected a model that put one board 0.5 mm over another's parts
   (2026-09-26: "once components are installed you'd have issues").
@@ -179,10 +178,9 @@ decision, not a correction.
    beside the connector (`CBL-USB-EXT`). *Rules: "USB-C extension receptacle
    beside the etherCON body", "tail cap web between the USB-C cutout and the
    etherCON flange"; the cable run is an INFO line.*
-4. **The display is what sets the mouth end.** On the underside it cannot
-   share the space under the left-hand run with the thumb arc, so it adds
-   roughly its own length in front of the keys. *Rule: "what the mouth end
-   needs".* Moving it is the largest remaining length lever.
+4. **The display set the mouth end — resolved by the owner.** It is gone
+   (ADR 0015), and the mouth end is now the equal band. *Rule: "what the
+   mouth end needs".*
 5. **Individual thumb recesses leave almost no oak between them** at the
    ADR 0010 arc spacing. *Rule: "oak-bottom cuts at least 3 mm apart".* ADR 0010
    already asks shared-versus-individual as an M2 question; the model says
@@ -214,11 +212,10 @@ only as good as those envelopes. Group the report's lines by these causes
    at 2.0 mm pitch (2.54 will not fit between two switches' pins, 19 mm
    apart), passing through the centre board. It engages as the lid closes,
    so it must blind-mate, and its height is the board gap, not a stock size.
-2. **No ribbons remain inside the body** except the display link, a short
-   flat-flex from the centre board's mouth end. **The hardware pages do not
-   follow yet:** `hardware/interfaces/key-chain-loom/`, the J-CHAIN, J-DISP,
+2. **No ribbons remain inside the body.** **The hardware pages do not
+   follow yet:** `hardware/interfaces/key-chain-loom/`, the J-CHAIN,
    WIRE-LOOM and HDR-DEV rows, and the register's `chain-connectors` still
-   describe IDC ribbons and dev boards plugged into one carrier, and change
+   describe IDC ribbons and a dev board plugged into one carrier, and change
    when the owner confirms this layout.
 3. **The breath tube** runs the tube lane beside the centre board, between
    the cluster boards' parts, to the gap between the hands and onto the
@@ -242,6 +239,6 @@ hold it. That is a BOM decision, not a CAD one, and is left open here.
 ## Not modelled yet
 
 The thumb rest lip, gasket beads, plate stiffening (ADR 0002 — open, and it changes the lid),
-the diffuser standoff, and anything in the display band beyond the board. The
+and the diffuser standoff. The
 centre board and cluster boards are rectangles, because their outlines are
 M3/M4 outputs.

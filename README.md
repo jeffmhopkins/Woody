@@ -21,7 +21,7 @@ The project splits into two physical deliverables that meet over a single cable:
 | | **Controller** | **Interface module** |
 |---|---|---|
 | Form | Laminated wood/aluminium/acrylic body | 10HP Eurorack module |
-| Contains | Keys, breath sensor, IMU, display, MCU | DAC, analog scaling, jacks, knobs |
+| Contains | Keys, breath sensor, IMU, LED matrix, MCU | DAC, analog scaling, jacks, knobs |
 | Domain | Digital | Analog, ±12V |
 | Primary risk | Mechanical and ergonomic | Analog precision |
 
@@ -46,7 +46,7 @@ Six CV channels from the module:
 - **Pitch** — dedicated, 1V/oct, −2V to +7V, per-unit calibrated
 - **Breath** — dedicated, 0–10V, with panel knobs for gain and offset
 - **Mod 1–4** — assignable; source, scale, offset, curve and slew configured
-  on the instrument's own display
+  over the instrument's USB port (ADR 0015)
 
 ## Design scope
 

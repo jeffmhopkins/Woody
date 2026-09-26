@@ -4,8 +4,8 @@
 > position in `config/key-layout.yaml` is still `null` (they are M2/M3
 > outputs), so keys are placed on ADR 0009's length budget and every render
 > says so in its footer. Keys are **flush with the top face at full travel**
-> — thumb keys included, on the bottom face — and the display is on the
-> **underside** (decided 2026-09-26).
+> — thumb keys included, on the bottom face. **There is no display board**:
+> the LED matrix is the instrument's only display (ADR 0015, 2026-09-26).
 
 The body described in [ADR 0009](../docs/decisions/0009-enclosure-construction.md)
 — a laminated stack of flat parts, every layer a 2D through-cut — as an
@@ -74,7 +74,7 @@ of a superseded value. Instead:
 | `cad/fig_*.scad` | Figure sources with dimensions and labels, drawn from the same variables as the parts. They sit beside the model because OpenSCAD resolves `import()` against the top-level file |
 | `cad/lib/annot.scad` | Dimension and label helpers (from JBrain2's back-plate CAD) |
 | `cad/generated/params.scad` | **Generated.** Every number the model uses, with its source and status |
-| `cad/vendor/*.stl` | **Generated.** The banked KS-33 and T-Display-S3 AMOLED STEP solids, meshed |
+| `cad/vendor/*.stl` | **Generated.** The banked KS-33 STEP solid, meshed |
 | [`outputs.yaml`](outputs.yaml) | Every output: cameras, defines, paths. The build does exactly this list |
 | [`OUTPUTS.csv`](OUTPUTS.csv) | **Generated.** The fingerprint ledger |
 | [`drc.echo`](drc.echo) | **Generated.** The design-rule report — read it after every change |
@@ -88,7 +88,7 @@ of a superseded value. Instead:
 
 | | |
 |---|---|
-| ![Underside](renders/underside.png) Underside: display, thumb recesses, spares (magenta), U-bolt, service cover | ![Exploded](renders/exploded.png) The stack, pulled apart |
+| ![Underside](renders/underside.png) Underside: thumb recesses, spares (magenta), U-bolt, service cover | ![Exploded](renders/exploded.png) The stack, pulled apart |
 | ![Internals](renders/internals.png) Lid off | ![Tail](renders/tail-detail.png) The tail from inside |
 | ![Centre board](renders/centre-board-3d.png) The centre board that replaces the carrier, in yellow | |
 

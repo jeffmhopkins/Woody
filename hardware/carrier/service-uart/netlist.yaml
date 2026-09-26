@@ -1,0 +1,37 @@
+# AUTHORITATIVE for connectivity. This circuit is one header and the
+# conductors to it, and the drawing in the page is a REPRESENTATION of this
+# file.
+#
+# Whatever is plugged into the service header is not part of the instrument,
+# so hardware/nets.yaml marks that end with `external_driver:` rather than
+# inventing a driver or calling the net undriven.
+
+circuit: carrier/service-uart
+title: Service UART header
+page: service-uart.md
+
+ports:
+  U0TXD:     {dir: in,  from: carrier/carrier}
+  U0RXD:     {dir: in,  from: carrier/carrier}
+  PWR_GND:   {dir: ref, from: module/power-entry, figure: dig-gnd-topology}
+
+components:
+
+  HDR-SERVICE:
+    value: "1x3"
+    pins: [RT_TXD, RT_RXD, RT_GND]
+    note: "THREE PINS: the one board's console pair and a ground. EN and IO0 are not on the dev board's headers and are not wired"
+
+nets:
+
+  U0TXD:
+    - port: U0TXD
+    - HDR-SERVICE.RT_TXD
+
+  U0RXD:
+    - port: U0RXD
+    - HDR-SERVICE.RT_RXD
+
+  PWR_GND:
+    - port: PWR_GND
+    - HDR-SERVICE.RT_GND

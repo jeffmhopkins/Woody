@@ -244,6 +244,10 @@ With that gone, three things push the sensor down:
   10–20 minutes, and this is a **gauge sensor with a temperature-dependent
   offset whose zero is captured once at cold startup.** Putting it next to the
   heat source is the worst available placement for both.
+
+  > **Superseded (2026-09-26, [ADR 0015](0015-one-mcu-no-display.md)): there is no display board.** The hottest single
+  > item is gone; the regulator and the dev board remain as heat sources. The
+  > routing argument above is unaffected.
 - **Serviceability.** The sensor is moisture-sensitive (below), and the
   most likely part to fail, in a body that is costly to open (ADR 0009). At the
   bottom it
