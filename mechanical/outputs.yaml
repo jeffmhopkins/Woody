@@ -45,6 +45,13 @@ renders:
     imgsize: [1600, 700]
     camera: [0, 28, 12, 50, 0, 340, 440]
     defines: {origin: "centre", show_lid: false, ghost_shell: true}
+  - name: internals-far
+    title: Lid off from the far side - the key boards' ribbons, the Matrix ribbon, the regulator
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/internals-far.png
+    imgsize: [1600, 700]
+    camera: [0, 28, 12, 50, 0, 160, 440]
+    defines: {origin: "centre", show_lid: false, ghost_shell: true}
   - name: main-board
     title: The main board - thumb switches and carrier circuits on one board - from above, lid off, in yellow, labelled
     src: mechanical/cad/fig_main_board.scad

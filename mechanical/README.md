@@ -89,7 +89,8 @@ of a superseded value. Instead:
 | | |
 |---|---|
 | ![Underside](renders/underside.png) Underside: thumb recesses, both thumb rests, U-bolt | ![Exploded](renders/exploded.png) The stack, pulled apart |
-| ![Internals](renders/internals.png) Lid off | ![Tail](renders/tail-detail.png) The tail from inside |
+| ![Internals](renders/internals.png) Lid off | ![Internals, far side](renders/internals-far.png) Lid off, from the far side: the ribbons |
+| ![Tail](renders/tail-detail.png) The tail from inside | |
 | ![Main board](renders/main-board-3d.png) The main board: thumb switches and carrier circuits on one board, in yellow | |
 
 ![The main board, labelled](renders/main-board.png)

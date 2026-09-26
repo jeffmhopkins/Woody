@@ -740,6 +740,10 @@ strip_l = min(cb_x[1] - lighting_strip_inset, jm_x0 - boards_board_clear) - stri
 // the lid flipped open over the far edge (drc.echo).
 ffc_sz = [boards_ffc_conn_l, boards_ffc_conn_w];   // along x, across y
 ffc_s = tube_side < 0 ? 1 : -1;                  // the far side, where the ribbons are
+// Exploded, the main board rises by e_mb and the key boards by e_kb; the
+// cables stretch to follow, so they stay connected in the picture.
+e_mb = explode * 0.1;
+e_kb = explode * 0.25;
 kb_ffc_y = W / 2 + ffc_s * (switch_cluster_pcb_w / 2 - boards_ffc_conn_w / 2 - 0.5);
 kb_ffc_z = top_z - boards_ffc_conn_h;           // underside of the key board's connector
 mb_ffc_z = cb_top + boards_ffc_conn_h;          // top of the main board's connector
@@ -771,9 +775,9 @@ function mb_ffc(cl) = [ffc_x(cl), mb_ffc_y];
 // what one arc can have in that space, so the lid tilts only a little with
 // the ribbons attached; to take it off, flip the two ZIF latches first
 // (drc.echo gives the angle).
-function ffc_path(cl) = let(zc = (ffc_zk + ffc_zm) / 2)
-    concat([[kb_ffc_y + ffc_s * boards_ffc_conn_w / 2, ffc_zk]],
-           [for (a = [90 : -7.5 : -90]) [ffc_yc + ffc_s * ffc_r * cos(a), zc + ffc_r * sin(a)]]);
+function ffc_path(cl) = let(zk = ffc_zk + e_kb, zm = ffc_zm + e_mb, r = (zk - zm) / 2, zc = (zk + zm) / 2)
+    concat([[kb_ffc_y + ffc_s * boards_ffc_conn_w / 2, zk]],
+           [for (a = [90 : -7.5 : -90]) [ffc_yc + ffc_s * r * cos(a), zc + r * sin(a)]]);
 function path_len(p) = sum([for (i = [0 : len(p) - 2]) norm(p[i + 1] - p[i])]);
 // The lid hinged on its far top edge and opened by phi: where the key
 // board's connector goes, and how far that is from the main board's.
@@ -783,9 +787,9 @@ function ffc_need(phi) = let(s = tube_side < 0 ? 1 : -1, hy = s > 0 ? W : 0, a =
 function ffc_open_angle(l, phi = 0) = phi < 180 && ffc_need(phi + 1) <= l - 3 ? ffc_open_angle(l, phi + 1) : phi;
 module ribbons_3d() {
     for (cl = ribbon_cls) let(k = kb_ffc(cl), m = mb_ffc(cl), p = ffc_path(cl)) {
-        P([0.85, 0.85, 0.80], false, str("ZIF ", cl, " key board")) translate([k[0] - ffc_sz[0] / 2, k[1] - ffc_sz[1] / 2, kb_ffc_z])
+        P([0.85, 0.85, 0.80], false, str("ZIF ", cl, " key board")) translate([k[0] - ffc_sz[0] / 2, k[1] - ffc_sz[1] / 2, kb_ffc_z + e_kb])
             cube([ffc_sz[0], ffc_sz[1], boards_ffc_conn_h]);
-        P([0.85, 0.85, 0.80], false, str("ZIF ", cl, " main board")) translate([m[0] - ffc_sz[0] / 2, m[1] - ffc_sz[1] / 2, cb_top])
+        P([0.85, 0.85, 0.80], false, str("ZIF ", cl, " main board")) translate([m[0] - ffc_sz[0] / 2, m[1] - ffc_sz[1] / 2, cb_top + e_mb])
             cube([ffc_sz[0], ffc_sz[1], boards_ffc_conn_h]);
         // Swept as a strip of the ribbon's width along x, bending in (y, z).
         P([0.80, 0.55, 0.20], false, str("ribbon ", cl)) for (i = [0 : len(p) - 2])
@@ -809,8 +813,8 @@ function sbend(a, e, r, n = 8) = let(h = a[1] - e[1], sg = h >= 0 ? 1 : -1, H = 
            [for (i = [0 : n]) let(t = 270 + th * (n - i) / n) [e[0] + r * cos(t), e[1] + sg * (r + r * sin(t))]], [e]);
 function sbend_dx(h, r) = abs(h) >= 2 * r ? 2 * r : 2 * r * sin(acos(1 - abs(h) / (2 * r)));
 module tail_wiring_3d() {
-    P([0.85, 0.85, 0.80], false, "J-MCU") translate([jm_x0, jm_y - jm_sz[1] / 2, cb_top]) cube([jm_sz[0], jm_sz[1], boards_mcu_conn_h]);
-    P([0.85, 0.85, 0.80], false, "J-UMB") translate([ju_x1 - ju_sz[0], ec_sock_c[0] - ju_sz[1] / 2, cb_top]) cube([ju_sz[0], ju_sz[1], boards_umb_conn_h]);
+    P([0.85, 0.85, 0.80], false, "J-MCU") translate([jm_x0, jm_y - jm_sz[1] / 2, cb_top + e_mb]) cube([jm_sz[0], jm_sz[1], boards_mcu_conn_h]);
+    P([0.85, 0.85, 0.80], false, "J-UMB") translate([ju_x1 - ju_sz[0], ec_sock_c[0] - ju_sz[1] / 2, cb_top + e_mb]) cube([ju_sz[0], ju_sz[1], boards_umb_conn_h]);
     P([0.30, 0.30, 0.80], false, "Matrix ribbon") for (i = [0 : len(mcu_path) - 2])
         hull() for (q = [mcu_path[i], mcu_path[i + 1]]) translate([q[0], jm_y, q[1]]) cube([routing_mcu_ribbon_t, routing_mcu_ribbon_w, routing_mcu_ribbon_t], center = true);
     P([0.25, 0.45, 0.75], false, "patch lead") run([for (q = umb_path) [q[0], ec_sock_c[0], q[1]]], routing_umb_cable_od);
@@ -852,15 +856,15 @@ mcu_r = 4;   // drawing convention: the ribbon's bends
 // edge), one bend, and level into J-MCU.
 mcu_x = matrix_xy[0] - boards_matrix_board / 2 + 1.5;
 mcu_path = concat([[mcu_x, matrix_board_z - boards_matrix_harness_h]],
-                  [for (i = [0 : 8]) let(t = 180 * 0 + 90 * i / 8) [mcu_x - mcu_r + mcu_r * cos(t), jm_z + mcu_r - mcu_r * sin(t)]],
-                  [[jm_x1, jm_z]]);
+                  [for (i = [0 : 8]) let(t = 90 * i / 8) [mcu_x - mcu_r + mcu_r * cos(t), jm_z + e_mb + mcu_r - mcu_r * sin(t)]],
+                  [[jm_x1, jm_z + e_mb]]);
 // J-UMB: in line with the patch plug, where its bend lands.
 pb_x = ec_panel_x - ethercon_depth - ethercon_rj45_plug_l;     // the patch plug's cable end
 umb_r = routing_umb_cable_od * routing_umb_bend_r_per_od;
 ju_z = cb_top + boards_umb_conn_h / 2;
 ju_x1 = pb_x - 1 - sbend_dx(ec_sock_c[1] - ju_z, umb_r);       // J-UMB's mouth
 ju_sz = [boards_umb_conn_w, boards_umb_conn_l];
-umb_path = sbend([pb_x, ec_sock_c[1]], [ju_x1, ju_z], umb_r);
+umb_path = sbend([pb_x, ec_sock_c[1]], [ju_x1, ju_z + e_mb], umb_r);
 // Standoffs off the oak: candidates along both edge bands and at the thumb
 // rests, kept where nothing else is - the soldered thumb switches, clipped
 // into their plates, carry the board between them.
@@ -958,16 +962,19 @@ module hardware_3d() {
     lam(z_floor, hardware_backplate_t, C_ALU, false, "U-bolt backplate") ubolt_backplate_2d();
 }
 
+// The shell is drawn LAST: a see-through (ghosted or faded) part drawn
+// before what is behind it hides it in the preview renderer, which is how
+// the ribbons went missing from the first renders of them.
 module assembly() {
-    if (show_u) u_channel();
-    if (show_caps) caps();
-    if (show_lid) lid(explode);
     if (show_keys) { keys_3d(); thumb_plates_3d(); }
     if (show_boards) { cluster_boards(); tail_equipment(); }
-    if (show_strips) translate([0, 0, explode * 0.1]) led_strips();
+    if (show_strips) translate([0, 0, e_mb]) led_strips();
     if (show_routing) routing_3d();
-    if (show_boards) { parts_3d(); translate([0, 0, explode * 0.1]) { sensor_3d(); centre_board_3d(); } ribbons_3d(); tail_wiring_3d(); }
+    if (show_boards) { parts_3d(); translate([0, 0, e_mb]) { sensor_3d(); centre_board_3d(); } ribbons_3d(); tail_wiring_3d(); }
     if (show_hardware) hardware_3d();
+    if (show_lid) lid(explode);
+    if (show_caps) caps();
+    if (show_u) u_channel();
 }
 
 // =============================================================== DRC ======
