@@ -95,7 +95,7 @@ it is free"* `[repo] 0001`.
 
 `LT` and `LH` are both in the upper region of the body, at roughly equal
 distance from the carrier, so **swapping them is free in skew terms and saves a
-crossing** — a crossing being a run through the 38 mm body thickness, past the
+crossing** — a crossing being a run through the body's thickness (`body-thickness`), past the
 LED channel, terminated by hand, inside something that bonds shut.
 
 **Proposed, not applied**, because the physical positions are all `null` until

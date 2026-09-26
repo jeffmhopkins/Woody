@@ -22,7 +22,7 @@ meta:
     # and prints it in mechanical/drc.echo ("overall length"). Not a number
     # here: a stated length would go stale with every key move.
     length: null
-    thickness: 38   # 1.5 in
+    thickness: 42   # `body-thickness`, config/figures.yaml - stated in ADR 0009
     width: 57       # 2.25 in
   origin: top-left of key plate, +x right, +y down
   switch: gateron-ks33

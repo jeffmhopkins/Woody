@@ -683,6 +683,16 @@ figures:
       bounce, and nothing in the corpus said so until the latency budget was
       made to close.
 
+  - id: body-thickness
+    quantity: Instrument body thickness, oak top face to oak bottom face (config/key-layout.yaml envelope.thickness)
+    value: "42.0 mm"
+    status: settled
+    owner: docs/decisions/0009-enclosure-construction.md
+    derivation: "Owner, 2026-09-26: raise the body rather than pocket the oak bottom for the etherCON. The connector stands on the floor with its rear socket and patch plug under the LED matrix, which hangs from the lid; mechanical/drc.echo ('body thickness takes the etherCON on the floor') gives the thinnest body that allows it, and 42 is that rounded up to the next whole millimetre."
+    provenance_note: "The original 38 mm (1.5 in) was a grip argument in ADR 0009; that argument is unchanged at 42."
+    forbidden: ["57 × 38", "2.25 × 1.5 in", "38 mm body thickness", "38 mm of cavity", "38 mm of stack", "on a 38 mm", "1.5 inches thick", "thickness: 38"]
+    false_positive_note: "38 and 1.5 are common numerals in this corpus (a 1.5 mm plate candidate, drill sizes). Match the phrase, never the numeral."
+
   - id: plate-thickness
     quantity: Key plate thickness (PLATE-TOP, PLATE-THUMB)
     value: "1.20 mm"

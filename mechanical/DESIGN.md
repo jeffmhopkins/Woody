@@ -85,9 +85,11 @@ Three things can claim each end, and the largest wins:
   off its mouth edge, and — because the NE8FDP is a feedthrough with an RJ45
   socket at its back — the etherCON's rear socket and a patch lead's plug,
   down the left side lane. Only the connector's full-height housing queues
-  behind the Matrix, and it sits in a pocket in the oak bottom. `drc.echo`
+  behind the Matrix. The connector **stands on the floor**, and the body is
+  thick enough for its socket to clear the Matrix (owner, same day: raise the
+  body rather than pocket the oak — `body-thickness`, ADR 0009). `drc.echo`
   itemises "behind the Matrix", confirms the socket passes under, and gives
-  the pocket's depth. **With the matrix centred, anything in front of or
+  the thinnest body that works. **With the matrix centred, anything in front of or
   behind it counts twice, and the gap between the hands copies the result** —
   a straight USB-C plug cost about 24 mm of body, which is why the plug is
   right-angle (`openings.usb_plug_l`).
@@ -141,11 +143,11 @@ decision, not a correction.
    exceeded the NE8FDP's maximum panel. The owner freed the mounting
    (2026-09-26): flange and chassis sit behind the tail cap, and the panel
    limit no longer applies.
-2. **The etherCON body is taller than the cavity.** Centred on the tail face,
-   the connector body (taken at the bore diameter — the real body is at least
-   that) reaches into the oak top and bottom. *Rule: "etherCON body inside the
-   cavity height".* The lamination can take through-cuts at the tail, but they
-   must be in the DXF before gluing.
+2. **The etherCON body is taller than the cavity — resolved by the owner.**
+   The body is now thick enough to take the connector standing on the floor,
+   with its rear socket under the Matrix (`body-thickness`, 2026-09-26).
+   *Rules: "etherCON body inside the cavity height", "body thickness takes
+   the etherCON on the floor".*
 3. **The Matrix's USB-C reaches the tail through an extension** (owner,
    2026-09-26). Its port cannot reach the face — the etherCON fills the
    tail's depth — so a panel-mount USB-C extension runs to a receptacle
@@ -207,8 +209,7 @@ only as good as those envelopes. Group the report's lines by these causes
    through the carrier and the U-bolt backplate. The tail pair is clear.
 6. **The tail is clear.** The etherCON, its rear socket, the patch plug,
    the USB-C plug, receptacle and lead, the Matrix and the last fastener pair
-   meet nothing. The housing is taller than the cavity, so it takes a pocket
-   in the oak bottom — cut before the U is glued.
+   meet nothing, and the connector fits the cavity without cutting the oak.
 
 **The ribbons are standard flat ribbon, lying flat** down the body just off
 its centreline, stacked, folding off to each socket (owner asked for standard

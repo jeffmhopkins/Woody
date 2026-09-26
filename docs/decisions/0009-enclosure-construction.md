@@ -14,7 +14,15 @@ feels right.
 
 ## Envelope
 
-**Width and thickness: 2.25 × 1.5 inches — 57 × 38 mm.**
+**Width 2.25 inches (57 mm); thickness 42.0 mm, about 1.65 inches** — the
+register's `body-thickness`, stated here.
+
+> **The thickness was 1.5 inches until 2026-09-26**, when the owner raised it
+> by a few millimetres rather than pocket the oak bottom for the etherCON. The
+> connector now stands on the floor with its rear socket and patch plug under
+> the LED matrix, which hangs from the lid; `mechanical/drc.echo` ("body
+> thickness takes the etherCON on the floor") gives the thinnest body that
+> allows it, and this figure is that rounded up to a whole millimetre.
 
 > **The length is no longer set here (owner, 2026-09-26: "minimize total
 > length").** It is derived by the body CAD from the key layout, a little at
@@ -71,7 +79,7 @@ transceivers stay a contingency rather than a likely requirement.
 
 ### Thickness is bounded by switch bodies, not boards
 
-38 mm of stack, consumed roughly as:
+The body's thickness (`body-thickness`), consumed roughly as:
 
 ```
   oak top                   = cap height above the seat - travel  <- flush rule, below
@@ -85,7 +93,7 @@ transceivers stay a contingency rather than a likely requirement.
 are flush at full travel" below. The cavity arithmetic does not change: the
 lid is the same two layers in the other order.
 
-That leaves around 20 mm of clear cavity — except where switch bodies intrude.
+That leaves the clear cavity the body CAD derives (`mechanical/cad/woody_body.scad`, `cavity_h`) — except where switch bodies intrude.
 Top switches pass through the plate and oak and protrude slightly into the
 cavity; the bottom thumb switches mount to the inside face and protrude *up*
 into it by most of their body height.
@@ -95,8 +103,8 @@ this ADR previously called it unmeasured and deferred it to M1, which was wrong
 on both counts: the switch is documented, and the number was available all along
 (ADR 0002).
 
-That is good news for the cavity. Against 20 mm of clear space, even if the
-entire 12.2 mm sat inside it there would be 8 mm left, and in practice several
+That is good news for the cavity. Against that clear space, even if the
+entire 12.2 mm sat inside it there would be room left, and in practice several
 millimetres of that height is stem and top housing sitting *above* the plate.
 **The earlier worry that "usable cavity may be half of what it is elsewhere" in
 the thumb regions looks overstated.**
@@ -107,7 +115,7 @@ the reason to download the drawing and the STEP model before starting M4 rather
 than modelling against a nominal box.
 
 Boards are not the constraint on *depth*. An ESP32-S3-WROOM module on a PCB is
-around 5 mm total. 38 mm is comfortable; it is the switch bodies and the U-bolt
+around 5 mm total. The thickness is comfortable; it is the switch bodies and the U-bolt
 that eat the space.
 
 **But the cavity is not a clear box in plan, either.** Switch bodies run down
@@ -118,10 +126,10 @@ narrow side channels flanking the switch column — which are the natural route
 for wiring looms. Board outlines belong on that plan, not on the raw envelope
 (ADR 0013).
 
-### 1.5 inches suits the grip
+### The thickness suits the grip
 
 The left hand sandwiches the body between fingers and thumb (ADR 0010). At
-1.5 inches thick that is a comfortable pinch — about the span of a thick book
+`body-thickness` that is a comfortable pinch — about the span of a thick book
 spine. Thinner would make the grip cramped and give the thumb less leverage;
 much thicker would strain it.
 
@@ -320,8 +328,9 @@ thumb keys and the U-bolt:
 > carrier by a pigtail soldered to its pads, so **the carrier cutout below is
 > no longer needed** and which face carries the LEDs stops being a risk. The
 > etherCON's rear socket and the patch plug pass **under** it, beside its
-> USB-C plug, so only the connector's housing queues behind it; the housing
-> sits in a pocket in the oak bottom. The carrier is no longer under the
+> USB-C plug, so only the connector's housing queues behind it; the connector
+> stands on the floor, and the body is thick enough for that
+> (`body-thickness`). The carrier is no longer under the
 > Matrix — where it goes is open (`mechanical/DESIGN.md`, the interference
 > check). The paragraphs below are the original underside design.
 
@@ -361,25 +370,32 @@ it is unchanged. The body CAD checks the receptacle fits beside the connector
 and reports the cable run (`mechanical/drc.echo`).
 
 **And the umbilical connector, which is the reason the tail face is now
-crowded.** The etherCON chassis flange (ADR 0004) is roughly 26 × 31 mm on a
-face that measures 57 × 38 mm. Two consequences:
+crowded.** The etherCON chassis flange (ADR 0004)
+is roughly 26 × 31 mm on a face 57 mm wide and `body-thickness` tall. Two
+consequences:
 
-- **It leaves about 7.1 mm of material above and below the cutout** — not the
-  3.5 mm this bullet used to claim. **That was the flange, and the flange is
-  not what is cut away.** The chassis bore is **⌀24.0 mm minimum**, read off
-  Neutrik drawing ST-NE8FDP (`datasheets/connectors/NE8FDP.pdf`), so on a 38 mm
-  tall face the remaining material is `(38 − 24.0)/2 = 7.0 mm` per side. The
-  26 × 31 flange *overlaps* that face and clamps against it; it removes
-  nothing. Double the material the page thought it had, and it changes the
-  answer below from "marginal" to "fine".
+- **What is cut away is the bore, not the flange.** The chassis bore is
+  **⌀24.0 mm minimum**, read off Neutrik drawing ST-NE8FDP
+  (`datasheets/connectors/NE8FDP.pdf`); the 26 × 31 flange *overlaps* the
+  face and clamps against it, and removes nothing. The connector stands on the
+  floor since 2026-09-26, so it is not centred and the oak left below and
+  above the bore differs — `mechanical/drc.echo` measures both ("tail cap
+  material below and above the etherCON bore"). An earlier revision of this
+  bullet worked the margin from the flange and got half the real figure.
 
   **Oak is still not what should be carrying it**, and the reason is unchanged
   by the arithmetic. This is the same rule as the U-bolt and the key switches:
   the wood is a shell, not structure (ADR 0002).
 
-- **Rotate it 90°. Settled off the drawing.** The flange is 26 × 31 mm on a
-  57 × 38 mm face, and the mounting pattern is two diagonal ⌀3.2 holes at
+- **Rotate it 90°. Settled off the drawing.** The flange is 26 × 31 mm on the
+  tail face, and the mounting pattern is two diagonal ⌀3.2 holes at
   19 × 24 mm — so the orientation is a free variable worth spending:
+
+  *The table is the argument as first made, for a connector centred on the
+  face as it was until 2026-09-26. It stands on the floor now, and the body
+  CAD measures its margins (`mechanical/drc.echo`); what the table shows
+  about rotation — flange and screw margin gained, bore margin unchanged —
+  still holds.*
 
   | On the tail face | as drawn (portrait) | **rotated 90°** |
   |---|---|---|

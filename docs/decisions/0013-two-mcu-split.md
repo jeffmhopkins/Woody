@@ -199,7 +199,7 @@ failure modes are delay and condensation, both bounded and both handled, where a
 **The tail face is crowded.** It carries the umbilical connector, the USB-C
 slot, and — on the underside just inboard — the matrix window (on the top
 face since 2026-09-26). A ~26 × 31 mm
-etherCON flange on a 57 × 38 mm face leaves little room, the D-series is rated
+etherCON flange on a 57 mm wide face (ADR 0009, `body-thickness` tall) leaves little room, the D-series is rated
 for a **4 mm maximum panel thickness** so it cannot mount through 6 mm oak, and
 all of it must be drawn together at M4 (ADR 0009).
 
@@ -267,7 +267,7 @@ in the ESP32-S3-Matrix's case — the IMU. Rebuilding any of that is work for no
 gain.
 
 Costs, honestly: the dev board outlines dictate carrier layout, the stack gains
-a board-on-board height (affordable against 38 mm of cavity and 10 mm boards),
+a board-on-board height (affordable against the body's cavity and 10 mm boards — ADR 0009),
 and a discontinued dev board would mean a redesign. Against a custom S3 carrier
 that risks not working at all, this is the better trade.
 

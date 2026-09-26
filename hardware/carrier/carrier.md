@@ -284,7 +284,7 @@ is now a gate on the board outline. Draw the oak window either way; draw the PCB
 cutout as the fallback.
 
 **The USB-C edge must align with the tail-face slot** `[repo] 0009`, on a face
-that also carries a ~26 × 31 mm etherCON flange in 57 × 38 mm. That is a 1:1
+that also carries a ~26 × 31 mm etherCON flange on a face 57 mm wide and `body-thickness` tall. That is a 1:1
 paper check at M4, and the ROADMAP already lists it.
 
 ---

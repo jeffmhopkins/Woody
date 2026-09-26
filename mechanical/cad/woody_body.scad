@@ -387,9 +387,17 @@ module mouth_cap_2d() {
 }
 tube_yz = [W / 2, z_floor + cavity_h / 2];
 
-ec_c = [W / 2 + ethercon_offset_y, ethercon_centre_z];    // etherCON centre on the tail face
 // The NE8FDP's rear envelope, rotated with the connector: [across Y, height Z].
 ec_house = ethercon_rotated ? [ethercon_housing_h, ethercon_housing_w] : [ethercon_housing_w, ethercon_housing_h];
+ec_fl = ethercon_rotated ? [ethercon_flange_h, ethercon_flange_w] : [ethercon_flange_w, ethercon_flange_h];
+// The housing and the flange behind the cap both stand in the cavity.
+ec_env = [max(ec_house[0], ec_fl[0]), max(ec_house[1], ec_fl[1])];
+ec_clear = 0.3;    // drawing convention: connector envelope to the floor, and its socket to the Matrix
+// THE CONNECTOR STANDS ON THE FLOOR (owner, 2026-09-26: raise the body's
+// thickness rather than pocket the oak bottom). Its axis is derived: the
+// envelope sits ec_clear above the oak bottom, and the body is made thick
+// enough that the rear socket still passes under the Matrix (drc.echo).
+ec_c = [W / 2 + ethercon_offset_y, z_floor + ec_clear + ec_env[1] / 2];    // etherCON centre on the tail face
 ec_sock = ethercon_rotated ? [ethercon_socket_h, ethercon_socket_w] : [ethercon_socket_w, ethercon_socket_h];
 ec_plug = ethercon_rotated ? [ethercon_rj45_plug_h, ethercon_rj45_plug_w] : [ethercon_rj45_plug_w, ethercon_rj45_plug_h];
 // The rear socket sits off the axis: 0.35 + half its height, on the side away from the latch.
@@ -397,7 +405,6 @@ ec_sock_off_mag = 0.35 + ethercon_socket_h / 2;
 ec_sock_dir = (W / 2 - ec_c[0] >= 0 ? 1 : -1) * (ethercon_socket_toward_centre ? 1 : -1);
 ec_panel_x = L - ends_tail_cap_t;                  // flange and chassis sit behind the tail cap's inside face
 ec_sock_c = ethercon_rotated ? ec_c + [ec_sock_dir * ec_sock_off_mag, 0] : ec_c - [0, ec_sock_off_mag];
-ec_fl = ethercon_rotated ? [ethercon_flange_h, ethercon_flange_w] : [ethercon_flange_w, ethercon_flange_h];
 ec_holes = [for (s = [-1, 1]) ec_c + s * (ethercon_rotated ? [ethercon_hole_dy, ethercon_hole_dx] : [ethercon_hole_dx, ethercon_hole_dy]) / 2];
 // The USB-C extension's receptacle (owner, 2026-09-26): beside the
 // etherCON, 2 mm of oak clear of its flange on the tail face, inside the
@@ -502,14 +509,6 @@ function ubolt_legs() = [for (s = [-1, 1]) ubolt_c + [0, s * hardware_ubolt_span
 // ================================================================ 3D ======
 
 // The etherCON housing's bottom below the floor, if the connector is low.
-// The housing and the flange behind the cap both reach below the floor.
-ec_env = [max(ec_house[0], ec_fl[0]), max(ec_house[1], ec_fl[1])];
-ec_pocket_d = max(0, z_floor - (ethercon_centre_z - ec_env[1] / 2) + 0.3);
-module ec_pocket_2d() {
-    if (ec_pocket_d > 0) translate([L - ends_tail_cap_t - ethercon_housing_d - 0.5, ec_c[0] - ec_env[0] / 2 - 0.5])
-        square([ethercon_housing_d + 0.5 + EPS, ec_env[0] + 1]);
-}
-module ec_pocket_3d() { if (ec_pocket_d > 0) translate([0, 0, z_floor - ec_pocket_d]) linear_extrude(ec_pocket_d + EPS) ec_pocket_2d(); }
 
 module lam(z, t, c, shell = true, id = "") {
     P(c, shell, id) translate([0, 0, z]) linear_extrude(t) children();
@@ -531,8 +530,6 @@ module u_channel() {
     P(C_OAK, true, "oak bottom") translate([x_in0, 0, -explode]) difference() {
         linear_extrude(oak_bottom_t) oak_bottom_2d();
         translate([0, 0, oak_bottom_t - stack_groove_depth]) linear_extrude(stack_groove_depth + EPS) oak_grooves_2d();
-        // The pocket the lowered etherCON housing sits in (router pass).
-        translate([-x_in0, 0, 0]) ec_pocket_3d();
         // Fastener counterbores from the bottom face (a drill, not a cut:
         // the DXF carries the clearance hole, the drawing the counterbore).
         translate([-x_in0, 0, -EPS]) for (f = fasteners()) translate(f)
@@ -894,7 +891,13 @@ module drc_report() {
     drc(ec_sock_c[1] + ec_sock[1] / 2 <= under_m && ec_sock_c[1] + ec_plug[1] / 2 <= under_m,
         "etherCON rear socket and patch plug pass under the Matrix", under_m - max(ec_sock_c[1] + ec_sock[1] / 2, ec_sock_c[1] + ec_plug[1] / 2),
         "mm below the Matrix's underside parts");
-    drc(undef, "etherCON housing pocket in the oak bottom", ec_pocket_d, "mm deep (0 = none needed)");
+    // The thinnest body that takes the connector on the floor with its rear
+    // socket under the Matrix, and its envelope under the key plate. Every
+    // term above moves one for one with T, so the shortfall adds directly.
+    t_min = T + max(ec_sock_c[1] + max(ec_sock[1], ec_plug[1]) / 2 + ec_clear - under_m,
+                    ec_c[1] + ec_env[1] / 2 + ec_clear - z_lid_bot);
+    drc(T >= t_min, "body thickness takes the etherCON on the floor, its rear socket under the Matrix", T - t_min,
+        str("mm spare; the thinnest body that does is ", t_min, " mm (envelope.thickness)"));
     mc = (top_last + cap_edge_rel + L) / 2 - matrix_xy[0];
     drc(abs(mc) < 0.01 || !layout_matrix_centred, "LED matrix centred between the last cap and the tail face", mc, "mm off centre");
     if (layout_gap_matches_matrix)
@@ -1009,11 +1012,14 @@ module drc_report() {
     // Tail face
     ec_in = ec_panel_x - ethercon_depth;
     drc(carrier_x1 < ec_in, "carrier clears the etherCON body", ec_in - carrier_x1, "mm along X");
-    ec_lo = ec_c[1] - ec_house[1] / 2; ec_hi = ec_c[1] + ec_house[1] / 2;
+    ec_lo = ec_c[1] - ec_env[1] / 2; ec_hi = ec_c[1] + ec_env[1] / 2;
     drc(ec_lo >= z_floor && ec_hi <= z_lid_bot, "etherCON body inside the cavity height",
         [ec_lo, ec_hi, z_floor, z_lid_bot], "body Z range vs cavity Z range; outside = through-cuts in the oak at the tail");
-    fl_margin = (T - ec_fl[1]) / 2;
-    drc(fl_margin >= 0, "etherCON flange fits behind the tail cap", fl_margin, "mm above and below the flange, inside the cap's height");
+    fl_margin = min(ec_c[1] - ec_fl[1] / 2, T - (ec_c[1] + ec_fl[1] / 2));
+    drc(fl_margin >= 0, "etherCON flange fits behind the tail cap", fl_margin, "mm, the smaller of above and below the flange, inside the cap's height");
+    // The bore is what is cut from the cap; the flange only clamps against it.
+    drc(undef, "tail cap material below and above the etherCON bore",
+        [ec_c[1] - ethercon_bore_d / 2, T - (ec_c[1] + ethercon_bore_d / 2)], "mm - the connector stands on the floor, so it is not centred");
     // USB-C by panel-mount extension (owner, 2026-09-26).
     usb_room = (W - u_y0) - (ec_c[0] + ec_house[0] / 2);
     drc(usb_room >= openings_usb_slot_w + 2, "USB-C extension receptacle beside the etherCON body", usb_room - openings_usb_slot_w,

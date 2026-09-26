@@ -538,14 +538,10 @@ ethercon:
   # STACKED UNDER THE MATRIX (owner, 2026-09-26: "the matrix can be up
   # higher out of the way and still allow the connectors"). The rear socket
   # and the patch plug pass UNDER the Matrix; only the housing, the full
-  # cavity's height, has to stay behind it. The connector is lowered so the
-  # socket clears the Matrix's underside; the housing then sits in a shallow
-  # pocket in the oak bottom (a router pass, like the grooves).
-  centre_z:
-    value: 16.0
-    status: tbd
-    source: "connector axis height: low enough that the rear socket passes under the Matrix's underside parts"
-    decided_by: "M4, with the Matrix's real underside height"
+  # cavity's height, has to stay behind it. The connector stands on the
+  # floor - its height is derived, not set - and the body is thick enough
+  # for the socket to clear the Matrix (owner, same day: "increase distance
+  # between top and bottom" rather than pocket the oak).
   offset_y:
     value: -7.0
     status: tbd
