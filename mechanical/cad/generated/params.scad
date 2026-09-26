@@ -4,7 +4,7 @@
 // Units: mm. Every value below cites its source in the YAML it came from.
 
 // ---- config/key-layout.yaml :: meta
-envelope_length = 457;
+envelope_length = undef;
 envelope_width = 57;
 envelope_thickness = 38;
 plate_cutout = 14.0;
@@ -45,17 +45,14 @@ stack_groove_clear = 0.2;  // tbd; per side of the acrylic, so the lid lifts off
 ends_mouth_cap_t = 4.0;  // tbd; ADR 0009 end-cap table: acrylic, 'the material already being cut for the sides' - so the side sheet's thickness
 ends_tail_cap_t = 6.0;  // tbd; ADR 0009 end-cap table: oak - so the oak top's stock
 ends_tube_hole_d = 6.0;  // tbd; ADR 0003: tube bore and OD are settled at E2
-layout_margin_mouth = 10.0;  // nominal; [adr] ADR 0009 'End margins 20' - split evenly between the ends, which the ADR does not say
-layout_mouthpiece = 40.0;  // nominal; [adr] ADR 0009 length table
-layout_display_band = 60.0;  // nominal; [adr] ADR 0009 length table (grew from 30 with ADR 0008)
+layout_mouth_extra = 10.0;  // tbd; owner: 'a little extra near the mouth' - oak between the mouth cap's inside face and the first thing (the underside display, or the first cap if the display moves)
+layout_tail_clear = 3.0;  // tbd; clearance from the last key board, and from the carrier, to the etherCON body - the connector space the owner asked for is its depth plus this
+layout_underside_clear = 3.0;  // tbd; clearance between the underside display and the first thumb recess, and from the last thumb recess to the tail cap
 layout_lh_gaps = [20.0, 20.0, 18.0, 0.0];  // nominal; [research] soprano recorder L1-L2-L3 21.0/22.3, D whistle 20/20; pad widths put touching fingers 15-22 apart (P5 F - P95 M). 18 to the little-finger keys (soprano R3-R4 18.0; 1.5 mm between MT165 caps). The final 0 is the side-by-side pair LH4 / LH5 (owner, 2026-09-26)
 layout_lh_offsets = [0.0, 0.0, 0.0, -9.0, 9.0];  // tbd; LH1-3 on the centreline; LH4 / LH5 the little finger's side-by-side pair, one cap pitch apart across the body, centred so both switch bodies stay inside the plate
 layout_rh_offsets = [0.0, 0.0, 0.0, -9.0, 9.0, -9.0];  // tbd; RH1-3 on the centreline; RH4 / RH5 the little finger's side-by-side pair, centred as LH4 / LH5; RH6 the single key below it, IN LINE with RH4 - the pair key on the player's right, the recorder's direction (owner, 2026-09-26)
 layout_gap = 50.0;  // nominal; [adr] ADR 0009 length table - the U-bolt band
 layout_rh_gaps = [20.0, 20.0, 18.0, 0.0, 18.0];  // nominal; [research] as lh_gaps; soprano R1-R2-R3 20.8/20.1, R3-R4 18.0. A 0 GAP IS A SIDE-BY-SIDE PAIR: RH4 / RH5 share the first little-finger position, RH6 is the single key one step further down (owner, 2026-09-26)
-layout_tail = 40.0;  // nominal; [adr] ADR 0009 length table
-layout_margin_tail = 10.0;  // nominal; [adr] ADR 0009 'End margins 20', the other half
-layout_slack_to = "tail";  // tbd; ADR 0009 leaves the 31 mm of slack unassigned. The tail holds the etherCON, carrier, matrix and USB-C, so it gets it
 layout_lt_arc_length = 57.0;  // nominal; [adr] ADR 0010 'roughly 57 mm of travel down the body'
 layout_lt_arc_lateral = 20.0;  // nominal; [adr] ADR 0010 'perhaps 15-25 mm of lateral deviation' - the middle of it
 layout_lt_arc_start = 10.0;  // tbd; ADR 0010 puts the arc 'underneath the left-hand key run' and a grip patch clear of it; the offset from the run's first key is a placeholder, small enough that the arc and its two spare cutouts stay under the run
@@ -74,7 +71,6 @@ boards_matrix_emitters = 20.8;  // nominal; ADR 0014 / carrier.md - 8 x 2.6 mm p
 boards_carrier_l = 100.0;  // tbd; hardware/bom.csv PCB-CARRIER '~100 x 45' - carrier.md: 'an assumption, not a fit'
 boards_carrier_w = 45.0;  // tbd; hardware/bom.csv PCB-CARRIER
 boards_carrier_z = 20.0;  // tbd; [calc] oak bottom 8 + diffuser gap 2 + Matrix board 1.6 + machined header ~8.5 [from memory], with the Matrix hung under the carrier per carrier.md section 7
-boards_carrier_from_tail = 42.0;  // tbd; placeholder - clears the etherCON's depth behind the tail face
 openings_matrix_window = 22.0;  // nominal; [adr] ADR 0009 - 'Roughly 22 mm square'
 openings_usb_slot_w = 12.5;  // tbd; no document - a USB-C plug overmould [from memory]
 openings_usb_slot_h = 7.0;  // tbd; no document [from memory]
@@ -95,10 +91,9 @@ hardware_fastener_count = 6;  // settled; [adr] ADR 0009 - six M3 from the botto
 hardware_fastener_clear_d = 3.4;  // nominal; M3 clearance, medium fit [from memory]
 hardware_fastener_cbore_d = 6.0;  // nominal; M3 socket head is 5.5 [from memory]; counterbore with clearance
 hardware_fastener_cbore_depth = 3.5;  // nominal; M3 socket head height 3.0 [from memory] + 0.5 below flush
-hardware_fastener_inset = 7.0;  // tbd; placeholder - distance from the inside face of each acrylic side, clear of the switch column
-hardware_fastener_end = 30.0;  // tbd; placeholder - distance of the first and last stations from the ends; stations zig-zag between the edges ~80 apart as ADR 0009 says
+hardware_fastener_inset = 3.0;  // tbd; placeholder - distance from the inside face of each acrylic side; small, so the holes pass outside the underside display and the side-by-side key pairs
 hardware_ubolt_rod_d = 5.0;  // tbd; ADR 0009 gives no U-bolt size
-hardware_ubolt_span = 24.0;  // tbd; placeholder - leg centre to leg centre
+hardware_ubolt_span = 20.0;  // tbd; placeholder - leg centre to leg centre, legs across the body; narrow enough to clear the gap fasteners
 hardware_ubolt_drop = 18.0;  // tbd; placeholder - how far the loop stands below the bottom face
 hardware_backplate_t = 3.0;  // tbd; hardware/bom.csv MECH-BACKPLATE - aluminium or ply, thickness open
 lighting_strip_w = 10.0;  // tbd; hardware/carrier/carrier.md '~10 mm' [from memory there]; the strip geometry row is BLOCKED in datasheets/MANIFEST.csv
@@ -106,5 +101,5 @@ lighting_strip_gap = 3.0;  // tbd; ADR 0009 / ADR 0014: the diffusion gap is a p
 
 // Every value above with status tbd - a placeholder, not a number any
 // document gives. The DRC report lists these so no result hides one.
-tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_lh_offsets", "layout_rh_offsets", "layout_slack_to", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_carrier_l", "boards_carrier_w", "boards_carrier_z", "boards_carrier_from_tail", "openings_usb_slot_w", "openings_usb_slot_h", "ethercon_body_d", "ethercon_offset_y", "hardware_fastener_inset", "hardware_fastener_end", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_backplate_t", "lighting_strip_w", "lighting_strip_gap"];
+tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_mouth_extra", "layout_tail_clear", "layout_underside_clear", "layout_lh_offsets", "layout_rh_offsets", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_carrier_l", "boards_carrier_w", "boards_carrier_z", "openings_usb_slot_w", "openings_usb_slot_h", "ethercon_body_d", "ethercon_offset_y", "hardware_fastener_inset", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_backplate_t", "lighting_strip_w", "lighting_strip_gap"];
 

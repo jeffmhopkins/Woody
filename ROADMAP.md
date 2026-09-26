@@ -61,9 +61,10 @@ being wrong (ADR 0006).
 
 ## Track M — Mechanical
 
-The envelope is set at 18 × 2.25 × 1.5 in (ADR 0009). Keys run in a **single
-line** down the body, flute-style, with short sections above and below the key
-runs — which is what makes 18 inches workable.
+Width and thickness are set at 2.25 × 1.5 in (ADR 0009). **The length is
+derived** — minimized around the keys, a little at the mouth, the connector at
+the tail — by the body CAD (`mechanical/drc.echo`, "overall length"). It was
+18 in until 2026-09-26.
 
 
 | ID | Milestone | Done when |
@@ -332,6 +333,7 @@ page, its `bom.csv` fragment and its `circuit.yaml`.
 | Blocks | Question | Tracked in |
 |---|---|---|
 | M4, M5 | **Plate stiffening** — the thickness is **settled at 1.20 mm** by Gateron's own drawing (2026-09-21), which puts both 1.5 mm and 2 mm out of spec and makes stiffening a **requirement, not an option**. What remains is how: lamination, a structural backer, or a ribbed sub-frame | [ADR 0002](docs/decisions/0002-key-switches-and-mounting.md) |
+| M4, E2, E11 | **Re-derive what was sized from the 457 mm body**, now the length is derived and much shorter: the breath tube (~400 mm — ADR 0003's pipe-mode frequencies and delay move with its length, so this is analysis, not an edit), the display and key-chain looms (360 / 265 mm — ADR 0013, `carrier.md`, `display-and-service-uart.md`, `key-chain-loom.md`; shorter only helps), and the LED strips (2 × 420 mm — ADR 0014, `led-strip-drive.md`; fewer LEDs, lower current). Current length in `mechanical/drc.echo` | [ADR 0009](docs/decisions/0009-enclosure-construction.md) |
 | M4 | **The first body model's design-rule failures** — etherCON panel stack and body height at the tail, Matrix USB-C reach, the underside display against the left-thumb recesses, thumb recess spacing, carrier vs LED strips. Current values in `mechanical/drc.echo`. (The CAD tool itself was decided 2026-09-26: OpenSCAD, `mechanical/`) | [mechanical/DESIGN.md](mechanical/DESIGN.md) |
 | M1 | **MT165 cap height above the switch seat** — both oak panels' thicknesses now derive from it (keys flush with both faces at full travel, 2026-09-26), so it is the number the lamination is waiting on | [ADR 0009](docs/decisions/0009-enclosure-construction.md) |
 | E4b | Inter-MCU frame format and protocol versioning | [ADR 0013](docs/decisions/0013-two-mcu-split.md) |

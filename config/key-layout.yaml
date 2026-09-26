@@ -17,7 +17,11 @@ meta:
   units: mm
   # Instrument envelope (ADR 0009).
   envelope:
-    length: 457     # 18 in
+    # DERIVED since 2026-09-26 (owner: "minimize total length"). The body CAD
+    # computes it from the key layout, the underside and the tail connector
+    # and prints it in mechanical/drc.echo ("overall length"). Not a number
+    # here: a stated length would go stale with every key move.
+    length: null
     thickness: 38   # 1.5 in
     width: 57       # 2.25 in
   origin: top-left of key plate, +x right, +y down

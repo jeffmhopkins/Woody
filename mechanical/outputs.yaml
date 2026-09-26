@@ -19,64 +19,67 @@ meshes:
     # (y < -1.18); fitted, it folds under. Board frame x 0..25.49, y 0..58.78.
     clip: [-1, -1.2, -2, 27, 60, 7]
 
-# Cameras: [tx, ty, tz, rx, ry, rz, distance]. The body's centre is about
-# [228, 28, 19]; it is 457 long, so a whole-body view wants ~500-600.
+# Cameras: [tx, ty, tz, rx, ry, rz, distance]. The LENGTH IS DERIVED, so no
+# camera aims at a fixed X: each render sets `origin` (centre or tail) and
+# its camera aims at X = 0. A whole-body view wants ~1.5 x the length.
 renders:
   - name: hero
     title: The instrument, key face up
     src: mechanical/cad/woody_body.scad
     out: mechanical/renders/hero.png
     imgsize: [1600, 700]
-    camera: [228, 28, 12, 60, 0, 335, 640]
+    camera: [0, 28, 12, 60, 0, 335, 470]
+    defines: {origin: "centre"}
   - name: underside
     title: The underside - thumb keys, U-bolt, matrix window, fasteners
     src: mechanical/cad/woody_body.scad
     out: mechanical/renders/underside.png
     imgsize: [1600, 700]
-    camera: [228, 28, 12, 125, 0, 335, 640]
+    camera: [0, 28, 12, 125, 0, 335, 470]
+    defines: {origin: "centre"}
   - name: exploded
     title: The laminated stack, pulled apart
     src: mechanical/cad/woody_body.scad
     out: mechanical/renders/exploded.png
     imgsize: [1600, 900]
-    camera: [228, 28, 28, 62, 0, 330, 700]
-    defines: {explode: 22}
+    camera: [0, 28, 28, 62, 0, 330, 520]
+    defines: {origin: "centre", explode: 22}
   - name: internals
     title: Lid off - boards, strips, tail equipment
     src: mechanical/cad/woody_body.scad
     out: mechanical/renders/internals.png
     imgsize: [1600, 700]
-    camera: [228, 28, 12, 50, 0, 340, 600]
-    defines: {show_lid: false, ghost_shell: true}
+    camera: [0, 28, 12, 50, 0, 340, 440]
+    defines: {origin: "centre", show_lid: false, ghost_shell: true}
   - name: tail-detail
     title: The tail, lid off, from inside
     src: mechanical/cad/woody_body.scad
     out: mechanical/renders/tail-detail.png
     imgsize: [1200, 800]
-    camera: [400, 28, 15, 55, 0, 300, 190]
-    defines: {show_lid: false, ghost_shell: true}
+    camera: [-60, 28, 15, 55, 0, 300, 190]
+    defines: {origin: "tail", show_lid: false, ghost_shell: true}
   - name: plan-top
     title: Plan from above, with the length budget
     src: mechanical/cad/fig_plan_top.scad
     out: mechanical/renders/plan-top.png
     imgsize: [2000, 560]
     projection: o
-    camera: [228, 22, 0, 0, 0, 0, 420]
+    camera: [0, 30, 0, 0, 0, 0, 345]
   - name: plan-bottom
     title: Plan from below
     src: mechanical/cad/fig_plan_bottom.scad
     out: mechanical/renders/plan-bottom.png
     imgsize: [2000, 420]
     projection: o
-    camera: [228, 28, 0, 180, 0, 0, 330]
+    camera: [0, 28, 0, 180, 0, 0, 250]
   - name: section-long
     title: Longitudinal section on the centreline, looking from the +Y side
     src: mechanical/cad/woody_body.scad
     out: mechanical/renders/section-long.png
     imgsize: [2000, 380]
     projection: o
-    camera: [228, 22, 0, 0, 0, 0, 330]
-    defines: {cut: "y2d", cut_at: 28.5, show_strips: false}
+    camera: [0, 22, 0, 0, 0, 0, 250]
+    defines: {origin: "centre", cut: "y2d", cut_at: 28.5, show_strips: false}
   - name: section-key
     title: Cross-section through RH3, seen from the tail
     src: mechanical/cad/fig_section_key.scad
@@ -90,7 +93,7 @@ renders:
     out: mechanical/renders/tail-face.png
     imgsize: [1200, 900]
     projection: o
-    camera: [457, 28, 12, 90, 0, 90, 190]
+    camera: [0, 28, 12, 90, 0, 90, 190]
   - name: key-layouts
     title: Top-key spacing, current config against the alternatives, to scale
     src: mechanical/cad/fig_key_layouts.scad

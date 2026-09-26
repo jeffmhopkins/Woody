@@ -101,25 +101,32 @@ ends:
 # with a real x/y overrides this for that key. Every render made while any
 # key is still provisional is stamped PROVISIONAL LAYOUT by tools/cad.py.
 layout:
-  # The length budget, mouthpiece to tail. ADR 0009's table is the feasibility
-  # argument; these are the numbers the model draws. Each hand is a LIST OF
+  # THE LENGTH IS DERIVED (owner, 2026-09-26: "minimize total length ...
+  # a little extra near the mouth and a little after the keys for the
+  # connector"). The model computes it from the keys, the underside and the
+  # connector; drc.echo prints it and says what sets each end. These are the
+  # only allowances left:
+  mouth_extra:
+    value: 10.0
+    status: tbd
+    source: "owner: 'a little extra near the mouth' - oak between the mouth cap's inside face and the first thing (the underside display, or the first cap if the display moves)"
+    decided_by: "M2 - where the lips and the mouthpiece mount land"
+  tail_clear:
+    value: 3.0
+    status: tbd
+    source: "clearance from the last key board, and from the carrier, to the etherCON body - the connector space the owner asked for is its depth plus this"
+    decided_by: "M4, with the connector's real rear envelope"
+  underside_clear:
+    value: 3.0
+    status: tbd
+    source: "clearance between the underside display and the first thumb recess, and from the last thumb recess to the tail cap"
+    decided_by: "M4"
+  # KEY SPACING. Each hand is a LIST OF
   # GAPS, key centre to key centre from the mouthpiece end, so spacing can be
   # non-uniform as ADR 0010 expects; the run length is their sum and there is
   # deliberately no separate run or pitch value - two numbers for one
   # quantity is the defect this repository keeps finding. Real x/y positions
   # in config/key-layout.yaml replace this block key by key at M2.
-  margin_mouth:
-    value: 10.0
-    status: nominal
-    source: "[adr] ADR 0009 'End margins 20' - split evenly between the ends, which the ADR does not say"
-  mouthpiece:
-    value: 40.0
-    status: nominal
-    source: "[adr] ADR 0009 length table"
-  display_band:
-    value: 60.0
-    status: nominal
-    source: "[adr] ADR 0009 length table (grew from 30 with ADR 0008)"
   # 2026-09-26: tightened from 24 mm, which the finger-spacing research
   # (docs/research/2026-09-26-finger-spacing/) puts at the wide end. Graded
   # as real instruments are: comfortable pitch under index-middle-ring,
@@ -162,19 +169,6 @@ layout:
     status: nominal
     source: "[research] as lh_gaps; soprano R1-R2-R3 20.8/20.1, R3-R4 18.0. A 0 GAP IS A SIDE-BY-SIDE PAIR: RH4 / RH5 share the first little-finger position, RH6 is the single key one step further down (owner, 2026-09-26)"
     decided_by: "M2 - replaced key by key by x/y in config/key-layout.yaml"
-  tail:
-    value: 40.0
-    status: nominal
-    source: "[adr] ADR 0009 length table"
-  margin_tail:
-    value: 10.0
-    status: nominal
-    source: "[adr] ADR 0009 'End margins 20', the other half"
-  slack_to:
-    value: "tail"
-    status: tbd
-    source: "ADR 0009 leaves the 31 mm of slack unassigned. The tail holds the etherCON, carrier, matrix and USB-C, so it gets it"
-    decided_by: "M2 - where the hands land decides where the slack is"
   lt_arc_length:
     value: 57.0
     status: nominal
@@ -271,11 +265,6 @@ boards:
     status: tbd
     source: "[calc] oak bottom 8 + diffuser gap 2 + Matrix board 1.6 + machined header ~8.5 [from memory], with the Matrix hung under the carrier per carrier.md section 7"
     decided_by: "M4, from the real header stack height"
-  carrier_from_tail:
-    value: 42.0
-    status: tbd
-    source: "placeholder - clears the etherCON's depth behind the tail face"
-    decided_by: "M4"
 
 # ------------------------------------------------------------- openings ----
 openings:
@@ -370,14 +359,9 @@ hardware:
     status: nominal
     source: "M3 socket head height 3.0 [from memory] + 0.5 below flush"
   fastener_inset:
-    value: 7.0
+    value: 3.0
     status: tbd
-    source: "placeholder - distance from the inside face of each acrylic side, clear of the switch column"
-    decided_by: "M4"
-  fastener_end:
-    value: 30.0
-    status: tbd
-    source: "placeholder - distance of the first and last stations from the ends; stations zig-zag between the edges ~80 apart as ADR 0009 says"
+    source: "placeholder - distance from the inside face of each acrylic side; small, so the holes pass outside the underside display and the side-by-side key pairs"
     decided_by: "M4"
   ubolt_rod_d:
     value: 5.0
@@ -385,9 +369,9 @@ hardware:
     source: "ADR 0009 gives no U-bolt size"
     decided_by: "M4, from the strap hardware chosen"
   ubolt_span:
-    value: 24.0
+    value: 20.0
     status: tbd
-    source: "placeholder - leg centre to leg centre"
+    source: "placeholder - leg centre to leg centre, legs across the body; narrow enough to clear the gap fasteners"
     decided_by: "M4"
   ubolt_drop:
     value: 18.0

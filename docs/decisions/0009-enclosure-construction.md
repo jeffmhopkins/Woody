@@ -14,7 +14,16 @@ feels right.
 
 ## Envelope
 
-**18 × 2.25 × 1.5 inches** — 457 × 57 × 38 mm.
+**Width and thickness: 2.25 × 1.5 inches — 57 × 38 mm.**
+
+> **The length is no longer set here (owner, 2026-09-26: "minimize total
+> length").** It is derived by the body CAD from the key layout, a little at
+> the mouth end, the underside and the tail connector, and printed in
+> `mechanical/drc.echo` ("overall length", with what sets each end). The
+> 18-inch (457 mm) envelope and the table below are the original feasibility
+> argument — the record of why a single line of keys was believed to fit —
+> not the current length. Figures sized from 457 mm elsewhere (tube, looms,
+> strips) are tracked for re-derivation in `ROADMAP.md`.
 
 ### Keys run in a single line
 
@@ -639,9 +648,11 @@ have to hold it down.
 
 **Six fasteners come up from the bottom face, through the whole instrument,
 into the aluminium plate.** They are the only thing holding the instrument
-closed. Six, not four, because the body is 457 mm long and the span between
-fasteners is what sets how much the lid can lift between them; six puts them
-roughly 80 mm apart, clear of the key runs.
+closed. Six, not four, because the span between fasteners is what sets how
+much the lid can lift between them. *(On the original 457 mm body that put
+them ~80 mm apart. The derived body has three stations of two — mouth end,
+between the hands, before the connector — placed where the keys are not;
+`mechanical/DESIGN.md`.)*
 
 **Why this and not a lid that screws down from the top:** the top face is the
 playing surface and the one the hands sit on. Fastener heads there are

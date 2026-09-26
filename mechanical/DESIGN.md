@@ -62,6 +62,25 @@ the DXF's own DIMENSION entities.
 - **Every part is a 2D module** in its own sheet frame; the assembly only
   places them. `export/*.dxf` are those modules exactly.
 
+## The length is derived
+
+Since 2026-09-26 the owner's rule is *minimize total length*: the body is the
+keys, a little at the mouth, and room for the connector at the tail. So the
+model computes the length rather than reading it (`config/key-layout.yaml`'s
+`envelope.length` is null), and `drc.echo` prints it with what set each end.
+Three things can claim each end, and the largest wins:
+
+- **Mouth end:** the first top cap plus `layout.mouth_extra`; or the
+  **underside display**, which sits nearest the mouthpiece and must clear the
+  left-thumb recesses — and in practice it is the display that sets it.
+- **Tail end:** the last key board, a fastener pair and the etherCON's depth;
+  or the underside chain after the right thumb — service cover, Matrix window,
+  then the connector; or the right-thumb cluster against the tail cap.
+- **Between:** the key gaps, and `layout.gap` between the hands.
+
+Every render aims at the body's centre or tail (`origin` in `outputs.yaml`),
+so a length change reframes nothing.
+
 ## What the first model found
 
 Each item is a rule in `drc.echo`; read the current value there. These are
@@ -84,13 +103,10 @@ decision, not a correction.
    depth and there is not room beside it for the Matrix board. *Rules: "Matrix
    USB-C at the tail face", "room beside the etherCON body".* A short
    panel-mount USB-C extension is the obvious answer; it is a BOM line.
-4. **The underside is crowded at the display band.** With the display moved to
-   the underside, its cut in the oak bottom sits next to the left-thumb arc:
-   LT1's recess leaves almost no oak beside it, and the placeholder spare
-   cutout before LT1 lands inside it. *Rule: "oak-bottom cuts at least 3 mm
-   apart".* The budget's slack, `layout.lt_arc_start` and where the spares go
-   are the levers; all are M2 questions. (The earlier top-face clash between
-   the display and LH1 went away with the move.)
+4. **The display is what sets the mouth end.** On the underside it cannot
+   share the space under the left-hand run with the thumb arc, so it adds
+   roughly its own length in front of the keys. *Rule: "what sets the mouth
+   end".* Moving it is the largest remaining length lever.
 5. **Individual thumb recesses leave almost no oak between them** at the
    ADR 0010 arc spacing. *Rule: "oak-bottom cuts at least 3 mm apart".* ADR 0010
    already asks shared-versus-individual as an M2 question; the model says

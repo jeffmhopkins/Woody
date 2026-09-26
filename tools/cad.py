@@ -62,7 +62,7 @@ OWNED_EXT = (".png", ".dxf", ".svg", ".stl", ".echo")
 # Bump when the way an output is MADE changes (stamp layout, mesh settings,
 # render flags) - it is part of every fingerprint, so a bump marks every
 # output stale, which is the truth.
-RECIPE = "4"
+RECIPE = "5"
 
 LEDGER_COLS = ["name", "kind", "out", "fingerprint", "out_sha256", "provisional",
                "built", "tool", "inputs"]
@@ -348,8 +348,8 @@ def stamp(png, o, fp, provisional):
     d.text((8, y0 + 4), text, fill=(60, 60, 60), font=f)
     if provisional:
         d.text((8, y0 + 19), "PROVISIONAL LAYOUT - key positions are null in "
-               "config/key-layout.yaml; keys are placed on the ADR 0009 length "
-               "budget until M2/M3", fill=(170, 40, 20), font=fb)
+               "config/key-layout.yaml; keys sit on the provisional layout in "
+               "config/body.yaml until M2/M3", fill=(170, 40, 20), font=fb)
     # Deterministic PNG: no timestamps, no text chunks.
     out.save(png, optimize=True)
 

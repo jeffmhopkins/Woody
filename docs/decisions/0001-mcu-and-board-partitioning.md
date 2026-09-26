@@ -87,8 +87,8 @@ BODY   four key cluster boards — switches, ONE 74HC165 each, its decoupling,
 ```
 
 The display is the only thing that cannot run far — high-bandwidth SPI with many
-signals will ring and crosstalk over any distance. (The instrument is 18 inches
-overall per ADR 0009, so the longest run is nearer 14–16 inches than the two
+signals will ring and crosstalk over any distance. (The instrument was 18 inches
+overall per ADR 0009 — shorter since 2026-09-26, which only helps here — so the longest run is nearer 14–16 inches than the two
 feet this analysis originally assumed. The topology stands; the margin is
 better than feared.) So the MCU lives with the display
 and everything else runs long and slow. Bandwidth down the body is trivial: six

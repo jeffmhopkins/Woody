@@ -3,6 +3,8 @@
 include <woody_body.scad>
 use <lib/annot.scad>
 figure = true;
+origin = "tail";
+module fig() {
 assembly();
 x = L + 12;
 module d(a, b, s, off) dim([x, a[0], a[1]], [x, b[0], b[1]], s, [0, off[0], off[1]], view = "right", size = 1.8);
@@ -13,3 +15,5 @@ d([ec_c[0] - ec_fl[0] / 2, -5], [ec_c[0] + ec_fl[0] / 2, -5], str("flange ", ec_
 d([0, -14], [W, -14], str("W ", W), [0, -3]);
 label([x, usb_c[0], usb_c[1] + 8], "USB-C (tbd)", view = "right", size = 1.8);
 label([x, ec_c[0], ec_c[1]], str("bore ", ethercon_bore_d), view = "right", size = 1.8, c = "White");
+}
+at_origin() fig();

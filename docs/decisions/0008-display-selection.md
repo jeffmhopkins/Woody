@@ -192,6 +192,9 @@ natural reading direction looking down the instrument while playing.
 The cost is the display band growing from 30 mm to 60 mm, which takes the length
 budget from 61 mm of slack to **31 mm (1.2 in)**. Still closes, but no longer
 generously — worth knowing before anything else claims length (ADR 0009).
+*(Superseded 2026-09-26: the length is now derived rather than budgeted, and
+the display sits on the underside at the mouth end, where it is what sets the
+mouth end's length — `mechanical/drc.echo`.)*
 
 ### Notes
 

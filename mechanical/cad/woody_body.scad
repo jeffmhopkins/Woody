@@ -42,6 +42,10 @@ cut_at = 0;
 cut_key = "";         // or name a key: the X cut goes through its centre
 cut_depth = 1000;     // "x" keeps a slab this deep beyond the cut
 figure = false;       // set true by a figure that includes this file
+// Where X = 0 sits in the rendered picture: "mouth" (the model's own frame),
+// "centre" or "tail". Cameras aim at the origin, so a render stays framed
+// when the derived length changes.
+origin = "mouth";
 
 LAYERS = ["plate_top", "oak_top", "oak_bottom", "oak_grooves", "thumb_plate", "side",
           "mouth_cap", "tail_cap", "tail_backplate", "ubolt_backplate",
@@ -51,7 +55,9 @@ $fn = 40;
 EPS = 0.01;           // drawing convention: coplanar-face nudge
 
 // ---------------------------------------------------------------- frame ----
-L = envelope_length;
+// L, THE OVERALL LENGTH, IS DERIVED (owner, 2026-09-26: "minimize total
+// length"). It is computed below the key layout, from the keys, the
+// underside and the connector - see "length" - not read from a register.
 W = envelope_width;
 T = envelope_thickness;
 
@@ -81,7 +87,6 @@ u_w = W - 2 * u_y0;                             // the interior, between the sid
 z_side0 = z_floor - stack_groove_depth;         // side's bottom edge, in the bottom groove
 z_side1 = z_oak_top_bot + stack_groove_depth;   // side's top edge, in the top groove
 x_in0 = ends_mouth_cap_t;                       // between the end caps
-x_in1 = L - ends_tail_cap_t;
 
 // The key plate's origin (config/key-layout.yaml: "top-left of key plate").
 plate_x0 = x_in0;
@@ -92,18 +97,25 @@ function sum(v, i = 0) = i >= len(v) ? 0 : v[i] + sum(v, i + 1);
 function cum(v, i) = i <= 0 ? 0 : sum([for (j = [0 : i - 1]) v[j]]);
 lh_run = sum(layout_lh_gaps);
 rh_run = sum(layout_rh_gaps);
-seg_sum = layout_margin_mouth + layout_mouthpiece + layout_display_band
-        + lh_run + layout_gap + rh_run + layout_tail + layout_margin_tail;
-slack = L - seg_sum;
-function grow(s) = layout_slack_to == s ? slack : 0;
-x_mouth0 = layout_margin_mouth;
-x_disp0 = x_mouth0 + layout_mouthpiece + grow("mouth");
-x_lh0 = x_disp0 + layout_display_band;
-x_gap0 = x_lh0 + lh_run;
-x_rh0 = x_gap0 + layout_gap + grow("gap");
-x_tail0 = x_rh0 + rh_run;
-x_tail1 = x_tail0 + layout_tail + grow("tail");
+thumb_recess_clear = 1.0;  // drawing convention: cap-to-recess clearance, an M2 question (ADR 0010)
+rc = switch_keycap + 2 * thumb_recess_clear;    // a thumb recess, square
+cluster_margin = 4;        // drawing convention: board edge past the outermost switch body
 
+// The MOUTH END. The display is on the underside, lengthwise, nearest the
+// mouthpiece (ADR 0008's "top"). It cannot share the underside under the
+// left-hand run with the left-thumb arc, so the keys start where BOTH the
+// first top cap and the first thumb recess clear it. Everything is measured
+// from x_in0, the inside face of the mouth cap.
+disp_board = [58.782, 25.495];   // read off DISP_DXF's DIMENSION entities (OpenSCAD cannot measure an import)
+disp_x0 = x_in0 + layout_mouth_extra;
+disp_x1 = disp_x0 + disp_board[0];
+// The left-thumb cluster's extent relative to LH1 (x_lh0 = 0), recesses included.
+lt_rel = concat([for (i = [0 : 3]) layout_lt_arc_start + i * layout_lt_arc_length / 3], [layout_lt_arc_start, layout_lt_arc_start + layout_lt_arc_length]);
+x_lh0 = max(x_in0 + layout_mouth_extra + switch_keycap / 2 + stack_cap_clear,  // the first top cap
+            disp_x1 + 0.5 + layout_underside_clear - (min(lt_rel) - rc / 2));  // the first thumb recess (display cut is +0.5)
+x_gap0 = x_lh0 + lh_run;
+x_rh0 = x_gap0 + layout_gap;
+x_tail0 = x_rh0 + rh_run;
 // -------------------------------------------------------------- keys ------
 function key_id(k) = k[0];
 function key_face(k) = k[1];
@@ -133,7 +145,31 @@ function rt_xy(i) = i == 0 ? rt_rest + [layout_rt_offset, 0]
 // Straight extensions of the arc's end keys - the half-sine is not
 // extrapolated, it leaves the body.
 lt_step = layout_lt_arc_length / (count("left_thumb") - 1);
-spare_xy = [lt_arc(0) - [lt_step, 0], lt_arc(1) + [lt_step, 0], rt_rest - [1.6 * layout_rt_offset, 0]];
+// Beside the arc's end keys, across the body - extending the arc along it
+// cost length the owner asked to remove (2026-09-26). Placeholders for M2.
+spare_xy = [lt_arc(0) + [0, lt_step], lt_arc(1) + [0, lt_step], rt_rest - [1.6 * layout_rt_offset, 0]];
+
+// THE TAIL END, and so the length. Past the last top key: its cluster board's
+// overhang, a clearance, and the etherCON's depth behind the tail face - the
+// connector cannot sit under the key boards (drc.echo, etherCON height). The
+// underside's right-thumb cluster must also be inside.
+top_last = max([for (k = keys) if (k[1] == "top") key_xy(k)[0]]);
+rt_last = max([for (k = keys) if (k[1] == "bottom") key_xy(k)[0]]);
+// The tail also holds the last fastener pair, between the key board and the
+// connector - so its counterbore is part of the length, not squeezed in.
+tail_fastener_x = top_last + plate_cutout / 2 + cluster_margin + layout_tail_clear + hardware_fastener_cbore_d / 2;
+// The tail underside, in order after the right-thumb cluster: the service
+// cover, turned across the body, then the Matrix window, centred. The Matrix
+// board hangs under the carrier, which must end before the etherCON body -
+// so this chain is a third claim on the length.
+service_xy = [rt_last + rc / 2 + layout_underside_clear + openings_service_cover_w / 2, W / 2];
+matrix_xy = [service_xy[0] + openings_service_cover_w / 2 + layout_underside_clear
+             + max(openings_matrix_window, boards_matrix_board) / 2, W / 2];
+tail_chain_x = matrix_xy[0] + boards_matrix_board / 2 + layout_tail_clear;
+L = max(tail_fastener_x + hardware_fastener_cbore_d / 2 + layout_tail_clear + ethercon_depth,
+        tail_chain_x + layout_tail_clear + ethercon_depth,
+        rt_last + rc / 2 + layout_underside_clear + ends_tail_cap_t);
+x_in1 = L - ends_tail_cap_t;
 
 function placed(k) = !is_undef(k[2]) && !is_undef(k[3]);
 function key_xy(k) = placed(k) ? [plate_x0 + k[3], plate_y0 + k[2]] : prov_xy(k);
@@ -222,7 +258,7 @@ module oak_top_2d() {
         square([x_in1 - x_in0, W]);
         translate([-x_in0, 0])
             if (stack_cap_holes == "slot")
-                for (cl = ["left_hand", "right_hand"]) chain_2d(cluster_keys(cl), switch_keycap + 2 * stack_cap_clear);
+                for (cl = ["left_hand", "right_hand"]) keys_2d(cluster_keys(cl), switch_keycap + 2 * stack_cap_clear);
             else
                 for (k = top_keys) translate(key_xy(k)) rotate(key_rot(k))
                     square(switch_keycap + 2 * stack_cap_clear, center = true);
@@ -242,13 +278,12 @@ module oak_bottom_2d() {
             for (s = spare_xy) translate(s) square(switch_keycap + 2 * thumb_recess_clear, center = true);
             translate(matrix_xy) square(openings_matrix_window, center = true);
             display_board_cut_2d();
-            translate(service_xy) square([openings_service_cover_l, openings_service_cover_w], center = true);
+            translate(service_xy) square([openings_service_cover_w, openings_service_cover_l], center = true);
             for (f = fasteners()) translate(f) circle(d = hardware_fastener_clear_d);
             for (u = ubolt_legs()) translate(u) circle(d = hardware_ubolt_rod_d + 0.5);
         }
     }
 }
-thumb_recess_clear = 1.0;  // drawing convention: cap-to-recess clearance, an M2 question (ADR 0010)
 
 // One thumb plate per thumb cluster, on the oak bottom's inside face.
 // Frame: model XY.
@@ -310,7 +345,7 @@ module tail_backplate_2d() {
         translate(usb_c) square([openings_usb_slot_w, openings_usb_slot_h], center = true);
     }
 }
-ubolt_bp = [2 * hardware_ubolt_span, u_w - 12];
+ubolt_bp = [hardware_ubolt_span, u_w - 6];
 module ubolt_backplate_2d() {
     difference() {
         translate(ubolt_c) square(ubolt_bp, center = true);
@@ -319,54 +354,57 @@ module ubolt_backplate_2d() {
 }
 module diffuser_2d() { translate(matrix_xy) square(openings_matrix_window + 4, center = true); }
 module service_cover_2d() {
-    translate(service_xy) difference() {
+    translate(service_xy) rotate(90) difference() {
         square([openings_service_cover_l + 6, openings_service_cover_w + 6], center = true);
         for (s = [-1, 1]) translate([s * (openings_service_cover_l / 2 + 1.5), 0]) circle(d = 2.4);
     }
 }
 
 // --------------------------------------------------------- features ------
-disp_c = [x_disp0 + layout_display_band / 2, W / 2];
+disp_c = [(disp_x0 + disp_x1) / 2, W / 2];
 // The board lies lengthwise (ADR 0008) on the UNDERSIDE, glass down, in a
 // through-cut in the oak bottom (decided 2026-09-26).
 // Its outline is the vendor's own DXF, not retyped numbers.
 DISP_DXF = "../../datasheets/mechanical/LILYGO-T-DISPLAY-S3-AMOLED-OUTLINE.dxf";
-disp_board = [58.782, 25.495];   // read off DISP_DXF's DIMENSION entities, for centring only
 module display_board_outline_2d() {
     translate(disp_c) rotate(-90) translate([-disp_board[1] / 2, -disp_board[0] / 2]) import(DISP_DXF, layer = "KeepOutLayer");
 }
 module display_board_cut_2d() { offset(0.5) display_board_outline_2d(); }
-// Hull each key's square with the next one's, in key order: a slot or a
-// board that follows the keys round an offset or a side-by-side pair
-// instead of swallowing everything between them as one hull would.
-module chain_2d(ks, s) {
-    for (i = [0 : len(ks) - 2]) hull() for (k = [ks[i], ks[i + 1]])
-        translate(key_xy(k)) rotate(key_rot(k)) square(s, center = true);
+// Each key's square, unioned, then CLOSED (grow, shrink) so squares closer
+// than 2 x close merge into one outline that follows the keys round an
+// offset or a side-by-side pair. Hulling key to key instead left diagonal
+// wedges wherever the order zig-zags across a pair.
+module keys_2d(ks, s, close = 1.5) {
+    offset(delta = -close) offset(delta = close)
+        for (k = ks) translate(key_xy(k)) rotate(key_rot(k)) square(s, center = true);
 }
-cluster_margin = 4;   // drawing convention: board edge past the outermost switch body
+   // drawing convention: board edge past the outermost switch body
 // A top cluster board: the switch footprints, chained, grown to the board
 // width over a single line (switch.cluster_pcb_w). Outline is an M3 output.
 module cluster_window_2d(ks) {
-    offset(delta = (switch_cluster_pcb_w - plate_cutout) / 2) chain_2d(ks, plate_cutout);
+    offset(delta = (switch_cluster_pcb_w - plate_cutout) / 2) keys_2d(ks, plate_cutout, close = 3);
 }
 
 // Tail equipment. The Matrix hangs under the carrier (carrier.md section 7)
 // with its LEDs facing the window in the oak bottom.
-carrier_x1 = x_in1 - boards_carrier_from_tail;
+// The carrier ends where the etherCON body begins, less a clearance.
+carrier_x1 = L - ethercon_depth - layout_tail_clear;
 carrier_x0 = carrier_x1 - boards_carrier_l;
-matrix_xy = [carrier_x1 - boards_matrix_board / 2 - 2, W / 2 + (u_w / 2 - boards_matrix_board / 2 - 1)];
-service_xy = [matrix_xy[0] - boards_matrix_board / 2 - openings_service_cover_l / 2 - 8, W / 2 - 8];
 
 // Six fasteners up from the bottom into the plate, zig-zagging between the
 // long edges ~80 mm apart (ADR 0009).
+// Three stations of two, one each side: beside the underside display at the
+// mouth end, in the gap between the hands, and between the last key board
+// and the connector. ADR 0009's "~80 mm apart" was for a 457 mm body; on
+// the derived body the stations fall where the keys are not.
+fastener_x = [(disp_x0 + disp_x1) / 2, (x_gap0 + x_rh0) / 2, tail_fastener_x];
 function fasteners() =
-    let(n = hardware_fastener_count, a = x_in0 + hardware_fastener_end, b = x_in1 - hardware_fastener_end)
-    [for (i = [0 : n - 1]) [lerp(a, b, i / (n - 1)),
-                            i % 2 == 0 ? u_y0 + hardware_fastener_inset : W - u_y0 - hardware_fastener_inset]];
+    [for (x = fastener_x, sd = [0, 1]) [x, sd == 0 ? u_y0 + hardware_fastener_inset : W - u_y0 - hardware_fastener_inset]];
 
-// U-bolt in the inter-hand gap on the bottom face (ADR 0009); legs along X.
+// U-bolt in the inter-hand gap on the bottom face (ADR 0009); legs ACROSS the
+// body, since the shortened gap has no room along it beside the thumb arc.
 ubolt_c = [(x_gap0 + x_rh0) / 2, W / 2];
-function ubolt_legs() = [for (s = [-1, 1]) ubolt_c + [s * hardware_ubolt_span / 2, 0]];
+function ubolt_legs() = [for (s = [-1, 1]) ubolt_c + [0, s * hardware_ubolt_span / 2]];
 
 // ================================================================ 3D ======
 
@@ -463,11 +501,15 @@ module tail_equipment() {
     P(C_PCB) translate([x_in1 - 20, usb_c[0], z_floor + 1.6]) cube([20, 9, 1.6], center = false);
 }
 
+// ADR 0014 sized the strips at 420 mm for a 457 mm body. They now run the
+// cavity, less 10 mm at each end; drc.echo reports the shortfall.
+strip_run_adr = 420;
+strip_l = min(strip_run_adr, x_in1 - x_in0 - 20);
 module led_strips() {
     for (s = [0, 1]) {
         y = s == 0 ? u_y0 + lighting_strip_gap : W - u_y0 - lighting_strip_gap - 1;
-        P(C_LED) translate([(L - 420) / 2, y, z_floor + cavity_h / 2 - lighting_strip_w / 2])
-            cube([420, 1, lighting_strip_w]);
+        P(C_LED) translate([(L - strip_l) / 2, y, z_floor + cavity_h / 2 - lighting_strip_w / 2])
+            cube([strip_l, 1, lighting_strip_w]);
     }
 }
 
@@ -481,7 +523,7 @@ module hardware_3d() {
     P(C_STEEL) translate([0, 0, -explode]) {
         for (u = ubolt_legs()) translate([u[0], u[1], -hardware_ubolt_drop + hardware_ubolt_span / 2])
             cylinder(d = hardware_ubolt_rod_d, h = z_floor + hardware_backplate_t + 6 + hardware_ubolt_drop - hardware_ubolt_span / 2);
-        translate([ubolt_c[0], ubolt_c[1], -hardware_ubolt_drop + hardware_ubolt_span / 2]) rotate([-90, 0, 0])
+        translate([ubolt_c[0], ubolt_c[1], -hardware_ubolt_drop + hardware_ubolt_span / 2]) rotate([0, 0, 90]) rotate([-90, 0, 0])
             rotate_extrude(angle = 180) translate([hardware_ubolt_span / 2, 0]) circle(d = hardware_ubolt_rod_d);
     }
     lam(z_floor, hardware_backplate_t, C_ALU, false) ubolt_backplate_2d();
@@ -513,8 +555,18 @@ module drc_report() {
          str(keys_placed, " of ", len(keys), " keys placed in config/key-layout.yaml"));
     echo("DRC", "INFO", "tbd parameters in play", len(tbd_params), tbd_params);
 
-    drc(slack >= 0, "length budget closes (ADR 0009 table)", slack,
-        str("mm of slack, assigned to '", layout_slack_to, "'"));
+    echo("DRC", "INFO", "overall length (derived)", L, str("mm = ", L / 25.4, " in; mouth cap to LH1 ", x_lh0,
+         ", keys ", top_last - x_lh0, " centre to centre, last key to tail face ", L - top_last));
+    drc(undef, "what sets the mouth end", x_lh0 - (x_in0 + layout_mouth_extra + switch_keycap / 2 + stack_cap_clear) > 0.01
+        ? "the display on the underside (it must clear the left-thumb recesses)" : "the first top key",
+        str("display occupies X ", disp_x0, " to ", disp_x1));
+    drc(undef, "what sets the tail end",
+        L == tail_chain_x + layout_tail_clear + ethercon_depth ? "right-thumb cluster, service cover, Matrix window, then the etherCON depth"
+        : L == tail_fastener_x + hardware_fastener_cbore_d / 2 + layout_tail_clear + ethercon_depth ? "last key board, tail fastener pair, then the etherCON depth"
+        : "the right-thumb cluster against the tail cap",
+        str("etherCON depth ", ethercon_depth));
+    drc(strip_l >= strip_run_adr, "LED strips at ADR 0014's length", strip_l,
+        str("mm per side against ", strip_run_adr, " in ADR 0014 - fewer LEDs per side if shorter"));
     // Each run's end keys put half a cap into the neighbouring band - the
     // ADR 0009 table counts runs centre to centre.
     lh = xs(cluster_keys("left_hand")); rh = xs(cluster_keys("right_hand"));
@@ -547,7 +599,8 @@ module drc_report() {
         stack_cap_clear, str("mm per side vs ", 0.015 * (switch_keycap + 2 * stack_cap_clear), " mm of movement at 1.5 % (ADR 0009)"));
     d_gap = (min(rh) - max(lh)) - switch_keycap;
     drc(undef, "inter-hand gap between caps", d_gap, "mm of clear band for the U-bolt and right thumb rest");
-    d_uv = min([for (u = ubolt_legs()) min([for (k = bottom_keys) norm(key_xy(k) - u)])]) - hardware_ubolt_rod_d / 2 - (switch_keycap / 2 + thumb_recess_clear) * sqrt(2);
+    d_uv = min([for (u = ubolt_legs(), p = concat([for (k = bottom_keys) key_xy(k)], spare_xy))
+                max(abs(p[0] - u[0]), abs(p[1] - u[1])) - rc / 2 - hardware_ubolt_rod_d / 2]);
     drc(d_uv >= 2, "U-bolt legs clear of the thumb recesses", d_uv, "mm, worst case");
 
     // Everything cut through the oak bottom, pairwise: [name, centre, size].
@@ -555,9 +608,9 @@ module drc_report() {
     feats = concat([for (k = bottom_keys) [k[0], key_xy(k), [rc, rc]]],
                    [for (i = [0 : 2]) [str("spare ", i + 1), spare_xy[i], [rc, rc]]],
                    [["matrix window", matrix_xy, [openings_matrix_window, openings_matrix_window]],
-                    ["service opening", service_xy, [openings_service_cover_l, openings_service_cover_w]],
+                    ["service opening", service_xy, [openings_service_cover_w, openings_service_cover_l]],
                     ["display", disp_c, [disp_board[0] + 1, disp_board[1] + 1]],
-                    ["U-bolt", ubolt_c, [hardware_ubolt_span + hardware_ubolt_rod_d, hardware_ubolt_rod_d]]],
+                    for (u = ubolt_legs()) ["U-bolt leg", u, [hardware_ubolt_rod_d, hardware_ubolt_rod_d]]],
                    [for (i = [0 : len(fasteners()) - 1]) [str("M3 #", i + 1), fasteners()[i], [hardware_fastener_cbore_d, hardware_fastener_cbore_d]]]);
     function gap(a, b) = max(abs(a[1][0] - b[1][0]) - (a[2][0] + b[2][0]) / 2,
                              abs(a[1][1] - b[1][1]) - (a[2][1] + b[2][1]) / 2);
@@ -565,7 +618,10 @@ module drc_report() {
                if (gap(feats[i], feats[j]) < 3) str(feats[i][0], " / ", feats[j][0], " ", gap(feats[i], feats[j]))];
     drc(len(clashes) == 0, "oak-bottom cuts at least 3 mm apart (display, thumb recesses, spares, window, service, U-bolt, counterbores)",
         clashes, "pairs closer than 3 mm, with the web between them (negative = overlap)");
-    edge = min([for (f = feats) min(f[1][1] - f[2][1] / 2 - u_y0, W - u_y0 - f[1][1] - f[2][1] / 2)]);
+    // Through-cuts only: a fastener's counterbore is partial depth from the
+    // outside face, so its clearance hole is what meets the side.
+    function thru_w(f) = f[0][0] == "M" ? hardware_fastener_clear_d : f[2][1];
+    edge = min([for (f = feats) min(f[1][1] - thru_w(f) / 2 - u_y0, W - u_y0 - f[1][1] - thru_w(f) / 2)]);
     drc(edge >= 2, "oak-bottom cuts inside the U", edge, "mm, smallest web to the inside of a side");
 
     // Sides in grooves
@@ -598,6 +654,9 @@ module drc_report() {
     rt_in = max([for (k = cluster_keys("right_thumb")) key_xy(k)[0]]) > carrier_x0;
     drc(!rt_in || boards_carrier_z > rt_top, "carrier clears the right-thumb switch bodies", boards_carrier_z - rt_top, "mm");
 
+    drc(matrix_xy[0] + boards_matrix_board / 2 <= carrier_x1 && matrix_xy[0] - boards_matrix_board / 2 >= carrier_x0,
+        "Matrix board under the carrier", carrier_x1 - matrix_xy[0] - boards_matrix_board / 2, "mm of carrier past the board's tail edge");
+
     // Tail face
     ec_in = x_in1 - (ethercon_depth - ends_tail_cap_t);
     drc(carrier_x1 < ec_in, "carrier clears the etherCON body", ec_in - carrier_x1, "mm along X");
@@ -619,9 +678,10 @@ module drc_report() {
     // Plate
     drc(undef, "M3 thread engagement in the key plate", plate_thickness,
         "mm of aluminium = ~2 threads at 0.5 pitch [calc]; plain tapping will strip, so the BOM's 'insert or tapped boss' is the only option");
-    drc(min([for (f = fasteners()) min([for (k = top_keys) norm(key_xy(k) - f)])]) > plate_cutout / 2 * sqrt(2) + 3,
-        "fasteners clear of the top switch cutouts",
-        min([for (f = fasteners()) min([for (k = top_keys) norm(key_xy(k) - f)])]), "mm, centre to nearest key centre");
+    fk = min([for (f = fasteners(), k = top_keys) max(abs(key_xy(k)[0] - f[0]), abs(key_xy(k)[1] - f[1])) - plate_cutout / 2 - tap_d_m3 / 2]);
+    drc(fk >= 2, "fastener holes clear of the top switch cutouts", fk, "mm of plate between a tap hole and the nearest cutout");
+    fe = min([for (f = fasteners()) min(f[1] - tap_d_m3 / 2 - (u_y0 + stack_groove_clear), (W - u_y0 - stack_groove_clear) - f[1] - tap_d_m3 / 2)]);
+    drc(fe >= 1.5, "fastener tap holes inside the plate edge", fe, "mm of plate outside the hole");
 }
 
 // ============================================================ dispatch ====
@@ -641,8 +701,11 @@ module part_2d(p) {
     else assert(false, str("unknown part ", p));
 }
 
+function origin_x() = origin == "centre" ? -L / 2 : origin == "tail" ? -L : 0;
+module at_origin() { translate([origin_x(), 0, 0]) children(); }
+
 if (!figure) {
-    if (part == "assembly") assembly();
+    if (part == "assembly") at_origin() assembly();
     else if (part == "drc") drc_report();
     else part_2d(part);
 }
