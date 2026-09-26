@@ -54,6 +54,31 @@ count a per-circuit check structurally cannot do"*.
 
 **Not yet verified, not to be repeated:** N7-1 through N7-7, N7-10(a), N7-11 through N7-15.
 
+## N5 — the deliberate holes
+
+Slice enumerated what the checker only counts: **39 `external_endpoints`
+entries across 12 of the 22 netlists, and exactly 39 single-endpoint nets —
+the two sets are identical.** No undeclared single-endpoint net, no stale entry
+naming a net that has since gained a second endpoint. It then classified them:
+8 genuinely undecided, 14 decided no-connects, 14 consequences of a modelling
+choice, 1 physical, 2 not holes at all. 12 findings. Three verified.
+
+| id | verdict | verification |
+|---|---|---|
+| **N5-1** | **CONFIRMED — and it is the same defect N1-2 found independently** | Two cold slices that could not see each other filed `breath-output-stage`'s `RAIL_POS`/`RAIL_NEG` as false holes. Under this wave's own method that agreement is evidence. The stated reason — the clamp rails "terminate on the module's supply rather than inside this circuit" — is refuted by `MODULE_ANALOG_NEG12` being a declared port *and* a two-endpoint net in the same file, by the page's Interfaces row "`D-JACK-CLAMP` returns to both rails", by `nets.yaml` listing the circuit in both rails' `receivers:`, and by every other circuit netting the identical BAV99 normally. `[repo]` |
+| **N5-3** | **CONFIRMED — "four different rows" is wrong, and it is my sentence in three files** | Parsed the allocation table: `right_thumb` and `right_hand` are **identical** as a switch/marker/free map (`sw ×6, M, M`) and share marker positions `(B, A)`. Three distinct rows, not four. The claim appears in `key-register/netlist.yaml`, `key-marker-and-bits/netlist.yaml` and `nets.yaml`'s `KEY_BITS` **and** `MARKER_BITS` notes. The conclusion survives — three rows is still not one, so a shared netlist cannot name the inputs — but **a stated count moved under the sentence stating it**, which is one of the four shapes `CLAUDE.md` says to slice for. The slice's replacement fact checks out: the marker **level** map *is* distinct on all four — `RT B=1/A=0`, `RH B=0/A=1`, `LT D=0/C=1`, `LH C=0/B=1`. `[test]` `[repo key-marker-and-bits.md:80-84]` |
+| **N5-5** | **CONFIRMED — a `port:` in two nets is never counted, and I relied on that** | `tools/check-netlist.py:406-416`: `declared_pins` and `used` are built only from `REF.PIN` string endpoints; the `isinstance(ep, dict)` branch checks the port is declared and then `continue`s without recording it. So any two nets in one file can share a port silently. I used that deliberately as a bundle-boundary convention — and `key-marker-and-bits`'s `MARKER_HIGH` is that convention's accident: its only endpoint is `port: V3V3_CHAIN`, which another net in the same file already carries. Two names for one node, same for `MARKER_LOW`/`GND_CHAIN`. The tool cannot tell the convention from the accident. `[repo tools/check-netlist.py:406]` |
+
+**Not yet verified, not to be repeated:** N5-2, N5-4, N5-6 through N5-12.
+
+**Holes the slice attacked and could not break** — recorded because a hole that
+survives an attack is a result: `CS_PULLUP_TOP` (the "rail does not exist on
+this board" claim is true, both halves of the contradiction are real, and it
+names what decides it — offered as the model the other 38 should match), the
+four console-pair nets, `ON_DIVIDER`, `TRIM_OFFSET_BOTTOM`, `TVS_SPARE`, and
+`DAC_CH6/CH8_UNUSED`, whose `[derived, not cited]` disclosure the slice calls
+the right way to write a derived assertion.
+
 ## Slices still running
 
-N2, N3, N4, N5, N8.
+N2, N3, N4, N8.
