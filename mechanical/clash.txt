@@ -73,9 +73,9 @@ ALLOWED 97 (by rule in mechanical/clash-allow.yaml)
         11.0 mm3  parts left_hand  x  switch LH5   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts right_hand  x  switch RH4   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts left_hand  x  switch LH4   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
+        11.0 mm3  parts right_hand  x  switch RH3   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts right_hand  x  switch RH1   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts right_hand  x  switch RH2   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
-        11.0 mm3  parts right_hand  x  switch RH3   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts left_hand  x  switch LH3   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts left_thumb  x  switch LT4   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts left_thumb  x  switch spare 2   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
@@ -83,8 +83,8 @@ ALLOWED 97 (by rule in mechanical/clash-allow.yaml)
         11.0 mm3  parts right_thumb  x  switch RT3   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts right_thumb  x  switch spare 3   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts right_thumb  x  switch RT1   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
-        11.0 mm3  parts left_thumb  x  switch LT3   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
         11.0 mm3  parts left_thumb  x  switch LT2   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
+        11.0 mm3  parts left_thumb  x  switch LT3   - the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement
          1.7 mm3  M3 #3  x  key plate   - the fastener threads into the plate - an insert or tapped boss (hardware/bom.csv MECH-FASTENER); the tap hole is drawn at the tap drill
          1.7 mm3  M3 #4  x  key plate   - the fastener threads into the plate - an insert or tapped boss (hardware/bom.csv MECH-FASTENER); the tap hole is drawn at the tap drill
          1.7 mm3  M3 #5  x  key plate   - the fastener threads into the plate - an insert or tapped boss (hardware/bom.csv MECH-FASTENER); the tap hole is drawn at the tap drill

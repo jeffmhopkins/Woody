@@ -29,9 +29,9 @@ module fig() {
     zt = T + 6;
     zb = -8;
     if (fig_view == "side") {
-        label([mean(spine_x), y, zt + 14], "THE SPINE: one board on its edge, parts standing sideways into the body", v, size = s * 1.15);
-        label([mean(spine_x), y, zt + 6], str(round(spine_x[1] - spine_x[0]), " mm long, ", spine_zt - spine_zb, " mm tall between the boards' parts, ",
-              spine_zt - spine_tab_zb, " where it drops"), v, size = s * 0.9);
+        label([mean(spine_x), y, zt + 14], "THE SPINE: one board on its edge in the side channel, inboard of the LED strip", v, size = s * 1.15);
+        label([mean(spine_x), y, zt + 6], str(round(spine_x[1] - spine_x[0]), " mm long, up to ", spine_z[1] - spine_z[0],
+              " mm tall - its outline is whatever the boards reaching the channel leave"), v, size = s * 0.9);
         callout([conn_x("left_hand"), y, top_z - 1], [conn_x("left_hand") + 4, y, zt - 2], "header up to the LH key board", v, size = s * 0.85);
         callout([conn_x("right_hand"), y, top_z - 1], [conn_x("right_hand") + 4, y, zt - 2], "header up to the RH key board", v, size = s * 0.85);
         callout([conn_x("left_thumb"), y, thumb_z + 1], [conn_x("left_thumb") - 4, y, zb], "header down to LT", v, size = s * 0.85, halign = "right");

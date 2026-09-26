@@ -226,11 +226,12 @@ moved.
 
 > **No carrier board (owner, 2026-09-26: "we don't need a carrier", then
 > "turning it on the side, and connecting via 90 degree header — one longer
-> board that connects everything down one side").** The carrier's circuits
-> below are unchanged, and "the carrier" still names them, but they are built
-> on **the spine**: one board standing on its edge down the side of the body,
-> its parts standing sideways into the body's width, with a short header to
-> each cluster board, so the key chain runs through its traces. Still one
+> board that connects everything down one side", then "on the outside, to
+> get more area").** The carrier's circuits below are unchanged, and "the
+> carrier" still names them, but they are built on **the spine**: one board
+> standing on its edge in the side channel, inboard of that side's LED strip
+> (ADR 0014's strips are kept), with a short header to each cluster board, so
+> the key chain runs through its traces. Still one
 > regulator per dev board, and the breath sensor at the spine's far end from
 > the AMOLED (ADR 0003). The dev boards no longer plug into it: the Matrix is
 > under its window at the tail on a soldered pigtail, the display at the

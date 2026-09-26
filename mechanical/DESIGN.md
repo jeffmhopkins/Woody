@@ -107,21 +107,27 @@ Three things can claim each end, and the largest wins:
   `drc.echo` reports the lip and the LED-to-window distance, which is what
   decides how soft the pixels look. In practice the matrix sets it.
 - **There is no carrier board** (owner, 2026-09-26: "we don't need a
-  carrier"): the carrier's circuits are on ONE board standing on
-  its edge down the side of the body away from the tube, from under the left
-  hand to the end of the right — **the spine** (owner, 2026-09-26: "turning it
-  on the side, and connecting via 90 degree header — one longer board that
-  connects everything down one side"). Its components stand sideways off its
-  inward face into the body's width, so they cost no height; flat between the
-  thumb and key boards, the same circuits had a few millimetres. Each cluster
-  board plugs into it through one short header — on its top edge for a key
-  board, its bottom edge for a thumb board — so the chain runs through the
-  spine's traces, and the Matrix's pigtail, the patch lead and the display
-  link all end on it. Behind the right-thumb board, where nothing is under
-  it, it drops towards the floor, and the breath sensor stands there, as far
-  from the display's AMOLED as the body allows (ADR 0003). One regulator per
-  dev board (ADR 0013), each a block at its end. It stands on the headers and
-  on standoffs off the oak. `drc.echo` prints its size and every clearance.
+  carrier"): the carrier's circuits are on ONE board standing on its edge in
+  the side channel away from the tube, just inboard of that side's LED strip,
+  from the mouth cap to the tail equipment — **the spine** (owner, same day:
+  "turning it on the side, and connecting via 90 degree header — one longer
+  board that connects everything down one side", then "on the outside, to
+  get more area — between side of boards and acrylic", keeping the strip).
+  **Its outline is not drawn; it is what is left** of the channel from floor
+  to lid once everything that reaches into it is cut away with the board
+  clearance round it: the thumb boards, which span nearly the full width, so
+  over them it stands on their parts; the key boards where a pinky key
+  overhangs; the display; the U-bolt's plate and nuts. So it follows any
+  layout change by itself. Its SMT goes wherever the face is clear by the
+  parts' height and the clearance; its tall blocks — one regulator per dev
+  board (ADR 0013) — stand sideways into the band between the boards' parts.
+  Each cluster board plugs into it through one short header: a right-angle
+  one from a key board's edge across the channel, a straight one up from a
+  thumb board into its bottom edge. So the key chain runs through its traces,
+  and the Matrix's pigtail, the patch lead and the display link all end on
+  it. The breath sensor is on its face behind the right-thumb board, as far
+  from the display's AMOLED as the body allows (ADR 0003). It stands on
+  brackets off the oak at each end. `drc.echo` prints its size.
 - **Board clearances are real ones** (`boards.board_clear`): the owner
   rejected a model that put one board 0.5 mm over another's parts
   (2026-09-26: "once components are installed you'd have issues").
@@ -182,15 +188,14 @@ decision, not a correction.
    already asks shared-versus-individual as an M2 question; the model says
    individual recesses need the arc spread further. The same rule catches
    placeholder fasteners landing on placeholder spares — move one.
-6. **The spine is short where it runs between the boards** — the height
-   between the thumb boards' parts and the key boards' parts, less the
-   clearances. Its parts do not care (they stand sideways), but its SMT has
-   that height of board to sit on, and the breath sensor only fits where the
-   spine drops. *Rules: "spine (derived)", "breath sensor fits on the spine
-   where it drops".*
-7. **The spine follows the key boards' length**, so a key layout change
-   resizes it, and its headers are placed between two switches of each
-   cluster board by the model (*"spine header to … clear of its switches"*).
+6. **Under the key boards the spine's face is only a few millimetres from
+   their edge** — too little for SMT plus the clearance, so the model keeps
+   parts off that strip of the face. *Rule: "spine's face to the key boards'
+   edge".* Narrower key boards (`switch.cluster_pcb_w`) would give it back.
+7. **The spine follows the layout by itself**, and its headers are placed
+   between two switches of each cluster board by the model (*"spine header
+   to … clear of its switches"*). The breath sensor only fits where nothing
+   is under the spine (*"breath sensor fits on the spine where it drops"*).
 8. **M3 into a 1.20 mm plate** is about two threads. The BOM already says
    "insert or tapped boss"; the model says plain tapping is not one of the
    options.

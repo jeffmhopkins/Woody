@@ -693,35 +693,62 @@ function xspan(cl) = [min(xs(cluster_keys(cl))), max(xs(cluster_keys(cl)))];
 
 // THE SPINE (owner, 2026-09-26: "turning it on the side, and connecting via
 // 90 degree header - one longer board that connects everything down one
-// side"). There is no carrier: the carrier's circuits are
-// on ONE board standing on its edge down the side of the body away from the
-// tube, from under the left hand to the end of the right. Its components
-// stand SIDEWAYS off its inward face, into the width of the body, so they
-// cost no height: stacked flat between a thumb board and the key board
-// above it, the same circuits had 10.8 mm for every part and 0.5 mm to the
-// board below. Each cluster board plugs into it through one short header -
-// on the spine's top edge for a key board, on its bottom edge for a thumb
-// board - so the chain runs RT -> RH -> LT -> LH through the spine's own
-// traces, and every other cable (the Matrix's pigtail, the patch lead, the
-// display link) ends on it. Where no thumb board is underneath, behind the
-// right thumb, it drops towards the floor, and the breath sensor stands
-// there: at the far end from the display's AMOLED (ADR 0003).
+// side", then "on the outside, to get more area - between side of boards and
+// acrylic", keeping the LED strip separate). There is no carrier: the
+// carrier's circuits are on ONE board standing on its edge in the side
+// channel away from the tube, just inboard of that side's LED strip, from
+// the mouth cap to the tail equipment.
+//   ITS OUTLINE IS NOT DRAWN, IT IS WHAT IS LEFT: floor to lid, less
+// everything that reaches into its slab of the channel, each with the board
+// clearance round it - the thumb boards (which span nearly the full width,
+// so over them it stands on their parts), the key boards where a pinky key
+// overhangs, the display, the U-bolt's plate and nuts. Its components go the
+// same way on the inward face: SMT wherever the face is clear, the tall
+// blocks sideways into the body's width between the boards' parts.
+//   Each cluster board plugs into it through one short header, so the chain
+// runs RT -> RH -> LT -> LH through its traces, and every other cable ends
+// on it. The breath sensor is behind the right-thumb board, as far from the
+// display's AMOLED as the body allows (ADR 0003).
 spine_side = routing_tube_lane == "left" ? "right" : "left";
 ssg = sgn(spine_side);
-spine_y = W / 2 + ssg * boards_spine_off;                       // its inward (component) face
+// The strip's inner face, then a clearance, then the board; its component
+// face is the inward one.
+strip_inner = ssg > 0 ? W - u_y0 - lighting_strip_gap - lighting_strip_t : u_y0 + lighting_strip_gap + lighting_strip_t;
+spine_y = strip_inner - ssg * (boards_board_clear + switch_pcb_t);   // component face
+spine_back = spine_y + ssg * switch_pcb_t;
 function tspan(cl) = let(p = [for (q = thumb_pts(cl)) q[0]]) [min(p) - (switch_keycap + 4) / 2, max(p) + (switch_keycap + 4) / 2];
 function kspan(cl) = xspan(cl) + [-1, 1] * (plate_cutout / 2 + cluster_margin);
-spine_x = [max(kspan("left_hand")[0], disp_sock_x1 + boards_board_clear), kspan("right_hand")[1]];
-spine_zb = thumb_z + boards_cluster_smt_h + boards_board_clear;      // over the thumb boards' parts
-spine_zt = top_z - boards_cluster_smt_h - boards_board_clear;        // under the key boards' parts
+spine_x = [x_in0 + boards_board_clear, tail_equip_x - boards_board_clear];
+spine_z = [z_floor + 0.5, z_lid_bot - boards_board_clear];   // a bare edge 0.5 over bare oak; under the plate
+// The band between the cluster boards' parts, where the tall blocks go.
+spine_zb = thumb_z + boards_cluster_smt_h + boards_board_clear;
+spine_zt = top_z - boards_cluster_smt_h - boards_board_clear;
 spine_tab_x0 = tspan("right_thumb")[1] + boards_board_clear;          // no thumb board past here
-spine_tab_zb = z_floor + 0.5;     // a bare board edge over bare oak: no parts meet there
+spine_tab_zb = spine_z[0];
+// Everything that reaches the side channel, with the clearance round it.
+module spine_keepouts() {
+    c = boards_board_clear;
+    for (cl = ["left_thumb", "right_thumb"])
+        translate([0, 0, -1]) linear_extrude(thumb_z + boards_cluster_smt_h + c + 1) offset(r = c) thumb_outline_2d(cl);
+    for (cl = ["left_hand", "right_hand"])
+        translate([0, 0, top_z - boards_cluster_smt_h - c]) linear_extrude(T) offset(r = c) cluster_window_2d(cluster_keys(cl));
+    translate([0, 0, -1]) linear_extrude(disp_sock_top + c + 1) offset(r = c)
+        translate([disp_x0, W / 2 - disp_board[1] / 2]) square([disp_x1 - disp_x0, disp_board[1]]);
+    translate([0, 0, -1]) linear_extrude(z_floor + hardware_backplate_t + hardware_ubolt_nut_h + c + 1) offset(r = c)
+        translate(ubolt_c) square(ubolt_bp, center = true);
+}
+// The keep-outs' shadow on a slab of the channel [ya, yb], in the spine's
+// own plane (X, Z).
+module keepout_xz(ya, yb) {
+    projection() rotate([-90, 0, 0]) intersection() {
+        spine_keepouts();
+        translate([-1, min(ya, yb), -1]) cube([L + 2, abs(yb - ya), T + 2]);
+    }
+}
 module spine_2d() {   // in the spine's own plane: (X, Z)
     difference() {
-        union() {
-            translate([spine_x[0], spine_zb]) square([spine_x[1] - spine_x[0], spine_zt - spine_zb]);
-            if (spine_tab_x0 < spine_x[1]) translate([spine_tab_x0, spine_tab_zb]) square([spine_x[1] - spine_tab_x0, spine_zt - spine_tab_zb]);
-        }
+        translate([spine_x[0], spine_z[0]]) square([spine_x[1] - spine_x[0], spine_z[1] - spine_z[0]]);
+        keepout_xz(spine_y, spine_back);
         // A slot in front of the sensor's lower port (see below).
         translate([sensor_face_x - boards_sensor_port_l - 2, p2_z - boards_sensor_port_d / 2 - 1])
             square([boards_sensor_port_l + 2 + EPS, boards_sensor_port_d + 2]);
@@ -735,13 +762,15 @@ module on_spine(d, board = false) {
     translate([0, y_hi, 0]) rotate([90, 0, 0]) linear_extrude(board ? switch_pcb_t : d) children();
 }
 
-// ONE HEADER PER CLUSTER BOARD: a 2 x 6 at 2.0 mm pitch on the spine's
-// face at its edge, bridging to the cluster board - up to a key board, down
-// to a thumb board. Along the body it goes midway between two of that
-// board's keys, clear of every switch's pole and pins (which stand proud of
-// the board), nearest the board's middle.
+// ONE HEADER PER CLUSTER BOARD, 2 x 6 at 2.0 mm pitch. A key board's is a
+// right-angle header on its underside at its edge, reaching across the
+// channel into the spine's face. A thumb board spans the channel, so its
+// header stands up from it into the spine's bottom edge. Along the body each
+// goes midway between two of that board's keys, clear of every switch's
+// pole and pins (which stand proud of the board), nearest its middle.
 ks33_stub = 2.6;   // half-width of the KS-33's pole and pins where they stand proud of a board [clash.txt, off the vendor STEP]
 conn_yc = spine_y - ssg * boards_conn_w / 2;
+key_edge = W / 2 + ssg * switch_cluster_pcb_w / 2;
 function conn_clear(x, cl) = min([for (k = cluster_keys(cl))
     max(abs(key_xy(k)[0] - x) - boards_conn_l / 2, abs(key_xy(k)[1] - conn_yc) - boards_conn_w / 2)]) >= ks33_stub + 0.3;
 function conn_x(cl) = let(t = [for (k = cluster_keys(cl)) key_xy(k)[0]], m = (min(t) + max(t)) / 2,
@@ -751,16 +780,17 @@ function conn_x(cl) = let(t = [for (k = cluster_keys(cl)) key_xy(k)[0]], m = (mi
     len(ok) > 0 ? ok[search(min(d), d)[0]] : undef;
 chain = ["right_thumb", "right_hand", "left_thumb", "left_hand"];
 function is_top(cl) = cl == "left_hand" || cl == "right_hand";
-function conn_z(cl) = is_top(cl) ? [spine_zt - 3, top_z] : [thumb_z, spine_zb + 3];
 
 // THE BREATH SENSOR: MPXV4006DP case 1351-01, SURFACE MOUNT (datasheet p.2),
-// on the spine's face where it drops, ports pointing to the mouth. Seated on
-// the face, its "height" is inward. The lower barb reaches the board's
-// surface (p.7), so the spine has a slot in front of that port; the upper
-// one, which takes the tube, stands clear. Far enough along that the tube
-// meets it past the right-thumb board, not over it.
+// on the spine's face behind the right-thumb board, ports pointing to the
+// mouth. Seated on the face, its "height" is inward, so it stays below the
+// key board's parts overhead. The lower barb reaches the board's surface
+// (p.7), so the spine has a slot in front of that port; the upper one,
+// which takes the tube, stands clear. Far enough along that the tube meets
+// it past the right-thumb board, not over it.
 sensor_face_x = spine_tab_x0 + boards_sensor_port_l + routing_tube_od + 2;
-sensor_c = [sensor_face_x + boards_sensor_body / 2, (spine_tab_zb + spine_zt) / 2];   // (X, Z)
+sensor_c = [sensor_face_x + boards_sensor_body / 2,
+            min((spine_tab_zb + spine_zt) / 2, spine_zt - boards_sensor_body / 2)];   // (X, Z)
 function port_y(i) = spine_y - ssg * boards_sensor_port_z[i];
 p2_z = sensor_c[1] + 2.1;
 p1_tip = [sensor_face_x - boards_sensor_port_l, port_y(0), sensor_c[1] - 2.1];
@@ -773,51 +803,50 @@ module sensor_3d() {
     }
 }
 // The two regulator blocks (a module and its bulk capacitors each, one per
-// dev board - ADR 0013): the display's near the spine's mouth end, the
-// Matrix's near its tail, both clear of the headers and the sensor.
+// dev board - ADR 0013), standing sideways into the band between the
+// boards' parts: the display's near the mouth end of the hands, the
+// Matrix's near their tail end, clear of the headers and the sensor.
 function tall_ok(x) = min(concat([for (cl = chain) abs(conn_x(cl) - x) - boards_conn_l / 2 - boards_tall_l / 2],
                                  [abs(sensor_c[0] - x) - boards_sensor_body / 2 - boards_tall_l / 2 - boards_sensor_port_l - 2])) >= 1
-                 // and out of the tube's way in to the sensor, past the right-thumb board
                  && (x + boards_tall_l / 2 <= spine_tab_x0 - 6 - routing_tube_od || x - boards_tall_l / 2 >= sensor_c[0] + boards_sensor_body / 2 + 1);
-tall_xs = [for (x = [spine_x[0] + boards_zif_disp_l + 2 + boards_tall_l / 2 : 1 : spine_x[1]]) if (tall_ok(x)) x];
+tall_xs = [for (x = [max(kspan("left_hand")[0], disp_sock_x1 + boards_board_clear) + boards_tall_l / 2 : 1 : kspan("right_hand")[1] - boards_tall_l / 2]) if (tall_ok(x)) x];
 tall_c = [[tall_xs[0], (spine_zb + spine_zt) / 2], [tall_xs[len(tall_xs) - 1], (spine_zb + spine_zt) / 2]];   // (X, Z)
 tall_face = [boards_tall_l, min(boards_tall_w, spine_zt - spine_zb)];
-// The display link: a ZIF at the spine's mouth end, its cable down onto the
-// display's socket strips.
-zif_disp = [spine_x[0] + boards_zif_disp_l / 2, (spine_zb + spine_zt) / 2];   // (X, Z), long side along the body
+// The display link: a ZIF on the spine's face just above the display, its
+// cable down onto the display's socket strips.
+zif_disp = [disp_sock_x1 - boards_zif_disp_l / 2 - 2, disp_sock_top + boards_board_clear + boards_zif_w / 2 + 2];   // (X, Z)
 
 module spine_3d() {
     P(C_PCB, false, "spine") on_spine(0, board = true) spine_2d();
+    // SMT wherever the face is clear by its height and the clearance.
     P([0.35, 0.55, 0.40], false, "parts spine") on_spine(boards_smt_h) difference() {
         offset(-0.5) spine_2d();
-        for (cl = chain) translate([conn_x(cl), mean(conn_z(cl))]) square([boards_conn_l + 1, 100], center = true);
+        keepout_xz(spine_y - ssg * boards_smt_h, spine_y);
+        for (cl = chain) translate([conn_x(cl) - boards_conn_l / 2 - 0.5, -1]) square([boards_conn_l + 1, 100]);
         translate(sensor_c) square([boards_sensor_body + 1, boards_sensor_leads + 1], center = true);
         for (c = tall_c) translate(c) square(tall_face + [1, 1], center = true);
         translate(zif_disp) square([boards_zif_disp_l + 1, boards_zif_w + 1], center = true);
-        for (c = spine_standoffs) translate([c, spine_zb]) square([boards_standoff_d + 1, 6], center = true);
+        for (b = spine_brackets) translate([b - 4, -1]) square([8, spine_z[0] + 1 + 7]);
     }
     for (i = [0, 1]) P([0.30, 0.30, 0.55], false, str("tall parts spine ", i == 0 ? "mouth" : "tail"))
         on_spine(boards_tall_h) translate(tall_c[i]) square(tall_face, center = true);
     P([0.85, 0.85, 0.80], false, "ZIF display link") on_spine(boards_zif_h) translate(zif_disp) square([boards_zif_disp_l, boards_zif_w], center = true);
-    // Standoffs off the oak, under the spine's bottom edge: in the gap between
-    // the hands (onto the U-bolt's backing plate) and where it drops at the
-    // tail. The mouth end is held by the headers; the display is under it.
-    for (i = [0 : len(spine_standoffs) - 1]) let(x = spine_standoffs[i], zb = spine_bottom_at(x), f = floor_at(x))
-        P(C_STEEL, false, str("spine standoff ", i + 1)) translate([x, spine_y + ssg * switch_pcb_t / 2, f])
-            cylinder(d = boards_standoff_d, h = zb - f, $fn = 6);
+    // Brackets off the oak at the two ends, where the spine stands on the floor.
+    for (i = [0 : len(spine_brackets) - 1]) P(C_STEEL, false, str("spine bracket ", i + 1))
+        on_spine(6) translate([spine_brackets[i] - 3, z_floor]) square([6, 6]);
 }
 function mean(v) = (v[0] + v[1]) / 2;
-function spine_bottom_at(x) = x >= spine_tab_x0 ? spine_tab_zb : spine_zb;
-function floor_at(x) = abs(x - ubolt_c[0]) <= ubolt_bp[0] / 2 ? z_floor + hardware_backplate_t : z_floor;
-// The gap's standoff stands beside the U-bolt's nuts, still on its plate.
-spine_standoffs = [ubolt_c[0] + hardware_ubolt_nut_af / 2 + boards_standoff_d / 2 + 1, spine_x[1] - boards_standoff_d / 2 - 1];
+spine_brackets = [spine_x[0] + 3, spine_x[1] - 3];
 
 module headers_3d() {
-    // One header per cluster board, from the spine's edge to that board.
-    for (cl = chain) let(x = conn_x(cl), z = conn_z(cl))
+    for (cl = chain) let(x = conn_x(cl))
         P([0.12, 0.12, 0.14], false, str("J-SPINE ", cl))
-            translate([x - boards_conn_l / 2, ssg > 0 ? spine_y - boards_conn_w : spine_y, z[0]])
-                cube([boards_conn_l, boards_conn_w, z[1] - z[0]]);
+            if (is_top(cl))   // right-angle, under the key board's edge, across to the spine's face
+                translate([x - boards_conn_l / 2, min(key_edge - ssg * 5, spine_y), top_z - boards_conn_w])
+                    cube([boards_conn_l, abs(spine_y - (key_edge - ssg * 5)), boards_conn_w]);
+            else              // up from the thumb board into the spine's bottom edge
+                translate([x - boards_conn_l / 2, ssg > 0 ? spine_y - boards_conn_w : spine_y, thumb_z])
+                    cube([boards_conn_l, boards_conn_w, spine_zb + 3 - thumb_z]);
 }
 
 // PARTS ON THE BOARDS, as envelopes. Cluster boards: a component layer on
@@ -829,7 +858,7 @@ module parts_3d() {
         P([0.35, 0.55, 0.40], false, str("parts ", cl)) translate([0, 0, top_z - boards_cluster_smt_h])
             linear_extrude(boards_cluster_smt_h) difference() {
                 offset(-0.5) cluster_window_2d(cluster_keys(cl));
-                translate([conn_x(cl), conn_yc]) square([boards_conn_l + 1, boards_conn_w + 1], center = true);
+                translate([conn_x(cl) - boards_conn_l / 2 - 0.5, min(key_edge, key_edge - ssg * 5.5)]) square([boards_conn_l + 1, 5.5]);
             }
     for (cl = ["left_thumb", "right_thumb"])
         P([0.35, 0.55, 0.40], false, str("parts ", cl)) translate([0, 0, thumb_z])
@@ -852,7 +881,7 @@ module routing_3d() {
     // key board (the two leave it no height). From it the tube runs down the
     // tube lane between the cluster boards' parts, the length of both hands,
     // and turns across past the right-thumb board onto the sensor's port.
-    trap_x0 = min(spine_x[0], kspan("left_hand")[0]) - boards_board_clear - routing_trap_l;
+    trap_x0 = kspan("left_hand")[0] - boards_board_clear - routing_trap_l;
     trap_z = max(routing_lane_z, disp_sock_top + routing_trap_d / 2 + boards_board_clear);
     P([0.95, 0.60, 0.45], false, "breath tube") run([
         [0, tube_yz[0], tube_yz[1]], [x_in0 + 3, tube_yz[0], tube_yz[1]],
@@ -1037,11 +1066,13 @@ module drc_report() {
     drc(undef, "thumb switch pole tip height in the cavity", th_pole, "mm above the bottom face");
 
     // The spine (no carrier, 2026-09-26)
-    drc(undef, "spine (derived)", [spine_x[1] - spine_x[0], spine_zt - spine_zb, spine_zt - spine_tab_zb],
-        "mm long, tall between the cluster boards' parts, and tall where it drops behind the right thumb");
+    drc(undef, "spine (derived)", [spine_x[1] - spine_x[0], spine_z[1] - spine_z[0], spine_zt - spine_zb],
+        "mm long; tall where nothing reaches the side channel; tall over the thumb boards and under the pinky keys - its outline is what the keep-outs leave");
+    drc(undef, "spine's face to the key boards' edge", abs(spine_y - key_edge),
+        str("mm across the channel; SMT needs ", boards_smt_h + boards_board_clear, " there, so the model keeps it off the face under the key boards - narrower key boards (switch.cluster_pcb_w) would give that strip back"));
     for (cl = chain) drc(conn_x(cl) != undef, str("spine header to ", cl, " clear of its switches"),
                          conn_x(cl) == undef ? "none found" : conn_x(cl), "mm along the body, midway between two keys");
-    room_in = abs(spine_y - (tube_y + sgn(routing_tube_lane) * 0 + ssg * (routing_tube_od / 2 + boards_board_clear)));
+    room_in = abs(spine_y - (tube_y + ssg * (routing_tube_od / 2 + boards_board_clear)));
     drc(boards_tall_h <= room_in, "spine's tallest parts clear of the tube lane", room_in - boards_tall_h,
         "mm - they stand sideways off the spine, into the width of the body");
     drc(boards_sensor_leads <= spine_zt - spine_tab_zb, "breath sensor fits on the spine where it drops", spine_zt - spine_tab_zb - boards_sensor_leads,

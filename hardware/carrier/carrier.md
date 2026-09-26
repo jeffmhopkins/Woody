@@ -14,9 +14,9 @@ under its window at the tail (§7), and everything else here is passive, slow,
 or analog.
 
 > **There is no carrier board (owner, 2026-09-26).** These circuits are built
-> on **the spine**: one board standing on its edge down the side of the body,
-> its parts standing sideways into the body's width, with a short header to
-> each cluster board (ADR 0013's build-approach note, `mechanical/DESIGN.md`).
+> on **the spine**: one board standing on its edge in the side channel,
+> inboard of that side's LED strip, from the mouth cap to the tail, with a
+> short header to each cluster board (ADR 0013's build-approach note, `mechanical/DESIGN.md`).
 > The block diagram and §§ below describe the circuits, which have not
 > changed; where a line talks about "the board", read the spine. Its size and
 > the room its parts have are in `mechanical/drc.echo`.

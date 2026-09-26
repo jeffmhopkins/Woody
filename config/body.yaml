@@ -338,21 +338,16 @@ boards:
     source: "HDR-DEV female socket strips on the display board's back, 1 x 14 [from memory]"
     decided_by: "M4, with the header bought"
   # NO CARRIER: THE SPINE (owner, 2026-09-26: "turning it on the side, and
-  # connecting via 90 degree header - one longer board that connects
-  # everything down one side"). The carrier's circuits are on one board
-  # standing on its edge down the side away from the tube, its parts
-  # standing sideways into the body's width. Its length and heights are
-  # derived; drc.echo prints them.
+  # connecting via 90 degree header", then "on the outside, to get more
+  # area"). The carrier's circuits are on one board standing on its edge in
+  # the side channel away from the tube, inboard of that side's LED strip.
+  # Its outline is what the parts reaching the channel leave; drc.echo
+  # prints its size.
   board_clear:
     value: 1.5
     status: tbd
     source: "clearance between a board and the parts on the board facing it, and between parts: board flex, solder fillets and height tolerance, hand assembly [drawing convention]. 0.5 was a drawing clearance and the owner rejected it (2026-09-26: 'once components are installed you'd have issues')"
     decided_by: "M4, with the boards laid out"
-  spine_off:
-    value: 8.0
-    status: tbd
-    source: "the spine's component face, off the centreline on the side away from the tube: under the key boards' and thumb boards' edge so a short header reaches each"
-    decided_by: "M4, with the board outlines"
   standoff_d:
     value: 5.5
     status: tbd
