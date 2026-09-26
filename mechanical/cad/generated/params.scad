@@ -36,7 +36,7 @@ keys_placed = 0;  // of 18
 spare_switch_cutouts = 3;
 
 // ---- config/body.yaml
-stack_oak_top_t = 6.0;  // nominal; [adr] ADR 0009 'Thickness is bounded by switch bodies' - '~6 mm'
+stack_cap_clear = 0.75;  // tbd; keycap to oak-top hole, per side. Must beat oak's cross-grain movement across one hole, which ADR 0009 puts at 1-1.5 % [calc: 1.5 % of 18 mm = 0.27 mm]
 stack_oak_bottom_t = 8.0;  // nominal; [adr] ADR 0009 - '~8 mm <- sets thumb key inset depth'
 stack_side_t = 4.0;  // nominal; [adr] ADR 0009 mass table - 'Acrylic sides, 2 x 4 mm'
 stack_rebate_w = 2.0;  // tbd; no document dimensions the notch (ADR 0009 'A U, a notch, and six fasteners')
@@ -61,12 +61,11 @@ layout_lateral_inset = 0.0;  // nominal; [adr] ADR 0010: single line down the ce
 switch_pole_tip_below_seat = 5.75;  // settled; [ds] Gateron KS-33H10B050NN-Y24 sheet 6, 5.75 +/-0.05 (the STEP says 5.70; the vendor wins)
 switch_pcb_below_seat = 3.4;  // settled; [calc] docs/reference/ks33-geometry.md: PCB top 3.2-3.6 below the seat; the middle
 switch_keycap_top_above_seat = 9.0;  // tbd; MT165 height is unpublished (hardware/bom.csv MT165 row). Stem top is +7.05 [ds STEP]; the cap adds a guess
+switch_total_travel = 3.0;  // settled; [ds] Gateron KS-33H10B050NN-Y24 sheet 6 - total travel 3.0 +/-0.2 mm
 switch_keycap = 16.5;  // settled; [adr] ADR 0002 - MT165 16.5 x 16.5
 switch_cluster_pcb_w = 22.0;  // tbd; hardware/cluster/cluster-boards.md: outlines are undrawable until M3
 switch_pcb_t = 1.6;  // settled; [adr] hardware/bom.csv PCB-CLUSTER and PCB-CARRIER, 1.6 mm
-boards_display_active_w = 19.8;  // settled; [adr] ADR 0008 - AMOLED active area 44.22 x 19.8
-boards_display_active_l = 44.22;  // settled; [adr] ADR 0008
-boards_display_window_margin = 1.5;  // tbd; no document - the plate and oak-top window clearance around the active area; the active area's offset on the glass is assumed centred
+boards_display_recess = 1.0;  // tbd; placeholder - glass face back from the bottom face, so the glass is not what the instrument rests on
 boards_matrix_board = 25.0;  // settled; [ds] datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-dimensions.jpg - 25.00 x 25.00, R1.0
 boards_matrix_emitters = 20.8;  // nominal; ADR 0014 / carrier.md - 8 x 2.6 mm pitch [from memory there]
 boards_carrier_l = 100.0;  // tbd; hardware/bom.csv PCB-CARRIER '~100 x 45' - carrier.md: 'an assumption, not a fit'
@@ -104,5 +103,5 @@ lighting_strip_gap = 3.0;  // tbd; ADR 0009 / ADR 0014: the diffusion gap is a p
 
 // Every value above with status tbd - a placeholder, not a number any
 // document gives. The DRC report lists these so no result hides one.
-tbd_params = ["stack_rebate_w", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_slack_to", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_window_margin", "boards_carrier_l", "boards_carrier_w", "boards_carrier_z", "boards_carrier_from_tail", "openings_usb_slot_w", "openings_usb_slot_h", "ethercon_body_d", "ethercon_offset_y", "hardware_fastener_inset", "hardware_fastener_end", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_backplate_t", "lighting_strip_w", "lighting_strip_gap"];
+tbd_params = ["stack_cap_clear", "stack_rebate_w", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_slack_to", "layout_lt_arc_start", "layout_rt_rest_at", "layout_rt_offset", "switch_keycap_top_above_seat", "switch_cluster_pcb_w", "boards_display_recess", "boards_carrier_l", "boards_carrier_w", "boards_carrier_z", "boards_carrier_from_tail", "openings_usb_slot_w", "openings_usb_slot_h", "ethercon_body_d", "ethercon_offset_y", "hardware_fastener_inset", "hardware_fastener_end", "hardware_ubolt_rod_d", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_backplate_t", "lighting_strip_w", "lighting_strip_gap"];
 

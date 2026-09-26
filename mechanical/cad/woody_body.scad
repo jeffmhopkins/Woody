@@ -55,9 +55,15 @@ L = envelope_length;
 W = envelope_width;
 T = envelope_thickness;
 
-z_plate_top = T;
-z_plate_bot = T - plate_thickness;
-z_lid_bot = z_plate_bot - stack_oak_top_t;      // underside of the oak top
+// KEYS ARE FLUSH AT FULL TRAVEL (decided 2026-09-26): a pressed cap's top is
+// level with the top face. So the plate sits UNDER the oak top, and the oak
+// is exactly as thick as the cap stands above the seat at the bottom of its
+// stroke. At rest each cap stands proud by the travel.
+oak_top_t = switch_keycap_top_above_seat - switch_total_travel;
+z_oak_top_bot = T - oak_top_t;                  // underside of the oak = plate top face
+z_plate_top = z_oak_top_bot;                    // the switch seat
+z_plate_bot = z_plate_top - plate_thickness;
+z_lid_bot = z_plate_bot;                        // the lid's underside is the plate's
 z_floor = stack_oak_bottom_t;                   // inside face of the oak bottom
 z_thumb_top = z_floor + plate_thickness;        // thumb plate, on the inside face
 cavity_h = z_lid_bot - z_floor;
@@ -189,24 +195,21 @@ module plate_top_2d() {
         square([x_in1 - x_in0, lid_w]);
         translate([-plate_x0, -plate_y0]) {
             for (k = top_keys) cutout_at(key_xy(k), key_rot(k), plate_cutout);
-            display_window_2d(0);
             for (f = fasteners()) translate(f) circle(d = tap_d_m3);
         }
     }
 }
 tap_d_m3 = 2.5;   // drawing convention: M3 tap drill; see the DRC on thread engagement
 
-// Oak top: the lid's wood. Windows for the display board and for the two
-// top cluster boards, which sit INSIDE this layer (ks33-geometry.md: PCB top
-// 3.2-3.6 below the seat puts it inside a 6 mm oak top).
+// Oak top: the lid's wood, ON TOP of the plate. One hole per key, which the
+// cap travels in. No fastener holes - the fasteners stop in the plate, so the
+// playing face is unbroken oak. Frame: as the plate.
 module oak_top_2d() {
     difference() {
         square([x_in1 - x_in0, lid_w]);
-        translate([-plate_x0, -plate_y0]) {
-            display_board_cut_2d();
-            for (cl = ["left_hand", "right_hand"]) cluster_window_2d(cluster_keys(cl));
-            for (f = fasteners()) translate(f) circle(d = hardware_fastener_clear_d);
-        }
+        translate([-plate_x0, -plate_y0])
+            for (k = top_keys) translate(key_xy(k)) rotate(key_rot(k))
+                square(switch_keycap + 2 * stack_cap_clear, center = true);
     }
 }
 
@@ -221,6 +224,7 @@ module oak_bottom_2d() {
                 square(switch_keycap + 2 * thumb_recess_clear, center = true);
             for (s = spare_xy) translate(s) square(switch_keycap + 2 * thumb_recess_clear, center = true);
             translate(matrix_xy) square(openings_matrix_window, center = true);
+            display_board_cut_2d();
             translate(service_xy) square([openings_service_cover_l, openings_service_cover_w], center = true);
             for (f = fasteners()) translate(f) circle(d = hardware_fastener_clear_d);
             for (u = ubolt_legs()) translate(u) circle(d = hardware_ubolt_rod_d + 0.5);
@@ -302,7 +306,8 @@ module service_cover_2d() {
 
 // --------------------------------------------------------- features ------
 disp_c = [x_disp0 + layout_display_band / 2, W / 2];
-// The board lies lengthwise, glass up, just under the plate (ADR 0008).
+// The board lies lengthwise (ADR 0008) on the UNDERSIDE, glass down, in a
+// through-cut in the oak bottom (decided 2026-09-26).
 // Its outline is the vendor's own DXF, not retyped numbers.
 DISP_DXF = "../../datasheets/mechanical/LILYGO-T-DISPLAY-S3-AMOLED-OUTLINE.dxf";
 disp_board = [58.782, 25.495];   // read off DISP_DXF's DIMENSION entities, for centring only
@@ -310,10 +315,6 @@ module display_board_outline_2d() {
     translate(disp_c) rotate(-90) translate([-disp_board[1] / 2, -disp_board[0] / 2]) import(DISP_DXF, layer = "KeepOutLayer");
 }
 module display_board_cut_2d() { offset(0.5) display_board_outline_2d(); }
-module display_window_2d(extra) {
-    translate(disp_c) square([boards_display_active_l + 2 * boards_display_window_margin + extra,
-                              boards_display_active_w + 2 * boards_display_window_margin + extra], center = true);
-}
 cluster_margin = 4;   // drawing convention: board edge past the outermost switch body
 module cluster_window_2d(ks) {
     x = xs(ks);
@@ -347,10 +348,10 @@ module lam(z, t, c, shell = true) {
 
 module lid(dz = 0) {
     translate([0, 0, dz]) {
-        lam(z_plate_bot + explode, plate_thickness, C_ALU, false)
-            translate([plate_x0, plate_y0]) plate_top_2d();
-        lam(z_lid_bot + explode / 2, stack_oak_top_t, C_OAK)
+        lam(z_oak_top_bot + explode, oak_top_t, C_OAK)
             translate([plate_x0, plate_y0]) oak_top_2d();
+        lam(z_plate_bot + explode / 2, plate_thickness, C_ALU, false)
+            translate([plate_x0, plate_y0]) plate_top_2d();
     }
 }
 
@@ -376,7 +377,7 @@ module caps() {
 
 module switch_at(xy, rot, top, spare = false) {
     // Seat (collar underside) on the plate's key face.
-    tf = top ? [xy[0], xy[1], z_plate_top + explode] : [xy[0], xy[1], z_floor - explode];
+    tf = top ? [xy[0], xy[1], z_plate_top + explode / 2] : [xy[0], xy[1], z_floor - explode];
     // P() OUTSIDE the placement: a section cuts in world coordinates, and a
     // P() inside translate() cut every switch in its own frame instead.
     P(C_SWITCH) translate(tf) rotate([top ? 0 : 180, 0, rot]) import("vendor/ks33.stl");
@@ -396,7 +397,7 @@ module thumb_plates_3d() {
 
 module cluster_boards() {
     for (cl = ["left_hand", "right_hand"])
-        P(C_PCB) translate([0, 0, z_plate_top - switch_pcb_below_seat - switch_pcb_t + explode * 0.75])
+        P(C_PCB) translate([0, 0, z_plate_top - switch_pcb_below_seat - switch_pcb_t + explode * 0.25])
             linear_extrude(switch_pcb_t) offset(-0.5) cluster_window_2d(cluster_keys(cl));
     for (cl = ["left_thumb", "right_thumb"])
         P(C_PCB) translate([0, 0, z_floor + switch_pcb_below_seat - explode * 0.25])
@@ -404,9 +405,10 @@ module cluster_boards() {
 }
 
 module display_board() {
-    // Vendor STEP, meshed; its frame matches the DXF: x across, y along, glass at z = 5.5.
-    P([0.22, 0.24, 0.30]) translate([disp_c[0], disp_c[1], z_plate_bot - 5.5 - 0.2 + explode * 0.6])
-        rotate([0, 0, -90]) translate([-disp_board[1] / 2, -disp_board[0] / 2, 0])
+    // Vendor STEP, meshed; its frame matches the DXF: x across, y along, glass
+    // at z = 5.5. Flipped glass-down, glass at boards_display_recess.
+    P([0.22, 0.24, 0.30]) translate([disp_c[0], disp_c[1], boards_display_recess + 5.5 - explode])
+        rotate([180, 0, 0]) rotate([0, 0, -90]) translate([-disp_board[1] / 2, -disp_board[0] / 2, 0])
             intersection() {
                 import("vendor/t-display-s3-amoled.stl");
                 // The STEP models the display flex unfolded 20 mm past the board;
@@ -488,9 +490,11 @@ module drc_report() {
     // Each run's end keys put half a cap into the neighbouring band - the
     // ADR 0009 table counts runs centre to centre.
     lh = xs(cluster_keys("left_hand")); rh = xs(cluster_keys("right_hand"));
-    d_disp = (min(lh) - plate_cutout / 2 - cluster_margin) - (disp_c[0] + disp_board[0] / 2 + 0.5);
-    drc(d_disp >= 0, "display board clear of the LH cluster board (both live inside the oak top)", d_disp,
-        "mm; negative = the two oak-top windows merge and the boards collide");
+    echo("DRC", "INFO", "oak top thickness (flush at full travel)", oak_top_t,
+         "mm = keycap_top_above_seat - total_travel; keycap height is tbd, so this is too");
+    drc(undef, "key cap stands proud of the top face at rest", switch_total_travel, "mm = the travel");
+    drc(stack_cap_clear * 2 >= 0.015 * (switch_keycap + 2 * stack_cap_clear), "cap hole clearance beats oak cross-grain movement across the hole",
+        stack_cap_clear, str("mm per side vs ", 0.015 * (switch_keycap + 2 * stack_cap_clear), " mm of movement at 1.5 % (ADR 0009)"));
     d_gap = (min(rh) - max(lh)) - switch_keycap;
     drc(undef, "inter-hand gap between caps", d_gap, "mm of clear band for the U-bolt and right thumb rest");
     d_uv = min([for (u = ubolt_legs()) min([for (k = bottom_keys) norm(key_xy(k) - u)])]) - hardware_ubolt_rod_d / 2 - (switch_keycap / 2 + thumb_recess_clear) * sqrt(2);
@@ -502,32 +506,28 @@ module drc_report() {
                    [for (i = [0 : 2]) [str("spare ", i + 1), spare_xy[i], [rc, rc]]],
                    [["matrix window", matrix_xy, [openings_matrix_window, openings_matrix_window]],
                     ["service opening", service_xy, [openings_service_cover_l, openings_service_cover_w]],
+                    ["display", disp_c, [disp_board[0] + 1, disp_board[1] + 1]],
                     ["U-bolt", ubolt_c, [hardware_ubolt_span + hardware_ubolt_rod_d, hardware_ubolt_rod_d]]],
                    [for (i = [0 : len(fasteners()) - 1]) [str("M3 #", i + 1), fasteners()[i], [hardware_fastener_cbore_d, hardware_fastener_cbore_d]]]);
     function gap(a, b) = max(abs(a[1][0] - b[1][0]) - (a[2][0] + b[2][0]) / 2,
                              abs(a[1][1] - b[1][1]) - (a[2][1] + b[2][1]) / 2);
     clashes = [for (i = [0 : len(feats) - 1], j = [i + 1 : 1 : len(feats) - 1])
                if (gap(feats[i], feats[j]) < 3) str(feats[i][0], " / ", feats[j][0], " ", gap(feats[i], feats[j]))];
-    drc(len(clashes) == 0, "oak-bottom cuts at least 3 mm apart (thumb recesses, spares, window, service, U-bolt, counterbores)",
+    drc(len(clashes) == 0, "oak-bottom cuts at least 3 mm apart (display, thumb recesses, spares, window, service, U-bolt, counterbores)",
         clashes, "pairs closer than 3 mm, with the web between them (negative = overlap)");
     edge = min([for (f = feats) min(f[1][1] - f[2][1] / 2 - u_y0, W - u_y0 - f[1][1] - f[2][1] / 2)]);
     drc(edge >= 2, "oak-bottom cuts inside the U", edge, "mm, smallest web to the inside of a side");
 
-    // The key plate: aluminium left between the display window and the
-    // nearest key cutout. The plate is the structure (ADR 0002).
-    dw = boards_display_active_l / 2 + boards_display_window_margin;
-    web = min([for (k = top_keys) abs(key_xy(k)[0] - disp_c[0]) - dw - plate_cutout / 2]);
-    drc(web >= 3, "key plate web between the display window and the nearest cutout", web,
-        "mm of aluminium; negative = the window and the cutout are one hole");
-
     // Z stack
-    drc(cavity_h > 0, "cavity height", cavity_h, "mm between the oak top and the oak bottom");
+    drc(cavity_h > 0, "cavity height", cavity_h, "mm between the key plate and the oak bottom");
     z_pole = z_plate_top - switch_pole_tip_below_seat;
-    drc(z_pole > z_lid_bot, "top switch pole tip inside the oak top", z_pole - z_lid_bot,
-        "mm above the lid underside; negative = the pole pokes into the cavity");
+    drc(undef, "top switch pole tip below the lid", z_lid_bot - z_pole, "mm into the cavity");
     z_pcb_bot = z_plate_top - switch_pcb_below_seat - switch_pcb_t;
-    drc(z_pcb_bot > z_lid_bot, "top cluster board inside the oak top", z_pcb_bot - z_lid_bot,
-        "mm left under the board for its components before the cavity");
+    drc(boards_carrier_z + switch_pcb_t < z_pcb_bot, "carrier clears the top cluster boards", z_pcb_bot - boards_carrier_z - switch_pcb_t,
+        "mm between the carrier's top face and the cluster boards' underside, for components on both");
+    dz_disp = boards_display_recess + 6.6;
+    drc(dz_disp <= z_floor, "display board within the oak bottom", z_floor - dz_disp,
+        "mm below the floor; 6.6 = the vendor STEP's full stack. Negative = it stands into the cavity");
     cap_out = switch_keycap_top_above_seat - stack_oak_bottom_t;
     drc(undef, "thumb cap protrusion past the bottom face", cap_out,
         "mm (negative = inset). keycap height is tbd; ADR 0009 sets this with the oak bottom thickness");

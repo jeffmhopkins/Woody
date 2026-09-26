@@ -273,8 +273,9 @@ that risks not working at all, this is the better trade.
 ### RF through the aluminium plate: not a concern
 
 Raised and dismissed. The display board's antenna sits under the aluminium key
-plate, but oak and acrylic are effectively RF-transparent, the plate is only one
-face of the enclosure, and the display needs a window cut in it regardless.
+plate, but oak and acrylic are effectively RF-transparent and the plate is only one
+face of the enclosure. (Since 2026-09-26 the display sits on the underside, below
+the plate rather than under a window in it, which only improves this — ADR 0009.)
 Recorded so it does not get re-litigated.
 
 ## Considered and rejected

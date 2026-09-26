@@ -14,11 +14,12 @@ module lv(zv, s, dz = 0) {
     seg([xr, zv + dz, 1], [0, zv, 1], r = 0.06);
     label([xr - 1, zv + dz, 1], s, size = 1.3, halign = "right");
 }
-lv(z_plate_top + (switch_keycap_top_above_seat), str("cap top ", z_plate_top + switch_keycap_top_above_seat, " (tbd)"));
-lv(z_plate_top, str("plate top ", z_plate_top), 1.2);
-lv(z_plate_bot, str("plate under ", z_plate_bot), -0.4);
+lv(z_plate_top + switch_keycap_top_above_seat, str("cap top at rest ", z_plate_top + switch_keycap_top_above_seat, " (tbd)"));
+lv(T, str("top face ", T, " = cap top pressed"), -1.2);
+lv(z_plate_top, str("plate top = seat ", z_plate_top), 0.4);
+lv(z_plate_bot, str("plate under = lid under ", z_plate_bot), -0.8);
 lv(z_plate_top - switch_pole_tip_below_seat, str("pole tip ", z_plate_top - switch_pole_tip_below_seat), -1.6);
-lv(z_lid_bot, str("lid under ", z_lid_bot), -1.4);
+
 lv(z_floor, str("floor ", z_floor));
 lv(0, "bottom face 0");
 label([W / 2, -8, 1], str("cavity ", cavity_h, " mm   side ", stack_side_t, " = two laminae, rebate ", stack_rebate_w, " (tbd)"), size = 1.6);

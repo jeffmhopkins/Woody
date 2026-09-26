@@ -30,12 +30,17 @@ the DXF's own DIMENSION entities.
 
 ## How the stack is modelled
 
-- **The lid** is the aluminium key plate on the oak top. **The top cluster
-  boards live inside the oak top**, in through-cut windows: the KS-33's pins
-  put the PCB a few millimetres under the seat (`docs/reference/ks33-geometry.md`
-  gives the window; `switch.pcb_below_seat` in `config/body.yaml` is what the
-  model uses), and that is inside the oak top, not in the cavity. The display board sits
-  the same way, glass just under the plate.
+- **The lid** is the oak top **on** the aluminium key plate — the plate is
+  underneath, because keys are **flush with the top face at full travel**
+  (decided 2026-09-26, ADR 0009). The oak top's thickness is not a parameter:
+  it is the cap's height above the seat less the travel, derived in the model
+  and printed in `drc.echo`. The oak carries one clearance hole per cap and
+  nothing else; the fasteners stop in the plate. The top cluster boards hang
+  under the plate in the cavity, at the depth the KS-33's pins set
+  (`docs/reference/ks33-geometry.md`; `switch.pcb_below_seat`).
+- **The display is on the underside** (decided 2026-09-26), glass down in a
+  through-cut in the oak bottom, recessed by `boards.display_recess`, still in
+  the display band at the mouthpiece end.
 - **The U** is the oak bottom and two acrylic sides. **Each side is two
   laminae**: the outer full height, the inner stopping at the lid. That is how
   ADR 0009's rebate becomes two through-cuts instead of a routed step, which
@@ -73,13 +78,13 @@ decision, not a correction.
    depth and there is not room beside it for the Matrix board. *Rules: "Matrix
    USB-C at the tail face", "room beside the etherCON body".* A short
    panel-mount USB-C extension is the obvious answer; it is a BOM line.
-4. **The display band does not hold the display and the first key.** ADR 0009's
-   length table counts key runs centre to centre, so LH1's half-cap, its switch
-   body and its cluster board all spill into the display band. In the oak top the
-   display and LH cluster windows merge; in the plate, the display window and
-   LH1's cutout merge. *Rules: "display board clear of the LH cluster board",
-   "key plate web between the display window and the nearest cutout".* The
-   budget has slack; where it goes is `layout.slack_to`.
+4. **The underside is crowded at the display band.** With the display moved to
+   the underside, its cut in the oak bottom sits next to the left-thumb arc:
+   LT1's recess leaves almost no oak beside it, and the placeholder spare
+   cutout before LT1 lands inside it. *Rule: "oak-bottom cuts at least 3 mm
+   apart".* The budget's slack, `layout.lt_arc_start` and where the spares go
+   are the levers; all are M2 questions. (The earlier top-face clash between
+   the display and LH1 went away with the move.)
 5. **Individual thumb recesses leave almost no oak between them** at the
    ADR 0010 arc spacing. *Rule: "oak-bottom cuts at least 3 mm apart".* ADR 0010
    already asks shared-versus-individual as an M2 question; the model says
@@ -88,7 +93,10 @@ decision, not a correction.
 6. **The carrier and the LED strips.** The carrier at the BOM's assumed width
    does not fit between strips in the side channels at the placeholder
    diffusion gap. *Rule: "carrier fits between the LED strips".*
-7. **M3 into a 1.20 mm plate** is about two threads. The BOM already says
+7. **The carrier runs under the right-hand cluster board** with little height
+   between them for components on both. *Rule: "carrier clears the top
+   cluster boards".* It passes; it is the tightest pass in the report.
+8. **M3 into a 1.20 mm plate** is about two threads. The BOM already says
    "insert or tapped boss"; the model says plain tapping is not one of the
    options.
 

@@ -61,12 +61,16 @@ transceivers stay a contingency rather than a likely requirement.
 38 mm of stack, consumed roughly as:
 
 ```
-  aluminium top plate       1.20 mm <- SETTLED by Gateron's drawing, see ADR 0002
-  oak top                   ~6 mm
+  oak top                   = cap height above the seat - travel  <- flush rule, below
+  aluminium key plate       1.20 mm <- SETTLED by Gateron's drawing, see ADR 0002
   ---- cavity ----          remainder
   oak bottom                ~8 mm   <- sets thumb key inset depth
   thumb switch plate        ~2 mm
 ```
+
+**The plate is under the oak, not on it (decided 2026-09-26)** — see "Keys
+are flush at full travel" below. The cavity arithmetic does not change: the
+lid is the same two layers in the other order.
 
 That leaves around 20 mm of clear cavity — except where switch bodies intrude.
 Top switches pass through the plate and oak and protrude slightly into the
@@ -225,11 +229,37 @@ where the middle layer has a through-cut. Every layer stays a 2D part that can
 be cut on a scroll saw or sent out flat. This is how a cavity gets built without
 a mill.
 
+### Keys are flush at full travel, so the plate goes under the oak
+
+**Decided 2026-09-26.** A key pressed to the bottom of its stroke is level with
+the top face; at rest it stands proud by the travel. That puts the switch seat
+— the plate's top face — below the top face by the cap's height above the seat
+less the travel, so **the plate moves under the oak top, and the oak top's
+thickness is set by that rule rather than chosen**. The body CAD derives it
+(`mechanical/drc.echo`, "oak top thickness"); until the MT165's height is
+measured at M1 it rests on an estimate.
+
+What changes, and what does not:
+
+- **The oak top is a sheet with one clearance hole per cap**, which the cap
+  travels in. It is still not structural and still holds no switch (ADR 0002):
+  the plate retains every key, the oak only surrounds the caps. The clearance
+  must exceed the oak's cross-grain movement across one hole, which the model
+  checks.
+- **The playing face is unbroken oak.** The six fasteners stop in the plate
+  from below, so no hole in the oak top carries one.
+- **The display is on the underside** (same date), glass down, in a through-cut
+  in the oak bottom — still in the display band at the mouthpiece end. Nothing
+  is cut in the plate for it any more.
+- **The plate is no longer under the player's hands**, but it is still a
+  floating conductor a few millimetres from eighteen switch pins, so the
+  bonding rule below stands unchanged.
+
 ### The thumb inset falls out for free
 
 ```
- ┌──────────────────────────┐   aluminium top plate (switch cutouts)
- ├──────────────────────────┤   oak top
+ ┌──────────────────────────┐   oak top (a hole per key cap)
+ ├──────────────────────────┤   aluminium key plate (switch cutouts), under the oak
  │    electronics cavity    │   spacer layers; frosted acrylic sides + LEDs
  ├───────┬──────────┬───────┤   oak bottom, through-cut at the thumb
  └───────┤  switch  ├───────┘   thumb plate mounted to the INSIDE face
@@ -581,8 +611,8 @@ went on bonding it. It does not any more.
 assembled as a single channel — glued to each other, once, permanently. That
 sub-assembly is never taken apart again and it carries the LED strips.
 
-**The other side pulls in on a notch.** The lid — aluminium key plate on oak
-top — drops into a rebate cut along the top inside edge of each acrylic side.
+**The other side pulls in on a notch.** The lid — oak top on the aluminium key
+plate — drops into a rebate cut along the top inside edge of each acrylic side.
 The notch locates the lid laterally and takes the shear, so the fasteners only
 have to hold it down.
 

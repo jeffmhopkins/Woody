@@ -12,7 +12,7 @@ z = T + 12;
 s = 5;
 yb = -14;
 // The budget, band by band.
-bands = [["margin", 0, x_mouth0], ["mouthpiece", x_mouth0, x_disp0], ["display", x_disp0, x_lh0],
+bands = [["margin", 0, x_mouth0], ["mouthpiece", x_mouth0, x_disp0], ["display (underside)", x_disp0, x_lh0],
          ["LH run", x_lh0, x_gap0], ["gap", x_gap0, x_rh0], ["RH run", x_rh0, x_tail0],
          ["tail", x_tail0, x_tail1], ["margin", x_tail1, L]];
 for (i = [0 : len(bands) - 1]) let(b = bands[i], y = yb - (i % 2) * 12) {
