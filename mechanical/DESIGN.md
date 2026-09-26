@@ -126,7 +126,8 @@ Three things can claim each end, and the largest wins:
   thumb board into its bottom edge. So the key chain runs through its traces,
   and the Matrix's pigtail, the patch lead and the display link all end on
   it. The breath sensor is on its face behind the right-thumb board, as far
-  from the display's AMOLED as the body allows (ADR 0003). It stands on
+  from the display's AMOLED as the body allows (ADR 0003; the owner
+  confirmed the tail end over a shorter tube, 2026-09-26). It stands on
   brackets off the oak at each end. `drc.echo` prints its size.
 - **Board clearances are real ones** (`boards.board_clear`): the owner
   rejected a model that put one board 0.5 mm over another's parts
