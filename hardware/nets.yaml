@@ -49,12 +49,9 @@ nets:
     note: >
       It is the carrier's PWR_GND pour arriving on HDR-DEV's ground pins - a
       separate name for the five conductors in the ribbon, not a separate node.
-      cluster/key-marker-and-bits is NOT in `reference:` any more: its four low
-      straps do join this net to a register input, but the input is per-board,
-      so that connection sits inside the KEY_BITS / MARKER_BITS `per_board:`
-      gap rather than being a second omission of its own. It used to be listed,
-      and the netlist satisfied it with a net whose only endpoint was the port -
-      a second name for a node rather than a net.
+      cluster/key-marker-and-bits is not in `reference:`: its four low straps do
+      join this net to a register input, but the input is per-board, so that
+      connection sits inside the KEY_BITS / MARKER_BITS `per_board:` gap.
     reference: [cluster/key-register, cluster/key-switch-network]
 
   CHAIN_SCK:
@@ -340,7 +337,7 @@ nets:
     figure: dig-gnd-topology
     origin: module/power-entry
     reference: [interfaces/spi-link, module/digital-and-supervision, carrier/mcu]
-    note: "carrier/mcu joined on 2026-09-26. Before that this net had NO INSTRUMENT END: spi-link netted J-UMB pin 8 and stopped, and nothing declared the far side, so CS_MOD's ground partner was open-circuit at the driving end. At the carrier it is one node with PWR_GND - that board has a single power ground pour"
+    note: "At the carrier this is one node with PWR_GND - that board has a single power ground pour and no separate digital ground"
 
   UMBILICAL_POS12:
     kind: power
@@ -353,15 +350,14 @@ nets:
       - carrier/breath-excitation-reference
       - interfaces/spi-link
     note: >
-      module/link-supervision was a receiver here and is not one: its page says
-      "Not fitted" against every row, including the presence detect that gated
-      OE_MOD from this node. A deleted circuit is not a receiver.
+      module/link-supervision is not a receiver: its page says "Not fitted"
+      against every row, including the presence detect that gated OE_MOD from
+      this node.
 
-      The carrier's "+12V strip feed" and "+12V analog" are not separate nets:
+      The carrier's "+12V strip feed" and "+12V analog" are NOT separate nets.
       D-REVSHUNT is a shunt across the pair and D-TVS-PWR is a clamp, so
-      nothing is in series between J-UMB pin 3 and either tap. They were two
-      more entries here until the netlist had to name both ends of each and
-      there was only one node to name.
+      nothing is in series between J-UMB pin 3 and either tap. Do not split
+      them again.
 
   PWR_GND:
     kind: reference
@@ -378,13 +374,10 @@ nets:
       The aluminium key plate bonds to this net through MECH-GNDBOND and NEVER
       to AGND, and carrier/power-entry-instrument is the only board that bond
       can originate on.
-      IT DOES NOT LIST THE TWO ANALOG CIRCUITS. power-entry-instrument.md's
-      Interfaces table names carrier/breath-adc and
-      carrier/breath-excitation-reference as returning to the pour, and both of
-      those pages say their return is AGND_INST - which reaches PWR_GND on the
-      single tie and is a different node everywhere else. The circuits' own
-      declarations win, because that distinction is the entire point of having
-      an instrument analog star.
+      THE TWO ANALOG CIRCUITS ARE NOT LISTED: carrier/breath-adc and
+      carrier/breath-excitation-reference return to AGND_INST, which reaches
+      this pour on the single tie and is a different node everywhere else. That
+      distinction is the entire point of the instrument analog star.
 
   # ======================================================================
   # MODULE: power
@@ -424,7 +417,7 @@ nets:
     carries: "Eurorack +5 V after FB4/C4. The level shifter only - the one rail with no local regulation"
     driver: module/power-entry
     receivers: [module/digital-and-supervision]
-    note: "interfaces/spi-link names this rail in its Interfaces table with Dir '-' and says it 'reaches no part of this circuit'. A '-' row is context, not a connection, and it was seeded here as one"
+    note: "interfaces/spi-link marks this rail '-' in its table: it reaches no part of that circuit, and a '-' row is context rather than a connection"
 
   DAC_AVDD:
     kind: power
@@ -459,11 +452,9 @@ nets:
   # MODULE: DAC and CV
   # ======================================================================
 
-  # THREE NETS, NOT ONE BUNDLE. They were one entry, SPI_DAC, with a note
-  # saying to split them when a page needed them separately; the DAC netlist
-  # is that page - each lands on its own pin and they cannot share a net.
-  # interfaces/spi-link is a receiver on all three because the DAC-side three
-  # of the six R-SPI-PULL sit on them and are that circuit's rows.
+  # THREE NETS, NOT ONE BUNDLE: each lands on its own DAC pin, and
+  # interfaces/spi-link is a receiver on all three because the DAC-side three of
+  # the six R-SPI-PULL sit on them. Do not fold them back together.
 
   SCLK_DAC:
     kind: signal
@@ -515,8 +506,7 @@ nets:
     driver: module/dac8568
     receivers: [module/pitch-stage]
 
-  # FOUR NETS, NOT ONE. They were one entry, DAC_CH2_5, which no layout could
-  # have used: each channel drives its own mod channel's R-OPAMP-IN.
+  # FOUR NETS, NOT ONE: each channel drives its own mod channel's R-OPAMP-IN.
 
   DAC_CH2:
     kind: signal
@@ -572,12 +562,11 @@ nets:
   # MODULE: panel
   # ======================================================================
   #
-  # THERE ARE NO PANEL NETS. BREATH_JACK, PITCH_JACK and MOD1..4_JACK were
-  # six entries here with module/panel as their receiver, and panel.md says
-  # plainly of every one of them: "A panel cutout. The net is that circuit's."
-  # The far end of each is a J-CV, which is a PART - so the net ends inside
-  # the circuit that drives it, and the six jacks are now placed in
-  # pitch-stage, breath-output-stage and mod-channels. The panel owns holes.
+  # THERE ARE NO PANEL NETS, and there should not be. panel.md says of every
+  # jack: "A panel cutout. The net is that circuit's." The far end of each is a
+  # J-CV, which is a PART, so the net ends inside the circuit that drives it -
+  # the six jacks are placed in pitch-stage, breath-output-stage and
+  # mod-channels. The panel owns holes.
 
 # ----------------------------------------------------------------------
 # RETIRED. Kept so that a page naming one of these is understood rather than

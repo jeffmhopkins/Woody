@@ -159,14 +159,4 @@ nets:
     - C-OUT-BREATH.2
     - J-CV-BREATH.SLEEVE
 
-# THE CLAMP IS ON THE REAL RAILS NOW. It used to sit on two single-endpoint
-# nets called RAIL_POS and RAIL_NEG, declared external on the grounds that
-# "the clamp rails terminate on the module's supply rather than inside this
-# circuit" - which was false four ways: MODULE_ANALOG_NEG12 was already a
-# declared port AND a two-endpoint net in this same file, the page's Interfaces
-# table says "D-JACK-CLAMP returns to both rails", nets.yaml lists this circuit
-# in both rails' receivers, and pitch-stage and all four mod-channels net the
-# identical BAV99 to the rail ports. Transcribed as written, the breath jack was
-# the one CV output with no clamp. Found independently by two cold slices.
-
 external_endpoints: []

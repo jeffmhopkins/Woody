@@ -11,10 +11,7 @@
 # shaping half only. The restoring half has no drawing and no passives in any
 # BOM row, so it is not netlisted: writing it would be inventing it. That gap
 # is now a bullet in the page's "Open before layout".
-#
-# THREE PASSIVES WERE DRAWN AND NEVER LISTED. R1 20k, R2 10k and the 2 x 10k
-# divider are in the page's cost table and were in no bom.csv row until
-# 2026-09-23. They are R-RESP-IN, R-RESP-FB and R-RESP-DIV now.
+
 
 circuit: module/breath-response-shaper
 title: Response control (PROPOSED)

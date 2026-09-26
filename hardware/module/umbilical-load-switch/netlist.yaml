@@ -2,12 +2,9 @@
 #
 # THIS CIRCUIT IS DRAWN ON ANOTHER PAGE. The load switch sits inside
 # power-entry.md's entry drawing, deliberately, because that is one board and
-# one drawing; this page carries only the gate-network detail. So the labels
-# that describe these parts are on a page whose netlist does not own them -
-# which is why tools/check-netlist.py resolves a drawing label against EVERY
-# netlist, not just the one beside the page. Before that, every load-switch
-# label on power-entry.md was skipped as "a BOM row, not a component here"
-# and its value was never compared to anything.
+# one drawing; this page carries only the gate-network detail. Those labels are
+# still checked: check-netlist.py resolves a drawing label against every
+# netlist, not only the one beside the page.
 
 circuit: module/umbilical-load-switch
 title: Umbilical load switch

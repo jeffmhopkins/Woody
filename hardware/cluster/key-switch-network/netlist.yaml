@@ -7,9 +7,8 @@
 # three belong to cluster/key-marker-and-bits rather than here; the global
 # instance count prints the difference rather than hiding it.
 #
-# THE SWITCH LEG GOES TO GROUND. It ran off the 3V3 rail until 2026-09-21,
-# which made a press a 33 mA rail short that never moved the register input -
-# and contradicted the figure's own caption. Pressed = pulled LOW.
+# THE SWITCH LEG GOES TO GROUND: pressed = pulled LOW. Off the 3V3 rail it
+# would be a 33 mA rail short that never moves the register input.
 
 circuit: cluster/key-switch-network
 title: Key switch network

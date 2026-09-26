@@ -106,18 +106,13 @@ components:
     pins: [IN, OUT, ADJ]
     note: "Minimum load current differs by manufacturer - see the row. The ~13mA here clears every reading"
 
-  # *** THESE TWO WERE WIRED BACKWARDS UNTIL 2026-09-26 *** and the rail was
-  # 1.65 V, below the DAC8568's absolute minimum. They were called -HI and -LO,
-  # which can only be read by resistance, so the netlist put the bigger one on
-  # the OUT-to-ADJ leg. The names now carry the nodes, and a wiring that
-  # contradicts them contradicts itself.
+  # THE NAMES CARRY THE NODES, so a wiring that contradicts them contradicts
+  # itself. Swapping the legs gives 1.65 V, below the DAC8568's minimum AVDD.
   #
   #   V_OUT = 1.25 x (1 + R_ADJGND / R_OUTADJ) + I_ADJ x R_ADJGND
   #         = 1.25 x (1 + 475/150) + 50uA x 475  =  5.23 V   [calc]
   #
-  # dac-rail's own derivation is 1.25 x (1 + 475/150) = 5.208 V (it omits the
-  # I_ADJ term), and ADR 0004 writes the pair as R1/R2 = OUT-ADJ/ADJ-GND:
-  # "150 ohm / 475 ohm instead of 240 ohm / 768 ohm".
+  # Rail value and floor: figure dac-rail, whose derivation omits I_ADJ.
 
   R-REG-SET-OUTADJ:
     value: "150R 0.1%"

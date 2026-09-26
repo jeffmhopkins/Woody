@@ -19,13 +19,9 @@ page: key-marker-and-bits.md
 ports:
   V3V3_CHAIN: {dir: in,  from: interfaces/key-chain-loom, figure: key-pullup-qty}
 
-# NO GND_CHAIN PORT, and that is a correction. This file used to declare one and
-# use it in a net called MARKER_LOW whose only endpoint WAS that port - a second
-# name for a node, not a net, and the same for MARKER_HIGH against V3V3_CHAIN.
-# The four low straps really do join GND_CHAIN to a register input, but the
-# input is per-board and unassertable, so the connection lives inside the
-# KEY_BITS/MARKER_BITS `per_board:` gap that check-netlist prints on every run
-# rather than being a second, separate omission here.
+# NO GND_CHAIN PORT. The four low straps do join GND_CHAIN to a register input,
+# but the input is per-board and unassertable, so that connection sits inside
+# the KEY_BITS / MARKER_BITS `per_board:` gap the checker prints, not here.
 
 components:
 
