@@ -71,12 +71,28 @@ open — the ordering half of it, anyway. Which *switch* lands on which input is
 
 **The part is the SN74HCS165: HC-family outputs, Schmitt-trigger inputs, not
 74LVC and not a plain 74HC165**, and both halves are load-bearing. *Outputs:*
-HC-family edges (output transition time at most 5 ns at 4.5 V and 25 °C, 8 ns
-over temperature `[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.8]`) keep each hop — a ribbon
-and part of the main board — an ordinary lumped load instead of a transmission
-line, which is what removed the hazards that briefly sent these registers to
-the tail `[repo] 0001, bom.csv`. Same SOIC-16 footprint, so LVC with proper
-source termination remains the way back if E4 disagrees. *Inputs:* the key
+HC-family drive, weaker than LVC's, which is what rings least on an
+unterminated line. **Its edges do not make a hop a lumped load, and nothing
+here relies on that.** TI publishes output transition time as a *maximum*
+only (5 ns at 4.5 V and 25 °C, 8 ns over temperature
+`[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.8]`), and the reflection
+hazard is set by the fastest edge, which is not published. By
+[`key-chain-loom.md`](../../interfaces/key-chain-loom/key-chain-loom.md)'s own
+length rule (a lump while the one-way delay is under a sixth of the edge, at
+~6 ns/m) even the 5 ns maximum gives `[calc]` 5 / 6 / 6 × 1000 ≈ 139 mm, and a
+hop is a ribbon (`mechanical/drc.echo` "key-chain ribbon length (derived)")
+plus key-board and main-board traces — longer than that. **What makes the
+hops safe is what they carry.** `QH` → next `SER` is data, sampled at the
+*next* rising `CLK`, one period later (1 µs at the chain's 1 MHz); `SER` setup
+is at most 14 ns and hold 0 ns over temperature `[same, p.7]`, so ringing on
+`QH`, whose round trip over a hop is a few nanoseconds, has had hundreds of
+nanoseconds to settle before it is sampled `[calc; judgment, not measured]`.
+Every register input the chain drives (`SER`, `CLK`, `SH/LD`) is a Schmitt
+input, hysteresis at least 0.2 V at 2 V and 0.4 V at 4.5 V `[same, p.6]`. The
+edge-sensitive nets, `SCK` and `SH/LD`, are driven by the MCU, not by this
+part, and are `R-CHAIN-SER`'s, scoped at E14 (`key-chain-loom.md`). Same
+SOIC-16 footprint, so LVC with proper source termination remains the way back
+if E4 or E14 disagrees. *Inputs:* the key
 network's RC edges are far slower than a plain 74HC165's input transition
 limit allows; the HCS165 has "no input signal transition rate requirements"
 `[same, p.15]` (ADR 0001's amendment, 2026-09-27;

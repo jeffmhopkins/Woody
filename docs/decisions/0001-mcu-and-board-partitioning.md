@@ -160,7 +160,9 @@ capacitor but **4.5 V into a bare wire, a false key press**. In fact:
   4.5 V was 37 % above the ceiling of its own mechanism.
 
 Corrected, an unfiltered wire sees **1.36 V**, landing at 1.94 V against a
-0.8 V threshold. **Capacitive coupling does not produce a false press on either
+0.8 V threshold *(LVC's; amended 2026-09-27: against the SN74HCS165 now
+fitted it clears the lower threshold by about 0.3 V - see "Key-line signal
+integrity" below)*. **Capacitive coupling does not produce a false press on either
 topology**, and the decision has to be made on something else.
 
 **On the something else, per-cluster wins on three counts and loses on one.**
@@ -184,7 +186,9 @@ the lower-risk choice on those grounds" — and then kept LVC anyway.
 That sentence is now load-bearing. The hazards used to reject the per-cluster
 loom the first time round — reflections, termination on a multidrop line, hold
 margin — are properties of **fast edges**. At LVC's rise times 265 mm is a
-transmission line; at HC's it is an ordinary lumped load. Same SOIC-16
+transmission line; at HC's it is an ordinary lumped load *(amended
+2026-09-27: not by the key-chain page's own length rule; see the 2026-09-27
+amendment below for the argument that holds)*. Same SOIC-16
 footprint, and the drive is ample: ~26 pF of loom plus connectors, at 1 MHz.
 
 **So `R-TERM-CHAIN` is not restored.** It was wrong as written anyway — series
@@ -205,6 +209,12 @@ elsewhere make a single corrupted read worse than it looks:
   filtering**. A conventional symmetric 20 ms window would silently absorb it.
 - **`SH/LD` is asynchronous and level-sensitive.** Any glitch below V_IL during
   the 32-clock shift re-loads all four registers and corrupts the whole word.
+  *(Amended 2026-09-27: on the SN74HCS165 read "below VT−", the Schmitt
+  input's lower threshold; `SH/LD` is now a Schmitt input, so a glitch has to
+  cross VT− having already fallen from above VT+, with at least 0.2 V of
+  hysteresis between them at 2 V and 0.4 V at 4.5 V
+  `[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.6]`. That lowers the risk;
+  it does not remove it, and the blast radius is unchanged.)*
 
 **Before any of that: the inputs need pull-ups, and there were none.** A 74x165's
 parallel inputs have no internal pull-up, so every key input floated when its
@@ -216,8 +226,8 @@ above: a 12 V edge through ~15 pF, `Q/C` into a bare wire. There is no 12 V
 edge, coupling is a divider, and the honest figure is 1.36 V of swing, landing
 at 1.94 V — nowhere near `V_IL` on either family (0.8 V for LVC, 0.99 V for the
 74HC165 then fitted). *(Amended 2026-09-27: the SN74HCS165's lower threshold
-can be as high as 0.5 × VCC, 1.65 V at 3.3 V `[calc; SN74HCS165-ti-scls828a.pdf
-p.6, every row]`, so 1.94 V clears it by about 0.3 V - still no false press,
+is at most 0.5 × VCC, 1.65 V at 3.3 V `[calc; SN74HCS165-ti-scls828a.pdf
+p.6: VT− max is 0.50, 0.49 and 0.50 × VCC at 2, 4.5 and 6 V]`, so 1.94 V clears it by about 0.3 V - still no false press,
 but not "nowhere near".)* **The pull-ups are still required**, for the plainer reason that a
 floating CMOS input has no defined state at all and sits wherever leakage,
 humidity and the last edge left it — which in a body that is breathed into for
@@ -245,9 +255,10 @@ against the SN74HCS165's Schmitt thresholds since 2026-09-27):
 > Earlier versions of this line read "~1 µs" and "~93 µs". Those were the
 > 10 kΩ/10 nF pair against LVC thresholds and both parts of that changed. The
 > conclusion does not: press is still instant on the scan's timescale and
-> release is still filtered. `bom.csv` row `C-KEY` carried the stale
-> the superseded "~1.4 us / 176x" pair until this edit and now carries these
-> figures. Neither old value is correct for any part in the current design.
+> release is still filtered. `bom.csv` row `C-KEY` carried the superseded
+> "~1.4 us / 176x" pair until this edit, and now cites `key-release-time` and
+> `key-press-time` *(amended 2026-09-27: this line said it "now carries these
+> figures"; since that day neither the table above nor the row restates them)*. Neither old value is correct for any part in the current design.
 
 > **27.3 mA is 4.4× what 10 kΩ pull-ups would draw** and it is drawn from the dev board's 3V3
 > LDO, down the loom, as a play-rate step. That LDO is also the MCP3202's
@@ -301,7 +312,14 @@ which is still reason enough to do them now.
 
    **Magnitude, honestly:** the skew between adjacent clusters is ~0.5 ns
    against an HC165's propagation delay of tens of nanoseconds, so the wrong
-   order costs a few percent of hold margin rather than violating it. An
+   order costs a few percent of hold margin rather than violating it.
+   *(Amended 2026-09-27, `docs/review/2026-09-27-lh-key-board-r2/` R1-8: "tens of
+   nanoseconds" is the MAXIMUM propagation delay, and hold margin depends on
+   the minimum, which TI does not publish for the SN74HCS165 (p.7 gives
+   CLK→QH max only). What p.7 does give is `SER` hold after `CLK`↑ = 0 ns at
+   every rail, so the ~0.5 ns of skew only has to stay under the register's
+   unpublished minimum delay - near certain for any CMOS flip-flop, but a
+   judgment, not the margin this paragraph quoted.)* An
    earlier version of `config/key-layout.yaml` claimed it would put
    "hold-margin violations" into a bonded body — an honesty marker pointing the
    wrong way. The rule is still worth following because it is free. It is not
@@ -312,7 +330,11 @@ which is still reason enough to do them now.
    boards, where intermediate receivers sit at the incident half-step; at 68 Ω
    that step can land at 1.96 V against a 2.0 V threshold, so the specified
    "33–68 Ω" spanned fine to marginal, in the counterintuitive direction. And
-   with HC165's slow edges there is nothing to terminate.
+   with HC165's slow edges there is nothing to terminate. *(Amended
+   2026-09-27: the second reason does not hold as stated - see the
+   2026-09-27 amendment below. The first reason stands on its own, and the
+   clock and latch lines now carry `R-CHAIN-SER` for edge rate, not as
+   termination: `hardware/interfaces/key-chain-loom/`.)*
 5. **100 nF at every register**, on its own board — which is where it belongs.
    A 74x165's output edges brown out a local rail that has no reservoir.
 6. **Tie `CLK INH` low at all four devices, and pull every unused parallel
@@ -331,7 +353,9 @@ technique for the topology.
 
 **HC makes the loom an ordinary lumped load instead of a transmission line**,
 which is what removes the hazards that sent the registers to the tail in the
-first place. Same SOIC-16 footprint, and the drive is ample into ~26 pF of loom
+first place. *(Amended 2026-09-27: it does not, by the key-chain page's own
+length rule, and the chain does not need it to - the 2026-09-27 amendment
+below gives the argument that holds.)* Same SOIC-16 footprint, and the drive is ample into ~26 pF of loom
 at 1 MHz. If E4 disagrees, LVC with proper source termination is the way back.
 
 ### Two firmware rules the chain depends on
@@ -395,15 +419,36 @@ drop-in part instead.
 - **TI SN74HCS165** has Schmitt-trigger inputs and no input transition-rate
   requirement `[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.15]`. It has the
   same pinout and SOIC-16 `[same, p.3]`, and a better ESD rating `[same, p.4]`.
-- **The family argument above stands.** Its outputs are HC-family, not LVC:
-  at most 5 ns at 4.5 V and 25 °C, 8 ns over temperature `[same, p.8]`,
-  against the 74HC165's 15 ns maximum at 25 °C `[74HC165-nexperia.pdf p.8]`. So
-  each hop is still a lumped load, and the chain's 1 MHz clock is far inside
-  its limit at every published rail `[same, p.6]`.
-- **The key-timing figures moved** to the HCS165's thresholds, taken at their
-  guaranteed extremes, because TI publishes no 3.3 V row: see
+- **The family choice stands; the "lumped load" argument for it does not.**
+  *(Corrected 2026-09-27, `docs/review/2026-09-27-lh-key-board-r2/` R1-2. This bullet
+  first said the HCS165's output transition time - at most 5 ns at 4.5 V and
+  25 °C, 8 ns over temperature `[same, p.8]` - kept each hop a lumped load.
+  That is a maximum, and the reflection hazard is set by the fastest edge,
+  which is not published; TI itself warns the outputs "may create fast edges
+  into light loads" `[same, p.11 §8.3.1]`. The HCS165's guaranteed maximum is
+  below the 74HC165's typical, 7 ns `[74HC165-nexperia.pdf p.8]`, so the part
+  change made edges faster, not the same. By `key-chain-loom.md`'s length
+  rule, 5 ns gives a lump length of about 139 mm `[calc: 5 / 6 / 6 ns/m]`, and
+  a hop is a ribbon plus main-board and key-board traces - longer.)* What
+  holds instead: `QH` → next `SER` is **data**, sampled at the next rising
+  `CLK` a whole period after it changes (1 µs at 1 MHz), against `SER` setup
+  of at most 14 ns and hold of 0 ns `[same, p.7]`, so a ring whose round trip
+  is a few nanoseconds has settled long before `[calc; judgment, not
+  measured]`. Every register input the chain drives is now a Schmitt input
+  `[same, p.6]`. The edge-sensitive nets, `SCK` and `SH/LD`, are driven by
+  the MCU and carry `R-CHAIN-SER`, E14's to scope. HC-family drive is still
+  the right family over LVC, being the weaker, and LVC with source
+  termination is still the way back if E4 or E14 disagrees. The chain's
+  1 MHz clock is far inside the register's limit at every published rail
+  `[same, p.6]`.
+- **The key-timing figures moved** to the HCS165's thresholds, taken at the
+  extreme ratios of TI's published rows *(amended 2026-09-27, R1-7: an
+  extrapolated bound, not a guarantee - TI publishes no 3.3 V row)*: see
   `key-release-time` and `key-press-time` in `config/figures.yaml`. The release
-  is now just over half a scan period, which changes no conclusion here.
+  is now just over half a scan period, which changes no conclusion here
+  *(amended 2026-09-27, R1-5: it delays about half of all releases by one
+  scan, invisible behind firmware's release window -
+  `key-switch-network.md` §2)*.
 - **The part bought is the sheet's** (`key-register.kicad_sch`, ADR 0019), and
   the U-KEYS row says what a substitute must be. The wording "74HC165" that
   remains above records the reasoning at the time.
@@ -429,7 +474,9 @@ drop-in part instead.
   ~32 µs at 1 MHz, about 13 % of a 250 µs loop period. **1 MHz is the design
   rate and the chain should not be pushed much past it**: it crossed four
   connectors and ~265 mm of loom when this was written *(Amended 2026-09-26, ADR 0017: now main-board traces plus two ribbons, 1.27 mm IDC since 2026-09-27; the length is `mechanical/drc.echo` "main board (derived)")*, and HC165's slow edges are what make that an
-  ordinary lumped load. Clocking it hard is how the transmission-line hazards
+  ordinary lumped load *(amended 2026-09-27: they do not; what keeps the
+  register-driven hops safe is that they carry sampled data - the
+  2026-09-27 amendment below)*. Clocking it hard is how the transmission-line hazards
   come back.
 - LED power and data run the length of the body too. Keep their ground return
   separate from the analog section and star-ground at one point, or the LEDs

@@ -139,7 +139,7 @@ being asked to guess.
 | Host | Devices | Clock |
 |---|---|---|
 | **SPI2** | DAC8568 down the umbilical, **and** MCP3202 on this board | **2 MHz for the DAC, 900 kHz for the ADC — not one clock** |
-| **SPI3** | The key chain's four `U-KEYS` registers (SN74HCS165) alone, because `QH` is always driven (ADR 0001) | **1 MHz, and not much more** — the serial path crosses both key-board ribbons out and back and runs the main board's length, and the registers' HC-family output edges are what keep each hop a lumped load `[repo] 0001, key-chain-loom.md` |
+| **SPI3** | The key chain's four `U-KEYS` registers (SN74HCS165) alone, because `QH` is always driven (ADR 0001) | **1 MHz, and not much more** — the serial path crosses both key-board ribbons out and back and runs the main board's length. Each hop's `QH` → `SER` is data sampled a whole clock period after it changes, into a Schmitt input, so a hop need not be a lumped load (it is not one, by `key-chain-loom.md`'s own length rule: `key-register.md`); the edge-sensitive `SCK` and `SH/LD` are `R-CHAIN-SER`'s, scoped at E14 `[repo] 0001, key-chain-loom.md`. **SPI mode 2 (CPOL 1, CPHA 0).** The register shows `H` on `QH` from the load, before any clock, and shifts on `CLK`↑ `[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.11 §8.1, p.13 Table 8-1]`, so the MCU must take its first sample before the first rising edge or on it. Mode 2 samples on each falling edge, half a period after the shift, with no dependence on the register's timing beyond its maximum `tpd` `[calc]`. Modes 0 and 3 sample on the rising edge that shifts, and hold only on the register's unpublished minimum `tpd`; mode 1 samples after the first shift and loses bit 0, which the marker reports as a framing error (ADR 0001). A firmware line, written nowhere else |
 
 > **The MCP3202 cannot run at 2 MHz.** `[repo, verified]` against Microchip
 > DS21034F, now at `datasheets/analog/MCP3202-CI-SN.pdf`. The Timing
@@ -173,8 +173,10 @@ SPI2  DAC    6 × 32 bits @ 2.0 MHz =  96.0 µs
 SPI2  ADC    24 clocks    @ 0.9 MHz =  26.7 µs
 SPI2  total                         = 122.7 µs of 250 µs → 49 %
 SPI3  keys   32 bits      @ 1.0 MHz =  32.0 µs, concurrent → 13 %
-             (+ four register CLK→QH delays, 18–45 ns max each over
-              temperature at 4.5–2 V, SN74HCS165 datasheet p.7 — noise)
+             (+ one register CLK→QH delay plus flight: each hop is
+              re-sampled on the next clock, so the delays do not add; the
+              last register's is 18–45 ns max over temperature at 4.5–2 V,
+              SN74HCS165 datasheet p.7, against mode 2's 500 ns — noise)
 ```
 
 **SPI2 cannot use IO_MUX and does not need to.** The S3's FSPI IO_MUX pins are

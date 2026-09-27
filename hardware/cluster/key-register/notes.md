@@ -21,7 +21,10 @@ The `§Derivations` it points at is now the `### Derivations` of
 - ~~**The 74HC165 pin map and its 3.3 V thresholds** (§1, §2).~~ **CLOSED
   2026-09-21.** The pin map is confirmed against Nexperia's Table 2 and the
   thresholds against onsemi's published 3.0 V row — see §Derivations. It did
-  take rather more than five minutes, and it moved twice.
+  take rather more than five minutes, and it moved twice. *(Since 2026-09-27
+  §Derivations derives the SN74HCS165's thresholds; the onsemi table and the
+  74HC165 derivation this item closed on are in
+  [`../key-switch-network/notes.md`](../key-switch-network/notes.md).)*
 
 ---
 

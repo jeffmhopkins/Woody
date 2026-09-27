@@ -125,12 +125,12 @@ keys:
 # BIT 0 IS THE FIRST BIT CLOCKED OUT - the device nearest the MCU. That
 # definition was ambiguous once and the ambiguity is what got the order wrong.
 #
-# Honest magnitude: adjacent-cluster skew is ~0.5ns against the register's tens of
-# nanoseconds of propagation delay (SN74HCS165 CLK->QH, its datasheet p.7),
-# so the wrong order costs a few percent of hold margin rather than violating
-# it. An earlier version of this comment said it would put "hold-margin
-# violations" into a bonded body; that was an honesty marker pointing the
-# wrong way. Follow the rule anyway - it is free.
+# Honest magnitude: adjacent-cluster skew is ~0.5ns. The SN74HCS165's SER hold
+# after CLK rising is 0 ns at every rail (datasheets/logic/SN74HCS165-ti-scls828a.pdf
+# p.7), so the wrong order would need the skew to exceed the register's MINIMUM
+# CLK->QH delay, which TI does not publish (p.7 gives the maximum only). Near
+# certain not to for a CMOS flip-flop, but a judgment, not a measured margin.
+# It does not decide whether the chain works. Follow the rule anyway - it is free.
 chain:
   - cluster: right_thumb  # bits 0-7   — 4 used, 4 spare — nearest the MCU
   - cluster: right_hand   # bits 8-15  — 6 used, 2 spare

@@ -72,16 +72,19 @@ networks:
 # right; its chain pins (SH/LD, CLK below; QH, SER above) toward the header.
 parts:
   U-KEYS-LH:     [90.5, 43.5, 90]
-  C-DECOUPLE-165-LH: [94.3, 48.2, 180]   # across the ends of pins 16 (VCC) and 15 (GND): the loop is two stubs
+  # across the ends of pins 16 (VCC) and 15 (CLK INH, tied to GND): VCC is one stub,
+  # and its return runs to the register's ground pin 8, at the opposite corner, in
+  # its own track (connect_first, below) - not through whatever the pour leaves
+  C-DECOUPLE-165-LH: [94.3, 48.2, 180]
   R-KEY-PU-FREE3: [84.0, 43.5, 90]
   # Do-not-fit reservoir on the chain's 3V3, beside J-CHAIN's 3V3 pin (C-BULK-CHAIN row)
   C-BULK-CHAIN-LH: [67.0, 42.0, 90]
   # Bring-up test pads (TP-CHAIN), a row between the key row and the register:
-  # in the order of the register's own pins above them - SER and QH by pins 10 and
-  # 9, SCK and SH/LD by 2 and 1, 3V3 by 16 - so no chain net crosses another's
+  # in the order of the register's own pins above them - QH and SER by pins 9 and
+  # 10, SCK and SH/LD by 2 and 1, 3V3 by 16 - so no chain net crosses another's
   # pad. README.md says how to use them.
-  TP-SER-LH:     [83.0, 36.0, 0]
-  TP-QH-LH:      [86.5, 36.0, 0]
+  TP-QH-LH:      [83.0, 36.0, 0]
+  TP-SER-LH:     [86.5, 36.0, 0]
   TP-GND-LH:     [90.0, 36.0, 0]
   TP-SCK-LH:     [93.5, 36.0, 0]
   TP-SHLD-LH:    [97.0, 36.0, 0]
@@ -104,5 +107,9 @@ route: true
 # from the header's back - its 1.27 mm pads leave no room for a track between
 # them - so those nets are routed before the key lines can close that side.
 route_first: [/CHAIN_SCK, /CHAIN_SHLD, /CHAIN_SER_LH, /HOP_LH_LT]
+# Pad-to-pad connections routed before everything, and held to a length by
+# pcb.py check: the decoupler's return to the register's ground pin.
+connect_first:
+  - {pads: [C-DECOUPLE-165-LH.2, U-KEYS-LH.8], max_mm: 15, why: "the decoupling loop's ground half, in its own track"}
 ground_net: GND_CHAIN
 power_nets: [V3V3_CHAIN_LH]

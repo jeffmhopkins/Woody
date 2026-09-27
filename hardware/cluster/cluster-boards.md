@@ -240,7 +240,10 @@ main board's `U-TVS-CHAIN` guards the **MCU's** pins only — `SCK`, `SH/LD`
 and the chain-end `SER`, at the `left_hand` `J-CHAIN`. The hop nets
 (`HOP_*`, each register's `QH` to the next one's `SER`) and every signal pin
 of a key board's `J-CHAIN` land on register pins, which carry the part's own
-HBM rating of ±4000 V `[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.4]`. The
+HBM rating of ±4000 V `[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.4]` —
+a component handling rating (JS-001; TI's own footnote is about safe
+manufacturing), not a system-level IEC 61000-4-2 rating for a contact touched
+with the lid off. The exposure is accepted, not protected. The
 array's spare fourth channel stays spare: one channel cannot cover the three
 hops. `key-chain-loom.md` has the argument.
 

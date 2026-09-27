@@ -60,8 +60,9 @@ components:
     - G
     - H
     note: 'Schmitt-trigger inputs (74HCS): the key networks'' slow edges are within its rating - it has no input
-      transition-rate limit. HC-family outputs, not LVC: its edges keep each hop an ordinary lumped load. Bit order
-      out is H first, then G F E D C B A'
+      transition-rate limit. HC-family outputs, not LVC: the weaker drive. A hop is not a lumped load and need not
+      be - QH to the next SER is data sampled a clock period later, into a Schmitt input (key-register.md). Bit
+      order out is H first, then G F E D C B A'
 nets:
   CHAIN_QH:
   - port: CHAIN_QH

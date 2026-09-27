@@ -61,10 +61,11 @@ else; `tools/check-netlist.py` prints that shortfall by name every run.*
 ### Derivations
 
 `[calc]`, at 3.3 V into the **SN74HCS165**'s Schmitt-trigger thresholds, taken
-at their guaranteed extremes: the input is certainly read high once it passes
-**VT+ at its maximum, 2.475 V**, and certainly read low once it passes **VT− at
-its minimum, 0.495 V** (0.75 / 0.15 × VCC). TI tabulates 2 V, 4.5 V and 6 V
-and no 3.3 V row `[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.6]`:
+at an **extrapolated bound** — not a guarantee, because TI guarantees nothing
+at 3.3 V: the input is read high once it passes **VT+ at its maximum,
+2.475 V**, and read low once it passes **VT− at its minimum, 0.495 V**
+(0.75 / 0.15 × VCC, the worst ratios in the table). TI tabulates 2 V, 4.5 V
+and 6 V and no 3.3 V row `[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.6]`:
 
 | VCC | VT+ max | VT− min | as × VCC |
 |---|---|---|---|
@@ -99,11 +100,33 @@ several transitions.
 
 Both crossing times are derived in `config/figures.yaml` (`key-release-time`,
 `key-press-time`); this page owns them, and every other page cites them by name.
+They use nominal parts. **Tolerance, and why no conclusion rests on the
+bound:** `[calc]` with `R-KEY-PU` 1 % high and `C-KEY` +10 % and a further
++15 % for X7R over temperature, both times scale by 1.01 × 1.10 × 1.15 = 1.28:
+the release to about 177 µs, still inside one 250 µs scan, and the press to
+about 12.6 µs, still about 20× inside it. The release stays inside one scan
+for any VT+ up to 3.3 − 3.1565 × e^(−250 / 103.4) = 3.02 V, 0.915 × VCC —
+far beyond any row TI publishes.
 
 **Press is instant on the scan's timescale and release is delayed by
-`key-release-time`**, just over half a scan period, which costs nothing
-musically: the release reaches firmware on the next scan either way. **This RC is a glitch filter, not the debounce.** It swallows a
-contact opening shorter than `key-release-time`; the switch's own bounce,
+`key-release-time`**, just over half a scan period. That adds **0 or 1 scan**
+to a release: it is seen at the first scan after the node crosses VT+, so with
+the scan phase uniform it slips one extra scan whenever the phase falls inside
+the delay — `[calc]` `key-release-time` / 250 µs, just over half of all
+releases — and the mean added latency is `key-release-time` itself. That costs
+nothing musically, because releases sit behind firmware's release window,
+milliseconds long (below). **This RC is a glitch filter, not the debounce.**
+What it guarantees to swallow is set by the *other* extreme of the threshold:
+an opening is missed only if the node never reaches VT+ on the part that
+reads high **earliest**, VT+ at its **minimum**. TI's smallest VT+ min ratio is
+0.35 × VCC (0.7 V at 2 V, 2.1 V at 6 V; 1.7 V at 4.5 V is 0.378)
+`[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.6]`, so `[calc]` 0.35 × 3.3 =
+1.155 V and 103.4 µs × ln((3.3 − 0.1435) / (3.3 − 1.155)) = **≈ 40 µs** —
+≈ 30 µs with `R-KEY-PU` 1 % low, `C-KEY` −10 % and X7R's −15 %. So a contact
+opening **shorter than about 30 µs is always swallowed**; one that outlasts
+`key-release-time` (nominal parts; about 177 µs at the tolerance extremes
+above) always takes the node past VT+, so a scan that lands inside it reads a
+release; in between depends on the part. The switch's own bounce,
 `ks33-contact-bounce`, is many times longer, so bounce passes straight through
 it in both directions — every re-closure during a release pulls the node low
 again within `key-press-time`. Rejecting bounce is entirely firmware's release
@@ -116,14 +139,24 @@ front of the register input, so it protects nothing on the register side. Its
 two jobs are the pressed-node divider (the node sits a little above 0 V, which
 both crossing figures start from) and **limiting `C-KEY`'s discharge into the
 switch contact** on every press. `[calc]` Peak = 3.3 V / (100 Ω + ≤ 0.2 Ω
-contact) ≈ 33 mA for a few µs (τ ≈ 4.7 µs, ½·47 nF·3.3² ≈ 0.26 µJ). The KS-33
+contact) ≈ 33 mA for a few µs (τ ≈ 4.5 µs, the parallel τ of
+`key-press-time`'s `threshold_note`; ½·47 nF·3.3² ≈ 0.26 µJ). The KS-33
 is rated **10 mA 12 VDC, resistive load** `[datasheets/mechanical/GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf,
 item 3 "Ratings"]`, so the press transient is about 3× the rating, for
 microseconds; without `R-KEY-SER` only the contact's own resistance would
 bound it. The steady closed-key current (`key-scan-current`) is well inside
-the rating. A larger `R-KEY-SER` (≈ 330 Ω brings the peak to the rating)
-raises the pressed-node voltage and slows the press; that trade is open, not
-taken here.
+the rating. A larger `R-KEY-SER` (≈ 330 Ω brings the peak to the rating,
+3.3 V / 330 Ω = 10 mA) raises the pressed-node voltage and slows the press;
+that trade is open, not taken here. **But the fitted part nearly closes it.**
+A pressed key reads low only if the divider sits below VT− at its minimum, so
+`[calc]` `R-KEY-SER` < 2.2 kΩ × 0.495 / (3.3 − 0.495) ≈ **388 Ω** nominal,
+≈ 380 Ω with both resistors at their 1 % extremes, or a pressed key may never
+read at all. At 330 Ω the pressed node sits at 3.3 × 330 / 2530 = 0.430 V,
+**65 mV** under that bound (57 mV at the 1 % extremes), and the press slows to
+(2.2 kΩ ∥ 330 Ω) × 47 nF × ln((3.3 − 0.430) / (0.495 − 0.430)) = 13.49 µs ×
+3.79 ≈ **51 µs**, about five times `key-press-time`. So 330 Ω is at the edge,
+and anything that pushes the rating-driven value up — a tighter reading of the
+contact current, say — runs out of room below ≈ 390 Ω.
 
 > **Why the network is fitted at all, stated honestly.** The argument that
 > originally bought these parts — a 12 V LED edge through ~15 pF injecting a

@@ -232,6 +232,12 @@ def network_parts(lay, geo):
     pat, exc = n.get("pattern"), n.get("except") or {}
     if not pat:
         return {}
+    for key in exc:
+        if key not in geo["switches"]:
+            sys.exit(f"pcb: networks: except: {key!r} names no switch on this board ({', '.join(sorted(geo['switches']))})")
+    for key, spec in [("pattern", pat)] + [(k, {**pat, **v}) for k, v in exc.items()]:
+        if spec.get("axis") not in ("x", "y") or spec.get("leg") not in (1, -1) or spec.get("c") not in (1, -1):
+            sys.exit(f"pcb: networks: {key}: axis must be x or y, leg and c +1 or -1 - got {spec}")
     out = {}
     for key, (sx, sy, sr) in geo["switches"].items():
         spec = {**pat, **exc.get(key, {})}
@@ -239,7 +245,8 @@ def network_parts(lay, geo):
             x, y = spec["at"]
         else:
             if sr % 360:
-                sys.exit(f"pcb: networks: pattern is written for switches at 0 deg; SW-{key} is at {sr} - give it an except: entry")
+                sys.exit(f"pcb: networks: pattern is written for switches at 0 deg; SW-{key} is at {sr} - "
+                         "give it an except: entry with its own `at`")
             x, y = sx + spec["offset"][0], sy + spec["offset"][1]
         d, c = spec["leg"], spec["c"]
         if spec["axis"] == "x":
@@ -248,14 +255,14 @@ def network_parts(lay, geo):
             out[f"R-KEY-PU-{key}"] = [x - d * NET_PITCH, y, rot]
             out[f"C-KEY-{key}"] = [x, y + c * NET_PITCH, 270 if c > 0 else 90]
         else:
-            rot = 270 if d > 0 else 90        # pad 1 faces +y at 90 and -y at 270
+            rot = 90 if d > 0 else 270        # pad 1 faces -y at 90 and +y at 270 (measured through place())
             out[f"R-KEY-SER-{key}"] = [x, y + d * NET_PITCH, rot]
             out[f"R-KEY-PU-{key}"] = [x, y - d * NET_PITCH, rot]
             out[f"C-KEY-{key}"] = [x + c * NET_PITCH, y, 0 if c > 0 else 180]
     return out
 
 
-SILK_H, SILK_W = 1.0, 0.15     # silkscreen text height and stroke, mm - above every board house's minimum (layout.yaml rules)
+SILK_H, SILK_W = 1.0, 0.18     # silkscreen text height and stroke, mm: JLC's 1.0 minimum height, and a stroke over its 0.15 minimum near its preferred 1:6 (R3-8)
 
 
 def silk_text(board, text, x, y, h=SILK_H, justify=0, top=False, angle=0):
@@ -297,6 +304,7 @@ def fit_footprint_silk(board, fab):
     board house would clip it anyway; the part letters mark the parts)."""
     from shapely.geometry import LineString, Point, Polygon
     wmin, gap = fab["silk_line_min"], fab["silk_to_pad"]
+    removed = {}
     for fp in board.GetFootprints():
         pads = []
         for p in fp.Pads():
@@ -331,6 +339,9 @@ def fit_footprint_silk(board, fab):
             side = pcbnew.B_Cu if item.GetLayer() == pcbnew.B_SilkS else pcbnew.F_Cu
             if any(p.IsOnLayer(side) and g.distance(pg) - pcbnew.ToMM(item.GetWidth()) / 2 < gap for p, pg in pads):
                 fp.Remove(item)
+                removed.setdefault(fp.GetFPID().GetLibItemName().wx_str(), set()).add(fp.GetReference())
+    for name, refs in sorted(removed.items()):
+        print(f"pcb: silk adapted - {name}: library silk too near its pads removed ({', '.join(sorted(refs))})")
 
 
 def silk_dot(board, x, y, r=0.3, top=False):
@@ -685,6 +696,18 @@ def build(bdir):
         px, py = to_pcb(x, y)
         place(board, fps[ref], px, py, r, True)
         placed.add(ref)
+    # every key's T must have its node's three pads nearest the junction, or the
+    # pattern turned a part the wrong way round (R6-3)
+    for key in (lay.get("networks") or {}).get("pattern") and geo["switches"] or []:
+        refs = [f"R-KEY-SER-{key}", f"R-KEY-PU-{key}", f"C-KEY-{key}"]
+        if not all(r in fps for r in refs):
+            continue
+        s_, p_ = fps[refs[0]].GetPosition(), fps[refs[1]].GetPosition()
+        jx, jy = (s_.x + p_.x) / 2, (s_.y + p_.y) / 2
+        pads = sorted((pd for r in refs for pd in fps[r].Pads()), key=lambda pd: math.hypot(pd.GetPosition().x - jx, pd.GetPosition().y - jy))
+        if len({pd.GetNetname() for pd in pads[:3]}) != 1:
+            sys.exit(f"pcb: {key}'s network is not a T round its node: the pads nearest its junction are "
+                     f"{', '.join(pd.GetParentFootprint().GetReference() + '.' + pd.GetNumber() + ' ' + pd.GetNetname() for pd in pads[:3])}")
     missing = sorted(set(fps) - placed)
     if missing:
         sys.exit(f"pcb: not placed (add them to layout.yaml parts): {', '.join(missing)}")
@@ -826,6 +849,19 @@ FAB_TESTS = ["clearance", "track_width", "annular_width", "drill_out_of_range", 
              "silk_edge_clearance", "silk_over_copper", "silk_overlap", "solder_mask_bridge"]
 
 
+# DRC tests that may be set to ignore, each for a reason; any other ignored test
+# fails the check (R6-2: an ignored unconnected_items passed a board with a whole
+# net unrouted).
+IGNORE_OK = {
+    "lib_footprint_mismatch": "fit_footprint_silk adapts the library silk to the board house on purpose",
+    "footprint_filters_mismatch": "the sheets' symbols carry no footprint filters",
+    "footprint_type_mismatch": "a hand-fitted THT part is marked SMD-excluded for placement files, not mistyped",
+    "missing_courtyard": "the board-only mounting holes have none",
+    "npth_inside_courtyard": "a switch's centre-pole hole lies inside its own courtyard",
+    "pth_inside_courtyard": "a switch's pins lie inside its own courtyard",
+}
+
+
 def check_rules(board, bdir, name, lay):
     """The board's design settings still say what layout.yaml says, and no fab test is off."""
     import json
@@ -845,10 +881,11 @@ def check_rules(board, bdir, name, lay):
                    f"under layout.yaml rules.clearance {lay['rules']['clearance']}")
     pro = os.path.join(bdir, name + ".kicad_pro")
     sev = json.load(open(pro))["board"]["design_settings"].get("rule_severities", {}) if os.path.exists(pro) else {}
-    for test in FAB_TESTS:
-        if sev.get(test) == "ignore":
-            bad.append(f"error: [rules] DRC test {test} is set to ignore in {name}.kicad_pro - it enforces "
-                       f"a board-house limit, so it must report")
+    for test, level in sorted(sev.items()):
+        if level == "ignore" and test not in IGNORE_OK:
+            why = "it enforces a board-house limit" if test in FAB_TESTS else "an ignored test drops out of the report, and a check with nothing to say reads as a pass"
+            bad.append(f"error: [rules] DRC test {test} is set to ignore in {name}.kicad_pro - {why}; "
+                       f"set it back, or add it to tools/pcb.py IGNORE_OK with the reason")
     return bad
 
 
@@ -873,9 +910,14 @@ def check_silk(board, fab):
         for pad in fp.Pads():
             for s, mask in silk.items():
                 if pad.IsOnLayer(mask):
-                    openings[s].append((f"{ref} pad {pad.GetNumber()}",
+                    openings[s].append((f"{ref} pad {pad.GetNumber()}" if pad.GetNumber() else f"{ref}'s hole",
                                         item_shape(pad, mask, pad.GetSolderMaskExpansion(mask))))
     line_min, text_min, to_pad = (float(fab.get(k, 0)) for k in ("silk_line_min", "silk_text_min", "silk_to_pad"))
+    # a tented via has no mask opening, but silk on it prints onto its tent over
+    # an open hole: keep silk off every via's copper (R3-2, R3-3)
+    from shapely.geometry import Point as _P
+    vias = [(v.GetNetname(), _P(pcbnew.ToMM(v.GetPosition().x), pcbnew.ToMM(v.GetPosition().y)).buffer(pcbnew.ToMM(v.GetWidth(pcbnew.F_Cu)) / 2))
+            for v in board.GetTracks() if isinstance(v, pcbnew.PCB_VIA)]
     thin, near = {}, {}
     for who, it in items:
         layer = it.GetLayer()
@@ -887,12 +929,20 @@ def check_silk(board, fab):
         if not outline.contains(shape):
             bad.append(f"error: [silk] {what} at {where} is {'partly' if outline.intersects(shape) else 'wholly'} off the board")
         if not text:
-            # a filled shape prints its fill: its stroke is not a feature of its own
-            if not it.IsFilled() and pcbnew.ToMM(it.GetWidth()) + 1e-4 < line_min:
+            # a filled shape prints its fill, so the fill must be as wide as a line
+            if it.IsFilled():
+                if shape.buffer(-line_min / 2 + 1e-3).is_empty:
+                    bad.append(f"error: [silk] {what} at {where} is a filled sliver narrower than fab.silk_line_min {line_min:g}")
+            elif pcbnew.ToMM(it.GetWidth()) + 1e-4 < line_min:
                 thin.setdefault((who, pcbnew.ToMM(it.GetWidth())), []).append(where)
         elif pcbnew.ToMM(it.GetTextHeight()) + 1e-4 < text_min or pcbnew.ToMM(it.GetTextThickness()) + 1e-4 < line_min:
             bad.append(f"error: [silk] {what} is {pcbnew.ToMM(it.GetTextHeight()):g} mm high with a "
                        f"{pcbnew.ToMM(it.GetTextThickness()):g} mm stroke; fab: needs {text_min:g} / {line_min:g}")
+        for vnet, vg in vias:
+            if shape.intersects(vg):
+                c2 = vg.centroid
+                bad.append(f"error: [silk] {what} at {where} lies on a via ({vnet} at ({c2.x:.2f}, {c2.y:.2f})) - "
+                           "move the label, or the via")
         for pname, opening in openings[layer]:
             gap = shape.distance(opening)
             if gap + 1e-4 < to_pad:
@@ -909,22 +959,93 @@ def check_silk(board, fab):
 def check_tracks(board):
     """Two tracks of one net meeting on one layer at under 90 degrees leave a wedge
     the etch pools in and the pour cannot fill (an acid trap). KiCad's DRC has no
-    such test, and the router can make one where two stubs leave a pad (K3-6)."""
-    bad, ends = [], {}
-    for t in board.GetTracks():
-        if type(t) is not pcbnew.PCB_TRACK:
-            continue
+    such test. Joins at a shared end AND a track ending in the middle of another
+    (R6-1) are both tested; a wedge whose apex a via or pad of the net fills is
+    not a trap (pcb_route.acute_closed, R6-7)."""
+    import pcb_route
+    bad, arms = [], {}
+    tracks = [t for t in board.GetTracks() if type(t) is pcbnew.PCB_TRACK]
+    for t in tracks:
         for e, o in ((t.GetStart(), t.GetEnd()), (t.GetEnd(), t.GetStart())):
-            ends.setdefault((t.GetNetname(), t.GetLayer(), round(e.x / 1000), round(e.y / 1000)), []).append((o.x - e.x, o.y - e.y))
-    for (net, layer, x, y), vs in ends.items():
+            arms.setdefault((t.GetNetname(), t.GetLayer(), e.x, e.y), []).append(((o.x - e.x, o.y - e.y), t.GetWidth()))
+    # a track end inside another track of the net: that track's two halves are arms there
+    for (net, layer, x, y) in list(arms):
+        for u in tracks:
+            if u.GetNetname() != net or u.GetLayer() != layer:
+                continue
+            a, b = u.GetStart(), u.GetEnd()
+            dx, dy = b.x - a.x, b.y - a.y
+            l2 = dx * dx + dy * dy
+            if not l2 or (x, y) in ((a.x, a.y), (b.x, b.y)):
+                continue
+            k = ((x - a.x) * dx + (y - a.y) * dy) / l2
+            if 0 < k < 1 and abs((x - a.x) * dy - (y - a.y) * dx) / math.sqrt(l2) < 1000:
+                arms[(net, layer, x, y)] += [((a.x - x, a.y - y), u.GetWidth()), ((b.x - x, b.y - y), u.GetWidth())]
+    for (net, layer, x, y), vs in arms.items():
         for i in range(len(vs)):
             for j in range(i + 1, len(vs)):
-                (ax, ay), (cx, cy) = vs[i], vs[j]
+                ((ax, ay), wa), ((cx, cy), wc) = vs[i], vs[j]
                 na, nc = math.hypot(ax, ay), math.hypot(cx, cy)
-                if na and nc and (ax * cx + ay * cy) / (na * nc) > math.cos(math.radians(89.5)):
-                    ang = math.degrees(math.acos(min(1.0, (ax * cx + ay * cy) / (na * nc))))
-                    bad.append(f"error: [tracks] {net} on {board.GetLayerName(layer)}: two tracks meet at {ang:.0f} deg "
-                               f"at ({x / 1000:.2f}, {y / 1000:.2f}) - an acid trap; re-route one")
+                if not (na and nc) or (ax * cx + ay * cy) / (na * nc) <= math.cos(math.radians(89.5)):
+                    continue
+                if pcb_route.acute_closed(board, net, layer, (x, y), (ax, ay), (cx, cy), max(wa, wc)):
+                    continue
+                ang = math.degrees(math.acos(min(1.0, (ax * cx + ay * cy) / (na * nc))))
+                bad.append(f"error: [tracks] {net} on {board.GetLayerName(layer)}: two tracks meet at {ang:.0f} deg "
+                           f"at ({x / 1e6:.2f}, {y / 1e6:.2f}) - an acid trap; re-route one")
+    return bad
+
+
+def track_path_mm(board, pa, pb):
+    """The shortest route in the net's own tracks and vias from pad pa to pad pb
+    (pad objects), in mm, or None: the pour does not count - it is what a signal
+    track can cut (R3-1)."""
+    import heapq as hq
+    net = pa.GetNetname()
+    node = lambda layer, v: (layer, round(v.x / 1000), round(v.y / 1000))
+    adj = {}
+
+    def edge(u, v, w):
+        adj.setdefault(u, []).append((v, w))
+        adj.setdefault(v, []).append((u, w))
+    items = [t for t in board.GetTracks() if t.GetNetname() == net]
+    for t in items:
+        if isinstance(t, pcbnew.PCB_VIA):
+            edge(node(pcbnew.F_Cu, t.GetPosition()), node(pcbnew.B_Cu, t.GetPosition()), 0.0)
+        else:
+            edge(node(t.GetLayer(), t.GetStart()), node(t.GetLayer(), t.GetEnd()), pcbnew.ToMM(t.GetLength()))
+    for tag, pad in (("A", pa), ("B", pb)):
+        for t in items:
+            if isinstance(t, pcbnew.PCB_VIA):
+                continue
+            for v in (t.GetStart(), t.GetEnd()):
+                if pad.IsOnLayer(t.GetLayer()) and pad.HitTest(v):
+                    edge(tag, node(t.GetLayer(), v), 0.0)
+    dist, q = {"A": 0.0}, [(0.0, "A")]
+    while q:
+        d, u = hq.heappop(q)
+        if u == "B":
+            return d
+        if d > dist.get(u, 1e18):
+            continue
+        for v, w in adj.get(u, []):
+            if d + w < dist.get(v, 1e18):
+                dist[v] = d + w
+                hq.heappush(q, (d + w, v))
+    return None
+
+
+def check_connect_first(board, lay):
+    """layout.yaml connect_first: each connection still runs in its own tracks, and
+    no longer than its max_mm - the decoupling loop stays a loop (R3-1)."""
+    bad = []
+    for spec in lay.get("connect_first", []):
+        pa, pb = (board.FindFootprintByReference(p.split(".")[0]).FindPadByNumber(p.split(".")[1]) for p in spec["pads"])
+        d = track_path_mm(board, pa, pb)
+        if d is None or d > spec["max_mm"]:
+            bad.append(f"error: [connect] {spec['pads'][0]} to {spec['pads'][1]}: "
+                       + ("no track path" if d is None else f"{d:.1f} mm of track") + f", layout.yaml connect_first allows "
+                       f"{spec['max_mm']} ({spec.get('why', '')})")
     return bad
 
 
@@ -984,6 +1105,33 @@ def check_cad(board, lay, geo):
         got = None if fp is None else (pcbnew.ToMM(fp.GetPosition().x), pcbnew.ToMM(fp.GetPosition().y))
         if got is None or math.hypot(got[0] - px, got[1] - py) > 0.05:
             bad.append(f"error: [cad] standoff hole H{i} is at {got}, the body CAD puts it at ({px:.2f}, {py:.2f})")
+            continue
+        hole_d, head, od = geo["standoffs"][i - 1][2:5]
+        for pad in fp.Pads():
+            if pad.GetAttribute() != pcbnew.PAD_ATTRIB_NPTH or abs(pcbnew.ToMM(pad.GetDrillSize().x) - hole_d) > 0.01:
+                bad.append(f"error: [cad] H{i} must be an NPTH hole of {hole_d:g} mm (the body CAD's); it is "
+                           f"{'plated' if pad.GetAttribute() != pcbnew.PAD_ATTRIB_NPTH else 'unplated'}, {pcbnew.ToMM(pad.GetDrillSize().x):g} mm")
+        # ADR 0020: no copper under what bears on the board on either face - a bond
+        # to the grounded plate, and a short to any net routed there (R6-4)
+        from shapely.geometry import Point as _P
+        r = max(head, od) / 2 + float(lay["rules"]["clearance"])
+        disc = _P(*got).buffer(r - 0.02)
+        for L in (pcbnew.F_Cu, pcbnew.B_Cu):
+            hits = []
+            for t in board.GetTracks():
+                if t.IsOnLayer(L) and item_shape(t, L).intersects(disc):
+                    hits.append(f"{t.GetNetname()} {'via' if isinstance(t, pcbnew.PCB_VIA) else 'track'}")
+            for z in board.Zones():
+                if not z.GetIsRuleArea() and z.IsOnLayer(L) and z.GetFilledPolysList(L).OutlineCount() \
+                        and shapely_of(z.GetFilledPolysList(L)).intersects(disc):
+                    hits.append(f"{z.GetNetname()} pour")
+            for f2 in board.GetFootprints():
+                for pad in f2.Pads():
+                    if f2.GetReference() != fp.GetReference() and pad.IsOnLayer(L) and item_shape(pad, L).intersects(disc):
+                        hits.append(f"{f2.GetReference()} pad {pad.GetNumber()}")
+            if hits:
+                bad.append(f"error: [cad] copper within {r:.2f} mm of standoff hole H{i} on {board.GetLayerName(L)} "
+                           f"({', '.join(sorted(set(hits)))}) - the washer and nut bear there (ADR 0020)")
     if geo["chain"]:
         fp = board.FindFootprintByReference("J-CHAIN")
         if fp is None:
@@ -1021,6 +1169,7 @@ def cmd_check(bdir):
     if lay.get("fab"):
         bad += check_silk(board, lay["fab"])
     bad += check_tracks(board)
+    bad += check_connect_first(board, lay)
     bad += check_cad(board, lay, cad_geometry(lay["cluster"]))
     print(f"pcb: {os.path.relpath(pcb, ROOT)}: {len(bad)} error(s)")
     for b in bad:

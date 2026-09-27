@@ -145,36 +145,25 @@ netlist and two clones differ.
 > **A page-by-page netlist is not the whole board, and `hardware/unplaced.csv`
 > is the measure of the gap.** A row lives with the circuit whose page derives
 > it; a row nobody has drawn lives in `unplaced.csv`, so anything transcribed
-> from the pages alone omits exactly those rows. **Re-measured against the
-> current tree, 2026-09-21:**
+> from the pages alone omits exactly those rows. **`wc -l
+> hardware/unplaced.csv` is the count**, as `hardware/README.md` says; before
+> emitting `module.net`, grep it for module-board refdes — each hit is a part
+> the netlist will be missing. Most of the file is the instrument's mechanical
+> and controller rows plus the board blanks, which no netlist wants.
 >
-> | | Rows | Units |
-> |---|---|---|
-> | `hardware/bom.csv`, the generated master | 138 | 388 |
-> | In the 23 per-circuit fragments | 104 | 313 |
-> | **In `hardware/unplaced.csv` — no page names them** | **34** | **75** |
+> `D-CLAMP-BREATH` was the shape of the problem. It **was drawn** — twice, in
+> the ASCII figures on `hardware/module/breath-receive-stage/breath-receive-stage.md`,
+> as *"BAV99 to ±12 V, both legs"* — and its row sat in `unplaced.csv`,
+> because **the drawing never wrote the refdes**. Nothing joined the picture
+> to the BOM row, so nothing could notice. Drawn, named and placed are three
+> different tests, and only the circuit's `bom.csv` fragment answers the
+> third. (It is placed now, and `tools/check-netlist.py` reads every
+> `[REFDES value]` drawing label against the netlist, so that shape is caught.)
 >
-> Of those 34, five are module-board netlist parts and would be missing from
-> `module.net`: **`J-CV` ×6** (the CV jacks — the module's whole output
-> connector set), `U-TVS-MODULE`, `D-CLAMP-BREATH` ×2, `R-BREATH-SUM` ×2 and
-> `R-BREATH-OFF` ×2. **Thirteen units.** The rest of `unplaced.csv` is the
-> instrument's mechanical and controller rows plus the board blank itself,
-> which no netlist wants.
->
-> `D-CLAMP-BREATH` is the shape of the problem. It **is drawn** — twice, in the
-> ASCII figures on `hardware/module/breath-receive-stage/breath-receive-stage.md`,
-> as *"BAV99 to ±12 V, both legs"* — and its row is still in `unplaced.csv`,
-> because **the drawing never writes the refdes**. Nothing joins the picture to
-> the BOM row, so nothing can notice. Drawn, named and placed are three
-> different tests, and only the circuit's `bom.csv` fragment answers the third.
->
-> *This warning used to say ~50 rows / 105 units, and that the emitted module
-> would have no DAC8568, no CV jacks, no etherCON and no AVDD rail. Sixteen
-> rows have since been moved into the circuits that derive them, so the DAC
-> (`hardware/module/dac8568/bom.csv`), the etherCON chassis connector and the
-> `U-REG-DAC` AVDD regulator (`hardware/module/power-entry/bom.csv`) are all
-> placed now. **The CV jacks are not**, and neither are the four rows beside
-> them.*
+> *This warning used to carry a dated table of row and unit counts and a list
+> of module rows still unplaced. Both moved under it every time a row was
+> placed — the table was already wrong by 2026-09-27 — so the count is the
+> command above, not a number here. History is in git.*
 
 ### 2. Simulate — headless, runs today
 

@@ -40,7 +40,9 @@ the left-hand key board's review (K1-1) found that every key edge broke that
 part's input transition limit: about 280× on release and 14× on press. The
 owner switched to the SN74HCS165, whose Schmitt-trigger inputs have no such
 limit, and the crossing times moved to its thresholds (`key-release-time`,
-`key-press-time`). What the page said until then, verbatim:
+`key-press-time`). What the page said until then, verbatim except that each
+retired figure is marked "(retired, 74HC165)" on its own line, so the
+staleness checker can see the marking beside the value:
 
 #### The derivation as it stood on the 74HC165
 

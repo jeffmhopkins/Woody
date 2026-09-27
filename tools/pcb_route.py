@@ -31,6 +31,7 @@ HOW IT WORKS
     proves nothing about itself; the DRC does.
 """
 import heapq
+import sys
 import math
 
 import pcbnew
@@ -107,6 +108,11 @@ class Router:
         self.pth_holes = []         # plated holes: kept apart from vias only
         self.smd = []               # (net, layer set, geometry): SMD pads - no via in or on them, not even their own net's
         self.owned = {}             # net -> [(board item, copper entry, hole)] its routes added
+        self.pad_at = {}            # "REF.PIN" -> index of the pad's entry in self.copper
+        self.tree_pads = {}         # net -> copper indices of the pads its main tree joined
+        self.prejoined = {}         # net -> (pad indices, cells) joined by connect_first
+        self.silk = []              # silkscreen outlines: no via under them (a via under silk
+                                    # prints the legend onto a tented hole)
         for fp in board.GetFootprints():
             for pad in fp.Pads():
                 net = pad.GetNetname()
@@ -115,6 +121,7 @@ class Router:
                 if pad.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH:
                     self.holes.append(g)
                     continue
+                self.pad_at[f"{fp.GetReference()}.{pad.GetNumber()}"] = len(self.copper)
                 self.copper.append((net, layers, g, "pad"))
                 if not pad.HasHole():
                     # reflowed on this side: a via in the pad is an untented hole that
@@ -129,6 +136,14 @@ class Router:
             if z.GetIsRuleArea() and z.GetDoNotAllowTracks():
                 ol = z.Outline().Outline(0)
                 self.holes.append(Polygon([(TO(ol.CPoint(k).x), TO(ol.CPoint(k).y)) for k in range(ol.PointCount())]))
+        silk_layers = (pcbnew.F_SilkS, pcbnew.B_SilkS)
+        items = [d for d in board.GetDrawings() if d.GetLayer() in silk_layers]
+        for fp in board.GetFootprints():
+            items += [g for g in fp.GraphicalItems() if g.GetLayer() in silk_layers]
+            items += [f for f in fp.GetFields() if f.GetLayer() in silk_layers and f.IsVisible()]
+        for it in items:
+            bb = it.GetBoundingBox()
+            self.silk.append(box(TO(bb.GetLeft()), TO(bb.GetTop()), TO(bb.GetRight()), TO(bb.GetBottom())))
         self.inside = self.outline.buffer(-self.edge)
 
     def cell_xy(self, i, j):
@@ -140,7 +155,7 @@ class Router:
         grids = [[[False] * self.ny for _ in range(self.nx)] for _ in (TOP, BOT)]
         for L in (TOP, BOT):
             obst = [g for (n, ls, g, _) in self.copper if L in ls and n != net]
-            obst += self.holes + (self.pth_holes if via else [])
+            obst += self.holes + (self.pth_holes + self.silk if via else [])
             rad = half + self.clear + SLACK
             if via:
                 # its own net's SMD pads: off the pad (and its mask opening, which is
@@ -315,6 +330,13 @@ class Router:
             px, py = self.cell_xy(*prev)
             if (c.x - x) * (px - x) + (c.y - y) * (py - y) > 0:
                 return
+        # a pad another route already reaches keeps that stub alone: a second one
+        # beside it is overlapping copper, not a connection (the path ends in the pad)
+        inner = pad_geom_.buffer(0.01)
+        for item, _, _ in self.owned.get(net, []):
+            if type(item) is pcbnew.PCB_TRACK and item.GetLayer() == LAYERS[L] and \
+                    any(inner.contains(Point(TO(v.x), TO(v.y))) for v in (item.GetStart(), item.GetEnd())):
+                return
         t = pcbnew.PCB_TRACK(self.board)
         t.SetStart(pcbnew.VECTOR2I(MM(c.x), MM(c.y)))
         t.SetEnd(pcbnew.VECTOR2I(MM(x), MM(y)))
@@ -338,8 +360,18 @@ class Router:
         cx = sum(g.centroid.x for *_, g in pads) / len(pads)
         cy = sum(g.centroid.y for *_, g in pads) / len(pads)
         pads.sort(key=lambda p: math.hypot(p[3].centroid.x - cx, p[3].centroid.y - cy))
-        tree = {(L, i, j) for L in pads[0][1] for (i, j) in pads[0][2]}
-        todo = pads[1:]
+        if net in self.prejoined:
+            # connect_first already joined some of these pads: they, and the path
+            # between them, are the tree's seed, so the tree does not join them twice
+            ks, cells0 = self.prejoined[net]
+            tree = set(cells0) | {(L, i, j) for (k, ls, cells, _) in pads if k in ks for L in ls for (i, j) in cells}
+            todo = [p for p in pads if p[0] not in ks]
+            joined = set(ks)
+        else:
+            tree = {(L, i, j) for L in pads[0][1] for (i, j) in pads[0][2]}
+            todo = pads[1:]
+            joined = {pads[0][0]}
+        self.tree_pads[net] = joined
         while todo:
             targets = {}
             for idx, (_, ls, cells, _) in enumerate(todo):
@@ -352,7 +384,8 @@ class Router:
                 # still wants every pin that can be joined, so it gets them
                 return False if not planes else (self.route_rest(net, todo, width, grid, vgrid) and False)
             idx = targets[path[-1]]
-            _, ls, cells, g = todo.pop(idx)
+            k, ls, cells, g = todo.pop(idx)
+            joined.add(k)
             self.commit(net, path, width)
             self.pad_stub(net, g, path[-1][0], path[-1][1:], width, path[-2][1:] if len(path) > 1 else None)
             tree |= set(path) | {(L, i, j) for L in ls for (i, j) in cells}
@@ -382,10 +415,14 @@ class Router:
         return not any(n != net and L in ls and g.intersects(o) for (n, ls, o, _) in self.copper)
 
     def stitch_gnd(self, gnd):
-        """Every single-layer GND pad gets a via into the other layer's plane, beside it."""
+        """A single-layer GND pad gets a via into the other layer's plane, beside it,
+        where the via's stub keeps 90 degrees from every track already on the pad.
+        A pad the main ground tree reaches goes without when no such spot exists;
+        any other pad takes the via wherever it fits."""
         vgrid = self.blocked(gnd, self.w, via=True)
         n = 0
-        for (_, ls, cells, g) in self.pad_cells(gnd):
+        on_tree = self.tree_pads.get(gnd, set())
+        for (k, ls, cells, g) in self.pad_cells(gnd):
             if len(ls) != 1:
                 continue
             c = g.centroid
@@ -411,9 +448,10 @@ class Router:
                         fallback = fallback or (i, j)
                 if best:
                     break
-            # a pad the ground route already reaches does not need the via at any
-            # angle - it only adds a parallel path; one with no track takes any spot
-            best = best or (fallback if not leave else None)
+            # a pad the main ground tree already reaches does not need the via at
+            # any angle - it would only add a parallel path; any other pad (an
+            # island route_rest joined, or none) takes the via wherever it fits
+            best = best or (None if k in on_tree else fallback)
             if not best:
                 continue
             self.commit(gnd, [(L, *best), (1 - L, *best)], self.w)
@@ -422,21 +460,82 @@ class Router:
             n += 1
         return n
 
+    def recopper(self, net, item):
+        """Bring a track's entry in self.copper back in line after it was moved."""
+        from shapely.geometry import LineString
+        rec = self.owned.get(net, [])
+        for n, (it, cop, hole) in enumerate(rec):
+            if it is item:
+                a, b = item.GetStart(), item.GetEnd()
+                g = LineString([(TO(a.x), TO(a.y)), (TO(b.x), TO(b.y))]).buffer(TO(item.GetWidth()) / 2) \
+                    if (a.x, a.y) != (b.x, b.y) else Point(TO(a.x), TO(a.y)).buffer(TO(item.GetWidth()) / 2)
+                new = (net, {LAYERS.index(item.GetLayer())}, g, "track")
+                if cop is None:
+                    self.copper.append(new)
+                else:
+                    self.copper = [new if c is cop else c for c in self.copper]
+                rec[n] = (it, new, hole)
+                return
+
+    def split(self, t, X):
+        """Split track t at the point X on it; returns the new second half."""
+        end = pcbnew.VECTOR2I(t.GetEnd().x, t.GetEnd().y)
+        t2 = pcbnew.PCB_TRACK(self.board)
+        t2.SetStart(pcbnew.VECTOR2I(X.x, X.y))
+        t2.SetEnd(end)
+        t2.SetWidth(t.GetWidth())
+        t2.SetLayer(t.GetLayer())
+        t2.SetNet(t.GetNet())
+        t.SetEnd(pcbnew.VECTOR2I(X.x, X.y))
+        net = t.GetNetname()
+        self.own(net, t2, None)
+        self.recopper(net, t)
+        self.recopper(net, t2)
+        return t2
+
     def square_joins(self):
-        """Where a route joined the tree at one of its bends at under 90 degrees,
-        the wedge between the two is an acid trap. Move the joining track's end
-        along the other track to the foot of the perpendicular from its far end,
-        and split that track there: the join becomes a right-angle T. Only where
-        the moved track keeps its clearance to every other net's copper."""
+        """Where two tracks of a net meet on a layer at under 90 degrees - at a bend,
+        or where a branch starts in the middle of another track - the wedge between
+        them is an acid trap. A branch ending mid-track first splits that track, so
+        the join is a vertex like any other. Then the joining track's end moves along
+        the other track to the foot of the perpendicular from its far end, and that
+        track splits there: the join becomes a right-angle T. Only where the moved
+        track keeps its clearance to every other net's copper, off every hole and
+        keep-out and inside the edge clearance; a wedge whose apex a via or pad of
+        the net fills is left (acute_closed)."""
         from shapely.geometry import LineString
         fixed = 0
-        for _ in range(20):
-            again = False
+        for rnd in range(60):
+            changed = False
             tracks = [t for t in self.board.GetTracks() if type(t) is pcbnew.PCB_TRACK]
+            # 1. a branch ending in the middle of a track: split the track there
+            for t in tracks:
+                for e in (t.GetStart(), t.GetEnd()):
+                    for u in tracks:
+                        if u is t or u.GetNetname() != t.GetNetname() or u.GetLayer() != t.GetLayer():
+                            continue
+                        a, b = u.GetStart(), u.GetEnd()
+                        dx, dy = b.x - a.x, b.y - a.y
+                        l2 = dx * dx + dy * dy
+                        if not l2:
+                            continue
+                        k = ((e.x - a.x) * dx + (e.y - a.y) * dy) / l2
+                        if 0 < k < 1 and abs((e.x - a.x) * dy - (e.y - a.y) * dx) / math.sqrt(l2) < 1000 \
+                                and (e.x, e.y) not in ((a.x, a.y), (b.x, b.y)):
+                            self.split(u, pcbnew.VECTOR2I(e.x, e.y))
+                            changed = True
+                            break
+                    if changed:
+                        break
+                if changed:
+                    break
+            if changed:
+                continue
+            # 2. an acute pair at a shared end: square it
             ends = {}
             for t in tracks:
                 for e, o in ((t.GetStart(), t.GetEnd()), (t.GetEnd(), t.GetStart())):
-                    ends.setdefault((t.GetNetname(), t.GetLayer(), e.x, e.y), []).append((t, o))
+                    ends.setdefault((t.GetNetname(), t.GetLayer(), e.x, e.y), []).append((t, pcbnew.VECTOR2I(o.x, o.y)))
             for (net, layer, px, py), vs in ends.items():
                 for i in range(len(vs)):
                     for j in range(len(vs)):
@@ -447,38 +546,40 @@ class Router:
                         la, lb = math.hypot(ax, ay), math.hypot(bx, by)
                         if not la or not lb or (ax * bx + ay * by) / (la * lb) <= math.cos(math.radians(89.5)):
                             continue
+                        if acute_closed(self.board, net, layer, (px, py), (ax, ay), (bx, by), max(ta.GetWidth(), tb.GetWidth())):
+                            continue
                         k = (ax * bx + ay * by) / (la * la)      # the foot of fb's perpendicular on P->fa
                         if not 0.02 < k < 0.98:
                             continue
                         X = pcbnew.VECTOR2I(int(px + k * ax), int(py + k * ay))
                         L = LAYERS.index(layer)
-                        g = LineString([(TO(X.x), TO(X.y)), (TO(fb.x), TO(fb.y))]).buffer(TO(tb.GetWidth()) / 2 + self.clear)
-                        if any(n != net and L in ls and g.intersects(o) for (n, ls, o, _) in self.copper):
+                        seg = LineString([(TO(X.x), TO(X.y)), (TO(fb.x), TO(fb.y))])
+                        body = seg.buffer(TO(tb.GetWidth()) / 2)
+                        g = seg.buffer(TO(tb.GetWidth()) / 2 + self.clear)
+                        if any(n != net and L in ls and g.intersects(o) for (n, ls, o, _) in self.copper) \
+                                or any(body.intersects(h) for h in self.holes) or not self.inside.contains(body):
                             continue
-                        if tb.GetStart().x == px and tb.GetStart().y == py:
+                        if (tb.GetStart().x, tb.GetStart().y) == (px, py):
                             tb.SetStart(X)
                         else:
                             tb.SetEnd(X)
-                        a2 = pcbnew.PCB_TRACK(self.board)
-                        a2.SetStart(X)
-                        a2.SetEnd(fa)
-                        a2.SetWidth(ta.GetWidth())
-                        a2.SetLayer(layer)
-                        a2.SetNet(ta.GetNet())
-                        if ta.GetStart().x == px and ta.GetStart().y == py:
-                            ta.SetEnd(X)
+                        self.recopper(net, tb)
+                        if (ta.GetStart().x, ta.GetStart().y) == (px, py):
+                            # ta runs P -> fa: split it at X
+                            self.split(ta, X)
                         else:
-                            ta.SetStart(X)
-                        self.board.Add(a2)
+                            # ta runs fa -> P: its start half is fa -> X
+                            t2 = self.split(ta, X)            # ta: fa -> X, t2: X -> P
                         fixed += 1
-                        again = True
+                        changed = True
                         break
-                    if again:
+                    if changed:
                         break
-                if again:
+                if changed:
                     break
-            if not again:
-                break
+            if not changed:
+                return fixed
+        print("route: WARNING - square_joins stopped at its pass limit; pcb.py check reports what is left")
         return fixed
 
     def pour(self, gnd):
@@ -500,6 +601,31 @@ class Router:
             self.board.Add(z)
 
 
+def acute_closed(board, net, layer, p, a, c, width):
+    """Whether copper of the net fills the apex of the wedge two tracks leaving p
+    along a and c (nm) make: their inner edges meet at (w/2)/sin(theta/2) from p on
+    the bisector, and a via or pad of the net covering that point leaves no sharp
+    wedge for the etch to pool in (R6-7)."""
+    na, nc = math.hypot(*a), math.hypot(*c)
+    ux, uy = a[0] / na + c[0] / nc, a[1] / na + c[1] / nc
+    nb = math.hypot(ux, uy)
+    cos = max(-1.0, min(1.0, (a[0] * c[0] + a[1] * c[1]) / (na * nc)))
+    half = math.acos(cos) / 2
+    if not nb or half <= 0:
+        return False
+    d = (width / 2) / math.sin(half)
+    m = pcbnew.VECTOR2I(int(p[0] + ux / nb * d), int(p[1] + uy / nb * d))
+    for t in board.GetTracks():
+        if isinstance(t, pcbnew.PCB_VIA) and t.GetNetname() == net and \
+                math.hypot(t.GetPosition().x - m.x, t.GetPosition().y - m.y) <= t.GetWidth(pcbnew.F_Cu) / 2:
+            return True
+    for fp in board.GetFootprints():
+        for pad in fp.Pads():
+            if pad.GetNetname() == net and pad.IsOnLayer(layer) and pad.HitTest(m):
+                return True
+    return False
+
+
 def route(board, lay):
     r = Router(board, lay)
     gnd = lay["ground_net"]
@@ -517,6 +643,32 @@ def route(board, lay):
     # (a 1.27 mm header's far row) go before anything that could close that side
     first = lay.get("route_first", [])
     order = sorted(nets, key=lambda n: (n not in power, n not in first, first.index(n) if n in first else 0, span(n)))
+    # layout.yaml connect_first: pad-to-pad connections routed before anything else,
+    # the most direct path the board allows - a decoupler's return to its IC's
+    # ground pin, which the ground net (routed last, round everything) would not give
+    for spec in lay.get("connect_first", []):
+        pa, pb = spec["pads"]
+        ka, kb = r.pad_at[pa], r.pad_at[pb]
+        net = r.copper[ka][0]
+        if r.copper[kb][0] != net:
+            sys.exit(f"pcb: connect_first {pa} and {pb} are not on one net")
+        width = r.pw if net in power else r.w
+        pads = {k: (ls, cells, g) for (k, ls, cells, g) in r.pad_cells(net)}
+        grid, vgrid = r.blocked(net, width), r.blocked(net, width, via=True)
+        for k in (ka, kb):
+            for L in pads[k][0]:
+                for (i, j) in pads[k][1]:
+                    grid[L][i][j] = False
+        src = {(L, i, j) for L in pads[ka][0] for (i, j) in pads[ka][1]}
+        dst = {(L, i, j) for L in pads[kb][0] for (i, j) in pads[kb][1]}
+        path = r.astar(src, dst, grid, vgrid)
+        if path is None:
+            print(f"route: connect_first {pa} - {pb} FAILED")
+            continue
+        r.commit(net, path, width)
+        r.pad_stub(net, pads[kb][2], path[-1][0], path[-1][1:], width, path[-2][1:] if len(path) > 1 else None)
+        r.prejoined[net] = (r.prejoined.get(net, (set(), set()))[0] | {ka, kb}, r.prejoined.get(net, (set(), set()))[1] | set(path))
+        print(f"route: connect_first {pa} - {pb} ok")
     failed = []
     for n in order:
         ok = r.route_net(n, r.pw if n in power else r.w)

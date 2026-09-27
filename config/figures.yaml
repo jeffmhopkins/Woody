@@ -221,7 +221,7 @@ figures:
     owner: hardware/cluster/key-switch-network/key-switch-network.md
     derivation: "Pressed node sits at 3.3 x 100/(2200+100) = 0.1435 V, NOT 0 V. Charging through 2.2k (tau = 103.40 us): t = -103.40 x ln((3.3-2.475)/(3.3-0.1435)) = 138.7 us"
     threshold_note: "VT+ = 2.475 V = 0.75 x VCC, the SN74HCS165's upper Schmitt threshold at its maximum (the part bought, ADR 0001 amendment 2026-09-27). TI publishes rows at 2 V (1.5 V max, 0.75 x VCC), 4.5 V (3.15, 0.70) and 6 V (4.2, 0.70) and none at 3.3 V (datasheets/logic/SN74HCS165-ti-scls828a.pdf p.6), so the value is taken at the largest ratio in the table rather than interpolated - the project has been caught once already by a ratio assumed to hold between rows. Interpolating linearly between the 2 V and 4.5 V rows gives 2.358 V and 125.0 us; Nexperia's 74HCS165 publishes a 3.0-3.6 V row (0.7 x VCC max, 2.31 V, 119.9 us) but is a different die and not the part bought. The design takes the bound."
-    forbidden: ["`V_IH` at **125", "release ~93 us", "~93 µs hardware", "93.2 us", "release is ~93us", "~93us", "at ~125us", "~125us", "125 µs release filter", "125 µs the key network", "free hardware debounce", "a BOUNCE filter", "at **119.9", "→ 119.9 µs", "119.9us", "V_IH = 2.31 V", "V_IH` = 2.31"]
+    forbidden: ["`V_IH` at **125", "release ~93 us", "~93 µs hardware", "93.2 us", "release is ~93us", "~93us", "at ~125us", "~125us", "125 µs release filter", "125 µs the key network", "free hardware debounce", "a BOUNCE filter", "at **119.9", "→ 119.9 µs", "119.9us", "V_IH = 2.31 V", "V_IH` = 2.31", "`V_IH` 2.31 V", "VIH (2.31V)", "119.9 µs"]
     escape_note: |
       THE CSV SPELLING IS NOT THE MARKDOWN SPELLING, 2026-09-21. Every
       pattern was once written from a prose page - "`V_IH` at **125" - and
@@ -229,9 +229,12 @@ figures:
       backticks, no asterisks, no space before the unit. Two cold agents
       found R-KEY-SER and C-KEY still carrying a superseded network's
       timings while the checker reported PASS. Patterns for a retired value
-      go in both spellings.
+      go in both spellings. The 2026-09-27 move missed that rule itself: the
+      C-KEY cell had spelled the retired thresholds "VIL (0.99V at 3.3V)" and
+      "VIH (2.31V)" and ADR 0001 "`V_IH` 2.31 V, `V_IL` 0.99 V", and no
+      pattern matched any of them until review r2 (R1-4, R5-8) added them.
     false_positive_note: "A bare 125 us also legitimately means the MEAN SAMPLING PERIOD (0-250 us at 4 kHz) and the 8 kHz LOOP PERIOD, and 125.0 us is the interpolation stated in threshold_note. Match the phrase, not the numeral. 119.9 us is the 74HC165's crossing, legitimate in notes.md and in text recording the part change."
-    role_note: "This is a GLITCH filter on release, not the debounce: ks33-contact-bounce is many times longer, so rejecting bounce is firmware's release window (firmware/README.md). It is just over half the 250 us scan period, which costs nothing: the release reaches firmware on the next scan either way."
+    role_note: "This is a GLITCH filter on release, not the debounce: ks33-contact-bounce is many times longer, so rejecting bounce is firmware's release window (firmware/README.md). This value is the LATENCY bound (VT+ at its maximum); it is NOT what the filter guarantees to reject - that is set by VT+ at its MINIMUM, a much shorter opening, derived on the owner page. It is just over half the 250 us scan period, so it delays a release by 0 or 1 scan (one extra scan for just over half of releases, mean added latency this value), which is invisible behind firmware's release window."
     note: "Starting from 0 V instead of the divider voltage gives an error of about 4.5 us, which is where a long-retired 125 us figure came from."
 
   - id: key-press-time
@@ -241,7 +244,7 @@ figures:
     owner: hardware/cluster/key-switch-network/key-switch-network.md
     derivation: "tau = (2200||100) x 47nF = 4.4957 us; t = -4.4957 x ln((0.495-0.1435)/(3.3-0.1435)) = 9.87 us"
     threshold_note: "VT- = 0.495 V = 0.15 x VCC, the SN74HCS165's lower Schmitt threshold at its minimum, the smallest ratio in TI's table (2 V row: 0.3 V min; 4.5 V: 0.9; 6 V: 1.2 - datasheets/logic/SN74HCS165-ti-scls828a.pdf p.6); no 3.3 V row, same reasoning as key-release-time. Linear interpolation gives 0.612 V and 8.58 us. tau is the PARALLEL combination, 4.4957 us, not 100 ohm x 47 nF = 4.7 us."
-    forbidden: ["`V_IL` at **5.7", "~1.4 µs / 176", "176× margin", "176x margin against", "at **6.89", "crosses `V_IL` at **6.89", "0.25 x VCC = 0.825", "0.25 × VCC = 0.825", "in ~5.7us", "~5.7us", "44x margin", "press is ~1us", "at **5.92", "5.92us", "42× inside the 250", "42x inside the 250", "V_IL = 0.99 V", "V_IL` = 0.99"]
+    forbidden: ["`V_IL` at **5.7", "~1.4 µs / 176", "176× margin", "176x margin against", "at **6.89", "crosses `V_IL` at **6.89", "0.25 x VCC = 0.825", "0.25 × VCC = 0.825", "in ~5.7us", "~5.7us", "44x margin", "press is ~1us", "at **5.92", "5.92us", "42× inside the 250", "42x inside the 250", "V_IL = 0.99 V", "V_IL` = 0.99", "`V_IL` 0.99 V", "0.99V at 3.3V", "VIL (0.99V", "HC165's VIL", "5.92 µs"]
     escape_note: |
       Same escape as key-release-time: patterns written in markdown
       spelling miss the CSV. "~5.7us" and "44x margin" once sat live in

@@ -396,7 +396,7 @@
     (property "Datasheet" "" (at 101.6 110.49 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "U-KEYS" (at 101.6 110.49 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "SHLD=1(~{PL}) CLK=2(CP) CLKINH=15(~{CE}) QH_BAR=7(~{Q7}) GND=8(GND) SER=10(DS) QH=9(Q7) VCC=16(VCC) A=11(D0) B=12(D1) C=13(D2) D=14(D3) E=3(D4) F=4(D5) G=5(D6) H=6(D7)" (at 101.6 110.49 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "Schmitt-trigger inputs (74HCS): the key networks' slow edges are within its rating - it has no input transition-rate limit. HC-family outputs, not LVC: its edges keep each hop an ordinary lumped load. Bit order out is H first, then G F E D C B A" (at 101.6 110.49 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Schmitt-trigger inputs (74HCS): the key networks' slow edges are within its rating - it has no input transition-rate limit. HC-family outputs, not LVC: the weaker drive. A hop is not a lumped load and need not be - QH to the next SER is data sampled a clock period later, into a Schmitt input (key-register.md). Bit order out is H first, then G F E D C B A" (at 101.6 110.49 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins_source" "SOIC-16 (D) pin-out, datasheets/logic/SN74HCS165-ti-scls828a.pdf p.3 section 5; identical to the 74HC165's; library symbol 74xx:74HC165 names checked" (at 101.6 110.49 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "Texas Instruments" (at 101.6 110.49 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "SN74HCS165DR" (at 101.6 110.49 0) (effects (font (size 1.27 1.27)) hide))

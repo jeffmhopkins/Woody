@@ -342,11 +342,19 @@ termination, which ADR 0001 rejected for a line that drops on several loads.
 **Open, decided at E14**: scope `SCK` at the `left_hand` register on the real
 main board and ribbons. It is three 0805s either way.
 
-*(The registers' own `QH` edges are HC-family edges: output transition time
-at most 5 ns at 4.5 V and 25 °C, and up to 17 ns at 2 V over temperature
-`[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.8]`, and each hop is a ribbon
-plus part of the main board — the "HC-family edges keep it a lumped load"
-argument still covers them.)*
+*(The registers' own `QH` edges are not a lump by the rule above, and do not
+need to be. TI publishes their transition time as a maximum only — 5 ns at
+4.5 V and 25 °C, 8 ns over temperature `[datasheets/logic/SN74HCS165-ti-scls828a.pdf
+p.8]` — and warns that the outputs "may create fast edges into light loads"
+`[same, p.11 §8.3.1]`. Even the 5 ns maximum gives `[calc]` 5 / 6 = 0.83 ns →
+0.83 / 6 ns/m ≈ 139 mm, and a hop is a ribbon plus key-board and main-board
+traces, longer than that. What makes a hop safe is that `QH` → next `SER` is
+data, sampled at the next rising `CLK` a whole period (1 µs) later, against
+`SER` setup of at most 14 ns and hold of 0 ns `[same, p.7]`, into a Schmitt
+input `[same, p.6]`: a ring whose round trip is a few nanoseconds has settled
+long before `[calc; judgment, not measured]`. The edge-sensitive nets are
+`SCK` and `SH/LD`, above. If E4 or E14 shows otherwise, LVC with source
+termination is ADR 0001's way back.)*
 
 **`U-TVS-CHAIN` — fitted, for service.** The ribbons never leave the body
 and sit under the grounded plate, so in play nothing reaches them. The
@@ -363,8 +371,12 @@ the board is made, and it costs pennies.
 every signal pin of a key board's `J-CHAIN` land on register pins, not on the
 MCU. The key board has no ESD part of its own. Those pins carry the
 SN74HCS165's own rating, ±4000 V HBM (ANSI/ESDA/JEDEC JS-001) and ±1500 V CDM
-`[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.4]`, and a register is a part on a
-board that can be replaced, where an MCU pin is not. **The fourth channel
+`[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.4]` — a component rating for
+manufacturing handling (TI's footnote to the same table: "500-V HBM allows
+safe manufacturing with a standard ESD control process"), not a system-level
+IEC 61000-4-2 rating for a contact touched with the lid off. **The exposure
+is accepted, not protected**: a register is a part on a board that can be
+replaced, where an MCU pin is not. **The fourth channel
 stays spare**: there are three hops, on two ribbons, and one channel cannot
 cover them.
 
