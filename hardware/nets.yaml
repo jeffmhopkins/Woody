@@ -65,7 +65,7 @@ nets:
     figure: chain-conductors
     origin: interfaces/key-chain-loom
     note: "It is the main board's ground pour, carried to each key board by its ribbon's five grounds - a separate name for those conductors, not a separate node"
-    reference: [cluster/key-register, cluster/key-switch-network, cluster/key-marker-and-bits]
+    reference: [cluster/key-register, cluster/key-switch-network]
 
   CHAIN_SCK:
     kind: signal
@@ -203,7 +203,17 @@ nets:
     driver: cluster/key-marker-and-bits
     receivers: [cluster/key-register]
     per_board: true
-    note: "Two per device, one high and one low, and they sit on different inputs on every device - see KEY_BITS"
+    note: "Two per device, one high and one low, and they sit on different inputs on every device - see KEY_BITS. They are traces, not parts, drawn on each board's sheet; key-marker-and-bits holds only the free-bit pull-up since 2026-09-27"
+
+  FREE_BIT:
+    kind: signal
+    domain: digital
+    carries: "A free register input, held high by its own R-KEY-PU (three: left_thumb B and A, left_hand A)"
+    figure: free-bits
+    driver: cluster/key-marker-and-bits
+    receivers: [cluster/key-register]
+    per_board: true
+    note: "Which input is free differs per register - allocation.yaml - so the far end is per board, like KEY_BITS"
 
   # --- the dev board's pins that drive the chain ------------------------
 

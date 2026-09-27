@@ -26,9 +26,13 @@ The `Dir` and `Peer` columns are defined once in
 
 ### Allocation, on the chain order as written today
 
-**The data is [`allocation.yaml`](allocation.yaml)**, which `tools/board.py`
-reads to assemble each board's netlist; the table below is its written form,
-and `board.py` refuses to build if the two disagree. Change both together.
+**The data is [`allocation.yaml`](allocation.yaml)**; the table below is its
+written form. The wiring itself is on the KiCad board sheets (ADR 0019), and
+`tools/kicad.py check` fails if a board's register is wired differently from
+`allocation.yaml`, or if the file and this table disagree. Change all three
+together. **This circuit is now just the free-bit pull-up**, one sheet placed
+once per free bit ([`key-marker-and-bits.kicad_sch`](key-marker-and-bits.kicad_sch));
+the marker straps are traces, drawn on each board's own sheet.
 
 `H` is the first bit out of each device, so within a cluster the lowest-numbered
 key takes the earliest bit:

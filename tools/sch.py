@@ -275,6 +275,8 @@ class Sheet:
         self.power = lay.get("power", {})
         self.n_power = 0
         self.ports_in = set(net.get("ports", {}))
+        self.hier = bool(lay.get("hierarchical"))   # a SOURCE circuit sheet: ports are hierarchical labels
+        self.extra_inst = {}                         # ref -> [(project, path, ref)] for boards using this sheet
 
     def lib(self, lib_id):
         if lib_id not in self.libs:
@@ -335,8 +337,10 @@ class Sheet:
         for (un, num) in sorted(pins):
             if un in (unit, 0):
                 out.append(f"    (pin {q(num)} (uuid {u(self.name, 'pin', key, num)}))")
-        out.append(f"    (instances (project {q(self.name)} (path \"/{u(self.name, 'root')}\" "
-                   f"(reference {q(ref)}) (unit {unit}))))")
+        inst = [f"(project {q(self.name)} (path \"/{u(self.name, 'root')}\" (reference {q(ref)}) (unit {unit})))"]
+        for proj, path, nref in self.extra_inst.get(ref, []):
+            inst.append(f"(project {q(proj)} (path {q(path)} (reference {q(nref)}) (unit {unit})))")
+        out.append("    (instances " + " ".join(inst) + ")")
         out.append("  )")
         self.items.append("\n".join(out))
 
@@ -347,10 +351,21 @@ class Sheet:
                           f" (uuid {u(self.name, 'wire', a, b)}))")
         self.segments.append((a, b))
 
-    def label(self, netname, at, d, glob=False):
+    def label(self, netname, at, d, glob=False, hier=None):
         # d is the outward direction of the stub the label sits at the end of
         ang = {(1, 0): 0, (-1, 0): 180, (0, -1): 90, (0, 1): 270}[d]
         just = "left" if ang in (0, 90) else "right"
+        if hier is not None:
+            # A PORT of a source circuit sheet. Its netlist.yaml metadata rides as hidden fields,
+            # which tools/kicad.py exports back: Dir, From/To, Figure; Kind=endpoint for an
+            # external endpoint a board wires up (the register's eight inputs).
+            shape = {"in": "input", "out": "output", "ref": "passive"}.get(hier.get("dir"), "passive")
+            props = "".join(f"\n    (property {q(k)} {q(v)} (at {at[0]} {at[1]} 0) (effects (font (size 1.27 1.27)) hide))"
+                            for k, v in hier.get("fields", {}).items())
+            self.items.append(f"  (hierarchical_label {q(netname)} (shape {shape}) (at {at[0]} {at[1]} {ang})"
+                              f" (effects (font (size 1.27 1.27)) (justify {just}))"
+                              f" (uuid {u(self.name, 'hlabel', netname, at)}){props})")
+            return
         if glob:
             shape = self.lay.get("ports", {}).get(netname, {}).get("shape", "input")
             self.items.append(f"  (global_label {q(netname)} (shape {shape}) (at {at[0]} {at[1]} {ang})"
@@ -387,6 +402,24 @@ class Sheet:
             over = {"value_at": [d, 0], "value_at_justify": "left" if d > 0 else "right"}
         self.symbol(self.power_lib(netname), ref, netname, (at[0], at[1], r), 1, ("pwr", key), hide_ref=True,
                     over=over)
+
+    def meta_comments(self):
+        if not self.hier:
+            return ""
+        n = self.net
+        meta = [("circuit", n.get("circuit")), ("page", n.get("page")), ("title", n.get("title")),
+                ("replicated", n.get("replicated"))]
+        return "\n".join(f"    (comment {5 + i} {q(f'{k}: {v}')})" for i, (k, v) in enumerate(meta) if v is not None)
+
+    def port_fields(self, nname):
+        pd = self.net.get("ports", {}).get(nname)
+        if pd is None:
+            return {"dir": "ref", "fields": {"Kind": "endpoint"}}
+        f = {"Dir": pd.get("dir", "")}
+        for k in ("from", "to", "figure"):
+            if k in pd:
+                f[k.capitalize()] = str(pd[k])
+        return {"dir": pd.get("dir"), "fields": f}
 
     def power_flags(self):
         """Power nets SUPPLIED BY ANOTHER CIRCUIT (ports in netlist.yaml). On a sheet drawn
@@ -450,10 +483,23 @@ class Sheet:
                 x, y = place(at, lx, ly)
                 self.pinpos[f"{ref}.{n}"] = (x, y) + outward(ang, at[2]) + (typ,)
                 self.pinnum[f"{ref}.{n}"] = (ref, num)
+            fields = dict(c["fields"]) if c.get("fields") else None
+            if self.hier:
+                nc = net["components"][ref]
+                fields = {"Row": nc.get("of", ref),
+                          "Pins": " ".join(n + "=" + (pinmap.get(n, n) + (f"({libname[n]})" if n in libname else ""))
+                                           for n in names)}
+                for k in ("drawn_as", "note"):
+                    if nc.get(k):
+                        fields[k.capitalize() if k == "note" else "Drawn_as"] = str(nc[k])
+                if c.get("pins_source"):
+                    fields["Pins_source"] = c["pins_source"]
             for un, at in units.items():
                 at = tuple(at) + (0,) * (3 - len(at))
                 self.symbol(c["symbol"], ref, c.get("value", net["components"][ref].get("value", "")),
-                            at, un, (ref, un), footprint=c.get("footprint", ""), over=c)
+                            at, un, (ref, un), footprint=c.get("footprint", ""), over=c, fields=fields)
+        for k, v in getattr(self, "extra_pins", {}).items():
+            self.pinpos[k] = v
         missing = [r for r in net["components"] if r not in comps]
         if missing:
             sys.exit(f"sch: not placed in schematic.yaml: {', '.join(missing)}")
@@ -479,7 +525,10 @@ class Sheet:
         for lb in lay.get("labels", []):
             at = (snap(lb["at"][0]), snap(lb["at"][1]))
             d = {"left": (-1, 0), "right": (1, 0), "up": (0, -1), "down": (0, 1)}[lb.get("dir", "left")]
-            self.label(lb["net"], at, d, glob=lb["net"] in ports)
+            if self.hier and (lb["net"] in ports or lb["net"] in self.lay.get("hier_endpoints", [])):
+                self.label(lb["net"], at, d, hier=self.port_fields(lb["net"]))
+            else:
+                self.label(lb["net"], at, d, glob=lb["net"] in ports)
         for i, ps in enumerate(lay.get("power_symbols", [])):
             self.power_symbol(ps["net"], (snap(ps["at"][0]), snap(ps["at"][1])), ("placed", i))
 
@@ -495,7 +544,7 @@ class Sheet:
                 if p in self.wired:
                     continue
                 x, y, dx, dy, typ = self.pinpos[p]
-                if nname in ext and len(plist) == 1:
+                if nname in ext and len(plist) == 1 and not (self.hier and nname in self.lay.get("hier_endpoints", [])):
                     self.no_connect((x, y))
                     continue
                 end = (snap(x + dx * STUB), snap(y + dy * STUB))
@@ -505,6 +554,8 @@ class Sheet:
                     # turns into a neighbouring pin's stub or label
                     down = self.power[nname] in ("GND", "GNDA", "GNDD", "Earth")
                     self.power_symbol(nname, end, ("auto", p), point=(dx, dy), down=down)
+                elif self.hier and (nname in ports or nname in self.lay.get("hier_endpoints", [])):
+                    self.label(nname, end, (dx, dy), hier=self.port_fields(nname))
                 else:
                     self.label(nname, end, (dx, dy), glob=nname in ports)
 
@@ -534,6 +585,7 @@ class Sheet:
   (paper {q(lay.get('paper', 'A4'))})
   (title_block
     (title {q(tb.get('title', net.get('title', self.name)))})
+{self.meta_comments()}
     (date "")
     (rev {q(fp)})
     (company "Woody")

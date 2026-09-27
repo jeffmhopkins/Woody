@@ -16,9 +16,17 @@ sit together, so a change and its record are never in different places.
                   circuit.yaml     declared dependencies. SEEDED, NOT VERIFIED
                   notes.md         past tense only. No live value belongs here
                   sim/             an ngspice deck and its contract. No results
-                  netlist.yaml     AUTHORITATIVE for connectivity. The
-                                   drawing is a representation of it, and
-                                   every circuit that carries nets has one
+                  <circuit>.kicad_sch  THE SOURCE OF TRUTH where it exists
+                                   (ADR 0019): connections and part facts.
+                                   Edit in KiCad 9
+                  netlist.yaml     EXPORTED from the sheet by tools/kicad.py
+                                   where one exists - do not edit. Otherwise
+                                   hand-written and authoritative until the
+                                   circuit is migrated. Every check reads it
+
+boards/<board>/   one KiCad project per physical board: the root sheet
+                  places circuit sheets once per instance; board-netlist.yaml
+                  is its exported, flattened netlist
 
 nets.yaml                          at hardware/ root: THE MASTER NET LIST,
                                    which owns every net that crosses a circuit

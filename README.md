@@ -105,9 +105,9 @@ hardware/         Schematics, split by CIRCUIT under each board:
                                       circuit.yaml  declared dependencies
                                       notes.md      what it used to be
                   interfaces/  the three circuits that cross a board boundary
-                  boards/      one directory per physical board: its netlist
-                               ASSEMBLED from the circuits by tools/board.py,
-                               and its KiCad sheet (docs/reference/tooling.md)
+                  boards/      one KiCad project per physical board, placing the
+                               circuit sheets; the KiCad sheets are the source
+                               of truth (ADR 0019, docs/reference/tooling.md)
                   bom.csv      GENERATED from the fragments - do not edit
 firmware/         ESP32-S3 firmware (PlatformIO)
 mechanical/       Body CAD (OpenSCAD, parametric): renders, DXF cut files and

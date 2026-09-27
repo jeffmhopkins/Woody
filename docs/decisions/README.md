@@ -63,4 +63,5 @@ why it was deleted is worth keeping.
 | [0016](0016-one-strip-on-the-centre-board.md) | One LED strip, on the centre board | Accepted (placement amended by 0017) |
 | [0017](0017-one-main-board.md) | One main board | Accepted (wiring details in 0018) |
 | [0018](0018-main-board-wiring-decisions.md) | Main board wiring: five decisions | Accepted |
+| [0019](0019-kicad-sheets-are-the-source.md) | The KiCad sheets are the source of truth | Accepted (migration in progress) |
 | [0014](0014-lighting.md) | Lighting | Accepted (geometry amended by 0016) |

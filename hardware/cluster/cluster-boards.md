@@ -33,7 +33,8 @@ identical in the chain** — one connector each, `SER` in on conductor 6 and `QH
 on conductor 8 (key-board `J-CHAIN` pins 7 and 5; conductor k is key-board
 pin 13 − k, `key-chain-loom.md`) — so they differ only in switch count and strapping.
 
-**The two key boards are drawn** as KiCad sheets generated from these circuits:
+**The two key boards are KiCad projects** placing these circuits' sheets, which are
+the source of truth (ADR 0019):
 [`key-board-rh.sch.png`](../boards/key-board-rh/key-board-rh.sch.png) and
 [`key-board-lh.sch.png`](../boards/key-board-lh/key-board-lh.sch.png)
 (`hardware/boards/`, `docs/reference/tooling.md` §3).

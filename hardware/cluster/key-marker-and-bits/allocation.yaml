@@ -1,9 +1,10 @@
 # THE 32-BIT ALLOCATION AS DATA - what each 74HC165 parallel input carries.
 #
 # Owned by this circuit (key-marker-and-bits.md §4 argues it; its table is a
-# REPRESENTATION of this file, and tools/board.py fails if the two disagree).
-# tools/board.py reads it to assemble each board's netlist, so a key moved
-# here moves on the generated board schematics too.
+# REPRESENTATION of this file). The WIRING is on the KiCad board sheets
+# (ADR 0019): tools/kicad.py check fails if a board's register is wired
+# differently from this file, or this file and the page's table disagree.
+# Moving a key means editing the board sheet, this file and the table.
 #
 # One row per register in chain order (config/key-layout.yaml `chain`), each
 # row listed H G F E D C B A - H is the first bit out of each device.
@@ -13,7 +14,8 @@
 #   sw+ sw-   a reserved spare-switch position: the full network, switch not
 #             fitted (config/key-layout.yaml spare_bits_switches)
 #   M0 M1     a marker strap, straight to GND (0) or to the chain's 3V3 (1)
-#   FREEn     a free bit: R-KEY-PU-FREEn only (key-marker-and-bits/netlist.yaml)
+#   FREEn     a free bit: one instance of key-marker-and-bits (an R-KEY-PU, nothing
+#             else), named FREEn on the board that carries it
 
 order: [H, G, F, E, D, C, B, A]
 

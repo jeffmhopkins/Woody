@@ -5,12 +5,14 @@ Two pipelines turn data in this repository into pictures and design files:
 | Pipeline | Source (edit these) | Tool | Generated (never edit) |
 |---|---|---|---|
 | **Body CAD** | `config/body.yaml`, `config/key-layout.yaml`, `mechanical/cad/*.scad` | `tools/cad.py` (OpenSCAD) | `mechanical/renders/*.png`, `mechanical/export/*.dxf`, `mechanical/drc.echo`, `mechanical/clash.txt`, `mechanical/OUTPUTS.csv`, `mechanical/cad/generated/params.scad` |
-| **Schematics** | a circuit's `netlist.yaml` + `schematic.yaml`; a board's `board.yaml` + `schematic.yaml` | `tools/board.py`, `tools/sch.py` (KiCad 9) | `hardware/boards/*/board-netlist.yaml`, `*.kicad_sch`, `*.sch.png` |
+| **Schematics** | the KiCad sheets: each circuit's `<circuit>.kicad_sch`, each board's project under `hardware/boards/` (ADR 0019) | `tools/kicad.py` (KiCad 9) | a migrated circuit's `netlist.yaml`, `board-netlist.yaml`, `*.sch.png`, `hardware/SHEETS.csv` |
 
 Both follow the same rule, the one this repository exists to enforce
-(`CLAUDE.md`): **numbers and connections live in one data file, and every
-picture is generated from it and fingerprinted**, so a picture that no longer
-matches its source is reported by name instead of silently lying.
+(`CLAUDE.md`): **each fact lives in one source, and everything derived from
+it is generated and fingerprinted**, so a derived file that no longer
+matches its source is reported by name instead of silently lying. For the
+body the source is data (`config/body.yaml`); for the electronics it is the
+KiCad sheets.
 
 ---
 
@@ -113,109 +115,125 @@ the way it is). This is the working summary.
 
 ---
 
-## §3. Schematics — `tools/board.py` and `tools/sch.py`
+## §3. Schematics — KiCad is the source (ADR 0019)
 
 ### What is the source
 
-- **`netlist.yaml` is authoritative for connectivity**, as it is for all of
-  `hardware/` (`CLAUDE.md`). Circuits are written once and *replicated*: one
-  key-register netlist serves four registers.
-- **A board is assembled, not written.** `hardware/boards/<board>/board.yaml`
-  names the cluster, the connector and what the circuit's ports are called on
-  this board; `tools/board.py` expands the circuit netlists into
-  `board-netlist.yaml`, filling each register input from
-  `hardware/cluster/key-marker-and-bits/allocation.yaml` (the 32-bit
-  allocation as data) and the connector's pins from
-  `hardware/interfaces/key-chain-loom/netlist.yaml`. It refuses to build if
-  `allocation.yaml` and the table in `key-marker-and-bits.md` §4 disagree, or
-  if a key named there is not on that cluster in `config/key-layout.yaml`.
-- **`schematic.yaml` is placement only**: which KiCad symbol draws each part,
-  each pin's package number (cited to a banked datasheet), and where things
-  sit. It is to a sheet what `config/body.yaml` is to the body.
+- **A circuit's `<circuit>.kicad_sch` is the source of truth** wherever it
+  exists (its title block says `circuit: ...`). It owns every connection and
+  each part's identity, as KiCad fields on the symbol:
+
+  | Field | Holds |
+  |---|---|
+  | `Row` | the BOM row the part buys from (`R-KEY-PU`) |
+  | `Pins` | the pin map, `name=number(KiCad's name)`: `SHLD=1(~{PL}) CLK=2(CP) …` |
+  | `Pins_source` | the banked datasheet page that proves the map |
+  | `Note` | what a builder must know about this part |
+
+  **Ports are hierarchical labels**, with fields `Dir` (in/out/ref),
+  `From` / `To` and `Figure`. A label with `Kind = endpoint` is an input a
+  board wires up — the register's eight inputs.
+- **A board is a KiCad project** under `hardware/boards/<board>/`. Its root
+  sheet places circuit sheets as sub-sheets, **once per instance**: a key
+  board places the register once and the key network once per key. KiCad
+  gives each instance its own references (`R-KEY-PU-RH1`). Change a circuit
+  sheet once and every instance on every board follows.
+- **Everything else is exported and must not be edited**: a migrated
+  circuit's `netlist.yaml` (which `check-netlist.py`, `nets.yaml` and the BOM
+  checks keep reading exactly as before), each board's `board-netlist.yaml`
+  (its flattened netlist, what a PCB is laid out from), and the PNG renders,
+  recorded in `hardware/SHEETS.csv`.
+- **Not yet migrated circuits** keep a hand-written `netlist.yaml`. The LED
+  strip drive's sheet is still *generated* from its YAML by `tools/sch.py`.
 
 ### Commands
 
 ```
-python3 tools/board.py build hardware/boards/key-board-rh    # assemble the board netlist
-python3 tools/sch.py   build hardware/boards/key-board-rh    # write, prove, ERC and render the sheet
-python3 tools/sch.py   build hardware/carrier/led-strip-drive   # a single-circuit sheet
-python3 tools/board.py check hardware/boards/key-board-rh    # exit 1 if the board netlist is stale
-python3 tools/sch.py   check hardware/boards/key-board-rh    # exit 1 if the sheet is stale
+python3 tools/kicad.py export hardware/cluster/key-register   # sheet -> netlist.yaml
+python3 tools/kicad.py export hardware/boards/key-board-rh    # board -> board-netlist.yaml, with KiCad's ERC
+python3 tools/kicad.py render hardware/boards/key-board-rh    # a PNG of every page
+python3 tools/kicad.py check                                  # everything above, compared with what is committed
 ```
 
-`sch.py build` prints three things, and all three must pass:
+**`kicad.py check` fails when:**
+- a sheet was edited and not re-exported;
+- a render's sheet moved, or the PNG itself was edited;
+- a board has an ERC error;
+- a board's register is wired differently from
+  `hardware/cluster/key-marker-and-bits/allocation.yaml`, that file disagrees
+  with the table in `key-marker-and-bits.md` §4, or it names a key that is not
+  on that cluster in `config/key-layout.yaml`.
 
-1. **netlist match** — it exports KiCad's own netlist of the sheet it just
-   wrote (`kicad-cli sch export netlist`) and compares every net, pin by pin,
-   with the netlist. A wire to the wrong pin, a label on the wrong stub, a net
-   split in two or two nets merged: all fail.
-2. **KiCad ERC** — `kicad-cli sch erc`, KiCad's own electrical rules check.
-3. **pin names** — where the KiCad library names a pin (`VCC`, `GND`, `DS`,
-   `~{PL}`), the pin map must agree.
+It needs KiCad 9, so it is **not** in the commit hook; run it before
+committing anything under `hardware/` that touches a sheet, a netlist or the
+allocation.
 
-**What no check can prove: the pin-number map.** The wires go wherever the map
-says, so a wrong map draws a consistent, wrong sheet. That is why every map
-cites its datasheet page, and why a map may state the library's pin name too
-(`SHLD: [1, "~{PL}"]`) — then a wrong number is caught against the name.
+### Editing a circuit or a board
 
-### Drawing a new sheet
+1. Open the board project in KiCad 9 (`hardware/boards/key-board-rh/key-board-rh.kicad_pro`)
+   — the sub-sheets open from it — or a circuit's `.kicad_sch` on its own.
+   **Edit a replicated circuit from inside a board**, so its instance
+   references stay attached; KiCad writes the change to the shared circuit
+   file.
+2. A new part needs its fields: `Row`, `Pins` (every pin the netlist should
+   name, in order), `Pins_source`, `Note`. A new port is a hierarchical label
+   with `Dir` and `From`/`To`. **Every net must carry a label** — the export
+   refuses an unnamed net with two or more pins.
+3. Save, then `kicad.py export` the circuit **and every board that uses it**,
+   `kicad.py render` them, and `kicad.py check`.
+4. Then run the usual gates (`check-netlist.py --strict`,
+   `check-staleness.py`): they read the exported netlists.
 
-1. **For a circuit**: add `schematic.yaml` beside its `netlist.yaml`
-   (copy `hardware/carrier/led-strip-drive/schematic.yaml`).
-   **For a board**: add `hardware/boards/<name>/board.yaml` and
-   `schematic.yaml` (copy a key board's), then `board.py build`.
-2. Give every part a `symbol` (`library:name` from
-   `/usr/share/kicad/symbols/`), and a `pins` map for anything whose pins are
-   not already numbered in the netlist.
-3. Place parts with `at: [x, y, rotation]` — millimetres, y down, on the
-   1.27 mm grid. Multi-unit parts (a quad gate) place each unit under `units`.
-4. Build, then **look at the PNG** — the checks prove connections, not
-   legibility. Move things until nothing overlaps.
+A sheet opened alone reports ERC errors for its hierarchical ports — they have
+no parent there. **ERC means something on a board**, where every port is
+wired; `kicad.py export` of a board runs it.
 
-### How connections are drawn
+**What no check can prove: a pin-number map.** A wrong map draws a
+consistent, wrong sheet. That is why `Pins` carries KiCad's own name for each
+pin wherever the library names it, and `Pins_source` the page that proves it.
 
-- A pin named in a `wires` polyline is joined by that wire. Polylines mix pin
-  names (`R-LED-SER.1`) and points (`[91.44, 58.42]`) and must be orthogonal.
-- Every other pin gets a short stub and then: **a power symbol** if its net is
-  in `power` (it points along the stub, away from the part); **a no-connect
-  flag** if it is the only pin of an `external_endpoints` net; otherwise **a
-  net label** — a global label if the net is a port.
-- `labels` put a name on a wire; `power_symbols` put a power symbol at a point.
-- `repeat` lays one block down per instance: `for` lists the instances, `{k}`
-  in any name is replaced by each, and coordinates are relative to
-  `at + i × step`. The six key networks on a key board are one block.
-- `supplied` lists power nets that arrive from another board. Drawn alone, a
-  sheet cannot see their source, so each gets a `PWR_FLAG` in a labelled group
-  at `flags_at`; a circuit's power *ports* get one automatically.
+### Migrating a circuit that is still YAML
+
+`tools/sch.py` writes a circuit's first sheet from its `netlist.yaml` plus a
+`schematic.yaml` (symbol, pin map, placement — `hardware/carrier/led-strip-drive/schematic.yaml`
+is one, and the key-board circuits' are in git history) with `hierarchical: true`. Then:
+1. `python3 tools/sch.py build <dir>` writes the sheet;
+2. `python3 tools/kicad.py export <dir>` to a scratch copy, and compare it
+   with the hand-written `netlist.yaml` **part by part and net by net** — the
+   migration must change nothing;
+3. write the export over `netlist.yaml`, delete `schematic.yaml`, and from
+   then on edit the sheet.
 
 ### KiCad behaviour learned the hard way
 
-- **Power nets are named after the power symbol's value** (KiCad 8+), so the
-  stock `+3V3` / `GND` symbols are used with the value set to this
-  repository's net name (`V3V3_CHAIN_RH`). KiCad 7 named them after the pin.
+- **Power nets are named after the power symbol's value** (KiCad 8+).
 - **A field's justification is read in the rotated symbol's frame**, so on a
-  rotated part "left" draws as "right". `sch.py` flips it.
+  rotated part "left" draws as "right".
 - **Library symbols that `extends` another** (KiCad 9's `74AHCT125` extends
   `74LS125`) are flattened into the sheet, as KiCad itself does.
 - **Strings in a sheet file cannot contain raw newlines** — `\n` escapes only.
+- **A single-pin net is named `unconnected-…`** in KiCad's netlist whatever
+  label it carries; the export names a lone no-connect pin after the pin.
+- **KiCad 7 has no command-line ERC**, and cannot read these sheets; use 9.
 
 ### Where the sheets are
 
-| Sheet | Source |
+| Sheet | Status |
 |---|---|
-| [`led-strip-drive.sch.png`](../../hardware/carrier/led-strip-drive/led-strip-drive.sch.png) | `hardware/carrier/led-strip-drive/` — the first, a single circuit |
-| [`key-board-rh.sch.png`](../../hardware/boards/key-board-rh/key-board-rh.sch.png) | `hardware/boards/key-board-rh/` — the right-hand key board |
-| [`key-board-lh.sch.png`](../../hardware/boards/key-board-lh/key-board-lh.sch.png) | `hardware/boards/key-board-lh/` — the left-hand key board |
+| [`key-board-rh.sch.png`](../../hardware/boards/key-board-rh/key-board-rh.sch.png) (+ one PNG per sub-sheet) | **source**, `hardware/boards/key-board-rh/` |
+| [`key-board-lh.sch.png`](../../hardware/boards/key-board-lh/key-board-lh.sch.png) (+ pages) | **source**, `hardware/boards/key-board-lh/` |
+| [`key-register.sch.png`](../../hardware/cluster/key-register/key-register.sch.png), [`key-switch-network.sch.png`](../../hardware/cluster/key-switch-network/key-switch-network.sch.png), [`key-marker-and-bits.sch.png`](../../hardware/cluster/key-marker-and-bits/key-marker-and-bits.sch.png) | **source**, the three key-board circuits |
+| [`led-strip-drive.sch.png`](../../hardware/carrier/led-strip-drive/led-strip-drive.sch.png) | generated from YAML — not yet migrated |
 
 ### Not yet
 
+- **The main board, the module and the interfaces** are still YAML; each
+  migrates as described above, the main board as a project placing its
+  circuit sheets like the key boards do.
+- **The BOM fragments** become exports once every board is in KiCad, because
+  a row's quantity is a count over all of them (ADR 0019).
 - **Footprints and a PCB.** The sheets carry no footprints yet; that is the
   next step toward boards, and `docs/reference/pcb-pipeline.md` is the plan
   for it.
-- **The main board**, which needs the other circuits' `schematic.yaml` and a
-  `board.yaml` that can compose them — `board.py` only knows key clusters so
-  far.
-- **The commit gate.** `check-staleness.py` runs `cad.py check` but not yet
-  `sch.py check` / `board.py check`, because those need KiCad installed; run
-  them by hand before committing a change to a netlist, `allocation.yaml` or a
-  `schematic.yaml`.
+- **The commit gate.** `check-staleness.py` runs `cad.py check` but not
+  `kicad.py check`, because that needs KiCad installed; run it by hand.

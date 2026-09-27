@@ -269,11 +269,23 @@ repeating, and record the verification.
 
 ## Hardware conventions
 
-- Every schematic page is Markdown with ASCII drawings and derivations inline.
-  One circuit per directory: the page, its `bom.csv` fragment, its
-  `circuit.yaml`, `netlist.yaml`, and `notes.md` for what the circuit *used to
-  be*.
-- **`netlist.yaml` IS AUTHORITATIVE FOR CONNECTIVITY, not the drawing.** The
+- Every schematic page is Markdown with derivations inline. One circuit per
+  directory: the page, its `bom.csv` fragment, its `circuit.yaml`,
+  `netlist.yaml`, and `notes.md` for what the circuit *used to be*.
+- **THE KICAD SHEET IS THE SOURCE OF TRUTH** (ADR 0019) wherever a circuit has
+  one — `<circuit>/<circuit>.kicad_sch` whose title block names the circuit.
+  It owns every connection and each part's identity (fields `Row`, `Pins`,
+  `Pins_source`, `Note`); ports are hierarchical labels. **Its `netlist.yaml`
+  is EXPORTED** by `python3 tools/kicad.py export <dir>` and must never be
+  edited: an edit survives until the next export and then disappears. Boards
+  are KiCad projects under `hardware/boards/`, placing circuit sheets once per
+  instance. `python3 tools/kicad.py check` fails on a sheet edited without
+  re-exporting, a stale render, a board ERC error, or a board wired against
+  `allocation.yaml`. It needs KiCad 9 (`tools/setup-env.sh`) and is **not** in
+  the commit hook, so run it by hand. Circuits not yet migrated keep a
+  hand-written `netlist.yaml`, authoritative until their sheet exists; their
+  ASCII drawings are representations of it.
+- **`netlist.yaml` IS WHAT EVERY CHECK READS**, exported or hand-written. The
   drawing is a representation of it. `hardware/nets.yaml` is the master list
   of every net that crosses a circuit boundary, because a per-circuit file can
   only declare its own side. `tools/check-netlist.py --strict` runs from the
