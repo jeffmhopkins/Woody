@@ -1,5 +1,8 @@
 # Instrument body — parametric CAD
 
+*Installing the tools and the day-to-day loop: [`docs/reference/tooling.md`](../docs/reference/tooling.md)
+(`sudo bash tools/setup-env.sh` installs everything).*
+
 > **Status:** first model, 2026-09-26. **Layout is PROVISIONAL**: every key
 > position in `config/key-layout.yaml` is still `null` (they are M2/M3
 > outputs), so keys are placed on ADR 0009's length budget and every render

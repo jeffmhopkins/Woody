@@ -29,8 +29,9 @@ schematic.yaml; the one check possible here is that pins the library NAMES
 sheet too (kicad-cli 8 or later; KiCad 7's has none, and a small pin-type
 check stands in and says so).
 
-NEEDS KiCad 9 (the sheets are written in its format) and its symbol library.
-On Ubuntu 24.04, from the KiCad project's own archive:
+NEEDS KiCad 9 (the sheets are written in its format) and its symbol library:
+`sudo bash tools/setup-env.sh` installs it, and docs/reference/tooling.md is
+the user's guide. By hand, on Ubuntu 24.04, from the KiCad project's archive:
     key=$(curl -s https://api.launchpad.net/1.0/~kicad/+archive/ubuntu/kicad-9.0-releases \
           | python3 -c "import sys,json;print(json.load(sys.stdin)['signing_key_fingerprint'])")
     curl -s "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x$key" | gpg --dearmor \
@@ -214,13 +215,14 @@ def git_blob(path):
 
 def load(circuit_dir):
     d = os.path.join(ROOT, circuit_dir)
-    net = yaml.safe_load(open(os.path.join(d, "netlist.yaml")))
     lay = yaml.safe_load(open(os.path.join(d, "schematic.yaml")))
-    return d, net, lay
+    net = yaml.safe_load(open(os.path.join(d, lay.get("netlist", "netlist.yaml"))))
+    return d, net, expand(lay)
 
 
 def fingerprint(d, lay):
-    files = [os.path.join(d, "netlist.yaml"), os.path.join(d, "schematic.yaml"), os.path.abspath(__file__)]
+    files = [os.path.join(d, lay.get("netlist", "netlist.yaml")), os.path.join(d, "schematic.yaml"),
+             os.path.abspath(__file__)]
     libs = sorted({c["symbol"].split(":")[0] for c in lay["components"].values()} | {"power"})
     files += [os.path.join(SYMDIR, l + ".kicad_sym") for l in libs]
     for f in files:
@@ -230,6 +232,29 @@ def fingerprint(d, lay):
     for f in files:
         h.update((os.path.basename(f) + git_blob(f)).encode())
     return h.hexdigest()[:12]
+
+
+def expand(lay):
+    """`repeat` blocks: one placement written once, laid down per instance. Every string
+    has {k} replaced by the instance; every [x, y] is relative to at + i * step."""
+    lay = dict(lay)
+    comps = dict(lay.get("components", {}))
+    wires, labels = list(lay.get("wires", [])), list(lay.get("labels", []))
+    for blk in lay.get("repeat", []):
+        for i, k in enumerate(blk["for"]):
+            ox = blk["at"][0] + i * blk["step"][0]
+            oy = blk["at"][1] + i * blk["step"][1]
+            sub = lambda t: t.replace("{k}", str(k))
+            for ref, c in blk.get("components", {}).items():
+                c = dict(c)
+                c["at"] = [ox + c["at"][0], oy + c["at"][1]] + list(c["at"][2:])
+                comps[sub(ref)] = c
+            for poly in blk.get("wires", []):
+                wires.append([sub(p) if isinstance(p, str) else [ox + p[0], oy + p[1]] for p in poly])
+            for lb in blk.get("labels", []):
+                labels.append(dict(lb, net=sub(lb["net"]), at=[ox + lb["at"][0], oy + lb["at"][1]]))
+    lay["components"], lay["wires"], lay["labels"] = comps, wires, labels
+    return lay
 
 
 def pin_ref(s):
@@ -296,6 +321,9 @@ class Sheet:
             else:
                 lx, ly, _ = props.get(pname, (0, 0, 0))
                 (px, py), just = place(at, lx, ly), None
+            if just and pname in spots and r % 360 != 0:
+                # KiCad reads a field's justification in the ROTATED symbol's frame
+                just = {"left": "right", "right": "left"}[just]
             j = f" (justify {just})" if just else ""
             eff = "(effects (font (size 1.27 1.27))" + j + (" hide" if hide else "") + ")"
             # KiCad stores a field's angle as the symbol's rotation plus the field's own;
@@ -342,16 +370,29 @@ class Sheet:
         self.lib(lid)
         return lid
 
-    def power_symbol(self, netname, at, key):
+    def power_symbol(self, netname, at, key, point=None, down=None):
+        """`point` is the direction the symbol should extend: a supply symbol extends up and a
+        ground symbol down at rotation 0, so rotate to match."""
         self.n_power += 1
         ref = f"#PWR{self.n_power:02d}"
-        self.symbol(self.power_lib(netname), ref, netname, (at[0], at[1], 0), 1, ("pwr", key), hide_ref=True)
+        r = 0
+        if point is not None:
+            natural = (0, 1) if down else (0, -1)
+            turns = {(0, -1): 0, (-1, 0): 90, (0, 1): 180, (1, 0): 270}
+            r = (turns[tuple(point)] - turns[natural]) % 360
+        over = None
+        if point is not None and point[1] == 0:
+            # lying sideways: the net name reads horizontally, just past the symbol's tip
+            d = 6.35 if point[0] > 0 else -6.35
+            over = {"value_at": [d, 0], "value_at_justify": "left" if d > 0 else "right"}
+        self.symbol(self.power_lib(netname), ref, netname, (at[0], at[1], r), 1, ("pwr", key), hide_ref=True,
+                    over=over)
 
     def power_flags(self):
         """Power nets SUPPLIED BY ANOTHER CIRCUIT (ports in netlist.yaml). On a sheet drawn
         alone KiCad's ERC cannot see their source, so each gets a PWR_FLAG - the standard
         way - grouped at `flags_at` under a note saying where the supply comes from."""
-        nets = [n for n in self.power if n in self.ports_in]
+        nets = [n for n in self.power if n in self.ports_in or n in self.lay.get("supplied", [])]
         if not nets:
             return
         x0, y0 = self.lay.get("flags_at", [20.32, 30.48])
@@ -383,7 +424,12 @@ class Sheet:
                 sys.exit(f"sch: {ref} is placed in schematic.yaml but not in netlist.yaml")
             text, pins, props = self.lib(c["symbol"])
             units = {int(k): v for k, v in c["units"].items()} if "units" in c else {1: c["at"]}
-            pinmap = {str(k): str(v) for k, v in c.get("pins", {}).items()}
+            pinmap, libname = {}, {}
+            for k, v in c.get("pins", {}).items():
+                if isinstance(v, list):
+                    pinmap[str(k)], libname[str(k)] = str(v[0]), str(v[1])
+                else:
+                    pinmap[str(k)] = str(v)
             names = [str(p) for p in net["components"][ref]["pins"]]
             for n in names:
                 num = pinmap.get(n, n)
@@ -392,6 +438,11 @@ class Sheet:
                     sys.exit(f"sch: {ref}.{n} maps to pin {num}, which {c['symbol']} does not have")
                 un, (lx, ly, ang, typ, lname) = hit[0]
                 self.pinname[f"{ref}.{n}"] = lname
+                if n in libname and libname[n] != lname:
+                    sys.exit(f"sch: {ref}.{n} maps to pin {num}, which the library names {lname!r}, "
+                             f"not {libname[n]!r} as schematic.yaml says")
+                if n in libname:
+                    self.pinname[f"{ref}.{n}"] = "~"   # the map named it; the name check is done
                 at = units.get(un) if un else units[min(units)]
                 if at is None:
                     sys.exit(f"sch: {ref} pin {n} is on unit {un}, which schematic.yaml does not place")
@@ -450,15 +501,10 @@ class Sheet:
                 end = (snap(x + dx * STUB), snap(y + dy * STUB))
                 self.wire((x, y), end)
                 if nname in self.power:
-                    kind = self.power[nname]
-                    down = kind in ("GND", "GNDA", "GNDD", "Earth")
-                    if dy == 0:  # horizontal stub: turn towards where the symbol hangs
-                        turn = (end[0], snap(end[1] + (STUB if down else -STUB)))
-                        self.wire(end, turn)
-                        end = turn
-                    elif (dy > 0) != down:  # stub points away from where the symbol hangs
-                        pass
-                    self.power_symbol(nname, end, ("auto", p))
+                    # the symbol points along its stub, away from the part, so it never
+                    # turns into a neighbouring pin's stub or label
+                    down = self.power[nname] in ("GND", "GNDA", "GNDD", "Earth")
+                    self.power_symbol(nname, end, ("auto", p), point=(dx, dy), down=down)
                 else:
                     self.label(nname, end, (dx, dy), glob=nname in ports)
 
@@ -491,8 +537,8 @@ class Sheet:
     (date "")
     (rev {q(fp)})
     (company "Woody")
-    (comment 1 {q('GENERATED by tools/sch.py - do not edit; connectivity: ' + os.path.relpath(self.d, ROOT) + '/netlist.yaml')})
-    (comment 2 {q('placement: schematic.yaml; checked against netlist.yaml by kicad-cli netlist export')})
+    (comment 1 {q('GENERATED by tools/sch.py - do not edit; connectivity: ' + os.path.relpath(self.d, ROOT) + '/' + lay.get('netlist', 'netlist.yaml'))})
+    (comment 2 {q('placement: schematic.yaml; checked against ' + lay.get('netlist', 'netlist.yaml') + ' by kicad-cli netlist export')})
     (comment 3 {q(tb.get('comment', ''))})
     (comment 4 {q('fingerprint ' + fp + ' - verify: python3 tools/sch.py check ' + os.path.relpath(self.d, ROOT))})
   )
@@ -558,7 +604,8 @@ def pin_types(sheet, net):
     for nname, plist in net["nets"].items():
         pins = [m for m in plist if isinstance(m, str)]
         types = [sheet.pinpos[p][4] for p in pins]
-        is_port = any(isinstance(m, dict) and "port" in m for m in plist) or nname in ports
+        is_port = any(isinstance(m, dict) and "port" in m for m in plist) or nname in ports \
+            or nname in sheet.lay.get("supplied", [])
         powered = is_port or nname in sheet.power
         outs = [p for p, t in zip(pins, types) if t in ("output", "power_out")]
         if len(outs) > 1:

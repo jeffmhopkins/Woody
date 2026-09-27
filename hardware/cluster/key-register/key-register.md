@@ -37,7 +37,7 @@ would be true of all four. The allocation table lives on
 
 
 ```
-                        74HC165  SOIC-16          [from memory: pin map]
+                        74HC165  SOIC-16   [ds 74HC165-ti-scls116e.pdf p.1]
                      ┌────────────∪────────────┐
        SH/LD  ──────►│ 1  SH/LD        VCC  16 │◄──── 3V3 ──┬── [C-DECOUPLE-165 100nF]
         SCK   ──────►│ 2  CLK       CLK INH 15 │──── GND     │   AT the package,

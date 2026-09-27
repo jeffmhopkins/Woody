@@ -26,6 +26,10 @@ The `Dir` and `Peer` columns are defined once in
 
 ### Allocation, on the chain order as written today
 
+**The data is [`allocation.yaml`](allocation.yaml)**, which `tools/board.py`
+reads to assemble each board's netlist; the table below is its written form,
+and `board.py` refuses to build if the two disagree. Change both together.
+
 `H` is the first bit out of each device, so within a cluster the lowest-numbered
 key takes the earliest bit:
 

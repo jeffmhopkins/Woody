@@ -105,6 +105,9 @@ hardware/         Schematics, split by CIRCUIT under each board:
                                       circuit.yaml  declared dependencies
                                       notes.md      what it used to be
                   interfaces/  the three circuits that cross a board boundary
+                  boards/      one directory per physical board: its netlist
+                               ASSEMBLED from the circuits by tools/board.py,
+                               and its KiCad sheet (docs/reference/tooling.md)
                   bom.csv      GENERATED from the fragments - do not edit
 firmware/         ESP32-S3 firmware (PlatformIO)
 mechanical/       Body CAD (OpenSCAD, parametric): renders, DXF cut files and
@@ -140,6 +143,9 @@ restates.)*
    constraint that shapes most of the electrical design
 5. [docs/reference/repo-maintenance.md](docs/reference/repo-maintenance.md) —
    which files are generated, which are history, what each tool owns
+6. [docs/reference/tooling.md](docs/reference/tooling.md) — **installing and
+   using the tools**: the body CAD (OpenSCAD) and the schematic sheets
+   (KiCad 9), one setup script for both
 
 *(Entry 2 was missing until 2026-09-21. `hardware/README.md` — the page that
 explains the whole `<board>/<circuit>/` scheme the restructure exists to

@@ -1,5 +1,9 @@
 # hardware/ — how this directory is organised
 
+*Schematic sheets are generated from the netlists in KiCad 9, and each
+physical board has a directory under [`boards/`](boards/) whose netlist is
+assembled from the circuits: [`docs/reference/tooling.md`](../docs/reference/tooling.md) §3.*
+
 One circuit per directory. The directory is the unit: the drawing, the parts,
 the declared dependencies and the history of what the circuit *used to be* all
 sit together, so a change and its record are never in different places.
