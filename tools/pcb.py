@@ -107,8 +107,11 @@ def sheet_netlist(sch):
         fp = find(c, "footprint")
         tst = find(c, "tstamps")
         sp = find(find(c, "sheetpath")[0], "tstamps")[0][1]
+        flags = {find(p, "name")[0][1] for p in find(c, "property")}
         comps[ref] = {"value": find(c, "value")[0][1], "footprint": fp[0][1] if fp else "",
-                      "path": sp + (tst[0][1] if tst else "")}
+                      "path": sp + (tst[0][1] if tst else ""),
+                      # the symbol's own "Exclude from BOM" and "Do not populate": the footprint carries both
+                      "exclude_from_bom": "exclude_from_bom" in flags, "dnp": "dnp" in flags}
     nets = []
     for n in find(find(tree, "nets")[0], "net"):
         nets.append((find(n, "name")[0][1], [(find(x, "ref")[0][1], find(x, "pin")[0][1]) for x in find(n, "node")]))
@@ -469,6 +472,11 @@ def build(bdir):
         fp.SetReference(ref)
         fp.SetValue(c["value"])
         fp.SetPath(pcbnew.KIID_PATH(c["path"]))
+        if c["exclude_from_bom"]:
+            fp.SetExcludedFromBOM(True)
+        if c["dnp"]:
+            fp.SetDNP(True)
+            fp.SetExcludedFromPosFiles(True)
         # References this long (R-KEY-SER-LH1) do not fit as silkscreen on an 0805:
         # they stay on the fabrication layer, where the assembly drawing reads them.
         fp.Reference().SetLayer(pcbnew.F_Fab)

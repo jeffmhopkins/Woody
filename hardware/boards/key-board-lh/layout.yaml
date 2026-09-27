@@ -70,17 +70,19 @@ networks:
 # its inputs H..E (pins 6..3) face the key row in the keys' own order, left to
 # right; its chain pins (SH/LD, CLK below; QH, SER above) toward the header.
 parts:
-  U-KEYS-LH:     [90.5, 44.5, 90]
-  C-DECOUPLE-165-LH: [97.0, 46.5, 90]
-  R-KEY-PU-FREE3: [84.0, 44.5, 90]
+  U-KEYS-LH:     [90.5, 43.5, 90]
+  C-DECOUPLE-165-LH: [94.3, 48.2, 180]   # across the ends of pins 16 (VCC) and 15 (GND): the loop is two stubs
+  R-KEY-PU-FREE3: [84.0, 43.5, 90]
+  # Do-not-fit reservoir on the chain's 3V3, beside J-CHAIN's 3V3 pin (C-BULK-CHAIN row)
+  C-BULK-CHAIN-LH: [67.0, 42.0, 90]
   # Bring-up test pads (TP-CHAIN), a row between the key row and the register:
   # SER, 3V3, GND, SCK, SH/LD, QH - README.md says how to use them.
-  TP-3V3-LH:     [85.0, 36.0, 0]
-  TP-GND-LH:     [88.5, 36.0, 0]
-  TP-SCK-LH:     [92.0, 36.0, 0]
-  TP-SHLD-LH:    [95.5, 36.0, 0]
-  TP-QH-LH:      [99.0, 36.0, 0]
-  TP-SER-LH:     [81.5, 36.0, 0]
+  TP-3V3-LH:     [85.0, 35.0, 0]
+  TP-GND-LH:     [88.5, 35.0, 0]
+  TP-SCK-LH:     [92.0, 35.0, 0]
+  TP-SHLD-LH:    [95.5, 35.0, 0]
+  TP-QH-LH:      [99.0, 35.0, 0]
+  TP-SER-LH:     [81.5, 35.0, 0]
 
 # The parts-side silkscreen's title block (tools/pcb.py add_silk); body coordinates.
 silk:

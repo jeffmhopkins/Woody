@@ -13,6 +13,145 @@
     (comment 4 "Register inputs must match hardware/cluster/key-marker-and-bits/allocation.yaml - tools/kicad.py check")
   )
   (lib_symbols
+    (symbol "Device:C"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0.254)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "C"
+			(at 0.635 2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "C"
+			(at 0.635 -2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 0.9652 -3.81 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "cap capacitor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "C_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "C_0_1"
+			(polyline
+				(pts
+					(xy -2.032 0.762) (xy 2.032 0.762)
+				)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -2.032 -0.762) (xy 2.032 -0.762)
+				)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "C_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 2.794)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 2.794)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
     (symbol "Connector:TestPoint"
         (pin_numbers
           (hide yes)
@@ -1412,5 +1551,40 @@
     (instances (project "key-board-lh" (path "/a2d77fad-366b-59d5-8d08-ccdc7dd94a07" (reference "TP-SER-LH") (unit 1))))
   )
   (label "CHAIN_SER_LH" (at 78.74 152.4 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid cb42e910-81cc-42fd-b598-59d4aa69e391))
+  (symbol (lib_id "Device:C") (at 93.98 152.4 0) (unit 1)
+    (in_bom no) (on_board yes) (dnp yes)
+    (uuid 24c8d0e7-4b92-466c-aa93-770cac531e74)
+    (property "Reference" "C-BULK-CHAIN-LH" (at 96.52000000000001 151.13 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "10uF DNP" (at 96.52000000000001 153.67000000000002 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 93.98 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 93.98 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-BULK-CHAIN" (at 93.98 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 93.98 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "DO NOT FIT unless the rail rings: FB-CHAIN and C-DECOUPLE-165 make an LC near 0.5 MHz, half the chain clock. Scope this board's VCC while shifting at bring-up; if it rings, fit a 10uF X5R 0805 here, whose ESR damps it (FB-CHAIN row, key-chain-loom/bom.csv)" (at 93.98 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "none" (at 93.98 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 9e9df550-6758-4d13-8d72-553df225b3c3))
+    (pin "2" (uuid af6000c3-7f4c-4f2b-9ddb-16e185629c8c))
+    (instances (project "key-board-lh" (path "/a2d77fad-366b-59d5-8d08-ccdc7dd94a07" (reference "C-BULK-CHAIN-LH") (unit 1))))
+  )
+  (symbol (lib_id "power:+3V3") (at 93.98 148.59 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 4ea9bcb9-c40d-4eec-b339-2ef6dcb2714f)
+    (property "Reference" "#PWR27" (at 93.98 154.94 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Value" "V3V3_CHAIN_LH" (at 93.98 144.78 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "" (at 93.98 148.59 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 93.98 148.59 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid ba14a443-961b-4caa-bd84-3327f683774b))
+    (instances (project "key-board-lh" (path "/a2d77fad-366b-59d5-8d08-ccdc7dd94a07" (reference "#PWR27") (unit 1))))
+  )
+  (symbol (lib_id "power:GND") (at 93.98 156.21 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 621dddfd-ccd7-46b1-83ba-132ecd78c44b)
+    (property "Reference" "#PWR28" (at 93.98 162.56 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Value" "GND_CHAIN" (at 93.98 160.02 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "" (at 93.98 156.21 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 93.98 156.21 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid b0159af8-5125-407c-8dfd-3ce1361fa049))
+    (instances (project "key-board-lh" (path "/a2d77fad-366b-59d5-8d08-ccdc7dd94a07" (reference "#PWR28") (unit 1))))
+  )
   (sheet_instances (path "/" (page "1")))
 )

@@ -4,6 +4,12 @@
 board: key-board-lh
 title: Left-hand key board (left_hand cluster, PCB-CLUSTER)
 components:
+  C-BULK-CHAIN-LH:
+    of: C-BULK-CHAIN
+    value: 10uF DNP
+    pins:
+    - 1
+    - 2
   C-DECOUPLE-165-LH:
     of: C-DECOUPLE-165
     value: 100nF
@@ -263,6 +269,7 @@ nets:
   - R-KEY-SER-LH5.2
   - SW-LH5.1
   GND_CHAIN:
+  - C-BULK-CHAIN-LH.2
   - C-DECOUPLE-165-LH.2
   - C-KEY-LH1.2
   - C-KEY-LH2.2
@@ -290,6 +297,7 @@ nets:
   U-KEYS-LH.QH_BAR:
   - U-KEYS-LH.QH_BAR
   V3V3_CHAIN_LH:
+  - C-BULK-CHAIN-LH.1
   - C-DECOUPLE-165-LH.1
   - J-CHAIN.3
   - R-KEY-PU-FREE3.1

@@ -4,6 +4,12 @@
 board: key-board-rh
 title: Right-hand key board (right_hand cluster, PCB-CLUSTER)
 components:
+  C-BULK-CHAIN-RH:
+    of: C-BULK-CHAIN
+    value: 10uF DNP
+    pins:
+    - 1
+    - 2
   C-DECOUPLE-165-RH:
     of: C-DECOUPLE-165
     value: 100nF
@@ -286,6 +292,7 @@ nets:
   - R-KEY-SER-RH6.2
   - SW-RH6.1
   GND_CHAIN:
+  - C-BULK-CHAIN-RH.2
   - C-DECOUPLE-165-RH.2
   - C-KEY-RH1.2
   - C-KEY-RH2.2
@@ -315,6 +322,7 @@ nets:
   U-KEYS-RH.QH_BAR:
   - U-KEYS-RH.QH_BAR
   V3V3_CHAIN_RH:
+  - C-BULK-CHAIN-RH.1
   - C-DECOUPLE-165-RH.1
   - J-CHAIN.3
   - R-KEY-PU-RH1.1
