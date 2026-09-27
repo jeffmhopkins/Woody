@@ -23,8 +23,11 @@ SN74HCS165 with its decoupling, its switches and a network per switch position.
 Since ADR 0017:
 
 - **`right_hand` and `left_hand` are the two key boards** (`PCB-CLUSTER`),
-  screwed to the underside of `PLATE-TOP` on M2 standoffs pressed into the
-  plate, one in each corner of a board that spans the cavity (ADR 0020). Each connects to the main board by one 1.27 mm IDC ribbon (`CBL-CHAIN`) into a through-hole right-angle header on its underside.
+  hung from `PLATE-TOP` on an M2 screw in each corner of a board that spans
+  the cavity: down through a plugged bore in the wood top and the plate,
+  then a spacer and a washer, the board, and a nut underneath (ADR 0020,
+  Amendment 2 — the owner's standard since 2026-09-27; it replaced a
+  pressed-in standoff). Each connects to the main board by one 1.27 mm IDC ribbon (`CBL-CHAIN`) into a through-hole right-angle header on its underside.
 - **`right_thumb` and `left_thumb` are on the main board** (`PCB-CARRIER`),
   their switches soldered to it and clipped into `PLATE-THUMB`, their
   registers and networks beside them.
@@ -119,8 +122,8 @@ sibling pages cite `cluster-boards.md` §3.*
 height rules below hold for the main board's thumb areas too —
 which suits it, because its parts face the other way (ADR 0017). The depth
 does not: the thumb switches' board sits at `switch.thumb_pcb_below_seat`,
-set by the main board's own standoffs, not by the key boards' standoff and
-washer (ADR 0020, amended 2026-09-27).*
+set by the main board's own standoffs, not by the key boards' spacer and
+washer (ADR 0020, Amendment 2).*
 
 **Plate, then switch, then board.** The switch clips into a 14.0 × 14.0 mm
 cutout in the aluminium plate — the same as standard MX, measured across 47
@@ -147,9 +150,11 @@ ks33-geometry.md`.
 > supersedes it wherever the two disagree `[repo] ks33-geometry.md`.
 
 **The key-board outline is the body CAD's**: a rectangle across the cavity
-with a standoff in each corner (ADR 0020 point 3), exported as
+with a screw in each corner (ADR 0020 point 3 and Amendment 2), exported as
 `mechanical/export/key-board-*.dxf` and placed from `config/body.yaml`
-`layout.*`, `boards.*` and `hardware.kb_standoff_*`. **Its switch positions are
+`layout.*`, `boards.*` (the tail ends' `boards.kb_tail_margin` is longer, so
+each corner's plug bore clears the last cap slot) and `hardware.kb_*`
+(`kb_mount_inset` puts the bores clear of the side grooves). **Its switch positions are
 provisional until M3**: `layout.lh_gaps` and `layout.lh_offsets` stand in until
 the ergonomic iteration of M2 fills `key-layout.yaml`'s `x`/`y` (all `null` on
 purpose) `[repo] key-layout.yaml, 0010`. Spacing along the key line is
@@ -169,11 +174,13 @@ than a pitch parameter.
   leaves the blade in the hole and some pin to solder is
   `switch.pcb_below_seat_window`, and the design depth is
   `switch.pcb_below_seat` (`config/body.yaml`). Subtract `plate-thickness` and
-  that is the gap — the standoff length is derived as `mechanical/drc.echo`
-  "key-board standoff length (derived)", and it is the standoff below the
-  plate **plus its washer** (`MECH-KB-WASHER`): the key boards' depth is set
-  by that hardware and checked by "key-board standoff and washer set the
-  board depth" (ADR 0020, amended 2026-09-27).
+  that is the gap, `mechanical/drc.echo` "key-board mount gap (derived)":
+  the spacer under the plate **plus the washer** (`MECH-KB-SPACER`,
+  `MECH-KB-WASHER`; `hardware.kb_spacer_l`, `kb_washer_t`). The screw's head
+  bears on the plate's top face, so the key boards' depth is the plate plus
+  that hardware, checked by "key-board mount sets the board depth"; at the
+  hardware's tolerance limits it prints a NOTE, and the first board
+  confirms the fit (ADR 0020, Amendment 2).
 
   Against a plate that is grounded, the rule that follows is a **height**
   rule: chip passives and SOT-23 may sit on the plate-facing side; **nothing
@@ -262,13 +269,15 @@ and the `LT` springs to
 [`key-switch-network/`](key-switch-network/key-switch-network.md), and the
 closed 74HC165 item to [`key-register/notes.md`](key-register/notes.md).*
 
-- **Whether the standoff clinches in the plate** (§5, ADR 0020). The part is
-  chosen — PEM MSO4-M2-3 with an M2 small washer under the board
-  (`MECH-KB-STANDOFF`, `MECH-KB-WASHER`), which together set the depth
-  (drc.echo "key-board standoff and washer set the board depth"). Whether it
-  clinches in the plate's alloy and thickness is the plate vendor's and PEM's
-  answer, at M4; ADR 0020's fallback if not. **Plate stiffening** (`plate-thickness` is settled;
-  whether it needs a rib or a backer is not) gates M4/M5 — ADR 0002.
+- **The key-board mount's placeholders** (§5, ADR 0020 Amendment 2). The
+  parts are chosen and stock (`MECH-KB-SCREW`, `MECH-KB-SPACER`,
+  `MECH-KB-WASHER`, `MECH-KB-NUT`, `MECH-KB-PLUG`); nothing is pressed into the plate any more. Open: the wood left
+  round a plug bore and the plug's depth (`hardware.kb_bore_wall`,
+  `kb_plug_min_depth`), which a scrap of the chosen wood settles at M2; and
+  the depth at the tolerance limits (drc.echo "key-board depth at the
+  hardware's tolerance limits", a NOTE), which the first board confirms.
+  **Plate stiffening** (`plate-thickness` is settled; whether it needs a rib
+  or a backer is not) gates M4/M5 — ADR 0002.
 - **Conformal coating.** `MECH-COAT` covers the main board; nothing says
   whether the key boards are coated, and they sit under an open switch contact
   in a cavity that is breathed into. Coating a soldered mechanical switch is

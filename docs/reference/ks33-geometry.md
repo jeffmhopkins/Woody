@@ -73,6 +73,17 @@ what that means for an aluminium plate.
 > 1.28 ±0.04 arm. **Overall height is NOT-IN-DOCUMENT**: neither the 12.75 mm
 > measured off the STEP nor the BOM's 12.2 mm is confirmed or refuted.
 
+> **The order code's suffix is a housing colour, not a date** (2026-09-27).
+> **-Y24 is the black-bottom-housing variant**, the part this drawing is
+> for. **-Y31 is the white-bottom-housing variant**, banked at
+> `datasheets/mechanical/GATERON-KS-33-SPEC-WHITE-HOUSING-KS-33H10B050NN-Y31.pdf`;
+> the two specs differ in item number, case colour and drawing date, and
+> -Y31's total travel is 0.2 mm longer `[banked: both specs, text diff]`.
+> `switch.total_travel` is read off -Y24, and the flush rule derives the
+> wood top's thickness from it (ADR 0009), so **ordering -Y31 would break
+> the flush rule**: a pressed key would sit below the face. Buy -Y24
+> (`SW1-n`).
+
 ## The Z stack, measured off a solid model — 2026-09-21
 
 `datasheets/mechanical/GATERON-KS-33-3D.step` is a five-body STEP solid
@@ -111,9 +122,12 @@ solder. Subtract the plate `[calc]`:
 board's underside the pins show 5.10 mm less the board-top depth less the
 board's thickness `[calc]`: at the window's middle, 3.4 mm, that is
 5.10 − 3.4 − 1.6 ≈ 0.1 mm on a 1.6 mm board and 5.10 − 3.4 − 1.2 ≈ 0.5 mm on
-a 1.2 mm one. The key boards sit at `switch.pcb_below_seat`, which their
-standoff hardware sets (ADR 0020), a little higher than the middle, so they
-show a little more pin than that. That is why the key boards are
+a 1.2 mm one. The key boards sit at `switch.pcb_below_seat`, not at the
+middle: their mount hardware sets it — the plate + `hardware.kb_spacer_l` +
+`hardware.kb_washer_t` (ADR 0020, Amendment 2). `mechanical/drc.echo`
+"key-board depth inside the switch pins' window" prints where that lands,
+and "key-board depth at the hardware's tolerance limits" (a NOTE) what the
+worst case leaves to solder. That is why the key boards are
 `boards.key_board_t` (ADR 0020 point 6), and why the main board's thickness
 under the thumb switches (`switch.pcb_t`) is still to be decided.
 

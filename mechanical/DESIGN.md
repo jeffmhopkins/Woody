@@ -33,17 +33,32 @@ drawing.
   (decided 2026-09-26, ADR 0009). The oak top's thickness is not a parameter:
   it is the cap's height above the seat less the travel, derived in the model
   and printed in `drc.echo`. The oak carries one clearance hole per cap and
-  nothing else; the fasteners stop in the plate. The two key boards are
-  screwed up to the plate's underside on M2 standoffs pressed into it (ADR
-  0020), at the depth the KS-33's pins set (`docs/reference/ks33-geometry.md`;
-  `switch.pcb_below_seat`). Each board is a rectangle across the cavity with a
-  standoff in each corner, the standoff's edge distance from every switch
-  cutout (*"key-board standoffs clear of the switch cutouts"*); the
-  standoff's length is derived (*"key-board standoff length (derived)"*),
-  and the chosen standoff plus an M2 small washer under the board set the
-  key boards' depth (*"key-board standoff and washer set the board depth"*,
-  *"key-board depth at the hardware's tolerance limits"*; ADR 0020). The
-  thumb switches' main board has its own depth, `switch.thumb_pcb_below_seat`.
+  a plugged bore at each key board's corner, and nothing else; the lid's
+  fasteners stop in the plate from below. The two key boards hang from the
+  plate on M2 screws that go DOWN through those bores (ADR 0020, Amendment 2
+  — the owner's standard since 2026-09-27, replacing a pressed-in standoff):
+  a bore through the wood top (`hardware.kb_bore_d`), the screw's head on the
+  plate's top face, the plate's clearance hole, a spacer and a washer under
+  the plate, the board, a nut underneath, and a glued face-grain plug over
+  the head (`hardware.kb_plug_glue_gap`, *"key-board plugs deep enough to
+  hold"*). Each board is a rectangle across the cavity with a screw in each
+  corner, `hardware.kb_mount_inset` in from both edges so each bore clears
+  the side grooves; the tail ends run `boards.kb_tail_margin` past the last
+  cutout so the tail bores clear the last cap slot (*"key-board plug bores
+  clear of the wood top's cuts (mouth ends)"* and *"(tail ends)"*, against
+  `hardware.kb_bore_wall`). The head bears on plate metal (*"key-board screw
+  heads bear on plate metal"*) and the spacer and washer stay off the
+  switch cutouts (*"key-board spacers and washers clear of the switch
+  cutouts"*). The plate + `hardware.kb_spacer_l` + `hardware.kb_washer_t`
+  is the key boards' depth, at the depth the KS-33's pins allow
+  (`docs/reference/ks33-geometry.md`; `switch.pcb_below_seat`): *"key-board
+  mount sets the board depth"*, and *"key-board depth at the hardware's
+  tolerance limits"*, a NOTE — the first board confirms the fit. The rest
+  of the mount: *"key-board screw: thread past the nut"*, *"key-board screw
+  ends clear of the main board's parts"*, *"key-board nuts clear of the
+  chain header"*, and the count, *"key-board mounts"*. The wood's species is
+  open (a hardwood, the owner's; ADR 0009). The thumb switches' main board
+  has its own depth, `switch.thumb_pcb_below_seat`.
   The key board's chain header's through-hole pin tails come up through the
   board toward the grounded plate and stop short of it (*"J-CHAIN pin tails
   clear of the key plate"*), so the plate is not cut over them

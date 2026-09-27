@@ -272,6 +272,24 @@ What changes, and what does not:
   checks.
 - **The playing face is unbroken oak.** The six fasteners stop in the plate
   from below, so no hole in the oak top carries one.
+  > **Amended 2026-09-27 ([ADR 0020](0020-key-boards-screw-to-the-plate.md),
+  > Amendment 2): the face now READS as unbroken wood, and is not.** The six
+  > lid fasteners still come from below. But the key boards now hang on
+  > screws that go down through bores in the wood top, one at each corner
+  > of each key board (`hardware.kb_bore_d`, `drc.echo` "key-board mounts"),
+  > each bore filled over the screw head with a glued face-grain plug of the
+  > same wood (`MECH-KB-PLUG`) — the owner's standard: "so that we can put a
+  > wooden cap on top so it looks like it's not there". The plugs are cut
+  > from the top's own stock, so the grain matches. What the playing face
+  > loses is the claim that nothing pierces it; what it keeps is that
+  > nothing shows, catches a finger, or loosens in play.
+  >
+  > **The species is open.** The owner: "we've been calling this oak, but
+  > honestly, I'll probably use a harder wood, but it really doesn't matter
+  > for the design aspect". A hardwood, the owner's choice. The part names
+  > keep "oak"; the cross-grain movement figure below and the plug and
+  > bore-wall placeholders (`hardware.kb_bore_wall`, `kb_plug_min_depth`)
+  > assume oak until the species is chosen.
 - **Superseded (2026-09-26, [ADR 0015](0015-one-mcu-no-display.md)): there is no display.** The display band is gone
   and the CAD derives a shorter mouth end. Record: **the display was on the underside** (same date), glass down, in a through-cut
   in the oak bottom — still in the display band at the mouthpiece end. Nothing
@@ -739,6 +757,17 @@ whose flatness under the switches is the whole point of it being aluminium.
 From underneath they are invisible in play and land in oak, which takes a
 counterbore for free.
 
+> **Amended 2026-09-27 (ADR 0020, Amendment 2).** This still holds for the
+> lid: its six screws come from below. It no longer means that nothing
+> screws down from the top. The **key-board** screws do, through the wood
+> top, their heads on the plate at the floor of each bore and under a
+> glued wooden plug, so the face shows no head and no hole. They hold the
+> key boards, not the lid, and the lid comes off without touching them. The
+> reasons above (a head to feel or catch, holes through the plate under the
+> switches) are what the plug and the corner positions answer: the heads
+> are covered, and the screws sit outside every switch cutout
+> ("key-board screw heads bear on plate metal").
+
 ### The two end caps, and what they are made of
 
 The ends are separate parts, not extensions of the top or the bottom.
@@ -792,6 +821,7 @@ ordering a ferrite bead and an electrolytic on one row.
 | Joint | Adhesive | Permanent? |
 |---|---|---|
 | Oak ↔ oak — spacer layers, thumb rest lip | **PVA wood glue** | Yes |
+| Wood plug ↔ its bore in the oak top, over each key-board screw (`MECH-KB-PLUG`, ADR 0020) — *added 2026-09-27* | **PVA wood glue**, wood to wood | Yes, but serviceable: drill the plug out and re-plug. Glue it last; dry-fit it through bring-up |
 | Frosted acrylic sides ↔ oak bottom — **the U** | **PVA is wrong here; use a solvent-free acrylic-to-wood structural adhesive or a mechanical fixing** | Yes — this is the one sub-assembly that stays together |
 | Aluminium key plate ↔ oak top — **the lid** | **RTV silicone**, still — see below | Yes, within the lid |
 | Lid ↔ the U, at the notch | **RTV as a gasket bead, not an adhesive.** Skinned, not fresh, so it seals without sticking | **No — six fasteners** |
@@ -822,7 +852,7 @@ fighting the wood.
 *(Thermal is the small term here, not the large one. Aluminium over 400 mm and a
 20 K swing is 0.18 mm; wood and water is three to five times that.)*
 
-**Two specifics, because both are easy to get wrong at the shop:**
+**The specifics, because each is easy to get wrong at the shop:**
 
 - **Neutral cure, not acetoxy.** The common hardware-store RTV releases acetic
   acid as it cures, and this cure is happening inside a sealed cavity holding
@@ -834,6 +864,12 @@ fighting the wood.
   them, and real time before the final closure goes on — which also keeps the
   outgassing away from the breath sensor, alongside the port-masking rule
   above.
+- **Keep the plate's beads off the key-board screw bores** *(added
+  2026-09-27, ADR 0020)*. The oak top is bored through at each key board's
+  corners (`hardware.kb_bore_d`) before the plate is bonded to it. Silicone
+  in a bore keeps the plug's PVA from holding, and PVA does not bond to
+  cured RTV. Order: bore the wood, bond the plate, fit the key boards, plug
+  last.
 
 ## Open
 

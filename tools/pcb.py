@@ -685,11 +685,11 @@ def build(bdir):
         h.Reference().SetLayer(pcbnew.F_Fab)
         px, py = to_pcb(x, y)
         place(board, h, px, py, 0, True)
-        # The standoff's end face presses on the top copper and the screw head on
-        # the bottom, and both are the plate, which is grounded through its own
-        # bond: no copper under either, or the board gets a second ground bond
-        # and every net routed there a short. A rule area on both layers, which
-        # the router also treats as an obstacle.
+        # The mount's washer presses on the top copper and its nut on the bottom,
+        # and both are on the screw that the plate grounds through its own bond:
+        # no copper under either, or the board gets a second ground bond and
+        # every net routed there a short. A rule area on both layers, which the
+        # router also treats as an obstacle.
         keepout(board, px, py, max(head, od) / 2 + lay["rules"]["clearance"])
     # everything else: layout.yaml, in body coordinates, bottom side
     for ref, (x, y, r) in {**network_parts(lay, geo), **lay["parts"]}.items():

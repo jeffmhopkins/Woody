@@ -193,8 +193,8 @@ each board (off the banked full print), and fits.
   leave downward is the standard one, without `-RN2`, and it puts 3V3 on a
   ground; every cable is metered before it is first powered.)*
 - **The key header's pin tails stop short of the plate.** They come up
-  through the key board toward the grounded plate, across the standoffs'
-  gap, and `drc.echo` "J-CHAIN pin tails clear of the key plate" checks they
+  through the key board toward the grounded plate, across the plate-to-board
+  gap (the spacer and washer's since ADR 0020's Amendment 2), and `drc.echo` "J-CHAIN pin tails clear of the key plate" checks they
   stay clear of it. *(Amended 2026-09-27, after the key board's review:
   this bullet gave the plate a window over the tails. The print's tail
   length shows they stand short of the plate, so the window is gone.)*
