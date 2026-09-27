@@ -1,0 +1,120 @@
+id,slice,line,severity,verdict,headline
+H4-9,K4,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+K1-1,K1,39,medium,NOT ADDRESSED,"K1-1 medium Every key input breaks the 74HC165's maximum input rise/fall time, by ~16× on press and ~280× on release, and no page says so"
+K1-10,K1,217,low,NOT ADDRESSED,"K1-10 low SH/LD is described as ""falling edge loads""; the load is level-sensitive, and the sample is taken at the rising edge"
+K1-11,K1,229,low,NOT ADDRESSED,"K1-11 low Bench bring-up leaves SER floating, with no test pad; the README's ""only draw is quiescent current"" does not hold with a floating CMOS input"
+K1-12,K1,242,advisory,NOT ADDRESSED,"K1-12 advisory The key board has no ESD protection, and the main-board TVS does not cover this board's QH"
+K1-13,K1,254,advisory,NOT ADDRESSED,K1-13 advisory No footprint for the damping bulk capacitor that the chain page already expects the key board may need
+K1-14,K1,267,advisory,NOT ADDRESSED,K1-14 advisory Provenance defects on the threshold and pinout citations
+K1-2,K1,69,medium,NOT ADDRESSED,"K1-2 medium The page and BOM call the RC a ""free hardware debounce"", but the switch's banked bounce is 5 ms, 42× longer than the RC's 120 µs window"
+K1-3,K1,90,medium,NOT ADDRESSED,"K1-3 medium key-release-time is restated as ""125 µs"" on its own owner page and on latency-budget.md ; the value is 119.9 µs, and the checker passes both"
+K1-4,K1,104,low,NOT ADDRESSED,"K1-4 low key-marker-and-bits.md ""Still open"" says ""the 3 reserved spare-switch positions""; there are 2"
+K1-5,K1,119,low,NOT ADDRESSED,"K1-5 low ""A mid-shift SH/LD reload passes at 11 of 31 reload points"" has no derivation and does not reproduce against allocation.yaml"
+K1-6,K1,142,low,NOT ADDRESSED,"K1-6 low The free-bit pull-up's note says each one ""costs the same static draw as a key""; it draws about 1 µA"
+K1-7,K1,154,low,NOT ADDRESSED,"K1-7 low R-KEY-SER 's stated role (""bounds injected current"") is not what it does; it limits C-KEY 's dump into the switch contact, which peaks at 3.3× the KS-33's rating"
+K1-8,K1,175,low,NOT ADDRESSED,"K1-8 low The 10 kΩ trade is priced as ""a 100 µs τ"", which is the old 10 kΩ/10 nF network; with the fitted 47 nF it is 470 µs"
+K1-9,K1,192,low,NOT ADDRESSED,"K1-9 low The pages say the network passives sit ""AT the register input, millimetres from the switch""; on the LH board they sit at the switch, up to 44 mm from the register"
+K2-1,K2,167,high,NOT ADDRESSED,"K2-1 high The rule ""an FFSD socket's cable leaves on the side away from its notch"" contradicts the banked print. With -RN2 the main-board socket's cable leaves UPWARD, and the drawn route is the one the wrong (standard) "
+K2-2,K2,249,medium,NOT ADDRESSED,"K2-2 medium The closed ribbon's modelled path, and the drc.echo figures derived from it, describe a path the -RN2 cable does not take"
+K2-3,K2,284,medium,NOT ADDRESSED,"K2-3 medium The meter check is scoped to ""the first one"", but a wrong cable goes in without any mechanical sign, so every cable needs checking before power"
+K2-4,K2,313,low,NOT ADDRESSED,"K2-4 low The FFSD length field is in inches, while the corpus gives the length in millimetres and says ""order that length or the next stock one up"""
+K2-5,K2,336,low,NOT ADDRESSED,K2-5 low No check ties the key boards' J-CHAIN pin numbers to the loom netlist's J-CHAIN-KEY- pins; they agree today only by hand
+K2-6,K2,360,low,NOT ADDRESSED,K2-6 low config/body.yaml carries two stale statements about the chain parts
+K2-7,K2,376,advisory,NOT ADDRESSED,"K2-7 advisory The header's 2×6 pad grid is symmetric under a 180° turn, so a hand-fitted J-CHAIN soldered with its mouth backward is electrically 3V3-on-ground"
+K2-8,K2,399,advisory,NOT ADDRESSED,"K2-8 advisory hardware/nets.yaml GND_CHAIN.carries gives the grounds as ""J-CHAIN pins 1/3/5/7/9"" without saying which end"
+K3-1,K3,41,medium,NOT ADDRESSED,"K3-1 medium 20 vias are centred inside SMD or test pads on the reflowed bottom side, and 5 more overlap pads; nothing prevents it"
+K3-10,K3,290,advisory,NOT ADDRESSED,K3-10 advisory PTH and NPTH share one drill file
+K3-11,K3,304,low,NOT ADDRESSED,"K3-11 low layout.yaml restates JLC's track/space as 0.127 mm "" from memory ""; the page banked two lines below says 0.10/0.10"
+K3-12,K3,315,advisory,NOT ADDRESSED,"K3-12 advisory ADR 0020's ""the PCB carries the ribbon's run as a rule area"" is not on the board"
+K3-13,K3,331,advisory,NOT ADDRESSED,K3-13 advisory The register's only label is printed under its own body
+K3-2,K3,84,medium,NOT ADDRESSED,"K3-2 medium layout.yaml fab: is not what gates the board. Two limits are unchecked, and the rest only warn, which the gate ignores"
+K3-3,K3,122,low,NOT ADDRESSED,"K3-3 low The silkscreen breaks JLC's legend limits: 0.12 mm and 0.1 mm lines, and silk 0.128 mm and 0.14 mm from pad openings"
+K3-4,K3,151,low,NOT ADDRESSED,"K3-4 low J-CHAIN : a 0.65 mm finished hole for a 0.41 mm square tail leaves 0.07 mm over the diagonal nominally, and none at JLC's worst-case tolerance"
+K3-5,K3,172,low,NOT ADDRESSED,"K3-5 low KS-33: a 1.2 mm round hole for a 0.45 × 1.00 mm blade leaves 0.02 mm at worst case, and the banked vendor drawing contradicts itself on the pattern"
+K3-6,K3,203,low,NOT ADDRESSED,"K3-6 low The router's output is left on its 0.2 mm grid: 449 unmerged collinear fragments, 4 acute junctions, and 180 mm of ground tracks that layout.yaml says are not there"
+K3-7,K3,233,low,NOT ADDRESSED,"K3-7 low The key-network pad order forces the KEY_LHn node across neighbouring pads, which is where most signal vias come from"
+K3-8,K3,251,advisory,NOT ADDRESSED,"K3-8 advisory The decoupling loop closes through the F.Cu plane, 12.9 mm between the capacitor's ground via and pin 8's"
+K3-9,K3,276,low,NOT ADDRESSED,"K3-9 low The Gerber job file says ""Revision"": ""rev?"" ; the board has no title block, and the stackup has no copper weight or mask colour"
+K4-1,K4,35,medium,NOT ADDRESSED,"K4-1 medium The README says JLC applies its own rotation corrections, citing a guide that attributes them to a plugin this flow does not use"
+K4-2,K4,66,low,NOT ADDRESSED,K4-2 low MECH-KB-STANDOFF names a PEM class with no M2 member
+K4-3,K4,93,low,NOT ADDRESSED,"K4-3 low Three of the five bought part numbers have no banked datasheet, and the 74HC165's pin source cites a vendor the board does not buy"
+K4-4,K4,121,low,NOT ADDRESSED,"K4-4 low The README restates the sheets' part numbers, and already spells one differently"
+K4-5,K4,140,low,NOT ADDRESSED,"K4-5 low The switches' ""MPN"" in the hand list is prose, not a part number"
+K4-6,K4,158,low,NOT ADDRESSED,K4-6 low The ordering section is not quite enough to place an order
+K4-7,K4,188,advisory,NOT ADDRESSED,"K4-7 advisory SW1-n 's ""placed exactly to BOM qty"" is a coincidence of two different 2s"
+K4-8,K4,210,advisory,NOT ADDRESSED,K4-8 advisory J-CHAIN's 0.65 mm drill against a 0.41 mm square tail leaves no margin at JLC's lower hole tolerance
+K4-9,K4,224,advisory,NOT ADDRESSED,K4-9 advisory The U-KEYS row does not carry the fact that makes the vendor matter at 3.3 V
+K5-1,K5,57,high,NOT ADDRESSED,"K5-1 high The FFSD cable leaves the main board's socket upward, not downward: the modelled hairpin and the rule written in four places misread the print"
+K5-10,K5,227,low,NOT ADDRESSED,"K5-10 low Two definitions of where a key board ends: kspan() / board_lead use cluster_margin 4, the board itself uses kb_end_margin 6"
+K5-11,K5,242,low,NOT ADDRESSED,"K5-11 low ADR 0020 point 3 and the model's comment say the PCB carries a rule area where the ribbon runs; it does not, and no longer needs one"
+K5-12,K5,252,advisory,NOT ADDRESSED,"K5-12 advisory body.yaml says the Samtec full prints are ""not (403)""; both are banked"
+K5-13,K5,260,advisory,NOT ADDRESSED,"K5-13 advisory boards.cluster_smt_h cites the SOIC-16 height ""from memory""; the banked Nexperia datasheet gives it"
+K5-14,K5,275,advisory,NOT ADDRESSED,"K5-14 advisory chain_plug_proud decides whether the cable clears the shroud at all, not just the fold"
+K5-15,K5,287,advisory,NOT ADDRESSED,"K5-15 advisory The board README says the outline DXF has ""four M2 holes""; it has only the outline"
+K5-16,K5,295,advisory,NOT ADDRESSED,K5-16 advisory J-CHAIN's 0.65 mm drills for 0.41 mm square tails
+K5-2,K5,100,medium,NOT ADDRESSED,"K5-2 medium ""Order this length"": the FFSD length is overall, outer face to outer face, in inches, ±0.125″ — ordering 86.27 mm leaves up to ~9 mm less free cable than the path needs"
+K5-3,K5,117,medium,NOT ADDRESSED,"K5-3 medium The service position puts the body flat on its bottom face, and the U-bolt stops it: the key plug ends up 11–23 mm lower relative to the main plug than the length assumes"
+K5-4,K5,134,low,NOT ADDRESSED,K5-4 low The plate window over J-CHAIN's tails is not needed: the tails stand ~0.95 mm above the board top under a 2.2 mm gap
+K5-5,K5,156,medium,NOT ADDRESSED,"K5-5 medium The standoff hole sits 1.3 mm from LH4's cutout, the build's precision feature; ""key-board standoffs in the plate's web"" passes on a drawing convention, not on the clinch vendor's edge distance"
+K5-6,K5,176,low,NOT ADDRESSED,"K5-6 low ""Buy standoffs this long: 2.2"" states a point where the pins allow a window of 2.0–2.4; and pcb-geometry.echo's standoff line puts a different 2.2 first"
+K5-7,K5,192,low,NOT ADDRESSED,K5-7 low MECH-KB-SCREW's length rule covers only a blind standoff; with a through standoff (which the row allows) a screw over 4.6 mm lifts the oak top
+K5-8,K5,202,low,NOT ADDRESSED,"K5-8 low clash-allow.yaml still says the switch pins and pole stand ""0.75 mm proud of the cluster board"" — that is the 1.6 mm board's figure"
+K5-9,K5,214,low,NOT ADDRESSED,"K5-9 low switch.pcb_t (1.6, ""settled"") cites PCB-CLUSTER at 1.6, which is now 1.2; at 1.6 the thumb switches get the same 0.1 mm of pin that ADR 0020 moved the key boards off"
+K6-1,K6,27,high,NOT ADDRESSED,"K6-1 high The board README presents the board as ready to order, but the switch positions it is built around are provisional until M2/M3, and no page says so"
+K6-10,K6,116,low,NOT ADDRESSED,"K6-10 low layout.yaml comments: one garbled placement sentence, and a dated history line in a data file"
+K6-11,K6,123,low,NOT ADDRESSED,K6-11 low The README's rebuild sequence leaves out the sheet renders and the prerequisites
+K6-12,K6,130,low,NOT ADDRESSED,"K6-12 low Stale comments in the corpus still describe retired designs (standoffs between switches, full prints unbanked, flat flex)"
+K6-13,K6,139,low,NOT ADDRESSED,"K6-13 low tooling.md still reads as two pipelines, and one ""finding"" states a retired key in the present tense"
+K6-14,K6,149,low,NOT ADDRESSED,"K6-14 low The ""Where the sheets are"" table in tooling.md §4 labels the PNG renders as ""source"""
+K6-15,K6,155,low,NOT ADDRESSED,"K6-15 low The tooling.md note on 3D models miscounts them, and the manual install it describes is not in setup-env.sh"
+K6-16,K6,161,low,NOT ADDRESSED,"K6-16 low cluster-boards.md §5 restates KS-33 geometry, including a centre-pole tip that body.yaml has superseded"
+K6-17,K6,167,low,NOT ADDRESSED,K6-17 low The README and the loom page restate key-scan-current instead of citing it
+K6-18,K6,175,low,NOT ADDRESSED,"K6-18 low key-switch-network.md cites a Toshiba datasheet filename that is not banked, and names the wrong peer for the switch"
+K6-19,K6,182,low,NOT ADDRESSED,"K6-19 low Two of the three migrated circuit pages still send the reader to netlist.yaml as if it were the thing to edit, and neither links its sheet"
+K6-2,K6,39,medium,NOT ADDRESSED,"K6-2 medium cluster-boards.md §5 says the key-board outline ""cannot be drawn yet"" and will be generated from key-layout.yaml . It is drawn, and it comes from body.yaml ."
+K6-20,K6,188,low,NOT ADDRESSED,"K6-20 low ADR 0019 counts the key network as ""six times on one board and nineteen in all"". The network is built 21 times."
+K6-21,K6,194,low,NOT ADDRESSED,"K6-21 low mechanical/DESIGN.md : ""outlines are M3/M4 outputs"" contradicts ADR 0020, and the plate window is attributed to a rule that does not check it"
+K6-22,K6,202,low,NOT ADDRESSED,K6-22 low The README's Open table leaves out an open item that bears on ordering and assembly
+K6-23,K6,207,advisory,NOT ADDRESSED,K6-23 advisory The README lacks several things the next board will need as a template
+K6-24,K6,219,advisory,NOT ADDRESSED,K6-24 advisory The ADR index and its format rule do not match how 0017 and 0020 were changed
+K6-25,K6,227,advisory,NOT ADDRESSED,"K6-25 advisory key-marker-and-bits.md still says the pattern is ""proposed"" and that errors show on ""the display"""
+K6-26,K6,232,advisory,NOT ADDRESSED,"K6-26 advisory ADR 0020 point 4 says ""reaches the steel"". The plate is aluminium."
+K6-27,K6,238,low,NOT ADDRESSED,"K6-27 low The README's ""JLC Basic"" claim has no provenance"
+K6-3,K6,51,medium,NOT ADDRESSED,"K6-3 medium cluster-boards.md ""Still open"" contradicts its own §5, the register and ADR 0020"
+K6-4,K6,61,medium,NOT ADDRESSED,"K6-4 medium cluster-boards.md totals: ""63 network passives"" is the pre-24-pull-up count. The table above it sums to 66."
+K6-5,K6,68,medium,NOT ADDRESSED,"K6-5 medium key-marker-and-bits.md ""Still open"" counts three reserved spare-switch positions. There are two."
+K6-6,K6,76,medium,NOT ADDRESSED,"K6-6 medium ADR 0020 and tooling.md §4 say the PCB carries the ribbon/header no-parts strip as a rule area. It does not, and the body CAD no longer exports one."
+K6-7,K6,86,medium,NOT ADDRESSED,"K6-7 medium The README says DRC checks the board against layout.yaml fab: . DRC reads a copy written into the project at first layout, and nothing compares the two."
+K6-8,K6,97,medium,NOT ADDRESSED,"K6-8 medium Who owns the part number (sheet Manufacturer / MPN / LCSC / Assembly / Footprint ) is stated only in the board README. ADR 0019, CLAUDE.md and tooling.md §3 still list four fields."
+K6-9,K6,110,low,NOT ADDRESSED,"K6-9 low layout.yaml gives JLC's minimum track as ""0.127 mm from memory "". The banked page, cited ten lines lower, says 0.10 mm."
+K7-1,K7,82,high,NOT ADDRESSED,K7-1 high Nothing checks the key board's J-CHAIN pinout against the ribbon's netlist. A swapped chain pin passes every gate once the PCB is re-laid
+K7-10,K7,201,low,NOT ADDRESSED,"K7-10 low tools/setup-env.sh does not install the 3D models the renders need. On a fresh machine pcb.py render silently drops every part body, and the ledger accepts it"
+K7-11,K7,216,low,NOT ADDRESSED,"K7-11 low pcb.py layout exits 0 when a net fails to route, after overwriting the source board"
+K7-12,K7,226,low,NOT ADDRESSED,"K7-12 low pcb.py check crashes instead of reporting when a checked footprint is missing, and the DRC report is lost with it. layout / check on a board without layout.yaml also crash with tracebacks"
+K7-13,K7,238,advisory,NOT ADDRESSED,"K7-13 advisory Re-layout reproduces the geometry exactly, but no file byte for byte, and nothing in tools/ can say ""same board"""
+K7-14,K7,253,advisory,NOT ADDRESSED,"K7-14 advisory None of the PCB checks is in the commit gate, and after layout the board's design rules are checked against nothing"
+K7-15,K7,266,advisory,NOT ADDRESSED,K7-15 advisory The documented full CAD rebuild did not complete within the documented timeout 590
+K7-16,K7,277,low,NOT ADDRESSED,"K7-16 low The board README's ""Rebuild and check"" does not rebuild what a sheet edit makes stale"
+K7-2,K7,94,high,NOT ADDRESSED,"K7-2 high Board thickness is taken from the body CAD once, at layout, and never checked again. A CAD change to boards.key_board_t leaves a 1.2 mm Gerber job under an all-green gate"
+K7-3,K7,115,medium,NOT ADDRESSED,"K7-3 medium Assembly = none on a real part drops it from both the JLC BOM and the hand-assembly list, and every check passes"
+K7-4,K7,127,medium,NOT ADDRESSED,"K7-4 medium kicad.py check 's remedy for a stale PCB render or fab/ file names the wrong tool, and for fab/ a directory that makes it crash"
+K7-5,K7,139,medium,NOT ADDRESSED,"K7-5 medium The ""no silkscreen label off the board"" guarantee exists only inside layout , and only for the text's anchor. The checks let an off-board label through"
+K7-6,K7,155,medium,NOT ADDRESSED,"K7-6 medium Stray files in fab/ are invisible to every check, and the README says to upload every .gbr in it"
+K7-7,K7,166,low,NOT ADDRESSED,K7-7 low A refused pcb.py render has already destroyed fab/ and rewritten the renders
+K7-8,K7,178,low,NOT ADDRESSED,K7-8 low pcb.py check checks each switch's position but not its rotation
+K7-9,K7,188,low,NOT ADDRESSED,"K7-9 low The ""ribbon's no-parts strip"" is still documented as coming from pcb-geometry.echo , but the body CAD stopped emitting it, and pcb.py silently does without"
+K8-1,K8,59,medium,NOT ADDRESSED,"K8-1 medium ADR 0017's ""why IDC was rejected"" rebuttal cites a gap derivation that the hairpin fix broke; followed today it computes 15.5 mm, not the real 17.4 mm"
+K8-10,K8,288,low,NOT ADDRESSED,"K8-10 low The JLC via rule is explained with the PTH ring figure, and layout.yaml still gives JLC's track/space from memory beside the banked page that contradicts it"
+K8-11,K8,319,advisory,NOT ADDRESSED,"K8-11 advisory boards.chain_plug_proud (1.4) is ""scaled"" off prints that say DO NOT SCALE DRAWING"
+K8-12,K8,338,advisory,NOT ADDRESSED,"K8-12 advisory chain-connectors (4) is restated as ""all four positions"" in the row that says not to restate it, and in today's ADR text"
+K8-13,K8,354,advisory,NOT ADDRESSED,K8-13 advisory Smaller stale edges
+K8-2,K8,97,medium,NOT ADDRESSED,"K8-2 medium config/body.yaml 's comment on the key-board standoffs still describes the retired placement (""between each pair of neighbouring switches"")"
+K8-3,K8,117,medium,NOT ADDRESSED,"K8-3 medium ADR 0020 point 5 still says the board ""stayed the same size"" and that J-CHAIN ""sits at the board's end""; the amendment note in the same point corrects neither"
+K8-4,K8,140,low,NOT ADDRESSED,"K8-4 low switch.pcb_t still cites PCB-CLUSTER as 1.6 mm and is marked settled , although the key boards are 1.2 mm and ADR 0020 leaves the main board's thickness open"
+K8-5,K8,160,low,NOT ADDRESSED,"K8-5 low tooling.md counts ""the four 3D models this board needs""; since J-CHAIN became the model-less Samtec footprint it is three"
+K8-6,K8,178,low,NOT ADDRESSED,K8-6 low hardware/lib/README.md still says the J-CHAIN footprint's shroud comes from the catalogue page; the footprint and the Changed column say the full print
+K8-7,K8,202,low,NOT ADDRESSED,"K8-7 low repo-maintenance.md describes fab/ as Gerbers, drill and placement, ledgered against the .kicad_pcb ; since d46a3b0 it also holds the JLC BOM, CPL and hand list, and every file is ledgered against the sheets too"
+K8-8,K8,222,low,NOT ADDRESSED,K8-8 low Three ADR lines edited today to date the IDC change still call the Matrix ribbon 20-way (24-way since ADR 0018)
+K8-9,K8,250,medium,NOT ADDRESSED,K8-9 medium No forbidden pattern was added for any value retired today; the key-board pin map changed twice in a day and is restated in ten files with no register entry
+M2-3,K4,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+M2-5,K4,,,NOT ADDRESSED,CITED ONLY - introduced in no report
