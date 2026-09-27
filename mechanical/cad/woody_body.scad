@@ -854,9 +854,23 @@ chain_ribbon_cls = ["left_hand", "right_hand"];
 ribbon_cls = chain_ribbon_cls;
 // Across the body: the header's length along y, in from the far edge of both boards.
 chain_y = W / 2 + far_s * (W / 2 - u_y0 - boards_board_clear - 0.5 - boards_chain_hdr_l / 2);
-chain_zk = top_z - boards_chain_hdr_h / 2;       // the key board's plug, its centre
-chain_zm = cb_top + boards_chain_hdr_h / 2;      // the main board's
-chain_r = (chain_zk - chain_zm) / 2;             // the fold's radius
+chain_zk = top_z - boards_chain_hdr_mouth_z;     // the key board's plug, its centre
+chain_zm = cb_top + boards_chain_hdr_mouth_z;    // the main board's
+// THE CABLE LEAVES EACH SOCKET DOWNWARD, down the socket's back face: an FFSD
+// socket's cable exits on the side away from its key (datasheets/connectors/
+// SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf, sheet 1), the main board's socket is
+// keyed up, and the key board's has its notch reversed (-RN2) so it is keyed
+// up too. That reversed notch is also what makes key-board pin = 13 - main-
+// board pin, with the ribbon flat and untwisted (key-chain-loom.md). So the
+// main board's leg lies on the main board, the key board's hangs just under
+// its socket, and both run the same way to the fold.
+// The main board's leg clears the thumb switches' centre poles, which stand
+// proud of the main board by the pole's reach less the board's depth under
+// the seat, plus a drawing-convention 0.3.
+chain_thumb_stub = switch_pole_tip_below_seat - (switch_pcb_below_seat + switch_pcb_t) + 0.3;
+chain_z_low = cb_top + chain_thumb_stub + routing_chain_ribbon_t / 2;
+chain_z_up = chain_zk - boards_chain_plug_t / 2 - 1.5;
+chain_r = (chain_z_up - chain_z_low) / 2;        // the fold's radius
 function chain_dir(cl) = routing_chain_fold[search([cl], chain_ribbon_cls)[0]];
 // A header's footprint, from its mouth at x: [x0, x1] along the body - pins,
 // body, and the plug standing out of the mouth.
@@ -894,15 +908,18 @@ chain_side_top = z_side1 + 1;
 chain_ks = [far_s > 0 ? 2 * W - chain_y : -chain_y, T - chain_zk];
 chain_len = (chain_side_top - chain_zm) + abs((far_s > 0 ? W : 0) - chain_y) + (chain_side_top - chain_ks[1])
             + abs(chain_ks[0] - (far_s > 0 ? W : 0)) + routing_chain_slack;
-// Closed: two legs and the fold.
-chain_leg = (chain_len - PI * chain_r) / 2;
+// Closed: the two drops down the sockets' backs, two legs and the fold.
+chain_drops = (chain_zm - boards_chain_plug_t / 2 - chain_z_low) + (chain_zk - boards_chain_plug_t / 2 - chain_z_up);
+chain_leg = (chain_len - chain_drops - PI * chain_r) / 2;
 function chain_exit(cl) = chain_x(cl) + chain_dir(cl) * boards_chain_plug_proud;
 // The hairpin's extent along the body, for the parts it must clear.
 function chain_hairpin_at(x, d) = let(a = x + d * boards_chain_plug_proud, b = a + d * (chain_leg + chain_r + routing_chain_ribbon_t)) [min(a, b), max(a, b)];
 function chain_hairpin(cl) = chain_hairpin_at(chain_x(cl), chain_dir(cl));
-function chain_path(cl) = let(xe = chain_exit(cl), dr = chain_dir(cl), zk = chain_zk + e_kb, zm = chain_zm + e_mb,
-                              r = (zk - zm) / 2, zc = (zk + zm) / 2, xf = xe + dr * chain_leg)
-    concat([[xe, zm]], [for (a = [-90 : 10 : 90]) [xf + dr * r * cos(a), zc + r * sin(a)]], [[xe, zk]]);
+function chain_path(cl) = let(xe = chain_exit(cl), dr = chain_dir(cl), zl = chain_z_low + e_mb, zu = chain_z_up + e_kb,
+                              r = (zu - zl) / 2, zc = (zu + zl) / 2, xf = xe + dr * chain_leg)
+    concat([[xe, chain_zm + e_mb - boards_chain_plug_t / 2], [xe + dr * 0.8, zl]],
+           [for (a = [-90 : 10 : 90]) [xf + dr * r * cos(a), zc + r * sin(a)]],
+           [[xe + dr * 0.6, zu], [xe, zu + 0.6], [xe, chain_zk + e_kb - boards_chain_plug_t / 2]]);
 function path_len(p) = sum([for (i = [0 : len(p) - 2]) norm(p[i + 1] - p[i])]);
 module chain_header(cl, z0, up) {
     x = chain_x(cl); d = chain_dir(cl);
@@ -912,8 +929,9 @@ module chain_header(cl, z0, up) {
 }
 module chain_plug(cl, zc) {
     x = chain_x(cl); d = chain_dir(cl);
-    translate([d > 0 ? x - (boards_chain_hdr_d - 1) : x - boards_chain_plug_proud, chain_y - boards_chain_plug_l / 2, zc - boards_chain_plug_t / 2])
-        cube([boards_chain_hdr_d - 1 + boards_chain_plug_proud, boards_chain_plug_l, boards_chain_plug_t]);
+    // the socket, its back standing chain_plug_proud out of the mouth
+    translate([d > 0 ? x + boards_chain_plug_proud - boards_chain_plug_h : x - boards_chain_plug_proud, chain_y - boards_chain_plug_l / 2, zc - boards_chain_plug_t / 2])
+        cube([boards_chain_plug_h, boards_chain_plug_l, boards_chain_plug_t]);
 }
 module ribbons_3d() {
     for (cl = chain_ribbon_cls) let(p = chain_path(cl)) {
@@ -1301,7 +1319,7 @@ module drc_report() {
     // plug in with the lid laid beside the body; closed, a flat hairpin.
     drc(undef, "key-chain ribbon length (derived)", chain_len,
         "mm between the plugs: the lid laid face down beside the body, the ribbon over the far side's top edge, plus routing.chain_slack - order this length or the next one up");
-    drc(undef, "key-chain ribbon closed: hairpin leg and fold radius", [chain_leg, chain_r], "mm; the legs lie flat along the body, one at each plug's height");
+    drc(undef, "key-chain ribbon closed: hairpin leg and fold radius", [chain_leg, chain_r], "mm; the legs lie flat along the body - the main board's on it, the key board's just under its socket");
     for (cl = chain_ribbon_cls) let(h = chain_hairpin(cl), r = kb_rect(cl))
         drc(h[0] >= x_in0 + boards_board_clear && h[1] <= x_in1 - boards_board_clear, str("key-chain ribbon hairpin inside the body (", cl, ")"), h, "mm along the body");
 

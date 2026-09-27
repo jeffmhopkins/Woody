@@ -107,6 +107,10 @@ one big long board?")
 
 ## Amendment, 2026-09-27 — the key chain goes to through-hole IDC
 
+*Corrected the same day against the banked full prints: the key-board pin
+map, the cable's part, the hairpin's legs and the header's height
+(`hardware/interfaces/key-chain-loom/notes.md` has what it said).*
+
 **Decided by the owner, 2026-09-27.** The key chain's connectors change from
 flat flex to through-hole IDC. The ribbon decision above stands — each key
 board still reaches the main board by one ribbon, and the lid still comes off
@@ -115,11 +119,12 @@ with nothing to line up blind — but its parts, its path and its length change:
 - **`J-CHAIN`** is a **2×6, 1.27 mm pitch, shrouded, keyed, right-angle,
   through-hole IDC header**, the same part at all four positions (stand-in
   Samtec SHF-106-01-L-D-RA,
-  `datasheets/connectors/SAMTEC-SHF-1.27MM-SHROUDED-IDC-HEADER.pdf`).
+  `datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf`).
   `chain-connectors` is unchanged.
 - **The cable is a flat IDC ribbon**, 12 conductors at 0.635 mm, with a 2×6
-  IDC socket at each end, bought as an assembled length (stand-in Samtec
-  FFSD-06-D, `datasheets/connectors/SAMTEC-FFSD-1.27MM-IDC-CABLE.pdf`). Its
+  IDC socket at each end, bought as an assembled length, **its notch
+  reversed on the key-board end** (stand-in Samtec FFSD-06-D-xx.xx-01-N-RN2,
+  `datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf`). Its
   BOM row is renamed `FFC-CHAIN` → **`CBL-CHAIN`**.
 
 **The owner's reasons:**
@@ -131,7 +136,8 @@ with nothing to line up blind — but its parts, its path and its length change:
    the LED strip, both mouths facing the same way along the body.
 3. **The ribbon lies flat, so it does not block the LED strip.** It comes out
    of both plugs and folds back on itself: closed, a flat hairpin along the
-   body, one leg at each plug's height (`mechanical/drc.echo` "key-chain
+   body, the main board's leg lying on the main board and the key board's
+   hanging just under its socket (`mechanical/drc.echo` "key-chain
    ribbon closed: hairpin leg and fold radius"; which way each folds is
    `config/body.yaml` `routing.chain_fold`).
 4. **Long enough to connect with the lid off** — "to have the top off and
@@ -146,21 +152,21 @@ with nothing to line up blind — but its parts, its path and its length change:
 rejected IDC as too tall for the gap. That was judged from memory, about
 2.54 mm parts. Measured this time from banked drawings: a 2.54 mm IDC header
 and plug stack 13.1 mm (14.6 mm worst case) `[datasheet, the banked 2.54 mm
-header and socket drawings in datasheets/connectors/]` in a 17.4 mm gap
+header and socket drawings in datasheets/connectors/]` in the gap
 between the boards `[calc: twice the fold radius in drc.echo "key-chain ribbon
 closed…" plus boards.chain_hdr_h]`, with parts on both boards, and fits
 nowhere. The 1.27 mm right-angle header stands only `boards.chain_hdr_h` off
-each board (the shroud's width, lying on its side, off the banked Samtec
-page), and fits.
+each board (off the banked full print), and fits.
 
 **Consequences.**
 
-- **The key board's pin numbers change.** Its header is the main board's
-  part mounted upside down, facing the same way, so the keyed shroud mates
-  one way and the conductor order reverses along the header: main-board pin
-  n arrives at key-board pin 12 − n for odd n and 14 − n for even n
-  `[calc]`. That assumes standard IDC numbering and is **open until the
-  part's full print confirms it** (`hardware/interfaces/key-chain-loom/`).
+- **The key board's pin numbers differ, and the cable sets them.** A keyed
+  socket always mates its position n to header pin n, so the map is how the
+  cable assembly is built. The key board's header is the main board's part
+  upside down; with the key-board socket's notch reversed (Samtec `-RN2`)
+  that socket mates rotated 180°, its ribbon leaves downward like the main
+  board's with no twist, and main-board pin n arrives at key-board pin
+  13 − n `[datasheet, both full prints]` (`hardware/interfaces/key-chain-loom/`).
 - **The key plate gets a window.** The key header's pin tails come up
   through the key board toward the grounded plate, across the standoffs'
   gap; the plate has a window cut through it over them, under the oak top

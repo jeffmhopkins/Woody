@@ -16,12 +16,25 @@ rules:
   track: 0.25
   track_min: 0.2
   clearance: 0.2
-  via: 0.6
+  via: 0.7                  # 0.2 ring on the 0.3 drill: JLC's 0.18 minimum (fab: below)
   via_drill: 0.3
-  via_min: 0.5
+  via_min: 0.66
   drill_min: 0.3
   edge_clearance: 0.3
   power_track: 0.4           # the chain's 3V3 rail
+
+# The board house's own limits, from JLCPCB's capability pages banked 2026-09-27
+# (datasheets/fab/JLCPCB-PCB-CAPABILITIES.pdf, JLCPCB-PCBA-CAPABILITIES.pdf):
+# KiCad's DRC checks the board against these as well as against rules: above.
+fab:
+  house: JLCPCB
+  hole_clearance: 0.28       # plated hole to track
+  hole_to_hole: 0.45         # between pad holes (0.2 between vias; the stricter one here)
+  annular_min: 0.18          # PTH ring, absolute minimum (0.25 recommended)
+  silk_text_min: 1.0
+  silk_line_min: 0.15
+  silk_to_pad: 0.15
+  finish: "HAL lead-free"    # at 1.2 mm, Economic assembly offers HASL only, green or black mask
 
 # The chain header, J-CHAIN (ADR 0017 amended): a 1.27 mm shrouded IDC header,
 # right-angle, placed by tools/pcb.py where the body CAD stacks it over the
@@ -39,8 +52,8 @@ standoff_footprint: "MountingHole:MountingHole_2.2mm_M2"
 # The register sits on the far side just past the chain header, turned so
 # its inputs H..E (pins 6..3) face the key row in the keys' own order, left to
 # right; its chain pins (SH/LD, CLK below; QH, SER above) toward the header.
-# Each key network is a row of three 0805s beside its own switch: LH1 and LH3
-# on the row's far side, LH2 on the near side, LH4 between LH4 and LH5, LH5
+# Each key network is a row of three 0805s beside its own switch: LH1 on the
+# row's far side, LH2 and LH3 on the near side, LH4 between LH4 and LH5, LH5
 # beside the register.
 parts:
   C-KEY-LH1:     [46.0, 34.5, 0]
@@ -49,9 +62,9 @@ parts:
   C-KEY-LH2:     [66.0, 17.5, 0]
   R-KEY-SER-LH2: [70.0, 17.5, 0]
   R-KEY-PU-LH2:  [74.0, 17.5, 0]
-  C-KEY-LH3:     [86.0, 34.5, 0]
-  R-KEY-SER-LH3: [90.0, 34.5, 0]
-  R-KEY-PU-LH3:  [94.0, 34.5, 0]
+  C-KEY-LH3:     [86.0, 17.5, 0]
+  R-KEY-SER-LH3: [90.0, 17.5, 0]
+  R-KEY-PU-LH3:  [94.0, 17.5, 0]
   C-KEY-LH4:     [102.0, 27.0, 0]
   R-KEY-SER-LH4: [106.0, 27.0, 0]
   R-KEY-PU-LH4:  [110.0, 27.0, 0]
@@ -61,6 +74,20 @@ parts:
   U-KEYS-LH:     [90.5, 44.5, 90]
   C-DECOUPLE-165-LH: [97.0, 46.5, 90]
   R-KEY-PU-FREE3: [84.0, 44.5, 90]
+  # Bring-up test pads (TP-CHAIN), a row between the key row and the register:
+  # 3V3, GND, SCK, SH/LD, QH - README.md says how to use them.
+  TP-3V3-LH:     [85.0, 37.5, 0]
+  TP-GND-LH:     [88.5, 37.5, 0]
+  TP-SCK-LH:     [92.0, 37.5, 0]
+  TP-SHLD-LH:    [95.5, 37.5, 0]
+  TP-QH-LH:      [99.0, 37.5, 0]
+
+# The parts-side silkscreen's title block (tools/pcb.py add_silk); body coordinates.
+silk:
+  at: [44.0, 12.5]
+  title: "WOODY key board LH"
+  rev: "A"
+  date: "2026-09-27"
 
 # Routing (tools/pcb_route.py): ground is a pour on both layers, not tracks;
 # the chain's 3V3 rail is the wider power track.

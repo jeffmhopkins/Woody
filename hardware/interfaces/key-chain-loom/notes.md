@@ -84,6 +84,27 @@ the board rather than SMT pads takes the cable's pull; right-angle 1.27 mm
 shrouded IDC headers, stacked one over the other; the ribbon folded flat as a
 hairpin along the body so that it never blocks the LED strip; and long enough
 to plug in with the lid off, laid beside the body. `FFC-CHAIN` became
-`CBL-CHAIN`, the key-board pin map became 12 − k / 14 − k, and the ZIF-era
-note that a ribbon "seated skewed" could bridge 3V3 to ground gave way to the
-keyed shroud.
+`CBL-CHAIN`, and the ZIF-era note that a ribbon "seated skewed" could bridge
+3V3 to ground gave way to the keyed shroud.
+
+**The key-board pin map was written wrong for part of the same day.** With
+only Samtec's catalogue pages banked, the first IDC write-up derived the key
+board's pins from the header alone `[calc]`: the same part upside down, a
+straight-through cable, standard IDC numbering — so main-board pin k was said
+to reach key-board pin 12 − k for odd k and 14 − k for even k, with the
+key-board signals "side by side in its even row", the chain-end `SER` on
+key-board pin 8, and the closed hairpin's legs "one at each plug's height".
+It was marked open until the full prints. The full prints were banked the
+same day (`SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf`, `SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf`)
+and showed the derivation asked the wrong part: a keyed socket always mates
+position k to header pin k, so the map is set by how the **cable** is built.
+An FFSD socket's cable leaves on the side away from its notch, and a
+straight cable would have left the key-board socket's ribbon rising into the
+key board. Ordered `-RN2`, notch reversed on the key-board end, that socket
+mates rotated 180°, its ribbon leaves downward like the main board's, and
+conductor k meets key-board pin 13 − k — the same map the flat-flex design
+had. The key boards' sheets were renetted to it (3V3 on pin 3, signals on
+the odd pins); the same corrections moved the header's height, mouth and
+pin-row depth in `config/body.yaml` off the print, and the hairpin became a
+main-board leg on the board and a key-board leg just under its socket.
+ADR 0017's amendment was corrected in place the same day.

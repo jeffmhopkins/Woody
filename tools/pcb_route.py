@@ -18,10 +18,11 @@ HOW IT WORKS
     has a preferred direction (top along the board, bottom across it) and a
     move against it costs extra; a turn costs by its angle, so a route is a
     few straight runs joined by 45-degree corners rather than a staircase.
-  * Then every net is ripped up and routed again with all the others in
-    place, in the same order, and the new route kept if it is cheaper: the
-    first pass routes early nets round an empty board, and they are the ones
-    that wander.
+  * Then rip-up and reroute: a net that took a real detour is ripped up with
+    the nets crossing its corridor, routed first, and the result kept only if
+    the group's total cost fell. (Rerouting a net with every other net still
+    in place cannot improve it - it faces the same obstacles or more - which
+    is what the first version of this pass did, improving nothing.)
   * Ground is routed last as an ordinary net, so no ground pin depends on a
     pour finding a way round the tracks; then both layers get a GND pour and
     every single-sided GND pad a stitching via into the other plane.
@@ -427,22 +428,32 @@ def route(board, lay):
         print(f"route: {n:20s} {'ok' if ok else 'FAILED'}")
         if not ok:
             failed.append(n)
-    # Rip up and reroute: each net again, with every other net in place. A
-    # net that now fails, or comes back dearer, gets its old route back.
-    for rnd in range(2):
+    # Rip up and reroute. A net routed early went round an emptier board; a net
+    # routed late had to go round the early ones. So for each net that took a
+    # real detour (its route much longer than its pads' span), rip up it AND the
+    # nets whose tracks cross its corridor, route it first and them after, and
+    # keep the result only if the group's total cost fell and nothing failed.
+    for rnd in range(3):
         better = 0
-        for n in order:
-            before = r.cost(n)
-            old = r.rip_up(n)
-            ok = r.route_net(n, r.pw if n in power else r.w)
-            if ok and (n in failed or r.cost(n) < before - 0.05):
+        for n in sorted(order, key=lambda n: -(r.cost(n) / max(span(n), 0.5))):
+            if n in failed or r.cost(n) <= 1.4 * span(n) + 2:
+                continue
+            gs = [g for (nn, _, g, k) in r.copper if nn == n and k == "pad"]
+            corridor = unary_union(gs).envelope.buffer(1.0)
+            blockers = sorted({nn for (nn, ls, g, k) in r.copper
+                               if k == "track" and nn not in (n, gnd) and nn in order and g.intersects(corridor)})
+            group = [n] + blockers
+            before = sum(r.cost(m) for m in group)
+            old = {m: r.rip_up(m) for m in group}
+            ok = all(r.route_net(m, r.pw if m in power else r.w) for m in group)
+            if ok and sum(r.cost(m) for m in group) < before - 0.05:
                 better += 1
-                if n in failed:
-                    failed.remove(n)
             else:
-                r.rip_up(n)
-                r.put_back(n, old)
-        print(f"route: reroute pass {rnd + 1}: {better} net(s) improved")
+                for m in group:
+                    r.rip_up(m)
+                for m in group:
+                    r.put_back(m, old[m])
+        print(f"route: rip-up round {rnd + 1}: {better} group(s) improved")
         if not better:
             break
     # Ground is wired as a net too, after everything else, so no ground pin

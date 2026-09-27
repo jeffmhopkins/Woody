@@ -30,8 +30,8 @@ of their eight register bits are switches, markers or free. The device, the
 decoupling, the network and the chain wiring are identical, and they should be
 laid out from one schematic with a variant table. **The two key boards are
 identical in the chain** — one connector each, `SER` in on conductor 6 and `QH` out
-on conductor 8 (key-board `J-CHAIN` pins 8 and 6; conductor k is key-board
-pin 12 − k for odd k and 14 − k for even k, `key-chain-loom.md`) — so they differ only in switch count and strapping.
+on conductor 8 (key-board `J-CHAIN` pins 7 and 5; conductor k is key-board
+pin 13 − k, set by the cable, `key-chain-loom.md`) — so they differ only in switch count and strapping.
 
 **The two key boards are KiCad projects** placing these circuits' sheets, which are
 the source of truth (ADR 0019):

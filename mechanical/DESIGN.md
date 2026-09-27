@@ -256,8 +256,10 @@ only as good as those envelopes. Group the report's lines by these causes
    body — both in the far band beside the LED strip and **both mouths facing
    the same way along the body**, clear of the switch pins above and below.
    The ribbon comes out of both plugs and **folds back on itself: closed, it
-   is a flat hairpin lying along the body**, legs horizontal, one at each
-   plug's height, so it never stands across the LED strip's light
+   is a flat hairpin lying along the body**: both sockets' cables leave
+   downward, the main board's leg lies on the main board and the key board's
+   hangs just under its socket, both running the same way to the fold, so it
+   never stands across the LED strip's light
    (`renders/section-ribbon.png`; *"key-chain ribbon closed: hairpin leg and
    fold radius"*, *"key-chain ribbon hairpin inside the body"*). The left
    hand's hairpin folds toward the tail and the right hand's toward the mouth
@@ -272,8 +274,10 @@ only as good as those envelopes. Group the report's lines by these causes
 2. **The hardware pages follow**: `hardware/interfaces/key-chain-loom/`
    describes the two ribbons (`J-CHAIN`, `CBL-CHAIN`) and the thumb chain in
    traces, and `chain-connectors` is derived from them. The key-board header
-   is the main board's part mounted upside down, facing the same way, so its
-   pin numbers do not match the main board's — `key-chain-loom.md` says how.
+   is the main board's part mounted upside down, facing the same way, and the
+   cable's key-board socket has its notch reversed so its ribbon leaves
+   downward too; that makes the key board's pin numbers differ from the main
+   board's — `key-chain-loom.md` says how.
 3. **The breath tube** is short: mouth cap, trap, then across over the strip
    and back onto the sensor's port, all in the mouth band; the board has a
    slot in front of the sensor's lower port.

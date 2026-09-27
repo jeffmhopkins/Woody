@@ -103,7 +103,8 @@ def kicad_netlist(sch):
             for f in find(fs, "field"):
                 if len(f) > 2:
                     fields[find(f, "name")[0][1]] = f[2]
-        comps[ref] = {"value": find(c, "value")[0][1], "fields": fields}
+        fp = find(c, "footprint")
+        comps[ref] = {"value": find(c, "value")[0][1], "fields": fields, "footprint": fp[0][1] if fp else ""}
     nets = []
     for n in find(find(tree, "nets")[0], "net"):
         nodes = [(find(x, "ref")[0][1], find(x, "pin")[0][1]) for x in find(n, "node")]

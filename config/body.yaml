@@ -345,25 +345,35 @@ boards:
     source: "SHF header length A = pins per row x 1.27 + 6.35, 6 per row [datasheets/connectors/SAMTEC-SHF-1.27MM-SHROUDED-IDC-HEADER.pdf]"
     decided_by: "M4, with J-CHAIN's part and its full print"
   chain_hdr_h:
-    value: 5.85
-    status: tbd
-    source: "the right-angle header's height off the board: the shroud's width across its rows, 5.85 on the same page, lying on its side [calc from the banked page; the -RA view is not dimensioned legibly]"
+    value: 5.59
+    status: nominal
+    source: "the right-angle header's height off the board, .220 REF, standing on 0.51 ribs [datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf, sheet 1 fig 1]"
     decided_by: "M4, with the full print"
   chain_hdr_d:
     value: 5.33
-    status: tbd
-    source: "the right-angle shroud's depth, mouth to back: the vertical shroud's height, 5.33 on the same page [calc; the -RA view is not dimensioned legibly]"
+    status: nominal
+    source: "the right-angle shroud's depth, mouth to back, .210 REF [datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf, sheet 1]"
     decided_by: "M4, with the full print"
   chain_hdr_pin_back:
-    value: 7.1
-    status: tbd
-    source: "from the header's mouth back to its far pin row: the depth plus 1.77 for the pins' bend, as KiCad's 1.27 mm right-angle pin header draws it [calc; KiCad Connector_PinHeader_1.27mm]"
+    value: 7.86
+    status: nominal
+    source: "from the mouth back to the far (odd) pin row: the depth 5.33 plus the odd row's bend 1.26 + 1.27 behind the back face, measured at the bend (note 7) [datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf, sheet 2 section C-C; calc]"
     decided_by: "M4, with the full print"
   chain_plug_proud:
-    value: 2.44
+    value: 1.4
     status: tbd
-    source: "how far the IDC socket stands out of the header's mouth: the FFSD socket's 5.08 height less its 2.64 minimum insertion depth [calc, datasheets/connectors/SAMTEC-FFSD-1.27MM-IDC-CABLE.pdf]"
-    decided_by: "M4, with the full print"
+    source: "how far the FFSD socket stands out of the header's mouth: its 5.08 height less the header's mouth-to-floor, about 3.67, which the print does not dimension (scaled) [calc from datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf sheet 1 and datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf sheet 2]"
+    decided_by: "M4, on the first mated pair"
+  chain_hdr_mouth_z:
+    value: 3.05
+    status: nominal
+    source: "the mouth's centre above the board: the 0.51 ribs plus half the 5.08 body [calc, datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf sheet 1 fig 1]"
+    decided_by: "M4"
+  chain_plug_h:
+    value: 5.08
+    status: nominal
+    source: "the FFSD socket's height along its insertion, 5.08 +0.15/-0.08 [datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf, sheet 1 fig 1]"
+    decided_by: "M4"
   chain_plug_t:
     value: 3.05
     status: nominal

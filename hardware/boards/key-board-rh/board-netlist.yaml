@@ -170,6 +170,31 @@ components:
     pins:
     - 1
     - 2
+  TP-3V3-RH:
+    of: TP-CHAIN
+    value: test pad
+    pins:
+    - 1
+  TP-GND-RH:
+    of: TP-CHAIN
+    value: test pad
+    pins:
+    - 1
+  TP-QH-RH:
+    of: TP-CHAIN
+    value: test pad
+    pins:
+    - 1
+  TP-SCK-RH:
+    of: TP-CHAIN
+    value: test pad
+    pins:
+    - 1
+  TP-SHLD-RH:
+    of: TP-CHAIN
+    value: test pad
+    pins:
+    - 1
   U-KEYS-RH:
     of: U-KEYS
     value: 74HC165
@@ -192,16 +217,19 @@ components:
     - H
 nets:
   /CHAIN_SCK:
-  - J-CHAIN.12
+  - J-CHAIN.11
+  - TP-SCK-RH.1
   - U-KEYS-RH.CLK
   /CHAIN_SHLD:
-  - J-CHAIN.10
+  - J-CHAIN.9
+  - TP-SHLD-RH.1
   - U-KEYS-RH.SHLD
   /HOP_LT_RH:
-  - J-CHAIN.8
+  - J-CHAIN.7
   - U-KEYS-RH.SER
   /HOP_RH_RT:
-  - J-CHAIN.6
+  - J-CHAIN.5
+  - TP-QH-RH.1
   - U-KEYS-RH.QH
   /KEY_RH1:
   - C-KEY-RH1.1
@@ -259,17 +287,18 @@ nets:
   - C-KEY-RH4.2
   - C-KEY-RH5.2
   - C-KEY-RH6.2
-  - J-CHAIN.11
-  - J-CHAIN.3
-  - J-CHAIN.5
-  - J-CHAIN.7
-  - J-CHAIN.9
+  - J-CHAIN.10
+  - J-CHAIN.12
+  - J-CHAIN.4
+  - J-CHAIN.6
+  - J-CHAIN.8
   - SW-RH1.2
   - SW-RH2.2
   - SW-RH3.2
   - SW-RH4.2
   - SW-RH5.2
   - SW-RH6.2
+  - TP-GND-RH.1
   - U-KEYS-RH.B
   - U-KEYS-RH.CLKINH
   - U-KEYS-RH.GND
@@ -281,13 +310,14 @@ nets:
   - U-KEYS-RH.QH_BAR
   V3V3_CHAIN_RH:
   - C-DECOUPLE-165-RH.1
-  - J-CHAIN.4
+  - J-CHAIN.3
   - R-KEY-PU-RH1.1
   - R-KEY-PU-RH2.1
   - R-KEY-PU-RH3.1
   - R-KEY-PU-RH4.1
   - R-KEY-PU-RH5.1
   - R-KEY-PU-RH6.1
+  - TP-3V3-RH.1
   - U-KEYS-RH.A
   - U-KEYS-RH.VCC
 external_endpoints:
