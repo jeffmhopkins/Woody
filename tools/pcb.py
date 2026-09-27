@@ -57,7 +57,7 @@ def V(x, y):
 # ------------------------------------------------------------------ inputs
 
 def cad_geometry(cluster):
-    geo = {"switches": {}, "ffc": None}
+    geo = {"switches": {}, "ffc": None, "standoffs": []}
     for line in open(os.path.join(ROOT, "mechanical", "export", "pcb-geometry.echo")):
         m = re.match(r'ECHO: "PCB", "(\w+)", "(\w+)", (.*)', line)
         if not m or m.group(1) != cluster:
@@ -67,6 +67,8 @@ def cad_geometry(cluster):
             geo["switches"][rest[0]] = (float(rest[1]), float(rest[2]), float(rest[3]))
         elif kind == "ffc":
             geo["ffc"] = tuple(float(v) for v in rest[1:6])
+        elif kind == "standoff":
+            geo["standoffs"].append(tuple(float(v) for v in rest[1:6]))
         elif kind == "board":
             geo["thickness"] = float(rest[1])
     return geo
@@ -158,6 +160,26 @@ def place(board, fp, x, y, rot, bottom):
     fp.SetOrientationDegrees(rot)
 
 
+def keepout(board, px, py, r, n=32):
+    z = pcbnew.ZONE(board)
+    z.SetIsRuleArea(True)
+    layers = pcbnew.LSET()
+    layers.AddLayer(pcbnew.F_Cu)
+    layers.AddLayer(pcbnew.B_Cu)
+    z.SetLayerSet(layers)
+    z.SetDoNotAllowTracks(True)
+    z.SetDoNotAllowVias(True)
+    z.SetDoNotAllowCopperPour(True)
+    z.SetDoNotAllowPads(False)
+    z.SetDoNotAllowFootprints(False)
+    ol = z.Outline()
+    ol.NewOutline()
+    for k in range(n):
+        a = 2 * math.pi * k / n
+        ol.Append(MM(px + r * math.cos(a)), MM(py + r * math.sin(a)))
+    board.Add(z)
+
+
 def build(bdir):
     name = os.path.basename(bdir)
     lay = yaml.safe_load(open(os.path.join(bdir, "layout.yaml")))
@@ -218,6 +240,25 @@ def build(bdir):
     j = lay["connector"]
     place(board, fps["J-CHAIN"], to_pcb(fx, 0)[0], edge_y + j["origin_from_edge"], j["rot"], True)
     placed.add("J-CHAIN")
+    # the standoffs' screw holes (ADR 0020): board-only footprints, no symbol - the
+    # screw and standoff are mechanical, in hardware/unplaced.csv. On the BOTTOM,
+    # so their courtyard keeps the underside parts off the screw heads.
+    for i, (x, y, hole, head, od) in enumerate(geo["standoffs"], 1):
+        h = load_fp(lay["standoff_footprint"])
+        h.SetReference(f"H{i}")
+        h.SetValue("M2 standoff")
+        h.SetBoardOnly(True)
+        h.SetExcludedFromBOM(True)
+        h.SetExcludedFromPosFiles(True)
+        h.Reference().SetLayer(pcbnew.F_Fab)
+        px, py = to_pcb(x, y)
+        place(board, h, px, py, 0, True)
+        # The standoff's end face presses on the top copper and the screw head on
+        # the bottom, and both are the plate, which is grounded through its own
+        # bond: no copper under either, or the board gets a second ground bond
+        # and every net routed there a short. A rule area on both layers, which
+        # the router also treats as an obstacle.
+        keepout(board, px, py, max(head, od) / 2 + lay["rules"]["clearance"])
     # everything else: layout.yaml, in body coordinates, bottom side
     for ref, (x, y, r) in lay["parts"].items():
         px, py = to_pcb(x, y)
@@ -283,6 +324,12 @@ def cmd_check(bdir):
         got = (pcbnew.ToMM(fp.GetPosition().x), pcbnew.ToMM(fp.GetPosition().y))
         if math.hypot(got[0] - px, got[1] - py) > 0.05:
             bad.append(f"error: [cad] SW-{key} is at {got}, the body CAD puts it at ({px:.2f}, {py:.2f})")
+    for i, (x, y, *_) in enumerate(geo["standoffs"], 1):
+        fp = board.FindFootprintByReference(f"H{i}")
+        px, py = to_pcb(x, y)
+        got = None if fp is None else (pcbnew.ToMM(fp.GetPosition().x), pcbnew.ToMM(fp.GetPosition().y))
+        if got is None or math.hypot(got[0] - px, got[1] - py) > 0.05:
+            bad.append(f"error: [cad] standoff hole H{i} is at {got}, the body CAD puts it at ({px:.2f}, {py:.2f})")
     errs = [b for b in bad if b.startswith("error")]
     print(f"pcb: {os.path.relpath(pcb, ROOT)}: {len(errs)} error(s), {len(bad) - len(errs)} warning(s)")
     for b in bad:

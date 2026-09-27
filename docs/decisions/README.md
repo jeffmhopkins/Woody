@@ -64,4 +64,5 @@ why it was deleted is worth keeping.
 | [0017](0017-one-main-board.md) | One main board | Accepted (wiring details in 0018) |
 | [0018](0018-main-board-wiring-decisions.md) | Main board wiring: five decisions | Accepted |
 | [0019](0019-kicad-sheets-are-the-source.md) | The KiCad sheets are the source of truth | Accepted (migration in progress) |
+| [0020](0020-key-boards-screw-to-the-plate.md) | The key boards are screwed to the key plate | Accepted (standoff part open to M4) |
 | [0014](0014-lighting.md) | Lighting | Accepted (geometry amended by 0016) |

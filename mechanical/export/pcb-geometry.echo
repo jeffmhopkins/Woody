@@ -3,7 +3,9 @@ ECHO: "PCB", "left_hand", "switch", "LH2", 70, 28.5, 0
 ECHO: "PCB", "left_hand", "switch", "LH3", 90, 28.5, 0
 ECHO: "PCB", "left_hand", "switch", "LH4", 108, 19.5, 0
 ECHO: "PCB", "left_hand", "switch", "LH5", 108, 37.5, 0
-ECHO: "PCB", "left_hand", "ffc", "J-CHAIN", 70, 36.25, 0, 17, 5.5
+ECHO: "PCB", "left_hand", "ffc", "J-CHAIN", 70, 35.65, 0, 19.7, 6.7
+ECHO: "PCB", "left_hand", "standoff", "M2", 60, 28.5, 2.2, 3.8, 4
+ECHO: "PCB", "left_hand", "standoff", "M2", 80, 28.5, 2.2, 3.8, 4
 ECHO: "PCB", "left_hand", "board", "thickness", 1.6, "smt_height_max", 1.8, "side", "switches on top, parts and ribbon connector underneath"
 ECHO: "PCB", "right_hand", "switch", "RH1", 158, 28.5, 0
 ECHO: "PCB", "right_hand", "switch", "RH2", 178, 28.5, 0
@@ -11,5 +13,8 @@ ECHO: "PCB", "right_hand", "switch", "RH3", 198, 28.5, 0
 ECHO: "PCB", "right_hand", "switch", "RH4", 216, 19.5, 0
 ECHO: "PCB", "right_hand", "switch", "RH5", 216, 37.5, 0
 ECHO: "PCB", "right_hand", "switch", "RH6", 234, 19.5, 0
-ECHO: "PCB", "right_hand", "ffc", "J-CHAIN", 178, 36.25, 0, 17, 5.5
+ECHO: "PCB", "right_hand", "ffc", "J-CHAIN", 178, 35.65, 0, 19.7, 6.7
+ECHO: "PCB", "right_hand", "standoff", "M2", 168, 28.5, 2.2, 3.8, 4
+ECHO: "PCB", "right_hand", "standoff", "M2", 188, 28.5, 2.2, 3.8, 4
+ECHO: "PCB", "right_hand", "standoff", "M2", 225, 28.5, 2.2, 3.8, 4
 ECHO: "PCB", "right_hand", "board", "thickness", 1.6, "smt_height_max", 1.8, "side", "switches on top, parts and ribbon connector underneath"

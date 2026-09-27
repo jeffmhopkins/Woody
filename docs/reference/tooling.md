@@ -228,7 +228,7 @@ else.
 |---|---|
 | Netlist, footprints, references | the board's KiCad sheets (§3); a part's footprint is its sheet's `Footprint` field |
 | Board outline | `mechanical/export/key-board-lh.dxf` — the body CAD's key board |
-| Switch and ribbon-connector positions | `mechanical/export/pcb-geometry.echo` — the body CAD |
+| Switch, ribbon-connector and standoff positions | `mechanical/export/pcb-geometry.echo` — the body CAD |
 | Switch 3D model height | `config/body.yaml` `switch.pcb_below_seat` |
 | Everything else's place, and the design rules | `layout.yaml` beside the board |
 | Footprints KiCad lacks | `hardware/lib/woody.pretty/` (`hardware/lib/README.md`) |
@@ -253,7 +253,10 @@ reported by name.
 layer, vias where they fit, every other net's copper, every hole and the board
 edge inflated by the clearance. Signals first (shortest first), the power rail
 wider, ground last as a net of its own, then a ground pour on both layers and
-a stitching via beside every single-sided ground pad. **It proves nothing about
+a stitching via beside every single-sided ground pad. Ground pins the main
+ground tree cannot reach are still joined to each other, in whatever groups
+they can reach, so the pour has more copper to reach. The standoffs' copper
+keep-outs (ADR 0020) are obstacles on both layers. **It proves nothing about
 itself** — KiCad's DRC does, with schematic parity and zero unrouted
 connections. It is for simple digital boards like the key boards. **The main
 board's analog routing is done by hand** (`docs/reference/pcb-pipeline.md`).
@@ -266,7 +269,14 @@ board's analog routing is done by hand** (`docs/reference/pcb-pipeline.md`).
 - **SWIG iterators hand out copies**: `for m in fp.Models(): m.m_Offset.z = …`
   changes nothing. Index into the list.
 - **A stub that is not an obstacle becomes a short**: every piece of copper the
-  router adds, however small, must enter its obstacle list.
+  router adds, however small, must enter its obstacle list. A stub is also a
+  straight line off the grid, so it must be checked for clearance before it is
+  laid; a stitching via's stub once crossed a signal track.
+- **A pour can be cut into islands by tracks.** A ground pin inside a loop of
+  signal tracks on both layers gets no ground, and a pin at the board edge can
+  get only one thermal spoke. DRC reports both. A small move of a part usually
+  clears it: the left-hand register's place in `layout.yaml` is good to about
+  ±0.1 mm between a starved thermal at the edge and the standoff's courtyard.
 - **KiCad may write an empty global `fp-lib-table`** on first run, and then
   every footprint "is not in the configuration". `tools/setup-env.sh` replaces
   an empty one.
@@ -280,12 +290,15 @@ board's analog routing is done by hand** (`docs/reference/pcb-pipeline.md`).
 
 ### Findings the first layout made
 
-- **The ribbon connector is deeper than the body CAD assumes.** The CAD's
-  envelope is 5.5 mm deep (`boards.ffc_conn_w`, from memory); the first
-  stand-in footprint (Würth 68611214422) needed 9.9 and could not fit beside
-  the switch holes, and the one used (Molex 200528-0120) needs 6.7 — it
-  clears LH2's centre hole by about 1.2 mm. `J-CHAIN`'s part is open until
-  M4; when it is chosen, its real depth goes into `config/body.yaml`.
+- **The ribbon connector was deeper than the body CAD assumed**, and the CAD
+  now uses the footprint's size (`boards.ffc_conn_*`, ADR 0020). A first
+  stand-in footprint (Würth 68611214422) needed 9.9 mm and could not fit
+  beside the switch holes; the Molex 200528-0120 fits the board as drawn,
+  with its cable entry at the board's end. `J-CHAIN`'s exact part is still
+  open until M4.
+- **Nothing held the board.** The first layout had no mounting at all. Now
+  there are M2 standoffs in the plate where its web holds one, NPTH holes,
+  and copper keep-outs under the standoff face and the screw head (ADR 0020).
 - **The switch pins barely reach through.** The pin blades' tips are 5.10 mm
   below the seat and the PCB top is `switch.pcb_below_seat` below it, so on a
   1.6 mm board about 0.1 mm of pin shows to solder (`docs/reference/ks33-geometry.md`).

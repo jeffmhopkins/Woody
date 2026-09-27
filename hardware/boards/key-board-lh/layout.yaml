@@ -25,9 +25,15 @@ rules:
 
 # The ribbon connector, Molex 200528-0120 as the stand-in (J-CHAIN's part is
 # open until M4): turned so its cable entry faces the board's far edge, where
-# the body CAD's ribbon leaves, with its front at that edge.
+# the body CAD's ribbon leaves, with its front at that edge. Checked, not assumed:
+# its pads are on the board's inner side, its cable face at the edge.
+# The standoffs' screw holes (ADR 0020): positions from the body CAD; this is
+# only which footprint draws them. NPTH - the plate is bonded to ground by the
+# main board's MECH-GNDBOND, and a plated hole here would make a second bond.
+standoff_footprint: "MountingHole:MountingHole_2.2mm_M2"
+
 connector:
-  rot: 180
+  rot: 0                     # ON THE BOTTOM KiCad's rotation is mirrored: 0 here puts the cable face at the far edge
   origin_from_edge: 4.74     # the footprint's origin behind its front face [footprint courtyard]
 
 # One key network per switch, a row of three 0805s beside its own switch,
@@ -49,9 +55,11 @@ parts:
   C-KEY-LH5:     [104.0, 43.5, 0]
   R-KEY-SER-LH5: [108.0, 43.5, 0]
   R-KEY-PU-LH5:  [112.0, 43.5, 0]
-  U-KEYS-LH:     [79.0, 24.0, 0]
-  C-DECOUPLE-165-LH: [74.0, 27.5, 90]
-  R-KEY-PU-FREE3: [84.2, 29.0, 90]
+  # The register lies along the body between LH2's and LH3's switch pins,
+  # under the LH2-LH3 standoff; its decoupler and the free-bit pull-up beside it.
+  U-KEYS-LH:     [79.1, 22.3, 90]
+  C-DECOUPLE-165-LH: [84.8, 27.8, 0]
+  R-KEY-PU-FREE3: [74.5, 28.5, 90]
 
 # Routing (tools/pcb_route.py): ground is a pour on both layers, not tracks;
 # the chain's 3V3 rail is the wider power track.

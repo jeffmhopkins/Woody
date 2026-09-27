@@ -338,15 +338,15 @@ boards:
   # still connected. Low ZIF connectors, because a 2.54 IDC box header and
   # plug stand ~12-13 mm [from memory] in a 17 mm gap with parts both sides.
   ffc_conn_l:
-    value: 17.0
+    value: 19.7
     status: tbd
-    source: "a 12-way 1.0 mm pitch right-angle (side-entry) ZIF FFC connector, along the body [from memory]"
-    decided_by: "M4, with the part"
+    source: "Molex 200528-0120 (12-way 1.0 mm ZIF, the stand-in the first key-board layout uses): its KiCad footprint's courtyard, 19.69 along the body [KiCad Connector_FFC-FPC library]. Was 17 from memory"
+    decided_by: "M4, with J-CHAIN's part chosen"
   ffc_conn_w:
-    value: 5.5
+    value: 6.7
     status: tbd
-    source: "the same connector, across the body [from memory]"
-    decided_by: "M4, with the part"
+    source: "the same footprint's courtyard across the body, cable face to the back of its pads, 6.69 [KiCad library]. Was 5.5 from memory, which no real 12-way 1.0 mm ZIF footprint in KiCad's library meets (docs/reference/tooling.md §4)"
+    decided_by: "M4, with J-CHAIN's part chosen"
   ffc_conn_h:
     value: 2.5
     status: tbd
@@ -666,6 +666,36 @@ hardware:
     value: 2.5
     status: nominal
     source: "fastener_head_h + 0.5 below flush. Must stay at or under the oak left under the side groove (oak bottom - stack.groove_depth), so the counterbore and the groove share no depth (drc 'fastener counterbores clear of the side grooves')"
+  # THE KEY BOARDS ARE SCREWED TO THE KEY PLATE (owner, 2026-09-27, ADR 0020):
+  # an M2 self-clinching standoff pressed into the plate between each pair of
+  # neighbouring switches, and an M2 screw up through the board into it. The
+  # standoff's length is not a parameter: it is the plate-to-board gap the
+  # switch pins set (switch.pcb_below_seat less the plate), in drc.echo.
+  kb_standoff_od:
+    value: 4.0
+    status: tbd
+    source: "an M2 self-clinching (PEM-type) standoff's barrel below the plate [from memory]"
+    decided_by: "M4, with the standoff chosen with the plate vendor"
+  kb_standoff_hole:
+    value: 3.2
+    status: tbd
+    source: "the plate's mounting hole for that standoff [from memory - the vendor's install spec decides]"
+    decided_by: "M4, with the plate vendor"
+  kb_screw_hole:
+    value: 2.2
+    status: tbd
+    source: "M2 clearance through the key board [from memory, ISO 273 medium]"
+    decided_by: "M4"
+  kb_screw_head_d:
+    value: 3.8
+    status: tbd
+    source: "M2 low-head cap screw head, under the key board [from memory]"
+    decided_by: "M4, with the screw bought"
+  kb_screw_head_h:
+    value: 1.6
+    status: tbd
+    source: "the same head's height [from memory]"
+    decided_by: "M4, with the screw bought"
   fastener_inset:
     value: 4.3
     status: tbd

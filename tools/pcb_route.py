@@ -94,6 +94,11 @@ class Router:
                 self.copper.append((net, layers, g, "pad"))
                 if pad.HasHole():
                     self.holes.append(Point(TO(pad.GetPosition().x), TO(pad.GetPosition().y)).buffer(TO(pad.GetDrillSize().x) / 2))
+        # keep-outs (the standoffs' faces and screw heads): obstacles on every layer
+        for z in board.Zones():
+            if z.GetIsRuleArea() and z.GetDoNotAllowTracks():
+                ol = z.Outline().Outline(0)
+                self.holes.append(Polygon([(TO(ol.CPoint(k).x), TO(ol.CPoint(k).y)) for k in range(ol.PointCount())]))
         self.inside = self.outline.buffer(-self.edge)
 
     def cell_xy(self, i, j):
@@ -244,7 +249,7 @@ class Router:
         from shapely.geometry import LineString
         self.copper.append((net, {L}, LineString([(c.x, c.y), (x, y)]).buffer(width / 2), "track"))
 
-    def route_net(self, net, width):
+    def route_net(self, net, width, planes=False):
         pads = self.pad_cells(net)
         if len(pads) < 2:
             return True
@@ -268,13 +273,38 @@ class Router:
                         targets[(L, i, j)] = idx
             path = self.astar(tree, set(targets), grid, vgrid)
             if path is None:
-                return False
+                # the tree reaches none of the rest; a net with planes (ground)
+                # still wants every pin that can be joined, so it gets them
+                return False if not planes else (self.route_rest(net, todo, width, grid, vgrid) and False)
             idx = targets[path[-1]]
             _, ls, cells, g = todo.pop(idx)
             self.commit(net, path, width)
             self.pad_stub(net, g, path[-1][0], path[-1][1:], width)
             tree |= set(path) | {(L, i, j) for L in ls for (i, j) in cells}
         return True
+
+    def route_rest(self, net, todo, width, grid, vgrid):
+        """Join the pins the tree could not reach to each other, in the groups they
+        can reach, so each group has more copper for its stitching via and pour."""
+        while len(todo) > 1:
+            first = todo.pop(0)
+            tree = {(L, i, j) for L in first[1] for (i, j) in first[2]}
+            while todo:
+                targets = {(L, i, j): idx for idx, (_, ls, cells, _) in enumerate(todo) for L in ls for (i, j) in cells}
+                path = self.astar(tree, set(targets), grid, vgrid)
+                if path is None:
+                    break
+                _, ls, cells, g = todo.pop(targets[path[-1]])
+                self.commit(net, path, width)
+                self.pad_stub(net, g, path[-1][0], path[-1][1:], width)
+                tree |= set(path) | {(L, i, j) for L in ls for (i, j) in cells}
+        return True
+
+    def stub_clear(self, net, L, a, b):
+        """A straight stub from a to b on layer L keeps its clearance to every other net."""
+        from shapely.geometry import LineString
+        g = LineString([a, b]).buffer(self.w / 2 + self.clear)
+        return not any(n != net and L in ls and g.intersects(o) for (n, ls, o, _) in self.copper)
 
     def stitch_gnd(self, gnd):
         """Every single-layer GND pad gets a via into the other layer's plane, beside it."""
@@ -289,7 +319,8 @@ class Router:
                 for a in range(0, 360, 20):
                     x, y = c.x + r * GRID * math.cos(math.radians(a)), c.y + r * GRID * math.sin(math.radians(a))
                     i, j = round((x - self.x0) / GRID), round((y - self.y0) / GRID)
-                    if 0 <= i < self.nx and 0 <= j < self.ny and not vgrid[0][i][j] and not vgrid[1][i][j]:
+                    if 0 <= i < self.nx and 0 <= j < self.ny and not vgrid[0][i][j] and not vgrid[1][i][j] \
+                            and self.stub_clear(gnd, next(iter(ls)), (c.x, c.y), self.cell_xy(i, j)):
                         best = (i, j)
                         break
                 if best:
@@ -344,7 +375,7 @@ def route(board, lay):
     # depends on a pour finding its way round the tracks; the pours then add the
     # planes. A pin it cannot reach is left to its stitching via and the pour,
     # and the DRC says whether that was enough.
-    ok = r.route_net(gnd, r.w)
+    ok = r.route_net(gnd, r.w, planes=True)
     print(f"route: {gnd:20s} {'ok' if ok else 'partial - pours and stitching vias must finish it'}")
     vias = r.stitch_gnd(gnd)
     print(f"route: {vias} ground stitching via(s)")

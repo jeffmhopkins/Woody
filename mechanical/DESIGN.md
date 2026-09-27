@@ -33,9 +33,12 @@ drawing.
   (decided 2026-09-26, ADR 0009). The oak top's thickness is not a parameter:
   it is the cap's height above the seat less the travel, derived in the model
   and printed in `drc.echo`. The oak carries one clearance hole per cap and
-  nothing else; the fasteners stop in the plate. The top cluster boards hang
-  under the plate in the cavity, at the depth the KS-33's pins set
-  (`docs/reference/ks33-geometry.md`; `switch.pcb_below_seat`).
+  nothing else; the fasteners stop in the plate. The two key boards are
+  screwed up to the plate's underside on M2 standoffs pressed into it (ADR
+  0020), at the depth the KS-33's pins set (`docs/reference/ks33-geometry.md`;
+  `switch.pcb_below_seat`). A standoff goes between neighbouring switches only
+  where the plate's web holds one (*"key-board standoffs in the plate's web"*),
+  and its length is derived (*"key-board standoff length (derived)"*).
 - **Thumb keys are flush with the bottom face at full travel** too (same date).
   The thumb plate is on the oak bottom's inside face, so the oak bottom is
   derived by the same rule as the oak top.

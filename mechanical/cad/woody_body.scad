@@ -351,6 +351,7 @@ module plate_top_2d() {
         translate([-plate_x0, -plate_y0]) {
             for (k = top_keys) cutout_at(key_xy(k), key_rot(k), plate_cutout);
             for (f = fasteners()) translate(f) circle(d = tap_d_m3);
+            for (cl = ["left_hand", "right_hand"], s = kb_standoffs(cl)) translate(s) circle(d = hardware_kb_standoff_hole);
         }
     }
 }
@@ -629,10 +630,37 @@ module thumb_plates_3d() {
 // A key board's outline, as its PCB is cut (the PCB's Edge.Cuts come from this).
 module key_board_2d(cl) { offset(-0.5) cluster_window_2d(cluster_keys(cl)); }
 
+// THE KEY BOARDS ARE SCREWED TO THE PLATE (owner, 2026-09-27, ADR 0020): an M2
+// standoff pressed into the plate midway between each pair of neighbouring
+// switches, where the plate is a web between two cutouts, and a screw up
+// through the board. Its length is the gap the switch pins set.
+// Only where the web can hold one: where two switches are 18 mm apart (LH3 and
+// LH4, the stacked pair) the web is 4 mm and the standoff goes elsewhere or not
+// at all. The DRC below guards what is chosen.
+function rect_gap(p, c, sz, r) = let(d = [cos(-r) * (p[0] - c[0]) - sin(-r) * (p[1] - c[1]), sin(-r) * (p[0] - c[0]) + cos(-r) * (p[1] - c[1])],
+                                   e = [max(abs(d[0]) - sz[0] / 2, 0), max(abs(d[1]) - sz[1] / 2, 0)]) norm(e);
+function cutout_gap(p) = min([for (k = top_keys) rect_gap(p, key_xy(k), [plate_cutout, plate_cutout], key_rot(k))]);
+kb_web_min = 0.5;       // drawing convention: plate metal left round a standoff's barrel
+function kb_standoffs(cl) = let(ks = cluster_keys(cl))
+    [for (i = [0 : len(ks) - 2]) let(m = (key_xy(ks[i]) + key_xy(ks[i + 1])) / 2)
+        if (cutout_gap(m) - hardware_kb_standoff_od / 2 >= kb_web_min) m];
+kb_gap = switch_pcb_below_seat - plate_thickness;            // plate underside to board top
+kb_top = z_plate_top - switch_pcb_below_seat;                 // the key boards' top face
+
 module cluster_boards() {
-    for (cl = ["left_hand", "right_hand"])
-        P(C_PCB, false, str("board ", cl)) translate([0, 0, z_plate_top - switch_pcb_below_seat - switch_pcb_t + explode * 0.25])
-            linear_extrude(switch_pcb_t) key_board_2d(cl);
+    for (cl = ["left_hand", "right_hand"]) {
+        P(C_PCB, false, str("board ", cl)) translate([0, 0, kb_top - switch_pcb_t + explode * 0.25])
+            linear_extrude(switch_pcb_t) difference() {
+                key_board_2d(cl);
+                for (s = kb_standoffs(cl)) translate(s) circle(d = hardware_kb_screw_hole);
+            }
+        for (i = [0 : len(kb_standoffs(cl)) - 1]) let(s = kb_standoffs(cl)[i]) {
+            P(C_STEEL, false, str("standoff ", cl, " ", i + 1)) translate([s[0], s[1], kb_top + explode * 0.2])
+                cylinder(d = hardware_kb_standoff_od, h = kb_gap);
+            P(C_STEEL, false, str("standoff screw ", cl, " ", i + 1)) translate([s[0], s[1], kb_top - switch_pcb_t - hardware_kb_screw_head_h + explode * 0.25])
+                cylinder(d = hardware_kb_screw_head_d, h = hardware_kb_screw_head_h);
+        }
+    }
 }
 
 // WHAT A KEY BOARD'S PCB IS PLACED FROM (tools/pcb.py). Body coordinates, mm:
@@ -643,6 +671,7 @@ module pcb_geometry() {
     for (cl = ["left_hand", "right_hand"]) {
         for (k = cluster_keys(cl)) echo("PCB", cl, "switch", k[0], key_xy(k)[0], key_xy(k)[1], key_rot(k));
         echo("PCB", cl, "ffc", "J-CHAIN", kb_ffc(cl)[0], kb_ffc(cl)[1], 0, boards_ffc_conn_l, boards_ffc_conn_w);
+        for (s = kb_standoffs(cl)) echo("PCB", cl, "standoff", "M2", s[0], s[1], hardware_kb_screw_hole, hardware_kb_screw_head_d, hardware_kb_standoff_od);
         echo("PCB", cl, "board", "thickness", switch_pcb_t, "smt_height_max", boards_cluster_smt_h,
              "side", "switches on top, parts and ribbon connector underneath");
     }
@@ -976,6 +1005,8 @@ module parts_3d() {
             linear_extrude(boards_cluster_smt_h) difference() {
                 offset(-0.5) cluster_window_2d(cluster_keys(cl));
                 translate(kb_ffc(cl)) square(ffc_sz + [1, 1], center = true);
+                // no parts under a screw head: the PCB keeps the same circle clear (ADR 0020)
+                for (s = kb_standoffs(cl)) translate(s) circle(d = max(hardware_kb_screw_head_d, hardware_kb_standoff_od));
             }
     P([0.20, 0.20, 0.22], false, "Matrix underside parts") translate([matrix_xy[0] - 9.5, matrix_xy[1] - 9.5, matrix_board_z - boards_matrix_under_h])
         cube([19, 19, boards_matrix_under_h]);
@@ -1223,6 +1254,19 @@ module drc_report() {
     drc(undef, "Matrix ribbon length", path_len(mcu_path), "mm from the Matrix's edge to J-MCU, as drawn");
     rp = ffc_path(ribbon_cls[0]);
     drc(max([for (q = rp) q[1]]) <= z_lid_bot - 1, "ribbon arc clear of the lid", z_lid_bot - max([for (q = rp) q[1]]), "mm under the lid at its peak");
+
+    // THE KEY BOARDS' STANDOFFS (ADR 0020). The standoff's length is the gap the
+    // switch pins set; it sits in the plate's web between two cutouts; its screw
+    // head is on the board's underside, beside the ribbon connector.
+    echo("DRC", "INFO", "key-board standoff length (derived)", kb_gap,
+         "mm: plate underside to board top, set by switch.pcb_below_seat - buy standoffs this long");
+    web = min([for (cl = ["left_hand", "right_hand"], st = kb_standoffs(cl)) cutout_gap(st) - hardware_kb_standoff_od / 2]);
+    drc(web >= kb_web_min, "key-board standoffs in the plate's web", web, "mm from a standoff's barrel to the nearest switch cutout, worst case");
+    echo("DRC", "INFO", "key-board standoffs", [for (cl = ["left_hand", "right_hand"]) len(kb_standoffs(cl))],
+         "per board (left_hand, right_hand): one between each pair of neighbouring switches whose web holds one");
+    kb_head = min([for (cl = ["left_hand", "right_hand"], st = kb_standoffs(cl))
+                rect_gap(st, kb_ffc(cl), [boards_ffc_conn_l, boards_ffc_conn_w], 0) - hardware_kb_screw_head_d / 2]);
+    drc(kb_head >= 0.5, "key-board screw heads clear of the ribbon connector", kb_head, "mm, worst case, both on the board's underside");
     drc(undef, "ribbon arc length, and the lid tilt it allows attached", [path_len(rp), ffc_open_angle(path_len(rp))],
         "mm, and degrees the lid opens on its far edge before the ribbon is taut (3 mm slack) - beyond that, flip the ZIF latches");
 

@@ -19,8 +19,8 @@ datasheet, `TBD` means the value is not known and the row says what decides it.
 Since ADR 0017:
 
 - **`right_hand` and `left_hand` are the two key boards** (`PCB-CLUSTER`),
-  hanging from the lid under `PLATE-TOP`. Each connects to the main board by
-  one flat flex ribbon.
+  screwed to the underside of `PLATE-TOP` on M2 standoffs pressed into the
+  plate (ADR 0020). Each connects to the main board by one flat flex ribbon.
 - **`right_thumb` and `left_thumb` are on the main board** (`PCB-CARRIER`),
   their switches soldered to it and clipped into `PLATE-THUMB`, their
   registers and networks beside them.
