@@ -33,7 +33,10 @@ something.
 `check` re-exports everything into a scratch directory and compares it with
 what is committed, and recomputes each render's inputs, so a sheet edited
 without re-exporting is reported by name - the same contract as
-tools/cad.py for the body.
+tools/cad.py for the body. It also runs tools/pcb.py check on every board
+with a layout, holds each key board's J-CHAIN pins to the ribbon's netlist
+(hardware/interfaces/key-chain-loom), and fails on any render or fab/ file
+the ledger does not know - a stray Gerber is uploaded with the rest.
 
 Circuits not yet migrated keep a hand-written netlist.yaml and are untouched.
 """
@@ -104,7 +107,10 @@ def kicad_netlist(sch):
                 if len(f) > 2:
                     fields[find(f, "name")[0][1]] = f[2]
         fp = find(c, "footprint")
-        comps[ref] = {"value": find(c, "value")[0][1], "fields": fields, "footprint": fp[0][1] if fp else ""}
+        # a symbol with "Exclude from BOM" ticked (in_bom no): a test pad, a fiducial - board-only
+        in_bom = not any(find(p, "name")[0][1] == "exclude_from_bom" for p in find(c, "property"))
+        comps[ref] = {"value": find(c, "value")[0][1], "fields": fields, "footprint": fp[0][1] if fp else "",
+                      "in_bom": in_bom}
     nets = []
     for n in find(find(tree, "nets")[0], "net"):
         nodes = [(find(x, "ref")[0][1], find(x, "pin")[0][1]) for x in find(n, "node")]
@@ -444,6 +450,65 @@ def check_allocation(board_docs):
     return problems
 
 
+LOOM = os.path.join(ROOT, "hardware", "interfaces", "key-chain-loom", "netlist.yaml")
+
+
+def check_chain(board_docs):
+    """Each key board's J-CHAIN against the ribbon's other end (K7-1). The two ends are
+    recorded apart: the board's pin map in its sheet (board-netlist.yaml), the ribbon's in
+    the loom's hand-written netlist.yaml, as J-CHAIN-KEY-<LH|RH>. Pin k of the key board
+    must be on the net the loom puts J-CHAIN-KEY-<x>.k on, by name, and a pin the board
+    leaves unconnected must be a spare conductor there. The loom's own -RN2 map is held
+    to its rule too: key-board pin k shares a net with main-board pin 13 - k. A swapped
+    pin on either side is a wrong conductor, and on the rail and ground pins a short."""
+    loom = yaml.safe_load(open(LOOM))
+    lnet = {}
+    for net, nodes in loom["nets"].items():
+        for n in nodes:
+            if isinstance(n, str):
+                lnet[n] = net
+    rel = os.path.relpath(LOOM, ROOT)
+    problems = []
+    for bname, doc in board_docs:
+        if "J-CHAIN" not in doc["components"]:
+            continue
+        side = bname.rsplit("-", 1)[-1].upper()
+        key = f"J-CHAIN-KEY-{side}"
+        if key not in loom["components"]:
+            problems.append(f"chain: {bname} has a J-CHAIN but {rel} has no {key}")
+            continue
+        bnet = {}
+        for net, pins in doc["nets"].items():
+            for p in pins:
+                bnet[p] = (net.lstrip("/"), len(pins))
+        for k in range(1, 13):
+            want = lnet.get(f"{key}.{k}")
+            main = lnet.get(f"J-CHAIN-MAIN-{side}.{13 - k}")
+            if want is None or want != main:
+                problems.append(f"chain: {rel} puts {key}.{k} on {want}, but J-CHAIN-MAIN-{side}.{13 - k} "
+                                f"(the same conductor, -RN2) on {main}")
+            got, size = bnet.get(f"J-CHAIN.{k}", (None, 0))
+            if size == 1:
+                # unconnected on the board: fine only on a conductor nothing else uses
+                spare = want is not None and all(isinstance(n, str) and n.startswith("J-CHAIN-")
+                                                 for n in loom["nets"][want])
+                if not spare:
+                    problems.append(f"chain: {bname} leaves J-CHAIN.{k} unconnected; {rel} puts {key}.{k} on {want}")
+            elif got != want:
+                problems.append(f"chain: {bname} wires J-CHAIN.{k} to {got}; {rel} puts {key}.{k} "
+                                f"(main-board pin {13 - k}) on {want}")
+    return problems
+
+
+def board_outputs(d):
+    """Every generated file beside a board: renders and fab/. What the ledger must know."""
+    out = [os.path.join(d, f) for f in os.listdir(d) if f.endswith(".sch.png") or ".pcb-" in f]
+    fab = os.path.join(d, "fab")
+    if os.path.isdir(fab):
+        out += [os.path.join(fab, f) for f in os.listdir(fab)]
+    return out
+
+
 def cmd_check():
     bad = []
     board_docs = []
@@ -470,7 +535,9 @@ def cmd_check():
             if r.returncode and not any(l.strip().startswith("error") for l in r.stdout.splitlines()):
                 bad.append(f"{os.path.relpath(pcbfile, ROOT)}: pcb check failed:\n{r.stdout}{r.stderr}")
     bad += check_allocation(board_docs)
+    bad += check_chain(board_docs)
     rows = ledger_rows()
+    stale = {}
     for r in rows.values():
         png = os.path.join(ROOT, r["render"])
         if not os.path.exists(png):
@@ -481,9 +548,26 @@ def cmd_check():
         for item in r["inputs"].split():
             path, b = item.rsplit("@", 1)
             if blob(os.path.join(ROOT, path)) != b:
-                bad.append(f"{r['render']} is STALE: {path} changed - run: python3 tools/kicad.py render "
-                           f"{os.path.dirname(r['render'])}")
+                # a PCB render or fab/ file is remade by pcb.py from the BOARD's directory;
+                # a sheet render by this tool from its own. One line per remedy (K7-4).
+                d = os.path.dirname(r["render"])
+                if ".pcb-" in r["render"] or "/fab/" in r["render"]:
+                    fix = "python3 tools/pcb.py render " + (os.path.dirname(d) if d.endswith("/fab") else d)
+                else:
+                    fix = "python3 tools/kicad.py render " + d
+                stale.setdefault(fix, []).append((r["render"], path))
                 break
+    for fix, items in sorted(stale.items()):
+        why = sorted({p for _, p in items})
+        bad.append(f"{items[0][0]}{f' and {len(items) - 1} more' if len(items) > 1 else ''} STALE: "
+                   f"{', '.join(why)} changed - run: {fix}")
+    # a generated file nobody generated: a stray Gerber is uploaded with the rest (K7-6)
+    for d in boards() + migrated_circuits():
+        for f in board_outputs(d):
+            if os.path.relpath(f, ROOT) not in rows:
+                bad.append(f"{os.path.relpath(f, ROOT)} is in no ledger row - no tool made it; delete it, "
+                           f"or re-render: python3 tools/{'pcb' if '.pcb-' in f or '/fab/' in f else 'kicad'}.py render "
+                           f"{os.path.relpath(d, ROOT)}")
     n = len(migrated_circuits()), len(boards()), len(rows)
     if bad:
         print(f"kicad: FAIL - {len(bad)} problem(s) over {n[0]} source sheet(s), {n[1]} board(s), {n[2]} render(s)")

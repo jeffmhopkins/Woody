@@ -11,6 +11,17 @@ set -euo pipefail
 need_apt=()
 have() { dpkg -s "$1" >/dev/null 2>&1; }
 
+# --- what this script itself uses before anything else: curl and gpg fetch the
+# KiCad archive's key, and neither is in a minimal Ubuntu image.
+boot=()
+for p in curl gnupg ca-certificates; do
+  have "$p" || boot+=("$p")
+done
+if [ ${#boot[@]} -gt 0 ]; then
+  apt-get update -q
+  DEBIAN_FRONTEND=noninteractive apt-get install -y -q --no-install-recommends "${boot[@]}"
+fi
+
 # --- body CAD (tools/cad.py): OpenSCAD renders headless through xvfb; gmsh
 # meshes the vendor STEP files and needs libxft2; poppler reads datasheets.
 for p in openscad xvfb libxft2 poppler-utils librsvg2-bin python3-yaml python3-pip; do
@@ -47,6 +58,22 @@ mkdir -p "$HOME/.config/kicad/9.0"
 for t in sym-lib-table fp-lib-table; do
   if ! grep -q "(lib (name" "$HOME/.config/kicad/9.0/$t" 2>/dev/null; then
     cp "/usr/share/kicad/template/$t" "$HOME/.config/kicad/9.0/$t"
+  fi
+done
+
+# --- 3D models for tools/pcb.py render. kicad-packages3d is 3 GB, so only the ones
+# the boards' footprints name, from KiCad's own library at the release tag. Without
+# them kicad-cli renders the parts as nothing, exits 0 and says nothing; pcb.py render
+# now refuses instead. Add a line here when a board names a new one (the refusal lists
+# it). The KS-33's model is banked in datasheets/; the chain header has none.
+models=/usr/share/kicad/3dmodels
+for m in Capacitor_SMD.3dshapes/C_0805_2012Metric.step \
+         Resistor_SMD.3dshapes/R_0805_2012Metric.step \
+         Package_SO.3dshapes/SOIC-16_3.9x9.9mm_P1.27mm.step; do
+  if [ ! -s "$models/$m" ]; then
+    mkdir -p "$models/$(dirname "$m")"
+    curl -fsSL -o "$models/$m.part" "https://gitlab.com/kicad/libraries/kicad-packages3D/-/raw/9.0.0/$m"
+    mv "$models/$m.part" "$models/$m"
   fi
 done
 

@@ -2,8 +2,8 @@
 """A board's first PCB: placed from the body CAD and the KiCad sheets, routed, checked.
 
     python3 tools/pcb.py layout hardware/boards/key-board-lh   # write <board>.kicad_pcb (refuses if it exists; --force)
-    python3 tools/pcb.py check  hardware/boards/key-board-lh   # DRC + schematic parity + CAD agreement
-    python3 tools/pcb.py render hardware/boards/key-board-lh   # 3D top/bottom and 2D copper PNGs
+    python3 tools/pcb.py check  hardware/boards/key-board-lh   # DRC + schematic parity + fab limits + CAD agreement
+    python3 tools/pcb.py render hardware/boards/key-board-lh   # 3D top/bottom and 2D copper PNGs, fab/ (refuses a board that fails check)
 
 WHERE THINGS COME FROM - nothing on this board is typed in by hand twice:
 
@@ -16,8 +16,12 @@ WHERE THINGS COME FROM - nothing on this board is typed in by hand twice:
 `layout` writes the PCB ONCE. From then on the .kicad_pcb is the source, like
 the sheets: open it in KiCad 9, move and re-route by hand. `check` is what
 keeps it honest whoever edits it: KiCad's DRC with schematic parity (every
-footprint and net agrees with the sheets), zero unrouted connections, and
-every switch and the ribbon connector still where the body CAD puts them.
+footprint and net agrees with the sheets), zero unrouted connections, its
+warnings counted as failures; the design settings still those of layout.yaml
+rules:/fab:, and the silkscreen limits DRC does not test (line width, silk to
+a pad opening, silk off the board); and the body CAD's outline, thickness,
+and every switch, standoff and the ribbon connector still where - and which
+way up - it puts them.
 
 COORDINATES. The body CAD's x runs along the body from the mouth and y across
 it, seen from above. The PCB is drawn as seen from above too (KiCad's top
@@ -127,7 +131,9 @@ def new_board(bdir, lay, geo):
     board = pcbnew.BOARD()
     ds = board.GetDesignSettings()
     rules = lay["rules"]
-    ds.SetBoardThickness(MM(geo.get("thickness", 1.6)))
+    if "thickness" not in geo:
+        sys.exit("pcb: pcb-geometry.echo gives no board thickness for this cluster - run: python3 tools/cad.py build pcb-geometry")
+    ds.SetBoardThickness(MM(geo["thickness"]))
     ds.m_TrackMinWidth = MM(rules["track_min"])
     ds.m_MinClearance = MM(rules["clearance"])
     ds.m_ViasMinSize = MM(rules["via_min"])
@@ -566,26 +572,41 @@ def cmd_layout(bdir, force=False):
     out = os.path.join(bdir, name + ".kicad_pcb")
     if os.path.exists(out) and not force:
         sys.exit(f"pcb: {os.path.relpath(out, ROOT)} exists and is the source now; --force overwrites it")
+    layout_yaml(bdir)      # a clear message, not build()'s traceback, when there is none
     board, fps, netinfo, lay = build(bdir)
     if lay.get("route", True):
         import pcb_route
         failed = pcb_route.route(board, lay)
         if failed:
-            print(f"pcb: could not route {', '.join(failed)} - move parts in layout.yaml and re-run")
-    save(board, out)
-    if lay.get("route", True):
-        # zones are filled in a fresh process: an in-process fill of a just-built board crashes
-        subprocess.run([sys.executable, "-c", f"import sys; sys.path.insert(0, {os.path.dirname(os.path.abspath(__file__))!r}); "
-                        f"import pcb_route; pcb_route.fill_zones({out!r})"], check=True)
-    if lay.get("fab"):
-        set_stackup(out, lay["fab"], board.GetDesignSettings().GetBoardThickness() / 1e6)
-        # fit_footprint_silk adapts the library footprints' silkscreen to the board
-        # house on purpose, so "does not match the library copy" is expected, not a finding
-        pro = os.path.join(bdir, name + ".kicad_pro")
-        import json
-        j = json.load(open(pro))
-        j["board"]["design_settings"]["rule_severities"]["lib_footprint_mismatch"] = "ignore"
-        json.dump(j, open(pro, "w"), indent=2)
+            # the existing board, if any, is the source: a half-routed one does not replace it
+            print(f"pcb: could not route {', '.join(failed)} - move parts in layout.yaml and re-run; "
+                  f"{os.path.relpath(out, ROOT)} {'left as it was' if os.path.exists(out) else 'not written'}")
+            return 1
+    # Written in a scratch directory beside the board and moved in only when complete.
+    # SaveBoard writes <name>.kicad_pro beside the .kicad_pcb, from the board (the design
+    # rules are in it), so the scratch copy keeps the board's own name and both move.
+    import shutil
+    t = tempfile.mkdtemp(prefix=".layout-", dir=bdir)
+    try:
+        tmp = os.path.join(t, name + ".kicad_pcb")
+        save(board, tmp)
+        if lay.get("route", True):
+            # zones are filled in a fresh process: an in-process fill of a just-built board crashes
+            subprocess.run([sys.executable, "-c", f"import sys; sys.path.insert(0, {os.path.dirname(os.path.abspath(__file__))!r}); "
+                            f"import pcb_route; pcb_route.fill_zones({tmp!r})"], check=True)
+        if lay.get("fab"):
+            set_stackup(tmp, lay["fab"], board.GetDesignSettings().GetBoardThickness() / 1e6)
+            # fit_footprint_silk adapts the library footprints' silkscreen to the board
+            # house on purpose, so "does not match the library copy" is expected, not a finding
+            import json
+            pro = os.path.join(t, name + ".kicad_pro")
+            j = json.load(open(pro))
+            j["board"]["design_settings"]["rule_severities"]["lib_footprint_mismatch"] = "ignore"
+            json.dump(j, open(pro, "w"), indent=2)
+        os.replace(os.path.join(t, name + ".kicad_pro"), os.path.join(bdir, name + ".kicad_pro"))
+        os.replace(tmp, out)
+    finally:
+        shutil.rmtree(t, ignore_errors=True)
     print(f"pcb: wrote {os.path.relpath(out, ROOT)}")
 
 
@@ -593,32 +614,187 @@ def drc(pcb):
     import json
     with tempfile.TemporaryDirectory() as t:
         out = os.path.join(t, "drc.json")
-        subprocess.run(["kicad-cli", "pcb", "drc", "--schematic-parity", "--severity-all",
-                        "--format", "json", "-o", out, pcb], capture_output=True, text=True, env=kicad_env())
+        r = subprocess.run(["kicad-cli", "pcb", "drc", "--schematic-parity", "--severity-all",
+                            "--format", "json", "-o", out, pcb], capture_output=True, text=True, env=kicad_env())
+        if not os.path.exists(out):
+            # kicad-cli exits non-zero when it FINDS violations, so the report's absence is the failure
+            sys.exit(f"pcb: KiCad's DRC did not run on {os.path.relpath(pcb, ROOT)} (exit {r.returncode}):\n{r.stdout}{r.stderr}")
         return json.load(open(out))
 
 
-def cmd_check(bdir):
-    name = os.path.basename(bdir)
-    pcb = os.path.join(bdir, name + ".kicad_pcb")
-    d = drc(pcb)
+def layout_yaml(bdir):
+    p = os.path.join(bdir, "layout.yaml")
+    if not os.path.exists(p):
+        sys.exit(f"pcb: {os.path.relpath(p, ROOT)} does not exist - a board's first layout needs one; "
+                 f"hardware/boards/key-board-lh/layout.yaml is the pattern")
+    return yaml.safe_load(open(p))
+
+
+def shapely_of(ps):
+    """A KiCad SHAPE_POLY_SET as one shapely geometry, in PCB mm, holes kept: a
+    test pad's silk ring has its pad in the hole, not under the ring."""
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+
+    def ring(c):
+        return [(pcbnew.ToMM(c.CPoint(j).x), pcbnew.ToMM(c.CPoint(j).y)) for j in range(c.PointCount())]
+    return unary_union([Polygon(ring(ps.Outline(i)), [ring(ps.Hole(i, h)) for h in range(ps.HoleCount(i))])
+                        for i in range(ps.OutlineCount())])
+
+
+def item_shape(item, layer, grow=0):
+    ps = pcbnew.SHAPE_POLY_SET()
+    item.TransformShapeToPolygon(ps, layer, grow, MM(0.005), pcbnew.ERROR_OUTSIDE)
+    return shapely_of(ps)
+
+
+# The layout.yaml limits the .kicad_pcb must still carry after a hand edit in KiCad's
+# Board Setup (K7-14): (section, key, design-settings attribute). new_board sets them.
+RULE_SETTINGS = [
+    ("rules", "track_min", "m_TrackMinWidth"), ("rules", "clearance", "m_MinClearance"),
+    ("rules", "via_min", "m_ViasMinSize"), ("rules", "drill_min", "m_MinThroughDrill"),
+    ("rules", "edge_clearance", "m_CopperEdgeClearance"),
+    ("fab", "hole_clearance", "m_HoleClearance"), ("fab", "hole_to_hole", "m_HoleToHoleMin"),
+    ("fab", "annular_min", "m_ViasMinAnnularWidth"), ("fab", "silk_text_min", "m_MinSilkTextHeight"),
+    ("fab", "silk_line_min", "m_MinSilkTextThickness"), ("fab", "silk_to_pad", "m_SilkClearance"),
+]
+# DRC tests that enforce a board house's limit. Set to "ignore" in the .kicad_pro they
+# vanish from the report, and a DRC with nothing to say reads as a pass.
+FAB_TESTS = ["clearance", "track_width", "annular_width", "drill_out_of_range", "hole_clearance",
+             "hole_to_hole", "copper_edge_clearance", "text_height", "text_thickness",
+             "silk_edge_clearance", "silk_over_copper", "silk_overlap", "solder_mask_bridge"]
+
+
+def check_rules(board, bdir, name, lay):
+    """The board's design settings still say what layout.yaml says, and no fab test is off."""
+    import json
     bad = []
-    for v in d.get("violations", []):
-        bad.append(f"{v['severity']}: [{v['type']}] {v['description']} - " + "; ".join(i["description"] for i in v.get("items", [])))
-    for v in d.get("unconnected_items", []):
-        bad.append(f"error: [unconnected] " + "; ".join(i["description"] for i in v.get("items", [])))
-    for v in d.get("schematic_parity", []):
-        bad.append(f"error: [parity] {v['description']} - " + "; ".join(i["description"] for i in v.get("items", [])))
-    # the body CAD still agrees: switches and connector where it says
-    lay = yaml.safe_load(open(os.path.join(bdir, "layout.yaml")))
-    geo = cad_geometry(lay["cluster"])
-    board = pcbnew.LoadBoard(pcb)
+    ds = board.GetDesignSettings()
+    for sec, key, attr in RULE_SETTINGS:
+        want = lay.get(sec, {}).get(key)
+        if want is None:
+            continue
+        got = pcbnew.ToMM(getattr(ds, attr))
+        if abs(got - float(want)) > 1e-4:
+            bad.append(f"error: [rules] the board's {attr} is {got:g} mm, layout.yaml {sec}.{key} says {want} - "
+                       f"set it back in Board Setup, or change layout.yaml and say why")
+    nc = ds.m_NetSettings.GetDefaultNetclass()
+    if pcbnew.ToMM(nc.GetClearance()) + 1e-4 < float(lay["rules"]["clearance"]):
+        bad.append(f"error: [rules] the Default net class clearance is {pcbnew.ToMM(nc.GetClearance()):g} mm, "
+                   f"under layout.yaml rules.clearance {lay['rules']['clearance']}")
+    pro = os.path.join(bdir, name + ".kicad_pro")
+    sev = json.load(open(pro))["board"]["design_settings"].get("rule_severities", {}) if os.path.exists(pro) else {}
+    for test in FAB_TESTS:
+        if sev.get(test) == "ignore":
+            bad.append(f"error: [rules] DRC test {test} is set to ignore in {name}.kicad_pro - it enforces "
+                       f"a board-house limit, so it must report")
+    return bad
+
+
+def check_silk(board, fab):
+    """What KiCad 9's DRC does not check (K3-2): silk LINE width (min_text_thickness is
+    text only), silk to a pad's mask opening (min_silk_clearance is silk to silk, and
+    silk over a pad fires only when they overlap), and silk wholly off the board (not
+    a DRC item at all). Whole shapes, not anchors: a title anchored on the board can
+    still run off it."""
+    bad = []
+    ol = pcbnew.SHAPE_POLY_SET()
+    if not board.GetBoardPolygonOutlines(ol):
+        return ["error: [silk] the Edge.Cuts outline is not one closed shape, so silk cannot be checked against it"]
+    outline = shapely_of(ol)
+    silk = {pcbnew.F_SilkS: pcbnew.F_Mask, pcbnew.B_SilkS: pcbnew.B_Mask}
+    openings = {s: [] for s in silk}
+    items = [("board", d) for d in board.GetDrawings() if d.GetLayer() in silk]
+    for fp in board.GetFootprints():
+        ref = fp.GetReference()
+        items += [(ref, g) for g in fp.GraphicalItems() if g.GetLayer() in silk]
+        items += [(ref, f) for f in fp.GetFields() if f.GetLayer() in silk and f.IsVisible()]
+        for pad in fp.Pads():
+            for s, mask in silk.items():
+                if pad.IsOnLayer(mask):
+                    openings[s].append((f"{ref} pad {pad.GetNumber()}",
+                                        item_shape(pad, mask, pad.GetSolderMaskExpansion(mask))))
+    line_min, text_min, to_pad = (float(fab.get(k, 0)) for k in ("silk_line_min", "silk_text_min", "silk_to_pad"))
+    thin, near = {}, {}
+    for who, it in items:
+        layer = it.GetLayer()
+        text = hasattr(it, "GetText")
+        what = f"{who} text {it.GetText()!r}" if text else f"{who} silk {it.ShowShape().lower()}"
+        c = it.GetBoundingBox().Centre()
+        where = f"({pcbnew.ToMM(c.x):.2f}, {pcbnew.ToMM(c.y):.2f})"
+        shape = item_shape(it, layer)
+        if not outline.contains(shape):
+            bad.append(f"error: [silk] {what} at {where} is {'partly' if outline.intersects(shape) else 'wholly'} off the board")
+        if not text:
+            # a filled shape prints its fill: its stroke is not a feature of its own
+            if not it.IsFilled() and pcbnew.ToMM(it.GetWidth()) + 1e-4 < line_min:
+                thin.setdefault((who, pcbnew.ToMM(it.GetWidth())), []).append(where)
+        elif pcbnew.ToMM(it.GetTextHeight()) + 1e-4 < text_min or pcbnew.ToMM(it.GetTextThickness()) + 1e-4 < line_min:
+            bad.append(f"error: [silk] {what} is {pcbnew.ToMM(it.GetTextHeight()):g} mm high with a "
+                       f"{pcbnew.ToMM(it.GetTextThickness()):g} mm stroke; fab: needs {text_min:g} / {line_min:g}")
+        for pname, opening in openings[layer]:
+            gap = shape.distance(opening)
+            if gap + 1e-4 < to_pad:
+                k = (f"{what} at {where}", pname)
+                near[k] = min(gap, near.get(k, gap))
+    for (who, w), wheres in sorted(thin.items()):
+        bad.append(f"error: [silk] {who}: {len(wheres)} silk line(s) {w:g} mm wide, under fab.silk_line_min {line_min:g}")
+    for (who, pname), gap in sorted(near.items()):
+        bad.append(f"error: [silk] {who} is {gap:.3f} mm from {pname}'s mask opening, "
+                   f"under fab.silk_to_pad {to_pad:g}")
+    return bad
+
+
+def check_cad(board, lay, geo):
+    """The body CAD still agrees with the board: its outline and thickness, and every
+    switch, standoff and the chain header where - and which way up - it puts them."""
+    from shapely.geometry import MultiLineString
+    bad = []
+    # thickness: the board against the echo, and the echo against its own source
+    body = yaml.safe_load(open(os.path.join(ROOT, "config", "body.yaml")))
+    t_cfg = float(body["boards"]["key_board_t"]["value"])
+    t_pcb = pcbnew.ToMM(board.GetDesignSettings().GetBoardThickness())
+    if "thickness" not in geo:
+        bad.append("error: [cad] pcb-geometry.echo has no board thickness for this cluster - run: python3 tools/cad.py build pcb-geometry")
+    else:
+        if abs(geo["thickness"] - t_cfg) > 1e-6:
+            bad.append(f"error: [cad] pcb-geometry.echo says the board is {geo['thickness']:g} mm, config/body.yaml "
+                       f"boards.key_board_t says {t_cfg:g} - run: python3 tools/cad.py build")
+        if abs(t_pcb - geo["thickness"]) > 1e-6:
+            bad.append(f"error: [cad] the board's stackup is {t_pcb:g} mm thick, the body CAD's key board "
+                       f"{geo['thickness']:g} mm (boards.key_board_t) - Board Setup > Physical Stackup")
+    # outline: every point of each within 0.05 mm of the other (the DXF's corner arcs are segments)
+    dxf = os.path.join(ROOT, "mechanical", "export", f"key-board-{lay['suffix'].lower()}.dxf")
+    ol = pcbnew.SHAPE_POLY_SET()
+    if not board.GetBoardPolygonOutlines(ol):
+        bad.append("error: [cad] the Edge.Cuts outline is not one closed shape")
+    else:
+        cad = MultiLineString([(to_pcb(*a), to_pcb(*b)) for a, b in dxf_segments(dxf)])
+        off = shapely_of(ol).boundary.hausdorff_distance(cad)
+        if off > 0.05:
+            bad.append(f"error: [cad] the Edge.Cuts outline is up to {off:.2f} mm from the body CAD's "
+                       f"({os.path.relpath(dxf, ROOT)})")
+    below_seat = float(body["switch"]["pcb_below_seat"]["value"])
     for key, (x, y, r) in geo["switches"].items():
         fp = board.FindFootprintByReference(f"SW-{key}")
+        if fp is None:
+            bad.append(f"error: [cad] SW-{key} is not on the board; the body CAD has a switch there")
+            continue
         px, py = to_pcb(x, y)
         got = (pcbnew.ToMM(fp.GetPosition().x), pcbnew.ToMM(fp.GetPosition().y))
         if math.hypot(got[0] - px, got[1] - py) > 0.05:
             bad.append(f"error: [cad] SW-{key} is at {got}, the body CAD puts it at ({px:.2f}, {py:.2f})")
+        # the KS-33's pins are asymmetric: a turned switch no longer fits its plate cutout
+        want = (r + lay.get("switch_rot", 0)) % 360
+        rot = fp.GetOrientationDegrees() % 360
+        if min(abs(rot - want), 360 - abs(rot - want)) > 0.01 or fp.IsFlipped():
+            bad.append(f"error: [cad] SW-{key} is turned {rot:g} deg{' on the bottom' if fp.IsFlipped() else ''}; "
+                       f"the body CAD turns it {want:g} deg, on the top")
+        models = fp.Models()
+        for i in range(len(models)):      # by index: SWIG's iterator hands out copies
+            if abs(models[i].m_Offset.z - below_seat) > 1e-6:
+                bad.append(f"error: [cad] SW-{key}'s 3D model sits {models[i].m_Offset.z:g} mm up; "
+                           f"config/body.yaml switch.pcb_below_seat is {below_seat:g}")
     for i, (x, y, *_) in enumerate(geo["standoffs"], 1):
         fp = board.FindFootprintByReference(f"H{i}")
         px, py = to_pcb(x, y)
@@ -627,16 +803,45 @@ def cmd_check(bdir):
             bad.append(f"error: [cad] standoff hole H{i} is at {got}, the body CAD puts it at ({px:.2f}, {py:.2f})")
     if geo["chain"]:
         fp = board.FindFootprintByReference("J-CHAIN")
-        (tx, ty), d = chain_target(geo)
-        got = pads_centre(fp)
-        p1, p2 = fp.FindPadByNumber("1").GetPosition(), fp.FindPadByNumber("2").GetPosition()
-        if math.hypot(got[0] - tx, got[1] - ty) > 0.05 or pcbnew.ToMM(p2.x - p1.x) * d <= 0:
-            bad.append(f"error: [cad] J-CHAIN's pads centre at {got}, facing {'+' if p2.x > p1.x else '-'}x; the body CAD puts them at ({tx:.2f}, {ty:.2f}) facing {'+' if d > 0 else '-'}x")
-    errs = [b for b in bad if b.startswith("error")]
-    print(f"pcb: {os.path.relpath(pcb, ROOT)}: {len(errs)} error(s), {len(bad) - len(errs)} warning(s)")
+        if fp is None:
+            bad.append("error: [cad] J-CHAIN is not on the board; the body CAD has the chain header there")
+        else:
+            (tx, ty), d = chain_target(geo)
+            got = pads_centre(fp)
+            p1, p2 = fp.FindPadByNumber("1").GetPosition(), fp.FindPadByNumber("2").GetPosition()
+            if math.hypot(got[0] - tx, got[1] - ty) > 0.05 or pcbnew.ToMM(p2.x - p1.x) * d <= 0:
+                bad.append(f"error: [cad] J-CHAIN's pads centre at {got}, facing {'+' if p2.x > p1.x else '-'}x; the body CAD puts them at ({tx:.2f}, {ty:.2f}) facing {'+' if d > 0 else '-'}x")
+            if not fp.IsFlipped():
+                bad.append("error: [cad] J-CHAIN is on the top side; it belongs underneath, facing the main board")
+    return bad
+
+
+def cmd_check(bdir):
+    """Every line is a failure, KiCad's DRC warnings included: the fab-limit tests (text
+    height, hole to hole, silk at the edge) only ever warn (K3-2), and this board has none."""
+    name = os.path.basename(bdir)
+    pcb = os.path.join(bdir, name + ".kicad_pcb")
+    lay = layout_yaml(bdir)
+    if not os.path.exists(pcb):
+        sys.exit(f"pcb: {os.path.relpath(pcb, ROOT)} does not exist - run: python3 tools/pcb.py layout {os.path.relpath(bdir, ROOT)}")
+    d = drc(pcb)
+    bad = []
+    for v in d.get("violations", []):
+        sev = "" if v["severity"] == "error" else f" (KiCad: {v['severity']})"
+        bad.append(f"error: [{v['type']}]{sev} {v['description']} - " + "; ".join(i["description"] for i in v.get("items", [])))
+    for v in d.get("unconnected_items", []):
+        bad.append(f"error: [unconnected] " + "; ".join(i["description"] for i in v.get("items", [])))
+    for v in d.get("schematic_parity", []):
+        bad.append(f"error: [parity] {v['description']} - " + "; ".join(i["description"] for i in v.get("items", [])))
+    board = pcbnew.LoadBoard(pcb)
+    bad += check_rules(board, bdir, name, lay)
+    if lay.get("fab"):
+        bad += check_silk(board, lay["fab"])
+    bad += check_cad(board, lay, cad_geometry(lay["cluster"]))
+    print(f"pcb: {os.path.relpath(pcb, ROOT)}: {len(bad)} error(s)")
     for b in bad:
         print("  " + b)
-    return 1 if errs else 0
+    return 1 if bad else 0
 
 
 def assembly_files(bdir, name, fab):
@@ -654,10 +859,18 @@ def assembly_files(bdir, name, fab):
     root = os.path.join(bdir, name + ".kicad_sch")
     comps, _ = kicad.kicad_netlist(root)
     pos = {r["Ref"]: r for r in csv.DictReader(open(os.path.join(fab, name + "-pos.csv")))}
-    machine, hand = {}, []
+    machine, hand, none = {}, [], []
     for ref in sorted(comps):
         f = comps[ref]["fields"]
         how = f.get("Assembly", "")
+        if how == "none":
+            # nothing is bought for it - so it must be a part nothing is bought for: a test
+            # pad, a fiducial, "Exclude from BOM" ticked. Otherwise `none` drops a real part
+            # from the order and the hand list both, and every check passes (K7-3).
+            if comps[ref]["in_bom"]:
+                sys.exit(f"pcb: {ref} is Assembly = none but in the BOM - machine or hand, or tick "
+                         f"'Exclude from BOM' on its symbol if nothing is bought for it")
+            none.append(ref)
         if how == "machine":
             if ref not in pos:
                 sys.exit(f"pcb: {ref} is machine-assembled but not in the placement export")
@@ -685,6 +898,8 @@ def assembly_files(bdir, name, fab):
         w = csv.writer(fh)
         w.writerow(["Designator", "Value", "Manufacturer", "MPN"])
         w.writerows(hand)
+    if none:
+        print(f"pcb: not in any order (Assembly = none, excluded from the BOM): {', '.join(none)}")
     subs = re.findall(r'\(property "Sheetfile" "([^"]+)"', open(root).read())
     return [root] + sorted({os.path.normpath(os.path.join(bdir, s)) for s in subs})
 
@@ -692,20 +907,32 @@ def assembly_files(bdir, name, fab):
 def cmd_render(bdir):
     """3D views of both sides, 2D copper plots, and the fabrication outputs - all recorded
     in hardware/SHEETS.csv against the .kicad_pcb, so tools/kicad.py check reports them
-    stale when the board moves."""
+    stale when the board moves.
+
+    Nothing is written until everything is: the board must pass `check` first, every 3D
+    model it names must exist, and the outputs are made in a scratch directory and moved
+    in at the end. A refusal half-way used to leave fab/ deleted and the renders
+    rewritten with no ledger row, which kicad.py check then blamed on a hand edit (K7-7)."""
     import shutil
     import kicad
     name = os.path.basename(bdir)
     pcb = os.path.join(bdir, name + ".kicad_pcb")
+    if cmd_check(bdir):
+        sys.exit("pcb: not rendering a board that fails its check - nothing was written")
     env = kicad_env()
-    outs = []
-    for side, rot in (("top", "-35,0,20"), ("bottom", "35,0,-20")):
-        o = os.path.join(bdir, f"{name}.pcb-3d-{side}.png")
-        subprocess.run(["kicad-cli", "pcb", "render", "--side", side, "--width", "1800", "--height", "1000",
-                        "--quality", "high", "--perspective", "--rotate", rot, "-o", o, pcb],
-                       capture_output=True, text=True, env=env, check=True)
-        outs.append(o)
-    with tempfile.TemporaryDirectory() as t:
+    missing = missing_models(pcbnew.LoadBoard(pcb), bdir, env)
+    if missing:
+        sys.exit("pcb: the 3D render would silently leave out every part whose model is missing - "
+                 "run tools/setup-env.sh, or bank the model:\n  " + "\n  ".join(missing))
+    t = tempfile.mkdtemp(prefix=".render-", dir=bdir)
+    try:
+        outs = []
+        for side, rot in (("top", "-35,0,20"), ("bottom", "35,0,-20")):
+            o = os.path.join(t, f"{name}.pcb-3d-{side}.png")
+            subprocess.run(["kicad-cli", "pcb", "render", "--side", side, "--width", "1800", "--height", "1000",
+                            "--quality", "high", "--perspective", "--rotate", rot, "-o", o, pcb],
+                           capture_output=True, text=True, env=env, check=True)
+            outs.append(o)
         for layers, tag, mirror in (("F.Cu,Edge.Cuts", "copper-top", False), ("B.Cu,Edge.Cuts,B.Fab", "copper-bottom", True)):
             svg = os.path.join(t, tag + ".svg")
             args = ["kicad-cli", "pcb", "export", "svg", "--layers", layers, "--page-size-mode", "2",
@@ -713,25 +940,56 @@ def cmd_render(bdir):
             if mirror:
                 args.insert(4, "--mirror")
             subprocess.run(args, capture_output=True, text=True, env=env, check=True)
-            o = os.path.join(bdir, f"{name}.pcb-{tag}.png")
+            o = os.path.join(t, f"{name}.pcb-{tag}.png")
             subprocess.run(["rsvg-convert", "-z", "7", "-b", "white", "-o", o, svg], check=True)
             outs.append(o)
-    # fabrication: Gerbers, drill, pick-and-place, as a board house takes them
-    fab = os.path.join(bdir, "fab")
-    shutil.rmtree(fab, ignore_errors=True)
-    os.makedirs(fab)
-    subprocess.run(["kicad-cli", "pcb", "export", "gerbers", "--no-protel-ext", "--layers", "F.Cu,B.Cu,F.Paste,B.Paste,F.Silkscreen,B.Silkscreen,F.Mask,B.Mask,Edge.Cuts", "-o", fab + "/", pcb],
-                   capture_output=True, text=True, env=env, check=True)
-    subprocess.run(["kicad-cli", "pcb", "export", "drill", "--format", "excellon", "-o", fab + "/", pcb],
-                   capture_output=True, text=True, env=env, check=True)
-    subprocess.run(["kicad-cli", "pcb", "export", "pos", "--format", "csv", "--units", "mm", "--side", "both",
-                    "-o", os.path.join(fab, name + "-pos.csv"), pcb], capture_output=True, text=True, env=env, check=True)
-    sheets = assembly_files(bdir, name, fab)
-    fabfiles = sorted(os.path.join(fab, f) for f in os.listdir(fab))
-    kicad.ledger_set(bdir, outs + fabfiles, [pcb] + sheets, kind="pcb")
-    for o in outs:
+        # fabrication: Gerbers, drill, pick-and-place, as a board house takes them. Plated
+        # and unplated holes in separate drill files (<name>-PTH.drl, <name>-NPTH.drl), as
+        # JLCPCB asks - the standoff holes must stay unplated (ADR 0020).
+        fab = os.path.join(t, "fab")
+        os.makedirs(fab)
+        subprocess.run(["kicad-cli", "pcb", "export", "gerbers", "--no-protel-ext", "--layers", "F.Cu,B.Cu,F.Paste,B.Paste,F.Silkscreen,B.Silkscreen,F.Mask,B.Mask,Edge.Cuts", "-o", fab + "/", pcb],
+                       capture_output=True, text=True, env=env, check=True)
+        subprocess.run(["kicad-cli", "pcb", "export", "drill", "--format", "excellon", "--excellon-separate-th", "-o", fab + "/", pcb],
+                       capture_output=True, text=True, env=env, check=True)
+        subprocess.run(["kicad-cli", "pcb", "export", "pos", "--format", "csv", "--units", "mm", "--side", "both",
+                        "-o", os.path.join(fab, name + "-pos.csv"), pcb], capture_output=True, text=True, env=env, check=True)
+        sheets = assembly_files(bdir, name, fab)
+        # everything made: now swap it in
+        final = []
+        for o in outs:
+            final.append(os.path.join(bdir, os.path.basename(o)))
+            os.replace(o, final[-1])
+        dest, old = os.path.join(bdir, "fab"), os.path.join(t, "fab.old")
+        if os.path.exists(dest):
+            os.rename(dest, old)
+        os.rename(fab, dest)
+    finally:
+        shutil.rmtree(t, ignore_errors=True)
+    fabfiles = sorted(os.path.join(dest, f) for f in os.listdir(dest))
+    kicad.ledger_set(bdir, final + fabfiles, [pcb] + sheets, kind="pcb")
+    for o in final:
         print(f"pcb: rendered {os.path.relpath(o, ROOT)}")
-    print(f"pcb: {len(fabfiles)} fabrication file(s) in {os.path.relpath(fab, ROOT)}/")
+    print(f"pcb: {len(fabfiles)} fabrication file(s) in {os.path.relpath(dest, ROOT)}/")
+
+
+def missing_models(board, bdir, env):
+    """Every 3D model a footprint names, resolved as KiCad would: kicad-cli renders a part
+    whose model is missing as nothing at all, exits 0 and says nothing. A footprint that
+    names no model (woody:IDC-Header_..._Samtec_SHF_Horizontal, the test pads, the
+    standoff holes) is not asked for one."""
+    out = {}
+    for fp in board.GetFootprints():
+        models = fp.Models()
+        for i in range(len(models)):      # by index: SWIG's iterator hands out copies
+            if not models[i].m_Show:
+                continue
+            f = models[i].m_Filename
+            p = re.sub(r"\$\{(\w+)\}", lambda m: bdir if m.group(1) == "KIPRJMOD" else env.get(m.group(1), m.group(0)), f)
+            p = p if os.path.isabs(p) else os.path.join(bdir, p)
+            if not os.path.exists(p):
+                out.setdefault(f"{f} -> {p}", []).append(fp.GetReference())
+    return [f"{m} ({', '.join(sorted(refs))})" for m, refs in sorted(out.items())]
 
 
 if __name__ == "__main__":
