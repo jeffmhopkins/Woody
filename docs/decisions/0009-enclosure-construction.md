@@ -637,8 +637,11 @@ capacitance straight onto the breath channel's voltage reference.
 
 **Fit the key input networks.** A 74x165's parallel inputs have no internal
 pull-up, so without them every key input floats in a channel shared with 12 V
-LED power and 800 kHz data — 10 kΩ, 100 Ω and 10 nF per switch position on the
-cluster boards (ADR 0001).
+LED power and 800 kHz data — a pull-up, a series resistor and a capacitor per
+switch position on the cluster boards (ADR 0001; the values are
+`key-switch-network.md` §2's, `R-KEY-PU`, `R-KEY-SER`, `C-KEY`). *(Amended
+2026-09-27: this line gave 10 kΩ, 100 Ω and 10 nF, a network retired on
+2026-09-21.)*
 
 *(Amended 2026-09-26: since ADRs 0016 and 0017 there is no hand-built loom.
 The key boards are on flat flex *(1.27 mm IDC since 2026-09-27, ADR 0017's amendment)* and the Matrix on a 24-way ribbon, whose extra positions carry 5 V and

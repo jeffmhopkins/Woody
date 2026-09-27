@@ -171,6 +171,14 @@ allow for a less fragile mounting of the IC". The owner also asked whether
       standoffs are.
     - Whether the standoff clinches in the plate is still PEM's and the
       plate vendor's to confirm (`MECH-KB-STANDOFF`).
+    - **If it does not, the fallback is the owner's (2026-09-27): nothing
+      pressed into the aluminium.** An M2 screw comes up from under the
+      board, through the washer and a plain spacer, through a clearance hole
+      in the plate. A nut sits on the plate's top face, in a shallow pocket
+      in the oak top's underside. Every part is stock. The depth rule still
+      holds: spacer plus washer replaces the standoff's reach. The cost is a
+      pocket per standoff in the oak, which the body CAD would cut. This
+      replaces the self-clinching-nut fallback above.
 - **Where the standoffs can go is now a rule.** `kb_standoffs()` in
   `mechanical/cad/woody_body.scad` finds them. The PCB takes them from
   `mechanical/export/pcb-geometry.echo`, and `tools/pcb.py check` fails if a

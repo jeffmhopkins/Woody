@@ -343,7 +343,7 @@ termination, which ADR 0001 rejected for a line that drops on several loads.
 main board and ribbons. It is three 0805s either way.
 
 *(The registers' own `QH` edges are HC-family edges: output transition time
-5 ns typical at 4.5 V and up to 17 ns at 2 V over temperature
+at most 5 ns at 4.5 V and 25 °C, and up to 17 ns at 2 V over temperature
 `[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.8]`, and each hop is a ribbon
 plus part of the main board — the "HC-family edges keep it a lumped load"
 argument still covers them.)*

@@ -215,7 +215,10 @@ Three reviewers found this independently and it is unretrofittable.
 above: a 12 V edge through ~15 pF, `Q/C` into a bare wire. There is no 12 V
 edge, coupling is a divider, and the honest figure is 1.36 V of swing, landing
 at 1.94 V — nowhere near `V_IL` on either family (0.8 V for LVC, 0.99 V for the
-74HC165 actually fitted). **The pull-ups are still required**, for the plainer reason that a
+74HC165 then fitted). *(Amended 2026-09-27: the SN74HCS165's lower threshold
+can be as high as 0.5 × VCC, 1.65 V at 3.3 V `[calc; SN74HCS165-ti-scls828a.pdf
+p.6, every row]`, so 1.94 V clears it by about 0.3 V - still no false press,
+but not "nowhere near".)* **The pull-ups are still required**, for the plainer reason that a
 floating CMOS input has no defined state at all and sits wherever leakage,
 humidity and the last edge left it — which in a body that is breathed into for
 hours, at 10–20 K above ambient, is not a hypothetical. What the correction
@@ -393,7 +396,8 @@ drop-in part instead.
   requirement `[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.15]`. It has the
   same pinout and SOIC-16 `[same, p.3]`, and a better ESD rating `[same, p.4]`.
 - **The family argument above stands.** Its outputs are HC-family, not LVC:
-  about 5 ns at 4.5 V `[same, p.8]`, against the 74HC165's 7 ns typical. So
+  at most 5 ns at 4.5 V and 25 °C, 8 ns over temperature `[same, p.8]`,
+  against the 74HC165's 15 ns maximum at 25 °C `[74HC165-nexperia.pdf p.8]`. So
   each hop is still a lumped load, and the chain's 1 MHz clock is far inside
   its limit at every published rail `[same, p.6]`.
 - **The key-timing figures moved** to the HCS165's thresholds, taken at their

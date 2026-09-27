@@ -288,7 +288,7 @@ boards:
   cluster_smt_h:
     value: 1.8
     status: nominal
-    source: "the key boards' tallest underside part: the 74HC165's SO16 body, max 1.75 [datasheets/logic/74HC165-nexperia.pdf, section 12, SOT109-1], and 0805 passives"
+    source: "the key boards' tallest underside part: the register's SOIC-16 (U-KEYS, SN74HCS165D), max 1.75 - the JEDEC MS-012 outline as drawn for SOT109-1 [datasheets/logic/74HCS165-nexperia.pdf Fig. 18]; TI's SCLS828A as banked has no D-package outline (pp.25-34 are BQB, DYY and PW only) and its D is MS-012 [from memory] - and 0805 passives"
   tall_l:
     value: 15.0
     status: tbd

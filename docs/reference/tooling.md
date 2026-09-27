@@ -384,8 +384,9 @@ board's analog routing is done by hand** (`docs/reference/pcb-pipeline.md`).
   open (none stocked at JLC - the board's README).
 - **Nothing held the board.** The first layout had no mounting at all. Now
   the board is a rectangle across the cavity with an M2 standoff in each
-  corner, NPTH holes, and copper keep-outs under the standoff face and the
-  screw head (ADR 0020).
+  corner, NPTH holes, and copper keep-outs under the washer between the
+  standoff and the board (`hardware.kb_washer_od`) and under the screw head
+  (ADR 0020).
 - **The switch pins barely reached through** a 1.6 mm board (about 0.1 mm).
   The key boards are now 1.2 mm, which leaves about 0.5 mm (ADR 0020;
   `docs/reference/ks33-geometry.md`).

@@ -39,7 +39,11 @@ drawing.
   `switch.pcb_below_seat`). Each board is a rectangle across the cavity with a
   standoff in each corner, the standoff's edge distance from every switch
   cutout (*"key-board standoffs clear of the switch cutouts"*); the
-  standoff's length is derived (*"key-board standoff length (derived)"*).
+  standoff's length is derived (*"key-board standoff length (derived)"*),
+  and the chosen standoff plus an M2 small washer under the board set the
+  key boards' depth (*"key-board standoff and washer set the board depth"*,
+  *"key-board depth at the hardware's tolerance limits"*; ADR 0020). The
+  thumb switches' main board has its own depth, `switch.thumb_pcb_below_seat`.
   The key board's chain header's through-hole pin tails come up through the
   board toward the grounded plate and stop short of it (*"J-CHAIN pin tails
   clear of the key plate"*), so the plate is not cut over them

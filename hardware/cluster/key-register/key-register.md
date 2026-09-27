@@ -71,8 +71,8 @@ open — the ordering half of it, anyway. Which *switch* lands on which input is
 
 **The part is the SN74HCS165: HC-family outputs, Schmitt-trigger inputs, not
 74LVC and not a plain 74HC165**, and both halves are load-bearing. *Outputs:*
-HC-family edges (output transition time 5 ns typical at 4.5 V
-`[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.8]`) keep each hop — a ribbon
+HC-family edges (output transition time at most 5 ns at 4.5 V and 25 °C, 8 ns
+over temperature `[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.8]`) keep each hop — a ribbon
 and part of the main board — an ordinary lumped load instead of a transmission
 line, which is what removed the hazards that briefly sent these registers to
 the tail `[repo] 0001, bom.csv`. Same SOIC-16 footprint, so LVC with proper
