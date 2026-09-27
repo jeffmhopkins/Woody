@@ -32,9 +32,13 @@ only by the firmware clamp and the regulator (`U-BUCK`), so it all crosses
 2. **Fit `U-TVS-CHAIN`.** The key-chain lines that reach the ZIF connectors
    are bare to fingers whenever the lid is off and a ribbon is unplugged. The
    array cannot be added after the board is made, and costs pennies.
+   *(Amended 2026-09-27: the connectors are now through-hole 1.27 mm IDC
+   headers (ADR 0017's amendment); the exposure is the same — a main-board
+   header with its socket unplugged — and so is the decision.)*
 3. **No fuse on the chain's 3V3 (`F-CHAIN` goes); protect at the source.**
    The chain's 3V3 comes from the Matrix's own LDO. The one fault a fuse would
-   cover, a ribbon seated skewed at reassembly, happens on the bench, before
+   cover, a ribbon seated skewed at reassembly *(since 2026-09-27 a keyed IDC
+   shroud: a socket forced or a ribbon pinched)*, happens on the bench, before
    the lid goes on, and shows at once: the short pulls down the Matrix's own
    3V3, so the instrument does not start. A series ferrite per ribbon isolates
    each key board's supply. The LDO's short-circuit limit is typical-only on

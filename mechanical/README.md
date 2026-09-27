@@ -114,7 +114,7 @@ of a superseded value. Instead:
 | | |
 |---|---|
 | ![Tail wiring](renders/breakdown-tail-wiring.png) The etherCON's patch lead into J-UMB, and the Matrix's ribbon | ![Tail wiring, far side](renders/breakdown-tail-wiring-far.png) The Matrix ribbon's drop into J-MCU |
-| ![Ribbons](renders/breakdown-ribbons.png) The key boards' ribbons and connectors, lid, sides and oak bottom off | ![Ribbon fold](renders/section-ribbon.png) Section through the left ribbon, closed: the fold up the far side |
+| ![Ribbons](renders/breakdown-ribbons.png) The key boards' ribbons and connectors, lid, sides and oak bottom off | ![Ribbon fold](renders/section-ribbon.png) Section along the body through the left key board's chain headers: the ribbon's hairpin, closed |
 
 ![Plan from above, with the length budget](renders/plan-top.png)
 

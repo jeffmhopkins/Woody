@@ -241,7 +241,7 @@ moved.
 > Matrix and the IMU; the breath sensor, ADC and power are now mid-body.
 > *(Since ADR 0017, 2026-09-26: the centre board and thumb boards are one main
 > board; the key boards join it on 12-way flat-flex ribbons, not stacking
-> headers; the Matrix is on the lid on a 20-way ribbon into `J-MCU`, not a
+> headers *(1.27 mm IDC ribbons since ADR 0017's 2026-09-27 amendment)*; the Matrix is on the lid on a 20-way ribbon into `J-MCU`, not a
 > pigtail; the breath sensor is soldered at the main board's mouth end beside
 > the trap, not mid-body; one regulator block, the Matrix being the only dev
 > board since ADR 0015.)*

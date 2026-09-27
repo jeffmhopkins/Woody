@@ -7,7 +7,7 @@
 
 id: interfaces/key-chain-loom
 title: Key chain — main board to two key boards
-last_reviewed: '2026-09-26'
+last_reviewed: '2026-09-27'
 depends_on:
 - adr:0001
 - adr:0009
@@ -19,8 +19,8 @@ depends_on:
 - fig:free-bits
 - fig:key-pullup-qty
 - fig:marker-bits
+- refdes:CBL-CHAIN
 - refdes:FB-CHAIN
-- refdes:FFC-CHAIN
 - refdes:J-CHAIN
 - refdes:J-MCU
 - refdes:PCB-CLUSTER

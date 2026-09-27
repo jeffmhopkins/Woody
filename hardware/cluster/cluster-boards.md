@@ -20,7 +20,7 @@ Since ADR 0017:
 
 - **`right_hand` and `left_hand` are the two key boards** (`PCB-CLUSTER`),
   screwed to the underside of `PLATE-TOP` on M2 standoffs pressed into the
-  plate, one in each corner of a board that spans the cavity (ADR 0020). Each connects to the main board by one flat flex ribbon.
+  plate, one in each corner of a board that spans the cavity (ADR 0020). Each connects to the main board by one 1.27 mm IDC ribbon (`CBL-CHAIN`) into a through-hole right-angle header on its underside.
 - **`right_thumb` and `left_thumb` are on the main board** (`PCB-CARRIER`),
   their switches soldered to it and clipped into `PLATE-THUMB`, their
   registers and networks beside them.
@@ -30,8 +30,8 @@ of their eight register bits are switches, markers or free. The device, the
 decoupling, the network and the chain wiring are identical, and they should be
 laid out from one schematic with a variant table. **The two key boards are
 identical in the chain** — one connector each, `SER` in on conductor 6 and `QH` out
-on conductor 8 (key-board `J-CHAIN` pins 7 and 5; conductor k is key-board
-pin 13 − k, `key-chain-loom.md`) — so they differ only in switch count and strapping.
+on conductor 8 (key-board `J-CHAIN` pins 8 and 6; conductor k is key-board
+pin 12 − k for odd k and 14 − k for even k, `key-chain-loom.md`) — so they differ only in switch count and strapping.
 
 **The two key boards are KiCad projects** placing these circuits' sheets, which are
 the source of truth (ADR 0019):
@@ -205,12 +205,12 @@ and `RT` are on the main board.
 | `R-KEY-PU` | 2.2 kΩ 1% 0805 | **6** | **6** | 6 | 6 | **24, not 21.** `RT` carries its 4 keys and the 2 reserved spare-switch positions; `LT` and `LH` each carry a pull-up for their *free* bits (22, 23, 31), which the first draft budgeted for switch positions only |
 | `R-KEY-SER` | 100 Ω 1% 0805 | 5 | 4 | 6 | 6 | |
 | `C-KEY` | 47 nF X7R 0805 | 5 | 4 | 6 | 6 | |
-| `J-CHAIN` | 12-way FFC ZIF | 1 | — | 1 | — | One per key board; its mate is on the main board (`chain-connectors`) |
+| `J-CHAIN` | 2×6 1.27 mm shrouded IDC, right-angle, through-hole | 1 | — | 1 | — | One per key board, on its underside; its mate is on the main board (`chain-connectors`). Its pin tails need the key plate's window over them (`mechanical/DESIGN.md`) |
 | `marker straps` | copper, no parts | 2 | 2 | 2 | 2 | **Decided** — 8-bit marker, §4. Straight to GND or 3V3, no resistor and no cap: the node never changes |
 
 **Totals:** 4 ICs, 4 decoupling caps, 19 fitted switches in 21 networked
 positions, 63 network passives. The chain's own parts — `J-CHAIN` at both ends
-of each ribbon, `FFC-CHAIN`, and the chain-end `R-SER-TERM` on the main board —
+of each ribbon, `CBL-CHAIN`, and the chain-end `R-SER-TERM` on the main board —
 are the key-chain page's.
 
 ---

@@ -39,7 +39,11 @@ drawing.
   `switch.pcb_below_seat`). Each board is a rectangle across the cavity with a
   standoff in each corner, in plate metal (*"key-board standoffs in the
   plate's web"*); the standoff's length is derived (*"key-board standoff
-  length (derived)"*).
+  length (derived)"*). The plate has **a window cut through it over each key
+  board's chain header**, whose through-hole pin tails come up through the
+  board toward the grounded plate across the standoffs' gap (*"key-board
+  standoff length (derived)"*); the oak top covers
+  it (drawn in the plate's outline, `export/plate-top.dxf`).
 - **Thumb keys are flush with the bottom face at full travel** too (same date).
   The thumb plate is on the oak bottom's inside face, so the oak bottom is
   derived by the same rule as the oak top.
@@ -227,9 +231,9 @@ decision, not a correction.
 6. **The regulator block** fits wherever it stands on the main board.
    *Rule: "regulator block fits where it stands".*
 7. **The main board is placed by the layout** — its length by the mouth cap
-   and the right hand, its width by the sides — and each key board's ribbon
-   connector is placed clear of its switches by the model (*"ribbon connector
-   on the … key board clear of its switches"*).
+   and the right hand, its width by the sides — and each key board's chain
+   header, with the main board's under it, is placed clear of the switches by
+   the model (*"chain headers on the … boards clear of the switches"*).
 8. **M3 into a 1.20 mm plate** is about two threads. The BOM already says
    "insert or tapped boss"; the model says plain tapping is not one of the
    options.
@@ -245,22 +249,31 @@ only as good as those envelopes. Group the report's lines by these causes
 (read the counts there, not here):
 
 1. **Each key board is on a ribbon** (owner, 2026-09-26, ADR 0017), not a
-   blind-mating header: a 12-way flat flex ribbon from a low ZIF connector on
-   the key board's underside, beside its switches' pins on the side away from
-   the tube, to one on the main board below it; both connectors are placed
-   clear of the switch pins above and below. **One clean arc** (owner, same
-   day): both connectors take the ribbon from the far side, and it runs round
-   a C toward the side wall (`renders/section-ribbon.png`). One arc is short,
-   so the lid only tilts a little with the ribbons attached (*"ribbon arc
-   length, and the lid tilt it allows attached"*); to take the lid off, flip
-   the two ZIF latches first. A 2.54 IDC box header and
-   plug stand ~12-13 mm [from memory] in a 17 mm gap with parts on both
-   boards, which is why it is flat flex.
-2. **The hardware pages follow** (2026-09-26): `hardware/interfaces/key-chain-loom/`
-   describes the two flat flex ribbons (`J-CHAIN`, `FFC-CHAIN`) and the thumb
-   chain in traces, and `chain-connectors` is derived from them. The
-   key-board connector is the main board's part mounted upside down, so its
-   pinout is mirrored — `key-chain-loom.md` says how.
+   blind-mating header — and since 2026-09-27 a **through-hole IDC** one
+   (ADR 0017's amendment): a 2×6 1.27 mm shrouded right-angle header on each
+   board (`boards.chain_hdr_*`), the key board's **hanging from its underside
+   directly over the main board's** — stacked, at the same place along the
+   body — both in the far band beside the LED strip and **both mouths facing
+   the same way along the body**, clear of the switch pins above and below.
+   The ribbon comes out of both plugs and **folds back on itself: closed, it
+   is a flat hairpin lying along the body**, legs horizontal, one at each
+   plug's height, so it never stands across the LED strip's light
+   (`renders/section-ribbon.png`; *"key-chain ribbon closed: hairpin leg and
+   fold radius"*, *"key-chain ribbon hairpin inside the body"*). The left
+   hand's hairpin folds toward the tail and the right hand's toward the mouth
+   (`routing.chain_fold`, which says why). **Its length is the service
+   position's** (owner: long enough "to have the top off and still connect
+   the ribbon before tightening down"): the lid laid face down beside the
+   body off its far edge, the ribbon running up from the main board over the
+   far side's top edge and down to the key board (`routing.chain_service`,
+   `routing.chain_slack`; *"key-chain ribbon length (derived)"*). To take the
+   lid off, lift it, lay it beside the body and unplug the two sockets. The
+   key header's pin tails need the plate's window (above).
+2. **The hardware pages follow**: `hardware/interfaces/key-chain-loom/`
+   describes the two ribbons (`J-CHAIN`, `CBL-CHAIN`) and the thumb chain in
+   traces, and `chain-connectors` is derived from them. The key-board header
+   is the main board's part mounted upside down, facing the same way, so its
+   pin numbers do not match the main board's — `key-chain-loom.md` says how.
 3. **The breath tube** is short: mouth cap, trap, then across over the strip
    and back onto the sensor's port, all in the mouth band; the board has a
    slot in front of the sensor's lower port.
@@ -317,8 +330,9 @@ soldered to the main board, with no socket; how it is fitted and swapped is in
 **Found by the first PCB layout (2026-09-27, `docs/reference/tooling.md` §4):**
 the key boards' ribbon connector was deeper than the envelope assumed, and
 on a 1.6 mm board the KS-33's pins would show only about 0.1 mm below it.
-Both are settled in ADR 0020: the envelope is the Molex 200528's footprint,
-and the key boards are `boards.key_board_t` thick. The model
+Both were settled in ADR 0020: the key boards are `boards.key_board_t` thick,
+and the connector's envelope now comes from the IDC header's banked page
+(`boards.chain_hdr_*`, ADR 0017's 2026-09-27 amendment). The model
 now exports each key board's outline (`export/key-board-*.dxf`) and its
 switch and connector positions (`export/pcb-geometry.echo`), which the PCB is
 placed from.

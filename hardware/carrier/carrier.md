@@ -16,7 +16,7 @@ this board (ADR 0017), and everything else here is passive, slow, or analog.
 > **There is no carrier board (owner, 2026-09-26).** These circuits are built
 > on **the main board** (ADR 0017): one long board at the thumb level that
 > also carries the thumb switches and their registers, with the key boards
-> connected to it by flat flex ribbons (`mechanical/DESIGN.md`). The block
+> connected to it by 1.27 mm IDC ribbons (`mechanical/DESIGN.md`). The block
 > diagram and §§ below describe the circuits, which have not changed; where a
 > line talks about "the board", read the main board. Its size and the room its
 > parts have are in `mechanical/drc.echo`. The breath sensor is at its mouth
@@ -229,7 +229,7 @@ and both are board decisions, not firmware ones.
 *§3 is
 [`../interfaces/key-chain-loom/`](../interfaces/key-chain-loom/key-chain-loom.md),
 which holds the whole chain: the `right_thumb` and `left_thumb` registers on
-this board, the two flat flex ribbons to the key boards, and this board's
+this board, the two IDC ribbons to the key boards, and this board's
 chain parts — `R-CHAIN-SER`, `R-SER-TERM`, `U-TVS-CHAIN`, the two `FB-CHAIN`
 and its two `J-CHAIN`. The section number is kept because other pages cite `carrier.md`
 §3.*
@@ -463,7 +463,7 @@ page and have no BOM entry yet.
 | `D-TVS-BREATH` ×2 | 12 V standoff, SOD-323 | `BREATH` and `AGND` legs | `[repo]` |
 | `R-SPI-SER` ×3 | **100 Ω** | Series at the driving end on `SCLK`, `MOSI`, `CS`. **Was drawn as three refdes that are not in the BOM, at 220 Ω, derived from an RC model** — see §4 | `[repo] bom.csv` |
 | `U-TVS-SPI` | SP0504BAHT, **SOT-23-5** | `SCLK`, `MOSI`, `CS` + spare, to `PWR_GND` | `[repo]` |
-| **`J-CHAIN`** ×2 here | **12-way 1.0 mm FFC ZIF** | **One per key-board ribbon (`FFC-CHAIN`); the mates are on the key boards (`chain-connectors` in all). 4 signals, 5 alternating grounds, 3V3, 2 spare. Part open until M4. `key-chain-loom.md`** | ribbon decided (ADR 0017), part open |
+| **`J-CHAIN`** ×2 here | **2×6 1.27 mm shrouded IDC header, right-angle, through-hole** | **One per key-board ribbon (`CBL-CHAIN`), in the far band beside the LED strip, under its key board's; the mates are on the key boards (`chain-connectors` in all). 4 signals, 5 alternating grounds, 3V3, 2 spare. Part open until M4. `key-chain-loom.md`** | ribbon decided (ADR 0017), part open |
 | `MECH-GNDBOND` | Ring terminal + M3 | Plate to `PWR_GND`. Needs a pad and a hole on this board | `[repo]` |
 | `PCB-CARRIER` | 2-layer, outline derived by the body CAD | The main board (ADR 0017). See *Still open* | `[repo]` `mechanical/drc.echo` "main board (derived)" |
 | **`TP-*`, `LK-*`** | **TBD** | **Proposed — `D2` asked for test points, shunt links and an LA header on this board and none exist in the BOM** | proposed |
@@ -482,13 +482,13 @@ buffer and the other is the breath buffer.*
 
 ## What plugs into this board
 
-**There are no internal looms** (ADR 0017). The key chain is flat flex
-ribbon, the LED strip is on this board (ADR 0016), the console is a header on
+**There are no internal looms** (ADR 0017). The key chain is two IDC
+ribbons, the LED strip is on this board (ADR 0016), the console is a header on
 it, and power arrives down the umbilical. What terminates here:
 
 | From | Conductors | Connector |
 |---|---|---|
-| The two key boards, one flat flex ribbon each (`FFC-CHAIN`) | 12 each: four chain signals, five alternating grounds, 3V3, two spare — `key-chain-loom.md` | `J-CHAIN` ZIF, one per ribbon here; `chain-connectors` counts both ends |
+| The two key boards, one IDC ribbon each (`CBL-CHAIN`) | `chain-conductors` each: four chain signals, five alternating grounds, 3V3, two spare — `key-chain-loom.md` | `J-CHAIN` IDC header, one per ribbon here; `chain-connectors` counts both ends |
 | The Matrix, on the lid | 24 | `J-MCU` |
 | The umbilical, from the tail cap | 8 | `J-UMB` |
 | WS2815 strip — on this board (ADR 0016): 12 V, GND, `DI`, `BI` to ground | 4 | `J-LED` |

@@ -21,7 +21,7 @@ register's `body-thickness`, stated here.
 > set it by the etherCON rather than pocket the oak bottom for it. The
 > connector stands on the floor with its rear socket and patch plug under the
 > LED matrix; the matrix sits against the oak top, the key plate ending short
-> of it, and the key and thumb boards join by stacking headers *(since ADR 0017: one main board, key boards on 12-way flat-flex ribbons)* (owner, same
+> of it, and the key and thumb boards join by stacking headers *(since ADR 0017: one main board, key boards on 12-way ribbons — 1.27 mm IDC since 2026-09-27)* (owner, same
 > day: "tighter vertically"). `mechanical/drc.echo` ("body thickness takes
 > the etherCON on the floor") gives the thinnest body that allows it — the
 > connector's flange, floor to oak top — and this figure is that rounded up
@@ -612,7 +612,7 @@ flat parts, and not blocked.
 "a body that is bonded shut is a body that is never opened again." The body is
 not bonded shut any more, so the items below are no longer *impossible* later —
 they are merely expensive, because getting at them means lifting the lid,
-disturbing the loom *(since ADR 0017: unlatching two ZIF ribbons and unplugging J-MCU)* and re-laying a gasket. That is a real cost and it is worth
+disturbing the loom *(since ADR 0017: unplugging J-MCU and, with the lid laid beside the body, the two key-chain ribbons — IDC sockets since 2026-09-27, no ZIF latches)* and re-laying a gasket. That is a real cost and it is worth
 avoiding, but it is not the cliff this page was written against.
 
 **Two of them are still genuinely impossible later**, because they are cuts in
@@ -641,7 +641,7 @@ LED power and 800 kHz data — 10 kΩ, 100 Ω and 10 nF per switch position on t
 cluster boards (ADR 0001).
 
 *(Amended 2026-09-26: since ADRs 0016 and 0017 there is no hand-built loom.
-The key boards are on flat flex and the Matrix on a 20-way ribbon; how its
+The key boards are on flat flex *(1.27 mm IDC since 2026-09-27, ADR 0017's amendment)* and the Matrix on a 20-way ribbon; how its
 spare positions are used is open on `CBL-MCU-RIBBON`.)*
 **Run two spare conductors in every internal loom.** The looms are hand-built,
 once, and threaded through channels in a glued sub-assembly. The lid comes off,

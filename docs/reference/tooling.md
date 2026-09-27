@@ -288,8 +288,9 @@ board's analog routing is done by hand** (`docs/reference/pcb-pipeline.md`).
   an empty one.
 - **3D models**: `kicad-packages3d` is 3 GB; the four this board needs came
   from `gitlab.com/kicad/libraries/kicad-packages3D` tag `9.0.0` into
-  `/usr/share/kicad/3dmodels/`. The Molex connector has no model there, so it
-  renders as pads.
+  `/usr/share/kicad/3dmodels/`. The chain header's footprint is the
+  repository's own (`woody:IDC-Header_2x06_P1.27mm_Samtec_SHF_Horizontal`), so
+  it has no 3D model and renders without a body.
 - **Reference text as long as `R-KEY-SER-LH1` cannot be silkscreened on an
   0805**: references go on the fabrication layer, which the assembly drawing
   reads.
@@ -300,8 +301,11 @@ board's analog routing is done by hand** (`docs/reference/pcb-pipeline.md`).
   now uses the footprint's size (`boards.ffc_conn_*`, ADR 0020). A first
   stand-in footprint (Würth 68611214422) needed 9.9 mm and could not fit
   beside the switch holes; the Molex 200528-0120 fits the board as drawn,
-  with its cable entry at the board's end. `J-CHAIN`'s exact part is still
-  open until M4.
+  with its cable entry at the board's end. *(2026-09-27, ADR 0017's
+  amendment: `J-CHAIN` is now a through-hole 2×6 1.27 mm shrouded right-angle
+  IDC header, stand-in Samtec SHF-106-01-L-D-RA, and the CAD's envelope is
+  `boards.chain_hdr_*`; `boards.ffc_conn_*` no longer exists.)* `J-CHAIN`'s
+  exact part is still open until M4.
 - **Nothing held the board.** The first layout had no mounting at all. Now
   the board is a rectangle across the cavity with an M2 standoff in each
   corner, NPTH holes, and copper keep-outs under the standoff face and the

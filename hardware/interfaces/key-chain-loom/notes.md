@@ -64,3 +64,26 @@ board's rail got its own net past its bead.
 `U-TVS-CHAIN` had been `open`, with "protect service by procedure (instrument
 off, a wrist strap) or by the part" left to the owner. The owner chose the
 part.
+
+## 2026-09-27 — flat flex and ZIF replaced by through-hole 1.27 mm IDC
+
+From 2026-09-26 the chain's connectors were a 12-way 1.0 mm SMT side-entry
+ZIF (`J-CHAIN`, the Molex 200528-0120 as the first layout's stand-in) at each
+end of a same-side-contact flat flex cable, `FFC-CHAIN`. The key board's
+connector took the ribbon from the far side, level, and the ribbon ran round
+one 180° C toward the far side wall into the main board's. That short arc let
+the lid tilt only a little with the ribbons attached; to take the lid off,
+the two ZIF latches were flipped first. The key board's pins were netted
+13 − k, and the cable's length was to be "ribbon arc length" plus two
+insertion depths. Flat flex had been chosen because a 2.54 mm IDC box header
+and plug were judged too tall for the gap between the boards — a figure from
+memory, about 2.54 mm parts only.
+
+The owner changed it on 2026-09-27 (ADR 0017's amendment): through-hole, so
+the board rather than SMT pads takes the cable's pull; right-angle 1.27 mm
+shrouded IDC headers, stacked one over the other; the ribbon folded flat as a
+hairpin along the body so that it never blocks the LED strip; and long enough
+to plug in with the lid off, laid beside the body. `FFC-CHAIN` became
+`CBL-CHAIN`, the key-board pin map became 12 − k / 14 − k, and the ZIF-era
+note that a ribbon "seated skewed" could bridge 3V3 to ground gave way to the
+keyed shroud.

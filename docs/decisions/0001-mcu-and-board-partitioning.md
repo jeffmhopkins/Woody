@@ -82,7 +82,8 @@ TAIL   dev board on a passive carrier: MCU, IMU, 8×8 matrix, breath sensor,
        mouth end; the Matrix is on the lid, 20-way ribbon to J-MCU; the
        umbilical is etherCON -> patch lead -> J-UMB on the main board)
         |
-        |  (since ADR 0017: thumbs on traces, key boards on 12-way FFC)
+        |  (since ADR 0017: thumbs on traces, key boards on 12-way ribbons,
+        |   1.27 mm IDC since its 2026-09-27 amendment)
         |  ONE chained run, 12 conductors per hop (2x6 IDC), passing through
         |  each cluster board in turn: SCK, SH/LD, serial in, serial out,
         |  a ground between every signal, 3V3, and two spares
@@ -138,7 +139,7 @@ connection is a copper trace. Four conductors plus power leave each board.
 | | **One per cluster** | All four at the tail |
 |---|---|---|
 | Conductors down the body | **12 per hop** — 6 signals-and-supply, 5 grounds, 2 spare | 32–44 |
-| Hand-terminated joints | **~8 connectors, 4 ribbon assemblies** (since ADR 0017: `chain-connectors`, two flat flex) | **~46 individual wires** |
+| Hand-terminated joints | **~8 connectors, 4 ribbon assemblies** (since ADR 0017: `chain-connectors`, two ribbons — 1.27 mm IDC since 2026-09-27) | **~46 individual wires** |
 | Boards | 5 | 5 — *the switches need a PCB either way* |
 | Carrier area | as designed | **+41 %**: 4 ICs and 63 passives |
 | Risk | clocked lines in the LED channel | a fat loom, and blast radius if one is hit |
@@ -264,7 +265,10 @@ which is still reason enough to do them now.
    in and `QH` out. The pinout, the alternating grounds, the two spares and
    the chain order below are kept; the connector count is `chain-connectors`
    and the hop map is `hardware/interfaces/key-chain-loom/`. What follows is
-   the IDC version as decided.)*
+   the IDC version as decided.)* *(Amended 2026-09-27, ADR 0017's amendment:
+   the flat flex and ZIF connectors are replaced by through-hole 2×6 1.27 mm
+   IDC headers and a 12-conductor IDC ribbon per key board, pinout unchanged
+   at the main board.)*
 
    **`J-CHAIN` is a 2×6 IDC on a 12-way ribbon**, alternating ground:
    `GND SCK GND SH/LD GND SER GND QH GND 3V3 spare spare`. Every signal has
@@ -385,14 +389,14 @@ during performance.
   diodes. **And with the registers back on the cluster boards it does not mean
   per-key wiring back to a central point**: every switch-to-chip connection is
   a trace on the board the switch is already soldered to, and twelve
-  conductors leave each cluster (this line said six; the hop was a 2x6 IDC — *(Amended 2026-09-26, ADR 0017: a 12-way flat-flex ribbon per key board, the thumbs' registers on main-board traces)*). An intermediate version of this line called that wiring
+  conductors leave each cluster (this line said six; the hop was a 2x6 IDC — *(Amended 2026-09-26, ADR 0017: a 12-way flat-flex ribbon per key board, the thumbs' registers on main-board traces; 1.27 mm IDC ribbon since 2026-09-27)*). An intermediate version of this line called that wiring
   "the right price" for tail-mounted registers. The price is no longer paid.
 - **Chain is 4 registers, 32 bits, for 18 switches** (ADR 0010), **one per
   cluster board**. The 14 spare bits are free expansion for octave, mode and
   hold inputs, **8 of them carry the marker pattern** and 3 stay free. *(Amended 2026-09-26: hold/preset became switch RT4, so the used and spare counts each moved by one — `config/key-layout.yaml` `chain` and `spare_bits*` own them; and since ADR 0017 the four registers sit two on the key boards and two on the main board.)* Full chain reads in
   ~32 µs at 1 MHz, about 13 % of a 250 µs loop period. **1 MHz is the design
   rate and the chain should not be pushed much past it**: it crossed four
-  connectors and ~265 mm of loom when this was written *(Amended 2026-09-26, ADR 0017: now main-board traces plus two flat-flex ribbons; the length is `mechanical/drc.echo` "main board (derived)")*, and HC165's slow edges are what make that an
+  connectors and ~265 mm of loom when this was written *(Amended 2026-09-26, ADR 0017: now main-board traces plus two ribbons, 1.27 mm IDC since 2026-09-27; the length is `mechanical/drc.echo` "main board (derived)")*, and HC165's slow edges are what make that an
   ordinary lumped load. Clocking it hard is how the transmission-line hazards
   come back.
 - LED power and data run the length of the body too. Keep their ground return

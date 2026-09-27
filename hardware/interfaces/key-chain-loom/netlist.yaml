@@ -3,7 +3,7 @@
 #
 # THE HOP MAP IS HERE, AS NETS. Chain order MCU <- RT <- RH <- LT <- LH
 # (config/key-layout.yaml). right_thumb and left_thumb are on the main board;
-# right_hand and left_hand are on the key boards, one flat flex ribbon each.
+# right_hand and left_hand are on the key boards, one IDC ribbon each.
 # Each ribbon carries its key board's SER in on conductor 6 and its QH out on
 # conductor 8, so every hop is a named net below.
 #
@@ -14,12 +14,14 @@
 # hardware/nets.yaml marks those nets `per_board:` - the checker prints them
 # rather than pretending the register declares them.
 #
-# THE KEY-BOARD CONNECTOR IS NUMBERED IN REVERSE. Same part at both ends, the
-# key board's mounted upside down with the same entry side: conductor k is
-# main-board pin k and key-board pin 13-k. That is [calc] geometry on the
-# page, to be confirmed against the chosen part's pin-1 drawing.
+# THE KEY-BOARD HEADER NUMBERS THE CONDUCTORS DIFFERENTLY. Same 2x6 1.27 mm
+# right-angle IDC header at both ends, the key board's mounted upside down on
+# its underside, facing the same way: conductor k is main-board pin k and
+# key-board pin 12-k (k odd) or 14-k (k even). That is [calc] geometry on the
+# page, assuming standard IDC numbering - OPEN until the part's full print
+# confirms it.
 #
-# THE CABLE IS NOT A COMPONENT HERE. FFC-CHAIN is a straight conductor per
+# THE CABLE IS NOT A COMPONENT HERE. CBL-CHAIN is a straight conductor per
 # pin, so each ribbon is modelled as the nets it joins: a main-board pin and
 # the key-board pin it reaches are on the same net.
 #
@@ -69,7 +71,7 @@ components:
     of: J-CHAIN
     value: "12-way"
     pins: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-    note: "right_hand key board. REVERSED: conductor k lands on pin 13-k"
+    note: "right_hand key board, the header upside down: conductor k lands on pin 12-k (k odd) or 14-k (k even) - open until the full print"
 
   J-CHAIN-MAIN-LH:
     of: J-CHAIN

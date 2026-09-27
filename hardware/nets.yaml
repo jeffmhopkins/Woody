@@ -47,14 +47,14 @@ nets:
   # chain's to say.
   V3V3_CHAIN_RH:
     kind: power
-    carries: "right_hand key board's 3V3: FB-CHAIN on the main board, then conductor 10 of its ribbon (main-board J-CHAIN pin 10, key-board pin 3)"
+    carries: "right_hand key board's 3V3: FB-CHAIN on the main board, then conductor 10 of its ribbon (main-board J-CHAIN pin 10, key-board pin 4)"
     driver: interfaces/key-chain-loom
     receivers: [cluster/key-register, cluster/key-switch-network, cluster/key-marker-and-bits]
     per_board: true
 
   V3V3_CHAIN_LH:
     kind: power
-    carries: "left_hand key board's 3V3: FB-CHAIN on the main board, then conductor 10 of its ribbon (main-board J-CHAIN pin 10, key-board pin 3)"
+    carries: "left_hand key board's 3V3: FB-CHAIN on the main board, then conductor 10 of its ribbon (main-board J-CHAIN pin 10, key-board pin 4)"
     driver: interfaces/key-chain-loom
     receivers: [cluster/key-register, cluster/key-switch-network, cluster/key-marker-and-bits]
     per_board: true

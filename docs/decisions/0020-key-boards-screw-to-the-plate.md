@@ -64,6 +64,14 @@ connector envelope using a stand-in size. The real footprint, a Molex 200528
      the connector fits once the model is right.
    - The rule "key-board screw heads clear of the ribbon connector" keeps
      the screw heads off it.
+   - *(Amended 2026-09-27, [ADR 0017](0017-one-main-board.md)'s amendment:
+     `J-CHAIN` is now a through-hole 2×6 1.27 mm shrouded right-angle IDC
+     header, stand-in Samtec SHF-106-01-L-D-RA, stacked over the main
+     board's. `boards.ffc_conn_*` no longer exists: the envelope is
+     `config/body.yaml` `boards.chain_hdr_*` and the plug's
+     `boards.chain_plug_*`, from the banked Samtec pages. The rule is now
+     "key-board screw heads clear of the chain header", and the no-parts
+     strip is under the header, its plug and the ribbon's hairpin.)*
 
 6. **The key boards are 1.2 mm thick** (`boards.key_board_t`).
    - The switch pins end 5.10 mm below the seat, and the board's top is
