@@ -256,28 +256,33 @@ only as good as those envelopes. Group the report's lines by these causes
    body — both in the far band beside the LED strip and **both mouths facing
    the same way along the body**, clear of the switch pins above and below.
    The ribbon comes out of both plugs and **folds back on itself: closed, it
-   is a flat hairpin lying along the body**: both sockets' cables leave
-   downward, the main board's leg lies on the main board and the key board's
-   hangs just under its socket, both running the same way to the fold, so it
-   never stands across the LED strip's light
+   is a flat hairpin lying along the body**: the `-RN2` cable leaves the main
+   board's socket upward and the key board's downward, facing each other,
+   and both legs lie between the two plugs' heights, running the same way to
+   the fold, so it never stands across the LED strip's light
    (`renders/section-ribbon.png`; *"key-chain ribbon closed: hairpin leg and
-   fold radius"*, *"key-chain ribbon hairpin inside the body"*). The left
-   hand's hairpin folds toward the tail and the right hand's toward the mouth
-   (`routing.chain_fold`, which says why). **Its length is the service
+   fold radius"*, *"key-chain ribbon fold no tighter than its bend radius"*,
+   *"key-chain ribbon hairpin inside the body"*, *"key-chain ribbon hairpin
+   clear of the lid screws"*). Which way each hand's hairpin folds is
+   `routing.chain_fold`, which says why. **Its length is the service
    position's** (owner: long enough "to have the top off and still connect
    the ribbon before tightening down"): the lid laid face down beside the
-   body off its far edge, the ribbon running up from the main board over the
-   far side's top edge and down to the key board (`routing.chain_service`,
-   `routing.chain_slack`; *"key-chain ribbon length (derived)"*). To take the
-   lid off, lift it, lay it beside the body and unplug the two sockets. The
-   key header's pin tails need the plate's window (above).
+   body off its far edge, the body standing on its U-bolt, the ribbon running
+   up from the main board over the far side's top edge and down to the key
+   board (`routing.chain_service`, `routing.chain_slack`; *"key-chain ribbon
+   length (derived)"*). The cable is ordered by *"key-chain cable to order
+   (FFSD length code)"*, which is the FFSD part number's length field, in
+   inches. To take the lid off, lift it, lay it beside the body and unplug
+   the two sockets. The key header's pin tails stop short of the plate
+   (above).
 2. **The hardware pages follow**: `hardware/interfaces/key-chain-loom/`
    describes the two ribbons (`J-CHAIN`, `CBL-CHAIN`) and the thumb chain in
    traces, and `chain-connectors` is derived from them. The key-board header
    is the main board's part mounted upside down, facing the same way, and the
-   cable's key-board socket has its notch reversed so its ribbon leaves
-   downward too; that makes the key board's pin numbers differ from the main
-   board's — `key-chain-loom.md` says how.
+   cable is ordered with its second socket's notch reversed (`-RN2`), which
+   is what sends the two ends' cables toward each other; that makes the key
+   board's pin numbers differ from the main board's — `key-chain-loom.md`
+   says how.
 3. **The breath tube** is short: mouth cap, trap, then across over the strip
    and back onto the sensor's port, all in the mouth band; the board has a
    slot in front of the sensor's lower port.
@@ -335,7 +340,7 @@ soldered to the main board, with no socket; how it is fitted and swapped is in
 the key boards' ribbon connector was deeper than the envelope assumed, and
 on a 1.6 mm board the KS-33's pins would show only about 0.1 mm below it.
 Both were settled in ADR 0020: the key boards are `boards.key_board_t` thick,
-and the connector's envelope now comes from the IDC header's banked page
+and the connector's envelope now comes from the IDC header's banked full print
 (`boards.chain_hdr_*`, ADR 0017's 2026-09-27 amendment). The model
 now exports each key board's outline (`export/key-board-*.dxf`) and its
 switch and connector positions (`export/pcb-geometry.echo`), which the PCB is
@@ -344,6 +349,8 @@ placed from.
 ## Not modelled yet
 
 The thumb rest lip, gasket beads, plate stiffening (ADR 0002 — open, and it changes the lid),
-and the diffuser standoff. The
-main board and the key boards are rectangles, because their outlines are
-M3/M4 outputs.
+and the diffuser standoff. The main board is a rectangle because its
+outline is an M3/M4 output. The key boards are rectangles by decision (ADR
+0020 point 3): their outlines are generated now (`export/key-board-*.dxf`),
+and only their size moves, with the switch positions, which are provisional
+until M3.

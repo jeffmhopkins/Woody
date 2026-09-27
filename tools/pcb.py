@@ -858,9 +858,10 @@ def assembly_files(bdir, name, fab):
     placement (CPL) file of the same parts, and the list of parts fitted by hand.
     Part identity comes from the sheets' fields (Manufacturer, MPN, LCSC,
     Assembly = machine / hand / none); positions from KiCad's own placement
-    export. Rotation is KiCad's: JLC's placement preview is where the part
-    orientations are confirmed before the order (its KiCad guide,
-    datasheets/fab/JLCPCB-KICAD-BOM-CPL-GUIDE.pdf). Returns the sheets read, so
+    export. Rotation is KiCad's, uncorrected - the guide's Method 1
+    (datasheets/fab/JLCPCB-KICAD-BOM-CPL-GUIDE.pdf credits rotation fixes only
+    to a plugin this flow does not use), so JLC's placement preview is where
+    the part orientations are confirmed before the order. Returns the sheets read, so
     the ledger ties these files to them as well as to the board."""
     import csv
     import kicad

@@ -86,7 +86,7 @@ boards_sensor_port_z = [8.5, 1.4];  // nominal; port centres above the seating p
 boards_sensor_port_offset = 2.1;  // tbd; [ds] MPXV4006DP p.7 end view, case 1351-01 dim N (p.20 table) 4.06-4.57 - the two ports' centres are offset across the body by N, so each sits N/2 = 2.03-2.29 either side of the body's centre [calc]; 2.1 is a pick inside that range
 boards_sensor_lead_row = 10.2;  // tbd; length along the body of the block standing in for the leads. NOT a datasheet dimension: the p.20 table gives e 2.54 BSC and b 0.96-1.07, so 4 leads per side span 3 x 2.54 + 1.07 = 8.69 max [calc]; 10.2 is a modelling envelope over that [from memory]
 boards_sensor_lead_h = 1.2;  // tbd; height of the block standing in for the lead forms. NOT a datasheet dimension: the p.20 table gives only A1 0.05-0.25 (standoff) and L 1.02-1.52 (foot length); the lead's rise to the body is drawn (p.7 Detail G) but not dimensioned [from memory]
-boards_chain_hdr_l = 13.97;  // nominal; SHF header length A = pins per row x 1.27 + 6.35, 6 per row [datasheets/connectors/SAMTEC-SHF-1.27MM-SHROUDED-IDC-HEADER.pdf]
+boards_chain_hdr_l = 13.97;  // nominal; SHF header length = positions per row x 1.27 + 6.35 REF, 6 per row [datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf, sheet 1]
 boards_chain_hdr_h = 5.59;  // nominal; the right-angle header's height off the board, .220 REF, standing on 0.51 ribs [datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf, sheet 1 fig 1]
 boards_chain_hdr_d = 5.33;  // nominal; the right-angle shroud's depth, mouth to back, .210 REF [datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf, sheet 1]
 boards_chain_hdr_pin_back = 7.86;  // nominal; from the mouth back to the far (odd) pin row: the depth 5.33 plus the odd row's bend 1.26 + 1.27 behind the back face, measured at the bend (note 7) [datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf, sheet 2 section C-C; calc]
@@ -94,8 +94,8 @@ boards_chain_plug_proud = 1.4;  // tbd; how far the FFSD socket stands out of th
 boards_chain_hdr_tail = 2.15;  // nominal; the header's tails below its seating plane, .085 REF [datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf, sheet 2 section C-C]
 boards_chain_hdr_mouth_z = 3.05;  // nominal; the mouth's centre above the board: the 0.51 ribs plus half the 5.08 body [calc, datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf sheet 1 fig 1]
 boards_chain_plug_h = 5.08;  // nominal; the FFSD socket's height along its insertion, 5.08 +0.15/-0.08 [datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf, sheet 1 fig 1]
-boards_chain_plug_t = 3.05;  // nominal; the FFSD socket's thickness [datasheets/connectors/SAMTEC-FFSD-1.27MM-IDC-CABLE.pdf]
-boards_chain_plug_l = 11.81;  // nominal; the FFSD socket's length, positions x 1.27 + 4.19 for 6 per row [datasheets/connectors/SAMTEC-FFSD-1.27MM-IDC-CABLE.pdf]
+boards_chain_plug_t = 3.05;  // nominal; the FFSD socket's thickness, .120 REF [datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf, sheet 1]
+boards_chain_plug_l = 11.81;  // nominal; the FFSD socket's length, positions per row x 1.27 + 4.19, 6 per row [datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf, sheet 1]
 boards_mcu_conn_l = 18.5;  // tbd; a 2 x 12 1.27 mm box header, side entry, across the body: 11 x 1.27 = 13.97 between end pins [calc] plus the shroud's end walls [from memory] (ADR 0018)
 boards_mcu_conn_w = 6.0;  // tbd; the same header along the body, with its latch [from memory]
 boards_mcu_conn_h = 5.0;  // tbd; the same header's height [from memory]

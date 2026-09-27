@@ -348,23 +348,23 @@ boards:
   chain_hdr_l:
     value: 13.97
     status: nominal
-    source: "SHF header length A = pins per row x 1.27 + 6.35, 6 per row [datasheets/connectors/SAMTEC-SHF-1.27MM-SHROUDED-IDC-HEADER.pdf]"
-    decided_by: "M4, with J-CHAIN's part and its full print"
+    source: "SHF header length = positions per row x 1.27 + 6.35 REF, 6 per row [datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf, sheet 1]"
+    decided_by: "M4, with J-CHAIN's part"
   chain_hdr_h:
     value: 5.59
     status: nominal
     source: "the right-angle header's height off the board, .220 REF, standing on 0.51 ribs [datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf, sheet 1 fig 1]"
-    decided_by: "M4, with the full print"
+    decided_by: "M4, with J-CHAIN's part"
   chain_hdr_d:
     value: 5.33
     status: nominal
     source: "the right-angle shroud's depth, mouth to back, .210 REF [datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf, sheet 1]"
-    decided_by: "M4, with the full print"
+    decided_by: "M4, with J-CHAIN's part"
   chain_hdr_pin_back:
     value: 7.86
     status: nominal
     source: "from the mouth back to the far (odd) pin row: the depth 5.33 plus the odd row's bend 1.26 + 1.27 behind the back face, measured at the bend (note 7) [datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf, sheet 2 section C-C; calc]"
-    decided_by: "M4, with the full print"
+    decided_by: "M4, with J-CHAIN's part"
   chain_plug_proud:
     value: 1.4
     status: tbd
@@ -388,12 +388,12 @@ boards:
   chain_plug_t:
     value: 3.05
     status: nominal
-    source: "the FFSD socket's thickness [datasheets/connectors/SAMTEC-FFSD-1.27MM-IDC-CABLE.pdf]"
+    source: "the FFSD socket's thickness, .120 REF [datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf, sheet 1]"
     decided_by: "M4"
   chain_plug_l:
     value: 11.81
     status: nominal
-    source: "the FFSD socket's length, positions x 1.27 + 4.19 for 6 per row [datasheets/connectors/SAMTEC-FFSD-1.27MM-IDC-CABLE.pdf]"
+    source: "the FFSD socket's length, positions per row x 1.27 + 4.19, 6 per row [datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf, sheet 1]"
     decided_by: "M4"
   # THE MATRIX AND THE UMBILICAL, onto the main board's tail end (owner,
   # 2026-09-26: "what about matrix led esp32 and ethercon wire connections?").

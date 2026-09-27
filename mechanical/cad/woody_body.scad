@@ -657,9 +657,10 @@ function kb_standoffs(cl) = let(r = kb_rect(cl), e = hardware_kb_standoff_inset)
 kb_gap = switch_pcb_below_seat - plate_thickness;            // plate underside to board top
 kb_top = z_plate_top - switch_pcb_below_seat;                 // the key boards' top face
 // Where the ribbon runs under a key board, from its connector's mouth to the
-// board's far edge: no parts there (the PCB keeps it as a rule area).
+// board's far edge: no parts there - the model's parts envelope leaves it out.
 // The key board's chain header with its plug, as a rectangle [x0, y0, x1, y1]:
-// no other part there, and the plate's window over its pin tails.
+// no other part there; its pin tails stop short of the plate (drc.echo
+// "J-CHAIN pin tails clear of the key plate").
 function kb_chain_rect(cl) = let(sp = chain_span(chain_x(cl), chain_dir(cl)))
     [sp[0], chain_y - boards_chain_hdr_l / 2, sp[1], chain_y + boards_chain_hdr_l / 2];
 // Where the key board's chain header's pin tails come up through the board:
@@ -756,8 +757,8 @@ module led_strips() {
 // ------------------------------------------------------------ routing -----
 // The breath tube runs from the mouth cap to the trap and the sensor inside
 // the mouth band, against one side (routing_tube_lane); there are no looms
-// since ADR 0017 - the key boards are on flat flex and the Matrix on a
-// ribbon, both drawn below. The lane is a model choice (config/body.yaml
+// since ADR 0017 - the key boards are on 1.27 mm IDC ribbons and the Matrix
+// on a ribbon, both drawn below. The lane is a model choice (config/body.yaml
 // routing): the clash check reports what is in it.
 // Inboard of the fastener line, which is close to the sides.
 function lane_y(side, d) = let(e = hardware_fastener_inset + fastener_notch + d / 2)
@@ -1351,6 +1352,8 @@ module drc_report() {
     drc(undef, "key-chain ribbon closed: hairpin leg and fold radius", [chain_leg, chain_r], "mm; the legs lie flat along the body between the two plugs' heights");
     for (cl = chain_ribbon_cls) let(h = chain_hairpin(cl), r = kb_rect(cl))
         drc(h[0] >= x_in0 + boards_board_clear && h[1] <= x_in1 - boards_board_clear, str("key-chain ribbon hairpin inside the body (", cl, ")"), h, "mm along the body");
+    echo("DRC", "INFO", "key board to main board gap", (kb_top - boards_key_board_t) - cb_top,
+         "mm from the main board's top face to a key board's underside: what the chain header, its plug and the ribbon's hairpin stand in (ADR 0017)");
     for (cl = chain_ribbon_cls) let(g = chain_screw_gap(chain_hairpin(cl)))
         drc(g >= fastener_notch, str("key-chain ribbon hairpin clear of the lid screws (", cl, ")"), g, "mm from the hairpin to the nearest screw's centre");
 

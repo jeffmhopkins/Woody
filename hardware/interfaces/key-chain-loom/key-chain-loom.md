@@ -169,10 +169,10 @@ header; the stand-in is Samtec SHF-106-01-L-D-RA
 `[datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf, the full print]`.
 `CBL-CHAIN` is a flat IDC ribbon, 12 conductors at 0.635 mm, with a 2×6 IDC
 socket at each end, bought as an assembled length; the stand-in is Samtec
-**FFSD-06-D-xx.xx-01-N-RN2** — `xx.xx` is the length below, and **`-RN2`,
-the notch reversed on the key-board end only, is what sets the pin map**
-(below) `[datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf, sheet 2
-fig 3]`. Their envelopes are `config/body.yaml` `boards.chain_hdr_*` and
+**FFSD-06-D-xx.xx-01-N-RN2** — `xx.xx` is the length code below, in
+inches, and **`-RN2`, the notch reversed on the second socket, is what sets
+the pin map and which way each end's cable leaves** (below)
+`[datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf, sheet 2 fig 3]`. Their envelopes are `config/body.yaml` `boards.chain_hdr_*` and
 `boards.chain_plug_*`, and the ribbon's `routing.chain_ribbon_w` / `_t`.
 **Through-hole** is the owner's reason for the change: the cable's pull goes
 into the board, not into SMT pads.
@@ -185,31 +185,43 @@ body**. Each header stands `boards.chain_hdr_h` off its board with its mouth
 centred `boards.chain_hdr_mouth_z` above it; its pin rows are **behind the
 body's back face**, the tails bending down behind it (`boards.chain_hdr_pin_back`,
 from the mouth); a mated socket stands `boards.chain_plug_proud` out of the
-mouth (tbd). The key header's pin tails come up through the key board toward the
-grounded key plate, which has a **window cut through it over them**, under the
-oak top. The model places both headers clear of the switches (`drc.echo`
-"chain headers on the left_hand boards clear of the switches", and the
-`right_hand` rule).
+mouth (tbd). That stand-out decides whether the cable clears the shroud's
+mouth at all, not only where the ribbon folds: the cable leaves the socket a
+little inside its back face, so a socket that stands out less than estimated
+can pinch the cable on the shroud. It is measured on the first mated pair.
+The key header's pin tails come up through the key board toward the grounded
+key plate and **stop short of it**: the plate has no window over them
+(`drc.echo` "J-CHAIN pin tails clear of the key plate"). The model places
+both headers clear of the switches (`drc.echo` "chain headers on the
+left_hand boards clear of the switches", and the `right_hand` rule).
 
-**How the ribbon lies closed** `[repo]`: both sockets' cables leave
-**downward** — the main board's onto the main board, the key board's away
-from the key board (below) — and the ribbon folds back on itself into a
-**flat hairpin lying along the body**: **the main board's leg lies on the
-main board and the key board's hangs just under its socket**, both running
-the same way along the body to the fold, so it never stands across the LED
-strip's light. The left hand's hairpin folds toward the tail and the right
-hand's toward the mouth (`config/body.yaml` `routing.chain_fold`, which says
-why). Leg and fold radius: `mechanical/drc.echo` "key-chain ribbon closed:
-hairpin leg and fold radius"; both hairpins are checked inside the body
-("key-chain ribbon hairpin inside the body").
+**How the ribbon lies closed** `[repo]`: with `-RN2`, **the main board's
+socket's cable leaves upward, toward the key board, and the key board's
+leaves downward**, so the two exits face each other across the gap between
+the plugs (*Pin numbering*, below). Each end turns out along the body and the
+ribbon folds back on itself into a **flat hairpin lying along the body,
+both legs between the two plugs' heights**, running the same way to the
+fold, so it never stands across the LED strip's light. Which way each hand's
+hairpin folds is `config/body.yaml` `routing.chain_fold`, which says why.
+Leg and fold radius: `mechanical/drc.echo` "key-chain ribbon closed:
+hairpin leg and fold radius", held to the cable's bend radius by "key-chain
+ribbon fold no tighter than its bend radius". Both hairpins are checked
+inside the body ("key-chain ribbon hairpin inside the body") and off the lid
+screws ("key-chain ribbon hairpin clear of the lid screws").
 
 **Why it is as long as it is** (owner, 2026-09-27: long enough "to have the
 top off and still connect the ribbon before tightening down"). The service
-position is the lid laid **face down beside the body, off its far edge**; the
-ribbon runs up from the main board's plug, over the far side's top edge and
-down to the key board's (`routing.chain_service`, plus `routing.chain_slack`).
-The length is `mechanical/drc.echo` "key-chain ribbon length (derived)" —
-order that length or the next stock one up. **So the lid comes off by lifting
+position is the lid laid **face down beside the body, off its far edge**,
+with the body standing on its U-bolt and a block under its other end, which
+lifts the main board's plug; the ribbon runs up from the main board's plug,
+over the far side's top edge and down to the key board's
+(`routing.chain_service`, plus `routing.chain_slack`). The free length is
+`mechanical/drc.echo` "key-chain ribbon length (derived)", in millimetres.
+**The part is ordered by a different line**: "key-chain cable to order
+(FFSD length code)" is the FFSD length field — inches, overall, measured
+over both sockets as the print measures it, with its −0.125 in tolerance
+already covered — so the order is `FFSD-06-D-<that code>-01-N-RN2`. FFSD is
+built to length; there are no stock lengths. **So the lid comes off by lifting
 it, laying it beside the body and unplugging the two sockets**; it goes back
 on by plugging them in with the lid beside the body, then closing it and
 screwing it down.
@@ -220,16 +232,18 @@ it.** `[datasheet]`, both full prints banked:
 1. **A keyed IDC socket always mates its position k to header pin k.** So
    which main-board pin reaches which key-board pin is set by **how the cable
    assembly is built**, not by the headers.
-2. **An FFSD socket's cable leaves it on the long side away from its notch**
-   (FFSD print sheet 1 fig 1). The main board's header is upright, its key
-   slot in the odd-row wall, away from the board (SHF print), so that
-   socket's cable leaves downward, onto the main board. The key board's
-   header is the same part upside down on the key board's underside.
-3. **The cable is ordered `-RN2`: notch reversed on the second (key-board)
-   end only** (FFSD print sheet 2 fig 3). That socket mates rotated 180°
-   about its insertion axis, so its cable also leaves downward, away from the
-   key board, and the ribbon runs flat with no twist — and conductor k meets
-   key-board pin 13 − k:
+2. **On an FFSD cable, the first socket's cable leaves on the side of its
+   key and the second's on the side away from it; `-RN2` reverses the
+   second's notch, so both sockets' cables leave on their key's side**
+   (FFSD print sheet 1 fig 1, sheet 2 fig 3). The main board's header is
+   upright, its key slot in the odd-row wall, away from the board (SHF
+   print), so that socket's cable leaves **upward**, toward the key board.
+   The key board's header is the same part upside down on the key board's
+   underside, its slot facing down, so that socket's cable leaves
+   **downward**. The two face each other.
+3. **The cable is ordered `-RN2`.** Both ends are then built alike, so either
+   end may go on either board; the ribbon runs flat with no twist, and
+   conductor k meets key-board pin 13 − k:
 
 ```
    conductor k  =  main-board J-CHAIN pin k
@@ -244,10 +258,14 @@ it.** `[datasheet]`, both full prints banked:
 `hardware/boards/key-board-*/board-netlist.yaml` confirm it), and
 [`netlist.yaml`](netlist.yaml) nets the ribbon by it. Place the standard
 footprint on the key board's bottom side; do not hand-mirror it — the map is
-in the netting, and mirroring the footprint as well would undo it. **Order the
-cable without `-RN2` and it is wrong twice**: that socket mates the other way
-up, so its cable leaves toward the key board, and conductor k meets key-board
-pin k — conductor 10's 3V3 on pin 10, a ground.
+in the netting, and mirroring the footprint as well would undo it. **A standard cable,
+without `-RN2`, fits and looks right, and is wrong**: plugged with its
+second socket on the main board, both ends' cables leave downward and the
+ribbon takes a half-twist it absorbs unnoticed, and conductor k meets
+key-board pin k — conductor 10's 3V3 on pin 10, a ground, and `SH/LD` and
+conductor 6's signal on grounds too `[datasheet, both full prints; calc]`. **A cable whose ends both leave downward is a standard cable.**
+Nothing mechanical shows it, so every cable is metered before it is first
+powered (*Still open*, and the key board's README, *Bring-up*).
 
 **What the header does to "a ground between every signal".** In the **ribbon**
 every signal conductor has a ground on both sides, which is ADR 0001's rule
@@ -338,6 +356,16 @@ is `right_thumb`'s and reaches no connector. **Decided: fit it** (ADR 0018).
 The exposure is real every time the lid is off, the part cannot be added once
 the board is made, and it costs pennies.
 
+**It guards the MCU's pins only, and that is accepted.** The hop nets
+(`HOP_LH_LT`, `HOP_LT_RH`, `HOP_RH_RT` in [`netlist.yaml`](netlist.yaml)) and
+every signal pin of a key board's `J-CHAIN` land on 74HC165 pins, not on the
+MCU. The key board has no ESD part of its own. Those pins carry the 74HC165's
+own rating, HBM over 2000 V (JS-001 class 2) and CDM over 1000 V
+`[datasheets/logic/74HC165-nexperia.pdf p.1]`, and a register is a part on a
+board that can be replaced, where an MCU pin is not. **The fourth channel
+stays spare**: there are three hops, on two ribbons, and one channel cannot
+cover them.
+
 **No fuse — the short is protected at its source.** The chain's 3V3 is the
 Matrix's 3V3 pad, from its ME6217C33M5G LDO (`DEV_3V3`, the instrument's only
 3V3 and the MCP3202's reference) `[repo] datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-SCHEMATIC.pdf`,
@@ -367,7 +395,8 @@ current, because during a short it carries that. `≥ 600 Ω` at 100 MHz is
 below its resistive band, and ~1 µH `[from memory]` against the key board's
 100 nF `C-DECOUPLE-165` resonates near `1 / (2π √(1 µH × 100 nF))` ≈ 0.5 MHz
 `[calc]`, close to the chain's clock — scope the key board's VCC while
-shifting, and add a damping bulk capacitor on the key board if it rings.
+shifting, and fit the key board's damping bulk capacitor if it rings. Its
+footprint is on each key board, empty by default (`C-BULK-CHAIN`).
 
 ---
 
@@ -411,12 +440,14 @@ and none of it moved.
   right-angle through-hole header inside `boards.chain_hdr_*`, the same part
   at all four positions (stand-in Samtec SHF-106-01-L-D-RA, full print
   banked). The pin map is the cable's, not the header's (above).
-- **The `CBL-CHAIN` part and stock length**, decided at M4: `drc.echo`
-  "key-chain ribbon length (derived)", or the next stock length up, **with
-  the key-board end's notch reversed** (stand-in Samtec
-  FFSD-06-D-xx.xx-01-N-RN2, assembled). On the first one, check with a meter
-  that conductor 10 reaches key-board pin 3 before plugging it in powered.
-  `boards.chain_plug_proud` is measured on the first mated pair.
+- **The `CBL-CHAIN` part**, decided at M4: stand-in Samtec
+  `FFSD-06-D-<code>-01-N-RN2`, assembled, where `<code>` is `drc.echo`
+  "key-chain cable to order (FFSD length code)", in inches. **Meter every
+  cable before it is first powered**, not only the first: conductor 10 must
+  reach the far socket's position 3, and conductor 2 its position 11. A
+  standard cable goes in without any mechanical sign (above).
+  `boards.chain_plug_proud` is measured on the first mated pair; it decides
+  whether the cable clears the shroud's mouth.
 - **`R-CHAIN-SER`** (E14) — above. **`U-TVS-CHAIN`** and the fuse are
   decided (ADR 0018); what is left of them is two tests — the LDO's short
   limit at E1 and `FB-CHAIN`'s ring at E14 — and the bead's part number.

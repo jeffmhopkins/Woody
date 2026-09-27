@@ -26,7 +26,8 @@ rules:
 
 # The board house's own limits, from JLCPCB's capability pages banked 2026-09-27
 # (datasheets/fab/JLCPCB-PCB-CAPABILITIES.pdf, JLCPCB-PCBA-CAPABILITIES.pdf):
-# KiCad's DRC checks the board against these as well as against rules: above.
+# tools/pcb.py writes these and rules: above into the board's design rules, and
+# `pcb.py check` fails if the board's rules no longer match them.
 fab:
   house: JLCPCB
   hole_clearance: 0.28       # plated hole to track
@@ -57,8 +58,8 @@ standoff_footprint: "MountingHole:MountingHole_2.2mm_M2"
 # `at` the junction, `leg` which way along the body the series resistor runs
 # (its SWITCH_LEG end toward the switch's pin 1), `c` which way across the
 # body the capacitor hangs. Each clears its switch's pole hole and pins by its
-# courtyards: LH1 above its switch, LH2 and LH3 below theirs, LH4 between
-# LH4 and LH5, LH5 beside the register.
+# courtyards: LH1 above its switch, LH2 and LH3 below theirs, LH4 between the
+# LH4 and LH5 switches, LH5 beside the register.
 networks:
   LH1: {at: [50.0, 34.5], leg: -1, c: 1}
   LH2: {at: [70.0, 17.5], leg: -1, c: -1}

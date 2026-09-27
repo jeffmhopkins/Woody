@@ -48,8 +48,13 @@ connector envelope using a stand-in size. The real footprint, a Molex 200528
      clear of the lid screws" keeps the board edges off the M3 screws that
      close the lid.
    - Where the ribbon runs under the board, from its connector to the far
-     edge, no part may go: the model leaves it out of the parts envelope,
-     and the PCB carries it as a rule area.
+     edge, no part may go: the model leaves it out of the parts envelope.
+     *(Amended 2026-09-27, after the key board's review: this also said "the
+     PCB carries it as a rule area". It does not, and needs none. The ribbon
+     now folds between the two plugs' heights, below the key board's parts,
+     so nothing on the PCB's underside is in its path; the clash check and
+     the hairpin rules in `drc.echo` are what keep it clear. The PCB's only
+     rule areas are the standoff keep-outs of point 4.)*
 4. **The plate makes no second ground bond through the board.**
    - The plate is grounded through `MECH-GNDBOND` (`hardware/cluster/cluster-boards.md`).
    - The board's holes are unplated (NPTH).
@@ -75,6 +80,8 @@ connector envelope using a stand-in size. The real footprint, a Molex 200528
      `boards.chain_plug_*`, from the banked Samtec pages. The rule is now
      "key-board screw heads clear of the chain header", and the no-parts
      strip is under the header, its plug and the ribbon's hairpin.)*
+     *(Amended again 2026-09-27: that strip is the body model's parts
+     envelope, not a keep-out on the PCB — see point 3's note.)*
    - *(Amended 2026-09-27, with point 3: the second and third bullets above
      no longer hold. The board was grown to point 3's rectangle, and
      `J-CHAIN` is not at the board's end: it sits between the switches where

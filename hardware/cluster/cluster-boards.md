@@ -217,7 +217,9 @@ and `RT` are on the main board.
 | `R-KEY-PU` | 2.2 kΩ 1% 0805 | **6** | **6** | 6 | 6 | **24, not 21.** `RT` carries its 4 keys and the 2 reserved spare-switch positions; `LT` and `LH` each carry a pull-up for their *free* bits (22, 23, 31), which the first draft budgeted for switch positions only |
 | `R-KEY-SER` | 100 Ω 1% 0805 | 5 | 4 | 6 | 6 | |
 | `C-KEY` | 47 nF X7R 0805 | 5 | 4 | 6 | 6 | |
-| `J-CHAIN` | 2×6 1.27 mm shrouded IDC, right-angle, through-hole | 1 | — | 1 | — | One per key board, on its underside; its mate is on the main board (`chain-connectors`). Its pin tails need the key plate's window over them (`mechanical/DESIGN.md`) |
+| `J-CHAIN` | 2×6 1.27 mm shrouded IDC, right-angle, through-hole | 1 | — | 1 | — | One per key board, on its underside; its mate is on the main board (`chain-connectors`). Its pin tails stop short of the key plate, which has no window over them (`drc.echo` "J-CHAIN pin tails clear of the key plate") |
+| `TP-CHAIN` | test pad, bare copper | 6 | — | 6 | — | Bring-up pads on each key board: 3V3, GND, SCK, SH/LD, QH and SER. On the bench, SER is tied to GND or 3V3 at its pad (the row; the key board's README, *Bring-up*) |
+| `C-BULK-CHAIN` | 10 µF 0805, **do not fit** | 1 | — | 1 | — | An empty footprint on each key board's 3V3, fitted at bring-up only if the rail rings (`FB-CHAIN` with `C-DECOUPLE-165`; `key-chain-loom.md`) |
 | `marker straps` | copper, no parts | 2 | 2 | 2 | 2 | **Decided** — 8-bit marker, §4. Straight to GND or 3V3, no resistor and no cap: the node never changes |
 
 **Totals:** 4 ICs, 4 decoupling caps, 19 fitted switches in 21 networked
@@ -225,6 +227,15 @@ positions; the network passives are the `R-KEY-PU` (`key-pullup-qty`),
 `R-KEY-SER` and `C-KEY` rows' quantities in `hardware/bom.csv`. The chain's own parts — `J-CHAIN` at both ends
 of each ribbon, `CBL-CHAIN`, and the chain-end `R-SER-TERM` on the main board —
 are the key-chain page's.
+
+**ESD: the key boards carry no protection part, and that is accepted.** The
+main board's `U-TVS-CHAIN` guards the **MCU's** pins only — `SCK`, `SH/LD`
+and the chain-end `SER`, at the `left_hand` `J-CHAIN`. The hop nets
+(`HOP_*`, each register's `QH` to the next one's `SER`) and every signal pin
+of a key board's `J-CHAIN` land on 74HC165 pins, which carry the part's own
+HBM rating of over 2000 V `[datasheets/logic/74HC165-nexperia.pdf p.1]`. The
+array's spare fourth channel stays spare: one channel cannot cover the three
+hops. `key-chain-loom.md` has the argument.
 
 ---
 

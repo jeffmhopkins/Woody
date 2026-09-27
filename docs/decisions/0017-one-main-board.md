@@ -136,10 +136,14 @@ with nothing to line up blind — but its parts, its path and its length change:
    the LED strip, both mouths facing the same way along the body.
 3. **The ribbon lies flat, so it does not block the LED strip.** It comes out
    of both plugs and folds back on itself: closed, a flat hairpin along the
-   body, the main board's leg lying on the main board and the key board's
-   hanging just under its socket (`mechanical/drc.echo` "key-chain
-   ribbon closed: hairpin leg and fold radius"; which way each folds is
-   `config/body.yaml` `routing.chain_fold`).
+   body, both legs between the two plugs' heights (`mechanical/drc.echo`
+   "key-chain ribbon closed: hairpin leg and fold radius" and "key-chain
+   ribbon fold no tighter than its bend radius"; which way each folds is
+   `config/body.yaml` `routing.chain_fold`). *(Amended 2026-09-27, after the
+   key board's review: this said the main board's leg lay on the main board
+   and the key board's hung just under its socket. With the `-RN2` cable
+   the main board's socket's cable leaves upward, so both legs lie between
+   the plugs; see the pin-map bullet below.)*
 4. **Long enough to connect with the lid off** — "to have the top off and
    still connect the ribbon before tightening down". The service position is
    the lid laid face down beside the body off its far edge, the ribbon running
@@ -147,16 +151,26 @@ with nothing to line up blind — but its parts, its path and its length change:
    board (`routing.chain_service`, `routing.chain_slack`; the length is
    `drc.echo` "key-chain ribbon length (derived)"). The lid comes off by
    lifting it, laying it beside the body and unplugging the two sockets.
+   *(Amended 2026-09-27, after the key board's review: the service length
+   now includes the lift of the body standing on its U-bolt
+   (`routing.chain_service`), and the cable is ordered by a separate line,
+   `drc.echo` "key-chain cable to order (FFSD length code)": the FFSD length
+   field is inches, overall over both sockets, with its tolerance covered.
+   The derived length is millimetres of free ribbon and is not the order
+   code.)*
 
 **Why the old reason against IDC no longer holds.** The decision above
 rejected IDC as too tall for the gap. That was judged from memory, about
 2.54 mm parts. Measured this time from banked drawings: a 2.54 mm IDC header
 and plug stack 13.1 mm (14.6 mm worst case) `[datasheet, the banked 2.54 mm
-header and socket drawings in datasheets/connectors/]` in the gap
-between the boards — the key board's underside to the main board's top face,
-which is the body model's board stack (`mechanical/cad/woody_body.scad`, the
-key board's underside less the main board's top; no `drc.echo` line prints it
-yet) — with parts on both boards, and fits nowhere. *(Amended 2026-09-27: this
+header and socket drawings in datasheets/connectors/]` between the
+boards. The gap is `drc.echo` "key board to main board gap"; with parts on
+both boards what a main-board part may stand in is "main board parts room
+under the key boards", and against that the 2.54 mm stack fits nominally but
+not at its worst case `[calc: 13.1 and 14.6 against the room drc.echo
+prints]`. *(Amended 2026-09-27: this sentence said "fits nowhere", which
+the room it is measured against does not support; "not at its worst case"
+is the finding, and it is still a reason to reject it.)* *(Amended 2026-09-27: this
 bracket cited the gap as twice the ribbon's fold radius plus
 `boards.chain_hdr_h`. That was true only of the first hairpin, and it no
 longer derives the gap; the gap itself did not move.)* The 1.27 mm right-angle header stands only `boards.chain_hdr_h` off
@@ -167,14 +181,23 @@ each board (off the banked full print), and fits.
 - **The key board's pin numbers differ, and the cable sets them.** A keyed
   socket always mates its position n to header pin n, so the map is how the
   cable assembly is built. The key board's header is the main board's part
-  upside down; with the key-board socket's notch reversed (Samtec `-RN2`)
-  that socket mates rotated 180°, its ribbon leaves downward like the main
-  board's with no twist, and main-board pin n arrives at key-board pin
-  13 − n `[datasheet, both full prints]` (`hardware/interfaces/key-chain-loom/`).
-- **The key plate gets a window.** The key header's pin tails come up
+  upside down; with the cable's second socket's notch reversed (Samtec
+  `-RN2`), both sockets' cables leave on their key's side, so **the main
+  board's leaves upward and the key board's downward**, facing each other,
+  with no twist, and main-board pin n arrives at key-board pin 13 − n
+  `[datasheet, both full prints: FFSD sheet 1 fig 1, sheet 2 fig 3]`
+  (`hardware/interfaces/key-chain-loom/`). *(Amended 2026-09-27, after the
+  key board's review: this said the key board's ribbon "leaves downward like
+  the main board's", from a rule — "a socket's cable leaves on the side away
+  from its notch" — that the print does not support. A cable whose ends both
+  leave downward is the standard one, without `-RN2`, and it puts 3V3 on a
+  ground; every cable is metered before it is first powered.)*
+- **The key header's pin tails stop short of the plate.** They come up
   through the key board toward the grounded plate, across the standoffs'
-  gap; the plate has a window cut through it over them, under the oak top
-  (`mechanical/DESIGN.md`).
+  gap, and `drc.echo` "J-CHAIN pin tails clear of the key plate" checks they
+  stay clear of it. *(Amended 2026-09-27, after the key board's review:
+  this bullet gave the plate a window over the tails. The print's tail
+  length shows they stand short of the plate, so the window is gone.)*
 - **No ZIF latches.** Any text telling a builder to flip ZIF latches, or
   that the lid tilts a little with the ribbons attached, is superseded.
 - `config/body.yaml`'s `boards.ffc_conn_*` became `boards.chain_hdr_*` and

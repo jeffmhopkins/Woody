@@ -55,6 +55,7 @@ ECHO: "DRC", "PASS", "J-CHAIN pin tails clear of the key plate", 1.25, "mm from 
 ECHO: "DRC", "NOTE", "key-chain ribbon closed: hairpin leg and fold radius", [46.2838, 2.725], "mm; the legs lie flat along the body between the two plugs' heights"
 ECHO: "DRC", "PASS", "key-chain ribbon hairpin inside the body (left_hand)", [79.9, 129.709], "mm along the body"
 ECHO: "DRC", "PASS", "key-chain ribbon hairpin inside the body (right_hand)", [176.9, 226.709], "mm along the body"
+ECHO: "DRC", "INFO", "key board to main board gap", 17.4, "mm from the main board's top face to a key board's underside: what the chain header, its plug and the ribbon's hairpin stand in (ADR 0017)"
 ECHO: "DRC", "PASS", "key-chain ribbon hairpin clear of the lid screws (left_hand)", 3.40554, "mm from the hairpin to the nearest screw's centre"
 ECHO: "DRC", "PASS", "key-chain ribbon hairpin clear of the lid screws (right_hand)", 24.8067, "mm from the hairpin to the nearest screw's centre"
 ECHO: "DRC", "INFO", "key-board standoff length (derived)", 2.2, "mm: plate underside to board top, set by switch.pcb_below_seat"
