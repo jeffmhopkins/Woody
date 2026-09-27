@@ -403,7 +403,7 @@ def add_silk(board, lay):
             p2 = fp.FindPadByNumber("2").GetPosition()
             # pin 1's dot outside the pad array, away from the mouth
             dx = pcbnew.ToMM(p1.x - p2.x)
-            silk_dot(board, pcbnew.ToMM(p1.x) + (1.0 if dx > 0 else -1.0), pcbnew.ToMM(p1.y))
+            silk_dot(board, pcbnew.ToMM(p1.x) + (1.3 if dx > 0 else -1.3), pcbnew.ToMM(p1.y))   # its edge 0.39 off the pad: fab silk_to_pad
             put("J-CHAIN", *above_or_below(x0, y0, x1, y1, "J-CHAIN"))
             # which way its mouth faces: pads 1 -> 2 point at it (place_chain); a
             # header soldered backward puts 3V3 on a ground pin (key-chain-loom.md)

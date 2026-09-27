@@ -426,13 +426,15 @@ def route(board, lay):
     gnd = lay["ground_net"]
     power = set(lay.get("power_nets", []))
     nets = sorted({n for (n, _, _, _) in r.copper if n and n != gnd and not n.startswith("unconnected")})
-    # shortest nets first: they have the fewest ways round
+    # the power rail first - it visits every network on the board and is the
+    # widest track, so it takes the straight way and signals go round it;
+    # then the shortest nets: they have the fewest ways round
     def span(n):
         gs = [g for (nn, _, g, _) in r.copper if nn == n]
         xs = [g.centroid.x for g in gs]
         ys = [g.centroid.y for g in gs]
         return (max(xs) - min(xs)) + (max(ys) - min(ys)) if len(gs) > 1 else 0
-    order = sorted(nets, key=lambda n: (n in power, span(n)))
+    order = sorted(nets, key=lambda n: (n not in power, span(n)))
     failed = []
     for n in order:
         ok = r.route_net(n, r.pw if n in power else r.w)
