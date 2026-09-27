@@ -23,32 +23,25 @@ rules:
   edge_clearance: 0.3
   power_track: 0.4           # the chain's 3V3 rail
 
-# The ribbon connector, Molex 200528-0120 as the stand-in (J-CHAIN's part is
-# open until M4): turned so its cable entry faces the board's far edge, where
-# the body CAD's ribbon leaves, with its front at the far edge of the CAD's
-# connector envelope; the ribbon runs on under the board to its edge, over a
-# no-parts strip. Checked, not assumed: its pads are on the inner side.
+# The chain header, J-CHAIN (ADR 0017 amended): a 1.27 mm shrouded IDC header,
+# right-angle, placed by tools/pcb.py where the body CAD stacks it over the
+# main board's, its mouth toward the ribbon's fold (pcb-geometry.echo "chain").
 # The standoffs' screw holes (ADR 0020): one per corner, positions from the
 # body CAD; this is only which footprint draws them. NPTH - the plate is
 # bonded to ground by the main board's MECH-GNDBOND, and a plated hole here
 # would make a second bond.
 standoff_footprint: "MountingHole:MountingHole_2.2mm_M2"
 
-connector:
-  rot: 0                     # ON THE BOTTOM KiCad's rotation is mirrored: 0 here puts the cable face at the far edge
-  origin_from_edge: 4.74     # the footprint's origin behind its front face [footprint courtyard]
-
 # Placement (2026-09-27, the board grown to a rectangle with corner standoffs,
 # ADR 0020). A switch's pins are on its near side (low y): pin 1, the switch
 # leg, at (-4.4, -4.7) from its centre and pin 2, ground, at (+2.6, -5.75).
 #
-# The register sits on the far side past the ribbon connector's end, turned so
+# The register sits on the far side just past the chain header, turned so
 # its inputs H..E (pins 6..3) face the key row in the keys' own order, left to
-# right; the chain pins (SH/LD, CLK below; QH, SER above) face the connector.
+# right; its chain pins (SH/LD, CLK below; QH, SER above) toward the header.
 # Each key network is a row of three 0805s beside its own switch: LH1 and LH3
-# on the row's far side, LH2 on the near side (the connector is above it),
-# LH4 between LH4 and LH5, LH5 beside the register. The ribbon's strip above
-# the connector is a no-parts rule area (the body CAD's "ribbon" line).
+# on the row's far side, LH2 on the near side, LH4 between LH4 and LH5, LH5
+# beside the register.
 parts:
   C-KEY-LH1:     [46.0, 34.5, 0]
   R-KEY-SER-LH1: [50.0, 34.5, 0]
@@ -62,12 +55,12 @@ parts:
   C-KEY-LH4:     [102.0, 27.0, 0]
   R-KEY-SER-LH4: [106.0, 27.0, 0]
   R-KEY-PU-LH4:  [110.0, 27.0, 0]
-  C-KEY-LH5:     [99.5, 44.0, 0]
-  R-KEY-SER-LH5: [103.5, 44.0, 0]
-  R-KEY-PU-LH5:  [107.5, 44.0, 0]
-  U-KEYS-LH:     [89.0, 44.0, 90]
-  C-DECOUPLE-165-LH: [96.0, 46.5, 90]
-  R-KEY-PU-FREE3: [82.5, 44.5, 90]
+  C-KEY-LH5:     [100.5, 44.0, 0]
+  R-KEY-SER-LH5: [104.5, 44.0, 0]
+  R-KEY-PU-LH5:  [108.5, 44.0, 0]
+  U-KEYS-LH:     [90.5, 44.5, 90]
+  C-DECOUPLE-165-LH: [97.0, 46.5, 90]
+  R-KEY-PU-FREE3: [84.0, 44.5, 90]
 
 # Routing (tools/pcb_route.py): ground is a pour on both layers, not tracks;
 # the chain's 3V3 rail is the wider power track.

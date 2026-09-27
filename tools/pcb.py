@@ -57,7 +57,7 @@ def V(x, y):
 # ------------------------------------------------------------------ inputs
 
 def cad_geometry(cluster):
-    geo = {"switches": {}, "ffc": None, "standoffs": [], "ribbon": None}
+    geo = {"switches": {}, "chain": None, "standoffs": [], "ribbon": None}
     for line in open(os.path.join(ROOT, "mechanical", "export", "pcb-geometry.echo")):
         m = re.match(r'ECHO: "PCB", "(\w+)", "(\w+)", (.*)', line)
         if not m or m.group(1) != cluster:
@@ -65,8 +65,9 @@ def cad_geometry(cluster):
         kind, rest = m.group(2), [t.strip().strip('"') for t in m.group(3).split(",")]
         if kind == "switch":
             geo["switches"][rest[0]] = (float(rest[1]), float(rest[2]), float(rest[3]))
-        elif kind == "ffc":
-            geo["ffc"] = tuple(float(v) for v in rest[1:6])
+        elif kind == "chain":
+            # mouth x, centre y, which way the mouth faces along the body (+1 the tail), length, mouth to far pin row
+            geo["chain"] = tuple(float(v) for v in rest[1:6])
         elif kind == "ribbon":
             geo["ribbon"] = tuple(float(v) for v in rest[0:4])
         elif kind == "standoff":
@@ -152,6 +153,37 @@ def add_outline(board, segs):
         s.SetEnd(V(*to_pcb(*b)))
         s.SetWidth(MM(0.1))
         board.Add(s)
+
+
+def chain_target(geo):
+    """Where J-CHAIN's pads must centre, in PCB mm, and which way (PCB x) its mouth faces."""
+    x, y, d, _, back = geo["chain"]
+    return to_pcb(x - d * (back - 0.635), y), d
+
+
+def pads_centre(fp):
+    ps = [p.GetPosition() for p in fp.Pads()]
+    return (sum(pcbnew.ToMM(p.x) for p in ps) / len(ps), sum(pcbnew.ToMM(p.y) for p in ps) / len(ps))
+
+
+def place_chain(board, fp, geo):
+    """The chain header on the bottom, its mouth facing along the body the way
+    the body CAD says: the rotation is FOUND, not assumed - on the bottom KiCad
+    mirrors rotation, and the footprint's own frame puts the mouth at +x from
+    pin 1's row (pads 1 -> 2 point at the mouth)."""
+    (tx, ty), d = chain_target(geo)
+    for rot in (0, 90, 180, 270):
+        place(board, fp, 0, 0, rot, True)
+        p1, p2 = fp.FindPadByNumber("1").GetPosition(), fp.FindPadByNumber("2").GetPosition()
+        dx, dy = pcbnew.ToMM(p2.x - p1.x), pcbnew.ToMM(p2.y - p1.y)
+        if abs(dy) < 1e-3 and dx * d > 0:
+            cx, cy = pads_centre(fp)
+            fp.SetPosition(V(tx - cx, ty - cy))
+            return rot
+        board.Remove(fp)
+        if fp.IsFlipped():
+            fp.Flip(fp.GetPosition(), pcbnew.FLIP_DIRECTION_LEFT_RIGHT)
+    raise SystemExit("pcb: no rotation puts J-CHAIN's mouth where the body CAD faces it")
 
 
 def place(board, fp, x, y, rot, bottom):
@@ -255,11 +287,9 @@ def build(bdir):
         px, py = to_pcb(x, y)
         place(board, fps[ref], px, py, r + lay.get("switch_rot", 0), False)
         placed.add(ref)
-    # the ribbon connector: bottom side, its cable entry at the board edge the CAD's ribbon leaves by
-    fx, fy, _, fl, fw = geo["ffc"]
-    edge_y = to_pcb(0, fy + fw / 2)[1]          # the far edge of the CAD envelope, in pcb y
-    j = lay["connector"]
-    place(board, fps["J-CHAIN"], to_pcb(fx, 0)[0], edge_y + j["origin_from_edge"], j["rot"], True)
+    # the chain header: bottom side, where the body CAD stacks it over the
+    # main board's, its mouth facing along the body toward the ribbon's fold
+    place_chain(board, fps["J-CHAIN"], geo)
     placed.add("J-CHAIN")
     # the standoffs' screw holes (ADR 0020): board-only footprints, no symbol - the
     # screw and standoff are mechanical, in hardware/unplaced.csv. On the BOTTOM,
@@ -354,6 +384,13 @@ def cmd_check(bdir):
         got = None if fp is None else (pcbnew.ToMM(fp.GetPosition().x), pcbnew.ToMM(fp.GetPosition().y))
         if got is None or math.hypot(got[0] - px, got[1] - py) > 0.05:
             bad.append(f"error: [cad] standoff hole H{i} is at {got}, the body CAD puts it at ({px:.2f}, {py:.2f})")
+    if geo["chain"]:
+        fp = board.FindFootprintByReference("J-CHAIN")
+        (tx, ty), d = chain_target(geo)
+        got = pads_centre(fp)
+        p1, p2 = fp.FindPadByNumber("1").GetPosition(), fp.FindPadByNumber("2").GetPosition()
+        if math.hypot(got[0] - tx, got[1] - ty) > 0.05 or pcbnew.ToMM(p2.x - p1.x) * d <= 0:
+            bad.append(f"error: [cad] J-CHAIN's pads centre at {got}, facing {'+' if p2.x > p1.x else '-'}x; the body CAD puts them at ({tx:.2f}, {ty:.2f}) facing {'+' if d > 0 else '-'}x")
     errs = [b for b in bad if b.startswith("error")]
     print(f"pcb: {os.path.relpath(pcb, ROOT)}: {len(errs)} error(s), {len(bad) - len(errs)} warning(s)")
     for b in bad:

@@ -15,7 +15,8 @@ fig_view = "plan";
 // A literal list: an override is evaluated where the model first assigns
 // highlight, before the model's own variables exist.
 highlight = ["main board", "parts main board", "tall parts main board", "breath sensor", "LED strip",
-             "ZIF left_hand main board", "ZIF right_hand main board", "ribbon left_hand", "ribbon right_hand",
+             "J-CHAIN left_hand main board", "J-CHAIN right_hand main board", "IDC plug left_hand main board", "IDC plug right_hand main board",
+             "ribbon left_hand", "ribbon right_hand",
              "main board standoff 1", "main board standoff 2", "main board standoff 3", "main board standoff 4",
              "main board standoff 5", "main board standoff 6", "main board standoff 7", "main board standoff 8"];
 $k = 3;
@@ -35,8 +36,8 @@ module fig() {
         callout([gap_x[0] + 10, W / 2, z], [gap_x[0] + 12, bot - 10, z], "LED strip - lights both sides", size = s2);
         callout([tall_c[0][0], tall_c[0][1], z], [tall_c[0][0] - 2, top, z], "regulator + bulk caps", size = s2, halign = "right");
         callout([sensor_c[0], sensor_c[1], z], [sensor_c[0] - 2, top, z], "breath sensor (mouth end)", size = s2, halign = "left");
-        callout([mb_ffc("left_hand")[0], mb_ffc_y, z], [mb_ffc("left_hand")[0] + 2, bot, z], "ribbon to the LH key board", size = s2);
-        callout([mb_ffc("right_hand")[0], mb_ffc_y, z], [mb_ffc("right_hand")[0] + 2, bot, z], "ribbon to the RH key board", size = s2);
+        callout([mb_chain("left_hand")[0], chain_y, z], [mb_chain("left_hand")[0] + 2, bot, z], "ribbon to the LH key board", size = s2);
+        callout([mb_chain("right_hand")[0], chain_y, z], [mb_chain("right_hand")[0] + 2, bot, z], "ribbon to the RH key board", size = s2);
         callout([cb_standoffs[0][0], cb_standoffs[0][1], z], [cb_standoffs[0][0] + 2, bot - 10, z], "standoffs", size = s2);
         label([0, bot - 24, z], str("MAIN BOARD ", round(cb_x[1] - cb_x[0]), " x ", cb_y[1] - cb_y[0],
               " mm - the thumb switches, both thumb registers and the carrier circuits, one board"), size = s2, halign = "left");

@@ -101,7 +101,8 @@ class Router:
         self.nx, self.ny = int((maxx - minx) / GRID) + 2, int((maxy - miny) / GRID) + 2
         # copper per net and per layer: (net, layer) -> list of geometries
         self.copper = []            # (netname, layer set, geometry, kind) - kind is 'pad' or 'track'
-        self.holes = []             # geometry of every drilled hole (any net or none)
+        self.holes = []             # unplated holes and keep-outs: no copper of any net
+        self.pth_holes = []         # plated holes: kept apart from vias only
         self.owned = {}             # net -> [(board item, copper entry, hole)] its routes added
         for fp in board.GetFootprints():
             for pad in fp.Pads():
@@ -113,7 +114,9 @@ class Router:
                     continue
                 self.copper.append((net, layers, g, "pad"))
                 if pad.HasHole():
-                    self.holes.append(Point(TO(pad.GetPosition().x), TO(pad.GetPosition().y)).buffer(TO(pad.GetDrillSize().x) / 2))
+                    # a plated hole: its pad's copper already keeps other nets' tracks
+                    # away, so it matters only to vias (hole to hole)
+                    self.pth_holes.append(Point(TO(pad.GetPosition().x), TO(pad.GetPosition().y)).buffer(TO(pad.GetDrillSize().x) / 2))
         # keep-outs (the standoffs' faces and screw heads): obstacles on every layer
         for z in board.Zones():
             if z.GetIsRuleArea() and z.GetDoNotAllowTracks():
@@ -130,7 +133,7 @@ class Router:
         grids = [[[False] * self.ny for _ in range(self.nx)] for _ in (TOP, BOT)]
         for L in (TOP, BOT):
             obst = [g for (n, ls, g, _) in self.copper if L in ls and n != net]
-            obst += self.holes if via else [h for h in self.holes]
+            obst += self.holes + (self.pth_holes if via else [])
             rad = half + self.clear + SLACK
             for g in obst:
                 gx0, gy0, gx1, gy1 = g.bounds
@@ -220,7 +223,7 @@ class Router:
         if copper is not None:
             self.copper.append(copper)
         if hole is not None:
-            self.holes.append(hole)
+            self.pth_holes.append(hole)     # a via's drill: plated
 
     def rip_up(self, net):
         """Remove every track and via this net's routes added; returns them for put_back."""
@@ -231,7 +234,7 @@ class Router:
             if copper is not None:
                 self.copper = [c for c in self.copper if c is not copper]
             if hole is not None:
-                self.holes = [h for h in self.holes if h is not hole]
+                self.pth_holes = [h for h in self.pth_holes if h is not hole]
         return rec
 
     def put_back(self, net, rec):

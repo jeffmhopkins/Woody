@@ -333,25 +333,47 @@ boards:
     status: tbd
     source: "height of the block standing in for the lead forms. NOT a datasheet dimension: the p.20 table gives only A1 0.05-0.25 (standoff) and L 1.02-1.52 (foot length); the lead's rise to the body is drawn (p.7 Detail G) but not dimensioned [from memory]"
     decided_by: "M4 footprint"
-  # RIBBONS, NOT STACKING HEADERS (owner, 2026-09-26, ADR 0017): one 12-way
-  # flat flex ribbon per key board, so the lid comes off with the key boards
-  # still connected. Low ZIF connectors, because a 2.54 IDC box header and
-  # plug stand ~12-13 mm [from memory] in a 17 mm gap with parts both sides.
-  ffc_conn_l:
-    value: 19.7
+  # THE KEY CHAIN'S CONNECTORS (owner, 2026-09-27, ADR 0017 amended): a
+  # through-hole 1.27 mm shrouded IDC header, right-angle, on each board -
+  # stacked, the key board's hanging from its underside over the main
+  # board's - and a flat IDC ribbon between them. Samtec SHF-106-01-L-D-RA
+  # and an FFSD-06-D cable are the stand-ins; both catalogue pages are banked
+  # (datasheets/connectors/SAMTEC-*.pdf), their full prints are not (403).
+  chain_hdr_l:
+    value: 13.97
+    status: nominal
+    source: "SHF header length A = pins per row x 1.27 + 6.35, 6 per row [datasheets/connectors/SAMTEC-SHF-1.27MM-SHROUDED-IDC-HEADER.pdf]"
+    decided_by: "M4, with J-CHAIN's part and its full print"
+  chain_hdr_h:
+    value: 5.85
     status: tbd
-    source: "Molex 200528-0120 (12-way 1.0 mm ZIF, the stand-in the first key-board layout uses): its KiCad footprint's courtyard, 19.69 along the body [KiCad Connector_FFC-FPC library]. Was 17 from memory"
-    decided_by: "M4, with J-CHAIN's part chosen"
-  ffc_conn_w:
-    value: 6.7
+    source: "the right-angle header's height off the board: the shroud's width across its rows, 5.85 on the same page, lying on its side [calc from the banked page; the -RA view is not dimensioned legibly]"
+    decided_by: "M4, with the full print"
+  chain_hdr_d:
+    value: 5.33
     status: tbd
-    source: "the same footprint's courtyard across the body, cable face to the back of its pads, 6.69 [KiCad library]. Was 5.5 from memory, which no real 12-way 1.0 mm ZIF footprint in KiCad's library meets (docs/reference/tooling.md §4)"
-    decided_by: "M4, with J-CHAIN's part chosen"
-  ffc_conn_h:
-    value: 2.5
+    source: "the right-angle shroud's depth, mouth to back: the vertical shroud's height, 5.33 on the same page [calc; the -RA view is not dimensioned legibly]"
+    decided_by: "M4, with the full print"
+  chain_hdr_pin_back:
+    value: 7.1
     status: tbd
-    source: "the same connector's height above the board [from memory]"
-    decided_by: "M4, with the part"
+    source: "from the header's mouth back to its far pin row: the depth plus 1.77 for the pins' bend, as KiCad's 1.27 mm right-angle pin header draws it [calc; KiCad Connector_PinHeader_1.27mm]"
+    decided_by: "M4, with the full print"
+  chain_plug_proud:
+    value: 2.44
+    status: tbd
+    source: "how far the IDC socket stands out of the header's mouth: the FFSD socket's 5.08 height less its 2.64 minimum insertion depth [calc, datasheets/connectors/SAMTEC-FFSD-1.27MM-IDC-CABLE.pdf]"
+    decided_by: "M4, with the full print"
+  chain_plug_t:
+    value: 3.05
+    status: nominal
+    source: "the FFSD socket's thickness [datasheets/connectors/SAMTEC-FFSD-1.27MM-IDC-CABLE.pdf]"
+    decided_by: "M4"
+  chain_plug_l:
+    value: 11.81
+    status: nominal
+    source: "the FFSD socket's length, positions x 1.27 + 4.19 for 6 per row [datasheets/connectors/SAMTEC-FFSD-1.27MM-IDC-CABLE.pdf]"
+    decided_by: "M4"
   # THE MATRIX AND THE UMBILICAL, onto the main board's tail end (owner,
   # 2026-09-26: "what about matrix led esp32 and ethercon wire connections?").
   # The Matrix: a flat ribbon soldered to its two pad rows (the board is on
@@ -819,16 +841,31 @@ routing:
     status: tbd
     source: "minimum bend radius as a multiple of the cable's diameter, the usual rule for twisted-pair patch cable [from memory]"
     decided_by: "M4, with the lead's datasheet"
-  ffc_w:
-    value: 13.0
+  chain_ribbon_w:
+    value: 7.62
+    status: nominal
+    source: "[calc] 12 conductors at 0.635 mm, the FFSD cable's 1.27 mm IDC pitch over two rows"
+    decided_by: "M4, with the cable"
+  chain_ribbon_t:
+    value: 0.8
     status: tbd
-    source: "12-way 1.0 mm pitch flat flex cable: 11 x 1.0 between outer conductors plus the edges [calc]; ADR 0001's 12 conductors"
-    decided_by: "M4, with the part"
-  ffc_t:
-    value: 0.3
+    source: "30 AWG flat cable's thickness [from memory]"
+    decided_by: "M4, with the cable"
+  chain_service:
+    value: "beside"
+    status: nominal
+    source: "owner, 2026-09-27: long enough 'to have the top off and still connect the ribbon before tightening down'. The lid lies face down beside the body off its far edge, and the ribbon runs up from the main board, over the far side's top edge and down to the key board"
+    decided_by: "owner"
+  chain_slack:
+    value: 10.0
     status: tbd
-    source: "flat flex cable thickness [from memory]"
-    decided_by: "M4, with the part"
+    source: "length added to the service path for the twist and the hand [drawing convention]"
+    decided_by: "M4, on the first assembly"
+  chain_fold:
+    value: [1, -1]
+    status: nominal
+    source: "which way each ribbon's spare length folds closed, along the body (+1 toward the tail), for left_hand and right_hand: the left hand's mouth side has the breath tube's crossing and the right hand's tail side the regulator block (clash.txt)"
+    decided_by: "the clash check"
   ribbon_t:
     value: 1.0
     status: nominal

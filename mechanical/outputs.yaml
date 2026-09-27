@@ -88,7 +88,7 @@ renders:
     imgsize: [1600, 800]
     camera: [0, 28, 10, 50, 0, 340, 440]
     defines: {origin: "centre", show_lid: false, show_caps: false,
-              highlight: ["main board*", "parts *", "tall parts*", "breath sensor", "LED strip", "ribbon *", "ZIF *", "board *",
+              highlight: ["main board*", "parts *", "tall parts*", "breath sensor", "LED strip", "ribbon *", "J-CHAIN *", "IDC plug *", "board *",
                           "switch *", "Matrix*", "etherCON", "USB-C*", "RJ45 plug"]}
   - name: breakdown-breath
     title: "Breakdown: the breath path - mouth cap, tube, trap, sensor, at the mouth end"
@@ -122,13 +122,13 @@ renders:
     camera: [-40, 28, 14, 50, 0, 125, 200]
     defines: {origin: "tail", show_lid: false, ghost_shell: true}
   - name: section-ribbon
-    title: Cross-section through the left key board's ribbon, seen from the tail - the fold, closed
+    title: Section along the body through the left key board's chain headers - the ribbon's hairpin, closed
     src: mechanical/cad/woody_body.scad
     out: mechanical/renders/section-ribbon.png
-    imgsize: [1200, 900]
+    imgsize: [1600, 700]
     projection: o
-    camera: [36, 20, 0, 0, 0, 0, 85]
-    defines: {origin: "mouth", cut: "x2d", cut_key: "ribbon"}
+    camera: [88, 20, 0, 0, 0, 0, 90]
+    defines: {origin: "mouth", cut: "y2d", cut_key: "ribbon"}
   - name: breakdown-ribbons
     title: "Breakdown: the key boards' ribbons and their connectors - lid, sides and oak bottom off"
     src: mechanical/cad/woody_body.scad
@@ -136,7 +136,7 @@ renders:
     imgsize: [1600, 800]
     camera: [0, 40, 14, 50, 0, 150, 360]
     defines: {origin: "centre", show_lid: false, show_caps: false, show_u: false,
-              highlight: ["ribbon *", "ZIF *", "board left_hand", "board right_hand"]}
+              highlight: ["ribbon *", "J-CHAIN *", "IDC plug *", "board left_hand", "board right_hand"]}
   - name: breakdown-tail-wiring
     title: "Breakdown: the Matrix's ribbon and the etherCON's patch lead onto the main board's tail end - lid, sides and oak bottom off"
     src: mechanical/cad/woody_body.scad

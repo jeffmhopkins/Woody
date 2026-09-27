@@ -174,16 +174,16 @@ components:
     - H
 nets:
   /CHAIN_SCK:
-  - J-CHAIN.11
+  - J-CHAIN.12
   - U-KEYS-LH.CLK
   /CHAIN_SER_LH:
-  - J-CHAIN.7
+  - J-CHAIN.8
   - U-KEYS-LH.SER
   /CHAIN_SHLD:
-  - J-CHAIN.9
+  - J-CHAIN.10
   - U-KEYS-LH.SHLD
   /HOP_LH_LT:
-  - J-CHAIN.5
+  - J-CHAIN.6
   - U-KEYS-LH.QH
   /KEY_FREE3:
   - R-KEY-PU-FREE3.2
@@ -235,11 +235,11 @@ nets:
   - C-KEY-LH3.2
   - C-KEY-LH4.2
   - C-KEY-LH5.2
-  - J-CHAIN.10
-  - J-CHAIN.12
-  - J-CHAIN.4
-  - J-CHAIN.6
-  - J-CHAIN.8
+  - J-CHAIN.11
+  - J-CHAIN.3
+  - J-CHAIN.5
+  - J-CHAIN.7
+  - J-CHAIN.9
   - SW-LH1.2
   - SW-LH2.2
   - SW-LH3.2
@@ -256,7 +256,7 @@ nets:
   - U-KEYS-LH.QH_BAR
   V3V3_CHAIN_LH:
   - C-DECOUPLE-165-LH.1
-  - J-CHAIN.3
+  - J-CHAIN.4
   - R-KEY-PU-FREE3.1
   - R-KEY-PU-LH1.1
   - R-KEY-PU-LH2.1
