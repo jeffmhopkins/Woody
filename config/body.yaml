@@ -240,7 +240,7 @@ switch:
   pcb_below_seat:
     value: 3.5
     status: nominal
-    source: "THE KEY BOARDS' (the thumb switches' main board is switch.thumb_pcb_below_seat): set by their mount (ADR 0020, amended 2026-09-27): the screw's head sits on the plate's top face, so the board top sits the plate + hardware.kb_spacer_l + hardware.kb_washer_t below the seat [calc: 1.2 + 2.0 + 0.3]; drc.echo 'key-board mount sets the board depth' fails if this and the hardware disagree. Inside switch.pcb_below_seat_window"
+    source: "THE KEY BOARDS' (the thumb switches' main board is switch.thumb_pcb_below_seat): set by their mount (ADR 0020, amended 2026-09-27): the mount clamps the plate between the screw's head on top and the spacer below, so the board top sits the plate + hardware.kb_spacer_l + hardware.kb_washer_t below the seat [calc: 1.2 + 2.0 + 0.3]; drc.echo 'key-board mount sets the board depth' fails if this and the hardware disagree. Inside switch.pcb_below_seat_window"
   keycap_top_above_seat:
     value: 9.0
     status: tbd
@@ -450,13 +450,13 @@ boards:
   kb_end_margin:
     value: 6.0
     status: tbd
-    source: "a key board's MOUTH end past its first switch cutout, along the body: room for the corner screws' nuts clear of that cutout, and their plug bores clear of the first cap slot (drc.echo 'key-board plug bores clear of the wood top's cuts (mouth ends)' and '(tail ends)') [drawing convention]"
+    source: "a key board's MOUTH end past its first switch cutout, along the body: room for the corner mounts clear of that cutout, and their head pockets clear of the first cap slot (drc.echo 'key-board head pockets clear of the wood top's cuts (mouth ends)' and '(tail ends)') [drawing convention]"
     decided_by: "M4, with the boards laid out"
   kb_tail_margin:
     value: 10.1
     status: nominal
-    source: "a key board's TAIL end past its last switch cutout. Longer than the mouth end because the last keys (LH4/LH5, RH6) reach the board's corners across the body, and each corner screw's plug bore must keep hardware.kb_bore_wall of wood from that key's cap slot [calc: half the slot 9.0 + half the bore 3.175 + the wall 1.5 + the inset 3.4 - half the cutout 7.0 = 10.075, rounded up]. drc.echo 'key-board plug bores clear of the wood top's cuts (tail ends)' prints the least it may be"
-    decided_by: "hardware.kb_bore_wall and kb_bore_d, which set it"
+    source: "a key board's TAIL end past its last switch cutout. Longer than the mouth end because the last keys (LH4/LH5, RH6) reach the board's corners across the body, and each corner's head pocket must keep hardware.kb_pocket_wall of wood from that key's cap slot [calc: half the slot 9.0 + half the pocket 3.175 + the wall 1.5 + the inset 3.4 - half the cutout 7.0 = 10.075, rounded up]. drc.echo 'key-board head pockets clear of the wood top's cuts (tail ends)' prints the least it may be"
+    decided_by: "hardware.kb_pocket_wall and kb_pocket_d, which set it"
   board_clear:
     value: 1.5
     status: tbd
@@ -731,38 +731,40 @@ hardware:
     value: 2.5
     status: nominal
     source: "fastener_head_h + 0.5 below flush. Must stay at or under the oak left under the side groove (oak bottom - stack.groove_depth), so the counterbore and the groove share no depth (drc 'fastener counterbores clear of the side grooves')"
-  # THE KEY BOARDS HANG FROM THE KEY PLATE ON SCREWS THROUGH THE WOOD (owner,
-  # 2026-09-27: "fasteners through the wood ... so that we can put a wooden
-  # cap on top so it looks like it's not there" - "make that the standard";
-  # ADR 0020, amended). At each corner of a key board, from the top down:
-  # a bore through the wood top (kb_bore_d), a socket-head screw whose head
-  # sits on the plate at the bore's floor, the plate's clearance hole, a
-  # spacer below the plate, a washer, the key board, and a nut on the board's
-  # underside. A glued wooden plug fills the bore over the head. The spacer
-  # and washer set the board's depth: plate + spacer + washer below the seat
-  # (drc.echo 'key-board mount sets the board depth').
-  kb_bore_d:
+  # THE KEY BOARDS HANG FROM THE KEY PLATE; THE SCREW HEADS HIDE IN THE WOOD
+  # (owner, 2026-09-27, ADR 0020 Amendment 3: "I don't want to have through
+  # holes and plugs in the wood ... only holes that go half depth in the wood
+  # drilled from the inside ... enough to be able to fit the head"). At each
+  # corner of a key board, from the top down: a socket-head screw whose head
+  # sits on the plate's top face inside a blind pocket drilled up into the
+  # wood top's underside, the plate's clearance hole, a spacer below the
+  # plate, a washer, the key board, and a nut on the board's underside. The
+  # screws go into the plate before the plate is bonded to the wood, so the
+  # playing face is unbroken. The spacer and washer set the board's depth:
+  # plate + spacer + washer below the seat (drc.echo 'key-board mount sets
+  # the board depth').
+  kb_pocket_d:
     value: 6.35
     status: nominal
-    source: "the bore through the wood top over each key-board screw, and the plug that fills it: 1/4 in, the smallest common face-grain plug and plug-cutter size in US supply (MECH-KB-PLUG). Clears the screw head (kb_screw_head_d) and a hex key"
-  kb_bore_wall:
-    value: 1.5
-    status: tbd
-    source: "the least wood left between a plug bore and a cap slot (or the top's edge): a placeholder for a plug hole beside a through-slot in hardwood [from memory - no banked figure]; the model moves each key board's end until every bore has it (kb_rect, drc.echo 'key-board plug bores clear of the wood top's cuts (mouth ends)' and '(tail ends)')"
-    decided_by: "M2 - bore and plug a scrap of the chosen wood beside a slot"
-  kb_plug_glue_gap:
+    source: "the blind pocket in the wood top's underside over each key-board screw head: 1/4 in, a stock Forstner size, which leaves a flat floor. Clears the head (kb_screw_head_d) with room to spare; the pocket only houses it, the head bears on the plate"
+  kb_pocket_clear:
     value: 0.5
     status: nominal
-    source: "clearance between the screw head's top and the plug's bottom, so the plug seats on its glue and never on the head [drawing convention]"
-  kb_plug_min_depth:
-    value: 3.0
+    source: "the pocket's depth past the screw head's top [drawing convention]"
+  kb_pocket_skin:
+    value: 2.0
     status: tbd
-    source: "the least depth of wood plug over a screw head, for a glue joint that holds and a face that can be sanded flush [from memory - no banked figure]"
-    decided_by: "M2 - plug a scrap of the chosen wood over a screw and sand it"
+    source: "the least wood left over a pocket, between its floor and the playing face: enough not to telegraph or crack through in hardwood [from memory - no banked figure]"
+    decided_by: "M2 - pocket a scrap of the chosen wood and sand its face"
+  kb_pocket_wall:
+    value: 1.5
+    status: tbd
+    source: "the least wood left between a pocket and a cap slot or a side groove: a placeholder for a drilled pocket beside a through-slot in hardwood [from memory - no banked figure]; the model moves each key board's tail end until every pocket has it (kb_rect, drc.echo 'key-board head pockets clear of the wood top's cuts (mouth ends)' and '(tail ends)')"
+    decided_by: "M2 - pocket a scrap of the chosen wood beside a slot"
   kb_plate_t_tol:
     value: [-0.05, 0.05]
     status: nominal
-    source: "the key plate's thickness tolerance: the switch's own plate-slot tolerance (`plate-thickness`, config/figures.yaml), which a plate bought to that register must meet. It enters the key boards' depth now that the screw head sits on the plate's top face"
+    source: "the key plate's thickness tolerance: the switch's own plate-slot tolerance (`plate-thickness`, config/figures.yaml), which a plate bought to that register must meet. It enters the key boards' depth because the mount clamps the plate itself between the screw head and the spacer"
   kb_plate_hole:
     value: 2.4
     status: nominal
@@ -774,7 +776,7 @@ hardware:
   kb_screw_head_d:
     value: 3.8
     status: nominal
-    source: "ISO 4762 / DIN 912 M2 socket head cap screw, head diameter dk max 3.80 [datasheets/mechanical/ASPEN-ME127-204X8-M2X8-ISO4762-SHCS-DRAWING.pdf]"
+    source: "ISO 4762 / DIN 912 M2 socket head cap screw, head diameter dk max 3.80; the head bears on the plate's top face, in the wood's pocket (kb_pocket_d) [datasheets/mechanical/ASPEN-ME127-204X8-M2X8-ISO4762-SHCS-DRAWING.pdf]"
   kb_screw_head_h:
     value: 2.0
     status: nominal
@@ -827,7 +829,7 @@ hardware:
   kb_mount_inset:
     value: 3.4
     status: tbd
-    source: "a corner screw's centre in from both board edges: far enough across the body that its plug bore keeps hardware.kb_bore_wall of wood from the side groove in the wood top (drc.echo 'key-board plug bores clear of the wood top's cuts (mouth ends)' and '(tail ends)') [calc: the groove's inner edge 6.2 + 1.5 + 3.175 = 10.875 across, less the board's edge at 7.5]; the nut (kb_nut_e) leaves about 1.1 mm of board outside it"
+    source: "a corner screw's centre in from both board edges: far enough across the body that its head pocket keeps hardware.kb_pocket_wall of wood from the side groove in the wood top (drc.echo 'key-board head pockets clear of the wood top's cuts (mouth ends)' and '(tail ends)') [calc: the groove's inner edge 6.2 + 1.5 + 3.175 = 10.875 across, less the board's edge at 7.5]; the nut (kb_nut_e) leaves about 1.1 mm of board outside it"
     decided_by: "M4, with the board's first fit"
   fastener_inset:
     value: 4.3

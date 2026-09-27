@@ -190,7 +190,7 @@ renders:
     projection: o
     camera: [16, 18, 0, 0, 0, 0, 190]
   - name: section-kb-mount
-    title: Cross-section through a key board's corner mount - plugged bore, screw on the plate, spacer, washer, board, nut
+    title: Cross-section through a key board's corner mount - screw head in a blind pocket in the wood, plate, spacer, washer, board, nut
     src: mechanical/cad/fig_section_kb_mount.scad
     out: mechanical/renders/section-kb-mount.png
     imgsize: [1200, 900]
@@ -237,6 +237,7 @@ exports:
   - {name: dxf-ubolt-backplate, src: mechanical/cad/woody_body.scad, out: mechanical/export/ubolt-backplate.dxf, defines: {part: "ubolt_backplate"}}
   - {name: dxf-matrix-window, src: mechanical/cad/woody_body.scad, out: mechanical/export/matrix-window.dxf, defines: {part: "matrix_window"}}
   - {name: dxf-oak-rebates, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-rebates.dxf, defines: {part: "oak_rebates"}}
+  - {name: dxf-oak-pockets, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-pockets.dxf, defines: {part: "oak_pockets"}}
   - {name: dxf-key-board-lh, src: mechanical/cad/woody_body.scad, out: mechanical/export/key-board-lh.dxf, defines: {part: "key_board_left_hand"}}
   - {name: dxf-key-board-rh, src: mechanical/cad/woody_body.scad, out: mechanical/export/key-board-rh.dxf, defines: {part: "key_board_right_hand"}}
   - {name: pcb-geometry, src: mechanical/cad/woody_body.scad, out: mechanical/export/pcb-geometry.echo, defines: {part: "pcb_geom"}}

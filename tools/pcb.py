@@ -685,8 +685,8 @@ def build(bdir):
         h.Reference().SetLayer(pcbnew.F_Fab)
         px, py = to_pcb(x, y)
         place(board, h, px, py, 0, True)
-        # The mount's washer presses on the top copper and its nut on the bottom,
-        # and both are on the screw that the plate grounds through its own bond:
+        # The mount's washer presses on the top copper and its nut on the
+        # bottom, and both are on the screw that the plate grounds through its own bond:
         # no copper under either, or the board gets a second ground bond and
         # every net routed there a short. A rule area on both layers, which the
         # router also treats as an obstacle.
