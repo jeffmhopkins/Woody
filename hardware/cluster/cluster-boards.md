@@ -20,7 +20,7 @@ Since ADR 0017:
 
 - **`right_hand` and `left_hand` are the two key boards** (`PCB-CLUSTER`),
   screwed to the underside of `PLATE-TOP` on M2 standoffs pressed into the
-  plate (ADR 0020). Each connects to the main board by one flat flex ribbon.
+  plate, one in each corner of a board that spans the cavity (ADR 0020). Each connects to the main board by one flat flex ribbon.
 - **`right_thumb` and `left_thumb` are on the main board** (`PCB-CARRIER`),
   their switches soldered to it and clipped into `PLATE-THUMB`, their
   registers and networks beside them.
@@ -165,7 +165,8 @@ coordinates rather than a pitch parameter.
   them.
 
   Also budget a **⌀5.25 mm clearance hole through both the plate and this
-  board** for the centre pole, which protrudes 0.5–0.9 mm below a 1.6 mm PCB.
+  board** for the centre pole, which protrudes 0.9–1.3 mm below the key board
+  (`boards.key_board_t`; tip 5.70 below the seat `[calc]`).
 
   > **This bullet read "there is none, and that is the answer" and derived
   > *there is no plate-facing side: put every passive on the far face*.**

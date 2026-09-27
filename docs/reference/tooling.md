@@ -228,7 +228,7 @@ else.
 |---|---|
 | Netlist, footprints, references | the board's KiCad sheets (§3); a part's footprint is its sheet's `Footprint` field |
 | Board outline | `mechanical/export/key-board-lh.dxf` — the body CAD's key board |
-| Switch, ribbon-connector and standoff positions | `mechanical/export/pcb-geometry.echo` — the body CAD |
+| Switch, ribbon-connector and standoff positions, the ribbon's no-parts strip, board thickness | `mechanical/export/pcb-geometry.echo` — the body CAD |
 | Switch 3D model height | `config/body.yaml` `switch.pcb_below_seat` |
 | Everything else's place, and the design rules | `layout.yaml` beside the board |
 | Footprints KiCad lacks | `hardware/lib/woody.pretty/` (`hardware/lib/README.md`) |
@@ -253,7 +253,10 @@ reported by name.
 layer, vias where they fit, every other net's copper, every hole and the board
 edge inflated by the clearance. Signals first (shortest first), the power rail
 wider, ground last as a net of its own, then a ground pour on both layers and
-a stitching via beside every single-sided ground pad. Ground pins the main
+a stitching via beside every single-sided ground pad. Each layer has a
+preferred direction (top along the board, bottom across it), a turn costs by
+its angle, and after the first pass every net is ripped up and rerouted with
+the others in place. Ground pins the main
 ground tree cannot reach are still joined to each other, in whatever groups
 they can reach, so the pour has more copper to reach. The standoffs' copper
 keep-outs (ADR 0020) are obstacles on both layers. **It proves nothing about
@@ -274,9 +277,12 @@ board's analog routing is done by hand** (`docs/reference/pcb-pipeline.md`).
   laid; a stitching via's stub once crossed a signal track.
 - **A pour can be cut into islands by tracks.** A ground pin inside a loop of
   signal tracks on both layers gets no ground, and a pin at the board edge can
-  get only one thermal spoke. DRC reports both. A small move of a part usually
-  clears it: the left-hand register's place in `layout.yaml` is good to about
-  ±0.1 mm between a starved thermal at the edge and the standoff's courtyard.
+  get only one thermal spoke. DRC reports both. Room fixes it: on the first,
+  smaller outline the left-hand register's place was good to only about
+  ±0.1 mm, and on the corner-standoff board it is not near either limit.
+- **Placement makes the routing tidy, not the router.** The left-hand
+  register is turned so its inputs face the key row in the keys' own order;
+  the routes then need almost no crossings.
 - **KiCad may write an empty global `fp-lib-table`** on first run, and then
   every footprint "is not in the configuration". `tools/setup-env.sh` replaces
   an empty one.
@@ -297,13 +303,12 @@ board's analog routing is done by hand** (`docs/reference/pcb-pipeline.md`).
   with its cable entry at the board's end. `J-CHAIN`'s exact part is still
   open until M4.
 - **Nothing held the board.** The first layout had no mounting at all. Now
-  there are M2 standoffs in the plate where its web holds one, NPTH holes,
-  and copper keep-outs under the standoff face and the screw head (ADR 0020).
-- **The switch pins barely reach through.** The pin blades' tips are 5.10 mm
-  below the seat and the PCB top is `switch.pcb_below_seat` below it, so on a
-  1.6 mm board about 0.1 mm of pin shows to solder (`docs/reference/ks33-geometry.md`).
-  A 1.2 mm board would leave about 0.5 mm. Open, and cheap to decide before
-  the first order.
+  the board is a rectangle across the cavity with an M2 standoff in each
+  corner, NPTH holes, and copper keep-outs under the standoff face and the
+  screw head (ADR 0020).
+- **The switch pins barely reached through** a 1.6 mm board (about 0.1 mm).
+  The key boards are now 1.2 mm, which leaves about 0.5 mm (ADR 0020;
+  `docs/reference/ks33-geometry.md`).
 
 ### Where the sheets are
 

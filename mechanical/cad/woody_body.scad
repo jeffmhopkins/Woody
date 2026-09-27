@@ -627,37 +627,49 @@ module thumb_plates_3d() {
     lam(z_floor - explode * 0.5, plate_thickness, C_ALU, false, "thumb plates") thumb_plate_both_2d();
 }
 
-// A key board's outline, as its PCB is cut (the PCB's Edge.Cuts come from this).
-module key_board_2d(cl) { offset(-0.5) cluster_window_2d(cluster_keys(cl)); }
+// A KEY BOARD IS A RECTANGLE ACROSS THE CAVITY (owner, 2026-09-27, ADR 0020
+// amended: "increase that size a little bit so that we could fit the
+// standoffs... anchor it in each corner"): from the side walls less the board
+// clearance, and along the body past its outermost cutouts by kb_end_margin.
+// Corners rounded by a drawing convention. The PCB's Edge.Cuts come from this.
+kb_corner_r = 1;        // drawing convention: board corner radius
+function kb_rect(cl) = let(x = xs(cluster_keys(cl)))
+    [min(x) - plate_cutout / 2 - boards_kb_end_margin, u_y0 + boards_board_clear,
+     max(x) + plate_cutout / 2 + boards_kb_end_margin, W - u_y0 - boards_board_clear];
+module key_board_2d(cl) {
+    r = kb_rect(cl);
+    offset(r = kb_corner_r) offset(delta = -kb_corner_r) translate([r[0], r[1]]) square([r[2] - r[0], r[3] - r[1]]);
+}
 
 // THE KEY BOARDS ARE SCREWED TO THE PLATE (owner, 2026-09-27, ADR 0020): an M2
-// standoff pressed into the plate midway between each pair of neighbouring
-// switches, where the plate is a web between two cutouts, and a screw up
-// through the board. Its length is the gap the switch pins set.
-// Only where the web can hold one: where two switches are 18 mm apart (LH3 and
-// LH4, the stacked pair) the web is 4 mm and the standoff goes elsewhere or not
-// at all. The DRC below guards what is chosen.
+// standoff pressed into the plate at each corner of the board, and a screw up
+// through the board. Its length is the gap the switch pins set. The DRC below
+// checks each one is in plate metal, clear of the switch cutouts.
 function rect_gap(p, c, sz, r) = let(d = [cos(-r) * (p[0] - c[0]) - sin(-r) * (p[1] - c[1]), sin(-r) * (p[0] - c[0]) + cos(-r) * (p[1] - c[1])],
                                    e = [max(abs(d[0]) - sz[0] / 2, 0), max(abs(d[1]) - sz[1] / 2, 0)]) norm(e);
 function cutout_gap(p) = min([for (k = top_keys) rect_gap(p, key_xy(k), [plate_cutout, plate_cutout], key_rot(k))]);
 kb_web_min = 0.5;       // drawing convention: plate metal left round a standoff's barrel
-function kb_standoffs(cl) = let(ks = cluster_keys(cl))
-    [for (i = [0 : len(ks) - 2]) let(m = (key_xy(ks[i]) + key_xy(ks[i + 1])) / 2)
-        if (cutout_gap(m) - hardware_kb_standoff_od / 2 >= kb_web_min) m];
+function kb_standoffs(cl) = let(r = kb_rect(cl), e = hardware_kb_standoff_inset)
+    [[r[0] + e, r[1] + e], [r[0] + e, r[3] - e], [r[2] - e, r[1] + e], [r[2] - e, r[3] - e]];
 kb_gap = switch_pcb_below_seat - plate_thickness;            // plate underside to board top
 kb_top = z_plate_top - switch_pcb_below_seat;                 // the key boards' top face
+// Where the ribbon runs under a key board, from its connector's mouth to the
+// board's far edge: no parts there (the PCB keeps it as a rule area).
+function kb_ribbon_rect(cl) = let(c = kb_ffc(cl), r = kb_rect(cl))
+    [c[0] - boards_ffc_conn_l / 2, ffc_s > 0 ? c[1] + boards_ffc_conn_w / 2 : r[1],
+     c[0] + boards_ffc_conn_l / 2, ffc_s > 0 ? r[3] : c[1] - boards_ffc_conn_w / 2];
 
 module cluster_boards() {
     for (cl = ["left_hand", "right_hand"]) {
-        P(C_PCB, false, str("board ", cl)) translate([0, 0, kb_top - switch_pcb_t + explode * 0.25])
-            linear_extrude(switch_pcb_t) difference() {
+        P(C_PCB, false, str("board ", cl)) translate([0, 0, kb_top - boards_key_board_t + explode * 0.25])
+            linear_extrude(boards_key_board_t) difference() {
                 key_board_2d(cl);
                 for (s = kb_standoffs(cl)) translate(s) circle(d = hardware_kb_screw_hole);
             }
         for (i = [0 : len(kb_standoffs(cl)) - 1]) let(s = kb_standoffs(cl)[i]) {
             P(C_STEEL, false, str("standoff ", cl, " ", i + 1)) translate([s[0], s[1], kb_top + explode * 0.2])
                 cylinder(d = hardware_kb_standoff_od, h = kb_gap);
-            P(C_STEEL, false, str("standoff screw ", cl, " ", i + 1)) translate([s[0], s[1], kb_top - switch_pcb_t - hardware_kb_screw_head_h + explode * 0.25])
+            P(C_STEEL, false, str("standoff screw ", cl, " ", i + 1)) translate([s[0], s[1], kb_top - boards_key_board_t - hardware_kb_screw_head_h + explode * 0.25])
                 cylinder(d = hardware_kb_screw_head_d, h = hardware_kb_screw_head_h);
         }
     }
@@ -672,7 +684,8 @@ module pcb_geometry() {
         for (k = cluster_keys(cl)) echo("PCB", cl, "switch", k[0], key_xy(k)[0], key_xy(k)[1], key_rot(k));
         echo("PCB", cl, "ffc", "J-CHAIN", kb_ffc(cl)[0], kb_ffc(cl)[1], 0, boards_ffc_conn_l, boards_ffc_conn_w);
         for (s = kb_standoffs(cl)) echo("PCB", cl, "standoff", "M2", s[0], s[1], hardware_kb_screw_hole, hardware_kb_screw_head_d, hardware_kb_standoff_od);
-        echo("PCB", cl, "board", "thickness", switch_pcb_t, "smt_height_max", boards_cluster_smt_h,
+        let(q = kb_ribbon_rect(cl)) echo("PCB", cl, "ribbon", q[0], q[1], q[2], q[3]);
+        echo("PCB", cl, "board", "thickness", boards_key_board_t, "smt_height_max", boards_cluster_smt_h,
              "side", "switches on top, parts and ribbon connector underneath");
     }
 }
@@ -757,7 +770,7 @@ module ribbon(pts, w, t = routing_ribbon_t) {
 module run(pts, d) {
     for (i = [0 : len(pts) - 2]) hull() { translate(pts[i]) sphere(d = d, $fn = 16); translate(pts[i + 1]) sphere(d = d, $fn = 16); }
 }
-top_z = z_plate_top - switch_pcb_below_seat - switch_pcb_t;     // top cluster boards' underside
+top_z = z_plate_top - switch_pcb_below_seat - boards_key_board_t;     // top cluster boards' underside
 thumb_z = z_floor + switch_pcb_below_seat + switch_pcb_t;       // the main board's top face, where the thumb switches solder
 function mid_x(cl) = (min(xs(cluster_keys(cl))) + max(xs(cluster_keys(cl)))) / 2;
 function sgn(side) = side == "right" ? 1 : -1;
@@ -1003,8 +1016,9 @@ module parts_3d() {
     for (cl = ["left_hand", "right_hand"])
         P([0.35, 0.55, 0.40], false, str("parts ", cl)) translate([0, 0, top_z - boards_cluster_smt_h])
             linear_extrude(boards_cluster_smt_h) difference() {
-                offset(-0.5) cluster_window_2d(cluster_keys(cl));
+                offset(-0.5) key_board_2d(cl);
                 translate(kb_ffc(cl)) square(ffc_sz + [1, 1], center = true);
+                let(q = kb_ribbon_rect(cl)) translate([q[0] - 0.5, q[1]]) square([q[2] - q[0] + 1, q[3] - q[1]]);
                 // no parts under a screw head: the PCB keeps the same circle clear (ADR 0020)
                 for (s = kb_standoffs(cl)) translate(s) circle(d = max(hardware_kb_screw_head_d, hardware_kb_standoff_od));
             }
@@ -1263,7 +1277,10 @@ module drc_report() {
     web = min([for (cl = ["left_hand", "right_hand"], st = kb_standoffs(cl)) cutout_gap(st) - hardware_kb_standoff_od / 2]);
     drc(web >= kb_web_min, "key-board standoffs in the plate's web", web, "mm from a standoff's barrel to the nearest switch cutout, worst case");
     echo("DRC", "INFO", "key-board standoffs", [for (cl = ["left_hand", "right_hand"]) len(kb_standoffs(cl))],
-         "per board (left_hand, right_hand): one between each pair of neighbouring switches whose web holds one");
+         "per board (left_hand, right_hand): one in each corner");
+    kb_fast = min([for (cl = ["left_hand", "right_hand"], f = fasteners()) let(r = kb_rect(cl))
+                rect_gap(f, [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2], [r[2] - r[0], r[3] - r[1]], 0) - 1.5]);
+    drc(kb_fast >= boards_board_clear, "key boards clear of the lid screws", kb_fast, "mm from a key board's edge to the nearest M3 screw's shank");
     kb_head = min([for (cl = ["left_hand", "right_hand"], st = kb_standoffs(cl))
                 rect_gap(st, kb_ffc(cl), [boards_ffc_conn_l, boards_ffc_conn_w], 0) - hardware_kb_screw_head_d / 2]);
     drc(kb_head >= 0.5, "key-board screw heads clear of the ribbon connector", kb_head, "mm, worst case, both on the board's underside");

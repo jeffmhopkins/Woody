@@ -14,8 +14,14 @@ HOW IT WORKS
     too.
   * Each net is routed as a tree: A* from everything already connected to the
     nearest pad not yet connected, 8-connected moves on a layer, a via to the
-    other layer where a via fits. Vias cost more than distance, and turns cost
-    a little, so routes are short and tidy.
+    other layer where a via fits. Vias cost more than distance; each layer
+    has a preferred direction (top along the board, bottom across it) and a
+    move against it costs extra; a turn costs by its angle, so a route is a
+    few straight runs joined by 45-degree corners rather than a staircase.
+  * Then every net is ripped up and routed again with all the others in
+    place, in the same order, and the new route kept if it is cheaper: the
+    first pass routes early nets round an empty board, and they are the ones
+    that wander.
   * Ground is routed last as an ordinary net, so no ground pin depends on a
     pour finding a way round the tracks; then both layers get a GND pour and
     every single-sided GND pad a stitching via into the other plane.
@@ -32,9 +38,22 @@ from shapely.ops import unary_union
 
 GRID = 0.2
 SLACK = GRID * 0.75
+# Search costs, in grid steps. A 45-degree turn is cheap, a 90-degree one is
+# not, and anything sharper is as good as forbidden; a via is worth a detour
+# of about 2.4 mm; a move against the layer's direction costs a third extra.
+DIAG = 1.5
+TURN = {1: 0.8, 2: 2.5, 3: 20.0, 4: 40.0}      # by the angle between moves, in 45-degree steps
+VIA = 12.0
+AGAINST = 0.35
 TOP, BOT = 0, 1
 LAYERS = [pcbnew.F_Cu, pcbnew.B_Cu]
 MM, TO = pcbnew.FromMM, pcbnew.ToMM
+
+
+def steps45(a, b):
+    """The angle between two grid moves, in 45-degree steps (0-4)."""
+    d = math.degrees(math.atan2(b[1], b[0]) - math.atan2(a[1], a[0])) % 360
+    return round(min(d, 360 - d) / 45)
 
 
 def pad_geom(pad):
@@ -83,6 +102,7 @@ class Router:
         # copper per net and per layer: (net, layer) -> list of geometries
         self.copper = []            # (netname, layer set, geometry, kind) - kind is 'pad' or 'track'
         self.holes = []             # geometry of every drilled hole (any net or none)
+        self.owned = {}             # net -> [(board item, copper entry, hole)] its routes added
         for fp in board.GetFootprints():
             for pad in fp.Pads():
                 net = pad.GetNetname()
@@ -154,7 +174,7 @@ class Router:
         for s in sources:
             cost[s] = 0
             heapq.heappush(openq, (h(s[1], s[2]), 0, s, None))
-        moves = [(1, 0, 1), (-1, 0, 1), (0, 1, 1), (0, -1, 1), (1, 1, 1.414), (1, -1, 1.414), (-1, 1, 1.414), (-1, -1, 1.414)]
+        moves = [(1, 0, 1), (-1, 0, 1), (0, 1, 1), (0, -1, 1), (1, 1, DIAG), (1, -1, DIAG), (-1, 1, DIAG), (-1, -1, DIAG)]
         seen = set()
         while openq:
             f, g, cur, prevdir = heapq.heappop(openq)
@@ -174,8 +194,9 @@ class Router:
                 if di and dj and (grid[L][i + di][j] or grid[L][i][j + dj]):
                     continue            # no corner-cutting past an obstacle
                 nxt = (L, ni, nj)
-                turn = 0.3 if prevdir and prevdir != (di, dj) else 0
-                ng = g + c + turn + (0.2 if L == BOT else 0)
+                turn = TURN.get(steps45(prevdir, (di, dj)), 0) if prevdir else 0
+                pref = (dj == 0) if L == TOP else (di == 0)
+                ng = g + c + turn + (0 if pref else AGAINST * c)
                 if ng < cost.get(nxt, 1e18):
                     cost[nxt] = ng
                     came[nxt] = (cur,)
@@ -184,12 +205,48 @@ class Router:
             O = 1 - L
             if not vgrid[L][i][j] and not vgrid[O][i][j]:
                 nxt = (O, i, j)
-                ng = g + 12
+                ng = g + VIA
                 if ng < cost.get(nxt, 1e18):
                     cost[nxt] = ng
                     came[nxt] = (cur,)
                     heapq.heappush(openq, (ng + h(i, j), ng, nxt, None))
         return None
+
+    def own(self, net, item, copper=None, hole=None):
+        """Record what a route added, so rip_up can take it all back."""
+        self.board.Add(item)
+        rec = self.owned.setdefault(net, [])
+        rec.append((item, copper, hole))
+        if copper is not None:
+            self.copper.append(copper)
+        if hole is not None:
+            self.holes.append(hole)
+
+    def rip_up(self, net):
+        """Remove every track and via this net's routes added; returns them for put_back."""
+        rec = self.owned.pop(net, [])
+        for item, copper, hole in rec:
+            self.board.Remove(item)
+            # by identity: two entries can be equal geometry
+            if copper is not None:
+                self.copper = [c for c in self.copper if c is not copper]
+            if hole is not None:
+                self.holes = [h for h in self.holes if h is not hole]
+        return rec
+
+    def put_back(self, net, rec):
+        for item, copper, hole in rec:
+            self.own(net, item, copper, hole)
+
+    def cost(self, net):
+        """What a net's route costs: its length, and its vias at their search cost."""
+        c = 0.0
+        for item, _, _ in self.owned.get(net, []):
+            if isinstance(item, pcbnew.PCB_VIA):
+                c += VIA * GRID
+            else:
+                c += TO(item.GetLength())
+        return c
 
     def commit(self, net, path, width):
         """Write the path as tracks and vias, and add it to the copper others must avoid."""
@@ -216,10 +273,8 @@ class Router:
                     v.SetWidth(MM(self.via))
                     v.SetDrill(MM(self.via_drill))
                     v.SetNet(netinfo)
-                    self.board.Add(v)
-                    g = Point(pts[k][1], pts[k][2]).buffer(self.via / 2)
-                    self.copper.append((net, {TOP, BOT}, g, "track"))
-                    self.holes.append(Point(pts[k][1], pts[k][2]).buffer(self.via_drill / 2))
+                    self.own(net, v, (net, {TOP, BOT}, Point(pts[k][1], pts[k][2]).buffer(self.via / 2), "track"),
+                             Point(pts[k][1], pts[k][2]).buffer(self.via_drill / 2))
                 start = k
         for L, a, b in segs:
             t = pcbnew.PCB_TRACK(self.board)
@@ -228,10 +283,9 @@ class Router:
             t.SetWidth(MM(width))
             t.SetLayer(LAYERS[L])
             t.SetNet(netinfo)
-            self.board.Add(t)
             from shapely.geometry import LineString
             g = LineString([a, b]).buffer(width / 2) if a != b else Point(a).buffer(width / 2)
-            self.copper.append((net, {L}, g, "track"))
+            self.own(net, t, (net, {L}, g, "track"))
 
     def pad_stub(self, net, pad_geom_, L, cell, width):
         """A short track from the pad's centre to the cell the path started or ended in."""
@@ -245,9 +299,8 @@ class Router:
         t.SetWidth(MM(width))
         t.SetLayer(LAYERS[L])
         t.SetNet(self.board.FindNet(net))
-        self.board.Add(t)
         from shapely.geometry import LineString
-        self.copper.append((net, {L}, LineString([(c.x, c.y), (x, y)]).buffer(width / 2), "track"))
+        self.own(net, t, (net, {L}, LineString([(c.x, c.y), (x, y)]).buffer(width / 2), "track"))
 
     def route_net(self, net, width, planes=False):
         pads = self.pad_cells(net)
@@ -371,6 +424,24 @@ def route(board, lay):
         print(f"route: {n:20s} {'ok' if ok else 'FAILED'}")
         if not ok:
             failed.append(n)
+    # Rip up and reroute: each net again, with every other net in place. A
+    # net that now fails, or comes back dearer, gets its old route back.
+    for rnd in range(2):
+        better = 0
+        for n in order:
+            before = r.cost(n)
+            old = r.rip_up(n)
+            ok = r.route_net(n, r.pw if n in power else r.w)
+            if ok and (n in failed or r.cost(n) < before - 0.05):
+                better += 1
+                if n in failed:
+                    failed.remove(n)
+            else:
+                r.rip_up(n)
+                r.put_back(n, old)
+        print(f"route: reroute pass {rnd + 1}: {better} net(s) improved")
+        if not better:
+            break
     # Ground is wired as a net too, after everything else, so no ground pin
     # depends on a pour finding its way round the tracks; the pours then add the
     # planes. A pin it cannot reach is left to its stitching via and the pour,

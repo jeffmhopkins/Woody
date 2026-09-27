@@ -36,9 +36,10 @@ drawing.
   nothing else; the fasteners stop in the plate. The two key boards are
   screwed up to the plate's underside on M2 standoffs pressed into it (ADR
   0020), at the depth the KS-33's pins set (`docs/reference/ks33-geometry.md`;
-  `switch.pcb_below_seat`). A standoff goes between neighbouring switches only
-  where the plate's web holds one (*"key-board standoffs in the plate's web"*),
-  and its length is derived (*"key-board standoff length (derived)"*).
+  `switch.pcb_below_seat`). Each board is a rectangle across the cavity with a
+  standoff in each corner, in plate metal (*"key-board standoffs in the
+  plate's web"*); the standoff's length is derived (*"key-board standoff
+  length (derived)"*).
 - **Thumb keys are flush with the bottom face at full travel** too (same date).
   The thumb plate is on the oak bottom's inside face, so the oak bottom is
   derived by the same rule as the oak top.
@@ -314,10 +315,10 @@ soldered to the main board, with no socket; how it is fitted and swapped is in
 `hardware/interfaces/breath-sense-link/breath-sense-link.md`, "Mounting".
 
 **Found by the first PCB layout (2026-09-27, `docs/reference/tooling.md` §4):**
-the key boards' ribbon connector is deeper than `boards.ffc_conn_w` (a real
-12-way 1.0 mm ZIF footprint needs 6.7 mm, the envelope is 5.5 from memory),
-and on a 1.6 mm board the KS-33's pins show only about 0.1 mm below it. Both
-are open until the connector and the board thickness are chosen. The model
+the key boards' ribbon connector was deeper than the envelope assumed, and
+on a 1.6 mm board the KS-33's pins would show only about 0.1 mm below it.
+Both are settled in ADR 0020: the envelope is the Molex 200528's footprint,
+and the key boards are `boards.key_board_t` thick. The model
 now exports each key board's outline (`export/key-board-*.dxf`) and its
 switch and connector positions (`export/pcb-geometry.echo`), which the PCB is
 placed from.

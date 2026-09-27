@@ -392,6 +392,18 @@ boards:
   # carrier's circuits on one board at the thumb level, mouth cap to the end
   # of the right hand. Its size and the height its parts have are derived;
   # drc.echo prints them.
+  # THE KEY BOARDS (ADR 0020, amended 2026-09-27): 1.2 mm, and a rectangle
+  # across the cavity with a standoff in each corner.
+  key_board_t:
+    value: 1.2
+    status: nominal
+    source: "[calc] docs/reference/ks33-geometry.md: the pins end 5.10 below the seat and the board top is switch.pcb_below_seat below it, so a 1.6 mm board leaves ~0.1 mm of pin to solder and 1.2 mm ~0.5 mm. 1.2 mm is a standard thickness at every board house [from memory]"
+    decided_by: "owner, 2026-09-27 (ADR 0020); confirmed with the first board order"
+  kb_end_margin:
+    value: 6.0
+    status: tbd
+    source: "a key board's end past its outermost switch cutout, along the body: room for a corner standoff clear of that cutout (drc.echo 'key-board standoffs in the plate's web') [drawing convention]"
+    decided_by: "M4, with the boards laid out"
   board_clear:
     value: 1.5
     status: tbd
@@ -696,6 +708,11 @@ hardware:
     status: tbd
     source: "the same head's height [from memory]"
     decided_by: "M4, with the screw bought"
+  kb_standoff_inset:
+    value: 3.5
+    status: tbd
+    source: "[calc] a corner standoff's centre in from both board edges: the barrel's radius (kb_standoff_od / 2) and 1.5 mm of board past it"
+    decided_by: "M4, with the standoff chosen"
   fastener_inset:
     value: 4.3
     status: tbd

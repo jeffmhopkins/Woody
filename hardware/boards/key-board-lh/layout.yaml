@@ -25,41 +25,49 @@ rules:
 
 # The ribbon connector, Molex 200528-0120 as the stand-in (J-CHAIN's part is
 # open until M4): turned so its cable entry faces the board's far edge, where
-# the body CAD's ribbon leaves, with its front at that edge. Checked, not assumed:
-# its pads are on the board's inner side, its cable face at the edge.
-# The standoffs' screw holes (ADR 0020): positions from the body CAD; this is
-# only which footprint draws them. NPTH - the plate is bonded to ground by the
-# main board's MECH-GNDBOND, and a plated hole here would make a second bond.
+# the body CAD's ribbon leaves, with its front at the far edge of the CAD's
+# connector envelope; the ribbon runs on under the board to its edge, over a
+# no-parts strip. Checked, not assumed: its pads are on the inner side.
+# The standoffs' screw holes (ADR 0020): one per corner, positions from the
+# body CAD; this is only which footprint draws them. NPTH - the plate is
+# bonded to ground by the main board's MECH-GNDBOND, and a plated hole here
+# would make a second bond.
 standoff_footprint: "MountingHole:MountingHole_2.2mm_M2"
 
 connector:
   rot: 0                     # ON THE BOTTOM KiCad's rotation is mirrored: 0 here puts the cable face at the far edge
   origin_from_edge: 4.74     # the footprint's origin behind its front face [footprint courtyard]
 
-# One key network per switch, a row of three 0805s beside its own switch,
-# clear of its centre hole and pins: the node is R-KEY-PU.2 / C-KEY.1 /
-# R-KEY-SER.1, and R-KEY-SER.2 goes to the switch.
+# Placement (2026-09-27, the board grown to a rectangle with corner standoffs,
+# ADR 0020). A switch's pins are on its near side (low y): pin 1, the switch
+# leg, at (-4.4, -4.7) from its centre and pin 2, ground, at (+2.6, -5.75).
+#
+# The register sits on the far side past the ribbon connector's end, turned so
+# its inputs H..E (pins 6..3) face the key row in the keys' own order, left to
+# right; the chain pins (SH/LD, CLK below; QH, SER above) face the connector.
+# Each key network is a row of three 0805s beside its own switch: LH1 and LH3
+# on the row's far side, LH2 on the near side (the connector is above it),
+# LH4 between LH4 and LH5, LH5 beside the register. The ribbon's strip above
+# the connector is a no-parts rule area (the body CAD's "ribbon" line).
 parts:
   C-KEY-LH1:     [46.0, 34.5, 0]
   R-KEY-SER-LH1: [50.0, 34.5, 0]
   R-KEY-PU-LH1:  [54.0, 34.5, 0]
-  C-KEY-LH2:     [62.0, 19.8, 0]
-  R-KEY-SER-LH2: [66.0, 19.8, 0]
-  R-KEY-PU-LH2:  [70.0, 19.8, 0]
+  C-KEY-LH2:     [66.0, 17.5, 0]
+  R-KEY-SER-LH2: [70.0, 17.5, 0]
+  R-KEY-PU-LH2:  [74.0, 17.5, 0]
   C-KEY-LH3:     [86.0, 34.5, 0]
   R-KEY-SER-LH3: [90.0, 34.5, 0]
   R-KEY-PU-LH3:  [94.0, 34.5, 0]
-  C-KEY-LH4:     [104.0, 25.5, 0]
-  R-KEY-SER-LH4: [108.0, 25.5, 0]
-  R-KEY-PU-LH4:  [112.0, 25.5, 0]
-  C-KEY-LH5:     [104.0, 43.5, 0]
-  R-KEY-SER-LH5: [108.0, 43.5, 0]
-  R-KEY-PU-LH5:  [112.0, 43.5, 0]
-  # The register lies along the body between LH2's and LH3's switch pins,
-  # under the LH2-LH3 standoff; its decoupler and the free-bit pull-up beside it.
-  U-KEYS-LH:     [79.1, 22.3, 90]
-  C-DECOUPLE-165-LH: [84.8, 27.8, 0]
-  R-KEY-PU-FREE3: [74.5, 28.5, 90]
+  C-KEY-LH4:     [102.0, 27.0, 0]
+  R-KEY-SER-LH4: [106.0, 27.0, 0]
+  R-KEY-PU-LH4:  [110.0, 27.0, 0]
+  C-KEY-LH5:     [99.5, 44.0, 0]
+  R-KEY-SER-LH5: [103.5, 44.0, 0]
+  R-KEY-PU-LH5:  [107.5, 44.0, 0]
+  U-KEYS-LH:     [89.0, 44.0, 90]
+  C-DECOUPLE-165-LH: [96.0, 46.5, 90]
+  R-KEY-PU-FREE3: [82.5, 44.5, 90]
 
 # Routing (tools/pcb_route.py): ground is a pour on both layers, not tracks;
 # the chain's 3V3 rail is the wider power track.

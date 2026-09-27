@@ -57,7 +57,7 @@ def V(x, y):
 # ------------------------------------------------------------------ inputs
 
 def cad_geometry(cluster):
-    geo = {"switches": {}, "ffc": None, "standoffs": []}
+    geo = {"switches": {}, "ffc": None, "standoffs": [], "ribbon": None}
     for line in open(os.path.join(ROOT, "mechanical", "export", "pcb-geometry.echo")):
         m = re.match(r'ECHO: "PCB", "(\w+)", "(\w+)", (.*)', line)
         if not m or m.group(1) != cluster:
@@ -67,6 +67,8 @@ def cad_geometry(cluster):
             geo["switches"][rest[0]] = (float(rest[1]), float(rest[2]), float(rest[3]))
         elif kind == "ffc":
             geo["ffc"] = tuple(float(v) for v in rest[1:6])
+        elif kind == "ribbon":
+            geo["ribbon"] = tuple(float(v) for v in rest[0:4])
         elif kind == "standoff":
             geo["standoffs"].append(tuple(float(v) for v in rest[1:6]))
         elif kind == "board":
@@ -158,6 +160,25 @@ def place(board, fp, x, y, rot, bottom):
     if bottom:
         fp.Flip(V(x, y), pcbnew.FLIP_DIRECTION_LEFT_RIGHT)
     fp.SetOrientationDegrees(rot)
+
+
+def no_parts(board, pts):
+    """A rule area on the bottom side that no footprint may enter: where the
+    ribbon runs under the board from its connector to the far edge."""
+    z = pcbnew.ZONE(board)
+    z.SetIsRuleArea(True)
+    z.SetLayer(pcbnew.B_Cu)
+    z.SetDoNotAllowFootprints(True)
+    z.SetDoNotAllowTracks(False)
+    z.SetDoNotAllowVias(False)
+    z.SetDoNotAllowCopperPour(False)
+    z.SetDoNotAllowPads(False)
+    z.SetZoneName("ribbon")
+    ol = z.Outline()
+    ol.NewOutline()
+    for x, y in pts:
+        ol.Append(MM(x), MM(y))
+    board.Add(z)
 
 
 def keepout(board, px, py, r, n=32):
@@ -259,6 +280,9 @@ def build(bdir):
         # and every net routed there a short. A rule area on both layers, which
         # the router also treats as an obstacle.
         keepout(board, px, py, max(head, od) / 2 + lay["rules"]["clearance"])
+    if geo["ribbon"]:
+        x0, y0, x1, y1 = geo["ribbon"]
+        no_parts(board, [to_pcb(x0, y0), to_pcb(x1, y0), to_pcb(x1, y1), to_pcb(x0, y1)])
     # everything else: layout.yaml, in body coordinates, bottom side
     for ref, (x, y, r) in lay["parts"].items():
         px, py = to_pcb(x, y)

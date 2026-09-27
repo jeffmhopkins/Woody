@@ -1,7 +1,8 @@
 # 0020 — The key boards are screwed to the key plate
 
-**Status:** Accepted. Decided by the owner, 2026-09-27. Parts open until M4:
-the standoff's length and alloy are the plate vendor's to confirm (below).
+**Status:** Accepted. Decided by the owner, 2026-09-27, and amended the same
+day (points 3 and 6; *Amendment* below). Parts open until M4: the standoff's
+length and alloy are the plate vendor's to confirm (below).
 
 ## Context
 
@@ -32,17 +33,20 @@ connector envelope using a stand-in size. The real footprint, a Molex 200528
      `plate-thickness`.
    - The model prints it as `mechanical/drc.echo` "key-board standoff length
      (derived)", and the BOM row cites that line.
-3. **A standoff goes only where the plate holds one.**
-   - Candidates are the midpoints between neighbouring switches.
-   - A candidate is kept only where the plate's web around the standoff's
-     barrel is wider than a minimum. The rule is "key-board standoffs in the
-     plate's web".
-   - The count per board is in `drc.echo` "key-board standoffs".
-   - The left hand's LH4/LH5 block is too tight for one. The two standoffs
-     between LH1–LH2–LH3 carry that board. The LH4/LH5 end is held only by
-     the board's own stiffness and those switches' clips. Whether that is
-     stiff enough under a press is open, and it is decided at M4 on the
-     printed or cut plate.
+3. **The board is a rectangle across the cavity, with a standoff in each
+   corner.**
+   - Across the body it spans the cavity between the side walls, less
+     `boards.board_clear` each side. Along the body it runs past the outermost
+     switch cutouts by `boards.kb_end_margin`.
+   - Each standoff sits `hardware.kb_standoff_inset` in from both edges of
+     its corner, outside every switch cutout. The rule "key-board standoffs
+     in the plate's web" checks each one is in plate metal.
+   - The count per board is in `drc.echo` "key-board standoffs". "Key boards
+     clear of the lid screws" keeps the board edges off the M3 screws that
+     close the lid.
+   - Where the ribbon runs under the board, from its connector to the far
+     edge, no part may go: the model leaves it out of the parts envelope,
+     and the PCB carries it as a rule area.
 4. **The plate makes no second ground bond through the board.**
    - The plate is grounded through `MECH-GNDBOND` (`hardware/cluster/cluster-boards.md`).
    - The board's holes are unplated (NPTH).
@@ -61,6 +65,29 @@ connector envelope using a stand-in size. The real footprint, a Molex 200528
    - The rule "key-board screw heads clear of the ribbon connector" keeps
      the screw heads off it.
 
+6. **The key boards are 1.2 mm thick** (`boards.key_board_t`).
+   - The switch pins end 5.10 mm below the seat, and the board's top is
+     `switch.pcb_below_seat` below it. On a 1.6 mm board about 0.1 mm of pin
+     would show to solder; on 1.2 mm about 0.5 mm
+     (`docs/reference/ks33-geometry.md`) `[calc]`.
+   - 1.2 mm is a standard thickness at every board house `[from memory]`.
+   - The standoff length does not change: it is set by the board's *top*
+     face, which is fixed. Only the screw gets shorter.
+   - The main board's thumb switches have the same arithmetic, and it is
+     decided when the main board is laid out.
+
+## Amendment, 2026-09-27
+
+Points 3 and 6 replace the first version's placement, which put a standoff
+midway between neighbouring switches wherever the plate's web was wide
+enough. That left the left hand's LH4/LH5 end with none. It also crowded the
+register between two switches' pins, where its position was good to about
+±0.1 mm. The owner: "maybe the standoffs need to be from the outside and if
+we need to increase the size of the board a little bit that would make sense
+and kind of anchor it maybe in each corner", and a bigger board "would also
+allow for a less fragile mounting of the IC". The owner also asked whether
+1.2 mm is a common thickness; it is, so point 6 adopts it.
+
 ## Options considered
 
 - **Standoffs off the oak bottom or the main board.** The key board's
@@ -71,8 +98,9 @@ connector envelope using a stand-in size. The real footprint, a Molex 200528
 - **Plated holes bonded to ground.** They are simpler to lay out. But they make a second
   plate-to-ground path, a loop through the plate, next to the key networks.
   Rejected.
-- **A bigger board for the connector.** The owner offered it, and it was not
-  needed.
+- **Standoffs between the switches, on the smallest board** (this ADR's first
+  version). Rejected in the amendment: it left one end unheld and the
+  register crowded.
 
 ## Consequences
 
@@ -90,6 +118,4 @@ connector envelope using a stand-in size. The real footprint, a Molex 200528
 - **The screw heads are on the parts side.**
   - Each hole footprint's courtyard is on the bottom, so KiCad's courtyard
     check keeps parts clear of the heads.
-  - This is what placed the left-hand register next to the LH2–LH3 standoff.
-- **The right-hand board** gets its three standoffs the same way when it is
-  laid out.
+- **The right-hand board** gets its four the same way when it is laid out.
