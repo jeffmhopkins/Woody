@@ -362,11 +362,14 @@ board's analog routing is done by hand** (`docs/reference/pcb-pipeline.md`).
   faces the same obstacles or more. The first rip-up pass did exactly that and
   improved nothing, every run. A real rip-up removes the blockers too.
 - **Put the board house's limits in the DRC, not in a README.** Adding JLC's
-  0.18 mm minimum ring caught the vias (0.6 on a 0.3 drill = 0.15) and the
-  header's pads (Ø1.0 on 0.65 = 0.175) at once; both grew.
-- **KiCad's Python API cannot set the stackup's surface finish**, and the zone
-  fill re-saves the board: `pcb.py` writes the finish into the saved file after
-  the fill (`set_finish`).
+  0.18 mm minimum ring caught the header's pads (Ø1.0 on 0.65 = 0.175). That
+  figure is the page's PTH ring; for vias it asks only a diameter 0.1 mm over
+  the hole (0.15 preferred) `[datasheets/fab/JLCPCB-PCB-CAPABILITIES.pdf, "Vias"
+  and "PTH annular ring"]`, but KiCad's one annular-width rule applies to both,
+  so the vias grew to 0.7 on 0.3 as well - over both figures.
+- **KiCad's Python API cannot set the stackup** (finish, mask and silk colour,
+  copper weight), and the zone fill re-saves the board: `pcb.py` writes the
+  whole stackup into the saved file after the fill (`set_stackup`).
 - **A silkscreen label wholly off the board is not a DRC error** - one sat
   outside the edge unreported. `pcb.py` refuses to place one, and `check`
   fails on any silk shape that is partly or wholly off the board.
