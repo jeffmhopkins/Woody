@@ -1,73 +1,73 @@
 id,slice,line,severity,verdict,headline
-M2-3,R2|R4|R5,,,NOT ADDRESSED,CITED ONLY - introduced in no report
-M4-4,R4,,,NOT ADDRESSED,CITED ONLY - introduced in no report
-R1-1,R1,34,medium,NOT ADDRESSED,"R1-1 medium The RC's stated job, ""swallows a contact opening shorter than key-release-time "", is bounded by VT+ min, which guarantees only about 40 µs"
-R1-10,R1,283,advisory,NOT ADDRESSED,R1-10 advisory HC threshold vocabulary survives on a Schmitt part
-R1-11,R1,300,advisory,NOT ADDRESSED,"R1-11 advisory ""As high as 0.5 × VCC … every row"" is slightly off (the 4.5 V row is 0.489), and the owner page uses τ ≈ 4.7 µs where the register says ""not 4.7"""
-R1-12,R1,317,advisory,NOT ADDRESSED,R1-12 advisory The ESD sentence quotes a component-level HBM rating as field protection
-R1-2,R1,77,medium,NOT ADDRESSED,"R1-2 medium The ""HC-family output edges keep each hop a lumped load"" argument is carried by a maximum transition time, the HCS165's edges are faster than the part it replaced, and the corpus's own 1/6 rule does not retur"
-R1-3,R1,137,medium,NOT ADDRESSED,"R1-3 medium The lower VT− bound nearly closes the open R-KEY-SER trade, and the page does not say so: the ceiling is ≈ 388 Ω and the ""≈ 330 Ω"" option has 57–65 mV of margin"
-R1-4,R1,164,medium,NOT ADDRESSED,"R1-4 medium The retired values have a CSV spelling and a no- = spelling that no forbidden pattern matches: the pre-change C-KEY row, restored verbatim, passes the checker"
-R1-5,R1,193,low,NOT ADDRESSED,"R1-5 low ""The release reaches firmware on the next scan either way"" is false for about 55 % of releases"
-R1-6,R1,212,low,NOT ADDRESSED,"R1-6 low latency-budget.md says the press is ""two orders of magnitude inside the scan period"". It is 25×."
-R1-7,R1,224,advisory,NOT ADDRESSED,"R1-7 advisory ""Guaranteed extremes"" overstates what TI publishes, component tolerance is left out, and neither changes a conclusion"
-R1-8,R1,243,advisory,NOT ADDRESSED,"R1-8 advisory The hold-margin argument cites the maximum propagation delay; hold depends on the minimum, which TI does not publish"
-R1-9,R1,261,advisory,NOT ADDRESSED,"R1-9 advisory SPI3's clock mode is specified nowhere, and spi-link.md adds four CLK→QH delays that do not accumulate"
-R2-1,R2,54,medium,NOT ADDRESSED,"R2-1 medium ""Standoff length (derived)"" = 2.1 is still presented as the standoff's length, and the part is 3 mm"
-R2-2,R2,70,medium,NOT ADDRESSED,"R2-2 medium The copper keep-out leaves 0.19 mm round the washer, less than the washer's own float on the screw"
-R2-3,R2,86,medium,NOT ADDRESSED,R2-3 medium The owner's fallback (nut in an oak pocket) does not fit the model it claims to share
-R2-4,R2,102,low,NOT ADDRESSED,"R2-4 low The screw is specified in a standard that has no M2, and its length is checked by nothing"
-R2-5,R2,116,low,NOT ADDRESSED,R2-5 low Depth 3.4 survives in the pin-protrusion figure and in the window's own source text
-R2-6,R2,131,low,NOT ADDRESSED,R2-6 low ADR 0020's own text still describes the pre-washer hardware in three places
-R2-7,R2,142,low,NOT ADDRESSED,"R2-7 low ""The washer lifts the board"" gets the direction wrong"
-R2-8,R2,153,advisory,NOT ADDRESSED,R2-8 advisory Provenance slips on correct numbers
-R2-9,R2,164,advisory,NOT ADDRESSED,"R2-9 advisory Small gaps in the rules and in the assembly steps, all currently passing"
-R3-1,R3,14,medium,NOT ADDRESSED,"R3-1 medium C-DECOUPLE-165-LH, U-KEYS-LH pin 8, GND_CHAIN The decoupler returns to pin 15 (CLK INH), not to GND pin 8. The copper path to pin 8 is 38.5 mm"
-R3-10,R3,23,advisory,NOT ADDRESSED,"R3-10 advisory J-CHAIN pads The annular ring is 0.185 mm, on JLC's absolute minimum (0.18), not its recommended 0.25. The trade-off is documented, and is recorded here only so the board's ordering risk is visible"
-R3-2,R3,15,medium,NOT ADDRESSED,"R3-2 medium U-KEYS-LH pin-1 mark, /CHAIN_SHLD via (155.8, 108.9) The register's pin-1 triangle is printed over a via hole"
-R3-3,R3,16,low,NOT ADDRESSED,"R3-3 low B/F silkscreen vs vias Eleven silk labels and outlines sit on via holes or rings, including LH3 , QH , GND , CD and both title blocks. The commit's ""off every pad and hole"" claim is false for vias"
-R3-4,R3,17,low,NOT ADDRESSED,"R3-4 low /CHAIN_SER_LH F.Cu (140.8, 113.3) A 45° acid-trap junction remains. The README's ""no acute track junction"" is false, and check_tracks cannot see a T onto a segment's middle"
-R3-5,R3,18,low,NOT ADDRESSED,"R3-5 low key-board-lh.pcb-copper-bottom.png The render the README calls ""the assembly drawing"" is illegible: Fab references and values overprint each other"
-R3-6,R3,19,low,NOT ADDRESSED,"R3-6 low /HOP_LH_LT, /LH4–LH5 SWITCH_LEG Needless vias and detours: the QH test-pad stub uses 3 vias (5 on the net), LH5's leg uses 2, and LH4/LH5 are routed unlike LH1–3"
-R3-7,R3,20,advisory,NOT ADDRESSED,"R3-7 advisory V3V3_CHAIN_LH at U pins 12 and 16 Duplicate parallel 0.4 mm stubs 0.2 mm apart, and 17 track fragments under 0.35 mm"
-R3-8,R3,21,advisory,NOT ADDRESSED,"R3-8 advisory silk text, rule fab.silk_text_min / silk_line_min Every silk character sits exactly on JLC's minimums (1.0 mm / 0.15 mm, 1:6.7 against the preferred 1:6)"
-R3-9,R3,22,advisory,NOT ADDRESSED,"R3-9 advisory layout.yaml parts: TP comment, README Rev A row ""Test pads in the register's pin order"" holds for SCK/SH/LD but not for SER/QH or GND"
-R4-1,R4,23,medium,NOT ADDRESSED,"R4-1 medium CBL-CHAIN : the length code is emitted as 4.48 , but Samtec's code is XX.XX with two integer digits ( 04.48 )"
-R4-10,R4,113,advisory,NOT ADDRESSED,R4-10 advisory MECH-KB-STANDOFF : US stock not independently confirmed; PEM names stainless sheet only
-R4-2,R4,34,medium,NOT ADDRESSED,"R4-2 medium MECH-KB-SCREW : ""M2 low-head cap screw (DIN 7984)"" is not a standard part, and its head size is from memory"
-R4-3,R4,49,medium,NOT ADDRESSED,"R4-3 medium SW1-n (SW-LH1…5): the hand list and the sheet carry a description, not an order code, although the banked drawing names one"
-R4-4,R4,58,medium,NOT ADDRESSED,"R4-4 medium One instrument needs the right-hand board, and it cannot be ordered today; the README does not say so"
-R4-5,R4,68,low,NOT ADDRESSED,"R4-5 low MECH-KB-WASHER : the named US sources sell M2 ISO 7092 only by the 4,400, and the McMaster alternative's thickness range is wider than the window"
-R4-6,R4,78,low,NOT ADDRESSED,"R4-6 low J-CHAIN : the README sends the buyer to Samtec (0 in stock), but Digi-Key lists the exact part in stock"
-R4-7,R4,88,low,NOT ADDRESSED,"R4-7 low C-BULK-CHAIN-LH : bring-up step 6 says ""its row says which part"", but the row is a spec with no part number"
-R4-8,R4,97,advisory,NOT ADDRESSED,"R4-8 advisory UNI-ROYAL resistors ( R-KEY-SER , R-KEY-PU , R-KEY-PU-FREE ) have no US distributor"
-R4-9,R4,105,advisory,NOT ADDRESSED,R4-9 advisory Datasheet bank: the washer and the screw have no banked document
-R5-1,R5,33,medium,NOT ADDRESSED,"R5-1 medium config/body.yaml 's hardware comment still says the standoff's length is not a parameter and the part is ""a candidate, not a choice"""
-R5-10,R5,117,advisory,NOT ADDRESSED,"R5-10 advisory The README says networks: , parts: and silk: are the layout-only keys: route_first: is one too, and nothing checks the owner's rule afterwards"
-R5-11,R5,125,advisory,NOT ADDRESSED,R5-11 advisory Two superseded ADRs still state the 74HC165 as settled
-R5-12,R5,133,advisory,NOT ADDRESSED,R5-12 advisory The owner's new standoff fallback did not reach MECH-KB-SCREW
-R5-13,R5,141,advisory,NOT ADDRESSED,"R5-13 advisory The retired derivation in key-switch-network/notes.md is announced as ""verbatim"" but carries inserted markers"
-R5-14,R5,149,advisory,NOT ADDRESSED,"R5-14 advisory ADR 0001's history quote says C-KEY ""now carries these figures"""
-R5-15,R5,157,advisory,NOT ADDRESSED,R5-15 advisory The test pads' stated order and the register's pins disagree for SER/QH
-R5-16,R5,165,advisory,NOT ADDRESSED,R5-16 advisory The dated unplaced.csv count table in pcb-pipeline.md moved again
-R5-2,R5,41,medium,NOT ADDRESSED,"R5-2 medium ADR 0020 cites a DRC rule that cd264c1 deleted, in the present tense"
-R5-3,R5,49,low,NOT ADDRESSED,"R5-3 low switch.pcb_below_seat moved 3.4 → 3.3, and three pages still derive about 0.5 mm of pin from it"
-R5-4,R5,61,low,NOT ADDRESSED,"R5-4 low switch.pcb_below_seat_window 's source still says ""pcb_below_seat is its middle"""
-R5-5,R5,69,low,NOT ADDRESSED,R5-5 low ADR 0020 point 4 still says the standoff's end face is what covers the top keep-out
-R5-6,R5,80,low,NOT ADDRESSED,"R5-6 low latency-budget.md says the key press is ""two orders of magnitude inside the scan period"": it is 25×"
-R5-7,R5,88,low,NOT ADDRESSED,R5-7 low The R-KEY-SER row still names the plain-HC thresholds V_IL / V_IH
-R5-8,R5,96,low,NOT ADDRESSED,"R5-8 low The new forbidden patterns miss the CSV spellings of the retired thresholds, against the escape note written in the same commit"
-R5-9,R5,109,low,NOT ADDRESSED,R5-9 low pcb.py check 's new acid-trap test is missing from both lists of what check fails on
-R6-1,R6,13,high,NOT ADDRESSED,"R6-1 high check_tracks cannot see a join onto the middle of a track, and the committed board has a live 45° acid trap"
-R6-10,R6,142,low,NOT ADDRESSED,R6-10 low tooling.md §4 and the board README do not describe what changed today
-R6-11,R6,156,advisory,NOT ADDRESSED,R6-11 advisory Re-running layout produces identical geometry but a different file
-R6-12,R6,166,advisory,NOT ADDRESSED,R6-12 advisory fit_footprint_silk drops silk without a word
-R6-13,R6,175,advisory,NOT ADDRESSED,"R6-13 advisory The silk error message names an unnumbered NPTH pad as ""pad ''"""
-R6-2,R6,33,high,NOT ADDRESSED,"R6-2 high Setting a non-fab DRC test to ignore hides it, and a whole unrouted net then passes check"
-R6-3,R6,47,medium,NOT ADDRESSED,"R6-3 medium network_parts turns S and P the wrong way round on the axis: y pattern, so the KEY pads face away from the junction"
-R6-4,R6,71,medium,NOT ADDRESSED,R6-4 medium Nothing holds the standoff copper keep-outs (ADR 0020) once the board is the source
-R6-5,R6,81,low,NOT ADDRESSED,"R6-5 low Most single-layer ground pads get no stitching via, and the tools doc still says every one does"
-R6-6,R6,101,low,NOT ADDRESSED,"R6-6 low square_joins checks clearance against a stale copper list and ignores holes, keep-outs and the edge"
-R6-7,R6,117,advisory,NOT ADDRESSED,R6-7 advisory check_tracks also fires where a via's copper fills the wedge
-R6-8,R6,126,low,NOT ADDRESSED,"R6-8 low A filled silk shape is exempt from the line-width check, so a 0.05 mm sliver passes"
-R6-9,R6,133,low,NOT ADDRESSED,R6-9 low The networks: input is not validated
+M2-3,R2|R4|R5,,,recorded,CITED ONLY - introduced in no report
+M4-4,R4,,,recorded,CITED ONLY - introduced in no report
+R1-1,R1,34,medium,recorded,"R1-1 medium The RC's stated job, ""swallows a contact opening shorter than key-release-time "", is bounded by VT+ min, which guarantees only about 40 µs"
+R1-10,R1,283,advisory,recorded,R1-10 advisory HC threshold vocabulary survives on a Schmitt part
+R1-11,R1,300,advisory,recorded,"R1-11 advisory ""As high as 0.5 × VCC … every row"" is slightly off (the 4.5 V row is 0.489), and the owner page uses τ ≈ 4.7 µs where the register says ""not 4.7"""
+R1-12,R1,317,advisory,recorded,R1-12 advisory The ESD sentence quotes a component-level HBM rating as field protection
+R1-2,R1,77,medium,recorded,"R1-2 medium The ""HC-family output edges keep each hop a lumped load"" argument is carried by a maximum transition time, the HCS165's edges are faster than the part it replaced, and the corpus's own 1/6 rule does not retur"
+R1-3,R1,137,medium,recorded,"R1-3 medium The lower VT− bound nearly closes the open R-KEY-SER trade, and the page does not say so: the ceiling is ≈ 388 Ω and the ""≈ 330 Ω"" option has 57–65 mV of margin"
+R1-4,R1,164,medium,recorded,"R1-4 medium The retired values have a CSV spelling and a no- = spelling that no forbidden pattern matches: the pre-change C-KEY row, restored verbatim, passes the checker"
+R1-5,R1,193,low,recorded,"R1-5 low ""The release reaches firmware on the next scan either way"" is false for about 55 % of releases"
+R1-6,R1,212,low,recorded,"R1-6 low latency-budget.md says the press is ""two orders of magnitude inside the scan period"". It is 25×."
+R1-7,R1,224,advisory,recorded,"R1-7 advisory ""Guaranteed extremes"" overstates what TI publishes, component tolerance is left out, and neither changes a conclusion"
+R1-8,R1,243,advisory,recorded,"R1-8 advisory The hold-margin argument cites the maximum propagation delay; hold depends on the minimum, which TI does not publish"
+R1-9,R1,261,advisory,recorded,"R1-9 advisory SPI3's clock mode is specified nowhere, and spi-link.md adds four CLK→QH delays that do not accumulate"
+R2-1,R2,54,medium,recorded,"R2-1 medium ""Standoff length (derived)"" = 2.1 is still presented as the standoff's length, and the part is 3 mm"
+R2-2,R2,70,medium,recorded,"R2-2 medium The copper keep-out leaves 0.19 mm round the washer, less than the washer's own float on the screw"
+R2-3,R2,86,medium,recorded,R2-3 medium The owner's fallback (nut in an oak pocket) does not fit the model it claims to share
+R2-4,R2,102,low,recorded,"R2-4 low The screw is specified in a standard that has no M2, and its length is checked by nothing"
+R2-5,R2,116,low,recorded,R2-5 low Depth 3.4 survives in the pin-protrusion figure and in the window's own source text
+R2-6,R2,131,low,recorded,R2-6 low ADR 0020's own text still describes the pre-washer hardware in three places
+R2-7,R2,142,low,recorded,"R2-7 low ""The washer lifts the board"" gets the direction wrong"
+R2-8,R2,153,advisory,recorded,R2-8 advisory Provenance slips on correct numbers
+R2-9,R2,164,advisory,recorded,"R2-9 advisory Small gaps in the rules and in the assembly steps, all currently passing"
+R3-1,R3,14,medium,recorded,"R3-1 medium C-DECOUPLE-165-LH, U-KEYS-LH pin 8, GND_CHAIN The decoupler returns to pin 15 (CLK INH), not to GND pin 8. The copper path to pin 8 is 38.5 mm"
+R3-10,R3,23,advisory,recorded,"R3-10 advisory J-CHAIN pads The annular ring is 0.185 mm, on JLC's absolute minimum (0.18), not its recommended 0.25. The trade-off is documented, and is recorded here only so the board's ordering risk is visible"
+R3-2,R3,15,medium,recorded,"R3-2 medium U-KEYS-LH pin-1 mark, /CHAIN_SHLD via (155.8, 108.9) The register's pin-1 triangle is printed over a via hole"
+R3-3,R3,16,low,recorded,"R3-3 low B/F silkscreen vs vias Eleven silk labels and outlines sit on via holes or rings, including LH3 , QH , GND , CD and both title blocks. The commit's ""off every pad and hole"" claim is false for vias"
+R3-4,R3,17,low,recorded,"R3-4 low /CHAIN_SER_LH F.Cu (140.8, 113.3) A 45° acid-trap junction remains. The README's ""no acute track junction"" is false, and check_tracks cannot see a T onto a segment's middle"
+R3-5,R3,18,low,recorded,"R3-5 low key-board-lh.pcb-copper-bottom.png The render the README calls ""the assembly drawing"" is illegible: Fab references and values overprint each other"
+R3-6,R3,19,low,recorded,"R3-6 low /HOP_LH_LT, /LH4–LH5 SWITCH_LEG Needless vias and detours: the QH test-pad stub uses 3 vias (5 on the net), LH5's leg uses 2, and LH4/LH5 are routed unlike LH1–3"
+R3-7,R3,20,advisory,recorded,"R3-7 advisory V3V3_CHAIN_LH at U pins 12 and 16 Duplicate parallel 0.4 mm stubs 0.2 mm apart, and 17 track fragments under 0.35 mm"
+R3-8,R3,21,advisory,recorded,"R3-8 advisory silk text, rule fab.silk_text_min / silk_line_min Every silk character sits exactly on JLC's minimums (1.0 mm / 0.15 mm, 1:6.7 against the preferred 1:6)"
+R3-9,R3,22,advisory,recorded,"R3-9 advisory layout.yaml parts: TP comment, README Rev A row ""Test pads in the register's pin order"" holds for SCK/SH/LD but not for SER/QH or GND"
+R4-1,R4,23,medium,recorded,"R4-1 medium CBL-CHAIN : the length code is emitted as 4.48 , but Samtec's code is XX.XX with two integer digits ( 04.48 )"
+R4-10,R4,113,advisory,recorded,R4-10 advisory MECH-KB-STANDOFF : US stock not independently confirmed; PEM names stainless sheet only
+R4-2,R4,34,medium,recorded,"R4-2 medium MECH-KB-SCREW : ""M2 low-head cap screw (DIN 7984)"" is not a standard part, and its head size is from memory"
+R4-3,R4,49,medium,recorded,"R4-3 medium SW1-n (SW-LH1…5): the hand list and the sheet carry a description, not an order code, although the banked drawing names one"
+R4-4,R4,58,medium,recorded,"R4-4 medium One instrument needs the right-hand board, and it cannot be ordered today; the README does not say so"
+R4-5,R4,68,low,recorded,"R4-5 low MECH-KB-WASHER : the named US sources sell M2 ISO 7092 only by the 4,400, and the McMaster alternative's thickness range is wider than the window"
+R4-6,R4,78,low,recorded,"R4-6 low J-CHAIN : the README sends the buyer to Samtec (0 in stock), but Digi-Key lists the exact part in stock"
+R4-7,R4,88,low,recorded,"R4-7 low C-BULK-CHAIN-LH : bring-up step 6 says ""its row says which part"", but the row is a spec with no part number"
+R4-8,R4,97,advisory,recorded,"R4-8 advisory UNI-ROYAL resistors ( R-KEY-SER , R-KEY-PU , R-KEY-PU-FREE ) have no US distributor"
+R4-9,R4,105,advisory,recorded,R4-9 advisory Datasheet bank: the washer and the screw have no banked document
+R5-1,R5,33,medium,recorded,"R5-1 medium config/body.yaml 's hardware comment still says the standoff's length is not a parameter and the part is ""a candidate, not a choice"""
+R5-10,R5,117,advisory,recorded,"R5-10 advisory The README says networks: , parts: and silk: are the layout-only keys: route_first: is one too, and nothing checks the owner's rule afterwards"
+R5-11,R5,125,advisory,recorded,R5-11 advisory Two superseded ADRs still state the 74HC165 as settled
+R5-12,R5,133,advisory,recorded,R5-12 advisory The owner's new standoff fallback did not reach MECH-KB-SCREW
+R5-13,R5,141,advisory,recorded,"R5-13 advisory The retired derivation in key-switch-network/notes.md is announced as ""verbatim"" but carries inserted markers"
+R5-14,R5,149,advisory,recorded,"R5-14 advisory ADR 0001's history quote says C-KEY ""now carries these figures"""
+R5-15,R5,157,advisory,recorded,R5-15 advisory The test pads' stated order and the register's pins disagree for SER/QH
+R5-16,R5,165,advisory,recorded,R5-16 advisory The dated unplaced.csv count table in pcb-pipeline.md moved again
+R5-2,R5,41,medium,recorded,"R5-2 medium ADR 0020 cites a DRC rule that cd264c1 deleted, in the present tense"
+R5-3,R5,49,low,recorded,"R5-3 low switch.pcb_below_seat moved 3.4 → 3.3, and three pages still derive about 0.5 mm of pin from it"
+R5-4,R5,61,low,recorded,"R5-4 low switch.pcb_below_seat_window 's source still says ""pcb_below_seat is its middle"""
+R5-5,R5,69,low,recorded,R5-5 low ADR 0020 point 4 still says the standoff's end face is what covers the top keep-out
+R5-6,R5,80,low,recorded,"R5-6 low latency-budget.md says the key press is ""two orders of magnitude inside the scan period"": it is 25×"
+R5-7,R5,88,low,recorded,R5-7 low The R-KEY-SER row still names the plain-HC thresholds V_IL / V_IH
+R5-8,R5,96,low,recorded,"R5-8 low The new forbidden patterns miss the CSV spellings of the retired thresholds, against the escape note written in the same commit"
+R5-9,R5,109,low,recorded,R5-9 low pcb.py check 's new acid-trap test is missing from both lists of what check fails on
+R6-1,R6,13,high,recorded,"R6-1 high check_tracks cannot see a join onto the middle of a track, and the committed board has a live 45° acid trap"
+R6-10,R6,142,low,recorded,R6-10 low tooling.md §4 and the board README do not describe what changed today
+R6-11,R6,156,advisory,recorded,R6-11 advisory Re-running layout produces identical geometry but a different file
+R6-12,R6,166,advisory,recorded,R6-12 advisory fit_footprint_silk drops silk without a word
+R6-13,R6,175,advisory,recorded,"R6-13 advisory The silk error message names an unnumbered NPTH pad as ""pad ''"""
+R6-2,R6,33,high,recorded,"R6-2 high Setting a non-fab DRC test to ignore hides it, and a whole unrouted net then passes check"
+R6-3,R6,47,medium,recorded,"R6-3 medium network_parts turns S and P the wrong way round on the axis: y pattern, so the KEY pads face away from the junction"
+R6-4,R6,71,medium,recorded,R6-4 medium Nothing holds the standoff copper keep-outs (ADR 0020) once the board is the source
+R6-5,R6,81,low,recorded,"R6-5 low Most single-layer ground pads get no stitching via, and the tools doc still says every one does"
+R6-6,R6,101,low,recorded,"R6-6 low square_joins checks clearance against a stale copper list and ignores holes, keep-outs and the edge"
+R6-7,R6,117,advisory,recorded,R6-7 advisory check_tracks also fires where a via's copper fills the wedge
+R6-8,R6,126,low,recorded,"R6-8 low A filled silk shape is exempt from the line-width check, so a 0.05 mm sliver passes"
+R6-9,R6,133,low,recorded,R6-9 low The networks: input is not validated
