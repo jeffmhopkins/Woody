@@ -57,7 +57,7 @@ def V(x, y):
 # ------------------------------------------------------------------ inputs
 
 def cad_geometry(cluster):
-    geo = {"switches": {}, "chain": None, "standoffs": [], "ribbon": None}
+    geo = {"switches": {}, "chain": None, "standoffs": []}
     for line in open(os.path.join(ROOT, "mechanical", "export", "pcb-geometry.echo")):
         m = re.match(r'ECHO: "PCB", "(\w+)", "(\w+)", (.*)', line)
         if not m or m.group(1) != cluster:
@@ -68,8 +68,6 @@ def cad_geometry(cluster):
         elif kind == "chain":
             # mouth x, centre y, which way the mouth faces along the body (+1 the tail), length, mouth to far pin row
             geo["chain"] = tuple(float(v) for v in rest[1:6])
-        elif kind == "ribbon":
-            geo["ribbon"] = tuple(float(v) for v in rest[0:4])
         elif kind == "standoff":
             geo["standoffs"].append(tuple(float(v) for v in rest[1:6]))
         elif kind == "board":
@@ -204,23 +202,28 @@ def place(board, fp, x, y, rot, bottom):
     fp.SetOrientationDegrees(rot)
 
 
-def no_parts(board, pts):
-    """A rule area on the bottom side that no footprint may enter: where the
-    ribbon runs under the board from its connector to the far edge."""
-    z = pcbnew.ZONE(board)
-    z.SetIsRuleArea(True)
-    z.SetLayer(pcbnew.B_Cu)
-    z.SetDoNotAllowFootprints(True)
-    z.SetDoNotAllowTracks(False)
-    z.SetDoNotAllowVias(False)
-    z.SetDoNotAllowCopperPour(False)
-    z.SetDoNotAllowPads(False)
-    z.SetZoneName("ribbon")
-    ol = z.Outline()
-    ol.NewOutline()
-    for x, y in pts:
-        ol.Append(MM(x), MM(y))
-    board.Add(z)
+# A KEY NETWORK's three 0805s, as a T round the node they share (the KEY net:
+# C-KEY pad 1, R-KEY-SER pad 1, R-KEY-PU pad 2), so no other pad stands
+# between them and the node needs no via: S and P end to end, their KEY pads
+# facing across the junction, and C hanging off the junction at right angles.
+# On the bottom side, in body coordinates, an 0805's pad 1 faces -x at 0,
+# +x at 180, +y at 90 and -y at 270 (measured through place()).
+NET_PITCH = 2.7     # junction to each part's centre: two 0805 courtyards (±1.68 × ±0.95) apart
+
+
+def network_parts(lay):
+    """layout.yaml networks: -> parts: entries. Each key gives its junction
+    `at` (body mm), `leg` (+1/-1: which way along x the series resistor runs,
+    its SWITCH_LEG end toward the switch's pin 1) and `c` (+1/-1: which way
+    across the body the capacitor hangs)."""
+    out = {}
+    for key, n in (lay.get("networks") or {}).items():
+        (x, y), d, c = n["at"], n["leg"], n["c"]
+        rot = 0 if d > 0 else 180         # S's pad 1 (KEY) and P's pad 2 (KEY) toward the junction
+        out[f"R-KEY-SER-{key}"] = [x + d * NET_PITCH, y, rot]
+        out[f"R-KEY-PU-{key}"] = [x - d * NET_PITCH, y, rot]
+        out[f"C-KEY-{key}"] = [x, y + c * NET_PITCH, 270 if c > 0 else 90]
+    return out
 
 
 SILK_H, SILK_W = 1.0, 0.15     # silkscreen text height and stroke, mm - above every board house's minimum (layout.yaml rules)
@@ -245,6 +248,60 @@ def silk_text(board, text, x, y, h=SILK_H, justify=0):
     board.Add(t)
 
 
+def silk_arrow(board, x, y, d, s=1.2):
+    """A filled triangle on the bottom silkscreen pointing along PCB x (d = +1/-1)."""
+    c = pcbnew.PCB_SHAPE(board)
+    c.SetShape(pcbnew.SHAPE_T_POLY)
+    c.SetLayer(pcbnew.B_SilkS)
+    c.SetFilled(True)
+    c.SetWidth(MM(SILK_W))
+    c.SetPolyPoints([V(x - d * s / 2, y - s / 2), V(x + d * s / 2, y), V(x - d * s / 2, y + s / 2)])
+    board.Add(c)
+
+
+def fit_footprint_silk(board, fab):
+    """The library footprints' own silkscreen, made legal for the board house:
+    every stroke widened to its minimum line, and a stroke that then comes
+    nearer a pad's mask opening than its silk-to-pad limit removed (the
+    board house would clip it anyway; the part letters mark the parts)."""
+    from shapely.geometry import LineString, Point, Polygon
+    wmin, gap = fab["silk_line_min"], fab["silk_to_pad"]
+    for fp in board.GetFootprints():
+        pads = []
+        for p in fp.Pads():
+            poly = p.GetEffectivePolygon(pcbnew.F_Cu if p.IsOnLayer(pcbnew.F_Cu) else pcbnew.B_Cu, pcbnew.ERROR_INSIDE)
+            ol = poly.Outline(0)
+            g = Polygon([(pcbnew.ToMM(ol.CPoint(k).x), pcbnew.ToMM(ol.CPoint(k).y)) for k in range(ol.PointCount())])
+            m = pcbnew.ToMM(p.GetSolderMaskExpansion(pcbnew.B_Mask if p.IsOnLayer(pcbnew.B_Cu) else pcbnew.F_Mask))
+            pads.append((p, g.buffer(m)))
+        for item in list(fp.GraphicalItems()):
+            if item.GetLayer() not in (pcbnew.F_SilkS, pcbnew.B_SilkS) or not isinstance(item, pcbnew.PCB_SHAPE):
+                continue
+            item.SetWidth(max(item.GetWidth(), MM(wmin)))
+            xy = lambda v: (pcbnew.ToMM(v.x), pcbnew.ToMM(v.y))
+            sh = item.GetShape()
+            # the stroke as drawn: an outline is its ring, not the area it encloses
+            if sh == pcbnew.SHAPE_T_SEGMENT:
+                g = LineString([xy(item.GetStart()), xy(item.GetEnd())])
+            elif sh == pcbnew.SHAPE_T_RECT:
+                (x0, y0), (x1, y1) = xy(item.GetStart()), xy(item.GetEnd())
+                g = LineString([(x0, y0), (x1, y0), (x1, y1), (x0, y1), (x0, y0)])
+            elif sh == pcbnew.SHAPE_T_CIRCLE:
+                g = Point(xy(item.GetCenter())).buffer(pcbnew.ToMM(item.GetRadius())).exterior
+            elif sh == pcbnew.SHAPE_T_ARC:
+                g = LineString([xy(item.GetStart()), xy(item.GetArcMid()), xy(item.GetEnd())])
+            elif sh == pcbnew.SHAPE_T_POLY:
+                ol = item.GetPolyShape().Outline(0)
+                g = LineString([xy(ol.CPoint(k)) for k in range(ol.PointCount())] + [xy(ol.CPoint(0))])
+            else:
+                continue
+            if item.IsFilled():
+                g = Polygon(g.coords) if sh != pcbnew.SHAPE_T_CIRCLE else Polygon(g)
+            side = pcbnew.B_Cu if item.GetLayer() == pcbnew.B_SilkS else pcbnew.F_Cu
+            if any(p.IsOnLayer(side) and g.distance(pg) - pcbnew.ToMM(item.GetWidth()) / 2 < gap for p, pg in pads):
+                fp.Remove(item)
+
+
 def silk_dot(board, x, y, r=0.3):
     c = pcbnew.PCB_SHAPE(board)
     c.SetShape(pcbnew.SHAPE_T_CIRCLE)
@@ -252,7 +309,7 @@ def silk_dot(board, x, y, r=0.3):
     c.SetFilled(True)
     c.SetCenter(V(x, y))
     c.SetEnd(V(x + r, y))
-    c.SetWidth(MM(0.1))
+    c.SetWidth(MM(SILK_W))
     board.Add(c)
 
 
@@ -282,54 +339,82 @@ def add_silk(board, lay):
         return (a0 >= ex0 and b0 >= ey0 and a1 <= ex1 and b1 <= ey1
                 and not any(a0 < c[2] and a1 > c[0] and b0 < c[3] and b1 > c[1] for c in crt))
 
-    def above_or_below(x0, y0, x1, y1, text):
-        """Centre a short label over the part if it is clear there, else under it."""
-        w = SILK_H * 0.9 * len(text) / 2
-        cx, up, down = (x0 + x1) / 2, y0 - SILK_H * 0.75, y1 + SILK_H * 0.75
-        return (cx, up) if clear(cx - w, up - SILK_H / 2, cx + w, up + SILK_H / 2) else (cx, down)
+    placed_txt = []
+
+    def put(text, x, y, justify=0):
+        """Every label goes through here, so each later one keeps off it."""
+        w = SILK_H * 0.9 * len(text)
+        a0 = x - w / 2 if justify == 0 else (x - w if justify == 1 else x)
+        placed_txt.append((a0, y - SILK_H / 2, a0 + w, y + SILK_H / 2))
+        silk_text(board, text, x, y, justify=justify)
+
+    def free(a0, b0, a1, b1):
+        return clear(a0, b0, a1, b1) and not any(a0 < t[2] and a1 > t[0] and b0 < t[3] and b1 > t[1] for t in placed_txt)
+
+    def beside(x0, y0, x1, y1, text):
+        """A short label over the part, else under it, else to either side:
+        the first place off every courtyard and every label already placed."""
+        w, h = SILK_H * 0.9 * len(text) / 2, SILK_H / 2
+        cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+        for px, py in ((cx, y0 - SILK_H * 0.75), (cx, y1 + SILK_H * 0.75), (x0 - 0.4 - w, cy), (x1 + 0.4 + w, cy)):
+            if free(px - w, py - h, px + w, py + h):
+                return px, py
+        sys.exit(f"pcb: no clear place for the silkscreen label {text!r} at ({cx:.1f}, {cy:.1f}) - move parts in layout.yaml")
+    above_or_below = beside
     for key, parts in groups.items():
         boxes = [box(fp) for _, fp in parts]
         top = min(b[1] for b in boxes)
         for kind, fp in parts:
-            x0, y0, x1, y1 = box(fp)
-            silk_text(board, letter[kind], (x0 + x1) / 2, y0 - SILK_H * 0.75)
+            put(letter[kind], *beside(*box(fp), letter[kind]))
         # the key's name beside its row, on whichever side is clear
         x0, x1 = min(b[0] for b in boxes), max(b[2] for b in boxes)
         cy = (min(b[1] for b in boxes) + max(b[3] for b in boxes)) / 2
         w = SILK_H * 0.9 * len(key)
         for bx, j in ((x0 - 0.5 - w, 1), (x1 + 0.5, -1)):
-            if clear(bx - 0.3, cy - SILK_H, bx + w + 0.3, cy + SILK_H):
-                silk_text(board, key, bx + w if j == 1 else bx, cy, justify=j)
+            if free(bx - 0.3, cy - SILK_H, bx + w + 0.3, cy + SILK_H):
+                put(key, bx + w if j == 1 else bx, cy, justify=j)
                 break
         else:
-            silk_text(board, key, (x0 + x1) / 2, top - SILK_H * 2.3)
-    for fp in board.GetFootprints():
+            put(key, *beside(x0, top - SILK_H * 1.6, x1, top - SILK_H * 1.6, key))
+    # fixed-place labels (the test pads' row) first, so the searched ones keep off them
+    for fp in sorted(board.GetFootprints(), key=lambda f: not f.GetReference().startswith("TP-")):
         ref = fp.GetReference()
         x0, y0, x1, y1 = box(fp) if fp.GetCourtyard(pcbnew.B_CrtYd).OutlineCount() else (0, 0, 0, 0)
         if ref.startswith("U-"):
-            silk_text(board, fp.GetValue(), (x0 + x1) / 2, (y0 + y1) / 2)
+            put(fp.GetValue(), *beside(x0, y0, x1, y1, fp.GetValue()))
         elif ref.startswith("C-DECOUPLE"):
-            silk_text(board, "CD", *above_or_below(x0, y0, x1, y1, "CD"))
+            put("CD", *above_or_below(x0, y0, x1, y1, "CD"))
         elif ref.startswith("R-KEY-PU-FREE"):
-            silk_text(board, "PF", *above_or_below(x0, y0, x1, y1, "PF"))
+            put("PF", *above_or_below(x0, y0, x1, y1, "PF"))
         elif ref.startswith("TP-"):
             # test pads sit in a row: their names alternate under and over it
             name = ref[3:].rsplit("-", 1)[0].replace("SHLD", "SH/LD")
             row = sorted((f for f in board.GetFootprints() if f.GetReference().startswith("TP-")), key=lambda f: f.GetPosition().x)
             under = [f.GetReference() for f in row].index(ref) % 2 == 0
-            silk_text(board, name, (x0 + x1) / 2, y1 + SILK_H * 0.75 if under else y0 - SILK_H * 0.75)
+            put(name, (x0 + x1) / 2, y1 + SILK_H * 0.75 if under else y0 - SILK_H * 0.75)
         elif ref == "J-CHAIN":
             p1 = fp.FindPadByNumber("1").GetPosition()
             p2 = fp.FindPadByNumber("2").GetPosition()
             # pin 1's dot outside the pad array, away from the mouth
             dx = pcbnew.ToMM(p1.x - p2.x)
             silk_dot(board, pcbnew.ToMM(p1.x) + (1.0 if dx > 0 else -1.0), pcbnew.ToMM(p1.y))
-            silk_text(board, "J-CHAIN", *above_or_below(x0, y0, x1, y1, "J-CHAIN"))
+            put("J-CHAIN", *above_or_below(x0, y0, x1, y1, "J-CHAIN"))
+            # which way its mouth faces: pads 1 -> 2 point at it (place_chain); a
+            # header soldered backward puts 3V3 on a ground pin (key-chain-loom.md)
+            mx = pcbnew.ToMM(p2.x - p1.x) > 0
+            ax = x1 + 1.2 if mx else x0 - 1.2
+            silk_arrow(board, ax, (y0 + y1) / 2, 1 if mx else -1)
     t = lay.get("silk", {})
     if t:
+        # the title block too: the Gerber job file's "Revision" is its
+        tb = board.GetTitleBlock()
+        tb.SetTitle(t["title"])
+        tb.SetRevision(t["rev"])
+        tb.SetDate(t["date"])
+        board.SetTitleBlock(tb)
         x, y = to_pcb(*t["at"])
         for i, line in enumerate([t["title"], f"rev {t['rev']}  {t['date']}"]):
-            silk_text(board, line, x, y + i * SILK_H * 1.6, justify=-1)
+            put(line, x, y + i * SILK_H * 1.6, justify=-1)
 
 
 def keepout(board, px, py, r, n=32):
@@ -429,17 +514,16 @@ def build(bdir):
         # and every net routed there a short. A rule area on both layers, which
         # the router also treats as an obstacle.
         keepout(board, px, py, max(head, od) / 2 + lay["rules"]["clearance"])
-    if geo["ribbon"]:
-        x0, y0, x1, y1 = geo["ribbon"]
-        no_parts(board, [to_pcb(x0, y0), to_pcb(x1, y0), to_pcb(x1, y1), to_pcb(x0, y1)])
     # everything else: layout.yaml, in body coordinates, bottom side
-    for ref, (x, y, r) in lay["parts"].items():
+    for ref, (x, y, r) in {**network_parts(lay), **lay["parts"]}.items():
         px, py = to_pcb(x, y)
         place(board, fps[ref], px, py, r, True)
         placed.add(ref)
     missing = sorted(set(fps) - placed)
     if missing:
         sys.exit(f"pcb: not placed (add them to layout.yaml parts): {', '.join(missing)}")
+    if lay.get("fab"):
+        fit_footprint_silk(board, lay["fab"])
     add_silk(board, lay)
     return board, fps, netinfo, lay
 
@@ -449,16 +533,31 @@ def save(board, path):
     pcbnew.SaveBoard(path, board)
 
 
-def set_finish(path, finish):
-    """KiCad's Python API does not reach the stackup's copper finish, which the
-    Gerber job file reports to the board house: set it in the saved file, after
-    the last save (the zone fill re-saves the board)."""
+MASK_T = 0.01      # solder mask thickness in the stackup: KiCad's own default; it only splits the board's thickness
+
+
+def set_stackup(path, fab, thickness):
+    """KiCad's Python API does not reach the stackup, which the Gerber job file
+    reports to the board house - finish, mask colour, copper weight: write it
+    into the saved file, after the last save (the zone fill re-saves the board).
+    The core is what is left of the board's thickness."""
+    cu = fab["copper_oz"] * 0.035
+    core = thickness - 2 * cu - 2 * MASK_T
+    L = lambda name, typ, extra="": f'\t\t\t(layer "{name}"\n\t\t\t\t(type "{typ}"){extra}\n\t\t\t)\n'
+    mask = f'\n\t\t\t\t(color "{fab["mask"]}")\n\t\t\t\t(thickness {MASK_T})'
+    silk = f'\n\t\t\t\t(color "{fab["silk"]}")'
+    block = ("\t\t(stackup\n" + L("F.SilkS", "Top Silk Screen", silk) + L("F.Paste", "Top Solder Paste")
+             + L("F.Mask", "Top Solder Mask", mask) + L("F.Cu", "copper", f"\n\t\t\t\t(thickness {cu:.3f})")
+             + L("dielectric 1", "core", f'\n\t\t\t\t(thickness {core:.3f})\n\t\t\t\t(material "FR4")\n\t\t\t\t(epsilon_r 4.5)\n\t\t\t\t(loss_tangent 0.02)')
+             + L("B.Cu", "copper", f"\n\t\t\t\t(thickness {cu:.3f})") + L("B.Mask", "Bottom Solder Mask", mask)
+             + L("B.Paste", "Bottom Solder Paste") + L("B.SilkS", "Bottom Silk Screen", silk)
+             + f'\t\t\t(copper_finish "{fab["finish"]}")\n\t\t\t(dielectric_constraints no)\n\t\t)\n')
     t = open(path).read()
-    t2 = re.sub(r'\(copper_finish "[^"]*"\)', f'(copper_finish "{finish}")', t)
-    if t2 == t:
-        t2 = t.replace("\t(setup\n", f'\t(setup\n\t\t(stackup\n\t\t\t(copper_finish "{finish}")\n\t\t\t(dielectric_constraints no)\n\t\t)\n', 1)
+    t2, n = re.subn(r"\t\t\(stackup\n.*?\n\t\t\)\n", lambda m: block, t, count=1, flags=re.S)
+    if not n:
+        t2 = t.replace("\t(setup\n", "\t(setup\n" + block, 1)
         if t2 == t:
-            sys.exit("pcb: could not write the surface finish - no (setup) section found")
+            sys.exit("pcb: could not write the stackup - no (setup) section found")
     open(path, "w").write(t2)
 
 
@@ -478,8 +577,15 @@ def cmd_layout(bdir, force=False):
         # zones are filled in a fresh process: an in-process fill of a just-built board crashes
         subprocess.run([sys.executable, "-c", f"import sys; sys.path.insert(0, {os.path.dirname(os.path.abspath(__file__))!r}); "
                         f"import pcb_route; pcb_route.fill_zones({out!r})"], check=True)
-    if lay.get("fab", {}).get("finish"):
-        set_finish(out, lay["fab"]["finish"])
+    if lay.get("fab"):
+        set_stackup(out, lay["fab"], board.GetDesignSettings().GetBoardThickness() / 1e6)
+        # fit_footprint_silk adapts the library footprints' silkscreen to the board
+        # house on purpose, so "does not match the library copy" is expected, not a finding
+        pro = os.path.join(bdir, name + ".kicad_pro")
+        import json
+        j = json.load(open(pro))
+        j["board"]["design_settings"]["rule_severities"]["lib_footprint_mismatch"] = "ignore"
+        json.dump(j, open(pro, "w"), indent=2)
     print(f"pcb: wrote {os.path.relpath(out, ROOT)}")
 
 

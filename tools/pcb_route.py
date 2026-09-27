@@ -39,6 +39,7 @@ from shapely.ops import unary_union
 
 GRID = 0.2
 SLACK = GRID * 0.75
+OWN_PAD_GAP = 0.05            # a via's ring to its own net's SMD pad: off it, not another net's clearance
 # Search costs, in grid steps. A 45-degree turn is cheap, a 90-degree one is
 # not, and anything sharper is as good as forbidden; a via is worth a detour
 # of about 2.4 mm; a move against the layer's direction costs a third extra.
@@ -104,6 +105,7 @@ class Router:
         self.copper = []            # (netname, layer set, geometry, kind) - kind is 'pad' or 'track'
         self.holes = []             # unplated holes and keep-outs: no copper of any net
         self.pth_holes = []         # plated holes: kept apart from vias only
+        self.smd = []               # (net, layer set, geometry): SMD pads - no via in or on them, not even their own net's
         self.owned = {}             # net -> [(board item, copper entry, hole)] its routes added
         for fp in board.GetFootprints():
             for pad in fp.Pads():
@@ -114,6 +116,10 @@ class Router:
                     self.holes.append(g)
                     continue
                 self.copper.append((net, layers, g, "pad"))
+                if not pad.HasHole():
+                    # reflowed on this side: a via in the pad is an untented hole that
+                    # wicks its solder away, so a via keeps off every SMD pad, its own too
+                    self.smd.append((net, layers, g))
                 if pad.HasHole():
                     # a plated hole: its pad's copper already keeps other nets' tracks
                     # away, so it matters only to vias (hole to hole)
@@ -136,6 +142,11 @@ class Router:
             obst = [g for (n, ls, g, _) in self.copper if L in ls and n != net]
             obst += self.holes + (self.pth_holes if via else [])
             rad = half + self.clear + SLACK
+            if via:
+                # its own net's SMD pads: off the pad (and its mask opening, which is
+                # the pad: pad_to_mask_clearance 0), not the clearance another net needs
+                own = [g.buffer(OWN_PAD_GAP - self.clear) for (n, ls, g) in self.smd if n == net and L in ls]
+                obst += own
             for g in obst:
                 gx0, gy0, gx1, gy1 = g.bounds
                 i0, i1 = max(0, int((gx0 - rad - self.x0) / GRID)), min(self.nx - 1, int((gx1 + rad - self.x0) / GRID) + 1)
@@ -256,21 +267,21 @@ class Router:
         """Write the path as tracks and vias, and add it to the copper others must avoid."""
         netinfo = self.board.FindNet(net)
         pts = [(L, *self.cell_xy(i, j)) for (L, i, j) in path]
-        # merge collinear runs on one layer
+        # merge collinear runs on one layer - on the grid's integer cells: in mm,
+        # rounding leaves a diagonal staircase of 0.28 mm steps unmerged
         segs, start = [], 0
         for k in range(1, len(pts) + 1):
             if k == len(pts) or pts[k][0] != pts[start][0]:
-                run = pts[start:k]
-                simp = [run[0]]
-                for p in run[1:-1]:
-                    a, b = simp[-1], p
-                    nxt = run[run.index(p) + 1]
-                    if (b[1] - a[1]) * (nxt[2] - b[2]) - (b[2] - a[2]) * (nxt[1] - b[1]) != 0:
-                        simp.append(p)
+                run = list(range(start, k))
+                keep = [run[0]]
+                for m in run[1:-1]:
+                    a, b, c = path[keep[-1]], path[m], path[m + 1]
+                    if (b[1] - a[1]) * (c[2] - b[2]) - (b[2] - a[2]) * (c[1] - b[1]) != 0:
+                        keep.append(m)
                 if len(run) > 1:
-                    simp.append(run[-1])
-                for a, b in zip(simp, simp[1:]):
-                    segs.append((a[0], (a[1], a[2]), (b[1], b[2])))
+                    keep.append(run[-1])
+                for a, b in zip(keep, keep[1:]):
+                    segs.append((pts[a][0], (pts[a][1], pts[a][2]), (pts[b][1], pts[b][2])))
                 if k < len(pts):
                     v = pcbnew.PCB_VIA(self.board)
                     v.SetPosition(pcbnew.VECTOR2I(MM(pts[k][1]), MM(pts[k][2])))
@@ -428,6 +439,25 @@ def route(board, lay):
         print(f"route: {n:20s} {'ok' if ok else 'FAILED'}")
         if not ok:
             failed.append(n)
+    # A net that could not route at all: rip up the nets whose tracks cross the
+    # box round its pads, route it first and them after, and keep that only if
+    # every one of them routes; else put them back as they were.
+    for n in list(failed):
+        gs = [g for (nn, _, g, k) in r.copper if nn == n and k == "pad"]
+        corridor = unary_union(gs).envelope.buffer(1.0)
+        blockers = sorted({nn for (nn, ls, g, k) in r.copper
+                           if k == "track" and nn not in (n, gnd) and nn in order and g.intersects(corridor)},
+                          key=lambda m: (m in power, span(m)))
+        r.rip_up(n)
+        old = {m: r.rip_up(m) for m in blockers}
+        if all(r.route_net(m, r.pw if m in power else r.w) for m in [n] + blockers):
+            failed.remove(n)
+            print(f"route: {n:20s} ok after ripping up {len(blockers)} net(s)")
+        else:
+            for m in [n] + blockers:
+                r.rip_up(m)
+            for m in blockers:
+                r.put_back(m, old[m])
     # Rip up and reroute. A net routed early went round an emptier board; a net
     # routed late had to go round the early ones. So for each net that took a
     # real detour (its route much longer than its pads' span), rip up it AND the
@@ -464,8 +494,49 @@ def route(board, lay):
     print(f"route: {gnd:20s} {'ok' if ok else 'partial - pours and stitching vias must finish it'}")
     vias = r.stitch_gnd(gnd)
     print(f"route: {vias} ground stitching via(s)")
+    print(f"route: {merge_tracks(board)} collinear joint(s) merged")
     r.pour(gnd)
     return failed
+
+
+def merge_tracks(board):
+    """Join two tracks of one net and layer that meet head to tail in a straight
+    line, so the board is edited in KiCad as runs, not grid steps. Never at a
+    via, a third track, or inside a pad: KiCad connects a track to a pad by its
+    end, so an end in a pad must stay one."""
+    key = lambda v: (round(v.x / 1000), round(v.y / 1000))       # to the micron
+    pads = [p for fp in board.GetFootprints() for p in fp.Pads()]
+    vias = {key(t.GetPosition()) for t in board.GetTracks() if isinstance(t, pcbnew.PCB_VIA)}
+    merged, again = 0, True
+    while again:
+        again = False
+        ends = {}
+        tracks = [t for t in board.GetTracks() if type(t) is pcbnew.PCB_TRACK]
+        for t in tracks:
+            for e in (t.GetStart(), t.GetEnd()):
+                ends.setdefault((t.GetNetname(), t.GetLayer(), key(e)), []).append(t)
+        for (net, layer, pt), ts in ends.items():
+            if len(ts) != 2 or ts[0] is ts[1] or pt in vias or ts[0].GetWidth() != ts[1].GetWidth():
+                continue
+            a, b = ts
+            far = lambda t: t.GetEnd() if key(t.GetStart()) == pt else t.GetStart()
+            pa, pb = far(a), far(b)
+            p = pcbnew.VECTOR2I(pt[0] * 1000, pt[1] * 1000)
+            ux, uy, vx, vy = p.x - pa.x, p.y - pa.y, pb.x - p.x, pb.y - p.y
+            if abs(ux * vy - uy * vx) > 1e-3 * math.hypot(ux, uy) * math.hypot(vx, vy) or ux * vx + uy * vy <= 0:
+                continue
+            if any(q.IsOnLayer(layer) and q.HitTest(p) for q in pads):
+                continue
+            if any(t is not a and t is not b and t.GetNetname() == net and t.GetLayer() == layer and t.HitTest(p, 1000)
+                   for t in tracks):
+                continue
+            a.SetStart(pa)
+            a.SetEnd(pb)
+            board.Remove(b)
+            merged += 1
+            again = True
+            break
+    return merged
 
 
 def fill_zones(path):

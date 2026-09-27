@@ -24,8 +24,8 @@ components:
     pins:
     - 1
     - 2
-    note: 'One per FREE bit. The same part the key networks use, and the reason ''free'' bits are not free: each
-      one costs the same static draw as a key'
+    note: One per FREE bit, holding its unswitched input high. The same part the key networks use; with no switch
+      on the bit it draws only the input's leakage, so what a free bit costs is a part and a placement, not current
 nets:
   FREE_BIT:
   - port: FREE_BIT

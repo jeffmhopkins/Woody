@@ -26,8 +26,8 @@ components:
     pins:
     - 1
     - 2
-    note: Also AT the register input - automatic, because every register sits beside its own switches (main board
-      or key board)
+    note: 'Beside its own switch, with R-KEY-SER and R-KEY-PU: the node''s RC is local to the contact that disturbs
+      it, and the trace on to the register input carries a slow edge'
   R-KEY-PU:
     value: 2k2 1%
     pins:
@@ -40,7 +40,8 @@ components:
     pins:
     - 1
     - 2
-    note: Between the switch and the input node. AT the register input, millimetres from the switch
+    note: Between the switch and the input node, beside the switch. It sets the pressed node's divider with R-KEY-PU
+      and limits C-KEY's discharge into the contact (key-switch-network.md section 2)
   SW1-n:
     value: KS-33
     pins:

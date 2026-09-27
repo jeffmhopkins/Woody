@@ -10,13 +10,14 @@
 cluster: left_hand
 suffix: LH
 
-# Rules: JLCPCB's standard 2-layer process allows 0.127 mm track and space
-# [from memory]; these are deliberately looser, so any board house builds it.
+# Rules: looser than the board house's own limits (JLCPCB: 0.10 mm track and
+# space at 1 oz, datasheets/fab/JLCPCB-PCB-CAPABILITIES.pdf), so any board
+# house builds it.
 rules:
   track: 0.25
   track_min: 0.2
   clearance: 0.2
-  via: 0.7                  # 0.2 ring on the 0.3 drill: JLC's 0.18 minimum (fab: below)
+  via: 0.7                  # a 0.2 ring on the 0.3 drill, over the 0.18 minimum ring in fab: below
   via_drill: 0.3
   via_min: 0.66
   drill_min: 0.3
@@ -35,6 +36,9 @@ fab:
   silk_line_min: 0.15
   silk_to_pad: 0.15
   finish: "HAL lead-free"    # at 1.2 mm, Economic assembly offers HASL only, green or black mask
+  mask: Green
+  silk: White
+  copper_oz: 1               # outer copper, in the stackup the Gerber job file carries
 
 # The chain header, J-CHAIN (ADR 0017 amended): a 1.27 mm shrouded IDC header,
 # right-angle, placed by tools/pcb.py where the body CAD stacks it over the
@@ -45,42 +49,38 @@ fab:
 # would make a second bond.
 standoff_footprint: "MountingHole:MountingHole_2.2mm_M2"
 
-# Placement (2026-09-27, the board grown to a rectangle with corner standoffs,
-# ADR 0020). A switch's pins are on its near side (low y): pin 1, the switch
-# leg, at (-4.4, -4.7) from its centre and pin 2, ground, at (+2.6, -5.75).
+# Placement. A switch's pins are on its near side (low y): pin 1, the switch
+# leg, at (-4.4, -4.7) from its centre and pin 2, ground, at (+2.6, -5.75);
+# its centre pole's hole is 5.25 across.
 #
+# Each key network is a T round its KEY node (tools/pcb.py network_parts):
+# `at` the junction, `leg` which way along the body the series resistor runs
+# (its SWITCH_LEG end toward the switch's pin 1), `c` which way across the
+# body the capacitor hangs. Each clears its switch's pole hole and pins by its
+# courtyards: LH1 above its switch, LH2 and LH3 below theirs, LH4 between
+# LH4 and LH5, LH5 beside the register.
+networks:
+  LH1: {at: [50.0, 34.5], leg: -1, c: 1}
+  LH2: {at: [70.0, 17.5], leg: -1, c: -1}
+  LH3: {at: [90.0, 17.5], leg: -1, c: -1}
+  LH4: {at: [106.0, 27.0], leg: -1, c: 1}
+  LH5: {at: [104.5, 44.0], leg: -1, c: 1}
+
 # The register sits on the far side just past the chain header, turned so
 # its inputs H..E (pins 6..3) face the key row in the keys' own order, left to
 # right; its chain pins (SH/LD, CLK below; QH, SER above) toward the header.
-# Each key network is a row of three 0805s beside its own switch: LH1 on the
-# row's far side, LH2 and LH3 on the near side, LH4 between LH4 and LH5, LH5
-# beside the register.
 parts:
-  C-KEY-LH1:     [46.0, 34.5, 0]
-  R-KEY-SER-LH1: [50.0, 34.5, 0]
-  R-KEY-PU-LH1:  [54.0, 34.5, 0]
-  C-KEY-LH2:     [66.0, 17.5, 0]
-  R-KEY-SER-LH2: [70.0, 17.5, 0]
-  R-KEY-PU-LH2:  [74.0, 17.5, 0]
-  C-KEY-LH3:     [86.0, 17.5, 0]
-  R-KEY-SER-LH3: [90.0, 17.5, 0]
-  R-KEY-PU-LH3:  [94.0, 17.5, 0]
-  C-KEY-LH4:     [102.0, 27.0, 0]
-  R-KEY-SER-LH4: [106.0, 27.0, 0]
-  R-KEY-PU-LH4:  [110.0, 27.0, 0]
-  C-KEY-LH5:     [100.5, 44.0, 0]
-  R-KEY-SER-LH5: [104.5, 44.0, 0]
-  R-KEY-PU-LH5:  [108.5, 44.0, 0]
   U-KEYS-LH:     [90.5, 44.5, 90]
   C-DECOUPLE-165-LH: [97.0, 46.5, 90]
   R-KEY-PU-FREE3: [84.0, 44.5, 90]
   # Bring-up test pads (TP-CHAIN), a row between the key row and the register:
-  # 3V3, GND, SCK, SH/LD, QH - README.md says how to use them.
-  TP-3V3-LH:     [85.0, 37.5, 0]
-  TP-GND-LH:     [88.5, 37.5, 0]
-  TP-SCK-LH:     [92.0, 37.5, 0]
-  TP-SHLD-LH:    [95.5, 37.5, 0]
-  TP-QH-LH:      [99.0, 37.5, 0]
+  # SER, 3V3, GND, SCK, SH/LD, QH - README.md says how to use them.
+  TP-3V3-LH:     [85.0, 36.0, 0]
+  TP-GND-LH:     [88.5, 36.0, 0]
+  TP-SCK-LH:     [92.0, 36.0, 0]
+  TP-SHLD-LH:    [95.5, 36.0, 0]
+  TP-QH-LH:      [99.0, 36.0, 0]
+  TP-SER-LH:     [81.5, 36.0, 0]
 
 # The parts-side silkscreen's title block (tools/pcb.py add_silk); body coordinates.
 silk:
@@ -89,8 +89,9 @@ silk:
   rev: "A"
   date: "2026-09-27"
 
-# Routing (tools/pcb_route.py): ground is a pour on both layers, not tracks;
-# the chain's 3V3 rail is the wider power track.
+# Routing (tools/pcb_route.py): ground is routed as a net, so no ground pin
+# depends on a pour finding its way round the tracks, and then poured on both
+# layers; the chain's 3V3 rail is the wider power track.
 route: true
 ground_net: GND_CHAIN
 power_nets: [V3V3_CHAIN_LH]

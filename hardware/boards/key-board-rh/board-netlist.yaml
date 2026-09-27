@@ -190,6 +190,11 @@ components:
     value: test pad
     pins:
     - 1
+  TP-SER-RH:
+    of: TP-CHAIN
+    value: test pad
+    pins:
+    - 1
   TP-SHLD-RH:
     of: TP-CHAIN
     value: test pad
@@ -226,6 +231,7 @@ nets:
   - U-KEYS-RH.SHLD
   /HOP_LT_RH:
   - J-CHAIN.7
+  - TP-SER-RH.1
   - U-KEYS-RH.SER
   /HOP_RH_RT:
   - J-CHAIN.5
