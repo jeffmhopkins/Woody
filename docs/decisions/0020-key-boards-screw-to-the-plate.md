@@ -1,11 +1,13 @@
 # 0020 — The key boards are screwed to the key plate
 
 **Status:** Accepted. Decided by the owner, 2026-09-27, and amended the same
-day (points 3 and 6, and point 5's notes; *Amendment* below). **Amended again
-2026-09-27: the owner made through-wood fastening the standard** (*Amendment 2
-— screws through the wood* below). There is no standoff any more, so nothing
-waits on a plate vendor's clinch data; what stays open is in that amendment's
-last list.
+day (points 3 and 6, and point 5's notes; *Amendment* below). **Amended twice more
+on 2026-09-27**: *Amendment 2* made a screw down through a plugged bore in
+the wood top the standard, and **Amendment 3 replaced the bore and plug
+with a blind pocket drilled into the wood top's underside** — the current
+mount, with nothing through the playing face. There is no standoff, so
+nothing waits on a plate vendor's clinch data; what stays open is in
+Amendment 3's last list.
 
 ## Context
 
@@ -32,6 +34,9 @@ connector envelope using a stand-in size. The real footprint, a Molex 200528
      into the plate. The screw comes DOWN through a plugged bore in the wood
      top and the plate, and a nut holds the board: `MECH-KB-SCREW`,
      `MECH-KB-SPACER`, `MECH-KB-WASHER`, `MECH-KB-NUT`, `MECH-KB-PLUG`.)*
+     *(Amendment 3, same day: no bore and no plug — the screw drops through
+     the plate before the wood goes on, and its head sits in a blind pocket
+     in the wood top's underside. `MECH-KB-PLUG` is gone.)*
    - This was the owner's choice over standoffs off the oak or clips.
    - It keeps the board at the depth the switch pins set, and it loads the
      plate, not the solder joints.
@@ -234,6 +239,12 @@ allow for a less fragile mounting of the IC". The owner also asked whether
 
 ## Amendment 2, 2026-09-27 — screws through the wood
 
+> **Superseded in part the same day by Amendment 3** (below): the bore
+> through the wood top and the glued plug are gone, replaced by a blind
+> pocket in the top's underside. Everything below the plate — screw,
+> spacer, washer, board, nut — and the depth rules stand as written here.
+> The passages about the bore and the plug are marked where they sit.
+
 **The standard mount for the key boards is now a screw down through the wood
 top, under a glued wooden plug.** It replaces the PEM MSO4-M2-3
 self-clinching standoff, and with it everything in this page that speaks of
@@ -246,8 +257,8 @@ there", and then "Yeah let's go ahead and make that the standard".
 
 | Part | Row | Size |
 |---|---|---|
-| Wooden plug, glued into the bore over the head | `MECH-KB-PLUG` | `hardware.kb_bore_d`, `kb_plug_glue_gap`, `kb_plug_min_depth` |
-| A bore through the wood top, down to the plate | — | `hardware.kb_bore_d` |
+| Wooden plug, glued into the bore over the head *(gone: Amendment 3)* | `MECH-KB-PLUG` | `hardware.kb_bore_d`, `kb_plug_glue_gap`, `kb_plug_min_depth` |
+| A bore through the wood top, down to the plate *(now a blind pocket: Amendment 3)* | — | `hardware.kb_bore_d` |
 | M2 × 8 socket head cap screw, ISO 4762, A2; head on the plate's top face at the bore's floor | `MECH-KB-SCREW` | `hardware.kb_screw_head_d`, `kb_screw_head_h`, `kb_screw_l` |
 | The key plate's M2 clearance hole | `PLATE-TOP` | `hardware.kb_plate_hole` |
 | Würth WA-SMST 9774020943R steel spacer, under the plate | `MECH-KB-SPACER` | `hardware.kb_spacer_l`, `kb_spacer_l_tol`, `kb_spacer_od` |
@@ -291,15 +302,21 @@ part of this mount has a length derived from the pins.
   key's cap slot.
 - Both are checked by "key-board plug bores clear of the wood top's cuts
   (mouth ends)" and "(tail ends)"; the tail line prints the least
-  `boards.kb_tail_margin` may be.
+  `boards.kb_tail_margin` may be. *(Amendment 3: the bore is now a pocket,
+  the wall is `hardware.kb_pocket_wall`, and the rules are "key-board head
+  pockets clear of the wood top's cuts (mouth ends)" and "(tail ends)".)*
 - "key-board screw heads bear on plate metal", "key-board spacers and washers
-  clear of the switch cutouts", "key-board plugs deep enough to hold",
+  clear of the switch cutouts", "key-board plugs deep enough to hold"
+  *(withdrawn with the plug, Amendment 3)*,
   "key-board screw: thread past the nut", "key-board screw ends clear of the
   main board's parts" and "key-board nuts clear of the chain header" hold the
   rest. The count per board is "key-board mounts".
 - The PCB's keep-outs: point 4's note.
 
 ### Assembly, and service
+
+*(Superseded by Amendment 3's order: the screws go in before the plate is
+bonded, and there is no plug. Kept as the record.)*
 
 1. Bore the wood top at every corner (`hardware.kb_bore_d`), through to the
    plate.
@@ -325,7 +342,8 @@ species is open** — a hardwood, the owner's choice (ADR 0009). The part names
 keep "oak". The cross-grain movement figure and the plug and bore-wall
 placeholders (`hardware.kb_bore_wall`, `kb_plug_min_depth`) assume oak until
 the species is chosen; the M2 trial that settles those two uses the chosen
-wood.
+wood. *(Amendment 3: the placeholders are now `hardware.kb_pocket_wall` and
+`kb_pocket_skin`; the species is still open.)*
 
 ### What this supersedes
 
@@ -362,7 +380,104 @@ wood.
 
 - `hardware.kb_bore_wall` and `kb_plug_min_depth` are placeholders `[from
   memory]`: settled at M2 by boring and plugging a scrap of the chosen wood
-  beside a slot.
+  beside a slot. *(Replaced by Amendment 3's list.)*
 - `hardware.kb_mount_inset` and `kb_spacer_l`: confirmed at M4 with the
   board's first fit.
 - The wood's species (above).
+
+## Amendment 3, 2026-09-27 — the heads hide in blind pockets; no through-holes, no plugs
+
+**The screw heads now sit in blind pockets drilled up into the wood top's
+underside.** Nothing goes through the playing face, and there are no plugs.
+This replaces Amendment 2's bore and plug; everything else in Amendment 2
+stands. The owner: "I don't want to have through holes and plugs in the
+wood. I want to have only holes that go half depth in the wood, drilled from
+the inside halfway down, enough to be able to fit the head."
+
+### The stack, from the top down
+
+| Part | Row | Size |
+|---|---|---|
+| The wood top, unbroken on its face; a blind pocket in its underside over each head (1/4 in Forstner, flat floor) | — | `hardware.kb_pocket_d`; depth `drc.echo` "key-board head pocket depth (derived)" = the head's height + `hardware.kb_pocket_clear` |
+| M2 × 8 socket head cap screw, ISO 4762, A2; head on the plate's top face, inside the pocket | `MECH-KB-SCREW` | `hardware.kb_screw_head_d`, `kb_screw_head_h`, `kb_screw_l` |
+| The key plate's M2 clearance hole | `PLATE-TOP` | `hardware.kb_plate_hole` |
+| Würth WA-SMST 9774020943R spacer, under the plate | `MECH-KB-SPACER` | `hardware.kb_spacer_l`, `kb_spacer_l_tol`, `kb_spacer_od` |
+| ISO 7092 / DIN 433 small washer | `MECH-KB-WASHER` | `hardware.kb_washer_t`, `kb_washer_t_range`, `kb_washer_od` |
+| The key board, its NPTH hole | — | `boards.key_board_t`, `hardware.kb_screw_hole` |
+| ISO 4032 M2 nut, on the board's underside | `MECH-KB-NUT` | `hardware.kb_nut_e`, `kb_nut_m` |
+
+The pocket only houses the head: the head bears on the plate, so the depth
+rules, the tolerance NOTE, the screw rules and the PCB keep-outs are
+Amendment 2's, unchanged. The mount clamps the plate itself between the head
+and the spacer.
+
+### The wood's rules
+
+- "key-board head pockets clear of the wood top's cuts (mouth ends)" and
+  "(tail ends)": each pocket keeps `hardware.kb_pocket_wall` of wood from
+  every cap slot, side groove and window rebate. The tail line still prints
+  the least `boards.kb_tail_margin` may be, and `hardware.kb_mount_inset`
+  still keeps the pockets off the side grooves.
+- "key-board head pockets leave wood over them": the wood between a pocket's
+  floor and the playing face, against `hardware.kb_pocket_skin`.
+- The pockets are a blind cut, like the side grooves, so they are exported
+  on their own: `mechanical/export/oak-pockets.dxf`.
+- "key-board plugs deep enough to hold" is withdrawn with the plug.
+
+### Assembly
+
+1. Clip the switches into the plate.
+2. Drop the screws down through the plate's holes from its top face.
+3. From below: the spacer, the washer, the key board, and the nut. Tighten
+   each nut while holding its head with a 1.5 mm hex key from above.
+4. **Epoxy each head to the plate** (below) and let it cure fully before
+   anything else torques a nut.
+5. Solder the switches — after the hardware has fixed the depth.
+6. **Then** RTV-bond the plate to the wood top (ADR 0009's adhesives
+   table); the heads go up into the pockets. **Keep the RTV beads off the
+   pockets.** Each pocket's radius is well over the head's, so the heads
+   find their pockets without a jig `[calc: (kb_pocket_d − kb_screw_head_d) / 2
+   is over a millimetre]`.
+
+### Service — the heads are epoxied to the plate (decided)
+
+**Once the lid is bonded, the heads cannot be reached or held.** Left
+loose, a nut loosened from below would spin its screw in the pocket, and
+taking a key board off would mean lifting the plate off the wood, breaking
+an RTV joint ADR 0009 calls permanent within the lid.
+
+**So each head is fixed to the plate with a dot of epoxy before the plate
+is bonded** (`ADH-EPOXY`). The owner, 2026-09-27: "Yes, add the epoxy dot on
+the heads." The head then stays put while its nut is undone from below, and
+a key board comes off with the lid in place.
+
+- Put the dot beside the head, where its edge meets the plate — after the
+  nut is tightened (step 3), before soldering (step 4), and let it cure
+  before any torque goes on a nut again.
+- **Keep it inside the pocket's footprint** (`hardware.kb_pocket_d`), and
+  **no taller than `hardware.kb_pocket_clear` above the head** — kept below
+  the head's top, it is — or the plate will not seat on the wood. Keep it
+  out of the hex socket.
+- Epoxy is right here and nowhere else in the body: it is metal to metal,
+  steel head to aluminium plate, and nothing in that joint moves with the
+  wood (ADR 0009's adhesives table).
+- A screw that must itself be replaced is the one case that still means
+  lifting the plate.
+
+### What this supersedes
+
+- Amendment 2's bore through the wood top (`hardware.kb_bore_d`), its plug
+  (`MECH-KB-PLUG`, `hardware.kb_plug_glue_gap`, `kb_plug_min_depth`), its
+  wall (`hardware.kb_bore_wall`, now `kb_pocket_wall`), its rules, and its
+  assembly order (bore, bond, screw, plug last). Each is marked in place.
+- ADR 0009's amendment saying the face "reads as unbroken wood, and is not":
+  it is unbroken again (ADR 0009, marked there).
+
+### Still open
+
+- `hardware.kb_pocket_skin` and `kb_pocket_wall` are placeholders `[from
+  memory]`: settled at M2 by pocketing a scrap of the chosen wood beside a
+  slot and sanding its face.
+- `hardware.kb_mount_inset` and `kb_spacer_l`: confirmed at M4 with the
+  board's first fit.
+- The wood's species (Amendment 2, *The wood*).

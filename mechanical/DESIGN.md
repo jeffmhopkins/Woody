@@ -32,21 +32,25 @@ drawing.
   underneath, because keys are **flush with the top face at full travel**
   (decided 2026-09-26, ADR 0009). The oak top's thickness is not a parameter:
   it is the cap's height above the seat less the travel, derived in the model
-  and printed in `drc.echo`. The oak carries one clearance hole per cap and
-  a plugged bore at each key board's corner, and nothing else; the lid's
-  fasteners stop in the plate from below. The two key boards hang from the
-  plate on M2 screws that go DOWN through those bores (ADR 0020, Amendment 2
-  — the owner's standard since 2026-09-27, replacing a pressed-in standoff):
-  a bore through the wood top (`hardware.kb_bore_d`), the screw's head on the
-  plate's top face, the plate's clearance hole, a spacer and a washer under
-  the plate, the board, a nut underneath, and a glued face-grain plug over
-  the head (`hardware.kb_plug_glue_gap`, *"key-board plugs deep enough to
-  hold"*). Each board is a rectangle across the cavity with a screw in each
-  corner, `hardware.kb_mount_inset` in from both edges so each bore clears
-  the side grooves; the tail ends run `boards.kb_tail_margin` past the last
-  cutout so the tail bores clear the last cap slot (*"key-board plug bores
-  clear of the wood top's cuts (mouth ends)"* and *"(tail ends)"*, against
-  `hardware.kb_bore_wall`). The head bears on plate metal (*"key-board screw
+  and printed in `drc.echo`. The oak carries one clearance hole per cap
+  through it, and on its underside a blind pocket over each key-board screw
+  head; the playing face is unbroken, and the lid's fasteners stop in the
+  plate from below. The two key boards hang from the plate on M2 screws put
+  DOWN through it before it is bonded to the wood (ADR 0020, Amendment 3 —
+  the owner's, 2026-09-27, replacing a pressed-in standoff and then a
+  plugged through-bore): the screw's head on the plate's top face, inside a
+  pocket (`hardware.kb_pocket_d`, depth *"key-board head pocket depth
+  (derived)"*, the head plus `hardware.kb_pocket_clear`), the plate's
+  clearance hole, a spacer and a washer under the plate, the board, and a
+  nut underneath. The wood over a pocket is ruled (*"key-board head pockets
+  leave wood over them"*, against `hardware.kb_pocket_skin`), and the
+  pockets are a blind cut exported on their own, `export/oak-pockets.dxf`.
+  Each board is a rectangle across the cavity with a screw in each corner,
+  `hardware.kb_mount_inset` in from both edges so each pocket clears the
+  side grooves; the tail ends run `boards.kb_tail_margin` past the last
+  cutout so the tail pockets clear the last cap slot (*"key-board head
+  pockets clear of the wood top's cuts (mouth ends)"* and *"(tail ends)"*,
+  against `hardware.kb_pocket_wall`). The head bears on plate metal (*"key-board screw
   heads bear on plate metal"*) and the spacer and washer stay off the
   switch cutouts (*"key-board spacers and washers clear of the switch
   cutouts"*). The plate + `hardware.kb_spacer_l` + `hardware.kb_washer_t`

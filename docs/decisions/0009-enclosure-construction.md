@@ -272,6 +272,24 @@ What changes, and what does not:
   checks.
 - **The playing face is unbroken oak.** The six fasteners stop in the plate
   from below, so no hole in the oak top carries one.
+  > **True again, 2026-09-27 ([ADR 0020](0020-key-boards-screw-to-the-plate.md),
+  > Amendment 3).** The key boards hang on screws whose heads sit on the
+  > plate's top face inside **blind pockets drilled up into the wood top's
+  > underside** (`hardware.kb_pocket_d`), one at each corner of each key
+  > board. Nothing goes through the face and nothing is plugged. The owner:
+  > "I don't want to have through holes and plugs in the wood. I want to
+  > have only holes that go half depth in the wood, drilled from the inside".
+  > The wood left over each pocket is ruled (`drc.echo` "key-board head
+  > pockets leave wood over them", against `hardware.kb_pocket_skin`).
+  >
+  > **The species is open.** The owner: "we've been calling this oak, but
+  > honestly, I'll probably use a harder wood, but it really doesn't matter
+  > for the design aspect". A hardwood, the owner's choice. The part names
+  > keep "oak"; the cross-grain movement figure below and the pocket
+  > placeholders (`hardware.kb_pocket_wall`, `kb_pocket_skin`) assume oak
+  > until the species is chosen.
+  >
+  > *Superseded the same day by the note above — the record of Amendment 2:*
   > **Amended 2026-09-27 ([ADR 0020](0020-key-boards-screw-to-the-plate.md),
   > Amendment 2): the face now READS as unbroken wood, and is not.** The six
   > lid fasteners still come from below. But the key boards now hang on
@@ -757,6 +775,16 @@ whose flatness under the switches is the whole point of it being aluminium.
 From underneath they are invisible in play and land in oak, which takes a
 counterbore for free.
 
+> **Amended 2026-09-27 (ADR 0020, Amendment 3): this holds again, for
+> everything.** No screw goes through the playing face. The key-board screws
+> are put through the plate from its top face before the plate is bonded to
+> the wood, and their heads end up in blind pockets in the wood's underside.
+> Once the lid is bonded a head cannot be held, so each head is fixed to
+> the plate with a dot of epoxy before bonding (the owner, 2026-09-27: "Yes,
+> add the epoxy dot on the heads"); the nuts then come off from below with
+> the lid in place (ADR 0020, Amendment 3).
+>
+> *Superseded the same day by the note above — the record of Amendment 2:*
 > **Amended 2026-09-27 (ADR 0020, Amendment 2).** This still holds for the
 > lid: its six screws come from below. It no longer means that nothing
 > screws down from the top. The **key-board** screws do, through the wood
@@ -812,7 +840,11 @@ before the instrument is treated as finished, and the point at which every
 measurement is taken on the final loom *(since ADR 0017: the final boards and ribbons)*. The tests do not change. What changes
 is that failing one of them after M8 is now a repair rather than a rebuild.
 
-### Two adhesives, and which joint gets which
+### Adhesives, and which joint gets which
+
+*(Titled "Two adhesives" until 2026-09-27; the table has since gained the
+key-board screw heads' epoxy, and it was never only two - the U's acrylic
+joint has its own.)*
 
 "Structural adhesive for oak/acrylic/aluminium" was one line in the BOM for at
 least four joints with incompatible requirements, which is the same defect as
@@ -821,9 +853,9 @@ ordering a ferrite bead and an electrolytic on one row.
 | Joint | Adhesive | Permanent? |
 |---|---|---|
 | Oak ↔ oak — spacer layers, thumb rest lip | **PVA wood glue** | Yes |
-| Wood plug ↔ its bore in the oak top, over each key-board screw (`MECH-KB-PLUG`, ADR 0020) — *added 2026-09-27* | **PVA wood glue**, wood to wood | Yes, but serviceable: drill the plug out and re-plug. Glue it last; dry-fit it through bring-up |
 | Frosted acrylic sides ↔ oak bottom — **the U** | **PVA is wrong here; use a solvent-free acrylic-to-wood structural adhesive or a mechanical fixing** | Yes — this is the one sub-assembly that stays together |
-| Aluminium key plate ↔ oak top — **the lid** | **RTV silicone**, still — see below | Yes, within the lid |
+| Aluminium key plate ↔ oak top — **the lid** | **RTV silicone**, still — see below. Bonded **after** the key boards are screwed to the plate and soldered (ADR 0020, Amendment 3) | Yes, within the lid. The key boards still come off from below: their screw heads are epoxied to the plate (next row) |
+| Key-board screw heads ↔ the plate's top face (ADR 0020, Amendment 3) — *added 2026-09-27* | **Epoxy**, a dot beside each head (`ADH-EPOXY`), cured before the plate is bonded. Inside the pocket's footprint (`hardware.kb_pocket_d`) and no taller than `hardware.kb_pocket_clear` above the head | Yes. Metal to metal, and nothing in it moves with the wood — the one joint in the body where epoxy is right |
 | Lid ↔ the U, at the notch | **RTV as a gasket bead, not an adhesive.** Skinned, not fresh, so it seals without sticking | **No — six fasteners** |
 | End caps | **Fasteners into the stack** | **No** |
 | Matrix diffuser | **RTV silicone**, edges only, clear of the light path | Yes |
@@ -847,7 +879,8 @@ an aluminium plate that moves essentially nothing, and a rigid bond would have
 to fight that for the life of the instrument. RTV lets it slide. But press a
 key and the plate is pushing *into* a thin confined layer, which barely gives.
 Epoxy would have bought shear stiffness nobody needs and paid for it by
-fighting the wood.
+fighting the wood. *(Epoxy's one joint is the key-board screw heads to the plate, metal to
+metal, where no wood moves — table above.)*
 
 *(Thermal is the small term here, not the large one. Aluminium over 400 mm and a
 20 K swing is 0.18 mm; wood and water is three to five times that.)*
@@ -864,12 +897,15 @@ fighting the wood.
   them, and real time before the final closure goes on — which also keeps the
   outgassing away from the breath sensor, alongside the port-masking rule
   above.
-- **Keep the plate's beads off the key-board screw bores** *(added
-  2026-09-27, ADR 0020)*. The oak top is bored through at each key board's
-  corners (`hardware.kb_bore_d`) before the plate is bonded to it. Silicone
-  in a bore keeps the plug's PVA from holding, and PVA does not bond to
-  cured RTV. Order: bore the wood, bond the plate, fit the key boards, plug
-  last.
+- **Keep the plate's beads off the key-board head pockets** *(2026-09-27,
+  ADR 0020 Amendment 3)*. Each key board's corner screw head sits in a
+  blind pocket in the oak top's underside (`hardware.kb_pocket_d`). Order:
+  screw the key boards to the plate and solder them, then bond the plate to
+  the wood. The heads are already epoxied to the plate by then (table
+  above); silicone that runs into a pocket glues the head to the wood as
+  well, and a stray bead there stops the plate seating. *(This bullet first read "off the
+  screw bores", for Amendment 2's plugged through-bores, withdrawn the same
+  day; a wood plug joint was in the table above for the same few hours.)*
 
 ## Open
 

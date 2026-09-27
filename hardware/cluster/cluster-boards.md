@@ -24,10 +24,10 @@ Since ADR 0017:
 
 - **`right_hand` and `left_hand` are the two key boards** (`PCB-CLUSTER`),
   hung from `PLATE-TOP` on an M2 screw in each corner of a board that spans
-  the cavity: down through a plugged bore in the wood top and the plate,
-  then a spacer and a washer, the board, and a nut underneath (ADR 0020,
-  Amendment 2 — the owner's standard since 2026-09-27; it replaced a
-  pressed-in standoff). Each connects to the main board by one 1.27 mm IDC ribbon (`CBL-CHAIN`) into a through-hole right-angle header on its underside.
+  the cavity: down through the plate, its head in a blind pocket in the
+  wood top's underside, then a spacer and a washer, the board, and a nut
+  underneath (ADR 0020, Amendment 3 — the owner's, 2026-09-27; it replaced
+  a pressed-in standoff and then a plugged bore through the wood). Each connects to the main board by one 1.27 mm IDC ribbon (`CBL-CHAIN`) into a through-hole right-angle header on its underside.
 - **`right_thumb` and `left_thumb` are on the main board** (`PCB-CARRIER`),
   their switches soldered to it and clipped into `PLATE-THUMB`, their
   registers and networks beside them.
@@ -150,11 +150,12 @@ ks33-geometry.md`.
 > supersedes it wherever the two disagree `[repo] ks33-geometry.md`.
 
 **The key-board outline is the body CAD's**: a rectangle across the cavity
-with a screw in each corner (ADR 0020 point 3 and Amendment 2), exported as
-`mechanical/export/key-board-*.dxf` and placed from `config/body.yaml`
-`layout.*`, `boards.*` (the tail ends' `boards.kb_tail_margin` is longer, so
-each corner's plug bore clears the last cap slot) and `hardware.kb_*`
-(`kb_mount_inset` puts the bores clear of the side grooves). **Its switch positions are
+with a screw in each corner (ADR 0020 point 3 and Amendments 2 and 3),
+exported as `mechanical/export/key-board-*.dxf` and placed from
+`config/body.yaml` `layout.*`, `boards.*` (the tail ends' `boards.kb_tail_margin`
+is longer, so each corner's head pocket clears the last cap slot) and
+`hardware.kb_*` (`kb_mount_inset` puts the pockets clear of the side
+grooves). **Its switch positions are
 provisional until M3**: `layout.lh_gaps` and `layout.lh_offsets` stand in until
 the ergonomic iteration of M2 fills `key-layout.yaml`'s `x`/`y` (all `null` on
 purpose) `[repo] key-layout.yaml, 0010`. Spacing along the key line is
@@ -269,13 +270,17 @@ and the `LT` springs to
 [`key-switch-network/`](key-switch-network/key-switch-network.md), and the
 closed 74HC165 item to [`key-register/notes.md`](key-register/notes.md).*
 
-- **The key-board mount's placeholders** (§5, ADR 0020 Amendment 2). The
+- **The key-board mount's open items** (§5, ADR 0020 Amendment 3). The
   parts are chosen and stock (`MECH-KB-SCREW`, `MECH-KB-SPACER`,
-  `MECH-KB-WASHER`, `MECH-KB-NUT`, `MECH-KB-PLUG`); nothing is pressed into the plate any more. Open: the wood left
-  round a plug bore and the plug's depth (`hardware.kb_bore_wall`,
-  `kb_plug_min_depth`), which a scrap of the chosen wood settles at M2; and
-  the depth at the tolerance limits (drc.echo "key-board depth at the
-  hardware's tolerance limits", a NOTE), which the first board confirms.
+  `MECH-KB-WASHER`, `MECH-KB-NUT`); nothing is pressed into the plate and
+  nothing goes through the wood's face. Open:
+  - the wood round and over each head pocket (`hardware.kb_pocket_wall`,
+    `kb_pocket_skin`), which a scrap of the chosen wood settles at M2;
+  - the depth at the tolerance limits (drc.echo "key-board depth at the
+    hardware's tolerance limits", a NOTE), which the first board confirms;
+  - *(decided 2026-09-27, not open: each screw head is epoxied to the
+    plate before the lid is bonded, so the key boards come off from below
+    — `ADH-EPOXY`, ADR 0020 Amendment 3.)*
   **Plate stiffening** (`plate-thickness` is settled; whether it needs a rib
   or a backer is not) gates M4/M5 — ADR 0002.
 - **Conformal coating.** `MECH-COAT` covers the main board; nothing says

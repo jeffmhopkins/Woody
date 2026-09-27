@@ -70,4 +70,4 @@ dated italic note at each point it changes, and the amendment named in the
 | [0017](0017-one-main-board.md) | One main board | Accepted (wiring details in 0018; key-chain connectors amended to through-hole IDC 2026-09-27) |
 | [0018](0018-main-board-wiring-decisions.md) | Main board wiring: five decisions | Accepted |
 | [0019](0019-kicad-sheets-are-the-source.md) | The KiCad sheets are the source of truth | Accepted, amended 2026-09-27 (the sheet names the bought part; migration in progress) |
-| [0020](0020-key-boards-screw-to-the-plate.md) | The key boards are screwed to the key plate | Accepted, amended 2026-09-27 (a screw at each corner, 1.2 mm boards); amended again 2026-09-27: the screws go down through the wood top under glued plugs, the owner's standard |
+| [0020](0020-key-boards-screw-to-the-plate.md) | The key boards are screwed to the key plate | Accepted, amended 2026-09-27 (a screw at each corner, 1.2 mm boards); amended twice more 2026-09-27: the screws go down through the plate, their heads epoxied to it and hidden in blind pockets in the wood top's underside; the face is unbroken |

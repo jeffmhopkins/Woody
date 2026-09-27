@@ -437,8 +437,8 @@ step 6 is what the code does.
   open (none stocked at JLC - the board's README).
 - **Nothing held the board.** The first layout had no mounting at all. Now
   the board is a rectangle across the cavity, hung at each corner on an M2
-  screw through the wood top and the plate (ADR 0020; the board README's
-  assembly steps), with NPTH holes and copper keep-outs on both layers under
+  screw through the plate, its head in a blind pocket in the wood top's
+  underside (ADR 0020, Amendment 3; the board README's assembly steps), with NPTH holes and copper keep-outs on both layers under
   the nut and under the spacer and washer.
 - **The switch pins barely reached through** a 1.6 mm board. The key boards
   are now `boards.key_board_t`; how much pin that leaves is in
