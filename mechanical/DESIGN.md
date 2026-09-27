@@ -37,13 +37,13 @@ drawing.
   screwed up to the plate's underside on M2 standoffs pressed into it (ADR
   0020), at the depth the KS-33's pins set (`docs/reference/ks33-geometry.md`;
   `switch.pcb_below_seat`). Each board is a rectangle across the cavity with a
-  standoff in each corner, in plate metal (*"key-board standoffs in the
-  plate's web"*); the standoff's length is derived (*"key-board standoff
-  length (derived)"*). The plate has **a window cut through it over each key
-  board's chain header**, whose through-hole pin tails come up through the
-  board toward the grounded plate across the standoffs' gap (*"key-board
-  standoff length (derived)"*); the oak top covers
-  it (drawn in the plate's outline, `export/plate-top.dxf`).
+  standoff in each corner, the standoff's edge distance from every switch
+  cutout (*"key-board standoffs clear of the switch cutouts"*); the
+  standoff's length is derived (*"key-board standoff length (derived)"*).
+  The key board's chain header's through-hole pin tails come up through the
+  board toward the grounded plate and stop short of it (*"J-CHAIN pin tails
+  clear of the key plate"*), so the plate is not cut over them
+  (2026-09-27; the first layout cut a window there).
 - **Thumb keys are flush with the bottom face at full travel** too (same date).
   The thumb plate is on the oak bottom's inside face, so the oak bottom is
   derived by the same rule as the oak top.

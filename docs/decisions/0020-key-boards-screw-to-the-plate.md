@@ -40,7 +40,10 @@ connector envelope using a stand-in size. The real footprint, a Molex 200528
      switch cutouts by `boards.kb_end_margin`.
    - Each standoff sits `hardware.kb_standoff_inset` in from both edges of
      its corner, outside every switch cutout. The rule "key-board standoffs
-     in the plate's web" checks each one is in plate metal.
+     clear of the switch cutouts" checks each is the standoff's edge
+     distance (`hardware.kb_standoff_edge`) from every cutout. *(Amended
+     2026-09-27: it first checked 0.5 mm of plate round the barrel, a
+     drawing convention; the vendor's figure is from the hole centre.)*
    - The count per board is in `drc.echo` "key-board standoffs". "Key boards
      clear of the lid screws" keeps the board edges off the M3 screws that
      close the lid.
@@ -124,7 +127,18 @@ allow for a less fragile mounting of the IC". The owner also asked whether
   - Both are for the plate vendor at M4. If no stocked length fits, the
     fallback is a self-clinching nut in the plate and a spacer of the
     derived length. The CAD geometry is the same either way.
-  - `config/body.yaml` marks the standoff and screw sizes `tbd`, from memory.
+  - `config/body.yaml` marks the standoff and screw sizes `tbd`.
+  - *(2026-09-27, from the banked vendor data.)* PEM makes an M2
+    self-clinching standoff only in its microPEM range, the MSO4-M2
+    (`datasheets/mechanical/PEM-MPF-MICROPEM-FASTENERS.pdf` p5; its SO
+    range starts at M3). Its hole, barrel and edge distance are now the
+    model's (`hardware.kb_standoff_*`). It is made only 2 and 3 mm long,
+    head flush in the sheet, and neither length lands in the window the
+    switch pins allow: `drc.echo` "key-board standoff stocked lengths
+    against the window" prints both and the shim that would close the gap.
+    PEM publishes no data for it in aluminium or in a 1.2 mm sheet. So the
+    first question for the plate vendor and PEM is whether MSO4-M2-3 with a
+    shim, or the fallback above, holds the board.
 - **Where the standoffs can go is now a rule.** `kb_standoffs()` in
   `mechanical/cad/woody_body.scad` finds them. The PCB takes them from
   `mechanical/export/pcb-geometry.echo`, and `tools/pcb.py check` fails if a

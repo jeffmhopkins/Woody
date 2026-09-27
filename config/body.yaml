@@ -445,7 +445,7 @@ boards:
   kb_end_margin:
     value: 6.0
     status: tbd
-    source: "a key board's end past its outermost switch cutout, along the body: room for a corner standoff clear of that cutout (drc.echo 'key-board standoffs in the plate's web') [drawing convention]"
+    source: "a key board's end past its outermost switch cutout, along the body: room for a corner standoff clear of that cutout (drc.echo 'key-board standoffs clear of the switch cutouts') [drawing convention]"
     decided_by: "M4, with the boards laid out"
   board_clear:
     value: 1.5
@@ -726,16 +726,29 @@ hardware:
   # board, and an M2 screw up through the board into it. The
   # standoff's length is not a parameter: it is the plate-to-board gap the
   # switch pins set (switch.pcb_below_seat less the plate), in drc.echo.
+  # The only M2 self-clinching standoff PEM makes is the microPEM MSO4-M2
+  # (the SO range starts at M3); the sizes below are its, and it is a
+  # candidate, not a choice - see MECH-KB-STANDOFF and ADR 0020.
   kb_standoff_od:
-    value: 4.0
+    value: 3.16
     status: tbd
-    source: "an M2 self-clinching (PEM-type) standoff's barrel below the plate [from memory]"
+    source: "the standoff's barrel below the plate: MSO4-M2's C, max [datasheets/mechanical/PEM-MPF-MICROPEM-FASTENERS.pdf p5]"
     decided_by: "M4, with the standoff chosen with the plate vendor"
   kb_standoff_hole:
     value: 3.2
     status: tbd
-    source: "the plate's mounting hole for that standoff [from memory - the vendor's install spec decides]"
+    source: "the plate's mounting hole for that standoff: MSO4-M2's hole in sheet, 3.18 +0.05 [datasheets/mechanical/PEM-MPF-MICROPEM-FASTENERS.pdf p5]"
     decided_by: "M4, with the plate vendor"
+  kb_standoff_edge:
+    value: 3.0
+    status: tbd
+    source: "the least distance from the standoff's hole centre to an edge of the sheet - a switch cutout is one: MSO4-M2's min. dist. hole C/L to edge [datasheets/mechanical/PEM-MPF-MICROPEM-FASTENERS.pdf p5]"
+    decided_by: "M4, with the standoff chosen"
+  kb_standoff_stock_l:
+    value: [2, 3]
+    status: tbd
+    source: "the lengths MSO4-M2 is made in, overall, head included; the head installs flush in the sheet [datasheets/mechanical/PEM-MPF-MICROPEM-FASTENERS.pdf p5]"
+    decided_by: "M4, with the standoff chosen"
   kb_screw_hole:
     value: 2.2
     status: tbd
@@ -752,9 +765,9 @@ hardware:
     source: "the same head's height [from memory]"
     decided_by: "M4, with the screw bought"
   kb_standoff_inset:
-    value: 3.5
+    value: 3.0
     status: tbd
-    source: "[calc] a corner standoff's centre in from both board edges: the barrel's radius (kb_standoff_od / 2) and 1.5 mm of board past it"
+    source: "a corner standoff's centre in from both board edges: as near the corner as the screw head allows, so it sits furthest from the switch cutouts (drc.echo 'key-board standoffs clear of the switch cutouts'); the head (kb_screw_head_d) leaves 1.1 mm of board outside it [calc: 3.0 - 3.8 / 2]"
     decided_by: "M4, with the standoff chosen"
   fastener_inset:
     value: 4.3

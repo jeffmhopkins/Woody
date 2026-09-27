@@ -652,7 +652,6 @@ module key_board_2d(cl) {
 function rect_gap(p, c, sz, r) = let(d = [cos(-r) * (p[0] - c[0]) - sin(-r) * (p[1] - c[1]), sin(-r) * (p[0] - c[0]) + cos(-r) * (p[1] - c[1])],
                                    e = [max(abs(d[0]) - sz[0] / 2, 0), max(abs(d[1]) - sz[1] / 2, 0)]) norm(e);
 function cutout_gap(p) = min([for (k = top_keys) rect_gap(p, key_xy(k), [plate_cutout, plate_cutout], key_rot(k))]);
-kb_web_min = 0.5;       // drawing convention: plate metal left round a standoff's barrel
 function kb_standoffs(cl) = let(r = kb_rect(cl), e = hardware_kb_standoff_inset)
     [[r[0] + e, r[1] + e], [r[0] + e, r[3] - e], [r[2] - e, r[1] + e], [r[2] - e, r[3] - e]];
 kb_gap = switch_pcb_below_seat - plate_thickness;            // plate underside to board top
@@ -1356,14 +1355,22 @@ module drc_report() {
         drc(g >= fastener_notch, str("key-chain ribbon hairpin clear of the lid screws (", cl, ")"), g, "mm from the hairpin to the nearest screw's centre");
 
     // THE KEY BOARDS' STANDOFFS (ADR 0020). The standoff's length is the gap the
-    // switch pins set; it sits in the plate's web between two cutouts; its screw
-    // head is on the board's underside, beside the ribbon connector.
+    // switch pins set; it sits the vendor's edge distance from every switch
+    // cutout; its screw head is on the board's underside.
     echo("DRC", "INFO", "key-board standoff length (derived)", kb_gap,
          "mm: plate underside to board top, set by switch.pcb_below_seat");
     echo("DRC", "INFO", "key-board standoff length window", switch_pcb_below_seat_window - [1, 1] * plate_thickness,
          "mm: the lengths that keep the switch pins' blades in the board and some pin to solder (switch.pcb_below_seat_window)");
-    web = min([for (cl = ["left_hand", "right_hand"], st = kb_standoffs(cl)) cutout_gap(st) - hardware_kb_standoff_od / 2]);
-    drc(web >= kb_web_min, "key-board standoffs in the plate's web", web, "mm from a standoff's barrel to the nearest switch cutout, worst case");
+    web = min([for (cl = ["left_hand", "right_hand"], st = kb_standoffs(cl)) cutout_gap(st)]);
+    drc(web >= hardware_kb_standoff_edge, "key-board standoffs clear of the switch cutouts", web,
+        "mm from a standoff's hole centre to the nearest switch cutout, worst case, against the standoff's least distance to an edge (hardware.kb_standoff_edge)");
+    // What the standoff can be bought as: its stocked lengths, head flush in the plate, against the window.
+    let(pr = [for (l = hardware_kb_standoff_stock_l) l - plate_thickness], win = switch_pcb_below_seat_window - [1, 1] * plate_thickness,
+        fit = [for (q = pr) if (q >= win[0] && q <= win[1]) q])
+        echo("DRC", len(fit) > 0 ? "PASS" : "NOTE", "key-board standoff stocked lengths against the window", pr,
+             len(fit) > 0 ? "mm below the plate: one is in the window"
+                          : str("mm below the plate: none is in the window, so a shim of ", win[0] - max(pr), " to ", win[1] - max(pr),
+                                " mm goes under the longest, or ADR 0020's fallback - open until M4"));
     echo("DRC", "INFO", "key-board standoffs", [for (cl = ["left_hand", "right_hand"]) len(kb_standoffs(cl))],
          "per board (left_hand, right_hand): one in each corner");
     kb_fast = min([for (cl = ["left_hand", "right_hand"], f = fasteners()) let(r = kb_rect(cl))

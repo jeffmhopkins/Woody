@@ -28,10 +28,10 @@ ALLOWED 100 (by rule in mechanical/clash-allow.yaml)
         24.4 mm3  board left_hand  x  switch LH1   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         24.4 mm3  board left_hand  x  switch LH4   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         24.4 mm3  board left_hand  x  switch LH5   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
-        24.4 mm3  board right_hand  x  switch RH3   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
-        24.4 mm3  board right_hand  x  switch RH1   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         24.4 mm3  board right_hand  x  switch RH4   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
+        24.4 mm3  board right_hand  x  switch RH1   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         24.4 mm3  board right_hand  x  switch RH2   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
+        24.4 mm3  board right_hand  x  switch RH3   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         24.4 mm3  board right_hand  x  switch RH6   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         24.4 mm3  board right_hand  x  switch RH5   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         20.4 mm3  cap RT1  x  switch RT1   - the MX stem enters the cap's cross socket; the socket is not modelled
