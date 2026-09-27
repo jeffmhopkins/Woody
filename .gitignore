@@ -11,3 +11,9 @@
 # every commit - so every commit carried a spurious binary change.
 __pycache__/
 *.py[cod]
+
+# KiCad per-user and cache files (the .kicad_sch / .kicad_pcb / .kicad_pro are source)
+*.kicad_prl
+fp-info-cache
+*-backups/
+_autosave-*

@@ -1,0 +1,60 @@
+# FIRST-LAYOUT INPUT for this board's PCB - tools/pcb.py layout.
+#
+# The switches and the ribbon connector are NOT here: their places come from
+# the body CAD (mechanical/export/pcb-geometry.echo) and the outline from
+# mechanical/export/key-board-lh.dxf. This file places everything else, on the
+# BOTTOM side, in BODY coordinates (x along the body from the mouth, y across,
+# mm, seen from above), and sets the routing rules. Once the .kicad_pcb exists
+# it is the source; this file records how the first layout was made.
+
+cluster: left_hand
+suffix: LH
+
+# Rules: JLCPCB's standard 2-layer process allows 0.127 mm track and space
+# [from memory]; these are deliberately looser, so any board house builds it.
+rules:
+  track: 0.25
+  track_min: 0.2
+  clearance: 0.2
+  via: 0.6
+  via_drill: 0.3
+  via_min: 0.5
+  drill_min: 0.3
+  edge_clearance: 0.3
+  power_track: 0.4           # the chain's 3V3 rail
+
+# The ribbon connector, Molex 200528-0120 as the stand-in (J-CHAIN's part is
+# open until M4): turned so its cable entry faces the board's far edge, where
+# the body CAD's ribbon leaves, with its front at that edge.
+connector:
+  rot: 180
+  origin_from_edge: 4.74     # the footprint's origin behind its front face [footprint courtyard]
+
+# One key network per switch, a row of three 0805s beside its own switch,
+# clear of its centre hole and pins: the node is R-KEY-PU.2 / C-KEY.1 /
+# R-KEY-SER.1, and R-KEY-SER.2 goes to the switch.
+parts:
+  C-KEY-LH1:     [46.0, 34.5, 0]
+  R-KEY-SER-LH1: [50.0, 34.5, 0]
+  R-KEY-PU-LH1:  [54.0, 34.5, 0]
+  C-KEY-LH2:     [62.0, 19.8, 0]
+  R-KEY-SER-LH2: [66.0, 19.8, 0]
+  R-KEY-PU-LH2:  [70.0, 19.8, 0]
+  C-KEY-LH3:     [86.0, 34.5, 0]
+  R-KEY-SER-LH3: [90.0, 34.5, 0]
+  R-KEY-PU-LH3:  [94.0, 34.5, 0]
+  C-KEY-LH4:     [104.0, 25.5, 0]
+  R-KEY-SER-LH4: [108.0, 25.5, 0]
+  R-KEY-PU-LH4:  [112.0, 25.5, 0]
+  C-KEY-LH5:     [104.0, 43.5, 0]
+  R-KEY-SER-LH5: [108.0, 43.5, 0]
+  R-KEY-PU-LH5:  [112.0, 43.5, 0]
+  U-KEYS-LH:     [79.0, 24.0, 0]
+  C-DECOUPLE-165-LH: [74.0, 27.5, 90]
+  R-KEY-PU-FREE3: [84.2, 29.0, 90]
+
+# Routing (tools/pcb_route.py): ground is a pour on both layers, not tracks;
+# the chain's 3V3 rail is the wider power track.
+route: true
+ground_net: GND_CHAIN
+power_nets: [V3V3_CHAIN_LH]

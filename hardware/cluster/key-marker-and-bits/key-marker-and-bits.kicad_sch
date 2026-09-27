@@ -146,7 +146,7 @@
     (uuid 0dd191cc-e345-5e58-9bb6-089cfed5a9dc)
     (property "Reference" "R-KEY-PU-FREE" (at 104.14 100.33 0) (effects (font (size 1.27 1.27)) (justify left)))
     (property "Value" "2k2 1%" (at 104.14 102.87 0) (effects (font (size 1.27 1.27)) (justify left)))
-    (property "Footprint" "" (at 100.33 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 100.33 101.6 0) (effects (font (size 1.27 1.27)) hide))
     (property "Datasheet" "" (at 101.6 101.6 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "R-KEY-PU" (at 101.6 101.6 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2" (at 101.6 101.6 0) (effects (font (size 1.27 1.27)) hide))

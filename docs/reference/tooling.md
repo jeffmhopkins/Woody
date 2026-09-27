@@ -216,6 +216,82 @@ is one, and the key-board circuits' are in git history) with `hierarchical: true
   label it carries; the export names a lone no-connect pin after the pin.
 - **KiCad 7 has no command-line ERC**, and cannot read these sheets; use 9.
 
+## §4. PCB layout — `tools/pcb.py`
+
+The left-hand key board (`hardware/boards/key-board-lh/`) is the proof of
+concept: placed, routed and checked here, from the same sources as everything
+else.
+
+### Where a layout comes from
+
+| What | From |
+|---|---|
+| Netlist, footprints, references | the board's KiCad sheets (§3); a part's footprint is its sheet's `Footprint` field |
+| Board outline | `mechanical/export/key-board-lh.dxf` — the body CAD's key board |
+| Switch and ribbon-connector positions | `mechanical/export/pcb-geometry.echo` — the body CAD |
+| Switch 3D model height | `config/body.yaml` `switch.pcb_below_seat` |
+| Everything else's place, and the design rules | `layout.yaml` beside the board |
+| Footprints KiCad lacks | `hardware/lib/woody.pretty/` (`hardware/lib/README.md`) |
+
+### Commands
+
+```
+python3 tools/pcb.py layout hardware/boards/key-board-lh   # FIRST layout: place, route, pour, fill (refuses if the board exists; --force)
+python3 tools/pcb.py check  hardware/boards/key-board-lh   # KiCad DRC + schematic parity + switches where the CAD puts them
+python3 tools/pcb.py render hardware/boards/key-board-lh   # 3D both sides, 2D copper, and fab/ (Gerbers, drill, placement)
+```
+
+**After `layout`, the `.kicad_pcb` is the source**, like the sheets: open the
+project in KiCad 9 and move or re-route by hand. `tools/kicad.py check` runs
+`pcb.py check` on every board that has a layout, and the renders and `fab/`
+files are in `hardware/SHEETS.csv`, so an edited board with stale Gerbers is
+reported by name.
+
+### The router, and its limits
+
+`tools/pcb_route.py` is a small two-layer grid router: A* on a 0.2 mm grid per
+layer, vias where they fit, every other net's copper, every hole and the board
+edge inflated by the clearance. Signals first (shortest first), the power rail
+wider, ground last as a net of its own, then a ground pour on both layers and
+a stitching via beside every single-sided ground pad. **It proves nothing about
+itself** — KiCad's DRC does, with schematic parity and zero unrouted
+connections. It is for simple digital boards like the key boards. **The main
+board's analog routing is done by hand** (`docs/reference/pcb-pipeline.md`).
+
+### Learned the hard way
+
+- **KiCad's zone filler crashes Python, silently,** on a board built in the
+  same process: the file was never written. Fill in a fresh process after
+  saving (`pcb_route.fill_zones`).
+- **SWIG iterators hand out copies**: `for m in fp.Models(): m.m_Offset.z = …`
+  changes nothing. Index into the list.
+- **A stub that is not an obstacle becomes a short**: every piece of copper the
+  router adds, however small, must enter its obstacle list.
+- **KiCad may write an empty global `fp-lib-table`** on first run, and then
+  every footprint "is not in the configuration". `tools/setup-env.sh` replaces
+  an empty one.
+- **3D models**: `kicad-packages3d` is 3 GB; the four this board needs came
+  from `gitlab.com/kicad/libraries/kicad-packages3D` tag `9.0.0` into
+  `/usr/share/kicad/3dmodels/`. The Molex connector has no model there, so it
+  renders as pads.
+- **Reference text as long as `R-KEY-SER-LH1` cannot be silkscreened on an
+  0805**: references go on the fabrication layer, which the assembly drawing
+  reads.
+
+### Findings the first layout made
+
+- **The ribbon connector is deeper than the body CAD assumes.** The CAD's
+  envelope is 5.5 mm deep (`boards.ffc_conn_w`, from memory); the first
+  stand-in footprint (Würth 68611214422) needed 9.9 and could not fit beside
+  the switch holes, and the one used (Molex 200528-0120) needs 6.7 — it
+  clears LH2's centre hole by about 1.2 mm. `J-CHAIN`'s part is open until
+  M4; when it is chosen, its real depth goes into `config/body.yaml`.
+- **The switch pins barely reach through.** The pin blades' tips are 5.10 mm
+  below the seat and the PCB top is `switch.pcb_below_seat` below it, so on a
+  1.6 mm board about 0.1 mm of pin shows to solder (`docs/reference/ks33-geometry.md`).
+  A 1.2 mm board would leave about 0.5 mm. Open, and cheap to decide before
+  the first order.
+
 ### Where the sheets are
 
 | Sheet | Status |
@@ -232,8 +308,7 @@ is one, and the key-board circuits' are in git history) with `hierarchical: true
   circuit sheets like the key boards do.
 - **The BOM fragments** become exports once every board is in KiCad, because
   a row's quantity is a count over all of them (ADR 0019).
-- **Footprints and a PCB.** The sheets carry no footprints yet; that is the
-  next step toward boards, and `docs/reference/pcb-pipeline.md` is the plan
-  for it.
+- **The right-hand key board's layout**, the same way as the left-hand one
+  (§4); its sheets already carry footprints.
 - **The commit gate.** `check-staleness.py` runs `cad.py check` but not
   `kicad.py check`, because that needs KiCad installed; run it by hand.

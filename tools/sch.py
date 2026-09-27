@@ -686,6 +686,8 @@ def kicad_env():
     env = dict(os.environ)
     for v in ("KICAD9_SYMBOL_DIR", "KICAD8_SYMBOL_DIR", "KICAD7_SYMBOL_DIR"):
         env.setdefault(v, SYMDIR)
+    env.setdefault("KICAD9_FOOTPRINT_DIR", "/usr/share/kicad/footprints")
+    env.setdefault("KICAD9_3DMODEL_DIR", "/usr/share/kicad/3dmodels")
     return env
 
 

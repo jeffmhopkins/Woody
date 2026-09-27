@@ -310,6 +310,15 @@ the tail cap, and several of the check's own first routings.
 soldered to the main board, with no socket; how it is fitted and swapped is in
 `hardware/interfaces/breath-sense-link/breath-sense-link.md`, "Mounting".
 
+**Found by the first PCB layout (2026-09-27, `docs/reference/tooling.md` §4):**
+the key boards' ribbon connector is deeper than `boards.ffc_conn_w` (a real
+12-way 1.0 mm ZIF footprint needs 6.7 mm, the envelope is 5.5 from memory),
+and on a 1.6 mm board the KS-33's pins show only about 0.1 mm below it. Both
+are open until the connector and the board thickness are chosen. The model
+now exports each key board's outline (`export/key-board-*.dxf`) and its
+switch and connector positions (`export/pcb-geometry.echo`), which the PCB is
+placed from.
+
 ## Not modelled yet
 
 The thumb rest lip, gasket beads, plate stiffening (ADR 0002 — open, and it changes the lid),

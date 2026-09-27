@@ -5,6 +5,7 @@
     python3 tools/kicad.py export hardware/boards/key-board-rh      # write board-netlist.yaml, ERC it
     python3 tools/kicad.py render hardware/boards/key-board-rh      # PNG of every page
     python3 tools/kicad.py check                                    # exit 1 if any export or render is stale
+    python3 tools/kicad.py set-field <sheet> <REF> <field> <value>  # edit one field on a sheet (the source)
 
 WHAT IS THE SOURCE. For every circuit directory holding a `<name>.kicad_sch`
 whose title block names a circuit (`circuit: ...`), THAT SHEET IS
@@ -279,7 +280,7 @@ def render(d):
         subprocess.run(["pdftoppm", "-png", "-r", "150", os.path.join(t, "s.pdf"), os.path.join(t, "p")], check=True)
         pages = sorted(f for f in os.listdir(t) if f.startswith("p") and f.endswith(".png"))
         for f in os.listdir(d):
-            if re.fullmatch(re.escape(name) + r"(\.p\d+)?\.sch\.png", f):
+            if re.fullmatch(re.escape(name) + r"(\.p\d+)?\.sch\.png", f):  # this sheet's own renders only
                 os.remove(os.path.join(d, f))
         outs = []
         for i, f in enumerate(pages, 1):
@@ -296,10 +297,11 @@ def ledger_rows():
     return {r["render"]: r for r in csv.DictReader(open(LEDGER))}
 
 
-def ledger_set(d, outs, inputs):
+def ledger_set(d, outs, inputs, kind="sch"):
+    """Record renders (kind 'sch' or 'pcb') and the blobs they were made from."""
     rows = ledger_rows()
     rel = os.path.relpath(d, ROOT)
-    for k in [k for k in rows if os.path.dirname(k) == rel]:
+    for k in [k for k in rows if os.path.dirname(k).startswith(rel) and (".pcb-" in k or "/fab/" in k) == (kind == "pcb")]:
         del rows[k]
     ins = " ".join(f"{os.path.relpath(p, ROOT)}@{blob(p)}" for p in inputs)
     for o in outs:
@@ -310,6 +312,39 @@ def ledger_set(d, outs, inputs):
         w.writeheader()
         for k in sorted(rows):
             w.writerow(rows[k])
+
+
+# ------------------------------------------------------------------ editing a sheet as text
+
+def set_field(sch, ref, field, value):
+    """Set one field on the symbol(s) whose default Reference is `ref` - every unit.
+    The sheet is the source; this is the scripted way to edit it, same as KiCad would."""
+    text = open(sch).read()
+    tree = parse(text)[0]
+    hits = 0
+    for sym in find(tree, "symbol"):
+        if not find(sym, "lib_id"):
+            continue
+        pr = {p[1]: p for p in find(sym, "property")}
+        if pr.get("Reference", [None, None, None])[2] != ref:
+            continue
+        uid = find(sym, "uuid")[0][1]
+        i = text.index(f"(uuid {uid})")
+        end = text.index("\n  )", i)
+        block = text[i:end]
+        m = re.search(r'\(property "%s" "((?:\\.|[^"\\])*)"' % re.escape(field), block)
+        esc = value.replace("\\", "\\\\").replace('"', '\\"')
+        if m:
+            block = block[:m.start()] + f'(property "{field}" "{esc}"' + block[m.end():]
+        else:
+            at = find(sym, "at")[0]
+            block = block.replace("\n    (pin ", f'\n    (property "{field}" "{esc}" (at {at[1]} {at[2]} 0) (effects (font (size 1.27 1.27)) hide))\n    (pin ', 1)
+        text = text[:i] + block + text[end:]
+        hits += 1
+    if not hits:
+        sys.exit(f"kicad: no symbol {ref} in {sch}")
+    open(sch, "w").write(text)
+    return hits
 
 
 # ------------------------------------------------------------------ commands
@@ -424,6 +459,15 @@ def cmd_check():
             bad.append(f"{os.path.relpath(p, ROOT)} is STALE - run: python3 tools/kicad.py export {os.path.relpath(d, ROOT)}")
         bad += [f"{os.path.relpath(d, ROOT)}: ERC {c}" for c in checks if c.startswith("error")]
         board_docs.append((os.path.basename(d), yaml.safe_load(text)))
+        pcbfile = os.path.join(d, os.path.basename(d) + ".kicad_pcb")
+        if os.path.exists(pcbfile):
+            # the board's layout: KiCad's DRC with schematic parity, and the body CAD's
+            # switch places (tools/pcb.py check) - any error is this check's error too
+            r = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "pcb.py"), "check", os.path.relpath(d, ROOT)],
+                               capture_output=True, text=True)
+            bad += [f"{os.path.relpath(pcbfile, ROOT)}: {l.strip()}" for l in r.stdout.splitlines() if l.strip().startswith("error")]
+            if r.returncode and not any(l.strip().startswith("error") for l in r.stdout.splitlines()):
+                bad.append(f"{os.path.relpath(pcbfile, ROOT)}: pcb check failed:\n{r.stdout}{r.stderr}")
     bad += check_allocation(board_docs)
     rows = ledger_rows()
     for r in rows.values():
@@ -450,6 +494,10 @@ def cmd_check():
 
 
 if __name__ == "__main__":
+    if len(sys.argv) == 6 and sys.argv[1] == "set-field":
+        n = set_field(os.path.join(ROOT, sys.argv[2]), sys.argv[3], sys.argv[4], sys.argv[5])
+        print(f"kicad: set {sys.argv[4]} on {sys.argv[3]} ({n} unit(s)) in {sys.argv[2]}")
+        sys.exit(0)
     if len(sys.argv) >= 2 and sys.argv[1] == "check":
         sys.exit(cmd_check())
     if len(sys.argv) == 3 and sys.argv[1] in ("export", "render"):

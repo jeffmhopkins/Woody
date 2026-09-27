@@ -626,10 +626,26 @@ module thumb_plates_3d() {
     lam(z_floor - explode * 0.5, plate_thickness, C_ALU, false, "thumb plates") thumb_plate_both_2d();
 }
 
+// A key board's outline, as its PCB is cut (the PCB's Edge.Cuts come from this).
+module key_board_2d(cl) { offset(-0.5) cluster_window_2d(cluster_keys(cl)); }
+
 module cluster_boards() {
     for (cl = ["left_hand", "right_hand"])
         P(C_PCB, false, str("board ", cl)) translate([0, 0, z_plate_top - switch_pcb_below_seat - switch_pcb_t + explode * 0.25])
-            linear_extrude(switch_pcb_t) offset(-0.5) cluster_window_2d(cluster_keys(cl));
+            linear_extrude(switch_pcb_t) key_board_2d(cl);
+}
+
+// WHAT A KEY BOARD'S PCB IS PLACED FROM (tools/pcb.py). Body coordinates, mm:
+// x along the body from the mouth, y across it, seen from above. The PCB tool
+// maps these onto the board, so the switches land in the plate's cutouts and
+// the ribbon connector where the ribbon's C needs it.
+module pcb_geometry() {
+    for (cl = ["left_hand", "right_hand"]) {
+        for (k = cluster_keys(cl)) echo("PCB", cl, "switch", k[0], key_xy(k)[0], key_xy(k)[1], key_rot(k));
+        echo("PCB", cl, "ffc", "J-CHAIN", kb_ffc(cl)[0], kb_ffc(cl)[1], 0, boards_ffc_conn_l, boards_ffc_conn_w);
+        echo("PCB", cl, "board", "thickness", switch_pcb_t, "smt_height_max", boards_cluster_smt_h,
+             "side", "switches on top, parts and ribbon connector underneath");
+    }
 }
 
 module tail_equipment() {
@@ -1278,6 +1294,8 @@ module part_2d(p) {
     else if (p == "ubolt_backplate") ubolt_backplate_2d();
     else if (p == "matrix_window") matrix_window_2d();
     else if (p == "oak_rebates") oak_rebates_2d();
+    else if (p == "key_board_left_hand") key_board_2d("left_hand");
+    else if (p == "key_board_right_hand") key_board_2d("right_hand");
     else assert(false, str("unknown part ", p));
 }
 
@@ -1287,5 +1305,6 @@ module at_origin() { translate([origin_x(), 0, 0]) children(); }
 if (!figure) {
     if (part == "assembly") at_origin() assembly();
     else if (part == "drc") drc_report();
+    else if (part == "pcb_geom") pcb_geometry();
     else part_2d(part);
 }

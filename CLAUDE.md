@@ -285,6 +285,13 @@ repeating, and record the verification.
   the commit hook, so run it by hand. Circuits not yet migrated keep a
   hand-written `netlist.yaml`, authoritative until their sheet exists; their
   ASCII drawings are representations of it.
+- **A board's `.kicad_pcb` is the source once it exists.** `tools/pcb.py
+  layout` writes the first one (placed from the body CAD's exports, routed,
+  poured); after that it is edited in KiCad. `tools/kicad.py check` runs
+  `tools/pcb.py check` on it: KiCad's DRC with schematic parity, zero unrouted
+  connections, and every switch where the body CAD puts it. Renders and
+  `fab/` are exported and ledgered in `hardware/SHEETS.csv`.
+  `docs/reference/tooling.md` §4.
 - **`netlist.yaml` IS WHAT EVERY CHECK READS**, exported or hand-written. The
   drawing is a representation of it. `hardware/nets.yaml` is the master list
   of every net that crosses a circuit boundary, because a per-circuit file can

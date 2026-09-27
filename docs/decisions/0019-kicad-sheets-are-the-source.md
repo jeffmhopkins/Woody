@@ -80,6 +80,11 @@ these KiCad schematics actually be the source of truth of all the things.")
 - **`allocation.yaml` stays data until the main board is drawn**, because two
   of its four rows are registers on the main board. `kicad.py check` proves
   the key boards' wiring against it, and it against the page's table.
+- **The layouts follow the same rule** (2026-09-27, the left-hand key board
+  as proof of concept): `tools/pcb.py` writes a board's first layout from the
+  sheets and the body CAD's exports, and from then the `.kicad_pcb` is the
+  source, checked by KiCad's DRC with schematic parity and against the body
+  CAD's switch positions. `docs/reference/tooling.md` §4.
 - **`kicad.py check` needs KiCad 9**, so it is not in the commit hook, which
   runs before every shell command. It is run by hand, and
   `docs/reference/tooling.md` says when.
