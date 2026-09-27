@@ -1,4 +1,4 @@
-# THE 32-BIT ALLOCATION AS DATA - what each 74HC165 parallel input carries.
+# THE 32-BIT ALLOCATION AS DATA - what each register's (U-KEYS) parallel input carries.
 #
 # Owned by this circuit (key-marker-and-bits.md §4 argues it; its table is a
 # REPRESENTATION of this file). The WIRING is on the KiCad board sheets

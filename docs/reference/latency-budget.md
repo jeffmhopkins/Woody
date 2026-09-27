@@ -95,7 +95,7 @@ bottom of this page is the one that settles it.
 | Switch mechanical actuation | mechanical | Bounce is **not** a press-path term here — see below |
 | Key network RC, press | `key-press-time` | Owned by `hardware/cluster/key-switch-network/key-switch-network.md`. Two orders of magnitude inside the scan period; carried as a line so the table is complete, not because it moves the total |
 | **Sampling period** | **0–250 µs** | The same 4 kHz loop the breath table books. A closure waits up to one period to be seen. Mean 125 µs. **This table omitted it entirely until 2026-09-21** |
-| 74HC165 chain read | **32 µs** | 32 bits at 1 MHz (ADR 0001). This row said "< 10 µs via SPI DMA"; the chain runs at 1 MHz and cannot be clocked away |
+| Key chain read (`U-KEYS`) | **32 µs** | 32 bits at 1 MHz (ADR 0001). This row said "< 10 µs via SPI DMA"; the chain runs at 1 MHz and cannot be clocked away |
 | **Note-on gate — two consecutive agreeing samples** | **+250 µs** | One whole loop period, **required by ADR 0001**. This row read "Debounce (press) — 0, fire immediately", which contradicted the ADR that specifies it |
 | Debounce (release) | filtered | Off the attack path by construction, which is the point of the asymmetry |
 | Firmware note resolution | < 20 µs | |

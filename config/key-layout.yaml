@@ -3,7 +3,7 @@
 # Consumed by:
 #   - mechanical: key positions generate plate DXF cutout geometry
 #                 (tools/cad.py -> mechanical/cad/generated/params.scad)
-#   - firmware:   key ids generate 74HC165 bit mapping and fingering table
+#   - firmware:   key ids generate the shift-register bit mapping and fingering table
 #
 # When a key moves, both stay in sync by construction. Do not hand-edit the
 # generated plate or the firmware mapping.
@@ -110,7 +110,7 @@ keys:
   - { id: RT3, face: bottom, x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb, role: control }
   - { id: RT4, face: bottom, x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb, role: control }
 
-# Shift register chain. One 74HC165 per cluster, ON THE BOARD ITS SWITCHES ARE
+# Shift register chain. One U-KEYS per cluster, ON THE BOARD ITS SWITCHES ARE
 # ALREADY ON: 4 devices, 32 bits, 19 used, 13 spare. The two thumb registers
 # are on the main board; each key board's register reaches it by one 12-way
 # IDC ribbon carrying its SER in and QH out (ADR 0017,
@@ -125,11 +125,12 @@ keys:
 # BIT 0 IS THE FIRST BIT CLOCKED OUT - the device nearest the MCU. That
 # definition was ambiguous once and the ambiguity is what got the order wrong.
 #
-# Honest magnitude: adjacent-cluster skew is ~0.5ns against an HC165's tens of
-# nanoseconds of propagation delay, so the wrong order costs a few percent of
-# hold margin rather than violating it. An earlier version of this comment said
-# it would put "hold-margin violations" into a bonded body; that was an honesty
-# marker pointing the wrong way. Follow the rule anyway - it is free.
+# Honest magnitude: adjacent-cluster skew is ~0.5ns against the register's tens of
+# nanoseconds of propagation delay (SN74HCS165 CLK->QH, its datasheet p.7),
+# so the wrong order costs a few percent of hold margin rather than violating
+# it. An earlier version of this comment said it would put "hold-margin
+# violations" into a bonded body; that was an honesty marker pointing the
+# wrong way. Follow the rule anyway - it is free.
 chain:
   - cluster: right_thumb  # bits 0-7   — 4 used, 4 spare — nearest the MCU
   - cluster: right_hand   # bits 8-15  — 6 used, 2 spare

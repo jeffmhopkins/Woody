@@ -39,7 +39,7 @@ would be true of all four. The allocation table lives on
 
 
 ```
-                        74HC165  SOIC-16   [ds 74HC165-ti-scls116e.pdf p.1]
+                      SN74HCS165  SOIC-16  [ds SN74HCS165-ti-scls828a.pdf p.3]
                      ┌────────────∪────────────┐
        SH/LD  ──────►│ 1  SH/LD        VCC  16 │◄──── 3V3 ──┬── [C-DECOUPLE-165 100nF]
         SCK   ──────►│ 2  CLK       CLK INH 15 │──── GND     │   AT the package,
@@ -62,16 +62,23 @@ would be true of all four. The allocation table lives on
 `SH/LD` is LOW the parallel inputs load, asynchronously and level-sensitively
 (ADR 0001); what the chain then shifts out is the inputs' state at the moment
 `SH/LD` returns HIGH. During the load `H` (D7) appears at `QH`, and each clock
-after it shifts the next one toward the output `[datasheets/logic/74HC165-nexperia.pdf
-p.4, Table 3 (parallel load: Q7 = D7; serial shift on CP ↑)]`. Combined with ADR 0001's *"bit 0 is the first bit clocked out"*
+after it shifts the next one toward the output `[datasheets/logic/SN74HCS165-ti-scls828a.pdf
+p.13, Table 8-1 (SH/LD L: parallel load; SH/LD H, CLK ↑, CLK INH L: shift toward QH) and Table 8-2 (QH follows internal register H)]`. Combined with ADR 0001's *"bit 0 is the first bit clocked out"*
 `[repo] 0001, key-layout.yaml`, that fixes **bit 0 = the `H` input of the
 `right_thumb` device** and settles the `H`…`A` question the carrier page left
 open — the ordering half of it, anyway. Which *switch* lands on which input is
 §4.
 
-**The part is 74HC, not 74LVC**, and that is load-bearing rather than
-incidental. HC's slow edges keep each hop — a ribbon and part of the main board — an
-ordinary lumped load instead
-of a transmission line, which is what removed the hazards that briefly sent
-these registers to the tail `[repo] 0001, bom.csv`. Same SOIC-16 footprint, so
-LVC with proper source termination remains the way back if E4 disagrees.
+**The part is the SN74HCS165: HC-family outputs, Schmitt-trigger inputs, not
+74LVC and not a plain 74HC165**, and both halves are load-bearing. *Outputs:*
+HC-family edges (output transition time 5 ns typical at 4.5 V
+`[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.8]`) keep each hop — a ribbon
+and part of the main board — an ordinary lumped load instead of a transmission
+line, which is what removed the hazards that briefly sent these registers to
+the tail `[repo] 0001, bom.csv`. Same SOIC-16 footprint, so LVC with proper
+source termination remains the way back if E4 disagrees. *Inputs:* the key
+network's RC edges are far slower than a plain 74HC165's input transition
+limit allows; the HCS165 has "no input signal transition rate requirements"
+`[same, p.15]` (ADR 0001's amendment, 2026-09-27;
+[`../key-switch-network/key-switch-network.md`](../key-switch-network/key-switch-network.md)).
+A substitute must keep both: the `U-KEYS` row.

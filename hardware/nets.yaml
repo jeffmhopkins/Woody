@@ -70,14 +70,14 @@ nets:
   CHAIN_SCK:
     kind: signal
     domain: digital
-    carries: "Shift clock to all four 74HC165s - one net, two by trace and two over the ribbons"
+    carries: "Shift clock to all four U-KEYS registers - one net, two by trace and two over the ribbons"
     driver: interfaces/key-chain-loom
     receivers: [cluster/key-register]
 
   CHAIN_SHLD:
     kind: signal
     domain: digital
-    carries: "Shift/load to all four 74HC165s, one net like CHAIN_SCK"
+    carries: "Shift/load to all four U-KEYS registers, one net like CHAIN_SCK"
     driver: interfaces/key-chain-loom
     receivers: [cluster/key-register]
 

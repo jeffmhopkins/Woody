@@ -139,7 +139,7 @@ being asked to guess.
 | Host | Devices | Clock |
 |---|---|---|
 | **SPI2** | DAC8568 down the umbilical, **and** MCP3202 on this board | **2 MHz for the DAC, 900 kHz for the ADC — not one clock** |
-| **SPI3** | 74HC165 chain alone, because `QH` is always driven (ADR 0001) | **1 MHz, and not much more** — the serial path crosses both key-board ribbons out and back and runs the main board's length, and HC's slow edges are what keep each hop a lumped load `[repo] 0001, key-chain-loom.md` |
+| **SPI3** | The key chain's four `U-KEYS` registers (SN74HCS165) alone, because `QH` is always driven (ADR 0001) | **1 MHz, and not much more** — the serial path crosses both key-board ribbons out and back and runs the main board's length, and the registers' HC-family output edges are what keep each hop a lumped load `[repo] 0001, key-chain-loom.md` |
 
 > **The MCP3202 cannot run at 2 MHz.** `[repo, verified]` against Microchip
 > DS21034F, now at `datasheets/analog/MCP3202-CI-SN.pdf`. The Timing
@@ -173,7 +173,8 @@ SPI2  DAC    6 × 32 bits @ 2.0 MHz =  96.0 µs
 SPI2  ADC    24 clocks    @ 0.9 MHz =  26.7 µs
 SPI2  total                         = 122.7 µs of 250 µs → 49 %
 SPI3  keys   32 bits      @ 1.0 MHz =  32.0 µs, concurrent → 13 %
-             (+ four HC165 propagation delays, tens of ns each — noise)
+             (+ four register CLK→QH delays, 18–45 ns max each over
+              temperature at 4.5–2 V, SN74HCS165 datasheet p.7 — noise)
 ```
 
 **SPI2 cannot use IO_MUX and does not need to.** The S3's FSPI IO_MUX pins are

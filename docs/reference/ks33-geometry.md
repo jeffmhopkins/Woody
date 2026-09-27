@@ -134,7 +134,7 @@ short waiting to happen:
 |---|---|---|
 | 0402 / 0603 chip passive | ~0.5–0.6 mm | ~1.4–1.5 mm — comfortable |
 | SOT-23 | ~1.1–1.45 mm | ~0.55–0.9 mm — workable |
-| SOIC-16 (the `74HC165`) | 1.75 mm max | **~0.25 mm — do not** |
+| SOIC-16 (the register, `U-KEYS`) | 1.75 mm max | **~0.25 mm — do not** |
 
 So the rule is **not** "there is no plate-facing side". It is: **chip passives
 and SOT-23 may sit on the plate-facing side; nothing with a body over about

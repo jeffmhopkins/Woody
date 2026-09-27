@@ -10,15 +10,16 @@
 [ADR 0017](../../docs/decisions/0017-one-main-board.md); the circuits are KiCad
 sheets ([ADR 0019](../../docs/decisions/0019-kicad-sheets-are-the-source.md))
 and the key boards are laid out, screwed to the plate
-([ADR 0020](../../docs/decisions/0020-key-boards-screw-to-the-plate.md)). The 74HC165 pin map is
-**CONFIRMED pin for pin** `[74HC165-nexperia.pdf Table 2, p.4]`.
+([ADR 0020](../../docs/decisions/0020-key-boards-screw-to-the-plate.md)). The register is the
+**SN74HCS165** since 2026-09-27 (ADR 0001's amendment), and its pin map is
+**CONFIRMED pin for pin** `[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.3, Table 5-1]`.
 
 Evidence marking follows the other hardware pages: `[repo]` names a file,
 `[calc]` shows the arithmetic, `[from memory]` means I could not open the
 datasheet, `TBD` means the value is not known and the row says what decides it.
 
 **Four key clusters, one circuit, on three boards.** Each cluster is one
-74HC165 with its decoupling, its switches and a network per switch position.
+SN74HCS165 with its decoupling, its switches and a network per switch position.
 Since ADR 0017:
 
 - **`right_hand` and `left_hand` are the two key boards** (`PCB-CLUSTER`),
@@ -115,8 +116,11 @@ sibling pages cite `cluster-boards.md` §3.*
 
 *Written for the key boards under `PLATE-TOP`. The thumb switches sit in
 `PLATE-THUMB` the same way, with the main board beneath them, so the
-standoff and height rules below hold for the main board's thumb areas too —
-which suits it, because its parts face the other way (ADR 0017).*
+height rules below hold for the main board's thumb areas too —
+which suits it, because its parts face the other way (ADR 0017). The depth
+does not: the thumb switches' board sits at `switch.thumb_pcb_below_seat`,
+set by the main board's own standoffs, not by the key boards' standoff and
+washer (ADR 0020, amended 2026-09-27).*
 
 **Plate, then switch, then board.** The switch clips into a 14.0 × 14.0 mm
 cutout in the aluminium plate — the same as standard MX, measured across 47
@@ -166,11 +170,14 @@ than a pitch parameter.
   `switch.pcb_below_seat_window`, and the design depth is
   `switch.pcb_below_seat` (`config/body.yaml`). Subtract `plate-thickness` and
   that is the gap — the standoff length is derived as `mechanical/drc.echo`
-  "key-board standoff length (derived)".
+  "key-board standoff length (derived)", and it is the standoff below the
+  plate **plus its washer** (`MECH-KB-WASHER`): the key boards' depth is set
+  by that hardware and checked by "key-board standoff and washer set the
+  board depth" (ADR 0020, amended 2026-09-27).
 
   Against a plate that is grounded, the rule that follows is a **height**
   rule: chip passives and SOT-23 may sit on the plate-facing side; **nothing
-  with a body over about 1.4 mm may** — a SOIC-16 `74HC165` at 1.75 mm leaves
+  with a body over about 1.4 mm may** — the SOIC-16 register at 1.75 mm leaves
   ~0.25 mm. That keeps the ICs on the far face, which is where they were
   going anyway, and stops forcing every decoupling capacitor across to join
   them.
@@ -211,7 +218,7 @@ and `RT` are on the main board.
 
 | Ref | Value | `LH` | `LT` | `RH` | `RT` | Notes |
 |---|---|---|---|---|---|---|
-| `U-KEYS` | 74HC165 SOIC-16 | 1 | 1 | 1 | 1 | `CLK INH` low, `QH_bar` open |
+| `U-KEYS` | SN74HCS165 SOIC-16 | 1 | 1 | 1 | 1 | `CLK INH` low, `QH_bar` open. Schmitt-trigger inputs: not a plain 74HC165 (its row) |
 | `C-DECOUPLE-165` | 100 nF X7R 0805 | 1 | 1 | 1 | 1 | At the package |
 | `SW1-n` | Gateron KS-33 Red | 5 | 4 | 6 | 4 | Soldered. `SW-THUMB` lighter springs are an open option for `LT` |
 | `R-KEY-PU` | 2.2 kΩ 1% 0805 | **6** | **6** | 6 | 6 | **24, not 21.** `RT` carries its 4 keys and the 2 reserved spare-switch positions; `LT` and `LH` each carry a pull-up for their *free* bits (22, 23, 31), which the first draft budgeted for switch positions only |
@@ -232,8 +239,8 @@ are the key-chain page's.
 main board's `U-TVS-CHAIN` guards the **MCU's** pins only — `SCK`, `SH/LD`
 and the chain-end `SER`, at the `left_hand` `J-CHAIN`. The hop nets
 (`HOP_*`, each register's `QH` to the next one's `SER`) and every signal pin
-of a key board's `J-CHAIN` land on 74HC165 pins, which carry the part's own
-HBM rating of over 2000 V `[datasheets/logic/74HC165-nexperia.pdf p.1]`. The
+of a key board's `J-CHAIN` land on register pins, which carry the part's own
+HBM rating of ±4000 V `[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.4]`. The
 array's spare fourth channel stays spare: one channel cannot cover the three
 hops. `key-chain-loom.md` has the argument.
 
@@ -252,10 +259,12 @@ and the `LT` springs to
 [`key-switch-network/`](key-switch-network/key-switch-network.md), and the
 closed 74HC165 item to [`key-register/notes.md`](key-register/notes.md).*
 
-- **The standoff part and the plate alloy** (§5, ADR 0020). The length is
-  derived (drc.echo "key-board standoff length (derived)"); the stocked part
-  that meets it and a plate alloy it can be pressed into are the plate
-  vendor's answer, at M4. **Plate stiffening** (`plate-thickness` is settled;
+- **Whether the standoff clinches in the plate** (§5, ADR 0020). The part is
+  chosen — PEM MSO4-M2-3 with an M2 small washer under the board
+  (`MECH-KB-STANDOFF`, `MECH-KB-WASHER`), which together set the depth
+  (drc.echo "key-board standoff and washer set the board depth"). Whether it
+  clinches in the plate's alloy and thickness is the plate vendor's and PEM's
+  answer, at M4; ADR 0020's fallback if not. **Plate stiffening** (`plate-thickness` is settled;
   whether it needs a rib or a backer is not) gates M4/M5 — ADR 0002.
 - **Conformal coating.** `MECH-COAT` covers the main board; nothing says
   whether the key boards are coated, and they sit under an open switch contact

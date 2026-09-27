@@ -8,7 +8,7 @@ keeps its old name so that paths into it do not break; there is no loom any
 more. What this page described before — a carrier and four cluster boards on
 IDC ribbons — is summarised in [`notes.md`](notes.md) and is whole in git.
 
-The four 74HC165s are still one chain of 32 bits, **in the same order**, so the
+The four registers (`U-KEYS`, SN74HCS165) are still one chain of 32 bits, **in the same order**, so the
 bit map ([`key-marker-and-bits`](../../cluster/key-marker-and-bits/key-marker-and-bits.md))
 and the firmware do not change. What changed is where the registers sit:
 
@@ -146,7 +146,7 @@ and `key-layout.yaml`'s order stands.
 ### The key-board end
 
 ```
-   J-CHAIN, key board              74HC165 on this key board
+   J-CHAIN, key board              U-KEYS on this key board
    conductor k = key-board pin 13 − k — see below
    cond. 2  = pin 11  SCK   ───────►  CLK
    cond. 4  = pin 9   SH/LD ───────►  SH/LD
@@ -336,15 +336,17 @@ sixth of the edge:
 `mechanical/drc.echo` "main board (derived)", several times 56 mm — to two
 registers and two ribbons (each `drc.echo` "key-chain ribbon length
 (derived)" long). A fast edge sees that as a branched line, and a ring through the
-74HC165's threshold on `SCK` is a double clock that shifts the whole word. The
+register's threshold on `SCK` is a double clock that shifts the whole word. The
 100 Ω at the source slows the edge and damps the ring; it is not series
 termination, which ADR 0001 rejected for a line that drops on several loads.
 **Open, decided at E14**: scope `SCK` at the `left_hand` register on the real
 main board and ribbons. It is three 0805s either way.
 
-*(The registers' own `QH` edges are 74HC edges, several times slower
-`[from memory]`, and each hop is a ribbon plus part of the main board — the
-old "HC's slow edges keep it a lumped load" argument still covers them.)*
+*(The registers' own `QH` edges are HC-family edges: output transition time
+5 ns typical at 4.5 V and up to 17 ns at 2 V over temperature
+`[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.8]`, and each hop is a ribbon
+plus part of the main board — the "HC-family edges keep it a lumped load"
+argument still covers them.)*
 
 **`U-TVS-CHAIN` — fitted, for service.** The ribbons never leave the body
 and sit under the grounded plate, so in play nothing reaches them. The
@@ -358,10 +360,10 @@ the board is made, and it costs pennies.
 
 **It guards the MCU's pins only, and that is accepted.** The hop nets
 (`HOP_LH_LT`, `HOP_LT_RH`, `HOP_RH_RT` in [`netlist.yaml`](netlist.yaml)) and
-every signal pin of a key board's `J-CHAIN` land on 74HC165 pins, not on the
-MCU. The key board has no ESD part of its own. Those pins carry the 74HC165's
-own rating, HBM over 2000 V (JS-001 class 2) and CDM over 1000 V
-`[datasheets/logic/74HC165-nexperia.pdf p.1]`, and a register is a part on a
+every signal pin of a key board's `J-CHAIN` land on register pins, not on the
+MCU. The key board has no ESD part of its own. Those pins carry the
+SN74HCS165's own rating, ±4000 V HBM (ANSI/ESDA/JEDEC JS-001) and ±1500 V CDM
+`[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.4]`, and a register is a part on a
 board that can be replaced, where an MCU pin is not. **The fourth channel
 stays spare**: there are three hops, on two ribbons, and one channel cannot
 cover them.

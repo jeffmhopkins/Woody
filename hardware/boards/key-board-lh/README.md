@@ -151,11 +151,13 @@ test are checked by `pcb.py` itself (above).
   - The CPL carries KiCad's own rotations, with KiCad's column headers renamed to JLC's (the banked guide's Method 1, `datasheets/fab/JLCPCB-KICAD-BOM-CPL-GUIDE.pdf`).
   - That guide attributes automatic rotation corrections only to the Fabrication Toolkit plugin (its Method 2). This flow does not use the plugin, so **nothing corrects the rotations**: JLC's preview is the only check.
   - Bottom-side parts are the ones most often shown wrong `[from memory]`, and every part here is on the bottom.
-  - The 74HC165's pin 1 is marked on the silkscreen, and that is the one to look at.
+  - The register's (`U-KEYS-LH`) pin 1 is marked on the silkscreen, and that is the one to look at.
   - Record any correction the first order needs in *Revisions* (below), so the next order does not rediscover it.
-- **Which parts are in the order.** The resistors and capacitors are JLC **Basic** parts. The 74HC165 is an **Extended** part flagged "Preferred", which carries no feeder-loading fee on Economic assembly `[datasheets/fab/JLCPCB-PCBA-FAQ.pdf]`.
-  - Library status as of 2026-09-27 `[web, JLC part pages: jlcpcb.com/partdetail/…/C17408, …/C17520, …/C49678, …/C53134, …/C5613, and JLC's component-search API]`. It can change, so check it at order.
-  - The part numbers are not repeated here. They are on the sheets, and in `fab/key-board-lh-bom-jlc.csv`.
+- **Which parts are in the order.** The resistors and capacitors are JLC **Basic** parts. The register, TI's SN74HCS165DR, is an **Extended** part, not a "Preferred" one, so it carries JLC's feeder-loading fee on Economic assembly ("$3 per extended component", FAQ 6 `[datasheets/fab/JLCPCB-PCBA-FAQ.pdf]`).
+  - **Its stock at JLC is thin**: about 112 on 2026-09-27 `[web https://jlcpcb.com/partdetail/TexasInstruments-SN74HCS165DR/C2864745, 2026-09-27]`. Digi-Key held 5,845 at $0.73 the same day `[web https://www.digikey.com/en/products/detail/texas-instruments/SN74HCS165DR/13563029, 2026-09-27]`. **If JLC is short, buy it from Digi-Key** and either send it to JLC as a consigned part or leave it off the JLC order and fit it by hand (SOIC-16, 1.27 mm pitch).
+  - **Do not let JLC substitute a plain 74HC165** or a 74LV165A: the part must have Schmitt-trigger inputs with no input transition-rate limit (the `U-KEYS` row says why).
+  - Library status as of 2026-09-27 `[web, JLC part pages: jlcpcb.com/partdetail/…/C17408, …/C17520, …/C49678, …/C53134, …/C2864745, and JLC's component-search API]`. It can change, so check it at order.
+  - The other part numbers are not repeated here. They are on the sheets, and in `fab/key-board-lh-bom-jlc.csv`.
 - **Not in the order:**
   - the five switches and `J-CHAIN`, which are in `fab/key-board-lh-hand-assembly.csv`;
   - `C-BULK-CHAIN-LH`, a do-not-fit footprint (*Bring-up*, step 6);
@@ -163,7 +165,7 @@ test are checked by `pcb.py` itself (above).
 - **Bought separately, for the hand assembly.** Only the first two are on the hand list:
   - the switches: BOM row `SW1-n`;
   - `J-CHAIN`: JLC/LCSC had none on 2026-09-27 (C17202657, stock 0 `[web, JLC API]`). Order the stand-in from samtec.com and check the lead time when ordering. Its sourcing is open (see its BOM row, and *Open* below);
-  - one `MECH-KB-SCREW` per standoff (`drc.echo` "key-board standoffs");
+  - one `MECH-KB-SCREW` (M2 × 4) and one `MECH-KB-WASHER` per standoff (`drc.echo` "key-board standoffs");
   - one `CBL-CHAIN`, ordered as in *Assembling*, step 3;
   - the standoffs (`MECH-KB-STANDOFF`), which are pressed into the plate by the plate vendor, not fitted to this board.
 - **The sheets are the source of every part number.** To change a part, set its `LCSC`/`MPN` fields in the circuit sheet and re-render. The BOM row (`hardware/cluster/bom.csv` etc.) says what the part must be; the sheet says which one is bought.
@@ -177,10 +179,11 @@ test are checked by `pcb.py` itself (above).
    - The plate has **no window** over the tails. Seated flat, they stop short of the grounded plate (`mechanical/drc.echo` "J-CHAIN pin tails clear of the key plate"), so do not trim them or leave the header standing proud.
 2. **The switches go into the plate first.**
    - Clip the five KS-33s into the key plate's cutouts.
-   - Lower the board onto their pins and the plate's M2 standoffs, one in each corner.
-   - Fit an M2 screw (`MECH-KB-SCREW`) from the bottom into each.
+   - Put one washer (`MECH-KB-WASHER`, the small ISO 7092 / DIN 433 series, not DIN 125) on the end of each of the plate's four M2 standoffs (`MECH-KB-STANDOFF`, PEM MSO4-M2-3). **The washer is not optional**: the standoff and the washer together set the board's depth (`drc.echo` "key-board standoff and washer set the board depth"). Without it the board sits too high on the pins.
+   - Lower the board onto the switch pins and the washers.
+   - Fit an M2 × 4 screw (`MECH-KB-SCREW`) from the bottom, through the board and the washer, into each standoff.
    - **Then** solder the switch pins, from the bottom. Soldering with the board screwed to the plate is what holds the board at the depth the pins were designed for (`switch.pcb_below_seat`).
-   - The standoff part is open (*Open* below). The candidate is PEM's microPEM MSO4-M2 (`config/body.yaml` `hardware.kb_standoff_*`, `datasheets/mechanical/PEM-MPF-MICROPEM-FASTENERS.pdf` p5). Neither of its stocked lengths lands in the window the switch pins allow, so it needs a shim or ADR 0020's fallback (`drc.echo` "key-board standoff stocked lengths against the window").
+   - Check a sample washer with calipers first: its thickness range is `hardware.kb_washer_t_range` (`config/body.yaml`). Whether the standoff clinches in the plate is the plate vendor's and PEM's to confirm (*Open* below).
 3. **The ribbon** (`CBL-CHAIN`).
    - **Order it as** `FFSD-06-D-<code>-01-N-RN2`. `<code>` is `mechanical/drc.echo` "key-chain cable to order (FFSD length code)". It is the overall length in **inches**, over both sockets, as the FFSD print measures it, with the print's −0.125 in tolerance already covered. `-RN2` reverses the notch on the second socket. **Do not type the millimetre length** ("key-chain ribbon length (derived)") into the part number: read as inches, it orders a cable about 25 times too long.
    - **Meter every cable before it is first powered**, not only the first one. Check it by *Bring-up*, step 2.
@@ -199,7 +202,7 @@ six test pads are on the bottom, labelled 3V3, GND, SCK, SH/LD, QH and SER.
    - A cable without `-RN2` looks right on the drawn route and puts 3V3 on a ground pin. Nothing mechanical shows it, so check every cable, spares and replacements included.
 3. **Tie SER.** Nothing drives SER on the bench, and a floating CMOS input draws current and shifts in undefined bits. Tie TP-SER to TP-GND or TP-3V3 (the `TP-CHAIN` row).
 4. **Power.** Feed 3.3 V between TP-3V3 and TP-GND (current-limited to ~20 mA).
-   - With no key pressed, and SER tied, the only draw is the 74HC165's quiescent current and leakage.
+   - With no key pressed, and SER tied, the draw should be near zero: the register's quiescent current is microamps `[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.6]`. A reading of milliamps with no key pressed is a fault.
    - Each pressed key adds its pull-up's current (`key-scan-current`, on `key-switch-network.md`).
 5. **The chain.** Drive SH/LD low then high, then clock SCK, and watch QH.
    - It shifts out this board's eight bits, H first: LH1..LH5, then the two marker bits and the free bit, in `key-marker-and-bits/allocation.yaml`'s order. Idle, each key bit and the free bit read high, and the markers read the pattern `marker-bits` gives this device.
@@ -211,14 +214,14 @@ six test pads are on the bottom, labelled 3V3, GND, SCK, SH/LD, QH and SER.
 ## The silkscreen
 
 All of it is on the bottom (parts) side, mirrored so it reads from below.
-Pin 1 of the 74HC165 is marked by its footprint.
+Pin 1 of the register (`U-KEYS-LH`) is marked by its footprint.
 
 | Mark | Means |
 |---|---|
 | `LH1`…`LH5`, each over `C` `S` `P` | a key's network: `C` its `C-KEY`, `S` its `R-KEY-SER`, `P` its `R-KEY-PU` |
 | `PF` | `R-KEY-PU-FREE3`, the free bit's pull-up |
 | `CD` | `C-DECOUPLE-165-LH`, the register's decoupler |
-| `74HC165` | `U-KEYS-LH` |
+| `74HCS165` | `U-KEYS-LH` |
 | `3V3` `GND` `SCK` `SH/LD` `QH` `SER` | the test pads |
 | `J-CHAIN`, a dot, an arrow | the chain header: the dot is pin 1, and the arrow points out of its mouth |
 | `WOODY key board LH`, `rev …  <date>` | the title block (`layout.yaml` `silk:`) |
@@ -244,7 +247,9 @@ a drill that did not fit) in the row.
 |---|---|
 | **The switch positions** (`layout.lh_gaps`, `layout.lh_offsets` `tbd`; `config/key-layout.yaml` `x`/`y` replace them) | M2 on the mule, locked at M3 |
 | The FFSD socket's stand-out from the header's mouth, `boards.chain_plug_proud`. The print does not dimension it, and it decides whether the cable clears the shroud's mouth at all, not only the ribbon's fold | M4, the first mated pair |
-| The M2 standoff: candidate MSO4-M2, whose stocked lengths miss the window (a shim, or ADR 0020's fallback), and the plate alloy it clinches into | the plate vendor and PEM, M4 |
+| Whether the chosen standoff (MSO4-M2-3, `MECH-KB-STANDOFF`) clinches in the plate's alloy and thickness; ADR 0020's fallback if not | the plate vendor and PEM, M4 |
+| The board depth at the hardware's tolerance limits: the worst case reaches the window's shoulder end (`drc.echo` "key-board depth at the hardware's tolerance limits") | the first board, fitted |
+| The register's supply: JLC's stock is thin (above) | the first order |
 | J-CHAIN's source: none at JLC; buy the stand-in from Samtec, or validate a stocked alternative against its print (its BOM row) | the first order |
 | Part orientation in JLC's placement preview (above) | the first order |
 | `C-BULK-CHAIN-LH` fitted or not | *Bring-up*, step 6 |

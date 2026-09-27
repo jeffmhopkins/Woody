@@ -15,7 +15,8 @@ repeatedly during ergonomic iteration (ADR 0009) and again during playing.
 `config/key-layout.yaml` is the single source of truth. Both sides consume it:
 
 - **Mechanical** — key positions drive the plate DXF cutout locations
-- **Firmware** — key IDs drive the 74HC165 bit mapping and the fingering table
+- **Firmware** — key IDs drive the shift-register bit mapping and the fingering table
+  *(Amended 2026-09-27: this said "74HC165"; the register is the SN74HCS165, ADR 0001)*
 
 When a key moves during iteration, the plate and the firmware stay in sync by
 construction rather than by remembering to update both.

@@ -199,14 +199,16 @@ umbilical +12V ──┬── WS2815 LED strip (one, ADR 0016; direct, no conve
                  │
                  └── TVS array / LC filter at entry  (no fuse — see below)
 
-real-time board 3V3 out ──┬── 74HC165 chain
+real-time board 3V3 out ──┬── 74x165 chain
                           ├── breath ADC
                           └── I2C pull-ups
 ```
 
 **3.3 V does not need its own converter.** The loads on it are the shift register
 chain (microamps), the ADC (milliamps) and pull-ups, all comfortably inside the
-headroom of the real-time board's onboard regulator.
+headroom of the real-time board's onboard regulator. *(Amended 2026-09-27: the
+registers are SN74HCS165s since ADR 0001's amendment; still microamps quiescent
+`[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.6]`.)*
 
 > **Superseded (2026-09-26, [ADR 0015](0015-one-mcu-no-display.md)): one buck.** There is no display board for buck B to
 > feed. The clamp-legal-worst 5 V figure above assumed both boards; without the
