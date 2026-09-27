@@ -4,10 +4,10 @@ ECHO: "PCB", "left_hand", "switch", "LH3", 90, 28.5, 0
 ECHO: "PCB", "left_hand", "switch", "LH4", 108, 19.5, 0
 ECHO: "PCB", "left_hand", "switch", "LH5", 108, 37.5, 0
 ECHO: "PCB", "left_hand", "chain", "J-CHAIN", 78.5, 42.015, 1, 13.97, 7.86
-ECHO: "PCB", "left_hand", "standoff", "M2", 40, 10.5, 2.2, 3.8, 3.16
-ECHO: "PCB", "left_hand", "standoff", "M2", 40, 46.5, 2.2, 3.8, 3.16
-ECHO: "PCB", "left_hand", "standoff", "M2", 118, 10.5, 2.2, 3.8, 3.16
-ECHO: "PCB", "left_hand", "standoff", "M2", 118, 46.5, 2.2, 3.8, 3.16
+ECHO: "PCB", "left_hand", "standoff", "M2", 40, 10.5, 2.2, 3.8, 4.5
+ECHO: "PCB", "left_hand", "standoff", "M2", 40, 46.5, 2.2, 3.8, 4.5
+ECHO: "PCB", "left_hand", "standoff", "M2", 118, 10.5, 2.2, 3.8, 4.5
+ECHO: "PCB", "left_hand", "standoff", "M2", 118, 46.5, 2.2, 3.8, 4.5
 ECHO: "PCB", "left_hand", "board", "thickness", 1.2, "smt_height_max", 1.8, "side", "switches on top, parts and ribbon connector underneath"
 ECHO: "PCB", "right_hand", "switch", "RH1", 158, 28.5, 0
 ECHO: "PCB", "right_hand", "switch", "RH2", 178, 28.5, 0
@@ -16,8 +16,8 @@ ECHO: "PCB", "right_hand", "switch", "RH4", 216, 19.5, 0
 ECHO: "PCB", "right_hand", "switch", "RH5", 216, 37.5, 0
 ECHO: "PCB", "right_hand", "switch", "RH6", 234, 19.5, 0
 ECHO: "PCB", "right_hand", "chain", "J-CHAIN", 175.5, 42.015, 1, 13.97, 7.86
-ECHO: "PCB", "right_hand", "standoff", "M2", 148, 10.5, 2.2, 3.8, 3.16
-ECHO: "PCB", "right_hand", "standoff", "M2", 148, 46.5, 2.2, 3.8, 3.16
-ECHO: "PCB", "right_hand", "standoff", "M2", 244, 10.5, 2.2, 3.8, 3.16
-ECHO: "PCB", "right_hand", "standoff", "M2", 244, 46.5, 2.2, 3.8, 3.16
+ECHO: "PCB", "right_hand", "standoff", "M2", 148, 10.5, 2.2, 3.8, 4.5
+ECHO: "PCB", "right_hand", "standoff", "M2", 148, 46.5, 2.2, 3.8, 4.5
+ECHO: "PCB", "right_hand", "standoff", "M2", 244, 10.5, 2.2, 3.8, 4.5
+ECHO: "PCB", "right_hand", "standoff", "M2", 244, 46.5, 2.2, 3.8, 4.5
 ECHO: "PCB", "right_hand", "board", "thickness", 1.2, "smt_height_max", 1.8, "side", "switches on top, parts and ribbon connector underneath"

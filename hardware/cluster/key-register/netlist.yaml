@@ -41,7 +41,7 @@ components:
     note: AT the package, on this board. A 74x165's output edges brown out a local rail with no reservoir, and on
       a key board the ribbon is the only other source
   U-KEYS:
-    value: 74HC165
+    value: 74HCS165
     pins:
     - SHLD
     - CLK
@@ -59,8 +59,9 @@ components:
     - F
     - G
     - H
-    note: '74HC AND NOT 74LVC, and that is load-bearing: HC''s slow edges keep each hop an ordinary lumped load.
-      Bit order out is H first, then G F E D C B A'
+    note: 'Schmitt-trigger inputs (74HCS): the key networks'' slow edges are within its rating - it has no input
+      transition-rate limit. HC-family outputs, not LVC: its edges keep each hop an ordinary lumped load. Bit order
+      out is H first, then G F E D C B A'
 nets:
   CHAIN_QH:
   - port: CHAIN_QH

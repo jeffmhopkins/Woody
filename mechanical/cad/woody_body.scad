@@ -678,8 +678,10 @@ module cluster_boards() {
                 for (s = kb_standoffs(cl)) translate(s) circle(d = hardware_kb_screw_hole);
             }
         for (i = [0 : len(kb_standoffs(cl)) - 1]) let(s = kb_standoffs(cl)[i]) {
-            P(C_STEEL, false, str("standoff ", cl, " ", i + 1)) translate([s[0], s[1], kb_top + explode * 0.2])
-                cylinder(d = hardware_kb_standoff_od, h = kb_gap);
+            P(C_STEEL, false, str("standoff washer ", cl, " ", i + 1)) translate([s[0], s[1], kb_top + explode * 0.15])
+                difference() { cylinder(d = hardware_kb_washer_od, h = hardware_kb_washer_t); translate([0, 0, -1]) cylinder(d = hardware_kb_screw_hole, h = hardware_kb_washer_t + 2); }
+            P(C_STEEL, false, str("standoff ", cl, " ", i + 1)) translate([s[0], s[1], kb_top + hardware_kb_washer_t + explode * 0.2])
+                cylinder(d = hardware_kb_standoff_od, h = kb_gap - hardware_kb_washer_t);
             P(C_STEEL, false, str("standoff screw ", cl, " ", i + 1)) translate([s[0], s[1], kb_top - boards_key_board_t - hardware_kb_screw_head_h + explode * 0.25])
                 cylinder(d = hardware_kb_screw_head_d, h = hardware_kb_screw_head_h);
         }
@@ -694,7 +696,9 @@ module pcb_geometry() {
     for (cl = ["left_hand", "right_hand"]) {
         for (k = cluster_keys(cl)) echo("PCB", cl, "switch", k[0], key_xy(k)[0], key_xy(k)[1], key_rot(k));
         echo("PCB", cl, "chain", "J-CHAIN", chain_x(cl), chain_y, chain_dir(cl), boards_chain_hdr_l, boards_chain_hdr_pin_back);
-        for (s = kb_standoffs(cl)) echo("PCB", cl, "standoff", "M2", s[0], s[1], hardware_kb_screw_hole, hardware_kb_screw_head_d, hardware_kb_standoff_od);
+        // the last field is what bears on the board's top copper: the washer, not the standoff's end
+        for (s = kb_standoffs(cl)) echo("PCB", cl, "standoff", "M2", s[0], s[1], hardware_kb_screw_hole, hardware_kb_screw_head_d,
+                                          max(hardware_kb_standoff_od, hardware_kb_washer_od));
         echo("PCB", cl, "board", "thickness", boards_key_board_t, "smt_height_max", boards_cluster_smt_h,
              "side", "switches on top, parts and ribbon connector underneath");
     }
@@ -781,7 +785,7 @@ module run(pts, d) {
     for (i = [0 : len(pts) - 2]) hull() { translate(pts[i]) sphere(d = d, $fn = 16); translate(pts[i + 1]) sphere(d = d, $fn = 16); }
 }
 top_z = z_plate_top - switch_pcb_below_seat - boards_key_board_t;     // top cluster boards' underside
-thumb_z = z_floor + switch_pcb_below_seat + switch_pcb_t;       // the main board's top face, where the thumb switches solder
+thumb_z = z_floor + switch_thumb_pcb_below_seat + switch_pcb_t;       // the main board's top face, where the thumb switches solder
 function mid_x(cl) = (min(xs(cluster_keys(cl))) + max(xs(cluster_keys(cl)))) / 2;
 function sgn(side) = side == "right" ? 1 : -1;
 function xspan(cl) = [min(xs(cluster_keys(cl))), max(xs(cluster_keys(cl)))];
@@ -1361,19 +1365,23 @@ module drc_report() {
     // switch pins set; it sits the vendor's edge distance from every switch
     // cutout; its screw head is on the board's underside.
     echo("DRC", "INFO", "key-board standoff length (derived)", kb_gap,
-         "mm: plate underside to board top, set by switch.pcb_below_seat");
+         "mm: plate underside to board top, set by switch.pcb_below_seat - the standoff below the plate and its washer");
     echo("DRC", "INFO", "key-board standoff length window", switch_pcb_below_seat_window - [1, 1] * plate_thickness,
          "mm: the lengths that keep the switch pins' blades in the board and some pin to solder (switch.pcb_below_seat_window)");
     web = min([for (cl = ["left_hand", "right_hand"], st = kb_standoffs(cl)) cutout_gap(st)]);
     drc(web >= hardware_kb_standoff_edge, "key-board standoffs clear of the switch cutouts", web,
         "mm from a standoff's hole centre to the nearest switch cutout, worst case, against the standoff's least distance to an edge (hardware.kb_standoff_edge)");
-    // What the standoff can be bought as: its stocked lengths, head flush in the plate, against the window.
-    let(pr = [for (l = hardware_kb_standoff_stock_l) l - plate_thickness], win = switch_pcb_below_seat_window - [1, 1] * plate_thickness,
-        fit = [for (q = pr) if (q >= win[0] && q <= win[1]) q])
-        echo("DRC", len(fit) > 0 ? "PASS" : "NOTE", "key-board standoff stocked lengths against the window", pr,
-             len(fit) > 0 ? "mm below the plate: one is in the window"
-                          : str("mm below the plate: none is in the window, so a shim of ", win[0] - max(pr), " to ", win[1] - max(pr),
-                                " mm goes under the longest, or ADR 0020's fallback - open until M4"));
+    // The hardware sets the depth: the standoff's head flush in the plate's top face, its washer under the board.
+    let(d = hardware_kb_standoff_l + hardware_kb_washer_t,
+        lo = hardware_kb_standoff_l + hardware_kb_standoff_l_tol[0] + hardware_kb_washer_t_range[0],
+        hi = hardware_kb_standoff_l + hardware_kb_standoff_l_tol[1] + hardware_kb_washer_t_range[1],
+        w = switch_pcb_below_seat_window) {
+        drc(abs(d - switch_pcb_below_seat) < 0.005, "key-board standoff and washer set the board depth", d,
+            "mm below the seat: hardware.kb_standoff_l + hardware.kb_washer_t, against switch.pcb_below_seat");
+        drc(d >= w[0] && d <= w[1], "key-board depth inside the switch pins' window", [d, w], "mm: nominal, against switch.pcb_below_seat_window");
+        echo("DRC", lo >= w[0] && hi <= w[1] ? "PASS" : "NOTE", "key-board depth at the hardware's tolerance limits", [lo, hi],
+             str("mm below the seat, against the window ", w, lo < w[0] ? str(": at the low corner the pins' wide shoulder starts ", w[0] - lo, " mm into the hole - the first board confirms the fit") : ""));
+    }
     echo("DRC", "INFO", "key-board standoffs", [for (cl = ["left_hand", "right_hand"]) len(kb_standoffs(cl))],
          "per board (left_hand, right_hand): one in each corner");
     kb_fast = min([for (cl = ["left_hand", "right_hand"], f = fasteners()) let(r = kb_rect(cl))

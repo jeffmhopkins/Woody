@@ -40,7 +40,7 @@ else; `tools/check-netlist.py` prints that shortfall by name every run.*
 ```
    3V3 (the chain rail: a main-board trace, or ribbon conductor 10 = key-board J-CHAIN pin 3)
     │
-    └──[R-KEY-PU 2k2 1%]──┬────────────────────► 74HC165 parallel input
+    └──[R-KEY-PU 2k2 1%]──┬────────────────────► 74HCS165 parallel input
                           │                 │
                   [C-KEY 47 nF X7R]  [R-KEY-SER 100R 1%]
                           │                 │
@@ -60,105 +60,49 @@ else; `tools/check-netlist.py` prints that shortfall by name every run.*
 
 ### Derivations
 
-`[calc]`, at 3.3 V into 74HC165 thresholds (**`V_IH` = 2.31 V, `V_IL` = 0.99 V**
-— 0.70 / 0.30 × VCC `[datasheet MC74HC165A/D Rev. 13 p.4]`):
+`[calc]`, at 3.3 V into the **SN74HCS165**'s Schmitt-trigger thresholds, taken
+at their guaranteed extremes: the input is certainly read high once it passes
+**VT+ at its maximum, 2.475 V**, and certainly read low once it passes **VT− at
+its minimum, 0.495 V** (0.75 / 0.15 × VCC). TI tabulates 2 V, 4.5 V and 6 V
+and no 3.3 V row `[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.6]`:
 
-> **Corrected 2026-09-21, the same day it was changed the other way.** This
-> page reasoned from TI's SCLS116E, which has no 3.3 V row, that the 0.70/0.30
-> ratio "breaks at 2 V" and that the conservative 2 V ratio 0.75/0.25 was the
-> defensible bound at 3.3 V. **A 3.0 V row is published, and it is 0.70/0.30.**
->
-> | source | 2.0 V | **3.0 V** | 4.5 V | 6.0 V |
-> |---|---|---|---|---|
-> | TI SCLS116E `datasheets/logic/74HC165-ti-scls116e.pdf` | 1.5 / 0.5 | *(absent)* | 3.15 / 1.35 | 4.2 / 1.8 |
-> | Nexperia Rev. 8 `74HC165-nexperia.pdf` | 1.5 / 0.5 | *(absent)* | 3.15 / 1.35 | 4.2 / 1.8 |
-> | Toshiba TC74HC165 `74HC165-toshiba-1986-excerpt.pdf` | 1.5 / 0.5 | *(absent)* | 3.15 / 1.35 | 4.2 / 1.8 |
-> | **onsemi MC74HC165A Rev. 13** `74HC165-onsemi.pdf` | 1.5 / 0.5 | **2.1 / 0.9** | 3.15 / 1.35 | 4.2 / 1.8 |
->
-> All four agree digit for digit at every shared rail, so onsemi is not a
-> different device — it simply prints the JEDEC HC row the other three omit.
-> **3.3 V is bracketed on both sides by published 0.70/0.30 rows**, so no
-> extrapolation through the 2 V point is needed at all. The 2 V entry is the
-> single exception at the bottom of the family's range, not the start of a
-> trend. Nexperia's front page also claims compliance with **JESD8C**
-> (2.7–3.6 V) `[74HC165-nexperia.pdf p.1]`, but it prints no levels there, and
-> JESD8C itself is not banked, so it is not used as evidence for any threshold
-> on this page. The onsemi bracket above stands on its own.
->
-> `[calc]` Interpolating in **absolute volts** between onsemi's bracketing rows,
-> assuming no ratio at all:
-> `V_IH`(3.3) = 2.1 + (0.3/1.5)(3.15−2.1) = **2.31 V**;
-> `V_IL`(3.3) = 0.9 + (0.3/1.5)(1.35−0.9) = **0.99 V**. Both land exactly on
-> 0.70/0.30, which is what makes the bracketing argument safe rather than lucky.
->
-> So both crossing times go back to what they were before yesterday's move:
-> **138.7 → 119.9 µs** and **6.89 → 5.92 µs**. Neither ever changed a
-> conclusion — the release is absorbed by firmware's release window either way,
-> and the press clears the scan period by 42× instead of 36×. What was not
-> defensible was stating 0.75/0.25 **as the datasheet threshold** when no
-> datasheet in the corpus gave a threshold at 3.3 V at all.
->
-> **If a TI SN74HC165 is the part actually fitted**, its own datasheet still
-> guarantees nothing at 3.3 V, and the pessimistic bound is 2.475 / 0.825 V,
-> giving 138.7 µs and 6.89 µs. Those are the numbers to design margin against
-> if the margin ever gets tight. It is not tight: 42× and 36× are the same
-> answer.
->
-> *(The press row also said `τ = 100 Ω × 47 nF = 4.7 µs` beside a crossing
-> time computed from the **parallel** combination, 4.496 µs. That correction is
-> independent of the threshold question and **stands** — the pull-up is still
-> connected, so the parallel value is the right one.)*
->
-> The TI datasheet carries a warning worth repeating: operating in the
-> threshold region risks **double-clocking from induced ground bounce**.
-> Another reason not to shave this margin.
+| VCC | VT+ max | VT− min | as × VCC |
+|---|---|---|---|
+| 2.0 V | 1.5 | 0.3 | 0.75 / 0.15 |
+| 4.5 V | 3.15 | 0.9 | 0.70 / 0.20 |
+| 6.0 V | 4.2 | 1.2 | 0.70 / 0.20 |
 
-**Every key edge breaks the 74HC165's input transition limit, and this is
-accepted, not overlooked.** The HC165 has no Schmitt inputs, and each
-datasheet caps how slowly an input may cross its thresholds: Nexperia (the
-fitted part) allows 625 ns/V at 2.0 V and 139 ns/V at 4.5 V
-`[datasheets/logic/74HC165-nexperia.pdf p.6, Table 5]`, about **372 ns/V at
-3.3 V** interpolated `[calc: 625 − (1.3/2.5)(625 − 139)]`. `[calc]`, from the
-table above:
+So the page takes the **largest VT+ ratio and the smallest VT− ratio in the
+table**, not an interpolation. A ratio assumed to hold between published rows
+has misled this page once already (`notes.md`). Linear interpolation between
+the 2 V and 4.5 V rows gives 2.358 / 0.612 V instead; both are inside the
+bound. Nexperia's 74HCS165 does publish a 3.0–3.6 V row
+`[datasheets/logic/74HCS165-nexperia.pdf p.6]`, but it is a different die and
+not the part bought, so it is a cross-check only: both of its thresholds are
+inside the bound too.
 
-- **Release** crosses `V_IH` at (3.3 − 2.31) V / 103.4 µs = 9.57 mV/µs, which
-  is **104 000 ns/V, about 280× the limit**. The node spends 32.3 → 119.9 µs,
-  **87.6 µs**, between `V_IL` and `V_IH`, so at the 250 µs scan about **35 %
-  of releases put one sample inside the band**.
-- **Press** crosses `V_IL` at 5 310 ns/V, **about 14×**, and spends 4.2 µs in
-  the band.
-
-Why it is accepted:
-- These are parallel data inputs, not clocks. The register captures them
-  when `SH/LD` returns high (`key-register.md` §1), so a slow input cannot
-  double-clock anything. An input caught mid-band reads as 0 or 1.
-- One indeterminate sample during a release is indistinguishable from
-  contact bounce, which firmware's release window already rejects (above).
-- The unquantified cost is extra supply current while an input dwells
-  mid-rail. It is measured at bring-up: `ICC` with a key held half-pressed,
-  from TP-3V3 (`hardware/boards/key-board-lh/README.md`).
-
-**The alternative is a drop-in part, and it is the owner's choice** (Still
-open, below): TI's **SN74HCS165** has Schmitt-trigger inputs and "no input
-signal transition rate requirements" `[datasheets/logic/SN74HCS165-ti-scls828a.pdf
-p.15]`, the same pinout and SOIC-16 `[same, p.3; p.1]`. Adopting it re-derives
-`key-release-time` and `key-press-time` against its thresholds: TI publishes
-them at 2 V, 4.5 V and 6 V only `[same, p.6]`, and Nexperia's 74HCS165, which
-does publish a 3.0–3.6 V row, is a different die and not the one bought
-`[datasheets/logic/74HCS165-nexperia.pdf p.6]`. The 74LV165A is not an
-alternative: its "Schmitt-trigger action" still carries a transition-rate
-limit `[datasheets/logic/74LV165A-nexperia.pdf p.5]`.
+**The slow edges are within this part's rating.** It has Schmitt-trigger
+inputs and "no input signal transition rate requirements"
+`[SN74HCS165-ti-scls828a.pdf p.15]`, which is why it is the part: the key
+network's edges cross the thresholds at the RC's rate, hundreds of times
+slower than a plain 74HC165 allows (`notes.md`, and ADR 0001's amendment).
+The hysteresis between VT+ and VT− (at least 0.2 V at 2 V and 0.4 V at
+4.5 V `[same, p.6]`) is what stops a slow edge with noise on it from reading as
+several transitions.
 
 | | |
 |---|---|
-| Release, τ = 2.2 kΩ × 47 nF = 103.4 µs | crosses `V_IH` at **119.9 µs** |
-| Press, τ = (2.2 kΩ ∥ 100 Ω) × 47 nF = 4.496 µs | crosses `V_IL` at **5.92 µs** — 42× inside the 250 µs scan |
+| Release, τ = 2.2 kΩ × 47 nF = 103.4 µs | passes VT+ max at **138.7 µs** (`key-release-time`) |
+| Press, τ = (2.2 kΩ ∥ 100 Ω) × 47 nF = 4.496 µs | passes VT− min at **9.87 µs** (`key-press-time`) — 25× inside the 250 µs scan |
 | Pole | 1.54 kHz → **54 dB** at the WS2815's 800 kHz data rate |
 | Static | **1.43 mA** per closed key; 19 closed = **27.3 mA** off the chain's 3V3 |
 
+Both crossing times are derived in `config/figures.yaml` (`key-release-time`,
+`key-press-time`); this page owns them, and every other page cites them by name.
+
 **Press is instant on the scan's timescale and release is delayed by
-`key-release-time`**, which is under half a scan period and costs nothing
-musically. **This RC is a glitch filter, not the debounce.** It swallows a
+`key-release-time`**, just over half a scan period, which costs nothing
+musically: the release reaches firmware on the next scan either way. **This RC is a glitch filter, not the debounce.** It swallows a
 contact opening shorter than `key-release-time`; the switch's own bounce,
 `ks33-contact-bounce`, is many times longer, so bounce passes straight through
 it in both directions — every re-closure during a release pulls the node low
@@ -199,9 +143,9 @@ board, and the 2.2 kΩ was kept as cheap insurance ([`notes.md`](notes.md)).
 also the MCP3202's voltage reference — worth 3.4 LSB, accepted on the carrier
 page `[repo] carrier.md §2`. Going back to 10 kΩ would cut that to 6.2 mA and
 0.8 LSB — **but not with the fitted 47 nF.** `[calc]` 10 kΩ × 47 nF = 470 µs,
-and the release would cross `V_IH` at 470 × ln((3.3 − 0.033)/(3.3 − 2.31)) ≈
-561 µs, more than two scan periods. So 10 kΩ also means shrinking `C-KEY`
-(≈ 10 nF puts the release back under half a scan period), with less glitch
+and the release would pass VT+ max at 470 × ln((3.3 − 0.033)/(3.3 − 2.475)) ≈
+647 µs, more than two scan periods. So 10 kΩ also means shrinking `C-KEY`
+(≈ 10 nF brings the release back near `key-release-time`), with less glitch
 filtering in a humid cavity. **Recorded as a live trade, not re-opened here.**
 
 ---
@@ -215,10 +159,5 @@ circuit, moved verbatim 2026-09-21. `§2` is this page.*
   the register moved back to this board, and the cost — 27.3 mA on the ADC's
   reference rather than 6.2 mA — arrived at the same moment. Live trade,
   recorded on the carrier page as accepted.
-- **74HC165 or SN74HCS165** (§2, "Every key edge breaks the 74HC165's input
-  transition limit"). Decided by the owner, before the first order or after
-  the bring-up `ICC` measurement: the HC165 is accepted with the reasoning
-  above; the HCS165 removes the violation, costs the threshold re-derivation
-  and is thinly stocked at the board house `[web https://jlcpcb.com/partdetail/TexasInstruments-SN74HCS165DR/C2864745, 2026-09-27]`.
 - **Whether `LT` takes lighter springs** (`SW-THUMB`), which is an M1 decision by
   hand and changes nothing electrically `[repo] bom.csv, 0002`.

@@ -232,10 +232,15 @@ switch:
     value: 5.75
     status: settled
     source: "[ds] Gateron KS-33H10B050NN-Y24 sheet 6, 5.75 +/-0.05 (the STEP says 5.70; the vendor wins)"
-  pcb_below_seat:
+  thumb_pcb_below_seat:
     value: 3.4
+    status: tbd
+    source: "the main board's top face below the thumb switches' seat: the middle of switch.pcb_below_seat_window [calc, docs/reference/ks33-geometry.md], until the main board's own standoffs set it"
+    decided_by: "the main board's layout and standoffs"
+  pcb_below_seat:
+    value: 3.3
     status: settled
-    source: "[calc] docs/reference/ks33-geometry.md: PCB top 3.2-3.6 below the seat; the middle"
+    source: "THE KEY BOARDS' (the thumb switches' main board is switch.thumb_pcb_below_seat): set by their standoff hardware (ADR 0020): the standoff's head is flush in the plate's top face, so the board top sits hardware.kb_standoff_l + hardware.kb_washer_t below the seat, whatever the plate's thickness; drc.echo 'key-board standoff and washer set the board depth' fails if this and the hardware disagree. Inside switch.pcb_below_seat_window [calc]"
   keycap_top_above_seat:
     value: 9.0
     status: tbd
@@ -744,11 +749,27 @@ hardware:
     status: tbd
     source: "the least distance from the standoff's hole centre to an edge of the sheet - a switch cutout is one: MSO4-M2's min. dist. hole C/L to edge [datasheets/mechanical/PEM-MPF-MICROPEM-FASTENERS.pdf p5]"
     decided_by: "M4, with the standoff chosen"
-  kb_standoff_stock_l:
-    value: [2, 3]
-    status: tbd
-    source: "the lengths MSO4-M2 is made in, overall, head included; the head installs flush in the sheet [datasheets/mechanical/PEM-MPF-MICROPEM-FASTENERS.pdf p5]"
-    decided_by: "M4, with the standoff chosen"
+  kb_standoff_l:
+    value: 3
+    status: nominal
+    source: "MSO4-M2-3, the owner's choice 2026-09-27 (ADR 0020): its overall length, head included, the head installed flush in the sheet; made only 2 and 3 long [datasheets/mechanical/PEM-MPF-MICROPEM-FASTENERS.pdf p5]"
+    decided_by: "M4: PEM and the plate vendor confirm it clinches in the plate"
+  kb_standoff_l_tol:
+    value: [-0.08, 0.05]
+    status: nominal
+    source: "MSO4's L tolerance, +0.05 / -0.08 [datasheets/mechanical/PEM-MPF-MICROPEM-FASTENERS.pdf p5]"
+  kb_washer_t:
+    value: 0.3
+    status: nominal
+    source: "an M2 small flat washer, ISO 7092 / DIN 433, between the standoff's end and the board: it lifts the board from the 3 mm standoff's 1.8 below the plate into the pins' window. Nominal 0.3, 0.25-0.35 [web https://www.aspenfasteners.com/m2-din-433-iso-7092-metric-flat-washers-small-outside-diameter-a2-stainless-steel/, 2026-09-27]"
+  kb_washer_t_range:
+    value: [0.25, 0.35]
+    status: nominal
+    source: "the same washer's thickness limits [web, as kb_washer_t]"
+  kb_washer_od:
+    value: 4.5
+    status: nominal
+    source: "the same washer's outside diameter, maximum; it bears on the board's top copper, so the PCB keeps copper out from under it [web, as kb_washer_t]"
   kb_screw_hole:
     value: 2.2
     status: tbd

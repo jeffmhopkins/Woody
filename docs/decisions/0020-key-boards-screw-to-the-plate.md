@@ -31,6 +31,11 @@ connector envelope using a stand-in size. The real footprint, a Molex 200528
 2. **The standoff's length is derived, not chosen.**
    - It is the plate-to-board gap: `switch.pcb_below_seat` less
      `plate-thickness`.
+   - *(Amended 2026-09-27: the derivation now runs the other way. No M2
+     standoff is made at the derived length, so the owner chose the stocked
+     one and a washer under it. The board depth,
+     `switch.pcb_below_seat`, is now what they set, and a rule checks it
+     (below).)*
    - The model prints it as `mechanical/drc.echo` "key-board standoff length
      (derived)", and the BOM row cites that line.
 3. **The board is a rectangle across the cavity, with a standoff in each
@@ -146,6 +151,26 @@ allow for a less fragile mounting of the IC". The owner also asked whether
     PEM publishes no data for it in aluminium or in a 1.2 mm sheet. So the
     first question for the plate vendor and PEM is whether MSO4-M2-3 with a
     shim, or the fallback above, holds the board.
+  - *(2026-09-27, the owner's choice.)* **MSO4-M2-3, with an M2 small flat
+    washer (ISO 7092 / DIN 433, `MECH-KB-WASHER`) between its end and the
+    board.**
+    - With the head flush in the plate's top face, the board top sits
+      `hardware.kb_standoff_l` + `hardware.kb_washer_t` below the seat,
+      whatever the plate's thickness. That is `switch.pcb_below_seat` for
+      the key boards, inside the pins' window.
+    - `drc.echo` "key-board standoff and washer set the board depth" fails
+      if the parameter and the hardware disagree.
+    - "key-board depth at the hardware's tolerance limits" prints the worst
+      case, which reaches the window's shoulder end by a few hundredths.
+      The first board confirms the fit.
+    - The washer is chosen over filing or printing a spacer: it is a stock
+      part at a controlled thickness. A printed spacer would creep under the
+      screw's clamp, and the standoff sets the depth every key press loads.
+    - The thumb switches' board is not affected: its depth is
+      `switch.thumb_pcb_below_seat`, set when the main board's own
+      standoffs are.
+    - Whether the standoff clinches in the plate is still PEM's and the
+      plate vendor's to confirm (`MECH-KB-STANDOFF`).
 - **Where the standoffs can go is now a rule.** `kb_standoffs()` in
   `mechanical/cad/woody_body.scad` finds them. The PCB takes them from
   `mechanical/export/pcb-geometry.echo`, and `tools/pcb.py check` fails if a

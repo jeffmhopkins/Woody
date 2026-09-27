@@ -109,9 +109,11 @@ solder. Subtract the plate `[calc]`:
 
 **The board's thickness sets how much pin is left to solder.** Below the
 board's underside the pins show 5.10 mm less the board-top depth less the
-board's thickness `[calc]`: at `switch.pcb_below_seat` (3.4 mm, the window's
-middle) that is 5.10 − 3.4 − 1.6 ≈ 0.1 mm on a 1.6 mm board and
-5.10 − 3.4 − 1.2 ≈ 0.5 mm on a 1.2 mm one. That is why the key boards are
+board's thickness `[calc]`: at the window's middle, 3.4 mm, that is
+5.10 − 3.4 − 1.6 ≈ 0.1 mm on a 1.6 mm board and 5.10 − 3.4 − 1.2 ≈ 0.5 mm on
+a 1.2 mm one. The key boards sit at `switch.pcb_below_seat`, which their
+standoff hardware sets (ADR 0020), a little higher than the middle, so they
+show a little more pin than that. That is why the key boards are
 `boards.key_board_t` (ADR 0020 point 6), and why the main board's thickness
 under the thumb switches (`switch.pcb_t`) is still to be decided.
 

@@ -190,7 +190,7 @@ components:
     - 1
   U-KEYS-LH:
     of: U-KEYS
-    value: 74HC165
+    value: 74HCS165
     pins:
     - SHLD
     - CLK

@@ -4,7 +4,9 @@
 [ADR 0017](0017-one-main-board.md). One MCU since [ADR 0015](0015-one-mcu-no-display.md). Partitioning revised by
 [ADR 0013](0013-two-mcu-split.md) — display and WiFi moved to a second MCU. The
 family choice below still holds for the real-time board, and the C6 analysis
-still applies to *that* role; a C6 is fine as the display board.
+still applies to *that* role; a C6 is fine as the display board. The shift
+register is the **SN74HCS165** since 2026-09-27 (*Amendment* below): the same
+part in every other respect, with Schmitt-trigger inputs.
 
 ## Context
 
@@ -226,14 +228,14 @@ four boards, so the reserved spare-switch bits are covered too *(three until
 2026-09-26, two since RT4 took one — the 21 positions are unchanged)*.
 (`R-KEY-PU`, `R-KEY-SER`, `C-KEY`; values per `bom.csv`.)
 
-`[calc]`, at 3.3 V into 74HC165 thresholds (`V_IH` 2.31 V, `V_IL` 0.99 V —
-0.70/0.30 × VCC, from onsemi MC74HC165A Rev. 13's published 3.0 V row; see
-`hardware/cluster/cluster-boards.md` for why three other vendors omit it):
+`[calc]`, at 3.3 V into the register's input thresholds
+(`hardware/cluster/key-switch-network/key-switch-network.md` §2 derives both,
+against the SN74HCS165's Schmitt thresholds since 2026-09-27):
 
 | | |
 |---|---|
-| Release, τ = 2.2 kΩ × 47 nF = 103.4 µs | crosses `V_IH` at **119.9 µs** |
-| Press, τ = (2.2 kΩ ∥ 100 Ω) × 47 nF = 4.496 µs | crosses `V_IL` at **5.92 µs** — 42× inside the 250 µs scan |
+| Release, τ = 2.2 kΩ × 47 nF = 103.4 µs | `key-release-time` |
+| Press, τ = (2.2 kΩ ∥ 100 Ω) × 47 nF = 4.496 µs | `key-press-time`, far inside the 250 µs scan |
 | Pole | 1.54 kHz → **54 dB** at the WS2815's 800 kHz data rate |
 | Static | **1.43 mA** per closed key; 19 closed = **27.3 mA** |
 
@@ -375,6 +377,32 @@ that are indistinguishable from playing mistakes.
 output own one core; display, radio and web server own the other. The radio is
 the less polite neighbour of the two — see ADR 0012 for why it is also off
 during performance.
+
+## Amendment, 2026-09-27 — the register is the SN74HCS165
+
+A review of the left-hand key board (`docs/review/2026-09-27-lh-key-board/`,
+K1-1) found that every key input breaks the 74HC165's input transition limit.
+The key network's RC crosses the thresholds far slower than any HC165
+datasheet allows: about 280× on release and 14× on press, against
+Nexperia's rate interpolated to 3.3 V (`key-switch-network/notes.md`). The
+inputs are sampled data, not clocks, so it was defensible. But it was out
+of specification on the part the whole chain depends on. The owner chose the
+drop-in part instead.
+
+- **TI SN74HCS165** has Schmitt-trigger inputs and no input transition-rate
+  requirement `[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.15]`. It has the
+  same pinout and SOIC-16 `[same, p.3]`, and a better ESD rating `[same, p.4]`.
+- **The family argument above stands.** Its outputs are HC-family, not LVC:
+  about 5 ns at 4.5 V `[same, p.8]`, against the 74HC165's 7 ns typical. So
+  each hop is still a lumped load, and the chain's 1 MHz clock is far inside
+  its limit at every published rail `[same, p.6]`.
+- **The key-timing figures moved** to the HCS165's thresholds, taken at their
+  guaranteed extremes, because TI publishes no 3.3 V row: see
+  `key-release-time` and `key-press-time` in `config/figures.yaml`. The release
+  is now just over half a scan period, which changes no conclusion here.
+- **The part bought is the sheet's** (`key-register.kicad_sch`, ADR 0019), and
+  the U-KEYS row says what a substitute must be. The wording "74HC165" that
+  remains above records the reasoning at the time.
 
 ## Consequences
 
