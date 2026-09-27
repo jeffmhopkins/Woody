@@ -25,9 +25,19 @@ net that is split or merged fails the build. What it CANNOT prove is the
 pin-number map: the wires go wherever the map says, so a wrong map draws a
 consistent wrong sheet. The map is a package fact, cited to its datasheet in
 schematic.yaml; the one check possible here is that pins the library NAMES
-(VCC, GND...) carry the same name in netlist.yaml. KiCad 7's command line has
-no ERC, so a small pin-type check stands in until the sheet is opened in
-KiCad 8 or 9.
+(VCC, GND...) carry the same name in netlist.yaml. KiCad's own ERC runs on the
+sheet too (kicad-cli 8 or later; KiCad 7's has none, and a small pin-type
+check stands in and says so).
+
+NEEDS KiCad 9 (the sheets are written in its format) and its symbol library.
+On Ubuntu 24.04, from the KiCad project's own archive:
+    key=$(curl -s https://api.launchpad.net/1.0/~kicad/+archive/ubuntu/kicad-9.0-releases \
+          | python3 -c "import sys,json;print(json.load(sys.stdin)['signing_key_fingerprint'])")
+    curl -s "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x$key" | gpg --dearmor \
+          > /etc/apt/trusted.gpg.d/kicad-9.gpg
+    echo "deb https://ppa.launchpadcontent.net/kicad/kicad-9.0-releases/ubuntu noble main" \
+          > /etc/apt/sources.list.d/kicad-9.list
+    apt-get update && apt-get install -y --no-install-recommends kicad kicad-symbols
 
 HOW PINS CONNECT. A pin named in a `wires` polyline is joined by that wire. A
 pin that is not gets a short stub and a label with its net name (a power
@@ -62,6 +72,10 @@ def tokenize(s):
     return re.findall(r'"(?:\\.|[^"\\])*"|\(|\)|[^\s()]+', s)
 
 
+class Str(str):
+    """A quoted string in an s-expression, so it is written back quoted."""
+
+
 def parse(s):
     toks = tokenize(s)
     stack = [[]]
@@ -72,8 +86,23 @@ def parse(s):
             x = stack.pop()
             stack[-1].append(x)
         else:
-            stack[-1].append(t[1:-1].replace('\\"', '"') if t.startswith('"') else t)
+            stack[-1].append(Str(t[1:-1].replace('\\"', '"').replace("\\n", "\n").replace("\\\\", "\\"))
+                             if t.startswith('"') else t)
     return stack[0]
+
+
+def dump(node, ind="    "):
+    if isinstance(node, Str):
+        return q(node)
+    if not isinstance(node, list):
+        return node
+    head = [c for c in node if not isinstance(c, list)]
+    kids = [c for c in node if isinstance(c, list)]
+    if not kids:
+        return "(" + " ".join(dump(c) for c in node) + ")"
+    # atoms stay on the opening line: "(symbol "NAME"" is matched as text later
+    inner = "\n".join(ind + "  " + dump(c, ind + "  ") for c in kids)
+    return "(" + " ".join(dump(c) for c in head) + "\n" + inner + ")"
 
 
 def find(node, key):
@@ -84,10 +113,10 @@ def lib_symbol_text(lib, name):
     """The raw text of one symbol in a .kicad_sym, by bracket matching."""
     path = os.path.join(SYMDIR, lib + ".kicad_sym")
     text = open(path).read()
-    m = re.search(r'\n  \(symbol "%s"' % re.escape(name), text)
+    m = re.search(r'\n(?:\t|  )\(symbol "%s"\s' % re.escape(name), text)
     if not m:
         sys.exit(f"sch: symbol {lib}:{name} not in {path}")
-    i, depth = m.start() + 3, 0
+    i, depth = text.index("(", m.start()), 0
     for j in range(i, len(text)):
         if text[j] == "(":
             depth += 1
@@ -95,8 +124,23 @@ def lib_symbol_text(lib, name):
             depth -= 1
             if depth == 0:
                 body = text[i:j + 1]
-                if "(extends " in body.split("\n")[0]:
-                    sys.exit(f"sch: {lib}:{name} extends another symbol; name the base symbol and set its value")
+                node = parse(body)[0]
+                ext = find(node, "extends")
+                if ext:
+                    # A derived symbol: the parent's graphics and pins, the child's fields.
+                    parent = parse(lib_symbol_text(lib, ext[0][1])[0])[0]
+                    pname = parent[1]
+                    kids = {c[1]: c for c in find(node, "property")}
+                    flat = [node[0], Str(name)]
+                    for c in parent[2:]:
+                        if isinstance(c, list) and c[0] == "property" and c[1] in kids:
+                            flat.append(kids.pop(c[1]))
+                        elif isinstance(c, list) and c[0] == "symbol":
+                            flat.append([c[0], Str(c[1].replace(pname + "_", name + "_", 1))] + c[2:])
+                        else:
+                            flat.append(c)
+                    flat[2:2] = list(kids.values())
+                    body = dump(flat)
                 return body, path
     sys.exit(f"sch: unbalanced symbol {lib}:{name}")
 
@@ -205,6 +249,7 @@ class Sheet:
         self.wired = set()
         self.power = lay.get("power", {})
         self.n_power = 0
+        self.ports_in = set(net.get("ports", {}))
 
     def lib(self, lib_id):
         if lib_id not in self.libs:
@@ -291,22 +336,34 @@ class Sheet:
                               f" (uuid {u(self.name, 'label', netname, at)}))")
 
     def power_lib(self, netname):
-        """KiCad 7 names a power net after the power symbol's PIN, not its value. So each power
-        net gets its own copy of the library symbol, renamed, with the pin named after the net."""
-        kind = self.power[netname]
-        lid = f"power:{netname}"
-        if lid not in self.libs:
-            text, _ = lib_symbol_text("power", kind)
-            text = text.replace(f'(symbol "{kind}"', f'(symbol "{netname}"', 1)
-            text = text.replace(f'(symbol "{kind}_', f'(symbol "{netname}_')
-            text = text.replace(f'(name "{kind}"', f'(name "{netname}"')
-            self.libs[lid] = (text, lib_pins(text), lib_props(text))
+        """KiCad 8 and later name a power net after the power symbol's VALUE, so the stock
+        library symbol is used unchanged, with the value set to this repository's net name."""
+        lid = f"power:{self.power[netname]}"
+        self.lib(lid)
         return lid
 
     def power_symbol(self, netname, at, key):
         self.n_power += 1
         ref = f"#PWR{self.n_power:02d}"
         self.symbol(self.power_lib(netname), ref, netname, (at[0], at[1], 0), 1, ("pwr", key), hide_ref=True)
+
+    def power_flags(self):
+        """Power nets SUPPLIED BY ANOTHER CIRCUIT (ports in netlist.yaml). On a sheet drawn
+        alone KiCad's ERC cannot see their source, so each gets a PWR_FLAG - the standard
+        way - grouped at `flags_at` under a note saying where the supply comes from."""
+        nets = [n for n in self.power if n in self.ports_in]
+        if not nets:
+            return
+        x0, y0 = self.lay.get("flags_at", [20.32, 30.48])
+        self.text("Supplied by other circuits (PWR_FLAG):", (x0, y0 - 10.16))
+        for i, n in enumerate(nets):
+            y = snap(y0 + i * 12.7)
+            a, b = (snap(x0 + 2.54), y), (snap(x0 + 20.32), y)
+            self.power_symbol(n, a, ("flaggroup", n))
+            self.wire(a, b)
+            self.n_power += 1
+            self.symbol("power:PWR_FLAG", f"#FLG{self.n_power:02d}", "PWR_FLAG", (b[0], b[1], 0), 1,
+                        ("flag", n), hide_ref=True)
 
     def no_connect(self, at):
         self.items.append(f"  (no_connect (at {at[0]} {at[1]}) (uuid {u(self.name, 'nc', at)}))")
@@ -418,6 +475,7 @@ class Sheet:
                 self.items.append(f"  (junction (at {p[0]} {p[1]}) (diameter 0) (color 0 0 0 0)"
                                   f" (uuid {u(self.name, 'junction', p)}))")
 
+        self.power_flags()
         for t in lay.get("notes", []):
             self.text(t["text"], t["at"])
 
@@ -425,7 +483,7 @@ class Sheet:
         libsyms = "\n".join("    " + t.replace(f'(symbol "{lid.split(":")[1]}"', f'(symbol {q(lid)}', 1)
                             .replace("\n  ", "\n    ")
                             for lid, (t, _, _) in sorted(self.libs.items()))
-        head = f"""(kicad_sch (version 20230121) (generator sch.py)
+        head = f"""(kicad_sch (version 20250114) (generator "sch.py") (generator_version "9.0")
   (uuid {u(self.name, 'root')})
   (paper {q(lay.get('paper', 'A4'))})
   (title_block
@@ -510,6 +568,12 @@ def pin_types(sheet, net):
         ins = [p for p, t in zip(pins, types) if t == "input"]
         if ins and not powered and not any(t in drivers for t in types):
             problems.append(f"warning: {nname} has inputs {ins} and nothing driving it")
+    return problems + pin_names(sheet)
+
+
+def pin_names(sheet):
+    """The one check a pin-number map allows: pins the library NAMES must match netlist.yaml's name."""
+    problems = []
     for p, (ref, num) in sheet.pinnum.items():
         lname = sheet.pinname.get(p, "~")
         ours = p.rsplit(".", 1)[1]
@@ -517,6 +581,31 @@ def pin_types(sheet, net):
                 and lname.upper() != ours.upper():
             problems.append(f"error: {p} maps to pin {num}, which the library names {lname!r}")
     return problems
+
+
+def kicad_env():
+    env = dict(os.environ)
+    for v in ("KICAD9_SYMBOL_DIR", "KICAD8_SYMBOL_DIR", "KICAD7_SYMBOL_DIR"):
+        env.setdefault(v, SYMDIR)
+    return env
+
+
+def kicad_erc(sch_path):
+    """KiCad's own ERC, as 'error: ...'/'warning: ...' lines; None if kicad-cli has none (KiCad 7)."""
+    import json
+    with tempfile.TemporaryDirectory() as t:
+        out = os.path.join(t, "erc.json")
+        r = subprocess.run(["kicad-cli", "sch", "erc", "--severity-all", "--format", "json", "-o", out, sch_path],
+                           capture_output=True, text=True, env=kicad_env())
+        if not os.path.exists(out):
+            return None
+        d = json.load(open(out))
+    lines = []
+    for sh in d.get("sheets", []):
+        for v in sh.get("violations", []):
+            items = "; ".join(i["description"] for i in v.get("items", []))
+            lines.append(f"{v['severity']}: [{v['type']}] {v['description']} - {items}")
+    return lines
 
 
 def render(sch_path, png):
@@ -541,7 +630,12 @@ def cmd_build(circuit_dir):
     sch, png = outputs(d, lay)
     open(sch, "w").write(text)
     problems = compare(sheet, net, kicad_netlist(sch))
-    checks = pin_types(sheet, net)
+    checks = kicad_erc(sch)
+    erc_name = "KiCad ERC + pin names"
+    if checks is not None:
+        checks += pin_names(sheet)
+    else:
+        checks, erc_name = pin_types(sheet, net), "pin-type check (kicad-cli has no ERC before KiCad 8)"
     render(sch, png)
     rel = os.path.relpath(sch, ROOT)
     print(f"sch: wrote {rel} and {os.path.relpath(png, ROOT)} (fingerprint {fp})")
@@ -549,8 +643,7 @@ def cmd_build(circuit_dir):
     print(f"sch: netlist match: {'PASS' if not problems else 'FAIL'} - {len(net['nets'])} nets compared pin by pin")
     for p in problems:
         print("  " + p)
-    print(f"sch: pin-type check: {n_err} error(s), {len(checks) - n_err} warning(s)"
-          " (not KiCad's ERC - kicad-cli 7 has none; run ERC in KiCad 8/9)")
+    print(f"sch: {erc_name}: {n_err} error(s), {len(checks) - n_err} warning(s)")
     for c in checks:
         print("  " + c)
     return 1 if problems or n_err else 0

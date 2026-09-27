@@ -23,9 +23,11 @@ power:
 ports:
   IO1: {shape: input}
 
+flags_at: [208.28, 96.52]         # where the PWR_FLAG group for the supplied nets goes
+
 components:
   U-LVLSHIFT:
-    symbol: "74xx:74LS125"          # same pinout and symbol; value says what is fitted
+    symbol: "74xx:74AHCT125"
     value: "74AHCT125"
     # Package pin numbers, SOIC-14 [ds datasheets/logic/SN74AHCT125.pdf p.1,
     # pin-out drawing: 1OE 1, 1A 2, 1Y 3, 2OE 4, 2A 5, 2Y 6, GND 7, 3Y 8,
