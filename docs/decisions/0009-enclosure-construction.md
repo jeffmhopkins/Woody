@@ -331,8 +331,8 @@ thumb keys and the U-bolt:
 > its LEDs standing up into the opening (owner, 2026-09-26: "the matrix can
 > be up higher out of the way and still allow the connectors", then "tighter
 > to the acrylic"), wired to the
-> carrier by a pigtail soldered to its pads *(since ADR 0017: a 20-way
-> ribbon, soldered to its pads, into J-MCU on the main board)*, so **the carrier cutout below is
+> carrier by a pigtail soldered to its pads *(since ADR 0017: a 24-way
+> ribbon (ADR 0018), soldered to its pads, into J-MCU on the main board)*, so **the carrier cutout below is
 > no longer needed** and which face carries the LEDs stops being a risk. The
 > etherCON's rear socket and the patch plug pass **under** it, beside its
 > USB-C plug, so only the connector's housing queues behind it; the connector
@@ -641,8 +641,8 @@ LED power and 800 kHz data — 10 kΩ, 100 Ω and 10 nF per switch position on t
 cluster boards (ADR 0001).
 
 *(Amended 2026-09-26: since ADRs 0016 and 0017 there is no hand-built loom.
-The key boards are on flat flex *(1.27 mm IDC since 2026-09-27, ADR 0017's amendment)* and the Matrix on a 20-way ribbon; how its
-spare positions are used is open on `CBL-MCU-RIBBON`.)*
+The key boards are on flat flex *(1.27 mm IDC since 2026-09-27, ADR 0017's amendment)* and the Matrix on a 24-way ribbon, whose extra positions carry 5 V and
+ground (ADR 0018, `CBL-MCU-RIBBON`).)*
 **Run two spare conductors in every internal loom.** The looms are hand-built,
 once, and threaded through channels in a glued sub-assembly. The lid comes off,
 but the looms do not re-route themselves. A spare pair costs a few cents and

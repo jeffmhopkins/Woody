@@ -1,7 +1,7 @@
 # 0020 — The key boards are screwed to the key plate
 
 **Status:** Accepted. Decided by the owner, 2026-09-27, and amended the same
-day (points 3 and 6; *Amendment* below). Parts open until M4: the standoff's
+day (points 3 and 6, and point 5's notes; *Amendment* below). Parts open until M4: the standoff's
 length and alloy are the plate vendor's to confirm (below).
 
 ## Context
@@ -52,8 +52,8 @@ connector envelope using a stand-in size. The real footprint, a Molex 200528
    - The board's holes are unplated (NPTH).
    - Each hole sits in a copper keep-out on both layers. On top it is
      covered by the standoff's end face, and underneath by the screw head.
-   - No track, via or pour reaches the steel, so the screw cannot bond the
-     plate to `GND_CHAIN` or short a signal. `tools/pcb.py` places the keep-out
+   - No track, via or pour reaches the standoff or the screw head, so the
+     screw cannot bond the plate to `GND_CHAIN` or short a signal. `tools/pcb.py` places the keep-out
      from the CAD's standoff diameter and screw head, and the router treats it
      as an obstacle.
 5. **The ribbon connector envelope is the Molex 200528's footprint.**
@@ -72,6 +72,12 @@ connector envelope using a stand-in size. The real footprint, a Molex 200528
      `boards.chain_plug_*`, from the banked Samtec pages. The rule is now
      "key-board screw heads clear of the chain header", and the no-parts
      strip is under the header, its plug and the ribbon's hairpin.)*
+   - *(Amended 2026-09-27, with point 3: the second and third bullets above
+     no longer hold. The board was grown to point 3's rectangle, and
+     `J-CHAIN` is not at the board's end: it sits between the switches where
+     the body CAD finds room (`mechanical/export/pcb-geometry.echo` "chain",
+     checked by `drc.echo` "chain headers on the left_hand boards clear of
+     the switches" and its right-hand twin).)*
 
 6. **The key boards are 1.2 mm thick** (`boards.key_board_t`).
    - The switch pins end 5.10 mm below the seat, and the board's top is

@@ -221,8 +221,8 @@ figures:
     owner: hardware/cluster/key-switch-network/key-switch-network.md
     derivation: "Pressed node sits at 3.3 x 100/(2200+100) = 0.1435 V, NOT 0 V. Charging through 2.2k (tau = 103.40 us): t = -103.40 x ln((3.3-2.31)/(3.3-0.1435)) = 119.9 us"
     threshold_note: "V_IH = 2.31 V = 0.70 x VCC. THIS FIGURE MOVED TWICE ON 2026-09-21 AND THE SECOND MOVE PUT IT BACK. First move: TI's SCLS116E (datasheets/logic/74HC165-ti-scls116e.pdf) has NO 3.3 V row - it tabulates 2 V (1.5/0.5 = 0.75/0.25), 4.5 V and 6 V (both 0.70/0.30) - so the 0.75/0.25 bound was taken on the reasoning that 0.70/0.30 'breaks' at 2 V. Second move: onsemi's MC74HC165A/D Rev. 13 p.4 PUBLISHES A 3.0 V ROW, V_IH 2.1 V / V_IL 0.9 V, which is exactly 0.70/0.30. 3.3 V is therefore bracketed on BOTH sides by published 0.70/0.30 rows and needs no extrapolation through the 2 V point; 2 V is the single exception at the bottom of the family range, not a trend. TI, Nexperia (Rev. 8) and Toshiba agree with onsemi digit for digit at every shared rail, so the 3.0 V row is the family's, not one vendor's. All four PDFs are banked."
-    conservative_bound: "If a TI SN74HC165 is the part fitted, its own datasheet guarantees nothing at 3.3 V and the pessimistic bound is V_IH = 2.475 V, giving 138.7 us. Nothing in the design depends on which is used - the release is absorbed by the asymmetric debounce either way. Design margin against 138.7 us if it ever gets tight."
-    forbidden: ["`V_IH` at **125", "release ~93 us", "~93 µs hardware", "93.2 us", "at **138.7", "crosses `V_IH` at **138.7", "0.75 x VCC = 2.475", "0.75 × VCC = 2.475", "release is ~93us", "~93us", "at ~125us", "~125us"]
+    conservative_bound: "If a TI SN74HC165 is the part fitted, its own datasheet guarantees nothing at 3.3 V and the pessimistic bound is V_IH = 2.475 V, giving 138.7 us. Nothing in the design depends on which is used - the release is absorbed by firmware's release window (sized against ks33-contact-bounce) either way. Design margin against 138.7 us if it ever gets tight."
+    forbidden: ["`V_IH` at **125", "release ~93 us", "~93 µs hardware", "93.2 us", "at **138.7", "crosses `V_IH` at **138.7", "0.75 x VCC = 2.475", "0.75 × VCC = 2.475", "release is ~93us", "~93us", "at ~125us", "~125us", "125 µs release filter", "125 µs the key network", "free hardware debounce", "a BOUNCE filter"]
     escape_note: |
       THE CSV SPELLING IS NOT THE MARKDOWN SPELLING, 2026-09-21. Every
       pattern above was written from a prose page - "`V_IH` at **125" - and
@@ -235,6 +235,7 @@ figures:
       itself - and a reader cross-checking the page against the BOM found
       agreement on one of the two numbers.
     false_positive_note: "A bare 125 us also legitimately means the MEAN SAMPLING PERIOD (0-250 us at 4 kHz) and the 8 kHz LOOP PERIOD. Match the phrase, not the numeral. 138.7 us appears legitimately as the stated conservative bound and in the text recording the two moves - those lines carry refutation wording."
+    role_note: "This is a GLITCH filter on release, not the debounce: ks33-contact-bounce is many times longer, so rejecting bounce is firmware's release window (firmware/README.md). The last two patterns guard the key-switch-network BOM rows, which called the RC 'a free hardware debounce' and 'a BOUNCE filter'."
     note: "Starting from 0 V instead of the divider voltage gives 124.5 us, which is the error the 125 us figure came from."
 
   - id: key-press-time
@@ -299,6 +300,42 @@ figures:
     # spellings are deliberately not patterns here. "~4 connectors" is not a
     # pattern either: 4 is the right value now.
     forbidden: ["five connectors must match", "Five connectors", "eight connectors", "EIGHT connectors", "EIGHT of them across five boards", "eight in all", "7 chain connectors", "J-CHAIN 1/8"]
+
+  - id: key-board-chain-pinmap
+    quantity: Key-board J-CHAIN pin for each main-board J-CHAIN pin (the ribbon's pin map)
+    value: "key-board pin = 13 - main-board pin"
+    status: settled
+    owner: hardware/interfaces/key-chain-loom/key-chain-loom.md
+    derivation: "A keyed socket always mates position k to header pin k, so the map is set by how the cable is built. Ordered -RN2 (notch reversed on the key-board end) the key-board socket mates rotated 180 degrees, and conductor k meets key-board pin 13 - k [datasheet, datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf and SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf; key-chain-loom.md]. The key boards' sheets and hardware/interfaces/key-chain-loom/netlist.yaml carry it."
+    # Tracked 2026-09-27 (review wave 2026-09-27-lh-key-board, K8-9): the map
+    # moved twice in one day and was restated in ten files with no entry here.
+    # GREPPED FIRST, corpus only, every spelling below: the ONLY hits were
+    # key-chain-loom/notes.md's dated paragraph ("12 − k", "14 − k", "SER on
+    # key-board pin 8"), which carries refutation wording.
+    forbidden: ["12 − n", "14 − n", "12−n", "14−n", "12-n", "14-n", "12 − k", "14 − k", "12−k", "14−k", "12-k", "14-k", "12 SCK, 10 SH/LD", "SER on key-board pin 8", "SER` on key-board pin 8", "3V3 on key-board pin 4", "3V3` on key-board pin 4", "FFC-CHAIN,controller", "ffc_conn_l:", "ffc_conn_w:", "ffc_conn_h:", "Molex_200528"]
+    false_positive_note: >
+      DO NOT add a bare "key-board pin 8" or "key-board pin 4". Under the live
+      map both are GROUNDS (key-board pins 4/6/8/10/12), so a correct sentence
+      about a ground fires on them. The retired map put SER on key-board pin 8
+      and 3V3 on pin 4, so only those pairings are patterns. "13-n", "13 − k"
+      and "13 − n" are the live map, never patterns. FFC-CHAIN, ffc_conn and
+      200528 belong to the retired flat-flex/ZIF chain. As bare words they
+      appear legitimately in dated history (notes.md, ADR 0017/0020, the
+      tooling.md findings), not all of it within the refutation window, and a
+      bare pattern fired on nine such lines when tried (2026-09-27). So only
+      their DATA spellings are patterns - the BOM row's ref-and-category, the
+      body.yaml keys, the KiCad footprint name - which no prose uses.
+
+  - id: mcu-ribbon-ways
+    quantity: Conductors in the Matrix ribbon (CBL-MCU-RIBBON into J-MCU)
+    value: "24-way"
+    status: settled
+    owner: hardware/carrier/carrier.md
+    derivation: "ADR 0018 decision 1: twelve used GPIO, three 5 V, four ground, 3V3, EN, IO0 and two spare GPIO."
+    # Tracked 2026-09-27 (K8-8): three ADR lines dated to the IDC change still
+    # said "20-way ribbon". ADR 0018 narrates the change as "It was 20-way"
+    # and "keep 20-way and spend", which this pattern does not match.
+    forbidden: ["20-way ribbon"]
 
   - id: key-pullup-qty
     quantity: R-KEY-PU quantity

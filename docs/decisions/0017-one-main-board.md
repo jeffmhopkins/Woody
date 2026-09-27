@@ -1,6 +1,6 @@
 # 0017 — One main board
 
-**Status:** Accepted
+**Status:** Accepted; amended 2026-09-27 (the key-board chain: 1.27 mm IDC, *Amendment* below)
 
 Replaces the **centre board** and the two **thumb boards** with one board.
 The centre board is named in ADRs 0009, 0013, 0014, 0015 and 0016 and in
@@ -117,8 +117,8 @@ board still reaches the main board by one ribbon, and the lid still comes off
 with nothing to line up blind — but its parts, its path and its length change:
 
 - **`J-CHAIN`** is a **2×6, 1.27 mm pitch, shrouded, keyed, right-angle,
-  through-hole IDC header**, the same part at all four positions (stand-in
-  Samtec SHF-106-01-L-D-RA,
+  through-hole IDC header**, the same part at every `J-CHAIN` position
+  (`chain-connectors`; stand-in Samtec SHF-106-01-L-D-RA,
   `datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf`).
   `chain-connectors` is unchanged.
 - **The cable is a flat IDC ribbon**, 12 conductors at 0.635 mm, with a 2×6
@@ -153,9 +153,13 @@ rejected IDC as too tall for the gap. That was judged from memory, about
 2.54 mm parts. Measured this time from banked drawings: a 2.54 mm IDC header
 and plug stack 13.1 mm (14.6 mm worst case) `[datasheet, the banked 2.54 mm
 header and socket drawings in datasheets/connectors/]` in the gap
-between the boards `[calc: twice the fold radius in drc.echo "key-chain ribbon
-closed…" plus boards.chain_hdr_h]`, with parts on both boards, and fits
-nowhere. The 1.27 mm right-angle header stands only `boards.chain_hdr_h` off
+between the boards — the key board's underside to the main board's top face,
+which is the body model's board stack (`mechanical/cad/woody_body.scad`, the
+key board's underside less the main board's top; no `drc.echo` line prints it
+yet) — with parts on both boards, and fits nowhere. *(Amended 2026-09-27: this
+bracket cited the gap as twice the ribbon's fold radius plus
+`boards.chain_hdr_h`. That was true only of the first hairpin, and it no
+longer derives the gap; the gap itself did not move.)* The 1.27 mm right-angle header stands only `boards.chain_hdr_h` off
 each board (off the banked full print), and fits.
 
 **Consequences.**

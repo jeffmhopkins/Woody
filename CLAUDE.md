@@ -275,7 +275,9 @@ repeating, and record the verification.
 - **THE KICAD SHEET IS THE SOURCE OF TRUTH** (ADR 0019) wherever a circuit has
   one — `<circuit>/<circuit>.kicad_sch` whose title block names the circuit.
   It owns every connection and each part's identity (fields `Row`, `Pins`,
-  `Pins_source`, `Note`); ports are hierarchical labels. **Its `netlist.yaml`
+  `Pins_source`, `Note`, and the bought part: `Manufacturer`, `MPN`, `LCSC`,
+  `Assembly` = `machine`/`hand`/`none` — the BOM row says what the part must
+  be, the sheet which one is bought); ports are hierarchical labels. **Its `netlist.yaml`
   is EXPORTED** by `python3 tools/kicad.py export <dir>` and must never be
   edited: an edit survives until the next export and then disappears. Boards
   are KiCad projects under `hardware/boards/`, placing circuit sheets once per

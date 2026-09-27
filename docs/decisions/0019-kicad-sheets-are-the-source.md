@@ -1,6 +1,7 @@
 # 0019 — The KiCad sheets are the source of truth
 
-**Status:** Accepted. Decided by the owner, 2026-09-27. Migration in progress:
+**Status:** Accepted. Decided by the owner, 2026-09-27; amended the same day
+(the sheet names the bought part). Migration in progress:
 the key-board circuits and both key boards are done (see *Consequences*).
 
 ## Context
@@ -25,7 +26,8 @@ these KiCad schematics actually be the source of truth of all the things.")
   every connection and each part's identity as KiCad fields: `Row` (the BOM
   row it buys from), `Pins` (the pin map, with KiCad's own pin names where it
   names them), `Pins_source` (the datasheet page that proves the map) and
-  `Note`. Ports are hierarchical labels, carrying their direction, peer and
+  `Note` — and, since the 2026-09-27 amendment below, the bought part:
+  `Manufacturer`, `MPN`, `LCSC` and `Assembly`. Ports are hierarchical labels, carrying their direction, peer and
   register figure as fields. The design prose and derivations stay in the
   circuit's `.md` page, which is where arguments read and review best (the
   owner's choice over moving prose onto the sheet).
@@ -53,7 +55,8 @@ these KiCad schematics actually be the source of truth of all the things.")
 - **Prose on the sheets too.** Long arguments read badly on a sheet and
   review badly in a diff. Not chosen.
 - **A flat sheet per board.** Simpler files, but a change to the key network
-  would be made six times on one board and nineteen in all. Not chosen.
+  would be made once per networked position on every board — the count
+  `key-switch-network/netlist.yaml`'s `replicated:` gives. Not chosen.
 
 ## Consequences
 
@@ -88,3 +91,28 @@ these KiCad schematics actually be the source of truth of all the things.")
 - **`kicad.py check` needs KiCad 9**, so it is not in the commit hook, which
   runs before every shell command. It is run by hand, and
   `docs/reference/tooling.md` says when.
+
+## Amendment, 2026-09-27 — the sheet names the bought part
+
+Decided with the left-hand key board's first order (`hardware/boards/key-board-lh/`).
+
+- **Every part on a migrated sheet carries four more fields:**
+  `Manufacturer`, `MPN` (the orderable part number), `LCSC` (the board
+  house's stock number, for a machine-placed part) and `Assembly` —
+  `machine` (placed by the board house, so it needs an `LCSC`), `hand` (fitted
+  after, listed in the hand-assembly file) or `none` (copper only: a test pad,
+  a mounting hole). `tools/pcb.py` builds a board's BOM, placement and
+  hand-assembly lists from these fields and refuses a part without an
+  `Assembly`, or a `machine` part without an `LCSC`.
+- **The BOM row says what the part must be; the sheet says which one is
+  bought.** The fragment's `part`, `package` and `description` are the
+  requirement (value, tolerance, dielectric, package), and its `manufacturer`
+  column is the constraint on who may supply it (`multiple` means any vendor
+  that meets the row). The sheet's `Manufacturer`/`MPN`/`LCSC` are the choice
+  that meets it, and they win for ordering. Change the bought part on the
+  sheet, then re-export and re-render; change the row only when the
+  requirement changes.
+- **This does not undo "part facts in two places" (Options).** The row keeps
+  the requirement and the sheet the choice — two different facts. A migrated
+  circuit's fragment does not restate the sheet's part number; a page that
+  needs one cites the sheet (or the board's generated `fab/` BOM).

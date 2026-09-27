@@ -19,7 +19,7 @@ The `Dir` and `Peer` columns are defined once in
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
 | `SCK` | in | `interfaces/key-chain-loom` | `chain-conductors` | One net to all four devices: a trace on the main board; on a key board, ribbon conductor 2 = key-board `J-CHAIN` pin 11 |
-| `SH/LD` | in | `interfaces/key-chain-loom` | `chain-conductors` | The chain bus: a trace on the main board; on a key board, ribbon conductor 4 = key-board `J-CHAIN` pin 9. Falling edge loads the parallel inputs |
+| `SH/LD` | in | `interfaces/key-chain-loom` | `chain-conductors` | The chain bus: a trace on the main board; on a key board, ribbon conductor 4 = key-board `J-CHAIN` pin 9. Level-sensitive: while it is LOW the parallel inputs load, asynchronously; the state captured is the inputs' when it returns HIGH |
 | `SER` | in | `interfaces/key-chain-loom` | `chain-connectors` | Point to point: the next device's `QH`, or at the chain end `IO33` and its pull-up. On a key board it is always ribbon conductor 6 = key-board `J-CHAIN` pin 7. Which device feeds which is the hop map in the key-chain netlist |
 | `QH` | out | `interfaces/key-chain-loom` | `chain-connectors` | Toward the MCU: on a key board, ribbon conductor 8 = key-board `J-CHAIN` pin 5; `right_thumb`'s is a trace to the MCU. Bit 0 is the `H` input of the `right_thumb` device |
 | `A`…`H` | in | `cluster/key-switch-network`, `cluster/key-marker-and-bits` | `marker-bits`, `free-bits` | Eight parallel inputs per device: a switch network, a marker strap or a free bit |
@@ -28,8 +28,10 @@ The `Dir` and `Peer` columns are defined once in
 
 ## §1 The device
 
-*Connectivity is **[`netlist.yaml`](netlist.yaml)**, not this drawing, and that
-file is one schematic for four boards — `replicated: 4`. The eight parallel
+*Connectivity is the KiCad sheet **[`key-register.kicad_sch`](key-register.kicad_sch)**
+(render: `key-register.sch.png`), not this drawing (ADR 0019). `netlist.yaml`
+is exported from the sheet and is what the checks read — never edit it. It is
+one schematic for four boards — `replicated: 4`. The eight parallel
 inputs are deliberately not netted there: which of `A`…`H` is a switch, a
 marker strap or a free bit is different on every board, so no assignment
 would be true of all four. The allocation table lives on
@@ -56,10 +58,12 @@ would be true of all four. The allocation table lives on
   has no reservoir.                                [repo] 0001 fix 5
 ```
 
-**Bit order inside the device is `H` first, then `G F E D C B A`.** On the
-falling edge of `SH/LD` the parallel inputs load; `H` (D7) appears at `QH`
-immediately, and each clock shifts the next one toward the output `[from
-memory]`. Combined with ADR 0001's *"bit 0 is the first bit clocked out"*
+**Bit order inside the device is `H` first, then `G F E D C B A`.** While
+`SH/LD` is LOW the parallel inputs load, asynchronously and level-sensitively
+(ADR 0001); what the chain then shifts out is the inputs' state at the moment
+`SH/LD` returns HIGH. During the load `H` (D7) appears at `QH`, and each clock
+after it shifts the next one toward the output `[datasheets/logic/74HC165-nexperia.pdf
+p.4, Table 3 (parallel load: Q7 = D7; serial shift on CP ↑)]`. Combined with ADR 0001's *"bit 0 is the first bit clocked out"*
 `[repo] 0001, key-layout.yaml`, that fixes **bit 0 = the `H` input of the
 `right_thumb` device** and settles the `H`…`A` question the carrier page left
 open — the ordering half of it, anyway. Which *switch* lands on which input is

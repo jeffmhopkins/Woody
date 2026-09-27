@@ -61,7 +61,7 @@ nets:
 
   GND_CHAIN:
     kind: reference
-    carries: "Chain return: the main board's ground, and five alternating grounds on J-CHAIN pins 1/3/5/7/9 of each ribbon"
+    carries: "Chain return: the main board's ground, and five alternating grounds on each ribbon: main-board J-CHAIN pins 1/3/5/7/9, key-board pins 4/6/8/10/12"
     figure: chain-conductors
     origin: interfaces/key-chain-loom
     note: "It is the main board's ground pour, carried to each key board by its ribbon's five grounds - a separate name for those conductors, not a separate node"

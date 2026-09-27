@@ -130,7 +130,8 @@ is the one place latency is audible.
 > intent: the gate rejects a single corrupted 32-bit frame, not contact
 > chatter. What it means is that **rejecting bounce is entirely the release
 > filter's job**, and the release window has to outlast the bounce burst rather
-> than the 125 µs the key network's RC contributes. `firmware/README.md` sets
+> than the key network's RC delay (`key-release-time`), which is a glitch
+> filter, not a debounce. `firmware/README.md` sets
 > that window from measured bounce at M1; the vendor maximum is now the number
 > M1 has to come in under, instead of the 20 ms the 2021 firmware guessed.
 

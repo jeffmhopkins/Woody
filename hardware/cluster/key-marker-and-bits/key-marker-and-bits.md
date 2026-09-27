@@ -65,7 +65,9 @@ The argument, for the record:
 A marker is a framing check: firmware reads it every scan, and a frame that
 fails it holds the previous frame and increments a visible error counter
 `[repo] 0001`. Its whole value is converting an invisible intermittent fault
-into a number on the display.
+into a number someone can read — the error counter. There is no display
+(ADR 0015); how the counter is surfaced, on the matrix or over USB, is
+firmware's (F7).
 
 **Six bits cannot do that per device in both directions, and eight can.** With
 two marker bits in every device, one wired high and one wired low, a device that
@@ -85,7 +87,7 @@ one now means recutting the thumb plate and oak bottom.)* **So the trade is: two
 that could never be used against per-device fault detection in both
 directions.**
 
-Proposed levels:
+Levels:
 
 | Device | Input | Bit | Level | | Input | Bit | Level |
 |---|---|---|---|---|---|---|---|
@@ -102,8 +104,13 @@ permutation that flipping it kills — [`notes.md`](notes.md).)*
 **What the marker still cannot see**, stated plainly because firmware needs
 it: a single-bit flip is caught **8 times in 32**, and the 24 bits that carry
 the music are never among them — so **the visible error counter undercounts
-true corruption about 4×**. A mid-shift `SH/LD` reload passes at 11 of 31
-reload points. And the straps go direct to the rails, so they share no
+true corruption about 4×**. **A mid-shift `SH/LD` reload is not reliably
+caught**: a reload after *k* of 32 clocks makes each later bit a copy of the
+bit *k* places earlier in the frame, so whether all eight marker positions
+still read right depends on *k* and on which keys are held. `[calc over
+allocation.yaml]` Only a reload at the last clock passes for every key state,
+and many reload points pass for some key states. Firmware must not count on
+the marker to catch it. And the straps go direct to the rails, so they share no
 component with the 21 key networks they are read as vouching for.
 
 That leaves **3 free bits**: `left_thumb` `B` and `A` (22, 23) and `left_hand`
@@ -136,10 +143,12 @@ be right before the boards are ordered, and firmware has to be told the pattern.
 *The two items from `cluster-boards.md`'s `Still open` list that belong to this
 circuit, moved verbatim 2026-09-21. `§4` is this page.*
 
-- **Where the 3 reserved spare-switch positions go.** Proposed on `right_thumb`
-  as the control cluster; placement is an M2 decision with hands on the mule
-  `[repo] key-layout.yaml`, and it decides which board carries them. There
-  are no cutouts for them (owner, 2026-09-26, ADR 0010).
+- **Whether the reserved spare-switch positions** (`config/key-layout.yaml`
+  `spare_bits_switches`) **are ever fitted.** Their bits are decided and wired
+  — `sw+` `sw−` on `right_thumb` (`allocation.yaml`), networks fitted — and
+  there are no cutouts for them (owner, 2026-09-26, ADR 0010). Where on the
+  body a switch would go, and so whether fitting one is worth recutting
+  `PLATE-THUMB` and the oak bottom, is an M2 decision with hands on the mule.
 - **Whether the last 3 free bits should be marker bits too**, making it 11.
   The argument that took the marker from 6 to 8 — a free bit has no plate
   cutout and the body bonds shut, so it can never become a switch — applies to

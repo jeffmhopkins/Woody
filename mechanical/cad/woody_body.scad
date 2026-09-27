@@ -106,7 +106,7 @@ rh_run = sum(layout_rh_gaps);
 thumb_recess_clear = stack_cap_clear;
 rc = switch_keycap + 2 * thumb_recess_clear;    // a thumb recess, square
 thumb_pitch = layout_lh_gaps[0];                 // the top's index-to-middle pitch
-cluster_margin = 4;        // drawing convention: board edge past the outermost switch body
+cluster_margin = boards_kb_end_margin;   // a key board's end past its outermost switch cutout (the board itself: kb_rect)
 
 // The MOUTH END. There is no display (owner, 2026-09-26: "remove the upper
 // display ... we can do all this with the matrix led"; ADR 0015), so the
@@ -352,7 +352,6 @@ module plate_top_2d() {
             for (k = top_keys) cutout_at(key_xy(k), key_rot(k), plate_cutout);
             for (f = fasteners()) translate(f) circle(d = tap_d_m3);
             for (cl = ["left_hand", "right_hand"], s = kb_standoffs(cl)) translate(s) circle(d = hardware_kb_standoff_hole);
-            for (cl = chain_ribbon_cls) let(q = chain_tail_rect(cl)) translate([q[0], q[1]]) square([q[2] - q[0], q[3] - q[1]]);
         }
     }
 }
@@ -537,7 +536,11 @@ fastener_notch = 1.5 + boards_board_clear;   // an M3's radius and a clearance: 
 // boards, in the gap between the hands, and between the last key board and
 // the connector. ADR 0009's "~80 mm apart" was for a 457 mm body; on the
 // derived body the stations fall where the keys are not.
-fastener_x = [(x_in0 + x_lh0 - board_lead) / 2, (x_gap0 + x_rh0) / 2, tail_fastener_x];
+// The mouth pair sits midway between the cap and the first key board, but no
+// nearer the cap than the breath sensor's far end allows (the sensor is on the
+// main board's same edge; sensor_c, below, is placed from the same numbers).
+sensor_x1 = x_in0 + boards_board_clear + 0.5 + boards_sensor_body;
+fastener_x = [max((x_in0 + x_lh0 - board_lead) / 2, sensor_x1 + fastener_notch), (x_gap0 + x_rh0) / 2, tail_fastener_x];
 function fasteners() =
     [for (x = fastener_x, sd = [0, 1]) [x, sd == 0 ? u_y0 + hardware_fastener_inset : W - u_y0 - hardware_fastener_inset]];
 
@@ -660,9 +663,9 @@ kb_top = z_plate_top - switch_pcb_below_seat;                 // the key boards'
 // no other part there, and the plate's window over its pin tails.
 function kb_chain_rect(cl) = let(sp = chain_span(chain_x(cl), chain_dir(cl)))
     [sp[0], chain_y - boards_chain_hdr_l / 2, sp[1], chain_y + boards_chain_hdr_l / 2];
-// Over the key board's chain header's pin tails, which come up through the
-// board toward the plate - it is grounded, and the gap is 2.2 mm: a window
-// through the plate, under the oak.
+// Where the key board's chain header's pin tails come up through the board:
+// outside every switch body (chain_clear), and short of the plate (drc.echo
+// "J-CHAIN pin tails clear of the key plate").
 function chain_tail_rect_at(x, d) = let(a = x - d * boards_chain_hdr_pin_back, b = x - d * (boards_chain_hdr_pin_back - 1.27))
     [min(a, b) - 1, chain_y - 6.35 / 2 - 1, max(a, b) + 1, chain_y + 6.35 / 2 + 1];
 function chain_tail_rect(cl) = chain_tail_rect_at(chain_x(cl), chain_dir(cl));
@@ -841,10 +844,10 @@ strip_l = min(cb_x[1] - lighting_strip_inset, jm_x0 - boards_board_clear) - stri
 // hanging from its underside directly over the main board's, both mouths
 // facing the same way along the body, in the far band beside the LED strip.
 // The ribbon runs out of one plug, folds back on itself and into the other:
-// a flat hairpin lying along the body, so it never stands across the strip's
-// light. Its length is what the lid needs laid off to the side with the
-// ribbon still plugged in (routing.chain_service); closed, that length is the
-// hairpin's legs.
+// a flat hairpin lying along the body between the two plugs' heights, so it
+// never stands across the strip's light. Its length is what the lid needs
+// laid off to the side with the ribbon still plugged in (routing.chain_service);
+// closed, that length is the hairpin's legs.
 far_s = tube_side < 0 ? 1 : -1;                  // the far side, away from the tube
 // Exploded, the main board rises by e_mb and the key boards by e_kb; the
 // cables stretch to follow, so they stay connected in the picture.
@@ -856,20 +859,20 @@ ribbon_cls = chain_ribbon_cls;
 chain_y = W / 2 + far_s * (W / 2 - u_y0 - boards_board_clear - 0.5 - boards_chain_hdr_l / 2);
 chain_zk = top_z - boards_chain_hdr_mouth_z;     // the key board's plug, its centre
 chain_zm = cb_top + boards_chain_hdr_mouth_z;    // the main board's
-// THE CABLE LEAVES EACH SOCKET DOWNWARD, down the socket's back face: an FFSD
-// socket's cable exits on the side away from its key (datasheets/connectors/
-// SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf, sheet 1), the main board's socket is
-// keyed up, and the key board's has its notch reversed (-RN2) so it is keyed
-// up too. That reversed notch is also what makes key-board pin = 13 - main-
-// board pin, with the ribbon flat and untwisted (key-chain-loom.md). So the
-// main board's leg lies on the main board, the key board's hangs just under
-// its socket, and both run the same way to the fold.
-// The main board's leg clears the thumb switches' centre poles, which stand
-// proud of the main board by the pole's reach less the board's depth under
-// the seat, plus a drawing-convention 0.3.
-chain_thumb_stub = switch_pole_tip_below_seat - (switch_pcb_below_seat + switch_pcb_t) + 0.3;
-chain_z_low = cb_top + chain_thumb_stub + routing_chain_ribbon_t / 2;
-chain_z_up = chain_zk - boards_chain_plug_t / 2 - 1.5;
+// WHICH WAY THE CABLE LEAVES EACH SOCKET. On an FFSD cable the first socket's
+// key is on the side its cable leaves by, and a -RN2 cable reverses the
+// second socket's notch, so on this cable BOTH sockets' keys are on their
+// cable sides (datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf,
+// sheet 1 fig 1 and sheet 2 fig 3). The main board's header stands upright,
+// its key slot in the wall away from the board, so its cable leaves UPWARD;
+// the key board's is the same part upside down, so its cable leaves
+// DOWNWARD. The two face each other across the gap between the plugs, and
+// the ribbon's spare length folds into a flat hairpin in that gap, clear of
+// both boards' parts: each end turns out along the body at routing.chain_bend_r,
+// the two legs run the same way, and the fold joins them. (The pin map this
+// cable gives, key-board pin = 13 - main-board pin, is key-chain-loom.md's.)
+chain_z_low = chain_zm + boards_chain_plug_t / 2 + routing_chain_bend_r + routing_chain_ribbon_t / 2;
+chain_z_up = chain_zk - boards_chain_plug_t / 2 - routing_chain_bend_r - routing_chain_ribbon_t / 2;
 chain_r = (chain_z_up - chain_z_low) / 2;        // the fold's radius
 function chain_dir(cl) = routing_chain_fold[search([cl], chain_ribbon_cls)[0]];
 // A header's footprint, from its mouth at x: [x0, x1] along the body - pins,
@@ -893,23 +896,35 @@ function chain_clear(x, cl) = let(d = chain_dir(cl), sp = chain_span(x, d), c = 
                                           abs(key_xy(k)[1] - (tl[1] + tl[3]) / 2) - (tl[3] - tl[1]) / 2) - plate_cutout / 2]) >= 0.5
     // the main board's tall parts, and the hairpin clear of them too
     && (let(h = chain_hairpin_at(x, d), x0 = min(h[0], sp[0]), x1 = max(h[1], sp[1]))
-       min([for (t = tall_c) max(abs(t[0] - (x0 + x1) / 2) - ((x1 - x0) + tall_sz[0]) / 2, abs(t[1] - chain_y) - (boards_chain_hdr_l + tall_sz[1]) / 2)]) >= boards_board_clear);
+       min([for (t = tall_c) max(abs(t[0] - (x0 + x1) / 2) - ((x1 - x0) + tall_sz[0]) / 2, abs(t[1] - chain_y) - (boards_chain_hdr_l + tall_sz[1]) / 2)]) >= boards_board_clear)
+    // and the hairpin clear of the lid screws, which stand through the cavity beside it
+    && chain_screw_gap(chain_hairpin_at(x, d)) >= fastener_notch;
+function chain_screw_gap(h) = min([for (f = fasteners()) rect_gap(f, [(h[0] + h[1]) / 2, chain_y], [h[1] - h[0], routing_chain_ribbon_w], 0)]);
 // Along the key board: the clear mouth position nearest its middle.
 function chain_x(cl) = let(t = [for (k = cluster_keys(cl)) key_xy(k)[0]], m = (min(t) + max(t)) / 2,
                            ok = [for (x = [min(t) : 0.5 : max(t)]) if (chain_clear(x, cl)) x], d = [for (x = ok) abs(x - m)])
     len(ok) > 0 ? ok[search(min(d), d)[0]] : undef;
 function kb_chain(cl) = [chain_x(cl), chain_y];
 function mb_chain(cl) = [chain_x(cl), chain_y];
-// THE SERVICE LENGTH. The lid laid face down beside the body off its far edge:
-// a point of the lid at (y, z) lands at (2W - y, T - z) for the far side W,
-// mirrored for the other. The ribbon rises from the main board's plug over
-// the far side's top edge and comes down to the key board's.
-chain_side_top = z_side1 + 1;
+// THE SERVICE LENGTH. The lid laid face down on the bench beside the body,
+// off its far edge: a point of the lid at (y, z) lands at (2W - y, T - z) for
+// the far side W, mirrored for the other. The body stands level on the U-bolt's
+// loop, which hangs hardware.ubolt_drop below its bottom face (on a block of
+// that height under its other end), so everything in it is that much higher.
+// The ribbon rises from the main board's plug over the far side's top edge
+// and comes down to the key board's.
+chain_lift = max(0, hardware_ubolt_drop);
+chain_side_top = z_side1 + 1 + chain_lift;
 chain_ks = [far_s > 0 ? 2 * W - chain_y : -chain_y, T - chain_zk];
-chain_len = (chain_side_top - chain_zm) + abs((far_s > 0 ? W : 0) - chain_y) + (chain_side_top - chain_ks[1])
+chain_len = (chain_side_top - (chain_zm + chain_lift)) + abs((far_s > 0 ? W : 0) - chain_y) + (chain_side_top - chain_ks[1])
             + abs(chain_ks[0] - (far_s > 0 ? W : 0)) + routing_chain_slack;
-// Closed: the two drops down the sockets' backs, two legs and the fold.
-chain_drops = (chain_zm - boards_chain_plug_t / 2 - chain_z_low) + (chain_zk - boards_chain_plug_t / 2 - chain_z_up);
+// WHAT TO ORDER. An FFSD's length is overall, over both sockets, in inches, to
+// +/-0.125 in (the print, sheet 1 notes 8 and 11): the ribbon between the
+// sockets plus a socket's thickness at each end, and the tolerance added so
+// the shortest cable made is still long enough.
+chain_order_in = ceil((chain_len + 2 * boards_chain_plug_t + 0.125 * 25.4) / 25.4 * 100) / 100;
+// Closed: each end's turn out along the body, two legs and the fold.
+chain_drops = 2 * (PI / 2 * routing_chain_bend_r);
 chain_leg = (chain_len - chain_drops - PI * chain_r) / 2;
 function chain_exit(cl) = chain_x(cl) + chain_dir(cl) * boards_chain_plug_proud;
 // The hairpin's extent along the body, for the parts it must clear.
@@ -917,9 +932,9 @@ function chain_hairpin_at(x, d) = let(a = x + d * boards_chain_plug_proud, b = a
 function chain_hairpin(cl) = chain_hairpin_at(chain_x(cl), chain_dir(cl));
 function chain_path(cl) = let(xe = chain_exit(cl), dr = chain_dir(cl), zl = chain_z_low + e_mb, zu = chain_z_up + e_kb,
                               r = (zu - zl) / 2, zc = (zu + zl) / 2, xf = xe + dr * chain_leg)
-    concat([[xe, chain_zm + e_mb - boards_chain_plug_t / 2], [xe + dr * 0.8, zl]],
+    concat([[xe, chain_zm + e_mb + boards_chain_plug_t / 2], [xe + dr * routing_chain_bend_r, zl]],
            [for (a = [-90 : 10 : 90]) [xf + dr * r * cos(a), zc + r * sin(a)]],
-           [[xe + dr * 0.6, zu], [xe, zu + 0.6], [xe, chain_zk + e_kb - boards_chain_plug_t / 2]]);
+           [[xe + dr * routing_chain_bend_r, zu], [xe, chain_zk + e_kb - boards_chain_plug_t / 2]]);
 function path_len(p) = sum([for (i = [0 : len(p) - 2]) norm(p[i + 1] - p[i])]);
 module chain_header(cl, z0, up) {
     x = chain_x(cl); d = chain_dir(cl);
@@ -1025,18 +1040,22 @@ function so_clear(p) = let(r = boards_standoff_d / 2 + 0.5)
     && min([for (u = ubolt_legs()) norm(p - u)]) >= ubolt_hole_r + r
     && max(abs(p[0] - sensor_c[0]) - boards_sensor_body / 2, abs(p[1] - sensor_c[1]) - boards_sensor_leads / 2) >= r
     && max(abs(p[0] - tall_c[0][0]) - tall_sz[0] / 2, abs(p[1] - tall_c[0][1]) - tall_sz[1] / 2) >= r
-    && min([for (cl = chain_ribbon_cls) let(h = chain_hairpin(cl), sp = chain_span(chain_x(cl), chain_dir(cl)), x0 = min(h[0], sp[0]), x1 = max(h[1], sp[1]))
+    && min([for (cl = chain_ribbon_cls) let(sp = chain_span(chain_x(cl), chain_dir(cl)), x0 = sp[0], x1 = sp[1])
               rect_gap(p, [(x0 + x1) / 2, chain_y], [x1 - x0, boards_chain_hdr_l], 0)]) >= r + 1
     && max(abs(p[0] - (jm_x0 + jm_x1) / 2) - jm_sz[0] / 2, abs(p[1] - jm_y) - jm_sz[1] / 2) >= r
-    && max(abs(p[0] - (ju_x1 - ju_sz[0] / 2)) - ju_sz[0] / 2, abs(p[1] - ec_sock_c[0]) - ju_sz[1] / 2) >= r + routing_umb_cable_od;
+    && max(abs(p[0] - (ju_x1 - ju_sz[0] / 2)) - ju_sz[0] / 2, abs(p[1] - ec_sock_c[0]) - ju_sz[1] / 2) >= r + routing_umb_cable_od
+    // wholly on a thumb plate, or wholly off it - never through its edge
+    && min([for (cl = ["left_thumb", "right_thumb"]) let(b = thumb_box(cl))
+            max(rect_gap(p, [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2], [b[2] - b[0], b[3] - b[1]], 0),
+                min(p[0] - b[0], b[2] - p[0], p[1] - b[1], b[3] - p[1]))]) >= r;
 cb_standoffs = [for (x = [cb_x[0] + 4, lt_rest_xy[0], (gap_x[0] + gap_x[1]) / 2, rt_rest[0], (rt_rest[0] + jm_x0) / 2, cb_x[1] - 4],
                      y = [cb_y[0] + 4, cb_y[1] - 4]) if (so_clear([x, y])) [x, y]];
 module centre_board_3d() {
     P(C_PCB, false, "main board") translate([0, 0, cb_z]) linear_extrude(switch_pcb_t) cb_2d();
     P([0.35, 0.55, 0.40], false, "parts main board") translate([0, 0, cb_top]) linear_extrude(boards_smt_h) difference() {
         offset(-0.5) cb_2d();
-        // nothing under the chain header, its plug and the ribbon's hairpin
-        for (cl = chain_ribbon_cls) let(h = chain_hairpin(cl), sp = chain_span(chain_x(cl), chain_dir(cl)), x0 = min(h[0], sp[0]), x1 = max(h[1], sp[1]))
+        // nothing under the chain header and its plug (the ribbon's hairpin is above them, between the plugs)
+        for (cl = chain_ribbon_cls) let(sp = chain_span(chain_x(cl), chain_dir(cl)), x0 = sp[0], x1 = sp[1])
             translate([x0 - 0.5, chain_y - boards_chain_hdr_l / 2 - 0.5]) square([x1 - x0 + 1, boards_chain_hdr_l + 1]);
         translate([jm_x0 - 0.5, jm_y - jm_sz[1] / 2 - 0.5]) square(jm_sz + [1, 1]);
         translate([ju_x1 - ju_sz[0] - 0.5, ec_sock_c[0] - ju_sz[1] / 2 - 0.5]) square(ju_sz + [1, 1]);
@@ -1052,10 +1071,12 @@ module centre_board_3d() {
     for (i = [0 : 1 : len(cb_standoffs) - 1]) let(c = cb_standoffs[i], f = on_thumb_plate(c) ? z_thumb_top : floor_at(c[0]))
         P(C_STEEL, false, str("main board standoff ", i + 1)) translate([c[0], c[1], f]) cylinder(d = boards_standoff_d, h = cb_z - f, $fn = 6);
 }
-function on_thumb_plate(p) = len([for (cl = ["left_thumb", "right_thumb"])
-    let(q = thumb_pts(cl), h = (switch_keycap + 4) / 2)
-    if (p[0] >= min([for (a = q) a[0]]) - h && p[0] <= max([for (a = q) a[0]]) + h
-        && p[1] >= min([for (a = q) a[1]]) - h && p[1] <= max([for (a = q) a[1]]) + h) 1]) > 0;
+// A thumb plate's extent, [x0, y0, x1, y1]: thumb_outline_2d's hull, clipped to the interior.
+function thumb_box(cl) = let(q = thumb_pts(cl), h = (switch_keycap + 4) / 2)
+    [max(x_in0, min([for (a = q) a[0]]) - h), max(u_y0 + 0.5, min([for (a = q) a[1]]) - h),
+     min(x_in1, max([for (a = q) a[0]]) + h), min(W - u_y0 - 0.5, max([for (a = q) a[1]]) + h)];
+function on_thumb_plate(p) = len([for (cl = ["left_thumb", "right_thumb"]) let(b = thumb_box(cl))
+    if (p[0] >= b[0] && p[0] <= b[2] && p[1] >= b[1] && p[1] <= b[3]) 1]) > 0;
 function floor_at(x) = abs(x - ubolt_c[0]) <= ubolt_bp[0] / 2 ? z_floor + hardware_backplate_t + hardware_ubolt_nut_h : z_floor;
 
 
@@ -1305,6 +1326,8 @@ module drc_report() {
         "mm from its top face to the key boards' parts, less the clearances - every part there must fit this");
     drc(undef, "main board parts room where no key board is overhead", gap_room, "mm, up to the plate");
     drc(boards_sensor_h <= sensor_room, "breath sensor fits at the mouth end", sensor_room - boards_sensor_h, "mm spare above it");
+    drc(fastener_x[0] - sensor_x1 >= fastener_notch, "mouth lid screws clear of the breath sensor", fastener_x[0] - sensor_x1,
+        "mm from the sensor's far end to the screws' centre, against the boards' notch round a screw");
     drc(len(cb_standoffs) >= 4, "main board standoffs found clear of everything", len(cb_standoffs),
         "standoffs off the oak; the soldered thumb switches carry the board between them");
     drc(boards_tall_h <= tall_room, "regulator block fits where it stands", tall_room - boards_tall_h,
@@ -1318,16 +1341,27 @@ module drc_report() {
     // THE KEY CHAIN'S RIBBONS (ADR 0017, amended 2026-09-27): long enough to
     // plug in with the lid laid beside the body; closed, a flat hairpin.
     drc(undef, "key-chain ribbon length (derived)", chain_len,
-        "mm between the plugs: the lid laid face down beside the body, the ribbon over the far side's top edge, plus routing.chain_slack - order this length or the next one up");
-    drc(undef, "key-chain ribbon closed: hairpin leg and fold radius", [chain_leg, chain_r], "mm; the legs lie flat along the body - the main board's on it, the key board's just under its socket");
+        "mm of ribbon between the sockets: the lid laid face down beside the body, the body standing on its U-bolt, the ribbon over the far side's top edge, plus routing.chain_slack");
+    drc(undef, "key-chain cable to order (FFSD length code)", chain_order_in,
+        "inches overall, over both sockets, with the -0.125 in tolerance covered: FFSD-06-D-<this>-01-N-RN2");
+    drc(chain_r >= routing_chain_bend_r, "key-chain ribbon fold no tighter than its bend radius", chain_r,
+        "mm: the fold between the two plugs' heights, against routing.chain_bend_r");
+    tails = boards_chain_hdr_tail - boards_key_board_t;
+    drc(kb_gap - tails >= 0.5, "J-CHAIN pin tails clear of the key plate", kb_gap - tails,
+        "mm from the key header's pin tails, through the key board, to the grounded plate - no window needed");
+    drc(undef, "key-chain ribbon closed: hairpin leg and fold radius", [chain_leg, chain_r], "mm; the legs lie flat along the body between the two plugs' heights");
     for (cl = chain_ribbon_cls) let(h = chain_hairpin(cl), r = kb_rect(cl))
         drc(h[0] >= x_in0 + boards_board_clear && h[1] <= x_in1 - boards_board_clear, str("key-chain ribbon hairpin inside the body (", cl, ")"), h, "mm along the body");
+    for (cl = chain_ribbon_cls) let(g = chain_screw_gap(chain_hairpin(cl)))
+        drc(g >= fastener_notch, str("key-chain ribbon hairpin clear of the lid screws (", cl, ")"), g, "mm from the hairpin to the nearest screw's centre");
 
     // THE KEY BOARDS' STANDOFFS (ADR 0020). The standoff's length is the gap the
     // switch pins set; it sits in the plate's web between two cutouts; its screw
     // head is on the board's underside, beside the ribbon connector.
     echo("DRC", "INFO", "key-board standoff length (derived)", kb_gap,
-         "mm: plate underside to board top, set by switch.pcb_below_seat - buy standoffs this long");
+         "mm: plate underside to board top, set by switch.pcb_below_seat");
+    echo("DRC", "INFO", "key-board standoff length window", switch_pcb_below_seat_window - [1, 1] * plate_thickness,
+         "mm: the lengths that keep the switch pins' blades in the board and some pin to solder (switch.pcb_below_seat_window)");
     web = min([for (cl = ["left_hand", "right_hand"], st = kb_standoffs(cl)) cutout_gap(st) - hardware_kb_standoff_od / 2]);
     drc(web >= kb_web_min, "key-board standoffs in the plate's web", web, "mm from a standoff's barrel to the nearest switch cutout, worst case");
     echo("DRC", "INFO", "key-board standoffs", [for (cl = ["left_hand", "right_hand"]) len(kb_standoffs(cl))],

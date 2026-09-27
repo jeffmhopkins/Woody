@@ -3,7 +3,7 @@ ECHO: "PCB", "left_hand", "switch", "LH2", 70, 28.5, 0
 ECHO: "PCB", "left_hand", "switch", "LH3", 90, 28.5, 0
 ECHO: "PCB", "left_hand", "switch", "LH4", 108, 19.5, 0
 ECHO: "PCB", "left_hand", "switch", "LH5", 108, 37.5, 0
-ECHO: "PCB", "left_hand", "chain", "J-CHAIN", 79, 42.015, 1, 13.97, 7.86
+ECHO: "PCB", "left_hand", "chain", "J-CHAIN", 78.5, 42.015, 1, 13.97, 7.86
 ECHO: "PCB", "left_hand", "standoff", "M2", 40.5, 11, 2.2, 3.8, 4
 ECHO: "PCB", "left_hand", "standoff", "M2", 40.5, 46, 2.2, 3.8, 4
 ECHO: "PCB", "left_hand", "standoff", "M2", 117.5, 11, 2.2, 3.8, 4
@@ -15,7 +15,7 @@ ECHO: "PCB", "right_hand", "switch", "RH3", 198, 28.5, 0
 ECHO: "PCB", "right_hand", "switch", "RH4", 216, 19.5, 0
 ECHO: "PCB", "right_hand", "switch", "RH5", 216, 37.5, 0
 ECHO: "PCB", "right_hand", "switch", "RH6", 234, 19.5, 0
-ECHO: "PCB", "right_hand", "chain", "J-CHAIN", 183.5, 42.015, -1, 13.97, 7.86
+ECHO: "PCB", "right_hand", "chain", "J-CHAIN", 175.5, 42.015, 1, 13.97, 7.86
 ECHO: "PCB", "right_hand", "standoff", "M2", 148.5, 11, 2.2, 3.8, 4
 ECHO: "PCB", "right_hand", "standoff", "M2", 148.5, 46, 2.2, 3.8, 4
 ECHO: "PCB", "right_hand", "standoff", "M2", 243.5, 11, 2.2, 3.8, 4

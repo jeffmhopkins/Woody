@@ -218,7 +218,11 @@ The switches themselves are easily sourced and can be bought later. So:
 - **Eight of the spare chain bits belong to the marker pattern** (decided
   2026-09-21; this line said "four to six" until then)
   (ADR 0001) and are not available for switches. **Six remain** — three reserved
-  spare-switch positions and three genuinely free. This line said "eight to ten"
+  spare-switch positions and three genuinely free. *(Amended 2026-09-26: the
+  right thumb went to four keys and RT4 took the hold/preset bit, so the
+  reserved spare-switch positions are `config/key-layout.yaml`
+  `spare_bits_switches`, octave up and down, and "three" above and in the
+  first bullet no longer holds.)* This line said "eight to ten"
   while the marker was four to six; both halves were corrected 2026-09-21. What is
   more than three.
 

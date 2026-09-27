@@ -38,7 +38,7 @@ allow:
     why: "the tube pushes onto the sensor's P1 barb"
   - a: "switch *"
     b: "parts *"
-    why: "the switch pins and centre pole stand 0.75 mm proud of the cluster board, between its parts; a layer envelope cannot follow the placement"
+    why: "the switch pins and centre pole stand proud of the key board, by the pole's and pins' reach below the seat less switch.pcb_below_seat and boards.key_board_t, between its parts; a layer envelope cannot follow the placement"
   - a: "switch *"
     b: "main board"
     why: "the thumb switches solder into the main board (ADR 0017): pins and centre pole pass through its holes, which are not modelled"

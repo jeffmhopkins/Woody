@@ -7,7 +7,10 @@
      nets have netlist.yaml beside them.) -->
 
 **Status:** **First draft, 2026-09-21; board split reworked 2026-09-26** for
-[ADR 0017](../../docs/decisions/0017-one-main-board.md). The 74HC165 pin map is
+[ADR 0017](../../docs/decisions/0017-one-main-board.md); the circuits are KiCad
+sheets ([ADR 0019](../../docs/decisions/0019-kicad-sheets-are-the-source.md))
+and the key boards are laid out, screwed to the plate
+([ADR 0020](../../docs/decisions/0020-key-boards-screw-to-the-plate.md)). The 74HC165 pin map is
 **CONFIRMED pin for pin** `[74HC165-nexperia.pdf Table 2, p.4]`.
 
 Evidence marking follows the other hardware pages: `[repo]` names a file,
@@ -27,8 +30,10 @@ Since ADR 0017:
 
 The four clusters differ only in how many switch positions are fitted and which
 of their eight register bits are switches, markers or free. The device, the
-decoupling, the network and the chain wiring are identical, and they should be
-laid out from one schematic with a variant table. **The two key boards are
+decoupling, the network and the chain wiring are identical, and they are drawn
+once: hierarchical KiCad sheets placed per board, with which bit is a switch, a
+marker or free held in
+[`allocation.yaml`](key-marker-and-bits/allocation.yaml) (ADR 0019). **The two key boards are
 identical in the chain** — one connector each, `SER` in on conductor 6 and `QH` out
 on conductor 8 (key-board `J-CHAIN` pins 7 and 5; conductor k is key-board
 pin 13 − k, set by the cable, `key-chain-loom.md`) — so they differ only in switch count and strapping.
@@ -137,12 +142,15 @@ ks33-geometry.md`.
 > because `gateron.com` is unreachable from this sandbox, and the vendor drawing
 > supersedes it wherever the two disagree `[repo] ks33-geometry.md`.
 
-**The board outline cannot be drawn yet, and that is correct rather than
-incomplete.** Every `x`/`y` in `key-layout.yaml` is `null` on purpose; positions
-come out of ergonomic iteration at M2/M3, and the plate DXF and these outlines
-are both generated from that file `[repo] key-layout.yaml, 0010`. Spacing along
-the key line is deliberately non-uniform, which is why keys carry explicit
-coordinates rather than a pitch parameter.
+**The key-board outline is the body CAD's**: a rectangle across the cavity
+with a standoff in each corner (ADR 0020 point 3), exported as
+`mechanical/export/key-board-*.dxf` and placed from `config/body.yaml`
+`layout.*`, `boards.*` and `hardware.kb_standoff_*`. **Its switch positions are
+provisional until M3**: `layout.lh_gaps` and `layout.lh_offsets` stand in until
+the ergonomic iteration of M2 fills `key-layout.yaml`'s `x`/`y` (all `null` on
+purpose) `[repo] key-layout.yaml, 0010`. Spacing along the key line is
+deliberately non-uniform, which is why keys carry explicit coordinates rather
+than a pitch parameter.
 
 ### Three layout rules that are not obvious
 
@@ -151,11 +159,14 @@ coordinates rather than a pitch parameter.
   shields the key networks from the LED channel for free — and it is also a
   short waiting to happen. Every part on the plate-facing side needs clearance
   to the plate, or the board needs its passives on the far side.
-- **Plate-to-PCB standoff: 2.0–2.4 mm, and it is a height limit rather than a
-  ban** `[repo] docs/reference/ks33-geometry.md`. The pins reach **5.10 mm**
-  below the collar seat with only the last **1.9 mm** as narrow blade, so
-  **the PCB top must sit within ~3.2–3.6 mm of the seat**. Subtract
-  `plate-thickness` and that is the gap.
+- **The plate-to-PCB gap is a height limit rather than a ban.** How far the
+  pins reach below the collar seat, and how much of that is narrow blade, is
+  `docs/reference/ks33-geometry.md`'s; the band of board-top depths that
+  leaves the blade in the hole and some pin to solder is
+  `switch.pcb_below_seat_window`, and the design depth is
+  `switch.pcb_below_seat` (`config/body.yaml`). Subtract `plate-thickness` and
+  that is the gap — the standoff length is derived as `mechanical/drc.echo`
+  "key-board standoff length (derived)".
 
   Against a plate that is grounded, the rule that follows is a **height**
   rule: chip passives and SOT-23 may sit on the plate-facing side; **nothing
@@ -164,9 +175,10 @@ coordinates rather than a pitch parameter.
   going anyway, and stops forcing every decoupling capacitor across to join
   them.
 
-  Also budget a **⌀5.25 mm clearance hole through both the plate and this
-  board** for the centre pole, which protrudes 0.9–1.3 mm below the key board
-  (`boards.key_board_t`; tip 5.70 below the seat `[calc]`).
+  Also budget a **clearance hole through this board** for the centre pole
+  (its diameter: the `ks33-geometry.md` footprint). The pole's tip is
+  `switch.pole_tip_below_seat` below the seat, so it protrudes below the key
+  board by that less `switch.pcb_below_seat` and `boards.key_board_t`.
 
   > **This bullet read "there is none, and that is the answer" and derived
   > *there is no plate-facing side: put every passive on the far face*.**
@@ -209,7 +221,8 @@ and `RT` are on the main board.
 | `marker straps` | copper, no parts | 2 | 2 | 2 | 2 | **Decided** — 8-bit marker, §4. Straight to GND or 3V3, no resistor and no cap: the node never changes |
 
 **Totals:** 4 ICs, 4 decoupling caps, 19 fitted switches in 21 networked
-positions, 63 network passives. The chain's own parts — `J-CHAIN` at both ends
+positions; the network passives are the `R-KEY-PU` (`key-pullup-qty`),
+`R-KEY-SER` and `C-KEY` rows' quantities in `hardware/bom.csv`. The chain's own parts — `J-CHAIN` at both ends
 of each ribbon, `CBL-CHAIN`, and the chain-end `R-SER-TERM` on the main board —
 are the key-chain page's.
 
@@ -228,8 +241,11 @@ and the `LT` springs to
 [`key-switch-network/`](key-switch-network/key-switch-network.md), and the
 closed 74HC165 item to [`key-register/notes.md`](key-register/notes.md).*
 
-- **Plate-to-PCB standoff, and plate thickness** (§5). Both come from Gateron's
-  drawing; the second blocks M4/M5 already.
+- **The standoff part and the plate alloy** (§5, ADR 0020). The length is
+  derived (drc.echo "key-board standoff length (derived)"); the stocked part
+  that meets it and a plate alloy it can be pressed into are the plate
+  vendor's answer, at M4. **Plate stiffening** (`plate-thickness` is settled;
+  whether it needs a rib or a backer is not) gates M4/M5 — ADR 0002.
 - **Conformal coating.** `MECH-COAT` covers the main board; nothing says
   whether the key boards are coated, and they sit under an open switch contact
   in a cavity that is breathed into. Coating a soldered mechanical switch is

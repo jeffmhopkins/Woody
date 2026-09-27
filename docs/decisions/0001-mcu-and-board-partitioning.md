@@ -79,7 +79,7 @@ satellite boards distributed along the body.
 TAIL   dev board on a passive carrier: MCU, IMU, 8×8 matrix, breath sensor,
        ADC, reference, umbilical connector, USB-C. NO shift registers.
        (since ADR 0017: sensor, reference and buffer at the main board's
-       mouth end; the Matrix is on the lid, 20-way ribbon to J-MCU; the
+       mouth end; the Matrix is on the lid, 24-way ribbon (0018) to J-MCU; the
        umbilical is etherCON -> patch lead -> J-UMB on the main board)
         |
         |  (since ADR 0017: thumbs on traces, key boards on 12-way ribbons,

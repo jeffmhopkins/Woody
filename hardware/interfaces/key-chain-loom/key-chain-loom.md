@@ -360,8 +360,8 @@ before the lid is screwed down.
 ferrite bead in series with each ribbon's conductor 10 on the main board keeps
 a key board's register edges off the rail that is also the ADC's reference;
 `right_thumb`, `left_thumb` and `R-SER-TERM` stay on `DEV_3V3` directly. It is
-chosen for a low `DCR` — at the chain's whole 27.3 mA a 0.1 Ω bead drops
-2.7 mV `[calc]` — and for a rated current above the LDO's short-circuit
+chosen for a low `DCR` — at the chain's whole `key-scan-current` (every key
+closed) a 0.1 Ω bead drops under 3 mV `[calc]` — and for a rated current above the LDO's short-circuit
 current, because during a short it carries that. `≥ 600 Ω` at 100 MHz is
 `[from memory]`, and the part is open. **Check at E14:** a bead is inductive
 below its resistive band, and ~1 µH `[from memory]` against the key board's
@@ -373,12 +373,10 @@ shifting, and add a damping bulk capacitor on the key board if it rings.
 
 ## What the main board still owes the chain
 
-**The 3V3 rail, and it is a real load on the ADC's reference** `[calc]`:
-
-```
-3.3 V / (2.2 kΩ + 100 Ω) = 1.43 mA per CLOSED key
-19 closed                = 27.3 mA, as a step, at play rate
-```
+**The 3V3 rail, and it is a real load on the ADC's reference**: every closed
+key draws its pull-up's current, and the whole chain's, every key closed, is a
+step at play rate — both are `key-scan-current`, stated on
+[`key-switch-network.md`](../../cluster/key-switch-network/key-switch-network.md).
 
 Unchanged by this rework — the same pull-ups (`key-pullup-qty`) on the same
 rail. It lands on the MCP3202's reference and is accepted as a gain term; the

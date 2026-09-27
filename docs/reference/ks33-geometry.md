@@ -107,6 +107,14 @@ solder. Subtract the plate `[calc]`:
 | 1.5 mm, the MX standard — over the vendor window, ruled out | 1.7–2.1 mm |
 | **1.20 mm — `plate-thickness`, settled, and this page owns it** | **2.0–2.4 mm** |
 
+**The board's thickness sets how much pin is left to solder.** Below the
+board's underside the pins show 5.10 mm less the board-top depth less the
+board's thickness `[calc]`: at `switch.pcb_below_seat` (3.4 mm, the window's
+middle) that is 5.10 − 3.4 − 1.6 ≈ 0.1 mm on a 1.6 mm board and
+5.10 − 3.4 − 1.2 ≈ 0.5 mm on a 1.2 mm one. That is why the key boards are
+`boards.key_board_t` (ADR 0020 point 6), and why the main board's thickness
+under the thumb switches (`switch.pcb_t`) is still to be decided.
+
 > **⚠ THIS SECTION'S CONCLUSION IS REVERSED, 2026-09-21, AND SO IS THE LAYOUT
 > RULE DERIVED FROM IT.** It read *"the answer is 'there isn't one'"* and
 > *"either way the board is effectively hard against the plate underside"* —
@@ -132,14 +140,13 @@ and SOT-23 may sit on the plate-facing side; nothing with a body over about
 going anyway, and stops forcing every decoupling capacitor across to join them.
 
 The centre pole still needs a **⌀5.25 mm clearance hole through the plate *and*
-the PCB**: its tip is at −5.70 mm against a PCB top at −3.2 to −3.6 mm, so on a
-1.6 mm board it protrudes **0.5–0.9 mm** below the underside `[calc]`.
-
-> **`hardware/cluster/cluster-boards.md` §"Three layout rules that are not
-> obvious" still carries the reversed conclusion** — *"there is no plate-facing
-> side: put every passive on the far face"*, cited to this page, and computed
-> against the same withdrawn 1.5–2 mm bracket. **That page has to follow this
-> one**; it is outside this file to change.
+the PCB**. Its tip is `switch.pole_tip_below_seat` below the seat
+(`config/body.yaml`: Gateron's drawing, which beats the STEP's −5.70 mm),
+against a PCB top at −3.2 to −3.6 mm, so it protrudes below a board's
+underside by the tip depth less the board-top depth less the board's
+thickness `[calc]`: on a key board (`boards.key_board_t`) about 1 mm, more at
+the shallow end of the window; on the main board (`switch.pcb_t`) about 0.4 mm
+less than that.
 
 ### And the retention clip may not be a clip
 

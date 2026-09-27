@@ -588,8 +588,9 @@ step is 12 cents. Plus a toggle on a panel with 5.5 mm of slack
 **And the instrument already has octave control, twice.** The four left-thumb
 keys are octave/register keys in the conventional woodwind arrangement — the
 2021 firmware used three left-thumb inputs across a four-octave span — and
-ADR 0010 reserves three spare chain bits for dedicated octave up/down switches
-besides.
+ADR 0010 reserves spare chain bits (`config/key-layout.yaml`
+`spare_bits_switches`) for dedicated octave up/down switches besides
+*(amended 2026-09-27: this line said three, the count until 2026-09-26)*.
 
 Doing it in firmware is free, and **the reason it is free is worth stating**
 because it was briefly got wrong: the DAC's 0.25–4.75 V window reserve is

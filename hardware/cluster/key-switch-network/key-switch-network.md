@@ -19,8 +19,8 @@ The `Dir` and `Peer` columns are defined once in
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
 | `3V3` | in | `interfaces/key-chain-loom` | `key-pullup-qty` | The chain's 3V3 rail: a trace on the main board; on a key board, ribbon conductor 10 = key-board `J-CHAIN` pin 3. What `R-KEY-PU` pulls to. It is also the MCP3202's reference, which is what makes the static draw a live trade rather than a free one |
-| key input node | out | `cluster/key-register` | `key-release-time`, `key-press-time` | Both passives sit **at the register input**, millimetres from the switch |
-| `SW` | in | `SW-THUMB` | — | The KS-33 in its plate cutout, `cluster-boards.md` §5. Pressed = pulled LOW, through `R-KEY-SER` |
+| key input node | out | `cluster/key-register` | `key-release-time`, `key-press-time` | One node: the register input, `R-KEY-PU`, `C-KEY` and `R-KEY-SER` all sit on it. Where the three passives are placed along it is the board's layout — on a key board, beside their own switch, with the node trace running to the register over the ground pour (`hardware/boards/key-board-lh/layout.yaml`) |
+| `SW` | in | `SW1-n` (`SW-THUMB` is an option on LT) | — | The KS-33 in its plate cutout, `cluster-boards.md` §5. Pressed = pulled LOW, through `R-KEY-SER` |
 | `GND` | ref | `interfaces/key-chain-loom` | — | The main board's ground; on a key board, the ribbon's five alternating grounds. `C-KEY` and the closed switch both return here |
 | unfitted positions | — | `cluster/key-marker-and-bits` | `free-bits` | The reserved spare-switch positions carry the full network; the free bits carry a pull-up only, and the marker straps carry nothing |
 
@@ -28,8 +28,11 @@ The `Dir` and `Peer` columns are defined once in
 
 ## §2 The key network — 21 of these, spread across the four clusters
 
-*Connectivity is **[`netlist.yaml`](netlist.yaml)**, not this drawing, and that
-file says `replicated: 21` — one network, built twenty-one times. `R-KEY-PU`
+*Connectivity is the KiCad sheet
+**[`key-switch-network.kicad_sch`](key-switch-network.kicad_sch)** (render:
+`key-switch-network.sch.png`), not this drawing (ADR 0019). `netlist.yaml` is
+exported from the sheet and is what the checks read — never edit it. It says
+`replicated: 21` — one network, built twenty-one times. `R-KEY-PU`
 is bought 24 times because the three free bits carry a pull-up and nothing
 else; `tools/check-netlist.py` prints that shortfall by name every run.*
 
@@ -49,9 +52,10 @@ else; `tools/check-netlist.py` prints that shortfall by name every run.*
    3V3 rail, so a press was a 33 mA rail short and the register input
    never moved - contradicting the figure's own caption. Found in review.
 
-   Both passives are AT the register input, millimetres from the switch.
-   That is automatic: every register sits beside its own switches, on the
-   main board or a key board.
+   The register input, R-KEY-PU, C-KEY and R-KEY-SER share ONE node.
+   Where the passives sit along it is the board layout's choice: on a key
+   board they sit beside their own switch (layout.yaml), and the node
+   trace runs to the register over the ground pour.
 ```
 
 ### Derivations
@@ -68,7 +72,7 @@ else; `tools/check-netlist.py` prints that shortfall by name every run.*
 > |---|---|---|---|---|
 > | TI SCLS116E `datasheets/logic/74HC165-ti-scls116e.pdf` | 1.5 / 0.5 | *(absent)* | 3.15 / 1.35 | 4.2 / 1.8 |
 > | Nexperia Rev. 8 `74HC165-nexperia.pdf` | 1.5 / 0.5 | *(absent)* | 3.15 / 1.35 | 4.2 / 1.8 |
-> | Toshiba TC74HC165 `74HC165-toshiba.pdf` | 1.5 / 0.5 | *(absent)* | 3.15 / 1.35 | 4.2 / 1.8 |
+> | Toshiba TC74HC165 `74HC165-toshiba-1986-excerpt.pdf` | 1.5 / 0.5 | *(absent)* | 3.15 / 1.35 | 4.2 / 1.8 |
 > | **onsemi MC74HC165A Rev. 13** `74HC165-onsemi.pdf` | 1.5 / 0.5 | **2.1 / 0.9** | 3.15 / 1.35 | 4.2 / 1.8 |
 >
 > All four agree digit for digit at every shared rail, so onsemi is not a
@@ -76,8 +80,10 @@ else; `tools/check-netlist.py` prints that shortfall by name every run.*
 > **3.3 V is bracketed on both sides by published 0.70/0.30 rows**, so no
 > extrapolation through the 2 V point is needed at all. The 2 V entry is the
 > single exception at the bottom of the family's range, not the start of a
-> trend. Nexperia's own front page claims compliance with **JESD8C** (2.7–3.6 V),
-> whose levels are 0.7/0.3 × VDD `[74HC165-nexperia.pdf p.1]` — a second strike.
+> trend. Nexperia's front page also claims compliance with **JESD8C**
+> (2.7–3.6 V) `[74HC165-nexperia.pdf p.1]`, but it prints no levels there, and
+> JESD8C itself is not banked, so it is not used as evidence for any threshold
+> on this page. The onsemi bracket above stands on its own.
 >
 > `[calc]` Interpolating in **absolute volts** between onsemi's bracketing rows,
 > assuming no ratio at all:
@@ -87,7 +93,7 @@ else; `tools/check-netlist.py` prints that shortfall by name every run.*
 >
 > So both crossing times go back to what they were before yesterday's move:
 > **138.7 → 119.9 µs** and **6.89 → 5.92 µs**. Neither ever changed a
-> conclusion — the release is absorbed by the asymmetric debounce either way,
+> conclusion — the release is absorbed by firmware's release window either way,
 > and the press clears the scan period by 42× instead of 36×. What was not
 > defensible was stating 0.75/0.25 **as the datasheet threshold** when no
 > datasheet in the corpus gave a threshold at 3.3 V at all.
@@ -114,10 +120,30 @@ else; `tools/check-netlist.py` prints that shortfall by name every run.*
 | Pole | 1.54 kHz → **54 dB** at the WS2815's 800 kHz data rate |
 | Static | **1.43 mA** per closed key; 19 closed = **27.3 mA** off the chain's 3V3 |
 
-**Press is instant on the scan's timescale and release is filtered**, which is
-the asymmetric-debounce shape ADR 0001 wants — instant attack, filtered release
-`[repo] 0001`. The 125 µs release filter is half a scan period and costs
-nothing musically; note-off is filtered in firmware anyway.
+**Press is instant on the scan's timescale and release is delayed by
+`key-release-time`**, which is under half a scan period and costs nothing
+musically. **This RC is a glitch filter, not the debounce.** It swallows a
+contact opening shorter than `key-release-time`; the switch's own bounce,
+`ks33-contact-bounce`, is many times longer, so bounce passes straight through
+it in both directions — every re-closure during a release pulls the node low
+again within `key-press-time`. Rejecting bounce is entirely firmware's release
+window, sized against `ks33-contact-bounce` (the asymmetric debounce ADR 0001
+wants — instant attack, filtered release; `firmware/README.md`,
+`docs/reference/latency-budget.md`).
+
+**What `R-KEY-SER` is for.** It sits between the node and the switch, not in
+front of the register input, so it protects nothing on the register side. Its
+two jobs are the pressed-node divider (the node sits a little above 0 V, which
+both crossing figures start from) and **limiting `C-KEY`'s discharge into the
+switch contact** on every press. `[calc]` Peak = 3.3 V / (100 Ω + ≤ 0.2 Ω
+contact) ≈ 33 mA for a few µs (τ ≈ 4.7 µs, ½·47 nF·3.3² ≈ 0.26 µJ). The KS-33
+is rated **10 mA 12 VDC, resistive load** `[datasheets/mechanical/GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf,
+item 3 "Ratings"]`, so the press transient is about 3× the rating, for
+microseconds; without `R-KEY-SER` only the contact's own resistance would
+bound it. The steady closed-key current (`key-scan-current`) is well inside
+the rating. A larger `R-KEY-SER` (≈ 330 Ω brings the peak to the rating)
+raises the pressed-node voltage and slows the press; that trade is open, not
+taken here.
 
 > **Why the network is fitted at all, stated honestly.** The argument that
 > originally bought these parts — a 12 V LED edge through ~15 pF injecting a
@@ -126,8 +152,8 @@ nothing musically; note-off is filtered in firmware anyway.
 > exceed its aggressor's swing `[repo] 0001`. **The pull-up is still
 > mandatory**, because a floating CMOS input has no defined state at all — and
 > this cavity is breathed into for hours at 10–20 K above ambient, with the
-> switch contacts open. The 47 nF is a bounce filter and cheap insurance. It is
-> not what makes the topology safe.
+> switch contacts open. The 47 nF is a glitch filter and cheap insurance — not
+> a debounce (above), and not what makes the topology safe.
 
 **`R-KEY-PU` is 2.2 kΩ and the reason it is no longer 10 kΩ has expired.**
 It was chosen when each key node ran a long uncoated loom to a register at the
@@ -136,8 +162,11 @@ board, and the 2.2 kΩ was kept as cheap insurance ([`notes.md`](notes.md)).
 **Keeping it is not free any more**, because 27.3 mA of play-rate load lands on the rail that is
 also the MCP3202's voltage reference — worth 3.4 LSB, accepted on the carrier
 page `[repo] carrier.md §2`. Going back to 10 kΩ would cut that to 6.2 mA and
-0.8 LSB, at the price of a 100 µs τ in a humid cavity. **Recorded as a live
-trade, not re-opened here.**
+0.8 LSB — **but not with the fitted 47 nF.** `[calc]` 10 kΩ × 47 nF = 470 µs,
+and the release would cross `V_IH` at 470 × ln((3.3 − 0.033)/(3.3 − 2.31)) ≈
+561 µs, more than two scan periods. So 10 kΩ also means shrinking `C-KEY`
+(≈ 10 nF puts the release back under half a scan period), with less glitch
+filtering in a humid cavity. **Recorded as a live trade, not re-opened here.**
 
 ---
 

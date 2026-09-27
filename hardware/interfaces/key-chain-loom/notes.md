@@ -91,9 +91,9 @@ to plug in with the lid off, laid beside the body. `FFC-CHAIN` became
 only Samtec's catalogue pages banked, the first IDC write-up derived the key
 board's pins from the header alone `[calc]`: the same part upside down, a
 straight-through cable, standard IDC numbering — so main-board pin k was said
-to reach key-board pin 12 − k for odd k and 14 − k for even k, with the
-key-board signals "side by side in its even row", the chain-end `SER` on
-key-board pin 8, and the closed hairpin's legs "one at each plug's height".
+(superseded the same day) to reach key-board pin 12 − k for odd k and 14 − k
+for even k, with the key-board signals "side by side in its even row", the
+chain-end `SER` on key-board pin 8 (superseded), and the closed hairpin's legs "one at each plug's height".
 It was marked open until the full prints. The full prints were banked the
 same day (`SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf`, `SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf`)
 and showed the derivation asked the wrong part: a keyed socket always mates

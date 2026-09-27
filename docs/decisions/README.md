@@ -34,6 +34,11 @@ write a new one that says what changed. ADR 0005 is an example: the battery
 architecture was real work that got deleted by a better idea, and the record of
 why it was deleted is worth keeping.
 
+A **partial** reversal, where most of the decision stands, may instead be
+recorded in the same ADR as a dated `## Amendment, <date>` section, with a
+dated italic note at each point it changes, and the amendment named in the
+`**Status:**` line. ADRs 0017, 0019 and 0020 are examples.
+
 ## Index
 
 > **This table is hand-maintained, and on 2026-09-21 three of its fourteen rows
@@ -59,10 +64,10 @@ why it was deleted is worth keeping.
 | [0011](0011-licensing.md) | Licensing | Accepted |
 | [0012](0012-configuration-interface.md) | Configuration interface | Superseded by 0015 |
 | [0013](0013-two-mcu-split.md) | Two-MCU split | Superseded by 0015 |
+| [0014](0014-lighting.md) | Lighting | Accepted (geometry amended by 0016) |
 | [0015](0015-one-mcu-no-display.md) | One MCU, no display board | Accepted |
 | [0016](0016-one-strip-on-the-centre-board.md) | One LED strip, on the centre board | Accepted (placement amended by 0017) |
 | [0017](0017-one-main-board.md) | One main board | Accepted (wiring details in 0018; key-chain connectors amended to through-hole IDC 2026-09-27) |
 | [0018](0018-main-board-wiring-decisions.md) | Main board wiring: five decisions | Accepted |
-| [0019](0019-kicad-sheets-are-the-source.md) | The KiCad sheets are the source of truth | Accepted (migration in progress) |
-| [0020](0020-key-boards-screw-to-the-plate.md) | The key boards are screwed to the key plate | Accepted (standoff part open to M4) |
-| [0014](0014-lighting.md) | Lighting | Accepted (geometry amended by 0016) |
+| [0019](0019-kicad-sheets-are-the-source.md) | The KiCad sheets are the source of truth | Accepted, amended 2026-09-27 (the sheet names the bought part; migration in progress) |
+| [0020](0020-key-boards-screw-to-the-plate.md) | The key boards are screwed to the key plate | Accepted, amended 2026-09-27 (corner standoffs, 1.2 mm; standoff part open to M4) |
