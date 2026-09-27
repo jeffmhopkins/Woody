@@ -238,9 +238,9 @@ switch:
     source: "the main board's top face below the thumb switches' seat: the middle of switch.pcb_below_seat_window [calc, docs/reference/ks33-geometry.md], until the main board's own standoffs set it"
     decided_by: "the main board's layout and standoffs"
   pcb_below_seat:
-    value: 3.3
-    status: settled
-    source: "THE KEY BOARDS' (the thumb switches' main board is switch.thumb_pcb_below_seat): set by their standoff hardware (ADR 0020): the standoff's head is flush in the plate's top face, so the board top sits hardware.kb_standoff_l + hardware.kb_washer_t below the seat, whatever the plate's thickness; drc.echo 'key-board standoff and washer set the board depth' fails if this and the hardware disagree. Inside switch.pcb_below_seat_window [calc]"
+    value: 3.5
+    status: nominal
+    source: "THE KEY BOARDS' (the thumb switches' main board is switch.thumb_pcb_below_seat): set by their mount (ADR 0020, amended 2026-09-27): the screw's head sits on the plate's top face, so the board top sits the plate + hardware.kb_spacer_l + hardware.kb_washer_t below the seat [calc: 1.2 + 2.0 + 0.3]; drc.echo 'key-board mount sets the board depth' fails if this and the hardware disagree. Inside switch.pcb_below_seat_window"
   keycap_top_above_seat:
     value: 9.0
     status: tbd
@@ -450,8 +450,13 @@ boards:
   kb_end_margin:
     value: 6.0
     status: tbd
-    source: "a key board's end past its outermost switch cutout, along the body: room for a corner standoff clear of that cutout (drc.echo 'key-board standoffs clear of the switch cutouts') [drawing convention]"
+    source: "a key board's MOUTH end past its first switch cutout, along the body: room for the corner screws' nuts clear of that cutout, and their plug bores clear of the first cap slot (drc.echo 'key-board plug bores clear of the wood top's cuts') [drawing convention]"
     decided_by: "M4, with the boards laid out"
+  kb_tail_margin:
+    value: 10.1
+    status: nominal
+    source: "a key board's TAIL end past its last switch cutout. Longer than the mouth end because the last keys (LH4/LH5, RH6) reach the board's corners across the body, and each corner screw's plug bore must keep hardware.kb_bore_wall of wood from that key's cap slot [calc: half the slot 9.0 + half the bore 3.175 + the wall 1.5 + the inset 3.4 - half the cutout 7.0 = 10.075, rounded up]. drc.echo 'key-board plug bores clear of the wood top's cuts' prints the least it may be"
+    decided_by: "hardware.kb_bore_wall and kb_bore_d, which set it"
   board_clear:
     value: 1.5
     status: tbd
@@ -726,70 +731,104 @@ hardware:
     value: 2.5
     status: nominal
     source: "fastener_head_h + 0.5 below flush. Must stay at or under the oak left under the side groove (oak bottom - stack.groove_depth), so the counterbore and the groove share no depth (drc 'fastener counterbores clear of the side grooves')"
-  # THE KEY BOARDS ARE SCREWED TO THE KEY PLATE (owner, 2026-09-27, ADR 0020):
-  # an M2 self-clinching standoff pressed into the plate at each corner of the
-  # board, and an M2 screw up through the board into it. The
-  # standoff's length is not a parameter: it is the plate-to-board gap the
-  # switch pins set (switch.pcb_below_seat less the plate), in drc.echo.
-  # The only M2 self-clinching standoff PEM makes is the microPEM MSO4-M2
-  # (the SO range starts at M3); the sizes below are its, and it is a
-  # candidate, not a choice - see MECH-KB-STANDOFF and ADR 0020.
-  kb_standoff_od:
-    value: 3.16
+  # THE KEY BOARDS HANG FROM THE KEY PLATE ON SCREWS THROUGH THE WOOD (owner,
+  # 2026-09-27: "fasteners through the wood ... so that we can put a wooden
+  # cap on top so it looks like it's not there" - "make that the standard";
+  # ADR 0020, amended). At each corner of a key board, from the top down:
+  # a bore through the wood top (kb_bore_d), a socket-head screw whose head
+  # sits on the plate at the bore's floor, the plate's clearance hole, a
+  # spacer below the plate, a washer, the key board, and a nut on the board's
+  # underside. A glued wooden plug fills the bore over the head. The spacer
+  # and washer set the board's depth: plate + spacer + washer below the seat
+  # (drc.echo 'key-board mount sets the board depth').
+  kb_bore_d:
+    value: 6.35
+    status: nominal
+    source: "the bore through the wood top over each key-board screw, and the plug that fills it: 1/4 in, the smallest common face-grain plug and plug-cutter size in US supply (MECH-KB-PLUG). Clears the screw head (kb_screw_head_d) and a hex key"
+  kb_bore_wall:
+    value: 1.5
     status: tbd
-    source: "the standoff's barrel below the plate: MSO4-M2's C, max [datasheets/mechanical/PEM-MPF-MICROPEM-FASTENERS.pdf p5]"
-    decided_by: "M4, with the standoff chosen with the plate vendor"
-  kb_standoff_hole:
-    value: 3.2
-    status: tbd
-    source: "the plate's mounting hole for that standoff: MSO4-M2's hole in sheet, 3.18 +0.05 [datasheets/mechanical/PEM-MPF-MICROPEM-FASTENERS.pdf p5]"
-    decided_by: "M4, with the plate vendor"
-  kb_standoff_edge:
+    source: "the least wood left between a plug bore and a cap slot (or the top's edge): a placeholder for a plug hole beside a through-slot in hardwood [from memory - no banked figure]; the model moves each key board's end until every bore has it (kb_rect, drc.echo 'key-board plug bores clear of the cap slots')"
+    decided_by: "M2 - bore and plug a scrap of the chosen wood beside a slot"
+  kb_plug_glue_gap:
+    value: 0.5
+    status: nominal
+    source: "clearance between the screw head's top and the plug's bottom, so the plug seats on its glue and never on the head [drawing convention]"
+  kb_plug_min_depth:
     value: 3.0
     status: tbd
-    source: "the least distance from the standoff's hole centre to an edge of the sheet - a switch cutout is one: MSO4-M2's min. dist. hole C/L to edge [datasheets/mechanical/PEM-MPF-MICROPEM-FASTENERS.pdf p5]"
-    decided_by: "M4, with the standoff chosen"
-  kb_standoff_l:
-    value: 3
+    source: "the least depth of wood plug over a screw head, for a glue joint that holds and a face that can be sanded flush [from memory - no banked figure]"
+    decided_by: "M2 - plug a scrap of the chosen wood over a screw and sand it"
+  kb_plate_t_tol:
+    value: [-0.05, 0.05]
     status: nominal
-    source: "MSO4-M2-3, the owner's choice 2026-09-27 (ADR 0020): its overall length, head included, the head installed flush in the sheet; made only 2 and 3 long [datasheets/mechanical/PEM-MPF-MICROPEM-FASTENERS.pdf p5]"
-    decided_by: "M4: PEM and the plate vendor confirm it clinches in the plate"
-  kb_standoff_l_tol:
-    value: [-0.08, 0.05]
+    source: "the key plate's thickness tolerance: the switch's own plate-slot tolerance (`plate-thickness`, config/figures.yaml), which a plate bought to that register must meet. It enters the key boards' depth now that the screw head sits on the plate's top face"
+  kb_plate_hole:
+    value: 2.4
     status: nominal
-    source: "MSO4's L tolerance, +0.05 / -0.08 [datasheets/mechanical/PEM-MPF-MICROPEM-FASTENERS.pdf p5]"
+    source: "M2 clearance through the key plate, ISO 273 medium [from memory]; the head (kb_screw_head_d) bears on the plate round it"
+  kb_screw_hole:
+    value: 2.2
+    status: nominal
+    source: "M2 clearance through the key board, ISO 273 fine [from memory]: the board locates on the screws, so the fine fit"
+  kb_screw_head_d:
+    value: 3.8
+    status: nominal
+    source: "ISO 4762 / DIN 912 M2 socket head cap screw, head diameter dk max 3.80 [datasheets/mechanical/ASPEN-ME127-204X8-M2X8-ISO4762-SHCS-DRAWING.pdf]"
+  kb_screw_head_h:
+    value: 2.0
+    status: nominal
+    source: "the same head's height, k max 2.00 [datasheets/mechanical/ASPEN-ME127-204X8-M2X8-ISO4762-SHCS-DRAWING.pdf]"
+  kb_screw_l:
+    value: 8
+    status: nominal
+    source: "the screw's length under the head: plate + spacer + washer + key board + nut + at least two threads past the nut, rounded up to a stocked length (drc.echo 'key-board screw: thread past the nut'); M2 x 8 is stocked in the US (MECH-KB-SCREW) [calc]"
+  kb_screw_pitch:
+    value: 0.4
+    status: settled
+    source: "M2 coarse thread pitch, ISO 261 [from memory]"
+  kb_spacer_l:
+    value: 2.0
+    status: nominal
+    source: "Wurth WA-SMST 9774020943R, an unthreaded steel M2 spacer, L 2 [datasheets/mechanical/WURTH-WA-SMST-9774020943R-SPACER-M2-2MM.pdf]. Made 1, 1.5, 2, 2.5 ... 8 long - no 2.2 [web https://www.we-online.com/en/components/products/SMST_SMD_STEEL_SPACER_2_25_INTERNAL_NON_STOP, 2026-09-27], so the washer makes up the depth"
+    decided_by: "M4, with the spacer bought - or file or print one (owner, 2026-09-27)"
+  kb_spacer_l_tol:
+    value: [-0.1, 0.1]
+    status: nominal
+    source: "the same spacer's length tolerance, +/-0.1 [datasheets/mechanical/WURTH-WA-SMST-9774020943R-SPACER-M2-2MM.pdf]"
+  kb_spacer_od:
+    value: 4.35
+    status: nominal
+    source: "the same spacer's outside diameter, 4.35; its bore is 2.25 +/-0.05 [datasheets/mechanical/WURTH-WA-SMST-9774020943R-SPACER-M2-2MM.pdf]. It bears on the plate's underside and on the washer"
   kb_washer_t:
     value: 0.3
     status: nominal
-    source: "an M2 small flat washer, ISO 7092 / DIN 433, between the standoff's end and the board: it lifts the board from the 3 mm standoff's 1.8 below the plate into the pins' window. Nominal 0.3, 0.25-0.35 [web https://www.aspenfasteners.com/m2-din-433-iso-7092-metric-flat-washers-small-outside-diameter-a2-stainless-steel/, 2026-09-27]"
+    source: "an M2 small flat washer, ISO 7092 / DIN 433, between the spacer and the key board: 0.30 -0.05/+0.05 [datasheets/mechanical/ASPEN-ME351-2-M2-ISO7092-DIN433-WASHER-DRAWING.pdf]"
   kb_washer_t_range:
     value: [0.25, 0.35]
     status: nominal
-    source: "the same washer's thickness limits [web, as kb_washer_t]"
+    source: "the same washer's thickness limits [datasheets/mechanical/ASPEN-ME351-2-M2-ISO7092-DIN433-WASHER-DRAWING.pdf]"
   kb_washer_od:
     value: 4.5
     status: nominal
-    source: "the same washer's outside diameter, maximum; it bears on the board's top copper, so the PCB keeps copper out from under it [web, as kb_washer_t]"
-  kb_screw_hole:
-    value: 2.2
-    status: tbd
-    source: "M2 clearance through the key board [from memory, ISO 273 medium]"
-    decided_by: "M4"
-  kb_screw_head_d:
-    value: 3.8
-    status: tbd
-    source: "M2 low-head cap screw head, under the key board [from memory]"
-    decided_by: "M4, with the screw bought"
-  kb_screw_head_h:
+    source: "the same washer's outside diameter, 4.50 max (-0.30); it bears on the board's top copper, so the PCB keeps copper out from under it [datasheets/mechanical/ASPEN-ME351-2-M2-ISO7092-DIN433-WASHER-DRAWING.pdf]"
+  kb_nut_e:
+    value: 4.62
+    status: nominal
+    source: "ISO 4032 M2 hex nut across its corners, at its largest: s max 4.00 / cos 30 = 4.62 [calc from datasheets/mechanical/ASPEN-ISO4032-DIN934-HEX-NUT-DIMENSION-TABLE.pdf, whose e is the minimum, 4.3]. It bears on the board's underside, so the PCB keeps copper and parts out from under it"
+  kb_nut_m:
     value: 1.6
+    status: nominal
+    source: "the same nut's height, m max 1.60 [datasheets/mechanical/ASPEN-ISO4032-DIN934-HEX-NUT-DIMENSION-TABLE.pdf; datasheets/mechanical/ASPEN-ME013-204-M2-ISO4032-HEX-NUT-DRAWING.pdf]"
+  kb_mount_float:
+    value: 0.2
+    status: nominal
+    source: "how far the spacer and washer can sit off the screw's axis: (the bore - the screw) / 2 - the spacer's 2.25 +0.05 and the washer's 2.20 +0.14 on an M2 give at most 0.17 [calc from the two drawings under kb_spacer_od and kb_washer_od]; the PCB keep-out grows by it on every side"
+  kb_mount_inset:
+    value: 3.4
     status: tbd
-    source: "the same head's height [from memory]"
-    decided_by: "M4, with the screw bought"
-  kb_standoff_inset:
-    value: 3.0
-    status: tbd
-    source: "a corner standoff's centre in from both board edges: as near the corner as the screw head allows, so it sits furthest from the switch cutouts (drc.echo 'key-board standoffs clear of the switch cutouts'); the head (kb_screw_head_d) leaves 1.1 mm of board outside it [calc: 3.0 - 3.8 / 2]"
-    decided_by: "M4, with the standoff chosen"
+    source: "a corner screw's centre in from both board edges: far enough across the body that its plug bore keeps hardware.kb_bore_wall of wood from the side groove in the wood top (drc.echo 'key-board plug bores clear of the wood top's cuts') [calc: the groove's inner edge 6.2 + 1.5 + 3.175 = 10.875 across, less the board's edge at 7.5]; the nut (kb_nut_e) leaves about 1.1 mm of board outside it"
+    decided_by: "M4, with the board's first fit"
   fastener_inset:
     value: 4.3
     status: tbd

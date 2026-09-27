@@ -678,7 +678,7 @@ def build(bdir):
     for i, (x, y, hole, head, od) in enumerate(geo["standoffs"], 1):
         h = load_fp(lay["standoff_footprint"])
         h.SetReference(f"H{i}")
-        h.SetValue("M2 standoff")
+        h.SetValue("M2 mount")
         h.SetBoardOnly(True)
         h.SetExcludedFromBOM(True)
         h.SetExcludedFromPosFiles(True)
