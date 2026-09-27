@@ -25,7 +25,8 @@ HOW IT WORKS
     is what the first version of this pass did, improving nothing.)
   * Ground is routed last as an ordinary net, so no ground pin depends on a
     pour finding a way round the tracks; then both layers get a GND pour and
-    every single-sided GND pad a stitching via into the other plane.
+    each single-sided GND pad a stitching via into the other plane - except a
+    pad already on the routed ground tree, which the tree's copper joins.
   * Every track, via and zone is written to the board, zones are filled, and
     tools/pcb.py's `check` runs KiCad's DRC over the result - the router
     proves nothing about itself; the DRC does.

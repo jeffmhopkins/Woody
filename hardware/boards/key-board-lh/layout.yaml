@@ -44,10 +44,12 @@ fab:
 # The chain header, J-CHAIN (ADR 0017 amended): a 1.27 mm shrouded IDC header,
 # right-angle, placed by tools/pcb.py where the body CAD stacks it over the
 # main board's, its mouth toward the ribbon's fold (pcb-geometry.echo "chain").
-# The standoffs' screw holes (ADR 0020): one per corner, positions from the
-# body CAD; this is only which footprint draws them. NPTH - the plate is
-# bonded to ground by the main board's MECH-GNDBOND, and a plated hole here
-# would make a second bond.
+# The mount's screw holes (ADR 0020, Amendment 2: a screw down through the
+# wood top and the plate, a spacer and washer, the board, a nut underneath):
+# one per corner, positions from the body CAD; this is only which footprint
+# draws them (the key keeps its old name, which tools/pcb.py reads). NPTH -
+# the plate is bonded to ground by the main board's MECH-GNDBOND, and a
+# plated hole here would make a second bond.
 standoff_footprint: "MountingHole:MountingHole_2.2mm_M2"
 
 # Placement. A switch's pins are on its near side (low y): pin 1, the switch
@@ -62,7 +64,7 @@ standoff_footprint: "MountingHole:MountingHole_2.2mm_M2"
 # joins the switch's pin 1, on that side; `c` is the side the capacitor hangs.
 # Midway to the next switch along the body, standing across it: on this board
 # the one offset that clears every switch's pins and pole, J-CHAIN, the test
-# pads, the register, the standoffs and the board's edge for all five keys.
+# pads, the register, the corner mounts and the board's edge for all five keys.
 networks:
   pattern: {offset: [10.0, 0.0], axis: y, leg: -1, c: -1}
   except: {}
