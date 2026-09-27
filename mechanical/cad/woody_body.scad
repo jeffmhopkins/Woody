@@ -271,6 +271,10 @@ C_SWITCH = [0.18, 0.18, 0.20];
 C_CAP = [0.93, 0.91, 0.86];
 C_SPARE = [0.85, 0.20, 0.60];
 C_STEEL = [0.55, 0.57, 0.60];
+// A PARTS ENVELOPE is not a part: it is the volume a board's components may
+// fill, which clash.txt checks against everything else. Translucent amber, so
+// no render shows it as a second board.
+C_ENVELOPE = [0.95, 0.72, 0.25, 0.35];
 C_CONN = [0.25, 0.25, 0.27];
 C_LED = [1.0, 0.75, 0.30];
 C_FROSTED = [0.94, 0.95, 0.97, 0.85];
@@ -1085,7 +1089,7 @@ cb_standoffs = [for (x = [cb_x[0] + 4, lt_rest_xy[0], (gap_x[0] + gap_x[1]) / 2,
                      y = [cb_y[0] + 4, cb_y[1] - 4]) if (so_clear([x, y])) [x, y]];
 module centre_board_3d() {
     P(C_PCB, false, "main board") translate([0, 0, cb_z]) linear_extrude(switch_pcb_t) cb_2d();
-    P([0.35, 0.55, 0.40], false, "parts main board") translate([0, 0, cb_top]) linear_extrude(boards_smt_h) difference() {
+    P(C_ENVELOPE, false, "parts main board") translate([0, 0, cb_top]) linear_extrude(boards_smt_h) difference() {
         offset(-0.5) cb_2d();
         // nothing under the chain header and its plug (the ribbon's hairpin is above them, between the plugs)
         for (cl = chain_ribbon_cls) let(sp = chain_span(chain_x(cl), chain_dir(cl)), x0 = sp[0], x1 = sp[1])
@@ -1118,7 +1122,7 @@ function floor_at(x) = abs(x - ubolt_c[0]) <= ubolt_bp[0] / 2 ? z_floor + hardwa
 // The Matrix: its back-side parts. The main board's parts are with it.
 module parts_3d() {
     for (cl = ["left_hand", "right_hand"])
-        P([0.35, 0.55, 0.40], false, str("parts ", cl)) translate([0, 0, top_z - boards_cluster_smt_h])
+        P(C_ENVELOPE, false, str("parts ", cl)) translate([0, 0, top_z - boards_cluster_smt_h + explode * 0.25])   // moves with its board
             linear_extrude(boards_cluster_smt_h) difference() {
                 offset(-0.5) key_board_2d(cl);
                 let(q = kb_chain_rect(cl)) translate([q[0] - 0.5, q[1] - 0.5]) square([q[2] - q[0] + 1, q[3] - q[1] + 1]);
