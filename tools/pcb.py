@@ -220,48 +220,70 @@ def place(board, fp, x, y, rot, bottom):
 NET_PITCH = 2.7     # junction to each part's centre: two 0805 courtyards (±1.68 × ±0.95) apart
 
 
-def network_parts(lay):
-    """layout.yaml networks: -> parts: entries. Each key gives its junction
-    `at` (body mm), `leg` (+1/-1: which way along x the series resistor runs,
-    its SWITCH_LEG end toward the switch's pin 1) and `c` (+1/-1: which way
-    across the body the capacitor hangs)."""
+def network_parts(lay, geo):
+    """layout.yaml networks: -> parts: entries. ONE PATTERN, RELATIVE TO EACH KEY'S
+    SWITCH, so every key's network sits exactly the same way round its switch:
+    `offset` (body mm, switch centre to the T's junction), `axis` (x or y: the line
+    S and P lie along), `leg` (+1/-1: which way along that axis the series
+    resistor sits - its SWITCH_LEG end, toward the switch's pin 1) and `c` (+1/-1:
+    which way across it the capacitor hangs). A key that cannot take the pattern
+    goes in `except:` with its own `at` and the reason beside it."""
+    n = lay.get("networks") or {}
+    pat, exc = n.get("pattern"), n.get("except") or {}
+    if not pat:
+        return {}
     out = {}
-    for key, n in (lay.get("networks") or {}).items():
-        (x, y), d, c = n["at"], n["leg"], n["c"]
-        rot = 0 if d > 0 else 180         # S's pad 1 (KEY) and P's pad 2 (KEY) toward the junction
-        out[f"R-KEY-SER-{key}"] = [x + d * NET_PITCH, y, rot]
-        out[f"R-KEY-PU-{key}"] = [x - d * NET_PITCH, y, rot]
-        out[f"C-KEY-{key}"] = [x, y + c * NET_PITCH, 270 if c > 0 else 90]
+    for key, (sx, sy, sr) in geo["switches"].items():
+        spec = {**pat, **exc.get(key, {})}
+        if "at" in spec:
+            x, y = spec["at"]
+        else:
+            if sr % 360:
+                sys.exit(f"pcb: networks: pattern is written for switches at 0 deg; SW-{key} is at {sr} - give it an except: entry")
+            x, y = sx + spec["offset"][0], sy + spec["offset"][1]
+        d, c = spec["leg"], spec["c"]
+        if spec["axis"] == "x":
+            rot = 0 if d > 0 else 180         # S's pad 1 (KEY) and P's pad 2 (KEY) toward the junction
+            out[f"R-KEY-SER-{key}"] = [x + d * NET_PITCH, y, rot]
+            out[f"R-KEY-PU-{key}"] = [x - d * NET_PITCH, y, rot]
+            out[f"C-KEY-{key}"] = [x, y + c * NET_PITCH, 270 if c > 0 else 90]
+        else:
+            rot = 270 if d > 0 else 90        # pad 1 faces +y at 90 and -y at 270
+            out[f"R-KEY-SER-{key}"] = [x, y + d * NET_PITCH, rot]
+            out[f"R-KEY-PU-{key}"] = [x, y - d * NET_PITCH, rot]
+            out[f"C-KEY-{key}"] = [x + c * NET_PITCH, y, 0 if c > 0 else 180]
     return out
 
 
 SILK_H, SILK_W = 1.0, 0.15     # silkscreen text height and stroke, mm - above every board house's minimum (layout.yaml rules)
 
 
-def silk_text(board, text, x, y, h=SILK_H, justify=0):
+def silk_text(board, text, x, y, h=SILK_H, justify=0, top=False, angle=0):
+    """A line of text on the silkscreen: the BOTTOM (the parts side) by default,
+    mirrored so it reads from below, or the TOP (the switch side). x, y in PCB mm;
+    justify -1 left, 0 centre, +1 right, as read from that side."""
     edge = board.GetBoardEdgesBoundingBox()
     if not (pcbnew.ToMM(edge.GetLeft()) < x < pcbnew.ToMM(edge.GetRight()) and pcbnew.ToMM(edge.GetTop()) < y < pcbnew.ToMM(edge.GetBottom())):
         sys.exit(f"pcb: silkscreen label {text!r} would sit off the board at ({x:.1f}, {y:.1f})")
-    """A line of text on the BOTTOM silkscreen (the parts side), mirrored so it
-    reads from below. x, y in PCB mm; justify -1 left, 0 centre, +1 right, as
-    read from below."""
     t = pcbnew.PCB_TEXT(board)
     t.SetText(text)
-    t.SetLayer(pcbnew.B_SilkS)
-    t.SetMirrored(True)
+    t.SetLayer(pcbnew.F_SilkS if top else pcbnew.B_SilkS)
+    t.SetMirrored(not top)
     t.SetTextSize(V(h, h))
     t.SetTextThickness(MM(SILK_W))
     t.SetPosition(V(x, y))
+    t.SetTextAngleDegrees(angle)
     # mirrored: what reads as "left" from below is the text's right
-    t.SetHorizJustify({-1: pcbnew.GR_TEXT_H_ALIGN_RIGHT, 0: pcbnew.GR_TEXT_H_ALIGN_CENTER, 1: pcbnew.GR_TEXT_H_ALIGN_LEFT}[justify])
+    left, right = (pcbnew.GR_TEXT_H_ALIGN_LEFT, pcbnew.GR_TEXT_H_ALIGN_RIGHT) if top else (pcbnew.GR_TEXT_H_ALIGN_RIGHT, pcbnew.GR_TEXT_H_ALIGN_LEFT)
+    t.SetHorizJustify({-1: left, 0: pcbnew.GR_TEXT_H_ALIGN_CENTER, 1: right}[justify])
     board.Add(t)
 
 
-def silk_arrow(board, x, y, d, s=1.2):
-    """A filled triangle on the bottom silkscreen pointing along PCB x (d = +1/-1)."""
+def silk_arrow(board, x, y, d, s=1.2, top=False):
+    """A filled triangle on the silkscreen pointing along PCB x (d = +1/-1)."""
     c = pcbnew.PCB_SHAPE(board)
     c.SetShape(pcbnew.SHAPE_T_POLY)
-    c.SetLayer(pcbnew.B_SilkS)
+    c.SetLayer(pcbnew.F_SilkS if top else pcbnew.B_SilkS)
     c.SetFilled(True)
     c.SetWidth(MM(SILK_W))
     c.SetPolyPoints([V(x - d * s / 2, y - s / 2), V(x + d * s / 2, y), V(x - d * s / 2, y + s / 2)])
@@ -311,10 +333,10 @@ def fit_footprint_silk(board, fab):
                 fp.Remove(item)
 
 
-def silk_dot(board, x, y, r=0.3):
+def silk_dot(board, x, y, r=0.3, top=False):
     c = pcbnew.PCB_SHAPE(board)
     c.SetShape(pcbnew.SHAPE_T_CIRCLE)
-    c.SetLayer(pcbnew.B_SilkS)
+    c.SetLayer(pcbnew.F_SilkS if top else pcbnew.B_SilkS)
     c.SetFilled(True)
     c.SetCenter(V(x, y))
     c.SetEnd(V(x + r, y))
@@ -342,6 +364,13 @@ def add_silk(board, lay):
     ex0, ey0, ex1, ey1 = (pcbnew.ToMM(edge.GetLeft()) + 0.5, pcbnew.ToMM(edge.GetTop()) + 0.5,
                           pcbnew.ToMM(edge.GetRight()) - 0.5, pcbnew.ToMM(edge.GetBottom()) - 0.5)
     crt = [box(fp) for fp in board.GetFootprints() if fp.GetCourtyard(pcbnew.B_CrtYd).OutlineCount()]
+    # and every pad the parts side can see - the switches' pins and the holes
+    # carry no bottom courtyard, but a label on them is silk on a solder joint
+    for fp in board.GetFootprints():
+        for p in fp.Pads():
+            if p.IsOnLayer(pcbnew.B_Cu) or p.HasHole():
+                b = p.GetBoundingBox()
+                crt.append((pcbnew.ToMM(b.GetLeft()) - 0.3, pcbnew.ToMM(b.GetTop()) - 0.3, pcbnew.ToMM(b.GetRight()) + 0.3, pcbnew.ToMM(b.GetBottom()) + 0.3))
 
     def clear(a0, b0, a1, b1):
         """A text box, in PCB mm, off every bottom courtyard and inside the board."""
@@ -357,20 +386,49 @@ def add_silk(board, lay):
         placed_txt.append((a0, y - SILK_H / 2, a0 + w, y + SILK_H / 2))
         silk_text(board, text, x, y, justify=justify)
 
-    def free(a0, b0, a1, b1):
-        return clear(a0, b0, a1, b1) and not any(a0 < t[2] and a1 > t[0] and b0 < t[3] and b1 > t[1] for t in placed_txt)
+    def free(a0, b0, a1, b1, m=0.25):
+        """clear(), and off every label already placed by m: the board house's silk-to-silk
+        clearance, with room for the stroke font's glyphs running wider than the estimate."""
+        return clear(a0, b0, a1, b1) and not any(a0 < t[2] + m and a1 > t[0] - m and b0 < t[3] + m and b1 > t[1] - m for t in placed_txt)
 
-    def beside(x0, y0, x1, y1, text):
+    def beside(x0, y0, x1, y1, text, under_first=False):
         """A short label over the part, else under it, else to either side:
         the first place off every courtyard and every label already placed."""
         w, h = SILK_H * 0.9 * len(text) / 2, SILK_H / 2
         cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
-        for px, py in ((cx, y0 - SILK_H * 0.75), (cx, y1 + SILK_H * 0.75), (x0 - 0.4 - w, cy), (x1 + 0.4 + w, cy)):
+        spots = [(cx, y0 - SILK_H * 0.75), (cx, y1 + SILK_H * 0.75), (x0 - 0.4 - w, cy), (x1 + 0.4 + w, cy)]
+        if under_first:
+            spots[0], spots[1] = spots[1], spots[0]
+        for px, py in spots:
             if free(px - w, py - h, px + w, py + h):
                 return px, py
         sys.exit(f"pcb: no clear place for the silkscreen label {text!r} at ({cx:.1f}, {cy:.1f}) - move parts in layout.yaml")
     above_or_below = beside
+    def fixed(text, x, y):
+        w = SILK_H * 0.9 * len(text) / 2
+        if not free(x - w, y - SILK_H / 2, x + w, y + SILK_H / 2):
+            sys.exit(f"pcb: the key-network label {text!r} at ({x:.1f}, {y:.1f}) is not clear - every key's labels sit "
+                     "the same way round its network; move the part in the way, or the pattern (layout.yaml networks:)")
+        put(text, x, y)
     for key, parts in groups.items():
+        if len(parts) == 3:
+            # A T (network_parts): every key's labels the same way round it. S's and P's
+            # letters outside the column, away from C; C's letter on the S side of C,
+            # the key's name on the P side of it.
+            f = {kind: fp for kind, fp in parts}
+            xy = {k: (pcbnew.ToMM(v.GetPosition().x), pcbnew.ToMM(v.GetPosition().y)) for k, v in f.items()}
+            jx, jy = (xy["R-KEY-SER"][0] + xy["R-KEY-PU"][0]) / 2, (xy["R-KEY-SER"][1] + xy["R-KEY-PU"][1]) / 2
+            ux, uy = xy["C-KEY"][0] - jx, xy["C-KEY"][1] - jy
+            n = math.hypot(ux, uy)
+            ux, uy = ux / n, uy / n                       # junction -> C
+            ax, ay = xy["R-KEY-PU"][0] - jx, xy["R-KEY-PU"][1] - jy
+            n = math.hypot(ax, ay)
+            ax, ay = ax / n, ay / n                       # junction -> P
+            for kind in ("R-KEY-SER", "R-KEY-PU"):
+                fixed(letter[kind], xy[kind][0] - ux * 1.7, xy[kind][1] - uy * 1.7)
+            fixed("C", xy["C-KEY"][0] - ax * 1.7, xy["C-KEY"][1] - ay * 1.7)
+            fixed(key, xy["C-KEY"][0] + ax * 1.7, xy["C-KEY"][1] + ay * 1.7)
+            continue
         boxes = [box(fp) for _, fp in parts]
         top = min(b[1] for b in boxes)
         for kind, fp in parts:
@@ -386,13 +444,18 @@ def add_silk(board, lay):
         else:
             put(key, *beside(x0, top - SILK_H * 1.6, x1, top - SILK_H * 1.6, key))
     # fixed-place labels (the test pads' row) first, so the searched ones keep off them
-    for fp in sorted(board.GetFootprints(), key=lambda f: not f.GetReference().startswith("TP-")):
+    # fixed-place marks first - the test pads' labels, J-CHAIN's dot and arrow - so
+    # every searched label keeps off them
+    for fp in sorted(board.GetFootprints(), key=lambda f: (not f.GetReference().startswith("TP-"), f.GetReference() != "J-CHAIN")):
         ref = fp.GetReference()
         x0, y0, x1, y1 = box(fp) if fp.GetCourtyard(pcbnew.B_CrtYd).OutlineCount() else (0, 0, 0, 0)
         if ref.startswith("U-"):
             put(fp.GetValue(), *beside(x0, y0, x1, y1, fp.GetValue()))
         elif ref.startswith("C-DECOUPLE"):
             put("CD", *above_or_below(x0, y0, x1, y1, "CD"))
+        elif ref.startswith("C-BULK"):
+            # under it: over it the label reads as J-CHAIN's, whose pads are beside
+            put("CB DNP", *beside(x0, y0, x1, y1, "CB DNP", under_first=True))
         elif ref.startswith("R-KEY-PU-FREE"):
             put("PF", *above_or_below(x0, y0, x1, y1, "PF"))
         elif ref.startswith("TP-"):
@@ -400,19 +463,37 @@ def add_silk(board, lay):
             name = ref[3:].rsplit("-", 1)[0].replace("SHLD", "SH/LD")
             row = sorted((f for f in board.GetFootprints() if f.GetReference().startswith("TP-")), key=lambda f: f.GetPosition().x)
             under = [f.GetReference() for f in row].index(ref) % 2 == 0
-            put(name, (x0 + x1) / 2, y1 + SILK_H * 0.75 if under else y0 - SILK_H * 0.75)
+            # alternating, where that side is free; else the other side; else anywhere near
+            w = SILK_H * 0.9 * len(name) / 2
+            cx = (x0 + x1) / 2
+            for py in ((y1 + SILK_H * 0.75, y0 - SILK_H * 0.75) if under else (y0 - SILK_H * 0.75, y1 + SILK_H * 0.75)):
+                if free(cx - w, py - SILK_H / 2, cx + w, py + SILK_H / 2):
+                    put(name, cx, py)
+                    break
+            else:
+                put(name, *beside(x0, y0, x1, y1, name))
         elif ref == "J-CHAIN":
             p1 = fp.FindPadByNumber("1").GetPosition()
             p2 = fp.FindPadByNumber("2").GetPosition()
             # pin 1's dot outside the pad array, away from the mouth
             dx = pcbnew.ToMM(p1.x - p2.x)
-            silk_dot(board, pcbnew.ToMM(p1.x) + (1.3 if dx > 0 else -1.3), pcbnew.ToMM(p1.y))   # its edge 0.39 off the pad: fab silk_to_pad
+            dxd = pcbnew.ToMM(p1.x) + (1.3 if dx > 0 else -1.3)
+            silk_dot(board, dxd, pcbnew.ToMM(p1.y))   # its edge 0.39 off the pad: fab silk_to_pad
+            placed_txt.append((dxd - 0.6, pcbnew.ToMM(p1.y) - 0.6, dxd + 0.6, pcbnew.ToMM(p1.y) + 0.6))
             put("J-CHAIN", *above_or_below(x0, y0, x1, y1, "J-CHAIN"))
             # which way its mouth faces: pads 1 -> 2 point at it (place_chain); a
             # header soldered backward puts 3V3 on a ground pin (key-chain-loom.md)
             mx = pcbnew.ToMM(p2.x - p1.x) > 0
             ax = x1 + 1.2 if mx else x0 - 1.2
             silk_arrow(board, ax, (y0 + y1) / 2, 1 if mx else -1)
+            placed_txt.append((ax - 0.9, (y0 + y1) / 2 - 0.9, ax + 0.9, (y0 + y1) / 2 + 0.9))
+    # which end of the board faces the mouth: body x runs from the mouth, so the
+    # board's low-x edge - an arrow at it and the word beside, clear of everything
+    mx, my = ex0 + 0.9, (ey0 + ey1) / 2
+    if not clear(mx - 0.8, my - 0.8, mx + 1.2 + SILK_H * 0.9 * 5 + 0.3, my + 0.8):
+        sys.exit("pcb: no clear place for the MOUTH marker at the board's mouth-end edge")
+    silk_arrow(board, mx, my, -1)
+    put("MOUTH", mx + 1.1 + SILK_H * 0.9 * 5 / 2, my)
     t = lay.get("silk", {})
     if t:
         # the title block too: the Gerber job file's "Revision" is its
@@ -423,7 +504,78 @@ def add_silk(board, lay):
         board.SetTitleBlock(tb)
         x, y = to_pcb(*t["at"])
         for i, line in enumerate([t["title"], f"rev {t['rev']}  {t['date']}"]):
-            put(line, x, y + i * SILK_H * 1.6, justify=-1)
+            put(line, x, y + i * SILK_H * 1.8, justify=-1)
+
+
+def add_top_silk(board, lay):
+    """The switch side's silkscreen. J-CHAIN is soldered from this side and the
+    board is lowered onto the switch pins top first, so it carries each key's name
+    beside its switch, J-CHAIN's pin 1 and the way its mouth faces, the MOUTH end,
+    and the board's title and revision. Not mirrored: it reads from above."""
+    edge = board.GetBoardEdgesBoundingBox()
+    ex0, ey0, ex1, ey1 = (pcbnew.ToMM(edge.GetLeft()) + 0.5, pcbnew.ToMM(edge.GetTop()) + 0.5,
+                          pcbnew.ToMM(edge.GetRight()) - 0.5, pcbnew.ToMM(edge.GetBottom()) - 0.5)
+    keep = []
+    for fp in board.GetFootprints():
+        if fp.GetCourtyard(pcbnew.F_CrtYd).OutlineCount():
+            b = fp.GetCourtyard(pcbnew.F_CrtYd).BBox()
+            keep.append((pcbnew.ToMM(b.GetLeft()), pcbnew.ToMM(b.GetTop()), pcbnew.ToMM(b.GetRight()), pcbnew.ToMM(b.GetBottom())))
+        for p in fp.Pads():
+            if p.IsOnLayer(pcbnew.F_Cu) or p.HasHole():
+                b, m = p.GetBoundingBox(), 0.3
+                keep.append((pcbnew.ToMM(b.GetLeft()) - m, pcbnew.ToMM(b.GetTop()) - m, pcbnew.ToMM(b.GetRight()) + m, pcbnew.ToMM(b.GetBottom()) + m))
+    placed = []
+
+    def free(a0, b0, a1, b1, m=0.25):
+        return (a0 >= ex0 and b0 >= ey0 and a1 <= ex1 and b1 <= ey1
+                and not any(a0 < c[2] and a1 > c[0] and b0 < c[3] and b1 > c[1] for c in keep)
+                and not any(a0 < c[2] + m and a1 > c[0] - m and b0 < c[3] + m and b1 > c[1] - m for c in placed))
+
+    def put(text, x, y):
+        w = SILK_H * 0.9 * len(text)
+        placed.append((x - w / 2, y - SILK_H / 2, x + w / 2, y + SILK_H / 2))
+        silk_text(board, text, x, y, top=True)
+
+    def beside(x0, y0, x1, y1, text):
+        w, h = SILK_H * 0.9 * len(text) / 2, SILK_H / 2
+        cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+        for px, py in ((cx, y0 - SILK_H * 0.75), (cx, y1 + SILK_H * 0.75), (x0 - 0.4 - w, cy), (x1 + 0.4 + w, cy)):
+            if free(px - w, py - h, px + w, py + h):
+                return px, py
+        sys.exit(f"pcb: no clear place on the top silkscreen for {text!r} at ({cx:.1f}, {cy:.1f}) - move parts in layout.yaml")
+    for fp in sorted(board.GetFootprints(), key=lambda f: f.GetReference()):
+        ref = fp.GetReference()
+        if ref.startswith("SW-"):
+            b = fp.GetCourtyard(pcbnew.F_CrtYd).BBox()
+            put(ref[3:], *beside(pcbnew.ToMM(b.GetLeft()), pcbnew.ToMM(b.GetTop()), pcbnew.ToMM(b.GetRight()), pcbnew.ToMM(b.GetBottom()), ref[3:]))
+        elif ref == "J-CHAIN":
+            p1, p2 = fp.FindPadByNumber("1").GetPosition(), fp.FindPadByNumber("2").GetPosition()
+            dx = pcbnew.ToMM(p1.x - p2.x)
+            silk_dot(board, pcbnew.ToMM(p1.x) + (1.3 if dx > 0 else -1.3), pcbnew.ToMM(p1.y), top=True)
+            xs = [pcbnew.ToMM(p.GetPosition().x) for p in fp.Pads()]
+            ys = [pcbnew.ToMM(p.GetPosition().y) for p in fp.Pads()]
+            x0, x1, y0, y1 = min(xs) - 0.8, max(xs) + 0.8, min(ys) - 0.8, max(ys) + 0.8
+            put("J-CHAIN", *beside(x0, y0, x1, y1, "J-CHAIN"))
+            # its mouth faces the way pads 1 -> 2 point (place_chain)
+            silk_arrow(board, (x1 + 1.0) if dx < 0 else (x0 - 1.0), (y0 + y1) / 2, 1 if dx < 0 else -1, top=True)
+    # the MOUTH end: here the first switch leaves too narrow a strip for the word
+    # across it, so it runs along the edge, the arrow beside it
+    mx, my, tl = ex0 + 0.9, (ey0 + ey1) / 2, SILK_H * 0.9 * 5
+    box = (mx - 0.8, my - tl / 2, mx + 1.2 + SILK_H + 0.2, my + tl / 2)
+    if not free(*box):
+        sys.exit("pcb: no clear place on the top silkscreen for the MOUTH marker")
+    placed.append(box)
+    silk_arrow(board, mx, my, -1, top=True)
+    silk_text(board, "MOUTH", mx + 1.2 + SILK_H / 2, my, top=True, angle=90)
+    t = lay.get("silk", {})
+    if t.get("top_at"):
+        x, y = to_pcb(*t["top_at"])
+        for i, line in enumerate([t["title"], f"rev {t['rev']}  {t['date']}"]):
+            w = SILK_H * 0.9 * len(line)
+            if not free(x, y + i * SILK_H * 1.8 - SILK_H / 2, x + w, y + i * SILK_H * 1.8 + SILK_H / 2):
+                sys.exit(f"pcb: the top silkscreen title at layout.yaml silk.top_at is not clear: {line!r}")
+            placed.append((x, y + i * SILK_H * 1.8 - SILK_H / 2, x + w, y + i * SILK_H * 1.8 + SILK_H / 2))
+            silk_text(board, line, x, y + i * SILK_H * 1.8, top=True, justify=-1)
 
 
 def keepout(board, px, py, r, n=32):
@@ -529,7 +681,7 @@ def build(bdir):
         # the router also treats as an obstacle.
         keepout(board, px, py, max(head, od) / 2 + lay["rules"]["clearance"])
     # everything else: layout.yaml, in body coordinates, bottom side
-    for ref, (x, y, r) in {**network_parts(lay), **lay["parts"]}.items():
+    for ref, (x, y, r) in {**network_parts(lay, geo), **lay["parts"]}.items():
         px, py = to_pcb(x, y)
         place(board, fps[ref], px, py, r, True)
         placed.add(ref)
@@ -539,6 +691,7 @@ def build(bdir):
     if lay.get("fab"):
         fit_footprint_silk(board, lay["fab"])
     add_silk(board, lay)
+    add_top_silk(board, lay)
     return board, fps, netinfo, lay
 
 
@@ -753,6 +906,28 @@ def check_silk(board, fab):
     return bad
 
 
+def check_tracks(board):
+    """Two tracks of one net meeting on one layer at under 90 degrees leave a wedge
+    the etch pools in and the pour cannot fill (an acid trap). KiCad's DRC has no
+    such test, and the router can make one where two stubs leave a pad (K3-6)."""
+    bad, ends = [], {}
+    for t in board.GetTracks():
+        if type(t) is not pcbnew.PCB_TRACK:
+            continue
+        for e, o in ((t.GetStart(), t.GetEnd()), (t.GetEnd(), t.GetStart())):
+            ends.setdefault((t.GetNetname(), t.GetLayer(), round(e.x / 1000), round(e.y / 1000)), []).append((o.x - e.x, o.y - e.y))
+    for (net, layer, x, y), vs in ends.items():
+        for i in range(len(vs)):
+            for j in range(i + 1, len(vs)):
+                (ax, ay), (cx, cy) = vs[i], vs[j]
+                na, nc = math.hypot(ax, ay), math.hypot(cx, cy)
+                if na and nc and (ax * cx + ay * cy) / (na * nc) > math.cos(math.radians(89.5)):
+                    ang = math.degrees(math.acos(min(1.0, (ax * cx + ay * cy) / (na * nc))))
+                    bad.append(f"error: [tracks] {net} on {board.GetLayerName(layer)}: two tracks meet at {ang:.0f} deg "
+                               f"at ({x / 1000:.2f}, {y / 1000:.2f}) - an acid trap; re-route one")
+    return bad
+
+
 def check_cad(board, lay, geo):
     """The body CAD still agrees with the board: its outline and thickness, and every
     switch, standoff and the chain header where - and which way up - it puts them."""
@@ -845,6 +1020,7 @@ def cmd_check(bdir):
     bad += check_rules(board, bdir, name, lay)
     if lay.get("fab"):
         bad += check_silk(board, lay["fab"])
+    bad += check_tracks(board)
     bad += check_cad(board, lay, cad_geometry(lay["cluster"]))
     print(f"pcb: {os.path.relpath(pcb, ROOT)}: {len(bad)} error(s)")
     for b in bad:

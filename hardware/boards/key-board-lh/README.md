@@ -100,12 +100,19 @@ The right-hand board, or any other simple board, starts from a copy of
 `layout.yaml`:
 - `cluster:` and `suffix:` name the cluster (`right_hand`, `RH`). The switches,
   standoffs, `J-CHAIN` and outline then come from the body CAD for that cluster.
-- `networks:` gives one entry per key: where its junction sits, and which way
-  its resistors and capacitor turn. `tools/pcb.py` `network_parts` expands each
-  entry into the key's three parts as a T.
+- `networks:` gives ONE PATTERN for every key: where the T's junction sits
+  relative to the key's switch, and which way its resistors and capacitor
+  turn. `tools/pcb.py` `network_parts` places each key's three parts from its
+  switch's position in the body CAD, so every key's network sits the same way
+  round its switch. A key that cannot take the pattern goes under `except:`,
+  with the reason; on this board none does.
+- `route_first:` names the nets that must be routed before the key lines:
+  those reaching `J-CHAIN`'s far (odd) row, which a track can reach only from
+  behind the header.
 - `parts:` places everything else: the register, its decoupler, the free-bit
   pull-ups, `C-BULK-CHAIN-<suffix>` and the six test pads.
-- `rules:`, `fab:` (the board house), `silk:` (title, revision, date),
+- `rules:`, `fab:` (the board house), `silk:` (title, revision, date; `at`
+  for the parts side, `top_at` for the switch side),
   `standoff_footprint:`, `route:`, `ground_net:` and `power_nets:` are copied
   as they are. `power_nets:` names that board's rail.
 
@@ -213,18 +220,26 @@ six test pads are on the bottom, labelled 3V3, GND, SCK, SH/LD, QH and SER.
 
 ## The silkscreen
 
-All of it is on the bottom (parts) side, mirrored so it reads from below.
+Both sides carry it. The parts side is mirrored so it reads from below.
 Pin 1 of the register (`U-KEYS-LH`) is marked by its footprint.
+
+**Parts side (bottom):**
 
 | Mark | Means |
 |---|---|
-| `LH1`…`LH5`, each over `C` `S` `P` | a key's network: `C` its `C-KEY`, `S` its `R-KEY-SER`, `P` its `R-KEY-PU` |
+| `LH1`…`LH5`, each with `C` `S` `P` | a key's network: `C` its `C-KEY`, `S` its `R-KEY-SER`, `P` its `R-KEY-PU`. Every key's letters sit the same way round its network, as its parts do round its switch |
+| `CB DNP` | `C-BULK-CHAIN-LH`, left empty unless the rail rings (bring-up) |
+| `MOUTH` and an arrow | the board's mouth end |
 | `PF` | `R-KEY-PU-FREE3`, the free bit's pull-up |
 | `CD` | `C-DECOUPLE-165-LH`, the register's decoupler |
 | `74HCS165` | `U-KEYS-LH` |
 | `3V3` `GND` `SCK` `SH/LD` `QH` `SER` | the test pads |
 | `J-CHAIN`, a dot, an arrow | the chain header: the dot is pin 1, and the arrow points out of its mouth |
 | `WOODY key board LH`, `rev …  <date>` | the title block (`layout.yaml` `silk:`) |
+
+**Switch side (top):** each key's name beside its switch; `J-CHAIN` with
+pin 1's dot and the arrow out of its mouth, where it is soldered; `MOUTH`;
+the title block again (`silk:` `top_at`).
 
 The full references are on the fabrication layer. `key-board-lh.pcb-copper-bottom.png`
 plots it with the bottom copper, so that render is the assembly drawing.
@@ -233,7 +248,7 @@ plots it with the bottom copper, so that render is the assembly drawing.
 
 | Rev | Date | What changed | Where |
 |---|---|---|---|
-| A | 2026-09-27 | First layout: networks placed as a T round each key's node, six test pads, `C-BULK-CHAIN-LH` footprint (do not fit) | git history of this directory |
+| A | 2026-09-27 | First layout: every key's network the same T in the same place round its switch, six test pads in the register's pin order, `C-BULK-CHAIN-LH` footprint (do not fit), silkscreen on both sides, no acute track junction | git history of this directory |
 
 To make a revision, edit the board in KiCad, change the revision and date in
 the title block and in the silkscreen text, and copy them into

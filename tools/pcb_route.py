@@ -302,12 +302,19 @@ class Router:
             g = LineString([a, b]).buffer(width / 2) if a != b else Point(a).buffer(width / 2)
             self.own(net, t, (net, {L}, g, "track"))
 
-    def pad_stub(self, net, pad_geom_, L, cell, width):
-        """A short track from the pad's centre to the cell the path started or ended in."""
+    def pad_stub(self, net, pad_geom_, L, cell, width, prev=None):
+        """A short track from the pad's centre to the cell the path ended in - inside
+        the pad already, so the stub is for the eye, not the connection. Left out
+        where it would meet the path's last step at an acute angle: the wedge
+        between them is an acid trap the pour cannot fill."""
         c = pad_geom_.centroid
         x, y = self.cell_xy(*cell)
         if math.hypot(c.x - x, c.y - y) < 1e-6:
             return
+        if prev is not None:
+            px, py = self.cell_xy(*prev)
+            if (c.x - x) * (px - x) + (c.y - y) * (py - y) > 0:
+                return
         t = pcbnew.PCB_TRACK(self.board)
         t.SetStart(pcbnew.VECTOR2I(MM(c.x), MM(c.y)))
         t.SetEnd(pcbnew.VECTOR2I(MM(x), MM(y)))
@@ -347,7 +354,7 @@ class Router:
             idx = targets[path[-1]]
             _, ls, cells, g = todo.pop(idx)
             self.commit(net, path, width)
-            self.pad_stub(net, g, path[-1][0], path[-1][1:], width)
+            self.pad_stub(net, g, path[-1][0], path[-1][1:], width, path[-2][1:] if len(path) > 1 else None)
             tree |= set(path) | {(L, i, j) for L in ls for (i, j) in cells}
         return True
 
@@ -364,7 +371,7 @@ class Router:
                     break
                 _, ls, cells, g = todo.pop(targets[path[-1]])
                 self.commit(net, path, width)
-                self.pad_stub(net, g, path[-1][0], path[-1][1:], width)
+                self.pad_stub(net, g, path[-1][0], path[-1][1:], width, path[-2][1:] if len(path) > 1 else None)
                 tree |= set(path) | {(L, i, j) for L in ls for (i, j) in cells}
         return True
 
@@ -382,25 +389,97 @@ class Router:
             if len(ls) != 1:
                 continue
             c = g.centroid
-            best = None
+            L = next(iter(ls))
+            # the ways tracks already leave this pad: the via's stub keeps 90 degrees
+            # from each, or the two make an acid-trap wedge
+            leave = []
+            for item, _, _ in self.owned.get(gnd, []):
+                if type(item) is pcbnew.PCB_TRACK and item.GetLayer() == LAYERS[L]:
+                    ends = [(TO(v.x), TO(v.y)) for v in (item.GetStart(), item.GetEnd())]
+                    if any(g.buffer(0.01).contains(Point(*e)) for e in ends):
+                        leave += [math.atan2(y - c.y, x - c.x) for x, y in ends if math.hypot(x - c.x, y - c.y) > 0.05]
+            best = fallback = None
             for r in range(3, 20):
                 for a in range(0, 360, 20):
                     x, y = c.x + r * GRID * math.cos(math.radians(a)), c.y + r * GRID * math.sin(math.radians(a))
                     i, j = round((x - self.x0) / GRID), round((y - self.y0) / GRID)
                     if 0 <= i < self.nx and 0 <= j < self.ny and not vgrid[0][i][j] and not vgrid[1][i][j] \
-                            and self.stub_clear(gnd, next(iter(ls)), (c.x, c.y), self.cell_xy(i, j)):
-                        best = (i, j)
-                        break
+                            and self.stub_clear(gnd, L, (c.x, c.y), self.cell_xy(i, j)):
+                        if all(math.cos(math.radians(a) - t) <= 0 for t in leave):
+                            best = (i, j)
+                            break
+                        fallback = fallback or (i, j)
                 if best:
                     break
+            # a pad the ground route already reaches does not need the via at any
+            # angle - it only adds a parallel path; one with no track takes any spot
+            best = best or (fallback if not leave else None)
             if not best:
                 continue
-            L = next(iter(ls))
             self.commit(gnd, [(L, *best), (1 - L, *best)], self.w)
             self.pad_stub(gnd, g, L, best, self.w)
             vgrid = self.blocked(gnd, self.w, via=True)
             n += 1
         return n
+
+    def square_joins(self):
+        """Where a route joined the tree at one of its bends at under 90 degrees,
+        the wedge between the two is an acid trap. Move the joining track's end
+        along the other track to the foot of the perpendicular from its far end,
+        and split that track there: the join becomes a right-angle T. Only where
+        the moved track keeps its clearance to every other net's copper."""
+        from shapely.geometry import LineString
+        fixed = 0
+        for _ in range(20):
+            again = False
+            tracks = [t for t in self.board.GetTracks() if type(t) is pcbnew.PCB_TRACK]
+            ends = {}
+            for t in tracks:
+                for e, o in ((t.GetStart(), t.GetEnd()), (t.GetEnd(), t.GetStart())):
+                    ends.setdefault((t.GetNetname(), t.GetLayer(), e.x, e.y), []).append((t, o))
+            for (net, layer, px, py), vs in ends.items():
+                for i in range(len(vs)):
+                    for j in range(len(vs)):
+                        if i == j:
+                            continue
+                        (ta, fa), (tb, fb) = vs[i], vs[j]
+                        ax, ay, bx, by = fa.x - px, fa.y - py, fb.x - px, fb.y - py
+                        la, lb = math.hypot(ax, ay), math.hypot(bx, by)
+                        if not la or not lb or (ax * bx + ay * by) / (la * lb) <= math.cos(math.radians(89.5)):
+                            continue
+                        k = (ax * bx + ay * by) / (la * la)      # the foot of fb's perpendicular on P->fa
+                        if not 0.02 < k < 0.98:
+                            continue
+                        X = pcbnew.VECTOR2I(int(px + k * ax), int(py + k * ay))
+                        L = LAYERS.index(layer)
+                        g = LineString([(TO(X.x), TO(X.y)), (TO(fb.x), TO(fb.y))]).buffer(TO(tb.GetWidth()) / 2 + self.clear)
+                        if any(n != net and L in ls and g.intersects(o) for (n, ls, o, _) in self.copper):
+                            continue
+                        if tb.GetStart().x == px and tb.GetStart().y == py:
+                            tb.SetStart(X)
+                        else:
+                            tb.SetEnd(X)
+                        a2 = pcbnew.PCB_TRACK(self.board)
+                        a2.SetStart(X)
+                        a2.SetEnd(fa)
+                        a2.SetWidth(ta.GetWidth())
+                        a2.SetLayer(layer)
+                        a2.SetNet(ta.GetNet())
+                        if ta.GetStart().x == px and ta.GetStart().y == py:
+                            ta.SetEnd(X)
+                        else:
+                            ta.SetStart(X)
+                        self.board.Add(a2)
+                        fixed += 1
+                        again = True
+                        break
+                    if again:
+                        break
+                if again:
+                    break
+            if not again:
+                break
+        return fixed
 
     def pour(self, gnd):
         for L in (TOP, BOT):
@@ -434,7 +513,10 @@ def route(board, lay):
         xs = [g.centroid.x for g in gs]
         ys = [g.centroid.y for g in gs]
         return (max(xs) - min(xs)) + (max(ys) - min(ys)) if len(gs) > 1 else 0
-    order = sorted(nets, key=lambda n: (n not in power, span(n)))
+    # layout.yaml route_first: nets whose pads can be reached from one side only
+    # (a 1.27 mm header's far row) go before anything that could close that side
+    first = lay.get("route_first", [])
+    order = sorted(nets, key=lambda n: (n not in power, n not in first, first.index(n) if n in first else 0, span(n)))
     failed = []
     for n in order:
         ok = r.route_net(n, r.pw if n in power else r.w)
@@ -496,6 +578,7 @@ def route(board, lay):
     print(f"route: {gnd:20s} {'ok' if ok else 'partial - pours and stitching vias must finish it'}")
     vias = r.stitch_gnd(gnd)
     print(f"route: {vias} ground stitching via(s)")
+    print(f"route: {r.square_joins()} acute join(s) squared")
     print(f"route: {merge_tracks(board)} collinear joint(s) merged")
     r.pour(gnd)
     return failed

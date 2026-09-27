@@ -54,18 +54,18 @@ standoff_footprint: "MountingHole:MountingHole_2.2mm_M2"
 # leg, at (-4.4, -4.7) from its centre and pin 2, ground, at (+2.6, -5.75);
 # its centre pole's hole is 5.25 across.
 #
-# Each key network is a T round its KEY node (tools/pcb.py network_parts):
-# `at` the junction, `leg` which way along the body the series resistor runs
-# (its SWITCH_LEG end toward the switch's pin 1), `c` which way across the
-# body the capacitor hangs. Each clears its switch's pole hole and pins by its
-# courtyards: LH1 above its switch, LH2 and LH3 below theirs, LH4 between the
-# LH4 and LH5 switches, LH5 beside the register.
+# Each key network is a T round its KEY node (tools/pcb.py network_parts), and
+# EVERY KEY'S IS PLACED THE SAME WAY ROUND ITS OWN SWITCH, from the switch's
+# position in the body CAD: the pattern below, or an `except:` entry with its
+# reason. `offset` runs from the switch centre to the T's junction (body mm);
+# S and P lie along `axis`; `leg` puts the series resistor, whose SWITCH_LEG end
+# joins the switch's pin 1, on that side; `c` is the side the capacitor hangs.
+# Midway to the next switch along the body, standing across it: on this board
+# the one offset that clears every switch's pins and pole, J-CHAIN, the test
+# pads, the register, the standoffs and the board's edge for all five keys.
 networks:
-  LH1: {at: [50.0, 34.5], leg: -1, c: 1}
-  LH2: {at: [70.0, 17.5], leg: -1, c: -1}
-  LH3: {at: [90.0, 17.5], leg: -1, c: -1}
-  LH4: {at: [106.0, 27.0], leg: -1, c: 1}
-  LH5: {at: [104.5, 44.0], leg: -1, c: 1}
+  pattern: {offset: [10.0, 0.0], axis: y, leg: -1, c: -1}
+  except: {}
 
 # The register sits on the far side just past the chain header, turned so
 # its inputs H..E (pins 6..3) face the key row in the keys' own order, left to
@@ -77,17 +77,21 @@ parts:
   # Do-not-fit reservoir on the chain's 3V3, beside J-CHAIN's 3V3 pin (C-BULK-CHAIN row)
   C-BULK-CHAIN-LH: [67.0, 42.0, 90]
   # Bring-up test pads (TP-CHAIN), a row between the key row and the register:
-  # SER, 3V3, GND, SCK, SH/LD, QH - README.md says how to use them.
-  TP-3V3-LH:     [85.0, 35.0, 0]
-  TP-GND-LH:     [88.5, 35.0, 0]
-  TP-SCK-LH:     [92.0, 35.0, 0]
-  TP-SHLD-LH:    [95.5, 35.0, 0]
-  TP-QH-LH:      [99.0, 35.0, 0]
-  TP-SER-LH:     [81.5, 35.0, 0]
+  # in the order of the register's own pins above them - SER and QH by pins 10 and
+  # 9, SCK and SH/LD by 2 and 1, 3V3 by 16 - so no chain net crosses another's
+  # pad. README.md says how to use them.
+  TP-SER-LH:     [83.0, 36.0, 0]
+  TP-QH-LH:      [86.5, 36.0, 0]
+  TP-GND-LH:     [90.0, 36.0, 0]
+  TP-SCK-LH:     [93.5, 36.0, 0]
+  TP-SHLD-LH:    [97.0, 36.0, 0]
+  TP-3V3-LH:     [100.5, 36.0, 0]
 
-# The parts-side silkscreen's title block (tools/pcb.py add_silk); body coordinates.
+# The silkscreen title blocks (tools/pcb.py add_silk, add_top_silk): the parts side's
+# and the switch side's, in body coordinates.
 silk:
   at: [44.0, 12.5]
+  top_at: [83.0, 46.0]       # the switch side's copy, left edge of the text
   title: "WOODY key board LH"
   rev: "A"
   date: "2026-09-27"
@@ -96,5 +100,9 @@ silk:
 # depends on a pour finding its way round the tracks, and then poured on both
 # layers; the chain's 3V3 rail is the wider power track.
 route: true
+# J-CHAIN's far row (the odd pins: 3V3, QH, SER, SH/LD, SCK) can be reached only
+# from the header's back - its 1.27 mm pads leave no room for a track between
+# them - so those nets are routed before the key lines can close that side.
+route_first: [/CHAIN_SCK, /CHAIN_SHLD, /CHAIN_SER_LH, /HOP_LH_LT]
 ground_net: GND_CHAIN
 power_nets: [V3V3_CHAIN_LH]
