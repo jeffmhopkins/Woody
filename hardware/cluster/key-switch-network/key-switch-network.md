@@ -113,6 +113,42 @@ else; `tools/check-netlist.py` prints that shortfall by name every run.*
 > threshold region risks **double-clocking from induced ground bounce**.
 > Another reason not to shave this margin.
 
+**Every key edge breaks the 74HC165's input transition limit, and this is
+accepted, not overlooked.** The HC165 has no Schmitt inputs, and each
+datasheet caps how slowly an input may cross its thresholds: Nexperia (the
+fitted part) allows 625 ns/V at 2.0 V and 139 ns/V at 4.5 V
+`[datasheets/logic/74HC165-nexperia.pdf p.6, Table 5]`, about **372 ns/V at
+3.3 V** interpolated `[calc: 625 − (1.3/2.5)(625 − 139)]`. `[calc]`, from the
+table above:
+
+- **Release** crosses `V_IH` at (3.3 − 2.31) V / 103.4 µs = 9.57 mV/µs, which
+  is **104 000 ns/V, about 280× the limit**. The node spends 32.3 → 119.9 µs,
+  **87.6 µs**, between `V_IL` and `V_IH`, so at the 250 µs scan about **35 %
+  of releases put one sample inside the band**.
+- **Press** crosses `V_IL` at 5 310 ns/V, **about 14×**, and spends 4.2 µs in
+  the band.
+
+Why it is accepted:
+- These are parallel data inputs, not clocks. The register captures them
+  when `SH/LD` returns high (`key-register.md` §1), so a slow input cannot
+  double-clock anything. An input caught mid-band reads as 0 or 1.
+- One indeterminate sample during a release is indistinguishable from
+  contact bounce, which firmware's release window already rejects (above).
+- The unquantified cost is extra supply current while an input dwells
+  mid-rail. It is measured at bring-up: `ICC` with a key held half-pressed,
+  from TP-3V3 (`hardware/boards/key-board-lh/README.md`).
+
+**The alternative is a drop-in part, and it is the owner's choice** (Still
+open, below): TI's **SN74HCS165** has Schmitt-trigger inputs and "no input
+signal transition rate requirements" `[datasheets/logic/SN74HCS165-ti-scls828a.pdf
+p.15]`, the same pinout and SOIC-16 `[same, p.3; p.1]`. Adopting it re-derives
+`key-release-time` and `key-press-time` against its thresholds: TI publishes
+them at 2 V, 4.5 V and 6 V only `[same, p.6]`, and Nexperia's 74HCS165, which
+does publish a 3.0–3.6 V row, is a different die and not the one bought
+`[datasheets/logic/74HCS165-nexperia.pdf p.6]`. The 74LV165A is not an
+alternative: its "Schmitt-trigger action" still carries a transition-rate
+limit `[datasheets/logic/74LV165A-nexperia.pdf p.5]`.
+
 | | |
 |---|---|
 | Release, τ = 2.2 kΩ × 47 nF = 103.4 µs | crosses `V_IH` at **119.9 µs** |
@@ -179,5 +215,10 @@ circuit, moved verbatim 2026-09-21. `§2` is this page.*
   the register moved back to this board, and the cost — 27.3 mA on the ADC's
   reference rather than 6.2 mA — arrived at the same moment. Live trade,
   recorded on the carrier page as accepted.
+- **74HC165 or SN74HCS165** (§2, "Every key edge breaks the 74HC165's input
+  transition limit"). Decided by the owner, before the first order or after
+  the bring-up `ICC` measurement: the HC165 is accepted with the reasoning
+  above; the HCS165 removes the violation, costs the threshold re-derivation
+  and is thinly stocked at the board house `[web https://jlcpcb.com/partdetail/TexasInstruments-SN74HCS165DR/C2864745, 2026-09-27]`.
 - **Whether `LT` takes lighter springs** (`SW-THUMB`), which is an M1 decision by
   hand and changes nothing electrically `[repo] bom.csv, 0002`.
