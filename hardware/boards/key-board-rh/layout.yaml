@@ -37,7 +37,7 @@ fab:
   silk: White
   copper_oz: 1               # outer copper, in the stackup the Gerber job file carries
 
-standoff_footprint: "MountingHole:MountingHole_2.2mm_M2"
+standoff_footprint: "MountingHole:MountingHole_2.7mm_M2.5"
 
 # Each key's network: the one pattern, as on the left-hand board.
 networks:

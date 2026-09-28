@@ -33,26 +33,21 @@ drawing.
   (decided 2026-09-26, ADR 0009). The oak top's thickness is not a parameter:
   it is the cap's height above the seat less the travel, derived in the model
   and printed in `drc.echo`. The oak carries one clearance hole per cap
-  through it, and on its underside a blind pocket over each key-board screw
-  head; the playing face is unbroken, and the lid's fasteners stop in the
-  plate from below. The two key boards hang from the plate on M2 screws put
-  DOWN through it before it is bonded to the wood (ADR 0020, Amendment 3 —
-  the owner's, 2026-09-27, replacing a pressed-in standoff and then a
-  plugged through-bore): the screw's head on the plate's top face, inside a
-  pocket (`hardware.kb_pocket_d`, depth *"key-board head pocket depth
-  (derived)"*, the head plus `hardware.kb_pocket_clear`), the plate's
-  clearance hole, a spacer and a washer under the plate, the board, and a
-  nut underneath. The wood over a pocket is ruled (*"key-board head pockets
-  leave wood over them"*, against `hardware.kb_pocket_skin`), and the
-  pockets are a blind cut exported on their own, `export/oak-pockets.dxf`.
-  Each board is a rectangle across the cavity with a screw in each corner,
-  `hardware.kb_mount_inset` in from both edges so each pocket clears the
-  side grooves; the tail ends run `boards.kb_tail_margin` past the last
-  cutout so the tail pockets clear the last cap slot (*"key-board head
-  pockets clear of the wood top's cuts (mouth ends)"* and *"(tail ends)"*,
-  against `hardware.kb_pocket_wall`). The head bears on plate metal (*"key-board screw
-  heads bear on plate metal"*) and the spacer and washer stay off the
-  switch cutouts (*"key-board spacers and washers clear of the switch
+  through it and nothing else; the playing face is unbroken, and the lid's
+  fasteners stop in the plate from below. The two key boards hang from the
+  plate on PEM FHL-M2.5 self-clinching studs pressed into it, heads flush with
+  its top face (ADR 0020, Amendment 4 — the owner's, 2026-09-28, replacing a
+  pressed-in standoff, a plugged through-bore and then screw heads in blind
+  pockets): the stud, a spacer and a washer under the plate, the board, and a
+  nut underneath. Nothing stands above the plate, so the wood bonds to it
+  flat. Each board is a rectangle across the cavity with a stud in each
+  corner, `hardware.kb_mount_inset` in from both edges for the nut's
+  keep-out; the tail ends run `boards.kb_tail_margin` past the last cutout
+  (*"key-board tail margin, least"* prints how short it may be). Each stud
+  keeps PEM's edge distance from the plate's edges and cutouts (*"key-board
+  studs clear of the plate's edges and cutouts"*, against
+  `hardware.kb_stud_edge`), and the spacer and washer stay off the switch
+  cutouts (*"key-board spacers and washers clear of the switch
   cutouts"*). The plate + `hardware.kb_spacer_l` + `hardware.kb_washer_t`
   is the key boards' depth, at the depth the KS-33's pins allow
   (`docs/reference/ks33-geometry.md`; `switch.pcb_below_seat`): *"key-board

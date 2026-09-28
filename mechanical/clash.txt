@@ -5,7 +5,7 @@
 
 CLASH 0 - none
 
-ALLOWED 138 (by rule in mechanical/clash-allow.yaml)
+ALLOWED 146 (by rule in mechanical/clash-allow.yaml)
        132.6 mm3  IDC plug left_hand main board  x  J-CHAIN left_hand main board   - each plug sits in its header's shroud (ADR 0017)
        132.6 mm3  IDC plug left_hand key board  x  J-CHAIN left_hand key board   - each plug sits in its header's shroud (ADR 0017)
        132.6 mm3  IDC plug right_hand main board  x  J-CHAIN right_hand main board   - each plug sits in its header's shroud (ADR 0017)
@@ -31,8 +31,8 @@ ALLOWED 138 (by rule in mechanical/clash-allow.yaml)
         24.4 mm3  board right_hand  x  switch RH1   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         24.4 mm3  board right_hand  x  switch RH3   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         24.4 mm3  board right_hand  x  switch RH6   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
-        24.4 mm3  board right_hand  x  switch RH4   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         24.4 mm3  board right_hand  x  switch RH2   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
+        24.4 mm3  board right_hand  x  switch RH4   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         24.4 mm3  board right_hand  x  switch RH5   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
         24.3 mm3  cap LH5  x  travel LH5   - a cap's travel (the volume its shell sweeps pressing down) includes where that cap sits at rest; subtracting it leaves coincident faces no mesh check can intersect. Caps move straight down, so a travel meeting a NEIGHBOUR's cap would mean the two overlap in plan, which drc.echo's cap-to-cap gap rule holds
         24.3 mm3  cap LH4  x  travel LH4   - a cap's travel (the volume its shell sweeps pressing down) includes where that cap sits at rest; subtracting it leaves coincident faces no mesh check can intersect. Caps move straight down, so a travel meeting a NEIGHBOUR's cap would mean the two overlap in plan, which drc.echo's cap-to-cap gap rule holds
@@ -75,11 +75,11 @@ ALLOWED 138 (by rule in mechanical/clash-allow.yaml)
         17.1 mm3  parts left_hand  x  switch LH3   - the switch pins and centre pole stand proud of the key board, by the pole's and pins' reach below the seat less switch.pcb_below_seat and boards.key_board_t, between its parts; a layer envelope cannot follow the placement
         17.1 mm3  parts left_hand  x  switch LH2   - the switch pins and centre pole stand proud of the key board, by the pole's and pins' reach below the seat less switch.pcb_below_seat and boards.key_board_t, between its parts; a layer envelope cannot follow the placement
         17.1 mm3  parts left_hand  x  switch LH1   - the switch pins and centre pole stand proud of the key board, by the pole's and pins' reach below the seat less switch.pcb_below_seat and boards.key_board_t, between its parts; a layer envelope cannot follow the placement
-        17.1 mm3  parts right_hand  x  switch RH6   - the switch pins and centre pole stand proud of the key board, by the pole's and pins' reach below the seat less switch.pcb_below_seat and boards.key_board_t, between its parts; a layer envelope cannot follow the placement
-        17.1 mm3  parts right_hand  x  switch RH2   - the switch pins and centre pole stand proud of the key board, by the pole's and pins' reach below the seat less switch.pcb_below_seat and boards.key_board_t, between its parts; a layer envelope cannot follow the placement
-        17.1 mm3  parts right_hand  x  switch RH1   - the switch pins and centre pole stand proud of the key board, by the pole's and pins' reach below the seat less switch.pcb_below_seat and boards.key_board_t, between its parts; a layer envelope cannot follow the placement
         17.1 mm3  parts right_hand  x  switch RH4   - the switch pins and centre pole stand proud of the key board, by the pole's and pins' reach below the seat less switch.pcb_below_seat and boards.key_board_t, between its parts; a layer envelope cannot follow the placement
+        17.1 mm3  parts right_hand  x  switch RH2   - the switch pins and centre pole stand proud of the key board, by the pole's and pins' reach below the seat less switch.pcb_below_seat and boards.key_board_t, between its parts; a layer envelope cannot follow the placement
+        17.1 mm3  parts right_hand  x  switch RH6   - the switch pins and centre pole stand proud of the key board, by the pole's and pins' reach below the seat less switch.pcb_below_seat and boards.key_board_t, between its parts; a layer envelope cannot follow the placement
         17.1 mm3  parts right_hand  x  switch RH3   - the switch pins and centre pole stand proud of the key board, by the pole's and pins' reach below the seat less switch.pcb_below_seat and boards.key_board_t, between its parts; a layer envelope cannot follow the placement
+        17.1 mm3  parts right_hand  x  switch RH1   - the switch pins and centre pole stand proud of the key board, by the pole's and pins' reach below the seat less switch.pcb_below_seat and boards.key_board_t, between its parts; a layer envelope cannot follow the placement
         17.1 mm3  parts right_hand  x  switch RH5   - the switch pins and centre pole stand proud of the key board, by the pole's and pins' reach below the seat less switch.pcb_below_seat and boards.key_board_t, between its parts; a layer envelope cannot follow the placement
         17.1 mm3  parts left_hand  x  switch LH4   - the switch pins and centre pole stand proud of the key board, by the pole's and pins' reach below the seat less switch.pcb_below_seat and boards.key_board_t, between its parts; a layer envelope cannot follow the placement
         17.1 mm3  parts left_hand  x  switch LH5   - the switch pins and centre pole stand proud of the key board, by the pole's and pins' reach below the seat less switch.pcb_below_seat and boards.key_board_t, between its parts; a layer envelope cannot follow the placement
@@ -109,8 +109,8 @@ ALLOWED 138 (by rule in mechanical/clash-allow.yaml)
          1.0 mm3  key plate  x  switch RH5   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
          1.0 mm3  switch RT2  x  thumb plates   - as the key plate - the thumb switches clip into their plates
          1.0 mm3  switch RT4  x  thumb plates   - as the key plate - the thumb switches clip into their plates
-         1.0 mm3  key plate  x  switch RH1   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
          1.0 mm3  key plate  x  switch RH2   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
+         1.0 mm3  key plate  x  switch RH1   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
          1.0 mm3  key plate  x  switch RH3   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
          1.0 mm3  key plate  x  switch RH4   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
          1.0 mm3  key plate  x  switch RH6   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
@@ -125,6 +125,14 @@ ALLOWED 138 (by rule in mechanical/clash-allow.yaml)
          1.0 mm3  key plate  x  switch LH2   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
          1.0 mm3  switch LT1  x  thumb plates   - as the key plate - the thumb switches clip into their plates
          1.0 mm3  switch LT3  x  thumb plates   - as the key plate - the thumb switches clip into their plates
+         0.9 mm3  key plate  x  key-board stud left_hand 1   - the PEM FHL stud is pressed into the plate: its head flush in the top face, its clinch displacing the sheet round its shank (ADR 0020, Amendment 4)
+         0.9 mm3  key plate  x  key-board stud left_hand 2   - the PEM FHL stud is pressed into the plate: its head flush in the top face, its clinch displacing the sheet round its shank (ADR 0020, Amendment 4)
+         0.9 mm3  key plate  x  key-board stud left_hand 3   - the PEM FHL stud is pressed into the plate: its head flush in the top face, its clinch displacing the sheet round its shank (ADR 0020, Amendment 4)
+         0.9 mm3  key plate  x  key-board stud right_hand 3   - the PEM FHL stud is pressed into the plate: its head flush in the top face, its clinch displacing the sheet round its shank (ADR 0020, Amendment 4)
+         0.9 mm3  key plate  x  key-board stud left_hand 4   - the PEM FHL stud is pressed into the plate: its head flush in the top face, its clinch displacing the sheet round its shank (ADR 0020, Amendment 4)
+         0.9 mm3  key plate  x  key-board stud right_hand 4   - the PEM FHL stud is pressed into the plate: its head flush in the top face, its clinch displacing the sheet round its shank (ADR 0020, Amendment 4)
+         0.9 mm3  key plate  x  key-board stud right_hand 1   - the PEM FHL stud is pressed into the plate: its head flush in the top face, its clinch displacing the sheet round its shank (ADR 0020, Amendment 4)
+         0.9 mm3  key plate  x  key-board stud right_hand 2   - the PEM FHL stud is pressed into the plate: its head flush in the top face, its clinch displacing the sheet round its shank (ADR 0020, Amendment 4)
          0.2 mm3  cap RH5  x  cap socket RH5   - the socket boss is moulded into the cap's top: one part, drawn as two solids so the socket alone may meet the stem
          0.2 mm3  cap RH6  x  cap socket RH6   - the socket boss is moulded into the cap's top: one part, drawn as two solids so the socket alone may meet the stem
          0.2 mm3  cap RH4  x  cap socket RH4   - the socket boss is moulded into the cap's top: one part, drawn as two solids so the socket alone may meet the stem

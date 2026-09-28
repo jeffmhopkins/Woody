@@ -51,7 +51,7 @@ origin = "mouth";
 
 LAYERS = ["plate_top", "oak_top", "oak_bottom", "oak_grooves", "thumb_plate", "side",
           "mouth_cap", "tail_cap", "ubolt_backplate",
-          "matrix_window", "oak_rebates", "oak_pockets"];
+          "matrix_window", "oak_rebates"];
 
 $fn = 40;
 EPS = 0.01;           // drawing convention: coplanar-face nudge
@@ -107,7 +107,7 @@ thumb_recess_clear = stack_cap_clear;
 rc = switch_keycap + 2 * thumb_recess_clear;    // a thumb recess, square
 thumb_pitch = layout_lh_gaps[0];                 // the top's index-to-middle pitch
 cluster_margin = boards_kb_end_margin;   // a key board's MOUTH end past its first switch cutout (the board itself: kb_rect)
-tail_margin = boards_kb_tail_margin;     // and its TAIL end past its last: longer, for the corner head pockets (hardware.kb_pocket_wall)
+tail_margin = boards_kb_tail_margin;     // and its TAIL end past its last: longer, for the tail corners' studs beside the last keys
 
 // The MOUTH END. There is no display (owner, 2026-09-26: "remove the upper
 // display ... we can do all this with the matrix led"; ADR 0015), so the
@@ -357,7 +357,7 @@ module plate_top_2d() {
         translate([-plate_x0, -plate_y0]) {
             for (k = top_keys) cutout_at(key_xy(k), key_rot(k), plate_cutout);
             for (f = fasteners()) translate(f) circle(d = tap_d_m3);
-            for (cl = ["left_hand", "right_hand"], s = kb_mounts(cl)) translate(s) circle(d = hardware_kb_plate_hole);
+            for (cl = ["left_hand", "right_hand"], s = kb_mounts(cl)) translate(s) circle(d = hardware_kb_stud_hole);
         }
     }
 }
@@ -366,8 +366,8 @@ tap_d_m3 = 2.5;   // drawing convention: M3 tap drill; see the DRC on thread eng
 // Oak top: the lid's wood, ON TOP of the plate, full width. One hole per key
 // (or one slot per hand), which the cap travels in. Nothing else goes
 // through it: the lid screws stop in the plate from below, and the key
-// boards' screw heads sit in blind pockets in its underside (oak_pockets_2d, ADR 0020
-// Amendment 3), so the playing face is unbroken wood. The side
+// boards hang from studs flush in the plate's top face (ADR 0020 Amendment 4),
+// so the wood bonds to a flat plate and the playing face is unbroken. The side
 // grooves are NOT in this outline: they are a saw cut, not a through-cut,
 // and export separately (oak_grooves_2d). Frame: model XY minus [x_in0, 0].
 module oak_top_2d() {
@@ -502,10 +502,6 @@ matrix_rebate = openings_matrix_window + 2 * openings_matrix_lip;
 module matrix_window_2d() { translate(matrix_xy) offset(r = 0.5) offset(delta = -0.6) square(matrix_rebate, center = true); }
 // Rebates in the oak top's upper face - a router pass, like the grooves, so
 // exported on their own. Frame: as the oak panels.
-// The key boards' screw-head pockets: blind, drilled up into the oak top's underside
-// kb_pocket_depth deep, one over each key-board mount. Exported separately,
-// like the grooves, because they are not through-cuts.
-module oak_pockets_2d() { translate([-x_in0, 0]) for (cl = ["left_hand", "right_hand"], m = kb_mounts(cl)) translate(m) circle(d = hardware_kb_pocket_d); }
 module oak_rebates_2d() { translate([-x_in0, 0]) translate(matrix_xy) square(matrix_rebate, center = true); }
 
 // --------------------------------------------------------- features ------
@@ -575,7 +571,6 @@ module lid(dz = 0) {
         P(C_OAK, true, "oak top") translate([x_in0, 0, z_oak_top_bot + explode]) intersection() { sanded_panel(x_in1 - x_in0, oak_top_t); difference() {
             linear_extrude(oak_top_t) oak_top_2d();
             translate([0, 0, -EPS]) linear_extrude(stack_groove_depth + EPS) oak_grooves_2d();
-            translate([0, 0, -EPS]) linear_extrude(kb_pocket_depth + EPS) oak_pockets_2d();
             translate([0, 0, oak_top_t - openings_matrix_acrylic_t]) linear_extrude(openings_matrix_acrylic_t + EPS) oak_rebates_2d();
         } }
         lam(z_plate_bot + explode / 2, plate_thickness, C_ALU, false, "key plate")
@@ -693,15 +688,14 @@ module key_board_2d(cl) {
     offset(r = kb_corner_r) offset(delta = -kb_corner_r) translate([r[0], r[1]]) square([r[2] - r[0], r[3] - r[1]]);
 }
 
-// THE KEY BOARDS HANG FROM THE PLATE; THE SCREW HEADS HIDE IN THE WOOD
-// (owner, 2026-09-27, ADR 0020 Amendment 3): at each corner an M2 socket-head
-// screw goes down through the plate, its head on the plate's top face, then a
-// spacer and a washer below the plate, the board, and a nut on the board's
-// underside. The screws go in before the plate is bonded to the wood; a blind
-// pocket drilled up into the wood's underside takes each head, so nothing
-// shows on the playing face. The spacer and washer set the board's depth. The
-// DRC below checks the head lands on plate metal, the spacer clears the switch
-// cutouts, and each pocket keeps wood round and over it.
+// THE KEY BOARDS HANG FROM STUDS FLUSH IN THE PLATE (owner, 2026-09-28, ADR 0020
+// Amendment 4): at each corner a PEM FHL-M2.5 self-clinching stud is pressed
+// into the plate, its head flush with the plate's top face; below the plate a
+// spacer, a washer, the board, and a nut on the board's underside. Nothing
+// stands above the plate, so the wood bonds to it flat. The spacer and washer
+// set the board's depth. The DRC below checks each stud keeps PEM's edge
+// distance from the plate's edges and cutouts, the spacer clears the cutouts,
+// and the stud reaches through the nut.
 function rect_gap(p, c, sz, r) = let(d = [cos(-r) * (p[0] - c[0]) - sin(-r) * (p[1] - c[1]), sin(-r) * (p[0] - c[0]) + cos(-r) * (p[1] - c[1])],
                                    e = [max(abs(d[0]) - sz[0] / 2, 0), max(abs(d[1]) - sz[1] / 2, 0)]) norm(e);
 function cutout_gap(p) = min([for (k = top_keys) rect_gap(p, key_xy(k), [plate_cutout, plate_cutout], key_rot(k))]);
@@ -713,8 +707,7 @@ function kb_mounts(cl) = let(r = kb_rect(cl), e = hardware_kb_mount_inset)
     [[r[0] + e, r[1] + e], [r[0] + e, r[3] - e], [r[2] - e, r[1] + e], [r[2] - e, r[3] - e]];
 kb_gap = hardware_kb_spacer_l + hardware_kb_washer_t;        // plate underside to board top: what the mount stacks there
 kb_top = z_plate_top - switch_pcb_below_seat;                 // the key boards' top face
-kb_screw_below = hardware_kb_screw_l - (plate_thickness + kb_gap + boards_key_board_t);   // the screw's end below the board's underside
-kb_pocket_depth = hardware_kb_screw_head_h + hardware_kb_pocket_clear;                    // the head pocket, up into the oak top
+kb_stud_below = hardware_kb_stud_l - (plate_thickness + kb_gap + boards_key_board_t);   // the stud's end below the board's underside (L from the head's face)
 // Where the ribbon runs under a key board, from its connector's mouth to the
 // board's far edge: no parts there - the model's parts envelope leaves it out.
 // The key board's chain header with its plug, as a rectangle [x0, y0, x1, y1]:
@@ -734,20 +727,22 @@ module cluster_boards() {
         P(C_PCB, false, str("board ", cl)) translate([0, 0, kb_top - boards_key_board_t + explode * 0.25])
             linear_extrude(boards_key_board_t) difference() {
                 key_board_2d(cl);
-                for (m = kb_mounts(cl)) translate(m) circle(d = hardware_kb_screw_hole);
+                for (m = kb_mounts(cl)) translate(m) circle(d = hardware_kb_board_hole);
             }
         // each P() places its own solid, so a section cut sees it where it is
         for (i = [0 : len(kb_mounts(cl)) - 1]) let(m = kb_mounts(cl)[i], n = str(cl, " ", i + 1)) {
-            P(C_STEEL, false, str("key-board screw ", n)) translate([m[0], m[1], explode * 0.6]) {
-                translate([0, 0, z_plate_top]) cylinder(d = hardware_kb_screw_head_d, h = hardware_kb_screw_head_h);
-                translate([0, 0, z_plate_top - hardware_kb_screw_l]) cylinder(d = 2, h = hardware_kb_screw_l);
+            // the stud: its head flush in the plate's top face, its shank down through
+            // the spacer, washer, board and nut (L from the head's face)
+            P(C_STEEL, false, str("key-board stud ", n)) translate([m[0], m[1], explode * 0.6]) {
+                translate([0, 0, z_plate_top - 0.3]) cylinder(d = hardware_kb_stud_head_d, h = 0.3);
+                translate([0, 0, z_plate_top - hardware_kb_stud_l]) cylinder(d = 2.5, h = hardware_kb_stud_l);
             }
             P(C_STEEL, false, str("key-board spacer ", n)) translate([m[0], m[1], z_plate_bot - hardware_kb_spacer_l + explode * 0.2])
-                difference() { cylinder(d = hardware_kb_spacer_od, h = hardware_kb_spacer_l); translate([0, 0, -1]) cylinder(d = hardware_kb_screw_hole, h = hardware_kb_spacer_l + 2); }
+                difference() { cylinder(d = hardware_kb_spacer_od, h = hardware_kb_spacer_l); translate([0, 0, -1]) cylinder(d = hardware_kb_stud_attached_hole, h = hardware_kb_spacer_l + 2); }
             P(C_STEEL, false, str("key-board washer ", n)) translate([m[0], m[1], kb_top + explode * 0.15])
-                difference() { cylinder(d = hardware_kb_washer_od, h = hardware_kb_washer_t); translate([0, 0, -1]) cylinder(d = hardware_kb_screw_hole, h = hardware_kb_washer_t + 2); }
+                difference() { cylinder(d = hardware_kb_washer_od, h = hardware_kb_washer_t); translate([0, 0, -1]) cylinder(d = hardware_kb_board_hole, h = hardware_kb_washer_t + 2); }
             P(C_STEEL, false, str("key-board nut ", n)) translate([m[0], m[1], kb_top - boards_key_board_t - hardware_kb_nut_m - explode * 0.3])
-                difference() { cylinder(d = hardware_kb_nut_e, h = hardware_kb_nut_m, $fn = 6); translate([0, 0, -1]) cylinder(d = 2, h = hardware_kb_nut_m + 2); }
+                difference() { cylinder(d = hardware_kb_nut_e, h = hardware_kb_nut_m, $fn = 6); translate([0, 0, -1]) cylinder(d = 2.5, h = hardware_kb_nut_m + 2); }
         }
     }
 }
@@ -762,8 +757,8 @@ module pcb_geometry() {
         echo("PCB", cl, "chain", "J-CHAIN", chain_x(cl), chain_y, chain_dir(cl), boards_chain_hdr_l, boards_chain_hdr_pin_back);
         // the hole, then what bears on the board's underside (the nut, across its
         // corners) and on its top copper (the spacer or washer, whichever is wider),
-        // each grown by how far it can sit off the screw's axis
-        for (m = kb_mounts(cl)) echo("PCB", cl, "standoff", "M2", m[0], m[1], hardware_kb_screw_hole,
+        // each grown by how far it can sit off the stud's axis
+        for (m = kb_mounts(cl)) echo("PCB", cl, "standoff", "M2.5", m[0], m[1], hardware_kb_board_hole,
                                      hardware_kb_nut_e + 2 * hardware_kb_mount_float,
                                      max(hardware_kb_spacer_od, hardware_kb_washer_od) + 2 * hardware_kb_mount_float);
         echo("PCB", cl, "board", "thickness", boards_key_board_t, "smt_height_max", boards_cluster_smt_h,
@@ -1446,10 +1441,9 @@ module drc_report() {
     for (cl = chain_ribbon_cls) let(g = chain_screw_gap(chain_hairpin(cl)))
         drc(g >= fastener_notch, str("key-chain ribbon hairpin clear of the lid screws (", cl, ")"), g, "mm from the hairpin to the nearest screw's centre");
 
-    // THE KEY BOARDS' MOUNTS (ADR 0020, Amendment 3). The screw's head sits on
-    // the plate's top face in a blind pocket in the wood; the spacer and washer
-    // below the plate set the board's depth; the nut is on the board's
-    // underside.
+    // THE KEY BOARDS' MOUNTS (ADR 0020, Amendment 4). The stud's head is flush in
+    // the plate's top face; the spacer and washer below the plate set the
+    // board's depth; the nut is on the board's underside.
     mounts = [for (cl = ["left_hand", "right_hand"], m = kb_mounts(cl)) m];
     echo("DRC", "INFO", "key-board mount gap (derived)", kb_gap,
          "mm: plate underside to board top - hardware.kb_spacer_l + hardware.kb_washer_t");
@@ -1467,35 +1461,31 @@ module drc_report() {
                  lo < w[0] ? str(": at the low corner the pins' wide shoulder starts ", w[0] - lo, " mm into the hole - the first board confirms the fit") : "",
                  hi > w[1] ? str(": at the high corner ", hi - w[1], " mm less pin stands proud to solder - the first board confirms the fit") : ""));
     }
-    head = min([for (m = mounts) min(cutout_gap(m), m[1] - u_y0, W - u_y0 - m[1])]) - hardware_kb_screw_head_d / 2;
-    drc(head >= 0.5, "key-board screw heads bear on plate metal", head,
-        "mm from a screw head's edge to the nearest switch cutout or cavity wall, worst case");
+    // a self-clinching stud needs sheet round it: PEM's least distance from the
+    // hole's centre to an edge, and a switch cutout is an edge
+    stud_edge = min([for (m = mounts) min(cutout_gap(m), m[1] - u_y0, W - u_y0 - m[1])]);
+    drc(stud_edge >= hardware_kb_stud_edge, "key-board studs clear of the plate's edges and cutouts", stud_edge,
+        "mm from a stud's centre to the nearest switch cutout or plate edge, worst case, against hardware.kb_stud_edge");
     sp = min([for (m = mounts) cutout_gap(m)]) - max(hardware_kb_spacer_od, hardware_kb_washer_od) / 2 - hardware_kb_mount_float;
     drc(sp >= 0.5, "key-board spacers and washers clear of the switch cutouts", sp,
         "mm from a spacer's or washer's edge, off its axis by hardware.kb_mount_float, to the nearest switch cutout, worst case");
-    // a pocket is a blind hole in the wood's underside: keep hardware.kb_pocket_wall
-    // of wood round it, to every cap hole or slot, the side grooves and the
-    // window's rebate, and hardware.kb_pocket_skin over it
-    groove_in = stack_side_inset + stack_side_t + stack_groove_clear;   // a groove's inner edge from the top's edge
-    function pocket_wall(m) = min(cap_gap(m), m[1] - groove_in, W - groove_in - m[1],
-                                  sq_gap(m, matrix_xy, matrix_rebate / 2)) - hardware_kb_pocket_d / 2;
-    for (end = [0, 1]) let(ms = [for (cl = ["left_hand", "right_hand"]) each [kb_mounts(cl)[2 * end], kb_mounts(cl)[2 * end + 1]]],
-                         wl = min([for (m = ms) pocket_wall(m)]),
-                         wc = min([for (m = ms) cap_gap(m)]) - hardware_kb_pocket_d / 2)   // along the body, only the cap slots move with the margin
-        drc(wl >= hardware_kb_pocket_wall, str("key-board head pockets clear of the wood top's cuts (", end == 0 ? "mouth" : "tail", " ends)"), wl,
-            str("mm of wood between a pocket and the nearest cap slot, side groove or window rebate, against hardware.kb_pocket_wall",
-                end == 1 ? str("; boards.kb_tail_margin may be as short as ", boards_kb_tail_margin - (wc - hardware_kb_pocket_wall)) : ""));
-    echo("DRC", "INFO", "key-board head pocket depth (derived)", kb_pocket_depth,
-         "mm into the oak top's underside: the screw head's height plus hardware.kb_pocket_clear");
-    skin = oak_top_t - kb_pocket_depth;
-    drc(skin >= hardware_kb_pocket_skin, "key-board head pockets leave wood over them", skin,
-        "mm of wood between a pocket's floor and the playing face, against hardware.kb_pocket_skin");
-    thread = kb_screw_below - hardware_kb_nut_m;
-    drc(thread >= 2 * hardware_kb_screw_pitch, "key-board screw: thread past the nut", thread,
-        str("mm of M2 x ", hardware_kb_screw_l, " past the nut, against two pitches"));
-    tip = (kb_top - boards_key_board_t) - kb_screw_below - (cb_top + boards_smt_h);
-    drc(tip >= 1, "key-board screw ends clear of the main board's parts", tip,
-        "mm from a screw's end, below the key board, to the top of the main board's tallest part, anywhere");
+    // the tail corners reach the last keys: the least tail margin that keeps the
+    // tail studs' spacers and washers 0.5 from those keys' cutouts, and the studs
+    // PEM's edge distance from them (along the body only the tail end moves)
+    let(tails = [for (cl = ["left_hand", "right_hand"]) each [kb_mounts(cl)[2], kb_mounts(cl)[3]]],
+        need = max(max(hardware_kb_spacer_od, hardware_kb_washer_od) / 2 + hardware_kb_mount_float + 0.5, hardware_kb_stud_edge),
+        have = min([for (m = tails) cutout_gap(m)]))
+        echo("DRC", "INFO", "key-board tail margin, least", boards_kb_tail_margin - (have - need),
+             str("mm past the last switch cutout that keeps the tail corners' hardware clear of it; boards.kb_tail_margin is ", boards_kb_tail_margin));
+    thread = kb_stud_below + hardware_kb_stud_l_tol[0] - hardware_kb_nut_m;
+    drc(thread >= 2 * hardware_kb_stud_pitch, "key-board stud: thread past the nut", thread,
+        str("mm of FHL-M2.5-", hardware_kb_stud_l, " past the nut at the stud's shortest, against two pitches"));
+    shank = hardware_kb_stud_s - plate_thickness;
+    drc(shank <= hardware_kb_spacer_l + hardware_kb_washer_t, "key-board stud: its unthreaded shank ends above the board", shank,
+        "mm of unthreaded shank below the plate, against the spacer and washer it sits in");
+    tip = (kb_top - boards_key_board_t) - (kb_stud_below + hardware_kb_stud_l_tol[1]) - (cb_top + boards_smt_h);
+    drc(tip >= 1, "key-board stud ends clear of the main board's parts", tip,
+        "mm from a stud's end at its longest, below the key board, to the top of the main board's tallest part, anywhere");
     echo("DRC", "INFO", "key-board mounts", [for (cl = ["left_hand", "right_hand"]) len(kb_mounts(cl))],
          "per board (left_hand, right_hand): one in each corner");
     kb_fast = min([for (cl = ["left_hand", "right_hand"], f = fasteners()) let(r = kb_rect(cl))
@@ -1573,7 +1563,6 @@ module part_2d(p) {
     else if (p == "ubolt_backplate") ubolt_backplate_2d();
     else if (p == "matrix_window") matrix_window_2d();
     else if (p == "oak_rebates") oak_rebates_2d();
-    else if (p == "oak_pockets") oak_pockets_2d();
     else if (p == "key_board_left_hand") key_board_2d("left_hand");
     else if (p == "key_board_right_hand") key_board_2d("right_hand");
     else assert(false, str("unknown part ", p));

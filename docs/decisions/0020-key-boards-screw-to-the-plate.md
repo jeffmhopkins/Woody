@@ -3,11 +3,13 @@
 **Status:** Accepted. Decided by the owner, 2026-09-27, and amended the same
 day (points 3 and 6, and point 5's notes; *Amendment* below). **Amended twice more
 on 2026-09-27**: *Amendment 2* made a screw down through a plugged bore in
-the wood top the standard, and **Amendment 3 replaced the bore and plug
-with a blind pocket drilled into the wood top's underside** — the current
-mount, with nothing through the playing face. There is no standoff, so
-nothing waits on a plate vendor's clinch data; what stays open is in
-Amendment 3's last list.
+the wood top the standard, and *Amendment 3* replaced the bore and plug
+with a blind pocket drilled into the wood top's underside. **Amendment 4,
+2026-09-28, replaced the screw with a PEM self-clinching stud pressed into the
+plate, its head flush with the plate's top face** — the current mount: nothing
+above the plate, no pockets, no epoxy. PEM publishes the stud's data in a
+1.2 mm aluminium sheet, which the standoff this page first chose did not
+have. What stays open is in Amendment 4's last list.
 
 ## Context
 
@@ -481,3 +483,106 @@ a key board comes off with the lid in place.
 - `hardware.kb_mount_inset` and `kb_spacer_l`: confirmed at M4 with the
   board's first fit.
 - The wood's species (Amendment 2, *The wood*).
+
+## Amendment 4, 2026-09-28 — studs pressed flush into the plate; no pockets, no epoxy
+
+**The key boards now hang from PEM self-clinching flush-head studs pressed
+into the key plate.** The owner asked whether the screws could be made flush
+with the plate by countersinking. At M2 a flat head is as tall as the plate is
+thick (1.20, the switch's plate slot, `plate-thickness`), which leaves a
+knife-edge hole; a self-clinching flush-head stud gets the same flush face
+without taking the plate's thickness. The owner: "The press and flush looked
+good, let's go ahead and convert to that", and a thicker plate was allowed
+only if the keys were unaffected — which it would not be, since the switches
+clip into 1.20 mm. It is not needed: the stud is rated for this sheet.
+
+### The stack, from the top down
+
+| Part | Row | Size |
+|---|---|---|
+| The wood top, unbroken, bonded flat on the plate: no pocket | — | — |
+| PEM FHL-M2.5-10ZI stud, pressed into the plate, head flush with its top face | `MECH-KB-STUD` | `hardware.kb_stud_hole`, `kb_stud_head_d`, `kb_stud_l`, `kb_stud_s`, `kb_stud_edge` |
+| Ettinger 005.52.023 spacer, faced to length, under the plate | `MECH-KB-SPACER` | `hardware.kb_spacer_l`, `kb_spacer_l_tol`, `kb_spacer_od` |
+| ISO 7092 / DIN 433 M2.5 small washer | `MECH-KB-WASHER` | `hardware.kb_washer_t`, `kb_washer_t_range`, `kb_washer_od` |
+| The key board, its NPTH hole | — | `boards.key_board_t`, `hardware.kb_board_hole` |
+| ISO 4032 M2.5 nut, on the board's underside | `MECH-KB-NUT` | `hardware.kb_nut_e`, `kb_nut_m` |
+
+### Why this stud, and why M2.5
+
+- **PEM makes no M2 flush-head stud** in its bulletin; the metric tables
+  start at M2.5 [datasheets/mechanical/PEM-FH-SELF-CLINCHING-STUDS.pdf p.FH-5, FH-7]. (One distributor lists a steel FH-M2
+  that PEM does not publish, with no data; not used.) So the mount goes to
+  M2.5: the nut, washer, spacer and board hole all change with it.
+- **FHL, the low-displacement head, not the plain FH.** PEM publishes FHL's
+  performance in exactly this sheet — 1.2 mm aluminium: push-out 285 N,
+  torque-out 0.55 N·m, nut torque 0.32 N·m (`hardware.kb_stud_torque`)
+  [datasheets/mechanical/PEM-FH-SELF-CLINCHING-STUDS.pdf p.FH-31] — and FHL needs 2.8 mm from its hole's centre to an edge,
+  where FH needs 5.4 [p.FH-5, FH-7]. A switch cutout is an edge: the model
+  puts every stud 5.1 from the nearest cutout or plate edge (`drc.echo`
+  "key-board studs clear of the plate's edges and cutouts"), so FH would
+  not fit and FHL does.
+- **Its sheet:** 1 mm and up, aluminium to HRB 80 / HB 150 [p.FH-7] — 5052
+  and 6061 alike, so the plate's alloy stays the vendor's choice.
+- **Zinc-plated steel, not stainless:** PEM's finish guide rates stainless
+  in aluminium a significant galvanic pair and plated steel acceptable
+  [datasheets/mechanical/PEM-TECHSHEET-CHOOSING-A-FASTENER-FINISH.pdf
+  pp.3-4].
+- **Length 10:** the stack below the head's face, the nut and two pitches,
+  at the stud's shortest (±0.4) — `drc.echo` "key-board stud: thread past
+  the nut". Its unthreaded shank (`kb_stud_s`) ends inside the spacer.
+
+### The depth, and the spacer that is made, not bought
+
+The spacer and washer still set the board's depth (Amendment 2, *The
+depth*: `drc.echo` "key-board mount sets the board depth"). The M2.5 washer is
+0.5 thick, not 0.3, so the spacer must be 1.8. **No stocked M2.5 spacer
+family has a 1.8** — Ettinger 005.52, Würth WA-SMST and RAF all step from 1.5
+to 2.0 — and 1.5 or 2.0 with the washer lands the board on the edge of the
+switch pins' window, past it at the tolerance limits. So the 2.0 Ettinger
+spacer is **faced down to 1.8**, in metal: the owner's standing allowance to
+file a spacer (Amendment 2), and not printed, which would creep under the
+clamp. The Würth WA-SMST parts are ruled out in any case: they carry a
+spigot under the body for reflow, so they are not the plain spacers they
+were taken for (the M2 one that Amendment 2 named included).
+
+### Assembly
+
+1. **The plate vendor presses the studs**, on a press, into holes that are
+   not deburred, inserted from the punch side and squeezed flush on a
+   parallel anvil — for sheet this thin, PEM's countersunk anvil [datasheets/mechanical/PEM-FH-SELF-CLINCHING-STUDS.pdf
+   p.FH-18, FH-20]. Never hammered.
+2. Clip the switches into the plate.
+3. From below, on each stud: the spacer, the washer, the key board, and the
+   nut, tightened to no more than `hardware.kb_stud_torque`.
+4. Solder the switches — after the hardware has fixed the depth.
+5. RTV-bond the plate to the wood top (ADR 0009). The beads may run over the
+   studs' heads: they are flush and never turn.
+
+**Service:** the clinch holds each stud against turning, so a nut comes off
+from below with the lid bonded, and the board comes off. Nothing needs
+holding from above, which is why there is no epoxy.
+
+### What this supersedes
+
+- Amendment 3's pockets (`hardware.kb_pocket_*`, the "key-board head
+  pocket" rules, `mechanical/export/oak-pockets.dxf`), its epoxy
+  (`ADH-EPOXY`), and the M2 screw (`MECH-KB-SCREW`, `hardware.kb_screw_*`,
+  `kb_plate_hole`, `kb_screw_hole`, now `kb_stud_hole` and `kb_board_hole`).
+- The M2 spacer, washer and nut: now M2.5 (the rows keep their names).
+- `hardware.kb_mount_inset`: now set by the M2.5 nut's keep-out, not by the
+  pockets' wall to the side grooves.
+- `boards.kb_tail_margin` keeps its value so the boards' outlines do not move
+  before M3; with no pockets it could be as short as `drc.echo` "key-board
+  tail margin, least".
+- ADR 0009's notes on the face, the lid screws and the adhesives: marked
+  there.
+
+### Still open
+
+- The spacers, faced to `hardware.kb_spacer_l` and measured, at M4, with the
+  board's first fit; `hardware.kb_mount_inset` with it.
+- A US source for FHL-M2.5-10ZI — the plate vendor who presses them is the
+  first to ask — and for the M2.5 washers and nuts.
+- The wood's species (Amendment 2, *The wood*); it no longer sets anything in
+  the mount.
+

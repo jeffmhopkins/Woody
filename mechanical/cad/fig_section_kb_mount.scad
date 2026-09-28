@@ -1,8 +1,8 @@
-// Cross-section through a key board's corner mount (ADR 0020, amended
-// 2026-09-27): the left hand's tail screw, seen from the tail. Every level of
-// the stack is labelled from the values it is computed from: the screw head
-// on the plate in its blind pocket in the wood, the spacer and washer that set
-// the board's depth, the board, and the nut under it. Drawing frame: (Y, Z).
+// Cross-section through a key board's corner mount (ADR 0020, Amendment 4):
+// the left hand's tail stud, seen from the tail. Every level of the stack is
+// labelled from the values it is computed from: the stud's head flush in the
+// plate under the wood, the spacer and washer that set the board's depth, the
+// board, and the nut under it. Drawing frame: (Y, Z).
 include <woody_body.scad>
 use <lib/annot.scad>
 figure = true;
@@ -16,12 +16,10 @@ module lv(zv, s, dz = 0) {
     label([xr + 0.5, zv + dz, 1], s, size = 0.6, halign = "left");
 }
 lv(T, str("top face ", T, " - unbroken"), 0.6);
-lv(z_plate_top + kb_pocket_depth, str("pocket ", kb_pocket_depth, " deep, ", oak_top_t - kb_pocket_depth, " of wood over it"), 0.3);
-lv(z_plate_top + hardware_kb_screw_head_h, str("M2 socket head, ", hardware_kb_screw_head_h, " high, on the plate"), -0.2);
-lv(z_plate_top, str("plate top = seat ", z_plate_top), -0.3);
-lv(z_plate_bot, str("plate under ", z_plate_bot, " (", plate_thickness, ")"), -0.9);
+lv(z_plate_top, str("FHL-M2.5-", hardware_kb_stud_l, " flush, seat ", z_plate_top), 0.2);
+lv(z_plate_bot, str("plate under ", z_plate_bot, " (", plate_thickness, ")"), -0.6);
 lv(z_plate_bot - hardware_kb_spacer_l, str("spacer ", hardware_kb_spacer_l, " + washer ", hardware_kb_washer_t), 0);
 lv(kb_top, str("board top ", kb_top, " = seat - ", switch_pcb_below_seat), -1.0);
-lv(kb_top - boards_key_board_t - hardware_kb_nut_m, str("nut ", hardware_kb_nut_m, " under the ", boards_key_board_t, " board"), -0.4);
-lv(kb_top - boards_key_board_t - kb_screw_below, str("M2 x ", hardware_kb_screw_l, " ends ", kb_screw_below - hardware_kb_nut_m, " past the nut"), -0.6);
-label([m[1] + 10, T + 3.5, 1], str("key-board mount at X = ", cut_pos(), " (left hand, tail end), seen from the tail"), size = 0.6);
+lv(kb_top - boards_key_board_t - hardware_kb_nut_m, str("M2.5 nut ", hardware_kb_nut_m, " under the ", boards_key_board_t, " board"), -0.4);
+lv(kb_top - boards_key_board_t - kb_stud_below, str("stud ", kb_stud_below - hardware_kb_nut_m, " past the nut (min ", kb_stud_below + hardware_kb_stud_l_tol[0] - hardware_kb_nut_m, ")"), -0.6);
+label([m[1] + 10, T + 3.5, 1], str("key-board mount, X = ", cut_pos(), " (LH tail), from the tail"), size = 0.6);

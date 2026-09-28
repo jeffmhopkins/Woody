@@ -12,6 +12,14 @@ frosted acrylic sides carrying LEDs, aluminium key plate on top, and three or
 four mechanical keys on the underside for the left thumb, inset so the travel
 feels right.
 
+> **Finishes, 2026-09-28 (owner).** The wood is stained **a very dark
+> ebony**, with the grain still showing through, under a satin oil finish.
+> The frosted acrylic sides are **dark grey**. The tint is not only a look:
+> the side LEDs light through these panels (ADR 0014), so how much a dark
+> grey sheet passes sets how hard the LEDs are driven. **Open:** a sample of
+> the chosen sheet under the chosen LEDs, before the sides are ordered
+> (`SIDE-ACRYLIC`).
+
 ## Envelope
 
 **Width 2.25 inches (57 mm); thickness 39.0 mm, about 1.54 inches** — the
@@ -272,6 +280,14 @@ What changes, and what does not:
   checks.
 - **The playing face is unbroken oak.** The six fasteners stop in the plate
   from below, so no hole in the oak top carries one.
+  > **True, and simpler, 2026-09-28 ([ADR 0020](0020-key-boards-screw-to-the-plate.md),
+  > Amendment 4).** The key boards hang on PEM self-clinching studs pressed
+  > into the plate, their heads flush with its top face. Nothing stands above
+  > the plate, so the wood top has no pockets at all and bonds to a flat
+  > plate; nothing goes through the face. The owner: "the press and flush
+  > looked good, let's go ahead and convert to that".
+  >
+  > *Superseded 2026-09-28 by the note above — the record of Amendment 3:*
   > **True again, 2026-09-27 ([ADR 0020](0020-key-boards-screw-to-the-plate.md),
   > Amendment 3).** The key boards hang on screws whose heads sit on the
   > plate's top face inside **blind pockets drilled up into the wood top's
@@ -775,6 +791,13 @@ whose flatness under the switches is the whole point of it being aluminium.
 From underneath they are invisible in play and land in oak, which takes a
 counterbore for free.
 
+> **Amended 2026-09-28 (ADR 0020, Amendment 4): this holds, for
+> everything, with nothing above the plate.** The key boards hang on studs
+> pressed into the plate, heads flush with its top face; the clinch holds
+> each stud against turning, so the nuts come off from below with the lid in
+> place, and there is no head to hold, pocket or epoxy.
+>
+> *Superseded 2026-09-28 by the note above — the record of Amendment 3:*
 > **Amended 2026-09-27 (ADR 0020, Amendment 3): this holds again, for
 > everything.** No screw goes through the playing face. The key-board screws
 > are put through the plate from its top face before the plate is bonded to
@@ -842,9 +865,10 @@ is that failing one of them after M8 is now a repair rather than a rebuild.
 
 ### Adhesives, and which joint gets which
 
-*(Titled "Two adhesives" until 2026-09-27; the table has since gained the
-key-board screw heads' epoxy, and it was never only two - the U's acrylic
-joint has its own.)*
+*(Titled "Two adhesives" until 2026-09-27, and it was never only two - the
+U's acrylic joint has its own. The key-board screw heads' epoxy had a row from
+2026-09-27 until the screws gave way to clinched studs, 2026-09-28, ADR 0020
+Amendment 4.)*
 
 "Structural adhesive for oak/acrylic/aluminium" was one line in the BOM for at
 least four joints with incompatible requirements, which is the same defect as
@@ -854,8 +878,7 @@ ordering a ferrite bead and an electrolytic on one row.
 |---|---|---|
 | Oak ↔ oak — spacer layers, thumb rest lip | **PVA wood glue** | Yes |
 | Frosted acrylic sides ↔ oak bottom — **the U** | **PVA is wrong here; use a solvent-free acrylic-to-wood structural adhesive or a mechanical fixing** | Yes — this is the one sub-assembly that stays together |
-| Aluminium key plate ↔ oak top — **the lid** | **RTV silicone**, still — see below. Bonded **after** the key boards are screwed to the plate and soldered (ADR 0020, Amendment 3) | Yes, within the lid. The key boards still come off from below: their screw heads are epoxied to the plate (next row) |
-| Key-board screw heads ↔ the plate's top face (ADR 0020, Amendment 3) — *added 2026-09-27* | **Epoxy**, a dot beside each head (`ADH-EPOXY`), cured before the plate is bonded. Inside the pocket's footprint (`hardware.kb_pocket_d`) and no taller than `hardware.kb_pocket_clear` above the head | Yes. Metal to metal, and nothing in it moves with the wood — the one joint in the body where epoxy is right |
+| Aluminium key plate ↔ oak top — **the lid** | **RTV silicone**, still — see below. Bonded **after** the key boards are mounted on the plate's studs and soldered (ADR 0020, Amendment 4) | Yes, within the lid. The key boards still come off from below: their studs are clinched in the plate and do not turn |
 | Lid ↔ the U, at the notch | **RTV as a gasket bead, not an adhesive.** Skinned, not fresh, so it seals without sticking | **No — six fasteners** |
 | End caps | **Fasteners into the stack** | **No** |
 | Matrix diffuser | **RTV silicone**, edges only, clear of the light path | Yes |
@@ -879,8 +902,7 @@ an aluminium plate that moves essentially nothing, and a rigid bond would have
 to fight that for the life of the instrument. RTV lets it slide. But press a
 key and the plate is pushing *into* a thin confined layer, which barely gives.
 Epoxy would have bought shear stiffness nobody needs and paid for it by
-fighting the wood. *(Epoxy's one joint is the key-board screw heads to the plate, metal to
-metal, where no wood moves — table above.)*
+fighting the wood.
 
 *(Thermal is the small term here, not the large one. Aluminium over 400 mm and a
 20 K swing is 0.18 mm; wood and water is three to five times that.)*
@@ -897,15 +919,12 @@ metal, where no wood moves — table above.)*
   them, and real time before the final closure goes on — which also keeps the
   outgassing away from the breath sensor, alongside the port-masking rule
   above.
-- **Keep the plate's beads off the key-board head pockets** *(2026-09-27,
-  ADR 0020 Amendment 3)*. Each key board's corner screw head sits in a
-  blind pocket in the oak top's underside (`hardware.kb_pocket_d`). Order:
-  screw the key boards to the plate and solder them, then bond the plate to
-  the wood. The heads are already epoxied to the plate by then (table
-  above); silicone that runs into a pocket glues the head to the wood as
-  well, and a stray bead there stops the plate seating. *(This bullet first read "off the
-  screw bores", for Amendment 2's plugged through-bores, withdrawn the same
-  day; a wood plug joint was in the table above for the same few hours.)*
+- **The plate's beads may run over the key-board studs' heads** *(2026-09-28,
+  ADR 0020 Amendment 4)*. They are flush with the plate's top face and never
+  turn, so silicone on them costs nothing. Order: mount the key boards on the
+  studs and solder them, then bond the plate to the wood. *(Until that day
+  this bullet kept the beads off the screw heads' pockets, and before that
+  off Amendment 2's plugged bores.)*
 
 ## Open
 

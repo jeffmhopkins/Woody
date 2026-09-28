@@ -150,12 +150,11 @@ ks33-geometry.md`.
 > supersedes it wherever the two disagree `[repo] ks33-geometry.md`.
 
 **The key-board outline is the body CAD's**: a rectangle across the cavity
-with a screw in each corner (ADR 0020 point 3 and Amendments 2 and 3),
+with a stud in each corner (ADR 0020 point 3 and Amendment 4),
 exported as `mechanical/export/key-board-*.dxf` and placed from
 `config/body.yaml` `layout.*`, `boards.*` (the tail ends' `boards.kb_tail_margin`
-is longer, so each corner's head pocket clears the last cap slot) and
-`hardware.kb_*` (`kb_mount_inset` puts the pockets clear of the side
-grooves). **Its switch positions are
+is longer, so the tail corners' hardware clears the last keys' cutouts) and
+`hardware.kb_*` (`kb_mount_inset` keeps the nut's keep-out on the board). **Its switch positions are
 provisional until M3**: `layout.lh_gaps` and `layout.lh_offsets` stand in until
 the ergonomic iteration of M2 fills `key-layout.yaml`'s `x`/`y` (all `null` on
 purpose) `[repo] key-layout.yaml, 0010`. Spacing along the key line is
@@ -177,8 +176,8 @@ than a pitch parameter.
   `switch.pcb_below_seat` (`config/body.yaml`). Subtract `plate-thickness` and
   that is the gap, `mechanical/drc.echo` "key-board mount gap (derived)":
   the spacer under the plate **plus the washer** (`MECH-KB-SPACER`,
-  `MECH-KB-WASHER`; `hardware.kb_spacer_l`, `kb_washer_t`). The screw's head
-  bears on the plate's top face, so the key boards' depth is the plate plus
+  `MECH-KB-WASHER`; `hardware.kb_spacer_l`, `kb_washer_t`). The stud's head is
+  flush with the plate's top face, so the key boards' depth is the plate plus
   that hardware, checked by "key-board mount sets the board depth"; at the
   hardware's tolerance limits it prints a NOTE, and the first board
   confirms the fit (ADR 0020, Amendment 2).
@@ -270,17 +269,15 @@ and the `LT` springs to
 [`key-switch-network/`](key-switch-network/key-switch-network.md), and the
 closed 74HC165 item to [`key-register/notes.md`](key-register/notes.md).*
 
-- **The key-board mount's open items** (§5, ADR 0020 Amendment 3). The
-  parts are chosen and stock (`MECH-KB-SCREW`, `MECH-KB-SPACER`,
-  `MECH-KB-WASHER`, `MECH-KB-NUT`); nothing is pressed into the plate and
-  nothing goes through the wood's face. Open:
-  - the wood round and over each head pocket (`hardware.kb_pocket_wall`,
-    `kb_pocket_skin`), which a scrap of the chosen wood settles at M2;
+- **The key-board mount's open items** (§5, ADR 0020 Amendment 4). The
+  parts are chosen (`MECH-KB-STUD`, `MECH-KB-SPACER`, `MECH-KB-WASHER`,
+  `MECH-KB-NUT`); the studs are pressed flush into the plate, so nothing
+  stands above it and nothing goes into the wood. Open:
+  - the spacers, faced to `hardware.kb_spacer_l` from a stocked 2.0 (no
+    stocked M2.5 spacer has that length), measured at the first fit;
   - the depth at the tolerance limits (drc.echo "key-board depth at the
     hardware's tolerance limits", a NOTE), which the first board confirms;
-  - *(decided 2026-09-27, not open: each screw head is epoxied to the
-    plate before the lid is bonded, so the key boards come off from below
-    — `ADH-EPOXY`, ADR 0020 Amendment 3.)*
+  - a US source for the studs, and whether the plate vendor presses them.
   **Plate stiffening** (`plate-thickness` is settled; whether it needs a rib
   or a backer is not) gates M4/M5 — ADR 0002.
 - **Conformal coating.** `MECH-COAT` covers the main board; nothing says

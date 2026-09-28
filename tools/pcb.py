@@ -729,13 +729,13 @@ def build(bdir):
     jref = ref_of(comps, "J-CHAIN")
     place_chain(board, fps[jref], geo)
     placed.add(jref)
-    # the standoffs' screw holes (ADR 0020): board-only footprints, no symbol - the
-    # screw and standoff are mechanical, in hardware/unplaced.csv. On the BOTTOM,
-    # so their courtyard keeps the underside parts off the screw heads.
+    # the corner mounts' holes (ADR 0020): board-only footprints, no symbol - the
+    # stud, spacer, washer and nut are mechanical, in hardware/unplaced.csv. On the
+    # BOTTOM, so their courtyard keeps the underside parts off the nuts.
     for i, (x, y, hole, head, od) in enumerate(geo["standoffs"], 1):
         h = load_fp(lay["standoff_footprint"])
         h.SetReference(f"H{i}")
-        h.SetValue("M2 mount")
+        h.SetValue("mount")
         h.SetBoardOnly(True)
         h.SetExcludedFromBOM(True)
         h.SetExcludedFromPosFiles(True)
@@ -743,7 +743,7 @@ def build(bdir):
         px, py = to_pcb(x, y)
         place(board, h, px, py, 0, True)
         # The mount's washer presses on the top copper and its nut on the
-        # bottom, and both are on the screw that the plate grounds through its own bond:
+        # bottom, and both are on the stud that the plate grounds through its own bond:
         # no copper under either, or the board gets a second ground bond and
         # every net routed there a short. A rule area on both layers, which the
         # router also treats as an obstacle.
