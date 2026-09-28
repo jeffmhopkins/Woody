@@ -522,7 +522,9 @@ def add_silk(board, lay, comps):
             p2 = fp.FindPadByNumber("2").GetPosition()
             # pin 1's dot outside the pad array, away from the mouth
             dx = pcbnew.ToMM(p1.x - p2.x)
-            dxd = pcbnew.ToMM(p1.x) + (1.3 if dx > 0 else -1.3)
+            # from pad 1's copper edge, not its hole: the pads are lengthened outward
+            pb = fp.FindPadByNumber("1").GetBoundingBox()
+            dxd = pcbnew.ToMM(pb.GetRight()) + 0.765 if dx > 0 else pcbnew.ToMM(pb.GetLeft()) - 0.765
             silk_dot(board, dxd, pcbnew.ToMM(p1.y))   # its edge 0.39 off the pad: fab silk_to_pad
             placed_txt.append((dxd - 0.6, pcbnew.ToMM(p1.y) - 0.6, dxd + 0.6, pcbnew.ToMM(p1.y) + 0.6))
             put(ref, *above_or_below(x0, y0, x1, y1, ref))
@@ -614,10 +616,12 @@ def add_top_silk(board, lay, comps):
         elif row == "J-CHAIN":
             p1, p2 = fp.FindPadByNumber("1").GetPosition(), fp.FindPadByNumber("2").GetPosition()
             dx = pcbnew.ToMM(p1.x - p2.x)
-            silk_dot(board, pcbnew.ToMM(p1.x) + (1.3 if dx > 0 else -1.3), pcbnew.ToMM(p1.y), top=True)
-            xs = [pcbnew.ToMM(p.GetPosition().x) for p in fp.Pads()]
-            ys = [pcbnew.ToMM(p.GetPosition().y) for p in fp.Pads()]
-            x0, x1, y0, y1 = min(xs) - 0.8, max(xs) + 0.8, min(ys) - 0.8, max(ys) + 0.8
+            # measured from the pads' copper, not their holes: the pads are lengthened outward
+            pb = fp.FindPadByNumber("1").GetBoundingBox()
+            silk_dot(board, pcbnew.ToMM(pb.GetRight()) + 0.765 if dx > 0 else pcbnew.ToMM(pb.GetLeft()) - 0.765, pcbnew.ToMM(p1.y), top=True)
+            bb = [p.GetBoundingBox() for p in fp.Pads()]
+            x0, x1 = min(pcbnew.ToMM(b.GetLeft()) for b in bb) - 0.265, max(pcbnew.ToMM(b.GetRight()) for b in bb) + 0.265
+            y0, y1 = min(pcbnew.ToMM(b.GetTop()) for b in bb) - 0.265, max(pcbnew.ToMM(b.GetBottom()) for b in bb) + 0.265
             put(ref, *beside(x0, y0, x1, y1, ref))
             # its mouth faces the way pads 1 -> 2 point (place_chain)
             silk_arrow(board, (x1 + 1.0) if dx < 0 else (x0 - 1.0), (y0 + y1) / 2, 1 if dx < 0 else -1, top=True)

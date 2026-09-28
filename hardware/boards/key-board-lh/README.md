@@ -310,7 +310,7 @@ a drill that did not fit) in the row.
 | The board depth at the hardware's tolerance limits: the worst case reaches the window's shoulder end (`drc.echo` "key-board depth at the hardware's tolerance limits") | the first board, fitted |
 | The register's supply: JLC's stock is thin (above) | the first order |
 | J-CHAIN's source: none at JLC, 8 at DigiKey on 2026-09-27 (above); buy the stand-in there or from Samtec, or validate a stocked alternative against its print (its BOM row) | the first order |
-| J-CHAIN's pads' annular ring is at JLC's absolute minimum, not its recommended one: the 1.27 mm pitch leaves no room for a larger pad (`hardware/lib/README.md`, the IDC header's row) | the first order |
+| J-CHAIN's pads' ring is at JLC's absolute minimum on the sides facing a neighbour. The 1.27 mm pitch both ways leaves no room there. The pads are lengthened on their free side instead (`hardware/lib/README.md`, the IDC header's row); ask JLC's review to accept the thin side | the first order |
 | Whether Samtec takes the FFSD length code to 0.01 in (*Assembling*, step 3) | Samtec's configurator, at order |
 | Part orientation in JLC's placement preview (above) | the first order |
 | C7 (`C-BULK-CHAIN`) fitted or not | *Bring-up*, step 6 |
