@@ -81,8 +81,8 @@ parts:
   # its own track (connect_first, below) - not through whatever the pour leaves
   C6:  [94.3, 48.2, 180]     # C-DECOUPLE-165
   R11: [84.0, 43.5, 90]      # R-KEY-PU on sheet FREE3: the free input's pull-up
-  # Do-not-fit reservoir on the chain's 3V3, beside J-CHAIN's 3V3 pin (C-BULK-CHAIN row)
-  C7:  [67.0, 42.0, 90]      # C-BULK-CHAIN, do not fit
+  # The reservoir on the chain's 3V3, beside J-CHAIN's 3V3 pin (C-BULK-CHAIN row)
+  C7:  [67.0, 42.0, 90]      # C-BULK-CHAIN
   # Bring-up test pads (TP-CHAIN), a row between the key row and the register:
   # in the order of the register's own pins above them - QH and SER by pins 9 and
   # 10, SCK and SH/LD by 2 and 1, 3V3 by 16 - so no chain net crosses another's

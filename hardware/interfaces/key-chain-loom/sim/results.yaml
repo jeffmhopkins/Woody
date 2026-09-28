@@ -4,8 +4,8 @@
 
 inputs:
   tools/sim.py: 5bf1170c63f788eb
-  hardware/interfaces/key-chain-loom/sim/sims.yaml: 8522cf8857e9fde8
-  hardware/boards/key-board-lh/board-netlist.yaml: f489b8888ab55fc8
+  hardware/interfaces/key-chain-loom/sim/sims.yaml: 4254d2c6f005eafb
+  hardware/boards/key-board-lh/board-netlist.yaml: 08b7d975eaf7d32d
   hardware/interfaces/key-chain-loom/sim/rail.cir: 537b273e07928b72
   hardware/interfaces/key-chain-loom/sim/edge.cir: af73f23cc4332e65
   hardware/interfaces/key-chain-loom/sim/rail-ac.cir: 3bc2f2ac7bb9405b
@@ -22,6 +22,36 @@ inputs:
 ngspice: '42'
 sims:
   rail-as-ordered:
+    corners: 9
+    measures:
+      kb_vpp:
+        nominal: 0.005091
+        min: 0.00413
+        min_at: esr_c6- l_per_m- r_ldo+
+        max: 0.005118
+        max_at: esr_c6- l_per_m+ r_ldo-
+      kb_step:
+        nominal: 0.000909
+        min: 0.000909
+        min_at: nominal
+        max: 0.001882
+        max_at: esr_c6- l_per_m- r_ldo+
+      dev_vpp_clk:
+        nominal: 6.0e-06
+        min: 6.0e-06
+        min_at: nominal
+        max: 2.5e-05
+        max_at: esr_c6- l_per_m- r_ldo+
+    asserts:
+    - expr: max['kb_vpp'] < 0.1
+      why: 'with C-BULK-CHAIN fitted, the key board''s 3V3 moves under 0.1 V peak to peak through a clock burst and every
+        key closing at once, at every corner: the thresholds are fractions of VCC, and the key inputs'' smallest margin (the
+        key network''s sim) is over three times that'
+      pass: true
+    - expr: max['dev_vpp_clk'] < 3.3 / 4096
+      why: the key board's clocking moves DEV_3V3, the MCP3202's reference, by under one 12-bit LSB (FB-CHAIN's job, ADR 0018)
+      pass: true
+  rail-without-bulk:
     corners: 9
     measures:
       kb_vpp:
@@ -44,14 +74,13 @@ sims:
         max_at: esr_c6- l_per_m- r_ldo+
     asserts:
     - expr: max['kb_vpp'] < 0.1
-      why: 'with C-BULK-CHAIN not fitted, the key board''s 3V3 moves under 0.1 V peak to peak through a clock burst and every
-        key closing at once, at every corner: the thresholds are fractions of VCC, and the key inputs'' smallest margin (the
-        key network''s sim) is over three times that'
+      why: 'with C-BULK-CHAIN left off, the key board''s 3V3 still moves under 0.1 V peak to peak, at every corner: the part
+        makes the rail quieter, it is not what keeps it inside its limit'
       pass: true
     - expr: max['dev_vpp_clk'] < 3.3 / 4096
-      why: the key board's clocking moves DEV_3V3, the MCP3202's reference, by under one 12-bit LSB (FB-CHAIN's job, ADR 0018)
+      why: and DEV_3V3 still moves under one 12-bit LSB
       pass: true
-  edge-droop-as-ordered:
+  edge-droop-decoupler-alone:
     corners: 3
     measures:
       dv_edge:
@@ -63,53 +92,10 @@ sims:
     asserts:
     - expr: max['dv_edge'] < 0.05
       why: 'each clock edge''s charge, drawn from C-DECOUPLE-165 alone, dips the register''s VCC under 50 mV at every corner:
-        far inside its thresholds'' margin, so C-DECOUPLE-165 alone decouples the register'
+        far inside its thresholds'' margin, so C-DECOUPLE-165 alone decouples the register (C-BULK-CHAIN, beside J-CHAIN,
+        is too far away to count on at an edge)'
       pass: true
-  rail-with-bulk:
-    corners: 9
-    measures:
-      kb_vpp:
-        nominal: 0.005091
-        min: 0.00413
-        min_at: esr_c6- l_per_m- r_ldo+
-        max: 0.005118
-        max_at: esr_c6- l_per_m+ r_ldo-
-      kb_step:
-        nominal: 0.000909
-        min: 0.000909
-        min_at: nominal
-        max: 0.001882
-        max_at: esr_c6- l_per_m- r_ldo+
-      dev_vpp_clk:
-        nominal: 6.0e-06
-        min: 6.0e-06
-        min_at: nominal
-        max: 2.5e-05
-        max_at: esr_c6- l_per_m- r_ldo+
-    asserts: []
   rail-impedance-as-ordered:
-    corners: 9
-    measures:
-      z_peak:
-        nominal: 176.193
-        min: 141.751
-        min_at: esr_c6+ l_per_m- r_ldo+
-        max: 216.911
-        max_at: esr_c6- l_per_m+ r_ldo-
-      f_peak:
-        nominal: 295121.0
-        min: 295121.0
-        min_at: nominal
-        max: 295121.0
-        max_at: nominal
-      z_1mhz:
-        nominal: 1.74477
-        min: 1.74337
-        min_at: esr_c6- l_per_m+ r_ldo-
-        max: 1.74549
-        max_at: esr_c6+ l_per_m- r_ldo+
-    asserts: []
-  rail-impedance-with-bulk:
     corners: 9
     measures:
       z_peak:
@@ -130,6 +116,28 @@ sims:
         min_at: esr_c6+ l_per_m+ r_ldo-
         max: 0.0186257
         max_at: esr_c6- l_per_m- r_ldo-
+    asserts: []
+  rail-impedance-without-bulk:
+    corners: 9
+    measures:
+      z_peak:
+        nominal: 176.193
+        min: 141.751
+        min_at: esr_c6+ l_per_m- r_ldo+
+        max: 216.911
+        max_at: esr_c6- l_per_m+ r_ldo-
+      f_peak:
+        nominal: 295121.0
+        min: 295121.0
+        min_at: nominal
+        max: 295121.0
+        max_at: nominal
+      z_1mhz:
+        nominal: 1.74477
+        min: 1.74337
+        min_at: esr_c6- l_per_m+ r_ldo-
+        max: 1.74549
+        max_at: esr_c6+ l_per_m- r_ldo+
     asserts: []
   sck-to-key-board:
     corners: 17

@@ -1,6 +1,6 @@
 # The key chain between the main board and the left-hand key board, simulated in
 # ngspice by tools/sim.py: its 3V3 rail (FB-CHAIN, the ribbon, C-DECOUPLE-165 and
-# the do-not-fit C-BULK-CHAIN) and its signals over the ribbon (SCK out to the key
+# C-BULK-CHAIN) and its signals over the ribbon (SCK out to the key
 # board's register, QH back). Values come from the key board's board-netlist.yaml
 # and, for the main board's parts, from hardware/bom.csv; the ribbon's length from
 # the body CAD. Run: python3 tools/sim.py run hardware/interfaces/key-chain-loom/sim
@@ -25,7 +25,7 @@ params:
   n_gnd:   {value: 5, source: "ground conductors in the ribbon (key-chain-loom.md pinout: 1, 3, 5, 7, 9 main-board side)"}
   esr_c6:  {value: 0.02, source: "a 0805 X7R 100 nF's ESR near its resonance [from memory] (vary)"}
   esr_c7:  {value: 0.01, source: "a 0805 X5R 10 uF's ESR [from memory]"}
-  c7:      {value: 0}          # 0 do not fit (as ordered), 1 fitted (each sim sets it)
+  c7:      {value: 1}          # 1 fitted (as ordered), 0 left off (each sim sets it)
   cpd:     {value: 20.0e-12, source: "SN74HCS165 power dissipation capacitance Cpd [datasheets/logic/SN74HCS165-ti-scls828a.pdf p.8]"}
   f_clk:   {value: 1.0e6, source: "the chain's clock: 1 MHz, 32 bits per read [ADR 0001; docs/reference/latency-budget.md]"}
   n_clk:   {value: 32}
@@ -79,35 +79,41 @@ sims:
   - name: rail-as-ordered
     deck: rail.cir
     vary: [r_ldo, l_per_m, esr_c6]
+    set: {c7: 1}
+    measures: [kb_vpp, kb_step, dev_vpp_clk]
+    asserts:
+      - expr: "max['kb_vpp'] < 0.1"
+        why: "with C-BULK-CHAIN fitted, the key board's 3V3 moves under 0.1 V peak to peak through a clock burst and every key closing at once, at every corner: the thresholds are fractions of VCC, and the key inputs' smallest margin (the key network's sim) is over three times that"
+      - expr: "max['dev_vpp_clk'] < 3.3 / 4096"
+        why: "the key board's clocking moves DEV_3V3, the MCP3202's reference, by under one 12-bit LSB (FB-CHAIN's job, ADR 0018)"
+  - name: rail-without-bulk
+    # C-BULK-CHAIN left off: a board built without it must still work, so the same limits
+    deck: rail.cir
+    vary: [r_ldo, l_per_m, esr_c6]
     set: {c7: 0}
     measures: [kb_vpp, kb_step, dev_vpp_clk]
     asserts:
       - expr: "max['kb_vpp'] < 0.1"
-        why: "with C-BULK-CHAIN not fitted, the key board's 3V3 moves under 0.1 V peak to peak through a clock burst and every key closing at once, at every corner: the thresholds are fractions of VCC, and the key inputs' smallest margin (the key network's sim) is over three times that"
+        why: "with C-BULK-CHAIN left off, the key board's 3V3 still moves under 0.1 V peak to peak, at every corner: the part makes the rail quieter, it is not what keeps it inside its limit"
       - expr: "max['dev_vpp_clk'] < 3.3 / 4096"
-        why: "the key board's clocking moves DEV_3V3, the MCP3202's reference, by under one 12-bit LSB (FB-CHAIN's job, ADR 0018)"
-  - name: edge-droop-as-ordered
+        why: "and DEV_3V3 still moves under one 12-bit LSB"
+  - name: edge-droop-decoupler-alone
     deck: edge.cir
     vary: [esr_c6]
     set: {c7: 0}
     measures: [dv_edge]
     asserts:
       - expr: "max['dv_edge'] < 0.05"
-        why: "each clock edge's charge, drawn from C-DECOUPLE-165 alone, dips the register's VCC under 50 mV at every corner: far inside its thresholds' margin, so C-DECOUPLE-165 alone decouples the register"
-  - name: rail-with-bulk
-    deck: rail.cir
-    vary: [r_ldo, l_per_m, esr_c6]
-    set: {c7: 1}
-    measures: [kb_vpp, kb_step, dev_vpp_clk]
+        why: "each clock edge's charge, drawn from C-DECOUPLE-165 alone, dips the register's VCC under 50 mV at every corner: far inside its thresholds' margin, so C-DECOUPLE-165 alone decouples the register (C-BULK-CHAIN, beside J-CHAIN, is too far away to count on at an edge)"
   - name: rail-impedance-as-ordered
     deck: rail-ac.cir
     vary: [r_ldo, l_per_m, esr_c6]
-    set: {c7: 0}
+    set: {c7: 1}
     measures: [z_peak, f_peak, z_1mhz]
-  - name: rail-impedance-with-bulk
+  - name: rail-impedance-without-bulk
     deck: rail-ac.cir
     vary: [r_ldo, l_per_m, esr_c6]
-    set: {c7: 1}
+    set: {c7: 0}
     measures: [z_peak, f_peak, z_1mhz]
   - name: sck-to-key-board
     deck: sck.cir

@@ -22,7 +22,7 @@ parts:
   R-KEY-PU:  "R{ref} {1} {2} {row}"
   C-KEY:     "C{ref} {1} {2} {row}"
   C-DECOUPLE-165: "C{ref} {1} {2} {row}"
-  C-BULK-CHAIN: ""                          # do not fit (Bring-up, step 6)
+  C-BULK-CHAIN: "C{ref} {1} {2} {row}"
   SW1-n:     "S{ref} {1} {2} ctl 0 kswitch"  # every switch on one control
   U-KEYS:    "X{ref} {VCC} {GND} {A} {B} {C} {D} {E} {F} {G} {H} {SER} {CLK} {SHLD} {CLKINH} hcs165_inputs"
   J-CHAIN:   ""

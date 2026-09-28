@@ -55,7 +55,7 @@ components:
     sheet: REG
   C8:
     of: C-BULK-CHAIN
-    value: 10uF DNP
+    value: 10uF
     pins:
     - 1
     - 2

@@ -412,17 +412,17 @@ several microhenries, **not** the ~1 µH this page once assumed. Against the key
 board's 100 nF `C-DECOUPLE-165` it forms a lightly damped LC, below the chain's
 clock; its frequency and peak are in `sim/results.yaml` (`rail-impedance-*`).
 The simulation shows two things:
-- **The ring stays small.** With `C-BULK-CHAIN` not fitted, the key board's rail
-  stays inside its limit through a clock burst and every key closing at once, at
-  every corner (`rail-as-ordered`).
+- **The ring stays small.** The key board's rail stays inside its limit through
+  a clock burst and every key closing at once, at every corner, with
+  `C-BULK-CHAIN` fitted (`rail-as-ordered`) and without it (`rail-without-bulk`).
 - **Nothing reaches the reference.** The key board's clocking moves `DEV_3V3`,
   the MCP3202's reference, by under one LSB.
 
-So the bulk capacitor's footprint stays empty. Murata states the model for 1 MHz
-to 3 GHz, so at the LC's frequency it is extrapolated: **bring-up step 6 still
-scopes the key board's VCC while shifting**, and fits the damping capacitor if
-the real rail rings more than the simulation says. Its footprint is on each key
-board, empty by default (`C-BULK-CHAIN`).
+So the rail does not need the bulk capacitor, and it is fitted anyway (owner,
+2026-09-28): a 10 µF 0805 costs cents, and its ESR damps the LC. Murata states
+the bead's model for 1 MHz to 3 GHz, so at the LC's frequency it is
+extrapolated: **bring-up step 6 still scopes the key board's VCC while
+shifting**, against the simulation.
 
 ---
 

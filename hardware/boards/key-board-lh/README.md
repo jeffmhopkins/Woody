@@ -193,14 +193,12 @@ test are checked by `pcb.py` itself (above).
   - The other part numbers are not repeated here. They are on the sheets, and in `fab/key-board-lh-bom-jlc.csv`.
 - **Not in the order:**
   - SW1-SW5 and J1 (`J-CHAIN`), which are in `fab/key-board-lh-hand-assembly.csv`;
-  - C7 (`C-BULK-CHAIN`), a do-not-fit footprint (*Bring-up*, step 6);
   - the test pads and the M2 holes, which are copper and drill only.
 - **Bought separately, for the hand assembly.** Only the first two are on the hand list. Sourcing facts below were read on 2026-09-27; check stock at order.
   - **The switches** (BOM row `SW1-n`): Gateron **KS-33H10B050NN-Y24**, Low Profile 2.0 Red, the code on the sheet and the hand list. **Order `-Y24` exactly.** The suffix is the bottom housing's colour, not a year: `-Y24` is black and `-Y31` white. The white-housing spec gives a longer total travel than the black one the body is drawn from (`switch.total_travel`), which would break the flush rule `[datasheets/mechanical/GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf; datasheets/mechanical/GATERON-KS-33-SPEC-WHITE-HOUSING-KS-33H10B050NN-Y31.pdf]`. Not the Silent, not the Low Profile 3.0. Gateron's own store sells the black-housing Red `[web https://www.gateron.com/products/gateron-ks-33-low-profile-switch-set, 2026-09-27]`; whether it ships from a US warehouse is unverified. US sellers found (e.g. LumeKeebs) sell "KS-33 2.0 Red" without naming the housing or the code `[web https://lumekeebs.com/products/gateron-ks-33-low-profile-2-0-mechanical-switches, 2026-09-27]`, so check the code on the packaging.
   - **`J-CHAIN`**, Samtec SHF-106-01-L-D-RA. JLC/LCSC had none (C17202657, stock 0 `[web, JLC API, 2026-09-27]`). DigiKey SHF-106-01-L-D-RA-ND had **only 8 in stock**, with a **4-week factory lead time** `[web https://www.digikey.com/en/products/detail/samtec-inc/SHF-106-01-L-D-RA/8410402, 2026-09-27]`. Eight covers one instrument's two boards with few spares; failing that, Samtec direct (reel variants and samples). Its sourcing is open (its BOM row, and *Open* below).
   - **The corner mount hardware**: one screw, spacer, washer and nut per corner, four corners per board, and a dot of epoxy per head (`ADH-EPOXY`). What each must be, the quantities and the sources are the `MECH-KB-*` rows in `hardware/unplaced.csv`; their prices are not repeated here. The mount is described in *Assembling*, step 2.
   - **`CBL-CHAIN`**, one per board, ordered as in *Assembling*, step 3.
-  - **C7** (`C-BULK-CHAIN`), only if *Bring-up* step 6 needs it: Samsung CL21A106KAYNNNE (10 µF X5R 0805), LCSC C15850, a JLC **Basic** part `[web https://jlcpcb.com/partdetail/SamsungElectroMechanics-CL21A106KAYNNNE/C15850, 2026-09-27; datasheets/discrete-and-power/SAMSUNG-CL21A106KAYNNNE-SPECSHEET.pdf]`. It is do-not-fit on this board, so it is in no order; this is the part to fit.
 - **A US-sourced hand build.** The UNI-ROYAL resistors stay for JLC assembly: they are JLC **Basic** parts, with no feeder fee. No US distributor stocks them (DigiKey had no result `[web https://www.digikey.com/en/products/result?keywords=0805W8F1000T5E, 2026-09-27]`). For a board built by hand from US stock, use YAGEO RC0805FR-07100RL (100R) and RC0805FR-072K2L (2k2): DigiKey 311-100CRCT-ND / 311-2.20KCRCT-ND; LCSC C105577 / C114561, which are JLC **Extended** `[web https://www.digikey.com/en/products/result?keywords=RC0805FR-07100RL; …=RC0805FR-072K2L; https://jlcpcb.com/partdetail/YAGEO-RC0805FR07100RL/C105577; …/YAGEO-RC0805FR072K2L/C114561, all 2026-09-27]`. The capacitors' parts are already at DigiKey.
 - **One instrument needs two key boards.** The right-hand board is a separate design and a separate order: [`../key-board-rh/README.md`](../key-board-rh/README.md), which gives only what differs from this one.
 - **The sheets are the source of every part number.** To change a part, set its `LCSC`/`MPN` fields in the circuit sheet and re-render. The BOM row (`hardware/cluster/bom.csv` etc.) says what the part must be; the sheet says which one is bought.
@@ -247,7 +245,7 @@ what each probes: TP1 QH, TP2 SER, TP3 GND, TP4 SCK, TP5 SH/LD, TP6 3V3.
    - Each key reads low while pressed.
    - Clocks past the 8th shift in the level SER is tied to.
    - Firmware normally does this; with a logic analyser on the test pads it is visible without one.
-6. **The rail, in the instrument.** On the real main board and ribbon, scope the key board's VCC (TP6 to TP3) while the chain shifts. `FB-CHAIN` and `C-DECOUPLE-165` form a lightly damped LC (the `FB-CHAIN` row). The simulation (`hardware/interfaces/key-chain-loom/sim/`, `rail-as-ordered`) keeps this rail inside its limit with C7 empty, so expect a small ring after each burst and each key change, not a large one; if the real rail rings more than the simulation says, fit C7 (the part is under *Ordering it*, bought separately). The bench supply has no bead, so this step needs the main board.
+6. **The rail, in the instrument.** On the real main board and ribbon, scope the key board's VCC (TP6 to TP3) while the chain shifts. `FB-CHAIN` and `C-DECOUPLE-165` form a lightly damped LC (the `FB-CHAIN` row). The simulation (`hardware/interfaces/key-chain-loom/sim/`, `rail-as-ordered`) keeps this rail well inside its limit with C7 fitted, and inside it even without C7 (`rail-without-bulk`), so expect at most a small ring after each burst and each key change. A larger one means the bead or the ribbon is not what the simulation assumes: record it in *Revisions*. The bench supply has no bead, so this step needs the main board.
 
 ## The silkscreen
 
@@ -270,7 +268,7 @@ is how the tools find it.
 | C*n*: C1-C5 | `C-KEY` | key LH*n*'s capacitor |
 | R11 | `R-KEY-PU` | the free input's pull-up (sheet FREE3) |
 | C6 | `C-DECOUPLE-165` | the register's decoupler |
-| C7 | `C-BULK-CHAIN` | the rail's reservoir, do not fit (*Bring-up*, step 6) |
+| C7 | `C-BULK-CHAIN` | the rail's reservoir, beside J1's 3V3 pin |
 | U1 | `U-KEYS` | the register, SN74HCS165 |
 | J1 | `J-CHAIN` | the key chain's header |
 | TP1-TP6 | `TP-CHAIN` | the test pads: QH, SER, GND, SCK, SH/LD, 3V3 |
@@ -279,7 +277,7 @@ is how the tools find it.
 **Parts side (bottom):** every part's reference beside it. Each key's three
 network parts carry theirs the same way round the network, as the parts sit
 round the switch (the two resistors' along them, beside the column), with the
-key's name (LH1..LH5) beside its capacitor. `DNP` after C7's; the test pads'
+key's name (LH1..LH5) beside its capacitor. the test pads'
 references beside them, and a legend by the title saying what each probes;
 J1's pin 1 dot and an arrow out of its mouth; `MOUTH` and an arrow at the
 mouth end; the title block (`layout.yaml` `silk:`, the legend at `legend_at`).
@@ -292,7 +290,7 @@ J1 with pin 1's dot and the arrow out of its mouth, where it is soldered;
 
 | Rev | Date | What changed | Where |
 |---|---|---|---|
-| A | 2026-09-27 | First layout: every key's network the same T in the same place round its switch, six test pads in one row (QH, SER, GND, SCK, SH/LD, 3V3), C7 (`C-BULK-CHAIN`) footprint (do not fit), silkscreen on both sides, no acute track junction (`pcb.py check` tests every join, a track ending mid-track included). Not yet ordered; re-laid out on the same date for the screwed corner mount (keep-outs from the nut and the spacer/washer; ADR 0020 Amendment 3 then moved the heads from plugged bores into blind pockets, which changes nothing on the board) | git history of this directory |
+| A | 2026-09-27 | First layout: every key's network the same T in the same place round its switch, six test pads in one row (QH, SER, GND, SCK, SH/LD, 3V3), C7 (`C-BULK-CHAIN`), silkscreen on both sides, no acute track junction (`pcb.py check` tests every join, a track ending mid-track included). Not yet ordered; re-laid out on the same date for the screwed corner mount (keep-outs from the nut and the spacer/washer; ADR 0020 Amendment 3 then moved the heads from plugged bores into blind pockets, which changes nothing on the board); on 2026-09-28, C7 made a fitted, machine-placed part (it had been a do-not-fit footprint; owner: it costs cents) and J-CHAIN's pads lengthened on their free side | git history of this directory |
 
 To make a revision, edit the board in KiCad, change the revision and date in
 the title block and in the silkscreen text, and copy them into
@@ -313,7 +311,6 @@ a drill that did not fit) in the row.
 | J-CHAIN's pads' ring is at JLC's absolute minimum on the sides facing a neighbour. The 1.27 mm pitch both ways leaves no room there. The pads are lengthened on their free side instead (`hardware/lib/README.md`, the IDC header's row); ask JLC's review to accept the thin side | the first order |
 | Whether Samtec takes the FFSD length code to 0.01 in (*Assembling*, step 3) | Samtec's configurator, at order |
 | Part orientation in JLC's placement preview (above) | the first order |
-| C7 (`C-BULK-CHAIN`) fitted or not | *Bring-up*, step 6 |
 | Conformal coating of the key boards (`cluster-boards.md`, *Still open*) | ADR 0009, M4 |
 | No 3D model of J-CHAIN in the renders (Samtec's is behind a login; `datasheets/.manifest-R12.csv` records the attempt) | nothing blocks on it |
 | The main board's end of the ribbon | the main board's layout |

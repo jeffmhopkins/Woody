@@ -20,10 +20,10 @@ filled by `tools/sim.py`; `results.yaml` is generated.
 
 | Sim | Holds, at every corner |
 |---|---|
-| `rail-as-ordered` | with C-BULK-CHAIN not fitted, the key board's 3V3 stays inside its limit through a clock burst and every key closing at once; DEV_3V3, the ADC's reference, moves under one LSB |
-| `rail-with-bulk` | the same with it fitted (recorded, for bring-up step 6) |
+| `rail-as-ordered` | with C-BULK-CHAIN fitted, the key board's 3V3 stays inside its limit through a clock burst and every key closing at once; DEV_3V3, the ADC's reference, moves under one LSB |
+| `rail-without-bulk` | the same holds with it left off: the part makes the rail quieter, it is not what keeps it inside its limit |
 | `rail-impedance-*` | the rail's impedance at the register, and its peak: the LC's frequency and height (recorded) |
-| `edge-droop-as-ordered` | each clock edge's charge, from `C-DECOUPLE-165` alone, dips the register's VCC only a millivolt or so |
+| `edge-droop-decoupler-alone` | each clock edge's charge, from `C-DECOUPLE-165` alone, dips the register's VCC only a millivolt or so |
 | `sck-to-key-board` | SCK at the register: no swing back through its hysteresis (no double clock), no overshoot past its clamp |
 | `sck-without-series-resistor` | the same with `R-CHAIN-SER` shorted: at the strong-drive corner it double-clocks and passes the clamp. This is what the resistor is for (recorded) |
 | `qh-to-main-board` | QH, with no series resistor, at the next register's SER: no false edge, no overshoot past its clamp |

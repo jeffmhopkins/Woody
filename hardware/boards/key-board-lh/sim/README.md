@@ -22,7 +22,6 @@ network's simulation (`params_from:`), so they are stated once.
 **Not simulated here:**
 - The low marker (C) is on ground, which SPICE holds at 0 V. `kicad.py check`'s
   allocation test holds that wiring.
-- C7 is not fitted.
 - The register's outputs.
 - The rail and the chain's signals over the ribbon need the main board's end:
   the bead, the driver and the ribbon (see `sims.yaml`'s sims as they are added).
