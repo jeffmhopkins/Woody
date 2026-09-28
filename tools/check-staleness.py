@@ -1196,6 +1196,28 @@ def check_cad():
                     f"parseable - it probably crashed. Run it directly"]
 
 
+def check_sim():
+    """Every SPICE simulation's results still describe the circuit as it is.
+
+    tools/sim.py builds each deck from the circuit's own netlist, so a value changed
+    on a sheet changes what the simulation would say - and results.yaml, which
+    hashes every input, goes stale. This asks that tool (no ngspice needed; it
+    compares hashes and reads the recorded assertions), stdout and stderr both,
+    for the same reason as check_cad().
+    """
+    import subprocess
+    try:
+        r = subprocess.run([sys.executable, os.path.join(ROOT, "tools/sim.py"), "check"],
+                           capture_output=True, text=True, cwd=ROOT, timeout=60)
+    except Exception as e:
+        return [f"could not run tools/sim.py check: {e}"]
+    if r.returncode == 0:
+        return []
+    msgs = [l.strip() for l in (r.stdout + "\n" + r.stderr).splitlines()
+            if l.strip() and not l.strip().startswith("sim: PASS") and not l.strip().startswith("sim: FAIL")]
+    return msgs or [f"tools/sim.py check exited {r.returncode} and said nothing parseable - run it directly"]
+
+
 def main():
     files = corpus_files()
 
@@ -1224,6 +1246,7 @@ def main():
     circuits = load_circuits()
     generated_problems = check_bom_generated()
     cad_problems = check_cad()
+    sim_problems = check_sim()
     datasheet_problems = check_datasheets()
     pattern_problems, thin_patterns = check_patterns(spec)
     bomfig_problems = check_bom_figures(spec, bom_rows)
@@ -1250,6 +1273,13 @@ def main():
               "  A render or cut file that no longer shows the model it names. "
               "Run `python3 tools/cad.py build`; `explain <name>` says what moved.", ""]
              + ["  " + p for p in cad_problems] + [""], detail_only=True)
+
+    if sim_problems:
+        fail = True
+        emit([f"SIMULATIONS STALE OR FAILING ({len(sim_problems)})",
+              "  A circuit whose SPICE results no longer match its netlist, deck or cited "
+              "figures, or whose assertions failed. Run `python3 tools/sim.py run`.", ""]
+             + ["  " + p for p in sim_problems] + [""], detail_only=True)
 
     if bomfig_problems:
         fail = True
@@ -1401,7 +1431,7 @@ def main():
     if fail:
         print(f"FAIL {len(shape_problems)} shape + {len(owner_problems)} owners + {len(link_problems)} links "
               f"+ {len(section_problems)} sections + {len(circuit_problems)} deps "
-              f"+ {len(generated_problems)} generated + {len(cad_problems)} cad "
+              f"+ {len(generated_problems)} generated + {len(cad_problems)} cad + {len(sim_problems)} sim "
               f"+ {len(bomfig_problems)} register-vs-bom "
               f"+ {len(datasheet_problems)} datasheets + {len(pattern_problems)} dead-patterns "
               f"+ {len(wiring_problems)} unwired "

@@ -28,6 +28,10 @@ for p in openscad xvfb libxft2 poppler-utils librsvg2-bin python3-yaml python3-p
   have "$p" || need_apt+=("$p")
 done
 
+# --- circuit simulation (tools/sim.py): ngspice 42 from the Ubuntu archive. Raw
+# decks through subprocess; not PySpice (hardware/module/pitch-stage/sim/README.md says why).
+have ngspice || need_apt+=(ngspice)
+
 # --- schematics (tools/sch.py): KiCad 9 from the KiCad project's own archive.
 # Ubuntu's own kicad is 7.0, whose command line has no ERC and whose file
 # format is older than the sheets this repository writes.

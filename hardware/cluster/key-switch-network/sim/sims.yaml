@@ -1,0 +1,74 @@
+# The key network (key-switch-network.md §2), simulated in ngspice by tools/sim.py:
+# one key's node, pull-up, capacitor, series resistor and switch, into one
+# SN74HCS165 input. Every part value is read from ../netlist.yaml (exported from
+# the sheet); nothing here restates one. Run: python3 tools/sim.py run
+# hardware/cluster/key-switch-network/sim. Results: results.yaml (generated).
+title: Key switch network, one key into the register
+values:
+  netlist: hardware/cluster/key-switch-network/netlist.yaml
+
+# Model parameters that are not part values, each with its source.
+params:
+  ci:       {value: 5.0e-12, source: "SN74HCS165 input capacitance Ci, max [datasheets/logic/SN74HCS165-ti-scls828a.pdf p.6]"}
+  ileak:    {value: 1.0e-6,  source: "SN74HCS165 input leakage II, max, at 6 V [same, p.6]; its sign is a corner (vary)"}
+  ron:      {value: 0.2,     source: "KS-33 contact resistance, max [datasheets/mechanical/GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf, item 2]"}
+  roff:     {value: 1.0e8,   source: "KS-33 insulation resistance, min, 100 Mohm [same, item 3]"}
+  vcc:      {value: 3.3,     source: "the chain rail's nominal (DEV_3V3, the Matrix's ME6217C33 LDO; FB-CHAIN row)"}
+  # The register's thresholds as fractions of VCC. TI tabulates 2, 4.5 and 6 V and no
+  # 3.3 V row, so each is the extreme ratio across its table - the bound the page
+  # argues from (key-switch-network.md §2), not an interpolation. [same, p.6]
+  r_vtp_min: {value: 0.35, source: "VT+ min: 0.7/2, 1.7/4.5 = 0.378, 2.1/6 - the smallest ratio [p.6]"}
+  r_vtp_max: {value: 0.75, source: "VT+ max: 1.5/2, 3.15/4.5 = 0.70, 4.2/6 = 0.70 - the largest [p.6]"}
+  r_vtm_min: {value: 0.15, source: "VT- min: 0.3/2, 0.9/4.5 = 0.20, 1.2/6 = 0.20 - the smallest [p.6]"}
+  r_vtm_max: {value: 0.50, source: "VT- max: 1.0/2, 2.2/4.5 = 0.489, 3.0/6 - the largest [p.6]"}
+  # when the switch closes and opens, and how long the run is: long enough for the
+  # slowest corner's release to settle (5 x its tau)
+  t_on:  {value: 20.0e-6}
+  t_off: {value: 400.0e-6}
+  t_end: {value: 1.6e-3}
+
+# The corners: each by a relative range about its nominal.
+vary:
+  R-KEY-PU:  {tol: from-value}               # "2k2 1%"
+  R-KEY-SER: {tol: from-value}               # "100R 1%"
+  C-KEY:     {tol: [-0.235, 0.265], source: "CL21B473KBCNNNC: K = +/-10 % [datasheets/discrete-and-power/SAMSUNG-MLCC-CATALOGUE-2015-CL21B473KBCNNNC.pdf, part-number key], and X7R's +/-15 % over temperature [same, X7R characteristic]: 0.90 x 0.85 and 1.10 x 1.15. DC bias at 3.3 V on a 50 V part is left out [from memory: under 1 %]"}
+  vcc:       {tol: [-0.03, 0.03], source: "placeholder until the LDO's datasheet is banked: every threshold is a fraction of VCC and the network is a divider, so only the leakage and contact terms move with it"}
+  ileak:     {tol: [-2.0, 0.0]}              # -1 uA (into the node) and +1 uA (out of it)
+
+derived:
+  vtp_min: "v['r_vtp_min'] * v['vcc']"
+  vtp_max: "v['r_vtp_max'] * v['vcc']"
+  vtm_min: "v['r_vtm_min'] * v['vcc']"
+  vtm_max: "v['r_vtm_max'] * v['vcc']"
+  t_on_1n: "v['t_on'] + 1e-9"
+  t_off_1n: "v['t_off'] + 1e-9"
+  t_pressed: "v['t_off'] - 5e-6"
+  t_released: "v['t_on'] - 1e-6"
+
+sims:
+  - name: press-and-release
+    deck: key-network.cir
+    measures: [t_press, t_rel_latest, t_rel_earliest, v_pressed, m_pressed, v_released, m_released, i_static, i_peak]
+    asserts:
+      - expr: "abs(nom['t_press'] / fig['key-press-time'] - 1) < 0.01"
+        why: "the simulated press, nominal parts, agrees with key-press-time (derived by hand, key-switch-network.md) within 1 %"
+      - expr: "abs(nom['t_rel_latest'] / fig['key-release-time'] - 1) < 0.01"
+        why: "the simulated release, nominal parts, agrees with key-release-time within 1 %"
+      - expr: "max['t_press'] < fig['scan-period'] / 10"
+        why: "a press reads at the next scan at every corner: under a tenth of scan-period"
+      - expr: "max['t_rel_latest'] < fig['scan-period']"
+        why: "a release reads within one scan of the contact opening at every corner (the page's 'about 177 us, still inside one scan')"
+      - expr: "min['m_pressed'] > 0"
+        why: "a pressed key sits below VT- at its minimum at every corner, so it reads low at all (m_pressed = VT- min - the pressed node)"
+      - expr: "min['m_released'] > 0"
+        why: "a released key sits above VT+ at its maximum at every corner, input leakage included"
+      - expr: "abs(nom['i_static'] / fig['key-scan-current'] - 1) < 0.01"
+        why: "a closed key's static current agrees with key-scan-current (per key) within 1 %"
+  - name: filter-response
+    deck: key-network-ac.cir
+    measures: [f_pole, a_800k]
+    asserts:
+      - expr: "abs(nom['f_pole'] - 1 / (2 * math.pi * p['R-KEY-PU'] * p['C-KEY'])) / nom['f_pole'] < 0.02"
+        why: "the released node is a single pole at 1/(2 pi R-KEY-PU C-KEY), the page's 'Pole' row"
+      - expr: "max['a_800k'] < -50"
+        why: "the page's '54 dB at the WS2815's 800 kHz data rate' holds to within a few dB at every corner (a_800k is the rail-to-node gain, dB)"

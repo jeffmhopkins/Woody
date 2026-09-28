@@ -188,6 +188,14 @@ figures:
       ADR 0006 and bom.csv - CAME OUT OF THE GREP-FIRST RULE IN CLAUDE.md 2,
       because the agent was reading only its own page.
 
+  - id: scan-period
+    quantity: The control loop's period, which is also how often the key chain is read
+    value: "250 us"
+    status: settled
+    owner: docs/reference/latency-budget.md
+    derivation: "The output loop runs at 4 kHz (docs/reference/latency-budget.md, 'The output loop runs at 4 kHz, not 8'): 1 / 4 kHz = 250 us, and the key chain is read once per pass."
+    note: "Registered 2026-09-28 so the key board's SPICE assertions (hardware/cluster/key-switch-network/sim/) cite it by name instead of restating it."
+
   - id: key-scan-current
     quantity: 3V3 draw of the closed key pull-ups, and the step it puts on the ADC reference
     value: "1.43 mA per closed key, 27.3 mA at 19 closed"

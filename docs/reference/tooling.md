@@ -39,6 +39,7 @@ It installs:
 | `poppler-utils` | `pdftoppm` renders sheets to PNG; `pdftotext` reads banked datasheets |
 | `librsvg2-bin` | `rsvg-convert`: `pcb.py render` turns its SVG copper plots into PNGs |
 | `shapely` (pip) | `pcb.py check`'s silkscreen and outline geometry, and the router's clearances |
+| `ngspice` (42, Ubuntu's) | `sim.py`: every circuit's SPICE simulation (§5) |
 | three KiCad 3D models (0805 resistor and capacitor, SOIC-16) | `pcb.py render`. The full `kicad-packages3D` library is 3 GB, so the script fetches only these, from the KiCad project's GitLab at tag `9.0.0`, into `/usr/share/kicad/3dmodels/`. The KS-33's model is banked in `datasheets/`, and the chain header has none |
 
 **KiCad must be 9, not Ubuntu's 7.0.** KiCad 7's command line has no ERC, and
@@ -477,3 +478,61 @@ Each render is generated; what it is rendered from is the source.
   (§4); its sheets already carry footprints.
 - **The commit gate.** `check-staleness.py` runs `cad.py check` but not
   `kicad.py check`, because that needs KiCad installed; run it by hand.
+
+## §5. Circuit simulation — `tools/sim.py`
+
+```
+python3 tools/sim.py run [<sim dir> ...]   # run every sim/sims.yaml, or those named; write results.yaml
+python3 tools/sim.py check                 # no ngspice: each results.yaml matches its inputs and passed
+python3 tools/sim.py show <sim dir>        # a results.yaml as a table
+```
+
+A circuit's `sim/` holds three things:
+- `sims.yaml`: what is simulated, the model parameters with their sources,
+  the tolerance corners, and what every run must show;
+- the decks;
+- `results.yaml`, which is generated.
+
+**Part values are never written in a sim.** A deck names them by BOM row
+(double-braced, `R-KEY-PU`) and the tool fills them from the circuit's exported
+`netlist.yaml`. Figures are cited by id (`fig['key-release-time']`).
+`params_from:` imports another sim's model parameters, so a threshold ratio or
+an input capacitance is stated once.
+
+**Corners, not a guess.** Every `vary:` parameter has a relative range. Each sim
+runs at the nominal and at every combination of the range ends, and each
+measure is recorded at its nominal, minimum and maximum, with the corner that
+gave each. For RC networks and thresholds, which are monotonic in every
+parameter, the corners bound the result.
+
+**`generate: board`** builds a deck from a board's `board-netlist.yaml`:
+- every part by its row (`parts:`), on the nets it is wired to;
+- the nets the rest of the system drives (`drive:`).
+
+A wiring or value mistake on the board therefore shows up in its own
+simulation.
+
+**Held like the renders.** `results.yaml` hashes every input: the tool, the
+sims.yaml files, the decks, the netlist and the cited figures' values.
+`check-staleness.py` runs `sim.py check`, so a changed value, deck or figure,
+or a failed assertion, fails the check until the sims are re-run. Proven by
+changing `C-KEY` in the netlist, 2026-09-28.
+
+**What a result is worth.** It proves the arithmetic and the wiring against the
+models it was given. Where a model is behavioural, as a Schmitt input modelled
+as its datasheet thresholds or a switch as two resistances, `sims.yaml` says
+so.
+
+**Learned the hard way:**
+- ngspice 42's netlist `.meas` cannot parse `vm()` or `vdb()` in batch mode. On
+  `v()` it measures the **real part**: a pole came out at 102 Hz instead of
+  159 Hz, with no error. AC measures go in a `.control` block, where they are
+  right.
+- `v(0)` is not a vector. A measure of the ground net proves nothing anyway,
+  so none is taken.
+- Do not use PySpice (`hardware/module/pitch-stage/sim/README.md`).
+
+| Simulated | Where |
+|---|---|
+| one key's network, with its press, release, filter and corners | `hardware/cluster/key-switch-network/sim/` |
+| the left-hand key board as wired, all keys released and pressed | `hardware/boards/key-board-lh/sim/` |

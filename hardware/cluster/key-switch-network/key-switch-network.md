@@ -100,6 +100,14 @@ several transitions.
 
 Both crossing times are derived in `config/figures.yaml` (`key-release-time`,
 `key-press-time`); this page owns them, and every other page cites them by name.
+**Simulated** (`sim/`, ngspice, 2026-09-28): the nominal network reproduces both
+figures within 1 %, and at every corner of the parts' tolerances, the rail and
+the input leakage a press reads under a tenth of `scan-period` and a release
+inside one. The corners' values (`sim/results.yaml`, generated) confirm the
+tolerance arithmetic below: the slowest release, the longest opening always
+swallowed (`t_rel_earliest`), and the press transient (`i_peak`). The
+simulation reads its values from this circuit's netlist, so it goes stale,
+and `check-staleness.py` fails, when one of them changes.
 They use nominal parts. **Tolerance, and why no conclusion rests on the
 bound:** `[calc]` with `R-KEY-PU` 1 % high and `C-KEY` +10 % and a further
 +15 % for X7R over temperature, both times scale by 1.01 × 1.10 × 1.15 = 1.28:
