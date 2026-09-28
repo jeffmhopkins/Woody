@@ -1,0 +1,22 @@
+* Every switch held open (ctl 0) or closed (ctl 1) from the start; the operating point
+* is the answer, read at the end of a short run. Nets are named by the board netlist,
+* inside angle brackets after "net:". The key inputs are the register's H..C and the
+* marker A on the chain's 3V3. Marker B is on the ground net, which SPICE holds at
+* 0 V by definition, so simulating it proves nothing: kicad.py check's allocation
+* test holds that wiring.
+VCTL ctl 0 {{ctl}}
+.model kswitch sw vt=0.5 vh=0.1 ron={{ron}} roff={{roff}}
+.tran 0.1u {{t_end}}
+.meas tran k1 FIND v(<net:/KEY_RH1>) AT={{t_end}}
+.meas tran k2 FIND v(<net:/KEY_RH2>) AT={{t_end}}
+.meas tran k3 FIND v(<net:/KEY_RH3>) AT={{t_end}}
+.meas tran k4 FIND v(<net:/KEY_RH4>) AT={{t_end}}
+.meas tran k5 FIND v(<net:/KEY_RH5>) AT={{t_end}}
+.meas tran k6 FIND v(<net:/KEY_RH6>) AT={{t_end}}
+.meas tran ka FIND v(<net:V3V3_CHAIN_RH>) AT={{t_end}}
+.meas tran isup FIND i(vsup) AT={{t_end}}
+.meas tran m_keys_high PARAM='min(min(min(k1,k2),min(k3,k4)),min(k5,k6)) - {{vtp_max}}'
+.meas tran m_keys_low PARAM='{{vtm_min}} - max(max(max(k1,k2),max(k3,k4)),max(k5,k6))'
+.meas tran m_marker_high PARAM='ka - {{vtp_max}}'
+.meas tran i_supply PARAM='-isup'
+.end

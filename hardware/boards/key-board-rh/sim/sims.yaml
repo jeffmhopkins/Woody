@@ -1,0 +1,60 @@
+# The right-hand key board as wired, simulated in ngspice by tools/sim.py: the deck
+# is GENERATED from ../board-netlist.yaml, as the left-hand board's is
+# (hardware/boards/key-board-lh/sim/, which says how). The register's model and its
+# parameters are that board's, imported by path, so they are stated once.
+# Run: python3 tools/sim.py run hardware/boards/key-board-rh/sim
+title: Right-hand key board, every part, on the bench as Bring-up wires it
+generate: board
+values:
+  netlist: hardware/boards/key-board-rh/board-netlist.yaml
+params_from: [hardware/cluster/key-switch-network/sim/sims.yaml, hardware/boards/key-board-lh/sim/sims.yaml]
+include: [hardware/boards/key-board-lh/sim/hcs165-inputs.lib]
+ground: GND_CHAIN
+
+vary:
+  R-KEY-PU:  {tol: from-value}
+  R-KEY-SER: {tol: from-value}
+  vcc:       {tol: [-0.03, 0.03], source: "as the key network's (params_from)"}
+  ileak:     {tol: [-2.0, 0.0]}
+
+parts:
+  R-KEY-SER: "R{ref} {1} {2} {row}"
+  R-KEY-PU:  "R{ref} {1} {2} {row}"
+  C-KEY:     "C{ref} {1} {2} {row}"
+  C-DECOUPLE-165: "C{ref} {1} {2} {row}"
+  C-BULK-CHAIN: ""                          # do not fit (Bring-up, step 6)
+  SW1-n:     "S{ref} {1} {2} ctl 0 kswitch"  # every switch on one control
+  U-KEYS:    "X{ref} {VCC} {GND} {A} {B} {C} {D} {E} {F} {G} {H} {SER} {CLK} {SHLD} {CLKINH} hcs165_inputs"
+  J-CHAIN:   ""
+  TP-CHAIN:  ""
+
+# The bench of Bring-up: 3V3 at J1's pin, SH/LD high, the clock low, SER tied low.
+drive:
+  V3V3_CHAIN_RH: "VSUP <net> 0 {{vcc}}"
+  /CHAIN_SHLD:   "VSHLD <net> 0 {{vcc}}"
+  /CHAIN_SCK:    "VSCK <net> 0 0"
+  /HOP_LT_RH:    "VSER <net> 0 0"
+
+sims:
+  - name: all-keys-released
+    deck: board-dc.cir
+    set: {ctl: 0}
+    measures: [m_keys_high, m_marker_high, i_supply]
+    asserts:
+      - expr: "min['m_keys_high'] > 0"
+        why: "every key input H..C sits above VT+ at its maximum with its key open, at every corner"
+      - expr: "min['m_marker_high'] > 0"
+        why: "the high marker input (A) sits above VT+ max (the low one, B, is on ground: see board-dc.cir)"
+      - expr: "max['i_supply'] < 50e-6"
+        why: "with every key open the board draws only leakage and the register's static current: no resistive path to ground"
+  - name: all-keys-pressed
+    deck: board-dc.cir
+    set: {ctl: 1}
+    measures: [m_keys_low, m_marker_high, i_supply]
+    asserts:
+      - expr: "min['m_keys_low'] > 0"
+        why: "every key input H..C sits below VT- at its minimum with its key closed, at every corner"
+      - expr: "min['m_marker_high'] > 0"
+        why: "the high marker stays high with every key pressed"
+      - expr: "abs(nom['i_supply'] / (n['SW1-n'] * fig['key-scan-current']) - 1) < 0.02"
+        why: "the board's draw with every key closed is its switch count times key-scan-current (per key), within 2 %"

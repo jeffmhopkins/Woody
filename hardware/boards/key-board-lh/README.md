@@ -160,7 +160,7 @@ Everything below was checked against JLCPCB's banked pages
 | Setting | Value | Why |
 |---|---|---|
 | Layers | 2 | |
-| Quantity | 5, the fewest JLC makes `[from memory]`; assemble 2 | Economic PCBA assembles 2–30 boards `[datasheets/fab/JLCPCB-PCBA-CAPABILITIES.pdf, "PCB Specs for Economic PCB Assembly"]`. The right-hand board is a different design and a separate order, and it has no layout yet (below) |
+| Quantity | 5, the fewest JLC makes `[from memory]`; assemble 2 | Economic PCBA assembles 2–30 boards `[datasheets/fab/JLCPCB-PCBA-CAPABILITIES.pdf, "PCB Specs for Economic PCB Assembly"]`. The right-hand board is a different design and a separate order (below) |
 | Thickness | `boards.key_board_t` | `config/body.yaml` (ADR 0020); a standard JLC thickness `[datasheets/fab/JLCPCB-PCB-CAPABILITIES.pdf]`. `pcb.py check` holds the stackup to it |
 | Material | FR-4 | |
 | Surface finish | HASL lead-free | At this thickness, Economic assembly offers HASL only `[JLCPCB-PCBA-CAPABILITIES.pdf]`. `layout.yaml` `fab: finish`, in the stackup and the Gerber job file |
@@ -202,7 +202,7 @@ test are checked by `pcb.py` itself (above).
   - **`CBL-CHAIN`**, one per board, ordered as in *Assembling*, step 3.
   - **C7** (`C-BULK-CHAIN`), only if *Bring-up* step 6 needs it: Samsung CL21A106KAYNNNE (10 µF X5R 0805), LCSC C15850, a JLC **Basic** part `[web https://jlcpcb.com/partdetail/SamsungElectroMechanics-CL21A106KAYNNNE/C15850, 2026-09-27; datasheets/discrete-and-power/SAMSUNG-CL21A106KAYNNNE-SPECSHEET.pdf]`. It is do-not-fit on this board, so it is in no order; this is the part to fit.
 - **A US-sourced hand build.** The UNI-ROYAL resistors stay for JLC assembly: they are JLC **Basic** parts, with no feeder fee. No US distributor stocks them (DigiKey had no result `[web https://www.digikey.com/en/products/result?keywords=0805W8F1000T5E, 2026-09-27]`). For a board built by hand from US stock, use YAGEO RC0805FR-07100RL (100R) and RC0805FR-072K2L (2k2): DigiKey 311-100CRCT-ND / 311-2.20KCRCT-ND; LCSC C105577 / C114561, which are JLC **Extended** `[web https://www.digikey.com/en/products/result?keywords=RC0805FR-07100RL; …=RC0805FR-072K2L; https://jlcpcb.com/partdetail/YAGEO-RC0805FR07100RL/C105577; …/YAGEO-RC0805FR072K2L/C114561, all 2026-09-27]`. The capacitors' parts are already at DigiKey.
-- **One instrument needs two key boards, and the right-hand board cannot be ordered yet.** `hardware/boards/key-board-rh/` is schematic only: no layout, no `fab/`, no README. It is laid out from this one (*Making the next board*, above).
+- **One instrument needs two key boards.** The right-hand board is a separate design and a separate order: [`../key-board-rh/README.md`](../key-board-rh/README.md), which gives only what differs from this one.
 - **The sheets are the source of every part number.** To change a part, set its `LCSC`/`MPN` fields in the circuit sheet and re-render. The BOM row (`hardware/cluster/bom.csv` etc.) says what the part must be; the sheet says which one is bought.
 
 ## Assembling the rest by hand
