@@ -23,11 +23,11 @@ SN74HCS165 with its decoupling, its switches and a network per switch position.
 Since ADR 0017:
 
 - **`right_hand` and `left_hand` are the two key boards** (`PCB-CLUSTER`),
-  hung from `PLATE-TOP` on an M2 screw in each corner of a board that spans
-  the cavity: down through the plate, its head in a blind pocket in the
-  wood top's underside, then a spacer and a washer, the board, and a nut
-  underneath (ADR 0020, Amendment 3 — the owner's, 2026-09-27; it replaced
-  a pressed-in standoff and then a plugged bore through the wood). Each connects to the main board by one 1.27 mm IDC ribbon (`CBL-CHAIN`) into a through-hole right-angle header on its underside.
+  hung from `PLATE-TOP` on an M2.5 stud in each corner of a board that spans
+  the cavity: pressed into the plate, its head flush with the plate's top
+  face, then a spacer, the board, and a nut underneath (ADR 0020, Amendment
+  4 — the owner's, 2026-09-28; it replaced a pressed-in standoff, a plugged
+  bore through the wood, and screw heads in blind pockets). Each connects to the main board by one 1.27 mm IDC ribbon (`CBL-CHAIN`) into a through-hole right-angle header on its underside.
 - **`right_thumb` and `left_thumb` are on the main board** (`PCB-CARRIER`),
   their switches soldered to it and clipped into `PLATE-THUMB`, their
   registers and networks beside them.
@@ -122,8 +122,8 @@ sibling pages cite `cluster-boards.md` §3.*
 height rules below hold for the main board's thumb areas too —
 which suits it, because its parts face the other way (ADR 0017). The depth
 does not: the thumb switches' board sits at `switch.thumb_pcb_below_seat`,
-set by the main board's own standoffs, not by the key boards' spacer and
-washer (ADR 0020, Amendment 2).*
+set by the main board's own standoffs, not by the key boards' spacer
+(ADR 0020, Amendment 4).*
 
 **Plate, then switch, then board.** The switch clips into a 14.0 × 14.0 mm
 cutout in the aluminium plate — the same as standard MX, measured across 47
@@ -175,8 +175,8 @@ than a pitch parameter.
   `switch.pcb_below_seat_window`, and the design depth is
   `switch.pcb_below_seat` (`config/body.yaml`). Subtract `plate-thickness` and
   that is the gap, `mechanical/drc.echo` "key-board mount gap (derived)":
-  the spacer under the plate **plus the washer** (`MECH-KB-SPACER`,
-  `MECH-KB-WASHER`; `hardware.kb_spacer_l`, `kb_washer_t`). The stud's head is
+  the spacer under the plate (`MECH-KB-SPACER`, `hardware.kb_spacer_l`),
+  with nothing else in the gap. The stud's head is
   flush with the plate's top face, so the key boards' depth is the plate plus
   that hardware, checked by "key-board mount sets the board depth"; at the
   hardware's tolerance limits it prints a NOTE, and the first board
@@ -270,10 +270,9 @@ and the `LT` springs to
 closed 74HC165 item to [`key-register/notes.md`](key-register/notes.md).*
 
 - **The key-board mount's open items** (§5, ADR 0020 Amendment 4). The
-  parts are chosen (`MECH-KB-STUD`, `MECH-KB-SPACER`, `MECH-KB-WASHER`,
-  `MECH-KB-NUT`); the studs are pressed flush into the plate, so nothing
+  parts are chosen (`MECH-KB-STUD`, `MECH-KB-SPACER`, `MECH-KB-NUT`); the studs are pressed flush into the plate, so nothing
   stands above it and nothing goes into the wood. Open:
-  - the spacers, faced to `hardware.kb_spacer_l` from a stocked 2.0 (no
+  - the spacers, faced to `hardware.kb_spacer_l` from a stocked 3.0 (no
     stocked M2.5 spacer has that length), measured at the first fit;
   - the depth at the tolerance limits (drc.echo "key-board depth at the
     hardware's tolerance limits", a NOTE), which the first board confirms;

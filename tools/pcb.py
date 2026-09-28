@@ -730,7 +730,7 @@ def build(bdir):
     place_chain(board, fps[jref], geo)
     placed.add(jref)
     # the corner mounts' holes (ADR 0020): board-only footprints, no symbol - the
-    # stud, spacer, washer and nut are mechanical, in hardware/unplaced.csv. On the
+    # stud, spacer and nut are mechanical, in hardware/unplaced.csv. On the
     # BOTTOM, so their courtyard keeps the underside parts off the nuts.
     for i, (x, y, hole, head, od) in enumerate(geo["standoffs"], 1):
         h = load_fp(lay["standoff_footprint"])
@@ -742,7 +742,7 @@ def build(bdir):
         h.Reference().SetLayer(pcbnew.F_Fab)
         px, py = to_pcb(x, y)
         place(board, h, px, py, 0, True)
-        # The mount's washer presses on the top copper and its nut on the
+        # The mount's spacer presses on the top copper and its nut on the
         # bottom, and both are on the stud that the plate grounds through its own bond:
         # no copper under either, or the board gets a second ground bond and
         # every net routed there a short. A rule area on both layers, which the
@@ -1202,7 +1202,7 @@ def check_cad(board, lay, geo, comps):
                         hits.append(f"{f2.GetReference()} pad {pad.GetNumber()}")
             if hits:
                 bad.append(f"error: [cad] copper within {r:.2f} mm of standoff hole H{i} on {board.GetLayerName(L)} "
-                           f"({', '.join(sorted(set(hits)))}) - the washer and nut bear there (ADR 0020)")
+                           f"({', '.join(sorted(set(hits)))}) - the spacer and nut bear there (ADR 0020)")
     if geo["chain"]:
         js = [ref for ref, c in comps.items() if c["row"] == "J-CHAIN"]
         fp = board.FindFootprintByReference(js[0]) if len(js) == 1 else None

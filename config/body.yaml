@@ -264,7 +264,7 @@ switch:
   pcb_below_seat:
     value: 3.5
     status: nominal
-    source: "THE KEY BOARDS' (the thumb switches' main board is switch.thumb_pcb_below_seat): set by their mount (ADR 0020, amended 2026-09-27): the mount clamps the plate between the screw's head on top and the spacer below, so the board top sits the plate + hardware.kb_spacer_l + hardware.kb_washer_t below the seat [calc: 1.2 + 2.0 + 0.3]; drc.echo 'key-board mount sets the board depth' fails if this and the hardware disagree. Inside switch.pcb_below_seat_window"
+    source: "THE KEY BOARDS' (the thumb switches' main board is switch.thumb_pcb_below_seat): set by their mount (ADR 0020, Amendment 4): the stud's head is flush in the plate's top face and the spacer bears on its underside, so the board top sits the plate + hardware.kb_spacer_l below the seat [calc: 1.2 + 2.3]; drc.echo 'key-board mount sets the board depth' fails if this and the hardware disagree. Inside switch.pcb_below_seat_window"
   keycap_top_above_seat:
     value: 9.0
     status: tbd
@@ -511,12 +511,12 @@ boards:
   kb_end_margin:
     value: 6.0
     status: tbd
-    source: "a key board's MOUTH end past its first switch cutout, along the body: room for the corner mounts' studs, spacers and washers clear of that cutout (drc.echo 'key-board studs clear of the plate's edges and cutouts', 'key-board spacers and washers clear of the switch cutouts') [drawing convention]"
+    source: "a key board's MOUTH end past its first switch cutout, along the body: room for the corner mounts' studs and spacers clear of that cutout (drc.echo 'key-board studs clear of the plate's edges and cutouts', 'key-board spacers clear of the switch cutouts') [drawing convention]"
     decided_by: "M4, with the boards laid out"
   kb_tail_margin:
     value: 10.1
     status: nominal
-    source: "a key board's TAIL end past its last switch cutout, longer than the mouth end: the last keys (LH4/LH5, RH6) reach the board's corners across the body, and each tail corner's stud, spacer and washer must clear that key's cutout. drc.echo 'key-board tail margin, least' prints how short it may be; held here so the boards' outlines, and the layouts, do not move before M3 fixes the keys"
+    source: "a key board's TAIL end past its last switch cutout, longer than the mouth end: the last keys (LH4/LH5, RH6) reach the board's corners across the body, and each tail corner's stud and spacer must clear that key's cutout. drc.echo 'key-board tail margin, least' prints how short it may be; held here so the boards' outlines, and the layouts, do not move before M3 fixes the keys"
     decided_by: "M3, with the key positions"
   board_clear:
     value: 1.5
@@ -797,10 +797,10 @@ hardware:
   # looked good, let's go ahead and convert to that"). At each corner of a key
   # board, from the top down: a PEM FHL self-clinching flush-head stud pressed
   # into the plate, its head flush with the plate's top face; below the plate a
-  # spacer, a washer, the key board, and a nut on the board's underside. Nothing
+  # spacer, the key board, and a nut on the board's underside. Nothing
   # stands above the plate, so the wood top bonds to it unbroken - no pockets.
-  # The spacer and washer set the board's depth: plate + spacer + washer below
-  # the seat (drc.echo 'key-board mount sets the board depth').
+  # The spacer sets the board's depth: plate + spacer below the seat (drc.echo
+  # 'key-board mount sets the board depth').
   kb_stud_hole:
     value: 2.5
     status: settled
@@ -816,7 +816,7 @@ hardware:
   kb_stud_s:
     value: 2.1
     status: settled
-    source: "the FHL-M2.5 stud's unthreaded length S, max, from the head's face [datasheets/mechanical/PEM-FH-SELF-CLINCHING-STUDS.pdf p.FH-7]: the first 0.9 below a 1.2 plate is the clinch shank, inside the spacer; the thread starts above the washer"
+    source: "the FHL-M2.5 stud's unthreaded length S, max, from the head's face [datasheets/mechanical/PEM-FH-SELF-CLINCHING-STUDS.pdf p.FH-7]: the first 0.9 below a 1.2 plate is the clinch shank, inside the spacer; the thread starts inside it too"
   kb_stud_attached_hole:
     value: 2.9
     status: settled
@@ -824,7 +824,7 @@ hardware:
   kb_stud_l:
     value: 10
     status: nominal
-    source: "the FHL-M2.5 stud's length code L, from the head's face (stocked 6, 8, 10, 12, 15, 18) [datasheets/mechanical/PEM-FH-SELF-CLINCHING-STUDS.pdf p.FH-7]: plate + spacer + washer + key board + nut + two pitches, at the stud's shortest (kb_stud_l_tol), rounded up to a stocked length (drc.echo 'key-board stud: thread past the nut') [calc]"
+    source: "the FHL-M2.5 stud's length code L, from the head's face (stocked 6, 8, 10, 12, 15, 18) [datasheets/mechanical/PEM-FH-SELF-CLINCHING-STUDS.pdf p.FH-7]: plate + spacer + key board + nut + two pitches, at the stud's shortest (kb_stud_l_tol), rounded up to a stocked length (drc.echo 'key-board stud: thread past the nut') [calc]"
   kb_stud_l_tol:
     value: [-0.4, 0.4]
     status: settled
@@ -846,9 +846,9 @@ hardware:
     status: nominal
     source: "M2.5 clearance through the key board, ISO 273 fine [from memory]: the board locates on the studs, so the fine fit"
   kb_spacer_l:
-    value: 1.8
+    value: 2.3
     status: tbd
-    source: "a plain metal spacer for M2.5 between the plate and the washer, flat both ends: the length that keeps the board at switch.pcb_below_seat with kb_washer_t [calc: 3.5 - 1.2 - 0.5]. NOT STOCKED: Ettinger 005.52, Wurth WA-SMST and RAF all step from 1.5 to 2.0, and 1.5 or 2.0 with the washer puts the board at the pins' window's edge (switch.pcb_below_seat_window). Make it: face Ettinger 005.52.023 (2.0, bore 2.6, OD 4.5, nickel-plated brass [datasheets/mechanical/ETTINGER-005.52.023-SPACER-2.6x4.5x2.0-BRASS-NI.pdf]) down to 1.8 +/-0.05 - metal, not printed, which would creep under the nut's clamp"
+    source: "a plain metal spacer for M2.5 between the plate and the board, flat both ends, and the only thing there: the length that keeps the board at switch.pcb_below_seat [calc: 3.5 - 1.2]; its bore at most kb_stud_attached_hole. NOT STOCKED at 2.3 (Ettinger 5.52, Wurth WA-SMST and RAF step 2.0, 2.5/3.0): make it - face Ettinger 5.52.033 (M2.5, 3.0 long, bore 2.6, OD 4.5 [datasheets/mechanical/ETTINGER-CATALOG-2024-P79-DISTANZHUELSEN-MESSING.html]) down to 2.3 +/-0.05, in metal, not printed, which would creep under the nut's clamp"
     decided_by: "M4, with the spacers faced and measured"
   kb_spacer_l_tol:
     value: [-0.05, 0.05]
@@ -858,19 +858,7 @@ hardware:
   kb_spacer_od:
     value: 4.5
     status: nominal
-    source: "Ettinger 005.52.023's outside diameter, 4.5; its bore is 2.6, inside kb_stud_attached_hole [datasheets/mechanical/ETTINGER-005.52.023-SPACER-2.6x4.5x2.0-BRASS-NI.pdf]. It bears on the plate's underside and on the washer"
-  kb_washer_t:
-    value: 0.5
-    status: nominal
-    source: "an M2.5 small flat washer, ISO 7092 / DIN 433, between the spacer and the key board: H 0.5 [datasheets/mechanical/ASPEN-DIN433-ISO7092-WASHER-DIMENSION-TABLE.pdf]"
-  kb_washer_t_range:
-    value: [0.45, 0.55]
-    status: nominal
-    source: "the same washer's thickness limits [datasheets/mechanical/ASPEN-DIN433-ISO7092-WASHER-DIMENSION-TABLE.pdf]"
-  kb_washer_od:
-    value: 5.0
-    status: nominal
-    source: "the same washer's outside diameter, D2 5.0 max; bore D1 2.7 [datasheets/mechanical/ASPEN-DIN433-ISO7092-WASHER-DIMENSION-TABLE.pdf]. It bears on the board's top copper, so the PCB keeps copper out from under it"
+    source: "the Ettinger 5.52 spacer's outside diameter, 4.5; its bore is 2.6, inside kb_stud_attached_hole [datasheets/mechanical/ETTINGER-CATALOG-2024-P79-DISTANZHUELSEN-MESSING.html]. It bears on the plate's underside and on the board's top copper, so the PCB keeps copper out from under it"
   kb_nut_e:
     value: 5.77
     status: nominal
@@ -882,7 +870,7 @@ hardware:
   kb_mount_float:
     value: 0.2
     status: nominal
-    source: "how far the spacer and washer can sit off the stud's axis: (the bore - the stud) / 2 - the washer's 2.7 and the spacer's 2.6 (+0.1) on an M2.5 give at most 0.1 [calc from the drawings under kb_washer_od and kb_spacer_od]; held at 0.2, and the PCB keep-out grows by it on every side"
+    source: "how far the spacer can sit off the stud's axis: (the bore - the stud) / 2 - the spacer's 2.6 (+0.1) on an M2.5 gives at most 0.1 [calc from the catalogue under kb_spacer_od]; held at 0.2, and the PCB keep-out grows by it on every side"
   kb_mount_inset:
     value: 3.6
     status: tbd

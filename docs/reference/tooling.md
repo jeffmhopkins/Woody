@@ -239,7 +239,7 @@ assemble and bring it up, what is open.
 |---|---|
 | Netlist, footprints, references | the board's KiCad sheets (§3); a part's footprint is its sheet's `Footprint` field |
 | Board outline | `mechanical/export/key-board-lh.dxf` — the body CAD's key board |
-| Switch, ribbon-connector and corner-mount positions, which way the connector's mouth faces, each mount's hole and keep-out sizes (the nut across its corners, and the spacer or washer, each grown by `hardware.kb_mount_float`), board thickness | `mechanical/export/pcb-geometry.echo` — the body CAD |
+| Switch, ribbon-connector and corner-mount positions, which way the connector's mouth faces, each mount's hole and keep-out sizes (the nut across its corners, and the spacer, each grown by `hardware.kb_mount_float`), board thickness | `mechanical/export/pcb-geometry.echo` — the body CAD |
 | Switch 3D model height | `config/body.yaml` `switch.pcb_below_seat` |
 | Each key network's three parts | `layout.yaml` `networks:` — ONE `pattern` for every key, relative to the key's switch in the body CAD: the T's junction `offset`, the `axis` S and P lie along, the side the series resistor sits (`leg`) and the side the capacitor hangs (`c`); `except:` for a key that cannot take it, with its own `at` and the reason. `network_parts` expands it into a T round the key's node, finding each key's three parts by BOM row (`Row`) and the sheet they sit on (LH1..LH5) - references are plain numbers - and `add_silk` labels every T the same way. `layout` exits on an `except:` key that names no switch, an `axis` other than x or y, a `leg` or `c` other than ±1, a switch not at 0° without its own `at`, and **a key whose three KEY pads are not the three pads nearest its T's junction**. That is a layout-time test only: after a hand edit, `check` holds the switches where the body CAD puts them, and nothing holds the networks' positions round them |
 | Which connections and nets route first | `layout.yaml` `connect_first:` — pad-to-pad connections routed before anything else, each with a `max_mm` that **every `check` holds** (the decoupler's return to the register's ground pin). Then `route_first:` — after the power rail, before the rest: nets whose pads can be reached from one side only (a 1.27 mm header's far row) |
@@ -451,7 +451,7 @@ step 6 is what the code does.
   the board is a rectangle across the cavity, hung at each corner on an
   M2.5 stud pressed flush into the plate (ADR 0020, Amendment 4; the board
   README's assembly steps), with NPTH holes and copper keep-outs on both
-  layers under the nut and under the spacer and washer.
+  layers under the nut and under the spacer.
 - **The switch pins barely reached through** a 1.6 mm board. The key boards
   are now `boards.key_board_t`; how much pin that leaves is in
   `docs/reference/ks33-geometry.md` (ADR 0020).

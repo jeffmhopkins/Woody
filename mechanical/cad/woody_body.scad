@@ -691,8 +691,8 @@ module key_board_2d(cl) {
 // THE KEY BOARDS HANG FROM STUDS FLUSH IN THE PLATE (owner, 2026-09-28, ADR 0020
 // Amendment 4): at each corner a PEM FHL-M2.5 self-clinching stud is pressed
 // into the plate, its head flush with the plate's top face; below the plate a
-// spacer, a washer, the board, and a nut on the board's underside. Nothing
-// stands above the plate, so the wood bonds to it flat. The spacer and washer
+// spacer, the board, and a nut on the board's underside. Nothing
+// stands above the plate, so the wood bonds to it flat. The spacer alone
 // set the board's depth. The DRC below checks each stud keeps PEM's edge
 // distance from the plate's edges and cutouts, the spacer clears the cutouts,
 // and the stud reaches through the nut.
@@ -705,7 +705,7 @@ function cutout_gap(p) = min([for (k = top_keys) rect_gap(p, key_xy(k), [plate_c
 function cap_gap(p) = min([for (k = top_keys) rect_gap(p, key_xy(k), [1, 1] * (switch_keycap + 2 * stack_cap_clear), key_rot(k))]);
 function kb_mounts(cl) = let(r = kb_rect(cl), e = hardware_kb_mount_inset)
     [[r[0] + e, r[1] + e], [r[0] + e, r[3] - e], [r[2] - e, r[1] + e], [r[2] - e, r[3] - e]];
-kb_gap = hardware_kb_spacer_l + hardware_kb_washer_t;        // plate underside to board top: what the mount stacks there
+kb_gap = hardware_kb_spacer_l;                               // plate underside to board top: what the mount stacks there
 kb_top = z_plate_top - switch_pcb_below_seat;                 // the key boards' top face
 kb_stud_below = hardware_kb_stud_l - (plate_thickness + kb_gap + boards_key_board_t);   // the stud's end below the board's underside (L from the head's face)
 // Where the ribbon runs under a key board, from its connector's mouth to the
@@ -732,15 +732,13 @@ module cluster_boards() {
         // each P() places its own solid, so a section cut sees it where it is
         for (i = [0 : len(kb_mounts(cl)) - 1]) let(m = kb_mounts(cl)[i], n = str(cl, " ", i + 1)) {
             // the stud: its head flush in the plate's top face, its shank down through
-            // the spacer, washer, board and nut (L from the head's face)
+            // the spacer, board and nut (L from the head's face)
             P(C_STEEL, false, str("key-board stud ", n)) translate([m[0], m[1], explode * 0.6]) {
                 translate([0, 0, z_plate_top - 0.3]) cylinder(d = hardware_kb_stud_head_d, h = 0.3);
                 translate([0, 0, z_plate_top - hardware_kb_stud_l]) cylinder(d = 2.5, h = hardware_kb_stud_l);
             }
             P(C_STEEL, false, str("key-board spacer ", n)) translate([m[0], m[1], z_plate_bot - hardware_kb_spacer_l + explode * 0.2])
                 difference() { cylinder(d = hardware_kb_spacer_od, h = hardware_kb_spacer_l); translate([0, 0, -1]) cylinder(d = hardware_kb_stud_attached_hole, h = hardware_kb_spacer_l + 2); }
-            P(C_STEEL, false, str("key-board washer ", n)) translate([m[0], m[1], kb_top + explode * 0.15])
-                difference() { cylinder(d = hardware_kb_washer_od, h = hardware_kb_washer_t); translate([0, 0, -1]) cylinder(d = hardware_kb_board_hole, h = hardware_kb_washer_t + 2); }
             P(C_STEEL, false, str("key-board nut ", n)) translate([m[0], m[1], kb_top - boards_key_board_t - hardware_kb_nut_m - explode * 0.3])
                 difference() { cylinder(d = hardware_kb_nut_e, h = hardware_kb_nut_m, $fn = 6); translate([0, 0, -1]) cylinder(d = 2.5, h = hardware_kb_nut_m + 2); }
         }
@@ -756,11 +754,11 @@ module pcb_geometry() {
         for (k = cluster_keys(cl)) echo("PCB", cl, "switch", k[0], key_xy(k)[0], key_xy(k)[1], key_rot(k));
         echo("PCB", cl, "chain", "J-CHAIN", chain_x(cl), chain_y, chain_dir(cl), boards_chain_hdr_l, boards_chain_hdr_pin_back);
         // the hole, then what bears on the board's underside (the nut, across its
-        // corners) and on its top copper (the spacer or washer, whichever is wider),
+        // corners) and on its top copper (the spacer),
         // each grown by how far it can sit off the stud's axis
         for (m = kb_mounts(cl)) echo("PCB", cl, "standoff", "M2.5", m[0], m[1], hardware_kb_board_hole,
                                      hardware_kb_nut_e + 2 * hardware_kb_mount_float,
-                                     max(hardware_kb_spacer_od, hardware_kb_washer_od) + 2 * hardware_kb_mount_float);
+                                     hardware_kb_spacer_od + 2 * hardware_kb_mount_float);
         echo("PCB", cl, "board", "thickness", boards_key_board_t, "smt_height_max", boards_cluster_smt_h,
              "side", "switches on top, parts and ribbon connector underneath");
     }
@@ -1442,22 +1440,22 @@ module drc_report() {
         drc(g >= fastener_notch, str("key-chain ribbon hairpin clear of the lid screws (", cl, ")"), g, "mm from the hairpin to the nearest screw's centre");
 
     // THE KEY BOARDS' MOUNTS (ADR 0020, Amendment 4). The stud's head is flush in
-    // the plate's top face; the spacer and washer below the plate set the
+    // the plate's top face; the spacer below the plate sets the
     // board's depth; the nut is on the board's underside.
     mounts = [for (cl = ["left_hand", "right_hand"], m = kb_mounts(cl)) m];
     echo("DRC", "INFO", "key-board mount gap (derived)", kb_gap,
-         "mm: plate underside to board top - hardware.kb_spacer_l + hardware.kb_washer_t");
+         "mm: plate underside to board top - hardware.kb_spacer_l");
     echo("DRC", "INFO", "key-board mount gap window", switch_pcb_below_seat_window - [1, 1] * plate_thickness,
          "mm: the gaps that keep the switch pins' blades in the board and some pin to solder (switch.pcb_below_seat_window)");
     let(d = plate_thickness + kb_gap,
-        lo = plate_thickness + hardware_kb_plate_t_tol[0] + hardware_kb_spacer_l + hardware_kb_spacer_l_tol[0] + hardware_kb_washer_t_range[0],
-        hi = plate_thickness + hardware_kb_plate_t_tol[1] + hardware_kb_spacer_l + hardware_kb_spacer_l_tol[1] + hardware_kb_washer_t_range[1],
+        lo = plate_thickness + hardware_kb_plate_t_tol[0] + hardware_kb_spacer_l + hardware_kb_spacer_l_tol[0],
+        hi = plate_thickness + hardware_kb_plate_t_tol[1] + hardware_kb_spacer_l + hardware_kb_spacer_l_tol[1],
         w = switch_pcb_below_seat_window) {
         drc(abs(d - switch_pcb_below_seat) < 0.005, "key-board mount sets the board depth", d,
-            "mm below the seat: the plate + hardware.kb_spacer_l + hardware.kb_washer_t, against switch.pcb_below_seat");
+            "mm below the seat: the plate + hardware.kb_spacer_l, against switch.pcb_below_seat");
         drc(d >= w[0] && d <= w[1], "key-board depth inside the switch pins' window", [d, w], "mm: nominal, against switch.pcb_below_seat_window");
         echo("DRC", lo >= w[0] && hi <= w[1] ? "PASS" : "NOTE", "key-board depth at the hardware's tolerance limits", [lo, hi],
-             str("mm below the seat (plate, spacer and washer each at its limit), against the window ", w,
+             str("mm below the seat (plate and spacer each at its limit), against the window ", w,
                  lo < w[0] ? str(": at the low corner the pins' wide shoulder starts ", w[0] - lo, " mm into the hole - the first board confirms the fit") : "",
                  hi > w[1] ? str(": at the high corner ", hi - w[1], " mm less pin stands proud to solder - the first board confirms the fit") : ""));
     }
@@ -1466,14 +1464,14 @@ module drc_report() {
     stud_edge = min([for (m = mounts) min(cutout_gap(m), m[1] - u_y0, W - u_y0 - m[1])]);
     drc(stud_edge >= hardware_kb_stud_edge, "key-board studs clear of the plate's edges and cutouts", stud_edge,
         "mm from a stud's centre to the nearest switch cutout or plate edge, worst case, against hardware.kb_stud_edge");
-    sp = min([for (m = mounts) cutout_gap(m)]) - max(hardware_kb_spacer_od, hardware_kb_washer_od) / 2 - hardware_kb_mount_float;
-    drc(sp >= 0.5, "key-board spacers and washers clear of the switch cutouts", sp,
-        "mm from a spacer's or washer's edge, off its axis by hardware.kb_mount_float, to the nearest switch cutout, worst case");
+    sp = min([for (m = mounts) cutout_gap(m)]) - hardware_kb_spacer_od / 2 - hardware_kb_mount_float;
+    drc(sp >= 0.5, "key-board spacers clear of the switch cutouts", sp,
+        "mm from a spacer's edge, off its axis by hardware.kb_mount_float, to the nearest switch cutout, worst case");
     // the tail corners reach the last keys: the least tail margin that keeps the
-    // tail studs' spacers and washers 0.5 from those keys' cutouts, and the studs
+    // tail studs' spacers 0.5 from those keys' cutouts, and the studs
     // PEM's edge distance from them (along the body only the tail end moves)
     let(tails = [for (cl = ["left_hand", "right_hand"]) each [kb_mounts(cl)[2], kb_mounts(cl)[3]]],
-        need = max(max(hardware_kb_spacer_od, hardware_kb_washer_od) / 2 + hardware_kb_mount_float + 0.5, hardware_kb_stud_edge),
+        need = max(hardware_kb_spacer_od / 2 + hardware_kb_mount_float + 0.5, hardware_kb_stud_edge),
         have = min([for (m = tails) cutout_gap(m)]))
         echo("DRC", "INFO", "key-board tail margin, least", boards_kb_tail_margin - (have - need),
              str("mm past the last switch cutout that keeps the tail corners' hardware clear of it; boards.kb_tail_margin is ", boards_kb_tail_margin));
@@ -1481,8 +1479,8 @@ module drc_report() {
     drc(thread >= 2 * hardware_kb_stud_pitch, "key-board stud: thread past the nut", thread,
         str("mm of FHL-M2.5-", hardware_kb_stud_l, " past the nut at the stud's shortest, against two pitches"));
     shank = hardware_kb_stud_s - plate_thickness;
-    drc(shank <= hardware_kb_spacer_l + hardware_kb_washer_t, "key-board stud: its unthreaded shank ends above the board", shank,
-        "mm of unthreaded shank below the plate, against the spacer and washer it sits in");
+    drc(shank <= hardware_kb_spacer_l, "key-board stud: its unthreaded shank ends above the board", shank,
+        "mm of unthreaded shank below the plate, against the spacer it sits in");
     tip = (kb_top - boards_key_board_t) - (kb_stud_below + hardware_kb_stud_l_tol[1]) - (cb_top + boards_smt_h);
     drc(tip >= 1, "key-board stud ends clear of the main board's parts", tip,
         "mm from a stud's end at its longest, below the key board, to the top of the main board's tallest part, anywhere");

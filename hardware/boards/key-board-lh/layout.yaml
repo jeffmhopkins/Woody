@@ -45,7 +45,7 @@ fab:
 # right-angle, placed by tools/pcb.py where the body CAD stacks it over the
 # main board's, its mouth toward the ribbon's fold (pcb-geometry.echo "chain").
 # The mount's holes (ADR 0020, Amendment 4: a PEM FHL-M2.5 stud flush in the
-# plate, a spacer and washer, the board, a nut underneath): one per corner,
+# plate, a spacer, the board, a nut underneath): one per corner,
 # positions from the body CAD; this is only which footprint draws them (the key
 # keeps its old name, which tools/pcb.py reads). NPTH -
 # the plate is bonded to ground by the main board's MECH-GNDBOND, and a

@@ -502,8 +502,7 @@ clip into 1.20 mm. It is not needed: the stud is rated for this sheet.
 |---|---|---|
 | The wood top, unbroken, bonded flat on the plate: no pocket | — | — |
 | PEM FHL-M2.5-10ZI stud, pressed into the plate, head flush with its top face | `MECH-KB-STUD` | `hardware.kb_stud_hole`, `kb_stud_head_d`, `kb_stud_l`, `kb_stud_s`, `kb_stud_edge` |
-| Ettinger 005.52.023 spacer, faced to length, under the plate | `MECH-KB-SPACER` | `hardware.kb_spacer_l`, `kb_spacer_l_tol`, `kb_spacer_od` |
-| ISO 7092 / DIN 433 M2.5 small washer | `MECH-KB-WASHER` | `hardware.kb_washer_t`, `kb_washer_t_range`, `kb_washer_od` |
+| Ettinger 5.52.033 spacer, faced to length, between the plate and the board | `MECH-KB-SPACER` | `hardware.kb_spacer_l`, `kb_spacer_l_tol`, `kb_spacer_od` |
 | The key board, its NPTH hole | — | `boards.key_board_t`, `hardware.kb_board_hole` |
 | ISO 4032 M2.5 nut, on the board's underside | `MECH-KB-NUT` | `hardware.kb_nut_e`, `kb_nut_m` |
 
@@ -512,7 +511,7 @@ clip into 1.20 mm. It is not needed: the stud is rated for this sheet.
 - **PEM makes no M2 flush-head stud** in its bulletin; the metric tables
   start at M2.5 [datasheets/mechanical/PEM-FH-SELF-CLINCHING-STUDS.pdf p.FH-5, FH-7]. (One distributor lists a steel FH-M2
   that PEM does not publish, with no data; not used.) So the mount goes to
-  M2.5: the nut, washer, spacer and board hole all change with it.
+  M2.5: the nut, spacer and board hole all change with it.
 - **FHL, the low-displacement head, not the plain FH.** PEM publishes FHL's
   performance in exactly this sheet — 1.2 mm aluminium: push-out 285 N,
   torque-out 0.55 N·m, nut torque 0.32 N·m (`hardware.kb_stud_torque`)
@@ -533,17 +532,31 @@ clip into 1.20 mm. It is not needed: the stud is rated for this sheet.
 
 ### The depth, and the spacer that is made, not bought
 
-The spacer and washer still set the board's depth (Amendment 2, *The
-depth*: `drc.echo` "key-board mount sets the board depth"). The M2.5 washer is
-0.5 thick, not 0.3, so the spacer must be 1.8. **No stocked M2.5 spacer
-family has a 1.8** — Ettinger 005.52, Würth WA-SMST and RAF all step from 1.5
-to 2.0 — and 1.5 or 2.0 with the washer lands the board on the edge of the
-switch pins' window, past it at the tolerance limits. So the 2.0 Ettinger
-spacer is **faced down to 1.8**, in metal: the owner's standing allowance to
-file a spacer (Amendment 2), and not printed, which would creep under the
-clamp. The Würth WA-SMST parts are ruled out in any case: they carry a
-spigot under the body for reflow, so they are not the plain spacers they
-were taken for (the M2 one that Amendment 2 named included).
+**The spacer alone sets the board's depth: no washer** (owner, 2026-09-28:
+"dropping the washer is the right idea"). The board top sits the plate plus
+the spacer below the seat (`drc.echo` "key-board mount sets the board
+depth"), so the spacer is the whole 2.3 mm gap. A washer was only ever there
+to make up a length no stocked spacer had; here it would have been a 0.5
+M2.5 washer under a 1.8 spacer, which is no more stocked than a 2.3. Without
+it the stack has one tolerance fewer, and at its limits it stays inside the
+switch pins' window ("key-board depth at the hardware's tolerance limits").
+
+**No stocked M2.5 spacer is 2.3** — Ettinger 5.52, Würth WA-SMST and RAF
+step through 2.0 to 2.5 or 3.0 — so an Ettinger **5.52.033 (3.0) is faced
+down to 2.3**, in metal: the owner's standing allowance to file a spacer
+(Amendment 2), and not printed, which would creep under the clamp. The Würth
+WA-SMST parts are ruled out in any case: they carry a spigot under the body
+for reflow, so they are not the plain spacers they were taken for (the M2 one
+that Amendment 2 named included).
+
+**The board stays 1.2 mm.** A thicker board does not move the board's top —
+the spacer sets that — it moves the underside further down the pins: at 1.6
+the pins end about flush with it and leave nothing to fillet
+(`docs/reference/ks33-geometry.md`). Nor does a switch rest on the board:
+its housing ends 1.0 above the board's top, and a key press goes into the
+plate through the switch's clips, not into the joints. The plated holes fill
+from the underside, so the joints need no soldering from the top, where the
+switch body covers them.
 
 ### Assembly
 
@@ -552,7 +565,7 @@ were taken for (the M2 one that Amendment 2 named included).
    parallel anvil — for sheet this thin, PEM's countersunk anvil [datasheets/mechanical/PEM-FH-SELF-CLINCHING-STUDS.pdf
    p.FH-18, FH-20]. Never hammered.
 2. Clip the switches into the plate.
-3. From below, on each stud: the spacer, the washer, the key board, and the
+3. From below, on each stud: the spacer, the key board, and the
    nut, tightened to no more than `hardware.kb_stud_torque`.
 4. Solder the switches — after the hardware has fixed the depth.
 5. RTV-bond the plate to the wood top (ADR 0009). The beads may run over the
@@ -568,7 +581,9 @@ holding from above, which is why there is no epoxy.
   pocket" rules, `mechanical/export/oak-pockets.dxf`), its epoxy
   (`ADH-EPOXY`), and the M2 screw (`MECH-KB-SCREW`, `hardware.kb_screw_*`,
   `kb_plate_hole`, `kb_screw_hole`, now `kb_stud_hole` and `kb_board_hole`).
-- The M2 spacer, washer and nut: now M2.5 (the rows keep their names).
+- The M2 spacer and nut: now M2.5 (the rows keep their names). The washer
+  (`MECH-KB-WASHER`, `hardware.kb_washer_*`): gone, the spacer making up its
+  length.
 - `hardware.kb_mount_inset`: now set by the M2.5 nut's keep-out, not by the
   pockets' wall to the side grooves.
 - `boards.kb_tail_margin` keeps its value so the boards' outlines do not move
@@ -582,7 +597,7 @@ holding from above, which is why there is no epoxy.
 - The spacers, faced to `hardware.kb_spacer_l` and measured, at M4, with the
   board's first fit; `hardware.kb_mount_inset` with it.
 - A US source for FHL-M2.5-10ZI — the plate vendor who presses them is the
-  first to ask — and for the M2.5 washers and nuts.
+  first to ask — and for the M2.5 nuts.
 - The wood's species (Amendment 2, *The wood*); it no longer sets anything in
   the mount.
 

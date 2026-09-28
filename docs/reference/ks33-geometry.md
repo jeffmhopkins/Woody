@@ -146,8 +146,8 @@ board's underside the pins show 5.10 mm less the board-top depth less the
 board's thickness `[calc]`: at the window's middle, 3.4 mm, that is
 5.10 − 3.4 − 1.6 ≈ 0.1 mm on a 1.6 mm board and 5.10 − 3.4 − 1.2 ≈ 0.5 mm on
 a 1.2 mm one. The key boards sit at `switch.pcb_below_seat`, not at the
-middle: their mount hardware sets it — the plate + `hardware.kb_spacer_l` +
-`hardware.kb_washer_t` (ADR 0020, Amendment 2). `mechanical/drc.echo`
+middle: their mount hardware sets it — the plate + `hardware.kb_spacer_l`
+(ADR 0020, Amendment 4). `mechanical/drc.echo`
 "key-board depth inside the switch pins' window" prints where that lands,
 and "key-board depth at the hardware's tolerance limits" (a NOTE) what the
 worst case leaves to solder. That is why the key boards are

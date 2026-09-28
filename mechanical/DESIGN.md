@@ -38,7 +38,7 @@ drawing.
   plate on PEM FHL-M2.5 self-clinching studs pressed into it, heads flush with
   its top face (ADR 0020, Amendment 4 — the owner's, 2026-09-28, replacing a
   pressed-in standoff, a plugged through-bore and then screw heads in blind
-  pockets): the stud, a spacer and a washer under the plate, the board, and a
+  pockets): the stud, a spacer under the plate, the board, and a
   nut underneath. Nothing stands above the plate, so the wood bonds to it
   flat. Each board is a rectangle across the cavity with a stud in each
   corner, `hardware.kb_mount_inset` in from both edges for the nut's
@@ -46,9 +46,9 @@ drawing.
   (*"key-board tail margin, least"* prints how short it may be). Each stud
   keeps PEM's edge distance from the plate's edges and cutouts (*"key-board
   studs clear of the plate's edges and cutouts"*, against
-  `hardware.kb_stud_edge`), and the spacer and washer stay off the switch
-  cutouts (*"key-board spacers and washers clear of the switch
-  cutouts"*). The plate + `hardware.kb_spacer_l` + `hardware.kb_washer_t`
+  `hardware.kb_stud_edge`), and the spacers stay off the switch
+  cutouts (*"key-board spacers clear of the switch
+  cutouts"*). The plate + `hardware.kb_spacer_l`
   is the key boards' depth, at the depth the KS-33's pins allow
   (`docs/reference/ks33-geometry.md`; `switch.pcb_below_seat`): *"key-board
   mount sets the board depth"*, and *"key-board depth at the hardware's
