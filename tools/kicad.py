@@ -109,8 +109,12 @@ def kicad_netlist(sch):
         fp = find(c, "footprint")
         # a symbol with "Exclude from BOM" ticked (in_bom no): a test pad, a fiducial - board-only
         in_bom = not any(find(p, "name")[0][1] == "exclude_from_bom" for p in find(c, "property"))
+        # the hierarchical sheet it sits on ("LH1", "REG"; "" at the root): with its Row,
+        # that is what a numeric reference (R1, C6) is looked up by
+        sp = find(c, "sheetpath")
+        sheet = find(sp[0], "names")[0][1].strip("/").rsplit("/", 1)[-1] if sp else ""
         comps[ref] = {"value": find(c, "value")[0][1], "fields": fields, "footprint": fp[0][1] if fp else "",
-                      "in_bom": in_bom}
+                      "in_bom": in_bom, "sheet": sheet}
     nets = []
     for n in find(find(tree, "nets")[0], "net"):
         nodes = [(find(x, "ref")[0][1], find(x, "pin")[0][1]) for x in find(n, "node")]
@@ -225,6 +229,8 @@ def export_board(d):
         maps[ref] = num2name
         out_comps[ref] = {"of": f.get("Row", ref), "value": comps[ref]["value"],
                           "pins": [int(n) if n.isdigit() else n for n in names]}
+        if comps[ref]["sheet"]:
+            out_comps[ref]["sheet"] = comps[ref]["sheet"]
     out_nets, ext = {}, []
     for kname, nodes in nets:
         pins = [f"{r}.{maps.get(r, {}).get(p, p)}" for r, p in nodes if not r.startswith("#")]
@@ -430,7 +436,12 @@ def check_allocation(board_docs):
                 problems.append(f"allocation: {item} is not a {cluster} key in config/key-layout.yaml")
     rows = {tuple(r): c for c, r in alloc["registers"].items()}
     for bname, doc in board_docs:
-        for u in [r for r in doc["components"] if r.startswith("U-KEYS-")]:
+        comps = doc["components"]
+        regs = [r for r, c in comps.items() if c.get("of") == "U-KEYS"]
+        if not regs:
+            # a key board without its register would pass this check by having nothing to check
+            problems.append(f"allocation: {bname} has no U-KEYS register - nothing to hold to allocation.yaml")
+        for u in regs:
             where = {}
             for pins in doc["nets"].values():
                 for p in pins:
@@ -443,8 +454,9 @@ def check_allocation(board_docs):
                 elif f"{u}.GND" in net:
                     got.append("M0")
                 else:
-                    pu = [p for p in net if p.startswith("R-KEY-PU-") and p.endswith(".2")]
-                    got.append(pu[0][len("R-KEY-PU-"):-2] if len(pu) == 1 else "?")
+                    # a pull-up's key is the sheet it sits on (LH1, FREE3)
+                    pu = [p for p in net if p.endswith(".2") and comps.get(p[:-2], {}).get("of") == "R-KEY-PU"]
+                    got.append(comps[pu[0][:-2]].get("sheet", "?") if len(pu) == 1 else "?")
             if tuple(got) not in rows:
                 problems.append(f"allocation: {bname} wires {u} as {' '.join(got)} (H..A), which is no row of allocation.yaml")
     return problems
@@ -470,8 +482,10 @@ def check_chain(board_docs):
     rel = os.path.relpath(LOOM, ROOT)
     problems = []
     for bname, doc in board_docs:
-        if "J-CHAIN" not in doc["components"]:
+        js = [r for r, c in doc["components"].items() if c.get("of") == "J-CHAIN"]
+        if not js:
             continue
+        jref = js[0]
         side = bname.rsplit("-", 1)[-1].upper()
         key = f"J-CHAIN-KEY-{side}"
         if key not in loom["components"]:
@@ -487,15 +501,15 @@ def check_chain(board_docs):
             if want is None or want != main:
                 problems.append(f"chain: {rel} puts {key}.{k} on {want}, but J-CHAIN-MAIN-{side}.{13 - k} "
                                 f"(the same conductor, -RN2) on {main}")
-            got, size = bnet.get(f"J-CHAIN.{k}", (None, 0))
+            got, size = bnet.get(f"{jref}.{k}", (None, 0))
             if size == 1:
                 # unconnected on the board: fine only on a conductor nothing else uses
                 spare = want is not None and all(isinstance(n, str) and n.startswith("J-CHAIN-")
                                                  for n in loom["nets"][want])
                 if not spare:
-                    problems.append(f"chain: {bname} leaves J-CHAIN.{k} unconnected; {rel} puts {key}.{k} on {want}")
+                    problems.append(f"chain: {bname} leaves {jref}.{k} (J-CHAIN) unconnected; {rel} puts {key}.{k} on {want}")
             elif got != want:
-                problems.append(f"chain: {bname} wires J-CHAIN.{k} to {got}; {rel} puts {key}.{k} "
+                problems.append(f"chain: {bname} wires {jref}.{k} (J-CHAIN) to {got}; {rel} puts {key}.{k} "
                                 f"(main-board pin {13 - k}) on {want}")
     return problems
 

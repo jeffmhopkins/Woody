@@ -108,14 +108,29 @@ def sheet_netlist(sch):
         tst = find(c, "tstamps")
         sp = find(find(c, "sheetpath")[0], "tstamps")[0][1]
         flags = {find(p, "name")[0][1] for p in find(c, "property")}
+        fields = {find(f, "name")[0][1]: f[2] for fs in find(c, "fields") for f in find(fs, "field") if len(f) > 2}
+        names = find(find(c, "sheetpath")[0], "names")[0][1].strip("/")
         comps[ref] = {"value": find(c, "value")[0][1], "footprint": fp[0][1] if fp else "",
                       "path": sp + (tst[0][1] if tst else ""),
+                      # what a numeric reference is looked up by: its BOM row and the
+                      # hierarchical sheet it sits on (a key's network is on sheet "LH1")
+                      "row": fields.get("Row", ref), "sheet": names.rsplit("/", 1)[-1] if names else "",
+                      "probe": fields.get("Probe", ""),
                       # the symbol's own "Exclude from BOM" and "Do not populate": the footprint carries both
                       "exclude_from_bom": "exclude_from_bom" in flags, "dnp": "dnp" in flags}
     nets = []
     for n in find(find(tree, "nets")[0], "net"):
         nets.append((find(n, "name")[0][1], [(find(x, "ref")[0][1], find(x, "pin")[0][1]) for x in find(n, "node")]))
     return comps, nets
+
+
+def ref_of(comps, row, sheet=None):
+    """The one reference on the board with this BOM row (and on this sheet, if given):
+    references are plain numbers (R1, C6), so the tools find a part by what it is."""
+    got = [r for r, c in comps.items() if c["row"] == row and (sheet is None or c["sheet"] == sheet)]
+    if len(got) != 1:
+        sys.exit(f"pcb: expected one {row}{' on sheet ' + sheet if sheet else ''}, found {got or 'none'}")
+    return got[0]
 
 
 def load_fp(libid):
@@ -220,7 +235,7 @@ def place(board, fp, x, y, rot, bottom):
 NET_PITCH = 2.7     # junction to each part's centre: two 0805 courtyards (±1.68 × ±0.95) apart
 
 
-def network_parts(lay, geo):
+def network_parts(lay, geo, comps):
     """layout.yaml networks: -> parts: entries. ONE PATTERN, RELATIVE TO EACH KEY'S
     SWITCH, so every key's network sits exactly the same way round its switch:
     `offset` (body mm, switch centre to the T's junction), `axis` (x or y: the line
@@ -245,24 +260,42 @@ def network_parts(lay, geo):
             x, y = spec["at"]
         else:
             if sr % 360:
-                sys.exit(f"pcb: networks: pattern is written for switches at 0 deg; SW-{key} is at {sr} - "
+                sys.exit(f"pcb: networks: pattern is written for switches at 0 deg; {key}'s switch is at {sr} - "
                          "give it an except: entry with its own `at`")
             x, y = sx + spec["offset"][0], sy + spec["offset"][1]
         d, c = spec["leg"], spec["c"]
         if spec["axis"] == "x":
             rot = 0 if d > 0 else 180         # S's pad 1 (KEY) and P's pad 2 (KEY) toward the junction
-            out[f"R-KEY-SER-{key}"] = [x + d * NET_PITCH, y, rot]
-            out[f"R-KEY-PU-{key}"] = [x - d * NET_PITCH, y, rot]
-            out[f"C-KEY-{key}"] = [x, y + c * NET_PITCH, 270 if c > 0 else 90]
+            out[ref_of(comps, "R-KEY-SER", key)] = [x + d * NET_PITCH, y, rot]
+            out[ref_of(comps, "R-KEY-PU", key)] = [x - d * NET_PITCH, y, rot]
+            out[ref_of(comps, "C-KEY", key)] = [x, y + c * NET_PITCH, 270 if c > 0 else 90]
         else:
             rot = 90 if d > 0 else 270        # pad 1 faces -y at 90 and +y at 270 (measured through place())
-            out[f"R-KEY-SER-{key}"] = [x, y + d * NET_PITCH, rot]
-            out[f"R-KEY-PU-{key}"] = [x, y - d * NET_PITCH, rot]
-            out[f"C-KEY-{key}"] = [x + c * NET_PITCH, y, 0 if c > 0 else 180]
+            out[ref_of(comps, "R-KEY-SER", key)] = [x, y + d * NET_PITCH, rot]
+            out[ref_of(comps, "R-KEY-PU", key)] = [x, y - d * NET_PITCH, rot]
+            out[ref_of(comps, "C-KEY", key)] = [x + c * NET_PITCH, y, 0 if c > 0 else 180]
     return out
 
 
 SILK_H, SILK_W = 1.0, 0.18     # silkscreen text height and stroke, mm: JLC's 1.0 minimum height, and a stroke over its 0.15 minimum near its preferred 1:6 (R3-8)
+
+
+_TW, _TWB = {}, [None]
+
+
+def text_w(text, h=SILK_H):
+    """A silkscreen label's real width in mm, stroke included, measured on KiCad's own
+    font: the per-character guess it replaces ran 15-35 % short on short labels, so
+    labels checked as clear printed touching (3V3SH/LDSCK). Measured on the board being
+    built (add_silk sets it): a new pcbnew.BOARD() makes KiCad's default project the
+    current one, and the board then saves with default design rules."""
+    if (text, h) not in _TW:
+        t = pcbnew.PCB_TEXT(_TWB[0])
+        t.SetText(text)
+        t.SetTextSize(V(h, h))
+        t.SetTextThickness(MM(SILK_W))
+        _TW[(text, h)] = pcbnew.ToMM(t.GetBoundingBox().GetWidth())
+    return _TW[(text, h)]
 
 
 def silk_text(board, text, x, y, h=SILK_H, justify=0, top=False, angle=0):
@@ -355,22 +388,17 @@ def silk_dot(board, x, y, r=0.3, top=False):
     board.Add(c)
 
 
-def add_silk(board, lay):
+def add_silk(board, lay, comps):
     """The parts-side silkscreen, so the board can be assembled and probed by
-    hand: references like R-KEY-SER-LH1 do not fit beside an 0805, so each key
-    network's three parts get a letter (C the capacitor, S the series resistor,
-    P the pull-up) under the key's name, and everything else a short name.
-    The full references are on the fabrication layer, for the assembly drawing."""
+    hand: every part's reference (R1, C1, U1, J1, TP1), each OFF every part body
+    and pad on this side, so it can still be read with the parts fitted
+    (check_silk holds that). Each key's network carries its three references the
+    same way round the T, and the key's name beside it; each test pad its
+    reference and what it probes (its Probe field)."""
+    _TWB[0] = board
     def box(fp):
         b = fp.GetCourtyard(pcbnew.B_CrtYd).BBox()
         return pcbnew.ToMM(b.GetLeft()), pcbnew.ToMM(b.GetTop()), pcbnew.ToMM(b.GetRight()), pcbnew.ToMM(b.GetBottom())
-    groups = {}
-    for fp in board.GetFootprints():
-        ref = fp.GetReference()
-        m = re.match(r"(C-KEY|R-KEY-SER|R-KEY-PU)-(.+)$", ref)
-        if m and not m.group(2).startswith("FREE"):
-            groups.setdefault(m.group(2), []).append((m.group(1), fp))
-    letter = {"C-KEY": "C", "R-KEY-SER": "S", "R-KEY-PU": "P"}
     edge = board.GetBoardEdgesBoundingBox()
     ex0, ey0, ex1, ey1 = (pcbnew.ToMM(edge.GetLeft()) + 0.5, pcbnew.ToMM(edge.GetTop()) + 0.5,
                           pcbnew.ToMM(edge.GetRight()) - 0.5, pcbnew.ToMM(edge.GetBottom()) - 0.5)
@@ -390,12 +418,15 @@ def add_silk(board, lay):
 
     placed_txt = []
 
-    def put(text, x, y, justify=0):
+    def put(text, x, y, justify=0, angle=0):
         """Every label goes through here, so each later one keeps off it."""
-        w = SILK_H * 0.9 * len(text)
-        a0 = x - w / 2 if justify == 0 else (x - w if justify == 1 else x)
-        placed_txt.append((a0, y - SILK_H / 2, a0 + w, y + SILK_H / 2))
-        silk_text(board, text, x, y, justify=justify)
+        w = text_w(text)
+        if angle % 180:
+            placed_txt.append((x - SILK_H / 2, y - w / 2, x + SILK_H / 2, y + w / 2))
+        else:
+            a0 = x - w / 2 if justify == 0 else (x - w if justify == 1 else x)
+            placed_txt.append((a0, y - SILK_H / 2, a0 + w, y + SILK_H / 2))
+        silk_text(board, text, x, y, justify=justify, angle=angle)
 
     def free(a0, b0, a1, b1, m=0.25):
         """clear(), and off every label already placed by m: the board house's silk-to-silk
@@ -405,85 +436,88 @@ def add_silk(board, lay):
     def beside(x0, y0, x1, y1, text, under_first=False):
         """A short label over the part, else under it, else to either side:
         the first place off every courtyard and every label already placed."""
-        w, h = SILK_H * 0.9 * len(text) / 2, SILK_H / 2
+        w, h = text_w(text) / 2, SILK_H / 2
         cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
         spots = [(cx, y0 - SILK_H * 0.75), (cx, y1 + SILK_H * 0.75), (x0 - 0.4 - w, cy), (x1 + 0.4 + w, cy)]
         if under_first:
             spots[0], spots[1] = spots[1], spots[0]
         for px, py in spots:
             if free(px - w, py - h, px + w, py + h):
-                return px, py
-        sys.exit(f"pcb: no clear place for the silkscreen label {text!r} at ({cx:.1f}, {cy:.1f}) - move parts in layout.yaml")
+                return px, py, 0, 0
+        # then reading along the part: at either side of it, or over or under it
+        for px, py in ((x0 - 0.4 - h, cy), (x1 + 0.4 + h, cy), (cx, y0 - 0.3 - w), (cx, y1 + 0.3 + w)):
+            if free(px - h, py - w, px + h, py + w):
+                return px, py, 0, 90
+        near_ = [tuple(round(v, 1) for v in c) for c in crt + placed_txt
+                 if c[0] < x1 + 4 and c[2] > x0 - 4 and c[1] < y1 + 4 and c[3] > y0 - 4]
+        sys.exit(f"pcb: no clear place for the silkscreen label {text!r} at ({cx:.1f}, {cy:.1f}), part box "
+                 f"{tuple(round(v, 1) for v in (x0, y0, x1, y1))}; nearby: {near_} - move parts in layout.yaml")
     above_or_below = beside
-    def fixed(text, x, y):
-        w = SILK_H * 0.9 * len(text) / 2
-        if not free(x - w, y - SILK_H / 2, x + w, y + SILK_H / 2):
-            sys.exit(f"pcb: the key-network label {text!r} at ({x:.1f}, {y:.1f}) is not clear - every key's labels sit "
+    def fixed(text, x, y, angle=0):
+        w, h = text_w(text) / 2, SILK_H / 2
+        if angle % 180:
+            w, h = h, w
+        if not free(x - w, y - h, x + w, y + h):
+            a0, b0, a1, b1 = x - w, y - h, x + w, y + h
+            hit = [c for c in crt if a0 < c[2] and a1 > c[0] and b0 < c[3] and b1 > c[1]] + \
+                  [t for t in placed_txt if a0 < t[2] + 0.25 and a1 > t[0] - 0.25 and b0 < t[3] + 0.25 and b1 > t[1] - 0.25]
+            outside = not (a0 >= ex0 and b0 >= ey0 and a1 <= ex1 and b1 <= ey1)
+            sys.exit(f"pcb: the label {text!r} at ({x:.1f}, {y:.1f}) is not clear "
+                     f"({'off the board edge; ' if outside else ''}in the way: {[tuple(round(v, 1) for v in h) for h in hit]}) - every key's labels sit "
                      "the same way round its network; move the part in the way, or the pattern (layout.yaml networks:)")
-        put(text, x, y)
-    for key, parts in groups.items():
-        if len(parts) == 3:
-            # A T (network_parts): every key's labels the same way round it. S's and P's
-            # letters outside the column, away from C; C's letter on the S side of C,
-            # the key's name on the P side of it.
-            f = {kind: fp for kind, fp in parts}
-            xy = {k: (pcbnew.ToMM(v.GetPosition().x), pcbnew.ToMM(v.GetPosition().y)) for k, v in f.items()}
-            jx, jy = (xy["R-KEY-SER"][0] + xy["R-KEY-PU"][0]) / 2, (xy["R-KEY-SER"][1] + xy["R-KEY-PU"][1]) / 2
-            ux, uy = xy["C-KEY"][0] - jx, xy["C-KEY"][1] - jy
-            n = math.hypot(ux, uy)
-            ux, uy = ux / n, uy / n                       # junction -> C
-            ax, ay = xy["R-KEY-PU"][0] - jx, xy["R-KEY-PU"][1] - jy
-            n = math.hypot(ax, ay)
-            ax, ay = ax / n, ay / n                       # junction -> P
-            for kind in ("R-KEY-SER", "R-KEY-PU"):
-                fixed(letter[kind], xy[kind][0] - ux * 1.7, xy[kind][1] - uy * 1.7)
-            fixed("C", xy["C-KEY"][0] - ax * 1.7, xy["C-KEY"][1] - ay * 1.7)
-            fixed(key, xy["C-KEY"][0] + ax * 1.7, xy["C-KEY"][1] + ay * 1.7)
-            continue
-        boxes = [box(fp) for _, fp in parts]
-        top = min(b[1] for b in boxes)
-        for kind, fp in parts:
-            put(letter[kind], *beside(*box(fp), letter[kind]))
-        # the key's name beside its row, on whichever side is clear
-        x0, x1 = min(b[0] for b in boxes), max(b[2] for b in boxes)
-        cy = (min(b[1] for b in boxes) + max(b[3] for b in boxes)) / 2
-        w = SILK_H * 0.9 * len(key)
-        for bx, j in ((x0 - 0.5 - w, 1), (x1 + 0.5, -1)):
-            if free(bx - 0.3, cy - SILK_H, bx + w + 0.3, cy + SILK_H):
-                put(key, bx + w if j == 1 else bx, cy, justify=j)
-                break
-        else:
-            put(key, *beside(x0, top - SILK_H * 1.6, x1, top - SILK_H * 1.6, key))
-    # fixed-place labels (the test pads' row) first, so the searched ones keep off them
+        put(text, x, y, angle=angle)
+    def near(fp, text, d, angle=0):
+        """A point beside fp's courtyard in direction d (a unit axis vector), with the
+        text's own half-size and a 0.3 mm gap between them."""
+        x0, y0, x1, y1 = box(fp)
+        cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+        w, h = text_w(text) / 2, SILK_H / 2
+        if angle % 180:
+            w, h = h, w
+        if abs(d[0]) > abs(d[1]):
+            return (x1 + 0.3 + w if d[0] > 0 else x0 - 0.3 - w), cy
+        return cx, (y1 + 0.3 + h if d[1] > 0 else y0 - 0.3 - h)
+
+    def unit(dx, dy):
+        n = math.hypot(dx, dy)
+        return dx / n, dy / n
+
+    fps = {fp.GetReference(): fp for fp in board.GetFootprints()}
+    keys = sorted({c["sheet"] for c in comps.values() if c["row"] == "SW1-n"})
+    for key in keys:
+        # A T (network_parts): every key's labels the same way round it. S's and P's
+        # references outside the column, away from C; C's on the S side of C, the
+        # key's name on the P side of it.
+        f = {row: fps[ref_of(comps, row, key)] for row in ("R-KEY-SER", "R-KEY-PU", "C-KEY")}
+        xy = {k: (pcbnew.ToMM(v.GetPosition().x), pcbnew.ToMM(v.GetPosition().y)) for k, v in f.items()}
+        jx, jy = (xy["R-KEY-SER"][0] + xy["R-KEY-PU"][0]) / 2, (xy["R-KEY-SER"][1] + xy["R-KEY-PU"][1]) / 2
+        u = unit(xy["C-KEY"][0] - jx, xy["C-KEY"][1] - jy)          # junction -> C
+        a = unit(xy["R-KEY-PU"][0] - jx, xy["R-KEY-PU"][1] - jy)    # junction -> P
+        # S's and P's references read along the parts, beside the column: across
+        # it they would reach the switch's pins
+        ang = 90 if abs(a[1]) > abs(a[0]) else 0
+        for row in ("R-KEY-SER", "R-KEY-PU"):
+            fixed(f[row].GetReference(), *near(f[row], f[row].GetReference(), (-u[0], -u[1]), ang), angle=ang)
+        fixed(f["C-KEY"].GetReference(), *near(f["C-KEY"], f["C-KEY"].GetReference(), (-a[0], -a[1])))
+        fixed(key, *near(f["C-KEY"], key, a))
     # fixed-place marks first - the test pads' labels, J-CHAIN's dot and arrow - so
     # every searched label keeps off them
-    for fp in sorted(board.GetFootprints(), key=lambda f: (not f.GetReference().startswith("TP-"), f.GetReference() != "J-CHAIN")):
+    order = lambda fp: (comps.get(fp.GetReference(), {}).get("row") != "TP-CHAIN", comps.get(fp.GetReference(), {}).get("row") != "J-CHAIN")
+    tp_row = [f.GetReference() for f in sorted((f for f in board.GetFootprints() if comps.get(f.GetReference(), {}).get("row") == "TP-CHAIN"),
+                                                key=lambda f: f.GetPosition().x)]
+    for fp in sorted(board.GetFootprints(), key=order):
         ref = fp.GetReference()
+        c = comps.get(ref)
+        if c is None or c["row"] in ("R-KEY-SER", "C-KEY", "SW1-n") or (c["row"] == "R-KEY-PU" and c["sheet"] in keys):
+            continue                                   # mounting holes; the key networks, labelled above; switches (top)
         x0, y0, x1, y1 = box(fp) if fp.GetCourtyard(pcbnew.B_CrtYd).OutlineCount() else (0, 0, 0, 0)
-        if ref.startswith("U-"):
-            put(fp.GetValue(), *beside(x0, y0, x1, y1, fp.GetValue()))
-        elif ref.startswith("C-DECOUPLE"):
-            put("CD", *above_or_below(x0, y0, x1, y1, "CD"))
-        elif ref.startswith("C-BULK"):
-            # under it: over it the label reads as J-CHAIN's, whose pads are beside
-            put("CB DNP", *beside(x0, y0, x1, y1, "CB DNP", under_first=True))
-        elif ref.startswith("R-KEY-PU-FREE"):
-            put("PF", *above_or_below(x0, y0, x1, y1, "PF"))
-        elif ref.startswith("TP-"):
-            # test pads sit in a row: their names alternate under and over it
-            name = ref[3:].rsplit("-", 1)[0].replace("SHLD", "SH/LD")
-            row = sorted((f for f in board.GetFootprints() if f.GetReference().startswith("TP-")), key=lambda f: f.GetPosition().x)
-            under = [f.GetReference() for f in row].index(ref) % 2 == 0
-            # alternating, where that side is free; else the other side; else anywhere near
-            w = SILK_H * 0.9 * len(name) / 2
+        if c["row"] == "TP-CHAIN":
+            # test pads sit in a row: each one's reference under it and over it by
+            # turns, so side by side on either side they are two pads apart; what each
+            # probes is in the legend (below)
             cx = (x0 + x1) / 2
-            for py in ((y1 + SILK_H * 0.75, y0 - SILK_H * 0.75) if under else (y0 - SILK_H * 0.75, y1 + SILK_H * 0.75)):
-                if free(cx - w, py - SILK_H / 2, cx + w, py + SILK_H / 2):
-                    put(name, cx, py)
-                    break
-            else:
-                put(name, *beside(x0, y0, x1, y1, name))
-        elif ref == "J-CHAIN":
+            fixed(ref, cx, (y1 + SILK_H * 0.75) if tp_row.index(ref) % 2 == 0 else (y0 - SILK_H * 0.75))
+        elif c["row"] == "J-CHAIN":
             p1 = fp.FindPadByNumber("1").GetPosition()
             p2 = fp.FindPadByNumber("2").GetPosition()
             # pin 1's dot outside the pad array, away from the mouth
@@ -491,13 +525,18 @@ def add_silk(board, lay):
             dxd = pcbnew.ToMM(p1.x) + (1.3 if dx > 0 else -1.3)
             silk_dot(board, dxd, pcbnew.ToMM(p1.y))   # its edge 0.39 off the pad: fab silk_to_pad
             placed_txt.append((dxd - 0.6, pcbnew.ToMM(p1.y) - 0.6, dxd + 0.6, pcbnew.ToMM(p1.y) + 0.6))
-            put("J-CHAIN", *above_or_below(x0, y0, x1, y1, "J-CHAIN"))
+            put(ref, *above_or_below(x0, y0, x1, y1, ref))
             # which way its mouth faces: pads 1 -> 2 point at it (place_chain); a
             # header soldered backward puts 3V3 on a ground pin (key-chain-loom.md)
             mx = pcbnew.ToMM(p2.x - p1.x) > 0
             ax = x1 + 1.2 if mx else x0 - 1.2
             silk_arrow(board, ax, (y0 + y1) / 2, 1 if mx else -1)
             placed_txt.append((ax - 0.9, (y0 + y1) / 2 - 0.9, ax + 0.9, (y0 + y1) / 2 + 0.9))
+        else:
+            # everything else: its reference, with DNP where it is not fitted
+            text = ref + (" DNP" if fp.IsDNP() else "")
+            # a DNP part's label under it: over it, it reads as J-CHAIN's, whose pads are beside
+            put(text, *beside(x0, y0, x1, y1, text, under_first=fp.IsDNP()))
     # which end of the board faces the mouth: body x runs from the mouth, so the
     # board's low-x edge - an arrow at it and the word beside, clear of everything
     mx, my = ex0 + 0.9, (ey0 + ey1) / 2
@@ -516,13 +555,24 @@ def add_silk(board, lay):
         x, y = to_pcb(*t["at"])
         for i, line in enumerate([t["title"], f"rev {t['rev']}  {t['date']}"]):
             put(line, x, y + i * SILK_H * 1.8, justify=-1)
+        if t.get("legend_at") and tp_row:
+            # what each test pad probes, by reference, three to a line
+            items = [f"{r} {comps[r]['probe'] or '?'}" for r in sorted(tp_row, key=lambda r: int(re.sub(r'\D', '', r) or 0))]
+            x, y = to_pcb(*t["legend_at"])
+            for i in range(0, len(items), 3):
+                line = "  ".join(items[i:i + 3])
+                yy = y + (i // 3) * SILK_H * 1.8
+                if not free(x - 0.2, yy - SILK_H / 2, x + text_w(line) + 0.2, yy + SILK_H / 2):
+                    sys.exit(f"pcb: the test pads' legend at layout.yaml silk.legend_at is not clear: {line!r}")
+                put(line, x, yy, justify=-1)
 
 
-def add_top_silk(board, lay):
+def add_top_silk(board, lay, comps):
     """The switch side's silkscreen. J-CHAIN is soldered from this side and the
     board is lowered onto the switch pins top first, so it carries each key's name
-    beside its switch, J-CHAIN's pin 1 and the way its mouth faces, the MOUTH end,
+    and reference beside its switch (off its body), J-CHAIN's reference, pin 1 and the way its mouth faces, the MOUTH end,
     and the board's title and revision. Not mirrored: it reads from above."""
+    _TWB[0] = board
     edge = board.GetBoardEdgesBoundingBox()
     ex0, ey0, ex1, ey1 = (pcbnew.ToMM(edge.GetLeft()) + 0.5, pcbnew.ToMM(edge.GetTop()) + 0.5,
                           pcbnew.ToMM(edge.GetRight()) - 0.5, pcbnew.ToMM(edge.GetBottom()) - 0.5)
@@ -543,12 +593,12 @@ def add_top_silk(board, lay):
                 and not any(a0 < c[2] + m and a1 > c[0] - m and b0 < c[3] + m and b1 > c[1] - m for c in placed))
 
     def put(text, x, y):
-        w = SILK_H * 0.9 * len(text)
+        w = text_w(text)
         placed.append((x - w / 2, y - SILK_H / 2, x + w / 2, y + SILK_H / 2))
         silk_text(board, text, x, y, top=True)
 
     def beside(x0, y0, x1, y1, text):
-        w, h = SILK_H * 0.9 * len(text) / 2, SILK_H / 2
+        w, h = text_w(text) / 2, SILK_H / 2
         cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
         for px, py in ((cx, y0 - SILK_H * 0.75), (cx, y1 + SILK_H * 0.75), (x0 - 0.4 - w, cy), (x1 + 0.4 + w, cy)):
             if free(px - w, py - h, px + w, py + h):
@@ -556,17 +606,19 @@ def add_top_silk(board, lay):
         sys.exit(f"pcb: no clear place on the top silkscreen for {text!r} at ({cx:.1f}, {cy:.1f}) - move parts in layout.yaml")
     for fp in sorted(board.GetFootprints(), key=lambda f: f.GetReference()):
         ref = fp.GetReference()
-        if ref.startswith("SW-"):
+        row = comps.get(ref, {}).get("row")
+        if row == "SW1-n":
             b = fp.GetCourtyard(pcbnew.F_CrtYd).BBox()
-            put(ref[3:], *beside(pcbnew.ToMM(b.GetLeft()), pcbnew.ToMM(b.GetTop()), pcbnew.ToMM(b.GetRight()), pcbnew.ToMM(b.GetBottom()), ref[3:]))
-        elif ref == "J-CHAIN":
+            text = f"{ref} {comps[ref]['sheet']}"          # SW1 LH1: the reference, and the key it is
+            put(text, *beside(pcbnew.ToMM(b.GetLeft()), pcbnew.ToMM(b.GetTop()), pcbnew.ToMM(b.GetRight()), pcbnew.ToMM(b.GetBottom()), text))
+        elif row == "J-CHAIN":
             p1, p2 = fp.FindPadByNumber("1").GetPosition(), fp.FindPadByNumber("2").GetPosition()
             dx = pcbnew.ToMM(p1.x - p2.x)
             silk_dot(board, pcbnew.ToMM(p1.x) + (1.3 if dx > 0 else -1.3), pcbnew.ToMM(p1.y), top=True)
             xs = [pcbnew.ToMM(p.GetPosition().x) for p in fp.Pads()]
             ys = [pcbnew.ToMM(p.GetPosition().y) for p in fp.Pads()]
             x0, x1, y0, y1 = min(xs) - 0.8, max(xs) + 0.8, min(ys) - 0.8, max(ys) + 0.8
-            put("J-CHAIN", *beside(x0, y0, x1, y1, "J-CHAIN"))
+            put(ref, *beside(x0, y0, x1, y1, ref))
             # its mouth faces the way pads 1 -> 2 point (place_chain)
             silk_arrow(board, (x1 + 1.0) if dx < 0 else (x0 - 1.0), (y0 + y1) / 2, 1 if dx < 0 else -1, top=True)
     # the MOUTH end: here the first switch leaves too narrow a strip for the word
@@ -582,7 +634,7 @@ def add_top_silk(board, lay):
     if t.get("top_at"):
         x, y = to_pcb(*t["top_at"])
         for i, line in enumerate([t["title"], f"rev {t['rev']}  {t['date']}"]):
-            w = SILK_H * 0.9 * len(line)
+            w = text_w(line)
             if not free(x, y + i * SILK_H * 1.8 - SILK_H / 2, x + w, y + i * SILK_H * 1.8 + SILK_H / 2):
                 sys.exit(f"pcb: the top silkscreen title at layout.yaml silk.top_at is not clear: {line!r}")
             placed.append((x, y + i * SILK_H * 1.8 - SILK_H / 2, x + w, y + i * SILK_H * 1.8 + SILK_H / 2))
@@ -640,8 +692,8 @@ def build(bdir):
         if c["dnp"]:
             fp.SetDNP(True)
             fp.SetExcludedFromPosFiles(True)
-        # References this long (R-KEY-SER-LH1) do not fit as silkscreen on an 0805:
-        # they stay on the fabrication layer, where the assembly drawing reads them.
+        # The reference's own field goes on the fabrication layer; the silkscreen
+        # labels are placed by add_silk, which keeps each off every part body.
         fp.Reference().SetLayer(pcbnew.F_Fab)
         fp.Reference().SetTextSize(pcbnew.VECTOR2I(MM(0.5), MM(0.5)))
         fp.Reference().SetTextThickness(MM(0.08))
@@ -656,7 +708,7 @@ def build(bdir):
     body = yaml.safe_load(open(os.path.join(ROOT, "config", "body.yaml")))
     below_seat = float(body["switch"]["pcb_below_seat"]["value"])
     for ref, fp in fps.items():
-        if ref.startswith("SW-"):
+        if comps[ref]["row"] == "SW1-n":
             models = fp.Models()
             for i in range(len(models)):      # by index: SWIG's iterator hands out copies
                 models[i].m_Offset.z = below_seat
@@ -664,14 +716,15 @@ def build(bdir):
     placed = set()
     # switches: top side, exactly where the body CAD puts them
     for key, (x, y, r) in geo["switches"].items():
-        ref = f"SW-{key}"
+        ref = ref_of(comps, "SW1-n", key)
         px, py = to_pcb(x, y)
         place(board, fps[ref], px, py, r + lay.get("switch_rot", 0), False)
         placed.add(ref)
     # the chain header: bottom side, where the body CAD stacks it over the
     # main board's, its mouth facing along the body toward the ribbon's fold
-    place_chain(board, fps["J-CHAIN"], geo)
-    placed.add("J-CHAIN")
+    jref = ref_of(comps, "J-CHAIN")
+    place_chain(board, fps[jref], geo)
+    placed.add(jref)
     # the standoffs' screw holes (ADR 0020): board-only footprints, no symbol - the
     # screw and standoff are mechanical, in hardware/unplaced.csv. On the BOTTOM,
     # so their courtyard keeps the underside parts off the screw heads.
@@ -692,16 +745,14 @@ def build(bdir):
         # router also treats as an obstacle.
         keepout(board, px, py, max(head, od) / 2 + lay["rules"]["clearance"])
     # everything else: layout.yaml, in body coordinates, bottom side
-    for ref, (x, y, r) in {**network_parts(lay, geo), **lay["parts"]}.items():
+    for ref, (x, y, r) in {**network_parts(lay, geo, comps), **lay["parts"]}.items():
         px, py = to_pcb(x, y)
         place(board, fps[ref], px, py, r, True)
         placed.add(ref)
     # every key's T must have its node's three pads nearest the junction, or the
     # pattern turned a part the wrong way round (R6-3)
     for key in (lay.get("networks") or {}).get("pattern") and geo["switches"] or []:
-        refs = [f"R-KEY-SER-{key}", f"R-KEY-PU-{key}", f"C-KEY-{key}"]
-        if not all(r in fps for r in refs):
-            continue
+        refs = [ref_of(comps, row, key) for row in ("R-KEY-SER", "R-KEY-PU", "C-KEY")]
         s_, p_ = fps[refs[0]].GetPosition(), fps[refs[1]].GetPosition()
         jx, jy = (s_.x + p_.x) / 2, (s_.y + p_.y) / 2
         pads = sorted((pd for r in refs for pd in fps[r].Pads()), key=lambda pd: math.hypot(pd.GetPosition().x - jx, pd.GetPosition().y - jy))
@@ -713,8 +764,8 @@ def build(bdir):
         sys.exit(f"pcb: not placed (add them to layout.yaml parts): {', '.join(missing)}")
     if lay.get("fab"):
         fit_footprint_silk(board, lay["fab"])
-    add_silk(board, lay)
-    add_top_silk(board, lay)
+    add_silk(board, lay, comps)
+    add_top_silk(board, lay, comps)
     return board, fps, netinfo, lay
 
 
@@ -918,6 +969,15 @@ def check_silk(board, fab):
     from shapely.geometry import Point as _P
     vias = [(v.GetNetname(), _P(pcbnew.ToMM(v.GetPosition().x), pcbnew.ToMM(v.GetPosition().y)).buffer(pcbnew.ToMM(v.GetWidth(pcbnew.F_Cu)) / 2))
             for v in board.GetTracks() if isinstance(v, pcbnew.PCB_VIA)]
+    # every part body on each side: a label under one cannot be read once the part
+    # is fitted, and nothing else checks it (owner, 2026-09-27)
+    crt_layer = {pcbnew.F_SilkS: pcbnew.F_CrtYd, pcbnew.B_SilkS: pcbnew.B_CrtYd}
+    bodies = {s: [] for s in silk}
+    for fp in board.GetFootprints():
+        for s_, cl in crt_layer.items():
+            cy = fp.GetCourtyard(cl)
+            if cy.OutlineCount():
+                bodies[s_].append((fp.GetReference(), shapely_of(cy)))
     thin, near = {}, {}
     for who, it in items:
         layer = it.GetLayer()
@@ -938,6 +998,12 @@ def check_silk(board, fab):
         elif pcbnew.ToMM(it.GetTextHeight()) + 1e-4 < text_min or pcbnew.ToMM(it.GetTextThickness()) + 1e-4 < line_min:
             bad.append(f"error: [silk] {what} is {pcbnew.ToMM(it.GetTextHeight()):g} mm high with a "
                        f"{pcbnew.ToMM(it.GetTextThickness()):g} mm stroke; fab: needs {text_min:g} / {line_min:g}")
+        if who == "board":
+            # the placed labels, dots and arrows (a footprint's own outline is drawn round its body)
+            for bref, body in bodies[layer]:
+                if shape.intersects(body) and shape.intersection(body).area > 1e-4:
+                    bad.append(f"error: [silk] {what} at {where} lies under {bref}'s body (its courtyard) - "
+                               "it cannot be read with the part fitted")
         for vnet, vg in vias:
             if shape.intersects(vg):
                 c2 = vg.centroid
@@ -1049,7 +1115,7 @@ def check_connect_first(board, lay):
     return bad
 
 
-def check_cad(board, lay, geo):
+def check_cad(board, lay, geo, comps):
     """The body CAD still agrees with the board: its outline and thickness, and every
     switch, standoff and the chain header where - and which way up - it puts them."""
     from shapely.geometry import MultiLineString
@@ -1080,24 +1146,25 @@ def check_cad(board, lay, geo):
                        f"({os.path.relpath(dxf, ROOT)})")
     below_seat = float(body["switch"]["pcb_below_seat"]["value"])
     for key, (x, y, r) in geo["switches"].items():
-        fp = board.FindFootprintByReference(f"SW-{key}")
+        sw = [ref for ref, c in comps.items() if c["row"] == "SW1-n" and c["sheet"] == key]
+        fp = board.FindFootprintByReference(sw[0]) if len(sw) == 1 else None
         if fp is None:
-            bad.append(f"error: [cad] SW-{key} is not on the board; the body CAD has a switch there")
+            bad.append(f"error: [cad] {key}'s switch is not on the board (its sheet has {sw or 'none'}); the body CAD has a switch there")
             continue
         px, py = to_pcb(x, y)
         got = (pcbnew.ToMM(fp.GetPosition().x), pcbnew.ToMM(fp.GetPosition().y))
         if math.hypot(got[0] - px, got[1] - py) > 0.05:
-            bad.append(f"error: [cad] SW-{key} is at {got}, the body CAD puts it at ({px:.2f}, {py:.2f})")
+            bad.append(f"error: [cad] {sw[0]} ({key}) is at {got}, the body CAD puts it at ({px:.2f}, {py:.2f})")
         # the KS-33's pins are asymmetric: a turned switch no longer fits its plate cutout
         want = (r + lay.get("switch_rot", 0)) % 360
         rot = fp.GetOrientationDegrees() % 360
         if min(abs(rot - want), 360 - abs(rot - want)) > 0.01 or fp.IsFlipped():
-            bad.append(f"error: [cad] SW-{key} is turned {rot:g} deg{' on the bottom' if fp.IsFlipped() else ''}; "
+            bad.append(f"error: [cad] {sw[0]} ({key}) is turned {rot:g} deg{' on the bottom' if fp.IsFlipped() else ''}; "
                        f"the body CAD turns it {want:g} deg, on the top")
         models = fp.Models()
         for i in range(len(models)):      # by index: SWIG's iterator hands out copies
             if abs(models[i].m_Offset.z - below_seat) > 1e-6:
-                bad.append(f"error: [cad] SW-{key}'s 3D model sits {models[i].m_Offset.z:g} mm up; "
+                bad.append(f"error: [cad] {sw[0]} ({key})'s 3D model sits {models[i].m_Offset.z:g} mm up; "
                            f"config/body.yaml switch.pcb_below_seat is {below_seat:g}")
     for i, (x, y, *_) in enumerate(geo["standoffs"], 1):
         fp = board.FindFootprintByReference(f"H{i}")
@@ -1133,7 +1200,8 @@ def check_cad(board, lay, geo):
                 bad.append(f"error: [cad] copper within {r:.2f} mm of standoff hole H{i} on {board.GetLayerName(L)} "
                            f"({', '.join(sorted(set(hits)))}) - the washer and nut bear there (ADR 0020)")
     if geo["chain"]:
-        fp = board.FindFootprintByReference("J-CHAIN")
+        js = [ref for ref, c in comps.items() if c["row"] == "J-CHAIN"]
+        fp = board.FindFootprintByReference(js[0]) if len(js) == 1 else None
         if fp is None:
             bad.append("error: [cad] J-CHAIN is not on the board; the body CAD has the chain header there")
         else:
@@ -1170,7 +1238,8 @@ def cmd_check(bdir):
         bad += check_silk(board, lay["fab"])
     bad += check_tracks(board)
     bad += check_connect_first(board, lay)
-    bad += check_cad(board, lay, cad_geometry(lay["cluster"]))
+    comps, _ = sheet_netlist(os.path.join(bdir, name + ".kicad_sch"))
+    bad += check_cad(board, lay, cad_geometry(lay["cluster"]), comps)
     print(f"pcb: {os.path.relpath(pcb, ROOT)}: {len(bad)} error(s)")
     for b in bad:
         print("  " + b)
@@ -1265,6 +1334,15 @@ def cmd_render(bdir):
             o = os.path.join(t, f"{name}.pcb-3d-{side}.png")
             subprocess.run(["kicad-cli", "pcb", "render", "--side", side, "--width", "1800", "--height", "1000",
                             "--quality", "high", "--perspective", "--rotate", rot, "-o", o, pcb],
+                           capture_output=True, text=True, env=env, check=True)
+            outs.append(o)
+        # and straight down on each side: the view a builder has, where every
+        # silkscreen label reads clear of the parts (the angled ones hide those
+        # behind a tall switch)
+        for side in ("top", "bottom"):
+            o = os.path.join(t, f"{name}.pcb-plan-{side}.png")
+            subprocess.run(["kicad-cli", "pcb", "render", "--side", side, "--width", "1800", "--height", "1000",
+                            "--quality", "high", "--zoom", "1.6", "-o", o, pcb],
                            capture_output=True, text=True, env=env, check=True)
             outs.append(o)
         for layers, tag, mirror in (("F.Cu,Edge.Cuts", "copper-top", False), ("B.Cu,Edge.Cuts,B.Fab", "copper-bottom", True)):

@@ -4,49 +4,55 @@
 board: key-board-lh
 title: Left-hand key board (left_hand cluster, PCB-CLUSTER)
 components:
-  C-BULK-CHAIN-LH:
-    of: C-BULK-CHAIN
-    value: 10uF DNP
+  C1:
+    of: C-KEY
+    value: 47nF
     pins:
     - 1
     - 2
-  C-DECOUPLE-165-LH:
+    sheet: LH1
+  C2:
+    of: C-KEY
+    value: 47nF
+    pins:
+    - 1
+    - 2
+    sheet: LH2
+  C3:
+    of: C-KEY
+    value: 47nF
+    pins:
+    - 1
+    - 2
+    sheet: LH3
+  C4:
+    of: C-KEY
+    value: 47nF
+    pins:
+    - 1
+    - 2
+    sheet: LH4
+  C5:
+    of: C-KEY
+    value: 47nF
+    pins:
+    - 1
+    - 2
+    sheet: LH5
+  C6:
     of: C-DECOUPLE-165
     value: 100nF
     pins:
     - 1
     - 2
-  C-KEY-LH1:
-    of: C-KEY
-    value: 47nF
+    sheet: REG
+  C7:
+    of: C-BULK-CHAIN
+    value: 10uF DNP
     pins:
     - 1
     - 2
-  C-KEY-LH2:
-    of: C-KEY
-    value: 47nF
-    pins:
-    - 1
-    - 2
-  C-KEY-LH3:
-    of: C-KEY
-    value: 47nF
-    pins:
-    - 1
-    - 2
-  C-KEY-LH4:
-    of: C-KEY
-    value: 47nF
-    pins:
-    - 1
-    - 2
-  C-KEY-LH5:
-    of: C-KEY
-    value: 47nF
-    pins:
-    - 1
-    - 2
-  J-CHAIN:
+  J1:
     of: J-CHAIN
     value: 12-way
     pins:
@@ -62,133 +68,149 @@ components:
     - 10
     - 11
     - 12
-  R-KEY-PU-FREE3:
-    of: R-KEY-PU
-    value: 2k2 1%
-    pins:
-    - 1
-    - 2
-  R-KEY-PU-LH1:
-    of: R-KEY-PU
-    value: 2k2 1%
-    pins:
-    - 1
-    - 2
-  R-KEY-PU-LH2:
-    of: R-KEY-PU
-    value: 2k2 1%
-    pins:
-    - 1
-    - 2
-  R-KEY-PU-LH3:
-    of: R-KEY-PU
-    value: 2k2 1%
-    pins:
-    - 1
-    - 2
-  R-KEY-PU-LH4:
-    of: R-KEY-PU
-    value: 2k2 1%
-    pins:
-    - 1
-    - 2
-  R-KEY-PU-LH5:
-    of: R-KEY-PU
-    value: 2k2 1%
-    pins:
-    - 1
-    - 2
-  R-KEY-SER-LH1:
+  R1:
     of: R-KEY-SER
     value: 100R 1%
     pins:
     - 1
     - 2
-  R-KEY-SER-LH2:
+    sheet: LH1
+  R10:
+    of: R-KEY-PU
+    value: 2k2 1%
+    pins:
+    - 1
+    - 2
+    sheet: LH5
+  R11:
+    of: R-KEY-PU
+    value: 2k2 1%
+    pins:
+    - 1
+    - 2
+    sheet: FREE3
+  R2:
+    of: R-KEY-PU
+    value: 2k2 1%
+    pins:
+    - 1
+    - 2
+    sheet: LH1
+  R3:
     of: R-KEY-SER
     value: 100R 1%
     pins:
     - 1
     - 2
-  R-KEY-SER-LH3:
+    sheet: LH2
+  R4:
+    of: R-KEY-PU
+    value: 2k2 1%
+    pins:
+    - 1
+    - 2
+    sheet: LH2
+  R5:
     of: R-KEY-SER
     value: 100R 1%
     pins:
     - 1
     - 2
-  R-KEY-SER-LH4:
+    sheet: LH3
+  R6:
+    of: R-KEY-PU
+    value: 2k2 1%
+    pins:
+    - 1
+    - 2
+    sheet: LH3
+  R7:
     of: R-KEY-SER
     value: 100R 1%
     pins:
     - 1
     - 2
-  R-KEY-SER-LH5:
+    sheet: LH4
+  R8:
+    of: R-KEY-PU
+    value: 2k2 1%
+    pins:
+    - 1
+    - 2
+    sheet: LH4
+  R9:
     of: R-KEY-SER
     value: 100R 1%
     pins:
     - 1
     - 2
-  SW-LH1:
+    sheet: LH5
+  SW1:
     of: SW1-n
     value: KS-33
     pins:
     - 1
     - 2
-  SW-LH2:
+    sheet: LH1
+  SW2:
     of: SW1-n
     value: KS-33
     pins:
     - 1
     - 2
-  SW-LH3:
+    sheet: LH2
+  SW3:
     of: SW1-n
     value: KS-33
     pins:
     - 1
     - 2
-  SW-LH4:
+    sheet: LH3
+  SW4:
     of: SW1-n
     value: KS-33
     pins:
     - 1
     - 2
-  SW-LH5:
+    sheet: LH4
+  SW5:
     of: SW1-n
     value: KS-33
     pins:
     - 1
     - 2
-  TP-3V3-LH:
+    sheet: LH5
+  TP1:
     of: TP-CHAIN
     value: test pad
     pins:
     - 1
-  TP-GND-LH:
+  TP2:
     of: TP-CHAIN
     value: test pad
     pins:
     - 1
-  TP-QH-LH:
+  TP3:
     of: TP-CHAIN
     value: test pad
     pins:
     - 1
-  TP-SCK-LH:
+  TP4:
     of: TP-CHAIN
     value: test pad
     pins:
     - 1
-  TP-SER-LH:
+  TP5:
     of: TP-CHAIN
     value: test pad
     pins:
     - 1
-  TP-SHLD-LH:
+  TP6:
     of: TP-CHAIN
     value: test pad
     pins:
     - 1
-  U-KEYS-LH:
+  U1:
     of: U-KEYS
     value: 74HCS165
     pins:
@@ -208,108 +230,109 @@ components:
     - F
     - G
     - H
+    sheet: REG
 nets:
   /CHAIN_SCK:
-  - J-CHAIN.11
-  - TP-SCK-LH.1
-  - U-KEYS-LH.CLK
+  - J1.11
+  - TP4.1
+  - U1.CLK
   /CHAIN_SER_LH:
-  - J-CHAIN.7
-  - TP-SER-LH.1
-  - U-KEYS-LH.SER
+  - J1.7
+  - TP2.1
+  - U1.SER
   /CHAIN_SHLD:
-  - J-CHAIN.9
-  - TP-SHLD-LH.1
-  - U-KEYS-LH.SHLD
+  - J1.9
+  - TP5.1
+  - U1.SHLD
   /HOP_LH_LT:
-  - J-CHAIN.5
-  - TP-QH-LH.1
-  - U-KEYS-LH.QH
+  - J1.5
+  - TP1.1
+  - U1.QH
   /KEY_FREE3:
-  - R-KEY-PU-FREE3.2
-  - U-KEYS-LH.A
+  - R11.2
+  - U1.A
   /KEY_LH1:
-  - C-KEY-LH1.1
-  - R-KEY-PU-LH1.2
-  - R-KEY-SER-LH1.1
-  - U-KEYS-LH.H
+  - C1.1
+  - R1.1
+  - R2.2
+  - U1.H
   /KEY_LH2:
-  - C-KEY-LH2.1
-  - R-KEY-PU-LH2.2
-  - R-KEY-SER-LH2.1
-  - U-KEYS-LH.G
+  - C2.1
+  - R3.1
+  - R4.2
+  - U1.G
   /KEY_LH3:
-  - C-KEY-LH3.1
-  - R-KEY-PU-LH3.2
-  - R-KEY-SER-LH3.1
-  - U-KEYS-LH.F
+  - C3.1
+  - R5.1
+  - R6.2
+  - U1.F
   /KEY_LH4:
-  - C-KEY-LH4.1
-  - R-KEY-PU-LH4.2
-  - R-KEY-SER-LH4.1
-  - U-KEYS-LH.E
+  - C4.1
+  - R7.1
+  - R8.2
+  - U1.E
   /KEY_LH5:
-  - C-KEY-LH5.1
-  - R-KEY-PU-LH5.2
-  - R-KEY-SER-LH5.1
-  - U-KEYS-LH.D
+  - C5.1
+  - R10.2
+  - R9.1
+  - U1.D
   /LH1/SWITCH_LEG:
-  - R-KEY-SER-LH1.2
-  - SW-LH1.1
+  - R1.2
+  - SW1.1
   /LH2/SWITCH_LEG:
-  - R-KEY-SER-LH2.2
-  - SW-LH2.1
+  - R3.2
+  - SW2.1
   /LH3/SWITCH_LEG:
-  - R-KEY-SER-LH3.2
-  - SW-LH3.1
+  - R5.2
+  - SW3.1
   /LH4/SWITCH_LEG:
-  - R-KEY-SER-LH4.2
-  - SW-LH4.1
+  - R7.2
+  - SW4.1
   /LH5/SWITCH_LEG:
-  - R-KEY-SER-LH5.2
-  - SW-LH5.1
+  - R9.2
+  - SW5.1
   GND_CHAIN:
-  - C-BULK-CHAIN-LH.2
-  - C-DECOUPLE-165-LH.2
-  - C-KEY-LH1.2
-  - C-KEY-LH2.2
-  - C-KEY-LH3.2
-  - C-KEY-LH4.2
-  - C-KEY-LH5.2
-  - J-CHAIN.10
-  - J-CHAIN.12
-  - J-CHAIN.4
-  - J-CHAIN.6
-  - J-CHAIN.8
-  - SW-LH1.2
-  - SW-LH2.2
-  - SW-LH3.2
-  - SW-LH4.2
-  - SW-LH5.2
-  - TP-GND-LH.1
-  - U-KEYS-LH.C
-  - U-KEYS-LH.CLKINH
-  - U-KEYS-LH.GND
-  J-CHAIN.1:
-  - J-CHAIN.1
-  J-CHAIN.2:
-  - J-CHAIN.2
-  U-KEYS-LH.QH_BAR:
-  - U-KEYS-LH.QH_BAR
+  - C1.2
+  - C2.2
+  - C3.2
+  - C4.2
+  - C5.2
+  - C6.2
+  - C7.2
+  - J1.10
+  - J1.12
+  - J1.4
+  - J1.6
+  - J1.8
+  - SW1.2
+  - SW2.2
+  - SW3.2
+  - SW4.2
+  - SW5.2
+  - TP3.1
+  - U1.C
+  - U1.CLKINH
+  - U1.GND
+  J1.1:
+  - J1.1
+  J1.2:
+  - J1.2
+  U1.QH_BAR:
+  - U1.QH_BAR
   V3V3_CHAIN_LH:
-  - C-BULK-CHAIN-LH.1
-  - C-DECOUPLE-165-LH.1
-  - J-CHAIN.3
-  - R-KEY-PU-FREE3.1
-  - R-KEY-PU-LH1.1
-  - R-KEY-PU-LH2.1
-  - R-KEY-PU-LH3.1
-  - R-KEY-PU-LH4.1
-  - R-KEY-PU-LH5.1
-  - TP-3V3-LH.1
-  - U-KEYS-LH.B
-  - U-KEYS-LH.VCC
+  - C6.1
+  - C7.1
+  - J1.3
+  - R10.1
+  - R11.1
+  - R2.1
+  - R4.1
+  - R6.1
+  - R8.1
+  - TP6.1
+  - U1.B
+  - U1.VCC
 external_endpoints:
-- J-CHAIN.1
-- J-CHAIN.2
-- U-KEYS-LH.QH_BAR
+- J1.1
+- J1.2
+- U1.QH_BAR
