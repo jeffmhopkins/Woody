@@ -3,12 +3,12 @@
 # its inputs (hashed below), so a value changed on the sheet makes it stale.
 
 inputs:
-  tools/sim.py: 5ce21a94504d7467
+  tools/sim.py: 5bf1170c63f788eb
   hardware/boards/key-board-lh/sim/sims.yaml: 3d2d8463b2dc0bf1
   hardware/boards/key-board-lh/board-netlist.yaml: f489b8888ab55fc8
   hardware/boards/key-board-lh/sim/board-dc.cir: f09067869f07f16f
   hardware/boards/key-board-lh/sim/hcs165-inputs.lib: cb24246067ce5447
-  hardware/cluster/key-switch-network/sim/sims.yaml: 7b82c05420c9726e
+  hardware/cluster/key-switch-network/sim/sims.yaml: 28274e715669f42e
   figure:key-press-time: 9.87 us
   figure:key-release-time: 138.7 us
   figure:key-scan-current: 1.43 mA per closed key, 27.3 mA at 19 closed

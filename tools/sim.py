@@ -92,6 +92,12 @@ def figures():
     return {it["id"]: it for it in items}
 
 
+def inc_path(simdir, inc):
+    """An include beside the sims.yaml, or a banked model by its repo path (datasheets/...)."""
+    here = os.path.join(simdir, inc)
+    return here if os.path.exists(here) else os.path.join(ROOT, inc)
+
+
 def spice_num(v):
     return f"{v:.6g}"
 
@@ -119,6 +125,37 @@ def load(simdir):
     return spec
 
 
+def bom_value(row):
+    """A row's Value from hardware/bom.csv (generated from the fragments): for parts on
+    another board, which this circuit's netlist does not carry (R-CHAIN-SER)."""
+    import csv
+    for r in csv.reader(open(os.path.join(ROOT, "hardware", "bom.csv"), newline="")):
+        if r and r[0] == row:
+            return r[2]
+    raise SystemExit(f"sim: `values: bom:` names {row!r}, which hardware/bom.csv has no row for")
+
+
+def drc_value(rule):
+    """A number the body CAD prints in mechanical/drc.echo, by its rule's name: the
+    first number after the name (a derived length, say), so it is cited, not restated."""
+    for line in open(os.path.join(ROOT, "mechanical", "drc.echo")):
+        if f'"{rule}"' in line:
+            m = re.search(re.escape(f'"{rule}"') + r",\s*\[?\s*(-?[\d.]+(?:e[-+]?\d+)?)", line)
+            if m:
+                return float(m.group(1))
+    raise SystemExit(f"sim: mechanical/drc.echo has no numeric rule {rule!r}")
+
+
+def param_value(p):
+    v = p["value"]
+    if isinstance(v, dict) and "drc" in v:
+        return drc_value(v["drc"]) * float(v.get("scale", 1))
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return part_value(str(v))
+
+
 def netlist_parts(spec):
     """{row: {'value': number, 'tol': fraction or None, 'text': ...}} from the circuit's netlist.yaml
     (a circuit's components are keyed by row) or a board's (keyed by reference, with `of:`)."""
@@ -132,6 +169,13 @@ def netlist_parts(spec):
         except ValueError:
             continue
         out.setdefault(row, {"value": v, "tol": part_tol(str(c["value"])), "text": str(c["value"])})
+    for row in spec["values"].get("bom", []):
+        text = bom_value(row)
+        out[row] = {"value": part_value(text), "tol": part_tol(text), "text": text}
+    # counts by row, for derived values: v['n:SW1-n']
+    from collections import Counter
+    for row, k in Counter(c.get("of", r) for r, c in doc["components"].items()).items():
+        out[f"n:{row}"] = {"value": float(k), "tol": None, "text": str(k)}
     return out, doc
 
 
@@ -145,13 +189,18 @@ def inputs_of(spec):
         if s.get("deck"):
             files.append(os.path.join(d, s["deck"]))
     for inc in spec.get("include", []):
-        files.append(os.path.join(d, inc))
+        files.append(inc_path(d, inc))
     for src in spec.get("params_from", []):
         files.append(os.path.join(ROOT, src))
     h = {os.path.relpath(f, ROOT): sha(f) for f in files}
     figs = figures()
     text = "".join(open(f).read() for f in files if f.endswith(".yaml") and "sims" in os.path.basename(f))
     cited = sorted(set(re.findall(r"fig\['([^']+)'\]", text)))
+    for row in spec["values"].get("bom", []):
+        h[f"bom:{row}"] = bom_value(row)
+    for name, p in (spec.get("params") or {}).items():
+        if isinstance(p.get("value"), dict) and "drc" in p["value"]:
+            h[f"drc:{p['value']['drc']}"] = str(drc_value(p["value"]["drc"]))
     for fid in cited:
         if fid not in figs:
             raise SystemExit(f"sim: {os.path.relpath(d, ROOT)}/sims.yaml cites figure {fid!r}, which is not in config/figures.yaml")
@@ -159,15 +208,15 @@ def inputs_of(spec):
     return h
 
 
-def corners(spec, parts):
-    """[(name, {param: value})]: the nominal, then every combination of the range ends."""
+def corners(spec, parts, only=None):
+    """[(name, {param: value})]: the nominal, then every combination of the range ends.
+    `only`, a sim's own `vary:` list, limits the corners to the parameters that move it."""
     nominal, ranges = {}, {}
     for name, p in (spec.get("params") or {}).items():
-        try:
-            nominal[name] = float(p["value"])
-        except ValueError:
-            nominal[name] = part_value(str(p["value"]))
+        nominal[name] = param_value(p)
     for name, v in (spec.get("vary") or {}).items():
+        if only is not None and name not in only:
+            continue
         if name in parts:
             base = parts[name]["value"]
         else:
@@ -266,11 +315,44 @@ def board_deck(spec, doc, body):
     return "\n".join(lines) + "\n" + re.sub(r"<net:([^>]+)>", net, body)
 
 
-def ngspice(deck):
+def backswing(wave, level, rising, t_from, t_to):
+    """How far a waveform swings BACK after it first crosses `level` (searched from
+    `t_from`), until `t_to`: on a
+    rising edge the most it falls below its own running maximum, on a falling edge the
+    most it rises above its running minimum. A Schmitt input double-clocks only if an
+    edge swings back through its hysteresis after crossing its threshold, wherever in
+    the datasheet's spread that threshold sits - so this, against the hysteresis's
+    minimum, is the test; a fixed pair of threshold extremes is not (they overlap)."""
+    t, v = wave
+    started, run, worst = False, None, 0.0
+    for ti, vi in zip(t, v):
+        if ti < t_from:
+            continue
+        if ti > t_to:
+            break
+        if not started:
+            started = (vi >= level) if rising else (vi <= level)
+            run = vi
+            continue
+        run = max(run, vi) if rising else min(run, vi)
+        worst = max(worst, (run - vi) if rising else (vi - run))
+    return worst if started else float("inf")
+
+
+POST = {"backswing": backswing}
+
+
+def ngspice(deck, post=None, values=None):
+    """Run a deck; return its measures (and `post:` ones, computed on waveforms the deck
+    writes with `wrdata <name>.dat <vector>`)."""
     with tempfile.TemporaryDirectory() as t:
         p = os.path.join(t, "deck.cir")
         open(p, "w").write(deck)
         r = subprocess.run(["ngspice", "-b", p], capture_output=True, text=True, cwd=t, timeout=300)
+        waves = {}
+        for f in glob.glob(os.path.join(t, "*.dat")):
+            rows = [l.split() for l in open(f) if l.strip()]
+            waves[os.path.basename(f)[:-4]] = ([float(x[0]) for x in rows], [float(x[1]) for x in rows])
     out = r.stdout + "\n" + r.stderr
     meas = {}
     for line in out.splitlines():
@@ -279,6 +361,9 @@ def ngspice(deck):
             meas[m.group(1).lower()] = float(m.group(2))
     errors = [l for l in out.splitlines() if re.search(r"error|failed|not found|singular", l, re.I)
               and "no error" not in l.lower()]
+    for name, expr in (post or {}).items():
+        env = {"w": waves, "p": values or {}, **POST}
+        meas[name] = float(eval(expr, {"__builtins__": {}}, env))
     return meas, errors, out
 
 
@@ -299,13 +384,18 @@ def run(simdir):
         if spec.get("generate") == "board":
             template = board_deck(spec, doc, template)
         # model libraries, inlined (the deck runs in a scratch directory), filled like the deck
-        lib = "".join(open(os.path.join(simdir, inc)).read() + "\n" for inc in spec.get("include", []))
+        lib = "".join(open(inc_path(simdir, inc)).read() + "\n" for inc in spec.get("include", []))
         template = template.replace("\n.end", "\n" + lib + ".end") if lib else template
         per = {}
-        for label, values in corners(spec, parts):
+        for label, values in corners(spec, parts, s.get("vary")):
             v = derive(spec, {**values, **{k: fv for k, fv in (s.get("set") or {}).items()}})
-            meas, errors, out = ngspice(fill(template, v))
+            meas, errors, out = ngspice(fill(template, v), s.get("post"), v)
             missing = [m for m in s["measures"] if m not in meas]
+            # a run that diverged reports a number too: never record one
+            wild = [f"{m} = {meas[m]:g}" for m in s["measures"] if m in meas
+                    and (not math.isfinite(meas[m]) or abs(meas[m]) > 1e12)]
+            if wild:
+                errors = errors + [f"the run diverged: {', '.join(wild)} - set .options method=gear, or a smaller step"]
             if errors or missing:
                 raise SystemExit(f"sim: {os.path.relpath(simdir, ROOT)} {s['name']} at {label}: "
                                  f"{'; '.join(errors[:5])} {'missing measures ' + str(missing) if missing else ''}\n"

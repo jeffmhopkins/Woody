@@ -21,6 +21,7 @@ params:
   r_vtp_max: {value: 0.75, source: "VT+ max: 1.5/2, 3.15/4.5 = 0.70, 4.2/6 = 0.70 - the largest [p.6]"}
   r_vtm_min: {value: 0.15, source: "VT- min: 0.3/2, 0.9/4.5 = 0.20, 1.2/6 = 0.20 - the smallest [p.6]"}
   r_vtm_max: {value: 0.50, source: "VT- max: 1.0/2, 2.2/4.5 = 0.489, 3.0/6 - the largest [p.6]"}
+  r_hyst_min: {value: 0.089, source: "hysteresis (VT+ - VT-) min: 0.2/2 = 0.10, 0.4/4.5 = 0.089, 0.6/6 = 0.10 - the smallest [p.6]. An edge double-clocks only if it swings back by this after crossing its threshold"}
   # when the switch closes and opens, and how long the run is: long enough for the
   # slowest corner's release to settle (5 x its tau)
   t_on:  {value: 20.0e-6}
@@ -40,6 +41,7 @@ derived:
   vtp_max: "v['r_vtp_max'] * v['vcc']"
   vtm_min: "v['r_vtm_min'] * v['vcc']"
   vtm_max: "v['r_vtm_max'] * v['vcc']"
+  hyst_min: "v['r_hyst_min'] * v['vcc']"
   t_on_1n: "v['t_on'] + 1e-9"
   t_off_1n: "v['t_off'] + 1e-9"
   t_pressed: "v['t_off'] - 5e-6"

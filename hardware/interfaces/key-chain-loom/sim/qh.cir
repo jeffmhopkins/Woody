@@ -1,0 +1,18 @@
+* QH from the left-hand key board's register back over its ribbon to the main board,
+* where it is left_thumb's SER (the chain's next register, net HOP_LH_LT). The
+* register's output is a source behind its output resistance, its edge swept; there
+* is no series resistor on the key board; the ribbon is a lossless line.
+VDRV src 0 PULSE(0 {{vcc}} 20n {{tr_qh}} {{tr_qh}} 480n 1u)
+RDRV src a {{r_qh}}
+CKB a 0 {{c_kb}}
+TLH a 0 rx 0 Z0={{z0_ribbon}} TD={{td_rib}}
+CRX rx 0 {{c_rx_main}}
+.control
+tran 20p {{t_sig_end}}
+wrdata rx.dat v(rx)
+meas tran v_over max v(rx)
+meas tran v_under min v(rx)
+meas tran t_delay trig v(src) val={{vhalf}} rise=1 targ v(rx) val={{vhalf}} rise=1
+quit
+.endc
+.end

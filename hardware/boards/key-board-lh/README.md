@@ -247,7 +247,7 @@ what each probes: TP1 QH, TP2 SER, TP3 GND, TP4 SCK, TP5 SH/LD, TP6 3V3.
    - Each key reads low while pressed.
    - Clocks past the 8th shift in the level SER is tied to.
    - Firmware normally does this; with a logic analyser on the test pads it is visible without one.
-6. **The rail, in the instrument.** On the real main board and ribbon, scope the key board's VCC (TP6 to TP3) while the chain shifts. `FB-CHAIN` and `C-DECOUPLE-165` can ring near half the chain clock (the `FB-CHAIN` row). If the rail rings, fit C7 (the part is under *Ordering it*, bought separately). The bench supply has no bead, so this step needs the main board.
+6. **The rail, in the instrument.** On the real main board and ribbon, scope the key board's VCC (TP6 to TP3) while the chain shifts. `FB-CHAIN` and `C-DECOUPLE-165` form a lightly damped LC (the `FB-CHAIN` row). The simulation (`hardware/interfaces/key-chain-loom/sim/`, `rail-as-ordered`) keeps this rail inside its limit with C7 empty, so expect a small ring after each burst and each key change, not a large one; if the real rail rings more than the simulation says, fit C7 (the part is under *Ordering it*, bought separately). The bench supply has no bead, so this step needs the main board.
 
 ## The silkscreen
 

@@ -405,12 +405,24 @@ a key board's register edges off the rail that is also the ADC's reference;
 chosen for a low `DCR` — at the chain's whole `key-scan-current` (every key
 closed) a 0.1 Ω bead drops under 3 mV `[calc]` — and for a rated current above the LDO's short-circuit
 current, because during a short it carries that. `≥ 600 Ω` at 100 MHz is
-`[from memory]`, and the part is open. **Check at E14:** a bead is inductive
-below its resistive band, and ~1 µH `[from memory]` against the key board's
-100 nF `C-DECOUPLE-165` resonates near `1 / (2π √(1 µH × 100 nF))` ≈ 0.5 MHz
-`[calc]`, close to the chain's clock — scope the key board's VCC while
-shifting, and fit the key board's damping bulk capacitor if it rings. Its
-footprint is on each key board, empty by default (`C-BULK-CHAIN`).
+`[from memory]`; the part is now Murata's BLM21SP601SN1D (its row says why, and
+names a second source). **Simulated** (`sim/`, 2026-09-28), with Murata's own
+model of that part, which is banked. Below its resistive band the bead is
+several microhenries, **not** the ~1 µH this page once assumed. Against the key
+board's 100 nF `C-DECOUPLE-165` it forms a lightly damped LC, below the chain's
+clock; its frequency and peak are in `sim/results.yaml` (`rail-impedance-*`).
+The simulation shows two things:
+- **The ring stays small.** With `C-BULK-CHAIN` not fitted, the key board's rail
+  stays inside its limit through a clock burst and every key closing at once, at
+  every corner (`rail-as-ordered`).
+- **Nothing reaches the reference.** The key board's clocking moves `DEV_3V3`,
+  the MCP3202's reference, by under one LSB.
+
+So the bulk capacitor's footprint stays empty. Murata states the model for 1 MHz
+to 3 GHz, so at the LC's frequency it is extrapolated: **bring-up step 6 still
+scopes the key board's VCC while shifting**, and fits the damping capacitor if
+the real rail rings more than the simulation says. Its footprint is on each key
+board, empty by default (`C-BULK-CHAIN`).
 
 ---
 

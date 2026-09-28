@@ -1,0 +1,22 @@
+* One clock edge's charge at the key board's register: the register's Cpd and QH
+* driving the ribbon and the next register's input, drawn in 10 ns from
+* C-DECOUPLE-165 (and C-BULK-CHAIN when fitted). The ribbon and FB-CHAIN supply none
+* of it in that time: the bead is hundreds of ohms there (its model, rail.cir). The
+* capacitor is charged to the rail at the operating point (VHOLD through 1 Mohm, which
+* supplies nothing in 10 ns); the droop is the answer.
+C6 kbv c6n {{C-DECOUPLE-165}}
+RC6 c6n 0 {{esr_c6}}
+C7 kbv c7n {{C-BULK-CHAIN}}
+RC7 c7n 0 {{r_c7}}
+RHOLD kbv hold 1meg
+VHOLD hold 0 {{vcc}}
+IEDGE kbv 0 PULSE(0 {{i_edge}} 100n 5n 5n 1p 1 1)
+.options method=gear
+.control
+tran 0.05n 400n 0 0.1n
+meas tran v_min min v(kbv) from=50n to=400n
+let dv_edge = {{vcc}} - v_min
+print dv_edge
+quit
+.endc
+.end

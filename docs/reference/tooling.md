@@ -531,8 +531,19 @@ so.
 - `v(0)` is not a vector. A measure of the ground net proves nothing anyway,
   so none is taken.
 - Do not use PySpice (`hardware/module/pitch-stage/sim/README.md`).
+- **A PULSE with a zero width is not a spike.** SPICE reads PW = 0 as unset,
+  and it defaults to the whole run: a 5 ns charge pulse became a step that never
+  ended, and the rail "rang" 100 times too hard.
+- **A diverged run reports a number too.** `sim.py` refuses any measure that is
+  not finite or is beyond 1e12.
+- **A threshold test must not mix parts.** "Never below VT− max after crossing
+  VT+ min" fails on a perfect edge, because across the datasheet's spread VT−
+  max is above VT+ min. The test is the waveform's swing back after its first
+  crossing (`backswing`), held against the smallest hysteresis. It was proven
+  to fire on SCK without its series resistor.
 
 | Simulated | Where |
 |---|---|
 | one key's network, with its press, release, filter and corners | `hardware/cluster/key-switch-network/sim/` |
 | the left-hand key board as wired, all keys released and pressed | `hardware/boards/key-board-lh/sim/` |
+| the key chain: its 3V3 rail (bead, ribbon, decoupling, the do-not-fit bulk capacitor) and SCK and QH over the ribbon | `hardware/interfaces/key-chain-loom/sim/` |
