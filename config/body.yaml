@@ -228,6 +228,30 @@ switch:
   # (docs/reference/ks33-geometry.md). The model imports the real solid
   # (mechanical/cad/vendor/ks33.stl, meshed from the banked STEP); these are
   # for the arithmetic and the clearance checks.
+  stem_top_above_seat:
+    value: 6.4
+    status: nominal
+    source: "the MX cross stem's top at rest, above the seat: 6.38 in the front elevation and 6.38 in the side one (3.35 to the housing top, the stem ~3.03 over it), SCALED off Gateron KS-33H10B050NN-Y24 sheet 6 - both views to scale within 0.03 on their dimensioned 13.75, 14.00 and 5.85 [scaled, datasheets/mechanical/GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf, 2026-09-28]. The third-party STEP's is higher (docs/reference/ks33-geometry.md); the vendor wins"
+  cover_w:
+    value: 13.75
+    status: settled
+    source: "[ds] Gateron KS-33H10B050NN-Y24 sheet 6, front elevation: the switch's widest part above the collar, tapering upward. The 14.70 latch span is BELOW the collar, in the plate slot - the third-party STEP draws its latches above it, so the model trims the switch's mesh to this above the collar"
+  cover_straight_h:
+    value: 1.5
+    status: nominal
+    source: "how far above the seat the cover stays switch.cover_w wide before it tapers [scaled, Gateron KS-33H10B050NN-Y24 sheet 6 front elevation rendered at 400 dpi, 40 px/mm on its 13.75, 2026-09-28]"
+  cover_top_w:
+    value: 12.8
+    status: nominal
+    source: "the cover's width at its top (switch.housing_top_above_seat), where it steps in to the 11.0 actuator [scaled, as switch.cover_straight_h]"
+  collar_t:
+    value: 0.45
+    status: settled
+    source: "[ds] Gateron KS-33H10B050NN-Y24 sheet 6, side elevation: the 15.0 x 15.0 collar's thickness, from the seat"
+  housing_top_above_seat:
+    value: 3.35
+    status: settled
+    source: "[ds] Gateron KS-33H10B050NN-Y24 sheet 6, side elevation: the housing's top face above the seat; only the stem and its actuator stand above it"
   pole_tip_below_seat:
     value: 5.75
     status: settled
@@ -244,7 +268,7 @@ switch:
   keycap_top_above_seat:
     value: 9.0
     status: tbd
-    source: "MT165 height is unpublished (hardware/bom.csv MT165 row). Stem top is +7.05 [ds STEP]; the cap adds a guess"
+    source: "the cap's top above the seat = switch.stem_top_above_seat + switch.keycap_boss_below_top - how deep the stem enters the socket, which nothing published gives; the vendor's height (switch.keycap_h) bounds only the cap itself. A guess inside that bracket"
     decided_by: "M1 - measure a cap on a switch with calipers. It now SETS BOTH oak panel thicknesses (flush rule, stack above)"
   total_travel:
     value: 3.0
@@ -254,6 +278,43 @@ switch:
     value: 16.5
     status: settled
     source: "[adr] ADR 0002 - MT165 16.5 x 16.5"
+  # THE CAP AS A SOLID (owner, 2026-09-28: "make sure that they don't cause
+  # interference because their size I think is a little bit different than the
+  # actual key underneath"). A hollow shell: its skirt, 16.5 square at the bottom
+  # (keycap), tapering to keycap_top_w, keycap_h tall, walls keycap_wall thick,
+  # its top keycap_top_t thick; and the MX cross socket under the top, which the
+  # stem enters. Its top sits keycap_top_above_seat above the seat. The clash
+  # check sweeps the shell down through total_travel against the real switch
+  # mesh, the plate and the oak, and drc.echo prints the margins.
+  keycap_h:
+    value: 3.5
+    status: nominal
+    source: "MT165: 3.50 mm, skirt bottom to top - Tai-Hao's own dimension guide [datasheets/mechanical/TAIHAO-MT165-THCS-THT-DIMENSION-GUIDE.jpg]"
+  keycap_top_w:
+    value: 15.4
+    status: tbd
+    source: "the top face's width: the MT165's sides are drafted about 0.55 mm a side [scaled off datasheets/mechanical/TAIHAO-MT165-THCS-THT-DIMENSION-GUIDE.jpg, 2026-09-28]"
+    decided_by: "calipers on a cap (M1)"
+  keycap_wall:
+    value: 1.3
+    status: tbd
+    source: "the skirt's wall at its bottom edge: 1.1-1.5 mm scaled off a reseller's underside photo [datasheets/mechanical/BEEKEEB-MT165-THCS-UNDERSIDE-COMPARISON.jpg; inferred, UNVERIFIED]. It sets the inner cavity the switch's housing and clips must fit in when the key is pressed"
+    decided_by: "calipers on a cap (M1)"
+  keycap_top_t:
+    value: 1.2
+    status: tbd
+    source: "the top's thickness [from memory: no source]"
+    decided_by: "calipers on a cap (M1)"
+  keycap_boss_below_top:
+    value: 4.8
+    status: tbd
+    source: "how far the MX cross socket's boss reaches below the cap's top: about 4.8 mm, so about 1.3 mm below the skirt [reseller copy, shop.talpkeyboard.com/products/mt165-mx-blank-1u-black and shop.beekeeb.jp/products/tai-hao-mt-165, 2026-09-28; method not stated, UNVERIFIED]. The boss rides on the stem and moves with it"
+    decided_by: "calipers on a cap (M1)"
+  keycap_socket_d:
+    value: 4.4
+    status: tbd
+    source: "the socket boss's outside diameter: about 4.2-4.5 mm in a reseller's photo [shop.talpkeyboard.com, 2026-09-28; inferred, low confidence]"
+    decided_by: "calipers on a cap (M1)"
   cluster_pcb_w:
     value: 22.0
     status: tbd

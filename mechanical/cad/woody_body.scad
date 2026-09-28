@@ -617,22 +617,56 @@ module switch_at(xy, rot, top, name, spare = false) {
     tf = top ? [xy[0], xy[1], z_plate_top + explode / 2] : [xy[0], xy[1], z_floor - explode];
     // P() OUTSIDE the placement: a section cuts in world coordinates, and a
     // P() inside translate() cut every switch in its own frame instead.
-    P(C_SWITCH, false, str("switch ", name)) translate(tf) rotate([top ? 0 : 180, 0, rot]) import("vendor/ks33.stl");
-    P(spare ? C_SPARE : C_CAP, false, str("cap ", name)) translate(tf) rotate([top ? 0 : 180, 0, rot])
-        translate([0, 0, switch_keycap_top_above_seat - 2.5])
-            linear_extrude(2.5, scale = 0.85) square(switch_keycap, center = true);
-    // The cap's TRAVEL: the space it sweeps when pressed. Only for the clash
-    // check - drawn nowhere else - so a cap that would hit something at the
-    // bottom of its stroke is caught, not just one that hits at rest.
+    // Trimmed above the collar to Gateron's drawn cover (switch.cover_*): the
+    // third-party mesh draws its latches up there, where the vendor has none.
+    P(C_SWITCH, false, str("switch ", name)) translate(tf) rotate([top ? 0 : 180, 0, rot]) intersection() {
+        import("vendor/ks33.stl");
+        union() {
+            translate([-10, -10, -10]) cube([20, 20, 10 + switch_collar_t]);
+            hull() {
+                translate([-switch_cover_w / 2, -switch_cover_w / 2, 0]) cube([switch_cover_w, switch_cover_w, switch_cover_straight_h]);
+                translate([-switch_cover_top_w / 2, -switch_cover_top_w / 2, 0]) cube([switch_cover_top_w, switch_cover_top_w, switch_housing_top_above_seat]);
+            }
+            translate([-switch_cover_top_w / 2, -switch_cover_top_w / 2, 0]) cube([switch_cover_top_w, switch_cover_top_w, 20]);
+        }
+    }
+    // THE CAP (MT165-MX, ADR 0002): a hollow shell, and the MX cross socket the
+    // stem enters, as separate solids so the clash check lets only the SOCKET meet
+    // the switch; the shell must clear it at rest and all the way down.
+    P(spare ? C_SPARE : C_CAP, false, str("cap ", name)) translate(tf) rotate([top ? 0 : 180, 0, rot]) cap_shell(0);
+    P(spare ? C_SPARE : C_CAP, false, str("cap socket ", name)) translate(tf) rotate([top ? 0 : 180, 0, rot]) cap_socket(0);
+    // The cap's TRAVEL: the space its shell sweeps when pressed (it includes where
+    // the cap sits at rest: clash-allow.yaml says why). Only for the clash check - drawn nowhere else - so a skirt that would
+    // land on the switch, the plate or the oak at the bottom of its stroke is caught.
     if (only == str("travel ", name) || list_solids)
         P(C_CAP, false, str("travel ", name)) translate(tf) rotate([top ? 0 : 180, 0, rot])
-            translate([0, 0, switch_keycap_top_above_seat - 2.5 - switch_total_travel])
-                linear_extrude(switch_total_travel) difference() {
-                    square(switch_keycap * 0.85, center = true);
-                    // The stem and actuator move WITH the cap: measured off the
-                    // mesh, 11.0 x 5.6 above the housing top at +3.2.
-                    square([11.4, 6.0], center = true);
+            difference() {
+                union() {
+                    cap_shell(switch_total_travel);
+                    translate([0, 0, cap_sk - switch_total_travel]) linear_extrude(switch_total_travel)
+                        difference() { square(switch_keycap, center = true); square(switch_keycap - 2 * switch_keycap_wall, center = true); }
                 }
+                // The stem and actuator move WITH the cap: measured off the mesh,
+                // 11.0 x 5.6 above the housing top. Leaving it out of the sweep keeps
+                // the pressed cap from meeting the switch's (static) stem.
+                translate([0, 0, -1]) linear_extrude(switch_keycap_top_above_seat + 2) square([11.4, 6.0], center = true);
+            }
+}
+// The cap in the switch's frame (seat at z = 0), pressed by dz: its skirt's
+// bottom is cap_sk above the seat at rest.
+cap_sk = switch_keycap_top_above_seat - switch_keycap_h;
+cap_ceiling = switch_keycap_top_above_seat - switch_keycap_top_t;     // the inside of its top
+function cap_w_at(z) = switch_keycap + (switch_keycap_top_w - switch_keycap) * z / switch_keycap_h;   // outer, z above the skirt
+module cap_shell(dz) {
+    hi = switch_keycap_h - switch_keycap_top_t;
+    translate([0, 0, cap_sk - dz]) difference() {
+        linear_extrude(switch_keycap_h, scale = switch_keycap_top_w / switch_keycap) square(switch_keycap, center = true);
+        translate([0, 0, -EPS]) linear_extrude(hi + EPS, scale = (cap_w_at(hi) - 2 * switch_keycap_wall) / (switch_keycap - 2 * switch_keycap_wall))
+            square(switch_keycap - 2 * switch_keycap_wall, center = true);
+    }
+}
+module cap_socket(dz) {
+    translate([0, 0, switch_keycap_top_above_seat - switch_keycap_boss_below_top - dz]) cylinder(d = switch_keycap_socket_d, h = switch_keycap_boss_below_top - switch_keycap_top_t + EPS);
 }
 
 module keys_3d() {
@@ -1274,6 +1308,24 @@ module drc_report() {
     drc(undef, "key cap stands proud of the top face at rest", switch_total_travel, "mm = the travel");
     drc(stack_cap_clear * 2 >= 0.015 * (switch_keycap + 2 * stack_cap_clear), "cap hole clearance beats oak cross-grain movement across the hole",
         stack_cap_clear, str("mm per side vs ", 0.015 * (switch_keycap + 2 * stack_cap_clear), " mm of movement at 1.5 % (ADR 0009)"));
+    // THE CAP ON ITS SWITCH (MT165-MX; owner, 2026-09-28). The clash check sweeps the
+    // shell through its travel against the switch's own mesh; these print the margins.
+    drc(cap_ceiling >= switch_stem_top_above_seat, "keycap seats on its stem: the inside of its top above the stem's top",
+        cap_ceiling - switch_stem_top_above_seat, "mm at rest - negative means the cap cannot sit at switch.keycap_top_above_seat on this stem");
+    let(sk = cap_sk - switch_total_travel, inner = switch_keycap - 2 * switch_keycap_wall)
+        echo("DRC", "INFO", "keycap skirt at full travel", [sk, inner],
+             str("mm above the seat, and the skirt's inside width there: over the housing (top at ", switch_housing_top_above_seat,
+                 ") its inside must clear the cover (", switch_cover_w, " across), and it must stay above the collar (", switch_collar_t, ") - the clash check tests both on the trimmed mesh"));
+    // the skirt, fully pressed, either stays above the housing, or it comes down
+    // round the cover (its inside wider) and stops above the collar - the clash
+    // check tests the trimmed mesh
+    let(sk = cap_sk - switch_total_travel, inner = switch_keycap - 2 * switch_keycap_wall)
+        drc(sk >= switch_housing_top_above_seat || (inner >= switch_cover_w && sk >= switch_collar_t),
+            "keycap skirt clears the switch's cover and collar at full travel",
+            [sk - switch_housing_top_above_seat, inner - switch_cover_w, sk - switch_collar_t],
+            "mm: the pressed skirt above the housing's top; or the skirt's inside less the cover's width AND the skirt above the collar - the first, or both of the others, must be positive");
+    drc(cap_sk - switch_total_travel >= 0, "keycap skirt stays above the plate at full travel", cap_sk - switch_total_travel,
+        "mm above the seat (the plate's top face), fully pressed");
     d_gap = (min(rh) - max(lh)) - switch_keycap;
     drc(undef, "inter-hand gap between caps", d_gap, "mm of clear band for the U-bolt and right thumb rest");
     d_uv = min([for (u = ubolt_legs(), p = concat([for (k = bottom_keys) key_xy(k)], spare_xy))

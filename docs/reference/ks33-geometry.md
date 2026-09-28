@@ -105,6 +105,29 @@ on the switch that can seat on a plate.
 | Stem top, MX cross | +7.05 mm |
 | Overall | 15.0 × 15.0 × **12.75 mm** |
 
+> **Above the seat, the vendor drawing and this STEP disagree, and the model
+> follows the drawing** (2026-09-28, for the MT165 cap's fit). Gateron's
+> sheet 6, read by rendering it at 500 dpi:
+>
+> - The **14.70 latch span is below the collar**, in the 1.20 plate slot (front
+>   elevation). **Above the collar**, the widest part is the cover, **13.75**.
+>   It holds that to about 1.5 above the seat, then tapers to about 12.8 at
+>   the housing top (scaled: `switch.cover_straight_h`, `switch.cover_top_w`). The STEP draws 14.7–15.0 wide latch bands from the collar
+>   up to the housing's top. A cap's skirt checked against that would "land on
+>   the clips" on a switch that has none there. The model therefore trims the
+>   mesh above the collar to that outline (`mechanical/cad/woody_body.scad`,
+>   `switch_at`).
+> - **Collar 0.45** thick (side elevation), where the STEP has 0.50. The
+>   **housing top is at 3.35** (dimensioned), which the STEP matches.
+> - **Stem top: about 6.4, not +7.05.** It is not dimensioned. It is scaled off
+>   both elevations: 6.38 in each. Both views check to scale within 0.03 on
+>   their own dimensioned 13.75, 14.00 and 5.85. The STEP's stem is about
+>   0.65 mm too tall. `switch.stem_top_above_seat` carries the scaled figure,
+>   marked nominal.
+>
+> The BOM's 12.2 mm overall less the 5.75 pole gives 6.45. That agrees with
+> the scaled stem top, and it is a second route to the same number.
+
 ### This answers the plate-to-PCB standoff, and at the settled thickness there is one
 
 The pins reach **5.10 mm** below the seat and only the last **1.9 mm** is the
