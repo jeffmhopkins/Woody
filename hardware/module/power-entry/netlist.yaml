@@ -33,7 +33,7 @@ foreign:
 components:
 
   J-PWR-EURO:
-    value: "16-pin shrouded keyed IDC header"
+    value: "2x8 2.54mm shrouded box header (16-pin)"
     pins: [POS12, NEG12, POS5, GND]
     note: "Keyed. The rack's -12 V is pin 1 by convention and reversing it is what D-REVPOL exists for"
 

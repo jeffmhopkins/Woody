@@ -45,7 +45,7 @@ components:
 
   J-UMB-MOD:
     of: J-UMBILICAL
-    value: "Neutrik etherCON D-series chassis"
+    value: "Neutrik NE8FAV"
     pins: [1, 2, 3, 4, 5, 6, 7, 8]
     note: "The module panel's. BORE IS D24.0 mm MINIMUM, which in a 50.50 mm 10HP panel leaves 13.25 mm each side - that is a panel constraint before it is a connector choice"
 

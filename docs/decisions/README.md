@@ -73,3 +73,4 @@ dated italic note at each point it changes, and the amendment named in the
 | [0020](0020-key-boards-screw-to-the-plate.md) | The key boards are screwed to the key plate | Accepted, amended 2026-09-27 (a mount at each corner, 1.2 mm boards; twice more the same day) and 2026-09-28 (Amendment 4: a PEM flush-head stud pressed into the plate, nothing above it) |
 | [0021](0021-pcb-mount-ethercon.md) | The instrument's etherCON is PCB-mounted, on an adapter joined to the main board | Accepted (the instrument's end of ADR 0004's open variant question) |
 | [0022](0022-main-board-mount.md) | How the main board is held, and how thick it is | Accepted |
+| [0023](0023-module-ethercon-and-two-boards.md) | The module's etherCON is the NE8FAV too, and the module is two boards | Accepted (the module's end of ADR 0004's open variant question) |

@@ -705,6 +705,11 @@ below.
 | *(at 8HP)* | *8.17 mm* | *~12 mm* | *~15 mm* |
 | *(at the original 6HP)* | *3.09 mm* | *~7 mm* | *~10 mm* |
 
+> *Since [ADR 0023](0023-module-ethercon-and-two-boards.md) the module's
+> etherCON is an NE8FAV (A-series, 22 mm bore), not this D-series part. The
+> D-series figures below are kept as the sizing they were: the NE8FAV is
+> smaller on each.*
+>
 > **The etherCON column is now read off the vendor drawing**, not estimated:
 > Neutrik **ST-NE8FDP, Aend-Index B**, held in the repo at
 > `datasheets/connectors/NE8FDP.pdf` with its DXF beside it. The bore is
@@ -965,10 +970,12 @@ pulses on `CS`.
 
 ## Open
 
-*The instrument's end is decided by [ADR 0021](0021-pcb-mount-ethercon.md):
+*Both ends are decided. The instrument's is [ADR 0021](0021-pcb-mount-ethercon.md):
 an NE8FAV soldered to an adapter board, joined to the main board by a
-soldered header — no patch lead and no extra contact interface. The module's
-end is still open, as below.*
+soldered header. The module's is [ADR 0023](0023-module-ethercon-and-two-boards.md):
+the same NE8FAV, soldered to the module's main board, which makes the module
+two boards. Neither end has a patch lead or an extra contact interface. The
+question below is kept as it was asked.*
 
 **Which etherCON variant at each end.** Feedthrough (NE8FDP-class) presents a
 plain RJ45 on the back, so the instrument end could take a short patch lead to a
