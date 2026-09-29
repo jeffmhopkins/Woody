@@ -32,7 +32,7 @@ fab:
   silk_text_min: 1.0
   silk_line_min: 0.15
   silk_to_pad: 0.15
-  finish: "HAL lead-free"    # at 1.2 mm, Economic assembly offers HASL only, green or black mask
+  finish: "HAL lead-free"    # Economic assembly's standard finish
   mask: Green
   silk: White
   copper_oz: 1               # outer copper, in the stackup the Gerber job file carries
@@ -41,7 +41,7 @@ standoff_footprint: "MountingHole:MountingHole_2.7mm_M2.5"
 
 # Each key's network: the one pattern, as on the left-hand board.
 networks:
-  pattern: {offset: [10.0, 0.0], axis: y, leg: -1, c: -1}
+  pattern: {offset: [9.4, 0.0], axis: y, leg: -1, c: -1}
   except: {}
 
 # Placed as the left-hand board's, 108.0 further along the body - the key row's own

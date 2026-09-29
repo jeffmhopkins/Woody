@@ -257,13 +257,13 @@ switch:
     status: settled
     source: "[ds] Gateron KS-33H10B050NN-Y24 sheet 6, 5.75 +/-0.05 (the STEP says 5.70; the vendor wins)"
   thumb_pcb_below_seat:
-    value: 3.5
+    value: 2.5
     status: nominal
-    source: "the main board's face nearest the thumb switches' seat, below it: set by its mount (ADR 0022), the key boards' stack on the thumb plate - the plate + hardware.kb_spacer_l [calc: 1.2 + 2.3], inside switch.pcb_below_seat_window; drc.echo 'main board mount sets its depth'"
+    source: "the main board's face nearest the thumb switches' seat, below it: against the thumb switches' housing bottom, as the key boards are (ADR 0022, ADR 0020 Amendment 6), held there by the key boards' mount on the thumb plate - the plate + hardware.kb_spacer_l [calc: 1.2 + 1.3], inside switch.pcb_below_seat_window; drc.echo 'main board mount sets its depth'"
   pcb_below_seat:
-    value: 3.5
+    value: 2.5
     status: nominal
-    source: "THE KEY BOARDS' (the thumb switches' main board is switch.thumb_pcb_below_seat): set by their mount (ADR 0020, Amendment 4): the stud's head is flush in the plate's top face and the spacer bears on its underside, so the board top sits the plate + hardware.kb_spacer_l below the seat [calc: 1.2 + 2.3]; drc.echo 'key-board mount sets the board depth' fails if this and the hardware disagree. Inside switch.pcb_below_seat_window"
+    source: "THE KEY BOARDS' (the thumb switches' main board is switch.thumb_pcb_below_seat): the board top is pressed against the switches' housing bottom (owner, 2026-09-29; ADR 0020 Amendment 6), 2.50 +/-0.05 below the seat [ds GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf sheet 6]. The mount holds it there: the stud's head is flush in the plate's top face and the spacer bears on its underside, so the board top sits the plate + hardware.kb_spacer_l below the seat [calc: 1.2 + 1.3]; drc.echo 'key-board mount sets the board depth' fails if this and the hardware disagree. Inside switch.pcb_below_seat_window"
   keycap_top_above_seat:
     value: 9.0
     status: tbd
@@ -320,13 +320,13 @@ switch:
     source: "hardware/cluster/cluster-boards.md: outlines are undrawable until M3"
     decided_by: "M3"
   pcb_t:
-    value: 1.2
+    value: 1.6
     status: nominal
-    source: "the MAIN board's thickness (PCB-CARRIER), as the key boards' (boards.key_board_t): at 1.6 mm a thumb switch shows about 0.1 mm of pin to solder [calc, docs/reference/ks33-geometry.md]; ADR 0022"
+    source: "the MAIN board's thickness (PCB-CARRIER), as the key boards' (boards.key_board_t): a standard 1.6 mm board, its top against the thumb switches' housing bottom, shows 5.10 - 2.50 - 1.60 = 1.0 mm of pin to solder [calc, docs/reference/ks33-geometry.md]; ADR 0022, ADR 0020 Amendment 6"
   pcb_below_seat_window:
-    value: [3.2, 3.6]
+    value: [2.45, 2.55]
     status: settled
-    source: "[calc] docs/reference/ks33-geometry.md: the band of PCB-top depths below the seat that keeps the pins' narrow blade in the hole and some pin to solder; the key boards' depth, pcb_below_seat, is set by their mount and checked against it (drc.echo 'key-board depth inside the switch pins' window')"
+    source: "[ds] GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf sheet 6: the housing bottom, 2.50 +/-0.05 below the seat, which the board top is pressed against (owner, 2026-09-29; ADR 0020 Amendment 6). Higher is impossible (the housing is there); lower leaves a gap the key press would close. The pins flare to about 2 mm wide just under the housing [3D, mechanical/cad/vendor/ks33.stl, sectioned 2026-09-29], so the switch footprint's holes are sized to pass the flare (hardware/lib/README.md). Checked by drc.echo 'key-board depth inside the switch pins' window'"
 
 # ---------------------------------------------------------------- boards ----
 boards:
@@ -503,10 +503,10 @@ boards:
   # THE KEY BOARDS (ADR 0020, amended 2026-09-27): 1.2 mm, and a rectangle
   # across the cavity with a standoff in each corner.
   key_board_t:
-    value: 1.2
+    value: 1.6
     status: nominal
-    source: "[calc] docs/reference/ks33-geometry.md: the pins end 5.10 below the seat and the board top is switch.pcb_below_seat below it, so a 1.6 mm board leaves ~0.1 mm of pin to solder, and a 1.2 mm board 0.3-0.7 mm across switch.pcb_below_seat_window. 1.2 mm is a standard thickness at every board house [from memory]"
-    decided_by: "owner, 2026-09-27 (ADR 0020); confirmed with the first board order"
+    source: "[calc] docs/reference/ks33-geometry.md: the pins end 5.10 below the seat and the board top is against the housing bottom at switch.pcb_below_seat, so a standard 1.6 mm board shows 1.0 mm of pin to solder. 1.6 mm is every board house's standard thickness"
+    decided_by: "owner, 2026-09-29 (ADR 0020 Amendment 6); confirmed with the first board order"
   kb_end_margin:
     value: 6.0
     status: tbd
@@ -808,7 +808,7 @@ hardware:
     status: settled
     source: "the largest hole PEM allows in the part that bears on the sheet round an FHL-M2.5 stud - here the spacer's bore [datasheets/mechanical/PEM-FH-SELF-CLINCHING-STUDS.pdf p.FH-7]"
   kb_stud_l:
-    value: 10
+    value: 8
     status: nominal
     source: "the FHL-M2.5 stud's length code L, from the head's face (stocked 6, 8, 10, 12, 15, 18) [datasheets/mechanical/PEM-FH-SELF-CLINCHING-STUDS.pdf p.FH-7]: plate + spacer + key board + nut + two pitches, at the stud's shortest (kb_stud_l_tol), rounded up to a stocked length (drc.echo 'key-board stud: thread past the nut') [calc]"
   kb_stud_l_tol:
@@ -832,9 +832,9 @@ hardware:
     status: nominal
     source: "M2.5 clearance through the key board, ISO 273 fine [from memory]: the board locates on the studs, so the fine fit"
   kb_spacer_l:
-    value: 2.3
+    value: 1.3
     status: tbd
-    source: "a plain metal spacer for M2.5 between the plate and the board, flat both ends, and the only thing there: the length that keeps the board at switch.pcb_below_seat [calc: 3.5 - 1.2]; its bore at most kb_stud_attached_hole. NOT STOCKED at 2.3 (Ettinger 5.52, Wurth WA-SMST and RAF step 2.0, 2.5/3.0): make it - face Ettinger 5.52.033 (M2.5, 3.0 long, bore 2.6, OD 4.5 [datasheets/mechanical/ETTINGER-CATALOG-2024-P79-DISTANZHUELSEN-MESSING.html]) down to 2.3 +/-0.05, in metal, not printed, which would creep under the nut's clamp"
+    source: "a plain metal spacer for M2.5 between the plate and the board, flat both ends, and the only thing there: the switches' housing below the plate, which the board is pressed against [calc: 2.50 - 1.20]. The switches hold the gap only where they are; at the mount there is no switch, and without the spacer the nut would pull the board up into the plate (owner, 2026-09-29). Its bore at most kb_stud_attached_hole. NOT STOCKED at 1.3: face Ettinger 5.52.015 (M2.5, 1.5 long, bore 2.6 [datasheets/mechanical/ETTINGER-CATALOG-2024-P79-DISTANZHUELSEN-MESSING.html]) down to 1.3 +/-0.05, in metal, not printed, which would creep under the nut's clamp"
     decided_by: "M4, with the spacers faced and measured"
   kb_spacer_l_tol:
     value: [-0.05, 0.05]
@@ -937,9 +937,9 @@ hardware:
     source: "M3 nyloc (DIN 985) height, ~4.0 [from memory] - hardware/unplaced.csv MECH-UBOLT orders nylocs; a plain ISO 4032 nut is 2.4"
     decided_by: "M4"
   backplate_t:
-    value: 3.0
+    value: 2.0
     status: tbd
-    source: "hardware/bom.csv MECH-BACKPLATE - aluminium or ply, thickness open"
+    source: "hardware/bom.csv MECH-BACKPLATE - thickness open; at most what fits under the main board, which since ADR 0020 Amendment 6 sits 1.0 mm lower (pressed against the thumb switches' housings): 2.0 leaves the clash check's clearance. Aluminium at this thickness, not ply"
     decided_by: "M4, with the U-bolt bought: the plate spreads its nuts' clamp (mechanical/drc.echo, U-bolt nuts bear on the backplate)"
   backplate_clear:
     value: 0.5

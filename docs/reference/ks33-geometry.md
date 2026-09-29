@@ -130,30 +130,37 @@ on the switch that can seat on a plate.
 
 ### This answers the plate-to-PCB standoff, and at the settled thickness there is one
 
-The pins reach **5.10 mm** below the seat and only the last **1.9 mm** is the
-narrow blade that goes through a hole. So the PCB top has to sit within roughly
-**3.2–3.6 mm** of the seat for the blade to fill the hole and protrude enough to
-solder. Subtract the plate `[calc]`:
+**The board's top is pressed against the housing bottom, 2.50 mm below the
+seat** (owner, 2026-09-29; ADR 0020 Amendment 6). The switch hangs in the
+plate by its rim and clips, and 1.3 mm of housing stands below a 1.20 mm plate
+[calc: 2.50 − 1.20]. The board goes right under it, so each switch is held
+between the plate and the board. That is `switch.pcb_below_seat`, and its
+window, `switch.pcb_below_seat_window`, is the housing bottom's ±0.05
+[ds sheet 6].
 
-| Plate | Gap between plate underside and PCB top |
-|---|---|
-| 2 mm — over the vendor window, ruled out | 1.2–1.6 mm |
-| 1.5 mm, the MX standard — over the vendor window, ruled out | 1.7–2.1 mm |
-| **1.20 mm — `plate-thickness`, settled, and this page owns it** | **2.0–2.4 mm** |
+**The pins flare where they leave the housing.** Sectioned off the 3D model
+(`mechanical/cad/vendor/ks33.stl`), each pin is a 0.45 mm blade. It is 1.8 mm
+wide 0.1 mm below the housing, 1.4 mm at 0.3 mm below, and 1.0 mm from 0.5 mm
+below down to the tip [3D]. A board against the housing therefore needs holes
+that pass the flare: 2.2 mm (`hardware/lib/README.md`). Gateron's layout uses
+3.0 mm. The old 1.3 mm holes passed only the 1.0 mm blade, which is why the
+board used to sit lower, at 3.2–3.6 mm.
 
-**The board's thickness sets how much pin is left to solder.** Below the
-board's underside the pins show 5.10 mm less the board-top depth less the
-board's thickness `[calc]`: at the window's middle, 3.4 mm, that is
-5.10 − 3.4 − 1.6 ≈ 0.1 mm on a 1.6 mm board and 5.10 − 3.4 − 1.2 ≈ 0.5 mm on
-a 1.2 mm one. The key boards sit at `switch.pcb_below_seat`, not at the
-middle: their mount hardware sets it — the plate + `hardware.kb_spacer_l`
-(ADR 0020, Amendment 4). `mechanical/drc.echo`
-"key-board depth inside the switch pins' window" prints where that lands,
-and "key-board depth at the hardware's tolerance limits" (a NOTE) what the
-worst case leaves to solder. That is why the key boards are
-`boards.key_board_t` (ADR 0020 point 6), and why the main board under the
-thumb switches is too (`switch.pcb_t`, ADR 0022): it sits at the same depth
-on the same mount, `switch.thumb_pcb_below_seat`.
+**The board's thickness sets how much pin is left to solder**: 5.10 mm less
+the board-top depth less the thickness `[calc]`. Against the housing, a
+standard 1.6 mm board shows 5.10 − 2.50 − 1.60 = **1.0 mm**
+(`boards.key_board_t`, and `switch.pcb_t` for the main board under the thumb
+switches). `mechanical/drc.echo` "key-board depth inside the switch pins'
+window" checks the depth, and "key-board depth at the hardware's tolerance
+limits" (a NOTE) the worst case.
+
+**The mount's spacer is the housing's height, 1.3 mm** (`hardware.kb_spacer_l`).
+The switches keep the plate and the board apart only where they are, and a
+mount is where they are not.
+
+*Until 2026-09-29 the board sat 3.2–3.6 mm below the seat, on 1.3 mm holes.
+At that depth a 1.6 mm board left only about 0.1 mm of pin, so the boards
+were 1.2 mm. The history is in git.*
 
 > **⚠ THIS SECTION'S CONCLUSION IS REVERSED, 2026-09-21, AND SO IS THE LAYOUT
 > RULE DERIVED FROM IT.** It read *"the answer is 'there isn't one'"* and
@@ -163,6 +170,10 @@ on the same mount, `switch.thumb_pcb_below_seat`.
 > **2.0–2.4 mm**, which is a standoff, not the absence of one. The old
 > conclusion was arithmetic applied to two thicknesses that are no longer
 > candidates.
+
+> *Since ADR 0020 Amendment 6 the gap is the housing's 1.3 mm, and nothing
+> but the switches goes on a board's plate side. The table below was worked
+> for the old 2.0–2.4 mm gap.*
 
 **What that clearance actually buys**, taken at the tight end of the range and
 against a plate that is grounded (ADR 0020, Amendment 5) and is therefore a
@@ -230,6 +241,10 @@ independent source for the 14 mm cutout, alongside the 47 STL cutouts above.
 The STEP model shows why ⌀1.2 is the better number: **the pins are flat blades,
 2.0 × 0.45 mm at the root narrowing to 1.0 × 0.45 mm** through the
 board — not round pins.
+
+> *That held while the board sat below the root. Since ADR 0020 Amendment 6
+> the board is pressed against the housing, so the hole's top meets the 2.0 mm
+> root, and the drill is 2.2 mm (`hardware/lib/README.md`).*
 
 **There are no alignment posts.** The repository's combined `gateron-ks27-mx`
 footprint carries MX's two ⌀1.75 mm posts at (±5.08, 0) *and* MX's own pin

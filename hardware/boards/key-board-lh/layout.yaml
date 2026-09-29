@@ -36,7 +36,7 @@ fab:
   silk_text_min: 1.0
   silk_line_min: 0.15
   silk_to_pad: 0.15
-  finish: "HAL lead-free"    # at 1.2 mm, Economic assembly offers HASL only, green or black mask
+  finish: "HAL lead-free"    # Economic assembly's standard finish
   mask: Green
   silk: White
   copper_oz: 1               # outer copper, in the stackup the Gerber job file carries
@@ -68,8 +68,10 @@ bond_mount: {index: 2, footprint: "MountingHole:MountingHole_2.7mm_M2.5_Pad_TopB
 # Midway to the next switch along the body, standing across it: on this board
 # the one offset that clears every switch's pins and pole, J-CHAIN, the test
 # pads, the register, the corner mounts and the board's edge for all five keys.
+# 9.4, not 10.0, since the switch pads grew to 2.6 mm (ADR 0020 Amendment 6):
+# at 10.0 a resistor's label landed on the next switch's pin pad.
 networks:
-  pattern: {offset: [10.0, 0.0], axis: y, leg: -1, c: -1}
+  pattern: {offset: [9.4, 0.0], axis: y, leg: -1, c: -1}
   except: {}
 
 # References are plain numbers (R1, C6, U1: owner, 2026-09-27); each part's BOM

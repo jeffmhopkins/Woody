@@ -27,6 +27,8 @@ Two things were therefore unanswered:
 ## Decision
 
 1. **The main board is 1.2 mm** (`switch.pcb_t`), as the key boards are.
+   *(Since ADR 0020 Amendment 6: 1.6 mm, as the key boards now are, its top
+   pressed against the thumb switches' housings.)*
 2. **Over a thumb plate it is held exactly as a key board is** (ADR 0020,
    Amendment 4), with the same parts:
    - the PEM FHL-M2.5 stud pressed into the thumb plate, its head flush in
@@ -75,7 +77,8 @@ Two things were therefore unanswered:
 - **The main board and the key boards share one stack** and one set of
   hardware on the plates. The oak mounts add three small parts
   (`MECH-MB-INSERT`, `MECH-MB-OAK-SPACER`, `MECH-MB-SCREW`, open until M4).
-- **The board is 0.4 mm thinner and a long board**, about
+- **The board is a long one** (a standard 1.6 mm since ADR 0020 Amendment 6),
+  about
   `mechanical/drc.echo` *main board* long. Where it spans between mounts it
   is carried by the soldered thumb switches, as before. The first board
   confirms how stiff that is.

@@ -129,7 +129,8 @@ connector envelope using a stand-in size. The real footprint, a Molex 200528
      checked by `drc.echo` "chain headers on the left_hand boards clear of
      the switches" and its right-hand twin).)*
 
-6. **The key boards are 1.2 mm thick** (`boards.key_board_t`).
+6. **The key boards are 1.2 mm thick** (`boards.key_board_t`). *(Since
+   Amendment 6: 1.6 mm, pressed against the switches' housings.)*
    - The switch pins end 5.10 mm below the seat, and the board's top is
      `switch.pcb_below_seat` below it. How much pin a 1.6 mm and a 1.2 mm
      board leave to solder is worked in `docs/reference/ks33-geometry.md`:
@@ -622,4 +623,41 @@ way the thumb plates are grounded (ADR 0022 point 6):
 - `MECH-GNDBOND`, its wire and its M3 hardware are gone. `tools/pcb.py check`
   holds the bonded mount to its rule: plated, every pad on the ground net,
   and no other net's copper under the spacer or the nut.
+
+## Amendment 6, 2026-09-29 — standard 1.6 mm boards, pressed against the switches
+
+The owner: the board can be a standard thickness, because the switch sits in
+the plate and only its pins go through the board. Gateron's drawing agrees.
+
+- **The board's top is pressed against the switches' housing bottom**, 2.50 mm
+  below the seat [ds `GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf` sheet 6]. Each
+  switch is held between the plate above (its rim on the plate, its clips
+  under it) and the board below (`switch.pcb_below_seat`,
+  `switch.pcb_below_seat_window`).
+- **The boards are 1.6 mm** (`boards.key_board_t`). The pins end 5.10 mm below
+  the seat, so 1.0 mm shows below the board to solder [calc]. That is more
+  than the 1.2 mm board at the old depth left.
+- **The pin holes are larger:** 2.2 mm on 2.8 mm pads
+  (`hardware/lib/woody.pretty/SW_Gateron_KS33_1u`). Each pin is a 0.45 mm
+  blade that flares to about 2 mm wide where it leaves the housing, and the
+  hole's top now meets that flare [3D, sectioned; `hardware/lib/README.md`].
+  Gateron's own layout uses 3.0 mm holes.
+- **The mounts keep a spacer, 1.3 mm** (`hardware.kb_spacer_l`), the
+  switches' housing below the plate. The switches hold the plate and the
+  board apart only where they are. At a mount there is no switch, and without
+  the spacer the nut would pull the board up into the plate. It is an
+  Ettinger 5.52.015 (1.5 mm), faced to length.
+- **The board sits 1.0 mm higher.** The room between the plate and the board
+  is now only the housing's 1.3 mm, so nothing but the switches goes on the
+  board's plate side. The parts are on the underside already.
+- **The stud is 8 mm** (FHL-M2.5-8ZI, `hardware.kb_stud_l`), no longer 10.
+  The stack is thinner, and the 10 mm stud's tip reached the ribbon under
+  the raised board. The 8 mm stud leaves 1.5 mm of thread past the nut
+  (`drc.echo` "key-board stud: thread past the nut").
+- **The main board follows** (ADR 0022). Its thumb switches use the same
+  mount on the thumb plates, so it is 1.6 mm, pressed against their housings,
+  with the same spacer.
+
+Supersedes point 6's 1.2 mm, and Amendment 4's 2.3 mm spacer and 10 mm stud. The first switch
+pushed into the first board confirms the holes and the depth.
 
