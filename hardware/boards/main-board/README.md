@@ -94,7 +94,6 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 | J1 | `J-MCU` | carrier |
 | J6 | `J-UMB` | root |
 | L1 | `L-BUCK-IN` | power-entry-instrument |
-| E1 | `MECH-GNDBOND` | power-entry-instrument |
 | NT2 | `NT-AGND` | power-entry-instrument |
 | NT1 | `NT-DIG` | carrier |
 | R5 | `R-ADCDIV-L` | breath-adc |
@@ -132,7 +131,6 @@ key-board mode reads `pcb-geometry.echo` by cluster, and this board is `main`):
 |---|---|
 | **`J-MCU`'s footprint is KiCad's bare 2 × 12 1.27 mm pad grid.** The XKB header wants 0.70 drills and its shroud's outline and courtyard [ds `XKB-X1270WR-2x12A-9TV01.pdf`], so it gets a `woody.pretty` footprint the way `J-CHAIN`'s Samtec did | Drawn at layout, from the banked drawing |
 | **The plate mounts ground the thumb plates** (ADR 0022 point 6): each is `MountingHole:MountingHole_2.7mm_M2.5_Pad_Via` on `PWR_GND`. The oak mounts are unplated `MountingHole_2.7mm_M2.5` | Layout; the mounts' places are `pcb-geometry.echo` `main` `standoff … "plate"` |
-| **`E1` (`MECH-GNDBOND`) has no footprint.** It bonds the key plate, the one over the key boards, which no main-board mount touches | The owner: how the key plate is bonded |
 | **The regulator block holds `U-BUCK` and one can, not four parts.** `U-BUCK`, `C-STRIP-BULK`, `C-BUCK-IN` and `L-BUCK-IN` together take about twice the block's area. Only `U-BUCK` and `C-STRIP-BULK` need its height; `C-BUCK-IN` (5.8 mm) and `L-BUCK-IN` (2.8 mm) go where the room over them is enough (`mechanical/drc.echo`, *main board parts room under the key boards*) | Layout |
 | **`A1` (the Matrix) has no footprint**: it is on the lid, and is on the sheet for its pad-to-pin map | The layout skips a part with no footprint |
 | **The spare positions' switches (`sw+`, `sw-`) are not fitted** (`config/key-layout.yaml` `spare_bits_switches`), but their network is. The switch sits in the shared key-network sheet | Marked not-fitted on this board at layout |

@@ -165,7 +165,7 @@ on the same mount, `switch.thumb_pcb_below_seat`.
 > candidates.
 
 **What that clearance actually buys**, taken at the tight end of the range and
-against a plate that is grounded through `MECH-GNDBOND` and is therefore a
+against a plate that is grounded (ADR 0020, Amendment 5) and is therefore a
 short waiting to happen:
 
 | Part | Height | Clearance, worst case |

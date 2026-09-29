@@ -86,7 +86,7 @@ connector envelope using a stand-in size. The real footprint, a Molex 200528
      rule areas are the standoff keep-outs of point 4.)* *(Those are the
      mount keep-outs since Amendment 2.)*
 4. **The plate makes no second ground bond through the board.**
-   - The plate is grounded through `MECH-GNDBOND` (`hardware/cluster/cluster-boards.md`).
+   - The plate is grounded at one mount of the left-hand key board (Amendment 5).
    - The board's holes are unplated (NPTH).
    - Each hole sits in a copper keep-out on both layers. On top it is
      covered by the standoff's end face, and underneath by the screw head.
@@ -600,4 +600,26 @@ holding from above, which is why there is no epoxy.
   first to ask — and for the M2.5 nuts.
 - The wood's species (Amendment 2, *The wood*); it no longer sets anything in
   the mount.
+
+## Amendment 5, 2026-09-29 — the plate is grounded at one mount of the left-hand board
+
+The key plate was grounded by `MECH-GNDBOND`, a ring terminal and a wire from
+the main board. The owner replaced it with one of the mounts themselves, the
+way the thumb plates are grounded (ADR 0022 point 6):
+
+- **One mount of the left-hand key board is plated**, with a `GND_CHAIN` pad on
+  both faces (`hardware/boards/key-board-lh/layout.yaml` `bond_mount`). The
+  stud's clinch, the spacer on the top pad and the nut on the bottom one bond
+  the plate. `GND_CHAIN` is the main board's `PWR_GND` down the ribbon
+  (`hardware/nets.yaml`), so the plate still bonds to `PWR_GND`, never to
+  `AGND`.
+- **Only one.** Every other key-board mount, on both boards, stays NPTH with
+  its keep-out. A second bond would close a ground loop through the two
+  ribbons.
+- **The plate is ordered un-anodised**, or masked round that stud hole
+  (`PLATE-TOP`), because the bond is metal to metal. Bring-up meters the
+  plate to `PWR_GND`.
+- `MECH-GNDBOND`, its wire and its M3 hardware are gone. `tools/pcb.py check`
+  holds the bonded mount to its rule: plated, every pad on the ground net,
+  and no other net's copper under the spacer or the nut.
 

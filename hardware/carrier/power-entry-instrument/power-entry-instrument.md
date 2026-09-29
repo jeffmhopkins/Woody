@@ -27,7 +27,7 @@ The `Dir` and `Peer` columns are defined once in
 | `+12V` strip feed | out | `carrier/led-strip-drive` | — | Taken direct off the input node. `C-STRIP-BULK` is this circuit's part. **The same net as the row above** — `D-REVSHUNT` is a shunt and `D-TVS-PWR` a clamp, so nothing is in series between `J-UMB` pin 3 and this tap |
 | `+12V` analog | out | `carrier/breath-excitation-reference` | — | REF5050 `VIN`, and the V+ of both OPA2197 halves. **Also the same net**, for the same reason |
 | 5 V, buck A | out | `J-MCU`, `carrier/led-strip-drive` | `matrix-led-current` | Through `D-USBOR` and `J-MCU`, down three conductors of `CBL-MCU-RIBBON` onto the dev board's 5 V pad and `TP2`, and on to the 74AHCT125 |
-| `PWR_GND` pour | ref | `carrier/service-uart`, `carrier/led-strip-drive`, `carrier/carrier` | `dig-gnd-topology` | The whole board returns here, and the aluminium key plate through `MECH-GNDBOND`, which can only originate here. **`carrier/breath-adc` and `carrier/breath-excitation-reference` are no longer listed**: both of those pages say their return is `AGND_INST`, which reaches this pour on the **single tie** and is a different node everywhere else — and that distinction is the whole point of the star |
+| `PWR_GND` pour | ref | `carrier/service-uart`, `carrier/led-strip-drive`, `carrier/carrier` | `dig-gnd-topology` | The whole board returns here, and so do the plates: the thumb plates through this board's plate mounts, the key plate through the left-hand key board's `GND_CHAIN` (ADR 0022, ADR 0020 Amendment 5). **`carrier/breath-adc` and `carrier/breath-excitation-reference` are no longer listed**: both of those pages say their return is `AGND_INST`, which reaches this pour on the **single tie** and is a different node everywhere else — and that distinction is the whole point of the star |
 
 ## §1 Power entry
 
@@ -58,8 +58,6 @@ the two agree, and where they do not the netlist wins.*
                      │      25V, real ESR   │                              via the board)
                      │                      │
  J-UMB pin 6 PWR_GND ┴──────────────────────┴──── PWR_GND pour
-                                             │
-                                             └──[MECH-GNDBOND]── aluminium key plate
 ```
 
 **`D-REVSHUNT` goes at the connector, ahead of `L-BUCK-IN`.** Its job is a
@@ -70,8 +68,10 @@ fault and the diode is the wrong way round.
 **There is no fuse and no power switch on this board** (ADR 0005). The current
 limit is at the module.
 
-**`MECH-GNDBOND` ties the aluminium plate to `PWR_GND`, never to `AGND`**
-`[repo] 0009`. This board is the only place that bond can originate.
+**The aluminium plates bond to `PWR_GND`, never to `AGND`** `[repo] 0009`.
+The thumb plates bond through this board's plate mounts (ADR 0022). The key
+plate bonds through one mount of the left-hand key board, whose `GND_CHAIN` is
+this pour down the ribbon (ADR 0020, Amendment 5).
 
 ### Derivations
 

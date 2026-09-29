@@ -164,7 +164,7 @@ than a pitch parameter.
 ### Three layout rules that are not obvious
 
 - **The aluminium plate sits directly above this board and is grounded**
-  through `MECH-GNDBOND` `[repo] power-entry-instrument.md, 0009`. That is useful — it
+  at one mount of the left-hand key board `[repo] 0020 Amendment 5, 0009`. That is useful — it
   shields the key networks from the LED channel for free — and it is also a
   short waiting to happen. Every part on the plate-facing side needs clearance
   to the plate, or the board needs its passives on the far side.

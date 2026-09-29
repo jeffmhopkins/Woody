@@ -66,13 +66,6 @@ components:
     - 1
     - 2
     note: One inductor, one buck input capacitor, one buck
-  MECH-GNDBOND:
-    value: Ring terminal
-    pins:
-    - 1
-    - 2
-    note: THE ALUMINIUM KEY PLATE BONDS TO PWR_GND, NEVER TO AGND, and this board is the only place that bond can
-      originate
   NT-AGND:
     value: net tie
     pins:
@@ -106,7 +99,6 @@ nets:
   - C-STRIP-BULK.2
   - D-REVSHUNT.A
   - D-TVS-PWR.A
-  - MECH-GNDBOND.1
   - NT-AGND.2
   - U-BUCK-A.GND
   UMBILICAL_POS12:
@@ -119,7 +111,3 @@ nets:
   - C-BUCK-IN.1
   - L-BUCK-IN.2
   - U-BUCK-A.IN
-  '2':
-  - MECH-GNDBOND.2
-external_endpoints:
-- '2'

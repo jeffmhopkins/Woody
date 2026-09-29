@@ -472,9 +472,9 @@ nets:
     note: >
       The thumb plates bond to this net through the main board's plate mounts
       (ADR 0022), each at its own studs.
-      The aluminium key plate bonds to this net through MECH-GNDBOND and NEVER
-      to AGND, and carrier/power-entry-instrument is the only board that bond
-      can originate on.
+      The aluminium key plate bonds to it at one mount of the left-hand key
+      board, whose GND_CHAIN is this net down the ribbon (ADR 0020, Amendment
+      5). Neither plate ever bonds to AGND.
       IT DOES NOT LIST THE TWO ANALOG CIRCUITS. power-entry-instrument.md's
       Interfaces table names carrier/breath-adc and
       carrier/breath-excitation-reference as returning to the pour, and both of

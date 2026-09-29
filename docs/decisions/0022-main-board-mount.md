@@ -66,8 +66,8 @@ Two things were therefore unanswered:
    both faces: the spacer bears on the underside pad and the nut on the top
    one. The stud's clinch and the spacer's face bond the plate to the board's
    ground with no part added. The thumb plates had no bond before. Unbonded,
-   a plate floats a millimetre or two from the thumb switches' pins, the way
-   `MECH-GNDBOND`'s row says the key plate would. The oak mounts stay
+   a plate floats a millimetre or two from the thumb switches' pins, and a touch
+   on it fires spurious notes, as the key plate's would (ADR 0009). The oak mounts stay
    unplated: nothing metal is under them.
 
 ## Consequences

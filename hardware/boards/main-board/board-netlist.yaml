@@ -238,13 +238,6 @@ components:
     pins:
     - A
     - K
-  E1:
-    of: MECH-GNDBOND
-    value: Ring terminal
-    pins:
-    - 1
-    - 2
-    sheet: power-entry-instrument
   FB1:
     of: FB-CHAIN
     value: Ferrite bead 600R @ 100MHz
@@ -1138,8 +1131,6 @@ nets:
   - U7.VCC
   - U8.B
   - U8.VCC
-  E1.2:
-  - E1.2
   INST_5V_A:
   - A1.P5V
   - A1.TP2
@@ -1177,7 +1168,6 @@ nets:
   - C24.2
   - D2.A
   - D3.A
-  - E1.1
   - J1.11
   - J1.15
   - J1.2
@@ -1283,7 +1273,6 @@ nets:
   - R8.1
   - U10.VS
 external_endpoints:
-- E1.2
 - J4.11
 - J4.12
 - J5.11

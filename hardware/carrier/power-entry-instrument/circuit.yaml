@@ -24,7 +24,6 @@ depends_on:
 - refdes:J-MCU
 - refdes:J-UMB
 - refdes:L-BUCK-IN
-- refdes:MECH-GNDBOND
 - refdes:U-BUCK
 - circuit:carrier/breath-adc
 - circuit:carrier/breath-excitation-reference
