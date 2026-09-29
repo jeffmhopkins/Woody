@@ -1,0 +1,96 @@
+# Every file tools/cad.py builds for the EURORACK MODULE (ADR 0023, 0024).
+# A separate spec and ledger from the instrument body's (mechanical/outputs.yaml),
+# so a change to one model never marks the other's outputs stale. Nothing
+# under mechanical/module/renders/ or mechanical/module/export/ may exist
+# unless it is named here. `python3 tools/cad.py build` rebuilds what is
+# stale; `check` proves the rest. Numbers: config/module.yaml.
+#
+# Every module render sets `layout_sensitive: false`: the body's PROVISIONAL
+# key layout does not reach the module, so its footer never says it does.
+
+meshes:
+  # The banked vendor solids, meshed for the pictures. The clash check and the
+  # DRC use envelopes from config/module.yaml (vendor=false), never these.
+  - name: module-ne8fav-mesh
+    from: datasheets/connectors/NEUTRIK-NE8FAV-3D.stp
+    out: mechanical/cad/vendor/ne8fav.stl
+  - name: module-pj398sm-mesh
+    from: datasheets/connectors/THONKICONN-PJ398SM-BADPIXEL-3D.step
+    out: mechanical/cad/vendor/pj398sm.stl
+  - name: module-r0904n-mesh
+    from: datasheets/connectors/SONGHUEI-R0904N-L25-BADPIXEL-3D.step
+    out: mechanical/cad/vendor/r0904n.stl
+
+# Cameras: [tx, ty, tz, rx, ry, rz, distance]; the panel's centre is
+# [25.25, 64.25, 0] (config/module.yaml panel.w / 2, panel.h / 2).
+renders:
+  - name: module-hero
+    title: The module, three-quarter front - panel, knobs, jacks, the etherCON and the toggle, with the boards behind
+    src: mechanical/cad/module.scad
+    out: mechanical/module/renders/hero.png
+    stamp: Woody module
+    layout_sensitive: false
+    imgsize: [1200, 1400]
+    camera: [25, 64, -12, 62, 0, 35, 330]
+    defines: {show_rails: false}
+  - name: module-rear
+    title: The module from behind - the main board's rear face, the power header with its socket and ribbon, the trimmers and bulk caps
+    src: mechanical/cad/module.scad
+    out: mechanical/module/renders/rear.png
+    stamp: Woody module
+    layout_sensitive: false
+    imgsize: [1200, 1400]
+    camera: [25, 64, -20, 62, 0, 215, 330]
+    defines: {show_rails: false}
+  - name: module-exploded
+    title: The stack pulled apart - panel and knobs, jack board, standoffs and J-B2B-MOD, main board, power socket
+    src: mechanical/cad/module.scad
+    out: mechanical/module/renders/exploded.png
+    stamp: Woody module
+    layout_sensitive: false
+    imgsize: [1400, 1400]
+    camera: [25, 64, -20, 70, 0, 60, 420]
+    defines: {show_rails: false, explode: 14}
+  - name: module-section
+    title: Side section through the panel's centre - the etherCON's axis, the toggle, J-B2B-MOD and the middle pot - with every depth
+    src: mechanical/cad/fig_module_section.scad
+    out: mechanical/module/renders/section.png
+    stamp: Woody module
+    layout_sensitive: false
+    imgsize: [1400, 1500]
+    projection: o
+    camera: [22, 64, 0, 0, 0, 0, 260]
+  - name: module-panel
+    title: The panel drawing - cuts, positions, legend zones, the screw hardware's reach
+    src: mechanical/cad/fig_module_panel.scad
+    out: mechanical/module/renders/panel.png
+    stamp: Woody module
+    layout_sensitive: false
+    imgsize: [1200, 1800]
+    projection: o
+    camera: [25, 64, 0, 0, 0, 0, 250]
+  - name: module-boards
+    title: Both boards seen from the panel - outlines, the notch, standoffs, J-B2B-MOD, the parts on each face
+    src: mechanical/cad/fig_module_boards.scad
+    out: mechanical/module/renders/boards.png
+    stamp: Woody module
+    layout_sensitive: false
+    imgsize: [2000, 1500]
+    projection: o
+    camera: [62, 64, 0, 0, 0, 0, 280]
+
+# Cut files and reports.
+exports:
+  - {name: module-drc, src: mechanical/cad/module.scad, out: mechanical/module/drc.echo, defines: {part: "drc"}}
+  - {name: module-dxf-panel, src: mechanical/cad/module.scad, out: mechanical/module/export/panel.dxf, defines: {part: "panel"}}
+  - {name: module-dxf-jack-board, src: mechanical/cad/module.scad, out: mechanical/module/export/jack-board.dxf, defines: {part: "jack_board"}}
+  - {name: module-dxf-main-board, src: mechanical/cad/module.scad, out: mechanical/module/export/main-board.dxf, defines: {part: "main_board"}}
+  - {name: module-pcb-geometry, src: mechanical/cad/module.scad, out: mechanical/module/export/pcb-geometry.echo, defines: {part: "pcb_geom"}}
+
+# The interference check on the envelopes (vendor=false).
+clashes:
+  - name: module-clash
+    src: mechanical/cad/module.scad
+    out: mechanical/module/clash.txt
+    allow: mechanical/module/clash-allow.yaml
+    defines: {vendor: false, show_plugs: false, show_rails: true}

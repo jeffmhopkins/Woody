@@ -67,10 +67,19 @@ panel:
     value: [3.0, 125.5]
     status: settled
     source: "[ds] A100FP.gif: 3.0 from the bottom edge, 125.5 (3.0 from the top)"
+  slot_travel:
+    value: 3.0
+    status: settled
+    source: "[ds] EURORACK-3U-3HP-PANEL-apfaudio-pmod-r3.1.kicad_pcb Edge.Cuts: a FABRICATED panel's mounting cut is a slot, arcs of r 1.6 whose centres run 1.5 either side of the Doepfer hole centre [calc 6.0..9.0 from the left edge], so the panel takes the rail's nut strip wherever it sits in the HP grid. Doepfer's own sketch draws a round d3.2; the slot contains it"
   four_screws:
     value: true
     status: settled
     source: "[adr 0023] point 4 - four M3 screws; Doepfer: 'From 10/12 HP usually four mounting holes are used'"
+  washer_t:
+    value: 0.5
+    status: tbd
+    source: "[from memory] DIN 125 M3 washer thickness"
+    decided_by: "a DIN 125 table banked (the bank has DIN 433 / ISO 7092, the small washer)"
   washer_od:
     value: 7.0
     status: settled
@@ -84,6 +93,11 @@ rail:
     status: tbd
     source: "[web] 108-110 mm is the usual maximum board height between the rails (modwiggler 'Max PCB height for Eurorack?', t=203897; sdiy.info wiki 'Eurorack'), i.e. ~10 mm at each edge; NOT banked - both pages refused a fetch (403) on 2026-09-29. Community rail profiles (github.com/rahji/eurorack-ears) exist but their orientation to the panel is not stated"
     decided_by: "a rail maker's drawing banked (Vector, Tiptop Z-rail, or the case vendor's), or the target case measured"
+  depth:
+    value: 10.0
+    status: tbd
+    source: "[from memory] how far behind the panel's rear face a Eurorack rail's profile reaches; drawn so the clash check sees parts in the rail band near the panel"
+    decided_by: "as rail.band"
 
 # The case the depth is checked against.
 case:
@@ -134,21 +148,24 @@ standoff:
     value: 3.2
     status: nominal
     source: "[calc] M3 clearance, the panel's own hole size"
-  head_d:
-    value: 5.6
-    status: settled
-    source: "[repo] panel-height-budget's derivation: ISO 7045 / DIN 7985 M3 pan head dk max 5.6 [ds ASPEN-DIN7985-ISO7045-PAN-HEAD-DIMENSION-TABLE.pdf]"
-  head_k:
-    value: 2.4
-    status: tbd
-    source: "[from memory] ISO 7045 M3 head height"
-    decided_by: "read off ASPEN-DIN7985-ISO7045-PAN-HEAD-DIMENSION-TABLE.pdf"
   # Where the four sit (x, y), panel frame. Two above the pots, between them;
   # one in each of the jack board's legs beside the NE8FAV, low.
   at:
     value: [[16.75, 114.8], [33.75, 114.8], [6.375, 17.0], [44.125, 17.0]]
     status: nominal
     source: "[adr 0024] placed by hand against the pots, the legs and the rail band; module.scad DRCs every one"
+
+# The M3 pan-head screw, DIN 7985: the panel's four (MECH-PANEL-SCREW-MOD) and
+# the standoffs' eight, one each side of each standoff.
+m3:
+  head_d:
+    value: 6.0
+    status: settled
+    source: "[ds] ASPEN-DIN7985-ISO7045-PAN-HEAD-DIMENSION-TABLE.pdf: DIN 7985 M3 dk nominal max 6.0 (min 5.7) - the head MECH-PANEL-SCREW-MOD buys. The ISO 7045 head is smaller; the table banked is the DIN one"
+  head_k:
+    value: 2.52
+    status: settled
+    source: "[ds] as head_d: DIN 7985 M3 k max 2.52 (nominal 2.4)"
 
 # The 2 x 10 header soldered through both boards (J-B2B-MOD).
 b2b:
@@ -229,9 +246,13 @@ power:
   # stripe) at the BOTTOM - Doepfer: 'the coloured marking on the ribbon
   # cable is at the bottom of the module's connector' [ds a100m_e.html]
   at:
-    value: [42.5, 32.0]
+    value: [42.5, 35.0]
     status: nominal
-    source: "[adr 0024] low on the right, behind the jack board's right leg, clear of the NE8FAV's tails; the ribbon drops straight down to the bus board"
+    source: "[adr 0024] low on the right, behind the jack board's right leg, clear of the NE8FAV's tails and of the lower right standoff screw's head; the ribbon folds down to the bus board"
+  drop:
+    value: 10.0
+    status: nominal
+    source: "[adr 0024] how far below the panel's bottom edge the ribbon's envelope is drawn - toward the bus board, which the model does not draw"
 
 # Tall parts on the main board's rear face (envelopes for the depth check).
 tall:
@@ -301,6 +322,11 @@ jack:
     status: tbd
     source: "[from memory] the Thonkiconn's knurled/hex nut, ~8 across"
     decided_by: "a nut in hand"
+  nut_h:
+    value: 2.0
+    status: tbd
+    source: "[from memory] the Thonkiconn nut's thickness"
+    decided_by: "a nut in hand"
   plug_d:
     value: 10.0
     status: tbd
@@ -354,8 +380,15 @@ knob:
     source: "[adr 0024] air between the knob's skirt and the panel face, so it turns without rubbing"
     decided_by: "the knob's bore depth, at the first fit"
 
-# LTL-4231N, 3 mm diffused.
+# LTL-4231N, 3 mm diffused. Held at its depth by MECH-LED-BEZEL-MOD taken as a
+# lead spacer from the jack board (ADR 0024): its length is derived, never set.
 led:
+  spacer_d:
+    value: 4.0
+    status: tbd
+    source: "[from memory] a 3 mm LED's two-lead spacer, ~4 across"
+    decided_by: "the spacer bought for MECH-LED-BEZEL-MOD"
+
   lens_d:
     value: 3.0
     status: settled
@@ -423,6 +456,11 @@ toggle:
     status: tbd
     source: "[from memory] an M6 hex nut across corners (~8 AF)"
     decided_by: "NKK's supplied nut, read off p.7 or measured"
+  nut_h:
+    value: 2.0
+    status: tbd
+    source: "[from memory] NKK's thin M6 panel nut"
+    decided_by: "as nut_d"
 
 # The NE8FAV (J-UMBILICAL). The body owns these numbers (ADR 0021/0023): ref.
 ethercon:
@@ -464,6 +502,16 @@ ethercon:
     value: 0.2
     status: nominal
     source: "[adr 0024] over the drawing's 22 MIN bore, for the cutter's kerf tolerance"
+  screw_head_d:
+    value: 5.5
+    status: tbd
+    source: "[from memory] Neutrik's A-series mounting screw (MECH-ETHERCON-SCREW-MOD): a small countersunk/pan head"
+    decided_by: "the A-Screw's drawing banked, or one in hand"
+  screw_head_h:
+    value: 1.7
+    status: tbd
+    source: "[from memory] as screw_head_d"
+    decided_by: "as screw_head_d"
   push_slot:
     value: false
     status: settled
@@ -509,3 +557,44 @@ layout:
     value: 17.0
     status: nominal
     source: "[adr 0024] the toggle row, centred, under the NE8FAV: its body clear of the rail band below and the pegs above"
+  pots:
+    value: ["POT-GAIN", "POT-OFFSET", "POT-RESP"]
+    status: nominal
+    source: "[adr 0004] 'three knobs across (gain, offset, response)', left to right"
+  jacks:
+    value: [["J-CV-PITCH", "J-CV-BREATH"], ["J-CV-MOD1", "J-CV-MOD2"], ["J-CV-MOD3", "J-CV-MOD4"]]
+    status: nominal
+    source: "[adr 0024] rows top to bottom, left then right: PITCH and BREATH on the row under the knobs that shape breath; MOD 1-4 below, read like text"
+
+# ---------------------------------------------------------------- rules ----
+# The thresholds module.scad's DRC measures against. Each is a design choice
+# or a banked limit, never a measured value.
+rules:
+  web_min:
+    value: 3.5
+    status: nominal
+    source: "[adr 0024] the least aluminium between two cuts of DIFFERENT parts, or a cut and the panel edge: above the 3.09 ADR 0004 rejected ('a fit the panel passes and a stiffness test it does not') and the ~3.1 of a toggle beside the flange, below the 4.52 it accepted for the LED. Cuts inside one part's own pattern (the NE8FAV's bore and screws) and the standard mounting slots are exempt"
+  knob_gap_min:
+    value: 3.0
+    status: settled
+    source: "[adr 0004] three knobs across with 3 mm gaps"
+  plug_gap_min:
+    value: 2.0
+    status: nominal
+    source: "[adr 0024] the least air between two patch-plug grips, or a grip and a knob, so each can be pulled without dragging the next"
+  knob_edge_min:
+    value: 1.0
+    status: nominal
+    source: "[adr 0024] a knob at its 14 mm budget this far inside the panel's side edge, so it cannot foul the neighbouring module's knob"
+  legend_h:
+    value: 3.0
+    status: nominal
+    source: "[adr 0024] the least height of a legend zone: 2.0 mm text (a common Eurorack legend size [from memory]) with 0.5 above and below"
+  legend_w:
+    value: 8.0
+    status: nominal
+    source: "[adr 0024] the least width of a jack's side legend zone: 'BREATH' at 2.0 mm text [from memory]"
+  front_clear:
+    value: 1.0
+    status: nominal
+    source: "[adr 0024] the least air between two things on the panel's face that are not knobs or plugs (nuts, screw heads, the toggle's sweep, the NE8MX)"

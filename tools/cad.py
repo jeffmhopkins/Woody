@@ -3,7 +3,7 @@
 The instrument body's CAD pipeline: parameters in, renders and cut files out,
 and a check that every output still matches the source it claims to show.
 
-    python3 tools/cad.py params    # regenerate mechanical/cad/generated/params.scad
+    python3 tools/cad.py params    # regenerate mechanical/cad/generated/*params.scad
     python3 tools/cad.py build     # params, then every STALE output (--all: every output)
     python3 tools/cad.py build hero plan-top   # ...or just these, stale or not
     python3 tools/cad.py check     # exit 1 if anything is stale, missing or hand-edited
@@ -693,7 +693,7 @@ def cmd_build(names, all_):
 
 def problems_for(o, row):
     if row is None:
-        return [f"{o['name']}: never built - no row in {LEDGER}"]
+        return [f"{o['name']}: never built - no row in {ledger_of(o.get('_spec', SPEC))}"]
     if not os.path.exists(os.path.join(ROOT, o["out"])):
         return [f"{o['name']}: {o['out']} is missing"]
     if row["out"] != o["out"]:
@@ -805,7 +805,7 @@ def main(argv):
     cmd, rest = argv[0], argv[1:]
     if cmd == "params":
         write_params()
-        print(f"wrote {PARAMS}")
+        print(f"wrote {', '.join(p for p, _, _ in PARAM_SETS)}")
         return 0
     if cmd == "build":
         all_ = "--all" in rest

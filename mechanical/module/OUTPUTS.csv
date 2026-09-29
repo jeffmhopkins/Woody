@@ -1,0 +1,2 @@
+name,kind,out,fingerprint,out_sha256,provisional,built,tool,inputs
+module-ne8fav-mesh,mesh,mechanical/cad/vendor/ne8fav.stl,904b5295349c4811,206169bc22ed51d6,,2026-09-29,gmsh 4.15.2,datasheets/connectors/NEUTRIK-NE8FAV-3D.stp@d1770d0b6233
