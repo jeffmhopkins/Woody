@@ -82,7 +82,9 @@ TAIL   dev board on a passive carrier: MCU, IMU, 8×8 matrix, breath sensor,
        ADC, reference, umbilical connector, USB-C. NO shift registers.
        (since ADR 0017: sensor, reference and buffer at the main board's
        mouth end; the Matrix is on the lid, 24-way ribbon (0018) to J-MCU; the
-       umbilical is etherCON -> patch lead -> J-UMB on the main board)
+       umbilical is etherCON -> patch lead -> J-UMB on the main board;
+       since ADR 0021 the etherCON is soldered to an adapter that J-UMB,
+       a right-angle header, joins to the main board - no cable inside)
         |
         |  (since ADR 0017: thumbs on traces, key boards on 12-way ribbons,
         |   1.27 mm IDC since its 2026-09-27 amendment)

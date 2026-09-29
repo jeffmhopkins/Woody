@@ -40,7 +40,7 @@ The `Dir` and `Peer` columns are defined once in
 | `CS_MOD` | instrument → module | out | `J-MCU` IO34 → `module/digital-and-supervision` | `umbilical-pinmap`, `spi-series-r` | On `J-UMB`. Pulled **up**, both sides. The one that must not glitch. Shares a pair with `DIG_GND`. **Not `CS_ADC`**, the MCP3202's, which never leaves the carrier |
 | `DIG_GND` | instrument ↔ module | ref | `carrier/carrier` (its `PWR_GND`, at `J-UMB`) ↔ `module/power-entry` | `umbilical-pinmap`, `dig-gnd-topology` | On `J-UMB` pin 8. `CS_MOD`'s return partner. **Tied to the main board's ground at `J-UMB`** (ADR 0018). Where it ties at the **module** end is `dig-gnd-topology`, still disputed |
 | `U-TVS-SPI` | instrument | — | — | — | This circuit's own part: on all three signals, to `PWR_GND`, at the connector |
-| `J-UMB`, `CBL-UMB-PATCH` | instrument | — | — | `umbilical-pinmap` | This circuit's own parts: the umbilical's connector on the main board and the straight patch lead to it from the etherCON's rear socket. See *The instrument's connector*, below |
+| `J-UMBILICAL-INST`, `PCB-UMB-ADAPTER`, `J-UMB` | instrument | — | — | `umbilical-pinmap` | This circuit's own parts: the instrument's etherCON, the adapter board it is soldered to, and the header that joins the adapter to the main board. See *The instrument's connector*, below |
 | `MISO` | instrument | — | `carrier/breath-adc` | — | IO37 is the MCP3202's `DOUT` and **never leaves the board**. ADR 0004 deleted `MISO` from the umbilical, which is why nothing reads the DAC back |
 | SPI2 host | instrument | — | `carrier/breath-adc`, `module/dac8568` | `loop-budget` | One host, two devices, two clocks. The ADC's limit is a fact about a part on the instrument board that constrains the link's budget |
 | `SCLK_DAC`, `DIN`, `SYNC` | module | — | `module/digital-and-supervision` → `module/dac8568` | — | **Not sourced here.** The 74AHCT125 is on `module/digital-and-supervision`, which owns that row; these three are a module-board net and do not cross the umbilical. The DAC-side three of the six `R-SPI-PULL` — this circuit's `bom.csv` — sit on them |
@@ -48,34 +48,36 @@ The `Dir` and `Peer` columns are defined once in
 | bus `+5V` after `FB4`/`C4` | module | — | `module/power-entry` → `module/digital-and-supervision` | — | Supplies the 74AHCT125 and nothing else, and reaches no part of this circuit. **Open**, and the item stayed on `module/digital-and-supervision` because it is a rail and connector question about that board, not about this link |
 | `OE_MOD` ×4 | module | — | `module/digital-and-supervision` | — | The module buffer's four enables, tied to `GND` and permanently enabled. On that circuit's part, so they reach nothing here; the circuit that used to gate them, `module/link-supervision`, is not fitted. **Not `OE_INST`** |
 
-## The instrument's connector — `J-UMB` and the patch lead
+## The instrument's connector — the etherCON on its adapter, and `J-UMB`
 
-*Added 2026-09-26 with ADR 0017; not part of the verbatim consolidation below.*
+*Added with ADR 0017 and rewritten with ADR 0021; not part of the verbatim
+consolidation below.*
 
-The etherCON at the instrument end, `J-UMB-INST` in
-[`netlist.yaml`](netlist.yaml), is in the tail cap and is a feedthrough: its
-back is an RJ45 socket. `CBL-UMB-PATCH` runs from that socket to **`J-UMB`**
-on the main board's tail end, straight, pin N to pin N. So:
+The etherCON at the instrument end is `J-UMBILICAL-INST`, an NE8FAV (`J-UMB-INST`
+in [`netlist.yaml`](netlist.yaml)). It sits behind the tail cap and is
+soldered to a small board of its own, `PCB-UMB-ADAPTER`, whose tracks run its
+pin N to pin N of **`J-UMB`**. `J-UMB` is a right-angle pin header soldered into
+both the adapter and a tongue of the main board. There is no cable and no
+mated contact inside the body. So:
 
-- **"`J-UMB` pin N" on every instrument page is the main board's connector,
-  and the same conductor as the etherCON's pin N.** The pin map is
-  `umbilical-pinmap` at every connector in the chain, and the patch lead has
-  none of its own to get wrong — the same argument this circuit makes for
-  `CABLE-UMB`.
-- **The pairs stay twisted to the housing.** The pairing is the argument on
-  this page, and the patch lead is the last stretch of the same line; a few
-  millimetres untwisted at the housing is all a crimp needs.
-- **`J-UMB` sits where the lead's minimum bend radius lands it**
-  (`mechanical/drc.echo` *"J-UMB on the main board, the patch lead at its bend
-  radius"*), and the clamps drawn "at the connector" — `U-TVS-SPI` here,
-  `D-REVSHUNT` and `D-TVS-PWR` on
-  [`power-entry-instrument`](../../carrier/power-entry-instrument/power-entry-instrument.md) — are at `J-UMB`.
-- **Its contacts are rated above the module's current-limit trip**
-  (`R-ILIM`), not only `umbilical-current`. A hard short folds the limit back
-  (the `R-ILIM` row gives the floor), so the worst case is an overload just
-  under the trip, which the load switch carries indefinitely. A 1.25 mm-pitch
-  latching family is ~1.0 A per contact `[from memory]` and may fail that;
-  decided at M4 with the part.
+- **"`J-UMB` pin N" on every instrument page is the main board's end of the
+  umbilical, and the same conductor as the etherCON's pin N.** The pin map is
+  `umbilical-pinmap` at every connector in the chain, and the adapter has
+  none of its own to get wrong: eight straight tracks, the same argument this
+  circuit makes for `CABLE-UMB`.
+- **The pairs stay side by side on the adapter.** The pairing is the argument
+  on this page, and the adapter's few millimetres are the last stretch of the
+  same line.
+- **The clamps drawn "at the connector"** — `U-TVS-SPI` here, `D-REVSHUNT`
+  and `D-TVS-PWR` on
+  [`power-entry-instrument`](../../carrier/power-entry-instrument/power-entry-instrument.md) —
+  are on the main board at `J-UMB`, not on the adapter.
+- **The +12 V and `PWR_GND` path is rated above the module's current-limit
+  trip** (`R-ILIM`), not only `umbilical-current`. A hard short folds the
+  limit back (the `R-ILIM` row gives the floor), so the worst case is an
+  overload just under the trip, which the load switch carries indefinitely.
+  The etherCON's own contacts are the limit here, at the rating in
+  `J-UMBILICAL-INST`'s row; `J-UMB`'s header pins carry more.
 - **`J-UMB` pin 8, `DIG_GND`, is the main board's ground at the instrument
   end** (owner, 2026-09-26,
   [ADR 0018](../../../docs/decisions/0018-main-board-wiring-decisions.md)): a
@@ -92,11 +94,10 @@ on the main board's tail end, straight, pin N to pin N. So:
 
 **Netlisted here, beside both etherCONs**, because it carries this circuit's
 pin map and all eight of its nets: each net is `J-UMB`, `J-UMB-INST` and
-`J-UMB-MOD` pin N, and the carrier's nets reach it as this circuit's ports,
-as they reached the etherCON before. Both parts are open — `J-UMB` is an
-envelope in `config/body.yaml` `[from memory]`, and the lead is a length and a
-bend radius — and are decided at M4 with the parts (the rows in this
-circuit's [`bom.csv`](bom.csv)).
+`J-UMB-MOD` pin N, and the carrier's nets reach it as this circuit's ports.
+`J-UMB`'s part is open — its insulator is an envelope in `config/body.yaml`
+`boards.umb_joint_*` `[from memory]` — and is decided at M4 with the part
+(the rows in this circuit's [`bom.csv`](bom.csv)).
 
 ---
 

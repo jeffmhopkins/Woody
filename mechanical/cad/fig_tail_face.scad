@@ -1,6 +1,6 @@
-// The tail face from outside: etherCON (rotated, ADR 0009), the USB-C slot in
-// its overmould pocket, and
-// the margins the ADR argues from.
+// The tail face from outside: the etherCON (an NE8FAV, latch up, ADR 0021) in
+// its recess, the USB-C slot in its overmould pocket, and the margins the
+// ADRs argue from.
 include <woody_body.scad>
 use <lib/annot.scad>
 figure = true;
@@ -18,5 +18,7 @@ label([x, usb_c[0], usb_c[1] + max(usb_sz[1], usb_om[1]) / 2 + 2], "USB-C (tbd)"
 // The overmould pocket's floor is oak, the colour of the face, so dimension it.
 d([usb_c[0] - usb_om[0] / 2, usb_c[1] - usb_om[1] / 2], [usb_c[0] + usb_om[0] / 2, usb_c[1] - usb_om[1] / 2], str("pocket ", usb_om[0], " x ", usb_om[1]), [0, -3]);
 label([x, ec_c[0], ec_c[1]], str("bore ", ethercon_bore_d), view = "right", size = 1.8, c = "White");
+// The recess's floor is oak too: it leaves the connector its panel.
+label([x, ec_c[0], ec_c[1] - ec_fl[1] / 2 - 3.5], str("recess ", ec_recess_d, " deep, ", ec_panel_t, " mm panel"), view = "right", size = 1.5);
 }
 at_origin() fig();

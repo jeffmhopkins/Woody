@@ -112,9 +112,10 @@ boards_chain_plug_l = 11.81;  // nominal; the FFSD socket's length, positions pe
 boards_mcu_conn_l = 18.5;  // tbd; a 2 x 12 1.27 mm box header, side entry, across the body: 11 x 1.27 = 13.97 between end pins [calc] plus the shroud's end walls [from memory] (ADR 0018)
 boards_mcu_conn_w = 6.0;  // tbd; the same header along the body, with its latch [from memory]
 boards_mcu_conn_h = 5.0;  // tbd; the same header's height [from memory]
-boards_umb_conn_l = 12.0;  // tbd; an 8-way latching wire-to-board header, side entry, across the body [from memory]
-boards_umb_conn_w = 7.0;  // tbd; the same header along the body [from memory]
-boards_umb_conn_h = 6.0;  // tbd; the same header's height [from memory]
+boards_umb_adapter_t = 1.6;  // tbd; the adapter board's thickness, a standard 2-layer board [from memory]; the NE8FAV's pin tails reach through it
+boards_umb_joint_d = 2.5;  // tbd; J-UMB's insulator along the body, behind the adapter: a 2.54 mm right-angle header's 2.5 mm square insulator [from memory]
+boards_umb_joint_h = 2.5;  // tbd; the same insulator's height on the main board [from memory]
+boards_umb_joint_row_h = 1.27;  // tbd; the header's pin row above the main board, at the insulator's middle [from memory]; where the row meets the adapter
 boards_key_board_t = 1.2;  // nominal; [calc] docs/reference/ks33-geometry.md: the pins end 5.10 below the seat and the board top is switch.pcb_below_seat below it, so a 1.6 mm board leaves ~0.1 mm of pin to solder, and a 1.2 mm board 0.3-0.7 mm across switch.pcb_below_seat_window. 1.2 mm is a standard thickness at every board house [from memory]
 boards_kb_end_margin = 6.0;  // tbd; a key board's MOUTH end past its first switch cutout, along the body: room for the corner mounts' studs and spacers clear of that cutout (drc.echo 'key-board studs clear of the plate's edges and cutouts', 'key-board spacers clear of the switch cutouts') [drawing convention]
 boards_kb_tail_margin = 10.1;  // nominal; a key board's TAIL end past its last switch cutout, longer than the mouth end: the last keys (LH4/LH5, RH6) reach the board's corners across the body, and each tail corner's stud and spacer must clear that key's cutout. drc.echo 'key-board tail margin, least' prints how short it may be; held here so the boards' outlines, and the layouts, do not move before M3 fixes the keys
@@ -129,7 +130,7 @@ openings_matrix_lip = 2.0;  // tbd; oak lip the acrylic rests on, per side - the
 openings_matrix_acrylic_t = 3.0;  // tbd; frosted acrylic window thickness [from memory: common sheet]; must leave an oak lip under it
 openings_usb_slot_w = 12.5;  // tbd; panel cutout for a panel-mount USB-C extension receptacle [from memory]
 openings_usb_slot_h = 7.0;  // tbd; as usb_slot_w [from memory]
-openings_usb_slot_portrait = true;  // tbd; [calc] portrait takes usb_slot_h across instead of usb_slot_w: landscape was flange 31 + web 2 + slot 12.5 = 45.5 in a 45 interior; portrait is 31 + 2 + 7 = 40, and 12.5 tall in the cavity's height. Chosen over moving the etherCON (already against the side), widening the body, or a backing plate. Un-rotating the etherCON would give 5 mm back across, but its flange would then stand 31 tall in a cavity 27 tall behind the cap (drc 'etherCON body inside the cavity height')
+openings_usb_slot_portrait = true;  // tbd; [calc] portrait takes usb_slot_h across instead of usb_slot_w, and usb_slot_w tall in the cavity's height; drc.echo gives the lane and the webs either way
 openings_usb_plug_l = 15.0;  // tbd; RIGHT-ANGLE USB-C plug on the extension (2026-09-26): the Matrix's edge to the far side of the moulding, where the lead turns across the body [from memory]. A straight plug is 25-30 and, doubled by the centred Matrix, added ~24 mm of body
 openings_matrix_usb_to_tail = false;  // tbd; false = the Matrix's USB-C edge faces the MOUTH, so its plug runs under the key boards instead of into the connector's housing; datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-dimensions.jpg shows the port overhanging one edge
 openings_usb_ext_depth = 20.0;  // tbd; the extension receptacle's body behind the panel [from memory]
@@ -138,23 +139,22 @@ openings_usb_panel_t = 1.5;  // tbd; oak left under the overmould pocket, the pa
 openings_usb_nose_l = 2.0;  // tbd; how far the receptacle's shell stands proud of its clamping shoulder, i.e. the thickest panel it can sit flush in [from memory]
 openings_usb_mount = "earless";  // tbd; earless | ears. 'ears' is checked against usb_ear_pitch and fails at this cavity height; see the note above
 openings_usb_ear_pitch = 29.0;  // tbd; screw-ear pitch of a typical panel-mount USB-C extension, ~28-30 [from memory]; used only to show why the ears do not fit on end
-ethercon_bore_d = 24.0;  // settled; [ds] Neutrik ST-NE8FDP - chassis bore 24.0 min (ADR 0009)
-ethercon_flange_w = 26.0;  // settled; [ds] NE8FDP flange 26 x 31
-ethercon_flange_h = 31.0;  // settled; [ds] NE8FDP
-ethercon_hole_dx = 19.0;  // settled; [ds] NE8FDP - two diagonal 3.2 holes at 19 x 24
-ethercon_hole_dy = 24.0;  // settled; [ds] NE8FDP
-ethercon_hole_d = 3.2;  // settled; [ds] NE8FDP
-ethercon_depth = 36.3;  // settled; [ds] NE8FDP.dxf - cap's inside face to the back of the rear RJ45 socket, flange and chassis both behind
-ethercon_housing_w = 25.5;  // settled; [ds] NE8FDP.dxf - main housing width (drawn portrait)
-ethercon_housing_h = 27.64;  // settled; [ds] NE8FDP.dxf - main housing height (drawn portrait)
-ethercon_housing_d = 19.8;  // settled; [ds] NE8FDP.dxf - cap's inside face to the back of the main housing, flange and chassis both behind
-ethercon_socket_w = 15.9;  // settled; [ds] NE8FDP.dxf - rear RJ45 socket width
-ethercon_socket_h = 13.2;  // settled; [ds] NE8FDP.dxf - rear RJ45 socket height; it runs from 0.35 off the axis to the housing's face, on the side away from the latch
-ethercon_socket_toward_centre = false;  // tbd; with the 90-degree rotation the socket's offset lies across the body; AWAY from the centre, so the patch plug runs beside the Matrix's USB-C plug, not under it - the two cannot stack in the height under the Matrix
-ethercon_rj45_plug_l = 30.0;  // tbd; mated RJ45 plug + strain-relief boot, beyond the etherCON's rear face [from memory: plug ~21, boot ~10-15]
-ethercon_rj45_plug_w = 14.0;  // tbd; RJ45 boot envelope across [from memory]
-ethercon_rj45_plug_h = 12.0;  // tbd; RJ45 boot envelope, height [from memory]
-ethercon_rotated = true;  // settled; [adr] ADR 0009 - 'Rotate it 90 degrees. Settled off the drawing.'
+ethercon_bore_d = 22.0;  // settled; [ds] ST-NE8FAV - panel cut out (rear side), bore 22 min
+ethercon_flange_w = 25.0;  // settled; [ds] ST-NE8FAV front view - flange 25 x 25
+ethercon_flange_h = 25.0;  // settled; [ds] ST-NE8FAV side view - 25, the axis at 12.5 from its lower edge
+ethercon_hole_dx = 19.8;  // settled; [ds] ST-NE8FAV panel cut out - two diagonal 3.2 min holes at 19.8 +/-0.1 x 19.8 +/-0.1, upper left and lower right seen from the front
+ethercon_hole_dy = 19.8;  // settled; [ds] ST-NE8FAV
+ethercon_hole_d = 3.2;  // settled; [ds] ST-NE8FAV
+ethercon_panel_max = 3.0;  // settled; [ds] NEUTRIK-NE8FAV-DATASHEET.pdf - 'Panel thickness max. 3 mm'. The oak tail cap is thicker, so a recess from outside leaves this much oak where the connector mounts
+ethercon_pcb_setback = 18.3;  // settled; [ds] ST-NE8FAV side view - flange front face to the PCB's front face
+ethercon_nose_l = 2.7;  // settled; [ds] ST-NE8FAV side view - 21 from the PCB face to the nose's front, less the 18.3 to the flange face [calc]; it stays inside a 3 mm panel's bore
+ethercon_tab_w = 10.0;  // settled; [ds 3D] NEUTRIK-NE8FAV-3D.stp - the tab spans +/-5.0 across [calc, read 2026-09-29]
+ethercon_tab_top = 16.6;  // settled; [ds 3D] NEUTRIK-NE8FAV-3D.stp - 16.61 above the axis; the drawing's front view shows it above the flange's 12.5
+ethercon_tab_front = 6.8;  // settled; [ds 3D] NEUTRIK-NE8FAV-3D.stp - 6.8 in front of the flange face; the drawing's 24.3 overall is to the same tab, from the rear latch
+ethercon_pin_rows = [2.11, 4.65];  // settled; [ds] ST-NE8FAV PCB layout - the two contact rows, 2.54 apart, the upper at 4.65 above the peg line through the axis
+ethercon_g_below = 10.55;  // settled; [ds] ST-NE8FAV PCB layout - G (d1.2) 15.2 below the upper row [calc: 15.2 - 4.65]
+ethercon_recess_margin = 1.0;  // tbd; the tail cap's outside recess round the flange's outline and the PUSH tab [placeholder]
+ethercon_rotated = false;  // settled; [adr] ADR 0021 - the NE8FAV's flange is square, so ADR 0009's reason to turn the NE8FDP is gone; latch up, the PUSH tab on top
 ethercon_offset_y = -7.0;  // tbd; placeholder - off-centre so the USB-C slot fits beside it
 hardware_fastener_count = 6;  // settled; [adr] ADR 0009 - six M3 from the bottom into the plate
 hardware_fastener_clear_d = 3.4;  // nominal; M3 clearance, medium fit [from memory]
@@ -195,8 +195,6 @@ routing_trap_l = 12.0;  // tbd; trap length: 10 mm bore x 12 mm = 0.94 mL, insid
 routing_tube_lane = "left";  // tbd; which side the tube and trap run on inside the mouth band (ADR 0017: sensor on the far side from the tube); there are no looms since ADR 0017
 routing_mcu_ribbon_w = 15.24;  // tbd; 24-way 0.635 mm ribbon for a 1.27 mm dual-row header [calc: 24 x 0.635]: allocation in hardware/carrier/bom.csv CBL-MCU-RIBBON (ADR 0018)
 routing_mcu_ribbon_t = 0.8;  // tbd; fine-pitch ribbon thickness [from memory]
-routing_umb_cable_od = 4.0;  // tbd; a slim Cat6 patch lead [from memory]; the patch plug is CBL-UMB-PATCH's plug in the etherCON's rear socket
-routing_umb_bend_r_per_od = 4.0;  // tbd; minimum bend radius as a multiple of the cable's diameter, the usual rule for twisted-pair patch cable [from memory]
 routing_chain_ribbon_w = 7.62;  // nominal; [calc] 12 conductors at 0.635 mm, the FFSD cable's 1.27 mm IDC pitch over two rows
 routing_chain_ribbon_t = 0.8;  // tbd; 30 AWG flat cable's thickness [from memory]
 routing_chain_bend_r = 1.0;  // tbd; the tightest turn the flat cable takes where it leaves a socket and turns along the body, and the least the fold may be (drc.echo 'key-chain ribbon fold no tighter than its bend radius') [drawing convention; 30 AWG PVC flat cable folds flatter than this]
@@ -211,5 +209,5 @@ lighting_strip_per_m = 60;  // tbd; LEDs per metre; hardware/unplaced.csv LED-ST
 
 // Every value above with status tbd - a placeholder, not a number any
 // document gives. The DRC report lists these so no result hides one.
-tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_edge_r", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_mouth_extra", "layout_tail_clear", "layout_underside_clear", "layout_lh_offsets", "layout_rh_offsets", "layout_lt_rest_under", "layout_lt_rest", "layout_rt_rest_under", "layout_rt_rest", "switch_thumb_pcb_below_seat", "switch_keycap_top_above_seat", "switch_keycap_top_w", "switch_keycap_wall", "switch_keycap_top_t", "switch_keycap_boss_below_top", "switch_keycap_socket_d", "switch_cluster_pcb_w", "switch_pcb_t", "boards_tall_l", "boards_tall_w", "boards_tall_h", "boards_sensor_port_offset", "boards_sensor_lead_row", "boards_sensor_lead_h", "boards_chain_plug_proud", "boards_mcu_conn_l", "boards_mcu_conn_w", "boards_mcu_conn_h", "boards_umb_conn_l", "boards_umb_conn_w", "boards_umb_conn_h", "boards_kb_end_margin", "boards_board_clear", "boards_main_neck_min", "boards_standoff_d", "boards_matrix_harness_h", "boards_matrix_under_h", "boards_matrix_led_h", "openings_matrix_lip", "openings_matrix_acrylic_t", "openings_usb_slot_w", "openings_usb_slot_h", "openings_usb_slot_portrait", "openings_usb_plug_l", "openings_matrix_usb_to_tail", "openings_usb_ext_depth", "openings_usb_overmold", "openings_usb_panel_t", "openings_usb_nose_l", "openings_usb_mount", "openings_usb_ear_pitch", "ethercon_socket_toward_centre", "ethercon_rj45_plug_l", "ethercon_rj45_plug_w", "ethercon_rj45_plug_h", "ethercon_offset_y", "hardware_fastener_head_d", "hardware_fastener_head_h", "hardware_kb_spacer_l", "hardware_kb_spacer_l_tol", "hardware_kb_mount_inset", "hardware_fastener_inset", "hardware_ubolt_rod_d", "hardware_ubolt_hole_clear", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_ubolt_nut_af", "hardware_ubolt_nut_h", "hardware_backplate_t", "hardware_backplate_clear", "routing_tube_od", "routing_trap_d", "routing_trap_l", "routing_tube_lane", "routing_mcu_ribbon_w", "routing_mcu_ribbon_t", "routing_umb_cable_od", "routing_umb_bend_r_per_od", "routing_chain_ribbon_t", "routing_chain_bend_r", "routing_chain_slack", "lighting_strip_w", "lighting_strip_t", "lighting_strip_per_m"];
+tbd_params = ["stack_cap_clear", "stack_cap_holes", "stack_edge_r", "stack_side_inset", "stack_groove_depth", "stack_groove_clear", "ends_mouth_cap_t", "ends_tail_cap_t", "ends_tube_hole_d", "layout_mouth_extra", "layout_tail_clear", "layout_underside_clear", "layout_lh_offsets", "layout_rh_offsets", "layout_lt_rest_under", "layout_lt_rest", "layout_rt_rest_under", "layout_rt_rest", "switch_thumb_pcb_below_seat", "switch_keycap_top_above_seat", "switch_keycap_top_w", "switch_keycap_wall", "switch_keycap_top_t", "switch_keycap_boss_below_top", "switch_keycap_socket_d", "switch_cluster_pcb_w", "switch_pcb_t", "boards_tall_l", "boards_tall_w", "boards_tall_h", "boards_sensor_port_offset", "boards_sensor_lead_row", "boards_sensor_lead_h", "boards_chain_plug_proud", "boards_mcu_conn_l", "boards_mcu_conn_w", "boards_mcu_conn_h", "boards_umb_adapter_t", "boards_umb_joint_d", "boards_umb_joint_h", "boards_umb_joint_row_h", "boards_kb_end_margin", "boards_board_clear", "boards_main_neck_min", "boards_standoff_d", "boards_matrix_harness_h", "boards_matrix_under_h", "boards_matrix_led_h", "openings_matrix_lip", "openings_matrix_acrylic_t", "openings_usb_slot_w", "openings_usb_slot_h", "openings_usb_slot_portrait", "openings_usb_plug_l", "openings_matrix_usb_to_tail", "openings_usb_ext_depth", "openings_usb_overmold", "openings_usb_panel_t", "openings_usb_nose_l", "openings_usb_mount", "openings_usb_ear_pitch", "ethercon_recess_margin", "ethercon_offset_y", "hardware_fastener_head_d", "hardware_fastener_head_h", "hardware_kb_spacer_l", "hardware_kb_spacer_l_tol", "hardware_kb_mount_inset", "hardware_fastener_inset", "hardware_ubolt_rod_d", "hardware_ubolt_hole_clear", "hardware_ubolt_span", "hardware_ubolt_drop", "hardware_ubolt_nut_af", "hardware_ubolt_nut_h", "hardware_backplate_t", "hardware_backplate_clear", "routing_tube_od", "routing_trap_d", "routing_trap_l", "routing_tube_lane", "routing_mcu_ribbon_w", "routing_mcu_ribbon_t", "routing_chain_ribbon_t", "routing_chain_bend_r", "routing_chain_slack", "lighting_strip_w", "lighting_strip_t", "lighting_strip_per_m"];
 

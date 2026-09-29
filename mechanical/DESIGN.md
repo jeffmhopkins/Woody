@@ -14,7 +14,7 @@ regenerated on every build.
 Three kinds, and `config/body.yaml` marks every leaf with one:
 
 - **settled** — read off a banked document or decided in an ADR. The KS-33
-  geometry, the NE8FDP flange and holes, the Matrix board outline, the plate
+  geometry, the NE8FAV's flange, holes and footprint, the Matrix board outline, the plate
   thickness (the register's `plate-thickness`).
 - **nominal** — an ADR's working estimate: the oak thicknesses, the length
   budget, the side thickness.
@@ -101,30 +101,30 @@ Several things can claim each end, and the largest wins:
   first key board; or the breath sensor, which must stop short of the first
   thumb row's pins — and then the equal bands (below).
 - **Tail end:** the **LED matrix on the top face, centred** after the keys
-  (owner, 2026-09-26), with the etherCON's housing behind it; or the key
-  board, the last fastener pair, the patch plug and the etherCON's depth in a
-  row; or the right-thumb cluster against the tail cap. (There is no service
+  (owner, 2026-09-26), with the etherCON and its adapter behind it; or the
+  key board, the last fastener pair, J-UMB, the adapter and the etherCON's
+  depth in a row; or the right-thumb cluster against the tail cap. (There is no service
   cover since 2026-09-26.)
 - **The tail is stacked** (owner, 2026-09-26: "it's unacceptable to go this
   long" and "the matrix can be up higher out of the way and still allow the
   connectors"). The Matrix **sits against the oak top** under its window,
   wired by a ribbon: the key plate stops short of it, so the board's top
   face is on the oak and its LEDs stand up into the window opening, under the
-  acrylic (owner, same day: "led matrix tighter to the acrylic"). Under it, side by side: the extension's **right-angle USB-C plug**
-  off its mouth edge, and — because the NE8FDP is a feedthrough with an RJ45
-  socket at its back — the etherCON's rear socket and a patch lead's plug,
-  down the left side lane. Only the connector's full-height housing queues
-  behind the Matrix. The connector **stands on the floor**, and the body is
-  thick enough for it (owner, same day: set the body rather than pocket the
-  oak — `body-thickness`, ADR 0009). Past the plate's end the ceiling is the
-  oak top, so it is the connector's flange, floor to oak, that sets the
-  thickness. `drc.echo` itemises "behind the Matrix", confirms the socket
-  passes under, and gives the thinnest body that works. **With the matrix centred, anything in front of or
+  acrylic (owner, same day: "led matrix tighter to the acrylic"). Under it:
+  the extension's **right-angle USB-C plug** off its mouth edge, and the
+  main board's tongue with J-UMB on it. Behind it, the etherCON (an NE8FAV,
+  ADR 0021) on its **adapter board**, which stands the connector's full
+  height parallel to the tail cap. The connector **stands on the floor**, and
+  the body is thick enough for it (owner, same day: set the body rather than
+  pocket the oak — `body-thickness`, ADR 0009). Past the plate's end the
+  ceiling is the oak top, so it is the connector's flange, floor to oak,
+  that sets the thickness. `drc.echo` itemises "behind the Matrix", confirms
+  J-UMB passes under it, and gives the thinnest body that works. **With the matrix centred, anything in front of or
   behind it counts twice, and the gap between the hands copies the result** —
   a straight USB-C plug cost about 24 mm of body, which is why the plug is
   right-angle (`openings.usb_plug_l`).
-- **The last fastener pair** stands just in front of the tail equipment,
-  where the patch plug is not yet in the side lane.
+- **The last fastener pair** stands just in front of the tail equipment;
+  the main board's tongue is notched round it.
 - **One LED strip, on the main board** (ADR 0016, ADR 0017): LEDs up down
   the board's centreline, between the thumb switches' two rows of pins, from
   past the breath sensor to the board's tail end, lighting both sides through
@@ -149,7 +149,8 @@ Several things can claim each end, and the largest wins:
   registers and the carrier's circuits are on one board at the thumb level,
   from the mouth cap to the end of the right hand, the full width inside the
   sides. Its parts face up; the two key boards connect to it by ribbons (below);
-  the Matrix's ribbon and the patch lead end on it. It has holes
+  the Matrix's ribbon ends on it, and a **tongue** runs on from its tail end
+  to the etherCON's adapter, carrying J-UMB (ADR 0021). It has holes
   over the U-bolt's nuts, notches at the screws (one bite where a notch and a
   hole would leave a sliver between them), and standoffs off the oak or
   the thumb plates wherever nothing else is (*"main board standoffs found
@@ -198,28 +199,30 @@ the questions M4 has to answer, and several contradict something an ADR
 currently says. None has been fixed by editing a document: fixing them is a
 decision, not a correction.
 
-1. **The etherCON panel stack — resolved by the owner.** ADR 0009 put the
-   connector's screws through the oak tail cap into a backing plate, which
-   exceeded the NE8FDP's maximum panel. The owner freed the mounting
-   (2026-09-26): flange and chassis sit behind the tail cap, and the panel
-   limit no longer applies.
+1. **The etherCON panel stack — resolved by a recess.** The NE8FAV mounts
+   from behind a panel of `ethercon.panel_max` at most, and the oak tail cap
+   is thicker. A router pocket from outside leaves exactly that much oak
+   where the flange clamps; it takes the flange's outline and the PUSH tab,
+   which stands in it (ADR 0021). Like the USB-C overmould pocket it is not
+   in the tail cap's DXF, which carries the through-cuts; the tail-face
+   figure and *"tail cap recess for the etherCON inside the tail face"* give
+   it. *"etherCON PUSH tab against the tail face"* says how far the tab
+   stands proud.
 2. **The etherCON body is taller than the cavity — resolved by the owner.**
-   The body is now thick enough to take the connector standing on the floor,
-   with its rear socket under the Matrix (`body-thickness`, 2026-09-26).
+   The body is now thick enough to take the connector standing on the floor
+   (`body-thickness`, 2026-09-26).
    *Rules: "etherCON body inside the cavity height", "body thickness takes
    the etherCON on the floor".*
 3. **The Matrix's USB-C reaches the tail through an extension** (owner,
    2026-09-26). Its port cannot reach the face — the etherCON fills the
    tail's depth — so a panel-mount USB-C extension runs to a receptacle
    beside the connector (`CBL-USB-EXT`). **The receptacle stands on end**
-   (`openings.usb_slot_portrait`, 2026-09-26): the rotated etherCON's flange
-   already sits against one side, and a landscape slot beside it left too
-   little oak to the flange on the face the cables plug into. On end it sits
-   centred in the lane between the flange and the other side; USB-C is
-   reversible, so the user never sees the difference. Moving the etherCON
-   (already against the side), widening the body or a backing plate were
-   the alternatives; un-rotating it would give the width back but stand its
-   flange taller than the cavity behind the cap.
+   (`openings.usb_slot_portrait`, 2026-09-26): the etherCON sits off-centre
+   toward one side, and on end the receptacle sits centred in the lane
+   between its recess and the other side; USB-C is reversible, so the user
+   never sees the difference. *"USB-C extension receptacle beside the
+   etherCON flange"* and *"tail cap web between the USB-C cutout and the
+   etherCON recess"* give the lane and the oak between them.
    **The plug has to reach it, and it has no screw ears** (2026-09-26). The
    tail cap is much thicker than the panel a panel-mount receptacle is made
    for, and a plug's overmould is bigger than the receptacle's cutout, so the
@@ -331,18 +334,20 @@ only as good as those envelopes. Group the report's lines by these causes
 5. **The Matrix and the umbilical are wired onto the main board's tail
    end** (owner, 2026-09-26). The Matrix, on the lid, has a flat 24-way
    ribbon soldered to its pad rows, two test points and two button pads
-   (allocation on `CBL-MCU-RIBBON`, ADR 0018): out past its mouth edge above the patch plug, down in the gap
-   between the right-hand key board's end and the plug, and level into
-   J-MCU beside the regulator block; it unplugs there when the lid comes
-   off. The etherCON's patch lead runs from its plug in an S-bend at the
-   lead's minimum bend radius (`routing.umb_bend_r_per_od`) into J-UMB, which
-   the model places as far in as that bend needs (*"J-UMB on the main
-   board…"*). The LED strip stops short of J-MCU. The rows are `J-MCU` and
-   `CBL-MCU-RIBBON` (`hardware/carrier/`), `J-UMB` and `CBL-UMB-PATCH`
-   (`hardware/interfaces/spi-link/`).
-6. **The tail is clear.** The etherCON, its rear socket, the patch plug,
-   the USB-C plug, receptacle and lead, the Matrix and the last fastener pair
-   meet nothing, and the connector fits the cavity without cutting the oak.
+   (allocation on `CBL-MCU-RIBBON`, ADR 0018): out past its mouth edge, down
+   in the gap between the right-hand key board's end and the tail
+   equipment, and level into J-MCU beside the regulator block, over the
+   tongue, which keeps its parts out from under it; it unplugs there when
+   the lid comes off. **The umbilical has no cable inside the body** (ADR
+   0021): the etherCON is soldered to its adapter, and J-UMB, a right-angle
+   header, is soldered into the adapter and the tongue (*"J-UMB on the main
+   board's tongue…"*, *"J-UMB's row lands on the adapter clear of the
+   etherCON's footprint"*). The LED strip stops short of J-MCU. The rows are
+   `J-MCU` and `CBL-MCU-RIBBON` (`hardware/carrier/`), `J-UMBILICAL-INST`,
+   `J-UMB` and `PCB-UMB-ADAPTER` (`hardware/interfaces/spi-link/`).
+6. **The tail is clear.** The etherCON and its adapter, J-UMB, the USB-C
+   plug, receptacle and lead, the Matrix and the last fastener pair meet
+   nothing, and the connector fits the cavity without cutting the oak.
 
 Found by the check and fixed as model bugs, not findings: the oak bottom's
 missing counterbores, thumb boards drawn with switch holes, the display cut

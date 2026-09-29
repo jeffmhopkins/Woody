@@ -59,7 +59,10 @@ one big long board?")
   a flat ribbon from the Matrix's pad rows to J-MCU *(24-way since
   [ADR 0018](0018-main-board-wiring-decisions.md))*, unplugged when
   the lid comes off; the etherCON's patch lead to J-UMB, placed where the
-  lead's minimum bend radius lands it (`mechanical/DESIGN.md`).
+  lead's minimum bend radius lands it (`mechanical/DESIGN.md`) *(since
+  [ADR 0021](0021-pcb-mount-ethercon.md): no patch lead — the etherCON is
+  soldered to an adapter, and J-UMB, a right-angle header, joins the adapter
+  to a tongue of this board)*.
 - **The LED strip runs down the centreline** (ADR 0016's strip, moved from the
   board's edge), from past the sensor to the board's tail end.
 - **Holes in the board over the U-bolt's nuts**, which stand above its
@@ -96,7 +99,8 @@ one big long board?")
 - **The dev board is not socketed, and there is no loom.** The Matrix's
   ribbon unplugs at `J-MCU` and is desoldered to swap the board
   (`hardware/carrier/carrier.md`); the patch lead plugs into `J-UMB`
-  (`hardware/interfaces/spi-link/`). The Matrix's pad rows have one ground
+  (`hardware/interfaces/spi-link/`) *(since ADR 0021: `J-UMB` is soldered to
+  the etherCON's adapter; nothing unplugs there)*. The Matrix's pad rows have one ground
   pad, so the ribbon's extra conductors are 5 V and ground soldered to its
   test points, decided in [ADR 0018](0018-main-board-wiring-decisions.md). The breath sensor is surface
   mount and is soldered down (`hardware/interfaces/breath-sense-link/`,

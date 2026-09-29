@@ -87,11 +87,13 @@ pages that have no netlist yet.
 
 **`J-UMB` is no longer a shorthand.** It was one, for `J-UMBILICAL`, until
 ADR 0017 put a real connector of that name on the main board: `J-UMB` is now
-its own row, wired to the etherCON by a straight patch lead, so "`J-UMB` pin
-N" on an instrument page is that connector and the same conductor as the
-etherCON's pin N (`hardware/interfaces/spi-link/spi-link.md`). On a module
-page the umbilical connector is `J-UMBILICAL` — netlisted as `J-UMB-MOD`, as
-the instrument's etherCON is `J-UMB-INST` — and never `J-UMB`.
+its own row, the header that joins the etherCON's adapter to the main board
+(ADR 0021), so "`J-UMB` pin N" on an instrument page is that header and the
+same conductor as the etherCON's pin N
+(`hardware/interfaces/spi-link/spi-link.md`). On a module page the umbilical
+connector is `J-UMBILICAL`, netlisted as `J-UMB-MOD`; the instrument's
+etherCON is `J-UMBILICAL-INST`, netlisted as `J-UMB-INST`. Neither is ever
+`J-UMB`.
 
 A cold reviewer filed these two, and `J-UMB` when it was a shorthand, as
 refdes that "match nothing in `bom.csv`", which was fair — nothing said

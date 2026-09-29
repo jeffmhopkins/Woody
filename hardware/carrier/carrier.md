@@ -46,10 +46,10 @@ the ribbon to it (*The Matrix and the umbilical at the tail end*, below).
 ```
                               TAIL FACE
    ┌─────────────────────────────────────────────────────────────┐
-   │  etherCON J-UMBILICAL, in the tail cap, NOT on this PCB     │
+   │  etherCON J-UMBILICAL-INST, on its adapter, behind the cap  │
    │  USB-C receptacle ── CBL-USB-EXT to the Matrix's own port   │
    └──────────────┬──────────────────────────────────────────────┘
-                  │ CBL-UMB-PATCH, straight: 8 conductors, T568B pairs (ADR 0004)
+                  │ PCB-UMB-ADAPTER: 8 tracks, pin N to pin N (ADR 0021)
                   │
    ┌──────────────▼──────────────────────────────────────────────────────┐
    │ J-UMB   1 BREATH   2 AGND   3 +12V   6 PWR_GND   4 SCLK   5 MOSI      │
@@ -316,15 +316,16 @@ Two connectors on this board's tail end, one for each thing that is not on it
 `mechanical/renders/breakdown-tail-wiring.png`):
 
 ```
-  ON THE LID                                  IN THE TAIL CAP
-  U-MCU-RT  ESP32-S3-Matrix                   J-UMBILICAL  etherCON, a feedthrough
-    two pad rows, TP2/TP3, Key1/Key2            rear RJ45 socket
+  ON THE LID                                  BEHIND THE TAIL CAP
+  U-MCU-RT  ESP32-S3-Matrix                   J-UMBILICAL-INST  etherCON NE8FAV,
+    two pad rows, TP2/TP3, Key1/Key2            soldered to PCB-UMB-ADAPTER
         │                                           │
-        │ CBL-MCU-RIBBON, 24-way                    │ CBL-UMB-PATCH
-        │ soldered to the pads                      │ straight, pin N to pin N,
-        │                                           │ S-bend at its minimum bend radius
+        │ CBL-MCU-RIBBON, 24-way                    │ the adapter's tracks,
+        │ soldered to the pads                      │ pin N to pin N
+        │                                           │
         ▼                                           ▼
-  J-MCU  2 × 12, 1.27 mm ──── main board, tail end ──── J-UMB  8-way, latching
+  J-MCU  2 × 12, 1.27 mm ──── main board, tail end ──── J-UMB  1 × 8, 2.54 mm, right-angle,
+                                                        soldered into the adapter and the tongue
 ```
 
 **`J-MCU` replaces the dev-board sockets.** The Matrix is on the lid, so it
@@ -414,30 +415,31 @@ capacitor on `EN` — `R8` and `Key1` are all that is on its `RESET` net — and
 a glitch there is a reset. **The spares must be quiet to shield:** firmware
 drives `IO2` and `IO3` low (`firmware/README.md`).
 
-**`J-UMB` is where the umbilical reaches this board.** `J-UMBILICAL` is a
-feedthrough, and `CBL-UMB-PATCH` runs straight from its rear RJ45 socket to
-`J-UMB`, pin N to pin N — so every "`J-UMB` pin N" on these pages is this
-board's connector *and* the same conductor as the etherCON's pin N, and the
-pin map is `umbilical-pinmap` either way. `J-UMB` sits as far in as the
-patch lead's bend needs (`mechanical/drc.echo` *"J-UMB on the main board, the
-patch lead at its bend radius"*). The clamps and the reverse shunt drawn "at
-the connector" on these pages are at `J-UMB`. Its contacts must be rated
-above the module's current-limit trip (`R-ILIM`,
+**`J-UMB` is where the umbilical reaches this board** (ADR 0021). The
+instrument's etherCON, `J-UMBILICAL-INST`, is soldered to its own small board,
+`PCB-UMB-ADAPTER`, behind the tail cap; the adapter's tracks run its pin N to
+pin N of `J-UMB`, a right-angle header soldered into the adapter and into a
+**tongue** of this board that runs on from its tail end. So every "`J-UMB`
+pin N" on these pages is this board's end of the umbilical *and* the same
+conductor as the etherCON's pin N, and the pin map is `umbilical-pinmap`
+either way. The clamps and the reverse shunt drawn "at the connector" on
+these pages are at `J-UMB`, on this board. The +12 V and `PWR_GND` path must
+be rated above the module's current-limit trip (`R-ILIM`,
 [`umbilical-load-switch`](../module/umbilical-load-switch/umbilical-load-switch.md)),
 not only `umbilical-current`. The worst case is not a hard short — that folds
 the limit back to the floor the `R-ILIM` row gives — but an overload just under
-the trip, which the load switch carries indefinitely. A 1.25 mm-pitch latching
-family is ~1.0 A per contact `[from memory]` and may fail that; decided at M4
-with the part.
+the trip, which the load switch carries indefinitely. The etherCON's contacts
+are the limit, at `J-UMBILICAL-INST`'s rating; `J-UMB`'s header pins carry
+more.
 
 **Netlisted where the connector's pin map is.** `J-MCU` is in this board's
 [`netlist.yaml`](netlist.yaml), in series with every Matrix net. `J-UMB` is in
 [`../interfaces/spi-link/netlist.yaml`](../interfaces/spi-link/netlist.yaml)
 beside both etherCONs, because it carries the umbilical's pin map and all
-eight of its nets; the carrier's nets reach it as that circuit's ports, as
-they reached the etherCON before. Neither cable is a component: each is
+eight of its nets; the carrier's nets reach it as that circuit's ports.
+Neither the Matrix's ribbon nor the adapter's tracks are components: each is
 straight, with no pin map of its own, so each connector pin shares a net with
-the pin at the cable's other end.
+the pin at the other end.
 
 ---
 
@@ -451,8 +453,8 @@ page and have no BOM entry yet.
 | `U-MCU-RT` | ESP32-S3-Matrix | The instrument. On the lid, not on this board; wired by `CBL-MCU-RIBBON` | `[repo]` |
 | `J-MCU` | 2 × 12, 1.27 mm shrouded box header, right-angle | The Matrix's connector, at the tail end. Pin map decided (ADR 0018) — *The Matrix and the umbilical at the tail end* | pin map decided; `[from memory]` part; part **open**, M4 |
 | `CBL-MCU-RIBBON` | 24-way flat ribbon, 0.635 mm | Soldered to the Matrix's pad rows, `TP2`/`TP3` and its two button pads; IDC socket into `J-MCU` | `[repo]` pad map and schematic; `[from memory]` ribbon; part **open**, M4 |
-| `J-UMB` | 8-way latching wire-to-board header | Where the umbilical reaches this board; `interfaces/spi-link`'s row | `[from memory]`; part **open**, M4 |
-| `CBL-UMB-PATCH` | Short Cat5e/Cat6 patch lead, RJ45 to crimp housing | etherCON rear socket to `J-UMB`, straight; `interfaces/spi-link`'s row | `[from memory]`; **open**, M4 |
+| `J-UMB` | 1 × 8, 2.54 mm right-angle pin header | Where the umbilical reaches this board, on its tongue: soldered into it and into `PCB-UMB-ADAPTER` (ADR 0021); `interfaces/spi-link`'s row | `[from memory]` envelope; part **open**, M4 |
+| `J-UMBILICAL-INST`, `PCB-UMB-ADAPTER` | NE8FAV on its adapter board | The instrument's etherCON behind the tail cap, and the board that carries it to `J-UMB`; `interfaces/spi-link`'s rows | `[ds]` NE8FAV; adapter **open**, M4 |
 | `U-KEYS`, `R-KEY-PU`, `R-KEY-SER`, `C-KEY`, `C-DECOUPLE-165` | — | **Half of them are on this board since ADR 0017**: the `right_thumb` and `left_thumb` clusters. The other two clusters are on the key boards. Counts per cluster are `cluster-boards.md`'s component table | `[repo] 0017, bom.csv` |
 | **`R-CHAIN-SER`** ×3 | **100 Ω** | **Open — series at the driving end on `SCK`, `SH/LD` and the chain-end `SER`. Edge-rate damping, not termination; E14 decides. `key-chain-loom.md`** | open |
 | `U-TVS-CHAIN` | SP0504BAHTG, 4-ch array, SOT-23-5 | **Fitted** (ADR 0018) — the three MCU nets the ribbon connectors expose, for service handling with the lid off; fourth channel spare. `key-chain-loom.md` | candidate |
@@ -505,9 +507,9 @@ what it keeps clear of are derived in `mechanical/` — `mechanical/drc.echo`
 
 Ordered by what blocks what. The first two block layout.
 
-- **`J-MCU`, `J-UMB` and their mates are envelopes, not parts** — the
+- **`J-MCU` and its mate, and `J-UMB`, are envelopes, not parts** — the
   envelopes in `config/body.yaml` are `[from memory]`. Decided at M4 with the
-  parts; `J-UMB`'s contacts against `R-ILIM`, not only `umbilical-current`.
+  parts.
 - **The board outline** is now derived by the body CAD (the main board,
   ADR 0017, `mechanical/DESIGN.md`), with the strip on it (ADR 0016). What is still open
   is the routing inside that outline.
@@ -534,11 +536,10 @@ Ordered by what blocks what. The first two block layout.
 > unretrofittable, both still have to be told to firmware, and neither is any
 > less urgent — they are just not on this board's critical path. They are now
 > on `hardware/cluster/cluster-boards.md`, which proposes an answer to both.
-- **The etherCON variant at the instrument end** `[repo] 0004`, deferred by
-  ADR 0004 to E12/M7. It no longer decides this board's footprint — that is
-  `J-UMB` either way — but `CBL-UMB-PATCH`'s plug end assumes a feedthrough
-  with an RJ45 socket at the back, as the body model draws the NE8FDP. A
-  variant without one changes the patch lead, not this board.
+- **The etherCON at the instrument end is decided** (ADR 0021): an NE8FAV on
+  its own adapter, joined to this board's tongue by `J-UMB`. What is open is
+  `J-UMB`'s part and the tail cap's recess margin, both M4, and whether the
+  NE8MX cable connector latches in it (`J-UMBILICAL-CABLE`).
 - **The breath trap "clearable without disassembly"** (ADR 0003). The sensor
   is reached with the lid off and replaced with an iron (`breath-sense-link.md`,
   *Mounting*); the trap is a separate question, decided with the trap's own

@@ -11,11 +11,12 @@
 # N to pin N, with no pin map of its own to get wrong. Netting sixteen
 # conductor ends to say "1 goes to 1" would add length and no truth.
 #
-# THE SAME HOLDS INSIDE THE INSTRUMENT (ADR 0017). J-UMB-INST, in the tail
-# cap, is a feedthrough; CBL-UMB-PATCH runs straight from its rear RJ45 socket
-# to J-UMB on the main board, pin N to pin N. So J-UMB, J-UMB-INST and
-# J-UMB-MOD pin N are one net each, and J-UMB is the connector the carrier's
-# nets actually reach. It is declared HERE, not in carrier/carrier, because it
+# INSIDE THE INSTRUMENT THERE IS NO CABLE (ADR 0021). J-UMB-INST, behind the
+# tail cap, is soldered to the umbilical adapter, whose tracks run its pin N
+# to J-UMB pin N, and J-UMB - a right-angle header - is soldered into both
+# the adapter and the main board. The adapter's tracks are not components
+# either. So J-UMB, J-UMB-INST and J-UMB-MOD pin N are one net each, and
+# J-UMB is where the carrier's nets actually reach the umbilical. It is declared HERE, not in carrier/carrier, because it
 # is the umbilical's connector with the umbilical's pin map, and splitting the
 # eight nets at it would give every port in this file a second name for the
 # same node.
@@ -49,15 +50,15 @@ components:
     note: "The module panel's. BORE IS D24.0 mm MINIMUM, which in a 50.50 mm 10HP panel leaves 13.25 mm each side - that is a panel constraint before it is a connector choice"
 
   J-UMB-INST:
-    of: J-UMBILICAL
-    value: "Neutrik etherCON D-series chassis"
+    of: J-UMBILICAL-INST
+    value: "NE8FAV"
     pins: [1, 2, 3, 4, 5, 6, 7, 8]
-    note: "The instrument's, in the tail cap. A feedthrough: CBL-UMB-PATCH plugs into its rear socket"
+    note: "The instrument's, behind the tail cap on the umbilical adapter (ADR 0021). Its G tab is not a pin of the umbilical and goes nowhere: the housing is plastic, isolated to panel ground [ds]"
 
   J-UMB:
-    value: "8-way latching wire-to-board header"
+    value: "8-way 2.54mm right-angle pin header"
     pins: [1, 2, 3, 4, 5, 6, 7, 8]
-    note: "On the main board's tail end, where the carrier's nets reach the umbilical. Pin N is J-UMB-INST pin N through the straight patch lead; D-REVSHUNT and U-TVS-SPI sit at it"
+    note: "On the main board's tongue, soldered into it and into the umbilical adapter, where the carrier's nets reach the umbilical. Pin N is J-UMB-INST pin N through the adapter's tracks; D-REVSHUNT and U-TVS-SPI sit at it"
 
 nets:
 

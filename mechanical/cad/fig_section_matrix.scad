@@ -17,7 +17,7 @@ lv(T, str("top face ", T, " = frosted window, flush"));
 lv(T - openings_matrix_acrylic_t, str("acrylic under = oak lip top ", T - openings_matrix_acrylic_t), 0.6);
 lv(matrix_top_z, str("LED tops ", matrix_top_z), -0.4);
 lv(z_oak_top_bot, str("Matrix board top = oak under ", z_oak_top_bot), -2.2);
-lv(ec_sock_c[1] + ec_sock[1] / 2, str("etherCON rear socket top ", ec_sock_c[1] + ec_sock[1] / 2), -3.2);
+lv(cb_top + boards_umb_joint_h, str("J-UMB top, under the Matrix ", cb_top + boards_umb_joint_h), -3.2);
 lv(z_floor, str("floor ", z_floor));
 lv(0, "bottom face 0");
 label([W / 2, -8, 1], str("cavity here ", z_oak_top_bot - z_floor, " x ", u_w, " mm   sides ", stack_side_t, " in ", stack_groove_depth, " mm grooves (tbd)"), size = 1.6);

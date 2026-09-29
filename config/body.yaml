@@ -465,8 +465,7 @@ boards:
   # 2026-09-26: "what about matrix led esp32 and ethercon wire connections?").
   # The Matrix: a flat ribbon soldered to its two pad rows (the board is on
   # the lid, so it unplugs at the main board like the key boards). The
-  # umbilical: a slim patch lead from the etherCON's rear socket to a latching
-  # connector, far enough in that the cable's bend is legal.
+  # umbilical reaches the board through the etherCON's adapter (below).
   mcu_conn_l:
     value: 18.5
     status: tbd
@@ -482,20 +481,28 @@ boards:
     status: tbd
     source: "the same header's height [from memory]"
     decided_by: "M4, with the part"
-  umb_conn_l:
-    value: 12.0
+  # The umbilical (ADR 0021): the etherCON on its own adapter board, which a
+  # right-angle 2.54 mm header joins to a tongue of the main board. The
+  # header is J-UMB, 8 pins, pin N = etherCON pin N.
+  umb_adapter_t:
+    value: 1.6
     status: tbd
-    source: "an 8-way latching wire-to-board header, side entry, across the body [from memory]"
+    source: "the adapter board's thickness, a standard 2-layer board [from memory]; the NE8FAV's pin tails reach through it"
+    decided_by: "M4, with the board ordered"
+  umb_joint_d:
+    value: 2.5
+    status: tbd
+    source: "J-UMB's insulator along the body, behind the adapter: a 2.54 mm right-angle header's 2.5 mm square insulator [from memory]"
     decided_by: "M4, with the part"
-  umb_conn_w:
-    value: 7.0
+  umb_joint_h:
+    value: 2.5
     status: tbd
-    source: "the same header along the body [from memory]"
+    source: "the same insulator's height on the main board [from memory]"
     decided_by: "M4, with the part"
-  umb_conn_h:
-    value: 6.0
+  umb_joint_row_h:
+    value: 1.27
     status: tbd
-    source: "the same header's height [from memory]"
+    source: "the header's pin row above the main board, at the insulator's middle [from memory]; where the row meets the adapter"
     decided_by: "M4, with the part"
   # ONE MAIN BOARD (ADR 0017): the thumb switches, their registers and the
   # carrier's circuits on one board at the thumb level, mouth cap to the end
@@ -592,16 +599,15 @@ openings:
     status: tbd
     source: "as usb_slot_w [from memory]"
     decided_by: "M4"
-  # THE RECEPTACLE STANDS ON END (2026-09-26). Landscape, the tail face
-  # could not hold it: the rotated etherCON's flange already sits against
-  # one side, and flange + web + a landscape slot is wider than the interior,
-  # so the slot was pinned to the other side short of its web (drc.echo,
-  # "tail cap web between the USB-C cutout and the etherCON flange"). USB-C
-  # is reversible, so the receptacle's orientation costs the user nothing.
+  # THE RECEPTACLE STANDS ON END (2026-09-26), centred in the lane between
+  # the etherCON's recess and the side (drc.echo, "USB-C extension
+  # receptacle beside the etherCON flange", "tail cap web between the USB-C
+  # cutout and the etherCON recess"). USB-C is reversible, so the
+  # receptacle's orientation costs the user nothing.
   usb_slot_portrait:
     value: true
     status: tbd
-    source: "[calc] portrait takes usb_slot_h across instead of usb_slot_w: landscape was flange 31 + web 2 + slot 12.5 = 45.5 in a 45 interior; portrait is 31 + 2 + 7 = 40, and 12.5 tall in the cavity's height. Chosen over moving the etherCON (already against the side), widening the body, or a backing plate. Un-rotating the etherCON would give 5 mm back across, but its flange would then stand 31 tall in a cavity 27 tall behind the cap (drc 'etherCON body inside the cavity height')"
+    source: "[calc] portrait takes usb_slot_h across instead of usb_slot_w, and usb_slot_w tall in the cavity's height; drc.echo gives the lane and the webs either way"
     decided_by: "M4, against the extension bought - its screw ears, if any, would run up and down the tail face, which is why it is earless (usb_mount)"
   usb_plug_l:
     value: 15.0
@@ -660,98 +666,83 @@ openings:
     decided_by: "M4, against the extension bought"
 
 ethercon:
-  # Neutrik NE8FDP, read off the banked drawing (datasheets/connectors/NE8FDP.*)
+  # Neutrik NE8FAV: etherCON A-series, VERTICAL PCB mount, rear mounting
+  # (ADR 0021). Read off the banked drawing ST-NE8FAV rev B
+  # (datasheets/connectors/NEUTRIK-NE8FAV-DRAWING.pdf), its data sheet
+  # (-DATASHEET.pdf) and, where the drawing gives no number, its 3D model
+  # (-3D.stp). It is soldered to its own small board, the umbilical adapter,
+  # which stands behind it parallel to the tail cap; a right-angle header
+  # joins that board to the main board (boards.umb_joint_*).
   bore_d:
-    value: 24.0
+    value: 22.0
     status: settled
-    source: "[ds] Neutrik ST-NE8FDP - chassis bore 24.0 min (ADR 0009)"
+    source: "[ds] ST-NE8FAV - panel cut out (rear side), bore 22 min"
   flange_w:
-    value: 26.0
+    value: 25.0
     status: settled
-    source: "[ds] NE8FDP flange 26 x 31"
+    source: "[ds] ST-NE8FAV front view - flange 25 x 25"
   flange_h:
-    value: 31.0
+    value: 25.0
     status: settled
-    source: "[ds] NE8FDP"
+    source: "[ds] ST-NE8FAV side view - 25, the axis at 12.5 from its lower edge"
   hole_dx:
-    value: 19.0
+    value: 19.8
     status: settled
-    source: "[ds] NE8FDP - two diagonal 3.2 holes at 19 x 24"
+    source: "[ds] ST-NE8FAV panel cut out - two diagonal 3.2 min holes at 19.8 +/-0.1 x 19.8 +/-0.1, upper left and lower right seen from the front"
   hole_dy:
-    value: 24.0
+    value: 19.8
     status: settled
-    source: "[ds] NE8FDP"
+    source: "[ds] ST-NE8FAV"
   hole_d:
     value: 3.2
     status: settled
-    source: "[ds] NE8FDP"
-  # MOUNTING IS FREE (owner, 2026-09-26: "don't care if the etherCON is
-  # panel mounted"). So the flange-on-backplate mount and its 4 mm maximum
-  # panel are gone; the connector sits with flange AND chassis behind the
-  # tail cap, its front through the cap's bore - the drawing's second set of
-  # depths. Screws through the cap into the flange; hardware is M4's.
-  depth:
-    value: 36.3
+    source: "[ds] ST-NE8FAV"
+  panel_max:
+    value: 3.0
     status: settled
-    source: "[ds] NE8FDP.dxf - cap's inside face to the back of the rear RJ45 socket, flange and chassis both behind"
-  # The rear envelope, read off the banked drawing's own labels (NE8FDP.dxf;
-  # assignment from the dimension defpoints, 2026-09-26 datasheet read):
-  # a main housing, then the rear RJ45 socket, which sits off-axis.
-  housing_w:
-    value: 25.5
+    source: "[ds] NEUTRIK-NE8FAV-DATASHEET.pdf - 'Panel thickness max. 3 mm'. The oak tail cap is thicker, so a recess from outside leaves this much oak where the connector mounts"
+  pcb_setback:
+    value: 18.3
     status: settled
-    source: "[ds] NE8FDP.dxf - main housing width (drawn portrait)"
-  housing_h:
-    value: 27.64
+    source: "[ds] ST-NE8FAV side view - flange front face to the PCB's front face"
+  nose_l:
+    value: 2.7
     status: settled
-    source: "[ds] NE8FDP.dxf - main housing height (drawn portrait)"
-  housing_d:
-    value: 19.8
+    source: "[ds] ST-NE8FAV side view - 21 from the PCB face to the nose's front, less the 18.3 to the flange face [calc]; it stays inside a 3 mm panel's bore"
+  # The PUSH tab, above the flange and in front of it: it stands in the tail
+  # cap's recess, not in the cavity.
+  tab_w:
+    value: 10.0
     status: settled
-    source: "[ds] NE8FDP.dxf - cap's inside face to the back of the main housing, flange and chassis both behind"
-  socket_w:
-    value: 15.9
+    source: "[ds 3D] NEUTRIK-NE8FAV-3D.stp - the tab spans +/-5.0 across [calc, read 2026-09-29]"
+  tab_top:
+    value: 16.6
     status: settled
-    source: "[ds] NE8FDP.dxf - rear RJ45 socket width"
-  socket_h:
-    value: 13.2
+    source: "[ds 3D] NEUTRIK-NE8FAV-3D.stp - 16.61 above the axis; the drawing's front view shows it above the flange's 12.5"
+  tab_front:
+    value: 6.8
     status: settled
-    source: "[ds] NE8FDP.dxf - rear RJ45 socket height; it runs from 0.35 off the axis to the housing's face, on the side away from the latch"
-  socket_toward_centre:
-    value: false
+    source: "[ds 3D] NEUTRIK-NE8FAV-3D.stp - 6.8 in front of the flange face; the drawing's 24.3 overall is to the same tab, from the rear latch"
+  # Where the footprint's holes sit, from the axis, on the adapter (seen
+  # from the connector's back). The drawing dimensions them from the lower
+  # peg line, which is the axis [ds]; the model agrees to 0.01 [ds 3D].
+  pin_rows:
+    value: [2.11, 4.65]
+    status: settled
+    source: "[ds] ST-NE8FAV PCB layout - the two contact rows, 2.54 apart, the upper at 4.65 above the peg line through the axis"
+  g_below:
+    value: 10.55
+    status: settled
+    source: "[ds] ST-NE8FAV PCB layout - G (d1.2) 15.2 below the upper row [calc: 15.2 - 4.65]"
+  recess_margin:
+    value: 1.0
     status: tbd
-    source: "with the 90-degree rotation the socket's offset lies across the body; AWAY from the centre, so the patch plug runs beside the Matrix's USB-C plug, not under it - the two cannot stack in the height under the Matrix"
-    decided_by: "M4, with the latch direction chosen on the tail face"
-  # THE NE8FDP IS A FEEDTHROUGH: its back is an RJ45 socket, so inside the
-  # instrument a short patch lead plugs into it (hardware/bom.csv
-  # CBL-UMB-PATCH). The mated plug and boot stand inboard of the body,
-  # and the lead runs on to the main board.
-  rj45_plug_l:
-    value: 30.0
-    status: tbd
-    source: "mated RJ45 plug + strain-relief boot, beyond the etherCON's rear face [from memory: plug ~21, boot ~10-15]"
-    decided_by: "M4 - calipers on the patch lead actually used"
-  rj45_plug_w:
-    value: 14.0
-    status: tbd
-    source: "RJ45 boot envelope across [from memory]"
-    decided_by: "M4"
-  rj45_plug_h:
-    value: 12.0
-    status: tbd
-    source: "RJ45 boot envelope, height [from memory]"
-    decided_by: "M4"
+    source: "the tail cap's outside recess round the flange's outline and the PUSH tab [placeholder]"
+    decided_by: "M4, with the cable connector (J-UMBILICAL-CABLE) in hand: its shell has to enter the recess and a thumb has to reach the tab"
   rotated:
-    value: true
+    value: false
     status: settled
-    source: "[adr] ADR 0009 - 'Rotate it 90 degrees. Settled off the drawing.'"
-  # STACKED UNDER THE MATRIX (owner, 2026-09-26: "the matrix can be up
-  # higher out of the way and still allow the connectors"). The rear socket
-  # and the patch plug pass UNDER the Matrix; only the housing, the full
-  # cavity's height, has to stay behind it. The connector stands on the
-  # floor - its height is derived, not set - and the body is thick enough
-  # for the socket to clear the Matrix (owner, same day: "increase distance
-  # between top and bottom" rather than pocket the oak).
+    source: "[adr] ADR 0021 - the NE8FAV's flange is square, so ADR 0009's reason to turn the NE8FDP is gone; latch up, the PUSH tab on top"
   offset_y:
     value: -7.0
     status: tbd
@@ -972,16 +963,6 @@ routing:
     status: tbd
     source: "fine-pitch ribbon thickness [from memory]"
     decided_by: "M4"
-  umb_cable_od:
-    value: 4.0
-    status: tbd
-    source: "a slim Cat6 patch lead [from memory]; the patch plug is CBL-UMB-PATCH's plug in the etherCON's rear socket"
-    decided_by: "M4, with the lead bought"
-  umb_bend_r_per_od:
-    value: 4.0
-    status: tbd
-    source: "minimum bend radius as a multiple of the cable's diameter, the usual rule for twisted-pair patch cable [from memory]"
-    decided_by: "M4, with the lead's datasheet"
   chain_ribbon_w:
     value: 7.62
     status: nominal

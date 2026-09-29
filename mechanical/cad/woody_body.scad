@@ -153,23 +153,23 @@ rt_rest_rel = [run_rel(layout_rt_rest_under), W / 2];
 function rt_rel(i) = rt_rest_rel + [(i < 2 ? -1 : 1) * layout_rt_rest / 2, (i % 2 == 0 ? -1 : 1) * thumb_pitch / 2];
 top_last_rel = max([for (i = [0 : len(layout_rh_gaps)]) cum(layout_rh_gaps, i)]);
 rt_last_rel = max([for (i = [0 : count("right_thumb") - 1]) rt_rel(i)[0]]);
-// BEHIND THE MATRIX, IN ORDER (2026-09-26): the USB-C extension's plug off
-// the Matrix's tail edge (if that edge faces the tail), a clearance, the
-// RJ45 plug and boot mated into the etherCON's rear socket, then the
-// etherCON body to the tail face.
+// BEHIND THE MATRIX, IN ORDER: the USB-C extension's plug off the Matrix's
+// tail edge (if that edge faces the tail), a clearance, then the etherCON
+// (ADR 0021): its adapter board, the connector's body to the flange, and the
+// tail cap. The adapter stands the connector's full height, so it queues
+// behind the Matrix; J-UMB, low on the main board, passes under it.
 usb_behind = openings_matrix_usb_to_tail ? openings_usb_plug_l : 0;
-// STACKED (owner, 2026-09-26): the rear socket and the patch plug pass UNDER
-// the Matrix, so behind it only the etherCON's full-height housing queues.
-behind_matrix = usb_behind + layout_tail_clear + ethercon_housing_d + ends_tail_cap_t;
+ec_stack_d = boards_umb_adapter_t + ethercon_pcb_setback;   // the adapter's rear face to the flange's front face
+behind_matrix = usb_behind + layout_tail_clear + ec_stack_d + ends_tail_cap_t;
 // IN FRONT OF IT: the USB-C plug off the mouth edge (if that edge faces the
-// mouth) and the patch plug both reach forward, and the last fastener pair
-// stands in front of whichever is first; all of it must clear the right-hand
-// key board. Measured from the last key centre to where the equipment starts.
+// mouth) reaches forward, and the last fastener pair stands in front of it;
+// all of it must clear the right-hand key board. Measured from the last key
+// centre to where the equipment starts.
 usb_front = openings_matrix_usb_to_tail ? 0 : openings_usb_plug_l;
 tail_fastener_back = 3;    // drawing convention: last fastener centre to the tail equipment
 equip_start_rel = plate_cutout / 2 + tail_margin + layout_tail_clear + tail_fastener_back + 3 / 2;
 tail_claims_rel = [
-    top_last_rel + equip_start_rel + ethercon_rj45_plug_l + ethercon_depth + ends_tail_cap_t,
+    top_last_rel + equip_start_rel + boards_umb_joint_d + ec_stack_d + ends_tail_cap_t,
     top_last_rel + plate_cutout / 2 + tail_margin + layout_tail_clear + boards_matrix_board + behind_matrix,
     rt_last_rel + rc / 2 + layout_underside_clear + ends_tail_cap_t];
 // The LED matrix CENTRED in the space after the keys (owner, 2026-09-26):
@@ -439,25 +439,40 @@ module mouth_cap_2d() {
 }
 tube_yz = [W / 2, z_floor + cavity_h / 2];
 
-// The NE8FDP's rear envelope, rotated with the connector: [across Y, height Z].
-ec_house = ethercon_rotated ? [ethercon_housing_h, ethercon_housing_w] : [ethercon_housing_w, ethercon_housing_h];
-ec_fl = ethercon_rotated ? [ethercon_flange_h, ethercon_flange_w] : [ethercon_flange_w, ethercon_flange_h];
-// The housing and the flange behind the cap both stand in the cavity.
-ec_env = [max(ec_house[0], ec_fl[0]), max(ec_house[1], ec_fl[1])];
-ec_clear = 0.3;    // drawing convention: connector envelope to the floor, and its socket to the Matrix
+// The NE8FAV (ADR 0021), rear-mounted: flange and body behind the tail cap,
+// soldered to the umbilical adapter, which stands parallel to the cap. Its
+// flange is square, so ethercon.rotated turns only the latch: false puts the
+// PUSH tab on top, the contact rows above the axis and G below it.
+ec_rot = ethercon_rotated ? 90 : 0;
+ec_fl = ethercon_rotated ? [ethercon_flange_h, ethercon_flange_w] : [ethercon_flange_w, ethercon_flange_h];   // [across Y, height Z]
+ec_clear = 0.3;    // drawing convention: connector envelope to the floor
 // THE CONNECTOR STANDS ON THE FLOOR (owner, 2026-09-26: raise the body's
-// thickness rather than pocket the oak bottom). Its axis is derived: the
-// envelope sits ec_clear above the oak bottom, and the body is made thick
-// enough that the rear socket still passes under the Matrix (drc.echo).
-ec_c = [W / 2 + ethercon_offset_y, z_floor + ec_clear + ec_env[1] / 2];    // etherCON centre on the tail face
-ec_sock = ethercon_rotated ? [ethercon_socket_h, ethercon_socket_w] : [ethercon_socket_w, ethercon_socket_h];
-ec_plug = ethercon_rotated ? [ethercon_rj45_plug_h, ethercon_rj45_plug_w] : [ethercon_rj45_plug_w, ethercon_rj45_plug_h];
-// The rear socket sits off the axis: 0.35 + half its height, on the side away from the latch.
-ec_sock_off_mag = 0.35 + ethercon_socket_h / 2;
-ec_sock_dir = (W / 2 - ec_c[0] >= 0 ? 1 : -1) * (ethercon_socket_toward_centre ? 1 : -1);
-ec_panel_x = L - ends_tail_cap_t;                  // flange and chassis sit behind the tail cap's inside face
-ec_sock_c = ethercon_rotated ? ec_c + [ec_sock_dir * ec_sock_off_mag, 0] : ec_c - [0, ec_sock_off_mag];
-ec_holes = [for (s = [-1, 1]) ec_c + s * (ethercon_rotated ? [ethercon_hole_dy, ethercon_hole_dx] : [ethercon_hole_dx, ethercon_hole_dy]) / 2];
+// thickness rather than pocket the oak bottom): the flange's lower edge
+// ec_clear above the oak bottom, the axis half a flange above that.
+ec_c = [W / 2 + ethercon_offset_y, z_floor + ec_clear + ec_fl[1] / 2];    // etherCON centre on the tail face
+ec_panel_x = L - ends_tail_cap_t;                  // the flange's front face, on the tail cap's inside face
+ec_pcb_x1 = ec_panel_x - ethercon_pcb_setback;     // the adapter's front face
+ua_x0 = ec_pcb_x1 - boards_umb_adapter_t;          // the adapter's rear face
+// The panel holes, upper left and lower right seen from the front ([ds]);
+// from the front, +Y is on the right. (Y, Z) on the tail face.
+ec_holes = [for (s = [-1, 1]) ec_c + s * [ethercon_hole_dx, -ethercon_hole_dy] / 2];
+// A point given (across, up) from the axis in the connector's own frame, on the tail face.
+function ec_pt(p) = ec_c + (ethercon_rotated ? [p[1], -p[0]] : p);
+// THE TAIL CAP'S RECESS: the NE8FAV takes a panel of ethercon.panel_max at
+// most, and the cap is thicker, so a pocket from outside leaves that much
+// oak where the flange clamps. It takes the flange's outline, the PUSH tab
+// (which stands in it, in front of the panel), and a margin for the cable
+// connector's shell and a thumb. A router pass, like the USB-C overmould
+// pocket: the DXF carries the through-cuts only.
+ec_panel_t = min(ethercon_panel_max, ends_tail_cap_t);
+function ethercon_fl_top() = ethercon_flange_h / 2;   // the flange's edge above the axis, in the connector's frame
+ec_recess_d = ends_tail_cap_t - ec_panel_t;
+module ec_recess_2d() {
+    offset(r = ethercon_recess_margin) hull() {
+        translate(ec_c) square(ec_fl, center = true);
+        for (s = [-1, 1]) translate(ec_pt([s * ethercon_tab_w / 2, ethercon_tab_top])) circle(d = EPS * 10);
+    }
+}
 // The USB-C extension's receptacle (owner, 2026-09-26): beside the
 // etherCON, inside the sides, at the cavity's mid height. Stood on end
 // (openings.usb_slot_portrait) it fits the lane between the etherCON's
@@ -465,7 +480,7 @@ ec_holes = [for (s = [-1, 1]) ec_c + s * (ethercon_rotated ? [ethercon_hole_dy, 
 // and the room to the side share what the lane has spare.
 usb_web_min = 2;   // drawing convention: oak between two tail-face cutouts
 usb_sz = openings_usb_slot_portrait ? [openings_usb_slot_h, openings_usb_slot_w] : [openings_usb_slot_w, openings_usb_slot_h];   // [across Y, height Z]
-usb_lane = [max(ec_c[0] + ec_fl[0] / 2, ec_c[0] + ec_house[0] / 2), W - u_y0];   // flange edge to the side's inside face
+usb_lane = [ec_c[0] + ec_fl[0] / 2, W - u_y0];   // flange edge to the side's inside face
 usb_c = [(usb_lane[0] + usb_lane[1]) / 2, z_floor + cavity_h / 2];
 // THE OVERMOULD POCKET (openings.usb_overmold): from the tail face down to a
 // thin panel, so the plug's overmould reaches the receptacle, whose nose
@@ -531,10 +546,9 @@ matrix_top_z = z_oak_top_bot + boards_matrix_led_h;              // LED tops
 plate_x1 = matrix_xy[0] - boards_matrix_board / 2 - 1;
 // The USB-C extension's plug, in the Matrix's mouth or tail edge.
 usb_plug_x0 = openings_matrix_usb_to_tail ? matrix_xy[0] + boards_matrix_board / 2 : matrix_xy[0] - boards_matrix_board / 2 - openings_usb_plug_l;
-// The tail equipment starts at the first of that plug and the patch plug.
-// The last fastener pair stands just in front of it - beside the Matrix the
-// patch plug runs down the side lane.
-tail_equip_x = min(usb_plug_x0, L - ends_tail_cap_t - ethercon_depth - ethercon_rj45_plug_l);
+// The tail equipment starts at the first of that plug and J-UMB, behind the
+// etherCON's adapter. The last fastener pair stands just in front of it.
+tail_equip_x = min(usb_plug_x0, ua_x0 - boards_umb_joint_d);
 tail_fastener_x = tail_equip_x - tail_fastener_back;
 fastener_notch = 1.5 + boards_board_clear;   // an M3's radius and a clearance: what a board or a run keeps from a screw
 
@@ -604,6 +618,7 @@ module caps() {
         render() difference() {
             intersection() { linear_extrude(ends_tail_cap_t) tail_cap_2d(); sanded_cap(ends_tail_cap_t); }
             translate([usb_c[0] - usb_om[0] / 2, usb_c[1] - usb_om[1] / 2, openings_usb_panel_t]) cube([usb_om[0], usb_om[1], usb_pocket_d + EPS]);
+            if (ec_recess_d > 0) translate([0, 0, ec_panel_t]) linear_extrude(ec_recess_d + EPS) ec_recess_2d();
         }
 }
 
@@ -776,23 +791,17 @@ module tail_equipment() {
         translate([matrix_xy[0] - 12.7, matrix_xy[1] + (i == 0 ? -1 : 1) * 11.43 - 1.27, matrix_board_z - boards_matrix_harness_h])
             cube([25.4, 2.54, boards_matrix_harness_h]);   // rows 22.86 apart [ds]
     P(C_FROSTED, false, "matrix window") translate([0, 0, T - openings_matrix_acrylic_t + explode]) linear_extrude(openings_matrix_acrylic_t) matrix_window_2d();
-    // The etherCON: flange and chassis behind the tail cap (mounting is free).
-    // The NE8FDP as drawn (NE8FDP.dxf): flange outside the tail cap, main
-    // housing behind the panel, rear RJ45 socket beyond it, off the axis.
-    // Its front passes through the cap's bore; the flange sits against the
-    // cap's inside face; housing and rear socket stand inboard of it.
+    // The etherCON, an NE8FAV (ADR 0021): flange and body behind the tail
+    // cap, the nose into the cap's bore, the PUSH tab in front of the flange
+    // in the cap's recess. Soldered to the umbilical adapter behind it.
     P(C_CONN, false, "etherCON") union() {
-        translate([ec_panel_x - 2, ec_c[0] - ec_fl[0] / 2, ec_c[1] - ec_fl[1] / 2]) cube([2, ec_fl[0], ec_fl[1]]);
-        translate([ec_panel_x - EPS, ec_c[0], ec_c[1]]) rotate([0, 90, 0]) cylinder(d = ethercon_bore_d - 0.2, h = L - ec_panel_x + 2 * EPS);
-        translate([ec_panel_x - ethercon_housing_d, ec_c[0] - ec_house[0] / 2, ec_c[1] - ec_house[1] / 2])
-            cube([ethercon_housing_d, ec_house[0], ec_house[1]]);
-        translate([ec_panel_x - ethercon_depth, ec_sock_c[0] - ec_sock[0] / 2, ec_sock_c[1] - ec_sock[1] / 2])
-            cube([ethercon_depth - ethercon_housing_d + EPS, ec_sock[0], ec_sock[1]]);
+        translate([ec_pcb_x1, ec_c[0] - ec_fl[0] / 2, ec_c[1] - ec_fl[1] / 2]) cube([ethercon_pcb_setback, ec_fl[0], ec_fl[1]]);
+        translate([ec_panel_x - EPS, ec_c[0], ec_c[1]]) rotate([0, 90, 0]) cylinder(d = ethercon_bore_d - 0.2, h = ethercon_nose_l + EPS);
+        let(t = ec_pt([0, (ethercon_fl_top() + ethercon_tab_top) / 2]), tsz = ethercon_rotated ? [ethercon_tab_top - ethercon_fl_top(), ethercon_tab_w] : [ethercon_tab_w, ethercon_tab_top - ethercon_fl_top()])
+            translate([ec_panel_x + ethercon_tab_front - 3, t[0] - tsz[0] / 2, t[1] - tsz[1] / 2]) cube([3, tsz[0], tsz[1]]);
     }
-    // The RJ45 patch lead's plug and boot, mated into that rear socket.
-    // It turns with the connector, as the socket does.
-    P([0.55, 0.70, 0.85], false, "RJ45 plug") translate([ec_panel_x - ethercon_depth - ethercon_rj45_plug_l, ec_sock_c[0] - ec_plug[0] / 2, ec_sock_c[1] - ec_plug[1] / 2])
-        cube([ethercon_rj45_plug_l, ec_plug[0], ec_plug[1]]);
+    // The umbilical adapter: the flange's outline, parallel to the tail cap.
+    P(C_PCB, false, "umbilical adapter") translate([ua_x0, ec_c[0] - ec_fl[0] / 2, ec_c[1] - ec_fl[1] / 2]) cube([boards_umb_adapter_t, ec_fl[0], ec_fl[1]]);
     // The USB-C extension's plug in the Matrix's tail edge, under the board.
     P([0.35, 0.35, 0.38], false, "USB-C plug") translate([usb_plug_x0, matrix_xy[1] - openings_usb_slot_w / 2, matrix_board_z - openings_usb_slot_h])
         cube([openings_usb_plug_l, openings_usb_slot_w, openings_usb_slot_h]);
@@ -1029,22 +1038,14 @@ module ribbons_3d() {
 // end. The Matrix: a flat 24-way ribbon soldered to its pads (ADR 0018), down
 // just inside its mouth edge, one bend, and level beside the patch plug
 // into J-MCU - the Matrix is on the lid,
-// so it unplugs there like the key boards. The umbilical: the slim patch
-// lead from the etherCON's rear socket, in an S-bend at its legal radius
-// down into J-UMB, which stands in from the plug by what that bend needs.
-// An S-bend in (x, z), moving toward -x, level at both ends, radius r:
-// two arcs, with a vertical run between them if the drop is more than 2r.
-function sbend(a, e, r, n = 8) = let(h = a[1] - e[1], sg = h >= 0 ? 1 : -1, H = abs(h),
-                                     th = H >= 2 * r ? 90 : acos(1 - H / (2 * r)), dx = 2 * r * sin(th), xs = e[0] + dx)
-    concat([a], [for (i = [0 : n]) let(t = 90 + th * i / n) [xs + r * cos(t), a[1] + sg * (-r + r * sin(t))]],
-           [for (i = [0 : n]) let(t = 270 + th * (n - i) / n) [e[0] + r * cos(t), e[1] + sg * (r + r * sin(t))]], [e]);
-function sbend_dx(h, r) = abs(h) >= 2 * r ? 2 * r : 2 * r * sin(acos(1 - abs(h) / (2 * r)));
+// so it unplugs there like the key boards. The umbilical (ADR 0021): no
+// cable inside the body. The etherCON is soldered to its adapter, and J-UMB,
+// a right-angle header on a tongue of the main board, is soldered to both.
 module tail_wiring_3d() {
     P([0.85, 0.85, 0.80], false, "J-MCU") translate([jm_x0, jm_y - jm_sz[1] / 2, cb_top + e_mb]) cube([jm_sz[0], jm_sz[1], boards_mcu_conn_h]);
-    P([0.85, 0.85, 0.80], false, "J-UMB") translate([ju_x1 - ju_sz[0], ec_sock_c[0] - ju_sz[1] / 2, cb_top + e_mb]) cube([ju_sz[0], ju_sz[1], boards_umb_conn_h]);
+    P([0.10, 0.10, 0.10], false, "J-UMB") translate([ua_x0 - boards_umb_joint_d, ec_c[0] - ju_l / 2, cb_top + e_mb]) cube([boards_umb_joint_d, ju_l, boards_umb_joint_h]);
     P([0.30, 0.30, 0.80], false, "Matrix ribbon") for (i = [0 : len(mcu_path) - 2])
         hull() for (q = [mcu_path[i], mcu_path[i + 1]]) translate([q[0], jm_y, q[1]]) cube([routing_mcu_ribbon_t, routing_mcu_ribbon_w, routing_mcu_ribbon_t], center = true);
-    P([0.25, 0.45, 0.75], false, "patch lead") run([for (q = umb_path) [q[0], ec_sock_c[0], q[1]]], routing_umb_cable_od);
 }
 
 // The regulator block (a module and its bulk capacitors, for the one dev
@@ -1063,7 +1064,12 @@ tall_room = under_keys(tall_c[0], tall_sz) ? cb_room : gap_room;
 ubolt_hole_r = hardware_ubolt_nut_af / cos(30) / 2 + boards_board_clear;   // the U-bolt's nuts stand above the board's underside
 module cb_2d() {
     difference() {
-        translate([cb_x[0], cb_y[0]]) square([cb_x[1] - cb_x[0], cb_y[1] - cb_y[0]]);
+        union() {
+            translate([cb_x[0], cb_y[0]]) square([cb_x[1] - cb_x[0], cb_y[1] - cb_y[0]]);
+            // THE TONGUE (ADR 0021): on to the etherCON's adapter, as wide as
+            // it, carrying J-UMB against the adapter's rear face.
+            translate([cb_x[1] - EPS, tongue_y[0]]) square([ua_x0 - cb_x[1] + EPS, tongue_y[1] - tongue_y[0]]);
+        }
         // The slot in front of the sensor's lower port.
         translate([sensor_face_x - EPS, p2_y - boards_sensor_port_d / 2 - 1])
             square([boards_sensor_port_l + 2, boards_sensor_port_d + 2]);
@@ -1078,8 +1084,8 @@ module cb_2d() {
 }
 // J-MCU: on the tube side of the regulator block, at the board's tail edge.
 jm_sz = [boards_mcu_conn_w, boards_mcu_conn_l];
-// Across: the ribbon clear of the patch plug beside it.
-jm_y = ec_sock_c[0] + far_s * (ec_plug[0] / 2 + boards_board_clear + routing_mcu_ribbon_w / 2);
+// Across: under the Matrix's middle, so the ribbon comes straight down.
+jm_y = matrix_xy[1];
 jm_z = cb_top + boards_mcu_conn_h / 2;
 mcu_r = 4;   // drawing convention: the ribbon's bends
 // Down just inside the Matrix's mouth edge (its USB-C plug leaves that
@@ -1088,13 +1094,12 @@ mcu_x = matrix_xy[0] - boards_matrix_board / 2 + 1.5;
 mcu_path = concat([[mcu_x, matrix_board_z - boards_matrix_harness_h]],
                   [for (i = [0 : 8]) let(t = 90 * i / 8) [mcu_x - mcu_r + mcu_r * cos(t), jm_z + e_mb + mcu_r - mcu_r * sin(t)]],
                   [[jm_x1, jm_z + e_mb]]);
-// J-UMB: in line with the patch plug, where its bend lands.
-pb_x = ec_panel_x - ethercon_depth - ethercon_rj45_plug_l;     // the patch plug's cable end
-umb_r = routing_umb_cable_od * routing_umb_bend_r_per_od;
-ju_z = cb_top + boards_umb_conn_h / 2;
-ju_x1 = pb_x - 1 - sbend_dx(ec_sock_c[1] - ju_z, umb_r);       // J-UMB's mouth
-ju_sz = [boards_umb_conn_w, boards_umb_conn_l];
-umb_path = sbend([pb_x, ec_sock_c[1]], [ju_x1, ju_z + e_mb], umb_r);
+// J-UMB: one pin per umbilical conductor at 2.54 mm, centred on the
+// etherCON's axis across the body, its row meeting the adapter at
+// boards.umb_joint_row_h above the main board.
+ju_l = 8 * 2.54;
+ju_row_z = cb_top + boards_umb_joint_row_h;
+tongue_y = [ec_c[0] - ec_fl[0] / 2, ec_c[0] + ec_fl[0] / 2];
 // Standoffs off the oak: candidates along both edge bands and at the thumb
 // rests, kept where nothing else is - the soldered thumb switches, clipped
 // into their plates, carry the board between them.
@@ -1107,13 +1112,15 @@ function so_clear(p) = let(r = boards_standoff_d / 2 + 0.5)
     && min([for (cl = chain_ribbon_cls) let(sp = chain_span(chain_x(cl), chain_dir(cl)), x0 = sp[0], x1 = sp[1])
               rect_gap(p, [(x0 + x1) / 2, chain_y], [x1 - x0, boards_chain_hdr_l], 0)]) >= r + 1
     && max(abs(p[0] - (jm_x0 + jm_x1) / 2) - jm_sz[0] / 2, abs(p[1] - jm_y) - jm_sz[1] / 2) >= r
-    && max(abs(p[0] - (ju_x1 - ju_sz[0] / 2)) - ju_sz[0] / 2, abs(p[1] - ec_sock_c[0]) - ju_sz[1] / 2) >= r + routing_umb_cable_od
+    && max(abs(p[0] - (ua_x0 - boards_umb_joint_d / 2)) - boards_umb_joint_d / 2, abs(p[1] - ec_c[0]) - ju_l / 2) >= r + 1
     // wholly on a thumb plate, or wholly off it - never through its edge
     && min([for (cl = ["left_thumb", "right_thumb"]) let(b = thumb_box(cl))
             max(rect_gap(p, [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2], [b[2] - b[0], b[3] - b[1]], 0),
                 min(p[0] - b[0], b[2] - p[0], p[1] - b[1], b[3] - p[1]))]) >= r;
 cb_standoffs = [for (x = [cb_x[0] + 4, lt_rest_xy[0], (gap_x[0] + gap_x[1]) / 2, rt_rest[0], (rt_rest[0] + jm_x0) / 2, cb_x[1] - 4],
-                     y = [cb_y[0] + 4, cb_y[1] - 4]) if (so_clear([x, y])) [x, y]];
+                     y = [cb_y[0] + 4, cb_y[1] - 4]) if (so_clear([x, y])) [x, y],
+                // and the tongue's corners in front of J-UMB, under the adapter's weight
+                for (y = [tongue_y[0] + 4, tongue_y[1] - 4]) let(x = ua_x0 - boards_umb_joint_d - 4) if (so_clear([x, y])) [x, y]];
 module centre_board_3d() {
     P(C_PCB, false, "main board") translate([0, 0, cb_z]) linear_extrude(switch_pcb_t) cb_2d();
     P(C_ENVELOPE, false, "parts main board") translate([0, 0, cb_top]) linear_extrude(boards_smt_h) difference() {
@@ -1122,8 +1129,9 @@ module centre_board_3d() {
         for (cl = chain_ribbon_cls) let(sp = chain_span(chain_x(cl), chain_dir(cl)), x0 = sp[0], x1 = sp[1])
             translate([x0 - 0.5, chain_y - boards_chain_hdr_l / 2 - 0.5]) square([x1 - x0 + 1, boards_chain_hdr_l + 1]);
         translate([jm_x0 - 0.5, jm_y - jm_sz[1] / 2 - 0.5]) square(jm_sz + [1, 1]);
-        translate([ju_x1 - ju_sz[0] - 0.5, ec_sock_c[0] - ju_sz[1] / 2 - 0.5]) square(ju_sz + [1, 1]);
-        translate([ju_x1, ec_sock_c[0] - routing_umb_cable_od / 2 - 0.5]) square([cb_x[1] - ju_x1 + 1, routing_umb_cable_od + 1]);   // under the lead
+        translate([ua_x0 - boards_umb_joint_d - 0.5, ec_c[0] - ju_l / 2 - 0.5]) square([boards_umb_joint_d + 1, ju_l + 1]);
+        // nothing tall under the Matrix ribbon's level run into J-MCU, over the tongue
+        translate([jm_x1, jm_y - routing_mcu_ribbon_w / 2 - 0.5]) square([mcu_x - jm_x1 + 1, routing_mcu_ribbon_w + 1]);
         translate(sensor_c) square([boards_sensor_body + 1, boards_sensor_leads + 1], center = true);
         for (c = tall_c) translate(c) square(tall_sz + [1, 1], center = true);
         for (c = cb_standoffs) translate(c) circle(d = boards_standoff_d + 1);
@@ -1233,7 +1241,7 @@ module drc_report() {
     echo("DRC", "INFO", "overall length (derived)", L, str("mm = ", L / 25.4, " in; mouth cap to LH1 ", x_lh0,
          ", keys ", top_last - x_lh0, " centre to centre, last key to tail face ", L - top_last));
     drc(undef, "what the mouth end needs", mouth_names[search(max(mouth_claims), mouth_claims)[0]], str(mouth_req, " mm from the mouth cap to LH1"));
-    tail_names = ["last key board, the last fastener pair, then the patch plug and the etherCON depth",
+    tail_names = ["last key board, the last fastener pair, J-UMB, then the etherCON on its adapter",
                   "last key board, the LED matrix on the top face, then the etherCON depth (matrix not centred)",
                   "the right-thumb cluster against the tail cap"];
     drc(undef, "what the tail end needs", layout_matrix_centred && matrix_centred_req >= max(tail_claims_rel) - top_last_rel
@@ -1242,18 +1250,18 @@ module drc_report() {
             ? "the etherCON behind it" : "its USB-C plug and the last fastener pair in front of it, clear of the key board") : tail_names[search(max(tail_claims_rel), tail_claims_rel)[0]],
         str(tail_req, " mm after the last key"));
     echo("DRC", "INFO", "behind the Matrix, to the tail face", behind_matrix,
-         str("mm = USB-C plug ", usb_behind, " + clearance ", layout_tail_clear, " + etherCON housing ", ethercon_housing_d,
-             " + tail cap ", ends_tail_cap_t, " - the rear socket and patch plug pass under the Matrix"));
+         str("mm = USB-C plug ", usb_behind, " + clearance ", layout_tail_clear, " + the etherCON's adapter ", boards_umb_adapter_t,
+             " + the connector to its flange ", ethercon_pcb_setback, " + tail cap ", ends_tail_cap_t, " - J-UMB passes under the Matrix"));
     under_m = matrix_board_z - boards_matrix_under_h;
-    drc(ec_sock_c[1] + ec_sock[1] / 2 <= under_m && ec_sock_c[1] + ec_plug[1] / 2 <= under_m,
-        "etherCON rear socket and patch plug pass under the Matrix", under_m - max(ec_sock_c[1] + ec_sock[1] / 2, ec_sock_c[1] + ec_plug[1] / 2),
+    m_x1 = matrix_xy[0] + boards_matrix_board / 2 + usb_behind;
+    drc(ua_x0 >= m_x1 + layout_tail_clear - 0.01, "etherCON adapter behind the Matrix", ua_x0 - m_x1,
+        "mm from the Matrix's tail edge (and any plug off it) to the adapter's rear face; the adapter stands the connector's full height");
+    drc(cb_top + boards_umb_joint_h <= under_m, "J-UMB passes under the Matrix", under_m - cb_top - boards_umb_joint_h,
         "mm below the Matrix's underside parts");
-    // The thinnest body that takes the connector on the floor with its rear
-    // socket under the Matrix, and its envelope under the key plate. Every
-    // term above moves one for one with T, so the shortfall adds directly.
-    t_min = T + max(ec_sock_c[1] + max(ec_sock[1], ec_plug[1]) / 2 + ec_clear - under_m,
-                    ec_c[1] + ec_env[1] / 2 + ec_clear - z_oak_top_bot);
-    drc(T >= t_min, "body thickness takes the etherCON on the floor, its rear socket under the Matrix", T - t_min,
+    // The thinnest body that takes the connector on the floor under the oak
+    // top. The term moves one for one with T, so the shortfall adds directly.
+    t_min = T + ec_c[1] + ec_fl[1] / 2 + ec_clear - z_oak_top_bot;
+    drc(T >= t_min, "body thickness takes the etherCON on the floor", T - t_min,
         str("mm spare; the thinnest body that does is ", t_min, " mm (envelope.thickness)"));
     mc = (top_last + cap_edge_rel + L) / 2 - matrix_xy[0];
     drc(abs(mc) < 0.01 || !layout_matrix_centred, "LED matrix centred between the last cap and the tail face", mc, "mm off centre");
@@ -1417,8 +1425,16 @@ module drc_report() {
             " [approx: key board footprints as squares; clash.txt is the check] - negative means low-profile parts"));
     for (cl = chain_ribbon_cls) drc(chain_x(cl) != undef, str("chain headers on the ", cl, " boards clear of the switches"),
                                     chain_x(cl) == undef ? "none found" : chain_x(cl), "mm along the body (the headers' mouths)");
-    drc(ju_x1 - ju_sz[0] >= cb_x[0] && ju_x1 <= cb_x[1], "J-UMB on the main board, the patch lead at its bend radius", [ju_x1, umb_r],
-        "mm along the body (its mouth), and the lead's bend radius in mm (routing.umb_bend_r_per_od x the diameter)");
+    drc(tongue_y[1] - tongue_y[0] >= ju_l + 2 * boards_board_clear && ua_x0 > cb_x[1], "J-UMB on the main board's tongue, against the etherCON's adapter",
+        [ua_x0 - cb_x[1], tongue_y[1] - tongue_y[0] - ju_l],
+        "mm: the tongue's length past the main board, and its width less J-UMB's pin row");
+    // Where J-UMB's row meets the adapter, in the connector's own frame:
+    // between G below the axis and the peg line through it, a pad's worth
+    // (a pitch) clear of each, and above the adapter's lower edge.
+    ju_r = ethercon_rotated ? undef : ju_row_z - ec_c[1];
+    ju_m = ethercon_rotated ? -1 : min(ju_r + ethercon_g_below, -ju_r, ju_r + ethercon_flange_h / 2 - 1.27) - 2.54;
+    drc(ju_m >= 0, "J-UMB's row lands on the adapter clear of the etherCON's footprint", [ju_r, ju_m],
+        "mm: the row from the axis (negative = below), and its margin past a pitch from G, from the peg line and from the adapter's edge; a turned connector puts its footprint across the row and is not handled");
     drc(undef, "Matrix ribbon length", path_len(mcu_path), "mm from the Matrix's edge to J-MCU, as drawn");
     // THE KEY CHAIN'S RIBBONS (ADR 0017, amended 2026-09-27): long enough to
     // plug in with the lid laid beside the body; closed, a flat hairpin.
@@ -1503,7 +1519,7 @@ module drc_report() {
         "mm - frosted acrylic this far above the LEDs softens the pixels; the owner chose it (2026-09-26)");
 
     // Tail face
-    ec_lo = ec_c[1] - ec_env[1] / 2; ec_hi = ec_c[1] + ec_env[1] / 2;
+    ec_lo = ec_c[1] - ec_fl[1] / 2; ec_hi = ec_c[1] + ec_fl[1] / 2;
     drc(ec_lo >= z_floor && ec_hi <= z_oak_top_bot, "etherCON body inside the cavity height",
         [ec_lo, ec_hi, z_floor, z_oak_top_bot], "body Z range vs cavity Z range at the tail, where the key plate has ended");
     drc(plate_x1 - (tail_fastener_x + tap_d_m3 / 2) >= 2, "key plate reaches past the last fastener pair",
@@ -1524,9 +1540,18 @@ module drc_report() {
     drc(usb_room >= usb_sz[0] + usb_web_min, "USB-C extension receptacle beside the etherCON flange", usb_room - usb_sz[0],
         str("mm spare across the ", usb_room, " mm lane from the flange's edge to the side, for a receptacle ", usb_sz[0], " mm across (",
             openings_usb_slot_portrait ? "on end" : "flat", ")"));
-    usb_web = (usb_c[0] - usb_cut_y / 2) - (ec_c[0] + ec_fl[0] / 2);
-    drc(usb_web >= usb_web_min, "tail cap web between the USB-C cutout and the etherCON flange", usb_web,
+    usb_web = (usb_c[0] - usb_cut_y / 2) - (ec_c[0] + ec_fl[0] / 2 + ethercon_recess_margin);
+    drc(usb_web >= usb_web_min, "tail cap web between the USB-C cutout and the etherCON recess", usb_web,
         str("mm of oak on the tail face, from the widest USB-C cutout (", usb_cut_y, " mm across: the overmould pocket or the slot)"));
+    // The recess (ADR 0021): the NE8FAV's panel limit, met by a pocket from
+    // outside; its edges stay on the face with oak round them.
+    rc_top = ethercon_rotated ? ec_c[1] + ec_fl[1] / 2 : ec_c[1] + ethercon_tab_top;
+    rc_web = min(T - (rc_top + ethercon_recess_margin), ec_c[1] - ec_fl[1] / 2 - ethercon_recess_margin,
+                 ec_c[0] - ec_fl[0] / 2 - ethercon_recess_margin - u_y0);
+    drc(rc_web >= usb_web_min, "tail cap recess for the etherCON inside the tail face", rc_web,
+        str("mm of oak round the ", ec_recess_d, " mm recess that leaves the NE8FAV its ", ec_panel_t, " mm panel (ethercon.panel_max ", ethercon_panel_max, ")"));
+    drc(undef, "etherCON PUSH tab against the tail face", ethercon_tab_front - ends_tail_cap_t,
+        "mm the tab stands proud of the tail face (negative = inside the recess)");
     drc(usb_om[0] >= usb_sz[0] && usb_om[1] >= usb_sz[1] && openings_usb_panel_t <= openings_usb_nose_l,
         "USB-C plug overmould reaches the receptacle", [usb_pocket_d, openings_usb_panel_t, openings_usb_nose_l],
         "mm: the overmould pocket's depth from the tail face; the panel left under it; the receptacle's nose, which must pass that panel so its face is level with the pocket floor");

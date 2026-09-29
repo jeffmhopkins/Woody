@@ -44,7 +44,7 @@ networks:
   pattern: {offset: [10.0, 0.0], axis: y, leg: -1, c: -1}
   except: {}
 
-# Placed as the left-hand board's, 108.2 further along the body - the key row's own
+# Placed as the left-hand board's, 108.0 further along the body - the key row's own
 # offset (pcb-geometry.echo) - so the register stands level with RH3, as it
 # stands level with LH3 there, with two differences, both because this board's
 # register drives two key lines out of its FAR row (RH5's D, pin 14, and RH6's C,
@@ -60,26 +60,26 @@ networks:
 #   QH's run back to J-CHAIN crossing the key lines. MARGINAL: a re-layout that moves
 #   anything here should expect to re-try this placement.
 # J-CHAIN stays where the body CAD puts it (chain_x; the main board's header and
-# the ribbon follow it), 7.5 nearer the mouth than the left-hand board's relative
+# the ribbon follow it), 7.0 nearer the mouth than the left-hand board's relative
 # to its keys.
 # No free input: the six keys take H..C, and A and B are the markers
 # (key-marker-and-bits/allocation.yaml), so there is no R-KEY-PU on FREE3.
 parts:
-  U1:  [198.7, 44.0, 90]     # U-KEYS, the register
-  C7:  [192.2, 41.8, 90]     # C-DECOUPLE-165, beside pin 8 at the register's J-CHAIN end
-  C8:  [167.7, 42.0, 90]     # C-BULK-CHAIN, beside J-CHAIN's 3V3 pin
+  U1:  [198.5, 44.0, 90]     # U-KEYS, the register
+  C7:  [192.0, 41.8, 90]     # C-DECOUPLE-165, beside pin 8 at the register's J-CHAIN end
+  C8:  [167.5, 42.0, 90]     # C-BULK-CHAIN, beside J-CHAIN's 3V3 pin
   # Bring-up test pads (TP-CHAIN), in the order of the register's own pins above them
-  TP1: [191.2, 36.0, 0]       # QH
-  TP2: [194.7, 36.0, 0]       # SER
-  TP3: [198.2, 36.0, 0]       # GND
-  TP4: [201.7, 36.0, 0]       # SCK
-  TP5: [205.2, 36.0, 0]       # SH/LD
-  TP6: [208.7, 36.0, 0]       # 3V3
+  TP1: [191.0, 36.0, 0]       # QH
+  TP2: [194.5, 36.0, 0]       # SER
+  TP3: [198.0, 36.0, 0]       # GND
+  TP4: [201.5, 36.0, 0]       # SCK
+  TP5: [205.0, 36.0, 0]       # SH/LD
+  TP6: [208.5, 36.0, 0]       # 3V3
 
 silk:
-  at: [152.2, 12.5]
-  legend_at: [152.2, 17.0]
-  top_at: [183.7, 46.0]     # clear of the vias QH needs near the register: silk is placed before routing, and no via goes under silk
+  at: [152.0, 12.5]
+  legend_at: [152.0, 17.0]
+  top_at: [183.5, 46.0]     # clear of the vias QH needs near the register: silk is placed before routing, and no via goes under silk
   title: "WOODY key board RH"
   rev: "A"
   date: "2026-09-28"

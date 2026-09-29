@@ -28,7 +28,8 @@ register's `body-thickness`, stated here.
 > **The thickness was 1.5 inches until 2026-09-26**, when the owner chose to
 > set it by the etherCON rather than pocket the oak bottom for it. The
 > connector stands on the floor with its rear socket and patch plug under the
-> LED matrix; the matrix sits against the oak top, the key plate ending short
+> LED matrix *(since ADR 0021: an NE8FAV on an adapter, with no rear socket
+> or plug; only `J-UMB` passes under the matrix)*; the matrix sits against the oak top, the key plate ending short
 > of it, and the key and thumb boards join by stacking headers *(since ADR 0017: one main board, key boards on 12-way ribbons — 1.27 mm IDC since 2026-09-27)* (owner, same
 > day: "tighter vertically"). `mechanical/drc.echo` ("body thickness takes
 > the etherCON on the floor") gives the thinnest body that allows it — the
@@ -387,7 +388,9 @@ thumb keys and the U-bolt:
 > ribbon (ADR 0018), soldered to its pads, into J-MCU on the main board)*, so **the carrier cutout below is
 > no longer needed** and which face carries the LEDs stops being a risk. The
 > etherCON's rear socket and the patch plug pass **under** it, beside its
-> USB-C plug, so only the connector's housing queues behind it; the connector
+> USB-C plug, so only the connector's housing queues behind it *(since ADR
+> 0021: the connector and its adapter queue behind it, and only `J-UMB`
+> passes under)*; the connector
 > stands on the floor, and the body is thick enough for that
 > (`body-thickness`). There is no carrier board any more: its circuits
 > were on one flat board between the thumb and key boards, the centre board (ADR 0013) *(since ADR 0017: on the main board, which replaced the centre and thumb boards, under the key boards)*. The
@@ -429,7 +432,13 @@ it is unchanged. The body CAD checks the receptacle fits beside the connector
 and reports the cable run (`mechanical/drc.echo`).
 
 **And the umbilical connector, which is the reason the tail face is now
-crowded.** The etherCON chassis flange (ADR 0004)
+crowded.** *(Since [ADR 0021](0021-pcb-mount-ethercon.md) the instrument's
+etherCON is an NE8FAV: a square flange, a smaller bore, mounted latch up
+behind a recess in the cap that leaves it the 3 mm panel it allows, and
+screwed through that panel. The two bullets below argue about the NE8FDP;
+the bore-not-flange point still holds, and the rotation is retired with the
+part — `config/body.yaml` `ethercon:` has the NE8FAV's numbers.)* The
+etherCON chassis flange (ADR 0004)
 is roughly 26 × 31 mm on a face 57 mm wide and `body-thickness` tall. Two
 consequences:
 

@@ -965,6 +965,11 @@ pulses on `CS`.
 
 ## Open
 
+*The instrument's end is decided by [ADR 0021](0021-pcb-mount-ethercon.md):
+an NE8FAV soldered to an adapter board, joined to the main board by a
+soldered header — no patch lead and no extra contact interface. The module's
+end is still open, as below.*
+
 **Which etherCON variant at each end.** Feedthrough (NE8FDP-class) presents a
 plain RJ45 on the back, so the instrument end could take a short patch lead to a
 jack on the carrier instead of eight soldered wires inside a body that cannot be
