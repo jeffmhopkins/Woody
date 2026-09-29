@@ -128,9 +128,19 @@ The right-hand board, or any other simple board, starts from a copy of
   switch's position in the body CAD, so every key's network sits the same way
   round its switch. A key that cannot take the pattern goes under `except:`,
   with the reason; on this board none does.
-- `route_first:` names the nets that must be routed before the key lines:
-  those reaching `J-CHAIN`'s far (odd) row, which a track can reach only from
-  behind the header.
+- `route_first:` names the nets routed before the rest, in order. They are
+  the chain nets reaching `J-CHAIN`'s far (odd) row, which a track can reach
+  only from behind the header. On this board they also include three key
+  lines, which would otherwise be boxed in at the register:
+  - `/KEY_LH5` goes first, because U1.14's only way out is a via between the
+    pin rows, which SCK would otherwise take;
+  - `/KEY_LH4` and `/KEY_LH1` go straight after the chain nets.
+
+  With that order, every net routes on the first pass. `layout.yaml` says why,
+  line by line.
+- **One mount grounds the key plate** (`bond_mount`, ADR 0020 Amendment 5).
+  It is plated, with `GND_CHAIN` pads on both faces. The other three stay
+  unplated with their copper keep-outs.
 - `connect_first:` names pad-to-pad connections routed before everything,
   each with the `max_mm` that `pcb.py check` then holds it to: here the
   decoupler's return to the register's ground pin. Name the new board's pads.
