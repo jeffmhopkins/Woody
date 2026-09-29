@@ -844,11 +844,11 @@ hardware:
   kb_spacer_od:
     value: 4.5
     status: nominal
-    source: "the Ettinger 5.52 spacer's outside diameter, 4.5; its bore is 2.6, inside kb_stud_attached_hole [datasheets/mechanical/ETTINGER-CATALOG-2024-P79-DISTANZHUELSEN-MESSING.html]. It bears on the plate's underside and on the board's top copper, so the PCB keeps copper out from under it"
+    source: "the Ettinger 5.52 spacer's outside diameter, 4.5; its bore is 2.6, inside kb_stud_attached_hole [datasheets/mechanical/ETTINGER-CATALOG-2024-P79-DISTANZHUELSEN-MESSING.html]. It bears on the plate's underside and on the board's top copper, so a key board keeps copper out from under it; on the main board's plate mounts it bears on a PWR_GND pad instead, which grounds the thumb plate (ADR 0022)"
   kb_nut_e:
     value: 5.77
     status: nominal
-    source: "ISO 4032 M2.5 hex nut across its corners, at its largest: s max 5.0 / cos 30 = 5.77 [calc from datasheets/mechanical/ASPEN-ISO4032-DIN934-HEX-NUT-DIMENSION-TABLE.pdf, whose e is the minimum, 5.5]. It bears on the board's underside, so the PCB keeps copper and parts out from under it"
+    source: "ISO 4032 M2.5 hex nut across its corners, at its largest: s max 5.0 / cos 30 = 5.77 [calc from datasheets/mechanical/ASPEN-ISO4032-DIN934-HEX-NUT-DIMENSION-TABLE.pdf, whose e is the minimum, 5.5]. It bears on the board's underside, so a key board keeps copper and parts out from under it; on the main board's plate mounts it bears on a PWR_GND pad (ADR 0022)"
   kb_nut_m:
     value: 2.0
     status: nominal

@@ -61,6 +61,15 @@ Two things were therefore unanswered:
    near row they pointed at the LED strip's edge. Turned, they point away. A
    square cap on a cross stem feels the same either way.
 
+6. **Each thumb plate is grounded through its own mounts** (owner, 2026-09-29).
+   A plate mount's hole in the main board is plated, with a `PWR_GND` pad on
+   both faces: the spacer bears on the underside pad and the nut on the top
+   one. The stud's clinch and the spacer's face bond the plate to the board's
+   ground with no part added. The thumb plates had no bond before. Unbonded,
+   a plate floats a millimetre or two from the thumb switches' pins, the way
+   `MECH-GNDBOND`'s row says the key plate would. The oak mounts stay
+   unplated: nothing metal is under them.
+
 ## Consequences
 
 - **The main board and the key boards share one stack** and one set of
@@ -73,6 +82,12 @@ Two things were therefore unanswered:
 - **The oak bottom gets blind holes for the inserts.** Like the counterbores
   they are not in its DXF, which carries through-cuts only; the body CAD
   places them.
+- **The thumb plates are ordered un-anodised**, or masked round each stud
+  hole, because the bond is metal to metal (`PLATE-THUMB`). Bring-up meters
+  each plate to `PWR_GND`.
+- **The main board's plate mounts are plated holes on `PWR_GND`**
+  (`MountingHole_2.7mm_M2.5_Pad_Via`), where the key boards' mounts are
+  unplated and keep copper clear.
 - **The Matrix keeps its own thickness** (`boards.matrix_t`). It had been
   borrowing the main board's.
 
