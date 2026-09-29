@@ -110,9 +110,17 @@ def find(node, key):
     return [c for c in node if isinstance(c, list) and c and c[0] == key]
 
 
+def sym_path(lib):
+    """KiCad's own libraries, or this project's (`woody`, hardware/lib/woody.kicad_sym) for a
+    part KiCad does not draw - hardware/lib/README.md."""
+    if lib == "woody":
+        return os.path.join(ROOT, "hardware", "lib", "woody.kicad_sym")
+    return os.path.join(SYMDIR, lib + ".kicad_sym")
+
+
 def lib_symbol_text(lib, name):
     """The raw text of one symbol in a .kicad_sym, by bracket matching."""
-    path = os.path.join(SYMDIR, lib + ".kicad_sym")
+    path = sym_path(lib)
     text = open(path).read()
     m = re.search(r'\n(?:\t|  )\(symbol "%s"\s' % re.escape(name), text)
     if not m:
@@ -224,7 +232,7 @@ def fingerprint(d, lay):
     files = [os.path.join(d, lay.get("netlist", "netlist.yaml")), os.path.join(d, "schematic.yaml"),
              os.path.abspath(__file__)]
     libs = sorted({c["symbol"].split(":")[0] for c in lay["components"].values()} | {"power"})
-    files += [os.path.join(SYMDIR, l + ".kicad_sym") for l in libs]
+    files += [sym_path(l) for l in libs]
     for f in files:
         if not os.path.exists(f):
             sys.exit(f"sch: {f} missing - install KiCad and its symbols (apt-get install kicad kicad-symbols)")
