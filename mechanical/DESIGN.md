@@ -371,13 +371,17 @@ and the connector's envelope now comes from the IDC header's banked full print
 (`boards.chain_hdr_*`, ADR 0017's 2026-09-27 amendment). The model
 now exports each key board's outline (`export/key-board-*.dxf`) and its
 switch and connector positions (`export/pcb-geometry.echo`), which the PCB is
-placed from.
+placed from. The main board's the same way: `export/main-board.dxf` is its
+outline, with the tongue, notches, holes and the sensor's slot, and its
+`main` entries in `export/pcb-geometry.echo` place the thumb switches (from
+below), both chain headers, J-MCU, J-UMB, the sensor, the regulator block,
+the strip and the mounts, with how tall parts may stand under each key board
+and where nothing may.
 
 ## Not modelled yet
 
 The thumb rest lip, gasket beads, plate stiffening (ADR 0002 — open, and it changes the lid),
-and the diffuser standoff. The main board is a rectangle because its
-outline is an M3/M4 output. The key boards are rectangles by decision (ADR
+and the diffuser standoff. The key boards are rectangles by decision (ADR
 0020 point 3): their outlines are generated now (`export/key-board-*.dxf`),
 and only their size moves, with the switch positions, which are provisional
 until M3.

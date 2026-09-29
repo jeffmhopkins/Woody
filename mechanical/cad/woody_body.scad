@@ -780,6 +780,51 @@ module pcb_geometry() {
         echo("PCB", cl, "board", "thickness", boards_key_board_t, "smt_height_max", boards_cluster_smt_h,
              "side", "switches on top, parts and ribbon connector underneath");
     }
+    // THE MAIN BOARD (ADR 0017, 0021, 0022), cluster "main". Parts face UP; the
+    // thumb switches come in from BELOW (their seat is on the thumb plates),
+    // so their footprints go on the board's underside. Body coordinates, mm;
+    // its outline is export/main-board.dxf (the U-bolt holes, screw notches,
+    // sensor slot and the mounts' holes are in it).
+    for (k = bottom_keys) echo("PCB", "main", "switch", k[0], key_xy(k)[0], key_xy(k)[1], key_rot(k));
+    // Each ribbon's header, standing on the top face, its mouth facing along
+    // the body: mouth x, centre y, which way the mouth faces (+1 the tail),
+    // length, mouth to far pin row - as a key board's "chain".
+    for (cl = chain_ribbon_cls) echo("PCB", "main", "chain", str("J-CHAIN-", cl == "left_hand" ? "LH" : "RH"),
+                                     chain_x(cl), chain_y, chain_dir(cl), boards_chain_hdr_l, boards_chain_hdr_pin_back);
+    // The Matrix's header: its insulator's extent along x, centre y, length
+    // across, and the mouth's direction (+1 the tail) - the ribbon comes in
+    // over the tongue.
+    echo("PCB", "main", "connector", "J-MCU", jm_x0, jm_x1, jm_y, jm_sz[1], 1);
+    // J-UMB: the right-angle header whose long legs go down through the
+    // tongue; its insulator's extent along x (it stands against the
+    // adapter's rear face), centre y, pin count, pitch, and its row's
+    // height above the top face, where it meets the adapter.
+    echo("PCB", "main", "connector", "J-UMB", ua_x0 - boards_umb_joint_d, ua_x0, ec_c[0], 8, 2.54, boards_umb_joint_row_h);
+    // The breath sensor: its centre, the ports toward +x (the tail), its
+    // body and lead span; the slot in front of its lower port is in the DXF.
+    echo("PCB", "main", "part", "U-BREATH", sensor_c[0], sensor_c[1], 0, boards_sensor_body, boards_sensor_leads);
+    // The regulator block's envelope: centre, along x, across y, height.
+    echo("PCB", "main", "part", "REGULATOR-BLOCK", tall_c[0][0], tall_c[0][1], 0, tall_sz[0], tall_sz[1], boards_tall_h);
+    // The LED strip lying on the top face: start x, band's lower y, length, width.
+    echo("PCB", "main", "strip", "LED", strip_x0, strip_y, strip_l, lighting_strip_w);
+    // Each mount (ADR 0022): centre, hole, what bears on the top face (a nut
+    // or a screw head, across, with float), what bears on the underside
+    // (the spacer, with float), and which kind.
+    for (c = cb_standoffs) echo("PCB", "main", "standoff", "M2.5", c[0], c[1], hardware_kb_board_hole,
+                                max(hardware_kb_nut_e, hardware_mb_screw_head_d) + 2 * hardware_kb_mount_float,
+                                hardware_kb_spacer_od + 2 * hardware_kb_mount_float, on_thumb_plate(c) ? "plate" : "oak");
+    // How tall parts may stand: under each key board, and where none is
+    // overhead; and nothing under the chain headers' plugs and hairpins, or
+    // under the Matrix ribbon's level run into J-MCU.
+    for (cl = ["left_hand", "right_hand"]) let(r = kb_rect(cl))
+        echo("PCB", "main", "keepout", str("under key board ", cl), r[0], r[1], r[2], r[3], cb_room);
+    echo("PCB", "main", "keepout", "elsewhere", cb_x[0], cb_y[0], ua_x0, cb_y[1], gap_room);
+    for (cl = chain_ribbon_cls) let(sp = chain_span(chain_x(cl), chain_dir(cl)))
+        echo("PCB", "main", "keepout", str("ribbon ", cl), sp[0], chain_y - boards_chain_hdr_l / 2, sp[1], chain_y + boards_chain_hdr_l / 2, 0);
+    echo("PCB", "main", "keepout", "Matrix ribbon", jm_x1, jm_y - routing_mcu_ribbon_w / 2, mcu_x, jm_y + routing_mcu_ribbon_w / 2,
+         jm_z + e_mb - routing_mcu_ribbon_t / 2 - cb_top);
+    echo("PCB", "main", "board", "thickness", switch_pcb_t, "smt_height_max", boards_smt_h,
+         "side", "parts on top; the thumb switches from below, their footprints on the underside");
 }
 
 module tail_equipment() {
@@ -1633,6 +1678,7 @@ module part_2d(p) {
     else if (p == "oak_rebates") oak_rebates_2d();
     else if (p == "key_board_left_hand") key_board_2d("left_hand");
     else if (p == "key_board_right_hand") key_board_2d("right_hand");
+    else if (p == "main_board") cb_2d();
     else assert(false, str("unknown part ", p));
 }
 
