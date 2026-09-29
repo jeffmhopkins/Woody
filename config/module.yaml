@@ -1,0 +1,600 @@
+# Eurorack module geometry - the module CAD's inputs (ADR 0004, ADR 0023, ADR 0024)
+#
+# Consumed by tools/cad.py, which writes mechanical/cad/generated/module-params.scad
+# from this file. Every render, cut file and echo built from
+# mechanical/cad/module.scad is fingerprinted against that file, so a change
+# here marks every picture of the old value STALE until the build runs.
+#
+# A SEPARATE FILE FROM config/body.yaml, on purpose: the body and the module
+# are separate models, and a change to one must not mark the other's
+# pictures stale. Where the module uses a number the body already owns - the
+# NE8FAV is the same part at both ends - a leaf says `ref:` and cad.py copies
+# the value, status and source from there. It is never restated here.
+# Where a number is a register figure (config/figures.yaml), the leaf says
+# `figure:` and cad.py fails unless the figure's value text still contains it.
+#
+# EVERY LEAF CARRIES A STATUS, as in body.yaml:
+#   settled  - read off a banked document or decided in an ADR; cite it
+#   nominal  - a working choice; the CAD uses it until the first fit says otherwise
+#   tbd      - NO document gives a number. `decided_by` says what replaces it.
+# Provenance: [ds] banked datasheet, [ds 3D] banked 3D model measured,
+# [adr] decision record, [calc] arithmetic shown, [repo] another corpus file,
+# [web] a web source not banked, [from memory] unverified.
+#
+# COORDINATES - the PANEL FRAME, seen from the front:
+#   x across, 0 at the panel's left edge, + to the right
+#   y up, 0 at the panel's bottom edge
+#   depth into the case, 0 at the panel's FRONT face (the model draws it as -z)
+# KiCad's top view of either board, looking from the panel, is this view with
+# y negated; parts on a board's "front" face the panel.
+
+meta:
+  owner: docs/decisions/0024-module-panel-layout-and-stack.md
+  model: mechanical/cad/module.scad
+
+# ---------------------------------------------------------------- panel ----
+panel:
+  w:
+    value: 50.5
+    figure: panel-width
+    status: settled
+    source: "[ds] DOEPFER-A100-CONSTRUCTION-DETAILS-a100m_e.html, Table 1: 10 HP actual module width"
+  h:
+    value: 128.5
+    status: settled
+    source: "[ds] DOEPFER-A100-CONSTRUCTION-DETAILS-a100m_e.html: 'the final height is 128.5 mm for all A-100 front panels'"
+  t:
+    value: 2.0
+    status: settled
+    source: "[ds] DOEPFER-A100-CONSTRUCTION-DETAILS-a100m_e.html: 'The front panels are made of 2 mm anodized aluminium'; PANEL row"
+  hp:
+    value: 5.08
+    status: settled
+    source: "[ds] DOEPFER-A100-CONSTRUCTION-DETAILS-a100m_e.html: 1 HP = 5.08 mm; hole spacing must be a multiple of it"
+  hole_d:
+    value: 3.2
+    status: settled
+    source: "[ds] DOEPFER-A100-FRONT-PANEL-HOLE-SKETCH-A100FP.gif: d = 3.2 mm"
+  hole_x0:
+    value: 7.5
+    status: settled
+    source: "[ds] A100FP.gif: the left holes 7.5 from the panel's left edge"
+  hole_n_hp:
+    value: 7
+    status: settled
+    source: "[adr 0024] the widest whole-HP spread that keeps the right holes inside 10HP: 7.5 + 7 x 5.08 = 43.06 [calc], as mechanical/EURORACK-3U-PANEL-HP-TABLE-make_blanks.py has for 10HP [ds]"
+  hole_y:
+    value: [3.0, 125.5]
+    status: settled
+    source: "[ds] A100FP.gif: 3.0 from the bottom edge, 125.5 (3.0 from the top)"
+  slot_travel:
+    value: 3.0
+    status: settled
+    source: "[ds] EURORACK-3U-3HP-PANEL-apfaudio-pmod-r3.1.kicad_pcb Edge.Cuts: a FABRICATED panel's mounting cut is a slot, arcs of r 1.6 whose centres run 1.5 either side of the Doepfer hole centre [calc 6.0..9.0 from the left edge], so the panel takes the rail's nut strip wherever it sits in the HP grid. Doepfer's own sketch draws a round d3.2; the slot contains it"
+  four_screws:
+    value: true
+    status: settled
+    source: "[adr 0023] point 4 - four M3 screws; Doepfer: 'From 10/12 HP usually four mounting holes are used'"
+  washer_t:
+    value: 0.5
+    status: tbd
+    source: "[from memory] DIN 125 M3 washer thickness"
+    decided_by: "a DIN 125 table banked (the bank has DIN 433 / ISO 7092, the small washer)"
+  washer_od:
+    value: 7.0
+    status: settled
+    source: "[repo] MECH-PANEL-SCREW-MOD: DIN 125 M3 washer; OD 7.0 is the assumption panel-height-budget's clear height is derived on"
+
+# The rail behind the panel's top and bottom edges. Doepfer publishes no
+# board height limit: the banked pages give the panel, not the rail.
+rail:
+  band:
+    value: 10.0
+    status: tbd
+    source: "[web] 108-110 mm is the usual maximum board height between the rails (modwiggler 'Max PCB height for Eurorack?', t=203897; sdiy.info wiki 'Eurorack'), i.e. ~10 mm at each edge; NOT banked - both pages refused a fetch (403) on 2026-09-29. Community rail profiles (github.com/rahji/eurorack-ears) exist but their orientation to the panel is not stated"
+    decided_by: "a rail maker's drawing banked (Vector, Tiptop Z-rail, or the case vendor's), or the target case measured"
+  depth:
+    value: 10.0
+    status: tbd
+    source: "[from memory] how far behind the panel's rear face a Eurorack rail's profile reaches; drawn so the clash check sees parts in the rail band near the panel"
+    decided_by: "as rail.band"
+
+# The case the depth is checked against.
+case:
+  depth_max:
+    value: 45.5
+    status: settled
+    source: "[ds] INTELLIJEL-PALETTE-CASE-MANUAL-2020-11-30.pdf p.6: '3U modules, up to a depth of 45.5mm' (middle HP; 37.42 at each 1 HP edge). Taken as behind the panel's REAR face - the manual does not say which face; the DRC also reports the depth from the front face, which is 2 mm worse"
+
+# --------------------------------------------------------------- boards ----
+boards:
+  t:
+    value: 1.6
+    status: settled
+    source: "[repo] PCB-MODULE, PCB-MODULE-JACK rows: 1.6 mm"
+  side_margin:
+    value: 1.0
+    status: nominal
+    source: "[adr 0024] each board's side edge this far inside the panel's side edge, so a neighbour module's board cannot touch it"
+  ec_clear:
+    value: 1.0
+    status: nominal
+    source: "[adr 0024] the jack board's notch this far clear of the NE8FAV's 25 x 25 body on each side"
+  copper_edge:
+    value: 0.5
+    status: nominal
+    source: "[adr 0024] a pad's edge this far inside a board edge or cut-out (a fab-house edge clearance; the layout's own rules may be stricter)"
+  part_clear:
+    value: 0.5
+    status: nominal
+    source: "[adr 0024] the least air between two parts' envelopes that the DRC accepts"
+
+# The board-to-board spacer. Its LENGTH is derived in module.scad (the
+# NE8FAV's setback less the jack board's depth and thickness), never set here.
+standoff:
+  stock_l:
+    value: 8.0
+    status: settled
+    source: "[ds] WURTH-WA-SPAII-970080365-SPACER-M3-8MM-POLYAMIDE.pdf: 8.0 +/-0.1, M3 internal both ends"
+  tol:
+    value: 0.1
+    status: settled
+    source: "[ds] as stock_l: +/-0.1"
+  af:
+    value: 6.0
+    status: settled
+    source: "[ds] as stock_l: SW 6 (hex across flats)"
+  hole_d:
+    value: 3.2
+    status: nominal
+    source: "[calc] M3 clearance, the panel's own hole size"
+  # Where the four sit (x, y), panel frame. Two above the pots, between them;
+  # one in each of the jack board's legs beside the NE8FAV, low.
+  at:
+    value: [[16.75, 114.8], [33.75, 114.8], [6.375, 17.0], [44.125, 17.0]]
+    status: nominal
+    source: "[adr 0024] placed by hand against the pots, the legs and the rail band; module.scad DRCs every one"
+
+# The M3 pan-head screw, DIN 7985: the panel's four (MECH-PANEL-SCREW-MOD) and
+# the standoffs' eight, one each side of each standoff.
+m3:
+  head_d:
+    value: 6.0
+    status: settled
+    source: "[ds] ASPEN-DIN7985-ISO7045-PAN-HEAD-DIMENSION-TABLE.pdf: DIN 7985 M3 dk nominal max 6.0 (min 5.7) - the head MECH-PANEL-SCREW-MOD buys. The ISO 7045 head is smaller; the table banked is the DIN one"
+  head_k:
+    value: 2.52
+    status: settled
+    source: "[ds] as head_d: DIN 7985 M3 k max 2.52 (nominal 2.4)"
+
+# The 2 x 10 header soldered through both boards (J-B2B-MOD).
+b2b:
+  rows:
+    value: 2
+    status: settled
+    source: "[repo] J-B2B-MOD: 2 x 10, 2.54 mm"
+  pins:
+    value: 10
+    status: settled
+    source: "[repo] J-B2B-MOD"
+  pitch:
+    value: 2.54
+    status: settled
+    source: "[repo] J-B2B-MOD"
+  insulator_h:
+    value: 2.54
+    status: settled
+    source: "[ds 3D] KICAD-PinHeader_2x10_P2.54mm_Vertical-3D.step: insulator z 0..2.54"
+  pad_d:
+    value: 1.7
+    status: nominal
+    source: "[repo] KiCad PinHeader_2x10_P2.54mm_Vertical pad (1.7 round) [from memory]"
+  protrude:
+    value: 1.5
+    status: nominal
+    source: "[adr 0024] how far the posts stand out of the jack board's front face, for a solder fillet"
+  tail:
+    value: 1.5
+    status: nominal
+    source: "[adr 0024] how far the tails stand out of the main board's rear face"
+  # centre (x, y) and orientation: long axis along y, between the jack columns
+  at:
+    value: [25.25, 75.5]
+    status: nominal
+    source: "[adr 0024] between the two jack columns, level with the middle jack row"
+
+# J-PWR-EURO, the 2 x 8 shrouded header, on the main board's REAR face.
+power:
+  l:
+    value: 27.97
+    status: settled
+    source: "[ds] XFCN-BH254V-16P-2x8-BOX-HEADER.pdf: B = 27.97 for 2x08"
+  w:
+    value: 8.8
+    status: settled
+    source: "[ds] XFCN BH254V: body width 8.8"
+  h:
+    value: 9.05
+    status: settled
+    source: "[ds] XFCN BH254V: height above board 9.05"
+  floor:
+    value: 2.55
+    status: settled
+    source: "[calc] 9.05 height - 6.5 cavity depth [ds XFCN BH254V] = where a seated socket's face stops"
+  socket_h:
+    value: 14.35
+    status: settled
+    source: "[ds] TE-IDC-SOCKET-CATALOG-82012.pdf p.52: 622/636 socket height after crimping WITH strain relief 14.35 (the taller build; 10.5 without)"
+  socket_w:
+    value: 6.1
+    status: settled
+    source: "[ds] TE 82012 p.52: body width 6.10 max"
+  socket_l:
+    value: 24.82
+    status: settled
+    source: "[calc] TE 82012 p.53: A = B + 7.04 (12-position: 19.74 = 12.70 + 7.04); 16-position B = 7 x 2.54 = 17.78, so A = 24.82"
+  ribbon_t:
+    value: 1.0
+    status: tbd
+    source: "[from memory] 1.27 mm-pitch flat cable, ~0.9 thick"
+    decided_by: "CBL-PWR-EURO's cable (the case's supplied ribbon)"
+  ribbon_w:
+    value: 20.32
+    status: settled
+    source: "[calc] 16 conductors x 1.27 mm pitch"
+  # centre (x, y) on the rear face; long axis along y, pin 1 (-12 V, red
+  # stripe) at the BOTTOM - Doepfer: 'the coloured marking on the ribbon
+  # cable is at the bottom of the module's connector' [ds a100m_e.html]
+  at:
+    value: [42.5, 35.0]
+    status: nominal
+    source: "[adr 0024] low on the right, behind the jack board's right leg, clear of the NE8FAV's tails and of the lower right standoff screw's head; the ribbon folds down to the bus board"
+  drop:
+    value: 10.0
+    status: nominal
+    source: "[adr 0024] how far below the panel's bottom edge the ribbon's envelope is drawn - toward the bus board, which the model does not draw"
+
+# Tall parts on the main board's rear face (envelopes for the depth check).
+tall:
+  cap_d:
+    value: 6.3
+    status: settled
+    source: "[repo] C-BULK-RAIL 100 uF: CP_Radial_D6.3mm (the tallest of the four)"
+  cap_h:
+    value: 11.0
+    status: tbd
+    source: "[from memory] a 6.3 x 11 25 V 100 uF can; the banked KiCad model is a generic 6.3 tall"
+    decided_by: "C-BULK-RAIL's MPN"
+  trim:
+    value: [9.53, 4.83, 10.03]
+    status: settled
+    source: "[ds] BOURNS-3296-TRIMPOT.pdf via R26: 3296W body 9.53 x 4.83 x 10.03"
+  # Each: [x, y, kind] on the rear face - an envelope for the depth and
+  # clash checks, NOT a placement; the layout places them.
+  at:
+    value: [[10.0, 60.0, "cap"], [10.0, 70.0, "cap"], [40.0, 60.0, "cap"], [40.0, 70.0, "cap"],
+            [25.25, 95.0, "trim"], [14.0, 95.0, "trim"], [36.5, 95.0, "trim"]]
+    status: nominal
+    source: "[adr 0024] representative spots for the three trimmers and four bulk caps, so the depth check sees them; the layout moves them"
+
+# ----------------------------------------------------------- panel parts ----
+# PJ398SM (J-CV) - QingPu / Thonk drawing and the banked community STEP.
+jack:
+  hole_d:
+    value: 6.3
+    status: nominal
+    source: "[ds] PJ398SM-drawing.jpg: bushing D6; +0.3 clearance [repo J-CV: '6.2-6.5 in practice']"
+    decided_by: "the first panel's test-fit"
+  body_w:
+    value: 9.0
+    status: settled
+    source: "[ds] PJ398SM-drawing.jpg front view: 9"
+  body_up:
+    value: 6.0
+    status: settled
+    source: "[ds] PJ398SM front view: 6 from the axis to the body's top (the pin 3 side); PJ398SM.kicad_mod F.Fab -5.98"
+  body_down:
+    value: 4.5
+    status: settled
+    source: "[ds] PJ398SM front view: 4.5 from the axis to the body's foot (the pin 1 side); PJ398SM.kicad_mod F.Fab 4.42"
+  body_d:
+    value: 9.0
+    status: settled
+    source: "[ds] PJ398SM side view: body 9 along the axis; [ds 3D] THONKICONN-PJ398SM-BADPIXEL-3D.step z 0..9. It SETS THE JACK BOARD'S DEPTH: body front on the panel's rear face"
+  bushing_l:
+    value: 5.5
+    status: settled
+    source: "[ds] PJ398SM side view: 5.5 from the body's front face"
+  tails:
+    value: 3.5
+    status: settled
+    source: "[ds] PJ398SM side view: 3.5 behind the body"
+  pins:
+    value: [4.92, -3.38, -6.48]
+    status: settled
+    source: "[ds] PJ398SM PCB layout: pins 3, 2, 1 at +4.92, -3.38, -6.48 from the barrel axis (3.38 + 3.10) along one line [calc]"
+  pads:
+    value: [[2.6, 2.6], [2.6, 2.6], [3.1, 2.3]]
+    status: settled
+    source: "[ds] PJ398SM.kicad_mod: pads T (pin 3) and TN (pin 2) 2.6 x 2.6 roundrect, S (pin 1) 3.1 x 2.3 oval - [across, along] the pin line, in the order of pins"
+  nut_d:
+    value: 8.0
+    status: tbd
+    source: "[from memory] the Thonkiconn's knurled/hex nut, ~8 across"
+    decided_by: "a nut in hand"
+  nut_h:
+    value: 2.0
+    status: tbd
+    source: "[from memory] the Thonkiconn nut's thickness"
+    decided_by: "a nut in hand"
+  plug_d:
+    value: 10.0
+    status: tbd
+    source: "[from memory] the grip of a common 3.5 mm patch plug (Tiptop Stackcables and similar), 9-10 mm"
+    decided_by: "the patch cables the owner uses"
+
+# R0904N, 9 mm vertical, snap-in, insulated knurled (T18) shaft, L-25.
+pot:
+  shaft_d:
+    value: 6.0
+    status: settled
+    source: "[ds 3D] SONGHUEI-R0904N-L25-BADPIXEL-3D.step: shaft +/-3.0"
+  hole_d:
+    value: 7.0
+    status: nominal
+    source: "[adr 0024] 1 mm over the shaft: the R0904N has no bushing, so nothing but its board locates it and the hole must absorb the board's position tolerance"
+    decided_by: "the first panel's test-fit"
+  body:
+    value: [-6.22, 5.48, 9.7, 7.8]
+    status: settled
+    source: "[ds 3D] R0904N STEP: body from -6.22 to +5.48 along the pin axis, 9.7 wide [ds R0904N.pdf], top of the bracket 7.8 above the seating plane"
+  shaft_top:
+    value: 25.0
+    status: settled
+    source: "[ds 3D] R0904N STEP: shaft top 25.0 above the seating plane (L-25)"
+  pins:
+    value: [-6.7, 2.5]
+    status: settled
+    source: "[ds 3D] R0904N STEP: three pins at -6.7 along the pin axis, 2.5 apart"
+  legs:
+    value: 3.7
+    status: settled
+    source: "[ds 3D] R0904N STEP: pins and snap legs 3.7 below the seating plane"
+
+knob:
+  d:
+    value: 12.0
+    status: settled
+    source: "[ds] THONK-DAVIES-1900H-CLONE-T18-KNOB-PRODUCT-PAGE.html: '12mm diameter at the base and 16mm tall'"
+  h:
+    value: 16.0
+    status: settled
+    source: "[ds] as d"
+  d_max:
+    value: 14.0
+    status: settled
+    source: "[repo] KNOB-BREATH: 14 mm MAX; ADR 0004's knob table"
+  gap:
+    value: 1.0
+    status: tbd
+    source: "[adr 0024] air between the knob's skirt and the panel face, so it turns without rubbing"
+    decided_by: "the knob's bore depth, at the first fit"
+
+# LTL-4231N, 3 mm diffused. Held at its depth by MECH-LED-BEZEL-MOD taken as a
+# lead spacer from the jack board (ADR 0024): its length is derived, never set.
+led:
+  spacer_d:
+    value: 4.0
+    status: tbd
+    source: "[from memory] a 3 mm LED's two-lead spacer, ~4 across"
+    decided_by: "the spacer bought for MECH-LED-BEZEL-MOD"
+
+  lens_d:
+    value: 3.0
+    status: settled
+    source: "[ds] LITEON-LTL-4231N-3MM-GREEN-DIFFUSED.pdf: 3.0"
+  flange_d:
+    value: 3.2
+    status: settled
+    source: "[ds] LTL-4231N: flange 3.2"
+  flange_t:
+    value: 1.0
+    status: settled
+    source: "[ds] LTL-4231N: 1.0"
+  l:
+    value: 5.55
+    status: settled
+    source: "[ds] LTL-4231N: 5.55 +/-0.3 lens tip to the flange's underside"
+  pitch:
+    value: 2.54
+    status: settled
+    source: "[ds] LTL-4231N: leads 2.54 nom."
+  hole_d:
+    value: 3.2
+    status: settled
+    source: "[repo] panel-height-budget's toggle_row note: a D3.2 hole for the LED; the lens passes, the flange stops behind the panel"
+  proud:
+    value: 1.0
+    status: tbd
+    source: "[adr 0024] how far the lens stands in front of the panel face"
+    decided_by: "the first panel, looked at"
+
+# NKK M2011SD4G01 (SW-POWER), panel-mounted, wired.
+toggle:
+  hole_d:
+    value: 6.5
+    figure: panel-toggle-hole
+    status: settled
+    source: "[ds] NKK-SERIES-M-TOGGLE.pdf p.7, D4 bushing"
+  flat:
+    value: 5.8
+    figure: panel-toggle-hole
+    status: settled
+    source: "[ds] NKK Series M p.7: the D4 D-flat"
+  body:
+    value: [7.9, 13.0, 9.4]
+    status: settled
+    source: "[ds] NKK Series M p.11 (A62), single pole: 7.9 across, 13.0 terminal field, 9.4 deep behind the bushing"
+  lugs:
+    value: 4.5
+    status: settled
+    source: "[ds] NKK p.11: solder lugs 4.5 behind the body"
+  bushing_l:
+    value: 8.9
+    status: settled
+    source: "[ds] NKK p.11: bushing 8.9"
+  lever:
+    value: [10.5, 2.8, 25]
+    status: settled
+    source: "[ds] NKK p.11: lever 10.5 long, 2.8 dia, 25 deg throw"
+  panel_max:
+    value: 2.6
+    status: settled
+    source: "[ds] NKK p.7: max panel thickness with the standard hardware, D4"
+  nut_d:
+    value: 9.2
+    status: tbd
+    source: "[from memory] an M6 hex nut across corners (~8 AF)"
+    decided_by: "NKK's supplied nut, read off p.7 or measured"
+  nut_h:
+    value: 2.0
+    status: tbd
+    source: "[from memory] NKK's thin M6 panel nut"
+    decided_by: "as nut_d"
+
+# The NE8FAV (J-UMBILICAL). The body owns these numbers (ADR 0021/0023): ref.
+ethercon:
+  bore_d: {ref: "config/body.yaml:ethercon.bore_d"}
+  flange_w: {ref: "config/body.yaml:ethercon.flange_w"}
+  flange_h: {ref: "config/body.yaml:ethercon.flange_h"}
+  hole_dx: {ref: "config/body.yaml:ethercon.hole_dx"}
+  hole_dy: {ref: "config/body.yaml:ethercon.hole_dy"}
+  hole_d: {ref: "config/body.yaml:ethercon.hole_d"}
+  panel_max: {ref: "config/body.yaml:ethercon.panel_max"}
+  pcb_setback: {ref: "config/body.yaml:ethercon.pcb_setback"}
+  nose_l: {ref: "config/body.yaml:ethercon.nose_l"}
+  tab_w: {ref: "config/body.yaml:ethercon.tab_w"}
+  tab_top: {ref: "config/body.yaml:ethercon.tab_top"}
+  tab_front: {ref: "config/body.yaml:ethercon.tab_front"}
+  peg_below: {ref: "config/body.yaml:ethercon.peg_below"}
+  # What the module needs that the body did not.
+  tab_back:
+    value: 3.8
+    status: settled
+    source: "[ds 3D] NEUTRIK-NE8FAV-3D.stp sliced 2026-09-29: the PUSH tab's plate spans 3.8..6.8 in front of the flange face, on a 5 x 1 stem at 2.7..3.8 that rises from inside the nose's 22 circle (y 9.9..10.9). NOTHING of the tab lies in the panel for a panel thinner than 3.8 - hence no slot (ADR 0024)"
+  tab_bottom:
+    value: 9.9
+    status: settled
+    source: "[ds 3D] NE8FAV STEP: the tab's plate from 9.91 above the axis (to ethercon.tab_top)"
+  tails:
+    value: 3.4
+    status: settled
+    source: "[ds 3D] NE8FAV STEP: z -21.7, i.e. 21.7 - 18.3 = 3.4 behind the PCB's front face [calc], over x +/-9.28, y -11.0..+12.35"
+  pegs:
+    value: [5.855, 3.0, 13.5]
+    status: settled
+    source: "[ds 3D] NE8FAV STEP: the two pegs below the flange span x +/-5.855, from 3.0 to 13.5 behind the flange face"
+  cable_d:
+    value: 20.1
+    status: settled
+    source: "[repo] J-UMBILICAL-CABLE: NE8MX dia 20.1 (from NE8MX.pdf [ds])"
+  bore_clear:
+    value: 0.2
+    status: nominal
+    source: "[adr 0024] over the drawing's 22 MIN bore, for the cutter's kerf tolerance"
+  screw_head_d:
+    value: 5.5
+    status: tbd
+    source: "[from memory] Neutrik's A-series mounting screw (MECH-ETHERCON-SCREW-MOD): a small countersunk/pan head"
+    decided_by: "the A-Screw's drawing banked, or one in hand"
+  screw_head_h:
+    value: 1.7
+    status: tbd
+    source: "[from memory] as screw_head_d"
+    decided_by: "as screw_head_d"
+  push_slot:
+    value: false
+    status: settled
+    source: "[adr 0024] no slot: Neutrik's rear-mount panel cut-out has none [ds ST-NE8FAV], and the tab stands tab_back in front of the flange face, clear of any panel up to panel_max [ds 3D]"
+
+# --------------------------------------------------------------- layout ----
+# THE PANEL LAYOUT (ADR 0024). Centres, panel frame. Everything the DRC checks
+# is derived from these few numbers and the part envelopes above.
+layout:
+  label_band:
+    value: 5.0
+    status: settled
+    source: "[adr 0004] panel table: label / title band 5 mm"
+  pot_y:
+    value: 106.0
+    status: nominal
+    source: "[adr 0024] the pot row: the knob's 14 mm budget (ADR 0004) under the title band"
+  pot_pitch:
+    value: 17.0
+    status: settled
+    source: "[adr 0004] three 14 mm knobs with 3 mm gaps across 10HP [calc 14 + 3]"
+  jack_y0:
+    value: 88.5
+    status: nominal
+    source: "[adr 0024] the first jack row"
+  jack_pitch_y:
+    value: 13.0
+    status: settled
+    source: "[adr 0004] panel table: jacks at 13 mm pitch"
+  jack_pitch_x:
+    value: 19.0
+    status: nominal
+    source: "[adr 0024] the jacks lie on their sides, pins across, sleeve outward (a PJ398SM's footprint is 13.85 along its pin line [calc from its pads], so pins down a 13 mm column collide); 19 leaves J-B2B-MOD's pads between the columns with the DRC's clearance"
+  ec_y:
+    value: 39.5
+    status: nominal
+    source: "[adr 0024] the NE8FAV's axis: as high as the tab clears the last jack's plug, as low as the toggle row allows"
+  led_side:
+    value: "left"
+    status: nominal
+    source: "[adr 0024] the LED in the strip left of the flange, level with the axis"
+  toggle_y:
+    value: 17.0
+    status: nominal
+    source: "[adr 0024] the toggle row, centred, under the NE8FAV: its body clear of the rail band below and the pegs above"
+  pots:
+    value: ["POT-GAIN", "POT-OFFSET", "POT-RESP"]
+    status: nominal
+    source: "[adr 0004] 'three knobs across (gain, offset, response)', left to right"
+  jacks:
+    value: [["J-CV-PITCH", "J-CV-BREATH"], ["J-CV-MOD1", "J-CV-MOD2"], ["J-CV-MOD3", "J-CV-MOD4"]]
+    status: nominal
+    source: "[adr 0024] rows top to bottom, left then right: PITCH and BREATH on the row under the knobs that shape breath; MOD 1-4 below, read like text"
+
+# ---------------------------------------------------------------- rules ----
+# The thresholds module.scad's DRC measures against. Each is a design choice
+# or a banked limit, never a measured value.
+rules:
+  web_min:
+    value: 3.5
+    status: nominal
+    source: "[adr 0024] the least aluminium between two cuts of DIFFERENT parts, or a cut and the panel edge: above the 3.09 ADR 0004 rejected ('a fit the panel passes and a stiffness test it does not') and the ~3.1 of a toggle beside the flange, below the 4.52 it accepted for the LED. Cuts inside one part's own pattern (the NE8FAV's bore and screws) and the standard mounting slots are exempt"
+  knob_gap_min:
+    value: 3.0
+    status: settled
+    source: "[adr 0004] three knobs across with 3 mm gaps"
+  plug_gap_min:
+    value: 2.0
+    status: nominal
+    source: "[adr 0024] the least air between two patch-plug grips, or a grip and a knob, so each can be pulled without dragging the next"
+  knob_edge_min:
+    value: 1.0
+    status: nominal
+    source: "[adr 0024] a knob at its 14 mm budget this far inside the panel's side edge, so it cannot foul the neighbouring module's knob"
+  legend_h:
+    value: 3.0
+    status: nominal
+    source: "[adr 0024] the least height of a legend zone: 2.0 mm text (a common Eurorack legend size [from memory]) with 0.5 above and below"
+  legend_w:
+    value: 8.0
+    status: nominal
+    source: "[adr 0024] the least width of a jack's side legend zone: 'BREATH' at 2.0 mm text [from memory]"
+  front_clear:
+    value: 1.0
+    status: nominal
+    source: "[adr 0024] the least air between two things on the panel's face that are not knobs or plugs (nuts, screw heads, the toggle's sweep, the NE8MX)"

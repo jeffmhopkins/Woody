@@ -96,6 +96,16 @@ the way it is). This is the working summary.
    or built by nothing. `python3 tools/cad.py explain <output>` says which input
    moved since it was built.
 
+**The Eurorack module is a second model in the same pipeline**:
+`config/module.yaml` → `mechanical/cad/module.scad`, with its own spec
+(`mechanical/module/outputs.yaml`), ledger (`mechanical/module/OUTPUTS.csv`),
+`drc.echo` and `clash.txt` under `mechanical/module/`
+([`mechanical/module/README.md`](../../mechanical/module/README.md)). One
+`build` or `check` covers both. A module config leaf may say
+`ref: config/body.yaml:<path>` instead of a value — the NE8FAV is dimensioned
+once for both ends — or `figure: <id>`, which fails the build when that
+register figure no longer contains the number.
+
 ### Adding things
 
 - **A new render**: add an entry to `mechanical/outputs.yaml` (source file,
