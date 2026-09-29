@@ -1,0 +1,1687 @@
+(kicad_sch (version 20250114) (generator "sch.py") (generator_version "9.0")
+  (uuid deca1880-f796-509a-b41b-fda81b07e63f)
+  (paper "A2")
+  (title_block
+    (title "Key chain, main board to two key boards (interfaces/key-chain-loom)")
+    (comment 5 "circuit: interfaces/key-chain-loom")
+    (comment 6 "page: key-chain-loom.md")
+    (comment 7 "title: Key chain (main board to two key boards)")
+    (date "")
+    (rev "")
+    (company "Woody")
+    (comment 1 "SOURCE for this circuit - edit in KiCad 9. netlist.yaml is exported from it: python3 tools/kicad.py export hardware/interfaces/key-chain-loom")
+    (comment 2 "Part facts ride on each symbol: Row (BOM row), Pins + Pins_source (pin map and its datasheet), Note")
+    (comment 3 "ADR 0001, ADR 0017, ADR 0018 - migrated from its hand-written netlist.yaml, compared part by part and net by net")
+    (comment 4 "Ports are hierarchical labels (Dir, From/To, Figure). It spans three boards: no board places it - key-chain-loom.md")
+  )
+  (lib_symbols
+    (symbol "Connector_Generic:Conn_01x12"
+		(pin_names
+			(offset 1.016)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "J"
+			(at 0 15.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Conn_01x12"
+			(at 0 -17.78 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x12, script generated (kicad-library-utils/schlib/autogen/connector/)"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "connector"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "Connector*:*_1x??_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "Conn_01x12_1_1"
+			(rectangle
+				(start -1.27 13.97)
+				(end 1.27 -16.51)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+			(rectangle
+				(start -1.27 12.827)
+				(end 0 12.573)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 10.287)
+				(end 0 10.033)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 7.747)
+				(end 0 7.493)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 5.207)
+				(end 0 4.953)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 2.667)
+				(end 0 2.413)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 0.127)
+				(end 0 -0.127)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 -2.413)
+				(end 0 -2.667)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 -4.953)
+				(end 0 -5.207)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 -7.493)
+				(end 0 -7.747)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 -10.033)
+				(end 0 -10.287)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 -12.573)
+				(end 0 -12.827)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 -15.113)
+				(end 0 -15.367)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(pin passive line
+				(at -5.08 12.7 0)
+				(length 3.81)
+				(name "Pin_1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 10.16 0)
+				(length 3.81)
+				(name "Pin_2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 7.62 0)
+				(length 3.81)
+				(name "Pin_3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 5.08 0)
+				(length 3.81)
+				(name "Pin_4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 2.54 0)
+				(length 3.81)
+				(name "Pin_5"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "5"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 0 0)
+				(length 3.81)
+				(name "Pin_6"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "6"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 -2.54 0)
+				(length 3.81)
+				(name "Pin_7"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "7"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 -5.08 0)
+				(length 3.81)
+				(name "Pin_8"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "8"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 -7.62 0)
+				(length 3.81)
+				(name "Pin_9"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "9"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 -10.16 0)
+				(length 3.81)
+				(name "Pin_10"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "10"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 -12.7 0)
+				(length 3.81)
+				(name "Pin_11"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "11"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 -15.24 0)
+				(length 3.81)
+				(name "Pin_12"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "12"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "Device:FerriteBead"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "FB"
+			(at -3.81 0.635 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "FerriteBead"
+			(at 3.81 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at -1.778 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Ferrite bead"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "L ferrite bead inductor filter"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "Inductor_* L_* *Ferrite*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "FerriteBead_0_1"
+			(polyline
+				(pts
+					(xy -2.7686 0.4064) (xy -1.7018 2.2606) (xy 2.7686 -0.3048) (xy 1.6764 -2.159) (xy -2.7686 0.4064)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0 1.27) (xy 0 1.2954)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0 -1.27) (xy 0 -1.2192)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "FerriteBead_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 2.54)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 2.54)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "Device:R"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "R"
+			(at 2.032 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "R"
+			(at 0 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at -1.778 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "R res resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "R_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "R_0_1"
+			(rectangle
+				(start -1.016 -2.54)
+				(end 1.016 2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "R_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "Power_Protection:SP0504BAHT"
+		(pin_names
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "D"
+			(at 7.62 2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "SP0504BAHT"
+			(at 7.62 0.635 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23-5"
+			(at 7.62 -1.27 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "http://www.littelfuse.com/~/media/files/littelfuse/technical%20resources/documents/data%20sheets/sp05xxba.pdf"
+			(at 3.175 3.175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "TVS Diode Array, 5.5V Standoff, 4 Channels, SOT-23-5 package"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "usb esd protection suppression transient"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "SOT?23*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "SP0504BAHT_0_0"
+			(pin passive line
+				(at 0 -5.08 90)
+				(length 2.54)
+				(name "A"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(symbol "SP0504BAHT_0_1"
+			(rectangle
+				(start -4.445 2.54)
+				(end 6.985 -2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+			(polyline
+				(pts
+					(xy -3.302 1.016) (xy -3.302 1.27) (xy -1.778 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -2.54 2.54) (xy -2.54 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -2.54 1.27) (xy -2.54 -1.27) (xy 2.54 -1.27) (xy 2.54 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -2.54 1.27) (xy -1.905 0) (xy -3.175 0) (xy -2.54 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0 2.54) (xy 0 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0 -1.27) (xy 0 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0 -1.27) (xy 0 -2.54)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center 0 -1.27)
+				(radius 0.254)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0.635 0) (xy -0.635 0) (xy 0 1.27) (xy 0.635 0)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0.762 1.27) (xy -0.762 1.27) (xy -0.762 1.016)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.778 1.016) (xy 1.778 1.27) (xy 3.175 1.27) (xy 3.302 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 2.54 2.54) (xy 2.54 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 2.54 1.27) (xy 1.905 0) (xy 3.175 0) (xy 2.54 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center 2.54 -1.27)
+				(radius 0.254)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(polyline
+				(pts
+					(xy 4.318 1.016) (xy 4.318 1.27) (xy 5.715 1.27) (xy 5.842 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 5.08 2.54) (xy 5.08 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 5.08 1.27) (xy 5.08 -1.27) (xy 2.54 -1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 5.08 1.27) (xy 4.445 0) (xy 5.715 0) (xy 5.08 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "SP0504BAHT_1_1"
+			(pin passive line
+				(at -2.54 5.08 270)
+				(length 2.54)
+				(name "K"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 5.08 270)
+				(length 2.54)
+				(name "K"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 2.54 5.08 270)
+				(length 2.54)
+				(name "K"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 5.08 5.08 270)
+				(length 2.54)
+				(name "K"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "5"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+  )
+  (symbol (lib_id "Connector_Generic:Conn_01x12") (at 101.6 88.9 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 7dbe0c0b-4dc0-5adb-927a-2192b8d2b90e)
+    (property "Reference" "J-CHAIN-MAIN-RH" (at 101.6 73.66 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "12-way" (at 101.6 106.68 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "woody:IDC-Header_2x06_P1.27mm_Samtec_SHF_Horizontal" (at 101.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 101.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "J-CHAIN" (at 101.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2 3=3 4=4 5=5 6=6 7=7 8=8 9=9 10=10 11=11 12=12" (at 101.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Main board, right_hand ribbon. Main-board numbering: pin k is conductor k" (at 101.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "IDC header positions 1-12, the ribbon's conductor order (key-chain-loom.md)" (at 101.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Samtec" (at 101.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "SHF-106-01-L-D-RA" (at 101.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "" (at 101.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "hand" (at 101.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 25fdce89-4599-5588-ad3c-aa184b29f291))
+    (pin "10" (uuid 6f2b393b-2082-51b1-ad35-863a5e6db5da))
+    (pin "11" (uuid 1c41ad54-c745-53e0-8e2d-e480a246b866))
+    (pin "12" (uuid dcd95840-fc37-5a56-8d91-4fded0f84b6c))
+    (pin "2" (uuid 102e511a-b1f9-5aeb-911b-12d69b5c1a66))
+    (pin "3" (uuid a70ccbc4-90cc-52b6-b253-bbdc980310ed))
+    (pin "4" (uuid 6f8a4354-2adc-5f10-9d48-28e797214445))
+    (pin "5" (uuid ecee2014-adc4-5f46-87eb-c0aa9dbb95a7))
+    (pin "6" (uuid bd14725b-bc97-5f7c-9dbf-2ceecc144f18))
+    (pin "7" (uuid 3ece98a7-2cf5-59a4-80c2-f4476f111fcb))
+    (pin "8" (uuid 18bab672-82e6-5952-96ca-a23463a94f24))
+    (pin "9" (uuid 47a3dd32-d607-5566-939a-4d845fe1318b))
+    (instances (project "key-chain-loom" (path "/deca1880-f796-509a-b41b-fda81b07e63f" (reference "J-CHAIN-MAIN-RH") (unit 1))))
+  )
+  (symbol (lib_id "Connector_Generic:Conn_01x12") (at 203.2 88.9 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid c5a54137-67a3-589d-8203-f6ef70698089)
+    (property "Reference" "J-CHAIN-KEY-RH" (at 203.2 73.66 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "12-way" (at 203.2 106.68 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "woody:IDC-Header_2x06_P1.27mm_Samtec_SHF_Horizontal" (at 203.2 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 203.2 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "J-CHAIN" (at 203.2 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2 3=3 4=4 5=5 6=6 7=7 8=8 9=9 10=10 11=11 12=12" (at 203.2 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "right_hand key board: conductor k lands on pin 13-k - the cable's key-board socket has its notch reversed (FFSD -RN2)" (at 203.2 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "IDC header positions 1-12; the cable's key-board socket is notch-reversed (Samtec -RN2), so conductor k lands on pin 13-k (key-chain-loom.md)" (at 203.2 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Samtec" (at 203.2 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "SHF-106-01-L-D-RA" (at 203.2 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "" (at 203.2 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "hand" (at 203.2 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 87278db1-7fd6-5e8f-8b90-b1cdb7686ded))
+    (pin "10" (uuid f7b1cda4-ba1b-5d5d-85b0-eb41b6b4d5f5))
+    (pin "11" (uuid 758467ba-8fe8-528d-bb20-05cadbbff352))
+    (pin "12" (uuid d43cb739-4c1f-5bc3-9947-6c3221d9788e))
+    (pin "2" (uuid b89f79d8-83f9-55b1-9c5b-79d2a0554f52))
+    (pin "3" (uuid eeb9fefa-f824-51cd-9755-d983d23d8667))
+    (pin "4" (uuid cb65c378-fa17-5698-98b8-4ac67c750da4))
+    (pin "5" (uuid ab60938f-5f33-5f0c-a081-782977bfdf82))
+    (pin "6" (uuid bcf4d175-8e36-51a9-93f6-2e5075d266d2))
+    (pin "7" (uuid 3e314427-8db8-555b-9b6f-98362eb05ea8))
+    (pin "8" (uuid 89d78646-1a08-5c53-8f3b-a1b9f5756d6e))
+    (pin "9" (uuid 2f880c12-4df1-522e-98c6-1af0e99eb50e))
+    (instances (project "key-chain-loom" (path "/deca1880-f796-509a-b41b-fda81b07e63f" (reference "J-CHAIN-KEY-RH") (unit 1))))
+  )
+  (symbol (lib_id "Connector_Generic:Conn_01x12") (at 304.8 88.9 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 510ba13d-ff1d-529f-9af3-510c758514c0)
+    (property "Reference" "J-CHAIN-MAIN-LH" (at 304.8 73.66 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "12-way" (at 304.8 106.68 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "woody:IDC-Header_2x06_P1.27mm_Samtec_SHF_Horizontal" (at 304.8 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 304.8 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "J-CHAIN" (at 304.8 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2 3=3 4=4 5=5 6=6 7=7 8=8 9=9 10=10 11=11 12=12" (at 304.8 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Main board, left_hand ribbon - the chain end" (at 304.8 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "IDC header positions 1-12, the ribbon's conductor order (key-chain-loom.md)" (at 304.8 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Samtec" (at 304.8 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "SHF-106-01-L-D-RA" (at 304.8 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "" (at 304.8 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "hand" (at 304.8 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 4a624397-6c2f-5ebb-a79f-07cd49b4dd3d))
+    (pin "10" (uuid 17aa9845-e1e5-5cba-9bc2-8168e4449389))
+    (pin "11" (uuid 295c3f3a-4a46-59b2-bd74-b12e67408cc3))
+    (pin "12" (uuid df9fc60b-1251-50e8-ab1e-9c919bfd164d))
+    (pin "2" (uuid c357f006-a22c-5fa4-95c7-08acd28f8e0e))
+    (pin "3" (uuid ba6bf601-550b-5d16-952f-e25314b74362))
+    (pin "4" (uuid 4dab4477-40e8-58c2-a76a-1a7f2071a2ff))
+    (pin "5" (uuid 2c1ddbd3-bd01-5455-ab98-ae8a1537b3cf))
+    (pin "6" (uuid 20987773-e32f-5d73-8fa5-506110edd1af))
+    (pin "7" (uuid 04075091-cfc1-57d7-8072-4361954d14dc))
+    (pin "8" (uuid 86a4058a-787e-55e5-83a9-b8ace9942a33))
+    (pin "9" (uuid a01fee51-fdcd-54ab-a070-4cb48405a323))
+    (instances (project "key-chain-loom" (path "/deca1880-f796-509a-b41b-fda81b07e63f" (reference "J-CHAIN-MAIN-LH") (unit 1))))
+  )
+  (symbol (lib_id "Connector_Generic:Conn_01x12") (at 406.4 88.9 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 2d16a341-da74-5014-8441-2c0b793e982e)
+    (property "Reference" "J-CHAIN-KEY-LH" (at 406.4 73.66 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "12-way" (at 406.4 106.68 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "woody:IDC-Header_2x06_P1.27mm_Samtec_SHF_Horizontal" (at 406.4 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 406.4 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "J-CHAIN" (at 406.4 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2 3=3 4=4 5=5 6=6 7=7 8=8 9=9 10=10 11=11 12=12" (at 406.4 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "left_hand key board. REVERSED, like the right_hand one" (at 406.4 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "IDC header positions 1-12; the cable's key-board socket is notch-reversed (Samtec -RN2), so conductor k lands on pin 13-k (key-chain-loom.md)" (at 406.4 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Samtec" (at 406.4 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "SHF-106-01-L-D-RA" (at 406.4 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "" (at 406.4 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "hand" (at 406.4 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 9f24633a-37a1-5f92-a671-2abfe342101d))
+    (pin "10" (uuid 520ae90d-cf2d-54c7-8dda-1bc6a9beb71d))
+    (pin "11" (uuid 34525163-adc4-50df-9061-ecf0ab1bcc7e))
+    (pin "12" (uuid 8293615e-e82b-580b-924f-bbcf89e92dad))
+    (pin "2" (uuid 3c5fef22-d506-5269-b619-ed42080c0da9))
+    (pin "3" (uuid 13393494-2a29-584a-b582-9b46d22b0c1f))
+    (pin "4" (uuid 370cdebf-35c2-5ff3-b25a-4a40acc63a53))
+    (pin "5" (uuid 432f95f1-71c0-51ca-af0b-84d77864afc1))
+    (pin "6" (uuid ce052c96-2c46-558d-b808-1a679091d0e5))
+    (pin "7" (uuid 25fffd43-8373-5049-b65e-ea3732a96db7))
+    (pin "8" (uuid e9f4264f-d3d9-50ce-a9df-02c4c21bd81c))
+    (pin "9" (uuid 7b6d8eb4-969c-5509-8cc2-b56dc14810a3))
+    (instances (project "key-chain-loom" (path "/deca1880-f796-509a-b41b-fda81b07e63f" (reference "J-CHAIN-KEY-LH") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 63.5 165.1 90) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 751178f3-1dd0-5ccf-aba5-ccf890936d25)
+    (property "Reference" "R-CHAIN-SER-SCK" (at 63.5 162.56 90) (effects (font (size 1.27 1.27))))
+    (property "Value" "100R 1%" (at 63.5 167.64 90) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Resistor_SMD:R_1206_3216Metric" (at 63.5 166.37 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 63.5 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-CHAIN-SER" (at 63.5 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 63.5 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Drawn_as" "R-CHAIN-SER" (at 63.5 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "At the DRIVING end, where the MCU's pins arrive on the main board" (at 63.5 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL" (at 63.5 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "1206W4F1000T5E" (at 63.5 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C17901" (at 63.5 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 63.5 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid cd21cfb6-9880-58df-9a00-c89ecd0770f1))
+    (pin "2" (uuid 5255e967-95e1-57e1-859b-21b6dd83a80c))
+    (instances (project "key-chain-loom" (path "/deca1880-f796-509a-b41b-fda81b07e63f" (reference "R-CHAIN-SER-SCK") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 127.0 165.1 90) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 83b10884-137d-54de-88a9-6a80a6f41117)
+    (property "Reference" "R-CHAIN-SER-SHLD" (at 127.0 162.56 90) (effects (font (size 1.27 1.27))))
+    (property "Value" "100R 1%" (at 127.0 167.64 90) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Resistor_SMD:R_1206_3216Metric" (at 127.0 166.37 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 127.0 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-CHAIN-SER" (at 127.0 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 127.0 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL" (at 127.0 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "1206W4F1000T5E" (at 127.0 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C17901" (at 127.0 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 127.0 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 86bbe4d8-6b9c-577a-9d4a-763829b8f74c))
+    (pin "2" (uuid f2b4b219-222e-5ada-abc2-824ebe7784c4))
+    (instances (project "key-chain-loom" (path "/deca1880-f796-509a-b41b-fda81b07e63f" (reference "R-CHAIN-SER-SHLD") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 190.5 165.1 90) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 4448ae94-90de-5249-9ccb-0cab73415d57)
+    (property "Reference" "R-CHAIN-SER-SER" (at 190.5 162.56 90) (effects (font (size 1.27 1.27))))
+    (property "Value" "100R 1%" (at 190.5 167.64 90) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Resistor_SMD:R_1206_3216Metric" (at 190.5 166.37 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 190.5 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-CHAIN-SER" (at 190.5 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 190.5 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL" (at 190.5 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "1206W4F1000T5E" (at 190.5 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C17901" (at 190.5 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 190.5 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 77861360-b9d3-537a-8e97-caad96de88b1))
+    (pin "2" (uuid d6a85874-4806-5c5c-b07b-e1903c6bc4c6))
+    (instances (project "key-chain-loom" (path "/deca1880-f796-509a-b41b-fda81b07e63f" (reference "R-CHAIN-SER-SER") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 254.0 165.1 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid d2aec48b-32c4-5429-bc1d-fb98da4421a8)
+    (property "Reference" "R-SER-TERM" (at 256.54 163.83 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "10k" (at 256.54 166.37 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 252.73 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 254.0 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-SER-TERM" (at 254.0 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 254.0 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "On the MAIN board at the left_hand ribbon's pin 6, so the key boards stay identical. Holds the chain end high; IO33 overrides it through 100R for the self-test" (at 254.0 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL" (at 254.0 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "0805W8F1002T5E" (at 254.0 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C17414" (at 254.0 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 254.0 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid adfb5e27-7407-5f4c-804f-31ee0f941414))
+    (pin "2" (uuid e9e344ae-e27e-5489-bf74-6ecb3a09ba96))
+    (instances (project "key-chain-loom" (path "/deca1880-f796-509a-b41b-fda81b07e63f" (reference "R-SER-TERM") (unit 1))))
+  )
+  (symbol (lib_id "Device:FerriteBead") (at 304.8 165.1 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 1163c823-4f78-5a3c-92a5-3ba3284a87a8)
+    (property "Reference" "FB-CHAIN-RH" (at 307.34 163.83 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "Ferrite bead 600R @ 100MHz" (at 307.34 166.37 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Inductor_SMD:L_0805_2012Metric" (at 303.53 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 304.8 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "FB-CHAIN" (at 304.8 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 304.8 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Drawn_as" "FB-CHAIN" (at 304.8 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "In series with the right_hand ribbon's conductor 10. Isolation, not protection - the LDO's current limit is the protection" (at 304.8 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Murata" (at 304.8 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "BLM21SP601SN1D" (at 304.8 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C3716677" (at 304.8 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 304.8 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 30676e0b-8ff0-59cb-ad0f-6969ca4950ca))
+    (pin "2" (uuid e2e1230c-3fa0-5a7f-911d-638e1b663680))
+    (instances (project "key-chain-loom" (path "/deca1880-f796-509a-b41b-fda81b07e63f" (reference "FB-CHAIN-RH") (unit 1))))
+  )
+  (symbol (lib_id "Device:FerriteBead") (at 355.6 165.1 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid f01b6846-0727-5ea1-b32c-bee504503837)
+    (property "Reference" "FB-CHAIN-LH" (at 358.14 163.83 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "Ferrite bead 600R @ 100MHz" (at 358.14 166.37 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Inductor_SMD:L_0805_2012Metric" (at 354.33 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 355.6 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "FB-CHAIN" (at 355.6 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 355.6 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "In series with the left_hand ribbon's conductor 10" (at 355.6 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Murata" (at 355.6 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "BLM21SP601SN1D" (at 355.6 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C3716677" (at 355.6 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 355.6 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid fdb3e060-da8b-5004-9dd4-3057335a5805))
+    (pin "2" (uuid 921a18f4-5256-5928-9fd6-b0abee0b86e7))
+    (instances (project "key-chain-loom" (path "/deca1880-f796-509a-b41b-fda81b07e63f" (reference "FB-CHAIN-LH") (unit 1))))
+  )
+  (symbol (lib_id "Power_Protection:SP0504BAHT") (at 431.8 165.1 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 0e5623a0-c85c-56ec-ab86-a2f11e0445e8)
+    (property "Reference" "U-TVS-CHAIN" (at 439.42 162.56 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "SP0504BAHTG 4-channel 5V array" (at 439.42 165.1 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Package_TO_SOT_SMD:SOT-23-5" (at 439.42 166.37 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 434.34 161.29 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "U-TVS-CHAIN" (at 431.8 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "CH1=1(K) CH2=3(K) CH3=4(K) CH4=5(K) GND=2(A)" (at 431.8 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "FITTED (ADR 0018). On the three MCU nets the ribbon connectors expose, at the left_hand J-CHAIN. The fourth channel is spare" (at 431.8 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/discrete-and-power/SP0504BAHT.pdf p.1 pinout (SOT-23-5): I/O on 1, 3, 4, 5, ground on 2" (at 431.8 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Littelfuse" (at 431.8 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "SP0504BAHTG" (at 431.8 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C10675" (at 431.8 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 431.8 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "2" (uuid a80b8a08-2fac-5aa3-98f8-9df05a0a6d31))
+    (pin "1" (uuid b70f750a-b244-5b78-8c83-1a5fef74cdd6))
+    (pin "3" (uuid 4d737d25-b205-5397-96bc-95fd89ed3962))
+    (pin "4" (uuid f6d4b567-c10f-5762-8985-f9df0271d374))
+    (pin "5" (uuid b161fb42-45a1-56d5-8771-af7d318ddc37))
+    (instances (project "key-chain-loom" (path "/deca1880-f796-509a-b41b-fda81b07e63f" (reference "U-TVS-CHAIN") (unit 1))))
+  )
+  (wire (pts (xy 63.5 228.6) (xy 101.6 228.6)) (stroke (width 0) (type default)) (uuid 5af0935c-7829-570c-8a58-fef6b26ea540))
+  (wire (pts (xy 101.6 228.6) (xy 139.7 228.6)) (stroke (width 0) (type default)) (uuid fcc059b0-8c40-57ef-bdb0-8802a2823188))
+  (wire (pts (xy 190.5 228.6) (xy 228.6 228.6)) (stroke (width 0) (type default)) (uuid 7e1faf61-88c6-5cea-956a-0ab1e2503267))
+  (wire (pts (xy 228.6 228.6) (xy 266.7 228.6)) (stroke (width 0) (type default)) (uuid aa1f8d8f-5cf8-51a2-b254-e135d163056e))
+  (wire (pts (xy 317.5 228.6) (xy 355.6 228.6)) (stroke (width 0) (type default)) (uuid 9a974a60-79fc-5098-8449-322df717c5eb))
+  (wire (pts (xy 355.6 228.6) (xy 393.7 228.6)) (stroke (width 0) (type default)) (uuid 22fb7870-cc34-5cd4-9339-0828559e5554))
+  (wire (pts (xy 63.5 254.0) (xy 101.6 254.0)) (stroke (width 0) (type default)) (uuid eda4a9cc-d5bc-5654-876a-a04f5885592f))
+  (wire (pts (xy 101.6 254.0) (xy 139.7 254.0)) (stroke (width 0) (type default)) (uuid ce3e527f-52a0-5b47-9392-92a1cc4e6eaf))
+  (wire (pts (xy 190.5 254.0) (xy 228.6 254.0)) (stroke (width 0) (type default)) (uuid 6446acf5-7d92-5b82-ac82-4c58dd08c127))
+  (wire (pts (xy 228.6 254.0) (xy 266.7 254.0)) (stroke (width 0) (type default)) (uuid 44643352-68bd-5f64-8c5a-40e9b8ae8f4b))
+  (hierarchical_label "CHAIN_QH_LH" (shape input) (at 63.5 228.6 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 7ce218d2-ce7d-5522-acac-b29091d16f88)
+    (property "Dir" "in" (at 63.5 228.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "cluster/key-register" (at 63.5 228.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-connectors" (at 63.5 228.6 0) (effects (font (size 1.27 1.27)) hide)))
+  (label "HOP_LH_LT" (at 101.6 228.6 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid b262018a-230c-53d8-a09a-9caeb0d060af))
+  (hierarchical_label "CHAIN_SER_LT" (shape output) (at 139.7 228.6 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid f6cc5d45-25ea-53ad-8628-a3ddecf34130)
+    (property "Dir" "out" (at 139.7 228.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 139.7 228.6 0) (effects (font (size 1.27 1.27)) hide)))
+  (hierarchical_label "CHAIN_QH_LT" (shape input) (at 190.5 228.6 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 9eeb89ed-47f1-545d-8150-d1236198fa2f)
+    (property "Dir" "in" (at 190.5 228.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "cluster/key-register" (at 190.5 228.6 0) (effects (font (size 1.27 1.27)) hide)))
+  (label "HOP_LT_RH" (at 228.6 228.6 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 54c600c9-b4d4-58eb-ab10-a5d4d7ad5bb0))
+  (hierarchical_label "CHAIN_SER_RH" (shape output) (at 266.7 228.6 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid e761a211-42a2-5150-a9b3-589060448d9c)
+    (property "Dir" "out" (at 266.7 228.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 266.7 228.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-connectors" (at 266.7 228.6 0) (effects (font (size 1.27 1.27)) hide)))
+  (hierarchical_label "CHAIN_QH_RH" (shape input) (at 317.5 228.6 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 63f6dfb7-2b48-581d-8fc4-a0775ecd902d)
+    (property "Dir" "in" (at 317.5 228.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "cluster/key-register" (at 317.5 228.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-connectors" (at 317.5 228.6 0) (effects (font (size 1.27 1.27)) hide)))
+  (label "HOP_RH_RT" (at 355.6 228.6 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 6eb80957-6097-5933-8a70-5ce1896229f1))
+  (hierarchical_label "CHAIN_SER_RT" (shape output) (at 393.7 228.6 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid fc0856c7-d817-5391-86ff-77ce67b1cce1)
+    (property "Dir" "out" (at 393.7 228.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 393.7 228.6 0) (effects (font (size 1.27 1.27)) hide)))
+  (hierarchical_label "CHAIN_QH_RT" (shape input) (at 63.5 254.0 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid caec4da8-c7e0-5271-8a9c-2f3ee1b7d335)
+    (property "Dir" "in" (at 63.5 254.0 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "cluster/key-register" (at 63.5 254.0 0) (effects (font (size 1.27 1.27)) hide)))
+  (label "CHAIN_QH_RT" (at 101.6 254.0 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 63f9315e-d52b-54ea-89ce-99a722c948d7))
+  (hierarchical_label "IO40" (shape output) (at 139.7 254.0 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 04228762-22d4-5331-801f-06e7546032d7)
+    (property "Dir" "out" (at 139.7 254.0 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "carrier/carrier" (at 139.7 254.0 0) (effects (font (size 1.27 1.27)) hide)))
+  (hierarchical_label "DEV_3V3" (shape input) (at 190.5 254.0 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 44d620b1-01f9-5f4e-bf97-5f4759d33dbe)
+    (property "Dir" "in" (at 190.5 254.0 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/carrier" (at 190.5 254.0 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "key-pullup-qty" (at 190.5 254.0 0) (effects (font (size 1.27 1.27)) hide)))
+  (label "DEV_3V3" (at 228.6 254.0 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 03563a25-0bd7-5c16-b81b-c9afd03d122a))
+  (hierarchical_label "V3V3_CHAIN" (shape output) (at 266.7 254.0 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid d6f53dab-49f3-5ded-8afe-7593a5f2e6f3)
+    (property "Dir" "out" (at 266.7 254.0 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 266.7 254.0 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 59.69 165.1) (xy 57.15 165.1)) (stroke (width 0) (type default)) (uuid 527f36a1-f1a4-5e78-8cf8-0607e74762ae))
+  (hierarchical_label "IO38" (shape input) (at 57.15 165.1 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid c8e49ca5-effe-536a-ad7f-6404bb658d7f)
+    (property "Dir" "in" (at 57.15 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/carrier" (at 57.15 165.1 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 123.19 165.1) (xy 120.65 165.1)) (stroke (width 0) (type default)) (uuid 4545571f-434b-55de-9aaf-860684dcc94a))
+  (hierarchical_label "IO7" (shape input) (at 120.65 165.1 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 25b7b030-09a8-5b72-861c-e1aca333e376)
+    (property "Dir" "in" (at 120.65 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/carrier" (at 120.65 165.1 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 186.69 165.1) (xy 184.15 165.1)) (stroke (width 0) (type default)) (uuid 0dcba7ba-8195-5ead-9c70-3842753036e6))
+  (hierarchical_label "IO33" (shape input) (at 184.15 165.1 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid e9f18515-93c5-5d1f-bd08-60710dfc98b7)
+    (property "Dir" "in" (at 184.15 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/carrier" (at 184.15 165.1 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 67.31 165.1) (xy 69.85 165.1)) (stroke (width 0) (type default)) (uuid 77baf5e2-18e2-5460-99cc-8dc9b4fe0690))
+  (hierarchical_label "CHAIN_SCK" (shape output) (at 69.85 165.1 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 34879d3c-3adc-53ef-82da-4cafb9ea0ec2)
+    (property "Dir" "out" (at 69.85 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 69.85 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 69.85 165.1 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 429.26 160.02) (xy 429.26 157.48)) (stroke (width 0) (type default)) (uuid cd1c02a2-439d-52b0-a1c1-7725d74b49c9))
+  (hierarchical_label "CHAIN_SCK" (shape output) (at 429.26 157.48 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid d423182b-ff6a-5c52-89b3-bc6ea6080f6a)
+    (property "Dir" "out" (at 429.26 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 429.26 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 429.26 157.48 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 96.52 78.74) (xy 93.98 78.74)) (stroke (width 0) (type default)) (uuid 4048006d-e6c2-58b9-a3b1-c1d11953811a))
+  (hierarchical_label "CHAIN_SCK" (shape output) (at 93.98 78.74 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 910ca120-3925-58d4-bcc9-0c39d33ca152)
+    (property "Dir" "out" (at 93.98 78.74 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 93.98 78.74 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 93.98 78.74 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 198.12 101.6) (xy 195.58 101.6)) (stroke (width 0) (type default)) (uuid ff5daeb4-0ff7-56db-b6cd-d9e447cee127))
+  (hierarchical_label "CHAIN_SCK" (shape output) (at 195.58 101.6 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 608eb7a4-97c3-5155-bf76-8d0af89d0f5c)
+    (property "Dir" "out" (at 195.58 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 195.58 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 195.58 101.6 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 299.72 78.74) (xy 297.18 78.74)) (stroke (width 0) (type default)) (uuid 94a9560c-6f81-560a-8d5e-5508db90e9e9))
+  (hierarchical_label "CHAIN_SCK" (shape output) (at 297.18 78.74 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 6bc5afb1-c57c-5379-8ab5-920e82ca3bf9)
+    (property "Dir" "out" (at 297.18 78.74 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 297.18 78.74 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 297.18 78.74 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 401.32 101.6) (xy 398.78 101.6)) (stroke (width 0) (type default)) (uuid e5a5d808-1b11-5163-8e3c-87d6b2676f2d))
+  (hierarchical_label "CHAIN_SCK" (shape output) (at 398.78 101.6 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid d921e22c-e5ec-54a7-a6f9-1ad0dac127c2)
+    (property "Dir" "out" (at 398.78 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 398.78 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 398.78 101.6 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 130.81 165.1) (xy 133.35 165.1)) (stroke (width 0) (type default)) (uuid 8e3557a0-14a7-5290-a82c-4f203fe2679c))
+  (hierarchical_label "CHAIN_SHLD" (shape output) (at 133.35 165.1 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid f742a572-c654-5bf8-b1de-1bd48bd93c75)
+    (property "Dir" "out" (at 133.35 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 133.35 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 133.35 165.1 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 431.8 160.02) (xy 431.8 157.48)) (stroke (width 0) (type default)) (uuid 9f83124e-b2ad-5fd3-8896-bcc735095c1d))
+  (hierarchical_label "CHAIN_SHLD" (shape output) (at 431.8 157.48 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 7511a374-b843-55bc-bd00-3c021283b62f)
+    (property "Dir" "out" (at 431.8 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 431.8 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 431.8 157.48 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 96.52 83.82) (xy 93.98 83.82)) (stroke (width 0) (type default)) (uuid 68feb497-4124-524a-9354-6bd5d0457c20))
+  (hierarchical_label "CHAIN_SHLD" (shape output) (at 93.98 83.82 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 1f32f31d-33ff-5410-bef8-674fd8bce4b5)
+    (property "Dir" "out" (at 93.98 83.82 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 93.98 83.82 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 93.98 83.82 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 198.12 96.52) (xy 195.58 96.52)) (stroke (width 0) (type default)) (uuid 88520391-87d2-55ec-9aba-a786a7685597))
+  (hierarchical_label "CHAIN_SHLD" (shape output) (at 195.58 96.52 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid d014b273-8e0d-541e-9ff3-0298c72d6713)
+    (property "Dir" "out" (at 195.58 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 195.58 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 195.58 96.52 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 299.72 83.82) (xy 297.18 83.82)) (stroke (width 0) (type default)) (uuid 8081071a-ace8-5258-9b27-7ec51dd91e2e))
+  (hierarchical_label "CHAIN_SHLD" (shape output) (at 297.18 83.82 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 11e1f7d1-f7e8-56ce-9abd-7143124d60f3)
+    (property "Dir" "out" (at 297.18 83.82 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 297.18 83.82 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 297.18 83.82 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 401.32 96.52) (xy 398.78 96.52)) (stroke (width 0) (type default)) (uuid 97f8880d-907e-5538-829d-86549fe10f01))
+  (hierarchical_label "CHAIN_SHLD" (shape output) (at 398.78 96.52 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 9bd6ec84-5ff9-58db-9d19-aeb83ee02a63)
+    (property "Dir" "out" (at 398.78 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 398.78 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 398.78 96.52 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 194.31 165.1) (xy 196.85 165.1)) (stroke (width 0) (type default)) (uuid 66451025-7ecc-5e1c-9229-a78a4caad3d1))
+  (hierarchical_label "CHAIN_SER_LH" (shape output) (at 196.85 165.1 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 46eb91f6-8d4e-5e51-9a93-c3a596be58cf)
+    (property "Dir" "out" (at 196.85 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 196.85 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-connectors" (at 196.85 165.1 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 434.34 160.02) (xy 434.34 157.48)) (stroke (width 0) (type default)) (uuid d37952a1-e59a-5ca0-8cac-a7fe8bd07345))
+  (hierarchical_label "CHAIN_SER_LH" (shape output) (at 434.34 157.48 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 8a4593bf-70b5-5f38-98c3-96168146e1fa)
+    (property "Dir" "out" (at 434.34 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 434.34 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-connectors" (at 434.34 157.48 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 254.0 161.29) (xy 254.0 158.75)) (stroke (width 0) (type default)) (uuid 960c9326-223a-54e7-98a1-f6f1aecdad69))
+  (hierarchical_label "CHAIN_SER_LH" (shape output) (at 254.0 158.75 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid e448b29a-d254-5e67-a50e-e8a8ee20014f)
+    (property "Dir" "out" (at 254.0 158.75 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 254.0 158.75 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-connectors" (at 254.0 158.75 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 299.72 88.9) (xy 297.18 88.9)) (stroke (width 0) (type default)) (uuid 3a0f43fe-a61d-5c08-bf1e-fdb7945693ab))
+  (hierarchical_label "CHAIN_SER_LH" (shape output) (at 297.18 88.9 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 8829afd8-64db-56a5-a2bf-715ef3b33164)
+    (property "Dir" "out" (at 297.18 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 297.18 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-connectors" (at 297.18 88.9 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 401.32 91.44) (xy 398.78 91.44)) (stroke (width 0) (type default)) (uuid e69ad954-dfdd-5306-abaf-25bd90b07452))
+  (hierarchical_label "CHAIN_SER_LH" (shape output) (at 398.78 91.44 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid d294a74d-52dd-5c47-9abc-0b717c63df1c)
+    (property "Dir" "out" (at 398.78 91.44 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 398.78 91.44 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-connectors" (at 398.78 91.44 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 401.32 86.36) (xy 398.78 86.36)) (stroke (width 0) (type default)) (uuid 3d8e04c9-c2c1-5260-b3f5-d7dc0e0e911d))
+  (label "HOP_LH_LT" (at 398.78 86.36 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid ed93d825-8ff7-51c5-9a51-550139bd4c44))
+  (wire (pts (xy 299.72 93.98) (xy 297.18 93.98)) (stroke (width 0) (type default)) (uuid 98a0d3a4-cdaa-5ce0-8e08-6cb59d6fbd26))
+  (label "HOP_LH_LT" (at 297.18 93.98 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 812dc5df-4dd9-5a8d-8f6e-ef2dfc1b5e04))
+  (wire (pts (xy 96.52 88.9) (xy 93.98 88.9)) (stroke (width 0) (type default)) (uuid 0a5241fd-10bc-55a2-810c-6135347b9e24))
+  (label "HOP_LT_RH" (at 93.98 88.9 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 2940241b-a1d5-5621-b758-44e6290b10ec))
+  (wire (pts (xy 198.12 91.44) (xy 195.58 91.44)) (stroke (width 0) (type default)) (uuid f20e7f51-3ea1-585b-bb9a-8162e2ffb4b0))
+  (label "HOP_LT_RH" (at 195.58 91.44 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 07382081-4af4-5e63-9aaa-f375478fa5ad))
+  (wire (pts (xy 198.12 86.36) (xy 195.58 86.36)) (stroke (width 0) (type default)) (uuid 81e241bd-7c71-551a-ab21-8ac8a65674d8))
+  (label "HOP_RH_RT" (at 195.58 86.36 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid df06d131-6d6e-5181-98e1-16deddaaba0b))
+  (wire (pts (xy 96.52 93.98) (xy 93.98 93.98)) (stroke (width 0) (type default)) (uuid 7112ce28-4a17-5ed7-ab50-cc1a72c5ae3d))
+  (label "HOP_RH_RT" (at 93.98 93.98 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 22c584c7-00d7-5ce6-b91f-ea50e2624108))
+  (wire (pts (xy 254.0 168.91) (xy 254.0 171.45)) (stroke (width 0) (type default)) (uuid 859ca972-5981-5daf-b43c-39d6148e52b2))
+  (hierarchical_label "DEV_3V3" (shape input) (at 254.0 171.45 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid fc897fb1-46d7-59e9-b0bb-f8f13ec017eb)
+    (property "Dir" "in" (at 254.0 171.45 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/carrier" (at 254.0 171.45 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "key-pullup-qty" (at 254.0 171.45 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 304.8 161.29) (xy 304.8 158.75)) (stroke (width 0) (type default)) (uuid b7790f9a-5393-5998-b8aa-53fe7de5d163))
+  (hierarchical_label "DEV_3V3" (shape input) (at 304.8 158.75 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid f193db7e-ed61-53b5-9aa6-513eefec8ce7)
+    (property "Dir" "in" (at 304.8 158.75 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/carrier" (at 304.8 158.75 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "key-pullup-qty" (at 304.8 158.75 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 355.6 161.29) (xy 355.6 158.75)) (stroke (width 0) (type default)) (uuid 9dc47340-c8fc-53f1-801c-9b9a2b43bdff))
+  (hierarchical_label "DEV_3V3" (shape input) (at 355.6 158.75 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 2d02baae-3380-5ade-a741-1f8cf8f584c5)
+    (property "Dir" "in" (at 355.6 158.75 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/carrier" (at 355.6 158.75 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "key-pullup-qty" (at 355.6 158.75 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 304.8 168.91) (xy 304.8 171.45)) (stroke (width 0) (type default)) (uuid be85681a-fd1b-5fe3-8384-e7ccc06ca34f))
+  (hierarchical_label "V3V3_CHAIN_RH" (shape output) (at 304.8 171.45 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid d36784f5-4c08-50d7-95f9-283c41cc5925)
+    (property "Dir" "out" (at 304.8 171.45 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 304.8 171.45 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 96.52 99.06) (xy 93.98 99.06)) (stroke (width 0) (type default)) (uuid eddf7c65-aabf-5780-9cda-b05c84eb0ed5))
+  (hierarchical_label "V3V3_CHAIN_RH" (shape output) (at 93.98 99.06 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 4f60d083-dafb-52df-af15-e9cb533860a4)
+    (property "Dir" "out" (at 93.98 99.06 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 93.98 99.06 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 198.12 81.28) (xy 195.58 81.28)) (stroke (width 0) (type default)) (uuid eb632b7f-1443-53ad-890b-2aad086808ab))
+  (hierarchical_label "V3V3_CHAIN_RH" (shape output) (at 195.58 81.28 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid be3409e6-ad77-54df-a659-b74cf4ed258d)
+    (property "Dir" "out" (at 195.58 81.28 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 195.58 81.28 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 355.6 168.91) (xy 355.6 171.45)) (stroke (width 0) (type default)) (uuid e97590ec-520d-56ba-907e-6dc742e26d34))
+  (hierarchical_label "V3V3_CHAIN_LH" (shape output) (at 355.6 171.45 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 27c5b605-4059-5b72-b590-eb02bf6fcc54)
+    (property "Dir" "out" (at 355.6 171.45 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 355.6 171.45 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 299.72 99.06) (xy 297.18 99.06)) (stroke (width 0) (type default)) (uuid 82d807a8-04c2-50d8-98f5-485ada0ab38e))
+  (hierarchical_label "V3V3_CHAIN_LH" (shape output) (at 297.18 99.06 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 113b9c98-1500-564b-8416-85084e1dfb4e)
+    (property "Dir" "out" (at 297.18 99.06 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 297.18 99.06 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 401.32 81.28) (xy 398.78 81.28)) (stroke (width 0) (type default)) (uuid 314956c1-a3cd-5039-9092-727ba62cd5d4))
+  (hierarchical_label "V3V3_CHAIN_LH" (shape output) (at 398.78 81.28 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid f53b8bfe-82fb-5bd2-9ff2-e890c8c2a3de)
+    (property "Dir" "out" (at 398.78 81.28 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 398.78 81.28 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 431.8 170.18) (xy 431.8 172.72)) (stroke (width 0) (type default)) (uuid 1a3d77c7-4270-594e-9c49-07044a0ea0f5))
+  (hierarchical_label "GND_CHAIN" (shape passive) (at 431.8 172.72 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 49095b32-9124-5e47-b990-939878f0148c)
+    (property "Dir" "ref" (at 431.8 172.72 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 431.8 172.72 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 431.8 172.72 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 96.52 76.2) (xy 93.98 76.2)) (stroke (width 0) (type default)) (uuid 5ed9b993-aa70-537a-9f48-0ff7a00be5d0))
+  (hierarchical_label "GND_CHAIN" (shape passive) (at 93.98 76.2 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 5a4c366c-c3a0-57a4-a38b-4e6ac34e219e)
+    (property "Dir" "ref" (at 93.98 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 93.98 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 93.98 76.2 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 96.52 81.28) (xy 93.98 81.28)) (stroke (width 0) (type default)) (uuid ac8ab67b-3b26-5fa2-b6f5-61875d1b38cb))
+  (hierarchical_label "GND_CHAIN" (shape passive) (at 93.98 81.28 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 0dc13b24-bb8b-5cfb-b049-013cbcf4ec2e)
+    (property "Dir" "ref" (at 93.98 81.28 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 93.98 81.28 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 93.98 81.28 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 96.52 86.36) (xy 93.98 86.36)) (stroke (width 0) (type default)) (uuid 0ce86a1c-42a6-5474-8ded-7a80663dc54c))
+  (hierarchical_label "GND_CHAIN" (shape passive) (at 93.98 86.36 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 68f22752-9d73-576f-b60a-5d552f74be6c)
+    (property "Dir" "ref" (at 93.98 86.36 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 93.98 86.36 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 93.98 86.36 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 96.52 91.44) (xy 93.98 91.44)) (stroke (width 0) (type default)) (uuid 2441f734-2639-5060-93f7-aa816c098e7d))
+  (hierarchical_label "GND_CHAIN" (shape passive) (at 93.98 91.44 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 09527e32-f9e6-520c-b3b9-77d90508a151)
+    (property "Dir" "ref" (at 93.98 91.44 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 93.98 91.44 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 93.98 91.44 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 96.52 96.52) (xy 93.98 96.52)) (stroke (width 0) (type default)) (uuid 8992cc05-b99f-5919-90e8-a81fe7acb549))
+  (hierarchical_label "GND_CHAIN" (shape passive) (at 93.98 96.52 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 46e0a5f5-a55e-512f-b18d-01e78e480ee5)
+    (property "Dir" "ref" (at 93.98 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 93.98 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 93.98 96.52 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 198.12 104.14) (xy 195.58 104.14)) (stroke (width 0) (type default)) (uuid 34949db6-6d45-5935-8d17-2009a81a47e0))
+  (hierarchical_label "GND_CHAIN" (shape passive) (at 195.58 104.14 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 8da10ba5-b609-5d05-aac3-728cdc8cd7ad)
+    (property "Dir" "ref" (at 195.58 104.14 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 195.58 104.14 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 195.58 104.14 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 198.12 99.06) (xy 195.58 99.06)) (stroke (width 0) (type default)) (uuid 6a2e43c6-1ce6-5359-98c7-1944508bf538))
+  (hierarchical_label "GND_CHAIN" (shape passive) (at 195.58 99.06 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 9cb8ec5d-b112-5f03-84d3-34cebe0fc705)
+    (property "Dir" "ref" (at 195.58 99.06 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 195.58 99.06 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 195.58 99.06 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 198.12 93.98) (xy 195.58 93.98)) (stroke (width 0) (type default)) (uuid 77155d60-0c78-5295-b985-aa4317bcc75c))
+  (hierarchical_label "GND_CHAIN" (shape passive) (at 195.58 93.98 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 57328270-bd76-546a-9dff-8872f96bfa21)
+    (property "Dir" "ref" (at 195.58 93.98 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 195.58 93.98 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 195.58 93.98 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 198.12 88.9) (xy 195.58 88.9)) (stroke (width 0) (type default)) (uuid 195ac511-63bd-596f-b303-89fc3dfc69af))
+  (hierarchical_label "GND_CHAIN" (shape passive) (at 195.58 88.9 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid ac1d9359-55d9-5776-8974-ea225d37e48d)
+    (property "Dir" "ref" (at 195.58 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 195.58 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 195.58 88.9 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 198.12 83.82) (xy 195.58 83.82)) (stroke (width 0) (type default)) (uuid 04d56d08-2276-599c-93e6-78eb0fcfe5fc))
+  (hierarchical_label "GND_CHAIN" (shape passive) (at 195.58 83.82 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 74add3e3-1a8e-5e29-9399-f8726fbdda9c)
+    (property "Dir" "ref" (at 195.58 83.82 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 195.58 83.82 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 195.58 83.82 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 299.72 76.2) (xy 297.18 76.2)) (stroke (width 0) (type default)) (uuid 395389c0-e37e-5093-8379-677dc131c25a))
+  (hierarchical_label "GND_CHAIN" (shape passive) (at 297.18 76.2 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 5e68a8e4-c12e-54c7-b234-26094d130b4c)
+    (property "Dir" "ref" (at 297.18 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 297.18 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 297.18 76.2 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 299.72 81.28) (xy 297.18 81.28)) (stroke (width 0) (type default)) (uuid a80aa2f3-8313-5017-8817-b8bd624c33b1))
+  (hierarchical_label "GND_CHAIN" (shape passive) (at 297.18 81.28 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 68914821-2022-51ef-ba4c-c381fc78876a)
+    (property "Dir" "ref" (at 297.18 81.28 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 297.18 81.28 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 297.18 81.28 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 299.72 86.36) (xy 297.18 86.36)) (stroke (width 0) (type default)) (uuid b2ca9c11-a227-55f8-b059-e3f4e9bbf4ac))
+  (hierarchical_label "GND_CHAIN" (shape passive) (at 297.18 86.36 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 2573e5ac-709e-5f14-bd8b-b5ce16a17e55)
+    (property "Dir" "ref" (at 297.18 86.36 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 297.18 86.36 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 297.18 86.36 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 299.72 91.44) (xy 297.18 91.44)) (stroke (width 0) (type default)) (uuid afdc2733-04fa-56a1-88b0-721243bc119d))
+  (hierarchical_label "GND_CHAIN" (shape passive) (at 297.18 91.44 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 290541b5-66c4-53b5-80b8-8240995a8f06)
+    (property "Dir" "ref" (at 297.18 91.44 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 297.18 91.44 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 297.18 91.44 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 299.72 96.52) (xy 297.18 96.52)) (stroke (width 0) (type default)) (uuid 76eced48-f438-514a-8ab9-56c98471bc2f))
+  (hierarchical_label "GND_CHAIN" (shape passive) (at 297.18 96.52 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid a23d0df6-cd40-5494-82a6-ed110e4202a6)
+    (property "Dir" "ref" (at 297.18 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 297.18 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 297.18 96.52 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 401.32 104.14) (xy 398.78 104.14)) (stroke (width 0) (type default)) (uuid a9e50458-4def-54ed-a1ac-f39b7db072f4))
+  (hierarchical_label "GND_CHAIN" (shape passive) (at 398.78 104.14 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 8cb180fe-7e47-57af-9be6-93e304882606)
+    (property "Dir" "ref" (at 398.78 104.14 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 398.78 104.14 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 398.78 104.14 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 401.32 99.06) (xy 398.78 99.06)) (stroke (width 0) (type default)) (uuid 1cf6f480-becc-5ad9-b5ca-2b9ddce0bea4))
+  (hierarchical_label "GND_CHAIN" (shape passive) (at 398.78 99.06 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid d2ce5a05-5445-52cc-bf85-c5602b0b2d4d)
+    (property "Dir" "ref" (at 398.78 99.06 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 398.78 99.06 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 398.78 99.06 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 401.32 93.98) (xy 398.78 93.98)) (stroke (width 0) (type default)) (uuid 3399ad61-dcf5-544a-b769-8f1054dcb0d3))
+  (hierarchical_label "GND_CHAIN" (shape passive) (at 398.78 93.98 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 0a09c708-2d32-5c20-a455-7f87538bc1db)
+    (property "Dir" "ref" (at 398.78 93.98 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 398.78 93.98 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 398.78 93.98 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 401.32 88.9) (xy 398.78 88.9)) (stroke (width 0) (type default)) (uuid 027f3028-8cd9-5691-8b1e-1ab5d2e01ba0))
+  (hierarchical_label "GND_CHAIN" (shape passive) (at 398.78 88.9 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 659f86a8-4824-5938-9b80-fa6046c1f31d)
+    (property "Dir" "ref" (at 398.78 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 398.78 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 398.78 88.9 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 401.32 83.82) (xy 398.78 83.82)) (stroke (width 0) (type default)) (uuid c236fa2a-e591-5cef-bc02-c8d0e4c42531))
+  (hierarchical_label "GND_CHAIN" (shape passive) (at 398.78 83.82 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid c2159808-335c-5587-b1e9-bb240dbbced4)
+    (property "Dir" "ref" (at 398.78 83.82 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 398.78 83.82 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 398.78 83.82 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 96.52 101.6) (xy 93.98 101.6)) (stroke (width 0) (type default)) (uuid d18dd3aa-3696-5230-8e9f-6295aa6043a6))
+  (label "CHAIN_SPARE_RH_11" (at 93.98 101.6 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 5d7ff2c8-aeb1-5c52-b380-82020f0a98de))
+  (wire (pts (xy 198.12 78.74) (xy 195.58 78.74)) (stroke (width 0) (type default)) (uuid cc63f351-038b-58cb-a062-1964639a98c0))
+  (label "CHAIN_SPARE_RH_11" (at 195.58 78.74 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 8a04a195-48ee-5c89-a7b2-78a057319df7))
+  (wire (pts (xy 96.52 104.14) (xy 93.98 104.14)) (stroke (width 0) (type default)) (uuid f9a1e54a-3c9f-5412-bf64-b6382fa26845))
+  (label "CHAIN_SPARE_RH_12" (at 93.98 104.14 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid ab4674b5-934e-5c4f-83fd-92599336a8fa))
+  (wire (pts (xy 198.12 76.2) (xy 195.58 76.2)) (stroke (width 0) (type default)) (uuid 7a4db399-4586-55fb-92ba-25f7c6fa2415))
+  (label "CHAIN_SPARE_RH_12" (at 195.58 76.2 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 175074d6-b008-55d1-86cb-b38811a1e306))
+  (wire (pts (xy 299.72 101.6) (xy 297.18 101.6)) (stroke (width 0) (type default)) (uuid 4ac625da-a6f5-5465-9539-1eabcc34f16f))
+  (label "CHAIN_SPARE_LH_11" (at 297.18 101.6 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 13220dcc-0722-5aaa-b931-f284539211e9))
+  (wire (pts (xy 401.32 78.74) (xy 398.78 78.74)) (stroke (width 0) (type default)) (uuid f6ccfb02-eee9-5695-a226-4e2097cfa293))
+  (label "CHAIN_SPARE_LH_11" (at 398.78 78.74 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 5dfca878-76e8-5180-83d4-c27425ee4046))
+  (wire (pts (xy 299.72 104.14) (xy 297.18 104.14)) (stroke (width 0) (type default)) (uuid 70c8cf73-58dc-582d-bc46-cd7e907eedec))
+  (label "CHAIN_SPARE_LH_12" (at 297.18 104.14 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid cd43b311-5e4c-5880-93bf-c01f1cd6b0ff))
+  (wire (pts (xy 401.32 76.2) (xy 398.78 76.2)) (stroke (width 0) (type default)) (uuid 948777c5-052a-5528-9e0d-571d149bb0b4))
+  (label "CHAIN_SPARE_LH_12" (at 398.78 76.2 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 628ce91f-bdea-594e-a40e-56ade8074ff7))
+  (wire (pts (xy 436.88 160.02) (xy 436.88 157.48)) (stroke (width 0) (type default)) (uuid 4466b45d-fda9-5717-961f-595c1e748290))
+  (label "TVS_CHAIN_SPARE" (at 436.88 157.48 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 3ffd3c09-b779-5aa9-ac5b-d91f4b179096))
+  (text "Both ribbons, end to end. J-CHAIN-MAIN-RH/-LH, the series resistors, R-SER-TERM, the beads and U-TVS-CHAIN are on the MAIN board; J-CHAIN-KEY-RH and J-CHAIN-KEY-LH are each\nkey board's J-CHAIN. CBL-CHAIN is not a part: a main-board pin and the key-board pin its conductor reaches are one net. Which board carries which part: key-chain-loom.md,\n'Which board places what'. Below: the nets that carry two ports - a register's QH is the next register's SER - and CHAIN_QH_RT, which reaches no connector." (at 25.4 25.4 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid 0bb5c46e-e660-5426-b87f-bbc7063a854b))
+  (text "FROM THE HAND-WRITTEN NETLIST THIS SHEET REPLACES (the part notes are on each part's Note field):\n\nAUTHORITATIVE for connectivity. The drawings on key-chain-loom.md are a REPRESENTATION of this file.\n\nTHE HOP MAP IS HERE, AS NETS. Chain order MCU <- RT <- RH <- LT <- LH (config/key-layout.yaml). right_thumb and left_thumb are on the main board; right_hand and left_hand are on the key boards, one\nIDC ribbon each. Each ribbon carries its key board's SER in on conductor 6 and its QH out on conductor 8, so every hop is a named net below.\n\nTHE REGISTER SIDE IS PER INSTANCE. cluster/key-register is one schematic built four times (`replicated: 4`) with generic CHAIN_SER / CHAIN_QH pins, so it cannot declare which instance sits on which\nhop. This file does, with one port per instance pin (CHAIN_SER_RT ... CHAIN_QH_LH), and hardware/nets.yaml marks those nets `per_board:` - the checker prints them rather than pretending the register\ndeclares them.\n\nTHE KEY-BOARD END NUMBERS THE CONDUCTORS DIFFERENTLY, AND THE CABLE SETS IT. Same 2x6 1.27 mm right-angle IDC header at both ends, the key board's mounted upside down on its underside, facing the same\nway. A keyed socket always mates position k to header pin k; CBL-CHAIN is ordered with its notch reversed on the key-board end (Samtec -RN2), so conductor k is main-board pin k and key-board pin 13-k\n[datasheet, both full prints banked; key-chain-loom.md].\n\nTHE CABLE IS NOT A COMPONENT HERE. CBL-CHAIN is a straight conductor per pin, so each ribbon is modelled as the nets it joins: a main-board pin and the key-board pin it reaches are on the same net.\n\nTHE CHAIN'S 3V3 IS DEV_3V3 ON THE MAIN BOARD, and each ribbon's conductor 10 is behind its own ferrite bead (ADR 0018). So V3V3_CHAIN - the name the replicated cluster schematics use - is the same\nnode as DEV_3V3 for the two registers on the main board, and each key board's rail is its own net past its bead (V3V3_CHAIN_RH, V3V3_CHAIN_LH), `per_board:` in hardware/nets.yaml like the hop nets.\nThere is no fuse: short-circuit protection is the Matrix LDO's own current limit (key-chain-loom.md).\n\n[CHAIN_SER_RT] one per register instance - see the header\n\n[CHAIN_SCK] One net each: right_thumb and left_thumb by trace, the key boards by ribbon.\n\n--- the hop map, from the chain end toward the MCU ------------------\n\n[CHAIN_SER_LH] Chain end: IO33 (or the pull-up) into left_hand's SER, over its ribbon.\n\n[HOP_LH_LT] left_hand's QH back over its ribbon into left_thumb's SER.\n\n[HOP_LT_RH] left_thumb's QH out over the right_hand ribbon into right_hand's SER.\n\n[HOP_RH_RT] right_hand's QH back over its ribbon into right_thumb's SER.\n\n[CHAIN_QH_RT] ONE NET, TWO BOUNDARIES: right_thumb's QH is a main-board trace to the MCU's pin. It reaches no connector, so the TVS is not on it.\n\n[DEV_3V3] ONE NET, TWO BOUNDARIES: the Matrix's 3V3 arriving from carrier/carrier, and the chain rail the main-board registers and R-SER-TERM sit on.\n\n[V3V3_CHAIN_RH] Each key board's rail, past its ribbon's bead.\n\n[CHAIN_SPARE_RH_11] ADR 0009's rule: two spare conductors per ribbon, end to end, unallocated." (at 25.4 279.4 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid be950bfb-8199-5567-a48e-d9f2f1b4c8b7))
+  (sheet_instances (path "/" (page "1")))
+)

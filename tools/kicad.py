@@ -84,6 +84,56 @@ def sheet_labels(tree):
     return out
 
 
+def label_groups(tree):
+    """Which labels sit on one net, read off the sheet's own wires: [(local names, port names)].
+
+    KiCad's netlist names a net after ONE label and lists pins only, so a net that carries two
+    ports (a hop of the key chain: one register's QH is the next one's SER), or ports and no pin
+    at all (two ports joined by a trace), cannot be read from it. Labels are joined by the wires
+    they sit on - an end, or anywhere along one - by wires meeting end to end or end on segment,
+    and by name. Pins play no part: KiCad's netlist still decides every pin."""
+    segs = []
+    for w in find(tree, "wire"):
+        pts = [(float(p[1]), float(p[2])) for p in find(find(w, "pts")[0], "xy")]
+        segs += list(zip(pts, pts[1:]))
+    labels = [("local", l[1], (float(find(l, "at")[0][1]), float(find(l, "at")[0][2]))) for l in find(tree, "label")]
+    labels += [("port", l[1], (float(find(l, "at")[0][1]), float(find(l, "at")[0][2])))
+               for l in find(tree, "hierarchical_label")]
+
+    def on(p, s):
+        (x1, y1), (x2, y2) = s
+        return (min(x1, x2) - 1e-6 <= p[0] <= max(x1, x2) + 1e-6 and min(y1, y2) - 1e-6 <= p[1] <= max(y1, y2) + 1e-6
+                and abs((x2 - x1) * (p[1] - y1) - (y2 - y1) * (p[0] - x1)) < 1e-6)
+    parent = list(range(len(segs) + len(labels)))
+
+    def root(i):
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+
+    def join(a, b):
+        parent[root(a)] = root(b)
+    for i, s in enumerate(segs):
+        for j, t in enumerate(segs[:i]):
+            if any(on(p, t) for p in s) or any(on(p, s) for p in t):
+                join(i, j)
+    by_name = {}
+    for k, (kind, name, at) in enumerate(labels):
+        n = len(segs) + k
+        for i, s in enumerate(segs):
+            if on(at, s):
+                join(n, i)
+        if (kind, name) in by_name:
+            join(n, by_name[(kind, name)])
+        by_name[(kind, name)] = n
+    groups = {}
+    for k, (kind, name, _) in enumerate(labels):
+        g = groups.setdefault(root(len(segs) + k), (set(), set()))
+        g[0 if kind == "local" else 1].add(name)
+    return list(groups.values())
+
+
 def is_source(d):
     name = os.path.basename(d)
     p = os.path.join(d, name + ".kicad_sch")
@@ -116,8 +166,13 @@ def kicad_netlist(sch):
         comps[ref] = {"value": find(c, "value")[0][1], "fields": fields, "footprint": fp[0][1] if fp else "",
                       "in_bom": in_bom, "sheet": sheet}
     nets = []
+    kicad_netlist.nc = set()     # pins the LIBRARY marks not connected (an N/C lead of a package)
     for n in find(find(tree, "nets")[0], "net"):
         nodes = [(find(x, "ref")[0][1], find(x, "pin")[0][1]) for x in find(n, "node")]
+        for x in find(n, "node"):
+            t = find(x, "pintype")
+            if t and t[0][1].startswith("no_connect"):
+                kicad_netlist.nc.add((find(x, "ref")[0][1], find(x, "pin")[0][1]))
         nets.append((find(n, "name")[0][1], nodes))
     return comps, nets
 
@@ -174,9 +229,23 @@ def export_circuit(d):
         if not names:
             problems.append(f"{ref}: no Pins field - every part on a source sheet names its pins")
         out_comps[ref] = c
+    # the ports on each net, by the net's name: a local label names the net (KiCad ranks it
+    # above a hierarchical one), else its one port does
+    net_ports = {}
+    for local, hier in label_groups(tree):
+        if not hier:
+            continue
+        if len(local) > 1 or (not local and len(hier) > 1):
+            problems.append(f"labels {sorted(local | hier)} are one net - name it with exactly one local label")
+            continue
+        net_ports.setdefault(next(iter(local)) if local else next(iter(hier)), set()).update(hier)
     out_nets, ext = {}, []
+    nc = kicad_netlist.nc
     for kname, nodes in nets:
-        pins = [f"{r}.{maps.get(r, {}).get(p, p)}" for r, p in nodes if not r.startswith("#")]
+        # a package's N/C lead that the part's Pins field does not name (the library types it
+        # no_connect: the MPXV4006DP's pins 1 and 5-8) is no pin of the circuit and no net
+        pins = [f"{r}.{maps.get(r, {}).get(p, p)}" for r, p in nodes
+                if not r.startswith("#") and (p in maps.get(r, {}) or (r, p) not in nc)]
         if not pins:
             continue
         bare = kname.lstrip("/")
@@ -187,14 +256,22 @@ def export_circuit(d):
             else:
                 problems.append(f"net of {pins} has no label - name every net on a source sheet")
                 continue
-        members = [{"port": bare}] if bare in ports else []
+        on_net = sorted(p for p in net_ports.get(bare, ()) if p in ports) or ([bare] if bare in ports else [])
+        members = [{"port": p} for p in on_net]
         members += pins
         out_nets[bare] = members
         if bare in endpoints:
             ext.append(bare)
+        elif len(pins) == 1 and not on_net and not kname.startswith(("unconnected-", "Net-(")):
+            ext.append(bare)          # a lone pin named by a label: a spare, left open on purpose
+    # a net of ports and no pin (two ports joined by a trace) is not in KiCad's netlist at all
+    for name, hier in net_ports.items():
+        if name not in out_nets and any(p in ports for p in hier):
+            out_nets[name] = [{"port": p} for p in sorted(hier) if p in ports]
+    carried = {m["port"] for ms in out_nets.values() for m in ms if isinstance(m, dict)}
     for pname in ports:
-        if pname not in out_nets:
-            problems.append(f"port {pname} labels no net with a pin")
+        if pname not in carried:
+            problems.append(f"port {pname} labels no net")
     doc = {k: meta[k] for k in ("circuit", "title", "page", "replicated") if k in meta}
     doc["ports"] = ports
     doc["components"] = out_comps
@@ -473,7 +550,7 @@ LOOM = os.path.join(ROOT, "hardware", "interfaces", "key-chain-loom", "netlist.y
 def check_chain(board_docs):
     """Each key board's J-CHAIN against the ribbon's other end (K7-1). The two ends are
     recorded apart: the board's pin map in its sheet (board-netlist.yaml), the ribbon's in
-    the loom's hand-written netlist.yaml, as J-CHAIN-KEY-<LH|RH>. Pin k of the key board
+    the loom's netlist.yaml (exported from its sheet), as J-CHAIN-KEY-<LH|RH>. Pin k of the key board
     must be on the net the loom puts J-CHAIN-KEY-<x>.k on, by name, and a pin the board
     leaves unconnected must be a spare conductor there. The loom's own -RN2 map is held
     to its rule too: key-board pin k shares a net with main-board pin 13 - k. A swapped

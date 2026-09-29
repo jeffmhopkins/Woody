@@ -525,10 +525,11 @@ class Sheet:
         for lb in lay.get("labels", []):
             at = (snap(lb["at"][0]), snap(lb["at"][1]))
             d = {"left": (-1, 0), "right": (1, 0), "up": (0, -1), "down": (0, 1)}[lb.get("dir", "left")]
-            if self.hier and (lb["net"] in ports or lb["net"] in self.lay.get("hier_endpoints", [])):
+            # `local: true`: a local label even on a port's net - it names a net carrying two ports
+            if self.hier and not lb.get("local") and (lb["net"] in ports or lb["net"] in self.lay.get("hier_endpoints", [])):
                 self.label(lb["net"], at, d, hier=self.port_fields(lb["net"]))
             else:
-                self.label(lb["net"], at, d, glob=lb["net"] in ports)
+                self.label(lb["net"], at, d, glob=lb["net"] in ports and not lb.get("local"))
         for i, ps in enumerate(lay.get("power_symbols", [])):
             self.power_symbol(ps["net"], (snap(ps["at"][0]), snap(ps["at"][1])), ("placed", i))
 
@@ -544,7 +545,10 @@ class Sheet:
                 if p in self.wired:
                     continue
                 x, y, dx, dy, typ = self.pinpos[p]
-                if nname in ext and len(plist) == 1 and not (self.hier and nname in self.lay.get("hier_endpoints", [])):
+                # On a source sheet a spare whose net has its own name keeps it, as a label:
+                # tools/kicad.py exports a lone labelled pin as an external endpoint.
+                if nname in ext and len(plist) == 1 and not (self.hier and nname in self.lay.get("hier_endpoints", [])) \
+                        and not (self.hier and nname != p.rsplit(".", 1)[1]):
                     self.no_connect((x, y))
                     continue
                 end = (snap(x + dx * STUB), snap(y + dy * STUB))
@@ -613,9 +617,14 @@ def kicad_netlist(sch_path):
             sys.exit(f"sch: kicad-cli netlist export failed:\n{r.stdout}{r.stderr}")
         tree = parse(open(out).read())[0]
     nets = {}
+    kicad_netlist.nc = set()     # pins the LIBRARY marks not connected (an N/C lead of a package)
     for n in find(find(tree, "nets")[0], "net"):
         name = find(n, "name")[0][1]
         nodes = {(find(x, "ref")[0][1], find(x, "pin")[0][1]) for x in find(n, "node")}
+        for x in find(n, "node"):
+            t = find(x, "pintype")
+            if t and t[0][1].startswith("no_connect"):
+                kicad_netlist.nc.add((find(x, "ref")[0][1], find(x, "pin")[0][1]))
         nets[name] = nodes
     return nets
 
@@ -631,6 +640,9 @@ def compare(sheet, net, knets):
     seen = set()
     for nname, plist in net["nets"].items():
         want = frozenset(sheet.pinnum[m] for m in plist if isinstance(m, str))
+        if not want:
+            # ports and no pin: not in KiCad's netlist; tools/kicad.py export reads it off the labels
+            continue
         kname = by_pins.get(want)
         if kname is None:
             got = [k for k, v in knets.items() if want & v]
@@ -640,8 +652,11 @@ def compare(sheet, net, knets):
         bare = kname.lstrip("/")
         if len(want) > 1 and bare != nname and not kname.startswith("unconnected-"):
             problems.append(f"net {nname}: KiCad names it {kname!r}")
+    named = set(sheet.pinnum.values())
+    nc = getattr(kicad_netlist, "nc", set())
     for kname, nodes in knets.items():
-        real = {n for n in nodes if not n[0].startswith("#")}
+        # a package's N/C lead the netlist does not name (the library types it no_connect) is no net
+        real = {n for n in nodes if not n[0].startswith("#") and (n in named or n not in nc)}
         if real and kname not in seen:
             problems.append(f"KiCad net {kname} {sorted(real)} is not in netlist.yaml")
     return problems

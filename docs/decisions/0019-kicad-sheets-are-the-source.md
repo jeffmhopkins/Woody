@@ -85,7 +85,14 @@ these KiCad schematics actually be the source of truth of all the things.")
   `NT-AGND`, and `DIG_GND` at `J-UMB`, `NT-DIG`) are KiCad net ties, the one
   way a board can join two named nets there and nowhere else. A lone
   no-connect pin's net is named after the pin, as the export names it.
-- **Not yet migrated:** the module's circuits and the interfaces. Their
+- **Migrated, 2026-09-29:** the three interfaces (`breath-sense-link`,
+  `key-chain-loom`, `spi-link`). Each export was compared part by part and
+  net by net with the hand-written netlist it replaced: no change. **No board
+  places them**, because each is both ends of a cable and KiCad places a sheet
+  whole; the boards draw their own halves, and each interface page's *The
+  sheet, and which board places what* says which board draws which part and
+  what, if anything, holds the two together.
+- **Not yet migrated:** the module's circuits. Their
   `netlist.yaml` stays hand-written and authoritative until each gets its
   sheet; `tools/sch.py` writes a circuit's first sheet from its YAML, and from
   then the sheet is edited instead.
