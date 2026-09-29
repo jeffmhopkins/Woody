@@ -439,8 +439,10 @@ def check_allocation(board_docs):
         comps = doc["components"]
         regs = [r for r, c in comps.items() if c.get("of") == "U-KEYS"]
         if not regs:
-            # a key board without its register would pass this check by having nothing to check
-            problems.append(f"allocation: {bname} has no U-KEYS register - nothing to hold to allocation.yaml")
+            # a board that carries registers (the key boards, the main board) without one
+            # would pass this check by having nothing to check; the adapter carries none
+            if bname.startswith("key-board") or bname == "main-board":
+                problems.append(f"allocation: {bname} has no U-KEYS register - nothing to hold to allocation.yaml")
         for u in regs:
             where = {}
             for pins in doc["nets"].values():
