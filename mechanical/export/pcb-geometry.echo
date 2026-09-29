@@ -36,13 +36,20 @@ ECHO: "PCB", "main", "connector", "J-UMB", 300.8, 303.3, 21.5, 8, 2.54, 1.25
 ECHO: "PCB", "main", "part", "U-BREATH", 14.15, 40.1, 0, 12.3, 17.8
 ECHO: "PCB", "main", "part", "REGULATOR-BLOCK", 235.8, 41.5, 0, 10, 15, 12.5
 ECHO: "PCB", "main", "strip", "LED", 20.75, 23.5, 220.05, 10
+ECHO: "PCB", "main", "standoff", "M2.5", 40.1, 11.1, 2.7, 6.17, 4.9, "plate"
+ECHO: "PCB", "main", "standoff", "M2.5", 40.1, 45.9, 2.7, 6.17, 4.9, "plate"
+ECHO: "PCB", "main", "standoff", "M2.5", 121.5, 11.1, 2.7, 6.17, 4.9, "oak"
+ECHO: "PCB", "main", "standoff", "M2.5", 121.5, 45.9, 2.7, 6.17, 4.9, "oak"
+ECHO: "PCB", "main", "standoff", "M2.5", 148.1, 11.1, 2.7, 6.17, 4.9, "plate"
+ECHO: "PCB", "main", "standoff", "M2.5", 148.1, 45.9, 2.7, 6.17, 4.9, "plate"
+ECHO: "PCB", "main", "standoff", "M2.5", 247.5, 11.1, 2.7, 6.17, 4.9, "oak"
+ECHO: "PCB", "main", "standoff", "M2.5", 247.5, 45.9, 2.7, 6.17, 4.9, "oak"
 ECHO: "PCB", "main", "standoff", "M2.5", 11.5, 11.5, 2.7, 6.17, 4.9, "oak"
-ECHO: "PCB", "main", "standoff", "M2.5", 70, 11.5, 2.7, 6.17, 4.9, "plate"
-ECHO: "PCB", "main", "standoff", "M2.5", 178, 11.5, 2.7, 6.17, 4.9, "plate"
-ECHO: "PCB", "main", "standoff", "M2.5", 211.15, 11.5, 2.7, 6.17, 4.9, "oak"
-ECHO: "PCB", "main", "standoff", "M2.5", 211.15, 45.5, 2.7, 6.17, 4.9, "oak"
-ECHO: "PCB", "main", "standoff", "M2.5", 247.1, 11.5, 2.7, 6.17, 4.9, "oak"
-ECHO: "PCB", "main", "standoff", "M2.5", 247.1, 45.5, 2.7, 6.17, 4.9, "oak"
+ECHO: "PCB", "main", "standoff", "M2.5", 30.5, 45.5, 2.7, 6.17, 4.9, "oak"
+ECHO: "PCB", "main", "standoff", "M2.5", 295.715, 13, 2.7, 6.17, 4.9, "oak"
+ECHO: "PCB", "main", "standoff", "M2.5", 295.715, 30, 2.7, 6.17, 4.9, "oak"
+ECHO: "PCB", "main", "ubolt", "M3", 133, 18.5, 4, 6.35085, 6
+ECHO: "PCB", "main", "ubolt", "M3", 133, 38.5, 4, 6.35085, 6
 ECHO: "PCB", "main", "keepout", "under key board left_hand", 37, 7.5, 125.1, 49.5, 15.5
 ECHO: "PCB", "main", "keepout", "under key board right_hand", 145, 7.5, 251.1, 49.5, 15.5
 ECHO: "PCB", "main", "keepout", "elsewhere", 7.5, 7.5, 303.3, 49.5, 20.2

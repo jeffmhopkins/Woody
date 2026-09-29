@@ -894,14 +894,14 @@ hardware:
     source: "distance from the inside face of each acrylic side to the fastener centre. A window, not a placeholder [calc]: at least stack.groove_clear + fastener_clear_d / 2 + 2 = 0.2 + 1.7 + 2 = 3.9, for 2 mm of oak between the clearance hole and the groove wall - the oak ends there, not at the acrylic (drc 'oak-bottom cuts inside the U'); at most half the interior width - ubolt_span / 2 - (the leg's clearance hole + fastener_cbore_d) / 2 - 3 = 22.5 - 10 - (3.5 + 6) / 2 - 3 = 4.75, for the gap pair's counterbores to stay 3 mm from the U-bolt leg holes (drc 'oak-bottom cuts at least 3 mm apart'). 4.3 is the middle of 3.9-4.75. The U-bolt backplate stops short of the fasteners' clearance circle, so its width follows this too"
     decided_by: "M4, with the U-bolt and the fasteners bought - the window moves with ubolt_span, ubolt_rod_d, fastener_clear_d and fastener_cbore_d"
   # THE U-BOLT IS M3 (2026-09-26), sized by the main board, not by the load.
-  # Its nuts stand up through holes in the main board (nut corner +
-  # boards.board_clear), beside the LED strip on the centreline. Measured
+  # Its nuts stand on the main board's top face, beside the LED strip on the
+  # centreline, and keep boards.board_clear round their corners. Measured
   # [calc], interior 45, strip 10 wide on the centreline, span 20:
-  #   M5 (nut 8 AF):   hole edge 1.12 mm UNDER the strip; board neck 7.76
-  #   M4 (nut 7 AF):   hole edge 0.54 under the strip. Clearing it needs a
+  #   M5 (nut 8 AF):   keep-out edge 1.12 mm UNDER the strip
+  #   M4 (nut 7 AF):   keep-out edge 0.54 under the strip. Clearing it needs a
   #                    span of 21.1+, and that closes the fastener_inset
   #                    window (upper bound 3.65 < lower bound 3.9)
-  #   M3 (nut 5.5 AF): hole edge 0.33 clear of the strip; neck 10.65
+  #   M3 (nut 5.5 AF): keep-out edge 0.33 clear of the strip
   # Load: ADR 0009's mass table puts the body at ~825 g, ~8 N on the strap;
   # a factor of 10 for a jerk is 80 N. An M3 leg of 4.6 steel proofs at
   # ~1.1 kN [from memory: 5.03 mm2 stress area x 225 MPa], and there are two.
@@ -909,7 +909,7 @@ hardware:
   ubolt_rod_d:
     value: 3.0
     status: tbd
-    source: "M3 [calc above]. ADR 0009 gives no U-bolt size; M4/M5 put the nut holes under the LED strip (drc 'LED strip clear of the U-bolt nut holes')"
+    source: "M3 [calc above]. ADR 0009 gives no U-bolt size; M4/M5 put the nuts' keep-out on the main board under the LED strip (drc 'LED strip clear of the U-bolt nuts')"
     decided_by: "M4, from the strap hardware chosen - small M3 U-bolts are sold for model and tube clamps [from memory]; a bent M3 rod or a stainless M3 threaded rod does the same job"
   ubolt_hole_clear:
     value: 0.5
@@ -919,7 +919,7 @@ hardware:
   ubolt_span:
     value: 20.0
     status: tbd
-    source: "leg centre to leg centre, legs across the body. Bounded both ways [calc]: wider closes the fastener_inset window, narrower pulls the nut holes toward the LED strip"
+    source: "leg centre to leg centre, legs across the body. Bounded both ways [calc]: wider closes the fastener_inset window, narrower pulls the nuts toward the LED strip"
     decided_by: "M4"
   ubolt_drop:
     value: 18.0
@@ -939,13 +939,37 @@ hardware:
   backplate_t:
     value: 2.0
     status: tbd
-    source: "hardware/bom.csv MECH-BACKPLATE - thickness open; at most what fits under the main board, which since ADR 0020 Amendment 6 sits 1.0 mm lower (pressed against the thumb switches' housings): 2.0 leaves the clash check's clearance. Aluminium at this thickness, not ply"
-    decided_by: "M4, with the U-bolt bought: the plate spreads its nuts' clamp (mechanical/drc.echo, U-bolt nuts bear on the backplate)"
+    source: "hardware/bom.csv MECH-BACKPLATE - thickness open. It and one washer (ubolt_washer_t) fill the oak bottom's inside face to the main board's underside: the nuts clamp the board down onto them (drc 'main board in the U-bolt's clamp'), so a thicker plate takes a thinner washer. Aluminium at this thickness, not ply"
+    decided_by: "M4, with the U-bolt bought: the plate spreads its nuts' clamp (mechanical/drc.echo, U-bolt washers bear on the backplate)"
+  backplate_l:
+    value: 16.0
+    status: tbd
+    source: "the backplate's length along the body [calc]: it must carry both washers (ubolt_washer_od, on the legs' line across the body) and stop short of the main board's column mounts either side, whose oak spacers stand beside it (drc 'U-bolt backplate clear of the main board's mounts'). It was ubolt_span, 20, until the mounts followed the key boards' (ADR 0022 point 8)"
+    decided_by: "M4, with the plate cut"
   backplate_clear:
     value: 0.5
     status: tbd
     source: "the backplate's edge short of the gap fasteners' clearance circle, across the body. The plate floats on its legs by ubolt_hole_clear / 2 each way, so at zero it would touch the screws"
     decided_by: "M4, with the plate cut"
+  # THE MAIN BOARD IS IN THE U-BOLT'S CLAMP (owner, 2026-09-29: "I think we
+  # can have the standoffs be part of the actual stackup"). Up each leg: the
+  # oak, the backplate, a washer, the main board, a washer, the nut. The board
+  # has only a clearance hole for the rod; the nuts are on its top face.
+  ubolt_washer_t:
+    value: 0.5
+    status: tbd
+    source: "DIN 433 M3 washer, 0.5 thick [from memory]. The one under the board fills the gap from the backplate to the main board's underside, so backplate_t + this is the oak mounts' spacer length (drc 'main board in the U-bolt's clamp')"
+    decided_by: "M4, with the washers bought and measured"
+  ubolt_washer_od:
+    value: 6.0
+    status: tbd
+    source: "DIN 433 M3 washer, outside diameter 6.0 [from memory] - the small-OD series, so it bears on the board inside the nut's keep-out"
+    decided_by: "M4, with the washers bought"
+  ubolt_board_hole_clear:
+    value: 1.0
+    status: tbd
+    source: "clearance on the rod's diameter in the main board's hole. The board is located by its own mounts and the legs by the oak's holes, so the hole takes both tolerances; the washers cover it (their bore 3.2, outside 6.0)"
+    decided_by: "M4, with the oak drilled and the board in hand"
 
 # -------------------------------------------------------------- routing ----
 # THINGS THAT RUN THROUGH THE CAVITY (modelled 2026-09-26 for the clash

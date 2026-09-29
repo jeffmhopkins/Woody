@@ -66,7 +66,9 @@ one big long board?")
 - **The LED strip runs down the centreline** (ADR 0016's strip, moved from the
   board's edge), from past the sensor to the board's tail end.
 - **Holes in the board over the U-bolt's nuts**, which stand above its
-  underside, and notches at the screws its edges reach. **Standoffs** off the
+  underside, and notches at the screws its edges reach. *(Since ADR 0022
+  point 7: the board is in the U-bolt's clamp, with a clearance hole for each
+  leg and the nuts on its top face.)* **Standoffs** off the
   oak or the thumb plates where nothing else is; the soldered thumb switches
   carry it between them.
 

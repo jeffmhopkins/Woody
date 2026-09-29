@@ -67,18 +67,22 @@ networks:
 parts:
   U1:  [198.5, 44.0, 90]     # U-KEYS, the register
   C7:  [192.0, 41.8, 90]     # C-DECOUPLE-165, beside pin 8 at the register's J-CHAIN end
-  C8:  [166.0, 42.0, 90]     # C-BULK-CHAIN, beside J-CHAIN's 3V3 pin
+  C8:  [165.5, 42.0, 90]     # C-BULK-CHAIN, beside J-CHAIN's 3V3 pin
 
 silk:
   at: [152.0, 12.5]
-  top_at: [183.5, 46.0]     # clear of the vias QH needs near the register: silk is placed before routing, and no via goes under silk
+  top_at: [176.0, 46.0]     # short of the register: silk is placed before routing and no via goes under silk, and RH6's line (U1.13) and QH leave the register by vias below it
   title: "WOODY key board RH"
   rev: "A"
   date: "2026-09-28"
 
 route: true
-# J-CHAIN's far row (the odd pins), reachable only from the header's back
-route_first: [/CHAIN_SCK, /CHAIN_SHLD, /HOP_LT_RH, /HOP_RH_RT]
+# The two key lines from the register's far row first, as the left-hand board
+# routes KEY_LH5 first: U1.13 (RH6) is boxed in by the 12-15 strap, and routed
+# later it finds its via spots below the pin taken. Then J-CHAIN's far row (the
+# odd pins), reachable only from the header's back. KEY_RH1 last: routed early,
+# its via lands beside J-CHAIN's ground pin 4 and starves that pin's thermal.
+route_first: [/KEY_RH5, /KEY_RH6, /CHAIN_SCK, /CHAIN_SHLD, /HOP_LT_RH, /HOP_RH_RT, /KEY_RH1]
 connect_first:
   - {pads: [C7.2, U1.8], max_mm: 15, why: "the decoupling loop's ground half, in its own track"}
   # The register's two far-row ground pins are boxed in by the far-row key lines:

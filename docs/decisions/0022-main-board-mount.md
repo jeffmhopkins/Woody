@@ -56,7 +56,8 @@ Two things were therefore unanswered:
    pins, the strip, the lid screws, the U-bolt, the sensor, the regulator
    block and the chain headers (*"main board standoffs found clear of
    everything"* lists how many land on each). Each gets a hole in the board,
-   and each stud a hole in its thumb plate.
+   and each stud a hole in its thumb plate. *(Since point 8: the mounts
+   follow the key boards' mounts, with a pair at each end.)*
 5. **The thumb switches in the row nearer the centreline are turned 180°**
    (`config/key-layout.yaml`: LT1, LT3, RT1, RT3). A KS-33's pins sit off its
    centre. On the thinner board they stand proud of the top face, and in the
@@ -71,6 +72,63 @@ Two things were therefore unanswered:
    a plate floats a millimetre or two from the thumb switches' pins, and a touch
    on it fires spurious notes, as the key plate's would (ADR 0009). The oak mounts stay
    unplated: nothing metal is under them.
+
+7. **The main board is in the U-bolt's clamp** (owner, 2026-09-29: "I think we
+   can have the standoffs be part of the actual stackup"). Up each leg go:
+   - the oak;
+   - the backplate;
+   - a washer (`MECH-UBOLT-WASHER`);
+   - the main board;
+   - a second washer;
+   - the nyloc.
+
+   The backplate and one washer fill the oak to the board's underside, as an
+   oak mount's spacer does (*"main board in the U-bolt's clamp"*). So the
+   station in the middle of the board is also a mount, with no part added
+   but four washers.
+
+   Before this, the nuts stood on the backplate and up through holes in the
+   board. Each hole was a nut's corners plus the parts clearance, and it
+   merged with the middle screws' notch. The two bites left a neck of board
+   about 10 mm wide, which every trace between the two halves had to cross.
+   Now the board has a clearance hole for each leg. It keeps copper off
+   under the washers and nuts on its outer layers only. The inner layers
+   route past the hole (*"main board neck at the U-bolt station"*). The legs'
+   holes are unplated: the U-bolt is outside metal on the strap, and it stays
+   off the circuit's ground.
+
+   The owner's rule: no big holes in the board, and no narrowing of it here.
+   So the notches at the lid screws were cut down as well. They are now the
+   screw's clearance hole plus the board's copper-to-edge clearance, opened
+   to the edge. The parts' clearance (`boards.board_clear`) had set them
+   before, and it still keeps parts away from the screw. It no longer cuts
+   the board.
+
+8. **One mount pattern through the instrument** (owner, 2026-09-29: the key
+   boards' "standoff locations go all the way down through the instrument
+   and down to the main board", "and maybe an extra set of standoffs in the
+   very top and the very bottom"). The main board is held:
+   - under each of the key boards' eight mounts;
+   - by a pair at the mouth end;
+   - by a pair on the tongue before J-UMB, which takes the umbilical's mating
+     push;
+   - by the U-bolt's clamp in the middle (point 7).
+
+   A column is two stacks, not one standoff. The key boards hang from the
+   lid's key plate, and the lid lifts off with them plugged in (ADR 0017).
+   So the lid's stack ends at the key board. The main board's stands under
+   it, on the oak or on a thumb plate, by point 2 or 3.
+
+   The column nearest the mouth in each hand stands over a thumb plate,
+   0.4 mm too close to a thumb switch's cutout for the stud's edge distance.
+   Its main-board mount stands 0.5 mm nearer the mouth than the key board's.
+   The thumb plate reaches round it. A column may move up to 1 mm, along the
+   body only (*"main board mounts under the key boards' mounts, and a pair
+   at each end"*). The mouth pair's far mount stands clear of the breath
+   sensor, so it is further in than the near one.
+
+   The search for clear places in point 4 is gone. The counts are in
+   *"main board standoffs found clear of everything"*.
 
 ## Consequences
 
@@ -91,6 +149,15 @@ Two things were therefore unanswered:
 - **The main board's plate mounts are plated holes on `PWR_GND`**
   (`MountingHole_2.7mm_M2.5_Pad_Via`), where the key boards' mounts are
   unplated and keep copper clear.
+- **The strap's pull passes through the main board** as compression between
+  the washers. At ADR 0009's 80 N jerk that is a few MPa on FR-4 [calc: 80 N
+  over a DIN 433 M3 washer's ~20 mm² annulus]. The nylocs are snugged, not
+  torqued.
+- **The U-bolt's position is fixed by the board's holes.** Moving it after
+  the M8 balance check is a board change. It was already, while the board
+  had holes over the nuts.
+- **Taking the main board out frees the U-bolt and its backplate**, because
+  the same nuts hold all three.
 - **The Matrix keeps its own thickness** (`boards.matrix_t`). It had been
   borrowing the main board's.
 

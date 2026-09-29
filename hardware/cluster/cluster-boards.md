@@ -95,8 +95,9 @@ clusters are the ones near the MCU at the tail.
 
 **The two thumb clusters now share one board.** ADR 0009 puts the U-bolt in the
 band between the left thumb line and the right thumb rest `[repo] 0009`, which
-was once the reason for two thumb boards. The main board spans it instead, with
-holes over the U-bolt's nuts (ADR 0017).
+was once the reason for two thumb boards. The main board spans it instead,
+clamped in the U-bolt's stack with a clearance hole for each leg (ADR 0022
+point 7).
 
 **The chain order is `config/key-layout.yaml`'s and stays**:
 `right_thumb → right_hand → left_thumb → left_hand`, chosen so serial data

@@ -405,9 +405,20 @@ module oak_bottom_2d() {
 
 // The outline a thumb cluster's plate and board share, before cutouts.
 function thumb_pts(cl) = [for (k = cluster_keys(cl)) key_xy(k)];
+// THE MOUNT COLUMNS (owner, 2026-09-29): the main board is held under each
+// key board's mount. A column mount standing near a thumb plate is taken
+// onto it, and the plate reaches round its stud (col_pad: the stud's edge
+// distance, and the 1 mm a column may be nudged along the body).
+col_pad = 2 * (hardware_kb_stud_edge + 1.5);
+function thumb_cols(cl) = let(q = thumb_pts(cl), h = (switch_keycap + 4) / 2,
+                              x0 = min([for (a = q) a[0]]) - h, x1 = max([for (a = q) a[0]]) + h)
+    [for (c = ["left_hand", "right_hand"], m = kb_mounts(c)) if (m[0] > x0 - col_pad && m[0] < x1 + col_pad) m];
 module thumb_outline_2d(cl) {
     intersection() {
-        hull() for (p = thumb_pts(cl)) translate(p) square(switch_keycap + 4, center = true);
+        hull() {
+            for (p = thumb_pts(cl)) translate(p) square(switch_keycap + 4, center = true);
+            for (m = thumb_cols(cl)) translate(m) square(col_pad, center = true);
+        }
         translate([x_in0, u_y0 + 0.5]) square([x_in1 - x_in0, u_w - 1]);
     }
 }
@@ -507,7 +518,7 @@ module tail_cap_2d() {
 // fastener pair stands at the same station, so across the body the plate
 // stops short of their clearance circle, by more than it floats on its legs,
 // and is located by the legs alone; the screws never pass through it.
-ubolt_bp = [hardware_ubolt_span, u_w - 2 * (hardware_fastener_inset + hardware_fastener_clear_d / 2 + hardware_backplate_clear)];
+ubolt_bp = [hardware_backplate_l, u_w - 2 * (hardware_fastener_inset + hardware_fastener_clear_d / 2 + hardware_backplate_clear)];
 module ubolt_backplate_2d() {
     difference() {
         translate(ubolt_c) square(ubolt_bp, center = true);
@@ -553,7 +564,10 @@ usb_plug_x0 = openings_matrix_usb_to_tail ? matrix_xy[0] + boards_matrix_board /
 // etherCON's adapter. The last fastener pair stands just in front of it.
 tail_equip_x = min(usb_plug_x0, ua_x0 - boards_umb_joint_d);
 tail_fastener_x = tail_equip_x - tail_fastener_back;
-fastener_notch = 1.5 + boards_board_clear;   // an M3's radius and a clearance: what a board or a run keeps from a screw
+fastener_notch = 1.5 + boards_board_clear;   // an M3's radius and a clearance: what a run or a part keeps from a screw
+// The main board's edge notch at a screw: the screw's clearance hole and the
+// board's copper-to-edge clearance. Parts keep fastener_notch from the screw.
+board_notch = hardware_fastener_clear_d / 2 + 0.3;
 
 // Six fasteners up from the bottom into the plate, zig-zagging between the
 // long edges ~80 mm apart (ADR 0009).
@@ -813,6 +827,11 @@ module pcb_geometry() {
     for (c = cb_standoffs) echo("PCB", "main", "standoff", "M2.5", c[0], c[1], hardware_kb_board_hole,
                                 max(hardware_kb_nut_e, hardware_mb_screw_head_d) + 2 * hardware_kb_mount_float,
                                 hardware_kb_spacer_od + 2 * hardware_kb_mount_float, on_thumb_plate(c) ? "plate" : "oak");
+    // Each U-bolt leg (ADR 0022 point 7): centre, the board's hole, and what
+    // bears on the top face and the underside (a washer; the nut, across its
+    // corners, on top), which the board keeps copper and parts off.
+    for (u = ubolt_legs()) echo("PCB", "main", "ubolt", "M3", u[0], u[1], 2 * ubolt_board_hole_r,
+                                max(hardware_ubolt_nut_af / cos(30), hardware_ubolt_washer_od), hardware_ubolt_washer_od);
     // How tall parts may stand: under each key board, and where none is
     // overhead; and nothing under the chain headers' plugs and hairpins, or
     // under the Matrix ribbon's level run into J-MCU.
@@ -1109,7 +1128,13 @@ tall_c = [[jm_x0 - boards_board_clear - boards_tall_w / 2, far_y]];   // just in
 function under_keys(c, sz) = len([for (cl = ["left_hand", "right_hand"], k = cluster_keys(cl))
     if (abs(key_xy(k)[0] - c[0]) < (switch_cluster_pcb_w + sz[0]) / 2 && abs(key_xy(k)[1] - c[1]) < (switch_cluster_pcb_w + sz[1]) / 2) 1]) > 0;
 tall_room = under_keys(tall_c[0], tall_sz) ? cb_room : gap_room;
-ubolt_hole_r = hardware_ubolt_nut_af / cos(30) / 2 + boards_board_clear;   // the U-bolt's nuts stand above the board's underside
+// THE MAIN BOARD IS IN THE U-BOLT'S CLAMP (owner, 2026-09-29): up each leg the
+// backplate, a washer, the board, a washer, the nut. The board has a clearance
+// hole for the rod; the nut and its washer stand on the top face and keep the
+// board's parts clearance round the nut's corners.
+ubolt_board_hole_r = (hardware_ubolt_rod_d + hardware_ubolt_board_hole_clear) / 2;
+ubolt_nut_z = cb_top + hardware_ubolt_washer_t;   // the nut's underside, on its washer on the board
+ubolt_keep_r = max(hardware_ubolt_nut_af / cos(30), hardware_ubolt_washer_od) / 2 + boards_board_clear;
 module cb_2d() {
     difference() {
         union() {
@@ -1121,15 +1146,17 @@ module cb_2d() {
         // The slot in front of the sensor's lower port.
         translate([sensor_face_x - EPS, p2_y - boards_sensor_port_d / 2 - 1])
             square([boards_sensor_port_l + 2, boards_sensor_port_d + 2]);
-        // A notch for each screw the board's edge reaches, a hole over each
-        // U-bolt nut - one bite where the two would leave a sliver of board
+        // A notch for each screw the board's edge reaches, a hole for each
+        // U-bolt leg - one bite where the two would leave a sliver of board
         // narrower than a clearance between them.
-        for (f = fasteners()) translate(f) circle(r = fastener_notch);
-        for (u = ubolt_legs()) translate(u) circle(r = ubolt_hole_r);
+        // Open to the edge: the clearance hole alone would leave a sliver
+        // of board outside it.
+        for (f = fasteners()) hull() { translate(f) circle(r = board_notch); translate([f[0], f[1] < W / 2 ? 0 : W]) circle(r = board_notch); }
+        for (u = ubolt_legs()) translate(u) circle(r = ubolt_board_hole_r);
         // the mounts' holes (ADR 0022): the board locates on a stud or a screw
         for (c = cb_standoffs) translate(c) circle(d = hardware_kb_board_hole);
-        for (f = fasteners(), u = ubolt_legs()) if (norm(f - u) < fastener_notch + ubolt_hole_r + boards_board_clear)
-            hull() { translate(f) circle(r = fastener_notch); translate(u) circle(r = ubolt_hole_r); }
+        for (f = fasteners(), u = ubolt_legs()) if (norm(f - u) < board_notch + ubolt_board_hole_r + boards_board_clear)
+            hull() { translate(f) circle(r = board_notch); translate(u) circle(r = ubolt_board_hole_r); }
     }
 }
 // J-MCU: on the tube side of the regulator block, at the board's tail edge.
@@ -1159,9 +1186,13 @@ tongue_y = [ec_c[0] - ec_fl[0] / 2, ec_c[0] + ec_fl[0] / 2];
 mb_keep_d = max(hardware_kb_nut_e, hardware_mb_screw_head_d, hardware_kb_spacer_od) + 2 * hardware_kb_mount_float;
 mb_plate_r = max(hardware_kb_spacer_od / 2 + hardware_kb_mount_float, hardware_kb_stud_edge);   // what a thumb plate must have round a stud
 function so_clear(p) = let(r = mb_keep_d / 2 + 0.5)
-    !pins_at(p, r) && abs(p[1] - W / 2) >= lighting_strip_w / 2 + r
+    !pins_at(p, r) && (abs(p[1] - W / 2) >= lighting_strip_w / 2 + r || p[0] < strip_x0 - r || p[0] > strip_x0 + strip_l + r)
+    // a thumb switch's cutout in its plate is an edge for the stud, and its
+    // housing stands under the board beside the spacer
+    && min([for (k = concat(cluster_keys("left_thumb"), cluster_keys("right_thumb"))) rect_gap(p, key_xy(k), [plate_cutout, plate_cutout], key_rot(k))])
+       >= max(hardware_kb_stud_edge, hardware_kb_spacer_od / 2 + hardware_kb_mount_float)
     && min([for (f = fasteners()) norm(p - f)]) >= fastener_notch + r
-    && min([for (u = ubolt_legs()) norm(p - u)]) >= ubolt_hole_r + r
+    && min([for (u = ubolt_legs()) norm(p - u)]) >= ubolt_keep_r + r
     && max(abs(p[0] - sensor_c[0]) - boards_sensor_body / 2, abs(p[1] - sensor_c[1]) - boards_sensor_leads / 2) >= r
     && max(abs(p[0] - tall_c[0][0]) - tall_sz[0] / 2, abs(p[1] - tall_c[0][1]) - tall_sz[1] / 2) >= r
     && min([for (cl = chain_ribbon_cls) let(sp = chain_span(chain_x(cl), chain_dir(cl)), x0 = sp[0], x1 = sp[1])
@@ -1176,9 +1207,16 @@ function so_clear(p) = let(r = mb_keep_d / 2 + 0.5)
                 min(p[0] - b[0], b[2] - p[0], p[1] - b[1], b[3] - p[1]))]) >= mb_plate_r;
 // Each candidate is nudged along the board by up to 3 mm before it is given
 // up, so a mount does not vanish because a neighbour's envelope grew a little.
-cb_standoffs = [for (x = [cb_x[0] + 4, lt_rest_xy[0], (gap_x[0] + gap_x[1]) / 2, rt_rest[0], (rt_rest[0] + jm_x0) / 2, cb_x[1] - 4],
-                     y = [cb_y[0] + 4, cb_y[1] - 4])
-                   let(ok = [for (d = [0, 1, -1, 2, -2, 3, -3]) if (so_clear([x + d, y])) [x + d, y]]) if (len(ok) > 0) ok[0]];
+// THE MOUNTS (owner, 2026-09-29): one under each key board's mount - the
+// same pattern through the instrument, nudged along the body by at most 1 mm
+// where a thumb switch's cutout needs it - and a pair at each end: at the
+// mouth, and on the tongue before J-UMB, which takes the umbilical's mating
+// push. The U-bolt's clamp holds the middle (ADR 0022 point 7).
+function first_clear(cs) = let(ok = [for (c = cs) if (so_clear(c)) c]) len(ok) > 0 ? ok[0] : undef;
+cb_cols = [for (c = ["left_hand", "right_hand"], m = kb_mounts(c)) [m, first_clear([for (d = [0, -0.5, 0.5, -1, 1]) m + [d, 0]])]];
+cb_ends = concat([for (y = [cb_y[0] + 4, cb_y[1] - 4]) first_clear([for (d = [0 : 1 : 20]) [cb_x[0] + 4 + d, y]])],
+                 [for (y = [tongue_y[0] + 4, tongue_y[1] - 4]) first_clear([for (d = [0 : 1 : 20]) [ua_x0 - boards_umb_joint_d - mb_keep_d / 2 - 2 - d, y]])]);
+cb_standoffs = concat([for (c = cb_cols) if (c[1] != undef) c[1]], [for (c = cb_ends) if (c != undef) c]);
 module centre_board_3d() {
     P(C_PCB, false, "main board") translate([0, 0, cb_z]) linear_extrude(switch_pcb_t) cb_2d();
     P(C_ENVELOPE, false, "parts main board") translate([0, 0, cb_top]) linear_extrude(boards_smt_h) difference() {
@@ -1193,6 +1231,7 @@ module centre_board_3d() {
         translate(sensor_c) square([boards_sensor_body + 1, boards_sensor_leads + 1], center = true);
         for (c = tall_c) translate(c) square(tall_sz + [1, 1], center = true);
         for (c = cb_standoffs) translate(c) circle(d = mb_keep_d + 1);
+        for (u = ubolt_legs()) translate(u) circle(r = ubolt_keep_r);   // the U-bolt's washer and nut
         translate([strip_x0 - 0.5, strip_y - 0.5]) square([strip_l + 1, lighting_strip_w + 1]);
     }
     P([0.30, 0.30, 0.55], false, "tall parts main board")
@@ -1223,12 +1262,12 @@ module centre_board_3d() {
     }
 }
 // A thumb plate's extent, [x0, y0, x1, y1]: thumb_outline_2d's hull, clipped to the interior.
-function thumb_box(cl) = let(q = thumb_pts(cl), h = (switch_keycap + 4) / 2)
-    [max(x_in0, min([for (a = q) a[0]]) - h), max(u_y0 + 0.5, min([for (a = q) a[1]]) - h),
-     min(x_in1, max([for (a = q) a[0]]) + h), min(W - u_y0 - 0.5, max([for (a = q) a[1]]) + h)];
+function thumb_box(cl) = let(q = thumb_pts(cl), h = (switch_keycap + 4) / 2, m = thumb_cols(cl), g = col_pad / 2)
+    [max(x_in0, min(concat([for (a = q) a[0] - h], [for (a = m) a[0] - g]))), max(u_y0 + 0.5, min(concat([for (a = q) a[1] - h], [for (a = m) a[1] - g]))),
+     min(x_in1, max(concat([for (a = q) a[0] + h], [for (a = m) a[0] + g]))), min(W - u_y0 - 0.5, max(concat([for (a = q) a[1] + h], [for (a = m) a[1] + g])))];
 function on_thumb_plate(p) = len([for (cl = ["left_thumb", "right_thumb"]) let(b = thumb_box(cl))
     if (p[0] >= b[0] && p[0] <= b[2] && p[1] >= b[1] && p[1] <= b[3]) 1]) > 0;
-function floor_at(x) = abs(x - ubolt_c[0]) <= ubolt_bp[0] / 2 ? z_floor + hardware_backplate_t + hardware_ubolt_nut_h : z_floor;
+function floor_at(x) = abs(x - ubolt_c[0]) <= ubolt_bp[0] / 2 ? z_floor + hardware_backplate_t + hardware_ubolt_washer_t : z_floor;
 
 
 // PARTS ON THE BOARDS, as envelopes. Cluster boards: a component layer on
@@ -1273,17 +1312,21 @@ module hardware_3d() {
         translate([0, 0, hardware_fastener_cbore_depth - hardware_fastener_head_h]) cylinder(d = hardware_fastener_head_d, h = hardware_fastener_head_h);
         cylinder(d = 3, h = z_plate_top - 0.4 + explode * 2);
     }
-    // U-bolt: loop below, legs through the floor to the backing plate, a nut
-    // on each leg above the plate.
+    // U-bolt: loop below, legs through the floor, the backing plate and the
+    // main board; a washer under the board, and a washer and a nut on each
+    // leg on the board's top face. A leg ends a thread's pitch past its nyloc.
     P(C_STEEL, false, "U-bolt") translate([0, 0, -explode]) {
         for (u = ubolt_legs()) translate([u[0], u[1], -hardware_ubolt_drop + hardware_ubolt_span / 2])
-            cylinder(d = hardware_ubolt_rod_d, h = z_floor + hardware_backplate_t + hardware_ubolt_nut_h + hardware_ubolt_drop - hardware_ubolt_span / 2);
+            cylinder(d = hardware_ubolt_rod_d, h = ubolt_nut_z + hardware_ubolt_nut_h + 0.5 + hardware_ubolt_drop - hardware_ubolt_span / 2);
         translate([ubolt_c[0], ubolt_c[1], -hardware_ubolt_drop + hardware_ubolt_span / 2]) rotate([0, 0, 90]) rotate([-90, 0, 0])
             rotate_extrude(angle = 180) translate([hardware_ubolt_span / 2, 0]) circle(d = hardware_ubolt_rod_d);
     }
     for (i = [0, 1]) P(C_STEEL, false, str("U-bolt nut ", i + 1))
-        translate([ubolt_legs()[i][0], ubolt_legs()[i][1], z_floor + hardware_backplate_t - explode])
+        translate([ubolt_legs()[i][0], ubolt_legs()[i][1], ubolt_nut_z + explode])
             cylinder(d = hardware_ubolt_nut_af / cos(30), h = hardware_ubolt_nut_h, $fn = 6);
+    for (i = [0, 1], z = [z_floor + hardware_backplate_t, cb_top]) P(C_STEEL, false, str("U-bolt washer ", i + 1, z > cb_z ? " top" : " under"))
+        translate([ubolt_legs()[i][0], ubolt_legs()[i][1], z])
+            difference() { cylinder(d = hardware_ubolt_washer_od, h = hardware_ubolt_washer_t); translate([0, 0, -1]) cylinder(d = hardware_ubolt_rod_d + 0.2, h = 3); }
     lam(z_floor, hardware_backplate_t, C_ALU, false, "U-bolt backplate") ubolt_backplate_2d();
 }
 
@@ -1445,31 +1488,46 @@ module drc_report() {
         "mm of depth the counterbore and the groove share (must be 0 or less - or else 1.5 mm of oak across the body between them), and that oak");
     drc(hardware_fastener_cbore_depth >= hardware_fastener_head_h, "fastener heads at or below the bottom face",
         hardware_fastener_cbore_depth - hardware_fastener_head_h, "mm below flush - the counterbore less the screw's head height");
-    // The U-bolt's backplate: its nuts on it, and short of the gap fasteners
-    // by more than it floats on its legs, so it can never touch a screw.
-    bp_nut = ubolt_bp[1] / 2 - hardware_ubolt_span / 2 - hardware_ubolt_nut_af / cos(30) / 2;
+    // The U-bolt's backplate: the washers under the board on it, and short of
+    // the gap fasteners by more than it floats on its legs, so it can never
+    // touch a screw.
+    bp_nut = ubolt_bp[1] / 2 - hardware_ubolt_span / 2 - hardware_ubolt_washer_od / 2;
     bp_web = ubolt_bp[1] / 2 - hardware_ubolt_span / 2 - ubolt_hole_d / 2;
     bp_screw = (W / 2 - ubolt_bp[1] / 2) - (u_y0 + hardware_fastener_inset + hardware_fastener_clear_d / 2);
     bp_float = (ubolt_hole_d - hardware_ubolt_rod_d) / 2;
-    drc(bp_nut >= 0 && bp_web >= 2 && bp_screw > bp_float, "U-bolt nuts bear on the backplate, which stops at the gap fasteners' clearance",
-        [bp_nut, bp_web, bp_screw], str("mm: a nut's corners inside the plate end; plate beyond each leg hole; plate end short of the screws' clearance circle, which must beat the ",
+    drc(bp_nut >= 0 && bp_web >= 2 && bp_screw > bp_float, "U-bolt washers bear on the backplate, which stops at the gap fasteners' clearance",
+        [bp_nut, bp_web, bp_screw], str("mm: a washer's edge inside the plate end; plate beyond each leg hole; plate end short of the screws' clearance circle, which must beat the ",
             bp_float, " mm the plate floats on its legs"));
+    // Nothing else of the main board's mounts stands on the backplate.
+    bp_mount = min([for (c = cb_standoffs) rect_gap(c, ubolt_c, ubolt_bp, 0)]) - hardware_kb_spacer_od / 2 - hardware_kb_mount_float;
+    drc(bp_mount >= 0.5, "U-bolt backplate clear of the main board's mounts", bp_mount,
+        "mm from the plate's edge to the nearest mount's spacer, with its float");
+    // The main board in the U-bolt's clamp: the backplate and one washer fill
+    // the oak to the board's underside, as the oak mounts' spacer does.
+    clamp_gap = cb_z - z_floor - hardware_backplate_t - hardware_ubolt_washer_t;
+    drc(abs(clamp_gap) <= 0.05, "main board in the U-bolt's clamp", [clamp_gap, cb_z - z_floor],
+        "mm: the oak to the board's underside less the backplate and a washer (must be within 0.05 - the nuts pull the board down onto them), and that height");
     // The main board at the U-bolt station: the notches at the middle screws
-    // and the holes over the nuts leave strips of board that every trace
-    // crossing the station must pass. The widest is the neck. A strip
-    // narrower than a clearance is not left (cb_2d joins the two cuts).
-    cuts_y = concat([for (f = fasteners()) if (abs(f[0] - ubolt_c[0]) < fastener_notch) [f[1] - fastener_notch, f[1] + fastener_notch]],
-                    [for (u = ubolt_legs()) [u[1] - ubolt_hole_r, u[1] + ubolt_hole_r]]);
+    // and the legs' holes leave strips of board that every trace crossing the
+    // station must pass. A strip narrower than a clearance is not left (cb_2d
+    // joins the two cuts). On the outer layers the washers and nuts keep
+    // copper off a little more round each leg.
+    cuts_y = concat([for (f = fasteners()) if (abs(f[0] - ubolt_c[0]) < board_notch) [f[1] - board_notch, f[1] + board_notch]],
+                    [for (u = ubolt_legs()) [u[1] - ubolt_board_hole_r, u[1] + ubolt_board_hole_r]]);
+    cuts_out = concat([for (f = fasteners()) if (abs(f[0] - ubolt_c[0]) < board_notch) [f[1] - board_notch, f[1] + board_notch]],
+                      [for (u = ubolt_legs()) let(k = max(hardware_ubolt_nut_af / cos(30), hardware_ubolt_washer_od) / 2 + 0.5) [u[1] - k, u[1] + k]]);
     function first_by_lo(v) = [for (c = v) if (c[0] == min([for (d = v) d[0]])) c][0];
     function sort_lo(v) = len(v) == 0 ? [] : let(f = first_by_lo(v)) concat([f], sort_lo([for (c = v) if (c != f) c]));
     function strips(cs, from, to, i = 0) = i >= len(cs) ? (to - from >= boards_board_clear ? [to - from] : [])
         : concat(min(cs[i][0], to) - from >= boards_board_clear ? [min(cs[i][0], to) - from] : [], strips(cs, max(from, cs[i][1]), to, i + 1));
+    function total(v, i = 0) = i >= len(v) ? 0 : v[i] + total(v, i + 1);
     neck = strips(sort_lo(cuts_y), cb_y[0], cb_y[1]);
-    drc(max(neck) >= boards_main_neck_min, "main board neck at the U-bolt station", neck,
-        str("mm of board across the station, strip by strip; the widest carries every trace from one half to the other (boards.main_neck_min ", boards_main_neck_min, ")"));
-    strip_hole = min([for (u = ubolt_legs()) abs(u[1] - W / 2) - ubolt_hole_r - lighting_strip_w / 2]);
-    drc(strip_hole >= 0, "LED strip clear of the U-bolt nut holes", [strip_hole, strip_hole + boards_board_clear],
-        "mm, the strip's edge to the nearest nut hole's edge (negative = the strip bridges the hole), and to the nut's corners");
+    neck_out = strips(sort_lo(cuts_out), cb_y[0], cb_y[1]);
+    drc(total(neck) >= boards_main_neck_min, "main board neck at the U-bolt station", [neck, total(neck), total(neck_out)],
+        str("mm of board across the station, strip by strip, their total on the inner layers, and on the outer layers less 0.5 copper keep-out round each washer and nut; every trace from one half to the other passes here (boards.main_neck_min ", boards_main_neck_min, ")"));
+    strip_hole = min([for (u = ubolt_legs()) abs(u[1] - W / 2) - ubolt_keep_r - lighting_strip_w / 2]);
+    drc(strip_hole >= 0, "LED strip clear of the U-bolt nuts", [strip_hole, strip_hole + boards_board_clear],
+        "mm, the strip's edge to the nearest nut's parts keep-out (negative = the strip overlaps it), and to the nut's corners");
 
     // Sides in grooves
     drc(undef, "interior width between the acrylic sides", u_w, "mm - was the full width less two sides; the oak lips now come off it too");
@@ -1497,6 +1555,10 @@ module drc_report() {
     drc(boards_sensor_h <= sensor_room, "breath sensor fits at the mouth end", sensor_room - boards_sensor_h, "mm spare above it");
     drc(fastener_x[0] - sensor_x1 >= fastener_notch, "mouth lid screws clear of the breath sensor", fastener_x[0] - sensor_x1,
         "mm from the sensor's far end to the screws' centre, against the boards' notch round a screw");
+    col_off = [for (c = cb_cols) c[1] == undef ? undef : norm(c[1] - c[0])];
+    drc(len([for (o = col_off) if (o == undef) 1]) == 0 && len([for (c = cb_ends) if (c == undef) 1]) == 0,
+        "main board mounts under the key boards' mounts, and a pair at each end", [col_off, len(cb_ends)],
+        "mm each column's main-board mount stands off its key-board mount along the body (undef = none clear within 1 mm), and the end mounts found (mouth pair, tongue pair)");
     drc(len(cb_standoffs) >= 4, "main board standoffs found clear of everything", len(cb_standoffs),
         str("mounts (ADR 0022): ", len([for (c = cb_standoffs) if (on_thumb_plate(c)) 1]), " on the thumb plates (the key boards' stud, spacer and nut), ",
             len([for (c = cb_standoffs) if (!on_thumb_plate(c)) 1]), " on the oak (insert, spacer, screw); the soldered thumb switches carry the board between them"));

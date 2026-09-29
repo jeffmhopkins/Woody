@@ -150,10 +150,13 @@ Several things can claim each end, and the largest wins:
   from the mouth cap to the end of the right hand, the full width inside the
   sides. Its parts face up; the two key boards connect to it by ribbons (below);
   the Matrix's ribbon ends on it, and a **tongue** runs on from its tail end
-  to the etherCON's adapter, carrying J-UMB (ADR 0021). It has holes
-  over the U-bolt's nuts, notches at the screws (one bite where a notch and a
-  hole would leave a sliver between them), and mounts wherever nothing else
-  is (*"main board standoffs found clear of everything"*): on a thumb plate
+  to the etherCON's adapter, carrying J-UMB (ADR 0021). It is clamped in the
+  U-bolt's stack, a washer each side of it, with a clearance hole for each leg
+  (ADR 0022 point 7). It has notches at the screws (one bite where a notch and a
+  hole would leave a sliver between them), and a mount under each of the key
+  boards' mounts, with a pair at the mouth and a pair on the tongue (ADR 0022
+  point 8; *"main board mounts under the key boards' mounts, and a pair at
+  each end"*): on a thumb plate
   the key boards' stud, spacer and nut; on the oak an insert, a spacer and a
   screw (ADR 0022). It is as thin as the key boards and as deep below its
   switches' seat (*"main board mount sets its depth"*); the soldered thumb
@@ -316,7 +319,7 @@ only as good as those envelopes. Group the report's lines by these causes
    short of the pair's clearance circle, by more than it floats on its legs
    (`hardware.backplate_clear`), and is located by the U-bolt's legs alone,
    so the screws never pass through it and it comes out with the U-bolt
-   (*"U-bolt nuts bear on the backplate, which stops at the gap fasteners'
+   (*"U-bolt washers bear on the backplate, which stops at the gap fasteners'
    clearance"*). How far the fasteners stand in from the sides
    (`hardware.fastener_inset`) is a window between two rules: the oak between
    each clearance hole and the side groove's wall, where the oak ends
@@ -328,12 +331,14 @@ only as good as those envelopes. Group the report's lines by these causes
    head's counterbore would share the groove's depth across a sliver of oak
    (*"fastener counterbores clear of the side grooves"*, *"fastener heads at
    or below the bottom face"*). **The U-bolt is M3, and the main board sized
-   it**, not the load: its nuts stand up through holes in the main board
-   beside the LED strip, an M4 or M5 nut's hole reaches under the strip, and
+   it**, not the load: its nuts stand on the main board's top face beside
+   the LED strip, an M4 or M5 nut's keep-out reaches under the strip, and
    widening the span to clear it closes the fastener window
    (`hardware.ubolt_rod_d` has the arithmetic; *"LED strip clear of the U-bolt
-   nut holes"*, *"main board neck at the U-bolt station"* — the strip of board
-   every trace between the two halves must pass). (The stations ran through
+   nuts"*). The board is in the U-bolt's clamp: the backplate and a washer
+   fill the oak to its underside (*"main board in the U-bolt's clamp"*), and
+   *"main board neck at the U-bolt station"* gives the board every trace
+   between the two halves must cross. (The stations ran through
    the side strips until ADR 0016 removed them.)
 5. **The Matrix and the umbilical are wired onto the main board's tail
    end** (owner, 2026-09-26). The Matrix, on the lid, has a flat 24-way
