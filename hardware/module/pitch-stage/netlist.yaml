@@ -25,29 +25,37 @@ components:
     pins: [CW, W, CCW]
     note: "AHEAD of the follower, so it scales V_ref and therefore the intercept alone. Its span needs R-TRIM-RANGE, which is undecided - see external_endpoints"
 
-  U-PITCH-REFBUF:
-    part: OPA2197
-    section: A
+  # ONE OPA2197 PACKAGE, BOTH HALVES: A is the reference buffer, B the
+  # gain-of-2 amplifier. Its supply pins are netted, with one C-DECOUPLE at each.
+  U-PITCH:
     of: U-OPA-PITCH
-    pins: [IN+, IN-, OUT]
-    rails: [MODULE_ANALOG_POS12, MODULE_ANALOG_NEG12]
-    note: "Unity follower on the trimmed reference. The buffer is what lets a divider drive the bottom of the feedback network"
+    value: "OPA2197"
+    pins: [INA+, INA-, OUTA, INB+, INB-, OUTB, V+, V-]
+    note: "Half A is the unity follower on the trimmed reference - the buffer is what lets a divider drive the bottom of the feedback network. Half B is the non-inverting stage, gain 1 + R2/R1 = 2, with the reference at the bottom of the divider"
 
-  R1:
-    of: R-PRECISION
-    section: A
-    value: "10k"
-    drawn_as: R1
+  C-DEC-PITCH-POS:
+    of: C-DECOUPLE
+    value: "100nF"
     pins: [1, 2]
-    note: "One element of the LT5400 1:1 quad. R1 = R2 is what makes gain exactly 2 and the intercept exactly -2.500 V from the same ratio"
+    note: "V+ to the star, at the pin"
 
-  R2:
-    of: R-PRECISION
-    section: B
-    value: "10k"
-    drawn_as: R2
+  C-DEC-PITCH-NEG:
+    of: C-DECOUPLE
+    value: "100nF"
     pins: [1, 2]
-    note: "The other matched element. The quad's remaining two are spare"
+    note: "V- to the star, at the pin"
+
+  # THE LT5400 IS ONE PART: four matched 10k, R1 on pins 1-8, R2 on 2-7, R3
+  # on 3-6, R4 on 4-5 [ds datasheets/analog/LT5400.pdf p.2, pin configuration].
+  # The page's R1 and R2 are the first two; R3 and R4 are the spare pair. The
+  # exposed pad (pin 9) is floating and WHERE IT GOES IS OPEN - see the row -
+  # so it is not netted, and the symbol does not carry it.
+  RN-PITCH:
+    of: R-PRECISION
+    value: "10k"
+    drawn_as: "R1 R2"
+    pins: [R1A, R1B, R2A, R2B, R3A, R3B, R4A, R4B]
+    note: "R1 (R1A-R1B) and R2 (R2A-R2B) are the page's R1 = R2 that make gain exactly 2 and the intercept exactly -2.500 V from one ratio. R3 and R4 are spare. The exposed pad is not a pin here: where it goes is open (R-PRECISION row)"
 
   TRIM-GAIN:
     value: "200R multiturn cermet"
@@ -68,14 +76,6 @@ components:
     value: "100k 1%"
     pins: [1, 2]
     note: "One of qty 6, one per populated DAC channel. AT THE DAC PIN, not after R-OPAMP-IN, where it would cost 1 percent of gain. Not drawn on the page"
-
-  U-PITCH-AMP:
-    part: OPA2197
-    section: B
-    of: U-OPA-PITCH
-    pins: [IN+, IN-, OUT]
-    rails: [MODULE_ANALOG_POS12, MODULE_ANALOG_NEG12]
-    note: "Non-inverting, gain 1 + R2/R1 = 2, with the reference at the bottom of the divider"
 
   C-FB-PITCH:
     value: "2.2nF"
@@ -111,14 +111,14 @@ nets:
 
   TRIM_WIPER:
     - TRIM-OFFSET.W
-    - U-PITCH-REFBUF.IN+
+    - U-PITCH.INA+
 
   # V_ref, the buffered and trimmed reference. It is the bottom of the
   # feedback divider, which is where a non-inverting stage's offset belongs.
   VREF_BUFFERED:
-    - U-PITCH-REFBUF.OUT
-    - U-PITCH-REFBUF.IN-
-    - R1.1
+    - U-PITCH.OUTA
+    - U-PITCH.INA-
+    - RN-PITCH.R1A
 
   DAC_CH1:
     - port: DAC_CH1
@@ -128,23 +128,23 @@ nets:
   PLUS_NODE:
     - R-OPAMP-IN.2
     - C-AA-PITCH.1
-    - U-PITCH-AMP.IN+
+    - U-PITCH.INB+
 
   MINUS_NODE:
-    - R1.2
-    - R2.1
+    - RN-PITCH.R1B
+    - RN-PITCH.R2A
     - C-FB-PITCH.2
-    - U-PITCH-AMP.IN-
+    - U-PITCH.INB-
 
   # R2 and TRIM-GAIN in series, (-) input to jack. THE DC LOOP CLOSES AT THE
   # JACK, so R-OUT-PROT sits inside it and the divider it forms against a
   # patched load is corrected exactly.
   GAIN_TRIM_MID:
-    - R2.2
+    - RN-PITCH.R2B
     - TRIM-GAIN.W
 
   AMP_OUT:
-    - U-PITCH-AMP.OUT
+    - U-PITCH.OUTB
     - C-FB-PITCH.1
     - D-JACK-CLAMP.C
     - R-OUT-PROT.1
@@ -158,10 +158,14 @@ nets:
   MODULE_ANALOG_POS12:
     - port: MODULE_ANALOG_POS12
     - D-JACK-CLAMP.K
+    - U-PITCH.V+
+    - C-DEC-PITCH-POS.1
 
   MODULE_ANALOG_NEG12:
     - port: MODULE_ANALOG_NEG12
     - D-JACK-CLAMP.A
+    - U-PITCH.V-
+    - C-DEC-PITCH-NEG.1
 
   AGND_MOD:
     - port: AGND_MOD
@@ -169,6 +173,8 @@ nets:
     - C-FILT-PITCH.2
     - R-BIAS-DAC.2
     - J-CV-PITCH.SLEEVE
+    - C-DEC-PITCH-POS.2
+    - C-DEC-PITCH-NEG.2
 
   # ------------------------------------------------------------------
   # THE TWO HOLES, AND THEY ARE THE PAGE'S OWN OPEN ITEMS.
@@ -190,6 +196,21 @@ nets:
   TRIM_GAIN_STRAP:
     - TRIM-GAIN.CW
 
+  # THE LT5400'S SPARE PAIR, R3 and R4: matched, available, and unconnected
+  # by decision (pitch-stage.md, Still open).
+  RN_R3A:
+    - RN-PITCH.R3A
+  RN_R3B:
+    - RN-PITCH.R3B
+  RN_R4A:
+    - RN-PITCH.R4A
+  RN_R4B:
+    - RN-PITCH.R4B
+
 external_endpoints:
   - TRIM_OFFSET_BOTTOM
   - TRIM_GAIN_STRAP
+  - RN_R3A
+  - RN_R3B
+  - RN_R4A
+  - RN_R4B

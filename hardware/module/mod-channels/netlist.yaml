@@ -48,13 +48,66 @@ components:
     pins: [1, 2]
     note: "DC path to ground at the DAC pin, for the window before power-on reset"
 
-  U-MOD-REFBUF:
-    part: OPA2197
+  # --- the op-amps: five halves in three OPA2197 packages ----------------
+  #
+  # U-MOD-A holds the shared reference buffer (A) and channel 1 (B); U-MOD-B
+  # channels 2 (A) and 3 (B); U-MOD-C channel 4 (A) and one of the module's
+  # two spare halves (B), tied off as a follower on the star. Supply pins are
+  # netted, with one C-DECOUPLE at each.
+
+  U-MOD-A:
     of: U-OPA-PITCH
-    section: half
-    pins: [IN+, IN-, OUT]
-    rails: [MODULE_ANALOG_POS12, MODULE_ANALOG_NEG12]
-    note: "ONE buffer, four loads, deliberately. A shared node makes a residual offset a common shift across the mod set rather than four channels disagreeing. Do not split it into four"
+    value: "OPA2197"
+    pins: [INA+, INA-, OUTA, INB+, INB-, OUTB, V+, V-]
+    note: "Half A is the shared reference buffer: ONE buffer, four loads, deliberately. A shared node makes a residual offset a common shift across the mod set rather than four channels disagreeing. Do not split it into four. Half B is channel 1"
+
+  U-MOD-B:
+    of: U-OPA-PITCH
+    value: "OPA2197"
+    pins: [INA+, INA-, OUTA, INB+, INB-, OUTB, V+, V-]
+    note: "Half A is channel 2, half B channel 3"
+
+  U-MOD-C:
+    of: U-OPA-PITCH
+    value: "OPA2197"
+    pins: [INA+, INA-, OUTA, INB+, INB-, OUTB, V+, V-]
+    note: "Half A is channel 4. Half B is spare, a follower with its input on the star"
+
+  C-DEC-MODA-POS:
+    of: C-DECOUPLE
+    value: "100nF"
+    pins: [1, 2]
+    note: "U-MOD-A V+ to the star, at the pin"
+
+  C-DEC-MODA-NEG:
+    of: C-DECOUPLE
+    value: "100nF"
+    pins: [1, 2]
+    note: "U-MOD-A V- to the star, at the pin"
+
+  C-DEC-MODB-POS:
+    of: C-DECOUPLE
+    value: "100nF"
+    pins: [1, 2]
+    note: "U-MOD-B V+ to the star, at the pin"
+
+  C-DEC-MODB-NEG:
+    of: C-DECOUPLE
+    value: "100nF"
+    pins: [1, 2]
+    note: "U-MOD-B V- to the star, at the pin"
+
+  C-DEC-MODC-POS:
+    of: C-DECOUPLE
+    value: "100nF"
+    pins: [1, 2]
+    note: "U-MOD-C V+ to the star, at the pin"
+
+  C-DEC-MODC-NEG:
+    of: C-DECOUPLE
+    value: "100nF"
+    pins: [1, 2]
+    note: "U-MOD-C V- to the star, at the pin"
 
   # --- mod channel 1, from DAC ch2 -----------------------------------
 
@@ -67,13 +120,6 @@ components:
     of: R-BIAS-DAC
     value: "100k 1%"
     pins: [1, 2]
-
-  U-MOD-1:
-    part: OPA2197
-    of: U-OPA-PITCH
-    section: half
-    pins: [IN+, IN-, OUT]
-    rails: [MODULE_ANALOG_POS12, MODULE_ANALOG_NEG12]
 
   R1-1:
     of: R-MODGAIN-IN
@@ -124,13 +170,6 @@ components:
     value: "100k 1%"
     pins: [1, 2]
 
-  U-MOD-2:
-    part: OPA2197
-    of: U-OPA-PITCH
-    section: half
-    pins: [IN+, IN-, OUT]
-    rails: [MODULE_ANALOG_POS12, MODULE_ANALOG_NEG12]
-
   R1-2:
     of: R-MODGAIN-IN
     value: "10k 1%"
@@ -179,13 +218,6 @@ components:
     of: R-BIAS-DAC
     value: "100k 1%"
     pins: [1, 2]
-
-  U-MOD-3:
-    part: OPA2197
-    of: U-OPA-PITCH
-    section: half
-    pins: [IN+, IN-, OUT]
-    rails: [MODULE_ANALOG_POS12, MODULE_ANALOG_NEG12]
 
   R1-3:
     of: R-MODGAIN-IN
@@ -236,13 +268,6 @@ components:
     value: "100k 1%"
     pins: [1, 2]
 
-  U-MOD-4:
-    part: OPA2197
-    of: U-OPA-PITCH
-    section: half
-    pins: [IN+, IN-, OUT]
-    rails: [MODULE_ANALOG_POS12, MODULE_ANALOG_NEG12]
-
   R1-4:
     of: R-MODGAIN-IN
     value: "10k 1%"
@@ -289,13 +314,13 @@ nets:
 
   REF_PLUS:
     - R-OPAMP-IN-REF.2
-    - U-MOD-REFBUF.IN+
+    - U-MOD-A.INA+
 
   # V_ref, buffered once and shared by all four channels. The one node whose
   # error appears as a common shift rather than as four channels disagreeing.
   VREF_MOD:
-    - U-MOD-REFBUF.OUT
-    - U-MOD-REFBUF.IN-
+    - U-MOD-A.OUTA
+    - U-MOD-A.INA-
     - R1-1.1
     - R1-2.1
     - R1-3.1
@@ -308,15 +333,15 @@ nets:
 
   PLUS_1:
     - R-OPAMP-IN-1.2
-    - U-MOD-1.IN+
+    - U-MOD-A.INB+
 
   MINUS_1:
     - R1-1.2
     - R2-1.1
-    - U-MOD-1.IN-
+    - U-MOD-A.INB-
 
   OUT_1:
-    - U-MOD-1.OUT
+    - U-MOD-A.OUTB
     - R2-1.2
     - D-JACK-CLAMP-1.C
     - R-OUT-PROT-1.1
@@ -333,15 +358,15 @@ nets:
 
   PLUS_2:
     - R-OPAMP-IN-2.2
-    - U-MOD-2.IN+
+    - U-MOD-B.INA+
 
   MINUS_2:
     - R1-2.2
     - R2-2.1
-    - U-MOD-2.IN-
+    - U-MOD-B.INA-
 
   OUT_2:
-    - U-MOD-2.OUT
+    - U-MOD-B.OUTA
     - R2-2.2
     - D-JACK-CLAMP-2.C
     - R-OUT-PROT-2.1
@@ -358,15 +383,15 @@ nets:
 
   PLUS_3:
     - R-OPAMP-IN-3.2
-    - U-MOD-3.IN+
+    - U-MOD-B.INB+
 
   MINUS_3:
     - R1-3.2
     - R2-3.1
-    - U-MOD-3.IN-
+    - U-MOD-B.INB-
 
   OUT_3:
-    - U-MOD-3.OUT
+    - U-MOD-B.OUTB
     - R2-3.2
     - D-JACK-CLAMP-3.C
     - R-OUT-PROT-3.1
@@ -383,15 +408,15 @@ nets:
 
   PLUS_4:
     - R-OPAMP-IN-4.2
-    - U-MOD-4.IN+
+    - U-MOD-C.INA+
 
   MINUS_4:
     - R1-4.2
     - R2-4.1
-    - U-MOD-4.IN-
+    - U-MOD-C.INA-
 
   OUT_4:
-    - U-MOD-4.OUT
+    - U-MOD-C.OUTA
     - R2-4.2
     - D-JACK-CLAMP-4.C
     - R-OUT-PROT-4.1
@@ -407,6 +432,12 @@ nets:
     - D-JACK-CLAMP-2.K
     - D-JACK-CLAMP-3.K
     - D-JACK-CLAMP-4.K
+    - U-MOD-A.V+
+    - U-MOD-B.V+
+    - U-MOD-C.V+
+    - C-DEC-MODA-POS.1
+    - C-DEC-MODB-POS.1
+    - C-DEC-MODC-POS.1
 
   MODULE_ANALOG_NEG12:
     - port: MODULE_ANALOG_NEG12
@@ -414,6 +445,12 @@ nets:
     - D-JACK-CLAMP-2.A
     - D-JACK-CLAMP-3.A
     - D-JACK-CLAMP-4.A
+    - U-MOD-A.V-
+    - U-MOD-B.V-
+    - U-MOD-C.V-
+    - C-DEC-MODA-NEG.1
+    - C-DEC-MODB-NEG.1
+    - C-DEC-MODC-NEG.1
 
   AGND_MOD:
     - port: AGND_MOD
@@ -430,3 +467,15 @@ nets:
     - R-BIAS-DAC-2.2
     - R-BIAS-DAC-3.2
     - R-BIAS-DAC-4.2
+    - U-MOD-C.INB+
+    - C-DEC-MODA-POS.2
+    - C-DEC-MODB-POS.2
+    - C-DEC-MODC-POS.2
+    - C-DEC-MODA-NEG.2
+    - C-DEC-MODB-NEG.2
+    - C-DEC-MODC-NEG.2
+
+  # The spare half's follower loop.
+  SPARE_C_OUT:
+    - U-MOD-C.OUTB
+    - U-MOD-C.INB-

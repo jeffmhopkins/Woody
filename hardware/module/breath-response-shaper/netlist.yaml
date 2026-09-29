@@ -22,8 +22,8 @@ page: breath-response-shaper.md
 
 ports:
   BREATH_INAMP_OUT:    {dir: in,  from: module/breath-receive-stage, figure: inamp-full-scale}
-  # The two rails arrive through U-RESP-A's `rails:` - there is no clamp or
-  # divider on them here, so there is no net to declare them in.
+  MODULE_ANALOG_POS12: {dir: in,  from: module/power-entry}
+  MODULE_ANALOG_NEG12: {dir: in,  from: module/power-entry}
   AGND_MOD:            {dir: ref, from: module/power-entry, figure: dig-gnd-topology}
 
 components:
@@ -50,13 +50,25 @@ components:
     pins: [1, 2]
     note: "Bottom leg, to the star"
 
-  U-RESP-A:
-    part: OPA2197
-    of: U-RESP
-    section: half
-    pins: [IN+, IN-, OUT]
-    rails: [MODULE_ANALOG_POS12, MODULE_ANALOG_NEG12]
-    note: "The shaping half, inverting at /2. The restoring half is the page's other one and is not drawn"
+  # ONE OPA2197 PACKAGE. Half A is the shaping half. Half B is the restoring
+  # half the page spends and does not draw: until it is drawn it is tied off
+  # as a follower on the star, which is what an unused half is.
+  U-RESP:
+    value: "OPA2197IDR"
+    pins: [INA+, INA-, OUTA, INB+, INB-, OUTB, V+, V-]
+    note: "Half A is the shaping half, inverting at /2. Half B is the restoring x2 half, which is not drawn: tied off as a follower until it is"
+
+  C-DEC-RESP-POS:
+    of: C-DECOUPLE
+    value: "100nF"
+    pins: [1, 2]
+    note: "V+ to the star, at the pin"
+
+  C-DEC-RESP-NEG:
+    of: C-DECOUPLE
+    value: "100nF"
+    pins: [1, 2]
+    note: "V- to the star, at the pin"
 
   POT-RESP:
     value: "50k linear"
@@ -97,7 +109,7 @@ nets:
   VIRTUAL_GND:
     - R-RESP-IN.2
     - R-RESP-FB.1
-    - U-RESP-A.IN-
+    - U-RESP.INA-
     - D-RESP-A.A
     - D-RESP-B.K
 
@@ -113,13 +125,31 @@ nets:
   AGND_MOD:
     - port: AGND_MOD
     - R-RESP-DIV-LO.2
-    - U-RESP-A.IN+
+    - U-RESP.INA+
+    - U-RESP.INB+
+    - C-DEC-RESP-POS.2
+    - C-DEC-RESP-NEG.2
+
+  MODULE_ANALOG_POS12:
+    - port: MODULE_ANALOG_POS12
+    - U-RESP.V+
+    - C-DEC-RESP-POS.1
+
+  MODULE_ANALOG_NEG12:
+    - port: MODULE_ANALOG_NEG12
+    - U-RESP.V-
+    - C-DEC-RESP-NEG.1
+
+  # The untied half's follower loop.
+  SPARE_B_OUT:
+    - U-RESP.OUTB
+    - U-RESP.INB-
 
   # V_shaped. WHERE THIS INSERTS IS OPEN and the x2 restoring stage that
   # belongs between it and anything downstream is not drawn, so this file
   # stops here rather than asserting a path into module/breath-output-stage.
   V_SHAPED:
-    - U-RESP-A.OUT
+    - U-RESP.OUTA
     - R-RESP-FB.2
     - POT-RESP.CCW
 

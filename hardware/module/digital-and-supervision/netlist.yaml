@@ -35,6 +35,12 @@ components:
     pins: [1A, 1Y, 1OE, 2A, 2Y, 2OE, 3A, 3Y, 3OE, 4A, 4Y, 4OE, VCC, GND]
     note: "OE IS TIED ENABLED AND MUST STAY THAT WAY - the presence comparator that gated it is deleted. Inputs are TTL thresholds, V_IH 2.0V min, not ratioed to VCC, and there is NO INPUT CLAMP TO VCC, which is what makes back-driving an unpowered module safe"
 
+  C-DEC-LVL:
+    of: C-DECOUPLE
+    value: "100nF"
+    pins: [1, 2]
+    note: "VCC to DIG_GND, at the pin"
+
   # --- cable side: the three pulls that hold the BUFFER's inputs ------
 
   R-PULL-SCLK:
@@ -113,6 +119,7 @@ nets:
   BUS_5V:
     - port: BUS_5V
     - U-LVL-MOD.VCC
+    - C-DEC-LVL.1
 
   DAC_AVDD:
     - port: DAC_AVDD
@@ -134,6 +141,7 @@ nets:
     - R-PULL-MOSI.2
     - R-PULL-SCLK-DAC.2
     - R-PULL-DIN.2
+    - C-DEC-LVL.2
 
   # ------------------------------------------------------------------
 

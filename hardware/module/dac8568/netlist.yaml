@@ -75,6 +75,12 @@ components:
     pins: [1, 2]
     note: "STRAP TO GND, NOT A PULL-UP. Pin high gates the buffer-to-DAC-register transfer and no MISO exists to discover it"
 
+  C-DEC-DAC:
+    of: C-DECOUPLE
+    value: "100nF"
+    pins: [1, 2]
+    note: "AVDD to the star, at the pin. The DAC8568 has one supply pin"
+
   LK-CLR:
     value: "2-pad solder link"
     drawn_as: LK-CLR
@@ -87,6 +93,7 @@ nets:
     - port: DAC_AVDD
     - U-DAC.AVDD
     - R-CLR-PU.1
+    - C-DEC-DAC.1
 
   CLR:
     - port: CLR
@@ -153,6 +160,7 @@ nets:
     - U-DAC.GND
     - R-LDAC.2
     - LK-CLR.2
+    - C-DEC-DAC.2
 
 # Nets with one endpoint on purpose.
 external_endpoints:

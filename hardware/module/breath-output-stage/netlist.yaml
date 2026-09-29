@@ -19,6 +19,7 @@ page: breath-output-stage.md
 ports:
   BREATH_INAMP_OUT: {dir: in,  from: module/breath-receive-stage, note: "0 to inamp-full-scale, rest at 0"}
   DAC_AVDD:         {dir: in,  from: module/power-entry, figure: dac-rail}
+  MODULE_ANALOG_POS12:          {dir: in,  from: module/power-entry}
   MODULE_ANALOG_NEG12:          {dir: in,  from: module/power-entry}
   AGND_MOD:             {dir: ref, from: module/power-entry}
 
@@ -34,13 +35,25 @@ components:
     pins: [1, 2]
     note: "Sets the 0.5x floor: 7.15/(50+7.15) = 0.125"
 
-  U-BREATH-BUF:                 # 1/2 OPA2197, package counted on U-OPA-PITCH
-    part: OPA2197
-    section: A
+  # ONE OPA2197 PACKAGE, BOTH HALVES: A buffers the gain pot's wiper, B is the
+  # summer. Its supply pins are netted, with one C-DECOUPLE at each.
+  U-BREATH-OPA:
     of: U-OPA-PITCH
-    pins: [IN+, IN-, OUT]
-    rails: [MODULE_ANALOG_POS12, MODULE_ANALOG_NEG12]
-    note: "Unity follower. Buffers the wiper so R-IN does not load the pot"
+    value: "OPA2197"
+    pins: [INA+, INA-, OUTA, INB+, INB-, OUTB, V+, V-]
+    note: "Half A is the unity follower that buffers the wiper so R-IN does not load the pot. Half B is the inverting summer, fixed x4 = R-FB/R-IN"
+
+  C-DEC-BREATH-POS:
+    of: C-DECOUPLE
+    value: "100nF"
+    pins: [1, 2]
+    note: "V+ to the star, at the pin"
+
+  C-DEC-BREATH-NEG:
+    of: C-DECOUPLE
+    value: "100nF"
+    pins: [1, 2]
+    note: "V- to the star, at the pin"
 
   R-BREATH-IN:
     value: "10k 1%"
@@ -61,14 +74,6 @@ components:
     value: "95.3k 1%"
     drawn_as: R-OFFNEG
     pins: [1, 2]
-
-  U-BREATH-SUM:                 # the other 1/2 of the same package
-    part: OPA2197
-    section: B
-    of: U-OPA-PITCH
-    pins: [IN+, IN-, OUT]
-    rails: [MODULE_ANALOG_POS12, MODULE_ANALOG_NEG12]
-    note: "Inverting summer, fixed x4 = R-FB/R-IN"
 
   R-BREATH-FB:
     value: "40.2k 1%"
@@ -108,11 +113,11 @@ nets:
 
   GAIN_WIPER:
     - POT-GAIN.W
-    - U-BREATH-BUF.IN+
+    - U-BREATH-OPA.INA+
 
   BUF_OUT:
-    - U-BREATH-BUF.OUT
-    - U-BREATH-BUF.IN-             # unity follower: output tied to inverting input
+    - U-BREATH-OPA.OUTA
+    - U-BREATH-OPA.INA-             # unity follower: output tied to inverting input
     - R-BREATH-IN.1
 
   DAC_AVDD:
@@ -126,16 +131,25 @@ nets:
   MODULE_ANALOG_NEG12:
     - port: MODULE_ANALOG_NEG12
     - R-BREATH-OFFNEG.1
+    - D-JACK-CLAMP.A
+    - U-BREATH-OPA.V-
+    - C-DEC-BREATH-NEG.1
+
+  MODULE_ANALOG_POS12:
+    - port: MODULE_ANALOG_POS12
+    - D-JACK-CLAMP.K
+    - U-BREATH-OPA.V+
+    - C-DEC-BREATH-POS.1
 
   SUM_NODE:
     - R-BREATH-IN.2
     - R-BREATH-OFF.2
     - R-BREATH-OFFNEG.2
     - R-BREATH-FB.1
-    - U-BREATH-SUM.IN-
+    - U-BREATH-OPA.INB-
 
   BREATH_OUT:
-    - U-BREATH-SUM.OUT
+    - U-BREATH-OPA.OUTB
     - R-BREATH-FB.2
     - D-JACK-CLAMP.C
     - R-OUT-PROT.1
@@ -149,16 +163,12 @@ nets:
     - port: AGND_MOD
     - R-GAIN-FLOOR.2
     - POT-OFFSET.CCW
-    - U-BREATH-SUM.IN+
+    - U-BREATH-OPA.INB+
     - C-OUT-BREATH.2
     - J-CV-BREATH.SLEEVE
+    - C-DEC-BREATH-POS.2
+    - C-DEC-BREATH-NEG.2
 
-  RAIL_POS:                      # clamp to +12 V
-    - D-JACK-CLAMP.K
-  RAIL_NEG:                      # clamp to -12 V
-    - D-JACK-CLAMP.A
-
-# Endpoints deliberately outside this circuit's scope. Without this the
-# two-endpoint rule would fire on the clamp rails, which terminate on the
-# module's supply rather than inside this circuit.
-external_endpoints: [RAIL_POS, RAIL_NEG]
+# THE CLAMP'S RAILS ARE THE MODULE'S SUPPLY: "D-JACK-CLAMP returns to both
+# rails" (the page's Interfaces table), netted as pitch-stage and mod-channels
+# net theirs.

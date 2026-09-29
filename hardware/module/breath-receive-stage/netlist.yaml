@@ -104,12 +104,39 @@ components:
     pins: [CW, W, CCW]
     note: "Nulls the sensor pedestal. Range and derivation are the tracked figure breath-zero-ref"
 
+  # ONE OPA2197 PACKAGE. Half A buffers the trimmer wiper into the in-amp's
+  # REF; half B is one of the module's two spare halves (breath-output-stage.md:
+  # "ten of twelve halves used across the module, two spare"), tied off as a
+  # follower on the star so it cannot oscillate or rail.
   U-REF-BUF:
-    part: OPA2197
-    section: A
     of: U-OPA-PITCH
-    pins: [IN+, IN-, OUT]
-    note: "Buffers the trimmer wiper into the in-amp REF pin. A bare divider there degrades CMRR one-for-one"
+    value: "OPA2197"
+    pins: [INA+, INA-, OUTA, INB+, INB-, OUTB, V+, V-]
+    note: "Half A buffers the trimmer wiper into the in-amp REF pin: a bare divider there degrades CMRR one-for-one. Half B is spare, a follower with its input on the star"
+
+  C-DEC-REFBUF-POS:
+    of: C-DECOUPLE
+    value: "100nF"
+    pins: [1, 2]
+    note: "OPA2197 V+ to the star, at the pin"
+
+  C-DEC-REFBUF-NEG:
+    of: C-DECOUPLE
+    value: "100nF"
+    pins: [1, 2]
+    note: "OPA2197 V- to the star, at the pin"
+
+  C-DEC-INAMP-POS:
+    of: C-DECOUPLE
+    value: "100nF"
+    pins: [1, 2]
+    note: "INA828 V+ to the star, at the pin"
+
+  C-DEC-INAMP-NEG:
+    of: C-DECOUPLE
+    value: "100nF"
+    pins: [1, 2]
+    note: "INA828 V- to the star, at the pin"
 
 nets:
 
@@ -146,11 +173,11 @@ nets:
 
   TRIM_WIPER:
     - TRIM-BREATH-ZERO.W
-    - U-REF-BUF.IN+
+    - U-REF-BUF.INA+
 
   REF_DRIVE:
-    - U-REF-BUF.OUT
-    - U-REF-BUF.IN-
+    - U-REF-BUF.OUTA
+    - U-REF-BUF.INA-
     - U-DIFFRX.REF
 
   BREATH_INAMP_OUT:
@@ -164,12 +191,18 @@ nets:
   MODULE_ANALOG_POS12:
     - port: MODULE_ANALOG_POS12
     - U-DIFFRX.V+
+    - U-REF-BUF.V+
+    - C-DEC-REFBUF-POS.1
+    - C-DEC-INAMP-POS.1
     - D-CLAMP-IN+.K
     - D-CLAMP-IN-.K
 
   MODULE_ANALOG_NEG12:
     - port: MODULE_ANALOG_NEG12
     - U-DIFFRX.V-
+    - U-REF-BUF.V-
+    - C-DEC-REFBUF-NEG.1
+    - C-DEC-INAMP-NEG.1
     - D-CLAMP-IN+.A
     - D-CLAMP-IN-.A
 
@@ -180,3 +213,13 @@ nets:
     - C-CM-IN+.2
     - C-CM-IN-.2
     - TRIM-BREATH-ZERO.CCW
+    - U-REF-BUF.INB+
+    - C-DEC-REFBUF-POS.2
+    - C-DEC-REFBUF-NEG.2
+    - C-DEC-INAMP-POS.2
+    - C-DEC-INAMP-NEG.2
+
+  # The spare half's follower loop.
+  SPARE_B_OUT:
+    - U-REF-BUF.OUTB
+    - U-REF-BUF.INB-
