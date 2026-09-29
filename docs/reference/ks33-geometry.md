@@ -151,8 +151,9 @@ middle: their mount hardware sets it — the plate + `hardware.kb_spacer_l`
 "key-board depth inside the switch pins' window" prints where that lands,
 and "key-board depth at the hardware's tolerance limits" (a NOTE) what the
 worst case leaves to solder. That is why the key boards are
-`boards.key_board_t` (ADR 0020 point 6), and why the main board's thickness
-under the thumb switches (`switch.pcb_t`) is still to be decided.
+`boards.key_board_t` (ADR 0020 point 6), and why the main board under the
+thumb switches is too (`switch.pcb_t`, ADR 0022): it sits at the same depth
+on the same mount, `switch.thumb_pcb_below_seat`.
 
 > **⚠ THIS SECTION'S CONCLUSION IS REVERSED, 2026-09-21, AND SO IS THE LAYOUT
 > RULE DERIVED FROM IT.** It read *"the answer is 'there isn't one'"* and
@@ -184,8 +185,8 @@ the PCB**. Its tip is `switch.pole_tip_below_seat` below the seat
 against a PCB top at −3.2 to −3.6 mm, so it protrudes below a board's
 underside by the tip depth less the board-top depth less the board's
 thickness `[calc]`: on a key board (`boards.key_board_t`) about 1 mm, more at
-the shallow end of the window; on the main board (`switch.pcb_t`) about 0.4 mm
-less than that.
+the shallow end of the window; the main board (`switch.pcb_t`) is as thick
+and as deep, so the same.
 
 ### And the retention clip may not be a clip
 

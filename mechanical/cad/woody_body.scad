@@ -271,6 +271,7 @@ C_SWITCH = [0.18, 0.18, 0.20];
 C_CAP = [0.93, 0.91, 0.86];
 C_SPARE = [0.85, 0.20, 0.60];
 C_STEEL = [0.55, 0.57, 0.60];
+C_BRASS = [0.78, 0.62, 0.33];
 // A PARTS ENVELOPE is not a part: it is the volume a board's components may
 // fill, which clash.txt checks against everything else. Translucent amber, so
 // no render shows it as a second board.
@@ -416,6 +417,8 @@ module thumb_plate_2d(cl) {
     difference() {
         thumb_outline_2d(cl);
         for (k = cluster_keys(cl)) cutout_at(key_xy(k), key_rot(k), plate_cutout);
+        // the main board's studs, pressed in from its underside (ADR 0022)
+        for (c = cb_standoffs) if (on_thumb_plate(c)) translate(c) circle(d = hardware_kb_stud_hole);
     }
 }
 module thumb_plate_both_2d() { thumb_plate_2d("left_thumb"); thumb_plate_2d("right_thumb"); }
@@ -540,7 +543,7 @@ module cluster_window_2d(ks) {
 // acrylic"). The key plate stops short of the Matrix, so the board's top
 // face sits against the oak top's underside and its LEDs stand up into the
 // window opening through the oak lip, under the acrylic.
-matrix_board_z = z_oak_top_bot - switch_pcb_t;
+matrix_board_z = z_oak_top_bot - boards_matrix_t;
 matrix_top_z = z_oak_top_bot + boards_matrix_led_h;              // LED tops
 // The key plate ends before the Matrix, so past it the lid is the oak alone.
 plate_x1 = matrix_xy[0] - boards_matrix_board / 2 - 1;
@@ -782,8 +785,8 @@ module pcb_geometry() {
 module tail_equipment() {
     // The Matrix, face up under the top window.
     P([0.10, 0.10, 0.12], false, "Matrix board") translate([matrix_xy[0] - boards_matrix_board / 2, matrix_xy[1] - boards_matrix_board / 2, matrix_board_z])
-        cube([boards_matrix_board, boards_matrix_board, switch_pcb_t]);
-    P(C_LED, false, "Matrix LEDs") translate([matrix_xy[0] - boards_matrix_emitters / 2, matrix_xy[1] - boards_matrix_emitters / 2, matrix_board_z + switch_pcb_t])
+        cube([boards_matrix_board, boards_matrix_board, boards_matrix_t]);
+    P(C_LED, false, "Matrix LEDs") translate([matrix_xy[0] - boards_matrix_emitters / 2, matrix_xy[1] - boards_matrix_emitters / 2, matrix_board_z + boards_matrix_t])
         cube([boards_matrix_emitters, boards_matrix_emitters, boards_matrix_led_h]);
     // The Matrix's ribbon where it leaves the two pad rows, below the board;
     // it runs on to J-MCU (drawn with the tail wiring).
@@ -1078,6 +1081,8 @@ module cb_2d() {
         // narrower than a clearance between them.
         for (f = fasteners()) translate(f) circle(r = fastener_notch);
         for (u = ubolt_legs()) translate(u) circle(r = ubolt_hole_r);
+        // the mounts' holes (ADR 0022): the board locates on a stud or a screw
+        for (c = cb_standoffs) translate(c) circle(d = hardware_kb_board_hole);
         for (f = fasteners(), u = ubolt_legs()) if (norm(f - u) < fastener_notch + ubolt_hole_r + boards_board_clear)
             hull() { translate(f) circle(r = fastener_notch); translate(u) circle(r = ubolt_hole_r); }
     }
@@ -1103,7 +1108,12 @@ tongue_y = [ec_c[0] - ec_fl[0] / 2, ec_c[0] + ec_fl[0] / 2];
 // Standoffs off the oak: candidates along both edge bands and at the thumb
 // rests, kept where nothing else is - the soldered thumb switches, clipped
 // into their plates, carry the board between them.
-function so_clear(p) = let(r = boards_standoff_d / 2 + 0.5)
+// THE MAIN BOARD'S MOUNT (ADR 0022): what a mount keeps clear round its
+// centre - the nut on a thumb plate's stud or the screw's head on an oak
+// one, the spacer under the board, and the float.
+mb_keep_d = max(hardware_kb_nut_e, hardware_mb_screw_head_d, hardware_kb_spacer_od) + 2 * hardware_kb_mount_float;
+mb_plate_r = max(hardware_kb_spacer_od / 2 + hardware_kb_mount_float, hardware_kb_stud_edge);   // what a thumb plate must have round a stud
+function so_clear(p) = let(r = mb_keep_d / 2 + 0.5)
     !pins_at(p, r) && abs(p[1] - W / 2) >= lighting_strip_w / 2 + r
     && min([for (f = fasteners()) norm(p - f)]) >= fastener_notch + r
     && min([for (u = ubolt_legs()) norm(p - u)]) >= ubolt_hole_r + r
@@ -1113,14 +1123,14 @@ function so_clear(p) = let(r = boards_standoff_d / 2 + 0.5)
               rect_gap(p, [(x0 + x1) / 2, chain_y], [x1 - x0, boards_chain_hdr_l], 0)]) >= r + 1
     && max(abs(p[0] - (jm_x0 + jm_x1) / 2) - jm_sz[0] / 2, abs(p[1] - jm_y) - jm_sz[1] / 2) >= r
     && max(abs(p[0] - (ua_x0 - boards_umb_joint_d / 2)) - boards_umb_joint_d / 2, abs(p[1] - ec_c[0]) - ju_l / 2) >= r + 1
-    // wholly on a thumb plate, or wholly off it - never through its edge
+    // wholly on a thumb plate, or wholly off it - never through its edge.
+    // Under the board only the spacer stands on the plate, and the stud
+    // needs its edge distance there; the nut is above the board.
     && min([for (cl = ["left_thumb", "right_thumb"]) let(b = thumb_box(cl))
             max(rect_gap(p, [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2], [b[2] - b[0], b[3] - b[1]], 0),
-                min(p[0] - b[0], b[2] - p[0], p[1] - b[1], b[3] - p[1]))]) >= r;
+                min(p[0] - b[0], b[2] - p[0], p[1] - b[1], b[3] - p[1]))]) >= mb_plate_r;
 cb_standoffs = [for (x = [cb_x[0] + 4, lt_rest_xy[0], (gap_x[0] + gap_x[1]) / 2, rt_rest[0], (rt_rest[0] + jm_x0) / 2, cb_x[1] - 4],
-                     y = [cb_y[0] + 4, cb_y[1] - 4]) if (so_clear([x, y])) [x, y],
-                // and the tongue's corners in front of J-UMB, under the adapter's weight
-                for (y = [tongue_y[0] + 4, tongue_y[1] - 4]) let(x = ua_x0 - boards_umb_joint_d - 4) if (so_clear([x, y])) [x, y]];
+                     y = [cb_y[0] + 4, cb_y[1] - 4]) if (so_clear([x, y])) [x, y]];
 module centre_board_3d() {
     P(C_PCB, false, "main board") translate([0, 0, cb_z]) linear_extrude(switch_pcb_t) cb_2d();
     P(C_ENVELOPE, false, "parts main board") translate([0, 0, cb_top]) linear_extrude(boards_smt_h) difference() {
@@ -1134,14 +1144,35 @@ module centre_board_3d() {
         translate([jm_x1, jm_y - routing_mcu_ribbon_w / 2 - 0.5]) square([mcu_x - jm_x1 + 1, routing_mcu_ribbon_w + 1]);
         translate(sensor_c) square([boards_sensor_body + 1, boards_sensor_leads + 1], center = true);
         for (c = tall_c) translate(c) square(tall_sz + [1, 1], center = true);
-        for (c = cb_standoffs) translate(c) circle(d = boards_standoff_d + 1);
+        for (c = cb_standoffs) translate(c) circle(d = mb_keep_d + 1);
         translate([strip_x0 - 0.5, strip_y - 0.5]) square([strip_l + 1, lighting_strip_w + 1]);
     }
     P([0.30, 0.30, 0.55], false, "tall parts main board")
         translate([tall_c[0][0] - tall_sz[0] / 2, tall_c[0][1] - tall_sz[1] / 2, cb_top]) cube([tall_sz[0], tall_sz[1], boards_tall_h]);
-    // Off the oak, or off a thumb plate where one is under it.
-    for (i = [0 : 1 : len(cb_standoffs) - 1]) let(c = cb_standoffs[i], f = on_thumb_plate(c) ? z_thumb_top : floor_at(c[0]))
-        P(C_STEEL, false, str("main board standoff ", i + 1)) translate([c[0], c[1], f]) cylinder(d = boards_standoff_d, h = cb_z - f, $fn = 6);
+    // THE MOUNTS (ADR 0022). On a thumb plate: the key boards' stud, its head
+    // flush in the plate's underside, their spacer, the board, their nut. On
+    // the oak: an insert in the oak bottom, a spacer to the board, a screw.
+    for (i = [0 : 1 : len(cb_standoffs) - 1]) let(c = cb_standoffs[i], n = i + 1) {
+        if (on_thumb_plate(c)) {
+            P(C_STEEL, false, str("main board stud ", n)) translate([c[0], c[1], z_floor]) {
+                cylinder(d = hardware_kb_stud_head_d, h = 0.3);
+                cylinder(d = 2.5, h = hardware_kb_stud_l);
+            }
+            P(C_STEEL, false, str("main board spacer ", n)) translate([c[0], c[1], z_thumb_top])
+                difference() { cylinder(d = hardware_kb_spacer_od, h = cb_z - z_thumb_top); translate([0, 0, -1]) cylinder(d = hardware_kb_stud_attached_hole, h = 9); }
+            P(C_STEEL, false, str("main board nut ", n)) translate([c[0], c[1], cb_top])
+                difference() { cylinder(d = hardware_kb_nut_e, h = hardware_kb_nut_m, $fn = 6); translate([0, 0, -1]) cylinder(d = 2.5, h = 9); }
+        } else {
+            P(C_BRASS, false, str("main board insert ", n)) translate([c[0], c[1], z_floor - hardware_mb_insert_l])
+                difference() { cylinder(d = hardware_mb_insert_od, h = hardware_mb_insert_l); translate([0, 0, -1]) cylinder(d = 2.5, h = 9); }
+            P(C_STEEL, false, str("main board spacer ", n)) translate([c[0], c[1], z_floor])
+                difference() { cylinder(d = hardware_kb_spacer_od, h = cb_z - z_floor); translate([0, 0, -1]) cylinder(d = hardware_kb_stud_attached_hole, h = 9); }
+            P(C_STEEL, false, str("main board screw ", n)) translate([c[0], c[1], cb_top]) {
+                cylinder(d = hardware_mb_screw_head_d, h = hardware_mb_screw_head_h);
+                translate([0, 0, -(cb_top - z_floor) - hardware_mb_insert_l + 0.5]) cylinder(d = 2.5, h = cb_top - z_floor + hardware_mb_insert_l - 0.5);
+            }
+        }
+    }
 }
 // A thumb plate's extent, [x0, y0, x1, y1]: thumb_outline_2d's hull, clipped to the interior.
 function thumb_box(cl) = let(q = thumb_pts(cl), h = (switch_keycap + 4) / 2)
@@ -1419,7 +1450,19 @@ module drc_report() {
     drc(fastener_x[0] - sensor_x1 >= fastener_notch, "mouth lid screws clear of the breath sensor", fastener_x[0] - sensor_x1,
         "mm from the sensor's far end to the screws' centre, against the boards' notch round a screw");
     drc(len(cb_standoffs) >= 4, "main board standoffs found clear of everything", len(cb_standoffs),
-        "standoffs off the oak; the soldered thumb switches carry the board between them");
+        str("mounts (ADR 0022): ", len([for (c = cb_standoffs) if (on_thumb_plate(c)) 1]), " on the thumb plates (the key boards' stud, spacer and nut), ",
+            len([for (c = cb_standoffs) if (!on_thumb_plate(c)) 1]), " on the oak (insert, spacer, screw); the soldered thumb switches carry the board between them"));
+    // THE MAIN BOARD'S DEPTH (ADR 0022): its mount on a thumb plate is the key
+    // boards', so its face nearest the thumb switches' seat sits the plate +
+    // the key boards' spacer below it, and it is as thin as they are.
+    let(d = plate_thickness + hardware_kb_spacer_l, w = switch_pcb_below_seat_window) {
+        drc(abs(d - switch_thumb_pcb_below_seat) < 0.005, "main board mount sets its depth", d,
+            "mm below the thumb switches' seat: the plate + hardware.kb_spacer_l, against switch.thumb_pcb_below_seat");
+        drc(d >= w[0] && d <= w[1] && switch_pcb_t <= boards_key_board_t, "main board depth and thickness inside the switch pins' window",
+            [d, w, switch_pcb_t], "mm: its depth, against switch.pcb_below_seat_window, and its thickness, no more than the key boards' (boards.key_board_t) so the pins show to solder");
+    }
+    drc(cb_z - z_floor > 0, "main board spacers on the oak (derived)", cb_z - z_floor,
+        "mm: the oak bottom's inside face to the board - the spacer at an oak mount, as long as the plate and the key boards' spacer together");
     drc(boards_tall_h <= tall_room, "regulator block fits where it stands", tall_room - boards_tall_h,
         str("mm spare, ", under_keys(tall_c[0], tall_sz) ? "under a key board" : "beside the key boards, clear to the lid",
             " [approx: key board footprints as squares; clash.txt is the check] - negative means low-profile parts"));

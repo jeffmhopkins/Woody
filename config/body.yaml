@@ -257,10 +257,9 @@ switch:
     status: settled
     source: "[ds] Gateron KS-33H10B050NN-Y24 sheet 6, 5.75 +/-0.05 (the STEP says 5.70; the vendor wins)"
   thumb_pcb_below_seat:
-    value: 3.4
-    status: tbd
-    source: "the main board's top face below the thumb switches' seat: the middle of switch.pcb_below_seat_window [calc, docs/reference/ks33-geometry.md], until the main board's own standoffs set it"
-    decided_by: "the main board's layout and standoffs"
+    value: 3.5
+    status: nominal
+    source: "the main board's face nearest the thumb switches' seat, below it: set by its mount (ADR 0022), the key boards' stack on the thumb plate - the plate + hardware.kb_spacer_l [calc: 1.2 + 2.3], inside switch.pcb_below_seat_window; drc.echo 'main board mount sets its depth'"
   pcb_below_seat:
     value: 3.5
     status: nominal
@@ -321,10 +320,9 @@ switch:
     source: "hardware/cluster/cluster-boards.md: outlines are undrawable until M3"
     decided_by: "M3"
   pcb_t:
-    value: 1.6
-    status: tbd
-    source: "the MAIN board's thickness (PCB-CARRIER) - the key boards are boards.key_board_t. At 1.6 mm a thumb switch shows about 0.1 mm of pin to solder, the arithmetic that took the key boards to 1.2 mm (ADR 0020 point 6) [calc, docs/reference/ks33-geometry.md]"
-    decided_by: "the main board's layout (ADR 0020 point 6)"
+    value: 1.2
+    status: nominal
+    source: "the MAIN board's thickness (PCB-CARRIER), as the key boards' (boards.key_board_t): at 1.6 mm a thumb switch shows about 0.1 mm of pin to solder [calc, docs/reference/ks33-geometry.md]; ADR 0022"
   pcb_below_seat_window:
     value: [3.2, 3.6]
     status: settled
@@ -538,11 +536,10 @@ boards:
     status: tbd
     source: "[calc] ~20 nets cross the station (the key chain's 12 conductors, the breath sensor's lines, the strip's data, power) at 0.25 track / 0.25 gap is 10 mm on one layer, 5 mm on two; plus 0.5 mm copper keep-out from each cut edge is 6; 8 leaves room for a ground return beside them"
     decided_by: "M4 main board layout - the real net count and track widths"
-  standoff_d:
-    value: 5.5
-    status: tbd
-    source: "M3 hex standoff across flats, 5.5 [from memory]"
-    decided_by: "M4, with the standoff bought"
+  matrix_t:
+    value: 1.6
+    status: settled
+    source: "[ds 3D] datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-3D.stp - the board spans z -0.8 to 0.8"
   # THE LED MATRIX IS ON THE TOP FACE, just past the last key (owner,
   # 2026-09-26), face up against the oak top under its window, the key plate
   # ending short of it; the connectors pass beneath it. A 24-way ribbon soldered to
@@ -871,6 +868,32 @@ hardware:
     status: tbd
     source: "a corner stud's centre in from both board edges: the nut across its corners (kb_nut_e) and kb_mount_float, with 0.5 of board outside the keep-out [calc: 5.77 / 2 + 0.2 + 0.5 = 3.585]"
     decided_by: "M4, with the board's first fit"
+  # THE MAIN BOARD'S MOUNT (ADR 0022). Over a thumb plate it is the key
+  # boards' mount, the same parts (kb_*): a stud pressed into the plate, its
+  # head flush in the plate's underside, the spacer, the board, a nut. Where
+  # no thumb plate is under it, the board stands on the oak: a threaded
+  # insert set into the oak bottom's inside face, a spacer as tall as the
+  # plate and the key boards' spacer together, the board, a screw from above.
+  mb_insert_od:
+    value: 4.0
+    status: tbd
+    source: "an M2.5 threaded insert for hardwood, its outside diameter [from memory]; it sets the blind hole in the oak"
+    decided_by: "M4, with the insert bought"
+  mb_insert_l:
+    value: 4.0
+    status: tbd
+    source: "the same insert's length, and the blind hole's depth in the oak bottom [from memory]"
+    decided_by: "as mb_insert_od"
+  mb_screw_head_d:
+    value: 4.5
+    status: tbd
+    source: "an M2.5 low-head screw's head, e.g. ISO 7380 d_k 4.7 or DIN 7984 4.5 [from memory]; it bears on the board's top face"
+    decided_by: "M4, with the screw bought"
+  mb_screw_head_h:
+    value: 1.6
+    status: tbd
+    source: "the same head's height, 1.5-1.7 [from memory]; it stands on the board's top face among the parts"
+    decided_by: "as mb_screw_head_d"
   fastener_inset:
     value: 4.3
     status: tbd

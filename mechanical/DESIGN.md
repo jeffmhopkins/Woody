@@ -152,9 +152,13 @@ Several things can claim each end, and the largest wins:
   the Matrix's ribbon ends on it, and a **tongue** runs on from its tail end
   to the etherCON's adapter, carrying J-UMB (ADR 0021). It has holes
   over the U-bolt's nuts, notches at the screws (one bite where a notch and a
-  hole would leave a sliver between them), and standoffs off the oak or
-  the thumb plates wherever nothing else is (*"main board standoffs found
-  clear of everything"*); the soldered thumb switches carry it between them.
+  hole would leave a sliver between them), and mounts wherever nothing else
+  is (*"main board standoffs found clear of everything"*): on a thumb plate
+  the key boards' stud, spacer and nut; on the oak an insert, a spacer and a
+  screw (ADR 0022). It is as thin as the key boards and as deep below its
+  switches' seat (*"main board mount sets its depth"*); the soldered thumb
+  switches carry it between the mounts. The near row of thumb switches is
+  turned 180° so their pins point away from the LED strip.
   (Before it: a centre board stacked between the thumb boards and the key
   boards — that history is in git and ADR 0017.)
 - **Its parts have room** — `drc.echo` prints the height under the key boards

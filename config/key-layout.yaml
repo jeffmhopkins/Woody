@@ -84,11 +84,15 @@ keys:
   - { id: LH5, face: top,    x: null, y: null, rotation: 0, hand: left,  finger: null, cluster: left_hand, role: note }
 
   # --- Left thumb, bottom face (inset — ADR 0009) --------------------------
+  # LT1/LT3 and RT1/RT3, the row on the near side of the centreline, are
+  # turned 180 degrees: a KS-33's pins sit off its centre, and so turned they
+  # point away from the LED strip, which lies on the main board between the
+  # two rows (ADR 0022). A square cap and a cross stem feel the same either way.
   # Marked `note` on the assumption these are octave/register keys, as on a
   # conventional woodwind. Confirm at M2.
-  - { id: LT1, face: bottom, x: null, y: null, rotation: 0, hand: left,  finger: thumb, cluster: left_thumb, role: note }
+  - { id: LT1, face: bottom, x: null, y: null, rotation: 180, hand: left,  finger: thumb, cluster: left_thumb, role: note }
   - { id: LT2, face: bottom, x: null, y: null, rotation: 0, hand: left,  finger: thumb, cluster: left_thumb, role: note }
-  - { id: LT3, face: bottom, x: null, y: null, rotation: 0, hand: left,  finger: thumb, cluster: left_thumb, role: note }
+  - { id: LT3, face: bottom, x: null, y: null, rotation: 180, hand: left,  finger: thumb, cluster: left_thumb, role: note }
   - { id: LT4, face: bottom, x: null, y: null, rotation: 0, hand: left,  finger: thumb, cluster: left_thumb, role: note }
 
   # --- Right hand, top face ------------------------------------------------
@@ -105,9 +109,9 @@ keys:
   # reachable without giving up support. FOUR, as two rows across the body
   # either side of the rest, like the left thumb (owner, 2026-09-26: "let's
   # go consistent"). RT4 takes the bit reserved for the hold/preset spare.
-  - { id: RT1, face: bottom, x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb, role: control }
+  - { id: RT1, face: bottom, x: null, y: null, rotation: 180, hand: right, finger: thumb, cluster: right_thumb, role: control }
   - { id: RT2, face: bottom, x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb, role: control }
-  - { id: RT3, face: bottom, x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb, role: control }
+  - { id: RT3, face: bottom, x: null, y: null, rotation: 180, hand: right, finger: thumb, cluster: right_thumb, role: control }
   - { id: RT4, face: bottom, x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb, role: control }
 
 # Shift register chain. One U-KEYS per cluster, ON THE BOARD ITS SWITCHES ARE
