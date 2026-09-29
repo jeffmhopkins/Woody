@@ -80,10 +80,11 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 | C15, C16, C17, C18, C19, C20, C21, C22, C23, C24 | `C-KEY` | LT1, LT2, LT3, LT4, RT1, RT2, RT3, RT4, sw+, sw- |
 | C4, C5 | `C-REF-OUT` | breath-excitation-reference |
 | C10 | `C-STRIP-BULK` | power-entry-instrument |
-| D1 | `D-REVSHUNT` | power-entry-instrument |
-| D4, D5 | `D-TVS-BREATH` | root |
-| D2 | `D-TVS-PWR` | power-entry-instrument |
-| D3 | `D-USBOR` | power-entry-instrument |
+| D1 | `D-REF-CLAMP` | breath-excitation-reference |
+| D2 | `D-REVSHUNT` | power-entry-instrument |
+| D5, D6 | `D-TVS-BREATH` | root |
+| D3 | `D-TVS-PWR` | power-entry-instrument |
+| D4 | `D-USBOR` | power-entry-instrument |
 | FB1, FB2 | `FB-CHAIN` | root |
 | J2 | `HDR-SERVICE` | service-uart |
 | J4, J5 | `J-CHAIN` | root |
@@ -96,16 +97,17 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 | NT1 | `NT-DIG` | carrier |
 | R5 | `R-ADCDIV-L` | breath-adc |
 | R4 | `R-ADCDIV-U` | breath-adc |
-| R33, R34, R35 | `R-CHAIN-SER` | root |
-| R7 | `R-FB-REF` | breath-excitation-reference |
-| R8 | `R-FBX-REF` | breath-excitation-reference |
-| R6 | `R-ISO-REF` | breath-excitation-reference |
-| R11, R13, R15, R17, R19, R21, R23, R25, R27, R29, R31, R32 | `R-KEY-PU` | FREE1, FREE2, LT1, LT2, LT3, LT4, RT1, RT2, RT3, RT4, sw+, sw- |
-| R12, R14, R16, R18, R20, R22, R24, R26, R28, R30 | `R-KEY-SER` | LT1, LT2, LT3, LT4, RT1, RT2, RT3, RT4, sw+, sw- |
-| R9 | `R-LED-PD` | led-strip-drive |
-| R10 | `R-LED-SER` | led-strip-drive |
-| R37, R38 | `R-SER-BREATH-INST` | root |
-| R36 | `R-SER-TERM` | root |
+| R34, R35, R36 | `R-CHAIN-SER` | root |
+| R8 | `R-FB-REF` | breath-excitation-reference |
+| R9 | `R-FBX-REF` | breath-excitation-reference |
+| R7 | `R-ISO-REF` | breath-excitation-reference |
+| R12, R14, R16, R18, R20, R22, R24, R26, R28, R30, R32, R33 | `R-KEY-PU` | LT1, LT2, LT3, LT4, RT1, RT2, RT3, RT4, sw+, sw-, FREE1, FREE2 |
+| R13, R15, R17, R19, R21, R23, R25, R27, R29, R31 | `R-KEY-SER` | LT1, LT2, LT3, LT4, RT1, RT2, RT3, RT4, sw+, sw- |
+| R10 | `R-LED-PD` | led-strip-drive |
+| R11 | `R-LED-SER` | led-strip-drive |
+| R6 | `R-REF-IN` | breath-excitation-reference |
+| R38, R39 | `R-SER-BREATH-INST` | root |
+| R37 | `R-SER-TERM` | root |
 | R1, R2, R3 | `R-SPI-SER` | carrier |
 | SW1, SW2, SW3, SW4, SW5, SW6, SW7, SW8, SW9, SW10 | `SW1-n` | LT1, LT2, LT3, LT4, RT1, RT2, RT3, RT4, sw+, sw- |
 | U2 | `U-ADC` | breath-adc |

@@ -105,8 +105,14 @@ wins.*
 
 
 ```
+  +12V ──[R-REF-IN 330R 1%]──┬── REF_VIN      the reference's input clamp:
+                             │                the rail's TVS lets through more
+                  [D-REF-CLAMP 15V zener]     than the REF5050's VIN may see
+                             │                (breath-excitation-reference.md)
+                        AGND-local
+
           REF5050                  ½ OPA2197  "reference buffer"
-  +12V ──┬─┤VIN VOUT├─┬── 5.000 V ─┤+IN                         U-BREATH
+REF_VIN──┬─┤VIN VOUT├─┬── 5.000 V ─┤+IN                         U-BREATH
          │            │            │              R-ISO-REF     pin 2 VS
     [C-REF-OUT#1]  [C-REF-OUT#2]   │     OUT ───┬──[37.4 Ω]───┬──── = the
       10 µF          10 µF   ┌─────┤−IN         │             │     sensor's

@@ -67,6 +67,13 @@ components:
     - 1
     - 2
     note: VOUT load capacitor, on the REF5050's own output
+  D-REF-CLAMP:
+    value: 15V zener
+    pins:
+    - A
+    - K
+    note: Holds the REF5050's input under its 18 V absolute maximum through R-REF-IN; 15 V so the 12 V rail at its
+      highest never reaches it
   R-FB-REF:
     value: 10k 1%
     pins:
@@ -87,6 +94,12 @@ components:
     - 2
     note: Isolates the buffer from the sensor's capacitance. DC feedback is taken on its FAR side, so the drop across
       it is corrected to zero
+  R-REF-IN:
+    value: 330R 1%
+    pins:
+    - 1
+    - 2
+    note: Series into the REF5050's input, so D-REF-CLAMP can hold it under the part's 18 V absolute maximum
   U-BUF:
     value: OPA2197IDR
     pins:
@@ -124,6 +137,7 @@ nets:
   - C-DEC-SENSOR.2
   - C-REF-OUT-VIN.2
   - C-REF-OUT-VOUT.2
+  - D-REF-CLAMP.A
   - U-BUF.V-
   - U-REF-BREATH.GND
   BUF_OUT:
@@ -148,15 +162,19 @@ nets:
   - U-BUF.INB+
   UMBILICAL_POS12:
   - port: UMBILICAL_POS12
-  - C-DEC-REF-VIN.1
-  - C-REF-OUT-VIN.1
+  - R-REF-IN.1
   - U-BUF.V+
-  - U-REF-BREATH.VIN
   VS:
   - port: VS
   - C-DEC-SENSOR.1
   - R-FB-REF.1
   - R-ISO-REF.2
+  REF_VIN:
+  - C-DEC-REF-VIN.1
+  - C-REF-OUT-VIN.1
+  - D-REF-CLAMP.K
+  - R-REF-IN.2
+  - U-REF-BREATH.VIN
   DNC1:
   - U-REF-BREATH.DNC1
   DNC8:

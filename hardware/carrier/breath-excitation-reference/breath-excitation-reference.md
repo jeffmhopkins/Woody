@@ -23,7 +23,8 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `+12V` | in | `carrier/power-entry-instrument` | — | REF5050 `VIN` and the buffer half's V+ |
+| `+12V` | in | `carrier/power-entry-instrument` | — | The buffer half's V+, and REF5050 `VIN` through `R-REF-IN` (below) |
+| `REF_VIN` | — | — | — | Internal to this circuit. REF5050 `VIN` and its bypass, after `R-REF-IN`, held by `D-REF-CLAMP` |
 | REF5050 `VOUT` | — | — | `cref-out-node` | Internal to this circuit. Which side of the buffer `C-REF-OUT` sits on. Settled, and it decides the whole compensation |
 | op-amp output | — | — | `opa2197-output-impedance` | Internal to this circuit. The impedance `R-ISO-REF` is sized against. Specified, not back-solved |
 | `VS` | out | `interfaces/breath-sense-link` | `riso-ref-topology` | `U-BREATH`'s excitation pin, drawn in `carrier.md` §2. Through `R-ISO-REF`. DC feedback is taken **here**, not at the op-amp output — which is what makes the DC error across `R-ISO-REF` zero |
@@ -86,6 +87,32 @@ Two consequences to keep in mind at layout:
 *(The record of the two blockers that closed here on 2026-09-21, and of the two
 earlier notes they superseded, is in [`notes.md`](notes.md).)*
 
+## The reference's input clamp
+
+**The rail's TVS does not protect the REF5050.** `D-TVS-PWR` on `+12V`
+(`carrier/power-entry-instrument`) is sized for the rail and clamps at up to
+24.4 V at its rated pulse [ds `LITTELFUSE-SMAJ-SERIES-SMAJ15A.pdf` p.2]. The
+REF5050's `VIN` absolute maximum is 18 V [ds `REF5050.pdf` p.5]. The OPA2197
+on the same rail has a 40 V absolute maximum [ds `OPA2197.pdf` §6.1] and is
+not at risk; the reference is.
+
+So `VIN` is fed through `R-REF-IN` (330 Ω) and held by `D-REF-CLAMP`, a 15 V
+zener (onsemi MMSZ5245BT1G):
+
+- **Clamp.** At the TVS's clamp the resistor passes (24.4 − 15.75)/330 =
+  26 mA [calc]. The zener's `Vz` is at most 15.75 V and `Zzt` at most 16 Ω
+  [ds `ONSEMI-MMSZ5221BT1-SERIES-MMSZ5245BT1G.pdf` p.3], so `VIN` stays at or
+  under 15.75 + 0.0175 × 16 ≈ 16.1 V [calc], under 18 V.
+- **Normal running.** The REF5050 draws 1.2 mA at most [ds `REF5050.pdf`
+  p.8], which drops 0.40 V across the resistor [calc]. `VIN` sits at 11.6 V
+  or more, well above the 5.2 V the part needs for a 5 V output [ds p.7].
+  The zener is 1.65 V or more above the highest rail and draws only leakage;
+  1 µA of it would move `VIN` by 0.33 mV, which the reference's line
+  regulation ignores [calc].
+- **Where the bypass sits.** The REF5050's `VIN` capacitors (`C-REF-OUT` #1
+  and its 100 nF) sit on `REF_VIN`, after the resistor, so the resistor and
+  they filter an edge before the zener sees it. Layout keeps them there.
+
 ---
 
 ## Component table
@@ -97,5 +124,7 @@ stays with the board page.*
 | Ref | Value | Job | Confidence |
 |---|---|---|---|
 | `U-REF-BREATH` | REF5050AIDR | 5.000 V for the ratiometric sensor | `[repo]` |
+| `R-REF-IN` | 330 Ω 1 % | Series into the REF5050's `VIN`, so the zener can clamp it | this page, `[calc]` |
+| `D-REF-CLAMP` | 15 V zener (MMSZ5245BT1G) | Holds `VIN` under the REF5050's 18 V absolute maximum | this page, `[ds]` |
 | `C-REF-OUT` | 10 µF ×2 | REF5050 `VIN` bypass and REF5050 `VOUT` load cap — **not** on the buffer's output | `cref-out-node`, settled |
 | **`R-FB-REF` / `R-FBX-REF` / `C-FB-REF`** | **10 kΩ / 100 Ω / 1 nF** | **The reference buffer's dual feedback. All three instrument-side and unretrofittable** | `riso-ref-topology`, settled |

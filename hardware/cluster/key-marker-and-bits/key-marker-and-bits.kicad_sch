@@ -157,7 +157,7 @@
     (property "Assembly" "machine" (at 101.6 101.6 0) (effects (font (size 1.27 1.27)) hide))
     (pin "1" (uuid b6e210c5-1a92-5115-ae32-12f74e9303a2))
     (pin "2" (uuid d0d7c6dd-af6c-5d59-8f94-33326c6435c5))
-    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/997750e8-60f5-58ed-bc81-094f12e7f049" (reference "R32") (unit 1))) (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/6d1a0a6c-1349-54db-9d21-87c6fd61d4dd" (reference "R31") (unit 1))) (project "key-board-lh" (path "/a2d77fad-366b-59d5-8d08-ccdc7dd94a07/cf93950a-7e31-5a92-9838-2832bdd35f33" (reference "R11") (unit 1))) (project "key-marker-and-bits" (path "/097049c7-fa1e-503f-a49c-a44e764ffdad" (reference "R-KEY-PU-FREE") (unit 1))))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/997750e8-60f5-58ed-bc81-094f12e7f049" (reference "R33") (unit 1))) (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/6d1a0a6c-1349-54db-9d21-87c6fd61d4dd" (reference "R32") (unit 1))) (project "key-board-lh" (path "/a2d77fad-366b-59d5-8d08-ccdc7dd94a07/cf93950a-7e31-5a92-9838-2832bdd35f33" (reference "R11") (unit 1))) (project "key-marker-and-bits" (path "/097049c7-fa1e-503f-a49c-a44e764ffdad" (reference "R-KEY-PU-FREE") (unit 1))))
   )
   (wire (pts (xy 101.6 97.79) (xy 101.6 95.25)) (stroke (width 0) (type default)) (uuid 6423493d-9597-5d5a-8f92-43778c0185bd))
   (hierarchical_label "V3V3_CHAIN" (shape input) (at 101.6 95.25 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid f758756c-5e56-5a51-aa25-3c63036c7b1b)
