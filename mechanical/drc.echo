@@ -92,6 +92,7 @@ ECHO: "DRC", "PASS", "USB-C extension receptacle beside the etherCON flange", 10
 ECHO: "DRC", "PASS", "tail cap web between the USB-C cutout and the etherCON recess", 3, "mm of oak on the tail face, from the widest USB-C cutout (9 mm across: the overmould pocket or the slot)"
 ECHO: "DRC", "PASS", "tail cap recess for the etherCON inside the tail face", 2, "mm of oak round the 3 mm recess that leaves the NE8FAV its 3 mm panel (ethercon.panel_max 3)"
 ECHO: "DRC", "NOTE", "etherCON PUSH tab against the tail face", 0.8, "mm the tab stands proud of the tail face (negative = inside the recess)"
+ECHO: "DRC", "NOTE", "etherCON locating pegs, cut off flush", 1.2, "mm the two pegs under the flange would reach into the oak bottom if left on (ethercon.peg_below; ADR 0021)"
 ECHO: "DRC", "PASS", "USB-C plug overmould reaches the receptacle", [4.5, 1.5, 2], "mm: the overmould pocket's depth from the tail face; the panel left under it; the receptacle's nose, which must pass that panel so its face is level with the pocket floor"
 ECHO: "DRC", "PASS", "USB-C receptacle mount inside the cavity", ["earless", [4.4, 33.4], [6, 33]], "the mount; where screw ears at 29 mm pitch would put their centres on end; the cavity's height behind the cap - ears would not, so the receptacle is earless, clamped from behind (openings.usb_mount)"
 ECHO: "DRC", "INFO", "USB-C extension cable run, Matrix edge to receptacle", 18.0945, "mm straight line; buy the shortest extension that reaches, with slack for the tail cap to come off"

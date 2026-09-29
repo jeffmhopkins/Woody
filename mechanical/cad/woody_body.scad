@@ -1552,6 +1552,8 @@ module drc_report() {
         str("mm of oak round the ", ec_recess_d, " mm recess that leaves the NE8FAV its ", ec_panel_t, " mm panel (ethercon.panel_max ", ethercon_panel_max, ")"));
     drc(undef, "etherCON PUSH tab against the tail face", ethercon_tab_front - ends_tail_cap_t,
         "mm the tab stands proud of the tail face (negative = inside the recess)");
+    drc(undef, "etherCON locating pegs, cut off flush", ethercon_peg_below - ec_clear,
+        "mm the two pegs under the flange would reach into the oak bottom if left on (ethercon.peg_below; ADR 0021)");
     drc(usb_om[0] >= usb_sz[0] && usb_om[1] >= usb_sz[1] && openings_usb_panel_t <= openings_usb_nose_l,
         "USB-C plug overmould reaches the receptacle", [usb_pocket_d, openings_usb_panel_t, openings_usb_nose_l],
         "mm: the overmould pocket's depth from the tail face; the panel left under it; the receptacle's nose, which must pass that panel so its face is level with the pocket floor");

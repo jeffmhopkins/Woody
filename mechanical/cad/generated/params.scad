@@ -153,6 +153,7 @@ ethercon_tab_top = 16.6;  // settled; [ds 3D] NEUTRIK-NE8FAV-3D.stp - 16.61 abov
 ethercon_tab_front = 6.8;  // settled; [ds 3D] NEUTRIK-NE8FAV-3D.stp - 6.8 in front of the flange face; the drawing's 24.3 overall is to the same tab, from the rear latch
 ethercon_pin_rows = [2.11, 4.65];  // settled; [ds] ST-NE8FAV PCB layout - the two contact rows, 2.54 apart, the upper at 4.65 above the peg line through the axis
 ethercon_g_below = 10.55;  // settled; [ds] ST-NE8FAV PCB layout - G (d1.2) 15.2 below the upper row [calc: 15.2 - 4.65]
+ethercon_peg_below = 1.5;  // settled; [ds 3D] NEUTRIK-NE8FAV-3D.stp - two d1.5 locating pegs stand 1.5 below the flange's lower edge (the drawing's front view shows them). Standing on the floor, latch up, they point into the oak bottom, so they are CUT OFF FLUSH at assembly (ADR 0021): drilling the floor for them would locate the connector twice, by the cap and by the floor
 ethercon_recess_margin = 1.0;  // tbd; the tail cap's outside recess round the flange's outline and the PUSH tab [placeholder]
 ethercon_rotated = false;  // settled; [adr] ADR 0021 - the NE8FAV's flange is square, so ADR 0009's reason to turn the NE8FDP is gone; latch up, the PUSH tab on top
 ethercon_offset_y = -7.0;  // tbd; placeholder - off-centre so the USB-C slot fits beside it

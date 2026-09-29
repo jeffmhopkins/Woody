@@ -55,6 +55,12 @@ main board down and mount it directly to that."*
    Two of Neutrik's A-series screws go through its floor into the flange
    (`MECH-ETHERCON-SCREW`).
 
+6. **Its two locating pegs are cut off flush.** They stand below the flange
+   (`ethercon.peg_below`) and, with the connector on the floor latch up,
+   point into the oak bottom. Drilling the floor for them would locate the
+   connector a second time, against the cap's screws, across oak that moves;
+   standing it higher would take more body than `body-thickness` has.
+
 ## Why not mount it on the main board directly
 
 That was the owner's first suggestion, and the NE8FAH (the same connector

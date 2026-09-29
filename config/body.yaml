@@ -734,6 +734,10 @@ ethercon:
     value: 10.55
     status: settled
     source: "[ds] ST-NE8FAV PCB layout - G (d1.2) 15.2 below the upper row [calc: 15.2 - 4.65]"
+  peg_below:
+    value: 1.5
+    status: settled
+    source: "[ds 3D] NEUTRIK-NE8FAV-3D.stp - two d1.5 locating pegs stand 1.5 below the flange's lower edge (the drawing's front view shows them). Standing on the floor, latch up, they point into the oak bottom, so they are CUT OFF FLUSH at assembly (ADR 0021): drilling the floor for them would locate the connector twice, by the cap and by the floor"
   recess_margin:
     value: 1.0
     status: tbd
