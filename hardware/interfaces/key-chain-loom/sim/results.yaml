@@ -14,7 +14,7 @@ inputs:
   datasheets/discrete-and-power/BLM21SP601SN1-murata-spice.lib: e858b365fef2f77b
   hardware/cluster/key-switch-network/sim/sims.yaml: 28274e715669f42e
   bom:R-CHAIN-SER: 100R 1%
-  drc:key-chain ribbon length (derived): '105.67'
+  drc:key-chain ribbon length (derived): '49.65'
   figure:key-press-time: 9.87 us
   figure:key-release-time: 138.7 us
   figure:key-scan-current: 1.43 mA per closed key, 27.3 mA at 19 closed
@@ -25,23 +25,23 @@ sims:
     corners: 9
     measures:
       kb_vpp:
-        nominal: 0.005082
-        min: 0.004132
-        min_at: esr_c6- l_per_m- r_ldo+
-        max: 0.005111
+        nominal: 0.005401
+        min: 0.004066
+        min_at: esr_c6+ l_per_m- r_ldo+
+        max: 0.005414
         max_at: esr_c6- l_per_m+ r_ldo-
       kb_step:
-        nominal: 0.000913
-        min: 0.000913
+        nominal: 0.000755
+        min: 0.000755
         min_at: nominal
-        max: 0.001886
+        max: 0.001726
         max_at: esr_c6- l_per_m- r_ldo+
       dev_vpp_clk:
-        nominal: 6.0e-06
-        min: 6.0e-06
+        nominal: 5.0e-06
+        min: 5.0e-06
         min_at: nominal
-        max: 2.6e-05
-        max_at: esr_c6- l_per_m+ r_ldo+
+        max: 2.3e-05
+        max_at: esr_c6- l_per_m- r_ldo+
     asserts:
     - expr: max['kb_vpp'] < 0.1
       why: 'with C-BULK-CHAIN fitted, the key board''s 3V3 moves under 0.1 V peak to peak through a clock burst and every
@@ -55,22 +55,22 @@ sims:
     corners: 9
     measures:
       kb_vpp:
-        nominal: 0.072063
-        min: 0.07058
+        nominal: 0.072403
+        min: 0.070869
         min_at: esr_c6+ l_per_m- r_ldo+
-        max: 0.072496
+        max: 0.072766
         max_at: esr_c6- l_per_m+ r_ldo-
       kb_step:
-        nominal: 0.001043
-        min: 0.000962
-        min_at: esr_c6+ l_per_m+ r_ldo-
-        max: 0.002077
-        max_at: esr_c6- l_per_m- r_ldo+
+        nominal: 0.000921
+        min: 0.000864
+        min_at: esr_c6+ l_per_m- r_ldo-
+        max: 0.001935
+        max_at: esr_c6- l_per_m+ r_ldo+
       dev_vpp_clk:
         nominal: 6.0e-06
         min: 6.0e-06
         min_at: nominal
-        max: 2.2e-05
+        max: 2.0e-05
         max_at: esr_c6- l_per_m- r_ldo+
     asserts:
     - expr: max['kb_vpp'] < 0.1
@@ -84,10 +84,10 @@ sims:
     corners: 3
     measures:
       dv_edge:
-        nominal: 0.001148
-        min: 0.001068
+        nominal: 0.001012
+        min: 0.000942
         min_at: esr_c6-
-        max: 0.001594
+        max: 0.001405
         max_at: esr_c6+
     asserts:
     - expr: max['dv_edge'] < 0.05
@@ -99,10 +99,10 @@ sims:
     corners: 9
     measures:
       z_peak:
-        nominal: 2.12785
-        min: 1.12405
+        nominal: 2.49596
+        min: 1.20138
         min_at: esr_c6+ l_per_m- r_ldo+
-        max: 2.14443
+        max: 2.50759
         max_at: esr_c6- l_per_m+ r_ldo-
       f_peak:
         nominal: 29512.1
@@ -111,66 +111,66 @@ sims:
         max: 30903.0
         max_at: esr_c6- l_per_m- r_ldo+
       z_1mhz:
-        nominal: 0.0186246
-        min: 0.0186225
+        nominal: 0.0186248
+        min: 0.0186227
         min_at: esr_c6+ l_per_m+ r_ldo-
-        max: 0.0186257
+        max: 0.0186258
         max_at: esr_c6- l_per_m- r_ldo+
     asserts: []
   rail-impedance-without-bulk:
     corners: 9
     measures:
       z_peak:
-        nominal: 176.268
-        min: 141.885
-        min_at: esr_c6+ l_per_m- r_ldo+
-        max: 216.79
-        max_at: esr_c6- l_per_m+ r_ldo-
+        nominal: 166.114
+        min: 146.829
+        min_at: esr_c6+ l_per_m- r_ldo-
+        max: 203.767
+        max_at: esr_c6- l_per_m- r_ldo+
       f_peak:
         nominal: 295121.0
         min: 295121.0
         min_at: nominal
-        max: 295121.0
-        max_at: nominal
+        max: 301995.0
+        max_at: esr_c6- l_per_m- r_ldo+
       z_1mhz:
-        nominal: 1.74473
-        min: 1.74331
+        nominal: 1.74616
+        min: 1.74542
         min_at: esr_c6- l_per_m+ r_ldo-
-        max: 1.74546
+        max: 1.74689
         max_at: esr_c6+ l_per_m- r_ldo+
     asserts: []
   sck-to-key-board:
     corners: 17
     measures:
       bs_rise:
-        nominal: 0.0075655
-        min: 0.00139448
+        nominal: 0.018398
+        min: 0.0114874
         min_at: c_main- c_tvs- r_drv+ tr_drv+
-        max: 0.159077
+        max: 0.0913323
         max_at: c_main+ c_tvs+ r_drv- tr_drv-
       bs_fall:
-        nominal: 0.00764243
-        min: 0.00137528
+        nominal: 0.0184436
+        min: 0.0114827
         min_at: c_main- c_tvs- r_drv+ tr_drv+
-        max: 0.1594
+        max: 0.0912752
         max_at: c_main+ c_tvs+ r_drv- tr_drv-
       v_over:
-        nominal: 3.30182
-        min: 3.30048
+        nominal: 3.30457
+        min: 3.30174
         min_at: c_main- c_tvs- r_drv+ tr_drv+
-        max: 3.34526
+        max: 3.32782
         max_at: c_main+ c_tvs+ r_drv- tr_drv-
       v_under:
-        nominal: -0.00178045
-        min: -0.0453315
+        nominal: -0.00459262
+        min: -0.0278731
         min_at: c_main+ c_tvs+ r_drv- tr_drv-
-        max: -0.000465036
+        max: -0.00173634
         max_at: c_main- c_tvs- r_drv+ tr_drv+
       t_delay:
-        nominal: 7.61348e-09
-        min: 4.66037e-09
-        min_at: c_main- c_tvs- r_drv- tr_drv-
-        max: 9.23877e-09
+        nominal: 6.73226e-09
+        min: 4.25756e-09
+        min_at: c_main- c_tvs- r_drv- tr_drv+
+        max: 8.76684e-09
         max_at: c_main+ c_tvs+ r_drv+ tr_drv+
     asserts:
     - expr: max['bs_rise'] < p['hyst_min'] and max['bs_fall'] < p['hyst_min']
@@ -185,68 +185,68 @@ sims:
     corners: 17
     measures:
       bs_rise:
-        nominal: 0.0369054
-        min: 0.0163584
+        nominal: 0.0722766
+        min: 0.0485878
         min_at: c_main- c_tvs- r_drv+ tr_drv+
-        max: 1.3209
-        max_at: c_main- c_tvs- r_drv- tr_drv-
+        max: 0.647237
+        max_at: c_main+ c_tvs- r_drv- tr_drv-
       bs_fall:
-        nominal: 0.0369022
-        min: 0.0163574
+        nominal: 0.0722957
+        min: 0.0485867
         min_at: c_main- c_tvs- r_drv+ tr_drv+
-        max: 1.32092
-        max_at: c_main- c_tvs- r_drv- tr_drv-
+        max: 0.647218
+        max_at: c_main+ c_tvs- r_drv- tr_drv-
       v_over:
-        nominal: 3.31271
-        min: 3.30515
+        nominal: 3.32475
+        min: 3.31385
         min_at: c_main- c_tvs- r_drv+ tr_drv+
-        max: 3.99315
-        max_at: c_main- c_tvs- r_drv- tr_drv-
+        max: 3.56581
+        max_at: c_main+ c_tvs+ r_drv- tr_drv-
       v_under:
-        nominal: -0.0126734
-        min: -0.693039
-        min_at: c_main- c_tvs- r_drv- tr_drv-
-        max: -0.005145
+        nominal: -0.0247405
+        min: -0.26579
+        min_at: c_main+ c_tvs+ r_drv- tr_drv-
+        max: -0.0138456
         max_at: c_main- c_tvs- r_drv+ tr_drv+
       t_delay:
-        nominal: 1.95759e-09
-        min: 9.75372e-10
-        min_at: c_main- c_tvs- r_drv- tr_drv+
-        max: 2.31869e-09
+        nominal: 1.93906e-09
+        min: 8.0695e-10
+        min_at: c_main- c_tvs- r_drv- tr_drv-
+        max: 2.29212e-09
         max_at: c_main+ c_tvs+ r_drv+ tr_drv+
     asserts: []
   qh-to-main-board:
     corners: 5
     measures:
       bs_rise:
-        nominal: 0.00147583
-        min: 0.00024923
+        nominal: 0.00032017
+        min: 0.00015584
         min_at: r_qh+ tr_qh+
-        max: 0.247272
+        max: 0.098429
         max_at: r_qh- tr_qh-
       bs_fall:
-        nominal: 0.0014757
-        min: 0.000249059
+        nominal: 0.00032017
+        min: 0.000155844
         min_at: r_qh+ tr_qh+
-        max: 0.247274
+        max: 0.098429
         max_at: r_qh- tr_qh-
       v_over:
-        nominal: 3.30031
-        min: 3.30006
+        nominal: 3.30008
+        min: 3.30004
         min_at: r_qh+ tr_qh+
-        max: 3.4863
+        max: 3.37039
         max_at: r_qh- tr_qh-
       v_under:
-        nominal: -0.000312824
-        min: -0.186302
+        nominal: -8.19082e-05
+        min: -0.0703948
         min_at: r_qh- tr_qh-
-        max: -6.21925e-05
+        max: -3.96638e-05
         max_at: r_qh+ tr_qh+
       t_delay:
-        nominal: 1.20782e-09
-        min: 5.83275e-10
+        nominal: 9.07026e-10
+        min: 4.52287e-10
         min_at: r_qh- tr_qh-
-        max: 1.78763e-09
+        max: 1.35315e-09
         max_at: r_qh+ tr_qh+
     asserts:
     - expr: max['bs_rise'] < p['hyst_min'] and max['bs_fall'] < p['hyst_min']
