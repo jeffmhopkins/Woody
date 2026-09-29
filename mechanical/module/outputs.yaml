@@ -36,7 +36,7 @@ renders:
     stamp: Woody module
     layout_sensitive: false
     imgsize: [1200, 1400]
-    camera: [25, 60, -15, -35, 40, -10, 280]
+    camera: [25, 64, -15, -35, 40, -10, 390]
     defines: {show_rails: false}
   - name: module-rear
     title: The module from behind - the main board's rear face, the power header with its socket and ribbon, the trimmers and bulk caps
@@ -45,7 +45,7 @@ renders:
     stamp: Woody module
     layout_sensitive: false
     imgsize: [1200, 1400]
-    camera: [25, 60, -20, -35, 220, -10, 290]
+    camera: [25, 64, -20, -35, 220, -10, 400]
     defines: {show_rails: false}
   - name: module-exploded
     title: The stack pulled apart - panel and knobs, jack board, standoffs and J-B2B-MOD, main board, power socket
