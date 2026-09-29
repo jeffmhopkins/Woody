@@ -193,6 +193,14 @@ And, answering the follow-up questions:
   The cassette is then a working instrument without its wood. It is flashed,
   played and metered (both plates to `PWR_GND`) before the shell is closed
   round it.
+- **The Matrix is not in the cassette.** It sits under the oak top's window
+  (ADR 0009), so it belongs to the oak top, and it reaches the cassette only
+  by `CBL-MCU-RIBBON` into `J-MCU`. For the bench test it is plugged in with
+  the oak top held over the cassette, or before it is fixed into the oak top.
+  `J-MCU` is the last plug before the oak top is bonded, and the first thing
+  unplugged once it is cut free. Every page that says "with the lid off" now
+  means with the oak top cut free. The ribbon's length rule is unchanged
+  (*"Matrix ribbon length"*, `CBL-MCU-RIBBON`).
 - **The shell is the structure; the cassette only has to survive the bench.**
   A key press goes from the switch into the key board and the plate, down the
   columns in compression to the bottom plate, and into the oak bottom. Before,
