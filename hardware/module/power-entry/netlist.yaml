@@ -32,10 +32,15 @@ foreign:
 
 components:
 
+  # THE HEADER'S SIXTEEN PINS, as the Doepfer bus numbers them: -12 V on the
+  # pair at pin 1 (the ribbon's red stripe), GND on three pairs, +12 V, +5 V,
+  # then the bus CV and Gate, which this module does not use
+  # [ds mechanical/DOEPFER-A100-BUS-CONNECTORS-a100b_e.gif]. Each supply is
+  # carried on both pins of its pair; CV and Gate are no-connects by decision.
   J-PWR-EURO:
     value: "2x8 2.54mm shrouded box header (16-pin)"
-    pins: [POS12, NEG12, POS5, GND]
-    note: "Keyed. The rack's -12 V is pin 1 by convention and reversing it is what D-REVPOL exists for"
+    pins: [NEG12_1, NEG12_2, GND_3, GND_4, GND_5, GND_6, GND_7, GND_8, POS12_9, POS12_10, POS5_11, POS5_12, CV_13, CV_14, GATE_15, GATE_16]
+    note: "Keyed, but a key does not make a reversed ribbon impossible. The rack's -12 V is the pin-1 pair, the ribbon's red stripe, and reversing it is what D-REVPOL exists for"
 
   D1:
     of: D-REVPOL                 # qty 3: D1, D2, D3
@@ -122,10 +127,27 @@ components:
     drawn_as: C
     pins: [1, 2]
 
+  C-DEC-REG-IN:
+    of: C-DECOUPLE
+    value: "100nF"
+    pins: [1, 2]
+    note: "At the LM317's input pin. One of the board-wide C-DECOUPLE row"
+
+  # THE ANALOG STAR'S TIE. "One origin, at the IDC's ground pin ... The analog
+  # return is its own region joining at the star" (power-entry.md, Grounding).
+  # A net tie is how a board joins two named nets at one place and nowhere
+  # else, as NT-AGND does on the instrument's carrier. DIG_GND HAS NO TIE HERE:
+  # where it meets the others is dig-gnd-topology, which is disputed.
+  NT-AGND-MOD:
+    value: "net tie"
+    pins: [1, 2]
+    note: "The module analog star's single tie to PWR_GND, at the power header's ground pins (power-entry.md, Grounding): copper only"
+
 nets:
 
   BUS_POS12_RAW:
-    - J-PWR-EURO.POS12
+    - J-PWR-EURO.POS12_9
+    - J-PWR-EURO.POS12_10
     - D1.A
     - D2.A
     - port: BUS_POS12_RAW
@@ -137,6 +159,7 @@ nets:
     - FB1.2
     - C1.1
     - U-REG-DAC.IN
+    - C-DEC-REG-IN.1
     - port: MODULE_ANALOG_POS12
 
   POS12_D2:
@@ -149,7 +172,8 @@ nets:
     - C2.1
 
   NEG12_D3:
-    - J-PWR-EURO.NEG12
+    - J-PWR-EURO.NEG12_1
+    - J-PWR-EURO.NEG12_2
     - D3.A
   NEG12_FB:
     - D3.K
@@ -160,7 +184,8 @@ nets:
     - port: MODULE_ANALOG_NEG12
 
   BUS_5V_IN:
-    - J-PWR-EURO.POS5
+    - J-PWR-EURO.POS5_11
+    - J-PWR-EURO.POS5_12
     - FB4.1
   BUS_5V:
     - FB4.2
@@ -186,6 +211,8 @@ nets:
     - R-REG-SET-LO.2
     - C-REG-ADJ.2
     - C-REG-OUT.2
+    - C-DEC-REG-IN.2
+    - NT-AGND-MOD.1
 
   DIG_GND:
     - port: DIG_GND
@@ -193,8 +220,26 @@ nets:
 
   PWR_GND:
     - port: PWR_GND
-    - J-PWR-EURO.GND
+    - J-PWR-EURO.GND_3
+    - J-PWR-EURO.GND_4
+    - J-PWR-EURO.GND_5
+    - J-PWR-EURO.GND_6
+    - J-PWR-EURO.GND_7
+    - J-PWR-EURO.GND_8
     - C2.2
+    - NT-AGND-MOD.2
+
+  # The bus CV and Gate: a no-connect each, by decision.
+  CV_13:
+    - J-PWR-EURO.CV_13
+  CV_14:
+    - J-PWR-EURO.CV_14
+  GATE_15:
+    - J-PWR-EURO.GATE_15
+  GATE_16:
+    - J-PWR-EURO.GATE_16
+
+external_endpoints: [CV_13, CV_14, GATE_15, GATE_16]
 
 # ----------------------------------------------------------------------
 # OPEN, AND NOT GUESSED AT.
