@@ -4,8 +4,8 @@
 
 inputs:
   tools/sim.py: 5bf1170c63f788eb
-  hardware/boards/key-board-lh/sim/sims.yaml: dd9de7c17b8c6835
-  hardware/boards/key-board-lh/board-netlist.yaml: 08b7d975eaf7d32d
+  hardware/boards/key-board-lh/sim/sims.yaml: 0294bf1eaf257c78
+  hardware/boards/key-board-lh/board-netlist.yaml: 83dd5aa2b99e144f
   hardware/boards/key-board-lh/sim/board-dc.cir: f09067869f07f16f
   hardware/boards/key-board-lh/sim/hcs165-inputs.lib: cb24246067ce5447
   hardware/cluster/key-switch-network/sim/sims.yaml: 28274e715669f42e

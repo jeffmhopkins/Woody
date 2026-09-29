@@ -91,24 +91,11 @@ parts:
   R11: [89.23, 48.2, 180]    # R-KEY-PU on sheet FREE3
   # The reservoir on the chain's 3V3, beside J-CHAIN's 3V3 pin (C-BULK-CHAIN row)
   C7:  [67.0, 42.0, 90]      # C-BULK-CHAIN
-  # Bring-up test pads (TP-CHAIN), a row between the key row and the register:
-  # in the order of the register's own pins above them - QH and SER by pins 9 and
-  # 10, SCK and SH/LD by 2 and 1, 3V3 by 16 - so no chain net crosses another's
-  # pad. Each carries its reference, over and under the row by turns; what each
-  # probes (its Probe field) is in the silkscreen legend (silk: legend_at) - both
-  # beside each pad do not fit between J-CHAIN's body and LH3's switch pin. README.md says how to use them.
-  TP1: [83.0, 36.0, 0]        # QH
-  TP2: [86.5, 36.0, 0]        # SER
-  TP3: [90.0, 36.0, 0]        # GND
-  TP4: [93.5, 36.0, 0]        # SCK
-  TP5: [97.0, 36.0, 0]        # SH/LD
-  TP6: [100.5, 36.0, 0]       # 3V3
 
 # The silkscreen title blocks (tools/pcb.py add_silk, add_top_silk): the parts side's
 # and the switch side's, in body coordinates.
 silk:
   at: [44.0, 12.5]
-  legend_at: [44.0, 17.0]    # the test pads' legend (TP1 QH ...), under the title
   top_at: [44.0, 14.3]       # the switch side's copy, left edge of the text
   title: "WOODY key board LH"
   rev: "A"

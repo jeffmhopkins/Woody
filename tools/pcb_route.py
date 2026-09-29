@@ -590,7 +590,11 @@ class Router:
             z.SetNet(self.board.FindNet(gnd))
             z.SetLocalClearance(MM(self.clear))
             z.SetMinThickness(MM(0.25))
-            z.SetPadConnection(pcbnew.ZONE_CONNECTION_THERMAL)
+            # thermal spokes on through-hole pads, which are hand-soldered and
+            # need the heat kept in; SMD pads are reflowed and join the pour
+            # solid - a spoke there only starves the joint (KiCad's
+            # starved_thermal, which a boxed-in SMD ground pin kept tripping)
+            z.SetPadConnection(pcbnew.ZONE_CONNECTION_THT_THERMAL)
             z.SetThermalReliefGap(MM(0.3))
             z.SetThermalReliefSpokeWidth(MM(0.4))
             ol = z.Outline()

@@ -35,7 +35,6 @@ parts:
   SW1-n:     "S{ref} {1} {2} ctl 0 kswitch"  # every switch on one control: all open, or all closed
   U-KEYS:    "X{ref} {VCC} {GND} {A} {B} {C} {D} {E} {F} {G} {H} {SER} {CLK} {SHLD} {CLKINH} hcs165_inputs"
   J-CHAIN:   ""                             # the ribbon's end: its nets are driven below
-  TP-CHAIN:  ""                             # bare copper
 
 # What the rest of the chain puts on the board's nets: the bench of Bring-up (README),
 # 3V3 at J1's pin, SH/LD held high, the clock low, SER tied low.

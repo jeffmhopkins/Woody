@@ -4,12 +4,12 @@
 
 inputs:
   tools/sim.py: 5bf1170c63f788eb
-  hardware/boards/key-board-rh/sim/sims.yaml: 471b44c69a2dd8fc
-  hardware/boards/key-board-rh/board-netlist.yaml: 4b378fa99005ba7f
+  hardware/boards/key-board-rh/sim/sims.yaml: 4ee366317b343ade
+  hardware/boards/key-board-rh/board-netlist.yaml: a7398da1440384cc
   hardware/boards/key-board-rh/sim/board-dc.cir: e0f985df5c918b9d
   hardware/boards/key-board-lh/sim/hcs165-inputs.lib: cb24246067ce5447
   hardware/cluster/key-switch-network/sim/sims.yaml: 28274e715669f42e
-  hardware/boards/key-board-lh/sim/sims.yaml: dd9de7c17b8c6835
+  hardware/boards/key-board-lh/sim/sims.yaml: 0294bf1eaf257c78
   figure:key-press-time: 9.87 us
   figure:key-release-time: 138.7 us
   figure:key-scan-current: 1.43 mA per closed key, 27.3 mA at 19 closed

@@ -37,7 +37,7 @@ params:
   tr_drv:  {value: 3.0e-9, source: "the GPIO's own edge, unpublished; 1-3 ns swept (vary) [UNVERIFIED]"}
   c_tvs:   {value: 30.0e-12, source: "U-TVS-CHAIN (SP0504BAHT) capacitance per channel, typical, at 2.5 V [datasheets/discrete-and-power/SP0504BAHT.pdf]; only a typical is given (vary)"}
   c_main:  {value: 20.0e-12, source: "the main board's own load on SCK: right_thumb's and left_thumb's inputs (2 x Ci) and its trace [assumption until the main board is laid out] (vary)"}
-  c_kb:    {value: 3.0e-12, source: "the key board's SCK trace, J1 to U1 and TP4 [assumption: about 30 mm over the ground pour] (vary)"}
+  c_kb:    {value: 3.0e-12, source: "the key board's SCK trace, J1 to U1 [assumption: about 30 mm over the ground pour] (vary)"}
   r_qh:    {value: 80.0, source: "the SN74HCS165's output resistance: (4.5 - 4.0 V) / 6 mA at 4.5 V = 83 ohm [calc, SN74HCS165-ti-scls828a.pdf p.6]; higher at 3.3 V (vary)"}
   tr_qh:   {value: 8.0e-9, source: "the SN74HCS165's output transition time, max, at 4.5 V [same, p.8]; slower at 3.3 V (vary)"}
   c_rx_main: {value: 5.0e-12, source: "left_thumb's SER input (Ci) and its trace [assumption]"}

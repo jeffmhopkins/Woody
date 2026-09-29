@@ -26,7 +26,6 @@ parts:
   SW1-n:     "S{ref} {1} {2} ctl 0 kswitch"  # every switch on one control
   U-KEYS:    "X{ref} {VCC} {GND} {A} {B} {C} {D} {E} {F} {G} {H} {SER} {CLK} {SHLD} {CLKINH} hcs165_inputs"
   J-CHAIN:   ""
-  TP-CHAIN:  ""
 
 # The bench of Bring-up: 3V3 at J1's pin, SH/LD high, the clock low, SER tied low.
 drive:

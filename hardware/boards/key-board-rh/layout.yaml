@@ -68,17 +68,9 @@ parts:
   U1:  [198.5, 44.0, 90]     # U-KEYS, the register
   C7:  [192.0, 41.8, 90]     # C-DECOUPLE-165, beside pin 8 at the register's J-CHAIN end
   C8:  [166.0, 42.0, 90]     # C-BULK-CHAIN, beside J-CHAIN's 3V3 pin
-  # Bring-up test pads (TP-CHAIN), in the order of the register's own pins above them
-  TP1: [191.0, 36.0, 0]       # QH
-  TP2: [194.5, 36.0, 0]       # SER
-  TP3: [198.0, 36.0, 0]       # GND
-  TP4: [201.5, 36.0, 0]       # SCK
-  TP5: [205.0, 36.0, 0]       # SH/LD
-  TP6: [208.5, 36.0, 0]       # 3V3
 
 silk:
   at: [152.0, 12.5]
-  legend_at: [152.0, 17.0]
   top_at: [183.5, 46.0]     # clear of the vias QH needs near the register: silk is placed before routing, and no via goes under silk
   title: "WOODY key board RH"
   rev: "A"

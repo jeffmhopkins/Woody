@@ -473,7 +473,7 @@ page and have no BOM entry yet.
 | `U-TVS-SPI` | SP0504BAHT, **SOT-23-5** | `SCLK`, `MOSI`, `CS` + spare, to `PWR_GND` | `[repo]` |
 | **`J-CHAIN`** ×2 here | **2×6 1.27 mm shrouded IDC header, right-angle, through-hole** | **One per key-board ribbon (`CBL-CHAIN`), in the far band beside the LED strip, under its key board's; the mates are on the key boards (`chain-connectors` in all). 4 signals, 5 alternating grounds, 3V3, 2 spare. Part open until M4. `key-chain-loom.md`** | ribbon decided (ADR 0017), part open |
 | `PCB-CARRIER` | 2-layer, outline derived by the body CAD | The main board (ADR 0017). See *Still open* | `[repo]` `mechanical/drc.echo` "main board (derived)" |
-| **`TP-*`, `LK-*`** | **TBD** | **Proposed — `D2` asked for test points, shunt links and an LA header on this board and none exist in the BOM** | proposed |
+| `TP-*`, `LK-*` | none | A review (`D2`) asked for test points, shunt links and an LA header. **Not fitted** (owner, 2026-09-29): this is a one-off build, probed by hand at the parts' own pins | decided |
 
 *Rows for the five circuits that now have their own directories moved with them:
 `U-ADC`, `R-ADCDIV-U`/`R-ADCDIV-L`, `C-AA-ADC` and `C-ADC-BULK` to

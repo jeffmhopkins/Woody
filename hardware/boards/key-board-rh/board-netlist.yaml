@@ -201,36 +201,6 @@ components:
     - 1
     - 2
     sheet: RH6
-  TP1:
-    of: TP-CHAIN
-    value: test pad
-    pins:
-    - 1
-  TP2:
-    of: TP-CHAIN
-    value: test pad
-    pins:
-    - 1
-  TP3:
-    of: TP-CHAIN
-    value: test pad
-    pins:
-    - 1
-  TP4:
-    of: TP-CHAIN
-    value: test pad
-    pins:
-    - 1
-  TP5:
-    of: TP-CHAIN
-    value: test pad
-    pins:
-    - 1
-  TP6:
-    of: TP-CHAIN
-    value: test pad
-    pins:
-    - 1
   U1:
     of: U-KEYS
     value: 74HCS165
@@ -255,19 +225,15 @@ components:
 nets:
   /CHAIN_SCK:
   - J1.11
-  - TP4.1
   - U1.CLK
   /CHAIN_SHLD:
   - J1.9
-  - TP5.1
   - U1.SHLD
   /HOP_LT_RH:
   - J1.7
-  - TP2.1
   - U1.SER
   /HOP_RH_RT:
   - J1.5
-  - TP1.1
   - U1.QH
   /KEY_RH1:
   - C1.1
@@ -337,7 +303,6 @@ nets:
   - SW4.2
   - SW5.2
   - SW6.2
-  - TP3.1
   - U1.B
   - U1.CLKINH
   - U1.GND
@@ -357,7 +322,6 @@ nets:
   - R4.1
   - R6.1
   - R8.1
-  - TP6.1
   - U1.A
   - U1.VCC
 external_endpoints:

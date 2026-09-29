@@ -26,7 +26,7 @@ left-hand page holds, with `key-board-rh` for `key-board-lh` in every path.
 
 Everything else is the same part, placed the same way: every key's network
 the same T round its own switch (`layout.yaml` `networks:`, the same
-pattern), the six test pads in one row under the register, J1 where the body
+pattern), J1 where the body
 CAD puts it, the four corner mounts, the rules and the board house's limits.
 
 ## The references
@@ -43,7 +43,6 @@ As the left-hand board's table, for six keys:
 | C8 | `C-BULK-CHAIN` | the rail's reservoir, beside J1's 3V3 pin |
 | U1 | `U-KEYS` | the register, SN74HCS165 |
 | J1 | `J-CHAIN` | the key chain's header |
-| TP1-TP6 | `TP-CHAIN` | the test pads: QH, SER, GND, SCK, SH/LD, 3V3 |
 | H1-H4 | (board only) | the corner mounts' holes |
 
 ## Ordering

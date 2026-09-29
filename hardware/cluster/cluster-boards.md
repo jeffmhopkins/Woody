@@ -232,7 +232,6 @@ and `RT` are on the main board.
 | `R-KEY-SER` | 100 Ω 1% 0805 | 5 | 4 | 6 | 6 | |
 | `C-KEY` | 47 nF X7R 0805 | 5 | 4 | 6 | 6 | |
 | `J-CHAIN` | 2×6 1.27 mm shrouded IDC, right-angle, through-hole | 1 | — | 1 | — | One per key board, on its underside; its mate is on the main board (`chain-connectors`). Its pin tails stop short of the key plate, which has no window over them (`drc.echo` "J-CHAIN pin tails clear of the key plate") |
-| `TP-CHAIN` | test pad, bare copper | 6 | — | 6 | — | Bring-up pads on each key board: 3V3, GND, SCK, SH/LD, QH and SER. On the bench, SER is tied to GND or 3V3 at its pad (the row; the key board's README, *Bring-up*) |
 | `C-BULK-CHAIN` | 10 µF X5R 0805 | 1 | — | 1 | — | The reservoir on each key board's 3V3, beside `J-CHAIN`: its ESR damps `FB-CHAIN` with `C-DECOUPLE-165` (`key-chain-loom.md`) |
 | `marker straps` | copper, no parts | 2 | 2 | 2 | 2 | **Decided** — 8-bit marker, §4. Straight to GND or 3V3, no resistor and no cap: the node never changes |
 

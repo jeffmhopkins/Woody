@@ -138,7 +138,6 @@ key-board mode reads `pcb-geometry.echo` by cluster, and this board is `main`):
 | **`NT1` and `NT2` are net ties**: `NT1` at `J-UMB` pin 8 (ADR 0018), `NT2` at the analog star (`carrier.md` §2) | Placed there at layout |
 | **The thumb switches go on the underside**, entering from below; the near row is turned 180° (ADR 0022) | `pcb-geometry.echo` `main` |
 | **The umbilical adapter** (`PCB-UMB-ADAPTER`) is a separate small board: its schematic is [`../umb-adapter/`](../umb-adapter/README.md), not laid out | With this board's layout |
-| **Test points and links** (`carrier.md`, *Component table*: proposed `TP-*`, `LK-*`) | Added to the root sheet with the layout |
 
 ## Revisions
 

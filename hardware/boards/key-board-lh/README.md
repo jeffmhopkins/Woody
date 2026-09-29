@@ -145,10 +145,9 @@ The right-hand board, or any other simple board, starts from a copy of
   each with the `max_mm` that `pcb.py check` then holds it to: here the
   decoupler's return to the register's ground pin. Name the new board's pads.
 - `parts:` places everything else: the register, its decoupler, the free-bit
-  pull-ups, `C-BULK-CHAIN-<suffix>` and the six test pads.
+  pull-ups and `C-BULK-CHAIN-<suffix>`.
 - `rules:`, `fab:` (the board house), `silk:` (title, revision, date; `at`
-  for the parts side, `top_at` for the switch side, `legend_at` for the test
-  pads' legend),
+  for the parts side, `top_at` for the switch side),
   `standoff_footprint:`, `route:`, `ground_net:` and `power_nets:` are copied
   as they are. `power_nets:` names that board's rail.
 
@@ -203,7 +202,7 @@ test are checked by `pcb.py` itself (above).
   - The other part numbers are not repeated here. They are on the sheets, and in `fab/key-board-lh-bom-jlc.csv`.
 - **Not in the order:**
   - SW1-SW5 and J1 (`J-CHAIN`), which are in `fab/key-board-lh-hand-assembly.csv`;
-  - the test pads and the mount holes, which are copper and drill only.
+  - the mount holes, which are drill only.
 - **Bought separately, for the hand assembly.** Only the first two are on the hand list. Sourcing facts below were read on 2026-09-27; check stock at order.
   - **The switches** (BOM row `SW1-n`): Gateron **KS-33H10B050NN-Y24**, Low Profile 2.0 Red, the code on the sheet and the hand list. **Order `-Y24` exactly.** The suffix is the bottom housing's colour, not a year: `-Y24` is black and `-Y31` white. The white-housing spec gives a longer total travel than the black one the body is drawn from (`switch.total_travel`), which would break the flush rule `[datasheets/mechanical/GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf; datasheets/mechanical/GATERON-KS-33-SPEC-WHITE-HOUSING-KS-33H10B050NN-Y31.pdf]`. Not the Silent, not the Low Profile 3.0. Gateron's own store sells the black-housing Red `[web https://www.gateron.com/products/gateron-ks-33-low-profile-switch-set, 2026-09-27]`; whether it ships from a US warehouse is unverified. US sellers found (e.g. LumeKeebs) sell "KS-33 2.0 Red" without naming the housing or the code `[web https://lumekeebs.com/products/gateron-ks-33-low-profile-2-0-mechanical-switches, 2026-09-27]`, so check the code on the packaging.
   - **`J-CHAIN`**, Samtec SHF-106-01-L-D-RA. JLC/LCSC had none (C17202657, stock 0 `[web, JLC API, 2026-09-27]`). DigiKey SHF-106-01-L-D-RA-ND had **only 8 in stock**, with a **4-week factory lead time** `[web https://www.digikey.com/en/products/detail/samtec-inc/SHF-106-01-L-D-RA/8410402, 2026-09-27]`. Eight covers one instrument's two boards with few spares; failing that, Samtec direct (reel variants and samples). Its sourcing is open (its BOM row, and *Open* below).
@@ -236,25 +235,39 @@ test are checked by `pcb.py` itself (above).
 
 ## Bring-up
 
-Before the first key board goes into an instrument, check it on the bench. The
-six test pads are on the bottom, TP1-TP6, and the legend beside the title says
-what each probes: TP1 QH, TP2 SER, TP3 GND, TP4 SCK, TP5 SH/LD, TP6 3V3.
+Before the first key board goes into an instrument, check it on the bench.
+**There are no test pads** (owner, 2026-09-29: a one-off build is probed by
+hand). Everything is reached at J1's pin tails on the bottom, which carry the
+whole chain (`hardware/interfaces/key-chain-loom/key-chain-loom.md`, the
+key-board end):
 
-1. **No shorts.** Measure TP6 (3V3) to TP3 (GND) with no power: it must not read as a short.
+| J1 pin | Signal |
+|---|---|
+| 3 | 3V3 |
+| 4, 6, 8, 10, 12 | GND |
+| 11 | SCK |
+| 9 | SH/LD |
+| 7 | SER |
+| 5 | QH |
+
+A clip lead on the header's pin tails, or a spare ribbon with an IDC plug cut
+open, is the bench harness.
+
+1. **No shorts.** Measure J1 pin 3 (3V3) to pin 4 (GND) with no power: it must not read as a short.
 2. **Every cable's pinout, with a meter, before it is first powered.**
    - With both ends free, conductor 10 at one end must reach the other socket's position 3 (3V3), and conductor 2 its position 11 (SCK).
    - That is the `-RN2` map, key pin = 13 − main pin (`key-chain-loom.md`). The map is symmetric, so either end can be taken as the main-board end.
    - A cable without `-RN2` looks right on the drawn route and puts 3V3 on a ground pin. Nothing mechanical shows it, so check every cable, spares and replacements included.
-3. **Tie SER.** Nothing drives SER on the bench, and a floating CMOS input draws current and shifts in undefined bits. Tie TP2 (SER) to TP3 (GND) or TP6 (3V3) (the `TP-CHAIN` row).
-4. **Power.** Feed 3.3 V between TP6 (3V3) and TP3 (GND) (current-limited to ~20 mA).
+3. **Tie SER.** Nothing drives SER on the bench, and a floating CMOS input draws current and shifts in undefined bits. Tie J1 pin 7 (SER) to a GND pin or to pin 3 (3V3).
+4. **Power.** Feed 3.3 V between J1 pin 3 (3V3) and a GND pin (current-limited to ~20 mA).
    - With no key pressed, and SER tied, the draw should be near zero: the register's quiescent current is microamps `[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.6]`. A reading of milliamps with no key pressed is a fault.
    - Each pressed key adds its pull-up's current (`key-scan-current`, on `key-switch-network.md`).
 5. **The chain.** Drive SH/LD low then high, then clock SCK, and watch QH.
    - It shifts out this board's eight bits, H first: LH1..LH5, then the two marker bits and the free bit, in `key-marker-and-bits/allocation.yaml`'s order. Idle, each key bit and the free bit read high, and the markers read the pattern `marker-bits` gives this device.
    - Each key reads low while pressed.
    - Clocks past the 8th shift in the level SER is tied to.
-   - Firmware normally does this; with a logic analyser on the test pads it is visible without one.
-6. **The rail, in the instrument.** On the real main board and ribbon, scope the key board's VCC (TP6 to TP3) while the chain shifts. `FB-CHAIN` and `C-DECOUPLE-165` form a lightly damped LC (the `FB-CHAIN` row). The simulation (`hardware/interfaces/key-chain-loom/sim/`, `rail-as-ordered`) keeps this rail well inside its limit with C7 fitted, and inside it even without C7 (`rail-without-bulk`), so expect at most a small ring after each burst and each key change. A larger one means the bead or the ribbon is not what the simulation assumes: record it in *Revisions*. The bench supply has no bead, so this step needs the main board.
+   - Firmware normally does this; with a logic analyser on J1's pins it is visible without one.
+6. **The rail, in the instrument.** On the real main board and ribbon, scope the key board's VCC (J1 pin 3 to a GND pin, or across C6) while the chain shifts. `FB-CHAIN` and `C-DECOUPLE-165` form a lightly damped LC (the `FB-CHAIN` row). The simulation (`hardware/interfaces/key-chain-loom/sim/`, `rail-as-ordered`) keeps this rail well inside its limit with C7 fitted, and inside it even without C7 (`rail-without-bulk`), so expect at most a small ring after each burst and each key change. A larger one means the bead or the ribbon is not what the simulation assumes: record it in *Revisions*. The bench supply has no bead, so this step needs the main board.
 
 ## The silkscreen
 
@@ -280,16 +293,14 @@ is how the tools find it.
 | C7 | `C-BULK-CHAIN` | the rail's reservoir, beside J1's 3V3 pin |
 | U1 | `U-KEYS` | the register, SN74HCS165 |
 | J1 | `J-CHAIN` | the key chain's header |
-| TP1-TP6 | `TP-CHAIN` | the test pads: QH, SER, GND, SCK, SH/LD, 3V3 |
 | H1-H4 | (board only) | the corner mounts' holes |
 
 **Parts side (bottom):** every part's reference beside it. Each key's three
 network parts carry theirs the same way round the network, as the parts sit
 round the switch (the two resistors' along them, beside the column), with the
-key's name (LH1..LH5) beside its capacitor. the test pads'
-references beside them, and a legend by the title saying what each probes;
+key's name (LH1..LH5) beside its capacitor;
 J1's pin 1 dot and an arrow out of its mouth; `MOUTH` and an arrow at the
-mouth end; the title block (`layout.yaml` `silk:`, the legend at `legend_at`).
+mouth end; the title block (`layout.yaml` `silk:`).
 
 **Switch side (top):** each switch's reference and key (`SW1 LH1`) beside it;
 J1 with pin 1's dot and the arrow out of its mouth, where it is soldered;
