@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-The instrument body's CAD pipeline: parameters in, renders and cut files out,
+The instrument body's and the Eurorack module's CAD pipeline: parameters in, renders and cut files out,
 and a check that every output still matches the source it claims to show.
 
     python3 tools/cad.py params    # regenerate mechanical/cad/generated/*params.scad
