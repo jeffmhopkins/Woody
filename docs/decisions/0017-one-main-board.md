@@ -209,3 +209,18 @@ each board (off the banked full print), and fits.
 - `config/body.yaml`'s `boards.ffc_conn_*` became `boards.chain_hdr_*` and
   `boards.chain_plug_*` (see [ADR 0020](0020-key-boards-screw-to-the-plate.md)'s
   amendment note).
+
+## Amendment, 2026-09-29 — four layers, and parts on both faces
+
+The owner: "I am good to go to four layers on this. That makes sense to me."
+**The main board is four layers**, at the same 1.6 mm (signal / ground /
+power / signal). It gets an unbroken ground plane under the breath signal
+chain and under every chain and SPI line. Routing crosses the U-bolt station
+on the inner layers too (ADR 0022 point 7). The first placement had judged
+two layers feasible, and four better for the analog ground.
+
+And: "don't be afraid to put some of the passives on the other side if we
+need to." **Passives may go on the underside**, within the room between the
+board and the plate under it. `hardware/boards/main-board/README.md`,
+*Open*, gives the rule.
+
