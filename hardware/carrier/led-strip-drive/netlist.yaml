@@ -33,13 +33,14 @@ components:
     - 2
     note: AT the package, not near it
   J-LED:
-    value: 4-way
+    value: 4 solder pads
     pins:
     - POS12
     - GND
     - DI
     - BI
-    note: Strip power passes through this connector and is carrier/power-entry-instrument's net, not this circuit's
+    note: 'Four solder pads, no connector (BOM row J-LED): the strip''s leads solder straight in. Strip power passes
+      through them and is carrier/power-entry-instrument''s net, not this circuit''s'
   R-LED-PD:
     value: 10k 1%
     pins:

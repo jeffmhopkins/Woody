@@ -465,20 +465,17 @@ boards:
   # the lid, so it unplugs at the main board like the key boards). The
   # umbilical reaches the board through the etherCON's adapter (below).
   mcu_conn_l:
-    value: 18.5
-    status: tbd
-    source: "a 2 x 12 1.27 mm box header, side entry, across the body: 11 x 1.27 = 13.97 between end pins [calc] plus the shroud's end walls [from memory] (ADR 0018)"
-    decided_by: "M4, with the part"
+    value: 21.54
+    status: settled
+    source: "J-MCU, the XKB X1270WR-2x12A-9TV01 box header, side entry, across the body: dimension C for 2x12 [ds XKB-X1270WR-2x12A-9TV01.pdf] (ADR 0018)"
   mcu_conn_w:
-    value: 6.0
-    status: tbd
-    source: "the same header along the body, with its latch [from memory]"
-    decided_by: "M4, with the part"
+    value: 7.8
+    status: settled
+    source: "the same header along the body with its tail pads: 5.40 body [ds XKB-X1270WR-2x12A-9TV01.pdf], its far tail row 1.87 behind the body's back plus the pad [calc from the same drawing]"
   mcu_conn_h:
-    value: 5.0
-    status: tbd
-    source: "the same header's height [from memory]"
-    decided_by: "M4, with the part"
+    value: 5.1
+    status: settled
+    source: "the same header's height above the board [ds XKB-X1270WR-2x12A-9TV01.pdf]"
   # The umbilical (ADR 0021): the etherCON on its own adapter board, which a
   # right-angle 2.54 mm header joins to a tongue of the main board. The
   # header is J-UMB, 8 pins, pin N = etherCON pin N.
@@ -489,19 +486,16 @@ boards:
     decided_by: "M4, with the board ordered"
   umb_joint_d:
     value: 2.5
-    status: tbd
-    source: "J-UMB's insulator along the body, behind the adapter: a 2.54 mm right-angle header's 2.5 mm square insulator [from memory]"
-    decided_by: "M4, with the part"
+    status: settled
+    source: "J-UMB's insulator along the body, behind the adapter: the hanxia HX PZ2.54-1x8P WZ's 2.50 mm square insulator [ds HANXIA-HX-PZ2.54-1x8P-WZ.pdf]"
   umb_joint_h:
     value: 2.5
-    status: tbd
-    source: "the same insulator's height on the main board [from memory]"
-    decided_by: "M4, with the part"
+    status: settled
+    source: "the same insulator's height on the main board [ds HANXIA-HX-PZ2.54-1x8P-WZ.pdf]"
   umb_joint_row_h:
-    value: 1.27
-    status: tbd
-    source: "the header's pin row above the main board, at the insulator's middle [from memory]; where the row meets the adapter"
-    decided_by: "M4, with the part"
+    value: 1.25
+    status: settled
+    source: "the header's pin row above the main board, at the middle of its 2.50 insulator [ds HANXIA-HX-PZ2.54-1x8P-WZ.pdf]; where the row meets the adapter"
   # ONE MAIN BOARD (ADR 0017): the thumb switches, their registers and the
   # carrier's circuits on one board at the thumb level, mouth cap to the end
   # of the right hand. Its size and the height its parts have are derived;

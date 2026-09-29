@@ -39,7 +39,7 @@ components:
     sheet: breath-adc
   C10:
     of: C-STRIP-BULK
-    value: 470-1000uF
+    value: 470uF 25V
     pins:
     - 1
     - 2
@@ -221,20 +221,20 @@ components:
     sheet: power-entry-instrument
   D4:
     of: D-USBOR
-    value: 1N5817 (DO-41) or SS14 (SMA)
+    value: SS14
     pins:
     - A
     - K
     sheet: power-entry-instrument
   D5:
     of: D-TVS-BREATH
-    value: PESD12VS1UB or equivalent 12V-standoff ESD diode
+    value: PESD12VS1UA or equivalent 12V-standoff ESD diode
     pins:
     - A
     - K
   D6:
     of: D-TVS-BREATH
-    value: PESD12VS1UB or equivalent 12V-standoff ESD diode
+    value: PESD12VS1UA or equivalent 12V-standoff ESD diode
     pins:
     - A
     - K
@@ -298,7 +298,7 @@ components:
     sheet: service-uart
   J3:
     of: J-LED
-    value: 4-way
+    value: 4 solder pads
     pins:
     - POS12
     - GND
@@ -351,7 +351,7 @@ components:
     - 8
   L1:
     of: L-BUCK-IN
-    value: 10-47uH
+    value: 22uH
     pins:
     - 1
     - 2

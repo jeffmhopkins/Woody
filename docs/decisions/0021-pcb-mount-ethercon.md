@@ -34,9 +34,10 @@ main board down and mount it directly to that."*
    same-numbered pin of `J-UMB`, and it carries nothing else.
 
 3. **`J-UMB` is now a 1 × 8, 2.54 mm right-angle pin header, soldered into
-   both boards.** Its short legs go through the adapter and its long legs
-   through a **tongue of the main board** that runs from the main board's
-   tail end to the adapter's rear face. Pin N is still etherCON pin N, so
+   both boards.** Its insulator lies on a **tongue of the main board**, its
+   tails go down through the tongue and its posts through the adapter. The
+   tongue runs from the main board's tail end to the adapter's rear face.
+   Pin N is still etherCON pin N, so
    every "`J-UMB` pin N" on the carrier's pages still means the same
    conductor. There is no cable and no mated contact between the etherCON
    and the main board. `CBL-UMB-PATCH` is gone.
@@ -109,11 +110,17 @@ ADR 0004 counted every contact interface as a cost.
   standard RJ45 plug" and excludes the NE8MC6-MO and NKE6S* cables. It does
   not name the NE8MX, the NE8MC's successor (`J-UMBILICAL-CABLE`).
 
+**`J-UMB`'s part** was chosen the same day: hanxia HX PZ2.54-1x8P WZ
+(`hardware/interfaces/spi-link/bom.csv`). Its drawing
+(`datasheets/connectors/HANXIA-HX-PZ2.54-1x8P-WZ.pdf`) settles the insulator
+and row height in `boards.umb_joint_*`. The 6.00 mm posts pass the adapter
+with enough standing in front to trim, and the 3.00 mm tails pass the 1.2 mm
+tongue.
+
 ## Open, and what decides each
 
 | Item | Decided by |
 |---|---|
-| `J-UMB`'s part, and its insulator and row height (`boards.umb_joint_*`) | M4, with the part |
 | The recess margin round the flange and the PUSH tab | M4, with the cable connector in hand |
 | The mounting screws' part and length for a 3 mm panel | M4, with the connector |
 | Whether the NE8MX latches in the NE8FAV | Before buying the cable connectors |

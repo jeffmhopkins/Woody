@@ -11,11 +11,13 @@ The Matrix is on the lid and reaches it by a ribbon into `J-MCU`. The board
 stands on the thumb plates and the oak (ADR 0022).
 
 > **Status: schematic done, layout not started.** The sheets are the source
-> and pass KiCad's ERC; its outline and every placement the body fixes are
-> exported (`mechanical/export/main-board.dxf`, the `main` entries in
-> `mechanical/export/pcb-geometry.echo`). What the layout still has to settle
-> is listed under *Open*. The thumb switch positions are provisional until
-> M2/M3, as the key boards' are.
+> and pass KiCad's ERC. Every part has its footprint and bought part on its
+> symbol (`Footprint`, `Manufacturer`, `MPN`, `LCSC`, `Assembly`), from
+> selections whose datasheets are banked, except those under *Open*. The
+> board's outline and every placement the body fixes are exported
+> (`mechanical/export/main-board.dxf`, the `main` entries in
+> `mechanical/export/pcb-geometry.echo`). The thumb switch positions are
+> provisional until M2/M3, as the key boards' are.
 
 What each circuit does, and why, is on its page:
 - [`carrier.md`](../../carrier/carrier.md), the board's own page, and its
@@ -41,7 +43,7 @@ What each circuit does, and why, is on its page:
 | `main-board.kicad_sch` (+ the circuit sheets it places) | **Source.** Every connection, and each part's identity (ADR 0019) |
 | `board-netlist.yaml` | Exported from the sheets (`tools/kicad.py export hardware/boards/main-board`), with KiCad's ERC over the whole hierarchy |
 | `*.sch.png` | Renders, recorded in `hardware/SHEETS.csv` |
-| `fp-lib-table` | Registers `hardware/lib/woody.pretty` (the KS-33 footprint) for this project |
+| `fp-lib-table` | Registers `hardware/lib/woody.pretty` (the KS-33, `J-CHAIN` and MPXV4006DP footprints) for this project |
 
 The root sheet places, once per instance:
 - **the six carrier circuits**;
@@ -128,7 +130,10 @@ key-board mode reads `pcb-geometry.echo` by cluster, and this board is `main`):
 
 | Item | Decided by |
 |---|---|
-| **Footprints and bought parts** (`Footprint`, `Manufacturer`, `MPN`, `LCSC`, `Assembly` on every symbol) | The part selections banked for this board; set on the sheets with `tools/kicad.py set-field` |
+| **`J-MCU`'s footprint is KiCad's bare 2 × 12 1.27 mm pad grid.** The XKB header wants 0.70 drills and its shroud's outline and courtyard [ds `XKB-X1270WR-2x12A-9TV01.pdf`], so it gets a `woody.pretty` footprint the way `J-CHAIN`'s Samtec did | Drawn at layout, from the banked drawing |
+| **`E1` (`MECH-GNDBOND`) has no footprint.** The row's ring terminal wants an M3 plated hole on `PWR_GND` with room round it for the ring, washer and nut. A `PWR_GND` pad under one of the thumb-plate mounts would bond the plate with no extra part, if that plate is the one the row means and is bare aluminium | The owner |
+| **The regulator block holds `U-BUCK` and one can, not four parts.** `U-BUCK`, `C-STRIP-BULK`, `C-BUCK-IN` and `L-BUCK-IN` together take about twice the block's area. Only `U-BUCK` and `C-STRIP-BULK` need its height; `C-BUCK-IN` (5.8 mm) and `L-BUCK-IN` (2.8 mm) go where the room over them is enough (`mechanical/drc.echo`, *main board parts room under the key boards*) | Layout |
+| **`R-SPI-SER` and `R-CHAIN-SER` run at 87 % of their rating under a sustained output fault**: 33 mA through 100 Ω is 109 mW against 125 mW at 70 °C [calc, ds `UNIROYAL-THICK-FILM-CHIP-RESISTOR-0805W8F.pdf` p.4]. Inside the rating; a 1206 would give margin | The owner, before ordering |
 | **`A1` (the Matrix) has no footprint**: it is on the lid, and is on the sheet for its pad-to-pin map | The layout skips a part with no footprint |
 | **The spare positions' switches (`sw+`, `sw-`) are not fitted** (`config/key-layout.yaml` `spare_bits_switches`), but their network is. The switch sits in the shared key-network sheet | Marked not-fitted on this board at layout |
 | **`NT1` and `NT2` are net ties**: `NT1` at `J-UMB` pin 8 (ADR 0018), `NT2` at the analog star (`carrier.md` §2) | Placed there at layout |

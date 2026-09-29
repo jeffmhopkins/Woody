@@ -41,14 +41,14 @@ components:
 
   D-TVS-BREATH-SIG:
     of: D-TVS-BREATH
-    value: "PESD12VS1UB or equivalent 12V-standoff ESD diode"
+    value: "PESD12VS1UA or equivalent 12V-standoff ESD diode"
     drawn_as: D-TVS-BREATH
     pins: [A, K]
     note: "AT THE CONNECTOR, 12 V standoff - above the sensor's full scale so it never conducts in play"
 
   D-TVS-BREATH-RET:
     of: D-TVS-BREATH
-    value: "PESD12VS1UB or equivalent 12V-standoff ESD diode"
+    value: "PESD12VS1UA or equivalent 12V-standoff ESD diode"
     pins: [A, K]
     note: "The second of the pair, on the AGND conductor"
 

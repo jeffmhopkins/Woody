@@ -15,7 +15,7 @@ ECHO: "PCB", "right_hand", "switch", "RH3", 198, 28.5, 0
 ECHO: "PCB", "right_hand", "switch", "RH4", 216, 19.5, 0
 ECHO: "PCB", "right_hand", "switch", "RH5", 216, 37.5, 0
 ECHO: "PCB", "right_hand", "switch", "RH6", 234, 19.5, 0
-ECHO: "PCB", "right_hand", "chain", "J-CHAIN", 179.5, 42.015, 1, 13.97, 7.86
+ECHO: "PCB", "right_hand", "chain", "J-CHAIN", 178, 42.015, 1, 13.97, 7.86
 ECHO: "PCB", "right_hand", "standoff", "M2.5", 148.6, 11.1, 2.7, 6.17, 4.9
 ECHO: "PCB", "right_hand", "standoff", "M2.5", 148.6, 45.9, 2.7, 6.17, 4.9
 ECHO: "PCB", "right_hand", "standoff", "M2.5", 247.5, 11.1, 2.7, 6.17, 4.9
@@ -30,23 +30,23 @@ ECHO: "PCB", "main", "switch", "RT2", 158, 38.5, 0
 ECHO: "PCB", "main", "switch", "RT3", 198, 18.5, 180
 ECHO: "PCB", "main", "switch", "RT4", 198, 38.5, 0
 ECHO: "PCB", "main", "chain", "J-CHAIN-LH", 78.5, 42.015, 1, 13.97, 7.86
-ECHO: "PCB", "main", "chain", "J-CHAIN-RH", 179.5, 42.015, 1, 13.97, 7.86
-ECHO: "PCB", "main", "connector", "J-MCU", 244.1, 250.1, 28.5, 18.5, 1
-ECHO: "PCB", "main", "connector", "J-UMB", 300.8, 303.3, 21.5, 8, 2.54, 1.27
+ECHO: "PCB", "main", "chain", "J-CHAIN-RH", 178, 42.015, 1, 13.97, 7.86
+ECHO: "PCB", "main", "connector", "J-MCU", 242.3, 250.1, 28.5, 21.54, 1
+ECHO: "PCB", "main", "connector", "J-UMB", 300.8, 303.3, 21.5, 8, 2.54, 1.25
 ECHO: "PCB", "main", "part", "U-BREATH", 14.15, 40.1, 0, 12.3, 17.8
-ECHO: "PCB", "main", "part", "REGULATOR-BLOCK", 237.6, 41.5, 0, 10, 15, 12.5
-ECHO: "PCB", "main", "strip", "LED", 20.75, 23.5, 221.85, 10
+ECHO: "PCB", "main", "part", "REGULATOR-BLOCK", 235.8, 41.5, 0, 10, 15, 12.5
+ECHO: "PCB", "main", "strip", "LED", 20.75, 23.5, 220.05, 10
 ECHO: "PCB", "main", "standoff", "M2.5", 11.5, 11.5, 2.7, 6.17, 4.9, "oak"
 ECHO: "PCB", "main", "standoff", "M2.5", 70, 11.5, 2.7, 6.17, 4.9, "plate"
 ECHO: "PCB", "main", "standoff", "M2.5", 178, 11.5, 2.7, 6.17, 4.9, "plate"
-ECHO: "PCB", "main", "standoff", "M2.5", 211.05, 11.5, 2.7, 6.17, 4.9, "oak"
-ECHO: "PCB", "main", "standoff", "M2.5", 211.05, 45.5, 2.7, 6.17, 4.9, "oak"
+ECHO: "PCB", "main", "standoff", "M2.5", 211.15, 11.5, 2.7, 6.17, 4.9, "oak"
+ECHO: "PCB", "main", "standoff", "M2.5", 211.15, 45.5, 2.7, 6.17, 4.9, "oak"
 ECHO: "PCB", "main", "standoff", "M2.5", 247.1, 11.5, 2.7, 6.17, 4.9, "oak"
 ECHO: "PCB", "main", "standoff", "M2.5", 247.1, 45.5, 2.7, 6.17, 4.9, "oak"
 ECHO: "PCB", "main", "keepout", "under key board left_hand", 37, 7.5, 125.1, 49.5, 14.3
 ECHO: "PCB", "main", "keepout", "under key board right_hand", 145, 7.5, 251.1, 49.5, 14.3
 ECHO: "PCB", "main", "keepout", "elsewhere", 7.5, 7.5, 303.3, 49.5, 19.6
 ECHO: "PCB", "main", "keepout", "ribbon left_hand", 70.14, 35.03, 79.9, 49, 0
-ECHO: "PCB", "main", "keepout", "ribbon right_hand", 171.14, 35.03, 180.9, 49, 0
-ECHO: "PCB", "main", "keepout", "Matrix ribbon", 250.1, 20.88, 275.1, 36.12, 2.1
+ECHO: "PCB", "main", "keepout", "ribbon right_hand", 169.64, 35.03, 179.4, 49, 0
+ECHO: "PCB", "main", "keepout", "Matrix ribbon", 250.1, 20.88, 275.1, 36.12, 2.15
 ECHO: "PCB", "main", "board", "thickness", 1.2, "smt_height_max", 2.3, "side", "parts on top; the thumb switches from below, their footprints on the underside"

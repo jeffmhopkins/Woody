@@ -33,7 +33,7 @@ components:
     note: 'ELECTROLYTIC, AND THE ESR IS THE POINT: the input LC''s damping calculation assumes real ESR, and a low-ESR
       ceramic raises Q until the paragraph stops being true'
   C-STRIP-BULK:
-    value: 470-1000uF
+    value: 470uF 25V
     pins:
     - 1
     - 2
@@ -55,13 +55,13 @@ components:
     note: Across the power pair
   D-USBOR-A:
     of: D-USBOR
-    value: 1N5817 (DO-41) or SS14 (SMA)
+    value: SS14
     pins:
     - A
     - K
     note: 'Between the buck and the dev board''s 5V pin: the OR node is that pin, and USB can back-feed it'
   L-BUCK-IN:
-    value: 10-47uH
+    value: 22uH
     pins:
     - 1
     - 2

@@ -13,10 +13,10 @@ ALLOWED 156 (by rule in mechanical/clash-allow.yaml)
         67.9 mm3  USB-C lead  x  USB-C plug   - the extension's cable enters its own plug and receptacle
         31.0 mm3  breath trap  x  breath tube   - the tube enters the trap at both ends - one air path
         30.5 mm3  main board insert 1  x  oak bottom   - the threaded insert is set into a blind hole in the oak bottom's inside face; the hole is not modelled (ADR 0022)
-        30.5 mm3  main board insert 6  x  oak bottom   - the threaded insert is set into a blind hole in the oak bottom's inside face; the hole is not modelled (ADR 0022)
-        30.5 mm3  main board insert 7  x  oak bottom   - the threaded insert is set into a blind hole in the oak bottom's inside face; the hole is not modelled (ADR 0022)
         30.5 mm3  main board insert 4  x  oak bottom   - the threaded insert is set into a blind hole in the oak bottom's inside face; the hole is not modelled (ADR 0022)
+        30.5 mm3  main board insert 6  x  oak bottom   - the threaded insert is set into a blind hole in the oak bottom's inside face; the hole is not modelled (ADR 0022)
         30.5 mm3  main board insert 5  x  oak bottom   - the threaded insert is set into a blind hole in the oak bottom's inside face; the hole is not modelled (ADR 0022)
+        30.5 mm3  main board insert 7  x  oak bottom   - the threaded insert is set into a blind hole in the oak bottom's inside face; the hole is not modelled (ADR 0022)
         30.1 mm3  breath sensor  x  breath tube to sensor   - the tube pushes onto the sensor's P1 barb
         28.2 mm3  U-bolt  x  U-bolt nut 1   - the nuts thread onto the legs
         28.2 mm3  U-bolt  x  U-bolt nut 2   - the nuts thread onto the legs
@@ -78,8 +78,8 @@ ALLOWED 156 (by rule in mechanical/clash-allow.yaml)
         21.6 mm3  cap socket LT1  x  switch LT1   - the MX stem enters the cap's cross socket, modelled as its solid boss. ONLY the socket: the cap's shell and its travel must clear the switch (owner, 2026-09-28), so they have no rule
         21.6 mm3  cap socket LH1  x  switch LH1   - the MX stem enters the cap's cross socket, modelled as its solid boss. ONLY the socket: the cap's shell and its travel must clear the switch (owner, 2026-09-28), so they have no rule
         17.1 mm3  main board screw 4  x  oak bottom   - the screw's tip runs into the insert's blind hole, below the insert's own length; the hole is not modelled
-        17.1 mm3  main board screw 5  x  oak bottom   - the screw's tip runs into the insert's blind hole, below the insert's own length; the hole is not modelled
         17.1 mm3  main board screw 6  x  oak bottom   - the screw's tip runs into the insert's blind hole, below the insert's own length; the hole is not modelled
+        17.1 mm3  main board screw 5  x  oak bottom   - the screw's tip runs into the insert's blind hole, below the insert's own length; the hole is not modelled
         17.1 mm3  main board screw 7  x  oak bottom   - the screw's tip runs into the insert's blind hole, below the insert's own length; the hole is not modelled
         17.1 mm3  main board screw 1  x  oak bottom   - the screw's tip runs into the insert's blind hole, below the insert's own length; the hole is not modelled
         17.1 mm3  parts main board  x  switch LT3   - the switch pins and centre pole stand proud of the key board, by the pole's and pins' reach below the seat less switch.pcb_below_seat and boards.key_board_t, between its parts; a layer envelope cannot follow the placement
@@ -95,10 +95,10 @@ ALLOWED 156 (by rule in mechanical/clash-allow.yaml)
         17.1 mm3  parts main board  x  switch RT3   - the switch pins and centre pole stand proud of the key board, by the pole's and pins' reach below the seat less switch.pcb_below_seat and boards.key_board_t, between its parts; a layer envelope cannot follow the placement
         17.1 mm3  parts main board  x  switch RT2   - the switch pins and centre pole stand proud of the key board, by the pole's and pins' reach below the seat less switch.pcb_below_seat and boards.key_board_t, between its parts; a layer envelope cannot follow the placement
         17.1 mm3  parts main board  x  switch RT4   - the switch pins and centre pole stand proud of the key board, by the pole's and pins' reach below the seat less switch.pcb_below_seat and boards.key_board_t, between its parts; a layer envelope cannot follow the placement
-        17.1 mm3  parts right_hand  x  switch RH2   - the switch pins and centre pole stand proud of the key board, by the pole's and pins' reach below the seat less switch.pcb_below_seat and boards.key_board_t, between its parts; a layer envelope cannot follow the placement
         17.1 mm3  parts right_hand  x  switch RH4   - the switch pins and centre pole stand proud of the key board, by the pole's and pins' reach below the seat less switch.pcb_below_seat and boards.key_board_t, between its parts; a layer envelope cannot follow the placement
         17.1 mm3  parts right_hand  x  switch RH3   - the switch pins and centre pole stand proud of the key board, by the pole's and pins' reach below the seat less switch.pcb_below_seat and boards.key_board_t, between its parts; a layer envelope cannot follow the placement
         17.1 mm3  parts right_hand  x  switch RH6   - the switch pins and centre pole stand proud of the key board, by the pole's and pins' reach below the seat less switch.pcb_below_seat and boards.key_board_t, between its parts; a layer envelope cannot follow the placement
+        17.1 mm3  parts right_hand  x  switch RH2   - the switch pins and centre pole stand proud of the key board, by the pole's and pins' reach below the seat less switch.pcb_below_seat and boards.key_board_t, between its parts; a layer envelope cannot follow the placement
         17.1 mm3  parts right_hand  x  switch RH1   - the switch pins and centre pole stand proud of the key board, by the pole's and pins' reach below the seat less switch.pcb_below_seat and boards.key_board_t, between its parts; a layer envelope cannot follow the placement
         17.1 mm3  parts right_hand  x  switch RH5   - the switch pins and centre pole stand proud of the key board, by the pole's and pins' reach below the seat less switch.pcb_below_seat and boards.key_board_t, between its parts; a layer envelope cannot follow the placement
         15.7 mm3  breath trap  x  breath tube to sensor   - the tube enters the trap at both ends - one air path

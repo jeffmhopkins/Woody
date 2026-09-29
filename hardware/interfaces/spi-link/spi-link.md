@@ -95,9 +95,8 @@ mated contact inside the body. So:
 **Netlisted here, beside both etherCONs**, because it carries this circuit's
 pin map and all eight of its nets: each net is `J-UMB`, `J-UMB-INST` and
 `J-UMB-MOD` pin N, and the carrier's nets reach it as this circuit's ports.
-`J-UMB`'s part is open — its insulator is an envelope in `config/body.yaml`
-`boards.umb_joint_*` `[from memory]` — and is decided at M4 with the part
-(the rows in this circuit's [`bom.csv`](bom.csv)).
+`J-UMB`'s part is chosen (the row in this circuit's [`bom.csv`](bom.csv));
+its drawing settles the insulator in `config/body.yaml` `boards.umb_joint_*`.
 
 ---
 

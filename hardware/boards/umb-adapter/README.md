@@ -3,7 +3,7 @@
 The small board behind the tail cap that carries the instrument's etherCON
 (`J-UMBILICAL-INST`, an NE8FAV) and joins it to the main board (ADR 0021). Eight
 tracks, each etherCON pin to the same-numbered pin of `J-UMB`, the right-angle
-header whose short legs are soldered here and long legs into the main board's
+header whose posts are soldered here and tails into the main board's
 tongue. Nothing else is on it: the clamps are on the main board at `J-UMB`, and
 the connector's G (shield) tab goes nowhere — its housing is plastic, isolated
 to panel ground [ds].
@@ -14,7 +14,7 @@ to panel ground [ds].
 
 | File | What it is |
 |---|---|
-| `umb-adapter.kicad_sch` | **Source.** `J1` (the NE8FAV) and `J2` (the adapter's end of `J-UMB`) |
+| `umb-adapter.kicad_sch` | **Source.** `J1` (the NE8FAV) and `J2` (the adapter's end of `J-UMB`: the header's posts, a straight 1 × 8 row here). `J2` is the same part as the main board's `J-UMB`, bought and fitted once with the main board, so its `Assembly` is `none` |
 | `board-netlist.yaml` | Exported (`tools/kicad.py export hardware/boards/umb-adapter`) |
 | `*.sch.png` | Renders, recorded in `hardware/SHEETS.csv` |
 
@@ -25,8 +25,7 @@ sheet draws the adapter's half of it.
 
 | Item | Decided by |
 |---|---|
-| The NE8FAV's footprint (8 contacts, G, four pegs, the slot — `J-UMBILICAL-INST`'s row gives the drawing's dimensions) | Drawn into `hardware/lib/woody.pretty` at layout |
-| `J2` is the same part as the main board's `J-UMB` (one header, two boards): bought and fitted once, with the main board | Its `Assembly` field (`none` here) with the parts |
+| The NE8FAV's footprint (`woody:Neutrik_NE8FAV_etherCON_Vertical`, `hardware/lib/README.md`) is drawn from Neutrik's layout, mirrored because Neutrik draws it from the solder side | The first adapter, with the connector pushed into it before soldering |
 | The pairs side by side on the adapter (`spi-link.md`) | Layout |
 
 ## Revisions

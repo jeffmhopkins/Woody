@@ -67,7 +67,7 @@ networks:
 parts:
   U1:  [198.5, 44.0, 90]     # U-KEYS, the register
   C7:  [192.0, 41.8, 90]     # C-DECOUPLE-165, beside pin 8 at the register's J-CHAIN end
-  C8:  [167.5, 42.0, 90]     # C-BULK-CHAIN, beside J-CHAIN's 3V3 pin
+  C8:  [166.0, 42.0, 90]     # C-BULK-CHAIN, beside J-CHAIN's 3V3 pin
   # Bring-up test pads (TP-CHAIN), in the order of the register's own pins above them
   TP1: [191.0, 36.0, 0]       # QH
   TP2: [194.5, 36.0, 0]       # SER

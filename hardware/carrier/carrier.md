@@ -543,8 +543,8 @@ Ordered by what blocks what. The first two block layout.
 > less urgent — they are just not on this board's critical path. They are now
 > on `hardware/cluster/cluster-boards.md`, which proposes an answer to both.
 - **The etherCON at the instrument end is decided** (ADR 0021): an NE8FAV on
-  its own adapter, joined to this board's tongue by `J-UMB`. What is open is
-  `J-UMB`'s part and the tail cap's recess margin, both M4, and whether the
+  its own adapter, joined to this board's tongue by `J-UMB`. `J-UMB`'s part
+  is chosen. What is open is the tail cap's recess margin (M4) and whether the
   NE8MX cable connector latches in it (`J-UMBILICAL-CABLE`).
 - **The breath trap "clearable without disassembly"** (ADR 0003). The sensor
   is reached with the lid off and replaced with an iron (`breath-sense-link.md`,

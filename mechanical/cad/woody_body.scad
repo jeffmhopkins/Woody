@@ -795,8 +795,8 @@ module pcb_geometry() {
     // across, and the mouth's direction (+1 the tail) - the ribbon comes in
     // over the tongue.
     echo("PCB", "main", "connector", "J-MCU", jm_x0, jm_x1, jm_y, jm_sz[1], 1);
-    // J-UMB: the right-angle header whose long legs go down through the
-    // tongue; its insulator's extent along x (it stands against the
+    // J-UMB: the right-angle header whose tails go down through the
+    // tongue and whose posts go through the adapter; its insulator's extent along x (it stands against the
     // adapter's rear face), centre y, pin count, pitch, and its row's
     // height above the top face, where it meets the adapter.
     echo("PCB", "main", "connector", "J-UMB", ua_x0 - boards_umb_joint_d, ua_x0, ec_c[0], 8, 2.54, boards_umb_joint_row_h);
@@ -1174,8 +1174,11 @@ function so_clear(p) = let(r = mb_keep_d / 2 + 0.5)
     && min([for (cl = ["left_thumb", "right_thumb"]) let(b = thumb_box(cl))
             max(rect_gap(p, [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2], [b[2] - b[0], b[3] - b[1]], 0),
                 min(p[0] - b[0], b[2] - p[0], p[1] - b[1], b[3] - p[1]))]) >= mb_plate_r;
+// Each candidate is nudged along the board by up to 3 mm before it is given
+// up, so a mount does not vanish because a neighbour's envelope grew a little.
 cb_standoffs = [for (x = [cb_x[0] + 4, lt_rest_xy[0], (gap_x[0] + gap_x[1]) / 2, rt_rest[0], (rt_rest[0] + jm_x0) / 2, cb_x[1] - 4],
-                     y = [cb_y[0] + 4, cb_y[1] - 4]) if (so_clear([x, y])) [x, y]];
+                     y = [cb_y[0] + 4, cb_y[1] - 4])
+                   let(ok = [for (d = [0, 1, -1, 2, -2, 3, -3]) if (so_clear([x + d, y])) [x + d, y]]) if (len(ok) > 0) ok[0]];
 module centre_board_3d() {
     P(C_PCB, false, "main board") translate([0, 0, cb_z]) linear_extrude(switch_pcb_t) cb_2d();
     P(C_ENVELOPE, false, "parts main board") translate([0, 0, cb_top]) linear_extrude(boards_smt_h) difference() {

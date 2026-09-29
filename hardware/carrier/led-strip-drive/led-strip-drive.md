@@ -3,12 +3,12 @@
 **Status:** Split out of `carrier.md` 2026-09-21 (Phase B). **One strip since
 2026-09-26** ([ADR 0016](../../../docs/decisions/0016-one-strip-on-the-centre-board.md)):
 it lies on the main board and lights both acrylic sides, so there is one
-data line, one connector and one set of parts. The two-strip version is in
+data line, one set of solder pads (`J-LED`) and one set of parts. The two-strip version is in
 [`notes.md`](notes.md).
 
 The 74AHCT125 that lifts the ESP32-S3's 3.3 V data to the WS2815 strip, the
 pull-down that holds it quiet through reset, and the series damping to the
-strip connector. **The 12 V strip power and `C-STRIP-BULK` are not here** —
+strip's pads. **The 12 V strip power and `C-STRIP-BULK` are not here** —
 they belong to
 [`power-entry-instrument`](../power-entry-instrument/power-entry-instrument.md).
 
@@ -33,7 +33,7 @@ The `Dir` and `Peer` columns are defined once in
 | 5 V | in | `carrier/power-entry-instrument` | — | The buck. The 74AHCT125's rail; TTL thresholds on this rail are why 3.3 V in reads high |
 | `J-LED` `DI` | out | the WS2815 strip | — | Through `R-LED-SER` |
 | `J-LED` `BI` | ref | the head of the strip | — | A **ground** connection, not a driven one — see below |
-| `+12V`, GND at `J-LED` | — | `carrier/power-entry-instrument` | — | Strip power passes through this connector but is that circuit's net |
+| `+12V`, GND at `J-LED` | — | `carrier/power-entry-instrument` | — | Strip power passes through these pads but is that circuit's net |
 | `OE_INST` ×4 | ref | — | — | `U-LVLSHIFT`'s four enables, tied LOW on this board, which is why the pull-downs are needed rather than optional. **Not `OE_MOD`**, the module buffer's |
 
 ## §5 LED data
@@ -127,4 +127,4 @@ that value — do not re-introduce a different number into the drawing.
 | `U-LVLSHIFT` | 74AHCT125 SOIC-14 | LED data, 5 V rail. **Gate count depends on `BI`** | `[repo]`; `BI` `[from memory]` |
 | **`R-LED-PD`** | **10 kΩ** | **Proposed — holds the strip's data low through reset** | proposed |
 | **`R-LED-SER`** | **330 Ω** (useful range 100–330) | **Proposed — damps the data line at its source** | proposed |
-| **`J-LED`** | **4-way** | **Proposed — 12 V, GND, `DI`, `BI`.** `BI` is a **ground** connection at the head of the strip, not a driven one (§5, verified against the datasheet 2026-09-21) — so it is still a 4-way connector but only three nets, and `BI` can tie to the same GND pin's net at the strip end | proposed |
+| **`J-LED`** | **4 solder pads** | **12 V, GND, `DI`, `BI` — the strip's leads solder straight to the board (it lies on it, ADR 0016); no connector, so no plug to reverse after the build. Silkscreen each pad and meter 12 V to GND before first power.** `BI` is a **ground** connection at the head of the strip, not a driven one (§5, verified against the datasheet 2026-09-21) — so it is four pads but only three nets, and `BI` can tie to the same GND pad's net at the strip end | selected |
