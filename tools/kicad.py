@@ -314,7 +314,10 @@ def ledger_set(d, outs, inputs, kind="sch"):
     """Record renders (kind 'sch' or 'pcb') and the blobs they were made from."""
     rows = ledger_rows()
     rel = os.path.relpath(d, ROOT)
-    for k in [k for k in rows if os.path.dirname(k).startswith(rel) and (".pcb-" in k or "/fab/" in k) == (kind == "pcb")]:
+    # this directory's own renders and its fab/ - not a circuit nested under it
+    # (hardware/carrier holds five circuits of its own)
+    mine = lambda k: os.path.dirname(k) in (rel, os.path.join(rel, "fab"))
+    for k in [k for k in rows if mine(k) and (".pcb-" in k or "/fab/" in k) == (kind == "pcb")]:
         del rows[k]
     ins = " ".join(f"{os.path.relpath(p, ROOT)}@{blob(p)}" for p in inputs)
     for o in outs:
