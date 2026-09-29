@@ -1,0 +1,882 @@
+(kicad_sch (version 20250114) (generator "sch.py") (generator_version "9.0")
+  (uuid b85ef4e1-b1b5-5711-b0e7-36990bb72a4d)
+  (paper "A3")
+  (title_block
+    (title "DAC8568C (hardware/module/dac8568)")
+    (comment 5 "circuit: module/dac8568")
+    (comment 6 "page: dac8568.md")
+    (comment 7 "title: DAC8568C")
+    (date "")
+    (rev "")
+    (company "Woody")
+    (comment 1 "SOURCE for this circuit - edit in KiCad 9. netlist.yaml is exported from it: python3 tools/kicad.py export hardware/module/dac8568")
+    (comment 2 "Part facts ride on each symbol: Row (BOM row), Pins + Pins_source (pin map and its datasheet), Note")
+    (comment 3 "ADR 0004, ADR 0006, ADR 0019 - migrated from its hand-written netlist.yaml, compared part by part and net by net")
+    (comment 4 "Ports are hierarchical labels (Dir, From/To, Figure); the module main board places this sheet")
+  )
+  (lib_symbols
+    (symbol "Device:C"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0.254)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "C"
+			(at 0.635 2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "C"
+			(at 0.635 -2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 0.9652 -3.81 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "cap capacitor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "C_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "C_0_1"
+			(polyline
+				(pts
+					(xy -2.032 0.762) (xy 2.032 0.762)
+				)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -2.032 -0.762) (xy 2.032 -0.762)
+				)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "C_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 2.794)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 2.794)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "Device:R"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "R"
+			(at 2.032 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "R"
+			(at 0 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at -1.778 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "R res resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "R_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "R_0_1"
+			(rectangle
+				(start -1.016 -2.54)
+				(end 1.016 2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "R_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "Jumper:SolderJumper_2_Open"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(property "Reference" "JP"
+			(at 0 2.032 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "SolderJumper_2_Open"
+			(at 0 -2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Solder Jumper, 2-pole, open"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "solder jumper SPST"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "SolderJumper*Open*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "SolderJumper_2_Open_0_1"
+			(polyline
+				(pts
+					(xy -0.254 1.016) (xy -0.254 -1.016)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(arc
+				(start -0.254 -1.016)
+				(mid -1.2656 0)
+				(end -0.254 1.016)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(arc
+				(start -0.254 -1.016)
+				(mid -1.2656 0)
+				(end -0.254 1.016)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(arc
+				(start 0.254 1.016)
+				(mid 1.2656 0)
+				(end 0.254 -1.016)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(arc
+				(start 0.254 1.016)
+				(mid 1.2656 0)
+				(end 0.254 -1.016)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0.254 1.016) (xy 0.254 -1.016)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "SolderJumper_2_Open_1_1"
+			(pin passive line
+				(at -3.81 0 0)
+				(length 2.54)
+				(name "A"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 3.81 0 180)
+				(length 2.54)
+				(name "B"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "woody:DAC8568xPW"
+        (exclude_from_sim no)
+        (in_bom yes)
+        (on_board yes)
+        (property "Reference" "U"
+          (at -7.62 13.97 0)
+          (effects
+            (font
+              (size 1.27 1.27))))
+        (property "Value" "DAC8568xPW"
+          (at 7.62 13.97 0)
+          (effects
+            (font
+              (size 1.27 1.27))))
+        (property "Footprint" "Package_SO:TSSOP-16_4.4x5mm_P0.65mm"
+          (at 0 -13.97 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "Datasheet" "datasheets/analog/DAC8568CIPW.pdf"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "Description" "DAC8568: 16-bit octal voltage-output DAC with 2.5 V internal reference, SPI, TSSOP-16 (pin names from SBAS430E, the banked datasheet)"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "ki_keywords" "DAC SPI 8-channel 16-bit"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "ki_fp_filters" "TSSOP*4.4x5mm*P0.65mm*"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (symbol "DAC8568xPW_0_1"
+          (rectangle
+            (start -7.62 12.7)
+            (end 7.62 -12.7)
+            (stroke
+              (width 0.254)
+              (type default))
+            (fill
+              (type background))))
+        (symbol "DAC8568xPW_1_1"
+          (pin input line
+            (at -10.16 10.16 0)
+            (length 2.54)
+            (name "~{LDAC}"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "1"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input line
+            (at -10.16 7.62 0)
+            (length 2.54)
+            (name "~{CLR}"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "9"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin passive line
+            (at -10.16 0 0)
+            (length 2.54)
+            (name "VREFIN/VREFOUT"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "8"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input line
+            (at -10.16 -2.54 0)
+            (length 2.54)
+            (name "~{SYNC}"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "2"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input line
+            (at -10.16 -7.62 0)
+            (length 2.54)
+            (name "SCLK"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "16"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input line
+            (at -10.16 -10.16 0)
+            (length 2.54)
+            (name "DIN"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "15"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin power_in line
+            (at 0 15.24 270)
+            (length 2.54)
+            (name "AVDD"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "3"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin power_in line
+            (at 0 -15.24 90)
+            (length 2.54)
+            (name "GND"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "14"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin output line
+            (at 10.16 7.62 180)
+            (length 2.54)
+            (name "VOUTA"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "4"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin output line
+            (at 10.16 5.08 180)
+            (length 2.54)
+            (name "VOUTB"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "13"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin output line
+            (at 10.16 2.54 180)
+            (length 2.54)
+            (name "VOUTC"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "5"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin output line
+            (at 10.16 0 180)
+            (length 2.54)
+            (name "VOUTD"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "12"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin output line
+            (at 10.16 -2.54 180)
+            (length 2.54)
+            (name "VOUTE"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "6"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin output line
+            (at 10.16 -5.08 180)
+            (length 2.54)
+            (name "VOUTF"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "11"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin output line
+            (at 10.16 -7.62 180)
+            (length 2.54)
+            (name "VOUTG"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "7"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin output line
+            (at 10.16 -10.16 180)
+            (length 2.54)
+            (name "VOUTH"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "10"
+              (effects
+                (font
+                  (size 1.27 1.27))))))
+        (embedded_fonts no))
+  )
+  (symbol (lib_id "woody:DAC8568xPW") (at 40.64 60.96 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 8cb97beb-2921-59b3-bf5c-a6aa7e530ce8)
+    (property "Reference" "U-DAC" (at 33.02 46.99 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "DAC8568ICPW" (at 48.26 46.99 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "" (at 40.64 74.93 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 40.64 60.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "U-DAC" (at 40.64 60.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "LDAC=1(~{LDAC}) SYNC=2(~{SYNC}) AVDD=3(AVDD) VOUTA=4(VOUTA) VOUTB=13(VOUTB) VOUTC=5(VOUTC) VOUTD=12(VOUTD) VOUTE=6(VOUTE) VOUTF=11(VOUTF) VOUTG=7(VOUTG) VOUTH=10(VOUTH) VREFIN/VREFOUT=8(VREFIN/VREFOUT) CLR=9(~{CLR}) GND=14(GND) DIN=15(DIN) SCLK=16(SCLK)" (at 40.64 60.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Grade C: gain-2 reference, clears to ZERO scale, and AVDD 5.0-5.5 V is a condition of the grade rather than a preference. The BOM row carries the order code, which is not the banked file's name" (at 40.64 60.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/analog/DAC8568CIPW.pdf PIN DESCRIPTIONS (TSSOP-16): 1 LDAC, 2 SYNC, 3 AVDD, 4 VOUTA, 5 VOUTC, 6 VOUTE, 7 VOUTG, 8 VREFIN/VREFOUT, 9 CLR, 10 VOUTH, 11 VOUTF, 12 VOUTD, 13 VOUTB, 14 GND, 15 DIN, 16 SCLK" (at 40.64 60.96 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 6f65462e-b71f-5329-9c12-132bc2d0397b))
+    (pin "10" (uuid af8e857b-635a-5341-b545-df9e0e3b7cfc))
+    (pin "11" (uuid 4b82629a-0fd1-5a31-9519-ab2fbc7e342c))
+    (pin "12" (uuid d3070a3f-226b-5cfc-895c-cc8212d50684))
+    (pin "13" (uuid f1385fc8-0933-58a0-8e72-c4aea08ce7a1))
+    (pin "14" (uuid 495681c0-2466-51f3-8cd7-ff0414fa0118))
+    (pin "15" (uuid 7405b19f-76b3-5040-b126-c3b9cefec146))
+    (pin "16" (uuid 46487ac0-e0e8-5cdd-82d8-3bf4290a1ea8))
+    (pin "2" (uuid 375b6b7b-3aba-5436-bbf7-a5467c2d8114))
+    (pin "3" (uuid 53184dc1-f2c2-5c63-9a39-730ebbf0ebaa))
+    (pin "4" (uuid f046bc8a-ae5d-5af9-8e35-bae00bf3fa3b))
+    (pin "5" (uuid f1084376-c829-5575-902d-eb1b1efdf417))
+    (pin "6" (uuid 474b93e2-52a8-5af7-9d25-9d429ea4ce13))
+    (pin "7" (uuid ab603d31-5c97-55df-a317-f639bbd11470))
+    (pin "8" (uuid 23c215b2-601a-5a4b-877c-949a9dc28289))
+    (pin "9" (uuid 178395e3-2d46-500e-ba32-a06b96ad73e0))
+    (instances (project "dac8568" (path "/b85ef4e1-b1b5-5711-b0e7-36990bb72a4d" (reference "U-DAC") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 40.64 142.24 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid b4f29d51-7ef6-5649-9262-65c2f82dafd4)
+    (property "Reference" "R-CLR-PU" (at 43.18 140.97 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "10k 1%" (at 43.18 143.51 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 39.37 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 40.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-CLR-PU" (at 40.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 40.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "PULL-UP. CLR is active low and nothing drives it, so this holds it inactive" (at 40.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 9ca8a207-63c3-5d48-be00-9b2dc751d29a))
+    (pin "2" (uuid 6efe3b93-77ca-59f7-a311-781be6be8b3c))
+    (instances (project "dac8568" (path "/b85ef4e1-b1b5-5711-b0e7-36990bb72a4d" (reference "R-CLR-PU") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 91.44 142.24 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 10535ab4-b2ad-50e1-8fd0-5fd64197c8c5)
+    (property "Reference" "R-LDAC" (at 93.98 140.97 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "0R strap" (at 93.98 143.51 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 90.17 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 91.44 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-LDAC" (at 91.44 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 91.44 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "STRAP TO GND, NOT A PULL-UP. Pin high gates the buffer-to-DAC-register transfer and no MISO exists to discover it" (at 91.44 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid c3b0f9e3-d43f-5801-990f-eee708a47621))
+    (pin "2" (uuid a846a402-1b94-566a-ab5d-4012dfda0e03))
+    (instances (project "dac8568" (path "/b85ef4e1-b1b5-5711-b0e7-36990bb72a4d" (reference "R-LDAC") (unit 1))))
+  )
+  (symbol (lib_id "Device:C") (at 142.24 142.24 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid a32e9778-9674-5c9d-89de-6b07790f0eed)
+    (property "Reference" "C-DEC-DAC" (at 144.78 140.97 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "100nF" (at 144.78 143.51 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 143.51 146.05 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 142.24 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-DECOUPLE" (at 142.24 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 142.24 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "AVDD to the star, at the pin. The DAC8568 has one supply pin" (at 142.24 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid d16ee791-e42f-5335-a1f1-18b2dd01bce1))
+    (pin "2" (uuid 3626e4d9-72a5-5f6c-95f0-a49e10fbc61c))
+    (instances (project "dac8568" (path "/b85ef4e1-b1b5-5711-b0e7-36990bb72a4d" (reference "C-DEC-DAC") (unit 1))))
+  )
+  (symbol (lib_id "Jumper:SolderJumper_2_Open") (at 193.04 142.24 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 7e03d78c-f1de-5ca3-84fa-247fdd00ca4b)
+    (property "Reference" "LK-CLR" (at 193.04 139.7 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "2-pad solder link" (at 193.04 144.78 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "LK-CLR" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Drawn_as" "LK-CLR" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "NORMALLY OPEN, and copper rather than a part. Shorted by hand it asserts CLR - the only way to assert it" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "a solder link's two pads" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 3c69fc50-128d-59b6-97d0-47d8979363fe))
+    (pin "2" (uuid 850cd7da-d372-53ce-99c8-4b690f16e794))
+    (instances (project "dac8568" (path "/b85ef4e1-b1b5-5711-b0e7-36990bb72a4d" (reference "LK-CLR") (unit 1))))
+  )
+  (wire (pts (xy 40.64 45.72) (xy 40.64 43.18)) (stroke (width 0) (type default)) (uuid 48c5e871-9712-5caa-b70e-2b528f4e0b4f))
+  (hierarchical_label "DAC_AVDD" (shape input) (at 40.64 43.18 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 546356c5-3bf1-5d49-9442-f71c48e12903)
+    (property "Dir" "in" (at 40.64 43.18 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 40.64 43.18 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dac-rail" (at 40.64 43.18 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 40.64 138.43) (xy 40.64 135.89)) (stroke (width 0) (type default)) (uuid cfb11293-01d5-54bb-a46b-154e1aa3a445))
+  (hierarchical_label "DAC_AVDD" (shape input) (at 40.64 135.89 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 9c1e30be-84fb-5dcc-896a-0adde65df485)
+    (property "Dir" "in" (at 40.64 135.89 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 40.64 135.89 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dac-rail" (at 40.64 135.89 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 142.24 138.43) (xy 142.24 135.89)) (stroke (width 0) (type default)) (uuid 21965a24-0b98-5884-8906-755cf0d842c6))
+  (hierarchical_label "DAC_AVDD" (shape input) (at 142.24 135.89 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid acf51370-4baa-51ae-b3de-89418a329d6b)
+    (property "Dir" "in" (at 142.24 135.89 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 142.24 135.89 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dac-rail" (at 142.24 135.89 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 40.64 146.05) (xy 40.64 148.59)) (stroke (width 0) (type default)) (uuid cd05735b-63b3-5da1-8d97-d36e0e3a4929))
+  (hierarchical_label "CLR" (shape input) (at 40.64 148.59 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 08c96d03-9fb2-544d-9928-1c09544e8467)
+    (property "Dir" "in" (at 40.64 148.59 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/link-supervision" (at 40.64 148.59 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 189.23 142.24) (xy 186.69 142.24)) (stroke (width 0) (type default)) (uuid 99c8fafb-e326-56b8-8fdc-92b8e92afaf6))
+  (hierarchical_label "CLR" (shape input) (at 186.69 142.24 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid f03127a8-37f9-5ffd-9e7b-cce047b6c6f0)
+    (property "Dir" "in" (at 186.69 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/link-supervision" (at 186.69 142.24 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 30.48 53.34) (xy 27.94 53.34)) (stroke (width 0) (type default)) (uuid dc4d138d-e82c-5199-b090-4dbd0c02e5f7))
+  (hierarchical_label "CLR" (shape input) (at 27.94 53.34 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid dde596fc-e03f-55ea-82dc-71965b43390e)
+    (property "Dir" "in" (at 27.94 53.34 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/link-supervision" (at 27.94 53.34 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 30.48 50.8) (xy 27.94 50.8)) (stroke (width 0) (type default)) (uuid 31fed5f5-e230-57d5-83ba-4e138495c0be))
+  (label "LDAC" (at 27.94 50.8 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 4ce2172d-f636-5193-a57c-9a5483a5d837))
+  (wire (pts (xy 91.44 138.43) (xy 91.44 135.89)) (stroke (width 0) (type default)) (uuid d3984d42-285e-50f7-ae28-a1e5a9dda9f9))
+  (label "LDAC" (at 91.44 135.89 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 628eda4e-33b1-57d8-a067-ca44c65a1084))
+  (wire (pts (xy 30.48 68.58) (xy 27.94 68.58)) (stroke (width 0) (type default)) (uuid 9b51e520-8ec4-5893-a842-756a8bb81c22))
+  (hierarchical_label "SCLK_DAC" (shape input) (at 27.94 68.58 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 6f3faa5f-cfa8-5290-a59f-260d492634a6)
+    (property "Dir" "in" (at 27.94 68.58 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/digital-and-supervision" (at 27.94 68.58 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 30.48 71.12) (xy 27.94 71.12)) (stroke (width 0) (type default)) (uuid 8dd0c5d1-de06-58a3-9c20-a2dad48cdcaf))
+  (hierarchical_label "DIN" (shape input) (at 27.94 71.12 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 57ebcb8d-0e83-57ba-a4d2-60ee92193e08)
+    (property "Dir" "in" (at 27.94 71.12 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/digital-and-supervision" (at 27.94 71.12 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 30.48 63.5) (xy 27.94 63.5)) (stroke (width 0) (type default)) (uuid c343df63-4539-564a-9bd4-857a5b675c92))
+  (hierarchical_label "SYNC" (shape input) (at 27.94 63.5 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 5da1e94f-f82f-5ccf-aeac-2a797ba7f0ee)
+    (property "Dir" "in" (at 27.94 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/digital-and-supervision" (at 27.94 63.5 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 30.48 60.96) (xy 27.94 60.96)) (stroke (width 0) (type default)) (uuid 2723ee80-62ed-5308-b5cb-4c8bd3103e28))
+  (hierarchical_label "VREFOUT" (shape output) (at 27.94 60.96 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid b01f03e0-fd3c-5f38-a537-f94c097d4194)
+    (property "Dir" "out" (at 27.94 60.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "module/pitch-stage" (at 27.94 60.96 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 50.8 53.34) (xy 53.34 53.34)) (stroke (width 0) (type default)) (uuid 850e2fe1-b424-5a31-b15d-a35f43d73522))
+  (hierarchical_label "DAC_CH1" (shape output) (at 53.34 53.34 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 15288956-2e0e-52a1-abca-233fd7abd91a)
+    (property "Dir" "out" (at 53.34 53.34 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "module/pitch-stage" (at 53.34 53.34 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 50.8 55.88) (xy 53.34 55.88)) (stroke (width 0) (type default)) (uuid 5d845757-076b-5eb2-8b04-002b50b81448))
+  (hierarchical_label "DAC_CH2" (shape output) (at 53.34 55.88 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 50a4f777-4346-5240-8b66-bea52abba29c)
+    (property "Dir" "out" (at 53.34 55.88 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "module/mod-channels" (at 53.34 55.88 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 50.8 58.42) (xy 53.34 58.42)) (stroke (width 0) (type default)) (uuid 74f0161e-27de-5060-ac65-80b9708ed8d3))
+  (hierarchical_label "DAC_CH3" (shape output) (at 53.34 58.42 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid ad8b76a2-8de8-5f68-a9d7-46334c9a43e4)
+    (property "Dir" "out" (at 53.34 58.42 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "module/mod-channels" (at 53.34 58.42 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 50.8 60.96) (xy 53.34 60.96)) (stroke (width 0) (type default)) (uuid 247e104c-1abb-5bdf-ac85-5c674ab71768))
+  (hierarchical_label "DAC_CH4" (shape output) (at 53.34 60.96 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 1737cada-288a-5e93-a5e5-0231efd9a923)
+    (property "Dir" "out" (at 53.34 60.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "module/mod-channels" (at 53.34 60.96 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 50.8 63.5) (xy 53.34 63.5)) (stroke (width 0) (type default)) (uuid a0b76fb7-9572-50f8-9b54-765bb583ace2))
+  (hierarchical_label "DAC_CH5" (shape output) (at 53.34 63.5 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 530e0891-ff05-5af3-afed-7db0ef5343f3)
+    (property "Dir" "out" (at 53.34 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "module/mod-channels" (at 53.34 63.5 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 50.8 68.58) (xy 53.34 68.58)) (stroke (width 0) (type default)) (uuid fd179d1f-ccc2-5e66-879c-824484219a0f))
+  (hierarchical_label "DAC_CH7" (shape output) (at 53.34 68.58 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid f99736a3-7a83-5080-864d-3295a0c4cb93)
+    (property "Dir" "out" (at 53.34 68.58 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "module/mod-channels" (at 53.34 68.58 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "mod-reference" (at 53.34 68.58 0) (effects (font (size 1.27 1.27)) hide)))
+  (no_connect (at 50.8 66.04) (uuid 6c64d67f-e333-5c27-b458-3177b6cb9ed0))
+  (no_connect (at 50.8 71.12) (uuid 8b9c5c54-86a4-5f29-99ba-bfd16229233f))
+  (wire (pts (xy 40.64 76.2) (xy 40.64 78.74)) (stroke (width 0) (type default)) (uuid a62a1cb6-7d62-5607-be05-4caab4023a00))
+  (hierarchical_label "AGND_MOD" (shape passive) (at 40.64 78.74 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid b5ff04b8-4553-5a1c-a9c1-f4d910b9892b)
+    (property "Dir" "ref" (at 40.64 78.74 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 40.64 78.74 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 40.64 78.74 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 91.44 146.05) (xy 91.44 148.59)) (stroke (width 0) (type default)) (uuid 6f87719f-013e-5720-8533-6975beb6f106))
+  (hierarchical_label "AGND_MOD" (shape passive) (at 91.44 148.59 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid e35aac5b-3f02-57e0-a7cd-7f8d0807a198)
+    (property "Dir" "ref" (at 91.44 148.59 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 91.44 148.59 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 91.44 148.59 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 196.85 142.24) (xy 199.39 142.24)) (stroke (width 0) (type default)) (uuid 5523ec12-5ef6-5163-a3f0-390369f7fd7a))
+  (hierarchical_label "AGND_MOD" (shape passive) (at 199.39 142.24 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 2ced49a0-0504-578c-9adc-a8f171e46e68)
+    (property "Dir" "ref" (at 199.39 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 199.39 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 199.39 142.24 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 142.24 146.05) (xy 142.24 148.59)) (stroke (width 0) (type default)) (uuid 7bfb9fa3-9b9e-575e-8c33-07e5491f54ca))
+  (hierarchical_label "AGND_MOD" (shape passive) (at 142.24 148.59 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid e1c28bd8-3dae-5fdf-933d-e68b567b1669)
+    (property "Dir" "ref" (at 142.24 148.59 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 142.24 148.59 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 142.24 148.59 0) (effects (font (size 1.27 1.27)) hide)))
+  (text "FROM THE HAND-WRITTEN NETLIST THIS SHEET REPLACES (verbatim; the part notes are on each part's Note field):\n\nA LONE NO-CONNECT PIN'S NET IS NAMED AFTER THE PIN (the export names it so, whatever label it carries), so the\none-pin nets the text below names are, on this sheet: DAC_CH6_UNUSED is VOUTF; DAC_CH8_UNUSED is VOUTH.\n\nAUTHORITATIVE for connectivity. The ASCII drawing in dac8568.md is a REPRESENTATION of this file.\n\nTHE DRAWING SHOWS TWO PINS OF SIXTEEN. It was split out of digital-and-supervision.md to carry the CLR and\nLDAC corrections, and those are all it draws - the SPI pins, the rail, the ground and all six live outputs are\nprose in the ## Interfaces table and nowhere in the picture. They are netted here. That gap is the reason a\nnetlist is worth more than a redraw: a picture of two pins cannot be wrong about the other fourteen, and it\ncannot be right about them either.\n\nPin names are SBAS430E's own, from the 16-pin TSSOP PIN DESCRIPTIONS table of the banked\ndatasheets/analog/DAC8568CIPW.pdf [datasheet]: 1 LDAC   2 SYNC   3 AVDD   4 VOUTA  5 VOUTC  6 VOUTE  7 VOUTG 8\nVREFIN/VREFOUT  9 CLR   10 VOUTH 11 VOUTF 12 VOUTD 13 VOUTB 14 GND  15 DIN   16 SCLK\n\n[pins] CHANNEL NUMBER TO DATASHEET LETTER IS ORDINAL HERE: ch1=VOUTA through ch8=VOUTH, so the two spares are\nVOUTF and VOUTH. NO DOCUMENT IN THIS CORPUS STATES THAT MAP [derived, not cited] - ADR 0006 allocates by\nnumber and the datasheet names by letter, and nothing joins them. It is the only reading consistent with\n\"channels 6 and 8 spare\", and it decides which two pins a layout leaves unconnected, so it is asserted here\nrather than left implied. Contradict it in ADR 0006 if it is wrong and this file follows.\n\n[LDAC] LOCAL, and it crosses no boundary: the pin and its strap, nothing else. That is the whole content of\nthe LDAC correction.\n\n[VOUTF] THE TWO SPARES, NAMED SO THEY ARE NO-CONNECT BY DECISION RATHER THAN BY OMISSION. An unlisted pin and\na pin listed as going nowhere read the same in a picture and not at all the same in a layout review.\n\nNets with one endpoint on purpose." (at 256.54 38.099999999999994 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid b9ffbaf9-0630-5b2b-9542-44087951313b))
+  (sheet_instances (path "/" (page "1")))
+)

@@ -150,9 +150,9 @@ nets:
   # THE TWO SPARES, NAMED SO THEY ARE NO-CONNECT BY DECISION RATHER THAN BY
   # OMISSION. An unlisted pin and a pin listed as going nowhere read the same
   # in a picture and not at all the same in a layout review.
-  DAC_CH6_UNUSED:
+  VOUTF:
     - U-DAC.VOUTF
-  DAC_CH8_UNUSED:
+  VOUTH:
     - U-DAC.VOUTH
 
   AGND_MOD:
@@ -164,5 +164,5 @@ nets:
 
 # Nets with one endpoint on purpose.
 external_endpoints:
-  - DAC_CH6_UNUSED
-  - DAC_CH8_UNUSED
+  - VOUTF
+  - VOUTH

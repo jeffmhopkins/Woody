@@ -126,7 +126,7 @@ nets:
     - R-FB-LO.1
     - U-LOADSW.FB
 
-  ON:
+  'ON':                     # quoted: YAML reads a bare ON as true
     - SW-POWER.COM
     - U-LOADSW.ON
 
@@ -145,7 +145,7 @@ nets:
   # rail so the part knows the supply is up, and the toggle interrupts or
   # pulls that divider. Until the divider exists there is nothing to say the
   # switch's second terminal lands on.
-  ON_DIVIDER:
+  'NO':
     - SW-POWER.NO
 
   # PWRGD IS NOT USED. The presence detect that would have read it is
@@ -155,5 +155,5 @@ nets:
     - U-LOADSW.PWRGD
 
 external_endpoints:
-  - ON_DIVIDER
+  - 'NO'
   - PWRGD

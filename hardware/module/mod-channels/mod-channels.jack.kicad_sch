@@ -1,0 +1,259 @@
+(kicad_sch (version 20250114) (generator "sch.py") (generator_version "9.0")
+  (uuid 78e948b4-b72c-521f-91bf-99d3fb72fc5f)
+  (paper "A4")
+  (title_block
+    (title "Mod channels 1-4 - the module jack board's page (hardware/module/mod-channels)")
+    (comment 7 "title: Mod channels 1-4")
+    (date "")
+    (rev "")
+    (company "Woody")
+    (comment 1 "SOURCE - one page of hardware/module/mod-channels; edit in KiCad 9, then: python3 tools/kicad.py export hardware/module/mod-channels")
+    (comment 2 "Part facts ride on each symbol: Row (BOM row), Pins + Pins_source (pin map and its datasheet), Note")
+    (comment 3 "ADR 0006, ADR 0019, ADR 0023 - the module jack board's parts of this circuit")
+    (comment 4 "Page `jack` of hardware/module/mod-channels/mod-channels.kicad_sch; the module jack board places it")
+  )
+  (lib_symbols
+    (symbol "Connector_Audio:AudioJack2"
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "J"
+			(at 0 8.89 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "AudioJack2"
+			(at 0 6.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Audio Jack, 2 Poles (Mono / TS)"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "audio jack receptacle mono phone headphone TS connector"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "Jack*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "AudioJack2_0_1"
+			(rectangle
+				(start -3.81 0)
+				(end -2.54 -2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(rectangle
+				(start -2.54 3.81)
+				(end 2.54 -2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0 0) (xy 0.635 -0.635) (xy 1.27 0) (xy 2.54 0)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 2.54 2.54) (xy -0.635 2.54) (xy -0.635 0) (xy -1.27 -0.635) (xy -1.905 0)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "AudioJack2_1_1"
+			(pin passive line
+				(at 5.08 2.54 180)
+				(length 2.54)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "S"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 5.08 0 180)
+				(length 2.54)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "T"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+  )
+  (symbol (lib_id "Connector_Audio:AudioJack2") (at 40.64 50.8 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid f295a7e3-2411-521c-949b-690578ea17d5)
+    (property "Reference" "J-CV-MOD1" (at 43.18 49.53 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "PJ398SM" (at 43.18 52.07 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "J-CV" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "TIP=T(~) SLEEVE=S(~)" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/connectors/PJ398SM.kicad_mod pad names T, TN, S; datasheets/connectors/PJ398SM-drawing.jpg: 3 tip, 2 normalling contact, 1 sleeve. TN is not on this symbol: unused, not netted" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "S" (uuid 1198bb00-068e-5a25-9674-e863c2b50de0))
+    (pin "T" (uuid 93f6c581-2deb-5e57-b239-92d4c968c60a))
+    (instances (project "mod-channels.jack" (path "/78e948b4-b72c-521f-91bf-99d3fb72fc5f" (reference "J-CV-MOD1") (unit 1))) (project "mod-channels" (path "/cbc0bf1c-8023-50b5-8559-bb6234a2b622/c20288e6-dbab-5bd0-8a13-eb6772e93998" (reference "J-CV-MOD1") (unit 1))))
+  )
+  (symbol (lib_id "Connector_Audio:AudioJack2") (at 91.44 50.8 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 9269f705-31eb-52b1-93ba-f49429aa3540)
+    (property "Reference" "J-CV-MOD2" (at 93.98 49.53 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "PJ398SM" (at 93.98 52.07 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "J-CV" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "TIP=T(~) SLEEVE=S(~)" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/connectors/PJ398SM.kicad_mod pad names T, TN, S; datasheets/connectors/PJ398SM-drawing.jpg: 3 tip, 2 normalling contact, 1 sleeve. TN is not on this symbol: unused, not netted" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "S" (uuid 4dd55448-3176-55c7-8107-c9557ce0db1b))
+    (pin "T" (uuid 9c0501f6-ed6d-519f-a339-287f88fa8a31))
+    (instances (project "mod-channels.jack" (path "/78e948b4-b72c-521f-91bf-99d3fb72fc5f" (reference "J-CV-MOD2") (unit 1))) (project "mod-channels" (path "/cbc0bf1c-8023-50b5-8559-bb6234a2b622/c20288e6-dbab-5bd0-8a13-eb6772e93998" (reference "J-CV-MOD2") (unit 1))))
+  )
+  (symbol (lib_id "Connector_Audio:AudioJack2") (at 142.24 50.8 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 8f8cac05-1f8c-5a33-8cd2-ad27da64d3fb)
+    (property "Reference" "J-CV-MOD3" (at 144.78 49.53 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "PJ398SM" (at 144.78 52.07 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "J-CV" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "TIP=T(~) SLEEVE=S(~)" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/connectors/PJ398SM.kicad_mod pad names T, TN, S; datasheets/connectors/PJ398SM-drawing.jpg: 3 tip, 2 normalling contact, 1 sleeve. TN is not on this symbol: unused, not netted" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "S" (uuid 6fd0256d-59a4-5e74-b984-aa618ea732bf))
+    (pin "T" (uuid 376b8cb6-07c0-5283-9a71-9d0fef415260))
+    (instances (project "mod-channels.jack" (path "/78e948b4-b72c-521f-91bf-99d3fb72fc5f" (reference "J-CV-MOD3") (unit 1))) (project "mod-channels" (path "/cbc0bf1c-8023-50b5-8559-bb6234a2b622/c20288e6-dbab-5bd0-8a13-eb6772e93998" (reference "J-CV-MOD3") (unit 1))))
+  )
+  (symbol (lib_id "Connector_Audio:AudioJack2") (at 193.04 50.8 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 6eb1601c-a54d-503d-bbe2-9223216a5123)
+    (property "Reference" "J-CV-MOD4" (at 195.58 49.53 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "PJ398SM" (at 195.58 52.07 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 193.04 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 193.04 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "J-CV" (at 193.04 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "TIP=T(~) SLEEVE=S(~)" (at 193.04 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/connectors/PJ398SM.kicad_mod pad names T, TN, S; datasheets/connectors/PJ398SM-drawing.jpg: 3 tip, 2 normalling contact, 1 sleeve. TN is not on this symbol: unused, not netted" (at 193.04 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "S" (uuid bfdc13c3-bac1-5a6d-beb4-3509c0a344c9))
+    (pin "T" (uuid d48b6c55-37cb-5e0d-af3e-dc0abd0d17ac))
+    (instances (project "mod-channels.jack" (path "/78e948b4-b72c-521f-91bf-99d3fb72fc5f" (reference "J-CV-MOD4") (unit 1))) (project "mod-channels" (path "/cbc0bf1c-8023-50b5-8559-bb6234a2b622/c20288e6-dbab-5bd0-8a13-eb6772e93998" (reference "J-CV-MOD4") (unit 1))))
+  )
+  (wire (pts (xy 45.72 50.8) (xy 48.26 50.8)) (stroke (width 0) (type default)) (uuid 227b0358-3d05-50f0-8c39-0f03a8ea8b83))
+  (hierarchical_label "MOD1_JACK" (shape passive) (at 48.26 50.8 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid b5b8a70f-5019-5aff-b727-f3729b8c8690)
+    (property "Dir" "ref" (at 48.26 50.8 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 96.52 50.8) (xy 99.06 50.8)) (stroke (width 0) (type default)) (uuid 68c98c66-0c65-5cc6-a06f-b10852aa254c))
+  (hierarchical_label "MOD2_JACK" (shape passive) (at 99.06 50.8 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 03250841-8e50-5aee-b2bb-c1d29ad49a42)
+    (property "Dir" "ref" (at 99.06 50.8 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 147.32 50.8) (xy 149.86 50.8)) (stroke (width 0) (type default)) (uuid 2fee92bf-6608-5e76-9634-aeb589ae7083))
+  (hierarchical_label "MOD3_JACK" (shape passive) (at 149.86 50.8 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid b1fe3bf6-83e8-535c-97a6-d1b407e38bf8)
+    (property "Dir" "ref" (at 149.86 50.8 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 198.12 50.8) (xy 200.66 50.8)) (stroke (width 0) (type default)) (uuid a6cc033c-cad7-5fbc-898f-60d368e7ede7))
+  (hierarchical_label "MOD4_JACK" (shape passive) (at 200.66 50.8 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 7ad241ac-1803-5c5d-8d90-3af50448e38d)
+    (property "Dir" "ref" (at 200.66 50.8 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 45.72 48.26) (xy 48.26 48.26)) (stroke (width 0) (type default)) (uuid 4bec7ebe-03fa-5a37-81cf-d1a15666f348))
+  (hierarchical_label "AGND_MOD" (shape passive) (at 48.26 48.26 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid ccf37ced-85b0-50d1-b7bc-45ca043bb77f)
+    (property "Dir" "ref" (at 48.26 48.26 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 48.26 48.26 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 48.26 48.26 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 96.52 48.26) (xy 99.06 48.26)) (stroke (width 0) (type default)) (uuid ed68f781-abed-5152-8880-a4b9eca5e04d))
+  (hierarchical_label "AGND_MOD" (shape passive) (at 99.06 48.26 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid a2387c5f-c3bb-584a-8f0d-80e61dab27b7)
+    (property "Dir" "ref" (at 99.06 48.26 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 99.06 48.26 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 99.06 48.26 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 147.32 48.26) (xy 149.86 48.26)) (stroke (width 0) (type default)) (uuid b9b4f988-a235-5a6c-abe2-5506826bc654))
+  (hierarchical_label "AGND_MOD" (shape passive) (at 149.86 48.26 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 7419d434-4034-5556-a617-d94cf9c3c50b)
+    (property "Dir" "ref" (at 149.86 48.26 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 149.86 48.26 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 149.86 48.26 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 198.12 48.26) (xy 200.66 48.26)) (stroke (width 0) (type default)) (uuid 10b11686-1108-5ac2-84b0-f10e4c6f7ad2))
+  (hierarchical_label "AGND_MOD" (shape passive) (at 200.66 48.26 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid b5adee94-477e-5a87-aad2-3406934e06f8)
+    (property "Dir" "ref" (at 200.66 48.26 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 200.66 48.26 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 200.66 48.26 0) (effects (font (size 1.27 1.27)) hide)))
+  (sheet_instances (path "/" (page "1")))
+)

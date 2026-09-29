@@ -1,0 +1,412 @@
+(kicad_sch (version 20250114) (generator "sch.py") (generator_version "9.0")
+  (uuid 9a361b54-43b2-59f7-80b5-953311d0f986)
+  (paper "A4")
+  (title_block
+    (title "Breath output stage - the module jack board's page (hardware/module/breath-output-stage)")
+    (comment 7 "title: Breath output stage")
+    (date "")
+    (rev "")
+    (company "Woody")
+    (comment 1 "SOURCE - one page of hardware/module/breath-output-stage; edit in KiCad 9, then: python3 tools/kicad.py export hardware/module/breath-output-stage")
+    (comment 2 "Part facts ride on each symbol: Row (BOM row), Pins + Pins_source (pin map and its datasheet), Note")
+    (comment 3 "ADR 0004, ADR 0019, ADR 0023 - the module jack board's parts of this circuit")
+    (comment 4 "Page `jack` of hardware/module/breath-output-stage/breath-output-stage.kicad_sch; the module jack board places it")
+  )
+  (lib_symbols
+    (symbol "Connector_Audio:AudioJack2"
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "J"
+			(at 0 8.89 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "AudioJack2"
+			(at 0 6.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Audio Jack, 2 Poles (Mono / TS)"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "audio jack receptacle mono phone headphone TS connector"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "Jack*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "AudioJack2_0_1"
+			(rectangle
+				(start -3.81 0)
+				(end -2.54 -2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(rectangle
+				(start -2.54 3.81)
+				(end 2.54 -2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0 0) (xy 0.635 -0.635) (xy 1.27 0) (xy 2.54 0)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 2.54 2.54) (xy -0.635 2.54) (xy -0.635 0) (xy -1.27 -0.635) (xy -1.905 0)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "AudioJack2_1_1"
+			(pin passive line
+				(at 5.08 2.54 180)
+				(length 2.54)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "S"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 5.08 0 180)
+				(length 2.54)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "T"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "Device:R_Potentiometer"
+		(pin_names
+			(offset 1.016)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "RV"
+			(at -4.445 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "R_Potentiometer"
+			(at -2.54 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Potentiometer"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "resistor variable"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "Potentiometer*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "R_Potentiometer_0_1"
+			(rectangle
+				(start 1.016 2.54)
+				(end -1.016 -2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.143 0) (xy 2.286 0.508) (xy 2.286 -0.508) (xy 1.143 0)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(polyline
+				(pts
+					(xy 2.54 0) (xy 1.524 0)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "R_Potentiometer_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 1.27)
+				(name "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 1.27)
+				(name "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 3.81 0 180)
+				(length 1.27)
+				(name "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+  )
+  (symbol (lib_id "Device:R_Potentiometer") (at 40.64 50.8 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 1fafb804-9c9d-54f4-8450-99a1a27bfa89)
+    (property "Reference" "POT-GAIN" (at 40.64 43.18 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "50k" (at 40.64 45.72 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "POT-GAIN" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "CW=3(3) W=2(2) CCW=1(1)" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Attenuator, not a feedback rheostat. 0.125 to 1.000 with R-GAIN-FLOOR" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/connectors/R0904N.pdf p.2 (drawing R09N-003): pins 1-2-3, 2 the wiper, shaft drawn full CCW; clockwise toward 3 is the usual convention [from memory]" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid d1eeb0cd-e521-5625-8db2-b4385210afae))
+    (pin "2" (uuid 3a45ef59-51be-59fb-a114-b409b8144193))
+    (pin "3" (uuid 3a9e5fa4-a9c1-5622-88d1-012749fe475a))
+    (instances (project "breath-output-stage.jack" (path "/9a361b54-43b2-59f7-80b5-953311d0f986" (reference "POT-GAIN") (unit 1))) (project "breath-output-stage" (path "/6f4edadb-6257-58e5-9d51-bec8cbdf5df0/1baad570-1274-5418-a0cf-a0e799c92a9f" (reference "POT-GAIN") (unit 1))))
+  )
+  (symbol (lib_id "Device:R_Potentiometer") (at 91.44 50.8 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid c612708a-9303-5819-8ae7-ff2bb850d16b)
+    (property "Reference" "POT-OFFSET" (at 91.44 43.18 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "10k linear" (at 91.44 45.72 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "POT-OFFSET" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "CW=3(3) W=2(2) CCW=1(1)" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Wiper UNBUFFERED - its R/4 source impedance is why zero sits ~20 deg past centre" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/connectors/R0904N.pdf p.2 (drawing R09N-003): pins 1-2-3, 2 the wiper, shaft drawn full CCW; clockwise toward 3 is the usual convention [from memory]" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid f8993584-bb2b-5bd4-90f4-30b48fa36b97))
+    (pin "2" (uuid b62d9210-032d-53d3-bc01-737ae90b96f5))
+    (pin "3" (uuid 79954630-d5c9-54f8-9951-7e7d38fa68ef))
+    (instances (project "breath-output-stage.jack" (path "/9a361b54-43b2-59f7-80b5-953311d0f986" (reference "POT-OFFSET") (unit 1))) (project "breath-output-stage" (path "/6f4edadb-6257-58e5-9d51-bec8cbdf5df0/1baad570-1274-5418-a0cf-a0e799c92a9f" (reference "POT-OFFSET") (unit 1))))
+  )
+  (symbol (lib_id "Connector_Audio:AudioJack2") (at 142.24 50.8 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 10946a83-9988-5416-bba8-60518555cd28)
+    (property "Reference" "J-CV-BREATH" (at 144.78 49.53 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "PJ398SM" (at 144.78 52.07 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "J-CV" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "TIP=T(~) SLEEVE=S(~)" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "THE JACK IS THIS CIRCUIT'S PART - module/panel owns the hole. Third pin, the normalling contact, unused" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/connectors/PJ398SM.kicad_mod pad names T, TN, S; datasheets/connectors/PJ398SM-drawing.jpg: 3 tip, 2 normalling contact, 1 sleeve. TN is not on this symbol: unused, not netted" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "S" (uuid e70421fc-a851-5f76-9261-5660d7a07c3a))
+    (pin "T" (uuid 12640459-5bdb-50c9-ac29-47553c6bf3a0))
+    (instances (project "breath-output-stage.jack" (path "/9a361b54-43b2-59f7-80b5-953311d0f986" (reference "J-CV-BREATH") (unit 1))) (project "breath-output-stage" (path "/6f4edadb-6257-58e5-9d51-bec8cbdf5df0/1baad570-1274-5418-a0cf-a0e799c92a9f" (reference "J-CV-BREATH") (unit 1))))
+  )
+  (wire (pts (xy 40.64 54.61) (xy 40.64 57.15)) (stroke (width 0) (type default)) (uuid d9b28c35-bf60-50a0-84ea-c41ee01bace6))
+  (hierarchical_label "BREATH_INAMP_OUT" (shape input) (at 40.64 57.15 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 0ca7317c-2fb9-5fef-97e2-b17b0803d366)
+    (property "Dir" "in" (at 40.64 57.15 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/breath-receive-stage" (at 40.64 57.15 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "0 to inamp-full-scale, rest at 0" (at 40.64 57.15 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 40.64 46.99) (xy 40.64 44.45)) (stroke (width 0) (type default)) (uuid 292fddf6-edf1-56da-96f8-b61cb62eae3d))
+  (hierarchical_label "GAIN_FLOOR" (shape passive) (at 40.64 44.45 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 6c658963-5e74-5baa-9f54-0f7a6cf33514)
+    (property "Dir" "ref" (at 40.64 44.45 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 44.45 50.8) (xy 46.99 50.8)) (stroke (width 0) (type default)) (uuid a5149d9b-8cc7-53fd-b0f9-f57b41002be3))
+  (hierarchical_label "GAIN_WIPER" (shape passive) (at 46.99 50.8 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 84a62c84-21d3-5b6b-a530-56c9f0533179)
+    (property "Dir" "ref" (at 46.99 50.8 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 91.44 54.61) (xy 91.44 57.15)) (stroke (width 0) (type default)) (uuid 6a39d96d-00b4-5b43-901c-70c7da6acbdb))
+  (hierarchical_label "DAC_AVDD" (shape input) (at 91.44 57.15 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid f0b8a6b9-6433-568a-b590-4ed6b733044f)
+    (property "Dir" "in" (at 91.44 57.15 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 91.44 57.15 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dac-rail" (at 91.44 57.15 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 95.25 50.8) (xy 97.79 50.8)) (stroke (width 0) (type default)) (uuid 4963dbaf-756f-53c5-9e5e-b72f830872ae))
+  (hierarchical_label "OFFSET_WIPER" (shape passive) (at 97.79 50.8 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid baad42e0-f36a-5374-adb5-a237fc7bc4cd)
+    (property "Dir" "ref" (at 97.79 50.8 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 147.32 50.8) (xy 149.86 50.8)) (stroke (width 0) (type default)) (uuid ab3de15c-e6c6-53c3-ac74-2ce7d875299c))
+  (hierarchical_label "JACK_TIP" (shape passive) (at 149.86 50.8 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 5d99166f-4308-5268-bc2c-11b76da1539b)
+    (property "Dir" "ref" (at 149.86 50.8 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 91.44 46.99) (xy 91.44 44.45)) (stroke (width 0) (type default)) (uuid 06a8ae15-674b-588f-a6ff-094d0da8a5ba))
+  (hierarchical_label "AGND_MOD" (shape passive) (at 91.44 44.45 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid d4039fa0-e5dd-5da9-bd78-c1ac6d64b65d)
+    (property "Dir" "ref" (at 91.44 44.45 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 91.44 44.45 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 147.32 48.26) (xy 149.86 48.26)) (stroke (width 0) (type default)) (uuid a1b4d186-cf0f-5db3-811b-de38e33c7428))
+  (hierarchical_label "AGND_MOD" (shape passive) (at 149.86 48.26 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 6cd91767-825d-5319-8e06-f93fafc48570)
+    (property "Dir" "ref" (at 149.86 48.26 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 149.86 48.26 0) (effects (font (size 1.27 1.27)) hide)))
+  (sheet_instances (path "/" (page "1")))
+)

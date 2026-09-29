@@ -185,7 +185,7 @@ nets:
   # sit at an end stop with no downward authority. The fix divides VREFOUT and
   # gains it back, or injects a small bipolar correction, and needs
   # R-TRIM-RANGE - E10. Wiring CCW to AGND here would assert the broken one.
-  TRIM_OFFSET_BOTTOM:
+  CCW:
     - TRIM-OFFSET.CCW
 
   # A two-terminal series trimmer fails OPEN, and open here is the rail. The
@@ -193,24 +193,24 @@ nets:
   # known resistance - but which end, and whether it is a footprint option, is
   # open. The series path above runs W to CCW; CW is the strap terminal and
   # this file does not yet say where it goes.
-  TRIM_GAIN_STRAP:
+  CW:
     - TRIM-GAIN.CW
 
   # THE LT5400'S SPARE PAIR, R3 and R4: matched, available, and unconnected
   # by decision (pitch-stage.md, Still open).
-  RN_R3A:
+  R3A:
     - RN-PITCH.R3A
-  RN_R3B:
+  R3B:
     - RN-PITCH.R3B
-  RN_R4A:
+  R4A:
     - RN-PITCH.R4A
-  RN_R4B:
+  R4B:
     - RN-PITCH.R4B
 
 external_endpoints:
-  - TRIM_OFFSET_BOTTOM
-  - TRIM_GAIN_STRAP
-  - RN_R3A
-  - RN_R3B
-  - RN_R4A
-  - RN_R4B
+  - CCW
+  - CW
+  - R3A
+  - R3B
+  - R4A
+  - R4B

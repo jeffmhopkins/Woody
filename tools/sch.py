@@ -424,7 +424,7 @@ class Sheet:
         if pd is None:
             return {"dir": "ref", "fields": {"Kind": "endpoint"}}
         f = {"Dir": pd.get("dir", "")}
-        for k in ("from", "to", "figure"):
+        for k in ("from", "to", "figure", "note"):
             if k in pd:
                 f[k.capitalize()] = str(pd[k])
         return {"dir": pd.get("dir"), "fields": f}

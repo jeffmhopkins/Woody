@@ -150,7 +150,7 @@ nets:
   # enabled gate is the one wrong answer. GND is chosen over VCC because the
   # part has no input clamp to VCC and the ground tie cannot inject current
   # into an unpowered rail. Its output drives nothing, which is fine.
-  SPARE_GATE_OUT:
+  4Y:
     - U-LVL-MOD.4Y
 
   # *** THE CABLE-SIDE CS PULL-UP HAS NO RAIL ON THIS BOARD. ***
@@ -168,9 +168,9 @@ nets:
   # row's "at the module" description is right and the rail has to come from
   # somewhere. Both cannot be true. Nothing is asserted until it is decided;
   # digital-and-supervision.md's "Still open" carries the question.
-  CS_PULLUP_TOP:
+  '2':
     - R-PULL-CS.2
 
 external_endpoints:
-  - SPARE_GATE_OUT
-  - CS_PULLUP_TOP
+  - 4Y
+  - '2'

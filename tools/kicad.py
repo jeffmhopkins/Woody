@@ -149,7 +149,7 @@ def export_circuit(d):
         if lname in ports:
             continue
         spec = {"dir": p.get("Dir", "ref")}
-        for k in ("From", "To", "Figure"):
+        for k in ("From", "To", "Figure", "Note"):
             if p.get(k):
                 spec[k.lower()] = p[k]
         ports[lname] = spec
@@ -165,7 +165,8 @@ def export_circuit(d):
         c = {}
         if f.get("Row", ref) != ref:
             c["of"] = f["Row"]
-        c["value"] = comps[ref]["value"]
+        if comps[ref]["value"] not in ("", "~"):
+            c["value"] = comps[ref]["value"]      # a part not yet chosen has none (Q-LOADSW)
         if f.get("Drawn_as"):
             c["drawn_as"] = f["Drawn_as"]
         c["pins"] = [int(n) if n.isdigit() else n for n in names]
@@ -179,7 +180,9 @@ def export_circuit(d):
         pins = [f"{r}.{maps.get(r, {}).get(p, p)}" for r, p in nodes if not r.startswith("#")]
         if not pins:
             continue
-        bare = kname.lstrip("/")
+        # a net named on a sub-sheet of a circuit drawn as two pages (one per board -
+        # module/pitch-stage) carries its sheet path: the circuit's name is the last part
+        bare = kname if kname.startswith(("unconnected-", "Net-(")) else kname.rsplit("/", 1)[-1]
         if kname.startswith("unconnected-") or kname.startswith("Net-("):
             if len(pins) == 1:
                 bare = pins[0].split(".", 1)[1]       # a lone no-connect pin is named after the pin

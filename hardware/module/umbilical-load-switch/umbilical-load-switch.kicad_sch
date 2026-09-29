@@ -1,0 +1,1184 @@
+(kicad_sch (version 20250114) (generator "sch.py") (generator_version "9.0")
+  (uuid ac2e1e0e-68e1-5e82-9493-568803f88e12)
+  (paper "A2")
+  (title_block
+    (title "Umbilical load switch (hardware/module/umbilical-load-switch)")
+    (comment 5 "circuit: module/umbilical-load-switch")
+    (comment 6 "page: umbilical-load-switch.md")
+    (comment 7 "title: Umbilical load switch")
+    (date "")
+    (rev "")
+    (company "Woody")
+    (comment 1 "SOURCE for this circuit - edit in KiCad 9. netlist.yaml is exported from it: python3 tools/kicad.py export hardware/module/umbilical-load-switch")
+    (comment 2 "Part facts ride on each symbol: Row (BOM row), Pins + Pins_source (pin map and its datasheet), Note")
+    (comment 3 "ADR 0004, ADR 0005, ADR 0019 - migrated from its hand-written netlist.yaml, compared part by part and net by net")
+    (comment 4 "Ports are hierarchical labels (Dir, From/To, Figure); the module main board places this sheet")
+  )
+  (lib_symbols
+    (symbol "Device:C"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0.254)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "C"
+			(at 0.635 2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "C"
+			(at 0.635 -2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 0.9652 -3.81 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "cap capacitor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "C_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "C_0_1"
+			(polyline
+				(pts
+					(xy -2.032 0.762) (xy 2.032 0.762)
+				)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -2.032 -0.762) (xy 2.032 -0.762)
+				)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "C_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 2.794)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 2.794)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "Device:R"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "R"
+			(at 2.032 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "R"
+			(at 0 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at -1.778 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "R res resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "R_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "R_0_1"
+			(rectangle
+				(start -1.016 -2.54)
+				(end 1.016 2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "R_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "Power_Management:LT1641-1"
+		(pin_names
+			(offset 1.016)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "U"
+			(at -5.08 -11.43 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "LT1641-1"
+			(at 3.81 -11.43 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
+			(at 1.27 -15.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://www.analog.com/media/en/technical-documentation/data-sheets/164112fc.pdf"
+			(at 6.35 -12.7 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "High voltage hot swap controller, +9V to +80V, with latching feature, SOIC-8"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "high-voltage hot-swap"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "SOIC*3.9x4.9mm*P1.27mm*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "LT1641-1_0_1"
+			(rectangle
+				(start 7.62 7.62)
+				(end -7.62 -10.16)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+		)
+		(symbol "LT1641-1_1_0"
+			(pin power_in line
+				(at 2.54 -12.7 90)
+				(length 2.54)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(symbol "LT1641-1_1_1"
+			(pin input line
+				(at -10.16 -2.54 0)
+				(length 2.54)
+				(name "ON"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at -10.16 -7.62 0)
+				(length 2.54)
+				(name "TIMER"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "5"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_in line
+				(at -5.08 10.16 270)
+				(length 2.54)
+				(name "Vcc"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "8"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at -2.54 10.16 270)
+				(length 2.54)
+				(name "Sense"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "7"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin output line
+				(at 2.54 10.16 270)
+				(length 2.54)
+				(name "GATE"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "6"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at 10.16 0 180)
+				(length 2.54)
+				(name "FB"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin open_collector line
+				(at 10.16 -2.54 180)
+				(length 2.54)
+				(name "PWRGD"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "Switch:SW_SPST"
+		(pin_names
+			(offset 0)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "SW"
+			(at 0 3.175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "SW_SPST"
+			(at 0 -2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Single Pole Single Throw (SPST) switch"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "switch lever"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "SW_SPST_0_0"
+			(circle
+				(center -2.032 0)
+				(radius 0.508)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -1.524 0.254) (xy 1.524 1.778)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center 2.032 0)
+				(radius 0.508)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "SW_SPST_1_1"
+			(pin passive line
+				(at -5.08 0 0)
+				(length 2.54)
+				(name "A"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 5.08 0 180)
+				(length 2.54)
+				(name "B"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "Transistor_FET:Q_NMOS_GDS"
+		(pin_names
+			(offset 0)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "Q"
+			(at 5.08 1.905 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "Q_NMOS_GDS"
+			(at 5.08 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 5.08 2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "N-MOSFET transistor, gate/drain/source"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "transistor NMOS N-MOS N-MOSFET"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "Q_NMOS_GDS_0_1"
+			(polyline
+				(pts
+					(xy 0.254 1.905) (xy 0.254 -1.905)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0.254 0) (xy -2.54 0)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0.762 2.286) (xy 0.762 1.27)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0.762 0.508) (xy 0.762 -0.508)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0.762 -1.27) (xy 0.762 -2.286)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0.762 -1.778) (xy 3.302 -1.778) (xy 3.302 1.778) (xy 0.762 1.778)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.016 0) (xy 2.032 0.381) (xy 2.032 -0.381) (xy 1.016 0)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(circle
+				(center 1.651 0)
+				(radius 2.794)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 2.54 2.54) (xy 2.54 1.778)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center 2.54 1.778)
+				(radius 0.254)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(circle
+				(center 2.54 -1.778)
+				(radius 0.254)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(polyline
+				(pts
+					(xy 2.54 -2.54) (xy 2.54 0) (xy 0.762 0)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 2.921 0.381) (xy 3.683 0.381)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 3.302 0.381) (xy 2.921 -0.254) (xy 3.683 -0.254) (xy 3.302 0.381)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "Q_NMOS_GDS_1_1"
+			(pin input line
+				(at -5.08 0 0)
+				(length 2.54)
+				(name "G"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 2.54 5.08 270)
+				(length 2.54)
+				(name "D"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 2.54 -5.08 90)
+				(length 2.54)
+				(name "S"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+  )
+  (symbol (lib_id "Power_Management:LT1641-1") (at 40.64 60.96 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 58c7df7c-9bce-5378-9976-79743546ca33)
+    (property "Reference" "U-LOADSW" (at 35.56 72.39 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "LT1641-1CS8" (at 44.45 72.39 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "" (at 41.91 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 46.99 73.66 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "U-LOADSW" (at 40.64 60.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "VCC=8(Vcc) SENSE=7(Sense) GATE=6(GATE) FB=2(FB) TIMER=5(TIMER) ON=1(ON) PWRGD=3(PWRGD) GND=4(GND)" (at 40.64 60.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Hot-swap controller. FOLDBACK TRACKS THE FB PIN, NOT THE OUTPUT - with FB unconnected the part holds the sense drop at its 12 mV floor forever and the start never completes" (at 40.64 60.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/discrete-and-power/LT1641.pdf p.2 package (S8, top view): ON 1, FB 2, PWRGD 3, GND 4, TIMER 5, GATE 6, SENSE 7, VCC 8" (at 40.64 60.96 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 9a54affd-2db9-5af2-9b74-7f0e11834b46))
+    (pin "2" (uuid fd18b86b-38c9-5088-9ff0-9fdb88c3ee2f))
+    (pin "3" (uuid c0936569-5c1d-51c3-9277-ec7fb9525187))
+    (pin "4" (uuid 4df64f80-c99f-5d46-adba-1312c121f41c))
+    (pin "5" (uuid de41e6ec-4db3-5058-a5b4-d489d4639529))
+    (pin "6" (uuid f28cce4b-d860-5f3f-add9-ba6992ec6ce4))
+    (pin "7" (uuid 7730a95a-a494-5b2f-b051-b0d83fadc690))
+    (pin "8" (uuid c7966dbb-264d-5a15-8240-336039e92d20))
+    (instances (project "umbilical-load-switch" (path "/ac2e1e0e-68e1-5e82-9493-568803f88e12" (reference "U-LOADSW") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 40.64 142.24 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 6eedad32-9a21-576f-812d-dd52efe7a282)
+    (property "Reference" "R-ILIM" (at 43.18 140.97 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "" (at 43.18 143.51 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 39.37 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 40.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-ILIM" (at 40.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 40.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Sets the limit with V_SENSETRIP, which is 39/47/55 mV - so the limit has a spread whatever this resistor is" (at 40.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid a53115a8-1b41-5621-893b-7e0a6971ceb1))
+    (pin "2" (uuid c9708407-2372-5f58-8ecc-0487160024d7))
+    (instances (project "umbilical-load-switch" (path "/ac2e1e0e-68e1-5e82-9493-568803f88e12" (reference "R-ILIM") (unit 1))))
+  )
+  (symbol (lib_id "Transistor_FET:Q_NMOS_GDS") (at 91.44 142.24 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid d2de4091-de6e-50ea-8e10-6ae268593cd6)
+    (property "Reference" "Q-LOADSW" (at 91.44 133.35 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "" (at 91.44 135.89 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "" (at 96.52 139.7 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 91.44 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "Q-LOADSW" (at 91.44 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "D=2(D) G=1(G) S=3(S)" (at 91.44 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Pass FET, high side. Its drain is always at 12 V, which is why foldback acts on the OUTPUT and not on the drain" (at 91.44 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "the part is not chosen (Q-LOADSW row); 1 G, 2 D (the tab), 3 S is the DPAK (TO-252) convention the provisional footprint follows" (at 91.44 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 0302f2fc-a3d1-5c43-b796-a78288519fbd))
+    (pin "2" (uuid bbd88695-3395-55c6-8fc0-54e9e0cc378e))
+    (pin "3" (uuid 6aed1ec7-b924-5a06-b297-e2cad0127d4a))
+    (instances (project "umbilical-load-switch" (path "/ac2e1e0e-68e1-5e82-9493-568803f88e12" (reference "Q-LOADSW") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 142.24 142.24 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 4cde6f6b-0d85-5a73-aed3-ec83f4a5cf9b)
+    (property "Reference" "R-GATE-SER" (at 144.78 140.97 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "10R 5%" (at 144.78 143.51 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 140.97 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 142.24 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-GATE-SER" (at 142.24 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 142.24 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Prevents high-frequency oscillation in the FET. In SERIES with the gate, from the datasheet's own application circuit" (at 142.24 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 88be7034-930f-5a67-a74b-7896ee306b66))
+    (pin "2" (uuid 6d3b70fe-2aac-5576-b96c-5b58da27839a))
+    (instances (project "umbilical-load-switch" (path "/ac2e1e0e-68e1-5e82-9493-568803f88e12" (reference "R-GATE-SER") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 193.04 142.24 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid dbde5495-a2eb-5630-b090-08ac97087546)
+    (property "Reference" "R-GATE-COMP" (at 195.58 140.97 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "1k 5%" (at 195.58 143.51 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 191.77 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-GATE-COMP" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Current-limit loop compensation, IN SERIES WITH C-GATE - not in parallel with anything. C-GATE straight to ground removes the compensation zero" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid cad3698f-bec8-5446-bb2b-60db5cb2af30))
+    (pin "2" (uuid 2e65f95f-5f75-5da3-b81a-b50064137aa6))
+    (instances (project "umbilical-load-switch" (path "/ac2e1e0e-68e1-5e82-9493-568803f88e12" (reference "R-GATE-COMP") (unit 1))))
+  )
+  (symbol (lib_id "Device:C") (at 243.84 142.24 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 52189b4c-07a1-50bb-ac37-429610897328)
+    (property "Reference" "C-GATE-LOADSW" (at 246.38 140.97 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "82nF" (at 246.38 143.51 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 245.11 146.05 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 243.84 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-GATE-LOADSW" (at 243.84 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 243.84 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Drawn_as" "C-GATE" (at 243.84 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "The programmed ramp. Without it the bare C_iss gives 10 kV/s, which would demand more than twenty times the current limit" (at 243.84 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid bbc3ecdb-5ee0-5d10-953b-54828c2b4b68))
+    (pin "2" (uuid 9a20081a-007a-5c8d-8c1c-a5acf7146da8))
+    (instances (project "umbilical-load-switch" (path "/ac2e1e0e-68e1-5e82-9493-568803f88e12" (reference "C-GATE-LOADSW") (unit 1))))
+  )
+  (symbol (lib_id "Device:C") (at 294.64 142.24 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid e8479e88-7372-56b8-befe-4ed5dee2e7a0)
+    (property "Reference" "C-TIMER-LOADSW" (at 297.18 140.97 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "10uF" (at 297.18 143.51 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 295.91 146.05 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 294.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-TIMER-LOADSW" (at 294.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 294.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Drawn_as" "C-TIMER" (at 294.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "LOW LEAKAGE, and that is a specification not a preference: leakage is a meaningful fraction of the 3 uA pull-down, and if it wins the timer never resets" (at 294.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 2df2ae56-ce98-52a0-97cb-e73f1cab5f59))
+    (pin "2" (uuid af43ee3e-9f14-5f89-95a3-0f7dfaa0609c))
+    (instances (project "umbilical-load-switch" (path "/ac2e1e0e-68e1-5e82-9493-568803f88e12" (reference "C-TIMER-LOADSW") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 345.44 142.24 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 290a6372-b45e-556e-ab01-196f288c062e)
+    (property "Reference" "R-FB-HI" (at 347.98 140.97 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "35.7k 1%" (at 347.98 143.51 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 344.17 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 345.44 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-FB-HI" (at 345.44 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 345.44 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Top of the foldback divider, from the OUTPUT. Sized so foldback releases before the instrument's load arrives" (at 345.44 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 4738b8c2-d096-572a-970e-9acde44be280))
+    (pin "2" (uuid 11346e4d-ae43-51c5-9dd3-5905b432c6d8))
+    (instances (project "umbilical-load-switch" (path "/ac2e1e0e-68e1-5e82-9493-568803f88e12" (reference "R-FB-HI") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 40.64 187.96 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid c63b92a9-bc22-5227-97d3-97f520a8d742)
+    (property "Reference" "R-FB-LO" (at 43.18 186.69 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "5.11k 1%" (at 43.18 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 39.37 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-FB-LO" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Bottom of the foldback divider. k = R-FB-LO/(R-FB-HI + R-FB-LO) = 0.1250" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 1dda40a4-49db-532b-8a32-9e54c958f699))
+    (pin "2" (uuid 3250bdc1-ced0-5008-9ccf-6ed38b7eee35))
+    (instances (project "umbilical-load-switch" (path "/ac2e1e0e-68e1-5e82-9493-568803f88e12" (reference "R-FB-LO") (unit 1))))
+  )
+  (symbol (lib_id "Device:C") (at 91.44 187.96 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 8ec3fe34-a3cf-582e-b043-1b6be8213a47)
+    (property "Reference" "C-DECOUPLE-LOADSW" (at 93.98 186.69 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "100nF" (at 93.98 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 92.71 191.77 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-DECOUPLE" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "VCC to GND at the pin, which is the datasheet's supply transient protection. One of the board-wide C-DECOUPLE row" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid aa9d191c-61c5-52d3-8839-8e6ca3188051))
+    (pin "2" (uuid eae1e8c7-73ac-5235-99cc-b14e08b0b061))
+    (instances (project "umbilical-load-switch" (path "/ac2e1e0e-68e1-5e82-9493-568803f88e12" (reference "C-DECOUPLE-LOADSW") (unit 1))))
+  )
+  (symbol (lib_id "Switch:SW_SPST") (at 142.24 187.96 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 6bde782c-9789-523c-8565-4b0f6f787919)
+    (property "Reference" "SW-POWER" (at 142.24 185.42 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "NKK M2011SD4G01" (at 142.24 190.5 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "SW-POWER" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "COM=1(A) NO=2(B)" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "THE SWITCH IS THIS CIRCUIT'S PART. module/panel owns only the shaped hole and says so. Its other terminal waits on the UVLO divider - see ON_DIVIDER" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/connectors/NKK-SERIES-M-TOGGLE.pdf p.11: M2011 is the SPDT with terminal 1 omitted - 2 common, 3 the ON throw. Panel-mounted and wired: pad 1 takes the common's wire, pad 2 the throw's" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid f8fef949-51d7-5603-97a4-8e8fe0c7aee9))
+    (pin "2" (uuid 8177bcd8-37dc-5faf-bb64-0cbf299d5ea2))
+    (instances (project "umbilical-load-switch" (path "/ac2e1e0e-68e1-5e82-9493-568803f88e12" (reference "SW-POWER") (unit 1))))
+  )
+  (wire (pts (xy 35.56 50.8) (xy 35.56 48.26)) (stroke (width 0) (type default)) (uuid a093812a-f1be-5943-8ba2-02095fb54576))
+  (hierarchical_label "BUS_POS12_RAW" (shape input) (at 35.56 48.26 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 9c068bdc-2f6a-59ca-a6ae-dfbb84f5232d)
+    (property "Dir" "in" (at 35.56 48.26 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 35.56 48.26 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 40.64 138.43) (xy 40.64 135.89)) (stroke (width 0) (type default)) (uuid 033ae737-7f4a-5535-812a-bd3dcc8c4426))
+  (hierarchical_label "BUS_POS12_RAW" (shape input) (at 40.64 135.89 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid de8b31d4-3148-5a9c-9f2a-86295c009530)
+    (property "Dir" "in" (at 40.64 135.89 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 40.64 135.89 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 91.44 184.15) (xy 91.44 181.61)) (stroke (width 0) (type default)) (uuid f82c8fed-6b43-59b5-9639-d5577a82b5ed))
+  (hierarchical_label "BUS_POS12_RAW" (shape input) (at 91.44 181.61 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 6afc718a-a66e-507d-a332-8534a4d99b5b)
+    (property "Dir" "in" (at 91.44 181.61 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 91.44 181.61 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 40.64 146.05) (xy 40.64 148.59)) (stroke (width 0) (type default)) (uuid fd403710-d2ff-5ba5-8ecd-b26f09491025))
+  (label "SENSE_NODE" (at 40.64 148.59 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid a037a3da-fa0f-5308-ad31-3c3f1bf048aa))
+  (wire (pts (xy 38.1 50.8) (xy 38.1 48.26)) (stroke (width 0) (type default)) (uuid bb982264-0d0f-5520-9d2e-12e25a7f836c))
+  (label "SENSE_NODE" (at 38.1 48.26 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 274731bf-2797-5ef0-85df-b53b017cd68e))
+  (wire (pts (xy 93.98 137.16) (xy 93.98 134.62)) (stroke (width 0) (type default)) (uuid 2d3bb067-ec4c-590b-8b8b-be111a5be839))
+  (label "SENSE_NODE" (at 93.98 134.62 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 17536f78-c12d-566d-b8f3-ffef00923284))
+  (wire (pts (xy 43.18 50.8) (xy 43.18 48.26)) (stroke (width 0) (type default)) (uuid 9cb0db76-d872-5e7f-a2fd-3e04fecbaf4d))
+  (label "GATE_DRIVE" (at 43.18 48.26 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid f6749424-a00d-550c-a640-95d31a7d6ddb))
+  (wire (pts (xy 142.24 138.43) (xy 142.24 135.89)) (stroke (width 0) (type default)) (uuid c15f2cb3-1560-59ab-814a-c1d6fe010af3))
+  (label "GATE_DRIVE" (at 142.24 135.89 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 174adedd-8edb-50fa-8d29-b2b691e9e6c1))
+  (wire (pts (xy 193.04 138.43) (xy 193.04 135.89)) (stroke (width 0) (type default)) (uuid 7f3eec0b-de72-58f7-aaa6-460f45ba0715))
+  (label "GATE_DRIVE" (at 193.04 135.89 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 46b9b137-8c17-5edb-af9d-f411d77c892c))
+  (wire (pts (xy 142.24 146.05) (xy 142.24 148.59)) (stroke (width 0) (type default)) (uuid 430ec92f-88b0-5e3c-9a60-9000aaa42bc5))
+  (label "GATE_NODE" (at 142.24 148.59 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 060074a5-54b9-581f-a25c-ddfb13550ab7))
+  (wire (pts (xy 86.36 142.24) (xy 83.82 142.24)) (stroke (width 0) (type default)) (uuid da359c35-7a68-5957-bf79-bc21d3dc21fc))
+  (label "GATE_NODE" (at 83.82 142.24 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid c54d8ef8-e44a-5fa9-a358-5ebea41e0c01))
+  (wire (pts (xy 193.04 146.05) (xy 193.04 148.59)) (stroke (width 0) (type default)) (uuid afcabecd-0667-576c-94bd-e1d1de0a5b86))
+  (label "GATE_COMP_MID" (at 193.04 148.59 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 97239269-9673-5706-86f1-522baad14b10))
+  (wire (pts (xy 243.84 138.43) (xy 243.84 135.89)) (stroke (width 0) (type default)) (uuid 9f264f88-2913-5ba8-8f70-1c7da4a4a560))
+  (label "GATE_COMP_MID" (at 243.84 135.89 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid bd87be50-731f-54e8-b401-f77790917355))
+  (wire (pts (xy 30.48 68.58) (xy 27.94 68.58)) (stroke (width 0) (type default)) (uuid 4d61732f-f1fd-5b58-866e-7d2a8337a243))
+  (label "TIMER" (at 27.94 68.58 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid ee83582d-31a8-5c1d-be89-e0699c34a62b))
+  (wire (pts (xy 294.64 138.43) (xy 294.64 135.89)) (stroke (width 0) (type default)) (uuid cda04c84-e294-5eb3-80f2-05e0ef1307a2))
+  (label "TIMER" (at 294.64 135.89 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid c10b7fc8-07a0-5ee2-9b1c-bb58aee89948))
+  (wire (pts (xy 93.98 147.32) (xy 93.98 149.86)) (stroke (width 0) (type default)) (uuid 9a6b4866-bb82-5c46-a833-7ee29563da3e))
+  (hierarchical_label "UMBILICAL_POS12" (shape output) (at 93.98 149.86 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 4221116b-1b62-5e11-b677-c26210435d2a)
+    (property "Dir" "out" (at 93.98 149.86 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "carrier/power-entry-instrument" (at 93.98 149.86 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "umbilical-current" (at 93.98 149.86 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 345.44 138.43) (xy 345.44 135.89)) (stroke (width 0) (type default)) (uuid b3968b70-add3-528d-987f-81cf6302ec85))
+  (hierarchical_label "UMBILICAL_POS12" (shape output) (at 345.44 135.89 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid d5f87e0e-088c-5ba4-bfb4-ab03d1a465a0)
+    (property "Dir" "out" (at 345.44 135.89 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "carrier/power-entry-instrument" (at 345.44 135.89 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "umbilical-current" (at 345.44 135.89 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 345.44 146.05) (xy 345.44 148.59)) (stroke (width 0) (type default)) (uuid 8848e942-79c9-51b7-af8f-479624c790d8))
+  (label "FB" (at 345.44 148.59 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid aaf73e12-8b26-5e30-bf52-1a825cc94caa))
+  (wire (pts (xy 40.64 184.15) (xy 40.64 181.61)) (stroke (width 0) (type default)) (uuid b86d338d-231e-52fd-9f64-7e27877f99e4))
+  (label "FB" (at 40.64 181.61 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 29ceefd9-19fb-5e8c-9851-53d52df7b6f9))
+  (wire (pts (xy 50.8 60.96) (xy 53.34 60.96)) (stroke (width 0) (type default)) (uuid a5846c7e-beed-56d9-af6a-fb4cd1f7b8a1))
+  (label "FB" (at 53.34 60.96 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 5a85ee06-6cad-50c2-9c26-d1adeddf48ef))
+  (wire (pts (xy 137.16 187.96) (xy 134.62 187.96)) (stroke (width 0) (type default)) (uuid 08ad1f6c-b485-56d7-b69c-2c22d39ddbd9))
+  (label "ON" (at 134.62 187.96 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid eed6b3d0-3f1f-5e2c-980e-c44ca2485644))
+  (wire (pts (xy 30.48 63.5) (xy 27.94 63.5)) (stroke (width 0) (type default)) (uuid 1a0ea19e-025d-519d-afd6-7861c6e9abb5))
+  (label "ON" (at 27.94 63.5 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 10b622e0-07d6-5704-8f03-00d8fbc34313))
+  (wire (pts (xy 43.18 73.66) (xy 43.18 76.2)) (stroke (width 0) (type default)) (uuid c38c14cc-fc95-5e22-aacb-d64a97b6d51c))
+  (hierarchical_label "PWR_GND" (shape passive) (at 43.18 76.2 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 0844a262-60c2-593f-8850-fa5645b4d828)
+    (property "Dir" "ref" (at 43.18 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 43.18 76.2 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 243.84 146.05) (xy 243.84 148.59)) (stroke (width 0) (type default)) (uuid c9d4acfb-1195-5ad8-8f66-2b178af36462))
+  (hierarchical_label "PWR_GND" (shape passive) (at 243.84 148.59 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 7a1c6a33-c4c4-5b42-8cda-2b36c7aa9513)
+    (property "Dir" "ref" (at 243.84 148.59 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 243.84 148.59 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 294.64 146.05) (xy 294.64 148.59)) (stroke (width 0) (type default)) (uuid a151f5ce-ec52-5380-95c5-fd5295c3cf91))
+  (hierarchical_label "PWR_GND" (shape passive) (at 294.64 148.59 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 4477ae38-8ee4-5124-9ea4-f7a087c72846)
+    (property "Dir" "ref" (at 294.64 148.59 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 294.64 148.59 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 40.64 191.77) (xy 40.64 194.31)) (stroke (width 0) (type default)) (uuid a9dc5893-d4dc-5ab4-9e75-8dd4eb4c4de1))
+  (hierarchical_label "PWR_GND" (shape passive) (at 40.64 194.31 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 0fa73fe7-a6f5-57cb-aa8a-20557aa2747d)
+    (property "Dir" "ref" (at 40.64 194.31 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 40.64 194.31 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 91.44 191.77) (xy 91.44 194.31)) (stroke (width 0) (type default)) (uuid fa525430-6fa7-55a2-ad38-246106c9bb1b))
+  (hierarchical_label "PWR_GND" (shape passive) (at 91.44 194.31 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 16049d88-322d-572c-b900-6b09479c00af)
+    (property "Dir" "ref" (at 91.44 194.31 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 91.44 194.31 0) (effects (font (size 1.27 1.27)) hide)))
+  (no_connect (at 147.32 187.96) (uuid 59799c52-dbf4-5d79-80dc-1ad03308c2ee))
+  (no_connect (at 50.8 63.5) (uuid 4b27a5de-1436-5423-a786-e24d738f8f32))
+  (text "FROM THE HAND-WRITTEN NETLIST THIS SHEET REPLACES (verbatim; the part notes are on each part's Note field):\n\nA LONE NO-CONNECT PIN'S NET IS NAMED AFTER THE PIN (the export names it so, whatever label it carries), so the\none-pin nets the text below names are, on this sheet: ON_DIVIDER is NO.\n\nAUTHORITATIVE for connectivity.\n\nTHIS CIRCUIT IS DRAWN ON ANOTHER PAGE. The load switch sits inside power-entry.md's entry drawing,\ndeliberately, because that is one board and one drawing; this page carries only the gate-network detail. So\nthe labels that describe these parts are on a page whose netlist does not own them - which is why\ntools/check-netlist.py resolves a drawing label against EVERY netlist, not just the one beside the page.\nBefore that, every load-switch label on power-entry.md was skipped as \"a BOM row, not a component here\" and\nits value was never compared to anything.\n\n[pins] quoted: YAML reads a bare ON as true\n\n[note] NO `value:` ON PURPOSE. The row is open and says the value is selected on the bench at E6 with a\ncurrent probe, because the +-11% window the page wants is narrower than the LT1641's own sense-threshold\ntolerance. The 50 mohm in power-entry.md's drawing is the WORKING figure the 0.940 A limit is computed from,\nnot a chosen part.\n\n[note] NO `value:` - the part is not chosen, and the single-pulse SOA curve at V_DS = 12 V decides it, not\nR_DS(on).\n\n[pins] quoted: YAML reads a bare NO as false\n\n[SENSE_NODE] The sense resistor's far end IS the FET drain, and the pin that watches it.\n\n[GATE_COMP_MID] R-GATE-COMP and C-GATE in SERIES to ground. The series pair is the compensation zero; the\ncapacitor alone is not.\n\n['ON'] quoted: YAML reads a bare ON as true\n\n['NO'] THE UNDERVOLTAGE-LOCKOUT DIVIDER IS NOT DESIGNED, and the page says so. ON is a threshold input, not a\nswitch input: it needs a divider from the rail so the part knows the supply is up, and the toggle interrupts\nor pulls that divider. Until the divider exists there is nothing to say the switch's second terminal lands on.\n\n[PWRGD] PWRGD IS NOT USED. The presence detect that would have read it is deleted, and the panel indicator's\n\"latched\" signal is proposed only - the Interfaces table marks TIMER/GATE the same way, with nothing drawn." (at 408.94 38.099999999999994 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid 3e09ec79-e312-5333-a8e2-c8aea047f8bf))
+  (sheet_instances (path "/" (page "1")))
+)
