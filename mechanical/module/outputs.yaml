@@ -14,12 +14,17 @@ meshes:
   - name: module-ne8fav-mesh
     from: datasheets/connectors/NEUTRIK-NE8FAV-3D.stp
     out: mechanical/cad/vendor/ne8fav.stl
+  # The two community models are NOT fused: gmsh's boolean fuse did not finish
+  # on the jack's in several minutes. Unfused bodies overlap, which only
+  # matters to a section or a clash - and neither ever uses these meshes.
   - name: module-pj398sm-mesh
     from: datasheets/connectors/THONKICONN-PJ398SM-BADPIXEL-3D.step
     out: mechanical/cad/vendor/pj398sm.stl
+    fuse: false
   - name: module-r0904n-mesh
     from: datasheets/connectors/SONGHUEI-R0904N-L25-BADPIXEL-3D.step
     out: mechanical/cad/vendor/r0904n.stl
+    fuse: false
 
 # Cameras: [tx, ty, tz, rx, ry, rz, distance]; the panel's centre is
 # [25.25, 64.25, 0] (config/module.yaml panel.w / 2, panel.h / 2).
@@ -31,7 +36,7 @@ renders:
     stamp: Woody module
     layout_sensitive: false
     imgsize: [1200, 1400]
-    camera: [25, 64, -12, 62, 0, 35, 330]
+    camera: [25, 60, -15, -35, 40, -10, 280]
     defines: {show_rails: false}
   - name: module-rear
     title: The module from behind - the main board's rear face, the power header with its socket and ribbon, the trimmers and bulk caps
@@ -40,7 +45,7 @@ renders:
     stamp: Woody module
     layout_sensitive: false
     imgsize: [1200, 1400]
-    camera: [25, 64, -20, 62, 0, 215, 330]
+    camera: [25, 60, -20, -35, 220, -10, 290]
     defines: {show_rails: false}
   - name: module-exploded
     title: The stack pulled apart - panel and knobs, jack board, standoffs and J-B2B-MOD, main board, power socket
@@ -48,8 +53,8 @@ renders:
     out: mechanical/module/renders/exploded.png
     stamp: Woody module
     layout_sensitive: false
-    imgsize: [1400, 1400]
-    camera: [25, 64, -20, 70, 0, 60, 420]
+    imgsize: [1600, 1400]
+    camera: [25, 60, -25, -30, 55, -10, 440]
     defines: {show_rails: false, explode: 14}
   - name: module-section
     title: Side section through the panel's centre - the etherCON's axis, the toggle, J-B2B-MOD and the middle pot - with every depth
@@ -57,9 +62,10 @@ renders:
     out: mechanical/module/renders/section.png
     stamp: Woody module
     layout_sensitive: false
-    imgsize: [1400, 1500]
+    imgsize: [1300, 1700]
     projection: o
-    camera: [22, 64, 0, 0, 0, 0, 260]
+    camera: [0, 0, 0, 0, 0, 0, 300]
+    viewall: true
   - name: module-panel
     title: The panel drawing - cuts, positions, legend zones, the screw hardware's reach
     src: mechanical/cad/fig_module_panel.scad
@@ -68,7 +74,8 @@ renders:
     layout_sensitive: false
     imgsize: [1200, 1800]
     projection: o
-    camera: [25, 64, 0, 0, 0, 0, 250]
+    camera: [0, 0, 0, 0, 0, 0, 300]
+    viewall: true
   - name: module-boards
     title: Both boards seen from the panel - outlines, the notch, standoffs, J-B2B-MOD, the parts on each face
     src: mechanical/cad/fig_module_boards.scad
@@ -77,7 +84,8 @@ renders:
     layout_sensitive: false
     imgsize: [2000, 1500]
     projection: o
-    camera: [62, 64, 0, 0, 0, 0, 280]
+    camera: [0, 0, 0, 0, 0, 0, 300]
+    viewall: true
 
 # Cut files and reports.
 exports:

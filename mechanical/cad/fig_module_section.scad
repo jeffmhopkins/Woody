@@ -34,3 +34,8 @@ label([T + jb_d + boards_t / 2, H + 26, 1], "jack board", size = 2, halign = "ce
 label([T + mb_d + boards_t / 2, H + 30, 1], "main board", size = 2, halign = "center");
 label([T + 15, -power_drop - 1.5, 1], "ribbon to the bus board", size = 1.8, halign = "left");
 label([20, H + 40, 1], str("SECTION AT x = ", cut_x(), " - depth from the panel's front face, mm"), size = 2.4, halign = "center");
+// The deepest thing is off this plane: J-PWR-EURO and its socket, projected.
+module ghost_rect(u0, u1, v0, v1, c) { color(c) translate([u0, v0, 0.5]) linear_extrude(0.05) difference() { square([u1 - u0, v1 - v0]); offset(delta = -0.3) square([u1 - u0, v1 - v0]); } }
+ghost_rect(-mb_z0, -mb_z0 + power_h, pw[1] - power_l / 2, pw[1] + power_l / 2, "DimGray");
+ghost_rect(-pw_seat, -pw_top, pw[1] - power_socket_l / 2, pw[1] + power_socket_l / 2, "Black");
+label([-pw_top + 1, pw[1], 1], str("J-PWR-EURO + socket, at x = ", pw[0], " (projected)"), size = 1.6, halign = "left");

@@ -210,26 +210,37 @@ module panel_3d() {
         // Neutrik's A-screws into the flange, heads on the face.
         for (i = [0 : 1]) P(C_BLACK, false, str("etherCON screw ", i + 1)) cyl(ec_holes[i], ethercon_screw_head_d, 0, ethercon_screw_head_h);
         // Panel nuts: jacks and toggle.
-        for (j = jacks) P(C_METAL, false, str("nut ", j[0])) cyl(j[1], jack_nut_d, 0, jack_nut_h, 6);
-        P(C_METAL, false, "nut SW-POWER") cyl(tog, toggle_nut_d, 0, toggle_nut_h, 6);
+        // Nuts are envelopes round the bushing: bored to the panel hole, so a nut and its bushing never read as a clash.
+        for (j = jacks) P(C_METAL, false, str("nut ", j[0])) difference() { cyl(j[1], jack_nut_d, 0, jack_nut_h, 6); cyl(j[1], jack_hole_d, -1, jack_nut_h + 1); }
+        P(C_METAL, false, "nut SW-POWER") difference() { cyl(tog, toggle_nut_d, 0, toggle_nut_h, 6); cyl(tog, toggle_hole_d, -1, toggle_nut_h + 1); }
     }
 }
 
 // -- the jack board and what it carries (layer 0) --
+// PJ398SM ON ITS SIDE (ADR 0024): pins across the panel, the sleeve (pin 1)
+// toward the panel's nearer side edge. Along a 13 mm column the footprint's
+// pin line (fp_u below) does not fit; across, it does.
+function jsgn(p) = p[0] < cx ? 1 : -1;     // +1: the pin-3 side (the body's top) points +x
+function ju(p, u) = p[0] + jsgn(p) * u;    // x of a point `u` along the pin line
+fp_u = [min(-jack_body_down, jack_pins[2] - jack_pads[2][1] / 2), max(jack_body_up, jack_pins[0] + jack_pads[0][1] / 2)];
+fp_a = max(jack_body_w, jack_pads[0][0], jack_pads[1][0], jack_pads[2][0]) / 2;
+function jack_body_rect(p) = ["r", [min(ju(p, -jack_body_down), ju(p, jack_body_up)), p[1] - jack_body_w / 2],
+                                  [max(ju(p, -jack_body_down), ju(p, jack_body_up)), p[1] + jack_body_w / 2]];
+function jack_fp_rect(p) = ["r", [min(ju(p, fp_u[0]), ju(p, fp_u[1])), p[1] - fp_a], [max(ju(p, fp_u[0]), ju(p, fp_u[1])), p[1] + fp_a]];
 module jack_env(p) {
-    // PJ398SM, pins along y, sleeve (pin 1) down (ADR 0024): body on the panel's
-    // rear face and the board's front; bushing through the panel; tails out the back.
-    box(p[0] - jack_body_w / 2, p[1] - jack_body_down, jb_z1, p[0] + jack_body_w / 2, p[1] + jack_body_up, zd(0));
+    // Body on the panel's rear face and the board's front; bushing through the panel.
+    let(r = jack_body_rect(p)) box(r[1][0], r[1][1], jb_z1, r[2][0], r[2][1], zd(0));
     cyl(p, 6.0 - 0.02, zd(0), zd(0) + jack_bushing_l);      // the D6 bushing (drawing, [ds]); a nudge under the hole
 }
 module jack_3d(j) {
     p = j[1];
     P(C_BLACK, false, j[0]) {
-        if (vendor) translate([p[0], p[1], jb_z1]) rotate([0, 0, 180]) import("vendor/pj398sm.stl");
+        // The STEP has its sleeve toward +y; turn it to point outward.
+        if (vendor) translate([p[0], p[1], jb_z1]) rotate([0, 0, jsgn(p) > 0 ? 90 : -90]) import("vendor/pj398sm.stl");
         else jack_env(p);
     }
     P(C_METAL, false, str(j[0], " tails"))
-        box(p[0] - 0.8, p[1] + jack_pins[2] - 0.8, jb_z0, p[0] + 0.8, p[1] + jack_pins[0] + 0.8, jb_z1 - jack_tails);
+        box(ju(p, jack_pins[2]) - jsgn(p) * 0.8, p[1] - 0.8, jb_z0, ju(p, jack_pins[0]) + jsgn(p) * 0.8, p[1] + 0.8, jb_z1 - jack_tails);
 }
 module pot_env(p) {
     // R0904N, pins down: body on the board's front face, shaft up through the panel.
@@ -335,7 +346,8 @@ module main_board_3d() {
 module toggle_3d() {
     P(C_METAL, false, "SW-POWER") {
         box(tog[0] - toggle_body[0] / 2, tog[1] - toggle_body[1] / 2, zd(toggle_body[2]), tog[0] + toggle_body[0] / 2, tog[1] + toggle_body[1] / 2, zd(0));
-        cyl(tog, toggle_flat - 0.02, zd(0), zd(0) + toggle_bushing_l);
+        // The keyed bushing: the D-hole's shape less a nudge (NKK's D4 flat is what stops it turning).
+        translate([tog[0], tog[1], zd(0)]) linear_extrude(toggle_bushing_l) offset(delta = -0.05) dhole2d(toggle_hole_d, toggle_flat);
         translate([tog[0], tog[1], zd(0) + toggle_bushing_l]) rotate([-lev_ang, 0, 0]) cylinder(d = lev_d, h = lev_len);
     }
     P(C_METAL, false, "SW-POWER lugs") box(tog[0] - toggle_body[0] / 2 + 0.5, tog[1] - toggle_body[1] / 2 + 1, zd(toggle_body[2]), tog[0] + toggle_body[0] / 2 - 0.5, tog[1] + toggle_body[1] / 2 - 1, zd(toggle_body[2] + toggle_lugs));
@@ -511,7 +523,7 @@ module drc_report() {
     drc(notch[0] <= ec[0] - fl[0] / 2 - boards_ec_clear + 1e-6 && notch[2] >= ec[1] + fl[1] / 2 + boards_ec_clear - 1e-6,
         "jack board notch clear of the NE8FAV's body", boards_ec_clear, "mm each side and above");
     // Behind the panel, inside the rail's depth: nothing may reach into the band.
-    behind = concat([for (j = jacks) [j[0], j[1][1] - jack_body_down, j[1][1] + jack_body_up]],
+    behind = concat([for (j = jacks) [j[0], j[1][1] - jack_body_w / 2, j[1][1] + jack_body_w / 2]],
                     [for (i = [0 : 2]) [layout_pots[i], pots[i][1] + pot_body[0], pots[i][1] + pot_body[1]]],
                     [["SW-POWER", tog[1] - toggle_body[1] / 2, tog[1] + toggle_body[1] / 2],
                      ["J-UMBILICAL", ec[1] - fl[1] / 2 - ethercon_peg_below, ec[1] + fl[1] / 2],
@@ -524,7 +536,7 @@ module drc_report() {
     drc(tl >= 0, "toggle's lugs in front of the main board", tl, "mm between the lugs' ends and the main board's front face - room for the wires' bends");
     // Standoffs: in a leg or above the pots, clear of everything on each face.
     sp = [for (s = standoff_at) [s, ["r", s - [standoff_af / cos(30), standoff_af] / 2, s + [standoff_af / cos(30), standoff_af] / 2]]];
-    jb_face = concat([for (j = jacks) [j[0], rect_c(j[1] + [0, (jack_body_up - jack_body_down) / 2], jack_body_w, jack_body_up + jack_body_down)]],
+    jb_face = concat([for (j = jacks) [j[0], jack_body_rect(j[1])]],
                      [for (i = [0 : 2]) [layout_pots[i], ["r", pots[i] + [-pot_body[2] / 2, pot_body[0]], pots[i] + [pot_body[2] / 2, pot_body[1]]]]],
                      [["LED spacer", ["c", led, led_spacer_d / 2]],
                       ["J-B2B-MOD", rect_c(b2b_at, b2b_w + 2.54, b2b_l + 2.54)]]);
@@ -546,16 +558,18 @@ module drc_report() {
     mb_front = [["J-UMBILICAL body", ["r", ec - fl / 2, ec + fl / 2]], ["J-B2B-MOD", rect_c(b2b_at, b2b_w + 2.54, b2b_l + 2.54)]];
     sf = worst([for (s = sp) ["standoff", s[1]]], mb_front);
     drc(sf[0] >= boards_part_clear, "standoffs clear of the NE8FAV and J-B2B-MOD between the boards", sf[0], str("mm (", sf[2], ")"));
-    bj = worst([["J-B2B-MOD pads", rect_c(b2b_at, b2b_w + b2b_pad_d, b2b_l + b2b_pad_d)]],
-               [for (j = jacks) [str(j[0], " courtyard"), rect_c(j[1] + [0, (jack_body_up - jack_body_down) / 2], jack_body_w + 1, jack_body_up + jack_body_down + 1)]]);
-    drc(bj[0] >= boards_part_clear, "J-B2B-MOD's pads clear of the jacks", bj[0], str("mm (", bj[2], "), between the two jack columns"));
-    // Along a column, a jack's sleeve pad lands under the next jack's body.
-    sleeve = jack_pins[2] - jack_pad_d / 2;
-    col = layout_jack_pitch_y - jack_body_up + sleeve;
-    drc(undef, "jack sleeve pad to the next jack's body, down a column", col,
-        str("mm (negative: the pad runs under the next body's top edge) at ", layout_jack_pitch_y, " mm pitch - the layout checks it against the footprint's pad"));
-    nb = min([for (j = jacks) j[1][1] + jack_pins[2] - jack_pad_d / 2]) - notch[2];
-    drc(nb >= boards_copper_edge, "lowest jack's pads above the notch", nb, "mm, a sleeve pad's edge to the notch's top edge");
+    jfp = [for (j = jacks) [str(j[0], " footprint"), jack_fp_rect(j[1])]];
+    bj = worst([["J-B2B-MOD pads", rect_c(b2b_at, b2b_w + b2b_pad_d, b2b_l + b2b_pad_d)]], jfp);
+    drc(bj[0] >= boards_part_clear, "J-B2B-MOD's pads clear of the jacks' footprints", bj[0], str("mm (", bj[2], "), between the two jack columns"));
+    jj = worst(jfp, jfp, true);
+    drc(jj[0] >= boards_part_clear, "jack footprints clear of each other", jj[0],
+        str("mm (", jj[1], " / ", jj[2], "): body and pads, ", fp_u[1] - fp_u[0], " along the pin line, which lies across the panel"));
+    drc(fp_u[1] - fp_u[0] + boards_part_clear > layout_jack_pitch_y, "why the jacks lie on their sides", [fp_u[1] - fp_u[0], layout_jack_pitch_y],
+        "mm: a PJ398SM's footprint along its pin line, against the column's pitch - pins down the column would put one jack's sleeve pad on the next one's tip pad");
+    jpe = min([for (j = jacks) let(r = jack_fp_rect(j[1])) min(r[1][0] - b_x0, b_x1 - r[2][0])]);
+    drc(jpe >= boards_copper_edge, "jack pads inside the board's side edges", jpe, "mm, a sleeve pad's edge to the board's edge");
+    nb = min([for (j = jacks) j[1][1] - fp_a]) - notch[2];
+    drc(nb >= boards_copper_edge, "lowest jacks above the notch", nb, "mm, the lowest footprint's edge to the notch's top edge");
 
     // ---- depth
     ds = [["the mated power socket with its ribbon folded over it", depth_max_rear],
@@ -592,7 +606,8 @@ module pcb_geometry() {
     echo("PCB", "module-jack", "cutout", "notch", notch[0], b_y0, notch[1], notch[2], "open to the bottom edge; the NE8FAV's body passes");
     echo("PCB", "module-jack", "board", "thickness", boards_t, "depth", jb_d, "side", "jacks, pots, LED on the front (toward the panel)");
     echo("PCB", "module-main", "board", "thickness", boards_t, "depth", mb_d, "side", "NE8FAV and J-B2B-MOD's insulator on the front; power header, trimmers, bulk caps on the rear");
-    for (j = jacks) echo("PCB", "module-jack", "jack", j[0], j[1][0], j[1][1], 0, "PJ398SM, sleeve (pin 1) down; pins at dy", jack_pins);
+    for (j = jacks) echo("PCB", "module-jack", "jack", j[0], j[1][0], j[1][1], jsgn(j[1]) > 0 ? 180 : 0,
+                         "PJ398SM on its side: the angle (deg, from +x) from the barrel to the sleeve pad; pins 3, 2, 1 at this many mm along it", [-jack_pins[0], -jack_pins[1], -jack_pins[2]]);
     for (i = [0 : 2]) echo("PCB", "module-jack", "pot", layout_pots[i], pots[i][0], pots[i][1], 0, "R0904N, pins down at dy", pot_pins[0], "pitch", pot_pins[1]);
     echo("PCB", "module-jack", "led", "LED-PANEL", led[0], led[1], 0, "leads along x, pitch", led_pitch, "spacer", led_spacer_l);
     for (i = [0 : len(standoff_at) - 1]) {

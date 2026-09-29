@@ -292,11 +292,11 @@ jack:
   body_up:
     value: 6.0
     status: settled
-    source: "[ds] PJ398SM front view: 6 from the axis to the body's top (pin 3 side)"
+    source: "[ds] PJ398SM front view: 6 from the axis to the body's top (the pin 3 side); PJ398SM.kicad_mod F.Fab -5.98"
   body_down:
     value: 4.5
     status: settled
-    source: "[ds] PJ398SM front view: 4.5 from the axis to the body's foot (pin 1 side)"
+    source: "[ds] PJ398SM front view: 4.5 from the axis to the body's foot (the pin 1 side); PJ398SM.kicad_mod F.Fab 4.42"
   body_d:
     value: 9.0
     status: settled
@@ -313,10 +313,10 @@ jack:
     value: [4.92, -3.38, -6.48]
     status: settled
     source: "[ds] PJ398SM PCB layout: pins 3, 2, 1 at +4.92, -3.38, -6.48 from the barrel axis (3.38 + 3.10) along one line [calc]"
-  pad_d:
-    value: 2.0
-    status: nominal
-    source: "[ds] PJ398SM.kicad_mod oval pads; 2.0 is their envelope [from memory]"
+  pads:
+    value: [[2.6, 2.6], [2.6, 2.6], [3.1, 2.3]]
+    status: settled
+    source: "[ds] PJ398SM.kicad_mod: pads T (pin 3) and TN (pin 2) 2.6 x 2.6 roundrect, S (pin 1) 3.1 x 2.3 oval - [across, along] the pin line, in the order of pins"
   nut_d:
     value: 8.0
     status: tbd
@@ -542,9 +542,9 @@ layout:
     status: settled
     source: "[adr 0004] panel table: jacks at 13 mm pitch"
   jack_pitch_x:
-    value: 17.0
+    value: 19.0
     status: nominal
-    source: "[adr 0024] the two columns straddle the middle knob, one between each pair of knobs"
+    source: "[adr 0024] the jacks lie on their sides, pins across, sleeve outward (a PJ398SM's footprint is 13.85 along its pin line [calc from its pads], so pins down a 13 mm column collide); 19 leaves J-B2B-MOD's pads between the columns with the DRC's clearance"
   ec_y:
     value: 39.5
     status: nominal
