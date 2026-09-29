@@ -732,8 +732,10 @@ def build(bdir):
     # the corner mounts' holes (ADR 0020): board-only footprints, no symbol - the
     # stud, spacer and nut are mechanical, in hardware/unplaced.csv. On the
     # BOTTOM, so their courtyard keeps the underside parts off the nuts.
+    bond = lay.get("bond_mount") or {}
     for i, (x, y, hole, head, od) in enumerate(geo["standoffs"], 1):
-        h = load_fp(lay["standoff_footprint"])
+        bonded = bond.get("index") == i
+        h = load_fp(bond["footprint"] if bonded else lay["standoff_footprint"])
         h.SetReference(f"H{i}")
         h.SetValue("mount")
         h.SetBoardOnly(True)
@@ -742,6 +744,14 @@ def build(bdir):
         h.Reference().SetLayer(pcbnew.F_Fab)
         px, py = to_pcb(x, y)
         place(board, h, px, py, 0, True)
+        if bonded:
+            # THE ONE MOUNT THAT GROUNDS THE PLATE (layout.yaml bond_mount): plated,
+            # its pads on the board's ground, the spacer and nut bearing on them.
+            # No keep-out here: the ground pour is meant to meet it.
+            net = board.FindNet(bond["net"])
+            for pad in h.Pads():
+                pad.SetNet(net)
+            continue
         # The mount's spacer presses on the top copper and its nut on the
         # bottom, and both are on the stud that the plate grounds through its own bond:
         # no copper under either, or the board gets a second ground bond and
@@ -1178,6 +1188,26 @@ def check_cad(board, lay, geo, comps):
             bad.append(f"error: [cad] standoff hole H{i} is at {got}, the body CAD puts it at ({px:.2f}, {py:.2f})")
             continue
         hole_d, head, od = geo["standoffs"][i - 1][2:5]
+        bond = lay.get("bond_mount") or {}
+        if bond.get("index") == i:
+            # the plate's one ground bond: plated, every pad on the ground net, and
+            # nothing but that net where the spacer and nut bear
+            drilled = [p for p in fp.Pads() if p.GetDrillSize().x > 0 and abs(pcbnew.ToMM(p.GetDrillSize().x) - hole_d) <= 0.01]
+            if not drilled or any(p.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH for p in drilled):
+                bad.append(f"error: [cad] H{i} is the plate's ground bond (layout.yaml bond_mount): it must be a plated {hole_d:g} mm hole")
+            for pad in fp.Pads():
+                if pad.GetNetname() != bond["net"]:
+                    bad.append(f"error: [cad] H{i} pad on '{pad.GetNetname()}', not {bond['net']} - the bond is to ground")
+            from shapely.geometry import Point as _P
+            disc = _P(*got).buffer(max(head, od) / 2 + float(lay["rules"]["clearance"]) - 0.02)
+            for L in (pcbnew.F_Cu, pcbnew.B_Cu):
+                hits = {t.GetNetname() for t in board.GetTracks() if t.IsOnLayer(L) and item_shape(t, L).intersects(disc)}
+                hits |= {pad.GetNetname() for f2 in board.GetFootprints() for pad in f2.Pads()
+                         if f2.GetReference() != fp.GetReference() and pad.IsOnLayer(L) and item_shape(pad, L).intersects(disc)}
+                hits -= {bond["net"]}
+                if hits:
+                    bad.append(f"error: [cad] {', '.join(sorted(hits))} under the grounded mount H{i} on {board.GetLayerName(L)} - its spacer and nut would short them to the plate")
+            continue
         for pad in fp.Pads():
             if pad.GetAttribute() != pcbnew.PAD_ATTRIB_NPTH or abs(pcbnew.ToMM(pad.GetDrillSize().x) - hole_d) > 0.01:
                 bad.append(f"error: [cad] H{i} must be an NPTH hole of {hole_d:g} mm (the body CAD's); it is "
@@ -1361,7 +1391,7 @@ def cmd_render(bdir):
             outs.append(o)
         # fabrication: Gerbers, drill, pick-and-place, as a board house takes them. Plated
         # and unplated holes in separate drill files (<name>-PTH.drl, <name>-NPTH.drl), as
-        # JLCPCB asks - the standoff holes must stay unplated (ADR 0020).
+        # JLCPCB asks - the standoff holes stay unplated (ADR 0020) except a bond_mount.
         fab = os.path.join(t, "fab")
         os.makedirs(fab)
         subprocess.run(["kicad-cli", "pcb", "export", "gerbers", "--no-protel-ext", "--layers", "F.Cu,B.Cu,F.Paste,B.Paste,F.Silkscreen,B.Silkscreen,F.Mask,B.Mask,Edge.Cuts", "-o", fab + "/", pcb],
