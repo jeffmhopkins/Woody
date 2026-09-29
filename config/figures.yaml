@@ -743,7 +743,7 @@ figures:
     false_positive_note: "38 and 1.5 are common numerals in this corpus (a 1.5 mm plate candidate, drill sizes). Match the phrase, never the numeral. 42 was the value for part of 2026-09-26; `42.0 mm` is the register spelling."
 
   - id: plate-thickness
-    quantity: Key plate thickness (PLATE-TOP, PLATE-THUMB)
+    quantity: Key plate and bottom plate thickness (PLATE-TOP, PLATE-BOTTOM)
     value: "1.20 mm"
     status: settled
     owner: docs/reference/ks33-geometry.md

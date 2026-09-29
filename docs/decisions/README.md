@@ -59,7 +59,7 @@ dated italic note at each point it changes, and the amendment named in the
 | [0006](0006-cv-channel-allocation.md) | CV channel allocation and calibration | Accepted |
 | [0007](0007-imu-selection.md) | IMU selection | Accepted. Board selected: Waveshare ESP32-S3-Matrix |
 | [0008](0008-display-selection.md) | Display selection | Superseded by 0015 |
-| [0009](0009-enclosure-construction.md) | Enclosure construction | Accepted |
+| [0009](0009-enclosure-construction.md) | Enclosure construction | Accepted; how the body closes amended 2026-09-29 by 0024 (no body fasteners, glued shut round the cassette) |
 | [0010](0010-key-layout-as-data.md) | Key layout as data | Accepted |
 | [0011](0011-licensing.md) | Licensing | Accepted |
 | [0012](0012-configuration-interface.md) | Configuration interface | Superseded by 0015 |
@@ -70,7 +70,8 @@ dated italic note at each point it changes, and the amendment named in the
 | [0017](0017-one-main-board.md) | One main board | Accepted (wiring details in 0018; key-chain connectors amended to through-hole IDC 2026-09-27) |
 | [0018](0018-main-board-wiring-decisions.md) | Main board wiring: five decisions | Accepted |
 | [0019](0019-kicad-sheets-are-the-source.md) | The KiCad sheets are the source of truth | Accepted, amended 2026-09-27 (the sheet names the bought part; migration in progress) |
-| [0020](0020-key-boards-screw-to-the-plate.md) | The key boards are screwed to the key plate | Accepted, amended 2026-09-29 (1.6 mm boards pressed against the switches; the plate grounded at one left-hand mount), 2026-09-27 (a mount at each corner, 1.2 mm boards; twice more the same day) and 2026-09-28 (Amendment 4: a PEM flush-head stud pressed into the plate, nothing above it) |
+| [0020](0020-key-boards-screw-to-the-plate.md) | The key boards are screwed to the key plate | Accepted, amended 2026-09-29 (1.6 mm boards pressed against the switches; Amendment 7: held by the cassette's columns, Amendment 5's bond superseded, by 0024), 2026-09-27 (a mount at each corner, 1.2 mm boards; twice more the same day) and 2026-09-28 (Amendment 4: a PEM flush-head stud pressed into the plate, nothing above it) |
 | [0021](0021-pcb-mount-ethercon.md) | The instrument's etherCON is PCB-mounted, on an adapter joined to the main board | Accepted (the instrument's end of ADR 0004's open variant question) |
-| [0022](0022-main-board-mount.md) | How the main board is held, and how thick it is | Accepted |
+| [0022](0022-main-board-mount.md) | How the main board is held, and how thick it is | Accepted, amended 2026-09-29 by 0024 (every mount on the bottom plate) |
 | [0023](0023-module-ethercon-and-two-boards.md) | The module's etherCON is the NE8FAV too, and the module is two boards | Accepted (the module's end of ADR 0004's open variant question) |
+| [0024](0024-the-cassette.md) | The cassette: the internals are one bonded unit, dropped into the shell | Accepted |

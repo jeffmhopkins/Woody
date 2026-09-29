@@ -87,9 +87,11 @@ actually measure — and never leaves the instrument.
 
 ## The instrument must stay recoverable
 
-The body comes apart on six fasteners (ADR 0009), but answering a failed
-flash that way means lifting the lid, unplugging the Matrix's ribbon and the
-key boards' ribbons from the main board (ADR 0017), and re-laying the gasket. Everything here exists so that it never has to be the answer.
+The body comes apart by cutting its silicone (ADR 0024), and answering a
+failed flash that way means cutting the oak top free, unscrewing the key plate
+from the cassette's columns, unplugging the Matrix's ribbon and the key
+boards' ribbons from the main board (ADR 0017), and bonding it all back with
+fresh silicone. Everything here exists so that it never has to be the answer.
 
 - **Two app partitions, with `CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE`.** There
   is no OTA — no radio — but an image flashed over USB into the inactive slot
@@ -102,14 +104,14 @@ key boards' ribbons from the main board (ADR 0017), and re-laying the gasket. Ev
   through every boot that has not been asked for MIDI.
 - **The recovery ladder, in order.** (1) Rollback to the other app slot. (2) USB-Serial-JTAG
   through the tail USB-C slot — which is why MIDI is opt-in. (3) The console
-  header on the main board, with the lid off (ADR 0009 — there is no
+  header on the main board, with the body opened (ADR 0024 — there is no
   service cover since 2026-09-26), for watching a board that boots
   but misbehaves. (4) **Hardware boot-force on the same header**: `EN` and
   `IO0` are not on the ESP32-S3-Matrix's pad rows, so two ribbon conductors
   are soldered to its RESET and BOOT button pads and brought to
   `HDR-SERVICE` (ADR 0018; `hardware/carrier/service-uart/`). Hold `IO0` low,
   pulse `EN`, and the ROM download mode takes a UART flash over the console
-  pair — so a corrupted *bootloader* is recovered with the lid off and the
+  pair — so a corrupted *bootloader* is recovered with the body opened and the
   Matrix still in place. **Only pull `EN` and `IO0` to ground** (open-drain or
   a switch to GND), never drive them high: the Matrix's own buttons short them
   to GND. The two spare GPIO on the ribbon (`IO2`, `IO3`) sit beside fast

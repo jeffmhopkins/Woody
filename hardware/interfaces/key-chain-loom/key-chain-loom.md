@@ -206,25 +206,28 @@ hairpin folds is `config/body.yaml` `routing.chain_fold`, which says why.
 Leg and fold radius: `mechanical/drc.echo` "key-chain ribbon closed:
 hairpin leg and fold radius", held to the cable's bend radius by "key-chain
 ribbon fold no tighter than its bend radius". Both hairpins are checked
-inside the body ("key-chain ribbon hairpin inside the body") and off the lid
-screws ("key-chain ribbon hairpin clear of the lid screws").
+inside the body ("key-chain ribbon hairpin inside the body") and off the
+cassette's columns, which stand through the whole gap the hairpin lies in
+("key-chain ribbon hairpin clear of the columns"; ADR 0024).
 
 **Why it is as long as it is** (owner, 2026-09-27: long enough "to have the
-top off and still connect the ribbon before tightening down"). The service
-position is the lid laid **face down beside the body, off its far edge**,
-with the body standing on its U-bolt and a block under its other end, which
-lifts the main board's plug; the ribbon runs up from the main board's plug,
-over the far side's top edge and down to the key board's
-(`routing.chain_service`, plus `routing.chain_slack`). The free length is
+top off and still connect the ribbon before tightening down"). Since the
+cassette (ADR 0024), tightening down is screwing the key plate onto its
+columns, on the bench or, in service, once the oak top is cut free. The
+service position is the key plate, with both key boards on it, **held raised
+straight up off its columns** far enough for a hand to reach the main board's
+sockets (`routing.chain_service`, `routing.chain_raise`, plus
+`routing.chain_slack`). It is not laid beside the body any more: a ribbon that
+long folds into a hairpin that reaches the left-hand board's tail column. The free length is
 `mechanical/drc.echo` "key-chain ribbon length (derived)", in millimetres.
 **The part is ordered by a different line**: "key-chain cable to order
 (FFSD length code)" is the FFSD length field — inches, overall, measured
 over both sockets as the print measures it, with its −0.125 in tolerance
 already covered — so the order is `FFSD-06-D-<that code>-01-N-RN2`. FFSD is
-built to length; there are no stock lengths. **So the lid comes off by lifting
-it, laying it beside the body and unplugging the two sockets**; it goes back
-on by plugging them in with the lid beside the body, then closing it and
-screwing it down.
+built to length; there are no stock lengths. **So the key plate comes off by
+undoing its column screws, raising it and unplugging the main board's
+sockets**; it goes back on by plugging them in with the plate held raised,
+then lowering it onto its columns and screwing it down.
 
 **Pin numbering: key-board pin = 13 − main-board pin, and the cable sets
 it.** `[datasheet]`, both full prints banked:
@@ -396,7 +399,7 @@ and confirm the Matrix restarts once the short is removed.
 
 The symptom is immediate and on the bench: the whole 3V3 rail collapses, so
 the Matrix does not start at all — not a dead key board — and it is seen
-before the lid is screwed down.
+before the key plate is screwed down onto its columns.
 
 **`FB-CHAIN`, one per ribbon, is isolation, not protection** (ADR 0018). A
 ferrite bead in series with each ribbon's conductor 10 on the main board keeps

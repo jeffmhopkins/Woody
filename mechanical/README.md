@@ -94,7 +94,7 @@ of a superseded value. Instead:
 | | |
 |---|---|
 | ![Underside](renders/underside.png) Underside: thumb recesses, both thumb rests, U-bolt | ![Exploded](renders/exploded.png) The stack, pulled apart |
-| ![Internals](renders/internals.png) Lid off | ![Internals, far side](renders/internals-far.png) Lid off, from the far side: the ribbons |
+| ![Internals](renders/internals.png) Oak top and key plate off | ![Internals, far side](renders/internals-far.png) Oak top and key plate off, from the far side: the ribbons |
 | ![Tail](renders/tail-detail.png) The tail from inside | |
 | ![Main board](renders/main-board-3d.png) The main board: thumb switches and carrier circuits on one board, in yellow | |
 
@@ -107,7 +107,7 @@ of a superseded value. Instead:
 | | |
 |---|---|
 | ![Electronics](renders/breakdown-electronics.png) The electronics in yellow | ![Structure](renders/breakdown-structure.png) The structure in yellow, pulled apart |
-| ![Breath path](renders/breakdown-breath.png) The breath path at the mouth end | ![From the tail](renders/view-tail.png) The tail from outside, lid off |
+| ![Breath path](renders/breakdown-breath.png) The breath path at the mouth end | ![From the tail](renders/view-tail.png) The tail from outside, oak top and key plate off |
 
 ![Section through the thumb row](renders/section-thumb-row.png)
 
@@ -134,4 +134,4 @@ the oak top has **one slot per hand** (`stack.cap_holes`).
 | | |
 |---|---|
 | ![Cross-section through RH3](renders/section-key.png) | ![Tail face](renders/tail-face.png) |
-| ![Cross-section through the LED matrix](renders/section-matrix.png) The frosted window, flush on its oak lip | ![Section through a key-board corner](renders/section-kb-mount.png) A key board's corner mount (ADR 0020, Amendment 3): the screw's head on the plate inside a blind pocket in the wood's underside, the spacer and washer, the board, the nut |
+| ![Cross-section through the LED matrix](renders/section-matrix.png) The frosted window, flush on its oak lip | ![Section through a key-board corner](renders/section-kb-mount.png) A column at a key board's corner (ADR 0024): the stud in the bottom plate, a spacer, the main board, the standoff faced to the gap, the key board, a spacer, the key plate, and the screw whose head sits in a blind pocket in the oak top |

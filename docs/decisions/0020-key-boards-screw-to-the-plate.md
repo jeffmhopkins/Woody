@@ -6,10 +6,13 @@ on 2026-09-27**: *Amendment 2* made a screw down through a plugged bore in
 the wood top the standard, and *Amendment 3* replaced the bore and plug
 with a blind pocket drilled into the wood top's underside. **Amendment 4,
 2026-09-28, replaced the screw with a PEM self-clinching stud pressed into the
-plate, its head flush with the plate's top face** — the current mount: nothing
-above the plate, no pockets, no epoxy. PEM publishes the stud's data in a
-1.2 mm aluminium sheet, which the standoff this page first chose did not
-have. What stays open is in Amendment 4's last list.
+plate, its head flush with the plate's top face**: nothing above the plate,
+no pockets, no epoxy. PEM publishes the stud's data in a 1.2 mm aluminium
+sheet, which the standoff this page first chose did not have. **Amendment 7,
+2026-09-29 ([ADR 0024](0024-the-cassette.md)), is the current mount:** each
+corner is a column from the bottom plate to the key plate, and the key board is
+clamped in it by a screw down through the plate. Amendment 5's bonded mount is
+superseded.
 
 ## Context
 
@@ -87,6 +90,8 @@ connector envelope using a stand-in size. The real footprint, a Molex 200528
      mount keep-outs since Amendment 2.)*
 4. **The plate makes no second ground bond through the board.**
    - The plate is grounded at one mount of the left-hand key board (Amendment 5).
+     *(Superseded 2026-09-29 by Amendment 7: the plate is grounded through the
+     columns at the main board's mounts, and every key-board mount is unplated.)*
    - The board's holes are unplated (NPTH).
    - Each hole sits in a copper keep-out on both layers. On top it is
      covered by the standoff's end face, and underneath by the screw head.
@@ -604,6 +609,11 @@ holding from above, which is why there is no epoxy.
 
 ## Amendment 5, 2026-09-29 — the plate is grounded at one mount of the left-hand board
 
+> **Superseded the same day by Amendment 7** ([ADR 0024](0024-the-cassette.md)):
+> the key plate is tied by the cassette's columns to the main board's plated
+> mounts on `PWR_GND`, so no key-board mount is plated. The text below is the
+> record.
+
 The key plate was grounded by `MECH-GNDBOND`, a ring terminal and a wire from
 the main board. The owner replaced it with one of the mounts themselves, the
 way the thumb plates are grounded (ADR 0022 point 6):
@@ -661,3 +671,61 @@ the plate and only its pins go through the board. Gateron's drawing agrees.
 Supersedes point 6's 1.2 mm, and Amendment 4's 2.3 mm spacer and 10 mm stud. The first switch
 pushed into the first board confirms the holes and the depth.
 
+
+## Amendment 7, 2026-09-29 — the key boards are held by the cassette's columns
+
+[ADR 0024](0024-the-cassette.md) makes the internals one unit, the cassette,
+bonded into the shell. Nothing screws into the wood, and the key plate is tied
+to a bottom plate by a column at each key-board corner.
+
+### The stack at each corner, from the top down
+
+| Part | Row | Size |
+|---|---|---|
+| The oak top, with a blind pocket drilled up into its underside over the screw's head. Nothing breaks the playing face | — | `hardware.col_pocket_d`; depth, the head's height and `col_pocket_clear` |
+| M2.5 low-head screw, its head on the key plate's top face | `MECH-COL-SCREW` | `hardware.col_screw_head_d`, `col_screw_head_h`, `col_screw_l` |
+| The key plate's clearance hole | `PLATE-TOP` | `hardware.col_plate_hole` |
+| The spacer, faced to length, between the plate and the board. It still alone sets the board's depth | `MECH-KB-SPACER` | `hardware.kb_spacer_l`, `kb_spacer_l_tol`, `kb_spacer_od` |
+| The key board, its NPTH hole | — | `boards.key_board_t`, `hardware.kb_board_hole` |
+| The column standoff, threaded onto the stud from the bottom plate, faced to the gap down to the main board | `MECH-COL-STANDOFF` | `hardware.col_standoff_*`; `drc.echo` *"column standoff length (derived)"* |
+
+Below the standoff are the main board and the bottom plate's stud (ADR 0022,
+as amended by ADR 0024).
+
+### What changes, and what does not
+
+- **The depth rules are unchanged.** The spacer bears on the plate's
+  underside and the board's top, and the screw clamps the plate, the spacer and
+  the board onto the standoff. So *"key-board mount sets the board depth"* and
+  *"key-board depth at the hardware's tolerance limits"* read as before.
+- **The studs in the key plate are gone** (`MECH-KB-STUD`), and so is the nut
+  under the board (`MECH-KB-NUT`). The key plate has a clearance hole at each
+  corner, not a stud hole, so PEM's edge distance no longer applies there. The
+  screw's head must bear on plate metal (*"column screw heads bear on the key
+  plate"*).
+- **Service goes through the screws.** Once the oak top is cut free
+  (ADR 0024), the heads are reached from above. So there is no stud whose
+  clinch holds it against turning, and no nut underneath. The key plate comes
+  off the columns with both key boards on it.
+- **The pockets are back**, as Amendment 3's were: one per corner, blind, their
+  wood checked (*"column screw pockets clear of the wood top's cuts"*,
+  *"column screw pockets leave wood over them"*). The tail corners' pockets
+  set the least tail margin (`boards.kb_tail_margin`), as they did then.
+- **The keep-out under the board is the standoff's hex**, across its corners,
+  grown by `hardware.kb_mount_float`. It stands where the nut stood, the same
+  size (`hardware.col_standoff_af`, `kb_mount_inset`).
+- **The corners are where the columns can stand.** A column is vertical, so
+  the key board's mouth corners move until the column's stud in the bottom
+  plate clears the first thumb row (`boards.kb_end_margin`).
+- **Every key-board mount is unplated.** Amendment 5's bonded mount is
+  superseded: the key plate is grounded through the columns to the main
+  board's plated mounts, on `PWR_GND`, with the bottom plate. The key plate is
+  ordered un-anodised, or masked round each column hole on its top face, where
+  the screws' heads bear (`PLATE-TOP`).
+
+### Still open
+
+- The standoff and the screw, bought (ADR 0024's *Open*).
+- `hardware.col_pocket_wall` and `col_pocket_skin` are placeholders from
+  memory, as Amendment 3's were. They are settled at M2 by pocketing a scrap of
+  the chosen wood beside a slot.

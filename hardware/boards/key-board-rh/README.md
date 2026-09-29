@@ -19,7 +19,7 @@ left-hand page holds, with `key-board-rh` for `key-board-lh` in every path.
 | The register's other inputs | A is a free input with its pull-up (R11, sheet FREE3); B and C are the markers | **no free input**: A and B are the markers (`key-marker-and-bits/allocation.yaml`) |
 | The register's decoupler | C6, across the ends of pins 16 and 15 | **C7, below the register's J-CHAIN end, beside pin 8** (`layout.yaml` says why: two key lines leave the far row here, and the left-hand board's place walls them in) |
 | The register's far-row ground pins | reached by the pour | **strapped by tracks of their own**, pin 12 (the low marker) to pin 8 and pin 15 (CLK INH) to pin 12, held by `pcb.py check` (`layout.yaml` `connect_first:`): the far-row key lines box them in, so no pour reaches them |
-| The register's place | level with LH3 | level with RH3, 0.5 further from the key row, for the room those lines need. **Marginal**: `layout.yaml` records what else was tried |
+| The register's place | level with LH3 | 6.0 past RH3's level, where the header's new place leaves room for SCK and SH/LD between them (ADR 0024 moved `J-CHAIN`), and 0.5 further from the key row, for the room those lines need. **Marginal**: `layout.yaml` records what else was tried |
 | The rail's reservoir | C7 | **C8** |
 | SER comes from / QH goes to | the main board / the left thumb (`/CHAIN_SER_LH`, `/HOP_LH_LT`) | the left thumb / the right thumb (`/HOP_LT_RH`, `/HOP_RH_RT`), `key-chain-loom.md` |
 | Its rail | `V3V3_CHAIN_LH` | `V3V3_CHAIN_RH` |
@@ -70,7 +70,7 @@ every key closed is six keys' `key-scan-current`.
 
 | Rev | Date | What changed | Where |
 |---|---|---|---|
-| A | 2026-09-28 | First layout, from the left-hand board's (`layout.yaml`). Not yet ordered | git history of this directory |
+| A | 2026-09-28 | First layout, from the left-hand board's (`layout.yaml`). Not yet ordered; re-laid out 2026-09-29 for the cassette's columns (ADR 0024): the mouth end 0.6 and the tail end 0.2 longer, `J-CHAIN` 13.0 further toward the tail where the shorter ribbon lets the body CAD put it, the register, C7 and C8 following it, the switch side's title moved off the header's tails | git history of this directory |
 
 ## Open, and what decides each
 

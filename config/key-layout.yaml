@@ -156,8 +156,8 @@ chain:
 #   the exact fault R-KEY-PU exists to fix (ADR 0001).
 #   They have NO CUTOUTS (owner, 2026-09-26, ADR 0010): the right thumb is
 #   only its three, the left thumb its four in a line. Fitting one later
-#   means recutting the thumb plate and oak bottom; the body opens on six
-#   fasteners (ADR 0009), so that is work, not impossible.
+#   means recutting the bottom plate and oak bottom; the body opens by
+#   cutting its silicone (ADR 0024), so that is work, not impossible.
 # The 2021 firmware triggered mode changes from key combinations (A[1], A[7],
 # A[8]); dedicated inputs are better and these bits are already paid for.
 spare_bits: 13

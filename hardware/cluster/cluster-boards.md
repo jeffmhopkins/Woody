@@ -23,13 +23,13 @@ SN74HCS165 with its decoupling, its switches and a network per switch position.
 Since ADR 0017:
 
 - **`right_hand` and `left_hand` are the two key boards** (`PCB-CLUSTER`),
-  hung from `PLATE-TOP` on an M2.5 stud in each corner of a board that spans
-  the cavity: pressed into the plate, its head flush with the plate's top
-  face, then a spacer, the board, and a nut underneath (ADR 0020, Amendment
-  4 — the owner's, 2026-09-28; it replaced a pressed-in standoff, a plugged
-  bore through the wood, and screw heads in blind pockets). Each connects to the main board by one 1.27 mm IDC ribbon (`CBL-CHAIN`) into a through-hole right-angle header on its underside.
+  under `PLATE-TOP`, each a board that spans the cavity with one of the
+  cassette's columns at each corner (ADR 0024; ADR 0020 Amendment 7): under
+  the key plate a spacer, then the board, then the column's standoff, which
+  stands on the main board; a screw comes down through the plate, the spacer
+  and the board into the standoff. Each connects to the main board by one 1.27 mm IDC ribbon (`CBL-CHAIN`) into a through-hole right-angle header on its underside.
 - **`right_thumb` and `left_thumb` are on the main board** (`PCB-CARRIER`),
-  their switches soldered to it and clipped into `PLATE-THUMB`, their
+  their switches soldered to it and clipped into `PLATE-BOTTOM`, their
   registers and networks beside them.
 
 The four clusters differ only in how many switch positions are fitted and which
@@ -74,14 +74,14 @@ The section numbers are left as they were written.*
  P │     │  KEY BOARD  │               │   KEY BOARD   │              │
    │     │  left_hand  │               │   right_hand  │              │
    │     └──────┬──────┘               └───────┬───────┘              │
-   │      under PLATE-TOP, hung from the lid   │                      │
+   │      under PLATE-TOP, on the columns      │                      │
    │            │ ribbon                        │ ribbon              │
    ├────────────┼───────────────────────────────┼──────────────────────┤
  B │   ┌────────┴───────────── MAIN BOARD ──────┴───────────────────┐  │
  O │   │ left_thumb       U-BOLT band        right_thumb   carrier  │  │
- T │   │ LT 4 keys       (holes over nuts)   RT 4 keys     circuits │  │
+ T │   │ LT 4 keys       (legs' holes)       RT 4 keys     circuits │  │
  T │   └────────────────────────────────────────────────────────────┘  │
- O │      thumb switches in PLATE-THUMB, inside face of the oak bottom │
+ O │      thumb switches in PLATE-BOTTOM, inside face of the oak bottom│
  M │                                                                   │
    └──────────────────────────────────────────────────────────────────┘
                               TAIL (umbilical, USB-C)
@@ -119,12 +119,11 @@ sibling pages cite `cluster-boards.md` §3.*
 ## §5 Mechanical
 
 *Written for the key boards under `PLATE-TOP`. The thumb switches sit in
-`PLATE-THUMB` the same way, with the main board beneath them, so the
-height rules below hold for the main board's thumb areas too —
-which suits it, because its parts face the other way (ADR 0017). The depth
-does not: the thumb switches' board sits at `switch.thumb_pcb_below_seat`,
-set by the main board's own standoffs, not by the key boards' spacer
-(ADR 0020, Amendment 4).*
+`PLATE-BOTTOM` the same way, with the main board above them, so the
+height rules below hold for the main board's underside too, over its whole
+length since the bottom plate runs under all of it (ADR 0024). The thumb
+switches' board sits at `switch.thumb_pcb_below_seat`, set by the same spacer
+on the bottom plate (ADR 0022).*
 
 **Plate, then switch, then board.** The switch clips into a 14.0 × 14.0 mm
 cutout in the aluminium plate — the same as standard MX, measured across 47
@@ -151,11 +150,11 @@ ks33-geometry.md`.
 > supersedes it wherever the two disagree `[repo] ks33-geometry.md`.
 
 **The key-board outline is the body CAD's**: a rectangle across the cavity
-with a stud in each corner (ADR 0020 point 3 and Amendment 4),
+with a column in each corner (ADR 0020 point 3, ADR 0024),
 exported as `mechanical/export/key-board-*.dxf` and placed from
 `config/body.yaml` `layout.*`, `boards.*` (the tail ends' `boards.kb_tail_margin`
 is longer, so the tail corners' hardware clears the last keys' cutouts) and
-`hardware.kb_*` (`kb_mount_inset` keeps the nut's keep-out on the board). **Its switch positions are
+`hardware.kb_*` (`kb_mount_inset` keeps the column standoff's keep-out on the board). **Its switch positions are
 provisional until M3**: `layout.lh_gaps` and `layout.lh_offsets` stand in until
 the ergonomic iteration of M2 fills `key-layout.yaml`'s `x`/`y` (all `null` on
 purpose) `[repo] key-layout.yaml, 0010`. Spacing along the key line is
@@ -165,7 +164,7 @@ than a pitch parameter.
 ### Three layout rules that are not obvious
 
 - **The aluminium plate sits directly above this board and is grounded**
-  at one mount of the left-hand key board `[repo] 0020 Amendment 5, 0009`. That is useful — it
+  through the cassette's columns at the main board's mounts `[repo] 0024, 0020 Amendment 7`. That is useful — it
   shields the key networks from the LED channel for free — and it is also a
   short waiting to happen. Every part on the plate-facing side needs clearance
   to the plate, or the board needs its passives on the far side.
@@ -177,9 +176,9 @@ than a pitch parameter.
   `switch.pcb_below_seat` (`config/body.yaml`). Subtract `plate-thickness` and
   that is the gap, `mechanical/drc.echo` "key-board mount gap (derived)":
   the spacer under the plate (`MECH-KB-SPACER`, `hardware.kb_spacer_l`),
-  with nothing else in the gap. The stud's head is
-  flush with the plate's top face, so the key boards' depth is the plate plus
-  that hardware, checked by "key-board mount sets the board depth"; at the
+  with nothing else in the gap. The column's screw clamps the plate and the
+  spacer onto the board, so the key boards' depth is the plate plus
+  that spacer, checked by "key-board mount sets the board depth"; at the
   hardware's tolerance limits it prints a NOTE, and the first board
   confirms the fit (ADR 0020, Amendment 2).
 
@@ -269,14 +268,16 @@ and the `LT` springs to
 [`key-switch-network/`](key-switch-network/key-switch-network.md), and the
 closed 74HC165 item to [`key-register/notes.md`](key-register/notes.md).*
 
-- **The key-board mount's open items** (§5, ADR 0020 Amendment 4). The
-  parts are chosen (`MECH-KB-STUD`, `MECH-KB-SPACER`, `MECH-KB-NUT`); the studs are pressed flush into the plate, so nothing
-  stands above it and nothing goes into the wood. Open:
-  - the spacers, faced to `hardware.kb_spacer_l` from a stocked 3.0 (no
-    stocked M2.5 spacer has that length), measured at the first fit;
+- **The key-board mount's open items** (§5, ADR 0024, ADR 0020 Amendment 7).
+  The spacer is chosen (`MECH-KB-SPACER`); the column's standoff and screw are
+  open until bought (`MECH-COL-STANDOFF`, `MECH-COL-SCREW`), and nothing goes
+  into the wood but the screws' heads, in blind pockets. Open:
+  - the spacers, faced to `hardware.kb_spacer_l` (no stocked M2.5 spacer has
+    that length), measured at the first fit;
   - the depth at the tolerance limits (drc.echo "key-board depth at the
     hardware's tolerance limits", a NOTE), which the first board confirms;
-  - a US source for the studs, and whether the plate vendor presses them.
+  - the standoff and the screw, bought, and a US source for the bottom
+    plate's studs (`MECH-MB-STUD`), which the plate vendor presses.
   **Plate stiffening** (`plate-thickness` is settled; whether it needs a rib
   or a backer is not) gates M4/M5 — ADR 0002.
 - **Conformal coating.** `MECH-COAT` covers the main board; nothing says
