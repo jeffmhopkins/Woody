@@ -47,10 +47,13 @@ fab:
 # The mount's holes (ADR 0020, Amendment 4: a PEM FHL-M2.5 stud flush in the
 # plate, a spacer, the board, a nut underneath): one per corner,
 # positions from the body CAD; this is only which footprint draws them (the key
-# keeps its old name, which tools/pcb.py reads). NPTH -
-# the plate is bonded to ground by the main board's MECH-GNDBOND, and a
-# plated hole here would make a second bond.
+# keeps its old name, which tools/pcb.py reads). The key plate is grounded at
+# exactly ONE corner: bond_mount, below, a plated hole with pads top and bottom
+# on GND_CHAIN (index: H1..H4, in the order of the echo's left_hand standoff
+# lines; not _Pad_Via, whose ring of vias breaks fab: hole_to_hole). That is the
+# plate's one bond; the other three stay NPTH, so the plate makes no loop.
 standoff_footprint: "MountingHole:MountingHole_2.7mm_M2.5"
+bond_mount: {index: 2, footprint: "MountingHole:MountingHole_2.7mm_M2.5_Pad_TopBottom", net: GND_CHAIN}
 
 # Placement. A switch's pins are on its near side (low y): pin 1, the switch
 # leg, at (-4.4, -4.7) from its centre and pin 2, ground, at (+2.6, -5.75);
@@ -80,7 +83,10 @@ parts:
   # and its return runs to the register's ground pin 8, at the opposite corner, in
   # its own track (connect_first, below) - not through whatever the pour leaves
   C6:  [94.3, 48.2, 180]     # C-DECOUPLE-165
-  R11: [84.0, 43.5, 90]      # R-KEY-PU on sheet FREE3: the free input's pull-up
+  # the free input's pull-up, over the ends of its own two pins - 11 (FREE3, its
+  # pin 2) and 12 (3V3, its pin 1) - each one short stub: beside the register it
+  # sat where the 3V3 rail to its far pin walled pin 11 in
+  R11: [89.23, 48.2, 180]    # R-KEY-PU on sheet FREE3
   # The reservoir on the chain's 3V3, beside J-CHAIN's 3V3 pin (C-BULK-CHAIN row)
   C7:  [67.0, 42.0, 90]      # C-BULK-CHAIN
   # Bring-up test pads (TP-CHAIN), a row between the key row and the register:
@@ -101,7 +107,7 @@ parts:
 silk:
   at: [44.0, 12.5]
   legend_at: [44.0, 17.0]    # the test pads' legend (TP1 QH ...), under the title
-  top_at: [83.0, 46.0]       # the switch side's copy, left edge of the text
+  top_at: [44.0, 14.3]       # the switch side's copy, left edge of the text
   title: "WOODY key board LH"
   rev: "A"
   date: "2026-09-27"
@@ -112,8 +118,16 @@ silk:
 route: true
 # J-CHAIN's far row (the odd pins: 3V3, QH, SER, SH/LD, SCK) can be reached only
 # from the header's back - its 1.27 mm pads leave no room for a track between
-# them - so those nets are routed before the key lines can close that side.
-route_first: [/CHAIN_SCK, /CHAIN_SHLD, /CHAIN_SER_LH, /HOP_LH_LT]
+# them - so those nets are routed before the other key lines can close that side.
+# Before them, LH5's input: U1.14 sits between the two ground pins 13 and 15,
+# under the decoupler, with the decoupler's return on one side and the 3V3 rail
+# on the other, and its one way out - a via between the pin rows - is taken by
+# SCK if SCK goes first. After them, LH4 and LH1, the inputs at the two ends
+# of the register's key row (pins 3 and 6), before the chain's stubs to its test
+# pads and the other key lines close their ways out. In this order every net
+# routes on the first pass; in any order tried without LH5 first, LH5 did not,
+# and with LH5 alone first, LH4 and LH1 did not.
+route_first: [/KEY_LH5, /CHAIN_SCK, /CHAIN_SHLD, /CHAIN_SER_LH, /HOP_LH_LT, /KEY_LH4, /KEY_LH1]
 # Pad-to-pad connections routed before everything, and held to a length by
 # pcb.py check: the decoupler's return to the register's ground pin.
 connect_first:
