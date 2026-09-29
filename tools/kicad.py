@@ -550,7 +550,7 @@ LOOM = os.path.join(ROOT, "hardware", "interfaces", "key-chain-loom", "netlist.y
 def check_chain(board_docs):
     """Each key board's J-CHAIN against the ribbon's other end (K7-1). The two ends are
     recorded apart: the board's pin map in its sheet (board-netlist.yaml), the ribbon's in
-    the loom's hand-written netlist.yaml, as J-CHAIN-KEY-<LH|RH>. Pin k of the key board
+    the loom's netlist.yaml (exported from its sheet), as J-CHAIN-KEY-<LH|RH>. Pin k of the key board
     must be on the net the loom puts J-CHAIN-KEY-<x>.k on, by name, and a pin the board
     leaves unconnected must be a spare conductor there. The loom's own -RN2 map is held
     to its rule too: key-board pin k shares a net with main-board pin 13 - k. A swapped
