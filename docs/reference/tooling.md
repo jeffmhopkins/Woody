@@ -149,8 +149,8 @@ the way it is). This is the working summary.
   checks keep reading exactly as before), each board's `board-netlist.yaml`
   (its flattened netlist, what a PCB is laid out from), and the PNG renders,
   recorded in `hardware/SHEETS.csv`.
-- **Not yet migrated circuits** keep a hand-written `netlist.yaml`. The LED
-  strip drive's sheet is still *generated* from its YAML by `tools/sch.py`.
+- **Not yet migrated circuits** (the module's and the interfaces) keep a
+  hand-written `netlist.yaml`.
 
 ### Commands
 
@@ -204,8 +204,8 @@ pin wherever the library names it, and `Pins_source` the page that proves it.
 ### Migrating a circuit that is still YAML
 
 `tools/sch.py` writes a circuit's first sheet from its `netlist.yaml` plus a
-`schematic.yaml` (symbol, pin map, placement — `hardware/carrier/led-strip-drive/schematic.yaml`
-is one, and the key-board circuits' are in git history) with `hierarchical: true`. Then:
+`schematic.yaml` (symbol, pin map, placement — the key-board and main-board
+circuits' are in git history) with `hierarchical: true`. Then:
 1. `python3 tools/sch.py build <dir>` writes the sheet;
 2. `python3 tools/kicad.py export <dir>` to a scratch copy, and compare it
    with the hand-written `netlist.yaml` **part by part and net by net** — the
@@ -465,13 +465,15 @@ Each render is generated; what it is rendered from is the source.
 | [`key-board-rh.sch.png`](../../hardware/boards/key-board-rh/key-board-rh.sch.png) (+ one PNG per sub-sheet) | the KiCad project `hardware/boards/key-board-rh/key-board-rh.kicad_sch` (**source**) |
 | [`key-board-lh.sch.png`](../../hardware/boards/key-board-lh/key-board-lh.sch.png) (+ pages) | the KiCad project `hardware/boards/key-board-lh/key-board-lh.kicad_sch` (**source**) |
 | [`key-register.sch.png`](../../hardware/cluster/key-register/key-register.sch.png), [`key-switch-network.sch.png`](../../hardware/cluster/key-switch-network/key-switch-network.sch.png), [`key-marker-and-bits.sch.png`](../../hardware/cluster/key-marker-and-bits/key-marker-and-bits.sch.png) | each circuit's `.kicad_sch` beside it (**source**) |
-| [`led-strip-drive.sch.png`](../../hardware/carrier/led-strip-drive/led-strip-drive.sch.png) | a sheet itself generated from YAML — not yet migrated |
+| [`main-board.sch.png`](../../hardware/boards/main-board/main-board.sch.png) (+ one PNG per sub-sheet) | the KiCad project `hardware/boards/main-board/main-board.kicad_sch` (**source**) |
+| the six main-board circuits' `.sch.png` (`hardware/carrier/**`) | each circuit's `.kicad_sch` beside it (**source**) |
 
 ### Not yet
 
-- **The main board, the module and the interfaces** are still YAML; each
-  migrates as described above, the main board as a project placing its
-  circuit sheets like the key boards do.
+- **The module and the interfaces** are still YAML; each migrates as
+  described above. The main board is a project placing its circuit sheets
+  (2026-09-29); **its layout is next**, and `tools/pcb.py` has no main-board
+  mode yet (`hardware/boards/main-board/README.md`, *Open*).
 - **The BOM fragments** become exports once every board is in KiCad, because
   a row's quantity is a count over all of them (ADR 0019).
 - **The right-hand key board's layout**, the same way as the left-hand one

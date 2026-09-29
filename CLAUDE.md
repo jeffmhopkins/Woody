@@ -284,9 +284,9 @@ repeating, and record the verification.
   instance. `python3 tools/kicad.py check` fails on a sheet edited without
   re-exporting, a stale render, a board ERC error, or a board wired against
   `allocation.yaml`. It needs KiCad 9 (`tools/setup-env.sh`) and is **not** in
-  the commit hook, so run it by hand. Circuits not yet migrated keep a
-  hand-written `netlist.yaml`, authoritative until their sheet exists; their
-  ASCII drawings are representations of it.
+  the commit hook, so run it by hand. Circuits not yet migrated (the module's
+  and the interfaces) keep a hand-written `netlist.yaml`, authoritative until
+  their sheet exists; their ASCII drawings are representations of it.
 - **A board's `.kicad_pcb` is the source once it exists.** `tools/pcb.py
   layout` writes the first one (placed from the body CAD's exports, routed,
   poured); after that it is edited in KiCad. `tools/kicad.py check` runs

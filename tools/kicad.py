@@ -485,6 +485,9 @@ def check_chain(board_docs):
         js = [r for r, c in doc["components"].items() if c.get("of") == "J-CHAIN"]
         if not js:
             continue
+        if bname == "main-board":
+            problems += check_chain_main(doc, js, loom, lnet, rel)
+            continue
         jref = js[0]
         side = bname.rsplit("-", 1)[-1].upper()
         key = f"J-CHAIN-KEY-{side}"
@@ -511,6 +514,46 @@ def check_chain(board_docs):
             elif got != want:
                 problems.append(f"chain: {bname} wires {jref}.{k} (J-CHAIN) to {got}; {rel} puts {key}.{k} "
                                 f"(main-board pin {13 - k}) on {want}")
+    return problems
+
+
+# The main board's names for the loom's conductors: the chain's return IS its ground
+# pour (hardware/nets.yaml GND_CHAIN).
+MAIN_ALIAS = {"GND_CHAIN": "PWR_GND"}
+
+
+def check_chain_main(doc, js, loom, lnet, rel):
+    """The main board's two J-CHAIN headers against the loom's J-CHAIN-MAIN-<LH|RH>: pin k
+    on the net the loom puts it on (under the main board's name for it), a pin left
+    unconnected only on a spare conductor. Which header is which is read from its rail
+    pin, so a swapped pair of headers is two wrong rails, not a pass."""
+    problems = []
+    bnet = {}
+    for net, pins in doc["nets"].items():
+        for p in pins:
+            bnet[p] = (net.lstrip("/"), len(pins))
+    seen = set()
+    for jref in js:
+        rail = bnet.get(f"{jref}.10", (None, 0))[0]
+        side = {"V3V3_CHAIN_LH": "LH", "V3V3_CHAIN_RH": "RH"}.get(rail)
+        if side is None or side in seen:
+            problems.append(f"chain: main-board {jref} (J-CHAIN) pin 10 is on {rail}, not one ribbon's own rail")
+            continue
+        seen.add(side)
+        key = f"J-CHAIN-MAIN-{side}"
+        for k in range(1, 13):
+            want = lnet.get(f"{key}.{k}")
+            want = MAIN_ALIAS.get(want, want)
+            got, size = bnet.get(f"{jref}.{k}", (None, 0))
+            if size == 1:
+                spare = want is not None and all(isinstance(n, str) and n.startswith("J-CHAIN-")
+                                                 for n in loom["nets"].get(want, []))
+                if not spare:
+                    problems.append(f"chain: main-board leaves {jref}.{k} (J-CHAIN) unconnected; {rel} puts {key}.{k} on {want}")
+            elif got != want:
+                problems.append(f"chain: main-board wires {jref}.{k} (J-CHAIN) to {got}; {rel} puts {key}.{k} on {want}")
+    if seen != {"LH", "RH"}:
+        problems.append(f"chain: main-board has J-CHAIN for {sorted(seen)}, not both ribbons")
     return problems
 
 

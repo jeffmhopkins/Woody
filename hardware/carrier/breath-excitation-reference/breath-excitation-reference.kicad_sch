@@ -1,0 +1,900 @@
+(kicad_sch (version 20250114) (generator "sch.py") (generator_version "9.0")
+  (uuid 5307c492-2437-5eeb-8e77-9d437de128d5)
+  (paper "A3")
+  (title_block
+    (title "Breath excitation reference (hardware/carrier/breath-excitation-reference)")
+    (comment 5 "circuit: carrier/breath-excitation-reference")
+    (comment 6 "page: ../carrier.md")
+    (comment 7 "title: Breath excitation reference")
+    (date "")
+    (rev "")
+    (company "Woody")
+    (comment 1 "SOURCE for this circuit - edit in KiCad 9. netlist.yaml is exported from it: python3 tools/kicad.py export hardware/carrier/breath-excitation-reference")
+    (comment 2 "Part facts ride on each symbol: Row (BOM row), Pins + Pins_source (pin map and its datasheet), Note")
+    (comment 3 "ADR 0003, ADR 0019 - migrated from its hand-written netlist.yaml, compared part by part and net by net")
+    (comment 4 "Ports are hierarchical labels (Dir, From/To, Figure); the main board places this sheet")
+  )
+  (lib_symbols
+    (symbol "Amplifier_Operational:OPA2197xD"
+        (pin_names
+          (offset 0.127))
+        (exclude_from_sim no)
+        (in_bom yes)
+        (on_board yes)
+        (property "Reference" "U"
+          (at 2.54 6.35 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (justify left)))
+        (property "Value" "OPA2197xD"
+          (at 2.54 3.81 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (justify left)))
+        (property "Footprint" "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
+          (at 2.54 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "Datasheet" "http://www.ti.com/lit/ds/symlink/opa2197.pdf"
+          (at 6.35 3.81 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "Description" "Dual 36V, Precision, Rail-to-Rail Input/Output, Low Offset Voltage, Operational Amplifier, SOIC-8"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "ki_locked" ""
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))))
+        (property "ki_keywords" "dual opamp rtor"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "ki_fp_filters" "SOIC*3.9x4.9mm*P1.27mm*"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (symbol "OPA2197xD_1_1"
+          (polyline
+            (pts
+              (xy 5.08 0)
+              (xy -5.08 5.08)
+              (xy -5.08 -5.08)
+              (xy 5.08 0))
+            (stroke
+              (width 0.254)
+              (type default))
+            (fill
+              (type background)))
+          (pin input line
+            (at -7.62 2.54 0)
+            (length 2.54)
+            (name "+"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "3"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input line
+            (at -7.62 -2.54 0)
+            (length 2.54)
+            (name "-"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "2"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin output line
+            (at 7.62 0 180)
+            (length 2.54)
+            (name "~"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "1"
+              (effects
+                (font
+                  (size 1.27 1.27))))))
+        (symbol "OPA2197xD_2_1"
+          (polyline
+            (pts
+              (xy 5.08 0)
+              (xy -5.08 5.08)
+              (xy -5.08 -5.08)
+              (xy 5.08 0))
+            (stroke
+              (width 0.254)
+              (type default))
+            (fill
+              (type background)))
+          (pin input line
+            (at -7.62 2.54 0)
+            (length 2.54)
+            (name "+"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "5"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input line
+            (at -7.62 -2.54 0)
+            (length 2.54)
+            (name "-"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "6"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin output line
+            (at 7.62 0 180)
+            (length 2.54)
+            (name "~"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "7"
+              (effects
+                (font
+                  (size 1.27 1.27))))))
+        (symbol "OPA2197xD_3_1"
+          (pin power_in line
+            (at 0 7.62 270)
+            (length 3.81)
+            (name "V+"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "8"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin power_in line
+            (at 0 -7.62 90)
+            (length 3.81)
+            (name "V-"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "4"
+              (effects
+                (font
+                  (size 1.27 1.27))))))
+        (embedded_fonts no))
+    (symbol "Device:C"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0.254)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "C"
+			(at 0.635 2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "C"
+			(at 0.635 -2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 0.9652 -3.81 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "cap capacitor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "C_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "C_0_1"
+			(polyline
+				(pts
+					(xy -2.032 0.762) (xy 2.032 0.762)
+				)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -2.032 -0.762) (xy 2.032 -0.762)
+				)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "C_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 2.794)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 2.794)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "Device:R"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "R"
+			(at 2.032 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "R"
+			(at 0 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at -1.778 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "R res resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "R_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "R_0_1"
+			(rectangle
+				(start -1.016 -2.54)
+				(end 1.016 2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "R_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "Reference_Voltage:REF5050AD"
+        (pin_names
+          (offset 0.254))
+        (exclude_from_sim no)
+        (in_bom yes)
+        (on_board yes)
+        (property "Reference" "U"
+          (at -1.27 8.255 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (justify left)))
+        (property "Value" "REF5050AD"
+          (at -1.27 6.35 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (justify left)))
+        (property "Footprint" "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
+          (at -1.905 -6.35 0)
+          (effects
+            (font
+              (size 1.27 1.27)
+              (italic yes))
+            (justify left)
+            (hide yes)))
+        (property "Datasheet" "https://www.ti.com/lit/ds/symlink/ref5030a-q1.pdf"
+          (at -1.27 0 0)
+          (effects
+            (font
+              (size 1.27 1.27)
+              (italic yes))
+            (hide yes)))
+        (property "Description" "5V 0.1% 10mA Low Noise Precision Voltage Reference, SO-8"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "ki_keywords" "Low Noise Precision Voltage Reference 5V"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "ki_fp_filters" "SOIC*3.9x4.9mm*P1.27mm*"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (symbol "REF5050AD_0_1"
+          (rectangle
+            (start -7.62 5.08)
+            (end 7.62 -5.08)
+            (stroke
+              (width 0.254)
+              (type default))
+            (fill
+              (type background))))
+        (symbol "REF5050AD_1_1"
+          (pin passive line
+            (at -10.16 0 0)
+            (length 2.54)
+            (name "Temp"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "3"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin no_connect line
+            (at -7.62 2.54 0)
+            (length 2.54)
+            (hide yes)
+            (name "DNC"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "1"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin no_connect line
+            (at -5.08 -5.08 90)
+            (length 2.54)
+            (hide yes)
+            (name "NC"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "7"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin power_in line
+            (at -2.54 7.62 270)
+            (length 2.54)
+            (name "Vin"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "2"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin power_in line
+            (at -2.54 -7.62 90)
+            (length 2.54)
+            (name "GND"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "4"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin no_connect line
+            (at 7.62 0 180)
+            (length 2.54)
+            (hide yes)
+            (name "DNC"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "8"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin power_out line
+            (at 10.16 2.54 180)
+            (length 2.54)
+            (name "Vout"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "6"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin passive line
+            (at 10.16 -2.54 180)
+            (length 2.54)
+            (name "Trim/NR"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "5"
+              (effects
+                (font
+                  (size 1.27 1.27))))))
+        (embedded_fonts no))
+  )
+  (symbol (lib_id "Amplifier_Operational:OPA2197xD") (at 40.64 50.8 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 42a85e0d-5e4c-540e-b4a9-89c223cdabf0)
+    (property "Reference" "U-BUF" (at 40.64 43.18 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "OPA2197IDR" (at 40.64 45.72 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "" (at 43.18 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 46.99 46.99 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "U-BUF" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "INA+=3(+) INA-=2(-) OUTA=1(~) INB+=5(+) INB-=6(-) OUTB=7(~) V+=8(V+) V-=4(V-)" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Half A is the reference buffer, half B the breath buffer. Single supply from +12 V, V- on the analog star" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/analog/OPA2197.pdf section 5, D package (SOIC-8), OPA2197: OUT A 1, -IN A 2, +IN A 3, V- 4, +IN B 5, -IN B 6, OUT B 7, V+ 8" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid a4a219c6-7a28-512b-b3db-f9eaad50d322))
+    (pin "2" (uuid 6d84c2c6-6baa-526b-b4eb-782f3d3f6a6e))
+    (pin "3" (uuid e4884457-9a38-5da6-bca0-73a473a3b52f))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/6d52cf50-898d-5f10-a456-90ce50679c12" (reference "U3") (unit 1))) (project "breath-excitation-reference" (path "/5307c492-2437-5eeb-8e77-9d437de128d5" (reference "U-BUF") (unit 1))))
+  )
+  (symbol (lib_id "Amplifier_Operational:OPA2197xD") (at 91.44 50.8 0) (unit 2)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid f133ed0e-0cd6-5489-8928-9f643f13c9af)
+    (property "Reference" "U-BUF" (at 91.44 43.18 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "OPA2197IDR" (at 91.44 45.72 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "" (at 93.98 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 97.79 46.99 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "U-BUF" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "INA+=3(+) INA-=2(-) OUTA=1(~) INB+=5(+) INB-=6(-) OUTB=7(~) V+=8(V+) V-=4(V-)" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Half A is the reference buffer, half B the breath buffer. Single supply from +12 V, V- on the analog star" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/analog/OPA2197.pdf section 5, D package (SOIC-8), OPA2197: OUT A 1, -IN A 2, +IN A 3, V- 4, +IN B 5, -IN B 6, OUT B 7, V+ 8" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "5" (uuid 3bbecfb3-77f8-566a-8996-25414b5c49ed))
+    (pin "6" (uuid 63092f10-6e60-5fb4-b377-3132e2e87782))
+    (pin "7" (uuid ef911d07-e2bf-5865-b9fa-6a8156899b58))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/6d52cf50-898d-5f10-a456-90ce50679c12" (reference "U3") (unit 2))) (project "breath-excitation-reference" (path "/5307c492-2437-5eeb-8e77-9d437de128d5" (reference "U-BUF") (unit 2))))
+  )
+  (symbol (lib_id "Amplifier_Operational:OPA2197xD") (at 142.24 50.8 0) (unit 3)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid e5b91465-cb3a-59ea-99cb-de18880e7ae0)
+    (property "Reference" "U-BUF" (at 144.78 49.53 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "OPA2197IDR" (at 144.78 52.07 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 144.78 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 148.59 46.99 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "U-BUF" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "INA+=3(+) INA-=2(-) OUTA=1(~) INB+=5(+) INB-=6(-) OUTB=7(~) V+=8(V+) V-=4(V-)" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Half A is the reference buffer, half B the breath buffer. Single supply from +12 V, V- on the analog star" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/analog/OPA2197.pdf section 5, D package (SOIC-8), OPA2197: OUT A 1, -IN A 2, +IN A 3, V- 4, +IN B 5, -IN B 6, OUT B 7, V+ 8" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "4" (uuid 5ead226d-eebb-599c-befc-f612624262cc))
+    (pin "8" (uuid fea963e9-3b72-518e-a734-fe18094d8f6b))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/6d52cf50-898d-5f10-a456-90ce50679c12" (reference "U3") (unit 3))) (project "breath-excitation-reference" (path "/5307c492-2437-5eeb-8e77-9d437de128d5" (reference "U-BUF") (unit 3))))
+  )
+  (symbol (lib_id "Reference_Voltage:REF5050AD") (at 40.64 106.68 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid c7e5af5b-30ac-51d3-ac8f-2680ad78b8aa)
+    (property "Reference" "U-REF-BREATH" (at 39.37 99.06 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "REF5050AIDR" (at 39.37 100.33 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "" (at 38.1 113.03 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 39.37 106.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "U-REF-BREATH" (at 40.64 106.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "VIN=2(Vin) VOUT=6(Vout) GND=4(GND) TEMP=3(Temp) TRIM_NR=5(Trim/NR) DNC1=1(DNC) NC7=7(NC) DNC8=8(DNC)" (at 40.64 106.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Drawn_as" "REF5050" (at 40.64 106.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "5.000 V, and it is the excitation's absolute accuracy - the sensor is ratiometric, so every volt of error here is a volt of error at the jack" (at 40.64 106.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/analog/REF5050.pdf section 5, Table 5-1 (REF50xxAI, SOIC-8)" (at 40.64 106.68 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 3a28606c-4f9e-5632-81d2-cb555d88330c))
+    (pin "2" (uuid eef46df6-0e36-5fac-b8d5-6c2ec83ac49e))
+    (pin "3" (uuid 4adb8686-7adc-5ab3-905f-36a3cb34692a))
+    (pin "4" (uuid 5bfbbe44-85af-5726-81e8-b4f410b9bc60))
+    (pin "5" (uuid 4c4c40bb-0c27-5e0b-b403-3c5873be6c04))
+    (pin "6" (uuid 8d69c35a-7439-5d99-9550-491834e7b3ea))
+    (pin "7" (uuid f28e2382-a56e-5593-b773-c7aa4dd81e7f))
+    (pin "8" (uuid ee2d372a-e90f-576d-a7dd-62ccd863dd0c))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/6d52cf50-898d-5f10-a456-90ce50679c12" (reference "U4") (unit 1))) (project "breath-excitation-reference" (path "/5307c492-2437-5eeb-8e77-9d437de128d5" (reference "U-REF-BREATH") (unit 1))))
+  )
+  (symbol (lib_id "Device:C") (at 40.64 187.96 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 24ba8717-ca7a-5d9b-959e-4cf007f68645)
+    (property "Reference" "C-REF-OUT-VIN" (at 43.18 186.69 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "10uF" (at 43.18 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 41.91 191.77 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-REF-OUT" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Drawn_as" "C-REF-OUT" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "VIN bypass. NEITHER OF THE TWO IS ON THE BUFFER'S OUTPUT - that is the settled cref-out-node question, and putting one there is what the compensation cannot survive" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 94c1db20-98ae-53a6-96a2-d25bad81b303))
+    (pin "2" (uuid 79670cf3-5615-5abb-bc44-e3111048efe6))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/6d52cf50-898d-5f10-a456-90ce50679c12" (reference "C4") (unit 1))) (project "breath-excitation-reference" (path "/5307c492-2437-5eeb-8e77-9d437de128d5" (reference "C-REF-OUT-VIN") (unit 1))))
+  )
+  (symbol (lib_id "Device:C") (at 91.44 187.96 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 2ba0c67d-a9c4-515d-a9c6-4763c9381aa4)
+    (property "Reference" "C-REF-OUT-VOUT" (at 93.98 186.69 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "10uF" (at 93.98 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 92.71 191.77 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-REF-OUT" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "VOUT load capacitor, on the REF5050's own output" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 82c661c4-63a0-5174-ac7b-8176e93bc82b))
+    (pin "2" (uuid 2f274b2a-f38e-52d5-a10d-ea2b7a242ab2))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/6d52cf50-898d-5f10-a456-90ce50679c12" (reference "C5") (unit 1))) (project "breath-excitation-reference" (path "/5307c492-2437-5eeb-8e77-9d437de128d5" (reference "C-REF-OUT-VOUT") (unit 1))))
+  )
+  (symbol (lib_id "Device:C") (at 142.24 187.96 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 6ed8fcf5-5b48-5692-bca9-2d57e0295f5b)
+    (property "Reference" "C-DEC-REF-VIN" (at 144.78 186.69 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "100nF" (at 144.78 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 143.51 191.77 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-DECOUPLE-CARRIER" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 25fd7bf8-4cf6-567e-9106-beea23378fee))
+    (pin "2" (uuid 5b48a4ba-35cd-56be-a2da-b10b883d8aae))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/6d52cf50-898d-5f10-a456-90ce50679c12" (reference "C6") (unit 1))) (project "breath-excitation-reference" (path "/5307c492-2437-5eeb-8e77-9d437de128d5" (reference "C-DEC-REF-VIN") (unit 1))))
+  )
+  (symbol (lib_id "Device:C") (at 193.04 187.96 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid e7c2bf94-8870-5d98-ab0c-45afa2d2a477)
+    (property "Reference" "C-DEC-REF-VOUT" (at 195.58 186.69 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "100nF" (at 195.58 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 194.31 191.77 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 193.04 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-DECOUPLE-CARRIER" (at 193.04 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 193.04 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 887c4c95-3a88-59b7-afc3-263cfe02bd20))
+    (pin "2" (uuid 56ff785b-7011-54d2-8cd5-95dc4a3083da))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/6d52cf50-898d-5f10-a456-90ce50679c12" (reference "C7") (unit 1))) (project "breath-excitation-reference" (path "/5307c492-2437-5eeb-8e77-9d437de128d5" (reference "C-DEC-REF-VOUT") (unit 1))))
+  )
+  (symbol (lib_id "Device:C") (at 40.64 233.68 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 2eb56185-c9af-5bbb-a8f3-4ef30418d183)
+    (property "Reference" "C-DEC-SENSOR" (at 43.18 232.41 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "100nF" (at 43.18 234.95 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 41.91 237.49 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 40.64 233.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-DECOUPLE-CARRIER" (at 40.64 233.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 40.64 233.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "At the sensor's excitation pin, returning to the analog star" (at 40.64 233.68 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 9c7a3799-9f73-5391-a70b-82cfc968621d))
+    (pin "2" (uuid 9a1ec622-c91e-5134-b69c-8521556c92ad))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/6d52cf50-898d-5f10-a456-90ce50679c12" (reference "C8") (unit 1))) (project "breath-excitation-reference" (path "/5307c492-2437-5eeb-8e77-9d437de128d5" (reference "C-DEC-SENSOR") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 91.44 233.68 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid d29d13ad-e5fb-5d39-8f07-eadea6202566)
+    (property "Reference" "R-ISO-REF" (at 93.98 232.41 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "37.4R 1%" (at 93.98 234.95 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 90.17 233.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 91.44 233.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-ISO-REF" (at 91.44 233.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 91.44 233.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Isolates the buffer from the sensor's capacitance. DC feedback is taken on its FAR side, so the drop across it is corrected to zero" (at 91.44 233.68 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 1743e54e-a14c-5d44-9e7c-8e9349595e04))
+    (pin "2" (uuid 6237a86d-f1c2-5f51-bab9-b0a8e06c2ca2))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/6d52cf50-898d-5f10-a456-90ce50679c12" (reference "R6") (unit 1))) (project "breath-excitation-reference" (path "/5307c492-2437-5eeb-8e77-9d437de128d5" (reference "R-ISO-REF") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 142.24 233.68 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 220ad099-5628-5c2e-a1b3-3b31f370c20e)
+    (property "Reference" "R-FB-REF" (at 144.78 232.41 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "10k 1%" (at 144.78 234.95 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 140.97 233.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 142.24 233.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-FB-REF" (at 142.24 233.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 142.24 233.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "The DC feedback path, from VS - the far side of R-ISO-REF" (at 142.24 233.68 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 67658a68-6475-5725-9a2d-274ba5b1cedf))
+    (pin "2" (uuid be4b165d-df26-507b-ba1e-cd8ead46d373))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/6d52cf50-898d-5f10-a456-90ce50679c12" (reference "R7") (unit 1))) (project "breath-excitation-reference" (path "/5307c492-2437-5eeb-8e77-9d437de128d5" (reference "R-FB-REF") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 193.04 233.68 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 80d1489e-4b16-59cd-a93f-7a4dade2b126)
+    (property "Reference" "R-FBX-REF" (at 195.58 232.41 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "100R 1%" (at 195.58 234.95 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 191.77 233.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 193.04 233.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-FBX-REF" (at 193.04 233.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 193.04 233.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "In series with C-FB-REF. The AC path comes from the op-amp OUTPUT, before R-ISO-REF, which is what keeps the loop stable into the load" (at 193.04 233.68 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid c854e951-69ca-5023-9e7b-fdcd033e5fc6))
+    (pin "2" (uuid 8d67f030-a01e-561e-a3a9-e9821c0a5d6f))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/6d52cf50-898d-5f10-a456-90ce50679c12" (reference "R8") (unit 1))) (project "breath-excitation-reference" (path "/5307c492-2437-5eeb-8e77-9d437de128d5" (reference "R-FBX-REF") (unit 1))))
+  )
+  (symbol (lib_id "Device:C") (at 40.64 279.4 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 1d78dde4-d6b6-537a-abf3-7ccf87242e56)
+    (property "Reference" "C-FB-REF" (at 43.18 278.13 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "1nF" (at 43.18 280.67 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 41.91 283.21 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 40.64 279.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-FB-REF" (at 40.64 279.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 40.64 279.4 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 135a34e8-2df5-5359-8db8-983d1df88a97))
+    (pin "2" (uuid b29aee86-e9b3-5e86-bc30-434caa71a45d))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/6d52cf50-898d-5f10-a456-90ce50679c12" (reference "C9") (unit 1))) (project "breath-excitation-reference" (path "/5307c492-2437-5eeb-8e77-9d437de128d5" (reference "C-FB-REF") (unit 1))))
+  )
+  (wire (pts (xy 38.1 99.06) (xy 38.1 96.52)) (stroke (width 0) (type default)) (uuid aab26144-3ff6-59c6-9a6b-e499cf3766c4))
+  (hierarchical_label "UMBILICAL_POS12" (shape input) (at 38.1 96.52 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 7339ef48-11a5-5edd-a588-18d3965367f6)
+    (property "Dir" "in" (at 38.1 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/umbilical-load-switch" (at 38.1 96.52 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 142.24 43.18) (xy 142.24 40.64)) (stroke (width 0) (type default)) (uuid 58336bcc-5954-552e-8650-8f0700dbb0fb))
+  (hierarchical_label "UMBILICAL_POS12" (shape input) (at 142.24 40.64 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid dceacf1e-cc75-583d-b2d5-1b993179b415)
+    (property "Dir" "in" (at 142.24 40.64 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/umbilical-load-switch" (at 142.24 40.64 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 40.64 184.15) (xy 40.64 181.61)) (stroke (width 0) (type default)) (uuid 2e5b13a2-e3c4-596a-8b37-5ba6857a84cd))
+  (hierarchical_label "UMBILICAL_POS12" (shape input) (at 40.64 181.61 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid dc63c022-e37c-5ca3-b4e9-375d065a4a95)
+    (property "Dir" "in" (at 40.64 181.61 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/umbilical-load-switch" (at 40.64 181.61 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 142.24 184.15) (xy 142.24 181.61)) (stroke (width 0) (type default)) (uuid 6e127ad6-5bbc-55d2-be52-62d26437943f))
+  (hierarchical_label "UMBILICAL_POS12" (shape input) (at 142.24 181.61 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid b70b293e-c353-5104-a7c2-340d033617c0)
+    (property "Dir" "in" (at 142.24 181.61 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/umbilical-load-switch" (at 142.24 181.61 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 50.8 104.14) (xy 53.34 104.14)) (stroke (width 0) (type default)) (uuid 82c54978-98a6-51df-a3cb-a94d7c7dd6c0))
+  (label "REF_5V" (at 53.34 104.14 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 0e978637-e93f-50c1-8f31-f39e74ca98ef))
+  (wire (pts (xy 91.44 184.15) (xy 91.44 181.61)) (stroke (width 0) (type default)) (uuid 22454482-76f0-511f-a5a1-5d5889e5470f))
+  (label "REF_5V" (at 91.44 181.61 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 07cf134e-85c2-58b2-b64b-46f6af443cc1))
+  (wire (pts (xy 193.04 184.15) (xy 193.04 181.61)) (stroke (width 0) (type default)) (uuid 3c4419e0-1a82-5760-bfa3-c7627a7addd8))
+  (label "REF_5V" (at 193.04 181.61 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 5449f18f-ea14-58c6-a67b-73ef1e566d88))
+  (wire (pts (xy 33.02 48.26) (xy 30.48 48.26)) (stroke (width 0) (type default)) (uuid 588ec602-500d-564c-a1b3-9ee50f49f72a))
+  (label "REF_5V" (at 30.48 48.26 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid dc999f5e-462b-536c-b2c0-f4ff21f833aa))
+  (wire (pts (xy 48.26 50.8) (xy 50.8 50.8)) (stroke (width 0) (type default)) (uuid babd87fc-65ab-58d9-907f-d62c8f2e711e))
+  (label "BUF_OUT" (at 50.8 50.8 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 2636f4f9-e406-5760-8ceb-679d85c4dc00))
+  (wire (pts (xy 91.44 229.87) (xy 91.44 227.33)) (stroke (width 0) (type default)) (uuid cd4cd56a-5ccb-5dde-9790-e64bf538102e))
+  (label "BUF_OUT" (at 91.44 227.33 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid ed58863e-f7e0-57ba-a76e-8b40cc2d3ab3))
+  (wire (pts (xy 193.04 229.87) (xy 193.04 227.33)) (stroke (width 0) (type default)) (uuid eb3fb346-04bb-528d-8550-48b8049e8a09))
+  (label "BUF_OUT" (at 193.04 227.33 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 8fd26ceb-7f9d-503b-bae2-d696816d5e8d))
+  (wire (pts (xy 91.44 237.49) (xy 91.44 240.03)) (stroke (width 0) (type default)) (uuid 3f50af91-d672-52f3-9b28-4ba817bc9d9a))
+  (hierarchical_label "VS" (shape output) (at 91.44 240.03 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 4200c7f8-9b06-5a1a-b9c6-e520d15a8fb3)
+    (property "Dir" "out" (at 91.44 240.03 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "interfaces/breath-sense-link" (at 91.44 240.03 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "riso-ref-topology" (at 91.44 240.03 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 142.24 229.87) (xy 142.24 227.33)) (stroke (width 0) (type default)) (uuid ad10874c-f00f-5c1f-b5e0-765020727318))
+  (hierarchical_label "VS" (shape output) (at 142.24 227.33 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 75e493a6-30d8-528c-9cb5-2dbf78a6e6d0)
+    (property "Dir" "out" (at 142.24 227.33 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "interfaces/breath-sense-link" (at 142.24 227.33 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "riso-ref-topology" (at 142.24 227.33 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 40.64 229.87) (xy 40.64 227.33)) (stroke (width 0) (type default)) (uuid 33dedba1-8c17-52d1-ad29-1098345e1fd6))
+  (hierarchical_label "VS" (shape output) (at 40.64 227.33 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 1403d698-e25f-5141-bf2a-28da7ad7b9d0)
+    (property "Dir" "out" (at 40.64 227.33 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "interfaces/breath-sense-link" (at 40.64 227.33 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "riso-ref-topology" (at 40.64 227.33 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 33.02 53.34) (xy 30.48 53.34)) (stroke (width 0) (type default)) (uuid 88606a14-77c2-5a87-af22-7dad47b591f0))
+  (label "REF_MINUS" (at 30.48 53.34 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 2b26de35-4fd1-5ed3-bc24-51b19dd2115b))
+  (wire (pts (xy 142.24 237.49) (xy 142.24 240.03)) (stroke (width 0) (type default)) (uuid 2d764b48-5abf-5f46-b3bc-72aca62d34a8))
+  (label "REF_MINUS" (at 142.24 240.03 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid a1ea37b1-e9bd-528a-9442-4a9a0754c820))
+  (wire (pts (xy 40.64 275.59) (xy 40.64 273.05)) (stroke (width 0) (type default)) (uuid 089cec49-c258-551a-9ccf-13383e187383))
+  (label "REF_MINUS" (at 40.64 273.05 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 6e3fb8b9-b10b-582f-be74-57aa198754ad))
+  (wire (pts (xy 193.04 237.49) (xy 193.04 240.03)) (stroke (width 0) (type default)) (uuid 0c542c7f-3d02-5a8a-bf7f-414bc6ca31e1))
+  (label "AC_FB_MID" (at 193.04 240.03 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 7aae3a92-db98-5df4-b1f9-cf1debe71b29))
+  (wire (pts (xy 40.64 283.21) (xy 40.64 285.75)) (stroke (width 0) (type default)) (uuid 15db4d7e-c640-5ec1-88c7-a2c8c182e99e))
+  (label "AC_FB_MID" (at 40.64 285.75 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid ed5a8e8a-63d8-5d28-a788-2083ce4372cd))
+  (wire (pts (xy 83.82 48.26) (xy 81.28 48.26)) (stroke (width 0) (type default)) (uuid 20028419-bbbc-5089-9586-513da9182bbe))
+  (hierarchical_label "SENSOR_RAW" (shape input) (at 81.28 48.26 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid fff2c6c2-5ab2-5d69-b7c5-fb12fe374f24)
+    (property "Dir" "in" (at 81.28 48.26 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/breath-sense-link" (at 81.28 48.26 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "sensor-full-scale" (at 81.28 48.26 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 99.06 50.8) (xy 101.6 50.8)) (stroke (width 0) (type default)) (uuid ea1d94c9-8fb7-5650-9ff9-e440af9f52e3))
+  (hierarchical_label "SENSOR_BUFFERED_OUT" (shape output) (at 101.6 50.8 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 90afd0d5-5f49-53c5-bf75-e45e62ce6a5d)
+    (property "Dir" "out" (at 101.6 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "carrier/breath-adc" (at 101.6 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "sensor-full-scale" (at 101.6 50.8 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 83.82 53.34) (xy 81.28 53.34)) (stroke (width 0) (type default)) (uuid 2b391044-8f41-5126-b154-3c611ee4bf96))
+  (hierarchical_label "SENSOR_BUFFERED_OUT" (shape output) (at 81.28 53.34 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 4614df5f-b376-5f26-853e-1eebdc4d5731)
+    (property "Dir" "out" (at 81.28 53.34 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "carrier/breath-adc" (at 81.28 53.34 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "sensor-full-scale" (at 81.28 53.34 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 38.1 114.3) (xy 38.1 116.84)) (stroke (width 0) (type default)) (uuid bfd2403d-bda5-59c5-9abb-ad1250211ab4))
+  (hierarchical_label "AGND_INST" (shape passive) (at 38.1 116.84 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid a79b42d1-0721-5507-9a99-a84664627926)
+    (property "Dir" "ref" (at 38.1 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/power-entry-instrument" (at 38.1 116.84 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 142.24 58.42) (xy 142.24 60.96)) (stroke (width 0) (type default)) (uuid c12f1be6-ed01-5cc5-b205-5d250838b847))
+  (hierarchical_label "AGND_INST" (shape passive) (at 142.24 60.96 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid cea9ab24-1020-5543-8ce4-430c5aed2947)
+    (property "Dir" "ref" (at 142.24 60.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/power-entry-instrument" (at 142.24 60.96 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 40.64 191.77) (xy 40.64 194.31)) (stroke (width 0) (type default)) (uuid 5ed3f556-18e8-55a6-9649-7a7c8703bcc8))
+  (hierarchical_label "AGND_INST" (shape passive) (at 40.64 194.31 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 3cd34deb-6f48-5caf-90cd-68ee784e9f2d)
+    (property "Dir" "ref" (at 40.64 194.31 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/power-entry-instrument" (at 40.64 194.31 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 91.44 191.77) (xy 91.44 194.31)) (stroke (width 0) (type default)) (uuid e4cf03cf-cdb6-5693-8f75-ff875001bcc1))
+  (hierarchical_label "AGND_INST" (shape passive) (at 91.44 194.31 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid ee122c3f-59fd-5c2c-a764-8f78c7777a74)
+    (property "Dir" "ref" (at 91.44 194.31 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/power-entry-instrument" (at 91.44 194.31 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 142.24 191.77) (xy 142.24 194.31)) (stroke (width 0) (type default)) (uuid 9e53bf4a-0b09-5f93-be87-0d3434fa1ff7))
+  (hierarchical_label "AGND_INST" (shape passive) (at 142.24 194.31 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid bb0c109f-2502-59c3-8de8-44ee928e6fcb)
+    (property "Dir" "ref" (at 142.24 194.31 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/power-entry-instrument" (at 142.24 194.31 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 193.04 191.77) (xy 193.04 194.31)) (stroke (width 0) (type default)) (uuid b2f59626-3846-5276-8ddd-953577cc00f1))
+  (hierarchical_label "AGND_INST" (shape passive) (at 193.04 194.31 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 5f7afddd-df80-5f00-bfec-90658a1f700a)
+    (property "Dir" "ref" (at 193.04 194.31 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/power-entry-instrument" (at 193.04 194.31 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 40.64 237.49) (xy 40.64 240.03)) (stroke (width 0) (type default)) (uuid d109abea-f1c2-56b9-a99f-fda43a6c6159))
+  (hierarchical_label "AGND_INST" (shape passive) (at 40.64 240.03 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 9931bf6d-ef0d-5a31-90a6-2e556c592449)
+    (property "Dir" "ref" (at 40.64 240.03 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/power-entry-instrument" (at 40.64 240.03 0) (effects (font (size 1.27 1.27)) hide)))
+  (no_connect (at 30.48 106.68) (uuid 43031e1c-e104-54e6-92de-98d8dbab0d7a))
+  (no_connect (at 50.8 109.22) (uuid d8a697f6-fe6e-5915-be7f-0d762abe4065))
+  (no_connect (at 33.02 104.14) (uuid 6e0ca090-002d-5daa-b59e-bf1608ef9b46))
+  (no_connect (at 35.56 111.76) (uuid 689681fa-2666-57ca-aae5-6cfa8829c6a8))
+  (no_connect (at 48.26 106.68) (uuid 9071fafb-4dd8-518f-a291-f282bcd60dac))
+  (text "FROM THE HAND-WRITTEN NETLIST THIS SHEET REPLACES (verbatim; the part notes are on each part's Note field):\n\nAUTHORITATIVE for connectivity. THE DRAWING IS ON ANOTHER PAGE - carrier.md §2, which draws the reference, the\nbuffer, the sensor and the ADC in one picture because they are one signal path. This circuit owns the\nreference and both halves of the OPA2197; carrier/breath-adc and interfaces/breath-sense-link own the rest and\nnetlist it against the same drawing.\n\nONE PACKAGE, TWO JOBS: half A buffers the 5.000 V into the sensor, half B the sensor's output before anything\nloads it. Single supply from +12 V, V- on the analog star.\n\nThe REF5050's other pins [ds datasheets/analog/REF5050.pdf Table 5-1]: TEMP, TRIM/NR and NC are left open -\nthe trim and the noise-reduction capacitor are not used; DNC must not be connected." (at 256.54 38.099999999999994 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid 0f044db4-4ac3-511b-98ad-fcf4fe25b8dd))
+  (sheet_instances (path "/" (page "1")))
+)

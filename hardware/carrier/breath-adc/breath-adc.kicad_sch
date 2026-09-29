@@ -1,0 +1,587 @@
+(kicad_sch (version 20250114) (generator "sch.py") (generator_version "9.0")
+  (uuid c79f4df5-783d-57a4-af84-ebef797ab12e)
+  (paper "A3")
+  (title_block
+    (title "Breath ADC (hardware/carrier/breath-adc)")
+    (comment 5 "circuit: carrier/breath-adc")
+    (comment 6 "page: ../carrier.md")
+    (comment 7 "title: Breath ADC")
+    (date "")
+    (rev "")
+    (company "Woody")
+    (comment 1 "SOURCE for this circuit - edit in KiCad 9. netlist.yaml is exported from it: python3 tools/kicad.py export hardware/carrier/breath-adc")
+    (comment 2 "Part facts ride on each symbol: Row (BOM row), Pins + Pins_source (pin map and its datasheet), Note")
+    (comment 3 "ADR 0003, ADR 0019 - migrated from its hand-written netlist.yaml, compared part by part and net by net")
+    (comment 4 "Ports are hierarchical labels (Dir, From/To, Figure); the main board places this sheet")
+  )
+  (lib_symbols
+    (symbol "Analog_ADC:MCP3202"
+        (pin_names
+          (offset 1.016))
+        (exclude_from_sim no)
+        (in_bom yes)
+        (on_board yes)
+        (property "Reference" "U"
+          (at -6.35 11.43 0)
+          (effects
+            (font
+              (size 1.27 1.27))))
+        (property "Value" "MCP3202"
+          (at 11.43 11.43 0)
+          (effects
+            (font
+              (size 1.27 1.27))))
+        (property "Footprint" ""
+          (at 0 -2.54 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "Datasheet" "http://ww1.microchip.com/downloads/en/DeviceDoc/21034D.pdf"
+          (at 0 5.08 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "Description" "A/D Converter, 12-Bit, 2-Channel, SPI Interface, 2.7V-5.5V"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "ki_keywords" "12bit ADC Reference Single Supply SPI 2ch"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "ki_fp_filters" "DIP*W7.62mm** SOIC*3.9x4.9mm*P1.27mm* TSSOP*3x3mm*P0.65mm* MSOP*3x3mm*P0.65mm*"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (symbol "MCP3202_0_1"
+          (polyline
+            (pts
+              (xy 15.24 10.16)
+              (xy -7.62 10.16)
+              (xy -12.7 0)
+              (xy -7.62 -10.16)
+              (xy 15.24 -10.16)
+              (xy 15.24 10.16))
+            (stroke
+              (width 0.254)
+              (type default))
+            (fill
+              (type background))))
+        (symbol "MCP3202_1_1"
+          (pin passive line
+            (at -12.7 5.08 0)
+            (length 2.54)
+            (name "CH0"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "2"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin passive line
+            (at -12.7 -5.08 0)
+            (length 2.54)
+            (name "CH1"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "3"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin power_in line
+            (at 0 12.7 270)
+            (length 2.54)
+            (name "VDD/VREF"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "8"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin power_in line
+            (at 0 -12.7 90)
+            (length 2.54)
+            (name "VSS"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "4"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input line
+            (at 17.78 5.08 180)
+            (length 2.54)
+            (name "~{CS}/SHDN"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "1"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input line
+            (at 17.78 2.54 180)
+            (length 2.54)
+            (name "CLK"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "7"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin output line
+            (at 17.78 -2.54 180)
+            (length 2.54)
+            (name "DOUT"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "6"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input line
+            (at 17.78 -5.08 180)
+            (length 2.54)
+            (name "DIN"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "5"
+              (effects
+                (font
+                  (size 1.27 1.27))))))
+        (embedded_fonts no))
+    (symbol "Device:C"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0.254)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "C"
+			(at 0.635 2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "C"
+			(at 0.635 -2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 0.9652 -3.81 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "cap capacitor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "C_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "C_0_1"
+			(polyline
+				(pts
+					(xy -2.032 0.762) (xy 2.032 0.762)
+				)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -2.032 -0.762) (xy 2.032 -0.762)
+				)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "C_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 2.794)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 2.794)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "Device:R"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "R"
+			(at 2.032 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "R"
+			(at 0 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at -1.778 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "R res resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "R_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "R_0_1"
+			(rectangle
+				(start -1.016 -2.54)
+				(end 1.016 2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "R_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+  )
+  (symbol (lib_id "Device:R") (at 40.64 50.8 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid f26e1297-73ca-5f9c-a62d-afb8bc96c043)
+    (property "Reference" "R-ADCDIV-U" (at 43.18 49.53 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "10k 1%" (at 43.18 52.07 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 39.37 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-ADCDIV-U" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "UPPER LEG, AND >=10k IS A SPEC RATHER THAN A VALUE: below that, 5V-before-3V3 sequencing pushes about 2.5 mA into the ADC's ESD clamp on every power-up. DIVIDE AFTER THE BUFFER, never before" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 79d2502d-21b8-56ff-a281-ccc3dc278d21))
+    (pin "2" (uuid e0397b1c-c0d1-5be0-8f20-49fd947d9a04))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/0cf3bab1-830b-5708-931a-4147821b88e1" (reference "R4") (unit 1))) (project "breath-adc" (path "/c79f4df5-783d-57a4-af84-ebef797ab12e" (reference "R-ADCDIV-U") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 91.44 50.8 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid dbcbd8f6-2220-588d-96ca-5cab84975598)
+    (property "Reference" "R-ADCDIV-L" (at 93.98 49.53 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "15k 1%" (at 93.98 52.07 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 90.17 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-ADCDIV-L" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Lower leg, to the analog star. 15k against 10k is the 0.6x that lands the sensor's full scale inside a 3V3 ADC" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 69ecf49f-e11f-56cc-beeb-13d9f96a615f))
+    (pin "2" (uuid 8e0d6f17-c4d1-5724-ac27-f227bd07d572))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/0cf3bab1-830b-5708-931a-4147821b88e1" (reference "R5") (unit 1))) (project "breath-adc" (path "/c79f4df5-783d-57a4-af84-ebef797ab12e" (reference "R-ADCDIV-L") (unit 1))))
+  )
+  (symbol (lib_id "Device:C") (at 142.24 50.8 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 0ca4cc74-d1b4-55fc-b63d-76193d50e02a)
+    (property "Reference" "C-AA-ADC" (at 144.78 49.53 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "47nF C0G/NP0" (at 144.78 52.07 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 143.51 54.61 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-AA-ADC" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Anti-alias at the divider node. It has to settle inside the sample window, which is what stops the upper leg going higher still" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 3f572135-99d4-5d2f-8fae-b30c1e43747a))
+    (pin "2" (uuid c9039e6a-1e9b-5a7e-a81e-2a2b5beccb2e))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/0cf3bab1-830b-5708-931a-4147821b88e1" (reference "C1") (unit 1))) (project "breath-adc" (path "/c79f4df5-783d-57a4-af84-ebef797ab12e" (reference "C-AA-ADC") (unit 1))))
+  )
+  (symbol (lib_id "Analog_ADC:MCP3202") (at 40.64 106.68 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid bb1c9fb6-efd9-5171-ab5e-c8090cf22449)
+    (property "Reference" "U-ADC" (at 34.29 95.25 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "MCP3202-CI/SN" (at 52.07 95.25 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "" (at 40.64 109.22 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 40.64 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "U-ADC" (at 40.64 106.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "CS=1(~{CS}/SHDN) CH0=2(CH0) CH1=3(CH1) VSS=4(VSS) DIN=5(DIN) DOUT=6(DOUT) CLK=7(CLK) VDD=8(VDD/VREF)" (at 40.64 106.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Drawn_as" "MCP3202" (at 40.64 106.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "NO VREF PIN - VDD IS THE REFERENCE, and that reference is the dev board's LDO, the same rail the 24 key pull-ups load. CH1 is spare" (at 40.64 106.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/analog/MCP3202-CI-SN.pdf p.1 Package Types (SOIC) and Table 3-1" (at 40.64 106.68 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 4957a3b1-a2f1-5853-877d-084fc5bad3a9))
+    (pin "2" (uuid 68bff3ad-c5d2-55fb-88f4-045fb423897e))
+    (pin "3" (uuid 642d54f3-e84f-5673-a02c-2c3b1e81baed))
+    (pin "4" (uuid b4aa85e6-a772-5b92-b939-bf78b5dcc7d9))
+    (pin "5" (uuid 674edbc9-c519-5e88-9576-d13c4a18fba7))
+    (pin "6" (uuid b8dfa78d-cbdf-5f93-bd19-de0414b6f2aa))
+    (pin "7" (uuid cca13d54-f6f3-5fb3-9434-b689ff7eef44))
+    (pin "8" (uuid ce5bb4e5-b158-522a-92ab-5798f8fa8f2a))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/0cf3bab1-830b-5708-931a-4147821b88e1" (reference "U2") (unit 1))) (project "breath-adc" (path "/c79f4df5-783d-57a4-af84-ebef797ab12e" (reference "U-ADC") (unit 1))))
+  )
+  (symbol (lib_id "Device:C") (at 40.64 187.96 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 474053fc-c252-555b-acbd-f0bf7c623c00)
+    (property "Reference" "C-ADC-BULK" (at 43.18 186.69 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "10uF" (at 43.18 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 41.91 191.77 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-ADC-BULK" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Local reservoir on the reference rail" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid de48d53f-aaf9-5600-a640-42542411d452))
+    (pin "2" (uuid 0d69fa5f-f635-53d8-8705-8149776e8b79))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/0cf3bab1-830b-5708-931a-4147821b88e1" (reference "C2") (unit 1))) (project "breath-adc" (path "/c79f4df5-783d-57a4-af84-ebef797ab12e" (reference "C-ADC-BULK") (unit 1))))
+  )
+  (symbol (lib_id "Device:C") (at 91.44 187.96 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 0acd5056-4581-5bbd-ac73-a7d1fc1e5b32)
+    (property "Reference" "C-DEC-ADC" (at 93.98 186.69 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "100nF" (at 93.98 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "" (at 92.71 191.77 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-DECOUPLE-CARRIER" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 3f712ff0-9bb1-5f6f-a0be-5e7fc2acb239))
+    (pin "2" (uuid 9fecebca-b039-53d7-9b0c-2040f4b00153))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/0cf3bab1-830b-5708-931a-4147821b88e1" (reference "C3") (unit 1))) (project "breath-adc" (path "/c79f4df5-783d-57a4-af84-ebef797ab12e" (reference "C-DEC-ADC") (unit 1))))
+  )
+  (wire (pts (xy 40.64 46.99) (xy 40.64 44.45)) (stroke (width 0) (type default)) (uuid 469da89f-58ef-55fe-bd3d-d76151078c1d))
+  (hierarchical_label "SENSOR_BUFFERED_OUT" (shape input) (at 40.64 44.45 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 81dfc0d6-2258-5d1e-a2e7-68c08dc2ad54)
+    (property "Dir" "in" (at 40.64 44.45 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/breath-excitation-reference" (at 40.64 44.45 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "sensor-full-scale" (at 40.64 44.45 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 40.64 54.61) (xy 40.64 57.15)) (stroke (width 0) (type default)) (uuid f4588f2f-a26a-519e-b7d4-0d5930e0e21d))
+  (label "ADC_IN" (at 40.64 57.15 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 07cee7eb-5408-5364-b82c-6f4f22519eca))
+  (wire (pts (xy 91.44 46.99) (xy 91.44 44.45)) (stroke (width 0) (type default)) (uuid 419a9797-34a6-5d07-b1d5-1f934aa6d5b4))
+  (label "ADC_IN" (at 91.44 44.45 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 9514c70f-7993-5c84-b319-b1fb85a7e948))
+  (wire (pts (xy 142.24 46.99) (xy 142.24 44.45)) (stroke (width 0) (type default)) (uuid 9f3b5402-29e1-56c1-8ddf-c6e0fb1f675d))
+  (label "ADC_IN" (at 142.24 44.45 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid f2065b3d-06f7-5218-9bc9-36257b09d1a8))
+  (wire (pts (xy 27.94 101.6) (xy 25.4 101.6)) (stroke (width 0) (type default)) (uuid 3fd2ee6d-968b-5a49-9db7-264044e8b2b9))
+  (label "ADC_IN" (at 25.4 101.6 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 1d4b1182-9d94-5dc1-803a-11c71a9a9670))
+  (wire (pts (xy 40.64 93.98) (xy 40.64 91.44)) (stroke (width 0) (type default)) (uuid 2af8f01a-9fa6-5df8-9163-0aa6f824d110))
+  (hierarchical_label "DEV_3V3" (shape input) (at 40.64 91.44 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 8c4dbfdb-be08-5c0a-bc2b-b95d1f989d4c)
+    (property "Dir" "in" (at 40.64 91.44 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/carrier" (at 40.64 91.44 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 40.64 184.15) (xy 40.64 181.61)) (stroke (width 0) (type default)) (uuid 62d652fb-9b0f-5d3a-a4e2-aa2f6464401b))
+  (hierarchical_label "DEV_3V3" (shape input) (at 40.64 181.61 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 93474b08-80e2-5d05-b16d-8d08dbd39656)
+    (property "Dir" "in" (at 40.64 181.61 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/carrier" (at 40.64 181.61 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 91.44 184.15) (xy 91.44 181.61)) (stroke (width 0) (type default)) (uuid c81320ec-52a8-5aa0-8e90-b93bda00d123))
+  (hierarchical_label "DEV_3V3" (shape input) (at 91.44 181.61 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 71fda655-d612-50fb-a115-951185df6fef)
+    (property "Dir" "in" (at 91.44 181.61 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/carrier" (at 91.44 181.61 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 58.42 104.14) (xy 60.96 104.14)) (stroke (width 0) (type default)) (uuid e831b3c7-ac3f-588a-8c3b-d88bf86ef905))
+  (hierarchical_label "IO35" (shape input) (at 60.96 104.14 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 3811652e-7a6b-5678-904e-1620bb8967a9)
+    (property "Dir" "in" (at 60.96 104.14 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/carrier" (at 60.96 104.14 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 58.42 111.76) (xy 60.96 111.76)) (stroke (width 0) (type default)) (uuid 0023a2cc-d283-5055-a877-a5e1454a2afb))
+  (hierarchical_label "IO36" (shape input) (at 60.96 111.76 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid b3dd8a49-242c-51af-bd3b-e1595c44cb6f)
+    (property "Dir" "in" (at 60.96 111.76 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/carrier" (at 60.96 111.76 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 58.42 109.22) (xy 60.96 109.22)) (stroke (width 0) (type default)) (uuid c434753d-6e1b-5023-a6d7-b9bd7644fa85))
+  (hierarchical_label "IO37" (shape output) (at 60.96 109.22 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid e8b0122d-3a76-5b87-b73c-f24a96658571)
+    (property "Dir" "out" (at 60.96 109.22 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "carrier/carrier" (at 60.96 109.22 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 58.42 101.6) (xy 60.96 101.6)) (stroke (width 0) (type default)) (uuid 8f66aa4b-206a-5549-bd9f-e5fc28aca4b3))
+  (hierarchical_label "IO39" (shape input) (at 60.96 101.6 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid b3d772ba-8151-55e7-bfd2-eb7889ec4e8b)
+    (property "Dir" "in" (at 60.96 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/carrier" (at 60.96 101.6 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 91.44 54.61) (xy 91.44 57.15)) (stroke (width 0) (type default)) (uuid a723590c-75b4-5c14-bcbf-b6d0bf84a9cb))
+  (hierarchical_label "AGND_INST" (shape passive) (at 91.44 57.15 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid f10a402f-25ff-54d4-a344-8877d41f1f4b)
+    (property "Dir" "ref" (at 91.44 57.15 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/power-entry-instrument" (at 91.44 57.15 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 142.24 54.61) (xy 142.24 57.15)) (stroke (width 0) (type default)) (uuid 476d5bbf-bd33-5c4d-977e-0712d26632ba))
+  (hierarchical_label "AGND_INST" (shape passive) (at 142.24 57.15 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 28021ef5-061f-5555-bda3-83eacf201cbd)
+    (property "Dir" "ref" (at 142.24 57.15 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/power-entry-instrument" (at 142.24 57.15 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 40.64 119.38) (xy 40.64 121.92)) (stroke (width 0) (type default)) (uuid 18cd8cd9-6d6d-52cf-8e5f-9f7cc43dbca8))
+  (hierarchical_label "AGND_INST" (shape passive) (at 40.64 121.92 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 3a1cb55d-12b3-57a2-89f8-07284a347bbc)
+    (property "Dir" "ref" (at 40.64 121.92 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/power-entry-instrument" (at 40.64 121.92 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 40.64 191.77) (xy 40.64 194.31)) (stroke (width 0) (type default)) (uuid 6425b462-2a73-5a29-9168-9e3fedcd8795))
+  (hierarchical_label "AGND_INST" (shape passive) (at 40.64 194.31 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 7e907d8c-ee03-554d-87f3-07c289ad4496)
+    (property "Dir" "ref" (at 40.64 194.31 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/power-entry-instrument" (at 40.64 194.31 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 91.44 191.77) (xy 91.44 194.31)) (stroke (width 0) (type default)) (uuid d6e109ea-7e6b-57c1-9e5f-9b916ae306a8))
+  (hierarchical_label "AGND_INST" (shape passive) (at 91.44 194.31 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 5173bf56-c81d-5a49-8a0a-6d2ae1b6cea9)
+    (property "Dir" "ref" (at 91.44 194.31 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/power-entry-instrument" (at 91.44 194.31 0) (effects (font (size 1.27 1.27)) hide)))
+  (no_connect (at 27.94 111.76) (uuid 0ff0b3c6-f919-5bd6-ad97-346ac6dbdf0a))
+  (text "FROM THE HAND-WRITTEN NETLIST THIS SHEET REPLACES (verbatim; the part notes are on each part's Note field):\n\nAUTHORITATIVE for connectivity. THE DRAWING IS ON ANOTHER PAGE - carrier.md §2 draws the whole breath path in\none picture. This circuit is the divider and the MCP3202 at the end of it.\n\nSpare input, unconnected by decision - the Interfaces table says so." (at 256.54 38.099999999999994 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid e9b16af4-7bcf-5304-b518-b36f1717e537))
+  (sheet_instances (path "/" (page "1")))
+)

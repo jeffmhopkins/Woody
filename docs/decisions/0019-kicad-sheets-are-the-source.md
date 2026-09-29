@@ -72,10 +72,23 @@ these KiCad schematics actually be the source of truth of all the things.")
   one pull-up, placed once per free bit (`replicated: 3`); the marker straps
   are drawn as the plain wiring they are, on each board. The BOM count is
   unchanged.
-- **Not yet migrated:** the main board's circuits, the module's, and the
-  interfaces. Their `netlist.yaml` stays hand-written and authoritative until
-  each gets its sheet; `tools/sch.py` writes a circuit's first sheet from its
-  YAML, and from then the sheet is edited instead.
+- **Migrated, 2026-09-29:** the main board's six circuits (`carrier`,
+  `breath-adc`, `breath-excitation-reference`, `power-entry-instrument`,
+  `service-uart`, `led-strip-drive`) and the board `main-board`, which places
+  them with the thumb clusters and draws the interfaces' main-board parts.
+  Each export was compared part by part and net by net with the hand-written
+  netlist it replaced; ERC over the board is clean. **What the migration
+  changed, on purpose:** the OPA2197 became one part with its supply pins
+  netlisted, where it had been two half-parts with the supply as metadata; the
+  REF5050's unused pins are netlisted as no-connects; and the two grounds that
+  meet "in copper, not a part" at one place (the analog star's tie,
+  `NT-AGND`, and `DIG_GND` at `J-UMB`, `NT-DIG`) are KiCad net ties, the one
+  way a board can join two named nets there and nowhere else. A lone
+  no-connect pin's net is named after the pin, as the export names it.
+- **Not yet migrated:** the module's circuits and the interfaces. Their
+  `netlist.yaml` stays hand-written and authoritative until each gets its
+  sheet; `tools/sch.py` writes a circuit's first sheet from its YAML, and from
+  then the sheet is edited instead.
 - **The BOM fragments are a second phase.** A fragment's quantity is a total
   over every board, so it can only be counted from the sheets once every
   board is in KiCad. Until then the fragments stay hand-written, and
