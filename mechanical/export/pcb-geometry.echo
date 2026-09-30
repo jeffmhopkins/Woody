@@ -31,10 +31,10 @@ ECHO: "PCB", "main", "switch", "RT3", 198, 18.5, 180
 ECHO: "PCB", "main", "switch", "RT4", 198, 38.5, 0
 ECHO: "PCB", "main", "chain", "J-CHAIN-LH", 79, 42.015, 1, 13.97, 7.86
 ECHO: "PCB", "main", "chain", "J-CHAIN-RH", 190, 42.015, 1, 13.97, 7.86
-ECHO: "PCB", "main", "connector", "J-MCU", 242.5, 250.3, 28.5, 21.54, 1
+ECHO: "PCB", "main", "connector", "J-MCU", 241.33, 250.3, 28.5, 21.54, 1
 ECHO: "PCB", "main", "connector", "J-UMB", 297.4, 299.9, 21.5, 8, 2.54, 1.25
 ECHO: "PCB", "main", "part", "U-BREATH", 14.15, 39.6, 0, 12.3, 17.8
-ECHO: "PCB", "main", "part", "REGULATOR-BLOCK", 236, 41.5, 0, 10, 15, 12.5
+ECHO: "PCB", "main", "part", "REGULATOR-BLOCK", 234.83, 41.5, 0, 10, 15, 12.5
 ECHO: "PCB", "main", "led", "LED1", 224.685, 28.5, 180, 6.9, 5.5, 1.65
 ECHO: "PCB", "main", "led", "LED2", 208.015, 28.5, 180, 6.9, 5.5, 1.65
 ECHO: "PCB", "main", "led", "LED3", 191.345, 28.5, 180, 6.9, 5.5, 1.65

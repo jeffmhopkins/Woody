@@ -319,6 +319,12 @@ python3 tools/pcb.py check  hardware/boards/key-board-lh   # DRC + parity + fab 
 python3 tools/pcb.py render hardware/boards/key-board-lh   # 3D both sides, 2D copper, and fab/ (Gerbers, PTH and NPTH drills, placement, and the JLCPCB BOM, CPL and hand-assembly list)
 ```
 
+**3D models for `woody` footprints** whose maker's STEP could not be had are
+drawn from the banked drawings by `python3 tools/lib-models.py` into
+`hardware/lib/woody.3dshapes/` (`--check` to verify); each is built in its
+footprint's frame, so the footprint places it at offset 0. `hardware/lib/README.md`
+says which footprint has which model and where it came from.
+
 **`layout`** builds in a scratch directory and moves the board and its
 `.kicad_pro` in only when both are complete. If a net cannot be routed it
 prints which, exits 1, and leaves any existing board as it was.
