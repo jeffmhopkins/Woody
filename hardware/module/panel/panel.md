@@ -36,6 +36,37 @@ The `Dir` and `Peer` columns are defined once in
 | `SW-POWER` toggle | — | `module/umbilical-load-switch` | `panel-toggle-hole`, `panel-height-budget` | The shaped hole this page owns — it has to be in the DXF because it cannot be cut afterwards. The switch's net is that circuit's |
 | etherCON flange | — | — | `panel-width` | The umbilical connector's panel cutout |
 
+## The layout
+
+**Placed by [ADR 0024](../../../docs/decisions/0024-module-panel-layout-and-stack.md)**
+and modelled in `mechanical/cad/module.scad`; every position is a leaf of
+`config/module.yaml` (`layout.*`, with its status and source), and every
+clearance is a rule in `mechanical/module/drc.echo`. Nothing below restates
+either. The drawing is `mechanical/module/renders/panel.png`, and the cut
+file is `mechanical/module/export/panel.dxf` — generated, fingerprinted, and
+the one that goes to the cutter.
+
+Top to bottom it is ADR 0004's five rows: the title band under the top
+screws' washers; the three knobs across, gain, offset, response; the six
+jacks in two columns straddling the middle knob — PITCH and BREATH first,
+then MOD 1–4 — **lying on their sides**, pins across, because a PJ398SM's
+footprint is longer than the column pitch; the NE8FAV centred, latch up, with
+`LED-PANEL` in the strip to its left; `SW-POWER` on its own row below it, in
+the shaped hole `panel-toggle-hole` gives. The four mounting cuts are
+Doepfer's holes slotted sideways, as a fabricated panel cuts them.
+
+- **There is no slot for the NE8FAV's PUSH tab** (ADR 0024 point 3): the tab
+  stands in front of any panel the connector accepts. The bore and the two
+  screw holes are Neutrik's rear-mount cut-out.
+- **The legend zones are derived, not drawn**: each is the space its
+  neighbours leave, and each is DRC'd against every knob, plug grip, nut and
+  screw head. The artwork goes inside them.
+- **The knob is sized by `KNOB-BREATH`'s 14 mm budget** for spacing, and by
+  the chosen Thonk 1900h for the picture; both are checked.
+- `panel-height-budget` is unchanged and holds: the NE8FAV's flange is
+  shorter than the D-series allowance the figure keeps. The 1:1 paper check
+  is still the gate.
+
 ## Where the panel width came from
 
 *The block below moved verbatim from

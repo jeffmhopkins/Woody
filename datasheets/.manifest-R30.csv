@@ -1,0 +1,2 @@
+part,manufacturer,file,sha256,source_url,fetched,status,notes
+WS2815B-V1,Worldsemi,led/WS2815B-V1.pdf,13eb53d9277a69ad020431722413d01a1a4f592354640b79e74fb2480bb0b72d,https://datasheet.lcsc.com/datasheet/pdf/5c99f0bdb44e2621a1db9420710a5d3e.pdf,2026-09-29,OK,"Discrete 5050 WS2815B-V1 (LCSC C5446699), the on-board LED the owner chose to replace the strip (2026-09-29). p.2 pinout: 1 NC, 2 VDD +12 V, 3 DO, 4 DIN1, 5 GND, 6 DIN2 (the backup input). p.3: VIH min 2.7 V, VIL max 1.5 V at VDD 12 V; logical input abs max -0.3..5.7 V."

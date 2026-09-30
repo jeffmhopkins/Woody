@@ -63,7 +63,12 @@ A Eurorack module's board sits parallel to its panel. That is what a
   fraction of a millimetre off the stock M3 lengths, so the standoff is faced
   to length like the key boards' spacer, or the jack board's depth is set to
   suit. Decided at the module layout (`MECH-STANDOFF-MOD`).
-- **The panel needs a slot for the PUSH tab as well as the bore.** On a
+- *Amended 2026-09-29 by [ADR 0024](0024-module-panel-layout-and-stack.md):
+  **no slot.** The STEP, sliced, has nothing of the connector outside the
+  bore's circle within `ethercon.tab_back` of the flange face, so the tab
+  stands in front of any panel the NE8FAV accepts. The paragraph below is
+  what this record concluded before the slice.*
+  **The panel needs a slot for the PUSH tab as well as the bore.** On a
   rear-mounted NE8FAV the tab stands in front of the flange and above the
   bore (`config/body.yaml` `ethercon.tab_*`), so a thin panel must clear it.
   The instrument's tail cap has the same recess (ADR 0021). The panel drawing
@@ -81,6 +86,11 @@ A Eurorack module's board sits parallel to its panel. That is what a
   one datasheet.
 
 ## Open, and what decides each
+
+*2026-09-29: the module layout (ADR 0024) settled the first two rows: the
+standoff is faced to the length `mechanical/module/drc.echo` derives, the jack
+board's depth is the jack's body, and the panel's cut-out is Neutrik's with no
+tab slot.*
 
 | Item | Decided by |
 |---|---|
