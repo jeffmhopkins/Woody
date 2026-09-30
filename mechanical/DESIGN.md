@@ -143,8 +143,9 @@ Several things can claim each end, and the largest wins:
   through the cavity. The row is shifted along the body so the U-bolt station
   falls midway between two LEDs (*"LED row on the main board"*, *"LED row off
   the U-bolt station"*). How evenly the cavity lights the sides is the
-  diffusion test's question, and it now comes before the main board's layout,
-  because the count and pitch are fixed when the board is made.
+  diffusion test's question. It comes before the main board is ordered,
+  because the count and pitch are fixed when the board is made; the layout
+  goes ahead of it with the row as it is (owner's choice (b), ADR 0028 amendment).
 - **Every outer oak edge is rounded, as if sanded** (owner, 2026-09-26):
   the top and bottom panels' long edges, the lips beside the acrylic, and
   both end caps' outer faces and corners, at `stack.edge_r`. It goes on after

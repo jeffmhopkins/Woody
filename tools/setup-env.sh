@@ -69,11 +69,28 @@ done
 # the boards' footprints name, from KiCad's own library at the release tag. Without
 # them kicad-cli renders the parts as nothing, exits 0 and says nothing; pcb.py render
 # now refuses instead. Add a line here when a board names a new one (the refusal lists
-# it). The KS-33's model is banked in datasheets/; the chain header has none.
+# it). The KS-33's model is banked in datasheets/; the woody footprints' drawn
+# models are in hardware/lib/woody.3dshapes (tools/lib-models.py). The first three
+# are the key boards'; the rest the main board's (2026-09-30).
 models=/usr/share/kicad/3dmodels
 for m in Capacitor_SMD.3dshapes/C_0805_2012Metric.step \
          Resistor_SMD.3dshapes/R_0805_2012Metric.step \
-         Package_SO.3dshapes/SOIC-16_3.9x9.9mm_P1.27mm.step; do
+         Package_SO.3dshapes/SOIC-16_3.9x9.9mm_P1.27mm.step \
+         Capacitor_SMD.3dshapes/C_1206_3216Metric.step \
+         Capacitor_SMD.3dshapes/CP_Elec_10x10.step \
+         Capacitor_SMD.3dshapes/CP_Elec_6.3x5.8.step \
+         Resistor_SMD.3dshapes/R_1206_3216Metric.step \
+         Inductor_SMD.3dshapes/L_0805_2012Metric.step \
+         Inductor_SMD.3dshapes/L_Sunlord_SWPA6028S.step \
+         Diode_SMD.3dshapes/D_SMA.step \
+         Diode_SMD.3dshapes/D_SMC.step \
+         Diode_SMD.3dshapes/D_SOD-123.step \
+         Diode_SMD.3dshapes/D_SOD-323.step \
+         Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.step \
+         Package_SO.3dshapes/SOIC-14_3.9x8.7mm_P1.27mm.step \
+         Package_TO_SOT_SMD.3dshapes/SOT-23-5.step \
+         Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x05_P2.54mm_Vertical.step \
+         Converter_DCDC.3dshapes/Converter_DCDC_RECOM_R-78E-0.5_THT.step; do
   if [ ! -s "$models/$m" ]; then
     mkdir -p "$models/$(dirname "$m")"
     curl -fsSL -o "$models/$m.part" "https://gitlab.com/kicad/libraries/kicad-packages3D/-/raw/9.0.0/$m"
@@ -98,6 +115,8 @@ fi
 python3 - <<'EOF' || pip install --break-system-packages -q pillow gmsh manifold3d trimesh numpy shapely fonttools ezdxf
 import PIL, gmsh, manifold3d, trimesh, numpy, shapely, fontTools, ezdxf
 EOF
+# OpenCASCADE's Python binding: tools/lib-models.py draws the woody footprints' 3D models.
+python3 -c "import OCP" 2>/dev/null || pip install --break-system-packages -q cadquery-ocp
 python3 -c "import bpy" 2>/dev/null || pip install --break-system-packages -q bpy
 
 echo "setup-env: OpenSCAD $(openscad --version 2>&1 | awk '{print $3}'), KiCad $(kicad-cli version)"

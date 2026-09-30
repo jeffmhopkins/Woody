@@ -19,9 +19,9 @@ ports:
     dir: ref
     from: module/power-entry
     figure: dig-gnd-topology
-  UMBILICAL_POS12:
+  INST_POS12:
     dir: in
-    from: module/umbilical-load-switch
+    from: carrier/power-entry-instrument
     figure: umbilical-current
 components:
   C-DECOUPLE-LED:
@@ -334,6 +334,34 @@ nets:
   - port: INST_5V_A
   - C-DECOUPLE-LED.1
   - U-LVLSHIFT.VCC
+  INST_POS12:
+  - port: INST_POS12
+  - C-LED-1.1
+  - C-LED-10.1
+  - C-LED-11.1
+  - C-LED-12.1
+  - C-LED-13.1
+  - C-LED-2.1
+  - C-LED-3.1
+  - C-LED-4.1
+  - C-LED-5.1
+  - C-LED-6.1
+  - C-LED-7.1
+  - C-LED-8.1
+  - C-LED-9.1
+  - D-LED-1.VDD
+  - D-LED-10.VDD
+  - D-LED-11.VDD
+  - D-LED-12.VDD
+  - D-LED-13.VDD
+  - D-LED-2.VDD
+  - D-LED-3.VDD
+  - D-LED-4.VDD
+  - D-LED-5.VDD
+  - D-LED-6.VDD
+  - D-LED-7.VDD
+  - D-LED-8.VDD
+  - D-LED-9.VDD
   IO1:
   - port: IO1
   - R-LED-PD.1
@@ -428,34 +456,6 @@ nets:
   - U-LVLSHIFT.2A
   - U-LVLSHIFT.GND
   - U-LVLSHIFT.3A
-  UMBILICAL_POS12:
-  - port: UMBILICAL_POS12
-  - C-LED-1.1
-  - C-LED-10.1
-  - C-LED-11.1
-  - C-LED-12.1
-  - C-LED-13.1
-  - C-LED-2.1
-  - C-LED-3.1
-  - C-LED-4.1
-  - C-LED-5.1
-  - C-LED-6.1
-  - C-LED-7.1
-  - C-LED-8.1
-  - C-LED-9.1
-  - D-LED-1.VDD
-  - D-LED-10.VDD
-  - D-LED-11.VDD
-  - D-LED-12.VDD
-  - D-LED-13.VDD
-  - D-LED-2.VDD
-  - D-LED-3.VDD
-  - D-LED-4.VDD
-  - D-LED-5.VDD
-  - D-LED-6.VDD
-  - D-LED-7.VDD
-  - D-LED-8.VDD
-  - D-LED-9.VDD
   DO:
   - D-LED-13.DO
   2Y:

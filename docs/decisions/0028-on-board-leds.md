@@ -138,6 +138,17 @@ the cavity as the diffuser (ADR 0014, ADR 0016). Two things move:
 | Item | Decided by |
 |---|---|
 | The row's current at full white (`led-row-current`) | E6, a current probe on the row's feed |
-| `lighting.led_count` and `lighting.led_pitch` | The side-light diffusion test, before the main board's layout |
-| Whether the assembler's rotation for the B-V1 matches the footprint (chamfer at pin 4) | The first board order's placement preview |
+| `lighting.led_count` and `lighting.led_pitch` | The side-light diffusion test. **The layout no longer waits for it** (Amendment below, owner's choice (b)): if it moves them, the row is reshuffled |
+| Whether the assembler's rotation for the B-V1 matches the footprint (chamfer at pin 4) | The first board order's placement preview. JLCPCB's own footprint for the part puts its pin 1 at the chamfer, 180° from this footprint's 0°, and the footprint's silk triangle marks the chamfer so the preview can be checked by eye (`hardware/lib/README.md`) |
 | The U-bolt's size, now unbounded by the lights | ADR 0025's open item: the strap hardware chosen (M4) |
+
+## Amendment, 2026-09-30 — the layout goes ahead of the diffusion test
+
+**Owner's choice (b), 2026-09-30:** the main board is laid out now with the
+row as it stands — `lighting.led_count` WS2815B-V1s at `lighting.led_pitch`,
+where the body CAD puts them (`mechanical/export/pcb-geometry.echo` `main`
+`led`) — accepting that the row is reshuffled if the side-light diffusion
+test moves its count or pitch. The test is still run before the board is
+ordered; what changes is that it no longer holds up placement and routing.
+A reshuffle moves thirteen LEDs, their capacitors and the one data chain
+between them along the centreline, which the layout keeps clear for it.

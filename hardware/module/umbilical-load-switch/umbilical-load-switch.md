@@ -236,6 +236,13 @@ survives, but it is now a millisecond, not the whole ramp, and it is harmless.**
 insertion, and on insertion the FET is already fully enhanced, so there is no
 ramp and the entire start runs at the foldback limit:
 
+> **Since 2026-09-30 the instrument limits its own inrush** (`Q-INRUSH`,
+> `carrier/power-entry-instrument` §1a): its bulk is behind a Miller ramp, so
+> an ordinary hot-plug no longer puts it on this switch's output, and this
+> switch does not enter its limit (`hotplug-iso-ocp`). The case below stays
+> the one this switch must survive — a replug inside `Q-INRUSH`'s window, or
+> `Q-INRUSH` failed short — so the sizing stands.
+
 ```
 phase 1  0 → 3.99 V through the foldback ramp    t = (C/m).ln(I2/I1)
                                                    = (2.2mF/0.1753 A/V).ln(940/240)

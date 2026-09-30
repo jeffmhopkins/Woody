@@ -32,7 +32,7 @@ The `Dir` and `Peer` columns are defined once in
 |---|---|---|---|---|
 | IO1 | in | `J-MCU` | — | High-impedance through the bootloader window; `R-LED-PD` is what holds it down in it. IO2 is spare (ADR 0016) |
 | 5 V | in | `carrier/power-entry-instrument` | `matrix-led-current` | The buck. The 74AHCT125's rail; TTL thresholds on this rail are why 3.3 V in reads high |
-| `UMBILICAL_POS12` | in | `carrier/power-entry-instrument` (`C-STRIP-BULK` at the row's feed) | `umbilical-current`, `led-row-current` | Every LED's `VDD` and its 100 nF. Since ADR 0027 it is the module's isolated 12 V, through the load switch |
+| `INST_POS12` | in | `carrier/power-entry-instrument` (`C-STRIP-BULK` at the row's feed) | `umbilical-current`, `led-row-current` | Every LED's `VDD` and its 100 nF. Since ADR 0027 it is the module's isolated 12 V, through the load switch; on this board it is the node behind `Q-INRUSH`, the hot-plug inrush limiter, so the row's 1.3 µF of `C-LED` charges on its ramp and not off the plug |
 | `PWR_GND` | ref | `carrier/power-entry-instrument` | `dig-gnd-topology` | The LEDs' ground, LED 1's `DIN2`, the spare gates and enables |
 | `OE_INST` ×4 | ref | — | — | `U-LVLSHIFT`'s four enables, tied LOW on this board, which is why the pull-down is needed rather than optional. **Not `OE_MOD`**, the module buffer's |
 

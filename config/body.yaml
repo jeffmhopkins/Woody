@@ -473,9 +473,9 @@ boards:
     status: settled
     source: "J-MCU, the XKB X1270WR-2x12A-9TV01 box header, side entry, across the body: dimension C for 2x12 [ds XKB-X1270WR-2x12A-9TV01.pdf] (ADR 0018)"
   mcu_conn_w:
-    value: 7.8
+    value: 8.97
     status: settled
-    source: "the same header along the body with its tail pads: 5.40 body [ds XKB-X1270WR-2x12A-9TV01.pdf], its far tail row 1.87 behind the body's back plus the pad [calc from the same drawing]"
+    source: "the same header along the body with its tail pads: 5.40 body, its far tail row 2.60 behind the body's back (rev A1 side view) [ds XKB-X1270WR-2x12A-9TV01.pdf], and that row's pad reaching 0.965 past the hole, away from the body [repo hardware/lib/woody.pretty/IDC-Header_2x12_P1.27mm_XKB_X1270WR_Horizontal.kicad_mod; calc 5.40 + 2.60 + 0.965 = 8.965]"
   mcu_conn_h:
     value: 5.1
     status: settled
@@ -502,9 +502,9 @@ boards:
     source: "the header's pin row above the main board, at the middle of its 2.50 insulator [ds HANXIA-HX-PZ2.54-1x8P-WZ.pdf]; where the row meets the adapter"
   umb_parts_d:
     value: 14
-    status: tbd
-    source: "the depth along the body, in front of J-UMB's insulator, kept for J-UMB's own footprint and the parts that must sit at the connector (U-TVS-SPI, NT-DIG, D-TVS-BREATH x2, R-SER-BREATH-INST x2, D-REVSHUNT): the pin row 1.5 in front of the insulator plus its courtyard 1.77 [repo: KiCad PinHeader_1x08_P2.54mm_Horizontal as placed], a column of the SOD-323 / SOT-23-5 / net-tie parts 3.6, and a column of the 1206s and the SMC shunt 6.7 [calc: 3.27 + 3.6 + 6.7 = 13.57, rounded up]. The tongue's end mounts stand behind it; D-TVS-PWR goes between them"
-    decided_by: "M4 main board layout"
+    status: nominal
+    source: "the depth along the body, in front of J-UMB's insulator, kept for J-UMB's own footprint and the parts that must sit at the connector (U-TVS-SPI, NT-DIG, D-TVS-BREATH x2, R-SER-BREATH-INST x2, D-REVSHUNT): the pin row 1.80 in front of the insulator [ds HANXIA-HX-PZ2.54-1x8P-WZ.pdf: 4.30 mating face to tail, less the 2.50 insulator] plus its courtyard 1.10 [repo hardware/lib/woody.pretty/PinHeader_1x08_P2.54mm_Horizontal_Hanxia_PZ2.54-WZ.kicad_mod], a column of the SOD-323 / SOT-23-5 / net-tie parts 3.6, and a column of the 1206s and the SMC shunt 6.7 [calc: 2.90 + 3.6 + 6.7 = 13.2, rounded up]. The tongue's end mounts stand behind it; D-TVS-PWR goes between them. The two columns are a first placement's, not a routed layout's"
+    decided_by: "M4 main board layout, routed"
   # ONE MAIN BOARD (ADR 0017): the thumb switches, their registers and the
   # carrier's circuits on one board at the thumb level, mouth cap to the end
   # of the right hand. Its size and the height its parts have are derived;
@@ -1076,7 +1076,7 @@ lighting:
     value: 16.67
     status: tbd
     source: "centre to centre along the body: the strip's 60/m [calc: 1000 / 60 = 16.67], which ADR 0014 chose for how it diffuses"
-    decided_by: "the side-light diffusion test (ROADMAP), before the main board's layout: a strip offcut at board height under a white-masked mock key board, with the real acrylic at the side distance"
+    decided_by: "the side-light diffusion test (ROADMAP), before the main board is ordered - the layout goes ahead with this value and is reshuffled if the test moves it (owner's choice (b), 2026-09-30, ADR 0028 amendment): a strip offcut at board height under a white-masked mock key board, with the real acrylic at the side distance"
   led_body:
     value: [5.4, 5.0]
     status: settled

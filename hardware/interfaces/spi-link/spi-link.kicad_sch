@@ -608,7 +608,7 @@
     (uuid d5bee1a8-3d47-5969-b832-57d6ba435737)
     (property "Reference" "J-UMB" (at 165.1 91.44 0) (effects (font (size 1.27 1.27))))
     (property "Value" "8-way 2.54mm right-angle pin header" (at 165.1 114.3 0) (effects (font (size 1.27 1.27))))
-    (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x08_P2.54mm_Horizontal" (at 165.1 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Footprint" "woody:PinHeader_1x08_P2.54mm_Horizontal_Hanxia_PZ2.54-WZ" (at 165.1 101.6 0) (effects (font (size 1.27 1.27)) hide))
     (property "Datasheet" "" (at 165.1 101.6 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "J-UMB" (at 165.1 101.6 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2 3=3 4=4 5=5 6=6 7=7 8=8" (at 165.1 101.6 0) (effects (font (size 1.27 1.27)) hide))

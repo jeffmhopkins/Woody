@@ -3,12 +3,15 @@
 * threshold i_ocp: its output resistance r_bus, clamped), C-ISO-OUT, the load switch
 * (module/umbilical-load-switch, with umbilical-load-switch/sim's behavioural LT1641),
 * the umbilical's +12 V and PWR_GND conductors (R and L each), and the instrument's input:
-* C-STRIP-BULK at the input node, L-BUCK-IN, C-BUCK-IN, the buck (a constant-power load
-* above its input minimum) and the 12 V loads (the LED row and the analog block, a
-* current at v_nom, resistive below it). cold = 1: everything starts from 0 (the rack powers up with the instrument
-* plugged in). cold = 0: the module is running, its FET already enhanced, and the
-* instrument is plugged in (hot-plug). D-REVSHUNT and D-TVS-PWR are left out:
-* reverse-biased, and under the SMAJ15A's standoff (the run measures the input's peak).
+* J-UMB's node - D-TVS-PWR's capacitance, and Q-INRUSH's source and gate network - and,
+* behind Q-INRUSH's channel, everything that holds charge: C-STRIP-BULK, L-BUCK-IN,
+* C-BUCK-IN, the buck (a constant-power load above its input minimum) and the 12 V loads
+* (the LED row and the analog block, a current at v_nom, resistive below it).
+* The run starts from its operating point. cold = 1: U-ISO is off and the plug is in (the
+* rack powers up with the instrument plugged in). cold = 0: U-ISO is running, the load
+* switch's FET is enhanced with nothing on its output, and the +12 V conductor makes contact
+* at t_plug (a hot-plug); t_un and t_re, where a sim sets them, pull the plug and put it
+* back. D-REVSHUNT is left out: reverse-biased (the run measures the input's peak).
 VSET set 0 PWL(0 {{v_set0}} {{t_iso}} {{v_bus}})
 BISO 0 isx I = min({{i_ocp}}, max(0, (V(set) - V(vcc)) / {{r_bus}}))
 VIM isx vcc DC 0
@@ -25,31 +28,55 @@ M1 sense gnode out out QPASS
 CISS gnode out {{c_iss}}
 RFBH out fb {{R-FB-HI}}
 RFBL fb 0 {{R-FB-LO}}
+* the plug: the +12 V conductor's contact (its own resistance and capacitance across it,
+* r_arc and c_arc, only so the solver can open it with current flowing)
+VPLUG plug 0 PWL(0 {{plug0}} {{t_plug}} {{plug0}} {{t_plug1}} 1 {{t_un}} 1 {{t_un1}} 0 {{t_re}} 0 {{t_re1}} 1)
+SPLUG out cpx plug 0 SPLUGM
+CARC out arc {{c_arc}}
+RARC arc cpx {{r_arc}}
+.model SPLUGM SW(vt=0.5 vh=0.1 ron=1m roff=1e9)
 * the umbilical
-RCP out cp1 {{r_cable}}
+RCP cpx cp1 {{r_cable}}
 LCP cp1 inp {{l_cable}}
 RCN ig cn1 {{r_cable}}
 LCN cn1 0 {{l_cable}}
-* the instrument
-CSTRIP inp cs1 {{C-STRIP-BULK}}
+* the instrument at J-UMB: D-TVS-PWR's capacitance, and the inrush limiter
+CTVS inp tvs1 {{c_tvs}}
+RTVS tvs1 ig {{r_tvs}}
+MQ qd gq inp inp QINRUSH
+VQ ins qd DC 0
+CQGS gq inp {{c_iss_q}}
+CQGD gq ins {{c_rss_q}}
+DQB ins inp DQBODY
+RIGS inp gq {{R-INRUSH-GS}}
+RIG gq ig {{R-INRUSH-G}}
+CIGS inp gq {{C-INRUSH-GS}}
+CIGD gq gdm {{C-INRUSH-GD}}
+RIGD gdm ins {{R-INRUSH-GD}}
+DRST ig gq DRESET
+* behind it (INST_POS12)
+CSTRIP ins cs1 {{C-STRIP-BULK}}
 RCSTRIP cs1 ig {{esr_strip}}
-B12 inp ig I = {{i_12}} * max(0, min(1, V(inp,ig) / {{v_nom}}))
-LBIN inp lb1 {{L-BUCK-IN}}
+B12 ins ig I = {{i_12}} * max(0, min(1, V(ins,ig) / {{v_nom}}))
+LBIN ins lb1 {{L-BUCK-IN}}
 RLBIN lb1 cb {{r_lbin}}
 CBUCK cb cb1 {{C-BUCK-IN}}
 RCBUCK cb1 ig {{esr_buck}}
 BBUCK cb ig I = {{p_buck}} / max(V(cb,ig), 1) * 0.5 * (1 + tanh((V(cb,ig) - {{v_on}}) / 0.1))
 .model QPASS NMOS(level=1 vto={{v_th}} kp={{kp}})
-.ic v(out)=0 v(inp)=0 v(cb)=0 v(timer)=0 v(gcm)={{v_gate0}} v(gdrv)={{v_gate0}} v(gnode)={{v_gate0}} v(xu.latch)=0 v(vcc)={{v_bus0}}
+.model QINRUSH PMOS(level=1 vto={{vto_q}} kp={{kp_q}})
+.model DQBODY D(is={{is_body_q}} n=1)
+.model DRESET D(is={{is_rst}} n={{n_rst}})
 .options method=gear rshunt=1e10
 .control
-tran 5u {{t_end}} 0 20u uic
+tran 5u {{t_end}} 0 20u
 wrdata vinst.dat v(cb) - v(ig)
 wrdata vin.dat v(inp) - v(ig)
 wrdata iiso.dat i(VIM)
 wrdata latch.dat v(xu.latch)
 wrdata timer.dat v(timer)
 wrdata vcc.dat v(vcc)
+wrdata pq.dat (v(inp) - v(ins)) * (-i(VQ))
 quit
 .endc
 .end

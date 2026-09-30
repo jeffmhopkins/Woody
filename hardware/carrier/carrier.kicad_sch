@@ -2172,7 +2172,7 @@
     (uuid cfba09c8-9896-580b-b655-19577a22b1a6)
     (property "Reference" "J-MCU" (at 41.91 137.16 0) (effects (font (size 1.27 1.27))))
     (property "Value" "2x12 1.27mm shrouded box header" (at 41.91 170.18 0) (effects (font (size 1.27 1.27))))
-    (property "Footprint" "Connector_PinHeader_1.27mm:PinHeader_2x12_P1.27mm_Horizontal" (at 40.64 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Footprint" "woody:IDC-Header_2x12_P1.27mm_XKB_X1270WR_Horizontal" (at 40.64 152.4 0) (effects (font (size 1.27 1.27)) hide))
     (property "Datasheet" "" (at 40.64 152.4 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "J-MCU" (at 40.64 152.4 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2 3=3 4=4 5=5 6=6 7=7 8=8 9=9 10=10 11=11 12=12 13=13 14=14 15=15 16=16 17=17 18=18 19=19 20=20 21=21 22=22 23=23 24=24" (at 40.64 152.4 0) (effects (font (size 1.27 1.27)) hide))
