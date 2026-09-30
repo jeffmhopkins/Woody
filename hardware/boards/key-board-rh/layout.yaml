@@ -71,7 +71,7 @@ networks:
 parts:
   U1:  [204.0, 44.0, 90]     # U-KEYS, the register
   C7:  [197.5, 41.8, 90]     # C-DECOUPLE-165, beside pin 8 at the register's J-CHAIN end
-  C8:  [178.5, 42.0, 90]     # C-BULK-CHAIN, beside J-CHAIN's 3V3 pin
+  C8:  [178.0, 42.0, 90]     # C-BULK-CHAIN, beside J-CHAIN's 3V3 pin
 
 silk:
   at: [152.0, 12.5]
