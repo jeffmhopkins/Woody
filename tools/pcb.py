@@ -684,8 +684,8 @@ def add_silk_generic(board, lay, comps):
         for it in fp.GraphicalItems():
             if it.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS):
                 b = it.GetBoundingBox()
-                keep[it.GetLayer() == pcbnew.F_SilkS].append(_box(pcbnew.ToMM(b.GetLeft()) - 0.2, pcbnew.ToMM(b.GetTop()) - 0.2,
-                                                                   pcbnew.ToMM(b.GetRight()) + 0.2, pcbnew.ToMM(b.GetBottom()) + 0.2))
+                keep[it.GetLayer() == pcbnew.F_SilkS].append(_box(pcbnew.ToMM(b.GetLeft()) - 0.3, pcbnew.ToMM(b.GetTop()) - 0.3,
+                                                                   pcbnew.ToMM(b.GetRight()) + 0.3, pcbnew.ToMM(b.GetBottom()) + 0.3))
         for top, cl in ((True, pcbnew.F_CrtYd), (False, pcbnew.B_CrtYd)):
             cy = fp.GetCourtyard(cl)
             if cy.OutlineCount():

@@ -623,24 +623,17 @@ def check_planes(board, lay):
                 and spec["net"] in {pd.GetNetname() for pd in f.Pads()} and len({pd.GetNetname() for pd in f.Pads()}) > 1]
         if ties != [spec["tie"]]:
             bad.append(f"error: [island] {spec['net']} is tied to its plane by {ties or 'nothing'}; layout.yaml says one tie, {spec['tie']}")
-    # splits. A SPLIT is a gap in the reference plane's copper that a return current
-    # would have to go round: a moat round an island, or the edge of a pour. Antipads -
-    # the clearance holes round every other net's via and pin, merged or not - are not
-    # counted (a track to a connector's inner pin always crosses its neighbours'), so
-    # each fill counts by its outer boundary, and each moat by itself.
+    # splits. A SPLIT is a gap the design puts in a reference plane, that a return
+    # current would have to go round: a moat round an island, the plane's own edge, a
+    # cut-out. So the reference is each plane and island zone's OUTLINE as drawn (the
+    # moat is the gap between a plane's outline and its island's), not its fill: the
+    # fill's antipads round every other net's via and pin are not splits (a track to a
+    # connector's inner pin always crosses its neighbours'), and a fill read as polygons
+    # is fractured besides. What the fill does between antipads is KiCad's zone checks'.
     ref_of_layer = {pcbnew.F_Cu: "In1.Cu", pcbnew.B_Cu: "In2.Cu"}
     fills = {}
     for L, ref in ref_of_layer.items():
-        polys = []
-        for z in zones:
-            if board.GetLayerName(z.GetLayer()) == ref and z.GetFilledPolysList(z.GetLayer()).OutlineCount():
-                # KiCad keeps a fill FRACTURED - each hole joined to the outline by a
-                # zero-width slit - so unfracture a copy, or every antipad is a notch
-                ps = pcbnew.SHAPE_POLY_SET(z.GetFilledPolysList(z.GetLayer()))
-                ps.Unfracture()
-                g = pcb.shapely_of(ps)
-                polys += [Polygon(part.exterior.coords) for part in (g.geoms if g.geom_type == "MultiPolygon" else [g])]
-        fills[L] = polys
+        fills[L] = [pcb.shapely_of(z.Outline()) for z in zones if board.GetLayerName(z.GetLayer()) == ref]
     windows, moats = [], {pcbnew.F_Cu: [], pcbnew.B_Cu: []}
     for spec, p, moat in isl:
         above = pcbnew.F_Cu if spec["layer"] == "In1.Cu" else pcbnew.B_Cu
@@ -661,6 +654,7 @@ def check_planes(board, lay):
             lands.setdefault(pd.GetNetname(), []).append(box(pcbnew.ToMM(b_.GetLeft()) - 0.6, pcbnew.ToMM(b_.GetTop()) - 0.6,
                                                              pcbnew.ToMM(b_.GetRight()) + 0.6, pcbnew.ToMM(b_.GetBottom()) + 0.6))
     lands = {n: unary_union(v) for n, v in lands.items()}
+    solid = {L: unary_union(v) for L, v in fills.items()}
     crossings = {}
     for t in board.GetTracks():
         if type(t) is not pcbnew.PCB_TRACK or t.GetLayer() not in fills or t.GetNetname() in plane_nets - pair_nets:
@@ -671,9 +665,13 @@ def check_planes(board, lay):
         if g.is_empty:
             continue
         # over a moat: allowed where it crosses inside its tie's window, or as a pair
-        on_moat = unary_union([g.intersection(m) for m in moats[t.GetLayer()]])
-        bad_moat = not on_moat.is_empty and not (t.GetNetname() in pair_nets or on_moat.within(unary_union(windows)))
-        if any(g.within(pl) for pl in fills[t.GetLayer()]) and not bad_moat:
+        # (a moat where its island meets the board's edge is a notch in the plane's
+        # outline, not a hole in it: the moat allowed to this track counts as covered)
+        L = t.GetLayer()
+        moat = unary_union(moats[L])
+        allowed = moat if t.GetNetname() in pair_nets else moat.intersection(unary_union(windows))
+        on_moat = g.intersection(moat)
+        if g.within(solid[L].union(allowed).buffer(1e-3)) and (on_moat.is_empty or on_moat.within(allowed.buffer(1e-3))):
             continue
         c = g.centroid
         crossings.setdefault((t.GetNetname(), board.GetLayerName(t.GetLayer())), []).append(f"({c.x:.1f}, {c.y:.1f})")

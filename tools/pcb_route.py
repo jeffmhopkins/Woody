@@ -752,7 +752,7 @@ def route(board, lay):
     return failed
 
 
-def merge_tracks(board):
+def merge_tracks(board, delete=False):
     """Join two tracks of one net and layer that meet head to tail in a straight
     line, so the board is edited in KiCad as runs, not grid steps. Never at a
     via, a third track, or inside a pad: KiCad connects a track to a pad by its
@@ -785,7 +785,7 @@ def merge_tracks(board):
                 continue
             a.SetStart(pa)
             a.SetEnd(pb)
-            board.Remove(b)
+            board.Delete(b) if delete else board.Remove(b)     # Delete on a LOADED board (tidy): Remove corrupts it
             merged += 1
             again = True
             break
@@ -1220,10 +1220,57 @@ def tidy(board, lay):
             n0 += 1
             continue
         seen.add(k)
+    # a track lying along another of its net and layer, over part of it: the two become
+    # one, over both (an autorouter's overlap; check_tracks reads it as a 0-degree join)
+    groups = {}
+    for t in [t for t in board.GetTracks() if type(t) is pcbnew.PCB_TRACK]:
+        groups.setdefault((t.GetNetname(), t.GetLayer(), t.GetWidth()), []).append(t)
+    for ts in groups.values():
+        alive = list(ts)
+        again = True
+        while again:
+            again = False
+            for i in range(len(alive)):
+                for j in range(i + 1, len(alive)):
+                    a, b = alive[i], alive[j]
+                    p0, p1 = a.GetStart(), a.GetEnd()
+                    dx, dy = p1.x - p0.x, p1.y - p0.y
+                    l2 = dx * dx + dy * dy
+                    if not l2:
+                        continue
+                    ks = []
+                    for q in (b.GetStart(), b.GetEnd()):
+                        if abs((q.x - p0.x) * dy - (q.y - p0.y) * dx) / math.sqrt(l2) > 1000:
+                            break
+                        ks.append(((q.x - p0.x) * dx + (q.y - p0.y) * dy) / l2)
+                    else:
+                        lo, hi = min(ks), max(ks)
+                        if hi <= 1e-6 or lo >= 1 - 1e-6:
+                            continue          # end to end, or apart: not an overlap
+                        k0, k1 = min(0.0, lo), max(1.0, hi)
+                        a.SetStart(pcbnew.VECTOR2I(int(p0.x + k0 * dx), int(p0.y + k0 * dy)))
+                        a.SetEnd(pcbnew.VECTOR2I(int(p0.x + k1 * dx), int(p0.y + k1 * dy)))
+                        board.Delete(b)
+                        alive.pop(j)
+                        n0 += 1
+                        again = True
+                        break
+                if again:
+                    break
     # dangling ends, repeatedly: an end touches another track of the net (its end or its
-    # body), a via of the net, or a pad of the net on its layer - or it goes
+    # body), a via of the net, or a pad of the net on its layer - or it goes; and a via
+    # of a net that has no plane, reached on fewer than two layers, goes with them
     pads = [(p, p.GetNetname()) for fp in board.GetFootprints() for p in fp.Pads()]
+    planes = set(lay.get("fanout") or [])
     while True:
+        for v in [v for v in board.GetTracks() if isinstance(v, pcbnew.PCB_VIA) and v.GetNetname() not in planes]:
+            c, net = v.GetPosition(), v.GetNetname()
+            on = {t.GetLayer() for t in board.GetTracks() if type(t) is pcbnew.PCB_TRACK and t.GetNetname() == net
+                  and (t.GetStart() == c or t.GetEnd() == c or t.HitTest(c, 1000))}
+            on |= {L for p, n in pads if n == net and p.HitTest(c) for L in (pcbnew.F_Cu, pcbnew.B_Cu) if p.IsOnLayer(L)}
+            if len(on) < 2:
+                board.Delete(v)
+                n1 += 1
         tracks = [t for t in board.GetTracks() if type(t) is pcbnew.PCB_TRACK]
         vias = [v for v in board.GetTracks() if isinstance(v, pcbnew.PCB_VIA)]
         gone = []
@@ -1255,7 +1302,7 @@ def tidy(board, lay):
             g = LineString([(TO(a.x), TO(a.y)), (TO(b.x), TO(b.y))]).buffer(TO(t.GetWidth()) / 2)
             r.copper.append((t.GetNetname(), {LAYERS.index(t.GetLayer())}, g, "track"))
     n2 = r.square_joins()
-    n3 = merge_tracks(board)
+    n3 = merge_tracks(board, delete=True)
     print(f"route: tidy - {n0} empty or doubled track(s), {n1} dangling, {n2} acute join(s) squared, {n3} joint(s) merged")
 
 

@@ -84,7 +84,10 @@ islands:
     # its supply) and as the breath pair (pairs: below); anywhere else a layer-1 track
     # over the moat is a signal crossing a split in its reference plane
     tie_window: 4.0
-    outline: [[7.5, 15.6], [15.6, 15.6], [15.6, 7.5], [35.9, 7.5], [35.9, 15.2], [38.5, 15.2],
+    # its bottom edge stands off the board's (y 10.0, not 7.5): the strip of plane
+    # left along the edge is what joins H9's corner to the rest of layer 2 - an
+    # island down to the edge cut it off, and H9 with it
+    outline: [[7.5, 15.6], [15.6, 15.6], [15.6, 10.0], [35.9, 10.0], [35.9, 15.2], [38.5, 15.2],
               [38.5, 25.2], [20.3, 25.2], [20.3, 49.5], [7.5, 49.5]]
     # its one pad off the island: the breath pair's AGND leg ends at R-SER-BREATH-INST
     # beside J-UMB (breath-sense-link.md)
@@ -240,7 +243,7 @@ parts:
   C5:  [19.4, 20.9, 90]     # C-REF-OUT on REF_5V
   C7:  [19.2, 16.4, 90]     # 100 nF on REF_5V
   C4:  [17.2, 13.0, 0]      # C-REF-OUT on REF_VIN
-  C6:  [18.5, 9.6, 0]       # 100 nF on REF_VIN
+  C6:  [31.5, 12.9, 0]      # 100 nF on REF_VIN, beside R-REF-IN (on the island, off its edge strip)
   D1:  [22.5, 12.8, 0]      # D-REF-CLAMP on REF_VIN
   R6:  [27.5, 12.8, 0]      # R-REF-IN from +12 V
   U2:  [38.5, 21.0, 0]      # U-ADC MCP3202: pins 1-4 (CS, CH0, CH1, VSS) on the island, 5-8 on the plane
@@ -257,7 +260,6 @@ parts:
   D6:  [292.3, 27.85, 180]  # D-TVS-BREATH on AGND_SENSE (pin 2)
   R38: [287.6, 30.39, 0]    # R-SER-BREATH-INST in BREATH
   R39: [287.6, 27.85, 0]    # R-SER-BREATH-INST in AGND_SENSE
-  U1:  [292.2, 19.4, 90]    # U-TVS-SPI on SCLK, MOSI, CS (pins 4, 5, 7)
   NT1: [293.0, 13.4, 90]    # NT-DIG at J-UMB pin 8 (ADR 0018)
   D2:  [286.4, 20.0, 90]    # D-REVSHUNT, across pins 3 / 6, ahead of L-BUCK-IN
   D3:  [278.3, 21.5, 90]    # D-TVS-PWR, between the tongue's end mounts
@@ -267,6 +269,9 @@ parts:
   R2:  [257.2, 29.6, 90]    # R-SPI-SER MOSI
   R3:  [260.2, 29.6, 90]    # R-SPI-SER CS_MOD
   R40: [263.2, 29.6, 90]    # R-CS-PULL-INST, IO34 to 3V3 beside R-SPI-SER CS
+  # U-TVS-SPI clamps the pad side of R-SPI-SER (IO35, IO36, IO34 - spi-link), so it
+  # stands on the J-MCU side of the resistors, below the chain's, clear of the column mount
+  U1:  [256.5, 17.5, 0]
   R34: [254.2, 23.8, 90]    # R-CHAIN-SER SCK
   R35: [257.2, 23.8, 90]    # R-CHAIN-SER SH/LD
   R36: [260.2, 23.8, 90]    # R-CHAIN-SER SER (the chain's end)
