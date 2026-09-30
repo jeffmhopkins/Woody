@@ -787,14 +787,11 @@ figures:
 
   - id: ref5050-grade
     quantity: REF5050 grade, initial accuracy and tempco
-    value: "DISPUTED"
-    status: disputed
+    value: "REF5050IDR, the High grade: ±0.05 % initial, 3 ppm/°C"
+    status: settled
     owner: hardware/carrier/breath-excitation-reference/breath-excitation-reference.md
-    candidates: ["REF5050AIDR as currently specified = Standard grade = +/-0.1% and 8 ppm/degC (SBOS410O Table 4-2 p.3)", "REF5050IDR = High grade = +/-0.05% and 3 ppm/degC, which is what the corpus BELIEVES it has and states in three places"]
-    decided_by: "Changing one letter in the order code, or accepting 2x the initial error and 2.7x the drift in the ratiometric breath scale-factor budget. Since the whole reason for a separate reference is scale-factor stability, REF5050IDR is almost certainly the right answer - but it is a part change, not a documentation fix, so it is recorded as disputed rather than decided."
-    forbidden: ["+-0.05%, 3ppm/degC, ~5ppm/V", "against a reference specified to 0.05%", "5.000 V out at \u00b10.05 % and 3 ppm/\u00b0C", "SOIC-8, 7\u201318 V in"]
-    false_positive_note: "0.05% and 3 ppm/degC are legitimate figures for the OTHER grade and appear in the text that explains the difference. Match the phrase as it was asserted OF THIS PART, not the numerals. All four strings above are dead as of 2026-09-21 and are here to catch a regression."
-    caught_late_note: "This was fixed in bom.csv on 2026-09-21 and NOT in docs/decisions/0003-breath-sensing-path.md, which went on asserting 0.05%/3ppm for another two commits. Worse, the bom.csv row's own LEADING sentence still said 0.05% with the refutation appended 200 words later - the fix landed where the editor was, not where the reader looks. Both are why these forbidden strings exist."
-
-    note: "*** THE 'A' SUFFIX IS THE WORSE GRADE. *** SBOS410O Table 4-2 p.3, verbatim: REF50xxI = grade 'High' = 3 ppm/degC, +/-0.05%; REF50xxAI = grade 'Standard' = 8 ppm/degC, +/-0.1%. The corpus says REF5050AIDR is +/-0.05% / 3 ppm/degC in bom.csv (twice) and in ADR 0003. PROVENANCE CAVEAT WORTH KEEPING: Table 4-2 is NEW IN REV O (October 2025), so an earlier revision may have labelled the grades differently and the corpus's belief may have had an honest origin; rev M/N was not fetched. FETCH NOTE: ti.com/lit/ds/symlink/ref5050.pdf is a REAL 404 - TI renamed the folder at rev O and broke the symlink. Use ti.com/lit/ds/sbos410/sbos410.pdf."
-
+    source: "datasheets/analog/REF5050.pdf (SBOS410O) Table 4-2 p.3: REF50xxI = High = 3 ppm/degC, +/-0.05 %; REF50xxAI = Standard = 8 ppm/degC, +/-0.1 %. Same SOIC-8 pins, Table 5-1 p.4. Selected 2026-09-30: LCSC C24696, 4401 in stock at USD 1.92 against the Standard grade's USD 1.05 [web jlcpcb.com parts search 2026-09-30]"
+    derivation: "The reference exists only for scale-factor stability (the sensor is ratiometric), so the grade is chosen for it: the Standard grade doubles the initial error and multiplies the drift by 8/3 = 2.7 for USD 0.87 on one part [calc]."
+    forbidden: ["+-0.05%, 3ppm/degC, ~5ppm/V", "against a reference specified to 0.05%", "5.000 V out at \u00b10.05 % and 3 ppm/\u00b0C", "SOIC-8, 7\u201318 V in", "REF5050AID"]
+    false_positive_note: "The 'A' order code is the Standard grade; the grade family names REF50xxI and REF50xxAI are legitimate in text explaining the difference and are not matched. The first four strings predate the part change and are kept to catch a regression of the old assertion."
+    note: "*** THE 'A' SUFFIX IS THE WORSE GRADE. *** A substitution or an assembler's 'equivalent' that adds the A is a silent downgrade of the breath scale factor. FETCH NOTE: ti.com/lit/ds/symlink/ref5050.pdf is a 404 since rev O; use ti.com/lit/ds/sbos410/sbos410.pdf."

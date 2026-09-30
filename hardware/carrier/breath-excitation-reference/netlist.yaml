@@ -113,7 +113,7 @@ components:
     - V-
     note: Half A is the reference buffer, half B the breath buffer. Single supply from +12 V, V- on the analog star
   U-REF-BREATH:
-    value: REF5050AIDR
+    value: REF5050IDR
     drawn_as: REF5050
     pins:
     - VIN

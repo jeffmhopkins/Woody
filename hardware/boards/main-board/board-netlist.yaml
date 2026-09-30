@@ -745,7 +745,7 @@ components:
     sheet: breath-excitation-reference
   U4:
     of: U-REF-BREATH
-    value: REF5050AIDR
+    value: REF5050IDR
     pins:
     - VIN
     - VOUT

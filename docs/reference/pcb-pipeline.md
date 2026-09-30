@@ -103,11 +103,8 @@ pins, so this is a **netlist** change, not just a footprint. `SP0505BAHTG` is
 the genuine -6 with a fifth channel if the footprint matters more than the
 channel count.
 
-**6. `ref5050-grade` is disputed and may change the part.** `REF5050AIDR` is
-the *Standard* grade — ±0.1 %, 8 ppm/°C — not the ±0.05 % / 3 ppm/°C the corpus
-asserts in three places. `REF5050IDR` is the High grade: same package, same
-pinout, one letter. So this blocks precursor 1 for that row, not just the
-figures list.
+**6. `ref5050-grade` is settled** (2026-09-30): the High grade, `REF5050IDR`,
+same package and pinout. Nothing for this row blocks precursor 1 any more.
 
 ## Three ground questions that must be decided in one sitting
 

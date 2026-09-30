@@ -494,18 +494,11 @@ umbilical +12V ──[REF5050 5.000V]──[OPA2197 ½ buffer]──┬── MP
   5 ppm/V — so a full volt of movement on +12 V shifts the sensor supply by
   ~25 µV `[SBOS410O, datasheets/analog/REF5050.pdf]`.
 
-  > **⚠ The accuracy this line claimed belongs to a grade `bom.csv` does not
-  > order. 2026-09-21.** This read *"±0.05 % and 3 ppm/°C"*. SBOS410O Table 4-2
-  > p.3: **`REF50xxI` = "High" = ±0.05 %, 3 ppm/°C**; **`REF50xxAI` =
-  > "Standard" = ±0.1 %, 8 ppm/°C**. The BOM orders **`REF5050AIDR`** — the
-  > **A** suffix is the *worse* grade, so as specified this reference is
-  > **±0.1 % and 8 ppm/°C**: twice the initial error and 2.7× the drift.
-  > Since scale-factor stability is the entire reason for a separate reference,
-  > `REF5050IDR` is probably the right answer — but it is a part change, so it
-  > is tracked as `ref5050-grade` (**disputed**) in `config/figures.yaml` rather
-  > than decided here. *Caveat: Table 4-2 is new in rev O, so an earlier
-  > revision may have labelled the grades differently and this line may have had
-  > an honest origin.*
+  > **The grade is `ref5050-grade`** (`config/figures.yaml`, settled
+  > 2026-09-30): the High grade, `REF5050IDR`. SBOS410O Table 4-2 p.3 makes the
+  > **A** suffix the *worse* (Standard) grade, so the order code carries no A.
+  > The whole reason for a separate reference is scale-factor stability, and
+  > the better grade costs well under a dollar more on one part.
   >
   > The input range was **"7–18 V"**. 18 V is right; the minimum is specified as
   > **`V_OUT` + 0.2 V = 5.2 V** `[p.6]`, and 7 V was not from the datasheet.

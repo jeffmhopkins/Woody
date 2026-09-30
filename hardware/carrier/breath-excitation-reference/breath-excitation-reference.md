@@ -87,6 +87,16 @@ Two consequences to keep in mind at layout:
 *(The record of the two blockers that closed here on 2026-09-21, and of the two
 earlier notes they superseded, is in [`notes.md`](notes.md).)*
 
+## The reference's grade
+
+**`ref5050-grade`: REF5050IDR, the High grade: ±0.05 % initial, 3 ppm/°C**
+`[ds REF5050.pdf, SBOS410O Table 4-2 p.3]`. The **A** in an order code is the
+*Standard* grade — twice the initial error and 8/3 = 2.7× the drift `[calc]`
+— and this reference exists for nothing but scale-factor stability, so the
+order code carries no A. Both grades share the SOIC-8 pinout `[ds Table 5-1
+p.4]`; a substitution that adds the A fits the footprint and silently
+downgrades the breath scale factor.
+
 ## The reference's input clamp
 
 **The rail's TVS does not protect the REF5050.** `D-TVS-PWR` on `+12V`
@@ -123,7 +133,7 @@ stays with the board page.*
 
 | Ref | Value | Job | Confidence |
 |---|---|---|---|
-| `U-REF-BREATH` | REF5050AIDR | 5.000 V for the ratiometric sensor | `[repo]` |
+| `U-REF-BREATH` | REF5050IDR | 5.000 V for the ratiometric sensor | `ref5050-grade`, settled |
 | `R-REF-IN` | 330 Ω 1 % | Series into the REF5050's `VIN`, so the zener can clamp it | this page, `[calc]` |
 | `D-REF-CLAMP` | 15 V zener (MMSZ5245BT1G) | Holds `VIN` under the REF5050's 18 V absolute maximum | this page, `[ds]` |
 | `C-REF-OUT` | 10 µF ×2 | REF5050 `VIN` bypass and REF5050 `VOUT` load cap — **not** on the buffer's output | `cref-out-node`, settled |

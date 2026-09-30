@@ -11,6 +11,7 @@ last_reviewed: '2026-09-21'
 depends_on:
 - fig:cref-out-node
 - fig:opa2197-output-impedance
+- fig:ref5050-grade
 - fig:riso-ref-topology
 - refdes:C-FB-REF
 - refdes:C-REF-OUT
