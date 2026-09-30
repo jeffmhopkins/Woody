@@ -2,9 +2,9 @@
 * The umbilical load switch as netlisted (module/umbilical-load-switch), driving the
 * instrument's input as netlisted (carrier/power-entry-instrument: C-STRIP-BULK at the
 * input node, L-BUCK-IN, C-BUCK-IN), with the behavioural LT1641 of lt1641.inc.
-* Q-LOADSW is NOT CHOSEN (its row is open): it is a level-1 N-FET with the page's
-* assumptions, R_DS(on) r_dson at the guaranteed minimum gate drive and C_iss c_iss.
-* R-ILIM has no value (its row: "from E6"): it is the page's working 50 mohm.
+* Q-LOADSW (PSMN2R0-30YLE) is a level-1 N-FET fitted to its datasheet: R_DS(on) r_dson
+* at the guaranteed minimum gate drive, threshold v_th and C_iss c_iss.
+* R-ILIM is its row's 50 mohm.
 * cold = 1: the bus rises from 0 in t_rise and the gate ramps (a cold start).
 * cold = 0: the FET is already enhanced and the instrument is plugged in (hot-plug):
 * the output starts at 0 V with the gate at VCC + dvg.

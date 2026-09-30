@@ -11,7 +11,7 @@ inputs:
   hardware/carrier/power-entry-instrument/sim/pei-z.cir: d45e3a3d9d774b02
   hardware/carrier/power-entry-instrument/sim/pei-start.cir: 913643de0b2125a1
   hardware/module/umbilical-load-switch/sim/lt1641.inc: 59be165ccd4451a6
-  hardware/module/umbilical-load-switch/sim/sims.yaml: dfc2b55f3905293b
+  hardware/module/umbilical-load-switch/sim/sims.yaml: 85eec256fad8b2e5
   figure:umbilical-current: 359 mA
 ngspice: '42'
 sims:

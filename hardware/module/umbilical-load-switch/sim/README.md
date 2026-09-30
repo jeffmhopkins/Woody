@@ -25,10 +25,9 @@ it above the `ON` pin's worst-case turn-off, 9.90 V.
 
 **Values are the netlists'**: this circuit's, and the instrument's input that
 the umbilical charges (`carrier/power-entry-instrument`: `C-STRIP-BULK`,
-`L-BUCK-IN`, `C-BUCK-IN`). Two parts have no value yet and are stated
-assumptions: `R-ILIM` ("from E6"; the page's working 50 mΩ) and `Q-LOADSW` (not
-chosen; a logic-level FET at the page's ~50 mΩ, judged at the datasheet's
-minimum 4.5 V gate drive). The instrument's load is `umbilical-current`,
+`L-BUCK-IN`, `C-BUCK-IN`), with `R-ILIM` at its row's 50 mΩ. `Q-LOADSW`
+(PSMN2R0-30YLE) is a level-1 FET fitted to its datasheet: maximum threshold,
+maximum R_DS(on) at the LT1641's minimum 4.5 V gate drive, and C_iss. The instrument's load is `umbilical-current`,
 arriving at the buck's 8 V input minimum.
 
 ## What it shows
@@ -54,6 +53,13 @@ the sense thresholds (both ends of the foldback), the gate pull-up and both
   1.233 V. So the page's 47.5 ms hot-plug arithmetic is a safe upper bound on
   time in current limit, not the start. **The bench at E6 decides**, since the
   amplifier's own dynamics are the one thing the model assumed.
+- **`i_peak` in `hot-plug` is not a current anyone will see.** The deck has no
+  umbilical between `OUT` and `C-STRIP-BULK`, so the first instant is
+  `C-ISO-OUT` into `C-STRIP-BULK` through `R-ILIM` and the FET alone — tens to
+  a hundred-odd amps for microseconds, set by the 20 µs step. The plug-in
+  current with the cable in it, and what it does to `U-ISO`, is
+  `hotplug-iso-ocp` (`config/figures.yaml`), owned by
+  `carrier/power-entry-instrument/sim`.
 - **The page's 2.2 mF is in no netlist.** The instrument's input as netlisted
   holds `C-STRIP-BULK` and `C-BUCK-IN` only (`C-BULK-DISP` left with the
   display board, ADR 0015). The deck runs the netlisted capacitance and, beside
