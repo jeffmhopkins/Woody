@@ -56,6 +56,7 @@ ECHO: "DRC", "PASS", "regulator block fits where it stands", 7.7, "mm spare, bes
 ECHO: "DRC", "PASS", "chain headers on the left_hand boards clear of the switches", 79, "mm along the body (the headers' mouths)"
 ECHO: "DRC", "PASS", "chain headers on the right_hand boards clear of the switches", 190, "mm along the body (the headers' mouths)"
 ECHO: "DRC", "PASS", "J-UMB on the main board's tongue, against the etherCON's adapter", [48.6, 4.68], "mm: the tongue's length past the main board, and its width less J-UMB's pin row"
+ECHO: "DRC", "PASS", "main board's tongue flush with its edge on the near side of the adapter", ["low y", 1.5, 15.5], "the side run straight through (owner, 2026-09-30), the step it no longer has (mm), and the step the other side keeps (mm)"
 ECHO: "DRC", "PASS", "J-UMB's row lands on the adapter clear of the etherCON's footprint", [-7.45, 0.56], "mm: the row from the axis (negative = below), and its margin past a pitch from G, from the peg line and from the adapter's edge; a turned connector puts its footprint across the row and is not handled"
 ECHO: "DRC", "NOTE", "Matrix ribbon length", 37.6231, "mm from the Matrix's edge to J-MCU, as drawn"
 ECHO: "DRC", "NOTE", "key-chain ribbon length (derived)", 49.65, "mm of ribbon between the sockets: straight from the main board's plug to the key board's with the key plate raised routing.chain_raise off its columns, plus routing.chain_slack"

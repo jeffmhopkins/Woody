@@ -165,7 +165,11 @@ Several things can claim each end, and the largest wins:
   from the mouth cap to the end of the right hand, the full width inside the
   sides. Its parts face up; the two key boards connect to it by ribbons (below);
   the Matrix's ribbon ends on it, and a **tongue** runs on from its tail end
-  to the etherCON's adapter, carrying J-UMB (ADR 0021). It is clamped in the
+  to the etherCON's adapter, carrying J-UMB (ADR 0021): as wide as the
+  adapter, except that on the side where the adapter's edge falls just inside
+  the board's, it runs flush with the board's edge (owner, 2026-09-30;
+  *"main board's tongue flush with its edge on the near side of the
+  adapter"*). It is clamped in the
   U-bolt's stack, on a spacer from the bottom plate with a washer and the nut
   above, with a clearance hole for each leg (ADR 0022 point 7, ADR 0025). It
   has no edge notches. Every one of its mounts is on the bottom plate: a

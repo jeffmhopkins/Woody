@@ -267,6 +267,13 @@ column, and *"main board mounts on the bottom plate"* gives the count that
 `MECH-MB-STUD`, `MECH-MB-SPACER` and `MECH-MB-NUT` follow. The other mouth
 end mount and the tongue pair stay.
 
+The same day, on a marked-up render of the main board: *"I'm ok with it being
+more narrow, but ... my red line is inset just slightly which is not
+needed."* The tongue stays narrow, but on the side where it stepped in by a
+millimetre and a half from the main board's edge it now runs flush
+(ADR 0021's dated note; *"main board's tongue flush with its edge on the near
+side of the adapter"*). The tongue's mounts do not move.
+
 ## Open, and what decides each
 
 | Item | Decided by |

@@ -1135,8 +1135,10 @@ module cb_2d() {
         union() {
             translate([cb_x[0], cb_y[0]]) square([cb_x[1] - cb_x[0], cb_y[1] - cb_y[0]]);
             // THE TONGUE (ADR 0021): on to the etherCON's adapter, as wide as
-            // it, carrying J-UMB against the adapter's rear face.
-            translate([cb_x[1] - EPS, tongue_y[0]]) square([ua_x0 - cb_x[1] + EPS, tongue_y[1] - tongue_y[0]]);
+            // it, carrying J-UMB against the adapter's rear face - and on the
+            // side where the adapter's edge falls just inside the main board's,
+            // straight on from the main board's edge, with no step (tongue_board_y).
+            translate([cb_x[1] - EPS, tongue_board_y[0]]) square([ua_x0 - cb_x[1] + EPS, tongue_board_y[1] - tongue_board_y[0]]);
         }
         // The slot in front of the sensor's lower port.
         translate(port_slot_c - port_slot_sz / 2 - [EPS, 0]) square(port_slot_sz);
@@ -1164,6 +1166,12 @@ mcu_path = concat([[mcu_x, matrix_board_z - boards_matrix_harness_h]],
 ju_l = 8 * 2.54;
 ju_row_z = cb_top + boards_umb_joint_row_h;
 tongue_y = [ec_c[0] - ec_fl[0] / 2, ec_c[0] + ec_fl[0] / 2];
+// The tongue's own edges: the adapter's width, except that on the side where
+// the adapter's edge steps in less from the main board's, the tongue runs
+// flush with the main board's edge (owner, 2026-09-30: "my red line is inset
+// just slightly which is not needed"). The other side keeps its step.
+tongue_flush_lo = tongue_y[0] - cb_y[0] <= cb_y[1] - tongue_y[1];
+tongue_board_y = tongue_flush_lo ? [cb_y[0], tongue_y[1]] : [tongue_y[0], cb_y[1]];
 // THE MAIN BOARD'S MOUNTS (ADR 0022, ADR 0025), all on the bottom plate: what
 // a mount keeps clear round its centre - a column's standoff or an end
 // mount's nut on the top face, the spacer under the board, and the float.
@@ -1558,6 +1566,10 @@ module drc_report() {
     drc(tongue_y[1] - tongue_y[0] >= ju_l + 2 * boards_board_clear && ua_x0 > cb_x[1], "J-UMB on the main board's tongue, against the etherCON's adapter",
         [ua_x0 - cb_x[1], tongue_y[1] - tongue_y[0] - ju_l],
         "mm: the tongue's length past the main board, and its width less J-UMB's pin row");
+    drc(tongue_board_y[0] >= cb_y[0] && tongue_board_y[1] <= cb_y[1] && (tongue_board_y[0] == cb_y[0] || tongue_board_y[1] == cb_y[1]),
+        "main board's tongue flush with its edge on the near side of the adapter",
+        [tongue_flush_lo ? "low y" : "high y", tongue_flush_lo ? tongue_y[0] - cb_y[0] : cb_y[1] - tongue_y[1], tongue_flush_lo ? cb_y[1] - tongue_y[1] : tongue_y[0] - cb_y[0]],
+        "the side run straight through (owner, 2026-09-30), the step it no longer has (mm), and the step the other side keeps (mm)");
     // Where J-UMB's row meets the adapter, in the connector's own frame:
     // between G below the axis and the peg line through it, a pad's worth
     // (a pitch) clear of each, and above the adapter's lower edge.
