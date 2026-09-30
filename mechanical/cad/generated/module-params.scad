@@ -39,7 +39,7 @@ b2b_insulator_h = 2.54;  // settled; [ds 3D] KICAD-PinHeader_2x10_P2.54mm_Vertic
 b2b_pad_d = 1.7;  // nominal; [repo] KiCad PinHeader_2x10_P2.54mm_Vertical pad (1.7 round) [from memory]
 b2b_protrude = 1.5;  // nominal; [adr 0024] how far the posts stand out of the jack board's front face, for a solder fillet
 b2b_tail = 1.5;  // nominal; [adr 0024] how far the tails stand out of the main board's rear face
-b2b_at = [25.25, 75.5];  // nominal; [adr 0024] between the two jack columns, level with the middle jack row
+b2b_at = [25.25, 77.0];  // nominal; [adr 0024] between the two jack columns, near the middle jack row; 1.5 above it (2026-09-30) so its tails clear U-ISO's body on the main board's rear face (iso.at)
 power_l = 27.97;  // settled; [ds] XFCN-BH254V-16P-2x8-BOX-HEADER.pdf: B = 27.97 for 2x08
 power_w = 8.8;  // settled; [ds] XFCN BH254V: body width 8.8
 power_h = 9.05;  // settled; [ds] XFCN BH254V: height above board 9.05
@@ -54,7 +54,13 @@ power_drop = 10.0;  // nominal; [adr 0024] how far below the panel's bottom edge
 tall_cap_d = 6.3;  // settled; [repo] C-BULK-RAIL 100 uF: CP_Radial_D6.3mm (the tallest of the four)
 tall_cap_h = 11.0;  // tbd; [from memory] a 6.3 x 11 25 V 100 uF can; the banked KiCad model is a generic 6.3 tall
 tall_trim = [9.53, 4.83, 10.03];  // settled; [ds] BOURNS-3296-TRIMPOT.pdf via R26: 3296W body 9.53 x 4.83 x 10.03
-tall_at = [[10.0, 60.0, "cap"], [10.0, 70.0, "cap"], [40.0, 60.0, "cap"], [40.0, 70.0, "cap"], [25.25, 95.0, "trim"], [14.0, 95.0, "trim"], [36.5, 95.0, "trim"]];  // nominal; [adr 0024] representative spots for the three trimmers and four bulk caps, so the depth check sees them; the layout moves them
+tall_at = [[40.0, 57.0, "cap"], [40.0, 67.0, "cap"], [40.0, 77.0, "cap"], [40.0, 87.0, "cap"], [25.25, 95.0, "trim"], [14.0, 95.0, "trim"], [36.5, 95.0, "trim"]];  // nominal; [adr 0024] representative spots for the three trimmers and four bulk caps, so the depth check sees them; the layout moves them. The caps sit in the right-hand column (2026-09-30) because U-ISO and its filter take the left
+iso_body = [25.4, 25.4, 9.9];  // settled; [ds] RECOM-RP20-AW.pdf PD-6: 25.4 x 25.4 x 9.9 mm without heat sink
+iso_pin_l = 5.6;  // settled; [ds] RECOM-RP20-AW.pdf PD-6: pins 5.6 below the body
+iso_pin_d = 1.0;  // settled; [ds] RECOM-RP20-AW.pdf PD-6: pin d1.0 +/-0.1
+iso_pins = [[-10.16, 2.54], [-10.16, -2.54], [10.16, 10.16], [10.16, -10.16]];  // settled; [ds] RECOM-RP20-AW.pdf PD-6 recommended footprint: columns 20.32 apart; 1 and 2 at 12.70 and 7.62 from the 3/6 row, 6 and 4 at 0 and 20.32 [calc: offsets from the centre, the 3/6 row 2.54 inside the body's edge]
+iso_at = [14.2, 50.6];  // nominal; [calc] the only 25.4 square on the rear face: its bottom edge boards.part_clear above the NE8FAV's tails (ec.y + 12.35 + 0.5 = 37.85, taken as 37.9), its left 0.5 inside the board's edge (1.5), so the centre is 1.5 + 12.7, 37.9 + 12.7; J-B2B-MOD moved up to clear its top. The layout places it
+iso_filter = [[6.0, 68.5, "can", 6.3, 7.7, "C-ISO-BULK"], [6.0, 76.5, "can", 6.3, 5.8, "C-ISO-OUT"], [15.0, 68.5, "box", 6.0, 2.8, "L-ISO-IN"]];  // nominal; [repo] the rows' packages: C-ISO-BULK SMD can 6.3 x 7.7, C-ISO-OUT 6.3 x 5.8, L-ISO-IN 6.0 x 6.0 x 2.8 (hardware/module/power-entry/bom.csv); placed just above U-ISO, where the layout will want them - an envelope, not a placement
 jack_hole_d = 6.3;  // nominal; [ds] PJ398SM-drawing.jpg: bushing D6; +0.3 clearance [repo J-CV: '6.2-6.5 in practice']
 jack_body_w = 9.0;  // settled; [ds] PJ398SM-drawing.jpg front view: 9
 jack_body_up = 6.0;  // settled; [ds] PJ398SM front view: 6 from the axis to the body's top (the pin 3 side); PJ398SM.kicad_mod F.Fab -5.98

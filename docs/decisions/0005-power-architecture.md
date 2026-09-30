@@ -436,10 +436,12 @@ hangs on the bus +12 V but on the output of an isolated DC/DC converter whose
 input is across the rack's +12 V and −12 V, so the instrument's breath-following
 current never returns through the rack's ground and never moves the pitch CV
 (ADR 0027, `hardware/module/power-entry/power-entry.md`). The rack now supplies
-the instrument's power on both rails, ~0.21 A each in typical play, and the
-module fuses its rails (`PTC-POS12`, `PTC-NEG12`, `PTC-ISO`). The load switch's
-current limit, ramp and latch are unchanged; the converter's own limit is
-above them, so they still decide every start and fault.
+the instrument's power on both rails, equal currents in each (the figures are
+`power-entry.md`'s, *The instrument's supply*), and the module fuses its rails
+(`PTC-POS12`, `PTC-NEG12`, `PTC-ISO`). The load switch's current limit, ramp
+and latch are unchanged; the converter's own limit is meant to sit above them
+— typical only on its datasheet, so E6 confirms it — so they still decide
+every start and fault.
 
 ## Consequences
 

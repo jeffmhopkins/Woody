@@ -92,10 +92,11 @@ checked rather than asserted.
     axis vertical, pin 1 (−12 V, red stripe) at the bottom as Doepfer wants.
     The ribbon folds over the socket's strain relief and down to the bus
     board. The mated socket and its folded ribbon are the deepest thing in the
-    module; the depth is checked against the Intellijel Palette **both ways**
+    module; the depth is reported against the Intellijel Palette **both ways**
     its manual can be read, from the panel's rear face and from its front
-    (DRC: *depth behind the panel, against the Intellijel Palette* and *depth
-    from the panel's FRONT face, against the same*). Both pass.
+    (DRC: *depth behind the panel, against the Intellijel Palette*). **Since
+    2026-09-30 it is an INFO line, not a rule** — the owner: *"Don't worry
+    about module depth."*
 
 11. **Nothing the player must reach sits under the umbilical** — amended
     2026-09-30. The owner: *"Power switch should not be underneath the

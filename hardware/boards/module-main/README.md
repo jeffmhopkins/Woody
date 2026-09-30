@@ -131,6 +131,6 @@ go; the *reasons* above are about positions, so re-read them when
 | Item | Decided by |
 |---|---|
 | The metal standoffs' part (the CAD's `standoff.*` still cites the polyamide spacer) | The module CAD owner; the pads' nets are settled above |
-| `U-ISO`'s place on this board: 25.4 × 25.4 mm, **11.7 mm tall**, with `L-ISO-IN`, `C2`, `C-ISO-IN`, `C-ISO-OUT` and `C-ISO-Y` beside it, and `NT-UMB-MOD` at the etherCON's pins 6/8 (ADR 0027) | The module CAD (`config/module.yaml`): the jack board's clearance above it |
-| `U-ISO`'s source (MORNSUN part listed "not for new designs" at DigiKey) | Owner — the row's alternates need their own footprint |
+| `U-ISO`'s exact place: RECOM RP20-2412SAW, 25.4 × 25.4 × 9.9 mm on 5.6 mm pins `[ds RECOM-RP20-AW.pdf PD-6]`, on this board's **rear face** (too tall for the boards' gap), with `L-ISO-IN`, `C2`, `C-ISO-IN`, `C-ISO-OUT` and `C-ISO-Y` beside it, and `NT-UMB-MOD` at the etherCON's pins 6/8 (ADR 0027). The module CAD holds an envelope for it and its filter (`config/module.yaml` `iso.*`, lower left above the NE8FAV's tails, clash-checked) | The layout |
+| `U-ISO`'s lead time: none on DigiKey's shelf, eight expected mid-December (the row) | The order — place it first |
 | The bus's +5 V, CV and Gate pins (11–16) are unused, on no net | Nothing: the module makes its own 5 V and takes no bus CV (ADR 0023 point 3, amended) |
