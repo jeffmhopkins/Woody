@@ -4,8 +4,8 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/carrier/breath-excitation-reference/sim/sims.yaml: 2559015559b6450d
-  hardware/carrier/breath-excitation-reference/netlist.yaml: 8977daf842d52d85
+  hardware/carrier/breath-excitation-reference/sim/sims.yaml: aac46d8728bf742c
+  hardware/carrier/breath-excitation-reference/netlist.yaml: b7ad67d71f9ef78b
   hardware/carrier/breath-excitation-reference/sim/ref-loop.cir: 1d56e9e0c91fb8d1
   hardware/carrier/breath-excitation-reference/sim/ref-zout.cir: 9ed8273eeb0b003e
   hardware/carrier/breath-excitation-reference/sim/ref-step.cir: d1c4b5fda1a9c853

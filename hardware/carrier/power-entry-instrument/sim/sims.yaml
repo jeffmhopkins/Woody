@@ -2,8 +2,9 @@
 # (U-ISO) through the load switch and the umbilical. Two questions the page answers by
 # arithmetic: is the input LC damped against the buck's negative input resistance
 # (its Q <= 1.8 claim, which rests on C-BUCK-IN's ESR), and does the whole chain -
-# U-ISO's soft start and current limit, the LT1641, the cable, C-STRIP-BULK, the LC and
-# the buck - start cleanly, cold and hot-plugged. Values from every netlist the path
+# U-ISO's soft start and current limit, the LT1641, the cable, Q-INRUSH's soft start,
+# C-STRIP-BULK, the LC and the buck - start cleanly, cold, hot-plugged and re-plugged,
+# without U-ISO reaching its over-current threshold. Values from every netlist the path
 # crosses; the LT1641 is umbilical-load-switch/sim's behavioural part, and its
 # datasheet parameters are imported from there (params_from), not restated. Run:
 #   python3 tools/sim.py run hardware/carrier/power-entry-instrument/sim
@@ -36,10 +37,31 @@ params:
   i_12:    {value: 0.248, source: "the 12 V loads at typical play, 248 mA (umbilical-current's derivation, ADR 0005): the LEDs' lit share and the analog block"}
   v_on:    {value: 8.0, source: "the R-78E5.0-1.0's input minimum, 8 V [datasheets/discrete-and-power/R-78E5.0-1.0.pdf p.1]: the buck modelled as drawing its power from there up (no UVLO hysteresis is published)"}
   v_nom:   {value: 11.4, source: "the buck's input at typical play, the page's 11.4 V"}
-  t_end:   {value: 0.35}
+  t_end:   {value: 0.6}
+  # --- the hot-plug inrush limiter (Q-INRUSH, AO3401A) and J-UMB's node
+  vto_q:   {value: -0.9, source: "Q-INRUSH's V_GS(th), -0.5/-0.9/-1.3 V [datasheets/discrete-and-power/AOS-AO3401A.pdf p.2] (vary)"}
+  r_on_q:  {value: 0.06, source: "its R_DS(on), 60 mohm max at V_GS -4.5 V [same, p.2]: the level-1 kp is fitted there"}
+  r_on_z:  {value: 0.041, source: "its R_DS(on) in input-z, on: 41 mohm typ at -10 V [same, p.2], the lowest the datasheet gives, so the least damping"}
+  c_iss_q: {value: 645.0e-12, source: "its C_iss, 645 pF typ [same, p.2], gate to source"}
+  c_rss_q: {value: 55.0e-12, source: "its C_rss, 55 pF typ [same, p.2], gate to drain"}
+  is_body_q: {value: 1.7e-12, source: "its body diode: V_SD 0.7 V typ at 1 A [same, p.2] with n = 1 [calc: 1 A / exp(0.7 / 0.02585)]"}
+  is_rst:  {value: 2.5e-9, source: "D-INRUSH-RST, 1N4148W: V_F 0.715 V max at 1 mA, 0.855 V max at 10 mA [datasheets/discrete-and-power/SEMTECH-1N4148W-SOD123.pdf p.1]; is 2.5 nA with n 1.9 gives 0.63 and 0.75 V [calc], under both"}
+  n_rst:   {value: 1.9, source: "its emission coefficient, with is_rst"}
+  c_tvs:   {value: 1.0e-9, source: "D-TVS-PWR's junction capacitance, SMAJ15A: ~1000 pF uni-directional at 0 V for a 17 V V_BR, ~300 pF at its standoff [datasheets/discrete-and-power/LITTELFUSE-SMAJ-SERIES-SMAJ15A.pdf p.4 Figure 5, read off the curve] (vary)"}
+  r_tvs:   {value: 0.5, source: "its leads and pads [assumption; a solver aid]"}
+  c_arc:   {value: 1.0e-9, source: "across the +12 V contact while it is open [assumption: only so the solver can open it with current flowing]"}
+  r_arc:   {value: 100.0, source: "in series with c_arc [assumption, as c_arc]"}
+  t_plug:  {value: 1.0e-4, source: "a hot-plug's contact, 100 us into the run"}
+  t_un:    {value: 10.0, source: "the plug pulled: after the run unless a sim sets it"}
+  t_re:    {value: 11.0, source: "the plug put back: after the run unless a sim sets it"}
 
 derived:
   v_set0: "0.0 if v['cold'] else v['v_bus']"
+  plug0: "1.0 if v['cold'] else 0.0"
+  t_plug1: "v['t_plug'] + 1e-9"
+  t_un1: "v['t_un'] + 1e-9"
+  t_re1: "v['t_re'] + 1e-9"
+  kp_q: "1.0 / (v['r_on_q'] * (4.5 + v['vto_q']))"
   r_neg: "v['v_nom']**2 / v['p_buck']"
 
 vary:
@@ -51,6 +73,9 @@ vary:
   igate:  {tol: [-0.5, 1.0], source: "I_GATEUP 5 and 20 uA about 10"}
   itup:   {tol: [-0.7, 0.65], source: "I_TIMERUP 24 and 132 uA about 80"}
   vhi:    {tol: [-0.1702, 0.1702], source: "V_SENSETRIP 39 and 55 mV about 47"}
+  vto_q:  {tol: [-0.4444, 0.4444], source: "Q-INRUSH's V_GS(th), -0.5 and -1.3 V about -0.9"}
+  C-INRUSH-GD: {tol: [-0.3, 0.1], source: "X7R 10 %, and down to 30 % under at 6-12 V of bias [assumption: an 0805 X7R's DC-bias loss]; less capacitance is a faster ramp"}
+  c_tvs:  {tol: [-0.7, 0.0], source: "300 pF at the standoff to 1000 pF at 0 V"}
 
 sims:
   - name: input-z
@@ -69,7 +94,7 @@ sims:
     # the rack powers up with the instrument plugged in
     deck: pei-start.cir
     set: {cold: 1}
-    vary: [igate, itup, t_iso, r_cable]
+    vary: [igate, itup, t_iso, r_cable, vto_q]
     measures: [latched, t_up, i_iso_peak, t_at_ocp, v_in_peak, v_buck_dip, vcc_min]
     post: &start_post
       latched: "peak(w['latch'], 0, p['t_end'])"
@@ -91,16 +116,47 @@ sims:
       - expr: "max['v_in_peak'] < 15.0"
         why: "no overshoot at the instrument's input reaches D-TVS-PWR's 15 V standoff (SMAJ15A)"
   - name: hot-plug
-    # the module running, its FET enhanced; the instrument plugged in
+    # the module running, its FET enhanced with nothing on its output; the +12 V conductor
+    # makes contact at t_plug. Q-INRUSH's corners (threshold, Miller capacitor, the TVS's
+    # capacitance at J-UMB) on top of the LT1641's
     deck: pei-start.cir
     set: {cold: 0}
-    vary: [igate, vhi, r_cable]
-    measures: [latched, t_up, i_iso_peak, t_at_ocp, v_in_peak, v_buck_dip, vcc_min]
-    post: *start_post
+    vary: [igate, vhi, r_cable, vto_q, C-INRUSH-GD, c_tvs]
+    measures: [latched, t_up, i_iso_peak, t_at_ocp, v_in_peak, v_buck_dip, vcc_min, p_q_peak]
+    post:
+      <<: *start_post
+      p_q_peak: "peak(w['pq'], 0, p['t_end'])"
     asserts:
       - expr: "max['latched'] < 0.5"
         why: "the start completes without the LT1641's fault latch at every corner"
-      - expr: "min['i_iso_peak'] > 0.99 * p['i_ocp']"
-        why: "RECORDED HAZARD, not a requirement: hot-plugged into a running module, the instrument's input draws U-ISO into its lowest over-current threshold (1.84 A, where the RPA20 hiccups) at every corner, for t_at_ocp - C-ISO-OUT sags to charge C-STRIP-BULK through the already-enhanced FET before the LT1641's limit takes the gate back. Whether the converter hiccups depends on its over-current delay, which RECOM does not publish: the bench at E6 decides. If this starts failing the hazard is gone"
+      - expr: "max['i_iso_peak'] < 0.5 * p['i_ocp']"
+        why: "U-ISO stays under HALF its lowest over-current threshold (1.84 A, hiccup) on a hot-plug at every corner: Q-INRUSH keeps everything that holds charge behind a Miller ramp, so the already-enhanced load switch sees only J-UMB's node - the TVS's capacitance and the gate network - and then the ramp's current and the loads"
+      - expr: "min['vcc_min'] > 9.90"
+        why: "VCC at the load switch stays above the ON divider's worst-case turn-off, 9.90 V (umbilical-load-switch.md, 'The ON pin'), so the start is never interrupted by its own supply"
       - expr: "min['v_buck_dip'] > p['v_on'] + 0.5 and max['v_in_peak'] < 15.0"
-        why: "the buck's input never falls back towards its minimum once running, and nothing reaches D-TVS-PWR's standoff"
+        why: "the buck's input never falls back towards its minimum once running, and the ring at J-UMB when the plug makes contact stays under D-TVS-PWR's 15 V standoff (R-INRUSH-GD damps it)"
+      - expr: "max['p_q_peak'] < 3.0"
+        why: "Q-INRUSH's dissipation during the ramp peaks under 3 W at every corner, a quarter of the AO3401A's single-pulse rating at 50 ms (~12 W, AOS-AO3401A.pdf p.4 Figure 10, read off the curve)"
+  - name: replug-late
+    # running, the plug pulled at 0.8 s and put back 200 ms later: the instrument's
+    # capacitors have drained and D-INRUSH-RST has reset the gate
+    deck: pei-start.cir
+    set: {cold: 0, t_un: 0.8, t_re: 1.0, t_end: 1.5}
+    vary: [r_cable, vto_q]
+    measures: [latched, i_iso_peak, t_at_ocp, vcc_min]
+    post: *start_post
+    asserts:
+      - expr: "max['latched'] < 0.5 and max['i_iso_peak'] < 0.5 * p['i_ocp']"
+        why: "a replug once the instrument has drained starts from off, as a first plug-in does: U-ISO under half its over-current threshold, no fault latch"
+  - name: replug-early
+    # the plug pulled at 0.8 s and put back 30 ms later, with the bulk half drained
+    deck: pei-start.cir
+    set: {cold: 0, t_un: 0.8, t_re: 0.83, t_end: 1.3}
+    vary: [r_cable, vto_q]
+    measures: [latched, i_iso_peak, t_at_ocp, vcc_min]
+    post: *start_post
+    asserts:
+      - expr: "max['latched'] < 0.5 and min['vcc_min'] > 9.90"
+        why: "the restart completes without the fault latch and VCC stays above the ON pin's turn-off"
+      - expr: "min['i_iso_peak'] > 0.99 * p['i_ocp']"
+        why: "RECORDED HAZARD, not a requirement: put back within tens of milliseconds, while the bulk still holds a few volts, Q-INRUSH is still enhanced (C-INRUSH-GS holds its V_GS) and the replug reaches U-ISO's lowest over-current threshold for t_at_ocp, as every hot-plug did before Q-INRUSH. How long the window lasts depends on how fast the instrument drains, which the model's loads set: the bench at E6 decides. If this starts failing the window is gone"

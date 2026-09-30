@@ -22,10 +22,10 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `UMBILICAL +12V` at `J-UMB` | in | `module/umbilical-load-switch` | `umbilical-pinmap`, `umbilical-current` | Arrives down the umbilical from the module's load switch. `D-REVSHUNT` sits at the connector, ahead of `L-BUCK-IN` |
+| `UMBILICAL +12V` at `J-UMB` | in | `module/umbilical-load-switch` | `umbilical-pinmap`, `umbilical-current` | Arrives down the umbilical from the module's load switch. On this board it is `J-UMB` pin 3, `D-REVSHUNT`, `D-TVS-PWR` and `Q-INRUSH`'s source and gate network — **nothing that stores charge** (§1a) |
 | `PWR_GND` at `J-UMB` | ref | `module/power-entry` | `umbilical-pinmap` | This board's only supply return, down the umbilical to the module star |
-| `+12V` LED row feed | out | `carrier/led-strip-drive` | `led-row-current` | Taken direct off the input node. `C-STRIP-BULK` is this circuit's part. **The same net as the row above** — `D-REVSHUNT` is a shunt and `D-TVS-PWR` a clamp, so nothing is in series between `J-UMB` pin 3 and this tap |
-| `+12V` analog | out | `carrier/breath-excitation-reference` | — | REF5050 `VIN`, and the V+ of both OPA2197 halves. **Also the same net**, for the same reason |
+| `INST_POS12`, the LED row feed | out | `carrier/led-strip-drive` | `led-row-current` | `Q-INRUSH`'s drain (§1a), which `C-STRIP-BULK`, this circuit's part, sits on. Nothing is in series between the drain and this tap |
+| `INST_POS12`, analog | out | `carrier/breath-excitation-reference` | — | REF5050 `VIN`, and the V+ of both OPA2197 halves. **The same node as the row above**, for the same reason |
 | 5 V, buck A | out | `J-MCU`, `carrier/led-strip-drive` | `matrix-led-current` | Through `D-USBOR` and `J-MCU`, down three conductors of `CBL-MCU-RIBBON` onto the dev board's 5 V pad and `TP2`, and on to the 74AHCT125 |
 | `PWR_GND` pour | ref | `carrier/service-uart`, `carrier/led-strip-drive`, `carrier/carrier`, `interfaces/breath-sense-link` | `dig-gnd-topology` | Layer 2, §2. The whole board returns here, and the breath link's two clamps, and so do the plates: the bottom plate through this board's mounts, the key plate through the cassette's columns to the same mounts (ADR 0022, ADR 0025). **`carrier/breath-adc` and `carrier/breath-excitation-reference` are no longer listed**: both of those pages say their return is `AGND_INST`, which reaches this pour on the **single tie** and is a different node everywhere else — and that distinction is the whole point of the star |
 
@@ -38,9 +38,12 @@ the two agree, and where they do not the netlist wins.*
 
 ```
  J-UMB pin 3  +12V ──┬──[D-REVSHUNT SS34]──┐
-                     │   cathode to +12V   │
+ (UMBILICAL_POS12)   │   cathode to +12V   │
                      ├──[D-TVS-PWR SMAJ15A]┤
                      │                     │
+                  [Q-INRUSH AO3401A]       │    source up, drain down; its gate
+                     │                     │    network is drawn in §1a
+      INST_POS12 ────┤                     │
                      ├─────────────────────┼──── the LED row, direct
                      │                     │     (13 × WS2815B-V1)
                      │                     │     [C-STRIP-BULK 470 µF 25V]
@@ -60,7 +63,7 @@ the two agree, and where they do not the netlist wins.*
  J-UMB pin 6 PWR_GND ┴──────────────────────┴──── PWR_GND pour
 ```
 
-**`D-REVSHUNT` goes at the connector, ahead of `L-BUCK-IN`.** Its job is a
+**`D-REVSHUNT` goes at the connector, ahead of `Q-INRUSH` and `L-BUCK-IN`.** Its job is a
 rollover patch lead swapping pins 3 and 6 `[repo] 0004`; it has to conduct
 immediately and let the module's LT1641-1 latch off. An inductor between the
 fault and the diode is the wrong way round.
