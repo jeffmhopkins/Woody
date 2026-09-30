@@ -249,8 +249,12 @@ Its real job is **source-impedance balance on the twisted pair** — 1 kΩ
 against ~0 Ω is what a difference amplifier's CMRR actually responds to —
 and that justification appears nowhere in the repo. Without it the link
 CMRR falls from **70.2 dB to 60.2 dB** `[calc, A2]` against an independently
-derived requirement of 58.5 dB: **1.7 dB of margin**, resting on two parts'
-tolerance, inside a body that is expensive to reopen (ADR 0009).
+derived requirement of 58.5 dB — and 60.2 dB is the nominal: at the worst
+tolerance corner the unmatched link is **below** the requirement
+(`breath-link-cmrr`, simulated). With `R1b` fitted the worst case clears it
+at mains; it does not hold to the 500 Hz edge of the breath channel, because
+the `C_cm` mismatch grows with frequency (same figure). Both parts are inside a
+body that is expensive to reopen (ADR 0009).
 
 > One correction to the receive page's own case for `R1b`: it claims the
 > part buys "fifty times" the rejection. With `R1b` fitted the real floor

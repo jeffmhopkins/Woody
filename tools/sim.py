@@ -12,7 +12,8 @@ in a sim.** Each deck's `{{R-KEY-PU}}` is read from the circuit's netlist.yaml
 simulation, and `check` fails until the sims are re-run on it. Model parameters
 that are not part values (a threshold ratio, an input capacitance) live in
 `params:`, each with its source; figures are cited as `fig['key-release-time']`
-from config/figures.yaml, never restated.
+from config/figures.yaml, never restated - in an assertion, or as a param's value,
+`value: {fig: umbilical-current}` (its leading number in SI, hashed as an input).
 
 CORNERS, NOT A GUESS. Every parameter in `vary:` has a relative range about its
 nominal. Each sim runs at the nominal and at every combination of the range ends
@@ -33,6 +34,52 @@ A board's sims.yaml may also `generate: board` a deck from its board-netlist.yam
 every part on the board by its BOM row (`parts:` says what each row is in SPICE),
 the nets the rest of the chain drives (`drive:`), so a wiring or value mistake on
 the board shows up in the simulation of the board itself.
+
+VENDOR MODELS. `models:` names SPICE libraries banked in datasheets/ (each with its
+MANIFEST row and SHA-256); each is `.include`d by path, verbatim and unfilled, and its
+hash is an input. TI's PSpice macromodels need `spiceinit: [set ngbehavior=psa]`,
+which is written to the run's .spiceinit - inside .control is too late. A part with no
+runnable vendor model is behavioural, built from its banked datasheet, and sims.yaml
+says which figure each parameter comes from. `values: netlist:` may be a list, for a
+sim that spans circuits; every component is also addressable by its own reference
+({{R2}}, {{C-CM-IN+}}), so two parts of one row can sit at opposite tolerance ends.
+
+SWEEPS. A sim's `sweep: {param: [v1, v2, ...]}` runs it once per value (and per
+combination, for several), each as its own sim named `name[param=v]`, with its own
+corners and asserts: a stability sim sweeps the page's load-capacitance range this way.
+
+MEASURES ON WAVEFORMS (`post:`, over files the deck writes with `wrdata <name>.dat`):
+  phase_margin(w['tdb'], w['tph'])  the loop's phase margin in degrees, the least at
+      any 0 dB crossing of |T|; `tdb` is 20log|T| and `tph` its phase in degrees, of
+      T = -V(return)/V(injected). THE STATED BREAK, one of two, and the deck says
+      which. (a) The loop is opened at a high-impedance node - an op-amp input - by a
+      1 GH inductor that carries the DC
+      operating point, and the AC test signal enters through a 1 GF capacitor, so the
+      feedback network stays loaded by the input it drives and nothing else. With a
+      vendor macromodel the deck needs `.options rshunt=1e10` (10 Gohm per node) for
+      the solver to find that operating point: without it TI's OPA2197 model found none
+      at some corners, and ngspice's fallback "transient op" reported a false one (VS at
+      0.55 V), which is why a run that needed it is refused. (b) VOLTAGE INJECTION, a
+      series AC source between the feedback node and the op-amp input, where (a) finds
+      no operating point: the deck must show the network's impedance at that node is far
+      below the input's at every frequency that matters. It agreed with (a) within 0.5
+      degree on the reference buffer as netlisted, and failed there on the bare
+      follower, where 10 kohm of feedback against the model's input capacitance broke
+      its assumption above 1 MHz (|T| climbed back to +33 dB at 100 MHz, 2026-09-30).
+  crossover(w['tdb'])        the frequency of the first 0 dB crossing of |T|
+  overshoot(w['v'], t0, t1)  percent, of a step at t0: the largest excursion past the
+      final value (the mean of the last 5 % before t1) over the step's size
+  rebound(w['v'], t0, t1)    percent, of a load step on a regulated node: the swing
+      back through the final value after the first excursion, over that excursion
+  settling(w['v'], t0, t1, band)  seconds from t0 until v stays within +-band of final
+  at(w['x'], x0)             a waveform's value at x0, interpolated (a CMRR in dB at
+      50 Hz, say)
+  peak(w['v'], t0, t1) / trough(...)  the largest / smallest value in a window
+  argpeak(w['v'], t0, t1)    where in the window the largest value is (an impedance
+      peak's frequency)
+  cross(w['v'], level, t0)   the first time after t0 that v crosses level (either way)
+A SIMULATED PHASE MARGIN IS A SCREEN WITH A +-10 DEGREE BAR, not a spec: a vendor
+macromodel runs optimistic against its own tabulated figures. Assert against it so.
 """
 import glob
 import hashlib
@@ -150,32 +197,54 @@ def param_value(p):
     v = p["value"]
     if isinstance(v, dict) and "drc" in v:
         return drc_value(v["drc"]) * float(v.get("scale", 1))
+    if isinstance(v, dict) and "fig" in v:
+        # a register figure, cited by id: its leading number in SI (hashed as an input)
+        figs = figures()
+        if v["fig"] not in figs:
+            raise SystemExit(f"sim: a param cites figure {v['fig']!r}, which is not in config/figures.yaml")
+        return figure_value(str(figs[v["fig"]]["value"])) * float(v.get("scale", 1))
     try:
         return float(v)
     except (TypeError, ValueError):
         return part_value(str(v))
 
 
+def netlists(spec):
+    n = spec["values"]["netlist"]
+    return [n] if isinstance(n, str) else list(n)
+
+
 def netlist_parts(spec):
     """{row: {'value': number, 'tol': fraction or None, 'text': ...}} from the circuit's netlist.yaml
-    (a circuit's components are keyed by row) or a board's (keyed by reference, with `of:`)."""
-    path = os.path.join(ROOT, spec["values"]["netlist"])
-    doc = yaml.safe_load(open(path))
-    out = {}
-    for ref, c in doc["components"].items():
-        row = c.get("of", ref)
-        try:
-            v = part_value(str(c["value"]))
-        except ValueError:
-            continue
-        out.setdefault(row, {"value": v, "tol": part_tol(str(c["value"])), "text": str(c["value"])})
+    (a circuit's components are keyed by row) or a board's (keyed by reference, with `of:`).
+    Several netlists merge: rows are unique across the corpus. Every component is also
+    keyed by its own reference where that differs from its row, so a deck can put two
+    parts of one row at opposite ends of their tolerance ({{R2}}, {{R3}})."""
+    out, docs = {}, []
+    for path in netlists(spec):
+        doc = yaml.safe_load(open(os.path.join(ROOT, path)))
+        docs.append(doc)
+        for ref, c in doc["components"].items():
+            row = c.get("of", ref)
+            if "value" not in c:
+                continue                      # a row with no value yet (R-ILIM: "from E6")
+            try:
+                v = part_value(str(c["value"]))
+            except ValueError:
+                continue
+            entry = {"value": v, "tol": part_tol(str(c["value"])), "text": str(c["value"])}
+            out.setdefault(row, entry)
+            if ref != row:
+                out.setdefault(ref, dict(entry))
     for row in spec["values"].get("bom", []):
         text = bom_value(row)
         out[row] = {"value": part_value(text), "tol": part_tol(text), "text": text}
     # counts by row, for derived values: v['n:SW1-n']
     from collections import Counter
-    for row, k in Counter(c.get("of", r) for r, c in doc["components"].items()).items():
-        out[f"n:{row}"] = {"value": float(k), "tol": None, "text": str(k)}
+    doc = docs[0] if len(docs) == 1 else {"components": {f"{i}:{r}": c for i, d in enumerate(docs)
+                                                         for r, c in d["components"].items()}}
+    for row, k in Counter(c.get("of", r.split(":", 1)[-1]) for r, c in doc["components"].items()).items():
+        out.setdefault(f"n:{row}", {"value": float(k), "tol": None, "text": str(k)})
     return out, doc
 
 
@@ -183,13 +252,15 @@ def inputs_of(spec):
     """Every file the results depend on, with its hash: this tool, sims.yaml, the decks, the
     netlist and anything generated from; and the value of every figure the sims cite."""
     d = spec["_dir"]
-    files = [os.path.abspath(__file__), os.path.join(d, "sims.yaml"),
-             os.path.join(ROOT, spec["values"]["netlist"])]
+    files = [os.path.abspath(__file__), os.path.join(d, "sims.yaml")] + \
+            [os.path.join(ROOT, n) for n in netlists(spec)]
     for s in spec["sims"]:
-        if s.get("deck"):
+        if s.get("deck") and os.path.join(d, s["deck"]) not in files:
             files.append(os.path.join(d, s["deck"]))
     for inc in spec.get("include", []):
         files.append(inc_path(d, inc))
+    for m in spec.get("models", []):
+        files.append(os.path.join(ROOT, m))
     for src in spec.get("params_from", []):
         files.append(os.path.join(ROOT, src))
     h = {os.path.relpath(f, ROOT): sha(f) for f in files}
@@ -201,6 +272,8 @@ def inputs_of(spec):
     for name, p in (spec.get("params") or {}).items():
         if isinstance(p.get("value"), dict) and "drc" in p["value"]:
             h[f"drc:{p['value']['drc']}"] = str(drc_value(p["value"]["drc"]))
+        if isinstance(p.get("value"), dict) and "fig" in p["value"]:
+            cited.append(p["value"]["fig"])
     for fid in cited:
         if fid not in figs:
             raise SystemExit(f"sim: {os.path.relpath(d, ROOT)}/sims.yaml cites figure {fid!r}, which is not in config/figures.yaml")
@@ -208,13 +281,18 @@ def inputs_of(spec):
     return h
 
 
-def corners(spec, parts, only=None):
+def corners(spec, parts, only=None, tols=None):
     """[(name, {param: value})]: the nominal, then every combination of the range ends.
-    `only`, a sim's own `vary:` list, limits the corners to the parameters that move it."""
+    `only`, a sim's own `vary:` list, limits the corners to the parameters that move it;
+    `tols`, a sim's own `tol:` map, replaces a parameter's range for that sim alone (a
+    what-if at a wider tolerance than the part is bought at)."""
     nominal, ranges = {}, {}
     for name, p in (spec.get("params") or {}).items():
         nominal[name] = param_value(p)
-    for name, v in (spec.get("vary") or {}).items():
+    vary = {k: dict(v) for k, v in (spec.get("vary") or {}).items()}
+    for name, t in (tols or {}).items():
+        vary.setdefault(name, {})["tol"] = t
+    for name, v in vary.items():
         if only is not None and name not in only:
             continue
         if name in parts:
@@ -233,7 +311,7 @@ def corners(spec, parts, only=None):
         nominal.setdefault(row, p["value"])
     out = [("nominal", dict(nominal))]
     names = sorted(ranges)
-    for ends in itertools.product((0, 1), repeat=len(names)):
+    for ends in (itertools.product((0, 1), repeat=len(names)) if names else ()):
         c = dict(nominal)
         label = []
         for n, e in zip(names, ends):
@@ -247,7 +325,7 @@ def derive(spec, values):
     """`derived:` entries, in order: python expressions over the values so far (math allowed)."""
     v = dict(values)
     for name, expr in (spec.get("derived") or {}).items():
-        v[name] = eval(expr, {"__builtins__": {}, "math": math, "min": min, "max": max}, {"v": v})
+        v[name] = eval(expr, {"__builtins__": {}, "math": math, "min": min, "max": max, "round": round}, {"v": v})
     return v
 
 
@@ -339,19 +417,155 @@ def backswing(wave, level, rising, t_from, t_to):
     return worst if started else float("inf")
 
 
-POST = {"backswing": backswing}
+def _interp(x0, x1, y0, y1, y):
+    return x0 if y1 == y0 else x0 + (x1 - x0) * (y - y0) / (y1 - y0)
 
 
-def ngspice(deck, post=None, values=None):
+def _unwrap(ph):
+    out, off = [], 0.0
+    for i, p in enumerate(ph):
+        if i:
+            d = p + off - out[-1]
+            while d > 180:
+                off -= 360
+                d -= 360
+            while d < -180:
+                off += 360
+                d += 360
+        out.append(p + off)
+    return out
+
+
+def crossings(wave, level=0.0):
+    """Every x at which a waveform crosses `level`, interpolated (log-x for an AC sweep)."""
+    x, y = wave
+    out = []
+    for i in range(1, len(x)):
+        if (y[i - 1] - level) * (y[i] - level) < 0 or (y[i] == level and y[i - 1] != level):
+            if x[i - 1] > 0 and x[i] > 0 and x[i] / x[i - 1] > 1.0001:
+                lx = _interp(math.log10(x[i - 1]), math.log10(x[i]), y[i - 1], y[i], level)
+                out.append(10 ** lx)
+            else:
+                out.append(_interp(x[i - 1], x[i], y[i - 1], y[i], level))
+    return out
+
+
+def at(wave, x0):
+    """A waveform's value at x0, interpolated linearly between its samples."""
+    x, y = wave
+    for i in range(1, len(x)):
+        if x[i - 1] <= x0 <= x[i]:
+            return _interp(y[i - 1], y[i], x[i - 1], x[i], x0) if x[i] != x[i - 1] else y[i]
+    raise SystemExit(f"sim: at({x0:g}) is outside the waveform ({x[0]:g} to {x[-1]:g})")
+
+
+def crossover(tdb):
+    c = crossings(tdb, 0.0)
+    if not c:
+        return float("inf")          # never crosses: refused as a measure, which is right
+    return c[0]
+
+
+def phase_margin(tdb, tph):
+    """The least phase margin at any 0 dB crossing of |T|: 180 + the (unwrapped) phase of
+    T = -V(return)/V(injected), in degrees. At DC T's phase is 0 for negative feedback."""
+    ph = _unwrap(tph[1])
+    fs = crossings(tdb, 0.0)
+    if not fs:
+        return float("inf")
+    return min(180.0 + at((tph[0], ph), f) for f in fs)
+
+
+def _final(wave, t1):
+    t, v = wave
+    t0 = t1 - 0.05 * (t1 - t[0])
+    pts = [vi for ti, vi in zip(t, v) if t0 <= ti <= t1]
+    return sum(pts) / len(pts)
+
+
+def overshoot(wave, t0, t1):
+    """Percent overshoot of a step at t0: the largest excursion past the final value (the
+    mean of the last 5 % before t1), over the step's size (final less the value at t0)."""
+    t, v = wave
+    v0 = at(wave, t0)
+    vf = _final(wave, t1)
+    step = vf - v0
+    if step == 0:
+        return float("inf")
+    win = [vi for ti, vi in zip(t, v) if t0 <= ti <= t1]
+    ex = (max(win) - vf) if step > 0 else (vf - min(win))
+    return max(0.0, ex) / abs(step) * 100.0
+
+
+def settling(wave, t0, t1, band):
+    """Seconds from t0 until the waveform stays within +-band of its final value."""
+    t, v = wave
+    vf = _final(wave, t1)
+    last = t0
+    for ti, vi in zip(t, v):
+        if t0 <= ti <= t1 and abs(vi - vf) > band:
+            last = ti
+    return last - t0
+
+
+def rebound(wave, t0, t1):
+    """Percent, of a disturbance at t0 on a REGULATED node (a load step, whose final value
+    is its initial one, so overshoot() divides by nothing): the largest swing past the final
+    value on the far side of the first excursion, after that excursion's extreme, over the
+    first excursion. A well-damped loop recovers without crossing; one with little phase
+    margin rings through."""
+    t, v = wave
+    vf = _final(wave, t1)
+    win = [(ti, vi) for ti, vi in zip(t, v) if t0 <= ti <= t1]
+    lo = min(win, key=lambda x: x[1])
+    hi = max(win, key=lambda x: x[1])
+    first = lo if abs(lo[1] - vf) >= abs(hi[1] - vf) else hi
+    ex = abs(first[1] - vf)
+    if ex == 0:
+        return 0.0
+    after = [vi for ti, vi in win if ti >= first[0]]
+    back = (max(after) - vf) if first is lo else (vf - min(after))
+    return max(0.0, back) / ex * 100.0
+
+
+def peak(wave, t0, t1):
+    return max(vi for ti, vi in zip(*wave) if t0 <= ti <= t1)
+
+
+def argpeak(wave, t0, t1):
+    """Where a waveform peaks in a window: the frequency of an impedance peak, say."""
+    return max(((ti, vi) for ti, vi in zip(*wave) if t0 <= ti <= t1), key=lambda x: x[1])[0]
+
+
+def trough(wave, t0, t1):
+    return min(vi for ti, vi in zip(*wave) if t0 <= ti <= t1)
+
+
+def cross(wave, level, t0=0.0):
+    """The first time at or after t0 that a waveform crosses `level`; inf if it never does."""
+    t, v = wave
+    c = [x for x in crossings((t, v), level) if x >= t0]
+    return c[0] if c else float("inf")
+
+
+POST = {"backswing": backswing, "phase_margin": phase_margin, "crossover": crossover,
+        "overshoot": overshoot, "rebound": rebound, "settling": settling, "at": at, "peak": peak, "argpeak": argpeak,
+        "trough": trough, "cross": cross, "math": math, "abs": abs, "min": min, "max": max}
+
+
+def ngspice(deck, post=None, values=None, spiceinit=None):
     """Run a deck; return its measures (and `post:` ones, computed on waveforms the deck
-    writes with `wrdata <name>.dat <vector>`)."""
+    writes with `wrdata <name>.dat <vector>`). `spiceinit` lines go in the run's .spiceinit."""
     with tempfile.TemporaryDirectory() as t:
         p = os.path.join(t, "deck.cir")
         open(p, "w").write(deck)
+        if spiceinit:
+            open(os.path.join(t, ".spiceinit"), "w").write("\n".join(spiceinit) + "\n")
         r = subprocess.run(["ngspice", "-b", p], capture_output=True, text=True, cwd=t, timeout=300)
         waves = {}
         for f in glob.glob(os.path.join(t, "*.dat")):
             rows = [l.split() for l in open(f) if l.strip()]
+            rows = [x for x in rows if len(x) >= 2]
             waves[os.path.basename(f)[:-4]] = ([float(x[0]) for x in rows], [float(x[1]) for x in rows])
     out = r.stdout + "\n" + r.stderr
     meas = {}
@@ -359,11 +573,30 @@ def ngspice(deck, post=None, values=None):
         m = re.match(r"^\s*([a-z][a-z0-9_]*)\s*=\s*([-+]?\d[\d.]*(?:e[-+]?\d+)?)", line.strip(), re.I)
         if m:
             meas[m.group(1).lower()] = float(m.group(2))
-    errors = [l for l in out.splitlines() if re.search(r"error|failed|not found|singular", l, re.I)
+    errors = [l for l in out.splitlines() if re.search(r"error|failed|not found|singular|too small|aborted", l, re.I)
               and "no error" not in l.lower()]
+    # A vendor macromodel's operating point often needs gmin or source stepping (a noise
+    # diode's node starts singular). The warnings on the way are not failures when the
+    # stepping then completes; an operating point that cannot be found still prints an
+    # Error, which stays. NOT accepted: ngspice's last resort, the "transient op" (a
+    # pseudo-transient ramp of the sources). It reports success wherever the ramp stopped,
+    # and in a loop broken by a 1 GH inductor that is never the operating point - it put
+    # the reference buffer's VS at 0.55 V with every measure present, 2026-09-30. A deck
+    # that needs it gets `.options rshunt=1e10` (10 Gohm per node) instead, and converges.
+    if re.search(r"(gmin|source) stepping completed", out, re.I):
+        errors = [l for l in errors if not re.match(
+            r"\s*Warning: (singular matrix|dynamic gmin stepping failed|true gmin stepping failed|"
+            r"gmin stepping failed|source stepping failed)", l, re.I)]
     for name, expr in (post or {}).items():
         env = {"w": waves, "p": values or {}, **POST}
-        meas[name] = float(eval(expr, {"__builtins__": {}}, env))
+        try:
+            meas[name] = float(eval(expr, {"__builtins__": {}}, env))
+        except KeyError as e:
+            # a waveform the deck should have written is missing: the analysis did not run
+            errors.append(f"post: {name} needs waveform {e}, which the run did not write")
+        except (SystemExit, ValueError) as e:
+            # a waveform that stops short (an aborted run) cannot answer the question
+            errors.append(f"post: {name}: {e}")
     return meas, errors, out
 
 
@@ -373,23 +606,57 @@ def ngspice_version():
     return m.group(1) if m else "?"
 
 
+def expand(sims):
+    """A sim with `sweep: {param: [values]}` becomes one sim per value (per combination),
+    named name[param=value], each with the value `set:`."""
+    out = []
+    for s in sims:
+        sw = s.get("sweep")
+        if not sw:
+            out.append(s)
+            continue
+        names = list(sw)
+        for combo in itertools.product(*(sw[n] for n in names)):
+            t = dict(s)
+            t.pop("sweep")
+            t["set"] = dict(s.get("set") or {})
+            label = []
+            for n, val in zip(names, combo):
+                t["set"][n] = val if isinstance(val, (int, float)) else part_value(str(val))
+                label.append(f"{n}={val}")
+            t["name"] = f"{s['name']}[{','.join(label)}]"
+            out.append(t)
+    return out
+
+
 def run(simdir):
     spec = load(simdir)
     parts, doc = netlist_parts(spec)
     figs = {k: figure_value(str(v["value"])) for k, v in figures().items()
             if re.match(r"\s*-?\d", str(v["value"]))}
     results = {}
-    for s in spec["sims"]:
+    # vendor models, included by path (banked, verbatim - never filled)
+    models = "".join(f'.include "{os.path.join(ROOT, m)}"\n' for m in spec.get("models", []))
+    for s in expand(spec["sims"]):
         template = open(os.path.join(simdir, s["deck"])).read()
         if spec.get("generate") == "board":
             template = board_deck(spec, doc, template)
-        # model libraries, inlined (the deck runs in a scratch directory), filled like the deck
+        # model libraries, inlined (the deck runs in a scratch directory), filled like the deck,
+        # ahead of the deck's final .end (not a .endc)
         lib = "".join(open(inc_path(simdir, inc)).read() + "\n" for inc in spec.get("include", []))
-        template = template.replace("\n.end", "\n" + lib + ".end") if lib else template
+        if lib:
+            if re.search(r"\n\.end\s*$", template):
+                template = re.sub(r"\n\.end\s*$", lambda m: "\n" + lib + ".end\n", template)
+            else:
+                template += "\n" + lib
+        if models:
+            first, _, rest = template.partition("\n")
+            template = first + "\n" + models + rest
         per = {}
-        for label, values in corners(spec, parts, s.get("vary")):
-            v = derive(spec, {**values, **{k: fv for k, fv in (s.get("set") or {}).items()}})
-            meas, errors, out = ngspice(fill(template, v), s.get("post"), v)
+        for label, values in corners(spec, parts, s.get("vary"), s.get("tol")):
+            v = derive(spec, {**values, **{k: (fv if isinstance(fv, (int, float)) else part_value(str(fv)))
+                                           for k, fv in (s.get("set") or {}).items()}})
+            meas, errors, out = ngspice(fill(template, v), s.get("post"), v, spec.get("spiceinit"))
             missing = [m for m in s["measures"] if m not in meas]
             # a run that diverged reports a number too: never record one
             wild = [f"{m} = {meas[m]:g}" for m in s["measures"] if m in meas
@@ -413,7 +680,7 @@ def run(simdir):
             stats["nom"][m], stats["min"][m], stats["max"][m] = vals["nominal"], vals[lo], vals[hi]
         from collections import Counter
         env = {"nom": stats["nom"], "min": stats["min"], "max": stats["max"], "fig": figs,
-               "n": Counter(c.get("of", r) for r, c in doc["components"].items()),
+               "n": Counter(c.get("of", r.split(":", 1)[-1]) for r, c in doc["components"].items()),
                "p": derive(spec, corners(spec, parts)[0][1]), "abs": abs, "math": math}
         res["asserts"] = []
         for a in s.get("asserts") or []:

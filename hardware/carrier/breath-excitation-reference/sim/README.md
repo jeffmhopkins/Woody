@@ -1,59 +1,58 @@
 # Breath excitation reference — simulation
 
-**Nothing here has been run.** This directory holds the deck and the procedure.
-It holds no results, and it will not hold any until a run produces them.
+`sims.yaml` says what is simulated and what every run must show; the `.cir`
+files are the decks; `results.yaml` is what the last run found, **generated**
+by `python3 tools/sim.py run hardware/carrier/breath-excitation-reference/sim`.
+`python3 tools/sim.py show <this dir>` prints it as a table.
+`docs/reference/tooling.md` §5 explains the tool.
 
-That is the rule, not an apology: `docs/reference/pcb-pipeline.md` names five
-simulations worth running and records that **none has been**. A plausible
-number written here would sit next to figures read off banked datasheets and be
-indistinguishable from them. `datasheets/README.md` is explicit that a
-fabricated document is worse than an honest gap; a fabricated simulation result
-is the same thing with fewer bytes.
+**No part value is written here.** Each deck's double-braced names are filled
+from `../netlist.yaml`. The models are TI's own, banked in `datasheets/analog/`
+with their SHA-256: the OPA2197 (`OPAx197-ti-pspice-sboma34d.lib`) and the
+REF5050 (`REF5050-ti-pspice-slim175a.lib`).
 
-## The sim this circuit needs
+## What it shows
 
-**`R-ISO-REF` stability.** `pcb-pipeline.md` names it second in its ranked list,
-and the reason it ranks there is that the sweep has already found the drawn
-circuit to be the unstable one — the numbers are in that table and in
-`riso-ref-topology`, and are not repeated here.
+The reference half of `U-BUF` driving `VS` through `R-ISO-REF`, with the dual
+feedback of `riso-ref-topology`, at the nominal and every tolerance corner.
 
-Two things have changed since that row was written, and both make the run more
-worth doing rather than less:
+| Sim | What | Holds |
+|---|---|---|
+| `loop-as-netlisted[c_vs=…]` | loop gain, broken at `U-BUF`'s (−) input; loads 47 nF, 100 nF, 1 µF, 10 µF, 10.1 µF at `VS` | the page's robustness claim (above 76°) less the ±10° screen, at every corner; `VS` within 5 mV of 5.000 V |
+| `zout-as-netlisted[c_vs=…]` | the output impedance at `VS`, closed loop | 1.20 Ω at 500 Hz within 10 % |
+| `step-as-netlisted[c_vs=…]` | a 0.5 mA load step at `VS` | recovers without ringing through |
+| `step-with-10u-added` | the same with 10 µF added at `VS` | **a recorded finding**: it rings |
+| `reference-alone` | TI's REF5050 model, as netlisted, and a 1 V droop of +12 V | 5.000 V within 0.1 %; under 1 mV of disturbance |
+| `loop-bare-follower`, `loop-in-loop-riso-only` | the two circuits the page rejects | both short of 45° |
+| `ti-figure-56` | TI's own Figure 56, as printed | TI's published 89° within the screen: the deck and the break are sound |
 
-- The row records the sim as **blocked on `cref-out-node` first**. That figure
-  is now settled, so the block is lifted and the deck can be built against a
-  known load.
-- The compensation the page now draws is TI's dual-feedback network rather than
-  the bare series resistor the sweep condemned. Its margins are cited in
-  `riso-ref-topology` as simulated, and a simulated margin is what this
-  directory exists to reproduce independently rather than inherit.
+**The phase margin as netlisted is 118.5 deg minimum, crossover 1.23-1.28 MHz**
+(`riso-ref-phase-margin`), the least at 47 nF. Measures with no assertion are
+recorded for the page's arguments: `iso_drop` (the DC drop across `R-ISO-REF`,
+outside the loop), `z_peak`/`f_peak`, `dip_mv`, `t_settle`.
 
-What the run has to answer is not "is it stable at nominal" — the topology
-argument on the page already claims that, and claims it across a wide range of
-`Zo` and `C_L`. It is whether the claimed **robustness** survives a deck built
-by someone else: the same margins at the ends of that range, not just at the
-middle of it.
+**10 µF at `VS` is not free.** The crossover margin barely moves, but `|Z_out|`
+peaks near `R_ISO` at about 2.5 kHz and a load step swings back through most
+of its own dip for about 3 ms. The phase margin cannot see this; the step can.
 
-## Running it
+## How it was made to run
 
-| | |
-|---|---|
-| Simulator | `ngspice` 42, stock Ubuntu archive, no allowlist change needed |
-| **Do not use** | PySpice 1.5 — it treats every non-`Warning:` stderr line as fatal and ngspice prints a solver banner to stderr on every run. Raw netlists plus `subprocess` |
-| Model | TI's OPA2197 macromodel. **Bank it in `datasheets/` with a SHA-256 first**, like every other document |
-| `.spiceinit` | needs `set ngbehavior=psa` — **inside `.control` is too late** |
+- **The loop break** is `tools/sim.py`'s stated one (1 GH / 1 GF at the
+  op-amp input). A series voltage source was tried: it agreed within 0.5° as
+  netlisted but not on the bare follower, where 10 kΩ of feedback against the
+  model's input capacitance breaks its assumption above 1 MHz.
+- **`.options rshunt=1e10`** in every deck with the OPA2197. Without it the
+  model's operating point is not found at some corners, and ngspice's last
+  resort ("transient op") then reports a false one — `VS` at 0.55 V, every
+  measure present. `sim.py` now refuses a run that needed that fallback.
+- **The REF5050 is a 5.000 V source in the loop decks.** Its VOUT feeds only
+  `U-BUF`'s (+) input; `reference-alone` runs its model and checks the source
+  stands for it. A cold start of that model is not simulated: its transient
+  from 0 V aborts under ngspice 42 (`ref-startup.cir` says how).
+- `D-REF-CLAMP` is left out: it draws leakage at the rail.
 
-The load is not a bare capacitor. The sensor draws real current from `VS`, and
-the handover frequency is what stops that current appearing as a scale-factor
-error, so a deck that models the load as a capacitance alone cannot see the
-failure the network was designed against.
+## What a result is worth
 
-## What a result is worth when it arrives
-
-**A simulated phase margin is a screen with a ±10° bar, not a spec.** TI's own
-macromodel runs optimistic against TI's own tabulated figures. A number from
-here settles nothing on its own; it either agrees with the bench at E13 or it
-tells you where to look.
-
-Results land in `config/figures.yaml` with their provenance marked — not in
-this file, and not in the page.
+**A simulated phase margin is a screen with a ±10° bar, not a spec.** TI's
+macromodel runs optimistic against TI's own tabulated figures. It either agrees
+with the bench at E13 or tells you where to look.

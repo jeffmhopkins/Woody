@@ -605,11 +605,11 @@ figures:
     value: "Dual feedback per SBOS737C Figure 56: R_ISO 37.4 ohm, R_F 10 kohm taken at VS, R_Fx 100 ohm + C_F 1 nF at the op-amp output"
     status: settled
     owner: hardware/carrier/breath-excitation-reference/breath-excitation-reference.md
-    derivation: "TI's Figure 56 (SBOS737C section 8.2.3 p.30, 'Precision Reference Buffer') is the worked answer for this exact circuit: R_ISO 37.4 ohm, R_F 1 Mohm at VOUT, R_Fx 10 kohm + C_F 39 nF at the op-amp output, 89 deg phase margin. IT TRANSFERS TO OUR 100 nF LOAD BECAUSE R_ISO IS SET BY Zo, NOT BY C_L: with feedback taken at the amplifier output above the handover, V_A/V_i = (1 + s.R_ISO.C_L)/(1 + s.(Zo+R_ISO).C_L), so both the attenuation R_ISO/(Zo+R_ISO) and the pole-zero ratio depend only on R_ISO/Zo - C_L moves both corners together and cancels. 37.4 ohm is Zo/10 against the specified Zo = 375 ohm (SBOS737C p.8). Simulated phase margin 85.9 deg at 896 kHz."
-    adaptation: "R_F is 10 kohm, NOT TI's 1 Mohm, and R_Fx scales with it to preserve the 100:1 ratio. Two reasons, both absent from TI's circuit. (1) DC error: the guaranteed-over-temperature I_B of 5 nA through 1 Mohm is 5 mV = 1000 ppm = 3.4 LSB on a rail that IS the ratiometric scale factor; through 10 kohm it is 50 uV = 0.034 LSB. (2) Handover: R_F.C_F sets the frequency above which the loop closes on the amplifier's own output rather than on VS. TI's load is a pure capacitor, ours draws 10 mA, so above the handover any load-current change appears at VS across R_ISO. TI's 4.08 Hz would be a disaster; 10 kohm + 1 nF puts it at 15.9 kHz, well above the 500 Hz breath channel. |Z_out| at VS is then 1.20 ohm at 500 Hz against 27.7 ohm at TI's scaling."
+    derivation: "TI's Figure 56 (SBOS737C section 8.2.3 p.30, 'Precision Reference Buffer') is the worked answer for this exact circuit: R_ISO 37.4 ohm, R_F 1 kohm at VOUT, R_Fx 10 kohm + C_F 39 nF at the op-amp output, C_L 10 uF, 89 deg phase margin [the figure's R_F glyph read with TIDU026's key, datasheets/analog/TI-TIDU026-slew-rate-limiter.pdf; 1/(2 pi 1k 39n) = 4.08 kHz is SBOS737C's own '4 kHz']. IT TRANSFERS TO OUR 100 nF LOAD BECAUSE R_ISO IS SET BY Zo, NOT BY C_L: with feedback taken at the amplifier output above the handover, V_A/V_i = (1 + s.R_ISO.C_L)/(1 + s.(Zo+R_ISO).C_L), so both the attenuation R_ISO/(Zo+R_ISO) and the pole-zero ratio depend only on R_ISO/Zo - C_L moves both corners together and cancels. 37.4 ohm is Zo/10 against the specified Zo = 375 ohm (SBOS737C p.8). The simulated phase margin is riso-ref-phase-margin."
+    adaptation: "These are this board's values, not TI's scaled: TI's load is a pure capacitor and ours draws 10 mA. (1) DC error: the guaranteed-over-temperature I_B of 5 nA through R_F 10 kohm is 50 uV = 0.034 LSB on a rail that IS the ratiometric scale factor. (2) Handover: R_F.C_F sets the frequency above which the loop closes on the amplifier's own output rather than on VS, and above it any load-current change appears at VS across R_ISO. 10 kohm + 1 nF puts it at 15.9 kHz, well above the 500 Hz breath channel. |Z_out| at VS is then 1.20 ohm at 500 Hz [calc; reproduced by sim/, zout-as-netlisted]."
     dc_error: "ZERO ACROSS R_ISO, BY TOPOLOGY. C_F blocks at DC so no current flows in R_Fx; input current is pA so none flows in R_F; the summing node therefore sits at V(VS) and the amplifier forces V(VS) = 5.000 V. R-ISO-REF's value and tolerance stop mattering. The 2% ratiometric objection that drove the old in-loop-vs-out-of-loop argument is ANSWERED, not traded away. Total buffer contribution is 0.19 LSB worst case (I_B.R_F 50 uV, V_OS 100 uV, V_OS drift 125 uV over 50 K)."
-    robustness: "Phase margin stays above 76 deg across TI's entire published Zo range (73 ohm at 10 MHz to 3.26 kohm at 0.1 Hz, Figure 26) and across a 200x range of C_L (47 nF to 10 uF). So X7R DC-bias derating cannot destabilise it, and bulk capacitance may be added at VS later without recompensating - a 10 uF there costs 2.5 deg."
-    forbidden: ["INSIDE THE LOOP, with feedback taken at the SENSOR", "R-ISO-REF` goes inside the loop", "2.6° of phase margin", "oscillation near 458 kHz", "R-ISO-REF,controller,10R", "R_F . C_F  >  R-ISO-REF . C_LOAD", "series R–C snubber from `VS`", "8.4 deg", "75.2 deg"]
+    robustness: "Phase margin stays above 76 deg across TI's entire published Zo range (73 ohm at 10 MHz to 3.26 kohm at 0.1 Hz, Figure 26) and across a 200x range of C_L (47 nF to 10 uF); against TI's own macromodel it is riso-ref-phase-margin over that C_L range. So X7R DC-bias derating cannot destabilise it. Bulk capacitance at VS is NOT free on that account: 10 uF barely moves the phase margin, yet |Z_out| peaks near R_ISO at 2.5 kHz and a load step rings through for about 3 ms [sim, sim/ step-with-10u-added] - re-run that sim with any part added there."
+    forbidden: ["INSIDE THE LOOP, with feedback taken at the SENSOR", "R-ISO-REF` goes inside the loop", "2.6° of phase margin", "oscillation near 458 kHz", "R-ISO-REF,controller,10R", "R_F . C_F  >  R-ISO-REF . C_LOAD", "series R–C snubber from `VS`", "8.4 deg", "75.2 deg", "TI's 1 MΩ", "TI's 1 Mohm", "TI'S 1M", "R_F 1 Mohm", "1M x 39nF", "4.08 Hz", "a 10 uF there costs 2.5 deg", "for 2.5° of margin", "RATIO OF 100:1"]
     note: |
       DECIDED by preflight agent A4 2026-09-21
       (docs/review/2026-09-21-preflight/A4-carrier.md section 2), after
@@ -629,6 +629,28 @@ figures:
       TI's own OPA2197 macromodel, which models Zo explicitly. Note SPICE needs a
       leak resistor at the summing node for convergence and a real board does not -
       the amplifier's input leakage provides it.
+  - id: riso-ref-phase-margin
+    quantity: The reference buffer's loop phase margin as netlisted, against TI's OPA2197 macromodel
+    value: "118.5 deg minimum, crossover 1.23-1.28 MHz"
+    status: settled
+    owner: hardware/carrier/breath-excitation-reference/sim/README.md
+    derivation: "[sim] python3 tools/sim.py run hardware/carrier/breath-excitation-reference/sim, 2026-09-30, ngspice 42 with TI's OPA2197 PSpice macromodel (datasheets/analog/OPAx197-ti-pspice-sboma34d.lib). Sim loop-as-netlisted: loads 47 nF, 100 nF, 1 uF, 10 uF and 10.1 uF at VS, 33 tolerance corners each (R-ISO-REF, R-FB-REF, C-FB-REF, sensor current, C_L ESR); the minimum is at 47 nF, and 10 uF moves it by under 5 deg. Loop broken at U-BUF's (-) input, 1 GH / 1 GF (tools/sim.py). A SCREEN WITH A +-10 DEG BAR. The same deck on TI's Figure 56 as printed returns within 2 deg of TI's published 89 deg (sim ti-figure-56)."
+    forbidden: ["85.9 deg", "85.9°", "896 kHz", "returns 87.4"]
+    note: "Replaced a behavioural-model result (A4, 2026-09-21; docs/review/2026-09-21-preflight/A4-carrier.md) that sat outside the +-10 deg screen of this one. Both clear the page's 76 deg claim."
+  - id: breath-link-cmrr
+    quantity: Breath link CMRR, sensor buffer to INA828 output, worst tolerance corner at the mains fundamental
+    value: "70.5 dB worst case at 60 Hz"
+    status: settled
+    owner: hardware/module/breath-receive-stage/sim/README.md
+    derivation: "[sim] python3 tools/sim.py run hardware/module/breath-receive-stage/sim, 2026-09-30, ngspice 42 with TI's INA828 and OPA2197 PSpice models (datasheets/analog/). Sim cmrr-as-netlisted: both netlists (interfaces/breath-sense-link R1/R1b, module/breath-receive-stage the rest), every tolerance end of R1, R1b, R2, R3, R4, R5 and both C_cm at +-1 % - 257 runs. Worst corner 70.9 dB at 50 Hz, 70.5 dB at 60 Hz, 71.7 dB at DC (the page's 73 dB bias-pair floor within 3 dB). It falls through the page's 58.5 dB requirement near 480 Hz at the worst corner (C_cm mismatch, rising with frequency). Without R1b: 60.1 dB nominal (the page's 60.2), 58.2 dB worst - below the requirement. C_cm at +-5 %: 45.5 dB worst at 500 Hz (the page's ~46 dB). A SCREEN: the macromodels carry no layout asymmetry."
+    forbidden: ["1.7 dB of margin", "1.7 dB of claimed margin"]
+  - id: pitch-mult-overshoot
+    quantity: Pitch jack overshoot on an octave step, into a passive mult to another output's jack capacitor
+    value: "41.8 % at 82 nF, 64.1 % at 330 nF"
+    status: settled
+    owner: hardware/module/pitch-stage/sim/README.md
+    derivation: "[sim] python3 tools/sim.py run hardware/module/pitch-stage/sim, 2026-09-30, ngspice 42 with TI's OPA2197 PSpice model. Sim step-mult, nominal: the stage as netlisted with the other jack's C-FILT-MOD-1 (82 nF) or C-OUT-BREATH (330 nF) on PITCH; corners of C-FB-PITCH, C-FILT-PITCH and R-OUT-PROT move it about 1 point. The loop's phase margin is 69.3 deg at 10 MHz at every load (sim loop): the AC sweep cannot see it. With the other output's R-OUT-PROT to its driver also on the jack: 15.3 % and 41.8 %."
+    forbidden: ["44–67 %", "65.4 %"]
   - id: loop-budget
     quantity: Real-time loop, one pass
     value: "196-241 us of 250 us"

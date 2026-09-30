@@ -1,44 +1,55 @@
 # Pitch stage — simulation
 
-**Nothing here has been run.** This directory holds the deck and the procedure.
-It holds no results, and it will not hold any until a run produces them.
+`sims.yaml` says what is simulated and what every run must show;
+`pitch-step.cir` and `pitch-loop.cir` are the decks; `results.yaml` is what the
+last run found, **generated** by
+`python3 tools/sim.py run hardware/module/pitch-stage/sim`.
+`python3 tools/sim.py show <this dir>` prints it as a table.
+`docs/reference/tooling.md` §5 explains the tool.
 
-That is the rule, not an apology: `docs/reference/pcb-pipeline.md` names five
-simulations worth running and records that **none has been**. A plausible
-number written here would sit next to figures read off banked datasheets and
-be indistinguishable from them. `datasheets/README.md` is explicit that a
-fabricated document is worse than an honest gap; a fabricated simulation
-result is the same thing with fewer bytes.
+**No part value is written here.** The decks read this circuit's netlist and,
+for the loads a passive mult joins to `PITCH`, the other outputs' jack parts:
+`mod-channels`' `C-FILT-MOD-1` and `R-OUT-PROT-1`, `breath-output-stage`'s
+`C-OUT-BREATH`. Both op-amp halves are TI's OPA2197 model, banked in
+`datasheets/analog/`.
 
-## The sim this circuit needs, and why it is not optional
+## What it shows
 
-**Pitch transient into a passive mult.** `pcb-pipeline.md` records measured
-**41.8 % overshoot at 82 nF and 65.4 % at 330 nF**, and — the part that makes
-this a gate — that **the AC sweep is structurally blind to it** on the same
-circuit at the same loads. The page's own *Still open* list carries the same
-hazard from the other direction: joining `PITCH` to the `MOD` or `BREATH`
-jacks through a passive mult gives several semitones of transient on every
-note, a failure mode that did not exist before the feedback tap moved to the
-jack.
+An octave step from the DAC (an ideal edge, harder than the DAC8568's own
+settling), through `R-OPAMP-IN`/`C-AA-PITCH`, into the stage as netlisted with
+the DC loop closed at the jack. Every sim runs at the nominal and every
+tolerance end of `C-FB-PITCH`, `C-FILT-PITCH` and `R-OUT-PROT` (9 runs).
 
-So this is the one circuit where the DC argument being exactly right and the
-AC sweep being clean still does not tell you whether it is safe to patch.
+| Sim | Load on the jack | Holds |
+|---|---|---|
+| `step-vco` | one VCO input | under 5 % overshoot at every corner |
+| `step-mult[mult=1]`, `[mult=2]` | a passive mult to a MOD jack (its 82 nF) or the BREATH jack (its 330 nF) — the page's own model, the capacitor alone | **a recorded hazard**: over 25 % |
+| `step-real-mult[…]` | the same, with that output's own `R-OUT-PROT` to its driver as well | recorded only |
+| `loop[mult=…]` | the loop gain at all three loads, broken at `U-PITCH-AMP`'s (−) input | phase margin over 45° after the ±10° screen |
 
-## Running it
+**The result is `pitch-mult-overshoot`: 41.8 % at 82 nF, 64.1 % at 330 nF**,
+at the nominal; the corners move it by about a point either way. An octave step
+overshooting by 64 % is 7.7 semitones [calc: 0.641 × 12].
 
-| | |
-|---|---|
-| Simulator | `ngspice` 42, stock Ubuntu archive, no allowlist change needed |
-| **Do not use** | PySpice 1.5 — it treats every non-`Warning:` stderr line as fatal and ngspice prints a solver banner to stderr on every run. Raw netlists plus `subprocess` |
-| Model | TI's OPA2197 macromodel. **Bank it in `datasheets/` with a SHA-256 first**, like every other document |
-| `.spiceinit` | needs `set ngbehavior=psa` — **inside `.control` is too late** |
+**The AC sweep is blind to it, and the run shows why.** The phase margin at
+crossover is the same at all three loads to a tenth of a degree, because
+`C-FB-PITCH` closes the loop on the op-amp's own output there. The ringing is
+lower down, in the handover between that path and the DC path through the jack,
+where the loop gain is still large — no crossover, so no margin to read.
 
-## What a result is worth when it arrives
+With the other output's driver on the jack as well — which is what a patch
+cable actually connects — its `R-OUT-PROT` damps the ring: about 15 % at 82 nF
+and 42 % at 330 nF. The capacitor-only figure is the page's model and the
+worse case.
 
-**A simulated phase margin is a screen with a ±10° bar, not a spec.** TI's own
-macromodel runs optimistic against TI's own tabulated figures. A number from
-here settles nothing on its own; it either agrees with the bench at E9 or it
-tells you where to look.
+## How it was made to run
 
-Results land in `config/figures.yaml` with their provenance marked — not in
-this file, and not in the page.
+The loop is broken by voltage injection (`tools/sim.py`, the stated break's
+option (b)): the 1 GH break found no operating point on this stage at all.
+`pitch-loop.cir` states why injection is sound here.
+
+## What a result is worth
+
+**A simulated step is a screen, not a spec.** It either agrees with the bench
+at E9 — "pitch stability into worst-case cable capacitance" is in the
+measurement table — or tells you where to look.

@@ -96,8 +96,8 @@ the number this page multiplies:
   REF5050's own pins, not on the buffer's output — see `cref-out-node`.
 - **The in-loop-versus-out-of-loop trade this page framed has been
   dissolved, not decided.** It weighed instability against *"2 % of the
-  ratiometric scale factor"*. TI's dual-feedback network gives both: 85.9° of
-  phase margin **and** exactly zero DC error across `R-ISO-REF`, because at DC
+  ratiometric scale factor"*. TI's dual-feedback network gives both: ample
+  phase margin (`riso-ref-phase-margin`) **and** exactly zero DC error across `R-ISO-REF`, because at DC
   the only feedback path closes at the sensor pin. In-loop `R_ISO` on its own
   was never the answer either — it buys nothing at any value.
 
