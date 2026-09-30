@@ -112,6 +112,8 @@ config/           figures.yaml - THE SHARED-FIGURE REGISTER, the single
                   source of truth for every value used in more than one
                   document; plus key layout and routing, as data
 tools/            Host-side utilities
+branding/         The Space Coast Synthesizers mark: build.py generates the
+                  laser artwork (SVG/DXF), a test print and renders
 CLAUDE.md         THE WORKING RULES. Read this before editing anything -
                   it is short, and every rule in it was paid for once
 ```

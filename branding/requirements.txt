@@ -1,0 +1,5 @@
+numpy
+pillow
+shapely>=2
+ezdxf
+reportlab
