@@ -152,3 +152,28 @@ scripts:
     cmd: [tools/panel-art.py]
     inputs: *art_inputs
     out: mechanical/module/art/tex-height.png
+
+  # THE BLENDER RENDERS (ADR 0026): tools/render-module.py, Cycles on the CPU.
+  # Slow - tens of minutes each - so they rebuild only when what they show
+  # moved: the cut, the echo, the print's textures, the vendor meshes, the config.
+  - name: module-photo-hero
+    title: The module in a slice of a black case, three-quarter view - patched, the umbilical home, the LED lit
+    cmd: [tools/render-module.py, --view, hero]
+    inputs: &render_inputs [config/module.yaml, config/body.yaml, mechanical/module/export/panel.dxf, mechanical/module/export/panel-art.echo,
+                            mechanical/module/art/tex-albedo.png, mechanical/module/art/tex-roughness.png, mechanical/module/art/tex-height.png,
+                            mechanical/cad/vendor/ne8fav.stl, mechanical/cad/vendor/ne8mx.stl, mechanical/cad/vendor/pj398sm.stl,
+                            mechanical/module/blender/studio_small_08_1k.hdr]
+    out: mechanical/module/renders/photo-hero.png
+    stamp: Woody module
+  - name: module-photo-front
+    title: The module straight on, orthographic, no patch cables - for checking the printed artwork against the parts
+    cmd: [tools/render-module.py, --view, front]
+    inputs: *render_inputs
+    out: mechanical/module/renders/photo-front.png
+    stamp: Woody module
+  - name: module-photo-detail
+    title: Close-up - the breath knobs, their labels and the offset marks, the cv out pill, a patch plug
+    cmd: [tools/render-module.py, --view, detail]
+    inputs: *render_inputs
+    out: mechanical/module/renders/photo-detail.png
+    stamp: Woody module
