@@ -23,7 +23,7 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `+12V` | in | `carrier/power-entry-instrument` | — | The buffer half's V+, and REF5050 `VIN` through `R-REF-IN` (below) |
+| `INST_POS12` | in | `carrier/power-entry-instrument` | — | The instrument's +12 V behind `Q-INRUSH`, the hot-plug inrush limiter. The buffer half's V+, and REF5050 `VIN` through `R-REF-IN` (below) |
 | `REF_VIN` | — | — | — | Internal to this circuit. REF5050 `VIN` and its bypass, after `R-REF-IN`, held by `D-REF-CLAMP` |
 | REF5050 `VOUT` | — | — | `cref-out-node` | Internal to this circuit. Which side of the buffer `C-REF-OUT` sits on. Settled, and it decides the whole compensation |
 | op-amp output | — | — | `opa2197-output-impedance` | Internal to this circuit. The impedance `R-ISO-REF` is sized against. Specified, not back-solved |

@@ -247,6 +247,20 @@ components:
     - 1
     - 2
     sheet: led-strip-drive
+  C38:
+    of: C-INRUSH-GS
+    value: 1uF 50V X7R
+    pins:
+    - 1
+    - 2
+    sheet: power-entry-instrument
+  C39:
+    of: C-INRUSH-GD
+    value: 22nF 50V X7R
+    pins:
+    - 1
+    - 2
+    sheet: power-entry-instrument
   C4:
     of: C-REF-OUT
     value: 10uF
@@ -402,6 +416,13 @@ components:
     pins:
     - A
     - K
+    sheet: power-entry-instrument
+  D20:
+    of: D-INRUSH-RST
+    value: 1N4148W
+    pins:
+    - K
+    - A
     sheet: power-entry-instrument
   D3:
     of: D-TVS-PWR
@@ -576,6 +597,14 @@ components:
     pins:
     - 1
     - 2
+    sheet: power-entry-instrument
+  Q1:
+    of: Q-INRUSH
+    value: AO3401A
+    pins:
+    - G
+    - S
+    - D
     sheet: power-entry-instrument
   R1:
     of: R-SPI-SER
@@ -818,6 +847,27 @@ components:
     - 1
     - 2
     sheet: carrier
+  R41:
+    of: R-INRUSH-GS
+    value: 1M 1%
+    pins:
+    - 1
+    - 2
+    sheet: power-entry-instrument
+  R42:
+    of: R-INRUSH-G
+    value: 1M 1%
+    pins:
+    - 1
+    - 2
+    sheet: power-entry-instrument
+  R43:
+    of: R-INRUSH-GD
+    value: 22R 1%
+    pins:
+    - 1
+    - 2
+    sheet: power-entry-instrument
   R5:
     of: R-ADCDIV-L
     value: 15k 1%
@@ -1348,6 +1398,16 @@ nets:
   /power-entry-instrument/BUCK_A_OUT:
   - D4.A
   - U5.OUT
+  /power-entry-instrument/INRUSH_GATE:
+  - C38.2
+  - C39.1
+  - D20.K
+  - Q1.G
+  - R41.2
+  - R42.1
+  /power-entry-instrument/INRUSH_MILLER:
+  - C39.2
+  - R43.1
   /sw+/SWITCH_LEG:
   - R29.2
   - SW9.1
@@ -1440,6 +1500,39 @@ nets:
   - J1.17
   - J1.3
   - U6.VCC
+  INST_POS12:
+  - C10.1
+  - C25.1
+  - C26.1
+  - C27.1
+  - C28.1
+  - C29.1
+  - C30.1
+  - C31.1
+  - C32.1
+  - C33.1
+  - C34.1
+  - C35.1
+  - C36.1
+  - C37.1
+  - D10.VDD
+  - D11.VDD
+  - D12.VDD
+  - D13.VDD
+  - D14.VDD
+  - D15.VDD
+  - D16.VDD
+  - D17.VDD
+  - D18.VDD
+  - D19.VDD
+  - D7.VDD
+  - D8.VDD
+  - D9.VDD
+  - L1.1
+  - Q1.D
+  - R43.2
+  - R6.1
+  - U3.V+
   J4.11:
   - J4.11
   J4.12:
@@ -1490,6 +1583,7 @@ nets:
   - D18.GND
   - D19.GND
   - D2.A
+  - D20.A
   - D3.A
   - D5.A
   - D6.A
@@ -1516,6 +1610,7 @@ nets:
   - NT1.2
   - NT2.2
   - R10.2
+  - R42.2
   - SW1.2
   - SW10.2
   - SW2.2
@@ -1586,39 +1681,12 @@ nets:
   U9.CH4:
   - U9.CH4
   UMBILICAL_POS12:
-  - C10.1
-  - C25.1
-  - C26.1
-  - C27.1
-  - C28.1
-  - C29.1
-  - C30.1
-  - C31.1
-  - C32.1
-  - C33.1
-  - C34.1
-  - C35.1
-  - C36.1
-  - C37.1
-  - D10.VDD
-  - D11.VDD
-  - D12.VDD
-  - D13.VDD
-  - D14.VDD
-  - D15.VDD
-  - D16.VDD
-  - D17.VDD
-  - D18.VDD
-  - D19.VDD
+  - C38.1
   - D2.K
   - D3.K
-  - D7.VDD
-  - D8.VDD
-  - D9.VDD
   - J6.3
-  - L1.1
-  - R6.1
-  - U3.V+
+  - Q1.S
+  - R41.1
   VS:
   - C8.1
   - R7.2

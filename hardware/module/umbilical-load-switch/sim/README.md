@@ -59,7 +59,10 @@ the sense thresholds (both ends of the foldback), the gate pull-up and both
   a hundred-odd amps for microseconds, set by the 20 µs step. The plug-in
   current with the cable in it, and what it does to `U-ISO`, is
   `hotplug-iso-ocp` (`config/figures.yaml`), owned by
-  `carrier/power-entry-instrument/sim`.
+  `carrier/power-entry-instrument/sim`. And since `Q-INRUSH` the instrument's
+  bulk is not on `OUT` at a plug-in at all: this deck's hot-plug is the case
+  the switch must survive (a replug inside `Q-INRUSH`'s window, or `Q-INRUSH`
+  failed short), not the ordinary one.
 - **The page's 2.2 mF is in no netlist.** The instrument's input as netlisted
   holds `C-STRIP-BULK` and `C-BUCK-IN` only (`C-BULK-DISP` left with the
   display board, ADR 0015). The deck runs the netlisted capacitance and, beside

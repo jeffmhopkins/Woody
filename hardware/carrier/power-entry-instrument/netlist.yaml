@@ -12,6 +12,10 @@ ports:
     dir: in
     from: module/umbilical-load-switch
     figure: umbilical-current
+  INST_POS12:
+    dir: out
+    to: carrier/led-strip-drive
+    figure: umbilical-current
   INST_5V_A:
     dir: out
     to: carrier/led-strip-drive
@@ -32,6 +36,21 @@ components:
     - 2
     note: 'ELECTROLYTIC, AND THE ESR IS THE POINT: the input LC''s damping calculation assumes real ESR, and a low-ESR
       ceramic raises Q until the paragraph stops being true'
+  C-INRUSH-GD:
+    value: 22nF 50V X7R
+    pins:
+    - 1
+    - 2
+    note: 'The Miller capacitor: gate to drain, through R-INRUSH-GD. It sets the ramp: dV/dt = I(R-INRUSH-G) / C,
+      about 400 V/s, 0.23 A into the instrument''s 570 uF'
+  C-INRUSH-GS:
+    value: 1uF 50V X7R
+    pins:
+    - 1
+    - 2
+    note: 'Gate to source, AT LEAST 45x C-INRUSH-GD: when the plug makes contact the source jumps 12 V in microseconds,
+      and the gate must follow it or the Miller capacitor turns the FET on hard. 1 uF against 22 nF holds the jump
+      in V_GS to -0.26 V, under the 0.5 V minimum threshold'
   C-STRIP-BULK:
     value: 470uF 25V
     pins:
@@ -39,6 +58,14 @@ components:
     - 2
     note: 'At the LED row''s 12 V feed end. Bulk belongs where the current swings: the row''s PWM steps its whole
       current at once, and each LED''s own 100 nF (C-LED) takes only the edges (ADR 0028)'
+  D-INRUSH-RST:
+    value: 1N4148W
+    pins:
+    - K
+    - A
+    note: 'Resets the gate after an unplug: C-INRUSH-GS keeps V_GS while the instrument''s capacitors drain, so
+      the gate would be left below ground; this clamps it to -0.4 V, so once the input has fallen the next plug-in
+      starts from off'
   D-REVSHUNT:
     value: SS34
     pins:
@@ -73,6 +100,37 @@ components:
     - 2
     note: 'The analog star''s single tie to PWR_GND: copper only, under U-ADC between its VSS and its digital pins
       (power-entry-instrument.md section 2)'
+  Q-INRUSH:
+    value: AO3401A
+    pins:
+    - G
+    - S
+    - D
+    note: 'HOT-PLUG INRUSH LIMITER. P-channel, SOURCE AT THE CONNECTOR, drain to the instrument''s bulk: its body
+      diode points back at the connector, so nothing charges C-STRIP-BULK or C-BUCK-IN except through the channel,
+      and the channel opens only as fast as C-INRUSH-GD lets the drain rise (power-entry-instrument.md, Hot-plug
+      inrush). V_GS is +/-12 V max: the 1:1 divider holds it at half the input'
+  R-INRUSH-G:
+    value: 1M 1%
+    pins:
+    - 1
+    - 2
+    note: 'Gate to PWR_GND: the current that sets the ramp, through C-INRUSH-GD, once Q-INRUSH is at its plateau'
+  R-INRUSH-GD:
+    value: 22R 1%
+    pins:
+    - 1
+    - 2
+    note: 'Damps the plug: with the FET off, the connector is the cable''s inductance into D-TVS-PWR''s capacitance
+      and the gate network, and without this it rings to twice the rail. 22 ohm holds it under D-TVS-PWR''s 15 V
+      standoff'
+  R-INRUSH-GS:
+    value: 1M 1%
+    pins:
+    - 1
+    - 2
+    note: 'Gate to source: with R-INRUSH-G the divider that holds Q-INRUSH''s V_GS at half the input once on, and
+      the path that turns it off'
   U-BUCK-A:
     of: U-BUCK
     value: R-78E5.0-1.0
@@ -90,23 +148,42 @@ nets:
   BUCK_A_OUT:
   - D-USBOR-A.A
   - U-BUCK-A.OUT
+  INRUSH_GATE:
+  - C-INRUSH-GD.1
+  - C-INRUSH-GS.2
+  - D-INRUSH-RST.K
+  - Q-INRUSH.G
+  - R-INRUSH-G.1
+  - R-INRUSH-GS.2
+  INRUSH_MILLER:
+  - C-INRUSH-GD.2
+  - R-INRUSH-GD.1
   INST_5V_A:
   - port: INST_5V_A
   - D-USBOR-A.K
+  INST_POS12:
+  - port: INST_POS12
+  - C-STRIP-BULK.1
+  - L-BUCK-IN.1
+  - Q-INRUSH.D
+  - R-INRUSH-GD.2
   PWR_GND:
   - port: PWR_GND
   - C-BUCK-IN.2
   - C-STRIP-BULK.2
+  - D-INRUSH-RST.A
   - D-REVSHUNT.A
   - D-TVS-PWR.A
   - NT-AGND.2
+  - R-INRUSH-G.2
   - U-BUCK-A.GND
   UMBILICAL_POS12:
   - port: UMBILICAL_POS12
-  - C-STRIP-BULK.1
+  - C-INRUSH-GS.1
   - D-REVSHUNT.K
   - D-TVS-PWR.K
-  - L-BUCK-IN.1
+  - Q-INRUSH.S
+  - R-INRUSH-GS.1
   BUCK_IN:
   - C-BUCK-IN.1
   - L-BUCK-IN.2

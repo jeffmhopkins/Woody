@@ -22,10 +22,10 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `UMBILICAL +12V` at `J-UMB` | in | `module/umbilical-load-switch` | `umbilical-pinmap`, `umbilical-current` | Arrives down the umbilical from the module's load switch. `D-REVSHUNT` sits at the connector, ahead of `L-BUCK-IN` |
+| `UMBILICAL +12V` at `J-UMB` | in | `module/umbilical-load-switch` | `umbilical-pinmap`, `umbilical-current` | Arrives down the umbilical from the module's load switch. On this board it is `J-UMB` pin 3, `D-REVSHUNT`, `D-TVS-PWR` and `Q-INRUSH`'s source and gate network — **nothing that stores charge** (§1a) |
 | `PWR_GND` at `J-UMB` | ref | `module/power-entry` | `umbilical-pinmap` | This board's only supply return, down the umbilical to the module star |
-| `+12V` LED row feed | out | `carrier/led-strip-drive` | `led-row-current` | Taken direct off the input node. `C-STRIP-BULK` is this circuit's part. **The same net as the row above** — `D-REVSHUNT` is a shunt and `D-TVS-PWR` a clamp, so nothing is in series between `J-UMB` pin 3 and this tap |
-| `+12V` analog | out | `carrier/breath-excitation-reference` | — | REF5050 `VIN`, and the V+ of both OPA2197 halves. **Also the same net**, for the same reason |
+| `INST_POS12`, the LED row feed | out | `carrier/led-strip-drive` | `led-row-current` | `Q-INRUSH`'s drain (§1a), which `C-STRIP-BULK`, this circuit's part, sits on. Nothing is in series between the drain and this tap |
+| `INST_POS12`, analog | out | `carrier/breath-excitation-reference` | — | REF5050 `VIN`, and the V+ of both OPA2197 halves. **The same node as the row above**, for the same reason |
 | 5 V, buck A | out | `J-MCU`, `carrier/led-strip-drive` | `matrix-led-current` | Through `D-USBOR` and `J-MCU`, down three conductors of `CBL-MCU-RIBBON` onto the dev board's 5 V pad and `TP2`, and on to the 74AHCT125 |
 | `PWR_GND` pour | ref | `carrier/service-uart`, `carrier/led-strip-drive`, `carrier/carrier`, `interfaces/breath-sense-link` | `dig-gnd-topology` | Layer 2, §2. The whole board returns here, and the breath link's two clamps, and so do the plates: the bottom plate through this board's mounts, the key plate through the cassette's columns to the same mounts (ADR 0022, ADR 0025). **`carrier/breath-adc` and `carrier/breath-excitation-reference` are no longer listed**: both of those pages say their return is `AGND_INST`, which reaches this pour on the **single tie** and is a different node everywhere else — and that distinction is the whole point of the star |
 
@@ -38,9 +38,12 @@ the two agree, and where they do not the netlist wins.*
 
 ```
  J-UMB pin 3  +12V ──┬──[D-REVSHUNT SS34]──┐
-                     │   cathode to +12V   │
+ (UMBILICAL_POS12)   │   cathode to +12V   │
                      ├──[D-TVS-PWR SMAJ15A]┤
                      │                     │
+                  [Q-INRUSH AO3401A]       │    source up, drain down; its gate
+                     │                     │    network is drawn in §1a
+      INST_POS12 ────┤                     │
                      ├─────────────────────┼──── the LED row, direct
                      │                     │     (13 × WS2815B-V1)
                      │                     │     [C-STRIP-BULK 470 µF 25V]
@@ -60,7 +63,7 @@ the two agree, and where they do not the netlist wins.*
  J-UMB pin 6 PWR_GND ┴──────────────────────┴──── PWR_GND pour
 ```
 
-**`D-REVSHUNT` goes at the connector, ahead of `L-BUCK-IN`.** Its job is a
+**`D-REVSHUNT` goes at the connector, ahead of `Q-INRUSH` and `L-BUCK-IN`.** Its job is a
 rollover patch lead swapping pins 3 and 6 `[repo] 0004`; it has to conduct
 immediately and let the module's LT1641-1 latch off. An inductor between the
 fault and the diode is the wrong way round.
@@ -107,14 +110,10 @@ the LC, and the umbilical's resistance behind it. Those set the peak. Keep
 the electrolytic anyway.
 
 **Start-up, from the module's isolated converter** (ADR 0027), also in `sim/`:
-cold and hot-plugged, through the load switch, the cable and this input, the
-instrument starts at every corner and the buck's input never falls back once
-it is running. **A hot-plug into a running module drives `U-ISO` to its
-lowest over-current threshold** for `hotplug-iso-ocp`: `C-STRIP-BULK` charges
-from `C-ISO-OUT` through the already-enhanced FET before the LT1641 takes the
-gate back. Whether the RPA20 hiccups on that depends on its over-current
-delay, which RECOM does not publish. **E6 decides**, with a current probe on
-`U-ISO`'s output during a hot-plug.
+cold and hot-plugged, through the load switch, the cable, `Q-INRUSH` and this
+input, the instrument starts at every corner and the buck's input never falls
+back once it is running. A hot-plug into a running module keeps `U-ISO` under
+its lowest over-current threshold — `hotplug-iso-ocp` — because of §1a.
 
 **Regulator loading** `[calc]`, from ADR 0005's load table:
 
@@ -129,6 +128,123 @@ R-78E5.0-1.0 rating                                            1000 mA
 Seventy-odd percent, inside a body running 10–20 K above ambient, is near
 enough to want the derating curve. **The display board's share was only ever
 estimated**, so the figure is a range until E6 measures the rail.
+
+---
+
+## §1a Hot-plug inrush — `Q-INRUSH`
+
+*Added 2026-09-30. Simulated in `sim/` (`hot-plug`, `replug-late`,
+`replug-early`); the figure is `hotplug-iso-ocp`.*
+
+**Why it is here.** The module's load switch (`module/umbilical-load-switch`)
+has its FET enhanced whenever the module runs, instrument or not. A plug-in
+therefore used to put everything on this board that holds charge straight
+onto `U-ISO`'s output through 2 m of cable, and the LT1641's current limit had
+to pull back a gate that `C-GATE-LOADSW` was holding up. The simulation had
+`U-ISO` at its over-current threshold for over a hundred microseconds at every
+corner; whether the RPA20 then hiccups is unpublished. The fix belongs here,
+at the capacitors, not at the module: nothing the LT1641 does can be fast
+enough when its FET is already on, and the module cannot tell whether an
+instrument is attached (every umbilical conductor is spoken for,
+`umbilical-pinmap`).
+
+```
+ UMBILICAL_POS12 ─┬──────────────────────┬────────────────────── S
+  (J-UMB pin 3)   │                      │                       │
+          [C-INRUSH-GS 1uF]      [R-INRUSH-GS 1M]       [Q-INRUSH AO3401A]
+                  │                      │              G ───────┤
+ INRUSH_GATE ─────┴────────┬─────────────┴───────┬──────┘        │
+                           │                     │               │
+                  [C-INRUSH-GD 22nF]     [R-INRUSH-G 1M]         │
+                           │                     │               │
+                  [R-INRUSH-GD 22R]              ├──[D-INRUSH-RST 1N4148W]── cathode to INRUSH_GATE
+                           │                     │               │
+ INST_POS12 ───────────────┴─────────────────────┼────────────── D ── C-STRIP-BULK, L-BUCK-IN,
+                                                 │                    the LED row, the analog block
+ PWR_GND ────────────────────────────────────────┘
+```
+
+A P-channel FET with its **source at the connector** and its drain on
+`INST_POS12`, the node that carries every capacitor on the instrument's 12 V:
+its body diode points back at `J-UMB`, so nothing charges except through the
+channel. `C-INRUSH-GD` from gate to drain makes it a Miller integrator: once
+the gate reaches its plateau, the drain can rise only as fast as
+`R-INRUSH-G`'s current can charge `C-INRUSH-GD`. `D-REVSHUNT` and `D-TVS-PWR`
+stay at the connector, ahead of it.
+
+**The numbers** `[calc]`, each checked by the run:
+
+```
+Charge behind it: C-STRIP-BULK 470 µF + C-BUCK-IN 100 µF
+                  + 13 × C-LED 100 nF                          ≈ 571 µF
+The plug-in step: J-UMB jumps 0 → 12 V in microseconds. The gate follows
+  through C-INRUSH-GS and is held back through C-INRUSH-GD:
+  ΔV_GS = −12 V × (22 nF + 55 pF) / (1 µF + 645 pF + 22 nF + 55 pF)
+        = −0.26 V, against V_GS(th) −0.5 V minimum           [ds AO3401A p.2]
+The delay: the gate relaxes towards −V_in/2 through R-INRUSH-GS ∥ R-INRUSH-G
+  τ = 0.5 MΩ × 1.02 µF = 0.51 s; to a −1.5 V plateau from 0 of −5.9 V:
+  0.51 × ln(5.9 / 4.4) = 0.15 s
+The ramp: at the plateau the gate is ~10.3 V above ground
+  I = 10.3 V / 1 MΩ − 1.5 V / 1 MΩ = 8.8 µA
+  dV/dt = 8.8 µA / 22 nF = 400 V/s → 571 µF × 400 V/s = 0.23 A, ~30 ms
+On:  V_GS = −V_in / 2 = −5.9 V at 11.8 V; R_DS(on) ≤ 60 mΩ at −4.5 V [ds p.2]
+  at `umbilical-current`, 0.36 A × 60 mΩ ≈ 22 mV; at the LT1641's 1.10 A
+  worst-case trip, 66 mV and 73 mW
+Its ratings: V_DS −30 V against D-TVS-PWR's 24.4 V clamp [ds SMAJ15A p.2];
+  V_GS ±12 V against half the input — a surge does not reach the gate,
+  C-INRUSH-GS carries the source's jump to it
+```
+
+The run agrees with all of it and says more: `U-ISO` peaks at 0.49–0.54 A on
+a hot-plug at 65 corners (`hotplug-iso-ocp`) — the peak is the ramp's end,
+not the plug — `VCC` at the load switch does not move, the instrument is up in
+93–182 ms, and the ramp takes about 50 ms 10–90 %, slower than the arithmetic
+above because the loads come on during it. **`Q-INRUSH` dissipates 1.8 W at
+most, ~85 mJ a start**: the AO3401A's single-pulse rating at 50 ms is about
+12 W and its transient impedance there about 12 K/W `[ds p.4 Figures 10–11,
+read off the curves]`, so ~20 K of rise, once, at plug-in.
+
+**Two parts are there for the plug itself, not the ramp.**
+- **`R-INRUSH-GD`** damps `J-UMB`'s node. With the FET off, the plug is the
+  cable's inductance into `D-TVS-PWR`'s capacitance and the gate network;
+  undamped that rings to twice the rail, past `D-TVS-PWR`'s 15 V standoff.
+  With 22 Ω in the Miller leg the run peaks at 14.2 V at its worst corner.
+- **`D-INRUSH-RST`** resets the gate after an unplug. `C-INRUSH-GS` keeps
+  `V_GS` while the instrument drains, so the source falls to ground with the
+  gate still below it; the diode pulls the gate back up to −0.4 V once the
+  input is down, and the next plug-in starts from off (`replug-late`, 200 ms
+  after an unplug). Silicon, not Schottky: a small Schottky's leakage is
+  comparable to the 8.8 µA that sets the ramp.
+
+**What it does not cover: a replug within tens of milliseconds.** While the
+bulk still holds a few volts, `C-INRUSH-GS` is still holding `Q-INRUSH` on,
+and a replug is a hot-plug without the limiter — `replug-early` (30 ms)
+records `U-ISO` reaching its threshold, as every plug-in did before. The
+window narrows at both ends: 3 ms after an unplug the bulk has barely fallen
+and the run touches the threshold for about 2 µs; 200 ms after, it has
+drained and the replug starts from off. How long the window lasts is set by
+how fast the instrument drains, which the model's loads set. **E6 decides**,
+with a current probe on `U-ISO` during a quick replug.
+
+**What else was tried, and why not** (`sim/`'s deck with the instrument as it
+was, at the same corners, 2026-09-30):
+
+| Candidate | `U-ISO` at its threshold | Why not |
+|---|---|---|
+| none (as it was) | 114–157 µs | — |
+| `C-ISO-OUT` 330 µF, the largest standard value the RPA20's 1000 µF capacitive-load limit leaves room for with ~571 µF behind the switch | 93–134 µs | the converter still supplies the plug |
+| 2.2 Ω in `C-STRIP-BULK`'s leg | up to 188 µs, and some corners never start | `C-BUCK-IN` and the loads are still on the plug |
+| 4.7 Ω in the line | 3–60 µs, and the start never reaches 90 % | 1.7 V dropped at the run current |
+| 100 µH in the line | over 100 µs, and a 16 V ring | the LT1641's limit still overshoots |
+| `C-GATE-LOADSW` 10 nF | 8–13 µs | shorter, not gone; the cold-start ramp is 8× faster |
+| `C-GATE-LOADSW` 150 nF | 209–305 µs | **a bigger gate capacitor makes it worse**: it holds the gate up |
+| `R-GATE-COMP` 10 kΩ | the model stops starting | ten times the datasheet's own 1 kΩ, and the datasheet gives no stability guidance to move it by |
+| a 5.1 V zener from `C-GATE-LOADSW`'s node to the output | 2 µs | the best module-side part, and it still reaches the threshold |
+
+At the LT1641's highest gate drive (`dV_GATE` 15 V, where `D-GATE-CLAMP`
+holds it) the unlimited hot-plug was 270–364 µs and pulled `VCC` to 10.15 V,
+0.25 V above the `ON` pin's turn-off: the old hazard was worse than the
+figure that recorded it, which was taken at the minimum gate drive.
 
 ---
 
@@ -209,6 +325,11 @@ named as they stand; **proposed** rows have no BOM entry yet.*
 | `D-REVSHUNT` | SS34 | At the connector, ahead of `L-BUCK-IN` | `[repo]` |
 | `D-TVS-PWR` | SMAJ15A | Across the power pair | `[repo]` |
 | `C-STRIP-BULK` | 470 µF 25 V (UCW1E471MNL1GS) | At the LED row's feed end, on this board (ADR 0028) | `[repo]`, `[calc]` |
+| `Q-INRUSH` | AO3401A P-FET, SOT-23 | Hot-plug inrush limiter: source at `J-UMB`, drain on `INST_POS12` (§1a) | `[ds]`, `[calc]`, `[sim]` |
+| `R-INRUSH-GS`, `R-INRUSH-G` | 1 MΩ 1 % each | Its gate divider: `V_GS` half the input when on; `R-INRUSH-G` sets the ramp | `[calc]` |
+| `C-INRUSH-GS` | 1 µF 50 V X7R | Gate to source: the gate follows the plug-in step. **At least 45× `C-INRUSH-GD`** | `[calc]`, `[sim]` |
+| `C-INRUSH-GD`, `R-INRUSH-GD` | 22 nF 50 V X7R, 22 Ω | The Miller ramp, and the damping of `J-UMB`'s node at the plug | `[calc]`, `[sim]` |
+| `D-INRUSH-RST` | 1N4148W | Resets the gate after an unplug | `[sim]` |
 
 ---
 

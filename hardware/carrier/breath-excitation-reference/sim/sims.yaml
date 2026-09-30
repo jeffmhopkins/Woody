@@ -19,7 +19,7 @@ models:
 spiceinit: [set ngbehavior=psa]
 
 params:
-  v_pos:    {value: 12.0, source: "UMBILICAL_POS12, the buffer's V+ (netlist); the instrument's +12 V nominal"}
+  v_pos:    {value: 12.0, source: "INST_POS12, the buffer's V+ (netlist); the instrument's +12 V nominal, behind Q-INRUSH"}
   i_sensor: {value: 10.0e-3, source: "MPXV4006DP supply current I_S, 10 mAdc max [datasheets/analog/MPXV4006DP.pdf, operating characteristics]; the page's 'our load draws 10 mA'. A DC load at VS (vary)"}
   i_sensor_hi: {value: 10.5e-3}
   v_ref:    {value: 5.0, source: "REF5050 VOUT nominal [SBOS410O, datasheets/analog/REF5050.pdf]; in the loop decks the reference is this source (see ref-loop.cir); ref-startup runs TI's REF5050 macromodel itself"}
