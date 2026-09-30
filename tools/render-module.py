@@ -285,12 +285,12 @@ def build(view, preview):
     # anodise: a dark oxide over metal - part metallic, anisotropic along y
     mm_ = N.new("ShaderNodeMath")
     mm_.operation = "MULTIPLY"
-    mm_.inputs[1].default_value = 0.45
+    mm_.inputs[1].default_value = 0.25
     link(pm, anod.outputs["Value"], mm_.inputs[0])
     link(pm, mm_.outputs["Value"], bsdf.inputs["Metallic"])
     am = N.new("ShaderNodeMath")
     am.operation = "MULTIPLY"
-    am.inputs[1].default_value = 0.35
+    am.inputs[1].default_value = 0.2
     link(pm, anod.outputs["Value"], am.inputs[0])
     link(pm, am.outputs["Value"], bsdf.inputs["Anisotropic"])
     # the brushing runs up the panel: a constant object-space tangent (a UV
@@ -322,7 +322,7 @@ def build(view, preview):
     link(pm, col.outputs["Result"], bsdf.inputs["Base Color"])
     # the ink's relief, and the grain as a whisper of bump
     bump = N.new("ShaderNodeBump")
-    bump.inputs["Distance"].default_value = V("art.texture.relief") * MM * 40
+    bump.inputs["Distance"].default_value = V("art.texture.relief") * MM
     bump.inputs["Strength"].default_value = 1.0
     link(pm, t_h.outputs["Color"], bump.inputs["Height"])
     bump2 = N.new("ShaderNodeBump")
@@ -395,9 +395,9 @@ def build(view, preview):
     # --------------------------------------------------- patch cables ----
     if view != "front":
         plug_d = V("jack.plug_d")
-        routes = {  # picture: two patch cables, out of PITCH and MOD4, away and down
-            "J-CV-PITCH": [(0, 0, 34), (-8, -6, 62), (-38, -40, 78), (-80, -110, 70), (-110, -230, 40)],
-            "J-CV-MOD4": [(0, 0, 32), (26, 6, 42), (72, 0, 46), (125, -50, 42), (170, -220, 30)],
+        routes = {  # picture: two patch cables, out of MOD3 and MOD2, clear of the pitch and breath pills
+            "J-CV-MOD3": [(0, 0, 32), (-10, -6, 50), (-40, -30, 62), (-80, -100, 56), (-110, -230, 40)],
+            "J-CV-MOD2": [(0, 0, 30), (22, 6, 36), (64, 12, 40), (125, -10, 38), (180, -130, 30)],
         }
         for i, (name, rel) in enumerate(routes.items()):
             x, y = parts[name][:2]
@@ -709,9 +709,9 @@ def setup(sc, rig, parts, dims, view, preview):
         cam.lens = 100
         tgt = P(parts["POT-OFFSET"][0] - 2, parts["POT-OFFSET"][1] - 12, 4)
         co.location = tgt + Vector((0.07, -0.135, 0.075))
-        focus.location = P(parts["POT-OFFSET"][0], parts["POT-OFFSET"][1] - 6.0, 6)
+        focus.location = P(parts["POT-OFFSET"][0] - 9, parts["POT-OFFSET"][1] - 14.0, 5)
         cam.dof.use_dof = True
-        cam.dof.aperture_fstop = 8.0
+        cam.dof.aperture_fstop = 16.0
     d = (tgt - co.location).normalized()
     co.rotation_euler = d.to_track_quat("-Z", "Y").to_euler()
     if preview:
