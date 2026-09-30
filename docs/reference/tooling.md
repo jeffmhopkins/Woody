@@ -181,8 +181,10 @@ python3 tools/kicad.py check                                  # everything above
 - a board with a layout fails `tools/pcb.py check` (§4);
 - `J-B2B-MOD`, soldered through both module boards, is netted differently on
   `module-main` and `module-jack` (pin *k* is one conductor on both);
-- the module main board's etherCON (`J-UMBILICAL`) is wired differently from
-  `J-UMB-MOD` in `hardware/interfaces/spi-link/netlist.yaml`;
+- a board's umbilical connector is wired differently from its part in
+  `hardware/interfaces/spi-link/netlist.yaml`: the main board's and the
+  adapter's `J-UMB` against `J-UMB`, the adapter's etherCON against
+  `J-UMB-INST`, the module main board's against `J-UMB-MOD`;
 - a key board's `J-CHAIN` pins are netted differently from the ribbon's other end in `hardware/interfaces/key-chain-loom/netlist.yaml` (pin k on the key board against pin 13 − k on the main board);
 - a board's register is wired differently from
   `hardware/cluster/key-marker-and-bits/allocation.yaml`, that file disagrees

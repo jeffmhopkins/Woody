@@ -65,15 +65,14 @@ to the net this sheet puts pin N on:
 |---|---|---|---|
 | `J-UMB-INST` | `J-UMBILICAL-INST` | `hardware/boards/umb-adapter` | `J1` |
 | `J-UMB` | `J-UMB` | `hardware/boards/main-board` (its tails) **and** `umb-adapter` (its posts): one part, bought and fitted once | main board `J6` (`Assembly` hand); adapter `J2` (`Assembly` none) |
-| `J-UMB-MOD` | `J-UMBILICAL` (`module/power-entry`'s row) | the module board that carries the panel connector (`hardware/boards/module-*`, being drawn) | **not yet — its owner wires pin N to this sheet's net N** |
+| `J-UMB-MOD` | `J-UMBILICAL` (`module/power-entry`'s row) | `hardware/boards/module-main` | `J3` |
 | `CABLE-UMB`, the adapter's tracks | — | no board: straight conductors, not parts | — |
 
-The main board's `J6` and the adapter's `J1`/`J2` were compared with this
-sheet by hand on 2026-09-29, pin by pin, and agree `[repo, board-netlist.yaml]`.
-**Nothing re-checks that automatically**, as `tools/kicad.py check` does for
-`J-CHAIN` against the key chain's sheet. **Open**, decided by the board
-owners: extend that check to `J-UMB`, `J-UMB-INST` and `J-UMB-MOD`, or split
-this sheet into per-board ends that the boards place.
+**`tools/kicad.py check` holds every board's connector to this sheet**, pin
+by pin and by net name: the main board's `J6` and the adapter's `J2` against
+`J-UMB`, the adapter's `J1` against `J-UMB-INST`, and the module main board's
+etherCON against `J-UMB-MOD` — the same way it holds `J-CHAIN` to the key
+chain's sheet. A pin moved on a board's sheet is reported by name.
 
 ## The instrument's connector — the etherCON on its adapter, and `J-UMB`
 

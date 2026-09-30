@@ -694,29 +694,47 @@ def check_through(board_docs):
     return problems
 
 
-def check_umbilical_mod(board_docs):
-    """The module main board's etherCON against the umbilical's own sheet: pin k of J-UMB-MOD
-    (row J-UMBILICAL) on the net hardware/interfaces/spi-link puts J-UMB-MOD.k on, by name."""
-    doc = dict(board_docs).get("module-main")
-    if doc is None:
-        return []
+# Every board part that carries the umbilical's eight conductors, and the part on
+# hardware/interfaces/spi-link's sheet whose pin map it must follow: (board, BOM row,
+# spi-link part). The sheet is placed by no board (spi-link.md, "which board places
+# what"), so each board draws its own connector and this holds it to the sheet.
+UMBILICAL_ENDS = [
+    ("main-board", "J-UMB", "J-UMB"),
+    ("umb-adapter", "J-UMB", "J-UMB"),
+    ("umb-adapter", "J-UMBILICAL-INST", "J-UMB-INST"),
+    ("module-main", "J-UMBILICAL", "J-UMB-MOD"),
+]
+
+
+def check_umbilical(board_docs):
+    """Each board's umbilical connector against the umbilical's own sheet: pin k of the
+    board's part on the net hardware/interfaces/spi-link puts <spi-link part>.k on, by name.
+    A board not yet drawn is skipped; a drawn board without exactly one such part is not."""
+    docs = dict(board_docs)
     link = yaml.safe_load(open(SPI_LINK))
-    want = {}
-    for net, members in link["nets"].items():
-        for p in members:
-            if isinstance(p, str) and p.startswith("J-UMB-MOD."):
-                want[p.split(".", 1)[1]] = net
-    js = [r for r, c in doc["components"].items() if c.get("of") == "J-UMBILICAL"]
-    if len(js) != 1:
-        return [f"umbilical: module-main has {len(js)} J-UMBILICAL parts, not one"]
-    got = {}
-    for net, members in doc["nets"].items():
-        for p in members:
-            if isinstance(p, str) and p.startswith(js[0] + "."):
-                got[p.split(".", 1)[1]] = net.lstrip("/")
     rel = os.path.relpath(SPI_LINK, ROOT)
-    return [f"umbilical: module-main wires {js[0]}.{k} (J-UMBILICAL) to {got.get(k)}; {rel} puts J-UMB-MOD.{k} on {w}"
-            for k, w in sorted(want.items()) if got.get(k) != w]
+    problems = []
+    for bname, row, part in UMBILICAL_ENDS:
+        doc = docs.get(bname)
+        if doc is None:
+            continue
+        want = {}
+        for net, members in link["nets"].items():
+            for p in members:
+                if isinstance(p, str) and p.startswith(part + "."):
+                    want[p.split(".", 1)[1]] = net
+        js = [r for r, c in doc["components"].items() if c.get("of") == row]
+        if len(js) != 1:
+            problems.append(f"umbilical: {bname} has {len(js)} {row} parts, not one")
+            continue
+        got = {}
+        for net, members in doc["nets"].items():
+            for p in members:
+                if isinstance(p, str) and p.startswith(js[0] + "."):
+                    got[p.split(".", 1)[1]] = net.lstrip("/")
+        problems += [f"umbilical: {bname} wires {js[0]}.{k} ({row}) to {got.get(k)}; {rel} puts {part}.{k} on {w}"
+                     for k, w in sorted(want.items()) if got.get(k) != w]
+    return problems
 
 
 def board_outputs(d):
@@ -756,7 +774,7 @@ def cmd_check():
     bad += check_allocation(board_docs)
     bad += check_chain(board_docs)
     bad += check_through(board_docs)
-    bad += check_umbilical_mod(board_docs)
+    bad += check_umbilical(board_docs)
     rows = ledger_rows()
     stale = {}
     for r in rows.values():
