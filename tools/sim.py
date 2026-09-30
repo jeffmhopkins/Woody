@@ -519,11 +519,26 @@ def ngspice(deck, post=None, values=None, spiceinit=None):
         m = re.match(r"^\s*([a-z][a-z0-9_]*)\s*=\s*([-+]?\d[\d.]*(?:e[-+]?\d+)?)", line.strip(), re.I)
         if m:
             meas[m.group(1).lower()] = float(m.group(2))
-    errors = [l for l in out.splitlines() if re.search(r"error|failed|not found|singular", l, re.I)
+    errors = [l for l in out.splitlines() if re.search(r"error|failed|not found|singular|too small|aborted", l, re.I)
               and "no error" not in l.lower()]
+    # A vendor macromodel's operating point often needs gmin or source stepping (a noise
+    # diode's node starts singular). The warnings on the way are not failures when the
+    # stepping then completes; an operating point that cannot be found still prints an
+    # Error, which stays.
+    if re.search(r"(gmin|source) stepping completed|transient op finished successfully", out, re.I):
+        errors = [l for l in errors if not re.match(
+            r"\s*Warning: (singular matrix|dynamic gmin stepping failed|true gmin stepping failed|"
+            r"gmin stepping failed|source stepping failed)", l, re.I)]
     for name, expr in (post or {}).items():
         env = {"w": waves, "p": values or {}, **POST}
-        meas[name] = float(eval(expr, {"__builtins__": {}}, env))
+        try:
+            meas[name] = float(eval(expr, {"__builtins__": {}}, env))
+        except KeyError as e:
+            # a waveform the deck should have written is missing: the analysis did not run
+            errors.append(f"post: {name} needs waveform {e}, which the run did not write")
+        except (SystemExit, ValueError) as e:
+            # a waveform that stops short (an aborted run) cannot answer the question
+            errors.append(f"post: {name}: {e}")
     return meas, errors, out
 
 
@@ -581,7 +596,8 @@ def run(simdir):
             template = first + "\n" + models + rest
         per = {}
         for label, values in corners(spec, parts, s.get("vary")):
-            v = derive(spec, {**values, **{k: fv for k, fv in (s.get("set") or {}).items()}})
+            v = derive(spec, {**values, **{k: (fv if isinstance(fv, (int, float)) else part_value(str(fv)))
+                                           for k, fv in (s.get("set") or {}).items()}})
             meas, errors, out = ngspice(fill(template, v), s.get("post"), v, spec.get("spiceinit"))
             missing = [m for m in s["measures"] if m not in meas]
             # a run that diverged reports a number too: never record one

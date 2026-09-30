@@ -1,0 +1,27 @@
+* TI's own configuration, SBOS737C section 8.2.3 Figure 56 p.30, as printed: R_ISO
+* 37.4 ohm, R_F 1 kohm from VOUT, R_Fx 10 kohm + C_F 39 nF from the op-amp output,
+* C_L 10 uF, VREF 2.5 V. TI states 89 degrees of loop-gain phase margin. The values are
+* TI's circuit, not this project's parts, so they are params with their source. Same
+* break as ref-loop.cir.
+VPOS pos 0 {{v_pos}}
+VREF ref 0 {{ti_vref}}
+XBUF ref inm pos 0 bufout OPAx197
+RFX bufout acmid {{ti_rfx}}
+CF acmid refminus {{ti_cf}}
+RF vout refminus {{ti_rf}}
+RISO bufout vout {{ti_riso}}
+CL vout 0 {{ti_cl}}
+LBRK refminus inm 1G
+CINJ inm inj 1G
+VINJ inj 0 DC 0 AC 1
+.options method=gear
+.control
+ac dec 100 1 100meg
+let t = -v(refminus)/v(inm)
+let tdb = db(t)
+let tph = 180/pi*cph(t)
+wrdata tdb.dat tdb
+wrdata tph.dat tph
+quit
+.endc
+.end
