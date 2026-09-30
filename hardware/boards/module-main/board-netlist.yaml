@@ -898,6 +898,48 @@ components:
     - 1
     - 2
     sheet: breath-response-shaper
+  R61:
+    of: R-GAIN-CTR
+    value: 100R 0.1%
+    pins:
+    - 1
+    - 2
+    sheet: pitch-stage
+  R62:
+    of: R-VREF-SER
+    value: 1k 0.1%
+    pins:
+    - 1
+    - 2
+    sheet: pitch-stage
+  R63:
+    of: R-VREF-INJ
+    value: 22.1k 0.1%
+    pins:
+    - 1
+    - 2
+    sheet: pitch-stage
+  R64:
+    of: R-VREF-FB
+    value: 200R 0.1%
+    pins:
+    - 1
+    - 2
+    sheet: pitch-stage
+  R65:
+    of: R-VREF-GND
+    value: 10k 0.1%
+    pins:
+    - 1
+    - 2
+    sheet: pitch-stage
+  R66:
+    of: R-ZERO-TOP
+    value: 42.2k 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
   R7:
     of: R-FB-LO
     value: 5.11k 1%
@@ -931,6 +973,7 @@ components:
     - R3B
     - R4A
     - R4B
+    - EP
     sheet: pitch-stage
   RV1:
     of: TRIM-BREATH-ZERO
@@ -1159,8 +1202,8 @@ nets:
   - J2.12
   - R1.1
   - R15.2
+  - R66.1
   - R8.1
-  - RV1.CW
   - U1.OUT
   - U3.AVDD
   /DAC_CH1:
@@ -1258,6 +1301,7 @@ nets:
   - Q1.S3
   - R6.1
   /VREFOUT:
+  - R62.1
   - RV2.CW
   - U3.VREFIN/VREFOUT
   /breath-output-stage/BREATH_OUT:
@@ -1303,6 +1347,9 @@ nets:
   /breath-receive-stage/TRIM_WIPER:
   - RV1.W
   - U5.INA+
+  /breath-receive-stage/ZERO_TOP:
+  - R66.2
+  - RV1.CW
   /breath-response-shaper/DIODE_BRANCH:
   - D7.K
   - D8.A
@@ -1393,6 +1440,7 @@ nets:
   /pitch-stage/GAIN_TRIM_MID:
   - RN1.R2B
   - RV3.W
+  - RV3.CW
   /pitch-stage/MINUS_NODE:
   - C28.2
   - RN1.R2A
@@ -1402,23 +1450,34 @@ nets:
   - C27.1
   - R32.2
   - U9.INB+
-  /pitch-stage/TRIM_WIPER:
-  - RV2.W
-  - U9.INA+
-  /pitch-stage/VREF_BUFFERED:
+  /pitch-stage/R1_BOTTOM:
+  - R61.1
   - RN1.R1A
+  /pitch-stage/TRIM_WIPER:
+  - R63.1
+  - RV2.W
+  /pitch-stage/VREF_BUFFERED:
+  - R61.2
+  - R64.1
   - U9.OUTA
+  /pitch-stage/VREF_FB:
+  - R64.2
+  - R65.1
   - U9.INA-
+  /pitch-stage/VREF_SUM:
+  - R62.2
+  - R63.2
+  - U9.INA+
   /power-entry/BUS_5V_IN:
   - FB4.1
   - J1.POS5_11
   - J1.POS5_12
   /power-entry/NEG12_D3:
-  - D3.A
+  - D3.K
   - J1.NEG12_1
   - J1.NEG12_2
   /power-entry/NEG12_FB:
-  - D3.K
+  - D3.A
   - FB3.1
   /power-entry/POS12_D1:
   - D1.K
@@ -1514,8 +1573,15 @@ nets:
   - R43.2
   - R48.2
   - R53.2
+  - R65.2
   - R9.2
+  - RN1.R3A
+  - RN1.R4A
+  - RN1.R4B
+  - RN1.R3B
+  - RN1.EP
   - RV1.CCW
+  - RV2.CCW
   - U12.INB+
   - U3.GND
   - U5.INB+
@@ -1634,18 +1700,6 @@ nets:
   - U2.GND
   R12.2:
   - R12.2
-  RN1.R3A:
-  - RN1.R3A
-  RN1.R3B:
-  - RN1.R3B
-  RN1.R4A:
-  - RN1.R4A
-  RN1.R4B:
-  - RN1.R4B
-  RV2.CCW:
-  - RV2.CCW
-  RV3.CW:
-  - RV3.CW
   U2.PWRGD:
   - U2.PWRGD
   U3.VOUTF:
@@ -1660,12 +1714,6 @@ external_endpoints:
 - J1.GATE_15
 - J1.GATE_16
 - R12.2
-- RN1.R3A
-- RN1.R3B
-- RN1.R4A
-- RN1.R4B
-- RV2.CCW
-- RV3.CW
 - U2.PWRGD
 - U3.VOUTF
 - U3.VOUTH

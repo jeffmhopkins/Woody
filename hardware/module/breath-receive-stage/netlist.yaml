@@ -19,10 +19,6 @@ ports:
     dir: out
     to: module/breath-output-stage
     figure: inamp-full-scale
-  DAC_AVDD:
-    dir: in
-    from: module/power-entry
-    figure: dac-rail
   MODULE_ANALOG_POS12:
     dir: in
     from: module/power-entry
@@ -32,6 +28,10 @@ ports:
   AGND_MOD:
     dir: ref
     from: module/power-entry
+  DAC_AVDD:
+    dir: in
+    from: module/power-entry
+    figure: dac-rail
 foreign:
   R1:
     owner: interfaces/breath-sense-link
@@ -113,6 +113,13 @@ components:
     - 1
     - 2
     note: Sets the raw G = 1 + 50k/42.2k = 2.185
+  R-ZERO-TOP:
+    value: 42.2k 1%
+    pins:
+    - 1
+    - 2
+    note: 'Top of TRIM-BREATH-ZERO''s divider: 42.2k over the 10k track spans the wiper 0 to 0.998 V of DAC_AVDD,
+      the 0 to +1.0 V the page specifies, so breath-zero-ref sits at mid-track rather than a tenth of the way up'
   R2:
     of: R-SER-BREATH
     value: 10k 0.1%
@@ -206,7 +213,7 @@ nets:
   - R3.1
   DAC_AVDD:
   - port: DAC_AVDD
-  - TRIM-BREATH-ZERO.CW
+  - R-ZERO-TOP.1
   GAIN_SET:
   - R-GAIN-INAMP.1
   - U-DIFFRX.RG1
@@ -251,3 +258,6 @@ nets:
   TRIM_WIPER:
   - TRIM-BREATH-ZERO.W
   - U-REF-BUF.INA+
+  ZERO_TOP:
+  - R-ZERO-TOP.2
+  - TRIM-BREATH-ZERO.CW

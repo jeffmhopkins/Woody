@@ -128,7 +128,9 @@ components:
     pins:
     - A
     - K
-    note: Reverse protection, -12 V branch
+    note: 'Reverse protection, -12 V branch. CATHODE TO THE BUS, anode to the module''s -12 V rail: the rail''s
+      current flows out of the module into the bus''s -12 V, so this is the one entry diode the other way round
+      from D1/D2'
   FB1:
     of: FB-IN
     value: 600R @ 100MHz
@@ -248,11 +250,11 @@ nets:
   - FB1.2
   - U-REG-DAC.IN
   NEG12_D3:
-  - D3.A
+  - D3.K
   - J-PWR-EURO.NEG12_1
   - J-PWR-EURO.NEG12_2
   NEG12_FB:
-  - D3.K
+  - D3.A
   - FB3.1
   POS12_D1:
   - D1.K
