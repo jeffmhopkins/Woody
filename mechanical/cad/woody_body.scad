@@ -1146,6 +1146,9 @@ tongue_y = [ec_c[0] - ec_fl[0] / 2, ec_c[0] + ec_fl[0] / 2];
 // mount's nut on the top face, the spacer under the board, and the float.
 mb_keep_d = max(hardware_mb_nut_e, col_standoff_e, hardware_kb_spacer_od) + 2 * hardware_kb_mount_float;
 end_mount_in = 4;   // drawing convention: an end mount's centre in from the board's long edge
+// The breath sensor's footprint along the body, its barbs included.
+sensor_keep_l = boards_sensor_body + boards_sensor_port_l;
+sensor_keep_cx = sensor_c[0] - boards_sensor_body / 2 + sensor_keep_l / 2;
 function so_clear(p) = let(r = mb_keep_d / 2 + 0.5)
     !pins_at(p, r) && (abs(p[1] - W / 2) >= lighting_strip_w / 2 + r || p[0] < strip_x0 - r || p[0] > strip_x0 + strip_l + r)
     // a thumb switch's cutout in the bottom plate is an edge for the stud,
@@ -1154,7 +1157,9 @@ function so_clear(p) = let(r = mb_keep_d / 2 + 0.5)
     && min([for (k = bottom_keys) rect_gap(p, key_xy(k), [plate_cutout, plate_cutout], key_rot(k))])
        >= max(hardware_stud_edge, hardware_kb_spacer_od / 2 + hardware_kb_mount_float + 0.5)
     && min([for (u = ubolt_legs()) norm(p - u)]) >= ubolt_keep_r + r
-    && max(abs(p[0] - sensor_c[0]) - boards_sensor_body / 2, abs(p[1] - sensor_c[1]) - boards_sensor_leads / 2) >= r
+    // the breath sensor's body and leads, and its barbs, which stand out
+    // boards.sensor_port_l toward the tail at a nut's height
+    && max(abs(p[0] - sensor_keep_cx) - sensor_keep_l / 2, abs(p[1] - sensor_c[1]) - boards_sensor_leads / 2) >= r
     && max(abs(p[0] - tall_c[0][0]) - tall_sz[0] / 2, abs(p[1] - tall_c[0][1]) - tall_sz[1] / 2) >= r
     && min([for (cl = chain_ribbon_cls) let(sp = chain_span(chain_x(cl), chain_dir(cl)), x0 = sp[0], x1 = sp[1])
               rect_gap(p, [(x0 + x1) / 2, chain_y], [x1 - x0, boards_chain_hdr_l], 0)]) >= r + 1
