@@ -413,3 +413,9 @@ a correction against the receive page's own case for `R1b` — "fifty times"
 against about 13 dB — and the sentence it is answering is in "`R1` is a 1206,
 and it has a twin". They are now adjacent instead of two files apart. **No
 winner was picked here**, which is not the same as their agreeing.*
+
+**What closes it: the breath-link CMRR simulation** (the INA828 receive stage
+with both 1 kΩ legs and the 1 MΩ bias pair at their tolerances), in progress
+on 2026-09-30. Its CMRR with `R1b` fitted and with `R1b` shorted is the number
+both statements are estimating; whichever it matches stands, and the other is
+corrected to it.
