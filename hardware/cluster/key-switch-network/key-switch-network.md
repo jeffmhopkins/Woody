@@ -166,6 +166,17 @@ read at all. At 330 Ω the pressed node sits at 3.3 × 330 / 2530 = 0.430 V,
 and anything that pushes the rating-driven value up — a tighter reading of the
 contact current, say — runs out of room below ≈ 390 Ω.
 
+**Decided: 100 Ω stays.** The rating a larger resistor would meet is a
+steady resistive-load rating at 12 V; what the contact sees is a capacitor's
+discharge, ½·47 nF·3.3² ≈ 0.26 µJ `[calc, above]` over a few microseconds,
+once per press, at 3.3 V. The steady current it carries is
+`key-scan-current`'s per-key share, inside the rating. Against that, 330 Ω
+keeps a pressed key readable by 65 mV and nothing else, where 100 Ω keeps it
+by `[calc]` 0.495 − 3.3 × 100 / 2300 = 0.352 V. A margin of 65 mV on whether
+a key reads at all is the worse risk of the two. If M1's switch
+characterisation (ROADMAP) shows contact wear under the press transient, the
+way back is a smaller `C-KEY`, not a larger `R-KEY-SER`.
+
 > **Why the network is fitted at all, stated honestly.** The argument that
 > originally bought these parts — a 12 V LED edge through ~15 pF injecting a
 > false level — was wrong, and ADR 0001 now records why: there is no 12 V edge,
@@ -187,18 +198,19 @@ page `[repo] carrier.md §2`. Going back to 10 kΩ would cut that to 6.2 mA and
 and the release would pass VT+ max at 470 × ln((3.3 − 0.033)/(3.3 − 2.475)) ≈
 647 µs, more than two scan periods. So 10 kΩ also means shrinking `C-KEY`
 (≈ 10 nF brings the release back near `key-release-time`), with less glitch
-filtering in a humid cavity. **Recorded as a live trade, not re-opened here.**
+filtering in a humid cavity. **Decided: 2.2 kΩ with 47 nF**, the reference
+load accepted on the carrier page (`carrier.md` §2, *"Accepted, not
+ignored"*) and simulated at every corner (`sim/`). The two boards are laid
+out with it.
 
 ---
 
 ## Still open
 
-*The two items from `cluster-boards.md`'s `Still open` list that belong to this
-circuit, moved verbatim 2026-09-21. `§2` is this page.*
+- **Whether `LT` takes lighter springs** (`SW-THUMB`). It changes nothing
+  electrically `[repo] bom.csv, 0002`: the same footprint takes either
+  switch. **Closed at M1** by the hand assessment ROADMAP gives it — thumb tip
+  against fingertip on the characterisation coupon — and, if lighter, by
+  naming the KS-33 variant on `SW-THUMB`'s row.
 
-- **`R-KEY-PU` at 2.2 kΩ versus 10 kΩ** (§2). The reason for 2.2 kΩ expired when
-  the register moved back to this board, and the cost — 27.3 mA on the ADC's
-  reference rather than 6.2 mA — arrived at the same moment. Live trade,
-  recorded on the carrier page as accepted.
-- **Whether `LT` takes lighter springs** (`SW-THUMB`), which is an M1 decision by
-  hand and changes nothing electrically `[repo] bom.csv, 0002`.
+`R-KEY-PU`'s value (2.2 kΩ against 10 kΩ) is decided above.
