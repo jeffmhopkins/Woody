@@ -402,6 +402,10 @@ boards:
     status: tbd
     source: "height of the block standing in for the lead forms. NOT a datasheet dimension: the p.20 table gives only A1 0.05-0.25 (standoff) and L 1.02-1.52 (foot length); the lead's rise to the body is drawn (p.7 Detail G) but not dimensioned [from memory]"
     decided_by: "M4 footprint"
+  sensor_land_w:
+    value: 18.8
+    status: settled
+    source: "across the land pattern's two pad rows, outer end to outer end: rows 16.00 centre to centre plus one 2.80 pad [repo hardware/lib/woody.pretty/NXP_Case1351-01_SOP-8_P2.54mm.kicad_mod; calc 16.00 + 2.80 = 18.80]. Wider than the lead tips (sensor_leads), so it is what sets the sensor's inset from the main board's edge: the copper, not the part, must keep off the edge"
   # THE KEY CHAIN'S CONNECTORS (owner, 2026-09-27, ADR 0017 amended): a
   # through-hole 1.27 mm shrouded IDC header, right-angle, on each board -
   # stacked, the key board's hanging from its underside over the main
@@ -496,6 +500,11 @@ boards:
     value: 1.25
     status: settled
     source: "the header's pin row above the main board, at the middle of its 2.50 insulator [ds HANXIA-HX-PZ2.54-1x8P-WZ.pdf]; where the row meets the adapter"
+  umb_parts_d:
+    value: 14
+    status: tbd
+    source: "the depth along the body, in front of J-UMB's insulator, kept for J-UMB's own footprint and the parts that must sit at the connector (U-TVS-SPI, NT-DIG, D-TVS-BREATH x2, R-SER-BREATH-INST x2, D-REVSHUNT): the pin row 1.5 in front of the insulator plus its courtyard 1.77 [repo: KiCad PinHeader_1x08_P2.54mm_Horizontal as placed], a column of the SOD-323 / SOT-23-5 / net-tie parts 3.6, and a column of the 1206s and the SMC shunt 6.7 [calc: 3.27 + 3.6 + 6.7 = 13.57, rounded up]. The tongue's end mounts stand behind it; D-TVS-PWR goes between them"
+    decided_by: "M4 main board layout"
   # ONE MAIN BOARD (ADR 0017): the thumb switches, their registers and the
   # carrier's circuits on one board at the thumb level, mouth cap to the end
   # of the right hand. Its size and the height its parts have are derived;
