@@ -86,8 +86,8 @@ keys:
   # --- Left thumb, bottom face (inset — ADR 0009) --------------------------
   # LT1/LT3 and RT1/RT3, the row on the near side of the centreline, are
   # turned 180 degrees: a KS-33's pins sit off its centre, and so turned they
-  # point away from the LED strip, which lies on the main board between the
-  # two rows (ADR 0022). A square cap and a cross stem feel the same either way.
+  # point away from the centreline, where the LED row lies on the main board
+  # between the two rows (ADR 0022; ADR 0028 kept the turn for the row). A square cap and a cross stem feel the same either way.
   # Marked `note` on the assumption these are octave/register keys, as on a
   # conventional woodwind. Confirm at M2.
   - { id: LT1, face: bottom, x: null, y: null, rotation: 180, hand: left,  finger: thumb, cluster: left_thumb, role: note }

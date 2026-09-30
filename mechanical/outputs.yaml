@@ -88,7 +88,7 @@ renders:
     imgsize: [1600, 800]
     camera: [0, 28, 10, 50, 0, 340, 440]
     defines: {origin: "centre", show_lid: false, show_caps: false,
-              highlight: ["main board*", "parts *", "tall parts*", "breath sensor", "LED strip", "ribbon *", "J-CHAIN *", "IDC plug *", "board *",
+              highlight: ["main board*", "parts *", "tall parts*", "breath sensor", "LED row", "ribbon *", "J-CHAIN *", "IDC plug *", "board *",
                           "switch *", "Matrix*", "etherCON", "USB-C*", "umbilical adapter", "J-UMB", "J-MCU"]}
   - name: breakdown-breath
     title: "Breakdown: the breath path - mouth cap, tube, trap, sensor, at the mouth end"

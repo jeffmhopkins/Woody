@@ -35,7 +35,19 @@ ECHO: "PCB", "main", "connector", "J-MCU", 242.5, 250.3, 28.5, 21.54, 1
 ECHO: "PCB", "main", "connector", "J-UMB", 297.4, 299.9, 21.5, 8, 2.54, 1.25
 ECHO: "PCB", "main", "part", "U-BREATH", 14.15, 39.6, 0, 12.3, 17.8
 ECHO: "PCB", "main", "part", "REGULATOR-BLOCK", 236, 41.5, 0, 10, 15, 12.5
-ECHO: "PCB", "main", "strip", "LED", 20.75, 23.5, 220.25, 10
+ECHO: "PCB", "main", "led", "LED1", 224.685, 28.5, 180, 6.9, 5.5, 1.65
+ECHO: "PCB", "main", "led", "LED2", 208.015, 28.5, 180, 6.9, 5.5, 1.65
+ECHO: "PCB", "main", "led", "LED3", 191.345, 28.5, 180, 6.9, 5.5, 1.65
+ECHO: "PCB", "main", "led", "LED4", 174.675, 28.5, 180, 6.9, 5.5, 1.65
+ECHO: "PCB", "main", "led", "LED5", 158.005, 28.5, 180, 6.9, 5.5, 1.65
+ECHO: "PCB", "main", "led", "LED6", 141.335, 28.5, 180, 6.9, 5.5, 1.65
+ECHO: "PCB", "main", "led", "LED7", 124.665, 28.5, 180, 6.9, 5.5, 1.65
+ECHO: "PCB", "main", "led", "LED8", 107.995, 28.5, 180, 6.9, 5.5, 1.65
+ECHO: "PCB", "main", "led", "LED9", 91.325, 28.5, 180, 6.9, 5.5, 1.65
+ECHO: "PCB", "main", "led", "LED10", 74.655, 28.5, 180, 6.9, 5.5, 1.65
+ECHO: "PCB", "main", "led", "LED11", 57.985, 28.5, 180, 6.9, 5.5, 1.65
+ECHO: "PCB", "main", "led", "LED12", 41.315, 28.5, 180, 6.9, 5.5, 1.65
+ECHO: "PCB", "main", "led", "LED13", 24.645, 28.5, 180, 6.9, 5.5, 1.65
 ECHO: "PCB", "main", "standoff", "M2.5", 40, 11.1, 2.7, 6.1735, 4.9, "column"
 ECHO: "PCB", "main", "standoff", "M2.5", 40, 45.9, 2.7, 6.1735, 4.9, "column"
 ECHO: "PCB", "main", "standoff", "M2.5", 121.7, 11.1, 2.7, 6.1735, 4.9, "column"
