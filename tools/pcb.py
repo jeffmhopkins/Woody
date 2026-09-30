@@ -1589,7 +1589,7 @@ def assembly_files(bdir, name, fab):
     return [root] + sorted({os.path.normpath(os.path.join(bdir, s)) for s in subs})
 
 
-def cmd_render(bdir):
+def cmd_render(bdir, preview=None):
     """3D views of both sides, 2D copper plots, and the fabrication outputs - all recorded
     in hardware/SHEETS.csv against the .kicad_pcb, so tools/kicad.py check reports them
     stale when the board moves.
@@ -1597,16 +1597,28 @@ def cmd_render(bdir):
     Nothing is written until everything is: the board must pass `check` first, every 3D
     model it names must exist, and the outputs are made in a scratch directory and moved
     in at the end. A refusal half-way used to leave fab/ deleted and the renders
-    rewritten with no ledger row, which kicad.py check then blamed on a hand edit (K7-7)."""
+    rewritten with no ledger row, which kicad.py check then blamed on a hand edit (K7-7).
+
+    `--preview <dir>`: the same renders and fab files into <dir> OUTSIDE the repository,
+    for a board that does not pass yet - the board is not asked to pass, nothing goes
+    into the board's directory or the ledger, and the output says it is a preview."""
     import shutil
     import kicad
     name = os.path.basename(bdir)
     pcb = os.path.join(bdir, name + ".kicad_pcb")
-    if cmd_check(bdir):
+    if preview:
+        preview = os.path.abspath(preview)
+        if preview.startswith(ROOT + os.sep):
+            sys.exit("pcb: a --preview directory must be outside the repository: its files are not ledgered")
+        if cmd_check(bdir):
+            print("pcb: PREVIEW of a board that FAILS its check (above) - not for ordering")
+    elif cmd_check(bdir):
         sys.exit("pcb: not rendering a board that fails its check - nothing was written")
     env = kicad_env()
     missing = missing_models(pcbnew.LoadBoard(pcb), bdir, env)
-    if missing:
+    if missing and preview:
+        print("pcb: PREVIEW - these parts have no 3D model and render as nothing:\n  " + "\n  ".join(missing))
+    elif missing:
         sys.exit("pcb: the 3D render would silently leave out every part whose model is missing - "
                  "run tools/setup-env.sh, or bank the model:\n  " + "\n  ".join(missing))
     t = tempfile.mkdtemp(prefix=".render-", dir=bdir)
@@ -1654,6 +1666,13 @@ def cmd_render(bdir):
         subprocess.run(["kicad-cli", "pcb", "export", "pos", "--format", "csv", "--units", "mm", "--side", "both",
                         "-o", os.path.join(fab, name + "-pos.csv"), pcb], capture_output=True, text=True, env=env, check=True)
         sheets = assembly_files(bdir, name, fab)
+        if preview:
+            os.makedirs(preview, exist_ok=True)
+            for o in outs:
+                shutil.copy(o, preview)
+            shutil.copytree(fab, os.path.join(preview, "fab"), dirs_exist_ok=True)
+            print(f"pcb: PREVIEW written to {preview} (not in the repository, not ledgered)")
+            return
         # everything made: now swap it in
         final = []
         for o in outs:
@@ -1695,6 +1714,6 @@ if __name__ == "__main__":
     if len(sys.argv) >= 3 and sys.argv[1] in ("layout", "check", "render"):
         d = os.path.join(ROOT, sys.argv[2].rstrip("/"))
         sys.exit({"layout": lambda: cmd_layout(d, "--force" in sys.argv, "--no-route" not in sys.argv), "check": lambda: cmd_check(d),
-                  "render": lambda: cmd_render(d)}[sys.argv[1]]() or 0)
+                  "render": lambda: cmd_render(d, sys.argv[sys.argv.index("--preview") + 1] if "--preview" in sys.argv else None)}[sys.argv[1]]() or 0)
     print(__doc__)
     sys.exit(2)
