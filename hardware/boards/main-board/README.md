@@ -146,8 +146,8 @@ finish, and every other open item:
 | **The umbilical adapter** (`PCB-UMB-ADAPTER`) is a separate small board: its schematic is [`../umb-adapter/`](../umb-adapter/README.md), not laid out | With this board's layout |
 
 What the first layout settled, and where it is held:
-- **Four layers** (ADR 0017 amendment 2026-09-29), JLCPCB's stack `JLC04161H-7628`
-  [ds `datasheets/fab/JLCPCB-IMPEDANCE-STACKUPS.pdf`]: layer 2 `PWR_GND`, layer 3
+- **Four layers** (ADR 0017 amendment 2026-09-29), JLCPCB's stack
+  `JLC04161H-7628` [ds `datasheets/fab/JLCPCB-IMPEDANCE-STACKUPS.pdf`]. Layer 2 `PWR_GND`, layer 3
   the +12 V (`UMBILICAL_POS12`), the rails that are tracks in `layout.yaml`
   `net_classes:`. **`AGND_INST` is an island on layer 2** round the analog block,
   its moat bridged once by `NT-AGND` (NT2) beside `U-ADC`, between its VSS and its
