@@ -13,16 +13,19 @@
 * at 0 V (uic): that is what a power-on is.
 VP12 bp12 0 PWL(0 0 {{t_pos0}} 0 {{t_pos_end}} {{v_bus}})
 VN12 bn12 0 PWL(0 0 {{t_neg0}} 0 {{t_neg_end}} {{v_bus_neg}})
+* PTC-POS12 / PTC-NEG12 at their largest resistance (r_ptc), ahead of D1 / D3 (ADR 0027)
+RPTC1 bp12 bp12f {{r_ptc}}
+RPTC3 bn12 bn12f {{r_ptc}}
 * D1: bus +12 -> module +12 (A at the bus, as netlisted)
-D1 bp12 p12d D5817
+D1 bp12f p12d D5817
 RFB1 p12d p12 {{r_fb}}
 C1 p12 0 {{C1}}
 RLP p12 0 {{r_load_pos}}
 * D3: d3_flipped = the netlist's orientation (K at the bus -12 V pin, A towards the module);
 * d3_as_net = the reversed what-if. Only one is fitted (the other's m is 1e-6)
-D3N bn12 n12d D5817 m={{d3_as_net}}
-D3F n12d bn12 D5817 m={{d3_flipped}}
-RD3OFF n12d bn12 1e12
+D3N bn12f n12d D5817 m={{d3_as_net}}
+D3F n12d bn12f D5817 m={{d3_flipped}}
+RD3OFF n12d bn12f 1e12
 RFB3 n12d n12 {{r_fb}}
 C3 n12 0 {{C3}}
 RLN n12 0 {{r_load_neg}}

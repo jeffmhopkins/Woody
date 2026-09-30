@@ -34,6 +34,27 @@ params:
   d3_flip:    {value: 1, source: "1 = D3 as netlisted since 2026-09-30 (K at the bus, A at the module - hardware/module/power-entry/netlist.yaml); 0 = the reversed drawing it replaced"}
   t_neg_rise: {value: 2.0e-3}
 
+  # --- PTC-POS12 / PTC-NEG12 in the power-on deck (ADR 0027) ----------------------------
+  r_ptc:      {value: 0.4, source: "MF-MSMF020/60: Rmin 0.40 ohm, a fitted part's resistance [datasheets/discrete-and-power/BOURNS-MF-MSMF.pdf p.1]. R1max, 6.0 ohm an hour after a trip, is the page's DC arithmetic: TI's LM317L transient model does not converge with it in series at dt_neg = -1 ms or +5 ms (ngspice 42, 'timestep too small' inside the model), so it is not claimed here"}
+  # --- groundshift.cir: the rack's copper and the instrument's current -------------------
+  v_rail:     {value: 12.0}
+  v_rail_neg: {value: -12.0}
+  r_rib_gnd:  {value: 0.017, source: "the power ribbon's six ground conductors: 28 AWG 0.232 ohm/m x 0.3 m / 6 + IDC contacts 2 x 15 mohm / 6 [calc, docs/review/2026-09-21-hardware-and-standards-review/A7-module-power.md]"}
+  r_rib_rail: {value: 0.050, source: "one rail's two ribbon conductors: 0.232 x 0.3 / 2 + 2 x 15 mohm / 2 [calc, same basis]"}
+  r_bus_rail: {value: 0.031, source: "a bus-board trace, 1 oz, 4 mm wide, 0.25 m: 1.72e-8 x 0.25 / (0.004 x 35e-6) [calc, docs/review/2026-09-21-hardware-and-standards-review/B3-power-entry-practice.md]"}
+  r_bus_seg:  {value: 0.031, source: "the bus-board ground between this module's tap and the receiver's: 0 (the next slot - 1 mohm, since ngspice will not take 0) to the whole 0.25 m trace [calc, as r_bus_rail] (swept)"}
+  i_mod_pos:  {value: 0.045, source: "the module's own +12 V analog load, ~45 mA [repo, the FB-IN row]"}
+  i_mod_neg:  {value: 0.040, source: "the module's -12 V load, ~40 mA [repo, ADR 0004 power table]"}
+  i_q:        {value: 0.212, source: "the instrument at rest, 212 mA [repo, ADR 0005 load table, quiescent - an upper bound since ADR 0015]"}
+  i_swing:    {value: 0.195, source: "the breath-correlated swing: 0.195 A, the thirteen WS2815B-V1 on the main board at full white, 170-195 mA at 12 V [owner brief 2026-09-30, not yet in the corpus]; 0.367 A, ADR 0005's quiescent-to-clamp-legal-worst swing, the one the 7-18 cent estimate used [repo] (swept)"}
+  f_b:        {value: 2.0, source: "one breath 0 -> full -> 0 in 0.5 s [assumption: the frequency does not enter a resistive result]"}
+  eta:        {value: 0.85, source: "U-ISO at 20-30 % load, ~86 % [datasheets/discrete-and-power/MORNSUN-URB_YMD-15WR3.pdf p.4, efficiency vs load at 24 V in, the 15 V curve as the nearest to 12 V]"}
+  v_iso:      {value: 12.0, source: "U-ISO's output [ds p.1]"}
+  c_iso:      {value: 2.0e-9, source: "U-ISO's isolation capacitance, 2000 pF typ [ds p.3]"}
+  r_tie:      {value: 0.001, source: "NT-UMB-MOD, NT-DIG-MOD and the DIG_GND plane between them, lumped [assumption]"}
+  topo:       {value: 1, source: "0 before, 1 isolated (the design), 2 ground sense, 3 balanced load - groundshift.cir's header"}
+  bal_frac:   {value: 0.01, source: "topo 3: a dummy load that holds the instrument's total to 1 % of the swing [assumption]"}
+  t_gs:       {value: 1.0}
 derived:
   t_pos0: "max(-v['dt_neg'], 0) + 1e-6"
   t_pos_end: "max(-v['dt_neg'], 0) + 1e-6 + v['t_rise']"
@@ -41,6 +62,11 @@ derived:
   t_neg_end: "max(v['dt_neg'], 0) + 1e-6 + v['t_neg_rise']"
   d3_as_net: "1e-6 if v['d3_flip'] else 1.0"
   d3_flipped: "1.0 if v['d3_flip'] else 1e-6"
+  k_direct: "1.0 if v['topo'] in (0, 2, 3) else 0.0"
+  k_iso: "1.0 if v['topo'] == 1 else 0.0"
+  k_sense: "1.0 if v['topo'] == 2 else 0.0"
+  swing_frac: "v['bal_frac'] if v['topo'] == 3 else 1.0"
+  dc_extra: "v['i_swing'] if v['topo'] == 3 else 0.0"
 
 sims:
   - name: d3-reversed
@@ -82,3 +108,67 @@ sims:
         why: "DAC_AVDD settles at or above dac-rail's hard 5.00 V floor and never reaches the DAC8568's 6 V absolute maximum on the way (SBAS430, AVDD to GND -0.3 to +6 V)"
       - expr: "max['jack_peak'] < 0.1 and min['jack_trough'] > -0.1"
         why: "pitch-stage.md 'Power-on is 0.000 V': with the DAC at its reset zero scale and V_ref at 0 V the jack stays within 100 mV of 0 V through the whole power-up, whichever rail arrives first"
+
+  # ---- ADR 0027: the breath-correlated pitch error, before and after ------------------------
+  # groundshift.cir. The error is the pitch jack's reference moving against the receiving
+  # module's ground, peak to peak over one breath, in cents at 1 V/oct (1 cent = 1/1200 V).
+  # Each runs at the receiver in the next slot (r_bus_seg 0) and at the PSU end of the bus, and
+  # at both breath-correlated swings.
+  - name: gnd-before
+    # the design until 2026-09-30: the instrument's current returns through the star, the
+    # ribbon and the bus. Reproduces power-entry.md's old 7-18 cent table.
+    deck: groundshift.cir
+    set: {topo: 0}
+    sweep: {r_bus_seg: [0.001, 0.031], i_swing: [0.195, 0.367]}
+    vary: []
+    measures: [err_cents, err_mv, rail_mv]
+    post:
+      err_cents: "(peak(w['ref'], 0.05, p['t_gs']) - trough(w['ref'], 0.05, p['t_gs'])) * 1200"
+      err_mv: "1000*(peak(w['ref'], 0.05, p['t_gs']) - trough(w['ref'], 0.05, p['t_gs']))"
+      rail_mv: "1000*(peak(w['railp'], 0.05, p['t_gs']) - trough(w['railp'], 0.05, p['t_gs']))"
+    asserts:
+      - expr: "min['err_cents'] > 3.0"
+        why: "the problem ADR 0027 exists for: several cents of breath-correlated pitch error even with the receiver in the next slot"
+  - name: gnd-isolated
+    # the design: U-ISO draws the instrument's power rail to rail
+    deck: groundshift.cir
+    set: {topo: 1}
+    sweep: {r_bus_seg: [0.001, 0.031], i_swing: [0.195, 0.367]}
+    vary: []
+    measures: [err_cents, err_mv, tie_ua, rail_mv]
+    post:
+      err_cents: "(peak(w['ref'], 0.05, p['t_gs']) - trough(w['ref'], 0.05, p['t_gs'])) * 1200"
+      err_mv: "1000*(peak(w['ref'], 0.05, p['t_gs']) - trough(w['ref'], 0.05, p['t_gs']))"
+      rail_mv: "1000*(peak(w['railp'], 0.05, p['t_gs']) - trough(w['railp'], 0.05, p['t_gs']))"
+      tie_ua: "1e6*max(abs(peak(w['itie'], 0.05, p['t_gs'])), abs(trough(w['itie'], 0.05, p['t_gs'])))"
+    asserts:
+      - expr: "max['err_cents'] < 0.01 and max['tie_ua'] < 1.0"
+        why: "ADR 0027: with the converter no breath-correlated current reaches the rack's ground - under a hundredth of a cent, and under a microamp in the tie to the star (what is left is the isolation capacitance)"
+  - name: gnd-sense
+    # option (b): the pitch reference on a current-free ribbon conductor
+    deck: groundshift.cir
+    set: {topo: 2}
+    sweep: {r_bus_seg: [0.001, 0.031], i_swing: [0.195, 0.367]}
+    vary: []
+    measures: [err_cents, err_mv, rail_mv]
+    post:
+      err_cents: "(peak(w['ref'], 0.05, p['t_gs']) - trough(w['ref'], 0.05, p['t_gs'])) * 1200"
+      err_mv: "1000*(peak(w['ref'], 0.05, p['t_gs']) - trough(w['ref'], 0.05, p['t_gs']))"
+      rail_mv: "1000*(peak(w['railp'], 0.05, p['t_gs']) - trough(w['railp'], 0.05, p['t_gs']))"
+    asserts:
+      - expr: "nom['err_cents'] < 0.5 or nom['err_cents'] > 3.0"
+        why: "option (b) removes the ribbon's share only: next to nothing is left with the receiver at this module's tap (the rails' drop is common-mode), the whole bus-board share with it at the PSU end - the reason ADR 0027 does not choose it"
+  - name: gnd-balanced
+    # option (c): a dummy load holding the instrument's total current constant to bal_frac
+    deck: groundshift.cir
+    set: {topo: 3}
+    sweep: {r_bus_seg: [0.001, 0.031], i_swing: [0.195, 0.367]}
+    vary: []
+    measures: [err_cents, err_mv, rail_mv]
+    post:
+      err_cents: "(peak(w['ref'], 0.05, p['t_gs']) - trough(w['ref'], 0.05, p['t_gs'])) * 1200"
+      err_mv: "1000*(peak(w['ref'], 0.05, p['t_gs']) - trough(w['ref'], 0.05, p['t_gs']))"
+      rail_mv: "1000*(peak(w['railp'], 0.05, p['t_gs']) - trough(w['railp'], 0.05, p['t_gs']))"
+    asserts:
+      - expr: "max['err_cents'] < 0.5"
+        why: "option (c) at 1 % balance leaves a fraction of a cent - at the cost of burning the whole swing as heat all the time (ADR 0027)"

@@ -1,3 +1,4 @@
+* ADR 0027: the supply is U-ISO's isolated 12 V (v_bus, r_bus, C-ISO-OUT), not the bus.
 * The umbilical load switch as netlisted (module/umbilical-load-switch), driving the
 * instrument's input as netlisted (carrier/power-entry-instrument: C-STRIP-BULK at the
 * input node, L-BUCK-IN, C-BUCK-IN), with the behavioural LT1641 of lt1641.inc.
@@ -9,6 +10,8 @@
 * the output starts at 0 V with the gate at VCC + dvg.
 VBUS bus 0 PWL(0 {{v_bus0}} {{t_rise}} {{v_bus}})
 RBUS bus vcc {{r_bus}}
+* C-ISO-OUT, U-ISO's output capacitor (module/power-entry), at the load switch's VCC
+CISOOUT vcc 0 {{C-ISO-OUT}}
 CDEC vcc 0 {{C-DECOUPLE-LOADSW}}
 RILIM vcc sense {{r_ilim}}
 XU vcc sense gdrv fb timer on pwrgd 0 LT1641B vlo={{vlo}} vhi={{vhi}} igate={{igate}} dvg={{dvg}} gm={{gm}} itup={{itup}} itdn={{itdn}}
@@ -34,6 +37,7 @@ BLOAD cbuck 0 I = {{i_load}}*0.5*(1 + tanh((V(cbuck)-{{v_buck_min}})/0.1))
 .control
 tran 20u {{t_end}} 0 50u uic
 wrdata out.dat v(out)
+wrdata vcc.dat v(vcc)
 wrdata timer.dat v(timer)
 wrdata latch.dat v(xu.latch)
 wrdata isense.dat (v(vcc)-v(sense))/{{r_ilim}}

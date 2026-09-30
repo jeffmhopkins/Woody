@@ -2,10 +2,13 @@
 
 **Status:** Drawn 2026-09-21. Fourth module page.
 
-Everything from the rack connector to the four rails, plus the load switch that
-sends +12 V up the umbilical. This is the least conventional part of the module:
-no published Eurorack design passes 360 mA of someone else's load through its
-entry diode, so most of the prior art stops being applicable halfway down.
+Everything from the rack connector to the module's rails, the rail fuses, and
+the instrument's isolated supply that feeds the load switch sending +12 V up
+the umbilical. This is the least conventional part of the module: no published
+Eurorack design powers someone else's instrument from the bus, so most of the
+prior art stops being applicable halfway down. **Since 2026-09-30 (ADR 0027)
+the instrument's power is drawn from the rack rail to rail, through `U-ISO`,
+and none of its current returns through the rack's ground.**
 
 *Split 2026-09-21. The load switch moved to
 [`umbilical-load-switch/`](../umbilical-load-switch/umbilical-load-switch.md)
@@ -23,16 +26,16 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `+12V`, `-12V`, `GND` on `J-PWR-EURO` | in | Eurorack bus board | — | 16-pin shrouded keyed IDC. `GND` is the star point. **Its +5 V, CV and Gate pins are not used** — no-connects (owner, 2026-09-30; ADR 0023 point 3) |
-| `MODULE ANALOG +12V` | out | `module/pitch-stage`, `module/breath-receive-stage`, `module/breath-output-stage`, `module/breath-response-shaper`, `module/mod-channels` | — | After `D1`, `FB1`, `C1`. The panel LED is not on it: it hangs on the load switch's output (`module/panel-led`) |
-| `MODULE ANALOG −12V` | out | `module/pitch-stage`, `module/breath-receive-stage`, `module/breath-output-stage`, `module/breath-response-shaper`, `module/mod-channels` | — | After `D3`, `FB3`, `C3` |
+| `+12V`, `-12V`, `GND` on `J-PWR-EURO` | in | Eurorack bus board | — | 16-pin shrouded keyed IDC. `GND` is the star point, `BUS_GND` on the sheet — a net of this circuit only. **Its +5 V, CV and Gate pins are not used** — no-connects (owner, 2026-09-30; ADR 0023 point 3) |
+| `MODULE ANALOG +12V` | out | `module/pitch-stage`, `module/breath-receive-stage`, `module/breath-output-stage`, `module/breath-response-shaper`, `module/mod-channels` | — | After `PTC-POS12`, `D1`, `FB1`, `C1`. The panel LED is not on it: it hangs on the load switch's output (`module/panel-led`) |
+| `MODULE ANALOG −12V` | out | `module/pitch-stage`, `module/breath-receive-stage`, `module/breath-output-stage`, `module/breath-response-shaper`, `module/mod-channels` | — | After `PTC-NEG12`, `D3`, `FB3`, `C3` |
 | `DAC AVDD` | out | `module/dac8568`, `module/breath-receive-stage`, `module/breath-output-stage`, `interfaces/spi-link` | `dac-rail` | The LM317 output. Selected on the bench, per the figure's floor. **Not `module/digital-and-supervision`**, whose 74AHCT125 runs from `LOGIC_5V` |
 | `LOGIC_5V` | out | `module/digital-and-supervision` | — | `U-REG-LOGIC`'s output, made here from the analog +12 V: the level shifter only. See *The logic 5 V* |
-| `+12V` ahead of `D1`/`D2` | out | `module/umbilical-load-switch` | — | The branch is taken **before** the diodes; `U-LOADSW`'s `VCC` and the top of `R-ILIM` hang off it |
-| `PWR_GND` | ref | `module/umbilical-load-switch`, `carrier/power-entry-instrument` | `umbilical-current`, `dig-gnd-topology` | The umbilical return, on its own layer-4 copper from the etherCON's pin 6 to the star |
+| `ISO_POS12` | out | `module/umbilical-load-switch` | `umbilical-current` | `U-ISO`'s isolated +12 V (ADR 0027): `U-LOADSW`'s `VCC`, the top of `R-ILIM` and of the `ON` divider hang off it. Until 2026-09-30 the load switch took the bus +12 V ahead of the diodes, `BUS_POS12_RAW`, which is now a net of this circuit only |
+| `PWR_GND` | ref | `module/umbilical-load-switch`, `carrier/power-entry-instrument` | `umbilical-current`, `dig-gnd-topology` | `U-ISO`'s isolated return and the umbilical's pin 6, on its own layer-4 copper. It meets `DIG_GND` at the etherCON (`NT-UMB-MOD`) and nothing else — see *Grounding* |
 | `AGND_MOD` | ref | `module/dac8568`, `module/pitch-stage`, `module/breath-receive-stage`, `module/breath-output-stage`, `module/breath-response-shaper`, `module/mod-channels`, `module/panel-led` | `dig-gnd-topology` | The module analog ground. Joins the star through `NT-AGND-MOD` and nowhere else — see *Grounding* |
 | `DIG_GND` | ref | `module/digital-and-supervision`, `interfaces/spi-link` | `umbilical-pinmap`, `dig-gnd-topology` | `CS_MOD`'s return partner, down the umbilical. Joins the star through `NT-DIG-MOD` and nowhere else — see *Grounding* |
-| `FB1`–`FB3` | — | — | `ferrite-bias-impedance` | One bead per branch; the impedance each actually has under its own DC bias is the figure |
+| The beads `FB1`, `FB2`, `FB3` and `FB4` | — | — | `ferrite-bias-impedance` | One bead per branch; the impedance each actually has under its own DC bias is the figure |
 
 ## The circuit
 
@@ -43,49 +46,47 @@ the two agree, and where they do not the netlist wins.*
 ```
   16-pin shrouded keyed IDC (J-PWR-EURO)
        │
-  +12V ├───┬──[D1 1N5817]──[FB1]──[C1 100µF]──┬── MODULE ANALOG +12V
-       │   │                                  │   OPA2197 ×6, INA828
-       │   │                                  │
-       │   │                                  └──[LM317LZ]──┬── DAC AVDD 5.21V
-       │   │                                   150R/475R    │
-       │   │                                   0.1%      [C 1µF]
-       │   │                                                │
-       │   └──[D2 1N5817]──[FB2]──[C2 47µF]──┬──────── PWR_GND (star)
-       │                                      │
-       │                    ┌─────────────┴──────────────┐
-       │                    │      [R-ILIM 50mΩ]         │
-       │                    │            │               │
-       │                    │       ┌────┴────┐          │
-       │                    │       │ VCC SENSE│         │
-       │        panel ──────┼───────┤ ON       │         │
-       │        toggle      │       │ LT1641-1 │         │
-       │                    │       │   IS8    │         │
-       │                    │       │ TIMER GATE├──┬──[R-GATE-SER 10Ω]──┐
-       │                    │       │  FB      │   │                    │
-       │                    │       └──┬────┬──┘   │             ┌──────┴──┐
-       │                    │          │    │  [R-GATE-COMP 1k]  │ Q-LOADSW│ LFPAK56
-       │                    │  [C-TIMER 10µF]│      │            │         │
-       │                    │          │    │  [C-GATE 82nF]     └────┬────┘
-       │                    └──────────┴────┼──────┴──────────────────┼── PWR_GND
-       │                                    │                         │
-       │                          [R-FB-HI 35.7k 1%]                  │
-       │                                    ├─────────────────────────┤
-       │                          [R-FB-LO 5.11k 1%]                  │
-       │                                    │                         │
-       │                                PWR_GND                       │
-       │                                                              │
-       │                                      UMBILICAL +12V ─────────► instrument
+  +12V ├──[PTC-POS12]──[D1 1N5817]──[FB1]──[C1 100µF]──┬── MODULE ANALOG +12V
+       │                                               │   OPA2197 ×7, INA828
+       │                                               ├──[U-REG-DAC LM317LZ]── DAC AVDD
+       │                                               └──[U-REG-LOGIC]── LOGIC_5V, 74AHCT125 only
        │
-  -12V ├───[D3 1N5817]──[FB3]──[C3 47µF]────────── MODULE ANALOG −12V
-       │
-   +5V ×   pins 11–12 not used: the module makes its own 5 V
-       │
-       │   MODULE ANALOG +12V ──[U-REG-LOGIC ADP7118AUJZ-5.0]── LOGIC_5V, 74AHCT125 only
-       │
-   GND └───────────────────────────────────────────── STAR POINT
+       ├──[PTC-ISO]──[D2 1N5817]──[FB2]──[L-ISO-IN 22µH]──┬── ISO_VIN_POS
+       │                                                   │
+       │                   [C2 100µF] and [C-ISO-IN 4.7µF] across the 24 V
+       │                                                   │
+       │                                    ┌──────────────┴─────────┐
+       │                                    │ Vin               +Vo ├──┬── ISO_POS12 ──► U-LOADSW
+       │                                    │ [U-ISO URB2412YMD-15WR3]│ [C-ISO-OUT 100µF]  (umbilical-load-switch)
+       │                                    │ GND                0V ├──┴── PWR_GND ──► umbilical pin 6
+       │                                    └──────────────┬─────────┘           │
+       │                                                   │               [NT-UMB-MOD] at the etherCON
+       │                                    [C-ISO-Y 1nF], ISO_VIN_POS to PWR_GND │
+       │                                                   │               DIG_GND ──► umbilical pin 8
+       │                                               ISO_VIN_NEG                │
+       │                                                   │               [NT-DIG-MOD] at the star
+  -12V ├──[D4 1N5817]──[FB4]───────────────────────────────┘                      │
+       │   (cathode to the bus)                                                   │
+       ├──[PTC-NEG12]──[D3 1N5817]──[FB3]──[C3 47µF]── MODULE ANALOG −12V         │
+       │   (D3 cathode to the bus)                                                │
+   +5V ×   pins 11–12 not used: the module makes its own 5 V                      │
+       │                                                                          │
+   GND └── BUS_GND, THE STAR ──[NT-AGND-MOD]── AGND_MOD                           │
+                              └─────────────────────────────────────────────────┘
 ```
 
+*The drawing was redrawn on 2026-09-30 for ADR 0027. The load switch it used
+to show is on
+[`umbilical-load-switch.md`](../umbilical-load-switch/umbilical-load-switch.md),
+which draws it in full; it hangs on `ISO_POS12` and `PWR_GND` now, not on the
+bus +12 V and the star.*
+
 ## Three diodes, not two, and the branch is before them
+
+*Four since 2026-09-30: `D2` and `D4` are the two legs of `U-ISO`'s input
+(ADR 0027), and `D4` is cathode-to-bus like `D3`. The instrument's current
+still never shares a diode with the module's analog rails, which is what this
+section is about.*
 
 **`D1` and `D2` are right, and the reason given for them was wrong.** An
 earlier revision branched the two +12 V paths *after* a single shared
@@ -142,8 +143,13 @@ as it was, the next reviewer who checks the arithmetic deletes the part.
 > document**, and because it tracks breath it will not sound like noise —
 > it will sound like an intentional feature that has gone wrong.
 >
-> Not fixed here. It is a grounding and shield-bonding decision, and the
-> shield policy is sixteen words in the whole repo.
+> **Removed at the source, 2026-09-30 — ADR 0027.** The instrument's supply
+> is now drawn rail to rail through an isolated converter, so its current is in
+> none of those three segments; see *The instrument's supply* below, and the
+> `gnd-*` sims in [`sim/`](sim/README.md), which put the old path at 4.2–21
+> cents over the bus positions and swings they sweep and the new one below
+> 10⁻⁷. The shield row never applied to this hardware: both etherCON shells are
+> plastic with the G tab on no net (ADR 0021, ADR 0023).
 
 `D3` protects −12 V, and it is the one of the three the other way round: a
 negative rail's current flows out of the module into the bus, so its
@@ -152,6 +158,104 @@ it the other way until 2026-09-30, which reverse-biased it in normal running
 (found by the analog sims, [`sim/`](sim/README.md)). **There is no +5 V
 branch**: the bus +5 V is not used, so a reversed ribbon has no unprotected
 rail to land on — the gap this paragraph used to accept is closed.
+
+## The instrument's supply — `U-ISO` (ADR 0027)
+
+The owner, 2026-09-30: *"There needs to be another way to avoid the breath
+affecting pitch. This is unacceptable. We are powering the controller through
+the rack, there has to be a valid way to do this."* The way is an isolated
+DC/DC converter whose **input is across the rack's +12 V and −12 V**: the
+instrument's power then leaves the rack on +12 V and returns on −12 V, and the
+rack's ground carries none of it. The comparison with a ground-sense conductor
+and with a balanced dummy load, and the residual, are ADR 0027's.
+
+**The part is MORNSUN's `URB2412YMD-15WR3`** `[ds MORNSUN-URB_YMD-15WR3.pdf]`:
+9–36 V in, 12 V at 1250 mA out, 1500 VDC, 25.4 × 25.4 × 11.7 mm. Its output,
+`ISO_POS12`, feeds the load switch, which is unchanged
+([`umbilical-load-switch.md`](../umbilical-load-switch/umbilical-load-switch.md));
+its return is `PWR_GND`.
+
+| | `[calc]` | Source |
+|---|---|---|
+| Input voltage | 24.0 V nominal across the rails, 22.8 V at −5 % on both; less `PTC-ISO` (≤ 0.40 Ω × 0.21 A = 0.08 V), `D2` and `D4` (~0.23 V each at 0.21 A) and the bead and inductor → **~23.4 V typical, ≥ 22.2 V** | `[ds BOURNS-MF-MSMF.pdf p.1]`, `D-REVPOL`'s row |
+| Against its range | 9–36 V, start-up ≤ 9 V, under-voltage lockout 5.5–6.5 V: **13 V of margin** at the bottom | `[ds p.2]` |
+| Typical play | `umbilical-current` × 12 V ≈ **4.3 W** out; ~86 % at 20–30 % load → 5.0 W in → **~0.21 A on each of +12 V and −12 V** | `[ds p.4]`, efficiency vs load |
+| Clamp-legal worst (ADR 0005's table) | ~6.95 W out, ~88 % → **~0.36 A per rail** at 22.2 V | `[ds p.1]` |
+| Overload held just under the load switch's minimum trip, 0.78 A | 9.4 W → **~0.48 A per rail** | `R-ILIM`'s row |
+| Hot-plug, the load switch at its 1.10 A worst-case limit | 13.2 W for tens of ms → **~0.68 A per rail** | `umbilical-load-switch.md` |
+| Toggle off | no-load input **6 / 15 mA** typ/max | `[ds p.2]` |
+| Its limit against the load switch's | over-current at **110 / 150 / 190 %** of 1.25 A: the minimum, 1.375 A, is above the LT1641's 1.10 A worst-case trip, so the LT1641 decides every start and fault | `[ds p.2]` |
+| Output | 12 V ± 3 % max, 50/100 mV p-p ripple; the load switch's `ON` and `PWRGD` thresholds sit below its minimum with more margin than they had on the bus | `[ds p.2]`; the `hot-plug` sim holds `VCC` above `ON`'s turn-off at every corner |
+| Loss in the module | ~0.7 W in `U-ISO`, ~0.1 W in `D2`/`D4` | |
+
+**The rack's −12 V carries the instrument now.** At typical play the module
+draws ~0.26 A from +12 V and ~0.25 A from −12 V (its own ~45 mA and ~40 mA
+plus `U-ISO`), where it drew ~0.40 A and ~0.04 A. Check the case's −12 V
+rating: many Eurorack supplies give −12 V less than +12 V.
+
+**The input filter.** `U-ISO` reflects 30 mA of ripple current into its input
+`[ds p.2]` at 270 kHz — lower below half load `[ds p.3]`. `L-ISO-IN` (22 µH)
+with `C2` (100 µF 50 V electrolytic) and `C-ISO-IN` (4.7 µF) keeps it off the
+rails: at 100 kHz the inductor is 13.8 Ω against ~0.17 Ω of capacitor
+(`C-ISO-IN`'s 0.34 Ω in parallel with `C2`'s 0.34 Ω impedance
+`[ds NICHICON-UCM-SERIES-UCM1E101MCL1GS.pdf p.3]`), so **~1 %** reaches the
+rack, ~0.4 mA `[calc]`. It is damped by `C2`'s ESR: `f₀` = 1/(2π√(22 µH ×
+104.7 µF)) = 3.3 kHz, `Z₀` = √(L/C) = 0.46 Ω, against the converter's
+negative input resistance `V²/P` = 23.4² / 5.0 = **−110 Ω** — 200× the
+filter's characteristic impedance, the same shape and margin as the
+instrument's own input LC `[calc]`. **`C2` must stay an electrolytic.**
+
+**The common mode.** The converter's switching drives current through its
+2000 pF isolation capacitance `[ds p.3]`. `C-ISO-Y` (1 nF, `ISO_VIN_POS` to
+`PWR_GND`, beside the converter — the datasheet's `CY` `[ds p.5]`) gives it a
+way home there, instead of round `DIG_GND`, the star and the ribbon. At breath
+frequencies the barrier carries nothing measurable: the `gnd-isolated` sim puts
+under 0.3 nA in the tie.
+
+**Protection.** A reversed ribbon is blocked from both sides of the converter
+by `D2` and `D4`. A fault inside `U-ISO` or its input network is below the
+load switch, so it has its own fuse, `PTC-ISO` (next section). `U-ISO`'s own
+output protection is continuous and self-recovering `[ds p.2]`, but it never
+acts first: the load switch trips below it.
+
+## Fuses on the rails — `PTC-POS12`, `PTC-NEG12`, `PTC-ISO`
+
+The owner, 2026-09-30: *"You're good to add the PTCs."* They protect **the
+rack from the module**: a short inside the module pulls on the case's supply
+and browns out every module in it. Each sits at the header, **ahead of its
+reverse diode** — so it also carries the current if the diode fails short —
+and each is a Bourns MF-MSMF 1812 `[ds BOURNS-MF-MSMF.pdf]`.
+
+**Where, and why three.** One on each analog rail, and one on the converter's
++12 V leg, because the load switch sits on `U-ISO`'s *output* and cannot see a
+fault in the converter or its input network. One leg is enough there: the
+branch is a series loop from +12 V through `U-ISO` to −12 V, and the only
+element from it to ground, `C-ISO-Y`, hangs on the +12 V side of the fuse.
+
+**The analog rails' load** `[calc]`, worst case: fourteen OPA2197 channels at
+1.3 mA max `[ds OPA2197.pdf p.8]` = 18.2 mA on both rails; the INA828,
+0.65 mA (0.85 mA over temperature) `[ds INA828IDR.pdf p.6]`, on both; on +12 V
+only, the LM317 branch — the DAC's 2.0 mA max `[ds DAC8568CIPW.pdf p.5]`, the
+set divider's 5.21 V / 625 Ω = 8.3 mA — and `U-REG-LOGIC`'s ≤ 6 mA. That is
+**~35 mA on +12 V and ~20 mA on −12 V** with the jacks open, and on +12 V
+**~95 mA** with all six jacks shorted at full scale through their 1 kΩ
+`R-OUT-PROT` (6 × 10 mA).
+
+| Part | Hold / trip at 23 °C | Hold at 50 / 60 °C | Must hold | Resistance → drop at the typical load | Voltage |
+|---|---|---|---|---|---|
+| `PTC-POS12`, `PTC-NEG12`: MF-MSMF020/60-2 | 0.20 / 0.40 A | **0.15 / 0.13 A** | 95 mA worst (+12 V) | 0.40 Ω min → **18 mV** at 45 mA; 6.0 Ω an hour after a trip (R1max) → **0.27 V** | 60 V: a short between the two analog rails puts 24 V across the pair |
+| `PTC-ISO`: MF-MSMF075/33X-2 | 0.75 / 1.5 A | **0.56 / 0.49 A** | 0.36 A clamp-legal worst; 0.48 A overload held under the load switch's trip (it holds at 50 °C and may trip at 60 °C — a fault state either way); 0.68 A hot-plug for tens of ms, below its trip current | 0.11–0.40 Ω → **≤ 0.09 V** at 0.21 A | 33 V: a shorted `U-ISO` input puts all 24 V across it |
+
+`[ds p.1, p.9]`. The previous page's "~0.1 V" was from memory; the datasheet
+says 18 mV on a fitted part and 0.27 V at its worst. **At that worst the
+rails still work**: +12 V analog ≥ 11.4 − 0.27 − `D1` − `FB1` ≈ 10.9 V
+(10.5 V with all six jacks shorted, 0.57 V across the fuse), above the
+breath output's 10 V swing and the LM317's and the ADP7118's dropout. **The
+load switch no longer sees any of it**: its `ON` divider is on `U-ISO`'s
+regulated output, and `U-ISO`'s input has 13 V of margin. The `as-netlisted`
+power-on sims run with the fuses at their fitted resistance; TI's LM317L
+model will not converge with 6.0 Ω in series, so the post-trip case is the
+arithmetic above.
 
 ## The logic 5 V — `U-REG-LOGIC`
 
@@ -192,31 +296,41 @@ badly at current:
 
 | Bead | Carries | Impedance at 100 MHz |
 |---|---|---|
-| `FB1`, `FB3` | the low-current rails | **~580–614 Ω** |
-| `FB2` | `umbilical-current` | **~280–310 Ω** |
+| `FB1`, `FB3` | the analog rails, tens of mA | **~580–614 Ω** |
+| `FB2`, `FB4` | `U-ISO`'s input, ~0.21 A typical (~0.36 A clamp-legal) | **~440–480 Ω** (~310 Ω) |
 
-`FB2` is the one that matters and it has roughly **half** the impedance the
-part number advertises, because it is the bead carrying the umbilical's
-current. That is not a reason to change the part — it is a reason not to
+`FB2` and `FB4` are the ones that matter, and they lose a quarter to a half of
+the impedance the part number advertises, because they carry the instrument's
+supply. *(Until ADR 0027 `FB2` carried all of `umbilical-current` and read
+about half the nameplate.)* That is not a reason to change the part — it is a reason not to
 believe "600 Ω" anywhere in this drawing. Read off the banked drawing rev E,
 `datasheets/discrete-and-power/MI1206K601R-10-ferrite-bead.pdf`.
 
 ## Grounding — four layers, one star (owner, 2026-09-30)
 
 The owner, 2026-09-30: *"Four layer in the module board is fine."* So
-`PCB-MODULE` is **four layers, 1.6 mm**, and the three module grounds meet at
-**one point**, the star at `J-PWR-EURO`'s ground pins — this is the figure
-`dig-gnd-topology`:
+`PCB-MODULE` is **four layers, 1.6 mm**, and the module's grounds meet the
+rack's at **one point**, the star at `J-PWR-EURO`'s ground pins (`BUS_GND`) —
+this is the figure `dig-gnd-topology`, amended by ADR 0027:
 
 | Ground | Where it is | How it reaches the star |
 |---|---|---|
-| `PWR_GND` | its own copper on **layer 4**, from the etherCON's pin 6 to the header's ground pins, touching nothing on the way (ADR 0004) | it *is* the star's copper |
-| `DIG_GND` | a **layer-2 plane** under the etherCON, `U-LVL-MOD`, `U-REG-LOGIC` and the SPI traces, so `SCLK`/`MOSI`/`CS` return directly under themselves | `NT-DIG-MOD`, at the star |
+| `PWR_GND` | `U-ISO`'s isolated return: its own copper on **layer 4**, from the etherCON's pin 6 to `U-ISO`'s 0V and the load switch, and no further | `NT-UMB-MOD` joins it to `DIG_GND` **at the etherCON**, between pins 6 and 8 — the mirror of the instrument's `NT-DIG` (ADR 0018) — and it reaches the star only that way |
+| `DIG_GND` | a **layer-2 plane** under the etherCON, `U-LVL-MOD`, `U-REG-LOGIC` and the SPI traces, so `SCLK`/`MOSI`/`CS` return directly under themselves | `NT-DIG-MOD`, at the star — the isolated domain's only tie to the rack |
 | `AGND_MOD` | a **layer-2 region** under the analog block — the DAC8568, every op-amp, the LT5400, the trimmers and `J-B2B-MOD` — kept apart from the `DIG_GND` plane | `NT-AGND-MOD`, at the star |
 
 Layers 1 and 3 carry parts and signals; the analog rails route on layer 3
 over the analog region. The DAC8568 sits at the boundary with its digital
 pins toward the plane, and its one `GND` pin on the analog region.
+
+**Why the instrument's return ties at the etherCON (ADR 0027).** Pins 6 and 8
+are tied at the instrument (ADR 0018), so the instrument's current comes back
+on both. With `NT-UMB-MOD` at the connector, the half on pin 8 steps across to
+`PWR_GND` there and goes straight back to `U-ISO`: **no DC current of the
+instrument's crosses the `DIG_GND` plane, the star or the ribbon**. What
+`NT-DIG-MOD` carries is constant and the module's own — the level shifter's
+few mA back to the analog +12 V, and the panel LED's 4.5 mA the other way
+(`module/panel-led` returns it to `AGND_MOD`) — plus the SPI edges' return.
 
 **Why not the proposal that bridged `AGND_MOD` to the plane under the DAC.**
 That was the obvious shape and it is wrong here, twice. The datasheet asks for
@@ -227,10 +341,9 @@ system"* `[ds DAC8568CIPW.pdf p.49]`. And the umbilical makes it worse than
 usual: pin 8 (`DIG_GND`) and pin 6 (`PWR_GND`) are tied together at the
 instrument (ADR 0018), so they are two parallel conductors carrying the
 instrument's return, about half each `[calc: two equal 24 AWG conductors,
-2 m]`. With a bridge under the DAC, that half would cross the analog region on
-its way to the star and move the jacks' reference with every breath. With the
-ties at the star, it crosses only the `DIG_GND` plane, where a millivolt
-harms nothing.
+2 m]`. With a bridge under the DAC, that half would cross the analog region
+and move the jacks' reference with every breath. Since ADR 0027 it does not
+reach the plane beyond the etherCON at all.
 
 **The jack board stays two layers.** It carries the jacks, pots and LED and
 one ground, `AGND_MOD`, which reaches it only on `J-B2B-MOD`'s five ground
@@ -254,23 +367,18 @@ one-ended electrically (`MECH-STANDOFF-MOD`).
 *(`L-BUCK-IN` and the umbilical's input LC moved with the load switch — they
 are in [`umbilical-load-switch.md`](../umbilical-load-switch/umbilical-load-switch.md).)*
 
-- **The ribbon's own ground drop is breath-correlated** (the table under
-  *The ground path this section dismisses*): the umbilical's return reaches
-  the rack's supply through the power ribbon and the busboard, so the star
-  moves against the rest of the case with the instrument's current. The
-  shield row of that table no longer applies — the NE8FAV's shell is plastic
-  and its G tab is on no net (ADR 0023; `module-main` README) — but the ribbon
-  and busboard rows do, and no layout inside the module removes them.
-  **Decided by: owner** — accept it, or take the instrument's supply around
-  the rack (its own adapter, or a dedicated cable to the PSU).
-- **No fuse on the analog rails.** The load switch covers only the umbilical
-  branch. Mutable, Telex and others fit PTCs on their entry rails; ADR 0005's
-  deletion argument was about the *instrument-end* polyfuse and does not reach
-  these. **Decided by: owner** — a PTC per rail (≈50 mA hold) costs ≈0.1 V on
-  each rail and protects the rack from a module-internal short; the case's
-  own supply protection is the alternative.
+- **`U-ISO`'s source.** MORNSUN's datasheet is current (rev 2025.03.28-A/9),
+  but DigiKey lists the part "not for new designs" with one in stock, and the
+  part under that MPN at LCSC is another brand (`U-ISO`'s row). **Decided
+  by: owner** — buy the MORNSUN part through a MORNSUN channel, or move to
+  one of the row's alternates before layout (each needs its own footprint).
+- **The case's −12 V rating** against ~0.25 A typical and ~0.36 A clamp-legal
+  from this module. **Decided by: the owner's supply**, measured at E6.
+- **Where `U-ISO` sits on module-main**, 11.7 mm tall with its filter beside
+  it: a module CAD item (`config/module.yaml`), not decided here.
 
-*(The entry bulk — 100 µF on +12 V and 47 µF on the other two — is 2–5× the
-surveyed 10–22 µF, and it is kept: `C-BULK-RAIL` gives the reason, and the
-added inrush at rack power-on is 194 µF, a few percent of a typical case's
-total.)*
+*(The entry bulk — 100 µF on +12 V and 47 µF on −12 V — is 2–5× the
+surveyed 10–22 µF, and it is kept: `C-BULK-RAIL` gives the reason. `C2`,
+100 µF across the 24 V of `U-ISO`'s input, and `C-ISO-IN` add to the inrush at
+rack power-on, and `U-ISO`'s own start-up charges `C-ISO-OUT`; together still a
+few percent of a typical case's total.)*
