@@ -8,9 +8,10 @@ circuit: module/panel-led
 title: Panel power indicator
 page: panel-led.md
 ports:
-  MODULE_ANALOG_POS12:
+  UMBILICAL_POS12:
     dir: in
-    from: module/power-entry
+    from: module/umbilical-load-switch
+    figure: umbilical-current
   AGND_MOD:
     dir: ref
     from: module/power-entry
@@ -21,9 +22,9 @@ components:
     pins:
     - A
     - K
-    note: AN ORDINARY POWER INDICATOR NOW. It was kept to show the presence comparator's collector node, and that
-      comparator is not fitted - so it says the rack is on and nothing else. It is live whenever the rack is, which
-      is the whole of the page's open item
+    note: LIT = THE LOAD SWITCH IS DELIVERING. It hangs on UMBILICAL_POS12, the LT1641 output, so it is dark with
+      the toggle off and dark when the -1 has latched on a fault - the one indication the latching design needs.
+      It does not say the instrument is plugged in
   R-LED-PANEL:
     value: 2k2 1%
     pins:
@@ -36,6 +37,6 @@ nets:
   LED_ANODE:
   - LED-PANEL.A
   - R-LED-PANEL.2
-  MODULE_ANALOG_POS12:
-  - port: MODULE_ANALOG_POS12
+  UMBILICAL_POS12:
+  - port: UMBILICAL_POS12
   - R-LED-PANEL.1

@@ -209,8 +209,9 @@ a survival from the four-resistor circuit, on the page that owns the figure,
 contradicting its own drawing three sections above. `[calc: 3.3333/2500]`)*
 
 It wants its own `R-OPAMP-IN` on the way in, like every other DAC-driven
-op-amp input (`R-OPAMP-IN` qty 7 covers pitch, the four mods, this buffer and
-the `VREFOUT` follower).
+op-amp input (`R-OPAMP-IN` covers pitch, the four mods and this buffer; the
+pitch stage's `VREFOUT` follower has `R-VREF-SER` instead, a thin-film part
+because it also sets `V_ref`).
 
 **Do not be tempted to split it into four buffers.** One shared node means all
 four channels share exactly the same offset error, so a residual appears as a

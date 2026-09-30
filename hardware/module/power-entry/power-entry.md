@@ -23,16 +23,16 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `+12V`, `-12V`, `+5V`, `GND` on `J-PWR-EURO` | in | Eurorack bus board | — | 16-pin shrouded keyed IDC. `GND` is the star point |
-| `MODULE ANALOG +12V` | out | `module/pitch-stage`, `module/breath-receive-stage`, `module/breath-output-stage`, `module/breath-response-shaper`, `module/mod-channels`, `module/panel-led` | — | After `D1`, `FB1`, `C1`. `R-LED-PANEL` hangs on it too, which is the whole of why the indicator cannot say what it was kept to say |
+| `+12V`, `-12V`, `GND` on `J-PWR-EURO` | in | Eurorack bus board | — | 16-pin shrouded keyed IDC. `GND` is the star point. **Its +5 V, CV and Gate pins are not used** — no-connects (owner, 2026-09-30; ADR 0023 point 3) |
+| `MODULE ANALOG +12V` | out | `module/pitch-stage`, `module/breath-receive-stage`, `module/breath-output-stage`, `module/breath-response-shaper`, `module/mod-channels` | — | After `D1`, `FB1`, `C1`. The panel LED is not on it: it hangs on the load switch's output (`module/panel-led`) |
 | `MODULE ANALOG −12V` | out | `module/pitch-stage`, `module/breath-receive-stage`, `module/breath-output-stage`, `module/breath-response-shaper`, `module/mod-channels` | — | After `D3`, `FB3`, `C3` |
-| `DAC AVDD` | out | `module/dac8568`, `module/breath-receive-stage`, `module/breath-output-stage`, `interfaces/spi-link` | `dac-rail` | The LM317 output. Selected on the bench, per the figure's floor. **Not `module/digital-and-supervision`**, whose 74AHCT125 runs from bus `+5V` |
-| bus `+5V` after `FB4`/`C4` | out | `module/digital-and-supervision` | — | The level shifter only, and it is the one rail with no diode |
+| `DAC AVDD` | out | `module/dac8568`, `module/breath-receive-stage`, `module/breath-output-stage`, `interfaces/spi-link` | `dac-rail` | The LM317 output. Selected on the bench, per the figure's floor. **Not `module/digital-and-supervision`**, whose 74AHCT125 runs from `LOGIC_5V` |
+| `LOGIC_5V` | out | `module/digital-and-supervision` | — | `U-REG-LOGIC`'s output, made here from the analog +12 V: the level shifter only. See *The logic 5 V* |
 | `+12V` ahead of `D1`/`D2` | out | `module/umbilical-load-switch` | — | The branch is taken **before** the diodes; `U-LOADSW`'s `VCC` and the top of `R-ILIM` hang off it |
-| `PWR_GND` | ref | `module/umbilical-load-switch`, `carrier/power-entry-instrument` | `umbilical-current` | The umbilical return, on its own copper to the star |
-| `AGND_MOD` | ref | `module/dac8568`, `module/pitch-stage`, `module/breath-receive-stage`, `module/breath-output-stage`, `module/breath-response-shaper`, `module/mod-channels` | `dig-gnd-topology` | The module analog star. Where it returns is the disputed part — see the figure |
-| `DIG_GND` | ref | `module/digital-and-supervision`, `interfaces/spi-link` | `umbilical-pinmap`, `dig-gnd-topology` | `CS_MOD`'s return partner, down the umbilical. Where it ties is the disputed part — see the figure |
-| `FB1`–`FB4` | — | — | `ferrite-bias-impedance` | One bead per rail; the impedance each actually has under its own DC bias is the figure |
+| `PWR_GND` | ref | `module/umbilical-load-switch`, `carrier/power-entry-instrument` | `umbilical-current`, `dig-gnd-topology` | The umbilical return, on its own layer-4 copper from the etherCON's pin 6 to the star |
+| `AGND_MOD` | ref | `module/dac8568`, `module/pitch-stage`, `module/breath-receive-stage`, `module/breath-output-stage`, `module/breath-response-shaper`, `module/mod-channels`, `module/panel-led` | `dig-gnd-topology` | The module analog ground. Joins the star through `NT-AGND-MOD` and nowhere else — see *Grounding* |
+| `DIG_GND` | ref | `module/digital-and-supervision`, `interfaces/spi-link` | `umbilical-pinmap`, `dig-gnd-topology` | `CS_MOD`'s return partner, down the umbilical. Joins the star through `NT-DIG-MOD` and nowhere else — see *Grounding* |
+| `FB1`–`FB3` | — | — | `ferrite-bias-impedance` | One bead per branch; the impedance each actually has under its own DC bias is the figure |
 
 ## The circuit
 
@@ -59,11 +59,11 @@ the two agree, and where they do not the netlist wins.*
        │                    │       │ VCC SENSE│         │
        │        panel ──────┼───────┤ ON       │         │
        │        toggle      │       │ LT1641-1 │         │
-       │                    │       │   CS8    │         │
+       │                    │       │   IS8    │         │
        │                    │       │ TIMER GATE├──┬──[R-GATE-SER 10Ω]──┐
        │                    │       │  FB      │   │                    │
        │                    │       └──┬────┬──┘   │             ┌──────┴──┐
-       │                    │          │    │  [R-GATE-COMP 1k]  │ Q-LOADSW│ DPAK
+       │                    │          │    │  [R-GATE-COMP 1k]  │ Q-LOADSW│ LFPAK56
        │                    │  [C-TIMER 10µF]│      │            │         │
        │                    │          │    │  [C-GATE 82nF]     └────┬────┘
        │                    └──────────┴────┼──────┴──────────────────┼── PWR_GND
@@ -78,7 +78,9 @@ the two agree, and where they do not the netlist wins.*
        │
   -12V ├───[D3 1N5817]──[FB3]──[C3 47µF]────────── MODULE ANALOG −12V
        │
-   +5V ├───[FB4]──[C4 47µF]──────────────────────── 74AHCT125 only
+   +5V ×   pins 11–12 not used: the module makes its own 5 V
+       │
+       │   MODULE ANALOG +12V ──[U-REG-LOGIC ADP7118AUJZ-5.0]── LOGIC_5V, 74AHCT125 only
        │
    GND └───────────────────────────────────────────── STAR POINT
 ```
@@ -134,18 +136,48 @@ as it was, the next reviewer who checks the arithmetic deletes the part.
 > | The cable shield, if the etherCON shell bonds to the 10HP panel | **~7 cents** |
 >
 > All three are **breath-correlated**, because they are driven by the
-> instrument's own supply current. `pitch-stage.md` puts the entire pitch
-> error budget at 0.42 cents. **The carefully engineered part of the pitch
-> path is one to two orders of magnitude below an effect that appears in no
+> instrument's own supply current. `pitch-stage.md` puts the pitch stage's
+> own drift at `pitch-cents-budget`. **The carefully engineered part of the pitch
+> path is an order of magnitude below an effect that appeared in no
 > document**, and because it tracks breath it will not sound like noise —
 > it will sound like an intentional feature that has gone wrong.
 >
 > Not fixed here. It is a grounding and shield-bonding decision, and the
 > shield policy is sixteen words in the whole repo.
 
-`D3` protects −12 V. The bus +5 V pin gets no diode: the only thing on it is a
-$0.30 buffer, and a reversed ribbon that kills the buffer and nothing else is
-an acceptable outcome (ADR 0004).
+`D3` protects −12 V, and it is the one of the three the other way round: a
+negative rail's current flows out of the module into the bus, so its
+**cathode is on the bus pin and its anode on the module side**. The sheet had
+it the other way until 2026-09-30, which reverse-biased it in normal running
+(found by the analog sims, [`sim/`](sim/README.md)). **There is no +5 V
+branch**: the bus +5 V is not used, so a reversed ribbon has no unprotected
+rail to land on — the gap this paragraph used to accept is closed.
+
+## The logic 5 V — `U-REG-LOGIC`
+
+The owner, 2026-09-30: *"Create the 5v locally"*, and *"We keep the standard
+header, we just don't use the 5 volt. This keeps commonality of all the
+Eurorack cable connectors."* So `J-PWR-EURO` stays the 16-pin A-100 header
+(ADR 0023 point 3), its +5 V pins are no-connects, and the one 5 V load on the
+module — the 74AHCT125 (`U-LVL-MOD`) — runs from `LOGIC_5V`, made here.
+**`DAC AVDD` is not on it**: the DAC keeps its own LM317 rail, `dac-rail`.
+
+**The part is ADI's `ADP7118AUJZ-5.0`** (TSOT-5), off the protected analog
++12 V, `EN` tied to `VIN`, `SENSE` to `VOUT` at the part, ground on
+`DIG_GND`, with `C-LOGIC-REG` (4.7 µF 50 V X7R, 1206) in and out.
+
+| | `[calc]` | Source |
+|---|---|---|
+| Load | 74AHCT125 `I_CC` 20 µA, plus `ΔI_CC` 1.5 mA per input held at 3.4 V × 3 driven inputs = 4.5 mA; two 10 kΩ pull-downs on `SCLK_DAC`/`DIN` at 5 V, 1 mA when high; switching 3 × 10 pF × 5 V × 2 MHz ≈ 0.3 mA. **≤ 6 mA** | `[ds SN74AHCT125.pdf p.4]` |
+| Headroom | Input ≥ 11.4 V − `D1` ≈ 11.0 V against 5.0 V out: 6 V, where the dropout is 30/60 mV typ/max at 10 mA | `[ds ADI-ADP7118.pdf p.3]` |
+| Dissipation | (12.4 − 5.0) V × 6 mA = **44 mW**; θJA 170 °C/W gives **+7.5 °C** | `[ds p.5]` |
+| Input rating | 20 V max against a 12.6 V bus maximum | `[ds p.3]` |
+| Noise | 11 µV rms, 10 Hz–100 kHz — more than a logic rail needs; it keeps the level shifter's supply from being the noisiest node beside the DAC | `[ds p.3]` |
+| Capacitors | more than 1.5 µF in and out under all conditions; 4.7 µF X7R in 1206 keeps it at 12 V of DC bias | `[ds p.4]` |
+
+The few milliamps come off the analog +12 V after `D1`/`FB1`/`C1`; the
+op-amps on that rail reject it by their PSRR, and the LM317 by its line
+regulation (see *Three diodes* above for how small that path is).
 
 **Beads, not resistors, and the rating is the part that matters.** A ≥1 A bead
 is specified because the common 0805 600 Ω part is ~300 mA and **a saturated
@@ -160,7 +192,7 @@ badly at current:
 
 | Bead | Carries | Impedance at 100 MHz |
 |---|---|---|
-| `FB1`, `FB3`, `FB4` | the low-current rails | **~580–614 Ω** |
+| `FB1`, `FB3` | the low-current rails | **~580–614 Ω** |
 | `FB2` | `umbilical-current` | **~280–310 Ω** |
 
 `FB2` is the one that matters and it has roughly **half** the impedance the
@@ -169,35 +201,76 @@ current. That is not a reason to change the part — it is a reason not to
 believe "600 Ω" anywhere in this drawing. Read off the banked drawing rev E,
 `datasheets/discrete-and-power/MI1206K601R-10-ferrite-bead.pdf`.
 
-## Grounding
+## Grounding — four layers, one star (owner, 2026-09-30)
 
-One origin, at the IDC's ground pin. `PWR_GND` — the ~360 mA umbilical return
-— runs to it on its own copper and touches nothing else on the way. The analog
-return is its own region joining at the star. **`DIG_GND` is *not* given its
-own path to the star**, which an earlier revision of ADR 0004 asked for: a
-2 MHz SPI return wants the pour directly under its trace, and routing it to a
-distant star point is the classic split-plane mistake. `AGND` is not a ground
-at all — it is an in-amp input (ADR 0003).
+The owner, 2026-09-30: *"Four layer in the module board is fine."* So
+`PCB-MODULE` is **four layers, 1.6 mm**, and the three module grounds meet at
+**one point**, the star at `J-PWR-EURO`'s ground pins — this is the figure
+`dig-gnd-topology`:
 
-Full reasoning, and the arithmetic for why `PWR_GND` is the one that must be
-isolated, is in ADR 0004.
+| Ground | Where it is | How it reaches the star |
+|---|---|---|
+| `PWR_GND` | its own copper on **layer 4**, from the etherCON's pin 6 to the header's ground pins, touching nothing on the way (ADR 0004) | it *is* the star's copper |
+| `DIG_GND` | a **layer-2 plane** under the etherCON, `U-LVL-MOD`, `U-REG-LOGIC` and the SPI traces, so `SCLK`/`MOSI`/`CS` return directly under themselves | `NT-DIG-MOD`, at the star |
+| `AGND_MOD` | a **layer-2 region** under the analog block — the DAC8568, every op-amp, the LT5400, the trimmers and `J-B2B-MOD` — kept apart from the `DIG_GND` plane | `NT-AGND-MOD`, at the star |
+
+Layers 1 and 3 carry parts and signals; the analog rails route on layer 3
+over the analog region. The DAC8568 sits at the boundary with its digital
+pins toward the plane, and its one `GND` pin on the analog region.
+
+**Why not the proposal that bridged `AGND_MOD` to the plane under the DAC.**
+That was the obvious shape and it is wrong here, twice. The datasheet asks for
+the opposite: the DAC's ground *"would be connected directly to an analog
+ground plane. This plane would be separate from the ground connection for the
+digital components until they were connected at the power-entry point of the
+system"* `[ds DAC8568CIPW.pdf p.49]`. And the umbilical makes it worse than
+usual: pin 8 (`DIG_GND`) and pin 6 (`PWR_GND`) are tied together at the
+instrument (ADR 0018), so they are two parallel conductors carrying the
+instrument's return, about half each `[calc: two equal 24 AWG conductors,
+2 m]`. With a bridge under the DAC, that half would cross the analog region on
+its way to the star and move the jacks' reference with every breath. With the
+ties at the star, it crosses only the `DIG_GND` plane, where a millivolt
+harms nothing.
+
+**The jack board stays two layers.** It carries the jacks, pots and LED and
+one ground, `AGND_MOD`, which reaches it only on `J-B2B-MOD`'s five ground
+pins; nothing on it needs a second reference, so there is nothing for a
+second plane to separate (`PCB-MODULE-JACK`).
+
+**The standoffs are metal** (owner, 2026-09-30), so they could tie the boards'
+copper at four more points. **Their pads are on `AGND_MOD` on the jack board
+and on no net on the main board** — a plated ring with clearance from every
+plane. On the jack board `AGND_MOD` is the only ground there is; on the main
+board any net would be a second inter-board tie: to `AGND_MOD` a parallel
+loop around the header's five ground pins, to `DIG_GND` or `PWR_GND` a second
+junction with the analog ground away from the star. Mechanical only, and
+one-ended electrically (`MECH-STANDOFF-MOD`).
+
+`AGND` — no suffix — is not a ground at all: it is an in-amp input
+(ADR 0003).
 
 ## Still open
 
 *(`L-BUCK-IN` and the umbilical's input LC moved with the load switch — they
 are in [`umbilical-load-switch.md`](../umbilical-load-switch/umbilical-load-switch.md).)*
 
-- **`D3` is wired backwards in the netlist exported from the sheet.** Its anode
-  is on the bus −12 V pin and its cathode towards `FB3`, so the rail it exists
-  to pass reverse-biases it and `MODULE ANALOG −12V` never arrives
-  (simulated, [`sim/`](sim/README.md), `as-netlisted`). A negative rail's
-  reverse-protection diode has its anode on the module side. **Swap `D3`'s
-  pins on the sheet and re-export**; `d3-flipped` in the same sim is that fix,
-  and with it the rails, `dac-rail`'s floor and the pitch jack's 0 V all hold.
+- **The ribbon's own ground drop is breath-correlated** (the table under
+  *The ground path this section dismisses*): the umbilical's return reaches
+  the rack's supply through the power ribbon and the busboard, so the star
+  moves against the rest of the case with the instrument's current. The
+  shield row of that table no longer applies — the NE8FAV's shell is plastic
+  and its G tab is on no net (ADR 0023; `module-main` README) — but the ribbon
+  and busboard rows do, and no layout inside the module removes them.
+  **Decided by: owner** — accept it, or take the instrument's supply around
+  the rack (its own adapter, or a dedicated cable to the PSU).
 - **No fuse on the analog rails.** The load switch covers only the umbilical
   branch. Mutable, Telex and others fit PTCs on their entry rails; ADR 0005's
   deletion argument was about the *instrument-end* polyfuse and does not reach
-  these. Deliberately left open rather than silently omitted.
-- **Entry bulk is 100 µF on +12 V and 47 µF on the other three**, which is 2–5× the surveyed norm of 10–22 µF.
-  Harmless except for case-wide inrush at rack power-on, where it adds to
-  everything else in the case.
+  these. **Decided by: owner** — a PTC per rail (≈50 mA hold) costs ≈0.1 V on
+  each rail and protects the rack from a module-internal short; the case's
+  own supply protection is the alternative.
+
+*(The entry bulk — 100 µF on +12 V and 47 µF on the other two — is 2–5× the
+surveyed 10–22 µF, and it is kept: `C-BULK-RAIL` gives the reason, and the
+added inrush at rack power-on is 194 µF, a few percent of a typical case's
+total.)*

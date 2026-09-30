@@ -35,6 +35,13 @@ components:
     - 2
     note: The programmed ramp. Without it the bare C_iss gives 10 kV/s, which would demand more than twenty times
       the current limit
+  C-ON-LOADSW:
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: 'ON to GND at the pin: ''A 0.1uF capacitor from the ON pin to GND also helps reject induced noise'' (164112fc
+      p.10). The toggle''s wires hang off this node'
   C-TIMER-LOADSW:
     value: 10uF
     drawn_as: C-TIMER
@@ -43,13 +50,24 @@ components:
     - 2
     note: 'LOW LEAKAGE, and that is a specification not a preference: leakage is a meaningful fraction of the 3
       uA pull-down, and if it wins the timer never resets'
+  D-GATE-CLAMP:
+    value: 15V
+    pins:
+    - K
+    - A
+    note: 'Gate-source clamp, cathode at the FET gate, anode at its source. 164112fc p.10: ''In applications over
+      a 9V to 24V range, a logic level N-FET must be used with a proper protection Zener diode between its gate
+      and source (as D1 shown is Figure 5)'' - GATE rises up to 18 V above VCC, the FET''s VGS is 20 V max'
   Q-LOADSW:
+    value: PSMN2R0-30YLE
     pins:
     - D
     - G
     - S
-    note: Pass FET, high side. Its drain is always at 12 V, which is why foldback acts on the OUTPUT and not on
-      the drain
+    - S2
+    - S3
+    note: Pass FET, high side, chosen on its SOA at V_DS = 12 V (umbilical-load-switch.md, What sizes the FET).
+      Its drain is always at 12 V, which is why foldback acts on the OUTPUT and not on the drain
   R-FB-HI:
     value: 35.7k 1%
     pins:
@@ -78,20 +96,36 @@ components:
     note: Prevents high-frequency oscillation in the FET. In SERIES with the gate, from the datasheet's own application
       circuit
   R-ILIM:
+    value: 50m 1% 1W
     pins:
     - 1
     - 2
-    note: Sets the limit with V_SENSETRIP, which is 39/47/55 mV - so the limit has a spread whatever this resistor
-      is
+    note: 'Sets the limit with V_SENSETRIP, which is 39/47/55 mV - so the limit has a spread whatever this resistor
+      is: 0.78/0.94/1.10 A at 50 mohm. Kelvin-connect SENSE and VCC to its pads (164112fc p.10, Layout Considerations)'
+  R-ON-HI:
+    value: 68k 1%
+    pins:
+    - 1
+    - 2
+    note: 'Top of the ON (UVLO) divider, from the raw bus through the toggle. With R-ON-LO: ON at 10.2 V rising,
+      9.6 V falling'
+  R-ON-LO:
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    note: Bottom of the ON divider. With the toggle open it holds ON at 0 V, which is OFF, and cycling the toggle
+      is what resets the -1's latch
   SW-POWER:
     value: NKK M2011SD4G01
     pins:
     - COM
     - 'NO'
-    note: THE SWITCH IS THIS CIRCUIT'S PART. module/panel owns only the shaped hole and says so. Its other terminal
-      waits on the UVLO divider - see ON_DIVIDER
+    note: 'THE SWITCH IS THIS CIRCUIT''S PART. module/panel owns only the shaped hole and says so. COM on ON, NO
+      on ON_SW: the switch sits between R-ON-HI and the ON pin, so closing it (lever right, ADR 0024 point 12) completes
+      the UVLO divider and opening it lets R-ON-LO pull ON low. Both lugs wire to this board'
   U-LOADSW:
-    value: LT1641-1CS8
+    value: LT1641-1IS8
     pins:
     - VCC
     - SENSE
@@ -108,6 +142,7 @@ nets:
   - port: BUS_POS12_RAW
   - C-DECOUPLE-LOADSW.1
   - R-ILIM.1
+  - R-ON-HI.1
   - U-LOADSW.VCC
   FB:
   - R-FB-HI.2
@@ -121,17 +156,25 @@ nets:
   - R-GATE-SER.1
   - U-LOADSW.GATE
   GATE_NODE:
+  - D-GATE-CLAMP.K
   - Q-LOADSW.G
   - R-GATE-SER.2
   'ON':
+  - C-ON-LOADSW.1
+  - R-ON-LO.1
   - SW-POWER.COM
   - U-LOADSW.ON
+  ON_SW:
+  - R-ON-HI.2
+  - SW-POWER.NO
   PWR_GND:
   - port: PWR_GND
   - C-DECOUPLE-LOADSW.2
   - C-GATE-LOADSW.2
+  - C-ON-LOADSW.2
   - C-TIMER-LOADSW.2
   - R-FB-LO.2
+  - R-ON-LO.2
   - U-LOADSW.GND
   SENSE_NODE:
   - Q-LOADSW.D
@@ -142,12 +185,12 @@ nets:
   - U-LOADSW.TIMER
   UMBILICAL_POS12:
   - port: UMBILICAL_POS12
+  - D-GATE-CLAMP.A
   - Q-LOADSW.S
+  - Q-LOADSW.S2
+  - Q-LOADSW.S3
   - R-FB-HI.1
-  'NO':
-  - SW-POWER.NO
   PWRGD:
   - U-LOADSW.PWRGD
 external_endpoints:
-- 'NO'
 - PWRGD

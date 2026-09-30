@@ -14,38 +14,38 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `MODULE ANALOG +12V` | in | `module/power-entry` | — | Through `R-LED-PANEL` into `LED-PANEL`. Live whenever the rack is, which is the whole of the problem below |
-| LED return | ref | `module/power-entry` | `dig-gnd-topology` | **Not drawn anywhere in the corpus.** The rail it comes from is the analog one; which ground it lands on is the disputed figure |
+| `UMBILICAL +12V` | in | `module/umbilical-load-switch` | `umbilical-current` | The LT1641's output, through `R-LED-PANEL` into `LED-PANEL`. It crosses to the jack board on `J-B2B-MOD` pin 19 |
+| `AGND_MOD` | ref | `module/power-entry` | `dig-gnd-topology` | The LED's cathode, back across `J-B2B-MOD`'s ground pins with every other jack-board return |
 | panel cutout | — | `module/panel` | `panel-height-budget` | A cutout, not a net. The LED sits in the toggle's row, left of the toggle (ADR 0024 point 11); the figure's `toggle_row` note is what establishes that the row fits |
-| `TIMER` / `GATE` of `U-LOADSW` | — | `module/umbilical-load-switch` | `loadswitch-timer` | **Proposed, not drawn.** The rework below would take the indication from here instead |
-| comparator collector node | — | `module/link-supervision` | — | **Not fitted.** The deleted presence comparator shared this node, and that was the indication this LED was kept to give. It is an ordinary power indicator now |
+| comparator collector node | — | `module/link-supervision` | — | **Not fitted.** The deleted presence comparator shared this node |
 
 ## The circuit
 
-*The superseded circuit this sentence says "instead" of — the presence
-comparator and the two resistors that hung off it — is in
-[`notes.md`](notes.md).*
+`R-LED-PANEL` and `LED-PANEL` in series from the load switch's output to
+`AGND_MOD`. **Lit means the load switch is delivering**; dark means the toggle
+is off *or* the `-1` has latched on a fault — which is the one thing the
+panel has to say, because a latch leaves the instrument dark until the toggle
+is cycled ([`umbilical-load-switch.md`](../umbilical-load-switch/umbilical-load-switch.md),
+*`-1`, not `-2`*).
 
-`bom.csv` carries `R-LED-PANEL` at **2.2 kOhm from +12 V analog** instead,
-and that is the circuit.
+**Why the output and not `TIMER` or `GATE`**, the two nodes this page used to
+propose. The banked datasheet settles it `[164112fc p.5, pin functions]`:
+after a latch `GATE` is pulled to ground and `TIMER` is discharged by its
+3 µA pull-down, so neither holds a level that says "latched" — `TIMER`
+returns towards 0 V, which is where it sits in normal running too. The output
+does hold one: with `GATE` low it decays to 0 V and stays there. `PWRGD` is
+an open collector that pulls low while `FB` is *below* its threshold, so an
+LED on it would be lit for the fault and dark in normal running — the
+opposite of a power lamp, and it would need its own supply to be lit at all.
 
-## But the LED has lost the job it was kept for
+`[calc]` `(12.0 − 2.0 V) / 2.2 kΩ` ≈ **4.5 mA**, taken from the umbilical
+branch: 0.5 % of the 940 mA limit. The LED lights as the output passes about
+2 V on the way up, so it also shows a slow start.
 
-*Moved verbatim from `power-entry.md`, 2026-09-21. "The latching faults
-above" are the ones in
-[`umbilical-load-switch.md`](../umbilical-load-switch/umbilical-load-switch.md),
-which is where they still are.*
+**What it does not say**: whether the instrument is plugged in. With the
+toggle on and nothing on the cable the output is still delivered and the LED
+is lit. That knowledge moved to the instrument with the presence detect
+(`module/link-supervision`).
 
-`bom.csv` justifies it: *"with LT1641-1 latching off on a fault, this still
-says why the instrument went dark."* **On +12 V analog it cannot.** That
-rail is live whenever the rack is, so the LED is lit in every one of the
-latching faults above — hot-plug, LED-boot overcurrent, a current-limited
-start, a soft short. The one indication the design has for "the load switch
-has latched" indicates nothing.
-
-**Cheapest high-value fix in the review**: drive it from the LT1641's
-`TIMER` node, or from the gate, so that **lit = running and dark =
-latched.** One resistor's worth of rework on a part that is already fitted.
-
-Not applied here: it needs the same datasheet read as `C-TIMER`, because it
-depends on what the `TIMER` pin does after a latch.
+*(The circuits it replaced — the presence comparator's shared node, and the
+LED on the analog +12 V rail — are in [`notes.md`](notes.md).)*

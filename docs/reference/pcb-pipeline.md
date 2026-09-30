@@ -109,18 +109,15 @@ same package and pinout. Nothing for this row blocks precursor 1 any more.
 ## The ground questions that must be decided in one sitting
 
 Each is "which ground does this attach to", each is invisible to
-`check-staleness.py` because it is semantic, and **both are downstream of
-the module board's 2-layers-or-4** (the main board's is decided):
+`check-staleness.py` because it is semantic. **Both module questions closed
+2026-09-30**, when the owner took the module's main board to four layers:
 
-- **`dig-gnd-topology`** — three documents, three mutually exclusive answers,
-  and `power-entry.md` states ADR 0004 was corrected when it was not.
-- **The LT5400's exposed pad.** The part is MS8E with a **1.88 × 1.68 mm
-  exposed pad** the BOM did not know it had. ADI says do not tie it to noisy
-  ground and *"connecting the exposed pad to a quiet AC ground is
-  recommended"* — and **pad-to-resistor coupling is 5.5 pF against only 1.4 pF
-  resistor-to-resistor**, so the pad is the dominant stray on the 1 V/oct
-  network. This plan gives `AGND` no zone and a keepout, so "a quiet AC ground"
-  has to mean something specific here.
+- **`dig-gnd-topology`** — settled: one star at the power header, `DIG_GND` a
+  layer-2 plane, `AGND_MOD` its own layer-2 region, `PWR_GND` on layer 4
+  (`config/figures.yaml`; `power-entry.md`, *Grounding*).
+- **The LT5400's exposed pad** — to `AGND_MOD`, carried on the sheet as the
+  part's pin 9 (`pitch-stage.md`). (This plan's `AGND` with no zone is the
+  instrument's in-amp input, a different net.)
 - ~~`cref-out-node`~~ — **settled** (`config/figures.yaml`), and it is an
   instrument part on the four-layer main board, so it no longer belongs here.
 
@@ -253,8 +250,7 @@ by schematic page, with the widths and rules already set.
 **Hand-route these first**, because nothing else in the pipeline protects them:
 
 - `VREFOUT`, `V_ref`, the three trimmer wipers, the mods' shared 3.3333 V —
-  **1 mV on `V_ref` is 1.2 cents**, which equals or exceeds every candidate in
-  the disputed pitch budget. These were the nets the old plan left to the router
+  **1 mV on `V_ref` is 1.2 cents**, more than the whole of `pitch-cents-budget`. These were the nets the old plan left to the router
 - `BREATH` / `AGND` from the connector to the in-amp — one keepout window
   enclosing **both** legs, not one each, or the pour asymmetry costs the
   capacitive matching the ±1 % spec exists to control

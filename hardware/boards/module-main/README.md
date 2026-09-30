@@ -65,7 +65,7 @@ LED) comes back on the five ground pins. Pin 1 is at the top left
 
 | Pins | Left (odd) | Right (even) |
 |---|---|---|
-| 1, 2 | `BREATH_INAMP_OUT` | `AGND_MOD` |
+| 1, 2 | `BREATH_SHAPED` | `AGND_MOD` |
 | 3, 4 | `GAIN_WIPER` | `RESP_V_IN_HALF` |
 | 5, 6 | `AGND_MOD` | `RESP_WIPER` |
 | 7, 8 | `GAIN_FLOOR` | `RESP_V_SHAPED` |
@@ -74,16 +74,16 @@ LED) comes back on the five ground pins. Pin 1 is at the top left
 | 13, 14 | `AGND_MOD` | `BREATH_JACK` |
 | 15, 16 | `MOD1_JACK` | `MOD2_JACK` |
 | 17, 18 | `MOD3_JACK` | `AGND_MOD` |
-| 19, 20 | `MODULE_ANALOG_POS12` | `MOD4_JACK` |
+| 19, 20 | `UMBILICAL_POS12` | `MOD4_JACK` |
 
 Why this order:
 - **Grounds interleaved on a diagonal** (2, 5, 10, 13, 18): each ground pin
   is next to three pins (the one across and the ones above and below it), so
   five of them can border fifteen signals. Every signal has a ground beside it
-  except the LED's `MODULE_ANALOG_POS12`, which is DC.
+  except the LED's `UMBILICAL_POS12`, which is DC.
 - **The pots' nets on the top rows**, because the pots are above the header
   (ADR 0024: the pot row, then the jacks). The breath-gain chain
-  (`BREATH_INAMP_OUT`, `GAIN_WIPER`, `GAIN_FLOOR`) is the left column, on the
+  (`BREATH_SHAPED`, `GAIN_WIPER`, `GAIN_FLOOR`) is the left column, on the
   gain pot's side; the response pot's three nets are the right column, on its
   side; the offset pot, in the middle, closes the group. A ground row
   (9–10 and 13) separates the pots' high-impedance wipers from the jack
@@ -104,24 +104,30 @@ go; the *reasons* above are about positions, so re-read them when
 
 - [`link-supervision`](../../module/link-supervision/link-supervision.md) —
   **no parts**: the watchdog and the presence comparator were deleted before
-  layout and never had a BOM row. It has nothing to draw. Its one live effect
-  is `dac8568`'s `CLR` port, which it would drive; unfitted, `R-CLR-PU` holds
-  `CLR` inactive and `LK-CLR` asserts it by hand, so on this board that port
-  is a no-connect.
+  layout and never had a BOM row. It has nothing to draw. `CLR`, which it
+  would drive, is a net inside `dac8568`: `R-CLR-PU` ties it inactive and
+  `LK-CLR` asserts it by hand.
 - [`panel`](../../module/panel/panel.md) — **no electrical parts**: its one
   BOM row is the aluminium panel. The controls on it belong to the circuits
   that net them (the jacks and pots to their stages, `LED-PANEL` to
   `panel-led`, `SW-POWER` to `umbilical-load-switch`).
 
+## Decided 2026-09-30
+
+- **Four layers, 1.6 mm** (owner). The ground scheme is `dig-gnd-topology`:
+  one star at `J-PWR-EURO`'s ground pins, `NT-AGND-MOD` and `NT-DIG-MOD` the
+  only ties ([`power-entry.md`](../../module/power-entry/power-entry.md),
+  *Grounding*).
+- **Standoff pads**: the metal standoffs (owner) land on pads on **no net**
+  on this board — plated, clear of every plane. The jack board's are
+  `AGND_MOD`.
+- **`J-B2B-MOD`** is Samtec `TSW-110-09-G-D` (row), insulator on this board's
+  front face.
+- **Both `SW-POWER` lugs** wire to this board, beside `U-LOADSW`.
+
 ## Open, and what decides each
 
 | Item | Decided by |
 |---|---|
-| `SW-POWER`'s second terminal (`NO`) is on no net: the UVLO divider it would land on is not drawn | `umbilical-load-switch.md`, the ON divider |
-| Which board each `SW-POWER` lug's wire lands on; this sheet puts the switch with `U-LOADSW` (footprint: two wire pads) | The board layout (ADR 0024, open items) |
-| `Q-LOADSW` and `R-ILIM` have no chosen part (provisional TO-252 and 1206 footprints) | Their BOM rows |
-| `RN-PITCH` (`R-PRECISION`, LT5400) has no MPN on the symbol | Its BOM row's selection |
-| `J-B2B-MOD` has no MPN: a long-pin header or a stock one with its insulator moved | `mechanical/module/drc.echo`, *J-B2B-MOD pin length (derived)* |
-| Whether the standoffs carry ground between the boards (metal or nylon) | The layout's grounding scheme (ADR 0024) |
-| 2 × 8 or 2 × 5 power header: whether the module keeps the bus +5 V | `digital-and-supervision.md`, *the bus +5 V rail* (ADR 0023) |
-| The bus's CV and Gate pins (13–16) are unused, on no net | Nothing: the module takes no bus CV |
+| The metal standoffs' part (the CAD's `standoff.*` still cites the polyamide spacer) | The module CAD owner; the pads' nets are settled above |
+| The bus's +5 V, CV and Gate pins (11–16) are unused, on no net | Nothing: the module makes its own 5 V and takes no bus CV (ADR 0023 point 3, amended) |

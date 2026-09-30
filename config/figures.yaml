@@ -520,13 +520,14 @@ figures:
     forbidden: []
 
   - id: pitch-cents-budget
-    quantity: Total pitch error budget
-    value: "DISPUTED"
-    status: disputed
+    quantity: Total pitch error budget - drift over 10 degC after trim, at the worst note
+    value: "0.76 cents worst-case linear sum (0.45 cents RSS)"
+    status: settled
     owner: hardware/module/pitch-stage/pitch-stage.md
-    candidates: ["0.42 cents (this is a ROW of one table, not a total - and it is what power-entry.md scaled the ground-path finding against)", "0.85 cents RSS", "1.35 cents linear sum", "~1.2 cents RSS over 0-40 C from an independent reviewer"]
-    decided_by: "pitch-stage.md has two contradictory budget tables back to back and states no total. One coherent table, then cite it."
-    forbidden: []
+    derivation: "One table, pitch-stage.md 'What limits accuracy': DAC internal reference 5 ppm/C max (C grade, SBAS430E p.4) x 10 C x 7 V lever = 0.42; DAC gain tempco 1 ppm FSR/C typ (p.3) = 0.12; DAC offset drift 0.5 uV/C typ x 2 (p.3) = 0.012; LT5400 ratio tracking 0.027; TRIM-GAIN at mid-travel against R-GAIN-CTR 0.034; V_ref trim network (R-VREF-FB/R-VREF-GND 0.02/1.02 and R-VREF-INJ/R-VREF-SER, 25 ppm/C thin film) 0.06; OPA2197 V_os drift 2.5 uV/C max, follower x1 and stage x2 (SBOS737C p.7) 0.09. Sum 0.763, RSS 0.452 cents. 1 V/oct: 1 mV = 1.2 cents."
+    scope: "Temperature drift over 10 degC once the trims are set, worst note in -2..+7 V. NOT in it: static errors the trims and firmware's affine remove (DAC INL, initial offsets and ratios), the dynamic ground-path terms on power-entry.md (breath-correlated, 7-18 cents from the ribbon and busboard), and loads."
+    forbidden: ["pitch error budget at 0.42 cents", "budget at 0.42 cents"]
+    false_positive_note: "0.42 cents is legitimately the DAC-reference ROW of the budget table; only calling it the total is stale. The old candidates 0.85 cents RSS / 1.35 cents linear sum / ~1.2 cents RSS never appeared outside this entry."
 
   - id: loadswitch-timer
     quantity: C-TIMER-LOADSW
@@ -587,18 +588,15 @@ figures:
       is 100 nF at REF5050 VIN, 100 nF at REF5050 VOUT, and 100 nF at U-BREATH VS.
 
   - id: dig-gnd-topology
-    quantity: Where DIG_GND returns to
-    value: "DISPUTED"
-    status: disputed
+    quantity: Where DIG_GND (and AGND_MOD, and PWR_GND) meet at the module
+    value: "One star, at the power header's ground pins: DIG_GND (its own plane) and AGND_MOD (its own region) each tie there through their own net tie, PWR_GND reaches it on its own copper, and nothing ties anywhere else. Four-layer main board."
+    layers: "PCB-MODULE, four layers, 1.6 mm: layer 2 carries the DIG_GND plane (under the etherCON, the level shifter, the logic regulator and the SPI traces) and, separately, the AGND_MOD region (under the analog block); layer 4 carries PWR_GND from the etherCON's pin 6 to the header. Ties: NT-DIG-MOD and NT-AGND-MOD, both at the header's ground pins."
+    status: settled
     owner: hardware/module/power-entry/power-entry.md
-    candidates:
-      - "Its own path to the star (docs/decisions/0004-cv-interface-module.md:627)"
-      - "NOT its own path - the pour directly under its trace, because routing a 2 MHz SPI return to a distant star is the classic split-plane mistake (hardware/module/power-entry/power-entry.md:495-498)"
-      - "The analog star, single tie (hardware/module/digital-and-supervision/digital-and-supervision.md:53)"
-    decided_by: "The MODULE board's layer count - an owner decision, not yet made (PCB-MODULE is 2-layer in hardware/unplaced.csv; hardware/module/module.md lists it as undecided). The main board's four-layer decision (ADR 0017 amendment 2026-09-29) does NOT reach it: it settles only the instrument end, which is written in hardware/carrier/power-entry-instrument/power-entry-instrument.md section 2. On two layers the three module-side requirements stay mutually exclusive - power-entry.md wants the SPI return directly under its trace while ADR 0004 wants PWR_GND on its own copper AND the analog return as its own region, and two disjoint pours on one layer means every boundary-crossing trace loses its return across the moat. Four layers dissolves it; see proposed_if_four_layers."
-    forbidden: []
-    proposed_if_four_layers: "Written 2026-09-30 for the owner's decision, not decided. Layer 2 an unbroken ground plane that IS DIG_GND: the etherCON's pin 8 lands on it at the connector, so SCLK/MOSI/CS return directly under their traces to the 74AHCT125 and the DAC's digital pins (power-entry.md's requirement). The analog return (AGND_MOD) an island on layer 2 under the analog block, bridged to the plane at ONE point under the DAC8568 between its digital and analog pins - the only part with pins on both. PWR_GND (the umbilical's return, ~360 mA) NOT on layer 2: a dedicated trace or pour on layer 4 from the etherCON's pin 6 to the Eurorack inlet's ground pin, the star, touching nothing on the way (ADR 0004's requirement). The plane and the analog island reach the star at that pin and nowhere else. This is the instrument end's shape (power-entry-instrument.md section 2) with PWR_GND moved off the plane, because at the module it is the dirty current rather than the reference."
-    note: "power-entry.md states that ADR 0004 was corrected on this point. IT WAS NOT - line 627 still says the opposite. This is the named failure mode exactly: the fix landed where the editing was happening and not where the reader looks. It is SEMANTIC, so tools/check-staleness.py cannot see it, which is why it survived three review waves and is filed here instead. THE INSTRUMENT END IS DECIDED, AND THIS ENTRY IS ABOUT THE MODULE END: on 2026-09-26 the owner tied J-UMB pin 8 (DIG_GND) to the main board's ground, PWR_GND, at J-UMB (docs/decisions/0018-main-board-wiring-decisions.md; hardware/interfaces/spi-link/spi-link.md; hardware/carrier/netlist.yaml). Where DIG_GND meets AGND_MOD and PWR_GND at the module is still the dispute above, and the instrument end does not settle it."
+    decided: "Owner, 2026-09-30: 'Four layer in the module board is fine.' The topology on it adopts the four-layer proposal recorded here (DIG_GND plane on layer 2, analog region, PWR_GND on layer 4) with ONE correction: no AGND_MOD-to-DIG_GND bridge under the DAC8568. SBAS430E p.49 asks for the DAC's ground on an analog plane 'separate from the ground connection for the digital components until they were connected at the power-entry point of the system', and J-UMB pins 6 and 8 are tied at the instrument (ADR 0018), so about half the instrument's return comes back on pin 8 - a bridge under the DAC would route it across the analog region; tied at the star it crosses only the DIG_GND plane. ADR 0004's 'DIG_GND likewise - its own path to the star' is what this is."
+    forbidden: ["**`DIG_GND` is *not* given its own path to the star**", "Where it ties is the disputed part", "Where it returns is the disputed part", "Where it ties is the disputed figure", "The module ground plan is unsettled", "bridged to the plane at ONE point under the DAC8568"]
+    false_positive_note: "The pre-decision wording lives on in docs/review and in the notes.md history files, which are not the corpus. spi-link.md (interfaces) still calls this figure disputed and is outside the module - report, do not add a pattern that only fires there."
+    note: "THE INSTRUMENT END was decided first: on 2026-09-26 the owner tied J-UMB pin 8 (DIG_GND) to the main board's ground, PWR_GND, at J-UMB (docs/decisions/0018-main-board-wiring-decisions.md; hardware/interfaces/spi-link/spi-link.md; hardware/carrier/netlist.yaml). The module end is this entry. PCB-MODULE-JACK stays two layers: its only ground is AGND_MOD, arriving on J-B2B-MOD's five ground pins. The metal standoffs (owner, 2026-09-30) are on AGND_MOD at the jack board and on no net at the main board, so they add no second tie."
 
   - id: riso-ref-topology
     quantity: R-ISO-REF and the reference buffer's compensation network
@@ -801,11 +799,11 @@ figures:
 
   - id: ferrite-bias-impedance
     quantity: FB-IN impedance at 100 MHz under real DC bias
-    value: "~580-614 ohm on FB1/FB3/FB4; ~280-310 ohm on FB2"
+    value: "~580-614 ohm on FB1/FB3; ~280-310 ohm on FB2"
     status: settled
     owner: hardware/module/power-entry/power-entry.md
     derivation: "Laird MI1206K601R-10, drawing rev E, banked at datasheets/discrete-and-power/MI1206K601R-10-ferrite-bead.pdf. Read off the drawing's impedance-under-DC-bias curve family (0 / 250 / 500 / 1000 / 1500 mA traces) at 100 MHz: 0 A ~614 ohm, 250 mA ~431, 500 mA ~157, 1000 mA ~72, 1500 mA ~51. FB2 carries umbilical-current (359 mA) and interpolates to ~280-310 ohm; the module +12V total of 392 mA gives ~245-275."
-    forbidden: ["Rated >=1A - the common 0805 600R part is ~300mA and a saturated bead is a wire"]
+    forbidden: ["Rated >=1A - the common 0805 600R part is ~300mA and a saturated bead is a wire", "FB1/FB3/FB4", "`FB1`, `FB3`, `FB4`", "FB4 (+5V, mA)", "`FB1`–`FB4`"]
     note: "THE '>=1 A' RULE DOES NOT DO WHAT THE BOM ROW SAID IT DID. A bead's current rating is THERMAL, not magnetic, so it says nothing about saturation. A 3000 mA part in the same package with the same 600 ohm nominal (HI1206N601R-10, banked alongside) reads ~145 ohm at 500 mA - SLIGHTLY WORSE than the 1500 mA part. FB2 gets roughly half the 600 ohm its row specifies and no 1206 600R bead of any rating fixes it: DC bias shifts the impedance peak UP IN FREQUENCY, so the bead does not die, its useful band slides off 100 MHz. Either the FB2 requirement is restated at its real operating current or FB2 becomes a physically larger part. SELECTION CONSTRAINT WORTH PRESERVING: this part was chosen because its datasheet PUBLISHES the bias curve. Murata BLM's PDF does not (that data is in SimSurfing only) and neither does Wurth WE-CBF - an earlier researcher declined to bank a Wurth part for exactly this reason and that judgement is upheld."
 
   - id: ref5050-grade

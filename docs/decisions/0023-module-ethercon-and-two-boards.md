@@ -46,6 +46,16 @@ A Eurorack module's board sits parallel to its panel. That is what a
    own bus boards are unkeyed, "red strip down". `D-REVPOL` protects the
    ±12 V rails; the +5 V branch has no reverse protection, which is one of
    that open question's arguments.
+
+   *Amended 2026-09-30 by the owner: "Create the 5v locally", and "We keep the
+   standard header, we just don't use the 5 volt. This keeps commonality of
+   all the Eurorack cable connectors." **The header stays 2 × 8 and the bus
+   +5 V is not used**: its pins (and the CV and Gate pins) are no-connects,
+   and the module makes its own 5 V from the protected +12 V
+   (`hardware/module/power-entry/power-entry.md`, *The logic 5 V*). With the
+   +5 V pins unconnected, a reversed ribbon has no unprotected rail to land
+   on, so the concern above is resolved. The paragraph above is what this
+   point said before the amendment.*
 4. **The panel is the Doepfer A-100 standard at 10HP**, with four M3 screws
    and washers. The standard's dimensions are in `panel-width` and
    `panel-height-budget` (`config/figures.yaml`), from the banked Doepfer
@@ -97,4 +107,3 @@ tab slot.*
 | The standoff length and the jack board's exact depth | The module layout, with the jacks and the NE8FAV in hand |
 | The panel's bore, tab slot and screw holes | The panel drawing, from the NE8FAV drawing and STEP; test-fitted |
 | Whether the NE8MX cable connector latches in the NE8FAV | Before buying the cable connectors (ADR 0021) |
-| 2 × 8 or 2 × 5: whether the module keeps the bus +5 V | The open question in `digital-and-supervision.md` |
