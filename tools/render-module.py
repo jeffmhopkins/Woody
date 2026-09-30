@@ -395,9 +395,9 @@ def build(view, preview):
     # --------------------------------------------------- patch cables ----
     if view != "front":
         plug_d = V("jack.plug_d")
-        routes = {  # picture: two patch cables, out of PITCH and MOD2, away and down
+        routes = {  # picture: two patch cables, out of PITCH and MOD4, away and down
             "J-CV-PITCH": [(0, 0, 34), (-8, -6, 62), (-38, -40, 78), (-80, -110, 70), (-110, -230, 40)],
-            "J-CV-MOD2": [(0, 0, 34), (14, 10, 52), (52, 30, 64), (110, 14, 60), (170, -80, 44), (200, -220, 30)],
+            "J-CV-MOD4": [(0, 0, 32), (26, 6, 42), (72, 0, 46), (125, -50, 42), (170, -220, 30)],
         }
         for i, (name, rel) in enumerate(routes.items()):
             x, y = parts[name][:2]
