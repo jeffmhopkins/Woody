@@ -104,10 +104,9 @@ go; the *reasons* above are about positions, so re-read them when
 
 - [`link-supervision`](../../module/link-supervision/link-supervision.md) —
   **no parts**: the watchdog and the presence comparator were deleted before
-  layout and never had a BOM row. It has nothing to draw. Its one live effect
-  is `dac8568`'s `CLR` port, which it would drive; unfitted, `R-CLR-PU` holds
-  `CLR` inactive and `LK-CLR` asserts it by hand, so on this board that port
-  is a no-connect.
+  layout and never had a BOM row. It has nothing to draw. `CLR`, which it
+  would drive, is a net inside `dac8568`: `R-CLR-PU` ties it inactive and
+  `LK-CLR` asserts it by hand.
 - [`panel`](../../module/panel/panel.md) — **no electrical parts**: its one
   BOM row is the aluminium panel. The controls on it belong to the circuits
   that net them (the jacks and pots to their stages, `LED-PANEL` to

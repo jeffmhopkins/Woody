@@ -12,9 +12,6 @@ ports:
     dir: in
     from: module/power-entry
     figure: dac-rail
-  CLR:
-    dir: in
-    from: module/link-supervision
   SCLK_DAC:
     dir: in
     from: module/digital-and-supervision
@@ -108,7 +105,6 @@ nets:
   - R-LDAC.2
   - U-DAC.GND
   CLR:
-  - port: CLR
   - LK-CLR.1
   - R-CLR-PU.2
   - U-DAC.CLR

@@ -584,19 +584,6 @@ nets:
     driver: module/digital-and-supervision
     receivers: [module/dac8568]
 
-  CLR:
-    kind: signal
-    domain: digital
-    carries: "DAC asynchronous clear, active low"
-    undriven: true
-    pull: "R-CLR-PU holds it inactive"
-    receivers: [module/dac8568]
-    note: >
-      NOTHING DRIVES THIS NET. The watchdog that once did is deleted, and the
-      DAC page says so. It is listed because four other pages name CLR in
-      their Interfaces tables to record that it reaches no part of them -
-      which is a real fact about the design and the reason the net is here.
-
   VREFOUT:
     kind: signal
     domain: analog
