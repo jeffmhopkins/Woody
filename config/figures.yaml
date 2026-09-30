@@ -551,8 +551,9 @@ figures:
     status: settled
     owner: hardware/module/umbilical-load-switch/umbilical-load-switch.md
     derivation: "C = I_GATE / (dV/dt). I_GATEUP is -5 / -10 / -20 uA (164112fc p.2), corroborated independently by the DC1354A demo quick-start guide p.1 - the min/max this figure lacked. 82 nF (E24; 83 nF is not orderable) gives dV/dt = 61 / 122 / 244 V/s and a ramp to 12 V of 197 / 98 / 49 ms."
-    forbidden: ["= 83 nF         provisional", "so ~83nF", "a ramp spec with an unbounded tolerance", "No min/max established"]
-    note: "ADR 0005 specifies a 50-100 ms ramp and THAT SPEC IS NOT ACHIEVABLE with this part: I_GATE is a 4:1 window and no single capacitor holds it inside a 2:1 time window. 82 nF centres the typical inside ADR 0005; the guaranteed envelope is 49-197 ms. Raised against ADR 0005 2026-09-21, not decided."
+    forbidden: ["= 83 nF         provisional", "so ~83nF", "a ramp spec with an unbounded tolerance", "No min/max established", "Raised against ADR 0005 2026-09-21; not decided here", "RAISED AGAINST ADR 0005 AND NOT DECIDED", "is not achievable with this part (above,", "SO ADR 0005's '50-100ms RAMP' IS NOT ACHIEVABLE"]
+    decided: "Owner, 2026-09-30: 'Good to widen the spec.' ADR 0005's ramp specification is now this figure's guaranteed envelope (ADR 0005, amendment of that date). It used to specify 50-100 ms, which a 4:1 I_GATE window cannot hold inside a 2:1 time window; 82 nF always centred the typical inside it, and both corners of the envelope were shown safe on the owner page and in its sims before the decision."
+    note: "The envelope IS the specification since 2026-09-30 - do not restate a narrower one anywhere."
 
   - id: loadswitch-fb-divider
     quantity: LT1641 FB divider, R-FB-HI / R-FB-LO

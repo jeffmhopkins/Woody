@@ -76,8 +76,8 @@ cover, and it does, with the instrument's load arriving above ~7 V where the
 limit is already flat.
 
 **4. There was no gate capacitor anywhere.** Not in the drawing, not in
-`bom.csv`. The FET sizing, the boot analysis and ADR 0005's 50–100 ms
-specification all rest on a "programmed ramp" that **did not exist**. With
+`bom.csv`. The FET sizing, the boot analysis and ADR 0005's ramp specification
+as it then stood all rest on a "programmed ramp" that **did not exist**. With
 the FET's bare C_iss (~1 nF) and ~10 uA of gate current the ramp is
 10 kV/s, which demands `2.2 mF x 10 kV/s = 22 A` `[calc]` — twenty-odd
 times the limit. **`C-GATE` now exists and is 82 nF** — see below.
@@ -281,13 +281,12 @@ document rather than assumed away.
 | –10 µA (typ) | 122 V/s | **98 ms** | 268 mA |
 | –20 µA (max) | 244 V/s | **49 ms** | 537 mA |
 
-> **⚠ ADR 0005's "50–100 ms ramp" is not achievable with this part, and that is
-> a spec defect, not a component choice.** `I_GATE` is specified 5–20 µA — a
-> **4:1** window — so no single `C-GATE` can hold the ramp inside a 2:1 one. 82 nF
-> centres the *typical* at 98 ms, inside ADR 0005; the guaranteed envelope is
-> **49–197 ms**. Either ADR 0005 widens its ramp specification to 50–200 ms, or
-> the ramp must be programmed by something other than the internal pull-up.
-> **Raised against ADR 0005 2026-09-21; not decided here.**
+> **ADR 0005's ramp is this envelope — widened 2026-09-30.** `I_GATE` is
+> specified 5–20 µA, a **4:1** window, so no single `C-GATE` can hold the ramp
+> inside a 2:1 one; ADR 0005 used to ask for exactly that. The owner: *"Good to
+> widen the spec."* ADR 0005 now specifies the guaranteed envelope in the table
+> above, which is the tracked figure `loadswitch-gate-cap`. 82 nF centres the
+> typical where ADR 0005 always wanted it.
 
 **Both ends of that envelope are safe, and the fast one is worth doing properly.**
 At 537 mA the fast corner climbs out of foldback at `V_OUT` = **1.69 V**, not
@@ -440,11 +439,6 @@ deliberately cycle the panel toggle, which is why the panel LED matters.
 
 ## Still open
 
-- **ADR 0005's 50–100 ms ramp** is not achievable with this part (above,
-  *The two capacitors*). **Decided by: owner** — widen ADR 0005 to the
-  guaranteed 49–197 ms, or program the ramp by something other than the
-  internal pull-up. Recommendation: widen it — both corners are shown
-  safe above, and nothing downstream needs the upper bound.
 - **Damping the input LC** (`carrier/power-entry-instrument`, not this
   board). `L-BUCK-IN` (10–47 µH) in front of a constant-power
   switching load, with 2 m of cable and ~2 mF at the far end, is the textbook
