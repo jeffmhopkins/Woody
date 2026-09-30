@@ -1,0 +1,174 @@
+# GENERATED from the KiCad project hardware/boards/module-jack/module-jack.kicad_sch by tools/kicad.py - DO NOT EDIT.
+# The flattened netlist of this board, every sub-sheet instance expanded.
+
+board: module-jack
+title: Woody module jack board (hardware/boards/module-jack)
+components:
+  D1:
+    of: LED-PANEL
+    value: 3mm LED
+    pins:
+    - A
+    - K
+    sheet: panel-led
+  J1:
+    of: J-CV
+    value: PJ398SM
+    pins:
+    - TIP
+    - SLEEVE
+    sheet: pitch-stage
+  J2:
+    of: J-CV
+    value: PJ398SM
+    pins:
+    - TIP
+    - SLEEVE
+    sheet: breath-output-stage
+  J3:
+    of: J-CV
+    value: PJ398SM
+    pins:
+    - TIP
+    - SLEEVE
+    sheet: mod-channels
+  J4:
+    of: J-CV
+    value: PJ398SM
+    pins:
+    - TIP
+    - SLEEVE
+    sheet: mod-channels
+  J5:
+    of: J-CV
+    value: PJ398SM
+    pins:
+    - TIP
+    - SLEEVE
+    sheet: mod-channels
+  J6:
+    of: J-CV
+    value: PJ398SM
+    pins:
+    - TIP
+    - SLEEVE
+    sheet: mod-channels
+  J7:
+    of: J-B2B-MOD
+    value: 2x10 2.54mm pin header
+    pins:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    - 17
+    - 18
+    - 19
+    - 20
+  R1:
+    of: R-LED-PANEL
+    value: 2k2 1%
+    pins:
+    - 1
+    - 2
+    sheet: panel-led
+  RV1:
+    of: POT-GAIN
+    value: 50k
+    pins:
+    - CW
+    - W
+    - CCW
+    sheet: breath-output-stage
+  RV2:
+    of: POT-OFFSET
+    value: 10k linear
+    pins:
+    - CW
+    - W
+    - CCW
+    sheet: breath-output-stage
+  RV3:
+    of: POT-RESP
+    value: 50k linear
+    pins:
+    - CW
+    - W
+    - CCW
+    sheet: breath-response-shaper
+nets:
+  /AGND_MOD:
+  - D1.K
+  - J1.SLEEVE
+  - J2.SLEEVE
+  - J3.SLEEVE
+  - J4.SLEEVE
+  - J5.SLEEVE
+  - J6.SLEEVE
+  - J7.10
+  - J7.16
+  - J7.2
+  - J7.5
+  - J7.9
+  - RV2.CCW
+  /BREATH_INAMP_OUT:
+  - J7.11
+  - RV1.CW
+  /BREATH_JACK:
+  - J2.TIP
+  - J7.3
+  /DAC_AVDD:
+  - J7.15
+  - RV2.CW
+  /GAIN_FLOOR:
+  - J7.13
+  - RV1.CCW
+  /GAIN_WIPER:
+  - J7.12
+  - RV1.W
+  /MOD1_JACK:
+  - J3.TIP
+  - J7.4
+  /MOD2_JACK:
+  - J4.TIP
+  - J7.6
+  /MOD3_JACK:
+  - J5.TIP
+  - J7.7
+  /MOD4_JACK:
+  - J6.TIP
+  - J7.8
+  /MODULE_ANALOG_POS12:
+  - J7.20
+  - R1.1
+  /OFFSET_WIPER:
+  - J7.14
+  - RV2.W
+  /PITCH_JACK:
+  - J1.TIP
+  - J7.1
+  /RESP_V_IN_HALF:
+  - J7.17
+  - RV3.CW
+  /RESP_V_SHAPED:
+  - J7.19
+  - RV3.CCW
+  /RESP_WIPER:
+  - J7.18
+  - RV3.W
+  /panel-led/LED_ANODE:
+  - D1.A
+  - R1.2
+external_endpoints: []
