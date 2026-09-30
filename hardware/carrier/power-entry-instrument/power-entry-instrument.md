@@ -27,7 +27,7 @@ The `Dir` and `Peer` columns are defined once in
 | `+12V` strip feed | out | `carrier/led-strip-drive` | — | Taken direct off the input node. `C-STRIP-BULK` is this circuit's part. **The same net as the row above** — `D-REVSHUNT` is a shunt and `D-TVS-PWR` a clamp, so nothing is in series between `J-UMB` pin 3 and this tap |
 | `+12V` analog | out | `carrier/breath-excitation-reference` | — | REF5050 `VIN`, and the V+ of both OPA2197 halves. **Also the same net**, for the same reason |
 | 5 V, buck A | out | `J-MCU`, `carrier/led-strip-drive` | `matrix-led-current` | Through `D-USBOR` and `J-MCU`, down three conductors of `CBL-MCU-RIBBON` onto the dev board's 5 V pad and `TP2`, and on to the 74AHCT125 |
-| `PWR_GND` pour | ref | `carrier/service-uart`, `carrier/led-strip-drive`, `carrier/carrier`, `interfaces/breath-sense-link` | `dig-gnd-topology` | Layer 2, §2. The whole board returns here, and the breath link's two clamps, and so do the plates: the thumb plates through this board's plate mounts, the key plate through the left-hand key board's `GND_CHAIN` (ADR 0022, ADR 0020 Amendment 5). **`carrier/breath-adc` and `carrier/breath-excitation-reference` are no longer listed**: both of those pages say their return is `AGND_INST`, which reaches this pour on the **single tie** and is a different node everywhere else — and that distinction is the whole point of the star |
+| `PWR_GND` pour | ref | `carrier/service-uart`, `carrier/led-strip-drive`, `carrier/carrier`, `interfaces/breath-sense-link` | `dig-gnd-topology` | Layer 2, §2. The whole board returns here, and the breath link's two clamps, and so do the plates: the bottom plate through this board's mounts, the key plate through the cassette's columns to the same mounts (ADR 0022, ADR 0025). **`carrier/breath-adc` and `carrier/breath-excitation-reference` are no longer listed**: both of those pages say their return is `AGND_INST`, which reaches this pour on the **single tie** and is a different node everywhere else — and that distinction is the whole point of the star |
 
 ## §1 Power entry
 
@@ -69,9 +69,9 @@ fault and the diode is the wrong way round.
 limit is at the module.
 
 **The aluminium plates bond to `PWR_GND`, never to `AGND`** `[repo] 0009`.
-The thumb plates bond through this board's plate mounts (ADR 0022). The key
-plate bonds through one mount of the left-hand key board, whose `GND_CHAIN` is
-this pour down the ribbon (ADR 0020, Amendment 5).
+The bottom plate bonds through this board's mounts (ADR 0022). The key plate
+bonds through the cassette's columns, whose standoffs stand on the same
+plated mounts (ADR 0025); no key board's `GND_CHAIN` touches either plate.
 
 ### Derivations
 

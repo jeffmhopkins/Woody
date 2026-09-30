@@ -2,8 +2,8 @@
 // resolve against the top-level file, which is why figures sit beside it.
 // The main board - the one long board at the thumb level that carries the
 // thumb switches and everything the carrier did (ADR 0017) - picked out: the
-// lid off, the board, its parts, the LED strip, the key boards' ribbons,
-// standoffs and the breath sensor in bright yellow, everything else faded,
+// oak top and key plate off, the board, its parts, the LED strip, the key
+// boards' ribbons, its mounts and the breath sensor in bright yellow, everything else faded,
 // each labelled from the same variables that place it. fig_view = "plan" is
 // the labelled view from above; "3d" is a perspective with only the title.
 include <woody_body.scad>
@@ -17,8 +17,7 @@ fig_view = "plan";
 highlight = ["main board", "parts main board", "tall parts main board", "breath sensor", "LED strip",
              "J-CHAIN left_hand main board", "J-CHAIN right_hand main board", "IDC plug left_hand main board", "IDC plug right_hand main board",
              "ribbon left_hand", "ribbon right_hand",
-             "main board standoff 1", "main board standoff 2", "main board standoff 3", "main board standoff 4",
-             "main board standoff 5", "main board standoff 6", "main board standoff 7", "main board standoff 8"];
+             "main board stud*", "main board spacer*", "main board nut*", "column standoff*"];
 $k = 3;
 module fig() {
     assembly();
@@ -38,7 +37,7 @@ module fig() {
         callout([sensor_c[0], sensor_c[1], z], [sensor_c[0] - 2, top, z], "breath sensor (mouth end)", size = s2, halign = "left");
         callout([mb_chain("left_hand")[0], chain_y, z], [mb_chain("left_hand")[0] + 2, bot, z], "ribbon to the LH key board", size = s2);
         callout([mb_chain("right_hand")[0], chain_y, z], [mb_chain("right_hand")[0] + 2, bot, z], "ribbon to the RH key board", size = s2);
-        callout([cb_standoffs[0][0], cb_standoffs[0][1], z], [cb_standoffs[0][0] + 2, bot - 10, z], "standoffs", size = s2);
+        callout([cb_standoffs[0][0], cb_standoffs[0][1], z], [cb_standoffs[0][0] + 2, bot - 10, z], "columns and mounts, on the bottom plate", size = s2);
         label([0, bot - 24, z], str("MAIN BOARD ", round(cb_x[1] - cb_x[0]), " x ", cb_y[1] - cb_y[0],
               " mm - the thumb switches, both thumb registers and the carrier circuits, one board"), size = s2, halign = "left");
         label([0, bot - 34, z], str(cb_room, " mm for parts under the keys, ", gap_room, " mm where no key board is overhead"), size = s2, halign = "left");

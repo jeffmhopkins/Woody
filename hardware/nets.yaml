@@ -473,11 +473,11 @@ nets:
       - carrier/carrier
       - interfaces/breath-sense-link
     note: >
-      The thumb plates bond to this net through the main board's plate mounts
-      (ADR 0022), each at its own studs.
-      The aluminium key plate bonds to it at one mount of the left-hand key
-      board, whose GND_CHAIN is this net down the ribbon (ADR 0020, Amendment
-      5). Neither plate ever bonds to AGND.
+      The bottom plate bonds to this net through the main board's mounts
+      (ADR 0022), each at its own stud. The aluminium key plate bonds to it
+      through the cassette's columns, whose standoffs stand on the same
+      plated mounts (ADR 0025); no key board's GND_CHAIN touches either plate.
+      Neither plate ever bonds to AGND.
       IT DOES NOT LIST THE TWO ANALOG CIRCUITS. power-entry-instrument.md's
       Interfaces table names carrier/breath-adc and
       carrier/breath-excitation-reference as returning to the pour, and both of

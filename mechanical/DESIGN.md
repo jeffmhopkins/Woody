@@ -28,42 +28,53 @@ drawing.
 
 ## How the stack is modelled
 
-- **The lid** is the oak top **on** the aluminium key plate — the plate is
-  underneath, because keys are **flush with the top face at full travel**
-  (decided 2026-09-26, ADR 0009). The oak top's thickness is not a parameter:
-  it is the cap's height above the seat less the travel, derived in the model
-  and printed in `drc.echo`. The oak carries one clearance hole per cap
-  through it and nothing else; the playing face is unbroken, and the lid's
-  fasteners stop in the plate from below. The two key boards hang from the
-  plate on PEM FHL-M2.5 self-clinching studs pressed into it, heads flush with
-  its top face (ADR 0020, Amendment 4 — the owner's, 2026-09-28, replacing a
-  pressed-in standoff, a plugged through-bore and then screw heads in blind
-  pockets): the stud, a spacer under the plate, the board, and a
-  nut underneath. Nothing stands above the plate, so the wood bonds to it
-  flat. Each board is a rectangle across the cavity with a stud in each
-  corner, `hardware.kb_mount_inset` in from both edges for the nut's
-  keep-out; the tail ends run `boards.kb_tail_margin` past the last cutout
-  (*"key-board tail margin, least"* prints how short it may be). Each stud
-  keeps PEM's edge distance from the plate's edges and cutouts (*"key-board
-  studs clear of the plate's edges and cutouts"*, against
-  `hardware.kb_stud_edge`), and the spacers stay off the switch
-  cutouts (*"key-board spacers clear of the switch
-  cutouts"*). The plate + `hardware.kb_spacer_l`
-  is the key boards' depth, at the depth the KS-33's pins allow
-  (`docs/reference/ks33-geometry.md`; `switch.pcb_below_seat`): *"key-board
-  mount sets the board depth"*, and *"key-board depth at the hardware's
-  tolerance limits"*, a NOTE — the first board confirms the fit. The rest
-  of the mount: *"key-board screw: thread past the nut"*, *"key-board screw
-  ends clear of the main board's parts"*, *"key-board nuts clear of the
-  chain header"*, and the count, *"key-board mounts"*. The wood's species is
-  open (a hardwood, the owner's; ADR 0009). The thumb switches' main board
-  has its own depth, `switch.thumb_pcb_below_seat`.
+- **The cassette** (owner, 2026-09-29; ADR 0025) is everything inside the
+  shell as one unit: the key plate, one bottom plate, the two key boards and
+  the main board, tied by a **column** at each of the key boards' eight
+  corners. It is built and tested on the bench, dropped into the shell and
+  bonded with RTV to the oak top and bottom; service is by cutting the
+  silicone. Nothing screws into the wood but the U-bolt. A column, from the
+  bottom: a PEM FHL-M2.5 stud pressed into the bottom plate, head flush in its
+  underside; a spacer; the main board; an M2.5 female-female hex standoff
+  threaded onto the stud and faced to the gap up to the key board (*"column
+  standoff length (derived)"*); the key board; a spacer; the key plate; an
+  M2.5 low-head screw down into the standoff, its head in a blind pocket in
+  the oak top's underside (`export/oak-pockets.dxf`). The columns are
+  vertical (*"columns vertical: the main board's mounts under the key
+  boards'"*), and their threads, both ends of the standoff, are checked
+  (*"column: stud thread in the standoff"*, *"column: screw thread in the
+  standoff"*, *"column: stud and screw ends apart in the standoff"*). The
+  cassette's height against the shell's, and what the silicone takes, is
+  *"cassette height at the hardware's tolerance limits"*.
+- **The key plate** is under the oak top, because keys are **flush with the
+  top face at full travel** (decided 2026-09-26, ADR 0009). The oak top's
+  thickness is not a parameter: it is the cap's height above the seat less
+  the travel, derived in the model and printed in `drc.echo`. The oak carries
+  one clearance hole per cap through it and, from below, a blind pocket over
+  each column screw's head; the playing face is unbroken (*"column screw
+  pockets clear of the wood top's cuts"*, *"column screw pockets leave wood
+  over them"*). Each key board is a rectangle across the cavity with a column
+  in each corner, `hardware.kb_mount_inset` in from both edges for the
+  standoff's keep-out; the mouth ends run `boards.kb_end_margin` past the
+  first cutout, far enough that the mouth columns clear the first thumb row,
+  and the tail ends `boards.kb_tail_margin` past the last (*"key-board tail
+  margin, least"* prints how short it may be). The screws' heads bear on
+  plate metal (*"column screw heads bear on the key plate"*) and the spacers
+  stay off the switch cutouts (*"key-board spacers clear of the switch
+  cutouts"*). The plate + `hardware.kb_spacer_l` is the key boards' depth, at
+  the depth the KS-33's pins allow (`docs/reference/ks33-geometry.md`;
+  `switch.pcb_below_seat`): *"key-board mount sets the board depth"*, and
+  *"key-board depth at the hardware's tolerance limits"*, a NOTE — the first
+  board confirms the fit. The standoffs keep off the chain headers
+  (*"column standoffs clear of the chain headers"*), and the count is
+  *"key-board mounts"*. The wood's species is open (a hardwood, the owner's;
+  ADR 0009).
   The key board's chain header's through-hole pin tails come up through the
   board toward the grounded plate and stop short of it (*"J-CHAIN pin tails
   clear of the key plate"*), so the plate is not cut over them
   (2026-09-27; the first layout cut a window there).
 - **Thumb keys are flush with the bottom face at full travel** too (same date).
-  The thumb plate is on the oak bottom's inside face, so the oak bottom is
+  The bottom plate is on the oak bottom's inside face, so the oak bottom is
   derived by the same rule as the oak top.
 - **There is no display board** (owner, 2026-09-26: "remove the upper
   display ... we can do all this with the matrix led, keep things more
@@ -78,9 +89,12 @@ drawing.
   **The grooves are the one cut in the stack that is not a through-cut** — a
   saw or router pass, exported on their own as `export/oak-grooves.dxf` so
   the through-cut outlines stay clean. The plate sits between the sides.
-- **Thumb keys** mount upside down in a thumb plate on the oak bottom's inside
-  face; the through-cut in the oak is the recess (ADR 0009). Each thumb
-  cluster has its own plate.
+- **Thumb keys** mount upside down in the bottom plate on the oak bottom's
+  inside face; the through-cut in the oak is the recess (ADR 0009). One plate
+  serves both thumb clusters, the length of the main board (ADR 0025); every
+  one of the main board's mounts has a stud pressed into it (*"bottom-plate
+  studs clear of the plate's edges and cutouts"*, *"bottom-plate spacers clear
+  of the thumb switch cutouts"*).
 - **Key positions**: a key with `x`/`y` in `config/key-layout.yaml` is placed
   there. A key without one is placed on the provisional layout in
   `config/body.yaml`, where each run's spacing is its length over its gaps —
@@ -102,8 +116,7 @@ Several things can claim each end, and the largest wins:
   thumb row's pins — and then the equal bands (below).
 - **Tail end:** the **LED matrix on the top face, centred** after the keys
   (owner, 2026-09-26), with the etherCON and its adapter behind it; or the
-  key board, the last fastener pair, J-UMB, the adapter and the etherCON's
-  depth in a row; or the right-thumb cluster against the tail cap. (There is no service
+  key board, J-UMB, the adapter and the etherCON's depth in a row; or the right-thumb cluster against the tail cap. (There is no service
   cover since 2026-09-26.)
 - **The tail is stacked** (owner, 2026-09-26: "it's unacceptable to go this
   long" and "the matrix can be up higher out of the way and still allow the
@@ -123,8 +136,6 @@ Several things can claim each end, and the largest wins:
   behind it counts twice, and the gap between the hands copies the result** —
   a straight USB-C plug cost about 24 mm of body, which is why the plug is
   right-angle (`openings.usb_plug_l`).
-- **The last fastener pair** stands just in front of the tail equipment;
-  the main board's tongue is notched round it.
 - **One LED strip, on the main board** (ADR 0016, ADR 0017): LEDs up down
   the board's centreline, between the thumb switches' two rows of pins, from
   past the breath sensor to the board's tail end, lighting both sides through
@@ -151,14 +162,16 @@ Several things can claim each end, and the largest wins:
   sides. Its parts face up; the two key boards connect to it by ribbons (below);
   the Matrix's ribbon ends on it, and a **tongue** runs on from its tail end
   to the etherCON's adapter, carrying J-UMB (ADR 0021). It is clamped in the
-  U-bolt's stack, a washer each side of it, with a clearance hole for each leg
-  (ADR 0022 point 7). It has notches at the screws (one bite where a notch and a
-  hole would leave a sliver between them), and a mount under each of the key
-  boards' mounts, with a pair at the mouth and a pair on the tongue (ADR 0022
-  point 8; *"main board mounts under the key boards' mounts, and a pair at
-  each end"*): on a thumb plate
-  the key boards' stud, spacer and nut; on the oak an insert, a spacer and a
-  screw (ADR 0022). It is as thin as the key boards and as deep below its
+  U-bolt's stack, on a spacer from the bottom plate with a washer and the nut
+  above, with a clearance hole for each leg (ADR 0022 point 7, ADR 0025). It
+  has no edge notches. Every one of its mounts is on the bottom plate: a
+  column under each of the key boards' corners, and a pair at the mouth and a
+  pair on the tongue with a nut (ADR 0022 point 8, ADR 0025; *"main board
+  mounts on the bottom plate"*). Each mount is the stud, the spacer and the
+  board, on a plated `PWR_GND` hole that grounds both plates. Its underside
+  faces the grounded bottom plate over its whole length (*"main board
+  underside room over the bottom plate"*, *"J-CHAIN pin tails clear of the
+  bottom plate"*). It is as thin as the key boards and as deep below its
   switches' seat (*"main board mount sets its depth"*); the soldered thumb
   switches carry it between the mounts. The near row of thumb switches is
   turned 180° so their pins point away from the LED strip.
@@ -262,9 +275,9 @@ decision, not a correction.
    and the right hand, its width by the sides — and each key board's chain
    header, with the main board's under it, is placed clear of the switches by
    the model (*"chain headers on the … boards clear of the switches"*).
-8. **M3 into a 1.20 mm plate** is about two threads. The BOM already says
-   "insert or tapped boss"; the model says plain tapping is not one of the
-   options.
+8. **M3 into a 1.20 mm plate** was about two threads, which ruled out
+   tapping the key plate for the lid screws. Since ADR 0025 there are no lid
+   screws; the columns' threads are in their standoffs.
 
 ## The interference check
 
@@ -291,18 +304,19 @@ only as good as those envelopes. Group the report's lines by these causes
    (`renders/section-ribbon.png`; *"key-chain ribbon closed: hairpin leg and
    fold radius"*, *"key-chain ribbon fold no tighter than its bend radius"*,
    *"key-chain ribbon hairpin inside the body"*, *"key-chain ribbon hairpin
-   clear of the lid screws"*). Which way each hand's hairpin folds is
+   clear of the columns"*). Which way each hand's hairpin folds is
    `routing.chain_fold`, which says why. **Its length is the service
    position's** (owner: long enough "to have the top off and still connect
-   the ribbon before tightening down"): the lid laid face down beside the
-   body off its far edge, the body standing on its U-bolt, the ribbon running
-   up from the main board over the far side's top edge and down to the key
-   board (`routing.chain_service`, `routing.chain_slack`; *"key-chain ribbon
-   length (derived)"*). The cable is ordered by *"key-chain cable to order
-   (FFSD length code)"*, which is the FFSD part number's length field, in
-   inches. To take the lid off, lift it, lay it beside the body and unplug
-   the two sockets. The key header's pin tails stop short of the plate
-   (above).
+   the ribbon before tightening down"; since the cassette, ADR 0025,
+   tightening down is screwing the key plate onto its columns): the key
+   plate, with both key boards, held raised straight up off its columns while
+   a hand plugs the main board's sockets (`routing.chain_service`,
+   `routing.chain_raise`, `routing.chain_slack`; *"key-chain ribbon length
+   (derived)"*). A ribbon long enough to lay the plate beside the body would
+   fold into a hairpin that reaches the left-hand board's tail column. The
+   cable is ordered by *"key-chain cable to order (FFSD length code)"*, which
+   is the FFSD part number's length field, in inches. The key header's pin
+   tails stop short of the plate (above).
 2. **The hardware pages follow**: `hardware/interfaces/key-chain-loom/`
    describes the two ribbons (`J-CHAIN`, `CBL-CHAIN`) and the thumb chain in
    traces, and `chain-connectors` is derived from them. The key-board header
@@ -314,29 +328,16 @@ only as good as those envelopes. Group the report's lines by these causes
 3. **The breath tube** is short: mouth cap, trap, then across over the strip
    and back onto the sensor's port, all in the mouth band; the board has a
    slot in front of the sensor's lower port.
-4. **The middle M3 pair and the U-bolt backplate share a station**, the
-   middle of the gap between the hands. Across the body the plate stops
-   short of the pair's clearance circle, by more than it floats on its legs
-   (`hardware.backplate_clear`), and is located by the U-bolt's legs alone,
-   so the screws never pass through it and it comes out with the U-bolt
-   (*"U-bolt washers bear on the backplate, which stops at the gap fasteners'
-   clearance"*). How far the fasteners stand in from the sides
-   (`hardware.fastener_inset`) is a window between two rules: the oak between
-   each clearance hole and the side groove's wall, where the oak ends
-   (*"oak-bottom cuts inside the U"*), and the middle pair's counterbores
-   against the U-bolt's leg holes (*"oak-bottom cuts at least 3 mm apart"*).
-   A wider U-bolt or a bigger screw closes the window; `config/body.yaml`
-   gives both bounds. **The screws are low-head** (`hardware.fastener_head_h`):
-   the counterbore comes up beside the side groove, and a standard socket
-   head's counterbore would share the groove's depth across a sliver of oak
-   (*"fastener counterbores clear of the side grooves"*, *"fastener heads at
-   or below the bottom face"*). **The U-bolt is M3, and the main board sized
-   it**, not the load: its nuts stand on the main board's top face beside
-   the LED strip, an M4 or M5 nut's keep-out reaches under the strip, and
-   widening the span to clear it closes the fastener window
-   (`hardware.ubolt_rod_d` has the arithmetic; *"LED strip clear of the U-bolt
-   nuts"*). The board is in the U-bolt's clamp: the backplate and a washer
-   fill the oak to its underside (*"main board in the U-bolt's clamp"*), and
+4. **The U-bolt has the middle station to itself** (ADR 0025: the lid
+   screws that shared it, and the backplate, are gone). Its legs pass the oak
+   bottom and the bottom plate, which spreads its pull over the oak (*"U-bolt
+   spacers bear on the bottom plate"*). **The U-bolt is M3, and the main
+   board sized it**, not the load: its nuts stand on the main board's top face
+   beside the LED strip, an M5 nut's keep-out reaches under the strip, and an
+   M4's clears it only at a wider span, which the fasteners' window no longer
+   forbids (`hardware.ubolt_rod_d` has the arithmetic; *"LED strip clear of
+   the U-bolt nuts"*). The board is in the U-bolt's clamp: a spacer fills the
+   bottom plate to its underside (*"main board in the U-bolt's clamp"*), and
    *"main board neck at the U-bolt station"* gives the board every trace
    between the two halves must cross. (The stations ran through
    the side strips until ADR 0016 removed them.)
@@ -355,8 +356,7 @@ only as good as those envelopes. Group the report's lines by these causes
    `J-MCU` and `CBL-MCU-RIBBON` (`hardware/carrier/`), `J-UMBILICAL-INST`,
    `J-UMB` and `PCB-UMB-ADAPTER` (`hardware/interfaces/spi-link/`).
 6. **The tail is clear.** The etherCON and its adapter, J-UMB, the USB-C
-   plug, receptacle and lead, the Matrix and the last fastener pair meet
-   nothing, and the connector fits the cavity without cutting the oak.
+   plug, receptacle and lead and the Matrix meet nothing, and the connector fits the cavity without cutting the oak.
 
 Found by the check and fixed as model bugs, not findings: the oak bottom's
 missing counterbores, thumb boards drawn with switch holes, the display cut
@@ -385,7 +385,7 @@ and where nothing may.
 
 ## Not modelled yet
 
-The thumb rest lip, gasket beads, plate stiffening (ADR 0002 — open, and it changes the lid),
+The thumb rest lip, the silicone beads (ADR 0025), plate stiffening (ADR 0002 — open, and it changes the key plate),
 and the diffuser standoff. The key boards are rectangles by decision (ADR
 0020 point 3): their outlines are generated now (`export/key-board-*.dxf`),
 and only their size moves, with the switch positions, which are provisional

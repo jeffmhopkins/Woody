@@ -30,8 +30,8 @@ to the end of the right hand, the full width inside the sides.** (Owner:
 one big long board?")
 
 - **It carries the thumb switches** (soldered, clipped into the thumb plates as
-  before), **both thumb clusters' registers and networks, and everything the
-  centre board carried.**
+  before *(since ADR 0025: one bottom plate)*), **both thumb clusters' registers
+  and networks, and everything the centre board carried.**
 - **Its parts face up.** At this level they have the height between it and the
   key boards' parts, and more where no key board is overhead — both are in
   `mechanical/drc.echo` ("main board parts room …"). That is more than the
@@ -70,7 +70,8 @@ one big long board?")
   point 7: the board is in the U-bolt's clamp, with a clearance hole for each
   leg and the nuts on its top face.)* **Standoffs** off the
   oak or the thumb plates where nothing else is; the soldered thumb switches
-  carry it between them.
+  carry it between them. *(Since ADR 0025: no notches; every mount stands on
+  the one bottom plate, and eight are the cassette's columns.)*
 
 ## Options considered
 
@@ -163,7 +164,12 @@ with nothing to line up blind — but its parts, its path and its length change:
    `drc.echo` "key-chain cable to order (FFSD length code)": the FFSD length
    field is inches, overall over both sockets, with its tolerance covered.
    The derived length is millimetres of free ribbon and is not the order
-   code.)*
+   code.)* *(Superseded 2026-09-29 by ADR 0025: the lid no longer comes off
+   with the key boards. Tightening down is screwing the key plate onto the
+   cassette's columns, and the service position is the key plate held
+   raised straight up off them (`routing.chain_service`,
+   `routing.chain_raise`). Laid beside the body, the ribbon's hairpin would
+   reach the left-hand board's tail column.)*
 
 **Why the old reason against IDC no longer holds.** The decision above
 rejected IDC as too tall for the gap. That was judged from memory, about

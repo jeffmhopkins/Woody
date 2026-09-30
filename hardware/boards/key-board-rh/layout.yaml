@@ -55,23 +55,27 @@ networks:
 #   the 3V3 arrives: the same loop, pin 16 to pin 8, the other way round, and clear
 #   of pin 9's QH going over it to J-CHAIN.
 # - The register is 0.5 further from the key row (44.0), for the room those lines
-#   and QH need. At 43.5 the router cannot close QH; moving the register toward the
-#   tail (to 203 or 207, level with RH4's network) was tried and fails the same way,
-#   QH's run back to J-CHAIN crossing the key lines. MARGINAL: a re-layout that moves
-#   anything here should expect to re-try this placement.
+#   and QH need. MARGINAL: a re-layout that moves anything here should expect to
+#   re-try this placement.
 # J-CHAIN stays where the body CAD puts it (chain_x; the main board's header and
-# the ribbon follow it), 7.0 nearer the mouth than the left-hand board's relative
-# to its keys.
+# the ribbon follow it). Since the cassette (ADR 0025) the ribbon is shorter, and
+# the body CAD's rule - the clear place nearest the keys' middle - puts it 13.0
+# further toward the tail than before, 3.5 further along than the left-hand
+# board's relative to its keys, with its plug ending just short of the register.
+# So the register and C7 moved 5.5 toward the tail with it, and C8 moved to
+# J-CHAIN's 3V3 pin. At 2.0 and 3.5 the router could not close SCK and SH/LD
+# between the header and the register, in either route order; at 5.5 every net
+# routes on the first pass.
 # No free input: the six keys take H..C, and A and B are the markers
 # (key-marker-and-bits/allocation.yaml), so there is no R-KEY-PU on FREE3.
 parts:
-  U1:  [198.5, 44.0, 90]     # U-KEYS, the register
-  C7:  [192.0, 41.8, 90]     # C-DECOUPLE-165, beside pin 8 at the register's J-CHAIN end
-  C8:  [165.5, 42.0, 90]     # C-BULK-CHAIN, beside J-CHAIN's 3V3 pin
+  U1:  [204.0, 44.0, 90]     # U-KEYS, the register
+  C7:  [197.5, 41.8, 90]     # C-DECOUPLE-165, beside pin 8 at the register's J-CHAIN end
+  C8:  [178.5, 42.0, 90]     # C-BULK-CHAIN, beside J-CHAIN's 3V3 pin
 
 silk:
   at: [152.0, 12.5]
-  top_at: [176.0, 46.0]     # short of the register: silk is placed before routing and no via goes under silk, and RH6's line (U1.13) and QH leave the register by vias below it
+  top_at: [152.0, 14.3]     # the switch side's copy in the near band, as the left-hand board's: J-CHAIN's through-hole tails now stand where it was
   title: "WOODY key board RH"
   rev: "A"
   date: "2026-09-28"

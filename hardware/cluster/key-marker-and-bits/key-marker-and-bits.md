@@ -50,7 +50,7 @@ control cluster (its four fitted keys are `role: control`, not fingering
 inputs `[repo] key-layout.yaml`). There was a third, hold/preset, until
 2026-09-26: the right thumb went to four keys and RT4 took its bit. They have
 their networks and **no cutouts** since the same day (owner, ADR 0010), so
-fitting one means recutting `PLATE-THUMB` and the oak bottom.
+fitting one means recutting `PLATE-BOTTOM` and the oak bottom.
 
 **Every position above gets the full `R-KEY-PU`/`R-KEY-SER`/`C-KEY` network**,
 including the two unfitted spares — 21 sets, which is what `bom.csv` budgets
@@ -83,7 +83,7 @@ positions that *are* retrofittable are the reserved spare-switch bits
 (`config/key-layout.yaml` `spare_bits_switches`), which
 have their networks fitted and are untouched by this proposal. *(They had
 cutouts too until 2026-09-26; the owner removed them, ADR 0010, so fitting
-one now means recutting the thumb plate and oak bottom.)* **So the trade is: two bits
+one now means recutting the bottom plate and oak bottom.)* **So the trade is: two bits
 that could never be used against per-device fault detection in both
 directions.**
 
@@ -148,7 +148,7 @@ circuit, moved verbatim 2026-09-21. `§4` is this page.*
   — `sw+` `sw−` on `right_thumb` (`allocation.yaml`), networks fitted — and
   there are no cutouts for them (owner, 2026-09-26, ADR 0010). Where on the
   body a switch would go, and so whether fitting one is worth recutting
-  `PLATE-THUMB` and the oak bottom, is an M2 decision with hands on the mule.
+  `PLATE-BOTTOM` and the oak bottom, is an M2 decision with hands on the mule.
 - **Whether the last 3 free bits should be marker bits too**, making it 11.
   The argument that took the marker from 6 to 8 — a free bit has no plate
   cutout and the body bonds shut, so it can never become a switch — applies to

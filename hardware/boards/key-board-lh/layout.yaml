@@ -44,16 +44,15 @@ fab:
 # The chain header, J-CHAIN (ADR 0017 amended): a 1.27 mm shrouded IDC header,
 # right-angle, placed by tools/pcb.py where the body CAD stacks it over the
 # main board's, its mouth toward the ribbon's fold (pcb-geometry.echo "chain").
-# The mount's holes (ADR 0020, Amendment 4: a PEM FHL-M2.5 stud flush in the
-# plate, a spacer, the board, a nut underneath): one per corner,
-# positions from the body CAD; this is only which footprint draws them (the key
-# keeps its old name, which tools/pcb.py reads). The key plate is grounded at
-# exactly ONE corner: bond_mount, below, a plated hole with pads top and bottom
-# on GND_CHAIN (index: H1..H4, in the order of the echo's left_hand standoff
-# lines; not _Pad_Via, whose ring of vias breaks fab: hole_to_hole). That is the
-# plate's one bond; the other three stay NPTH, so the plate makes no loop.
+# The mount's holes: one per corner, where the cassette's columns stand
+# (ADR 0025: the key plate, a spacer, this board, the column's standoff under
+# it, a screw down through them all into the standoff). Positions come from the
+# body CAD; this is only which footprint draws them (the key keeps its old name,
+# which tools/pcb.py reads). All four are NPTH with their keep-outs: the key
+# plate is grounded through the columns at the main board's plated mounts, so
+# this board carries no bond (ADR 0020 Amendment 7, which supersedes the
+# bond_mount this board had under Amendment 5).
 standoff_footprint: "MountingHole:MountingHole_2.7mm_M2.5"
-bond_mount: {index: 2, footprint: "MountingHole:MountingHole_2.7mm_M2.5_Pad_TopBottom", net: GND_CHAIN}
 
 # Placement. A switch's pins are on its near side (low y): pin 1, the switch
 # leg, at (-4.4, -4.7) from its centre and pin 2, ground, at (+2.6, -5.75);
@@ -76,21 +75,25 @@ networks:
 
 # References are plain numbers (R1, C6, U1: owner, 2026-09-27); each part's BOM
 # row is its Row field, and a key's network is found by its sheet (LH1..LH5).
+# Since the cassette (ADR 0025) the body CAD puts J-CHAIN 0.5 further toward
+# the tail, and the four parts round it moved 0.5 with it, so their places
+# relative to the header are the ones this board was first routed with. Left
+# where they were, the chain lines cut C7's ground off from the pour.
 # The register sits on the far side just past the chain header, turned so
 # its inputs H..E (pins 6..3) face the key row in the keys' own order, left to
 # right; its chain pins (SH/LD, CLK below; QH, SER above) toward the header.
 parts:
-  U1:  [90.5, 43.5, 90]      # U-KEYS, the register
+  U1:  [91.0, 43.5, 90]      # U-KEYS, the register
   # across the ends of pins 16 (VCC) and 15 (CLK INH, tied to GND): VCC is one stub,
   # and its return runs to the register's ground pin 8, at the opposite corner, in
   # its own track (connect_first, below) - not through whatever the pour leaves
-  C6:  [94.3, 48.2, 180]     # C-DECOUPLE-165
+  C6:  [94.8, 48.2, 180]     # C-DECOUPLE-165
   # the free input's pull-up, over the ends of its own two pins - 11 (FREE3, its
   # pin 2) and 12 (3V3, its pin 1) - each one short stub: beside the register it
   # sat where the 3V3 rail to its far pin walled pin 11 in
-  R11: [89.23, 48.2, 180]    # R-KEY-PU on sheet FREE3
+  R11: [89.73, 48.2, 180]    # R-KEY-PU on sheet FREE3
   # The reservoir on the chain's 3V3, beside J-CHAIN's 3V3 pin (C-BULK-CHAIN row)
-  C7:  [67.0, 42.0, 90]      # C-BULK-CHAIN
+  C7:  [67.5, 42.0, 90]      # C-BULK-CHAIN
 
 # The silkscreen title blocks (tools/pcb.py add_silk, add_top_silk): the parts side's
 # and the switch side's, in body coordinates.

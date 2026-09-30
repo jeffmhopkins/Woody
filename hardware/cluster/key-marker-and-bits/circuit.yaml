@@ -13,7 +13,7 @@ depends_on:
 - fig:key-pullup-qty
 - fig:marker-bits
 - refdes:C-KEY
-- refdes:PLATE-THUMB
+- refdes:PLATE-BOTTOM
 - refdes:R-KEY-PU
 - refdes:R-KEY-SER
 - circuit:cluster/key-register

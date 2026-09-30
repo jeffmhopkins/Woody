@@ -95,13 +95,15 @@ ADR 0004 counted every contact interface as a cost.
   2026-09-26) and is now at its minimum, `layout.gap`. So the right-hand
   cluster moved toward the mouth. The left-hand ribbon's hairpin moved
   because it clears the lid screw between the hands. Both key boards were
-  re-laid out from the body CAD.
+  re-laid out from the body CAD. *(Since ADR 0025 there are no lid screws;
+  the hairpins clear the cassette's columns.)*
 - **The body could be thinner.** `mechanical/drc.echo` *body thickness takes
   the etherCON on the floor* reports the spare. `body-thickness` is the
   owner's figure and was not changed here.
 - **The main board is longer, by the tongue.** The tongue is as wide as the
   adapter and notched where the last lid screws pass. It has standoffs
-  under J-UMB's end.
+  under J-UMB's end. *(Since ADR 0025: no notches; the tongue's pair of mounts
+  stands on the bottom plate, which stops short of J-UMB.)*
 - **Taking the main board out means unscrewing the etherCON from outside
   first.** The connector, the adapter and the board come out as one piece.
   The nose sits in the cap's bore, so the assembly slides back before it

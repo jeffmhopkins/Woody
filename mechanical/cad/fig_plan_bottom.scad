@@ -1,5 +1,5 @@
-// The underside, orthographic, seen from below: thumb keys, the left thumb's
-// rest, U-bolt and the six fasteners.
+// The underside, orthographic, seen from below: thumb keys, the thumb rests
+// and the U-bolt - the only hardware that shows (ADR 0025).
 include <woody_body.scad>
 use <lib/annot.scad>
 figure = true;
@@ -15,6 +15,5 @@ for (r = [[lt_rest_xy, layout_lt_rest_under], [rt_rest, layout_rt_rest_under]]) 
     lb(r[0] + [0, 4], str("@", r[1]), "SaddleBrown");   // under that finger key
 }
 lb(ubolt_c + [0, -16], "U-bolt");
-for (i = [0 : len(fasteners()) - 1]) lb(fasteners()[i] + [0, fasteners()[i][1] > W / 2 ? 8 : -8], str("M3 #", i + 1));
 }
 at_origin() fig();

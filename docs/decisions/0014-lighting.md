@@ -87,7 +87,7 @@ counts:
   rather than 5 V.
 - **Backup data line.** WS2815 carries a redundant data path, so a single failed
   LED does not kill everything downstream of it. In a body that is not opened
-  casually — six fasteners, a loom *(since ADR 0017: ribbons, no loom)* and a gasket (ADR 0009) — that matters more
+  casually — six fasteners, a loom *(since ADR 0017: ribbons, no loom)* and a gasket (ADR 0009) *(since ADR 0025: glued shut, opened by cutting the silicone)* — that matters more
   than it would in a
   serviceable build.
 
