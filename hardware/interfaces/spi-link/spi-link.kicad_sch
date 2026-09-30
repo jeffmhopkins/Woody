@@ -637,7 +637,7 @@
     (property "Datasheet" "" (at 238.76 100.33 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "J-UMBILICAL" (at 238.76 101.6 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2 3=3 4=4 5=5 6=6 7=7 8=8" (at 238.76 101.6 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "The module panel's. BORE IS D24.0 mm MINIMUM, which in a 50.50 mm 10HP panel leaves 13.25 mm each side - that is a panel constraint before it is a connector choice" (at 238.76 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "The module panel's: a Neutrik NE8FAV, the same part as the instrument's end (ADR 0023), soldered to the module main board; its bore and screw holes are the module CAD's (mechanical/module/export/panel.dxf, ADR 0024)" (at 238.76 101.6 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins_source" "datasheets/connectors/NEUTRIK-NE8FAV-DRAWING.pdf, PCB layout: contacts 1-8 as the RJ45's; G, the shield tab, is not a pin of the umbilical" (at 238.76 101.6 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "Neutrik" (at 238.76 101.6 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "NE8FAV" (at 238.76 101.6 0) (effects (font (size 1.27 1.27)) hide))
