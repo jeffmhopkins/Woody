@@ -38,7 +38,7 @@ ratio      = 15k / (10k + 15k) = 0.600
 full scale = 4.86 V × 0.6 = 2.92 V  against VREF 3.3 V → 88 % of range, 3622 counts
 rest       = 0.265 V         × 0.6 = 0.159 V →  197 counts
 real play  = 2.8 kPa → 0.265 + 0.766 × 2.8 = 2.41 V → 1.447 V → 1795 counts
-                                          [2.8 kPa from breath-receive-stage.md]
+                                          [2.8 kPa: one candidate of breath-working-point, open until E2]
                                           [0.265 and 4.86 from sensor-full-scale]
 playable span above rest ≈ 1598 counts of 4096
 ```
@@ -48,9 +48,20 @@ board's 3V3, so for a few milliseconds the divider drives the ADC input above it
 own supply:
 
 ```
-worst case, 3V3 at 0 and the clamp holding the pin at ~0.7 V:
-  (4.7 − 0.7) / 10 kΩ = 400 µA   against a family-typical ±2 mA  [from memory]
+worst case, 3V3 at 0 and the clamp holding the pin at ~0.7 V, the buffer
+at the sensor's full scale (sensor-full-scale, rounded down here to 4.7 V):
+  (4.7 − 0.7) / 10 kΩ = 400 µA
 ```
+
+**The datasheet gives no injection-current rating to hold that against**:
+DS21034F's only limit on an input is *"All Inputs and Outputs w.r.t.
+V<sub>SS</sub> … −0.6 V to V<sub>DD</sub> + 0.6 V"* `[ds MCP3202-CI-SN.pdf
+p.2]`. So the 10 kΩ is a current limit judged against nothing printed, and it
+is only reached when the buffer is high while 3V3 is still down. At rest the
+divider sits at 0.16 V (above), inside the −0.6 V … +0.6 V window even with
+3V3 at zero. **Whether the buffer swings high during power-up is the
+power-on transient the sequencing simulation is answering**; that result
+closes this paragraph, and the upper leg stays ≥10 kΩ until it does.
 
 The same resistor covers a saturated buffer: if the sensor or the op-amp fails
 high at +12 V, `(12 − 0.7 − 3.3)/10 kΩ ≈ 800 µA`, still inside the clamp rating.
@@ -65,13 +76,12 @@ attenuation at the R-78E5.0's ~330 kHz switching rate = 20·log10(330k/564) = 55
 ```
 
 > **τ = 282 µs exceeds the 250 µs loop period, and the note-on threshold is read
-> through it.** `latency-budget.md` and ADR 0003 book "SAR ADC conversion
-> ~50–200 µs" and no RC term at all `[repo]`. About 5.6 % of the 5 ms budget —
-> not fatal, but it belongs in the table that chose 4 kHz over 8 kHz. Found by
-> `R10-keyscan-and-adc.md` §B-2 and still unapplied.
+> through it.** About 5.6 % of the 5 ms budget. It is booked as its own row,
+> *Anti-alias filter, 564 Hz*, in
+> [`latency-budget.md`](../../../docs/reference/latency-budget.md).
 
-**Sample-cap charge sharing** `[calc]`, from R10's datasheet quote (20 pF sample
-cap, 1.5 clocks of acquisition) `[repo] R10 B-2`:
+**Sample-cap charge sharing** `[calc]`, on `C_SAMPLE` 20 pF and `t_SAMPLE`
+1.5 clocks `[ds MCP3202-CI-SN.pdf p.2]`:
 
 ```
 I_avg = 20 pF × 4 kHz = 80 nA per volt
@@ -82,12 +92,23 @@ I_avg = 20 pF × 4 kHz = 80 nA per volt
 Invisible: the zero is auto-tracked in firmware and the span is set by a panel
 knob `[repo] 0003, 0006`.
 
-**`C-ADC-BULK` is new and is proposed, not decided.** The MCP3202 has no `VREF`
-pin — `VDD` *is* the reference `[repo] R10 B4` — so the ADC's scale factor is the
-dev board's LDO output, and it has no anti-alias filter of its own. The repo's
-own `C-STRIP-BULK` note puts the WS2815 PWM rate at ~2 kHz `[repo] bom.csv`,
-which is exactly Nyquist for a 4 kHz sampler. 10 µF plus the existing 100 nF,
-treating that pin as an analog reference rather than a logic supply.
+**`C-ADC-BULK` is fitted.** The MCP3202 has no `VREF` pin — `VDD` *is* the
+reference — so its `VDD` pin is treated as an analog reference rather than a
+logic supply: 10 µF X7R beside the 100 nF, at the pin, returned to
+`AGND_INST`. It is the reservoir each conversion draws from (375 µA typical
+`I_DD` `[ds MCP3202-CI-SN.pdf p.3]` for ~27 µs of a 250 µs loop), and it
+takes the ribbon's inductance out of that current's path.
+
+**What it does not do is filter LED PWM.** Against the ribbon's ~34 mΩ
+conductor `[from memory]`, `carrier.md` and the LDO's output, 10 µF corners
+near 1/(2π × 0.034 Ω × 10 µF) ≈ 470 kHz `[calc]`: nothing at a ~2 kHz PWM
+rate. PWM ripple on the reference, if there is any, is a gain term that
+aliases at a 4 kHz sample rate, and **E9 measures it**: scope `VDD` at
+`U-ADC` pin 8 against `AGND_INST`, AC-coupled, with every LED sweeping full
+white to off, and log the breath reading at rest and at a steady blow. It
+passes if the reading's peak-to-peak moves by less than 2 LSB between LEDs off
+and LEDs sweeping. A fail is closed in firmware (averaging a pair of samples
+nulls a 2 kHz component at a 4 kHz rate) before it is closed in copper.
 
 ---
 
@@ -97,7 +118,7 @@ treating that pin as an analog reference rather than a logic supply.
 
 | Ref | Value | Job | Confidence |
 |---|---|---|---|
-| `U-ADC` | MCP3202-CI/SN | `VDD` **is** `VREF`; 3V3 from the dev board | `[repo]`; clock limit `[from memory]` |
+| `U-ADC` | MCP3202-CI/SN | `VDD` **is** `VREF`; 3V3 from the dev board | `[ds]` DS21034F, clock limit p.3 |
 | `R-ADCDIV-U`, `R-ADCDIV-L` | 10 kΩ / 15 kΩ 1 % | 0.6× after the buffer | `[repo]` + `[calc]` |
 | `C-AA-ADC` | 47 nF C0G | 564 Hz, and the ADC's charge reservoir | `[repo]` + `[calc]` |
-| **`C-ADC-BULK`** | **10 µF X7R** | **Bulk at MCP3202 `VDD`/`VREF`. Proposed — the reference has no anti-alias and the WS2815 PWM is ~2 kHz against a 4 kHz sampler** | proposed, from `[repo] R10 B-3` |
+| `C-ADC-BULK` | 10 µF X7R | Reservoir at MCP3202 `VDD`/`VREF`, beside the 100 nF | `[ds]` + `[calc]`; the PWM question is E9's |

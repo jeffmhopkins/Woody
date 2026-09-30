@@ -55,7 +55,7 @@ The `Dir` and `Peer` columns are defined once in
 | `U-BREATH` (MPXV4006DP) | instrument | — | — | `sensor-full-scale`, `breath-working-point` | This circuit's own part, drawn in `carrier.md` §2, **soldered to the main board at its mouth end** (*Mounting*, below). Sets the span the module end multiplies and the pedestal `TRIM-BREATH-ZERO` nulls |
 | `VS` excitation | instrument | in | `carrier/breath-excitation-reference` | `riso-ref-topology`, `cref-out-node`, `opa2197-output-impedance` | The sensor's excitation, and its own circuit |
 | buffered sensor output | instrument | out | `carrier/breath-adc` | — | The same node that feeds `R1`. The instrument's own copy of breath leaves here and does not cross |
-| `D-TVS-BREATH` ×2 | instrument | — | — | — | This circuit's own parts, at the connector, on both legs |
+| `D-TVS-BREATH` ×2 | instrument | — | — | — | This circuit's own parts, at the connector, on both legs, **to `PWR_GND`** (the plane at `J-UMB`, `power-entry-instrument.md` §2), never to the analog island |
 | `R2`, `R3`, `C_diff`, `C_cm` ×2, `R4`, `R5` | module | — | `module/breath-receive-stage` | — | The receive filter and the common-mode bias return, all module-side |
 | in-amp output | module | out | `module/breath-receive-stage` → `module/breath-output-stage` | `inamp-full-scale` | Into the panel GAIN/OFFSET stage, which inverts. **The figure is owned at the module end and derived here** |
 | `REF` | module | in | `module/breath-receive-stage` | `breath-zero-ref`, `dac-rail` | The buffered trimmer that nulls the instrument's pedestal, fed from the `DAC AVDD` rail. Its own section stayed on the module page |
@@ -77,24 +77,23 @@ with it part by part and net by net: no change. The sensor's N/C pins (1, 5–8)
 are on the symbol and on no net, as before. The drawing on
 [`carrier.md`](../../carrier/carrier.md) §2 stays a representation.
 
-**Every part on this sheet is on the main board.** The umbilical conductors
-leave it on `interfaces/spi-link` (`J-UMB` pins 1 and 2), and the module end
-(`R-SER-BREATH`, the in-amp) is `module/breath-receive-stage`'s, so this sheet
-is the one interface that **one board could place whole**:
+**Every part on this sheet is on the main board, and the main board places
+this sheet once** (`hardware/boards/main-board`, since 2026-09-30). The
+umbilical conductors leave it on `interfaces/spi-link` (`J-UMB` pins 1 and 2),
+and the module end (`R-SER-BREATH`, the in-amp) is
+`module/breath-receive-stage`'s. So the board follows this sheet rather than
+restating it, and `tools/kicad.py export hardware/boards/main-board` carries
+every change here into `board-netlist.yaml`:
 
-| Part on this sheet | BOM row | Board | On that board today |
-|---|---|---|---|
-| `U-BREATH` | `U-BREATH` | `hardware/boards/main-board` | `U10`, drawn on its root sheet |
-| `R1`, `R1b` | `R-SER-BREATH-INST` | `main-board` | `R38`, `R39` |
-| `D-TVS-BREATH-SIG`, `D-TVS-BREATH-RET` | `D-TVS-BREATH` | `main-board` | `D5`, `D6` |
+| Part on this sheet | BOM row | Main-board reference |
+|---|---|---|
+| `U-BREATH` | `U-BREATH` | `U10` |
+| `R1`, `R1b` | `R-SER-BREATH-INST` | `R38`, `R39` |
+| `D-TVS-BREATH-SIG`, `D-TVS-BREATH-RET` | `D-TVS-BREATH` | `D5`, `D6` |
 
-The main board's five were compared with this sheet by hand on 2026-09-29,
-pin by pin, and agree `[repo, board-netlist.yaml]`; nothing re-checks that
-automatically. **Recommended to the main board's owner:** replace the five
-root-sheet parts with one placement of this sheet, its ports wired to the
-nets the root sheet already uses (`VS`, `SENSOR_RAW`, `SENSOR_BUFFERED_OUT`,
-`BREATH_SENSE`, `AGND_SENSE`, `AGND_INST`). Then the board follows this sheet
-instead of restating it. Not done here: board projects are their owners'.
+The placement replaced five parts drawn on the board's root sheet; the board's
+flattened netlist was compared before and after, net by net and pin by pin,
+and is unchanged `[repo, board-netlist.yaml]`.
 
 ## Mounting — `U-BREATH` is soldered to the main board
 
@@ -159,11 +158,16 @@ at the mouth end". **The buffered breath signal runs the board's length to
 is the buffer's output, never `SENSOR_RAW`. Route it over its own ground, clear
 of the strip's data and 12 V and the chain's clock; **E11 is the test**.
 
-**Open, and it follows from that run:** the star point below is "at the
-umbilical connector", which is now the far end of the board from the sensor,
-the reference and the buffer. Whether `AGND_SENSE` is taken at the star or at
-the sensor's ground and routed as the pair's partner is a layout decision for
-M4, and E11 decides whether it mattered.
+**`AGND_SENSE` is taken at the sensor's own `GND` pin** (U-BREATH pin 3),
+not at the star, and runs beside the buffered output as the pair's partner
+the length of the board to `J-UMB` `[calc]`: the in-amp at the module reads
+`BREATH_SENSE − AGND_SENSE`, and the buffer (a follower) reproduces `VOUT` as
+it stands against the sensor's own pin 3. Taken there, whatever the ~13 mA
+of analog supply return (below) drops across `AGND_INST` between the sensor
+and the star is common to both legs and cancels in the in-amp; taken at the
+star, it would be in the difference. Same net, `AGND_INST`, so the netlist
+does not change: it is a layout rule — `R1b`'s star end is a trace of its own
+from pin 3's pad, not a via into the pour. E11 is still the test of the whole run.
 
 ### Keeping the zero honest (Note 5)
 
@@ -198,9 +202,11 @@ ADR 0003 buys two. The spare goes in with an iron, and nothing else:
    the jack (Note 5 `[ds p.3]`).
 
 **Soldering conditions are open:** the sheet gives none. **Decided by banking
-NXP's soldering note for its pressure-sensor packages** — AN3150 `[from memory]`,
-not in the bank. Until then: a modest iron temperature, one lead at a time,
-short dwell, because the body is thermoplastic (PPS, `[ds p.1]`).
+NXP's soldering note for its pressure-sensor packages, AN3150**, which could
+not be fetched on 2026-09-30 (`datasheets/.manifest-R32.csv`, `BLOCKED`, with
+every URL tried); it must be banked before the sensor is first soldered, at
+the main board's assembly. Until then: a modest iron temperature, one lead at
+a time, short dwell, because the body is thermoplastic (PPS, `[ds p.1]`).
 
 ### Not taken: a breakout board on 2.54 mm headers
 
@@ -261,8 +267,8 @@ on `PWR_GND`.
 
 **Proposed: `PWR_GND`.** `AGND` leaves the board carrying nothing but the in-amp
 sense reference, which is what ADR 0004's rule says and what makes the 2 m run
-work `[repo] 0004`. The local analog pour joins `PWR_GND` at **one** tie, at the
-umbilical connector.
+work `[repo] 0004`. The local analog pour joins `PWR_GND` at **one** tie —
+under the ADC since the board went to four layers, `power-entry-instrument.md` §2.
 
 The cost of getting it the other way `[calc]`, using ADR 0003's own cable figure
 (0.168 Ω for 2 m of 24 AWG, implied by its 8.4 µV / 50 µA row):
@@ -407,3 +413,9 @@ a correction against the receive page's own case for `R1b` — "fifty times"
 against about 13 dB — and the sentence it is answering is in "`R1` is a 1206,
 and it has a twin". They are now adjacent instead of two files apart. **No
 winner was picked here**, which is not the same as their agreeing.*
+
+**What closes it: the breath-link CMRR simulation** (the INA828 receive stage
+with both 1 kΩ legs and the 1 MΩ bias pair at their tolerances), in progress
+on 2026-09-30. Its CMRR with `R1b` fitted and with `R1b` shorted is the number
+both statements are estimating; whichever it matches stands, and the other is
+corrected to it.

@@ -66,7 +66,8 @@ components:
     pins:
     - 1
     - 2
-    note: VOUT load capacitor, on the REF5050's own output
+    note: 'VOUT load capacitor, on the REF5050''s own output, straight to AGND_INST: no series resistor (SBOS410O
+      9.4.1.1 p.29, optional; see the C-REF-OUT row)'
   D-REF-CLAMP:
     value: 15V zener
     pins:
@@ -113,7 +114,7 @@ components:
     - V-
     note: Half A is the reference buffer, half B the breath buffer. Single supply from +12 V, V- on the analog star
   U-REF-BREATH:
-    value: REF5050AIDR
+    value: REF5050IDR
     drawn_as: REF5050
     pins:
     - VIN

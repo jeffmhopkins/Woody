@@ -518,7 +518,7 @@
     (property "Datasheet" "" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "C-ADC-BULK" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "Local reservoir on the reference rail" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Reservoir on the reference rail, at U-ADC pin 8 beside C-DEC-ADC. Fitted; it does not filter LED PWM (E9 tests that)" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "Samsung Electro-Mechanics" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "CL31B106KBHNNNE" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "LCSC" "C89632" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
