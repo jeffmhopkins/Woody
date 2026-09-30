@@ -11,11 +11,12 @@ values:
   netlist:
     - hardware/module/umbilical-load-switch/netlist.yaml
     - hardware/carrier/power-entry-instrument/netlist.yaml
+    - hardware/module/power-entry/netlist.yaml
 include: [lt1641.inc]
 
 params:
-  v_bus:    {value: 12.0, source: "the Eurorack +12 V bus at J-PWR-EURO, nominal"}
-  r_bus:    {value: 0.05, source: "the bus and the entry path's resistance [assumption]"}
+  v_bus:    {value: 12.0, source: "U-ISO's output, which feeds the load switch since ADR 0027: 12 V, +/-3 % max over 0-100 % load [datasheets/discrete-and-power/MORNSUN-URB_YMD-15WR3.pdf p.2] (vary)"}
+  r_bus:    {value: 0.1, source: "U-ISO's output resistance: load regulation +/-1 % max over 5-100 % load, 0.12 V across 1.19 A [calc from ds p.2]. A resistance, not the converter's loop: C-ISO-OUT carries the first hundreds of microseconds (transient recovery 300/500 us, p.2)"}
   t_rise:   {value: 1.0e-3, source: "the bus rising at power-on [assumption: a PSU's soft start is slower, which is easier]"}
   r_ilim:   {value: 0.05, source: "R-ILIM's row is 'value from E6' (open): the page's working 50 mohm (umbilical-load-switch.md, 'Four things')"}
   vhi:      {value: 47.0e-3, source: "V_SENSETRIP at V_FB >= 0.5 V, 39/47/55 mV [LT1641.pdf p.2] (vary)"}
@@ -43,6 +44,7 @@ derived:
   r_fb_lo: "1.0e-3 if v['fb_open'] else v['R-FB-LO']"
 
 vary:
+  v_bus: {tol: [-0.03, 0.03], source: "U-ISO's +/-3 % output accuracy"}
   vhi:   {tol: [-0.1702, 0.1702], source: "39 and 55 mV about 47"}
   vlo:   {tol: [-0.3333, 0.4167], source: "8 and 17 mV about 12"}
   igate: {tol: [-0.5, 1.0], source: "5 and 20 uA about 10"}
@@ -64,8 +66,9 @@ sims:
   - name: hot-plug
     deck: loadswitch.cir
     set: {cold: 0}
-    measures: [latched, timer_peak, t_up, i_peak, i_after]
+    measures: [latched, timer_peak, t_up, i_peak, i_after, vcc_min]
     post:
+      vcc_min: "trough(w['vcc'], 1e-4, p['t_end'])"
       latched: "peak(w['latch'], 0, p['t_end'])"
       timer_peak: "peak(w['timer'], 0, p['t_end'])"
       t_up: "cross(w['out'], 0.95*p['v_bus'], 0)"
@@ -74,6 +77,8 @@ sims:
     asserts:
       - expr: "max['latched'] < 0.5 and max['timer_peak'] < 1.233"
         why: "a hot-plug start completes before the TIMER reaches the fault threshold (1.233 V, p.5) on worst-case silicon - the page's sizing case"
+      - expr: "min['vcc_min'] > 9.90"
+        why: "ADR 0027: U-ISO sags under the hot-plug's current but VCC stays above the ON divider's worst-case turn-off, 9.90 V (umbilical-load-switch.md, 'The ON pin'), so the start is never interrupted by its own supply"
   - name: hot-plug-page-2m2
     # the page's start arithmetic uses 2.2 mF at the instrument; the instrument's netlist
     # has C-STRIP-BULK and C-BUCK-IN only (C-BULK-DISP went with the display, ADR 0015).

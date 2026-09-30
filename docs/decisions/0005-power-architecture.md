@@ -281,21 +281,22 @@ figure `loadswitch-gate-cap`, not a number stated here.**
 > has two readers: one who stops at the bold line, and one who does not.
 > The bold line now cites the figure, so it cannot drift again.
 
-> **⚠ The ramp half of that specification is not achievable with the chosen
-> part, 2026-09-21.** `164112fc.pdf` is now banked
-> (`datasheets/discrete-and-power/LT1641.pdf`) and the LT1641's `GATE` pull-up
-> is specified **−5 / −10 / −20 µA** `[p.2]`, corroborated by the DC1354A demo
-> guide. That is a **4:1** current window, and no single gate capacitor can hold
-> a ramp inside a 2:1 time window when the current that drives it varies 4:1.
-> `C-GATE` at 82 nF centres the *typical* at 98 ms, inside this spec; the
-> **guaranteed envelope is 49–197 ms** (`hardware/module/power-entry/power-entry.md`).
->
-> **This ADR has to choose.** Either widen the specification to **50–200 ms**,
-> which costs nothing the analysis below depends on — the 75 ms start it cites
-> is a *current-limited* start, not a ramped one, and the fault timer is sized
-> against the 47.5 ms hot-plug case rather than against the ramp — or program
-> the ramp with something other than the part's internal pull-up. **Not decided
-> here; raised against this ADR by the wave that read the datasheet.**
+> **Amended 2026-09-30 — the ramp specification is widened to the part's
+> guaranteed envelope.** The owner: *"Good to widen the spec."* The LT1641's
+> `GATE` pull-up is specified **−5 / −10 / −20 µA** `[164112fc p.2]`, a 4:1
+> window, and no single gate capacitor holds a ramp inside a 2:1 time window
+> when the current that drives it varies 4:1. So the specification is now
+> **the envelope `C-GATE-LOADSW` guarantees**, which is the tracked figure
+> `loadswitch-gate-cap` — typical centred where this ADR wanted it, both
+> corners within the figure's range. Nothing downstream depended on the upper
+> bound: the start the ADR cites is current-limited, not ramped, and the fault
+> timer is sized against the hot-plug case, not the ramp. Both corners were
+> shown safe before the decision — the fast one climbs out of foldback and
+> never approaches the limit, the slow one never enters current limit at all
+> (`hardware/module/umbilical-load-switch/umbilical-load-switch.md`, *The two
+> capacitors*; its sims run every corner). *(Raised 2026-09-21 by the wave that
+> banked the datasheet; the alternative — programming the ramp with something
+> other than the internal pull-up — is not taken.)*
 >
 > The 1.0 A half is confirmed and sharpened: the sense threshold is
 > **39 / 47 / 55 mV** `[p.2]`, so `R-ILIM` at 50 mΩ gives **0.78 / 0.94 /
@@ -378,7 +379,8 @@ is what the 75 ms start above needs. **Both are now programmed**:
 `C-GATE-LOADSW` and `C-TIMER-LOADSW` — the tracked figures
 `loadswitch-gate-cap` and `loadswitch-timer`, sized in
 `hardware/module/umbilical-load-switch/umbilical-load-switch.md` against
-the datasheet rather than against search results, with the ramp caveat above.
+the datasheet rather than against search results, and the ramp specified as
+the envelope the part guarantees (amended 2026-09-30, above).
 The fault timer's binding case turned out to be the **hot-plug** — 47.5 ms
 entirely in current limit, against a worst-case timer of 95.6 ms — and not the
 cold start at all.
@@ -425,6 +427,19 @@ is worth a diode.
 
 It is not a standalone mode and should not be designed toward. The instrument's
 outputs are CV; unplugged from the module it has nowhere to send them.
+
+## Amendment 2026-09-30 — the instrument's supply is isolated (ADR 0027)
+
+The umbilical still carries +12 V and everything above still holds at the
+instrument. What changed is where the module gets it: the load switch no longer
+hangs on the bus +12 V but on the output of an isolated DC/DC converter whose
+input is across the rack's +12 V and −12 V, so the instrument's breath-following
+current never returns through the rack's ground and never moves the pitch CV
+(ADR 0027, `hardware/module/power-entry/power-entry.md`). The rack now supplies
+the instrument's power on both rails, ~0.21 A each in typical play, and the
+module fuses its rails (`PTC-POS12`, `PTC-NEG12`, `PTC-ISO`). The load switch's
+current limit, ramp and latch are unchanged; the converter's own limit is
+above them, so they still decide every start and fault.
 
 ## Consequences
 

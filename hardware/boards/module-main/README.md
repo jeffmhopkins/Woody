@@ -104,7 +104,8 @@ go; the *reasons* above are about positions, so re-read them when
 
 - [`link-supervision`](../../module/link-supervision/link-supervision.md) —
   **no parts**: the watchdog and the presence comparator were deleted before
-  layout and never had a BOM row. It has nothing to draw. `CLR`, which it
+  layout and never had a BOM row, and the owner decided on 2026-09-30 not to
+  restore them. It has nothing to draw. `CLR`, which it
   would drive, is a net inside `dac8568`: `R-CLR-PU` ties it inactive and
   `LK-CLR` asserts it by hand.
 - [`panel`](../../module/panel/panel.md) — **no electrical parts**: its one
@@ -130,4 +131,6 @@ go; the *reasons* above are about positions, so re-read them when
 | Item | Decided by |
 |---|---|
 | The metal standoffs' part (the CAD's `standoff.*` still cites the polyamide spacer) | The module CAD owner; the pads' nets are settled above |
+| `U-ISO`'s place on this board: 25.4 × 25.4 mm, **11.7 mm tall**, with `L-ISO-IN`, `C2`, `C-ISO-IN`, `C-ISO-OUT` and `C-ISO-Y` beside it, and `NT-UMB-MOD` at the etherCON's pins 6/8 (ADR 0027) | The module CAD (`config/module.yaml`): the jack board's clearance above it |
+| `U-ISO`'s source (MORNSUN part listed "not for new designs" at DigiKey) | Owner — the row's alternates need their own footprint |
 | The bus's +5 V, CV and Gate pins (11–16) are unused, on no net | Nothing: the module makes its own 5 V and takes no bus CV (ADR 0023 point 3, amended) |

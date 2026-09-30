@@ -8,7 +8,7 @@ circuit: module/umbilical-load-switch
 title: Umbilical load switch
 page: umbilical-load-switch.md
 ports:
-  BUS_POS12_RAW:
+  ISO_POS12:
     dir: in
     from: module/power-entry
   UMBILICAL_POS12:
@@ -107,8 +107,8 @@ components:
     pins:
     - 1
     - 2
-    note: 'Top of the ON (UVLO) divider, from the raw bus through the toggle. With R-ON-LO: ON at 10.2 V rising,
-      9.6 V falling'
+    note: 'Top of the ON (UVLO) divider, from ISO_POS12 - U-ISO''s isolated 12 V since ADR 0027 - through the toggle.
+      With R-ON-LO: ON at 10.2 V rising, 9.6 V falling'
   R-ON-LO:
     value: 10k 1%
     pins:
@@ -138,12 +138,6 @@ components:
     note: Hot-swap controller. FOLDBACK TRACKS THE FB PIN, NOT THE OUTPUT - with FB unconnected the part holds the
       sense drop at its 12 mV floor forever and the start never completes
 nets:
-  BUS_POS12_RAW:
-  - port: BUS_POS12_RAW
-  - C-DECOUPLE-LOADSW.1
-  - R-ILIM.1
-  - R-ON-HI.1
-  - U-LOADSW.VCC
   FB:
   - R-FB-HI.2
   - R-FB-LO.1
@@ -159,6 +153,12 @@ nets:
   - D-GATE-CLAMP.K
   - Q-LOADSW.G
   - R-GATE-SER.2
+  ISO_POS12:
+  - port: ISO_POS12
+  - C-DECOUPLE-LOADSW.1
+  - R-ILIM.1
+  - R-ON-HI.1
+  - U-LOADSW.VCC
   'ON':
   - C-ON-LOADSW.1
   - R-ON-LO.1

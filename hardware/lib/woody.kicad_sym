@@ -233,4 +233,179 @@
               (font
                 (size 1.27 1.27))))))
       (embedded_fonts no))
+  (symbol "URB_YMD-15WR3"
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (property "Reference" "U"
+      (at -8.89 8.89 0)
+      (effects
+        (font
+          (size 1.27 1.27))))
+    (property "Value" "URB_YMD-15WR3"
+      (at 8.89 8.89 0)
+      (effects
+        (font
+          (size 1.27 1.27))))
+    (property "Footprint" "woody:Converter_DCDC_Mornsun_URB_YMD-15WR3_THT"
+      (at 0 -10.16 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (hide yes)))
+    (property "Datasheet" "datasheets/discrete-and-power/MORNSUN-URB_YMD-15WR3.pdf"
+      (at -0.635 0 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (hide yes)))
+    (property "Description" "Mornsun URB_YMD-15WR3: isolated 15 W DC/DC, 9-36 V in (24 V nominal), 1500 VDC I/O, 25.4 x 25.4 x 11.7 mm DIP. Pin numbers and names from the banked datasheet p.6 (1 Ctrl, 2 GND, 3 Vin, 4 +Vo, 5 Trim, 6 0V); graphics from KiCad's JTD2024S3V3"
+      (at 0 0 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (hide yes)))
+    (property "ki_keywords" "isolated isolation dc-dc converter step-down"
+      (at 0 0 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (hide yes)))
+    (property "ki_fp_filters" "Converter*DCDC*Mornsun*URB*"
+      (at 0 0 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (hide yes)))
+    (symbol "URB_YMD-15WR3_0_1"
+      (rectangle
+        (start -10.16 7.62)
+        (end 10.16 -7.62)
+        (stroke
+          (width 0.254)
+          (type default))
+        (fill
+          (type background)))
+      (polyline
+        (pts
+          (xy 0 7.62)
+          (xy 0 6.35))
+        (stroke
+          (width 0)
+          (type default))
+        (fill
+          (type none)))
+      (polyline
+        (pts
+          (xy 0 5.08)
+          (xy 0 3.81))
+        (stroke
+          (width 0)
+          (type default))
+        (fill
+          (type none)))
+      (polyline
+        (pts
+          (xy 0 2.54)
+          (xy 0 1.27))
+        (stroke
+          (width 0)
+          (type default))
+        (fill
+          (type none)))
+      (polyline
+        (pts
+          (xy 0 0)
+          (xy 0 -1.27))
+        (stroke
+          (width 0)
+          (type default))
+        (fill
+          (type none)))
+      (polyline
+        (pts
+          (xy 0 -2.54)
+          (xy 0 -3.81))
+        (stroke
+          (width 0)
+          (type default))
+        (fill
+          (type none)))
+      (polyline
+        (pts
+          (xy 0 -5.08)
+          (xy 0 -6.35))
+        (stroke
+          (width 0)
+          (type default))
+        (fill
+          (type none))))
+    (symbol "URB_YMD-15WR3_1_1"
+      (pin passive line
+        (at -12.7 5.08 0)
+        (length 2.54)
+        (name "Vin"
+          (effects
+            (font
+              (size 1.27 1.27))))
+        (number "3"
+          (effects
+            (font
+              (size 1.27 1.27)))))
+      (pin passive line
+        (at -12.7 0 0)
+        (length 2.54)
+        (name "Ctrl"
+          (effects
+            (font
+              (size 1.27 1.27))))
+        (number "1"
+          (effects
+            (font
+              (size 1.27 1.27)))))
+      (pin passive line
+        (at -12.7 -5.08 0)
+        (length 2.54)
+        (name "GND"
+          (effects
+            (font
+              (size 1.27 1.27))))
+        (number "2"
+          (effects
+            (font
+              (size 1.27 1.27)))))
+      (pin passive line
+        (at 12.7 5.08 180)
+        (length 2.54)
+        (name "+Vo"
+          (effects
+            (font
+              (size 1.27 1.27))))
+        (number "4"
+          (effects
+            (font
+              (size 1.27 1.27)))))
+      (pin passive line
+        (at 12.7 0 180)
+        (length 2.54)
+        (name "Trim"
+          (effects
+            (font
+              (size 1.27 1.27))))
+        (number "5"
+          (effects
+            (font
+              (size 1.27 1.27)))))
+      (pin passive line
+        (at 12.7 -5.08 180)
+        (length 2.54)
+        (name "0V"
+          (effects
+            (font
+              (size 1.27 1.27))))
+        (number "6"
+          (effects
+            (font
+              (size 1.27 1.27))))))
+    (embedded_fonts no))
 )

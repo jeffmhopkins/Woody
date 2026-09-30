@@ -1,0 +1,48 @@
+* Breath-correlated pitch shift from the instrument's supply current in the rack's ground
+* (ADR 0027). The rack as lumped copper: the PSU's +12 V, -12 V and ground; the bus board
+* from the PSU to this module's tap; the power ribbon from the tap to the module's header.
+* The receiving module (the VCO the pitch jack drives) is referenced to the bus at the PSU
+* end - the worst place for it (r_bus_seg is swept from 0, a receiver at this module's tap).
+* The pitch jack is a fixed voltage above its reference, so the error is the reference's
+* movement against node 0: V(ref).
+* topo 0 - BEFORE: the instrument's current leaves the +12 V rail and returns to the star
+*          (the load switch on the bus +12 V, the umbilical return on the star).
+* topo 1 - ISOLATED: U-ISO draws P / (eta V_in) rail to rail; its output is a floating
+*          12 V source and the instrument's load, tied to the star by the net ties (r_tie)
+*          and coupled to the -12 V rail by the isolation capacitance (c_iso).
+* topo 2 - GROUND SENSE: as BEFORE, but the pitch reference is a current-free ribbon
+*          conductor, i.e. the module's tap on the bus (V(tap_g)) instead of the star.
+* topo 3 - BALANCED: as BEFORE, but a dummy load holds the instrument's total at
+*          i_q + i_swing, to within swing_frac of the swing.
+* Breath: 0 -> 1 -> 0 over one period of f_b, a raised cosine.
+VP psu_p 0 {{v_rail}}
+VN psu_n 0 {{v_rail_neg}}
+RBP psu_p tap_p {{r_bus_rail}}
+RRP tap_p mod_p {{r_rib_rail}}
+RBN psu_n tap_n {{r_bus_rail}}
+RRN tap_n mod_n {{r_rib_rail}}
+RBG tap_g 0 {{r_bus_seg}}
+RRG star tap_g {{r_rib_gnd}}
+* the module's own analog loads, constant
+IMP mod_p star {{i_mod_pos}}
+IMN star mod_n {{i_mod_neg}}
+* the instrument, straight off the rails (topo 0, 2, 3)
+BINST mod_p star I = {{k_direct}}*({{i_q}} + {{dc_extra}} + {{i_swing}}*{{swing_frac}}*0.5*(1-cos(6.283185307*{{f_b}}*time)))
+* the instrument behind U-ISO (topo 1): input power = output power / eta, rail to rail
+BISO mod_p mod_n I = {{k_iso}}*{{v_iso}}*({{i_q}} + {{i_swing}}*0.5*(1-cos(6.283185307*{{f_b}}*time)))/({{eta}}*max(V(mod_p,mod_n),1))
+VISO iso_p iso_g {{v_iso}}
+BLOAD iso_p iso_g I = {{k_iso}}*({{i_q}} + {{i_swing}}*0.5*(1-cos(6.283185307*{{f_b}}*time)))
+VTIE iso_g tiex 0
+RTIE tiex star {{r_tie}}
+CISO mod_n iso_g {{c_iso}}
+* the pitch jack's reference
+Bref ref 0 V = V(star)*(1-{{k_sense}}) + V(tap_g)*{{k_sense}}
+.options method=gear
+.control
+tran 1m {{t_gs}} 0 1m
+wrdata ref.dat v(ref)
+wrdata itie.dat i(VTIE)
+wrdata railp.dat v(mod_p)
+quit
+.endc
+.end

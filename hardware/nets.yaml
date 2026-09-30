@@ -434,9 +434,9 @@ nets:
       AT THE INSTRUMENT END IT IS THE MAIN BOARD'S GROUND: tied to PWR_GND at
       J-UMB (ADR 0018), which carrier/carrier declares by putting this port on
       its PWR_GND net. The name is kept because at the module end conductor 8
-      is its own net: a layer-2 plane that meets AGND_MOD and PWR_GND only at
-      the module's star, through NT-DIG-MOD (dig-gnd-topology, settled
-      2026-09-30).
+      is its own net: a layer-2 plane that meets PWR_GND at the etherCON
+      (NT-UMB-MOD, the mirror of the instrument's NT-DIG) and the module's star
+      through NT-DIG-MOD, and nothing else (dig-gnd-topology, ADR 0027).
 
   UMBILICAL_POS12:
     kind: power
@@ -462,7 +462,7 @@ nets:
 
   PWR_GND:
     kind: reference
-    carries: "Power return for the exported rail, and the carrier's whole pour"
+    carries: "Power return for the exported rail - U-ISO's isolated 0V at the module (ADR 0027) - and the carrier's whole pour"
     origin: module/power-entry
     reference:
       - module/umbilical-load-switch
@@ -490,11 +490,16 @@ nets:
   # MODULE: power
   # ======================================================================
 
-  BUS_POS12_RAW:
+  ISO_POS12:
     kind: power
-    carries: "Eurorack +12 V as it arrives, ahead of D1/D2"
+    carries: "The isolated +12 V U-ISO makes for the instrument (ADR 0027), ahead of the load switch; returns on PWR_GND"
     driver: module/power-entry
     receivers: [module/umbilical-load-switch]
+    note: >
+      Until 2026-09-30 the load switch took the Eurorack +12 V as it arrives
+      (BUS_POS12_RAW, now a net inside module/power-entry). It takes the
+      converter's output instead, so the instrument's current is drawn from
+      the rack rail to rail and none of it returns through the rack's ground.
 
   MODULE_ANALOG_POS12:
     kind: power
@@ -550,8 +555,9 @@ nets:
       - module/pitch-stage
       - module/breath-response-shaper
     note: >
-      AGND_MOD meets DIG_GND and PWR_GND only at the star, through
-      NT-AGND-MOD - the tracked figure dig-gnd-topology, settled 2026-09-30.
+      AGND_MOD meets the Eurorack ground (BUS_GND, the star, inside
+      module/power-entry) only through NT-AGND-MOD, and DIG_GND and PWR_GND
+      only by way of the star - the tracked figure dig-gnd-topology.
       This file records which circuits reference the net.
 
   # ======================================================================

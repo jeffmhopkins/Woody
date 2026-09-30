@@ -14,7 +14,7 @@ circuits. **The circuits own their own values** — nothing here restates one.
 | [`umbilical-load-switch/`](umbilical-load-switch/umbilical-load-switch.md) | The LT1641 that ramps and current-limits the +12 V sent up the umbilical |
 | [`dac8568/`](dac8568/dac8568.md) | The converter: `CLR`, the `LDAC` strap, the grade lock |
 | [`digital-and-supervision/`](digital-and-supervision/digital-and-supervision.md) | The module end of the SPI receive path |
-| [`link-supervision/`](link-supervision/link-supervision.md) | **Not fitted.** The deleted watchdog and presence detect, and what restoring them would cost |
+| [`link-supervision/`](link-supervision/link-supervision.md) | **Not fitted, by decision** (owner, 2026-09-30: the module always runs with an umbilical attached to a controller). The deleted watchdog and presence detect, and what restoring them would cost |
 | [`breath-receive-stage/`](breath-receive-stage/breath-receive-stage.md) | The module half of the breath chain: the `REF` trimmer, commissioning, the `CLR` behaviour |
 | [`breath-output-stage/`](breath-output-stage/breath-output-stage.md) | Buffered attenuator → ×4 summer with bipolar offset → jack |
 | [`breath-response-shaper/`](breath-response-shaper/breath-response-shaper.md) | `POT-RESP`, the antiparallel-diode shaper |

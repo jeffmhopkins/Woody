@@ -76,3 +76,4 @@ dated italic note at each point it changes, and the amendment named in the
 | [0023](0023-module-ethercon-and-two-boards.md) | The module's etherCON is the NE8FAV too, and the module is two boards | Accepted (the module's end of ADR 0004's open variant question); amended 2026-09-29 by 0024 (no PUSH-tab slot) |
 | [0024](0024-module-panel-layout-and-stack.md) | The module's panel layout and board stack | Accepted |
 | [0026](0026-module-panel-graphics.md) | The module panel's graphic language (dark Lifeforms-style islands, Inter lowercase, spot-colour UV print) | Accepted |
+| [0027](0027-isolated-instrument-supply.md) | The instrument's supply is isolated, drawn rail to rail | Accepted (0025 is taken on another branch) |
