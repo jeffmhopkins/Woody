@@ -133,26 +133,46 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 
 ## Open, and what decides each
 
-Before the layout (`tools/pcb.py` does not yet have a main-board mode — its
-key-board mode reads `pcb-geometry.echo` by cluster, and this board is `main`):
+The first layout is `tools/pcb.py layout hardware/boards/main-board` (`kind:
+main`; `docs/reference/tooling.md` §4, *The main board*). What it does not yet
+finish, and every other open item:
 
 | Item | Decided by |
 |---|---|
-| **`J-MCU`'s footprint is KiCad's bare 2 × 12 1.27 mm pad grid.** The XKB header wants 0.70 drills and its shroud's outline and courtyard [ds `XKB-X1270WR-2x12A-9TV01.pdf`], so it gets a `woody.pretty` footprint the way `J-CHAIN`'s Samtec did | Drawn at layout, from the banked drawing |
-| **Four layers, decided** (owner, 2026-09-29; ADR 0017 amendment of that date): signal / ground / power / signal, 1.6 mm, JLCPCB stock [ds `JLCPCB-PCB-CAPABILITIES.pdf`, *Thickness*]. Unbroken ground under the breath reference, buffer and ADC and every chain and SPI line. `tools/pcb.py` routes two layers today: its main-board mode needs the inner layers as planes, ground by a via at each pin, and the analog star (`AGND_INST`, one tie `NT-AGND`, `carrier.md` §2) kept as its own island on the plane layer, not lost to one solid pour | The main-board mode of `tools/pcb.py` |
-| **White solder mask, both faces** (owner, ADR 0028): the top face is the LED row's first reflector. Record it in `layout.yaml` `fab: mask` when the main-board layout is written (the key boards' are green) | Decided; the layout writes it |
-| **The LED row's places** are the body CAD's (`pcb-geometry.echo` `main` `led`, *"LED row on the main board"* in `mechanical/drc.echo`): one row on the centreline, LED 1 at the tail end where the data arrives, the U-bolt station midway between two LEDs. **The WS2815B-V1's chamfer marks pin 4, not pin 1**; check the assembler's rotation preview | Layout; the first order's placement preview |
-| **Passives may go on the underside** (owner, 2026-09-29). The underside faces the grounded bottom plate, `hardware.kb_spacer_l` below it, over the board's whole length since the cassette (ADR 0025). At `boards.board_clear` that leaves no room for a part (`mechanical/drc.echo` *"main board underside room over the bottom plate"*), so an underside part needs a **window cut through the bottom plate** under it, down to the oak (the second figure on that line), and must be clear of the thumb switches' housings, pins and the mounts' spacers. Through-hole tails face the plate too: `J-CHAIN`'s clear it (*"J-CHAIN pin tails clear of the bottom plate"*), `J-MCU`'s must be checked against its drawing, and the plate stops short of `J-UMB`. The thumb switches are already underside parts | The layout; each window goes into the bottom plate's outline in the body CAD |
-| **Every mount grounds the plates** (ADR 0022 point 6, ADR 0025): each is `MountingHole:MountingHole_2.7mm_M2.5_Pad_TopBottom` on `PWR_GND`, pads on both faces (not `_Pad_Via`, whose ring of vias breaks the board house's hole-to-hole rule, as the key board found). The spacer bears on the underside pad and bonds the bottom plate; a column's standoff or an end mount's nut bears on the top pad, and through the column the key plate is bonded too. There are no unplated mounts and no edge notches | Layout; the mounts' places are `pcb-geometry.echo` `main` `standoff … "column"` and `… "end"` |
-| **The regulator block holds `U-BUCK` and one can, not four parts.** `U-BUCK`, `C-STRIP-BULK`, `C-BUCK-IN` and `L-BUCK-IN` together take about twice the block's area. Only `U-BUCK` and `C-STRIP-BULK` need its height; `C-BUCK-IN` (5.8 mm) and `L-BUCK-IN` (2.8 mm) go where the room over them is enough (`mechanical/drc.echo`, *main board parts room under the key boards*) | Layout |
-| **`A1` (the Matrix) has no footprint**: it is on the lid, and is on the sheet for its pad-to-pin map | The layout skips a part with no footprint |
-| **The spare positions' switches (`sw+`, `sw-`) are not fitted** (`config/key-layout.yaml` `spare_bits_switches`), but their network is. The switch sits in the shared key-network sheet | Marked not-fitted on this board at layout |
-| **`NT1` and `NT2` are net ties**: `NT1` at `J-UMB` pin 8 (ADR 0018), `NT2` at the analog star (`carrier.md` §2) | Placed there at layout |
-| **The thumb switches go on the underside**, entering from below; the near row is turned 180° (ADR 0022) | `pcb-geometry.echo` `main` |
+| **Connections left unrouted.** `pcb.py check` fails on each by name (`[unconnected]`); the layout prints the list when it writes the board. The breath pair, every plane pin's via, and all but these are routed; what is left is in the densest corners: the reference's feedback network at the mouth edge, the register pins walled in by their own key lines, the long `U-ADC` to `J-MCU` lines, and a chain hop into `J5` | Routed by hand in KiCad, or a re-run once the footprints below are final (placement moves change what is left) |
+| **`J-MCU`'s footprint is KiCad's bare 2 × 12 1.27 mm pad grid.** The XKB header wants 0.70 drills and its shroud's outline and courtyard [ds `XKB-X1270WR-2x12A-9TV01.pdf`]; the bare grid's 0.175 mm rings also fail the board house's 0.18 minimum, 24 `[annular_width]` failures in `check` | The `woody.pretty` footprint being drawn from the banked drawing; then re-check `layout.yaml` `connectors: J-MCU` (its pad-row offset is the placeholder's) and re-run the layout |
+| **`J-UMB`'s footprint is KiCad's horizontal 1 × 8 header**, placed by its pin row 1.5 mm in front of the insulator, a figure of that footprint | The Hanxia footprint; then re-check `layout.yaml` `connectors: J-UMB` |
+| **The LED row's chamfer**: the WS2815B-V1's marks pin 4, not pin 1; the LEDs stand where the body CAD puts them, LED 1 at the tail where the data arrives (`pcb-geometry.echo` `main` `led`) | The assembler's rotation preview, first order |
+| **Passives may go on the underside** (owner, 2026-09-29). The underside faces the grounded bottom plate, `hardware.kb_spacer_l` below it, over the board's whole length since the cassette (ADR 0025). At `boards.board_clear` that leaves no room for a part (`mechanical/drc.echo` *"main board underside room over the bottom plate"*), so an underside part needs a **window cut through the bottom plate** under it, down to the oak (the second figure on that line), and must be clear of the thumb switches' housings, pins and the mounts' spacers. Through-hole tails face the plate too: `J-CHAIN`'s clear it (*"J-CHAIN pin tails clear of the bottom plate"*), `J-MCU`'s must be checked against its drawing, and the plate stops short of `J-UMB`. The first layout needed none: every passive is on the top | A later layout that needs the room; each window goes into the bottom plate's outline in the body CAD |
+| **The references with no clear place on the silkscreen** stay on the fabrication layer; the layout names them when it writes the board | Hand-placed in KiCad, or room made round them |
 | **The umbilical adapter** (`PCB-UMB-ADAPTER`) is a separate small board: its schematic is [`../umb-adapter/`](../umb-adapter/README.md), not laid out | With this board's layout |
+
+What the first layout settled, and where it is held:
+- **Four layers** (ADR 0017 amendment 2026-09-29), JLCPCB's stack `JLC04161H-7628`
+  [ds `datasheets/fab/JLCPCB-IMPEDANCE-STACKUPS.pdf`]: layer 2 `PWR_GND`, layer 3
+  the +12 V (`UMBILICAL_POS12`), the rails that are tracks in `layout.yaml`
+  `net_classes:`. **`AGND_INST` is an island on layer 2** round the analog block,
+  its moat bridged once by `NT-AGND` (NT2) beside `U-ADC`, between its VSS and its
+  digital pins (`power-entry-instrument.md` §2); `check` fails a second tie, an
+  island pad off the island, and any layer-1 track crossing the moat but at the
+  tie or as the breath pair.
+- **White solder mask** both faces, black legend (`layout.yaml` `fab:`; ADR 0028).
+- **Every mount plated on `PWR_GND`**, pads both faces, no other net's copper under
+  its hardware (`check`); the U-bolt legs' holes unplated, the outer layers kept
+  clear round their hardware.
+- **The regulator block holds `U-BUCK` alone** (a rule area), `C-STRIP-BULK`,
+  `C-BUCK-IN` and `L-BUCK-IN` beside it where their heights fit (`check_heights`).
+- **`A1` (the Matrix) and the spare switches `SW9`, `SW10`** are on the sheets and
+  not on this board (`layout.yaml` `not_on_board:`, reported as notes); the spare
+  positions' networks are placed.
+- **`NT1`** at `J-UMB` pin 8 (ADR 0018); **`U-TVS-SPI`** on the J-MCU side of
+  `R-SPI-SER`, where its three channels now are.
+- **The thumb switches on the underside**, where the body CAD puts them, the near
+  row turned 180° (ADR 0022).
 
 ## Revisions
 
 | Rev | Date | What changed | Where |
 |---|---|---|---|
 | — | 2026-09-29 | Schematic: the carrier circuits migrated to KiCad and placed with the thumb clusters and the interfaces' main-board parts. Not laid out | git history of this directory |
+| A | 2026-09-30 | First layout by `tools/pcb.py` (`kind: main`): placed, four layers, planes and island, routed but for the connections under *Open* | `layout.yaml`, `main-board.kicad_pcb` |

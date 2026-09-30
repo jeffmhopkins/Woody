@@ -753,8 +753,30 @@ def add_silk_generic(board, lay, comps):
                 sys.exit(f"pcb: the silkscreen title at layout.yaml silk.at is not clear: {line!r}")
             put(True, line, x, y + i * SILK_H * 1.8, justify=-1)
             placed[True].append(g)
+    # every label placed, proved as check_silk will judge it - its real stroked shape,
+    # not its box, off every courtyard on its face and the board house's silk clearance
+    # off every footprint's own silk; one that fails comes off and is named with the rest
+    bodies = {True: [], False: []}
+    fsilk = {True: [], False: []}
+    for fp in board.GetFootprints():
+        for top, cl in ((True, pcbnew.F_CrtYd), (False, pcbnew.B_CrtYd)):
+            if fp.GetCourtyard(cl).OutlineCount():
+                bodies[top].append(shapely_of(fp.GetCourtyard(cl)))
+        for it in fp.GraphicalItems():
+            if it.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS):
+                fsilk[it.GetLayer() == pcbnew.F_SilkS].append(item_shape(it, it.GetLayer()))
+    gap = float((lay.get("fab") or {}).get("silk_to_pad", 0.15))
+    for d in list(board.GetDrawings()):
+        if not isinstance(d, pcbnew.PCB_TEXT) or d.GetLayer() not in (pcbnew.F_SilkS, pcbnew.B_SilkS):
+            continue
+        top = d.GetLayer() == pcbnew.F_SilkS
+        g = item_shape(d, d.GetLayer())
+        if any(g.intersects(b_) and g.intersection(b_).area > 1e-4 for b_ in bodies[top]) \
+                or any(g.distance(f_) < gap for f_ in fsilk[top]):
+            skipped.append(d.GetText().split(" ")[0])
+            board.Delete(d)
     if skipped:
-        print(f"pcb: silk - no clear place for {len(skipped)} reference(s), left on the fab layer only: {', '.join(skipped)}")
+        print(f"pcb: silk - no clear place for {len(skipped)} reference(s), left on the fab layer only: {', '.join(sorted(skipped))}")
 
 
 def post_route(path, bdir):

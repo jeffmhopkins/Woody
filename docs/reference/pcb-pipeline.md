@@ -1,7 +1,15 @@
 # PCB pipeline — schematic to a board you can route
 
 **Status:** Proposed 2026-09-21, rewritten after a 13-agent review
-(`docs/review/2026-09-21-pcb-pipeline-review/`). Not run.
+(`docs/review/2026-09-21-pcb-pipeline-review/`). Not run as written. **The
+main board's first layout (2026-09-30) went another way**, and what it found
+bears on the argument below: `tools/pcb.py` (`kind: main`, `docs/reference/tooling.md`
+§4) lays what an autorouter cannot represent itself - the analog island and its
+one tie, each plane pin's own via, the breath pair side by side - locks it, and
+gives Freerouting only the digital remainder; a completion pass and hand routing
+take what it leaves (`hardware/boards/main-board/README.md`, *Open*). The star
+ground is not the autorouter's, so the objection below to autorouting the star
+does not reach that split of the work.
 
 **The handoff is routing.** Everything up to a placed, grouped, rules-configured
 board is headless and re-runnable. You route it in KiCad. Everything after —

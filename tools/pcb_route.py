@@ -1343,6 +1343,10 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
                                 out |= {(L, i, j) for L in ls}
             return out
         src, dst = cells_of(pa), cells_of(pb)
+        # start and end only where a track may stand: a cell inside a pad can still be
+        # within clearance of the next pin's copper (all of them, if none may)
+        src = {c for c in src if grids[c[0]].free(c[1], c[2])} or src
+        dst = {c for c in dst if grids[c[0]].free(c[1], c[2])} or dst
         if not src or not dst:
             failed.append((net, pa, pb, "its copper was not found"))
             continue
