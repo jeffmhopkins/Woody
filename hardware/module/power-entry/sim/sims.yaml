@@ -48,9 +48,9 @@ params:
   i_q:        {value: 0.212, source: "the instrument at rest, 212 mA [repo, ADR 0005 load table, quiescent - an upper bound since ADR 0015]"}
   i_swing:    {value: 0.195, source: "the breath-correlated swing: 0.195 A, the thirteen WS2815B-V1 on the main board at full white, 170-195 mA at 12 V [owner brief 2026-09-30, not yet in the corpus]; 0.367 A, ADR 0005's quiescent-to-clamp-legal-worst swing, the one the 7-18 cent estimate used [repo] (swept)"}
   f_b:        {value: 2.0, source: "one breath 0 -> full -> 0 in 0.5 s [assumption: the frequency does not enter a resistive result]"}
-  eta:        {value: 0.85, source: "U-ISO at 20-30 % load, ~86 % [datasheets/discrete-and-power/MORNSUN-URB_YMD-15WR3.pdf p.4, efficiency vs load at 24 V in, the 15 V curve as the nearest to 12 V]"}
-  v_iso:      {value: 12.0, source: "U-ISO's output [ds p.1]"}
-  c_iso:      {value: 2.0e-9, source: "U-ISO's isolation capacitance, 2000 pF typ [ds p.3]"}
+  eta:        {value: 0.84, source: "U-ISO at ~21 % load (umbilical-current x 12 V = 4.3 W of 20 W), ~84 % [datasheets/discrete-and-power/RECOM-RP20-AW.pdf PD-2, efficiency vs output current at 24 V in, read off the curve at 20-22 %. The only curve RECOM publishes for a 24 V-in single is the RP20-2405SAW's; the 2412SAW's full-load figure, 89 % typ (PD-1), is the same as the 2405SAW's, so the curve is taken as its shape]"}
+  v_iso:      {value: 12.0, source: "U-ISO's output [ds PD-1]"}
+  c_iso:      {value: 1.5e-9, source: "U-ISO's isolation capacitance, 1500 pF max [ds PD-4]"}
   r_tie:      {value: 0.001, source: "NT-UMB-MOD, NT-DIG-MOD and the DIG_GND plane between them, lumped [assumption]"}
   topo:       {value: 1, source: "0 before, 1 isolated (the design), 2 ground sense, 3 balanced load - groundshift.cir's header"}
   bal_frac:   {value: 0.01, source: "topo 3: a dummy load that holds the instrument's total to 1 % of the swing [assumption]"}
