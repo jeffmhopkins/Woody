@@ -71,8 +71,8 @@ components:
     pins:
     - 1
     - 2
-    note: 'The analog star''s single tie to PWR_GND (carrier.md section 2, dig-gnd-topology): copper only, at the
-      star'
+    note: 'The analog star''s single tie to PWR_GND: copper only, under U-ADC between its VSS and its digital pins
+      (power-entry-instrument.md section 2)'
   U-BUCK-A:
     of: U-BUCK
     value: R-78E5.0-1.0

@@ -470,6 +470,7 @@ nets:
       - carrier/service-uart
       - carrier/led-strip-drive
       - carrier/carrier
+      - interfaces/breath-sense-link
     note: >
       The thumb plates bond to this net through the main board's plate mounts
       (ADR 0022), each at its own studs.

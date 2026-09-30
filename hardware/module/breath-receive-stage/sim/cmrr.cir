@@ -1,0 +1,44 @@
+* The breath link's CMRR across the umbilical, as netlisted on both sides: the sensor
+* buffer's output (an ideal source - an OPA2197 follower's closed-loop impedance is
+* milliohms) through R1 onto BREATH, the instrument's analog ground through R1b onto
+* AGND, then the module's R2/R3, R4/R5, C_cm, C_diff and the INA828 (TI's macromodel)
+* with its REF driven by U-REF-BUF (TI's OPA2197 model) from the trimmer's wiper.
+* VCM moves the instrument's ground against the module's: that is the common-mode
+* excitation, applied to BOTH legs through their own source impedances, as the cable
+* applies it. D-CLAMP-IN+/- are left out: reverse-biased at these voltages, and the
+* same part on both legs. The Cat5 pair's own resistance (~0.2 ohm per 2 m conductor
+* [from memory, TIA-568 9.38 ohm/100 m]) is balanced and left out.
+* CMRR = |Vout/Vsig| / |Vout/Vcm|, both at the INA828 output: referred to the link's
+* input, so the bias divider's loss is inside it.
+VPOS pos 0 {{v_pos}}
+VNEG neg 0 {{v_neg}}
+VCM agndinst 0 DC 0 AC 1
+VSIG sensbuf agndinst DC {{v_sensor}} AC 0
+R1 sensbuf breath {{R1}}
+R1b agndinst agndsense {{R1b}}
+R3 breath inneg {{R3}}
+R2 agndsense inpos {{R2}}
+R4 inpos 0 {{R4}}
+R5 inneg 0 {{R5}}
+CCMP inpos 0 {{C-CM-IN+}}
+CCMN inneg 0 {{C-CM-IN-}}
+CDIFF inpos inneg {{C-DIFF-BREATH}}
+XAMP inpos inneg pos neg out refdrv rg1 rg2 INA828
+RG rg1 rg2 {{R-GAIN-INAMP}}
+VWIP wiper 0 {{v_ref_trim}}
+XREFB wiper refdrv pos neg refdrv OPAx197
+.options method=gear rshunt=1e10
+.control
+op
+print v(out) v(refdrv)
+ac dec 50 1 100k
+let gcm = mag(v(out))
+alter @vcm[acmag] = 0
+alter @vsig[acmag] = 1
+ac dec 50 1 100k
+let gdm = mag(v(out))
+let cmrr = db(gdm) - db(ac1.gcm)
+wrdata cmrr.dat cmrr
+quit
+.endc
+.end
