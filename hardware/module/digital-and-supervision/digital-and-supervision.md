@@ -49,23 +49,25 @@ block below is where the DAC box was.*
 
 ```
   etherCON            NEW PIN MAP - see ADR 0004
-  ─┬── 4 SCLK ──┬─────────────────────────┐
-   │            │                         │
-   ├── 5 MOSI ──┼──┬──────────────────────┤     SCLK+MOSI share pair (4,5)
-   │            │  │                      │     CS+DIG_GND share pair (7,8)
-   ├── 7 CS  ───┼──┼──┬───────────────────┤
-   │            │  │  │                   │
-   └── 8 DIG_GND│  │  │              ┌────┴─────────┐
-        │   [R-SPI-PULL x3]          │  74AHCT125   │
-        │    SCLK↓ MOSI↓ CS↑(100k)   │  LOGIC_5V    │
-        │        │  │  │             │  OE x4 → GND │  tied ENABLED
-        │    DIG_GND                 └────┬─────────┘
-        │                                 │
-        │                        [R-SPI-PULL x3]
-        │                         SCLK_DAC↓ DIN↓ SYNC↑   ◄ buffer OUTPUTS,
-        │                                                 not the same nets
-        │                                                 as the three above
-        │                                 │
+  ─┬── 4 SCLK ──┬──[R-RX-SCLK 1k]──┬──►|o──►|o── SCLK_BUF ─┐
+   │            │                  [C-RX-SCLK 47pF]         │   SCLK+MOSI share pair (4,5)
+   ├── 5 MOSI ──┼──[R-RX-MOSI 1k]──┬──►|o──►|o── MOSI_BUF ─┤   CS+DIG_GND share pair (7,8)
+   │            │                  [C-RX-MOSI 47pF]         │
+   ├── 7 CS  ───┼──[R-RX-CS 1k]────┬──►|o──►|o── CS_BUF ───┤
+   │            │                  [C-RX-CS 47pF]           │
+   │            │                  to DIG_GND               │
+   │            │         ►|o = one gate of [U-RX-MOD 74AHCT14],
+   │            │         Schmitt, two per signal     ┌─────┴────────┐
+   └── 8 DIG_GND│                                     │  74AHCT125   │
+        │   [R-SPI-PULL x3]                           │  LOGIC_5V    │
+        │    SCLK↓ MOSI↓ CS↑(100k)                    │  OE x4 → GND │  tied ENABLED
+        │    at the cable node                        └────┬─────────┘
+        │                                                  │
+        │                                         [R-SPI-PULL x3]
+        │                                          SCLK_DAC↓ DIN↓ SYNC↑   ◄ buffer OUTPUTS,
+        │                                                                  not the same nets
+        │                                                                  as the three above
+        │                                                  │
         │
         └── the star, through NT-DIG-MOD (dig-gnd-topology)
 

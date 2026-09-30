@@ -245,18 +245,18 @@ and its two `J-CHAIN`. The section number is kept because other pages cite `carr
 ## §4 SPI egress to the umbilical
 
 ```
-  IO35 SCK  ──[R-SPI-SER 100R]───┬──── J-UMB pin 4   ┐ pair (4,5)
-  IO36 MOSI ──[R-SPI-SER 100R]───┼──── J-UMB pin 5   ┘
-  IO34 CS   ─┬─[R-SPI-SER 100R]──┼──── J-UMB pin 7   ┐ pair (7,8)
-             │                   │     J-UMB pin 8 ──┘ DIG_GND ── PWR_GND at J-UMB
-   [R-CS-PULL-INST 10k 1%] to 3V3 (J-MCU pin 13): CS held high while the ESP32 boots
-                                 │
-                        [U-TVS-SPI 4-ch array to PWR_GND]
+  IO35 SCK  ──┬──────[R-SPI-SER 82R]──── J-UMB pin 4   ┐ pair (4,5)
+  IO36 MOSI ──┼─┬────[R-SPI-SER 82R]──── J-UMB pin 5   ┘
+  IO34 CS   ──┼─┼─┬──[R-SPI-SER 82R]──── J-UMB pin 7   ┐ pair (7,8)
+              │ │ │                      J-UMB pin 8 ──┘ DIG_GND ── PWR_GND at J-UMB
+              │ │ ├── [R-CS-PULL-INST 10k 1%] to 3V3 (J-MCU pin 13): CS held high while the ESP32 boots
+              │ │ │
+        [U-TVS-SPI 4-ch array to PWR_GND]  on the PAD side of R-SPI-SER (cs-fall-reentry)
   IO37 MISO ── MCP3202 DOUT only (never leaves the board)
   IO39 CS   ── MCP3202 CS
 ```
 
-*The rest of §4 — `R-SPI-SER` and the 100 Ω derivation, the two SPI hosts and
+*The rest of §4 — `R-SPI-SER` and its derivation (`spi-series-r`), the two SPI hosts and
 what claims them, the loop budget and the IO_MUX note — moved verbatim to
 [`../interfaces/spi-link/`](../interfaces/spi-link/spi-link.md), which holds
 both ends of the link. The drawing above stays here: it also carries the

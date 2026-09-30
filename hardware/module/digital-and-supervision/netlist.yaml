@@ -48,6 +48,32 @@ components:
     - 1
     - 2
     note: VCC to DIG_GND, at the pin
+  C-DEC-RX:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: U-RX-MOD's VCC to DIG_GND, at the pin
+  C-RX-CS:
+    of: C-RX-MOD
+    value: 47pF C0G
+    pins:
+    - 1
+    - 2
+  C-RX-MOSI:
+    of: C-RX-MOD
+    value: 47pF C0G
+    pins:
+    - 1
+    - 2
+  C-RX-SCLK:
+    of: C-RX-MOD
+    value: 47pF C0G
+    pins:
+    - 1
+    - 2
+    note: 'C0G, to DIG_GND at U-RX-MOD''s input pin. With R-RX-MOD: 47 ns. interfaces/spi-link/sim'
   R-PULL-CS:
     of: R-CS-PULL-MOD
     value: 100k 1%
@@ -95,6 +121,27 @@ components:
     - 2
     note: 'PULL-UP TO DAC_AVDD, the LM317''s rail, NOT bus +5V: a pull-up belongs on its consumer''s rail, and on
       the bus rail a reversed ribbon reaches the DAC''s SYNC pin and turns a buffer failure into a DAC failure'
+  R-RX-CS:
+    of: R-RX-MOD
+    value: 1k 1%
+    pins:
+    - 1
+    - 2
+  R-RX-MOSI:
+    of: R-RX-MOD
+    value: 1k 1%
+    pins:
+    - 1
+    - 2
+  R-RX-SCLK:
+    of: R-RX-MOD
+    value: 1k 1%
+    pins:
+    - 1
+    - 2
+    note: 'With C-RX-MOD, the low-pass in front of U-RX-MOD''s Schmitt input: the cable''s crosstalk and reflections
+      last about one round trip (~20 ns) and this stretches that into less than the input''s hysteresis can see.
+      1k in series is near-open to the line, so it does not change the line''s own termination. interfaces/spi-link/sim'
   U-LVL-MOD:
     value: 74AHCT125
     pins:
@@ -115,17 +162,54 @@ components:
     note: OE IS TIED ENABLED AND MUST STAY THAT WAY - the presence comparator that gated it is deleted. Inputs are
       TTL thresholds, V_IH 2.0V min, not ratioed to VCC, and there is NO INPUT CLAMP TO VCC, which is what makes
       back-driving an unpowered module safe
+  U-RX-MOD:
+    value: 74AHCT14
+    pins:
+    - 1A
+    - 1Y
+    - 2A
+    - 2Y
+    - 3A
+    - 3Y
+    - 4A
+    - 4Y
+    - 5A
+    - 5Y
+    - 6A
+    - 6Y
+    - VCC
+    - GND
+    note: 'THE MODULE''S SPI RECEIVER (owner, 2026-09-30: add a buffer with hysteresis at the receiving end). Each
+      signal passes two gates, so it arrives at U-LVL-MOD uninverted: SCLK gates 1-2, MOSI 3-4, CS_MOD 5-6, every
+      gate used. Its first gate is the only Schmitt input on the link, behind R-RX-MOD and C-RX-MOD; TTL-compatible
+      thresholds with 0.4 V minimum hysteresis [SN74AHCT14.pdf p.5]. Like the 74AHCT125 it has NO INPUT CLAMP TO
+      VCC (I_IK specified for VI < 0 only, p.4; I_I +/-1 uA at VCC = 0 V, p.5), so a powered instrument back-driving
+      an unpowered module is still safe. interfaces/spi-link/sim, spi-pair-crosstalk'
 nets:
+  CS_BUF:
+  - U-LVL-MOD.3A
+  - U-RX-MOD.6Y
   CS_MOD:
   - port: CS_MOD
   - R-PULL-CS.1
-  - U-LVL-MOD.3A
+  - R-RX-CS.1
+  CS_N:
+  - U-RX-MOD.5Y
+  - U-RX-MOD.6A
+  CS_RC:
+  - C-RX-CS.1
+  - R-RX-CS.2
+  - U-RX-MOD.5A
   DAC_AVDD:
   - port: DAC_AVDD
   - R-PULL-SYNC.2
   DIG_GND:
   - port: DIG_GND
   - C-DEC-LVL.2
+  - C-DEC-RX.2
+  - C-RX-CS.2
+  - C-RX-MOSI.2
+  - C-RX-SCLK.2
   - R-PULL-DIN.2
   - R-PULL-MOSI.2
   - R-PULL-SCLK.2
@@ -136,6 +220,7 @@ nets:
   - U-LVL-MOD.4OE
   - U-LVL-MOD.2OE
   - U-LVL-MOD.GND
+  - U-RX-MOD.GND
   DIN:
   - port: DIN
   - R-PULL-DIN.1
@@ -143,20 +228,42 @@ nets:
   LOGIC_5V:
   - port: LOGIC_5V
   - C-DEC-LVL.1
+  - C-DEC-RX.1
   - R-PULL-CS.2
   - U-LVL-MOD.VCC
+  - U-RX-MOD.VCC
   MOSI:
   - port: MOSI
   - R-PULL-MOSI.1
+  - R-RX-MOSI.1
+  MOSI_BUF:
   - U-LVL-MOD.2A
+  - U-RX-MOD.4Y
+  MOSI_N:
+  - U-RX-MOD.3Y
+  - U-RX-MOD.4A
+  MOSI_RC:
+  - C-RX-MOSI.1
+  - R-RX-MOSI.2
+  - U-RX-MOD.3A
   SCLK:
   - port: SCLK
   - R-PULL-SCLK.1
+  - R-RX-SCLK.1
+  SCLK_BUF:
   - U-LVL-MOD.1A
+  - U-RX-MOD.2Y
   SCLK_DAC:
   - port: SCLK_DAC
   - R-PULL-SCLK-DAC.1
   - U-LVL-MOD.1Y
+  SCLK_N:
+  - U-RX-MOD.1Y
+  - U-RX-MOD.2A
+  SCLK_RC:
+  - C-RX-SCLK.1
+  - R-RX-SCLK.2
+  - U-RX-MOD.1A
   SYNC:
   - port: SYNC
   - R-PULL-SYNC.1
