@@ -261,12 +261,13 @@ Ordered by what blocks what. **The marker pattern is no longer among them** —
 8 bits, two per device, decided 2026-09-21 and recorded in `key-layout.yaml`
 and ADR 0001.
 
-*Four of the items below moved with their circuits, 2026-09-21: the spare-switch
-positions and the last 3 free bits to
-[`key-marker-and-bits/`](key-marker-and-bits/key-marker-and-bits.md), `R-KEY-PU`
-and the `LT` springs to
-[`key-switch-network/`](key-switch-network/key-switch-network.md), and the
-closed 74HC165 item to [`key-register/notes.md`](key-register/notes.md).*
+*Four items moved with their circuits, 2026-09-21, and three of them are
+decided there: `R-KEY-PU` (with `R-KEY-SER`) on
+[`key-switch-network/`](key-switch-network/key-switch-network.md), the last 3
+free bits on
+[`key-marker-and-bits/`](key-marker-and-bits/key-marker-and-bits.md). What is
+left of them there is the `LT` springs (M1) and the spare-switch positions
+(M2).*
 
 - **The key-board mount's open items** (§5, ADR 0025, ADR 0020 Amendment 7).
   The spacer is chosen (`MECH-KB-SPACER`); the column's standoff and screw are
@@ -280,7 +281,16 @@ closed 74HC165 item to [`key-register/notes.md`](key-register/notes.md).*
     plate's studs (`MECH-MB-STUD`), which the plate vendor presses.
   **Plate stiffening** (`plate-thickness` is settled; whether it needs a rib
   or a backer is not) gates M4/M5 — ADR 0002.
-- **Conformal coating.** `MECH-COAT` covers the main board; nothing says
-  whether the key boards are coated, and they sit under an open switch contact
-  in a cavity that is breathed into. Coating a soldered mechanical switch is
-  not obviously right — see ADR 0009 before deciding.
+- **Conformal coating — decided: the key boards are coated** (ADR 0009,
+  *"Conformal-coat the boards"*: every in-body board, and the key boards sit
+  under open switch cutouts in the breathed-into cavity). `MECH-COAT` covers
+  them. **Brush it on the parts face only** — the bottom, where every
+  machine-placed part is and the switch pins are soldered — and **mask
+  `J-CHAIN`'s mouth**, whose contacts must stay bare. The switch side is not
+  coated: a KS-33's contacts are inside its housing, above the board, and a
+  coating that wicks into the housing is a key that sticks or never makes;
+  the switch's plated holes are filled with solder from the parts face, so a
+  brushed coat has no path up to it `[judgment, not tested]`. Apply it last:
+  after the switches are soldered at depth and the board has passed bring-up
+  (the key board's README, *Assembling* step 2 and *Bring-up*), with the key
+  plate off its columns and turned over, as for soldering.

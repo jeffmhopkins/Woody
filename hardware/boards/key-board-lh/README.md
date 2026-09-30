@@ -233,6 +233,7 @@ test are checked by `pcb.py` itself (above).
    - **Meter every cable before it is first powered**, not only the first one. Check it by *Bring-up*, step 2.
    - Plug it in with the key plate held raised straight up off its columns, before the plate is screwed down (`routing.chain_service`, `routing.chain_raise`). That is the position its length was derived for.
    - With `-RN2`, the main board's socket's cable leaves **upward** and the key board's leaves **downward**. The two face each other, and closed, the ribbon folds into a flat hairpin between the two plugs' heights (`key-chain-loom.md`). **A cable whose ends both leave downward is a standard cable, without `-RN2`, and it is wrong.**
+4. **Conformal coat** (`MECH-COAT`), once the board has passed *Bring-up*: brush it on the bottom (parts) face only, with J1's mouth masked, and leave the switch side bare (`cluster-boards.md`, *Still open*, says why).
 
 ## Bring-up
 
@@ -331,6 +332,5 @@ a drill that did not fit) in the row.
 | J-CHAIN's supply: none at JLC, 8 at DigiKey (above); buy them with this order, or from Samtec. A stocked alternative is not a drop-in: its footprint is on three boards | the first order |
 | J-CHAIN's pads' ring is at JLC's absolute minimum on the sides facing a neighbour. The 1.27 mm pitch both ways leaves no room there. The pads are lengthened on their free side instead (`hardware/lib/README.md`, the IDC header's row); ask JLC's review to accept the thin side | the first order |
 | Part orientation in JLC's placement preview (above) | the first order |
-| Conformal coating of the key boards (`cluster-boards.md`, *Still open*) | ADR 0009, M4 |
 | No 3D model of J-CHAIN in the renders (Samtec's is behind a login; `datasheets/.manifest-R12.csv` records the attempt) | nothing blocks on it |
 | The main board's end of the ribbon | the main board's layout |
