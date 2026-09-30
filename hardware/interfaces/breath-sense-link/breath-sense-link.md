@@ -55,7 +55,7 @@ The `Dir` and `Peer` columns are defined once in
 | `U-BREATH` (MPXV4006DP) | instrument | — | — | `sensor-full-scale`, `breath-working-point` | This circuit's own part, drawn in `carrier.md` §2, **soldered to the main board at its mouth end** (*Mounting*, below). Sets the span the module end multiplies and the pedestal `TRIM-BREATH-ZERO` nulls |
 | `VS` excitation | instrument | in | `carrier/breath-excitation-reference` | `riso-ref-topology`, `cref-out-node`, `opa2197-output-impedance` | The sensor's excitation, and its own circuit |
 | buffered sensor output | instrument | out | `carrier/breath-adc` | — | The same node that feeds `R1`. The instrument's own copy of breath leaves here and does not cross |
-| `D-TVS-BREATH` ×2 | instrument | — | — | — | This circuit's own parts, at the connector, on both legs |
+| `D-TVS-BREATH` ×2 | instrument | — | — | — | This circuit's own parts, at the connector, on both legs, **to `PWR_GND`** (the plane at `J-UMB`, `power-entry-instrument.md` §2), never to the analog island |
 | `R2`, `R3`, `C_diff`, `C_cm` ×2, `R4`, `R5` | module | — | `module/breath-receive-stage` | — | The receive filter and the common-mode bias return, all module-side |
 | in-amp output | module | out | `module/breath-receive-stage` → `module/breath-output-stage` | `inamp-full-scale` | Into the panel GAIN/OFFSET stage, which inverts. **The figure is owned at the module end and derived here** |
 | `REF` | module | in | `module/breath-receive-stage` | `breath-zero-ref`, `dac-rail` | The buffered trimmer that nulls the instrument's pedestal, fed from the `DAC AVDD` rail. Its own section stayed on the module page |
@@ -267,8 +267,8 @@ on `PWR_GND`.
 
 **Proposed: `PWR_GND`.** `AGND` leaves the board carrying nothing but the in-amp
 sense reference, which is what ADR 0004's rule says and what makes the 2 m run
-work `[repo] 0004`. The local analog pour joins `PWR_GND` at **one** tie, at the
-umbilical connector.
+work `[repo] 0004`. The local analog pour joins `PWR_GND` at **one** tie —
+under the ADC since the board went to four layers, `power-entry-instrument.md` §2.
 
 The cost of getting it the other way `[calc]`, using ADR 0003's own cable figure
 (0.168 Ω for 2 m of 24 AWG, implied by its 8.4 µV / 50 µA row):

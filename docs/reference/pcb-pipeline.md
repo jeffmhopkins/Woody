@@ -106,11 +106,11 @@ channel count.
 **6. `ref5050-grade` is settled** (2026-09-30): the High grade, `REF5050IDR`,
 same package and pinout. Nothing for this row blocks precursor 1 any more.
 
-## Three ground questions that must be decided in one sitting
+## The ground questions that must be decided in one sitting
 
 Each is "which ground does this attach to", each is invisible to
-`check-staleness.py` because it is semantic, and **all three are downstream of
-2-layers-or-4**:
+`check-staleness.py` because it is semantic, and **both are downstream of
+the module board's 2-layers-or-4** (the main board's is decided):
 
 - **`dig-gnd-topology`** — three documents, three mutually exclusive answers,
   and `power-entry.md` states ADR 0004 was corrected when it was not.
@@ -121,8 +121,8 @@ Each is "which ground does this attach to", each is invisible to
   resistor-to-resistor**, so the pad is the dominant stray on the 1 V/oct
   network. This plan gives `AGND` no zone and a keepout, so "a quiet AC ground"
   has to mean something specific here.
-- **`cref-out-node`** — three drawings disagree about which side of the
-  reference buffer `C-REF-OUT` sits on.
+- ~~`cref-out-node`~~ — **settled** (`config/figures.yaml`), and it is an
+  instrument part on the four-layer main board, so it no longer belongs here.
 
 A pad told to find "a quiet AC ground" on a board that has not settled where
 its grounds meet is a decision deferred twice, not once.
@@ -312,11 +312,15 @@ that is the artefact that helps *you*, and it runs headless.
 **The 10HP panel is 2 mm aluminium**, laser or waterjet from DXF, same vendor
 and order as the key plate. Not a PCB. It belongs with the mechanical work.
 
-**Open: 2 layers or 4.** On two layers, two corpus requirements are mutually
-exclusive — `power-entry.md` wants the SPI return directly under its trace while
-ADR 0004 wants `PWR_GND` on its own copper *and* the analog return as its own
-region. Four layers dissolves it. This is a cost decision and it gates the
-grounding scheme, so it is upstream of stage 3.
+**2 layers or 4: the main board is decided, the module is not.** The main
+board is four layers (ADR 0017 amendment, 2026-09-29), and its ground is
+written in `power-entry-instrument.md` §2. The module board is still open: on
+two layers, two corpus requirements are mutually exclusive — `power-entry.md`
+wants the SPI return directly under its trace while ADR 0004 wants `PWR_GND`
+on its own copper *and* the analog return as its own region. Four layers
+dissolves it (`dig-gnd-topology`'s `proposed_if_four_layers`). This is the
+owner's cost decision and it gates the module's grounding, so it is upstream
+of stage 3 for that board.
 
 ## One warning about reading `datasheets/` programmatically
 

@@ -1476,7 +1476,7 @@
     (property "Datasheet" "" (at 193.04 96.52 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "NT-AGND" (at 193.04 96.52 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2" (at 193.04 96.52 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "The analog star's single tie to PWR_GND (carrier.md section 2, dig-gnd-topology): copper only, at the star" (at 193.04 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "The analog star's single tie to PWR_GND: copper only, under U-ADC between its VSS and its digital pins (power-entry-instrument.md section 2)" (at 193.04 96.52 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins_source" "a net tie's two pads: 1 the analog star, 2 PWR_GND" (at 193.04 96.52 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "" (at 193.04 96.52 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "" (at 193.04 96.52 0) (effects (font (size 1.27 1.27)) hide))
