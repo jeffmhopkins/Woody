@@ -1,4 +1,6 @@
-* The response shaper, as netlisted: the in-amp's output (VIN, swept over its range)
+* The response shaper, as netlisted: the in-amp's output (EIN, -1 x VMAG: the sweep runs
+* from 0 V to the in-amp's full scale in t_ramp, slow against the op-amps: a transient
+* ramp, because a DC sweep loses the macromodel's operating point where the output clips)
 * into R-RESP-IN and the R-RESP-DIV pair; U-RESP half A inverting at -R-RESP-FB/R-RESP-IN
 * to V_SHAPED; POT-RESP from V_IN_HALF (CW) to V_SHAPED (CCW), its wiper through R-RESP
 * and the antiparallel D-RESP pair into the virtual ground; half B restoring at
@@ -8,7 +10,8 @@
 * wiper; p_resp is its rotation from CCW (0, fully log) to CW (1, fully exp).
 VPOS pos 0 {{v_pos}}
 VNEG neg 0 {{v_neg}}
-VIN in 0 DC 0
+VMAG mag 0 PWL(0 0 {{t_ramp}} {{v_mag}})
+EIN in 0 mag 0 -1
 RDH in vhalf {{R-RESP-DIV-HI}}
 RDL vhalf 0 {{R-RESP-DIV-LO}}
 RIN in vg {{R-RESP-IN}}
@@ -26,7 +29,7 @@ RLOAD out 0 {{r_load}}
 .model DRESP D(IS={{is_d}} N={{n_d}} RS={{rs_d}} CJO=1.5p)
 .options rshunt=1e10
 .control
-dc VIN {{v_min}} 0 0.01
+tran 1u {{t_ramp}} 0 2u
 wrdata out.dat v(out)
 wrdata wip.dat v(wip)
 wrdata vsh.dat v(vsh)

@@ -4,7 +4,7 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/interfaces/spi-link/sim/sims.yaml: a3be5b105a6df3c9
+  hardware/interfaces/spi-link/sim/sims.yaml: 3be660de76e2c15c
   hardware/carrier/netlist.yaml: dd921b112607afd6
   hardware/module/digital-and-supervision/netlist.yaml: a753b9f7931d6d7b
   hardware/interfaces/spi-link/sim/cs.cir: 19bac4501f57e261
@@ -123,7 +123,7 @@ sims:
     - expr: min['v_min'] > -0.5 and max['v_max'] < 5.5
       why: and stays inside the input's -0.5 V clamp and its rail
       pass: true
-  pair-mosi-static[z_cm=70,mosi_hi=0]:
+  pair-mosi-low[z_cm=70]:
     corners: 33
     measures:
       mosi_margin:
@@ -171,63 +171,11 @@ sims:
     asserts:
     - expr: min['mosi_margin'] < 0
       why: 'RECORDED HAZARD, not a requirement: at every common-mode impedance swept, SCLK''s edges couple across the pair
-        into MOSI far enough to cross the 74AHCT125''s V_IL (MOSI low) or V_IH (MOSI high) at the worst corner, for about
-        one cable round trip - including on SCLK''s FALLING edge, the one the DAC clocks DIN in on. ADR 0004''s ''lands at
-        the moment nobody is looking'' is not what the run shows. If this starts failing the hazard is gone - re-read spi-link.md'
+        into a LOW MOSI far enough to cross the 74AHCT125''s V_IL at the worst corner, for about one cable round trip - including
+        on SCLK''s FALLING edge, the one the DAC clocks DIN in on. ADR 0004''s ''lands at the moment nobody is looking'' is
+        not what the run shows. If this starts failing the hazard is gone - re-read spi-link.md'
       pass: true
-  pair-mosi-static[z_cm=70,mosi_hi=1]:
-    corners: 33
-    measures:
-      mosi_margin:
-        nominal: 0.359624
-        min: 0.107903
-        min_at: c_rx- c_tvs+ r_drv- tr_drv- z_diff-
-        max: 0.454943
-        max_at: c_rx- c_tvs- r_drv+ tr_drv+ z_diff+
-      mosi_peak:
-        nominal: 4.15096
-        min: 4.06302
-        min_at: c_rx- c_tvs- r_drv+ tr_drv+ z_diff+
-        max: 4.41408
-        max_at: c_rx- c_tvs+ r_drv- tr_drv- z_diff-
-      mosi_trough:
-        nominal: 2.35962
-        min: 2.1079
-        min_at: c_rx- c_tvs+ r_drv- tr_drv- z_diff-
-        max: 2.45494
-        max_at: c_rx- c_tvs- r_drv+ tr_drv+ z_diff+
-      sclk_rise_back:
-        nominal: -0.0077248
-        min: -0.0157697
-        min_at: c_rx- c_tvs- r_drv- tr_drv- z_diff+
-        max: -0.00061126
-        max_at: c_rx- c_tvs+ r_drv+ tr_drv- z_diff-
-      sclk_fall_back:
-        nominal: 0.215289
-        min: -0.00728207
-        min_at: c_rx- c_tvs- r_drv- tr_drv- z_diff+
-        max: 0.328633
-        max_at: c_rx- c_tvs+ r_drv+ tr_drv- z_diff+
-      sclk_rise_dwell:
-        nominal: 3.06384e-09
-        min: 1.76247e-09
-        min_at: c_rx- c_tvs- r_drv- tr_drv- z_diff+
-        max: 4.62697e-09
-        max_at: c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff-
-      sclk_fall_dwell:
-        nominal: 6.67987e-09
-        min: 2.77078e-09
-        min_at: c_rx- c_tvs- r_drv- tr_drv- z_diff+
-        max: 1.54004e-08
-        max_at: c_rx- c_tvs+ r_drv+ tr_drv+ z_diff-
-    asserts:
-    - expr: min['mosi_margin'] < 0
-      why: 'RECORDED HAZARD, not a requirement: at every common-mode impedance swept, SCLK''s edges couple across the pair
-        into MOSI far enough to cross the 74AHCT125''s V_IL (MOSI low) or V_IH (MOSI high) at the worst corner, for about
-        one cable round trip - including on SCLK''s FALLING edge, the one the DAC clocks DIN in on. ADR 0004''s ''lands at
-        the moment nobody is looking'' is not what the run shows. If this starts failing the hazard is gone - re-read spi-link.md'
-      pass: false
-  pair-mosi-static[z_cm=100,mosi_hi=0]:
+  pair-mosi-low[z_cm=100]:
     corners: 33
     measures:
       mosi_margin:
@@ -275,63 +223,11 @@ sims:
     asserts:
     - expr: min['mosi_margin'] < 0
       why: 'RECORDED HAZARD, not a requirement: at every common-mode impedance swept, SCLK''s edges couple across the pair
-        into MOSI far enough to cross the 74AHCT125''s V_IL (MOSI low) or V_IH (MOSI high) at the worst corner, for about
-        one cable round trip - including on SCLK''s FALLING edge, the one the DAC clocks DIN in on. ADR 0004''s ''lands at
-        the moment nobody is looking'' is not what the run shows. If this starts failing the hazard is gone - re-read spi-link.md'
+        into a LOW MOSI far enough to cross the 74AHCT125''s V_IL at the worst corner, for about one cable round trip - including
+        on SCLK''s FALLING edge, the one the DAC clocks DIN in on. ADR 0004''s ''lands at the moment nobody is looking'' is
+        not what the run shows. If this starts failing the hazard is gone - re-read spi-link.md'
       pass: true
-  pair-mosi-static[z_cm=100,mosi_hi=1]:
-    corners: 33
-    measures:
-      mosi_margin:
-        nominal: 0.0155512
-        min: -0.214156
-        min_at: c_rx- c_tvs+ r_drv- tr_drv- z_diff-
-        max: 0.110509
-        max_at: c_rx- c_tvs- r_drv+ tr_drv+ z_diff+
-      mosi_peak:
-        nominal: 4.49631
-        min: 4.40746
-        min_at: c_rx- c_tvs- r_drv+ tr_drv+ z_diff+
-        max: 4.73159
-        max_at: c_rx- c_tvs+ r_drv- tr_drv- z_diff-
-      mosi_trough:
-        nominal: 2.01555
-        min: 1.78584
-        min_at: c_rx- c_tvs+ r_drv- tr_drv- z_diff-
-        max: 2.11051
-        max_at: c_rx- c_tvs- r_drv+ tr_drv+ z_diff+
-      sclk_rise_back:
-        nominal: -0.012614
-        min: -0.0202585
-        min_at: c_rx- c_tvs- r_drv- tr_drv+ z_diff+
-        max: -2.739e-05
-        max_at: c_rx+ c_tvs+ r_drv- tr_drv+ z_diff-
-      sclk_fall_back:
-        nominal: -0.0006849
-        min: -0.00685191
-        min_at: c_rx+ c_tvs- r_drv- tr_drv- z_diff+
-        max: 0.0662115
-        max_at: c_rx- c_tvs+ r_drv+ tr_drv- z_diff-
-      sclk_rise_dwell:
-        nominal: 3.03038e-09
-        min: 1.89696e-09
-        min_at: c_rx- c_tvs- r_drv- tr_drv- z_diff+
-        max: 4.66393e-09
-        max_at: c_rx+ c_tvs+ r_drv+ tr_drv- z_diff-
-      sclk_fall_dwell:
-        nominal: 4.80363e-09
-        min: 2.71388e-09
-        min_at: c_rx- c_tvs- r_drv- tr_drv+ z_diff+
-        max: 7.72755e-09
-        max_at: c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff-
-    asserts:
-    - expr: min['mosi_margin'] < 0
-      why: 'RECORDED HAZARD, not a requirement: at every common-mode impedance swept, SCLK''s edges couple across the pair
-        into MOSI far enough to cross the 74AHCT125''s V_IL (MOSI low) or V_IH (MOSI high) at the worst corner, for about
-        one cable round trip - including on SCLK''s FALLING edge, the one the DAC clocks DIN in on. ADR 0004''s ''lands at
-        the moment nobody is looking'' is not what the run shows. If this starts failing the hazard is gone - re-read spi-link.md'
-      pass: true
-  pair-mosi-static[z_cm=140,mosi_hi=0]:
+  pair-mosi-low[z_cm=140]:
     corners: 33
     measures:
       mosi_margin:
@@ -379,11 +275,103 @@ sims:
     asserts:
     - expr: min['mosi_margin'] < 0
       why: 'RECORDED HAZARD, not a requirement: at every common-mode impedance swept, SCLK''s edges couple across the pair
-        into MOSI far enough to cross the 74AHCT125''s V_IL (MOSI low) or V_IH (MOSI high) at the worst corner, for about
-        one cable round trip - including on SCLK''s FALLING edge, the one the DAC clocks DIN in on. ADR 0004''s ''lands at
-        the moment nobody is looking'' is not what the run shows. If this starts failing the hazard is gone - re-read spi-link.md'
+        into a LOW MOSI far enough to cross the 74AHCT125''s V_IL at the worst corner, for about one cable round trip - including
+        on SCLK''s FALLING edge, the one the DAC clocks DIN in on. ADR 0004''s ''lands at the moment nobody is looking'' is
+        not what the run shows. If this starts failing the hazard is gone - re-read spi-link.md'
       pass: true
-  pair-mosi-static[z_cm=140,mosi_hi=1]:
+  pair-mosi-high[z_cm=70]:
+    corners: 33
+    measures:
+      mosi_margin:
+        nominal: 0.359624
+        min: 0.107903
+        min_at: c_rx- c_tvs+ r_drv- tr_drv- z_diff-
+        max: 0.454943
+        max_at: c_rx- c_tvs- r_drv+ tr_drv+ z_diff+
+      mosi_peak:
+        nominal: 4.15096
+        min: 4.06302
+        min_at: c_rx- c_tvs- r_drv+ tr_drv+ z_diff+
+        max: 4.41408
+        max_at: c_rx- c_tvs+ r_drv- tr_drv- z_diff-
+      mosi_trough:
+        nominal: 2.35962
+        min: 2.1079
+        min_at: c_rx- c_tvs+ r_drv- tr_drv- z_diff-
+        max: 2.45494
+        max_at: c_rx- c_tvs- r_drv+ tr_drv+ z_diff+
+      sclk_rise_back:
+        nominal: -0.0077248
+        min: -0.0157697
+        min_at: c_rx- c_tvs- r_drv- tr_drv- z_diff+
+        max: -0.00061126
+        max_at: c_rx- c_tvs+ r_drv+ tr_drv- z_diff-
+      sclk_fall_back:
+        nominal: 0.215289
+        min: -0.00728207
+        min_at: c_rx- c_tvs- r_drv- tr_drv- z_diff+
+        max: 0.328633
+        max_at: c_rx- c_tvs+ r_drv+ tr_drv- z_diff+
+      sclk_rise_dwell:
+        nominal: 3.06384e-09
+        min: 1.76247e-09
+        min_at: c_rx- c_tvs- r_drv- tr_drv- z_diff+
+        max: 4.62697e-09
+        max_at: c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff-
+      sclk_fall_dwell:
+        nominal: 6.67987e-09
+        min: 2.77078e-09
+        min_at: c_rx- c_tvs- r_drv- tr_drv- z_diff+
+        max: 1.54004e-08
+        max_at: c_rx- c_tvs+ r_drv+ tr_drv+ z_diff-
+    asserts: []
+  pair-mosi-high[z_cm=100]:
+    corners: 33
+    measures:
+      mosi_margin:
+        nominal: 0.0155512
+        min: -0.214156
+        min_at: c_rx- c_tvs+ r_drv- tr_drv- z_diff-
+        max: 0.110509
+        max_at: c_rx- c_tvs- r_drv+ tr_drv+ z_diff+
+      mosi_peak:
+        nominal: 4.49631
+        min: 4.40746
+        min_at: c_rx- c_tvs- r_drv+ tr_drv+ z_diff+
+        max: 4.73159
+        max_at: c_rx- c_tvs+ r_drv- tr_drv- z_diff-
+      mosi_trough:
+        nominal: 2.01555
+        min: 1.78584
+        min_at: c_rx- c_tvs+ r_drv- tr_drv- z_diff-
+        max: 2.11051
+        max_at: c_rx- c_tvs- r_drv+ tr_drv+ z_diff+
+      sclk_rise_back:
+        nominal: -0.012614
+        min: -0.0202585
+        min_at: c_rx- c_tvs- r_drv- tr_drv+ z_diff+
+        max: -2.739e-05
+        max_at: c_rx+ c_tvs+ r_drv- tr_drv+ z_diff-
+      sclk_fall_back:
+        nominal: -0.0006849
+        min: -0.00685191
+        min_at: c_rx+ c_tvs- r_drv- tr_drv- z_diff+
+        max: 0.0662115
+        max_at: c_rx- c_tvs+ r_drv+ tr_drv- z_diff-
+      sclk_rise_dwell:
+        nominal: 3.03038e-09
+        min: 1.89696e-09
+        min_at: c_rx- c_tvs- r_drv- tr_drv- z_diff+
+        max: 4.66393e-09
+        max_at: c_rx+ c_tvs+ r_drv+ tr_drv- z_diff-
+      sclk_fall_dwell:
+        nominal: 4.80363e-09
+        min: 2.71388e-09
+        min_at: c_rx- c_tvs- r_drv- tr_drv+ z_diff+
+        max: 7.72755e-09
+        max_at: c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff-
+    asserts: []
+  pair-mosi-high[z_cm=140]:
     corners: 33
     measures:
       mosi_margin:
@@ -428,13 +416,7 @@ sims:
         min_at: c_rx- c_tvs- r_drv- tr_drv- z_diff+
         max: 7.30813e-09
         max_at: c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff-
-    asserts:
-    - expr: min['mosi_margin'] < 0
-      why: 'RECORDED HAZARD, not a requirement: at every common-mode impedance swept, SCLK''s edges couple across the pair
-        into MOSI far enough to cross the 74AHCT125''s V_IL (MOSI low) or V_IH (MOSI high) at the worst corner, for about
-        one cable round trip - including on SCLK''s FALLING edge, the one the DAC clocks DIN in on. ADR 0004''s ''lands at
-        the moment nobody is looking'' is not what the run shows. If this starts failing the hazard is gone - re-read spi-link.md'
-      pass: true
+    asserts: []
   pair-opposite-mosi-falls[z_cm=70]:
     corners: 33
     measures:
