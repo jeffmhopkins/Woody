@@ -55,6 +55,13 @@ components:
     - 1
     - 2
     note: AVDD to the star, at the pin. The DAC8568 has one supply pin
+  C-VREF-DAC:
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: 'VREFIN/VREFOUT to AGND_MOD at the pin: ''A minimum 100nF capacitor is recommended between the reference
+      output and GND for noise filtering'' (SBAS430E p.31)'
   LK-CLR:
     value: 2-pad solder link
     drawn_as: LK-CLR
@@ -101,6 +108,7 @@ nets:
   AGND_MOD:
   - port: AGND_MOD
   - C-DEC-DAC.2
+  - C-VREF-DAC.2
   - LK-CLR.2
   - R-LDAC.2
   - U-DAC.GND
@@ -145,6 +153,7 @@ nets:
   - U-DAC.SYNC
   VREFOUT:
   - port: VREFOUT
+  - C-VREF-DAC.1
   - U-DAC.VREFIN/VREFOUT
   VOUTF:
   - U-DAC.VOUTF

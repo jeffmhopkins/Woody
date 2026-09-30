@@ -256,6 +256,13 @@ components:
     - 1
     - 2
     sheet: power-entry
+  C43:
+    of: C-VREF-DAC
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: dac8568
   C5:
     of: C-REG-ADJ
     value: 10uF
@@ -1318,6 +1325,7 @@ nets:
   - Q1.S3
   - R6.1
   /VREFOUT:
+  - C43.1
   - R62.1
   - RV2.CW
   - U3.VREFIN/VREFOUT
@@ -1565,6 +1573,7 @@ nets:
   - C37.2
   - C38.2
   - C39.2
+  - C43.2
   - C5.2
   - C6.2
   - C7.2

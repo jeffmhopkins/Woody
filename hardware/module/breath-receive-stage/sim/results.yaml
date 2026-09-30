@@ -6,7 +6,7 @@ inputs:
   tools/sim.py: 0312a1077b9afa80
   hardware/module/breath-receive-stage/sim/sims.yaml: 5be525e753cc5d3d
   hardware/interfaces/breath-sense-link/netlist.yaml: c1b2e53ea0a18c0e
-  hardware/module/breath-receive-stage/netlist.yaml: d437885d68c0f6ee
+  hardware/module/breath-receive-stage/netlist.yaml: 6cb209388abdde3b
   hardware/module/breath-receive-stage/sim/cmrr.cir: 0c582bd5096fd228
   datasheets/analog/INA828-ti-pspice-sbomag5c.lib: 6ae6e0285c98dc1e
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
