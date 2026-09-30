@@ -12,9 +12,8 @@ driving end against a threshold at the receiving end, the pulls exist on both
 sides of that buffer, and the pin pairing is an argument about what couples
 into what inside the cable — none of which can be read from one end alone.
 
-The bus +5 V rail that supplies the buffer is still an open question, and it
-stayed on the module page with the rail rather than coming here with the part —
-see the `## Interfaces` row for it.
+The buffer's supply is the module's own `LOGIC_5V` (`U-REG-LOGIC`,
+`module/power-entry`); the bus +5 V is not used (owner, 2026-09-30).
 
 **The carrier end's drawing is not redrawn here.** It is in
 [`carrier.md`](../../carrier/carrier.md) §4 and also carries the MCP3202's
@@ -37,15 +36,15 @@ The `Dir` and `Peer` columns are defined once in
 |---|---|---|---|---|---|
 | `SCLK` | instrument → module | out | `J-MCU` IO35 → `module/digital-and-supervision` | `umbilical-pinmap`, `spi-series-r` | On `J-UMB`. Series resistor at the driving end, pulled **down** on both sides of the buffer. Shares a pair with `MOSI`. **Not `SCLK_DAC`**, which is the buffer's output |
 | `MOSI` | instrument → module | out | `J-MCU` IO36 → `module/digital-and-supervision` | `umbilical-pinmap`, `spi-series-r` | On `J-UMB`. Pulled **down**, both sides. Sampled only on a `SCLK` edge, which is why it shares that pair |
-| `CS_MOD` | instrument → module | out | `J-MCU` IO34 → `module/digital-and-supervision` | `umbilical-pinmap`, `spi-series-r` | On `J-UMB`. Pulled **up**, both sides. The one that must not glitch. Shares a pair with `DIG_GND`. **Not `CS_ADC`**, the MCP3202's, which never leaves the carrier |
-| `DIG_GND` | instrument ↔ module | ref | `carrier/carrier` (its `PWR_GND`, at `J-UMB`) ↔ `module/power-entry` | `umbilical-pinmap`, `dig-gnd-topology` | On `J-UMB` pin 8. `CS_MOD`'s return partner. **Tied to the main board's ground at `J-UMB`** (ADR 0018). Where it ties at the **module** end is `dig-gnd-topology`, still disputed |
+| `CS_MOD` | instrument → module | out | `J-MCU` IO34 → `module/digital-and-supervision` | `umbilical-pinmap`, `spi-series-r` | On `J-UMB`. Pulled **up at both ends of the cable** — `R-CS-PULL-INST` to 3V3 on the main board, `R-CS-PULL-MOD` to `LOGIC_5V` at the module (*`CS_MOD`'s two pulls*, below) — and on the DAC side of the buffer. The one that must not glitch. Shares a pair with `DIG_GND`. **Not `CS_ADC`**, the MCP3202's, which never leaves the carrier |
+| `DIG_GND` | instrument ↔ module | ref | `carrier/carrier` (its `PWR_GND`, at `J-UMB`) ↔ `module/power-entry` | `umbilical-pinmap`, `dig-gnd-topology` | On `J-UMB` pin 8. `CS_MOD`'s return partner. **Tied to the main board's ground at `J-UMB`** (ADR 0018). Where it ties at the **module** end is `dig-gnd-topology` |
 | `U-TVS-SPI` | instrument | — | — | — | This circuit's own part: on all three signals, to `PWR_GND`, at the connector |
 | `J-UMBILICAL-INST`, `PCB-UMB-ADAPTER`, `J-UMB` | instrument | — | — | `umbilical-pinmap` | This circuit's own parts: the instrument's etherCON, the adapter board it is soldered to, and the header that joins the adapter to the main board. See *The instrument's connector*, below |
 | `MISO` | instrument | — | `carrier/breath-adc` | — | IO37 is the MCP3202's `DOUT` and **never leaves the board**. ADR 0004 deleted `MISO` from the umbilical, which is why nothing reads the DAC back |
 | SPI2 host | instrument | — | `carrier/breath-adc`, `module/dac8568` | `loop-budget` | One host, two devices, two clocks. The ADC's limit is a fact about a part on the instrument board that constrains the link's budget |
 | `SCLK_DAC`, `DIN`, `SYNC` | module | — | `module/digital-and-supervision` → `module/dac8568` | — | **Not sourced here.** The 74AHCT125 is on `module/digital-and-supervision`, which owns that row; these three are a module-board net and do not cross the umbilical. The DAC-side three of the six `R-SPI-PULL` — this circuit's `bom.csv` — sit on them |
 | `DAC AVDD` | module | in | `module/power-entry` | `dac-rail` | What the DAC-side `CS` pull returns to, **not** bus `+5V`: on the bus rail a reversed ribbon reaches the DAC's `SYNC` pin. See this circuit's `bom.csv` |
-| bus `+5V` after `FB4`/`C4` | module | — | `module/power-entry` → `module/digital-and-supervision` | — | Supplies the 74AHCT125 and nothing else, and reaches no part of this circuit. **Open**, and the item stayed on `module/digital-and-supervision` because it is a rail and connector question about that board, not about this link |
+| `LOGIC_5V` | module | in | `module/power-entry` → `module/digital-and-supervision` | — | The module's own 5 V (`U-REG-LOGIC`): the 74AHCT125's supply, and the top of `R-CS-PULL-MOD` — the rail of the part that pull holds. The bus +5 V is not used |
 | `OE_MOD` ×4 | module | — | `module/digital-and-supervision` | — | The module buffer's four enables, tied to `GND` and permanently enabled. On that circuit's part, so they reach nothing here; the circuit that used to gate them, `module/link-supervision`, is not fitted. **Not `OE_INST`** |
 
 ## The sheet, and which board places what
@@ -115,9 +114,8 @@ mated contact inside the body. So:
   `CS_MOD` from the MCU side of `J-MCU`, through `R-SPI-SER`, to `J-UMB` over
   unbroken ground, so each edge's return runs under its trace to pin 8 and
   the pour; and keep `AGND_SENSE` (pin 2, the analog star's sense leg) off
-  this return — it is a signal, not a ground. The module end is still
-  `dig-gnd-topology` (disputed in `config/figures.yaml`); the instrument end
-  does not settle it.
+  this return — it is a signal, not a ground. The module end is
+  `dig-gnd-topology`.
 
 **Netlisted here, beside both etherCONs**, because it carries this circuit's
 pin map and all eight of its nets: each net is `J-UMB`, `J-UMB-INST` and
@@ -249,3 +247,50 @@ edge on `CS` re-frames the 32-bit word, and a DAC8568 frame carries the
 software reset, the clear-code register and the internal-reference enable — so
 a mis-framed word is a **sticky** failure that the 4 kHz refresh does not
 clear, unlike a corrupted data bit which self-heals in 250 µs.
+
+## `CS_MOD`'s two pulls — settled 2026-09-30
+
+The owner, 2026-09-30: *"Fix the SPI pull up."* The cable-side `CS` pull-up
+was drawn on the module sheet with its top end on no net, because the only
+rail its row allowed — 3V3 — exists only at the instrument. It is now **two
+resistors, one at each end of the cable, both pulling up**:
+
+| Part | Where | To | Value |
+|---|---|---|---|
+| `R-CS-PULL-INST` | main board (`carrier/carrier`), `IO34` beside `J-MCU` pins 13/14, on the MCU side of `R-SPI-SER-CS` | `DEV_3V3` | 10 kΩ |
+| `R-CS-PULL-MOD` (`R-PULL-CS` on the sheet) | module main board (`module/digital-and-supervision`), at the buffer's `3A` | `LOGIC_5V` | 100 kΩ |
+
+**Why up at the module, not the proposed weak pull-down.** The 74AHCT125 does
+not invert: `3A` drives `3Y`, which is the DAC's `SYNC`, active low. A
+pull-down at the module would hold `SYNC` **low — selected —** whenever the
+umbilical is out, leaving the DAC's shift register listening to whatever
+reaches `SCLK` ("When `SYNC` goes low, it enables the input shift register,
+and data are sampled on subsequent falling clock edges" `[ds DAC8568CIPW.pdf
+p.6]`). Pulled up, an unplugged module's DAC ignores `SCLK` entirely. The
+pull-down's one advantage — no current into an unpowered instrument — is kept
+by making the module's pull-up **weak** instead.
+
+**The four states of the link** `[calc]`, from `V_IH` 2.0 V / `V_IL` 0.8 V and
+±1 µA input current at the buffer `[ds SN74AHCT125.pdf p.3, p.4]`:
+
+| State | `CS_MOD` at the buffer | `SYNC` | Current into the instrument |
+|---|---|---|---|
+| Umbilical out, module on | 5 V − 1 µA × 100 kΩ ≥ **4.9 V** | high, deselected | — |
+| Plugged in, instrument off (toggle off: its 3V3 is dead, ~0 V) | 5 V × 10k / 110k = **0.45 V** | low | 5 V / 110 kΩ = **45 µA**, into the dead rail through the 10 kΩ — the node is below the ESP32 pad's clamp, so almost none through the clamp |
+| Instrument powered, ESP32 in reset or booting (`IO34` has no pull at reset, input-enabled only `[ds ESP32-S3-datasheet-v2.2.pdf p.17]`) | (3.3/10k + 5/100k) / (1/10k + 1/100k) = **3.45 V** | high, deselected | ≤ (5 − 3.3) / 100 kΩ = **17 µA** into the pad clamp |
+| Running | driven by `IO34`, push-pull | framed by firmware | ≤ 50 µA extra load on the pin |
+
+The second row is the one the old row was written about: a 10 kΩ pull-up to
+5 V at the module drove 430 µA through the ESP32's clamp and parked the node
+near 0.7 V. At 100 kΩ it is a tenth of that and goes into the rail, not the
+clamp. That state reads **selected**, and is harmless: `SCLK` is held low at
+both ends so there is no edge to shift, and when the instrument powers up its
+3V3 pulls `CS_MOD` high, and a `SYNC` rising edge before the 31st clock
+"acts as an interrupt, and the write sequence is ignored" `[ds DAC8568CIPW.pdf
+p.6]` — the first frame the firmware sends starts clean.
+
+**`GPIO34` is not a strapping pin** — those are GPIO0, 3, 45 and 46
+`[ds ESP32-S3-datasheet-v2.2.pdf p.26]` — so the instrument's pull-up changes
+no boot mode. It is on the MCU side of `R-SPI-SER-CS` so the source
+termination the cable sees is unchanged, and it sits at `J-MCU`, where pin 13
+(3V3) is beside pin 14 (`IO34`).

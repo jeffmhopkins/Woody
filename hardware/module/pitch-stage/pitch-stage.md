@@ -334,9 +334,10 @@ takes the lever of its pivot, an offset term does not.
 | **Linear sum / RSS** | | | **0.76 / 0.45 cents** |
 
 *Not in it*: what the trims and firmware's affine take out once (DAC INL, the
-initial offsets and ratios), and the dynamic, breath-correlated ground-path
-terms on [`power-entry.md`](../power-entry/power-entry.md), which are an order
-of magnitude larger and are not this stage's.
+initial offsets and ratios), and the breath-correlated ground-path terms on
+[`power-entry.md`](../power-entry/power-entry.md) — an order of magnitude
+larger until 2026-09-30, and removed at the source since by ADR 0027 (the
+instrument's supply is isolated; under 0.01 cents is left).
 
 **The network stays, and the ranking is the reason it needed deciding.** Two
 0.1 % / 10 ppm discretes would give 0.38 cents — fifteen times worse than the
@@ -351,9 +352,10 @@ populated board is not a five-minute job. The option-code lookup is.
 *(The superseded version of this table, which contradicted the live one twelve
 lines above it, is in [`notes.md`](notes.md).)*
 
-Nothing here approaches the dynamic, LED- and breath-correlated terms that
-ADR 0006 and `power-entry.md` deal with in the power tree and the ground plan.
-That remains the right order of priority: this budget was never the problem.
+Nothing here approached the dynamic, LED- and breath-correlated terms that
+`power-entry.md` dealt with in the power tree and the ground plan; since ADR
+0027 those are below this budget, which now is the largest term in the pitch
+path.
 
 ## Settled 2026-09-30
 

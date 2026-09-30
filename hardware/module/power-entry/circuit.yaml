@@ -9,6 +9,9 @@ id: module/power-entry
 title: Module power entry — schematic
 last_reviewed: '2026-09-21'
 depends_on:
+- adr:0027
+- refdes:U-ISO
+- refdes:PTC-ISO
 - adr:0003
 - adr:0004
 - adr:0005

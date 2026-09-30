@@ -49,12 +49,16 @@ components:
     - 2
     note: VCC to DIG_GND, at the pin
   R-PULL-CS:
-    of: R-SPI-PULL
-    value: 10k 1%
+    of: R-CS-PULL-MOD
+    value: 100k 1%
     pins:
     - 1
     - 2
-    note: PULL-UP, and the only one of the six whose top end this file cannot assert - see CS_PULLUP_TOP
+    note: PULL-UP TO LOGIC_5V, 100k - the weak half of CS_MOD's two pulls (the strong one is R-CS-PULL-INST, 10k
+      to 3V3 at the instrument). Weak so that with the instrument plugged in and unpowered it drives only ~45 uA
+      into the dead 3V3 rail and the node sits at ~0.45 V, not the 430 uA a 10k here would force through the ESP32's
+      clamp; with nothing plugged in it holds the buffer input, and so SYNC, deselected. interfaces/spi-link/spi-link.md,
+      'CS_MOD's two pulls'
   R-PULL-DIN:
     of: R-SPI-PULL
     value: 10k 1%
@@ -139,6 +143,7 @@ nets:
   LOGIC_5V:
   - port: LOGIC_5V
   - C-DEC-LVL.1
+  - R-PULL-CS.2
   - U-LVL-MOD.VCC
   MOSI:
   - port: MOSI
@@ -156,10 +161,7 @@ nets:
   - port: SYNC
   - R-PULL-SYNC.1
   - U-LVL-MOD.3Y
-  '2':
-  - R-PULL-CS.2
   4Y:
   - U-LVL-MOD.4Y
 external_endpoints:
-- '2'
 - 4Y

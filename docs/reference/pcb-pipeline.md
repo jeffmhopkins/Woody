@@ -200,9 +200,9 @@ like every other document.
 **Two numbers to check any EMC or stability work against**, both corrected since
 the corpus was written: the OPA2197's `Zo` is **375 Ω**, not the 75.8 Ω that was
 back-solved — every pole derived from it moves ~5× the *wrong* way. And `FB-IN`
-is **not 600 Ω where it matters**: `FB2` carries the umbilical at 359 mA and
-reads ~280–310 Ω, half its nameplate, because a bead's current rating is
-**thermal, not magnetic**.
+is **not 600 Ω where it matters**: the beads carrying the instrument's supply
+read well under their nameplate — the tracked figure `ferrite-bias-impedance` —
+because a bead's current rating is **thermal, not magnetic**.
 
 ### 3. Board bring-up — headless, **once per board**
 

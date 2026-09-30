@@ -1,11 +1,14 @@
 # Link supervision — schematic
 
-**NOT FITTED. Nothing in this directory is on the board.** The frame watchdog
-(74HC123) and the presence comparator (LM311) were both deleted before layout,
-and neither ever had a `bom.csv` row. There is no circuit to draw here and no
-part to buy. What this directory holds is the argument — why each went, what
-went with it, and what restoring the coverage would cost — because that
-decision is live even though the hardware is not.
+**NOT FITTED, BY DECISION. Nothing in this directory is on the board.** The
+frame watchdog (74HC123) and the presence comparator (LM311) were both deleted
+before layout, and neither ever had a `bom.csv` row. **The owner closed the
+question on 2026-09-30:** *"Assume the module will be operating with an
+umbilical attached to a controller."* So supervision is not restored, and the
+cost the section below records — pull the umbilical mid-note and the rack
+holds the note — is accepted rather than open. There is no circuit to draw
+here and no part to buy; what this directory holds is the argument, so that a
+future reader who reopens it starts from the cost and not from zero.
 
 *Moved verbatim from
 [`../digital-and-supervision/digital-and-supervision.md`](../digital-and-supervision/digital-and-supervision.md),
@@ -117,12 +120,26 @@ One part, three jobs. Not adopted here because it is a design decision rather
 than a correction, and because it should be taken with the SPI edge-cleanup
 question rather than separately.
 
-## Still open
+## Decided — not restored (owner, 2026-09-30)
 
-- **Whether to restore link supervision at all**, and at what cost. The section
-  above is the candidate; it is four parts, not zero. This is the one open
-  supervision question, and it subsumes the three that used to stand here.
-  **Decided by: owner** — it is a trade of four parts and a threshold that
-  must stay outside the breath signal's range against "pull the umbilical
-  mid-note and the rack holds the note". Until it is decided, `CLR` is tied
-  inactive inside `module/dac8568` and nothing on the board waits for it.
+*"Assume the module will be operating with an umbilical attached to a
+controller."* The module is specified as half of a pair, not as a standalone
+Eurorack module: the state link supervision would have covered — module
+powered, link gone mid-note — is outside that specification. So:
+
+- **Nothing is added.** No LM311, no `R-PRESENCE`, no 74AHCT14 and no
+  monostable; this directory stays without a `bom.csv`.
+- **`CLR` stays tied inactive** inside `module/dac8568` (`R-CLR-PU`, with
+  `LK-CLR` as the hand assert), and **`OE_MOD` stays tied enabled** on
+  `module/digital-and-supervision`. Neither waits for anything, and nothing on
+  either board is sized for a supervisor that might arrive later.
+- **The idle state of the link without an instrument is still defined** — not
+  by supervision, by the pulls: `CS_MOD`'s pull-up on the cable side and the
+  DAC side's three (`interfaces/spi-link`). With the umbilical out, `SYNC` sits
+  deselected and nothing reaches the DAC.
+- **The accepted cost is the one in the table above**: an umbilical pulled
+  mid-note holds the note until the toggle is flipped. E10 still pulls it to
+  record what the jacks do.
+
+Reopening it is an owner decision, and the section above is where the costing
+starts.

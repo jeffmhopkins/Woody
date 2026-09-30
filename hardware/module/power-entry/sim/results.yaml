@@ -4,10 +4,11 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/power-entry/sim/sims.yaml: 4e4b731c2ec914e4
-  hardware/module/power-entry/netlist.yaml: c381da6d9e4ec030
+  hardware/module/power-entry/sim/sims.yaml: decce0996a9450bc
+  hardware/module/power-entry/netlist.yaml: d89bae6598d0b5dc
   hardware/module/pitch-stage/netlist.yaml: 3d43eac2f5eabc29
-  hardware/module/power-entry/sim/poweron.cir: 08faa8101c0daca5
+  hardware/module/power-entry/sim/poweron.cir: f6dfa26bfaeb324a
+  hardware/module/power-entry/sim/groundshift.cir: 4aae040d6b7e03a1
   datasheets/discrete-and-power/LM317L-ti-pspice-snvmaw3.lib: 52c881eccf059881
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
 ngspice: '42'
@@ -16,10 +17,10 @@ sims:
     corners: 1
     measures:
       v_pos12:
-        nominal: 11.8325
-        min: 11.8325
+        nominal: 11.8043
+        min: 11.8043
         min_at: nominal
-        max: 11.8325
+        max: 11.8043
         max_at: nominal
       v_neg12:
         nominal: 0.294643
@@ -28,22 +29,22 @@ sims:
         max: 0.294643
         max_at: nominal
       avdd_final:
-        nominal: 5.2192
-        min: 5.2192
+        nominal: 5.21915
+        min: 5.21915
         min_at: nominal
-        max: 5.2192
+        max: 5.21915
         max_at: nominal
       avdd_peak:
-        nominal: 5.2192
-        min: 5.2192
+        nominal: 5.21915
+        min: 5.21915
         min_at: nominal
-        max: 5.2192
+        max: 5.21915
         max_at: nominal
       t_avdd_floor:
-        nominal: 0.0141385
-        min: 0.0141385
+        nominal: 0.0141798
+        min: 0.0141798
         min_at: nominal
-        max: 0.0141385
+        max: 0.0141798
         max_at: nominal
       jack_peak:
         nominal: 0.321674
@@ -66,52 +67,52 @@ sims:
     corners: 1
     measures:
       v_pos12:
-        nominal: 11.8325
-        min: 11.8325
+        nominal: 11.8043
+        min: 11.8043
         min_at: nominal
-        max: 11.8325
+        max: 11.8043
         max_at: nominal
       v_neg12:
-        nominal: -11.8401
-        min: -11.8401
+        nominal: -11.8157
+        min: -11.8157
         min_at: nominal
-        max: -11.8401
+        max: -11.8157
         max_at: nominal
       avdd_final:
-        nominal: 5.2192
-        min: 5.2192
+        nominal: 5.21915
+        min: 5.21915
         min_at: nominal
-        max: 5.2192
+        max: 5.21915
         max_at: nominal
       avdd_peak:
-        nominal: 5.2192
-        min: 5.2192
+        nominal: 5.21915
+        min: 5.21915
         min_at: nominal
-        max: 5.2192
+        max: 5.21915
         max_at: nominal
       t_avdd_floor:
-        nominal: 0.0151385
-        min: 0.0151385
+        nominal: 0.0151798
+        min: 0.0151798
         min_at: nominal
-        max: 0.0151385
+        max: 0.0151798
         max_at: nominal
       jack_peak:
-        nominal: 0.00662247
-        min: 0.00662247
+        nominal: 0.00648248
+        min: 0.00648248
         min_at: nominal
-        max: 0.00662247
+        max: 0.00648248
         max_at: nominal
       jack_trough:
-        nominal: -0.0383283
-        min: -0.0383283
+        nominal: -0.0383447
+        min: -0.0383447
         min_at: nominal
-        max: -0.0383283
+        max: -0.0383447
         max_at: nominal
       i_dac_pin:
-        nominal: 2.74366e-09
-        min: 2.74366e-09
+        nominal: 2.21961e-09
+        min: 2.21961e-09
         min_at: nominal
-        max: 2.74366e-09
+        max: 2.21961e-09
         max_at: nominal
     asserts:
     - expr: min['avdd_final'] >= 5.0 and max['avdd_peak'] < 6.0
@@ -126,52 +127,52 @@ sims:
     corners: 1
     measures:
       v_pos12:
-        nominal: 11.8325
-        min: 11.8325
+        nominal: 11.8043
+        min: 11.8043
         min_at: nominal
-        max: 11.8325
+        max: 11.8043
         max_at: nominal
       v_neg12:
-        nominal: -11.8401
-        min: -11.8401
+        nominal: -11.8157
+        min: -11.8157
         min_at: nominal
-        max: -11.8401
+        max: -11.8157
         max_at: nominal
       avdd_final:
-        nominal: 5.2192
-        min: 5.2192
+        nominal: 5.21915
+        min: 5.21915
         min_at: nominal
-        max: 5.2192
+        max: 5.21915
         max_at: nominal
       avdd_peak:
-        nominal: 5.2192
-        min: 5.2192
+        nominal: 5.21915
+        min: 5.21915
         min_at: nominal
-        max: 5.2192
+        max: 5.21915
         max_at: nominal
       t_avdd_floor:
-        nominal: 0.0141385
-        min: 0.0141385
+        nominal: 0.0141798
+        min: 0.0141798
         min_at: nominal
-        max: 0.0141385
+        max: 0.0141798
         max_at: nominal
       jack_peak:
-        nominal: 0.00295713
-        min: 0.00295713
+        nominal: 0.00296126
+        min: 0.00296126
         min_at: nominal
-        max: 0.00295713
+        max: 0.00296126
         max_at: nominal
       jack_trough:
-        nominal: -0.00518073
-        min: -0.00518073
+        nominal: -0.00492486
+        min: -0.00492486
         min_at: nominal
-        max: -0.00518073
+        max: -0.00492486
         max_at: nominal
       i_dac_pin:
-        nominal: 1.58471e-09
-        min: 1.58471e-09
+        nominal: 1.22196e-09
+        min: 1.22196e-09
         min_at: nominal
-        max: 1.58471e-09
+        max: 1.22196e-09
         max_at: nominal
     asserts:
     - expr: min['avdd_final'] >= 5.0 and max['avdd_peak'] < 6.0
@@ -186,52 +187,52 @@ sims:
     corners: 1
     measures:
       v_pos12:
-        nominal: 11.8325
-        min: 11.8325
+        nominal: 11.8043
+        min: 11.8043
         min_at: nominal
-        max: 11.8325
+        max: 11.8043
         max_at: nominal
       v_neg12:
-        nominal: -11.8401
-        min: -11.8401
+        nominal: -11.8157
+        min: -11.8157
         min_at: nominal
-        max: -11.8401
+        max: -11.8157
         max_at: nominal
       avdd_final:
-        nominal: 5.2192
-        min: 5.2192
+        nominal: 5.21915
+        min: 5.21915
         min_at: nominal
-        max: 5.2192
+        max: 5.21915
         max_at: nominal
       avdd_peak:
-        nominal: 5.2192
-        min: 5.2192
+        nominal: 5.21915
+        min: 5.21915
         min_at: nominal
-        max: 5.2192
+        max: 5.21915
         max_at: nominal
       t_avdd_floor:
-        nominal: 0.0141385
-        min: 0.0141385
+        nominal: 0.0141798
+        min: 0.0141798
         min_at: nominal
-        max: 0.0141385
+        max: 0.0141798
         max_at: nominal
       jack_peak:
-        nominal: 0.0744903
-        min: 0.0744903
+        nominal: 0.075141
+        min: 0.075141
         min_at: nominal
-        max: 0.0744903
+        max: 0.075141
         max_at: nominal
       jack_trough:
-        nominal: -0.0101541
-        min: -0.0101541
+        nominal: -0.0094607
+        min: -0.0094607
         min_at: nominal
-        max: -0.0101541
+        max: -0.0094607
         max_at: nominal
       i_dac_pin:
-        nominal: 4.53735e-09
-        min: 4.53735e-09
+        nominal: 3.91016e-09
+        min: 3.91016e-09
         min_at: nominal
-        max: 4.53735e-09
+        max: 3.91016e-09
         max_at: nominal
     asserts:
     - expr: min['avdd_final'] >= 5.0 and max['avdd_peak'] < 6.0
@@ -241,4 +242,448 @@ sims:
     - expr: max['jack_peak'] < 0.1 and min['jack_trough'] > -0.1
       why: 'pitch-stage.md ''Power-on is 0.000 V'': with the DAC at its reset zero scale and V_ref at 0 V the jack stays within
         100 mV of 0 V through the whole power-up, whichever rail arrives first'
+      pass: true
+  gnd-before[r_bus_seg=0.001,i_swing=0.195]:
+    corners: 1
+    measures:
+      err_cents:
+        nominal: 4.21199
+        min: 4.21199
+        min_at: nominal
+        max: 4.21199
+        max_at: nominal
+      err_mv:
+        nominal: 3.50999
+        min: 3.50999
+        min_at: nominal
+        max: 3.50999
+        max_at: nominal
+      rail_mv:
+        nominal: 15.795
+        min: 15.795
+        min_at: nominal
+        max: 15.795
+        max_at: nominal
+    asserts:
+    - expr: min['err_cents'] > 3.0
+      why: 'the problem ADR 0027 exists for: several cents of breath-correlated pitch error even with the receiver in the
+        next slot'
+      pass: true
+  gnd-before[r_bus_seg=0.001,i_swing=0.367]:
+    corners: 1
+    measures:
+      err_cents:
+        nominal: 7.92718
+        min: 7.92718
+        min_at: nominal
+        max: 7.92718
+        max_at: nominal
+      err_mv:
+        nominal: 6.60598
+        min: 6.60598
+        min_at: nominal
+        max: 6.60598
+        max_at: nominal
+      rail_mv:
+        nominal: 29.7269
+        min: 29.7269
+        min_at: nominal
+        max: 29.7269
+        max_at: nominal
+    asserts:
+    - expr: min['err_cents'] > 3.0
+      why: 'the problem ADR 0027 exists for: several cents of breath-correlated pitch error even with the receiver in the
+        next slot'
+      pass: true
+  gnd-before[r_bus_seg=0.031,i_swing=0.195]:
+    corners: 1
+    measures:
+      err_cents:
+        nominal: 11.232
+        min: 11.232
+        min_at: nominal
+        max: 11.232
+        max_at: nominal
+      err_mv:
+        nominal: 9.35997
+        min: 9.35997
+        min_at: nominal
+        max: 9.35997
+        max_at: nominal
+      rail_mv:
+        nominal: 15.795
+        min: 15.795
+        min_at: nominal
+        max: 15.795
+        max_at: nominal
+    asserts:
+    - expr: min['err_cents'] > 3.0
+      why: 'the problem ADR 0027 exists for: several cents of breath-correlated pitch error even with the receiver in the
+        next slot'
+      pass: true
+  gnd-before[r_bus_seg=0.031,i_swing=0.367]:
+    corners: 1
+    measures:
+      err_cents:
+        nominal: 21.1391
+        min: 21.1391
+        min_at: nominal
+        max: 21.1391
+        max_at: nominal
+      err_mv:
+        nominal: 17.6159
+        min: 17.6159
+        min_at: nominal
+        max: 17.6159
+        max_at: nominal
+      rail_mv:
+        nominal: 29.7269
+        min: 29.7269
+        min_at: nominal
+        max: 29.7269
+        max_at: nominal
+    asserts:
+    - expr: min['err_cents'] > 3.0
+      why: 'the problem ADR 0027 exists for: several cents of breath-correlated pitch error even with the receiver in the
+        next slot'
+      pass: true
+  gnd-isolated[r_bus_seg=0.001,i_swing=0.195]:
+    corners: 1
+    measures:
+      err_cents:
+        nominal: 5.04e-09
+        min: 5.04e-09
+        min_at: nominal
+        max: 5.04e-09
+        max_at: nominal
+      err_mv:
+        nominal: 4.2e-09
+        min: 4.2e-09
+        min_at: nominal
+        max: 4.2e-09
+        max_at: nominal
+      tie_ua:
+        nominal: 0.000117084
+        min: 0.000117084
+        min_at: nominal
+        max: 0.000117084
+        max_at: nominal
+      rail_mv:
+        nominal: 9.3168
+        min: 9.3168
+        min_at: nominal
+        max: 9.3168
+        max_at: nominal
+    asserts:
+    - expr: max['err_cents'] < 0.01 and max['tie_ua'] < 1.0
+      why: 'ADR 0027: with the converter no breath-correlated current reaches the rack''s ground - under a hundredth of a
+        cent, and under a microamp in the tie to the star (what is left is the isolation capacitance)'
+      pass: true
+  gnd-isolated[r_bus_seg=0.001,i_swing=0.367]:
+    corners: 1
+    measures:
+      err_cents:
+        nominal: 9.6e-09
+        min: 9.6e-09
+        min_at: nominal
+        max: 9.6e-09
+        max_at: nominal
+      err_mv:
+        nominal: 8.0e-09
+        min: 8.0e-09
+        min_at: nominal
+        max: 8.0e-09
+        max_at: nominal
+      tie_ua:
+        nominal: 0.00022051
+        min: 0.00022051
+        min_at: nominal
+        max: 0.00022051
+        max_at: nominal
+      rail_mv:
+        nominal: 17.5467
+        min: 17.5467
+        min_at: nominal
+        max: 17.5467
+        max_at: nominal
+    asserts:
+    - expr: max['err_cents'] < 0.01 and max['tie_ua'] < 1.0
+      why: 'ADR 0027: with the converter no breath-correlated current reaches the rack''s ground - under a hundredth of a
+        cent, and under a microamp in the tie to the star (what is left is the isolation capacitance)'
+      pass: true
+  gnd-isolated[r_bus_seg=0.031,i_swing=0.195]:
+    corners: 1
+    measures:
+      err_cents:
+        nominal: 1.44e-08
+        min: 1.44e-08
+        min_at: nominal
+        max: 1.44e-08
+        max_at: nominal
+      err_mv:
+        nominal: 1.2e-08
+        min: 1.2e-08
+        min_at: nominal
+        max: 1.2e-08
+        max_at: nominal
+      tie_ua:
+        nominal: 0.000117084
+        min: 0.000117084
+        min_at: nominal
+        max: 0.000117084
+        max_at: nominal
+      rail_mv:
+        nominal: 9.3168
+        min: 9.3168
+        min_at: nominal
+        max: 9.3168
+        max_at: nominal
+    asserts:
+    - expr: max['err_cents'] < 0.01 and max['tie_ua'] < 1.0
+      why: 'ADR 0027: with the converter no breath-correlated current reaches the rack''s ground - under a hundredth of a
+        cent, and under a microamp in the tie to the star (what is left is the isolation capacitance)'
+      pass: true
+  gnd-isolated[r_bus_seg=0.031,i_swing=0.367]:
+    corners: 1
+    measures:
+      err_cents:
+        nominal: 2.64e-08
+        min: 2.64e-08
+        min_at: nominal
+        max: 2.64e-08
+        max_at: nominal
+      err_mv:
+        nominal: 2.2e-08
+        min: 2.2e-08
+        min_at: nominal
+        max: 2.2e-08
+        max_at: nominal
+      tie_ua:
+        nominal: 0.00022051
+        min: 0.00022051
+        min_at: nominal
+        max: 0.00022051
+        max_at: nominal
+      rail_mv:
+        nominal: 17.5467
+        min: 17.5467
+        min_at: nominal
+        max: 17.5467
+        max_at: nominal
+    asserts:
+    - expr: max['err_cents'] < 0.01 and max['tie_ua'] < 1.0
+      why: 'ADR 0027: with the converter no breath-correlated current reaches the rack''s ground - under a hundredth of a
+        cent, and under a microamp in the tie to the star (what is left is the isolation capacitance)'
+      pass: true
+  gnd-sense[r_bus_seg=0.001,i_swing=0.195]:
+    corners: 1
+    measures:
+      err_cents:
+        nominal: 0.233999
+        min: 0.233999
+        min_at: nominal
+        max: 0.233999
+        max_at: nominal
+      err_mv:
+        nominal: 0.194999
+        min: 0.194999
+        min_at: nominal
+        max: 0.194999
+        max_at: nominal
+      rail_mv:
+        nominal: 15.795
+        min: 15.795
+        min_at: nominal
+        max: 15.795
+        max_at: nominal
+    asserts:
+    - expr: nom['err_cents'] < 0.5 or nom['err_cents'] > 3.0
+      why: 'option (b) removes the ribbon''s share only: next to nothing is left with the receiver at this module''s tap (the
+        rails'' drop is common-mode), the whole bus-board share with it at the PSU end - the reason ADR 0027 does not choose
+        it'
+      pass: true
+  gnd-sense[r_bus_seg=0.001,i_swing=0.367]:
+    corners: 1
+    measures:
+      err_cents:
+        nominal: 0.440399
+        min: 0.440399
+        min_at: nominal
+        max: 0.440399
+        max_at: nominal
+      err_mv:
+        nominal: 0.366999
+        min: 0.366999
+        min_at: nominal
+        max: 0.366999
+        max_at: nominal
+      rail_mv:
+        nominal: 29.7269
+        min: 29.7269
+        min_at: nominal
+        max: 29.7269
+        max_at: nominal
+    asserts:
+    - expr: nom['err_cents'] < 0.5 or nom['err_cents'] > 3.0
+      why: 'option (b) removes the ribbon''s share only: next to nothing is left with the receiver at this module''s tap (the
+        rails'' drop is common-mode), the whole bus-board share with it at the PSU end - the reason ADR 0027 does not choose
+        it'
+      pass: true
+  gnd-sense[r_bus_seg=0.031,i_swing=0.195]:
+    corners: 1
+    measures:
+      err_cents:
+        nominal: 7.25398
+        min: 7.25398
+        min_at: nominal
+        max: 7.25398
+        max_at: nominal
+      err_mv:
+        nominal: 6.04498
+        min: 6.04498
+        min_at: nominal
+        max: 6.04498
+        max_at: nominal
+      rail_mv:
+        nominal: 15.795
+        min: 15.795
+        min_at: nominal
+        max: 15.795
+        max_at: nominal
+    asserts:
+    - expr: nom['err_cents'] < 0.5 or nom['err_cents'] > 3.0
+      why: 'option (b) removes the ribbon''s share only: next to nothing is left with the receiver at this module''s tap (the
+        rails'' drop is common-mode), the whole bus-board share with it at the PSU end - the reason ADR 0027 does not choose
+        it'
+      pass: true
+  gnd-sense[r_bus_seg=0.031,i_swing=0.367]:
+    corners: 1
+    measures:
+      err_cents:
+        nominal: 13.6524
+        min: 13.6524
+        min_at: nominal
+        max: 13.6524
+        max_at: nominal
+      err_mv:
+        nominal: 11.377
+        min: 11.377
+        min_at: nominal
+        max: 11.377
+        max_at: nominal
+      rail_mv:
+        nominal: 29.7269
+        min: 29.7269
+        min_at: nominal
+        max: 29.7269
+        max_at: nominal
+    asserts:
+    - expr: nom['err_cents'] < 0.5 or nom['err_cents'] > 3.0
+      why: 'option (b) removes the ribbon''s share only: next to nothing is left with the receiver at this module''s tap (the
+        rails'' drop is common-mode), the whole bus-board share with it at the PSU end - the reason ADR 0027 does not choose
+        it'
+      pass: true
+  gnd-balanced[r_bus_seg=0.001,i_swing=0.195]:
+    corners: 1
+    measures:
+      err_cents:
+        nominal: 0.0421199
+        min: 0.0421199
+        min_at: nominal
+        max: 0.0421199
+        max_at: nominal
+      err_mv:
+        nominal: 0.0350999
+        min: 0.0350999
+        min_at: nominal
+        max: 0.0350999
+        max_at: nominal
+      rail_mv:
+        nominal: 0.1579
+        min: 0.1579
+        min_at: nominal
+        max: 0.1579
+        max_at: nominal
+    asserts:
+    - expr: max['err_cents'] < 0.5
+      why: option (c) at 1 % balance leaves a fraction of a cent - at the cost of burning the whole swing as heat all the
+        time (ADR 0027)
+      pass: true
+  gnd-balanced[r_bus_seg=0.001,i_swing=0.367]:
+    corners: 1
+    measures:
+      err_cents:
+        nominal: 0.0792718
+        min: 0.0792718
+        min_at: nominal
+        max: 0.0792718
+        max_at: nominal
+      err_mv:
+        nominal: 0.0660598
+        min: 0.0660598
+        min_at: nominal
+        max: 0.0660598
+        max_at: nominal
+      rail_mv:
+        nominal: 0.2973
+        min: 0.2973
+        min_at: nominal
+        max: 0.2973
+        max_at: nominal
+    asserts:
+    - expr: max['err_cents'] < 0.5
+      why: option (c) at 1 % balance leaves a fraction of a cent - at the cost of burning the whole swing as heat all the
+        time (ADR 0027)
+      pass: true
+  gnd-balanced[r_bus_seg=0.031,i_swing=0.195]:
+    corners: 1
+    measures:
+      err_cents:
+        nominal: 0.11232
+        min: 0.11232
+        min_at: nominal
+        max: 0.11232
+        max_at: nominal
+      err_mv:
+        nominal: 0.0935997
+        min: 0.0935997
+        min_at: nominal
+        max: 0.0935997
+        max_at: nominal
+      rail_mv:
+        nominal: 0.1579
+        min: 0.1579
+        min_at: nominal
+        max: 0.1579
+        max_at: nominal
+    asserts:
+    - expr: max['err_cents'] < 0.5
+      why: option (c) at 1 % balance leaves a fraction of a cent - at the cost of burning the whole swing as heat all the
+        time (ADR 0027)
+      pass: true
+  gnd-balanced[r_bus_seg=0.031,i_swing=0.367]:
+    corners: 1
+    measures:
+      err_cents:
+        nominal: 0.211391
+        min: 0.211391
+        min_at: nominal
+        max: 0.211391
+        max_at: nominal
+      err_mv:
+        nominal: 0.176159
+        min: 0.176159
+        min_at: nominal
+        max: 0.176159
+        max_at: nominal
+      rail_mv:
+        nominal: 0.2973
+        min: 0.2973
+        min_at: nominal
+        max: 0.2973
+        max_at: nominal
+    asserts:
+    - expr: max['err_cents'] < 0.5
+      why: option (c) at 1 % balance leaves a fraction of a cent - at the cost of burning the whole swing as heat all the
+        time (ADR 0027)
       pass: true

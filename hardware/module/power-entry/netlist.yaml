@@ -8,9 +8,6 @@ circuit: module/power-entry
 title: Module power entry
 page: power-entry.md
 ports:
-  BUS_POS12_RAW:
-    dir: out
-    to: module/umbilical-load-switch
   MODULE_ANALOG_POS12:
     dir: out
     to: module/breath-receive-stage
@@ -24,37 +21,18 @@ ports:
   AGND_MOD:
     dir: ref
     to: module/breath-receive-stage
-  PWR_GND:
-    dir: ref
-    to: module/umbilical-load-switch
   DIG_GND:
     dir: ref
     to: module/digital-and-supervision
   LOGIC_5V:
     dir: out
     to: module/digital-and-supervision
-foreign:
-  R-ILIM:
-    owner: module/umbilical-load-switch
-    row: R-ILIM
-  R-GATE-SER:
-    owner: module/umbilical-load-switch
-    row: R-GATE-SER
-  R-GATE-COMP:
-    owner: module/umbilical-load-switch
-    row: R-GATE-COMP
-  C-TIMER:
-    owner: module/umbilical-load-switch
-    row: C-TIMER-LOADSW
-  C-GATE:
-    owner: module/umbilical-load-switch
-    row: C-GATE-LOADSW
-  R-FB-HI:
-    owner: module/umbilical-load-switch
-    row: R-FB-HI
-  R-FB-LO:
-    owner: module/umbilical-load-switch
-    row: R-FB-LO
+  ISO_POS12:
+    dir: out
+    to: module/umbilical-load-switch
+  PWR_GND:
+    dir: ref
+    to: module/umbilical-load-switch
 components:
   C-DEC-REG-IN:
     of: C-DECOUPLE
@@ -63,6 +41,28 @@ components:
     - 1
     - 2
     note: At the LM317's input pin. One of the board-wide C-DECOUPLE row
+  C-ISO-IN:
+    value: 4.7uF 50V
+    pins:
+    - 1
+    - 2
+    note: 'Across U-ISO''s input pins, beside them: the ceramic half of the input filter (the datasheet''s C1/C2,
+      4.7uF/50V, p.5 Fig.3)'
+  C-ISO-OUT:
+    value: 100uF 25V
+    pins:
+    - 1
+    - 2
+    note: U-ISO's output capacitor, the datasheet's Cout 100uF/25V (p.4 Fig.2); well inside its 1000uF maximum capacitive
+      load (p.1). The instrument's own capacitance is behind the load switch and charged at its limit, not the converter's
+  C-ISO-Y:
+    value: 1nF
+    pins:
+    - 1
+    - 2
+    note: 'Across the isolation barrier AT the converter, ISO_VIN_POS to PWR_GND: gives the switching common-mode
+      current a 1 nF path home beside U-ISO instead of round the star and the ribbon (the datasheet''s CY, p.5 Fig.3).
+      On the +12 V side so PTC-ISO covers it if it fails short'
   C-LOGIC-IN:
     of: C-LOGIC-REG
     value: 4.7uF
@@ -98,14 +98,16 @@ components:
     pins:
     - 1
     - 2
-    note: 100uF on +12 V, NOT 47uF - the other three are 47uF and this one is not
+    note: 100uF on +12 V, NOT 47uF - C3 on -12 V is 47uF and this one is not (C2 is U-ISO's input bulk now)
   C2:
-    of: C-BULK-RAIL
-    value: 47uF
+    of: C-ISO-BULK
+    value: 100uF 50V
     drawn_as: C2
     pins:
     - 1
     - 2
+    note: 'U-ISO''s input bulk, ACROSS its input (ISO_VIN_POS to ISO_VIN_NEG, 24 V): the datasheet''s Cin, 100uF/50V
+      (MORNSUN-URB_YMD-15WR3.pdf p.4 Fig.2). An electrolytic with real ESR, because it damps L-ISO-IN (power-entry.md)'
   C3:
     of: C-BULK-RAIL
     value: 47uF
@@ -128,7 +130,7 @@ components:
     pins:
     - A
     - K
-    note: Reverse protection, EXPORTED +12 V branch. Separate from D1 on purpose - see diode-split-rationale
+    note: Reverse protection, the +12 V leg of U-ISO's input (ADR 0027). Separate from D1 on purpose - see diode-split-rationale
   D3:
     of: D-REVPOL
     value: 1N5817
@@ -137,8 +139,17 @@ components:
     - A
     - K
     note: 'Reverse protection, -12 V branch. CATHODE TO THE BUS, anode to the module''s -12 V rail: the rail''s
-      current flows out of the module into the bus''s -12 V, so this is the one entry diode the other way round
-      from D1/D2'
+      current flows out of the module into the bus''s -12 V, so this is, with D4, the entry diode the other way
+      round from D1/D2'
+  D4:
+    of: D-REVPOL
+    value: 1N5817
+    pins:
+    - A
+    - K
+    note: 'Reverse protection, the converter branch''s -12 V leg. CATHODE TO THE BUS like D3: this leg''s current
+      flows out of the module into the bus -12 V. With D2 it blocks a reversed ribbon from U-ISO''s input from both
+      sides'
   FB1:
     of: FB-IN
     value: 600R @ 100MHz
@@ -162,6 +173,13 @@ components:
     pins:
     - 1
     - 2
+  FB4:
+    of: FB-IN
+    value: 600R @ 100MHz
+    pins:
+    - 1
+    - 2
+    note: The converter branch's -12 V leg, the partner of FB2
   J-PWR-EURO:
     value: 2x8 2.54mm shrouded box header (16-pin)
     pins:
@@ -185,6 +203,13 @@ components:
       ribbon''s red stripe, and reversing it is what D-REVPOL exists for. The bus +5 V (11, 12) and CV/Gate (13-16)
       pins are NOT USED: pads present, no-connect - the module makes its own 5 V (U-REG-LOGIC), and the header stays
       2x8 for commonality with every Eurorack power cable (owner, 2026-09-30)'
+  L-ISO-IN:
+    value: 22uH
+    pins:
+    - 1
+    - 2
+    note: 'The L of U-ISO''s input filter, in the +12 V leg: keeps the converter''s reflected ripple out of the
+      rack''s rails. Damped by C2''s ESR (power-entry.md)'
   NT-AGND-MOD:
     value: net tie
     pins:
@@ -199,6 +224,37 @@ components:
     - 2
     note: 'DIG_GND''s single tie to the star, at the power header''s ground pins, beside NT-AGND-MOD (dig-gnd-topology):
       copper only'
+  NT-UMB-MOD:
+    value: net tie
+    pins:
+    - 1
+    - 2
+    note: PWR_GND to DIG_GND AT THE ETHERCON, between pins 6 and 8, copper only - the mirror of the instrument's
+      NT-DIG (ADR 0018). The instrument's return comes back on both conductors and meets U-ISO's 0V here, so none
+      of it crosses the DIG_GND plane to the star (dig-gnd-topology)
+  PTC-ISO:
+    value: MF-MSMF075/33X-2
+    pins:
+    - 1
+    - 2
+    note: 'The converter branch''s fuse, in its +12 V leg ahead of D2: the load switch is on U-ISO''s output and
+      cannot see a fault in U-ISO or its input network. One leg is enough - the branch is a series loop, +12 through
+      U-ISO to -12, and C-ISO-Y hangs on the +12 side of it. power-entry.md, ''Fuses on the rails'''
+  PTC-NEG12:
+    of: PTC-RAIL
+    value: MF-MSMF020/60-2
+    pins:
+    - 1
+    - 2
+    note: 'The module analog -12 V''s fuse: J-PWR-EURO -12 V, then this, then D3'
+  PTC-POS12:
+    of: PTC-RAIL
+    value: MF-MSMF020/60-2
+    pins:
+    - 1
+    - 2
+    note: 'The module analog +12 V''s fuse: J-PWR-EURO +12 V, then this, then D1. Sized on power-entry.md, ''Fuses
+      on the rails'''
   R-REG-SET-HI:
     value: 475R 0.1%
     pins:
@@ -209,6 +265,19 @@ components:
     pins:
     - 1
     - 2
+  U-ISO:
+    value: URB2412YMD-15WR3
+    pins:
+    - CTRL
+    - GND
+    - VIN
+    - VO
+    - TRIM
+    - 0V
+    note: 'THE INSTRUMENT''S SUPPLY, ISOLATED (ADR 0027): input across the rack''s +12 V and -12 V, so the instrument''s
+      current loops rail to rail and never enters the rack''s ground; output +12 V to the load switch, return on
+      PWR_GND, which meets the module''s grounds only through NT-UMB-MOD and NT-DIG-MOD. Ctrl open = on, Trim open
+      = 12 V (p.2, p.5)'
   U-REG-DAC:
     value: LM317LZ
     drawn_as: LM317LZ
@@ -237,12 +306,25 @@ nets:
   - C3.2
   - NT-AGND-MOD.1
   - R-REG-SET-LO.2
+  BUS_GND:
+  - J-PWR-EURO.GND_3
+  - J-PWR-EURO.GND_4
+  - J-PWR-EURO.GND_5
+  - J-PWR-EURO.GND_6
+  - J-PWR-EURO.GND_7
+  - J-PWR-EURO.GND_8
+  - NT-AGND-MOD.2
+  - NT-DIG-MOD.2
+  BUS_NEG12_RAW:
+  - D4.K
+  - J-PWR-EURO.NEG12_1
+  - J-PWR-EURO.NEG12_2
+  - PTC-NEG12.1
   BUS_POS12_RAW:
-  - port: BUS_POS12_RAW
-  - D1.A
-  - D2.A
   - J-PWR-EURO.POS12_10
   - J-PWR-EURO.POS12_9
+  - PTC-ISO.1
+  - PTC-POS12.1
   DAC_AVDD:
   - port: DAC_AVDD
   - C-REG-OUT.1
@@ -253,7 +335,26 @@ nets:
   - C-LOGIC-IN.2
   - C-LOGIC-OUT.2
   - NT-DIG-MOD.1
+  - NT-UMB-MOD.2
   - U-REG-LOGIC.GND
+  ISO_FB2:
+  - FB2.2
+  - L-ISO-IN.1
+  ISO_POS12:
+  - port: ISO_POS12
+  - C-ISO-OUT.1
+  - U-ISO.VO
+  ISO_VIN_NEG:
+  - C-ISO-IN.2
+  - C2.2
+  - FB4.2
+  - U-ISO.GND
+  ISO_VIN_POS:
+  - C-ISO-IN.1
+  - C-ISO-Y.1
+  - C2.1
+  - L-ISO-IN.2
+  - U-ISO.VIN
   LOGIC_5V:
   - port: LOGIC_5V
   - C-LOGIC-OUT.1
@@ -272,33 +373,33 @@ nets:
   - U-REG-DAC.IN
   - U-REG-LOGIC.VIN
   - U-REG-LOGIC.EN
-  NEG12_D3:
-  - D3.K
-  - J-PWR-EURO.NEG12_1
-  - J-PWR-EURO.NEG12_2
+  NEG12_D4:
+  - D4.A
+  - FB4.1
   NEG12_FB:
   - D3.A
   - FB3.1
+  NEG12_PTC3:
+  - D3.K
+  - PTC-NEG12.2
   POS12_D1:
   - D1.K
   - FB1.1
   POS12_D2:
   - D2.K
   - FB2.1
-  PWR_EXPORT:
-  - C2.1
-  - FB2.2
+  POS12_PTC1:
+  - D1.A
+  - PTC-POS12.2
+  POS12_PTC2:
+  - D2.A
+  - PTC-ISO.2
   PWR_GND:
   - port: PWR_GND
-  - C2.2
-  - J-PWR-EURO.GND_3
-  - J-PWR-EURO.GND_4
-  - J-PWR-EURO.GND_5
-  - J-PWR-EURO.GND_6
-  - J-PWR-EURO.GND_7
-  - J-PWR-EURO.GND_8
-  - NT-AGND-MOD.2
-  - NT-DIG-MOD.2
+  - C-ISO-OUT.2
+  - C-ISO-Y.2
+  - NT-UMB-MOD.1
+  - U-ISO.0V
   REG_ADJ:
   - C-REG-ADJ.1
   - R-REG-SET-HI.2
@@ -316,10 +417,16 @@ nets:
   - J-PWR-EURO.GATE_15
   GATE_16:
   - J-PWR-EURO.GATE_16
+  CTRL:
+  - U-ISO.CTRL
+  TRIM:
+  - U-ISO.TRIM
 external_endpoints:
+- CTRL
 - CV_13
 - CV_14
 - GATE_15
 - GATE_16
 - POS5_11
 - POS5_12
+- TRIM

@@ -25,7 +25,7 @@ The `Dir` and `Peer` columns are defined once in
 |---|---|---|---|---|
 | `SCLK` | in | `interfaces/spi-link` | `umbilical-pinmap`, `spi-series-r` | From the instrument, arriving on `J-UMBILICAL` (`J-UMB-MOD` in the spi-link netlist). Pulled **down**, cable side and DAC side. **Not `SCLK_DAC`**, this buffer's output |
 | `MOSI` | in | `interfaces/spi-link` | `umbilical-pinmap`, `spi-series-r` | From the instrument, arriving on `J-UMBILICAL` (`J-UMB-MOD` in the spi-link netlist). Pulled **down**, both sides. Shares a pair with `SCLK` |
-| `CS_MOD` | in | `interfaces/spi-link` | `umbilical-pinmap`, `spi-series-r` | From the instrument, arriving on `J-UMBILICAL` (`J-UMB-MOD` in the spi-link netlist). Pulled **up**, both sides. Shares a pair with `DIG_GND` |
+| `CS_MOD` | in | `interfaces/spi-link` | `umbilical-pinmap`, `spi-series-r` | From the instrument, arriving on `J-UMBILICAL` (`J-UMB-MOD` in the spi-link netlist). Pulled **up**, both sides: `R-PULL-CS` (100 kΩ to `LOGIC_5V`) here, and 10 kΩ to 3V3 at the instrument. Shares a pair with `DIG_GND` |
 | `DIG_GND` | ref | `interfaces/spi-link`, `module/power-entry` | `umbilical-pinmap`, `dig-gnd-topology` | `CS_MOD`'s return partner, and the plane this circuit sits over. It meets the other grounds only at the star (`NT-DIG-MOD`, on `module/power-entry`'s page) |
 | `SCLK_DAC`, `DIN`, `SYNC` | out | `module/dac8568`, `interfaces/spi-link` | — | **Sourced here** — the 74AHCT125 (`U-LVL-MOD`) is this circuit's part. The DAC-side three of the six `R-SPI-PULL` sit on these |
 | `LOGIC_5V` | in | `module/power-entry` | — | The module's own 5 V (`U-REG-LOGIC`). Supplies the 74AHCT125 and nothing else. The bus +5 V is not used |
@@ -57,7 +57,7 @@ block below is where the DAC box was.*
    │            │  │  │                   │
    └── 8 DIG_GND│  │  │              ┌────┴─────────┐
         │   [R-SPI-PULL x3]          │  74AHCT125   │
-        │    SCLK↓ MOSI↓ CS↑         │  LOGIC_5V    │
+        │    SCLK↓ MOSI↓ CS↑(100k)   │  LOGIC_5V    │
         │        │  │  │             │  OE x4 → GND │  tied ENABLED
         │    DIG_GND                 └────┬─────────┘
         │                                 │
@@ -88,20 +88,6 @@ and neither end of a cable states it alone. The drawing above stays here.*
 
 ## Still open
 
-- **The cable-side `CS` pull-up has no rail on this board.** `R-SPI-PULL`'s
-  row says it pulls to **3V3, not +5 V**, and gives the reason: at 5 V it
-  drives 430 µA continuously through the unpowered ESP32's input clamp in the
-  design's *normal* resting state, and the node sits at ~0.7 V so "`CS` idle
-  high" is not achieved at all. The reasoning holds and **the rail does not
-  exist here** — the umbilical carries `BREATH`/`AGND`, `+12V`/`PWR_GND`,
-  `SCLK`/`MOSI` and `CS`/`DIG_GND`, and this board makes ±12 V, bus +5 V and
-  `DAC AVDD`. So either that resistor belongs at the **instrument** end, where
-  3V3 exists and where its own argument about the ESP32's clamp is measured,
-  or the row's "at the module" is right and the rail has to come from
-  somewhere. **Decided by:** which end it sits at — a placement question, and
-  the other five pulls are unaffected either way. `netlist.yaml` leaves that
-  one endpoint unasserted rather than inventing a rail; the checker prints it.
-
 - **An ESP32-S3 NVS commit or OTA write disables the instruction cache** and can
   stall non-IRAM code on both cores. With no watchdog there is no `CLR` to fire
   mid-note, so the consequence is now a *stalled refresh* rather than a reset:
@@ -116,6 +102,13 @@ with no reverse protection. The owner: *"Create the 5v locally"* and *"We keep
 the standard header, we just don't use the 5 volt."* So the 74AHCT125 runs
 from `LOGIC_5V`, `U-REG-LOGIC` on `module/power-entry`, and `J-PWR-EURO`'s
 +5 V pins are no-connects (ADR 0023 point 3).
+
+**The cable-side `CS` pull-up — settled 2026-09-30** (owner: *"Fix the SPI
+pull up"*). It had no rail on this board. It is now two pulls, both up: 10 kΩ
+to 3V3 at the instrument (`R-CS-PULL-INST`, main board) and `R-PULL-CS`
+here, weakened to 100 kΩ and taken to `LOGIC_5V` (`R-CS-PULL-MOD`). Why up and
+not down, and the four link states, are on
+[`spi-link.md`](../../interfaces/spi-link/spi-link.md), *`CS_MOD`'s two pulls*.
 
 *(Supervision — the deleted frame watchdog, the deleted presence detect, and
 what restoring either would cost — is in

@@ -247,8 +247,9 @@ and its two `J-CHAIN`. The section number is kept because other pages cite `carr
 ```
   IO35 SCK  ──[R-SPI-SER 100R]───┬──── J-UMB pin 4   ┐ pair (4,5)
   IO36 MOSI ──[R-SPI-SER 100R]───┼──── J-UMB pin 5   ┘
-  IO34 CS   ──[R-SPI-SER 100R]───┼──── J-UMB pin 7   ┐ pair (7,8)
-                                 │     J-UMB pin 8 ──┘ DIG_GND ── PWR_GND at J-UMB
+  IO34 CS   ─┬─[R-SPI-SER 100R]──┼──── J-UMB pin 7   ┐ pair (7,8)
+             │                   │     J-UMB pin 8 ──┘ DIG_GND ── PWR_GND at J-UMB
+   [R-CS-PULL-INST 10k 1%] to 3V3 (J-MCU pin 13): CS held high while the ESP32 boots
                                  │
                         [U-TVS-SPI 4-ch array to PWR_GND]
   IO37 MISO ── MCP3202 DOUT only (never leaves the board)
