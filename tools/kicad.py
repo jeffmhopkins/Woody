@@ -204,7 +204,7 @@ def export_circuit(d):
         if lname in ports:
             continue
         spec = {"dir": p.get("Dir", "ref")}
-        for k in ("From", "To", "Figure"):
+        for k in ("From", "To", "Figure", "Note"):
             if p.get(k):
                 spec[k.lower()] = p[k]
         ports[lname] = spec
@@ -220,7 +220,8 @@ def export_circuit(d):
         c = {}
         if f.get("Row", ref) != ref:
             c["of"] = f["Row"]
-        c["value"] = comps[ref]["value"]
+        if comps[ref]["value"] not in ("", "~"):
+            c["value"] = comps[ref]["value"]      # a part not yet chosen has none (Q-LOADSW)
         if f.get("Drawn_as"):
             c["drawn_as"] = f["Drawn_as"]
         c["pins"] = [int(n) if n.isdigit() else n for n in names]
@@ -248,7 +249,9 @@ def export_circuit(d):
                 if not r.startswith("#") and (p in maps.get(r, {}) or (r, p) not in nc)]
         if not pins:
             continue
-        bare = kname.lstrip("/")
+        # a net named on a sub-sheet of a circuit drawn as two pages (one per board -
+        # module/pitch-stage) carries its sheet path: the circuit's name is the last part
+        bare = kname if kname.startswith(("unconnected-", "Net-(")) else kname.rsplit("/", 1)[-1]
         if kname.startswith("unconnected-") or kname.startswith("Net-("):
             if len(pins) == 1:
                 bare = pins[0].split(".", 1)[1]       # a lone no-connect pin is named after the pin
@@ -274,6 +277,16 @@ def export_circuit(d):
             problems.append(f"port {pname} labels no net")
     doc = {k: meta[k] for k in ("circuit", "title", "page", "replicated") if k in meta}
     doc["ports"] = ports
+    # parts the page's drawing shows and another circuit owns: one sheet-text line each,
+    # `FOREIGN <label>: owner <circuit>, row <BOM row>` (check-netlist resolves them by row)
+    foreign = {}
+    for t in find(tree, "text"):
+        for line in t[1].split("\n"):
+            m = re.match(r"FOREIGN (\S+): owner (\S+), row (\S+)$", line.strip())
+            if m:
+                foreign[m.group(1)] = {"owner": m.group(2), "row": m.group(3)}
+    if foreign:
+        doc["foreign"] = foreign
     doc["components"] = out_comps
     doc["nets"] = out_nets
     if ext:
@@ -639,6 +652,73 @@ def check_chain_main(doc, js, loom, lnet, rel):
     return problems
 
 
+# A header soldered through two boards is one conductor per pin: pin k on one board is pin k
+# on the other (ADR 0023). Each pair of boards it joins, by BOM row.
+THROUGH = {"J-B2B-MOD": ("module-main", "module-jack")}
+SPI_LINK = os.path.join(ROOT, "hardware", "interfaces", "spi-link", "netlist.yaml")
+
+
+def check_through(board_docs):
+    """J-B2B-MOD: every pin on the same net, by name, on both boards it is soldered into, and
+    no pin left open on one board that the other uses. A pin moved on one sheet only is a
+    wrong conductor on the other board, which no ERC sees - each board is clean alone."""
+    docs = dict(board_docs)
+    problems = []
+    for row, (a, b) in THROUGH.items():
+        pins = []
+        for bname in (a, b):
+            doc = docs.get(bname)
+            if doc is None:
+                problems.append(f"through: {row} joins {a} and {b}, but there is no board {bname}")
+                pins = None
+                break
+            js = [r for r, c in doc["components"].items() if c.get("of") == row]
+            if len(js) != 1:
+                problems.append(f"through: {bname} has {len(js)} {row} parts, not one")
+                pins = None
+                break
+            m = {}
+            for net, members in doc["nets"].items():
+                for p in members:
+                    if isinstance(p, str) and p.startswith(js[0] + "."):
+                        m[p.split(".", 1)[1]] = (net.lstrip("/"), len(members))
+            pins.append((js[0], m))
+        if not pins:
+            continue
+        (ja, ma), (jb, mb) = pins
+        for k in sorted(set(ma) | set(mb), key=lambda x: (len(x), x)):
+            na, sa = ma.get(k, (None, 0))
+            nb, sb = mb.get(k, (None, 0))
+            if na != nb and not (sa <= 1 and sb <= 1):
+                problems.append(f"through: {row} pin {k} is {na} on {a} ({ja}) but {nb} on {b} ({jb})")
+    return problems
+
+
+def check_umbilical_mod(board_docs):
+    """The module main board's etherCON against the umbilical's own sheet: pin k of J-UMB-MOD
+    (row J-UMBILICAL) on the net hardware/interfaces/spi-link puts J-UMB-MOD.k on, by name."""
+    doc = dict(board_docs).get("module-main")
+    if doc is None:
+        return []
+    link = yaml.safe_load(open(SPI_LINK))
+    want = {}
+    for net, members in link["nets"].items():
+        for p in members:
+            if isinstance(p, str) and p.startswith("J-UMB-MOD."):
+                want[p.split(".", 1)[1]] = net
+    js = [r for r, c in doc["components"].items() if c.get("of") == "J-UMBILICAL"]
+    if len(js) != 1:
+        return [f"umbilical: module-main has {len(js)} J-UMBILICAL parts, not one"]
+    got = {}
+    for net, members in doc["nets"].items():
+        for p in members:
+            if isinstance(p, str) and p.startswith(js[0] + "."):
+                got[p.split(".", 1)[1]] = net.lstrip("/")
+    rel = os.path.relpath(SPI_LINK, ROOT)
+    return [f"umbilical: module-main wires {js[0]}.{k} (J-UMBILICAL) to {got.get(k)}; {rel} puts J-UMB-MOD.{k} on {w}"
+            for k, w in sorted(want.items()) if got.get(k) != w]
+
+
 def board_outputs(d):
     """Every generated file beside a board: renders and fab/. What the ledger must know."""
     out = [os.path.join(d, f) for f in os.listdir(d) if f.endswith(".sch.png") or ".pcb-" in f]
@@ -675,6 +755,8 @@ def cmd_check():
                 bad.append(f"{os.path.relpath(pcbfile, ROOT)}: pcb check failed:\n{r.stdout}{r.stderr}")
     bad += check_allocation(board_docs)
     bad += check_chain(board_docs)
+    bad += check_through(board_docs)
+    bad += check_umbilical_mod(board_docs)
     rows = ledger_rows()
     stale = {}
     for r in rows.values():

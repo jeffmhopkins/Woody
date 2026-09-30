@@ -1,0 +1,1614 @@
+# GENERATED from the KiCad project hardware/boards/module-main/module-main.kicad_sch by tools/kicad.py - DO NOT EDIT.
+# The flattened netlist of this board, every sub-sheet instance expanded.
+
+board: module-main
+title: Woody module main board (hardware/boards/module-main)
+components:
+  C1:
+    of: C-BULK-RAIL
+    value: 100uF
+    pins:
+    - 1
+    - 2
+    sheet: power-entry
+  C10:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: umbilical-load-switch
+  C11:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: dac8568
+  C12:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: digital-and-supervision
+  C13:
+    of: C-CM-BREATH
+    value: 1.5nF
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  C14:
+    of: C-CM-BREATH
+    value: 1.5nF
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  C15:
+    of: C-DIFF-BREATH
+    value: 15nF
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  C16:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  C17:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  C18:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  C19:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  C2:
+    of: C-BULK-RAIL
+    value: 47uF
+    pins:
+    - 1
+    - 2
+    sheet: power-entry
+  C20:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: breath-output-stage
+  C21:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: breath-output-stage
+  C22:
+    of: C-OUT-BREATH
+    value: 330nF film
+    pins:
+    - 1
+    - 2
+    sheet: breath-output-stage
+  C23:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: breath-response-shaper
+  C24:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: breath-response-shaper
+  C25:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: pitch-stage
+  C26:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: pitch-stage
+  C27:
+    of: C-AA-PITCH
+    value: 10nF
+    pins:
+    - 1
+    - 2
+    sheet: pitch-stage
+  C28:
+    of: C-FB-PITCH
+    value: 2.2nF
+    pins:
+    - 1
+    - 2
+    sheet: pitch-stage
+  C29:
+    of: C-FILT-PITCH
+    value: 10nF
+    pins:
+    - 1
+    - 2
+    sheet: pitch-stage
+  C3:
+    of: C-BULK-RAIL
+    value: 47uF
+    pins:
+    - 1
+    - 2
+    sheet: power-entry
+  C30:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  C31:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  C32:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  C33:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  C34:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  C35:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  C36:
+    of: C-FILT-MOD
+    value: 82nF
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  C37:
+    of: C-FILT-MOD
+    value: 82nF
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  C38:
+    of: C-FILT-MOD
+    value: 82nF
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  C39:
+    of: C-FILT-MOD
+    value: 82nF
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  C4:
+    of: C-BULK-RAIL
+    value: 47uF
+    pins:
+    - 1
+    - 2
+    sheet: power-entry
+  C5:
+    of: C-REG-ADJ
+    value: 10uF
+    pins:
+    - 1
+    - 2
+    sheet: power-entry
+  C6:
+    of: C-REG-OUT
+    value: 1uF
+    pins:
+    - 1
+    - 2
+    sheet: power-entry
+  C7:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: power-entry
+  C8:
+    of: C-GATE-LOADSW
+    value: 82nF
+    pins:
+    - 1
+    - 2
+    sheet: umbilical-load-switch
+  C9:
+    of: C-TIMER-LOADSW
+    value: 10uF
+    pins:
+    - 1
+    - 2
+    sheet: umbilical-load-switch
+  D1:
+    of: D-REVPOL
+    value: 1N5817
+    pins:
+    - A
+    - K
+    sheet: power-entry
+  D10:
+    of: D-JACK-CLAMP
+    value: BAV99
+    pins:
+    - A
+    - K
+    - C
+    sheet: mod-channels
+  D11:
+    of: D-JACK-CLAMP
+    value: BAV99
+    pins:
+    - A
+    - K
+    - C
+    sheet: mod-channels
+  D12:
+    of: D-JACK-CLAMP
+    value: BAV99
+    pins:
+    - A
+    - K
+    - C
+    sheet: mod-channels
+  D13:
+    of: D-JACK-CLAMP
+    value: BAV99
+    pins:
+    - A
+    - K
+    - C
+    sheet: mod-channels
+  D2:
+    of: D-REVPOL
+    value: 1N5817
+    pins:
+    - A
+    - K
+    sheet: power-entry
+  D3:
+    of: D-REVPOL
+    value: 1N5817
+    pins:
+    - A
+    - K
+    sheet: power-entry
+  D4:
+    of: D-CLAMP-BREATH
+    value: BAV99
+    pins:
+    - A
+    - K
+    - C
+    sheet: breath-receive-stage
+  D5:
+    of: D-CLAMP-BREATH
+    value: BAV99
+    pins:
+    - A
+    - K
+    - C
+    sheet: breath-receive-stage
+  D6:
+    of: D-JACK-CLAMP
+    value: BAV99
+    pins:
+    - A
+    - K
+    - C
+    sheet: breath-output-stage
+  D7:
+    of: D-RESP
+    value: 1N4148
+    pins:
+    - A
+    - K
+    sheet: breath-response-shaper
+  D8:
+    of: D-RESP
+    value: 1N4148
+    pins:
+    - A
+    - K
+    sheet: breath-response-shaper
+  D9:
+    of: D-JACK-CLAMP
+    value: BAV99
+    pins:
+    - A
+    - K
+    - C
+    sheet: pitch-stage
+  FB1:
+    of: FB-IN
+    value: 600R @ 100MHz
+    pins:
+    - 1
+    - 2
+    sheet: power-entry
+  FB2:
+    of: FB-IN
+    value: 600R @ 100MHz
+    pins:
+    - 1
+    - 2
+    sheet: power-entry
+  FB3:
+    of: FB-IN
+    value: 600R @ 100MHz
+    pins:
+    - 1
+    - 2
+    sheet: power-entry
+  FB4:
+    of: FB-IN
+    value: 600R @ 100MHz
+    pins:
+    - 1
+    - 2
+    sheet: power-entry
+  J1:
+    of: J-PWR-EURO
+    value: 2x8 2.54mm shrouded box header (16-pin)
+    pins:
+    - NEG12_1
+    - NEG12_2
+    - GND_3
+    - GND_4
+    - GND_5
+    - GND_6
+    - GND_7
+    - GND_8
+    - POS12_9
+    - POS12_10
+    - POS5_11
+    - POS5_12
+    - CV_13
+    - CV_14
+    - GATE_15
+    - GATE_16
+    sheet: power-entry
+  J2:
+    of: J-B2B-MOD
+    value: 2x10 2.54mm pin header
+    pins:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    - 17
+    - 18
+    - 19
+    - 20
+  J3:
+    of: J-UMBILICAL
+    value: Neutrik NE8FAV
+    pins:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+  JP1:
+    of: LK-CLR
+    value: 2-pad solder link
+    pins:
+    - 1
+    - 2
+    sheet: dac8568
+  NT1:
+    of: NT-AGND-MOD
+    value: net tie
+    pins:
+    - 1
+    - 2
+    sheet: power-entry
+  Q1:
+    of: Q-LOADSW
+    value: '~'
+    pins:
+    - D
+    - G
+    - S
+    sheet: umbilical-load-switch
+  R1:
+    of: R-REG-SET-HI
+    value: 475R 0.1%
+    pins:
+    - 1
+    - 2
+    sheet: power-entry
+  R10:
+    of: R-SPI-PULL
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    sheet: digital-and-supervision
+  R11:
+    of: R-SPI-PULL
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    sheet: digital-and-supervision
+  R12:
+    of: R-SPI-PULL
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    sheet: digital-and-supervision
+  R13:
+    of: R-SPI-PULL
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    sheet: digital-and-supervision
+  R14:
+    of: R-SPI-PULL
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    sheet: digital-and-supervision
+  R15:
+    of: R-SPI-PULL
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    sheet: digital-and-supervision
+  R16:
+    of: R-SER-BREATH
+    value: 10k 0.1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  R17:
+    of: R-SER-BREATH
+    value: 10k 0.1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  R18:
+    of: R-BIAS-INAMP
+    value: 1M 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  R19:
+    of: R-BIAS-INAMP
+    value: 1M 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  R2:
+    of: R-REG-SET-LO
+    value: 150R 0.1%
+    pins:
+    - 1
+    - 2
+    sheet: power-entry
+  R20:
+    of: R-GAIN-INAMP
+    value: 42.2k 0.1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  R21:
+    of: R-GAIN-FLOOR
+    value: 7.15k 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-output-stage
+  R22:
+    of: R-BREATH-IN
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-output-stage
+  R23:
+    of: R-BREATH-OFF
+    value: 21.0k 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-output-stage
+  R24:
+    of: R-BREATH-OFFNEG
+    value: 95.3k 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-output-stage
+  R25:
+    of: R-BREATH-FB
+    value: 40.2k 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-output-stage
+  R26:
+    of: R-OUT-PROT
+    value: 1k 1%, >=500mW
+    pins:
+    - 1
+    - 2
+    sheet: breath-output-stage
+  R27:
+    of: R-RESP-IN
+    value: 20k 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-response-shaper
+  R28:
+    of: R-RESP-FB
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-response-shaper
+  R29:
+    of: R-RESP-DIV
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-response-shaper
+  R3:
+    of: R-ILIM
+    value: '~'
+    pins:
+    - 1
+    - 2
+    sheet: umbilical-load-switch
+  R30:
+    of: R-RESP-DIV
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-response-shaper
+  R31:
+    of: R-RESP
+    value: 15k 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-response-shaper
+  R32:
+    of: R-OPAMP-IN
+    value: 1k 1%
+    pins:
+    - 1
+    - 2
+    sheet: pitch-stage
+  R33:
+    of: R-BIAS-DAC
+    value: 100k 1%
+    pins:
+    - 1
+    - 2
+    sheet: pitch-stage
+  R34:
+    of: R-OUT-PROT
+    value: 1k 1%, >=500mW
+    pins:
+    - 1
+    - 2
+    sheet: pitch-stage
+  R35:
+    of: R-OPAMP-IN
+    value: 1k 1%
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  R36:
+    of: R-BIAS-DAC
+    value: 100k 1%
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  R37:
+    of: R-OPAMP-IN
+    value: 1k 1%
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  R38:
+    of: R-BIAS-DAC
+    value: 100k 1%
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  R39:
+    of: R-MODGAIN-IN
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  R4:
+    of: R-GATE-SER
+    value: 10R 5%
+    pins:
+    - 1
+    - 2
+    sheet: umbilical-load-switch
+  R40:
+    of: R-MODGAIN-FB
+    value: 30k 1%
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  R41:
+    of: R-OUT-PROT
+    value: 1k 1%, >=500mW
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  R42:
+    of: R-OPAMP-IN
+    value: 1k 1%
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  R43:
+    of: R-BIAS-DAC
+    value: 100k 1%
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  R44:
+    of: R-MODGAIN-IN
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  R45:
+    of: R-MODGAIN-FB
+    value: 30k 1%
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  R46:
+    of: R-OUT-PROT
+    value: 1k 1%, >=500mW
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  R47:
+    of: R-OPAMP-IN
+    value: 1k 1%
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  R48:
+    of: R-BIAS-DAC
+    value: 100k 1%
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  R49:
+    of: R-MODGAIN-IN
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  R5:
+    of: R-GATE-COMP
+    value: 1k 5%
+    pins:
+    - 1
+    - 2
+    sheet: umbilical-load-switch
+  R50:
+    of: R-MODGAIN-FB
+    value: 30k 1%
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  R51:
+    of: R-OUT-PROT
+    value: 1k 1%, >=500mW
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  R52:
+    of: R-OPAMP-IN
+    value: 1k 1%
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  R53:
+    of: R-BIAS-DAC
+    value: 100k 1%
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  R54:
+    of: R-MODGAIN-IN
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  R55:
+    of: R-MODGAIN-FB
+    value: 30k 1%
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  R56:
+    of: R-OUT-PROT
+    value: 1k 1%, >=500mW
+    pins:
+    - 1
+    - 2
+    sheet: mod-channels
+  R6:
+    of: R-FB-HI
+    value: 35.7k 1%
+    pins:
+    - 1
+    - 2
+    sheet: umbilical-load-switch
+  R7:
+    of: R-FB-LO
+    value: 5.11k 1%
+    pins:
+    - 1
+    - 2
+    sheet: umbilical-load-switch
+  R8:
+    of: R-CLR-PU
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    sheet: dac8568
+  R9:
+    of: R-LDAC
+    value: 0R strap
+    pins:
+    - 1
+    - 2
+    sheet: dac8568
+  RN1:
+    of: R-PRECISION
+    value: 10k
+    pins:
+    - R1A
+    - R1B
+    - R2A
+    - R2B
+    - R3A
+    - R3B
+    - R4A
+    - R4B
+    sheet: pitch-stage
+  RV1:
+    of: TRIM-BREATH-ZERO
+    value: 10k multiturn cermet
+    pins:
+    - CW
+    - W
+    - CCW
+    sheet: breath-receive-stage
+  RV2:
+    of: TRIM-OFFSET
+    value: 10k multiturn cermet
+    pins:
+    - CW
+    - W
+    - CCW
+    sheet: pitch-stage
+  RV3:
+    of: TRIM-GAIN
+    value: 200R multiturn cermet
+    pins:
+    - CW
+    - W
+    - CCW
+    sheet: pitch-stage
+  SW1:
+    of: SW-POWER
+    value: NKK M2011SD4G01
+    pins:
+    - COM
+    - 'NO'
+    sheet: umbilical-load-switch
+  U1:
+    of: U-REG-DAC
+    value: LM317LZ
+    pins:
+    - IN
+    - OUT
+    - ADJ
+    sheet: power-entry
+  U10:
+    of: U-OPA-PITCH
+    value: OPA2197
+    pins:
+    - INA+
+    - INA-
+    - OUTA
+    - INB+
+    - INB-
+    - OUTB
+    - V+
+    - V-
+    sheet: mod-channels
+  U11:
+    of: U-OPA-PITCH
+    value: OPA2197
+    pins:
+    - INA+
+    - INA-
+    - OUTA
+    - INB+
+    - INB-
+    - OUTB
+    - V+
+    - V-
+    sheet: mod-channels
+  U12:
+    of: U-OPA-PITCH
+    value: OPA2197
+    pins:
+    - INA+
+    - INA-
+    - OUTA
+    - INB+
+    - INB-
+    - OUTB
+    - V+
+    - V-
+    sheet: mod-channels
+  U2:
+    of: U-LOADSW
+    value: LT1641-1CS8
+    pins:
+    - VCC
+    - SENSE
+    - GATE
+    - FB
+    - TIMER
+    - 'ON'
+    - PWRGD
+    - GND
+    sheet: umbilical-load-switch
+  U3:
+    of: U-DAC
+    value: DAC8568ICPW
+    pins:
+    - LDAC
+    - SYNC
+    - AVDD
+    - VOUTA
+    - VOUTB
+    - VOUTC
+    - VOUTD
+    - VOUTE
+    - VOUTF
+    - VOUTG
+    - VOUTH
+    - VREFIN/VREFOUT
+    - CLR
+    - GND
+    - DIN
+    - SCLK
+    sheet: dac8568
+  U4:
+    of: U-LVL-MOD
+    value: 74AHCT125
+    pins:
+    - 1A
+    - 1Y
+    - 1OE
+    - 2A
+    - 2Y
+    - 2OE
+    - 3A
+    - 3Y
+    - 3OE
+    - 4A
+    - 4Y
+    - 4OE
+    - VCC
+    - GND
+    sheet: digital-and-supervision
+  U5:
+    of: U-OPA-PITCH
+    value: OPA2197
+    pins:
+    - INA+
+    - INA-
+    - OUTA
+    - INB+
+    - INB-
+    - OUTB
+    - V+
+    - V-
+    sheet: breath-receive-stage
+  U6:
+    of: U-DIFFRX
+    value: INA828IDR
+    pins:
+    - IN+
+    - IN-
+    - REF
+    - RG1
+    - RG2
+    - OUT
+    - V+
+    - V-
+    sheet: breath-receive-stage
+  U7:
+    of: U-OPA-PITCH
+    value: OPA2197
+    pins:
+    - INA+
+    - INA-
+    - OUTA
+    - INB+
+    - INB-
+    - OUTB
+    - V+
+    - V-
+    sheet: breath-output-stage
+  U8:
+    of: U-RESP
+    value: OPA2197IDR
+    pins:
+    - INA+
+    - INA-
+    - OUTA
+    - INB+
+    - INB-
+    - OUTB
+    - V+
+    - V-
+    sheet: breath-response-shaper
+  U9:
+    of: U-OPA-PITCH
+    value: OPA2197
+    pins:
+    - INA+
+    - INA-
+    - OUTA
+    - INB+
+    - INB-
+    - OUTB
+    - V+
+    - V-
+    sheet: pitch-stage
+nets:
+  /AGND_SENSE:
+  - D4.C
+  - J3.2
+  - R16.1
+  /BREATH_INAMP_OUT:
+  - J2.1
+  - R27.1
+  - R29.1
+  - U6.OUT
+  /BREATH_JACK:
+  - C22.1
+  - J2.14
+  - R26.2
+  /BREATH_SENSE:
+  - D5.C
+  - J3.1
+  - R17.1
+  /CS_MOD:
+  - J3.7
+  - R12.1
+  - U4.3A
+  /DAC_AVDD:
+  - C11.1
+  - C6.1
+  - J2.12
+  - R1.1
+  - R15.2
+  - R8.1
+  - RV1.CW
+  - U1.OUT
+  - U3.AVDD
+  /DAC_CH1:
+  - R32.1
+  - R33.1
+  - U3.VOUTA
+  /DAC_CH2:
+  - R37.1
+  - R38.1
+  - U3.VOUTB
+  /DAC_CH3:
+  - R42.1
+  - R43.1
+  - U3.VOUTC
+  /DAC_CH4:
+  - R47.1
+  - R48.1
+  - U3.VOUTD
+  /DAC_CH5:
+  - R52.1
+  - R53.1
+  - U3.VOUTE
+  /DAC_CH7:
+  - R35.1
+  - R36.1
+  - U3.VOUTG
+  /DIN:
+  - R14.1
+  - U3.DIN
+  - U4.2Y
+  /GAIN_FLOOR:
+  - J2.7
+  - R21.1
+  /GAIN_WIPER:
+  - J2.3
+  - U7.INA+
+  /MOD1_JACK:
+  - C36.1
+  - J2.15
+  - R41.2
+  /MOD2_JACK:
+  - C37.1
+  - J2.16
+  - R46.2
+  /MOD3_JACK:
+  - C38.1
+  - J2.17
+  - R51.2
+  /MOD4_JACK:
+  - C39.1
+  - J2.20
+  - R56.2
+  /MOSI:
+  - J3.5
+  - R11.1
+  - U4.2A
+  /OFFSET_WIPER:
+  - J2.9
+  - R23.1
+  /PITCH_JACK:
+  - C29.1
+  - J2.11
+  - R34.2
+  - RV3.CCW
+  /RESP_V_IN_HALF:
+  - J2.4
+  - R29.2
+  - R30.1
+  /RESP_V_SHAPED:
+  - J2.8
+  - R28.2
+  - U8.OUTA
+  /RESP_WIPER:
+  - J2.6
+  - R31.1
+  /SCLK:
+  - J3.4
+  - R10.1
+  - U4.1A
+  /SCLK_DAC:
+  - R13.1
+  - U3.SCLK
+  - U4.1Y
+  /SYNC:
+  - R15.1
+  - U3.SYNC
+  - U4.3Y
+  /UMBILICAL_POS12:
+  - J3.3
+  - Q1.S
+  - R6.1
+  /VREFOUT:
+  - RV2.CW
+  - U3.VREFIN/VREFOUT
+  /breath-output-stage/BREATH_OUT:
+  - D6.C
+  - R25.2
+  - R26.1
+  - U7.OUTB
+  /breath-output-stage/BUF_OUT:
+  - R22.1
+  - U7.OUTA
+  - U7.INA-
+  /breath-output-stage/SUM_NODE:
+  - R22.2
+  - R23.2
+  - R24.2
+  - R25.1
+  - U7.INB-
+  /breath-receive-stage/GAIN_SET:
+  - R20.1
+  - U6.RG1
+  /breath-receive-stage/GAIN_SET_B:
+  - R20.2
+  - U6.RG2
+  /breath-receive-stage/IN_NEG:
+  - C14.1
+  - C15.2
+  - R17.2
+  - R19.1
+  - U6.IN-
+  /breath-receive-stage/IN_POS:
+  - C13.1
+  - C15.1
+  - R16.2
+  - R18.1
+  - U6.IN+
+  /breath-receive-stage/REF_DRIVE:
+  - U5.OUTA
+  - U5.INA-
+  - U6.REF
+  /breath-receive-stage/SPARE_B_OUT:
+  - U5.INB-
+  - U5.OUTB
+  /breath-receive-stage/TRIM_WIPER:
+  - RV1.W
+  - U5.INA+
+  /breath-response-shaper/DIODE_BRANCH:
+  - D7.K
+  - D8.A
+  - R31.2
+  /breath-response-shaper/SPARE_B_OUT:
+  - U8.INB-
+  - U8.OUTB
+  /breath-response-shaper/VIRTUAL_GND:
+  - D7.A
+  - D8.K
+  - R27.2
+  - R28.1
+  - U8.INA-
+  /dac8568/CLR:
+  - JP1.1
+  - R8.2
+  - U3.CLR
+  /dac8568/LDAC:
+  - R9.1
+  - U3.LDAC
+  /mod-channels/MINUS_1:
+  - R39.2
+  - R40.1
+  - U10.INB-
+  /mod-channels/MINUS_2:
+  - R44.2
+  - R45.1
+  - U11.INA-
+  /mod-channels/MINUS_3:
+  - R49.2
+  - R50.1
+  - U11.INB-
+  /mod-channels/MINUS_4:
+  - R54.2
+  - R55.1
+  - U12.INA-
+  /mod-channels/OUT_1:
+  - D10.C
+  - R40.2
+  - R41.1
+  - U10.OUTB
+  /mod-channels/OUT_2:
+  - D11.C
+  - R45.2
+  - R46.1
+  - U11.OUTA
+  /mod-channels/OUT_3:
+  - D12.C
+  - R50.2
+  - R51.1
+  - U11.OUTB
+  /mod-channels/OUT_4:
+  - D13.C
+  - R55.2
+  - R56.1
+  - U12.OUTA
+  /mod-channels/PLUS_1:
+  - R37.2
+  - U10.INB+
+  /mod-channels/PLUS_2:
+  - R42.2
+  - U11.INA+
+  /mod-channels/PLUS_3:
+  - R47.2
+  - U11.INB+
+  /mod-channels/PLUS_4:
+  - R52.2
+  - U12.INA+
+  /mod-channels/REF_PLUS:
+  - R35.2
+  - U10.INA+
+  /mod-channels/SPARE_C_OUT:
+  - U12.INB-
+  - U12.OUTB
+  /mod-channels/VREF_MOD:
+  - R39.1
+  - R44.1
+  - R49.1
+  - R54.1
+  - U10.OUTA
+  - U10.INA-
+  /pitch-stage/AMP_OUT:
+  - C28.1
+  - D9.C
+  - R34.1
+  - U9.OUTB
+  /pitch-stage/GAIN_TRIM_MID:
+  - RN1.R2B
+  - RV3.W
+  /pitch-stage/MINUS_NODE:
+  - C28.2
+  - RN1.R2A
+  - RN1.R1B
+  - U9.INB-
+  /pitch-stage/PLUS_NODE:
+  - C27.1
+  - R32.2
+  - U9.INB+
+  /pitch-stage/TRIM_WIPER:
+  - RV2.W
+  - U9.INA+
+  /pitch-stage/VREF_BUFFERED:
+  - RN1.R1A
+  - U9.OUTA
+  - U9.INA-
+  /power-entry/BUS_5V_IN:
+  - FB4.1
+  - J1.POS5_11
+  - J1.POS5_12
+  /power-entry/NEG12_D3:
+  - D3.A
+  - J1.NEG12_1
+  - J1.NEG12_2
+  /power-entry/NEG12_FB:
+  - D3.K
+  - FB3.1
+  /power-entry/POS12_D1:
+  - D1.K
+  - FB1.1
+  /power-entry/POS12_D2:
+  - D2.K
+  - FB2.1
+  /power-entry/PWR_EXPORT:
+  - C2.1
+  - FB2.2
+  /power-entry/REG_ADJ:
+  - C5.1
+  - R1.2
+  - R2.1
+  - U1.ADJ
+  /umbilical-load-switch/FB:
+  - R6.2
+  - R7.1
+  - U2.FB
+  /umbilical-load-switch/GATE_COMP_MID:
+  - C8.1
+  - R5.2
+  /umbilical-load-switch/GATE_DRIVE:
+  - R4.1
+  - R5.1
+  - U2.GATE
+  /umbilical-load-switch/GATE_NODE:
+  - Q1.G
+  - R4.2
+  /umbilical-load-switch/ON:
+  - SW1.COM
+  - U2.ON
+  /umbilical-load-switch/SENSE_NODE:
+  - Q1.D
+  - R3.2
+  - U2.SENSE
+  /umbilical-load-switch/TIMER:
+  - C9.1
+  - U2.TIMER
+  AGND_MOD:
+  - C1.2
+  - C11.2
+  - C13.2
+  - C14.2
+  - C16.2
+  - C17.2
+  - C18.2
+  - C19.2
+  - C20.2
+  - C21.2
+  - C22.2
+  - C23.2
+  - C24.2
+  - C25.2
+  - C26.2
+  - C27.2
+  - C29.2
+  - C3.2
+  - C30.2
+  - C31.2
+  - C32.2
+  - C33.2
+  - C34.2
+  - C35.2
+  - C36.2
+  - C37.2
+  - C38.2
+  - C39.2
+  - C5.2
+  - C6.2
+  - C7.2
+  - J2.10
+  - J2.13
+  - J2.18
+  - J2.2
+  - J2.5
+  - JP1.2
+  - NT1.1
+  - R18.2
+  - R19.2
+  - R2.2
+  - R21.2
+  - R30.2
+  - R33.2
+  - R36.2
+  - R38.2
+  - R43.2
+  - R48.2
+  - R53.2
+  - R9.2
+  - RV1.CCW
+  - U12.INB+
+  - U3.GND
+  - U5.INB+
+  - U7.INB+
+  - U8.INA+
+  - U8.INB+
+  BUS_5V:
+  - C12.1
+  - C4.1
+  - FB4.2
+  - U4.VCC
+  BUS_POS12_RAW:
+  - C10.1
+  - D1.A
+  - D2.A
+  - J1.POS12_10
+  - J1.POS12_9
+  - R3.1
+  - U2.VCC
+  DIG_GND:
+  - C12.2
+  - C4.2
+  - J3.8
+  - R10.2
+  - R11.2
+  - R13.2
+  - R14.2
+  - U4.1OE
+  - U4.3OE
+  - U4.4A
+  - U4.4OE
+  - U4.2OE
+  - U4.GND
+  J1.CV_13:
+  - J1.CV_13
+  J1.CV_14:
+  - J1.CV_14
+  J1.GATE_15:
+  - J1.GATE_15
+  J1.GATE_16:
+  - J1.GATE_16
+  MODULE_ANALOG_NEG12:
+  - C17.1
+  - C19.1
+  - C21.1
+  - C24.1
+  - C26.1
+  - C3.1
+  - C31.1
+  - C33.1
+  - C35.1
+  - D10.A
+  - D11.A
+  - D12.A
+  - D13.A
+  - D4.A
+  - D5.A
+  - D6.A
+  - D9.A
+  - FB3.2
+  - R24.1
+  - U10.V-
+  - U11.V-
+  - U12.V-
+  - U5.V-
+  - U6.V-
+  - U7.V-
+  - U8.V-
+  - U9.V-
+  MODULE_ANALOG_POS12:
+  - C1.1
+  - C16.1
+  - C18.1
+  - C20.1
+  - C23.1
+  - C25.1
+  - C30.1
+  - C32.1
+  - C34.1
+  - C7.1
+  - D10.K
+  - D11.K
+  - D12.K
+  - D13.K
+  - D4.K
+  - D5.K
+  - D6.K
+  - D9.K
+  - FB1.2
+  - J2.19
+  - U1.IN
+  - U10.V+
+  - U11.V+
+  - U12.V+
+  - U5.V+
+  - U6.V+
+  - U7.V+
+  - U8.V+
+  - U9.V+
+  PWR_GND:
+  - C10.2
+  - C2.2
+  - C8.2
+  - C9.2
+  - J1.GND_3
+  - J1.GND_4
+  - J1.GND_5
+  - J1.GND_6
+  - J1.GND_7
+  - J1.GND_8
+  - J3.6
+  - NT1.2
+  - R7.2
+  - U2.GND
+  R12.2:
+  - R12.2
+  RN1.R3A:
+  - RN1.R3A
+  RN1.R3B:
+  - RN1.R3B
+  RN1.R4A:
+  - RN1.R4A
+  RN1.R4B:
+  - RN1.R4B
+  RV2.CCW:
+  - RV2.CCW
+  RV3.CW:
+  - RV3.CW
+  SW1.NO:
+  - SW1.NO
+  U2.PWRGD:
+  - U2.PWRGD
+  U3.VOUTF:
+  - U3.VOUTF
+  U3.VOUTH:
+  - U3.VOUTH
+  U4.4Y:
+  - U4.4Y
+external_endpoints:
+- J1.CV_13
+- J1.CV_14
+- J1.GATE_15
+- J1.GATE_16
+- R12.2
+- RN1.R3A
+- RN1.R3B
+- RN1.R4A
+- RN1.R4B
+- RV2.CCW
+- RV3.CW
+- SW1.NO
+- U2.PWRGD
+- U3.VOUTF
+- U3.VOUTH
+- U4.4Y

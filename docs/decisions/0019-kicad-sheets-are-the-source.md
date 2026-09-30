@@ -92,10 +92,11 @@ these KiCad schematics actually be the source of truth of all the things.")
   whole; the boards draw their own halves, and each interface page's *The
   sheet, and which board places what* says which board draws which part and
   what, if anything, holds the two together.
-- **Not yet migrated:** the module's circuits. Their
-  `netlist.yaml` stays hand-written and authoritative until each gets its
-  sheet; `tools/sch.py` writes a circuit's first sheet from its YAML, and from
-  then the sheet is edited instead.
+- **Migrated, 2026-09-30:** the module's ten circuits with netlists, each
+  export identical to the hand-written netlist it replaced, and its two boards
+  (`hardware/boards/module-main`, `module-jack`, ADR 0023). A circuit on both
+  boards is two pages, one per board. `link-supervision` (no parts) and
+  `panel` (no electrical parts) have nothing to draw.
 - **The BOM fragments are a second phase.** A fragment's quantity is a total
   over every board, so it can only be counted from the sheets once every
   board is in KiCad. Until then the fragments stay hand-written, and

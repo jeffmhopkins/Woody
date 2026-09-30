@@ -23,6 +23,12 @@ circuits. **The circuits own their own values** — nothing here restates one.
 | [`panel-led/`](panel-led/panel-led.md) | The panel indicator, and the job it has lost |
 | [`panel/`](panel/panel.md) | Panel geometry: width, clear height, how many control rows fit, and the layout (ADR 0024) |
 
+**The module is two boards** (ADR 0023), and each circuit's KiCad sheet is
+its source (ADR 0019): [`module-main`](../boards/module-main/README.md)
+carries the etherCON, every IC, the trimmers and the power header;
+[`module-jack`](../boards/module-jack/README.md) the jacks, pots and LED.
+`J-B2B-MOD` joins them; its pin allocation is in the main board's README.
+
 The other half of the breath chain and of the SPI path are **not here**. They
 cross a board boundary and live in
 [`hardware/interfaces/`](../interfaces/README.md), because their transfer

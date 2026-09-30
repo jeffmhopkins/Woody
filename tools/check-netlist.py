@@ -460,7 +460,11 @@ def check_one(d, bom, problems, seen, elsewhere=None):
     # itself a recorded defect on five pages. Declaring the alias HERE - in
     # the authoritative file - is better than the prose table it replaces,
     # because the checker can enforce it.
-    alias = {c["drawn_as"]: ref for ref, c in comps.items() if c.get("drawn_as")}
+    # ONE PART CAN CARRY SEVERAL DRAWN NAMES, space-separated: a resistor
+    # network is one package whose elements a drawing labels one by one
+    # (pitch-stage's LT5400 is drawn as `[R1 10k]` and `[R2 10k]`).
+    alias = {name: ref for ref, c in comps.items() if c.get("drawn_as")
+             for name in str(c["drawn_as"]).split()}
     # Parts drawn for context and owned by another circuit. A page whose
     # drawing deliberately spans two boards - to derive a pole or a CMRR
     # budget in one place - would otherwise report every foreign part as a
@@ -638,7 +642,7 @@ def main():
             entry = {"circuit": circ, "row": c.get("of", ref),
                      "value": c["value"]}
             by_row.setdefault(entry["row"], entry)
-            for name in (ref, c.get("drawn_as")):
+            for name in [ref] + str(c.get("drawn_as") or "").split():
                 if not name:
                     continue
                 if name in elsewhere and elsewhere[name] and \

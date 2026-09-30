@@ -159,8 +159,10 @@ register figure no longer contains the number.
   checks keep reading exactly as before), each board's `board-netlist.yaml`
   (its flattened netlist, what a PCB is laid out from), and the PNG renders,
   recorded in `hardware/SHEETS.csv`.
-- **Not yet migrated circuits** (the module's) keep a hand-written
-  `netlist.yaml`.
+- **Every circuit with a netlist is migrated** (the module's on
+  2026-09-30). A circuit whose parts sit on two boards (four of the module's)
+  is a parent sheet placing two pages, `<circuit>.main.kicad_sch` and
+  `<circuit>.jack.kicad_sch`, and each board places its own page.
 
 ### Commands
 
@@ -177,6 +179,10 @@ python3 tools/kicad.py check                                  # everything above
 - a render or a `fab/` file exists that no ledger row knows (a stray Gerber is uploaded with the rest);
 - a board has an ERC error;
 - a board with a layout fails `tools/pcb.py check` (§4);
+- `J-B2B-MOD`, soldered through both module boards, is netted differently on
+  `module-main` and `module-jack` (pin *k* is one conductor on both);
+- the module main board's etherCON (`J-UMBILICAL`) is wired differently from
+  `J-UMB-MOD` in `hardware/interfaces/spi-link/netlist.yaml`;
 - a key board's `J-CHAIN` pins are netted differently from the ribbon's other end in `hardware/interfaces/key-chain-loom/netlist.yaml` (pin k on the key board against pin 13 − k on the main board);
 - a board's register is wired differently from
   `hardware/cluster/key-marker-and-bits/allocation.yaml`, that file disagrees
@@ -236,6 +242,9 @@ What the export can carry beyond one port per net (added with the interfaces,
 - **A spare pin whose net has a name of its own** (`TVS_CHAIN_SPARE`) keeps
   the name as a label. A lone labelled pin with no port is exported as an
   external endpoint.
+- **Parts the page's drawing shows and another circuit owns** (`foreign:` in
+  the netlist): one line of sheet text each,
+  `FOREIGN <label>: owner <circuit>, row <BOM row>`.
 - **A package's N/C leads** (the library types them `no_connect`) that the
   part's `Pins` field does not name are on no net, as in the hand-written
   netlist.
@@ -494,11 +503,15 @@ Each render is generated; what it is rendered from is the source.
 | [`key-register.sch.png`](../../hardware/cluster/key-register/key-register.sch.png), [`key-switch-network.sch.png`](../../hardware/cluster/key-switch-network/key-switch-network.sch.png), [`key-marker-and-bits.sch.png`](../../hardware/cluster/key-marker-and-bits/key-marker-and-bits.sch.png) | each circuit's `.kicad_sch` beside it (**source**) |
 | [`main-board.sch.png`](../../hardware/boards/main-board/main-board.sch.png) (+ one PNG per sub-sheet) | the KiCad project `hardware/boards/main-board/main-board.kicad_sch` (**source**) |
 | the six main-board circuits' `.sch.png` (`hardware/carrier/**`) | each circuit's `.kicad_sch` beside it (**source**) |
+| [`module-main.sch.png`](../../hardware/boards/module-main/module-main.sch.png), [`module-jack.sch.png`](../../hardware/boards/module-jack/module-jack.sch.png) (+ one PNG per sub-sheet) | the KiCad projects under `hardware/boards/module-*/` (**source**) |
+| the module circuits' `.sch.png` (`hardware/module/**`; a two-page circuit renders `.p2`/`.p3` too) | each circuit's `.kicad_sch` beside it (**source**) |
 | the three interfaces' `.sch.png` (`hardware/interfaces/**`) | each circuit's `.kicad_sch` beside it (**source**). No board places them: each spans boards, and each page's *The sheet, and which board places what* says which board draws which part |
 
 ### Not yet
 
-- **The module** is still YAML; each circuit migrates as described above.
+- **The module's layout.** Its ten circuits are sheets and its two boards are
+  projects (2026-09-30, `hardware/boards/module-main/README.md`); no
+  `.kicad_pcb` yet, and the panel layout they are placed from is being revised.
   The interfaces migrated on 2026-09-29. The boards still draw their own
   halves of them rather than placing the interface sheets, which span boards
   (each interface page says which board draws which part). The main board is a project placing its circuit sheets
