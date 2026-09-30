@@ -48,6 +48,33 @@ The `Dir` and `Peer` columns are defined once in
 | bus `+5V` after `FB4`/`C4` | module | — | `module/power-entry` → `module/digital-and-supervision` | — | Supplies the 74AHCT125 and nothing else, and reaches no part of this circuit. **Open**, and the item stayed on `module/digital-and-supervision` because it is a rail and connector question about that board, not about this link |
 | `OE_MOD` ×4 | module | — | `module/digital-and-supervision` | — | The module buffer's four enables, tied to `GND` and permanently enabled. On that circuit's part, so they reach nothing here; the circuit that used to gate them, `module/link-supervision`, is not fitted. **Not `OE_INST`** |
 
+## The sheet, and which board places what
+
+**The source is [`spi-link.kicad_sch`](spi-link.kicad_sch)** (ADR 0019;
+render [`spi-link.sch.png`](spi-link.sch.png)). [`netlist.yaml`](netlist.yaml)
+is exported from it (`python3 tools/kicad.py export hardware/interfaces/spi-link`)
+and must not be edited. It was first written from the hand-written netlist
+and compared with it part by part and net by net: no change.
+
+**No board places this sheet, and none can as it stands.** KiCad places a
+sheet whole, and this one is three connectors on three boards joined by a
+cable that is not a part. Each board draws its own part and wires it pin N
+to the net this sheet puts pin N on:
+
+| Part on this sheet | BOM row | Board | On that board today |
+|---|---|---|---|
+| `J-UMB-INST` | `J-UMBILICAL-INST` | `hardware/boards/umb-adapter` | `J1` |
+| `J-UMB` | `J-UMB` | `hardware/boards/main-board` (its tails) **and** `umb-adapter` (its posts): one part, bought and fitted once | main board `J6` (`Assembly` hand); adapter `J2` (`Assembly` none) |
+| `J-UMB-MOD` | `J-UMBILICAL` (`module/power-entry`'s row) | the module board that carries the panel connector (`hardware/boards/module-*`, being drawn) | **not yet — its owner wires pin N to this sheet's net N** |
+| `CABLE-UMB`, the adapter's tracks | — | no board: straight conductors, not parts | — |
+
+The main board's `J6` and the adapter's `J1`/`J2` were compared with this
+sheet by hand on 2026-09-29, pin by pin, and agree `[repo, board-netlist.yaml]`.
+**Nothing re-checks that automatically**, as `tools/kicad.py check` does for
+`J-CHAIN` against the key chain's sheet. **Open**, decided by the board
+owners: extend that check to `J-UMB`, `J-UMB-INST` and `J-UMB-MOD`, or split
+this sheet into per-board ends that the boards place.
+
 ## The instrument's connector — the etherCON on its adapter, and `J-UMB`
 
 *Added with ADR 0017 and rewritten with ADR 0021; not part of the verbatim
@@ -82,8 +109,9 @@ mated contact inside the body. So:
   end** (owner, 2026-09-26,
   [ADR 0018](../../../docs/decisions/0018-main-board-wiring-decisions.md)): a
   short, wide connection from the pin to `PWR_GND` at `J-UMB`, copper rather
-  than a part. `carrier/carrier` declares `DIG_GND` on its `PWR_GND` net; the
-  name is kept because at the module end conductor 8 is its own net.
+  than a bought part. `carrier/carrier` makes it with `NT-DIG`, a KiCad net
+  tie between its `DIG_GND` and `PWR_GND` nets; the name is kept because at
+  the module end conductor 8 is its own net.
   **The layout rule that makes it a return:** route `SCLK`, `MOSI` and
   `CS_MOD` from the MCU side of `J-MCU`, through `R-SPI-SER`, to `J-UMB` over
   unbroken ground, so each edge's return runs under its trace to pin 8 and

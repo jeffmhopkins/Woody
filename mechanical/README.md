@@ -15,6 +15,9 @@ The body described in [ADR 0009](../docs/decisions/0009-enclosure-construction.m
 OpenSCAD model, with renders and cut files generated from it and a ledger that
 proves each one still shows the model it names.
 
+*The Eurorack module is a separate model in the same pipeline:
+[`module/README.md`](module/README.md).*
+
 ![The instrument, key face up](renders/hero.png)
 
 ![The mouth end close up: oak cap and sanded edges](renders/detail-mouth-end.png)

@@ -90,3 +90,6 @@ hardware/carrier/service-uart/service-uart.sch.png,ebac0359e9f0eaeb413e797775117
 hardware/cluster/key-marker-and-bits/key-marker-and-bits.sch.png,1be9aaec14462b9f73e2b99333a7eeba83eee071,hardware/cluster/key-marker-and-bits/key-marker-and-bits.kicad_sch@dfc1e97924bfce7eec481d62d257e8b1f18bd5a1
 hardware/cluster/key-register/key-register.sch.png,203507639b034865dab216001d9b1b265b614ec5,hardware/cluster/key-register/key-register.kicad_sch@4929caee420fff1def857b43ee108e34d21b6986
 hardware/cluster/key-switch-network/key-switch-network.sch.png,0bf457dee08e397737716260d9ed2a53ab4d9997,hardware/cluster/key-switch-network/key-switch-network.kicad_sch@3c6d2d3a9dfc538e4e66d4f7470554ef96e13beb
+hardware/interfaces/breath-sense-link/breath-sense-link.sch.png,64820457660b587a940bccd769a8365b1989e2d0,hardware/interfaces/breath-sense-link/breath-sense-link.kicad_sch@912dbfcf9788ada58c1aa9f9f363b8cf15387df4
+hardware/interfaces/key-chain-loom/key-chain-loom.sch.png,e05fee274199e383026a05c168daf370eb7c7e4f,hardware/interfaces/key-chain-loom/key-chain-loom.kicad_sch@293696fc77a678ba85d025b2ed8f271823923e24
+hardware/interfaces/spi-link/spi-link.sch.png,b7a35a3a369e1edc6719aab6548512e0a9019230,hardware/interfaces/spi-link/spi-link.kicad_sch@7cac24b4979c08e0034a123a97acd196ae34f718

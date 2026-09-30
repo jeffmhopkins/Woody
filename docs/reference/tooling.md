@@ -96,6 +96,16 @@ the way it is). This is the working summary.
    or built by nothing. `python3 tools/cad.py explain <output>` says which input
    moved since it was built.
 
+**The Eurorack module is a second model in the same pipeline**:
+`config/module.yaml` → `mechanical/cad/module.scad`, with its own spec
+(`mechanical/module/outputs.yaml`), ledger (`mechanical/module/OUTPUTS.csv`),
+`drc.echo` and `clash.txt` under `mechanical/module/`
+([`mechanical/module/README.md`](../../mechanical/module/README.md)). One
+`build` or `check` covers both. A module config leaf may say
+`ref: config/body.yaml:<path>` instead of a value — the NE8FAV is dimensioned
+once for both ends — or `figure: <id>`, which fails the build when that
+register figure no longer contains the number.
+
 ### Adding things
 
 - **A new render**: add an entry to `mechanical/outputs.yaml` (source file,
@@ -149,8 +159,8 @@ the way it is). This is the working summary.
   checks keep reading exactly as before), each board's `board-netlist.yaml`
   (its flattened netlist, what a PCB is laid out from), and the PNG renders,
   recorded in `hardware/SHEETS.csv`.
-- **Not yet migrated circuits** (the module's and the interfaces) keep a
-  hand-written `netlist.yaml`.
+- **Not yet migrated circuits** (the module's) keep a hand-written
+  `netlist.yaml`.
 
 ### Commands
 
@@ -212,6 +222,23 @@ circuits' are in git history) with `hierarchical: true`. Then:
    migration must change nothing;
 3. write the export over `netlist.yaml`, delete `schematic.yaml`, and from
    then on edit the sheet.
+
+What the export can carry beyond one port per net (added with the interfaces,
+2026-09-29):
+- **A net carrying two ports, or ports and no pin.** Examples are a key-chain
+  hop, where one register's `QH` is the next one's `SER`, and a port joined to
+  a port by a trace. Draw it as one wire between the two port labels, and name
+  the net with a **local** label on the wire, at a vertex (`labels:` entry
+  with `local: true`). A local label outranks a hierarchical one in KiCad's
+  naming. `kicad.py` reads which ports sit on the net off the sheet's wires
+  (`label_groups`), because KiCad's netlist names one label and lists only
+  pins. A net of two ports and no local label is refused.
+- **A spare pin whose net has a name of its own** (`TVS_CHAIN_SPARE`) keeps
+  the name as a label. A lone labelled pin with no port is exported as an
+  external endpoint.
+- **A package's N/C leads** (the library types them `no_connect`) that the
+  part's `Pins` field does not name are on no net, as in the hand-written
+  netlist.
 
 ### KiCad behaviour learned the hard way
 
@@ -467,11 +494,14 @@ Each render is generated; what it is rendered from is the source.
 | [`key-register.sch.png`](../../hardware/cluster/key-register/key-register.sch.png), [`key-switch-network.sch.png`](../../hardware/cluster/key-switch-network/key-switch-network.sch.png), [`key-marker-and-bits.sch.png`](../../hardware/cluster/key-marker-and-bits/key-marker-and-bits.sch.png) | each circuit's `.kicad_sch` beside it (**source**) |
 | [`main-board.sch.png`](../../hardware/boards/main-board/main-board.sch.png) (+ one PNG per sub-sheet) | the KiCad project `hardware/boards/main-board/main-board.kicad_sch` (**source**) |
 | the six main-board circuits' `.sch.png` (`hardware/carrier/**`) | each circuit's `.kicad_sch` beside it (**source**) |
+| the three interfaces' `.sch.png` (`hardware/interfaces/**`) | each circuit's `.kicad_sch` beside it (**source**). No board places them: each spans boards, and each page's *The sheet, and which board places what* says which board draws which part |
 
 ### Not yet
 
-- **The module and the interfaces** are still YAML; each migrates as
-  described above. The main board is a project placing its circuit sheets
+- **The module** is still YAML; each circuit migrates as described above.
+  The interfaces migrated on 2026-09-29. The boards still draw their own
+  halves of them rather than placing the interface sheets, which span boards
+  (each interface page says which board draws which part). The main board is a project placing its circuit sheets
   (2026-09-29); **its layout is next**, and `tools/pcb.py` has no main-board
   mode yet (`hardware/boards/main-board/README.md`, *Open*).
 - **The BOM fragments** become exports once every board is in KiCad, because

@@ -54,9 +54,53 @@ header numbers the same conductors differently — see *The ribbon*, below.
 
 ---
 
+## The sheet, and which board places what
+
+**The source is [`key-chain-loom.kicad_sch`](key-chain-loom.kicad_sch)**
+(ADR 0019; render [`key-chain-loom.sch.png`](key-chain-loom.sch.png)).
+[`netlist.yaml`](netlist.yaml) is exported from it
+(`python3 tools/kicad.py export hardware/interfaces/key-chain-loom`) and must
+not be edited. The sims read it (`sim/`). It was first written from the
+hand-written netlist and compared with it part by part and net by net: no
+change. The three hops, `CHAIN_QH_RT` and `DEV_3V3` each carry two ports.
+On the sheet each is one wire between its two port labels, named by a local
+label at its middle. A local label outranks a port label in KiCad's naming,
+and `tools/kicad.py` reads the ports off the wire (`label_groups`).
+
+**No board places this sheet, and none can as it stands.** KiCad places a
+sheet whole, and this one is both ends of two ribbons: three boards, joined
+by a cable that is not a part. Each board draws its own parts:
+
+| Part on this sheet | BOM row | Board | On that board today |
+|---|---|---|---|
+| `J-CHAIN-MAIN-RH`, `J-CHAIN-MAIN-LH` | `J-CHAIN` | `hardware/boards/main-board` | `J5` (rail pin on `V3V3_CHAIN_RH`), `J4` (`V3V3_CHAIN_LH`) |
+| `R-CHAIN-SER-SCK`, `-SHLD`, `-SER` | `R-CHAIN-SER` | `main-board` | `R34`, `R35`, `R36` |
+| `R-SER-TERM` | `R-SER-TERM` | `main-board` | `R37` |
+| `FB-CHAIN-RH`, `FB-CHAIN-LH` | `FB-CHAIN` | `main-board` | `FB2`, `FB1` |
+| `U-TVS-CHAIN` | `U-TVS-CHAIN` | `main-board` | `U9` |
+| `J-CHAIN-KEY-RH` | `J-CHAIN` | `hardware/boards/key-board-rh` | `J1` |
+| `J-CHAIN-KEY-LH` | `J-CHAIN` | `hardware/boards/key-board-lh` | `J1` |
+| `CBL-CHAIN` ×2 | `CBL-CHAIN` | no board: straight conductors, netted as the pins they join | — |
+
+`C-BULK-CHAIN` is not on this sheet: it is each key board's own part, on its
+root sheet.
+
+**What holds the boards to this sheet.** `tools/kicad.py check` holds every
+`J-CHAIN`, on all three boards, to this sheet's pin map (`check_chain`). On the
+main board `GND_CHAIN` is `PWR_GND` and `DEV_3V3` is itself. The main board's
+series resistors, terminator, beads and clamp are held by nothing. They were
+compared with this sheet by hand on 2026-09-29, pin by pin, and agree
+`[repo, board-netlist.yaml]`. **Open**, decided by the board owners: split
+this sheet into a main-board end (everything but the two key-board headers)
+that the main board places once, or extend `check_chain` to those seven
+parts.
+
+---
+
 ## The chain
 
-*Connectivity is **[`netlist.yaml`](netlist.yaml)**, not these drawings. It
+*Connectivity is **[`key-chain-loom.kicad_sch`](key-chain-loom.kicad_sch)**,
+not these drawings, and [`netlist.yaml`](netlist.yaml) is exported from it. It
 holds the hop map — which register's `QH` feeds which register's `SER`, and
 over which ribbon — as named nets. The register itself is one schematic built
 four times ([`key-register`](../../cluster/key-register/netlist.yaml),
