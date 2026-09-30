@@ -440,13 +440,11 @@ nets:
 
   UMBILICAL_POS12:
     kind: power
-    carries: "The +12 V exported to the instrument, downstream of the load switch. ONE NODE all the way to the LED row and the REF5050"
+    carries: "The +12 V exported to the instrument, downstream of the load switch, as far as Q-INRUSH's source at J-UMB"
     figure: umbilical-current
     driver: module/umbilical-load-switch
     receivers:
       - carrier/power-entry-instrument
-      - carrier/led-strip-drive
-      - carrier/breath-excitation-reference
       - interfaces/spi-link
       - module/panel-led
     note: >
@@ -454,11 +452,24 @@ nets:
       "Not fitted" against every row, including the presence detect that gated
       OE_MOD from this node. A deleted circuit is not a receiver.
 
+      At the instrument this node is J-UMB pin 3, D-REVSHUNT, D-TVS-PWR and
+      Q-INRUSH's source and gate network, and nothing that stores charge: the
+      LED row and the analog block are on INST_POS12, behind Q-INRUSH.
+
+  INST_POS12:
+    kind: power
+    carries: "The instrument's +12 V behind Q-INRUSH, the hot-plug inrush limiter: C-STRIP-BULK, L-BUCK-IN, the LED row and the REF5050/OPA2197 analog block. ONE NODE from Q-INRUSH's drain to all of them"
+    figure: umbilical-current
+    driver: carrier/power-entry-instrument
+    receivers:
+      - carrier/led-strip-drive
+      - carrier/breath-excitation-reference
+    note: >
       The carrier's "+12V LED row feed" and "+12V analog" are not separate nets:
-      D-REVSHUNT is a shunt across the pair and D-TVS-PWR is a clamp, so
-      nothing is in series between J-UMB pin 3 and either tap. They were two
-      more entries here until the netlist had to name both ends of each and
-      there was only one node to name.
+      nothing is in series between Q-INRUSH's drain and either tap. Everything
+      that holds charge on the instrument's 12 V is on this node, so a plug-in
+      charges it only through Q-INRUSH's ramp (power-entry-instrument.md,
+      Hot-plug inrush).
 
   PWR_GND:
     kind: reference
