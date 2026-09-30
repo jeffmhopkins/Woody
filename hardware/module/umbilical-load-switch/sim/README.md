@@ -17,7 +17,7 @@ chosen large enough that its regulation error is under 1 mV. The netlist was
 written from the PDF, not from the page, so a misreading of the law on the page
 would not be reproduced here for free.
 
-**The supply is `U-ISO`** since ADR 0027 (RECOM RP20-2412SAW): 12 V ± 2.2 %
+**The supply is `U-ISO`** since ADR 0027 (RECOM RPA20-2412SAW): 12 V ± 3.1 %
 (varied; accuracy, line, load and 40 K of tempco `[calc]`), its output
 resistance from the datasheet's load regulation, and `C-ISO-OUT` from
 `module/power-entry`'s netlist. `hot-plug` also measures `VCC`'s dip and holds

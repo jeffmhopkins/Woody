@@ -46,24 +46,25 @@ components:
     pins:
     - 1
     - 2
-    note: 'Across U-ISO''s input pins, beside them: the ceramic half of the input filter (RECOM''s Class B C1 for
-      the RP20-24xxSAW, 4.7uF MLCC, PD-6; 50 V here because it sits across both rails)'
+    note: 'Across U-ISO''s input pins, beside them: the ceramic half of the input filter (the RPA20 datasheet names
+      no ceramic, PD-7; 4.7uF 50 V beside the pins takes the switching current off C2)'
   C-ISO-OUT:
     value: 100uF 25V
     pins:
     - 1
     - 2
-    note: 'U-ISO''s output capacitor, 100uF/25V: well inside the RP20-2412SAW''s 850uF maximum capacitive load (RECOM-RP20-AW.pdf
-      PD-1). The instrument''s own capacitance is behind the load switch and charged at its limit, not the converter''s'
+    note: 'U-ISO''s output capacitor, 100uF/25V: well inside the RPA20-2412SAW''s 1000uF maximum capacitive load
+      (RECOM-RPA20-AW.pdf PD-1). The instrument''s own capacitance is behind the load switch and charged at its
+      limit, not the converter''s'
   C-ISO-Y:
     value: 1nF
     pins:
     - 1
     - 2
     note: 'Across the isolation barrier AT the converter, ISO_VIN_POS to PWR_GND: gives the switching common-mode
-      current a 1 nF path home beside U-ISO instead of round the star and the ribbon (RECOM''s Class B filter puts
-      470pF across the barrier on each side, C4/C5, PD-6; one 1 nF here). On the +12 V side so PTC-ISO covers it
-      if it fails short'
+      current a 1 nF path home beside U-ISO instead of round the star and the ribbon (RECOM''s RPA20 filter has
+      no Y-capacitor, PD-7; one 1 nF here against its 1100pF isolation capacitance, PD-5). On the +12 V side so
+      PTC-ISO covers it if it fails short'
   C-LOGIC-IN:
     of: C-LOGIC-REG
     value: 4.7uF
@@ -107,9 +108,9 @@ components:
     pins:
     - 1
     - 2
-    note: 'U-ISO''s input bulk, ACROSS its input (ISO_VIN_POS to ISO_VIN_NEG, 24 V): the external input electrolytic
-      RECOM asks for (RECOM-RP20-AW.pdf PD-5 Note 11, which suggests 220uF/100V where a surge test applies; 100uF/50V
-      here, on the rack''s rails). An electrolytic with real ESR, because it damps L-ISO-IN (power-entry.md)'
+    note: 'U-ISO''s input bulk, ACROSS its input (ISO_VIN_POS to ISO_VIN_NEG, 24 V): RECOM''s input electrolytic
+      (RECOM-RPA20-AW.pdf PD-7 filter: C1 47uF/50V; 100uF/50V here). An electrolytic with real ESR, because it damps
+      L-ISO-IN (power-entry.md)'
   C3:
     of: C-BULK-RAIL
     value: 47uF
@@ -239,10 +240,11 @@ components:
     pins:
     - 1
     - 2
-    note: 'The converter branch''s fuse, in its +12 V leg ahead of D2, and the input fuse RECOM requires (RECOM-RP20-AW.pdf
-      PD-4 Note 8: ''not internally fused. An input line fuse must always be used''): the load switch is on U-ISO''s
-      output and cannot see a fault in U-ISO or its input network. One leg is enough - the branch is a series loop,
-      +12 through U-ISO to -12, and C-ISO-Y hangs on the +12 side of it. power-entry.md, ''Fuses on the rails'''
+    note: 'The converter branch''s fuse, in its +12 V leg ahead of D2, and the input fuse RECOM recommends (RECOM-RPA20-AW.pdf
+      PD-5 Note 5: 3A slow blow, ''refer to local safety regulations''; F1 in the PD-7 filter): the load switch
+      is on U-ISO''s output and cannot see a fault in U-ISO or its input network. One leg is enough - the branch
+      is a series loop, +12 through U-ISO to -12, and C-ISO-Y hangs on the +12 side of it. power-entry.md, ''Fuses
+      on the rails'''
   PTC-NEG12:
     of: PTC-RAIL
     value: MF-MSMF020/60-2
@@ -269,17 +271,18 @@ components:
     - 1
     - 2
   U-ISO:
-    value: RP20-2412SAW
+    value: RPA20-2412SAW
     pins:
     - VIN
     - GND
-    - VO
     - 0V
+    - TRIM
+    - VO
     note: 'THE INSTRUMENT''S SUPPLY, ISOLATED (ADR 0027): input across the rack''s +12 V and -12 V, so the instrument''s
       current loops rail to rail and never enters the rack''s ground; output +12 V to the load switch, return on
-      PWR_GND, which meets the module''s grounds only through NT-UMB-MOD and NT-DIG-MOD. The standard RP20-2412SAW
-      has no CTRL and no Trim pin (PD-1 Note 3): always on, 12 V nominal. RECOM requires an input fuse (PD-4 Note
-      8): PTC-ISO'
+      PWR_GND, which meets the module''s grounds only through NT-UMB-MOD and NT-DIG-MOD. The standard RPA20-2412SAW
+      has no CTRL pin (PD-1 Note 2): always on; Trim open = 12 V nominal. Input fuse per RECOM''s PD-5 Note 5: PTC-ISO.
+      The RP20-2412SAW drops into the same holes (footprint''s descr)'
   U-REG-DAC:
     value: LM317LZ
     drawn_as: LM317LZ
@@ -419,6 +422,8 @@ nets:
   - J-PWR-EURO.GATE_15
   GATE_16:
   - J-PWR-EURO.GATE_16
+  TRIM:
+  - U-ISO.TRIM
 external_endpoints:
 - CV_13
 - CV_14
@@ -426,3 +431,4 @@ external_endpoints:
 - GATE_16
 - POS5_11
 - POS5_12
+- TRIM

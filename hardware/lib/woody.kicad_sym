@@ -233,7 +233,7 @@
               (font
                 (size 1.27 1.27))))))
       (embedded_fonts no))
-  (symbol "RP20-xxxxSAW"
+  (symbol "RPA20-xxxxSAW"
     (exclude_from_sim no)
     (in_bom yes)
     (on_board yes)
@@ -242,24 +242,24 @@
       (effects
         (font
           (size 1.27 1.27))))
-    (property "Value" "RP20-xxxxSAW"
+    (property "Value" "RPA20-xxxxSAW"
       (at 8.89 8.89 0)
       (effects
         (font
           (size 1.27 1.27))))
-    (property "Footprint" "woody:Converter_DCDC_RECOM_RP20-xxxxSAW_THT"
+    (property "Footprint" "woody:Converter_DCDC_RECOM_RPA20-RP20-xxxxSAW_THT"
       (at 0 -10.16 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
-    (property "Datasheet" "datasheets/discrete-and-power/RECOM-RP20-AW.pdf"
+    (property "Datasheet" "datasheets/discrete-and-power/RECOM-RPA20-AW.pdf"
       (at -0.635 0 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
-    (property "Description" "RECOM RP20-xxxxSAW (standard part, no suffix): isolated 20 W DC/DC, 9-36 V in (24 V nominal) for the 24xx, 1.6 kVDC I/O, 25.4 x 25.4 x 9.9 mm DIP. Pin numbers and names from the banked datasheet PD-6 (1 +Vin, 2 -Vin, 4 +Vout, 6 -Vout; 3 CTRL and 5 Trim are fitted only with the /P or /N suffix, PD-1 Note 3, so they are not drawn); graphics from KiCad's JTD2024S3V3"
+    (property "Description" "RECOM RPA20-xxxxSAW (standard part, no suffix: no CTRL pin, Trim fitted): isolated 20 W DC/DC, 9-36 V in (24 V nominal) for the 24xx, 1.6 kVDC I/O, 25.4 x 25.4 x 10.2 mm DIP. Pin numbers and names from the banked datasheet PD-8 (1 +Vin, 2 -Vin, 4 -Vout, 5 Trim, 6 +Vout; 3 CTRL only with /P or /N, PD-1 Note 2, so not drawn). The RP20-xxxxSAW fits the same footprint with 4 and 6 swapped and no Trim; graphics from KiCad's JTD2024S3V3"
       (at 0 0 0)
       (effects
         (font
@@ -271,13 +271,13 @@
         (font
           (size 1.27 1.27))
         (hide yes)))
-    (property "ki_fp_filters" "Converter*DCDC*RECOM*RP20*"
+    (property "ki_fp_filters" "Converter*DCDC*RECOM*RPA20*"
       (at 0 0 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
-    (symbol "RP20-xxxxSAW_0_1"
+    (symbol "RPA20-xxxxSAW_0_1"
       (rectangle
         (start -10.16 7.62)
         (end 10.16 -7.62)
@@ -340,7 +340,7 @@
           (type default))
         (fill
           (type none))))
-    (symbol "RP20-xxxxSAW_1_1"
+    (symbol "RPA20-xxxxSAW_1_1"
       (pin passive line
         (at -12.7 5.08 0)
         (length 2.54)
@@ -370,7 +370,18 @@
           (effects
             (font
               (size 1.27 1.27))))
-        (number "4"
+        (number "6"
+          (effects
+            (font
+              (size 1.27 1.27)))))
+      (pin passive line
+        (at 12.7 0 180)
+        (length 2.54)
+        (name "Trim"
+          (effects
+            (font
+              (size 1.27 1.27))))
+        (number "5"
           (effects
             (font
               (size 1.27 1.27)))))
@@ -381,7 +392,7 @@
           (effects
             (font
               (size 1.27 1.27))))
-        (number "6"
+        (number "4"
           (effects
             (font
               (size 1.27 1.27))))))

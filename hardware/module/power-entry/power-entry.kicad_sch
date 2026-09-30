@@ -227,7 +227,7 @@
                 (font
                   (size 1.27 1.27))))))
         (embedded_fonts no))
-    (symbol "woody:RP20-xxxxSAW"
+    (symbol "woody:RPA20-xxxxSAW"
         (exclude_from_sim no)
         (in_bom yes)
         (on_board yes)
@@ -236,24 +236,24 @@
           (effects
             (font
               (size 1.27 1.27))))
-        (property "Value" "RP20-xxxxSAW"
+        (property "Value" "RPA20-xxxxSAW"
           (at 8.89 8.89 0)
           (effects
             (font
               (size 1.27 1.27))))
-        (property "Footprint" "woody:Converter_DCDC_RECOM_RP20-xxxxSAW_THT"
+        (property "Footprint" "woody:Converter_DCDC_RECOM_RPA20-RP20-xxxxSAW_THT"
           (at 0 -10.16 0)
           (effects
             (font
               (size 1.27 1.27))
             (hide yes)))
-        (property "Datasheet" "datasheets/discrete-and-power/RECOM-RP20-AW.pdf"
+        (property "Datasheet" "datasheets/discrete-and-power/RECOM-RPA20-AW.pdf"
           (at -0.635 0 0)
           (effects
             (font
               (size 1.27 1.27))
             (hide yes)))
-        (property "Description" "RECOM RP20-xxxxSAW (standard part, no suffix): isolated 20 W DC/DC, 9-36 V in (24 V nominal) for the 24xx, 1.6 kVDC I/O, 25.4 x 25.4 x 9.9 mm DIP. Pin numbers and names from the banked datasheet PD-6 (1 +Vin, 2 -Vin, 4 +Vout, 6 -Vout; 3 CTRL and 5 Trim are fitted only with the /P or /N suffix, PD-1 Note 3, so they are not drawn); graphics from KiCad's JTD2024S3V3"
+        (property "Description" "RECOM RPA20-xxxxSAW (standard part, no suffix: no CTRL pin, Trim fitted): isolated 20 W DC/DC, 9-36 V in (24 V nominal) for the 24xx, 1.6 kVDC I/O, 25.4 x 25.4 x 10.2 mm DIP. Pin numbers and names from the banked datasheet PD-8 (1 +Vin, 2 -Vin, 4 -Vout, 5 Trim, 6 +Vout; 3 CTRL only with /P or /N, PD-1 Note 2, so not drawn). The RP20-xxxxSAW fits the same footprint with 4 and 6 swapped and no Trim; graphics from KiCad's JTD2024S3V3"
           (at 0 0 0)
           (effects
             (font
@@ -265,13 +265,13 @@
             (font
               (size 1.27 1.27))
             (hide yes)))
-        (property "ki_fp_filters" "Converter*DCDC*RECOM*RP20*"
+        (property "ki_fp_filters" "Converter*DCDC*RECOM*RPA20*"
           (at 0 0 0)
           (effects
             (font
               (size 1.27 1.27))
             (hide yes)))
-        (symbol "RP20-xxxxSAW_0_1"
+        (symbol "RPA20-xxxxSAW_0_1"
           (rectangle
             (start -10.16 7.62)
             (end 10.16 -7.62)
@@ -334,7 +334,7 @@
               (type default))
             (fill
               (type none))))
-        (symbol "RP20-xxxxSAW_1_1"
+        (symbol "RPA20-xxxxSAW_1_1"
           (pin passive line
             (at -12.7 5.08 0)
             (length 2.54)
@@ -364,7 +364,18 @@
               (effects
                 (font
                   (size 1.27 1.27))))
-            (number "4"
+            (number "6"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin passive line
+            (at 12.7 0 180)
+            (length 2.54)
+            (name "Trim"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "5"
               (effects
                 (font
                   (size 1.27 1.27)))))
@@ -375,7 +386,7 @@
               (effects
                 (font
                   (size 1.27 1.27))))
-            (number "6"
+            (number "4"
               (effects
                 (font
                   (size 1.27 1.27))))))
@@ -2226,7 +2237,7 @@
     (property "Footprint" "Capacitor_SMD:CP_Elec_6.3x7.7" (at 92.71 191.77 0) (effects (font (size 1.27 1.27)) hide))
     (property "Datasheet" "" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "C-ISO-BULK" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "U-ISO's input bulk, ACROSS its input (ISO_VIN_POS to ISO_VIN_NEG, 24 V): the external input electrolytic RECOM asks for (RECOM-RP20-AW.pdf PD-5 Note 11, which suggests 220uF/100V where a surge test applies; 100uF/50V here, on the rack's rails). An electrolytic with real ESR, because it damps L-ISO-IN (power-entry.md)" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "U-ISO's input bulk, ACROSS its input (ISO_VIN_POS to ISO_VIN_NEG, 24 V): RECOM's input electrolytic (RECOM-RPA20-AW.pdf PD-7 filter: C1 47uF/50V; 100uF/50V here). An electrolytic with real ESR, because it damps L-ISO-IN (power-entry.md)" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Drawn_as" "C2" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins_source" "pin 1 is the positive terminal" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
@@ -2665,7 +2676,7 @@
     (property "Row" "PTC-ISO" (at 91.44 325.12 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2" (at 91.44 325.12 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins_source" "a two-terminal PTC" (at 91.44 325.12 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "The converter branch's fuse, in its +12 V leg ahead of D2, and the input fuse RECOM requires (RECOM-RP20-AW.pdf PD-4 Note 8: 'not internally fused. An input line fuse must always be used'): the load switch is on U-ISO's output and cannot see a fault in U-ISO or its input network. One leg is enough - the branch is a series loop, +12 through U-ISO to -12, and C-ISO-Y hangs on the +12 side of it. power-entry.md, 'Fuses on the rails'" (at 91.44 325.12 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "The converter branch's fuse, in its +12 V leg ahead of D2, and the input fuse RECOM recommends (RECOM-RPA20-AW.pdf PD-5 Note 5: 3A slow blow, 'refer to local safety regulations'; F1 in the PD-7 filter): the load switch is on U-ISO's output and cannot see a fault in U-ISO or its input network. One leg is enough - the branch is a series loop, +12 through U-ISO to -12, and C-ISO-Y hangs on the +12 side of it. power-entry.md, 'Fuses on the rails'" (at 91.44 325.12 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "Bourns" (at 91.44 325.12 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "MF-MSMF075/33X-2" (at 91.44 325.12 0) (effects (font (size 1.27 1.27)) hide))
     (property "LCSC" "C3760814" (at 91.44 325.12 0) (effects (font (size 1.27 1.27)) hide))
@@ -2780,7 +2791,7 @@
     (property "Row" "C-ISO-IN" (at 345.44 325.12 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2" (at 345.44 325.12 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins_source" "a two-terminal capacitor" (at 345.44 325.12 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "Across U-ISO's input pins, beside them: the ceramic half of the input filter (RECOM's Class B C1 for the RP20-24xxSAW, 4.7uF MLCC, PD-6; 50 V here because it sits across both rails)" (at 345.44 325.12 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Across U-ISO's input pins, beside them: the ceramic half of the input filter (the RPA20 datasheet names no ceramic, PD-7; 4.7uF 50 V beside the pins takes the switching current off C2)" (at 345.44 325.12 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "YAGEO" (at 345.44 325.12 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "CC1206KKX7R9BB475" (at 345.44 325.12 0) (effects (font (size 1.27 1.27)) hide))
     (property "LCSC" "C132170" (at 345.44 325.12 0) (effects (font (size 1.27 1.27)) hide))
@@ -2793,24 +2804,25 @@
   (label "ISO_VIN_POS" (at 345.44 318.77 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid ae1551af-6095-4341-9990-dfec5804a617))
   (wire (pts (xy 345.44 328.93) (xy 345.44 331.47)) (stroke (width 0) (type default)) (uuid c9143ca8-70b7-4743-ab8f-868c9222494d))
   (label "ISO_VIN_NEG" (at 345.44 331.47 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 1e3ac24a-ed7b-4951-b694-886b0f2734cf))
-  (symbol (lib_id "woody:RP20-xxxxSAW") (at 91.44 370.84 0) (unit 1)
+  (symbol (lib_id "woody:RPA20-xxxxSAW") (at 91.44 370.84 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 22530ed2-c0e5-4039-a31e-971570801f6e)
     (property "Reference" "U-ISO" (at 93.98 369.57 0) (effects (font (size 1.27 1.27)) (justify left)))
-    (property "Value" "RP20-2412SAW" (at 93.98 372.11 0) (effects (font (size 1.27 1.27)) (justify left)))
-    (property "Footprint" "woody:Converter_DCDC_RECOM_RP20-xxxxSAW_THT" (at 91.44 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Value" "RPA20-2412SAW" (at 93.98 372.11 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "woody:Converter_DCDC_RECOM_RPA20-RP20-xxxxSAW_THT" (at 91.44 370.84 0) (effects (font (size 1.27 1.27)) hide))
     (property "Datasheet" "" (at 91.44 370.84 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "U-ISO" (at 91.44 370.84 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Pins" "VIN=1(+Vin) GND=2(-Vin) VO=4(+Vout) 0V=6(-Vout)" (at 91.44 370.84 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Pins_source" "datasheets/discrete-and-power/RECOM-RP20-AW.pdf PD-6 Pinning Information (Single): 1 +Vin, 2 -Vin, 3 CTRL, 4 +Vout, 5 Trim, 6 -Vout; 3 and 5 are not fitted on the standard part without the /P or /N suffix (PD-1 Note 3)" (at 91.44 370.84 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "THE INSTRUMENT'S SUPPLY, ISOLATED (ADR 0027): input across the rack's +12 V and -12 V, so the instrument's current loops rail to rail and never enters the rack's ground; output +12 V to the load switch, return on PWR_GND, which meets the module's grounds only through NT-UMB-MOD and NT-DIG-MOD. The standard RP20-2412SAW has no CTRL and no Trim pin (PD-1 Note 3): always on, 12 V nominal. RECOM requires an input fuse (PD-4 Note 8): PTC-ISO" (at 91.44 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "VIN=1(+Vin) GND=2(-Vin) 0V=4(-Vout) TRIM=5(Trim) VO=6(+Vout)" (at 91.44 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/discrete-and-power/RECOM-RPA20-AW.pdf PD-8 Pin Connections (Single): 1 +Vin, 2 -Vin, 3 CTRL, 4 -Vout, 5 Trim, 6 +Vout; 3 is not fitted on the standard part without the /P or /N suffix, Trim is (PD-1 Note 2)" (at 91.44 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "THE INSTRUMENT'S SUPPLY, ISOLATED (ADR 0027): input across the rack's +12 V and -12 V, so the instrument's current loops rail to rail and never enters the rack's ground; output +12 V to the load switch, return on PWR_GND, which meets the module's grounds only through NT-UMB-MOD and NT-DIG-MOD. The standard RPA20-2412SAW has no CTRL pin (PD-1 Note 2): always on; Trim open = 12 V nominal. Input fuse per RECOM's PD-5 Note 5: PTC-ISO. The RP20-2412SAW drops into the same holes (footprint's descr)" (at 91.44 370.84 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "RECOM" (at 91.44 370.84 0) (effects (font (size 1.27 1.27)) hide))
-    (property "MPN" "RP20-2412SAW" (at 91.44 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "RPA20-2412SAW" (at 91.44 370.84 0) (effects (font (size 1.27 1.27)) hide))
     (property "LCSC" "" (at 91.44 370.84 0) (effects (font (size 1.27 1.27)) hide))
     (property "Assembly" "hand" (at 91.44 370.84 0) (effects (font (size 1.27 1.27)) hide))
     (pin "2" (uuid b790773a-4001-4c7e-a340-815cc720f1f9))
     (pin "1" (uuid b49cc9dd-c185-498a-a524-344ce2edff44))
     (pin "4" (uuid 6044c27c-e76c-4c48-91ce-14b10f542482))
+    (pin "5" (uuid e5f7ec62-cd77-408e-b427-e962656dd98d))
     (pin "6" (uuid 4ef66822-2576-41c6-b47b-fb660b32016c))
     (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/c0f0f4e8-2456-5ca2-a9aa-c9e81c4bd91b" (reference "U14") (unit 1))) (project "power-entry" (path "/79e04111-e194-543b-9626-a5c2b61c4922" (reference "U-ISO") (unit 1))))
   )
@@ -2822,6 +2834,7 @@
   (hierarchical_label "ISO_POS12" (shape output) (at 106.68 365.76 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 1f2d3a74-c478-4cb1-993b-00e6c34ba172)
     (property "Dir" "out" (at 106.68 365.76 0) (effects (font (size 1.27 1.27)) hide))
     (property "To" "module/umbilical-load-switch" (at 106.68 365.76 0) (effects (font (size 1.27 1.27)) hide)))
+  (no_connect (at 104.14 370.84) (uuid 439dfe6d-a9d6-435f-a623-a694fb02f080))
   (wire (pts (xy 104.14 375.91999999999996) (xy 106.67999999999999 375.91999999999996)) (stroke (width 0) (type default)) (uuid 2c5f2ab1-7f1c-4988-b6bf-9a9310b2b5d2))
   (hierarchical_label "PWR_GND" (shape passive) (at 106.68 375.92 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 5f08541c-5955-4597-830c-798d3d7b8f9a)
     (property "Dir" "ref" (at 106.68 375.92 0) (effects (font (size 1.27 1.27)) hide))
@@ -2836,7 +2849,7 @@
     (property "Row" "C-ISO-OUT" (at 142.24 370.84 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2" (at 142.24 370.84 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins_source" "pin 1 is the positive terminal" (at 142.24 370.84 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "U-ISO's output capacitor, 100uF/25V: well inside the RP20-2412SAW's 850uF maximum capacitive load (RECOM-RP20-AW.pdf PD-1). The instrument's own capacitance is behind the load switch and charged at its limit, not the converter's" (at 142.24 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "U-ISO's output capacitor, 100uF/25V: well inside the RPA20-2412SAW's 1000uF maximum capacitive load (RECOM-RPA20-AW.pdf PD-1). The instrument's own capacitance is behind the load switch and charged at its limit, not the converter's" (at 142.24 370.84 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "Nichicon" (at 142.24 370.84 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "UCM1E101MCL1GS" (at 142.24 370.84 0) (effects (font (size 1.27 1.27)) hide))
     (property "LCSC" "C729678" (at 142.24 370.84 0) (effects (font (size 1.27 1.27)) hide))
@@ -2863,7 +2876,7 @@
     (property "Row" "C-ISO-Y" (at 193.04 370.84 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2" (at 193.04 370.84 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins_source" "a two-terminal capacitor" (at 193.04 370.84 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "Across the isolation barrier AT the converter, ISO_VIN_POS to PWR_GND: gives the switching common-mode current a 1 nF path home beside U-ISO instead of round the star and the ribbon (RECOM's Class B filter puts 470pF across the barrier on each side, C4/C5, PD-6; one 1 nF here). On the +12 V side so PTC-ISO covers it if it fails short" (at 193.04 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Across the isolation barrier AT the converter, ISO_VIN_POS to PWR_GND: gives the switching common-mode current a 1 nF path home beside U-ISO instead of round the star and the ribbon (RECOM's RPA20 filter has no Y-capacitor, PD-7; one 1 nF here against its 1100pF isolation capacitance, PD-5). On the +12 V side so PTC-ISO covers it if it fails short" (at 193.04 370.84 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "YAGEO" (at 193.04 370.84 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "CC0805JRNPO9BN102" (at 193.04 370.84 0) (effects (font (size 1.27 1.27)) hide))
     (property "LCSC" "C62774" (at 193.04 370.84 0) (effects (font (size 1.27 1.27)) hide))

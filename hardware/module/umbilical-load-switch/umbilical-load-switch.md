@@ -31,13 +31,12 @@ The `Dir` and `Peer` columns are defined once in
 0027): `VCC`, `R-ILIM` and the `ON` divider on `ISO_POS12`, every return on
 `PWR_GND`, the converter's 0V. Nothing below changed value. What changed is
 the supply the analysis assumes, and it is better on every count: RECOM's
-RP20-2412SAW holds 12 V to ± 1.0 % accuracy, ± 0.2 % line, ± 0.2 % load and
-0.02 %/K `[ds RECOM-RP20-AW.pdf PD-4, PD-5]` — **~± 2.2 %** over 40 K `[calc]` —
+RPA20-2412SAW holds 12 V to ± 2.0 % accuracy, ± 0.2 % line, ± 0.1 % load and
+0.02 %/K `[ds RECOM-RPA20-AW.pdf PD-5]` — **~± 3.1 %** over 40 K `[calc]` —
 instead of the bus's ± 5 %, and no rail fuse or entry diode between it and
-`VCC`. The converter's own over-load protection is 150 % of 1.67 A, 2.5 A,
-**typical; no minimum is published** `[PD-4]`, so E6 bench-confirms that it
-clears this switch's 1.10 A worst-case trip — the design intent is that this
-switch, not the converter, decides every start and every fault. The
+`VCC`. The converter's own over-current protection is 110–160 % of 1.67 A
+`[PD-5]`: its minimum, 1.84 A, is above this switch's 1.10 A worst-case trip,
+so this switch — not the converter — decides every start and every fault. The
 `sim/` decks run from the converter, its output resistance and `C-ISO-OUT`, and
 the hot-plug holds `VCC` above the `ON` pin's turn-off at every corner.
 

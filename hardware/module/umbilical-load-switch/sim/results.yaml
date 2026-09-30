@@ -4,10 +4,10 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/umbilical-load-switch/sim/sims.yaml: 9f213d5f6cef97d5
+  hardware/module/umbilical-load-switch/sim/sims.yaml: dfc2b55f3905293b
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
   hardware/carrier/power-entry-instrument/netlist.yaml: baac678182b33b94
-  hardware/module/power-entry/netlist.yaml: 5a1a9b9f44cb4d6c
+  hardware/module/power-entry/netlist.yaml: ccb32c181cd90840
   hardware/module/umbilical-load-switch/sim/loadswitch.cir: 1a73864b1c955377
   hardware/module/umbilical-load-switch/sim/lt1641.inc: 59be165ccd4451a6
   figure:umbilical-current: 359 mA
@@ -30,15 +30,15 @@ sims:
         max_at: nominal
       t_up:
         nominal: 0.112739
-        min: 0.0554
+        min: 0.0549793
         min_at: igate+ itdn- itup- v_bus- vhi- vlo-
-        max: 0.229497
+        max: 0.231181
         max_at: igate- itdn- itup- v_bus+ vhi- vlo-
       i_peak:
         nominal: 0.428768
-        min: 0.394006
+        min: 0.394004
         min_at: igate- itdn- itup- v_bus- vhi- vlo-
-        max: 0.498284
+        max: 0.498287
         max_at: igate+ itdn- itup- v_bus+ vhi- vlo-
     asserts:
     - expr: max['latched'] < 0.5
@@ -54,34 +54,34 @@ sims:
         max: 0.0
         max_at: nominal
       timer_peak:
-        nominal: 0.00396845
-        min: 0.00105759
-        min_at: igate- itdn+ itup- v_bus- vhi+ vlo+
-        max: 0.00693097
-        max_at: igate+ itdn- itup+ v_bus- vhi- vlo-
+        nominal: 0.00396616
+        min: 0.00106385
+        min_at: igate- itdn+ itup- v_bus+ vhi+ vlo+
+        max: 0.00690685
+        max_at: igate+ itdn- itup+ v_bus+ vhi- vlo-
       t_up:
-        nominal: 0.0888192
-        min: 0.0431993
+        nominal: 0.0887859
+        min: 0.0427813
         min_at: igate+ itdn- itup- v_bus- vhi+ vlo+
-        max: 0.182877
+        max: 0.184423
         max_at: igate- itdn- itup- v_bus+ vhi- vlo-
       i_peak:
-        nominal: 14.8485
-        min: 14.0406
+        nominal: 24.6961
+        min: 21.3937
         min_at: igate- itdn- itup+ v_bus- vhi- vlo-
-        max: 15.9258
+        max: 27.6817
         max_at: igate+ itdn- itup- v_bus+ vhi- vlo-
       i_after:
-        nominal: 0.125789
-        min: 0.090997
+        nominal: 0.126582
+        min: 0.0914238
         min_at: igate- itdn- itup- v_bus- vhi- vlo-
-        max: 0.188749
+        max: 0.189659
         max_at: igate+ itdn- itup- v_bus+ vhi+ vlo+
       vcc_min:
-        nominal: 11.9848
-        min: 11.7196
+        nominal: 11.9933
+        min: 11.6208
         min_at: igate+ itdn- itup+ v_bus- vhi+ vlo+
-        max: 12.2502
+        max: 12.3655
         max_at: igate- itdn- itup- v_bus+ vhi- vlo-
     asserts:
     - expr: max['latched'] < 0.5 and max['timer_peak'] < 1.233
@@ -102,22 +102,22 @@ sims:
         max: 0.0
         max_at: nominal
       timer_peak:
-        nominal: 0.00505568
-        min: 0.00137662
+        nominal: 0.00504208
+        min: 0.00137793
         min_at: igate- itdn+ itup- v_bus- vhi+ vlo+
-        max: 0.0610364
+        max: 0.0610552
         max_at: igate+ itdn- itup+ v_bus- vhi- vlo-
       t_up:
-        nominal: 0.0937456
-        min: 0.0465663
+        nominal: 0.0937372
+        min: 0.0461465
         min_at: igate+ itdn- itup- v_bus- vhi+ vlo+
-        max: 0.191373
+        max: 0.193022
         max_at: igate- itdn- itup- v_bus+ vhi- vlo-
       i_after:
-        nominal: 0.274428
-        min: 0.175491
+        nominal: 0.274525
+        min: 0.175353
         min_at: igate- itdn- itup- v_bus- vhi- vlo-
-        max: 0.536665
+        max: 0.536666
         max_at: igate+ itdn- itup- v_bus+ vhi- vlo+
     asserts:
     - expr: max['latched'] < 0.5 and max['timer_peak'] < 1.233
@@ -127,10 +127,10 @@ sims:
     corners: 3
     measures:
       latched:
-        nominal: 1.01102
-        min: 1.01049
-        min_at: itup+
-        max: 1.01104
+        nominal: 1.01057
+        min: 1.01057
+        min_at: nominal
+        max: 1.01116
         max_at: itup-
       v_out_max:
         nominal: 8.04828
