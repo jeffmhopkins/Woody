@@ -36,7 +36,7 @@ import sys
 import math
 
 import pcbnew
-from shapely.geometry import Point, Polygon, box
+from shapely.geometry import LineString, Point, Polygon, box
 from shapely.ops import unary_union
 
 GRID = 0.2
@@ -788,3 +788,408 @@ def fill_zones(path):
     board.BuildConnectivity()
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
     pcbnew.SaveBoard(path, board)
+
+
+# ------------------------------------------------------------------ multi-layer boards: planes
+
+class Obstacles:
+    """Every piece of copper, hole, keep-out and silkscreen box on a board, indexed, for
+    the pieces a multi-layer board's router lays itself before the autorouter: a plane
+    net's vias (fanout) and the breath pair (route_pair). In PCB mm; each entry is
+    (geometry, net, layers - a set of 'F' / 'B', the outer layers - , kind)."""
+
+    def __init__(self, board, lay):
+        self.board, self.lay = board, lay
+        r = lay["rules"]
+        self.clear, self.via, self.drill = r["clearance"], r["via"], r["via_drill"]
+        self.edge = r["edge_clearance"]
+        fab = lay.get("fab") or {}
+        self.h2h = fab.get("hole_to_hole", 0.25)
+        self.hclear = fab.get("hole_clearance", self.clear)
+        self.items = []
+        for fp in board.GetFootprints():
+            for pad in fp.Pads():
+                if pad.HasHole():
+                    c = Point(TO(pad.GetPosition().x), TO(pad.GetPosition().y))
+                    self.items.append((c.buffer(TO(pad.GetDrillSize().x) / 2), "", {"F", "B"},
+                                       "npth" if pad.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH else "hole"))
+                if pad.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH:
+                    continue
+                for L, lid in (("F", pcbnew.F_Cu), ("B", pcbnew.B_Cu)):
+                    if pad.IsOnLayer(lid):
+                        self.items.append((pad_geom_on(pad, lid), pad.GetNetname(), {L}, "pad" if pad.HasHole() else "smd"))
+        for z in board.Zones():
+            if z.GetIsRuleArea() and (z.GetDoNotAllowVias() or z.GetDoNotAllowTracks()):
+                ls = {k for k, lid in (("F", pcbnew.F_Cu), ("B", pcbnew.B_Cu)) if z.IsOnLayer(lid)}
+                for i in range(z.Outline().OutlineCount()):
+                    o = z.Outline().Outline(i)
+                    self.items.append((Polygon([(TO(o.CPoint(k).x), TO(o.CPoint(k).y)) for k in range(o.PointCount())]),
+                                       None, ls, "keepout"))
+        silk = [d for d in board.GetDrawings() if d.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS)]
+        for fp in board.GetFootprints():
+            silk += [g for g in fp.GraphicalItems() if g.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS)]
+        for it in silk:
+            bb = it.GetBoundingBox()
+            self.items.append((box(TO(bb.GetLeft()), TO(bb.GetTop()), TO(bb.GetRight()), TO(bb.GetBottom())), None,
+                               {"F" if it.GetLayer() == pcbnew.F_SilkS else "B"}, "silk"))
+        for t in board.GetTracks():
+            self.add_item(t)
+        self.outline = board_outline_with_holes(board)
+        from shapely.prepared import prep
+        self.inner = prep(self.outline.buffer(-self.edge))
+        self._tree = None
+
+    def add(self, geom, net, layers, kind):
+        self.items.append((geom, net, layers, kind))
+        self._tree = None
+
+    def add_item(self, t):
+        """A track or via already on the board, as an obstacle."""
+        if isinstance(t, pcbnew.PCB_VIA):
+            c = Point(TO(t.GetPosition().x), TO(t.GetPosition().y))
+            self.add(c.buffer(TO(t.GetWidth(pcbnew.F_Cu)) / 2, 16), t.GetNetname(), {"F", "B"}, "via")
+            self.add(c.buffer(TO(t.GetDrillValue()) / 2, 16), t.GetNetname(), {"F", "B"}, "vhole")
+        elif t.GetLayer() in (pcbnew.F_Cu, pcbnew.B_Cu):
+            a, b = t.GetStart(), t.GetEnd()
+            g = LineString([(TO(a.x), TO(a.y)), (TO(b.x), TO(b.y))]).buffer(TO(t.GetWidth()) / 2, 8) \
+                if (a.x, a.y) != (b.x, b.y) else Point(TO(a.x), TO(a.y)).buffer(TO(t.GetWidth()) / 2)
+            self.add(g, t.GetNetname(), {"F" if t.GetLayer() == pcbnew.F_Cu else "B"}, "track")
+
+    def near(self, g, pad=1.0):
+        from shapely.strtree import STRtree
+        if self._tree is None:
+            self._tree = STRtree([it[0] for it in self.items])
+        return [self.items[i] for i in self._tree.query(g.buffer(pad))]
+
+    def via_ok(self, x, y, net):
+        """A via of `net` at (x, y): its copper clear of every other net by the clearance,
+        off every SMD pad (its own net's too: a via in a pad wicks its solder), its hole
+        the board house's hole-to-hole from every other, off silkscreen and keep-outs,
+        and inside the board by the edge clearance."""
+        v = Point(x, y).buffer(self.via / 2, 16)
+        if not self.inner.contains(v):
+            return False
+        hole = Point(x, y).buffer(self.drill / 2, 16)
+        for g, n, ls, kind in self.near(v):
+            if kind in ("hole", "vhole", "npth"):
+                gap = self.h2h if kind != "vhole" else max(self.h2h, self.clear)
+                if g.distance(hole) < gap - 1e-6 or (kind == "npth" and g.distance(v) < self.hclear):
+                    return False
+            elif kind in ("keepout", "silk"):
+                if g.intersects(v):
+                    return False
+            elif kind == "smd" and n == net:
+                if g.distance(v) < OWN_PAD_GAP:
+                    return False
+            elif n != net and g.distance(v) < self.clear - 1e-6:
+                return False
+        return True
+
+    def track_ok(self, a, b, width, net, layer):
+        """A straight track a -> b on layer ('F' / 'B') clear of every other net's copper,
+        off keep-outs and unplated holes, inside the board by the edge clearance."""
+        g = LineString([a, b]).buffer(width / 2, 8) if a != b else Point(a).buffer(width / 2)
+        if not self.inner.contains(g):
+            return False
+        for og, n, ls, kind in self.near(g):
+            if layer not in ls or kind in ("silk", "hole", "vhole"):
+                continue
+            if kind == "npth":
+                if og.distance(g) < self.hclear:
+                    return False
+            elif kind == "keepout":
+                if og.intersects(g):
+                    return False
+            elif n != net and og.distance(g) < self.clear - 1e-6:
+                return False
+        return True
+
+
+def pad_geom_on(pad, layer):
+    poly = pad.GetEffectivePolygon(layer)
+    pts = []
+    for i in range(poly.OutlineCount()):
+        ol = poly.Outline(i)
+        pts.append(Polygon([(TO(ol.CPoint(j).x), TO(ol.CPoint(j).y)) for j in range(ol.PointCount())]))
+    return unary_union(pts)
+
+
+def board_outline_with_holes(board):
+    """The board's Edge.Cuts as one shapely polygon, its inner cut-outs (a routed hole,
+    a slot) as holes."""
+    ol = pcbnew.SHAPE_POLY_SET()
+    if not board.GetBoardPolygonOutlines(ol):
+        raise SystemExit("route: the Edge.Cuts outline is not closed")
+    ring = lambda c: [(TO(c.CPoint(k).x), TO(c.CPoint(k).y)) for k in range(c.PointCount())]
+    return unary_union([Polygon(ring(ol.Outline(i)), [ring(ol.Hole(i, h)) for h in range(ol.HoleCount(i))])
+                        for i in range(ol.OutlineCount())])
+
+
+def plane_regions(board, lay):
+    """net -> where that net's plane copper is, in PCB mm: a plane's layer less each
+    island's moat on it, and each island. A via for the net must stand inside."""
+    import pcb
+    out = {}
+    outline = board_outline_with_holes(board)
+    isl = []
+    for spec in lay.get("islands") or []:
+        p = Polygon([pcb.to_pcb(x, y) for x, y in spec["outline"]]).intersection(outline)
+        isl.append((spec, p, p.buffer(spec["moat"], join_style=2)))
+    for pl in lay.get("planes") or []:
+        reg = outline
+        for spec, p, moat in isl:
+            if spec["layer"] == pl["layer"]:
+                reg = reg.difference(moat)
+        out[pl["net"]] = unary_union([out[pl["net"]], reg]) if pl["net"] in out else reg
+    for spec, p, moat in isl:
+        out[spec["net"]] = p
+    return out
+
+
+def lay_via(board, obs, net, x, y, locked=True):
+    v = pcbnew.PCB_VIA(board)
+    v.SetPosition(pcbnew.VECTOR2I(MM(x), MM(y)))
+    v.SetWidth(MM(obs.via))
+    v.SetDrill(MM(obs.drill))
+    v.SetNet(board.FindNet(net))
+    v.SetLocked(locked)
+    board.Add(v)
+    obs.add_item(v)
+    return v
+
+
+def lay_track(board, obs, net, a, b, width, layer, locked=True):
+    t = pcbnew.PCB_TRACK(board)
+    t.SetStart(pcbnew.VECTOR2I(MM(a[0]), MM(a[1])))
+    t.SetEnd(pcbnew.VECTOR2I(MM(b[0]), MM(b[1])))
+    t.SetWidth(MM(width))
+    t.SetLayer(pcbnew.F_Cu if layer == "F" else pcbnew.B_Cu)
+    t.SetNet(board.FindNet(net))
+    t.SetLocked(locked)
+    board.Add(t)
+    obs.add_item(t)
+    return t
+
+
+def fanout(board, lay, obs):
+    """Every SMD pad on a plane net (layout.yaml fanout:) gets its own via into that
+    plane, on a short straight stub from the pad's centre: the nearest spot, searching
+    away from the part first, where the via is legal (Obstacles.via_ok), inside its
+    plane's region by the via's radius and a margin, and the stub clear of every other
+    net. A through-hole pad meets the plane itself. A pad in its island's `off_island:`
+    is left to the route that serves it (the pair). Both are LOCKED, so the autorouter
+    keeps them. Returns the pads no via fits by."""
+    regions = plane_regions(board, lay)
+    width = (lay.get("net_classes") or {}).get("plane_nets", {}).get("track", lay["rules"]["track"])
+    skip = {p for spec in lay.get("islands") or [] for p in spec.get("off_island", [])}
+    missed, n = [], 0
+    for fp in sorted(board.GetFootprints(), key=lambda f: f.GetReference()):
+        for pad in sorted(fp.Pads(), key=lambda p: p.GetNumber()):
+            net = pad.GetNetname()
+            name = f"{fp.GetReference()}.{pad.GetNumber()}"
+            if net not in (lay.get("fanout") or []) or pad.HasHole() or name in skip:
+                continue
+            if any(q.HasHole() and q.GetNumber() == pad.GetNumber() for q in fp.Pads()):
+                continue            # a plated hole's face pad (a mount's): the hole meets the plane
+            L = "F" if pad.IsOnLayer(pcbnew.F_Cu) else "B"
+            pg = pad_geom_on(pad, pcbnew.F_Cu if L == "F" else pcbnew.B_Cu)
+            c = pg.centroid
+            region = regions[net].buffer(-(obs.via / 2 + 0.3))
+            fc = Point(TO(fp.GetPosition().x), TO(fp.GetPosition().y))
+            away = math.atan2(c.y - fc.y, c.x - fc.x) if fc.distance(c) > 0.05 else 0.0
+            found = None
+            for k in range(3, 41):
+                r = k * 0.1
+                for da in range(0, 181, 15):
+                    for sgn in ((1,) if da in (0, 180) else (1, -1)):
+                        a = away + sgn * math.radians(da)
+                        x, y = c.x + r * math.cos(a), c.y + r * math.sin(a)
+                        p = Point(x, y)
+                        if pg.buffer(obs.via / 2 + OWN_PAD_GAP).contains(p) or not region.contains(p):
+                            continue
+                        if obs.via_ok(x, y, net) and obs.track_ok((c.x, c.y), (x, y), width, net, L):
+                            found = (x, y)
+                            break
+                    if found:
+                        break
+                if found:
+                    break
+            if not found:
+                missed.append(f"{name} ({net}): no legal via within 4 mm")
+                continue
+            lay_via(board, obs, net, *found)
+            lay_track(board, obs, net, (c.x, c.y), found, width, L)
+            n += 1
+    print(f"route: fanout - {n} plane via(s); {len(missed)} pad(s) without one")
+    for m in missed:
+        print("  fanout: " + m)
+    return missed
+
+
+class Grid:
+    """A lazy routing grid on one outer layer for one kind of track: a cell is free when
+    a track of half-width `half` centred there keeps the clearance to every obstacle on
+    the layer except copper of the nets in `own`, and stays inside the edge clearance.
+    Cells are tested as the search reaches them (the board is 300 mm long; a whole grid
+    of shapely tests is minutes, a search's worth is seconds)."""
+
+    def __init__(self, obs, layer, half, own=()):
+        from shapely.prepared import prep
+        self.obs, self.L, self.own = obs, layer, set(own)
+        self.rad = half + obs.clear + SLACK
+        self.x0, self.y0 = obs.outline.bounds[:2]
+        self.inner = prep(obs.outline.buffer(-(obs.edge + half + SLACK)))
+        self.cache = {}
+
+    def xy(self, c):
+        return (self.x0 + c[0] * GRID, self.y0 + c[1] * GRID)
+
+    def cell(self, x, y):
+        return (round((x - self.x0) / GRID), round((y - self.y0) / GRID))
+
+    def free(self, i, j):
+        if (i, j) not in self.cache:
+            p = Point(*self.xy((i, j)))
+            ok = self.inner.contains(p)
+            if ok:
+                for g, n, ls, kind in self.obs.near(p, self.rad):
+                    if self.L not in ls or kind in ("silk", "hole", "vhole") or (n in self.own and kind != "keepout"):
+                        continue
+                    if g.distance(p) < self.rad:
+                        ok = False
+                        break
+            self.cache[(i, j)] = ok
+        return self.cache[(i, j)]
+
+    def astar(self, starts, goals, gxy):
+        """starts {cell: cost}; goals a set of cells; gxy the goal's point (the heuristic).
+        8-connected, no corner cutting, turns costed as pcb_route's own router."""
+        ti, tj = (gxy[0] - self.x0) / GRID, (gxy[1] - self.y0) / GRID
+        h = lambda i, j: math.hypot(i - ti, j - tj)
+        moves = [(1, 0, 1), (-1, 0, 1), (0, 1, 1), (0, -1, 1), (1, 1, DIAG), (1, -1, DIAG), (-1, 1, DIAG), (-1, -1, DIAG)]
+        openq, came, cost, seen = [], {}, {}, set()
+        for c, c0 in starts.items():
+            cost[c] = c0
+            heapq.heappush(openq, (c0 + h(*c), c0, c, None))
+        free = self.free
+        while openq:
+            f, g, cur, pd = heapq.heappop(openq)
+            if cur in seen:
+                continue
+            seen.add(cur)
+            if cur in goals:
+                path = [cur]
+                while path[-1] in came:
+                    path.append(came[path[-1]])
+                return path[::-1]
+            if len(seen) > 400000:
+                return None
+            for di, dj, c in moves:
+                nxt = (cur[0] + di, cur[1] + dj)
+                if nxt in seen or not free(*nxt) or (di and dj and not (free(cur[0] + di, cur[1]) and free(cur[0], cur[1] + dj))):
+                    continue
+                ng = g + c + (TURN.get(steps45(pd, (di, dj)), 0) if pd else 0)
+                if ng < cost.get(nxt, 1e18):
+                    cost[nxt], came[nxt] = ng, cur
+                    heapq.heappush(openq, (ng + h(*nxt), ng, nxt, (di, dj)))
+        return None
+
+
+def corners(path):
+    """A grid path's cells where its direction changes, and its two ends."""
+    if len(path) < 3:
+        return list(path)
+    return [path[0]] + [path[k] for k in range(1, len(path) - 1)
+                        if (path[k][0] - path[k - 1][0], path[k][1] - path[k - 1][1]) != (path[k + 1][0] - path[k][0], path[k + 1][1] - path[k][1])] + [path[-1]]
+
+
+def route_pair(board, lay, obs, spec):
+    """Two nets side by side on one layer (layout.yaml pairs:) - a sensor's signal and
+    its reference taken at the sensor. The coupled run starts at the first of `through:`
+    (body mm: past the crowded corner the pads are in) and ends beside the `to` pads; it
+    is routed as ONE fat track - two widths and their gap - by A* on the 0.2 mm grid
+    through each `through:` point, and its two legs are that centreline offset each way
+    by half a width and half the gap. Each leg then reaches its own pad at each end by
+    a single track of its net (A* again, the other leg an obstacle), so the reference
+    leg really starts at the sensor's pin. Locked, so the autorouter keeps them.
+    Returns what it could not do."""
+    import pcb
+    nets, w, gap, L = spec["nets"], spec["width"], spec["gap"], {"F.Cu": "F", "B.Cu": "B"}[spec["layer"]]
+    lid = pcbnew.F_Cu if L == "F" else pcbnew.B_Cu
+    pads = {}
+    for p in spec["from"] + spec["to"]:
+        ref, num = p.split(".")
+        pad = board.FindFootprintByReference(ref).FindPadByNumber(num)
+        pads[p] = pad_geom_on(pad, lid)
+    fat = Grid(obs, L, w + gap / 2)
+    stops = [pcb.to_pcb(*p) for p in spec.get("through", [])]
+    if not stops:
+        return [f"pair {nets}: give it a through: point to start the coupled run at"]
+    tx = sum(pads[p].centroid.x for p in spec["to"]) / 2
+    ty = sum(pads[p].centroid.y for p in spec["to"]) / 2
+    c0 = fat.cell(*stops[0])
+    if not fat.free(*c0):
+        return [f"pair {nets}: its first through: point is not free for the pair"]
+    # the far end: the free cells within 5 mm of the `to` pads' midpoint
+    ci, cj = fat.cell(tx, ty)
+    dst = {(ci + di, cj + dj) for di in range(-25, 26) for dj in range(-25, 26)
+           if di * di + dj * dj <= 625 and fat.free(ci + di, cj + dj)}
+    path, starts = [c0], {c0: 0}
+    for k, stop in enumerate(stops[1:] + [(tx, ty)]):
+        if k < len(stops) - 1:
+            gi, gj = fat.cell(*stop)
+            goals = {(gi + a, gj + b) for a in range(-2, 3) for b in range(-2, 3) if fat.free(gi + a, gj + b)}
+        else:
+            goals = dst
+        seg = fat.astar(starts, goals, stop) if goals else None
+        if seg is None:
+            return [f"pair {nets}: no way through for the pair on {spec['layer']} (to through: point {k + 2})"
+                    if k < len(stops) - 1 else f"pair {nets}: no way to its far end on {spec['layer']}"]
+        path += seg[1:]
+        starts = {path[-1]: 0}
+    centre = LineString([fat.xy(c) for c in corners(path)])
+    legs = [centre.offset_curve(s * (w + gap) / 2, join_style=2, mitre_limit=2.0) for s in (1, -1)]
+    # which leg is which net: the one whose ends lie nearer that net's pads
+    ends = lambda leg: (Point(leg.coords[0]), Point(leg.coords[-1]))
+    want = [pads[spec["from"][0]].centroid, pads[spec["to"][0]].centroid, pads[spec["from"][1]].centroid, pads[spec["to"][1]].centroid]
+    d = lambda a, b: sum(p.distance(q) for p, q in zip(ends(a) + ends(b), want))
+    if d(legs[1], legs[0]) < d(legs[0], legs[1]):
+        legs = legs[::-1]
+    for leg, net in zip(legs, nets):
+        pts = list(leg.coords)
+        for a, b in zip(pts, pts[1:]):
+            lay_track(board, obs, net, a, b, w, L)
+    # each leg's end to its own pad: a single track of the leg's net
+    report = []
+    for leg, net, pf, pt in zip(legs, nets, spec["from"], spec["to"]):
+        pts = list(leg.coords)
+        for end, pname in ((pts[0], pf), (pts[-1], pt)):
+            g = Grid(obs, L, w / 2, own={net})
+            pg = pads[pname].buffer(-0.05)
+            bx0, by0, bx1, by1 = pads[pname].bounds
+            goals = {(i, j) for i in range(g.cell(bx0, by0)[0], g.cell(bx1, by1)[0] + 1)
+                     for j in range(g.cell(bx0, by0)[1], g.cell(bx1, by1)[1] + 1) if pg.contains(Point(*g.xy((i, j))))}
+            s0 = g.cell(*end)
+            seg = g.astar({s0: 0}, goals, (pads[pname].centroid.x, pads[pname].centroid.y)) if goals else None
+            if seg is None:
+                report.append(f"pair {net}: no way from the pair's end to {pname} - left to the autorouter")
+                continue
+            pts2 = [end] + [g.xy(c) for c in corners(seg)[1:]]
+            for a, b in zip(pts2, pts2[1:]):
+                if math.dist(a, b) > 1e-3:
+                    lay_track(board, obs, net, a, b, w, L)
+    print(f"route: pair {' / '.join(nets)} - {centre.length:.1f} mm side by side on {spec['layer']}")
+    return report
+
+
+def prepare(board, lay):
+    """A multi-layer board's own routing before the autorouter (tools/pcb.py
+    `route: freerouting`): the pairs, then every plane net's fanout. Returns the report."""
+    obs = Obstacles(board, lay)
+    report = []
+    for spec in lay.get("pairs") or []:
+        report += route_pair(board, lay, obs, spec)
+    report += fanout(board, lay, obs)
+    for r in report:
+        print("route: " + r)
+    return report

@@ -43,6 +43,8 @@ from sch import parse, find, kicad_env  # noqa: E402
 
 import pcbnew  # noqa: E402
 
+sys.modules.setdefault("pcb", sys.modules[__name__])    # pcb_main imports this module by name
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FPDIRS = {"woody": os.path.join(ROOT, "hardware", "lib", "woody.pretty")}
 SYS_FP = "/usr/share/kicad/footprints"
@@ -172,7 +174,11 @@ def new_board(bdir, lay, geo):
     nc.SetTrackWidth(MM(rules["track"]))
     nc.SetViaDiameter(MM(rules["via"]))
     nc.SetViaDrill(MM(rules["via_drill"]))
-    board.SetCopperLayerCount(2)
+    board.SetCopperLayerCount(int(lay.get("layers", 2)))
+    # a plane layer is a POWER layer: KiCad's DSN export tells a router not to run
+    # tracks on it, and the stackup names it so
+    for pl in lay.get("planes") or []:
+        board.SetLayerType(board.GetLayerID(pl["layer"]), pcbnew.LT_POWER)
     return board
 
 
@@ -198,14 +204,14 @@ def pads_centre(fp):
     return (sum(pcbnew.ToMM(p.x) for p in ps) / len(ps), sum(pcbnew.ToMM(p.y) for p in ps) / len(ps))
 
 
-def place_chain(board, fp, geo):
+def place_chain(board, fp, geo, bottom=True):
     """The chain header on the bottom, its mouth facing along the body the way
     the body CAD says: the rotation is FOUND, not assumed - on the bottom KiCad
     mirrors rotation, and the footprint's own frame puts the mouth at +x from
     pin 1's row (pads 1 -> 2 point at the mouth)."""
     (tx, ty), d = chain_target(geo)
     for rot in (0, 90, 180, 270):
-        place(board, fp, 0, 0, rot, True)
+        place(board, fp, 0, 0, rot, bottom)
         p1, p2 = fp.FindPadByNumber("1").GetPosition(), fp.FindPadByNumber("2").GetPosition()
         dx, dy = pcbnew.ToMM(p2.x - p1.x), pcbnew.ToMM(p2.y - p1.y)
         if abs(dy) < 1e-3 and dx * d > 0:
@@ -263,17 +269,25 @@ def network_parts(lay, geo, comps):
                 sys.exit(f"pcb: networks: pattern is written for switches at 0 deg; {key}'s switch is at {sr} - "
                          "give it an except: entry with its own `at`")
             x, y = sx + spec["offset"][0], sy + spec["offset"][1]
-        d, c = spec["leg"], spec["c"]
-        if spec["axis"] == "x":
-            rot = 0 if d > 0 else 180         # S's pad 1 (KEY) and P's pad 2 (KEY) toward the junction
-            out[ref_of(comps, "R-KEY-SER", key)] = [x + d * NET_PITCH, y, rot]
-            out[ref_of(comps, "R-KEY-PU", key)] = [x - d * NET_PITCH, y, rot]
-            out[ref_of(comps, "C-KEY", key)] = [x, y + c * NET_PITCH, 270 if c > 0 else 90]
-        else:
-            rot = 90 if d > 0 else 270        # pad 1 faces -y at 90 and +y at 270 (measured through place())
-            out[ref_of(comps, "R-KEY-SER", key)] = [x, y + d * NET_PITCH, rot]
-            out[ref_of(comps, "R-KEY-PU", key)] = [x, y - d * NET_PITCH, rot]
-            out[ref_of(comps, "C-KEY", key)] = [x + c * NET_PITCH, y, 0 if c > 0 else 180]
+        out.update(t_parts(comps, key, x, y, spec))
+    return out
+
+
+def t_parts(comps, key, x, y, spec):
+    """One key's T, its junction at body (x, y): the three parts' places, as network_parts
+    describes (and a main board's spare positions, which have no switch, take directly)."""
+    out = {}
+    d, c = spec["leg"], spec["c"]
+    if spec["axis"] == "x":
+        rot = 0 if d > 0 else 180         # S's pad 1 (KEY) and P's pad 2 (KEY) toward the junction
+        out[ref_of(comps, "R-KEY-SER", key)] = [x + d * NET_PITCH, y, rot]
+        out[ref_of(comps, "R-KEY-PU", key)] = [x - d * NET_PITCH, y, rot]
+        out[ref_of(comps, "C-KEY", key)] = [x, y + c * NET_PITCH, 270 if c > 0 else 90]
+    else:
+        rot = 90 if d > 0 else 270        # pad 1 faces -y at 90 and +y at 270 (measured through place())
+        out[ref_of(comps, "R-KEY-SER", key)] = [x, y + d * NET_PITCH, rot]
+        out[ref_of(comps, "R-KEY-PU", key)] = [x, y - d * NET_PITCH, rot]
+        out[ref_of(comps, "C-KEY", key)] = [x + c * NET_PITCH, y, 0 if c > 0 else 180]
     return out
 
 
@@ -338,6 +352,10 @@ def fit_footprint_silk(board, fab):
     from shapely.geometry import LineString, Point, Polygon
     wmin, gap = fab["silk_line_min"], fab["silk_to_pad"]
     removed = {}
+    # and a stroke nearer the board's edge than the silk clearance, or off it (a
+    # connector whose body overhangs the edge on purpose: the main board's J-UMB)
+    ol = pcbnew.SHAPE_POLY_SET()
+    inside = shapely_of(ol).buffer(-gap) if board.GetBoardPolygonOutlines(ol) else None
     for fp in board.GetFootprints():
         pads = []
         for p in fp.Pads():
@@ -370,7 +388,8 @@ def fit_footprint_silk(board, fab):
             if item.IsFilled():
                 g = Polygon(g.coords) if sh != pcbnew.SHAPE_T_CIRCLE else Polygon(g)
             side = pcbnew.B_Cu if item.GetLayer() == pcbnew.B_SilkS else pcbnew.F_Cu
-            if any(p.IsOnLayer(side) and g.distance(pg) - pcbnew.ToMM(item.GetWidth()) / 2 < gap for p, pg in pads):
+            if any(p.IsOnLayer(side) and g.distance(pg) - pcbnew.ToMM(item.GetWidth()) / 2 < gap for p, pg in pads) \
+                    or (inside is not None and not inside.contains(g.buffer(pcbnew.ToMM(item.GetWidth()) / 2))):
                 fp.Remove(item)
                 removed.setdefault(fp.GetFPID().GetLibItemName().wx_str(), set()).add(fp.GetReference())
     for name, refs in sorted(removed.items()):
@@ -645,6 +664,93 @@ def add_top_silk(board, lay, comps):
             silk_text(board, line, x, y + i * SILK_H * 1.8, top=True, justify=-1)
 
 
+def add_silk_generic(board, lay, comps):
+    """A board's silkscreen without a key board's fixed patterns (the main board): every
+    part's reference beside it on its own face - over it, under it, then to either side,
+    then reading along it - off every courtyard, pad and hole on that face and 0.25 mm off
+    every other label; a switch's with the key it is (SW1 LT1); the title block at
+    layout.yaml silk: `at` on the parts' face. A reference with no clear place is left
+    off and named (not fatal: the fab layer still carries it), so a crowded corner is
+    visible rather than silently unlabelled."""
+    _TWB[0] = board
+    edge = board.GetBoardEdgesBoundingBox()
+    ol = pcbnew.SHAPE_POLY_SET()
+    board.GetBoardPolygonOutlines(ol)
+    inside = shapely_of(ol).buffer(-0.5)
+    from shapely.geometry import box as _box
+    from shapely.strtree import STRtree
+    keep = {True: [], False: []}          # top face?, boxes
+    for fp in board.GetFootprints():
+        for it in fp.GraphicalItems():
+            if it.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS):
+                b = it.GetBoundingBox()
+                keep[it.GetLayer() == pcbnew.F_SilkS].append(_box(pcbnew.ToMM(b.GetLeft()) - 0.1, pcbnew.ToMM(b.GetTop()) - 0.1,
+                                                                   pcbnew.ToMM(b.GetRight()) + 0.1, pcbnew.ToMM(b.GetBottom()) + 0.1))
+        for top, cl in ((True, pcbnew.F_CrtYd), (False, pcbnew.B_CrtYd)):
+            cy = fp.GetCourtyard(cl)
+            if cy.OutlineCount():
+                b = cy.BBox()
+                keep[top].append(_box(pcbnew.ToMM(b.GetLeft()), pcbnew.ToMM(b.GetTop()), pcbnew.ToMM(b.GetRight()), pcbnew.ToMM(b.GetBottom())))
+        for p in fp.Pads():
+            b, m = p.GetBoundingBox(), 0.3
+            g = _box(pcbnew.ToMM(b.GetLeft()) - m, pcbnew.ToMM(b.GetTop()) - m, pcbnew.ToMM(b.GetRight()) + m, pcbnew.ToMM(b.GetBottom()) + m)
+            for top, L in ((True, pcbnew.F_Cu), (False, pcbnew.B_Cu)):
+                if p.IsOnLayer(L) or p.HasHole():
+                    keep[top].append(g)
+    trees = {t: STRtree(v) for t, v in keep.items()}
+    placed = {True: [], False: []}
+    skipped = []
+
+    def free(top, g):
+        if not inside.contains(g):
+            return False
+        if any(g.intersects(keep[top][i]) for i in trees[top].query(g)):
+            return False
+        return not any(g.distance(t) < 0.25 for t in placed[top])
+
+    def put(top, text, x, y, angle=0, justify=0):
+        silk_text(board, text, x, y, top=top, angle=angle, justify=justify)
+
+    for fp in sorted(board.GetFootprints(), key=lambda f: f.GetReference()):
+        ref = fp.GetReference()
+        c = comps.get(ref)
+        if c is None:
+            continue                                    # the mounts: board-only, no symbol
+        top = not fp.IsFlipped()
+        text = f"{ref} {c['sheet']}" if c["row"] == "SW1-n" else ref + (" DNP" if fp.IsDNP() else "")
+        cy = fp.GetCourtyard(pcbnew.F_CrtYd if top else pcbnew.B_CrtYd)
+        b = cy.BBox() if cy.OutlineCount() else fp.GetBoundingBox(False, False)
+        x0, y0, x1, y1 = pcbnew.ToMM(b.GetLeft()), pcbnew.ToMM(b.GetTop()), pcbnew.ToMM(b.GetRight()), pcbnew.ToMM(b.GetBottom())
+        w, h = text_w(text) / 2, SILK_H / 2
+        cx, cy_ = (x0 + x1) / 2, (y0 + y1) / 2
+        spots = [(cx, y0 - 0.2 - h, 0), (cx, y1 + 0.2 + h, 0), (x0 - 0.3 - w, cy_, 0), (x1 + 0.3 + w, cy_, 0),
+                 (x0 - 0.3 - h, cy_, 90), (x1 + 0.3 + h, cy_, 90), (cx, y0 - 0.3 - w, 90), (cx, y1 + 0.3 + w, 90)]
+        for px, py, ang in spots:
+            g = _box(px - w, py - h, px + w, py + h) if not ang else _box(px - h, py - w, px + h, py + w)
+            if free(top, g):
+                put(top, text, px, py, ang)
+                placed[top].append(g)
+                break
+        else:
+            skipped.append(ref)
+    t = lay.get("silk", {})
+    if t:
+        tb = board.GetTitleBlock()
+        tb.SetTitle(t["title"])
+        tb.SetRevision(t["rev"])
+        tb.SetDate(t["date"])
+        board.SetTitleBlock(tb)
+        x, y = to_pcb(*t["at"])
+        for i, line in enumerate([t["title"], f"rev {t['rev']}  {t['date']}"]):
+            g = _box(x, y + i * SILK_H * 1.8 - SILK_H / 2, x + text_w(line), y + i * SILK_H * 1.8 + SILK_H / 2)
+            if not free(True, g):
+                sys.exit(f"pcb: the silkscreen title at layout.yaml silk.at is not clear: {line!r}")
+            put(True, line, x, y + i * SILK_H * 1.8, justify=-1)
+            placed[True].append(g)
+    if skipped:
+        print(f"pcb: silk - no clear place for {len(skipped)} reference(s), left on the fab layer only: {', '.join(skipped)}")
+
+
 def keepout(board, px, py, r, n=32):
     z = pcbnew.ZONE(board)
     z.SetIsRuleArea(True)
@@ -665,15 +771,10 @@ def keepout(board, px, py, r, n=32):
     board.Add(z)
 
 
-def build(bdir):
-    name = os.path.basename(bdir)
-    lay = yaml.safe_load(open(os.path.join(bdir, "layout.yaml")))
-    cluster, suffix = lay["cluster"], lay["suffix"]
-    geo = cad_geometry(cluster)
-    comps, nets = sheet_netlist(os.path.join(bdir, name + ".kicad_sch"))
-    board = new_board(bdir, lay, geo)
-    add_outline(board, dxf_segments(os.path.join(ROOT, "mechanical", "export", f"key-board-{suffix.lower()}.dxf")))
-
+def load_parts(board, comps, nets, skip=()):
+    """Every net, and every part on the sheets as its footprint, pads on their nets -
+    not yet placed. `skip`: references the board does not carry (layout.yaml
+    not_on_board:, each with its reason)."""
     netinfo = {}
     for nname, _ in nets:
         ni = pcbnew.NETINFO_ITEM(board, nname)
@@ -683,7 +784,7 @@ def build(bdir):
 
     fps = {}
     for ref, c in sorted(comps.items()):
-        if ref.startswith("#"):
+        if ref.startswith("#") or ref in skip:
             continue
         if not c["footprint"]:
             sys.exit(f"pcb: {ref} has no footprint on its sheet - set its Footprint field")
@@ -691,8 +792,9 @@ def build(bdir):
         fp.SetReference(ref)
         fp.SetValue(c["value"])
         fp.SetPath(pcbnew.KIID_PATH(c["path"]))
-        if c["exclude_from_bom"]:
-            fp.SetExcludedFromBOM(True)
+        # the symbol's "Exclude from BOM", both ways: a library footprint may carry its own
+        # (KiCad's net ties do), and schematic parity compares the two
+        fp.SetExcludedFromBOM(c["exclude_from_bom"])
         if c["dnp"]:
             fp.SetDNP(True)
             fp.SetExcludedFromPosFiles(True)
@@ -706,6 +808,25 @@ def build(bdir):
             if n:
                 pad.SetNet(netinfo[n])
         fps[ref] = fp
+    return netinfo, fps
+
+
+def build(bdir):
+    name = os.path.basename(bdir)
+    lay = yaml.safe_load(open(os.path.join(bdir, "layout.yaml")))
+    if lay.get("kind") == "main":
+        import pcb_main
+        board, fps, netinfo, lay, comps, _ = pcb_main.build(bdir, lay)
+        if lay.get("fab"):
+            fit_footprint_silk(board, lay["fab"])
+        add_silk_generic(board, lay, comps)
+        return board, fps, netinfo, lay
+    cluster, suffix = lay["cluster"], lay["suffix"]
+    geo = cad_geometry(cluster)
+    comps, nets = sheet_netlist(os.path.join(bdir, name + ".kicad_sch"))
+    board = new_board(bdir, lay, geo)
+    add_outline(board, dxf_segments(os.path.join(ROOT, "mechanical", "export", f"key-board-{suffix.lower()}.dxf")))
+    netinfo, fps = load_parts(board, comps, nets)
 
     # The switch's 3D model has its origin at the plate seat (docs/reference/ks33-geometry.md);
     # the PCB top sits switch.pcb_below_seat below it (config/body.yaml), so lift the model by that.
@@ -791,20 +912,37 @@ def save(board, path):
 MASK_T = 0.01      # solder mask thickness in the stackup: KiCad's own default; it only splits the board's thickness
 
 
-def set_stackup(path, fab, thickness):
+def set_stackup(path, fab, thickness, stackup=None):
     """KiCad's Python API does not reach the stackup, which the Gerber job file
     reports to the board house - finish, mask colour, copper weight: write it
     into the saved file, after the last save (the zone fill re-saves the board).
-    The core is what is left of the board's thickness."""
-    cu = fab["copper_oz"] * 0.035
-    core = thickness - 2 * cu - 2 * MASK_T
+    Two layers: the core is what is left of the board's thickness. More: layout.yaml
+    stackup: gives the board house's named stack (copper, prepreg, core), and the
+    mask takes what is left of the thickness."""
     L = lambda name, typ, extra="": f'\t\t\t(layer "{name}"\n\t\t\t\t(type "{typ}"){extra}\n\t\t\t)\n'
-    mask = f'\n\t\t\t\t(color "{fab["mask"]}")\n\t\t\t\t(thickness {MASK_T})'
+    diel = lambda n, typ, d: L(f"dielectric {n}", typ, f'\n\t\t\t\t(thickness {d["thickness"]})\n\t\t\t\t(material "{d["material"]}")'
+                                                         f'\n\t\t\t\t(epsilon_r {d["epsilon_r"]})\n\t\t\t\t(loss_tangent 0.02)')
+    if stackup:
+        cu, icu = stackup["outer_cu"], stackup["inner_cu"]
+        pp, core = stackup["prepreg"], stackup["core"]
+        mask_t = round((thickness - 2 * cu - 2 * icu - 2 * pp["thickness"] - core["thickness"]) / 2, 4)
+        if mask_t < 0:
+            sys.exit(f"pcb: layout.yaml stackup: is thicker than the board ({thickness:g} mm)")
+        copper = (L("F.Cu", "copper", f"\n\t\t\t\t(thickness {cu})") + diel(1, "prepreg", pp)
+                  + L("In1.Cu", "copper", f"\n\t\t\t\t(thickness {icu})") + diel(2, "core", core)
+                  + L("In2.Cu", "copper", f"\n\t\t\t\t(thickness {icu})") + diel(3, "prepreg", pp)
+                  + L("B.Cu", "copper", f"\n\t\t\t\t(thickness {cu})"))
+    else:
+        cu = fab["copper_oz"] * 0.035
+        mask_t = MASK_T
+        core = thickness - 2 * cu - 2 * MASK_T
+        copper = (L("F.Cu", "copper", f"\n\t\t\t\t(thickness {cu:.3f})")
+                  + L("dielectric 1", "core", f'\n\t\t\t\t(thickness {core:.3f})\n\t\t\t\t(material "FR4")\n\t\t\t\t(epsilon_r 4.5)\n\t\t\t\t(loss_tangent 0.02)')
+                  + L("B.Cu", "copper", f"\n\t\t\t\t(thickness {cu:.3f})"))
+    mask = f'\n\t\t\t\t(color "{fab["mask"]}")\n\t\t\t\t(thickness {mask_t})'
     silk = f'\n\t\t\t\t(color "{fab["silk"]}")'
     block = ("\t\t(stackup\n" + L("F.SilkS", "Top Silk Screen", silk) + L("F.Paste", "Top Solder Paste")
-             + L("F.Mask", "Top Solder Mask", mask) + L("F.Cu", "copper", f"\n\t\t\t\t(thickness {cu:.3f})")
-             + L("dielectric 1", "core", f'\n\t\t\t\t(thickness {core:.3f})\n\t\t\t\t(material "FR4")\n\t\t\t\t(epsilon_r 4.5)\n\t\t\t\t(loss_tangent 0.02)')
-             + L("B.Cu", "copper", f"\n\t\t\t\t(thickness {cu:.3f})") + L("B.Mask", "Bottom Solder Mask", mask)
+             + L("F.Mask", "Top Solder Mask", mask) + copper + L("B.Mask", "Bottom Solder Mask", mask)
              + L("B.Paste", "Bottom Solder Paste") + L("B.SilkS", "Bottom Silk Screen", silk)
              + f'\t\t\t(copper_finish "{fab["finish"]}")\n\t\t\t(dielectric_constraints no)\n\t\t)\n')
     t = open(path).read()
@@ -816,14 +954,26 @@ def set_stackup(path, fab, thickness):
     open(path, "w").write(t2)
 
 
-def cmd_layout(bdir, force=False):
+def set_net_classes(j, lay):
+    """layout.yaml net_classes: into the project (a .kicad_pro's JSON), each a class with
+    its track width - clearance and vias the Default's - and one exact-name pattern per net."""
+    ns = j.setdefault("net_settings", {})
+    default = next(c for c in ns["classes"] if c["name"] == "Default")
+    ns["classes"] = [default] + [{**default, "name": name, "track_width": spec["track"], "priority": i}
+                                 for i, (name, spec) in enumerate(lay["net_classes"].items())]
+    ns["netclass_patterns"] = [{"netclass": name, "pattern": net}
+                               for name, spec in lay["net_classes"].items() for net in spec["nets"]]
+
+
+def cmd_layout(bdir, force=False, route=True):
     name = os.path.basename(bdir)
     out = os.path.join(bdir, name + ".kicad_pcb")
     if os.path.exists(out) and not force:
         sys.exit(f"pcb: {os.path.relpath(out, ROOT)} exists and is the source now; --force overwrites it")
     layout_yaml(bdir)      # a clear message, not build()'s traceback, when there is none
     board, fps, netinfo, lay = build(bdir)
-    if lay.get("route", True):
+    route = route and lay.get("route", True)
+    if route is True:
         import pcb_route
         failed = pcb_route.route(board, lay)
         if failed:
@@ -831,31 +981,55 @@ def cmd_layout(bdir, force=False):
             print(f"pcb: could not route {', '.join(failed)} - move parts in layout.yaml and re-run; "
                   f"{os.path.relpath(out, ROOT)} {'left as it was' if os.path.exists(out) else 'not written'}")
             return 1
+    elif route == "freerouting":
+        # what is not left to the autorouter: each plane net's pad to its plane (fanout),
+        # and the breath pair side by side (route_pair) - both then fixed for it
+        import pcb_route
+        pcb_route.prepare(board, lay)
+    unrouted = []
     # Written in a scratch directory beside the board and moved in only when complete.
     # SaveBoard writes <name>.kicad_pro beside the .kicad_pcb, from the board (the design
     # rules are in it), so the scratch copy keeps the board's own name and both move.
     import shutil
+    import json
     t = tempfile.mkdtemp(prefix=".layout-", dir=bdir)
     try:
         tmp = os.path.join(t, name + ".kicad_pcb")
         save(board, tmp)
-        if lay.get("route", True):
+        pro = os.path.join(t, name + ".kicad_pro")
+        j = json.load(open(pro))
+        if lay.get("net_classes"):
+            set_net_classes(j, lay)
+            json.dump(j, open(pro, "w"), indent=2)
+        here = os.path.dirname(os.path.abspath(__file__))
+        if route == "freerouting":
+            # in a fresh process, which loads the board with the net classes just written
+            r = subprocess.run([sys.executable, "-c", f"import sys, json; sys.path.insert(0, {here!r}); "
+                                f"import pcb_freeroute; print('UNROUTED=' + json.dumps(pcb_freeroute.route({tmp!r})))"],
+                               capture_output=True, text=True)
+            print(r.stdout.rstrip())
+            if r.returncode or "UNROUTED=" not in r.stdout:
+                sys.exit(f"pcb: the Freerouting round trip failed:\n{r.stderr[-3000:]}")
+            unrouted = json.loads(r.stdout.rsplit("UNROUTED=", 1)[1].splitlines()[0])
+        if route:
             # zones are filled in a fresh process: an in-process fill of a just-built board crashes
-            subprocess.run([sys.executable, "-c", f"import sys; sys.path.insert(0, {os.path.dirname(os.path.abspath(__file__))!r}); "
+            subprocess.run([sys.executable, "-c", f"import sys; sys.path.insert(0, {here!r}); "
                             f"import pcb_route; pcb_route.fill_zones({tmp!r})"], check=True)
         if lay.get("fab"):
-            set_stackup(tmp, lay["fab"], board.GetDesignSettings().GetBoardThickness() / 1e6)
+            set_stackup(tmp, lay["fab"], board.GetDesignSettings().GetBoardThickness() / 1e6, lay.get("stackup"))
             # fit_footprint_silk adapts the library footprints' silkscreen to the board
             # house on purpose, so "does not match the library copy" is expected, not a finding
-            import json
-            pro = os.path.join(t, name + ".kicad_pro")
             j = json.load(open(pro))
             j["board"]["design_settings"]["rule_severities"]["lib_footprint_mismatch"] = "ignore"
             json.dump(j, open(pro, "w"), indent=2)
-        os.replace(os.path.join(t, name + ".kicad_pro"), os.path.join(bdir, name + ".kicad_pro"))
+        os.replace(pro, os.path.join(bdir, name + ".kicad_pro"))
         os.replace(tmp, out)
     finally:
         shutil.rmtree(t, ignore_errors=True)
+    if unrouted:
+        print(f"pcb: {len(unrouted)} connection(s) left for hand routing (check fails on each until routed):")
+        for u in unrouted:
+            print("  " + u)
     print(f"pcb: wrote {os.path.relpath(out, ROOT)}")
 
 
@@ -1441,7 +1615,7 @@ def missing_models(board, bdir, env):
 if __name__ == "__main__":
     if len(sys.argv) >= 3 and sys.argv[1] in ("layout", "check", "render"):
         d = os.path.join(ROOT, sys.argv[2].rstrip("/"))
-        sys.exit({"layout": lambda: cmd_layout(d, "--force" in sys.argv), "check": lambda: cmd_check(d),
+        sys.exit({"layout": lambda: cmd_layout(d, "--force" in sys.argv, "--no-route" not in sys.argv), "check": lambda: cmd_check(d),
                   "render": lambda: cmd_render(d)}[sys.argv[1]]() or 0)
     print(__doc__)
     sys.exit(2)
