@@ -17,9 +17,6 @@ ports:
   MODULE_ANALOG_NEG12:
     dir: out
     to: module/breath-receive-stage
-  BUS_5V:
-    dir: out
-    to: module/digital-and-supervision
   DAC_AVDD:
     dir: out
     to: module/dac8568
@@ -27,12 +24,15 @@ ports:
   AGND_MOD:
     dir: ref
     to: module/breath-receive-stage
-  DIG_GND:
-    dir: ref
-    to: module/digital-and-supervision
   PWR_GND:
     dir: ref
     to: module/umbilical-load-switch
+  DIG_GND:
+    dir: ref
+    to: module/digital-and-supervision
+  LOGIC_5V:
+    dir: out
+    to: module/digital-and-supervision
 foreign:
   R-ILIM:
     owner: module/umbilical-load-switch
@@ -63,6 +63,21 @@ components:
     - 1
     - 2
     note: At the LM317's input pin. One of the board-wide C-DECOUPLE row
+  C-LOGIC-IN:
+    of: C-LOGIC-REG
+    value: 4.7uF
+    pins:
+    - 1
+    - 2
+    note: U-REG-LOGIC input capacitor. The datasheet asks for more than 1.5 uF under all conditions (ADP7118.pdf
+      p.4); 4.7 uF 50 V X7R keeps that at 12 V of DC bias
+  C-LOGIC-OUT:
+    of: C-LOGIC-REG
+    value: 4.7uF
+    pins:
+    - 1
+    - 2
+    note: 'U-REG-LOGIC output capacitor, the same part: more than 1.5 uF required (ADP7118.pdf p.4)'
   C-REG-ADJ:
     value: 10uF
     pins:
@@ -98,13 +113,6 @@ components:
     pins:
     - 1
     - 2
-  C4:
-    of: C-BULK-RAIL
-    value: 47uF
-    drawn_as: C4
-    pins:
-    - 1
-    - 2
   D1:
     of: D-REVPOL
     value: 1N5817
@@ -128,7 +136,9 @@ components:
     pins:
     - A
     - K
-    note: Reverse protection, -12 V branch
+    note: 'Reverse protection, -12 V branch. CATHODE TO THE BUS, anode to the module''s -12 V rail: the rail''s
+      current flows out of the module into the bus''s -12 V, so this is the one entry diode the other way round
+      from D1/D2'
   FB1:
     of: FB-IN
     value: 600R @ 100MHz
@@ -152,13 +162,6 @@ components:
     pins:
     - 1
     - 2
-  FB4:
-    of: FB-IN
-    value: 600R @ 100MHz
-    drawn_as: FB4
-    pins:
-    - 1
-    - 2
   J-PWR-EURO:
     value: 2x8 2.54mm shrouded box header (16-pin)
     pins:
@@ -178,8 +181,10 @@ components:
     - CV_14
     - GATE_15
     - GATE_16
-    note: Keyed, but a key does not make a reversed ribbon impossible. The rack's -12 V is the pin-1 pair, the ribbon's
-      red stripe, and reversing it is what D-REVPOL exists for
+    note: 'Keyed, but a key does not make a reversed ribbon impossible. The rack''s -12 V is the pin-1 pair, the
+      ribbon''s red stripe, and reversing it is what D-REVPOL exists for. The bus +5 V (11, 12) and CV/Gate (13-16)
+      pins are NOT USED: pads present, no-connect - the module makes its own 5 V (U-REG-LOGIC), and the header stays
+      2x8 for commonality with every Eurorack power cable (owner, 2026-09-30)'
   NT-AGND-MOD:
     value: net tie
     pins:
@@ -187,6 +192,13 @@ components:
     - 2
     note: 'The module analog star''s single tie to PWR_GND, at the power header''s ground pins (power-entry.md,
       Grounding): copper only'
+  NT-DIG-MOD:
+    value: net tie
+    pins:
+    - 1
+    - 2
+    note: 'DIG_GND''s single tie to the star, at the power header''s ground pins, beside NT-AGND-MOD (dig-gnd-topology):
+      copper only'
   R-REG-SET-HI:
     value: 475R 0.1%
     pins:
@@ -205,6 +217,16 @@ components:
     - OUT
     - ADJ
     note: Minimum load current differs by manufacturer - see the row. The ~13mA here clears every reading
+  U-REG-LOGIC:
+    value: ADP7118AUJZ-5.0
+    pins:
+    - VIN
+    - GND
+    - EN
+    - SENSE
+    - VOUT
+    note: 'The module''s own 5 V, for U-LVL-MOD: the bus +5 V is not used (owner, 2026-09-30). From the protected
+      analog +12 V; EN tied to VIN; SENSE to VOUT at the part. GND on DIG_GND, the logic''s return'
 nets:
   AGND_MOD:
   - port: AGND_MOD
@@ -215,14 +237,6 @@ nets:
   - C3.2
   - NT-AGND-MOD.1
   - R-REG-SET-LO.2
-  BUS_5V:
-  - port: BUS_5V
-  - C4.1
-  - FB4.2
-  BUS_5V_IN:
-  - FB4.1
-  - J-PWR-EURO.POS5_11
-  - J-PWR-EURO.POS5_12
   BUS_POS12_RAW:
   - port: BUS_POS12_RAW
   - D1.A
@@ -236,7 +250,15 @@ nets:
   - U-REG-DAC.OUT
   DIG_GND:
   - port: DIG_GND
-  - C4.2
+  - C-LOGIC-IN.2
+  - C-LOGIC-OUT.2
+  - NT-DIG-MOD.1
+  - U-REG-LOGIC.GND
+  LOGIC_5V:
+  - port: LOGIC_5V
+  - C-LOGIC-OUT.1
+  - U-REG-LOGIC.SENSE
+  - U-REG-LOGIC.VOUT
   MODULE_ANALOG_NEG12:
   - port: MODULE_ANALOG_NEG12
   - C3.1
@@ -244,15 +266,18 @@ nets:
   MODULE_ANALOG_POS12:
   - port: MODULE_ANALOG_POS12
   - C-DEC-REG-IN.1
+  - C-LOGIC-IN.1
   - C1.1
   - FB1.2
   - U-REG-DAC.IN
+  - U-REG-LOGIC.VIN
+  - U-REG-LOGIC.EN
   NEG12_D3:
-  - D3.A
+  - D3.K
   - J-PWR-EURO.NEG12_1
   - J-PWR-EURO.NEG12_2
   NEG12_FB:
-  - D3.K
+  - D3.A
   - FB3.1
   POS12_D1:
   - D1.K
@@ -273,11 +298,16 @@ nets:
   - J-PWR-EURO.GND_7
   - J-PWR-EURO.GND_8
   - NT-AGND-MOD.2
+  - NT-DIG-MOD.2
   REG_ADJ:
   - C-REG-ADJ.1
   - R-REG-SET-HI.2
   - R-REG-SET-LO.1
   - U-REG-DAC.ADJ
+  POS5_11:
+  - J-PWR-EURO.POS5_11
+  POS5_12:
+  - J-PWR-EURO.POS5_12
   CV_13:
   - J-PWR-EURO.CV_13
   CV_14:
@@ -291,3 +321,5 @@ external_endpoints:
 - CV_14
 - GATE_15
 - GATE_16
+- POS5_11
+- POS5_12

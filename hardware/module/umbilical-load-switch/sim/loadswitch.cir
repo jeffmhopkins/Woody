@@ -1,0 +1,42 @@
+* The umbilical load switch as netlisted (module/umbilical-load-switch), driving the
+* instrument's input as netlisted (carrier/power-entry-instrument: C-STRIP-BULK at the
+* input node, L-BUCK-IN, C-BUCK-IN), with the behavioural LT1641 of lt1641.inc.
+* Q-LOADSW is NOT CHOSEN (its row is open): it is a level-1 N-FET with the page's
+* assumptions, R_DS(on) r_dson at the guaranteed minimum gate drive and C_iss c_iss.
+* R-ILIM has no value (its row: "from E6"): it is the page's working 50 mohm.
+* cold = 1: the bus rises from 0 in t_rise and the gate ramps (a cold start).
+* cold = 0: the FET is already enhanced and the instrument is plugged in (hot-plug):
+* the output starts at 0 V with the gate at VCC + dvg.
+VBUS bus 0 PWL(0 {{v_bus0}} {{t_rise}} {{v_bus}})
+RBUS bus vcc {{r_bus}}
+CDEC vcc 0 {{C-DECOUPLE-LOADSW}}
+RILIM vcc sense {{r_ilim}}
+XU vcc sense gdrv fb timer on pwrgd 0 LT1641B vlo={{vlo}} vhi={{vhi}} igate={{igate}} dvg={{dvg}} gm={{gm}} itup={{itup}} itdn={{itdn}}
+RGS gdrv gnode {{R-GATE-SER}}
+RGC gdrv gcm {{R-GATE-COMP}}
+CGATE gcm 0 {{C-GATE-LOADSW}}
+CTIMER timer 0 {{C-TIMER-LOADSW}}
+M1 sense gnode out out QPASS
+CISS gnode out {{c_iss}}
+RFBH out fb {{R-FB-HI}}
+RFBL fb 0 {{r_fb_lo}}
+* the instrument: C-STRIP-BULK at the input node, L-BUCK-IN to C-BUCK-IN
+CSTRIP out 0 {{C-STRIP-BULK}}
+CXTRA out 0 {{c_extra}}
+LBIN out buckin {{L-BUCK-IN}}
+RLBIN buckin cbuck {{r_lbin}}
+CBUCK cbuck 0 {{C-BUCK-IN}}
+* the load arrives above the buck's input minimum
+BLOAD cbuck 0 I = {{i_load}}*0.5*(1 + tanh((V(cbuck)-{{v_buck_min}})/0.1))
+.model QPASS NMOS(level=1 vto={{v_th}} kp={{kp}})
+.ic v(out)=0 v(cbuck)=0 v(timer)=0 v(gcm)={{v_gate0}} v(gdrv)={{v_gate0}} v(gnode)={{v_gate0}} v(xu.latch)=0
+.options method=gear rshunt=1e10
+.control
+tran 20u {{t_end}} 0 50u uic
+wrdata out.dat v(out)
+wrdata timer.dat v(timer)
+wrdata latch.dat v(xu.latch)
+wrdata isense.dat (v(vcc)-v(sense))/{{r_ilim}}
+quit
+.endc
+.end

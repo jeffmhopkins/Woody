@@ -1,92 +1,56 @@
 # Breath receive stage — simulation
 
-**Nothing here has been run.** This directory holds the deck and the procedure.
-It holds no results, and it will not hold any until a run produces them.
+`sims.yaml` says what is simulated and what every run must show; `cmrr.cir` is
+the deck; `results.yaml` is what the last run found, **generated** by
+`python3 tools/sim.py run hardware/module/breath-receive-stage/sim`.
+`python3 tools/sim.py show <this dir>` prints it as a table.
+`docs/reference/tooling.md` §5 explains the tool.
 
-That is the rule, not an apology: `docs/reference/pcb-pipeline.md` names five
-simulations worth running and records that **none has been**. A plausible
-number written here would sit next to figures read off banked datasheets and
-be indistinguishable from them. `datasheets/README.md` is explicit that a
-fabricated document is worse than an honest gap; a fabricated simulation
-result is the same thing with fewer bytes.
+**No part value is written here.** The deck spans both ends of the link, so it
+reads two netlists: `interfaces/breath-sense-link` for `R1` and `R1b`, and this
+circuit's for the rest. The models are TI's INA828 (`U-DIFFRX`) and OPA2197
+(`U-REF-BUF`), banked in `datasheets/analog/` with their SHA-256.
 
-## The sim this circuit needs, and why it is not optional
+## What it shows
 
-**Breath-link CMRR with the INA828.** `pcb-pipeline.md` ranks it **first of
-five**, ahead of the reference-buffer stability work, on one argument: the
-margin is thin and the parts that set it cannot be changed afterwards.
+The link's common-mode rejection, sensor buffer to in-amp output: `VCM` moves
+the instrument's ground against the module's, so the common-mode drive reaches
+both legs through their own source impedances, as the cable delivers it. CMRR is
+the differential gain over the common-mode gain, both at the INA828's output.
 
-`hardware/interfaces/breath-sense-link/breath-sense-link.md` puts the link at **60.2 dB** `[calc, A2]` against
-an independently derived requirement of **58.5 dB** — **1.7 dB**, resting on
-two parts' tolerance. Both of those parts, `R1` and `R1b`, are instrument-side,
-behind the lid, and `bom.csv` marks them unretrofittable. So this is not a
-number that gets checked at E9 and adjusted: if it is wrong, it is wrong in a
-body that does not open.
+**The claim is a worst case over tolerance**, so every part that sets the
+balance is a corner: `R1`, `R1b`, `R2`, `R3`, `R4`, `R5` at their netlisted
+tolerance and both `C_cm` at ±1 % (the `C-CM-BREATH` row). 257 runs per sim.
 
-**And the corpus does not agree with itself about the size of the term.** The
-page's `### `R1` is a 1206, and it has a twin` argues that the unmatched case
-spends the entire budget and that `R1b` buys "fifty times" the rejection;
-the carrier-side text replies that with `R1b` fitted the floor is **73 dB**,
-set by the bias pair, so `R1b` buys about **13 dB**. Both agree the part must
-be fitted.
-
-*(Both halves of that disagreement now sit in the SAME file — the
-consolidation moved them together without resolving them, which is what a
-content freeze requires. They are still an order of magnitude apart about
-what `R1b` buys, and this deck is what settles it. Until 2026-09-21 this
-section credited `carrier.md` with all three figures; that page derives none
-of them any more, and nothing could see it: the path still resolved, and
-this file was written during the restructure so it was never a conservation
-source.)*
-They disagree by roughly an order of magnitude about what it is worth, which is
-exactly the kind of disagreement a model settles and a reading does not.
-
-**Three terms have to appear in the same deck**, because the claim is about
-their sum and each is currently argued on its own page:
-
-| Term | Where it is argued | What the deck must vary |
+| Sim | What | Holds |
 |---|---|---|
-| Source-impedance balance on the twisted pair | `carrier.md`, the `R1`/`R1b` pair | `R1b` fitted and omitted, and both at their stated tolerance |
-| The bias pair against the series legs | this page, `R4`/`R5` | The bias resistors' tolerance, which sets the floor `carrier.md` quotes |
-| Common-mode capacitor mismatch | this page, `### Why C_diff is ten times C_cm` | `C_cm` at **±1 %** and at **±5 %** — the page puts the ±5 % case near **46 dB**, i.e. below the requirement on its own, and that is the reason the ±1 % spec exists |
+| `cmrr-as-netlisted` | CMRR at DC, 50 Hz, 60 Hz, 500 Hz, 1 kHz, and where it first falls to 58.5 dB | the page's 58.5 dB requirement at the mains fundamental, worst corner; the page's 73 dB bias-pair floor within 3 dB |
+| `cmrr-without-r1b` | the same with `R1b` shorted | the page's 60.2 dB, at the nominal only |
+| `cmrr-ccm-5pct` | `C_cm` at ±5 % | the page's "~46 dB", at 500 Hz |
 
-Two things the deck must get right or it is measuring something else:
+**The result is `breath-link-cmrr`**, the worst corner at the mains
+fundamental: **70.5 dB worst case at 60 Hz**.
 
-- **`AGND` is a signal leg here, not a ground.** It arrives from the
-  instrument's analog star through `R1b` and drives `IN+` through `R2`. A deck
-  that ties it to the module's `AGND` node has deleted the common-mode
-  excitation it was built to apply.
-- **`REF` is driven from a buffer, and its source impedance is part of the
-  answer.** `bom.csv` carries TI's number verbatim from SBOS792A §8.1 — keep
-  the source impedance at the `REF` terminal below **5 Ω** — because `R_REF`
-  sits in series with one of the internal 40 kΩ difference-amp resistors and
-  unbalances the bridge. Model the buffer, not an ideal source, or the deck
-  cannot see the failure the buffer was added to prevent.
+Three things the run says that the page did not:
 
-## Running it
+- **The requirement has a frequency limit.** `C_cm`'s ±1 % mismatch converts
+  common mode to differential in proportion to frequency, so at the worst corner
+  CMRR falls through 58.5 dB near 480 Hz (`f_req`). The page states the
+  58.5 dB with no band. Mains and its low harmonics clear it; the 500 Hz edge of
+  the breath channel does not.
+- **Without `R1b` the margin was negative, not 1.7 dB.** 60.2 dB is the
+  nominal. At the worst tolerance corner the unmatched link is 58.2 dB at DC,
+  below the requirement. `R1b` is fitted, so this argues for the part, not
+  against it.
+- **`R1b` buys about 13.5 dB of worst case** (from 58.2 to 71.7 dB at DC), which
+  settles the page's two readings: "about 13 dB" was right, "fifty times" was
+  not.
 
-| | |
-|---|---|
-| Simulator | `ngspice` 42, stock Ubuntu archive, no allowlist change needed |
-| **Do not use** | PySpice 1.5 — it treats every non-`Warning:` stderr line as fatal and ngspice prints a solver banner to stderr on every run. Raw netlists plus `subprocess` |
-| Model | TI's INA828 macromodel. `pcb-pipeline.md` records that one exists, in the same directory as the OPA2197 macromodel whose URL is in the `BLOCKED` row of `datasheets/MANIFEST.csv`. **Bank it in `datasheets/` with a SHA-256 first**, like every other document |
-| `.spiceinit` | needs `set ngbehavior=psa` — **inside `.control` is too late** |
-| Sweep | AC, common-mode drive on both legs together, differential output referred to the input. The band that matters is the mains harmonics and the SPI hash, not DC |
-| Spread | The claim is a **worst case over tolerance**, not a typical. A nominal run that clears 58.5 dB answers nothing — the parts' tolerance is the whole of the 1.7 dB |
-
-## What a result is worth when it arrives
+## What a result is worth
 
 **A simulated CMRR is a screen, not a spec.** It is a ratio of two large
-numbers and it is sensitive to exactly the parasitics a macromodel does not
-carry — the pour asymmetry `pcb-pipeline.md` calls out for the `BREATH`/`AGND`
-keepout window is not in any netlist. A number from here either agrees with the
-bench at E9 or it tells you where to look.
-
-What it *can* settle without a bench is the ranking: which of the three terms
-dominates, and whether `R1b` is worth 13 dB or fifty times. That decides
-whether the ±1 % `C_cm` spec is load-bearing or belt-and-braces, and it has to
-be decided before the instrument-side parts are soldered into a body that does
-not reopen.
-
-Results land in `config/figures.yaml` with their provenance marked — not in
-this file, and not in the page.
+numbers, sensitive to exactly the parasitics a macromodel does not carry — the
+pour asymmetry under the `BREATH`/`AGND` pair is in no netlist. The `D-CLAMP`
+diodes are left out (reverse-biased, the same part on both legs), and so is the
+Cat5 pair's own resistance (balanced, about 0.2 Ω a conductor). A number from
+here either agrees with the bench at E9 or tells you where to look.

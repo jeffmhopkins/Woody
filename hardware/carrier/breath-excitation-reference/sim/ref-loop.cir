@@ -1,0 +1,46 @@
+* The reference buffer's loop gain, as netlisted: REF5050 -> U-BUF half A -> R-ISO-REF
+* -> VS, with dual feedback (R-FB-REF from VS, R-FBX-REF + C-FB-REF from the op-amp
+* output). TI's OPA2197 macromodel. The loop is broken at U-BUF's (-) input:
+* LBRK carries the DC operating point, CINJ brings in the test signal, and
+* T = -V(REFMINUS)/V(INM) (tools/sim.py, "THE STATED BREAK").
+* D-REF-CLAMP is left out: at the rail it is 1.65 V or more
+* short of its zener voltage and draws leakage (breath-excitation-reference.md).
+VPOS pos 0 {{v_pos}}
+* the REF5050 is outside this loop: its VOUT feeds only U-BUF's (+) input, which draws pA,
+* and C-REF-OUT holds it. It is a 5.000 V source here, on its netlisted capacitors; its own
+* macromodel runs in ref-startup.cir (inside one deck with the buffer its operating point
+* is not unique - it settles, corner by corner, on a collapsed state with VIN at 35 mV)
+VREFI refsrc 0 {{v_ref}}
+RREFO refsrc ref5v {{r_ref_out}}
+CROUT ref5v crn {{C-REF-OUT-VOUT}}
+RCROUT crn 0 {{esr_cref}}
+CDVOUT ref5v 0 {{C-DEC-REF-VOUT}}
+XBUF ref5v inm pos 0 bufout OPAx197
+RFX bufout acmid {{R-FBX-REF}}
+CF acmid refminus {{C-FB-REF}}
+RF vs refminus {{R-FB-REF}}
+RISO bufout vs {{R-ISO-REF}}
+CL vs cln {{c_vs}}
+RCL cln 0 {{esr_cvs}}
+ISENS vs 0 DC {{i_sensor}}
+LBRK refminus inm 1G
+CINJ inm inj 1G
+VINJ inj 0 DC 0 AC 1
+* rshunt: 10 Gohm from every node to ground, so the macromodel's operating point is found
+* (without it, or at 1 Tohm, some corners found none); 0.5 nA at 5 V, a tenth of U-BUF's own
+* guaranteed I_B, so 5 uV across R-FB-REF at most.
+.options method=gear rshunt=1e10
+.control
+op
+let vs_dc = v(vs)
+let iso_drop = v(bufout) - v(vs)
+print vs_dc iso_drop
+ac dec 100 1 100meg
+let t = -v(refminus)/v(inm)
+let tdb = db(t)
+let tph = 180/pi*cph(t)
+wrdata tdb.dat tdb
+wrdata tph.dat tph
+quit
+.endc
+.end

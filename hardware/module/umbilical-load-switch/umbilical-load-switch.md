@@ -21,10 +21,9 @@ The `Dir` and `Peer` columns are defined once in
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
 | `+12V` ahead of `D1`/`D2` | in | `module/power-entry` | — | `U-LOADSW`'s `VCC` and the top of `R-ILIM`. Taken before the entry diodes, which is the point of the split |
-| `ON` | — | `module/panel` | — | **Not a crossing.** `SW-POWER` is this circuit's row and its net is this circuit's; [`panel.md`](../panel/panel.md) owns only the shaped hole and says so. The LT1641's undervoltage-lockout input; the divider around it is **still not designed** — see below, and `netlist.yaml` leaves the switch's second terminal unasserted because of it |
-| `UMBILICAL +12V` | out | `carrier/power-entry-instrument`, `module/link-supervision` | `umbilical-current` | The FET's source, down the Cat5 umbilical. What the far end needs is what sizes the `FB` divider. `module/link-supervision`'s deleted presence detect gated `OE_MOD` from this node |
-| `PWR_GND` | ref | `module/power-entry` | — | `C-TIMER`, `C-GATE`, `R-FB-LO` and the FET source return here, to the star at the IDC |
-| `TIMER` / `GATE` | — | `module/panel-led` | `loadswitch-timer` | **Proposed only, nothing is drawn on it.** The indicator's missing "latched" signal would come from here — see [`panel-led.md`](../panel-led/panel-led.md) |
+| `ON` | — | `module/panel` | — | **Not a crossing.** `SW-POWER` is this circuit's row and its net is this circuit's; [`panel.md`](../panel/panel.md) owns only the shaped hole and says so. The LT1641's undervoltage-lockout input, divided from the raw bus by `R-ON-HI`/`R-ON-LO` with the toggle in the top leg — see *The `ON` pin* below. Both of the toggle's lugs wire to the main board |
+| `UMBILICAL +12V` | out | `carrier/power-entry-instrument`, `module/panel-led` | `umbilical-current` | The FET's source, down the Cat5 umbilical. What the far end needs is what sizes the `FB` divider. `module/panel-led` hangs the panel LED on it, so the LED is lit exactly while the switch is delivering |
+| `PWR_GND` | ref | `module/power-entry` | — | `C-TIMER`, `C-GATE`, `R-FB-LO`, `R-ON-LO` and `C-ON-LOADSW` return here, to the star at the IDC |
 
 ## The load switch — rebuilt 2026-09-21, because it never started
 
@@ -166,10 +165,10 @@ the `PWRGD` end, because that is the end with a hard requirement.
 
 **`PWRGD` must release below the worst-case delivered output.** Eurorack +12 V
 at −5 % is 11.4 V; `R-ILIM` at 50 mΩ drops exactly 20 mV at 0.4 A, and the FET
-drops about the same *if* its `R_DS(on)` is also ~50 mΩ — **an assumption, since
-the FET is still TBD** — so the worst-case output is ~11.36 V `[calc]`. A worse
-FET moves this, and the 0.4 V worst-case `PWRGD` margin below is what absorbs
-it: at 200 mΩ the output is 11.30 V and the margin is still 0.37 V. Placing the nominal `PWRGD` point at
+was allowed the same again as a placeholder for the FET — so the worst-case
+output is ~11.36 V `[calc]`. The chosen `Q-LOADSW` is 3.5 mΩ max at 4.5 V of
+gate drive `[ds NEXPERIA-PSMN2R0-30YLE.pdf p.1]`, 1.4 mV at 0.4 A, so the
+allowance is conservative by 18 mV and ~11.36 V stands as a lower bound. Placing the nominal `PWRGD` point at
 **10.5 V** leaves ~0.9 V nominal and ~0.4 V worst-case margin, and sits 2.5 V
 above the instrument buck's **8 V** input minimum
 `[repo, datasheets/discrete-and-power/R-78E5.0-1.0.pdf: R-78E5.0-1.0 is 8–28 V]`.
@@ -233,6 +232,22 @@ phase 2  3.99 → 12 V at 940 mA less 360 mA load  = 2.2mF x 8.01 V / 580 mA
 
 **The `TIMER` must exceed 47.5 ms on worst-case silicon.** That is the
 requirement; 62 ms was an artefact of the unconnected `FB`.
+
+**The 2.2 mF this section sizes against is a bound, not the instrument.** The
+instrument's input as netlisted is `C-STRIP-BULK` 470 µF plus `C-BUCK-IN`
+100 µF, **570 µF** `[repo, carrier/power-entry-instrument/netlist.yaml]`;
+2.2 mF is 3.9× that, so every charging time and current on this page is an
+upper bound, and the sims run both.
+
+> **Simulated 2026-09-30, behaviourally — [`sim/`](sim/README.md).** Every
+> datasheet corner starts, cold and hot-plug, and `FB` unconnected latches off
+> as §5 says. Two things this section assumes did not survive the deck. **The
+> hot-plug start is not all in current limit**: once the amplifier has pulled
+> `GATE` down, `C-GATE` sets the slew as in a cold start and the `TIMER` peaks
+> in millivolts, so 47.5 ms is a safe bound, not the start. **And 2.2 mF is in
+> no netlist**: the instrument's input holds `C-STRIP-BULK` and `C-BUCK-IN`
+> (`carrier/power-entry-instrument`). The deck runs both. The amplifier's own
+> dynamics are the one thing the model assumed, so E6 decides.
 
 ### The two capacitors — **values set 2026-09-21, no longer blocked**
 
@@ -321,39 +336,98 @@ on every hot-plug.
 
 ### What sizes the FET — `Q-LOADSW`
 
-The pass FET is its own BOM row, `Q-LOADSW`, and **the part is not chosen**.
-It was carried inside `U-LOADSW`'s `part` field as "DPAK/SO-8 N-FET" until
-2026-09-22, which is a description and cannot be ordered. This section is
-what decides it; the row cites this section rather than restating it.
+**Chosen 2026-09-30: Nexperia `PSMN2R0-30YLE`**, LFPAK56, a part Nexperia
+makes for this job — *"Enhanced forward biased safe operating area for
+superior linear mode operation"*, applications *"Electronic fuse, Hot swap,
+Load switch, Soft start"* `[ds NEXPERIA-PSMN2R0-30YLE.pdf p.1]`. It was
+chosen against the single-pulse SOA at `V_DS` = 12 V, not against
+`R_DS(on)`, which is irrelevant at 360 mA.
 
-With foldback working, peak fault dissipation is **~4 W at V_out ~ 4 V**,
-not the 12 W the old page assumed — the feature holds dissipation roughly
-flat instead of letting it peak. Ramp energy is `1/2 CV^2` = **0.158 J**
-regardless of ramp time; the ramp buys peak power, not total.
+**What it has to survive** `[calc]`, worst-case silicon throughout:
 
-**DPAK or SO-8, chosen against the single-pulse SOA curve** — not against
-R_DS(on), which is irrelevant at 360 mA. And the criterion is not thermal:
-a DPAK is 0.6 C/W at 50 ms, so 12 W is a 7 C rise. **The killer is
-Spirito / linear-mode derating at V_DS = 12 V**, which can put a trench
-part at 2–3 W. The SOA chart must cover 12 V at 10 and 100 ms.
+| Event | `V_DS` | `I_D` | For | Power |
+|---|---|---|---|---|
+| Shorted output, until the `TIMER` latches | 12 V | 340 mA (17 mV floor / 50 mΩ) | up to 587 ms (slowest timer) | **4.1 W** |
+| Hot-plug, end of the foldback ramp | 8.0 V | 1.10 A (55 mV / 50 mΩ) | the ~42 ms of phase 2 | **8.8 W** peak |
+| Hot-plug, typical | 8.0 V | 0.94 A | 30 ms | 7.5 W peak |
 
-### Still not designed: the `ON` pin
+> **This section said "peak fault dissipation is ~4 W at V_out ~ 4 V" until
+> 2026-09-30, and at V_out ~ 4 V that is wrong by 2×.** The foldback releases
+> at `V_OUT` = 3.99 V, where the limit is the full 940 mA and the FET still
+> drops 8.01 V: 7.5 W typical, 8.8 W on a 55 mV part. ~4 W is the
+> *shorted-output* case (12 V × 340 mA), which is the longer of the two.
 
-The panel toggle drives it, and the `ON` pin is the LT1641's **UVLO**
-input. There is no divider, no logic level, no supply, no pull-down, no
-debounce and no UVLO threshold specified anywhere — four missing passives
-on the node that decides whether the instrument powers up at all. Route
-the toggle as the bottom leg of an undervoltage divider.
+**What the part offers** — Fig. 3, single pulse at `T_mb` = 25 °C, read at
+12 V `[ds p.3]`: about **26 A for 10 ms, 12 A for 100 ms and 5.5 A DC**, i.e.
+66 W continuous at 12 V. Against the table: the shorted output needs 0.34 A
+at 12 V for 0.6 s and has the DC line, **16×**; the hot-plug needs 1.10 A at
+8 V for 42 ms and has the 100 ms line (≈22 A at 8 V), **20×**. Derated to a
+mounting base at 85 °C (`P_der` 60 %, Fig. 1) the smaller margin is still
+**~10×**. The trench-part worry this row carried — linear-mode derating
+putting the SOA at 2–3 W at 12 V — is the thing this part is built not to do.
 
-**What the datasheet now supplies for it** `[164112fc p.2, p.5]`: the `ON`
-comparator trips at **1.233 V** falling / **1.313 V** rising, 80 mV of
-hysteresis, input current **−1 µA max**, and the part has a *separate* `VCC`
-undervoltage lockout at **7.5 / 8.3 / 8.8 V** that holds `GATE` low regardless
-of `ON`. So the divider only has to place the *intended* UV trip somewhere above
-8.8 V; below that the chip is off anyway. ADI's own 24 V example uses 49.9 k /
-3.4 k for a ~19.6 V trip `[Figure 5, p.8]` — the same two-resistor form, and the
-one to copy. **Still not designed**, because the trip point is an ADR 0005
-decision, not a datasheet reading: pick it, then the divider is arithmetic.
+- **Logic level, and clamped.** `R_DS(on)` is 3.5 mΩ max at 4.5 V of gate
+  drive, which is the LT1641's minimum below 20 V of supply; the datasheet
+  requires exactly that *"with a proper protection Zener diode between its
+  gate and source"* `[164112fc p.10]`, because `GATE` rises up to 18 V above
+  `VCC` and this FET's `V_GS` is ±20 V. That is **`D-GATE-CLAMP`**, a 15 V
+  zener from gate (cathode) to source, as `D1` in ADI's Figure 5.
+- **The ramp does not move.** `C_rss` is 474 pF typ `[p.5]` against
+  `C-GATE`'s 82 nF, so `loadswitch-gate-cap` changes by 0.6 %.
+- **The drain is the mounting base**, so the tab's copper *is* `SENSE_NODE`;
+  keep it short to `R-ILIM` and Kelvin-connect `SENSE` and `VCC` to
+  `R-ILIM`'s pads `[164112fc p.10, Layout Considerations]`.
+
+**`R-ILIM` is 50 mΩ and fixed** (RALEC `LR1206-21R050F4`, 1 %, 1 W). Its row
+used to say the value is selected on the bench because a ±11 % window is
+narrower than the part's own ±17 % sense threshold. The window was the wrong
+requirement: what the limit must do is let the hot-plug finish before the
+timer, and it does so at the **low corner of everything at once** — 39 mV
+trip, 8 mV floor and the fastest timer: phase 1 is
+`(2.2 mF / 0.1554 A/V)·ln(780/160)` = 22.4 ms, phase 2
+`2.2 mF × 8.01 V / (780 − 360) mA` = 42.0 ms, **64.4 ms against 95.6 ms**
+`[calc]`. E6 still measures the trip with a current probe, as a check.
+
+### The `ON` pin — designed 2026-09-30
+
+The panel toggle drives the LT1641's **UVLO** input, and it is now a divider:
+
+```
+  BUS_POS12_RAW ──[R-ON-HI 68k]──ON_SW──o SW-POWER o──┬── ON (pin 1)
+  (ahead of D1/D2)                   (panel, wired)   │
+                                        ┌─────────────┤
+                                  [R-ON-LO 10k] [C-ON-LOADSW 100nF]
+                                        │             │
+                                     PWR_GND       PWR_GND
+```
+
+**The toggle is in the divider's top leg**, after `R-ON-HI`: closed (lever
+right, ON — ADR 0024 point 12), `ON` sits at 10/78 of the bus; open,
+`R-ON-LO` holds `ON` at 0 V, which is off, and cycling the toggle is the
+"pulsing ON low" that restores the `-1` after a latch `[164112fc p.9]`. The
+lugs never carry the bus unlimited: a wire shorted to the panel pulls `ON`
+low, which is also off. Both lugs wire to the **main board**, beside
+`U-LOADSW` — nothing on the jack board connects to the switch.
+
+**The thresholds** `[calc]`, from `V_ONH` 1.280 / 1.313 / 1.345 V and `V_ONL`
+1.221 / 1.233 / 1.245 V `[164112fc p.2]`, × 78/10 = 7.80:
+
+| | Typical | Worst case (1 % resistors, the part's window) |
+|---|---|---|
+| Turns on, bus rising | **10.24 V** | 9.79 – 10.70 V |
+| Turns off, bus falling | **9.62 V** | 9.33 – 9.90 V |
+
+**Why there.** Above the part's own `VCC` lockout, 8.8 V max, so the divider
+is what decides; below the Eurorack floor of 11.4 V (+12 V at −5 %) by
+0.7 V at the worst corner, so a sagging bus still starts; and the output it
+releases is above the instrument buck's 8 V minimum
+`[repo, R-78E5.0-1.0.pdf]` by more than the sense and FET drops. `ON`'s
+input current, 1 µA max, into the divider's 8.7 kΩ moves the trip by
+8.7 mV, 0.7 %. `C-ON-LOADSW` is the datasheet's own *"0.1µF capacitor from
+the ON pin to GND"* for induced noise `[p.10]` — the toggle's wires hang off
+this node — and with the 8.7 kΩ it is a 0.87 ms time constant, which also
+debounces the lever. The switch carries 12 V / 78 kΩ = 0.15 mA, which is why
+its contacts are gold (`SW-POWER`'s row).
 
 ## `-1`, not `-2`
 
@@ -366,7 +440,13 @@ deliberately cycle the panel toggle, which is why the panel LED matters.
 
 ## Still open
 
-- **Damping the input LC.** `L-BUCK-IN` (10–47 µH) in front of a constant-power
+- **ADR 0005's 50–100 ms ramp** is not achievable with this part (above,
+  *The two capacitors*). **Decided by: owner** — widen ADR 0005 to the
+  guaranteed 49–197 ms, or program the ramp by something other than the
+  internal pull-up. Recommendation: widen it — both corners are shown
+  safe above, and nothing downstream needs the upper bound.
+- **Damping the input LC** (`carrier/power-entry-instrument`, not this
+  board). `L-BUCK-IN` (10–47 µH) in front of a constant-power
   switching load, with 2 m of cable and ~2 mF at the far end, is the textbook
   negative-resistance instability and no damping leg is specified. Put it on
   E11 with the real cable.

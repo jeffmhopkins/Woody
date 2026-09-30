@@ -1,0 +1,28 @@
+* The REF5050 on its own, TI's macromodel, as netlisted: +12 V through R-REF-IN onto
+* REF_VIN (C-REF-OUT #1 and its 100 nF), VOUT onto C-REF-OUT #2 and its 100 nF, and
+* U-BUF's (+) input as its only load. The operating point, then a 1 V droop of the
+* rail at t_step (the instrument rail under strip PWM) and back.
+* A COLD START IS NOT SIMULATED: under ngspice 42 this macromodel's transient from 0 V
+* aborts ("timestep too small", its internal node 62, a BJT start-up cell), with gear or
+* trap and relaxed tolerances alike, 2026-09-29.
+VPOS pos 0 PWL(0 {{v_pos}} {{t_step}} {{v_pos}} {{t_step_1u}} {{v_pos_lo}} {{t_step_2}} {{v_pos_lo}} {{t_step_2_1u}} {{v_pos}})
+RRIN pos refvin {{R-REF-IN}}
+CRVIN refvin 0 {{C-REF-OUT-VIN}}
+CDVIN refvin 0 {{C-DEC-REF-VIN}}
+XREF refvin ntemp 0 ntrim ref5v REF5050
+RTEMP ntemp 0 1G
+RTRIM ntrim 0 1G
+CROUT ref5v crn {{C-REF-OUT-VOUT}}
+RCROUT crn 0 {{esr_cref}}
+CDVOUT ref5v 0 {{C-DEC-REF-VOUT}}
+.options method=gear
+.control
+op
+let vref_op = v(ref5v)
+let vin_op = v(refvin)
+print vref_op vin_op
+tran 1u {{t_ref_end}} 0 2u
+wrdata ref.dat v(ref5v)
+quit
+.endc
+.end

@@ -43,7 +43,8 @@ components:
     pins:
     - 1
     - 2
-    note: Local reservoir on the reference rail
+    note: Reservoir on the reference rail, at U-ADC pin 8 beside C-DEC-ADC. Fitted; it does not filter LED PWM (E9
+      tests that)
   C-DEC-ADC:
     of: C-DECOUPLE-CARRIER
     value: 100nF

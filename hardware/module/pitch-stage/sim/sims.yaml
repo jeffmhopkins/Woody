@@ -1,0 +1,86 @@
+# The pitch stage's step response into a passive mult, and its loop gain at the same
+# loads - the pair docs/reference/pcb-pipeline.md (section 2, ranked sim 3) says
+# disagree. Values from the netlists: this circuit's, and the other outputs' jack
+# parts a passive mult joins to PITCH (mod-channels' C-FILT-MOD-1 and R-OUT-PROT-1,
+# breath-output-stage's C-OUT-BREATH). Run:
+#   python3 tools/sim.py run hardware/module/pitch-stage/sim
+# `mult` selects the load: 0 a VCO alone, 1 a MOD jack, 2 the BREATH jack.
+title: Pitch stage - step and loop into a passive mult
+values:
+  netlist:
+    - hardware/module/pitch-stage/netlist.yaml
+    - hardware/module/mod-channels/netlist.yaml
+    - hardware/module/breath-output-stage/netlist.yaml
+models:
+  - datasheets/analog/OPAx197-ti-pspice-sboma34d.lib
+spiceinit: [set ngbehavior=psa]
+
+params:
+  v_pos:    {value: 12.0,  source: "MODULE_ANALOG_POS12 (netlist rails)"}
+  v_neg:    {value: -12.0, source: "MODULE_ANALOG_NEG12"}
+  v_refout: {value: 2.5,   source: "DAC8568 internal reference, VREFOUT 2.5 V [datasheets DAC8568; the page's -2.500 V intercept]"}
+  r_trim_gain: {value: 1.0e-3, source: "TRIM-GAIN at its 0-ohm end: the page's nominal, 'dead on 2.000' (pitch-stage.md, TRIM-GAIN row)"}
+  r_vco:    {value: 100.0e3, source: "one VCO's 1V/oct input, 100 kohm (pitch-stage.md, '100 kohm VCO') [assumption: typical Eurorack]"}
+  v_dac0:   {value: 2.0,   source: "a DAC code at jack +1.5 V (2 x 2.0 - 2.5)"}
+  v_dac1:   {value: 2.5,   source: "one octave up: jack +2.5 V"}
+  t_step:   {value: 20.0e-6}
+  t_edge:   {value: 100.0e-9, source: "an ideal DAC edge [assumption: harder than the DAC8568's own settling]"}
+  t_end:    {value: 3.0e-3, source: "long enough for the mult load's ring (~3 kHz) to die"}
+  mult:     {value: 0}
+  r_open:   {value: 1.0e12}
+  real_mult: {value: 0, source: "1: the other output's R-OUT-PROT to its driver at 0 V is on the jack too"}
+
+derived:
+  t_step_e: "v['t_step'] + v['t_edge']"
+  c_mult: "[1e-15, v['C-FILT-MOD-1'], v['C-OUT-BREATH']][round(v['mult'])]"
+  r_mult: "v['R-OUT-PROT-1'] if v['real_mult'] and v['mult'] else v['r_open']"
+
+vary:
+  C-FB-PITCH:  {tol: [-0.05, 0.05], source: "C0G +/-5 % [assumption: the netlist value states none]"}
+  C-FILT-PITCH: {tol: [-0.05, 0.05], source: "as C-FB-PITCH"}
+  R-OUT-PROT:  {tol: from-value}
+
+sims:
+  - name: step-vco
+    # one VCO on the jack, nothing else: the page's "safe to about 10 nF" case
+    deck: pitch-step.cir
+    measures: [overshoot_pct, t_settle]
+    post:
+      overshoot_pct: "overshoot(w['jack'], p['t_step'], p['t_end'])"
+      t_settle: "settling(w['jack'], p['t_step'], p['t_end'], 1.0/12/100)"
+    asserts:
+      - expr: "max['overshoot_pct'] < 5"
+        why: "into a VCO alone an octave step does not ring (under 5 %) at any corner"
+  - name: step-mult
+    # a passive mult to a MOD jack (mult=1) or the BREATH jack (mult=2): that jack's own
+    # C-FILT on PITCH, its driver not counted (the page's own model: a capacitor)
+    deck: pitch-step.cir
+    set: {t_end: 8.0e-3}
+    sweep: {mult: [1, 2]}
+    measures: [overshoot_pct, t_settle]
+    post:
+      overshoot_pct: "overshoot(w['jack'], p['t_step'], p['t_end'])"
+      t_settle: "settling(w['jack'], p['t_step'], p['t_end'], 1.0/12/100)"
+    asserts:
+      - expr: "min['overshoot_pct'] > 25"
+        why: "RECORDED HAZARD, not a requirement (pitch-stage.md, 'It does not oscillate; it rings'): a passive mult to another output's jack makes every note step overshoot by several semitones. If this starts failing the hazard is gone - re-read the page"
+  - name: step-real-mult
+    # the same mults with the other output's R-OUT-PROT to its driver (held at 0 V) on
+    # the jack as well: what a patch actually connects
+    deck: pitch-step.cir
+    set: {real_mult: 1, t_end: 8.0e-3}
+    sweep: {mult: [1, 2]}
+    measures: [overshoot_pct, t_settle]
+    post:
+      overshoot_pct: "overshoot(w['jack'], p['t_step'], p['t_end'])"
+      t_settle: "settling(w['jack'], p['t_step'], p['t_end'], 1.0/12/100)"
+  - name: loop
+    deck: pitch-loop.cir
+    sweep: {mult: [0, 1, 2]}
+    measures: [pm, fc]
+    post:
+      pm: "phase_margin(w['tdb'], w['tph'])"
+      fc: "crossover(w['tdb'])"
+    asserts:
+      - expr: "min['pm'] - 10 > 45"
+        why: "the loop's phase margin clears 45 degrees after the +-10 degree screen at every load - which is the point: the same margin at 0, 82 nF and 330 nF, while the step rings (pcb-pipeline.md: 'the AC sweep is structurally blind')"

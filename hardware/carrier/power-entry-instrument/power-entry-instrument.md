@@ -27,7 +27,7 @@ The `Dir` and `Peer` columns are defined once in
 | `+12V` strip feed | out | `carrier/led-strip-drive` | — | Taken direct off the input node. `C-STRIP-BULK` is this circuit's part. **The same net as the row above** — `D-REVSHUNT` is a shunt and `D-TVS-PWR` a clamp, so nothing is in series between `J-UMB` pin 3 and this tap |
 | `+12V` analog | out | `carrier/breath-excitation-reference` | — | REF5050 `VIN`, and the V+ of both OPA2197 halves. **Also the same net**, for the same reason |
 | 5 V, buck A | out | `J-MCU`, `carrier/led-strip-drive` | `matrix-led-current` | Through `D-USBOR` and `J-MCU`, down three conductors of `CBL-MCU-RIBBON` onto the dev board's 5 V pad and `TP2`, and on to the 74AHCT125 |
-| `PWR_GND` pour | ref | `carrier/service-uart`, `carrier/led-strip-drive`, `carrier/carrier` | `dig-gnd-topology` | The whole board returns here, and so do the plates: the thumb plates through this board's plate mounts, the key plate through the left-hand key board's `GND_CHAIN` (ADR 0022, ADR 0020 Amendment 5). **`carrier/breath-adc` and `carrier/breath-excitation-reference` are no longer listed**: both of those pages say their return is `AGND_INST`, which reaches this pour on the **single tie** and is a different node everywhere else — and that distinction is the whole point of the star |
+| `PWR_GND` pour | ref | `carrier/service-uart`, `carrier/led-strip-drive`, `carrier/carrier`, `interfaces/breath-sense-link` | `dig-gnd-topology` | Layer 2, §2. The whole board returns here, and the breath link's two clamps, and so do the plates: the thumb plates through this board's plate mounts, the key plate through the left-hand key board's `GND_CHAIN` (ADR 0022, ADR 0020 Amendment 5). **`carrier/breath-adc` and `carrier/breath-excitation-reference` are no longer listed**: both of those pages say their return is `AGND_INST`, which reaches this pour on the **single tie** and is a different node everywhere else — and that distinction is the whole point of the star |
 
 ## §1 Power entry
 
@@ -111,6 +111,52 @@ R-78E5.0-1.0 rating                                            1000 mA
 Seventy-odd percent, inside a body running 10–20 K above ambient, is near
 enough to want the derating curve. **The display board's share was only ever
 estimated**, so the figure is a range until E6 measures the rail.
+
+---
+
+## §2 The ground, on four layers
+
+The main board is four layers — signal / ground / power / signal, 1.6 mm
+(owner, 2026-09-29, [ADR 0017](../../../docs/decisions/0017-one-main-board.md)
+amendment of that date). This is the ground those layers carry. It decides
+the **instrument end** of `dig-gnd-topology`; the module end is that figure's,
+and it is not settled by this board.
+
+- **Layer 2 is `PWR_GND`, one unbroken plane** from `J-UMB` to the mouth end,
+  under every SPI, chain and LED-data trace. `J-UMB` pin 6 (`PWR_GND`) and
+  pin 8 (`DIG_GND`, through `NT-DIG`, ADR 0018) land on it at the header. So
+  each SPI edge on `SCLK`, `MOSI` and `CS_MOD` returns in the plane directly
+  under its own trace to pin 8 — the return an SPI link wants, and the
+  layout rule `interfaces/spi-link` states. Layer 3 carries the rails; no
+  signal is routed on layer 3 across a gap in layer 2.
+- **`AGND_INST` is an island on layer 2 under the analog block only**:
+  `U-BREATH`, `U-REF-BREATH`, `U-BUF`, the reference's feedback network,
+  `R-ADCDIV-U`/`-L`, `C-AA-ADC` and the analog side of `U-ADC`. A moat
+  surrounds it, bridged at one point by **`NT-AGND`**. The ~13 mA the
+  reference, the buffer and the sensor return (derived on
+  `breath-sense-link.md`) flows across the island to that tie and nowhere
+  else, so no `PWR_GND` current — umbilical, LED or logic — shares copper
+  with the analog references.
+- **`NT-AGND` sits under `U-ADC`**, between its `VSS` (pin 4) and its digital
+  pins. The ADC is the one part with a pin on each side: its `CLK`, `DIN`,
+  `DOUT` and `CS` edges return through the tie straight into the plane under
+  their traces to `J-MCU`, and no digital trace crosses the moat anywhere
+  else `[calc]`: a tie at the far end of the board, at `J-UMB`, would make
+  those edges return along the island and back up the plane, a loop the
+  length of the board.
+- **The breath pair crosses the moat as a pair.** `BREATH_SENSE` and
+  `AGND_SENSE` run side by side over the plane to `J-UMB` pins 1 and 2.
+  `AGND_SENSE` is taken at the sensor's own `GND` pin
+  (`breath-sense-link.md`, *Where it sits*), so any voltage between the island
+  and the plane is common to both legs and is the module in-amp's to reject.
+  This is what frees the tie to sit at the ADC rather than at the connector.
+- **The clamps return to the plane at the connector**: `D-TVS-PWR`,
+  `D-REVSHUNT`, `U-TVS-SPI` and both `D-TVS-BREATH` diodes, so a strike at
+  `J-UMB` never crosses the island.
+- **The plates bond to the plane** (ADR 0009, ADR 0022), never to the island.
+
+E11 is the test: the breath reading at rest with the LEDs sweeping and the
+keys scanning, at both ends of the link.
 
 ---
 

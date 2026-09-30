@@ -31,6 +31,9 @@ ports:
   AGND_INST:
     dir: ref
     from: carrier/power-entry-instrument
+  PWR_GND:
+    dir: ref
+    from: module/power-entry
 components:
   D-TVS-BREATH-RET:
     of: D-TVS-BREATH
@@ -38,7 +41,8 @@ components:
     pins:
     - A
     - K
-    note: The second of the pair, on the AGND conductor
+    note: The second of the pair, on the AGND_SENSE conductor. Anode to the PWR_GND plane at J-UMB, never to the
+      analog island
   D-TVS-BREATH-SIG:
     of: D-TVS-BREATH
     value: PESD12VS1UA or equivalent 12V-standoff ESD diode
@@ -46,7 +50,8 @@ components:
     pins:
     - A
     - K
-    note: AT THE CONNECTOR, 12 V standoff - above the sensor's full scale so it never conducts in play
+    note: AT THE CONNECTOR, 12 V standoff - above the sensor's full scale so it never conducts in play. Anode to
+      the PWR_GND plane at J-UMB, never to the analog island
   R1:
     of: R-SER-BREATH-INST
     value: 1k 1%
@@ -62,8 +67,9 @@ components:
     pins:
     - 1
     - 2
-    note: THE TWIN IN THE AGND LEG, and it was missing until 2026-09-21. Without it the return is not matched to
-      the signal leg and the link's CMRR is set by that asymmetry rather than by the in-amp
+    note: THE TWIN IN THE AGND_SENSE LEG. Without it the return is not matched to the signal leg and the link's
+      CMRR is set by that asymmetry rather than by the in-amp. Its AGND_INST end is a trace of its own from U-BREATH
+      pin 3 (breath-sense-link.md, Where it sits)
   U-BREATH:
     value: MPXV4006DP
     pins:
@@ -77,8 +83,6 @@ components:
 nets:
   AGND_INST:
   - port: AGND_INST
-  - D-TVS-BREATH-RET.A
-  - D-TVS-BREATH-SIG.A
   - R1b.1
   - U-BREATH.GND
   AGND_SENSE:
@@ -89,6 +93,10 @@ nets:
   - port: BREATH_SENSE
   - D-TVS-BREATH-SIG.K
   - R1.2
+  PWR_GND:
+  - port: PWR_GND
+  - D-TVS-BREATH-RET.A
+  - D-TVS-BREATH-SIG.A
   SENSOR_BUFFERED_OUT:
   - port: SENSOR_BUFFERED_OUT
   - R1.1

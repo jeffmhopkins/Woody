@@ -24,7 +24,7 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `CLR` | out | `module/dac8568` | — | **Not fitted.** The 74HC123 drove this. `R-CLR-PU` now holds it inactive and `LK-CLR` is the hand assert |
+| `CLR` | out | `module/dac8568` | — | **Not fitted.** The 74HC123 drove this. It is a net inside `module/dac8568` now, tied inactive by `R-CLR-PU`, with `LK-CLR` as the hand assert; it becomes a port again only if this circuit is restored |
 | `OE_MOD` ×4 | out | `module/digital-and-supervision` | — | **Not fitted.** The comparator gated these. Tied enabled instead |
 | breath pair | in | `interfaces/breath-sense-link` | `umbilical-pinmap` | **Not fitted.** The LM311 version watched `BREATH_SENSE` and `AGND_SENSE` |
 | `UMBILICAL +12V` | in | `module/umbilical-load-switch` | — | **Not fitted.** The first presence version gated `OE_MOD` from this node, downstream of the module's own load switch |
@@ -122,3 +122,7 @@ question rather than separately.
 - **Whether to restore link supervision at all**, and at what cost. The section
   above is the candidate; it is four parts, not zero. This is the one open
   supervision question, and it subsumes the three that used to stand here.
+  **Decided by: owner** — it is a trade of four parts and a threshold that
+  must stay outside the breath signal's range against "pull the umbilical
+  mid-note and the rack holds the note". Until it is decided, `CLR` is tied
+  inactive inside `module/dac8568` and nothing on the board waits for it.

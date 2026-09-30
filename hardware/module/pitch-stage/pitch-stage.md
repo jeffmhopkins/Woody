@@ -19,38 +19,41 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `VREFOUT` | in | `module/dac8568` | — | The DAC's own reference out. Trimmed by `TRIM-OFFSET`, then buffered. The whole tracking argument below depends on this being the same node the DAC's full scale references |
+| `VREFOUT` | in | `module/dac8568` | — | The DAC's own reference out, into the trim network and the follower that make `V_ref`. The whole tracking argument below depends on this being the same node the DAC's full scale references. **3-state until firmware enables the reference** `[ds DAC8568CIPW.pdf p.31]`; `TRIM-OFFSET`'s 10 kΩ to `AGND_MOD` holds it at 0 V until then |
 | `DAC ch1` | in | `module/dac8568` | `dac-rail` | Through `R-OPAMP-IN` into the (+) input |
 | `PITCH` | out | `module/panel` | `pitch-cents-budget` | The panel jack. **DC feedback is tapped here, not at the op-amp output** — so whatever is patched in sits inside the loop |
 | `MODULE ANALOG +12V`, `MODULE ANALOG −12V` | in | `module/power-entry` | — | `D-JACK-CLAMP` returns to both rails |
-| `AGND_MOD` | ref | `module/power-entry` | `dig-gnd-topology` | The module analog star, drawn `AGND`. `C-AA-PITCH` and `C-FILT-PITCH` shunt to it. Not a return path — see the figure |
+| `AGND_MOD` | ref | `module/power-entry` | `dig-gnd-topology` | The module analog ground, drawn `AGND`. `C-AA-PITCH`, `C-FILT-PITCH`, the LT5400's exposed pad and its two spare sections go to it |
 
 ## The circuit
 
 ```
-   VREFOUT ──[TRIM-OFFSET 10k]──┬── ½ OPA2197 ──┬── V_ref ≈ 2.500 V
-   (2.500 V)   + range resistors│   follower    │   (trimmed, buffered)
-                                └───────────────┘
-                                                │
-                                          [R1 10k]  ┐ LT5400
-                                                │   │ 1:1 pair
-                                                │   │
-   DAC ch1 ──[R-OPAMP-IN 1k]──┐                 │   │
-   0.25…4.75 V                │                 │   │
-                              │           ┌─────┴───┴───┐
-                              └───────────┤ +           │
-                                          │  ½ OPA2197  ├──┬── op-amp output
-                              ┌───────────┤ −           │  │
-                              │           └─────────────┘  │
-                              │                            │
-                              ├──[C-FB-PITCH 2.2nF]──────────┤   ← AC feedback
-                              │                            │
-                              │                   [D-JACK-CLAMP BAV99]── ±12 V
-                              │                            │
-                              │                  [R-OUT-PROT 1k, 1206]
-                              │                            │
-                              └──[R2 10k]─[TRIM-GAIN 200R]─┴── PITCH jack
-                                  LT5400   (in series)         ← DC feedback
+   VREFOUT ──┬──[R-VREF-SER 1k]──────────┬── (+) ½ OPA2197 ──┬── V_ref = 2.500 V
+   (2.500 V) │                           │   follower ×1.02  │   at mid-travel
+             │                           │                   │
+     [TRIM-OFFSET 10k]── wiper ──[R-VREF-INJ 22.1k]  (−)──┬──[R-VREF-FB 200R]
+     VREFOUT to AGND                                      │
+                                                  [R-VREF-GND 10k]── AGND
+                                                                     │
+                                                         [R-GAIN-CTR 100R]
+                                                                     │
+                                                              [R1 10k]  ┐ LT5400
+                                                                     │  │ 1:1 pair
+   DAC ch1 ──[R-OPAMP-IN 1k]──┐                                      │  │
+   0.25…4.75 V                │                                      │  │
+                              │                                ┌─────┴──┴────┐
+                              └────────────────────────────────┤ +           │
+                                                               │  ½ OPA2197  ├──┬── op-amp output
+                              ┌────────────────────────────────┤ −           │  │
+                              │                                └─────────────┘  │
+                              ├──[C-FB-PITCH 2.2nF]──────────────────────────────┤   ← AC feedback
+                              │                                                 │
+                              │                                [D-JACK-CLAMP BAV99]── ±12 V
+                              │                                                 │
+                              │                              [R-OUT-PROT 1k, 1206]
+                              │                                                 │
+                              └──[R2 10k]─[TRIM-GAIN 200R]──────────────────────┴── PITCH jack
+                                  LT5400   CW end strapped to its wiper           ← DC feedback
 ```
 
 ## It is a non-inverting amplifier, not a difference amplifier
@@ -125,20 +128,24 @@ converts the worse error into the better one, for free.
 | Ref | Value | Job |
 |---|---|---|
 | **R1, R2** | 10 kΩ, **1:1 matched** (LT5400) | Sets gain = 2 and the −2.5 V intercept together |
-| **V_ref** | 2.500 V, trimmed then buffered from `VREFOUT` | One op-amp half. `TRIM-OFFSET` sits **ahead** of the buffer |
-| **TRIM-GAIN** | **200 Ω** multiturn cermet, **in series** with R2 | 0 → +2 % of ratio, **one-sided and now pointing the wrong way**: the justification was that the load divider only ever *reduces* gain, and the jack-side tap deleted the divider. Nominal is dead on 2.000 and the trimmer has no downward authority. Firmware's affine covers it, but the stated reason is stale — resolve at E9 |
-| **TRIM-OFFSET** | 10 kΩ multiturn cermet + range resistors | **Before** the buffer, so it scales `V_ref` and therefore the intercept alone. `R-OFFINJ` is deleted |
-| **R-OPAMP-IN** | 1 kΩ 1 % | Clamp-current protection on the (+) input. No gain error |
+| **V_ref** | 2.500 V at `TRIM-OFFSET`'s mid-travel, buffered from `VREFOUT` | One op-amp half at gain 1.02. The trim sits **ahead** of the buffer — see *The offset trim* |
+| **TRIM-GAIN** | **200 Ω** multiturn cermet, **in series** with R2, CW end strapped to the wiper; **`R-GAIN-CTR` 100 Ω** in series with R1 | Ratio `(R2 + t)/(R1 + 100 Ω)`, t = 0 → 200 Ω: **±1 %, bipolar**, exactly 1 at mid-travel. Bipolar because the DAC's gain error is, ±0.15 % of FSR max `[ds DAC8568CIPW.pdf p.3]`. The strap makes a dirty track fail to a known resistance, not open |
+| **TRIM-OFFSET** | 10 kΩ multiturn cermet across `VREFOUT`–`AGND`, wiper through `R-VREF-INJ` 22.1 kΩ; `R-VREF-SER` 1 kΩ from `VREFOUT`; follower gain from `R-VREF-FB` 200 Ω / `R-VREF-GND` 10 kΩ, all four 0.1 % 25 ppm/°C | **Before** the buffer, so it moves `V_ref` and therefore the intercept alone: −60 / +50 mV about 2.500 V. See *The offset trim* |
+| **R-OPAMP-IN** | 1 kΩ 1 % | Clamp-current protection on the (+) input. No gain error. The follower's is `R-VREF-SER` |
 | **R-OUT-PROT** | 1 kΩ 1 %, **1206 ≥500 mW** (shared spec, qty 6 — ≥250 mW here until
 2026-09-22, which is `R-SER-BREATH-INST`'s rating, a different part) | Short protection, **inside the DC feedback loop** |
 | **C-FB-PITCH** | **2.2 nF C0G** | **From the op-amp OUTPUT to the (−) input — NOT "across R2".** See the warning below; this is the net that decides whether the stage is stable |
 | **C-AA-PITCH** | **10 nF C0G** | 15.9 kHz against `R-OPAMP-IN`, **ahead of the op-amp**, outside any loop. Filters the DAC before it is amplified |
 | **C-FILT-PITCH** | **10 nF C0G** | Restored at the jack. The low-impedance shunt at the connector, which nothing else provides |
 
-**Power-on is 0.000 V, not "subsonic".** `V_ref` is the DAC's internal
-reference, which is **disabled until firmware writes an enable** — so *both*
-terms are zero and the jack sits at **0 V, a VCO's base note**, until that
-write. After it, `CLR` parks at −2.500 V. ADR 0006's power-on table asserts
+**Power-on is 0.000 V, not "subsonic".** `V_ref` comes from the DAC's
+internal reference, which is **disabled until firmware writes an enable** — and
+while it is disabled the `VREFIN/VREFOUT` pin is **3-state**, *"disconnected
+from the VREFIN/VREFOUT pin (3-state output)"* `[ds DAC8568CIPW.pdf p.31]`, not
+0 V. What makes it 0 V is `TRIM-OFFSET`: its 10 kΩ track runs from that pin to
+`AGND_MOD`, so the undriven node sits at ground. With the C grade's zero-scale
+power-on, *both* terms are then zero and the jack sits at **0 V, a VCO's base
+note**, until that write. After it, `CLR` parks at −2.500 V. ADR 0006's power-on table asserts
 "below −2 V" for both; they are different states, 2.5 V apart.
 
 **This is the same argument that moved the breath zero off `VREFOUT`, and it
@@ -153,6 +160,34 @@ gets periodically refreshed (`firmware/README.md`).
 the ±600 cents of firmware reserve ADR 0006 describes. An OPA2197 on ±12 V
 less two Schottky drops reaches ~±11.45 V, so the reserve is real and not
 clipped.
+
+## The offset trim — made buildable 2026-09-30
+
+The first version divided `VREFOUT` down with the trimmer, which can only go
+*below* 2.500 V: the nominal sat at an end stop with no downward authority.
+Now the trimmer injects a small correction into the follower, and the
+follower gains it back:
+
+```
+V_ref = VREFOUT · [1 − a·(1 − w)] · (1 + g)
+        a = R-VREF-SER / (R-VREF-SER + R-VREF-INJ + R_w)     R_w = 10 kΩ·w(1 − w), the wiper's own
+        g = R-VREF-FB / R-VREF-GND = 0.0200
+```
+
+`[calc]` with the values fitted, `w` the wiper's position from the `AGND` end:
+
+| `w` | `a` | `V_ref` | vs 2.500 V |
+|---|---|---|---|
+| 0 (full CCW) | 0.0433 | 2.4396 V | **−60 mV** |
+| 0.5 (mid) | 0.0391 | 2.5002 V | +0.2 mV |
+| 1 (full CW) | 0.0433 | 2.5500 V | **+50 mV** |
+
+About ±60 cents of intercept, and the gain `1 + k` is untouched. **Its drift is
+small by construction**: the trimmer and `R-VREF-INJ` reach only `a` ≈ 4 % of
+`V_ref`, and the follower's gain ratio only `g/(1 + g)` ≈ 2 %, so 25 ppm/°C
+parts contribute a few ppm of `V_ref` over 10 °C — the *V_ref trim network*
+row below. `R-VREF-SER` is also the follower's clamp-current protection, the
+job `R-OPAMP-IN` does for the channels.
 
 ## Two changes prior art forced, both improvements
 
@@ -267,8 +302,8 @@ against the real patch because the 1 kΩ divided against it. That error is gone.
 
 - **It does not oscillate; it rings.** `Q = √(R_eff·C_load / R2·C_fb)`. Safe to
   about 10 nF, but joining PITCH to the MOD (82 nF) or BREATH (330 nF) jacks
-  through a passive mult gives 44–67 % overshoot — several semitones of
-  transient on every note. That failure mode did not exist with op-amp-side
+  through a passive mult gives the overshoot in `pitch-mult-overshoot`
+  (simulated, `sim/`) — several semitones of transient on every note. That failure mode did not exist with op-amp-side
   feedback.
 - **With the jack shorted, DC feedback is exactly zero** and the amp rails. A
   3.5 mm plug shorts tip to sleeve on every insertion, so every patch-in is a
@@ -282,11 +317,26 @@ numbers were wrong.** It was a pivot error: `∂Vout/∂k = Vdac − V_ref`, so 
 *reference* drift pivots at `Vout` = 0 with a lever of 7 V. Three documents
 used 9 V, 7 V and 2.5 V for the same term.
 
-| Term | Over 10 °C | Note |
-|---|---|---|
-| **DAC internal reference** | **0.42 cents** | **The largest term, and untrimmable** |
-| LT5400 ratio tracking | 0.027 cents | |
-| `TRIM-GAIN` tempco | **0.068 cents** | 200 Ω cermet. Second *smallest*, not "the largest line here" — so it does **not** defeat the matched network, costing 0.04 cents |
+**This is the budget — `pitch-cents-budget`: 0.76 cents worst-case linear
+sum, 0.45 cents RSS**, for drift over 10 °C once the trims are set, at the
+worst note of −2 → +7 V `[calc]`. At 1 V/oct, 1 mV is 1.2 cents; a gain term
+takes the lever of its pivot, an offset term does not.
+
+| Term | Spec | Lever | Over 10 °C |
+|---|---|---|---|
+| **DAC internal reference** | 5 ppm/°C max, C grade `[ds DAC8568CIPW.pdf p.4]` | 7 V (pivots at 0 V) | **0.42 cents** — the largest, and untrimmable |
+| DAC gain temperature coefficient | ±1 ppm of FSR/°C typ `[p.3]` | 10 V of jack span | 0.12 cents (typical: no maximum published) |
+| DAC offset drift | ±0.5 µV/°C typ `[p.3]` | ×2 | 0.012 cents |
+| LT5400 ratio tracking | 0.2 ppm/°C typ `[ds LT5400.pdf p.1]`, taken at 1 ppm/°C | 2.25 V (ratio pivots at +2.5 V) | 0.027 cents |
+| `TRIM-GAIN` against `R-GAIN-CTR` | ~100 ppm/°C cermet, at mid-travel 100 Ω of 10 kΩ | 2.25 V | 0.034 cents |
+| *V_ref* trim network | 25 ppm/°C, two ratios scaled by `g/(1+g)` and `a·(1−w)` | ×1 (an offset) | 0.06 cents |
+| OPA2197 offset drift, both halves | ±2.5 µV/°C max `[ds OPA2197.pdf p.7]` | follower ×1, stage ×2 | 0.09 cents |
+| **Linear sum / RSS** | | | **0.76 / 0.45 cents** |
+
+*Not in it*: what the trims and firmware's affine take out once (DAC INL, the
+initial offsets and ratios), and the dynamic, breath-correlated ground-path
+terms on [`power-entry.md`](../power-entry/power-entry.md), which are an order
+of magnitude larger and are not this stage's.
 
 **The network stays, and the ranking is the reason it needed deciding.** Two
 0.1 % / 10 ppm discretes would give 0.38 cents — fifteen times worse than the
@@ -301,45 +351,32 @@ populated board is not a five-minute job. The option-code lookup is.
 *(The superseded version of this table, which contradicted the live one twelve
 lines above it, is in [`notes.md`](notes.md).)*
 
-Nothing here approaches the **20-odd cents** of the dynamic, LED-correlated
-terms that ADR 0006 fixes in the power tree and the ground plan. That remains
-the right order of priority: the static budget was never the problem.
+Nothing here approaches the dynamic, LED- and breath-correlated terms that
+ADR 0006 and `power-entry.md` deal with in the power tree and the ground plan.
+That remains the right order of priority: this budget was never the problem.
+
+## Settled 2026-09-30
+
+- **The LT5400's exposed pad goes to `AGND_MOD`**, the quiet AC ground the
+  datasheet asks for — *"do not tie the exposed pad to noisy signals or noisy
+  grounds … connecting the exposed pad to a quiet AC ground is recommended"*
+  `[ds LT5400.pdf p.6]`. With the four-layer ground settled
+  (`dig-gnd-topology`) `AGND_MOD` is the region under this stage and carries
+  neither the umbilical's return nor the SPI's, so it is the quiet one. The
+  symbol carries the pad as pin 9 (`EP`), and the two spare sections are tied
+  to `AGND_MOD` at both ends so they are not floating plates beside the
+  network. Order code **`LT5400BIMS8E-1#PBF`** (`R-PRECISION` gives why B and
+  I).
+- **`TRIM-OFFSET` is buildable** — *The offset trim*, above.
+- **`TRIM-GAIN` is bipolar**, ±1 %, centred by `R-GAIN-CTR`, and its CW end
+  is strapped to the wiper.
+- **The (+) input's DC path** is `R-BIAS-DAC`, at the DAC pin.
+- **`R-OPAMP-IN` is six.** The follower's clamp-current protection is
+  `R-VREF-SER`, a thin-film part because it is also half of a ratio that sets
+  `V_ref`.
 
 ## Still open
 
-- **The LT5400's exposed pad has nowhere to go, and it is layout-blocking.**
-  The pad is 1.88 × 1.68 mm, floating, and couples **5.5 pF** to the resistors
-  against only 1.4 pF resistor-to-resistor — so it is the dominant stray on the
-  1 V/oct network, and nothing in this corpus says which ground it attaches to.
-  ADI says not a noisy one. **Decided by:** the 2-layer-or-4 decision and the
-  layout, not after it. Full reading of the banked datasheet, including the
-  option suffix that closed and the revision caveat, is in
-  [`notes.md`](notes.md).
-- **`TRIM-OFFSET` is not buildable as described.** `V_ref` nominal *is*
-  `VREFOUT`, and a divider can only go below it, so the nominal sits at an end
-  stop with no downward authority. The trim network has to put 2.500 V at
-  mid-travel — which means dividing `VREFOUT` and gaining it back, or injecting
-  a small bipolar correction. E10, with `R-TRIM-RANGE`.
-- **The (+) input has no DC path to ground.** Its only connection is a DAC pin
-  that may be high-Z before power-on reset, so the output can sit at either
-  rail during that window. This project already fixed the identical problem on
-  the breath in-amp with `R-BIAS-INAMP`. `R-BIAS-DAC` now does it here — at the
-  **DAC pin**, not after `R-OPAMP-IN`, where 100 kΩ would cost 1 % of gain.
-- **Whether 200 Ω is the right `TRIM-GAIN`.** It is 0 → +2 % and one-sided,
-  and with the load divider gone it has no downward authority at all. Whether
-  it should be bipolar (fixed leg slightly under nominal, trimmer bracketing
-  it) or deleted in favour of firmware is an E9 question.
-- **A two-terminal series trimmer fails open to the rail.** Strap the wiper to
-  one end so a dirty track degrades to a known resistance rather than an open
-  circuit. That is a footprint decision, not a value.
-- **The seventh `R-OPAMP-IN` has no home.** The row is qty 7 and
-  [`mod-channels.md`](../mod-channels/mod-channels.md) allocates it as pitch,
-  the four mods, the mod reference buffer and *the `VREFOUT` follower* — but
-  the follower's input is drawn straight off `TRIM-OFFSET`'s wiper with no
-  series resistor, and the value table above does not list one. Six are placed
-  in netlists and `tools/check-netlist.py` prints the shortfall every run.
-  **Decided by:** whether that (+) input needs clamp-current protection when
-  the DAC pin reaches it through a 10 kΩ trimmer. If it does, the part belongs
-  here and the drawing gains a label; if it does not, the row is qty 6.
-- **The two spare LT5400 resistors.** Available, matched, and currently doing
-  nothing. Worth a look when the mod channels are laid out.
+- **Pitch stability into worst-case cable, and the ring into a passive
+  mult** (*Two new bounds to check at E9*, above). Simulated —
+  `pitch-mult-overshoot`, `sim/` — and **decided by E9** on the bench.

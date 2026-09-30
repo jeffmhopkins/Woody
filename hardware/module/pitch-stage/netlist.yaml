@@ -81,6 +81,13 @@ components:
     - 2
     note: One of qty 6, one per populated DAC channel. AT THE DAC PIN, not after R-OPAMP-IN, where it would cost
       1 percent of gain. Not drawn on the page
+  R-GAIN-CTR:
+    value: 100R 0.1%
+    pins:
+    - 1
+    - 2
+    note: 'Centres TRIM-GAIN: 100R in the R1 leg against TRIM-GAIN''s 0-200R in the R2 leg makes the ratio 1 at
+      mid-travel and the trim +/-1 percent - bipolar, because the DAC''s gain error is'
   R-OPAMP-IN:
     value: 1k 1%
     pins:
@@ -94,6 +101,33 @@ components:
     - 1
     - 2
     note: INSIDE the DC feedback loop, because the loop is tapped at the jack
+  R-VREF-FB:
+    value: 200R 0.1%
+    pins:
+    - 1
+    - 2
+    note: Follower output to its (-) input. With R-VREF-GND the follower has gain 1.02, which puts 2.500 V back
+      at the trimmer's mid-travel
+  R-VREF-GND:
+    value: 10k 0.1%
+    pins:
+    - 1
+    - 2
+    note: 'Follower (-) input to AGND_MOD. 200R/10k = 0.02: the ratio''s drift reaches V_ref scaled by 0.02/1.02'
+  R-VREF-INJ:
+    value: 22.1k 0.1%
+    pins:
+    - 1
+    - 2
+    note: TRIM-OFFSET's wiper into the follower's (+) input. About 4 percent of the span, so the trimmer and its
+      tempco act on 4 percent of V_ref
+  R-VREF-SER:
+    value: 1k 0.1%
+    pins:
+    - 1
+    - 2
+    note: 'VREFOUT into the follower''s (+) input. Sets the injection fraction with R-VREF-INJ, and is the follower''s
+      clamp-current protection: the DAC pin reaches the (+) input through it, as R-OPAMP-IN does for the channels'
   RN-PITCH:
     of: R-PRECISION
     value: 10k
@@ -107,24 +141,28 @@ components:
     - R3B
     - R4A
     - R4B
-    note: 'R1 (R1A-R1B) and R2 (R2A-R2B) are the page''s R1 = R2 that make gain exactly 2 and the intercept exactly
-      -2.500 V from one ratio. R3 and R4 are spare. The exposed pad is not a pin here: where it goes is open (R-PRECISION
-      row)'
+    - EP
+    note: R1 (R1A-R1B) and R2 (R2A-R2B) are the page's R1 = R2 that make gain exactly 2 and the intercept exactly
+      -2.500 V from one ratio. R3 and R4 are spare, both ends on AGND_MOD. THE EXPOSED PAD (EP, pin 9) GOES TO AGND_MOD,
+      the quiet analog ground the datasheet asks for (LT5400.pdf p.6); it is the dominant stray on the 1 V/oct network,
+      5.5 pF to the resistors
   TRIM-GAIN:
     value: 200R multiturn cermet
     pins:
     - CW
     - W
     - CCW
-    note: IN SERIES with R2, between R2 and the jack. One-sided 0 to +2 percent
+    note: 'IN SERIES with R2, between R2 and the jack, its CW end strapped to the wiper so a dirty track fails to
+      a known resistance. 0 to 200R against R-GAIN-CTR''s 100R in the R1 leg: +/-1 percent of ratio about nominal'
   TRIM-OFFSET:
     value: 10k multiturn cermet
     pins:
     - CW
     - W
     - CCW
-    note: AHEAD of the follower, so it scales V_ref and therefore the intercept alone. Its span needs R-TRIM-RANGE,
-      which is undecided - see external_endpoints
+    note: Across VREFOUT (CW) and AGND_MOD (CCW); its wiper injects into the follower's (+) input through R-VREF-INJ,
+      which with R-VREF-SER and the follower's gain puts 2.500 V at mid-travel and spans about -60/+50 mV. Its 10k
+      to ground is also what holds VREFOUT at 0 V while the DAC's reference is disabled (3-state)
   U-PITCH:
     of: U-OPA-PITCH
     value: OPA2197
@@ -137,9 +175,9 @@ components:
     - OUTB
     - V+
     - V-
-    note: Half A is the unity follower on the trimmed reference - the buffer is what lets a divider drive the bottom
-      of the feedback network. Half B is the non-inverting stage, gain 1 + R2/R1 = 2, with the reference at the
-      bottom of the divider
+    note: Half A buffers the trimmed reference at gain 1.02 (R-VREF-FB/R-VREF-GND) - the buffer is what lets the
+      trim network drive the bottom of the feedback network. Half B is the non-inverting stage, gain 1 + R2/R1 =
+      2, with the reference at the bottom of the divider
 nets:
   AGND_MOD:
   - port: AGND_MOD
@@ -149,6 +187,13 @@ nets:
   - C-FILT-PITCH.2
   - J-CV-PITCH.SLEEVE
   - R-BIAS-DAC.2
+  - R-VREF-GND.2
+  - RN-PITCH.R3A
+  - RN-PITCH.R4A
+  - RN-PITCH.R4B
+  - RN-PITCH.R3B
+  - RN-PITCH.EP
+  - TRIM-OFFSET.CCW
   DAC_CH1:
   - port: DAC_CH1
   - R-BIAS-DAC.1
@@ -170,6 +215,7 @@ nets:
   - U-PITCH.V+
   VREFOUT:
   - port: VREFOUT
+  - R-VREF-SER.1
   - TRIM-OFFSET.CW
   AMP_OUT:
   - C-FB-PITCH.1
@@ -179,6 +225,7 @@ nets:
   GAIN_TRIM_MID:
   - RN-PITCH.R2B
   - TRIM-GAIN.W
+  - TRIM-GAIN.CW
   MINUS_NODE:
   - C-FB-PITCH.2
   - RN-PITCH.R2A
@@ -188,29 +235,21 @@ nets:
   - C-AA-PITCH.1
   - R-OPAMP-IN.2
   - U-PITCH.INB+
-  TRIM_WIPER:
-  - TRIM-OFFSET.W
-  - U-PITCH.INA+
-  VREF_BUFFERED:
+  R1_BOTTOM:
+  - R-GAIN-CTR.1
   - RN-PITCH.R1A
+  TRIM_WIPER:
+  - R-VREF-INJ.1
+  - TRIM-OFFSET.W
+  VREF_BUFFERED:
+  - R-GAIN-CTR.2
+  - R-VREF-FB.1
   - U-PITCH.OUTA
+  VREF_FB:
+  - R-VREF-FB.2
+  - R-VREF-GND.1
   - U-PITCH.INA-
-  R3A:
-  - RN-PITCH.R3A
-  R3B:
-  - RN-PITCH.R3B
-  R4A:
-  - RN-PITCH.R4A
-  R4B:
-  - RN-PITCH.R4B
-  CW:
-  - TRIM-GAIN.CW
-  CCW:
-  - TRIM-OFFSET.CCW
-external_endpoints:
-- CCW
-- CW
-- R3A
-- R3B
-- R4A
-- R4B
+  VREF_SUM:
+  - R-VREF-INJ.2
+  - R-VREF-SER.2
+  - U-PITCH.INA+

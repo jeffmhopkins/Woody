@@ -20,7 +20,7 @@ circuits. **The circuits own their own values** — nothing here restates one.
 | [`breath-response-shaper/`](breath-response-shaper/breath-response-shaper.md) | `POT-RESP`, the antiparallel-diode shaper |
 | [`pitch-stage/`](pitch-stage/pitch-stage.md) | Two-resistor non-inverting `2·Vdac − 2.5`, loop tapped at the jack |
 | [`mod-channels/`](mod-channels/mod-channels.md) | Four × `4·Vdac − 3·V_ref`, sharing one buffered reference |
-| [`panel-led/`](panel-led/panel-led.md) | The panel indicator, and the job it has lost |
+| [`panel-led/`](panel-led/panel-led.md) | The panel indicator: lit while the load switch delivers, dark when it is off or latched |
 | [`panel/`](panel/panel.md) | Panel geometry: width, clear height, how many control rows fit, and the layout (ADR 0024) |
 
 **The module is two boards** (ADR 0023), and each circuit's KiCad sheet is
@@ -46,9 +46,12 @@ functions and error budgets cannot be stated from one side.
   holds the spot-colour PDF and SVG master that go to the panel maker with
   the DXF, made by `tools/panel-art.py` from the same CAD. One proof panel
   before a run.
-- **Two layers or four** is undecided and gates the grounding scheme. It is
-  upstream of `power-entry/`'s `dig-gnd-topology`, which is tracked as
-  `disputed` for exactly this reason.
+- **Four layers, 1.6 mm, for the main board; two for the jack board** — the
+  owner, 2026-09-30: *"Four layer in the module board is fine."* The ground
+  scheme on it is `dig-gnd-topology` (`power-entry/`, *Grounding*). The jack
+  board has one ground, `AGND_MOD`, and needs no second layer pair.
+- **The bus +5 V is not used** (owner, 2026-09-30): the module makes its own
+  (`power-entry/`, *The logic 5 V*) and keeps the 16-pin header (ADR 0023).
 - ~~`hardware/unplaced.csv` holds this board's principal ICs.~~ **Fixed
   2026-09-21.** The DAC, the in-amp, the LM317, the entry diodes, the beads,
   the bulk caps, both load-switch capacitors and the level shifter are now

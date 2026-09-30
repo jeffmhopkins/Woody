@@ -1,0 +1,103 @@
+# The umbilical load switch's start, with a BEHAVIOURAL LT1641 (lt1641.inc, built from
+# the banked datasheet 164112fc - no vendor model could be banked, see fragment R29).
+# Values from both netlists the start runs through: this circuit's, and the
+# instrument's input (carrier/power-entry-instrument) that the umbilical charges. Run:
+#   python3 tools/sim.py run hardware/module/umbilical-load-switch/sim
+# docs/reference/pcb-pipeline.md, section 2, ranked sim 5: "the circuit proven not to
+# start". The corners are the datasheet's min/max on every current and threshold the
+# page's margins are stated at.
+title: Umbilical load switch - behavioural LT1641 start-up
+values:
+  netlist:
+    - hardware/module/umbilical-load-switch/netlist.yaml
+    - hardware/carrier/power-entry-instrument/netlist.yaml
+include: [lt1641.inc]
+
+params:
+  v_bus:    {value: 12.0, source: "the Eurorack +12 V bus at J-PWR-EURO, nominal"}
+  r_bus:    {value: 0.05, source: "the bus and the entry path's resistance [assumption]"}
+  t_rise:   {value: 1.0e-3, source: "the bus rising at power-on [assumption: a PSU's soft start is slower, which is easier]"}
+  r_ilim:   {value: 0.05, source: "R-ILIM's row is 'value from E6' (open): the page's working 50 mohm (umbilical-load-switch.md, 'Four things')"}
+  vhi:      {value: 47.0e-3, source: "V_SENSETRIP at V_FB >= 0.5 V, 39/47/55 mV [LT1641.pdf p.2] (vary)"}
+  vlo:      {value: 12.0e-3, source: "V_SENSETRIP at V_FB = 0, 8/12/17 mV [p.2] (vary)"}
+  igate:    {value: 10.0e-6, source: "I_GATEUP, 5/10/20 uA [p.2] (vary)"}
+  itup:     {value: 80.0e-6, source: "I_TIMERUP, 24/80/132 uA [p.2] (vary)"}
+  itdn:     {value: 3.0e-6,  source: "I_TIMERON, 1.5/3/5 uA [p.2]"}
+  dvg:      {value: 4.5, source: "dV_GATE, VCC 10.8-20 V: 4.5 V min (no typical) [p.2]; the guaranteed minimum, so the FET is judged at it"}
+  gm:       {value: 0.1, source: "the current-limit amplifier's transconductance: NOT IN THE DATASHEET [assumption, 0.1 A/V: a 10 uA error at 0.1 mV]"}
+  v_th:     {value: 2.0, source: "Q-LOADSW is not chosen: a logic-level threshold [assumption]"}
+  r_dson:   {value: 0.05, source: "the page's assumption, R_DS(on) ~50 mohm (umbilical-load-switch.md, 'Sizing the FB divider'), here at dV_GATE min"}
+  c_iss:    {value: 1.0e-9, source: "the page's 'bare C_iss (~1 nF)' [assumption: the FET is not chosen]"}
+  r_lbin:   {value: 0.05, source: "L-BUCK-IN's DCR [assumption]"}
+  i_load:   {value: {fig: umbilical-current}, source: "the instrument's current, typical play (an upper bound, blocked on E6)"}
+  v_buck_min: {value: 8.0, source: "R-78E5.0-1.0 input minimum, 8 V [datasheets/discrete-and-power/R-78E5.0-1.0.pdf]: the load is modelled as arriving there"}
+  cold:     {value: 1}
+  fb_open:  {value: 0, source: "1: FB tied to nothing - the part reads V_FB = 0 (the page's section 5)"}
+  c_extra:  {value: 1.0e-15, source: "capacitance beyond the netlisted input (a what-if sets it)"}
+  t_end:    {value: 0.4}
+
+derived:
+  kp: "1.0/(v['r_dson']*(v['dvg'] - v['v_th']))"
+  v_bus0: "0.0 if v['cold'] else v['v_bus']"
+  v_gate0: "0.0 if v['cold'] else v['v_bus'] + v['dvg']"
+  r_fb_lo: "1.0e-3 if v['fb_open'] else v['R-FB-LO']"
+
+vary:
+  vhi:   {tol: [-0.1702, 0.1702], source: "39 and 55 mV about 47"}
+  vlo:   {tol: [-0.3333, 0.4167], source: "8 and 17 mV about 12"}
+  igate: {tol: [-0.5, 1.0], source: "5 and 20 uA about 10"}
+  itup:  {tol: [-0.7, 0.65], source: "24 and 132 uA about 80"}
+  itdn:  {tol: [-0.5, 0.6667], source: "1.5 and 5 uA about 3"}
+
+sims:
+  - name: cold-start
+    deck: loadswitch.cir
+    measures: [latched, timer_peak, t_up, i_peak]
+    post:
+      latched: "peak(w['latch'], 0, p['t_end'])"
+      timer_peak: "peak(w['timer'], 0, p['t_end'])"
+      t_up: "cross(w['out'], 0.95*p['v_bus'], 0)"
+      i_peak: "peak(w['isense'], 0, p['t_end'])"
+    asserts:
+      - expr: "max['latched'] < 0.5"
+        why: "a cold start completes without the fault latch at every datasheet corner"
+  - name: hot-plug
+    deck: loadswitch.cir
+    set: {cold: 0}
+    measures: [latched, timer_peak, t_up, i_peak, i_after]
+    post:
+      latched: "peak(w['latch'], 0, p['t_end'])"
+      timer_peak: "peak(w['timer'], 0, p['t_end'])"
+      t_up: "cross(w['out'], 0.95*p['v_bus'], 0)"
+      i_peak: "peak(w['isense'], 0, p['t_end'])"
+      i_after: "peak(w['isense'], 1e-3, 0.5*cross(w['out'], 0.95*p['v_bus'], 0))"
+    asserts:
+      - expr: "max['latched'] < 0.5 and max['timer_peak'] < 1.233"
+        why: "a hot-plug start completes before the TIMER reaches the fault threshold (1.233 V, p.5) on worst-case silicon - the page's sizing case"
+  - name: hot-plug-page-2m2
+    # the page's start arithmetic uses 2.2 mF at the instrument; the instrument's netlist
+    # has C-STRIP-BULK and C-BUCK-IN only (C-BULK-DISP went with the display, ADR 0015).
+    # c_extra brings the total to 2.2 mF, to compare with the page's numbers
+    deck: loadswitch.cir
+    set: {cold: 0, c_extra: 1.63e-3}
+    measures: [latched, timer_peak, t_up, i_after]
+    post:
+      latched: "peak(w['latch'], 0, p['t_end'])"
+      timer_peak: "peak(w['timer'], 0, p['t_end'])"
+      t_up: "cross(w['out'], 0.95*p['v_bus'], 0)"
+      i_after: "peak(w['isense'], 1e-3, 0.5*cross(w['out'], 0.95*p['v_bus'], 0))"
+    asserts:
+      - expr: "max['latched'] < 0.5 and max['timer_peak'] < 1.233"
+        why: "even at the page's 2.2 mF the start completes on worst-case silicon"
+  - name: fb-unconnected
+    # the circuit before 2026-09-21: FB tied to nothing
+    deck: loadswitch.cir
+    set: {fb_open: 1, t_end: 1.0}
+    vary: [itup]
+    measures: [latched, v_out_max]
+    post:
+      latched: "peak(w['latch'], 0, p['t_end'])"
+      v_out_max: "peak(w['out'], 0, p['t_end'])"
+    asserts:
+      - expr: "min['latched'] > 0.5 and max['v_out_max'] < 0.95*p['v_bus']"
+        why: "reproduces the page's section 5 at every TIMER corner: with FB unconnected the limit stays at its 12 mV floor, the start never completes, and the -1 latches off. (The output does charge - to where the instrument's load arrives, which the floor cannot carry - so the stall, not the charge, is what trips the timer)"

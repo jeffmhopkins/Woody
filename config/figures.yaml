@@ -516,17 +516,18 @@ figures:
     status: disputed
     owner: docs/decisions/0003-breath-sensing-path.md
     candidates: ["2.8 kPa (cited to ADR 0003, which does not contain it; the two schematic pages cite each other)", "0-5 kPa (what ADR 0003 actually says)", "3-4 kPa (published wind-controller figures)"]
-    decided_by: "M1, with a player and a manometer. Sets the panel gain range AND the ADC headroom."
+    decided_by: "E2 (ROADMAP: breath sensing, a human playing through the real mouthpiece, tube and trap), with a manometer teed at P1 - the test is specified in docs/decisions/0003-breath-sensing-path.md beside the 0-6 kPa range. Sets the panel gain range AND the ADC headroom."
     forbidden: []
 
   - id: pitch-cents-budget
-    quantity: Total pitch error budget
-    value: "DISPUTED"
-    status: disputed
+    quantity: Total pitch error budget - drift over 10 degC after trim, at the worst note
+    value: "0.76 cents worst-case linear sum (0.45 cents RSS)"
+    status: settled
     owner: hardware/module/pitch-stage/pitch-stage.md
-    candidates: ["0.42 cents (this is a ROW of one table, not a total - and it is what power-entry.md scaled the ground-path finding against)", "0.85 cents RSS", "1.35 cents linear sum", "~1.2 cents RSS over 0-40 C from an independent reviewer"]
-    decided_by: "pitch-stage.md has two contradictory budget tables back to back and states no total. One coherent table, then cite it."
-    forbidden: []
+    derivation: "One table, pitch-stage.md 'What limits accuracy': DAC internal reference 5 ppm/C max (C grade, SBAS430E p.4) x 10 C x 7 V lever = 0.42; DAC gain tempco 1 ppm FSR/C typ (p.3) = 0.12; DAC offset drift 0.5 uV/C typ x 2 (p.3) = 0.012; LT5400 ratio tracking 0.027; TRIM-GAIN at mid-travel against R-GAIN-CTR 0.034; V_ref trim network (R-VREF-FB/R-VREF-GND 0.02/1.02 and R-VREF-INJ/R-VREF-SER, 25 ppm/C thin film) 0.06; OPA2197 V_os drift 2.5 uV/C max, follower x1 and stage x2 (SBOS737C p.7) 0.09. Sum 0.763, RSS 0.452 cents. 1 V/oct: 1 mV = 1.2 cents."
+    scope: "Temperature drift over 10 degC once the trims are set, worst note in -2..+7 V. NOT in it: static errors the trims and firmware's affine remove (DAC INL, initial offsets and ratios), the dynamic ground-path terms on power-entry.md (breath-correlated, 7-18 cents from the ribbon and busboard), and loads."
+    forbidden: ["pitch error budget at 0.42 cents", "budget at 0.42 cents"]
+    false_positive_note: "0.42 cents is legitimately the DAC-reference ROW of the budget table; only calling it the total is stale. The old candidates 0.85 cents RSS / 1.35 cents linear sum / ~1.2 cents RSS never appeared outside this entry."
 
   - id: loadswitch-timer
     quantity: C-TIMER-LOADSW
@@ -587,28 +588,26 @@ figures:
       is 100 nF at REF5050 VIN, 100 nF at REF5050 VOUT, and 100 nF at U-BREATH VS.
 
   - id: dig-gnd-topology
-    quantity: Where DIG_GND returns to
-    value: "DISPUTED"
-    status: disputed
+    quantity: Where DIG_GND (and AGND_MOD, and PWR_GND) meet at the module
+    value: "One star, at the power header's ground pins: DIG_GND (its own plane) and AGND_MOD (its own region) each tie there through their own net tie, PWR_GND reaches it on its own copper, and nothing ties anywhere else. Four-layer main board."
+    layers: "PCB-MODULE, four layers, 1.6 mm: layer 2 carries the DIG_GND plane (under the etherCON, the level shifter, the logic regulator and the SPI traces) and, separately, the AGND_MOD region (under the analog block); layer 4 carries PWR_GND from the etherCON's pin 6 to the header. Ties: NT-DIG-MOD and NT-AGND-MOD, both at the header's ground pins."
+    status: settled
     owner: hardware/module/power-entry/power-entry.md
-    candidates:
-      - "Its own path to the star (docs/decisions/0004-cv-interface-module.md:627)"
-      - "NOT its own path - the pour directly under its trace, because routing a 2 MHz SPI return to a distant star is the classic split-plane mistake (hardware/module/power-entry/power-entry.md:495-498)"
-      - "The analog star, single tie (hardware/module/digital-and-supervision/digital-and-supervision.md:53)"
-    decided_by: "The 2-layer vs 4-layer decision, which is upstream of it. On two layers the corpus's own requirements are mutually exclusive - power-entry.md wants the SPI return directly under its trace while ADR 0004 wants PWR_GND on its own copper AND the analog return as its own region, and two disjoint pours on one layer means every boundary-crossing trace loses its return across the moat. Four layers dissolves the conflict. Raised by a cold reviewer 2026-09-21."
-    forbidden: []
-    note: "power-entry.md states that ADR 0004 was corrected on this point. IT WAS NOT - line 627 still says the opposite. This is the named failure mode exactly: the fix landed where the editing was happening and not where the reader looks. It is SEMANTIC, so tools/check-staleness.py cannot see it, which is why it survived three review waves and is filed here instead. THE INSTRUMENT END IS DECIDED, AND THIS ENTRY IS ABOUT THE MODULE END: on 2026-09-26 the owner tied J-UMB pin 8 (DIG_GND) to the main board's ground, PWR_GND, at J-UMB (docs/decisions/0018-main-board-wiring-decisions.md; hardware/interfaces/spi-link/spi-link.md; hardware/carrier/netlist.yaml). Where DIG_GND meets AGND_MOD and PWR_GND at the module is still the dispute above, and the instrument end does not settle it."
+    decided: "Owner, 2026-09-30: 'Four layer in the module board is fine.' The topology on it adopts the four-layer proposal recorded here (DIG_GND plane on layer 2, analog region, PWR_GND on layer 4) with ONE correction: no AGND_MOD-to-DIG_GND bridge under the DAC8568. SBAS430E p.49 asks for the DAC's ground on an analog plane 'separate from the ground connection for the digital components until they were connected at the power-entry point of the system', and J-UMB pins 6 and 8 are tied at the instrument (ADR 0018), so about half the instrument's return comes back on pin 8 - a bridge under the DAC would route it across the analog region; tied at the star it crosses only the DIG_GND plane. ADR 0004's 'DIG_GND likewise - its own path to the star' is what this is."
+    forbidden: ["**`DIG_GND` is *not* given its own path to the star**", "Where it ties is the disputed part", "Where it returns is the disputed part", "Where it ties is the disputed figure", "The module ground plan is unsettled", "bridged to the plane at ONE point under the DAC8568"]
+    false_positive_note: "The pre-decision wording lives on in docs/review and in the notes.md history files, which are not the corpus. spi-link.md (interfaces) still calls this figure disputed and is outside the module - report, do not add a pattern that only fires there."
+    note: "THE INSTRUMENT END was decided first: on 2026-09-26 the owner tied J-UMB pin 8 (DIG_GND) to the main board's ground, PWR_GND, at J-UMB (docs/decisions/0018-main-board-wiring-decisions.md; hardware/interfaces/spi-link/spi-link.md; hardware/carrier/netlist.yaml). The module end is this entry. PCB-MODULE-JACK stays two layers: its only ground is AGND_MOD, arriving on J-B2B-MOD's five ground pins. The metal standoffs (owner, 2026-09-30) are on AGND_MOD at the jack board and on no net at the main board, so they add no second tie."
 
   - id: riso-ref-topology
     quantity: R-ISO-REF and the reference buffer's compensation network
     value: "Dual feedback per SBOS737C Figure 56: R_ISO 37.4 ohm, R_F 10 kohm taken at VS, R_Fx 100 ohm + C_F 1 nF at the op-amp output"
     status: settled
     owner: hardware/carrier/breath-excitation-reference/breath-excitation-reference.md
-    derivation: "TI's Figure 56 (SBOS737C section 8.2.3 p.30, 'Precision Reference Buffer') is the worked answer for this exact circuit: R_ISO 37.4 ohm, R_F 1 Mohm at VOUT, R_Fx 10 kohm + C_F 39 nF at the op-amp output, 89 deg phase margin. IT TRANSFERS TO OUR 100 nF LOAD BECAUSE R_ISO IS SET BY Zo, NOT BY C_L: with feedback taken at the amplifier output above the handover, V_A/V_i = (1 + s.R_ISO.C_L)/(1 + s.(Zo+R_ISO).C_L), so both the attenuation R_ISO/(Zo+R_ISO) and the pole-zero ratio depend only on R_ISO/Zo - C_L moves both corners together and cancels. 37.4 ohm is Zo/10 against the specified Zo = 375 ohm (SBOS737C p.8). Simulated phase margin 85.9 deg at 896 kHz."
-    adaptation: "R_F is 10 kohm, NOT TI's 1 Mohm, and R_Fx scales with it to preserve the 100:1 ratio. Two reasons, both absent from TI's circuit. (1) DC error: the guaranteed-over-temperature I_B of 5 nA through 1 Mohm is 5 mV = 1000 ppm = 3.4 LSB on a rail that IS the ratiometric scale factor; through 10 kohm it is 50 uV = 0.034 LSB. (2) Handover: R_F.C_F sets the frequency above which the loop closes on the amplifier's own output rather than on VS. TI's load is a pure capacitor, ours draws 10 mA, so above the handover any load-current change appears at VS across R_ISO. TI's 4.08 Hz would be a disaster; 10 kohm + 1 nF puts it at 15.9 kHz, well above the 500 Hz breath channel. |Z_out| at VS is then 1.20 ohm at 500 Hz against 27.7 ohm at TI's scaling."
+    derivation: "TI's Figure 56 (SBOS737C section 8.2.3 p.30, 'Precision Reference Buffer') is the worked answer for this exact circuit: R_ISO 37.4 ohm, R_F 1 kohm at VOUT, R_Fx 10 kohm + C_F 39 nF at the op-amp output, C_L 10 uF, 89 deg phase margin [the figure's R_F glyph read with TIDU026's key, datasheets/analog/TI-TIDU026-slew-rate-limiter.pdf; 1/(2 pi 1k 39n) = 4.08 kHz is SBOS737C's own '4 kHz']. IT TRANSFERS TO OUR 100 nF LOAD BECAUSE R_ISO IS SET BY Zo, NOT BY C_L: with feedback taken at the amplifier output above the handover, V_A/V_i = (1 + s.R_ISO.C_L)/(1 + s.(Zo+R_ISO).C_L), so both the attenuation R_ISO/(Zo+R_ISO) and the pole-zero ratio depend only on R_ISO/Zo - C_L moves both corners together and cancels. 37.4 ohm is Zo/10 against the specified Zo = 375 ohm (SBOS737C p.8). The simulated phase margin is riso-ref-phase-margin."
+    adaptation: "These are this board's values, not TI's scaled: TI's load is a pure capacitor and ours draws 10 mA. (1) DC error: the guaranteed-over-temperature I_B of 5 nA through R_F 10 kohm is 50 uV = 0.034 LSB on a rail that IS the ratiometric scale factor. (2) Handover: R_F.C_F sets the frequency above which the loop closes on the amplifier's own output rather than on VS, and above it any load-current change appears at VS across R_ISO. 10 kohm + 1 nF puts it at 15.9 kHz, well above the 500 Hz breath channel. |Z_out| at VS is then 1.20 ohm at 500 Hz [calc; reproduced by sim/, zout-as-netlisted]."
     dc_error: "ZERO ACROSS R_ISO, BY TOPOLOGY. C_F blocks at DC so no current flows in R_Fx; input current is pA so none flows in R_F; the summing node therefore sits at V(VS) and the amplifier forces V(VS) = 5.000 V. R-ISO-REF's value and tolerance stop mattering. The 2% ratiometric objection that drove the old in-loop-vs-out-of-loop argument is ANSWERED, not traded away. Total buffer contribution is 0.19 LSB worst case (I_B.R_F 50 uV, V_OS 100 uV, V_OS drift 125 uV over 50 K)."
-    robustness: "Phase margin stays above 76 deg across TI's entire published Zo range (73 ohm at 10 MHz to 3.26 kohm at 0.1 Hz, Figure 26) and across a 200x range of C_L (47 nF to 10 uF). So X7R DC-bias derating cannot destabilise it, and bulk capacitance may be added at VS later without recompensating - a 10 uF there costs 2.5 deg."
-    forbidden: ["INSIDE THE LOOP, with feedback taken at the SENSOR", "R-ISO-REF` goes inside the loop", "2.6° of phase margin", "oscillation near 458 kHz", "R-ISO-REF,controller,10R", "R_F . C_F  >  R-ISO-REF . C_LOAD", "series R–C snubber from `VS`", "8.4 deg", "75.2 deg"]
+    robustness: "Phase margin stays above 76 deg across TI's entire published Zo range (73 ohm at 10 MHz to 3.26 kohm at 0.1 Hz, Figure 26) and across a 200x range of C_L (47 nF to 10 uF); against TI's own macromodel it is riso-ref-phase-margin over that C_L range. So X7R DC-bias derating cannot destabilise it. Bulk capacitance at VS is NOT free on that account: 10 uF barely moves the phase margin, yet |Z_out| peaks near R_ISO at 2.5 kHz and a load step rings through for about 3 ms [sim, sim/ step-with-10u-added] - re-run that sim with any part added there."
+    forbidden: ["INSIDE THE LOOP, with feedback taken at the SENSOR", "R-ISO-REF` goes inside the loop", "2.6° of phase margin", "oscillation near 458 kHz", "R-ISO-REF,controller,10R", "R_F . C_F  >  R-ISO-REF . C_LOAD", "series R–C snubber from `VS`", "8.4 deg", "75.2 deg", "TI's 1 MΩ", "TI's 1 Mohm", "TI'S 1M", "R_F 1 Mohm", "1M x 39nF", "4.08 Hz", "a 10 uF there costs 2.5 deg", "for 2.5° of margin", "RATIO OF 100:1"]
     note: |
       DECIDED by preflight agent A4 2026-09-21
       (docs/review/2026-09-21-preflight/A4-carrier.md section 2), after
@@ -628,6 +627,28 @@ figures:
       TI's own OPA2197 macromodel, which models Zo explicitly. Note SPICE needs a
       leak resistor at the summing node for convergence and a real board does not -
       the amplifier's input leakage provides it.
+  - id: riso-ref-phase-margin
+    quantity: The reference buffer's loop phase margin as netlisted, against TI's OPA2197 macromodel
+    value: "118.5 deg minimum, crossover 1.23-1.28 MHz"
+    status: settled
+    owner: hardware/carrier/breath-excitation-reference/sim/README.md
+    derivation: "[sim] python3 tools/sim.py run hardware/carrier/breath-excitation-reference/sim, 2026-09-30, ngspice 42 with TI's OPA2197 PSpice macromodel (datasheets/analog/OPAx197-ti-pspice-sboma34d.lib). Sim loop-as-netlisted: loads 47 nF, 100 nF, 1 uF, 10 uF and 10.1 uF at VS, 33 tolerance corners each (R-ISO-REF, R-FB-REF, C-FB-REF, sensor current, C_L ESR); the minimum is at 47 nF, and 10 uF moves it by under 5 deg. Loop broken at U-BUF's (-) input, 1 GH / 1 GF (tools/sim.py). A SCREEN WITH A +-10 DEG BAR. The same deck on TI's Figure 56 as printed returns within 2 deg of TI's published 89 deg (sim ti-figure-56)."
+    forbidden: ["85.9 deg", "85.9°", "896 kHz", "returns 87.4"]
+    note: "Replaced a behavioural-model result (A4, 2026-09-21; docs/review/2026-09-21-preflight/A4-carrier.md) that sat outside the +-10 deg screen of this one. Both clear the page's 76 deg claim."
+  - id: breath-link-cmrr
+    quantity: Breath link CMRR, sensor buffer to INA828 output, worst tolerance corner at the mains fundamental
+    value: "70.5 dB worst case at 60 Hz"
+    status: settled
+    owner: hardware/module/breath-receive-stage/sim/README.md
+    derivation: "[sim] python3 tools/sim.py run hardware/module/breath-receive-stage/sim, 2026-09-30, ngspice 42 with TI's INA828 and OPA2197 PSpice models (datasheets/analog/). Sim cmrr-as-netlisted: both netlists (interfaces/breath-sense-link R1/R1b, module/breath-receive-stage the rest), every tolerance end of R1, R1b, R2, R3, R4, R5 and both C_cm at +-1 % - 257 runs. Worst corner 70.9 dB at 50 Hz, 70.5 dB at 60 Hz, 71.7 dB at DC (the page's 73 dB bias-pair floor within 3 dB). It falls through the page's 58.5 dB requirement near 480 Hz at the worst corner (C_cm mismatch, rising with frequency). Without R1b: 60.1 dB nominal (the page's 60.2), 58.2 dB worst - below the requirement. C_cm at +-5 %: 45.5 dB worst at 500 Hz (the page's ~46 dB). A SCREEN: the macromodels carry no layout asymmetry."
+    forbidden: ["1.7 dB of margin", "1.7 dB of claimed margin"]
+  - id: pitch-mult-overshoot
+    quantity: Pitch jack overshoot on an octave step, into a passive mult to another output's jack capacitor
+    value: "41.8 % at 82 nF, 64.1 % at 330 nF"
+    status: settled
+    owner: hardware/module/pitch-stage/sim/README.md
+    derivation: "[sim] python3 tools/sim.py run hardware/module/pitch-stage/sim, 2026-09-30, ngspice 42 with TI's OPA2197 PSpice model. Sim step-mult, nominal: the stage as netlisted with the other jack's C-FILT-MOD-1 (82 nF) or C-OUT-BREATH (330 nF) on PITCH; corners of C-FB-PITCH, C-FILT-PITCH and R-OUT-PROT move it about 1 point. The loop's phase margin is 69.3 deg at 10 MHz at every load (sim loop): the AC sweep cannot see it. With the other output's R-OUT-PROT to its driver also on the jack: 15.3 % and 41.8 %."
+    forbidden: ["44–67 %", "65.4 %"]
   - id: loop-budget
     quantity: Real-time loop, one pass
     value: "196-241 us of 250 us"
@@ -778,23 +799,20 @@ figures:
 
   - id: ferrite-bias-impedance
     quantity: FB-IN impedance at 100 MHz under real DC bias
-    value: "~580-614 ohm on FB1/FB3/FB4; ~280-310 ohm on FB2"
+    value: "~580-614 ohm on FB1/FB3; ~280-310 ohm on FB2"
     status: settled
     owner: hardware/module/power-entry/power-entry.md
     derivation: "Laird MI1206K601R-10, drawing rev E, banked at datasheets/discrete-and-power/MI1206K601R-10-ferrite-bead.pdf. Read off the drawing's impedance-under-DC-bias curve family (0 / 250 / 500 / 1000 / 1500 mA traces) at 100 MHz: 0 A ~614 ohm, 250 mA ~431, 500 mA ~157, 1000 mA ~72, 1500 mA ~51. FB2 carries umbilical-current (359 mA) and interpolates to ~280-310 ohm; the module +12V total of 392 mA gives ~245-275."
-    forbidden: ["Rated >=1A - the common 0805 600R part is ~300mA and a saturated bead is a wire"]
+    forbidden: ["Rated >=1A - the common 0805 600R part is ~300mA and a saturated bead is a wire", "FB1/FB3/FB4", "`FB1`, `FB3`, `FB4`", "FB4 (+5V, mA)", "`FB1`–`FB4`"]
     note: "THE '>=1 A' RULE DOES NOT DO WHAT THE BOM ROW SAID IT DID. A bead's current rating is THERMAL, not magnetic, so it says nothing about saturation. A 3000 mA part in the same package with the same 600 ohm nominal (HI1206N601R-10, banked alongside) reads ~145 ohm at 500 mA - SLIGHTLY WORSE than the 1500 mA part. FB2 gets roughly half the 600 ohm its row specifies and no 1206 600R bead of any rating fixes it: DC bias shifts the impedance peak UP IN FREQUENCY, so the bead does not die, its useful band slides off 100 MHz. Either the FB2 requirement is restated at its real operating current or FB2 becomes a physically larger part. SELECTION CONSTRAINT WORTH PRESERVING: this part was chosen because its datasheet PUBLISHES the bias curve. Murata BLM's PDF does not (that data is in SimSurfing only) and neither does Wurth WE-CBF - an earlier researcher declined to bank a Wurth part for exactly this reason and that judgement is upheld."
 
   - id: ref5050-grade
     quantity: REF5050 grade, initial accuracy and tempco
-    value: "DISPUTED"
-    status: disputed
+    value: "REF5050IDR, the High grade: ±0.05 % initial, 3 ppm/°C"
+    status: settled
     owner: hardware/carrier/breath-excitation-reference/breath-excitation-reference.md
-    candidates: ["REF5050AIDR as currently specified = Standard grade = +/-0.1% and 8 ppm/degC (SBOS410O Table 4-2 p.3)", "REF5050IDR = High grade = +/-0.05% and 3 ppm/degC, which is what the corpus BELIEVES it has and states in three places"]
-    decided_by: "Changing one letter in the order code, or accepting 2x the initial error and 2.7x the drift in the ratiometric breath scale-factor budget. Since the whole reason for a separate reference is scale-factor stability, REF5050IDR is almost certainly the right answer - but it is a part change, not a documentation fix, so it is recorded as disputed rather than decided."
-    forbidden: ["+-0.05%, 3ppm/degC, ~5ppm/V", "against a reference specified to 0.05%", "5.000 V out at \u00b10.05 % and 3 ppm/\u00b0C", "SOIC-8, 7\u201318 V in"]
-    false_positive_note: "0.05% and 3 ppm/degC are legitimate figures for the OTHER grade and appear in the text that explains the difference. Match the phrase as it was asserted OF THIS PART, not the numerals. All four strings above are dead as of 2026-09-21 and are here to catch a regression."
-    caught_late_note: "This was fixed in bom.csv on 2026-09-21 and NOT in docs/decisions/0003-breath-sensing-path.md, which went on asserting 0.05%/3ppm for another two commits. Worse, the bom.csv row's own LEADING sentence still said 0.05% with the refutation appended 200 words later - the fix landed where the editor was, not where the reader looks. Both are why these forbidden strings exist."
-
-    note: "*** THE 'A' SUFFIX IS THE WORSE GRADE. *** SBOS410O Table 4-2 p.3, verbatim: REF50xxI = grade 'High' = 3 ppm/degC, +/-0.05%; REF50xxAI = grade 'Standard' = 8 ppm/degC, +/-0.1%. The corpus says REF5050AIDR is +/-0.05% / 3 ppm/degC in bom.csv (twice) and in ADR 0003. PROVENANCE CAVEAT WORTH KEEPING: Table 4-2 is NEW IN REV O (October 2025), so an earlier revision may have labelled the grades differently and the corpus's belief may have had an honest origin; rev M/N was not fetched. FETCH NOTE: ti.com/lit/ds/symlink/ref5050.pdf is a REAL 404 - TI renamed the folder at rev O and broke the symlink. Use ti.com/lit/ds/sbos410/sbos410.pdf."
-
+    source: "datasheets/analog/REF5050.pdf (SBOS410O) Table 4-2 p.3: REF50xxI = High = 3 ppm/degC, +/-0.05 %; REF50xxAI = Standard = 8 ppm/degC, +/-0.1 %. Same SOIC-8 pins, Table 5-1 p.4. Selected 2026-09-30: LCSC C24696, 4401 in stock at USD 1.92 against the Standard grade's USD 1.05 [web jlcpcb.com parts search 2026-09-30]"
+    derivation: "The reference exists only for scale-factor stability (the sensor is ratiometric), so the grade is chosen for it: the Standard grade doubles the initial error and multiplies the drift by 8/3 = 2.7 for USD 0.87 on one part [calc]."
+    forbidden: ["+-0.05%, 3ppm/degC, ~5ppm/V", "against a reference specified to 0.05%", "5.000 V out at \u00b10.05 % and 3 ppm/\u00b0C", "SOIC-8, 7\u201318 V in", "REF5050AID"]
+    false_positive_note: "The 'A' order code is the Standard grade; the grade family names REF50xxI and REF50xxAI are legitimate in text explaining the difference and are not matched. The first four strings predate the part change and are kept to catch a regression of the old assertion."
+    note: "*** THE 'A' SUFFIX IS THE WORSE GRADE. *** A substitution or an assembler's 'equivalent' that adds the A is a silent downgrade of the breath scale factor. FETCH NOTE: ti.com/lit/ds/symlink/ref5050.pdf is a 404 since rev O; use ti.com/lit/ds/sbos410/sbos410.pdf."

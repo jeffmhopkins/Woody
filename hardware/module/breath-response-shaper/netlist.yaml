@@ -22,6 +22,9 @@ ports:
   MODULE_ANALOG_NEG12:
     dir: in
     from: module/power-entry
+  BREATH_SHAPED:
+    dir: out
+    to: module/breath-output-stage
 components:
   C-DEC-RESP-NEG:
     of: C-DECOUPLE
@@ -93,6 +96,19 @@ components:
     pins:
     - 1
     - 2
+  R-RESTORE-FB:
+    value: 20k 1%
+    pins:
+    - 1
+    - 2
+    note: Feedback resistor of the restoring half. -20k/10k = -2 undoes the shaping half's -1/2, so at centre detent
+      the stage is exactly unity and polarity is the in-amp's
+  R-RESTORE-IN:
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    note: 'Input resistor of the restoring half: V_shaped into U-RESP B''s (-) input. With R-RESTORE-FB, x2 inverting'
   U-RESP:
     value: OPA2197IDR
     pins:
@@ -104,8 +120,8 @@ components:
     - OUTB
     - V+
     - V-
-    note: 'Half A is the shaping half, inverting at /2. Half B is the restoring x2 half, which is not drawn: tied
-      off as a follower until it is'
+    note: Half A is the shaping half, inverting at /2. Half B is the restoring half, inverting at x2 (R-RESTORE-IN,
+      R-RESTORE-FB), whose output BREATH_SHAPED feeds POT-GAIN
 nets:
   AGND_MOD:
   - port: AGND_MOD
@@ -118,6 +134,10 @@ nets:
   - port: BREATH_INAMP_OUT
   - R-RESP-DIV-HI.1
   - R-RESP-IN.1
+  BREATH_SHAPED:
+  - port: BREATH_SHAPED
+  - R-RESTORE-FB.2
+  - U-RESP.OUTB
   MODULE_ANALOG_NEG12:
   - port: MODULE_ANALOG_NEG12
   - C-DEC-RESP-NEG.1
@@ -133,6 +153,7 @@ nets:
   V_SHAPED:
   - POT-RESP.CCW
   - R-RESP-FB.2
+  - R-RESTORE-IN.1
   - U-RESP.OUTA
   WIPER:
   - POT-RESP.W
@@ -141,9 +162,10 @@ nets:
   - D-RESP-A.K
   - D-RESP-B.A
   - R-RESP.2
-  SPARE_B_OUT:
+  RESTORE_SUM:
+  - R-RESTORE-FB.1
+  - R-RESTORE-IN.2
   - U-RESP.INB-
-  - U-RESP.OUTB
   VIRTUAL_GND:
   - D-RESP-A.A
   - D-RESP-B.K
