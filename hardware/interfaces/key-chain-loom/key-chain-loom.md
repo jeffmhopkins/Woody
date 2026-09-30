@@ -87,13 +87,14 @@ root sheet.
 
 **What holds the boards to this sheet.** `tools/kicad.py check` holds every
 `J-CHAIN`, on all three boards, to this sheet's pin map (`check_chain`). On the
-main board `GND_CHAIN` is `PWR_GND` and `DEV_3V3` is itself. The main board's
-series resistors, terminator, beads and clamp are held by nothing. They were
-compared with this sheet by hand on 2026-09-29, pin by pin, and agree
-`[repo, board-netlist.yaml]`. **Open**, decided by the board owners: split
-this sheet into a main-board end (everything but the two key-board headers)
-that the main board places once, or extend `check_chain` to those seven
-parts.
+main board `GND_CHAIN` is `PWR_GND` and `DEV_3V3` is itself. **The main
+board's other seven chain parts are held too** (`check_chain_main_parts`):
+every `R-CHAIN-SER`, `R-SER-TERM`, `FB-CHAIN` and `U-TVS-CHAIN` on this sheet
+must be one main-board part of the same row with every pin on the same net,
+one to one, so a missing part, an extra one, or two series resistors swapped
+between `IO38` and `IO7` fails `tools/kicad.py check`. The sheet is not split:
+it stays whole, both ends of both ribbons on one page, and the check does
+what a split would have bought.
 
 ---
 
