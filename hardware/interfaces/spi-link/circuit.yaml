@@ -14,8 +14,10 @@ depends_on:
 - adr:0004
 - adr:0018
 - adr:0021
+- fig:cs-fall-reentry
 - fig:dig-gnd-topology
 - fig:loop-budget
+- fig:spi-pair-crosstalk
 - fig:spi-series-r
 - fig:umbilical-pinmap
 - refdes:J-MCU
