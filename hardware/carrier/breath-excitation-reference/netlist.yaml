@@ -1,141 +1,194 @@
-# AUTHORITATIVE for connectivity. THE DRAWING IS ON ANOTHER PAGE - carrier.md
-# §2, which draws the reference, the buffer, the sensor and the ADC in one
-# picture because they are one signal path. This circuit owns the reference
-# and both halves of the OPA2197; carrier/breath-adc and
-# interfaces/breath-sense-link own the rest and netlist it against the same
-# drawing.
+# GENERATED from hardware/carrier/breath-excitation-reference/breath-excitation-reference.kicad_sch by tools/kicad.py - DO NOT EDIT.
+# The KiCad sheet is authoritative for this circuit: edit it in KiCad 9, then run
+#   python3 tools/kicad.py export hardware/carrier/breath-excitation-reference
+# Every note and argument that used to live in this file is on the sheet
+# (part fields, sheet text) or on ../carrier.md.
 
 circuit: carrier/breath-excitation-reference
 title: Breath excitation reference
 page: ../carrier.md
-
 ports:
-  UMBILICAL_POS12:     {dir: in,  from: module/umbilical-load-switch}
-  AGND_INST:           {dir: ref, from: carrier/power-entry-instrument}
-  VS:                  {dir: out, to: interfaces/breath-sense-link, figure: riso-ref-topology}
-  SENSOR_RAW:          {dir: in,  from: interfaces/breath-sense-link, figure: sensor-full-scale}
-  SENSOR_BUFFERED_OUT: {dir: out, to: carrier/breath-adc, figure: sensor-full-scale}
-
+  UMBILICAL_POS12:
+    dir: in
+    from: module/umbilical-load-switch
+  VS:
+    dir: out
+    to: interfaces/breath-sense-link
+    figure: riso-ref-topology
+  SENSOR_RAW:
+    dir: in
+    from: interfaces/breath-sense-link
+    figure: sensor-full-scale
+  SENSOR_BUFFERED_OUT:
+    dir: out
+    to: carrier/breath-adc
+    figure: sensor-full-scale
+  AGND_INST:
+    dir: ref
+    from: carrier/power-entry-instrument
 components:
-
-  U-REF-BREATH:
-    value: "REF5050AIDR"
-    drawn_as: REF5050
-    pins: [VIN, VOUT, GND]
-    note: "5.000 V, and it is the excitation's absolute accuracy - the sensor is ratiometric, so every volt of error here is a volt of error at the jack"
-
-  C-REF-OUT-VIN:
-    of: C-REF-OUT
-    value: "10uF"
-    drawn_as: C-REF-OUT
-    pins: [1, 2]
-    note: "VIN bypass. NEITHER OF THE TWO IS ON THE BUFFER'S OUTPUT - that is the settled cref-out-node question, and putting one there is what the compensation cannot survive"
-
-  C-REF-OUT-VOUT:
-    of: C-REF-OUT
-    value: "10uF"
-    pins: [1, 2]
-    note: "VOUT load capacitor, on the REF5050's own output"
-
   C-DEC-REF-VIN:
     of: C-DECOUPLE-CARRIER
-    value: "100nF"
-    pins: [1, 2]
-
+    value: 100nF
+    pins:
+    - 1
+    - 2
   C-DEC-REF-VOUT:
     of: C-DECOUPLE-CARRIER
-    value: "100nF"
-    pins: [1, 2]
-
+    value: 100nF
+    pins:
+    - 1
+    - 2
   C-DEC-SENSOR:
     of: C-DECOUPLE-CARRIER
-    value: "100nF"
-    pins: [1, 2]
-    note: "At the sensor's excitation pin, returning to the analog star"
-
-  U-REFBUF:
-    part: OPA2197
-    of: U-BUF
-    section: A
-    pins: [IN+, IN-, OUT]
-    rails: [UMBILICAL_POS12]
-    note: "Single supply from +12 V, V- on the analog star. Buffers the 5.000 V into the sensor"
-
-  U-BREATHBUF:
-    part: OPA2197
-    of: U-BUF
-    section: B
-    pins: [IN+, IN-, OUT]
-    rails: [UMBILICAL_POS12]
-    note: "The other half of the same package, buffering the sensor's output before anything loads it"
-
-  R-ISO-REF:
-    value: "37.4R 1%"
-    pins: [1, 2]
-    note: "Isolates the buffer from the sensor's capacitance. DC feedback is taken on its FAR side, so the drop across it is corrected to zero"
-
-  R-FB-REF:
-    value: "10k 1%"
-    pins: [1, 2]
-    note: "The DC feedback path, from VS - the far side of R-ISO-REF"
-
-  R-FBX-REF:
-    value: "100R 1%"
-    pins: [1, 2]
-    note: "In series with C-FB-REF. The AC path comes from the op-amp OUTPUT, before R-ISO-REF, which is what keeps the loop stable into the load"
-
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: At the sensor's excitation pin, returning to the analog star
   C-FB-REF:
-    value: "1nF"
-    pins: [1, 2]
-
+    value: 1nF
+    pins:
+    - 1
+    - 2
+  C-REF-OUT-VIN:
+    of: C-REF-OUT
+    value: 10uF
+    drawn_as: C-REF-OUT
+    pins:
+    - 1
+    - 2
+    note: VIN bypass. NEITHER OF THE TWO IS ON THE BUFFER'S OUTPUT - that is the settled cref-out-node question,
+      and putting one there is what the compensation cannot survive
+  C-REF-OUT-VOUT:
+    of: C-REF-OUT
+    value: 10uF
+    pins:
+    - 1
+    - 2
+    note: 'VOUT load capacitor, on the REF5050''s own output, straight to AGND_INST: no series resistor (SBOS410O
+      9.4.1.1 p.29, optional; see the C-REF-OUT row)'
+  D-REF-CLAMP:
+    value: 15V zener
+    pins:
+    - A
+    - K
+    note: Holds the REF5050's input under its 18 V absolute maximum through R-REF-IN; 15 V so the 12 V rail at its
+      highest never reaches it
+  R-FB-REF:
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    note: The DC feedback path, from VS - the far side of R-ISO-REF
+  R-FBX-REF:
+    value: 100R 1%
+    pins:
+    - 1
+    - 2
+    note: In series with C-FB-REF. The AC path comes from the op-amp OUTPUT, before R-ISO-REF, which is what keeps
+      the loop stable into the load
+  R-ISO-REF:
+    value: 37.4R 1%
+    pins:
+    - 1
+    - 2
+    note: Isolates the buffer from the sensor's capacitance. DC feedback is taken on its FAR side, so the drop across
+      it is corrected to zero
+  R-REF-IN:
+    value: 330R 1%
+    pins:
+    - 1
+    - 2
+    note: Series into the REF5050's input, so D-REF-CLAMP can hold it under the part's 18 V absolute maximum
+  U-BUF:
+    value: OPA2197IDR
+    pins:
+    - INA+
+    - INA-
+    - OUTA
+    - INB+
+    - INB-
+    - OUTB
+    - V+
+    - V-
+    note: Half A is the reference buffer, half B the breath buffer. Single supply from +12 V, V- on the analog star
+  U-REF-BREATH:
+    value: REF5050IDR
+    drawn_as: REF5050
+    pins:
+    - VIN
+    - VOUT
+    - GND
+    - TEMP
+    - TRIM_NR
+    - DNC1
+    - NC7
+    - DNC8
+    note: 5.000 V, and it is the excitation's absolute accuracy - the sensor is ratiometric, so every volt of error
+      here is a volt of error at the jack
 nets:
-
-  UMBILICAL_POS12:
-    - port: UMBILICAL_POS12
-    - U-REF-BREATH.VIN
-    - C-REF-OUT-VIN.1
-    - C-DEC-REF-VIN.1
-
-  REF_5V:
-    - U-REF-BREATH.VOUT
-    - C-REF-OUT-VOUT.1
-    - C-DEC-REF-VOUT.1
-    - U-REFBUF.IN+
-
-  BUF_OUT:
-    - U-REFBUF.OUT
-    - R-ISO-REF.1
-    - R-FBX-REF.1
-
-  VS:
-    - R-ISO-REF.2
-    - R-FB-REF.1
-    - C-DEC-SENSOR.1
-    - port: VS
-
-  REF_MINUS:
-    - U-REFBUF.IN-
-    - R-FB-REF.2
-    - C-FB-REF.1
-
   AC_FB_MID:
-    - R-FBX-REF.2
-    - C-FB-REF.2
-
-  SENSOR_RAW:
-    - port: SENSOR_RAW
-    - U-BREATHBUF.IN+
-
-  SENSOR_BUFFERED_OUT:
-    - U-BREATHBUF.OUT
-    - U-BREATHBUF.IN-
-    - port: SENSOR_BUFFERED_OUT
-
+  - C-FB-REF.2
+  - R-FBX-REF.2
   AGND_INST:
-    - port: AGND_INST
-    - U-REF-BREATH.GND
-    - C-REF-OUT-VIN.2
-    - C-REF-OUT-VOUT.2
-    - C-DEC-REF-VIN.2
-    - C-DEC-REF-VOUT.2
-    - C-DEC-SENSOR.2
+  - port: AGND_INST
+  - C-DEC-REF-VIN.2
+  - C-DEC-REF-VOUT.2
+  - C-DEC-SENSOR.2
+  - C-REF-OUT-VIN.2
+  - C-REF-OUT-VOUT.2
+  - D-REF-CLAMP.A
+  - U-BUF.V-
+  - U-REF-BREATH.GND
+  BUF_OUT:
+  - R-FBX-REF.1
+  - R-ISO-REF.1
+  - U-BUF.OUTA
+  REF_5V:
+  - C-DEC-REF-VOUT.1
+  - C-REF-OUT-VOUT.1
+  - U-BUF.INA+
+  - U-REF-BREATH.VOUT
+  REF_MINUS:
+  - C-FB-REF.1
+  - R-FB-REF.2
+  - U-BUF.INA-
+  SENSOR_BUFFERED_OUT:
+  - port: SENSOR_BUFFERED_OUT
+  - U-BUF.INB-
+  - U-BUF.OUTB
+  SENSOR_RAW:
+  - port: SENSOR_RAW
+  - U-BUF.INB+
+  UMBILICAL_POS12:
+  - port: UMBILICAL_POS12
+  - R-REF-IN.1
+  - U-BUF.V+
+  VS:
+  - port: VS
+  - C-DEC-SENSOR.1
+  - R-FB-REF.1
+  - R-ISO-REF.2
+  REF_VIN:
+  - C-DEC-REF-VIN.1
+  - C-REF-OUT-VIN.1
+  - D-REF-CLAMP.K
+  - R-REF-IN.2
+  - U-REF-BREATH.VIN
+  DNC1:
+  - U-REF-BREATH.DNC1
+  DNC8:
+  - U-REF-BREATH.DNC8
+  NC7:
+  - U-REF-BREATH.NC7
+  TEMP:
+  - U-REF-BREATH.TEMP
+  TRIM_NR:
+  - U-REF-BREATH.TRIM_NR
+external_endpoints:
+- DNC1
+- DNC8
+- NC7
+- TEMP
+- TRIM_NR

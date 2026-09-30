@@ -1,0 +1,128 @@
+# FIRST-LAYOUT INPUT for this board's PCB - tools/pcb.py layout.
+#
+# The switches and the ribbon connector are NOT here: their places come from
+# the body CAD (mechanical/export/pcb-geometry.echo) and the outline from
+# mechanical/export/key-board-lh.dxf. This file places everything else, on the
+# BOTTOM side, in BODY coordinates (x along the body from the mouth, y across,
+# mm, seen from above), and sets the routing rules. Once the .kicad_pcb exists
+# it is the source; this file records how the first layout was made.
+
+cluster: left_hand
+suffix: LH
+
+# Rules: looser than the board house's own limits (JLCPCB: 0.10 mm track and
+# space at 1 oz, datasheets/fab/JLCPCB-PCB-CAPABILITIES.pdf), so any board
+# house builds it.
+rules:
+  track: 0.25
+  track_min: 0.2
+  clearance: 0.2
+  via: 0.7                  # 0.4 over the 0.3 drill: JLC asks a via 0.1 over its hole (0.15 preferred), and KiCad's one annular rule also holds it to the PTH ring in fab: below
+  via_drill: 0.3
+  via_min: 0.66
+  drill_min: 0.3
+  edge_clearance: 0.3
+  power_track: 0.4           # the chain's 3V3 rail
+
+# The board house's own limits, from JLCPCB's capability pages banked 2026-09-27
+# (datasheets/fab/JLCPCB-PCB-CAPABILITIES.pdf, JLCPCB-PCBA-CAPABILITIES.pdf):
+# tools/pcb.py writes these and rules: above into the board's design rules, and
+# `pcb.py check` fails if the board's rules no longer match them.
+fab:
+  house: JLCPCB
+  hole_clearance: 0.28       # plated hole to track
+  hole_to_hole: 0.45         # between pad holes (0.2 between vias; the stricter one here)
+  annular_min: 0.18          # PTH ring, absolute minimum (0.25 recommended)
+  silk_text_min: 1.0
+  silk_line_min: 0.15
+  silk_to_pad: 0.15
+  finish: "HAL lead-free"    # Economic assembly's standard finish
+  mask: Green
+  silk: White
+  copper_oz: 1               # outer copper, in the stackup the Gerber job file carries
+
+# The chain header, J-CHAIN (ADR 0017 amended): a 1.27 mm shrouded IDC header,
+# right-angle, placed by tools/pcb.py where the body CAD stacks it over the
+# main board's, its mouth toward the ribbon's fold (pcb-geometry.echo "chain").
+# The mount's holes: one per corner, where the cassette's columns stand
+# (ADR 0025: the key plate, a spacer, this board, the column's standoff under
+# it, a screw down through them all into the standoff). Positions come from the
+# body CAD; this is only which footprint draws them (the key keeps its old name,
+# which tools/pcb.py reads). All four are NPTH with their keep-outs: the key
+# plate is grounded through the columns at the main board's plated mounts, so
+# this board carries no bond (ADR 0020 Amendment 7, which supersedes the
+# bond_mount this board had under Amendment 5).
+standoff_footprint: "MountingHole:MountingHole_2.7mm_M2.5"
+
+# Placement. A switch's pins are on its near side (low y): pin 1, the switch
+# leg, at (-4.4, -4.7) from its centre and pin 2, ground, at (+2.6, -5.75);
+# its centre pole's hole is 5.25 across.
+#
+# Each key network is a T round its KEY node (tools/pcb.py network_parts), and
+# EVERY KEY'S IS PLACED THE SAME WAY ROUND ITS OWN SWITCH, from the switch's
+# position in the body CAD: the pattern below, or an `except:` entry with its
+# reason. `offset` runs from the switch centre to the T's junction (body mm);
+# S and P lie along `axis`; `leg` puts the series resistor, whose SWITCH_LEG end
+# joins the switch's pin 1, on that side; `c` is the side the capacitor hangs.
+# Midway to the next switch along the body, standing across it: on this board
+# the one offset that clears every switch's pins and pole, J-CHAIN, the test
+# pads, the register, the corner mounts and the board's edge for all five keys.
+# 9.4, not 10.0, since the switch pads grew to 2.6 mm (ADR 0020 Amendment 6):
+# at 10.0 a resistor's label landed on the next switch's pin pad.
+networks:
+  pattern: {offset: [9.4, 0.0], axis: y, leg: -1, c: -1}
+  except: {}
+
+# References are plain numbers (R1, C6, U1: owner, 2026-09-27); each part's BOM
+# row is its Row field, and a key's network is found by its sheet (LH1..LH5).
+# Since the cassette (ADR 0025) the body CAD puts J-CHAIN 0.5 further toward
+# the tail, and the four parts round it moved 0.5 with it, so their places
+# relative to the header are the ones this board was first routed with. Left
+# where they were, the chain lines cut C7's ground off from the pour.
+# The register sits on the far side just past the chain header, turned so
+# its inputs H..E (pins 6..3) face the key row in the keys' own order, left to
+# right; its chain pins (SH/LD, CLK below; QH, SER above) toward the header.
+parts:
+  U1:  [91.0, 43.5, 90]      # U-KEYS, the register
+  # across the ends of pins 16 (VCC) and 15 (CLK INH, tied to GND): VCC is one stub,
+  # and its return runs to the register's ground pin 8, at the opposite corner, in
+  # its own track (connect_first, below) - not through whatever the pour leaves
+  C6:  [94.8, 48.2, 180]     # C-DECOUPLE-165
+  # the free input's pull-up, over the ends of its own two pins - 11 (FREE3, its
+  # pin 2) and 12 (3V3, its pin 1) - each one short stub: beside the register it
+  # sat where the 3V3 rail to its far pin walled pin 11 in
+  R11: [89.73, 48.2, 180]    # R-KEY-PU on sheet FREE3
+  # The reservoir on the chain's 3V3, beside J-CHAIN's 3V3 pin (C-BULK-CHAIN row)
+  C7:  [67.5, 42.0, 90]      # C-BULK-CHAIN
+
+# The silkscreen title blocks (tools/pcb.py add_silk, add_top_silk): the parts side's
+# and the switch side's, in body coordinates.
+silk:
+  at: [44.0, 12.5]
+  top_at: [44.0, 14.3]       # the switch side's copy, left edge of the text
+  title: "WOODY key board LH"
+  rev: "A"
+  date: "2026-09-27"
+
+# Routing (tools/pcb_route.py): ground is routed as a net, so no ground pin
+# depends on a pour finding its way round the tracks, and then poured on both
+# layers; the chain's 3V3 rail is the wider power track.
+route: true
+# J-CHAIN's far row (the odd pins: 3V3, QH, SER, SH/LD, SCK) can be reached only
+# from the header's back - its 1.27 mm pads leave no room for a track between
+# them - so those nets are routed before the other key lines can close that side.
+# Before them, LH5's input: U1.14 sits between the two ground pins 13 and 15,
+# under the decoupler, with the decoupler's return on one side and the 3V3 rail
+# on the other, and its one way out - a via between the pin rows - is taken by
+# SCK if SCK goes first. After them, LH4 and LH1, the inputs at the two ends
+# of the register's key row (pins 3 and 6), before the chain's stubs to its test
+# pads and the other key lines close their ways out. In this order every net
+# routes on the first pass; in any order tried without LH5 first, LH5 did not,
+# and with LH5 alone first, LH4 and LH1 did not.
+route_first: [/KEY_LH5, /CHAIN_SCK, /CHAIN_SHLD, /CHAIN_SER_LH, /HOP_LH_LT, /KEY_LH4, /KEY_LH1]
+# Pad-to-pad connections routed before everything, and held to a length by
+# pcb.py check: the decoupler's return to the register's ground pin.
+connect_first:
+  - {pads: [C6.2, U1.8], max_mm: 15, why: "the decoupling loop's ground half, in its own track"}
+ground_net: GND_CHAIN
+power_nets: [V3V3_CHAIN_LH]

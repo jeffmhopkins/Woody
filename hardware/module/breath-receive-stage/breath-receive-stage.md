@@ -40,11 +40,11 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node / part | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `BREATH_SENSE` | in | `interfaces/breath-sense-link` | `umbilical-pinmap`, `sensor-full-scale` | The sensor's buffered output, arriving on `J-UMB` through the instrument-side `R1`. Drives `IN−` through `R3`. **Not `BREATH_OUT`**, the module's jack |
+| `BREATH_SENSE` | in | `interfaces/breath-sense-link` | `umbilical-pinmap`, `sensor-full-scale` | The sensor's buffered output, arriving on `J-UMBILICAL` (`J-UMB-MOD` in the spi-link netlist) through the instrument-side `R1`. Drives `IN−` through `R3`. **Not `BREATH_OUT`**, the module's jack |
 | `AGND_SENSE` | in | `interfaces/breath-sense-link` | `umbilical-pinmap` | The instrument's analog star, arriving through the instrument-side `R1b`. Drives `IN+` through `R2`: on this page it is **a signal leg, not a local ground**, and the twisted pair's other conductor. The drawing labels it `AGND (pin 2)`. **Not `AGND_MOD`** |
 | `R1`, `R1b` (`R-SER-BREATH-INST`) | — | `interfaces/breath-sense-link` | — | Both legs' series resistance sets the differential pole against `C_diff`, and their match is what the bias pair's balance is measured against. Neither part is on this board |
 | `MPXV4006DP` and its `VS` reference buffer | — | `interfaces/breath-sense-link` | `sensor-full-scale`, `riso-ref-topology`, `cref-out-node`, `opa2197-output-impedance` | Sets the span this page multiplies and the pedestal `TRIM-BREATH-ZERO` nulls. Not this page's circuit — see [`notes.md`](notes.md) |
-| in-amp output | out | `module/breath-output-stage`, `module/breath-response-shaper`, `interfaces/breath-sense-link` | `inamp-full-scale` | **Owned here.** Into the panel GAIN/OFFSET stage, which inverts; `module/breath-response-shaper` is *proposed* to tap the same node |
+| in-amp output | out | `module/breath-response-shaper`, `interfaces/breath-sense-link` | `inamp-full-scale` | **Owned here.** Into the response shaper, whose output (`BREATH_SHAPED`, equal to this node at centre detent) feeds the panel GAIN/OFFSET stage, which inverts |
 | `DAC AVDD` | in | `module/power-entry` | `dac-rail` | Feeds `TRIM-BREATH-ZERO` and its buffer. Never `VREFOUT`, which is disabled until firmware enables it. The drawing calls this node the LM317 rail |
 | `MODULE ANALOG +12V`, `MODULE ANALOG −12V` | in | `module/power-entry` | — | The INA828, both OPA2197 halves, and the BAV99 legs on the input pair and at the jack |
 | `AGND_MOD` | ref | `module/power-entry` | `dig-gnd-topology` | The module analog star, drawn `AGND(module)`. Where `R4`, `R5`, both `C_cm` and the output RC return |
@@ -57,7 +57,7 @@ The drawing is a representation of it, `tools/check-netlist.py` checks that
 the two agree, and where they do not the netlist wins.*
 
 ```
-  INSTRUMENT (bottom cluster board)                 |  2 m Cat5  |   MODULE
+  INSTRUMENT (main board)                           |  2 m Cat5  |   MODULE
                                                     |            |
    MPXV4006DP ──┬── ½ OPA2197 ───[R1 1k]──────────── BREATH (pin 1) ──┐
                  │                          ↓ to IN−, via R3            │
@@ -131,7 +131,7 @@ omitted, which is the error `inamp-full-scale` already records for itself)* — 
 number**: 0.152–0.378 V, which needs `REF` anywhere from **0.332 V to
 0.826 V**. The band is the datasheet's own `V_off` min/typ/max
 `[datasheet MPXV4006DP p.4: "Voff 0.152 0.265 0.378 V"]`, and **its typical is
-0.265 V** — see `sensor-full-scale`. **Range the trimmer 0 → +1.0 V.** An earlier revision specified
+0.265 V** — see `sensor-full-scale`. **Range the trimmer 0 → +1.0 V** — `R-ZERO-TOP`, 42.2 kΩ above the 10 kΩ track, does it: `5.21 × 10/52.2` = 0.998 V at the top, 0.915 V with the track 10 % low `[calc]`, still above the band's 0.826 V. An earlier revision specified
 0 → +0.6 V, which covers pedestals only to 0.275 V; a sensor at the top of its
 own datasheet band would have been un-nullable, leaving 1.4–5.6 % of span
 standing at the jack — the same band as the polarity showstopper this trimmer
@@ -238,27 +238,16 @@ rest — and note that the same pull leaves pitch and the four mod jacks holding
 their last value indefinitely, which is the accepted cost of deleting the
 watchdog (`ROADMAP.md`, E10).
 
-## Still open
+## The downstream stage — settled
 
-- **The downstream gain/offset stage** is drawn as a block, and three things
-  about it are open:
-  - **Its offset reference must come from the LM317 rail, not `VREFOUT`.** An
-    earlier version nominated "the buffered `VREFOUT` created for pitch", which
-    would have made the jack's resting position depend on a DAC register that
-    is disabled until firmware enables it — so the jack would rest at ~0 V at
-    every boot and then *step* to where the player parked it, by up to 2 V.
-    Moving the `REF` trimmer off `VREFOUT` fixed the small term and left this,
-    the larger one. It would also have cross-linked the breath zero to the
-    *pitch* offset trimmer, through the same follower.
-  - **It needs two op-amp halves, not one.** Independent gain and offset
-    require the gain realised as a buffered attenuator *ahead* of the summing
-    node; a single inverting summer multiplies any offset at the virtual ground
-    by `Rf`, which reintroduces the very interaction the `REF` trimmer was
-    added to remove, displaced onto the OFFSET knob.
-  - **Drawn**, at last: `hardware/module/breath-output-stage/breath-output-stage.md`. GAIN 0.5–4×
-    as a buffered attenuator ahead of a fixed ×4; OFFSET ±5 V with zero at
-    centre, from two resistors and no extra op-amp half. Two halves, which
-    settles a count that was wrong twice.
+The gain/offset stage this page used to carry as three open points is drawn
+(`hardware/module/breath-output-stage/breath-output-stage.md`) and meets all
+three: its offset comes from the LM317 rail (`DAC AVDD`), not `VREFOUT`, so
+the jack does not step when firmware enables the DAC's reference; it spends two
+op-amp halves, a buffered attenuator ahead of the summer, so GAIN and OFFSET do
+not interact; and since 2026-09-30 the response shaper sits between this
+page's in-amp and that stage's `POT-GAIN`
+(`hardware/module/breath-response-shaper/breath-response-shaper.md`).
 
 *(The instrument-side reference buffer, which is not this page's circuit but
 sets the number this page multiplies, settled 2026-09-21 — [`notes.md`](notes.md).)*

@@ -1,6 +1,8 @@
 # 0012 — Configuration interface
 
-**Status:** Accepted
+**Status:** Superseded by [ADR 0015](0015-one-mcu-no-display.md) (2026-09-26): configuration is over
+USB only and the instrument has no radio. The need this ADR argues — too much
+to configure through buttons — still stands; the phone and WiFi do not.
 
 ## Context
 

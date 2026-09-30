@@ -1,0 +1,30 @@
+* The instrument's input filter, as netlisted, small-signal: the impedance the buck sees
+* at C-BUCK-IN, looking back through L-BUCK-IN to C-STRIP-BULK at the input node and on
+* down the umbilical (both conductors, R and L from the cable's datasheet) to the module:
+* the load switch's FET on (Q-LOADSW) and R-ILIM, and U-ISO as its output capacitor
+* C-ISO-OUT behind its output resistance. Each electrolytic carries its ESR (swept).
+* A 1 A AC current into the C-BUCK-IN node reads its impedance in volts.
+VISO iso 0 DC 12
+RBUS iso vcc {{r_bus}}
+CISO vcc ciso {{C-ISO-OUT}}
+RCISO ciso 0 {{esr_iso}}
+RILIM vcc sns {{R-ILIM}}
+RDS sns out {{r_dson}}
+RCP out cp1 {{r_cable}}
+LCP cp1 inp {{l_cable}}
+RCN ig cn1 {{r_cable}}
+LCN cn1 0 {{l_cable}}
+CSTRIP inp cs1 {{C-STRIP-BULK}}
+RCSTRIP cs1 ig {{esr_strip}}
+LBIN inp lb1 {{L-BUCK-IN}}
+RLBIN lb1 cb {{r_lbin}}
+CBUCK cb cb1 {{C-BUCK-IN}}
+RCBUCK cb1 ig {{esr_buck}}
+IAC ig cb DC 0 AC 1
+.control
+ac dec 200 10 1meg
+let zmag = mag(v(cb) - v(ig))
+wrdata zmag.dat zmag
+quit
+.endc
+.end

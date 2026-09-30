@@ -1,0 +1,50 @@
+* The chain's 3V3, main board to key board. DEV_3V3 is the LDO (a source behind its
+* output resistance, with its output capacitor); FB-CHAIN is Murata's own model of
+* the recommended part (banked; stated for 1 MHz - 3 GHz, so below 1 MHz, where this
+* rail resonates, it is extrapolated); the ribbon's 3V3 conductor and its five ground
+* returns are lumped (0.5 ns long against a ring of microseconds); on the key board,
+* C-DECOUPLE-165 and, when fitted, C-BULK-CHAIN. Loads: a burst of clock edges, each
+* the clock burst, as its average current, then every key closing at once.
+* TWO TIMESCALES, TWO DECKS. The rail rings at a few hundred kHz, so it sees the burst
+* as its average: each edge's charge times the clock rate, for the burst's length.
+* Each edge's own 5 ns spike is supplied by C-DECOUPLE-165 alone (edge.cir) - driving
+* 5 ns ideal spikes into the bead's model here gave a first-edge glitch no later edge
+* repeated, under every solver setting tried: a numerical artefact, not the circuit.
+* The step is capped at 2 ns, and gear is used, for the same stiffness.
+VLDO ldo 0 {{vcc}}
+RLDO ldo dev {{r_ldo}}
+CLDO dev cldo {{c_ldo}}
+RCLDO cldo 0 {{esr_ldo}}
+XFB dev fbo BLM21SP601SN1
+RRIB fbo rib {{r_rib}}
+LRIB rib kbv {{l_rib}}
+RGND kbg gr {{r_rib_gnd}}
+LGND gr 0 {{l_rib_gnd}}
+C6 kbv c6n {{C-DECOUPLE-165}}
+RC6 c6n kbg {{esr_c6}}
+C7 kbv c7n {{C-BULK-CHAIN}}
+RC7 c7n kbg {{r_c7}}
+ICLK kbv kbg PULSE(0 {{i_burst}} {{t_clk}} 100n 100n {{t_burst}} 1 1)
+SKEYS kbv krs kctl 0 kswitch
+RKEYS krs kbg {{r_keys}}
+VKCTL kctl 0 PWL(0 0 {{t_keys}} 0 {{t_keys_1n}} 1)
+.model kswitch sw vt=0.5 vh=0.1 ron={{ron}} roff={{roff}}
+.options method=gear
+.control
+tran 1n {{t_rail_end}} 0 2n
+let kbd = v(kbv) - v(kbg)
+meas tran kb_max max kbd
+meas tran kb_min min kbd
+let kb_vpp = kb_max - kb_min
+print kb_vpp
+meas tran kb_pre find kbd at={{t_keys}}
+meas tran kb_post find kbd at={{t_rail_end}}
+let kb_step = kb_pre - kb_post
+print kb_step
+meas tran dev_max max v(dev) from={{t_clk}} to={{t_burst_end}}
+meas tran dev_min min v(dev) from={{t_clk}} to={{t_burst_end}}
+let dev_vpp_clk = dev_max - dev_min
+print dev_vpp_clk
+quit
+.endc
+.end

@@ -1,6 +1,20 @@
 # 0014 — Lighting
 
-**Status:** Accepted
+**Status:** Accepted. Geometry and data-line wiring amended by
+[ADR 0016](0016-one-strip-on-the-centre-board.md): one strip, on the centre board.
+The strip itself replaced 2026-09-30 by [ADR 0028](0028-on-board-leds.md):
+thirteen WS2815B-V1 on the main board, 12 V, backup-chained.
+
+> **Note, 2026-09-30 (ADR 0028).** The lights are no longer a strip. The 12 V
+> rail, the level shifter, the backup data line, the shared clamp and
+> blank-at-boot all stand. Three things here do not: the density (the row's
+> count and pitch are `lighting.led_count` / `lighting.led_pitch`, fixed at
+> board fabrication); the diffusion prototype's timing (it moves ahead of the
+> main board's layout, ROADMAP); and the per-LED current. This page's reading
+> of the WS2815's "15 mA" as per channel, 45 mA per LED, would be three
+> times the WS2815B-V1's own maximum power `[ds datasheets/led/WS2815B-V1.pdf
+> p.2]`; the row's current is now the tracked figure `led-row-current`,
+> blocked on an E6 measurement.
 
 ## Requirement
 
@@ -10,7 +24,7 @@ other instrument state, diffused through the frosted acrylic side panels
 
 **Two light sources, not one.** The side strips above, and the **8×8 RGB matrix
 on the real-time board** (ADR 0007), which faces out through a window in the
-underside at the tail. The matrix was originally counted as dead weight — 64 LED
+underside at the tail. (Since 2026-09-26 the matrix is on the TOP face, just past the keys — owner's decision, ADR 0009.) The matrix was originally counted as dead weight — 64 LED
 drivers that would never be lit, costing current and heat for nothing. Pointing
 it at a window turns that into the instrument's only two-dimensional display.
 
@@ -19,6 +33,12 @@ and a blank-at-boot rule, and because the easiest way to get those wrong is to
 design them separately.
 
 ## Geometry: two runs, one chain
+
+> **Amended (2026-09-26, [ADR 0016](0016-one-strip-on-the-centre-board.md)): one strip, lying on the centre board, lighting both
+> sides through the cavity.** The centre board put a clear flat surface down
+> the middle of the body, which the "switch bodies occupy the centreline"
+> argument below predates. This section and the next are the record of the
+> two-run design.
 
 A single strip "down the middle" is not available — switch bodies occupy the
 centreline for the full length of both key runs (ADR 0009, ADR 0013). The free
@@ -48,7 +68,7 @@ Three ways to wire two runs:
 
 **B.** The deciding factor is physical: chaining needs a data wire crossing the
 cavity at one end of the runs, and **both ends are the congested ones** — the
-display board and breath sensor at the top, the real-time board, IMU and
+display board (removed by ADR 0015) and breath sensor at the top, the real-time board, IMU and
 umbilical connector at the bottom. Adding a signal wire across either, inside a
 stack that is stripped down to reach (ADR 0009), is a liability for no benefit.
 
@@ -80,7 +100,7 @@ counts:
   rather than 5 V.
 - **Backup data line.** WS2815 carries a redundant data path, so a single failed
   LED does not kill everything downstream of it. In a body that is not opened
-  casually — six fasteners, a loom and a gasket (ADR 0009) — that matters more
+  casually — six fasteners, a loom *(since ADR 0017: ribbons, no loom)* and a gasket (ADR 0009) *(since ADR 0025: glued shut, opened by cutting the silicone)* — that matters more
   than it would in a
   serviceable build.
 
@@ -326,7 +346,8 @@ rules.
 Span as a setting matters because the sensor's 6 kPa range is roughly twice
 what real playing produces (ADR 0003), so a fixed full-scale mapping would
 leave the top of the display unreachable. The player sets where full brightness
-lands, on the display or in the web app, like any other per-channel setting.
+lands, over the USB configuration interface (ADR 0015), like any other
+per-channel setting.
 
 ## The 8×8 matrix
 
@@ -338,7 +359,8 @@ run. Facing the player's downward glance, not the audience.
 ### It is a generic assignable surface, defaulting to breath
 
 The same shape as the mod channels in ADR 0006: a **sink with a configurable
-source**, set from the display and the web app rather than wired to one thing.
+source**, set over the USB configuration interface (ADR 0015) rather than wired
+to one thing.
 
 | | |
 |---|---|
@@ -352,8 +374,8 @@ source**, set from the display and the web app rather than wired to one thing.
 rotate a PCB to fix a display that reads sideways. One config field.
 
 **What it can do that nothing else in the instrument can is two dimensions.**
-The AMOLED at the top is text, and you are not looking at the far end mid-phrase;
-the side strips are a one-dimensional glow. Tilt and roll are two axes, and
+*(ADR 0015: there is no AMOLED; the matrix is the only display, and also
+carries the status role.)* The side strips are a one-dimensional glow. Tilt and roll are two axes, and
 ADR 0007's capture-on-press gating means there is a captured zero and a live
 deviation from it — which is a dot moving against a centre mark, **with the
 deadband drawn on the grid.** That is the assignment to reach for once breath
@@ -408,8 +430,9 @@ hard limit rather than a setting.
 > **blocked** in `config/figures.yaml`.
 >
 > **This ADR reaches the right conclusion through the wrong number — and the
-> binding constraint is not the one it names.** The 1 A R-78E5.0 is not what
-> stops the matrix first. On the dev board itself, all 64 LEDs draw through a
+> binding constraint is not the one it names** — *on USB power; in the
+> instrument the regulator is the binding one again (amendment below).* On
+> USB the 1 A R-78E5.0 is not what stops the matrix first. On the dev board itself *(on USB power only — see the 2026-09-26 amendment below)*, all 64 LEDs draw through a
 > single **`B5819WS` Schottky in SOD-323**, whose datasheet
 > (`datasheets/discrete-and-power/B5819WS.pdf`) gives `I_F(AV)` 1 A but
 > **`P_D` = 200 mW and `RθJA` = 500 °C/W**. `[calc]` At `V_F` ≈ 0.46 V that is
@@ -430,10 +453,23 @@ hard limit rather than a setting.
 >
 > What the schematic settles firmly: **the 64 LEDs run from 5 V, not 3V3** —
 > every VDD on net `VCC_5V`, no regulator or switch in between. That was a
-> strong inference and is now read off a schematic. But `VCC_5V` is USB `VBUS`
-> through the `B5819WS`, so it is a diode drop below 5 V, and there is **no
+> strong inference and is now read off a schematic. On USB, `VCC_5V` is `VBUS`
+> through the `B5819WS`, so it is a diode drop below 5 V (from the 5 V pad it is the pad itself), and there is **no
 > decoupling anywhere inside the array** — total `VCC_5V` capacitance is
 > 11.1 µF, all clustered on the back.
+>
+> *(Amended 2026-09-26, read off
+> `datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-SCHEMATIC.pdf`: pad row
+> `P1` pin 1 is `VCC_5V` itself, and `D1` (`B5819WS`) runs `VBUS` → `VCC_5V`.
+> So the diode is in the LEDs' path **only when the board runs from USB**. In
+> the instrument the Matrix is powered from the 5 V pad through the ribbon
+> into `J-MCU` (ADR 0017), which feeds `VCC_5V` directly and bypasses `D1`;
+> there the limits are the firmware brightness clamp and the R-78E5.0-1.0's
+> rating and loading (`hardware/carrier/power-entry-instrument/`). The
+> B5819WS argument above still governs a Matrix on the bench on USB, and the
+> cap still stands; its binding constraint in the instrument is the one this
+> note names, and E1/E6 measure it. The register's `matrix-led-current`
+> records both paths under `power_path`.)*
 
 WS2812C-2020 draws **5 mA per channel**, so 15 mA per LED at full white and
 960 mA for all 64 — **this is the wrong part's figure and it is at least 2.4×

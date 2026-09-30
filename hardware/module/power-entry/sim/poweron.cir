@@ -1,0 +1,64 @@
+* Rack power-on at the module, as netlisted: the bus rails at J-PWR-EURO rising (the
+* -12 V one delayed by dt_neg), D1 / D3 (1N5817, BEHAVIOURAL: fitted to the banked
+* curve, no vendor model could be banked), FB1 / FB3 as their DC resistance, C1 / C3,
+* the LM317L (TI's transient model) on R-REG-SET-HI / -LO with C-REG-ADJ and C-REG-OUT
+* making DAC_AVDD; and the pitch stage on those rails (module/pitch-stage, TI's OPA2197
+* model), with the DAC channel at its power-on-reset zero scale and VREFOUT at 0 V.
+* THAT LAST IS THE PAGE'S CLAIM, NOT THE DATASHEET'S: with the internal reference
+* disabled (its default, SBAS430 p.1) the pin is VREFIN, an input - what it sits at
+* then is not modelled here and is reported as open.
+* D3's orientation is TYPED HERE, not read from the netlist: d3_flip = 1 is the netlist's
+* (K at the bus, A towards the module); d3_flip = 0 is the old, reversed drawing, kept as a
+* what-if (see sims.yaml). Every node starts
+* at 0 V (uic): that is what a power-on is.
+VP12 bp12 0 PWL(0 0 {{t_pos0}} 0 {{t_pos_end}} {{v_bus}})
+VN12 bn12 0 PWL(0 0 {{t_neg0}} 0 {{t_neg_end}} {{v_bus_neg}})
+* PTC-POS12 / PTC-NEG12 at their largest resistance (r_ptc), ahead of D1 / D3 (ADR 0027)
+RPTC1 bp12 bp12f {{r_ptc}}
+RPTC3 bn12 bn12f {{r_ptc}}
+* D1: bus +12 -> module +12 (A at the bus, as netlisted)
+D1 bp12f p12d D5817
+RFB1 p12d p12 {{r_fb}}
+C1 p12 0 {{C1}}
+RLP p12 0 {{r_load_pos}}
+* D3: d3_flipped = the netlist's orientation (K at the bus -12 V pin, A towards the module);
+* d3_as_net = the reversed what-if. Only one is fitted (the other's m is 1e-6)
+D3N bn12f n12d D5817 m={{d3_as_net}}
+D3F n12d bn12f D5817 m={{d3_flipped}}
+RD3OFF n12d bn12f 1e12
+RFB3 n12d n12 {{r_fb}}
+C3 n12 0 {{C3}}
+RLN n12 0 {{r_load_neg}}
+* DAC_AVDD
+XREG p12 adj avdd LM317L_TRANS
+RSH avdd adj {{R-REG-SET-LO}}
+RSL adj 0 {{R-REG-SET-HI}}
+CADJ adj 0 {{C-REG-ADJ}}
+CREG avdd 0 {{C-REG-OUT}}
+RDAC avdd 0 {{r_dac}}
+* the pitch stage on those rails
+VREFO vrefout 0 0
+XRB vrefout vrefb p12 n12 vrefb OPAx197
+R1 vrefb minus {{RN-PITCH}}
+R2 minus jack {{RN-PITCH}}
+VDAC dac 0 0
+RBD dac 0 {{R-BIAS-DAC}}
+RIN dac plus {{R-OPAMP-IN}}
+CAA plus 0 {{C-AA-PITCH}}
+XAMP plus minus p12 n12 ampout OPAx197
+CFB ampout minus {{C-FB-PITCH}}
+ROUT ampout jack {{R-OUT-PROT}}
+CFILT jack 0 {{C-FILT-PITCH}}
+RVCO jack 0 {{r_vco}}
+.model D5817 D(Is={{d_is}} N={{d_n}} Rs={{d_rs}} Cjo=110p BV=20)
+.options method=gear rshunt=1e10
+.control
+tran 5u {{t_end}} 0 10u uic
+wrdata p12.dat v(p12)
+wrdata n12.dat v(n12)
+wrdata avdd.dat v(avdd)
+wrdata jack.dat v(jack)
+wrdata iin.dat i(VDAC)
+quit
+.endc
+.end

@@ -1,0 +1,71 @@
+# The left-hand key board as wired, simulated in ngspice by tools/sim.py. The deck is
+# GENERATED from ../board-netlist.yaml (exported from the sheets): every part on the
+# board by its BOM row, on the nets it is actually wired to, so a wrong value, a
+# pull-up on the wrong rail or a swapped input shows up here. The one-key network's
+# timing, filter and tolerance corners are simulated in
+# hardware/cluster/key-switch-network/sim/, which this imports its model from.
+# Run: python3 tools/sim.py run hardware/boards/key-board-lh/sim
+title: Left-hand key board, every part, on the bench as Bring-up wires it
+generate: board
+values:
+  netlist: hardware/boards/key-board-lh/board-netlist.yaml
+params_from: [hardware/cluster/key-switch-network/sim/sims.yaml]
+include: [hcs165-inputs.lib]
+ground: GND_CHAIN
+
+params:
+  icc: {value: 2.0e-6, source: "SN74HCS165 supply current ICC, max, at 6 V [datasheets/logic/SN74HCS165-ti-scls828a.pdf p.6]"}
+  ctl: {value: 0}          # 0 every switch open, 1 every switch closed (each sim sets it)
+  t_end: {value: 10.0e-6}
+
+vary:
+  R-KEY-PU:  {tol: from-value}
+  R-KEY-SER: {tol: from-value}
+  vcc:       {tol: [-0.03, 0.03], source: "as the key network's (params_from)"}
+  ileak:     {tol: [-2.0, 0.0]}
+
+# What each BOM row is in SPICE: {ref}, each pin's net by pin name ({1}, {VCC}), the
+# part's value as the corner varies it ({row}), and the sheet it sits on ({sheet}).
+parts:
+  R-KEY-SER: "R{ref} {1} {2} {row}"
+  R-KEY-PU:  "R{ref} {1} {2} {row}"
+  C-KEY:     "C{ref} {1} {2} {row}"
+  C-DECOUPLE-165: "C{ref} {1} {2} {row}"
+  C-BULK-CHAIN: "C{ref} {1} {2} {row}"
+  SW1-n:     "S{ref} {1} {2} ctl 0 kswitch"  # every switch on one control: all open, or all closed
+  U-KEYS:    "X{ref} {VCC} {GND} {A} {B} {C} {D} {E} {F} {G} {H} {SER} {CLK} {SHLD} {CLKINH} hcs165_inputs"
+  J-CHAIN:   ""                             # the ribbon's end: its nets are driven below
+
+# What the rest of the chain puts on the board's nets: the bench of Bring-up (README),
+# 3V3 at J1's pin, SH/LD held high, the clock low, SER tied low.
+drive:
+  V3V3_CHAIN_LH: "VSUP <net> 0 {{vcc}}"
+  /CHAIN_SHLD:   "VSHLD <net> 0 {{vcc}}"
+  /CHAIN_SCK:    "VSCK <net> 0 0"
+  /CHAIN_SER_LH: "VSER <net> 0 0"
+
+sims:
+  - name: all-keys-released
+    deck: board-dc.cir
+    set: {ctl: 0}
+    measures: [m_keys_high, m_free_high, m_marker_high, i_supply]
+    asserts:
+      - expr: "min['m_keys_high'] > 0"
+        why: "every key input H..D sits above VT+ at its maximum with its key open, at every corner"
+      - expr: "min['m_free_high'] > 0"
+        why: "the free input (A, R11's) sits above VT+ max: it reads a steady 1"
+      - expr: "min['m_marker_high'] > 0"
+        why: "the high marker input (B) sits above VT+ max (the low one, C, is on ground: see board-dc.cir)"
+      - expr: "max['i_supply'] < 50e-6"
+        why: "with every key open the board draws only leakage and the register's static current: no resistive path to ground"
+  - name: all-keys-pressed
+    deck: board-dc.cir
+    set: {ctl: 1}
+    measures: [m_keys_low, m_free_high, i_supply]
+    asserts:
+      - expr: "min['m_keys_low'] > 0"
+        why: "every key input H..D sits below VT- at its minimum with its key closed, at every corner"
+      - expr: "min['m_free_high'] > 0"
+        why: "the free input stays high with every key pressed"
+      - expr: "abs(nom['i_supply'] / (n['SW1-n'] * fig['key-scan-current']) - 1) < 0.02"
+        why: "the board's draw with every key closed is its switch count times key-scan-current (per key), within 2 %"

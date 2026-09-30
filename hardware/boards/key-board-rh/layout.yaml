@@ -1,0 +1,100 @@
+# FIRST-LAYOUT INPUT for this board's PCB - tools/pcb.py layout. Made from
+# hardware/boards/key-board-lh/layout.yaml, the worked example, which says what
+# each key means; only what differs is explained here.
+#
+# The switches, J-CHAIN, the corner mounts and the outline come from the body CAD
+# (mechanical/export/pcb-geometry.echo, mechanical/export/key-board-rh.dxf), in
+# BODY coordinates (x along the body from the mouth, y across, mm, seen from
+# above). Once the .kicad_pcb exists it is the source; this file records how the
+# first layout was made.
+
+cluster: right_hand
+suffix: RH
+
+# The left-hand board's rules and board-house limits, unchanged: one order of
+# both boards is made to one set (pcb.py check holds each board's rules to these).
+rules:
+  track: 0.25
+  track_min: 0.2
+  clearance: 0.2
+  via: 0.7                  # 0.4 over the 0.3 drill: JLC asks a via 0.1 over its hole (0.15 preferred), and KiCad's one annular rule also holds it to the PTH ring in fab: below
+  via_drill: 0.3
+  via_min: 0.66
+  drill_min: 0.3
+  edge_clearance: 0.3
+  power_track: 0.4           # the chain's 3V3 rail
+
+fab:
+  house: JLCPCB
+  hole_clearance: 0.28       # plated hole to track
+  hole_to_hole: 0.45         # between pad holes (0.2 between vias; the stricter one here)
+  annular_min: 0.18          # PTH ring, absolute minimum (0.25 recommended)
+  silk_text_min: 1.0
+  silk_line_min: 0.15
+  silk_to_pad: 0.15
+  finish: "HAL lead-free"    # Economic assembly's standard finish
+  mask: Green
+  silk: White
+  copper_oz: 1               # outer copper, in the stackup the Gerber job file carries
+
+standoff_footprint: "MountingHole:MountingHole_2.7mm_M2.5"
+
+# Each key's network: the one pattern, as on the left-hand board.
+networks:
+  pattern: {offset: [9.4, 0.0], axis: y, leg: -1, c: -1}
+  except: {}
+
+# Placed as the left-hand board's, 108.0 further along the body - the key row's own
+# offset (pcb-geometry.echo) - so the register stands level with RH3, as it
+# stands level with LH3 there, with two differences, both because this board's
+# register drives two key lines out of its FAR row (RH5's D, pin 14, and RH6's C,
+# pin 13) where the left-hand board's drives one:
+# - C7 is not across the ends of pins 16 and 15, the left-hand board's place: there
+#   its stubs to the pins (one layer) and its ground return (the other) wall those
+#   two lines in. It stands below the register's J-CHAIN end, beside pin 8, where
+#   the 3V3 arrives: the same loop, pin 16 to pin 8, the other way round, and clear
+#   of pin 9's QH going over it to J-CHAIN.
+# - The register is 0.5 further from the key row (44.0), for the room those lines
+#   and QH need. MARGINAL: a re-layout that moves anything here should expect to
+#   re-try this placement.
+# J-CHAIN stays where the body CAD puts it (chain_x; the main board's header and
+# the ribbon follow it). Since the cassette (ADR 0025) the ribbon is shorter, and
+# the body CAD's rule - the clear place nearest the keys' middle - puts it 13.0
+# further toward the tail than before, 3.5 further along than the left-hand
+# board's relative to its keys, with its plug ending just short of the register.
+# So the register and C7 moved 5.5 toward the tail with it, and C8 moved to
+# J-CHAIN's 3V3 pin. At 2.0 and 3.5 the router could not close SCK and SH/LD
+# between the header and the register, in either route order; at 5.5 every net
+# routes on the first pass.
+# No free input: the six keys take H..C, and A and B are the markers
+# (key-marker-and-bits/allocation.yaml), so there is no R-KEY-PU on FREE3.
+parts:
+  U1:  [204.0, 44.0, 90]     # U-KEYS, the register
+  C7:  [197.5, 41.8, 90]     # C-DECOUPLE-165, beside pin 8 at the register's J-CHAIN end
+  C8:  [178.0, 42.0, 90]     # C-BULK-CHAIN, beside J-CHAIN's 3V3 pin
+
+silk:
+  at: [152.0, 12.5]
+  top_at: [152.0, 14.3]     # the switch side's copy in the near band, as the left-hand board's: J-CHAIN's through-hole tails now stand where it was
+  title: "WOODY key board RH"
+  rev: "A"
+  date: "2026-09-28"
+
+route: true
+# The two key lines from the register's far row first, as the left-hand board
+# routes KEY_LH5 first: U1.13 (RH6) is boxed in by the 12-15 strap, and routed
+# later it finds its via spots below the pin taken. Then J-CHAIN's far row (the
+# odd pins), reachable only from the header's back. KEY_RH1 last: routed early,
+# its via lands beside J-CHAIN's ground pin 4 and starves that pin's thermal.
+route_first: [/KEY_RH5, /KEY_RH6, /CHAIN_SCK, /CHAIN_SHLD, /HOP_LT_RH, /HOP_RH_RT, /KEY_RH1]
+connect_first:
+  - {pads: [C7.2, U1.8], max_mm: 15, why: "the decoupling loop's ground half, in its own track"}
+  # The register's two far-row ground pins are boxed in by the far-row key lines:
+  # the low marker (B, pin 12) between the high marker (A, pin 11, 3V3) and RH6's
+  # line (C, pin 13), and CLK INH (pin 15) between RH5's line (D, pin 14) and VCC
+  # (pin 16). No pour reaches either and no stitching via fits, so each has a
+  # strap of its own, routed before the key lines: 12 to the ground pin 8, 15 to 12.
+  - {pads: [U1.12, U1.8], max_mm: 20, why: "the low marker's strap to ground, boxed in between the high marker and RH6's line"}
+  - {pads: [U1.15, U1.12], max_mm: 12, why: "CLK INH's strap to ground, boxed in between RH5's line and VCC"}
+ground_net: GND_CHAIN
+power_nets: [V3V3_CHAIN_RH]

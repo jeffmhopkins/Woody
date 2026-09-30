@@ -1,0 +1,153 @@
+# The key chain between the main board and the left-hand key board, simulated in
+# ngspice by tools/sim.py: its 3V3 rail (FB-CHAIN, the ribbon, C-DECOUPLE-165 and
+# C-BULK-CHAIN) and its signals over the ribbon (SCK out to the key
+# board's register, QH back). Values come from the key board's board-netlist.yaml
+# and, for the main board's parts, from hardware/bom.csv; the ribbon's length from
+# the body CAD. Run: python3 tools/sim.py run hardware/interfaces/key-chain-loom/sim
+title: Key chain, main board to the left-hand key board
+values:
+  netlist: hardware/boards/key-board-lh/board-netlist.yaml
+  bom: [R-CHAIN-SER]
+params_from: [hardware/cluster/key-switch-network/sim/sims.yaml]
+include: [datasheets/discrete-and-power/BLM21SP601SN1-murata-spice.lib]
+
+params:
+  # --- the rail
+  r_ldo:   {value: 0.034, source: "ME6217C33 output resistance from its load regulation, typical 10 mV over 1-300 mA; 0.17 at the 50 mV maximum (vary) [calc, datasheets/discrete-and-power/ME6217C33M5G.pdf]"}
+  c_ldo:   {value: 10.0e-6, source: "the Matrix's LDO output capacitor, C2 [research 2026-09-28; the ME6217 needs at least 4.7 uF, datasheet p.8]"}
+  esr_ldo: {value: 0.005, source: "an X5R MLCC's ESR near 1 MHz [from memory]"}
+  ribbon_len: {value: {drc: "key-chain ribbon length (derived)", scale: 1.0e-3}, source: "mechanical/drc.echo, in metres"}
+  r_per_m: {value: 0.333, source: "30 AWG 7/38 tinned copper, 333 ohm/km [datasheets/connectors/ALPHAWIRE-AWG-CONDUCTOR-CHART.pdf]"}
+  l_per_m: {value: 0.36e-6, source: "3M 3754 (0.025 in, 30 AWG), ground-signal-ground [datasheets/connectors/3M-3754-FLAT-CABLE-0.025IN-30AWG-PVC.pdf]; conductor 10 (3V3) sits beside a floating spare, so more (vary) [UNVERIFIED by how much]"}
+  c_per_m: {value: 68.2e-12, source: "the same, pF/m"}
+  z0_ribbon: {value: 73.0, source: "the same, G-S-G characteristic impedance"}
+  td_per_m: {value: 4.95e-9, source: "the same, propagation delay"}
+  n_gnd:   {value: 5, source: "ground conductors in the ribbon (key-chain-loom.md pinout: 1, 3, 5, 7, 9 main-board side)"}
+  esr_c6:  {value: 0.02, source: "a 0805 X7R 100 nF's ESR near its resonance [from memory] (vary)"}
+  esr_c7:  {value: 0.01, source: "a 0805 X5R 10 uF's ESR [from memory]"}
+  c7:      {value: 1}          # 1 fitted (as ordered), 0 left off (each sim sets it)
+  cpd:     {value: 20.0e-12, source: "SN74HCS165 power dissipation capacitance Cpd [datasheets/logic/SN74HCS165-ti-scls828a.pdf p.8]"}
+  f_clk:   {value: 1.0e6, source: "the chain's clock: 1 MHz, 32 bits per read [ADR 0001; docs/reference/latency-budget.md]"}
+  n_clk:   {value: 32}
+  t_clk:   {value: 50.0e-6}    # the clock burst starts
+  t_keys:  {value: 150.0e-6}   # every key closes at once
+  t_rail_end: {value: 500.0e-6}
+  # --- the signals
+  r_drv:   {value: 35.0, source: "the ESP32-S3's GPIO at its default 20 mA setting; 17 at 40 mA (vary). Espressif publishes neither an output impedance nor IBIS [research estimate from datasheets/logic/ESP32-S3-datasheet-v2.2.pdf p.65, UNVERIFIED]"}
+  tr_drv:  {value: 3.0e-9, source: "the GPIO's own edge, unpublished; 1-3 ns swept (vary) [UNVERIFIED]"}
+  c_tvs:   {value: 30.0e-12, source: "U-TVS-CHAIN (SP0504BAHT) capacitance per channel, typical, at 2.5 V [datasheets/discrete-and-power/SP0504BAHT.pdf]; only a typical is given (vary)"}
+  c_main:  {value: 20.0e-12, source: "the main board's own load on SCK: right_thumb's and left_thumb's inputs (2 x Ci) and its trace [assumption until the main board is laid out] (vary)"}
+  c_kb:    {value: 3.0e-12, source: "the key board's SCK trace, J1 to U1 [assumption: about 30 mm over the ground pour] (vary)"}
+  r_qh:    {value: 80.0, source: "the SN74HCS165's output resistance: (4.5 - 4.0 V) / 6 mA at 4.5 V = 83 ohm [calc, SN74HCS165-ti-scls828a.pdf p.6]; higher at 3.3 V (vary)"}
+  tr_qh:   {value: 8.0e-9, source: "the SN74HCS165's output transition time, max, at 4.5 V [same, p.8]; slower at 3.3 V (vary)"}
+  c_rx_main: {value: 5.0e-12, source: "left_thumb's SER input (Ci) and its trace [assumption]"}
+  t_sig_end: {value: 1.2e-6}
+
+vary:
+  r_ldo:   {tol: [0.0, 4.0]}
+  l_per_m: {tol: [0.0, 0.5]}
+  esr_c6:  {tol: [-0.75, 1.5]}
+  r_drv:   {tol: [-0.5, 0.0]}
+  tr_drv:  {tol: [-0.67, 0.0]}
+  c_tvs:   {tol: [-0.33, 0.33]}
+  c_main:  {tol: [-0.5, 0.5]}
+  r_qh:    {tol: [-0.5, 0.5]}
+  tr_qh:   {tol: [-0.6, 0.25]}
+
+derived:
+  r_rib: "v['r_per_m'] * v['ribbon_len']"
+  l_rib: "v['l_per_m'] * v['ribbon_len']"
+  r_rib_gnd: "v['r_per_m'] * v['ribbon_len'] / v['n_gnd']"
+  l_rib_gnd: "v['l_per_m'] * v['ribbon_len'] / v['n_gnd']"
+  td_rib: "v['td_per_m'] * v['ribbon_len']"
+  r_c7: "v['esr_c7'] if v['c7'] else 1e12"
+  r_keys: "(v['R-KEY-PU'] + v['R-KEY-SER']) / v['n:SW1-n']"
+  # one clock edge's charge: the register's Cpd, and QH driving the ribbon and the next
+  # register's input (every bit toggling, the worst case), as a 10 ns triangle
+  i_edge: "2 * (v['cpd'] + v['c_per_m'] * v['ribbon_len'] + v['ci']) * v['vcc'] / 10e-9"
+  t_per: "1 / v['f_clk']"
+  t_burst: "v['n_clk'] / v['f_clk']"
+  q_edge: "(v['cpd'] + v['c_per_m'] * v['ribbon_len'] + v['ci']) * v['vcc']"
+  i_burst: "(v['cpd'] + v['c_per_m'] * v['ribbon_len'] + v['ci']) * v['vcc'] * v['f_clk']"
+  t_keys_1n: "v['t_keys'] + 1e-9"
+  t_burst_end: "v['t_clk'] + v['n_clk'] / v['f_clk']"
+  vhalf: "v['vcc'] / 2"
+  vcc_over: "v['vcc'] + 0.5"
+  t_hi_end: "0.5e-6"
+
+sims:
+  - name: rail-as-ordered
+    deck: rail.cir
+    vary: [r_ldo, l_per_m, esr_c6]
+    set: {c7: 1}
+    measures: [kb_vpp, kb_step, dev_vpp_clk]
+    asserts:
+      - expr: "max['kb_vpp'] < 0.1"
+        why: "with C-BULK-CHAIN fitted, the key board's 3V3 moves under 0.1 V peak to peak through a clock burst and every key closing at once, at every corner: the thresholds are fractions of VCC, and the key inputs' smallest margin (the key network's sim) is over three times that"
+      - expr: "max['dev_vpp_clk'] < 3.3 / 4096"
+        why: "the key board's clocking moves DEV_3V3, the MCP3202's reference, by under one 12-bit LSB (FB-CHAIN's job, ADR 0018)"
+  - name: rail-without-bulk
+    # C-BULK-CHAIN left off: a board built without it must still work, so the same limits
+    deck: rail.cir
+    vary: [r_ldo, l_per_m, esr_c6]
+    set: {c7: 0}
+    measures: [kb_vpp, kb_step, dev_vpp_clk]
+    asserts:
+      - expr: "max['kb_vpp'] < 0.1"
+        why: "with C-BULK-CHAIN left off, the key board's 3V3 still moves under 0.1 V peak to peak, at every corner: the part makes the rail quieter, it is not what keeps it inside its limit"
+      - expr: "max['dev_vpp_clk'] < 3.3 / 4096"
+        why: "and DEV_3V3 still moves under one 12-bit LSB"
+  - name: edge-droop-decoupler-alone
+    deck: edge.cir
+    vary: [esr_c6]
+    set: {c7: 0}
+    measures: [dv_edge]
+    asserts:
+      - expr: "max['dv_edge'] < 0.05"
+        why: "each clock edge's charge, drawn from C-DECOUPLE-165 alone, dips the register's VCC under 50 mV at every corner: far inside its thresholds' margin, so C-DECOUPLE-165 alone decouples the register (C-BULK-CHAIN, beside J-CHAIN, is too far away to count on at an edge)"
+  - name: rail-impedance-as-ordered
+    deck: rail-ac.cir
+    vary: [r_ldo, l_per_m, esr_c6]
+    set: {c7: 1}
+    measures: [z_peak, f_peak, z_1mhz]
+  - name: rail-impedance-without-bulk
+    deck: rail-ac.cir
+    vary: [r_ldo, l_per_m, esr_c6]
+    set: {c7: 0}
+    measures: [z_peak, f_peak, z_1mhz]
+  - name: sck-to-key-board
+    deck: sck.cir
+    vary: [r_drv, tr_drv, c_tvs, c_main]
+    measures: [bs_rise, bs_fall, v_over, v_under, t_delay]
+    # the edge at the key board's register (rx.dat), after it first crosses the earliest
+    # threshold any part could have: how far it swings back (tools/sim.py backswing)
+    post:
+      bs_rise: "backswing(w['rx'], p['vtp_min'], True, 0, 0.5e-6)"
+      bs_fall: "backswing(w['rx'], p['vtm_max'], False, 0.5e-6, 1.0e-6)"
+    asserts:
+      - expr: "max['bs_rise'] < p['hyst_min'] and max['bs_fall'] < p['hyst_min']"
+        why: "no double clock: after SCK crosses the register's threshold, wherever in its spread, it never swings back through the register's smallest hysteresis, at every corner"
+      - expr: "max['v_over'] < p['vcc_over'] and min['v_under'] > -0.5"
+        why: "no overshoot past the register's input clamp (VCC + 0.5 V, -0.5 V, its absolute maximum) [SN74HCS165-ti-scls828a.pdf p.4]"
+  - name: sck-without-series-resistor
+    # the same, with R-CHAIN-SER shorted: what the resistor is for. Recorded, not
+    # asserted - the R-CHAIN-SER row cites it
+    deck: sck.cir
+    vary: [r_drv, tr_drv, c_tvs, c_main]
+    set: {R-CHAIN-SER: 0.001}
+    measures: [bs_rise, bs_fall, v_over, v_under, t_delay]
+    post:
+      bs_rise: "backswing(w['rx'], p['vtp_min'], True, 0, 0.5e-6)"
+      bs_fall: "backswing(w['rx'], p['vtm_max'], False, 0.5e-6, 1.0e-6)"
+  - name: qh-to-main-board
+    deck: qh.cir
+    vary: [r_qh, tr_qh]
+    measures: [bs_rise, bs_fall, v_over, v_under, t_delay]
+    post:
+      bs_rise: "backswing(w['rx'], p['vtp_min'], True, 0, 0.5e-6)"
+      bs_fall: "backswing(w['rx'], p['vtm_max'], False, 0.5e-6, 1.0e-6)"
+    asserts:
+      - expr: "max['bs_rise'] < p['hyst_min'] and max['bs_fall'] < p['hyst_min']"
+        why: "the key board's QH, over the ribbon with no series resistor, reaches the next register's SER with no false edge, at every corner"
+      - expr: "max['v_over'] < p['vcc_over'] and min['v_under'] > -0.5"
+        why: "and without overshoot past its input clamp"

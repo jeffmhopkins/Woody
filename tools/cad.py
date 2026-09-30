@@ -1,0 +1,861 @@
+#!/usr/bin/env python3
+"""
+The instrument body's and the Eurorack module's CAD pipeline: parameters in, renders and cut files out,
+and a check that every output still matches the source it claims to show.
+
+    python3 tools/cad.py params    # regenerate mechanical/cad/generated/*params.scad
+    python3 tools/cad.py build     # params, then every STALE output (--all: every output)
+    python3 tools/cad.py build hero plan-top   # ...or just these, stale or not
+    python3 tools/cad.py check     # exit 1 if anything is stale, missing or hand-edited
+    python3 tools/cad.py explain hero          # which inputs moved, and since which commit
+
+WHY THIS EXISTS. This repository's one failure is "a value changes and the
+documents derived from it do not follow" (CLAUDE.md). A render is the most
+derived document there is, and the least greppable: no staleness pattern can
+read a PNG. So every output carries a FINGERPRINT - a hash over the git blob
+ids of every file it was built from, found by walking include/use/import from
+its source - and `check` recomputes it. A render made before its model moved
+is reported by name, with the file that moved.
+
+The fingerprint is also STAMPED INTO THE IMAGE, in a footer band, because the
+reader looks at the picture and not at OUTPUTS.csv. A render pasted into a
+chat, a review or a vendor email still says which CAD state it shows, and
+`explain` turns the stamp back into commits.
+
+WHAT IS GENERATED, and therefore must never be edited by hand - the same trap
+as hardware/bom.csv:
+    mechanical/cad/generated/params.scad         from config/key-layout.yaml + config/body.yaml
+    mechanical/cad/generated/module-params.scad  from config/module.yaml (the Eurorack module)
+    mechanical/OUTPUTS.csv, mechanical/module/OUTPUTS.csv   the fingerprint ledgers
+    every file named as `out` in mechanical/outputs.yaml or mechanical/module/outputs.yaml
+
+TWO MODELS, ONE PIPELINE. The instrument body and the Eurorack module are
+separate models with separate configs, spec files and ledgers (SPECS below),
+so a change to one never marks the other stale and two people can work on
+them at once. Each ledger lives beside its spec. A module config leaf may
+take its number from another config file (`ref: config/body.yaml:ethercon.
+pcb_setback`) instead of restating it, and may name a register figure
+(`figure: panel-width`) whose value text must contain the number - so a
+figure that moves fails `check` here instead of leaving a stale copy.
+
+SCRIPTS. An output a Python tool makes rather than OpenSCAD - the module's
+panel artwork (tools/panel-art.py) and its Blender renders
+(tools/render-module.py) - is a `scripts:` entry naming the tool, its
+arguments and EVERY input it reads. There is no include walk to find them, so
+the tool prints `READ: <path>` for each file it opens and the build fails if
+one is not declared: the same cross-check OpenSCAD's depfile gets.
+
+`check` never needs OpenSCAD - it only hashes - so it runs from the commit
+gate (check-staleness.py) on any machine. `build` needs openscad (2021.01+),
+xvfb-run when there is no display, Pillow for the stamp, and gmsh for the
+STEP-to-mesh step.
+"""
+import csv
+import datetime
+import hashlib
+import io
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+
+import yaml
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MECH = "mechanical"
+SPEC = f"{MECH}/outputs.yaml"
+LEDGER = f"{MECH}/OUTPUTS.csv"
+# Every spec file; each output's ledger is OUTPUTS.csv beside its spec.
+SPECS = [SPEC, f"{MECH}/module/outputs.yaml"]
+PARAMS = f"{MECH}/cad/generated/params.scad"
+MODULE_PARAMS = f"{MECH}/cad/generated/module-params.scad"
+KEY_LAYOUT = "config/key-layout.yaml"
+BODY = "config/body.yaml"
+MODULE = "config/module.yaml"
+FIGURES = "config/figures.yaml"
+# Directories whose every file must be an output this tool owns. A PNG that
+# nobody can regenerate is exactly the artefact this tool exists to prevent.
+OWNED_DIRS = [f"{MECH}/renders", f"{MECH}/export", f"{MECH}/cad/vendor",
+              f"{MECH}/module/renders", f"{MECH}/module/export", f"{MECH}/module/art"]
+OWNED_EXT = (".png", ".dxf", ".svg", ".stl", ".echo", ".txt", ".pdf")
+
+# Bump when the way an output is MADE changes (stamp layout, mesh settings,
+# render flags) - it is part of every fingerprint, so a bump marks every
+# output stale, which is the truth.
+RECIPE = "6"
+
+LEDGER_COLS = ["name", "kind", "out", "fingerprint", "out_sha256", "provisional",
+               "built", "tool", "inputs"]
+
+
+def rel(p):
+    return os.path.relpath(os.path.abspath(p), ROOT).replace(os.sep, "/")
+
+
+def blob_id(path):
+    """git's own blob id, so `git log --find-object=<id>` finds the commit."""
+    data = open(os.path.join(ROOT, path), "rb").read()
+    return hashlib.sha1(b"blob %d\0" % len(data) + data).hexdigest()
+
+
+def sha256(path):
+    return hashlib.sha256(open(os.path.join(ROOT, path), "rb").read()).hexdigest()
+
+
+# ---------------------------------------------------------------- params ----
+
+def scad_value(v):
+    if v is None:
+        return "undef"
+    if isinstance(v, bool):
+        return "true" if v else "false"
+    if isinstance(v, (int, float)):
+        return repr(v)
+    if isinstance(v, str):
+        return json.dumps(v)
+    if isinstance(v, (list, tuple)):
+        return "[" + ", ".join(scad_value(x) for x in v) + "]"
+    raise TypeError(f"cannot express {v!r} in OpenSCAD")
+
+
+def scad_name(key):
+    return re.sub(r"[^A-Za-z0-9_]", "_", key)
+
+
+def flatten(prefix, node, out):
+    """body.yaml nests groups; each leaf carrying `value` becomes one variable."""
+    for k, v in node.items():
+        name = f"{prefix}_{scad_name(k)}" if prefix else scad_name(k)
+        if isinstance(v, dict) and "value" in v:
+            out.append((name, v))
+        elif isinstance(v, dict):
+            flatten(name, v, out)
+
+
+def render_params():
+    kl = yaml.safe_load(open(os.path.join(ROOT, KEY_LAYOUT), encoding="utf-8"))
+    body = yaml.safe_load(open(os.path.join(ROOT, BODY), encoding="utf-8"))
+    L = ["// GENERATED by tools/cad.py params - DO NOT EDIT.",
+         f"// Sources: {KEY_LAYOUT}, {BODY}. Edit those, then run",
+         "// `python3 tools/cad.py build`; `check` fails on a hand edit here.",
+         "// Units: mm. Every value below cites its source in the YAML it came from.",
+         ""]
+
+    m = kl["meta"]
+    L.append(f"// ---- {KEY_LAYOUT} :: meta")
+    for k in ("length", "width", "thickness"):
+        L.append(f"envelope_{k} = {scad_value(m['envelope'][k])};")
+    L.append(f"plate_cutout = {scad_value(m['plate_cutout'])};")
+    L.append(f"plate_thickness = {scad_value(m['plate_thickness'])};  // `plate-thickness`, config/figures.yaml")
+    L.append("")
+
+    L.append(f"// ---- {KEY_LAYOUT} :: keys")
+    L.append("// [id, face, x, y, rotation, hand, cluster, role]; x/y undef = not yet placed (M2/M3)")
+    rows = []
+    for k in kl["keys"]:
+        rows.append("  " + scad_value([k["id"], k["face"], k["x"], k["y"],
+                                        k.get("rotation", 0), k["hand"],
+                                        k["cluster"], k["role"]]))
+    L.append("keys = [\n" + ",\n".join(rows) + "\n];")
+    placed = sum(1 for k in kl["keys"] if k["x"] is not None and k["y"] is not None)
+    L.append(f"keys_placed = {placed};  // of {len(kl['keys'])}")
+    L.append(f"spare_switch_cutouts = {scad_value(kl.get('spare_bits_switches', 0))};")
+    L.append("")
+
+    leaves = []
+    flatten("", {k: v for k, v in body.items() if k != "meta"}, leaves)
+    L.append(f"// ---- {BODY}")
+    for name, spec in leaves:
+        tag = spec.get("status", "")
+        src = spec.get("source", "")
+        L.append(f"{name} = {scad_value(spec['value'])};  // {tag}; {src}".rstrip("; "))
+    L.append("")
+    L.append("// Every value above with status tbd - a placeholder, not a number any")
+    L.append("// document gives. The DRC report lists these so no result hides one.")
+    L.append("tbd_params = " + scad_value([n for n, s in leaves if s.get("status") == "tbd"]) + ";")
+    L.append("")
+    return "\n".join(L) + "\n"
+
+
+def cfg_leaf(v):
+    return isinstance(v, dict) and ("value" in v or "ref" in v)
+
+
+def flatten_cfg(prefix, node, out):
+    """As flatten(), for a config whose leaves may be `ref:` instead of `value:`."""
+    for k, v in node.items():
+        name = f"{prefix}_{scad_name(k)}" if prefix else scad_name(k)
+        if cfg_leaf(v):
+            out.append((name, v))
+        elif isinstance(v, dict):
+            flatten_cfg(name, v, out)
+
+
+def resolve_ref(ref):
+    """`file:dotted.path` -> that leaf of that config file (value, status, source)."""
+    path, _, dotted = ref.partition(":")
+    node = yaml.safe_load(open(os.path.join(ROOT, path), encoding="utf-8"))
+    for part in dotted.split("."):
+        if not isinstance(node, dict) or part not in node:
+            raise SystemExit(f"cad.py: {MODULE}: ref {ref!r} names nothing")
+        node = node[part]
+    if not (isinstance(node, dict) and "value" in node):
+        raise SystemExit(f"cad.py: {MODULE}: ref {ref!r} is not a leaf with a value")
+    return node
+
+
+def figure_spellings(v):
+    if isinstance(v, bool) or not isinstance(v, (int, float)):
+        return [str(v)]
+    return sorted({f"{v:g}", f"{v:.1f}", f"{v:.2f}"})
+
+
+def render_module_params():
+    cfg = yaml.safe_load(open(os.path.join(ROOT, MODULE), encoding="utf-8"))
+    figs = {f["id"]: f for f in yaml.safe_load(open(os.path.join(ROOT, FIGURES), encoding="utf-8"))["figures"]}
+    L = ["// GENERATED by tools/cad.py params - DO NOT EDIT.",
+         f"// Source: {MODULE} (and, where a leaf says ref:, the file it names). Edit",
+         "// those, then run `python3 tools/cad.py build`; `check` fails on a hand edit here.",
+         "// Units: mm. Every value below cites its source in the YAML it came from.",
+         ""]
+    leaves = []
+    flatten_cfg("", {k: v for k, v in cfg.items() if k != "meta"}, leaves)
+    L.append(f"// ---- {MODULE}")
+    tbd = []
+    for name, spec in leaves:
+        if "ref" in spec:
+            got = resolve_ref(spec["ref"])
+            val, tag = got["value"], got.get("status", "")
+            src = f"ref {spec['ref']}: {got.get('source', '')}"
+        else:
+            val, tag, src = spec["value"], spec.get("status", ""), spec.get("source", "")
+        if "figure" in spec:
+            f = figs.get(spec["figure"])
+            if f is None:
+                raise SystemExit(f"cad.py: {MODULE}: {name} names figure {spec['figure']!r}, "
+                                 f"which {FIGURES} does not have")
+            vals = val if isinstance(val, list) else [val]
+            miss = [x for x in vals if not any(sp in str(f["value"]) for sp in figure_spellings(x))]
+            if miss:
+                raise SystemExit(f"cad.py: {MODULE}: {name} = {val} but figure {spec['figure']!r} reads "
+                                 f"{f['value']!r} - the figure moved; update {MODULE} from it")
+            src = f"[register {spec['figure']}] {src}"
+        if tag == "tbd":
+            tbd.append(name)
+        L.append(f"{name} = {scad_value(val)};  // {tag}; {src}".rstrip("; "))
+    L.append("")
+    L.append("// Every value above with status tbd - a placeholder, not a number any")
+    L.append("// document gives. The module's DRC report lists these.")
+    L.append("module_tbd_params = " + scad_value(tbd) + ";")
+    L.append("")
+    return "\n".join(L) + "\n"
+
+
+# Each generated parameter file: (path, generator, what it is made from).
+PARAM_SETS = [(PARAMS, render_params, f"{KEY_LAYOUT} + {BODY}"),
+              (MODULE_PARAMS, render_module_params, MODULE)]
+
+
+def is_provisional():
+    kl = yaml.safe_load(open(os.path.join(ROOT, KEY_LAYOUT), encoding="utf-8"))
+    return any(k["x"] is None or k["y"] is None for k in kl["keys"])
+
+
+def params_problems():
+    """[(params file, problem)] for every generated parameter file that is stale."""
+    out = []
+    for path_, gen, made_from in PARAM_SETS:
+        path = os.path.join(ROOT, path_)
+        if not os.path.exists(path):
+            out.append((path_, f"{path_} is missing - run `python3 tools/cad.py build`"))
+            continue
+        try:
+            want = gen()
+        except SystemExit as e:
+            out.append((path_, str(e)))
+            continue
+        if open(path, encoding="utf-8").read() != want:
+            out.append((path_, f"{path_} does not match {made_from} - either a config "
+                        f"value moved (run `python3 tools/cad.py build`, which also re-renders "
+                        f"what it feeds) or the file was edited by hand (edit the YAML instead)"))
+    return out
+
+
+def write_params():
+    for path_, gen, _ in PARAM_SETS:
+        os.makedirs(os.path.dirname(os.path.join(ROOT, path_)), exist_ok=True)
+        with open(os.path.join(ROOT, path_), "w", encoding="utf-8", newline="\n") as f:
+            f.write(gen())
+
+
+# ------------------------------------------------------------ dependencies --
+
+INCLUDE_RE = re.compile(r"\b(?:include|use)\s*<([^>]+)>")
+# Any string literal naming a data file counts, not just import("..."):
+# the model imports through variables (DISP_DXF = "..."), and a walk that
+# only read call sites missed one on its first run - caught by the depfile
+# cross-check in check_depfile(), which is why that check exists.
+IMPORT_RE = re.compile(r"\"([^\"]+\.(?:stl|dxf|svg|off|amf|3mf|png|dat|csv|json))\"", re.I)
+
+
+def strip_comments(src):
+    src = re.sub(r"/\*.*?\*/", "", src, flags=re.S)
+    return re.sub(r"//[^\n]*", "", src)
+
+
+def scad_deps(path, seen=None):
+    """Every file an OpenSCAD source reads, transitively. Relative paths only:
+    a dependency on the OpenSCAD library path would be invisible to git and
+    so to the fingerprint, and is refused rather than silently skipped."""
+    seen = set() if seen is None else seen
+    if path in seen:
+        return seen
+    full = os.path.join(ROOT, path)
+    if not os.path.exists(full):
+        raise SystemExit(f"cad.py: {path} does not exist (named as a dependency)")
+    seen.add(path)
+    if not path.endswith(".scad"):
+        return seen
+    src = strip_comments(open(full, encoding="utf-8").read())
+    base = os.path.dirname(path)
+    for m in INCLUDE_RE.finditer(src):
+        scad_deps(rel(os.path.join(ROOT, base, m.group(1))), seen)
+    for m in IMPORT_RE.finditer(src):
+        scad_deps(rel(os.path.join(ROOT, base, m.group(1))), seen)
+    return seen
+
+
+def output_inputs(o):
+    if o["kind"] == "mesh":
+        deps = {o["from"]}
+    elif o["kind"] == "script":
+        deps = set(o["inputs"]) | {o["cmd"][0]}
+        for p in deps:
+            if not os.path.exists(os.path.join(ROOT, p)):
+                raise SystemExit(f"cad.py: {o['name']} names input {p}, which does not exist")
+    else:
+        deps = scad_deps(o["src"])
+    if o["kind"] == "clash":
+        deps.add(o["allow"])
+    return sorted(deps)
+
+
+def fingerprint(o, inputs):
+    recipe = {k: v for k, v in o.items() if k not in ("title", "caption") and not k.startswith("_")}
+    h = hashlib.sha256()
+    h.update(json.dumps({"recipe": RECIPE, "spec": recipe}, sort_keys=True).encode())
+    for p in inputs:
+        h.update(f"{p}\0{blob_id(p)}\n".encode())
+    return h.hexdigest()[:16]
+
+
+# ------------------------------------------------------------------ spec ----
+
+def ledger_of(spec_path):
+    return f"{os.path.dirname(spec_path)}/OUTPUTS.csv"
+
+
+def load_spec():
+    outs = []
+    for sp in SPECS:
+        if not os.path.exists(os.path.join(ROOT, sp)):
+            continue
+        spec = yaml.safe_load(open(os.path.join(ROOT, sp), encoding="utf-8")) or {}
+        for kind, key in (("mesh", "meshes"), ("render", "renders"), ("export", "exports"),
+                          ("script", "scripts"), ("clash", "clashes")):
+            for o in spec.get(key) or []:
+                o = dict(o)
+                o["kind"] = kind
+                o["_spec"] = sp      # not part of the recipe: fingerprint() skips "_" keys
+                outs.append(o)
+    names = [o["name"] for o in outs]
+    dup = {n for n in names if names.count(n) > 1}
+    if dup:
+        raise SystemExit(f"cad.py: duplicate output names across {SPECS}: {sorted(dup)}")
+    return outs
+
+
+def load_ledger():
+    """Every ledger's rows, by output name; `_ledger` says which file a row came from."""
+    rows = {}
+    for sp in SPECS:
+        path = os.path.join(ROOT, ledger_of(sp))
+        if not os.path.exists(path):
+            continue
+        with open(path, encoding="utf-8", newline="") as f:
+            for r in csv.DictReader(f):
+                r["_ledger"] = ledger_of(sp)
+                rows[r["name"]] = r
+    return rows
+
+
+def write_ledger(rows):
+    """Each row goes to the ledger beside the spec that builds it."""
+    spec_of = {o["name"]: o["_spec"] for o in load_spec()}
+    for sp in SPECS:
+        if not os.path.exists(os.path.join(ROOT, sp)):
+            continue
+        lg = ledger_of(sp)
+        mine = {n: r for n, r in rows.items()
+                if (spec_of[n] == sp if n in spec_of else r.get("_ledger", LEDGER) == lg)}
+        buf = io.StringIO()
+        w = csv.DictWriter(buf, fieldnames=LEDGER_COLS, lineterminator="\n", extrasaction="ignore")
+        w.writeheader()
+        for name in sorted(mine):
+            w.writerow(mine[name])
+        open(os.path.join(ROOT, lg), "w", encoding="utf-8", newline="").write(buf.getvalue())
+
+
+def encode_inputs(inputs):
+    return ";".join(f"{p}@{blob_id(p)[:12]}" for p in inputs)
+
+
+def decode_inputs(s):
+    return dict(x.rsplit("@", 1) for x in s.split(";") if x)
+
+
+# ----------------------------------------------------------------- build ----
+
+def openscad_version():
+    r = subprocess.run(["openscad", "--version"], capture_output=True, text=True)
+    return (r.stdout + r.stderr).strip().splitlines()[-1]
+
+
+def defines(o):
+    args = []
+    for k, v in (o.get("defines") or {}).items():
+        args += ["-D", f"{k}={scad_value(v)}"]
+    return args
+
+
+def run_openscad(o, out_abs, deps_abs):
+    cmd = ["openscad", "-o", out_abs, "-d", deps_abs]
+    if o["kind"] == "render":
+        w, h = o.get("imgsize", [1400, 800])
+        cmd += ["--preview", f"--colorscheme={o.get('colorscheme', 'Tomorrow')}",
+                f"--imgsize={w},{h}",
+                f"--projection={'o' if o.get('projection', 'p') == 'o' else 'p'}"]
+        if "camera" in o:
+            cmd.append("--camera=" + ",".join(str(c) for c in o["camera"]))
+        if o.get("viewall", "camera" not in o):
+            cmd += ["--viewall", "--autocenter"]
+    cmd += defines(o) + [os.path.join(ROOT, o["src"])]
+    if o["kind"] == "render" and not os.environ.get("DISPLAY"):
+        cmd = ["xvfb-run", "-a", "-s", "-screen 0 2400x1600x24"] + cmd
+    r = subprocess.run(cmd, capture_output=True, text=True, cwd=ROOT)
+    log = r.stdout + r.stderr
+    bad = [l for l in log.splitlines()
+           if re.search(r"\b(ERROR|WARNING)\b", l) and "fontconfig" not in l.lower()
+           # A banked vendor DXF carries annotation entities (hatches, text)
+           # OpenSCAD cannot read. The outline it can read is what is used, and
+           # only files under datasheets/ get this pass - never our own.
+           and not re.search(r"Unsupported DXF Entity .* datasheets/", l)]
+    if r.returncode != 0 or bad or not os.path.exists(out_abs):
+        raise SystemExit(f"cad.py: openscad failed on {o['name']}:\n" + "\n".join(bad or log.splitlines()[-15:]))
+    return log
+
+
+def check_depfile(o, deps_abs, inputs):
+    """Cross-check the static walk against what OpenSCAD actually opened. If
+    OpenSCAD read a file the walk missed, the fingerprint is blind to it."""
+    txt = open(deps_abs, encoding="utf-8").read().replace("\\\n", " ")
+    listed = txt.split(":", 1)[1].split() if ":" in txt else []
+    seen = {rel(p if os.path.isabs(p) else os.path.join(ROOT, p)) for p in listed}
+    missed = sorted(p for p in seen if p not in inputs and not p.startswith(".."))
+    if missed:
+        raise SystemExit(f"cad.py: OpenSCAD read {missed} for {o['name']} but the "
+                         f"dependency walk did not find them - fix scad_deps() before "
+                         f"trusting any fingerprint")
+
+
+def stamp(png, o, fp, provisional):
+    from PIL import Image, ImageDraw, ImageFont
+    img = Image.open(png).convert("RGB")
+    band = 34 if provisional else 22
+    out = Image.new("RGB", (img.width, img.height + band), (250, 250, 250))
+    out.paste(img, (0, 0))
+    d = ImageDraw.Draw(out)
+    mono = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+    bold = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+    f = ImageFont.truetype(mono, 12) if os.path.exists(mono) else ImageFont.load_default()
+    fb = ImageFont.truetype(bold, 11) if os.path.exists(bold) else f
+    y0 = img.height
+    d.line([(0, y0), (img.width, y0)], fill=(180, 180, 180))
+    text = (f"{o.get('stamp', 'Woody body')} · {o['name']} · cad {fp[:12]} · {o['src']}"
+            f" · verify: python3 tools/cad.py explain {o['name']}")
+    d.text((8, y0 + 4), text, fill=(60, 60, 60), font=f)
+    if provisional:
+        d.text((8, y0 + 19), "PROVISIONAL LAYOUT - key positions are null in "
+               "config/key-layout.yaml; keys sit on the provisional layout in "
+               "config/body.yaml until M2/M3", fill=(170, 40, 20), font=fb)
+    # Deterministic PNG: no timestamps, no text chunks.
+    out.save(png, optimize=True)
+
+
+def mesh_step(o, out_abs):
+    try:
+        import gmsh
+    except Exception as e:
+        raise SystemExit(f"cad.py: gmsh is needed to mesh {o['from']} ({e}). "
+                         f"`pip install gmsh` (and apt `libxft2 libglu1-mesa`).")
+    gmsh.initialize()
+    gmsh.option.setNumber("General.Terminal", 0)
+    gmsh.option.setNumber("Mesh.MeshSizeFactor", o.get("mesh_size_factor", 0.5))
+    gmsh.option.setNumber("Mesh.Binary", 1)
+    occ = gmsh.model.occ
+    vols = occ.importShapes(os.path.join(ROOT, o["from"]))
+    # Vendor STEPs arrive as several touching bodies. Unfused, their meshes
+    # overlap and OpenSCAD's CSG preview garbles any section through them;
+    # fused, they are one closed solid. `clip` trims what the vendor models
+    # but the instrument does not have (the display's unfolded flex).
+    if o.get("fuse", True) and len(vols) > 1:
+        vols, _ = occ.fuse(vols[:1], vols[1:])
+    if "clip" in o:
+        c = o["clip"]
+        box = occ.addBox(c[0], c[1], c[2], c[3] - c[0], c[4] - c[1], c[5] - c[2])
+        vols, _ = occ.intersect(vols, [(3, box)])
+    occ.synchronize()
+    gmsh.model.mesh.generate(2)
+    gmsh.write(out_abs)
+    gmsh.finalize()
+    return f"gmsh {gmsh.__version__}"
+
+
+# ----------------------------------------------------------------- clash ----
+#
+# THE INTERFERENCE CHECK. Every solid in the model is named (P(c, shell, id)
+# in woody_body.scad). This asks OpenSCAD for the list, renders each solid on
+# its own to a mesh, and intersects every pair exactly (manifold3d). A pair
+# that overlaps by more than CLASH_EPS mm^3 is a CLASH unless a rule in the
+# allow file names it and says why - parts meant to nest, like a switch's
+# latch arms in the plate cutout they clip into. An allow rule that matches
+# nothing is reported too: a stale excuse reads exactly like a live one.
+
+CLASH_EPS = 0.05   # mm^3 - below this, two faces touching, not two parts overlapping
+
+
+def run_scad(src, out, defines_, deps=None):
+    cmd = ["openscad", "-o", out] + (["-d", deps] if deps else []) + defines_ + [os.path.join(ROOT, src)]
+    r = subprocess.run(cmd, capture_output=True, text=True, cwd=ROOT)
+    return r.returncode, r.stdout + r.stderr
+
+
+def clash_step(o, out_abs, inputs):
+    import fnmatch
+    import concurrent.futures as cf
+    try:
+        import manifold3d as mf
+        import trimesh
+        import numpy as np
+    except Exception as e:
+        raise SystemExit(f"cad.py: the clash check needs manifold3d and trimesh ({e}). "
+                         f"`pip install manifold3d trimesh`")
+    allow = yaml.safe_load(open(os.path.join(ROOT, o["allow"]), encoding="utf-8")) or {}
+    rules = allow.get("allow") or []
+    base = ["-D", "explode=0", "-D", 'cut="none"', "-D", "ghost_shell=false"] + defines(o)
+    with tempfile.TemporaryDirectory() as td:
+        ids_echo = os.path.join(td, "ids.echo")
+        rc, log = run_scad(o["src"], ids_echo, base + ["-D", "list_solids=true"], os.path.join(td, "deps"))
+        if rc != 0:
+            raise SystemExit(f"cad.py: could not list solids:\n{log[-2000:]}")
+        check_depfile(o, os.path.join(td, "deps"), inputs)
+        ids = []
+        for line in open(ids_echo, encoding="utf-8"):
+            m = re.match(r'ECHO: "SOLID", "(.*)"$', line.strip())
+            if m and m.group(1) not in ids:
+                ids.append(m.group(1))
+
+        def one(i_id):
+            i, sid = i_id
+            stl = os.path.join(td, f"{i}.stl")
+            rc, log = run_scad(o["src"], stl, base + ["-D", f"only={json.dumps(sid)}"])
+            if rc != 0 or not os.path.exists(stl):
+                if "top level object is empty" in log.lower() or "empty" in log.lower():
+                    return sid, None, "empty"
+                return sid, None, log[-800:]
+            return sid, stl, None
+
+        meshes, empty = {}, []
+        with cf.ThreadPoolExecutor(max_workers=os.cpu_count() or 2) as ex:
+            for sid, stl, err in ex.map(one, list(enumerate(ids))):
+                if err == "empty":
+                    empty.append(sid)
+                    continue
+                if err:
+                    raise SystemExit(f"cad.py: could not render solid {sid!r}:\n{err}")
+                tm = trimesh.load(stl, force="mesh")
+                if not tm.is_watertight:
+                    raise SystemExit(f"cad.py: solid {sid!r} is not a closed mesh - it cannot be intersected; fix it")
+                m = mf.Manifold(mf.Mesh(vert_properties=np.asarray(tm.vertices, dtype=np.float32),
+                                        tri_verts=np.asarray(tm.faces, dtype=np.uint32)))
+                meshes[sid] = (m, tm.bounds)
+
+    def allowed(a, b):
+        for n, r in enumerate(rules):
+            if ((fnmatch.fnmatch(a, r["a"]) and fnmatch.fnmatch(b, r["b"])) or
+                    (fnmatch.fnmatch(b, r["a"]) and fnmatch.fnmatch(a, r["b"]))):
+                return n
+        return None
+
+    names = sorted(meshes)
+    clashes, excused, used = [], [], set()
+    for i, a in enumerate(names):
+        ma, ba = meshes[a]
+        for b in names[i + 1:]:
+            mb, bb = meshes[b]
+            if (ba[1] <= bb[0]).any() or (bb[1] <= ba[0]).any():
+                continue
+            inter = ma ^ mb
+            v = inter.volume()
+            if v <= CLASH_EPS:
+                continue
+            bx = inter.bounding_box()
+            where = "X %.1f-%.1f  Y %.1f-%.1f  Z %.1f-%.1f" % (bx[0], bx[3], bx[1], bx[4], bx[2], bx[5])
+            n = allowed(a, b)
+            if n is None:
+                clashes.append((v, a, b, where))
+            else:
+                used.add(n)
+                excused.append((v, a, b, rules[n]["why"]))
+    dead = [r for n, r in enumerate(rules) if n not in used]
+    L = [f"# Interference check - GENERATED by tools/cad.py from {o['src']}",
+         f"# {len(names)} solids, {len(names) * (len(names) - 1) // 2} pairs; overlap > {CLASH_EPS} mm^3 counts.",
+         f"# Excuses: {o['allow']}. Every solid is a modelled envelope - many sizes are tbd",
+         f"# (config/body.yaml), so a clean result is only as good as those envelopes.", ""]
+    L.append(f"CLASH {len(clashes)}" + ("" if clashes else " - none"))
+    for v, a, b, where in sorted(clashes, reverse=True):
+        L.append(f"  {v:10.1f} mm3  {a}  x  {b}   [{where}]")
+    L += ["", f"ALLOWED {len(excused)} (by rule in {o['allow']})"]
+    for v, a, b, why in sorted(excused, reverse=True):
+        L.append(f"  {v:10.1f} mm3  {a}  x  {b}   - {why}")
+    L += ["", f"UNUSED ALLOW RULES {len(dead)}" + (" - delete them or they will excuse the next clash" if dead else "")]
+    for r in dead:
+        L.append(f"  {r['a']}  x  {r['b']}   - {r['why']}")
+    if empty:
+        L += ["", f"EMPTY SOLIDS {len(empty)} (named, but drew nothing)"] + ["  " + e for e in empty]
+    open(out_abs, "w", encoding="utf-8", newline="\n").write("\n".join(L) + "\n")
+    print(f"      {len(names)} solids: {len(clashes)} clash(es), {len(excused)} allowed, {len(dead)} unused rule(s)")
+    return f"{openscad_version()}; manifold3d"
+
+
+def script_step(o, out_abs, inputs, fp):
+    """Run a Python tool that makes one output: `cmd` is [tool.py, args...];
+    the tool is given `--out <path>` and `--fingerprint <fp>`. Every file it
+    prints as `READ: <path>` must be a declared input."""
+    cmd = [sys.executable, os.path.join(ROOT, o["cmd"][0])] + [str(a) for a in o["cmd"][1:]] + \
+          ["--out", out_abs, "--fingerprint", fp]
+    r = subprocess.run(cmd, capture_output=True, text=True, cwd=ROOT)
+    log = r.stdout + r.stderr
+    if r.returncode != 0 or not os.path.exists(out_abs):
+        raise SystemExit(f"cad.py: {o['cmd'][0]} failed on {o['name']}:\n" + "\n".join(log.splitlines()[-25:]))
+    read = {rel(l[6:].strip()) for l in log.splitlines() if l.startswith("READ: ")}
+    missed = sorted(p for p in read if p not in inputs and not p.startswith(".."))
+    if missed:
+        raise SystemExit(f"cad.py: {o['cmd'][0]} read {missed} for {o['name']}, which its "
+                         f"`inputs` in the spec do not name - the fingerprint is blind to them")
+    tools = [l[6:].strip() for l in log.splitlines() if l.startswith("TOOL: ")]
+    return tools[-1] if tools else os.path.basename(o["cmd"][0])
+
+
+def build_one(o, provisional):
+    inputs = output_inputs(o)
+    fp = fingerprint(o, inputs)
+    out_abs = os.path.join(ROOT, o["out"])
+    os.makedirs(os.path.dirname(out_abs), exist_ok=True)
+    if o["kind"] == "mesh":
+        tool = mesh_step(o, out_abs)
+    elif o["kind"] == "clash":
+        tool = clash_step(o, out_abs, inputs)
+    elif o["kind"] == "script":
+        tool = script_step(o, out_abs, inputs, fp)
+        if o.get("stamp") and out_abs.endswith(".png"):
+            stamp(out_abs, dict(o, src=o["cmd"][0]), fp, provisional and o.get("layout_sensitive", False))
+    else:
+        with tempfile.TemporaryDirectory() as td:
+            deps_abs = os.path.join(td, "deps")
+            run_openscad(o, out_abs, deps_abs)
+            check_depfile(o, deps_abs, inputs)
+        tool = openscad_version()
+        if o["kind"] == "render":
+            stamp(out_abs, o, fp, provisional and o.get("layout_sensitive", True))
+    return {"name": o["name"], "kind": o["kind"], "out": o["out"], "fingerprint": fp,
+            "out_sha256": sha256(o["out"])[:16],
+            "provisional": "yes" if provisional and o["kind"] not in ("mesh", "script") else "",
+            "built": datetime.date.today().isoformat(), "tool": tool,
+            "inputs": encode_inputs(inputs)}
+
+
+def order(outs):
+    # Meshes first: renders import them, so their fingerprints depend on them.
+    # Scripts read exports (the art reads panel.dxf) and one another (the
+    # Blender scene reads the art's textures): their own spec order holds.
+    return sorted(outs, key=lambda o: {"mesh": 0, "export": 1, "script": 2, "render": 3, "clash": 4}[o["kind"]])
+
+
+def cmd_build(names, all_):
+    write_params()
+    outs = order(load_spec())
+    known = {o["name"] for o in outs}
+    unknown = [n for n in names if n not in known]
+    if unknown:
+        raise SystemExit(f"cad.py: no such output(s): {unknown}")
+    ledger = load_ledger()
+    provisional = is_provisional()
+    built = 0
+    for o in outs:
+        if names and o["name"] not in names:
+            continue
+        if not names and not all_ and not problems_for(o, ledger.get(o["name"])):
+            continue
+        print(f"  {o['kind']:6} {o['name']:28} -> {o['out']}", flush=True)
+        ledger[o["name"]] = build_one(o, provisional)
+        write_ledger(ledger)
+        built += 1
+    stale_rows = [n for n in ledger if n not in known]
+    for n in stale_rows:
+        del ledger[n]
+    write_ledger(ledger)
+    print(f"built {built} of {len(outs)} outputs"
+          + (f", dropped {len(stale_rows)} ledger rows with no spec" if stale_rows else ""))
+    rest = all_problems()
+    if rest:
+        print("\n".join("  " + p for p in rest))
+        return 1
+    return 0
+
+
+# ----------------------------------------------------------------- check ----
+
+def problems_for(o, row):
+    if row is None:
+        return [f"{o['name']}: never built - no row in {ledger_of(o.get('_spec', SPEC))}"]
+    if not os.path.exists(os.path.join(ROOT, o["out"])):
+        return [f"{o['name']}: {o['out']} is missing"]
+    if row["out"] != o["out"]:
+        return [f"{o['name']}: ledger says {row['out']}, spec says {o['out']}"]
+    if sha256(o["out"])[:16] != row["out_sha256"]:
+        return [f"{o['name']}: {o['out']} was changed after it was built - it is no "
+                f"longer the file the ledger vouches for. Rebuild it; never edit an output"]
+    inputs = output_inputs(o)
+    if fingerprint(o, inputs) == row["fingerprint"]:
+        return []
+    was = decode_inputs(row["inputs"])
+    now = {p: blob_id(p)[:12] for p in inputs}
+    moved = [p for p in now if p in was and was[p] != now[p]]
+    added = [p for p in now if p not in was]
+    gone = [p for p in was if p not in now]
+    why = ([f"changed {', '.join(moved)}"] if moved else []) + \
+          ([f"new input {', '.join(added)}"] if added else []) + \
+          ([f"dropped input {', '.join(gone)}"] if gone else [])
+    return [f"{o['name']}: STALE - {'; '.join(why) or 'its recipe in outputs.yaml changed'}"]
+
+
+def all_problems():
+    out = []
+    outs = load_spec()
+    for path_, msg in params_problems():
+        out.append(msg)
+        fed = [o["name"] for o in outs if o["kind"] != "mesh" and path_ in output_inputs(o)]
+        out.append(f"...and {len(fed)} outputs are built from {path_}, so every one of "
+                   f"them shows the OLD value until the build runs: {', '.join(fed)}")
+    ledger = load_ledger()
+    for o in outs:
+        out += problems_for(o, ledger.get(o["name"]))
+    owned = {o["out"] for o in outs}
+    for n in ledger:
+        if n not in {o["name"] for o in outs}:
+            out.append(f"{n}: in {ledger[n]['_ledger']} but in no spec ({', '.join(SPECS)})")
+    for d in OWNED_DIRS:
+        for dp, _, fs in os.walk(os.path.join(ROOT, d)):
+            for fn in fs:
+                p = rel(os.path.join(dp, fn))
+                if fn.endswith(OWNED_EXT) and p not in owned:
+                    out.append(f"{p}: an output no spec entry builds - nobody can "
+                               f"regenerate it, so nobody can tell when it goes stale")
+    # Every image a mechanical page shows must be one this tool vouches for.
+    for dp, _, fs in os.walk(os.path.join(ROOT, MECH)):
+        for fn in fs:
+            if not fn.endswith(".md"):
+                continue
+            page = rel(os.path.join(dp, fn))
+            for m in re.finditer(r"!\[[^\]]*\]\(([^)\s]+)\)", open(os.path.join(dp, fn), encoding="utf-8").read()):
+                tgt = rel(os.path.join(dp, m.group(1)))
+                if tgt not in owned:
+                    out.append(f"{page} shows {m.group(1)}, which is not a tracked output")
+    return out
+
+
+def cmd_check():
+    probs = all_problems()
+    n = len(load_spec())
+    if probs:
+        for p in probs:
+            print("  " + p)
+        print(f"FAIL {len(probs)} CAD output problem(s) of {n} outputs - "
+              f"run `python3 tools/cad.py build`")
+        return 1
+    print(f"PASS {n} CAD outputs match their sources")
+    return 0
+
+
+def git(*a):
+    r = subprocess.run(["git", *a], capture_output=True, text=True, cwd=ROOT)
+    return r.stdout.strip()
+
+
+def cmd_explain(names):
+    outs = {o["name"]: o for o in load_spec()}
+    ledger = load_ledger()
+    for n in names or sorted(outs):
+        o, row = outs.get(n), ledger.get(n)
+        if o is None:
+            print(f"{n}: no such output")
+            continue
+        print(f"{n}  ({o['kind']}, {o['out']})")
+        if row is None:
+            print("  never built")
+            continue
+        print(f"  built {row['built']} with {row['tool']}; stamp cad {row['fingerprint'][:12]}")
+        was = decode_inputs(row["inputs"])
+        now = {p: blob_id(p)[:12] for p in output_inputs(o)}
+        for p in sorted(set(was) | set(now)):
+            a, b = was.get(p), now.get(p)
+            # Full blob ids are needed for --find-object; recover from history.
+            when = ""
+            if a:
+                full = git("rev-parse", "--verify", "--quiet", f"{a}^{{blob}}") or ""
+                if full:
+                    when = git("log", "-1", "--format=%h %ad", "--date=short",
+                               f"--find-object={full}", "--", p)
+            state = "same" if a == b else ("NEW" if not a else "GONE" if not b else "MOVED")
+            print(f"  {state:5} {p}  built@{a or '-'}  now@{b or '-'}"
+                  + (f"  (built from commit {when})" if when else ""))
+        print("  " + ("; ".join(problems_for(o, row)) or "fresh"))
+
+
+def main(argv):
+    if not argv or argv[0] in ("-h", "--help"):
+        print(__doc__)
+        return 0
+    cmd, rest = argv[0], argv[1:]
+    if cmd == "params":
+        write_params()
+        print(f"wrote {', '.join(p for p, _, _ in PARAM_SETS)}")
+        return 0
+    if cmd == "build":
+        all_ = "--all" in rest
+        return cmd_build([r for r in rest if r != "--all"], all_)
+    if cmd == "check":
+        return cmd_check()
+    if cmd == "explain":
+        cmd_explain(rest)
+        return 0
+    print(f"cad.py: unknown command {cmd!r}\n{__doc__}")
+    return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

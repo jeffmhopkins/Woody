@@ -1,66 +1,67 @@
-# AUTHORITATIVE for connectivity. The ASCII drawing in key-switch-network.md
-# is a REPRESENTATION of this file.
-#
-# ONE NETWORK, BUILT 21 TIMES, spread across four boards - `replicated: 21`.
-# That is the number the BOM buys of R-KEY-SER and C-KEY. R-KEY-PU is 24
-# because the three FREE BITS carry a pull-up and nothing else, and those
-# three belong to cluster/key-marker-and-bits rather than here; the global
-# instance count prints the difference rather than hiding it.
-#
-# THE SWITCH LEG GOES TO GROUND. It ran off the 3V3 rail until 2026-09-21,
-# which made a press a 33 mA rail short that never moved the register input -
-# and contradicted the figure's own caption. Pressed = pulled LOW.
+# GENERATED from hardware/cluster/key-switch-network/key-switch-network.kicad_sch by tools/kicad.py - DO NOT EDIT.
+# The KiCad sheet is authoritative for this circuit: edit it in KiCad 9, then run
+#   python3 tools/kicad.py export hardware/cluster/key-switch-network
+# Every note and argument that used to live in this file is on the sheet
+# (part fields, sheet text) or on key-switch-network.md.
 
 circuit: cluster/key-switch-network
 title: Key switch network
 page: key-switch-network.md
 replicated: 21
-
 ports:
-  V3V3_CHAIN: {dir: in,  from: interfaces/key-chain-loom, figure: key-pullup-qty}
-  GND_CHAIN:  {dir: ref, from: interfaces/key-chain-loom}
-  KEY_BITS:   {dir: out, to: cluster/key-register, figure: key-release-time}
-
-components:
-
-  R-KEY-PU:
-    value: "2k2 1%"
-    pins: [1, 2]
-    note: "Pulls the register input to 3V3. It is also what makes the static draw a live trade rather than a free one - the same rail is the MCP3202's reference"
-
-  R-KEY-SER:
-    value: "100R 1%"
-    pins: [1, 2]
-    note: "Between the switch and the input node. AT the register input, millimetres from the switch"
-
-  C-KEY:
-    value: "47nF"
-    pins: [1, 2]
-    note: "Also AT the register input. On this board that is automatic; under the tail topology it was a layout rule with 265 mm of loom in between"
-
-  SW1-n:
-    value: "KS-33"
-    pins: [1, 2]
-    note: "Two electrical contacts. The row calls the part 3-pin, and the third is a locating post rather than a net - so it is not netted here"
-
-nets:
-
+  KEY_BITS:
+    dir: out
+    to: cluster/key-register
+    figure: key-release-time
   V3V3_CHAIN:
-    - port: V3V3_CHAIN
-    - R-KEY-PU.1
-
-  # The register input node. Both passives sit here.
-  KEY_NODE:
-    - R-KEY-PU.2
-    - C-KEY.1
-    - R-KEY-SER.1
-    - port: KEY_BITS
-
-  SWITCH_LEG:
-    - R-KEY-SER.2
-    - SW1-n.1
-
+    dir: in
+    from: interfaces/key-chain-loom
+    figure: key-pullup-qty
   GND_CHAIN:
-    - port: GND_CHAIN
-    - C-KEY.2
-    - SW1-n.2
+    dir: ref
+    from: interfaces/key-chain-loom
+components:
+  C-KEY:
+    value: 47nF
+    pins:
+    - 1
+    - 2
+    note: 'Beside its own switch, with R-KEY-SER and R-KEY-PU: the node''s RC is local to the contact that disturbs
+      it, and the trace on to the register input carries a slow edge'
+  R-KEY-PU:
+    value: 2k2 1%
+    pins:
+    - 1
+    - 2
+    note: Pulls the register input to 3V3. It is also what makes the static draw a live trade rather than a free
+      one - the same rail is the MCP3202's reference
+  R-KEY-SER:
+    value: 100R 1%
+    pins:
+    - 1
+    - 2
+    note: Between the switch and the input node, beside the switch. It sets the pressed node's divider with R-KEY-PU
+      and limits C-KEY's discharge into the contact (key-switch-network.md section 2)
+  SW1-n:
+    value: KS-33
+    pins:
+    - 1
+    - 2
+    note: Two electrical contacts. The row calls the part 3-pin, and the third is a locating post rather than a
+      net - so it is not netted here
+nets:
+  GND_CHAIN:
+  - port: GND_CHAIN
+  - C-KEY.2
+  - SW1-n.2
+  KEY_BITS:
+  - port: KEY_BITS
+  - C-KEY.1
+  - R-KEY-PU.2
+  - R-KEY-SER.1
+  SWITCH_LEG:
+  - R-KEY-SER.2
+  - SW1-n.1
+  V3V3_CHAIN:
+  - port: V3V3_CHAIN
+  - R-KEY-PU.1

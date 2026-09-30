@@ -1,0 +1,66 @@
+* The four mod channels and their shared reference, as netlisted: DAC ch7 through
+* R-OPAMP-IN-REF (R-BIAS-DAC-CH7 at the pin) into U-MOD-A half A, a follower whose
+* output VREF_MOD feeds all four R-MODGAIN-IN; each channel's DAC input through its
+* R-OPAMP-IN (R-BIAS-DAC at the pin) into its (+) input, R-MODGAIN-FB from the op-amp
+* output, R-OUT-PROT to the jack and C-FILT-MOD at the jack. TI's OPA2197 model for
+* all six used halves. D-JACK-CLAMP is left out: reverse-biased inside the rails.
+* Channel 1's DAC input steps from v_a0 to v_a1 at t_step; channels 2-4 sit at v_b.
+* Channel 1's jack drives r_vco and, on a passive mult, c_mult (and r_mult to 0 V,
+* when the other output's R-OUT-PROT and its driver are counted).
+VPOS pos 0 {{v_pos}}
+VNEG neg 0 {{v_neg}}
+* the DACs: ideal sources with a t_edge edge
+V7 dac7 0 {{v_ref7}}
+VA daca 0 PWL(0 {{v_a0}} {{t_step}} {{v_a0}} {{t_step_e}} {{v_a1}})
+VB dacb 0 {{v_b}}
+* the reference follower
+RB7 dac7 0 {{R-BIAS-DAC-CH7}}
+RI7 dac7 refp {{R-OPAMP-IN-REF}}
+XREF refp vref pos neg vref OPAx197
+* channel 1 (U-MOD-A half B)
+RBA daca 0 {{R-BIAS-DAC-1}}
+RIA daca p1 {{R-OPAMP-IN-1}}
+R1A vref m1 {{R1-1}}
+R2A m1 o1 {{R2-1}}
+X1 p1 m1 pos neg o1 OPAx197
+ROA o1 j1 {{R-OUT-PROT-1}}
+CFA j1 0 {{C-FILT-MOD-1}}
+RVCO j1 0 {{r_vco}}
+CMULT j1 0 {{c_mult}}
+RMULT j1 0 {{r_mult}}
+* channels 2-4, identical, at v_b
+RBB2 dacb 0 {{R-BIAS-DAC-2}}
+RIB2 dacb p2 {{R-OPAMP-IN-2}}
+R1B2 vref m2 {{R1-2}}
+R2B2 m2 o2 {{R2-2}}
+X2 p2 m2 pos neg o2 OPAx197
+ROB2 o2 j2 {{R-OUT-PROT-2}}
+CFB2 j2 0 {{C-FILT-MOD-2}}
+RLB2 j2 0 {{r_vco}}
+RBB3 dacb 0 {{R-BIAS-DAC-3}}
+RIB3 dacb p3 {{R-OPAMP-IN-3}}
+R1B3 vref m3 {{R1-3}}
+R2B3 m3 o3 {{R2-3}}
+X3 p3 m3 pos neg o3 OPAx197
+ROB3 o3 j3 {{R-OUT-PROT-3}}
+CFB3 j3 0 {{C-FILT-MOD-3}}
+RLB3 j3 0 {{r_vco}}
+RBB4 dacb 0 {{R-BIAS-DAC-4}}
+RIB4 dacb p4 {{R-OPAMP-IN-4}}
+R1B4 vref m4 {{R1-4}}
+R2B4 m4 o4 {{R2-4}}
+X4 p4 m4 pos neg o4 OPAx197
+ROB4 o4 j4 {{R-OUT-PROT-4}}
+CFB4 j4 0 {{C-FILT-MOD-4}}
+RLB4 j4 0 {{r_vco}}
+.options method=gear rshunt=1e10
+.control
+tran {{t_stepsize}} {{t_end}} 0 {{t_stepsize}}
+wrdata j1.dat v(j1)
+wrdata j2.dat v(j2)
+wrdata vref.dat v(vref)
+wrdata o1.dat v(o1)
+wrdata iref.dat (v(vref)-v(m1))/{{R1-1}}+(v(vref)-v(m2))/{{R1-2}}+(v(vref)-v(m3))/{{R1-3}}+(v(vref)-v(m4))/{{R1-4}}
+quit
+.endc
+.end

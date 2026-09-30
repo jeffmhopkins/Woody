@@ -1,0 +1,29 @@
+* The breath ADC's input, as netlisted: the buffered sensor output (VSRC, an ideal source:
+* U-BUF's output impedance is milliohms at these frequencies) through R-ADCDIV-U, with
+* R-ADCDIV-L and C-AA-ADC to AGND_INST at ADC_IN. The MCP3202's CH0 as its datasheet draws
+* it (Figure 4-1): a sampling switch R_SS into C_SAMPLE, closed for t_SAMPLE (1.5 clocks)
+* once per loop period, and - the worst case - C_SAMPLE discharged to 0 V between samples
+* by the conversion. BEHAVIOURAL: no SPICE model of the MCP3202 is published.
+* The source steps from v0 to v1 at t_step (the anti-alias filter's step, and the
+* latency term), and the samples run throughout.
+VSRC src 0 PWL(0 {{v0}} {{t_step}} {{v0}} {{t_step_e}} {{v1}})
+RU src adc {{R-ADCDIV-U}}
+RL adc 0 {{R-ADCDIV-L}}
+CAA adc 0 {{C-AA-ADC}}
+* the sample: switch closed for t_sample every t_loop
+VSMP smp 0 PULSE(0 1 {{t_first}} 1n 1n {{t_sample}} {{t_loop}})
+SSMP adc cs smp 0 SWSMP
+CSMP cs 0 {{c_sample}}
+* the conversion leaves C_SAMPLE at 0 V: shorted from just after each sample to the next
+VRST rst 0 PULSE(0 1 {{t_rst}} 1n 1n {{t_rst_w}} {{t_loop}})
+SRST cs 0 rst 0 SWRST
+.model SWSMP SW(VT=0.5 VH=0 RON={{r_ss}} ROFF=1e12)
+.model SWRST SW(VT=0.5 VH=0 RON=10 ROFF=1e12)
+.options method=gear
+.control
+tran 20n {{t_end}} 0 20n
+wrdata adc.dat v(adc)
+wrdata cs.dat v(cs)
+quit
+.endc
+.end

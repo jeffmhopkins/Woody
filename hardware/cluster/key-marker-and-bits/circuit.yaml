@@ -9,12 +9,11 @@ id: cluster/key-marker-and-bits
 title: The 32 bits — marker straps and bit allocation — schematic
 last_reviewed: '2026-09-21'
 depends_on:
-- fig:chain-connectors
 - fig:free-bits
 - fig:key-pullup-qty
 - fig:marker-bits
 - refdes:C-KEY
-- refdes:PLATE-THUMB
+- refdes:PLATE-BOTTOM
 - refdes:R-KEY-PU
 - refdes:R-KEY-SER
 - circuit:cluster/key-register

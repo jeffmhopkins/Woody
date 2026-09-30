@@ -1,0 +1,155 @@
+# The four mod channels and their shared reference, simulated as netlisted, with TI's
+# OPA2197 model for all six used halves. Values from the netlists: this circuit's, and
+# for the loads a passive mult joins to a MOD jack, the other outputs' jack parts
+# (breath-output-stage's C-OUT-BREATH, pitch-stage's C-FILT-PITCH, another channel's
+# C-FILT-MOD and R-OUT-PROT). Run:
+#   python3 tools/sim.py run hardware/module/mod-channels/sim
+# `mult` selects the load on channel 1's jack: 0 a VCO input alone, 1 a passive mult to
+# the BREATH jack, 2 to the PITCH jack, 3 to another MOD jack.
+title: Mod channels - range, reference, step and loop into a passive mult
+values:
+  netlist:
+    - hardware/module/mod-channels/netlist.yaml
+    - hardware/module/breath-output-stage/netlist.yaml
+    - hardware/module/pitch-stage/netlist.yaml
+models:
+  - datasheets/analog/OPAx197-ti-pspice-sboma34d.lib
+spiceinit: [set ngbehavior=psa]
+
+params:
+  v_pos:    {value: 12.0,  source: "MODULE_ANALOG_POS12 (netlist rails)"}
+  v_neg:    {value: -12.0, source: "MODULE_ANALOG_NEG12"}
+  v_ref7:   {value: {fig: mod-reference}, source: "DAC channel 7, the shared offset reference (mod-reference)"}
+  v_full:   {value: 4.99992, source: "the DAC8568's full scale, 2 x VREFOUT 2.5 V x 65535/65536 [calc; datasheets/analog/DAC8568CIPW.pdf, the C grade's gain of 2 (ADR 0006)]"}
+  r_vco:    {value: 100.0e3, source: "one module input on the jack, 100 kohm [assumption: typical Eurorack, as pitch-stage/sim]"}
+  v_a0:     {value: 0.0}
+  v_a1:     {value: 0.0}
+  v_b:      {value: 2.5, source: "channels 2-4 at mid-scale, 0 V at their jacks when V_ref is right"}
+  t_step:   {value: 50.0e-6}
+  t_edge:   {value: 100.0e-9, source: "an ideal DAC edge [assumption: harder than the DAC8568's own settling, as pitch-stage/sim]"}
+  t_end:    {value: 1.0e-3}
+  t_stepsize: {value: 100.0e-9}
+  mult:     {value: 0}
+  real_mult: {value: 0, source: "1: the other output's R-OUT-PROT to its driver at 0 V is on the jack too"}
+  r_open:   {value: 1.0e12}
+
+derived:
+  t_step_e: "v['t_step'] + v['t_edge']"
+  c_mult: "[1e-15, v['C-OUT-BREATH'], v['C-FILT-PITCH'], v['C-FILT-MOD-2']][round(v['mult'])]"
+  r_mult: "v['R-OUT-PROT-2'] if v['real_mult'] and v['mult'] else v['r_open']"
+  # the page's law with the parts as they are at this corner: (1 + R2/R1) Vdac - (R2/R1) V_ref
+  k1: "v['R2-1'] / v['R1-1']"
+
+vary:
+  R1-1:  {tol: from-value}
+  R2-1:  {tol: from-value}
+  C-FILT-MOD-1: {tol: [-0.05, 0.05], source: "C0G +/-5 % [assumption: the netlist value states none]"}
+
+sims:
+  - name: range
+    # channel 1 from code 0 to full scale; V_ref as the register has it
+    deck: mod.cir
+    set: {v_a0: 0.0, v_a1: 4.99992, t_step: 1.0e-3, t_end: 2.0e-3, t_stepsize: 1.0e-6}
+    vary: [R1-1, R2-1]
+    measures: [out_lo, out_hi, jack_lo, jack_hi, span_out, law_err_lo, law_err_hi]
+    post:
+      out_lo: "at(w['o1'], 0.95e-3)"
+      out_hi: "at(w['o1'], 1.95e-3)"
+      jack_lo: "at(w['j1'], 0.95e-3)"
+      jack_hi: "at(w['j1'], 1.95e-3)"
+      span_out: "at(w['o1'], 1.95e-3) - at(w['o1'], 0.95e-3)"
+      law_err_lo: "at(w['o1'], 0.95e-3) - (-p['k1'] * p['v_ref7'])"
+      law_err_hi: "at(w['o1'], 1.95e-3) - ((1 + p['k1']) * p['v_full'] - p['k1'] * p['v_ref7'])"
+    asserts:
+      - expr: "max['law_err_lo'] < 0.01 and min['law_err_lo'] > -0.01 and max['law_err_hi'] < 0.01 and min['law_err_hi'] > -0.01"
+        why: "the op-amp output follows the page's law 4 Vdac - 3 V_ref within 10 mV at both ends of the DAC's range, at every resistor corner: neither end clips on +-12 V"
+      - expr: "min['span_out'] > 19.70 and max['span_out'] < 20.31"
+        why: "the span at the op-amp output is inside the page's 19.703-20.303 V worst case"
+      - expr: "max['jack_hi'] < max['out_hi'] - 0.09"
+        why: "RECORDED, not a requirement: R-OUT-PROT is outside the loop, so a 100 kohm input on the jack reads 1 % low (1k/101k) - a load-dependent span error the page's tolerance table does not carry"
+  - name: clr-ref-stale
+    # the review's failure: every signal channel refreshed after a CLR, channel 7 not
+    deck: mod.cir
+    set: {v_ref7: 0.0, v_a0: 0.0, v_a1: 4.99992, t_step: 0.5e-3, t_end: 1.0e-3, t_stepsize: 1.0e-6}
+    vary: []
+    measures: [out_max, jack_max]
+    post:
+      out_max: "peak(w['o1'], 0.9e-3, 1.0e-3)"
+      jack_max: "peak(w['j1'], 0.9e-3, 1.0e-3)"
+    asserts:
+      - expr: "max['out_max'] > 11.0"
+        why: "the page's '+11.45 V' is the rail clip: with V_ref at 0 and a signal channel at full scale, the output pins within a volt of +12 V"
+  - name: wrong-ref-2v5
+    # ADR 0006's old 2.5 V written into channel 7 against the 10k/30k network
+    deck: mod.cir
+    set: {v_ref7: 2.5, v_a0: 0.0, v_a1: 4.99992, t_step: 0.5e-3, t_end: 1.0e-3, t_stepsize: 1.0e-6}
+    vary: []
+    measures: [out_lo, out_hi]
+    post:
+      out_lo: "at(w['o1'], 0.45e-3)"
+      out_hi: "peak(w['o1'], 0.9e-3, 1.0e-3)"
+    asserts:
+      - expr: "abs(nom['out_lo'] + 7.5) < 0.05 and nom['out_hi'] < 12.0 and nom['out_hi'] < 4*p['v_full'] - 3*2.5 - 0.3"
+        why: "the page's '-7.5...+12.5 V window, clips positive': the bottom lands at -7.5 V and the top stops at the rail, short of +12.5 V"
+  - name: step-mult
+    # a 1 V step at the jack (a quarter-volt DAC step) into a passive mult
+    deck: mod.cir
+    set: {v_a0: 2.5, v_a1: 2.75, t_end: 3.0e-3}
+    sweep: {mult: [0, 1, 2, 3]}
+    vary: [C-FILT-MOD-1]
+    measures: [overshoot_pct, t_settle]
+    post:
+      overshoot_pct: "overshoot(w['j1'], p['t_step'], p['t_end'])"
+      t_settle: "settling(w['j1'], p['t_step'], p['t_end'], 0.01)"
+    asserts:
+      - expr: "max['overshoot_pct'] < 1"
+        why: "C-FILT-MOD is outside the loop (feedback at the op-amp output, R-OUT-PROT between): a step into any passive mult is an RC charge, with no overshoot - unlike pitch, whose loop closes at the jack (pitch-mult-overshoot)"
+  - name: step-real-mult
+    deck: mod.cir
+    set: {v_a0: 2.5, v_a1: 2.75, t_end: 3.0e-3, real_mult: 1}
+    sweep: {mult: [1, 2, 3]}
+    vary: [C-FILT-MOD-1]
+    measures: [overshoot_pct, t_settle]
+    post:
+      overshoot_pct: "overshoot(w['j1'], p['t_step'], p['t_end'])"
+      t_settle: "settling(w['j1'], p['t_step'], p['t_end'], 0.01)"
+    asserts:
+      - expr: "max['overshoot_pct'] < 1"
+        why: "the same with the other output's R-OUT-PROT and driver on the jack"
+  - name: loop
+    deck: mod-loop.cir
+    set: {v_a0: 2.5}
+    sweep: {mult: [0, 1, 2, 3]}
+    vary: [C-FILT-MOD-1]
+    measures: [pm, fc]
+    post:
+      pm: "phase_margin(w['tdb'], w['tph'])"
+      fc: "crossover(w['tdb'])"
+    asserts:
+      - expr: "min['pm'] - 10 > 45"
+        why: "the loop's phase margin clears 45 degrees after the +-10 degree screen at every load"
+  - name: crosstalk
+    # channel 1 full scale in one edge; what channels 2-4 see through the shared VREF_MOD
+    deck: mod.cir
+    set: {v_a0: 0.0, v_a1: 4.99992, t_end: 1.0e-3}
+    vary: []
+    measures: [j2_dev, vref_dev, iref_lo, iref_hi]
+    post:
+      j2_dev: "max(peak(w['j2'], p['t_step'], p['t_end']) - at(w['j2'], p['t_step']), at(w['j2'], p['t_step']) - trough(w['j2'], p['t_step'], p['t_end']))"
+      vref_dev: "max(peak(w['vref'], p['t_step'], p['t_end']) - at(w['vref'], p['t_step']), at(w['vref'], p['t_step']) - trough(w['vref'], p['t_step'], p['t_end']))"
+      iref_lo: "at(w['iref'], p['t_step'])"
+      iref_hi: "at(w['iref'], p['t_end'])"
+    asserts:
+      - expr: "nom['j2_dev'] < 0.005"
+        why: "a full-scale step on one channel moves another channel's jack by under 5 mV through the shared reference (one buffer, four loads)"
+  - name: ref-current
+    # every channel at code 0: the follower's heaviest source current, the page's 1.33 mA
+    deck: mod.cir
+    set: {v_a0: 0.0, v_a1: 0.0, v_b: 0.0, t_end: 0.2e-3, t_stepsize: 1.0e-6}
+    vary: []
+    measures: [iref]
+    post:
+      iref: "at(w['iref'], p['t_end'])"
+    asserts:
+      - expr: "abs(nom['iref'] - 1.333e-3) < 0.02e-3"
+        why: "the page's 1.33 mA into four 10 kohm with every channel at code 0 (its (-) inputs at 0 V)"

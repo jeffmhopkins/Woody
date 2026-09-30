@@ -159,7 +159,7 @@ quiescent current, and no lighting clamp.
 | Typical play | 226 mA | 248 mA | **359 mA** | 4.1 W |
 | Typical + live config over WiFi | 336 mA | 248 mA | **414 mA** | 4.7 W |
 | **Clamp-legal worst** | 928 mA | 119 mA | **579 mA** | 6.5 W |
-| Clamp fails, strips latched full white | 1023 mA | 1023 mA | **~1522 mA** | ~17 W |
+| Clamp fails, strips latched full white (two runs — one since ADR 0016) | 1023 mA | 1023 mA | **~1522 mA** | ~17 W |
 
 **The 5 V rail is where the danger is, not the umbilical.** The same 3 W of
 light costs 531 mA on the umbilical if it is spent on the strips and 579 mA if
@@ -175,36 +175,47 @@ document used — 85 % is the 28 V-input figure.
 *(ADR 0014's ×0.49 umbilical conversion factor survives by coincidence: two ~6 %
 errors in opposite directions.)*
 
+> **Every row above includes the display board, which no longer exists (2026-09-26, [ADR 0015](0015-one-mcu-no-display.md)).**
+> Its share was only ever estimated, so the table is now an **upper bound**, and
+> the "live config over WiFi" row describes nothing — there is no radio. The
+> register's `umbilical-current` is blocked on E6 rather than re-derived from
+> a guess.
+
 **None of this is measured.** E6 measures the real draw with a current probe,
 and every number above is superseded the moment it does.
 
 ### Power tree
 
 ```
-umbilical +12V ──┬── WS2815 LED strips          (direct, no conversion)
+umbilical +12V ──┬── WS2815 LED strip (one, ADR 0016; direct, no conversion)
                  │
                  ├── REF5050 5.000V ──[OPA2197 ½]── MPXV4006DP breath sensor
                  │
                  ├── OPA2197 V+  (½ reference buffer, ½ breath buffer)
                  │
-                 ├── 12V→5V buck A ─┬── real-time board 5V pin
+                 ├── 12V→5V buck ───┬── real-time board 5V pin
                  │                  ├── 8×8 matrix (via that board)
                  │                  └── LED data level shifter
                  │
-                 ├── 12V→5V buck B ──── display board 5V pin
-                 │
                  └── TVS array / LC filter at entry  (no fuse — see below)
 
-real-time board 3V3 out ──┬── 74HC165 chain
+real-time board 3V3 out ──┬── 74x165 chain
                           ├── breath ADC
                           └── I2C pull-ups
 ```
 
 **3.3 V does not need its own converter.** The loads on it are the shift register
 chain (microamps), the ADC (milliamps) and pull-ups, all comfortably inside the
-headroom of the real-time board's onboard regulator.
+headroom of the real-time board's onboard regulator. *(Amended 2026-09-27: the
+registers are SN74HCS165s since ADR 0001's amendment; still microamps quiescent
+`[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.6]`.)*
 
-**Two bucks, not one.** ADR 0013 asks for a regulator per board so the display
+> **Superseded (2026-09-26, [ADR 0015](0015-one-mcu-no-display.md)): one buck.** There is no display board for buck B to
+> feed. The clamp-legal-worst 5 V figure above assumed both boards; without the
+> display it is the matrix and the real-time board behind one 1 A part, and
+> ADR 0014's lighting clamp is what keeps it there. E6 measures it.
+
+~~**Two bucks, not one.**~~ ADR 0013 asked for a regulator per board so the display
 board's WiFi bursts are absorbed locally instead of reaching the analog section,
 and the load table above gives the second reason: 928 mA of clamp-legal worst
 case does not fit behind one 1 A part. Split, the real-time side carries the
@@ -270,21 +281,22 @@ figure `loadswitch-gate-cap`, not a number stated here.**
 > has two readers: one who stops at the bold line, and one who does not.
 > The bold line now cites the figure, so it cannot drift again.
 
-> **⚠ The ramp half of that specification is not achievable with the chosen
-> part, 2026-09-21.** `164112fc.pdf` is now banked
-> (`datasheets/discrete-and-power/LT1641.pdf`) and the LT1641's `GATE` pull-up
-> is specified **−5 / −10 / −20 µA** `[p.2]`, corroborated by the DC1354A demo
-> guide. That is a **4:1** current window, and no single gate capacitor can hold
-> a ramp inside a 2:1 time window when the current that drives it varies 4:1.
-> `C-GATE` at 82 nF centres the *typical* at 98 ms, inside this spec; the
-> **guaranteed envelope is 49–197 ms** (`hardware/module/power-entry/power-entry.md`).
->
-> **This ADR has to choose.** Either widen the specification to **50–200 ms**,
-> which costs nothing the analysis below depends on — the 75 ms start it cites
-> is a *current-limited* start, not a ramped one, and the fault timer is sized
-> against the 47.5 ms hot-plug case rather than against the ramp — or program
-> the ramp with something other than the part's internal pull-up. **Not decided
-> here; raised against this ADR by the wave that read the datasheet.**
+> **Amended 2026-09-30 — the ramp specification is widened to the part's
+> guaranteed envelope.** The owner: *"Good to widen the spec."* The LT1641's
+> `GATE` pull-up is specified **−5 / −10 / −20 µA** `[164112fc p.2]`, a 4:1
+> window, and no single gate capacitor holds a ramp inside a 2:1 time window
+> when the current that drives it varies 4:1. So the specification is now
+> **the envelope `C-GATE-LOADSW` guarantees**, which is the tracked figure
+> `loadswitch-gate-cap` — typical centred where this ADR wanted it, both
+> corners within the figure's range. Nothing downstream depended on the upper
+> bound: the start the ADR cites is current-limited, not ramped, and the fault
+> timer is sized against the hot-plug case, not the ramp. Both corners were
+> shown safe before the decision — the fast one climbs out of foldback and
+> never approaches the limit, the slow one never enters current limit at all
+> (`hardware/module/umbilical-load-switch/umbilical-load-switch.md`, *The two
+> capacitors*; its sims run every corner). *(Raised 2026-09-21 by the wave that
+> banked the datasheet; the alternative — programming the ramp with something
+> other than the internal pull-up — is not taken.)*
 >
 > The 1.0 A half is confirmed and sharpened: the sense threshold is
 > **39 / 47 / 55 mV** `[p.2]`, so `R-ILIM` at 50 mΩ gives **0.78 / 0.94 /
@@ -367,7 +379,8 @@ is what the 75 ms start above needs. **Both are now programmed**:
 `C-GATE-LOADSW` and `C-TIMER-LOADSW` — the tracked figures
 `loadswitch-gate-cap` and `loadswitch-timer`, sized in
 `hardware/module/umbilical-load-switch/umbilical-load-switch.md` against
-the datasheet rather than against search results, with the ramp caveat above.
+the datasheet rather than against search results, and the ramp specified as
+the envelope the part guarantees (amended 2026-09-30, above).
 The fault timer's binding case turned out to be the **hot-plug** — 47.5 ms
 entirely in current limit, against a worst-case timer of 95.6 ms — and not the
 cold start at all.
@@ -414,6 +427,31 @@ is worth a diode.
 
 It is not a standalone mode and should not be designed toward. The instrument's
 outputs are CV; unplugged from the module it has nowhere to send them.
+
+## Amendment 2026-09-30 — the instrument's supply is isolated (ADR 0027)
+
+The umbilical still carries +12 V and everything above still holds at the
+instrument. What changed is where the module gets it: the load switch no longer
+hangs on the bus +12 V but on the output of an isolated DC/DC converter whose
+input is across the rack's +12 V and −12 V, so the instrument's breath-following
+current never returns through the rack's ground and never moves the pitch CV
+(ADR 0027, `hardware/module/power-entry/power-entry.md`). The rack now supplies
+the instrument's power on both rails, equal currents in each (the figures are
+`power-entry.md`'s, *The instrument's supply*), and the module fuses its rails
+(`PTC-POS12`, `PTC-NEG12`, `PTC-ISO`). The load switch's current limit, ramp
+and latch are unchanged; the converter's own limit is meant to sit above them
+— typical only on its datasheet, so E6 confirms it — so they still decide
+every start and fault.
+
+## Amendment 2026-09-30 — the lights are thirteen LEDs on the main board (ADR 0028)
+
+The strip in the load table above is gone. The lights are thirteen
+WS2815B-V1 on the main board, still on 12 V direct, and their full-white
+current is the tracked figure `led-row-current` (blocked on E6). The table's
+strip rows, and the latched-full-white row in particular, are upper bounds
+sized for 60/m tape; a latched row now sits on 12 V at a fraction of that,
+and never on the 5 V buck. `umbilical-current` is not re-derived here: it
+is already an upper bound, and E6 measures it.
 
 ## Consequences
 

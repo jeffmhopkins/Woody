@@ -1,0 +1,25 @@
+* SCK from the MCU to the left-hand key board's register: the GPIO (a source behind
+* its output resistance, its own edge swept), R-CHAIN-SER, the main board's node
+* (U-TVS-CHAIN, right_thumb's and left_thumb's inputs, trace), and two ribbons as
+* lossless lines, one to each key board; at each far end the key board's trace and the
+* register's input. One clock period; the register reads at its thresholds.
+VDRV src 0 PULSE(0 {{vcc}} 20n {{tr_drv}} {{tr_drv}} 480n 1u)
+RDRV src a {{r_drv}}
+RSER a m {{R-CHAIN-SER}}
+CTVS m 0 {{c_tvs}}
+CMAIN m 0 {{c_main}}
+TLH m 0 rx 0 Z0={{z0_ribbon}} TD={{td_rib}}
+CRX rx 0 {{ci}}
+CKB rx 0 {{c_kb}}
+TRH m 0 rxr 0 Z0={{z0_ribbon}} TD={{td_rib}}
+CRXR rxr 0 {{ci}}
+CKBR rxr 0 {{c_kb}}
+.control
+tran 20p {{t_sig_end}}
+wrdata rx.dat v(rx)
+meas tran v_over max v(rx)
+meas tran v_under min v(rx)
+meas tran t_delay trig v(src) val={{vhalf}} rise=1 targ v(rx) val={{vhalf}} rise=1
+quit
+.endc
+.end

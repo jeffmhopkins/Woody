@@ -2,9 +2,10 @@
 
 *The device itself: `## §1` of [`../cluster-boards.md`](../cluster-boards.md),
 moved verbatim 2026-09-21 when that page was split into a board page and its
-circuits. One of these sits on each of the four cluster boards. The chain bus
-it clocks from is `§3` of the board page, and the section number is left as it
-was written.*
+circuits. There are four: `right_thumb` and `left_thumb` on the main board,
+`right_hand` and `left_hand` on the key boards (ADR 0017). The chain that
+clocks them is [`key-chain-loom`](../../interfaces/key-chain-loom/key-chain-loom.md),
+which holds the hop map; the section number is left as it was written.*
 
 ## Interfaces
 
@@ -17,18 +18,20 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `SCK` | in | `interfaces/key-chain-loom` | `chain-conductors` | The chain bus, `cluster-boards.md` §3. Straight bus, IN to OUT, so any two boards take a plain straight-through ribbon |
-| `SH/LD` | in | `interfaces/key-chain-loom` | `chain-conductors` | The chain bus. Falling edge loads the parallel inputs |
-| `SER` | in | `interfaces/key-chain-loom` | `chain-connectors` | The next board's `QH`, or the carrier through `LK-SER`. Point to point, not a bus — which is what forces two connectors on most boards |
-| `QH` | out | `interfaces/key-chain-loom` | `chain-connectors` | Toward the carrier, on `IN` pin 8. Bit 0 is the `H` input of the `right_thumb` device |
+| `SCK` | in | `interfaces/key-chain-loom` | `chain-conductors` | One net to all four devices: a trace on the main board; on a key board, ribbon conductor 2 = key-board `J-CHAIN` pin 11 |
+| `SH/LD` | in | `interfaces/key-chain-loom` | `chain-conductors` | The chain bus: a trace on the main board; on a key board, ribbon conductor 4 = key-board `J-CHAIN` pin 9. Level-sensitive: while it is LOW the parallel inputs load, asynchronously; the state captured is the inputs' when it returns HIGH |
+| `SER` | in | `interfaces/key-chain-loom` | `chain-connectors` | Point to point: the next device's `QH`, or at the chain end `IO33` and its pull-up. On a key board it is always ribbon conductor 6 = key-board `J-CHAIN` pin 7. Which device feeds which is the hop map in the key-chain netlist |
+| `QH` | out | `interfaces/key-chain-loom` | `chain-connectors` | Toward the MCU: on a key board, ribbon conductor 8 = key-board `J-CHAIN` pin 5; `right_thumb`'s is a trace to the MCU. Bit 0 is the `H` input of the `right_thumb` device |
 | `A`…`H` | in | `cluster/key-switch-network`, `cluster/key-marker-and-bits` | `marker-bits`, `free-bits` | Eight parallel inputs per device: a switch network, a marker strap or a free bit |
-| `3V3` | in | `interfaces/key-chain-loom` | — | Chain bus pin 10, `cluster-boards.md` §3. `C-DECOUPLE-165` is the local reservoir this input has no other source for |
-| `GND` | ref | `interfaces/key-chain-loom` | `chain-conductors` | The chain bus, five alternating grounds. `C-DECOUPLE-165` returns here, at the package |
+| `3V3` | in | `interfaces/key-chain-loom` | — | The chain's 3V3 rail: a trace on the main board; on a key board, ribbon conductor 10 = key-board `J-CHAIN` pin 3. `C-DECOUPLE-165` is the local reservoir this input has no other source for |
+| `GND` | ref | `interfaces/key-chain-loom` | `chain-conductors` | The main board's ground; on a key board, the ribbon's five alternating grounds. `C-DECOUPLE-165` returns here, at the package |
 
 ## §1 The device
 
-*Connectivity is **[`netlist.yaml`](netlist.yaml)**, not this drawing, and that
-file is one schematic for four boards — `replicated: 4`. The eight parallel
+*Connectivity is the KiCad sheet **[`key-register.kicad_sch`](key-register.kicad_sch)**
+(render: `key-register.sch.png`), not this drawing (ADR 0019). `netlist.yaml`
+is exported from the sheet and is what the checks read — never edit it. It is
+one schematic for four boards — `replicated: 4`. The eight parallel
 inputs are deliberately not netted there: which of `A`…`H` is a switch, a
 marker strap or a free bit is different on every board, so no assignment
 would be true of all four. The allocation table lives on
@@ -36,7 +39,7 @@ would be true of all four. The allocation table lives on
 
 
 ```
-                        74HC165  SOIC-16          [from memory: pin map]
+                      SN74HCS165  SOIC-16  [ds SN74HCS165-ti-scls828a.pdf p.3]
                      ┌────────────∪────────────┐
        SH/LD  ──────►│ 1  SH/LD        VCC  16 │◄──── 3V3 ──┬── [C-DECOUPLE-165 100nF]
         SCK   ──────►│ 2  CLK       CLK INH 15 │──── GND     │   AT the package,
@@ -55,17 +58,43 @@ would be true of all four. The allocation table lives on
   has no reservoir.                                [repo] 0001 fix 5
 ```
 
-**Bit order inside the device is `H` first, then `G F E D C B A`.** On the
-falling edge of `SH/LD` the parallel inputs load; `H` (D7) appears at `QH`
-immediately, and each clock shifts the next one toward the output `[from
-memory]`. Combined with ADR 0001's *"bit 0 is the first bit clocked out"*
+**Bit order inside the device is `H` first, then `G F E D C B A`.** While
+`SH/LD` is LOW the parallel inputs load, asynchronously and level-sensitively
+(ADR 0001); what the chain then shifts out is the inputs' state at the moment
+`SH/LD` returns HIGH. During the load `H` (D7) appears at `QH`, and each clock
+after it shifts the next one toward the output `[datasheets/logic/SN74HCS165-ti-scls828a.pdf
+p.13, Table 8-1 (SH/LD L: parallel load; SH/LD H, CLK ↑, CLK INH L: shift toward QH) and Table 8-2 (QH follows internal register H)]`. Combined with ADR 0001's *"bit 0 is the first bit clocked out"*
 `[repo] 0001, key-layout.yaml`, that fixes **bit 0 = the `H` input of the
 `right_thumb` device** and settles the `H`…`A` question the carrier page left
 open — the ordering half of it, anyway. Which *switch* lands on which input is
 §4.
 
-**The part is 74HC, not 74LVC**, and that is load-bearing rather than
-incidental. HC's slow edges make 265 mm of loom an ordinary lumped load instead
-of a transmission line, which is what removed the hazards that briefly sent
-these registers to the tail `[repo] 0001, bom.csv`. Same SOIC-16 footprint, so
-LVC with proper source termination remains the way back if E4 disagrees.
+**The part is the SN74HCS165: HC-family outputs, Schmitt-trigger inputs, not
+74LVC and not a plain 74HC165**, and both halves are load-bearing. *Outputs:*
+HC-family drive, weaker than LVC's, which is what rings least on an
+unterminated line. **Its edges do not make a hop a lumped load, and nothing
+here relies on that.** TI publishes output transition time as a *maximum*
+only (5 ns at 4.5 V and 25 °C, 8 ns over temperature
+`[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.8]`), and the reflection
+hazard is set by the fastest edge, which is not published. By
+[`key-chain-loom.md`](../../interfaces/key-chain-loom/key-chain-loom.md)'s own
+length rule (a lump while the one-way delay is under a sixth of the edge, at
+~6 ns/m) even the 5 ns maximum gives `[calc]` 5 / 6 / 6 × 1000 ≈ 139 mm, and a
+hop is a ribbon (`mechanical/drc.echo` "key-chain ribbon length (derived)")
+plus key-board and main-board traces — longer than that. **What makes the
+hops safe is what they carry.** `QH` → next `SER` is data, sampled at the
+*next* rising `CLK`, one period later (1 µs at the chain's 1 MHz); `SER` setup
+is at most 14 ns and hold 0 ns over temperature `[same, p.7]`, so ringing on
+`QH`, whose round trip over a hop is a few nanoseconds, has had hundreds of
+nanoseconds to settle before it is sampled `[calc; judgment, not measured]`.
+Every register input the chain drives (`SER`, `CLK`, `SH/LD`) is a Schmitt
+input, hysteresis at least 0.2 V at 2 V and 0.4 V at 4.5 V `[same, p.6]`. The
+edge-sensitive nets, `SCK` and `SH/LD`, are driven by the MCU, not by this
+part, and are `R-CHAIN-SER`'s, scoped at E14 (`key-chain-loom.md`). Same
+SOIC-16 footprint, so LVC with proper source termination remains the way back
+if E4 or E14 disagrees. *Inputs:* the key
+network's RC edges are far slower than a plain 74HC165's input transition
+limit allows; the HCS165 has "no input signal transition rate requirements"
+`[same, p.15]` (ADR 0001's amendment, 2026-09-27;
+[`../key-switch-network/key-switch-network.md`](../key-switch-network/key-switch-network.md)).
+A substitute must keep both: the `U-KEYS` row.

@@ -27,3 +27,11 @@ for a footprint that is not on the board.
 | The retrigger arithmetic (~2400 retriggers per timeout, the 220 nF / 83 pC question, "a dedicated watchdog IC may be better") | Same — and if supervision is ever restored, the section above is where that work starts, not here |
 | The presence tap point "needs a corrected `R-PRESENCE` row" | `R-PRESENCE` is in no BOM and never was. Nothing to correct |
 | The comparator threshold "may sit inside the breath signal's own range" | True, and it is one of the **three reasons the comparator was deleted** (ADR 0004), not an open item about tuning it |
+
+### The last open question, closed 2026-09-30
+
+The page's `Still open` carried one bullet — whether to restore link
+supervision at all, at the cost of four parts and a threshold kept outside the
+breath signal's range. The owner decided it on 2026-09-30 (*"Assume the module
+will be operating with an umbilical attached to a controller"*): not restored.
+The bullet was replaced by the decision on the page.

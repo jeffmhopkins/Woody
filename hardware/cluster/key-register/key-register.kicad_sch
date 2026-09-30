@@ -1,0 +1,510 @@
+(kicad_sch (version 20250114) (generator "eeschema") (generator_version "9.0")
+  (uuid 1c06c0f3-909c-5b19-ae40-990673d82c30)
+  (paper "A4")
+  (title_block
+    (title "Key shift register (cluster/key-register)")
+    (comment 5 "circuit: cluster/key-register")
+    (comment 6 "page: key-register.md")
+    (comment 7 "title: Key shift register")
+    (comment 8 "replicated: 4")
+    (date "")
+    (rev "")
+    (company "Woody")
+    (comment 1 "SOURCE for this circuit - edit in KiCad 9. netlist.yaml is exported from it: python3 tools/kicad.py export hardware/cluster/key-register")
+    (comment 2 "Part facts ride on each symbol: Row (BOM row), Pins + Pins_source (pin map and its datasheet), Note")
+    (comment 3 "ADR 0001, ADR 0017 - one schematic, four instances")
+    (comment 4 "Ports are hierarchical labels (Dir, From/To, Figure); Kind=endpoint marks an input the board wires")
+  )
+  (lib_symbols
+    (symbol "74xx:74HC165"
+        (exclude_from_sim no)
+        (in_bom yes)
+        (on_board yes)
+        (property "Reference" "U"
+          (at -7.62 19.05 0)
+          (effects
+            (font
+              (size 1.27 1.27))))
+        (property "Value" "74HC165"
+          (at -7.62 -21.59 0)
+          (effects
+            (font
+              (size 1.27 1.27))))
+        (property "Footprint" ""
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "Datasheet" "https://assets.nexperia.com/documents/data-sheet/74HC_HCT165.pdf"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "Description" "Shift Register, 8-bit, Parallel Load"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "ki_keywords" "8 bit shift register parallel load cmos"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "ki_fp_filters" "DIP?16* SO*16*3.9x9.9mm*P1.27mm* SSOP*16*5.3x6.2mm*P0.65mm* TSSOP*16*4.4x5mm*P0.65*"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (symbol "74HC165_1_0"
+          (pin input line
+            (at -12.7 15.24 0)
+            (length 5.08)
+            (name "DS"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "10"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input line
+            (at -12.7 12.7 0)
+            (length 5.08)
+            (name "D0"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "11"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input line
+            (at -12.7 10.16 0)
+            (length 5.08)
+            (name "D1"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "12"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input line
+            (at -12.7 7.62 0)
+            (length 5.08)
+            (name "D2"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "13"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input line
+            (at -12.7 5.08 0)
+            (length 5.08)
+            (name "D3"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "14"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input line
+            (at -12.7 2.54 0)
+            (length 5.08)
+            (name "D4"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "3"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input line
+            (at -12.7 0 0)
+            (length 5.08)
+            (name "D5"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "4"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input line
+            (at -12.7 -2.54 0)
+            (length 5.08)
+            (name "D6"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "5"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input line
+            (at -12.7 -5.08 0)
+            (length 5.08)
+            (name "D7"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "6"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input line
+            (at -12.7 -10.16 0)
+            (length 5.08)
+            (name "~{PL}"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "1"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input line
+            (at -12.7 -15.24 0)
+            (length 5.08)
+            (name "CP"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "2"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input line
+            (at -12.7 -17.78 0)
+            (length 5.08)
+            (name "~{CE}"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "15"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin power_in line
+            (at 0 22.86 270)
+            (length 5.08)
+            (name "VCC"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "16"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin power_in line
+            (at 0 -25.4 90)
+            (length 5.08)
+            (name "GND"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "8"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin output line
+            (at 12.7 15.24 180)
+            (length 5.08)
+            (name "Q7"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "9"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin output line
+            (at 12.7 12.7 180)
+            (length 5.08)
+            (name "~{Q7}"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "7"
+              (effects
+                (font
+                  (size 1.27 1.27))))))
+        (symbol "74HC165_1_1"
+          (rectangle
+            (start -7.62 17.78)
+            (end 7.62 -20.32)
+            (stroke
+              (width 0.254)
+              (type default))
+            (fill
+              (type background))))
+        (embedded_fonts no))
+    (symbol "Device:C"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0.254)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "C"
+			(at 0.635 2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "C"
+			(at 0.635 -2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 0.9652 -3.81 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "cap capacitor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "C_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "C_0_1"
+			(polyline
+				(pts
+					(xy -2.032 0.762) (xy 2.032 0.762)
+				)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -2.032 -0.762) (xy 2.032 -0.762)
+				)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "C_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 2.794)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 2.794)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+  )
+  (symbol (lib_id "74xx:74HC165") (at 101.6 110.49 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 28e82d11-98b4-50ee-bcb5-554128f7430c)
+    (property "Reference" "U-KEYS" (at 93.98 91.44 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "74HCS165" (at 93.98 132.08 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Package_SO:SOIC-16_3.9x9.9mm_P1.27mm" (at 101.6 110.49 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 101.6 110.49 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "U-KEYS" (at 101.6 110.49 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "SHLD=1(~{PL}) CLK=2(CP) CLKINH=15(~{CE}) QH_BAR=7(~{Q7}) GND=8(GND) SER=10(DS) QH=9(Q7) VCC=16(VCC) A=11(D0) B=12(D1) C=13(D2) D=14(D3) E=3(D4) F=4(D5) G=5(D6) H=6(D7)" (at 101.6 110.49 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Schmitt-trigger inputs (74HCS): the key networks' slow edges are within its rating - it has no input transition-rate limit. HC-family outputs, not LVC: the weaker drive. A hop is not a lumped load and need not be - QH to the next SER is data sampled a clock period later, into a Schmitt input (key-register.md). Bit order out is H first, then G F E D C B A" (at 101.6 110.49 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "SOIC-16 (D) pin-out, datasheets/logic/SN74HCS165-ti-scls828a.pdf p.3 section 5; identical to the 74HC165's; library symbol 74xx:74HC165 names checked" (at 101.6 110.49 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Texas Instruments" (at 101.6 110.49 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "SN74HCS165DR" (at 101.6 110.49 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C2864745" (at 101.6 110.49 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 101.6 110.49 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid c57ae2d5-fb7c-54a6-ae38-831138ad55ba))
+    (pin "10" (uuid 9531dfd1-d313-56b4-9f81-5c7c097691fc))
+    (pin "11" (uuid e120da19-af45-5ce1-b47a-80b2faf28955))
+    (pin "12" (uuid 1e6d1ea9-94bf-5b1f-b45e-5bf080801865))
+    (pin "13" (uuid 87e4472d-5616-5131-8f8e-3ebb41cee0cf))
+    (pin "14" (uuid fc4af092-63ac-5119-905a-8fbed4171f8f))
+    (pin "15" (uuid 45ef8446-fc52-53cd-a605-4411d2d9db4f))
+    (pin "16" (uuid 46065fd4-390f-50a5-8d92-382ecddc7bba))
+    (pin "2" (uuid c2f2692f-9396-5a0c-9b0b-53b89484a3a7))
+    (pin "3" (uuid 5088e126-2e5e-526a-b7a5-774b6211ac23))
+    (pin "4" (uuid 4bb86be9-d4d7-5eae-bd5d-2bb7a88a763e))
+    (pin "5" (uuid 7c78d1d5-189c-56fd-b9de-d1c17f7ba5b0))
+    (pin "6" (uuid 1c18eb13-a2b5-594d-ac4d-36b3cff6dcdd))
+    (pin "7" (uuid 5bc26912-9da8-5300-804e-3eaef82155d3))
+    (pin "8" (uuid 84f10667-e9dd-5b45-b643-9e907fca0414))
+    (pin "9" (uuid 17d20b24-4f07-50b2-b852-27d640b6b041))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/7a50ccf9-a694-5b80-9465-ebb313aea857" (reference "U8") (unit 1))) (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/bb4862a5-79d0-56f6-9d21-4f7ecbf52376" (reference "U7") (unit 1))) (project "key-board-lh" (path "/a2d77fad-366b-59d5-8d08-ccdc7dd94a07/4221457c-e28c-5c2b-bcda-fa08233e468e" (reference "U1") (unit 1))) (project "key-board-rh" (path "/0d798814-7e94-52b0-a143-b50dd4dde890/65d7d4f5-8cbf-508f-a86f-604c3c11ee1c" (reference "U1") (unit 1))) (project "key-register" (path "/1c06c0f3-909c-5b19-ae40-990673d82c30" (reference "U-KEYS") (unit 1))))
+  )
+  (symbol (lib_id "Device:C") (at 127.0 80.01 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 7d0cd93d-4c2f-5bd0-80d3-0f4c4b45d69c)
+    (property "Reference" "C-DECOUPLE-165" (at 129.54 78.74 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "100nF" (at 129.54 81.28 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 128.27 83.82 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 127.0 80.01 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-DECOUPLE-165" (at 127.0 80.01 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 127.0 80.01 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "AT the package, on this board. A 74x165's output edges brown out a local rail with no reservoir, and on a key board the ribbon is the only other source" (at 127.0 80.01 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "YAGEO" (at 127.0 80.01 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "CC0805KRX7R9BB104" (at 127.0 80.01 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C49678" (at 127.0 80.01 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 127.0 80.01 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 2c22aaec-3b63-55e2-b3e0-b644bae123b8))
+    (pin "2" (uuid 5a340aeb-5d96-5da1-a02f-424e81d7adaa))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/7a50ccf9-a694-5b80-9465-ebb313aea857" (reference "C14") (unit 1))) (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/bb4862a5-79d0-56f6-9d21-4f7ecbf52376" (reference "C13") (unit 1))) (project "key-board-lh" (path "/a2d77fad-366b-59d5-8d08-ccdc7dd94a07/4221457c-e28c-5c2b-bcda-fa08233e468e" (reference "C6") (unit 1))) (project "key-board-rh" (path "/0d798814-7e94-52b0-a143-b50dd4dde890/65d7d4f5-8cbf-508f-a86f-604c3c11ee1c" (reference "C7") (unit 1))) (project "key-register" (path "/1c06c0f3-909c-5b19-ae40-990673d82c30" (reference "C-DECOUPLE-165") (unit 1))))
+  )
+  (wire (pts (xy 101.6 87.63) (xy 101.6 76.2)) (stroke (width 0) (type default)) (uuid 364242f0-5c19-5501-9e05-4457a8a69cfe))
+  (wire (pts (xy 101.6 76.2) (xy 127.0 76.2)) (stroke (width 0) (type default)) (uuid 14be8c15-3ff1-52cb-b944-76f1eead4e35))
+  (wire (pts (xy 101.6 76.2) (xy 101.6 71.12)) (stroke (width 0) (type default)) (uuid c3730cf5-204f-58ae-9213-f7ff43de01c1))
+  (hierarchical_label "V3V3_CHAIN" (shape input) (at 101.6 71.12 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid e2891a6c-969c-5e47-8e31-0b12404948b7)
+    (property "Dir" "in" (at 101.6 71.12 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 101.6 71.12 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 88.9 120.65) (xy 86.36 120.65)) (stroke (width 0) (type default)) (uuid 4aa3beb6-2ce6-5ec6-8ae9-ea2cb8b8df62))
+  (hierarchical_label "CHAIN_SHLD" (shape input) (at 86.36 120.65 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 7beef9c3-aa62-557f-b15b-b33629bf56f8)
+    (property "Dir" "in" (at 86.36 120.65 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 86.36 120.65 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 86.36 120.65 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 88.9 125.73) (xy 86.36 125.73)) (stroke (width 0) (type default)) (uuid 270ba214-a843-57bb-9378-7bd14f1bf957))
+  (hierarchical_label "CHAIN_SCK" (shape input) (at 86.36 125.73 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid c951c8ca-1884-5406-a0f4-39944740fbf7)
+    (property "Dir" "in" (at 86.36 125.73 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 86.36 125.73 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 86.36 125.73 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 88.9 95.25) (xy 86.36 95.25)) (stroke (width 0) (type default)) (uuid f6a13bed-7293-50b9-93bb-8cdbea62837d))
+  (hierarchical_label "CHAIN_SER" (shape input) (at 86.36 95.25 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid ab0af1f9-61b0-5b00-8087-3cf6710d9439)
+    (property "Dir" "in" (at 86.36 95.25 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 86.36 95.25 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-connectors" (at 86.36 95.25 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 114.3 95.25) (xy 116.84 95.25)) (stroke (width 0) (type default)) (uuid e925ce48-6501-5977-8193-0edcd51b39d5))
+  (hierarchical_label "CHAIN_QH" (shape output) (at 116.84 95.25 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid f4c1c554-ff9e-5d19-98c2-176626ad5231)
+    (property "Dir" "out" (at 116.84 95.25 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "interfaces/key-chain-loom" (at 116.84 95.25 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-connectors" (at 116.84 95.25 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 101.6 135.89) (xy 101.6 138.43)) (stroke (width 0) (type default)) (uuid b78e55e5-7f2c-5905-ad73-4bd4f2868d3d))
+  (hierarchical_label "GND_CHAIN" (shape passive) (at 101.6 138.43 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 8a3c0a57-4973-5fd5-9713-1d4168bf8c02)
+    (property "Dir" "ref" (at 101.6 138.43 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 101.6 138.43 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 101.6 138.43 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 88.9 128.27) (xy 86.36 128.27)) (stroke (width 0) (type default)) (uuid b1793676-36fb-5ea0-be24-24e8f4d5af01))
+  (hierarchical_label "GND_CHAIN" (shape passive) (at 86.36 128.27 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 9d8d6d55-47eb-5436-9ff4-e3b6348930cf)
+    (property "Dir" "ref" (at 86.36 128.27 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 86.36 128.27 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 86.36 128.27 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 127.0 83.82) (xy 127.0 86.36)) (stroke (width 0) (type default)) (uuid a6c4b12a-38ff-560a-9789-2ef56a5474bf))
+  (hierarchical_label "GND_CHAIN" (shape passive) (at 127.0 86.36 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 2b6dcea5-0dae-5e16-87c2-7b16991baf75)
+    (property "Dir" "ref" (at 127.0 86.36 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 127.0 86.36 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "chain-conductors" (at 127.0 86.36 0) (effects (font (size 1.27 1.27)) hide)))
+  (no_connect (at 114.3 97.79) (uuid 0b32f510-778f-5036-afad-efa4e3596627))
+  (wire (pts (xy 88.9 97.79) (xy 86.36 97.79)) (stroke (width 0) (type default)) (uuid 3147a2c5-13d7-5d7b-b4f4-43d26a68cf43))
+  (hierarchical_label "KEY_IN_A" (shape passive) (at 86.36 97.79 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 7b5ed8cb-0334-5658-bfc1-d4c4c0bee4a1)
+    (property "Kind" "endpoint" (at 86.36 97.79 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 88.9 100.33) (xy 86.36 100.33)) (stroke (width 0) (type default)) (uuid 87d3c59b-1ed0-51ba-84b4-ef44b40ac758))
+  (hierarchical_label "KEY_IN_B" (shape passive) (at 86.36 100.33 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 06f86224-36cd-5d53-96a4-a390e10a4810)
+    (property "Kind" "endpoint" (at 86.36 100.33 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 88.9 102.87) (xy 86.36 102.87)) (stroke (width 0) (type default)) (uuid 87647721-f18c-5cd6-9b54-eea02081b487))
+  (hierarchical_label "KEY_IN_C" (shape passive) (at 86.36 102.87 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 509ffb2b-9ee5-5969-af67-defb9ea9f894)
+    (property "Kind" "endpoint" (at 86.36 102.87 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 88.9 105.41) (xy 86.36 105.41)) (stroke (width 0) (type default)) (uuid 650f0fdd-47dc-58a7-aed6-d43075da93f5))
+  (hierarchical_label "KEY_IN_D" (shape passive) (at 86.36 105.41 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 3e052364-d2d0-587c-b5e0-1d3c05a09ff0)
+    (property "Kind" "endpoint" (at 86.36 105.41 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 88.9 107.95) (xy 86.36 107.95)) (stroke (width 0) (type default)) (uuid 5b9193f2-c259-5669-a584-c589678f344a))
+  (hierarchical_label "KEY_IN_E" (shape passive) (at 86.36 107.95 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 2433f214-f82a-56f0-aa65-0ae02d65f170)
+    (property "Kind" "endpoint" (at 86.36 107.95 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 88.9 110.49) (xy 86.36 110.49)) (stroke (width 0) (type default)) (uuid 18417ad3-cbca-59b9-8424-6d9dd5ee9828))
+  (hierarchical_label "KEY_IN_F" (shape passive) (at 86.36 110.49 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid c7c96843-19ab-5bec-888d-d154b8c00155)
+    (property "Kind" "endpoint" (at 86.36 110.49 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 88.9 113.03) (xy 86.36 113.03)) (stroke (width 0) (type default)) (uuid 8b4b67a1-9a4d-5e6d-9ea7-555cb8bd5619))
+  (hierarchical_label "KEY_IN_G" (shape passive) (at 86.36 113.03 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 063c59f6-e0b7-5e3c-97ad-865512f3d87d)
+    (property "Kind" "endpoint" (at 86.36 113.03 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 88.9 115.57) (xy 86.36 115.57)) (stroke (width 0) (type default)) (uuid 07665a8a-ef70-5917-8bc8-8c31ecf0fbce))
+  (hierarchical_label "KEY_IN_H" (shape passive) (at 86.36 115.57 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 351a5fe8-a1e3-5c3d-ad34-850f133befb1)
+    (property "Kind" "endpoint" (at 86.36 115.57 0) (effects (font (size 1.27 1.27)) hide)))
+  (junction (at 101.6 76.2) (diameter 0) (color 0 0 0 0) (uuid 1ffde9f4-c648-592b-b359-c1e9b1059465))
+  (text "ONE SCHEMATIC, FOUR INSTANCES: right_thumb and left_thumb on the main board, right_hand and left_hand on the key boards (ADR 0017).\nCHAIN_SER and CHAIN_QH are per instance; which register sits on which hop is the key-chain netlist's hop map.\nA..H are the eight parallel inputs. Each board wires them to a key network, a marker strap or a free-bit pull-up, per\nhardware/cluster/key-marker-and-bits/allocation.yaml. H is the first bit out.\nCLK INH is tied low, permanently. QH_BAR is an output: do not ground it." (at 20.32 160.02 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid 3f65d374-28ca-5b9b-9d5b-5423191a1eeb))
+  (sheet_instances (path "/" (page "1")))
+)

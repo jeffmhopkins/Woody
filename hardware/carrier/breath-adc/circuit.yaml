@@ -15,7 +15,7 @@ depends_on:
 - fig:sensor-full-scale
 - refdes:C-AA-ADC
 - refdes:C-STRIP-BULK
-- refdes:HDR-DEV
+- refdes:J-MCU
 - refdes:R-ADCDIV-L
 - refdes:R-ADCDIV-U
 - refdes:U-ADC

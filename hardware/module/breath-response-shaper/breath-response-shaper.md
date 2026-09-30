@@ -6,7 +6,7 @@ in the heading is the numbering it carried there. The panel-geometry block that
 sat under `What it costs, and the decision it forces` is now
 `hardware/module/panel/panel.md`.*
 
-**Proposed 2026-09-21.** Requested after the review wave, and independently
+**Proposed 2026-09-21; adopted and fully drawn 2026-09-30.** Requested after the review wave, and independently
 asked for by it: `B6` found that the nearest commercial equivalent
 (ADDAC310 Pressure-to-CV) ships Response — exp ↔ lin ↔ log — alongside
 slew, offset and gain, and that NuEVI ships thirteen curves and does not
@@ -26,18 +26,17 @@ The `Dir` and `Peer` columns are defined once in
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
 | in-amp output | in | `module/breath-receive-stage` | `inamp-full-scale`, `breath-working-point` | The drawing's `in-amp out`. `R1` and the `2 × 10 k` divider that makes `V_in/2` both hang on it |
-| `V_shaped` | out | `module/breath-output-stage` | — | Drawn feeding the gain attenuator. *Where it inserts* is argued below and is open |
+| `BREATH_SHAPED` | out | `module/breath-output-stage` | — | The restoring half's output, into `POT-GAIN` — the top of the gain attenuator — on `J-B2B-MOD` pin 1. Equal to the in-amp's output at centre detent. Where it inserts is argued below |
 | `MODULE ANALOG +12V`, `MODULE ANALOG −12V` | in | `module/power-entry` | — | `U-RESP`'s two halves — the last two on the module |
-| `AGND_MOD` | ref | `module/power-entry` | `dig-gnd-topology` | The module analog star. The `2 × 10 k` divider's bottom leg returns to it. The module ground plan is unsettled — see the figure |
+| `AGND_MOD` | ref | `module/power-entry` | `dig-gnd-topology` | The module analog star. The `2 × 10 k` divider's bottom leg returns to it. It meets the module's other grounds only at the star — see the figure |
 | `POT-RESP` | — | `module/panel` | `panel-width`, `panel-height-budget` | The third pot and the third knob — a panel cutout, not a net that leaves this circuit. What that costs the panel is on the panel page |
 
 ## The property the circuit is built around
 
-*Connectivity is **[`netlist.yaml`](netlist.yaml)**, not this drawing — for the
-half of the circuit that is drawn. That file states, and
-`tools/check-netlist.py` enforces, that this stage is **proposed**:
-`hardware/nets.yaml` carries it under `proposed:` on the three nets it reads,
-which declares the ports without claiming the board has the connection.*
+*Connectivity is **[`netlist.yaml`](netlist.yaml)**, not this drawing: the
+shaping half is drawn below, and the restoring half — `U-RESP` B with
+`R-RESTORE-IN` 10 k and `R-RESTORE-FB` 20 k, ×2 inverting from `V_shaped` to
+`BREATH_SHAPED` — is on the sheet.*
 
 
 An inverting stage sits at a virtual ground. Span a pot between **a signal
@@ -54,6 +53,12 @@ detent — **the stage is mathematically linear in the middle, not
 approximately linear.** Turn either way and the wiper develops a voltage
 proportional to the signal, which drives that branch into one leg or the
 other.
+
+> **That holds for an ideal `V/2` source, and the netlist's is not one.** The
+> `R-RESP-DIV` pair is a 5 kΩ source and the pot loads it, so the wiper's zero
+> lands about 5 % of the rotation clockwise of `p = 0.5` for every input, and
+> at the detent itself the stage is linear within 0.25 % across real playing
+> rather than exactly `[sim]` (the note under *Scaling*, `sim/README.md`).
 
 ```
                               R1 20k
@@ -89,7 +94,9 @@ loud; the top compresses.
 **Centre detent** → wiper at 0 V → no diode current → **linear**, exactly.
 This is the one place a centre detent is honestly warranted on this panel,
 and unlike `POT-OFFSET` (whose detent the review found lands ~20° off its
-true zero) this null is set by the topology, not by resistor tolerance.
+true zero) this null is set by the topology, not by resistor tolerance — to
+within the divider's loading, which puts it about 14° off the click and costs
+0.25 % of linearity at a hard blow `[sim]`.
 
 ## Scaling — and the mistake this nearly shipped with
 
@@ -112,6 +119,18 @@ acts across the playing range rather than above it `[calc]`:
 | *mf* | 3.50 V | 1.75 V | 77 µA | 1.440 |
 | hard blow | 4.64 V | 2.32 V | 115 µA | 1.494 |
 | full scale | 9.94 V | 4.97 V | 291 µA | 1.586 |
+
+> **Simulated 2026-09-30, and the table over-states the curve** (`sim/`). It
+> computes the diode branch from a node at exactly `V_in/2`. On the netlist
+> that node is the `R-RESP-DIV` pair's midpoint, a 5 kΩ source, and
+> `POT-RESP`'s 50 kΩ track from it to `V_shaped` loads it to about 0.41 `V_in`
+> at the CW end `[calc]`. The fully-exponential gain at a hard blow is
+> `shaper-exp-gain`, not the 1.494 above, and the curve is not exactly linear
+> below the knee (1.07× at *pp*). The same loading moves the centre detent's
+> null about 5 % of the rotation clockwise: at the detent the stage is linear
+> within 0.25 % across real playing, not exactly — the diodes see a few
+> hundred millivolts at full scale and barely conduct. The table is kept as the
+> arithmetic it is; `sim/README.md` has the curve as netlisted.
 
 ## What this is, stated honestly
 
@@ -136,28 +155,36 @@ divider — two more parts per side, piecewise, and no thermal behaviour.
 | Passives | `POT-RESP` 50 k lin (same part as `POT-GAIN`), `R-RESP` 15 k, `D-RESP` ×2 1N4148, R1 20 k, R2 10 k, divider 2 × 10 k |
 | Panel | **A third pot and a third knob** |
 
-## Open before layout
+## Settled before layout — 2026-09-30
 
-- **The restoring half is costed and not drawn.** The cost table above
-  spends *both* remaining OPA2197 halves — one shaping at ÷2, one restoring
-  ×2 to put scale and polarity back — and only the shaping half is in the
-  drawing. The restore stage has no drawing and no passives in any `bom.csv`
-  row, so `netlist.yaml` stops at `V_shaped` rather than inventing it.
-  **Decided by:** drawing it, at which point its two resistors get rows like
-  `R-RESP-IN` and `R-RESP-FB` just did — those three (R1, R2 and the 2 × 10 k
-  divider) were in this page's cost table and in no BOM row at all until
-  2026-09-23.
-- **The extra inversion.** This stage inverts twice, so polarity is
-  restored — but the existing chain's polarity was never re-derived with a
-  stage inserted. Check it end to end before layout, not after.
-- **Where it inserts.** Drawn here between the in-amp and the gain
-  attenuator, deliberately: the signal there has a **fixed** scale set by
-  the in-amp, so the knee sits at a known fraction of full breath. Put it
-  after `POT-GAIN` instead and **the curve would change every time you
-  moved the gain knob**, which is the one arrangement that must not happen.
-- **`R-RESP` at 15 kΩ is a first sizing**, targeting ~1.5× at a hard blow.
-  It is the knob that sets how strong "fully exponential" feels and it
-  wants a bench pass with a real player, not a spreadsheet.
-- **Diode matching.** Breath is unipolar, so only one of the antiparallel
-  pair ever conducts in normal play. The second is there for the
-  power-on/fault excursions the review catalogued, not for symmetry.
+- **The restoring half is drawn.** `U-RESP` B inverts `V_shaped` at
+  −20 k/10 k = −2 (`R-RESTORE-IN`, `R-RESTORE-FB`), so the stage's gain is
+  `(−R-RESP-FB/R-RESP-IN)·(−R-RESTORE-FB/R-RESTORE-IN)` = (−½)(−2) = **+1
+  exactly at centre detent** `[calc]`, and its output `BREATH_SHAPED` feeds
+  `POT-GAIN` in place of the in-amp's output.
+- **Polarity, end to end** `[calc]`: the in-amp's output runs 0 → −9.94 V
+  (`inamp-full-scale`) with breath; `V_shaped` = −½ × that, positive; the
+  restoring half gives it back negative, as the in-amp had it. The output
+  stage downstream is unchanged, so the jack's sense is unchanged.
+- **Where it inserts** is between the in-amp and `POT-GAIN`, for the reason
+  given above: the scale there is fixed by the in-amp, so the knee sits at a
+  known fraction of full breath and the gain knob cannot move it.
+- **Headroom.** At the full-exponential end `BREATH_SHAPED` clips at the
+  OPA2197's rail before the in-amp reaches its full scale. Where it starts is
+  `shaper-exp-gain` `[sim]` (`sim/`): about nine-tenths of the sensor's range,
+  beyond the ~2.8 kPa that real playing reaches (`breath-output-stage.md`).
+  The table's arithmetic put it earlier, at three-quarters, because the table
+  over-states the curve (below). The linear and log settings never clip.
+- **Diode matching** is not a requirement: breath is unipolar, so only one of
+  the pair conducts in play; the second is there for the power-on and fault
+  excursions. `D-RESP` is Vishay's `1N4148W` (row).
+- **The pot** is Alpha's centre-click RV09 on the R0904N footprint
+  (`POT-RESP` row).
+
+## Still open
+
+- **`R-RESP` at 15 kΩ is a first sizing**, made for ~1.5× at a hard blow on
+  the table's unloaded arithmetic; as netlisted it gives `shaper-exp-gain`
+  `[sim]`, and about 7 kΩ would give 1.5× (`sim/README.md`). It sets how
+  strong "fully exponential" feels. **Decided by: E10**, with a
+  real player and the sensor — 15 kΩ is what is fitted until then.

@@ -1,0 +1,31 @@
+* The same circuit in the time domain: the sensor's supply current steps by i_step at
+* t_step (a load transient at VS), and VS is watched. A loop with little phase margin
+* rings here; one with plenty does not. Overshoot is of the disturbance's own step.
+VPOS pos 0 {{v_pos}}
+* the REF5050 is outside this loop: its VOUT feeds only U-BUF's (+) input, which draws pA,
+* and C-REF-OUT holds it. It is a 5.000 V source here, on its netlisted capacitors; its own
+* macromodel runs in ref-startup.cir (inside one deck with the buffer its operating point
+* is not unique - it settles, corner by corner, on a collapsed state with VIN at 35 mV)
+VREFI refsrc 0 {{v_ref}}
+RREFO refsrc ref5v {{r_ref_out}}
+CROUT ref5v crn {{C-REF-OUT-VOUT}}
+RCROUT crn 0 {{esr_cref}}
+CDVOUT ref5v 0 {{C-DEC-REF-VOUT}}
+XBUF ref5v refminus pos 0 bufout OPAx197
+RFX bufout acmid {{R-FBX-REF}}
+CF acmid refminus {{C-FB-REF}}
+RF vs refminus {{R-FB-REF}}
+RISO bufout vs {{R-ISO-REF}}
+CL vs cln {{c_vs}}
+RCL cln 0 {{esr_cvs}}
+ISENS vs 0 PULSE({{i_sensor}} {{i_sensor_hi}} {{t_step}} 10n 10n 1 2)
+* rshunt: 10 Gohm from every node to ground, so the macromodel's operating point is found
+* (without it: singular at xbuf.x_u1.8, 'timestep too small'). 0.5 nA at 5 V, a tenth of
+* U-BUF's own guaranteed I_B: nothing a measure here can see.
+.options method=gear rshunt=1e10
+.control
+tran 50n {{t_end}} 0 50n
+wrdata vs.dat v(vs)
+quit
+.endc
+.end

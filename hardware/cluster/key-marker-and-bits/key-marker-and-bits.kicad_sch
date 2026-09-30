@@ -1,0 +1,174 @@
+(kicad_sch (version 20250114) (generator "eeschema") (generator_version "9.0")
+  (uuid 097049c7-fa1e-503f-a49c-a44e764ffdad)
+  (paper "A4")
+  (title_block
+    (title "Free-bit pull-up (cluster/key-marker-and-bits)")
+    (comment 5 "circuit: cluster/key-marker-and-bits")
+    (comment 6 "page: key-marker-and-bits.md")
+    (comment 7 "title: Free-bit pull-up")
+    (comment 8 "replicated: 3")
+    (date "")
+    (rev "")
+    (company "Woody")
+    (comment 1 "SOURCE for this circuit - edit in KiCad 9. netlist.yaml is exported from it: python3 tools/kicad.py export hardware/cluster/key-marker-and-bits")
+    (comment 2 "Part facts ride on each symbol: Row (BOM row), Pins + Pins_source (pin map and its datasheet), Note")
+    (comment 3 "ADR 0001 - three instances; marker straps are board wiring")
+    (comment 4 "Ports are hierarchical labels (Dir, From/To, Figure); Kind=endpoint marks an input the board wires")
+  )
+  (lib_symbols
+    (symbol "Device:R"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "R"
+			(at 2.032 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "R"
+			(at 0 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at -1.778 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "R res resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "R_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "R_0_1"
+			(rectangle
+				(start -1.016 -2.54)
+				(end 1.016 2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "R_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+  )
+  (symbol (lib_id "Device:R") (at 101.6 101.6 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 0dd191cc-e345-5e58-9bb6-089cfed5a9dc)
+    (property "Reference" "R-KEY-PU-FREE" (at 104.14 100.33 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "2k2 1%" (at 104.14 102.87 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 100.33 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 101.6 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-KEY-PU" (at 101.6 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 101.6 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "One per FREE bit, holding its unswitched input high. The same part the key networks use; with no switch on the bit it draws only the input's leakage, so what a free bit costs is a part and a placement, not current" (at 101.6 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL" (at 101.6 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "0805W8F2201T5E" (at 101.6 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C17520" (at 101.6 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 101.6 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid b6e210c5-1a92-5115-ae32-12f74e9303a2))
+    (pin "2" (uuid d0d7c6dd-af6c-5d59-8f94-33326c6435c5))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/997750e8-60f5-58ed-bc81-094f12e7f049" (reference "R33") (unit 1))) (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/6d1a0a6c-1349-54db-9d21-87c6fd61d4dd" (reference "R32") (unit 1))) (project "key-board-lh" (path "/a2d77fad-366b-59d5-8d08-ccdc7dd94a07/cf93950a-7e31-5a92-9838-2832bdd35f33" (reference "R11") (unit 1))) (project "key-marker-and-bits" (path "/097049c7-fa1e-503f-a49c-a44e764ffdad" (reference "R-KEY-PU-FREE") (unit 1))))
+  )
+  (wire (pts (xy 101.6 97.79) (xy 101.6 95.25)) (stroke (width 0) (type default)) (uuid 6423493d-9597-5d5a-8f92-43778c0185bd))
+  (hierarchical_label "V3V3_CHAIN" (shape input) (at 101.6 95.25 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid f758756c-5e56-5a51-aa25-3c63036c7b1b)
+    (property "Dir" "in" (at 101.6 95.25 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/key-chain-loom" (at 101.6 95.25 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "key-pullup-qty" (at 101.6 95.25 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 101.6 105.41) (xy 101.6 107.95)) (stroke (width 0) (type default)) (uuid a271a05a-00e4-59c5-bf7a-c7e4ebc83e73))
+  (hierarchical_label "FREE_BIT" (shape output) (at 101.6 107.95 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid cba8a540-5cec-56c7-a3b0-2b8c5535a038)
+    (property "Dir" "out" (at 101.6 107.95 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "cluster/key-register" (at 101.6 107.95 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "free-bits" (at 101.6 107.95 0) (effects (font (size 1.27 1.27)) hide)))
+  (text "A FREE BIT is an R-KEY-PU and nothing else: no switch, no series resistor, no capacitor. A floating CMOS input is\nthe fault R-KEY-PU exists to fix. Three instances: left_thumb B and A, left_hand A (allocation.yaml).\nThe MARKER STRAPS are traces, not parts: each board wires its two marker inputs straight to the rails." (at 20.32 140.97 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid 9fb8127a-7470-58d0-923e-4128023e2806))
+  (sheet_instances (path "/" (page "1")))
+)

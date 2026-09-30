@@ -1,0 +1,37 @@
+* The same stage's loop gain, broken at U-PITCH-AMP's (-) input by VOLTAGE INJECTION
+* (tools/sim.py, THE STATED BREAK (b)): VINJ in series between the feedback node and the
+* input, T = -V(minus)/V(inm). The 1 GH break found no operating point here at all (nor
+* did 1 kH, nor 1 mohm in its place: only a 0 V source converges), and injection is exact
+* where the input's impedance dwarfs the network's: at (-) the network is R1 || R2 = 5 kohm
+* at DC and C-FB-PITCH's reactance above the handover, 72 ohm at 1 MHz, against the
+* model's input. Same loads as pitch-step.cir.
+VPOS pos 0 {{v_pos}}
+VNEG neg 0 {{v_neg}}
+VREFO vrefout 0 {{v_refout}}
+XRB vrefout vrefb pos neg vrefb OPAx197
+R1 vrefb minus {{RN-PITCH}}
+R2 minus gtm {{RN-PITCH}}
+RTG gtm jack {{r_trim_gain}}
+VDAC dac 0 DC {{v_dac0}}
+RBD dac 0 {{R-BIAS-DAC}}
+RIN dac plus {{R-OPAMP-IN}}
+CAA plus 0 {{C-AA-PITCH}}
+XAMP plus inm pos neg ampout OPAx197
+CFB ampout minus {{C-FB-PITCH}}
+ROUT ampout jack {{R-OUT-PROT}}
+CFILT jack 0 {{C-FILT-PITCH}}
+CMULT jack 0 {{c_mult}}
+RVCO jack 0 {{r_vco}}
+RMULT jack 0 {{r_mult}}
+VINJ inm minus DC 0 AC 1
+.options method=gear rshunt=1e10
+.control
+ac dec 100 1 100meg
+let t = -v(minus)/v(inm)
+let tdb = db(t)
+let tph = 180/pi*cph(t)
+wrdata tdb.dat tdb
+wrdata tph.dat tph
+quit
+.endc
+.end

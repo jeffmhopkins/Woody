@@ -1,0 +1,29 @@
+* Key network: one key's node into a SN74HCS165 input. Press at t_on, release at t_off.
+* Filled by tools/sim.py: every double-braced name is a part value from netlist.yaml, a param or a
+* derived value in sims.yaml. The register input is its capacitance and leakage; its
+* thresholds are applied as measures (the datasheet's, not a model's). The switch is
+* two resistances: contact and insulation.
+VCC rail 0 {{vcc}}
+RPU rail node {{R-KEY-PU}}
+CKEY node 0 {{C-KEY}}
+CIN node 0 {{ci}}
+ILEAK node 0 {{ileak}}
+RSER node leg {{R-KEY-SER}}
+SKEY leg sense ctl 0 kswitch
+VSENSE sense 0 0
+VCTL ctl 0 PWL(0 0 {{t_on}} 0 {{t_on_1n}} 1 {{t_off}} 1 {{t_off_1n}} 0)
+.model kswitch sw vt=0.5 vh=0.1 ron={{ron}} roff={{roff}}
+.tran 20n {{t_end}}
+* press: switch closing to the node falling through VT- at its minimum (reads low, latest)
+.meas tran t_press TRIG v(ctl) VAL=0.5 RISE=1 TARG v(node) VAL={{vtm_min}} FALL=1
+* release: switch opening to the node rising through VT+ at its maximum (reads high, latest)
+.meas tran t_rel_latest TRIG v(ctl) VAL=0.5 FALL=1 TARG v(node) VAL={{vtp_max}} RISE=1
+* ...and through VT+ at its minimum: the shortest contact opening that could read high
+.meas tran t_rel_earliest TRIG v(ctl) VAL=0.5 FALL=1 TARG v(node) VAL={{vtp_min}} RISE=1
+.meas tran v_pressed FIND v(node) AT={{t_pressed}}
+.meas tran v_released FIND v(node) AT={{t_released}}
+.meas tran m_pressed PARAM='{{vtm_min}} - v_pressed'
+.meas tran m_released PARAM='v_released - {{vtp_max}}'
+.meas tran i_static FIND i(vsense) AT={{t_pressed}}
+.meas tran i_peak MAX i(vsense) FROM={{t_on}} TO={{t_off}}
+.end

@@ -190,7 +190,7 @@ checker excludes them by design.
 
 The design corpus — the thing that must be self-consistent — is:
 `hardware/**`, `docs/decisions/**`, `docs/reference/**`, `config/**`,
-`firmware/**`, `README.md`, `ROADMAP.md`.
+`firmware/**`, `mechanical/**`, `README.md`, `ROADMAP.md`.
 
 **Paths in those records point at pre-2026-09-21 locations and are not to be
 corrected.** Resolve them through `docs/reference/repo-maintenance.md` §7.
@@ -269,11 +269,35 @@ repeating, and record the verification.
 
 ## Hardware conventions
 
-- Every schematic page is Markdown with ASCII drawings and derivations inline.
-  One circuit per directory: the page, its `bom.csv` fragment, its
-  `circuit.yaml`, `netlist.yaml`, and `notes.md` for what the circuit *used to
-  be*.
-- **`netlist.yaml` IS AUTHORITATIVE FOR CONNECTIVITY, not the drawing.** The
+- Every schematic page is Markdown with derivations inline. One circuit per
+  directory: the page, its `bom.csv` fragment, its `circuit.yaml`,
+  `netlist.yaml`, and `notes.md` for what the circuit *used to be*.
+- **THE KICAD SHEET IS THE SOURCE OF TRUTH** (ADR 0019) wherever a circuit has
+  one — `<circuit>/<circuit>.kicad_sch` whose title block names the circuit.
+  It owns every connection and each part's identity (fields `Row`, `Pins`,
+  `Pins_source`, `Note`, and the bought part: `Manufacturer`, `MPN`, `LCSC`,
+  `Assembly` = `machine`/`hand`/`none` — the BOM row says what the part must
+  be, the sheet which one is bought); ports are hierarchical labels. **Its `netlist.yaml`
+  is EXPORTED** by `python3 tools/kicad.py export <dir>` and must never be
+  edited: an edit survives until the next export and then disappears. Boards
+  are KiCad projects under `hardware/boards/`, placing circuit sheets once per
+  instance. `python3 tools/kicad.py check` fails on a sheet edited without
+  re-exporting, a stale render, a board ERC error, or a board wired against
+  `allocation.yaml`. It needs KiCad 9 (`tools/setup-env.sh`) and is **not** in
+  the commit hook, so run it by hand. **Every circuit with parts has a
+  sheet**, so every `netlist.yaml` is exported: edit the sheet, never the
+  netlist. A circuit with no parts has no sheet and says so on its page.
+  A new circuit starts as a hand-written `netlist.yaml` and becomes a sheet
+  with `tools/sch.py build`, parity-checked by `tools/kicad.py export`
+  (`docs/reference/tooling.md`).
+- **A board's `.kicad_pcb` is the source once it exists.** `tools/pcb.py
+  layout` writes the first one (placed from the body CAD's exports, routed,
+  poured); after that it is edited in KiCad. `tools/kicad.py check` runs
+  `tools/pcb.py check` on it: KiCad's DRC with schematic parity, zero unrouted
+  connections, and every switch where the body CAD puts it. Renders and
+  `fab/` are exported and ledgered in `hardware/SHEETS.csv`.
+  `docs/reference/tooling.md` §4.
+- **`netlist.yaml` IS WHAT EVERY CHECK READS**, exported from its sheet. The
   drawing is a representation of it. `hardware/nets.yaml` is the master list
   of every net that crosses a circuit boundary, because a per-circuit file can
   only declare its own side. `tools/check-netlist.py --strict` runs from the
@@ -299,6 +323,15 @@ repeating, and record the verification.
   or a three-row change lands as a 130-row diff.
   `hardware/unplaced.csv` holds the rows no schematic page names — a count of
   parts nobody has drawn, not a dumping ground.
+- **The body CAD is parametric and its pictures are generated.** Numbers go in
+  `config/body.yaml` (each with `status` and `source`) or
+  `config/key-layout.yaml`, never into `mechanical/cad/*.scad`. `python3
+  tools/cad.py build` regenerates what is stale; every render and DXF is
+  fingerprinted against the git blob ids of everything it was built from, and
+  the fingerprint is stamped in the image, because no grep can read a PNG.
+  `check-staleness.py` fails on a stale, hand-edited or orphan output.
+  **Pages do not restate `mechanical/drc.echo`** — name the rule, the value
+  moves. `mechanical/README.md`.
 - Mark unresolved things `TBD`/`open` **with what decides them**. Two BOM rows
   are deliberately blocked on a datasheet and say so; that is correct, not a
   defect.

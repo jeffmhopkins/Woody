@@ -12,10 +12,16 @@ thrown away.**
 
 | Kind | Files | Rule |
 |---|---|---|
-| **Design corpus** | `hardware/**`, `docs/decisions/**`, `docs/reference/**`, `config/**`, `firmware/**`, `README.md`, `ROADMAP.md` | Must be self-consistent. This is what `check-staleness.py` checks. |
+| **Design corpus** | `hardware/**`, `docs/decisions/**`, `docs/reference/**`, `config/**`, `firmware/**`, `mechanical/**` (since 2026-09-26), `README.md`, `ROADMAP.md` | Must be self-consistent. This is what `check-staleness.py` checks. |
 | **Historical record** | `docs/review/**`, `docs/log/**`, `docs/research/**` | **Never "corrected".** A 2026-09-21 review saying "8HP" is right as a record of what was true when written. Excluded from the checker by design. |
 | **Generated** | `datasheets/MANIFEST.csv`, **`hardware/bom.csv`** | **Edits are silently destroyed.** See §3 and §4. `bom.csv` joined this row on 2026-09-21 and this table did not say so for several hours. |
+| **Generated, fingerprinted** | `mechanical/cad/generated/params.scad`, `mechanical/cad/generated/module-params.scad`, `mechanical/cad/vendor/*.stl`, `mechanical/renders/*.png`, `mechanical/export/*.dxf`, `mechanical/drc.echo`, `mechanical/OUTPUTS.csv`; the module's `mechanical/module/{renders,export,art}/*`, `drc.echo`, `clash.txt`, `OUTPUTS.csv` | Built by `tools/cad.py build` (the module's `art/` and `renders/photo-*.png` through `tools/panel-art.py` and `tools/render-module.py`, ADR 0026) from `config/body.yaml`, `config/key-layout.yaml`, `config/module.yaml` and the two models (`mechanical/outputs.yaml`, `mechanical/module/outputs.yaml`). **An edit is not destroyed — it is detected**: `cad.py check` (run by `check-staleness.py`) fails on any output whose inputs moved, whose bytes no longer match the ledger, or that no spec entry builds. `mechanical/README.md`. |
 | **Fragments (append-only, per author)** | `datasheets/.manifest-R*.csv` | One per research wave. **Do not edit another wave's fragment** — a `BLOCKED` row is the honest record of a gap *when it was written*. See §3 for how to close someone else's gap without touching it. |
+| **SOURCE (KiCad)** | `hardware/**/<circuit>.kicad_sch` whose title block names a circuit; `hardware/boards/*/<board>.kicad_sch` + `.kicad_pro` | The source of truth for connections and part identity (ADR 0019). Edit in KiCad 9. `docs/reference/tooling.md` §3. |
+| **SOURCE (layout)** | `hardware/boards/*/<board>.kicad_pcb` (+ its `.kicad_pro`, which holds the design rules), `layout.yaml` (the first layout's inputs; its `rules:` and `fab:` stay the limits the board is checked against), `hardware/lib/woody.pretty/` | Written once by `tools/pcb.py layout`, then edited in KiCad. `tools/pcb.py check` (run by `kicad.py check`): DRC with every warning a failure, schematic parity, the design settings against `layout.yaml` `rules:`/`fab:`, the silkscreen limits DRC does not test, and the body CAD's outline, thickness and part positions. `docs/reference/tooling.md` §4. |
+| **Exported from the layout** | `hardware/boards/*/*.pcb-*.png`, `hardware/boards/*/fab/*`: Gerbers, the `.gbrjob`, plated and unplated drill files, KiCad's placement, and the board house's BOM, CPL and hand-assembly list | `tools/pcb.py render`. Ledgered in `hardware/SHEETS.csv` against the `.kicad_pcb` **and the sheets it was built from**, so a part-number edit on a circuit sheet makes `fab/` stale too. `kicad.py check` also fails on a file in `fab/` that no ledger row knows — a stray Gerber would be uploaded with the rest. **Never edit.** |
+| **Exported from the sheets** | a migrated circuit's `netlist.yaml`; `hardware/boards/*/board-netlist.yaml`; `hardware/**/*.sch.png` and their ledger `hardware/SHEETS.csv` | `tools/kicad.py export <dir>` / `render <dir>`. **Never edit** — `kicad.py check` reports an export that no longer matches its sheet, and a render whose sheet moved or whose bytes changed. Board netlists are named so `check-netlist.py` does not count a board's parts twice. |
+| **Generated once, then source** | a circuit's first `.kicad_sch` | `tools/sch.py build` writes it from the hand-written `netlist.yaml` + a `schematic.yaml` when the circuit migrates; after the export replaces the YAML, the sheet is the source and `sch.py` has no further part in it. |
 | **Fragments (per circuit)** | `hardware/**/bom.csv`, `hardware/unplaced.csv` | The source the BOM is generated from. Editable — this is where a part change goes. §4. |
 
 Not tracked, and gitignored: `.staleness/`, `.staleness-report.txt`, `*.tmp`.
@@ -277,6 +283,9 @@ python3 tools/audit-notes.py          # BOM notes: live content vs accumulated h
 python3 tools/audit-notes.py --regrown  # ...rows that have turned back into logs
 python3 tools/audit-notes.py <REF>    # ...one row, classified segment by segment
 python3 tools/rewrite-paths.py        # restructure only; --apply/--verify/--invert
+python3 tools/cad.py build            # body CAD: params, then every STALE render/DXF
+python3 tools/cad.py check            # ...or prove every output still matches its sources
+python3 tools/cad.py explain <name>   # which input moved since an output was built
 ```
 
 The first four are expected to pass before a commit that touches the corpus.

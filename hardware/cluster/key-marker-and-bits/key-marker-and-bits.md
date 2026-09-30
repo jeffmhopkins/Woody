@@ -19,32 +19,41 @@ The `Dir` and `Peer` columns are defined once in
 | marker straps | out | `cluster/key-register` | `marker-bits` | Into the parallel inputs. Copper straight to a rail, two per device, one high and one low |
 | free-bit pull-ups | out | `cluster/key-register` | `free-bits`, `key-pullup-qty` | Into the parallel inputs. An `R-KEY-PU` and nothing else — no switch, no series resistor, no capacitor |
 | switch positions | in | `cluster/key-switch-network` | — | The networked positions, fitted and reserved, take the rest of the allocation |
-| the serial bit stream | out | `interfaces/key-chain-loom` | `chain-connectors` | The allocation rides on the chain order, which `cluster-boards.md` fixes and may yet change |
-| `3V3`, `GND` | ref | `interfaces/key-chain-loom` | — | The chain bus, `cluster-boards.md` §3. The straps land directly on the rails and share no component with the key networks they are read as vouching for |
+| the serial bit stream | out | `interfaces/key-chain-loom` | — | The allocation rides on the chain order, `config/key-layout.yaml`'s. Since ADR 0017 no reordering saves any wiring, so it is not expected to change |
+| `3V3`, `GND` | ref | `interfaces/key-chain-loom` | — | The chain's rails — main-board copper for `right_thumb` and `left_thumb`, the ribbon on a key board. The straps land directly on the rails and share no component with the key networks they are read as vouching for |
 
 ## §4 The 32 bits
 
 ### Allocation, on the chain order as written today
+
+**The data is [`allocation.yaml`](allocation.yaml)**; the table below is its
+written form. The wiring itself is on the KiCad board sheets (ADR 0019), and
+`tools/kicad.py check` fails if a board's register is wired differently from
+`allocation.yaml`, or if the file and this table disagree. Change all three
+together. **This circuit is now just the free-bit pull-up**, one sheet placed
+once per free bit ([`key-marker-and-bits.kicad_sch`](key-marker-and-bits.kicad_sch));
+the marker straps are traces, drawn on each board's own sheet.
 
 `H` is the first bit out of each device, so within a cluster the lowest-numbered
 key takes the earliest bit:
 
 | Device | Bits | `H` | `G` | `F` | `E` | `D` | `C` | `B` | `A` |
 |---|---|---|---|---|---|---|---|---|---|
-| `right_thumb` | 0–7 | RT1 | RT2 | RT3 | sw+ | sw− | sw? | **M** | **M** |
+| `right_thumb` | 0–7 | RT1 | RT2 | RT3 | RT4 | sw+ | sw− | **M** | **M** |
 | `right_hand` | 8–15 | RH1 | RH2 | RH3 | RH4 | RH5 | RH6 | **M** | **M** |
 | `left_thumb` | 16–23 | LT1 | LT2 | LT3 | LT4 | **M** | **M** | free | free |
 | `left_hand` | 24–31 | LH1 | LH2 | LH3 | LH4 | LH5 | **M** | **M** | free |
 
-`sw+` `sw−` `sw?` are the three reserved spare-switch positions — octave up,
-octave down, hold/preset `[repo] key-layout.yaml`. **Proposed on `right_thumb`**,
-because RT is already the control cluster (its three fitted keys are `role:
-control`, not fingering inputs `[repo] key-layout.yaml`) and it has the spare
-capacity. They need **plate cutouts at M3 even if the switches are fitted
-later** `[repo] key-layout.yaml, 0010`, and the cutouts go in `PLATE-THUMB`.
+`sw+` `sw−` are the two reserved spare-switch positions — octave up and
+octave down `[repo] key-layout.yaml`. **On `right_thumb`**, because RT is the
+control cluster (its four fitted keys are `role: control`, not fingering
+inputs `[repo] key-layout.yaml`). There was a third, hold/preset, until
+2026-09-26: the right thumb went to four keys and RT4 took its bit. They have
+their networks and **no cutouts** since the same day (owner, ADR 0010), so
+fitting one means recutting `PLATE-BOTTOM` and the oak bottom.
 
 **Every position above gets the full `R-KEY-PU`/`R-KEY-SER`/`C-KEY` network**,
-including the three unfitted spares — 21 sets, which is what `bom.csv` budgets
+including the two unfitted spares — 21 sets, which is what `bom.csv` budgets
 `[repo]`.
 
 ### The marker pattern: 8 bits, not 6 — DECIDED 2026-09-21
@@ -56,7 +65,9 @@ The argument, for the record:
 A marker is a framing check: firmware reads it every scan, and a frame that
 fails it holds the previous frame and increments a visible error counter
 `[repo] 0001`. Its whole value is converting an invisible intermittent fault
-into a number on the display.
+into a number someone can read — the error counter. There is no display
+(ADR 0015); how the counter is surfaced, on the matrix or over USB, is
+firmware's (F7).
 
 **Six bits cannot do that per device in both directions, and eight can.** With
 two marker bits in every device, one wired high and one wired low, a device that
@@ -67,13 +78,16 @@ a single marker bit each and are only checkable in one direction.
 **The two extra bits cost almost nothing, because "free" bits are not free —
 they are useless.** A free bit has no plate cutout and no switch. The body bonds
 shut. You cannot add a switch to one without cutting the plate, and the plate is
-generated at M3 and fitted before bonding `[repo] 0009, 0010`. The three
-positions that *are* retrofittable are the reserved spare-switch bits, which
-have cutouts and are untouched by this proposal. **So the trade is: two bits
+generated at M3 and fitted before bonding `[repo] 0009, 0010`. The
+positions that *are* retrofittable are the reserved spare-switch bits
+(`config/key-layout.yaml` `spare_bits_switches`), which
+have their networks fitted and are untouched by this proposal. *(They had
+cutouts too until 2026-09-26; the owner removed them, ADR 0010, so fitting
+one now means recutting the bottom plate and oak bottom.)* **So the trade is: two bits
 that could never be used against per-device fault detection in both
 directions.**
 
-Proposed levels:
+Levels:
 
 | Device | Input | Bit | Level | | Input | Bit | Level |
 |---|---|---|---|---|---|---|---|
@@ -90,8 +104,13 @@ permutation that flipping it kills — [`notes.md`](notes.md).)*
 **What the marker still cannot see**, stated plainly because firmware needs
 it: a single-bit flip is caught **8 times in 32**, and the 24 bits that carry
 the music are never among them — so **the visible error counter undercounts
-true corruption about 4×**. A mid-shift `SH/LD` reload passes at 11 of 31
-reload points. And the straps go direct to the rails, so they share no
+true corruption about 4×**. **A mid-shift `SH/LD` reload is not reliably
+caught**: a reload after *k* of 32 clocks makes each later bit a copy of the
+bit *k* places earlier in the frame, so whether all eight marker positions
+still read right depends on *k* and on which keys are held. `[calc over
+allocation.yaml]` Only a reload at the last clock passes for every key state,
+and many reload points pass for some key states. Firmware must not count on
+the marker to catch it. And the straps go direct to the rails, so they share no
 component with the 21 key networks they are read as vouching for.
 
 That leaves **3 free bits**: `left_thumb` `B` and `A` (22, 23) and `left_hand`
@@ -121,16 +140,23 @@ be right before the boards are ordered, and firmware has to be told the pattern.
 
 ## Still open
 
-*The two items from `cluster-boards.md`'s `Still open` list that belong to this
-circuit, moved verbatim 2026-09-21. `§4` is this page.*
+- **Whether the reserved spare-switch positions** (`config/key-layout.yaml`
+  `spare_bits_switches`) **are ever fitted.** Their bits are decided and wired
+  — `sw+` `sw−` on `right_thumb` (`allocation.yaml`), networks fitted — and
+  there are no cutouts for them (owner, 2026-09-26, ADR 0010). **Closed at M2**,
+  with hands on the mule: where on the body a switch would go, and so whether
+  fitting one is worth recutting `PLATE-BOTTOM` and the oak bottom. Nothing
+  on a board waits on it.
 
-- **Where the 3 reserved spare-switch positions go.** Proposed on `right_thumb`
-  as the control cluster; placement is an M2 decision with hands on the mule
-  `[repo] key-layout.yaml`, and it decides which board carries them **and which
-  plate gets the cutouts.**
-- **Whether the last 3 free bits should be marker bits too**, making it 11.
-  The argument that took the marker from 6 to 8 — a free bit has no plate
-  cutout and the body bonds shut, so it can never become a switch — applies to
-  these three unchanged, and strapping them costs *nothing* where pulling them
-  costs three resistors. Against: a pulled bit can still be jumpered at
-  bring-up, and 8 was decided deliberately. Left at 8/3 rather than drifting.
+**Decided: the last 3 free bits stay pulled up, not strapped** (8 marker bits,
+3 free, as `config/key-layout.yaml` has them). `[calc over allocation.yaml]`
+Strapping them would add no fault the marker cannot already see: every
+device already carries one bit wired high and one wired low, which is what
+makes a dead, unclocked, stuck-high or stuck-low device fail its own frame,
+and the only devices holding free bits (`left_thumb`, `left_hand`) have both.
+Three more straps would raise the single-bit-flip catch from 8 in 32 to 11 in
+32 and nothing else. A pulled-up free bit reads high on every good frame
+anyway, so firmware may check it as a high marker at no cost to the board,
+while the pull-up keeps it usable as an input: since ADR 0025 the body opens
+by cutting its silicone, so a free bit is no longer one that can never become
+a switch. Both key boards are laid out with it (`R11`).

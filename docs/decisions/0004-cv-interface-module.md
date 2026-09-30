@@ -277,6 +277,13 @@ one draws its own analog current *plus* everything the instrument consumes:
 | −12 V | ~40 mA |
 | +5 V | ~10 mA (level shifter only) |
 
+> **Amended 2026-09-30 — ADR 0027.** The instrument's current no longer comes
+> off the +12 V rail: an isolated converter draws its power rail to rail, so in
+> typical play the module takes ~0.26 A from +12 V and ~0.25 A from −12 V
+> (`power-entry.md`, *The instrument's supply*). The table above is the
+> arrangement this section was written against; the series-resistor argument
+> below still holds, on both of the converter's legs.
+
 That is about 15% of a modern rack supply's +12 V capacity — unremarkable, but
 it **rules out the series-resistor variant**, which is harmless at 50 mA and is
 not at the module's real draw:
@@ -356,8 +363,9 @@ reviewers found it independently. A diode costs about twenty cents.
 
 **The effect that genuinely *is* breath-correlated is the shared ground path**,
 at 5.7–7.2 cents for the module's internal ground and ~4.8 cents for the rack
-bus — two and three orders of magnitude above the diode term, and still open
-(`power-entry.md`). Ranking the diode above them, as the old figure did,
+bus — two and three orders of magnitude above the diode term. *(Removed at the
+source 2026-09-30 by ADR 0027: the instrument's supply is isolated and drawn
+rail to rail, so its current is in no ground the pitch CV is read against.)* Ranking the diode above them, as the old figure did,
 inverted the priority order for the grounding work.
 
 Branching also means the buck's pulsed draw is absorbed locally instead of
@@ -507,6 +515,14 @@ the instrument in your hands will not respond to anything you do with it.
 > reasoning, the cost and the no-new-parts way to get the link coverage back
 > are in `hardware/module/digital-and-supervision/digital-and-supervision.md`. The paragraphs below are
 > kept because the problem they describe is still real.
+>
+> **Decided 2026-09-30 — link supervision is not restored.** The owner:
+> *"Assume the module will be operating with an umbilical attached to a
+> controller."* The module is specified as half of a pair, so the uncovered
+> case above — the link going away while the module stays powered — is
+> accepted, not open. `CLR` stays tied inactive and `OE` enabled; nothing is
+> added. The costing that would reopen it is on
+> `hardware/module/link-supervision/link-supervision.md`.
 
 ~~**Assert `CLR` at the module when no valid frame has arrived for N milliseconds.**~~
 A few gates or a retriggerable monostable, at the module end where it is
@@ -588,8 +604,9 @@ step is 12 cents. Plus a toggle on a panel with 5.5 mm of slack
 **And the instrument already has octave control, twice.** The four left-thumb
 keys are octave/register keys in the conventional woodwind arrangement — the
 2021 firmware used three left-thumb inputs across a four-octave span — and
-ADR 0010 reserves three spare chain bits for dedicated octave up/down switches
-besides.
+ADR 0010 reserves spare chain bits (`config/key-layout.yaml`
+`spare_bits_switches`) for dedicated octave up/down switches besides
+*(amended 2026-09-27: this line said three, the count until 2026-09-26)*.
 
 Doing it in firmware is free, and **the reason it is free is worth stating**
 because it was briefly got wrong: the DAC's 0.25–4.75 V window reserve is
@@ -664,6 +681,13 @@ the case. The only lever is which slot the module sits in relative to the noisy
 ones, which is a patching decision. E6 measures it rather than trusting the
 figure.
 
+> **Amended 2026-09-30 — ADR 0027.** The paragraph above is right about other
+> modules' currents and was wrong to leave this one's: the largest current in
+> that shared return was the instrument's, and it is gone from it. `PWR_GND` is
+> now the isolated converter's return and reaches the star only through
+> `DIG_GND` (`dig-gnd-topology`); the bullets above describe the ground plan
+> before that change. What other modules put in the bus ground is still theirs.
+
 ### Panel, top to bottom
 
 Five rows, top to bottom: label band; **three** knobs across (gain, offset,
@@ -671,6 +695,13 @@ response); six jacks in two columns — **PITCH** and **BREATH** silkscreened,
 **MOD 1–4** numbered with a write-on strip; the etherCON **with the power LED
 beside it**; and the power switch on **a row of its own**. It is the system's
 only power switch, since the instrument has none.
+
+*Amended 2026-09-30 by [ADR 0024](0024-module-panel-layout-and-stack.md)
+point 11, on the owner's instruction that the power switch not sit under the
+connector: the etherCON is the bottom row and the toggle's row is above it,
+with the power LED moved into the toggle's row. The rows and their heights
+are the ones summed below, so `panel-height-budget` is unchanged, and the
+toggle still has a row of its own.*
 
 **110 mm of content against 115.5 mm of clear panel** — see
 `panel-height-budget`, and the derivation below.
@@ -704,6 +735,11 @@ below.
 | *(at 8HP)* | *8.17 mm* | *~12 mm* | *~15 mm* |
 | *(at the original 6HP)* | *3.09 mm* | *~7 mm* | *~10 mm* |
 
+> *Since [ADR 0023](0023-module-ethercon-and-two-boards.md) the module's
+> etherCON is an NE8FAV (A-series, 22 mm bore), not this D-series part. The
+> D-series figures below are kept as the sizing they were: the NE8FAV is
+> smaller on each.*
+>
 > **The etherCON column is now read off the vendor drawing**, not estimated:
 > Neutrik **ST-NE8FDP, Aend-Index B**, held in the repo at
 > `datasheets/connectors/NE8FDP.pdf` with its DXF beside it. The bore is
@@ -932,6 +968,14 @@ only corruption in the digital path that does not self-heal on the next
 receiver samples `MOSI` only on a `SCLK` edge, so whatever they couple into
 each other lands at the moment nobody is looking.
 
+> **Simulated 2026-09-30, and the premise does not hold**
+> (`hardware/interfaces/spi-link/sim/`). A glitch coupled from a `SCLK` edge
+> arrives at the module *with* that edge and lasts a cable round trip, and the
+> DAC clocks `DIN` on `SCLK`'s falling edge — so the coupling lands exactly
+> where the DAC is looking (`spi-pair-crosstalk`, bracketed because the pair's
+> common-mode impedance is in no datasheet). The pairing decision stands until
+> E11 measures it; what closes it if the bench agrees is on `spi-link.md`.
+
 > **What this section got wrong, and it is instructive.** The original
 > reasoning above is about the ~13 mm untwisted region inside an RJ45 plug,
 > and that reasoning is sound — a reviewer costed that effect at **15 mV**.
@@ -963,6 +1007,13 @@ this time it has something specific to look for: threshold dwell and runt
 pulses on `CS`.
 
 ## Open
+
+*Both ends are decided. The instrument's is [ADR 0021](0021-pcb-mount-ethercon.md):
+an NE8FAV soldered to an adapter board, joined to the main board by a
+soldered header. The module's is [ADR 0023](0023-module-ethercon-and-two-boards.md):
+the same NE8FAV, soldered to the module's main board, which makes the module
+two boards. Neither end has a patch lead or an extra contact interface. The
+question below is kept as it was asked.*
 
 **Which etherCON variant at each end.** Feedthrough (NE8FDP-class) presents a
 plain RJ45 on the back, so the instrument end could take a short patch lead to a

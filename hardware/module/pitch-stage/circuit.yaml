@@ -21,7 +21,7 @@ depends_on:
 - refdes:R-BIAS-INAMP
 - refdes:R-OPAMP-IN
 - refdes:R-OUT-PROT
-- refdes:R-TRIM-RANGE
+- refdes:R-VREF-INJ
 - refdes:TRIM-GAIN
 - refdes:TRIM-OFFSET
 - circuit:module/dac8568

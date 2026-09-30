@@ -38,10 +38,10 @@ existing. Drive it from any dev board with a test pattern and a multimeter.
 
 | ID | Milestone | Done when |
 |---|---|---|
-| E1 | Board bring-up | Waveshare ESP32-S3-Matrix + LilyGO T-Display-S3 AMOLED (ADR 0008). Both running; **PSRAM confirmed quad, not octal**, and **idle current measured** before the carrier is laid out (ADR 0007) |
-| E2 | Breath sensing | **Port orientation confirmed with a syringe first** — a reversed DP reads zero, not backwards. Then **a human plays it for 20 minutes** through a real mouthpiece, tube and trap — not a syringe. Ambient zeroing tracks, no condensation artefacts. **The restrictor is sized by ring-down, not by frequency**: tap the mouthpiece end and watch the sensor settle — one time constant, or a decaying oscillation that needs a denser plug. The 214–429 Hz pipe mode is below the filter corner and independent of trap volume, so it is damped, not placed (ADR 0003). **Also settles the tube bore** by playing a bare tube in two or three sizes. Sensor + ADC at the bottom with the real-time board |
+| E1 | Board bring-up | Waveshare ESP32-S3-Matrix, the only MCU (ADR 0015). Running; **PSRAM quad, not octal** (settled on the schematic — see the PSRAM row below; print it anyway), and **idle current measured** before the carrier is laid out (ADR 0007) |
+| E2 | Breath sensing | **Port orientation confirmed with a syringe first** — a reversed DP reads zero, not backwards. Then **a human plays it for 20 minutes** through a real mouthpiece, tube and trap — not a syringe. Ambient zeroing tracks, no condensation artefacts. **The restrictor is sized by ring-down, not by frequency**: tap the mouthpiece end and watch the sensor settle — one time constant, or a decaying oscillation that needs a denser plug. The 214–429 Hz pipe mode is below the filter corner and independent of trap volume, so it is damped, not placed (ADR 0003). **Also settles the tube bore** by playing a bare tube in two or three sizes. **And measures `breath-working-point`** with a manometer teed at `P1` (the test is in ADR 0003). Sensor + ADC at the bottom with the real-time board |
 | E3 | IMU | Tilt and roll angles read reliably at rate |
-| E4 | Key scan | 74HC165 chain reads all switches; debounce asymmetric (instant press, filtered release) |
+| E4 | Key scan | The shift-register chain (`U-KEYS`) reads all switches; debounce asymmetric (instant press, filtered release) |
 | E4b | **Inter-MCU link** | Framed UART between the two boards, status flowing, logic-analyser clean (ADR 0013) |
 | E5 | **USB MIDI out** | Plays into a DAW. Fingering table exercised. First playable milestone |
 | E6 | Module power | ±12V from rack via keyed header + reverse protection, local 5.21V DAC regulator and bus +5V logic rail up, input filtering, load switch limits and ramps the umbilical feed, no noise injected back into the rack |
@@ -49,9 +49,9 @@ existing. Drive it from any dev board with a test pattern and a multimeter.
 | E8 | Pitch channel scaled | Raw analog gain and offset trimmed to target, linear across the span. The 5%-over kludge is deleted — trimmers go both ways (ADR 0006) |
 | E9 | **Pitch calibration** | **Multi-point fit** — one point per octave, which is what every surveyed design does (Yarns 11, O&C 11, PER|FORMER 11) and what ADR 0006 asks for; this row said "two-point" and contradicted it. Stored in NVS with a version and a checksum, in its own slot away from presets; 1V/oct verified against a real VCO, not just a meter, loaded the way it will be played (ADR 0006) |
 | E10 | Remaining channels | Analog breath stage: in-amp receiver with **`REF` trimmed, not grounded** — grounding it makes the panel knobs interact, and leaves `TRIM-BREATH-ZERO` nothing to drive (`breath-receive-stage.md`; this row said "grounded" *and* "set the trimmer first", which are the two mutually exclusive options). **Set `TRIM-BREATH-ZERO` first**, until the in-amp output reads 0 V — then gain, then the panel offset, in that order. **Commission with a meter on the jack, not the display** — the analog and digital representations are calibrated separately on purpose (ADR 0003). **Pull the umbilical mid-note with the mouthpiece at rest.** Three things to observe, not one: breath parks quietly (no DAC in that path, so no reset reaches it); **pitch and the four mod jacks hold their last value indefinitely** — that is the accepted cost of deleting the frame watchdog, not a fault; and with the instrument absent the breath jack then sits wherever the panel OFFSET knob was left, anywhere in ±5 V (ADR 0004, ADR 0006). Four mod channels trimmed |
-| E11 | Umbilical link | SPI **at 2 MHz** (not the stale 0.6 MHz — see ADR 0004; the old figure came from a 2 kHz rate and does not close at 4 kHz) and the analog breath pair over the real cable at length, **on the T568B pin mapping in ADR 0004** — the mapping is reasoned, not measured. Breath output clean while display, LEDs and WiFi are exercised (ADR 0003) |
+| E11 | Umbilical link | SPI **at 2 MHz** (not the stale 0.6 MHz — see ADR 0004; the old figure came from a 2 kHz rate and does not close at 4 kHz) and the analog breath pair over the real cable at length, **on the T568B pin mapping in ADR 0004** — the mapping is reasoned, not measured. Breath output clean while the matrix and LEDs are exercised (ADR 0003); there is no radio (ADR 0015) |
 | E12 | Module PCB + panel | 10HP panel cut, module assembled and racked. etherCON braced to the PCB — good practice at `panel-width` rather than the structural necessity it was at the original 6HP. **Ground laid out to the star rule in ADR 0004** — one origin at the power inlet, `PWR_GND` and `DIG_GND` each on their own copper, `AGND` not a return at all. Free now, a bodge wire or a respin afterwards |
-| E13 | Carrier + cluster PCBs | **Passive** carrier: dev board plugs in, carrier holds ADC, reference, buffer, level shifter, regulators, connectors. **No MCU, no USB, no RF, and no shift registers** — those went back to the four cluster boards, one each, with their key networks (ADR 0001, ADR 0013) |
+| E13 | Carrier + cluster PCBs | **Passive** carrier circuits — ADC, reference, buffer, level shifter, regulators, connectors — built on **the main board** (ADR 0017), with the two thumb clusters' registers and key networks; the other two registers are on the key boards, on 1.27 mm IDC ribbons. **No MCU, no USB, no RF** — the Matrix is on the lid, on a ribbon into `J-MCU` (ADR 0001, ADR 0015, ADR 0017) |
 | E14 | **Carrier re-validation** | E1–E11 re-run on the carrier, not on dev boards. Everything before this was proven on a different physical thing |
 
 **E9 is the milestone that decides whether this is an instrument or a thing
@@ -61,9 +61,10 @@ being wrong (ADR 0006).
 
 ## Track M — Mechanical
 
-The envelope is set at 18 × 2.25 × 1.5 in (ADR 0009). Keys run in a **single
-line** down the body, flute-style, with short sections above and below the key
-runs — which is what makes 18 inches workable.
+Width is set at 2.25 in and thickness at `body-thickness` (ADR 0009). **The length is
+derived** — minimized around the keys, a little at the mouth, the connector at
+the tail — by the body CAD (`mechanical/drc.echo`, "overall length"). It was
+18 in until 2026-09-26.
 
 
 | ID | Milestone | Done when |
@@ -73,9 +74,9 @@ runs — which is what makes 18 inches workable.
 | M3 | Layout locked | Ergonomics settled after 2–3 iterations of M2. No aluminium cut before this |
 | M4 | Stack design | Full laminated stack in CAD, every layer a 2D part, **modelled against the real KS-33 STEP solid** rather than a nominal box (ADR 0002) |
 | M5 | Aluminium top plate | Cut, fitted, switches retained solidly, **bonded to `PWR_GND`**. Not before E13 — see the ordering rules below |
-| M6 | Body | Oak top and bottom, frosted acrylic sides, LEDs, strap points, **tail matrix window + diffuser and USB-C slot** (ADR 0009) |
+| M6 | Body | Oak top and bottom, frosted acrylic sides, strap points, **matrix window + diffuser on the top face after the keys, and the USB-C slot** (ADR 0009) |
 | M7 | Integration | Electronics mounted in the body, umbilical connector fitted and strain-relieved |
-| M8 | **Final-assembly gate** | Assembled, lid on, but not signed off. (This row said **Pre-bond gate / assembled but not bonded** until 2026-09-21. The body is no longer bonded shut — it closes on six fasteners onto an RTV gasket, ADR 0009 — so M8 is the last gate before the instrument is treated as finished rather than the last moment it can be opened.) Full E11 breath-noise test re-run on the *final* harness, **thermal soak at the lighting clamp, watching temperature *and the breath zero* at the sensor**, two-hour play test, failure injection, self-test, **pitch scoped while the LEDs sweep** (ADR 0006 — the one test the plan was missing), and **recover both boards through the service header** so the last route in is known good, not assumed (ADR 0009). Nothing closes until this passes |
+| M8 | **Final-assembly gate** | The cassette tested on the bench and dry-fitted in the shell, not yet bonded, not signed off. (This row said **Pre-bond gate / assembled but not bonded** until 2026-09-21. The body closed on six fasteners onto an RTV gasket from then until ADR 0025, 2026-09-29; it is now glued shut round the cassette with RTV and opened by cutting it, so M8 is again the last gate before the cassette is bonded in — dry-assemble, balance and test before then.) Full E11 breath-noise test re-run on the *final* harness, **thermal soak at the lighting clamp, watching temperature *and the breath zero* at the sensor**, two-hour play test, failure injection, self-test, **pitch scoped while the LEDs sweep** (ADR 0006 — the one test the plan was missing), and **recover both boards through the service header** so the last route in is known good, not assumed (ADR 0009). Nothing closes until this passes |
 
 **M1 no longer gates M4.** An earlier revision made the cutout measurement the
 single most important input to the mechanical design, on the assumption it could
@@ -103,8 +104,8 @@ when the body became serviceable (ADR 0009); the ordering rule stands anyway,
 because "recoverable" here means a full strip-down.
 
 **M8 exists because E11 tests a topology that does not survive to the finished
-instrument.** At E11 the LED strips are not installed — they arrive at M6 — and
-the body is not closed, so the loom under test is not the final loom. The
+instrument.** At E11 the body is not closed (the LEDs are on the main board
+since ADR 0028, so they are there), so the boards and ribbons under test are not in their final, closed-body configuration (there is no loom since ADR 0017). The
 single test that validates the entire analog-breath decision was running
 against a configuration that changes afterwards.
 **This was the most important missing milestone in the project.**
@@ -142,9 +143,9 @@ not a release, and should not be filtered as though the phrase were ending.
 | F2 | Breath response | Curve shaping, ambient zeroing **of the digital copy** (seeded at power-on, then gated on sub-threshold AND quiet), threshold and note gating |
 | F3 | Channel output | Fixed-rate DAC loop, per-channel smoothing in software |
 | F4 | Routing matrix | Four mod channels: source, scale, offset, curve, slew |
-| F5 | **Web config app** | SoftAP, captive portal, web app served from flash. Fingering table, routing matrix, breath curves |
-| F6 | Live monitoring | WebSocket telemetry to the phone: breath, IMU angles, commanded CV |
-| F7 | Status display | Note, breath, active channels, mode. Status only — config lives on the phone |
+| F5 | **USB config app** | A page on a computer over the instrument's USB port — USB-Serial-JTAG by default, SysEx when MIDI is on (`firmware/README.md`, ADR 0015). Fingering table, routing matrix, breath curves |
+| F6 | Live monitoring | Telemetry over the same USB link: breath, IMU angles, commanded CV |
+| F7 | Status display | Note, breath, active channels, mode — on the 8×8 matrix, the only display (ADR 0015). Status only — config lives on the computer |
 | F9 | **Matrix surface** | 8×8 as a generic assignable sink: breath by default, other sources and render modes from config. Alarm states preempt and cannot be configured off (ADR 0014) |
 | F8 | Persistence | Config and calibration in NVS; presets |
 
@@ -159,12 +160,12 @@ not a release, and should not be filtered as though the phrase were ending.
 | **2** | M3, E6–E9 | Layout locked; pitch CV calibrated and accurate |
 | **3** | E10–E12, M4 | Module complete and racked; stack designed. **M5 moves to Phase 4** — the plate is cut after the carrier layout exists |
 | **4** | E13, E14, M5–M7, M8 | Carrier built and re-proven; plate cut; real instrument in a real body, validated before it is called finished |
-| **5** | F4–F9 | Routing matrix, web config, monitoring, presets, matrix surface |
+| **5** | F4–F9 | Routing matrix, USB config, monitoring, presets, matrix surface |
 
 ## Out-of-order work worth pulling forward
 
-**F6 (live monitoring) is worth building well before its phase.** A phone
-showing live breath pressure, IMU angles and commanded CV over a WebSocket is a
+**F6 (live monitoring) is worth building well before its phase.** A computer
+showing live breath pressure, IMU angles and commanded CV over USB is a
 test instrument, not just a convenience:
 
 - **M2/M3** — see which keys actually register while trying a layout, instead of
@@ -173,7 +174,7 @@ test instrument, not just a convenience:
   of alternating between a meter and a menu
 - **E2** — see the breath response curve while playing against it
 
-It depends only on E1 and a WiFi stack, so it can be built as soon as there is a
+It depends only on E1 and the USB link, so it can be built as soon as there is a
 dev board on the bench.
 
 ## Bench measurements the review asked for
@@ -187,20 +188,22 @@ came out of the analog design review specifically.
 | Measure | At | Why |
 |---|---|---|
 | **Real-time board idle current** | E1 | 64 unlit `WS2812B-0807` drivers are an estimated ~50 mA and 0.25 W. **The part number is now read off the banked Waveshare schematic and the estimate is still an estimate** — Worldsemi publishes no WS2812B-0807 datasheet at all. Bracketing surrogates give 22 mA (XINGLIGHT 2022, 0.35 mA/device), <38 mA (Worldsemi WS2812B-2020, <0.6 mA) and **160 mA** (XINGLIGHT 2024, 2.5 mA/device), so ~50 mA is plausible but could be 3× low. E1 measures it, spent whether or not anything is displayed. The shared lighting budget is sized from this number (ADR 0014) |
-| **1:1 paper fit check, both faces** | M4 | The etherCON flange against a 50.50 mm 10HP panel *and* against the 57 × 38 mm instrument tail beside the USB-C slot. Was called comfortable at the superseded 8HP; the tail is now the tight one (ADR 0004, ADR 0009) |
+| **1:1 paper fit check, both faces** | M4 | The etherCON flange against a 50.50 mm 10HP panel *and* against the instrument's tail face beside the USB-C slot. Was called comfortable at the superseded 8HP; the tail is now the tight one (ADR 0004, ADR 0009) |
+| **Side-light diffusion test** | **Before the main board's layout (M4)** — moved from M6 by ADR 0028 | Fixes `lighting.led_count` and `lighting.led_pitch`, which the board fixes for good when it is made. A strip offcut at board height (the row's LEDs sit ~0.85 mm lower than a strip's) under a white-masked mock key board, with the real acrylic at the side distance (ADR 0014, *Diffusion is a prototype question*; ADR 0028) |
+| **LED row current at full white** | E6 | Settles `led-row-current`: ADR 0014 read the WS2815's "15 mA" as per channel, which the WS2815B-V1's own maximum power rules out; a current probe on the row's 12 V feed with all thirteen at full white (ADR 0028) |
 | **Matrix diffusion prototype** | M6 | Can an 8×8 at 2.6 mm pitch stay pixel-distinct through a window, or only as a blurred bar? Decides whether the 2-D IMU assignment is usable (ADR 0014) |
-| **Interior temperature rise under load** | M8 | The lighting budget is set from an estimated 3 K/W. Soak with strips and matrix at the clamp, and measure at the breath sensor (ADR 0014) |
+| **Interior temperature rise under load** | M8 | The lighting budget is set from an estimated 3 K/W. Soak with the LED row and matrix at the clamp, and measure at the breath sensor (ADR 0014) |
 | **Cold-start warm-up sweep** | E2 | Run the sensor from cold through 20 minutes of playing. Output that *falls* under warming is a blocked reference chamber; output that *drifts* is ordinary thermal offset (ADR 0003) |
 | **Breath zero vs cavity temperature** | M8 | The DP's reference port is open to the cavity, so the cavity must leak. Watch the zero during the same soak — a walking zero means it is sealing more than assumed. **The body opens, so a vent can be added at M8 or afterwards** — and a body that closes on a gasket rather than an adhesive is likelier to leak enough on its own (ADR 0003, ADR 0009) |
-| **PSRAM mode on the ESP32-S3-Matrix** | E1 | **No longer a gate** — settled on paper two ways: the vendor board file exposes GPIO33–40 as headers, which octal PSRAM makes impossible, and `R2` is Espressif's suffix for 2 MB *quad*. 17 broken out, three spare. Print the pin list anyway; it costs thirty seconds and catches a silent board revision (ADR 0007) |
+| **PSRAM mode on the ESP32-S3-Matrix** | E1 | **No longer a gate** — settled on paper two ways: the vendor board file exposes GPIO33–40 as headers, which octal PSRAM makes impossible, and `R2` is Espressif's suffix for 2 MB *quad*; and the vendor schematic (`datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-SCHEMATIC.pdf`) marks `U66` as `ESP32-S3FH4R2`, quad PSRAM in the package. 17 broken out; the spares are ADR 0007's pin table. Print the pin list anyway; it costs thirty seconds and catches a silent board revision (ADR 0007) |
 | **DAC saturation vs AVDD** | E7 | Full scale is 5.000 V from the internal reference at gain 2, *independent* of AVDD — what AVDD decides is whether the output buffer can reach it. Raise the top codes and find where they start compressing; that measurement is also what selects the LM317's divider (ADR 0004, ADR 0005) |
 | **Pitch DC load sweep: open / 100k / 50k / 33k** | E9 | Quantifies the 1 kΩ divider error against the real patch, and tells you how much a re-mult actually shifts tuning (ADR 0006) |
 | **Pitch stability into worst-case cable capacitance** | E9 | **A GATE, not a reassurance** — and this row used to say the opposite. The pitch stage now *is* the in-loop version: DC feedback is tapped at the jack, so the 1 kΩ and the patch cable are inside the loop and `C-FB-PITCH` is what compensates it. Sweep the load: open, 100 kΩ, a passive mult, a short (ADR 0006) |
 | **Inrush with a current probe, on switch-on *and* hot-plug** | E6 | Sizes the load switch's current limit from measurement rather than from a guess (ADR 0005) |
 | **Pitch jack while sweeping the LEDs, and while the rack is busy** | E6 / E9 | The test the plan was missing: the one measurement for this class scoped *breath*, the channel that is immune. Four routes put LED current onto pitch and two are fixed in hardware; this measures the two ground terms that are left — the module's own pour (5.7–7.2 cents) and the rack's shared bus return (~4.8) — rather than trusting the figures (ADR 0004, ADR 0006) |
 | **Gate-press-while-moving IMU test** | E3 | The failure mode that killed the bias-snapshot proposal. Press the gate mid-gesture and check the stillness-gated estimator does not adopt motion as bias (ADR 0007) |
-| **Key-chain error counter over an hour, LEDs and WiFi active** | E4 | The marker pattern's whole purpose. A non-zero count says the looms need work while the body is still openable (ADR 0001). **This covers the loom again** now that the chain runs through it — while the registers were briefly on the carrier the marker bits were board-local and could not see a switch conductor at all, and a version of this row claimed they could |
-| **Does the chained key loom fit the side channel?** | M4 | `chain-conductors` per hop rather than the 32–44 the tail-mounted alternative needed — much easier, but still check it against the real cavity section alongside the LED strips and the breath tube, before the plate DXF is cut (ADR 0001, ADR 0009) |
+| **Key-chain error counter over an hour, LEDs and matrix active** | E4 | The marker pattern's whole purpose. A non-zero count says the chain needs work while the body is open (ADR 0001). It covers both key-board ribbons, where the chain leaves a board (ADR 0017) |
+| **Do the key-chain ribbons work with the key plate raised?** | M4 | One IDC ribbon per key board, long enough to plug the main board's sockets with the key plate held raised off its columns (ADR 0025; `mechanical/drc.echo`, *"key-chain ribbon length (derived)"*), folds closed as a flat hairpin along the body (*"key-chain ribbon closed: hairpin leg and fold radius"*). Check the real ribbon's fold, plugging both sockets with the key plate raised (`routing.chain_raise`), that the main board's end leaves upward and the key board's downward (`-RN2`), that the socket clears the shroud's mouth (`boards.chain_plug_proud`), and, on every cable, that the key-board pinout is the one `key-chain-loom.md` gives, with a meter (ADR 0017, amended 2026-09-27) |
 | **Restrictor sizing by ring-down** | E2 | The tube is a distributed pipe at 214–429 Hz, below the filter corner and **independent of trap volume** — no orifice size places it, so size the plug for *damping* and measure the time constant it adds, which is a latency term the budget cannot fill in until then (ADR 0003) |
 
 **The key-chain and restrictor measurements are the time-critical ones** — both
@@ -215,9 +218,9 @@ on firmware for years. All three fixes are firmware and all three are free.
 
 | Failure | Why it is silent | Made loud by |
 |---|---|---|
-| **Blank or corrupt NVS → default calibration** | The instrument plays. It sounds like an instrument. It is just badly out of tune, with no indication anything is wrong | CRC the calibration blob; a hard **UNCALIBRATED** state on the display the player cannot miss |
+| **Blank or corrupt NVS → default calibration** | The instrument plays. It sounds like an instrument. It is just badly out of tune, with no indication anything is wrong | CRC the calibration blob; a hard **UNCALIBRATED** state on the matrix the player cannot miss |
 | **Stuck-closed switch** | Does not kill a note. Silently returns a *different* note for every fingering that key participates in — presents as "some fingerings feel wrong", which is unfalsifiable by ear inside a body that cannot be opened | Flag any key closed at boot, or held beyond N seconds, as suspect and report it |
-| **Stale breath zero** | Thermal drift over a session moves the floor, and the player compensates with their diaphragm without noticing | Continuous auto-zero (ADR 0006), plus showing the current zero on the display |
+| **Stale breath zero** | Thermal drift over a session moves the floor, and the player compensates with their diaphragm without noticing | Continuous auto-zero (ADR 0006), plus showing the current zero on the matrix |
 
 A fourth is hardware and already handled: a corrupted key-chain read becoming a
 spurious note, made countable by the marker pattern (ADR 0001).
@@ -313,14 +316,13 @@ page, its `bom.csv` fragment and its `circuit.yaml`.
    drawing-vs-netlist check `check-netlist.py` already runs is most of the
    value for a fraction of the work, and it has been catching things since
    the first circuit.
-2. **The four cluster boards are one schematic with four strappings.** Which
-   of a 74HC165's `A`…`H` carries a switch, a marker or a free bit differs on
+2. **The four registers are one schematic with four strappings** (two on the main board, one on each key board). Which
+   of a register's `A`…`H` carries a switch, a marker or a free bit differs on
    every board, so `KEY_BITS` and `MARKER_BITS` are marked `per_board:` and
    those inputs are declared unasserted. Resolving it means four board
    variants. The checker names the two nets on every run.
-3. **The key chain's hop map is prose.** Eight connectors, four ribbons,
-   `SER`/`QH` point-to-point and changing meaning at every hop. Only the
-   carrier's connector is placed; the tool prints `J-CHAIN 1/8`.
+3. **The key chain's hop map is netted** since ADR 0017: `key-chain-loom/netlist.yaml`
+   names every hop and places every `J-CHAIN`.
 4. **Decoupling is not netted.** Supply pins arrive through `rails:`, so the
    per-pin decouplers have no pin to hang on and `C-DECOUPLE` and
    `C-DECOUPLE-CARRIER` will read short until that changes.
@@ -332,6 +334,7 @@ page, its `bom.csv` fragment and its `circuit.yaml`.
 | Blocks | Question | Tracked in |
 |---|---|---|
 | M4, M5 | **Plate stiffening** — the thickness is **settled at 1.20 mm** by Gateron's own drawing (2026-09-21), which puts both 1.5 mm and 2 mm out of spec and makes stiffening a **requirement, not an option**. What remains is how: lamination, a structural backer, or a ribbed sub-frame | [ADR 0002](docs/decisions/0002-key-switches-and-mounting.md) |
-| M4 | CAD tool — Fusion, FreeCAD, or neutral STEP in `mechanical/cad/` | [ADR 0009](docs/decisions/0009-enclosure-construction.md) |
-| M4 | Oak thickness for the bottom panel, which sets thumb key travel | [ADR 0009](docs/decisions/0009-enclosure-construction.md) |
+| M4, E2, E11 | **Re-derive what was sized from the 457 mm body**, now the length is derived and much shorter: the breath tube (~400 mm — ADR 0003's pipe-mode frequencies and delay move with its length, so this is analysis, not an edit), the key chain (no loom since ADR 0017 — two short IDC ribbons, `key-chain-loom.md`), and the LED lighting (now one strip on the main board, ADR 0016 — its length in `mechanical/drc.echo`; the current and density tables in ADR 0014 and ADR 0005 were sized for two 420 mm runs). Current length in `mechanical/drc.echo` | [ADR 0009](docs/decisions/0009-enclosure-construction.md) |
+| M4 | **The body model's design rules all pass** (2026-09-26) — but every solid is an envelope, many `tbd` in `config/body.yaml`, so re-run `tools/cad.py build` as each part is bought and read `mechanical/drc.echo` and `clash.txt` again. (The CAD tool itself was decided 2026-09-26: OpenSCAD, `mechanical/`) | [mechanical/DESIGN.md](mechanical/DESIGN.md) |
+| M1 | **MT165 cap height above the switch seat** — both oak panels' thicknesses now derive from it (keys flush with both faces at full travel, 2026-09-26), so it is the number the lamination is waiting on | [ADR 0009](docs/decisions/0009-enclosure-construction.md) |
 | E4b | Inter-MCU frame format and protocol versioning | [ADR 0013](docs/decisions/0013-two-mcu-split.md) |
