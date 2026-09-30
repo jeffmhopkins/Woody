@@ -267,8 +267,8 @@ against the real patch because the 1 kΩ divided against it. That error is gone.
 
 - **It does not oscillate; it rings.** `Q = √(R_eff·C_load / R2·C_fb)`. Safe to
   about 10 nF, but joining PITCH to the MOD (82 nF) or BREATH (330 nF) jacks
-  through a passive mult gives 44–67 % overshoot — several semitones of
-  transient on every note. That failure mode did not exist with op-amp-side
+  through a passive mult gives the overshoot in `pitch-mult-overshoot`
+  (simulated, `sim/`) — several semitones of transient on every note. That failure mode did not exist with op-amp-side
   feedback.
 - **With the jack shorted, DC feedback is exactly zero** and the amp rails. A
   3.5 mm plug shorts tip to sleeve on every insertion, so every patch-in is a

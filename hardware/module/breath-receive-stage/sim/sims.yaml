@@ -57,7 +57,7 @@ sims:
     measures: [cmrr_dc, cmrr_50, cmrr_500]
     asserts:
       - expr: "abs(nom['cmrr_dc'] - 60.2) < 1 and min['cmrr_dc'] < 58.5"
-        why: "the page's 60.2 dB without R1b reproduces at the nominal - and the worst corner is BELOW the 58.5 dB requirement, so the '1.7 dB of margin' was a nominal, not a worst case"
+        why: "the page's 60.2 dB without R1b reproduces at the nominal - and the worst corner is BELOW the 58.5 dB requirement, so the margin the page claimed over it was a nominal's, not a worst case's"
     post:
       cmrr_dc: "at(w['cmrr'], 1)"
       cmrr_50: "at(w['cmrr'], 50)"

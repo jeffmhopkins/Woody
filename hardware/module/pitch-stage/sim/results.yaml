@@ -4,7 +4,7 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/pitch-stage/sim/sims.yaml: 28fab4f18c4ed8f8
+  hardware/module/pitch-stage/sim/sims.yaml: 08875776ff6de91e
   hardware/module/pitch-stage/netlist.yaml: 70250bae9e3ce8e5
   hardware/module/mod-channels/netlist.yaml: 452f00393ff76c56
   hardware/module/breath-output-stage/netlist.yaml: b8d1434daa4ab4eb
@@ -13,7 +13,7 @@ inputs:
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
 ngspice: '42'
 sims:
-  step[mult=0]:
+  step-vco:
     corners: 9
     measures:
       overshoot_pct:
@@ -28,8 +28,11 @@ sims:
         min_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT-
         max: 0.000132419
         max_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+
-    asserts: []
-  step[mult=1]:
+    asserts:
+    - expr: max['overshoot_pct'] < 5
+      why: into a VCO alone an octave step does not ring (under 5 %) at any corner
+      pass: true
+  step-mult[mult=1]:
     corners: 9
     measures:
       overshoot_pct:
@@ -44,23 +47,33 @@ sims:
         min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT-
         max: 0.00118292
         max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+
-    asserts: []
-  step[mult=2]:
+    asserts:
+    - expr: min['overshoot_pct'] > 25
+      why: 'RECORDED HAZARD, not a requirement (pitch-stage.md, ''It does not oscillate; it rings''): a passive mult to another
+        output''s jack makes every note step overshoot by several semitones. If this starts failing the hazard is gone - re-read
+        the page'
+      pass: true
+  step-mult[mult=2]:
     corners: 9
     measures:
       overshoot_pct:
-        nominal: 64.0046
-        min: 63.559
-        min_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT-
-        max: 64.6578
-        max_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+
+        nominal: 64.1083
+        min: 63.3
+        min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT-
+        max: 64.9334
+        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+
       t_settle:
-        nominal: 0.00298
-        min: 0.00295582
-        min_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT-
-        max: 0.00298
-        max_at: nominal
-    asserts: []
+        nominal: 0.00419202
+        min: 0.00419202
+        min_at: nominal
+        max: 0.00435072
+        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+
+    asserts:
+    - expr: min['overshoot_pct'] > 25
+      why: 'RECORDED HAZARD, not a requirement (pitch-stage.md, ''It does not oscillate; it rings''): a passive mult to another
+        output''s jack makes every note step overshoot by several semitones. If this starts failing the hazard is gone - re-read
+        the page'
+      pass: true
   step-real-mult[mult=1]:
     corners: 9
     measures:
@@ -81,17 +94,17 @@ sims:
     corners: 9
     measures:
       overshoot_pct:
-        nominal: 41.8213
-        min: 40.8525
+        nominal: 41.808
+        min: 40.8371
         min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT+
-        max: 42.8148
+        max: 42.8159
         max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT-
       t_settle:
-        nominal: 0.00209525
-        min: 0.00209525
-        min_at: nominal
-        max: 0.00226905
-        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+
+        nominal: 0.00229405
+        min: 0.00212415
+        min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT-
+        max: 0.00229405
+        max_at: nominal
     asserts: []
   loop[mult=0]:
     corners: 9
@@ -108,7 +121,11 @@ sims:
         min_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT-
         max: 9980480.0
         max_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+
-    asserts: []
+    asserts:
+    - expr: min['pm'] - 10 > 45
+      why: 'the loop''s phase margin clears 45 degrees after the +-10 degree screen at every load - which is the point: the
+        same margin at 0, 82 nF and 330 nF, while the step rings (pcb-pipeline.md: ''the AC sweep is structurally blind'')'
+      pass: true
   loop[mult=1]:
     corners: 9
     measures:
@@ -124,7 +141,11 @@ sims:
         min_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT-
         max: 9981290.0
         max_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+
-    asserts: []
+    asserts:
+    - expr: min['pm'] - 10 > 45
+      why: 'the loop''s phase margin clears 45 degrees after the +-10 degree screen at every load - which is the point: the
+        same margin at 0, 82 nF and 330 nF, while the step rings (pcb-pipeline.md: ''the AC sweep is structurally blind'')'
+      pass: true
   loop[mult=2]:
     corners: 9
     measures:
@@ -140,4 +161,8 @@ sims:
         min_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT-
         max: 9981360.0
         max_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+
-    asserts: []
+    asserts:
+    - expr: min['pm'] - 10 > 45
+      why: 'the loop''s phase margin clears 45 degrees after the +-10 degree screen at every load - which is the point: the
+        same margin at 0, 82 nF and 330 nF, while the step rings (pcb-pipeline.md: ''the AC sweep is structurally blind'')'
+      pass: true

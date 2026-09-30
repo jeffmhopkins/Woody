@@ -168,30 +168,31 @@ netlist and two clones differ.
 ### 2. Simulate — headless, runs today
 
 Independent of everything else; `ngspice` needs no allowlist change. Ranked by
-what the claim costs if wrong:
+what the claim costs if wrong. **All five have run** (2026-09-30), each in its
+circuit's `sim/` with its own README, under `tools/sim.py` (`tooling.md` §5);
+what each found is in the register, not here:
 
-| Sim | Why |
-|---|---|
-| **Breath-link CMRR** with the INA828 | 1.7 dB of claimed margin, across two boards. A macromodel exists — same directory as the OPA2197. **See the note below: the premise that used to rank it first is retired** |
-| **`R-ISO-REF` stability** | Already found the drawn circuit is the unstable one: 8.8° unfitted, **8.4° in-loop as drawn**, 75.2° out-of-loop. **And TI publishes the worked answer for this exact circuit** — SBOS737C §8.2.3, `R_ISO` 37.4 Ω with a dual-feedback network, 89° PM, against our 10 Ω. **Blocked on `cref-out-node` first** |
-| **Pitch transient into a passive mult** | Measured 41.8 % overshoot at 82 nF, 65.4 % at 330 nF. **The AC sweep is structurally blind to this** on the same circuit at the same loads |
-| **Power-on / reset transient** | Five power-on claims across three pages, no transient anywhere in the corpus |
-| **Behavioural LT1641** | `power-entry.md` already writes the foldback law as equations, and this is the circuit proven not to start |
+| Sim | Where | Result |
+|---|---|---|
+| **Breath-link CMRR** with the INA828 | `module/breath-receive-stage/sim` | `breath-link-cmrr`. Clears 58.5 dB at mains on the worst corner, not to the 500 Hz edge of the breath channel; without `R1b` the worst corner is below it |
+| **`R-ISO-REF` stability** | `carrier/breath-excitation-reference/sim` | `riso-ref-phase-margin`, TI's Figure 56 reproduced alongside. No longer blocked: `cref-out-node` settled the load. **10 µF added at `VS` rings** although the margin barely moves |
+| **Pitch transient into a passive mult** | `module/pitch-stage/sim` | `pitch-mult-overshoot`. **The AC sweep is structurally blind to it**: the phase margin is the same at every load |
+| **Power-on / reset transient** | `module/power-entry/sim` | **`D3` is netlisted backwards** and the −12 V rail never arrives; with it reversed, `DAC_AVDD` keeps `dac-rail`'s floor and the pitch jack stays at 0 V |
+| **Behavioural LT1641** | `module/umbilical-load-switch/sim` | Starts at every datasheet corner, cold and hot-plug; with `FB` unconnected it latches off, as the page says |
 
 > **The CMRR row's stated reason was refuted and the ranking survives on a
 > different one.** It read *"unretrofittable inside a bonded body"*. ADR 0009
 > retired the bonded body — it comes apart on six fasteners — and `R1b`, the
 > part the 60.2 dB term is entirely a statement about, is on the carrier inside
 > that body. So it *is* retrofittable, and the argument that put this sim first
-> is gone.
+> is gone. It stayed first on weaker grounds: the thinnest claimed margin in
+> the corpus, and the only derivation that crosses the umbilical.
 >
-> It stays first on three weaker grounds, stated so the next reader can
-> disagree with the real ones: it is the **thinnest claimed margin in the
-> corpus** (1.7 dB, and a worst case over tolerance rather than a typical); its
-> derivation is the only one that **crosses the umbilical**, so a bench
-> iteration on it spans two boards and a 2 m cable rather than one bench; and
-> the sim costs nothing, because the macromodel is already banked. If any of
-> those stops being true, re-rank it.
+> **This note used to say "the sim costs nothing, because the macromodel is
+> already banked". It was not.** No SPICE model was in `datasheets/` until
+> 2026-09-29, when the INA828, OPA2197, REF5050 and LM317L models were banked
+> (fragment R29, with the LT1641, 1N5817 and DAC8568 recorded `BLOCKED`).
+> Corrected 2026-09-30.
 
 Not worth running: Monte Carlo on the pitch budget. The dispute is over *what
 the terms are*, not their spread, and the two largest belong to a part with no

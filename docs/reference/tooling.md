@@ -536,6 +536,14 @@ so.
 - **A PULSE with a zero width is not a spike.** SPICE reads PW = 0 as unset,
   and it defaults to the whole run: a 5 ns charge pulse became a step that never
   ended, and the rail "rang" 100 times too hard.
+- **A false operating point reports every measure.** When a vendor macromodel
+  defeats gmin and source stepping, ngspice falls back to a "transient op" and
+  says it succeeded wherever the ramp stopped: the reference buffer's `VS` came
+  out at 0.55 V with every measure present. `sim.py` refuses a run that needed
+  it; `.options rshunt=1e10` (10 GΩ per node) lets the stepping finish.
+- **A load step on a regulated node has no step size.** `overshoot()` divides by
+  the change in final value, which is ~0 there and gave 5 × 10⁶ %. `rebound()`
+  measures the swing back through the final value against the first dip.
 - **A diverged run reports a number too.** `sim.py` refuses any measure that is
   not finite or is beyond 1e12.
 - **A threshold test must not mix parts.** "Never below VT− max after crossing
@@ -549,3 +557,8 @@ so.
 | one key's network, with its press, release, filter and corners | `hardware/cluster/key-switch-network/sim/` |
 | the left-hand key board as wired, all keys released and pressed | `hardware/boards/key-board-lh/sim/` |
 | the key chain: its 3V3 rail (bead, ribbon, decoupling, the do-not-fit bulk capacitor) and SCK and QH over the ribbon | `hardware/interfaces/key-chain-loom/sim/` |
+| the reference buffer's loop, output impedance and load step, and TI's Figure 56 (TI's OPA2197 and REF5050 models) | `hardware/carrier/breath-excitation-reference/sim/` |
+| the breath link's CMRR across the umbilical, both ends' parts at every tolerance corner (TI's INA828 and OPA2197) | `hardware/module/breath-receive-stage/sim/` |
+| the pitch stage's step into a passive mult, and its loop at the same loads | `hardware/module/pitch-stage/sim/` |
+| rack power-on: the rails, the LM317L's `DAC_AVDD` (TI's model) and the pitch jack | `hardware/module/power-entry/sim/` |
+| the umbilical load switch's start, with a behavioural LT1641 built from its datasheet | `hardware/module/umbilical-load-switch/sim/` |
