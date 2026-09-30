@@ -38,6 +38,13 @@ pcb_setback`) instead of restating it, and may name a register figure
 (`figure: panel-width`) whose value text must contain the number - so a
 figure that moves fails `check` here instead of leaving a stale copy.
 
+SCRIPTS. An output a Python tool makes rather than OpenSCAD - the module's
+panel artwork (tools/panel-art.py) and its Blender renders
+(tools/render-module.py) - is a `scripts:` entry naming the tool, its
+arguments and EVERY input it reads. There is no include walk to find them, so
+the tool prints `READ: <path>` for each file it opens and the build fails if
+one is not declared: the same cross-check OpenSCAD's depfile gets.
+
 `check` never needs OpenSCAD - it only hashes - so it runs from the commit
 gate (check-staleness.py) on any machine. `build` needs openscad (2021.01+),
 xvfb-run when there is no display, Pillow for the stamp, and gmsh for the
@@ -72,8 +79,8 @@ FIGURES = "config/figures.yaml"
 # Directories whose every file must be an output this tool owns. A PNG that
 # nobody can regenerate is exactly the artefact this tool exists to prevent.
 OWNED_DIRS = [f"{MECH}/renders", f"{MECH}/export", f"{MECH}/cad/vendor",
-              f"{MECH}/module/renders", f"{MECH}/module/export"]
-OWNED_EXT = (".png", ".dxf", ".svg", ".stl", ".echo", ".txt")
+              f"{MECH}/module/renders", f"{MECH}/module/export", f"{MECH}/module/art"]
+OWNED_EXT = (".png", ".dxf", ".svg", ".stl", ".echo", ".txt", ".pdf")
 
 # Bump when the way an output is MADE changes (stamp layout, mesh settings,
 # render flags) - it is part of every fingerprint, so a bump marks every
@@ -324,6 +331,11 @@ def scad_deps(path, seen=None):
 def output_inputs(o):
     if o["kind"] == "mesh":
         deps = {o["from"]}
+    elif o["kind"] == "script":
+        deps = set(o["inputs"]) | {o["cmd"][0]}
+        for p in deps:
+            if not os.path.exists(os.path.join(ROOT, p)):
+                raise SystemExit(f"cad.py: {o['name']} names input {p}, which does not exist")
     else:
         deps = scad_deps(o["src"])
     if o["kind"] == "clash":
@@ -352,7 +364,8 @@ def load_spec():
         if not os.path.exists(os.path.join(ROOT, sp)):
             continue
         spec = yaml.safe_load(open(os.path.join(ROOT, sp), encoding="utf-8")) or {}
-        for kind, key in (("mesh", "meshes"), ("render", "renders"), ("export", "exports"), ("clash", "clashes")):
+        for kind, key in (("mesh", "meshes"), ("render", "renders"), ("export", "exports"),
+                          ("script", "scripts"), ("clash", "clashes")):
             for o in spec.get(key) or []:
                 o = dict(o)
                 o["kind"] = kind
@@ -628,6 +641,25 @@ def clash_step(o, out_abs, inputs):
     return f"{openscad_version()}; manifold3d"
 
 
+def script_step(o, out_abs, inputs, fp):
+    """Run a Python tool that makes one output: `cmd` is [tool.py, args...];
+    the tool is given `--out <path>` and `--fingerprint <fp>`. Every file it
+    prints as `READ: <path>` must be a declared input."""
+    cmd = [sys.executable, os.path.join(ROOT, o["cmd"][0])] + [str(a) for a in o["cmd"][1:]] + \
+          ["--out", out_abs, "--fingerprint", fp]
+    r = subprocess.run(cmd, capture_output=True, text=True, cwd=ROOT)
+    log = r.stdout + r.stderr
+    if r.returncode != 0 or not os.path.exists(out_abs):
+        raise SystemExit(f"cad.py: {o['cmd'][0]} failed on {o['name']}:\n" + "\n".join(log.splitlines()[-25:]))
+    read = {rel(l[6:].strip()) for l in log.splitlines() if l.startswith("READ: ")}
+    missed = sorted(p for p in read if p not in inputs and not p.startswith(".."))
+    if missed:
+        raise SystemExit(f"cad.py: {o['cmd'][0]} read {missed} for {o['name']}, which its "
+                         f"`inputs` in the spec do not name - the fingerprint is blind to them")
+    tools = [l[6:].strip() for l in log.splitlines() if l.startswith("TOOL: ")]
+    return tools[-1] if tools else os.path.basename(o["cmd"][0])
+
+
 def build_one(o, provisional):
     inputs = output_inputs(o)
     fp = fingerprint(o, inputs)
@@ -637,6 +669,10 @@ def build_one(o, provisional):
         tool = mesh_step(o, out_abs)
     elif o["kind"] == "clash":
         tool = clash_step(o, out_abs, inputs)
+    elif o["kind"] == "script":
+        tool = script_step(o, out_abs, inputs, fp)
+        if o.get("stamp") and out_abs.endswith(".png"):
+            stamp(out_abs, dict(o, src=o["cmd"][0]), fp, provisional and o.get("layout_sensitive", False))
     else:
         with tempfile.TemporaryDirectory() as td:
             deps_abs = os.path.join(td, "deps")
@@ -647,14 +683,16 @@ def build_one(o, provisional):
             stamp(out_abs, o, fp, provisional and o.get("layout_sensitive", True))
     return {"name": o["name"], "kind": o["kind"], "out": o["out"], "fingerprint": fp,
             "out_sha256": sha256(o["out"])[:16],
-            "provisional": "yes" if provisional and o["kind"] != "mesh" else "",
+            "provisional": "yes" if provisional and o["kind"] not in ("mesh", "script") else "",
             "built": datetime.date.today().isoformat(), "tool": tool,
             "inputs": encode_inputs(inputs)}
 
 
 def order(outs):
     # Meshes first: renders import them, so their fingerprints depend on them.
-    return sorted(outs, key=lambda o: {"mesh": 0, "export": 1, "render": 2, "clash": 3}[o["kind"]])
+    # Scripts read exports (the art reads panel.dxf) and one another (the
+    # Blender scene reads the art's textures): their own spec order holds.
+    return sorted(outs, key=lambda o: {"mesh": 0, "export": 1, "script": 2, "render": 3, "clash": 4}[o["kind"]])
 
 
 def cmd_build(names, all_):

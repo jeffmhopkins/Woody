@@ -14,6 +14,7 @@
 //   part = "main_board"    the main board's outline, 2D (DXF)
 //   part = "drc"           the design-rule report, echo only
 //   part = "pcb_geom"      where every board-mounted thing is, echo only
+//   part = "art"           the printed graphics' zones and what stands on the face, echo only
 //
 // FRAME (config/module.yaml): x across the panel from its left edge, y up
 // from its bottom edge, both seen from the front; z out of the panel toward
@@ -480,6 +481,39 @@ legend = concat(
      ["SW-POWER legend", ["r", [tog_sweep_r[2][0] + 1, tog[1] - rules_legend_h / 2], [W - 1, tog[1] + rules_legend_h / 2]], ""]]);
 function legend_sep() = 1;     // drawing convention: 0.5 either side between neighbouring legend bands
 
+// THE PRINTED GRAPHICS' ZONES (ADR 0026), derived like the legend zones.
+// Three grey ISLANDS - A the breath knobs, B the six outputs, C power and the
+// umbilical - with black gutters between them; a HEADER pill over A under the
+// title band, and one for B on the spine between the first row's plug grips;
+// the "mod" label on the spine between the four MOD jacks; the OFFSET knob's
+// two end marks; the maker strip left of the umbilical's drop zone.
+// tools/panel-art.py reads these from panel-art.echo and sets the text in
+// them; nothing it draws may leave its zone.
+art_in = art_island_r / 2;                         // text and pads this far inside an island's edge
+knob_top = layout_pot_y + knob_d_max / 2;
+jack_grip_top = layout_jack_y0 + jack_plug_d / 2;
+jack_nut_bot = jacks[len(jacks) - 1][1][1] - jack_nut_d / 2;
+// Gutter A|B: centred between the first row's nuts and the pot legend bands' foot.
+gut_ab = (layout_jack_y0 + jack_nut_d / 2 + legend[1][1][1][1]) / 2;
+// Gutter B|C: centred between the last row's nuts and the top of the toggle row.
+row_top = max(tog_sweep_r[2][1], tog[1] + toggle_nut_d / 2, legend[len(legend) - 1][1][2][1], led[1] + led_hole_d / 2);
+gut_bc = (jack_nut_bot + row_top) / 2;
+hdr_a = ["r", [art_frame, (knob_top + title_band[1] - art_header_h) / 2], [W - art_frame, (knob_top + title_band[1] + art_header_h) / 2]];
+spine = [jacks[0][1][0] + jack_plug_d / 2 + 0.5, jacks[1][1][0] - jack_plug_d / 2 - 0.5];   // x between the columns' plug grips, 0.5 clear (the legend zones' air)
+islands = [["island A", ["r", [art_frame, gut_ab + art_island_gap / 2], [W - art_frame, hdr_a[1][1] - art_island_gap / 2]], "island"],
+           ["island B", ["r", [art_frame, gut_bc + art_island_gap / 2], [W - art_frame, gut_ab - art_island_gap / 2]], "island"],
+           ["island C", ["r", [art_frame, clear_bot + art_frame], [W - art_frame, gut_bc - art_island_gap / 2]], "island"]];
+mark_r = knob_d_max / 2 + art_mark_gap + art_mark_size / 2;
+mark_at = [for (s = [-1, 1]) pots[1] + mark_r * [s * sin(art_mark_angle), cos(art_mark_angle)]];
+art_zones = concat(islands,
+    [["header breath", hdr_a, "header"],
+     ["header cv out", ["r", [spine[0], jacks[0][1][1] - art_header_h / 2], [spine[1], jacks[0][1][1] + art_header_h / 2]], "header"],
+     ["mod label", ["r", [spine[0], (jacks[2][1][1] + jacks[4][1][1] - rules_legend_h) / 2], [spine[1], (jacks[2][1][1] + jacks[4][1][1] + rules_legend_h) / 2]], "text"],
+     ["scale OFFSET-", rect_c(mark_at[0], art_mark_size, art_mark_size), "mark"],
+     ["scale OFFSET+", rect_c(mark_at[1], art_mark_size, art_mark_size), "mark"],
+     ["maker", ["r", [art_frame + art_in, clear_bot + art_frame + art_in],
+                     [min(ec[0] - ethercon_cable_d / 2, ec_holes[0][0] - ethercon_screw_head_d / 2) - 0.5, ec[1]]], "text"]]);
+
 module drc_report() {
     echo("DRC", "INFO", "tbd parameters in play", len(module_tbd_params), module_tbd_params);
     echo("DRC", "INFO", "panel", [W, H, T], "mm: width, height, thickness (A-100, 10HP) - panel-width, panel-height-budget");
@@ -652,6 +686,65 @@ module drc_report() {
         drc(g[0] >= 0 && h >= rules_legend_h - 1e-6 && (l[2] != "jack" || w >= rules_legend_w),
             str("legend zone: ", l[0]), [w, h, g[0]], str("mm wide, high, and clear of the nearest face part (", g[2], ")"));
     }
+
+    // ---- the printed graphics' zones (ADR 0026)
+    // Islands are surfaces - they run under nuts, and the ink pulls back from
+    // every hole (tools/panel-art.py) - so they are checked for their gutters,
+    // for holding their controls' legends and for staying off the washers.
+    for (i = [0 : len(islands) - 2])
+        drc(islands[i][1][1][1] - islands[i + 1][1][2][1] >= art_island_gap - 1e-6, str("art: gutter ", islands[i][0], " / ", islands[i + 1][0]),
+            islands[i][1][1][1] - islands[i + 1][1][2][1], "mm of black frame between the two islands");
+    iw = worst(islands, washers);
+    drc(iw[0] >= 0, "art: islands clear of the panel screws' washers", iw[0], "mm, a washer anywhere along its slot");
+    // Held = the zone's full height and its centre inside the island; a pot's
+    // band is wider than its label, and the tool checks the ink itself.
+    inside = function(r, R) r[1][1] >= R[1][1] - 1e-6 && r[2][1] <= R[2][1] + 1e-6
+                            && (r[1][0] + r[2][0]) / 2 > R[1][0] && (r[1][0] + r[2][0]) / 2 < R[2][0];
+    held = [for (l = legend) if (l[0] != "title") len([for (s = islands) if (inside(l[1], s[1])) 1]) > 0];
+    drc(len([for (h = held) if (!h) 1]) == 0, "art: every control's legend zone inside one island", len([for (h = held) if (h) 1]),
+        str("of ", len(held), " legend zones, by height and centre (the title is on the frame)"));
+    ab = [islands[0][1][1][1] - legend[1][1][1][1], islands[1][1][2][1] - (layout_jack_y0 + jack_nut_d / 2)];
+    drc(ab[0] <= 1e-6 && ab[1] >= 0, "art: gutter A|B between the first row's nuts and the pot legends", ab,
+        "mm: island A's foot below the pot legend bands' foot (<= 0), island B's top above the first row's nuts (jack.nut_d is tbd)");
+    for (z = [for (a = art_zones) if (a[2] != "island") a]) {
+        w = z[1][2][0] - z[1][1][0];
+        h = z[1][2][1] - z[1][1][1];
+        others = concat(plugs, knobs_max, ne8mx, face_other, washers, [for (l = legend) [l[0], l[1]]],
+                        [for (a = art_zones) if (a[2] != "island" && a[0] != z[0]) [a[0], a[1]]]);
+        g = worst([z], others);
+        need_h = z[2] == "header" ? art_header_h : z[2] == "mark" ? art_mark_size : rules_legend_h;
+        drc(g[0] >= 0 && h >= need_h - 1e-6 && edge_gap(z[1]) >= art_frame - 1e-6, str("art zone: ", z[0]), [w, h, g[0]],
+            str("mm wide, high, and clear of the nearest face part or zone (", g[2], ")"));
+    }
+    dm = worst([for (a = art_zones) if (a[0] == "maker") [a[0], a[1]]], drop_zone);
+    drc(dm[0] >= 0, "art: the maker strip clear of the umbilical's drop zone", dm[0], "mm (ADR 0024 point 11: the NE8MX and its cable hang there)");
+}
+
+// The printed graphics' geometry, for tools/panel-art.py and the Blender
+// scene (ADR 0026) - every zone's POSITION, not only its size, and what
+// stands on the face:
+//   ECHO: "PANEL", "size", W, H, T
+//   ECHO: "PANEL", "zone", name, x0, y0, x1, y1, kind     kind: title legend jack island header text mark
+//   ECHO: "PANEL", "keepout", name, "c", x, y, r  |  "r", x0, y0, x1, y1
+//   ECHO: "PANEL", "part", name, x, y, ...                where each part sits, for the scene
+module panel_art() {
+    echo("PANEL", "size", W, H, T);
+    for (l = legend) echo("PANEL", "zone", l[0], l[1][1][0], l[1][1][1], l[1][2][0], l[1][2][1], l[0] == "title" ? "title" : l[2] == "jack" ? "jack" : "legend");
+    for (a = art_zones) echo("PANEL", "zone", a[0], a[1][1][0], a[1][1][1], a[1][2][0], a[1][2][1], a[2]);
+    kc = concat(knobs_max, plugs, ne8mx, face_other, washers, drop_zone,
+                [for (j = jacks) [str("nut ", j[0]), ["c", j[1], jack_nut_d / 2]]],
+                [["nut SW-POWER", ["c", tog, toggle_nut_d / 2]]]);
+    for (k = kc) if (k[1][0] == "c") echo("PANEL", "keepout", k[0], "c", k[1][1][0], k[1][1][1], k[1][2]);
+                 else echo("PANEL", "keepout", k[0], "r", k[1][1][0], k[1][1][1], k[1][2][0], k[1][2][1]);
+    for (i = [0 : 2]) echo("PANEL", "part", layout_pots[i], pots[i][0], pots[i][1], "pot", pot_shaft_d, knob_d, knob_h, knob_gap);
+    for (j = jacks) echo("PANEL", "part", j[0], j[1][0], j[1][1], "jack", jack_hole_d, jack_nut_d, jack_nut_h, jack_bushing_l - T);
+    echo("PANEL", "part", "LED-PANEL", led[0], led[1], "led", led_lens_d, led_proud);
+    echo("PANEL", "part", "SW-POWER", tog[0], tog[1], "toggle", tog_on[0], tog_on[1], lev_len, lev_d, lev_ang, tog_proud, toggle_nut_d, toggle_nut_h);
+    echo("PANEL", "part", "J-UMBILICAL", ec[0], ec[1], "ethercon", ethercon_cable_d, plug_reach);
+    for (i = [0 : 1]) echo("PANEL", "part", str("A-screw ", i + 1), ec_holes[i][0], ec_holes[i][1], "screw", ethercon_screw_head_d, ethercon_screw_head_h);
+    for (i = [0 : len(mounts) - 1]) echo("PANEL", "part", str("panel screw ", i + 1), mounts[i][0], mounts[i][1], "mount", m3_head_d, m3_head_k, panel_washer_od, panel_washer_t);
+    echo("PANEL", "part", "mark OFFSET-", mark_at[0][0], mark_at[0][1], "mark", -1);
+    echo("PANEL", "part", "mark OFFSET+", mark_at[1][0], mark_at[1][1], "mark", 1);
 }
 
 // Where everything board-mounted is, for the layout - the body's pcb-geometry
@@ -703,5 +796,6 @@ if (!figure) {
     else if (part == "main_board") main_board_2d();
     else if (part == "drc") drc_report();
     else if (part == "pcb_geom") pcb_geometry();
+    else if (part == "art") panel_art();
     else assert(false, str("unknown part ", part));
 }

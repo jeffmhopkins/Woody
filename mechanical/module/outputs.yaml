@@ -21,6 +21,11 @@ meshes:
     from: datasheets/connectors/THONKICONN-PJ398SM-BADPIXEL-3D.step
     out: mechanical/cad/vendor/pj398sm.stl
     fuse: false
+  # The umbilical's mated plug, for the Blender renders only (ADR 0026).
+  - name: module-ne8mx-mesh
+    from: datasheets/connectors/NEUTRIK-NE8MX-3D.stp
+    out: mechanical/cad/vendor/ne8mx.stl
+    fuse: false
   - name: module-r0904n-mesh
     from: datasheets/connectors/SONGHUEI-R0904N-L25-BADPIXEL-3D.step
     out: mechanical/cad/vendor/r0904n.stl
@@ -94,6 +99,9 @@ exports:
   - {name: module-dxf-jack-board, src: mechanical/cad/module.scad, out: mechanical/module/export/jack-board.dxf, defines: {part: "jack_board"}}
   - {name: module-dxf-main-board, src: mechanical/cad/module.scad, out: mechanical/module/export/main-board.dxf, defines: {part: "main_board"}}
   - {name: module-pcb-geometry, src: mechanical/cad/module.scad, out: mechanical/module/export/pcb-geometry.echo, defines: {part: "pcb_geom"}}
+  # Every legend and graphics zone's POSITION, every keep-out on the face and
+  # where each part sits: the panel artwork's and the Blender scene's input (ADR 0026).
+  - {name: module-art-echo, src: mechanical/cad/module.scad, out: mechanical/module/export/panel-art.echo, defines: {part: "art"}}
 
 # The interference check on the envelopes (vendor=false).
 clashes:
@@ -102,3 +110,45 @@ clashes:
     out: mechanical/module/clash.txt
     allow: mechanical/module/clash-allow.yaml
     defines: {vendor: false, show_plugs: false, show_rails: true}
+
+# Outputs a Python tool makes (tools/cad.py `scripts:`). Each names EVERY input
+# the tool reads; the tool prints `READ: <path>` for each file it opens and the
+# build fails on one not named here.
+#
+# THE PANEL ARTWORK (ADR 0026): tools/panel-art.py sets the words in the zones
+# module.scad exports, and fails on any placement rule.
+scripts:
+  - name: module-art-check
+    title: The panel artwork's placement report - every word, its zone, its air to cuts and keep-outs, the contrast
+    cmd: [tools/panel-art.py]
+    inputs: &art_inputs [config/module.yaml, mechanical/module/export/panel-art.echo, mechanical/module/export/panel.dxf,
+                         datasheets/fonts/Inter-Medium.ttf, datasheets/fonts/Inter-SemiBold.ttf]
+    out: mechanical/module/art/panel-art-check.txt
+  - name: module-art-svg
+    title: The panel artwork's master - layers CUT, UNDERBASE, SLATE, BAR, WHITE, text as outlines
+    cmd: [tools/panel-art.py]
+    inputs: *art_inputs
+    out: mechanical/module/art/panel-art.svg
+  - name: module-art-pdf
+    title: The panel artwork's print file - 1:1, one spot colour and one layer per ink
+    cmd: [tools/panel-art.py]
+    inputs: *art_inputs
+    out: mechanical/module/art/panel-art.pdf
+  - name: module-art-proof
+    title: The panel artwork, proofed on the anodise - the cuts shown light
+    cmd: [tools/panel-art.py]
+    inputs: *art_inputs
+    out: mechanical/module/art/panel-art.png
+    stamp: Woody module
+  - name: module-art-tex-albedo
+    cmd: [tools/panel-art.py]
+    inputs: *art_inputs
+    out: mechanical/module/art/tex-albedo.png
+  - name: module-art-tex-roughness
+    cmd: [tools/panel-art.py]
+    inputs: *art_inputs
+    out: mechanical/module/art/tex-roughness.png
+  - name: module-art-tex-height
+    cmd: [tools/panel-art.py]
+    inputs: *art_inputs
+    out: mechanical/module/art/tex-height.png

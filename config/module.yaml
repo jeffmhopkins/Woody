@@ -621,3 +621,228 @@ rules:
     value: 1.0
     status: nominal
     source: "[adr 0024] the least air between two things on the panel's face that are not knobs or plugs (nuts, screw heads, the toggle's sweep, the NE8MX)"
+
+# ------------------------------------------------------------------ art ----
+# THE PANEL'S PRINTED GRAPHICS (ADR 0026): a dark, three-tone language after
+# Pittsburgh Modular's black Lifeforms panels - black anodise, mid-grey
+# islands, light-grey header bars, white lowercase text, no scales, no boxes on
+# outputs. An ORIGINAL design in that grammar; nothing is traced.
+# module.scad derives every ZONE (islands, header pills, the mod label, the
+# OFFSET marks, the maker strip) from the layout above and these leaves, DRCs
+# them, and echoes them to mechanical/module/export/panel-art.echo;
+# tools/panel-art.py sets the text in them and fails on any placement rule.
+art:
+  ink:
+    # Preview colours (sRGB hex) for the proof, the textures and the contrast
+    # check; the printer mixes each named spot ink to its own match.
+    panel:
+      value: "#1B1B1D"
+      status: nominal
+      source: "[adr 0026] black anodised aluminium, bead-blasted before anodising (matte), as a preview colour"
+      decided_by: "the proof panel, photographed against a grey card"
+    slate:
+      value: "#46474D"
+      status: nominal
+      source: "[adr 0026] spot ink SLATE, the islands: a mid cool grey near the ~#44-#4C the 2026-09-30 research measured off the SV-1b's islands with the studio lift taken out [obs]; printed over the white underbase"
+    bar:
+      value: "#D8D8DB"
+      status: nominal
+      source: "[adr 0026] spot ink BAR, the header pills and MOD write-on pads: light grey, ~#D8 measured off the SV-1b's header bars [obs]; over the underbase"
+    white:
+      value: "#EDEDED"
+      status: nominal
+      source: "[adr 0026] WHITE ink, every legend; two passes if the printer offers it"
+  font:
+    medium:
+      value: "datasheets/fonts/Inter-Medium.ttf"
+      status: settled
+      source: "[ds] Inter 4.1 Medium, SIL OFL 1.1 (datasheets/.manifest-R33.csv): a Helvetica-class neo-grotesque with a tall x-height; control, row and small text"
+    semibold:
+      value: "datasheets/fonts/Inter-SemiBold.ttf"
+      status: settled
+      source: "[ds] Inter 4.1 SemiBold, as medium: the title, the section headers, the MOD numerals"
+  lowercase:
+    value: true
+    status: settled
+    source: "[adr 0026] every word on the panel is set lowercase, the Lifeforms rule; the text leaves below may be written in any case"
+  # Font sizes (the em, mm) per text class.
+  size:
+    title:
+      value: 4.0
+      status: nominal
+      source: "[adr 0026] ~1.7 x the label size; the SV-1b's title is 1.3-1.4 x its labels [obs]"
+    header:
+      value: 2.2
+      status: nominal
+      source: "[adr 0026] section headers, knocked out of BAR"
+    label:
+      value: 2.4
+      status: nominal
+      source: "[adr 0026] knob and jack labels: an x-height of ~1.31 [calc 0.546 em x 2.4], the SV-1b's ~1.3 [obs]"
+    row:
+      value: 2.2
+      status: nominal
+      source: "[adr 0026] the toggle row's words, whose zones are rules.legend_h high"
+    small:
+      value: 2.0
+      status: nominal
+      source: "[adr 0026] annotations and the maker line: the floor, art.min.text"
+  tracking:
+    value: 0.02
+    status: nominal
+    source: "[adr 0026] +2 % of the em between letters, every class but the title"
+  # Surfaces.
+  frame:
+    value: 1.0
+    status: nominal
+    source: "[adr 0026] the black frame left at the panel's side edges and above the bottom washers' reach - the title band's and the jack legends' own 1 mm edge"
+  island_r:
+    value: 2.0
+    status: nominal
+    source: "[adr 0026] island corner radius; the SV-1b's is ~3 on a much larger panel [obs]"
+  island_gap:
+    value: 1.2
+    status: nominal
+    source: "[adr 0026] the black gutter between two islands; the SV-1b's is 1.4-1.8 [obs]. Narrower here: the gutter between islands A and B runs in the air between the pot legend bands and the first row's plug grips"
+  header_h:
+    value: 3.0
+    status: nominal
+    source: "[adr 0026] header pill height: 2.2 mm text with 0.4 above and below; the SV-1b's bars are ~3.8 [obs]"
+  header_r:
+    value: 0.8
+    status: nominal
+    source: "[adr 0026] header pill corner radius"
+  pad_r:
+    value: 0.5
+    status: nominal
+    source: "[adr 0026] MOD write-on pad corner radius"
+  pad_gap:
+    value: 0.8
+    status: nominal
+    source: "[adr 0026] between a MOD numeral and its write-on pad"
+  text_pad:
+    value: 0.4
+    status: nominal
+    source: "[adr 0026] the least air between a header's knocked-out text and its pill's ends"
+  pad_inset:
+    value: 0.2
+    status: nominal
+    source: "[adr 0026] a MOD write-on pad this far inside its legend zone's top and bottom: 2.6 high in a 3.0 zone, room for three or four handwritten characters"
+  word_gap:
+    value: 1.5
+    status: nominal
+    source: "[adr 0026] the least air between two words sharing a zone ('rack' ... 'off', 'on' 'power')"
+  line_gap:
+    value: 0.35
+    status: nominal
+    source: "[adr 0026] between one line's descender and the next line's ascender (the umbilical's two lines, the maker's)"
+  # The rasters the Blender scene maps onto the panel (tools/render-module.py).
+  texture:
+    px_mm:
+      value: 40
+      status: nominal
+      source: "[adr 0026] 40 px/mm (~1000 dpi): a 0.2 mm stroke is 8 pixels, sharp at the close-up's scale"
+    rough_panel:
+      value: 0.55
+      status: nominal
+      source: "[from memory] bead-blasted black anodise reads satin-matte: PBR roughness ~0.5-0.6"
+    rough_ink:
+      value: 0.34
+      status: nominal
+      source: "[from memory] UV-cured ink is slightly glossier than the anodise it sits on"
+    relief:
+      value: 0.012
+      status: nominal
+      source: "[from memory] UV ink ~10-15 um per layer; the white underbase and a colour layer stack"
+  # The OFFSET knob's end marks, a bare minus and plus: offset is bipolar,
+  # zero at the centre - the attenuverter convention.
+  mark:
+    angle:
+      value: 140
+      status: settled
+      source: "[ds] R0904N.pdf and R0904N-thonk.pdf: total rotational angle 280 +/-10 deg, so each end stop is 140 from the centre [calc 280 / 2]"
+    size:
+      value: 1.6
+      status: nominal
+      source: "[adr 0026] each mark's square zone, its inner edge art.mark.gap outside the 14 mm knob budget"
+    gap:
+      value: 0.5
+      status: nominal
+      source: "[adr 0026] the mark's zone this far outside the knob budget"
+    bar:
+      value: [1.2, 0.25]
+      status: nominal
+      source: "[adr 0026] the minus and plus bars: length and stroke; the stroke clears art.min.stroke"
+  # The printer's and the reader's floors, which tools/panel-art.py enforces.
+  min:
+    text:
+      value: 2.0
+      status: nominal
+      source: "[web https://jlcpcb.com/blog/character-design-specifications, 2026-09-30] 1.0 mm is the silkscreen floor; 2.0 (x-height ~1.1) is the research's legibility floor at arm's length in a dim rack"
+    stroke:
+      value: 0.20
+      status: nominal
+      source: "[web https://www.lcsc.com/help-center/front-panels/front-panels-design-specifications, 2026-09-30] front-print line width > 0.15; 0.20 with margin"
+    stroke_knockout:
+      value: 0.25
+      status: nominal
+      source: "[from memory] knocked-out text closes up as the ink spreads into it"
+    print_cut:
+      value: 0.5
+      status: nominal
+      source: "[adr 0026] every print this far from any cut edge, for the print-to-mill registration; ink pulls back this far from every hole"
+    contrast:
+      value: 4.5
+      status: settled
+      source: "[web https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html, 2026-09-30] WCAG 2.1 SC 1.4.3, normal text"
+  # WHAT THE PANEL SAYS. The owner's choices of 2026-09-30 are settled.
+  text:
+    title:
+      value: "woody"
+      status: settled
+      source: "[adr 0026] the instrument's name, top centre on the black frame"
+    header_breath:
+      value: "breath"
+      status: settled
+      source: "[adr 0026] island A's header: all three knobs shape breath (ADR 0004)"
+    header_out:
+      value: "cv out"
+      status: settled
+      source: "[adr 0026] island B's header: every jack is a CV output, so no jack is boxed"
+    pots:
+      value: ["gain", "offset", "curve"]
+      status: settled
+      source: "[adr 0026] POT-GAIN, POT-OFFSET, POT-RESP, left to right. The third is 'curve': the owner, 2026-09-30, 'Replace response with curve'"
+    jacks:
+      value: [["pitch", "breath"], ["1", "2"], ["3", "4"]]
+      status: settled
+      source: "[adr 0026] as layout.jacks; a bare numeral is a MOD jack, set SemiBold beside a write-on pad (ADR 0004: 'numbered with a write-on strip')"
+    mod:
+      value: "mod"
+      status: settled
+      source: "[adr 0026] on the spine between the four MOD jacks, so they read mod 1-4"
+    led:
+      value: "rack"
+      status: settled
+      source: "[adr 0026] LED-PANEL is lit from the module's +12 V whether or not the instrument is on (hardware/module/panel-led)"
+    toggle:
+      value: ["off", "on"]
+      status: settled
+      source: "[adr 0026] words, not IEC 60417 O / I - the owner, 2026-09-30. OFF at the LED legend zone's right end, ON at the start of SW-POWER's"
+    power:
+      value: "power"
+      status: settled
+      source: "[adr 0026] after 'on': the system's only power switch (ADR 0004)"
+    umbilical:
+      value: ["umbilical", "to instrument"]
+      status: settled
+      source: "[adr 0026] J-UMBILICAL's legend zone, top left: the label and a small annotation"
+    maker:
+      value: "WOODY / 2026"
+      status: settled
+      source: "[adr 0026] the owner, 2026-09-30. ' / ' breaks the line; art.lowercase sets it 'woody' over '2026'"
+  resp_marks:
+    value: false
+    status: tbd
+    source: "[adr 0026] no end marks on the curve knob until its ends mean something a word can say"
+    decided_by: "hardware/module/breath-response-shaper.md stating which end of POT-RESP is linear"
