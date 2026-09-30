@@ -74,7 +74,7 @@ the tail — by the body CAD (`mechanical/drc.echo`, "overall length"). It was
 | M3 | Layout locked | Ergonomics settled after 2–3 iterations of M2. No aluminium cut before this |
 | M4 | Stack design | Full laminated stack in CAD, every layer a 2D part, **modelled against the real KS-33 STEP solid** rather than a nominal box (ADR 0002) |
 | M5 | Aluminium top plate | Cut, fitted, switches retained solidly, **bonded to `PWR_GND`**. Not before E13 — see the ordering rules below |
-| M6 | Body | Oak top and bottom, frosted acrylic sides, LEDs, strap points, **matrix window + diffuser on the top face after the keys, and the USB-C slot** (ADR 0009) |
+| M6 | Body | Oak top and bottom, frosted acrylic sides, strap points, **matrix window + diffuser on the top face after the keys, and the USB-C slot** (ADR 0009) |
 | M7 | Integration | Electronics mounted in the body, umbilical connector fitted and strain-relieved |
 | M8 | **Final-assembly gate** | The cassette tested on the bench and dry-fitted in the shell, not yet bonded, not signed off. (This row said **Pre-bond gate / assembled but not bonded** until 2026-09-21. The body closed on six fasteners onto an RTV gasket from then until ADR 0025, 2026-09-29; it is now glued shut round the cassette with RTV and opened by cutting it, so M8 is again the last gate before the cassette is bonded in — dry-assemble, balance and test before then.) Full E11 breath-noise test re-run on the *final* harness, **thermal soak at the lighting clamp, watching temperature *and the breath zero* at the sensor**, two-hour play test, failure injection, self-test, **pitch scoped while the LEDs sweep** (ADR 0006 — the one test the plan was missing), and **recover both boards through the service header** so the last route in is known good, not assumed (ADR 0009). Nothing closes until this passes |
 
@@ -104,8 +104,8 @@ when the body became serviceable (ADR 0009); the ordering rule stands anyway,
 because "recoverable" here means a full strip-down.
 
 **M8 exists because E11 tests a topology that does not survive to the finished
-instrument.** At E11 the LED strips are not installed — they arrive at M6 — and
-the body is not closed, so the boards and ribbons under test are not in their final, closed-body configuration (there is no loom since ADR 0017). The
+instrument.** At E11 the body is not closed (the LEDs are on the main board
+since ADR 0028, so they are there), so the boards and ribbons under test are not in their final, closed-body configuration (there is no loom since ADR 0017). The
 single test that validates the entire analog-breath decision was running
 against a configuration that changes afterwards.
 **This was the most important missing milestone in the project.**
@@ -189,8 +189,10 @@ came out of the analog design review specifically.
 |---|---|---|
 | **Real-time board idle current** | E1 | 64 unlit `WS2812B-0807` drivers are an estimated ~50 mA and 0.25 W. **The part number is now read off the banked Waveshare schematic and the estimate is still an estimate** — Worldsemi publishes no WS2812B-0807 datasheet at all. Bracketing surrogates give 22 mA (XINGLIGHT 2022, 0.35 mA/device), <38 mA (Worldsemi WS2812B-2020, <0.6 mA) and **160 mA** (XINGLIGHT 2024, 2.5 mA/device), so ~50 mA is plausible but could be 3× low. E1 measures it, spent whether or not anything is displayed. The shared lighting budget is sized from this number (ADR 0014) |
 | **1:1 paper fit check, both faces** | M4 | The etherCON flange against a 50.50 mm 10HP panel *and* against the instrument's tail face beside the USB-C slot. Was called comfortable at the superseded 8HP; the tail is now the tight one (ADR 0004, ADR 0009) |
+| **Side-light diffusion test** | **Before the main board's layout (M4)** — moved from M6 by ADR 0028 | Fixes `lighting.led_count` and `lighting.led_pitch`, which the board fixes for good when it is made. A strip offcut at board height (the row's LEDs sit ~0.85 mm lower than a strip's) under a white-masked mock key board, with the real acrylic at the side distance (ADR 0014, *Diffusion is a prototype question*; ADR 0028) |
+| **LED row current at full white** | E6 | Settles `led-row-current`: ADR 0014 read the WS2815's "15 mA" as per channel, which the WS2815B-V1's own maximum power rules out; a current probe on the row's 12 V feed with all thirteen at full white (ADR 0028) |
 | **Matrix diffusion prototype** | M6 | Can an 8×8 at 2.6 mm pitch stay pixel-distinct through a window, or only as a blurred bar? Decides whether the 2-D IMU assignment is usable (ADR 0014) |
-| **Interior temperature rise under load** | M8 | The lighting budget is set from an estimated 3 K/W. Soak with the strip and matrix at the clamp, and measure at the breath sensor (ADR 0014) |
+| **Interior temperature rise under load** | M8 | The lighting budget is set from an estimated 3 K/W. Soak with the LED row and matrix at the clamp, and measure at the breath sensor (ADR 0014) |
 | **Cold-start warm-up sweep** | E2 | Run the sensor from cold through 20 minutes of playing. Output that *falls* under warming is a blocked reference chamber; output that *drifts* is ordinary thermal offset (ADR 0003) |
 | **Breath zero vs cavity temperature** | M8 | The DP's reference port is open to the cavity, so the cavity must leak. Watch the zero during the same soak — a walking zero means it is sealing more than assumed. **The body opens, so a vent can be added at M8 or afterwards** — and a body that closes on a gasket rather than an adhesive is likelier to leak enough on its own (ADR 0003, ADR 0009) |
 | **PSRAM mode on the ESP32-S3-Matrix** | E1 | **No longer a gate** — settled on paper two ways: the vendor board file exposes GPIO33–40 as headers, which octal PSRAM makes impossible, and `R2` is Espressif's suffix for 2 MB *quad*; and the vendor schematic (`datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-SCHEMATIC.pdf`) marks `U66` as `ESP32-S3FH4R2`, quad PSRAM in the package. 17 broken out; the spares are ADR 0007's pin table. Print the pin list anyway; it costs thirty seconds and catches a silent board revision (ADR 0007) |
