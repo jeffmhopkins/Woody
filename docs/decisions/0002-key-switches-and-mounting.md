@@ -89,7 +89,7 @@ four of something different.
 
 A failed switch means taking the instrument apart — six fasteners, lid off,
 and the switch is soldered to a plate that is inside the lid (ADR 0009) *(since
-ADR 0024: the silicone cut, the oak top lifted, the key plate unscrewed from
+ADR 0025: the silicone cut, the oak top lifted, the key plate unscrewed from
 the cassette's columns)*. That
 is an afternoon, not a rebuild; this paragraph said "a bonded laminated body"
 and meant a rebuild. Accepted either way — mechanical switches are reliable,

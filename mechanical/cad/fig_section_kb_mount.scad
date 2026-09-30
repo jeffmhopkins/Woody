@@ -1,4 +1,4 @@
-// Cross-section through a column (ADR 0024): the left hand's tail corner,
+// Cross-section through a column (ADR 0025): the left hand's tail corner,
 // seen from the tail. Every level of the stack is labelled from the values it
 // is computed from, bottom to top: the stud pressed into the bottom plate, the
 // spacer, the main board, the standoff threaded onto the stud and faced to the

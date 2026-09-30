@@ -87,7 +87,7 @@ actually measure — and never leaves the instrument.
 
 ## The instrument must stay recoverable
 
-The body comes apart by cutting its silicone (ADR 0024), and answering a
+The body comes apart by cutting its silicone (ADR 0025), and answering a
 failed flash that way means cutting the oak top free, unscrewing the key plate
 from the cassette's columns, unplugging the Matrix's ribbon and the key
 boards' ribbons from the main board (ADR 0017), and bonding it all back with
@@ -104,7 +104,7 @@ fresh silicone. Everything here exists so that it never has to be the answer.
   through every boot that has not been asked for MIDI.
 - **The recovery ladder, in order.** (1) Rollback to the other app slot. (2) USB-Serial-JTAG
   through the tail USB-C slot — which is why MIDI is opt-in. (3) The console
-  header on the main board, with the body opened (ADR 0024 — there is no
+  header on the main board, with the body opened (ADR 0025 — there is no
   service cover since 2026-09-26), for watching a board that boots
   but misbehaves. (4) **Hardware boot-force on the same header**: `EN` and
   `IO0` are not on the ESP32-S3-Matrix's pad rows, so two ribbon conductors

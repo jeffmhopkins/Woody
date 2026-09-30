@@ -24,7 +24,7 @@ Since ADR 0017:
 
 - **`right_hand` and `left_hand` are the two key boards** (`PCB-CLUSTER`),
   under `PLATE-TOP`, each a board that spans the cavity with one of the
-  cassette's columns at each corner (ADR 0024; ADR 0020 Amendment 7): under
+  cassette's columns at each corner (ADR 0025; ADR 0020 Amendment 7): under
   the key plate a spacer, then the board, then the column's standoff, which
   stands on the main board; a screw comes down through the plate, the spacer
   and the board into the standoff. Each connects to the main board by one 1.27 mm IDC ribbon (`CBL-CHAIN`) into a through-hole right-angle header on its underside.
@@ -121,7 +121,7 @@ sibling pages cite `cluster-boards.md` §3.*
 *Written for the key boards under `PLATE-TOP`. The thumb switches sit in
 `PLATE-BOTTOM` the same way, with the main board above them, so the
 height rules below hold for the main board's underside too, over its whole
-length since the bottom plate runs under all of it (ADR 0024). The thumb
+length since the bottom plate runs under all of it (ADR 0025). The thumb
 switches' board sits at `switch.thumb_pcb_below_seat`, set by the same spacer
 on the bottom plate (ADR 0022).*
 
@@ -150,7 +150,7 @@ ks33-geometry.md`.
 > supersedes it wherever the two disagree `[repo] ks33-geometry.md`.
 
 **The key-board outline is the body CAD's**: a rectangle across the cavity
-with a column in each corner (ADR 0020 point 3, ADR 0024),
+with a column in each corner (ADR 0020 point 3, ADR 0025),
 exported as `mechanical/export/key-board-*.dxf` and placed from
 `config/body.yaml` `layout.*`, `boards.*` (the tail ends' `boards.kb_tail_margin`
 is longer, so the tail corners' hardware clears the last keys' cutouts) and
@@ -164,7 +164,7 @@ than a pitch parameter.
 ### Three layout rules that are not obvious
 
 - **The aluminium plate sits directly above this board and is grounded**
-  through the cassette's columns at the main board's mounts `[repo] 0024, 0020 Amendment 7`. That is useful — it
+  through the cassette's columns at the main board's mounts `[repo] 0025, 0020 Amendment 7`. That is useful — it
   shields the key networks from the LED channel for free — and it is also a
   short waiting to happen. Every part on the plate-facing side needs clearance
   to the plate, or the board needs its passives on the far side.
@@ -268,7 +268,7 @@ and the `LT` springs to
 [`key-switch-network/`](key-switch-network/key-switch-network.md), and the
 closed 74HC165 item to [`key-register/notes.md`](key-register/notes.md).*
 
-- **The key-board mount's open items** (§5, ADR 0024, ADR 0020 Amendment 7).
+- **The key-board mount's open items** (§5, ADR 0025, ADR 0020 Amendment 7).
   The spacer is chosen (`MECH-KB-SPACER`); the column's standoff and screw are
   open until bought (`MECH-COL-STANDOFF`, `MECH-COL-SCREW`), and nothing goes
   into the wood but the screws' heads, in blind pockets. Open:

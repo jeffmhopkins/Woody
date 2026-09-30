@@ -208,11 +208,11 @@ hairpin leg and fold radius", held to the cable's bend radius by "key-chain
 ribbon fold no tighter than its bend radius". Both hairpins are checked
 inside the body ("key-chain ribbon hairpin inside the body") and off the
 cassette's columns, which stand through the whole gap the hairpin lies in
-("key-chain ribbon hairpin clear of the columns"; ADR 0024).
+("key-chain ribbon hairpin clear of the columns"; ADR 0025).
 
 **Why it is as long as it is** (owner, 2026-09-27: long enough "to have the
 top off and still connect the ribbon before tightening down"). Since the
-cassette (ADR 0024), tightening down is screwing the key plate onto its
+cassette (ADR 0025), tightening down is screwing the key plate onto its
 columns, on the bench or, in service, once the oak top is cut free. The
 service position is the key plate, with both key boards on it, **held raised
 straight up off its columns** far enough for a hand to reach the main board's

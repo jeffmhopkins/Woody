@@ -259,7 +259,7 @@ switch:
   thumb_pcb_below_seat:
     value: 2.5
     status: nominal
-    source: "the main board's face nearest the thumb switches' seat, below it: against the thumb switches' housing bottom, as the key boards are (ADR 0022, ADR 0020 Amendment 6), held there by its mount on the bottom plate (ADR 0024) - the plate + hardware.kb_spacer_l [calc: 1.2 + 1.3], inside switch.pcb_below_seat_window; drc.echo 'main board mount sets its depth'"
+    source: "the main board's face nearest the thumb switches' seat, below it: against the thumb switches' housing bottom, as the key boards are (ADR 0022, ADR 0020 Amendment 6), held there by its mount on the bottom plate (ADR 0025) - the plate + hardware.kb_spacer_l [calc: 1.2 + 1.3], inside switch.pcb_below_seat_window; drc.echo 'main board mount sets its depth'"
   pcb_below_seat:
     value: 2.5
     status: nominal
@@ -514,7 +514,7 @@ boards:
   kb_end_margin:
     value: 6.6
     status: tbd
-    source: "a key board's MOUTH end past its first switch cutout, along the body. The mouth corners' columns stand over the first thumb row, and a column cannot lean (ADR 0024), so the key board's mount must be where its stud in the bottom plate keeps hardware.stud_edge, and its spacer 0.5, from a thumb switch's cutout: 0.6 more than the 6.0 the key board alone needed (drc.echo 'columns vertical: the main board's mounts under the key boards'', 'bottom-plate studs clear of the plate's edges and cutouts', 'bottom-plate spacers clear of the thumb switch cutouts')"
+    source: "a key board's MOUTH end past its first switch cutout, along the body. The mouth corners' columns stand over the first thumb row, and a column cannot lean (ADR 0025), so the key board's mount must be where its stud in the bottom plate keeps hardware.stud_edge, and its spacer 0.5, from a thumb switch's cutout: 0.6 more than the 6.0 the key board alone needed (drc.echo 'columns vertical: the main board's mounts under the key boards'', 'bottom-plate studs clear of the plate's edges and cutouts', 'bottom-plate spacers clear of the thumb switch cutouts')"
     decided_by: "M4, with the boards laid out"
   kb_tail_margin:
     value: 10.3
@@ -750,7 +750,7 @@ ethercon:
 
 # ------------------------------------------------------------- hardware ----
 hardware:
-  # THE CASSETTE (owner, 2026-09-29; ADR 0024): the key plate and ONE bottom
+  # THE CASSETTE (owner, 2026-09-29; ADR 0025): the key plate and ONE bottom
   # plate, tied by a column at each of the key boards' eight corners, with the
   # two key boards and the main board between them. It is built and tested on
   # the bench with its ribbons plugged, dropped into the shell and bonded to the
@@ -827,7 +827,7 @@ hardware:
   kb_spacer_od:
     value: 4.5
     status: nominal
-    source: "the Ettinger 5.52 spacer's outside diameter, 4.5; its bore is 2.6, inside stud_attached_hole [datasheets/mechanical/ETTINGER-CATALOG-2024-P79-DISTANZHUELSEN-MESSING.html]. On a key board it bears on the board's top copper, which keeps copper out from under it; on the main board it bears on a PWR_GND pad on the underside, which grounds the bottom plate (ADR 0022 point 6, ADR 0024)"
+    source: "the Ettinger 5.52 spacer's outside diameter, 4.5; its bore is 2.6, inside stud_attached_hole [datasheets/mechanical/ETTINGER-CATALOG-2024-P79-DISTANZHUELSEN-MESSING.html]. On a key board it bears on the board's top copper, which keeps copper out from under it; on the main board it bears on a PWR_GND pad on the underside, which grounds the bottom plate (ADR 0022 point 6, ADR 0025)"
   # THE COLUMN STANDOFF: not a stock length, so bought at the next stock
   # length and faced, as ADR 0023 does for the module's MECH-STANDOFF-MOD. Its
   # length is the gap from the main board's top face to a key board's underside
@@ -914,7 +914,7 @@ hardware:
   # [calc], interior 45, strip 10 wide on the centreline, span 20:
   #   M5 (nut 8 AF):   keep-out edge 1.12 mm UNDER the strip
   #   M4 (nut 7 AF):   keep-out edge 0.54 under the strip; clearing it needs a
-  #                    span of 21.1+, which nothing else bounds (ADR 0024)
+  #                    span of 21.1+, which nothing else bounds (ADR 0025)
   #   M3 (nut 5.5 AF): keep-out edge 0.33 clear of the strip
   # Load: ADR 0009's mass table puts the body at ~825 g, ~8 N on the strap;
   # a factor of 10 for a jerk is 80 N. An M3 leg of 4.6 steel proofs at
@@ -1026,7 +1026,7 @@ routing:
   chain_service:
     value: "raised"
     status: nominal
-    source: "owner, 2026-09-27: long enough 'to have the top off and still connect the ribbon before tightening down'. With the cassette (ADR 0024), 'tightening down' is screwing the key plate onto its columns, on the bench or, in service, with the oak top cut off. The key plate, with both key boards on it, is held raised straight up off the columns by routing.chain_raise while the main board's sockets are plugged or unplugged, then lowered and screwed down; the ribbon folds itself into the hairpin. A ribbon long enough to lay the plate beside the body would close into a hairpin that reaches the left-hand board's tail column (drc.echo 'key-chain ribbon hairpin clear of the columns')"
+    source: "owner, 2026-09-27: long enough 'to have the top off and still connect the ribbon before tightening down'. With the cassette (ADR 0025), 'tightening down' is screwing the key plate onto its columns, on the bench or, in service, with the oak top cut off. The key plate, with both key boards on it, is held raised straight up off the columns by routing.chain_raise while the main board's sockets are plugged or unplugged, then lowered and screwed down; the ribbon folds itself into the hairpin. A ribbon long enough to lay the plate beside the body would close into a hairpin that reaches the left-hand board's tail column (drc.echo 'key-chain ribbon hairpin clear of the columns')"
     decided_by: "owner"
   chain_raise:
     value: 30.0

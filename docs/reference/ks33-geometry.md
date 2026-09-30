@@ -158,7 +158,7 @@ limits" (a NOTE) the worst case.
 The switches keep the plate and the board apart only where they are, and a
 mount is where they are not. The same spacer stands at every mount on both
 plates: under the key plate above each key board, and on the bottom plate
-under the main board, over the thumb switches (ADR 0024).
+under the main board, over the thumb switches (ADR 0025).
 
 *Until 2026-09-29 the board sat 3.2–3.6 mm below the seat, on 1.3 mm holes.
 At that depth a 1.6 mm board left only about 0.1 mm of pin, so the boards

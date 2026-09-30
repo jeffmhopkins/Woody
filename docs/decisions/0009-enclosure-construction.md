@@ -1,9 +1,9 @@
 # 0009 — Enclosure construction
 
 **Status:** Accepted. **How the body closes is amended 2026-09-29 by
-[ADR 0024](0024-the-cassette.md)**: the six body fasteners are gone. The
+[ADR 0025](0025-the-cassette.md)**: the six body fasteners are gone. The
 internals are one bonded unit, the cassette, glued into the shell with RTV and
-opened by cutting it. Each passage that ADR 0024 changes is marked in place.
+opened by cutting it. Each passage that ADR 0025 changes is marked in place.
 
 ## Context
 
@@ -283,7 +283,7 @@ What changes, and what does not:
   must exceed the oak's cross-grain movement across one hole, which the model
   checks.
 - **The playing face is unbroken oak.** The six fasteners stop in the plate
-  from below, so no hole in the oak top carries one. *(Since [ADR 0024](0024-the-cassette.md):
+  from below, so no hole in the oak top carries one. *(Since [ADR 0025](0025-the-cassette.md):
   there are no body fasteners. The column screws' heads sit in blind pockets in
   the oak top's underside, so the face is still unbroken.)*
   > **True, and simpler, 2026-09-28 ([ADR 0020](0020-key-boards-screw-to-the-plate.md),
@@ -336,7 +336,7 @@ What changes, and what does not:
   is cut in the plate for it any more.
 - **Thumb keys follow the same rule** (same date): flush with the bottom face at
   full travel. The thumb plate stays on the oak bottom's inside face *(since
-  ADR 0024, one bottom plate for both thumbs, in the same place)*, so the
+  ADR 0025, one bottom plate for both thumbs, in the same place)*, so the
   oak bottom is the same thickness as the oak top and **"oak thickness sets the
   inset depth" becomes "the flush rule sets the oak thickness"** — the open
   question below is closed by it.
@@ -424,7 +424,7 @@ Three details that have to be in the CAD from the start:
 
 **A USB-C slot at the tail face**, which the instrument needs regardless of the
 window. Flashing and USB MIDI (E5) both require reaching the real-time board's
-own connector. The body opens on six fasteners now *(since ADR 0024, by
+own connector. The body opens on six fasteners now *(since ADR 0025, by
   cutting silicone)*, but opening it to flash a
 board is a bench operation, not a thing to do with an instrument in a rack —
 the slot is what makes it a cable. Keep that edge of the board at the tail.
@@ -583,7 +583,7 @@ Two consequences:
 - **It must anchor to the structural plate stack, not to the oak.** The wood is
   a shell (ADR 0002) and a U-bolt through oak alone will crush the fibres and
   eventually tear out. Through-bolt to a metal backing plate inside the cavity,
-  tied into the same structure that carries the keys. *(Since [ADR 0024](0024-the-cassette.md):
+  tied into the same structure that carries the keys. *(Since [ADR 0025](0025-the-cassette.md):
   that plate is the cassette's bottom plate, the length of the body, which the
   legs pass and which the columns tie to the key plate. There is no separate
   backplate.)*
@@ -601,7 +601,7 @@ Two consequences:
   bolt, lid on — so a slot or a row of positions is now worth cutting, and the
   balance can be tuned with the instrument on a strap and everything in it.
   Still do it once at M8 rather than treating it as a user control.
-  *(Since [ADR 0024](0024-the-cassette.md): moving it after closing means cutting the
+  *(Since [ADR 0025](0025-the-cassette.md): moving it after closing means cutting the
   silicone and a new main board, whose holes fix it. So the first way below,
   dry-assembly before closing, is the only one.)*
 
@@ -751,14 +751,14 @@ mass in it.
 
 ## The body comes apart
 
-> **Superseded 2026-09-29 by [ADR 0024](0024-the-cassette.md).** The owner: "we could just drop
+> **Superseded 2026-09-29 by [ADR 0025](0025-the-cassette.md).** The owner: "we could just drop
 > it into the instrument with a little bit of silicone to glue it to the top
 > and bottom wood ... so no need to like screw into the wood except for maybe
 > the u-bolt". The six fasteners, their counterbores and the lid's gasket are
 > gone. The internals are one unit, the cassette, built and tested on the
 > bench and bonded to the oak top and bottom with RTV. The oak top's joints at
 > the side grooves are glued too. **Service is by cutting the silicone**
-> (ADR 0024, *Consequences*). This section is the record of the body that
+> (ADR 0025, *Consequences*). This section is the record of the body that
 > opened on screws. What it says about the cavity's leak (the breath
 > reference must see the room) and about M8 still holds. A glued joint of RTV
 > beads is not airtight unless it is made so, and M8 still watches the zero.
@@ -882,7 +882,7 @@ line with the body, which is what makes a 2 m tether hang rather than twist
 **It does not weaken anything.** The load paths were never the glue: the keys
 land on the aluminium plate, the plate is the structure, and the U-bolt hangs
 from the same stack. What the glue did was hold the shell together, and six
-M3s do that better because they can be done up again. *(Since [ADR 0024](0024-the-cassette.md):
+M3s do that better because they can be done up again. *(Since [ADR 0025](0025-the-cassette.md):
 the load path is the cassette's columns, key plate to bottom plate, and the
 bottom plate bears on the oak bottom. The shell is glued and is the main
 structure, in the owner's words.)*
@@ -921,7 +921,7 @@ ordering a ferrite bead and an electrolytic on one row.
 | Matrix diffuser | **RTV silicone**, edges only, clear of the light path | Yes |
 | Thumb plate ↔ inside face of the oak bottom | **RTV silicone** | Yes |
 
-> **Amended 2026-09-29 ([ADR 0024](0024-the-cassette.md)).** The key plate is bonded to the
+> **Amended 2026-09-29 ([ADR 0025](0025-the-cassette.md)).** The key plate is bonded to the
 > oak top with RTV, as the table says. But it is bonded as the top of the
 > cassette, after the cassette is assembled, with the column screws' heads
 > finding their pockets. The **bottom plate**, which replaced the thumb
@@ -930,7 +930,7 @@ ordering a ferrite bead and an electrolytic on one row.
 > fasteners. It is an RTV bond, fresh, not skinned, and cut to open. The
 > **end caps'** "fasteners into the stack" were never drawn, and the owner
 > wants nothing screwed into the wood, so how the caps are held is open
-> (ADR 0024, *Open*). RTV is now the adhesive on every joint that may have to
+> (ADR 0025, *Open*). RTV is now the adhesive on every joint that may have to
 > open, and the gasket paragraph below is the record.
 
 **RTV changes job, not product.** It was the adhesive on four joints; it is now
@@ -950,7 +950,7 @@ the grain with indoor humidity — **0.6–0.9 mm over the 57 mm width** — aga
 an aluminium plate that moves essentially nothing, and a rigid bond would have
 to fight that for the life of the instrument. RTV lets it slide. But press a
 key and the plate is pushing *into* a thin confined layer, which barely gives.
-*(Corrected 2026-09-29, [ADR 0024](0024-the-cassette.md): this was written for a plate on top of
+*(Corrected 2026-09-29, [ADR 0025](0025-the-cassette.md): this was written for a plate on top of
 the wood. Since the plate went under the oak top (2026-09-26, above), a key
 press pulls the plate away from the wood, and the layer is in tension, not
 compression. The cassette's columns now take the press, down to the bottom

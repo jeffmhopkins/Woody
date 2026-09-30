@@ -1,7 +1,7 @@
 # Left-hand key board — `key-board-lh`
 
 The left hand's five keys (LH1–LH5) and their register. The board is held
-under the key plate by the cassette's columns, one at each corner (ADR 0024,
+under the key plate by the cassette's columns, one at each corner (ADR 0025,
 ADR 0020 Amendment 7), and one IDC ribbon runs from it to
 the main board (ADR 0017, amended). **This board is the project's worked
 example.** Every other board is laid out, checked and ordered the way this one
@@ -141,7 +141,7 @@ The right-hand board, or any other simple board, starts from a copy of
   line by line.
 - **No mount is plated.** All four stay unplated with their copper
   keep-outs: the key plate is grounded through the columns at the main
-  board's mounts (ADR 0024). Amendment 5's `bond_mount` is gone from
+  board's mounts (ADR 0025). Amendment 5's `bond_mount` is gone from
   `layout.yaml`; `tools/pcb.py` still supports the key for a board that needs one.
 - `connect_first:` names pad-to-pad connections routed before everything,
   each with the `max_mm` that `pcb.py check` then holds it to: here the
@@ -221,13 +221,13 @@ test are checked by `pcb.py` itself (above).
    - **Backward is 3V3 on ground.** The 2×6 pad grid fits the header either way round. Turned 180°, the header puts the ribbon's 3V3 on a ground pin (`key-chain-loom.md`). Fit it with its mouth at the arrow.
    - Seat it flat and solder it from the top (switch) side.
    - The plate has **no window** over the tails. Seated flat, they stop short of the grounded plate (`mechanical/drc.echo` "J-CHAIN pin tails clear of the key plate"), so do not trim them or leave the header standing proud.
-2. **The corner mounts, and the switches.** Each of the board's four corners is one of the cassette's columns (ADR 0024; ADR 0020 Amendment 7; the section is `mechanical/renders/section-kb-mount.png`). From the top down: an M2.5 low-head screw whose head bears on the key plate's top face; the key plate; a spacer (Ettinger 5.52.015, faced to `hardware.kb_spacer_l`); the board; and the column's standoff, which is already threaded onto its stud in the bottom plate and clamps the main board. The screw goes down through the plate, the spacer and the board into the standoff. The key board is fitted on the bench, with the rest of the cassette, before anything goes into the wood.
+2. **The corner mounts, and the switches.** Each of the board's four corners is one of the cassette's columns (ADR 0025; ADR 0020 Amendment 7; the section is `mechanical/renders/section-kb-mount.png`). From the top down: an M2.5 low-head screw whose head bears on the key plate's top face; the key plate; a spacer (Ettinger 5.52.015, faced to `hardware.kb_spacer_l`); the board; and the column's standoff, which is already threaded onto its stud in the bottom plate and clamps the main board. The screw goes down through the plate, the spacer and the board into the standoff. The key board is fitted on the bench, with the rest of the cassette, before anything goes into the wood.
    - **The spacer is not optional**: with the plate it sets the board's depth (`drc.echo` "key-board mount sets the board depth"). Measure each faced spacer with calipers before fitting: `hardware.kb_spacer_l`, within `kb_spacer_l_tol`.
    - Clip the five KS-33s into the key plate's cutouts.
    - Plug the ribbon into this board's J1 (step 3).
    - Stand the board on its four standoffs, set a spacer on each corner, lower the key plate onto the switch pins and the spacers, and drive the four screws into the standoffs.
    - **Then** solder the switch pins, from the bottom. Soldering with the board fixed at depth is what holds it at the depth the pins were designed for (`switch.pcb_below_seat`). How far the hardware's tolerances can move it is `drc.echo` "key-board depth at the hardware's tolerance limits" (*Open* below). Soldering from the bottom needs the key plate, with its board, off the columns and turned over: do it before the cassette's ribbon is plugged at the main board, or with the plate held raised (step 3).
-   - **Last, the cassette goes into the shell**, and the oak top is RTV-bonded onto the key plate (ADR 0024), the screws' heads finding their pockets. For service afterwards the silicone is cut and the screws come out from above.
+   - **Last, the cassette goes into the shell**, and the oak top is RTV-bonded onto the key plate (ADR 0025), the screws' heads finding their pockets. For service afterwards the silicone is cut and the screws come out from above.
 3. **The ribbon** (`CBL-CHAIN`).
    - **Order it as** `FFSD-06-D-<code>-01-N-RN2`. `<code>` is `mechanical/drc.echo` "key-chain cable to order (FFSD length code)", **written with two digits before the point**: Samtec's field is `XX.XX` `[datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf, part-number block]`, so a length under 10 in takes a leading zero, as DigiKey lists FFSD-06-D-06.00-01-N `[web https://www.digikey.com/en/products/detail/samtec-inc/FFSD-06-D-06-00-01-N/6678085, 2026-09-27]`. Whether Samtec accepts a length that is not on its catalogue's list, to 0.01 in, is **unverified**: confirm the full part number in Samtec's configurator before paying, since the series is non-returnable. It is the overall length in **inches**, over both sockets, as the FFSD print measures it, with the print's −0.125 in tolerance already covered. `-RN2` reverses the notch on the second socket. **Do not type the millimetre length** ("key-chain ribbon length (derived)") into the part number: read as inches, it orders a cable about 25 times too long.
    - **Meter every cable before it is first powered**, not only the first one. Check it by *Bring-up*, step 2.
@@ -311,7 +311,7 @@ J1 with pin 1's dot and the arrow out of its mouth, where it is soldered;
 
 | Rev | Date | What changed | Where |
 |---|---|---|---|
-| A | 2026-09-27 | First layout: every key's network the same T in the same place round its switch, six test pads in one row (QH, SER, GND, SCK, SH/LD, 3V3), C7 (`C-BULK-CHAIN`), silkscreen on both sides, no acute track junction (`pcb.py check` tests every join, a track ending mid-track included). Not yet ordered; re-laid out on the same date for the screwed corner mount (keep-outs from the nut and the spacer/washer; ADR 0020 Amendment 3 then moved the heads from plugged bores into blind pockets, which changes nothing on the board); on 2026-09-28, C7 made a fitted, machine-placed part (it had been a do-not-fit footprint; owner: it costs cents) and J-CHAIN's pads lengthened on their free side; the same day the corner mounts went to M2.5 for PEM studs pressed flush into the plate (ADR 0020 Amendment 4: larger holes and keep-outs, mounts 0.2 further in), and the washer dropped, the spacer taking its length; on 2026-09-29 re-laid out for the cassette's columns (ADR 0024): no bonded mount (Amendment 5's is superseded), the mouth end 0.6 and the tail end 0.2 longer, J-CHAIN 0.5 further toward the tail and the register, its decoupler, R11 and C7 moved 0.5 with it | git history of this directory |
+| A | 2026-09-27 | First layout: every key's network the same T in the same place round its switch, six test pads in one row (QH, SER, GND, SCK, SH/LD, 3V3), C7 (`C-BULK-CHAIN`), silkscreen on both sides, no acute track junction (`pcb.py check` tests every join, a track ending mid-track included). Not yet ordered; re-laid out on the same date for the screwed corner mount (keep-outs from the nut and the spacer/washer; ADR 0020 Amendment 3 then moved the heads from plugged bores into blind pockets, which changes nothing on the board); on 2026-09-28, C7 made a fitted, machine-placed part (it had been a do-not-fit footprint; owner: it costs cents) and J-CHAIN's pads lengthened on their free side; the same day the corner mounts went to M2.5 for PEM studs pressed flush into the plate (ADR 0020 Amendment 4: larger holes and keep-outs, mounts 0.2 further in), and the washer dropped, the spacer taking its length; on 2026-09-29 re-laid out for the cassette's columns (ADR 0025): no bonded mount (Amendment 5's is superseded), the mouth end 0.6 and the tail end 0.2 longer, J-CHAIN 0.5 further toward the tail and the register, its decoupler, R11 and C7 moved 0.5 with it | git history of this directory |
 
 To make a revision, edit the board in KiCad, change the revision and date in
 the title block and in the silkscreen text, and copy them into

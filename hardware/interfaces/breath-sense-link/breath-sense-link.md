@@ -12,7 +12,7 @@ The differential pole, the effective gain and `inamp-full-scale` with it, the
 sensor span and pedestal, the CMRR term and the `R1` power argument are all
 derived at the module end from parts fitted at the instrument end, 2 m away,
 inside a body that opens only by cutting its silicone and lifting the key
-plate off the cassette's columns (ADR 0024).
+plate off the cassette's columns (ADR 0025).
 
 **Neither schematic is redrawn here.** The instrument end is drawn in
 [`carrier.md`](../../carrier/carrier.md) §2, in one connected picture that also
@@ -153,7 +153,7 @@ M4, and E11 decides whether it mattered.
 ADR 0003 buys two. The spare goes in with an iron, and nothing else:
 
 1. **Open the body** — cut the oak top free and unscrew the key plate from the
-   cassette's columns (ADR 0024). The key boards come away with it on their
+   cassette's columns (ADR 0025). The key boards come away with it on their
    ribbons (ADR 0017), and the main board's parts face up, so the sensor is in
    reach in place.
 2. **Pull the tube off P1.**

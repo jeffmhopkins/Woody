@@ -4,7 +4,7 @@
 everything and get us to the line before board layout". It settles
 `switch.pcb_t` and `switch.thumb_pcb_below_seat`, which ADR 0020 point 6 and
 `docs/reference/ks33-geometry.md` had left open until the main board's own
-mount existed. **Amended 2026-09-29 by [ADR 0024](0024-the-cassette.md)**:
+mount existed. **Amended 2026-09-29 by [ADR 0025](0025-the-cassette.md)**:
 every mount is on one bottom plate, the oak mounts are gone, the columns run
 through to the key plate, and the U-bolt clamps the bottom plate (*Amendment*,
 below).
@@ -33,7 +33,7 @@ Two things were therefore unanswered:
    *(Since ADR 0020 Amendment 6: 1.6 mm, as the key boards now are, its top
    pressed against the thumb switches' housings.)*
 2. **Over a thumb plate it is held exactly as a key board is** (ADR 0020,
-   Amendment 4), with the same parts *(since ADR 0024: on the bottom plate,
+   Amendment 4), with the same parts *(since ADR 0025: on the bottom plate,
    which replaced the thumb plates, at every mount; at a column the nut is the
    column's standoff)*:
    - the PEM FHL-M2.5 stud pressed into the thumb plate, its head flush in
@@ -48,7 +48,7 @@ Two things were therefore unanswered:
    `mechanical/drc.echo` checks it (*"main board mount sets its depth"*,
    *"main board depth and thickness inside the switch pins' window"*).
 3. **Where no thumb plate is under it, it stands on the oak** *(superseded by
-   ADR 0024: there are no oak mounts; the bottom plate is under the whole
+   ADR 0025: there are no oak mounts; the bottom plate is under the whole
    board)*:
    - an M2.5 threaded insert for hardwood, set into a blind hole in the oak
      bottom's inside face;
@@ -72,7 +72,7 @@ Two things were therefore unanswered:
    square cap on a cross stem feels the same either way.
 
 6. **Each thumb plate is grounded through its own mounts** (owner, 2026-09-29).
-   *(Since ADR 0024: the bottom plate, through every mount, and the key plate
+   *(Since ADR 0025: the bottom plate, through every mount, and the key plate
    with it, through the columns.)*
    A plate mount's hole in the main board is plated, with a `PWR_GND` pad on
    both faces: the spacer bears on the underside pad and the nut on the top
@@ -84,7 +84,7 @@ Two things were therefore unanswered:
 
 7. **The main board is in the U-bolt's clamp** (owner, 2026-09-29: "I think we
    can have the standoffs be part of the actual stackup"). Up each leg go
-   *(since ADR 0024: the oak, the bottom plate, a spacer, the main board, a
+   *(since ADR 0025: the oak, the bottom plate, a spacer, the main board, a
    washer, the nyloc; there is no backplate)*:
    - the oak;
    - the backplate;
@@ -129,7 +129,7 @@ Two things were therefore unanswered:
    lid's key plate, and the lid lifts off with them plugged in (ADR 0017).
    So the lid's stack ends at the key board. The main board's stands under
    it, on the oak or on a thumb plate, by point 2 or 3. *(Superseded by ADR
-   0024: a column is one stack, from the bottom plate to the key plate, and
+   0025: a column is one stack, from the bottom plate to the key plate, and
    vertical, so the key board's mount moves to it rather than the main
    board's.)*
 
@@ -149,7 +149,7 @@ Two things were therefore unanswered:
 - **The main board and the key boards share one stack** and one set of
   hardware on the plates. The oak mounts add three small parts
   (`MECH-MB-INSERT`, `MECH-MB-OAK-SPACER`, `MECH-MB-SCREW`, open until M4).
-  *(Since ADR 0024 there are no oak mounts and no such parts.)*
+  *(Since ADR 0025 there are no oak mounts and no such parts.)*
 - **The board is a long one** (a standard 1.6 mm since ADR 0020 Amendment 6),
   about
   `mechanical/drc.echo` *main board* long. Where it spans between mounts it
@@ -157,14 +157,14 @@ Two things were therefore unanswered:
   confirms how stiff that is.
 - **The oak bottom gets blind holes for the inserts.** Like the counterbores
   they are not in its DXF, which carries through-cuts only; the body CAD
-  places them. *(Superseded by ADR 0024: no inserts, no holes.)*
+  places them. *(Superseded by ADR 0025: no inserts, no holes.)*
 - **The thumb plates are ordered un-anodised**, or masked round each stud
   hole, because the bond is metal to metal (`PLATE-THUMB`). Bring-up meters
-  each plate to `PWR_GND`. *(Since ADR 0024: the bottom plate, `PLATE-BOTTOM`,
+  each plate to `PWR_GND`. *(Since ADR 0025: the bottom plate, `PLATE-BOTTOM`,
   and the key plate round its column holes.)*
 - **The main board's plate mounts are plated holes on `PWR_GND`**
   (`MountingHole_2.7mm_M2.5_Pad_Via`), where the key boards' mounts are
-  unplated and keep copper clear. *(Corrected 2026-09-29, ADR 0024:
+  unplated and keep copper clear. *(Corrected 2026-09-29, ADR 0025:
   `MountingHole_2.7mm_M2.5_Pad_TopBottom`. `_Pad_Via`'s ring of vias breaks the
   board house's hole-to-hole rule, as the left-hand key board's layout found.)*
 - **The strap's pull passes through the main board** as compression between
@@ -175,7 +175,7 @@ Two things were therefore unanswered:
   the M8 balance check is a board change. It was already, while the board
   had holes over the nuts.
 - **Taking the main board out frees the U-bolt and its backplate**, because
-  the same nuts hold all three. *(Since ADR 0024 there is no backplate; the
+  the same nuts hold all three. *(Since ADR 0025 there is no backplate; the
   nuts hold the U-bolt, its spacers and the main board.)*
 - **The Matrix keeps its own thickness** (`boards.matrix_t`). It had been
   borrowing the main board's.
@@ -184,10 +184,10 @@ Two things were therefore unanswered:
 
 | Item | Decided by |
 |---|---|
-| ~~The insert, the oak spacer and the screw: parts and lengths (`hardware.mb_*`)~~ Gone with the oak mounts (ADR 0024) | — |
+| ~~The insert, the oak spacer and the screw: parts and lengths (`hardware.mb_*`)~~ Gone with the oak mounts (ADR 0025) | — |
 | Whether the long span sags between mounts | The first board |
 
-## Amendment, 2026-09-29 — every mount on the bottom plate ([ADR 0024](0024-the-cassette.md))
+## Amendment, 2026-09-29 — every mount on the bottom plate ([ADR 0025](0025-the-cassette.md))
 
 The owner made the internals one bonded unit, the cassette, with nothing
 screwed into the wood. For this board that means:
@@ -217,7 +217,7 @@ screwed into the wood. For this board that means:
   They bond the bottom plate, and through the columns the key plate too. The
   key boards' mounts are all unplated (ADR 0020 Amendment 7).
 - **The underside faces the plate everywhere.** A part on the underside needs
-  a window through the bottom plate (ADR 0024, *Consequences*).
+  a window through the bottom plate (ADR 0025, *Consequences*).
 
 Supersedes point 3, point 7's backplate and washer, point 8's two stacks and
 its nudge of the main board's mount, and the Consequences bullets on the oak

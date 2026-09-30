@@ -9,7 +9,7 @@ with a blind pocket drilled into the wood top's underside. **Amendment 4,
 plate, its head flush with the plate's top face**: nothing above the plate,
 no pockets, no epoxy. PEM publishes the stud's data in a 1.2 mm aluminium
 sheet, which the standoff this page first chose did not have. **Amendment 7,
-2026-09-29 ([ADR 0024](0024-the-cassette.md)), is the current mount:** each
+2026-09-29 ([ADR 0025](0025-the-cassette.md)), is the current mount:** each
 corner is a column from the bottom plate to the key plate, and the key board is
 clamped in it by a screw down through the plate. Amendment 5's bonded mount is
 superseded.
@@ -609,7 +609,7 @@ holding from above, which is why there is no epoxy.
 
 ## Amendment 5, 2026-09-29 — the plate is grounded at one mount of the left-hand board
 
-> **Superseded the same day by Amendment 7** ([ADR 0024](0024-the-cassette.md)):
+> **Superseded the same day by Amendment 7** ([ADR 0025](0025-the-cassette.md)):
 > the key plate is tied by the cassette's columns to the main board's plated
 > mounts on `PWR_GND`, so no key-board mount is plated. The text below is the
 > record.
@@ -674,7 +674,7 @@ pushed into the first board confirms the holes and the depth.
 
 ## Amendment 7, 2026-09-29 — the key boards are held by the cassette's columns
 
-[ADR 0024](0024-the-cassette.md) makes the internals one unit, the cassette,
+[ADR 0025](0025-the-cassette.md) makes the internals one unit, the cassette,
 bonded into the shell. Nothing screws into the wood, and the key plate is tied
 to a bottom plate by a column at each key-board corner.
 
@@ -690,7 +690,7 @@ to a bottom plate by a column at each key-board corner.
 | The column standoff, threaded onto the stud from the bottom plate, faced to the gap down to the main board | `MECH-COL-STANDOFF` | `hardware.col_standoff_*`; `drc.echo` *"column standoff length (derived)"* |
 
 Below the standoff are the main board and the bottom plate's stud (ADR 0022,
-as amended by ADR 0024).
+as amended by ADR 0025).
 
 ### What changes, and what does not
 
@@ -704,7 +704,7 @@ as amended by ADR 0024).
   screw's head must bear on plate metal (*"column screw heads bear on the key
   plate"*).
 - **Service goes through the screws.** Once the oak top is cut free
-  (ADR 0024), the heads are reached from above. So there is no stud whose
+  (ADR 0025), the heads are reached from above. So there is no stud whose
   clinch holds it against turning, and no nut underneath. The key plate comes
   off the columns with both key boards on it.
 - **The pockets are back**, as Amendment 3's were: one per corner, blind, their
@@ -725,7 +725,7 @@ as amended by ADR 0024).
 
 ### Still open
 
-- The standoff and the screw, bought (ADR 0024's *Open*).
+- The standoff and the screw, bought (ADR 0025's *Open*).
 - `hardware.col_pocket_wall` and `col_pocket_skin` are placeholders from
   memory, as Amendment 3's were. They are settled at M2 by pocketing a scrap of
   the chosen wood beside a slot.

@@ -210,7 +210,7 @@ The switches themselves are easily sourced and can be bought later. So:
   right thumb is "only the three" and the left thumb its four in a line. The
   three bits stay reserved and their networks stay fitted; a spare switch now
   means recutting the thumb plate and the oak bottom, which the body allows
-  because it opens on six fasteners (ADR 0009). *(Since ADR 0024: the bottom
+  because it opens on six fasteners (ADR 0009). *(Since ADR 0025: the bottom
   plate, and the body opens by cutting its silicone.)*)*
   **Reserve cutouts for three spare switches in the plate DXF** — the expected
   assignment is octave up, octave down, and a hold/preset input, which is what

@@ -1,5 +1,5 @@
 // The underside, orthographic, seen from below: thumb keys, the thumb rests
-// and the U-bolt - the only hardware that shows (ADR 0024).
+// and the U-bolt - the only hardware that shows (ADR 0025).
 include <woody_body.scad>
 use <lib/annot.scad>
 figure = true;

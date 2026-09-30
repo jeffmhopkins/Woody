@@ -134,4 +134,4 @@ the oak top has **one slot per hand** (`stack.cap_holes`).
 | | |
 |---|---|
 | ![Cross-section through RH3](renders/section-key.png) | ![Tail face](renders/tail-face.png) |
-| ![Cross-section through the LED matrix](renders/section-matrix.png) The frosted window, flush on its oak lip | ![Section through a key-board corner](renders/section-kb-mount.png) A column at a key board's corner (ADR 0024): the stud in the bottom plate, a spacer, the main board, the standoff faced to the gap, the key board, a spacer, the key plate, and the screw whose head sits in a blind pocket in the oak top |
+| ![Cross-section through the LED matrix](renders/section-matrix.png) The frosted window, flush on its oak lip | ![Section through a key-board corner](renders/section-kb-mount.png) A column at a key board's corner (ADR 0025): the stud in the bottom plate, a spacer, the main board, the standoff faced to the gap, the key board, a spacer, the key plate, and the screw whose head sits in a blind pocket in the oak top |

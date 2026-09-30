@@ -48,7 +48,7 @@ the center board. It'll diffuse to both sides.")
 - **The middle fastener pair moves towards the mouth** when the gap's middle
   would put the far-side screw through the sensor's leads; the centre board
   has a notch for it (`mechanical/cad/woody_body.scad`, `fastener_x`).
-  *(Since ADR 0024 there are no body fasteners, no notches and no
+  *(Since ADR 0025 there are no body fasteners, no notches and no
   `fastener_x`; the tube lane is placed inboard of the main board's mouth-end
   mounts instead.)*
 

@@ -58,7 +58,7 @@ networks:
 #   and QH need. MARGINAL: a re-layout that moves anything here should expect to
 #   re-try this placement.
 # J-CHAIN stays where the body CAD puts it (chain_x; the main board's header and
-# the ribbon follow it). Since the cassette (ADR 0024) the ribbon is shorter, and
+# the ribbon follow it). Since the cassette (ADR 0025) the ribbon is shorter, and
 # the body CAD's rule - the clear place nearest the keys' middle - puts it 13.0
 # further toward the tail than before, 3.5 further along than the left-hand
 # board's relative to its keys, with its plug ending just short of the register.

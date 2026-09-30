@@ -28,7 +28,7 @@ drawing.
 
 ## How the stack is modelled
 
-- **The cassette** (owner, 2026-09-29; ADR 0024) is everything inside the
+- **The cassette** (owner, 2026-09-29; ADR 0025) is everything inside the
   shell as one unit: the key plate, one bottom plate, the two key boards and
   the main board, tied by a **column** at each of the key boards' eight
   corners. It is built and tested on the bench, dropped into the shell and
@@ -91,7 +91,7 @@ drawing.
   the through-cut outlines stay clean. The plate sits between the sides.
 - **Thumb keys** mount upside down in the bottom plate on the oak bottom's
   inside face; the through-cut in the oak is the recess (ADR 0009). One plate
-  serves both thumb clusters, the length of the main board (ADR 0024); every
+  serves both thumb clusters, the length of the main board (ADR 0025); every
   one of the main board's mounts has a stud pressed into it (*"bottom-plate
   studs clear of the plate's edges and cutouts"*, *"bottom-plate spacers clear
   of the thumb switch cutouts"*).
@@ -163,10 +163,10 @@ Several things can claim each end, and the largest wins:
   the Matrix's ribbon ends on it, and a **tongue** runs on from its tail end
   to the etherCON's adapter, carrying J-UMB (ADR 0021). It is clamped in the
   U-bolt's stack, on a spacer from the bottom plate with a washer and the nut
-  above, with a clearance hole for each leg (ADR 0022 point 7, ADR 0024). It
+  above, with a clearance hole for each leg (ADR 0022 point 7, ADR 0025). It
   has no edge notches. Every one of its mounts is on the bottom plate: a
   column under each of the key boards' corners, and a pair at the mouth and a
-  pair on the tongue with a nut (ADR 0022 point 8, ADR 0024; *"main board
+  pair on the tongue with a nut (ADR 0022 point 8, ADR 0025; *"main board
   mounts on the bottom plate"*). Each mount is the stud, the spacer and the
   board, on a plated `PWR_GND` hole that grounds both plates. Its underside
   faces the grounded bottom plate over its whole length (*"main board
@@ -276,7 +276,7 @@ decision, not a correction.
    header, with the main board's under it, is placed clear of the switches by
    the model (*"chain headers on the … boards clear of the switches"*).
 8. **M3 into a 1.20 mm plate** was about two threads, which ruled out
-   tapping the key plate for the lid screws. Since ADR 0024 there are no lid
+   tapping the key plate for the lid screws. Since ADR 0025 there are no lid
    screws; the columns' threads are in their standoffs.
 
 ## The interference check
@@ -307,7 +307,7 @@ only as good as those envelopes. Group the report's lines by these causes
    clear of the columns"*). Which way each hand's hairpin folds is
    `routing.chain_fold`, which says why. **Its length is the service
    position's** (owner: long enough "to have the top off and still connect
-   the ribbon before tightening down"; since the cassette, ADR 0024,
+   the ribbon before tightening down"; since the cassette, ADR 0025,
    tightening down is screwing the key plate onto its columns): the key
    plate, with both key boards, held raised straight up off its columns while
    a hand plugs the main board's sockets (`routing.chain_service`,
@@ -328,7 +328,7 @@ only as good as those envelopes. Group the report's lines by these causes
 3. **The breath tube** is short: mouth cap, trap, then across over the strip
    and back onto the sensor's port, all in the mouth band; the board has a
    slot in front of the sensor's lower port.
-4. **The U-bolt has the middle station to itself** (ADR 0024: the lid
+4. **The U-bolt has the middle station to itself** (ADR 0025: the lid
    screws that shared it, and the backplate, are gone). Its legs pass the oak
    bottom and the bottom plate, which spreads its pull over the oak (*"U-bolt
    spacers bear on the bottom plate"*). **The U-bolt is M3, and the main
@@ -385,7 +385,7 @@ and where nothing may.
 
 ## Not modelled yet
 
-The thumb rest lip, the silicone beads (ADR 0024), plate stiffening (ADR 0002 — open, and it changes the key plate),
+The thumb rest lip, the silicone beads (ADR 0025), plate stiffening (ADR 0002 — open, and it changes the key plate),
 and the diffuser standoff. The key boards are rectangles by decision (ADR
 0020 point 3): their outlines are generated now (`export/key-board-*.dxf`),
 and only their size moves, with the switch positions, which are provisional

@@ -14,7 +14,7 @@ allow:
     why: "the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3"
   - a: "main board stud *"
     b: "bottom plate"
-    why: "the PEM FHL stud is pressed into the bottom plate from its underside: its head flush there, its clinch displacing the sheet round its shank (ADR 0024)"
+    why: "the PEM FHL stud is pressed into the bottom plate from its underside: its head flush there, its clinch displacing the sheet round its shank (ADR 0025)"
   - a: "switch *"
     b: "bottom plate"
     why: "as the key plate - the thumb switches clip into the bottom plate"

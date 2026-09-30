@@ -1,4 +1,4 @@
-# 0024 — The cassette: the internals are one bonded unit, dropped into the shell
+# 0025 — The cassette: the internals are one bonded unit, dropped into the shell
 
 **Status:** Accepted, 2026-09-29. Decided by the owner. It amends
 [ADR 0009](0009-enclosure-construction.md) (how the body closes and opens),
