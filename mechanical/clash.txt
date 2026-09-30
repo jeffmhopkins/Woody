@@ -3,8 +3,7 @@
 # Excuses: mechanical/clash-allow.yaml. Every solid is a modelled envelope - many sizes are tbd
 # (config/body.yaml), so a clean result is only as good as those envelopes.
 
-CLASH 1
-         4.5 mm3  breath sensor  x  main board nut 10   [X 22.6-26.4  Y 43.0-43.8  Z 10.1-12.1]
+CLASH 0 - none
 
 ALLOWED 142 (by rule in mechanical/clash-allow.yaml)
        132.6 mm3  IDC plug left_hand main board  x  J-CHAIN left_hand main board   - each plug sits in its header's shroud (ADR 0017)
