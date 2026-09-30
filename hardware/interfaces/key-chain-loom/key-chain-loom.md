@@ -360,6 +360,16 @@ ribbons in both directions**, so it tells "a ribbon is unplugged" from
 "one bit is stuck", which the static marker cannot. Fit the resistor; E4
 decides whether firmware uses it.
 
+**The other hops' inputs get no pull-up** (owner, 2026-09-30: "B"). With a
+ribbon unplugged, `right_thumb`'s or `left_thumb`'s `SER` — the main-board end
+of that ribbon's pin 8 — floats. It costs nothing in play, because the lid is
+on and both ribbons are seated, and at bring-up the markers still show the
+missing board as a failed frame, not as a wrong note. A pull-up there, the
+part `R-SER-TERM` is, would have made the failure read as all ones; the
+owner judged that not worth two parts. A floating hop is therefore a
+bring-up symptom to expect, not a fault: seat both ribbons before reading
+markers.
+
 ---
 
 ## The protection parts, and the fuse that is not there
@@ -548,12 +558,3 @@ that could be done on paper.
   **E1** shorts one ribbon's 3V3 through 1 Ω and confirms the LDO limits and
   the Matrix restarts (above); **E14** scopes the key board's VCC while the
   chain shifts, against `sim/`'s `rail-as-ordered`.
-- **The main board's hop inputs float with a ribbon unplugged — the owner.**
-  With a ribbon out, `right_thumb`'s or `left_thumb`'s `SER` — the main-board
-  end of that ribbon's pin 8 — has nothing on it. It costs nothing in play
-  (the lid is on) and the markers show the missing board as a failed frame,
-  not a wrong note. The fix, if wanted, is a 10 kΩ pull-up on each ribbon's
-  pin 8 at the main board, the part `R-SER-TERM` already is: a missing board
-  then shifts in all ones, which its low marker bit fails cleanly, and a
-  fitted board's `QH` drives it at `[calc]` 3.3 V / 10 kΩ = 0.33 mA. **Decided
-  by: owner** — two 0805s on the main board, whose sheet is being reworked.
