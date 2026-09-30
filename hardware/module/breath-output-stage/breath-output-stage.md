@@ -19,7 +19,7 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| in-amp output | in | `module/breath-receive-stage`, `interfaces/breath-sense-link`, `module/breath-response-shaper` | `inamp-full-scale`, `breath-working-point` | The drawing's `from the INA828`, resting at 0 V because the pedestal is nulled at the in-amp's `REF`. `module/breath-response-shaper` is *proposed* to insert here, ahead of `POT-GAIN` |
+| `BREATH_SHAPED` | in | `module/breath-response-shaper` | `inamp-full-scale`, `breath-working-point` | The in-amp's output after the response shaper, into the top of `POT-GAIN`; equal to it at `POT-RESP`'s centre detent, so everything below that quotes the in-amp column holds there. Resting at 0 V, because the pedestal is nulled at the in-amp's `REF` |
 | `DAC AVDD` | in | `module/power-entry` | `dac-rail` | The top of `POT-OFFSET`, buffered — the positive leg of the offset pair. The drawing below labels this node as the buffered LM317 rail and restates the figure's value in the label; the value belongs to `dac-rail` and not to a net name |
 | `MODULE ANALOG +12V`, `MODULE ANALOG −12V` | in | `module/power-entry` | — | Op-amp supplies, and `D-JACK-CLAMP` returns to both rails. `R-OFFNEG`'s fixed leg is on −12 V, chosen over +12 V because that rail carries no LED current |
 | `AGND_MOD` | ref | `module/power-entry` | `dig-gnd-topology` | The module analog star, drawn `AGND(module)`. `R-GAIN-FLOOR`, the summer's (+) input and `C-OUT-BREATH` all return here. The module ground plan is unsettled — see the figure |
@@ -61,7 +61,7 @@ The drawing is a representation of it, `tools/check-netlist.py` checks that
 the two agree, and where they do not the netlist wins.*
 
 ```
-   from the INA828                    ┌──────────────┐
+   BREATH_SHAPED                      ┌──────────────┐
    0 … −4.7 V ──────[POT-GAIN 50k]────┤ +            │
    (rest at 0)            │           │  ½ OPA2197   ├──┬── buffered
                           │           │  follower    │  │   attenuator
@@ -136,13 +136,13 @@ and positive — and their sum crosses zero at mid-rotation:
 > series with `R-OFF`. The endpoints are exact because that term vanishes
 > there; the middle does not. `[calc]` `−40.2k × (2.605/(21.0k + 2.5k) −
 > 12/95.3k)` = **+0.606 V**, and the zero crossing lands at p = 0.567,
-> **+20.1° on a 300° pot**. This matches `panel.md`'s independent derivation.
+> **+18.7° on the R0904N's 280° track** `[ds R0904N-thonk.pdf: 280° ± 10°]`
+> — `(0.567 − 0.5) × 280°`. This matches `panel.md`'s independent derivation.
 >
 > This table omitted the source-impedance term and read **+0.07 V at centre**
 > until 2026-09-22, and the paragraph below dismissed that impedance as "feel,
-> not error". **A centre detent would therefore click 20° away from actual
-> zero**, which is worse than no detent — see `U-RESP`, which buffers this
-> wiper and is `open` for that reason.
+> not error". **A centre detent would therefore click ~19° away from actual
+> zero**, which is worse than no detent — so `POT-OFFSET` has none (its row).
 
 `R-OFFNEG` pulls a constant from −12 V; `R-OFF` pushes a variable from the
 buffered 5.21 V. **No extra op-amp half, and no negative reference to
@@ -162,7 +162,7 @@ strips run from +12 V.
 
 | Ref | Value | Job |
 |---|---|---|
-| **POT-GAIN** | 50 kΩ, **taper from the bench** | Attenuator, 0.125 → 1.000 |
+| **POT-GAIN** | 50 kΩ **linear** | Attenuator, 0.125 → 1.000 — linear in rotation, see *Still open* for why |
 | **R-GAIN-FLOOR** | 7.15 kΩ 1 % | Sets the 0.5× floor |
 | **R-IN** | 10 kΩ 1 % | Summer input |
 | **R-FB** | 40.2 kΩ 1 % | Fixed ×4. **Not** the same value as `R-MODGAIN-IN`/`R-MODGAIN-FB`, which are 10k/30k — this row claimed a shared reel until 2026-09-22 |
@@ -173,8 +173,9 @@ strips run from +12 V.
 | **C-OUT-BREATH** | 330 nF film | ~482 Hz, jack side, feedback from the op-amp |
 
 **Two op-amp halves**, which settles a count that has been wrong in the BOM
-twice: gain buffer and summer. Ten of twelve halves used across the module,
-two spare.
+twice: gain buffer and summer. Ten of the twelve halves in the six
+`U-OPA-PITCH` packages are used, two spare (`U-REF-BUF` B, `U-MOD-C` B); the
+response shaper is its own package, `U-RESP`.
 
 ## Headroom, and the combination that clips
 
@@ -188,17 +189,22 @@ sound like a wall rather than compression. The honest usable rule: the offset
 sets where breath rests, and the gain sets how far it travels from there; their
 sum has to fit in ±11.5 V.
 
-## Still open
+## Settled 2026-09-30
 
-- **`POT-GAIN`'s taper.** Linear gives a knob that does most of its work in the
-  last quarter turn. A log or pseudo-log taper (or a second floor resistor
-  across part of the track) is a feel question, and feel is a bench question —
-  E10, with a real sensor and someone blowing into it.
-- **`POT-OFFSET` detent at centre**, which is now a meaningful position rather
-  than an arbitrary one. A centre-detent pot would make "no offset" findable in
-  the dark; whether that is worth the part is an E10 call.
-- **Commissioning order** is now three steps, not two: `TRIM-BREATH-ZERO` for
-  the pedestal, then GAIN for the span, then OFFSET for where it rests. The
-  first is internal and set once; the other two are performance controls.
-
----
+- **`POT-GAIN` is linear.** With `R-GAIN-FLOOR` under the track the
+  attenuation is `(7.15 k + 50 k·p) / 57.15 k`, linear in rotation `p`, so the
+  gain at the jack runs 0.5× → 4× in equal steps. The working gain this stage
+  is designed around, ≈2.16× (*What it has to do*), sits at
+  `p = (2.156/4 × 57.15 − 7.15)/50` = **0.47, i.e. at noon** `[calc]`. The
+  worry this bullet used to carry — "linear does most of its work in the last
+  quarter turn" — is backwards for an attenuator with a floor: in decibels the
+  first quarter turn moves the gain 8.8 dB (0.5× → 1.38×) and the last 2.1 dB
+  (3.13× → 4×). A log track would put the working gain three-quarters of the
+  way round. How it *feels* is still worth a minute at E10; nothing about the
+  part waits for it.
+- **`POT-OFFSET` has no centre detent**, because its zero is not at centre
+  (above). A detent would need the wiper buffered first.
+- **Commissioning order** is three steps: `TRIM-BREATH-ZERO` for the
+  pedestal, then GAIN for the span, then OFFSET for where it rests — and
+  `POT-RESP` at its centre click while doing it. The first is internal and
+  set once; the others are performance controls.

@@ -877,6 +877,13 @@ components:
     - 1
     - 2
     sheet: umbilical-load-switch
+  R59:
+    of: R-RESTORE-IN
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-response-shaper
   R6:
     of: R-FB-HI
     value: 35.7k 1%
@@ -884,6 +891,13 @@ components:
     - 1
     - 2
     sheet: umbilical-load-switch
+  R60:
+    of: R-RESTORE-FB
+    value: 20k 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-response-shaper
   R7:
     of: R-FB-LO
     value: 5.11k 1%
@@ -1120,7 +1134,6 @@ nets:
   - J3.2
   - R16.1
   /BREATH_INAMP_OUT:
-  - J2.1
   - R27.1
   - R29.1
   - U6.OUT
@@ -1132,6 +1145,10 @@ nets:
   - D5.C
   - J3.1
   - R17.1
+  /BREATH_SHAPED:
+  - J2.1
+  - R60.2
+  - U8.OUTB
   /CS_MOD:
   - J3.7
   - R12.1
@@ -1215,6 +1232,7 @@ nets:
   /RESP_V_SHAPED:
   - J2.8
   - R28.2
+  - R59.1
   - U8.OUTA
   /RESP_WIPER:
   - J2.6
@@ -1289,9 +1307,10 @@ nets:
   - D7.K
   - D8.A
   - R31.2
-  /breath-response-shaper/SPARE_B_OUT:
+  /breath-response-shaper/RESTORE_SUM:
+  - R59.2
+  - R60.1
   - U8.INB-
-  - U8.OUTB
   /breath-response-shaper/VIRTUAL_GND:
   - D7.A
   - D8.K

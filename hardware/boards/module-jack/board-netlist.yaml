@@ -86,7 +86,7 @@ components:
     sheet: panel-led
   RV1:
     of: POT-GAIN
-    value: 50k
+    value: 50k linear
     pins:
     - CW
     - W
@@ -123,12 +123,12 @@ nets:
   - J7.2
   - J7.5
   - RV2.CCW
-  /BREATH_INAMP_OUT:
-  - J7.1
-  - RV1.CW
   /BREATH_JACK:
   - J2.TIP
   - J7.14
+  /BREATH_SHAPED:
+  - J7.1
+  - RV1.CW
   /DAC_AVDD:
   - J7.12
   - RV2.CW

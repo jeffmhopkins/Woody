@@ -17,10 +17,10 @@ ports:
   AGND_MOD:
     dir: ref
     from: module/power-entry
-  BREATH_INAMP_OUT:
+  BREATH_SHAPED:
     dir: in
-    from: module/breath-receive-stage
-    note: 0 to inamp-full-scale, rest at 0
+    from: module/breath-response-shaper
+    note: 'The in-amp''s output after the response shaper: equal to it at centre detent'
   DAC_AVDD:
     dir: in
     from: module/power-entry
@@ -60,7 +60,7 @@ components:
     - SLEEVE
     note: THE JACK IS THIS CIRCUIT'S PART - module/panel owns the hole. Third pin, the normalling contact, unused
   POT-GAIN:
-    value: 50k
+    value: 50k linear
     pins:
     - CW
     - W
@@ -72,7 +72,8 @@ components:
     - CW
     - W
     - CCW
-    note: Wiper UNBUFFERED - its R/4 source impedance is why zero sits ~20 deg past centre
+    note: Wiper UNBUFFERED - its R/4 source impedance is why zero sits ~19 deg past centre on the 280 deg track;
+      no centre detent for that reason
   R-BREATH-FB:
     value: 40.2k 1%
     drawn_as: R-FB
@@ -134,8 +135,8 @@ nets:
   - POT-OFFSET.CCW
   - R-GAIN-FLOOR.2
   - U-BREATH-OPA.INB+
-  BREATH_INAMP_OUT:
-  - port: BREATH_INAMP_OUT
+  BREATH_SHAPED:
+  - port: BREATH_SHAPED
   - POT-GAIN.CW
   DAC_AVDD:
   - port: DAC_AVDD

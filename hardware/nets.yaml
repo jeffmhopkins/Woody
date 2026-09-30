@@ -503,7 +503,7 @@ nets:
       - module/breath-receive-stage
       - module/mod-channels
       - module/pitch-stage
-    proposed: [module/breath-response-shaper]
+      - module/breath-response-shaper
 
   MODULE_ANALOG_NEG12:
     kind: power
@@ -514,7 +514,7 @@ nets:
       - module/breath-receive-stage
       - module/mod-channels
       - module/pitch-stage
-    proposed: [module/breath-response-shaper]
+      - module/breath-response-shaper
 
   BUS_5V:
     kind: power
@@ -546,7 +546,7 @@ nets:
       - module/mod-channels
       - module/panel-led
       - module/pitch-stage
-    proposed: [module/breath-response-shaper]
+      - module/breath-response-shaper
     note: >
       Where AGND_MOD and DIG_GND meet is the tracked figure dig-gnd-topology
       and is DISPUTED. This file records which circuits reference the net; it
@@ -644,13 +644,18 @@ nets:
     carries: "In-amp output, the receiver's recovered breath signal"
     figure: inamp-full-scale
     driver: module/breath-receive-stage
+    receivers: [module/breath-response-shaper]
+
+  BREATH_SHAPED:
+    kind: signal
+    domain: analog
+    carries: "The in-amp output after the response shaper - equal to it at POT-RESP's centre detent - into POT-GAIN"
+    driver: module/breath-response-shaper
     receivers: [module/breath-output-stage]
-    proposed: [module/breath-response-shaper]
     note: >
-      `proposed:` means DRAWN BUT NOT ADOPTED. That circuit reads this node in
-      its drawing and every one of its BOM rows is `open`, so it declares the
-      port and this file does NOT claim the board has the connection. Move it
-      into receivers when it is fitted, not before.
+      Crosses to the jack board on J-B2B-MOD pin 1. The shaper is fitted
+      (2026-09-30): it sits between the in-amp and the gain attenuator, where
+      the scale is fixed, so POT-GAIN cannot move its knee.
 
   # ======================================================================
   # MODULE: panel

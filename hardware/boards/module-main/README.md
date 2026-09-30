@@ -65,7 +65,7 @@ LED) comes back on the five ground pins. Pin 1 is at the top left
 
 | Pins | Left (odd) | Right (even) |
 |---|---|---|
-| 1, 2 | `BREATH_INAMP_OUT` | `AGND_MOD` |
+| 1, 2 | `BREATH_SHAPED` | `AGND_MOD` |
 | 3, 4 | `GAIN_WIPER` | `RESP_V_IN_HALF` |
 | 5, 6 | `AGND_MOD` | `RESP_WIPER` |
 | 7, 8 | `GAIN_FLOOR` | `RESP_V_SHAPED` |
@@ -83,7 +83,7 @@ Why this order:
   except the LED's `UMBILICAL_POS12`, which is DC.
 - **The pots' nets on the top rows**, because the pots are above the header
   (ADR 0024: the pot row, then the jacks). The breath-gain chain
-  (`BREATH_INAMP_OUT`, `GAIN_WIPER`, `GAIN_FLOOR`) is the left column, on the
+  (`BREATH_SHAPED`, `GAIN_WIPER`, `GAIN_FLOOR`) is the left column, on the
   gain pot's side; the response pot's three nets are the right column, on its
   side; the offset pot, in the middle, closes the group. A ground row
   (9–10 and 13) separates the pots' high-impedance wipers from the jack

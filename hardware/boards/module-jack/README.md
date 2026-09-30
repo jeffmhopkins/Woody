@@ -41,7 +41,7 @@ The same header is `J7` here and `J2` on the main board.
 
 | Item | Decided by |
 |---|---|
-| The pots and jacks have no LCSC number (Thonk and Song Huei/Alpha, bought by hand) | Nothing to decide: hand-placed, bought from the maker's stockists |
-| The pots' rotation sense (which end is clockwise) is from memory, not the banked drawing | The first pot in hand, before the panel legends |
+| The pots and jacks have no LCSC number (Thonk and Song Huei/Alpha, bought by hand) | Nothing to decide: hand-placed, bought from the maker's stockists. `POT-GAIN`/`POT-OFFSET` are Song Huei R0904N with the 18-tooth **KC** shaft the T18 knob needs, `POT-RESP` Alpha's centre-click RV09 (rows) |
+| The pots' rotation sense (which end is clockwise). Checked 2026-09-30 against both banked drawings — `R0904N.pdf` p.2 and `RV09AF-40.pdf` p.3 draw pins 1-2-3 with the shaft at full CCW and say nothing about which end the wiper approaches, so the sheets' "CW toward pin 3" stays `[from memory]` | Goods-in, E10: turn each pot fully CCW and read pin 1 to 2 with an ohmmeter — near 0 Ω confirms the sheets; near the full track means swap `CW`/`CCW` on all three symbols before the legends are drawn |
 | Where the parts go, and so whether the reasons for `J-B2B-MOD`'s allocation still hold | The panel layout, now being revised (`mechanical/module/export/pcb-geometry.echo`) |
 | Whether the standoffs carry ground between the boards | The layout's grounding scheme (ADR 0024) |
