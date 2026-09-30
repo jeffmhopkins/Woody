@@ -72,6 +72,16 @@ def route(path, edge):
         band = outline.difference(outline.buffer(-edge, join_style=2))
         to_body = lambda g: __import__("shapely").ops.transform(lambda x, y, z=None: pcb_main.to_body(x, y), g)
         pcb_main.rule_area(exp, to_body(band.buffer(0.01)), "edge clearance (router only)", ["F.Cu", "B.Cu"])
+        # a footprint's own copper shapes (a net tie's bridge between its pads) are not in
+        # the DSN at all: a keep-out over each, grown by the edge clearance's margin
+        import pcb
+        for fp in exp.GetFootprints():
+            for g in fp.GraphicalItems():
+                for name, lid in (("F.Cu", pcbnew.F_Cu), ("B.Cu", pcbnew.B_Cu)):
+                    if g.GetLayer() == lid:
+                        ps = pcbnew.SHAPE_POLY_SET()
+                        g.TransformShapeToPolygon(ps, lid, 0, pcbnew.FromMM(0.005), pcbnew.ERROR_OUTSIDE)
+                        pcb_main.rule_area(exp, to_body(pcb.shapely_of(ps).buffer(edge)), f"{fp.GetReference()} copper (router only)", [name])
         if not pcbnew.ExportSpecctraDSN(exp, dsn):
             sys.exit("pcb: KiCad's Specctra DSN export failed")
         r = subprocess.run(["java", f"-Duser.home={t}", "-jar", j, "-de", dsn, "-do", ses, "-mp", str(PASSES),

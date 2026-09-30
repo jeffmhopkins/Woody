@@ -836,6 +836,15 @@ class Obstacles:
                     o = z.Outline().Outline(i)
                     self.items.append((Polygon([(TO(o.CPoint(k).x), TO(o.CPoint(k).y)) for k in range(o.PointCount())]),
                                        None, ls, "keepout"))
+        # a footprint's own copper shapes - a net tie's bridge - belong to no net
+        for fp in board.GetFootprints():
+            for g in fp.GraphicalItems():
+                for L, lid in (("F", pcbnew.F_Cu), ("B", pcbnew.B_Cu)):
+                    if g.GetLayer() == lid:
+                        ps = pcbnew.SHAPE_POLY_SET()
+                        g.TransformShapeToPolygon(ps, lid, 0, MM(0.005), pcbnew.ERROR_OUTSIDE)
+                        import pcb
+                        self.items.append((pcb.shapely_of(ps).buffer(self.clear), None, {L}, "keepout"))
         silk = [d for d in board.GetDrawings() if d.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS)]
         for fp in board.GetFootprints():
             silk += [g for g in fp.GraphicalItems() if g.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS)]
@@ -1290,8 +1299,18 @@ def tidy(board, lay):
         n1 += len(gone)
         if not gone:
             break
-    # a via that nothing reaches but its own plane is a plane via; one with no plane and
-    # nothing on either face is debris
+    # and KiCad's own test, the one its DRC reports: a track or via with an end that
+    # reaches nothing, or none at all, goes, until none is left
+    while True:
+        board.BuildConnectivity()
+        conn = board.GetConnectivity()
+        gone = [t for t in board.GetTracks() if (type(t) is pcbnew.PCB_TRACK and t.GetLength() < 1000)
+                or conn.TestTrackEndpointDangling(t, False)]
+        for t in gone:
+            board.Delete(t)
+        n1 += len(gone)
+        if not gone:
+            break
     r = Router(board, lay)
     for t in board.GetTracks():
         if isinstance(t, pcbnew.PCB_VIA):
