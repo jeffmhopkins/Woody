@@ -72,17 +72,22 @@ exactly zero by topology, and its value and tolerance stop mattering.**
 
 Two consequences to keep in mind at layout:
 
-- **`R-FB-REF` is 10 kΩ and not TI's 1 MΩ**, because our load draws 10 mA and
-  TI's does not. The handover `1/(2π·R_F·C_F)` must sit *above* the 500 Hz
-  breath channel — 15.9 kHz here, against 4.08 Hz at TI's values — or
-  load-current changes appear at `VS` across `R_ISO`. `VS` **is** the
-  ratiometric scale factor.
+- **`R-FB-REF` is 10 kΩ, `R-FBX-REF` 100 Ω and `C-FB-REF` 1 nF — this
+  board's values, not TI's scaled.** TI's Figure 56 prints `R_F` 1 kΩ,
+  `R_Fx` 10 kΩ and `C_F` 39 nF (read with TIDU026's glyph key, `ti_rf` in
+  `sim/sims.yaml`). What binds here is the handover `1/(2π·R_F·C_F)`, 15.9 kHz:
+  it must sit well *above* the 500 Hz breath channel, because our load draws
+  10 mA and TI's does not, and above the handover a load-current change appears
+  at `VS` across `R_ISO`. `VS` **is** the ratiometric scale factor.
 - **The network is robust, which is what makes it a design rather than a tuned
-  point.** Phase margin stays above 76° across TI's whole published `Zo` range
-  and across a 200× range of `C_L` `[sim, A4]`. X7R DC-bias derating cannot
-  destabilise it, and if E13 finds the rail wants stiffening against strip PWM,
-  **10 µF may be added at `VS` later for 2.5° of margin.** The old topology
-  could not have survived that.
+  point.** Against TI's own OPA2197 macromodel the phase margin is
+  `riso-ref-phase-margin` across a 200× range of `C_L` (47 nF to 10.1 µF) and
+  every tolerance corner `[sim, sim/]`, so X7R DC-bias derating cannot
+  destabilise it. **But do not add bulk capacitance at `VS` on the phase margin
+  alone.** 10 µF there barely moves the margin and still rings: `|Z_out|` peaks
+  near `R_ISO` at 2.5 kHz and a load step swings back through most of its own
+  dip for about 3 ms (`sim/`, `step-with-10u-added`). If E13 finds the rail
+  wants stiffening against strip PWM, re-run that sim with the part first.
 
 *(The record of the two blockers that closed here on 2026-09-21, and of the two
 earlier notes they superseded, is in [`notes.md`](notes.md).)*

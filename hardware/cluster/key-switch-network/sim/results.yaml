@@ -3,7 +3,7 @@
 # its inputs (hashed below), so a value changed on the sheet makes it stale.
 
 inputs:
-  tools/sim.py: b2bacba5c02bd882
+  tools/sim.py: 54bf4b282c849ffb
   hardware/cluster/key-switch-network/sim/sims.yaml: 28274e715669f42e
   hardware/cluster/key-switch-network/netlist.yaml: 487063e7361f9cd9
   hardware/cluster/key-switch-network/sim/key-network.cir: 4b3004bc928838ee
