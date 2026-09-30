@@ -111,6 +111,16 @@ components:
     - 1
     - 2
     note: 'DIG_GND (J-UMB pin 8) to this board''s ground, at the pin: copper only (ADR 0018)'
+  R-CS-PULL-INST:
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    note: 'CS_MOD''s idle pull-up, AT THE INSTRUMENT END (owner, 2026-09-30: ''Fix the SPI pull up''): IO34 to the
+      dev board''s 3V3, on the MCU side of R-SPI-SER-CS, beside J-MCU pins 13 (3V3) and 14 (IO34). IO34 has no pull
+      of its own at reset - ''IE'' only [ds ESP32-S3-datasheet-v2.2.pdf p.17] - so this is what holds CS deselected
+      while the ESP32 resets and boots. It is not a strapping pin (GPIO0/3/45/46, p.26). Values and the three link
+      states: interfaces/spi-link/spi-link.md, ''CS_MOD''s two pulls'''
   R-SPI-SER-CS:
     of: R-SPI-SER
     value: 100R 1%
@@ -178,6 +188,7 @@ nets:
   DEV_3V3:
   - port: DEV_3V3
   - J-MCU.13
+  - R-CS-PULL-INST.1
   - U-MCU-RT.P3V3
   DIG_GND:
   - port: DIG_GND
@@ -217,6 +228,7 @@ nets:
   - U-MCU-RT.IO33
   IO34:
   - J-MCU.14
+  - R-CS-PULL-INST.2
   - R-SPI-SER-CS.1
   - U-MCU-RT.IO34
   IO35:

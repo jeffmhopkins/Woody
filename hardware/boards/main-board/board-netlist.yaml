@@ -599,6 +599,13 @@ components:
     - 1
     - 2
     sheet: breath-adc
+  R40:
+    of: R-CS-PULL-INST
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    sheet: carrier
   R5:
     of: R-ADCDIV-L
     value: 15k 1%
@@ -1071,6 +1078,7 @@ nets:
   - A1.IO34
   - J1.14
   - R3.1
+  - R40.2
   /led-strip-drive/GATE_A_OUT:
   - R11.1
   - U6.1Y
@@ -1129,6 +1137,7 @@ nets:
   - R32.1
   - R33.1
   - R37.2
+  - R40.1
   - U2.VDD
   - U7.C
   - U7.VCC

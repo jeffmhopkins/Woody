@@ -104,7 +104,8 @@ go; the *reasons* above are about positions, so re-read them when
 
 - [`link-supervision`](../../module/link-supervision/link-supervision.md) —
   **no parts**: the watchdog and the presence comparator were deleted before
-  layout and never had a BOM row. It has nothing to draw. `CLR`, which it
+  layout and never had a BOM row, and the owner decided on 2026-09-30 not to
+  restore them. It has nothing to draw. `CLR`, which it
   would drive, is a net inside `dac8568`: `R-CLR-PU` ties it inactive and
   `LK-CLR` asserts it by hand.
 - [`panel`](../../module/panel/panel.md) — **no electrical parts**: its one

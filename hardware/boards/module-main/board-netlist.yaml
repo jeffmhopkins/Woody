@@ -535,8 +535,8 @@ components:
     - 2
     sheet: digital-and-supervision
   R12:
-    of: R-SPI-PULL
-    value: 10k 1%
+    of: R-CS-PULL-MOD
+    value: 100k 1%
     pins:
     - 1
     - 2
@@ -1651,6 +1651,7 @@ nets:
   LOGIC_5V:
   - C12.1
   - C42.1
+  - R12.2
   - U13.SENSE
   - U13.VOUT
   - U4.VCC
@@ -1732,8 +1733,6 @@ nets:
   - R58.2
   - R7.2
   - U2.GND
-  R12.2:
-  - R12.2
   U2.PWRGD:
   - U2.PWRGD
   U3.VOUTF:
@@ -1749,7 +1748,6 @@ external_endpoints:
 - J1.GATE_16
 - J1.POS5_11
 - J1.POS5_12
-- R12.2
 - U2.PWRGD
 - U3.VOUTF
 - U3.VOUTH

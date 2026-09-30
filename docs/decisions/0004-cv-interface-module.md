@@ -507,6 +507,14 @@ the instrument in your hands will not respond to anything you do with it.
 > reasoning, the cost and the no-new-parts way to get the link coverage back
 > are in `hardware/module/digital-and-supervision/digital-and-supervision.md`. The paragraphs below are
 > kept because the problem they describe is still real.
+>
+> **Decided 2026-09-30 — link supervision is not restored.** The owner:
+> *"Assume the module will be operating with an umbilical attached to a
+> controller."* The module is specified as half of a pair, so the uncovered
+> case above — the link going away while the module stays powered — is
+> accepted, not open. `CLR` stays tied inactive and `OE` enabled; nothing is
+> added. The costing that would reopen it is on
+> `hardware/module/link-supervision/link-supervision.md`.
 
 ~~**Assert `CLR` at the module when no valid frame has arrived for N milliseconds.**~~
 A few gates or a retriggerable monostable, at the module end where it is
