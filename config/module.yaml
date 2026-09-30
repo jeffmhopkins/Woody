@@ -576,6 +576,10 @@ layout:
     value: 49.5
     status: nominal
     source: "[adr 0024 point 11] the toggle's row, centred, ABOVE the NE8FAV: its lever's sweep clear of the PUSH tab below and of the last jack row's plug grips above, its body under the top of the jack board's notch"
+  toggle_on:
+    value: "right"
+    status: settled
+    source: "[adr 0024 point 12] the owner, 2026-09-30: the lever throws LEFT-RIGHT, across the panel, 'to avoid inadvertent triggering'. ON is thrown RIGHT, toward the POWER legend; OFF left, toward the LED. The M2011 is ON in NKK's 'Down' position, the lever away from the bushing's keyway [ds NKK-SERIES-M-TOGGLE.pdf p.5 (A56), the circuit table's position icons], and the D4 flat sits where S4's keyway does, across from the drawn lever [ds p.7 (A58), the D4 and S4 front views] - so the flat is on the LEFT. The model derives the flat, the sweep, the body's and lugs' orientation from this one leaf"
   pots:
     value: ["POT-GAIN", "POT-OFFSET", "POT-RESP"]
     status: nominal

@@ -46,8 +46,8 @@ translate([DX, 0, 0]) {
     for (i = [0 : len(tall_at) - 1]) let(t = tall_at[i])
         if (t[2] == "cap") outline("Blue") translate([t[0], t[1]]) circle(d = tall_cap_d);
         else outline("Blue") r2([t[0], t[1]] - [tall_trim[0], tall_trim[1]] / 2, [t[0], t[1]] + [tall_trim[0], tall_trim[1]] / 2);
-    outline("DimGray") r2(tog - [toggle_body[0], toggle_body[1]] / 2, tog + [toggle_body[0], toggle_body[1]] / 2);
-    tag(tog + [0, -toggle_body[1] / 2 - 1.5], "SW-POWER lugs, in front");
+    outline("DimGray") r2(tog - tog_body / 2, tog + tog_body / 2);
+    tag(tog + [0, -tog_body[1] / 2 - 1.5], "SW-POWER lugs, in front");
     tag([cx, -6], str("MAIN BOARD - ", b_x1 - b_x0, " x ", b_y1 - b_y0, ", ", mb_d, " behind the panel"), 1.5);
     tag([cx, -9], "solid: front face - outlined: rear face; orange: ribbon");
 }
