@@ -1,0 +1,35 @@
+* The pitch stage, as netlisted, stepped: U-PITCH-AMP non-inverting (R1, R2 + TRIM-GAIN
+* from the JACK, C-FB-PITCH from the op-amp output), R-OUT-PROT inside the DC loop,
+* C-FILT-PITCH at the jack; the reference follower U-PITCH-REFBUF at the bottom of R1;
+* the DAC channel through R-OPAMP-IN / C-AA-PITCH with R-BIAS-DAC at the pin. TI's
+* OPA2197 model for both halves. The jack drives a VCO input (r_vco) and, on a passive
+* mult, another output's jack: its C-FILT (c_mult) and, when r_mult is its R-OUT-PROT,
+* its driver held at 0 V. D-JACK-CLAMP is left out: reverse-biased inside +-12 V.
+* TRIM-OFFSET is at its CW end (V_ref = VREFOUT): its CCW end is the page's open item.
+* The DAC is an ideal source with a t_edge edge: its settling is slower than that, so
+* this is the harder step.
+VPOS pos 0 {{v_pos}}
+VNEG neg 0 {{v_neg}}
+VREFO vrefout 0 {{v_refout}}
+XRB vrefout vrefb pos neg vrefb OPAx197
+R1 vrefb minus {{R1}}
+R2 minus gtm {{R2}}
+RTG gtm jack {{r_trim_gain}}
+VDAC dac 0 PWL(0 {{v_dac0}} {{t_step}} {{v_dac0}} {{t_step_e}} {{v_dac1}})
+RBD dac 0 {{R-BIAS-DAC}}
+RIN dac plus {{R-OPAMP-IN}}
+CAA plus 0 {{C-AA-PITCH}}
+XAMP plus minus pos neg ampout OPAx197
+CFB ampout minus {{C-FB-PITCH}}
+ROUT ampout jack {{R-OUT-PROT}}
+CFILT jack 0 {{C-FILT-PITCH}}
+CMULT jack 0 {{c_mult}}
+RVCO jack 0 {{r_vco}}
+RMULT jack 0 {{r_mult}}
+.options method=gear rshunt=1e10
+.control
+tran 100n {{t_end}} 0 100n
+wrdata jack.dat v(jack)
+quit
+.endc
+.end

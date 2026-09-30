@@ -1,0 +1,77 @@
+# The breath link's common-mode rejection across the umbilical: both boards' parts,
+# as netlisted (interfaces/breath-sense-link for R1 and R1b, this circuit for the
+# rest), TI's INA828 and OPA2197 macromodels. Run:
+#   python3 tools/sim.py run hardware/module/breath-receive-stage/sim
+# docs/reference/pcb-pipeline.md, section 2, ranked sim 1. The claim is a WORST CASE
+# over tolerance, so every tolerance end of every part that sets the balance is a
+# corner (2^8 per sim).
+title: Breath link CMRR, sensor buffer to INA828 output
+values:
+  netlist:
+    - hardware/interfaces/breath-sense-link/netlist.yaml
+    - hardware/module/breath-receive-stage/netlist.yaml
+models:
+  - datasheets/analog/INA828-ti-pspice-sbomag5c.lib
+  - datasheets/analog/OPAx197-ti-pspice-sboma34d.lib
+spiceinit: [set ngbehavior=psa]
+
+params:
+  v_pos:      {value: 12.0,  source: "MODULE_ANALOG_POS12, the INA828's V+ (netlist)"}
+  v_neg:      {value: -12.0, source: "MODULE_ANALOG_NEG12, the INA828's V- (netlist)"}
+  v_sensor:   {value: 2.5,   source: "a mid-span operating point for the sensor buffer's output [assumption: CMRR is taken small-signal about it]"}
+  v_ref_trim: {value: 0.265, source: "the trimmer wiper at the sensor's typical pedestal, MPXV4006DP Voff typ [the U-DIFFRX/TRIM-BREATH-ZERO rows, hardware/module/breath-receive-stage/bom.csv]"}
+
+vary:
+  R1:  {tol: from-value}
+  R1b: {tol: from-value}
+  R2:  {tol: from-value}
+  R3:  {tol: from-value}
+  R4:  {tol: from-value}
+  R5:  {tol: from-value}
+  C-CM-IN+: {tol: [-0.01, 0.01], source: "C-CM-BREATH's '+/-1%' (bom.csv row; the netlist value states none)"}
+  C-CM-IN-: {tol: [-0.01, 0.01], source: "as C-CM-IN+"}
+
+sims:
+  - name: cmrr-as-netlisted
+    deck: cmrr.cir
+    measures: [cmrr_dc, cmrr_50, cmrr_60, cmrr_500, cmrr_1k, f_req]
+    post:
+      f_req: "cross(w['cmrr'], 58.5, 1)"
+      cmrr_dc: "at(w['cmrr'], 1)"
+      cmrr_50: "at(w['cmrr'], 50)"
+      cmrr_60: "at(w['cmrr'], 60)"
+      cmrr_500: "at(w['cmrr'], 500)"
+      cmrr_1k: "at(w['cmrr'], 1000)"
+    asserts:
+      - expr: "min['cmrr_50'] > 58.5 and min['cmrr_60'] > 58.5"
+        why: "the link clears the page's requirement (breath-sense-link.md, 58.5 dB) at the mains fundamental, worst corner"
+      - expr: "abs(min['cmrr_dc'] - 73) < 3"
+        why: "the worst-case floor is the page's 73 dB, set by the 1 Mohm bias pair's 1 % (breath-sense-link.md, 'One correction'), within 3 dB"
+      - expr: "min['f_req'] < 1000"
+        why: "RECORDED FINDING: at the worst corner the requirement is lost below 1 kHz - C_cm's +-1 % mismatch rises with frequency. The page states no band for its 58.5 dB; this is the frequency that band must stay under"
+  - name: cmrr-without-r1b
+    # R1b shorted: the case the page says spends the whole budget (1 kohm unmatched)
+    deck: cmrr.cir
+    set: {R1b: 1.0e-3}
+    vary: [R1, R2, R3, R4, R5, C-CM-IN+, C-CM-IN-]
+    measures: [cmrr_dc, cmrr_50, cmrr_500]
+    asserts:
+      - expr: "abs(nom['cmrr_dc'] - 60.2) < 1 and min['cmrr_dc'] < 58.5"
+        why: "the page's 60.2 dB without R1b reproduces at the nominal - and the worst corner is BELOW the 58.5 dB requirement, so the '1.7 dB of margin' was a nominal, not a worst case"
+    post:
+      cmrr_dc: "at(w['cmrr'], 1)"
+      cmrr_50: "at(w['cmrr'], 50)"
+      cmrr_500: "at(w['cmrr'], 500)"
+  - name: cmrr-ccm-5pct
+    # C_cm at +-5 %: the default tolerance the BOM row forbids
+    deck: cmrr.cir
+    tol: {C-CM-IN+: [-0.05, 0.05], C-CM-IN-: [-0.05, 0.05]}
+    measures: [cmrr_dc, cmrr_50, cmrr_500, cmrr_1k]
+    asserts:
+      - expr: "abs(min['cmrr_500'] - 46) < 3"
+        why: "the page's '~46 dB' for C_cm at +-5 % reproduces at 500 Hz, the breath channel's edge (the page names no frequency)"
+    post:
+      cmrr_dc: "at(w['cmrr'], 1)"
+      cmrr_50: "at(w['cmrr'], 50)"
+      cmrr_500: "at(w['cmrr'], 500)"
+      cmrr_1k: "at(w['cmrr'], 1000)"

@@ -12,7 +12,8 @@ in a sim.** Each deck's `{{R-KEY-PU}}` is read from the circuit's netlist.yaml
 simulation, and `check` fails until the sims are re-run on it. Model parameters
 that are not part values (a threshold ratio, an input capacitance) live in
 `params:`, each with its source; figures are cited as `fig['key-release-time']`
-from config/figures.yaml, never restated.
+from config/figures.yaml, never restated - in an assertion, or as a param's value,
+`value: {fig: umbilical-current}` (its leading number in SI, hashed as an input).
 
 CORNERS, NOT A GUESS. Every parameter in `vary:` has a relative range about its
 nominal. Each sim runs at the nominal and at every combination of the range ends
@@ -50,18 +51,21 @@ corners and asserts: a stability sim sweeps the page's load-capacitance range th
 MEASURES ON WAVEFORMS (`post:`, over files the deck writes with `wrdata <name>.dat`):
   phase_margin(w['tdb'], w['tph'])  the loop's phase margin in degrees, the least at
       any 0 dB crossing of |T|; `tdb` is 20log|T| and `tph` its phase in degrees, of
-      T = -V(return)/V(injected). THE STATED BREAK: the loop is opened at a high-
-      impedance node - an op-amp input - by a 1 GH inductor that carries the DC
+      T = -V(return)/V(injected). THE STATED BREAK, one of two, and the deck says
+      which. (a) The loop is opened at a high-impedance node - an op-amp input - by a
+      1 GH inductor that carries the DC
       operating point, and the AC test signal enters through a 1 GF capacitor, so the
       feedback network stays loaded by the input it drives and nothing else. With a
       vendor macromodel the deck needs `.options rshunt=1e10` (10 Gohm per node) for
       the solver to find that operating point: without it TI's OPA2197 model found none
       at some corners, and ngspice's fallback "transient op" reported a false one (VS at
-      0.55 V), which is why a run that needed it is refused. NOT USED: a series voltage
-      source at the input (voltage injection). It agreed within 0.5 degree on the
-      reference buffer as netlisted, but it is only exact while the input's impedance
-      dwarfs the network's, and with 10 kohm of feedback the model's input capacitance
-      broke that above 1 MHz: |T| climbed back to +33 dB at 100 MHz (2026-09-30).
+      0.55 V), which is why a run that needed it is refused. (b) VOLTAGE INJECTION, a
+      series AC source between the feedback node and the op-amp input, where (a) finds
+      no operating point: the deck must show the network's impedance at that node is far
+      below the input's at every frequency that matters. It agreed with (a) within 0.5
+      degree on the reference buffer as netlisted, and failed there on the bare
+      follower, where 10 kohm of feedback against the model's input capacitance broke
+      its assumption above 1 MHz (|T| climbed back to +33 dB at 100 MHz, 2026-09-30).
   crossover(w['tdb'])        the frequency of the first 0 dB crossing of |T|
   overshoot(w['v'], t0, t1)  percent, of a step at t0: the largest excursion past the
       final value (the mean of the last 5 % before t1) over the step's size
@@ -193,6 +197,12 @@ def param_value(p):
     v = p["value"]
     if isinstance(v, dict) and "drc" in v:
         return drc_value(v["drc"]) * float(v.get("scale", 1))
+    if isinstance(v, dict) and "fig" in v:
+        # a register figure, cited by id: its leading number in SI (hashed as an input)
+        figs = figures()
+        if v["fig"] not in figs:
+            raise SystemExit(f"sim: a param cites figure {v['fig']!r}, which is not in config/figures.yaml")
+        return figure_value(str(figs[v["fig"]]["value"])) * float(v.get("scale", 1))
     try:
         return float(v)
     except (TypeError, ValueError):
@@ -262,6 +272,8 @@ def inputs_of(spec):
     for name, p in (spec.get("params") or {}).items():
         if isinstance(p.get("value"), dict) and "drc" in p["value"]:
             h[f"drc:{p['value']['drc']}"] = str(drc_value(p["value"]["drc"]))
+        if isinstance(p.get("value"), dict) and "fig" in p["value"]:
+            cited.append(p["value"]["fig"])
     for fid in cited:
         if fid not in figs:
             raise SystemExit(f"sim: {os.path.relpath(d, ROOT)}/sims.yaml cites figure {fid!r}, which is not in config/figures.yaml")
@@ -269,13 +281,18 @@ def inputs_of(spec):
     return h
 
 
-def corners(spec, parts, only=None):
+def corners(spec, parts, only=None, tols=None):
     """[(name, {param: value})]: the nominal, then every combination of the range ends.
-    `only`, a sim's own `vary:` list, limits the corners to the parameters that move it."""
+    `only`, a sim's own `vary:` list, limits the corners to the parameters that move it;
+    `tols`, a sim's own `tol:` map, replaces a parameter's range for that sim alone (a
+    what-if at a wider tolerance than the part is bought at)."""
     nominal, ranges = {}, {}
     for name, p in (spec.get("params") or {}).items():
         nominal[name] = param_value(p)
-    for name, v in (spec.get("vary") or {}).items():
+    vary = {k: dict(v) for k, v in (spec.get("vary") or {}).items()}
+    for name, t in (tols or {}).items():
+        vary.setdefault(name, {})["tol"] = t
+    for name, v in vary.items():
         if only is not None and name not in only:
             continue
         if name in parts:
@@ -308,7 +325,7 @@ def derive(spec, values):
     """`derived:` entries, in order: python expressions over the values so far (math allowed)."""
     v = dict(values)
     for name, expr in (spec.get("derived") or {}).items():
-        v[name] = eval(expr, {"__builtins__": {}, "math": math, "min": min, "max": max}, {"v": v})
+        v[name] = eval(expr, {"__builtins__": {}, "math": math, "min": min, "max": max, "round": round}, {"v": v})
     return v
 
 
@@ -636,7 +653,7 @@ def run(simdir):
             first, _, rest = template.partition("\n")
             template = first + "\n" + models + rest
         per = {}
-        for label, values in corners(spec, parts, s.get("vary")):
+        for label, values in corners(spec, parts, s.get("vary"), s.get("tol")):
             v = derive(spec, {**values, **{k: (fv if isinstance(fv, (int, float)) else part_value(str(fv)))
                                            for k, fv in (s.get("set") or {}).items()}})
             meas, errors, out = ngspice(fill(template, v), s.get("post"), v, spec.get("spiceinit"))
