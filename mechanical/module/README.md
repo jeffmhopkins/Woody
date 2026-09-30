@@ -141,4 +141,4 @@ something it shows moved.
 
 | | |
 |---|---|
-| ![The stack pulled apart](renders/exploded.png) The stack pulled apart | ![From behind](renders/rear.png) From behind: the power header, its socket and the ribbon folded down, `U-ISO` (RP20-2412SAW, ADR 0027) with its filter parts, the trimmers and bulk caps (envelopes) |
+| ![The stack pulled apart](renders/exploded.png) The stack pulled apart | ![From behind](renders/rear.png) From behind: the power header, its socket and the ribbon folded down, `U-ISO` (RPA20-2412SAW, ADR 0027) with its filter parts, the trimmers and bulk caps (envelopes) |

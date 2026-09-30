@@ -379,7 +379,7 @@ module main_board_3d() {
             if (t[2] == "cap") P(C_CAP, false, str("tall cap ", i + 1)) cyl([t[0], t[1]], tall_cap_d, mb_z0, mb_z0 - tall_cap_h);
             else P(C_TRIM, false, str("tall trimmer ", i + 1)) box(t[0] - tall_trim[0] / 2, t[1] - tall_trim[1] / 2, mb_z0, t[0] + tall_trim[0] / 2, t[1] + tall_trim[1] / 2, mb_z0 - tall_trim[2]);
         }
-        // U-ISO, RECOM RP20-2412SAW (ADR 0027): the body on the rear face, the pins' tails out of the front.
+        // U-ISO, RECOM RPA20-2412SAW (ADR 0027): the body on the rear face, the pins' tails out of the front.
         P(C_METAL, false, "U-ISO") box(iso_at[0] - iso_body[0] / 2, iso_at[1] - iso_body[1] / 2, mb_z0,
                                        iso_at[0] + iso_body[0] / 2, iso_at[1] + iso_body[1] / 2, mb_z0 - iso_body[2]);
         P(C_BRASS, false, "U-ISO tails") for (q = iso_pins) cyl(iso_at + q, iso_pin_d, mb_z1, mb_z1 + iso_tail, 16);
@@ -784,7 +784,7 @@ module pcb_geometry() {
     echo("PCB", "module-main", "connector", "J-UMBILICAL", ec[0], ec[1], 0, "NE8FAV, latch up");
     echo("PCB", "module-main", "connector", "J-PWR-EURO", pw[0], pw[1], 0, "rear face, long axis along y, pin 1 (-12 V) at the bottom");
     for (i = [0 : len(tall_at) - 1]) echo("PCB", "module-main", "tall", tall_at[i][2], tall_at[i][0], tall_at[i][1], "rear face, an envelope - the layout places these");
-    echo("PCB", "module-main", "tall", "U-ISO", iso_at[0], iso_at[1], "rear face, RP20-2412SAW body", iso_body, "; pins' tails out of the front face", iso_tail);
+    echo("PCB", "module-main", "tall", "U-ISO", iso_at[0], iso_at[1], "rear face, RPA20-2412SAW body", iso_body, "; pins' tails out of the front face", iso_tail);
     for (f = iso_filter) echo("PCB", "module-main", "tall", f[5], f[0], f[1], "rear face, an envelope - the layout places these");
     echo("PCB", "module-main", "panel", "SW-POWER", tog[0], tog[1], str("panel-mounted, wired; lever ON ", layout_toggle_on, ", lugs in a line along the throw; lugs end"), zd(toggle_body[2] + toggle_lugs) - mb_z1, "in front of the main board");
     // Keep-outs: what each face must leave clear, and the height it allows.

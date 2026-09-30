@@ -7,18 +7,34 @@ the rack, there has to be a valid way to do this."* Numbering: 0025 and 0026
 are taken on other branches (the instrument's drop-in module, the panel
 graphics), so this is 0027.
 
-**Amended 2026-09-30 — `U-ISO` is RECOM's RP20-2412SAW.** The owner: *"Good
-to commit to the newer recom."* It replaces the MORNSUN URB2412YMD-15WR3 in
-point 1 below, on the same land pattern (RECOM numbers the pins differently,
-and the plain part has no CTRL or Trim pin) `[ds
-datasheets/discrete-and-power/RECOM-RP20-AW.pdf PD-6]`. Why not the other two:
+**Amended 2026-09-30 — `U-ISO` is RECOM's RPA20-2412SAW.** The owner: *"I
+thought the point was to do a RECOM that was in stock."* It replaces the
+MORNSUN URB2412YMD-15WR3 in point 1 below, on the same land pattern — same
+six hole positions, the same function in each; RECOM numbers the pins
+differently `[ds datasheets/discrete-and-power/RECOM-RPA20-AW.pdf PD-8]`. It
+is in stock: DigiKey `RPA20-2412SAW-ND`, 20 on the shelf, $53.19 `[web
+DigiKey 2026-09-30]`. Why not the other two:
 
 - **MORNSUN URB2412YMD-15WR3** — DigiKey lists it "not for new designs" with
   one in stock, and the part under that MPN at LCSC is another brand `[web
   DigiKey, LCSC 2026-09-30]`.
-- **RECOM RPA20-2412SAW** — every page of its datasheet is bannered *"NOT
-  RECOMMENDED FOR NEW DESIGNS — LAST TIME BUY: 6TH JULY 2026"*, and it names
-  the RP20-AW as its replacement `[ds RECOM-RPA20-AW.pdf PD-1]`.
+- **RECOM RP20-2412SAW** — the RPA20's named successor, and Active, but none
+  on DigiKey's shelf: eight expected 16-Dec-2026, 11 weeks from the maker,
+  $91.76 `[web DigiKey 2026-09-30]`.
+
+**The RPA20 is end-of-life.** Every page of its datasheet is bannered *"NOT
+RECOMMENDED FOR NEW DESIGNS — LAST TIME BUY: 6TH JULY 2026"*
+`[ds RECOM-RPA20-AW.pdf PD-1]`, and DigiKey lists it Obsolete. **Buy spares
+now**, while the 20 last. **The future supply is the RP20-2412SAW**, and the
+footprint is drawn for it too (`woody:Converter_DCDC_RECOM_RPA20-RP20-xxxxSAW_THT`):
+it drops into the same holes with the same function in each `[ds
+RECOM-RP20-AW.pdf PD-6]`; only its numbering differs (its −Vout is pin 6 and
++Vout pin 4, the RPA20's 4 and 6, and it has no Trim pin), so moving to it
+swaps two pad numbers in the footprint and symbol and changes no copper. It
+differs electrically, and those deltas are re-checked then: its over-load
+protection is 150 % *typical* with no minimum published `[PD-4]` against the
+RPA20's 110 % minimum, its isolation capacitance 1500 pF max `[PD-4]`, its
+body 9.9 mm tall `[PD-6]`.
 
 What moved with the part is on `power-entry.md` (*The instrument's supply*)
 and in the consequences below; the decision itself — isolated, rail to rail —
@@ -82,7 +98,7 @@ burns whatever the LEDs do not, so the total never moves.
 | Same, 0.367 A swing `[sim]` | same | 0.44 / **13.7 cents** | 0.08–0.21 cents |
 | Removes the ribbon term | yes | yes | yes |
 | Removes the bus-board term | **yes** | **no** — the sense line ends at this module's tap, not the receiver's | yes |
-| Cost in power | the converter's loss, ~0.8 W, in the module | none | **2.3 W** (0.195 A × 12 V) to 4.4 W burned all the time, **inside the sealed wooden body**, which ADR 0005 already puts at 4.1 W |
+| Cost in power | the converter's loss, ~0.95 W, in the module | none | **2.3 W** (0.195 A × 12 V) to 4.4 W burned all the time, **inside the sealed wooden body**, which ADR 0005 already puts at 4.1 W |
 | Rack budget | −12 V now carries the instrument (below) | unchanged | +12 V always at its worst |
 | Parts | a converter, a filter, three fuses' worth of protection — module only | none, but one fewer ground conductor (+20 % ribbon resistance) and a non-standard reference | a current regulator and a heat sink in the instrument |
 | Depends on the receiver's position in the case | no | **yes** | no |
@@ -96,9 +112,9 @@ cost is a converter the size of a postage stamp.
 
 ## Decision
 
-1. **`U-ISO`, a RECOM RP20-2412SAW** (20 W, 9–36 V in, 12 V at 1.67 A,
-   1.6 kVDC; the plain part, no CTRL or Trim pin) `[ds
-   datasheets/discrete-and-power/RECOM-RP20-AW.pdf PD-1, PD-4]` — amended
+1. **`U-ISO`, a RECOM RPA20-2412SAW** (20 W, 9–36 V in, 12 V at 1.67 A,
+   1.6 kVDC; the plain part, no CTRL pin, Trim left open) `[ds
+   datasheets/discrete-and-power/RECOM-RPA20-AW.pdf PD-1, PD-5]` — amended
    2026-09-30, above — on `module/power-entry`. Its **input is across the rack's +12 V and −12 V**
    (24 V nominal): +12 V through `PTC-ISO`, `D2`, `FB2` and `L-ISO-IN`; −12 V
    through `D4` (cathode to the bus, like `D3`) and `FB4`; `C2` (100 µF 50 V
@@ -110,10 +126,9 @@ cost is a converter the size of a postage stamp.
    LT1641 that latches on a fault, ramps a cold start and limits a hot-plug.
    On the input side it would see only the converter's hiccup, which is
    auto-retry — the behaviour ADR 0005 rejected. The converter's own
-   over-load protection is 150 % of 1.67 A, 2.5 A, **typical — RECOM
-   publishes no minimum** `[ds PD-4]`; the intent is that it sits above the
-   LT1641's 1.10 A worst-case trip, so the LT1641 decides every start and
-   every fault, and **E6 bench-confirms it**.
+   over-current protection starts at 110 % of 1.67 A, 1.84 A `[ds PD-5]`,
+   above the LT1641's 1.10 A worst-case trip, so the LT1641 decides every
+   start and every fault.
 3. **`PWR_GND` is the isolated return.** It is `U-ISO`'s 0V, the load
    switch's ground and the umbilical's pin 6, on its own layer-4 copper. It
    joins `DIG_GND` at the etherCON through `NT-UMB-MOD` (pins 6 and 8, the
@@ -123,7 +138,7 @@ cost is a converter the size of a postage stamp.
    tracked figure `dig-gnd-topology`.
 4. **`C-ISO-Y`, 1 nF across the barrier at the converter** (`ISO_VIN_POS` to
    `PWR_GND`), gives the switching common-mode current, driven through the
-   converter's isolation capacitance (1500 pF max `[ds PD-4]`), a way home beside
+   converter's isolation capacitance (1100 pF typ `[ds PD-5]`), a way home beside
    the converter instead of round the star and the ribbon.
 5. **The rails get fuses** (owner, same day: *"You're good to add the
    PTCs"*): `PTC-POS12` and `PTC-NEG12` on the module's analog rails, and
@@ -140,8 +155,8 @@ the isolation capacitance at breath frequency. What the model leaves out, each
 | Residual | Size |
 |---|---|
 | The module's own CV outputs driving their receivers: the breath jack's 0–10 V into 100 kΩ is 0.1 mA, returning through the bus between the receiver and the PSU | 0.1 mA × 48 mΩ (ribbon + whole bus) = 4.8 µV → **0.006 cents** — the module's own signal, not the instrument's supply |
-| The ±12 V rails at the header move by 9.4 mV (0.195 A swing) as `U-ISO`'s input current follows breath `[sim, rail_mv]` | OPA2197 at 3 µV/V worst `[SBOS737C p.8]` → 28 nV → **0.00003 cents**; the LM317 at 0.02 %/V passes 1.9 µV to `DAC_AVDD`, which does not set full scale (ADR 0005) |
-| `U-ISO`'s switching, 297–363 kHz `[ds PD-2]` | out of band; its reflected ripple current is 30 mA p-p into the input filter `[ds PD-2]` — see `power-entry.md` |
+| The ±12 V rails at the header move by 9.7 mV (0.195 A swing) as `U-ISO`'s input current follows breath `[sim, rail_mv]` | OPA2197 at 3 µV/V worst `[SBOS737C p.8]` → 29 nV → **0.00003 cents**; the LM317 at 0.02 %/V passes 1.9 µV to `DAC_AVDD`, which does not set full scale (ADR 0005) |
+| `U-ISO`'s switching, 550 kHz `[ds PD-2]` | out of band, behind the input filter — see `power-entry.md` |
 
 **Residual breath-correlated pitch error: under 0.01 cents**, with the rack's
 copper as `sims.yaml` states it, the new LEDs' swing, and the receiver
@@ -156,26 +171,25 @@ constant; it is part of what the owner tunes out, as in every Eurorack module.
 ## Consequences
 
 - **The rack's −12 V now carries the instrument.** Typical play:
-  `umbilical-current` × 12 V ≈ 4.3 W out of `U-ISO`, ~84 % efficient at that
-  load `[ds PD-2]`, from ~23.4 V → **~0.22 A on each of +12 V and −12 V**
+  `umbilical-current` × 12 V ≈ 4.3 W out of `U-ISO`, ~82 % efficient at that
+  load `[ds PD-3]`, from ~23.4 V → **~0.22 A on each of +12 V and −12 V**
   `[calc]`, where it was ~0.36 A on +12 V and none on −12 V. The module's own
   analog load adds ~45 mA and ~40 mA. At the clamp-legal worst (ADR 0005)
-  it is ~0.36 A per rail; an overload the load switch holds just under its
-  0.78 A minimum trip is ~0.48 A per rail; a hot-plug start draws up to
+  it is ~0.37 A per rail; an overload the load switch holds just under its
+  0.78 A minimum trip is ~0.49 A per rail; a hot-plug start draws up to
   ~0.68 A per rail for tens of milliseconds. **Check the case's −12 V
   rating** — many Eurorack supplies give −12 V less than +12 V. The rack
-  total rises by the converter's ~0.8 W loss.
-- **The module dissipates ~0.9 W more**: `U-ISO` ~0.8 W, `D2`/`D4` ~0.1 W.
+  total rises by the converter's ~0.95 W loss.
+- **The module dissipates ~1.05 W more**: `U-ISO` ~0.95 W, `D2`/`D4` ~0.1 W.
 - **A mechanical item for the module CAD**: `U-ISO` is 25.4 × 25.4 mm and
-  **9.9 mm tall on 5.6 mm pins** `[ds PD-6]`, too tall for the gap between
+  **10.2 mm tall on 5.6 mm pins** `[ds PD-7, PD-8]`, too tall for the gap between
   module-main and the jack board, so it goes on module-main's **rear face**
   with `L-ISO-IN`, `C2`, `C-ISO-IN`, `C-ISO-OUT` beside it; the envelopes are
   `config/module.yaml`'s.
-- **Supply, and a schedule risk**: DigiKey `RP20-2412SAW-ND`, Active,
-  $91.76, **none on the shelf, eight expected 16-Dec-2026, 11 weeks from the
-  maker** `[web DigiKey 2026-09-30]`. Order it first. There is no alternate
-  on this footprint in `U-ISO`'s row: the two candidates before it were
-  dropped (above).
+- **Supply**: the RPA20-2412SAW is end-of-life, 20 at DigiKey on
+  2026-09-30 — **buy spares with the first order**. The RP20-2412SAW is the
+  path after that, on the same footprint, with its lead time (11 weeks on
+  2026-09-30) as the schedule risk (above).
 - **The instrument must have no other path to the rack's ground.** A USB lead
   to a computer while the umbilical is plugged in (ADR 0005's bench-only OR)
   joins the isolated return to mains earth; the instrument's current still

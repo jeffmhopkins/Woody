@@ -281,29 +281,31 @@ tall:
     status: nominal
     source: "[adr 0024] representative spots for the three trimmers and four bulk caps, so the depth check sees them; the layout moves them. The caps sit in the right-hand column (2026-09-30) because U-ISO and its filter take the left"
 
-# U-ISO, the instrument's isolated supply (ADR 0027): RECOM RP20-2412SAW on the
-# main board's REAR face - 9.9 mm of body cannot go in the boards' gap. Its
+# U-ISO, the instrument's isolated supply (ADR 0027): RECOM RPA20-2412SAW on the
+# main board's REAR face - 10.2 mm of body cannot go in the boards' gap. Its
 # pins stand out of the FRONT face, toward the jack board.
 iso:
   body:
-    value: [25.4, 25.4, 9.9]
+    value: [25.4, 25.4, 10.2]
     status: settled
-    source: "[ds] RECOM-RP20-AW.pdf PD-6: 25.4 x 25.4 x 9.9 mm without heat sink"
+    source: "[ds] RECOM-RPA20-AW.pdf PD-7, PD-8: 25.4 x 25.4 x 10.2 mm without heat sink"
   pin_l:
     value: 5.6
     status: settled
-    source: "[ds] RECOM-RP20-AW.pdf PD-6: pins 5.6 below the body"
+    source: "[ds] RECOM-RPA20-AW.pdf PD-8: pins 5.60 below the body"
   pin_d:
     value: 1.0
     status: settled
-    source: "[ds] RECOM-RP20-AW.pdf PD-6: pin d1.0 +/-0.1"
-  # The fitted pins (plain SAW: 1, 2, 4, 6), offsets from the body's centre in
-  # the panel frame. The footprint's pattern (woody:Converter_DCDC_RECOM_RP20-xxxxSAW_THT)
-  # turned so the output column (6, 4) is on the right, clear of SW-POWER's lugs.
+    source: "[ds] RECOM-RPA20-AW.pdf PD-8: pin d1.0 +/-0.1"
+  # The fitted pins (plain RPA20 SAW: 1, 2, 4, 5, 6), offsets from the body's
+  # centre in the panel frame, in that order. The footprint's pattern
+  # (woody:Converter_DCDC_RECOM_RPA20-RP20-xxxxSAW_THT) turned a quarter so the
+  # input pins (1, 2) face down and the 4/5/6 row runs across the top: every
+  # tail then clears SW-POWER's lugs, which a column at either side would not.
   pins:
-    value: [[-10.16, 2.54], [-10.16, -2.54], [10.16, 10.16], [10.16, -10.16]]
+    value: [[-2.54, -10.16], [2.54, -10.16], [10.16, 10.16], [0.0, 10.16], [-10.16, 10.16]]
     status: settled
-    source: "[ds] RECOM-RP20-AW.pdf PD-6 recommended footprint: columns 20.32 apart; 1 and 2 at 12.70 and 7.62 from the 3/6 row, 6 and 4 at 0 and 20.32 [calc: offsets from the centre, the 3/6 row 2.54 inside the body's edge]"
+    source: "[ds] RECOM-RPA20-AW.pdf PD-8 recommended footprint: columns 20.32 apart, the 3/4 row 2.54 inside the body's edge; 2 and 1 at 7.62 and 12.70 from it, 4/5/6 at 0/10.16/20.32 [calc: offsets from the centre, turned 90 degrees]"
   at:
     value: [14.2, 50.6]
     status: nominal

@@ -55,10 +55,10 @@ tall_cap_d = 6.3;  // settled; [repo] C-BULK-RAIL 100 uF: CP_Radial_D6.3mm (the 
 tall_cap_h = 11.0;  // tbd; [from memory] a 6.3 x 11 25 V 100 uF can; the banked KiCad model is a generic 6.3 tall
 tall_trim = [9.53, 4.83, 10.03];  // settled; [ds] BOURNS-3296-TRIMPOT.pdf via R26: 3296W body 9.53 x 4.83 x 10.03
 tall_at = [[40.0, 57.0, "cap"], [40.0, 67.0, "cap"], [40.0, 77.0, "cap"], [40.0, 87.0, "cap"], [25.25, 95.0, "trim"], [14.0, 95.0, "trim"], [36.5, 95.0, "trim"]];  // nominal; [adr 0024] representative spots for the three trimmers and four bulk caps, so the depth check sees them; the layout moves them. The caps sit in the right-hand column (2026-09-30) because U-ISO and its filter take the left
-iso_body = [25.4, 25.4, 9.9];  // settled; [ds] RECOM-RP20-AW.pdf PD-6: 25.4 x 25.4 x 9.9 mm without heat sink
-iso_pin_l = 5.6;  // settled; [ds] RECOM-RP20-AW.pdf PD-6: pins 5.6 below the body
-iso_pin_d = 1.0;  // settled; [ds] RECOM-RP20-AW.pdf PD-6: pin d1.0 +/-0.1
-iso_pins = [[-10.16, 2.54], [-10.16, -2.54], [10.16, 10.16], [10.16, -10.16]];  // settled; [ds] RECOM-RP20-AW.pdf PD-6 recommended footprint: columns 20.32 apart; 1 and 2 at 12.70 and 7.62 from the 3/6 row, 6 and 4 at 0 and 20.32 [calc: offsets from the centre, the 3/6 row 2.54 inside the body's edge]
+iso_body = [25.4, 25.4, 10.2];  // settled; [ds] RECOM-RPA20-AW.pdf PD-7, PD-8: 25.4 x 25.4 x 10.2 mm without heat sink
+iso_pin_l = 5.6;  // settled; [ds] RECOM-RPA20-AW.pdf PD-8: pins 5.60 below the body
+iso_pin_d = 1.0;  // settled; [ds] RECOM-RPA20-AW.pdf PD-8: pin d1.0 +/-0.1
+iso_pins = [[-2.54, -10.16], [2.54, -10.16], [10.16, 10.16], [0.0, 10.16], [-10.16, 10.16]];  // settled; [ds] RECOM-RPA20-AW.pdf PD-8 recommended footprint: columns 20.32 apart, the 3/4 row 2.54 inside the body's edge; 2 and 1 at 7.62 and 12.70 from it, 4/5/6 at 0/10.16/20.32 [calc: offsets from the centre, turned 90 degrees]
 iso_at = [14.2, 50.6];  // nominal; [calc] the only 25.4 square on the rear face: its bottom edge boards.part_clear above the NE8FAV's tails (ec.y + 12.35 + 0.5 = 37.85, taken as 37.9), its left 0.5 inside the board's edge (1.5), so the centre is 1.5 + 12.7, 37.9 + 12.7; J-B2B-MOD moved up to clear its top. The layout places it
 iso_filter = [[6.0, 68.5, "can", 6.3, 7.7, "C-ISO-BULK"], [6.0, 76.5, "can", 6.3, 5.8, "C-ISO-OUT"], [15.0, 68.5, "box", 6.0, 2.8, "L-ISO-IN"]];  // nominal; [repo] the rows' packages: C-ISO-BULK SMD can 6.3 x 7.7, C-ISO-OUT 6.3 x 5.8, L-ISO-IN 6.0 x 6.0 x 2.8 (hardware/module/power-entry/bom.csv); placed just above U-ISO, where the layout will want them - an envelope, not a placement
 jack_hole_d = 6.3;  // nominal; [ds] PJ398SM-drawing.jpg: bushing D6; +0.3 clearance [repo J-CV: '6.2-6.5 in practice']

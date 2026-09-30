@@ -33,7 +33,7 @@ ECHO: "PCB", "module-main", "tall", "cap", 40, 87, "rear face, an envelope - the
 ECHO: "PCB", "module-main", "tall", "trim", 25.25, 95, "rear face, an envelope - the layout places these"
 ECHO: "PCB", "module-main", "tall", "trim", 14, 95, "rear face, an envelope - the layout places these"
 ECHO: "PCB", "module-main", "tall", "trim", 36.5, 95, "rear face, an envelope - the layout places these"
-ECHO: "PCB", "module-main", "tall", "U-ISO", 14.2, 50.6, "rear face, RP20-2412SAW body", [25.4, 25.4, 9.9], "; pins' tails out of the front face", 4
+ECHO: "PCB", "module-main", "tall", "U-ISO", 14.2, 50.6, "rear face, RPA20-2412SAW body", [25.4, 25.4, 10.2], "; pins' tails out of the front face", 4
 ECHO: "PCB", "module-main", "tall", "C-ISO-BULK", 6, 68.5, "rear face, an envelope - the layout places these"
 ECHO: "PCB", "module-main", "tall", "C-ISO-OUT", 6, 76.5, "rear face, an envelope - the layout places these"
 ECHO: "PCB", "module-main", "tall", "L-ISO-IN", 15, 68.5, "rear face, an envelope - the layout places these"
