@@ -2371,7 +2371,7 @@
     (property "Row" "D-INRUSH-RST" (at 223.52 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "K=1(K) A=2(A)" (at 223.52 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "Note" "Resets the gate after an unplug: C-INRUSH-GS keeps V_GS while the instrument's capacitors drain, so the gate would be left below ground; this clamps it to -0.4 V, so once the input has fallen the next plug-in starts from off" (at 223.52 142.24 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Pins_source" "datasheets/discrete-and-power/1N4148W.pdf: SOD-123, cathode band; KiCad pin 1 cathode" (at 223.52 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/discrete-and-power/SEMTECH-1N4148W-SOD123.pdf p.1 Pinning: pin 1 cathode, pin 2 anode (SOD-123); KiCad pin 1 cathode" (at 223.52 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "ST(Semtech)" (at 223.52 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "1N4148W" (at 223.52 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "LCSC" "C81598" (at 223.52 142.24 0) (effects (font (size 1.27 1.27)) hide))
