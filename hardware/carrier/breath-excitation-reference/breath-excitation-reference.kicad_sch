@@ -1125,7 +1125,7 @@
     (property "Datasheet" "" (at 193.04 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "C-REF-OUT" (at 193.04 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2" (at 193.04 187.96 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "VOUT load capacitor, on the REF5050's own output" (at 193.04 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "VOUT load capacitor, on the REF5050's own output, straight to AGND_INST: no series resistor (SBOS410O 9.4.1.1 p.29, optional; see the C-REF-OUT row)" (at 193.04 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "Samsung Electro-Mechanics" (at 193.04 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "CL31B106KBHNNNE" (at 193.04 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "LCSC" "C89632" (at 193.04 187.96 0) (effects (font (size 1.27 1.27)) hide))

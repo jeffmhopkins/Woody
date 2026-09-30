@@ -152,7 +152,7 @@ REF_VIN──┬─┤VIN VOUT├─┬── 5.000 V ─┤+IN                 
                      │                                     │ CH1 = spare   │
                      │                                     └───┬───────────┘
                      │                                    [100 nF] [C-ADC-BULK 10 µF]
-                     │                                         │      ** PROPOSED **
+                     │                                         │
   J-UMB pin 2 AGND ──[R-SER-BREATH-INST 1k]──┴── analog star point
                        R1b  ** WAS MISSING **      │
                                                    └──[single tie]── PWR_GND
