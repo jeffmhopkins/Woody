@@ -601,13 +601,15 @@ def check_planes(board, lay):
         M = Polygon([to_pcb(x, y) for x, y in moat.exterior.coords])
         if not any(board.GetLayerName(z.GetLayer()) == spec["layer"] and z.GetNetname() == spec["net"] for z in zones):
             bad.append(f"error: [island] no {spec['net']} island on {spec['layer']}")
+        # a plane on another layer than the island's passes over it: its pads and vias may stand there
+        other = {pl["net"] for pl in lay.get("planes") or [] if pl["layer"] != spec["layer"]}
         for f in board.GetFootprints():
             for pad in f.Pads():
                 name = f"{f.GetReference()}.{pad.GetNumber()}"
                 c = Point(*xy_mm(pad.GetPosition()))
                 if pad.GetNetname() == spec["net"] and name not in spec.get("off_island", []) and not P.contains(c):
                     bad.append(f"error: [island] {name} is {spec['net']} but off its island - it would return through the plane")
-                if pad.GetNetname() in plane_nets - {spec["net"]} and pad.GetNetname() != "UMBILICAL_POS12" and P.contains(c) \
+                if pad.GetNetname() in plane_nets - {spec["net"]} - other and P.contains(c) \
                         and f.GetReference() != spec["tie"]:
                     bad.append(f"error: [island] {name} ({pad.GetNetname()}) stands on the {spec['net']} island")
         for v in board.GetTracks():
@@ -616,7 +618,7 @@ def check_planes(board, lay):
             c = Point(*xy_mm(v.GetPosition()))
             if v.GetNetname() == spec["net"] and not P.contains(c):
                 bad.append(f"error: [island] a {spec['net']} via at ({c.x:.2f}, {c.y:.2f}) is off the island")
-            if v.GetNetname() in plane_nets - {spec["net"], "UMBILICAL_POS12"} and M.contains(c):
+            if v.GetNetname() in plane_nets - {spec["net"]} - other and M.contains(c):
                 bad.append(f"error: [island] a {v.GetNetname()} via at ({c.x:.2f}, {c.y:.2f}) is on the island or its moat")
         # the ties: every net-tie footprint joining the island's net to another
         ties = [f.GetReference() for f in board.GetFootprints() if f.IsNetTie()

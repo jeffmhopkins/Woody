@@ -59,13 +59,15 @@ stackup:
 # THE PLANES (hardware/carrier/power-entry-instrument/power-entry-instrument.md §2):
 # layer 2 is PWR_GND, one plane from J-UMB to the mouth end under every SPI,
 # chain and LED-data trace; layer 3 carries the rails. The rail that visits the
-# whole board is the +12 V (UMBILICAL_POS12: all thirteen LEDs and their caps,
-# C-STRIP-BULK, the reference's input and the buffer's supply), so it is the
-# layer-3 plane, and a signal on layer 4 has one unbroken plane over it. The
+# whole board is the +12 V behind Q-INRUSH (INST_POS12, power-entry-instrument.md
+# §1a: all thirteen LEDs and their caps, C-STRIP-BULK, L-BUCK-IN, the reference's
+# input and the buffer's supply), so it is the layer-3 plane, and a signal on
+# layer 4 has one unbroken plane over it. The +12 V ahead of Q-INRUSH
+# (UMBILICAL_POS12, J-UMB pin 3 to the clamps and Q-INRUSH's source) and the
 # lighter rails (DEV_3V3, INST_5V_A, BUCK_IN) are tracks: net_classes below.
 planes:
   - {layer: In1.Cu, net: PWR_GND}
-  - {layer: In2.Cu, net: UMBILICAL_POS12}
+  - {layer: In2.Cu, net: INST_POS12}
 
 # THE ANALOG ISLAND (same page, §2): AGND_INST on layer 2 under the analog block
 # only, a moat round it, bridged at ONE point by NT-AGND (NT2), which sits under
@@ -113,23 +115,30 @@ pairs:
 # -> 1.0 A (U-BUCK's rating, the most its 5 V path can carry; power-entry-
 # instrument.md "Regulator loading") needs 16.3 mil2 = 0.30 mm; 0.5 mm leaves
 # the drop along the 5 V path at 10 mV per 10 mm [calc: 0.5 mOhm/sq x 10/0.5
-# x 1.0 A = 10 mV]. DEV_3V3 is the registers, the ADC and the chain's pull-ups
+# x 1.0 A = 10 mV]. UMBILICAL_POS12, J-UMB to Q-INRUSH, carries the whole
+# instrument, bounded by the module's LT1641 worst-case trip (power-entry-
+# instrument.md §1a, 1.10 A): 18.6 mil2 = 0.34 mm [calc: (1.10 / (0.048 x
+# 10^0.44))^(1/0.725) = 18.6 mil2; / 1.378 mil (1 oz) = 13.5 mil], so 0.5 mm
+# too. DEV_3V3 is the registers, the ADC and the chain's pull-ups
 # (the Matrix's regulator is on the Matrix), tens of mA: 0.3 mm.
 net_classes:
   power5:
     nets: [INST_5V_A, BUCK_IN, /power-entry-instrument/BUCK_A_OUT]
+    track: 0.5
+  power12_in:
+    nets: [UMBILICAL_POS12]
     track: 0.5
   rail3v3:
     nets: [DEV_3V3]
     track: 0.3
   plane_nets:
     # stubs from a pad to its plane via, and the pair's AGND leg (pairs:)
-    nets: [PWR_GND, UMBILICAL_POS12, AGND_INST]
+    nets: [PWR_GND, INST_POS12, AGND_INST]
     track: 0.4
 
 # Every SMD pad on a plane net gets its own via into the plane beside it, a
 # short stub away (pcb_route.fanout); a through-hole pad meets the plane itself.
-fanout: [PWR_GND, UMBILICAL_POS12, AGND_INST]
+fanout: [PWR_GND, INST_POS12, AGND_INST]
 
 # Parts the sheets carry that this board does not: A1 is the Matrix, on the lid
 # (on the sheet for its pad-to-pin map, reached through J-MCU); SW9 and SW10 are
@@ -157,21 +166,23 @@ ubolt:
 
 # J-MCU and J-UMB, from the echo's insulator extent (x0, x1) and centre y. Each is
 # placed by its pad row farthest from the mouth - the connectors' mouths face the
-# tail - at `back_row_at` from x0 or x1. For J-MCU: XKB's body 5.40 along the
-# body and its far tail row 1.87 behind the body's back [ds XKB-X1270WR-2x12A-
-# 9TV01.pdf, config/body.yaml boards.mcu_conn_w], so 7.27 in front of the mouth
-# face x1. For J-UMB: KiCad's horizontal header's pin row stands 1.5 in front of
-# its insulator (the placeholder footprint; the Hanxia footprint replaces it).
-# RE-RUN NOTE: both are placeholder footprints being replaced (J-MCU by the real
-# XKB footprint); re-check both offsets against the new footprints' pad rows.
+# tail - at `back_row_at` from x0 or x1. Both are the woody.pretty footprints
+# (hardware/lib/README.md). J-MCU: the body 5.40 along the body and its far tail
+# row 2.60 behind the body's back [ds XKB-X1270WR-2x12A-9TV01.pdf rev A1 side
+# view; config/body.yaml boards.mcu_conn_w], so 8.00 in front of the mouth face x1
+# [calc: 5.40 + 2.60]. J-UMB: the Hanxia header's pin row 1.80 in front of its
+# insulator [ds HANXIA-HX-PZ2.54-1x8P-WZ.pdf; calc: 4.30 mating face to tail - 2.50].
 connectors:
-  J-MCU: {row: J-MCU, rot: 0, back_row_from: x1, back_row_at: -7.27}
-  J-UMB: {row: J-UMB, rot: 0, back_row_from: x0, back_row_at: -1.5}
+  J-MCU: {row: J-MCU, rot: 0, back_row_from: x1, back_row_at: -8.00}
+  J-UMB: {row: J-UMB, rot: 0, back_row_from: x0, back_row_at: -1.80}
 
-# Parts the echo places by centre: U-BREATH, its pads centred there, turned so
-# pins 1-4 (VS, GND, Vout) face the analog block at low y.
+# Parts the echo places by centre: U-BREATH, its pads centred there, turned so its
+# ports point to the tail (+x), as the body CAD and breath-sense-link.md
+# (Mounting) put them: the footprint's ports are at its -y, so 270. That puts
+# pins 1-4 (VS, GND, Vout) toward the far edge (high y), not the analog block;
+# the island reaches round them (islands: below).
 cad_parts:
-  U-BREATH: {row: U-BREATH, rot: 90}
+  U-BREATH: {row: U-BREATH, rot: 270}
 
 # Each LED's 100 nF (C-LED), 4.6 mm across the body from its LED's centre, over
 # its VDD and GND pads (ADR 0028). LED n is the nth along the data chain.
@@ -263,6 +274,16 @@ parts:
   NT1: [293.0, 13.4, 90]    # NT-DIG at J-UMB pin 8 (ADR 0018)
   D2:  [286.4, 20.0, 90]    # D-REVSHUNT, across pins 3 / 6, ahead of L-BUCK-IN
   D3:  [278.3, 21.5, 90]    # D-TVS-PWR, between the tongue's end mounts
+  # --- Q-INRUSH and its gate network (power-entry-instrument.md §1a) behind the
+  # clamps, on the tongue between HDR-SERVICE and the end mount: its source from
+  # J-UMB pin 3 past D-REVSHUNT and D-TVS-PWR, its drain into the INST_POS12 plane
+  Q1:  [270.5, 21.8, 0]     # Q-INRUSH AO3401A
+  C38: [266.0, 26.3, 90]    # C-INRUSH-GS, source to gate
+  R41: [268.3, 26.3, 90]    # R-INRUSH-GS, source to gate
+  R42: [270.6, 26.3, 90]    # R-INRUSH-G, gate to ground
+  C39: [272.9, 26.3, 90]    # C-INRUSH-GD, the Miller leg's capacitor
+  R43: [272.9, 30.8, 90]    # R-INRUSH-GD, the Miller leg's damping, to the drain
+  D20: [268.8, 30.8, 90]    # D-INRUSH-RST, gate reset after an unplug
   # --- the SPI and chain series resistors at their driving end, beside J-MCU, under
   # the Matrix ribbon (each under its 2.15 mm room)
   R1:  [254.2, 29.6, 90]    # R-SPI-SER SCLK
@@ -278,9 +299,9 @@ parts:
   J2:  [262.6, 16.6, 90]    # HDR-SERVICE, on the tongue, reached with the lid off
   # --- the regulator block (the echo's REGULATOR-BLOCK) holds U-BUCK alone; the
   # buck's input LC and C-STRIP-BULK where their height fits (README, Open)
-  U5:  [233.75, 43.985, 270] # U-BUCK, its courtyard centred in the block
-  C11: [218.3, 42.6, 90]    # C-BUCK-IN 100 uF (5.8 mm tall)
-  L1:  [226.6, 43.6, 0]     # L-BUCK-IN 22 uH
+  U5:  [232.58, 43.985, 270] # U-BUCK, its courtyard centred in the block
+  C11: [217.13, 42.6, 90]    # C-BUCK-IN 100 uF (5.8 mm tall)
+  L1:  [225.43, 43.6, 0]     # L-BUCK-IN 22 uH
   D4:  [225.6, 36.5, 180]   # D-USBOR, buck -> INST_5V_A
   C10: [221.2, 16.4, 0]     # C-STRIP-BULK 470 uF, at the LED row's feed (LED 1 end)
   U6:  [232.3, 16.4, 0]     # U-LVLSHIFT 74AHCT125
