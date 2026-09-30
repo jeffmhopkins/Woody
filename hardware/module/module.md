@@ -21,7 +21,13 @@ circuits. **The circuits own their own values** — nothing here restates one.
 | [`pitch-stage/`](pitch-stage/pitch-stage.md) | Two-resistor non-inverting `2·Vdac − 2.5`, loop tapped at the jack |
 | [`mod-channels/`](mod-channels/mod-channels.md) | Four × `4·Vdac − 3·V_ref`, sharing one buffered reference |
 | [`panel-led/`](panel-led/panel-led.md) | The panel indicator, and the job it has lost |
-| [`panel/`](panel/panel.md) | Panel geometry: width, clear height, how many control rows fit |
+| [`panel/`](panel/panel.md) | Panel geometry: width, clear height, how many control rows fit, and the layout (ADR 0024) |
+
+**The module is two boards** (ADR 0023), and each circuit's KiCad sheet is
+its source (ADR 0019): [`module-main`](../boards/module-main/README.md)
+carries the etherCON, every IC, the trimmers and the power header;
+[`module-jack`](../boards/module-jack/README.md) the jacks, pots and LED.
+`J-B2B-MOD` joins them; its pin allocation is in the main board's README.
 
 The other half of the breath chain and of the SPI path are **not here**. They
 cross a board boundary and live in
@@ -30,8 +36,12 @@ functions and error budgets cannot be stated from one side.
 
 ## Still open at board level
 
-- **There is no module board outline or panel DXF yet.** `panel/` settles the
-  geometry; nothing has been cut.
+- **The board outlines and the panel's cut file are generated** by the module
+  CAD (ADR 0024): `mechanical/module/export/` holds the panel DXF, both
+  boards' outlines and `pcb-geometry.echo` — every panel part's position,
+  the standoffs, both connectors and each face's keep-outs — which is the
+  board layout's input. `mechanical/module/README.md` has the pictures.
+  Nothing has been cut yet.
 - **Two layers or four** is undecided and gates the grounding scheme. It is
   upstream of `power-entry/`'s `dig-gnd-topology`, which is tracked as
   `disputed` for exactly this reason.

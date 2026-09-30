@@ -110,9 +110,17 @@ def find(node, key):
     return [c for c in node if isinstance(c, list) and c and c[0] == key]
 
 
+def sym_path(lib):
+    """KiCad's own libraries, or this project's (`woody`, hardware/lib/woody.kicad_sym) for a
+    part KiCad does not draw - hardware/lib/README.md."""
+    if lib == "woody":
+        return os.path.join(ROOT, "hardware", "lib", "woody.kicad_sym")
+    return os.path.join(SYMDIR, lib + ".kicad_sym")
+
+
 def lib_symbol_text(lib, name):
     """The raw text of one symbol in a .kicad_sym, by bracket matching."""
-    path = os.path.join(SYMDIR, lib + ".kicad_sym")
+    path = sym_path(lib)
     text = open(path).read()
     m = re.search(r'\n(?:\t|  )\(symbol "%s"\s' % re.escape(name), text)
     if not m:
@@ -224,7 +232,7 @@ def fingerprint(d, lay):
     files = [os.path.join(d, lay.get("netlist", "netlist.yaml")), os.path.join(d, "schematic.yaml"),
              os.path.abspath(__file__)]
     libs = sorted({c["symbol"].split(":")[0] for c in lay["components"].values()} | {"power"})
-    files += [os.path.join(SYMDIR, l + ".kicad_sym") for l in libs]
+    files += [sym_path(l) for l in libs]
     for f in files:
         if not os.path.exists(f):
             sys.exit(f"sch: {f} missing - install KiCad and its symbols (apt-get install kicad kicad-symbols)")
@@ -416,7 +424,7 @@ class Sheet:
         if pd is None:
             return {"dir": "ref", "fields": {"Kind": "endpoint"}}
         f = {"Dir": pd.get("dir", "")}
-        for k in ("from", "to", "figure"):
+        for k in ("from", "to", "figure", "note"):
             if k in pd:
                 f[k.capitalize()] = str(pd[k])
         return {"dir": pd.get("dir"), "fields": f}
@@ -525,10 +533,11 @@ class Sheet:
         for lb in lay.get("labels", []):
             at = (snap(lb["at"][0]), snap(lb["at"][1]))
             d = {"left": (-1, 0), "right": (1, 0), "up": (0, -1), "down": (0, 1)}[lb.get("dir", "left")]
-            if self.hier and (lb["net"] in ports or lb["net"] in self.lay.get("hier_endpoints", [])):
+            # `local: true`: a local label even on a port's net - it names a net carrying two ports
+            if self.hier and not lb.get("local") and (lb["net"] in ports or lb["net"] in self.lay.get("hier_endpoints", [])):
                 self.label(lb["net"], at, d, hier=self.port_fields(lb["net"]))
             else:
-                self.label(lb["net"], at, d, glob=lb["net"] in ports)
+                self.label(lb["net"], at, d, glob=lb["net"] in ports and not lb.get("local"))
         for i, ps in enumerate(lay.get("power_symbols", [])):
             self.power_symbol(ps["net"], (snap(ps["at"][0]), snap(ps["at"][1])), ("placed", i))
 
@@ -544,7 +553,11 @@ class Sheet:
                 if p in self.wired:
                     continue
                 x, y, dx, dy, typ = self.pinpos[p]
-                if nname in ext and len(plist) == 1 and not (self.hier and nname in self.lay.get("hier_endpoints", [])):
+                # On a source sheet a spare whose net has its own name keeps it, as a label:
+                # tools/kicad.py exports a lone labelled pin as an external endpoint.
+                # (A board's sub-sheet pin, `sheet:PIN`, has no part pin to name it: a no-connect.)
+                if nname in ext and len(plist) == 1 and not (self.hier and nname in self.lay.get("hier_endpoints", [])) \
+                        and not (self.hier and "." in p and nname != p.rsplit(".", 1)[1]):
                     self.no_connect((x, y))
                     continue
                 end = (snap(x + dx * STUB), snap(y + dy * STUB))
@@ -613,9 +626,14 @@ def kicad_netlist(sch_path):
             sys.exit(f"sch: kicad-cli netlist export failed:\n{r.stdout}{r.stderr}")
         tree = parse(open(out).read())[0]
     nets = {}
+    kicad_netlist.nc = set()     # pins the LIBRARY marks not connected (an N/C lead of a package)
     for n in find(find(tree, "nets")[0], "net"):
         name = find(n, "name")[0][1]
         nodes = {(find(x, "ref")[0][1], find(x, "pin")[0][1]) for x in find(n, "node")}
+        for x in find(n, "node"):
+            t = find(x, "pintype")
+            if t and t[0][1].startswith("no_connect"):
+                kicad_netlist.nc.add((find(x, "ref")[0][1], find(x, "pin")[0][1]))
         nets[name] = nodes
     return nets
 
@@ -631,6 +649,9 @@ def compare(sheet, net, knets):
     seen = set()
     for nname, plist in net["nets"].items():
         want = frozenset(sheet.pinnum[m] for m in plist if isinstance(m, str))
+        if not want:
+            # ports and no pin: not in KiCad's netlist; tools/kicad.py export reads it off the labels
+            continue
         kname = by_pins.get(want)
         if kname is None:
             got = [k for k, v in knets.items() if want & v]
@@ -640,8 +661,11 @@ def compare(sheet, net, knets):
         bare = kname.lstrip("/")
         if len(want) > 1 and bare != nname and not kname.startswith("unconnected-"):
             problems.append(f"net {nname}: KiCad names it {kname!r}")
+    named = set(sheet.pinnum.values())
+    nc = getattr(kicad_netlist, "nc", set())
     for kname, nodes in knets.items():
-        real = {n for n in nodes if not n[0].startswith("#")}
+        # a package's N/C lead the netlist does not name (the library types it no_connect) is no net
+        real = {n for n in nodes if not n[0].startswith("#") and (n in named or n not in nc)}
         if real and kname not in seen:
             problems.append(f"KiCad net {kname} {sorted(real)} is not in netlist.yaml")
     return problems

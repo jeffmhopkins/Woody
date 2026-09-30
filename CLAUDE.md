@@ -284,9 +284,12 @@ repeating, and record the verification.
   instance. `python3 tools/kicad.py check` fails on a sheet edited without
   re-exporting, a stale render, a board ERC error, or a board wired against
   `allocation.yaml`. It needs KiCad 9 (`tools/setup-env.sh`) and is **not** in
-  the commit hook, so run it by hand. Circuits not yet migrated (the module's
-  and the interfaces) keep a hand-written `netlist.yaml`, authoritative until
-  their sheet exists; their ASCII drawings are representations of it.
+  the commit hook, so run it by hand. **Every circuit with parts has a
+  sheet**, so every `netlist.yaml` is exported: edit the sheet, never the
+  netlist. A circuit with no parts has no sheet and says so on its page.
+  A new circuit starts as a hand-written `netlist.yaml` and becomes a sheet
+  with `tools/sch.py build`, parity-checked by `tools/kicad.py export`
+  (`docs/reference/tooling.md`).
 - **A board's `.kicad_pcb` is the source once it exists.** `tools/pcb.py
   layout` writes the first one (placed from the body CAD's exports, routed,
   poured); after that it is edited in KiCad. `tools/kicad.py check` runs
@@ -294,7 +297,7 @@ repeating, and record the verification.
   connections, and every switch where the body CAD puts it. Renders and
   `fab/` are exported and ledgered in `hardware/SHEETS.csv`.
   `docs/reference/tooling.md` §4.
-- **`netlist.yaml` IS WHAT EVERY CHECK READS**, exported or hand-written. The
+- **`netlist.yaml` IS WHAT EVERY CHECK READS**, exported from its sheet. The
   drawing is a representation of it. `hardware/nets.yaml` is the master list
   of every net that crosses a circuit boundary, because a per-circuit file can
   only declare its own side. `tools/check-netlist.py --strict` runs from the

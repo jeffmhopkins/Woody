@@ -16,7 +16,7 @@ The `Dir` and `Peer` columns are defined once in
 |---|---|---|---|---|
 | `MODULE ANALOG +12V` | in | `module/power-entry` | — | Through `R-LED-PANEL` into `LED-PANEL`. Live whenever the rack is, which is the whole of the problem below |
 | LED return | ref | `module/power-entry` | `dig-gnd-topology` | **Not drawn anywhere in the corpus.** The rail it comes from is the analog one; which ground it lands on is the disputed figure |
-| panel cutout | — | `module/panel` | `panel-height-budget` | A cutout, not a net. The bezel sits beside the etherCON flange; the figure's `toggle_row` note is what establishes that it fits |
+| panel cutout | — | `module/panel` | `panel-height-budget` | A cutout, not a net. The LED sits in the toggle's row, left of the toggle (ADR 0024 point 11); the figure's `toggle_row` note is what establishes that the row fits |
 | `TIMER` / `GATE` of `U-LOADSW` | — | `module/umbilical-load-switch` | `loadswitch-timer` | **Proposed, not drawn.** The rework below would take the indication from here instead |
 | comparator collector node | — | `module/link-supervision` | — | **Not fitted.** The deleted presence comparator shared this node, and that was the indication this LED was kept to give. It is an ordinary power indicator now |
 

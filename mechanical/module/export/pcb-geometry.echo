@@ -1,0 +1,54 @@
+ECHO: "PCB", "module-jack", "board", "outline", 1, 10, 49.5, 118.5
+ECHO: "PCB", "module-main", "board", "outline", 1, 10, 49.5, 118.5
+ECHO: "PCB", "module-jack", "cutout", "notch", 11.75, 10, 38.75, 38.5, "open to the bottom edge; the NE8FAV's body passes"
+ECHO: "PCB", "module-jack", "cutout", "notch step", 17.75, 38.5, 32.75, 54.45, "on the notch's top edge, one cut-out with it; SW-POWER's body passes"
+ECHO: "PCB", "module-jack", "board", "thickness", 1.6, "depth", 9, "side", "jacks, pots, LED on the front (toward the panel)"
+ECHO: "PCB", "module-main", "board", "thickness", 1.6, "depth", 18.3, "side", "NE8FAV and J-B2B-MOD's insulator on the front; power header, trimmers, bulk caps on the rear"
+ECHO: "PCB", "module-jack", "jack", "J-CV-PITCH", 15.75, 88.5, 180, "PJ398SM on its side: the angle (deg, from +x) from the barrel to the sleeve pad; pins 3, 2, 1 at this many mm along it", [-4.92, 3.38, 6.48]
+ECHO: "PCB", "module-jack", "jack", "J-CV-BREATH", 34.75, 88.5, 0, "PJ398SM on its side: the angle (deg, from +x) from the barrel to the sleeve pad; pins 3, 2, 1 at this many mm along it", [-4.92, 3.38, 6.48]
+ECHO: "PCB", "module-jack", "jack", "J-CV-MOD1", 15.75, 75.5, 180, "PJ398SM on its side: the angle (deg, from +x) from the barrel to the sleeve pad; pins 3, 2, 1 at this many mm along it", [-4.92, 3.38, 6.48]
+ECHO: "PCB", "module-jack", "jack", "J-CV-MOD2", 34.75, 75.5, 0, "PJ398SM on its side: the angle (deg, from +x) from the barrel to the sleeve pad; pins 3, 2, 1 at this many mm along it", [-4.92, 3.38, 6.48]
+ECHO: "PCB", "module-jack", "jack", "J-CV-MOD3", 15.75, 62.5, 180, "PJ398SM on its side: the angle (deg, from +x) from the barrel to the sleeve pad; pins 3, 2, 1 at this many mm along it", [-4.92, 3.38, 6.48]
+ECHO: "PCB", "module-jack", "jack", "J-CV-MOD4", 34.75, 62.5, 0, "PJ398SM on its side: the angle (deg, from +x) from the barrel to the sleeve pad; pins 3, 2, 1 at this many mm along it", [-4.92, 3.38, 6.48]
+ECHO: "PCB", "module-jack", "pot", "POT-GAIN", 8.25, 106, 0, "R0904N, pins down at dy", -6.7, "pitch", 2.5
+ECHO: "PCB", "module-jack", "pot", "POT-OFFSET", 25.25, 106, 0, "R0904N, pins down at dy", -6.7, "pitch", 2.5
+ECHO: "PCB", "module-jack", "pot", "POT-RESP", 42.25, 106, 0, "R0904N, pins down at dy", -6.7, "pitch", 2.5
+ECHO: "PCB", "module-jack", "led", "LED-PANEL", 6.375, 49.5, 0, "leads along x, pitch", 2.54, "spacer", 6.45
+ECHO: "PCB", "module-jack", "standoff", "MECH-STANDOFF-MOD 1", 16.75, 114.8, 3.2, 6, 7.7
+ECHO: "PCB", "module-main", "standoff", "MECH-STANDOFF-MOD 1", 16.75, 114.8, 3.2, 6, 7.7
+ECHO: "PCB", "module-jack", "standoff", "MECH-STANDOFF-MOD 2", 33.75, 114.8, 3.2, 6, 7.7
+ECHO: "PCB", "module-main", "standoff", "MECH-STANDOFF-MOD 2", 33.75, 114.8, 3.2, 6, 7.7
+ECHO: "PCB", "module-jack", "standoff", "MECH-STANDOFF-MOD 3", 6.375, 17, 3.2, 6, 7.7
+ECHO: "PCB", "module-main", "standoff", "MECH-STANDOFF-MOD 3", 6.375, 17, 3.2, 6, 7.7
+ECHO: "PCB", "module-jack", "standoff", "MECH-STANDOFF-MOD 4", 44.125, 17, 3.2, 6, 7.7
+ECHO: "PCB", "module-main", "standoff", "MECH-STANDOFF-MOD 4", 44.125, 17, 3.2, 6, 7.7
+ECHO: "PCB", "module-jack", "connector", "J-B2B-MOD", 25.25, 75.5, 0, 2, 10, 2.54, "long axis along y, pin 1 at the top left"
+ECHO: "PCB", "module-main", "connector", "J-B2B-MOD", 25.25, 75.5, 0, 2, 10, 2.54, "long axis along y, pin 1 at the top left"
+ECHO: "PCB", "module-main", "connector", "J-UMBILICAL", 25.25, 25, 0, "NE8FAV, latch up"
+ECHO: "PCB", "module-main", "connector", "J-PWR-EURO", 42.5, 35, 0, "rear face, long axis along y, pin 1 (-12 V) at the bottom"
+ECHO: "PCB", "module-main", "tall", "cap", 10, 60, "rear face, an envelope - the layout places these"
+ECHO: "PCB", "module-main", "tall", "cap", 10, 70, "rear face, an envelope - the layout places these"
+ECHO: "PCB", "module-main", "tall", "cap", 40, 60, "rear face, an envelope - the layout places these"
+ECHO: "PCB", "module-main", "tall", "cap", 40, 70, "rear face, an envelope - the layout places these"
+ECHO: "PCB", "module-main", "tall", "trim", 25.25, 95, "rear face, an envelope - the layout places these"
+ECHO: "PCB", "module-main", "tall", "trim", 14, 95, "rear face, an envelope - the layout places these"
+ECHO: "PCB", "module-main", "tall", "trim", 36.5, 95, "rear face, an envelope - the layout places these"
+ECHO: "PCB", "module-main", "panel", "SW-POWER", 25.25, 49.5, "panel-mounted, wired; lever ON right, lugs in a line along the throw; lugs end", 4.4, "in front of the main board"
+ECHO: "PCB", "module-jack", "keepout", "barrel J-CV-PITCH", 15.75, 88.5, 3, "d, no copper under the barrel (Thonk's PJ398SM note)"
+ECHO: "PCB", "module-jack", "keepout", "barrel J-CV-BREATH", 34.75, 88.5, 3, "d, no copper under the barrel (Thonk's PJ398SM note)"
+ECHO: "PCB", "module-jack", "keepout", "barrel J-CV-MOD1", 15.75, 75.5, 3, "d, no copper under the barrel (Thonk's PJ398SM note)"
+ECHO: "PCB", "module-jack", "keepout", "barrel J-CV-MOD2", 34.75, 75.5, 3, "d, no copper under the barrel (Thonk's PJ398SM note)"
+ECHO: "PCB", "module-jack", "keepout", "barrel J-CV-MOD3", 15.75, 62.5, 3, "d, no copper under the barrel (Thonk's PJ398SM note)"
+ECHO: "PCB", "module-jack", "keepout", "barrel J-CV-MOD4", 34.75, 62.5, 3, "d, no copper under the barrel (Thonk's PJ398SM note)"
+ECHO: "PCB", "module-jack", "keepout", "standoff head", 16.75, 114.8, 7, "d, no parts or copper"
+ECHO: "PCB", "module-jack", "keepout", "standoff head", 33.75, 114.8, 7, "d, no parts or copper"
+ECHO: "PCB", "module-jack", "keepout", "standoff head", 6.375, 17, 7, "d, no parts or copper"
+ECHO: "PCB", "module-jack", "keepout", "standoff head", 44.125, 17, 7, "d, no parts or copper"
+ECHO: "PCB", "module-main", "keepout", "standoff head", 16.75, 114.8, 7, "d, no parts or copper"
+ECHO: "PCB", "module-main", "keepout", "standoff head", 33.75, 114.8, 7, "d, no parts or copper"
+ECHO: "PCB", "module-main", "keepout", "standoff head", 6.375, 17, 7, "d, no parts or copper"
+ECHO: "PCB", "module-main", "keepout", "standoff head", 44.125, 17, 7, "d, no parts or copper"
+ECHO: "PCB", "module-main", "keepout", "front: under the jack board", 1, 10, 49.5, 118.5, 5.1, "max part height on the front face where the pots' legs are; ", 5.3, " under a jack's tails"
+ECHO: "PCB", "module-jack", "keepout", "rear: toward the main board", 1, 10, 49.5, 118.5, 7.2, "max part height on the rear face, less whatever the main board puts under it"
+ECHO: "PCB", "module-main", "keepout", "front: SW-POWER wiring", 18.75, 45.55, 31.75, 53.45, 4.4, "the lugs' ends above the front face"
+ECHO: "PCB", "module-main", "keepout", "rear: ribbon fold", 25.23, 10, 45.55, 47.41, 16.9, "max part height on the rear face under the ribbon (the socket's back)"

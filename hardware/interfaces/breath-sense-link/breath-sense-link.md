@@ -66,6 +66,36 @@ The `Dir` and `Peer` columns are defined once in
 
 ---
 
+## The sheet, and which board places what
+
+**The source is [`breath-sense-link.kicad_sch`](breath-sense-link.kicad_sch)**
+(ADR 0019; render [`breath-sense-link.sch.png`](breath-sense-link.sch.png)).
+[`netlist.yaml`](netlist.yaml) is exported from it
+(`python3 tools/kicad.py export hardware/interfaces/breath-sense-link`) and must
+not be edited. It was first written from the hand-written netlist and compared
+with it part by part and net by net: no change. The sensor's N/C pins (1, 5–8)
+are on the symbol and on no net, as before. The drawing on
+[`carrier.md`](../../carrier/carrier.md) §2 stays a representation.
+
+**Every part on this sheet is on the main board.** The umbilical conductors
+leave it on `interfaces/spi-link` (`J-UMB` pins 1 and 2), and the module end
+(`R-SER-BREATH`, the in-amp) is `module/breath-receive-stage`'s, so this sheet
+is the one interface that **one board could place whole**:
+
+| Part on this sheet | BOM row | Board | On that board today |
+|---|---|---|---|
+| `U-BREATH` | `U-BREATH` | `hardware/boards/main-board` | `U10`, drawn on its root sheet |
+| `R1`, `R1b` | `R-SER-BREATH-INST` | `main-board` | `R38`, `R39` |
+| `D-TVS-BREATH-SIG`, `D-TVS-BREATH-RET` | `D-TVS-BREATH` | `main-board` | `D5`, `D6` |
+
+The main board's five were compared with this sheet by hand on 2026-09-29,
+pin by pin, and agree `[repo, board-netlist.yaml]`; nothing re-checks that
+automatically. **Recommended to the main board's owner:** replace the five
+root-sheet parts with one placement of this sheet, its ports wired to the
+nets the root sheet already uses (`VS`, `SENSOR_RAW`, `SENSOR_BUFFERED_OUT`,
+`BREATH_SENSE`, `AGND_SENSE`, `AGND_INST`). Then the board follows this sheet
+instead of restating it. Not done here: board projects are their owners'.
+
 ## Mounting — `U-BREATH` is soldered to the main board
 
 *Written 2026-09-26, not moved. The verbatim sections below are unaffected.*

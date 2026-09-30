@@ -1,0 +1,211 @@
+(kicad_sch (version 20250114) (generator "sch.py") (generator_version "9.0")
+  (uuid f3cf1183-3ccd-574d-a1a6-4d0a7c605c94)
+  (paper "A4")
+  (title_block
+    (title "Response control (PROPOSED) - the module jack board's page (hardware/module/breath-response-shaper)")
+    (comment 7 "title: Response control (PROPOSED)")
+    (date "")
+    (rev "")
+    (company "Woody")
+    (comment 1 "SOURCE - one page of hardware/module/breath-response-shaper; edit in KiCad 9, then: python3 tools/kicad.py export hardware/module/breath-response-shaper")
+    (comment 2 "Part facts ride on each symbol: Row (BOM row), Pins + Pins_source (pin map and its datasheet), Note")
+    (comment 3 "ADR 0006 (proposed stage), ADR 0019, ADR 0023 - the module jack board's parts of this circuit")
+    (comment 4 "Page `jack` of hardware/module/breath-response-shaper/breath-response-shaper.kicad_sch; the module jack board places it")
+  )
+  (lib_symbols
+    (symbol "Device:R_Potentiometer"
+		(pin_names
+			(offset 1.016)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "RV"
+			(at -4.445 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "R_Potentiometer"
+			(at -2.54 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Potentiometer"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "resistor variable"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "Potentiometer*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "R_Potentiometer_0_1"
+			(rectangle
+				(start 1.016 2.54)
+				(end -1.016 -2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.143 0) (xy 2.286 0.508) (xy 2.286 -0.508) (xy 1.143 0)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(polyline
+				(pts
+					(xy 2.54 0) (xy 1.524 0)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "R_Potentiometer_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 1.27)
+				(name "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 1.27)
+				(name "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 3.81 0 180)
+				(length 1.27)
+				(name "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+  )
+  (symbol (lib_id "Device:R_Potentiometer") (at 40.64 50.8 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 59d41a7c-e1f2-547c-8606-5a93486b58ee)
+    (property "Reference" "POT-RESP" (at 40.64 43.18 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "50k linear" (at 40.64 45.72 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "woody:Potentiometer_SongHuei_R0904N_Single_Vertical" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "POT-RESP" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "CW=3(3) W=2(2) CCW=1(1)" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "CW end at V_in/2, CCW end at V_shaped. At centre the wiper is at exactly 0 V FOR ANY INPUT, so the diode branch carries no current and the stage is linear by topology rather than by tolerance" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/connectors/R0904N.pdf p.2 (drawing R09N-003): pins 1-2-3, 2 the wiper, shaft drawn full CCW; clockwise toward 3 is the usual convention [from memory]" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Alpha" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "RV09AF-40-20K-B50K-0C" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "hand" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 093b610b-1d04-558c-b8ce-01eea2feaac8))
+    (pin "2" (uuid f7d80f6d-dc3d-552e-b9f7-ceb75176cf28))
+    (pin "3" (uuid 0106d992-8176-5d0a-ac57-ae701fbf733b))
+    (instances (project "module-jack" (path "/f69c67ba-c380-5393-90d5-6d2847e300fb/de7f42d8-0ff4-57e8-9765-79c6eff73d2d" (reference "RV3") (unit 1))) (project "breath-response-shaper.jack" (path "/f3cf1183-3ccd-574d-a1a6-4d0a7c605c94" (reference "POT-RESP") (unit 1))) (project "breath-response-shaper" (path "/97139bb3-9c58-5159-a2a9-3813e79c635b/0b5e67e3-5413-52cb-b319-ff120b80b6dc" (reference "POT-RESP") (unit 1))))
+  )
+  (wire (pts (xy 40.64 54.61) (xy 40.64 57.15)) (stroke (width 0) (type default)) (uuid 5832d590-4b43-5e44-8cfe-f46d89296a1b))
+  (hierarchical_label "V_IN_HALF" (shape passive) (at 40.64 57.15 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 176abdce-b74c-50d7-87a6-648eb84d586b)
+    (property "Dir" "ref" (at 40.64 57.15 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 44.45 50.8) (xy 46.99 50.8)) (stroke (width 0) (type default)) (uuid dcc71fcc-9ed4-59dc-a32e-97c5dc17a962))
+  (hierarchical_label "WIPER" (shape passive) (at 46.99 50.8 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 6faf5e03-fc47-54d2-a08a-25661335498e)
+    (property "Dir" "ref" (at 46.99 50.8 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 40.64 46.99) (xy 40.64 44.45)) (stroke (width 0) (type default)) (uuid fcbfc60a-4bd4-563e-85ba-ae218ad2cc0d))
+  (hierarchical_label "V_SHAPED" (shape passive) (at 40.64 44.45 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 240e8412-61fa-581e-974b-beb14644e52b)
+    (property "Dir" "ref" (at 40.64 44.45 0) (effects (font (size 1.27 1.27)) hide)))
+  (sheet_instances (path "/" (page "1")))
+)
