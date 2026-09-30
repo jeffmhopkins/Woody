@@ -172,7 +172,7 @@ scripts:
     out: mechanical/module/renders/photo-front.png
     stamp: Woody module
   - name: module-photo-detail
-    title: Close-up - the breath knobs, their labels and the offset marks, the cv out pill, a patch plug
+    title: Close-up - the breath knobs, their labels and the offset marks, the pitch, breath and mod 1 pills
     cmd: [tools/render-module.py, --view, detail]
     inputs: *render_inputs
     out: mechanical/module/renders/photo-detail.png

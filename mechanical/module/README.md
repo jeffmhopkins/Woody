@@ -101,7 +101,7 @@ datasheets/fonts/Inter-*.ttf ─────────────────
                                                                                 └─> art/tex-*.png ─> tools/render-module.py ─> renders/photo-*.png
 ```
 
-- `module.scad` derives the islands, the header pills, the `mod` label, the
+- `module.scad` derives the islands, the `breath` header pill, the
   OFFSET marks and the name between the top screws from the layout, and `drc.echo` checks each
   (`art:` and `art zone:` rules). The legend zones ADR 0024 already had are
   exported with their positions too.
@@ -129,7 +129,7 @@ something it shows moved.
 
 | | |
 |---|---|
-| ![Straight on, orthographic, no patch cables: the print against the parts](renders/photo-front.png) Straight on — for checking the print against the parts | ![Close-up of the breath knobs and the outputs' header](renders/photo-detail.png) The breath knobs, the OFFSET marks, the `cv out` pill |
+| ![Straight on, orthographic, no patch cables: the print against the parts](renders/photo-front.png) Straight on — for checking the print against the parts | ![Close-up of the breath knobs and the first outputs' pills](renders/photo-detail.png) The breath knobs, the OFFSET marks, the pitch and breath pills |
 
 ## The views
 
