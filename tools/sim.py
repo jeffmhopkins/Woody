@@ -53,14 +53,26 @@ MEASURES ON WAVEFORMS (`post:`, over files the deck writes with `wrdata <name>.d
       T = -V(return)/V(injected). THE STATED BREAK: the loop is opened at a high-
       impedance node - an op-amp input - by a 1 GH inductor that carries the DC
       operating point, and the AC test signal enters through a 1 GF capacitor, so the
-      feedback network stays loaded by the input it drives and nothing else.
+      feedback network stays loaded by the input it drives and nothing else. With a
+      vendor macromodel the deck needs `.options rshunt=1e10` (10 Gohm per node) for
+      the solver to find that operating point: without it TI's OPA2197 model found none
+      at some corners, and ngspice's fallback "transient op" reported a false one (VS at
+      0.55 V), which is why a run that needed it is refused. NOT USED: a series voltage
+      source at the input (voltage injection). It agreed within 0.5 degree on the
+      reference buffer as netlisted, but it is only exact while the input's impedance
+      dwarfs the network's, and with 10 kohm of feedback the model's input capacitance
+      broke that above 1 MHz: |T| climbed back to +33 dB at 100 MHz (2026-09-30).
   crossover(w['tdb'])        the frequency of the first 0 dB crossing of |T|
   overshoot(w['v'], t0, t1)  percent, of a step at t0: the largest excursion past the
       final value (the mean of the last 5 % before t1) over the step's size
+  rebound(w['v'], t0, t1)    percent, of a load step on a regulated node: the swing
+      back through the final value after the first excursion, over that excursion
   settling(w['v'], t0, t1, band)  seconds from t0 until v stays within +-band of final
   at(w['x'], x0)             a waveform's value at x0, interpolated (a CMRR in dB at
       50 Hz, say)
   peak(w['v'], t0, t1) / trough(...)  the largest / smallest value in a window
+  argpeak(w['v'], t0, t1)    where in the window the largest value is (an impedance
+      peak's frequency)
   cross(w['v'], level, t0)   the first time after t0 that v crosses level (either way)
 A SIMULATED PHASE MARGIN IS A SCREEN WITH A +-10 DEGREE BAR, not a spec: a vendor
 macromodel runs optimistic against its own tabulated figures. Assert against it so.
@@ -282,7 +294,7 @@ def corners(spec, parts, only=None):
         nominal.setdefault(row, p["value"])
     out = [("nominal", dict(nominal))]
     names = sorted(ranges)
-    for ends in itertools.product((0, 1), repeat=len(names)):
+    for ends in (itertools.product((0, 1), repeat=len(names)) if names else ()):
         c = dict(nominal)
         label = []
         for n, e in zip(names, ends):
@@ -479,8 +491,33 @@ def settling(wave, t0, t1, band):
     return last - t0
 
 
+def rebound(wave, t0, t1):
+    """Percent, of a disturbance at t0 on a REGULATED node (a load step, whose final value
+    is its initial one, so overshoot() divides by nothing): the largest swing past the final
+    value on the far side of the first excursion, after that excursion's extreme, over the
+    first excursion. A well-damped loop recovers without crossing; one with little phase
+    margin rings through."""
+    t, v = wave
+    vf = _final(wave, t1)
+    win = [(ti, vi) for ti, vi in zip(t, v) if t0 <= ti <= t1]
+    lo = min(win, key=lambda x: x[1])
+    hi = max(win, key=lambda x: x[1])
+    first = lo if abs(lo[1] - vf) >= abs(hi[1] - vf) else hi
+    ex = abs(first[1] - vf)
+    if ex == 0:
+        return 0.0
+    after = [vi for ti, vi in win if ti >= first[0]]
+    back = (max(after) - vf) if first is lo else (vf - min(after))
+    return max(0.0, back) / ex * 100.0
+
+
 def peak(wave, t0, t1):
     return max(vi for ti, vi in zip(*wave) if t0 <= ti <= t1)
+
+
+def argpeak(wave, t0, t1):
+    """Where a waveform peaks in a window: the frequency of an impedance peak, say."""
+    return max(((ti, vi) for ti, vi in zip(*wave) if t0 <= ti <= t1), key=lambda x: x[1])[0]
 
 
 def trough(wave, t0, t1):
@@ -495,7 +532,7 @@ def cross(wave, level, t0=0.0):
 
 
 POST = {"backswing": backswing, "phase_margin": phase_margin, "crossover": crossover,
-        "overshoot": overshoot, "settling": settling, "at": at, "peak": peak,
+        "overshoot": overshoot, "rebound": rebound, "settling": settling, "at": at, "peak": peak, "argpeak": argpeak,
         "trough": trough, "cross": cross, "math": math, "abs": abs, "min": min, "max": max}
 
 
@@ -524,8 +561,12 @@ def ngspice(deck, post=None, values=None, spiceinit=None):
     # A vendor macromodel's operating point often needs gmin or source stepping (a noise
     # diode's node starts singular). The warnings on the way are not failures when the
     # stepping then completes; an operating point that cannot be found still prints an
-    # Error, which stays.
-    if re.search(r"(gmin|source) stepping completed|transient op finished successfully", out, re.I):
+    # Error, which stays. NOT accepted: ngspice's last resort, the "transient op" (a
+    # pseudo-transient ramp of the sources). It reports success wherever the ramp stopped,
+    # and in a loop broken by a 1 GH inductor that is never the operating point - it put
+    # the reference buffer's VS at 0.55 V with every measure present, 2026-09-30. A deck
+    # that needs it gets `.options rshunt=1e10` (10 Gohm per node) instead, and converges.
+    if re.search(r"(gmin|source) stepping completed", out, re.I):
         errors = [l for l in errors if not re.match(
             r"\s*Warning: (singular matrix|dynamic gmin stepping failed|true gmin stepping failed|"
             r"gmin stepping failed|source stepping failed)", l, re.I)]

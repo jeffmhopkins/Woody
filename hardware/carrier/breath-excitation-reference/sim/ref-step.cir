@@ -19,8 +19,10 @@ RISO bufout vs {{R-ISO-REF}}
 CL vs cln {{c_vs}}
 RCL cln 0 {{esr_cvs}}
 ISENS vs 0 PULSE({{i_sensor}} {{i_sensor_hi}} {{t_step}} 10n 10n 1 2)
-.nodeset v(vs)=5 v(bufout)=5.4 v(refminus)=5 v(acmid)=5.4
-.options method=gear
+* rshunt: 10 Gohm from every node to ground, so the macromodel's operating point is found
+* (without it: singular at xbuf.x_u1.8, 'timestep too small'). 0.5 nA at 5 V, a tenth of
+* U-BUF's own guaranteed I_B: nothing a measure here can see.
+.options method=gear rshunt=1e10
 .control
 tran 50n {{t_end}} 0 50n
 wrdata vs.dat v(vs)

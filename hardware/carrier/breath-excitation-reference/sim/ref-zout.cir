@@ -18,8 +18,10 @@ RISO bufout vs {{R-ISO-REF}}
 CL vs cln {{c_vs}}
 RCL cln 0 {{esr_cvs}}
 ISENS vs 0 DC {{i_sensor}} AC 1
-.nodeset v(vs)=5 v(bufout)=5.4 v(refminus)=5 v(acmid)=5.4
-.options method=gear
+* rshunt: 10 Gohm from every node to ground, so the macromodel's operating point is found
+* (without it, or at 1 Tohm, some corners found none); 0.5 nA at 5 V, a tenth of U-BUF's own
+* guaranteed I_B, so 5 uV across R-FB-REF at most.
+.options method=gear rshunt=1e10
 .control
 ac dec 50 10 10meg
 let z = mag(v(vs))

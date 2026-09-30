@@ -14,7 +14,10 @@ CL vout 0 {{ti_cl}}
 LBRK refminus inm 1G
 CINJ inm inj 1G
 VINJ inj 0 DC 0 AC 1
-.options method=gear
+* rshunt: 10 Gohm from every node to ground, so the macromodel's operating point is found
+* (without it, or at 1 Tohm, some corners found none); 0.5 nA at 5 V, a tenth of U-BUF's own
+* guaranteed I_B, so 5 uV across R-FB-REF at most.
+.options method=gear rshunt=1e10
 .control
 ac dec 100 1 100meg
 let t = -v(refminus)/v(inm)
