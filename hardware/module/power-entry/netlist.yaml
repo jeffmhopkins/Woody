@@ -33,28 +33,6 @@ ports:
   PWR_GND:
     dir: ref
     to: module/umbilical-load-switch
-foreign:
-  R-ILIM:
-    owner: module/umbilical-load-switch
-    row: R-ILIM
-  R-GATE-SER:
-    owner: module/umbilical-load-switch
-    row: R-GATE-SER
-  R-GATE-COMP:
-    owner: module/umbilical-load-switch
-    row: R-GATE-COMP
-  C-TIMER:
-    owner: module/umbilical-load-switch
-    row: C-TIMER-LOADSW
-  C-GATE:
-    owner: module/umbilical-load-switch
-    row: C-GATE-LOADSW
-  R-FB-HI:
-    owner: module/umbilical-load-switch
-    row: R-FB-HI
-  R-FB-LO:
-    owner: module/umbilical-load-switch
-    row: R-FB-LO
 components:
   C-DEC-REG-IN:
     of: C-DECOUPLE
@@ -120,7 +98,7 @@ components:
     pins:
     - 1
     - 2
-    note: 100uF on +12 V, NOT 47uF - the other three are 47uF and this one is not
+    note: 100uF on +12 V, NOT 47uF - C3 on -12 V is 47uF and this one is not (C2 is U-ISO's input bulk now)
   C2:
     of: C-ISO-BULK
     value: 100uF 50V
@@ -152,7 +130,7 @@ components:
     pins:
     - A
     - K
-    note: Reverse protection, EXPORTED +12 V branch. Separate from D1 on purpose - see diode-split-rationale
+    note: Reverse protection, the +12 V leg of U-ISO's input (ADR 0027). Separate from D1 on purpose - see diode-split-rationale
   D3:
     of: D-REVPOL
     value: 1N5817
@@ -161,8 +139,8 @@ components:
     - A
     - K
     note: 'Reverse protection, -12 V branch. CATHODE TO THE BUS, anode to the module''s -12 V rail: the rail''s
-      current flows out of the module into the bus''s -12 V, so this is the one entry diode the other way round
-      from D1/D2'
+      current flows out of the module into the bus''s -12 V, so this is, with D4, the entry diode the other way
+      round from D1/D2'
   D4:
     of: D-REVPOL
     value: 1N5817

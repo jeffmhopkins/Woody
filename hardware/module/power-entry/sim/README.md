@@ -22,6 +22,24 @@ stage on those rails with the DAC at its power-on-reset zero scale.
 |---|---|---|
 | `as-netlisted[dt_neg=…]` | the rails, `DAC_AVDD` and the pitch jack, the −12 V rail arriving 1 ms early, together, and 5 ms late | `DAC_AVDD` settles at or above `dac-rail`'s hard floor and never reaches the DAC8568's 6 V absolute maximum; the pitch jack stays within 100 mV of 0 V throughout |
 | `d3-reversed` | a what-if: `D3` fitted with its anode at the bus | `MODULE_ANALOG_NEG12` never arrives |
+| `gnd-before[r_bus_seg=…,i_swing=…]` | `groundshift.cir`: the rack's copper — the bus board from the PSU to this module's tap, the power ribbon's rails and ground — with the instrument's breath-following current returning through the star, as it did until ADR 0027 | several cents of pitch error at every bus position and swing (4.2–21 cents over the sweep) |
+| `gnd-isolated[…]` | the same rack with the instrument behind `U-ISO`: its power drawn rail to rail, its output floating and tied to the star | under 0.01 cents, and under a microamp in the tie |
+| `gnd-sense[…]` | option (b): the pitch reference on a current-free ribbon conductor | the ribbon's share goes, the bus board's stays |
+| `gnd-balanced[…]` | option (c): a dummy load holding the instrument's total constant to 1 % | a fraction of a cent, for 2.3–4.4 W of heat |
+
+**The power-on runs have the rail fuses in them** (`PTC-POS12`, `PTC-NEG12`,
+ADR 0027) at their fitted resistance, 0.40 Ω. At 6.0 Ω, their worst an hour
+after a trip, TI's LM317L model does not converge (ngspice 42, "timestep too
+small" inside the model); that case is `power-entry.md`'s arithmetic, not a
+claim here.
+
+**The ground sims are resistive and say so.** Every resistance is a param with
+its provenance in `sims.yaml` — two review calculations for the ribbon and the
+bus board — and `r_bus_seg` is swept from 1 mΩ (the receiver in the next slot;
+ngspice will not take 0) to the whole 0.25 m trace. They show where the
+instrument's current flows and what it moves, which is the question; they
+do not model the converter's switching (see ADR 0027 for why it is out of
+band) or any cable's inductance.
 
 **`D3` must have its cathode at the bus.** The rail it passes flows out of the
 module into the bus's −12 V, so a diode with its anode at the bus is

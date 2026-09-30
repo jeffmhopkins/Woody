@@ -1,13 +1,13 @@
 # Umbilical load switch — schematic
 
 **Status:** Split out of [`power-entry.md`](../power-entry/power-entry.md)
-2026-09-21. It is drawn there, inside the module entry drawing, because that is
-one drawing; every word below moved across unchanged.
+2026-09-21, where it was drawn inside the module entry drawing. Since ADR 0027
+(2026-09-30) that drawing stops at `ISO_POS12`, the converter's output this
+circuit hangs on, and the gate network and `ON` divider below are the drawing.
 
 *Connectivity is **[`netlist.yaml`](netlist.yaml)**, not either drawing, and
-`tools/check-netlist.py` checks both against it — the entry drawing on
-`power-entry.md` as well as the gate network below, because a label is resolved
-against every netlist rather than only the one beside the page.*
+`tools/check-netlist.py` checks every drawing label against it, whichever page
+the label is on.*
 
 ## Interfaces
 
@@ -20,10 +20,23 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `+12V` ahead of `D1`/`D2` | in | `module/power-entry` | — | `U-LOADSW`'s `VCC` and the top of `R-ILIM`. Taken before the entry diodes, which is the point of the split |
+| `ISO_POS12` | in | `module/power-entry` | — | `U-LOADSW`'s `VCC`, the top of `R-ILIM` and of the `ON` divider. **`U-ISO`'s isolated 12 V since 2026-09-30 (ADR 0027)** — until then the Eurorack +12 V, taken ahead of the entry diodes |
 | `ON` | — | `module/panel` | — | **Not a crossing.** `SW-POWER` is this circuit's row and its net is this circuit's; [`panel.md`](../panel/panel.md) owns only the shaped hole and says so. The LT1641's undervoltage-lockout input, divided from the raw bus by `R-ON-HI`/`R-ON-LO` with the toggle in the top leg — see *The `ON` pin* below. Both of the toggle's lugs wire to the main board |
 | `UMBILICAL +12V` | out | `carrier/power-entry-instrument`, `module/panel-led` | `umbilical-current` | The FET's source, down the Cat5 umbilical. What the far end needs is what sizes the `FB` divider. `module/panel-led` hangs the panel LED on it, so the LED is lit exactly while the switch is delivering |
-| `PWR_GND` | ref | `module/power-entry` | — | `C-TIMER`, `C-GATE`, `R-FB-LO`, `R-ON-LO` and `C-ON-LOADSW` return here, to the star at the IDC |
+| `PWR_GND` | ref | `module/power-entry` | — | `C-TIMER`, `C-GATE`, `R-FB-LO`, `R-ON-LO` and `C-ON-LOADSW` return here: `U-ISO`'s isolated 0V, which meets the module's grounds only at the etherCON (`dig-gnd-topology`) |
+
+## Its supply — `U-ISO`, since 2026-09-30
+
+**The load switch hangs on `U-ISO`'s isolated output, not on the bus** (ADR
+0027): `VCC`, `R-ILIM` and the `ON` divider on `ISO_POS12`, every return on
+`PWR_GND`, the converter's 0V. Nothing below changed value. What changed is
+the supply the analysis assumes, and it is better on every count: 12 V ± 3 %
+`[ds MORNSUN-URB_YMD-15WR3.pdf p.2]` instead of the bus's ± 5 %, and no rail
+fuse or entry diode between it and `VCC`. The converter's own current limit,
+at least 1.375 A `[p.2]`, is above this switch's 1.10 A worst-case trip, so
+this switch — not the converter — decides every start and every fault. The
+`sim/` decks run from the converter, its output resistance and `C-ISO-OUT`, and
+the hot-plug holds `VCC` above the `ON` pin's turn-off at every corner.
 
 ## The load switch — rebuilt 2026-09-21, because it never started
 
@@ -163,8 +176,10 @@ output is good" are therefore **one decision, not two**. Pulling the foldback
 knee earlier pulls `PWRGD` earlier by the same factor. The divider is chosen at
 the `PWRGD` end, because that is the end with a hard requirement.
 
-**`PWRGD` must release below the worst-case delivered output.** Eurorack +12 V
-at −5 % is 11.4 V; `R-ILIM` at 50 mΩ drops exactly 20 mV at 0.4 A, and the FET
+**`PWRGD` must release below the worst-case delivered output.** The supply's
+floor was the Eurorack +12 V at −5 %, 11.4 V, when this was sized; since
+ADR 0027 it is `U-ISO`'s 12 V at −3 %, 11.64 V, so every margin below grows by
+0.24 V. Sized at 11.4 V: `R-ILIM` at 50 mΩ drops exactly 20 mV at 0.4 A, and the FET
 was allowed the same again as a placeholder for the FET — so the worst-case
 output is ~11.36 V `[calc]`. The chosen `Q-LOADSW` is 3.5 mΩ max at 4.5 V of
 gate drive `[ds NEXPERIA-PSMN2R0-30YLE.pdf p.1]`, 1.4 mV at 0.4 A, so the
@@ -392,8 +407,8 @@ trip, 8 mV floor and the fastest timer: phase 1 is
 The panel toggle drives the LT1641's **UVLO** input, and it is now a divider:
 
 ```
-  BUS_POS12_RAW ──[R-ON-HI 68k]──ON_SW──o SW-POWER o──┬── ON (pin 1)
-  (ahead of D1/D2)                   (panel, wired)   │
+  ISO_POS12 ──[R-ON-HI 68k]──ON_SW──o SW-POWER o──┬── ON (pin 1)
+  (U-ISO's output)               (panel, wired)   │
                                         ┌─────────────┤
                                   [R-ON-LO 10k] [C-ON-LOADSW 100nF]
                                         │             │
@@ -401,10 +416,10 @@ The panel toggle drives the LT1641's **UVLO** input, and it is now a divider:
 ```
 
 **The toggle is in the divider's top leg**, after `R-ON-HI`: closed (lever
-right, ON — ADR 0024 point 12), `ON` sits at 10/78 of the bus; open,
+right, ON — ADR 0024 point 12), `ON` sits at 10/78 of the supply; open,
 `R-ON-LO` holds `ON` at 0 V, which is off, and cycling the toggle is the
 "pulsing ON low" that restores the `-1` after a latch `[164112fc p.9]`. The
-lugs never carry the bus unlimited: a wire shorted to the panel pulls `ON`
+lugs never carry the supply unlimited: a wire shorted to the panel pulls `ON`
 low, which is also off. Both lugs wire to the **main board**, beside
 `U-LOADSW` — nothing on the jack board connects to the switch.
 
@@ -413,12 +428,13 @@ low, which is also off. Both lugs wire to the **main board**, beside
 
 | | Typical | Worst case (1 % resistors, the part's window) |
 |---|---|---|
-| Turns on, bus rising | **10.24 V** | 9.79 – 10.70 V |
-| Turns off, bus falling | **9.62 V** | 9.33 – 9.90 V |
+| Turns on, supply rising | **10.24 V** | 9.79 – 10.70 V |
+| Turns off, supply falling | **9.62 V** | 9.33 – 9.90 V |
 
 **Why there.** Above the part's own `VCC` lockout, 8.8 V max, so the divider
-is what decides; below the Eurorack floor of 11.4 V (+12 V at −5 %) by
-0.7 V at the worst corner, so a sagging bus still starts; and the output it
+is what decides; below the supply's floor by 0.7 V at the worst corner when
+that floor was the bus's 11.4 V, and by 0.94 V now that it is `U-ISO`'s
+11.64 V (ADR 0027), so the start is never refused; and the output it
 releases is above the instrument buck's 8 V minimum
 `[repo, R-78E5.0-1.0.pdf]` by more than the sense and FET drops. `ON`'s
 input current, 1 µA max, into the divider's 8.7 kΩ moves the trip by

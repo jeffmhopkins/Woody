@@ -277,6 +277,13 @@ one draws its own analog current *plus* everything the instrument consumes:
 | −12 V | ~40 mA |
 | +5 V | ~10 mA (level shifter only) |
 
+> **Amended 2026-09-30 — ADR 0027.** The instrument's current no longer comes
+> off the +12 V rail: an isolated converter draws its power rail to rail, so in
+> typical play the module takes ~0.26 A from +12 V and ~0.25 A from −12 V
+> (`power-entry.md`, *The instrument's supply*). The table above is the
+> arrangement this section was written against; the series-resistor argument
+> below still holds, on both of the converter's legs.
+
 That is about 15% of a modern rack supply's +12 V capacity — unremarkable, but
 it **rules out the series-resistor variant**, which is harmless at 50 mA and is
 not at the module's real draw:
@@ -356,8 +363,9 @@ reviewers found it independently. A diode costs about twenty cents.
 
 **The effect that genuinely *is* breath-correlated is the shared ground path**,
 at 5.7–7.2 cents for the module's internal ground and ~4.8 cents for the rack
-bus — two and three orders of magnitude above the diode term, and still open
-(`power-entry.md`). Ranking the diode above them, as the old figure did,
+bus — two and three orders of magnitude above the diode term. *(Removed at the
+source 2026-09-30 by ADR 0027: the instrument's supply is isolated and drawn
+rail to rail, so its current is in no ground the pitch CV is read against.)* Ranking the diode above them, as the old figure did,
 inverted the priority order for the grounding work.
 
 Branching also means the buck's pulsed draw is absorbed locally instead of
@@ -672,6 +680,13 @@ So:
 the case. The only lever is which slot the module sits in relative to the noisy
 ones, which is a patching decision. E6 measures it rather than trusting the
 figure.
+
+> **Amended 2026-09-30 — ADR 0027.** The paragraph above is right about other
+> modules' currents and was wrong to leave this one's: the largest current in
+> that shared return was the instrument's, and it is gone from it. `PWR_GND` is
+> now the isolated converter's return and reaches the star only through
+> `DIG_GND` (`dig-gnd-topology`); the bullets above describe the ground plan
+> before that change. What other modules put in the bus ground is still theirs.
 
 ### Panel, top to bottom
 

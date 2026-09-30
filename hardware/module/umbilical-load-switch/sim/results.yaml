@@ -5,9 +5,9 @@
 inputs:
   tools/sim.py: 0312a1077b9afa80
   hardware/module/umbilical-load-switch/sim/sims.yaml: 45d4cddaf730b34d
-  hardware/module/umbilical-load-switch/netlist.yaml: f4c195b503ad5eb2
+  hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
   hardware/carrier/power-entry-instrument/netlist.yaml: baac678182b33b94
-  hardware/module/power-entry/netlist.yaml: da66682185408671
+  hardware/module/power-entry/netlist.yaml: d89bae6598d0b5dc
   hardware/module/umbilical-load-switch/sim/loadswitch.cir: 1a73864b1c955377
   hardware/module/umbilical-load-switch/sim/lt1641.inc: 59be165ccd4451a6
   figure:umbilical-current: 359 mA
