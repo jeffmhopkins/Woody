@@ -38,7 +38,7 @@ ratio      = 15k / (10k + 15k) = 0.600
 full scale = 4.86 V × 0.6 = 2.92 V  against VREF 3.3 V → 88 % of range, 3622 counts
 rest       = 0.265 V         × 0.6 = 0.159 V →  197 counts
 real play  = 2.8 kPa → 0.265 + 0.766 × 2.8 = 2.41 V → 1.447 V → 1795 counts
-                                          [2.8 kPa: one candidate of breath-working-point, open until M1]
+                                          [2.8 kPa: one candidate of breath-working-point, open until E2]
                                           [0.265 and 4.86 from sensor-full-scale]
 playable span above rest ≈ 1598 counts of 4096
 ```

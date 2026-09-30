@@ -516,7 +516,7 @@ figures:
     status: disputed
     owner: docs/decisions/0003-breath-sensing-path.md
     candidates: ["2.8 kPa (cited to ADR 0003, which does not contain it; the two schematic pages cite each other)", "0-5 kPa (what ADR 0003 actually says)", "3-4 kPa (published wind-controller figures)"]
-    decided_by: "M1, with a player and a manometer. Sets the panel gain range AND the ADC headroom."
+    decided_by: "E2 (ROADMAP: breath sensing, a human playing through the real mouthpiece, tube and trap), with a manometer teed at P1 - the test is specified in docs/decisions/0003-breath-sensing-path.md beside the 0-6 kPa range. Sets the panel gain range AND the ADC headroom."
     forbidden: []
 
   - id: pitch-cents-budget

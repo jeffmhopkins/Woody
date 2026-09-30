@@ -144,6 +144,18 @@ off: `hardware/interfaces/breath-sense-link/breath-sense-link.md`, "Mounting".)*
 The 0–6 kPa range was well chosen in 2021 and stands. Normal wind-controller
 playing sits around 0–5 kPa.
 
+**The pressure of a hard blow is `breath-working-point`, open until E2 measures
+it.** It sets the panel gain range and the ADC headroom, so it is measured, not
+cited. **The test, at E2:** the player plays the real mouthpiece, tube and trap
+with a digital manometer (0–10 kPa or wider) teed into the tube at `P1`, and the
+instrument logs the breath reading over USB at the same time. Record (a) the
+99th percentile of 20 minutes of ordinary playing and (b) the median of five
+deliberate hardest blows, each against the manometer and against the sensor
+reading converted with `breath-sensor-slope` — the two must agree within the
+sensor's tolerance, or the tee or the zero is wrong. (b) becomes the figure's
+value; (a) is the working range the panel gain is centred on. Nothing is
+re-sized unless (b) exceeds the sensor's 6 kPa span.
+
 ### The reference port stays open to the cavity
 
 **The second port is the other face of the same diaphragm, not an outlet.** The
