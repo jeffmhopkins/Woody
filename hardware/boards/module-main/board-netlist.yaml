@@ -1233,6 +1233,7 @@ nets:
   - U4.3Y
   /UMBILICAL_POS12:
   - D14.A
+  - J2.19
   - J3.3
   - Q1.S
   - Q1.S2
@@ -1586,7 +1587,6 @@ nets:
   - D6.K
   - D9.K
   - FB1.2
-  - J2.19
   - U1.IN
   - U10.V+
   - U11.V+

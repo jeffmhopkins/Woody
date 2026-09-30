@@ -10,7 +10,7 @@ title: Panel LED — schematic
 last_reviewed: '2026-09-21'
 depends_on:
 - fig:dig-gnd-topology
-- fig:loadswitch-timer
+- fig:umbilical-current
 - fig:panel-height-budget
 - refdes:LED-PANEL
 - refdes:PANEL

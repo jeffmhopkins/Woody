@@ -74,13 +74,13 @@ LED) comes back on the five ground pins. Pin 1 is at the top left
 | 13, 14 | `AGND_MOD` | `BREATH_JACK` |
 | 15, 16 | `MOD1_JACK` | `MOD2_JACK` |
 | 17, 18 | `MOD3_JACK` | `AGND_MOD` |
-| 19, 20 | `MODULE_ANALOG_POS12` | `MOD4_JACK` |
+| 19, 20 | `UMBILICAL_POS12` | `MOD4_JACK` |
 
 Why this order:
 - **Grounds interleaved on a diagonal** (2, 5, 10, 13, 18): each ground pin
   is next to three pins (the one across and the ones above and below it), so
   five of them can border fifteen signals. Every signal has a ground beside it
-  except the LED's `MODULE_ANALOG_POS12`, which is DC.
+  except the LED's `UMBILICAL_POS12`, which is DC.
 - **The pots' nets on the top rows**, because the pots are above the header
   (ADR 0024: the pot row, then the jacks). The breath-gain chain
   (`BREATH_INAMP_OUT`, `GAIN_WIPER`, `GAIN_FLOOR`) is the left column, on the

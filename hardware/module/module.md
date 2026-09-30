@@ -20,7 +20,7 @@ circuits. **The circuits own their own values** — nothing here restates one.
 | [`breath-response-shaper/`](breath-response-shaper/breath-response-shaper.md) | `POT-RESP`, the antiparallel-diode shaper |
 | [`pitch-stage/`](pitch-stage/pitch-stage.md) | Two-resistor non-inverting `2·Vdac − 2.5`, loop tapped at the jack |
 | [`mod-channels/`](mod-channels/mod-channels.md) | Four × `4·Vdac − 3·V_ref`, sharing one buffered reference |
-| [`panel-led/`](panel-led/panel-led.md) | The panel indicator, and the job it has lost |
+| [`panel-led/`](panel-led/panel-led.md) | The panel indicator: lit while the load switch delivers, dark when it is off or latched |
 | [`panel/`](panel/panel.md) | Panel geometry: width, clear height, how many control rows fit, and the layout (ADR 0024) |
 
 **The module is two boards** (ADR 0023), and each circuit's KiCad sheet is

@@ -447,6 +447,7 @@ nets:
       - carrier/led-strip-drive
       - carrier/breath-excitation-reference
       - interfaces/spi-link
+      - module/panel-led
     note: >
       module/link-supervision was a receiver here and is not one: its page says
       "Not fitted" against every row, including the presence detect that gated
@@ -502,7 +503,6 @@ nets:
       - module/breath-receive-stage
       - module/mod-channels
       - module/pitch-stage
-      - module/panel-led
     proposed: [module/breath-response-shaper]
 
   MODULE_ANALOG_NEG12:

@@ -27,3 +27,19 @@ permanently enabled, and neither `R-OE-PU` nor `R-LED` ever had a BOM row.
 The bug the old section found was real — pulling a 5 V part's input toward
 12 V through an LED resistor — and it is moot now that nothing shares that
 node.
+
+---
+
+## On the analog +12 V rail — superseded 2026-09-30
+
+*Moved from the page, 2026-09-30, when the LED moved to the load switch's
+output.*
+
+From 2026-09-21 the LED hung on `MODULE ANALOG +12V` through
+`R-LED-PANEL`. **That rail is live whenever the rack is**, so the LED was lit
+in every one of the latching faults — hot-plug, LED-boot overcurrent, a
+current-limited start, a soft short — and the one indication the design has
+for "the load switch has latched" indicated nothing. The review proposed
+driving it from `TIMER` or `GATE`, pending the datasheet read that
+`C-TIMER` also needed. The datasheet, once banked, showed neither node holds
+a "latched" level; the output does.
