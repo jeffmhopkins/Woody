@@ -673,6 +673,13 @@ response); six jacks in two columns — **PITCH** and **BREATH** silkscreened,
 beside it**; and the power switch on **a row of its own**. It is the system's
 only power switch, since the instrument has none.
 
+*Amended 2026-09-30 by [ADR 0024](0024-module-panel-layout-and-stack.md)
+point 11, on the owner's instruction that the power switch not sit under the
+connector: the etherCON is the bottom row and the toggle's row is above it,
+with the power LED moved into the toggle's row. The rows and their heights
+are the ones summed below, so `panel-height-budget` is unchanged, and the
+toggle still has a row of its own.*
+
 **110 mm of content against 115.5 mm of clear panel** — see
 `panel-height-budget`, and the derivation below.
 

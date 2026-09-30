@@ -1,6 +1,8 @@
 # 0024 — The module's panel layout and board stack
 
-**Status:** Accepted, 2026-09-29. Made with the module's mechanical CAD, "up to
+**Status:** Accepted, 2026-09-29. **Amended 2026-09-30** by the owner's
+instruction (point 11): the etherCON is the bottom row, the toggle and the LED
+are the row above it. Made with the module's mechanical CAD, "up to
 the line before board layout". It takes ADR 0023's two-board decision to
 positions and lengths, and it **reverses one of 0023's consequences**: the
 panel has no slot for the NE8FAV's PUSH tab (point 3).
@@ -27,16 +29,18 @@ checked rather than asserted.
    under the top screws' washers. The three pots across, gain, offset,
    response (`layout.pots`). Six jacks in two columns of three that straddle
    the middle knob: PITCH and BREATH on the first row, under the knobs that
-   shape breath, then MOD 1–4 read like text (`layout.jacks`). The NE8FAV
-   centred, latch up, with the power LED in the strip to its left at its axis
-   height. The toggle centred on a row of its own under it, lever thrown up
-   for on. The rows' heights are `layout.*` leaves; what they must clear is
-   in the DRC's panel section.
+   shape breath, then MOD 1–4 read like text (`layout.jacks`). Then the
+   toggle, centred, on a row it shares only with the power LED (in the strip
+   to its left), lever thrown up for on. The NE8FAV last, centred, latch up,
+   on the bottom row. *Amended 2026-09-30, point 11: this point first had the
+   NE8FAV above the toggle, with the LED beside its flange.* The rows'
+   heights are `layout.*` leaves; what they must clear is in the DRC's panel
+   section.
 2. **Legend zones are part of the layout** and are derived from what is
    around them, never drawn freehand: the title band; a band under each knob;
    a zone beside each jack on the panel's outer side (the MOD write-on strip
-   of ADR 0004 is these four); a zone above the LED; the strip right of the
-   flange; one beside the toggle. `rules.legend_h` and `rules.legend_w` are
+   of ADR 0004 is these four); a zone between the LED and the toggle; the
+   strip right of the flange; one right of the toggle. `rules.legend_h` and `rules.legend_w` are
    their minimum sizes; each zone is DRC'd against every knob, plug grip,
    nut, screw head, the NE8MX and the washers.
 3. **No slot for the PUSH tab.** Sliced from the banked STEP
@@ -60,9 +64,12 @@ checked rather than asserted.
    are `layout.jack_pitch_x` apart, which is what leaves J-B2B-MOD room
    between them.
 6. **The jack board is a U.** Its notch clears the NE8FAV's body by
-   `boards.ec_clear` and is open to the bottom edge, so the toggle's body,
-   which is deeper than the jack board's depth (ADR 0023), sits in it too.
-   Its two legs carry the LED and the lower standoffs. Both boards have the
+   `boards.ec_clear` and is open to the bottom edge; above it, a narrower
+   step of the same cut-out clears the toggle's body by
+   `boards.toggle_clear`, because that body is deeper than the jack board's
+   depth (ADR 0023) and passes through the board (DRC: *jack board notch
+   clear of SW-POWER's body*). Its two legs carry the LED and the lower
+   standoffs. Both boards have the
    same outline, inside the rail band (`rail.band`) and `boards.side_margin`
    inside the panel's sides.
 7. **J-B2B-MOD stands between the jack columns**, long axis vertical, and is
@@ -87,6 +94,53 @@ checked rather than asserted.
     its manual can be read, from the panel's rear face and from its front
     (DRC: *depth behind the panel, against the Intellijel Palette* and *depth
     from the panel's FRONT face, against the same*). Both pass.
+
+11. **Nothing the player must reach sits under the umbilical** — amended
+    2026-09-30. The owner: *"Power switch should not be underneath the
+    connector."* In the layout of 2026-09-29 the toggle's row was directly
+    below the NE8FAV, so the mated NE8MX and its cable hung over the switch.
+    So the NE8FAV moved to the **bottom row** (`layout.ec_y`, as low as its
+    locating pegs clear the rail band), where its cable drops below every
+    control, and the toggle's row moved above it (`layout.toggle_y`), its
+    lever's sweep between the PUSH tab and the last jack row's plug grips.
+    The LED moved with the toggle, into the strip on the toggle's left, which
+    the jack board's left leg stands behind; the strip beside the flange no
+    longer carries anything but the umbilical's legend.
+
+    **The rule is checkable now.** The *drop zone* is the NE8MX's grip
+    (`ethercon.cable_d`, off `NE8MX.pdf`) and a strip that wide from the axis
+    down past the panel's bottom edge, which is where a cable leaving the
+    plug and bending down under its own weight hangs, seen from the front.
+    DRC: *no panel control under the umbilical: clear of the NE8MX's grip and
+    its cable's drop zone* measures every knob at its 14 mm budget, every
+    patch plug's grip, the toggle's sweep and nut, and the LED against it, and
+    wants a plug grip's clearance (`rules.plug_gap_min`). A second rule makes
+    the zone hold at every height: *the umbilical's plug stands proud of every
+    control* — the NE8MX's back, at its short length (`ethercon.plug_l_min`)
+    and fully home to the NE8FAV's PCB face, still stands further out than
+    the tallest thing on the face, so no control can get out from under the
+    cable by being taller. The cable's bend (`ethercon.umb_od` ×
+    `ethercon.umb_bend_k`, both `tbd`) is reported as INFO: how far in front
+    of the panel the hanging run stands, and where the bend has turned it
+    straight down. The layout of 2026-09-29 fails the first rule: its
+    toggle's sweep lay inside the strip.
+
+    **What moved with it, behind the panel.** The main board's NE8FAV moves
+    down with the panel's; its depth is unchanged (`ethercon.pcb_setback`).
+    The jack board's notch is shorter and gains the toggle's step, which is
+    what now sets the least room under the lowest jacks (DRC: *lowest jacks
+    above the notch*). J-B2B-MOD, the standoffs, J-PWR-EURO and its ribbon
+    route did not need to move: each is re-checked by the rules it already
+    had, and the header still clears the NE8FAV's tails, which are now below
+    it and to its left. The depth against the Palette is unchanged, because
+    nothing moved in depth.
+
+    **ADR 0004's conclusion holds**: the toggle still has a row of its own —
+    it is not beside the flange, where the webs are too thin — and shares it
+    only with the LED, whose hole (`led.hole_d`) has room in the strip beside it.
+    `panel-height-budget` sums the same rows at the same heights in a
+    different order, so its value is unchanged; its `toggle_row` note says
+    where the LED now is.
 
 ## Consequences
 
@@ -119,3 +173,5 @@ checked rather than asserted.
 | Which toggle lug wires go to which board | The board layout; the DRC gives the lugs' clearance in front of the main board |
 | The knob's bore depth and its gap to the panel (`knob.gap`) | The first fit, with the knob in hand |
 | The panel's legends | The artwork, inside the zones this record fixes |
+| Whether a thumb on the PUSH tab has room under the toggle's lever (point 11: the lever's sweep is the DRC's *face parts clear of each other* above the tab) | The 1:1 paper check with the NE8MX in hand, then the first panel |
+| The umbilical's jacket and bend radius (`ethercon.umb_od`, `umb_bend_k`) | CABLE-UMB bought, and its datasheet |

@@ -32,7 +32,7 @@ The `Dir` and `Peer` columns are defined once in
 | `PITCH` jack | — | `module/pitch-stage` | `panel-height-budget` | A panel cutout. The net is that circuit's |
 | `BREATH_OUT` jack | — | `module/breath-output-stage` | `panel-height-budget` | A panel cutout. The net is that circuit's |
 | `MOD 1`–`MOD 4` jacks | — | `module/mod-channels` | `panel-height-budget` | Four cutouts in the jack rows. The nets are that circuit's |
-| `LED-PANEL` bezel | — | `module/panel-led` | `panel-height-budget` | Beside the etherCON flange; the figure's `toggle_row` note is what establishes that it fits |
+| `LED-PANEL` bezel | — | `module/panel-led` | `panel-height-budget` | In the toggle's row, left of the toggle (ADR 0024 point 11); the figure's `toggle_row` note is what establishes that the row fits |
 | `SW-POWER` toggle | — | `module/umbilical-load-switch` | `panel-toggle-hole`, `panel-height-budget` | The shaped hole this page owns — it has to be in the DXF because it cannot be cut afterwards. The switch's net is that circuit's |
 | etherCON flange | — | — | `panel-width` | The umbilical connector's panel cutout |
 
@@ -50,10 +50,19 @@ Top to bottom it is ADR 0004's five rows: the title band under the top
 screws' washers; the three knobs across, gain, offset, response; the six
 jacks in two columns straddling the middle knob — PITCH and BREATH first,
 then MOD 1–4 — **lying on their sides**, pins across, because a PJ398SM's
-footprint is longer than the column pitch; the NE8FAV centred, latch up, with
-`LED-PANEL` in the strip to its left; `SW-POWER` on its own row below it, in
-the shaped hole `panel-toggle-hole` gives. The four mounting cuts are
-Doepfer's holes slotted sideways, as a fabricated panel cuts them.
+footprint is longer than the column pitch; `SW-POWER` centred on a row of its
+own, in the shaped hole `panel-toggle-hole` gives, with `LED-PANEL` in the
+strip to its left; and the NE8FAV centred, latch up, **on the bottom row**.
+The four mounting cuts are Doepfer's holes slotted sideways, as a fabricated
+panel cuts them.
+
+- **Nothing the player must reach is under the umbilical** (ADR 0024 point
+  11, the owner's instruction of 2026-09-30). The NE8FAV is the bottom row so
+  that the mated NE8MX and its cable drop below every control. The drawing
+  shades the *drop zone* — the NE8MX's grip and the strip its cable hangs in —
+  and the DRC rule *no panel control under the umbilical: clear of the
+  NE8MX's grip and its cable's drop zone* keeps every knob, plug grip, the
+  toggle and the LED out of it.
 
 - **There is no slot for the NE8FAV's PUSH tab** (ADR 0024 point 3): the tab
   stands in front of any panel the connector accepts. The bore and the two
@@ -63,9 +72,11 @@ Doepfer's holes slotted sideways, as a fabricated panel cuts them.
   screw head. The artwork goes inside them.
 - **The knob is sized by `KNOB-BREATH`'s 14 mm budget** for spacing, and by
   the chosen Thonk 1900h for the picture; both are checked.
-- `panel-height-budget` is unchanged and holds: the NE8FAV's flange is
-  shorter than the D-series allowance the figure keeps. The 1:1 paper check
-  is still the gate.
+- `panel-height-budget` is unchanged and holds: the rows are the ones it
+  sums, in a different order, and the NE8FAV's flange is shorter than the
+  D-series allowance the figure keeps. The 1:1 paper check is still the gate
+  — with the NE8MX in hand, for the thumb on its PUSH tab under the toggle's
+  lever.
 
 ## Where the panel width came from
 
