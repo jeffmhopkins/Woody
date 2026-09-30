@@ -242,6 +242,13 @@ components:
     - 1
     - 2
     sheet: power-entry
+  C40:
+    of: C-ON-LOADSW
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: umbilical-load-switch
   C5:
     of: C-REG-ADJ
     value: 10uF
@@ -316,6 +323,13 @@ components:
     - K
     - C
     sheet: mod-channels
+  D14:
+    of: D-GATE-CLAMP
+    value: 15V
+    pins:
+    - K
+    - A
+    sheet: umbilical-load-switch
   D2:
     of: D-REVPOL
     value: 1N5817
@@ -477,11 +491,13 @@ components:
     sheet: power-entry
   Q1:
     of: Q-LOADSW
-    value: '~'
+    value: PSMN2R0-30YLE
     pins:
     - D
     - G
     - S
+    - S2
+    - S3
     sheet: umbilical-load-switch
   R1:
     of: R-REG-SET-HI
@@ -639,7 +655,7 @@ components:
     sheet: breath-response-shaper
   R3:
     of: R-ILIM
-    value: '~'
+    value: 50m 1% 1W
     pins:
     - 1
     - 2
@@ -847,6 +863,20 @@ components:
     - 1
     - 2
     sheet: mod-channels
+  R57:
+    of: R-ON-HI
+    value: 68k 1%
+    pins:
+    - 1
+    - 2
+    sheet: umbilical-load-switch
+  R58:
+    of: R-ON-LO
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    sheet: umbilical-load-switch
   R6:
     of: R-FB-HI
     value: 35.7k 1%
@@ -968,7 +998,7 @@ components:
     sheet: mod-channels
   U2:
     of: U-LOADSW
-    value: LT1641-1CS8
+    value: LT1641-1IS8
     pins:
     - VCC
     - SENSE
@@ -1202,8 +1232,11 @@ nets:
   - U3.SYNC
   - U4.3Y
   /UMBILICAL_POS12:
+  - D14.A
   - J3.3
   - Q1.S
+  - Q1.S2
+  - Q1.S3
   - R6.1
   /VREFOUT:
   - RV2.CW
@@ -1393,11 +1426,17 @@ nets:
   - R5.1
   - U2.GATE
   /umbilical-load-switch/GATE_NODE:
+  - D14.K
   - Q1.G
   - R4.2
   /umbilical-load-switch/ON:
+  - C40.1
+  - R58.1
   - SW1.COM
   - U2.ON
+  /umbilical-load-switch/ON_SW:
+  - R57.2
+  - SW1.NO
   /umbilical-load-switch/SENSE_NODE:
   - Q1.D
   - R3.2
@@ -1475,6 +1514,7 @@ nets:
   - J1.POS12_10
   - J1.POS12_9
   - R3.1
+  - R57.1
   - U2.VCC
   DIG_GND:
   - C12.2
@@ -1559,6 +1599,7 @@ nets:
   PWR_GND:
   - C10.2
   - C2.2
+  - C40.2
   - C8.2
   - C9.2
   - J1.GND_3
@@ -1569,6 +1610,7 @@ nets:
   - J1.GND_8
   - J3.6
   - NT1.2
+  - R58.2
   - R7.2
   - U2.GND
   R12.2:
@@ -1585,8 +1627,6 @@ nets:
   - RV2.CCW
   RV3.CW:
   - RV3.CW
-  SW1.NO:
-  - SW1.NO
   U2.PWRGD:
   - U2.PWRGD
   U3.VOUTF:
@@ -1607,7 +1647,6 @@ external_endpoints:
 - RN1.R4B
 - RV2.CCW
 - RV3.CW
-- SW1.NO
 - U2.PWRGD
 - U3.VOUTF
 - U3.VOUTH

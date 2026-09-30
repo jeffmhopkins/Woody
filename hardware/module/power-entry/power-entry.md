@@ -59,11 +59,11 @@ the two agree, and where they do not the netlist wins.*
        │                    │       │ VCC SENSE│         │
        │        panel ──────┼───────┤ ON       │         │
        │        toggle      │       │ LT1641-1 │         │
-       │                    │       │   CS8    │         │
+       │                    │       │   IS8    │         │
        │                    │       │ TIMER GATE├──┬──[R-GATE-SER 10Ω]──┐
        │                    │       │  FB      │   │                    │
        │                    │       └──┬────┬──┘   │             ┌──────┴──┐
-       │                    │          │    │  [R-GATE-COMP 1k]  │ Q-LOADSW│ DPAK
+       │                    │          │    │  [R-GATE-COMP 1k]  │ Q-LOADSW│ LFPAK56
        │                    │  [C-TIMER 10µF]│      │            │         │
        │                    │          │    │  [C-GATE 82nF]     └────┬────┘
        │                    └──────────┴────┼──────┴──────────────────┼── PWR_GND

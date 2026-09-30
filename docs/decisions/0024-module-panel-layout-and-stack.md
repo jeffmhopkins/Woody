@@ -204,11 +204,16 @@ checked rather than asserted.
 
 ## Open, and what decides each
 
+*2026-09-30: the circuit settled which board the toggle's lugs wire to —
+both go to the main board, where `SW-POWER` sits in the top leg of the
+LT1641's `ON` divider beside `U-LOADSW`
+([`umbilical-load-switch.md`](../../hardware/module/umbilical-load-switch/umbilical-load-switch.md),
+*The `ON` pin*). Nothing on the jack board connects to it.*
+
 | Item | Decided by |
 |---|---|
 | The rail band and the rail's depth (`rail.*`) | A rail maker's drawing banked, or the target case measured |
 | Metal or nylon standoff (`MECH-STANDOFF-MOD`) | Whether the standoffs carry ground between the boards — the layout's grounding scheme |
-| Which toggle lug wires go to which board | The board layout; the DRC gives the lugs' clearance in front of the main board |
 | The knob's bore depth and its gap to the panel (`knob.gap`) | The first fit, with the knob in hand |
 | The panel's legends | The artwork, inside the zones this record fixes |
 | Whether a thumb on the PUSH tab has room under the toggle (points 11 and 12: the sweep's lower edge, now the nut's, is in the DRC's *face parts clear of each other* above the tab) | The 1:1 paper check with the NE8MX in hand, then the first panel |

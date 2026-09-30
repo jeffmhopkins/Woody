@@ -117,9 +117,6 @@ go; the *reasons* above are about positions, so re-read them when
 
 | Item | Decided by |
 |---|---|
-| `SW-POWER`'s second terminal (`NO`) is on no net: the UVLO divider it would land on is not drawn | `umbilical-load-switch.md`, the ON divider |
-| Which board each `SW-POWER` lug's wire lands on; this sheet puts the switch with `U-LOADSW` (footprint: two wire pads) | The board layout (ADR 0024, open items) |
-| `Q-LOADSW` and `R-ILIM` have no chosen part (provisional TO-252 and 1206 footprints) | Their BOM rows |
 | `RN-PITCH` (`R-PRECISION`, LT5400) has no MPN on the symbol | Its BOM row's selection |
 | `J-B2B-MOD` has no MPN: a long-pin header or a stock one with its insulator moved | `mechanical/module/drc.echo`, *J-B2B-MOD pin length (derived)* |
 | Whether the standoffs carry ground between the boards (metal or nylon) | The layout's grounding scheme (ADR 0024) |
