@@ -46,8 +46,15 @@ cdim(ec, str("screws d", ethercon_hole_d, " at +/-", ethercon_hole_dx / 2), 0, -
 label([ec[0], ec[1] + (ethercon_tab_bottom + ethercon_tab_top) / 2, 3 * Z], "PUSH tab", size = 1.0);
 label([1, led[1] - 3.4, 3 * Z], str(led[0], ", ", led[1]), size = 1.05, halign = "left");
 label([1, led[1] - 5.2, 3 * Z], str("d", led_hole_d), size = 1.05, halign = "left");
-cdim(tog, str(tog[0], ", ", tog[1]), toggle_nut_d / 2 + 1, -3.2, "left");
-cdim(tog, str("d", toggle_hole_d, " flat ", toggle_flat), toggle_nut_d / 2 + 1, -5.0, "left");
+// The lever's sweep (ADR 0024 point 12), and which way is ON.
+color("DarkRed") translate([0, 0, 2 * Z]) linear_extrude(0.05) difference() {
+    translate(tog_sweep_r[1]) square(tog_sweep_r[2] - tog_sweep_r[1]);
+    translate(tog_sweep_r[1] + [0.15, 0.15]) square(tog_sweep_r[2] - tog_sweep_r[1] - [0.3, 0.3]);
+}
+label([tog[0] + tog_on[0] * tog_sweep / 2, tog[1] + tog_on[1] * tog_sweep / 2 + (tog_on[0] != 0 ? toggle_nut_d / 2 + 1.0 : 0), 3 * Z],
+      str("ON ", tog_on[0] > 0 ? ">" : tog_on[0] < 0 ? "<" : tog_on[1] > 0 ? "^" : "v"), size = 1.05, c = "DarkRed");
+cdim(tog, str(tog[0], ", ", tog[1]), tog_sweep_r[2][0] - tog[0] + 0.5, -3.2, "left");
+cdim(tog, str("d", toggle_hole_d, " flat ", toggle_flat, tog_on[0] > 0 ? " (left)" : tog_on[0] < 0 ? " (right)" : ""), tog_sweep_r[2][0] - tog[0] + 0.5, -5.0, "left");
 for (m = mounts) cdim(m, str(m[0], ", ", m[1]), m[0] < cx ? 5.5 : -5.5, 0, m[0] < cx ? "left" : "right");
 // Overall.
 dim([0, -6, 1], [W, -6, 1], str("W ", W, " (10HP)"), [0, -2.2, 0], size = 1.8);

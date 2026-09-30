@@ -17,6 +17,14 @@ zone*, with *the umbilical's plug stands proud of every control* beside it.
 Behind the panel, the jack board's notch clears the NE8FAV and steps up
 narrower for the toggle's body.
 
+**The toggle throws left–right, ON to the right** (ADR 0024 point 12, the
+owner, 2026-09-30: *"to avoid inadvertent triggering"*). One leaf,
+`layout.toggle_on`, turns everything that turns with the switch: the panel
+hole's D-flat (on the OFF side, the left — NKK's M2011 is ON with its lever
+away from the flat), the lever's sweep and the legends derived from it, the
+body's terminal field and lugs, the jack board's step and the main board's
+wiring keep-out. The panel drawing outlines the sweep and marks ON.
+
 ![The module, three-quarter front](renders/hero.png)
 
 ## The one rule, as for the body

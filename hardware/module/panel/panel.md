@@ -53,6 +53,13 @@ then MOD 1–4 — **lying on their sides**, pins across, because a PJ398SM's
 footprint is longer than the column pitch; `SW-POWER` centred on a row of its
 own, in the shaped hole `panel-toggle-hole` gives, with `LED-PANEL` in the
 strip to its left; and the NE8FAV centred, latch up, **on the bottom row**.
+
+- **The toggle throws left–right, ON to the right** (ADR 0024 point 12, the
+  owner's instruction of 2026-09-30, "to avoid inadvertent triggering"). The
+  hole's D-flat is therefore on its **left**: the M2011 is ON with the lever
+  away from the flat, by NKK's own circuit table. The drawing outlines the
+  lever's sweep and marks ON; `layout.toggle_on` owns the side, and the flat
+  turns with it in the cut file.
 The four mounting cuts are Doepfer's holes slotted sideways, as a fabricated
 panel cuts them.
 
@@ -75,8 +82,7 @@ panel cuts them.
 - `panel-height-budget` is unchanged and holds: the rows are the ones it
   sums, in a different order, and the NE8FAV's flange is shorter than the
   D-series allowance the figure keeps. The 1:1 paper check is still the gate
-  — with the NE8MX in hand, for the thumb on its PUSH tab under the toggle's
-  lever.
+  — with the NE8MX in hand, for the thumb on its PUSH tab under the toggle.
 
 ## Where the panel width came from
 
