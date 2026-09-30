@@ -1,0 +1,37 @@
+* The breath gain and offset stage, as netlisted: BREATH_SHAPED into POT-GAIN (CW end),
+* its CCW end to R-GAIN-FLOOR, the wiper buffered by U-BREATH-OPA half A; the summer
+* (half B) takes R-BREATH-IN from the buffer, R-BREATH-OFF from POT-OFFSET's wiper
+* (DAC_AVDD at CW, AGND at CCW) and R-BREATH-OFFNEG from -12 V, with R-BREATH-FB from its
+* output; R-OUT-PROT to the jack, C-OUT-BREATH at the jack. TI's OPA2197 model.
+* A pot is two resistors about its wiper; p is the rotation from CCW (0) to CW (1).
+* D-JACK-CLAMP is left out: reverse-biased inside the rails. The input steps from v_in0
+* to v_in1 at t_step. The jack drives r_load and, on a passive mult, c_mult (and r_mult
+* to 0 V, the other output's R-OUT-PROT and its driver).
+VPOS pos 0 {{v_pos}}
+VNEG neg 0 {{v_neg}}
+VAVDD avdd 0 {{v_avdd}}
+VIN in 0 PWL(0 {{v_in0}} {{t_step}} {{v_in0}} {{t_step_e}} {{v_in1}})
+RGCW in gw {{r_gain_cw}}
+RGCCW gw gf {{r_gain_ccw}}
+RFLOOR gf 0 {{R-GAIN-FLOOR}}
+XA gw bufo pos neg bufo OPAx197
+RIN bufo sum {{R-BREATH-IN}}
+ROCW avdd ow {{r_off_cw}}
+ROCCW ow 0 {{r_off_ccw}}
+ROFF ow sum {{R-BREATH-OFF}}
+ROFFN neg sum {{R-BREATH-OFFNEG}}
+RFB sum out {{R-BREATH-FB}}
+XB 0 sum pos neg out OPAx197
+ROUT out jack {{R-OUT-PROT}}
+COUT jack 0 {{C-OUT-BREATH}}
+RLOAD jack 0 {{r_load}}
+CMULT jack 0 {{c_mult}}
+RMULT jack 0 {{r_mult}}
+.options method=gear rshunt=1e10
+.control
+tran {{t_stepsize}} {{t_end}} 0 {{t_stepsize}}
+wrdata out.dat v(out)
+wrdata jack.dat v(jack)
+quit
+.endc
+.end

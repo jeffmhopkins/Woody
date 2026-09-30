@@ -1,0 +1,37 @@
+* Channel 1's loop gain, as netlisted, at the loads mod.cir steps into: the reference
+* follower (U-MOD-A half A) driving R-MODGAIN-IN, U-MOD-A half B with R-MODGAIN-FB from
+* its own output, R-OUT-PROT and C-FILT-MOD to the jack, the jack's load. The loop is
+* broken at half B's (-) input by THE STATED BREAK (a) (tools/sim.py): LBRK carries the
+* DC operating point, CINJ brings in the test signal, T = -V(m1)/V(inm). The other three
+* channels' R-MODGAIN-IN load VREF_MOD and are outside this loop: left out.
+VPOS pos 0 {{v_pos}}
+VNEG neg 0 {{v_neg}}
+V7 dac7 0 {{v_ref7}}
+RB7 dac7 0 {{R-BIAS-DAC-CH7}}
+RI7 dac7 refp {{R-OPAMP-IN-REF}}
+XREF refp vref pos neg vref OPAx197
+VA daca 0 DC {{v_a0}}
+RBA daca 0 {{R-BIAS-DAC-1}}
+RIA daca p1 {{R-OPAMP-IN-1}}
+R1A vref m1 {{R1-1}}
+R2A m1 o1 {{R2-1}}
+X1 p1 inm pos neg o1 OPAx197
+ROA o1 j1 {{R-OUT-PROT-1}}
+CFA j1 0 {{C-FILT-MOD-1}}
+RVCO j1 0 {{r_vco}}
+CMULT j1 0 {{c_mult}}
+RMULT j1 0 {{r_mult}}
+LBRK m1 inm 1G
+CINJ inm inj 1G
+VINJ inj 0 DC 0 AC 1
+.options method=gear rshunt=1e10
+.control
+ac dec 100 1 100meg
+let t = -v(m1)/v(inm)
+let tdb = db(t)
+let tph = 180/pi*cph(t)
+wrdata tdb.dat tdb
+wrdata tph.dat tph
+quit
+.endc
+.end
