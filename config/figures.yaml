@@ -57,7 +57,7 @@ figures:
     status: settled
     owner: docs/decisions/0003-breath-sensing-path.md
     derivation: "Vout = VS*[(0.1533*P) + 0.053], verbatim from the datasheet. At VS = 5.0 V and P = 6 kPa: 5*(0.9198 + 0.053) = 4.864 V. The PEDESTAL IS 0.265 V, not 0.200 V."
-    forbidden: ["4.7 V output", "0.2-4.7 V", "0.2 – 4.7 V", "0.2 V + 0.766", "0.200 V at rest", "0.2 V at rest", "(0.1533*P) + 0.04", "0.1533 x P) + 0.04", "rest | 0.200 V", "0.2 + 0.766", "0.2-4.80 V", "0.2 – 4.80 V", "0.2–4.80 V", "0.2 → 4.8 V", "0.2 to 4.8 V out", "| 0.200 V |", "| 4.800 V |", "+0.2V pedestal", "+0.200 V pedestal", "typical +0.200 V", "4.7 V × 0.6", "full scale = 4.7 V", "0.1533·P + 0.04", "0.1533 · P + 0.04", "0.7665 V/kPa with 0.20 V", "reach 0.2 V at the bottom", "against the 0.2 V floor", "reaches 4.7 V", "reaches 4.7V", "0.2–4.7 V", "0.2-4.7V", "0.2 to 4.7 V", "top of range is 4.7V", "(766mV/kPa, 0.2-4.7V)"]
+    forbidden: ["4.7 V output", "0.2-4.7 V", "0.2 – 4.7 V", "0.2 V + 0.766", "0.200 V at rest", "0.2 V at rest", "(0.1533*P) + 0.04", "0.1533 x P) + 0.04", "rest | 0.200 V", "0.2 + 0.766", "0.2-4.80 V", "0.2 – 4.80 V", "0.2–4.80 V", "0.2 → 4.8 V", "0.2 to 4.8 V out", "| 0.200 V |", "| 4.800 V |", "+0.2V pedestal", "+0.200 V pedestal", "typical +0.200 V", "4.7 V × 0.6", "full scale = 4.7 V", "0.1533·P + 0.04", "0.1533 · P + 0.04", "0.7665 V/kPa with 0.20 V", "reach 0.2 V at the bottom", "against the 0.2 V floor", "reaches 4.7 V", "reaches 4.7V", "0.2–4.7 V", "0.2-4.7V", "0.2 to 4.7 V", "top of range is 4.7V", "(766mV/kPa, 0.2-4.7V)", "0.2 to 4.8V"]
     escape_note_3: |
       THE EIGHTH AND NINTH SPELLINGS, 2026-09-21, FOUND BY A PRE-MERGE WAVE
       AFTER ALL OF THE BELOW WAS ALREADY WRITTEN.
@@ -188,18 +188,27 @@ figures:
       ADR 0006 and bom.csv - CAME OUT OF THE GREP-FIRST RULE IN CLAUDE.md 2,
       because the agent was reading only its own page.
 
+  - id: scan-period
+    quantity: The control loop's period, which is also how often the key chain is read
+    value: "250 us"
+    status: settled
+    owner: docs/reference/latency-budget.md
+    derivation: "The output loop runs at 4 kHz (docs/reference/latency-budget.md, 'The output loop runs at 4 kHz, not 8'): 1 / 4 kHz = 250 us, and the key chain is read once per pass."
+    note: "Registered 2026-09-28 so the key board's SPICE assertions (hardware/cluster/key-switch-network/sim/) cite it by name instead of restating it."
+
   - id: key-scan-current
     quantity: 3V3 draw of the closed key pull-ups, and the step it puts on the ADC reference
-    value: "1.43 mA per closed key, 25.8 mA at 18 closed"
+    value: "1.43 mA per closed key, 27.3 mA at 19 closed"
     status: settled
     owner: hardware/cluster/key-switch-network/key-switch-network.md
-    derivation: "3.3 V / (R-KEY-PU 2.2 kohm + R-KEY-SER 100 ohm) = 1.43 mA per closed key; 18 fitted switches closed = 25.8 mA."
-    forbidden: ["10 kOhm pull-ups", "0.33 mA per closed key", "5.9 mA, as a step"]
-    companion: "Its two consequences are stated where they land: the ADC reference droop (0.077 %, 3.2 LSB, ~1594 counts) on hardware/carrier/carrier.md, and the 3V3 rail step on hardware/interfaces/key-chain-loom/key-chain-loom.md."
+    derivation: "3.3 V / (R-KEY-PU 2.2 kohm + R-KEY-SER 100 ohm) = 1.43 mA per closed key; 19 fitted switches closed = 27.3 mA (19 since the right thumb went to four keys, 2026-09-26)."
+    forbidden: ["10 kOhm pull-ups", "0.33 mA per closed key", "5.9 mA, as a step", "25.8 mA", "25.8mA", "18 closed", "18 keys closed", "0.077 %", "3.2 LSB"]
+    companion: "Its two consequences are stated where they land: the ADC reference droop (0.082 %, 3.4 LSB, ~1594 counts) on hardware/carrier/carrier.md, and the 3V3 rail step on hardware/interfaces/key-chain-loom/key-chain-loom.md."
     escape_note: |
       TRACKED 2026-09-21 AFTER A COLD REVIEWER FOUND THE DERIVATION LIVE IN
       TWO FILES IN FULL, WITH NONE OF ITS FIVE NUMBERS IN THIS REGISTER.
-      1.43 mA, 25.8 mA, 0.077 %, 3.2 LSB and ~1594 counts each appear in two
+      The per-key current, the all-closed current, the droop, its LSB and
+      ~1594 counts each appear in two
       or three corpus files. Nothing could see a divergence between them.
       THE SPLIT MADE IT WORSE, which is the part worth recording. Before the
       restructure both copies sat in ONE file, ninety lines apart, where a
@@ -214,42 +223,42 @@ figures:
       and today all three restate it.
 
   - id: key-release-time
-    quantity: Key network release, crossing V_IH
-    value: "119.9 us"
+    quantity: Key network release, crossing the register's upper threshold (VT+, at its maximum)
+    value: "138.7 us"
     status: settled
     owner: hardware/cluster/key-switch-network/key-switch-network.md
-    derivation: "Pressed node sits at 3.3 x 100/(2200+100) = 0.1435 V, NOT 0 V. Charging through 2.2k (tau = 103.40 us): t = -103.40 x ln((3.3-2.31)/(3.3-0.1435)) = 119.9 us"
-    threshold_note: "V_IH = 2.31 V = 0.70 x VCC. THIS FIGURE MOVED TWICE ON 2026-09-21 AND THE SECOND MOVE PUT IT BACK. First move: TI's SCLS116E (datasheets/logic/74HC165-ti-scls116e.pdf) has NO 3.3 V row - it tabulates 2 V (1.5/0.5 = 0.75/0.25), 4.5 V and 6 V (both 0.70/0.30) - so the 0.75/0.25 bound was taken on the reasoning that 0.70/0.30 'breaks' at 2 V. Second move: onsemi's MC74HC165A/D Rev. 13 p.4 PUBLISHES A 3.0 V ROW, V_IH 2.1 V / V_IL 0.9 V, which is exactly 0.70/0.30. 3.3 V is therefore bracketed on BOTH sides by published 0.70/0.30 rows and needs no extrapolation through the 2 V point; 2 V is the single exception at the bottom of the family range, not a trend. TI, Nexperia (Rev. 8) and Toshiba agree with onsemi digit for digit at every shared rail, so the 3.0 V row is the family's, not one vendor's. All four PDFs are banked."
-    conservative_bound: "If a TI SN74HC165 is the part fitted, its own datasheet guarantees nothing at 3.3 V and the pessimistic bound is V_IH = 2.475 V, giving 138.7 us. Nothing in the design depends on which is used - the release is absorbed by the asymmetric debounce either way. Design margin against 138.7 us if it ever gets tight."
-    forbidden: ["`V_IH` at **125", "release ~93 us", "~93 µs hardware", "93.2 us", "at **138.7", "crosses `V_IH` at **138.7", "0.75 x VCC = 2.475", "0.75 × VCC = 2.475", "release is ~93us", "~93us", "at ~125us", "~125us"]
+    derivation: "Pressed node sits at 3.3 x 100/(2200+100) = 0.1435 V, NOT 0 V. Charging through 2.2k (tau = 103.40 us): t = -103.40 x ln((3.3-2.475)/(3.3-0.1435)) = 138.7 us"
+    threshold_note: "VT+ = 2.475 V = 0.75 x VCC, the SN74HCS165's upper Schmitt threshold at its maximum (the part bought, ADR 0001 amendment 2026-09-27). TI publishes rows at 2 V (1.5 V max, 0.75 x VCC), 4.5 V (3.15, 0.70) and 6 V (4.2, 0.70) and none at 3.3 V (datasheets/logic/SN74HCS165-ti-scls828a.pdf p.6), so the value is taken at the largest ratio in the table rather than interpolated - the project has been caught once already by a ratio assumed to hold between rows. Interpolating linearly between the 2 V and 4.5 V rows gives 2.358 V and 125.0 us; Nexperia's 74HCS165 publishes a 3.0-3.6 V row (0.7 x VCC max, 2.31 V, 119.9 us) but is a different die and not the part bought. The design takes the bound."
+    forbidden: ["`V_IH` at **125", "release ~93 us", "~93 µs hardware", "93.2 us", "release is ~93us", "~93us", "at ~125us", "~125us", "125 µs release filter", "125 µs the key network", "free hardware debounce", "a BOUNCE filter", "at **119.9", "→ 119.9 µs", "119.9us", "V_IH = 2.31 V", "V_IH` = 2.31", "`V_IH` 2.31 V", "VIH (2.31V)", "119.9 µs"]
     escape_note: |
       THE CSV SPELLING IS NOT THE MARKDOWN SPELLING, 2026-09-21. Every
-      pattern above was written from a prose page - "`V_IH` at **125" - and
-      the BOM rows spell the same numbers "~125us" and "~93us": no
+      pattern was once written from a prose page - "`V_IH` at **125" - and
+      the BOM rows spelled the same numbers "~125us" and "~93us": no
       backticks, no asterisks, no space before the unit. Two cold agents
-      found R-KEY-SER and C-KEY still carrying the superseded 10k/10nF
-      network's timings while the checker reported PASS.
-      Worse than stale: C-KEY quoted the CORRECTED thresholds (0.99 V,
-      2.31 V) beside the OLD crossing times, so the row disagreed with
-      itself - and a reader cross-checking the page against the BOM found
-      agreement on one of the two numbers.
-    false_positive_note: "A bare 125 us also legitimately means the MEAN SAMPLING PERIOD (0-250 us at 4 kHz) and the 8 kHz LOOP PERIOD. Match the phrase, not the numeral. 138.7 us appears legitimately as the stated conservative bound and in the text recording the two moves - those lines carry refutation wording."
-    note: "Starting from 0 V instead of the divider voltage gives 124.5 us, which is the error the 125 us figure came from."
+      found R-KEY-SER and C-KEY still carrying a superseded network's
+      timings while the checker reported PASS. Patterns for a retired value
+      go in both spellings. The 2026-09-27 move missed that rule itself: the
+      C-KEY cell had spelled the retired thresholds "VIL (0.99V at 3.3V)" and
+      "VIH (2.31V)" and ADR 0001 "`V_IH` 2.31 V, `V_IL` 0.99 V", and no
+      pattern matched any of them until review r2 (R1-4, R5-8) added them.
+    false_positive_note: "A bare 125 us also legitimately means the MEAN SAMPLING PERIOD (0-250 us at 4 kHz) and the 8 kHz LOOP PERIOD, and 125.0 us is the interpolation stated in threshold_note. Match the phrase, not the numeral. 119.9 us is the 74HC165's crossing, legitimate in notes.md and in text recording the part change."
+    role_note: "This is a GLITCH filter on release, not the debounce: ks33-contact-bounce is many times longer, so rejecting bounce is firmware's release window (firmware/README.md). This value is the LATENCY bound (VT+ at its maximum); it is NOT what the filter guarantees to reject - that is set by VT+ at its MINIMUM, a much shorter opening, derived on the owner page. It is just over half the 250 us scan period, so it delays a release by 0 or 1 scan (one extra scan for just over half of releases, mean added latency this value), which is invisible behind firmware's release window."
+    note: "Starting from 0 V instead of the divider voltage gives an error of about 4.5 us, which is where a long-retired 125 us figure came from."
 
   - id: key-press-time
-    quantity: Key network press, crossing V_IL
-    value: "5.92 us"
+    quantity: Key network press, crossing the register's lower threshold (VT-, at its minimum)
+    value: "9.87 us"
     status: settled
     owner: hardware/cluster/key-switch-network/key-switch-network.md
-    derivation: "tau = (2200||100) x 47nF = 4.4957 us; t = -4.4957 x ln((0.99-0.1435)/(3.3-0.1435)) = 5.92 us"
-    threshold_note: "V_IL = 0.99 V = 0.30 x VCC, from onsemi MC74HC165A/D Rev. 13 p.4's published 3.0 V row. Same two-move history as key-release-time - see its threshold_note. SEPARATELY AND STILL CORRECT: tau is the PARALLEL combination, 4.4957 us, not 100 ohm x 47 nF = 4.7 us; the page stated 4.7 us beside a crossing time computed from 4.496. That correction is independent of the threshold question and stands."
-    conservative_bound: "The TI-only pessimistic bound is V_IL = 0.825 V, giving 6.89 us. Margin inside the 250 us scan is 42x at 5.92 us and 36x at 6.89 us - the same answer."
-    forbidden: ["`V_IL` at **5.7", "~1.4 µs / 176", "176× margin", "176x margin against", "at **6.89", "crosses `V_IL` at **6.89", "0.25 x VCC = 0.825", "0.25 × VCC = 0.825", "in ~5.7us", "~5.7us", "44x margin", "press is ~1us"]
+    derivation: "tau = (2200||100) x 47nF = 4.4957 us; t = -4.4957 x ln((0.495-0.1435)/(3.3-0.1435)) = 9.87 us"
+    threshold_note: "VT- = 0.495 V = 0.15 x VCC, the SN74HCS165's lower Schmitt threshold at its minimum, the smallest ratio in TI's table (2 V row: 0.3 V min; 4.5 V: 0.9; 6 V: 1.2 - datasheets/logic/SN74HCS165-ti-scls828a.pdf p.6); no 3.3 V row, same reasoning as key-release-time. Linear interpolation gives 0.612 V and 8.58 us. tau is the PARALLEL combination, 4.4957 us, not 100 ohm x 47 nF = 4.7 us."
+    forbidden: ["`V_IL` at **5.7", "~1.4 µs / 176", "176× margin", "176x margin against", "at **6.89", "crosses `V_IL` at **6.89", "0.25 x VCC = 0.825", "0.25 × VCC = 0.825", "in ~5.7us", "~5.7us", "44x margin", "press is ~1us", "at **5.92", "5.92us", "42× inside the 250", "42x inside the 250", "V_IL = 0.99 V", "V_IL` = 0.99", "`V_IL` 0.99 V", "0.99V at 3.3V", "VIL (0.99V", "HC165's VIL", "5.92 µs"]
     escape_note: |
-      Same escape as key-release-time, same day: the patterns were written
-      in markdown spelling and the BOM is CSV. "~5.7us" and "44x margin"
-      sat live in hardware/cluster/key-switch-network/bom.csv, and in the
-      generated master, while the checker reported PASS.
+      Same escape as key-release-time: patterns written in markdown
+      spelling miss the CSV. "~5.7us" and "44x margin" once sat live in
+      hardware/cluster/key-switch-network/bom.csv while the checker
+      reported PASS.
+    note: "25x inside the 250 us scan [calc: 250 / 9.87]."
 
   - id: marker-bits
     quantity: Marker pattern width
@@ -270,14 +279,13 @@ figures:
     quantity: Conductors per key-chain hop
     value: "12"
     status: settled
-    owner: docs/decisions/0001-mcu-and-board-partitioning.md
-    derivation: "4 signals + 5 alternating grounds + 3V3 + 2 spare, on a 2x6 IDC"
+    owner: hardware/interfaces/key-chain-loom/key-chain-loom.md
+    owner_note: "Moved from ADR 0001 on 2026-09-26: ADR 0001's chain section records the IDC version as decided and carries the flat-flex ribbon only as an amendment, while key-chain-loom.md states the live 12-way pinout (its ribbon table and the J-CHAIN row)." 
+    derivation: "4 signals + 5 alternating grounds + 3V3 + 2 spare, on a 12-conductor 1.27 mm IDC ribbon per key board (ADR 0017, amended 2026-09-27)"
     forbidden: ["six conductors per hop", "SIX conductors per hop", "6 conductors per hop", "Six conductors leave", "six conductors leave", "Six conductors per hop", "Six conductors per"]
     false_positive_note: >
-      key-chain-loom.md:138 says "Six conductors is the SIGNAL count, not the
-      conductor count", which is a correction and is correct.
-      led-strip-drive.md:88's "the LED loom stays at 6 conductors" is a
-      different loom entirely. Neither is this figure.
+      led-strip-drive.md's "the LED loom stays at 6 conductors" is a
+      different loom entirely, and is not this figure.
     escape_note: |
       THE MISS WAS ONE LETTER'S CASE, 2026-09-21. ROADMAP:203 read
       "Six conductors per hop" - Title case - against a list holding the
@@ -290,11 +298,51 @@ figures:
 
   - id: chain-connectors
     quantity: J-CHAIN connectors in the system
-    value: "8"
+    value: "4"
     status: settled
     owner: hardware/interfaces/key-chain-loom/key-chain-loom.md
-    derivation: "SER/QH are point-to-point, so every cluster board but the last has IN and OUT: carrier 1, RT 2, RH 2, LT 2, LH 1"
-    forbidden: ["five connectors must match", "Five connectors", "~4 connectors"]
+    derivation: "The thumb clusters are on the main board, so their part of the chain is traces (ADR 0017). Each of the two key boards has one 12-conductor IDC ribbon (CBL-CHAIN) plugged into a through-hole 2x6 1.27 mm right-angle shrouded IDC header at each end, one on the main board and one on the key board, carrying that board's SER in and QH out: 2 key boards x 2 ends = 4 (ADR 0017, amended 2026-09-27)"
+    # ADR 0001 keeps the IDC version ("Eight connectors ... carrier 1, RT 2,
+    # RH 2, LT 2, LH 1") as its record under an amendment note; those
+    # spellings are deliberately not patterns here. "~4 connectors" is not a
+    # pattern either: 4 is the right value now.
+    forbidden: ["five connectors must match", "Five connectors", "eight connectors", "EIGHT connectors", "EIGHT of them across five boards", "eight in all", "7 chain connectors", "J-CHAIN 1/8"]
+
+  - id: key-board-chain-pinmap
+    quantity: Key-board J-CHAIN pin for each main-board J-CHAIN pin (the ribbon's pin map)
+    value: "key-board pin = 13 - main-board pin"
+    status: settled
+    owner: hardware/interfaces/key-chain-loom/key-chain-loom.md
+    derivation: "A keyed socket always mates position k to header pin k, so the map is set by how the cable is built. Ordered -RN2 (notch reversed on the key-board end) the key-board socket mates rotated 180 degrees, and conductor k meets key-board pin 13 - k [datasheet, datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf and SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf; key-chain-loom.md]. The key boards' sheets and hardware/interfaces/key-chain-loom/netlist.yaml carry it."
+    # Tracked 2026-09-27 (review wave 2026-09-27-lh-key-board, K8-9): the map
+    # moved twice in one day and was restated in ten files with no entry here.
+    # GREPPED FIRST, corpus only, every spelling below: the ONLY hits were
+    # key-chain-loom/notes.md's dated paragraph ("12 − k", "14 − k", "SER on
+    # key-board pin 8"), which carries refutation wording.
+    forbidden: ["12 − n", "14 − n", "12−n", "14−n", "12-n", "14-n", "12 − k", "14 − k", "12−k", "14−k", "12-k", "14-k", "12 SCK, 10 SH/LD", "SER on key-board pin 8", "SER` on key-board pin 8", "3V3 on key-board pin 4", "3V3` on key-board pin 4", "FFC-CHAIN,controller", "ffc_conn_l:", "ffc_conn_w:", "ffc_conn_h:", "Molex_200528"]
+    false_positive_note: >
+      DO NOT add a bare "key-board pin 8" or "key-board pin 4". Under the live
+      map both are GROUNDS (key-board pins 4/6/8/10/12), so a correct sentence
+      about a ground fires on them. The retired map put SER on key-board pin 8
+      and 3V3 on pin 4, so only those pairings are patterns. "13-n", "13 − k"
+      and "13 − n" are the live map, never patterns. FFC-CHAIN, ffc_conn and
+      200528 belong to the retired flat-flex/ZIF chain. As bare words they
+      appear legitimately in dated history (notes.md, ADR 0017/0020, the
+      tooling.md findings), not all of it within the refutation window, and a
+      bare pattern fired on nine such lines when tried (2026-09-27). So only
+      their DATA spellings are patterns - the BOM row's ref-and-category, the
+      body.yaml keys, the KiCad footprint name - which no prose uses.
+
+  - id: mcu-ribbon-ways
+    quantity: Conductors in the Matrix ribbon (CBL-MCU-RIBBON into J-MCU)
+    value: "24-way"
+    status: settled
+    owner: hardware/carrier/carrier.md
+    derivation: "ADR 0018 decision 1: twelve used GPIO, three 5 V, four ground, 3V3, EN, IO0 and two spare GPIO."
+    # Tracked 2026-09-27 (K8-8): three ADR lines dated to the IDC change still
+    # said "20-way ribbon". ADR 0018 narrates the change as "It was 20-way"
+    # and "keep 20-way and spend", which this pattern does not match.
+    forbidden: ["20-way ribbon"]
 
   - id: key-pullup-qty
     quantity: R-KEY-PU quantity
@@ -403,7 +451,7 @@ figures:
     status: settled
     owner: docs/decisions/0004-cv-interface-module.md
     derivation: "CLEAR HEIGHT FIRST, because the corpus never derived it. Panel 128.5 mm with M3 clearance holes centred 3.0 mm from the top and bottom edges - two independent banked artefacts agree (a FABRICATED 3HP panel, mechanical/EURORACK-3U-3HP-PANEL-apfaudio-pmod-r3.1.kicad_pcb, Edge.Cuts measured 15.000 x 128.500; and mechanical/EURORACK-3U-PANEL-HP-TABLE-make_blanks.py, HEIGHT=128.5, HOLE_Y=(3.0,125.5), HOLE_DIA=3.2, 10HP width 50.50 with holes at x 7.50/43.06). What blocks panel-front components is the SCREW HARDWARE, so the clear full-width height is 128.5 - 2*(3.0 + r): 116.9 mm on a bare ISO 7045 pan head (dk max 5.6), 115.5 mm with a DIN 125 M3 washer (OD 7.0, the assumed case), 112.5 mm with a knurled thumbscrew (OD ~10). CONTENT: label band 5 + three pots across at 14 mm knobs 22 + jacks 3 rows x 2 columns at 13 mm pitch 39 + etherCON flange 31 + toggle row 13 = 110 mm. 5.5 mm spare, i.e. 1.4 mm per row boundary; 2.5 mm even on the thumbscrew assumption. IT FITS ON EVERY HARDWARE ASSUMPTION."
-    toggle_row: "THE TOGGLE NEEDS ITS OWN ROW, and this is what the dispute turned on. Beside the etherCON flange (26 mm wide, centred on 50.50) there are two 12.25 mm strips of aluminium. A D6.5 hole centred in one leaves 2.88 mm to the flange and 2.88 mm to the panel edge; the 6.00 mm alternative's D6.2 leaves 3.02 mm. BOTH ARE UNDER THE 3.09 mm THIS ADR ALREADY REJECTED when it went 6HP -> 8HP ('a fit the panel passes and a stiffness test it does not'), on a hole a player flips repeatedly in 2 mm aluminium. So the toggle gets a row and the choice of toggle does not affect this figure. THE LED DOES FIT BESIDE THE FLANGE: a D3.2 bezel leaves 4.52 mm each side. Row height 13 mm: the lever is 10.5 mm at a 25 deg throw, sweeping +/-4.44 mm in the panel plane, against a 7.9 mm body."
+    toggle_row: "THE TOGGLE NEEDS ITS OWN ROW, and this is what the dispute turned on. Beside the etherCON flange (26 mm wide, centred on 50.50) there are two 12.25 mm strips of aluminium. A D6.5 hole centred in one leaves 2.88 mm to the flange and 2.88 mm to the panel edge; the 6.00 mm alternative's D6.2 leaves 3.02 mm. BOTH ARE UNDER THE 3.09 mm THIS ADR ALREADY REJECTED when it went 6HP -> 8HP ('a fit the panel passes and a stiffness test it does not'), on a hole a player flips repeatedly in 2 mm aluminium. So the toggle gets a row and the choice of toggle does not affect this figure. THE LED DOES FIT BESIDE THE FLANGE: a D3.2 bezel leaves 4.52 mm each side. Row height 13 mm: the lever is 10.5 mm at a 25 deg throw, sweeping +/-4.44 mm in the panel plane; the body is 7.9 mm across and 13.0 along its terminal field, which lies along the throw. The lever throws across the panel (ADR 0024 point 12), so the row's height carries the nut and the body's 7.9, not the sweep - it holds either way. SINCE ADR 0023 THE ETHERCON IS AN NE8FAV: a 25 mm flange leaves 12.75 mm strips and the toggle's webs are still about 3.1 mm, so this conclusion stands; the budget keeps the D-series flange's height as a conservative allowance until the panel is laid out. THE LAYOUT (ADR 0024 point 11): the etherCON is the bottom row, so the umbilical's cable drops below every control, and the toggle's row is above it with the LED in it, left of the toggle - the same rows at the same heights in a different order, so the sum is unchanged."
     forbidden: ["107 mm of ~110 mm usable", "Roughly 107 mm of", "97 mm against ~110 mm", "97 mm against ~110", "~115 mm against ~110 mm usable", "115 mm against ~110 mm", "already at 107 mm of ~110 mm usable", "13 mm spare", "13mm spare", "= 97mm", "107mm of ~110mm", "115mm against ~110mm"]
     false_positive_note_narration: >
       panel.md:20 and 0004:736 both NARRATE the review that produced these
@@ -468,17 +516,18 @@ figures:
     status: disputed
     owner: docs/decisions/0003-breath-sensing-path.md
     candidates: ["2.8 kPa (cited to ADR 0003, which does not contain it; the two schematic pages cite each other)", "0-5 kPa (what ADR 0003 actually says)", "3-4 kPa (published wind-controller figures)"]
-    decided_by: "M1, with a player and a manometer. Sets the panel gain range AND the ADC headroom."
+    decided_by: "E2 (ROADMAP: breath sensing, a human playing through the real mouthpiece, tube and trap), with a manometer teed at P1 - the test is specified in docs/decisions/0003-breath-sensing-path.md beside the 0-6 kPa range. Sets the panel gain range AND the ADC headroom."
     forbidden: []
 
   - id: pitch-cents-budget
-    quantity: Total pitch error budget
-    value: "DISPUTED"
-    status: disputed
+    quantity: Total pitch error budget - drift over 10 degC after trim, at the worst note
+    value: "0.76 cents worst-case linear sum (0.45 cents RSS)"
+    status: settled
     owner: hardware/module/pitch-stage/pitch-stage.md
-    candidates: ["0.42 cents (this is a ROW of one table, not a total - and it is what power-entry.md scaled the ground-path finding against)", "0.85 cents RSS", "1.35 cents linear sum", "~1.2 cents RSS over 0-40 C from an independent reviewer"]
-    decided_by: "pitch-stage.md has two contradictory budget tables back to back and states no total. One coherent table, then cite it."
-    forbidden: []
+    derivation: "One table, pitch-stage.md 'What limits accuracy': DAC internal reference 5 ppm/C max (C grade, SBAS430E p.4) x 10 C x 7 V lever = 0.42; DAC gain tempco 1 ppm FSR/C typ (p.3) = 0.12; DAC offset drift 0.5 uV/C typ x 2 (p.3) = 0.012; LT5400 ratio tracking 0.027; TRIM-GAIN at mid-travel against R-GAIN-CTR 0.034; V_ref trim network (R-VREF-FB/R-VREF-GND 0.02/1.02 and R-VREF-INJ/R-VREF-SER, 25 ppm/C thin film) 0.06; OPA2197 V_os drift 2.5 uV/C max, follower x1 and stage x2 (SBOS737C p.7) 0.09. Sum 0.763, RSS 0.452 cents. 1 V/oct: 1 mV = 1.2 cents."
+    scope: "Temperature drift over 10 degC once the trims are set, worst note in -2..+7 V. NOT in it: static errors the trims and firmware's affine remove (DAC INL, initial offsets and ratios), the ground-path terms from the instrument's supply current, which ADR 0027 removed at the source (the isolated supply; under 0.01 cents residual, on power-entry.md and in its sims), and loads."
+    forbidden: ["pitch error budget at 0.42 cents", "budget at 0.42 cents"]
+    false_positive_note: "0.42 cents is legitimately the DAC-reference ROW of the budget table; only calling it the total is stale. The old candidates 0.85 cents RSS / 1.35 cents linear sum / ~1.2 cents RSS never appeared outside this entry."
 
   - id: loadswitch-timer
     quantity: C-TIMER-LOADSW
@@ -502,8 +551,9 @@ figures:
     status: settled
     owner: hardware/module/umbilical-load-switch/umbilical-load-switch.md
     derivation: "C = I_GATE / (dV/dt). I_GATEUP is -5 / -10 / -20 uA (164112fc p.2), corroborated independently by the DC1354A demo quick-start guide p.1 - the min/max this figure lacked. 82 nF (E24; 83 nF is not orderable) gives dV/dt = 61 / 122 / 244 V/s and a ramp to 12 V of 197 / 98 / 49 ms."
-    forbidden: ["= 83 nF         provisional", "so ~83nF", "a ramp spec with an unbounded tolerance", "No min/max established"]
-    note: "ADR 0005 specifies a 50-100 ms ramp and THAT SPEC IS NOT ACHIEVABLE with this part: I_GATE is a 4:1 window and no single capacitor holds it inside a 2:1 time window. 82 nF centres the typical inside ADR 0005; the guaranteed envelope is 49-197 ms. Raised against ADR 0005 2026-09-21, not decided."
+    forbidden: ["= 83 nF         provisional", "so ~83nF", "a ramp spec with an unbounded tolerance", "No min/max established", "Raised against ADR 0005 2026-09-21; not decided here", "RAISED AGAINST ADR 0005 AND NOT DECIDED", "is not achievable with this part (above,", "SO ADR 0005's '50-100ms RAMP' IS NOT ACHIEVABLE"]
+    decided: "Owner, 2026-09-30: 'Good to widen the spec.' ADR 0005's ramp specification is now this figure's guaranteed envelope (ADR 0005, amendment of that date). It used to specify 50-100 ms, which a 4:1 I_GATE window cannot hold inside a 2:1 time window; 82 nF always centred the typical inside it, and both corners of the envelope were shown safe on the owner page and in its sims before the decision."
+    note: "The envelope IS the specification since 2026-09-30 - do not restate a narrower one anywhere."
 
   - id: loadswitch-fb-divider
     quantity: LT1641 FB divider, R-FB-HI / R-FB-LO
@@ -536,31 +586,29 @@ figures:
       SECOND-ORDER, and landed with it: C-DECOUPLE-CARRIER goes qty 7 -> 8. The
       same 100 nF was being spent twice (drawn at the REF5050 output AND claimed at
       the sensor's VS pin) while the row enumerated only seven. Correct allocation
-      is 100 nF at REF5050 VIN, 100 nF at REF5050 VOUT, and 100 nF at SKT-BREATH VS.
+      is 100 nF at REF5050 VIN, 100 nF at REF5050 VOUT, and 100 nF at U-BREATH VS.
 
   - id: dig-gnd-topology
-    quantity: Where DIG_GND returns to
-    value: "DISPUTED"
-    status: disputed
+    quantity: Where DIG_GND (and AGND_MOD, and PWR_GND) meet at the module
+    value: "One star, at the power header's ground pins (BUS_GND): AGND_MOD (its own region) and DIG_GND (its own plane) each tie there through their own net tie, and nothing else ties to it. PWR_GND is the isolated return of the instrument's supply: its own layer-4 copper from the etherCON's pin 6, joined to DIG_GND at the etherCON, so it reaches the star only through DIG_GND. Four-layer main board."
+    layers: "PCB-MODULE, four layers, 1.6 mm: layer 2 carries the DIG_GND plane (under the etherCON, the level shifter, the logic regulator and the SPI traces) and, separately, the AGND_MOD region (under the analog block); layer 4 carries PWR_GND from the etherCON's pin 6 to U-ISO and the load switch, and does not reach the header (ADR 0027). Ties: NT-DIG-MOD and NT-AGND-MOD at the header's ground pins; NT-UMB-MOD at the etherCON."
+    status: settled
     owner: hardware/module/power-entry/power-entry.md
-    candidates:
-      - "Its own path to the star (docs/decisions/0004-cv-interface-module.md:627)"
-      - "NOT its own path - the pour directly under its trace, because routing a 2 MHz SPI return to a distant star is the classic split-plane mistake (hardware/module/power-entry/power-entry.md:495-498)"
-      - "The analog star, single tie (hardware/module/digital-and-supervision/digital-and-supervision.md:53)"
-    decided_by: "The 2-layer vs 4-layer decision, which is upstream of it. On two layers the corpus's own requirements are mutually exclusive - power-entry.md wants the SPI return directly under its trace while ADR 0004 wants PWR_GND on its own copper AND the analog return as its own region, and two disjoint pours on one layer means every boundary-crossing trace loses its return across the moat. Four layers dissolves the conflict. Raised by a cold reviewer 2026-09-21."
-    forbidden: []
-    note: "power-entry.md states that ADR 0004 was corrected on this point. IT WAS NOT - line 627 still says the opposite. This is the named failure mode exactly: the fix landed where the editing was happening and not where the reader looks. It is SEMANTIC, so tools/check-staleness.py cannot see it, which is why it survived three review waves and is filed here instead."
+    decided: "Owner, 2026-09-30: 'Four layer in the module board is fine.' The topology on it adopts the four-layer proposal recorded here (DIG_GND plane on layer 2, analog region, PWR_GND on layer 4) with ONE correction: no AGND_MOD-to-DIG_GND bridge under the DAC8568. SBAS430E p.49 asks for the DAC's ground on an analog plane 'separate from the ground connection for the digital components until they were connected at the power-entry point of the system', and J-UMB pins 6 and 8 are tied at the instrument (ADR 0018), so about half the instrument's return comes back on pin 8 - a bridge under the DAC would route it across the analog region; tied at the star it crosses only the DIG_GND plane. ADR 0004's 'DIG_GND likewise - its own path to the star' is what this is."
+    forbidden: ["**`DIG_GND` is *not* given its own path to the star**", "Where it ties is the disputed part", "Where it returns is the disputed part", "Where it ties is the disputed figure", "The module ground plan is unsettled", "bridged to the plane at ONE point under the DAC8568", "PWR_GND reaches it on its own copper", "from the etherCON's pin 6 to the header's ground pins", "it *is* the star's copper", "PWR_GND from the etherCON's pin 6 to the header.", "Not fixed here. It is a grounding and shield-bonding decision", "The ribbon's own ground drop is breath-correlated", "accept it, or take the instrument's supply around the rack"]
+    false_positive_note: "The pre-decision wording lives on in docs/review and in the notes.md history files, which are not the corpus. spi-link.md (interfaces) still calls this figure disputed and is outside the module - report, do not add a pattern that only fires there."
+    note: "THE INSTRUMENT END was decided first: on 2026-09-26 the owner tied J-UMB pin 8 (DIG_GND) to the main board's ground, PWR_GND, at J-UMB (docs/decisions/0018-main-board-wiring-decisions.md; hardware/interfaces/spi-link/spi-link.md; hardware/carrier/netlist.yaml). The module end is this entry. PCB-MODULE-JACK stays two layers: its only ground is AGND_MOD, arriving on J-B2B-MOD's five ground pins. The metal standoffs (owner, 2026-09-30) are on AGND_MOD at the jack board and on no net at the main board, so they add no second tie."
 
   - id: riso-ref-topology
     quantity: R-ISO-REF and the reference buffer's compensation network
     value: "Dual feedback per SBOS737C Figure 56: R_ISO 37.4 ohm, R_F 10 kohm taken at VS, R_Fx 100 ohm + C_F 1 nF at the op-amp output"
     status: settled
     owner: hardware/carrier/breath-excitation-reference/breath-excitation-reference.md
-    derivation: "TI's Figure 56 (SBOS737C section 8.2.3 p.30, 'Precision Reference Buffer') is the worked answer for this exact circuit: R_ISO 37.4 ohm, R_F 1 Mohm at VOUT, R_Fx 10 kohm + C_F 39 nF at the op-amp output, 89 deg phase margin. IT TRANSFERS TO OUR 100 nF LOAD BECAUSE R_ISO IS SET BY Zo, NOT BY C_L: with feedback taken at the amplifier output above the handover, V_A/V_i = (1 + s.R_ISO.C_L)/(1 + s.(Zo+R_ISO).C_L), so both the attenuation R_ISO/(Zo+R_ISO) and the pole-zero ratio depend only on R_ISO/Zo - C_L moves both corners together and cancels. 37.4 ohm is Zo/10 against the specified Zo = 375 ohm (SBOS737C p.8). Simulated phase margin 85.9 deg at 896 kHz."
-    adaptation: "R_F is 10 kohm, NOT TI's 1 Mohm, and R_Fx scales with it to preserve the 100:1 ratio. Two reasons, both absent from TI's circuit. (1) DC error: the guaranteed-over-temperature I_B of 5 nA through 1 Mohm is 5 mV = 1000 ppm = 3.4 LSB on a rail that IS the ratiometric scale factor; through 10 kohm it is 50 uV = 0.034 LSB. (2) Handover: R_F.C_F sets the frequency above which the loop closes on the amplifier's own output rather than on VS. TI's load is a pure capacitor, ours draws 10 mA, so above the handover any load-current change appears at VS across R_ISO. TI's 4.08 Hz would be a disaster; 10 kohm + 1 nF puts it at 15.9 kHz, well above the 500 Hz breath channel. |Z_out| at VS is then 1.20 ohm at 500 Hz against 27.7 ohm at TI's scaling."
+    derivation: "TI's Figure 56 (SBOS737C section 8.2.3 p.30, 'Precision Reference Buffer') is the worked answer for this exact circuit: R_ISO 37.4 ohm, R_F 1 kohm at VOUT, R_Fx 10 kohm + C_F 39 nF at the op-amp output, C_L 10 uF, 89 deg phase margin [the figure's R_F glyph read with TIDU026's key, datasheets/analog/TI-TIDU026-slew-rate-limiter.pdf; 1/(2 pi 1k 39n) = 4.08 kHz is SBOS737C's own '4 kHz']. IT TRANSFERS TO OUR 100 nF LOAD BECAUSE R_ISO IS SET BY Zo, NOT BY C_L: with feedback taken at the amplifier output above the handover, V_A/V_i = (1 + s.R_ISO.C_L)/(1 + s.(Zo+R_ISO).C_L), so both the attenuation R_ISO/(Zo+R_ISO) and the pole-zero ratio depend only on R_ISO/Zo - C_L moves both corners together and cancels. 37.4 ohm is Zo/10 against the specified Zo = 375 ohm (SBOS737C p.8). The simulated phase margin is riso-ref-phase-margin."
+    adaptation: "These are this board's values, not TI's scaled: TI's load is a pure capacitor and ours draws 10 mA. (1) DC error: the guaranteed-over-temperature I_B of 5 nA through R_F 10 kohm is 50 uV = 0.034 LSB on a rail that IS the ratiometric scale factor. (2) Handover: R_F.C_F sets the frequency above which the loop closes on the amplifier's own output rather than on VS, and above it any load-current change appears at VS across R_ISO. 10 kohm + 1 nF puts it at 15.9 kHz, well above the 500 Hz breath channel. |Z_out| at VS is then 1.20 ohm at 500 Hz [calc; reproduced by sim/, zout-as-netlisted]."
     dc_error: "ZERO ACROSS R_ISO, BY TOPOLOGY. C_F blocks at DC so no current flows in R_Fx; input current is pA so none flows in R_F; the summing node therefore sits at V(VS) and the amplifier forces V(VS) = 5.000 V. R-ISO-REF's value and tolerance stop mattering. The 2% ratiometric objection that drove the old in-loop-vs-out-of-loop argument is ANSWERED, not traded away. Total buffer contribution is 0.19 LSB worst case (I_B.R_F 50 uV, V_OS 100 uV, V_OS drift 125 uV over 50 K)."
-    robustness: "Phase margin stays above 76 deg across TI's entire published Zo range (73 ohm at 10 MHz to 3.26 kohm at 0.1 Hz, Figure 26) and across a 200x range of C_L (47 nF to 10 uF). So X7R DC-bias derating cannot destabilise it, and bulk capacitance may be added at VS later without recompensating - a 10 uF there costs 2.5 deg."
-    forbidden: ["INSIDE THE LOOP, with feedback taken at the SENSOR", "R-ISO-REF` goes inside the loop", "2.6° of phase margin", "oscillation near 458 kHz", "R-ISO-REF,controller,10R", "R_F . C_F  >  R-ISO-REF . C_LOAD", "series R–C snubber from `VS`", "8.4 deg", "75.2 deg"]
+    robustness: "Phase margin stays above 76 deg across TI's entire published Zo range (73 ohm at 10 MHz to 3.26 kohm at 0.1 Hz, Figure 26) and across a 200x range of C_L (47 nF to 10 uF); against TI's own macromodel it is riso-ref-phase-margin over that C_L range. So X7R DC-bias derating cannot destabilise it. Bulk capacitance at VS is NOT free on that account: 10 uF barely moves the phase margin, yet |Z_out| peaks near R_ISO at 2.5 kHz and a load step rings through for about 3 ms [sim, sim/ step-with-10u-added] - re-run that sim with any part added there."
+    forbidden: ["INSIDE THE LOOP, with feedback taken at the SENSOR", "R-ISO-REF` goes inside the loop", "2.6° of phase margin", "oscillation near 458 kHz", "R-ISO-REF,controller,10R", "R_F . C_F  >  R-ISO-REF . C_LOAD", "series R–C snubber from `VS`", "8.4 deg", "75.2 deg", "TI's 1 MΩ", "TI's 1 Mohm", "TI'S 1M", "R_F 1 Mohm", "1M x 39nF", "4.08 Hz", "a 10 uF there costs 2.5 deg", "for 2.5° of margin", "RATIO OF 100:1"]
     note: |
       DECIDED by preflight agent A4 2026-09-21
       (docs/review/2026-09-21-preflight/A4-carrier.md section 2), after
@@ -580,6 +628,70 @@ figures:
       TI's own OPA2197 macromodel, which models Zo explicitly. Note SPICE needs a
       leak resistor at the summing node for convergence and a real board does not -
       the amplifier's input leakage provides it.
+  - id: riso-ref-phase-margin
+    quantity: The reference buffer's loop phase margin as netlisted, against TI's OPA2197 macromodel
+    value: "118.5 deg minimum, crossover 1.23-1.28 MHz"
+    status: settled
+    owner: hardware/carrier/breath-excitation-reference/sim/README.md
+    derivation: "[sim] python3 tools/sim.py run hardware/carrier/breath-excitation-reference/sim, 2026-09-30, ngspice 42 with TI's OPA2197 PSpice macromodel (datasheets/analog/OPAx197-ti-pspice-sboma34d.lib). Sim loop-as-netlisted: loads 47 nF, 100 nF, 1 uF, 10 uF and 10.1 uF at VS, 33 tolerance corners each (R-ISO-REF, R-FB-REF, C-FB-REF, sensor current, C_L ESR); the minimum is at 47 nF, and 10 uF moves it by under 5 deg. Loop broken at U-BUF's (-) input, 1 GH / 1 GF (tools/sim.py). A SCREEN WITH A +-10 DEG BAR. The same deck on TI's Figure 56 as printed returns within 2 deg of TI's published 89 deg (sim ti-figure-56)."
+    forbidden: ["85.9 deg", "85.9°", "896 kHz", "returns 87.4"]
+    note: "Replaced a behavioural-model result (A4, 2026-09-21; docs/review/2026-09-21-preflight/A4-carrier.md) that sat outside the +-10 deg screen of this one. Both clear the page's 76 deg claim."
+  - id: breath-link-cmrr
+    quantity: Breath link CMRR, sensor buffer to INA828 output, worst tolerance corner at the mains fundamental
+    value: "70.5 dB worst case at 60 Hz"
+    status: settled
+    owner: hardware/module/breath-receive-stage/sim/README.md
+    derivation: "[sim] python3 tools/sim.py run hardware/module/breath-receive-stage/sim, 2026-09-30, ngspice 42 with TI's INA828 and OPA2197 PSpice models (datasheets/analog/). Sim cmrr-as-netlisted: both netlists (interfaces/breath-sense-link R1/R1b, module/breath-receive-stage the rest), every tolerance end of R1, R1b, R2, R3, R4, R5 and both C_cm at +-1 % - 257 runs. Worst corner 70.9 dB at 50 Hz, 70.5 dB at 60 Hz, 71.7 dB at DC (the page's 73 dB bias-pair floor within 3 dB). It falls through the page's 58.5 dB requirement near 480 Hz at the worst corner (C_cm mismatch, rising with frequency). Without R1b: 60.1 dB nominal (the page's 60.2), 58.2 dB worst - below the requirement. C_cm at +-5 %: 45.5 dB worst at 500 Hz (the page's ~46 dB). A SCREEN: the macromodels carry no layout asymmetry."
+    forbidden: ["1.7 dB of margin", "1.7 dB of claimed margin"]
+  - id: pitch-mult-overshoot
+    quantity: Pitch jack overshoot on an octave step, into a passive mult to another output's jack capacitor
+    value: "41.8 % at 82 nF, 64.1 % at 330 nF"
+    status: settled
+    owner: hardware/module/pitch-stage/sim/README.md
+    derivation: "[sim] python3 tools/sim.py run hardware/module/pitch-stage/sim, 2026-09-30, ngspice 42 with TI's OPA2197 PSpice model. Sim step-mult, nominal: the stage as netlisted with the other jack's C-FILT-MOD-1 (82 nF) or C-OUT-BREATH (330 nF) on PITCH; corners of C-FB-PITCH, C-FILT-PITCH and R-OUT-PROT move it about 1 point. The loop's phase margin is 69.3 deg at 10 MHz at every load (sim loop): the AC sweep cannot see it. With the other output's R-OUT-PROT to its driver also on the jack: 15.3 % and 41.8 %."
+    forbidden: ["44–67 %", "65.4 %"]
+  - id: cs-fall-reentry
+    quantity: CS_MOD at the module's 74AHCT125, how far its falling edge swings back up past V_IL (0.8 V) after crossing it
+    value: "0.42 V nominal, 0.63 V worst corner"
+    status: settled
+    owner: hardware/interfaces/spi-link/sim/README.md
+    derivation: "[sim] python3 tools/sim.py run hardware/interfaces/spi-link/sim, 2026-09-30, ngspice 42. Sim cs-edges: the netlisted path (pad as r_drv/tr_drv, R-SPI-SER-CS, U-TVS-SPI's 30 pF at J-UMB, 2 m of Belden 1752A as a CPL line of its 100-ohm differential impedance, the buffer's input and R-PULL-CS), 33 corners of pad resistance and edge, TVS and input capacitance and cable impedance. Two causes: the source (100 + 35 ohm) is above the line's 100 ohm, so the first step lands at 0.49 V [calc]; and the TVS on the line side of R-SPI-SER reflects the returning wave inverted. A lossless T line gives the same bump. What-if cs-edges-fix (TVS on the pad side, 82 ohm): clean at every corner."
+    forbidden: []
+  - id: spi-pair-crosstalk
+    quantity: MOSI at the module's 74AHCT125 while SCLK switches in the same pair, MOSI held low (peak) - against V_IL 0.8 V
+    value: "0.89-1.52 V nominal, 1.15-1.71 V worst corner, over a common-mode impedance of 70-140 ohm"
+    status: settled
+    owner: hardware/interfaces/spi-link/sim/README.md
+    derivation: "[sim] python3 tools/sim.py run hardware/interfaces/spi-link/sim, 2026-09-30, ngspice 42. Sim pair-mosi-low: pair 4/5 as two coupled lossy lines (ngspice CPL), odd mode 50 ohm from Belden 1752A's 100-ohm differential impedance, even mode twice a common-mode impedance NO DATASHEET GIVES - swept 70/100/140 ohm from a two-wire estimate - 33 corners each. The glitch lasts about one cable round trip and arrives with the SCLK edge that makes it, including the falling edge the DAC clocks DIN on. E11 measures it."
+    forbidden: []
+  - id: shaper-exp-gain
+    quantity: Breath response shaper at POT-RESP's fully-exponential end, gain ratio at a hard blow (in-amp -4.64 V)
+    value: "1.30x at a hard blow; clips from an in-amp output of -8.86 V"
+    status: settled
+    owner: hardware/module/breath-response-shaper/sim/README.md
+    derivation: "[sim] python3 tools/sim.py run hardware/module/breath-response-shaper/sim, 2026-09-30, ngspice 42, TI's OPA2197 model and a behavioural D-RESP fitted to the 1N4448W's 0.62-0.72 V at 5 mA (1.29-1.31x over that spread). The page's table (1.494) assumed V_IN_HALF at exactly V_in/2; POT-RESP loads the R-RESP-DIV pair's 5 kohm midpoint to 0.41 V_in [calc]. The same run: the clip starts at an in-amp output of -8.86 V, not -7.4 V; at the centre detent the wiper sits at 0.39 V at full scale and the stage is linear within 0.25 % across real playing."
+    forbidden: ["targeting ~1.5× at a hard blow", "clip starts near an in-amp output of −7.4 V"]
+  - id: adc-sample-kickback
+    quantity: The MCP3202's sample capacitor against C-AA-ADC, the sampled value's shortfall at the sensor's full scale (a gain term)
+    value: "2.6 LSB nominal, 3.3 LSB worst corner"
+    status: settled
+    owner: hardware/carrier/breath-adc/sim/README.md
+    derivation: "[sim] python3 tools/sim.py run hardware/carrier/breath-adc/sim, 2026-09-30, ngspice 42. Sim kickback: the netlisted divider and C-AA-ADC, the MCP3202's input as its datasheet's R_SS 1 kohm and C_SAMPLE 20 pF (typicals, varied), 1.5 clocks at 900 kHz once per 250 us, discharged between samples (the worst case). The page's 480 uV/V is the average current alone; each sample also takes 20 pF/47 nF of C-AA-ADC's charge [calc]."
+    forbidden: ["about 2 LSB at full scale"]
+  - id: instrument-input-z-margin
+    quantity: The buck's negative input resistance (-103 ohm) over the peak impedance it sees at C-BUCK-IN
+    value: "55x worst corner, 180x nominal (peak 0.57 ohm at 3.8 kHz)"
+    status: settled
+    owner: hardware/carrier/power-entry-instrument/sim/README.md
+    derivation: "[sim] python3 tools/sim.py run hardware/carrier/power-entry-instrument/sim, 2026-09-30, ngspice 42. Sim input-z: C-BUCK-IN, L-BUCK-IN, C-STRIP-BULK at the input node, the umbilical's two conductors (R and L from Belden 1752A, R to 28 AWG) and the load switch and C-ISO-OUT behind them; C-BUCK-IN's ESR swept from a third of its 100 kHz maximum to its 120 Hz maximum, C-STRIP-BULK's likewise. Peak 0.57 ohm at 3.8 kHz nominal."
+    forbidden: []
+  - id: hotplug-iso-ocp
+    quantity: Time U-ISO spends at its lowest over-current threshold (1.84 A, hiccup) when the instrument is plugged into a running module
+    value: "120-168 us at every corner"
+    status: settled
+    owner: hardware/carrier/power-entry-instrument/sim/README.md
+    derivation: "[sim] python3 tools/sim.py run hardware/carrier/power-entry-instrument/sim, 2026-09-30, ngspice 42. Sim hot-plug: U-ISO as a 12 V source clamped at 110 % of 1.67 A (RPA20-AW PD-5), C-ISO-OUT, umbilical-load-switch/sim's behavioural LT1641 with Q-LOADSW's banked PSMN2R0-30YLE figures, the cable and the instrument's input with a constant-power buck. The FET is already enhanced, so C-STRIP-BULK charges from C-ISO-OUT before the LT1641 takes the gate back. Whether the RPA20 hiccups depends on its unpublished over-current delay: E6 decides."
+    forbidden: []
   - id: loop-budget
     quantity: Real-time loop, one pass
     value: "196-241 us of 250 us"
@@ -610,13 +722,26 @@ figures:
       figure could take, so it is exactly the token that proves nothing.
 
   - id: umbilical-current
-    quantity: Instrument current down the umbilical, typical play
+    quantity: Instrument current down the umbilical, typical play (upper bound since ADR 0015)
     value: "359 mA"
-    status: settled
+    status: blocked
+    blocked_on: "An E6 current-probe measurement. The derivation below includes the display board, which ADR 0015 removed; its share was only ever estimated, so the figure is an upper bound and is not re-derived from a guess."
     owner: docs/decisions/0005-power-architecture.md
     derivation: "226 mA x 5 V / (0.9 x 11.4 V) + 248 mA = 358.1 mA. This is the only derived figure; eight others are asserted."
-    forbidden: ["~275 instrument", "Drop at 290 mA", "+12 V | ~320 mA"]
+    forbidden: ["~275 instrument", "Drop at 290 mA", "+12 V | ~320 mA", "0.21 A on each", "~0.21 A each in typical play", "~86 % efficient at that", "~86 % at 20–30 % load"]
+    rack_note: "Since ADR 0027 this current comes out of U-ISO, not off the bus +12 V: the rack supplies the same power rail to rail, ~0.22 A on each of +12 V and -12 V in typical play at ~82 % efficiency (RECOM RPA20-2412SAW at ~21 % load; power-entry.md, 'The instrument's supply'). The figure is still the instrument's current down the umbilical."
     false_positive_note: "392 mA is the MODULE total on +12 V (instrument + module), a DIFFERENT quantity from the 359 mA the instrument draws down the umbilical. Do not conflate. Figures quoted inside text that refutes them are allowed."
+
+  - id: led-row-current
+    quantity: The main board's LED row at full white, 13 x WS2815B-V1 on 12 V
+    value: "170-195 mA"
+    status: blocked
+    blocked_on: "An E6 current-probe measurement of the row at full white. The upper end is the datasheet's own bound, the lower end measurements of WS2815 tape; ADR 0014's reading of '15 mA' as per channel (45 mA per LED) would be three times the B-V1's stated maximum power and is not used."
+    owner: hardware/carrier/led-strip-drive/led-strip-drive.md
+    derivation: "Upper: 13 x 0.18 W / 12 V = 195 mA [ds datasheets/led/WS2815B-V1.pdf p.2, power consumption 0.1-0.18 W]. Lower: 13 x 13.1 mA = 170 mA [web https://www.ledlab.io/chips/ws2815, measured on WS2815 tape]. Blanked: under 2 mA each [ds p.3], ~26 mA for the row."
+    candidates: ["170-195 mA (the datasheet's bound and tape measurements)", "585 mA (13 x 45 mA, ADR 0014's per-channel reading of 15 mA)"]
+    decided_by: "E6, a current probe on the row's 12 V feed with all thirteen at full white"
+    forbidden: []
 
   - id: diode-split-rationale
     quantity: What the D1/D2 split actually buys
@@ -683,8 +808,18 @@ figures:
       bounce, and nothing in the corpus said so until the latency budget was
       made to close.
 
+  - id: body-thickness
+    quantity: Instrument body thickness, oak top face to oak bottom face (config/key-layout.yaml envelope.thickness)
+    value: "39.0 mm"
+    status: settled
+    owner: docs/decisions/0009-enclosure-construction.md
+    derivation: "Owner, 2026-09-26: raise the body rather than pocket the oak bottom for the etherCON. The connector stands on the floor, and the LED matrix sits against the oak top with the key plate ending short of it (owner, same day: 'tighter vertically'). Since ADR 0021 the connector is an NE8FAV on an adapter, queued behind the matrix, and its square flange leaves spare under this figure; the figure is the owner's and was not reduced. mechanical/drc.echo ('body thickness takes the etherCON on the floor') gives the thinnest body that allows it - the flange, standing on the floor under the oak top - and this is that rounded up to the next whole millimetre."
+    provenance_note: "The original 38 mm (1.5 in) was a grip argument in ADR 0009; that argument is unchanged at 39."
+    forbidden: ["57 × 38", "2.25 × 1.5 in", "38 mm body thickness", "38 mm of cavity", "38 mm of stack", "on a 38 mm", "1.5 inches thick", "thickness: 38", "42.0 mm", "thickness: 42", "1.65 in"]
+    false_positive_note: "38 and 1.5 are common numerals in this corpus (a 1.5 mm plate candidate, drill sizes). Match the phrase, never the numeral. 42 was the value for part of 2026-09-26; `42.0 mm` is the register spelling."
+
   - id: plate-thickness
-    quantity: Key plate thickness (PLATE-TOP, PLATE-THUMB)
+    quantity: Key plate and bottom plate thickness (PLATE-TOP, PLATE-BOTTOM)
     value: "1.20 mm"
     status: settled
     owner: docs/reference/ks33-geometry.md
@@ -713,29 +848,27 @@ figures:
     candidates: ["960 mA at 5 mA/ch - DERIVED FROM THE WRONG PART (WS2812C-2020) and optimistic by at least 2.4x", "2304 mA at 12 mA/ch, which is the WS2812B FAMILY figure from the banked WS2812B-2020 p.4 and from the XINGLIGHT 0807 surrogate's 2022 revision", "3648 mA at 19 mA/ch, the XINGLIGHT surrogate's 2024 revision default"]
     decided_by: "A BENCH MEASUREMENT AT E1, not another document. Worldsemi does not publish a WS2812B-0807 datasheet at all - their site's own machine-readable datasheet index enumerates 68 keys covering every published part and has no 0807 key in either language, while the control URL for ws2812b-2020-v6 returns a real 1.26 MB PDF. The two XINGLIGHT XL-0807RGBC-WS2812B revisions banked as SURROGATES disagree with each other 12 vs 19 mA and 7x on quiescent current, and which one matches the fitted board is unknowable from documents."
     blocked_on: "datasheets/MANIFEST.csv - WS2812B-0807. Unblocking needs a current probe, not a fetch."
-    supersedes_the_constraint: "THE 1 A R-78E5.0 IS NOT WHAT STOPS THE MATRIX FIRST. All 64 LEDs draw through one B5819WS Schottky in SOD-323 on the dev board, P_D 200 mW and R-thJA 500 degC/W (datasheets/discrete-and-power/B5819WS.pdf), which is ~435 mA at 25 degC and ~283 mA at a 60 degC interior [calc at V_F ~0.46 V]. Behind it the ME6217C33M5G LDO's printed 800 mA is 'guaranteed by design' and not production-tested, derating to ~250-500 mA on SOT-23-5. ADR 0014's brightness cap is RIGHT and its JUSTIFICATION IS WRONG."
+    power_path: "WHICH LIMIT BINDS DEPENDS ON WHICH INPUT FEEDS THE BOARD. Read off datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-SCHEMATIC.pdf: pad-row P1 pin 1 IS net VCC_5V, D1 B5819WS runs VBUS -> VCC_5V, and all 64 LED VDDs and the ME6217C33M5G LDO input are on VCC_5V. IN THE INSTRUMENT the Matrix is fed from its 5V pad (U-BUCK through J-MCU and CBL-MCU-RIBBON, ADR 0017), so D1 is BYPASSED and carries nothing: the limits are ADR 0014's firmware brightness clamp and U-BUCK's 1 A rating (R-78E5.0-1.0), shared with the rest of the 5V load. ON USB POWER ONLY (a Matrix on the bench, or USB with no umbilical) all 64 LEDs draw through that one Schottky in SOD-323, P_D 200 mW and R-thJA 500 degC/W (datasheets/discrete-and-power/B5819WS.pdf): ~435 mA at 25 degC and ~283 mA at a 60 degC interior [calc at V_F ~0.46 V]. The ME6217C33M5G LDO's printed 800 mA is 'guaranteed by design' and not production-tested, derating to ~250-500 mA on SOT-23-5 - that bounds the 3V3 load on either input, not the LEDs. ADR 0014's brightness cap stands on both inputs."
     forbidden: []
-    note: "THIS NUMBER IS LOAD-BEARING. ADR 0014 uses it to argue the matrix alone nearly exhausts the 1 A R-78E5.0, and that argument drives a hard brightness cap that the ADR deliberately makes non-configurable. The argument may well survive - 12 mA/ch would make it far worse, not better - but the figure behind it does not currently have a document. What the schematic DOES settle: the 64 LEDs run from 5 V, not 3V3 - every VDD on net VCC_5V with no regulator or switch between - which was a strong inference and is now read off a schematic. But VCC_5V is USB VBUS through a B5819WS Schottky, so it is a diode drop below 5 V, and there is NO decoupling anywhere inside the array."
+    note: "THIS NUMBER IS LOAD-BEARING. ADR 0014 uses it to argue the matrix alone nearly exhausts the 1 A R-78E5.0, and that argument drives a hard brightness cap that the ADR deliberately makes non-configurable. The argument may well survive - 12 mA/ch would make it far worse, not better - but the figure behind it does not currently have a document. What the schematic DOES settle: the 64 LEDs run from 5 V, not 3V3 - every VDD on net VCC_5V with no regulator or switch between - which was a strong inference and is now read off a schematic. On USB, VCC_5V is VBUS through the B5819WS, a diode drop below 5 V; from the 5V pad it is the pad itself (see power_path). Either way there is NO decoupling anywhere inside the array."
 
   - id: ferrite-bias-impedance
     quantity: FB-IN impedance at 100 MHz under real DC bias
-    value: "~580-614 ohm on FB1/FB3/FB4; ~280-310 ohm on FB2"
+    value: "~580-614 ohm on FB1/FB3; ~440-480 ohm on FB2 and FB4 at the isolated supply's typical input current (~310 ohm at the clamp-legal worst)"
     status: settled
     owner: hardware/module/power-entry/power-entry.md
-    derivation: "Laird MI1206K601R-10, drawing rev E, banked at datasheets/discrete-and-power/MI1206K601R-10-ferrite-bead.pdf. Read off the drawing's impedance-under-DC-bias curve family (0 / 250 / 500 / 1000 / 1500 mA traces) at 100 MHz: 0 A ~614 ohm, 250 mA ~431, 500 mA ~157, 1000 mA ~72, 1500 mA ~51. FB2 carries umbilical-current (359 mA) and interpolates to ~280-310 ohm; the module +12V total of 392 mA gives ~245-275."
-    forbidden: ["Rated >=1A - the common 0805 600R part is ~300mA and a saturated bead is a wire"]
+    derivation: "Laird MI1206K601R-10, drawing rev E, banked at datasheets/discrete-and-power/MI1206K601R-10-ferrite-bead.pdf. Read off the drawing's impedance-under-DC-bias curve family (0 / 250 / 500 / 1000 / 1500 mA traces) at 100 MHz: 0 A ~614 ohm, 250 mA ~431, 500 mA ~157, 1000 mA ~72, 1500 mA ~51. Since ADR 0027 FB2 and FB4 carry U-ISO's input current, ~0.22 A in typical play (power-entry.md), not umbilical-current: between the 0 and 250 mA traces, ~440-480 ohm [interpolated]; ~0.37 A at the clamp-legal worst reads ~310 [interpolated between 250 and 500 mA]."
+    forbidden: ["Rated >=1A - the common 0805 600R part is ~300mA and a saturated bead is a wire", "FB4 (+5V, mA)", "~280-310 ohm on FB2", "| `FB2` | `umbilical-current` |", "`FB2` carries the umbilical at 359 mA", "FB2 CARRIES THE UMBILICAL"]
+    false_positive_note: "FB4 EXISTS AGAIN since ADR 0027 - the -12 V leg of U-ISO's input, partner of FB2 - so the old patterns that caught the retired +5 V bead by its refdes alone ('FB1/FB3/FB4', '`FB1`, `FB3`, `FB4`', '`FB1`-`FB4`' with an en dash) were withdrawn 2026-09-30: they would fire on correct sentences. 'FB4 (+5V, mA)' still names the retired one."
     note: "THE '>=1 A' RULE DOES NOT DO WHAT THE BOM ROW SAID IT DID. A bead's current rating is THERMAL, not magnetic, so it says nothing about saturation. A 3000 mA part in the same package with the same 600 ohm nominal (HI1206N601R-10, banked alongside) reads ~145 ohm at 500 mA - SLIGHTLY WORSE than the 1500 mA part. FB2 gets roughly half the 600 ohm its row specifies and no 1206 600R bead of any rating fixes it: DC bias shifts the impedance peak UP IN FREQUENCY, so the bead does not die, its useful band slides off 100 MHz. Either the FB2 requirement is restated at its real operating current or FB2 becomes a physically larger part. SELECTION CONSTRAINT WORTH PRESERVING: this part was chosen because its datasheet PUBLISHES the bias curve. Murata BLM's PDF does not (that data is in SimSurfing only) and neither does Wurth WE-CBF - an earlier researcher declined to bank a Wurth part for exactly this reason and that judgement is upheld."
 
   - id: ref5050-grade
     quantity: REF5050 grade, initial accuracy and tempco
-    value: "DISPUTED"
-    status: disputed
+    value: "REF5050IDR, the High grade: ±0.05 % initial, 3 ppm/°C"
+    status: settled
     owner: hardware/carrier/breath-excitation-reference/breath-excitation-reference.md
-    candidates: ["REF5050AIDR as currently specified = Standard grade = +/-0.1% and 8 ppm/degC (SBOS410O Table 4-2 p.3)", "REF5050IDR = High grade = +/-0.05% and 3 ppm/degC, which is what the corpus BELIEVES it has and states in three places"]
-    decided_by: "Changing one letter in the order code, or accepting 2x the initial error and 2.7x the drift in the ratiometric breath scale-factor budget. Since the whole reason for a separate reference is scale-factor stability, REF5050IDR is almost certainly the right answer - but it is a part change, not a documentation fix, so it is recorded as disputed rather than decided."
-    forbidden: ["+-0.05%, 3ppm/degC, ~5ppm/V", "against a reference specified to 0.05%", "5.000 V out at \u00b10.05 % and 3 ppm/\u00b0C", "SOIC-8, 7\u201318 V in"]
-    false_positive_note: "0.05% and 3 ppm/degC are legitimate figures for the OTHER grade and appear in the text that explains the difference. Match the phrase as it was asserted OF THIS PART, not the numerals. All four strings above are dead as of 2026-09-21 and are here to catch a regression."
-    caught_late_note: "This was fixed in bom.csv on 2026-09-21 and NOT in docs/decisions/0003-breath-sensing-path.md, which went on asserting 0.05%/3ppm for another two commits. Worse, the bom.csv row's own LEADING sentence still said 0.05% with the refutation appended 200 words later - the fix landed where the editor was, not where the reader looks. Both are why these forbidden strings exist."
-
-    note: "*** THE 'A' SUFFIX IS THE WORSE GRADE. *** SBOS410O Table 4-2 p.3, verbatim: REF50xxI = grade 'High' = 3 ppm/degC, +/-0.05%; REF50xxAI = grade 'Standard' = 8 ppm/degC, +/-0.1%. The corpus says REF5050AIDR is +/-0.05% / 3 ppm/degC in bom.csv (twice) and in ADR 0003. PROVENANCE CAVEAT WORTH KEEPING: Table 4-2 is NEW IN REV O (October 2025), so an earlier revision may have labelled the grades differently and the corpus's belief may have had an honest origin; rev M/N was not fetched. FETCH NOTE: ti.com/lit/ds/symlink/ref5050.pdf is a REAL 404 - TI renamed the folder at rev O and broke the symlink. Use ti.com/lit/ds/sbos410/sbos410.pdf."
-
+    source: "datasheets/analog/REF5050.pdf (SBOS410O) Table 4-2 p.3: REF50xxI = High = 3 ppm/degC, +/-0.05 %; REF50xxAI = Standard = 8 ppm/degC, +/-0.1 %. Same SOIC-8 pins, Table 5-1 p.4. Selected 2026-09-30: LCSC C24696, 4401 in stock at USD 1.92 against the Standard grade's USD 1.05 [web jlcpcb.com parts search 2026-09-30]"
+    derivation: "The reference exists only for scale-factor stability (the sensor is ratiometric), so the grade is chosen for it: the Standard grade doubles the initial error and multiplies the drift by 8/3 = 2.7 for USD 0.87 on one part [calc]."
+    forbidden: ["+-0.05%, 3ppm/degC, ~5ppm/V", "against a reference specified to 0.05%", "5.000 V out at \u00b10.05 % and 3 ppm/\u00b0C", "SOIC-8, 7\u201318 V in", "REF5050AID"]
+    false_positive_note: "The 'A' order code is the Standard grade; the grade family names REF50xxI and REF50xxAI are legitimate in text explaining the difference and are not matched. The first four strings predate the part change and are kept to catch a regression of the old assertion."
+    note: "*** THE 'A' SUFFIX IS THE WORSE GRADE. *** A substitution or an assembler's 'equivalent' that adds the A is a silent downgrade of the breath scale factor. FETCH NOTE: ti.com/lit/ds/symlink/ref5050.pdf is a 404 since rev O; use ti.com/lit/ds/sbos410/sbos410.pdf."

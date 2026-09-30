@@ -73,6 +73,17 @@ what that means for an aluminium plate.
 > 1.28 ±0.04 arm. **Overall height is NOT-IN-DOCUMENT**: neither the 12.75 mm
 > measured off the STEP nor the BOM's 12.2 mm is confirmed or refuted.
 
+> **The order code's suffix is a housing colour, not a date** (2026-09-27).
+> **-Y24 is the black-bottom-housing variant**, the part this drawing is
+> for. **-Y31 is the white-bottom-housing variant**, banked at
+> `datasheets/mechanical/GATERON-KS-33-SPEC-WHITE-HOUSING-KS-33H10B050NN-Y31.pdf`;
+> the two specs differ in item number, case colour and drawing date, and
+> -Y31's total travel is 0.2 mm longer `[banked: both specs, text diff]`.
+> `switch.total_travel` is read off -Y24, and the flush rule derives the
+> wood top's thickness from it (ADR 0009), so **ordering -Y31 would break
+> the flush rule**: a pressed key would sit below the face. Buy -Y24
+> (`SW1-n`).
+
 ## The Z stack, measured off a solid model — 2026-09-21
 
 `datasheets/mechanical/GATERON-KS-33-3D.step` is a five-body STEP solid
@@ -94,18 +105,64 @@ on the switch that can seat on a plate.
 | Stem top, MX cross | +7.05 mm |
 | Overall | 15.0 × 15.0 × **12.75 mm** |
 
+> **Above the seat, the vendor drawing and this STEP disagree, and the model
+> follows the drawing** (2026-09-28, for the MT165 cap's fit). Gateron's
+> sheet 6, read by rendering it at 500 dpi:
+>
+> - The **14.70 latch span is below the collar**, in the 1.20 plate slot (front
+>   elevation). **Above the collar**, the widest part is the cover, **13.75**.
+>   It holds that to about 1.5 above the seat, then tapers to about 12.8 at
+>   the housing top (scaled: `switch.cover_straight_h`, `switch.cover_top_w`). The STEP draws 14.7–15.0 wide latch bands from the collar
+>   up to the housing's top. A cap's skirt checked against that would "land on
+>   the clips" on a switch that has none there. The model therefore trims the
+>   mesh above the collar to that outline (`mechanical/cad/woody_body.scad`,
+>   `switch_at`).
+> - **Collar 0.45** thick (side elevation), where the STEP has 0.50. The
+>   **housing top is at 3.35** (dimensioned), which the STEP matches.
+> - **Stem top: about 6.4, not +7.05.** It is not dimensioned. It is scaled off
+>   both elevations: 6.38 in each. Both views check to scale within 0.03 on
+>   their own dimensioned 13.75, 14.00 and 5.85. The STEP's stem is about
+>   0.65 mm too tall. `switch.stem_top_above_seat` carries the scaled figure,
+>   marked nominal.
+>
+> The BOM's 12.2 mm overall less the 5.75 pole gives 6.45. That agrees with
+> the scaled stem top, and it is a second route to the same number.
+
 ### This answers the plate-to-PCB standoff, and at the settled thickness there is one
 
-The pins reach **5.10 mm** below the seat and only the last **1.9 mm** is the
-narrow blade that goes through a hole. So the PCB top has to sit within roughly
-**3.2–3.6 mm** of the seat for the blade to fill the hole and protrude enough to
-solder. Subtract the plate `[calc]`:
+**The board's top is pressed against the housing bottom, 2.50 mm below the
+seat** (owner, 2026-09-29; ADR 0020 Amendment 6). The switch hangs in the
+plate by its rim and clips, and 1.3 mm of housing stands below a 1.20 mm plate
+[calc: 2.50 − 1.20]. The board goes right under it, so each switch is held
+between the plate and the board. That is `switch.pcb_below_seat`, and its
+window, `switch.pcb_below_seat_window`, is the housing bottom's ±0.05
+[ds sheet 6].
 
-| Plate | Gap between plate underside and PCB top |
-|---|---|
-| 2 mm — over the vendor window, ruled out | 1.2–1.6 mm |
-| 1.5 mm, the MX standard — over the vendor window, ruled out | 1.7–2.1 mm |
-| **1.20 mm — `plate-thickness`, settled, and this page owns it** | **2.0–2.4 mm** |
+**The pins flare where they leave the housing.** Sectioned off the 3D model
+(`mechanical/cad/vendor/ks33.stl`), each pin is a 0.45 mm blade. It is 1.8 mm
+wide 0.1 mm below the housing, 1.4 mm at 0.3 mm below, and 1.0 mm from 0.5 mm
+below down to the tip [3D]. A board against the housing therefore needs holes
+that pass the flare: 2.2 mm (`hardware/lib/README.md`). Gateron's layout uses
+3.0 mm. The old 1.3 mm holes passed only the 1.0 mm blade, which is why the
+board used to sit lower, at 3.2–3.6 mm.
+
+**The board's thickness sets how much pin is left to solder**: 5.10 mm less
+the board-top depth less the thickness `[calc]`. Against the housing, a
+standard 1.6 mm board shows 5.10 − 2.50 − 1.60 = **1.0 mm**
+(`boards.key_board_t`, and `switch.pcb_t` for the main board under the thumb
+switches). `mechanical/drc.echo` "key-board depth inside the switch pins'
+window" checks the depth, and "key-board depth at the hardware's tolerance
+limits" (a NOTE) the worst case.
+
+**The mount's spacer is the housing's height, 1.3 mm** (`hardware.kb_spacer_l`).
+The switches keep the plate and the board apart only where they are, and a
+mount is where they are not. The same spacer stands at every mount on both
+plates: under the key plate above each key board, and on the bottom plate
+under the main board, over the thumb switches (ADR 0025).
+
+*Until 2026-09-29 the board sat 3.2–3.6 mm below the seat, on 1.3 mm holes.
+At that depth a 1.6 mm board left only about 0.1 mm of pin, so the boards
+were 1.2 mm. The history is in git.*
 
 > **⚠ THIS SECTION'S CONCLUSION IS REVERSED, 2026-09-21, AND SO IS THE LAYOUT
 > RULE DERIVED FROM IT.** It read *"the answer is 'there isn't one'"* and
@@ -116,15 +173,19 @@ solder. Subtract the plate `[calc]`:
 > conclusion was arithmetic applied to two thicknesses that are no longer
 > candidates.
 
+> *Since ADR 0020 Amendment 6 the gap is the housing's 1.3 mm, and nothing
+> but the switches goes on a board's plate side. The table below was worked
+> for the old 2.0–2.4 mm gap.*
+
 **What that clearance actually buys**, taken at the tight end of the range and
-against a plate that is grounded through `MECH-GNDBOND` and is therefore a
+against a plate that is grounded (ADR 0020, Amendment 5) and is therefore a
 short waiting to happen:
 
 | Part | Height | Clearance, worst case |
 |---|---|---|
 | 0402 / 0603 chip passive | ~0.5–0.6 mm | ~1.4–1.5 mm — comfortable |
 | SOT-23 | ~1.1–1.45 mm | ~0.55–0.9 mm — workable |
-| SOIC-16 (the `74HC165`) | 1.75 mm max | **~0.25 mm — do not** |
+| SOIC-16 (the register, `U-KEYS`) | 1.75 mm max | **~0.25 mm — do not** |
 
 So the rule is **not** "there is no plate-facing side". It is: **chip passives
 and SOT-23 may sit on the plate-facing side; nothing with a body over about
@@ -132,14 +193,13 @@ and SOT-23 may sit on the plate-facing side; nothing with a body over about
 going anyway, and stops forcing every decoupling capacitor across to join them.
 
 The centre pole still needs a **⌀5.25 mm clearance hole through the plate *and*
-the PCB**: its tip is at −5.70 mm against a PCB top at −3.2 to −3.6 mm, so on a
-1.6 mm board it protrudes **0.5–0.9 mm** below the underside `[calc]`.
-
-> **`hardware/cluster/cluster-boards.md` §"Three layout rules that are not
-> obvious" still carries the reversed conclusion** — *"there is no plate-facing
-> side: put every passive on the far face"*, cited to this page, and computed
-> against the same withdrawn 1.5–2 mm bracket. **That page has to follow this
-> one**; it is outside this file to change.
+the PCB**. Its tip is `switch.pole_tip_below_seat` below the seat
+(`config/body.yaml`: Gateron's drawing, which beats the STEP's −5.70 mm),
+against a PCB top at −3.2 to −3.6 mm, so it protrudes below a board's
+underside by the tip depth less the board-top depth less the board's
+thickness `[calc]`: on a key board (`boards.key_board_t`) about 1 mm, more at
+the shallow end of the window; the main board (`switch.pcb_t`) is as thick
+and as deep, so the same.
 
 ### And the retention clip may not be a clip
 
@@ -183,6 +243,10 @@ independent source for the 14 mm cutout, alongside the 47 STL cutouts above.
 The STEP model shows why ⌀1.2 is the better number: **the pins are flat blades,
 2.0 × 0.45 mm at the root narrowing to 1.0 × 0.45 mm** through the
 board — not round pins.
+
+> *That held while the board sat below the root. Since ADR 0020 Amendment 6
+> the board is pressed against the housing, so the hole's top meets the 2.0 mm
+> root, and the drill is 2.2 mm (`hardware/lib/README.md`).*
 
 **There are no alignment posts.** The repository's combined `gateron-ks27-mx`
 footprint carries MX's two ⌀1.75 mm posts at (±5.08, 0) *and* MX's own pin

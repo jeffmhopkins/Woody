@@ -1,0 +1,53 @@
+# GENERATED from hardware/carrier/service-uart/service-uart.kicad_sch by tools/kicad.py - DO NOT EDIT.
+# The KiCad sheet is authoritative for this circuit: edit it in KiCad 9, then run
+#   python3 tools/kicad.py export hardware/carrier/service-uart
+# Every note and argument that used to live in this file is on the sheet
+# (part fields, sheet text) or on service-uart.md.
+
+circuit: carrier/service-uart
+title: Service UART header
+page: service-uart.md
+ports:
+  U0TXD:
+    dir: in
+    from: carrier/carrier
+  U0RXD:
+    dir: in
+    from: carrier/carrier
+  PWR_GND:
+    dir: ref
+    from: module/power-entry
+    figure: dig-gnd-topology
+  EN:
+    dir: in
+    from: carrier/carrier
+  IO0:
+    dir: in
+    from: carrier/carrier
+components:
+  HDR-SERVICE:
+    value: 1x5
+    pins:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    note: 'FIVE PINS (ADR 0018): 1 TXD, 2 RXD, 3 GND, 4 EN, 5 IO0 - the ground between the UART pair and the control
+      pair. EN and IO0 are pulled up on the Matrix; drive them to ground only'
+nets:
+  EN:
+  - port: EN
+  - HDR-SERVICE.4
+  IO0:
+  - port: IO0
+  - HDR-SERVICE.5
+  PWR_GND:
+  - port: PWR_GND
+  - HDR-SERVICE.3
+  U0RXD:
+  - port: U0RXD
+  - HDR-SERVICE.2
+  U0TXD:
+  - port: U0TXD
+  - HDR-SERVICE.1

@@ -1,0 +1,17 @@
+* Key network, released: the rail-to-node transfer, which is the key-switch-network page's filter pole.
+* Filled by tools/sim.py (see key-network.cir). AC measures run in a .control block:
+* ngspice 42's netlist .meas cannot parse vm()/vdb() in batch mode, and on v() it
+* measures the real part, which gave a wrong pole without an error.
+VCC rail 0 DC {{vcc}} AC 1
+RPU rail node {{R-KEY-PU}}
+CKEY node 0 {{C-KEY}}
+CIN node 0 {{ci}}
+RSER node leg {{R-KEY-SER}}
+ROPEN leg 0 {{roff}}
+.control
+ac dec 50 10 10meg
+meas ac f_pole WHEN vm(node)=0.70711
+meas ac a_800k FIND vdb(node) AT=800k
+quit
+.endc
+.end

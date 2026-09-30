@@ -1,0 +1,148 @@
+# The breath gain and offset stage, simulated as netlisted with TI's OPA2197 model:
+# the offset knob's transfer at its ends, centre and the page's zero; the gain knob's
+# ends; the clip; a step and the summer's loop into a passive mult; and what the -12 V
+# rail's breath-following movement reaches the jack as. Values from the netlists: this
+# circuit's, and for a passive mult the other outputs' jack parts (pitch-stage's
+# C-FILT-PITCH, mod-channels' C-FILT-MOD-1 and R-OUT-PROT-1). Run:
+#   python3 tools/sim.py run hardware/module/breath-output-stage/sim
+# `mult`: 0 a module input alone, 1 a passive mult to the PITCH jack, 2 to a MOD jack.
+title: Breath output stage - offset, gain, clip, step, loop and rail
+values:
+  netlist:
+    - hardware/module/breath-output-stage/netlist.yaml
+    - hardware/module/pitch-stage/netlist.yaml
+    - hardware/module/mod-channels/netlist.yaml
+models:
+  - datasheets/analog/OPAx197-ti-pspice-sboma34d.lib
+spiceinit: [set ngbehavior=psa]
+
+params:
+  v_pos:    {value: 12.0,  source: "MODULE_ANALOG_POS12 (netlist rails)"}
+  v_neg:    {value: -12.0, source: "MODULE_ANALOG_NEG12"}
+  v_avdd:   {value: {fig: dac-rail}, source: "DAC_AVDD, the top of POT-OFFSET (dac-rail)"}
+  r_load:   {value: 100.0e3, source: "one module input on the jack, 100 kohm [assumption: typical Eurorack, as pitch-stage/sim]"}
+  p_gain:   {value: 0.47, source: "POT-GAIN's rotation from CCW; 0.47 is the page's working gain, 2.16x (breath-output-stage.md, 'Settled 2026-09-30')"}
+  p_off:    {value: 0.5}
+  v_in0:    {value: 0.0}
+  v_in1:    {value: 0.0}
+  v_hard:   {value: -4.64, source: "the in-amp column's hard blow (breath-output-stage.md, 'What it has to do'): BREATH_SHAPED at POT-RESP's centre"}
+  t_step:   {value: 0.2e-3}
+  t_edge:   {value: 1.0e-6, source: "a fast breath edge [assumption: far harder than breath]"}
+  t_end:    {value: 1.0e-3}
+  t_stepsize: {value: 1.0e-6}
+  mult:     {value: 0}
+  real_mult: {value: 0, source: "1: the other output's R-OUT-PROT to its driver at 0 V is on the jack too"}
+  r_open:   {value: 1.0e12}
+  rail:     {value: 0}
+  rail_mv:  {value: 9.7e-3, source: "the +-12 V rails' movement at the header as U-ISO's input current follows breath (ADR 0027, residual table, [sim, rail_mv])"}
+
+derived:
+  t_step_e: "v['t_step'] + v['t_edge']"
+  r_gain_cw: "max(v['POT-GAIN'] * (1 - v['p_gain']), 1e-3)"
+  r_gain_ccw: "max(v['POT-GAIN'] * v['p_gain'], 1e-3)"
+  r_off_cw: "max(v['POT-OFFSET'] * (1 - v['p_off']), 1e-3)"
+  r_off_ccw: "max(v['POT-OFFSET'] * v['p_off'], 1e-3)"
+  c_mult: "[1e-15, v['C-FILT-PITCH'], v['C-FILT-MOD-1']][round(v['mult'])]"
+  r_mult: "v['R-OUT-PROT-1'] if v['real_mult'] and v['mult'] else v['r_open']"
+  inj: "0 if v['rail'] else 1"
+  r_close: "1e-3 if v['rail'] else 1e12"
+  l_brk: "1e-9 if v['rail'] else 1e9"
+  c_inj: "1e-15 if v['rail'] else 1e9"
+
+vary:
+  R-BREATH-FB:     {tol: from-value}
+  R-BREATH-OFF:    {tol: from-value}
+  R-BREATH-OFFNEG: {tol: from-value}
+  R-BREATH-IN:     {tol: from-value}
+  v_avdd:          {tol: [-0.04, 0.056], source: "dac-rail's floor 5.00 V to 5.50 V, the DAC8568 C grade's AVDD window (dac-rail's floor note)"}
+
+sims:
+  - name: offset
+    # breath at rest (BREATH_SHAPED 0 V); POT-OFFSET at its ends, its centre and the
+    # page's zero (p = 0.567); the op-amp output, and the jack behind R-OUT-PROT
+    deck: bos.cir
+    set: {t_end: 0.2e-3, t_stepsize: 2.0e-6}
+    sweep: {p_off: [0.0, 0.5, 0.567, 1.0]}
+    vary: [R-BREATH-FB, R-BREATH-OFF, R-BREATH-OFFNEG, v_avdd]
+    measures: [out, jack, page_err]
+    post:
+      out: "at(w['out'], p['t_end'])"
+      jack: "at(w['jack'], p['t_end'])"
+      # the page's arithmetic at this corner, wiper source impedance R p (1 - p) included:
+      # -R-BREATH-FB x (V_wiper/(R-BREATH-OFF + R p (1-p)) - 12/R-BREATH-OFFNEG)
+      page_err: "at(w['out'], p['t_end']) + p['R-BREATH-FB'] * (p['v_avdd'] * p['p_off'] / (p['R-BREATH-OFF'] + p['POT-OFFSET'] * p['p_off'] * (1 - p['p_off'])) + p['v_neg'] / p['R-BREATH-OFFNEG'])"
+    asserts:
+      - expr: "max['page_err'] < 0.01 and min['page_err'] > -0.01"
+        why: "the op-amp output agrees with the page's offset table and its derivation (+5.06 V CCW, +0.61 V at centre, 0 at p = 0.567, -4.91 V CW) within 10 mV at every corner - the wiper's own source impedance is the whole of the centre's offset"
+  - name: gain
+    # offset at the page's zero; a 1 V breath step (small enough that 4x does not clip);
+    # the gain is the op-amp output's change over the input's
+    deck: bos.cir
+    set: {p_off: 0.567, v_in0: 0.0, v_in1: -1.0, t_end: 0.6e-3}
+    sweep: {p_gain: [0.0, 0.47, 1.0]}
+    vary: [R-BREATH-FB, R-BREATH-IN]
+    measures: [gain]
+    post:
+      gain: "(at(w['out'], p['t_end']) - at(w['out'], p['t_step'])) / (p['v_in0'] - p['v_in1'])"
+    asserts:
+      - expr: "min['gain'] > 0.49 and max['gain'] < 4.11"
+        why: "the page's 0.5x to 4x at POT-GAIN's ends (4.02 x R-GAIN-FLOOR's 0.125 and 4.02 x 1, R-BREATH-FB/R-BREATH-IN), and 2.16x at noon; 1 % resistors move each end by 2 %"
+  - name: clip
+    # the page's combination: offset +5 V (CCW) and gain 4x (CW), a hard blow
+    deck: bos.cir
+    set: {p_off: 0.0, p_gain: 1.0, v_in0: 0.0, v_in1: -4.64, t_end: 0.6e-3}
+    vary: []
+    measures: [out_max, out_min_neg]
+    post:
+      out_max: "peak(w['out'], 0.5e-3, p['t_end'])"
+      out_min_neg: "at(w['out'], 0.19e-3)"
+    asserts:
+      - expr: "nom['out_max'] > 11.3 and nom['out_max'] < 12.0"
+        why: "the page's rail clip: the combination it names stops near +11.5 V, a hard wall short of the rail"
+  - name: clip-negative
+    # offset -4.9 V (CW) and full gain the other way is not reachable from breath (it only
+    # moves the jack positive): the negative extreme is the offset alone, at CW
+    deck: bos.cir
+    set: {p_off: 1.0, p_gain: 1.0, t_end: 0.2e-3}
+    vary: []
+    measures: [out]
+    post:
+      out: "at(w['out'], p['t_end'])"
+  - name: step-mult
+    # a hard-blow step at the working gain into a passive mult: C-OUT-BREATH is outside
+    # the loop behind R-OUT-PROT, so the jack is an RC, whatever it is joined to
+    deck: bos.cir
+    set: {p_off: 0.567, v_in0: 0.0, v_in1: -4.64, t_end: 3.0e-3}
+    sweep: {mult: [0, 1, 2]}
+    vary: []
+    measures: [overshoot_pct, t_settle]
+    post:
+      overshoot_pct: "overshoot(w['jack'], p['t_step'], p['t_end'])"
+      t_settle: "settling(w['jack'], p['t_step'], p['t_end'], 0.01)"
+    asserts:
+      - expr: "max['overshoot_pct'] < 1"
+        why: "no overshoot into any passive mult: the loop never sees the jack's capacitance"
+  - name: loop
+    deck: bos-ac.cir
+    set: {p_off: 0.567}
+    sweep: {mult: [0, 1, 2]}
+    vary: []
+    measures: [pm, fc]
+    post:
+      pm: "phase_margin(w['tdb'], w['tph'])"
+      fc: "crossover(w['tdb'])"
+    asserts:
+      - expr: "min['pm'] - 10 > 45"
+        why: "the summer's phase margin clears 45 degrees after the +-10 degree screen at every load"
+  - name: rail
+    # the -12 V rail's movement at breath rates, through R-BREATH-OFFNEG and the summer
+    deck: bos-ac.cir
+    set: {p_off: 0.567, rail: 1}
+    vary: [R-BREATH-FB, R-BREATH-OFFNEG]
+    measures: [rail_gain, jack_mv]
+    post:
+      rail_gain: "at(w['railg'], 10.0)"
+      jack_mv: "at(w['railg'], 10.0) * p['rail_mv'] * 1e3"
+    asserts:
+      - expr: "max['jack_mv'] < 4.5 and min['jack_mv'] > 3.7"
+        why: "the page's 4.1 mV at the jack for 9.7 mV on the rail: R-BREATH-FB/R-BREATH-OFFNEG, less the 1 % R-OUT-PROT drop into the load"

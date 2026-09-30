@@ -1,0 +1,293 @@
+(kicad_sch (version 20250114) (generator "sch.py") (generator_version "9.0")
+  (uuid cef56e05-f716-52bd-88f7-88ccc70bb739)
+  (paper "A4")
+  (title_block
+    (title "Service UART header (hardware/carrier/service-uart)")
+    (comment 5 "circuit: carrier/service-uart")
+    (comment 6 "page: service-uart.md")
+    (comment 7 "title: Service UART header")
+    (date "")
+    (rev "")
+    (company "Woody")
+    (comment 1 "SOURCE for this circuit - edit in KiCad 9. netlist.yaml is exported from it: python3 tools/kicad.py export hardware/carrier/service-uart")
+    (comment 2 "Part facts ride on each symbol: Row (BOM row), Pins + Pins_source (pin map and its datasheet), Note")
+    (comment 3 "ADR 0018, ADR 0019 - migrated from its hand-written netlist.yaml, compared part by part and net by net")
+    (comment 4 "Ports are hierarchical labels (Dir, From/To, Figure); the main board places this sheet")
+  )
+  (lib_symbols
+    (symbol "Connector_Generic:Conn_01x05"
+		(pin_names
+			(offset 1.016)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "J"
+			(at 0 7.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Conn_01x05"
+			(at 0 -7.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x05, script generated (kicad-library-utils/schlib/autogen/connector/)"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "connector"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "Connector*:*_1x??_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "Conn_01x05_1_1"
+			(rectangle
+				(start -1.27 6.35)
+				(end 1.27 -6.35)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+			(rectangle
+				(start -1.27 5.207)
+				(end 0 4.953)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 2.667)
+				(end 0 2.413)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 0.127)
+				(end 0 -0.127)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 -2.413)
+				(end 0 -2.667)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 -4.953)
+				(end 0 -5.207)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(pin passive line
+				(at -5.08 5.08 0)
+				(length 3.81)
+				(name "Pin_1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 2.54 0)
+				(length 3.81)
+				(name "Pin_2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 0 0)
+				(length 3.81)
+				(name "Pin_3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 -2.54 0)
+				(length 3.81)
+				(name "Pin_4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 -5.08 0)
+				(length 3.81)
+				(name "Pin_5"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "5"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+  )
+  (symbol (lib_id "Connector_Generic:Conn_01x05") (at 40.64 50.8 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 71d63cb1-51ab-5fca-a54d-217aaa8db728)
+    (property "Reference" "HDR-SERVICE" (at 40.64 43.18 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "1x5" (at 40.64 58.42 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "HDR-SERVICE" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2 3=3 4=4 5=5" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "FIVE PINS (ADR 0018): 1 TXD, 2 RXD, 3 GND, 4 EN, 5 IO0 - the ground between the UART pair and the control pair. EN and IO0 are pulled up on the Matrix; drive them to ground only" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "pin n is header position n (service-uart.md)" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "hanxia" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "HX PZ2.54-1x5P ZZ" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C32713271" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "hand" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 08f7969a-8365-5572-9192-28bd57b904e9))
+    (pin "2" (uuid 822d97c1-8907-58a9-b0f5-6d8b603fedbb))
+    (pin "3" (uuid 8f742ae8-8b0c-5109-82ab-ed465ccef451))
+    (pin "4" (uuid e26c1cae-1e27-5d2d-ae1b-b7061e4e0a96))
+    (pin "5" (uuid 4cb70772-b031-5e88-92bd-11738e2ca344))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/993f4837-2260-5646-9a14-8beddecedd97" (reference "J2") (unit 1))) (project "service-uart" (path "/cef56e05-f716-52bd-88f7-88ccc70bb739" (reference "HDR-SERVICE") (unit 1))))
+  )
+  (wire (pts (xy 35.56 45.72) (xy 33.02 45.72)) (stroke (width 0) (type default)) (uuid 8709dab3-0490-54d7-999a-b093c5313ebb))
+  (hierarchical_label "U0TXD" (shape input) (at 33.02 45.72 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 15ba5547-ac68-56ca-80a9-221c6afa3895)
+    (property "Dir" "in" (at 33.02 45.72 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/carrier" (at 33.02 45.72 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 35.56 48.26) (xy 33.02 48.26)) (stroke (width 0) (type default)) (uuid 3a9411de-aec8-5efd-b65b-a733c0e55930))
+  (hierarchical_label "U0RXD" (shape input) (at 33.02 48.26 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 9fd4df71-a1fb-5a8a-aed7-0e5bb3991d1e)
+    (property "Dir" "in" (at 33.02 48.26 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/carrier" (at 33.02 48.26 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 35.56 50.8) (xy 33.02 50.8)) (stroke (width 0) (type default)) (uuid b04af4ea-1c9d-59cc-bbd9-36c12ff1d4da))
+  (hierarchical_label "PWR_GND" (shape passive) (at 33.02 50.8 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 9c467a59-a5d9-5061-a5d1-482affad2f29)
+    (property "Dir" "ref" (at 33.02 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 33.02 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 33.02 50.8 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 35.56 53.34) (xy 33.02 53.34)) (stroke (width 0) (type default)) (uuid a8dc9c6d-aaa7-5a78-8ea1-b7b0b55ffc79))
+  (hierarchical_label "EN" (shape input) (at 33.02 53.34 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid c946ac05-854d-58a5-b6bd-b1a2c3b54e17)
+    (property "Dir" "in" (at 33.02 53.34 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/carrier" (at 33.02 53.34 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 35.56 55.88) (xy 33.02 55.88)) (stroke (width 0) (type default)) (uuid 6a34edc3-e297-58b9-92f5-05c88cc5b1c4))
+  (hierarchical_label "IO0" (shape input) (at 33.02 55.88 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid fe787a53-372a-5d47-8a75-dbe2fbd0a2a6)
+    (property "Dir" "in" (at 33.02 55.88 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/carrier" (at 33.02 55.88 0) (effects (font (size 1.27 1.27)) hide)))
+  (text "FROM THE HAND-WRITTEN NETLIST THIS SHEET REPLACES (verbatim; the part notes are on each part's Note field):\n\nAUTHORITATIVE for connectivity. This circuit is one header and the conductors to it, and the drawing in the\npage is a REPRESENTATION of this file. Whatever is plugged into the service header is not part of the\ninstrument, so hardware/nets.yaml marks that end with `external_driver:` rather than inventing a driver or\ncalling the net undriven." (at 205.74 38.099999999999994 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid 18a0b6f3-6f29-5346-99e1-ce2c083846d6))
+  (sheet_instances (path "/" (page "1")))
+)

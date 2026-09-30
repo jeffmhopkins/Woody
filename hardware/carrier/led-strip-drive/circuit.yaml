@@ -6,13 +6,16 @@
 # before adding or trusting an edge here.
 
 id: carrier/led-strip-drive
-title: LED strip drive — schematic
-last_reviewed: '2026-09-21'
+title: LED drive and the LED row — schematic
+last_reviewed: '2026-09-30'
 depends_on:
 - adr:0014
+- adr:0028
 - refdes:C-DECOUPLE-CARRIER
 - refdes:C-STRIP-BULK
-- refdes:HDR-DEV
+- refdes:D-LED
+- refdes:C-LED
+- refdes:J-MCU
 - refdes:R-LED-SER
 - refdes:R-SPI-PULL
 - refdes:U-LVLSHIFT

@@ -7,16 +7,21 @@
 
 id: interfaces/spi-link
 title: SPI link — carrier egress to the module's buffer
-last_reviewed: '2026-09-21'
+last_reviewed: '2026-09-26'
 depends_on:
 - adr:0001
 - adr:0003
 - adr:0004
+- adr:0018
+- adr:0021
 - fig:dig-gnd-topology
 - fig:loop-budget
 - fig:spi-series-r
 - fig:umbilical-pinmap
-- refdes:HDR-DEV
+- refdes:J-MCU
+- refdes:J-UMB
+- refdes:J-UMBILICAL-INST
+- refdes:PCB-UMB-ADAPTER
 - refdes:R-SPI-PULL
 - refdes:R-SPI-SER
 - refdes:U-TVS-SPI

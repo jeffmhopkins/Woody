@@ -32,67 +32,168 @@ version: 1
 nets:
 
   # ======================================================================
-  # INSTRUMENT: the key chain, carrier to cluster boards
+  # INSTRUMENT: the key chain, main board to the two key boards (ADR 0017)
   # ======================================================================
 
   V3V3_CHAIN:
     kind: power
-    carries: "3V3 to the cluster boards, J-CHAIN pin 10"
+    carries: "The chain's 3V3 as the replicated cluster schematics name it. On the main board it IS DEV_3V3 - right_thumb and left_thumb by trace, with no fuse (ADR 0018); each key board's instance is on V3V3_CHAIN_RH or V3V3_CHAIN_LH, past its ribbon's bead"
     driver: interfaces/key-chain-loom
     receivers: [cluster/key-register, cluster/key-switch-network, cluster/key-marker-and-bits]
 
+  # Each key board's 3V3, past the FB-CHAIN bead on its ribbon's conductor 10.
+  # `per_board:` like the hop nets below: the replicated schematic declares
+  # only the generic V3V3_CHAIN, so which instance sits on which is the key
+  # chain's to say.
+  V3V3_CHAIN_RH:
+    kind: power
+    carries: "right_hand key board's 3V3: FB-CHAIN on the main board, then conductor 10 of its ribbon (main-board J-CHAIN pin 10, key-board pin 3)"
+    driver: interfaces/key-chain-loom
+    receivers: [cluster/key-register, cluster/key-switch-network, cluster/key-marker-and-bits]
+    per_board: true
+
+  V3V3_CHAIN_LH:
+    kind: power
+    carries: "left_hand key board's 3V3: FB-CHAIN on the main board, then conductor 10 of its ribbon (main-board J-CHAIN pin 10, key-board pin 3)"
+    driver: interfaces/key-chain-loom
+    receivers: [cluster/key-register, cluster/key-switch-network, cluster/key-marker-and-bits]
+    per_board: true
+
   GND_CHAIN:
     kind: reference
-    carries: "Chain return, five alternating grounds on J-CHAIN pins 1/3/5/7/9"
+    carries: "Chain return: the main board's ground, and five alternating grounds on each ribbon: main-board J-CHAIN pins 1/3/5/7/9, key-board pins 4/6/8/10/12"
     figure: chain-conductors
     origin: interfaces/key-chain-loom
-    note: "It is the carrier's PWR_GND pour arriving on HDR-DEV's ground pins - a separate name for the five conductors in the ribbon, not a separate node"
-    reference: [cluster/key-register, cluster/key-switch-network, cluster/key-marker-and-bits]
+    note: "It is the main board's ground pour, carried to each key board by its ribbon's five grounds - a separate name for those conductors, not a separate node"
+    reference: [cluster/key-register, cluster/key-switch-network]
 
   CHAIN_SCK:
     kind: signal
     domain: digital
-    carries: "Shift clock to the 74HC165 chain"
+    carries: "Shift clock to all four U-KEYS registers - one net, two by trace and two over the ribbons"
     driver: interfaces/key-chain-loom
     receivers: [cluster/key-register]
 
   CHAIN_SHLD:
     kind: signal
     domain: digital
-    carries: "Shift/load to the 74HC165 chain"
+    carries: "Shift/load to all four U-KEYS registers, one net like CHAIN_SCK"
     driver: interfaces/key-chain-loom
     receivers: [cluster/key-register]
+
+  # --- SER and QH: point to point, one hop per net ------------------------
+  #
+  # cluster/key-register is ONE schematic built four times, so it declares a
+  # generic CHAIN_SER in and CHAIN_QH out. WHICH INSTANCE SITS ON WHICH HOP is
+  # the hop map, and it lives in interfaces/key-chain-loom/netlist.yaml, which
+  # declares one port per instance pin (the _RT/_RH/_LT/_LH nets below) and
+  # joins them hop by hop. Neither side can be checked against the other while
+  # the register is one replicated schematic, so all ten are `per_board:` and
+  # the checker prints them by name. Chain order MCU <- RT <- RH <- LT <- LH.
 
   CHAIN_SER:
     kind: signal
     domain: digital
-    carries: "Serial in at the far end of the chain. POINT TO POINT, not a bus - which is why the connector count is 8 and not one per board"
+    carries: "A register's serial input - generic, one per instance; resolved per instance by the CHAIN_SER_* nets"
     figure: chain-connectors
     driver: interfaces/key-chain-loom
     receivers: [cluster/key-register]
+    per_board: true
 
   CHAIN_QH:
     kind: signal
     domain: digital
-    carries: "Serial out, back toward the MCU. Point to point, like SER"
+    carries: "A register's serial output - generic, one per instance; resolved per instance by the CHAIN_QH_* nets"
+    figure: chain-connectors
     driver: cluster/key-register
     receivers: [interfaces/key-chain-loom]
+    per_board: true
+
+  CHAIN_SER_RT:
+    kind: signal
+    domain: digital
+    carries: "right_thumb's SER, on the main board: right_hand's QH arriving on the right_hand ribbon's conductor 8"
+    driver: interfaces/key-chain-loom
+    receivers: [cluster/key-register]
+    per_board: true
+
+  CHAIN_SER_RH:
+    kind: signal
+    domain: digital
+    carries: "right_hand's SER: left_thumb's QH, out on the right_hand ribbon's conductor 6"
+    figure: chain-connectors
+    driver: interfaces/key-chain-loom
+    receivers: [cluster/key-register]
+    per_board: true
+
+  CHAIN_SER_LT:
+    kind: signal
+    domain: digital
+    carries: "left_thumb's SER, on the main board: left_hand's QH arriving on the left_hand ribbon's conductor 8"
+    driver: interfaces/key-chain-loom
+    receivers: [cluster/key-register]
+    per_board: true
+
+  CHAIN_SER_LH:
+    kind: signal
+    domain: digital
+    carries: "left_hand's SER, the chain end: IO33 through R-CHAIN-SER, held high by R-SER-TERM, out on the left_hand ribbon's conductor 6"
+    figure: chain-connectors
+    driver: interfaces/key-chain-loom
+    receivers: [cluster/key-register]
+    per_board: true
+
+  CHAIN_QH_RT:
+    kind: signal
+    domain: digital
+    carries: "right_thumb's QH - bit 0 onward, a main-board trace to the MCU (IO40). Reaches no connector"
+    driver: cluster/key-register
+    receivers: [interfaces/key-chain-loom]
+    per_board: true
+
+  CHAIN_QH_RH:
+    kind: signal
+    domain: digital
+    carries: "right_hand's QH, back on its ribbon's conductor 8 (key-board J-CHAIN pin 5, main-board pin 8) to right_thumb's SER"
+    figure: chain-connectors
+    driver: cluster/key-register
+    receivers: [interfaces/key-chain-loom]
+    per_board: true
+
+  CHAIN_QH_LT:
+    kind: signal
+    domain: digital
+    carries: "left_thumb's QH, on the main board, out to the right_hand ribbon's conductor 6"
+    driver: cluster/key-register
+    receivers: [interfaces/key-chain-loom]
+    per_board: true
+
+  CHAIN_QH_LH:
+    kind: signal
+    domain: digital
+    carries: "left_hand's QH, back on its ribbon's conductor 8 (key-board J-CHAIN pin 5, main-board pin 8) to left_thumb's SER"
+    figure: chain-connectors
+    driver: cluster/key-register
+    receivers: [interfaces/key-chain-loom]
+    per_board: true
 
   KEY_BITS:
     kind: signal
     domain: digital
-    carries: "The parallel switch bits into the shift registers, within a cluster board"
+    carries: "The parallel switch bits into the shift registers, on the board each register is on - the main board for right_thumb and left_thumb, a key board for right_hand and left_hand"
     driver: cluster/key-switch-network
     receivers: [cluster/key-register]
     per_board: true
     note: >
       EIGHT NETS PER DEVICE, NOT ONE, and which of the eight is a switch is
-      different on all four boards - key-marker-and-bits.md's allocation table
-      has four different rows against one schematic. So no port assignment on
-      the shared cluster netlist is true of every board, and key-register's
-      netlist declares the eight inputs as unasserted endpoints. Resolving
-      this means four board variants, which is a real decision and not a
-      transcription job.
+      different for each of the four register instances -
+      key-marker-and-bits.md's allocation table has four different rows
+      against one schematic. So no port assignment on the shared register
+      netlist is true of every instance, and key-register's netlist declares
+      the eight inputs as unasserted endpoints. Resolving it means four
+      instance variants - two register placements on the main board
+      (right_thumb, left_thumb) and two key-board variants (right_hand,
+      left_hand) - which is a real decision and not a transcription job.
 
   MARKER_BITS:
     kind: signal
@@ -102,7 +203,17 @@ nets:
     driver: cluster/key-marker-and-bits
     receivers: [cluster/key-register]
     per_board: true
-    note: "Two per device, one high and one low, and they sit on different inputs on every board - see KEY_BITS"
+    note: "Two per device, one high and one low, and they sit on different inputs on every device - see KEY_BITS. They are traces, not parts, drawn on each board's sheet; key-marker-and-bits holds only the free-bit pull-up since 2026-09-27"
+
+  FREE_BIT:
+    kind: signal
+    domain: digital
+    carries: "A free register input, held high by its own R-KEY-PU (three: left_thumb B and A, left_hand A)"
+    figure: free-bits
+    driver: cluster/key-marker-and-bits
+    receivers: [cluster/key-register]
+    per_board: true
+    note: "Which input is free differs per register - allocation.yaml - so the far end is per board, like KEY_BITS"
 
   # --- the dev board's pins that drive the chain ------------------------
 
@@ -157,14 +268,14 @@ nets:
   IO33:
     kind: signal
     domain: digital
-    carries: "SER out of the MCU, riding every hop to the far device's serial input"
+    carries: "SER out of the MCU to the chain end - left_hand's serial input, over its ribbon - for the self-test"
     driver: carrier/carrier
     receivers: [interfaces/key-chain-loom]
 
   IO40:
     kind: signal
     domain: digital
-    carries: "MISO into the MCU: the chain's QH, out of the nearest register"
+    carries: "MISO into the MCU: right_thumb's QH, the nearest register, by a main-board trace"
     driver: interfaces/key-chain-loom
     receivers: [carrier/carrier]
 
@@ -187,46 +298,40 @@ nets:
   IO1:
     kind: signal
     domain: digital
-    carries: "LED data to the left WS2815 strip, ESP32 GPIO1 to the level shifter"
+    carries: "LED data to the main board's LED row (13 x WS2815B-V1, ADR 0028), ESP32 GPIO1 to the level shifter"
     driver: carrier/carrier
     receivers: [carrier/led-strip-drive]
-    note: "HIGH-IMPEDANCE THROUGH THE BOOTLOADER WINDOW, which is why R-LED-PD exists: OE is tied low, so a floating AHCT input becomes clean 5 V edges into 25 addressable LEDs before any firmware runs"
-
-  IO2:
-    kind: signal
-    domain: digital
-    carries: "LED data to the right WS2815 strip, ESP32 GPIO2 to the level shifter"
-    driver: carrier/carrier
-    receivers: [carrier/led-strip-drive]
-    note: "Same bootloader-window hazard as IO1"
-
-  IO5:
-    kind: signal
-    domain: digital
-    carries: "UART1 TX, real-time board to the display board on J-DISP"
-    driver: carrier/carrier
-    receivers: [carrier/display-and-service-uart]
-
-  IO6:
-    kind: signal
-    domain: digital
-    carries: "UART1 RX, display board to the real-time board"
-    external_driver: "the display board, which has no page in this corpus"
-    receivers: [carrier/carrier, carrier/display-and-service-uart]
+    note: "HIGH-IMPEDANCE THROUGH THE BOOTLOADER WINDOW, which is why R-LED-PD exists: OE is tied low, so a floating AHCT input becomes clean 5 V edges into the LED row before any firmware runs"
 
   U0TXD:
     kind: signal
     domain: digital
     carries: "The real-time board's console transmit, IO43, to HDR-SERVICE"
     driver: carrier/carrier
-    receivers: [carrier/display-and-service-uart]
+    receivers: [carrier/service-uart]
 
   U0RXD:
     kind: signal
     domain: digital
     carries: "The real-time board's console receive, IO44, from HDR-SERVICE"
     external_driver: "whatever is plugged into the service header"
-    receivers: [carrier/carrier, carrier/display-and-service-uart]
+    receivers: [carrier/carrier, carrier/service-uart]
+
+  EN:
+    kind: signal
+    domain: digital
+    carries: "The Matrix's EN (its RESET net, CHIP_PU), from Key1's RESET-side terminal down CBL-MCU-RIBBON (J-MCU pin 24) to HDR-SERVICE pin 4 (ADR 0018)"
+    external_driver: "whatever is plugged into the service header, pulling to ground only"
+    receivers: [carrier/carrier, carrier/service-uart]
+    note: "Held up on the Matrix by R8, 10k to its 3V3, with no capacitor on it; Key1 pulls it to GND. Nothing in series"
+
+  IO0:
+    kind: signal
+    domain: digital
+    carries: "The Matrix's GPIO0 (boot strap), from Key2's IO0-side terminal down CBL-MCU-RIBBON (J-MCU pin 23) to HDR-SERVICE pin 5 (ADR 0018)"
+    external_driver: "whatever is plugged into the service header, pulling to ground only"
+    receivers: [carrier/carrier, carrier/service-uart]
+    note: "Held up on the Matrix by R10, 10k to its 3V3; Key2 (BOOT) pulls it to GND. Nothing in series"
 
   INST_5V_A:
     kind: power
@@ -234,14 +339,7 @@ nets:
     figure: matrix-led-current
     driver: carrier/power-entry-instrument
     receivers: [carrier/led-strip-drive, carrier/carrier]
-    note: "It reaches the 8x8 matrix through the dev board, so carrier/carrier is where it lands and HDR-DEV is the socket it lands through"
-
-  INST_5V_B:
-    kind: power
-    carries: "Buck B, to the display board on J-DISP"
-    driver: carrier/power-entry-instrument
-    receivers: [carrier/display-and-service-uart]
-    note: "WHERE BUCK B LIVES IS OPEN. If it moves to the display board this net becomes +12 V up the loom instead, and J-DISP's conductor list changes with it"
+    note: "It reaches the 8x8 matrix through the dev board, so carrier/carrier is where it lands, through J-MCU and three conductors of CBL-MCU-RIBBON (two on the 5V pad, one on TP2)"
 
   VS:
     kind: signal
@@ -328,14 +426,21 @@ nets:
 
   DIG_GND:
     kind: reference
-    carries: "Digital return, instrument to module"
+    carries: "Digital return, instrument to module - J-UMB pin 8, CS_MOD's pair partner"
     figure: dig-gnd-topology
     origin: module/power-entry
-    reference: [interfaces/spi-link, module/digital-and-supervision]
+    reference: [interfaces/spi-link, module/digital-and-supervision, carrier/carrier]
+    note: >
+      AT THE INSTRUMENT END IT IS THE MAIN BOARD'S GROUND: tied to PWR_GND at
+      J-UMB (ADR 0018), which carrier/carrier declares by putting this port on
+      its PWR_GND net. The name is kept because at the module end conductor 8
+      is its own net: a layer-2 plane that meets PWR_GND at the etherCON
+      (NT-UMB-MOD, the mirror of the instrument's NT-DIG) and the module's star
+      through NT-DIG-MOD, and nothing else (dig-gnd-topology, ADR 0027).
 
   UMBILICAL_POS12:
     kind: power
-    carries: "The +12 V exported to the instrument, downstream of the load switch. ONE NODE all the way to the strips and the REF5050"
+    carries: "The +12 V exported to the instrument, downstream of the load switch. ONE NODE all the way to the LED row and the REF5050"
     figure: umbilical-current
     driver: module/umbilical-load-switch
     receivers:
@@ -343,12 +448,13 @@ nets:
       - carrier/led-strip-drive
       - carrier/breath-excitation-reference
       - interfaces/spi-link
+      - module/panel-led
     note: >
       module/link-supervision was a receiver here and is not one: its page says
       "Not fitted" against every row, including the presence detect that gated
       OE_MOD from this node. A deleted circuit is not a receiver.
 
-      The carrier's "+12V strip feed" and "+12V analog" are not separate nets:
+      The carrier's "+12V LED row feed" and "+12V analog" are not separate nets:
       D-REVSHUNT is a shunt across the pair and D-TVS-PWR is a clamp, so
       nothing is in series between J-UMB pin 3 and either tap. They were two
       more entries here until the netlist had to name both ends of each and
@@ -356,19 +462,22 @@ nets:
 
   PWR_GND:
     kind: reference
-    carries: "Power return for the exported rail, and the carrier's whole pour"
+    carries: "Power return for the exported rail - U-ISO's isolated 0V at the module (ADR 0027) - and the carrier's whole pour"
     origin: module/power-entry
     reference:
       - module/umbilical-load-switch
       - carrier/power-entry-instrument
       - interfaces/spi-link
-      - carrier/display-and-service-uart
+      - carrier/service-uart
       - carrier/led-strip-drive
       - carrier/carrier
+      - interfaces/breath-sense-link
     note: >
-      The aluminium key plate bonds to this net through MECH-GNDBOND and NEVER
-      to AGND, and carrier/power-entry-instrument is the only board that bond
-      can originate on.
+      The bottom plate bonds to this net through the main board's mounts
+      (ADR 0022), each at its own stud. The aluminium key plate bonds to it
+      through the cassette's columns, whose standoffs stand on the same
+      plated mounts (ADR 0025); no key board's GND_CHAIN touches either plate.
+      Neither plate ever bonds to AGND.
       IT DOES NOT LIST THE TWO ANALOG CIRCUITS. power-entry-instrument.md's
       Interfaces table names carrier/breath-adc and
       carrier/breath-excitation-reference as returning to the pour, and both of
@@ -381,11 +490,16 @@ nets:
   # MODULE: power
   # ======================================================================
 
-  BUS_POS12_RAW:
+  ISO_POS12:
     kind: power
-    carries: "Eurorack +12 V as it arrives, ahead of D1/D2"
+    carries: "The isolated +12 V U-ISO makes for the instrument (ADR 0027), ahead of the load switch; returns on PWR_GND"
     driver: module/power-entry
     receivers: [module/umbilical-load-switch]
+    note: >
+      Until 2026-09-30 the load switch took the Eurorack +12 V as it arrives
+      (BUS_POS12_RAW, now a net inside module/power-entry). It takes the
+      converter's output instead, so the instrument's current is drawn from
+      the rack rail to rail and none of it returns through the rack's ground.
 
   MODULE_ANALOG_POS12:
     kind: power
@@ -396,8 +510,7 @@ nets:
       - module/breath-receive-stage
       - module/mod-channels
       - module/pitch-stage
-      - module/panel-led
-    proposed: [module/breath-response-shaper]
+      - module/breath-response-shaper
 
   MODULE_ANALOG_NEG12:
     kind: power
@@ -408,14 +521,14 @@ nets:
       - module/breath-receive-stage
       - module/mod-channels
       - module/pitch-stage
-    proposed: [module/breath-response-shaper]
+      - module/breath-response-shaper
 
-  BUS_5V:
+  LOGIC_5V:
     kind: power
-    carries: "Eurorack +5 V after FB4/C4. The level shifter only - the one rail with no local regulation"
+    carries: "The module's own 5 V, U-REG-LOGIC from the analog +12 V. The level shifter only"
     driver: module/power-entry
     receivers: [module/digital-and-supervision]
-    note: "interfaces/spi-link names this rail in its Interfaces table with Dir '-' and says it 'reaches no part of this circuit'. A '-' row is context, not a connection, and it was seeded here as one"
+    note: "Replaces BUS_5V (2026-09-30): the bus +5 V is not used, and J-PWR-EURO's +5 V pins are no-connects"
 
   DAC_AVDD:
     kind: power
@@ -440,11 +553,12 @@ nets:
       - module/mod-channels
       - module/panel-led
       - module/pitch-stage
-    proposed: [module/breath-response-shaper]
+      - module/breath-response-shaper
     note: >
-      Where AGND_MOD and DIG_GND meet is the tracked figure dig-gnd-topology
-      and is DISPUTED. This file records which circuits reference the net; it
-      does NOT settle the topology and must not be read as settling it.
+      AGND_MOD meets the Eurorack ground (BUS_GND, the star, inside
+      module/power-entry) only through NT-AGND-MOD, and DIG_GND and PWR_GND
+      only by way of the star - the tracked figure dig-gnd-topology.
+      This file records which circuits reference the net.
 
   # ======================================================================
   # MODULE: DAC and CV
@@ -477,19 +591,6 @@ nets:
     carries: "Buffered frame sync (the DAC's chip select), level shifter to DAC"
     driver: module/digital-and-supervision
     receivers: [module/dac8568]
-
-  CLR:
-    kind: signal
-    domain: digital
-    carries: "DAC asynchronous clear, active low"
-    undriven: true
-    pull: "R-CLR-PU holds it inactive"
-    receivers: [module/dac8568]
-    note: >
-      NOTHING DRIVES THIS NET. The watchdog that once did is deleted, and the
-      DAC page says so. It is listed because four other pages name CLR in
-      their Interfaces tables to record that it reaches no part of them -
-      which is a real fact about the design and the reason the net is here.
 
   VREFOUT:
     kind: signal
@@ -551,13 +652,18 @@ nets:
     carries: "In-amp output, the receiver's recovered breath signal"
     figure: inamp-full-scale
     driver: module/breath-receive-stage
+    receivers: [module/breath-response-shaper]
+
+  BREATH_SHAPED:
+    kind: signal
+    domain: analog
+    carries: "The in-amp output after the response shaper - equal to it at POT-RESP's centre detent - into POT-GAIN"
+    driver: module/breath-response-shaper
     receivers: [module/breath-output-stage]
-    proposed: [module/breath-response-shaper]
     note: >
-      `proposed:` means DRAWN BUT NOT ADOPTED. That circuit reads this node in
-      its drawing and every one of its BOM rows is `open`, so it declares the
-      port and this file does NOT claim the board has the connection. Move it
-      into receivers when it is fitted, not before.
+      Crosses to the jack board on J-B2B-MOD pin 1. The shaper is fitted
+      (2026-09-30): it sits between the in-amp and the gain attenuator, where
+      the scale is fixed, so POT-GAIN cannot move its knee.
 
   # ======================================================================
   # MODULE: panel
@@ -575,6 +681,11 @@ nets:
 # treated as a missing net, and so nobody re-adds it from an old drawing.
 # ----------------------------------------------------------------------
 retired:
+  BUS_5V:
+    was: "Eurorack +5 V after FB4/C4, for the level shifter"
+    why: >
+      The module makes its own 5 V (LOGIC_5V, U-REG-LOGIC) and does not use the
+      bus +5 V (owner, 2026-09-30); J-PWR-EURO's +5 V pins are no-connects.
   OE_MOD:
     was: "Four buffer enables, gated by a presence comparator"
     why: >

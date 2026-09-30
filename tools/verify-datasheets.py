@@ -20,7 +20,10 @@ DS = os.path.join(ROOT, "datasheets")
 # Everything a researcher may legitimately bank. A file on disk with any other
 # extension is reported, not ignored.
 ARTEFACT = (".pdf", ".dxf", ".step", ".stp", ".kicad_mod", ".kicad_pcb",
-            ".jpg", ".jpeg", ".png", ".c", ".py", ".js", ".lib", ".asy")
+            ".jpg", ".jpeg", ".png", ".c", ".py", ".js", ".lib", ".asy",
+            # A typeface the panel artwork is set in, and the licence that must
+            # travel with it (tools/panel-art.py; datasheets/fonts/).
+            ".ttf", ".txt")
 NO_FILE_OK = {"BLOCKED", "NOT-FETCHED"}
 
 rows = list(csv.DictReader(open(os.path.join(DS, "MANIFEST.csv"), newline="", encoding="utf-8")))

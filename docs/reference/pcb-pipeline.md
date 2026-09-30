@@ -70,7 +70,7 @@ each table row names the drawing's spelling beside the qualified one.
 | `BREATH` | the in-amp input | the output jack | `BREATH_SENSE` / `BREATH_OUT` |
 | `SCLK` | the umbilical conductor from the MCU | **the 74AHCT125's OUTPUT, on the same page's own table** | `SCLK` / `SCLK_DAC` |
 | `OE` | the module's `74AHCT125` output enable, tied to `GND` (`hardware/module/digital-and-supervision/digital-and-supervision.md`) | the carrier's LED-buffer output enable, tied low (`hardware/carrier/led-strip-drive/led-strip-drive.md`) | `OE_MOD` / `OE_INST` |
-| `CS` | the umbilical SPI chip select, `HDR-DEV` IO34 → `J-UMB` pin 7 → the DAC (`hardware/interfaces/spi-link/spi-link.md`) | the MCP3202's board-local chip select, IO39, which never leaves the carrier (`hardware/carrier/breath-adc/breath-adc.md`) | `CS_MOD` / `CS_ADC` |
+| `CS` | the umbilical SPI chip select, `J-MCU` IO34 → `J-UMB` pin 7 → the DAC (`hardware/interfaces/spi-link/spi-link.md`) | the MCP3202's board-local chip select, IO39, which never leaves the carrier (`hardware/carrier/breath-adc/breath-adc.md`) | `CS_MOD` / `CS_ADC` |
 
 **Three cold reviewers found the first two independently**; `OE` and `CS` came
 out of the pre-merge wave, and `SCLK` out of the fix for it.
@@ -103,29 +103,23 @@ pins, so this is a **netlist** change, not just a footprint. `SP0505BAHTG` is
 the genuine -6 with a fifth channel if the footprint matters more than the
 channel count.
 
-**6. `ref5050-grade` is disputed and may change the part.** `REF5050AIDR` is
-the *Standard* grade — ±0.1 %, 8 ppm/°C — not the ±0.05 % / 3 ppm/°C the corpus
-asserts in three places. `REF5050IDR` is the High grade: same package, same
-pinout, one letter. So this blocks precursor 1 for that row, not just the
-figures list.
+**6. `ref5050-grade` is settled** (2026-09-30): the High grade, `REF5050IDR`,
+same package and pinout. Nothing for this row blocks precursor 1 any more.
 
-## Three ground questions that must be decided in one sitting
+## The ground questions that must be decided in one sitting
 
 Each is "which ground does this attach to", each is invisible to
-`check-staleness.py` because it is semantic, and **all three are downstream of
-2-layers-or-4**:
+`check-staleness.py` because it is semantic. **Both module questions closed
+2026-09-30**, when the owner took the module's main board to four layers:
 
-- **`dig-gnd-topology`** — three documents, three mutually exclusive answers,
-  and `power-entry.md` states ADR 0004 was corrected when it was not.
-- **The LT5400's exposed pad.** The part is MS8E with a **1.88 × 1.68 mm
-  exposed pad** the BOM did not know it had. ADI says do not tie it to noisy
-  ground and *"connecting the exposed pad to a quiet AC ground is
-  recommended"* — and **pad-to-resistor coupling is 5.5 pF against only 1.4 pF
-  resistor-to-resistor**, so the pad is the dominant stray on the 1 V/oct
-  network. This plan gives `AGND` no zone and a keepout, so "a quiet AC ground"
-  has to mean something specific here.
-- **`cref-out-node`** — three drawings disagree about which side of the
-  reference buffer `C-REF-OUT` sits on.
+- **`dig-gnd-topology`** — settled: one star at the power header, `DIG_GND` a
+  layer-2 plane, `AGND_MOD` its own layer-2 region, `PWR_GND` on layer 4
+  (`config/figures.yaml`; `power-entry.md`, *Grounding*).
+- **The LT5400's exposed pad** — to `AGND_MOD`, carried on the sheet as the
+  part's pin 9 (`pitch-stage.md`). (This plan's `AGND` with no zone is the
+  instrument's in-amp input, a different net.)
+- ~~`cref-out-node`~~ — **settled** (`config/figures.yaml`), and it is an
+  instrument part on the four-layer main board, so it no longer belongs here.
 
 A pad told to find "a quiet AC ground" on a board that has not settled where
 its grounds meet is a decision deferred twice, not once.
@@ -145,64 +139,62 @@ netlist and two clones differ.
 > **A page-by-page netlist is not the whole board, and `hardware/unplaced.csv`
 > is the measure of the gap.** A row lives with the circuit whose page derives
 > it; a row nobody has drawn lives in `unplaced.csv`, so anything transcribed
-> from the pages alone omits exactly those rows. **Re-measured against the
-> current tree, 2026-09-21:**
+> from the pages alone omits exactly those rows. **`wc -l
+> hardware/unplaced.csv` is the count**, as `hardware/README.md` says; before
+> emitting `module.net`, grep it for module-board refdes — each hit is a part
+> the netlist will be missing. Most of the file is the instrument's mechanical
+> and controller rows plus the board blanks, which no netlist wants.
 >
-> | | Rows | Units |
-> |---|---|---|
-> | `hardware/bom.csv`, the generated master | 138 | 388 |
-> | In the 23 per-circuit fragments | 104 | 313 |
-> | **In `hardware/unplaced.csv` — no page names them** | **34** | **75** |
+> `D-CLAMP-BREATH` was the shape of the problem. It **was drawn** — twice, in
+> the ASCII figures on `hardware/module/breath-receive-stage/breath-receive-stage.md`,
+> as *"BAV99 to ±12 V, both legs"* — and its row sat in `unplaced.csv`,
+> because **the drawing never wrote the refdes**. Nothing joined the picture
+> to the BOM row, so nothing could notice. Drawn, named and placed are three
+> different tests, and only the circuit's `bom.csv` fragment answers the
+> third. (It is placed now, and `tools/check-netlist.py` reads every
+> `[REFDES value]` drawing label against the netlist, so that shape is caught.)
 >
-> Of those 34, five are module-board netlist parts and would be missing from
-> `module.net`: **`J-CV` ×6** (the CV jacks — the module's whole output
-> connector set), `U-TVS-MODULE`, `D-CLAMP-BREATH` ×2, `R-BREATH-SUM` ×2 and
-> `R-BREATH-OFF` ×2. **Thirteen units.** The rest of `unplaced.csv` is the
-> instrument's mechanical and controller rows plus the board blank itself,
-> which no netlist wants.
->
-> `D-CLAMP-BREATH` is the shape of the problem. It **is drawn** — twice, in the
-> ASCII figures on `hardware/module/breath-receive-stage/breath-receive-stage.md`,
-> as *"BAV99 to ±12 V, both legs"* — and its row is still in `unplaced.csv`,
-> because **the drawing never writes the refdes**. Nothing joins the picture to
-> the BOM row, so nothing can notice. Drawn, named and placed are three
-> different tests, and only the circuit's `bom.csv` fragment answers the third.
->
-> *This warning used to say ~50 rows / 105 units, and that the emitted module
-> would have no DAC8568, no CV jacks, no etherCON and no AVDD rail. Sixteen
-> rows have since been moved into the circuits that derive them, so the DAC
-> (`hardware/module/dac8568/bom.csv`), the etherCON chassis connector and the
-> `U-REG-DAC` AVDD regulator (`hardware/module/power-entry/bom.csv`) are all
-> placed now. **The CV jacks are not**, and neither are the four rows beside
-> them.*
+> *This warning used to carry a dated table of row and unit counts and a list
+> of module rows still unplaced. Both moved under it every time a row was
+> placed — the table was already wrong by 2026-09-27 — so the count is the
+> command above, not a number here. History is in git.*
 
 ### 2. Simulate — headless, runs today
 
 Independent of everything else; `ngspice` needs no allowlist change. Ranked by
-what the claim costs if wrong:
+what the claim costs if wrong. **All five have run** (2026-09-30), and so
+have the rows after them, the next ranking down; each in its
+circuit's `sim/` with its own README, under `tools/sim.py` (`tooling.md` §5);
+what each found is in the register, not here:
 
-| Sim | Why |
-|---|---|
-| **Breath-link CMRR** with the INA828 | 1.7 dB of claimed margin, across two boards. A macromodel exists — same directory as the OPA2197. **See the note below: the premise that used to rank it first is retired** |
-| **`R-ISO-REF` stability** | Already found the drawn circuit is the unstable one: 8.8° unfitted, **8.4° in-loop as drawn**, 75.2° out-of-loop. **And TI publishes the worked answer for this exact circuit** — SBOS737C §8.2.3, `R_ISO` 37.4 Ω with a dual-feedback network, 89° PM, against our 10 Ω. **Blocked on `cref-out-node` first** |
-| **Pitch transient into a passive mult** | Measured 41.8 % overshoot at 82 nF, 65.4 % at 330 nF. **The AC sweep is structurally blind to this** on the same circuit at the same loads |
-| **Power-on / reset transient** | Five power-on claims across three pages, no transient anywhere in the corpus |
-| **Behavioural LT1641** | `power-entry.md` already writes the foldback law as equations, and this is the circuit proven not to start |
+| Sim | Where | Result |
+|---|---|---|
+| **Breath-link CMRR** with the INA828 | `module/breath-receive-stage/sim` | `breath-link-cmrr`. Clears 58.5 dB at mains on the worst corner, not to the 500 Hz edge of the breath channel; without `R1b` the worst corner is below it |
+| **`R-ISO-REF` stability** | `carrier/breath-excitation-reference/sim` | `riso-ref-phase-margin`, TI's Figure 56 reproduced alongside. No longer blocked: `cref-out-node` settled the load. **10 µF added at `VS` rings** although the margin barely moves |
+| **Pitch transient into a passive mult** | `module/pitch-stage/sim` | `pitch-mult-overshoot`. **The AC sweep is structurally blind to it**: the phase margin is the same at every load |
+| **Power-on / reset transient** | `module/power-entry/sim` | **`D3` is netlisted backwards** and the −12 V rail never arrives; with it reversed, `DAC_AVDD` keeps `dac-rail`'s floor and the pitch jack stays at 0 V |
+| **Behavioural LT1641** | `module/umbilical-load-switch/sim` | Starts at every datasheet corner, cold and hot-plug; with `FB` unconnected it latches off, as the page says |
+| **SPI over the umbilical** | `interfaces/spi-link/sim` | `cs-fall-reentry`, `spi-pair-crosstalk`. **`CS_MOD`'s falling edge re-enters the band; `SCLK` couples into `MOSI` at the DAC's sampling edge.** Both for E11 and the owner |
+| **Mod channels** | `module/mod-channels/sim` | Law to 0.1 mV, no clip, no overshoot into any mult (`C-FILT-MOD` is outside the loop); the jack reads 1 % low into 100 kΩ |
+| **Breath output stage** | `module/breath-output-stage/sim` | The offset table to 1 mV; 95.6° at every load; the −12 V rail reaches the jack at the page's 4.1 mV |
+| **Response shaper** | `module/breath-response-shaper/sim` | `shaper-exp-gain`: the curve is weaker than its table, because the pot loads the `V_in/2` divider |
+| **Breath ADC** | `carrier/breath-adc/sim` | 564 Hz, 55 dB, τ 282 µs as the page says; `adc-sample-kickback` is more than its "about 2 LSB" |
+| **Instrument power entry** | `carrier/power-entry-instrument/sim` | `instrument-input-z-margin`; starts cold and hot. **A hot-plug drives `U-ISO` to its over-current threshold** (`hotplug-iso-ocp`): E6 |
+| **LED data** | `carrier/led-strip-drive/sim` | A third slower edge than the page's, still a small fraction of `T0H` |
 
 > **The CMRR row's stated reason was refuted and the ranking survives on a
 > different one.** It read *"unretrofittable inside a bonded body"*. ADR 0009
-> retired the bonded body — it comes apart on six fasteners — and `R1b`, the
+> retired the bonded body — it came apart on six fasteners, and since ADR 0025 by cutting its silicone — and `R1b`, the
 > part the 60.2 dB term is entirely a statement about, is on the carrier inside
 > that body. So it *is* retrofittable, and the argument that put this sim first
-> is gone.
+> is gone. It stayed first on weaker grounds: the thinnest claimed margin in
+> the corpus, and the only derivation that crosses the umbilical.
 >
-> It stays first on three weaker grounds, stated so the next reader can
-> disagree with the real ones: it is the **thinnest claimed margin in the
-> corpus** (1.7 dB, and a worst case over tolerance rather than a typical); its
-> derivation is the only one that **crosses the umbilical**, so a bench
-> iteration on it spans two boards and a 2 m cable rather than one bench; and
-> the sim costs nothing, because the macromodel is already banked. If any of
-> those stops being true, re-rank it.
+> **This note used to say "the sim costs nothing, because the macromodel is
+> already banked". It was not.** No SPICE model was in `datasheets/` until
+> 2026-09-29, when the INA828, OPA2197, REF5050 and LM317L models were banked
+> (fragment R29, with the LT1641, 1N5817 and DAC8568 recorded `BLOCKED`).
+> Corrected 2026-09-30.
 
 Not worth running: Monte Carlo on the pitch budget. The dispute is over *what
 the terms are*, not their spread, and the two largest belong to a part with no
@@ -216,9 +208,9 @@ like every other document.
 **Two numbers to check any EMC or stability work against**, both corrected since
 the corpus was written: the OPA2197's `Zo` is **375 Ω**, not the 75.8 Ω that was
 back-solved — every pole derived from it moves ~5× the *wrong* way. And `FB-IN`
-is **not 600 Ω where it matters**: `FB2` carries the umbilical at 359 mA and
-reads ~280–310 Ω, half its nameplate, because a bead's current rating is
-**thermal, not magnetic**.
+is **not 600 Ω where it matters**: the beads carrying the instrument's supply
+read well under their nameplate — the tracked figure `ferrite-bias-impedance` —
+because a bead's current rating is **thermal, not magnetic**.
 
 ### 3. Board bring-up — headless, **once per board**
 
@@ -266,8 +258,7 @@ by schematic page, with the widths and rules already set.
 **Hand-route these first**, because nothing else in the pipeline protects them:
 
 - `VREFOUT`, `V_ref`, the three trimmer wipers, the mods' shared 3.3333 V —
-  **1 mV on `V_ref` is 1.2 cents**, which equals or exceeds every candidate in
-  the disputed pitch budget. These were the nets the old plan left to the router
+  **1 mV on `V_ref` is 1.2 cents**, more than the whole of `pitch-cents-budget`. These were the nets the old plan left to the router
 - `BREATH` / `AGND` from the connector to the in-amp — one keepout window
   enclosing **both** legs, not one each, or the pour asymmetry costs the
   capacitive matching the ±1 % spec exists to control
@@ -326,11 +317,15 @@ that is the artefact that helps *you*, and it runs headless.
 **The 10HP panel is 2 mm aluminium**, laser or waterjet from DXF, same vendor
 and order as the key plate. Not a PCB. It belongs with the mechanical work.
 
-**Open: 2 layers or 4.** On two layers, two corpus requirements are mutually
-exclusive — `power-entry.md` wants the SPI return directly under its trace while
-ADR 0004 wants `PWR_GND` on its own copper *and* the analog return as its own
-region. Four layers dissolves it. This is a cost decision and it gates the
-grounding scheme, so it is upstream of stage 3.
+**2 layers or 4: the main board is decided, the module is not.** The main
+board is four layers (ADR 0017 amendment, 2026-09-29), and its ground is
+written in `power-entry-instrument.md` §2. The module board is still open: on
+two layers, two corpus requirements are mutually exclusive — `power-entry.md`
+wants the SPI return directly under its trace while ADR 0004 wants `PWR_GND`
+on its own copper *and* the analog return as its own region. Four layers
+dissolves it (`dig-gnd-topology`'s `proposed_if_four_layers`). This is the
+owner's cost decision and it gates the module's grounding, so it is upstream
+of stage 3 for that board.
 
 ## One warning about reading `datasheets/` programmatically
 

@@ -1,0 +1,198 @@
+(kicad_sch (version 20250114) (generator "sch.py") (generator_version "9.0")
+  (uuid 777e1e5e-b5e8-55e6-8f24-0d55726d01d7)
+  (paper "A4")
+  (title_block
+    (title "Pitch stage - the module jack board's page (hardware/module/pitch-stage)")
+    (comment 7 "title: Pitch stage")
+    (date "")
+    (rev "")
+    (company "Woody")
+    (comment 1 "SOURCE - one page of hardware/module/pitch-stage; edit in KiCad 9, then: python3 tools/kicad.py export hardware/module/pitch-stage")
+    (comment 2 "Part facts ride on each symbol: Row (BOM row), Pins + Pins_source (pin map and its datasheet), Note")
+    (comment 3 "ADR 0006, ADR 0019, ADR 0023 - the module jack board's parts of this circuit")
+    (comment 4 "Page `jack` of hardware/module/pitch-stage/pitch-stage.kicad_sch; the module jack board places it")
+  )
+  (lib_symbols
+    (symbol "Connector_Audio:AudioJack2"
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "J"
+			(at 0 8.89 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "AudioJack2"
+			(at 0 6.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Audio Jack, 2 Poles (Mono / TS)"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "audio jack receptacle mono phone headphone TS connector"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "Jack*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "AudioJack2_0_1"
+			(rectangle
+				(start -3.81 0)
+				(end -2.54 -2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(rectangle
+				(start -2.54 3.81)
+				(end 2.54 -2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0 0) (xy 0.635 -0.635) (xy 1.27 0) (xy 2.54 0)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 2.54 2.54) (xy -0.635 2.54) (xy -0.635 0) (xy -1.27 -0.635) (xy -1.905 0)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "AudioJack2_1_1"
+			(pin passive line
+				(at 5.08 2.54 180)
+				(length 2.54)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "S"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 5.08 0 180)
+				(length 2.54)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "T"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+  )
+  (symbol (lib_id "Connector_Audio:AudioJack2") (at 40.64 50.8 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid fb77b737-451c-5acc-9885-d345bba2d82b)
+    (property "Reference" "J-CV-PITCH" (at 43.18 49.53 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "PJ398SM" (at 43.18 52.07 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "J-CV" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "TIP=T(~) SLEEVE=S(~)" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "THE JACK IS THIS CIRCUIT'S PART. module/panel owns the 6 mm hole and says the net is ours. Its third pin, the normalling switch contact, is unused and not netted" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/connectors/PJ398SM.kicad_mod pad names T, TN, S; datasheets/connectors/PJ398SM-drawing.jpg: 3 tip, 2 normalling contact, 1 sleeve. TN is not on this symbol: unused, not netted" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Thonk" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "PJ398SM" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "hand" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "S" (uuid 68c2bb85-9abb-583c-9b3f-09fdcc566cec))
+    (pin "T" (uuid 22050bfb-44c7-526b-8464-a2c6fca1419b))
+    (instances (project "module-jack" (path "/f69c67ba-c380-5393-90d5-6d2847e300fb/deb60ac7-2399-5c17-a8b9-cc8927c73157" (reference "J1") (unit 1))) (project "pitch-stage.jack" (path "/777e1e5e-b5e8-55e6-8f24-0d55726d01d7" (reference "J-CV-PITCH") (unit 1))) (project "pitch-stage" (path "/818bd2a7-cdf3-5daa-834c-14911dcdaa31/3ca85165-8ff2-5b92-af7f-5128b21a9b40" (reference "J-CV-PITCH") (unit 1))))
+  )
+  (wire (pts (xy 45.72 50.8) (xy 48.26 50.8)) (stroke (width 0) (type default)) (uuid 4b71a3a9-3549-5d53-8605-46869635eb74))
+  (hierarchical_label "JACK_TIP" (shape passive) (at 48.26 50.8 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid bdb377b0-10c4-5bfd-8e4e-a63905229ea3)
+    (property "Dir" "ref" (at 48.26 50.8 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 45.72 48.26) (xy 48.26 48.26)) (stroke (width 0) (type default)) (uuid 4cc52d68-7282-5b47-9fe9-7003af89e478))
+  (hierarchical_label "AGND_MOD" (shape passive) (at 48.26 48.26 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 4f61ef18-ff04-5514-b502-99c63a2de6a7)
+    (property "Dir" "ref" (at 48.26 48.26 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 48.26 48.26 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 48.26 48.26 0) (effects (font (size 1.27 1.27)) hide)))
+  (sheet_instances (path "/" (page "1")))
+)

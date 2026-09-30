@@ -1,0 +1,31 @@
+* The SN74HCS165 as its inputs and its supply (tools/sim.py fills the double-braced
+* names from sims.yaml): each input is its capacitance and its leakage to ground,
+* whose sign is a corner; VCC draws its static current. The register's thresholds are
+* applied as measures, as the datasheet gives them. Its outputs are not modelled.
+.subckt hcs165_inputs vcc gnd a b c d e f g h ser clk shld clkinh
+IQ vcc gnd {{icc}}
+CA a gnd {{ci}}
+IA a gnd {{ileak}}
+CB b gnd {{ci}}
+IB b gnd {{ileak}}
+CC c gnd {{ci}}
+IC c gnd {{ileak}}
+CD d gnd {{ci}}
+ID d gnd {{ileak}}
+CE e gnd {{ci}}
+IE e gnd {{ileak}}
+CF f gnd {{ci}}
+IF f gnd {{ileak}}
+CG g gnd {{ci}}
+IG g gnd {{ileak}}
+CH h gnd {{ci}}
+IH h gnd {{ileak}}
+CSER ser gnd {{ci}}
+ISER ser gnd {{ileak}}
+CCLK clk gnd {{ci}}
+ICLK clk gnd {{ileak}}
+CSHLD shld gnd {{ci}}
+ISHLD shld gnd {{ileak}}
+CINH clkinh gnd {{ci}}
+IINH clkinh gnd {{ileak}}
+.ends

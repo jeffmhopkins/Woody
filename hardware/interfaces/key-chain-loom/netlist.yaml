@@ -1,135 +1,304 @@
-# AUTHORITATIVE for connectivity - OF THE CARRIER END, which is what the
-# drawing on this page shows.
-#
-# *** THE CHAIN ITSELF IS NOT IN THIS FILE YET. *** Eight connectors and four
-# ribbon assemblies: carrier 1, RT 2, RH 2, LT 2, LH 1. SCK, SH/LD, 3V3 and
-# the five grounds are a straight bus across all of them, but SER and QH are
-# POINT TO POINT and change meaning at every hop - each board's QH feeds the
-# PREVIOUS board's SER - which is the whole reason the chain needs eight
-# connectors rather than five. Modelling that means naming which board's OUT
-# reaches which board's IN, and that hop map is prose on this page and in no
-# file a tool reads. Until it is, this netlist places the carrier's J-CHAIN
-# and the parts around it, LK-SER and R-SER-TERM are not placed, and
-# check-netlist prints J-CHAIN 1/8 rather than claiming the chain is drawn.
+# GENERATED from hardware/interfaces/key-chain-loom/key-chain-loom.kicad_sch by tools/kicad.py - DO NOT EDIT.
+# The KiCad sheet is authoritative for this circuit: edit it in KiCad 9, then run
+#   python3 tools/kicad.py export hardware/interfaces/key-chain-loom
+# Every note and argument that used to live in this file is on the sheet
+# (part fields, sheet text) or on key-chain-loom.md.
 
 circuit: interfaces/key-chain-loom
-title: Key chain loom (carrier end)
+title: Key chain (main board to two key boards)
 page: key-chain-loom.md
-
 ports:
-  IO38:        {dir: in,  from: carrier/carrier}
-  IO7:         {dir: in,  from: carrier/carrier}
-  IO33:        {dir: in,  from: carrier/carrier}
-  IO40:        {dir: out, to: carrier/carrier}
-  DEV_3V3:     {dir: in,  from: carrier/carrier, figure: key-pullup-qty}
-  CHAIN_SCK:   {dir: out, to: cluster/key-register, figure: chain-conductors}
-  CHAIN_SHLD:  {dir: out, to: cluster/key-register, figure: chain-conductors}
-  CHAIN_SER:   {dir: out, to: cluster/key-register, figure: chain-connectors}
-  CHAIN_QH:    {dir: in,  from: cluster/key-register, figure: chain-connectors}
-  V3V3_CHAIN:  {dir: out, to: cluster/key-register}
-  GND_CHAIN:   {dir: ref, from: interfaces/key-chain-loom, figure: chain-conductors}
-
+  CHAIN_QH_LH:
+    dir: in
+    from: cluster/key-register
+    figure: chain-connectors
+  CHAIN_SER_LT:
+    dir: out
+    to: cluster/key-register
+  CHAIN_QH_LT:
+    dir: in
+    from: cluster/key-register
+  CHAIN_SER_RH:
+    dir: out
+    to: cluster/key-register
+    figure: chain-connectors
+  CHAIN_QH_RH:
+    dir: in
+    from: cluster/key-register
+    figure: chain-connectors
+  CHAIN_SER_RT:
+    dir: out
+    to: cluster/key-register
+  CHAIN_QH_RT:
+    dir: in
+    from: cluster/key-register
+  IO40:
+    dir: out
+    to: carrier/carrier
+  DEV_3V3:
+    dir: in
+    from: carrier/carrier
+    figure: key-pullup-qty
+  V3V3_CHAIN:
+    dir: out
+    to: cluster/key-register
+  IO38:
+    dir: in
+    from: carrier/carrier
+  IO7:
+    dir: in
+    from: carrier/carrier
+  IO33:
+    dir: in
+    from: carrier/carrier
+  CHAIN_SCK:
+    dir: out
+    to: cluster/key-register
+    figure: chain-conductors
+  CHAIN_SHLD:
+    dir: out
+    to: cluster/key-register
+    figure: chain-conductors
+  CHAIN_SER_LH:
+    dir: out
+    to: cluster/key-register
+    figure: chain-connectors
+  V3V3_CHAIN_RH:
+    dir: out
+    to: cluster/key-register
+  V3V3_CHAIN_LH:
+    dir: out
+    to: cluster/key-register
+  GND_CHAIN:
+    dir: ref
+    from: interfaces/key-chain-loom
+    figure: chain-conductors
 components:
-
-  J-CHAIN:
-    value: "2x6"
-    pins: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-    note: "THE CARRIER'S ONE, of eight identical positions. 10 wired and 2 spare, and the spares are FREE because IDC comes in 2xN - a 2x6 costs what a 2x5 costs and the ribbon is 2 mm wider"
-
+  FB-CHAIN-LH:
+    of: FB-CHAIN
+    value: Ferrite bead 600R @ 100MHz
+    pins:
+    - 1
+    - 2
+    note: In series with the left_hand ribbon's conductor 10
+  FB-CHAIN-RH:
+    of: FB-CHAIN
+    value: Ferrite bead 600R @ 100MHz
+    drawn_as: FB-CHAIN
+    pins:
+    - 1
+    - 2
+    note: In series with the right_hand ribbon's conductor 10. Isolation, not protection - the LDO's current limit
+      is the protection
+  J-CHAIN-KEY-LH:
+    of: J-CHAIN
+    value: 12-way
+    pins:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    note: left_hand key board. REVERSED, like the right_hand one
+  J-CHAIN-KEY-RH:
+    of: J-CHAIN
+    value: 12-way
+    pins:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    note: 'right_hand key board: conductor k lands on pin 13-k - the cable''s key-board socket has its notch reversed
+      (FFSD -RN2)'
+  J-CHAIN-MAIN-LH:
+    of: J-CHAIN
+    value: 12-way
+    pins:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    note: Main board, left_hand ribbon - the chain end
+  J-CHAIN-MAIN-RH:
+    of: J-CHAIN
+    value: 12-way
+    pins:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    note: 'Main board, right_hand ribbon. Main-board numbering: pin k is conductor k'
   R-CHAIN-SER-SCK:
     of: R-CHAIN-SER
-    value: "100R 1%"
+    value: 100R 1%
     drawn_as: R-CHAIN-SER
-    pins: [1, 2]
-    note: "At the DRIVING end, which is the only end that can have one on a bus"
-
-  R-CHAIN-SER-SHLD:
-    of: R-CHAIN-SER
-    value: "100R 1%"
-    pins: [1, 2]
-
+    pins:
+    - 1
+    - 2
+    note: At the DRIVING end, where the MCU's pins arrive on the main board
   R-CHAIN-SER-SER:
     of: R-CHAIN-SER
-    value: "100R 1%"
-    pins: [1, 2]
-
-  F-CHAIN:
-    value: "100mA polyfuse"
-    pins: [1, 2]
-    note: "In the 3V3 feed, so a short anywhere down 265 mm of loom does not take the dev board's LDO with it"
-
+    value: 100R 1%
+    pins:
+    - 1
+    - 2
+  R-CHAIN-SER-SHLD:
+    of: R-CHAIN-SER
+    value: 100R 1%
+    pins:
+    - 1
+    - 2
+  R-SER-TERM:
+    value: 10k
+    pins:
+    - 1
+    - 2
+    note: On the MAIN board at the left_hand ribbon's pin 6, so the key boards stay identical. Holds the chain end
+      high; IO33 overrides it through 100R for the self-test
   U-TVS-CHAIN:
-    value: "SP0504BAHTG 4-channel 5V array"
-    pins: [CH1, CH2, CH3, CH4, GND]
-    note: "Four channels for four signals. ITS RETURN IS NETTED TO GND_CHAIN, and the drawing labels it DIG_GND - a name this corpus gives to the module's umbilical digital return, which does not reach this board. See the page note under the drawing"
-
+    value: SP0504BAHTG 4-channel 5V array
+    pins:
+    - CH1
+    - CH2
+    - CH3
+    - CH4
+    - GND
+    note: FITTED (ADR 0018). On the three MCU nets the ribbon connectors expose, at the left_hand J-CHAIN. The fourth
+      channel is spare
 nets:
-
-  IO38:
-    - port: IO38
-    - R-CHAIN-SER-SCK.1
-
-  IO7:
-    - port: IO7
-    - R-CHAIN-SER-SHLD.1
-
-  IO33:
-    - port: IO33
-    - R-CHAIN-SER-SER.1
-
   CHAIN_SCK:
-    - R-CHAIN-SER-SCK.2
-    - U-TVS-CHAIN.CH1
-    - J-CHAIN.2
-    - port: CHAIN_SCK
-
+  - port: CHAIN_SCK
+  - J-CHAIN-KEY-LH.11
+  - J-CHAIN-KEY-RH.11
+  - J-CHAIN-MAIN-LH.2
+  - J-CHAIN-MAIN-RH.2
+  - R-CHAIN-SER-SCK.2
+  - U-TVS-CHAIN.CH1
+  CHAIN_SER_LH:
+  - port: CHAIN_SER_LH
+  - J-CHAIN-KEY-LH.7
+  - J-CHAIN-MAIN-LH.6
+  - R-CHAIN-SER-SER.2
+  - R-SER-TERM.1
+  - U-TVS-CHAIN.CH3
   CHAIN_SHLD:
-    - R-CHAIN-SER-SHLD.2
-    - U-TVS-CHAIN.CH2
-    - J-CHAIN.4
-    - port: CHAIN_SHLD
-
-  CHAIN_SER:
-    - R-CHAIN-SER-SER.2
-    - U-TVS-CHAIN.CH3
-    - J-CHAIN.6
-    - port: CHAIN_SER
-
-  # ONE NET, TWO BOUNDARIES: nothing sits between the connector and the MCU
-  # pin but the clamp, so QH arriving from the clusters and IO40 going into
-  # the dev board are the same node.
-  CHAIN_QH:
-    - J-CHAIN.8
-    - U-TVS-CHAIN.CH4
-    - port: CHAIN_QH
-    - port: IO40
-
+  - port: CHAIN_SHLD
+  - J-CHAIN-KEY-LH.9
+  - J-CHAIN-KEY-RH.9
+  - J-CHAIN-MAIN-LH.4
+  - J-CHAIN-MAIN-RH.4
+  - R-CHAIN-SER-SHLD.2
+  - U-TVS-CHAIN.CH2
+  CHAIN_SPARE_LH_11:
+  - J-CHAIN-KEY-LH.2
+  - J-CHAIN-MAIN-LH.11
+  CHAIN_SPARE_LH_12:
+  - J-CHAIN-KEY-LH.1
+  - J-CHAIN-MAIN-LH.12
+  CHAIN_SPARE_RH_11:
+  - J-CHAIN-KEY-RH.2
+  - J-CHAIN-MAIN-RH.11
+  CHAIN_SPARE_RH_12:
+  - J-CHAIN-KEY-RH.1
+  - J-CHAIN-MAIN-RH.12
   DEV_3V3:
-    - port: DEV_3V3
-    - F-CHAIN.1
-
-  V3V3_CHAIN:
-    - F-CHAIN.2
-    - J-CHAIN.10
-    - port: V3V3_CHAIN
-
+  - port: DEV_3V3
+  - port: V3V3_CHAIN
+  - FB-CHAIN-LH.1
+  - FB-CHAIN-RH.1
+  - R-SER-TERM.2
   GND_CHAIN:
-    - port: GND_CHAIN
-    - J-CHAIN.1
-    - J-CHAIN.3
-    - J-CHAIN.5
-    - J-CHAIN.7
-    - J-CHAIN.9
-    - U-TVS-CHAIN.GND
-
-  # ADR 0009's rule. Unallocated by decision, and under this topology a spare
-  # conductor buys a REPAIR rather than a spare key - expansion lands on a
-  # spare register bit, which needs no wire.
-  CHAIN_SPARE_1:
-    - J-CHAIN.11
-  CHAIN_SPARE_2:
-    - J-CHAIN.12
-
+  - port: GND_CHAIN
+  - J-CHAIN-KEY-LH.10
+  - J-CHAIN-KEY-LH.12
+  - J-CHAIN-KEY-LH.4
+  - J-CHAIN-KEY-LH.6
+  - J-CHAIN-KEY-LH.8
+  - J-CHAIN-KEY-RH.10
+  - J-CHAIN-KEY-RH.12
+  - J-CHAIN-KEY-RH.4
+  - J-CHAIN-KEY-RH.6
+  - J-CHAIN-KEY-RH.8
+  - J-CHAIN-MAIN-LH.1
+  - J-CHAIN-MAIN-LH.3
+  - J-CHAIN-MAIN-LH.5
+  - J-CHAIN-MAIN-LH.7
+  - J-CHAIN-MAIN-LH.9
+  - J-CHAIN-MAIN-RH.1
+  - J-CHAIN-MAIN-RH.3
+  - J-CHAIN-MAIN-RH.5
+  - J-CHAIN-MAIN-RH.7
+  - J-CHAIN-MAIN-RH.9
+  - U-TVS-CHAIN.GND
+  HOP_LH_LT:
+  - port: CHAIN_QH_LH
+  - port: CHAIN_SER_LT
+  - J-CHAIN-KEY-LH.5
+  - J-CHAIN-MAIN-LH.8
+  HOP_LT_RH:
+  - port: CHAIN_QH_LT
+  - port: CHAIN_SER_RH
+  - J-CHAIN-KEY-RH.7
+  - J-CHAIN-MAIN-RH.6
+  HOP_RH_RT:
+  - port: CHAIN_QH_RH
+  - port: CHAIN_SER_RT
+  - J-CHAIN-KEY-RH.5
+  - J-CHAIN-MAIN-RH.8
+  IO7:
+  - port: IO7
+  - R-CHAIN-SER-SHLD.1
+  IO33:
+  - port: IO33
+  - R-CHAIN-SER-SER.1
+  IO38:
+  - port: IO38
+  - R-CHAIN-SER-SCK.1
+  TVS_CHAIN_SPARE:
+  - U-TVS-CHAIN.CH4
+  V3V3_CHAIN_LH:
+  - port: V3V3_CHAIN_LH
+  - FB-CHAIN-LH.2
+  - J-CHAIN-KEY-LH.3
+  - J-CHAIN-MAIN-LH.10
+  V3V3_CHAIN_RH:
+  - port: V3V3_CHAIN_RH
+  - FB-CHAIN-RH.2
+  - J-CHAIN-KEY-RH.3
+  - J-CHAIN-MAIN-RH.10
+  CHAIN_QH_RT:
+  - port: CHAIN_QH_RT
+  - port: IO40
 external_endpoints:
-  - CHAIN_SPARE_1
-  - CHAIN_SPARE_2
+- TVS_CHAIN_SPARE

@@ -1,0 +1,179 @@
+# Every file tools/cad.py builds for the EURORACK MODULE (ADR 0023, 0024).
+# A separate spec and ledger from the instrument body's (mechanical/outputs.yaml),
+# so a change to one model never marks the other's outputs stale. Nothing
+# under mechanical/module/renders/ or mechanical/module/export/ may exist
+# unless it is named here. `python3 tools/cad.py build` rebuilds what is
+# stale; `check` proves the rest. Numbers: config/module.yaml.
+#
+# Every module render sets `layout_sensitive: false`: the body's PROVISIONAL
+# key layout does not reach the module, so its footer never says it does.
+
+meshes:
+  # The banked vendor solids, meshed for the pictures. The clash check and the
+  # DRC use envelopes from config/module.yaml (vendor=false), never these.
+  - name: module-ne8fav-mesh
+    from: datasheets/connectors/NEUTRIK-NE8FAV-3D.stp
+    out: mechanical/cad/vendor/ne8fav.stl
+  # The two community models are NOT fused: gmsh's boolean fuse did not finish
+  # on the jack's in several minutes. Unfused bodies overlap, which only
+  # matters to a section or a clash - and neither ever uses these meshes.
+  - name: module-pj398sm-mesh
+    from: datasheets/connectors/THONKICONN-PJ398SM-BADPIXEL-3D.step
+    out: mechanical/cad/vendor/pj398sm.stl
+    fuse: false
+  # The umbilical's mated plug, for the Blender renders only (ADR 0026).
+  - name: module-ne8mx-mesh
+    from: datasheets/connectors/NEUTRIK-NE8MX-3D.stp
+    out: mechanical/cad/vendor/ne8mx.stl
+    fuse: false
+  - name: module-r0904n-mesh
+    from: datasheets/connectors/SONGHUEI-R0904N-L25-BADPIXEL-3D.step
+    out: mechanical/cad/vendor/r0904n.stl
+    fuse: false
+
+# Cameras: [tx, ty, tz, rx, ry, rz, distance]; the panel's centre is
+# [25.25, 64.25, 0] (config/module.yaml panel.w / 2, panel.h / 2).
+renders:
+  - name: module-hero
+    title: The module, three-quarter front - panel, knobs, jacks, the etherCON and the toggle, with the boards behind
+    src: mechanical/cad/module.scad
+    out: mechanical/module/renders/hero.png
+    stamp: Woody module
+    layout_sensitive: false
+    imgsize: [1200, 1400]
+    camera: [25, 64, -15, -35, 40, -10, 390]
+    defines: {show_rails: false}
+  - name: module-rear
+    title: The module from behind - the main board's rear face, the power header with its socket and ribbon, the trimmers and bulk caps
+    src: mechanical/cad/module.scad
+    out: mechanical/module/renders/rear.png
+    stamp: Woody module
+    layout_sensitive: false
+    imgsize: [1200, 1400]
+    camera: [25, 64, -20, -35, 220, -10, 400]
+    defines: {show_rails: false}
+  - name: module-exploded
+    title: The stack pulled apart - panel and knobs, jack board, standoffs and J-B2B-MOD, main board, power socket
+    src: mechanical/cad/module.scad
+    out: mechanical/module/renders/exploded.png
+    stamp: Woody module
+    layout_sensitive: false
+    imgsize: [1600, 1400]
+    camera: [25, 60, -25, -30, 55, -10, 440]
+    defines: {show_rails: false, explode: 14}
+  - name: module-section
+    title: Side section through the panel's centre - the etherCON's axis, the toggle, J-B2B-MOD and the middle pot - with every depth
+    src: mechanical/cad/fig_module_section.scad
+    out: mechanical/module/renders/section.png
+    stamp: Woody module
+    layout_sensitive: false
+    imgsize: [1300, 1700]
+    projection: o
+    camera: [0, 0, 0, 0, 0, 0, 300]
+    viewall: true
+  - name: module-panel
+    title: The panel drawing - cuts, positions, legend zones, the screw hardware's reach
+    src: mechanical/cad/fig_module_panel.scad
+    out: mechanical/module/renders/panel.png
+    stamp: Woody module
+    layout_sensitive: false
+    imgsize: [1200, 1800]
+    projection: o
+    camera: [0, 0, 0, 0, 0, 0, 300]
+    viewall: true
+  - name: module-boards
+    title: Both boards seen from the panel - outlines, the notch, standoffs, J-B2B-MOD, the parts on each face
+    src: mechanical/cad/fig_module_boards.scad
+    out: mechanical/module/renders/boards.png
+    stamp: Woody module
+    layout_sensitive: false
+    imgsize: [2000, 1500]
+    projection: o
+    camera: [0, 0, 0, 0, 0, 0, 300]
+    viewall: true
+
+# Cut files and reports.
+exports:
+  - {name: module-drc, src: mechanical/cad/module.scad, out: mechanical/module/drc.echo, defines: {part: "drc"}}
+  - {name: module-dxf-panel, src: mechanical/cad/module.scad, out: mechanical/module/export/panel.dxf, defines: {part: "panel"}}
+  - {name: module-dxf-jack-board, src: mechanical/cad/module.scad, out: mechanical/module/export/jack-board.dxf, defines: {part: "jack_board"}}
+  - {name: module-dxf-main-board, src: mechanical/cad/module.scad, out: mechanical/module/export/main-board.dxf, defines: {part: "main_board"}}
+  - {name: module-pcb-geometry, src: mechanical/cad/module.scad, out: mechanical/module/export/pcb-geometry.echo, defines: {part: "pcb_geom"}}
+  # Every legend and graphics zone's POSITION, every keep-out on the face and
+  # where each part sits: the panel artwork's and the Blender scene's input (ADR 0026).
+  - {name: module-art-echo, src: mechanical/cad/module.scad, out: mechanical/module/export/panel-art.echo, defines: {part: "art"}}
+
+# The interference check on the envelopes (vendor=false).
+clashes:
+  - name: module-clash
+    src: mechanical/cad/module.scad
+    out: mechanical/module/clash.txt
+    allow: mechanical/module/clash-allow.yaml
+    defines: {vendor: false, show_plugs: false, show_rails: true}
+
+# Outputs a Python tool makes (tools/cad.py `scripts:`). Each names EVERY input
+# the tool reads; the tool prints `READ: <path>` for each file it opens and the
+# build fails on one not named here.
+#
+# THE PANEL ARTWORK (ADR 0026): tools/panel-art.py sets the words in the zones
+# module.scad exports, and fails on any placement rule.
+scripts:
+  - name: module-art-check
+    title: The panel artwork's placement report - every word, its zone, its air to cuts and keep-outs, the contrast
+    cmd: [tools/panel-art.py]
+    inputs: &art_inputs [config/module.yaml, mechanical/module/export/panel-art.echo, mechanical/module/export/panel.dxf,
+                         datasheets/fonts/Inter-Medium.ttf, datasheets/fonts/Inter-SemiBold.ttf]
+    out: mechanical/module/art/panel-art-check.txt
+  - name: module-art-svg
+    title: The panel artwork's master - layers CUT, UNDERBASE, SLATE, BAR, WHITE, text as outlines
+    cmd: [tools/panel-art.py]
+    inputs: *art_inputs
+    out: mechanical/module/art/panel-art.svg
+  - name: module-art-pdf
+    title: The panel artwork's print file - 1:1, one spot colour and one layer per ink
+    cmd: [tools/panel-art.py]
+    inputs: *art_inputs
+    out: mechanical/module/art/panel-art.pdf
+  - name: module-art-proof
+    title: The panel artwork, proofed on the anodise - the cuts shown light
+    cmd: [tools/panel-art.py]
+    inputs: *art_inputs
+    out: mechanical/module/art/panel-art.png
+    stamp: Woody module
+  - name: module-art-tex-albedo
+    cmd: [tools/panel-art.py]
+    inputs: *art_inputs
+    out: mechanical/module/art/tex-albedo.png
+  - name: module-art-tex-roughness
+    cmd: [tools/panel-art.py]
+    inputs: *art_inputs
+    out: mechanical/module/art/tex-roughness.png
+  - name: module-art-tex-height
+    cmd: [tools/panel-art.py]
+    inputs: *art_inputs
+    out: mechanical/module/art/tex-height.png
+
+  # THE BLENDER RENDERS (ADR 0026): tools/render-module.py, Cycles on the CPU.
+  # Slow - tens of minutes each - so they rebuild only when what they show
+  # moved: the cut, the echo, the print's textures, the vendor meshes, the config.
+  - name: module-photo-hero
+    title: The module in a slice of a black case, three-quarter view - patched, the umbilical home, the LED lit
+    cmd: [tools/render-module.py, --view, hero]
+    inputs: &render_inputs [config/module.yaml, config/body.yaml, mechanical/module/export/panel.dxf, mechanical/module/export/panel-art.echo,
+                            mechanical/module/art/tex-albedo.png, mechanical/module/art/tex-roughness.png, mechanical/module/art/tex-height.png,
+                            mechanical/cad/vendor/ne8fav.stl, mechanical/cad/vendor/ne8mx.stl, mechanical/cad/vendor/pj398sm.stl,
+                            mechanical/module/blender/studio_small_08_1k.hdr]
+    out: mechanical/module/renders/photo-hero.png
+    stamp: Woody module
+  - name: module-photo-front
+    title: The module straight on, orthographic, no patch cables - for checking the printed artwork against the parts
+    cmd: [tools/render-module.py, --view, front]
+    inputs: *render_inputs
+    out: mechanical/module/renders/photo-front.png
+    stamp: Woody module
+  - name: module-photo-detail
+    title: Close-up - the breath knobs, their labels and the offset marks, the pitch, breath and mod 1 pills
+    cmd: [tools/render-module.py, --view, detail]
+    inputs: *render_inputs
+    out: mechanical/module/renders/photo-detail.png
+    stamp: Woody module

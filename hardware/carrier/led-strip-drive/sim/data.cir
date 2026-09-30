@@ -1,0 +1,16 @@
+* The LED row's data line, as netlisted: U-LVLSHIFT's output (a 5 V gate behind its
+* output resistance r_out, its own edge tr_out: BEHAVIOURAL, from the 74AHCT125's
+* banked V_OH/V_OL table), R-LED-SER, the trace, and the two inputs LED_DI feeds - D-LED-1's
+* DIN1 and D-LED-2's DIN2, C_I each. R-LED-PD is on the gate's input side and left out.
+* The gate sends the shortest high the row must read, t_hi, then a low of t_lo.
+VG g 0 PULSE(0 {{vcc}} 50n {{tr_out}} {{tr_out}} {{t_hi_w}} {{t_per}})
+ROUT g a {{r_out}}
+RSER a di {{R-LED-SER}}
+CTR di 0 {{c_trace}}
+CIN di 0 {{c_in_total}}
+.control
+tran 0.2n 1.5u
+wrdata di.dat v(di)
+quit
+.endc
+.end

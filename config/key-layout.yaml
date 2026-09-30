@@ -2,7 +2,8 @@
 #
 # Consumed by:
 #   - mechanical: key positions generate plate DXF cutout geometry
-#   - firmware:   key ids generate 74HC165 bit mapping and fingering table
+#                 (tools/cad.py -> mechanical/cad/generated/params.scad)
+#   - firmware:   key ids generate the shift-register bit mapping and fingering table
 #
 # When a key moves, both stay in sync by construction. Do not hand-edit the
 # generated plate or the firmware mapping.
@@ -16,8 +17,12 @@ meta:
   units: mm
   # Instrument envelope (ADR 0009).
   envelope:
-    length: 457     # 18 in
-    thickness: 38   # 1.5 in
+    # DERIVED since 2026-09-26 (owner: "minimize total length"). The body CAD
+    # computes it from the key layout, the underside and the tail connector
+    # and prints it in mechanical/drc.echo ("overall length"). Not a number
+    # here: a stated length would go stale with every key move.
+    length: null
+    thickness: 39   # `body-thickness`, config/figures.yaml - stated in ADR 0009
     width: 57       # 2.25 in
   origin: top-left of key plate, +x right, +y down
   switch: gateron-ks33
@@ -44,11 +49,11 @@ counts:
   left_hand: 5
   right_hand: 6
   left_thumb: 4
-  right_thumb: 3
-  total: 18
+  right_thumb: 4
+  total: 19
   by_role:
     note: 15      # LH1-5, RH1-6, LT1-4 — fingering inputs
-    control: 3    # RT1-3 — modulation and IMU gating
+    control: 4    # RT1-4 — modulation, IMU gating, hold/preset
 
 # Physical switch positions.
 #
@@ -79,11 +84,15 @@ keys:
   - { id: LH5, face: top,    x: null, y: null, rotation: 0, hand: left,  finger: null, cluster: left_hand, role: note }
 
   # --- Left thumb, bottom face (inset — ADR 0009) --------------------------
+  # LT1/LT3 and RT1/RT3, the row on the near side of the centreline, are
+  # turned 180 degrees: a KS-33's pins sit off its centre, and so turned they
+  # point away from the centreline, where the LED row lies on the main board
+  # between the two rows (ADR 0022; ADR 0028 kept the turn for the row). A square cap and a cross stem feel the same either way.
   # Marked `note` on the assumption these are octave/register keys, as on a
   # conventional woodwind. Confirm at M2.
-  - { id: LT1, face: bottom, x: null, y: null, rotation: 0, hand: left,  finger: thumb, cluster: left_thumb, role: note }
+  - { id: LT1, face: bottom, x: null, y: null, rotation: 180, hand: left,  finger: thumb, cluster: left_thumb, role: note }
   - { id: LT2, face: bottom, x: null, y: null, rotation: 0, hand: left,  finger: thumb, cluster: left_thumb, role: note }
-  - { id: LT3, face: bottom, x: null, y: null, rotation: 0, hand: left,  finger: thumb, cluster: left_thumb, role: note }
+  - { id: LT3, face: bottom, x: null, y: null, rotation: 180, hand: left,  finger: thumb, cluster: left_thumb, role: note }
   - { id: LT4, face: bottom, x: null, y: null, rotation: 0, hand: left,  finger: thumb, cluster: left_thumb, role: note }
 
   # --- Right hand, top face ------------------------------------------------
@@ -97,59 +106,65 @@ keys:
   # --- Right thumb, bottom face, offset from the thumb rest ----------------
   # Control switches, not fingering. Modulation and IMU gating (ADR 0007).
   # The right thumb normally rests; these sit offset from the rest position,
-  # reachable without giving up support.
-  - { id: RT1, face: bottom, x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb, role: control }
+  # reachable without giving up support. FOUR, as two rows across the body
+  # either side of the rest, like the left thumb (owner, 2026-09-26: "let's
+  # go consistent"). RT4 takes the bit reserved for the hold/preset spare.
+  - { id: RT1, face: bottom, x: null, y: null, rotation: 180, hand: right, finger: thumb, cluster: right_thumb, role: control }
   - { id: RT2, face: bottom, x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb, role: control }
-  - { id: RT3, face: bottom, x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb, role: control }
+  - { id: RT3, face: bottom, x: null, y: null, rotation: 180, hand: right, finger: thumb, cluster: right_thumb, role: control }
+  - { id: RT4, face: bottom, x: null, y: null, rotation: 0, hand: right, finger: thumb, cluster: right_thumb, role: control }
 
-# Shift register chain. One 74HC165 per cluster, ON THE BOARD ITS SWITCHES ARE
-# ALREADY ON: 4 devices, 32 bits, 18 used, 14 spare.
+# Shift register chain. One U-KEYS per cluster, ON THE BOARD ITS SWITCHES ARE
+# ALREADY ON: 4 devices, 32 bits, 19 used, 13 spare. The two thumb registers
+# are on the main board; each key board's register reaches it by one 12-way
+# IDC ribbon carrying its SER in and QH out (ADR 0017,
+# hardware/interfaces/key-chain-loom/).
 #
-# TWELVE conductors leave each board on a 2x6 IDC - 4 signals (SCK, SH/LD, SER,
-# QH), 5 alternating grounds, 3V3, and 2 spares - with
-# a ground return per signal, chained cluster to cluster rather than starred.
-#
-# THE ORDER BELOW IS A LOOM DECISION, not a layout detail. ADR 0001 requires
+# THE ORDER BELOW IS A CHAIN DECISION, not a layout detail. ADR 0001 requires
 # serial data to flow TOWARD the clock source so that propagation skew eats
 # SETUP margin (recoverable by clocking slower) rather than HOLD margin (not
 # recoverable at any speed). The MCU is at the tail, so right_thumb is nearest
-# and reads out first; left_hand is furthest and takes the loom's SER end.
+# and reads out first; left_hand takes the chain's SER end.
 #
 # BIT 0 IS THE FIRST BIT CLOCKED OUT - the device nearest the MCU. That
 # definition was ambiguous once and the ambiguity is what got the order wrong.
 #
-# Honest magnitude: adjacent-cluster skew is ~0.5ns against an HC165's tens of
-# nanoseconds of propagation delay, so the wrong order costs a few percent of
-# hold margin rather than violating it. An earlier version of this comment said
-# it would put "hold-margin violations" into a bonded body; that was an honesty
-# marker pointing the wrong way. Follow the rule anyway - it is free.
+# Honest magnitude: adjacent-cluster skew is ~0.5ns. The SN74HCS165's SER hold
+# after CLK rising is 0 ns at every rail (datasheets/logic/SN74HCS165-ti-scls828a.pdf
+# p.7), so the wrong order would need the skew to exceed the register's MINIMUM
+# CLK->QH delay, which TI does not publish (p.7 gives the maximum only). Near
+# certain not to for a CMOS flip-flop, but a judgment, not a measured margin.
+# It does not decide whether the chain works. Follow the rule anyway - it is free.
 chain:
-  - cluster: right_thumb  # bits 0-7   — 3 used, 5 spare — nearest the MCU
+  - cluster: right_thumb  # bits 0-7   — 4 used, 4 spare — nearest the MCU
   - cluster: right_hand   # bits 8-15  — 6 used, 2 spare
   - cluster: left_thumb   # bits 16-23 — 4 used, 4 spare
-  - cluster: left_hand    # bits 24-31 — 5 used, 3 spare — SER end of the loom
+  - cluster: left_hand    # bits 24-31 — 5 used, 3 spare — SER end of the chain
 
-# Spare chain bits: 14 total, but NOT all available.
+# Spare chain bits: 13 total, but NOT all available.
 #   8 are claimed by the marker pattern (ADR 0001) - wiring-only, and they
 #   are wiring-only, so adding one later means opening the body and
-#   re-laying the loom (ADR 0009). DECIDED 2026-09-21: eight, not
+#   reworking the board (ADR 0017). DECIDED 2026-09-21: eight, not
 #   the 4-6 this file used to say. Two per device, one wired high and one
 #   wired low, so any device that is dead, unclocked, stuck high or stuck low
 #   fails its own marker whichever way it broke. See
-#   hardware/cluster/cluster-boards.md section 4 for the bit assignment.
-#   3 are reserved for spare switches: octave up, octave down, hold/preset.
+#   hardware/cluster/key-marker-and-bits/key-marker-and-bits.md §4 for the
+#   bit assignment.
+#   2 are reserved for spare switches: octave up, octave down. (The third,
+#   hold/preset, became RT4 on 2026-09-26.)
 #   The 3 genuinely free bits are FLOATING CMOS INPUTS and must be pulled -
 #   the exact fault R-KEY-PU exists to fix (ADR 0001).
-#   Those three need CUTOUTS IN THE PLATE DXF at M3 even if the switches are
-#   fitted later (ADR 0010). Placement is decided at M2, with hands on the mule.
+#   They have NO CUTOUTS (owner, 2026-09-26, ADR 0010): the right thumb is
+#   only its three, the left thumb its four in a line. Fitting one later
+#   means recutting the bottom plate and oak bottom; the body opens by
+#   cutting its silicone (ADR 0025), so that is work, not impossible.
 # The 2021 firmware triggered mode changes from key combinations (A[1], A[7],
 # A[8]); dedicated inputs are better and these bits are already paid for.
-spare_bits: 14
+spare_bits: 13
 spare_bits_marker: 8      # DECIDED 2026-09-21, ADR 0001 - was 6
-spare_bits_switches: 3    # reserved, cutouts required at M3
+spare_bits_switches: 2    # reserved, networks fitted, no cutouts (2026-09-26)
 spare_bits_free: 3        # was 5; two went to the marker. A free bit has no
-                          # plate cutout and the body bonds shut, so it could
-                          # never have become a switch anyway. Still must be
+                          # network and no cutout. Still must be
                           # pulled - floating CMOS input (ADR 0001 fix 6)
 
 # Fingering table lives in NVS and is editable at runtime, not compiled in

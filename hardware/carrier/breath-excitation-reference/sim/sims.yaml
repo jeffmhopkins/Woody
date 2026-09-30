@@ -1,0 +1,159 @@
+# The reference buffer (breath-excitation-reference.md, "R-ISO-REF and the compensation
+# network"), simulated in ngspice by tools/sim.py against TI's own macromodels of the
+# REF5050 and the OPA2197. Every part value is read from ../netlist.yaml (exported from
+# the KiCad sheet); nothing here restates one. Run:
+#   python3 tools/sim.py run hardware/carrier/breath-excitation-reference/sim
+#
+# "BLOCKED ON cref-out-node" (docs/reference/pcb-pipeline.md, ranked sim 2) meant: which
+# side of the buffer C-REF-OUT sits on decides the buffer's load, so no stability deck
+# could be built until it was settled. It was settled 2026-09-21 (config/figures.yaml
+# cref-out-node): both C-REF-OUT parts are on the REF5050 (VIN bypass, VOUT load cap)
+# and the buffer drives C-DEC-SENSOR at VS and the sensor. The netlist says the same.
+# So the block is lifted and the deck is built against the netlisted load.
+title: Breath excitation reference - the reference buffer's stability
+values:
+  netlist: hardware/carrier/breath-excitation-reference/netlist.yaml
+models:
+  - datasheets/analog/OPAx197-ti-pspice-sboma34d.lib
+  - datasheets/analog/REF5050-ti-pspice-slim175a.lib
+spiceinit: [set ngbehavior=psa]
+
+params:
+  v_pos:    {value: 12.0, source: "UMBILICAL_POS12, the buffer's V+ (netlist); the instrument's +12 V nominal"}
+  i_sensor: {value: 10.0e-3, source: "MPXV4006DP supply current I_S, 10 mAdc max [datasheets/analog/MPXV4006DP.pdf, operating characteristics]; the page's 'our load draws 10 mA'. A DC load at VS (vary)"}
+  i_sensor_hi: {value: 10.5e-3}
+  v_ref:    {value: 5.0, source: "REF5050 VOUT nominal [SBOS410O, datasheets/analog/REF5050.pdf]; in the loop decks the reference is this source (see ref-loop.cir); ref-startup runs TI's REF5050 macromodel itself"}
+  r_ref_out: {value: 0.1, source: "REF5050 output resistance from its load regulation, 20 ppm/mA typ x 5 V = 0.1 ohm [SBOS410O p.7]"}
+  v_pos_lo: {value: 11.0, source: "a 1 V droop of the instrument's +12 V [assumption, a test stimulus]"}
+  t_ref_end: {value: 4.0e-3}
+  c_vs:     {value: 100.0e-9, source: "the capacitance at VS: C-DEC-SENSOR as netlisted (each sim sets or sweeps it)"}
+  esr_cvs:  {value: 0.01, source: "an X7R MLCC's ESR near 1 MHz [from memory] (vary)"}
+  esr_cref: {value: 0.01, source: "C-REF-OUT's ESR; the REF5050 needs <= 1.5 ohm (SBOS410O 8.4.1, cref-out-node) (vary)"}
+  t_step:   {value: 20.0e-6}
+  t_end:    {value: 6.0e-3, source: "long enough for a 10 uF at VS to finish ringing (it rings for ~5 ms)"}
+  # TI's Figure 56, as printed [SBOS737C 8.2.3 p.30, datasheets/analog/OPA2197.pdf]. The
+  # figure's callouts extract as '1 NŸ' and '10 NŸ'; TI's TIDU026, banked beside it,
+  # prints the same font's 'N' as k (datasheets/analog/TI-TIDU026-slew-rate-limiter.pdf).
+  ti_vref:  {value: 2.5,     source: "Figure 56 VREF"}
+  ti_riso:  {value: 37.4,    source: "Figure 56 R_ISO"}
+  ti_rf:    {value: 1.0e3,   source: "Figure 56 R_F, 1 kohm (NOT 1 Mohm - see the TIDU026 manifest row); SBOS737C's own prose, '4 kHz' closed-loop bandwidth, is 1/(2 pi 1k 39n) = 4.08 kHz"}
+  ti_rfx:   {value: 10.0e3,  source: "Figure 56 R_Fx, 10 kohm"}
+  ti_cf:    {value: 39.0e-9, source: "Figure 56 C_F"}
+  ti_cl:    {value: 10.0e-6, source: "Figure 56 C_L"}
+
+vary:
+  R-ISO-REF: {tol: from-value}
+  R-FB-REF:  {tol: from-value}
+  C-FB-REF:  {tol: [-0.05, 0.05], source: "C0G, +/-5 % [assumption: the netlist value states no tolerance]"}
+  i_sensor:  {tol: [-0.5, 0.0]}
+  esr_cvs:   {tol: [-0.5, 9.0]}
+
+derived:
+  t_step_1u: "v['t_step'] + 1e-6"
+  t_step_2: "v['t_step'] + 1e-3"
+  t_step_2_1u: "v['t_step'] + 1e-3 + 1e-6"
+
+sims:
+  # --- as netlisted, across the page's load range: 47 nF to 10 uF, plus the "10 uF
+  # may be added at VS later" case (C-DEC-SENSOR's 100 nF beside it)
+  - name: loop-as-netlisted
+    deck: ref-loop.cir
+    vary: [R-ISO-REF, R-FB-REF, C-FB-REF, i_sensor, esr_cvs]
+    sweep: {c_vs: [47n, 100n, 1u, 10u, 10.1u]}
+    measures: [pm, fc, vs_dc, iso_drop]
+    post:
+      pm: "phase_margin(w['tdb'], w['tph'])"
+      fc: "crossover(w['tdb'])"
+    asserts:
+      - expr: "min['pm'] - 10 > 76"
+        why: "the page's robustness claim (breath-excitation-reference.md: above 76 degrees across a 200x range of C_L) holds at every corner and load, after the +-10 degree screen a macromodel earns"
+      - expr: "abs(max['vs_dc'] - 5.0) < 5e-3 and abs(min['vs_dc'] - 5.0) < 5e-3"
+        why: "VS sits within 5 mV of 5.000 V at every corner: the reference's own 0.1 % initial accuracy, with nothing added by R-ISO-REF (the drop across it is outside the DC loop)"
+  - name: zout-as-netlisted
+    deck: ref-zout.cir
+    vary: [R-ISO-REF, R-FB-REF, C-FB-REF]
+    sweep: {c_vs: [100n, 10.1u]}
+    measures: [z_500, z_16k, z_peak, f_peak]
+    post:
+      z_500: "at(w['zvs'], 500)"
+      z_16k: "at(w['zvs'], 15.9e3)"
+      z_peak: "peak(w['zvs'], 10, 10e6)"
+      f_peak: "argpeak(w['zvs'], 10, 10e6)"
+    asserts:
+      - expr: "abs(nom['z_500'] - 1.20) < 0.12"
+        why: "|Z_out| at VS at 500 Hz, the breath channel's edge, is the 1.20 ohm riso-ref-topology derives for R_F 10 kohm + C_F 1 nF, within 10 %"
+  - name: step-as-netlisted
+    deck: ref-step.cir
+    vary: [R-ISO-REF, C-FB-REF]
+    sweep: {c_vs: [47n, 100n]}
+    measures: [dip_mv, ring_pct, t_settle]
+    post:
+      dip_mv: "(at(w['vs'], p['t_step']) - trough(w['vs'], p['t_step'], p['t_end'])) * 1e3"
+      ring_pct: "rebound(w['vs'], p['t_step'], p['t_end'])"
+      t_settle: "settling(w['vs'], p['t_step'], p['t_end'], 50e-6)"
+    asserts:
+      - expr: "max['ring_pct'] < 10"
+        why: "as built (47 nF to 100 nF at VS), a load step recovers without ringing through"
+  - name: step-with-10u-added
+    # the page's "10 uF may be added at VS later": C-DEC-SENSOR's 100 nF plus 10 uF
+    deck: ref-step.cir
+    vary: [R-ISO-REF, C-FB-REF]
+    set: {c_vs: 10.1u}
+    measures: [dip_mv, ring_pct, t_settle]
+    post:
+      dip_mv: "(at(w['vs'], p['t_step']) - trough(w['vs'], p['t_step'], p['t_end'])) * 1e3"
+      ring_pct: "rebound(w['vs'], p['t_step'], p['t_end'])"
+      t_settle: "settling(w['vs'], p['t_step'], p['t_end'], 50e-6)"
+    asserts:
+      - expr: "min['ring_pct'] > 50"
+        why: "RECORDED FINDING, not a requirement: 10 uF at VS rings (R-ISO-REF with 10 uF against the DC loop, the Z_out peak of zout-as-netlisted[c_vs=10.1u]) although the crossover phase margin barely moves - so 'may be added later' needs this sim re-run with the added part, not the phase margin alone. If this assert starts failing, the ringing has gone: re-read the page"
+  - name: reference-alone
+    # TI's REF5050 macromodel on its netlisted parts: its operating point, and a 1 V
+    # droop of the +12 V rail and back
+    vary: []          # a what-if at the nominal: no corners
+    deck: ref-startup.cir
+    measures: [vref_op, vin_op, vref_dev]
+    post:
+      vref_dev: "max(peak(w['ref'], 0, p['t_ref_end']) - trough(w['ref'], 0, p['t_ref_end']), 0)"
+    asserts:
+      - expr: "abs(nom['vref_op'] - 5.0) < 5e-3"
+        why: "the model's operating point is the running reference, within its 0.1 % initial accuracy of 5.000 V (A grade, SBOS410O Table 4-2) - the loop decks' 5.000 V source stands for this"
+      - expr: "nom['vref_dev'] < 1e-3"
+        why: "a 1 V droop of the rail moves VOUT by under 1 mV (C-REF-OUT on VIN and VOUT, and the part's line regulation)"
+  # --- what-ifs on the same deck, to reproduce the page's two hazard claims
+  - name: loop-bare-follower
+    # R-ISO-REF shorted and the AC path removed: a plain follower into 100 nF
+    vary: []          # a what-if at the nominal: no corners
+    deck: ref-loop.cir
+    set: {R-ISO-REF: 1.0e-3, C-FB-REF: 1.0e-18, c_vs: 100n}
+    measures: [pm, fc]
+    post:
+      pm: "phase_margin(w['tdb'], w['tph'])"
+      fc: "crossover(w['tdb'])"
+    asserts:
+      - expr: "nom['pm'] + 10 < 45"
+        why: "the page's hazard reproduces: uncompensated, the reference half cannot drive the sensor's 100 nF decoupler (short of 45 degrees even with the screen's 10 in its favour)"
+  - name: loop-in-loop-riso-only
+    # R-ISO-REF as netlisted, feedback from VS only (the AC path removed): the circuit
+    # the page says buys nothing at any R_ISO
+    vary: []          # a what-if at the nominal: no corners
+    deck: ref-loop.cir
+    set: {C-FB-REF: 1.0e-18, c_vs: 100n}
+    measures: [pm, fc]
+    post:
+      pm: "phase_margin(w['tdb'], w['tph'])"
+      fc: "crossover(w['tdb'])"
+    asserts:
+      - expr: "nom['pm'] + 10 < 45"
+        why: "R_ISO inside the loop buys nothing (the page's claim): no better than the bare follower, within the screen"
+  # --- TI's own configuration, as printed
+  - name: ti-figure-56
+    vary: []          # a what-if at the nominal: no corners
+    deck: ti-fig56.cir
+    measures: [pm, fc]
+    post:
+      pm: "phase_margin(w['tdb'], w['tph'])"
+      fc: "crossover(w['tdb'])"
+    asserts:
+      - expr: "abs(nom['pm'] - 89) < 10"
+        why: "the macromodel reproduces TI's published 89 degrees for TI's own circuit within the +-10 degree screen - the check that the deck and the break are sound"

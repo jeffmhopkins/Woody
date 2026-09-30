@@ -1,6 +1,9 @@
 # 0009 — Enclosure construction
 
-**Status:** Accepted
+**Status:** Accepted. **How the body closes is amended 2026-09-29 by
+[ADR 0025](0025-the-cassette.md)**: the six body fasteners are gone. The
+internals are one bonded unit, the cassette, glued into the shell with RTV and
+opened by cutting it. Each passage that ADR 0025 changes is marked in place.
 
 ## Context
 
@@ -12,9 +15,38 @@ frosted acrylic sides carrying LEDs, aluminium key plate on top, and three or
 four mechanical keys on the underside for the left thumb, inset so the travel
 feels right.
 
+> **Finishes, 2026-09-28 (owner).** The wood is stained **a very dark
+> ebony**, with the grain still showing through, under a satin oil finish.
+> The frosted acrylic sides are **dark grey**. The tint is not only a look:
+> the side LEDs light through these panels (ADR 0014), so how much a dark
+> grey sheet passes sets how hard the LEDs are driven. **Open:** a sample of
+> the chosen sheet under the chosen LEDs, before the sides are ordered
+> (`SIDE-ACRYLIC`).
+
 ## Envelope
 
-**18 × 2.25 × 1.5 inches** — 457 × 57 × 38 mm.
+**Width 2.25 inches (57 mm); thickness 39.0 mm, about 1.54 inches** — the
+register's `body-thickness`, stated here.
+
+> **The thickness was 1.5 inches until 2026-09-26**, when the owner chose to
+> set it by the etherCON rather than pocket the oak bottom for it. The
+> connector stands on the floor with its rear socket and patch plug under the
+> LED matrix *(since ADR 0021: an NE8FAV on an adapter, with no rear socket
+> or plug; only `J-UMB` passes under the matrix)*; the matrix sits against the oak top, the key plate ending short
+> of it, and the key and thumb boards join by stacking headers *(since ADR 0017: one main board, key boards on 12-way ribbons — 1.27 mm IDC since 2026-09-27)* (owner, same
+> day: "tighter vertically"). `mechanical/drc.echo` ("body thickness takes
+> the etherCON on the floor") gives the thinnest body that allows it — the
+> connector's flange, floor to oak top — and this figure is that rounded up
+> to a whole millimetre.
+
+> **The length is no longer set here (owner, 2026-09-26: "minimize total
+> length").** It is derived by the body CAD from the key layout, a little at
+> the mouth end, the underside and the tail connector, and printed in
+> `mechanical/drc.echo` ("overall length", with what sets each end). The
+> 18-inch (457 mm) envelope and the table below are the original feasibility
+> argument — the record of why a single line of keys was believed to fit —
+> not the current length. Figures sized from 457 mm elsewhere (tube, looms,
+> strips) are tracked for re-derivation in `ROADMAP.md`.
 
 ### Keys run in a single line
 
@@ -42,6 +74,10 @@ pitch:
 | **Available** | **457** |
 | **Slack** | **31 (1.2 in)** |
 
+*(2026-09-26: the key runs have since been tightened — ADR 0010 — so this
+table is now the conservative case. The working budget, and the slack it
+leaves, are in `config/body.yaml` and `mechanical/drc.echo`.)*
+
 It closes with 1.2 inches of slack, and more at a tighter pitch — the MT165 caps
 at 16.5 mm allow roughly 18–20 mm before caps collide, against standard 18 mm MX
 spacing. Not constrained, but the layout wants designing rather than
@@ -58,17 +94,21 @@ transceivers stay a contingency rather than a likely requirement.
 
 ### Thickness is bounded by switch bodies, not boards
 
-38 mm of stack, consumed roughly as:
+The body's thickness (`body-thickness`), consumed roughly as:
 
 ```
-  aluminium top plate       1.20 mm <- SETTLED by Gateron's drawing, see ADR 0002
-  oak top                   ~6 mm
+  oak top                   = cap height above the seat - travel  <- flush rule, below
+  aluminium key plate       1.20 mm <- SETTLED by Gateron's drawing, see ADR 0002
   ---- cavity ----          remainder
-  oak bottom                ~8 mm   <- sets thumb key inset depth
+  oak bottom                = the same rule, for the thumb keys (below)
   thumb switch plate        ~2 mm
 ```
 
-That leaves around 20 mm of clear cavity — except where switch bodies intrude.
+**The plate is under the oak, not on it (decided 2026-09-26)** — see "Keys
+are flush at full travel" below. The cavity arithmetic does not change: the
+lid is the same two layers in the other order.
+
+That leaves the clear cavity the body CAD derives (`mechanical/cad/woody_body.scad`, `cavity_h`) — except where switch bodies intrude.
 Top switches pass through the plate and oak and protrude slightly into the
 cavity; the bottom thumb switches mount to the inside face and protrude *up*
 into it by most of their body height.
@@ -78,8 +118,8 @@ this ADR previously called it unmeasured and deferred it to M1, which was wrong
 on both counts: the switch is documented, and the number was available all along
 (ADR 0002).
 
-That is good news for the cavity. Against 20 mm of clear space, even if the
-entire 12.2 mm sat inside it there would be 8 mm left, and in practice several
+That is good news for the cavity. Against that clear space, even if the
+entire 12.2 mm sat inside it there would be room left, and in practice several
 millimetres of that height is stem and top housing sitting *above* the plate.
 **The earlier worry that "usable cavity may be half of what it is elsewhere" in
 the thumb regions looks overstated.**
@@ -90,7 +130,7 @@ the reason to download the drawing and the STEP model before starting M4 rather
 than modelling against a nominal box.
 
 Boards are not the constraint on *depth*. An ESP32-S3-WROOM module on a PCB is
-around 5 mm total. 38 mm is comfortable; it is the switch bodies and the U-bolt
+around 5 mm total. The thickness is comfortable; it is the switch bodies and the U-bolt
 that eat the space.
 
 **But the cavity is not a clear box in plan, either.** Switch bodies run down
@@ -98,13 +138,13 @@ the centreline for the whole length of both key runs, and thumb switches
 protrude upward from the bottom face. The genuinely free volume is the upper
 section, the inter-hand gap (minus the U-bolt), the lower section, and two
 narrow side channels flanking the switch column — which are the natural route
-for wiring looms. Board outlines belong on that plan, not on the raw envelope
+for wiring looms *(since ADR 0017 there are none; the tube and ribbons use them)*. Board outlines belong on that plan, not on the raw envelope
 (ADR 0013).
 
-### 1.5 inches suits the grip
+### The thickness suits the grip
 
 The left hand sandwiches the body between fingers and thumb (ADR 0010). At
-1.5 inches thick that is a comfortable pinch — about the span of a thick book
+`body-thickness` that is a comfortable pinch — about the span of a thick book
 spine. Thinner would make the grip cramped and give the thumb less leverage;
 much thicker would strain it.
 
@@ -225,11 +265,90 @@ where the middle layer has a through-cut. Every layer stays a 2D part that can
 be cut on a scroll saw or sent out flat. This is how a cavity gets built without
 a mill.
 
+### Keys are flush at full travel, so the plate goes under the oak
+
+**Decided 2026-09-26.** A key pressed to the bottom of its stroke is level with
+the top face; at rest it stands proud by the travel. That puts the switch seat
+— the plate's top face — below the top face by the cap's height above the seat
+less the travel, so **the plate moves under the oak top, and the oak top's
+thickness is set by that rule rather than chosen**. The body CAD derives it
+(`mechanical/drc.echo`, "oak top thickness"); until the MT165's height is
+measured at M1 it rests on an estimate.
+
+What changes, and what does not:
+
+- **The oak top is a sheet with one clearance hole per cap**, which the cap
+  travels in. It is still not structural and still holds no switch (ADR 0002):
+  the plate retains every key, the oak only surrounds the caps. The clearance
+  must exceed the oak's cross-grain movement across one hole, which the model
+  checks.
+- **The playing face is unbroken oak.** The six fasteners stop in the plate
+  from below, so no hole in the oak top carries one. *(Since [ADR 0025](0025-the-cassette.md):
+  there are no body fasteners. The column screws' heads sit in blind pockets in
+  the oak top's underside, so the face is still unbroken.)*
+  > **True, and simpler, 2026-09-28 ([ADR 0020](0020-key-boards-screw-to-the-plate.md),
+  > Amendment 4).** The key boards hang on PEM self-clinching studs pressed
+  > into the plate, their heads flush with its top face. Nothing stands above
+  > the plate, so the wood top has no pockets at all and bonds to a flat
+  > plate; nothing goes through the face. The owner: "the press and flush
+  > looked good, let's go ahead and convert to that".
+  >
+  > *Superseded 2026-09-28 by the note above — the record of Amendment 3:*
+  > **True again, 2026-09-27 ([ADR 0020](0020-key-boards-screw-to-the-plate.md),
+  > Amendment 3).** The key boards hang on screws whose heads sit on the
+  > plate's top face inside **blind pockets drilled up into the wood top's
+  > underside** (`hardware.kb_pocket_d`), one at each corner of each key
+  > board. Nothing goes through the face and nothing is plugged. The owner:
+  > "I don't want to have through holes and plugs in the wood. I want to
+  > have only holes that go half depth in the wood, drilled from the inside".
+  > The wood left over each pocket is ruled (`drc.echo` "key-board head
+  > pockets leave wood over them", against `hardware.kb_pocket_skin`).
+  >
+  > **The species is open.** The owner: "we've been calling this oak, but
+  > honestly, I'll probably use a harder wood, but it really doesn't matter
+  > for the design aspect". A hardwood, the owner's choice. The part names
+  > keep "oak"; the cross-grain movement figure below and the pocket
+  > placeholders (`hardware.kb_pocket_wall`, `kb_pocket_skin`) assume oak
+  > until the species is chosen.
+  >
+  > *Superseded the same day by the note above — the record of Amendment 2:*
+  > **Amended 2026-09-27 ([ADR 0020](0020-key-boards-screw-to-the-plate.md),
+  > Amendment 2): the face now READS as unbroken wood, and is not.** The six
+  > lid fasteners still come from below. But the key boards now hang on
+  > screws that go down through bores in the wood top, one at each corner
+  > of each key board (`hardware.kb_bore_d`, `drc.echo` "key-board mounts"),
+  > each bore filled over the screw head with a glued face-grain plug of the
+  > same wood (`MECH-KB-PLUG`) — the owner's standard: "so that we can put a
+  > wooden cap on top so it looks like it's not there". The plugs are cut
+  > from the top's own stock, so the grain matches. What the playing face
+  > loses is the claim that nothing pierces it; what it keeps is that
+  > nothing shows, catches a finger, or loosens in play.
+  >
+  > **The species is open.** The owner: "we've been calling this oak, but
+  > honestly, I'll probably use a harder wood, but it really doesn't matter
+  > for the design aspect". A hardwood, the owner's choice. The part names
+  > keep "oak"; the cross-grain movement figure below and the plug and
+  > bore-wall placeholders (`hardware.kb_bore_wall`, `kb_plug_min_depth`)
+  > assume oak until the species is chosen.
+- **Superseded (2026-09-26, [ADR 0015](0015-one-mcu-no-display.md)): there is no display.** The display band is gone
+  and the CAD derives a shorter mouth end. Record: **the display was on the underside** (same date), glass down, in a through-cut
+  in the oak bottom — still in the display band at the mouthpiece end. Nothing
+  is cut in the plate for it any more.
+- **Thumb keys follow the same rule** (same date): flush with the bottom face at
+  full travel. The thumb plate stays on the oak bottom's inside face *(since
+  ADR 0025, one bottom plate for both thumbs, in the same place)*, so the
+  oak bottom is the same thickness as the oak top and **"oak thickness sets the
+  inset depth" becomes "the flush rule sets the oak thickness"** — the open
+  question below is closed by it.
+- **The plate is no longer under the player's hands**, but it is still a
+  floating conductor a few millimetres from eighteen switch pins, so the
+  bonding rule below stands unchanged.
+
 ### The thumb inset falls out for free
 
 ```
- ┌──────────────────────────┐   aluminium top plate (switch cutouts)
- ├──────────────────────────┤   oak top
+ ┌──────────────────────────┐   oak top (a hole per key cap)
+ ├──────────────────────────┤   aluminium key plate (switch cutouts), under the oak
  │    electronics cavity    │   spacer layers; frosted acrylic sides + LEDs
  ├───────┬──────────┬───────┤   oak bottom, through-cut at the thumb
  └───────┤  switch  ├───────┘   thumb plate mounted to the INSIDE face
@@ -250,16 +369,38 @@ at the sensor end handles what accumulates.
 The only stack requirement is **access to clear it without disassembly**. Not a
 drain plumbed through the body — just a serviceable path to the sensor end.
 
-**The tube is ~400 mm and the sensor is at the tail**, not the 30 mm near the
-top this section used to assume. The trap therefore sits at the tail alongside
-everything else, and "clearable" means reachable from the tail face rather than
-from the mouthpiece end. The tube runs the length of the body in one of the side
-channels.
+**The tube is ~400 mm and the sensor is at the tail** *(Amended 2026-09-26, ADR 0017: no longer — the sensor is on the main board at the mouth end beside the trap, and the tube is short, within the mouth band)*, not the 30 mm near the
+top this section used to assume. The trap therefore sat at the tail alongside
+everything else *(since ADR 0017: at the mouth end)*, and "clearable" meant reachable from the tail face *(since ADR 0017: from the mouthpiece end)* rather than
+from the mouthpiece end. The tube ran the length of the body in one of the side
+channels *(since ADR 0017: it does not)*.
 
 ### The tail carries a display window and a USB port
 
 Two openings in the tail section, below the right-hand key run, clear of the
 thumb keys and the U-bolt:
+
+> **Superseded 2026-09-26 (owner): the matrix is on the TOP face, just past
+> the last key**, through a window in the oak top. The
+> window is **frosted acrylic, flush with the oak top, sitting on a lip of
+> oak** (a rebate in the oak's upper face) — the owner's choice, made knowing
+> frosted material softens pixels at this distance from the LEDs, which the
+> diffuser guidance below warned against. **The Matrix board sits face up
+> against the oak top under the window**, the key plate ending short of it and
+> its LEDs standing up into the opening (owner, 2026-09-26: "the matrix can
+> be up higher out of the way and still allow the connectors", then "tighter
+> to the acrylic"), wired to the
+> carrier by a pigtail soldered to its pads *(since ADR 0017: a 24-way
+> ribbon (ADR 0018), soldered to its pads, into J-MCU on the main board)*, so **the carrier cutout below is
+> no longer needed** and which face carries the LEDs stops being a risk. The
+> etherCON's rear socket and the patch plug pass **under** it, beside its
+> USB-C plug, so only the connector's housing queues behind it *(since ADR
+> 0021: the connector and its adapter queue behind it, and only `J-UMB`
+> passes under)*; the connector
+> stands on the floor, and the body is thick enough for that
+> (`body-thickness`). There is no carrier board any more: its circuits
+> were on one flat board between the thumb and key boards, the centre board (ADR 0013) *(since ADR 0017: on the main board, which replaced the centre and thumb boards, under the key boards)*. The
+> paragraphs below are the original underside design.
 
 **A window in the oak underside for the 8×8 matrix** on the real-time board
 (ADR 0007, ADR 0014). Roughly 22 mm square, facing the player's downward glance
@@ -283,40 +424,64 @@ Three details that have to be in the CAD from the start:
 
 **A USB-C slot at the tail face**, which the instrument needs regardless of the
 window. Flashing and USB MIDI (E5) both require reaching the real-time board's
-own connector. The body opens on six fasteners now, but opening it to flash a
+own connector. The body opens on six fasteners now *(since ADR 0025, by
+  cutting silicone)*, but opening it to flash a
 board is a bench operation, not a thing to do with an instrument in a rack —
 the slot is what makes it a cable. Keep that edge of the board at the tail.
 
-**And the umbilical connector, which is the reason the tail face is now
-crowded.** The etherCON chassis flange (ADR 0004) is roughly 26 × 31 mm on a
-face that measures 57 × 38 mm. Two consequences:
+**Decided 2026-09-26 (owner): a panel-mount USB-C extension.** With the matrix
+on the top face the Matrix board sits a few centimetres inboard of the tail,
+and the etherCON fills the tail's depth, so its own port cannot reach the
+face. A short extension brings it to a receptacle in the tail cap beside the
+etherCON (`CBL-USB-EXT`). The ESP32-S3's USB is full-speed, which a short
+extension carries without a second thought; USB-Serial-JTAG recovery through
+it is unchanged. The body CAD checks the receptacle fits beside the connector
+and reports the cable run (`mechanical/drc.echo`).
 
-- **It leaves about 7.1 mm of material above and below the cutout** — not the
-  3.5 mm this bullet used to claim. **That was the flange, and the flange is
-  not what is cut away.** The chassis bore is **⌀24.0 mm minimum**, read off
-  Neutrik drawing ST-NE8FDP (`datasheets/connectors/NE8FDP.pdf`), so on a 38 mm
-  tall face the remaining material is `(38 − 24.0)/2 = 7.0 mm` per side. The
-  26 × 31 flange *overlaps* that face and clamps against it; it removes
-  nothing. Double the material the page thought it had, and it changes the
-  answer below from "marginal" to "fine".
+**And the umbilical connector, which is the reason the tail face is now
+crowded.** *(Since [ADR 0021](0021-pcb-mount-ethercon.md) the instrument's
+etherCON is an NE8FAV: a square flange, a smaller bore, mounted latch up
+behind a recess in the cap that leaves it the 3 mm panel it allows, and
+screwed through that panel. The two bullets below argue about the NE8FDP;
+the bore-not-flange point still holds, and the rotation is retired with the
+part — `config/body.yaml` `ethercon:` has the NE8FAV's numbers.)* The
+etherCON chassis flange (ADR 0004)
+is roughly 26 × 31 mm on a face 57 mm wide and `body-thickness` tall. Two
+consequences:
+
+- **What is cut away is the bore, not the flange.** The chassis bore is
+  **⌀24.0 mm minimum**, read off Neutrik drawing ST-NE8FDP
+  (`datasheets/connectors/NE8FDP.pdf`); the 26 × 31 flange *overlaps* the
+  face and clamps against it, and removes nothing. The connector stands on the
+  floor since 2026-09-26, so it is not centred and the oak left below and
+  above the bore differs — `mechanical/drc.echo` measures both ("tail cap
+  material below and above the etherCON bore"). An earlier revision of this
+  bullet worked the margin from the flange and got half the real figure.
 
   **Oak is still not what should be carrying it**, and the reason is unchanged
   by the arithmetic. This is the same rule as the U-bolt and the key switches:
   the wood is a shell, not structure (ADR 0002).
 
-- **Rotate it 90°. Settled off the drawing.** The flange is 26 × 31 mm on a
-  57 × 38 mm face, and the mounting pattern is two diagonal ⌀3.2 holes at
+- **Rotate it 90°. Settled off the drawing.** The flange is 26 × 31 mm on the
+  tail face, and the mounting pattern is two diagonal ⌀3.2 holes at
   19 × 24 mm — so the orientation is a free variable worth spending:
+
+  *The table is the argument as first made, for a connector centred on the
+  face as it was until 2026-09-26. It stands on the floor now, and the body
+  CAD measures its margins (`mechanical/drc.echo`); what the table shows
+  about rotation — flange and screw margin gained, bore margin unchanged —
+  still holds.*
 
   | On the tail face | as drawn (portrait) | **rotated 90°** |
   |---|---|---|
   | Material above/below the **flange** | 3.50 mm | **6.00 mm** |
   | Screw-hole edge to face edge, vertically | 5.40 mm | **7.90 mm** |
   | Material above/below the **bore** | 7.00 mm | 7.00 mm — *rotation-invariant* |
-  | Clear width beside the flange for USB-C | 31 mm | 26 mm |
+  | Clear width beside the flange for USB-C | 31 mm | 26 mm — *amended 2026-09-26: the body CAD's lane, flange edge to the side's inside face, is about half this once the oak lips and acrylic sides come off the width and the connector is off-centre (`mechanical/drc.echo`, "USB-C extension receptacle beside the etherCON flange")* |
 
-  Nearly double the flange margin and 2.5 mm more at the screws, for 5 mm of
-  width beside it that the USB-C slot does not need. **Note what it does not
+  Nearly double the flange margin and 2.5 mm more at the screws,
+  for 5 mm of width beside it that the USB-C slot does not need — *amended 2026-09-26: it did need it. A flat slot, 12.5 mm plus a 2 mm web to the rotated flange, did not fit the lane beside it, and that forced the receptacle on end (`config/body.yaml` `openings.usb_slot_portrait`; `mechanical/drc.echo`, "tail cap web between the USB-C cutout and the etherCON flange"). Un-rotating is not the way back: the flange would then stand 31 mm tall, taller than the cavity behind the cap (`drc.echo`, "etherCON body inside the cavity height").*
+  **Note what it does not
   fix:** the bore-referenced 7.00 mm is the same either way, so rotating is not
   what keeps the connector out of thin oak — the internal backing plate is.
 
@@ -327,11 +492,22 @@ face that measures 57 × 38 mm. Two consequences:
   **Mount the connector to an internal backing plate** — aluminium or ply, tied
   into the same stack that carries the keys — and let the oak be the face the
   screws pass through rather than the thing the screws hold.
-- **It shares the face with the USB-C slot**, leaving roughly 31 mm beside the
-  flange for it. That fits, but it is not the place to discover a conflict.
+  *(Superseded 2026-09-26, owner: the etherCON need not be panel mounted. It
+  now sits with flange and chassis behind the tail cap, its front through the
+  cap's bore — the drawing's "both behind" depths — and the backing plate and
+  its 4 mm panel limit no longer apply to it. The U-bolt keeps its plate.)*
+- **It shares the face with the USB-C slot**,
+  leaving roughly 31 mm beside the flange for it. That fits — *amended 2026-09-26: 31 mm was the unrotated column of the table above; the model's lane is about half the rotated one, and the receptacle fits it only on end, earless, behind an overmould pocket in the tail face (`config/body.yaml` `openings.usb_mount`; `mechanical/drc.echo`, "USB-C extension receptacle beside the etherCON flange", "USB-C plug overmould reaches the receptacle", "USB-C receptacle mount inside the cavity").*
+  But it is not the place to discover a conflict.
   Both openings and the backing plate go into the M4 CAD together, and the
   1:1 paper check covers this face as well as the 10HP panel — and the tail is
   now the tight one of the two.
+
+> **Superseded (2026-09-26, owner: "service cover is for to remove"): there is no service cover.** The console header
+> stays, on the centre board inside the body, and is reached by taking the
+> lid off (six fasteners). USB-Serial-JTAG through the tail USB-C port is
+> the recovery path that works with the body closed. The underside past the
+> right thumb is plain oak.
 
 **And a screwed service cover on the tail underside**, beside the matrix
 window, over a **six-pin** header on the carrier: `U0TXD`, `U0RXD` and `GND`
@@ -342,12 +518,18 @@ definition accounts for every pin on the ESP32-S3-Matrix's two header rows —
 three power and seventeen GPIO — and neither appears. They exist on the board
 (`IO0` under the BOOT button, `EN` on the reset circuit) but reaching them
 means soldering to the dev board, which would end its life as a socketed,
-swappable module. Not worth it, because the header was never the first line of
+swappable module. *(Amended 2026-09-26: since ADR 0017 the ribbon is
+soldered to the Matrix anyway and nothing is socketed, so this reason is
+gone; `EN` and `IO0` are wired to the service header since
+[ADR 0018](0018-main-board-wiring-decisions.md) — `hardware/carrier/service-uart/`.)* Not worth it, because the header was never the first line of
 defence. Roughly 12 × 40 mm, two M2 screws into the plate stack,
 in the same laminated layer as the window.
 
 **There are three lines of defence and this header is the third**, which is
 why losing the boot-force pins is acceptable:
+
+> **(2026-09-26, [ADR 0015](0015-one-mcu-no-display.md)): no radio, so no OTA.** The first line of defence below is
+> gone; USB-Serial-JTAG is now the first, and this header the second.
 
 1. **OTA rollback.** An image that does not mark itself valid is rolled back by
    the bootloader at the next boot. Covers the likely case — a bad flash.
@@ -361,13 +543,14 @@ why losing the boot-force pins is acceptable:
 
 What is given up is forcing the boot mode by hand when software cannot — and
 that is now **recoverable rather than terminal.** The body opens on six
-fasteners, the dev boards are socketed, and a corrupted *bootloader* means
+fasteners, the dev boards are socketed *(since ADR 0017: the Matrix unplugs
+at J-MCU and its ribbon is desoldered)*, and a corrupted *bootloader* means
 taking the lid off and swapping or re-flashing a board on the bench. This
 paragraph used to end "ends the instrument", which was true of a bonded body
 and is not true of this one. Still inconvenient, still behind three
 mitigations, no longer fatal.
 
-**The display board needs none of this.** It is flashed over its UART from the
+*(Superseded (2026-09-26, [ADR 0015](0015-one-mcu-no-display.md)): there is no display board.)* ~~The display board needs none of this.~~ It was flashed over its UART from the
 real-time board, which closes ADR 0013's open question about how it gets
 programmed and removes the one case where a board with no external connector
 had to be recovered through hardware.
@@ -400,7 +583,10 @@ Two consequences:
 - **It must anchor to the structural plate stack, not to the oak.** The wood is
   a shell (ADR 0002) and a U-bolt through oak alone will crush the fibres and
   eventually tear out. Through-bolt to a metal backing plate inside the cavity,
-  tied into the same structure that carries the keys.
+  tied into the same structure that carries the keys. *(Since [ADR 0025](0025-the-cassette.md):
+  that plate is the cassette's bottom plate, the length of the body, which the
+  legs pass and which the columns tie to the key plate. There is no separate
+  backplate.)*
 - **The position must be settled empirically, which is not the same as being
   adjustable.** CG cannot be known accurately from CAD — cable, connector,
   adhesive and finish all add mass that is hard to model, and what matters is
@@ -415,6 +601,9 @@ Two consequences:
   bolt, lid on — so a slot or a row of positions is now worth cutting, and the
   balance can be tuned with the instrument on a strap and everything in it.
   Still do it once at M8 rather than treating it as a user control.
+  *(Since [ADR 0025](0025-the-cassette.md): moving it after closing means cutting the
+  silicone and a new main board, whose holes fix it. So the first way below,
+  dry-assembly before closing, is the only one.)*
 
   Two ways to have it, and they are no longer exclusive:
 
@@ -467,14 +656,18 @@ flat parts, and not blocked.
   and mounts to the body at a few points.
 - Strap attachment points are hard points through the oak and must be designed
   in, not retrofitted (ADR 0005).
-- **The two side channels are shared: LED strips on both sides, looms alongside.**
+- *(Superseded (2026-09-26, [ADR 0016](0016-one-strip-on-the-centre-board.md)): there are no side strips; the one strip lies on the
+  centre board, and the side channels carry the tube and the looms.)*
+  *(Amended 2026-09-26, ADR 0017: the strip is on the main board, there are no
+  looms, and the tube stays in the mouth band.)*
+  **The two side channels are shared: LED strips on both sides, looms alongside.**
   An earlier revision assigned the channels to the wiring looms while ADR 0014
   assigned the same two to the LED strips — a direct contradiction between two
   accepted decisions, and one that made ADR 0014's own instruction ("keep the LED
   runs away from the breath wiring") unsatisfiable.
 
   **It is resolved by the sensor moving to the bottom** (ADR 0003). The analog
-  breath pair no longer runs the length of the body at all, so what shares the
+  breath pair no longer runs the length of the body at all *(Amended 2026-09-26, ADR 0017: it does again — the sensor is at the mouth end and the buffered signal runs the main board as a trace over its own ground; E11 is the test)*, so what shares the
   channels with pulsed LED current is the SPI key chain, the UART and power —
   all digital and all tolerant. Digital beside pulsed LED current is a far weaker
   objection than analog beside it would have been.
@@ -493,19 +686,19 @@ flat parts, and not blocked.
 "a body that is bonded shut is a body that is never opened again." The body is
 not bonded shut any more, so the items below are no longer *impossible* later —
 they are merely expensive, because getting at them means lifting the lid,
-disturbing the loom and re-laying a gasket. That is a real cost and it is worth
+disturbing the loom *(since ADR 0017: unplugging J-MCU and, with the lid laid beside the body, the two key-chain ribbons — IDC sockets since 2026-09-27, no ZIF latches)* and re-laying a gasket. That is a real cost and it is worth
 avoiding, but it is not the cliff this page was written against.
 
 **Two of them are still genuinely impossible later**, because they are cuts in
-the glued U or in a laminated layer: the matrix window and its carrier cutout,
-and the channels. Those keep the old force. Everything else below: do it now
+the glued U or in a laminated layer: the matrix window (now through the lid —
+oak top and plate — rather than the U) and the channels. Those keep the old force. Everything else below: do it now
 because opening a finished instrument is a bad afternoon, not because you
 cannot.
 
-**Cut the service cover and populate its header**, per the tail-face section
-above. It is the only thing standing between a bad flash and a finished
-instrument that will not boot, and both dev boards depend on it — the display
-board has no external connector at all.
+**Populate the console header** on the centre board. *(There is no service
+cover to cut since 2026-09-26; the header is reached with the lid off.)* It
+is the last line of defence between a bad flash and an instrument that will
+not boot, and the one dev board depends on it (ADR 0015).
 
 **Bond the aluminium plate to `PWR_GND`. Never to `AGND`.** Nothing currently
 bonds it. It floats under the player's hands, one to two millimetres from
@@ -518,9 +711,15 @@ capacitance straight onto the breath channel's voltage reference.
 
 **Fit the key input networks.** A 74x165's parallel inputs have no internal
 pull-up, so without them every key input floats in a channel shared with 12 V
-LED power and 800 kHz data — 10 kΩ, 100 Ω and 10 nF per switch position on the
-cluster boards (ADR 0001).
+LED power and 800 kHz data — a pull-up, a series resistor and a capacitor per
+switch position on the cluster boards (ADR 0001; the values are
+`key-switch-network.md` §2's, `R-KEY-PU`, `R-KEY-SER`, `C-KEY`). *(Amended
+2026-09-27: this line gave 10 kΩ, 100 Ω and 10 nF, a network retired on
+2026-09-21.)*
 
+*(Amended 2026-09-26: since ADRs 0016 and 0017 there is no hand-built loom.
+The key boards are on flat flex *(1.27 mm IDC since 2026-09-27, ADR 0017's amendment)* and the Matrix on a 24-way ribbon, whose extra positions carry 5 V and
+ground (ADR 0018, `CBL-MCU-RIBBON`).)*
 **Run two spare conductors in every internal loom.** The looms are hand-built,
 once, and threaded through channels in a glued sub-assembly. The lid comes off,
 but the looms do not re-route themselves. A spare pair costs a few cents and
@@ -528,7 +727,7 @@ some crimping now; discovering you need one signal more afterwards costs a
 strip-down.
 
 **Conformal-coat the boards.** The instrument is breathed into for hours, behind
-eighteen unsealed switch cutouts, in a body whose interior runs 10–20 K above
+eighteen unsealed switch cutouts *(Amended 2026-09-26: one more since hold/preset became RT4 — `config/key-layout.yaml`)*, in a body whose interior runs 10–20 K above
 ambient. There is no coating anywhere in the BOM and nothing else in the design
 addresses humidity inside the cavity.
 
@@ -551,6 +750,18 @@ still the sensible time, because M8 is when the instrument first has all its
 mass in it.
 
 ## The body comes apart
+
+> **Superseded 2026-09-29 by [ADR 0025](0025-the-cassette.md).** The owner: "we could just drop
+> it into the instrument with a little bit of silicone to glue it to the top
+> and bottom wood ... so no need to like screw into the wood except for maybe
+> the u-bolt". The six fasteners, their counterbores and the lid's gasket are
+> gone. The internals are one unit, the cassette, built and tested on the
+> bench and bonded to the oak top and bottom with RTV. The oak top's joints at
+> the side grooves are glued too. **Service is by cutting the silicone**
+> (ADR 0025, *Consequences*). This section is the record of the body that
+> opened on screws. What it says about the cavity's leak (the breath
+> reference must see the room) and about M8 still holds. A glued joint of RTV
+> beads is not airtight unless it is made so, and M8 still watches the zero.
 
 **This supersedes the page's earlier assumption that the stack is bonded shut.**
 The section below the U-bolt already said it in one line — "a body that is
@@ -577,20 +788,35 @@ went on bonding it. It does not any more.
          six fasteners, up through the bottom, into the plate
 ```
 
+> **Superseded in part, 2026-09-26: the sides sit BETWEEN the oak panels, in
+> grooves, not on the outside of them.** Oak top and oak bottom both run the
+> full width; each frosted acrylic side stands in a groove cut along the
+> inner face of each panel, set in from the edge behind an oak lip. The U is
+> still one glued sub-assembly — the sides are glued into the **bottom**
+> grooves — and the lid now drops onto the sides' top edges, which slide into
+> the **top** grooves. **That groove replaces the notch below**: it locates the
+> lid laterally and takes the shear, and the gasket bead goes in it. Two
+> costs, both measured by the body CAD (`mechanical/drc.echo`): the grooves are
+> a saw or router pass, the one cut in the stack that is not a through-cut;
+> and the oak lips come off the interior width twice.
+
 **One side is a U.** The oak bottom and the two frosted acrylic sides are
 assembled as a single channel — glued to each other, once, permanently. That
-sub-assembly is never taken apart again and it carries the LED strips.
+sub-assembly is never taken apart again. *(It carried the LED strips until
+ADR 0016 moved the one strip onto the centre board.)*
 
-**The other side pulls in on a notch.** The lid — aluminium key plate on oak
-top — drops into a rebate cut along the top inside edge of each acrylic side.
+**The other side pulls in on a notch.** The lid — oak top on the aluminium key
+plate — drops into a rebate cut along the top inside edge of each acrylic side.
 The notch locates the lid laterally and takes the shear, so the fasteners only
 have to hold it down.
 
 **Six fasteners come up from the bottom face, through the whole instrument,
 into the aluminium plate.** They are the only thing holding the instrument
-closed. Six, not four, because the body is 457 mm long and the span between
-fasteners is what sets how much the lid can lift between them; six puts them
-roughly 80 mm apart, clear of the key runs.
+closed. Six, not four, because the span between fasteners is what sets how
+much the lid can lift between them. *(On the original 457 mm body that put
+them ~80 mm apart. The derived body has three stations of two — mouth end,
+between the hands, before the connector — placed where the keys are not;
+`mechanical/DESIGN.md`.)*
 
 **Why this and not a lid that screws down from the top:** the top face is the
 playing surface and the one the hands sit on. Fastener heads there are
@@ -599,6 +825,34 @@ whose flatness under the switches is the whole point of it being aluminium.
 From underneath they are invisible in play and land in oak, which takes a
 counterbore for free.
 
+> **Amended 2026-09-28 (ADR 0020, Amendment 4): this holds, for
+> everything, with nothing above the plate.** The key boards hang on studs
+> pressed into the plate, heads flush with its top face; the clinch holds
+> each stud against turning, so the nuts come off from below with the lid in
+> place, and there is no head to hold, pocket or epoxy.
+>
+> *Superseded 2026-09-28 by the note above — the record of Amendment 3:*
+> **Amended 2026-09-27 (ADR 0020, Amendment 3): this holds again, for
+> everything.** No screw goes through the playing face. The key-board screws
+> are put through the plate from its top face before the plate is bonded to
+> the wood, and their heads end up in blind pockets in the wood's underside.
+> Once the lid is bonded a head cannot be held, so each head is fixed to
+> the plate with a dot of epoxy before bonding (the owner, 2026-09-27: "Yes,
+> add the epoxy dot on the heads"); the nuts then come off from below with
+> the lid in place (ADR 0020, Amendment 3).
+>
+> *Superseded the same day by the note above — the record of Amendment 2:*
+> **Amended 2026-09-27 (ADR 0020, Amendment 2).** This still holds for the
+> lid: its six screws come from below. It no longer means that nothing
+> screws down from the top. The **key-board** screws do, through the wood
+> top, their heads on the plate at the floor of each bore and under a
+> glued wooden plug, so the face shows no head and no hole. They hold the
+> key boards, not the lid, and the lid comes off without touching them. The
+> reasons above (a head to feel or catch, holes through the plate under the
+> switches) are what the plug and the corner positions answer: the heads
+> are covered, and the screws sit outside every switch cutout
+> ("key-board screw heads bear on plate metal").
+
 ### The two end caps, and what they are made of
 
 The ends are separate parts, not extensions of the top or the bottom.
@@ -606,7 +860,11 @@ The ends are separate parts, not extensions of the top or the bottom.
 | End | Material | Why |
 |---|---|---|
 | **Mouthpiece end** | **Acrylic**, with a drilled circle for the tube pass-through | It is the part most likely to want changing. A pass-through diameter that turns out wrong, or a mouthpiece that wants a different mount, is one flat part to re-cut — and acrylic is the material already being cut for the sides |
-| **Tail end** | **Oak**, carrying the etherCON, the USB-C slot and the matrix window | So the wood reads as wrapping from the top face around the bottom and up the back, which is the look. And it is the face with the most openings in it, which wants the material that takes a backing plate |
+| **Tail end** | **Oak**, carrying the etherCON and the USB-C slot (the matrix window is on the top face since 2026-09-26) | So the wood reads as wrapping from the top face around the bottom and up the back, which is the look. And it is the face with the most openings in it, which wants the material that takes a backing plate |
+
+> **Decided 2026-09-26 (owner): the mouthpiece end is oak**, the same stock
+> as the tail cap - the wood now wraps both ends. The table above is the
+> record of the acrylic reasoning.
 
 **If the acrylic mouthpiece end looks wrong on the bench, it becomes oak.**
 Same cut, same fixings, different sheet. That is the reason to make it a
@@ -624,7 +882,10 @@ line with the body, which is what makes a 2 m tether hang rather than twist
 **It does not weaken anything.** The load paths were never the glue: the keys
 land on the aluminium plate, the plate is the structure, and the U-bolt hangs
 from the same stack. What the glue did was hold the shell together, and six
-M3s do that better because they can be done up again.
+M3s do that better because they can be done up again. *(Since [ADR 0025](0025-the-cassette.md):
+the load path is the cassette's columns, key plate to bottom plate, and the
+bottom plate bears on the oak bottom. The shell is glued and is the main
+structure, in the owner's words.)*
 
 **It costs the cavity's seal, and that is fine.** The MPXV4006DP is a
 *differential* part with its reference port open to the cavity, so the cavity
@@ -636,10 +897,15 @@ hoping one was built loose enough.
 **It changes what M8 is.** M8 was the pre-bond gate — the last moment before
 the body closed forever. It is now the **pre-assembly gate**: the last moment
 before the instrument is treated as finished, and the point at which every
-measurement is taken on the final loom. The tests do not change. What changes
+measurement is taken on the final loom *(since ADR 0017: the final boards and ribbons)*. The tests do not change. What changes
 is that failing one of them after M8 is now a repair rather than a rebuild.
 
-### Two adhesives, and which joint gets which
+### Adhesives, and which joint gets which
+
+*(Titled "Two adhesives" until 2026-09-27, and it was never only two - the
+U's acrylic joint has its own. The key-board screw heads' epoxy had a row from
+2026-09-27 until the screws gave way to clinched studs, 2026-09-28, ADR 0020
+Amendment 4.)*
 
 "Structural adhesive for oak/acrylic/aluminium" was one line in the BOM for at
 least four joints with incompatible requirements, which is the same defect as
@@ -649,11 +915,23 @@ ordering a ferrite bead and an electrolytic on one row.
 |---|---|---|
 | Oak ↔ oak — spacer layers, thumb rest lip | **PVA wood glue** | Yes |
 | Frosted acrylic sides ↔ oak bottom — **the U** | **PVA is wrong here; use a solvent-free acrylic-to-wood structural adhesive or a mechanical fixing** | Yes — this is the one sub-assembly that stays together |
-| Aluminium key plate ↔ oak top — **the lid** | **RTV silicone**, still — see below | Yes, within the lid |
+| Aluminium key plate ↔ oak top — **the lid** | **RTV silicone**, still — see below. Bonded **after** the key boards are mounted on the plate's studs and soldered (ADR 0020, Amendment 4) | Yes, within the lid. The key boards still come off from below: their studs are clinched in the plate and do not turn |
 | Lid ↔ the U, at the notch | **RTV as a gasket bead, not an adhesive.** Skinned, not fresh, so it seals without sticking | **No — six fasteners** |
 | End caps | **Fasteners into the stack** | **No** |
 | Matrix diffuser | **RTV silicone**, edges only, clear of the light path | Yes |
 | Thumb plate ↔ inside face of the oak bottom | **RTV silicone** | Yes |
+
+> **Amended 2026-09-29 ([ADR 0025](0025-the-cassette.md)).** The key plate is bonded to the
+> oak top with RTV, as the table says. But it is bonded as the top of the
+> cassette, after the cassette is assembled, with the column screws' heads
+> finding their pockets. The **bottom plate**, which replaced the thumb
+> plates, is bonded to the oak bottom's inside face with RTV too. The **oak
+> top to the U** at the side grooves is no longer a gasket clamped by six
+> fasteners. It is an RTV bond, fresh, not skinned, and cut to open. The
+> **end caps'** "fasteners into the stack" were never drawn, and the owner
+> wants nothing screwed into the wood, so how the caps are held is open
+> (ADR 0025, *Open*). RTV is now the adhesive on every joint that may have to
+> open, and the gasket paragraph below is the record.
 
 **RTV changes job, not product.** It was the adhesive on four joints; it is now
 the adhesive on two and a **gasket** on the one joint that opens. Same
@@ -672,13 +950,18 @@ the grain with indoor humidity — **0.6–0.9 mm over the 57 mm width** — aga
 an aluminium plate that moves essentially nothing, and a rigid bond would have
 to fight that for the life of the instrument. RTV lets it slide. But press a
 key and the plate is pushing *into* a thin confined layer, which barely gives.
+*(Corrected 2026-09-29, [ADR 0025](0025-the-cassette.md): this was written for a plate on top of
+the wood. Since the plate went under the oak top (2026-09-26, above), a key
+press pulls the plate away from the wood, and the layer is in tension, not
+compression. The cassette's columns now take the press, down to the bottom
+plate and the oak bottom in compression. The shear argument above stands.)*
 Epoxy would have bought shear stiffness nobody needs and paid for it by
 fighting the wood.
 
 *(Thermal is the small term here, not the large one. Aluminium over 400 mm and a
 20 K swing is 0.18 mm; wood and water is three to five times that.)*
 
-**Two specifics, because both are easy to get wrong at the shop:**
+**The specifics, because each is easy to get wrong at the shop:**
 
 - **Neutral cure, not acetoxy.** The common hardware-store RTV releases acetic
   acid as it cures, and this cure is happening inside a sealed cavity holding
@@ -690,9 +973,21 @@ fighting the wood.
   them, and real time before the final closure goes on — which also keeps the
   outgassing away from the breath sensor, alongside the port-masking rule
   above.
+- **The plate's beads may run over the key-board studs' heads** *(2026-09-28,
+  ADR 0020 Amendment 4)*. They are flush with the plate's top face and never
+  turn, so silicone on them costs nothing. Order: mount the key boards on the
+  studs and solder them, then bond the plate to the wood. *(Until that day
+  this bullet kept the beads off the screw heads' pockets, and before that
+  off Amendment 2's plugged bores.)*
 
 ## Open
 
-- CAD tool, which decides whether `mechanical/cad/` holds Fusion, FreeCAD or
-  neutral STEP.
-- Oak thickness for the bottom panel, which sets thumb key travel.
+- ~~CAD tool~~ — **decided 2026-09-26: OpenSCAD, parametric, in
+  `mechanical/cad/`**, driven by `config/body.yaml` and `config/key-layout.yaml`
+  through `tools/cad.py`, which also fingerprints every render and DXF against
+  its sources (`mechanical/README.md`). The length table and the stack sketch
+  above are the feasibility argument; `config/body.yaml` holds the working
+  values the model draws, each citing this page, and `mechanical/drc.echo`
+  reports what the model found against them (`mechanical/DESIGN.md`).
+- ~~Oak thickness for the bottom panel~~ — **closed 2026-09-26** by the flush
+  rule above: it is derived from the cap height, which M1 measures.

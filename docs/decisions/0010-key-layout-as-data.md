@@ -15,7 +15,8 @@ repeatedly during ergonomic iteration (ADR 0009) and again during playing.
 `config/key-layout.yaml` is the single source of truth. Both sides consume it:
 
 - **Mechanical** — key positions drive the plate DXF cutout locations
-- **Firmware** — key IDs drive the 74HC165 bit mapping and the fingering table
+- **Firmware** — key IDs drive the shift-register bit mapping and the fingering table
+  *(Amended 2026-09-27: this said "74HC165"; the register is the SN74HCS165, ADR 0001)*
 
 When a key moves during iteration, the plate and the firmware stay in sync by
 construction rather than by remembering to update both.
@@ -42,18 +43,18 @@ source, scale, offset, curve and slew, defined as data rather than code.
 
 ## Key count
 
-**18 switches**, decided:
+**18 switches**, decided *(19 since 2026-09-26: the right thumb has four — owner, "let's go consistent"; RT4 took the hold/preset spare's bit)*:
 
 | Group | Count | Face | Role |
 |---|---|---|---|
 | Left hand | 5 | top | note |
 | Right hand | 6 | top | note |
 | Left thumb | 4 | bottom, inset (ADR 0009) | note |
-| Right thumb | 3 | bottom, offset from the rest | **control** |
+| Right thumb | 3 → **4** | bottom, either side of the rest | **control** |
 
 ## Not every switch is a note key
 
-The right thumb's three switches are **control inputs, not fingering inputs** —
+The right thumb's switches (four since 2026-09-26) are **control inputs, not fingering inputs** —
 modulation and IMU gating (ADR 0007). The fingering table covers 15 keys, not
 18, and the layout file carries a `role` field so firmware and the plate
 generator both know the difference.
@@ -97,6 +98,27 @@ clustered tighter at the end of the run.
 So the pitch should vary along the line: comfortable spacing under
 index/middle/ring, tighter grouping for the keys the pinky reaches.
 
+**Tightened 2026-09-26.** The owner judged 24 mm too wide, and the research
+agrees: pad-played instruments put adjacent holes about 20–23 mm apart, and
+adult finger pads touch at roughly 15–22 mm centre to centre
+(`docs/research/2026-09-26-finger-spacing/`). The provisional layout is now
+graded, wider under index-middle-ring and tighter to and between the
+little-finger keys, because a single line cannot offset the little-finger key
+sideways the way a recorder offsets its hole. The gaps are
+`layout.lh_gaps` / `rh_gaps` in `config/body.yaml`, and the body CAD draws
+them against the alternatives (`mechanical/renders/key-layouts.png`). Still
+provisional: M2 replaces them with measured positions.
+
+**The little-finger keys leave the line (owner, same date).** The keys stay
+close together, but each little finger's first position is a **side-by-side
+pair** — two keys at one position along the body, across it — and the right
+little finger has one more, single key below its pair, in line with the
+pair's key on the player's right — off centre as a recorder offsets its
+little-finger hole. So "single line" now means the
+index, middle and ring keys; the offsets are `layout.lh_offsets` /
+`rh_offsets` in `config/body.yaml`, and which way the single key goes is an
+assumption M2 confirms.
+
 **The layout file already supports this**, and it is a good example of why it is
 structured the way it is. Keys carry explicit `x`/`y` positions rather than a
 pitch parameter, so non-uniform spacing needs no schema change — it is just
@@ -122,8 +144,28 @@ Three things follow, and they constrain the layout more than the key count does:
 **The grip patch and the key cluster must be separate.** If the keys sit where
 the thumb bears down while gripping, they will trigger constantly. The thumb has
 to *deliberately move* to reach them. This is the same principle as the right
-thumb's rest-versus-switches offset, and it means the plate needs a defined
+thumb's rest-versus-switches offset (two side by side toward the mouth in one
+row, the rest, one toward the tail, with the same ~21.5 mm of clear rest as
+the left thumb — owner, 2026-09-26; `config/body.yaml` `layout.rt_*`), and it means the plate needs a defined
 grip area that has no switches in it.
+
+> **Superseded 2026-09-26 (owner): the four keys are a STRAIGHT LINE down
+> the centreline — a pair, the thumb rest, a pair** ("the vertical line of two
+> keys, gap, two keys"; "thumb rest is between the keys, two above, two
+> below"). The rest is the defined grip area the paragraph above asks for,
+> with the switches on either side of it rather than swept around it.
+> **Both thumb rests sit directly under the middle-finger key** of their hand
+> (owner, same day) — `config/body.yaml` `layout.lt_rest_under` /
+> `rt_rest_under`, LH2 and RH2 until M2 assigns fingers.
+> **The thumb keys are spaced and cut like the top keys** (owner, same day):
+> the top's pitch between adjacent keys, and one oak slot per group either
+> side of a rest, as the top has one per hand (`stack.cap_holes`). The arc
+> argument below is the record of the earlier layout; M2 tests the line.
+> Positions: `config/body.yaml` `layout.lt_*`.
+> **Revised the same day (owner): two rows ACROSS the body instead of a
+> line** — LT1/LT2 side by side, the rest, LT3/LT4 side by side, matching the
+> right thumb's pair ("dual horizontal rows too, with gap still in the
+> middle").
 
 **The four keys lie on the thumb tip's sweep, not in a line.** The tip traces an
 arc as the thumb extends and rotates away from the grip. Laying the keys along
@@ -164,7 +206,13 @@ layout lock**, earlier than anything else in the mechanical track.
 
 The switches themselves are easily sourced and can be bought later. So:
 
-- **Reserve cutouts for three spare switches in the plate DXF** — the expected
+- *(Superseded in part 2026-09-26, owner: **no spare-switch cutouts.** The
+  right thumb is "only the three" and the left thumb its four in a line. The
+  three bits stay reserved and their networks stay fitted; a spare switch now
+  means recutting the thumb plate and the oak bottom, which the body allows
+  because it opens on six fasteners (ADR 0009). *(Since ADR 0025: the bottom
+  plate, and the body opens by cutting its silicone.)*)*
+  **Reserve cutouts for three spare switches in the plate DXF** — the expected
   assignment is octave up, octave down, and a hold/preset input, which is what
   the 2021 firmware drove from key combinations and what dedicated inputs
   obviously improve.
@@ -172,7 +220,11 @@ The switches themselves are easily sourced and can be bought later. So:
 - **Eight of the spare chain bits belong to the marker pattern** (decided
   2026-09-21; this line said "four to six" until then)
   (ADR 0001) and are not available for switches. **Six remain** — three reserved
-  spare-switch positions and three genuinely free. This line said "eight to ten"
+  spare-switch positions and three genuinely free. *(Amended 2026-09-26: the
+  right thumb went to four keys and RT4 took the hold/preset bit, so the
+  reserved spare-switch positions are `config/key-layout.yaml`
+  `spare_bits_switches`, octave up and down, and "three" above and in the
+  first bullet no longer holds.)* This line said "eight to ten"
   while the marker was four to six; both halves were corrected 2026-09-21. What is
   more than three.
 

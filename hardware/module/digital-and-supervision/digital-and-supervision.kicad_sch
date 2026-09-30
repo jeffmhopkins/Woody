@@ -1,0 +1,900 @@
+(kicad_sch (version 20250114) (generator "sch.py") (generator_version "9.0")
+  (uuid 8196f86c-9d89-5c4c-b63e-e844a18f852d)
+  (paper "A3")
+  (title_block
+    (title "Digital path and supervision (hardware/module/digital-and-supervision)")
+    (comment 5 "circuit: module/digital-and-supervision")
+    (comment 6 "page: digital-and-supervision.md")
+    (comment 7 "title: Digital path and supervision")
+    (date "")
+    (rev "")
+    (company "Woody")
+    (comment 1 "SOURCE for this circuit - edit in KiCad 9. netlist.yaml is exported from it: python3 tools/kicad.py export hardware/module/digital-and-supervision")
+    (comment 2 "Part facts ride on each symbol: Row (BOM row), Pins + Pins_source (pin map and its datasheet), Note")
+    (comment 3 "ADR 0004, ADR 0019 - migrated from its hand-written netlist.yaml, compared part by part and net by net")
+    (comment 4 "Ports are hierarchical labels (Dir, From/To, Figure); the module main board places this sheet")
+  )
+  (lib_symbols
+    (symbol "74xx:74AHCT125"
+        (pin_names
+          (offset 1.016))
+        (exclude_from_sim no)
+        (in_bom yes)
+        (on_board yes)
+        (property "Reference" "U"
+          (at 0 1.27 0)
+          (effects
+            (font
+              (size 1.27 1.27))))
+        (property "Value" "74AHCT125"
+          (at 0 -1.27 0)
+          (effects
+            (font
+              (size 1.27 1.27))))
+        (property "Footprint" ""
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "Datasheet" "https://www.ti.com/lit/ds/symlink/sn74ahct125.pdf"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "Description" "Quadruple Bus Buffer Gates With 3-State Outputs"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "ki_locked" ""
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))))
+        (property "ki_keywords" "buffer 3State"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "ki_fp_filters" "DIP*W7.62mm* SO14* SSOP?14* TSSOP?14* SOIC*3.9x8.7mm*P1.27mm*"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (symbol "74AHCT125_1_0"
+          (polyline
+            (pts
+              (xy -3.81 3.81)
+              (xy -3.81 -3.81)
+              (xy 3.81 0)
+              (xy -3.81 3.81))
+            (stroke
+              (width 0.254)
+              (type default))
+            (fill
+              (type background)))
+          (pin input line
+            (at -7.62 0 0)
+            (length 3.81)
+            (name "~"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "2"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input inverted
+            (at 0 -6.35 90)
+            (length 4.445)
+            (name "~"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "1"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin tri_state line
+            (at 7.62 0 180)
+            (length 3.81)
+            (name "~"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "3"
+              (effects
+                (font
+                  (size 1.27 1.27))))))
+        (symbol "74AHCT125_2_0"
+          (polyline
+            (pts
+              (xy -3.81 3.81)
+              (xy -3.81 -3.81)
+              (xy 3.81 0)
+              (xy -3.81 3.81))
+            (stroke
+              (width 0.254)
+              (type default))
+            (fill
+              (type background)))
+          (pin input line
+            (at -7.62 0 0)
+            (length 3.81)
+            (name "~"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "5"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input inverted
+            (at 0 -6.35 90)
+            (length 4.445)
+            (name "~"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "4"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin tri_state line
+            (at 7.62 0 180)
+            (length 3.81)
+            (name "~"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "6"
+              (effects
+                (font
+                  (size 1.27 1.27))))))
+        (symbol "74AHCT125_3_0"
+          (polyline
+            (pts
+              (xy -3.81 3.81)
+              (xy -3.81 -3.81)
+              (xy 3.81 0)
+              (xy -3.81 3.81))
+            (stroke
+              (width 0.254)
+              (type default))
+            (fill
+              (type background)))
+          (pin input line
+            (at -7.62 0 0)
+            (length 3.81)
+            (name "~"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "9"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input inverted
+            (at 0 -6.35 90)
+            (length 4.445)
+            (name "~"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "10"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin tri_state line
+            (at 7.62 0 180)
+            (length 3.81)
+            (name "~"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "8"
+              (effects
+                (font
+                  (size 1.27 1.27))))))
+        (symbol "74AHCT125_4_0"
+          (polyline
+            (pts
+              (xy -3.81 3.81)
+              (xy -3.81 -3.81)
+              (xy 3.81 0)
+              (xy -3.81 3.81))
+            (stroke
+              (width 0.254)
+              (type default))
+            (fill
+              (type background)))
+          (pin input line
+            (at -7.62 0 0)
+            (length 3.81)
+            (name "~"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "12"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input inverted
+            (at 0 -6.35 90)
+            (length 4.445)
+            (name "~"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "13"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin tri_state line
+            (at 7.62 0 180)
+            (length 3.81)
+            (name "~"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "11"
+              (effects
+                (font
+                  (size 1.27 1.27))))))
+        (symbol "74AHCT125_5_0"
+          (pin power_in line
+            (at 0 12.7 270)
+            (length 5.08)
+            (name "VCC"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "14"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin power_in line
+            (at 0 -12.7 90)
+            (length 5.08)
+            (name "GND"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "7"
+              (effects
+                (font
+                  (size 1.27 1.27))))))
+        (symbol "74AHCT125_5_1"
+          (rectangle
+            (start -5.08 7.62)
+            (end 5.08 -7.62)
+            (stroke
+              (width 0.254)
+              (type default))
+            (fill
+              (type background))))
+        (embedded_fonts no))
+    (symbol "Device:C"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0.254)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "C"
+			(at 0.635 2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "C"
+			(at 0.635 -2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 0.9652 -3.81 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "cap capacitor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "C_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "C_0_1"
+			(polyline
+				(pts
+					(xy -2.032 0.762) (xy 2.032 0.762)
+				)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -2.032 -0.762) (xy 2.032 -0.762)
+				)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "C_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 2.794)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 2.794)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "Device:R"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "R"
+			(at 2.032 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "R"
+			(at 0 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at -1.778 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "R res resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "R_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "R_0_1"
+			(rectangle
+				(start -1.016 -2.54)
+				(end 1.016 2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "R_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+  )
+  (symbol (lib_id "74xx:74AHCT125") (at 40.64 50.8 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid ff6b33fb-f93a-5d86-b50e-59393d13fc94)
+    (property "Reference" "U-LVL-MOD" (at 40.64 43.18 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "74AHCT125" (at 40.64 45.72 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "U-LVL-MOD" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1A=2 1Y=3 1OE=1 2A=5 2Y=6 2OE=4 3A=9 3Y=8 3OE=10 4A=12 4Y=11 4OE=13 VCC=14 GND=7" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "OE IS TIED ENABLED AND MUST STAY THAT WAY - the presence comparator that gated it is deleted. Inputs are TTL thresholds, V_IH 2.0V min, not ratioed to VCC, and there is NO INPUT CLAMP TO VCC, which is what makes back-driving an unpowered module safe" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/logic/SN74AHCT125.pdf p.1 pin-out (SOIC-14): 1OE 1, 1A 2, 1Y 3, 2OE 4, 2A 5, 2Y 6, GND 7, 3Y 8, 3A 9, 3OE 10, 4Y 11, 4A 12, 4OE 13, VCC 14" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Texas Instruments" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "SN74AHCT125DR" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C155176" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid af9c1fed-39bd-5e56-bf50-a2626ba18871))
+    (pin "2" (uuid 8aed6ed2-68a0-5a3d-9306-5bfd518fe014))
+    (pin "3" (uuid 8b8d39cc-8365-534b-aac7-dda531824c02))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/1c4de2e2-e4d6-5c65-941f-65e6082f8763" (reference "U4") (unit 1))) (project "digital-and-supervision" (path "/8196f86c-9d89-5c4c-b63e-e844a18f852d" (reference "U-LVL-MOD") (unit 1))))
+  )
+  (symbol (lib_id "74xx:74AHCT125") (at 91.44 50.8 0) (unit 2)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid c56d62e2-b944-5900-b6da-58c930d05f44)
+    (property "Reference" "U-LVL-MOD" (at 91.44 43.18 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "74AHCT125" (at 91.44 45.72 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "U-LVL-MOD" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1A=2 1Y=3 1OE=1 2A=5 2Y=6 2OE=4 3A=9 3Y=8 3OE=10 4A=12 4Y=11 4OE=13 VCC=14 GND=7" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "OE IS TIED ENABLED AND MUST STAY THAT WAY - the presence comparator that gated it is deleted. Inputs are TTL thresholds, V_IH 2.0V min, not ratioed to VCC, and there is NO INPUT CLAMP TO VCC, which is what makes back-driving an unpowered module safe" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/logic/SN74AHCT125.pdf p.1 pin-out (SOIC-14): 1OE 1, 1A 2, 1Y 3, 2OE 4, 2A 5, 2Y 6, GND 7, 3Y 8, 3A 9, 3OE 10, 4Y 11, 4A 12, 4OE 13, VCC 14" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Texas Instruments" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "SN74AHCT125DR" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C155176" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "4" (uuid 2d38c2b8-df93-5dd4-aad6-9b66be5840f0))
+    (pin "5" (uuid 400cb260-c9ee-5688-bb4c-ca83f0286d52))
+    (pin "6" (uuid 1fe86141-87a2-50ff-b5da-9e16d7571003))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/1c4de2e2-e4d6-5c65-941f-65e6082f8763" (reference "U4") (unit 2))) (project "digital-and-supervision" (path "/8196f86c-9d89-5c4c-b63e-e844a18f852d" (reference "U-LVL-MOD") (unit 2))))
+  )
+  (symbol (lib_id "74xx:74AHCT125") (at 40.64 96.52 0) (unit 3)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 12009e69-1540-5c76-942a-d4933e772562)
+    (property "Reference" "U-LVL-MOD" (at 40.64 88.9 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "74AHCT125" (at 40.64 91.44 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" (at 40.64 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 40.64 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "U-LVL-MOD" (at 40.64 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1A=2 1Y=3 1OE=1 2A=5 2Y=6 2OE=4 3A=9 3Y=8 3OE=10 4A=12 4Y=11 4OE=13 VCC=14 GND=7" (at 40.64 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "OE IS TIED ENABLED AND MUST STAY THAT WAY - the presence comparator that gated it is deleted. Inputs are TTL thresholds, V_IH 2.0V min, not ratioed to VCC, and there is NO INPUT CLAMP TO VCC, which is what makes back-driving an unpowered module safe" (at 40.64 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/logic/SN74AHCT125.pdf p.1 pin-out (SOIC-14): 1OE 1, 1A 2, 1Y 3, 2OE 4, 2A 5, 2Y 6, GND 7, 3Y 8, 3A 9, 3OE 10, 4Y 11, 4A 12, 4OE 13, VCC 14" (at 40.64 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Texas Instruments" (at 40.64 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "SN74AHCT125DR" (at 40.64 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C155176" (at 40.64 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 40.64 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "10" (uuid a4f6e61b-e6a6-51a7-81f2-d7ee9554a2bc))
+    (pin "8" (uuid a0ea5e93-d889-51d2-b6d5-b33c9babfc52))
+    (pin "9" (uuid d1354143-e589-5d76-b535-614ea9ea222d))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/1c4de2e2-e4d6-5c65-941f-65e6082f8763" (reference "U4") (unit 3))) (project "digital-and-supervision" (path "/8196f86c-9d89-5c4c-b63e-e844a18f852d" (reference "U-LVL-MOD") (unit 3))))
+  )
+  (symbol (lib_id "74xx:74AHCT125") (at 91.44 96.52 0) (unit 4)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 95e007b0-98be-5625-b347-d81f128449e8)
+    (property "Reference" "U-LVL-MOD" (at 91.44 88.9 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "74AHCT125" (at 91.44 91.44 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" (at 91.44 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 91.44 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "U-LVL-MOD" (at 91.44 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1A=2 1Y=3 1OE=1 2A=5 2Y=6 2OE=4 3A=9 3Y=8 3OE=10 4A=12 4Y=11 4OE=13 VCC=14 GND=7" (at 91.44 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "OE IS TIED ENABLED AND MUST STAY THAT WAY - the presence comparator that gated it is deleted. Inputs are TTL thresholds, V_IH 2.0V min, not ratioed to VCC, and there is NO INPUT CLAMP TO VCC, which is what makes back-driving an unpowered module safe" (at 91.44 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/logic/SN74AHCT125.pdf p.1 pin-out (SOIC-14): 1OE 1, 1A 2, 1Y 3, 2OE 4, 2A 5, 2Y 6, GND 7, 3Y 8, 3A 9, 3OE 10, 4Y 11, 4A 12, 4OE 13, VCC 14" (at 91.44 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Texas Instruments" (at 91.44 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "SN74AHCT125DR" (at 91.44 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C155176" (at 91.44 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 91.44 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "11" (uuid 02a588b6-6e7c-5b57-8405-b1c34e1515a2))
+    (pin "12" (uuid d1fccd35-221f-558f-97d0-a95d3885ae45))
+    (pin "13" (uuid b46038e0-4fa0-5ca2-ac34-c75eb1142d7b))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/1c4de2e2-e4d6-5c65-941f-65e6082f8763" (reference "U4") (unit 4))) (project "digital-and-supervision" (path "/8196f86c-9d89-5c4c-b63e-e844a18f852d" (reference "U-LVL-MOD") (unit 4))))
+  )
+  (symbol (lib_id "74xx:74AHCT125") (at 142.24 50.8 0) (unit 5)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid b7366615-4be6-51fe-a660-5d9c1fc5580e)
+    (property "Reference" "U-LVL-MOD" (at 144.78 49.53 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "74AHCT125" (at 144.78 52.07 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "U-LVL-MOD" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1A=2 1Y=3 1OE=1 2A=5 2Y=6 2OE=4 3A=9 3Y=8 3OE=10 4A=12 4Y=11 4OE=13 VCC=14 GND=7" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "OE IS TIED ENABLED AND MUST STAY THAT WAY - the presence comparator that gated it is deleted. Inputs are TTL thresholds, V_IH 2.0V min, not ratioed to VCC, and there is NO INPUT CLAMP TO VCC, which is what makes back-driving an unpowered module safe" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/logic/SN74AHCT125.pdf p.1 pin-out (SOIC-14): 1OE 1, 1A 2, 1Y 3, 2OE 4, 2A 5, 2Y 6, GND 7, 3Y 8, 3A 9, 3OE 10, 4Y 11, 4A 12, 4OE 13, VCC 14" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Texas Instruments" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "SN74AHCT125DR" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C155176" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 142.24 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "14" (uuid 29099c41-9f45-51dd-ada4-eb9fcaab663c))
+    (pin "7" (uuid 185b56fc-79d0-59ef-8719-965891833a83))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/1c4de2e2-e4d6-5c65-941f-65e6082f8763" (reference "U4") (unit 5))) (project "digital-and-supervision" (path "/8196f86c-9d89-5c4c-b63e-e844a18f852d" (reference "U-LVL-MOD") (unit 5))))
+  )
+  (symbol (lib_id "Device:C") (at 40.64 142.24 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid d0b4ddda-3266-5f68-92b2-e485fb35ec9b)
+    (property "Reference" "C-DEC-LVL" (at 43.18 140.97 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "100nF" (at 43.18 143.51 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 41.91 146.05 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 40.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-DECOUPLE" (at 40.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 40.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "VCC to DIG_GND, at the pin" (at 40.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "YAGEO" (at 40.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "CC0805KRX7R9BB104" (at 40.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C49678" (at 40.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 40.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 0aa17b79-3da6-5b4f-a504-4c353933655d))
+    (pin "2" (uuid c1c9ef68-fe38-5a9b-8ba1-8342a74bdfb7))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/1c4de2e2-e4d6-5c65-941f-65e6082f8763" (reference "C12") (unit 1))) (project "digital-and-supervision" (path "/8196f86c-9d89-5c4c-b63e-e844a18f852d" (reference "C-DEC-LVL") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 91.44 142.24 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid af50bc9e-86f5-5807-88cd-92ce8a6f9b14)
+    (property "Reference" "R-PULL-SCLK" (at 93.98 140.97 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "10k 1%" (at 93.98 143.51 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 90.17 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 91.44 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-SPI-PULL" (at 91.44 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 91.44 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "PULL-DOWN. Holds the buffer input low when the instrument is absent" (at 91.44 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL(Uniroyal Elec)" (at 91.44 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "0805W8F1002T5E" (at 91.44 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C17414" (at 91.44 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 91.44 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 75b9e7e5-f31d-53ce-943f-bd22e0bf32a4))
+    (pin "2" (uuid a55865b7-0c54-5b69-9c8c-8ebddfb1c66b))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/1c4de2e2-e4d6-5c65-941f-65e6082f8763" (reference "R10") (unit 1))) (project "digital-and-supervision" (path "/8196f86c-9d89-5c4c-b63e-e844a18f852d" (reference "R-PULL-SCLK") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 142.24 142.24 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 7bf3d2cf-e20f-5795-8af3-eb199fe3777c)
+    (property "Reference" "R-PULL-MOSI" (at 144.78 140.97 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "10k 1%" (at 144.78 143.51 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 140.97 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 142.24 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-SPI-PULL" (at 142.24 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 142.24 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "PULL-DOWN" (at 142.24 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL(Uniroyal Elec)" (at 142.24 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "0805W8F1002T5E" (at 142.24 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C17414" (at 142.24 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 142.24 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid b346f30a-88e1-5630-94d1-9b813607724a))
+    (pin "2" (uuid 65eb737d-048c-5bfa-8c54-6212cf0a2397))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/1c4de2e2-e4d6-5c65-941f-65e6082f8763" (reference "R11") (unit 1))) (project "digital-and-supervision" (path "/8196f86c-9d89-5c4c-b63e-e844a18f852d" (reference "R-PULL-MOSI") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 193.04 142.24 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 97b88745-6415-5513-ac8b-9f800edab767)
+    (property "Reference" "R-PULL-CS" (at 195.58 140.97 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "100k 1%" (at 195.58 143.51 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 191.77 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-CS-PULL-MOD" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "PULL-UP TO LOGIC_5V, 100k - the weak half of CS_MOD's two pulls (the strong one is R-CS-PULL-INST, 10k to 3V3 at the instrument). Weak so that with the instrument plugged in and unpowered it drives only ~45 uA into the dead 3V3 rail and the node sits at ~0.45 V, not the 430 uA a 10k here would force through the ESP32's clamp; with nothing plugged in it holds the buffer input, and so SYNC, deselected. interfaces/spi-link/spi-link.md, 'CS_MOD's two pulls'" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL(Uniroyal Elec)" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "0805W8F1003T5E" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C149504" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid af805dd5-74fd-570d-a952-13024620e7f5))
+    (pin "2" (uuid 46886a9b-e15a-5898-8df4-fa2ecfdffbb5))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/1c4de2e2-e4d6-5c65-941f-65e6082f8763" (reference "R12") (unit 1))) (project "digital-and-supervision" (path "/8196f86c-9d89-5c4c-b63e-e844a18f852d" (reference "R-PULL-CS") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 40.64 187.96 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 318d9401-6609-5bdb-b928-7f21bc3fb6a0)
+    (property "Reference" "R-PULL-SCLK-DAC" (at 43.18 186.69 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "10k 1%" (at 43.18 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 39.37 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-SPI-PULL" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "PULL-DOWN" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL(Uniroyal Elec)" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "0805W8F1002T5E" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C17414" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid ea9c6371-dba6-5126-b5d4-171f4a1edda1))
+    (pin "2" (uuid d709ff69-80c7-5c52-9dec-49c27234d59f))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/1c4de2e2-e4d6-5c65-941f-65e6082f8763" (reference "R13") (unit 1))) (project "digital-and-supervision" (path "/8196f86c-9d89-5c4c-b63e-e844a18f852d" (reference "R-PULL-SCLK-DAC") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 91.44 187.96 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid f7ff7cd7-940e-59ea-a379-e127ffa6a0a1)
+    (property "Reference" "R-PULL-DIN" (at 93.98 186.69 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "10k 1%" (at 93.98 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 90.17 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-SPI-PULL" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "PULL-DOWN" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL(Uniroyal Elec)" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "0805W8F1002T5E" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C17414" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid d14f6479-a7ea-58b1-9f80-d85629918240))
+    (pin "2" (uuid c159b4bc-3377-5b71-b16d-bb2f00ee456e))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/1c4de2e2-e4d6-5c65-941f-65e6082f8763" (reference "R14") (unit 1))) (project "digital-and-supervision" (path "/8196f86c-9d89-5c4c-b63e-e844a18f852d" (reference "R-PULL-DIN") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 142.24 187.96 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 3f9e88f7-dbd7-5e96-816d-30ef62100111)
+    (property "Reference" "R-PULL-SYNC" (at 144.78 186.69 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "10k 1%" (at 144.78 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 140.97 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-SPI-PULL" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "PULL-UP TO DAC_AVDD, the LM317's rail, NOT bus +5V: a pull-up belongs on its consumer's rail, and on the bus rail a reversed ribbon reaches the DAC's SYNC pin and turns a buffer failure into a DAC failure" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL(Uniroyal Elec)" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "0805W8F1002T5E" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C17414" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 3ed0ecbe-1404-5653-8d01-85ffbf6cf7a2))
+    (pin "2" (uuid aa06f03e-22f6-59ea-a6fe-dc36d24ca67e))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/1c4de2e2-e4d6-5c65-941f-65e6082f8763" (reference "R15") (unit 1))) (project "digital-and-supervision" (path "/8196f86c-9d89-5c4c-b63e-e844a18f852d" (reference "R-PULL-SYNC") (unit 1))))
+  )
+  (wire (pts (xy 91.44 138.43) (xy 91.44 135.89)) (stroke (width 0) (type default)) (uuid 85e578ab-c237-55af-82ff-b4f0722a3dfb))
+  (hierarchical_label "SCLK" (shape input) (at 91.44 135.89 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid a39dd6f2-b91f-5fc3-9f11-3b8b09b02540)
+    (property "Dir" "in" (at 91.44 135.89 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/spi-link" (at 91.44 135.89 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "spi-series-r" (at 91.44 135.89 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 33.02 50.8) (xy 30.48 50.8)) (stroke (width 0) (type default)) (uuid 92e2eca0-3c8a-5f5c-943e-856cce50155e))
+  (hierarchical_label "SCLK" (shape input) (at 30.48 50.8 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 5390001c-8544-5ca4-ad52-380c1a12df99)
+    (property "Dir" "in" (at 30.48 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/spi-link" (at 30.48 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "spi-series-r" (at 30.48 50.8 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 142.24 138.43) (xy 142.24 135.89)) (stroke (width 0) (type default)) (uuid f93c58a4-9793-5037-a752-d40044c93ed1))
+  (hierarchical_label "MOSI" (shape input) (at 142.24 135.89 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 50cf0887-65e1-5d83-91ef-9ab29aa7f6fd)
+    (property "Dir" "in" (at 142.24 135.89 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/spi-link" (at 142.24 135.89 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "spi-series-r" (at 142.24 135.89 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 83.82 50.8) (xy 81.28 50.8)) (stroke (width 0) (type default)) (uuid 68ce4e2d-e502-5ae7-866b-d1b19b1289b6))
+  (hierarchical_label "MOSI" (shape input) (at 81.28 50.8 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid b6f079bb-31e8-59c5-bcdd-b6b12766540f)
+    (property "Dir" "in" (at 81.28 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/spi-link" (at 81.28 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "spi-series-r" (at 81.28 50.8 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 193.04 138.43) (xy 193.04 135.89)) (stroke (width 0) (type default)) (uuid 9f6395e9-6fa4-5d19-bf95-a0abd49d22cd))
+  (hierarchical_label "CS_MOD" (shape input) (at 193.04 135.89 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 3617a679-adfe-5a53-b611-94c33237faf2)
+    (property "Dir" "in" (at 193.04 135.89 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/spi-link" (at 193.04 135.89 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "spi-series-r" (at 193.04 135.89 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 33.02 96.52) (xy 30.48 96.52)) (stroke (width 0) (type default)) (uuid 43fe2222-a1e7-5d5f-8115-66605cd5ded7))
+  (hierarchical_label "CS_MOD" (shape input) (at 30.48 96.52 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 514ddc6c-8a8c-527a-b93c-2bea32900478)
+    (property "Dir" "in" (at 30.48 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "interfaces/spi-link" (at 30.48 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "spi-series-r" (at 30.48 96.52 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 48.26 50.8) (xy 50.8 50.8)) (stroke (width 0) (type default)) (uuid f99b1322-e91f-56e4-a79e-4c7a9beb61f3))
+  (hierarchical_label "SCLK_DAC" (shape output) (at 50.8 50.8 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 9eac43d1-30c1-5566-8525-7a012e3a9f35)
+    (property "Dir" "out" (at 50.8 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "module/dac8568" (at 50.8 50.8 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 40.64 184.15) (xy 40.64 181.61)) (stroke (width 0) (type default)) (uuid bec8d7b4-d8b8-5a55-8c8a-336623f3cb7d))
+  (hierarchical_label "SCLK_DAC" (shape output) (at 40.64 181.61 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid ec15721b-867b-5a26-b978-6c0c1bfdacce)
+    (property "Dir" "out" (at 40.64 181.61 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "module/dac8568" (at 40.64 181.61 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 99.06 50.8) (xy 101.6 50.8)) (stroke (width 0) (type default)) (uuid 49489774-3070-51c5-a904-88e5c187c6ab))
+  (hierarchical_label "DIN" (shape output) (at 101.6 50.8 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid ff7a1491-778d-5cbd-aa8d-f4c767c87b79)
+    (property "Dir" "out" (at 101.6 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "module/dac8568" (at 101.6 50.8 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 91.44 184.15) (xy 91.44 181.61)) (stroke (width 0) (type default)) (uuid da7e0ee1-8faa-586c-855d-c20cfa446bc9))
+  (hierarchical_label "DIN" (shape output) (at 91.44 181.61 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid a0452c69-2328-5d0a-b77c-6381d4767bbd)
+    (property "Dir" "out" (at 91.44 181.61 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "module/dac8568" (at 91.44 181.61 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 48.26 96.52) (xy 50.8 96.52)) (stroke (width 0) (type default)) (uuid 51d91bd0-8137-54c6-9796-69c9a05bea83))
+  (hierarchical_label "SYNC" (shape output) (at 50.8 96.52 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 2f0838f3-14ef-5d0f-bd94-2a668361c906)
+    (property "Dir" "out" (at 50.8 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "module/dac8568" (at 50.8 96.52 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 142.24 184.15) (xy 142.24 181.61)) (stroke (width 0) (type default)) (uuid 682ccf20-f12b-582b-bda8-ee14641e2bed))
+  (hierarchical_label "SYNC" (shape output) (at 142.24 181.61 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 54b0417f-df09-5e16-8de1-e272d09eda03)
+    (property "Dir" "out" (at 142.24 181.61 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "module/dac8568" (at 142.24 181.61 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 142.24 38.1) (xy 142.24 35.56)) (stroke (width 0) (type default)) (uuid b33963d9-fb3c-5152-bb6a-cfe38d213df3))
+  (hierarchical_label "LOGIC_5V" (shape input) (at 142.24 35.56 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid ce761c18-4cb7-57d2-89f0-b55e87332bf7)
+    (property "Dir" "in" (at 142.24 35.56 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 142.24 35.56 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 40.64 138.43) (xy 40.64 135.89)) (stroke (width 0) (type default)) (uuid 5db46d06-4385-56e4-8177-cfb26d30d190))
+  (hierarchical_label "LOGIC_5V" (shape input) (at 40.64 135.89 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 83f472e0-ee4f-540f-b89f-cab558d7a14a)
+    (property "Dir" "in" (at 40.64 135.89 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 40.64 135.89 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 142.24 191.77) (xy 142.24 194.31)) (stroke (width 0) (type default)) (uuid df05d631-1e7f-5698-981d-f4b4cc96ecd5))
+  (hierarchical_label "DAC_AVDD" (shape input) (at 142.24 194.31 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 78da9783-baf5-56da-afcb-2c60039968ad)
+    (property "Dir" "in" (at 142.24 194.31 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 142.24 194.31 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dac-rail" (at 142.24 194.31 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 142.24 63.5) (xy 142.24 66.04)) (stroke (width 0) (type default)) (uuid 74955910-4598-5d5f-87dd-51a5d70cfec1))
+  (hierarchical_label "DIG_GND" (shape passive) (at 142.24 66.04 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid c0af4363-9ead-5960-aba5-b0ba5dbcb34f)
+    (property "Dir" "ref" (at 142.24 66.04 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 142.24 66.04 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 142.24 66.04 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 40.64 57.15) (xy 40.64 59.69)) (stroke (width 0) (type default)) (uuid a7b2a1cf-79dd-54ae-9ea6-df2d3467ff8d))
+  (hierarchical_label "DIG_GND" (shape passive) (at 40.64 59.69 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 565cbe75-a18f-5a40-87bd-94f4974a802b)
+    (property "Dir" "ref" (at 40.64 59.69 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 40.64 59.69 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 40.64 59.69 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 91.44 57.15) (xy 91.44 59.69)) (stroke (width 0) (type default)) (uuid 874b8603-9ca2-5b0d-9c02-5e6d03d873cf))
+  (hierarchical_label "DIG_GND" (shape passive) (at 91.44 59.69 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 55a09eb1-efd2-50e2-b3c5-bf89392184b5)
+    (property "Dir" "ref" (at 91.44 59.69 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 91.44 59.69 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 91.44 59.69 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 40.64 102.87) (xy 40.64 105.41)) (stroke (width 0) (type default)) (uuid 09c6ade3-9509-5a38-96ca-0245d5ce5512))
+  (hierarchical_label "DIG_GND" (shape passive) (at 40.64 105.41 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 028ad532-78b1-5cbb-8cbb-ee1bc25f5d6a)
+    (property "Dir" "ref" (at 40.64 105.41 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 40.64 105.41 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 40.64 105.41 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 91.44 102.87) (xy 91.44 105.41)) (stroke (width 0) (type default)) (uuid 984b2d27-be2f-567d-88ba-4efd14a9cae3))
+  (hierarchical_label "DIG_GND" (shape passive) (at 91.44 105.41 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid af3283df-eb2a-5a5c-a2b6-adefb5aea11b)
+    (property "Dir" "ref" (at 91.44 105.41 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 91.44 105.41 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 91.44 105.41 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 83.82 96.52) (xy 81.28 96.52)) (stroke (width 0) (type default)) (uuid 87c21b39-779b-5e01-9c18-4161f088caf0))
+  (hierarchical_label "DIG_GND" (shape passive) (at 81.28 96.52 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 0233e890-42d7-5623-8023-a262a8e290f5)
+    (property "Dir" "ref" (at 81.28 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 81.28 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 81.28 96.52 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 91.44 146.05) (xy 91.44 148.59)) (stroke (width 0) (type default)) (uuid 55ebd1de-f76f-5b18-9b1a-7534df37202a))
+  (hierarchical_label "DIG_GND" (shape passive) (at 91.44 148.59 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 65c22dc3-e3b0-5007-9d86-ccb7e78b2795)
+    (property "Dir" "ref" (at 91.44 148.59 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 91.44 148.59 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 91.44 148.59 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 142.24 146.05) (xy 142.24 148.59)) (stroke (width 0) (type default)) (uuid 53c22486-637d-5998-b12d-b6aac5941e58))
+  (hierarchical_label "DIG_GND" (shape passive) (at 142.24 148.59 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid c1c851d2-aab7-5965-ac1d-e7a149c81566)
+    (property "Dir" "ref" (at 142.24 148.59 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 142.24 148.59 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 142.24 148.59 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 40.64 191.77) (xy 40.64 194.31)) (stroke (width 0) (type default)) (uuid a9c0d82c-cfd6-55df-bb72-651970c055f1))
+  (hierarchical_label "DIG_GND" (shape passive) (at 40.64 194.31 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 8a481e89-742f-51ac-b586-f178a54797ed)
+    (property "Dir" "ref" (at 40.64 194.31 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 40.64 194.31 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 40.64 194.31 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 91.44 191.77) (xy 91.44 194.31)) (stroke (width 0) (type default)) (uuid c52314d1-9e5c-5c3f-acc4-55c484d61d38))
+  (hierarchical_label "DIG_GND" (shape passive) (at 91.44 194.31 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid c28e6e35-4b28-5ec2-b7fb-b7503f4940a9)
+    (property "Dir" "ref" (at 91.44 194.31 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 91.44 194.31 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 91.44 194.31 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 40.64 146.05) (xy 40.64 148.59)) (stroke (width 0) (type default)) (uuid 201b5209-73ef-5fc0-bdaa-4b165f45abaf))
+  (hierarchical_label "DIG_GND" (shape passive) (at 40.64 148.59 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid de9a1960-5db5-55e4-916f-3119adf4f6b4)
+    (property "Dir" "ref" (at 40.64 148.59 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 40.64 148.59 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 40.64 148.59 0) (effects (font (size 1.27 1.27)) hide)))
+  (no_connect (at 99.06 96.52) (uuid 7b87abc1-7c8d-5875-90c8-099dd4146a63))
+  (wire (pts (xy 193.04 146.05) (xy 193.04 148.59)) (stroke (width 0) (type default)) (uuid 5c494797-04ed-417b-a428-4bdee0790aaa))
+  (hierarchical_label "LOGIC_5V" (shape input) (at 193.04 148.59 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid b7ee6fe6-d173-4f2c-98e4-58cb356aa518)
+    (property "Dir" "in" (at 193.04 148.59 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 193.04 148.59 0) (effects (font (size 1.27 1.27)) hide)))
+  (text "FROM THE HAND-WRITTEN NETLIST THIS SHEET REPLACES (verbatim; the part notes are on each part's Note field):\n\nA LONE NO-CONNECT PIN'S NET IS NAMED AFTER THE PIN (the export names it so, whatever label it carries), so the\none-pin net the text below names is, on this sheet: SPARE_GATE_OUT is 4Y.\n\nAUTHORITATIVE for connectivity. The ASCII drawing in digital-and-supervision.md is a REPRESENTATION of this\nfile.\n\nALL SIX MODULE-END SPI PULLS ARE PLACED HERE (five R-SPI-PULL, and R-PULL-CS of R-CS-PULL-MOD). The row lives in interfaces/spi-link's bom.csv because that page\nderives the values, but the resistors are on the module board on both sides of this buffer, and the drawing\nabove shows both triples. Owning a row and placing an instance are different things; `of:` is what says so.\n\nThe cable-side CS pull is 100k to LOGIC_5V - see the bottom.\n\n[pins] WHICH SIGNAL GETS WHICH GATE IS ASSIGNED HERE AND NOWHERE ELSE [derived, not cited]. No page states it;\na netlist has to. Gate 4 is the spare the BOM row mentions. Contradict this in the page and the file follows.\n\n--- cable side: the three pulls that hold the BUFFER's inputs ------\n\n--- DAC side: the three that hold the DAC's inputs ----------------\n\nThese were bought for the state the cable-side three do not reach: module alive, instrument off, which is\nNORMAL and not a fault.\n\n[DIG_GND] THE FOUR ENABLES ARE TIED, NOT DRIVEN. OE_MOD is in hardware/nets.yaml's `retired:` section for\nexactly this reason: the comparator that gated it is not fitted, so there is no net crossing a boundary - just\nfour pins on the local ground.\n\n[4Y] THE SPARE GATE'S INPUT IS TIED, and it is tied because the BOM row says \"TIE EVERY UNUSED INPUT TO VCC OR\nGND\" - a floating CMOS input on an enabled gate is the one wrong answer. GND is chosen over VCC because the\npart has no input clamp to VCC and the ground tie cannot inject current into an unpowered rail. Its output\ndrives nothing, which is fine.\n\nTHE CABLE-SIDE CS PULL-UP, SETTLED 2026-09-30 (owner: 'Fix the SPI pull up'). CS_MOD has two pulls now, one at each end: R-CS-PULL-INST, 10k to 3V3 on the main board, where 3V3 exists, and R-PULL-CS here, 100k to LOGIC_5V. The strong one holds CS high while the ESP32 boots; the weak one holds it high with nothing plugged in, and is weak enough that a plugged-in, unpowered instrument sees ~45 uA into its dead 3V3 rail instead of 430 uA through its clamp. A pull-DOWN here was proposed and not fitted: the 74AHCT125 does not invert, so it would hold SYNC LOW - selected - whenever the umbilical is out. interfaces/spi-link/spi-link.md carries the three states." (at 256.54 38.099999999999994 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid cd626b92-20f2-58b8-b2aa-b31952beacda))
+  (sheet_instances (path "/" (page "1")))
+)

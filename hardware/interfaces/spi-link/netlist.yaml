@@ -1,92 +1,127 @@
-# AUTHORITATIVE for connectivity: THE UMBILICAL ITSELF.
-#
-# This circuit is named for the SPI half and it carries all eight conductors.
-# J-UMBILICAL is one connector with one pin map - umbilical-pinmap - and four
-# of its eight belong to other circuits' nets: the breath pair is
-# interfaces/breath-sense-link's and the power pair is the load switch's and
-# the module's star's. They are declared here because the CONNECTOR is here,
-# not because the nets are.
-#
-# THE CABLE IS NOT A COMPONENT. CABLE-UMB is a straight Cat5e patch lead: pin
-# N to pin N, with no pin map of its own to get wrong. Netting sixteen
-# conductor ends to say "1 goes to 1" would add length and no truth.
-#
-# THIS CIRCUIT'S OWN THREE BOM ROWS ARE PLACED ELSEWHERE, and that is correct:
-# it derives R-SPI-PULL's values and R-SPI-SER's 100 ohm, but the six pulls
-# are on the module board (module/digital-and-supervision) and the three
-# series resistors are on the carrier (carrier/carrier). Owning a row and
-# placing an instance are different things.
+# GENERATED from hardware/interfaces/spi-link/spi-link.kicad_sch by tools/kicad.py - DO NOT EDIT.
+# The KiCad sheet is authoritative for this circuit: edit it in KiCad 9, then run
+#   python3 tools/kicad.py export hardware/interfaces/spi-link
+# Every note and argument that used to live in this file is on the sheet
+# (part fields, sheet text) or on spi-link.md.
 
 circuit: interfaces/spi-link
 title: SPI link and umbilical
 page: spi-link.md
-
 ports:
-  SCLK:            {dir: in,  from: carrier/carrier, figure: umbilical-pinmap}
-  MOSI:            {dir: in,  from: carrier/carrier, figure: umbilical-pinmap}
-  CS_MOD:          {dir: in,  from: carrier/carrier, figure: umbilical-pinmap}
-  DIG_GND:         {dir: ref, from: module/power-entry, figure: umbilical-pinmap}
-  BREATH_SENSE:    {dir: in,  from: interfaces/breath-sense-link, figure: umbilical-pinmap}
-  AGND_SENSE:      {dir: in,  from: interfaces/breath-sense-link, figure: umbilical-pinmap}
-  UMBILICAL_POS12: {dir: in,  from: module/umbilical-load-switch, figure: umbilical-current}
-  PWR_GND:         {dir: ref, from: module/power-entry, figure: umbilical-pinmap}
-
+  AGND_SENSE:
+    dir: in
+    from: interfaces/breath-sense-link
+    figure: umbilical-pinmap
+  BREATH_SENSE:
+    dir: in
+    from: interfaces/breath-sense-link
+    figure: umbilical-pinmap
+  CS_MOD:
+    dir: in
+    from: carrier/carrier
+    figure: umbilical-pinmap
+  DIG_GND:
+    dir: ref
+    from: module/power-entry
+    figure: umbilical-pinmap
+  MOSI:
+    dir: in
+    from: carrier/carrier
+    figure: umbilical-pinmap
+  PWR_GND:
+    dir: ref
+    from: module/power-entry
+    figure: umbilical-pinmap
+  SCLK:
+    dir: in
+    from: carrier/carrier
+    figure: umbilical-pinmap
+  UMBILICAL_POS12:
+    dir: in
+    from: module/umbilical-load-switch
+    figure: umbilical-current
 components:
-
+  J-UMB:
+    value: 8-way 2.54mm right-angle pin header
+    pins:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    note: On the main board's tongue, soldered into it and into the umbilical adapter, where the carrier's nets
+      reach the umbilical. Pin N is J-UMB-INST pin N through the adapter's tracks; D-REVSHUNT and U-TVS-SPI sit
+      at it
+  J-UMB-INST:
+    of: J-UMBILICAL-INST
+    value: NE8FAV
+    pins:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    note: 'The instrument''s, behind the tail cap on the umbilical adapter (ADR 0021). Its G tab is not a pin of
+      the umbilical and goes nowhere: the housing is plastic, isolated to panel ground [ds]'
   J-UMB-MOD:
     of: J-UMBILICAL
-    value: "Neutrik etherCON D-series chassis"
-    pins: [1, 2, 3, 4, 5, 6, 7, 8]
-    note: "The module panel's. BORE IS D24.0 mm MINIMUM, which in a 50.50 mm 10HP panel leaves 13.25 mm each side - that is a panel constraint before it is a connector choice"
-
-  J-UMB-INST:
-    of: J-UMBILICAL
-    value: "Neutrik etherCON D-series chassis"
-    pins: [1, 2, 3, 4, 5, 6, 7, 8]
-    note: "The instrument's, at the tail"
-
+    value: Neutrik NE8FAV
+    pins:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    note: 'The module panel''s: a Neutrik NE8FAV, the same part as the instrument''s end (ADR 0023), soldered to
+      the module main board; its bore and screw holes are the module CAD''s (mechanical/module/export/panel.dxf,
+      ADR 0024)'
 nets:
-
-  # THE PAIRING IS THE ARGUMENT, not the numbering. Each signal travels with
-  # its own return in a twisted pair: BREATH with AGND, +12V with PWR_GND,
-  # SCLK with MOSI, CS with DIG_GND.
-
-  BREATH_SENSE:
-    - port: BREATH_SENSE
-    - J-UMB-INST.1
-    - J-UMB-MOD.1
-
   AGND_SENSE:
-    - port: AGND_SENSE
-    - J-UMB-INST.2
-    - J-UMB-MOD.2
-
-  UMBILICAL_POS12:
-    - port: UMBILICAL_POS12
-    - J-UMB-MOD.3
-    - J-UMB-INST.3
-
-  SCLK:
-    - port: SCLK
-    - J-UMB-INST.4
-    - J-UMB-MOD.4
-
-  MOSI:
-    - port: MOSI
-    - J-UMB-INST.5
-    - J-UMB-MOD.5
-
-  PWR_GND:
-    - port: PWR_GND
-    - J-UMB-MOD.6
-    - J-UMB-INST.6
-
+  - port: AGND_SENSE
+  - J-UMB.2
+  - J-UMB-INST.2
+  - J-UMB-MOD.2
+  BREATH_SENSE:
+  - port: BREATH_SENSE
+  - J-UMB.1
+  - J-UMB-INST.1
+  - J-UMB-MOD.1
   CS_MOD:
-    - port: CS_MOD
-    - J-UMB-INST.7
-    - J-UMB-MOD.7
-
+  - port: CS_MOD
+  - J-UMB.7
+  - J-UMB-INST.7
+  - J-UMB-MOD.7
   DIG_GND:
-    - port: DIG_GND
-    - J-UMB-MOD.8
-    - J-UMB-INST.8
+  - port: DIG_GND
+  - J-UMB.8
+  - J-UMB-INST.8
+  - J-UMB-MOD.8
+  MOSI:
+  - port: MOSI
+  - J-UMB.5
+  - J-UMB-INST.5
+  - J-UMB-MOD.5
+  PWR_GND:
+  - port: PWR_GND
+  - J-UMB.6
+  - J-UMB-INST.6
+  - J-UMB-MOD.6
+  SCLK:
+  - port: SCLK
+  - J-UMB.4
+  - J-UMB-INST.4
+  - J-UMB-MOD.4
+  UMBILICAL_POS12:
+  - port: UMBILICAL_POS12
+  - J-UMB.3
+  - J-UMB-INST.3
+  - J-UMB-MOD.3

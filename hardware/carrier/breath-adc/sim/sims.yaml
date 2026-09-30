@@ -1,0 +1,83 @@
+# The breath ADC's input: the anti-alias filter's response and time constant (the
+# latency term latency-budget.md books), and the MCP3202's sample capacitor drawing on
+# C-AA-ADC once per loop - the page's 'sample-cap charge sharing'. Values from this
+# circuit's netlist; the MCP3202's input model from its banked datasheet. Run:
+#   python3 tools/sim.py run hardware/carrier/breath-adc/sim
+title: Breath ADC - anti-alias filter and sample-capacitor kickback
+values:
+  netlist: hardware/carrier/breath-adc/netlist.yaml
+
+params:
+  v_fs:     {value: {fig: sensor-full-scale}, source: "the buffered sensor output at full scale (sensor-full-scale)"}
+  vdd:      {value: 3.3, source: "the MCP3202's VDD, which is its reference: the dev board's 3V3 (breath-adc.md)"}
+  r_ss:     {value: 1000.0, source: "the MCP3202's sampling switch resistance R_SS, 1 kohm typical [datasheets/analog/MCP3202-CI-SN.pdf p.3, Figure 4-1]; no min or max (vary)"}
+  c_sample: {value: 20.0e-12, source: "C_SAMPLE, 20 pF typical [same]; no min or max (vary)"}
+  f_clk:    {value: 0.9e6, source: "the ADC's SPI clock, 900 kHz (spi-link.md, 'The two SPI hosts')"}
+  t_loop:   {value: 250.0e-6, source: "the loop period, one sample per pass (loop-budget: 250 us)"}
+  k0:       {value: 0.0, source: "the source before the step, as a fraction of v_fs (each sim sets it)"}
+  k1:       {value: 1.0, source: "after it"}
+  t_step:   {value: 1.0e-3}
+  t_edge:   {value: 1.0e-6}
+  t_end:    {value: 10.0e-3}
+  f_buck:   {value: 330.0e3, source: "the R-78E5.0's switching rate, ~330 kHz (breath-adc.md, 'Anti-alias')"}
+
+derived:
+  t_step_e: "v['t_step'] + v['t_edge']"
+  v0: "v['k0'] * v['v_fs']"
+  v1: "v['k1'] * v['v_fs']"
+  t_sample: "1.5 / v['f_clk']"
+  t_first: "v['t_loop'] / 2"
+  t_rst: "v['t_first'] + 1.5 / v['f_clk'] + 20e-6"
+  t_rst_w: "v['t_loop'] - 1.5 / v['f_clk'] - 40e-6"
+  ratio: "v['R-ADCDIV-L'] / (v['R-ADCDIV-U'] + v['R-ADCDIV-L'])"
+  lsb: "v['vdd'] / 4096"
+
+vary:
+  R-ADCDIV-U: {tol: from-value}
+  R-ADCDIV-L: {tol: from-value}
+  C-AA-ADC:   {tol: [-0.05, 0.05], source: "C0G +/-5 % [assumption: the netlist value states none]"}
+  r_ss:       {tol: [-0.5, 1.0], source: "a typical only; half to twice [assumption]"}
+  c_sample:   {tol: [-0.25, 0.25], source: "a typical only [assumption]"}
+
+sims:
+  - name: filter
+    deck: adc-ac.cir
+    vary: [R-ADCDIV-U, R-ADCDIV-L, C-AA-ADC]
+    measures: [f_3db, atten_buck_db]
+    post:
+      f_3db: "cross(w['hdb'], at(w['hdb'], 1.0) - 3.0103, 1.0)"
+      atten_buck_db: "at(w['hdb'], 1.0) - at(w['hdb'], p['f_buck'])"
+    asserts:
+      - expr: "abs(nom['f_3db'] - 564) < 6"
+        why: "the page's 564 Hz corner, 1/(2 pi x 6.0 kohm x 47 nF)"
+      - expr: "min['atten_buck_db'] > 54"
+        why: "the page's 55 dB at the buck's ~330 kHz: one pole, nothing else to it"
+  - name: step
+    # a full-scale step from rest: the time constant the loop reads the note-on through
+    deck: adc.cir
+    set: {k0: 0.0, k1: 1.0, t_step: 0.5e-3, t_end: 3.0e-3}
+    vary: [R-ADCDIV-U, R-ADCDIV-L, C-AA-ADC]
+    measures: [tau]
+    post:
+      tau: "cross(w['adc'], (1 - math.exp(-1)) * p['v1'] * p['ratio'], p['t_step']) - p['t_step']"
+    asserts:
+      - expr: "abs(nom['tau'] - 282e-6) < 5e-6"
+        why: "the page's tau = 6 kohm x 47 nF = 282 us, the term latency-budget.md books (the sample kickback does not move it)"
+  - name: kickback
+    # the sensor at full scale, held; twelve samples (ten time constants), each from a
+    # discharged C_SAMPLE
+    deck: adc.cir
+    set: {k0: 1.0, k1: 1.0, t_end: 3.0e-3}
+    measures: [err_lsb, droop_lsb, settle_frac]
+    post:
+      # what C_SAMPLE holds when the last sample's window closes, against the divider's
+      # own DC value, in LSB of VDD/4096
+      err_lsb: "(at(w['cs'], p['t_first'] + 11 * p['t_loop'] + p['t_sample'] - 20e-9) - p['v1'] * p['ratio']) / p['lsb']"
+      droop_lsb: "(p['v1'] * p['ratio'] - trough(w['adc'], p['t_first'] + 11 * p['t_loop'], p['t_first'] + 11 * p['t_loop'] + p['t_sample'])) / p['lsb']"
+      # how far C_SAMPLE got from 0 V towards ADC_IN inside the window: 1 means fully charged
+      settle_frac: "at(w['cs'], p['t_first'] + 11 * p['t_loop'] + p['t_sample'] - 20e-9) / at(w['adc'], p['t_first'] + 11 * p['t_loop'] + p['t_sample'] - 20e-9)"
+    asserts:
+      - expr: "min['err_lsb'] > -4 and max['err_lsb'] < 0"
+        why: "a pure gain term, under 4 LSB at every corner (adc-sample-kickback; C_SAMPLE and R_SS are typicals only). The average-current model (80 nA/V through 6 kohm) leaves out the instantaneous share each sample takes from C-AA-ADC, 20 pF/47 nF of it [calc: 0.043 %, 1.5 LSB at full scale], which the next sample finds only partly restored"
+      - expr: "min['settle_frac'] > 0.9999"
+        why: "C_SAMPLE charges fully inside t_SAMPLE (1.5 clocks at 900 kHz, 1.67 us against R_SS x C_SAMPLE = 20 ns): what it holds is C-AA-ADC's voltage, not a partial charge"

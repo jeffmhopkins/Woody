@@ -11,8 +11,8 @@ This circuit has a directory of its own because it crosses a board boundary.
 The differential pole, the effective gain and `inamp-full-scale` with it, the
 sensor span and pedestal, the CMRR term and the `R1` power argument are all
 derived at the module end from parts fitted at the instrument end, 2 m away,
-inside a body that opens only by lifting the lid, disturbing the loom and
-re-laying the gasket (ADR 0009).
+inside a body that opens only by cutting its silicone and lifting the key
+plate off the cassette's columns (ADR 0025).
 
 **Neither schematic is redrawn here.** The instrument end is drawn in
 [`carrier.md`](../../carrier/carrier.md) §2, in one connected picture that also
@@ -52,10 +52,10 @@ The `Dir` and `Peer` columns are defined once in
 | `BREATH_SENSE` | instrument → module | out | `carrier/carrier.md` §2 → `module/breath-receive-stage` | `umbilical-pinmap`, `sensor-full-scale` | The sensor's buffered output, on `J-UMB`. Leaves through the instrument-side `R1` and drives `IN−` through `R3`. **Not `BREATH_OUT`**, the module's jack, which is the far end of the output stage |
 | `AGND_SENSE` | instrument → module | out | `carrier/carrier.md` §2 → `module/breath-receive-stage` | `umbilical-pinmap`, `dig-gnd-topology` | The instrument's analog star exported on `J-UMB`. Leaves through the instrument-side `R1b` and drives `IN+` through `R2`. **A signal leg, not a local ground**, and the twisted pair's other conductor. It is neither `AGND_MOD` nor `AGND_INST` — `R1b` is between it and the star |
 | `R1`, `R1b` (`R-SER-BREATH-INST`) | instrument | — | — | — | This circuit's own parts, drawn in `carrier.md` §2, one in each leg. Both legs' series resistance sets the differential pole against `C_diff`, and their match is what the bias pair's balance is measured against. Unretrofittable |
-| `U-BREATH` (MPXV4006DP) | instrument | — | — | `sensor-full-scale`, `breath-working-point` | This circuit's own part, drawn in `carrier.md` §2. Sets the span the module end multiplies and the pedestal `TRIM-BREATH-ZERO` nulls |
+| `U-BREATH` (MPXV4006DP) | instrument | — | — | `sensor-full-scale`, `breath-working-point` | This circuit's own part, drawn in `carrier.md` §2, **soldered to the main board at its mouth end** (*Mounting*, below). Sets the span the module end multiplies and the pedestal `TRIM-BREATH-ZERO` nulls |
 | `VS` excitation | instrument | in | `carrier/breath-excitation-reference` | `riso-ref-topology`, `cref-out-node`, `opa2197-output-impedance` | The sensor's excitation, and its own circuit |
 | buffered sensor output | instrument | out | `carrier/breath-adc` | — | The same node that feeds `R1`. The instrument's own copy of breath leaves here and does not cross |
-| `D-TVS-BREATH` ×2 | instrument | — | — | — | This circuit's own parts, at the connector, on both legs |
+| `D-TVS-BREATH` ×2 | instrument | — | — | — | This circuit's own parts, at the connector, on both legs, **to `PWR_GND`** (the plane at `J-UMB`, `power-entry-instrument.md` §2), never to the analog island |
 | `R2`, `R3`, `C_diff`, `C_cm` ×2, `R4`, `R5` | module | — | `module/breath-receive-stage` | — | The receive filter and the common-mode bias return, all module-side |
 | in-amp output | module | out | `module/breath-receive-stage` → `module/breath-output-stage` | `inamp-full-scale` | Into the panel GAIN/OFFSET stage, which inverts. **The figure is owned at the module end and derived here** |
 | `REF` | module | in | `module/breath-receive-stage` | `breath-zero-ref`, `dac-rail` | The buffered trimmer that nulls the instrument's pedestal, fed from the `DAC AVDD` rail. Its own section stayed on the module page |
@@ -63,6 +63,168 @@ The `Dir` and `Peer` columns are defined once in
 | `±12 V` | module | in | `module/breath-receive-stage` | — | The module analog rails, sourced by `module/power-entry`: the INA828, both OPA2197 halves, and the BAV99 legs |
 | presence detect on the pair | module | — | `module/link-supervision` | — | **Not fitted.** The deleted LM311 watched `BREATH_SENSE`/`AGND_SENSE` to gate `OE_MOD`; its threshold sat inside the breath signal's own range |
 | `CLR` | module | — | — | — | **Reaches no part of this circuit.** It is `module/dac8568`'s, and nothing drives it |
+
+---
+
+## The sheet, and which board places what
+
+**The source is [`breath-sense-link.kicad_sch`](breath-sense-link.kicad_sch)**
+(ADR 0019; render [`breath-sense-link.sch.png`](breath-sense-link.sch.png)).
+[`netlist.yaml`](netlist.yaml) is exported from it
+(`python3 tools/kicad.py export hardware/interfaces/breath-sense-link`) and must
+not be edited. It was first written from the hand-written netlist and compared
+with it part by part and net by net: no change. The sensor's N/C pins (1, 5–8)
+are on the symbol and on no net, as before. The drawing on
+[`carrier.md`](../../carrier/carrier.md) §2 stays a representation.
+
+**Every part on this sheet is on the main board, and the main board places
+this sheet once** (`hardware/boards/main-board`, since 2026-09-30). The
+umbilical conductors leave it on `interfaces/spi-link` (`J-UMB` pins 1 and 2),
+and the module end (`R-SER-BREATH`, the in-amp) is
+`module/breath-receive-stage`'s. So the board follows this sheet rather than
+restating it, and `tools/kicad.py export hardware/boards/main-board` carries
+every change here into `board-netlist.yaml`:
+
+| Part on this sheet | BOM row | Main-board reference |
+|---|---|---|
+| `U-BREATH` | `U-BREATH` | `U10` |
+| `R1`, `R1b` | `R-SER-BREATH-INST` | `R38`, `R39` |
+| `D-TVS-BREATH-SIG`, `D-TVS-BREATH-RET` | `D-TVS-BREATH` | `D5`, `D6` |
+
+The placement replaced five parts drawn on the board's root sheet; the board's
+flattened netlist was compared before and after, net by net and pin by pin,
+and is unchanged `[repo, board-netlist.yaml]`.
+
+## Mounting — `U-BREATH` is soldered to the main board
+
+*Written 2026-09-26, not moved. The verbatim sections below are unaffected.*
+
+**The MPXV4006DP is a surface-mount part, and it solders straight to the main
+board. There is no socket.** Every datasheet figure here is read off
+`datasheets/analog/MPXV4006DP.pdf` (Freescale MPXV4006, 22 pages); page numbers
+are the sheet's own.
+
+| Fact | Where |
+|---|---|
+| MPXV4006DP, case 1351, is ticked **Surface Mount** in the ordering table; the through-hole cases are 1560, 482B and 482C | `[ds p.1]`; p.2 files case 1351-01 under "Small Outline Package Surface Mount" |
+| Case 1351-01 is an 8-lead gull-wing small outline package: body 11.81–12.32 mm square, lead pitch `e` 2.54 mm BSC, lead width `b` 0.96–1.07 mm, tip-to-tip `E` 17.27–17.78 mm, foot `L` 1.02–1.52 mm, height `A` 9.39–9.91 mm, both ports on one face, `F` 6.10–6.60 mm long | `[ds p.7]` outline (drawn, not in the text layer), `[ds p.20]` the same with its dimension table |
+| Pinout **Style 2**: pin 2 `VS`, pin 3 `GND`, pin 4 `VOUT`, pins 1 and 5–8 N/C | `[ds p.4]` Figure 1, the MPXV4006's own schematic: `VS` pin 2, `GND` pin 3, `Vout` pin 4, *"Pins 1, 5, 6, 7, and 8 are NO CONNECTS for small outline package device"* — which is Style 2 of the case outline `[ds p.8, p.20]`. Buzz it out on arrival as a check, not as the source |
+| P1 is the **side with the part marking** | `[ds p.6]` Table 3 |
+| The ports are **staggered** on the port face: `M` 6.86–7.37 mm apart vertically and `N` 4.06–4.57 mm apart laterally | `[ds p.7]` — `M` is dimensioned in the **side** view, `N` in the **end** view; both in the p.20 table. With the marking on top as mounted, **P1 is the upper port and P2 the one nearest the board** — an inference, the same one `config/body.yaml` `boards.sensor_port_z` models (and `boards.sensor_port_offset` the stagger). Check the marking on the part in hand |
+| The recommended footprint, Figure 6, is drawn for **case 482**, not 1351 | `[ds p.6]` |
+| No reflow profile, no hand-soldering guidance and no soldering temperature anywhere in the sheet | `[ds pp.1–22]`, searched. p.6 says only that the packages self-align under reflow on the right footprint |
+| Mounting stress and position shift the zero; the output must be auto-zeroed after installation | `[ds p.3]` Note 5 |
+| Media other than dry air may affect performance and reliability | `[ds p.5]` |
+
+### Land pattern — from the case 1351-01 outline, with Figure 6's pad
+
+Figure 6 is 8 pads of 2.54 × 1.52 mm (along × across the lead) at 2.54 mm
+pitch, the two rows 16.76 mm apart **centre to centre** `[ds p.6]` — read off
+the figure's vector geometry, whose dimension lines land on the pad centres.
+That spacing fits case 482's wider lead span (`S` 18.01–18.41 mm `[ds p.11]`).
+For case 1351 the rows close up to the feet, and the pads are lengthened
+inward so the heel gets at least the toe's margin `[calc]`:
+
+```
+foot centre to foot centre = E_nom − L_nom = 17.525 − 1.27 = 16.26 mm   [ds p.20]
+feet can occupy  E_min − 2·L_max … E_max  =  14.23 … 17.78 mm
+
+Figure 6's 2.54 mm pad centred on the feet (±8.13):
+   copper 13.72 … 18.80   toe (18.80 − 17.78)/2 = 0.51   heel (14.23 − 13.72)/2 = 0.25
+
+lengthened inward to 2.80 mm, outer edge kept at ±9.40:
+   inner edge 9.40 − 2.80 = 6.60   →  copper 13.20 … 18.80
+   pad centre (9.40 + 6.60)/2 = 8.00  →  rows 16.00 mm centre to centre
+   toe  (18.80 − 17.78)/2 = 0.51 mm   heel (14.23 − 13.20)/2 = 0.515 mm
+   clear of the body: 6.60 − E1_max/2 = 6.60 − 6.16 = 0.44 mm
+pad gap across the pitch: 2.54 − 1.52 = 1.02 mm of solder mask
+```
+
+A 0.25 mm heel is thin against the ~0.35 mm IPC-7351 nominal heel for
+gull-wing leads `[from memory]`, and the heel fillet is the one that holds a
+gull-wing joint, so the pad grows inward — the toe and the outer edge do not
+move, and the pad still stops short of the body. Figure 6 as printed would
+still put every 1351 foot on copper, but centred 0.25 mm outboard of the feet
+on each side. **Use 2.80 × 1.52 mm pads, rows 16.00 mm centre to centre.**
+Solder mask between pads, as p.6 asks.
+
+### Where it sits
+
+**At the mouth end of the main board, on the far side from the tube, ports
+towards the tail, beside the breath trap** (ADR 0017), parts face up. It is not
+under a key board: the room it has is `mechanical/drc.echo` "breath sensor fits
+at the mouth end". **The buffered breath signal runs the board's length to
+`J-UMB`** (ADR 0017), so `U-BUF` sits beside the sensor and what makes the run
+is the buffer's output, never `SENSOR_RAW`. Route it over its own ground, clear
+of the LED row's data and 12 V and the chain's clock; **E11 is the test**.
+
+**`AGND_SENSE` is taken at the sensor's own `GND` pin** (U-BREATH pin 3),
+not at the star, and runs beside the buffered output as the pair's partner
+the length of the board to `J-UMB` `[calc]`: the in-amp at the module reads
+`BREATH_SENSE − AGND_SENSE`, and the buffer (a follower) reproduces `VOUT` as
+it stands against the sensor's own pin 3. Taken there, whatever the ~13 mA
+of analog supply return (below) drops across `AGND_INST` between the sensor
+and the star is common to both legs and cancels in the in-amp; taken at the
+star, it would be in the difference. Same net, `AGND_INST`, so the netlist
+does not change: it is a layout rule — `R1b`'s star end is a trace of its own
+from pin 3's pad, not a via into the pour. E11 is still the test of the whole run.
+
+### Keeping the zero honest (Note 5)
+
+- **Solder it flat, with no preload**, and keep standoffs and screws out from
+  under it, so closing the lid does not bend the board beneath it.
+- **The tube must not pull on P1.** Support it off the board. A load present
+  at power-on is zeroed with everything else; one that changes after power-on
+  is an offset the zero never saw.
+- **Nothing liquid into either port**, flux or cleaner included `[ds p.5]` —
+  solder the leads, not the port face, and do not wash the board with the
+  sensor fitted.
+- **Mask both ports before `MECH-COAT`** (ADR 0003 and ADR 0009). P2 is open to
+  the cavity and must stay open.
+
+### How it stays a replaceable wear part
+
+ADR 0003 buys two. The spare goes in with an iron, and nothing else:
+
+1. **Open the body** — cut the oak top free and unscrew the key plate from the
+   cassette's columns (ADR 0025). The key boards come away with it on their
+   ribbons (ADR 0017), and the main board's parts face up, so the sensor is in
+   reach in place.
+2. **Pull the tube off P1.**
+3. **Cut the eight leads at the body** with flush cutters — the part is scrap
+   anyway — and lift each stub with the iron. Clear the pads with braid.
+4. **Fit the spare**: marked face up, ports towards the tail. Tack one corner
+   lead, check it sits flat and square, then solder the other seven. Eight
+   gull-wing leads at 2.54 mm pitch with a millimetre of mask between pads are
+   ordinary iron work; no hot air.
+5. **Re-mask both ports and touch up `MECH-COAT`** over the eight joints.
+6. **Re-zero both paths.** Power-cycle for the firmware's power-on zero
+   (`firmware/README.md`), and re-null `TRIM-BREATH-ZERO` at the module for
+   the jack (Note 5 `[ds p.3]`).
+
+**Soldering conditions are open:** the sheet gives none. **Decided by banking
+NXP's soldering note for its pressure-sensor packages, AN3150**, which could
+not be fetched on 2026-09-30 (`datasheets/.manifest-R32.csv`, `BLOCKED`, with
+every URL tried); it must be banked before the sensor is first soldered, at
+the main board's assembly. Until then: a modest iron temperature, one lead at
+a time, short dwell, because the body is thermoplastic (PPS, `[ds p.1]`).
+
+### Not taken: a breakout board on 2.54 mm headers
+
+A small board carrying the sensor and plugged into the main board on 2.54 mm
+headers would make the swap tool-free. Not taken, because:
+
+- **Height.** It lifts the sensor, both ports and the tube by a board thickness
+  plus a mated header pair — `[from memory]` 7–10 mm for 2.54 mm parts — which
+  is most or all of the spare in `mechanical/drc.echo` "breath sensor fits at
+  the mouth end", and moves the tube off the height "breath tube crosses the
+  strip clear of it" was checked at.
+- **Three contacts in the ratiometric path.** `VS`'s DC feedback is taken on
+  the main board (`R-FB-REF`), so a header contact on `VS`, `VOUT` or `GND` is
+  outside the loop — small, but not zero and not stable.
+- **The swap it buys is already available.** The sensor is replaced perhaps
+  once in the instrument's life, with the lid off either way, and the leads
+  are iron-reworkable.
 
 ---
 
@@ -88,8 +250,12 @@ Its real job is **source-impedance balance on the twisted pair** — 1 kΩ
 against ~0 Ω is what a difference amplifier's CMRR actually responds to —
 and that justification appears nowhere in the repo. Without it the link
 CMRR falls from **70.2 dB to 60.2 dB** `[calc, A2]` against an independently
-derived requirement of 58.5 dB: **1.7 dB of margin**, resting on two parts'
-tolerance, inside a body that is expensive to reopen (ADR 0009).
+derived requirement of 58.5 dB — and 60.2 dB is the nominal: at the worst
+tolerance corner the unmatched link is **below** the requirement
+(`breath-link-cmrr`, simulated). With `R1b` fitted the worst case clears it
+at mains; it does not hold to the 500 Hz edge of the breath channel, because
+the `C_cm` mismatch grows with frequency (same figure). Both parts are inside a
+body that is expensive to reopen (ADR 0009).
 
 > One correction to the receive page's own case for `R1b`: it claims the
 > part buys "fifty times" the rejection. With `R1b` fitted the real floor
@@ -106,8 +272,8 @@ on `PWR_GND`.
 
 **Proposed: `PWR_GND`.** `AGND` leaves the board carrying nothing but the in-amp
 sense reference, which is what ADR 0004's rule says and what makes the 2 m run
-work `[repo] 0004`. The local analog pour joins `PWR_GND` at **one** tie, at the
-umbilical connector.
+work `[repo] 0004`. The local analog pour joins `PWR_GND` at **one** tie —
+under the ADC since the board went to four layers, `power-entry-instrument.md` §2.
 
 The cost of getting it the other way `[calc]`, using ADR 0003's own cable figure
 (0.168 Ω for 2 m of 24 AWG, implied by its 8.4 µV / 50 µA row):
@@ -179,7 +345,7 @@ I = (12 − 0.2) / 1 kΩ = 11.8 mA      P = 139 mW
 ```
 
 against an 0805's ~125 mW. **The part fails in the fault the design calls
-survivable**, and it is instrument-side, behind a gasket and a loom.
+survivable**, and it is instrument-side, behind a gasket and a lid.
 `bom.csv` makes exactly this
 argument, in full, for the module-side `R-OUT-PROT` — and it was never carried
 across to the instrument-side twin.
@@ -252,3 +418,9 @@ a correction against the receive page's own case for `R1b` — "fifty times"
 against about 13 dB — and the sentence it is answering is in "`R1` is a 1206,
 and it has a twin". They are now adjacent instead of two files apart. **No
 winner was picked here**, which is not the same as their agreeing.*
+
+**What closes it: the breath-link CMRR simulation** (the INA828 receive stage
+with both 1 kΩ legs and the 1 MΩ bias pair at their tolerances), in progress
+on 2026-09-30. Its CMRR with `R1b` fitted and with `R1b` shorted is the number
+both statements are estimating; whichever it matches stands, and the other is
+corrected to it.

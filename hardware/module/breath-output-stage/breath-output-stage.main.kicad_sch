@@ -1,0 +1,989 @@
+(kicad_sch (version 20250114) (generator "sch.py") (generator_version "9.0")
+  (uuid 1628897f-2ed0-5a6a-9bf2-749dfca7ac5c)
+  (paper "A2")
+  (title_block
+    (title "Breath output stage - the module main board's page (hardware/module/breath-output-stage)")
+    (comment 7 "title: Breath output stage")
+    (date "")
+    (rev "")
+    (company "Woody")
+    (comment 1 "SOURCE - one page of hardware/module/breath-output-stage; edit in KiCad 9, then: python3 tools/kicad.py export hardware/module/breath-output-stage")
+    (comment 2 "Part facts ride on each symbol: Row (BOM row), Pins + Pins_source (pin map and its datasheet), Note")
+    (comment 3 "ADR 0004, ADR 0019, ADR 0023 - the module main board's parts of this circuit")
+    (comment 4 "Page `main` of hardware/module/breath-output-stage/breath-output-stage.kicad_sch; the module main board places it")
+  )
+  (lib_symbols
+    (symbol "Amplifier_Operational:OPA2197xD"
+        (pin_names
+          (offset 0.127))
+        (exclude_from_sim no)
+        (in_bom yes)
+        (on_board yes)
+        (property "Reference" "U"
+          (at 2.54 6.35 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (justify left)))
+        (property "Value" "OPA2197xD"
+          (at 2.54 3.81 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (justify left)))
+        (property "Footprint" "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
+          (at 2.54 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "Datasheet" "http://www.ti.com/lit/ds/symlink/opa2197.pdf"
+          (at 6.35 3.81 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "Description" "Dual 36V, Precision, Rail-to-Rail Input/Output, Low Offset Voltage, Operational Amplifier, SOIC-8"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "ki_locked" ""
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))))
+        (property "ki_keywords" "dual opamp rtor"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "ki_fp_filters" "SOIC*3.9x4.9mm*P1.27mm*"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (symbol "OPA2197xD_1_1"
+          (polyline
+            (pts
+              (xy 5.08 0)
+              (xy -5.08 5.08)
+              (xy -5.08 -5.08)
+              (xy 5.08 0))
+            (stroke
+              (width 0.254)
+              (type default))
+            (fill
+              (type background)))
+          (pin input line
+            (at -7.62 2.54 0)
+            (length 2.54)
+            (name "+"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "3"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input line
+            (at -7.62 -2.54 0)
+            (length 2.54)
+            (name "-"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "2"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin output line
+            (at 7.62 0 180)
+            (length 2.54)
+            (name "~"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "1"
+              (effects
+                (font
+                  (size 1.27 1.27))))))
+        (symbol "OPA2197xD_2_1"
+          (polyline
+            (pts
+              (xy 5.08 0)
+              (xy -5.08 5.08)
+              (xy -5.08 -5.08)
+              (xy 5.08 0))
+            (stroke
+              (width 0.254)
+              (type default))
+            (fill
+              (type background)))
+          (pin input line
+            (at -7.62 2.54 0)
+            (length 2.54)
+            (name "+"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "5"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input line
+            (at -7.62 -2.54 0)
+            (length 2.54)
+            (name "-"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "6"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin output line
+            (at 7.62 0 180)
+            (length 2.54)
+            (name "~"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "7"
+              (effects
+                (font
+                  (size 1.27 1.27))))))
+        (symbol "OPA2197xD_3_1"
+          (pin power_in line
+            (at 0 7.62 270)
+            (length 3.81)
+            (name "V+"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "8"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin power_in line
+            (at 0 -7.62 90)
+            (length 3.81)
+            (name "V-"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "4"
+              (effects
+                (font
+                  (size 1.27 1.27))))))
+        (embedded_fonts no))
+    (symbol "Device:C"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0.254)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "C"
+			(at 0.635 2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "C"
+			(at 0.635 -2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 0.9652 -3.81 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "cap capacitor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "C_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "C_0_1"
+			(polyline
+				(pts
+					(xy -2.032 0.762) (xy 2.032 0.762)
+				)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -2.032 -0.762) (xy 2.032 -0.762)
+				)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "C_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 2.794)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 2.794)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "Device:D_Dual_Series_AKC"
+		(pin_names
+			(offset 0.762)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "D"
+			(at 1.27 -2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "D_Dual_Series_AKC"
+			(at 0 2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Dual diode, anode/cathode/center"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "diode"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "D_Dual_Series_AKC_0_1"
+			(polyline
+				(pts
+					(xy -3.81 1.27) (xy -1.27 0) (xy -3.81 -1.27) (xy -3.81 1.27) (xy -3.81 1.27) (xy -3.81 1.27)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -3.81 0) (xy 3.81 0)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -1.27 -1.27) (xy -1.27 1.27) (xy -1.27 1.27)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0 0) (xy 0 -2.54)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center 0 0)
+				(radius 0.254)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.27 1.27) (xy 3.81 0) (xy 1.27 -1.27) (xy 1.27 1.27) (xy 1.27 1.27) (xy 1.27 1.27)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 3.81 1.27) (xy 3.81 -1.27) (xy 3.81 -1.27)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 6.35 0) (xy 7.62 0)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(pin passive line
+				(at -7.62 0 0)
+				(length 3.81)
+				(name "A"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -5.08 90)
+				(length 2.54)
+				(name "common"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 7.62 0 180)
+				(length 3.81)
+				(name "K"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "Device:R"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "R"
+			(at 2.032 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "R"
+			(at 0 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at -1.778 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "R res resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "R_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "R_0_1"
+			(rectangle
+				(start -1.016 -2.54)
+				(end 1.016 2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "R_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+  )
+  (symbol (lib_id "Amplifier_Operational:OPA2197xD") (at 40.64 50.8 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid b99b135b-d3fd-5a4b-b32e-a87c57aaeb1a)
+    (property "Reference" "U-BREATH-OPA" (at 40.64 43.18 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "OPA2197" (at 40.64 45.72 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" (at 43.18 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 46.99 46.99 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "U-OPA-PITCH" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "INA+=3(+) INA-=2(-) OUTA=1(~) INB+=5(+) INB-=6(-) OUTB=7(~) V+=8(V+) V-=4(V-)" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Half A is the unity follower that buffers the wiper so R-IN does not load the pot. Half B is the inverting summer, fixed x4 = R-FB/R-IN" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/analog/OPA2197.pdf section 5, D package (SOIC-8), OPA2197: OUT A 1, -IN A 2, +IN A 3, V- 4, +IN B 5, -IN B 6, OUT B 7, V+ 8" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Texas Instruments" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "OPA2197IDR" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C139363" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid f1cad205-cf77-564c-8188-96a741fc919a))
+    (pin "2" (uuid 26efe414-0dab-5ed0-bf74-fafa04f51462))
+    (pin "3" (uuid 933d2917-2cee-5eef-bd8b-64a18b093a58))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/17312cee-ca35-5de4-93d5-247b1fad2ee3" (reference "U7") (unit 1))) (project "breath-output-stage.main" (path "/1628897f-2ed0-5a6a-9bf2-749dfca7ac5c" (reference "U-BREATH-OPA") (unit 1))) (project "breath-output-stage" (path "/6f4edadb-6257-58e5-9d51-bec8cbdf5df0/ec51b1d2-0ca2-56b1-b291-6e590255992a" (reference "U-BREATH-OPA") (unit 1))))
+  )
+  (symbol (lib_id "Amplifier_Operational:OPA2197xD") (at 91.44 50.8 0) (unit 2)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid aceef741-8b2c-574e-9844-5cf510df159b)
+    (property "Reference" "U-BREATH-OPA" (at 91.44 43.18 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "OPA2197" (at 91.44 45.72 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" (at 93.98 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 97.79 46.99 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "U-OPA-PITCH" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "INA+=3(+) INA-=2(-) OUTA=1(~) INB+=5(+) INB-=6(-) OUTB=7(~) V+=8(V+) V-=4(V-)" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Half A is the unity follower that buffers the wiper so R-IN does not load the pot. Half B is the inverting summer, fixed x4 = R-FB/R-IN" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/analog/OPA2197.pdf section 5, D package (SOIC-8), OPA2197: OUT A 1, -IN A 2, +IN A 3, V- 4, +IN B 5, -IN B 6, OUT B 7, V+ 8" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Texas Instruments" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "OPA2197IDR" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C139363" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "5" (uuid b16fffb6-c2d6-5520-9f18-04dbf236c477))
+    (pin "6" (uuid 55f62e14-f9d5-591c-a4dc-74340458c434))
+    (pin "7" (uuid 5fbc056d-5cbc-565c-ba4d-5ed689a603dd))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/17312cee-ca35-5de4-93d5-247b1fad2ee3" (reference "U7") (unit 2))) (project "breath-output-stage.main" (path "/1628897f-2ed0-5a6a-9bf2-749dfca7ac5c" (reference "U-BREATH-OPA") (unit 2))) (project "breath-output-stage" (path "/6f4edadb-6257-58e5-9d51-bec8cbdf5df0/ec51b1d2-0ca2-56b1-b291-6e590255992a" (reference "U-BREATH-OPA") (unit 2))))
+  )
+  (symbol (lib_id "Amplifier_Operational:OPA2197xD") (at 40.64 111.75999999999999 0) (unit 3)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 1f0acda5-1bbf-5ee6-b8d1-e5c52a64f99e)
+    (property "Reference" "U-BREATH-OPA" (at 43.18 110.49 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "OPA2197" (at 43.18 113.03 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" (at 43.18 111.76 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 46.99 107.95 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "U-OPA-PITCH" (at 40.64 111.75999999999999 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "INA+=3(+) INA-=2(-) OUTA=1(~) INB+=5(+) INB-=6(-) OUTB=7(~) V+=8(V+) V-=4(V-)" (at 40.64 111.75999999999999 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Half A is the unity follower that buffers the wiper so R-IN does not load the pot. Half B is the inverting summer, fixed x4 = R-FB/R-IN" (at 40.64 111.75999999999999 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/analog/OPA2197.pdf section 5, D package (SOIC-8), OPA2197: OUT A 1, -IN A 2, +IN A 3, V- 4, +IN B 5, -IN B 6, OUT B 7, V+ 8" (at 40.64 111.75999999999999 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Texas Instruments" (at 40.64 111.75999999999999 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "OPA2197IDR" (at 40.64 111.75999999999999 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C139363" (at 40.64 111.75999999999999 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 40.64 111.75999999999999 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "4" (uuid a817bff1-bc36-5733-8312-f234f0b6aa56))
+    (pin "8" (uuid a846c756-dc02-515b-83c3-86b880491b93))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/17312cee-ca35-5de4-93d5-247b1fad2ee3" (reference "U7") (unit 3))) (project "breath-output-stage.main" (path "/1628897f-2ed0-5a6a-9bf2-749dfca7ac5c" (reference "U-BREATH-OPA") (unit 3))) (project "breath-output-stage" (path "/6f4edadb-6257-58e5-9d51-bec8cbdf5df0/ec51b1d2-0ca2-56b1-b291-6e590255992a" (reference "U-BREATH-OPA") (unit 3))))
+  )
+  (symbol (lib_id "Device:R") (at 40.64 187.96 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid b059fca7-f8a1-5e96-8f4d-fad52bf6dfc4)
+    (property "Reference" "R-GAIN-FLOOR" (at 43.18 186.69 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "7.15k 1%" (at 43.18 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 39.37 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-GAIN-FLOOR" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Sets the 0.5x floor: 7.15/(50+7.15) = 0.125" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL(Uniroyal Elec)" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "0805W8F7151T5E" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C17806" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 40.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 99e17e00-5843-5c43-8aaa-d3f8140a27d1))
+    (pin "2" (uuid fb41d91d-a035-5ff5-9121-02231b29f7b4))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/17312cee-ca35-5de4-93d5-247b1fad2ee3" (reference "R21") (unit 1))) (project "breath-output-stage.main" (path "/1628897f-2ed0-5a6a-9bf2-749dfca7ac5c" (reference "R-GAIN-FLOOR") (unit 1))) (project "breath-output-stage" (path "/6f4edadb-6257-58e5-9d51-bec8cbdf5df0/ec51b1d2-0ca2-56b1-b291-6e590255992a" (reference "R-GAIN-FLOOR") (unit 1))))
+  )
+  (symbol (lib_id "Device:C") (at 91.44 187.96 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid efcdef08-de07-5bf2-8061-f7319d19a42f)
+    (property "Reference" "C-DEC-BREATH-POS" (at 93.98 186.69 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "100nF" (at 93.98 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 92.71 191.77 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-DECOUPLE" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "V+ to the star, at the pin" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "YAGEO" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "CC0805KRX7R9BB104" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C49678" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 91.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid f0e3574a-2db4-50f5-8ff3-f3d9907dca73))
+    (pin "2" (uuid 5a9e70c1-028a-5d8a-9e43-fefaa0a7ce9a))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/17312cee-ca35-5de4-93d5-247b1fad2ee3" (reference "C20") (unit 1))) (project "breath-output-stage.main" (path "/1628897f-2ed0-5a6a-9bf2-749dfca7ac5c" (reference "C-DEC-BREATH-POS") (unit 1))) (project "breath-output-stage" (path "/6f4edadb-6257-58e5-9d51-bec8cbdf5df0/ec51b1d2-0ca2-56b1-b291-6e590255992a" (reference "C-DEC-BREATH-POS") (unit 1))))
+  )
+  (symbol (lib_id "Device:C") (at 142.24 187.96 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 2e891de1-48e5-5b0d-a149-14c6c663b2f7)
+    (property "Reference" "C-DEC-BREATH-NEG" (at 144.78 186.69 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "100nF" (at 144.78 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 143.51 191.77 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-DECOUPLE" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "V- to the star, at the pin" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "YAGEO" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "CC0805KRX7R9BB104" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C49678" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid b7e2ea47-29c8-5eea-b8df-a07c95f931b6))
+    (pin "2" (uuid 5ec9e4dc-f58c-50a2-87dd-6f7418f61dc8))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/17312cee-ca35-5de4-93d5-247b1fad2ee3" (reference "C21") (unit 1))) (project "breath-output-stage.main" (path "/1628897f-2ed0-5a6a-9bf2-749dfca7ac5c" (reference "C-DEC-BREATH-NEG") (unit 1))) (project "breath-output-stage" (path "/6f4edadb-6257-58e5-9d51-bec8cbdf5df0/ec51b1d2-0ca2-56b1-b291-6e590255992a" (reference "C-DEC-BREATH-NEG") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 193.04 187.96 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid a513a063-977a-5856-b7c4-da30bd3a2094)
+    (property "Reference" "R-BREATH-IN" (at 195.58 186.69 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "10k 1%" (at 195.58 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 191.77 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 193.04 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-BREATH-IN" (at 193.04 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 193.04 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Drawn_as" "R-IN" (at 193.04 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL(Uniroyal Elec)" (at 193.04 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "0805W8F1002T5E" (at 193.04 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C17414" (at 193.04 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 193.04 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid cb397ce3-22d2-5b38-b685-fb30a4d88a58))
+    (pin "2" (uuid 130abdd7-b372-5629-8dd5-0b789292e388))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/17312cee-ca35-5de4-93d5-247b1fad2ee3" (reference "R22") (unit 1))) (project "breath-output-stage.main" (path "/1628897f-2ed0-5a6a-9bf2-749dfca7ac5c" (reference "R-BREATH-IN") (unit 1))) (project "breath-output-stage" (path "/6f4edadb-6257-58e5-9d51-bec8cbdf5df0/ec51b1d2-0ca2-56b1-b291-6e590255992a" (reference "R-BREATH-IN") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 243.84 187.96 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 6ca8c83f-a78b-54ad-9a27-542c41ed58ab)
+    (property "Reference" "R-BREATH-OFF" (at 246.38 186.69 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "21.0k 1%" (at 246.38 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 242.57 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 243.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-BREATH-OFF" (at 243.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 243.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Drawn_as" "R-OFF" (at 243.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL(Uniroyal Elec)" (at 243.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "0805W8F2102T5E" (at 243.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C17550" (at 243.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 243.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 4d43adfa-a45b-56c6-8403-baaf196aa600))
+    (pin "2" (uuid 9498b787-93e2-5857-9758-7ddd53ecf781))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/17312cee-ca35-5de4-93d5-247b1fad2ee3" (reference "R23") (unit 1))) (project "breath-output-stage.main" (path "/1628897f-2ed0-5a6a-9bf2-749dfca7ac5c" (reference "R-BREATH-OFF") (unit 1))) (project "breath-output-stage" (path "/6f4edadb-6257-58e5-9d51-bec8cbdf5df0/ec51b1d2-0ca2-56b1-b291-6e590255992a" (reference "R-BREATH-OFF") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 294.64 187.96 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 83d10c65-fc46-57ce-96fd-db10b5c958ac)
+    (property "Reference" "R-BREATH-OFFNEG" (at 297.18 186.69 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "95.3k 1%" (at 297.18 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 293.37 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-BREATH-OFFNEG" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Drawn_as" "R-OFFNEG" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL(Uniroyal Elec)" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "0805W8F9532T5E" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C17873" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 12dd911b-78d3-57b8-b75a-4d1180508f1f))
+    (pin "2" (uuid 55a459da-6d38-5836-a998-816f2bdf0dac))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/17312cee-ca35-5de4-93d5-247b1fad2ee3" (reference "R24") (unit 1))) (project "breath-output-stage.main" (path "/1628897f-2ed0-5a6a-9bf2-749dfca7ac5c" (reference "R-BREATH-OFFNEG") (unit 1))) (project "breath-output-stage" (path "/6f4edadb-6257-58e5-9d51-bec8cbdf5df0/ec51b1d2-0ca2-56b1-b291-6e590255992a" (reference "R-BREATH-OFFNEG") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 345.44 187.96 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 23a04027-2149-5b4b-8d22-e68c3855bdf1)
+    (property "Reference" "R-BREATH-FB" (at 347.98 186.69 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "40.2k 1%" (at 347.98 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 344.17 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-BREATH-FB" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Drawn_as" "R-FB" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "40.2k, NOT 40k - 40k is not an E96 value and cannot be ordered" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL(Uniroyal Elec)" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "0805W8F4022T5E" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C17678" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 35cb674c-9236-5470-930a-fe9c47d76ed1))
+    (pin "2" (uuid fd39479d-baef-53f8-8edd-1e154818a0b0))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/17312cee-ca35-5de4-93d5-247b1fad2ee3" (reference "R25") (unit 1))) (project "breath-output-stage.main" (path "/1628897f-2ed0-5a6a-9bf2-749dfca7ac5c" (reference "R-BREATH-FB") (unit 1))) (project "breath-output-stage" (path "/6f4edadb-6257-58e5-9d51-bec8cbdf5df0/ec51b1d2-0ca2-56b1-b291-6e590255992a" (reference "R-BREATH-FB") (unit 1))))
+  )
+  (symbol (lib_id "Device:D_Dual_Series_AKC") (at 421.64 187.96 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 605069d7-a582-5ec6-a134-8eb1ebe3d7d7)
+    (property "Reference" "D-JACK-CLAMP" (at 421.64 180.34 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "BAV99" (at 421.64 182.88 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Package_TO_SOT_SMD:SOT-23" (at 421.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 421.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "D-JACK-CLAMP" (at 421.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "A=1(A) K=2(K) C=3(common)" (at 421.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "One of qty 6, one per CV output" (at 421.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/discrete-and-power/NEXPERIA-BAV99-SOT23.pdf Table 2 pinning: 1 A1 anode (diode 1), 2 K2 cathode (diode 2), 3 K1/A2 the common node" (at 421.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Nexperia" (at 421.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "BAV99,215" (at 421.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C2500" (at 421.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 421.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 3a7aa876-8d4a-518c-a83a-2df3eee54604))
+    (pin "2" (uuid 316000f6-e6cc-56cb-bec6-54321b9e3ad2))
+    (pin "3" (uuid 0af8bc9f-26e7-52de-9a9a-dc69495d9636))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/17312cee-ca35-5de4-93d5-247b1fad2ee3" (reference "D6") (unit 1))) (project "breath-output-stage.main" (path "/1628897f-2ed0-5a6a-9bf2-749dfca7ac5c" (reference "D-JACK-CLAMP") (unit 1))) (project "breath-output-stage" (path "/6f4edadb-6257-58e5-9d51-bec8cbdf5df0/ec51b1d2-0ca2-56b1-b291-6e590255992a" (reference "D-JACK-CLAMP") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 497.84 187.96 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid f9748ba5-d15a-5e87-8380-e6cabb176f62)
+    (property "Reference" "R-OUT-PROT" (at 500.38 186.69 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "1k 1%, >=500mW" (at 500.38 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_1206_3216Metric" (at 496.57 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 497.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-OUT-PROT" (at 497.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 497.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "The only part at real risk from a jack fault - see its BOM row" (at 497.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Panasonic" (at 497.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "ERJ-P08F1001V" (at 497.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C4261071" (at 497.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 497.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 54166f7a-08bc-597f-9596-7b0398ce537c))
+    (pin "2" (uuid cd659593-8ead-5035-b089-cf118b950d40))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/17312cee-ca35-5de4-93d5-247b1fad2ee3" (reference "R26") (unit 1))) (project "breath-output-stage.main" (path "/1628897f-2ed0-5a6a-9bf2-749dfca7ac5c" (reference "R-OUT-PROT") (unit 1))) (project "breath-output-stage" (path "/6f4edadb-6257-58e5-9d51-bec8cbdf5df0/ec51b1d2-0ca2-56b1-b291-6e590255992a" (reference "R-OUT-PROT") (unit 1))))
+  )
+  (symbol (lib_id "Device:C") (at 40.64 233.68 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 3f4d2bcb-f152-5a0e-b82c-7b201936f5e2)
+    (property "Reference" "C-OUT-BREATH" (at 43.18 232.41 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "330nF film" (at 43.18 234.95 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Capacitor_SMD:C_1206_3216Metric" (at 41.91 237.49 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 40.64 233.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-OUT-BREATH" (at 40.64 233.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 40.64 233.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Rubycon" (at 40.64 233.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "50MU334MA23216" (at 40.64 233.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C3774076" (at 40.64 233.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 40.64 233.68 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 10efb2af-f7ec-508e-a4cf-540f54290c3c))
+    (pin "2" (uuid 10cd0b8d-16ae-5612-9c81-779462f8004c))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/17312cee-ca35-5de4-93d5-247b1fad2ee3" (reference "C22") (unit 1))) (project "breath-output-stage.main" (path "/1628897f-2ed0-5a6a-9bf2-749dfca7ac5c" (reference "C-OUT-BREATH") (unit 1))) (project "breath-output-stage" (path "/6f4edadb-6257-58e5-9d51-bec8cbdf5df0/ec51b1d2-0ca2-56b1-b291-6e590255992a" (reference "C-OUT-BREATH") (unit 1))))
+  )
+  (wire (pts (xy 40.64 184.15) (xy 40.64 181.61)) (stroke (width 0) (type default)) (uuid 80091f29-8aea-5601-8016-63dfdbb0d3aa))
+  (hierarchical_label "GAIN_FLOOR" (shape passive) (at 40.64 181.61 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid f47032dd-37f4-5869-a3c9-32f1a69c5aeb)
+    (property "Dir" "ref" (at 40.64 181.61 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 33.02 48.26) (xy 30.48 48.26)) (stroke (width 0) (type default)) (uuid 1f752db6-0f51-5b1f-852e-c6f43e264088))
+  (hierarchical_label "GAIN_WIPER" (shape passive) (at 30.48 48.26 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 509ea8a4-9870-5af0-9eda-352aef10a49c)
+    (property "Dir" "ref" (at 30.48 48.26 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 48.26 50.8) (xy 50.8 50.8)) (stroke (width 0) (type default)) (uuid f6a3ce0b-6544-58b3-9ed4-e57b7477cf80))
+  (label "BUF_OUT" (at 50.8 50.8 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 82db5393-2d85-5270-bccf-b31b24cc8a0e))
+  (wire (pts (xy 33.02 53.34) (xy 30.48 53.34)) (stroke (width 0) (type default)) (uuid 935c1b81-9b77-5b71-bb38-f3a1f8bf54b6))
+  (label "BUF_OUT" (at 30.48 53.34 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 996c2c98-5a8c-5f41-a1e1-2d2c9611f661))
+  (wire (pts (xy 193.04 184.15) (xy 193.04 181.61)) (stroke (width 0) (type default)) (uuid 65f72c1c-d1f0-5d2f-915d-ec5c38ab66d6))
+  (label "BUF_OUT" (at 193.04 181.61 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 626d271b-e4ba-5666-a340-779c666d19de))
+  (wire (pts (xy 243.84 184.15) (xy 243.84 181.61)) (stroke (width 0) (type default)) (uuid 44d47c2b-860e-578e-857e-1ef8f3d54bd6))
+  (hierarchical_label "OFFSET_WIPER" (shape passive) (at 243.84 181.61 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid ae296d73-5f71-5954-92a8-0fb5fa269568)
+    (property "Dir" "ref" (at 243.84 181.61 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 294.64 184.15) (xy 294.64 181.61)) (stroke (width 0) (type default)) (uuid f07f4238-4f75-5c3d-9910-46b8b76d7c05))
+  (hierarchical_label "MODULE_ANALOG_NEG12" (shape input) (at 294.64 181.61 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 9f539bd8-f696-533b-a5a5-bbd09f68fb11)
+    (property "Dir" "in" (at 294.64 181.61 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 294.64 181.61 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 414.02 187.96) (xy 411.48 187.96)) (stroke (width 0) (type default)) (uuid 33227d9e-b72e-5006-aa41-4951ddf8de0b))
+  (hierarchical_label "MODULE_ANALOG_NEG12" (shape input) (at 411.48 187.96 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid c1e29ebb-efdc-55e5-b30f-ada70add8388)
+    (property "Dir" "in" (at 411.48 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 411.48 187.96 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 40.64 119.38) (xy 40.64 121.92)) (stroke (width 0) (type default)) (uuid 7a290994-fcd1-5907-8c2f-52b3f88d7649))
+  (hierarchical_label "MODULE_ANALOG_NEG12" (shape input) (at 40.64 121.92 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid d45e7694-ffc0-5381-9a7c-5a49a906121d)
+    (property "Dir" "in" (at 40.64 121.92 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 40.64 121.92 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 142.24 184.15) (xy 142.24 181.61)) (stroke (width 0) (type default)) (uuid af007106-2666-59a3-8de8-9c413e15d7ad))
+  (hierarchical_label "MODULE_ANALOG_NEG12" (shape input) (at 142.24 181.61 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid e4708138-3945-57f1-b4d3-f592ec1a3194)
+    (property "Dir" "in" (at 142.24 181.61 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 142.24 181.61 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 429.26 187.96) (xy 431.8 187.96)) (stroke (width 0) (type default)) (uuid 25f455b8-7dee-5eb3-810c-eeb7fb8d9b7e))
+  (hierarchical_label "MODULE_ANALOG_POS12" (shape input) (at 431.8 187.96 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid d569a6e9-ade1-592f-ab1c-ea8103361d4a)
+    (property "Dir" "in" (at 431.8 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 431.8 187.96 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 40.64 104.14) (xy 40.64 101.6)) (stroke (width 0) (type default)) (uuid 2450ae99-b226-588d-bd7c-5a7fb7884b2d))
+  (hierarchical_label "MODULE_ANALOG_POS12" (shape input) (at 40.64 101.6 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 30f3f242-a4fd-5921-8681-1e43a46728df)
+    (property "Dir" "in" (at 40.64 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 40.64 101.6 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 91.44 184.15) (xy 91.44 181.61)) (stroke (width 0) (type default)) (uuid 506187e3-dd63-5fa0-9104-16c36b884b7f))
+  (hierarchical_label "MODULE_ANALOG_POS12" (shape input) (at 91.44 181.61 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid d0be0264-206e-586f-b5a1-1e80a216ba65)
+    (property "Dir" "in" (at 91.44 181.61 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 91.44 181.61 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 193.04 191.77) (xy 193.04 194.31)) (stroke (width 0) (type default)) (uuid ca368825-6f64-52d7-99d7-aca71127ff3d))
+  (label "SUM_NODE" (at 193.04 194.31 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 0deb8597-67b6-5b17-85fc-6fcf273e1657))
+  (wire (pts (xy 243.84 191.77) (xy 243.84 194.31)) (stroke (width 0) (type default)) (uuid e0694f79-af9a-5fcc-a7cd-a0d6182ab3c7))
+  (label "SUM_NODE" (at 243.84 194.31 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid dd9a99a2-c0af-5f2e-9750-060bbf2dc525))
+  (wire (pts (xy 294.64 191.77) (xy 294.64 194.31)) (stroke (width 0) (type default)) (uuid 788b4b6e-2071-5ec0-8a75-151d141da551))
+  (label "SUM_NODE" (at 294.64 194.31 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid eacbb667-661a-5f11-9240-d5a79f8f757a))
+  (wire (pts (xy 345.44 184.15) (xy 345.44 181.61)) (stroke (width 0) (type default)) (uuid c8ef949e-8e97-5732-a799-a2234208e528))
+  (label "SUM_NODE" (at 345.44 181.61 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 2dbec662-272e-588a-8f0e-b6725d45cd9c))
+  (wire (pts (xy 83.82 53.34) (xy 81.28 53.34)) (stroke (width 0) (type default)) (uuid 2da19d44-c50e-5214-baf5-b81b8ffdd754))
+  (label "SUM_NODE" (at 81.28 53.34 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 70bf7dca-2f01-5b53-b085-caf8aaa672e7))
+  (wire (pts (xy 99.06 50.8) (xy 101.6 50.8)) (stroke (width 0) (type default)) (uuid 7e8b2b12-928b-56c7-9bc6-dc6c89ab5952))
+  (label "BREATH_OUT" (at 101.6 50.8 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 3fe843bd-1172-53d6-9e89-d5bb8a9f2bb4))
+  (wire (pts (xy 345.44 191.77) (xy 345.44 194.31)) (stroke (width 0) (type default)) (uuid 308d8530-0593-5945-bd6b-b37a1a71e540))
+  (label "BREATH_OUT" (at 345.44 194.31 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 04d7ee97-6b6b-5f2d-8c09-7ca97293c65d))
+  (wire (pts (xy 421.64 193.04) (xy 421.64 195.58)) (stroke (width 0) (type default)) (uuid 174d2372-c5b5-5d7e-b97e-860ec9a21e03))
+  (label "BREATH_OUT" (at 421.64 195.58 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid aa1a0d04-4192-5925-af57-1e74af424364))
+  (wire (pts (xy 497.84 184.15) (xy 497.84 181.61)) (stroke (width 0) (type default)) (uuid d4bccd50-7df6-5227-a715-b13d35e25430))
+  (label "BREATH_OUT" (at 497.84 181.61 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 9602cb0e-4cb9-5252-8211-beca3dc35030))
+  (wire (pts (xy 497.84 191.77) (xy 497.84 194.31)) (stroke (width 0) (type default)) (uuid ff6367c2-574d-5501-b94a-91436f777266))
+  (hierarchical_label "JACK_TIP" (shape passive) (at 497.84 194.31 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 2960057f-14c3-56ee-9938-614be1177e00)
+    (property "Dir" "ref" (at 497.84 194.31 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 40.64 229.87) (xy 40.64 227.33)) (stroke (width 0) (type default)) (uuid 7a3a8904-101f-56b5-a466-f014f4fd553a))
+  (hierarchical_label "JACK_TIP" (shape passive) (at 40.64 227.33 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 3f7a155a-001d-5dac-8721-81f0fb3ff962)
+    (property "Dir" "ref" (at 40.64 227.33 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 40.64 191.77) (xy 40.64 194.31)) (stroke (width 0) (type default)) (uuid 00c06789-fcad-5b32-a5d7-4171d581ffd8))
+  (hierarchical_label "AGND_MOD" (shape passive) (at 40.64 194.31 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid cd6f393f-452d-50ba-9c9c-58b889780cd4)
+    (property "Dir" "ref" (at 40.64 194.31 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 40.64 194.31 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 83.82 48.26) (xy 81.28 48.26)) (stroke (width 0) (type default)) (uuid 93959d4b-df88-59db-91b9-815f047a8003))
+  (hierarchical_label "AGND_MOD" (shape passive) (at 81.28 48.26 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 71d5ffe8-8195-5fd7-a9d2-970be02c169a)
+    (property "Dir" "ref" (at 81.28 48.26 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 81.28 48.26 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 40.64 237.49) (xy 40.64 240.03)) (stroke (width 0) (type default)) (uuid 95839f17-9701-5158-b24b-285f98b24a9d))
+  (hierarchical_label "AGND_MOD" (shape passive) (at 40.64 240.03 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 50a1ff36-a1b0-5bcd-beac-36e7f8da03de)
+    (property "Dir" "ref" (at 40.64 240.03 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 40.64 240.03 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 91.44 191.77) (xy 91.44 194.31)) (stroke (width 0) (type default)) (uuid 5a05b2c9-1e60-5220-92f5-058d4a595a14))
+  (hierarchical_label "AGND_MOD" (shape passive) (at 91.44 194.31 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 8702a042-3145-5cd2-88b3-d1a7901c7d2a)
+    (property "Dir" "ref" (at 91.44 194.31 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 91.44 194.31 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 142.24 191.77) (xy 142.24 194.31)) (stroke (width 0) (type default)) (uuid 835316a4-1ccb-5b31-86b4-2e85ffc316a5))
+  (hierarchical_label "AGND_MOD" (shape passive) (at 142.24 194.31 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid c9b3e0be-8933-5917-a420-470c451b1f2a)
+    (property "Dir" "ref" (at 142.24 194.31 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 142.24 194.31 0) (effects (font (size 1.27 1.27)) hide)))
+  (sheet_instances (path "/" (page "1")))
+)

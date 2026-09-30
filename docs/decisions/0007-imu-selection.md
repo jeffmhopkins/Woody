@@ -54,7 +54,10 @@ application it is the better fit, and it is cheaper and more widely available.
 
 ### It rides on the real-time board
 
-The instrument uses **two ESP32-S3s** (ADR 0013): display board at the top,
+> **(2026-09-26, [ADR 0015](0015-one-mcu-no-display.md)): one ESP32-S3.** There is no display board; the board below
+> is the only MCU, and its radio stays off.
+
+The instrument used **two ESP32-S3s** (ADR 0013): display board at the top,
 real-time board low. Choosing a real-time board that carries a 6-axis IMU
 onboard means the sensor lands where it is wanted with no separate part, no
 breakout and no I2C run.
@@ -133,6 +136,8 @@ condition under which the accelerometer is actually measuring gravity.
 
 ### What the three right-thumb switches should support
 
+*(Four since 2026-09-26, ADR 0010: the fourth took the reserved hold/preset bit.)*
+
 - **Momentary gate** — hold to enable, capturing zero on press. The default.
 - **Latch** — press to enable and capture, press again to release.
 - **Source or destination select** — which mod channel the IMU drives (ADR 0006).
@@ -188,10 +193,14 @@ the error propagated into ADR 0013 and the roadmap.
 | CS: DAC, CS: ADC | 2 | 34, 39 |
 | SPI3 — 74x165 chain alone (ADR 0001) | 2 | 38, 40 |
 | Shift register latch | 1 | 7 |
-| WS2815 data, two strips | 2 | 1, 2 |
-| UART1 to the display board | 2 | 5, 6 |
+| WS2815 data, one strip (ADR 0016; was two) | 1 | 1 — 2 spare |
+| ~~UART1 to the display board~~ — spare since ADR 0015 | 0 | (5, 6) |
 | UART0 console to a carrier test header | 2 | 43, 44 |
-| **Used** | **14 of 17** | spare: 3, 4, 33 |
+| 74x165 chain end, the last register's `SER` *(Amended 2026-09-26: `hardware/interfaces/key-chain-loom/`)* | 1 | 33 |
+| **Used** | **12 of 17** *(Amended 2026-09-26: was 11, before IO33 became the chain end)* | spare: 2, 3, 4, 5, 6 |
+
+*(The inter-MCU link below no longer exists (2026-09-26, [ADR 0015](0015-one-mcu-no-display.md)); the console reasoning
+still holds for UART0.)*
 
 **The inter-MCU link goes on UART1, not on 43/44.** Using UART0 would work and
 would save two pins, but it is the boot console — panic output and bootloader
@@ -211,8 +220,11 @@ anything is ever displayed — inside a sealed body with a documented 10–20 K
 interior rise, near a temperature-sensitive gauge sensor.
 
 This ADR originally recorded that as pure waste, with cutting the supply trace
-as the only remedy. **It is now the instrument's second display**: the board
-faces out through a window in the oak underside at the tail, and the matrix is a
+as the only remedy. **It is now the instrument's only display** (ADR 0015; it
+was the second): the board
+faces out through a window at the tail — the oak underside originally, the top
+face just past the keys since 2026-09-26 (ADR 0009), which puts the board face
+up and so flips the IMU's Z axis in the firmware's mounting transform — and the matrix is a
 generic assignable surface defaulting to breath (ADR 0014). The idle current is
 being spent either way, and sparse content costs single-digit milliamps on top
 of it.

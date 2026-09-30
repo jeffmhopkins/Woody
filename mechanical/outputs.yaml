@@ -1,0 +1,258 @@
+# Every file tools/cad.py builds. Nothing under mechanical/renders/,
+# mechanical/export/ or mechanical/cad/vendor/ may exist unless it is named here.
+# `python3 tools/cad.py build` rebuilds what is stale; `check` proves the rest.
+#
+# A render's fingerprint covers its recipe (every field below except title
+# and caption) and the git blob id of every file its source reads. Change a
+# camera and that render is stale; change config/body.yaml and all of them are.
+
+meshes:
+  # The banked vendor solids, meshed so OpenSCAD can import them. Datum is
+  # the vendor's: KS-33 z = 0 at the collar underside (ks33-geometry.md).
+  - name: ks33-mesh
+    from: datasheets/mechanical/GATERON-KS-33-3D.step
+    out: mechanical/cad/vendor/ks33.stl
+
+# Cameras: [tx, ty, tz, rx, ry, rz, distance]. The LENGTH IS DERIVED, so no
+# camera aims at a fixed X: each render sets `origin` (centre or tail) and
+# its camera aims at X = 0. A whole-body view wants ~1.5 x the length.
+renders:
+  - name: hero
+    title: The instrument, key face up
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/hero.png
+    imgsize: [1600, 700]
+    camera: [0, 28, 12, 60, 0, 335, 470]
+    defines: {origin: "centre"}
+  - name: detail-mouth-end
+    title: The mouth end close up - oak cap, sanded edges, the breath tube's pass-through
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/detail-mouth-end.png
+    imgsize: [1400, 800]
+    camera: [15, 28, 20, 55, 0, 320, 110]
+    defines: {origin: "mouth"}
+  - name: underside
+    title: The underside - thumb keys and the U-bolt
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/underside.png
+    imgsize: [1600, 700]
+    camera: [0, 28, 12, 125, 0, 335, 470]
+    defines: {origin: "centre"}
+  - name: exploded
+    title: The laminated stack, pulled apart
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/exploded.png
+    imgsize: [1600, 900]
+    camera: [0, 28, 28, 62, 0, 330, 520]
+    defines: {origin: "centre", explode: 22}
+  - name: internals
+    title: Oak top and key plate off - boards, strips, columns, tail equipment
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/internals.png
+    imgsize: [1600, 700]
+    camera: [0, 28, 12, 50, 0, 340, 440]
+    defines: {origin: "centre", show_lid: false, ghost_shell: true}
+  - name: internals-far
+    title: Oak top and key plate off, from the far side - the key boards' ribbons, the Matrix ribbon, the regulator
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/internals-far.png
+    imgsize: [1600, 700]
+    camera: [0, 28, 12, 50, 0, 160, 440]
+    defines: {origin: "centre", show_lid: false, ghost_shell: true}
+  - name: main-board
+    title: The main board - thumb switches and carrier circuits on one board - from above, oak top and key plate off, in yellow, labelled
+    src: mechanical/cad/fig_main_board.scad
+    out: mechanical/renders/main-board.png
+    imgsize: [2000, 900]
+    projection: o
+    camera: [0, 10, 0, 0, 0, 0, 400]
+    defines: {}
+  - name: main-board-3d
+    title: The main board - oak top and key plate off, in yellow
+    src: mechanical/cad/fig_main_board.scad
+    out: mechanical/renders/main-board-3d.png
+    imgsize: [1600, 800]
+    camera: [0, 28, 0, 38, 0, 340, 400]
+    defines: {fig_view: "3d", show_caps: false, show_keys: false}
+  - name: exploded-stack
+    title: The stack pulled apart, shell ghosted - oak bottom, bottom plate, main board, columns, key boards, key plate, oak top
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/exploded-stack.png
+    imgsize: [1600, 900]
+    camera: [0, 28, 16, 58, 0, 335, 640]
+    defines: {origin: "centre", explode: 36, ghost_shell: true}
+  - name: breakdown-electronics
+    title: "Breakdown: the electronics - main board, key boards, switches, sensor, strip, Matrix, connectors"
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/breakdown-electronics.png
+    imgsize: [1600, 800]
+    camera: [0, 28, 10, 50, 0, 340, 440]
+    defines: {origin: "centre", show_lid: false, show_caps: false,
+              highlight: ["main board*", "parts *", "tall parts*", "breath sensor", "LED row", "ribbon *", "J-CHAIN *", "IDC plug *", "board *",
+                          "switch *", "Matrix*", "etherCON", "USB-C*", "umbilical adapter", "J-UMB", "J-MCU"]}
+  - name: breakdown-breath
+    title: "Breakdown: the breath path - mouth cap, tube, trap, sensor, at the mouth end"
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/breakdown-breath.png
+    imgsize: [1400, 900]
+    camera: [28, 28, 12, 38, 0, 330, 150]
+    defines: {origin: "mouth", show_lid: false, show_caps: false, highlight: ["breath*", "mouth cap"]}
+  - name: breakdown-structure
+    title: "Breakdown: the structure, pulled apart - oak, both plates and their columns, sides, end caps, U-bolt"
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/breakdown-structure.png
+    imgsize: [1600, 900]
+    camera: [0, 28, 28, 62, 0, 330, 540]
+    defines: {origin: "centre", explode: 22,
+              highlight: ["oak top", "oak bottom", "key plate", "bottom plate", "side *", "mouth cap", "tail cap",
+                          "column *", "main board stud*", "main board spacer*", "main board nut*", "key-board spacer*", "U-bolt*", "matrix window"]}
+  - name: section-thumb-row
+    title: Longitudinal section through the thumb row with LT1 - thumb switches, main board, key boards
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/section-thumb-row.png
+    imgsize: [2000, 380]
+    projection: o
+    camera: [0, 22, 0, 0, 0, 0, 250]
+    defines: {origin: "centre", cut: "y2d", cut_key: "LT1"}
+  - name: view-tail
+    title: From the tail end, oak top and key plate off - Matrix, etherCON, USB-C, and the main board's tail
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/view-tail.png
+    imgsize: [1400, 900]
+    camera: [-40, 28, 14, 50, 0, 125, 200]
+    defines: {origin: "tail", show_lid: false, ghost_shell: true}
+  - name: section-ribbon
+    title: Section along the body through the left key board's chain headers - the ribbon's hairpin, closed
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/section-ribbon.png
+    imgsize: [1600, 700]
+    projection: o
+    camera: [88, 20, 0, 0, 0, 0, 90]
+    defines: {origin: "mouth", cut: "y2d", cut_key: "ribbon"}
+  - name: breakdown-ribbons
+    title: "Breakdown: the key boards' ribbons and their connectors - oak top, key plate, sides and oak bottom off"
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/breakdown-ribbons.png
+    imgsize: [1600, 800]
+    camera: [0, 40, 14, 50, 0, 150, 360]
+    defines: {origin: "centre", show_lid: false, show_caps: false, show_u: false,
+              highlight: ["ribbon *", "J-CHAIN *", "IDC plug *", "board left_hand", "board right_hand"]}
+  - name: breakdown-tail-wiring
+    title: "Breakdown: the Matrix's ribbon, and the etherCON on its adapter, joined by J-UMB to the main board's tongue - oak top, key plate, sides and oak bottom off"
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/breakdown-tail-wiring.png
+    imgsize: [1400, 900]
+    camera: [-50, 22, 16, 62, 0, 320, 190]
+    defines: {origin: "tail", show_lid: false, show_caps: false, show_u: false,
+              highlight: ["Matrix ribbon", "J-MCU", "J-UMB", "umbilical adapter", "etherCON", "Matrix board", "Matrix LEDs"]}
+  - name: breakdown-tail-wiring-far
+    title: "The same from the far side - the Matrix ribbon's drop and its run into J-MCU"
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/breakdown-tail-wiring-far.png
+    imgsize: [1400, 900]
+    camera: [-50, 30, 18, 60, 0, 145, 190]
+    defines: {origin: "tail", show_lid: false, show_caps: false, show_u: false,
+              highlight: ["Matrix ribbon", "J-MCU", "J-UMB", "umbilical adapter", "etherCON", "Matrix board", "Matrix LEDs"]}
+  - name: tail-detail
+    title: The tail, oak top and key plate off, from inside
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/tail-detail.png
+    imgsize: [1200, 800]
+    camera: [-60, 28, 15, 55, 0, 300, 190]
+    defines: {origin: "tail", show_lid: false, ghost_shell: true}
+  - name: plan-top
+    title: Plan from above, with the length budget
+    src: mechanical/cad/fig_plan_top.scad
+    out: mechanical/renders/plan-top.png
+    imgsize: [2000, 560]
+    projection: o
+    camera: [0, 30, 0, 0, 0, 0, 345]
+  - name: plan-bottom
+    title: Plan from below
+    src: mechanical/cad/fig_plan_bottom.scad
+    out: mechanical/renders/plan-bottom.png
+    imgsize: [2000, 420]
+    projection: o
+    camera: [0, 28, 0, 180, 0, 0, 250]
+  - name: section-long
+    title: Longitudinal section on the centreline, looking from the +Y side
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/section-long.png
+    imgsize: [2000, 380]
+    projection: o
+    camera: [0, 22, 0, 0, 0, 0, 250]
+    defines: {origin: "centre", cut: "y2d", cut_at: 28.5}
+  - name: section-key
+    title: Cross-section through RH3, seen from the tail
+    src: mechanical/cad/fig_section_key.scad
+    out: mechanical/renders/section-key.png
+    imgsize: [1200, 900]
+    projection: o
+    camera: [16, 18, 0, 0, 0, 0, 190]
+  - name: section-keycap
+    title: The MT165 cap on its switch at LH1, at rest and fully pressed (red) - does the skirt land on the switch?
+    src: mechanical/cad/fig_section_keycap.scad
+    out: mechanical/renders/section-keycap.png
+    imgsize: [1200, 900]
+    projection: o
+    camera: [60, 41, 0, 0, 0, 0, 105]
+  - name: section-kb-mount
+    title: Cross-section through a column at a key board's corner - bottom plate, stud, spacer, main board, standoff, key board, spacer, key plate, screw in its pocket
+    src: mechanical/cad/fig_section_kb_mount.scad
+    out: mechanical/renders/section-kb-mount.png
+    imgsize: [1200, 1200]
+    projection: o
+    camera: [-4, 21.5, 0, 0, 0, 0, 116]
+  - name: section-matrix
+    title: Cross-section through the LED matrix - the flush frosted window on its oak lip
+    src: mechanical/cad/fig_section_matrix.scad
+    out: mechanical/renders/section-matrix.png
+    imgsize: [1200, 900]
+    projection: o
+    camera: [8, 18, 0, 0, 0, 0, 205]
+  - name: tail-face
+    title: The tail face - etherCON rotated, USB-C beside it
+    src: mechanical/cad/fig_tail_face.scad
+    out: mechanical/renders/tail-face.png
+    imgsize: [1200, 900]
+    projection: o
+    camera: [0, 28, 12, 90, 0, 90, 190]
+  - name: key-layouts
+    title: Top-key spacing, current config against the alternatives, to scale
+    src: mechanical/cad/fig_key_layouts.scad
+    out: mechanical/renders/key-layouts.png
+    imgsize: [2000, 900]
+    projection: o
+    camera: [110, -66, 0, 0, 0, 0, 540]
+    layout_sensitive: false
+    defines:
+      options:
+        - ["was: 24 in line (ADR 0009)", [24, 24, 24, 24], [24, 24, 24, 24, 24], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]]
+        - ["20/18 in line", [20, 20, 18, 18], [20, 20, 18, 18, 18], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]]
+# Flat parts as they go to the cutter (ADR 0009: "CAD produces DXF as the
+# primary export"), plus the design-rule report.
+exports:
+  - {name: drc, src: mechanical/cad/woody_body.scad, out: mechanical/drc.echo, defines: {part: "drc"}}
+  - {name: dxf-plate-top, src: mechanical/cad/woody_body.scad, out: mechanical/export/plate-top.dxf, defines: {part: "plate_top"}}
+  - {name: dxf-oak-top, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-top.dxf, defines: {part: "oak_top"}}
+  - {name: dxf-oak-bottom, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-bottom.dxf, defines: {part: "oak_bottom"}}
+  - {name: dxf-plate-bottom, src: mechanical/cad/woody_body.scad, out: mechanical/export/plate-bottom.dxf, defines: {part: "plate_bottom"}}
+  - {name: dxf-side, src: mechanical/cad/woody_body.scad, out: mechanical/export/side.dxf, defines: {part: "side"}}
+  - {name: dxf-oak-grooves, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-grooves.dxf, defines: {part: "oak_grooves"}}
+  - {name: dxf-mouth-cap, src: mechanical/cad/woody_body.scad, out: mechanical/export/mouth-cap.dxf, defines: {part: "mouth_cap"}}
+  - {name: dxf-tail-cap, src: mechanical/cad/woody_body.scad, out: mechanical/export/tail-cap.dxf, defines: {part: "tail_cap"}}
+  - {name: dxf-matrix-window, src: mechanical/cad/woody_body.scad, out: mechanical/export/matrix-window.dxf, defines: {part: "matrix_window"}}
+  - {name: dxf-oak-rebates, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-rebates.dxf, defines: {part: "oak_rebates"}}
+  - {name: dxf-oak-pockets, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-pockets.dxf, defines: {part: "oak_pockets"}}
+  - {name: dxf-key-board-lh, src: mechanical/cad/woody_body.scad, out: mechanical/export/key-board-lh.dxf, defines: {part: "key_board_left_hand"}}
+  - {name: dxf-main-board, src: mechanical/cad/woody_body.scad, out: mechanical/export/main-board.dxf, defines: {part: "main_board"}}
+  - {name: dxf-key-board-rh, src: mechanical/cad/woody_body.scad, out: mechanical/export/key-board-rh.dxf, defines: {part: "key_board_right_hand"}}
+  - {name: pcb-geometry, src: mechanical/cad/woody_body.scad, out: mechanical/export/pcb-geometry.echo, defines: {part: "pcb_geom"}}
+
+# The interference check: every named solid against every other. Report
+# only - clashes are design findings, like drc.echo, not build failures.
+clashes:
+  - name: clash
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/clash.txt
+    allow: mechanical/clash-allow.yaml

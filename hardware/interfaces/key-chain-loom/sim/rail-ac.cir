@@ -1,0 +1,27 @@
+* The key board's 3V3 as the register sees it: the impedance between its VCC and
+* ground, looking back through C-DECOUPLE-165 (and C-BULK-CHAIN when fitted), the
+* ribbon and FB-CHAIN to the LDO. Its peak is the ring. See rail.cir for the parts.
+VLDO ldo 0 {{vcc}}
+RLDO ldo dev {{r_ldo}}
+CLDO dev cldo {{c_ldo}}
+RCLDO cldo 0 {{esr_ldo}}
+XFB dev fbo BLM21SP601SN1
+RRIB fbo rib {{r_rib}}
+LRIB rib kbv {{l_rib}}
+RGND kbg gr {{r_rib_gnd}}
+LGND gr 0 {{l_rib_gnd}}
+C6 kbv c6n {{C-DECOUPLE-165}}
+RC6 c6n kbg {{esr_c6}}
+C7 kbv c7n {{C-BULK-CHAIN}}
+RC7 c7n kbg {{r_c7}}
+IAC kbg kbv DC 0 AC 1
+.options method=gear
+.control
+ac dec 100 10k 100meg
+let z = vm(kbv, kbg)
+meas ac z_peak max z
+meas ac f_peak max_at z
+meas ac z_1mhz find z at=1meg
+quit
+.endc
+.end

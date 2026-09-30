@@ -1,0 +1,56 @@
+# GENERATED from the KiCad project hardware/boards/umb-adapter/umb-adapter.kicad_sch by tools/kicad.py - DO NOT EDIT.
+# The flattened netlist of this board, every sub-sheet instance expanded.
+
+board: umb-adapter
+title: Woody umbilical adapter (hardware/boards/umb-adapter)
+components:
+  J1:
+    of: J-UMBILICAL-INST
+    value: NE8FAV
+    pins:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+  J2:
+    of: J-UMB
+    value: 8-way 2.54mm right-angle pin header
+    pins:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+nets:
+  /AGND_SENSE:
+  - J1.2
+  - J2.2
+  /BREATH_SENSE:
+  - J1.1
+  - J2.1
+  /CS_MOD:
+  - J1.7
+  - J2.7
+  /DIG_GND:
+  - J1.8
+  - J2.8
+  /MOSI:
+  - J1.5
+  - J2.5
+  /PWR_GND:
+  - J1.6
+  - J2.6
+  /SCLK:
+  - J1.4
+  - J2.4
+  /UMBILICAL_POS12:
+  - J1.3
+  - J2.3
+external_endpoints: []

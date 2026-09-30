@@ -1,0 +1,1091 @@
+# Body geometry - the CAD's inputs (ADR 0009, ADR 0010)
+#
+# Consumed by tools/cad.py, which writes mechanical/cad/generated/params.scad
+# from this file and config/key-layout.yaml. Every render and cut file built
+# from the model is fingerprinted against both, so a change here marks every
+# picture of the old value STALE until `python3 tools/cad.py build` runs.
+#
+# WHAT IS NOT HERE, ON PURPOSE. The envelope, the plate thickness and the
+# switch cutout live in config/key-layout.yaml `meta` (the plate thickness is
+# the register's `plate-thickness`); key positions live there too. Do not
+# restate them here - params.scad takes them from there.
+#
+# EVERY LEAF CARRIES A STATUS, and the status is the point of this file:
+#   settled  - read off a banked document or decided in an ADR; cite it
+#   nominal  - an ADR's working estimate; the CAD uses it until measured
+#   tbd      - NO document gives a number. The value is a placeholder so the
+#              model can be drawn, and `decided_by` says what replaces it.
+#              A tbd value in a render is a question, not an answer.
+# Provenance tags follow the review convention: [ds] banked datasheet,
+# [adr] decision record, [calc] arithmetic shown, [from memory] unverified.
+#
+# COORDINATES (the model's, not the key plate's):
+#   X along the body, 0 at the mouthpiece end's outer face, + toward the tail
+#   Y across, 0 at the left edge seen from above with the mouthpiece at the top
+#   Z up, 0 at the bottom face, the key plate's top face at the envelope thickness
+# config/key-layout.yaml's key-plate frame (+x right, +y down, mouthpiece up)
+# maps as X = plate origin + y, Y = plate origin + x.
+
+meta:
+  owner: docs/decisions/0009-enclosure-construction.md
+  model: mechanical/cad/woody_body.scad
+
+# ---------------------------------------------------------------- stack ----
+stack:
+  # THE OAK TOP HAS NO THICKNESS OF ITS OWN. Decided 2026-09-26: a key fully
+  # pressed is FLUSH with the top face, so the key plate sits UNDER the oak
+  # top and the oak is exactly as thick as the cap stands above the seat at
+  # full travel - `switch.keycap_top_above_seat - switch.total_travel`. The
+  # model derives it and drc.echo prints it; a sheet that is not that
+  # thickness is shimmed or laminated up to it. The ADR 0009 stack sketch's
+  # "oak top ~6 mm" is superseded by this rule, not by a number.
+  cap_clear:
+    value: 0.75
+    status: tbd
+    source: "keycap to oak-top hole, per side. Must beat oak's cross-grain movement across one hole, which ADR 0009 puts at 1-1.5 % [calc: 1.5 % of 18 mm = 0.27 mm]"
+    decided_by: "M2 - the mule, with a real cap in a real oak hole"
+  cap_holes:
+    value: "slot"
+    status: tbd
+    source: "individual = one hole per cap in the oak top; slot = one slot per hand (and in the oak bottom one per thumb group either side of a rest), so pitch is limited by cap-to-cap clearance rather than by an oak web between holes"
+    decided_by: "the pitch chosen - at 18 mm an individual-hole web is zero, so the tightened layout needs slots (drc.echo); revisit if M2 widens it"
+  # THE OAK BOTTOM HAS NO THICKNESS OF ITS OWN EITHER. Decided 2026-09-26:
+  # thumb keys are flush with the bottom face at full travel too. The thumb
+  # plate is on the oak bottom's inside face, so the oak is the same
+  # `keycap_top_above_seat - total_travel` as the oak top. ADR 0009's
+  # "~8 mm <- sets thumb key inset depth" is superseded by this rule.
+  side_t:
+    value: 4.0
+    status: nominal
+    source: "[adr] ADR 0009 mass table - 'Acrylic sides, 2 x 4 mm'. Now a single sheet standing in the oak grooves"
+  # THE SIDES SIT BETWEEN THE OAK PANELS, IN GROOVES (decided 2026-09-26).
+  # Oak top and oak bottom run the full width; each acrylic side stands in a
+  # groove in both, set in from the edge by an oak lip. Glued into the bottom
+  # grooves (the U is still one glued sub-assembly), a sliding fit in the top
+  # grooves - which now locate the lid, the job ADR 0009's notch did.
+  # SANDED EDGES (owner, 2026-09-26: "the outer edges of all wood should be
+  # rounded like I sanded it"): every outer edge of the oak - the top and
+  # bottom panels' long edges, including the lips beside the acrylic, and the
+  # end caps' outer faces and corners. A roundover after assembly, not a cut:
+  # the DXFs carry the outlines, this radius goes on by hand or router.
+  edge_r:
+    value: 1.5
+    status: tbd
+    source: "a sanded roundover [owner]; under the 2 mm lip outside each groove (side_inset), so the lip keeps a flat beside the acrylic"
+    decided_by: "M5, on the first cut parts"
+  side_inset:
+    value: 2.0
+    status: tbd
+    source: "oak lip outside each groove. Every mm here comes off the interior width twice"
+    decided_by: "M4 - the thinnest lip the oak and the saw will hold"
+  groove_depth:
+    value: 3.0
+    status: tbd
+    source: "placeholder - half the oak panel, leaving half under the groove"
+    decided_by: "M4, with the oak panel thickness (which the flush rule sets)"
+  groove_clear:
+    value: 0.2
+    status: tbd
+    source: "per side of the acrylic, so the lid lifts off; acrylic sheet thickness varies [from memory]"
+    decided_by: "M4, against the sheet actually bought"
+# ----------------------------------------------------------------- ends ----
+ends:
+  mouth_cap_t:
+    value: 6.0
+    status: tbd
+    source: "OAK since 2026-09-26 (owner: replace the acrylic mouth cap with the wood; ADR 0009 kept that open - 'same cut, same fixings, different sheet') - the oak top's stock, as the tail cap"
+    decided_by: "M4"
+  tail_cap_t:
+    value: 6.0
+    status: tbd
+    source: "ADR 0009 end-cap table: oak - so the oak top's stock"
+    decided_by: "M4, together with the etherCON panel-thickness question in mechanical/DESIGN.md"
+  tube_hole_d:
+    value: 6.0
+    status: tbd
+    source: "ADR 0003: tube bore and OD are settled at E2"
+    decided_by: "E2 (tube bore by playing), then the tube's OD plus clearance"
+
+# ------------------------------------------------------ provisional layout --
+# USED ONLY WHILE config/key-layout.yaml HAS null POSITIONS. The first key
+# with a real x/y overrides this for that key. Every render made while any
+# key is still provisional is stamped PROVISIONAL LAYOUT by tools/cad.py.
+layout:
+  # THE LENGTH IS DERIVED (owner, 2026-09-26: "minimize total length ...
+  # a little extra near the mouth and a little after the keys for the
+  # connector"). The model computes it from the keys, the underside and the
+  # connector; drc.echo prints it and says what sets each end. These are the
+  # only allowances left:
+  mouth_extra:
+    value: 10.0
+    status: tbd
+    source: "owner: 'a little extra near the mouth' - oak between the mouth cap's inside face and the first cap"
+    decided_by: "M2 - where the lips and the mouthpiece mount land"
+  tail_clear:
+    value: 3.0
+    status: tbd
+    source: "clearance from the last key board to the etherCON body - the connector space the owner asked for is its depth plus this"
+    decided_by: "M4, with the connector's real rear envelope"
+  underside_clear:
+    value: 3.0
+    status: tbd
+    source: "clearance between the mouth cap and the first thumb recess, and from the last thumb recess to the tail cap"
+    decided_by: "M4"
+  # KEY SPACING. Each hand is a LIST OF
+  # GAPS, key centre to key centre from the mouthpiece end, so spacing can be
+  # non-uniform as ADR 0010 expects; the run length is their sum and there is
+  # deliberately no separate run or pitch value - two numbers for one
+  # quantity is the defect this repository keeps finding. Real x/y positions
+  # in config/key-layout.yaml replace this block key by key at M2.
+  # 2026-09-26: tightened from 24 mm, which the finger-spacing research
+  # (docs/research/2026-09-26-finger-spacing/) puts at the wide end. Graded
+  # as real instruments are: comfortable pitch under index-middle-ring,
+  # tighter to and between the little-finger keys, because a single straight
+  # line cannot offset the little-finger hole sideways the way a recorder
+  # does. Finger assignment is still M2's (ADR 0010); these gaps assume the
+  # first three keys of each hand are index, middle, ring.
+  lh_gaps:
+    value: [20.0, 20.0, 18.0, 0.0]
+    status: nominal
+    source: "[research] soprano recorder L1-L2-L3 21.0/22.3, D whistle 20/20; pad widths put touching fingers 15-22 apart (P5 F - P95 M). 18 to the little-finger keys (soprano R3-R4 18.0; 1.5 mm between MT165 caps). The final 0 is the side-by-side pair LH4 / LH5 (owner, 2026-09-26)"
+    decided_by: "M2 - replaced key by key by x/y in config/key-layout.yaml"
+  # SIDEWAYS OFFSETS, per key, mm from the centreline (owner, 2026-09-26):
+  # each little finger's first position is a side-by-side PAIR (a 0 in the
+  # gaps list); the right little finger then has a single key below it, off
+  # centre as a recorder offsets its little-finger hole.
+  # SIGN: + is toward the model's Y = W edge. Seen from the key face with the
+  # mouthpiece up - the audience's view - that edge is on the viewer's right,
+  # so the PLAYER's left. The assumption below is that each little finger is
+  # offset toward the side its hand wraps from: left hand +, right hand -.
+  # A recorder offsets only its right-hand holes, and toward the player's
+  # right, which agrees. Only RH6 depends on it now - the pairs are centred.
+  # Confirm on the mule.
+  lh_offsets:
+    value: [0.0, 0.0, 0.0, -9.0, 9.0]
+    status: tbd
+    source: "LH1-3 on the centreline; LH4 / LH5 the little finger's side-by-side pair, one cap pitch apart across the body, centred so both switch bodies stay inside the plate"
+    decided_by: "M2 - hands on the mule; the sign too"
+  rh_offsets:
+    value: [0.0, 0.0, 0.0, -9.0, 9.0, -9.0]
+    status: tbd
+    source: "RH1-3 on the centreline; RH4 / RH5 the little finger's side-by-side pair, centred as LH4 / LH5; RH6 the single key below it, IN LINE with RH4 - the pair key on the player's right, the recorder's direction (owner, 2026-09-26)"
+    decided_by: "M2 - hands on the mule; the sign too"
+  # EQUAL BANDS (owner, 2026-09-26): the space before the left hand and
+  # between the hands are made the same - the larger that either needs.
+  # The TAIL is sized on its own since the LED
+  # matrix is centred in it (matrix_centred). drc.echo prints the band and
+  # which set it. `gap` is then only a minimum for the space between the hands.
+  equal_bands:
+    value: true
+    status: settled
+    source: "owner, 2026-09-26: 'copy the same space above the left keys to between the hands and at the bottom'. Since the matrix was centred (same day) it equalizes the mouth end and the space between the hands only; the tail is sized by its own contents"
+  gap_matches_matrix:
+    value: true
+    status: settled
+    source: "owner, 2026-09-26: the gap between the key groups is the same as the gap from the last keys to the LED matrix - clear space, cap edge to cap edge and cap edge to window edge. Overrides equal_bands for the gap; equal_bands then only sets the mouth end, and gap stays a minimum"
+  matrix_centred:
+    value: true
+    status: settled
+    source: "owner, 2026-09-26: centre the LED matrix in the space after the keys, and let only the tail grow for it"
+  gap:
+    value: 50.0
+    status: nominal
+    source: "[adr] ADR 0009 length table - the U-bolt band. A MINIMUM while equal_bands is on"
+  rh_gaps:
+    value: [20.0, 20.0, 18.0, 0.0, 18.0]
+    status: nominal
+    source: "[research] as lh_gaps; soprano R1-R2-R3 20.8/20.1, R3-R4 18.0. A 0 GAP IS A SIDE-BY-SIDE PAIR: RH4 / RH5 share the first little-finger position, RH6 is the single key one step further down (owner, 2026-09-26)"
+    decided_by: "M2 - replaced key by key by x/y in config/key-layout.yaml"
+  # THE LEFT THUMB IS TWO ROWS ACROSS THE BODY with the rest between them,
+  # like the right thumb's pair (owner, 2026-09-26: "dual horizontal rows
+  # too, with gap still in the middle"): LT1 LT2, the rest, LT3 LT4.
+  lt_rest_under:
+    value: "LH2"
+    status: tbd
+    source: "the left thumb rest is directly under the middle-finger key (owner, 2026-09-26); LH2 is the middle finger on the index-middle-ring order key-layout.yaml assumes until M2 assigns fingers"
+    decided_by: "M2 - finger assignment"
+  lt_rest:
+    value: 40.0
+    status: tbd
+    source: "the LT1/LT2 row to the LT3/LT4 row, centre to centre, across the thumb rest: about a thumb pad clear between the cap holes. Each row's two keys are at the top keys' pitch (owner, 2026-09-26)"
+    decided_by: "M2"
+  rt_rest_under:
+    value: "RH2"
+    status: tbd
+    source: "the right thumb rest is directly under the middle-finger key (owner, 2026-09-26); RH2 on the same assumption as lt_rest_under"
+    decided_by: "M2 - finger assignment"
+  # THE RIGHT THUMB: two rows across the body with the rest between them,
+  # like the left (owner, 2026-09-26: "four keys right thumb too").
+  rt_rest:
+    value: 40.0
+    status: tbd
+    source: "the RT1/RT2 row to the RT3/RT4 row, centre to centre, across the thumb rest - the same as the left thumb's. Each row's two keys are at the top keys' pitch (owner, 2026-09-26)"
+    decided_by: "M2"
+
+# -------------------------------------------------------------- switches ----
+switch:
+  # z = 0 at the underside of the 15 x 15 collar = the plate's top face
+  # (docs/reference/ks33-geometry.md). The model imports the real solid
+  # (mechanical/cad/vendor/ks33.stl, meshed from the banked STEP); these are
+  # for the arithmetic and the clearance checks.
+  stem_top_above_seat:
+    value: 6.4
+    status: nominal
+    source: "the MX cross stem's top at rest, above the seat: 6.38 in the front elevation and 6.38 in the side one (3.35 to the housing top, the stem ~3.03 over it), SCALED off Gateron KS-33H10B050NN-Y24 sheet 6 - both views to scale within 0.03 on their dimensioned 13.75, 14.00 and 5.85 [scaled, datasheets/mechanical/GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf, 2026-09-28]. The third-party STEP's is higher (docs/reference/ks33-geometry.md); the vendor wins"
+  cover_w:
+    value: 13.75
+    status: settled
+    source: "[ds] Gateron KS-33H10B050NN-Y24 sheet 6, front elevation: the switch's widest part above the collar, tapering upward. The 14.70 latch span is BELOW the collar, in the plate slot - the third-party STEP draws its latches above it, so the model trims the switch's mesh to this above the collar"
+  cover_straight_h:
+    value: 1.5
+    status: nominal
+    source: "how far above the seat the cover stays switch.cover_w wide before it tapers [scaled, Gateron KS-33H10B050NN-Y24 sheet 6 front elevation rendered at 400 dpi, 40 px/mm on its 13.75, 2026-09-28]"
+  cover_top_w:
+    value: 12.8
+    status: nominal
+    source: "the cover's width at its top (switch.housing_top_above_seat), where it steps in to the 11.0 actuator [scaled, as switch.cover_straight_h]"
+  collar_t:
+    value: 0.45
+    status: settled
+    source: "[ds] Gateron KS-33H10B050NN-Y24 sheet 6, side elevation: the 15.0 x 15.0 collar's thickness, from the seat"
+  housing_top_above_seat:
+    value: 3.35
+    status: settled
+    source: "[ds] Gateron KS-33H10B050NN-Y24 sheet 6, side elevation: the housing's top face above the seat; only the stem and its actuator stand above it"
+  pole_tip_below_seat:
+    value: 5.75
+    status: settled
+    source: "[ds] Gateron KS-33H10B050NN-Y24 sheet 6, 5.75 +/-0.05 (the STEP says 5.70; the vendor wins)"
+  thumb_pcb_below_seat:
+    value: 2.5
+    status: nominal
+    source: "the main board's face nearest the thumb switches' seat, below it: against the thumb switches' housing bottom, as the key boards are (ADR 0022, ADR 0020 Amendment 6), held there by its mount on the bottom plate (ADR 0025) - the plate + hardware.kb_spacer_l [calc: 1.2 + 1.3], inside switch.pcb_below_seat_window; drc.echo 'main board mount sets its depth'"
+  pcb_below_seat:
+    value: 2.5
+    status: nominal
+    source: "THE KEY BOARDS' (the thumb switches' main board is switch.thumb_pcb_below_seat): the board top is pressed against the switches' housing bottom (owner, 2026-09-29; ADR 0020 Amendment 6), 2.50 +/-0.05 below the seat [ds GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf sheet 6]. The mount holds it there: the stud's head is flush in the plate's top face and the spacer bears on its underside, so the board top sits the plate + hardware.kb_spacer_l below the seat [calc: 1.2 + 1.3]; drc.echo 'key-board mount sets the board depth' fails if this and the hardware disagree. Inside switch.pcb_below_seat_window"
+  keycap_top_above_seat:
+    value: 9.0
+    status: tbd
+    source: "the cap's top above the seat = switch.stem_top_above_seat + switch.keycap_boss_below_top - how deep the stem enters the socket, which nothing published gives; the vendor's height (switch.keycap_h) bounds only the cap itself. A guess inside that bracket"
+    decided_by: "M1 - measure a cap on a switch with calipers. It now SETS BOTH oak panel thicknesses (flush rule, stack above)"
+  total_travel:
+    value: 3.0
+    status: settled
+    source: "[ds] Gateron KS-33H10B050NN-Y24 sheet 6 - total travel 3.0 +/-0.2 mm"
+  keycap:
+    value: 16.5
+    status: settled
+    source: "[adr] ADR 0002 - MT165 16.5 x 16.5"
+  # THE CAP AS A SOLID (owner, 2026-09-28: "make sure that they don't cause
+  # interference because their size I think is a little bit different than the
+  # actual key underneath"). A hollow shell: its skirt, 16.5 square at the bottom
+  # (keycap), tapering to keycap_top_w, keycap_h tall, walls keycap_wall thick,
+  # its top keycap_top_t thick; and the MX cross socket under the top, which the
+  # stem enters. Its top sits keycap_top_above_seat above the seat. The clash
+  # check sweeps the shell down through total_travel against the real switch
+  # mesh, the plate and the oak, and drc.echo prints the margins.
+  keycap_h:
+    value: 3.5
+    status: nominal
+    source: "MT165: 3.50 mm, skirt bottom to top - Tai-Hao's own dimension guide [datasheets/mechanical/TAIHAO-MT165-THCS-THT-DIMENSION-GUIDE.jpg]"
+  keycap_top_w:
+    value: 15.4
+    status: tbd
+    source: "the top face's width: the MT165's sides are drafted about 0.55 mm a side [scaled off datasheets/mechanical/TAIHAO-MT165-THCS-THT-DIMENSION-GUIDE.jpg, 2026-09-28]"
+    decided_by: "calipers on a cap (M1)"
+  keycap_wall:
+    value: 1.3
+    status: tbd
+    source: "the skirt's wall at its bottom edge: 1.1-1.5 mm scaled off a reseller's underside photo [datasheets/mechanical/BEEKEEB-MT165-THCS-UNDERSIDE-COMPARISON.jpg; inferred, UNVERIFIED]. It sets the inner cavity the switch's housing and clips must fit in when the key is pressed"
+    decided_by: "calipers on a cap (M1)"
+  keycap_top_t:
+    value: 1.2
+    status: tbd
+    source: "the top's thickness [from memory: no source]"
+    decided_by: "calipers on a cap (M1)"
+  keycap_boss_below_top:
+    value: 4.8
+    status: tbd
+    source: "how far the MX cross socket's boss reaches below the cap's top: about 4.8 mm, so about 1.3 mm below the skirt [reseller copy, shop.talpkeyboard.com/products/mt165-mx-blank-1u-black and shop.beekeeb.jp/products/tai-hao-mt-165, 2026-09-28; method not stated, UNVERIFIED]. The boss rides on the stem and moves with it"
+    decided_by: "calipers on a cap (M1)"
+  keycap_socket_d:
+    value: 4.4
+    status: tbd
+    source: "the socket boss's outside diameter: about 4.2-4.5 mm in a reseller's photo [shop.talpkeyboard.com, 2026-09-28; inferred, low confidence]"
+    decided_by: "calipers on a cap (M1)"
+  cluster_pcb_w:
+    value: 22.0
+    status: tbd
+    source: "hardware/cluster/cluster-boards.md: outlines are undrawable until M3"
+    decided_by: "M3"
+  pcb_t:
+    value: 1.6
+    status: nominal
+    source: "the MAIN board's thickness (PCB-CARRIER), as the key boards' (boards.key_board_t): a standard 1.6 mm board, its top against the thumb switches' housing bottom, shows 5.10 - 2.50 - 1.60 = 1.0 mm of pin to solder [calc, docs/reference/ks33-geometry.md]; ADR 0022, ADR 0020 Amendment 6"
+  pcb_below_seat_window:
+    value: [2.45, 2.55]
+    status: settled
+    source: "[ds] GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf sheet 6: the housing bottom, 2.50 +/-0.05 below the seat, which the board top is pressed against (owner, 2026-09-29; ADR 0020 Amendment 6). Higher is impossible (the housing is there); lower leaves a gap the key press would close. The pins flare to about 2 mm wide just under the housing [3D, mechanical/cad/vendor/ks33.stl, sectioned 2026-09-29], so the switch footprint's holes are sized to pass the flare (hardware/lib/README.md). Checked by drc.echo 'key-board depth inside the switch pins' window'"
+
+# ---------------------------------------------------------------- boards ----
+boards:
+  matrix_board:
+    value: 25.0
+    status: settled
+    source: "[ds] datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-dimensions.jpg - 25.00 x 25.00, R1.0"
+  matrix_emitters:
+    value: 20.8
+    status: nominal
+    source: "ADR 0014 / carrier.md - 8 x 2.6 mm pitch [from memory there]"
+  # Part envelopes on the boards (datasheet read 2026-09-26). Heights are
+  # above the board face they sit on.
+  smt_h:
+    value: 2.3
+    status: nominal
+    source: "tallest SMT part on the main board: SMA/SMC diodes 2.29-2.62 [ds SMAJ15A p.3, SS34 p.3]; SOIC 1.75"
+  cluster_smt_h:
+    value: 1.8
+    status: nominal
+    source: "the key boards' tallest underside part: the register's SOIC-16 (U-KEYS, SN74HCS165D), max 1.75 - the JEDEC MS-012 outline as drawn for SOT109-1 [datasheets/logic/74HCS165-nexperia.pdf Fig. 18]; TI's SCLS828A as banked has no D-package outline (pp.25-34 are BQB, DYY and PW only) and its D is MS-012 [from memory] - and 0805 passives"
+  tall_l:
+    value: 15.0
+    status: tbd
+    source: "ONE regulator block, the long side across the body - an R-78E5.0 SIP-3 (11.6 x 8.5 x 10.4 [ds R-78E5.0-1.0 p.4]), its C-BUCK-IN 6.3 x 11 and a C-STRIP-BULK 8-10 x 12.5-20 [from memory]; one block, on the main board (ADR 0017)"
+    decided_by: "M4 main board layout"
+  tall_w:
+    value: 10.0
+    status: tbd
+    source: "the regulator block's other side: an R-78E5.0 SIP-3 (11.6 x 8.5 on the board), capacitors beside it [ds R-78E5.0-1.0 p.4; caps from memory]"
+    decided_by: "M4 main board layout"
+  tall_h:
+    value: 12.5
+    status: tbd
+    source: "the shortest the bulk electrolytics come, upright [from memory]; lay them down or use SMD polymer where drc.echo says they do not fit"
+    decided_by: "part selection and layout at M4"
+  sensor_body:
+    value: 12.3
+    status: settled
+    source: "[ds] MPXV4006DP p.7, case 1351-01 - body 11.81-12.32 square. SURFACE MOUNT (p.1 ordering table), not THT"
+  sensor_h:
+    value: 9.9
+    status: settled
+    source: "[ds] MPXV4006DP p.20 case 1351-01 table, dim A - overall height 9.39-9.91"
+  sensor_leads:
+    value: 17.8
+    status: settled
+    source: "[ds] MPXV4006DP p.7 - across the lead tips 17.27-17.78"
+  sensor_port_l:
+    value: 6.6
+    status: settled
+    source: "[ds] MPXV4006DP p.7 - ports protrude 6.10-6.60 from one face"
+  sensor_port_d:
+    value: 3.3
+    status: settled
+    source: "[ds] MPXV4006DP p.7 - barb OD 2.79-3.30"
+  sensor_port_z:
+    value: [8.5, 1.4]
+    status: nominal
+    source: "port centres above the seating plane, upper (P1, marked side - p.6 Table 3) and lower; scaled off the p.7 drawing"
+  sensor_port_offset:
+    value: 2.1
+    status: tbd
+    source: "[ds] MPXV4006DP p.7 end view, case 1351-01 dim N (p.20 table) 4.06-4.57 - the two ports' centres are offset across the body by N, so each sits N/2 = 2.03-2.29 either side of the body's centre [calc]; 2.1 is a pick inside that range"
+    decided_by: "the part in hand at M4"
+  sensor_lead_row:
+    value: 10.2
+    status: tbd
+    source: "length along the body of the block standing in for the leads. NOT a datasheet dimension: the p.20 table gives e 2.54 BSC and b 0.96-1.07, so 4 leads per side span 3 x 2.54 + 1.07 = 8.69 max [calc]; 10.2 is a modelling envelope over that [from memory]"
+    decided_by: "M4 footprint"
+  sensor_lead_h:
+    value: 1.2
+    status: tbd
+    source: "height of the block standing in for the lead forms. NOT a datasheet dimension: the p.20 table gives only A1 0.05-0.25 (standoff) and L 1.02-1.52 (foot length); the lead's rise to the body is drawn (p.7 Detail G) but not dimensioned [from memory]"
+    decided_by: "M4 footprint"
+  sensor_land_w:
+    value: 18.8
+    status: settled
+    source: "across the land pattern's two pad rows, outer end to outer end: rows 16.00 centre to centre plus one 2.80 pad [repo hardware/lib/woody.pretty/NXP_Case1351-01_SOP-8_P2.54mm.kicad_mod; calc 16.00 + 2.80 = 18.80]. Wider than the lead tips (sensor_leads), so it is what sets the sensor's inset from the main board's edge: the copper, not the part, must keep off the edge"
+  # THE KEY CHAIN'S CONNECTORS (owner, 2026-09-27, ADR 0017 amended): a
+  # through-hole 1.27 mm shrouded IDC header, right-angle, on each board -
+  # stacked, the key board's hanging from its underside over the main
+  # board's - and a flat IDC ribbon between them. Samtec SHF-106-01-L-D-RA
+  # and an FFSD-06-D-xx.xx-01-N-RN2 cable are the stand-ins; their full prints
+  # are banked (datasheets/connectors/SAMTEC-SHF-1XX-*-PRINT.pdf and
+  # SAMTEC-FFSD-*-PRINT.pdf).
+  chain_hdr_l:
+    value: 13.97
+    status: nominal
+    source: "SHF header length = positions per row x 1.27 + 6.35 REF, 6 per row [datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf, sheet 1]"
+    decided_by: "M4, with J-CHAIN's part"
+  chain_hdr_h:
+    value: 5.59
+    status: nominal
+    source: "the right-angle header's height off the board, .220 REF, standing on 0.51 ribs [datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf, sheet 1 fig 1]"
+    decided_by: "M4, with J-CHAIN's part"
+  chain_hdr_d:
+    value: 5.33
+    status: nominal
+    source: "the right-angle shroud's depth, mouth to back, .210 REF [datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf, sheet 1]"
+    decided_by: "M4, with J-CHAIN's part"
+  chain_hdr_pin_back:
+    value: 7.86
+    status: nominal
+    source: "from the mouth back to the far (odd) pin row: the depth 5.33 plus the odd row's bend 1.26 + 1.27 behind the back face, measured at the bend (note 7) [datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf, sheet 2 section C-C; calc]"
+    decided_by: "M4, with J-CHAIN's part"
+  chain_plug_proud:
+    value: 1.4
+    status: tbd
+    source: "how far the FFSD socket stands out of the header's mouth - NOT given by either print, which also say DO NOT SCALE; estimated as the socket's 5.08 height less a mouth-to-floor depth of about 3.67 that is not dimensioned. It sets where the cable leaves the socket and whether it clears the shroud. An estimate until a mated pair is measured [datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf sheet 1 and datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf sheet 2]"
+    decided_by: "M4, on the first mated pair"
+  chain_hdr_tail:
+    value: 2.15
+    status: nominal
+    source: "the header's tails below its seating plane, .085 REF [datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf, sheet 2 section C-C]"
+    decided_by: "M4"
+  chain_hdr_mouth_z:
+    value: 3.05
+    status: nominal
+    source: "the mouth's centre above the board: the 0.51 ribs plus half the 5.08 body [calc, datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf sheet 1 fig 1]"
+    decided_by: "M4"
+  chain_plug_h:
+    value: 5.08
+    status: nominal
+    source: "the FFSD socket's height along its insertion, 5.08 +0.15/-0.08 [datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf, sheet 1 fig 1]"
+    decided_by: "M4"
+  chain_plug_t:
+    value: 3.05
+    status: nominal
+    source: "the FFSD socket's thickness, .120 REF [datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf, sheet 1]"
+    decided_by: "M4"
+  chain_plug_l:
+    value: 11.81
+    status: nominal
+    source: "the FFSD socket's length, positions per row x 1.27 + 4.19, 6 per row [datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf, sheet 1]"
+    decided_by: "M4"
+  # THE MATRIX AND THE UMBILICAL, onto the main board's tail end (owner,
+  # 2026-09-26: "what about matrix led esp32 and ethercon wire connections?").
+  # The Matrix: a flat ribbon soldered to its two pad rows (the board is on
+  # the lid, so it unplugs at the main board like the key boards). The
+  # umbilical reaches the board through the etherCON's adapter (below).
+  mcu_conn_l:
+    value: 21.54
+    status: settled
+    source: "J-MCU, the XKB X1270WR-2x12A-9TV01 box header, side entry, across the body: dimension C for 2x12 [ds XKB-X1270WR-2x12A-9TV01.pdf] (ADR 0018)"
+  mcu_conn_w:
+    value: 7.8
+    status: settled
+    source: "the same header along the body with its tail pads: 5.40 body [ds XKB-X1270WR-2x12A-9TV01.pdf], its far tail row 1.87 behind the body's back plus the pad [calc from the same drawing]"
+  mcu_conn_h:
+    value: 5.1
+    status: settled
+    source: "the same header's height above the board [ds XKB-X1270WR-2x12A-9TV01.pdf]"
+  # The umbilical (ADR 0021): the etherCON on its own adapter board, which a
+  # right-angle 2.54 mm header joins to a tongue of the main board. The
+  # header is J-UMB, 8 pins, pin N = etherCON pin N.
+  umb_adapter_t:
+    value: 1.6
+    status: tbd
+    source: "the adapter board's thickness, a standard 2-layer board [from memory]; the NE8FAV's pin tails reach through it"
+    decided_by: "M4, with the board ordered"
+  umb_joint_d:
+    value: 2.5
+    status: settled
+    source: "J-UMB's insulator along the body, behind the adapter: the hanxia HX PZ2.54-1x8P WZ's 2.50 mm square insulator [ds HANXIA-HX-PZ2.54-1x8P-WZ.pdf]"
+  umb_joint_h:
+    value: 2.5
+    status: settled
+    source: "the same insulator's height on the main board [ds HANXIA-HX-PZ2.54-1x8P-WZ.pdf]"
+  umb_joint_row_h:
+    value: 1.25
+    status: settled
+    source: "the header's pin row above the main board, at the middle of its 2.50 insulator [ds HANXIA-HX-PZ2.54-1x8P-WZ.pdf]; where the row meets the adapter"
+  umb_parts_d:
+    value: 14
+    status: tbd
+    source: "the depth along the body, in front of J-UMB's insulator, kept for J-UMB's own footprint and the parts that must sit at the connector (U-TVS-SPI, NT-DIG, D-TVS-BREATH x2, R-SER-BREATH-INST x2, D-REVSHUNT): the pin row 1.5 in front of the insulator plus its courtyard 1.77 [repo: KiCad PinHeader_1x08_P2.54mm_Horizontal as placed], a column of the SOD-323 / SOT-23-5 / net-tie parts 3.6, and a column of the 1206s and the SMC shunt 6.7 [calc: 3.27 + 3.6 + 6.7 = 13.57, rounded up]. The tongue's end mounts stand behind it; D-TVS-PWR goes between them"
+    decided_by: "M4 main board layout"
+  # ONE MAIN BOARD (ADR 0017): the thumb switches, their registers and the
+  # carrier's circuits on one board at the thumb level, mouth cap to the end
+  # of the right hand. Its size and the height its parts have are derived;
+  # drc.echo prints them.
+  # THE KEY BOARDS (ADR 0020, amended 2026-09-27): 1.2 mm, and a rectangle
+  # across the cavity with a standoff in each corner.
+  key_board_t:
+    value: 1.6
+    status: nominal
+    source: "[calc] docs/reference/ks33-geometry.md: the pins end 5.10 below the seat and the board top is against the housing bottom at switch.pcb_below_seat, so a standard 1.6 mm board shows 1.0 mm of pin to solder. 1.6 mm is every board house's standard thickness"
+    decided_by: "owner, 2026-09-29 (ADR 0020 Amendment 6); confirmed with the first board order"
+  pcb_t_tol:
+    value: [-0.16, 0.16]
+    status: settled
+    source: "a finished 1.6 mm board's thickness tolerance, key boards and main board: +/-10 % at 1.0 mm and over [datasheets/fab/JLCPCB-PCB-CAPABILITIES.pdf, 'Thickness Tolerance']. A board's top face is set by its spacer, so this moves only its other face - and so the gap the column standoff fills (drc.echo 'cassette height at the hardware's tolerance limits')"
+  kb_end_margin:
+    value: 6.6
+    status: tbd
+    source: "a key board's MOUTH end past its first switch cutout, along the body. The mouth corners' columns stand over the first thumb row, and a column cannot lean (ADR 0025), so the key board's mount must be where its stud in the bottom plate keeps hardware.stud_edge, and its spacer 0.5, from a thumb switch's cutout: 0.6 more than the 6.0 the key board alone needed (drc.echo 'columns vertical: the main board's mounts under the key boards'', 'bottom-plate studs clear of the plate's edges and cutouts', 'bottom-plate spacers clear of the thumb switch cutouts')"
+    decided_by: "M4, with the boards laid out"
+  kb_tail_margin:
+    value: 10.3
+    status: nominal
+    source: "a key board's TAIL end past its last switch cutout, longer than the mouth end: the last keys (LH4/LH5, RH6) reach the board's corners across the body, and each tail corner's screw pocket in the oak top must keep hardware.col_pocket_wall from that key's cap slot [calc: half the slot 9.0 + half the pocket 3.175 + the wall 1.5 + the inset 3.6 - half the cutout 7.0 = 10.275, rounded up]. drc.echo 'key-board tail margin, least' prints how short it may be"
+    decided_by: "M3, with the key positions; hardware.col_pocket_wall, which sets it"
+  board_clear:
+    value: 1.5
+    status: tbd
+    source: "clearance between a board and the parts on the board facing it, and between parts: board flex, solder fillets and height tolerance, hand assembly [drawing convention]. 0.5 was a drawing clearance and the owner rejected it (2026-09-26: 'once components are installed you'd have issues')"
+    decided_by: "M4, with the boards laid out"
+  # THE MAIN BOARD'S NECK at the U-bolt station (2026-09-26): the notches at
+  # the middle screws and the holes over the U-bolt's nuts leave one strip of
+  # board that every trace from the mouth half to the tail half must pass.
+  main_neck_min:
+    value: 8.0
+    status: tbd
+    source: "[calc] ~20 nets cross the station (the key chain's 12 conductors, the breath sensor's lines, the LED row's data and backup lines, power) at 0.25 track / 0.25 gap is 10 mm on one layer, 5 mm on two; plus 0.5 mm copper keep-out from each cut edge is 6; 8 leaves room for a ground return beside them"
+    decided_by: "M4 main board layout - the real net count and track widths"
+  matrix_t:
+    value: 1.6
+    status: settled
+    source: "[ds 3D] datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-3D.stp - the board spans z -0.8 to 0.8"
+  # THE LED MATRIX IS ON THE TOP FACE, just past the last key (owner,
+  # 2026-09-26), face up against the oak top under its window, the key plate
+  # ending short of it; the connectors pass beneath it. A 24-way ribbon soldered to
+  # its pads runs to J-MCU on the main board (hardware/carrier/bom.csv
+  # CBL-MCU-RIBBON).
+  matrix_harness_h:
+    value: 2.5
+    status: tbd
+    source: "below the Matrix: the ribbon soldered straight to its pads, wires bent flat [from memory]. Crimp housings on a pin header stood ~16.5 and put a row across the patch plug"
+    decided_by: "M4, with the harness built"
+  matrix_under_h:
+    value: 3.2
+    status: tbd
+    source: "the Matrix's back-side parts (ESP32-S3, USB-C, IMU) below its board [from memory]"
+    decided_by: "calipers on the board"
+  matrix_led_h:
+    value: 1.0
+    status: tbd
+    source: "WS2812B-0807 package height above the board [from memory]"
+    decided_by: "the banked WS2812B-0807 datasheet, if one is found"
+
+# ------------------------------------------------------------- openings ----
+openings:
+  matrix_window:
+    value: 22.0
+    status: nominal
+    source: "[adr] ADR 0009 - 'Roughly 22 mm square'; the clear opening through the plate and the oak LIP under the acrylic window"
+  # THE MATRIX WINDOW IS FROSTED ACRYLIC, FLUSH WITH THE OAK TOP, SITTING ON
+  # A LIP OF OAK (owner, 2026-09-26). The oak top has a rebate from its top
+  # face as deep as the acrylic, a lip wider than the opening below; the
+  # acrylic drops in flush. Frosted was chosen knowingly: it softens pixels
+  # at this distance from the LEDs (drc.echo prints the distance).
+  matrix_lip:
+    value: 2.0
+    status: tbd
+    source: "oak lip the acrylic rests on, per side - the rebate is the opening plus twice this"
+    decided_by: "M4, with the acrylic's cut size"
+  matrix_acrylic_t:
+    value: 3.0
+    status: tbd
+    source: "frosted acrylic window thickness [from memory: common sheet]; must leave an oak lip under it"
+    decided_by: "M6, with the diffusion prototype"
+  # USB-C REACHES THE TAIL THROUGH A PANEL-MOUNT EXTENSION (owner,
+  # 2026-09-26): the Matrix board sits under the top window, a few cm inboard
+  # of the tail face, and a short USB-C extension brings its port to a
+  # receptacle in the tail cap. The slot is the receptacle's panel cutout.
+  usb_slot_w:
+    value: 12.5
+    status: tbd
+    source: "panel cutout for a panel-mount USB-C extension receptacle [from memory]"
+    decided_by: "M4, against the extension bought"
+  usb_slot_h:
+    value: 7.0
+    status: tbd
+    source: "as usb_slot_w [from memory]"
+    decided_by: "M4"
+  # THE RECEPTACLE STANDS ON END (2026-09-26), centred in the lane between
+  # the etherCON's recess and the side (drc.echo, "USB-C extension
+  # receptacle beside the etherCON flange", "tail cap web between the USB-C
+  # cutout and the etherCON recess"). USB-C is reversible, so the
+  # receptacle's orientation costs the user nothing.
+  usb_slot_portrait:
+    value: true
+    status: tbd
+    source: "[calc] portrait takes usb_slot_h across instead of usb_slot_w, and usb_slot_w tall in the cavity's height; drc.echo gives the lane and the webs either way"
+    decided_by: "M4, against the extension bought - its screw ears, if any, would run up and down the tail face, which is why it is earless (usb_mount)"
+  usb_plug_l:
+    value: 15.0
+    status: tbd
+    source: "RIGHT-ANGLE USB-C plug on the extension (2026-09-26): the Matrix's edge to the far side of the moulding, where the lead turns across the body [from memory]. A straight plug is 25-30 and, doubled by the centred Matrix, added ~24 mm of body"
+    decided_by: "M4, against the extension bought"
+  matrix_usb_to_tail:
+    value: false
+    status: tbd
+    source: "false = the Matrix's USB-C edge faces the MOUTH, so its plug runs under the key boards instead of into the connector's housing; datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-dimensions.jpg shows the port overhanging one edge"
+    decided_by: "M4, the Matrix's orientation under its window"
+  usb_ext_depth:
+    value: 20.0
+    status: tbd
+    source: "the extension receptacle's body behind the panel [from memory]"
+    decided_by: "M4, against the extension bought"
+  # THE PLUG HAS TO REACH THE RECEPTACLE (2026-09-26). The tail cap is 6 mm
+  # of oak, thicker than the 1-2 mm panel a panel-mount receptacle is made
+  # for [from memory], and a plug's overmould is bigger than the receptacle's
+  # cutout, so behind a plain slot the plug would stop short. The cap is
+  # POCKETED from the tail face, overmould-sized, down to a thin panel; the
+  # receptacle's nose passes that panel's slot (usb_slot_w x usb_slot_h), its
+  # face level with the pocket floor. drc 'USB-C plug overmould reaches the
+  # receptacle'. The alternative, a receptacle mounted from the front, would
+  # put its flange on the tail face, where the lane has no room for one.
+  usb_overmold:
+    value: [15.0, 9.0]
+    status: tbd
+    source: "the plug's overmould, [wide, thick], plus clearance: common USB-C cables are ~12-14.5 x 6.5-8.5 [from memory]. Stood on end the thick side is across the body, and the lane beside the etherCON flange takes up to 10 with a 2 mm web (drc 'tail cap web between the USB-C cutout and the etherCON flange') - a cable fatter than that does not fit this face"
+    decided_by: "M4, calipers on the cables the instrument will actually be used with"
+  usb_panel_t:
+    value: 1.5
+    status: tbd
+    source: "oak left under the overmould pocket, the panel the receptacle clamps to [from memory: panel-mount USB-C is made for ~1-2 mm panels]"
+    decided_by: "M4, against the receptacle bought - it must not exceed usb_nose_l"
+  usb_nose_l:
+    value: 2.0
+    status: tbd
+    source: "how far the receptacle's shell stands proud of its clamping shoulder, i.e. the thickest panel it can sit flush in [from memory]"
+    decided_by: "M4, against the receptacle bought"
+  # EARLESS (2026-09-26). Stood on end, a receptacle's two screw ears run up
+  # and down the tail face, and at the usual pitch they land outside the
+  # cavity behind the cap (drc 'USB-C receptacle mount inside the cavity'
+  # prints where). So the receptacle is an earless one, held against the
+  # panel by a clamp plate across its body, screwed to the cap's inside face
+  # in the lane above and below it - or bonded, if the part has no shoulder.
+  usb_mount:
+    value: "earless"
+    status: tbd
+    source: "earless | ears. 'ears' is checked against usb_ear_pitch and fails at this cavity height; see the note above"
+    decided_by: "M4, against the extension bought"
+  usb_ear_pitch:
+    value: 29.0
+    status: tbd
+    source: "screw-ear pitch of a typical panel-mount USB-C extension, ~28-30 [from memory]; used only to show why the ears do not fit on end"
+    decided_by: "M4, against the extension bought"
+
+ethercon:
+  # Neutrik NE8FAV: etherCON A-series, VERTICAL PCB mount, rear mounting
+  # (ADR 0021). Read off the banked drawing ST-NE8FAV rev B
+  # (datasheets/connectors/NEUTRIK-NE8FAV-DRAWING.pdf), its data sheet
+  # (-DATASHEET.pdf) and, where the drawing gives no number, its 3D model
+  # (-3D.stp). It is soldered to its own small board, the umbilical adapter,
+  # which stands behind it parallel to the tail cap; a right-angle header
+  # joins that board to the main board (boards.umb_joint_*).
+  bore_d:
+    value: 22.0
+    status: settled
+    source: "[ds] ST-NE8FAV - panel cut out (rear side), bore 22 min"
+  flange_w:
+    value: 25.0
+    status: settled
+    source: "[ds] ST-NE8FAV front view - flange 25 x 25"
+  flange_h:
+    value: 25.0
+    status: settled
+    source: "[ds] ST-NE8FAV side view - 25, the axis at 12.5 from its lower edge"
+  hole_dx:
+    value: 19.8
+    status: settled
+    source: "[ds] ST-NE8FAV panel cut out - two diagonal 3.2 min holes at 19.8 +/-0.1 x 19.8 +/-0.1, upper left and lower right seen from the front"
+  hole_dy:
+    value: 19.8
+    status: settled
+    source: "[ds] ST-NE8FAV"
+  hole_d:
+    value: 3.2
+    status: settled
+    source: "[ds] ST-NE8FAV"
+  panel_max:
+    value: 3.0
+    status: settled
+    source: "[ds] NEUTRIK-NE8FAV-DATASHEET.pdf - 'Panel thickness max. 3 mm'. The oak tail cap is thicker, so a recess from outside leaves this much oak where the connector mounts"
+  pcb_setback:
+    value: 18.3
+    status: settled
+    source: "[ds] ST-NE8FAV side view - flange front face to the PCB's front face"
+  nose_l:
+    value: 2.7
+    status: settled
+    source: "[ds] ST-NE8FAV side view - 21 from the PCB face to the nose's front, less the 18.3 to the flange face [calc]; it stays inside a 3 mm panel's bore"
+  # The PUSH tab, above the flange and in front of it: it stands in the tail
+  # cap's recess, not in the cavity.
+  tab_w:
+    value: 10.0
+    status: settled
+    source: "[ds 3D] NEUTRIK-NE8FAV-3D.stp - the tab spans +/-5.0 across [calc, read 2026-09-29]"
+  tab_top:
+    value: 16.6
+    status: settled
+    source: "[ds 3D] NEUTRIK-NE8FAV-3D.stp - 16.61 above the axis; the drawing's front view shows it above the flange's 12.5"
+  tab_front:
+    value: 6.8
+    status: settled
+    source: "[ds 3D] NEUTRIK-NE8FAV-3D.stp - 6.8 in front of the flange face; the drawing's 24.3 overall is to the same tab, from the rear latch"
+  # Where the footprint's holes sit, from the axis, on the adapter (seen
+  # from the connector's back). The drawing dimensions them from the lower
+  # peg line, which is the axis [ds]; the model agrees to 0.01 [ds 3D].
+  pin_rows:
+    value: [2.11, 4.65]
+    status: settled
+    source: "[ds] ST-NE8FAV PCB layout - the two contact rows, 2.54 apart, the upper at 4.65 above the peg line through the axis"
+  g_below:
+    value: 10.55
+    status: settled
+    source: "[ds] ST-NE8FAV PCB layout - G (d1.2) 15.2 below the upper row [calc: 15.2 - 4.65]"
+  peg_below:
+    value: 1.5
+    status: settled
+    source: "[ds 3D] NEUTRIK-NE8FAV-3D.stp - two d1.5 locating pegs stand 1.5 below the flange's lower edge (the drawing's front view shows them). Standing on the floor, latch up, they point into the oak bottom, so they are CUT OFF FLUSH at assembly (ADR 0021): drilling the floor for them would locate the connector twice, by the cap and by the floor"
+  recess_margin:
+    value: 1.0
+    status: tbd
+    source: "the tail cap's outside recess round the flange's outline and the PUSH tab [placeholder]"
+    decided_by: "M4, with the cable connector (J-UMBILICAL-CABLE) in hand: its shell has to enter the recess and a thumb has to reach the tab"
+  rotated:
+    value: false
+    status: settled
+    source: "[adr] ADR 0021 - the NE8FAV's flange is square, so ADR 0009's reason to turn the NE8FDP is gone; latch up, the PUSH tab on top"
+  offset_y:
+    value: -7.0
+    status: tbd
+    source: "placeholder - off-centre so the USB-C slot fits beside it"
+    decided_by: "M4 tail-face paper check (ADR 0009)"
+
+# ------------------------------------------------------------- hardware ----
+hardware:
+  # THE CASSETTE (owner, 2026-09-29; ADR 0025): the key plate and ONE bottom
+  # plate, tied by a column at each of the key boards' eight corners, with the
+  # two key boards and the main board between them. It is built and tested on
+  # the bench with its ribbons plugged, dropped into the shell and bonded to the
+  # oak top and bottom with silicone. Nothing screws into the wood but the
+  # U-bolt. A COLUMN, from the bottom up:
+  #   a PEM FHL-M2.5 stud pressed into the bottom plate, its head flush in the
+  #   plate's underside (stud_*); a spacer (kb_spacer_*); the main board;
+  #   an M2.5 female-female hex standoff threaded onto the stud, clamping the
+  #   main board, faced to the gap up to the key board (col_standoff_*);
+  #   the key board; a spacer (kb_spacer_*); the key plate; an M2.5 low-head
+  #   screw down through the key plate into the standoff (col_screw_*), its head
+  #   in a blind pocket in the oak top's underside (col_pocket_*).
+  # The main board's END MOUNTS, at the mouth and a pair on the tongue: the
+  # same stud, spacer and board, and a nut (mb_nut_*). An end mount with a
+  # column within end_mount_merge_d is dropped; drc.echo gives the count.
+  stud_hole:
+    value: 2.5
+    status: settled
+    source: "the bottom plate's hole for a PEM FHL-M2.5 stud, 2.50 +0.08, punched or drilled, NOT deburred [datasheets/mechanical/PEM-FHL-M2.5-10ZI-SALES-DRAWING.pdf; installation, datasheets/mechanical/PEM-FH-SELF-CLINCHING-STUDS.pdf p.FH-18]"
+  stud_head_d:
+    value: 3.15
+    status: settled
+    source: "the FHL-M2.5 stud's head, 3.15 +/-0.40, flush in the bottom plate's underside, so the plate still lies flat on the oak [datasheets/mechanical/PEM-FHL-M2.5-10ZI-SALES-DRAWING.pdf]"
+  stud_edge:
+    value: 2.8
+    status: settled
+    source: "the FHL-M2.5 stud's least distance from its hole's centre to an edge of the sheet [datasheets/mechanical/PEM-FHL-M2.5-10ZI-SALES-DRAWING.pdf, 'min centerline-to-edge']. A thumb switch's cutout, a U-bolt leg's hole and the plate's outline are all edges (drc.echo 'bottom-plate studs clear of the plate's edges and cutouts')"
+  stud_s:
+    value: 2.1
+    status: settled
+    source: "the FHL-M2.5 stud's unthreaded length, max, from the head's face [datasheets/mechanical/PEM-FHL-M2.5-10ZI-SALES-DRAWING.pdf]. Below a 1.2 plate it ends inside the spacer, so the main board and the standoff meet thread (drc.echo 'bottom-plate studs: unthreaded shank ends inside the spacer')"
+  stud_attached_hole:
+    value: 2.9
+    status: settled
+    source: "the largest hole PEM allows in the part that bears on the sheet round an FHL-M2.5 stud - here the spacer's bore [datasheets/mechanical/PEM-FH-SELF-CLINCHING-STUDS.pdf p.FH-7]"
+  stud_l:
+    value: 10
+    status: nominal
+    source: "the FHL-M2.5 stud's length code L, from the head's face (stocked 6, 8, 10, 12, 15, 18 [datasheets/mechanical/PEM-FH-SELF-CLINCHING-STUDS.pdf p.FH-7]): the bottom plate + spacer + main board, and thread_engage_min diameters into the column standoff, at the stud's shortest [calc: 1.2 + 1.3 + 1.6 + 1.5 x 2.5 + 0.4 = 8.25, so 10; 8 gives 3.5 of the 3.75 wanted]. One length for every mount: at an end mount it leaves thread past the nut. drc.echo 'column: stud thread in the standoff', 'end mounts: stud thread past the nut'. The part is datasheets/mechanical/PEM-FHL-M2.5-10ZI-SALES-DRAWING.pdf"
+  stud_l_tol:
+    value: [-0.4, 0.4]
+    status: settled
+    source: "the FHL stud's length tolerance, 10.00 +/-0.40 [datasheets/mechanical/PEM-FHL-M2.5-10ZI-SALES-DRAWING.pdf]"
+  m25_pitch:
+    value: 0.45
+    status: settled
+    source: "M2.5 coarse thread pitch [datasheets/mechanical/PEM-FHL-M2.5-10ZI-SALES-DRAWING.pdf, 'M2.5 x 0.45']"
+  stud_torque:
+    value: 0.32
+    status: settled
+    source: "the most torque to put on a nut, or on a standoff threaded onto it, on an FHL-M2.5 stud in 1.2 mm aluminium, N.m; PEM tested push-out 285 N, torque-out 0.55 N.m in that sheet (HRB 33) [datasheets/mechanical/PEM-FH-SELF-CLINCHING-STUDS.pdf p.FH-31, metric table]. FHL is rated for aluminium to HRB 80 / HB 150 [p.FH-7], which takes 5052 and 6061 alike"
+  thread_engage_min:
+    value: 1.5
+    status: tbd
+    source: "the least thread engagement in the column standoff, in diameters of the M2.5 thread, for the stud from below and the screw from above [from memory: 1.5 x d, the owner's brief of 2026-09-29 gives it as a reasonable minimum] (drc.echo 'column: stud thread in the standoff', 'column: screw thread in the standoff')"
+    decided_by: "M4, with the standoff's material known: a soft aluminium thread wants more than brass or steel"
+  kb_plate_t_tol:
+    value: [-0.05, 0.05]
+    status: nominal
+    source: "a plate's thickness tolerance, key plate and bottom plate: the switch's own plate-slot tolerance (`plate-thickness`, config/figures.yaml), which a plate bought to that register must meet. It enters each board's depth because the spacer bears on the plate's inside face while the switch seats on its outside one"
+  kb_board_hole:
+    value: 2.7
+    status: nominal
+    source: "M2.5 clearance through the key boards and the main board, ISO 273 fine [from memory]: each board locates on its columns and studs, so the fine fit"
+  kb_spacer_l:
+    value: 1.3
+    status: tbd
+    source: "a plain metal spacer for M2.5, flat both ends, and the only thing between a plate and its board at a mount: the switches' housing below the plate, which the board is pressed against [calc: 2.50 - 1.20]. The switches hold the gap only where they are; at a mount there is no switch, and without the spacer the clamp would pull the board up into the plate (owner, 2026-09-29). The same part, faced alike, stands under the key plate on every column (MECH-KB-SPACER) and on the bottom plate under the main board at every mount (MECH-MB-SPACER); its bore, at most stud_attached_hole, matters on the bottom plate, where it bears on the stud's sheet. NOT STOCKED at 1.3: face Ettinger 5.52.015 (M2.5, 1.5 long, bore 2.6 [datasheets/mechanical/ETTINGER-CATALOG-2024-P79-DISTANZHUELSEN-MESSING.html]) down to 1.3 +/-0.05, in metal, not printed, which would creep under the clamp"
+    decided_by: "M4, with the spacers faced and measured"
+  kb_spacer_l_tol:
+    value: [-0.05, 0.05]
+    status: tbd
+    source: "the faced spacer's length tolerance, to be held when it is faced (kb_spacer_l)"
+    decided_by: "as kb_spacer_l"
+  kb_spacer_od:
+    value: 4.5
+    status: nominal
+    source: "the Ettinger 5.52 spacer's outside diameter, 4.5; its bore is 2.6, inside stud_attached_hole [datasheets/mechanical/ETTINGER-CATALOG-2024-P79-DISTANZHUELSEN-MESSING.html]. On a key board it bears on the board's top copper, which keeps copper out from under it; on the main board it bears on a PWR_GND pad on the underside, which grounds the bottom plate (ADR 0022 point 6, ADR 0025)"
+  # THE COLUMN STANDOFF: not a stock length, so bought at the next stock
+  # length and faced, as ADR 0023 does for the module's MECH-STANDOFF-MOD. Its
+  # length is the gap from the main board's top face to a key board's underside
+  # (drc.echo 'column standoff length (derived)'), and because it is the one
+  # part in the cassette's height that is made to length, it is also where the
+  # cassette is fitted to the shell (drc.echo 'cassette height at the hardware's
+  # tolerance limits').
+  col_standoff_af:
+    value: 5.0
+    status: tbd
+    source: "an M2.5 female-female hex standoff across its flats [from memory: 5 mm is the common M2.5 hex, the same as the ISO 4032 nut, mb_nut_e]. Its across-corners, af / cos 30, stands on the main board's top face and under the key board, and both boards keep copper and parts out from under it"
+    decided_by: "M4, with the standoff bought (MECH-COL-STANDOFF)"
+  col_standoff_stock_l:
+    value: 20
+    status: tbd
+    source: "the stocked M2.5 female-female length it is faced down from: the next one above the gap (drc.echo 'column standoff length (derived)') [from memory: the common series step 15, 18, 20]. drc.echo 'column standoff faced from its stock length'"
+    decided_by: "M4, with the standoff bought"
+  col_standoff_l_tol:
+    value: [-0.05, 0.05]
+    status: tbd
+    source: "the faced standoff's length tolerance, held as the spacers' is (kb_spacer_l_tol) [drawing convention]"
+    decided_by: "M4, with the standoffs faced and measured"
+  col_screw_head_d:
+    value: 4.5
+    status: tbd
+    source: "an M2.5 low-head cap screw's head, DIN 7984 [from memory; ISO 7380 is 4.7]. It bears on the key plate's top face round col_plate_hole and sits in col_pocket_d"
+    decided_by: "M4, with the screw bought (MECH-COL-SCREW)"
+  col_screw_head_h:
+    value: 1.5
+    status: tbd
+    source: "the same head's height [from memory: DIN 7984 M2.5, 1.5]. It sets the pocket's depth in the oak top (drc.echo 'column screw pockets leave wood over them')"
+    decided_by: "as col_screw_head_d"
+  col_screw_l:
+    value: 10
+    status: nominal
+    source: "the column screw's length under its head: the key plate + spacer + key board, and thread_engage_min diameters into the standoff, at the screw's shortest [calc: 1.2 + 1.3 + 1.6 + 1.5 x 2.5 + 0.3 = 8.15, so 10; 8 gives 3.6 of the 3.75 wanted]. drc.echo 'column: screw thread in the standoff', and 'column: stud and screw ends apart in the standoff'"
+  col_screw_l_tol:
+    value: [-0.3, 0.3]
+    status: tbd
+    source: "a 10 mm screw's length tolerance, js15 [from memory: ISO 4759-1, +/-0.29 over 6-10 mm]"
+    decided_by: "as col_screw_head_d"
+  col_plate_hole:
+    value: 2.9
+    status: nominal
+    source: "M2.5 clearance through the key plate, ISO 273 medium [from memory]: the key plate and the key boards are one part once the switches are soldered, and each board locates on its columns by the fine hole (kb_board_hole), so the plate takes the medium one; the screw's head (col_screw_head_d) bears on the plate round it"
+  col_pocket_d:
+    value: 6.35
+    status: nominal
+    source: "the blind pocket in the oak top's underside over each column screw's head: 1/4 in, a stock Forstner size, which leaves a flat floor (the size ADR 0020 Amendment 3 chose for the same job). Clears the head (col_screw_head_d) with room to spare; the pocket only houses the head, which bears on the plate"
+  col_pocket_clear:
+    value: 0.5
+    status: nominal
+    source: "the pocket's depth past the screw head's top [drawing convention]"
+  col_pocket_skin:
+    value: 2.0
+    status: tbd
+    source: "the least wood left over a pocket, between its floor and the playing face: enough not to telegraph or crack through in hardwood [from memory - no banked figure] (drc.echo 'column screw pockets leave wood over them')"
+    decided_by: "M2 - pocket a scrap of the chosen wood and sand its face"
+  col_pocket_wall:
+    value: 1.5
+    status: tbd
+    source: "the least wood left between a pocket and a cap slot, a side groove or the window's rebate [from memory - no banked figure] (drc.echo 'column screw pockets clear of the wood top's cuts'; the tail corners set boards.kb_tail_margin, 'key-board tail margin, least')"
+    decided_by: "M2 - pocket a scrap of the chosen wood beside a slot"
+  mb_nut_e:
+    value: 5.77
+    status: nominal
+    source: "ISO 4032 M2.5 hex nut across its corners, at its largest: s max 5.0 / cos 30 = 5.77 [calc from datasheets/mechanical/ASPEN-ISO4032-DIN934-HEX-NUT-DIMENSION-TABLE.pdf, whose e is the minimum, 5.5]. On the main board's end mounts; it bears on a PWR_GND pad on the top face (ADR 0022 point 6)"
+  mb_nut_m:
+    value: 2.0
+    status: nominal
+    source: "the same nut's height, m max 2.0 [datasheets/mechanical/ASPEN-ISO4032-DIN934-HEX-NUT-DIMENSION-TABLE.pdf]"
+  kb_mount_float:
+    value: 0.2
+    status: nominal
+    source: "how far a spacer or a standoff can sit off its axis: (the bore - the thread) / 2 - the spacer's 2.6 (+0.1) on an M2.5 gives at most 0.1 [calc from the catalogue under kb_spacer_od]; held at 0.2, and every PCB keep-out grows by it on every side"
+  end_mount_merge_d:
+    value: 12
+    status: settled
+    source: "an end mount is dropped when a column's mount stands within this distance of it: the column already holds the board there, and two studs side by side add a part and a hole for no support (owner, 2026-09-30: \"there's one spot where we have double standoffs right next to each other ... Good to reduce it to the one standoff there\"). The mouth end mount at (32.5, 45.5) stood 7.5 from the column at (40, 45.9); the nearest any other end mount comes to a column is 28.5 [calc from mechanical/export/pcb-geometry.echo at 064c49f: hypot(40 - 32.5, 45.9 - 45.5) = 7.51; hypot(40 - 11.5, 11.1 - 11.5) = 28.50]. 12 is about two mount keep-outs (mb_keep_d, 6.57 [calc: 6.17 + 2 x 0.2]) and sits well between the two; drc.echo reports each end mount dropped"
+  kb_mount_inset:
+    value: 3.6
+    status: tbd
+    source: "a column's centre in from both edges of its key board: the standoff across its corners (col_standoff_af / cos 30) and kb_mount_float, with 0.5 of board outside the keep-out [calc: 5.77 / 2 + 0.2 + 0.5 = 3.585]"
+    decided_by: "M4, with the board's first fit"
+  # THE U-BOLT IS M3 until the strap hardware is chosen. Its nuts stand on
+  # the main board's top face and keep boards.board_clear round their corners.
+  # The LED strip that held it to M3 is gone (ADR 0028): the LED row is shifted
+  # so the station falls midway between two LEDs, so a bigger nut's keep-out
+  # reaches nothing on the centreline (drc.echo 'LED row off the U-bolt
+  # station'). What bounds it now is the neck of board between the legs
+  # ('main board neck at the U-bolt station') and the thumb recesses.
+  # Load: ADR 0009's mass table puts the body at ~825 g, ~8 N on the strap;
+  # a factor of 10 for a jerk is 80 N. An M3 leg of 4.6 steel proofs at
+  # ~1.1 kN [from memory: 5.03 mm2 stress area x 225 MPa], and there are two.
+  # Up each leg: the oak bottom, the bottom plate, a spacer, the main board, a
+  # washer, the nyloc. The bottom plate spreads the pull over the oak.
+  ubolt_rod_d:
+    value: 3.0
+    status: tbd
+    source: "M3 [calc above]; ADR 0009 gives no U-bolt size. No longer bounded by the lights (ADR 0028); M4 or M5 must still leave the neck ('main board neck at the U-bolt station') and clear the thumb recesses"
+    decided_by: "M4, from the strap hardware chosen - small M3 U-bolts are sold for model and tube clamps [from memory]; a bent M3 rod or a stainless M3 threaded rod does the same job"
+  ubolt_hole_clear:
+    value: 0.5
+    status: tbd
+    source: "clearance on the leg's diameter, in the oak bottom and the bottom plate"
+    decided_by: "M4, with the U-bolt bought"
+  ubolt_span:
+    value: 20.0
+    status: tbd
+    source: "leg centre to leg centre, legs across the body. Narrower pulls the nuts toward the centreline and shrinks the neck between the legs; wider takes the legs toward the thumb recesses (drc 'U-bolt legs clear of the thumb recesses') and the main board's edge"
+    decided_by: "M4"
+  ubolt_drop:
+    value: 18.0
+    status: tbd
+    source: "placeholder - how far the loop stands below the bottom face"
+    decided_by: "M4"
+  ubolt_nut_af:
+    value: 5.5
+    status: tbd
+    source: "hex nut across flats for the U-bolt legs - an M3 nut is 5.5 mm [from memory, ISO 4032]; follows ubolt_rod_d"
+    decided_by: "M4, with the U-bolt bought"
+  ubolt_nut_h:
+    value: 4.0
+    status: tbd
+    source: "M3 nyloc (DIN 985) height, ~4.0 [from memory] - hardware/unplaced.csv MECH-UBOLT orders nylocs; a plain ISO 4032 nut is 2.4"
+    decided_by: "M4"
+  ubolt_spacer_od:
+    value: 6.0
+    status: nominal
+    source: "the spacer on each U-bolt leg between the bottom plate and the main board's underside: Ettinger 5.53.015, brass for M3, outside 6.0, bore 3.2, 1.5 long [datasheets/mechanical/ETTINGER-CATALOG-2024-P79-DISTANZHUELSEN-MESSING.html], faced to kb_spacer_l like every other spacer on the plates, so the board is not pulled down by the nyloc (drc 'main board in the U-bolt's clamp')"
+  ubolt_washer_t:
+    value: 0.5
+    status: tbd
+    source: "DIN 433 M3 washer, 0.5 thick [from memory], one per leg between the main board's top face and the nyloc"
+    decided_by: "M4, with the washers bought"
+  ubolt_washer_od:
+    value: 6.0
+    status: tbd
+    source: "DIN 433 M3 washer, outside diameter 6.0 [from memory] - the small-OD series, so it bears on the board inside the nut's keep-out"
+    decided_by: "M4, with the washers bought"
+  ubolt_board_hole_clear:
+    value: 1.0
+    status: tbd
+    source: "clearance on the rod's diameter in the main board's hole. The board is located by its own mounts and the legs by the oak's and the bottom plate's holes, so the hole takes both tolerances; the washer above and the spacer below cover it (bore 3.2, outside 6.0)"
+    decided_by: "M4, with the oak drilled and the board in hand"
+
+# -------------------------------------------------------------- routing ----
+# THINGS THAT RUN THROUGH THE CAVITY (modelled 2026-09-26 for the clash
+# check). Where they run is a MODEL CHOICE, not a document's - each is a
+# lane the design must keep free, and the clash check reports what is in it.
+routing:
+  tube_od:
+    value: 5.0
+    status: tbd
+    source: "breath tube outside diameter; ADR 0003 assumes a 3 mm bore, the wall is a guess [from memory]"
+    decided_by: "E2 - tube bore by playing (ADR 0003), then the tube bought"
+  trap_d:
+    value: 10.0
+    status: tbd
+    source: "dead-volume trap diameter; ADR 0003 caps the trap at 1 mL"
+    decided_by: "E2"
+  trap_l:
+    value: 12.0
+    status: tbd
+    source: "trap length: 10 mm bore x 12 mm = 0.94 mL, inside ADR 0003's 1 mL [calc]"
+    decided_by: "E2"
+  tube_lane:
+    value: "left"
+    status: tbd
+    source: "which side the tube and trap run on inside the mouth band (ADR 0017: sensor on the far side from the tube); there are no looms since ADR 0017"
+    decided_by: "M4"
+  # STANDARD FLAT RIBBON (owner, 2026-09-26), lying FLAT down the centreline
+  # (on edge it does not fit between the boards' part layers - clash check).
+  mcu_ribbon_w:
+    value: 15.24
+    status: tbd
+    source: "24-way 0.635 mm ribbon for a 1.27 mm dual-row header [calc: 24 x 0.635]: allocation in hardware/carrier/bom.csv CBL-MCU-RIBBON (ADR 0018)"
+    decided_by: "M4"
+  mcu_ribbon_t:
+    value: 0.8
+    status: tbd
+    source: "fine-pitch ribbon thickness [from memory]"
+    decided_by: "M4"
+  chain_ribbon_w:
+    value: 7.62
+    status: nominal
+    source: "[calc] 12 conductors at 0.635 mm, the FFSD cable's 1.27 mm IDC pitch over two rows"
+    decided_by: "M4, with the cable"
+  chain_ribbon_t:
+    value: 0.8
+    status: tbd
+    source: "30 AWG flat cable's thickness [from memory]"
+    decided_by: "M4, with the cable"
+  chain_bend_r:
+    value: 1.0
+    status: tbd
+    source: "the tightest turn the flat cable takes where it leaves a socket and turns along the body, and the least the fold may be (drc.echo 'key-chain ribbon fold no tighter than its bend radius') [drawing convention; 30 AWG PVC flat cable folds flatter than this]"
+    decided_by: "M4, on the first cable"
+  chain_service:
+    value: "raised"
+    status: nominal
+    source: "owner, 2026-09-27: long enough 'to have the top off and still connect the ribbon before tightening down'. With the cassette (ADR 0025), 'tightening down' is screwing the key plate onto its columns, on the bench or, in service, with the oak top cut off. The key plate, with both key boards on it, is held raised straight up off the columns by routing.chain_raise while the main board's sockets are plugged or unplugged, then lowered and screwed down; the ribbon folds itself into the hairpin. A ribbon long enough to lay the plate beside the body would close into a hairpin that reaches the left-hand board's tail column (drc.echo 'key-chain ribbon hairpin clear of the columns')"
+    decided_by: "owner"
+  chain_raise:
+    value: 30.0
+    status: tbd
+    source: "how far the key plate is held above its columns for a hand to reach the main board's sockets under the key boards and plug or unplug them [drawing convention: two fingers and an IDC socket]. With routing.chain_slack it sets the ribbon's length (drc.echo 'key-chain ribbon length (derived)')"
+    decided_by: "M4, on the first assembly"
+  chain_slack:
+    value: 10.0
+    status: tbd
+    source: "length added to the service path for the turns at the sockets and the hand [drawing convention]"
+    decided_by: "M4, on the first assembly"
+  chain_fold:
+    value: [1, 1]
+    status: nominal
+    source: "which way each ribbon's spare length folds closed, along the body (+1 toward the tail), for left_hand and right_hand: the left hand's mouth side has the breath tube's crossing; on the right hand, chain_clear keeps the tail side off the regulator block, and each hairpin must stop short of its board's columns (drc.echo 'key-chain ribbon hairpin clear of the columns', clash.txt)"
+    decided_by: "the clash check"
+  ribbon_t:
+    value: 1.0
+    status: nominal
+    source: "flat ribbon thickness, 1.27 mm pitch PVC ribbon [from memory]"
+
+# ------------------------------------------------------------ lighting ----
+lighting:
+  # THE LED ROW (ADR 0028): thirteen WS2815B-V1 reflowed on the main board's
+  # top face, one row down the centreline, LEDs up, lighting both acrylic
+  # sides through the cavity. LED 1 is at the tail end, where the data
+  # arrives; the row is shifted along the body so the U-bolt station falls
+  # midway between two LEDs (drc.echo 'LED row off the U-bolt station').
+  led_count:
+    value: 13
+    status: settled
+    source: "owner, 2026-09-30 (ADR 0028): thirteen LEDs, the count the 60/m strip gave over the same run"
+  led_pitch:
+    value: 16.67
+    status: tbd
+    source: "centre to centre along the body: the strip's 60/m [calc: 1000 / 60 = 16.67], which ADR 0014 chose for how it diffuses"
+    decided_by: "the side-light diffusion test (ROADMAP), before the main board's layout: a strip offcut at board height under a white-masked mock key board, with the real acrylic at the side distance"
+  led_body:
+    value: [5.4, 5.0]
+    status: settled
+    source: "the WS2815B-V1's body along the body and across it, 5.40 +/-0.05 x 5.00 +/-0.05 [ds datasheets/led/WS2815B-V1.pdf p.2]"
+  led_h:
+    value: 1.65
+    status: settled
+    source: "the WS2815B-V1's height above the board, 1.65 +/-0.05 [ds datasheets/led/WS2815B-V1.pdf p.2]"
+  led_court:
+    value: [6.9, 5.5]
+    status: settled
+    source: "the footprint's courtyard, woody:LED_WS2815B-V1_PLCC6_5.4x5.0mm_P1.6mm [repo hardware/lib/woody.pretty]: the pads' 6.4 across and the body's 5.0, each with KiCad's 0.25 margin a side"

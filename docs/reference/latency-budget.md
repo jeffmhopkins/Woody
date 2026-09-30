@@ -93,9 +93,9 @@ bottom of this page is the one that settles it.
 | Stage | Time | Notes |
 |---|---|---|
 | Switch mechanical actuation | mechanical | Bounce is **not** a press-path term here — see below |
-| Key network RC, press | `key-press-time` | Owned by `hardware/cluster/key-switch-network/key-switch-network.md`. Two orders of magnitude inside the scan period; carried as a line so the table is complete, not because it moves the total |
+| Key network RC, press | `key-press-time` | Owned by `hardware/cluster/key-switch-network/key-switch-network.md`. Far inside the scan period (the figure's `note`); carried as a line so the table is complete, not because it moves the total |
 | **Sampling period** | **0–250 µs** | The same 4 kHz loop the breath table books. A closure waits up to one period to be seen. Mean 125 µs. **This table omitted it entirely until 2026-09-21** |
-| 74HC165 chain read | **32 µs** | 32 bits at 1 MHz (ADR 0001). This row said "< 10 µs via SPI DMA"; the chain runs at 1 MHz and cannot be clocked away |
+| Key chain read (`U-KEYS`) | **32 µs** | 32 bits at 1 MHz (ADR 0001). This row said "< 10 µs via SPI DMA"; the chain runs at 1 MHz and cannot be clocked away |
 | **Note-on gate — two consecutive agreeing samples** | **+250 µs** | One whole loop period, **required by ADR 0001**. This row read "Debounce (press) — 0, fire immediately", which contradicted the ADR that specifies it |
 | Debounce (release) | filtered | Off the attack path by construction, which is the point of the asymmetry |
 | Firmware note resolution | < 20 µs | |
@@ -130,7 +130,8 @@ is the one place latency is audible.
 > intent: the gate rejects a single corrupted 32-bit frame, not contact
 > chatter. What it means is that **rejecting bounce is entirely the release
 > filter's job**, and the release window has to outlast the bounce burst rather
-> than the 125 µs the key network's RC contributes. `firmware/README.md` sets
+> than the key network's RC delay (`key-release-time`), which is a glitch
+> filter, not a debounce. `firmware/README.md` sets
 > that window from measured bounce at M1; the vendor maximum is now the number
 > M1 has to come in under, instead of the 20 ms the 2021 firmware guessed.
 

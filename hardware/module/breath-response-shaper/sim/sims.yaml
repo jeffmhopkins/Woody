@@ -1,0 +1,84 @@
+# The response shaper, simulated as netlisted with TI's OPA2197 model and a BEHAVIOURAL
+# D-RESP: the in-amp's output swept over its range (inamp-full-scale) at POT-RESP's two
+# ends and its centre detent. Run:
+#   python3 tools/sim.py run hardware/module/breath-response-shaper/sim
+# D-RESP IS BEHAVIOURAL: no 1N4148W SPICE model could be banked (Vishay, Diodes Inc,
+# Nexperia, onsemi and Diotec URLs tried 2026-09-30, fragment R38). A SPICE diode fitted to
+# the banked datasheets: the 1N4448W's guaranteed window, 0.62-0.72 V at 5 mA
+# [datasheets/discrete-and-power/1N4148W-DIOTEC.pdf p.2], sets IS; N is an assumption.
+title: Breath response shaper - the curve at POT-RESP's ends and centre
+values:
+  netlist: hardware/module/breath-response-shaper/netlist.yaml
+models:
+  - datasheets/analog/OPAx197-ti-pspice-sboma34d.lib
+spiceinit: [set ngbehavior=psa]
+
+params:
+  v_pos:  {value: 12.0,  source: "MODULE_ANALOG_POS12"}
+  v_neg:  {value: -12.0, source: "MODULE_ANALOG_NEG12"}
+  v_mag:  {value: {fig: inamp-full-scale, scale: -1}, source: "the in-amp's output at sensor full scale (inamp-full-scale), as a magnitude: the sweep runs from 0 V to there"}
+  v_hard: {value: 4.64, source: "a hard blow at the in-amp, as a magnitude (breath-response-shaper.md's table; breath-output-stage.md, 'What it has to do')"}
+  r_load: {value: 50.0e3, source: "BREATH_SHAPED's load: the top of POT-GAIN, 50 kohm to R-GAIN-FLOOR at most (breath-output-stage)"}
+  p_resp: {value: 0.5, source: "POT-RESP's rotation from CCW (0, log) to CW (1, exp); 0.5 is the centre detent"}
+  n_d:    {value: 1.8, source: "the diode's emission coefficient [assumption: 1N4148 SPICE models run 1.75-1.9, from memory]"}
+  is_d:   {value: 2.76e-9, source: "fitted: 0.67 V at 5 mA with N = 1.8 [calc: 5e-3 / exp(0.67 / (1.8 x 0.02585))], the middle of the 1N4448W's 0.62-0.72 V window [1N4148W-DIOTEC.pdf p.2] (vary: 8.1 nA at 0.62 V, 0.94 nA at 0.72 V). The 1N4148W's own sheets give only maxima (< 0.715 V at 1 mA, same page; 1.0 V at 10 mA, datasheets/discrete-and-power/1N4148W.pdf p.2): 0.645 V at 1 mA here, inside it"}
+  t_ramp: {value: 10.0e-3, source: "the input ramp, 0 V to full scale: quasi-static (a breath is slower; the op-amps settle in microseconds)"}
+  rs_d:   {value: 0.6, source: "series resistance [assumption: immaterial at the shaper's under 1 mA]"}
+
+derived:
+  r_pot_cw: "max(v['POT-RESP'] * (1 - v['p_resp']), 1e-3)"
+  r_pot_ccw: "max(v['POT-RESP'] * v['p_resp'], 1e-3)"
+
+vary:
+  is_d:  {tol: [-0.66, 1.93]}
+  R-RESP-DIV-HI: {tol: from-value}
+  R-RESP-DIV-LO: {tol: from-value}
+  R-RESP-IN: {tol: from-value}
+  R-RESTORE-FB: {tol: from-value}
+
+sims:
+  - name: curve
+    # the stage's gain ratio, BREATH_SHAPED over the in-amp's output, at the page's table's
+    # points; ratio 1 is the linear stage
+    deck: shaper.cir
+    sweep: {p_resp: [0.0, 0.5, 1.0]}
+    vary: [is_d]
+    measures: [g_pp, g_mp, g_mf, g_hard, g_full, i_hard, i_full]
+    post:
+      g_pp: "-at(w['out'], (1.0) * p['t_ramp'] / p['v_mag']) / 1.0"
+      g_mp: "-at(w['out'], (2.5) * p['t_ramp'] / p['v_mag']) / 2.5"
+      g_mf: "-at(w['out'], (3.5) * p['t_ramp'] / p['v_mag']) / 3.5"
+      g_hard: "-at(w['out'], (p['v_hard']) * p['t_ramp'] / p['v_mag']) / p['v_hard']"
+      g_full: "-at(w['out'], (p['v_mag'] - 0.001) * p['t_ramp'] / p['v_mag']) / (p['v_mag'] - 0.001)"
+      i_hard: "abs(at(w['idiode'], (p['v_hard']) * p['t_ramp'] / p['v_mag']))"
+      i_full: "abs(at(w['idiode'], (p['v_mag'] - 0.001) * p['t_ramp'] / p['v_mag']))"
+  - name: centre
+    # the centre detent, with every resistor at its tolerance ends: how linear is "exactly"
+    deck: shaper.cir
+    set: {p_resp: 0.5}
+    vary: [is_d, R-RESP-DIV-HI, R-RESP-DIV-LO, R-RESP-IN, R-RESTORE-FB]
+    measures: [g_hard, g_full, lin_hard_pct, lin_full_pct, wiper_full]
+    post:
+      g_hard: "-at(w['out'], (p['v_hard']) * p['t_ramp'] / p['v_mag']) / p['v_hard']"
+      g_full: "-at(w['out'], (p['v_mag'] - 0.001) * p['t_ramp'] / p['v_mag']) / (p['v_mag'] - 0.001)"
+      # departure from the stage's own small-signal gain (its slope near 0 V), in percent
+      lin_hard_pct: "100 * (at(w['out'], (p['v_hard']) * p['t_ramp'] / p['v_mag']) / p['v_hard'] / (at(w['out'], (0.2) * p['t_ramp'] / p['v_mag']) / 0.2) - 1)"
+      lin_full_pct: "100 * (at(w['out'], (p['v_mag'] - 0.001) * p['t_ramp'] / p['v_mag']) / (p['v_mag'] - 0.001) / (at(w['out'], (0.2) * p['t_ramp'] / p['v_mag']) / 0.2) - 1)"
+      wiper_full: "at(w['wip'], (p['v_mag'] - 0.001) * p['t_ramp'] / p['v_mag'])"
+    asserts:
+      - expr: "min['g_hard'] > 0.97 and max['g_hard'] < 1.03"
+        why: "+1 at centre detent (breath-response-shaper.md, 'Settled before layout'), within the four 1 % resistors' 2 x 2 %"
+      - expr: "max['lin_hard_pct'] < 0.5 and min['lin_hard_pct'] > -0.5"
+        why: "linear across real playing at the detent, within 0.5 % - but not 'exactly': see the README, the divider's loading moves the true null off centre"
+  - name: clip
+    # fully exponential: where BREATH_SHAPED stops following the curve
+    deck: shaper.cir
+    set: {p_resp: 1.0}
+    vary: [is_d]
+    measures: [out_min, clip_in]
+    post:
+      out_min: "trough(w['out'], 0, p['t_ramp'])"
+      clip_in: "-cross(w['out'], trough(w['out'], 0, p['t_ramp']) + 0.05, 0) * p['v_mag'] / p['t_ramp']"
+    asserts:
+      - expr: "max['clip_in'] < -8.0 and min['clip_in'] > -9.94"
+        why: "at the fully-exponential end BREATH_SHAPED clips between -8 V and the in-amp's full scale at every diode corner: later than the page's -7.4 V, because the curve is weaker than its table (README), and still inside the sensor's range, beyond real playing"

@@ -1,0 +1,213 @@
+(footprint "NXP_Case1351-01_SOP-8_P2.54mm"
+	(version 20241229)
+	(generator "woody")
+	(layer "F.Cu")
+	(descr "NXP MPXV4006DP, case 1351-01: 8-lead gull-wing SOP at 2.54 mm pitch, both ports on one face. Land pattern derived in hardware/interfaces/breath-sense-link/breath-sense-link.md (Land pattern): Figure 6's 1.52 mm pad width and 2.54 pitch [ds datasheets/analog/MPXV4006DP.pdf p.6], lengthened inward to 2.80 mm for case 1351's shorter feet, rows 16.00 mm centre to centre. Body 12.3 square [ds p.7]. Pin 1 top left, counter-clockwise.")
+	(tags "MPXV4006DP pressure sensor case 1351 SOP-8 2.54mm")
+	(attr smd)
+	(property "Reference" "REF**"
+		(at 0 -8.2 0)
+		(layer "F.SilkS")
+		(uuid "a6533c71-3990-5117-9672-1e98f837c674")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "NXP_Case1351-01_SOP-8_P2.54mm"
+		(at 0 8.2 0)
+		(layer "F.Fab")
+		(uuid "d798500c-9a49-55d1-bc45-b3be46939626")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "ccc81870-f16b-5a08-bde6-8d49636f3328")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" "MPXV4006DP case 1351-01 land pattern"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "abf1cd68-767e-56a1-a1c6-00707922f9dc")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(fp_line
+		(start -6.15 -6.15)
+		(end 6.15 -6.15)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "411a619a-f318-5a8e-8b55-17a6e6c8804c")
+	)
+	(fp_line
+		(start 6.15 -6.15)
+		(end 6.15 6.15)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "14ee9b60-bc38-58cf-aa63-71d461c06a8a")
+	)
+	(fp_line
+		(start 6.15 6.15)
+		(end -6.15 6.15)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "1ecb9f58-2d18-5c47-b5ac-5d0994e66b6e")
+	)
+	(fp_line
+		(start -6.15 6.15)
+		(end -6.15 -6.15)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "ccfd5f93-d1ba-53e2-b77a-dcb0a316913c")
+	)
+	(fp_line
+		(start -9.65 -6.4)
+		(end 9.65 -6.4)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "fa3eeca4-e428-5cb7-a440-a3dbcb0311a0")
+	)
+	(fp_line
+		(start 9.65 -6.4)
+		(end 9.65 6.4)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "3b203659-af72-5e3a-8e07-7657767daa9c")
+	)
+	(fp_line
+		(start 9.65 6.4)
+		(end -9.65 6.4)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "bbef6f0d-9418-5e18-b443-2c98cceb0852")
+	)
+	(fp_line
+		(start -9.65 6.4)
+		(end -9.65 -6.4)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "cc9d7731-eaee-556a-a956-74330784d931")
+	)
+	(fp_line
+		(start -5.9 -6.26)
+		(end 5.9 -6.26)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "d65a9b51-5294-5258-8de6-0f068fe3e5c2")
+	)
+	(fp_line
+		(start -5.9 6.26)
+		(end 5.9 6.26)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "58e120b7-1906-501b-84db-607d666daf26")
+	)
+	(fp_circle
+		(center -5.2 -5.4)
+		(end -4.9 -5.4)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(fill yes)
+		(layer "F.SilkS")
+		(uuid "96403f39-e3ba-5d7d-8d3f-b6f771708a76")
+	)
+	(pad "1" smd rect
+		(at -8.0 -3.81)
+		(size 2.8 1.52)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "047a9807-839b-5eac-9cf2-54d9b60b7d2d")
+	)
+	(pad "2" smd rect
+		(at -8.0 -1.27)
+		(size 2.8 1.52)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "e939fffb-d9ca-5134-b8c0-c49bf33a0afc")
+	)
+	(pad "3" smd rect
+		(at -8.0 1.27)
+		(size 2.8 1.52)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "67fd6669-6f86-56fb-84eb-91c1054cb9c2")
+	)
+	(pad "4" smd rect
+		(at -8.0 3.81)
+		(size 2.8 1.52)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "e553f755-ae7f-5444-9cbc-76c988c2aac8")
+	)
+	(pad "5" smd rect
+		(at 8.0 3.81)
+		(size 2.8 1.52)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "b8f31f47-ddb6-5e76-8129-b1d47f2fab74")
+	)
+	(pad "6" smd rect
+		(at 8.0 1.27)
+		(size 2.8 1.52)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "2ac22cac-402a-5a9d-b6fd-e3798e057517")
+	)
+	(pad "7" smd rect
+		(at 8.0 -1.27)
+		(size 2.8 1.52)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "b447bcd3-1aa3-5244-a927-8088e06e239f")
+	)
+	(pad "8" smd rect
+		(at 8.0 -3.81)
+		(size 2.8 1.52)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "dd01e64a-8649-577d-9fd2-08b18a6fc47f")
+	)
+)

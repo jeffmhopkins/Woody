@@ -1,226 +1,434 @@
-# AUTHORITATIVE for connectivity. The drawing in power-entry.md is a
-# representation of this file.
-#
-# SCOPE. That drawing shows the whole load switch - LT1641, R-ILIM, the timer
-# and gate capacitors, the FB divider and Q-LOADSW - so the export path can be
-# read in one place. THOSE ARE module/umbilical-load-switch's PARTS and are
-# declared `foreign:` here. This circuit owns the rail entry, the four
-# bead-and-bulk branches and the LM317.
+# GENERATED from hardware/module/power-entry/power-entry.kicad_sch by tools/kicad.py - DO NOT EDIT.
+# The KiCad sheet is authoritative for this circuit: edit it in KiCad 9, then run
+#   python3 tools/kicad.py export hardware/module/power-entry
+# Every note and argument that used to live in this file is on the sheet
+# (part fields, sheet text) or on power-entry.md.
 
 circuit: module/power-entry
 title: Module power entry
 page: power-entry.md
-
 ports:
-  BUS_POS12_RAW:       {dir: out, to: module/umbilical-load-switch}
-  MODULE_ANALOG_POS12: {dir: out, to: module/breath-receive-stage}
-  MODULE_ANALOG_NEG12: {dir: out, to: module/breath-receive-stage}
-  BUS_5V:              {dir: out, to: module/digital-and-supervision}
-  DAC_AVDD:            {dir: out, to: module/dac8568, figure: dac-rail}
-  AGND_MOD:            {dir: ref, to: module/breath-receive-stage}
-  DIG_GND:             {dir: ref, to: module/digital-and-supervision}
-  PWR_GND:             {dir: ref, to: module/umbilical-load-switch}
-
-foreign:
-  R-ILIM:       {owner: module/umbilical-load-switch, row: R-ILIM}
-  R-GATE-SER:   {owner: module/umbilical-load-switch, row: R-GATE-SER}
-  R-GATE-COMP:  {owner: module/umbilical-load-switch, row: R-GATE-COMP}
-  C-TIMER:      {owner: module/umbilical-load-switch, row: C-TIMER-LOADSW}
-  C-GATE:       {owner: module/umbilical-load-switch, row: C-GATE-LOADSW}
-  R-FB-HI:      {owner: module/umbilical-load-switch, row: R-FB-HI}
-  R-FB-LO:      {owner: module/umbilical-load-switch, row: R-FB-LO}
-
+  MODULE_ANALOG_POS12:
+    dir: out
+    to: module/breath-receive-stage
+  MODULE_ANALOG_NEG12:
+    dir: out
+    to: module/breath-receive-stage
+  DAC_AVDD:
+    dir: out
+    to: module/dac8568
+    figure: dac-rail
+  AGND_MOD:
+    dir: ref
+    to: module/breath-receive-stage
+  DIG_GND:
+    dir: ref
+    to: module/digital-and-supervision
+  LOGIC_5V:
+    dir: out
+    to: module/digital-and-supervision
+  ISO_POS12:
+    dir: out
+    to: module/umbilical-load-switch
+  PWR_GND:
+    dir: ref
+    to: module/umbilical-load-switch
 components:
-
-  J-PWR-EURO:
-    value: "16-pin shrouded keyed IDC header"
-    pins: [POS12, NEG12, POS5, GND]
-    note: "Keyed. The rack's -12 V is pin 1 by convention and reversing it is what D-REVPOL exists for"
-
-  D1:
-    of: D-REVPOL                 # qty 3: D1, D2, D3
-    value: "1N5817"
-    drawn_as: D1
-    pins: [A, K]
-    note: "Reverse protection, module analog +12 V branch"
-  D2:
-    of: D-REVPOL
-    value: "1N5817"
-    drawn_as: D2
-    pins: [A, K]
-    note: "Reverse protection, EXPORTED +12 V branch. Separate from D1 on purpose - see diode-split-rationale"
-  D3:
-    of: D-REVPOL
-    value: "1N5817"
-    drawn_as: D3
-    pins: [A, K]
-    note: "Reverse protection, -12 V branch"
-
-  FB1:
-    of: FB-IN                    # qty 4: FB1..FB4
-    value: "600R @ 100MHz"
-    drawn_as: FB1
-    pins: [1, 2]
-  FB2:
-    of: FB-IN
-    value: "600R @ 100MHz"
-    drawn_as: FB2
-    pins: [1, 2]
-    note: "THE UMBILICAL BRANCH. At its real operating current this bead gives roughly half its nameplate impedance - see the FB-IN row, which is the only one of the four where that matters"
-  FB3:
-    of: FB-IN
-    value: "600R @ 100MHz"
-    drawn_as: FB3
-    pins: [1, 2]
-  FB4:
-    of: FB-IN
-    value: "600R @ 100MHz"
-    drawn_as: FB4
-    pins: [1, 2]
-
+  C-DEC-REG-IN:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: At the LM317's input pin. One of the board-wide C-DECOUPLE row
+  C-ISO-IN:
+    value: 4.7uF 50V
+    pins:
+    - 1
+    - 2
+    note: 'Across U-ISO''s input pins, beside them: the ceramic half of the input filter (the RPA20 datasheet names
+      no ceramic, PD-7; 4.7uF 50 V beside the pins takes the switching current off C2)'
+  C-ISO-OUT:
+    value: 100uF 25V
+    pins:
+    - 1
+    - 2
+    note: 'U-ISO''s output capacitor, 100uF/25V: well inside the RPA20-2412SAW''s 1000uF maximum capacitive load
+      (RECOM-RPA20-AW.pdf PD-1). The instrument''s own capacitance is behind the load switch and charged at its
+      limit, not the converter''s'
+  C-ISO-Y:
+    value: 1nF
+    pins:
+    - 1
+    - 2
+    note: 'Across the isolation barrier AT the converter, ISO_VIN_POS to PWR_GND: gives the switching common-mode
+      current a 1 nF path home beside U-ISO instead of round the star and the ribbon (RECOM''s RPA20 filter has
+      no Y-capacitor, PD-7; one 1 nF here against its 1100pF isolation capacitance, PD-5). On the +12 V side so
+      PTC-ISO covers it if it fails short'
+  C-LOGIC-IN:
+    of: C-LOGIC-REG
+    value: 4.7uF
+    pins:
+    - 1
+    - 2
+    note: U-REG-LOGIC input capacitor. The datasheet asks for more than 1.5 uF under all conditions (ADP7118.pdf
+      p.4); 4.7 uF 50 V X7R keeps that at 12 V of DC bias
+  C-LOGIC-OUT:
+    of: C-LOGIC-REG
+    value: 4.7uF
+    pins:
+    - 1
+    - 2
+    note: 'U-REG-LOGIC output capacitor, the same part: more than 1.5 uF required (ADP7118.pdf p.4)'
+  C-REG-ADJ:
+    value: 10uF
+    pins:
+    - 1
+    - 2
+    note: ON THE ADJUSTMENT PIN, and THE DRAWING DOES NOT SHOW IT. The rail's ripple-rejection claim depends on
+      it being fitted
+  C-REG-OUT:
+    value: 1uF
+    drawn_as: C
+    pins:
+    - 1
+    - 2
   C1:
-    of: C-BULK-RAIL              # qty 4: C1..C4
-    value: "100uF"
-    drawn_as: C1
-    pins: [1, 2]
-    note: "100uF on +12 V, NOT 47uF - the other three are 47uF and this one is not"
-  C2:
     of: C-BULK-RAIL
-    value: "47uF"
+    value: 100uF
+    drawn_as: C1
+    pins:
+    - 1
+    - 2
+    note: 100uF on +12 V, NOT 47uF - C3 on -12 V is 47uF and this one is not (C2 is U-ISO's input bulk now)
+  C2:
+    of: C-ISO-BULK
+    value: 100uF 50V
     drawn_as: C2
-    pins: [1, 2]
+    pins:
+    - 1
+    - 2
+    note: 'U-ISO''s input bulk, ACROSS its input (ISO_VIN_POS to ISO_VIN_NEG, 24 V): RECOM''s input electrolytic
+      (RECOM-RPA20-AW.pdf PD-7 filter: C1 47uF/50V; 100uF/50V here). An electrolytic with real ESR, because it damps
+      L-ISO-IN (power-entry.md)'
   C3:
     of: C-BULK-RAIL
-    value: "47uF"
+    value: 47uF
     drawn_as: C3
-    pins: [1, 2]
-  C4:
-    of: C-BULK-RAIL
-    value: "47uF"
-    drawn_as: C4
-    pins: [1, 2]
-
-  U-REG-DAC:
-    value: "LM317LZ"
-    drawn_as: LM317LZ
-    pins: [IN, OUT, ADJ]
-    note: "Minimum load current differs by manufacturer - see the row. The ~13mA here clears every reading"
-
+    pins:
+    - 1
+    - 2
+  D1:
+    of: D-REVPOL
+    value: 1N5817
+    drawn_as: D1
+    pins:
+    - A
+    - K
+    note: Reverse protection, module analog +12 V branch
+  D2:
+    of: D-REVPOL
+    value: 1N5817
+    drawn_as: D2
+    pins:
+    - A
+    - K
+    note: Reverse protection, the +12 V leg of U-ISO's input (ADR 0027). Separate from D1 on purpose - see diode-split-rationale
+  D3:
+    of: D-REVPOL
+    value: 1N5817
+    drawn_as: D3
+    pins:
+    - A
+    - K
+    note: 'Reverse protection, -12 V branch. CATHODE TO THE BUS, anode to the module''s -12 V rail: the rail''s
+      current flows out of the module into the bus''s -12 V, so this is, with D4, the entry diode the other way
+      round from D1/D2'
+  D4:
+    of: D-REVPOL
+    value: 1N5817
+    pins:
+    - A
+    - K
+    note: 'Reverse protection, the converter branch''s -12 V leg. CATHODE TO THE BUS like D3: this leg''s current
+      flows out of the module into the bus -12 V. With D2 it blocks a reversed ribbon from U-ISO''s input from both
+      sides'
+  FB1:
+    of: FB-IN
+    value: 600R @ 100MHz
+    drawn_as: FB1
+    pins:
+    - 1
+    - 2
+  FB2:
+    of: FB-IN
+    value: 600R @ 100MHz
+    drawn_as: FB2
+    pins:
+    - 1
+    - 2
+    note: THE UMBILICAL BRANCH. At its real operating current this bead gives roughly half its nameplate impedance
+      - see the FB-IN row, which is the only one of the four where that matters
+  FB3:
+    of: FB-IN
+    value: 600R @ 100MHz
+    drawn_as: FB3
+    pins:
+    - 1
+    - 2
+  FB4:
+    of: FB-IN
+    value: 600R @ 100MHz
+    pins:
+    - 1
+    - 2
+    note: The converter branch's -12 V leg, the partner of FB2
+  J-PWR-EURO:
+    value: 2x8 2.54mm shrouded box header (16-pin)
+    pins:
+    - NEG12_1
+    - NEG12_2
+    - GND_3
+    - GND_4
+    - GND_5
+    - GND_6
+    - GND_7
+    - GND_8
+    - POS12_9
+    - POS12_10
+    - POS5_11
+    - POS5_12
+    - CV_13
+    - CV_14
+    - GATE_15
+    - GATE_16
+    note: 'Keyed, but a key does not make a reversed ribbon impossible. The rack''s -12 V is the pin-1 pair, the
+      ribbon''s red stripe, and reversing it is what D-REVPOL exists for. The bus +5 V (11, 12) and CV/Gate (13-16)
+      pins are NOT USED: pads present, no-connect - the module makes its own 5 V (U-REG-LOGIC), and the header stays
+      2x8 for commonality with every Eurorack power cable (owner, 2026-09-30)'
+  L-ISO-IN:
+    value: 22uH
+    pins:
+    - 1
+    - 2
+    note: 'The L of U-ISO''s input filter, in the +12 V leg: keeps the converter''s reflected ripple out of the
+      rack''s rails. Damped by C2''s ESR (power-entry.md)'
+  NT-AGND-MOD:
+    value: net tie
+    pins:
+    - 1
+    - 2
+    note: 'The module analog star''s single tie to PWR_GND, at the power header''s ground pins (power-entry.md,
+      Grounding): copper only'
+  NT-DIG-MOD:
+    value: net tie
+    pins:
+    - 1
+    - 2
+    note: 'DIG_GND''s single tie to the star, at the power header''s ground pins, beside NT-AGND-MOD (dig-gnd-topology):
+      copper only'
+  NT-UMB-MOD:
+    value: net tie
+    pins:
+    - 1
+    - 2
+    note: PWR_GND to DIG_GND AT THE ETHERCON, between pins 6 and 8, copper only - the mirror of the instrument's
+      NT-DIG (ADR 0018). The instrument's return comes back on both conductors and meets U-ISO's 0V here, so none
+      of it crosses the DIG_GND plane to the star (dig-gnd-topology)
+  PTC-ISO:
+    value: MF-MSMF075/33X-2
+    pins:
+    - 1
+    - 2
+    note: 'The converter branch''s fuse, in its +12 V leg ahead of D2, and the input fuse RECOM recommends (RECOM-RPA20-AW.pdf
+      PD-5 Note 5: 3A slow blow, ''refer to local safety regulations''; F1 in the PD-7 filter): the load switch
+      is on U-ISO''s output and cannot see a fault in U-ISO or its input network. One leg is enough - the branch
+      is a series loop, +12 through U-ISO to -12, and C-ISO-Y hangs on the +12 side of it. power-entry.md, ''Fuses
+      on the rails'''
+  PTC-NEG12:
+    of: PTC-RAIL
+    value: MF-MSMF020/60-2
+    pins:
+    - 1
+    - 2
+    note: 'The module analog -12 V''s fuse: J-PWR-EURO -12 V, then this, then D3'
+  PTC-POS12:
+    of: PTC-RAIL
+    value: MF-MSMF020/60-2
+    pins:
+    - 1
+    - 2
+    note: 'The module analog +12 V''s fuse: J-PWR-EURO +12 V, then this, then D1. Sized on power-entry.md, ''Fuses
+      on the rails'''
   R-REG-SET-HI:
-    value: "475R 0.1%"
-    pins: [1, 2]
+    value: 475R 0.1%
+    pins:
+    - 1
+    - 2
   R-REG-SET-LO:
-    value: "150R 0.1%"
-    pins: [1, 2]
-
-  C-REG-ADJ:
-    value: "10uF"
-    pins: [1, 2]
-    note: "ON THE ADJUSTMENT PIN, and THE DRAWING DOES NOT SHOW IT. The rail's ripple-rejection claim depends on it being fitted"
-  C-REG-OUT:
-    value: "1uF"
-    drawn_as: C
-    pins: [1, 2]
-
+    value: 150R 0.1%
+    pins:
+    - 1
+    - 2
+  U-ISO:
+    value: RPA20-2412SAW
+    pins:
+    - VIN
+    - GND
+    - 0V
+    - TRIM
+    - VO
+    note: 'THE INSTRUMENT''S SUPPLY, ISOLATED (ADR 0027): input across the rack''s +12 V and -12 V, so the instrument''s
+      current loops rail to rail and never enters the rack''s ground; output +12 V to the load switch, return on
+      PWR_GND, which meets the module''s grounds only through NT-UMB-MOD and NT-DIG-MOD. The standard RPA20-2412SAW
+      has no CTRL pin (PD-1 Note 2): always on; Trim open = 12 V nominal. Input fuse per RECOM''s PD-5 Note 5: PTC-ISO.
+      The RP20-2412SAW drops into the same holes (footprint''s descr)'
+  U-REG-DAC:
+    value: LM317LZ
+    drawn_as: LM317LZ
+    pins:
+    - IN
+    - OUT
+    - ADJ
+    note: Minimum load current differs by manufacturer - see the row. The ~13mA here clears every reading
+  U-REG-LOGIC:
+    value: ADP7118AUJZ-5.0
+    pins:
+    - VIN
+    - GND
+    - EN
+    - SENSE
+    - VOUT
+    note: 'The module''s own 5 V, for U-LVL-MOD: the bus +5 V is not used (owner, 2026-09-30). From the protected
+      analog +12 V; EN tied to VIN; SENSE to VOUT at the part. GND on DIG_GND, the logic''s return'
 nets:
-
-  BUS_POS12_RAW:
-    - J-PWR-EURO.POS12
-    - D1.A
-    - D2.A
-    - port: BUS_POS12_RAW
-
-  POS12_D1:
-    - D1.K
-    - FB1.1
-  MODULE_ANALOG_POS12:
-    - FB1.2
-    - C1.1
-    - U-REG-DAC.IN
-    - port: MODULE_ANALOG_POS12
-
-  POS12_D2:
-    - D2.K
-    - FB2.1
-  # The D2 branch. WHERE IT TERMINATES IS NOT DECIDABLE FROM THE DRAWING and
-  # is deliberately not asserted here - see the note at the foot of this file.
-  PWR_EXPORT:
-    - FB2.2
-    - C2.1
-
-  NEG12_D3:
-    - J-PWR-EURO.NEG12
-    - D3.A
-  NEG12_FB:
-    - D3.K
-    - FB3.1
-  MODULE_ANALOG_NEG12:
-    - FB3.2
-    - C3.1
-    - port: MODULE_ANALOG_NEG12
-
-  BUS_5V_IN:
-    - J-PWR-EURO.POS5
-    - FB4.1
-  BUS_5V:
-    - FB4.2
-    - C4.1
-    - port: BUS_5V
-
-  REG_ADJ:
-    - U-REG-DAC.ADJ
-    - R-REG-SET-HI.2
-    - R-REG-SET-LO.1
-    - C-REG-ADJ.1
-
-  DAC_AVDD:
-    - U-REG-DAC.OUT
-    - R-REG-SET-HI.1
-    - C-REG-OUT.1
-    - port: DAC_AVDD
-
   AGND_MOD:
-    - port: AGND_MOD
-    - C1.2
-    - C3.2
-    - R-REG-SET-LO.2
-    - C-REG-ADJ.2
-    - C-REG-OUT.2
-
+  - port: AGND_MOD
+  - C-DEC-REG-IN.2
+  - C-REG-ADJ.2
+  - C-REG-OUT.2
+  - C1.2
+  - C3.2
+  - NT-AGND-MOD.1
+  - R-REG-SET-LO.2
+  BUS_GND:
+  - J-PWR-EURO.GND_3
+  - J-PWR-EURO.GND_4
+  - J-PWR-EURO.GND_5
+  - J-PWR-EURO.GND_6
+  - J-PWR-EURO.GND_7
+  - J-PWR-EURO.GND_8
+  - NT-AGND-MOD.2
+  - NT-DIG-MOD.2
+  BUS_NEG12_RAW:
+  - D4.K
+  - J-PWR-EURO.NEG12_1
+  - J-PWR-EURO.NEG12_2
+  - PTC-NEG12.1
+  BUS_POS12_RAW:
+  - J-PWR-EURO.POS12_10
+  - J-PWR-EURO.POS12_9
+  - PTC-ISO.1
+  - PTC-POS12.1
+  DAC_AVDD:
+  - port: DAC_AVDD
+  - C-REG-OUT.1
+  - R-REG-SET-HI.1
+  - U-REG-DAC.OUT
   DIG_GND:
-    - port: DIG_GND
-    - C4.2
-
+  - port: DIG_GND
+  - C-LOGIC-IN.2
+  - C-LOGIC-OUT.2
+  - NT-DIG-MOD.1
+  - NT-UMB-MOD.2
+  - U-REG-LOGIC.GND
+  ISO_FB2:
+  - FB2.2
+  - L-ISO-IN.1
+  ISO_POS12:
+  - port: ISO_POS12
+  - C-ISO-OUT.1
+  - U-ISO.VO
+  ISO_VIN_NEG:
+  - C-ISO-IN.2
+  - C2.2
+  - FB4.2
+  - U-ISO.GND
+  ISO_VIN_POS:
+  - C-ISO-IN.1
+  - C-ISO-Y.1
+  - C2.1
+  - L-ISO-IN.2
+  - U-ISO.VIN
+  LOGIC_5V:
+  - port: LOGIC_5V
+  - C-LOGIC-OUT.1
+  - U-REG-LOGIC.SENSE
+  - U-REG-LOGIC.VOUT
+  MODULE_ANALOG_NEG12:
+  - port: MODULE_ANALOG_NEG12
+  - C3.1
+  - FB3.2
+  MODULE_ANALOG_POS12:
+  - port: MODULE_ANALOG_POS12
+  - C-DEC-REG-IN.1
+  - C-LOGIC-IN.1
+  - C1.1
+  - FB1.2
+  - U-REG-DAC.IN
+  - U-REG-LOGIC.VIN
+  - U-REG-LOGIC.EN
+  NEG12_D4:
+  - D4.A
+  - FB4.1
+  NEG12_FB:
+  - D3.A
+  - FB3.1
+  NEG12_PTC3:
+  - D3.K
+  - PTC-NEG12.2
+  POS12_D1:
+  - D1.K
+  - FB1.1
+  POS12_D2:
+  - D2.K
+  - FB2.1
+  POS12_PTC1:
+  - D1.A
+  - PTC-POS12.2
+  POS12_PTC2:
+  - D2.A
+  - PTC-ISO.2
   PWR_GND:
-    - port: PWR_GND
-    - J-PWR-EURO.GND
-    - C2.2
-
-# ----------------------------------------------------------------------
-# OPEN, AND NOT GUESSED AT.
-#
-# `BUS_POS12_RAW` is taken BEFORE D1/D2. Both Interfaces tables say so in the
-# same words - power-entry.md:31 "The branch is taken **before** the diodes"
-# and umbilical-load-switch.md:18 "Taken before the..." - so two independent
-# statements agree and this file follows them.
-#
-# THE DRAWING CANNOT BE READ THAT WAY WITH CONFIDENCE. It shows the D2 branch
-# running into the load-switch block, and the left-hand spine is the
-# connector body rather than a rail, so the two readings are not
-# distinguishable from the ASCII. That is the whole argument for this file
-# existing: A PICTURE CAN BE AMBIGUOUS AND A NETLIST CANNOT.
-#
-# So the D2 branch's far end is left unasserted. It is one of:
-#   - the exported rail's reverse protection, with the load switch upstream
-#     on the raw bus, which is what both tables describe; or
-#   - in series with the load switch output, which is what the drawing looks
-#     like and which would give the exported rail protection the tables do
-#     not credit it with.
-# The difference is what reverse-polarity protection the instrument actually
-# has. Resolve it on the page, then state it here - do not resolve it here
-# from a reading of the picture.
-#
-# The load switch's own parts (R-ILIM, the timer and gate network, the FB
-# divider) are `foreign:` above so the drawing checks, and are NOT netted
-# here: a part belongs to one circuit's netlist, or two files can disagree
-# about one connection and both look right.
+  - port: PWR_GND
+  - C-ISO-OUT.2
+  - C-ISO-Y.2
+  - NT-UMB-MOD.1
+  - U-ISO.0V
+  REG_ADJ:
+  - C-REG-ADJ.1
+  - R-REG-SET-HI.2
+  - R-REG-SET-LO.1
+  - U-REG-DAC.ADJ
+  POS5_11:
+  - J-PWR-EURO.POS5_11
+  POS5_12:
+  - J-PWR-EURO.POS5_12
+  CV_13:
+  - J-PWR-EURO.CV_13
+  CV_14:
+  - J-PWR-EURO.CV_14
+  GATE_15:
+  - J-PWR-EURO.GATE_15
+  GATE_16:
+  - J-PWR-EURO.GATE_16
+  TRIM:
+  - U-ISO.TRIM
+external_endpoints:
+- CV_13
+- CV_14
+- GATE_15
+- GATE_16
+- POS5_11
+- POS5_12
+- TRIM

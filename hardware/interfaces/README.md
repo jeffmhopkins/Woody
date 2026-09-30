@@ -7,7 +7,7 @@ two places until 2026-09-21, and each is now one directory.
 |---|---|
 | [`breath-sense-link/`](breath-sense-link/breath-sense-link.md) | Sensor and excitation buffer on the carrier → 2 m twisted pair → in-amp on the module |
 | [`spi-link/`](spi-link/spi-link.md) | Carrier SPI egress → umbilical → the module's 74AHCT125 |
-| [`key-chain-loom/`](key-chain-loom/key-chain-loom.md) | Carrier → four cluster boards, eight connectors on one bus |
+| [`key-chain-loom/`](key-chain-loom/key-chain-loom.md) | Main board → the two key boards, one 1.27 mm IDC ribbon each; the thumb clusters' part is main-board traces |
 
 ## Why these are not filed under a board
 

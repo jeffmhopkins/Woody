@@ -136,8 +136,25 @@ for a part that gets breathed into for years.
 The cost is a different footprint, and it is free because the carrier has not
 been laid out. **Design for case 1351-01.**
 
+*(Amended 2026-09-26: case 1351-01 is **surface mount** — the datasheet's
+p.1 ordering table — an 8-lead gull-wing package at 2.54 mm pitch. It cannot
+be socketed. It is soldered to the main board and swapped with an iron, lid
+off: `hardware/interfaces/breath-sense-link/breath-sense-link.md`, "Mounting".)*
+
 The 0–6 kPa range was well chosen in 2021 and stands. Normal wind-controller
 playing sits around 0–5 kPa.
+
+**The pressure of a hard blow is `breath-working-point`, open until E2 measures
+it.** It sets the panel gain range and the ADC headroom, so it is measured, not
+cited. **The test, at E2:** the player plays the real mouthpiece, tube and trap
+with a digital manometer (0–10 kPa or wider) teed into the tube at `P1`, and the
+instrument logs the breath reading over USB at the same time. Record (a) the
+99th percentile of 20 minutes of ordinary playing and (b) the median of five
+deliberate hardest blows, each against the manometer and against the sensor
+reading converted with `breath-sensor-slope` — the two must agree within the
+sensor's tolerance, or the tee or the zero is wrong. (b) becomes the figure's
+value; (a) is the working range the panel gain is centred on. Nothing is
+re-sized unless (b) exceeds the sensor's 6 kPa span.
 
 ### The reference port stays open to the cavity
 
@@ -234,7 +251,11 @@ The stated reason for the short tube did not exist.
 
 With that gone, three things push the sensor down:
 
-- **Routing.** At the top, the analog pair must traverse the whole body through
+- *(Amended 2026-09-26, [ADR 0017](0017-one-main-board.md): the sensor is at
+  the MOUTH end, on the main board, and the buffered breath signal runs the
+  board's length to the umbilical as a PCB trace. The argument below is the
+  record; ADR 0017 says what replaces it.)*
+  **Routing.** At the top, the analog pair must traverse the whole body through
   side channels shared with pulsed LED current. At the bottom it sits where the
   umbilical leaves, and **there is no internal analog run at all.** That deletes
   the problem rather than managing it — and the internal equivalent of the AGND
@@ -244,6 +265,10 @@ With that gone, three things push the sensor down:
   10–20 minutes, and this is a **gauge sensor with a temperature-dependent
   offset whose zero is captured once at cold startup.** Putting it next to the
   heat source is the worst available placement for both.
+
+  > **Superseded (2026-09-26, [ADR 0015](0015-one-mcu-no-display.md)): there is no display board.** The hottest single
+  > item is gone; the regulator and the dev board remain as heat sources. The
+  > routing argument above is unaffected.
 - **Serviceability.** The sensor is moisture-sensitive (below), and the
   most likely part to fail, in a body that is costly to open (ADR 0009). At the
   bottom it
@@ -481,18 +506,11 @@ umbilical +12V ──[REF5050 5.000V]──[OPA2197 ½ buffer]──┬── MP
   5 ppm/V — so a full volt of movement on +12 V shifts the sensor supply by
   ~25 µV `[SBOS410O, datasheets/analog/REF5050.pdf]`.
 
-  > **⚠ The accuracy this line claimed belongs to a grade `bom.csv` does not
-  > order. 2026-09-21.** This read *"±0.05 % and 3 ppm/°C"*. SBOS410O Table 4-2
-  > p.3: **`REF50xxI` = "High" = ±0.05 %, 3 ppm/°C**; **`REF50xxAI` =
-  > "Standard" = ±0.1 %, 8 ppm/°C**. The BOM orders **`REF5050AIDR`** — the
-  > **A** suffix is the *worse* grade, so as specified this reference is
-  > **±0.1 % and 8 ppm/°C**: twice the initial error and 2.7× the drift.
-  > Since scale-factor stability is the entire reason for a separate reference,
-  > `REF5050IDR` is probably the right answer — but it is a part change, so it
-  > is tracked as `ref5050-grade` (**disputed**) in `config/figures.yaml` rather
-  > than decided here. *Caveat: Table 4-2 is new in rev O, so an earlier
-  > revision may have labelled the grades differently and this line may have had
-  > an honest origin.*
+  > **The grade is `ref5050-grade`** (`config/figures.yaml`, settled
+  > 2026-09-30): the High grade, `REF5050IDR`. SBOS410O Table 4-2 p.3 makes the
+  > **A** suffix the *worse* (Standard) grade, so the order code carries no A.
+  > The whole reason for a separate reference is scale-factor stability, and
+  > the better grade costs well under a dollar more on one part.
   >
   > The input range was **"7–18 V"**. 18 V is right; the minimum is specified as
   > **`V_OUT` + 0.2 V = 5.2 V** `[p.6]`, and 7 V was not from the datasheet.
@@ -693,10 +711,14 @@ It exists now, and moving the sensor to the bottom is what made it trivial:
 
 > **The star point is the analog ground pour on the bottom cluster board, at the
 > sensor and reference, immediately adjacent to the umbilical connector.**
+> *(Amended 2026-09-26, ADR 0017: the board is the main board, and the sensor
+> is at its mouth end, far from `J-UMB` at its tail; where `AGND_SENSE` is
+> taken — at the star or at the connector — is open for M4 layout,
+> `hardware/interfaces/breath-sense-link/breath-sense-link.md`.)*
 
 Everything analog in the instrument — the sensor, the REF5050, both halves of
 the OPA2197, the ADC divider — sits on that one board within a few centimetres
-of each other and of the connector. `AGND` leaves the board straight into the
+of each other and of the connector *(since ADR 0017: sensor, reference and buffer at the main board's mouth end, `J-UMB` at its tail — see the amendment above)*. `AGND` leaves the board straight into the
 umbilical.
 
 **The same problem used to exist inside the body and was never addressed.** With
@@ -808,7 +830,10 @@ handling is three partial measures rather than one fix:
   plug rather than a drilled orifice.
 - **The restrictor limits the pumping itself**, since the ~6 % volume exchange
   per note has to pass through it.
-- **Treat the sensor as a wear part.** It is socketed or otherwise replaceable,
+- *(Amended 2026-09-26: the sensor is surface mount, so "socketed" is out;
+  it is soldered down and replaceable with an iron — breath-sense-link,
+  "Mounting". The spare and the clearable trap stand.)*
+- **Treat the sensor as a wear part.** It is replaceable with an iron (`hardware/interfaces/breath-sense-link/`, Mounting),
   and the trap is clearable without disassembly. **Buy two** — ordinary spares
   for a part that gets breathed into for years.
 

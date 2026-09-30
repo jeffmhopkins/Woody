@@ -1,6 +1,8 @@
 # 0013 — Two-MCU split
 
-**Status:** Accepted
+**Status:** Superseded by [ADR 0015](0015-one-mcu-no-display.md) (2026-09-26): one MCU, the
+real-time board. Its build approach — dev board as a module, a passive board
+for the rest — still holds.
 
 Revises the board partitioning in [ADR 0001](0001-mcu-and-board-partitioning.md).
 The MCU family choice there still holds for the real-time board.
@@ -166,7 +168,7 @@ arguments landed:
   from the display board's AMOLED, which is the hottest thing in the instrument
   (ADR 0003).
 - **The 8×8 matrix wants a window in the player's downward glance**, which is
-  the tail underside (ADR 0014).
+  the tail underside (ADR 0014). (Since 2026-09-26 the matrix is on the TOP face, just past the keys — owner's decision, ADR 0009.)
 
 All three want the same board in the same place, which is rare enough to take
 advantage of.
@@ -197,8 +199,9 @@ failure modes are delay and condensation, both bounded and both handled, where a
 ### Two physical constraints, now on the tail rather than the middle
 
 **The tail face is crowded.** It carries the umbilical connector, the USB-C
-slot, and — on the underside just inboard — the matrix window. A ~26 × 31 mm
-etherCON flange on a 57 × 38 mm face leaves little room, the D-series is rated
+slot, and — on the underside just inboard — the matrix window (on the top
+face since 2026-09-26). A ~26 × 31 mm
+etherCON flange on a 57 mm wide face (ADR 0009, `body-thickness` tall) leaves little room, the D-series is rated
 for a **4 mm maximum panel thickness** so it cannot mount through 6 mm oak, and
 all of it must be drawn together at M4 (ADR 0009).
 
@@ -222,6 +225,26 @@ at the tail. The third board existed only to hold a mid-body MCU, and the MCU
 moved.
 
 ## Build approach: dev boards as modules on a passive carrier
+
+> **No carrier board (owner, 2026-09-26: "we don't need a carrier", then
+> "a center board that stacks between the upper and lower key boards").** The
+> carrier's circuits below are unchanged, and "the carrier" still names them,
+> but they are built on **the centre board**: one flat board between the
+> thumb boards and the key boards, with each thumb board's stacking header to
+> the key board above passing through it, so the key chain runs through it.
+> Still one regulator per dev board. The breath sensor sits in the gap
+> between the hands, the one place on the board with height for it —
+> mid-body, well away from the AMOLED (ADR 0003). The dev boards no longer
+> plug into it: the Matrix is under its window at the tail on a soldered
+> pigtail, the display at the mouth on a flat-flex cable (ADR 0009,
+> `mechanical/DESIGN.md`). The placement table above still holds for the
+> Matrix and the IMU; the breath sensor, ADC and power are now mid-body.
+> *(Since ADR 0017, 2026-09-26: the centre board and thumb boards are one main
+> board; the key boards join it on 12-way flat-flex ribbons, not stacking
+> headers *(1.27 mm IDC ribbons since ADR 0017's 2026-09-27 amendment)*; the Matrix is on the lid on a 24-way ribbon (ADR 0018) into `J-MCU`, not a
+> pigtail; the breath sensor is soldered at the main board's mouth end beside
+> the trap, not mid-body; one regulator block, the Matrix being the only dev
+> board since ADR 0015.)*
 
 Optimising for ease of construction changes the shape of the final build, so it
 is worth stating rather than leaving implied by milestone E13.
@@ -266,15 +289,16 @@ in the ESP32-S3-Matrix's case — the IMU. Rebuilding any of that is work for no
 gain.
 
 Costs, honestly: the dev board outlines dictate carrier layout, the stack gains
-a board-on-board height (affordable against 38 mm of cavity and 10 mm boards),
+a board-on-board height (affordable against the body's cavity and 10 mm boards — ADR 0009),
 and a discontinued dev board would mean a redesign. Against a custom S3 carrier
 that risks not working at all, this is the better trade.
 
 ### RF through the aluminium plate: not a concern
 
 Raised and dismissed. The display board's antenna sits under the aluminium key
-plate, but oak and acrylic are effectively RF-transparent, the plate is only one
-face of the enclosure, and the display needs a window cut in it regardless.
+plate, but oak and acrylic are effectively RF-transparent and the plate is only one
+face of the enclosure. (Since 2026-09-26 the display sits on the underside, below
+the plate rather than under a window in it, which only improves this — ADR 0009.)
 Recorded so it does not get re-litigated.
 
 ## Considered and rejected

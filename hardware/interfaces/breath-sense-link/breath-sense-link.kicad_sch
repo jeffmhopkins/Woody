@@ -1,0 +1,719 @@
+(kicad_sch (version 20250114) (generator "sch.py") (generator_version "9.0")
+  (uuid 389f5e80-1343-55c9-9647-41a2f4e558a0)
+  (paper "A3")
+  (title_block
+    (title "Breath sense link, instrument end (interfaces/breath-sense-link)")
+    (comment 5 "circuit: interfaces/breath-sense-link")
+    (comment 6 "page: ../../carrier/carrier.md")
+    (comment 7 "title: Breath sense link (instrument end)")
+    (date "")
+    (rev "")
+    (company "Woody")
+    (comment 1 "SOURCE for this circuit - edit in KiCad 9. netlist.yaml is exported from it: python3 tools/kicad.py export hardware/interfaces/breath-sense-link")
+    (comment 2 "Part facts ride on each symbol: Row (BOM row), Pins + Pins_source (pin map and its datasheet), Note")
+    (comment 3 "ADR 0003 - migrated from its hand-written netlist.yaml, compared part by part and net by net")
+    (comment 4 "Ports are hierarchical labels (Dir, From/To, Figure). Every part is the main board's - breath-sense-link.md")
+  )
+  (lib_symbols
+    (symbol "Device:D_Zener"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 1.016)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "D"
+			(at 0 2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "D_Zener"
+			(at 0 -2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Zener diode"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "diode"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "TO-???* *_Diode_* *SingleDiode* D_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "D_Zener_0_1"
+			(polyline
+				(pts
+					(xy -1.27 -1.27) (xy -1.27 1.27) (xy -0.762 1.27)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.27 0) (xy -1.27 0)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.27 -1.27) (xy 1.27 1.27) (xy -1.27 0) (xy 1.27 -1.27)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "D_Zener_1_1"
+			(pin passive line
+				(at -3.81 0 0)
+				(length 2.54)
+				(name "K"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 3.81 0 180)
+				(length 2.54)
+				(name "A"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "Device:R"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "R"
+			(at 2.032 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "R"
+			(at 0 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at -1.778 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "R res resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "R_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "R_0_1"
+			(rectangle
+				(start -1.016 -2.54)
+				(end 1.016 2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "R_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "Sensor_Pressure:MPXA6115A"
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "U"
+			(at -10.16 6.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "MPXA6115A"
+			(at 1.27 6.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at -12.7 -8.89 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://www.nxp.com/docs/en/data-sheet/MPXA6115A.pdf"
+			(at 0 15.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Absolute pressure sensor, 15 to 115kPa, analog output, integrated signal conditioning, temperature compensated, SO package"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "absolute pressure sensor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "MPXA6115A_0_1"
+			(polyline
+				(pts
+					(xy -7.112 0.254) (xy -4.572 2.794)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center -5.842 1.524)
+				(radius 2.6162)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -5.842 -1.27) (xy -5.842 -3.81)
+				)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -4.572 2.794) (xy -4.826 1.778) (xy -5.588 2.54) (xy -4.572 2.794)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(rectangle
+				(start 7.62 5.08)
+				(end -10.16 -5.08)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+		)
+		(symbol "MPXA6115A_1_1"
+			(pin no_connect line
+				(at -7.62 -5.08 90)
+				(length 2.54)
+				(hide yes)
+				(name "NC"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "5"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin no_connect line
+				(at -5.08 -5.08 90)
+				(length 2.54)
+				(hide yes)
+				(name "NC"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "6"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin no_connect line
+				(at -2.54 -5.08 90)
+				(length 2.54)
+				(hide yes)
+				(name "NC"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "7"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_in line
+				(at 0 7.62 270)
+				(length 2.54)
+				(name "Vcc"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_in line
+				(at 0 -7.62 90)
+				(length 2.54)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin no_connect line
+				(at 2.54 -5.08 90)
+				(length 2.54)
+				(hide yes)
+				(name "NC"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "8"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin no_connect line
+				(at 5.08 -5.08 90)
+				(length 2.54)
+				(hide yes)
+				(name "NC"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin output line
+				(at 10.16 0 180)
+				(length 2.54)
+				(name "Vout"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+  )
+  (symbol (lib_id "Sensor_Pressure:MPXA6115A") (at 76.2 101.6 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 163a95ba-5f65-5bd9-8abb-a3b70e9ce4f5)
+    (property "Reference" "U-BREATH" (at 66.04 95.25 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "MPXV4006DP" (at 77.47 95.25 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "woody:NXP_Case1351-01_SOP-8_P2.54mm" (at 63.5 110.49 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 76.2 86.36 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "U-BREATH" (at 76.2 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "VS=2(Vcc) VOUT=4(Vout) GND=3(GND)" (at 76.2 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "SOLDERED TO THE MAIN BOARD, no socket (case 1351-01 is surface mount). Pin 2 VS, pin 3 GND, pin 4 VOUT; pins 1 and 5-8 are N/C and carry no net (Style 2 - breath-sense-link.md, Mounting). P1 takes the breath tube with its PTFE plug and its <=1 mL trap; P2 IS OPEN TO THE CAVITY AND MUST NEVER BE BLOCKED. Neither is a net, so neither is here - which is exactly the kind of fact a netlist cannot carry and the page must" (at 76.2 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/analog/MPXV4006DP.pdf, case 1351-01 Style 2: pin 2 VS, 3 GND, 4 VOUT, 1 and 5-8 N/C - the same 8-lead pinout as KiCad's MPXA6115A" (at 76.2 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "NXP" (at 76.2 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "MPXV4006DP" (at 76.2 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C5190605" (at 76.2 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "hand" (at 76.2 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 6ffde1b8-bb4d-5e6f-a8a1-9b512f04852b))
+    (pin "2" (uuid e302911c-ddb3-58aa-b144-af9c6e6f918d))
+    (pin "3" (uuid e9289313-fa68-5274-8fad-125985f6d1f7))
+    (pin "4" (uuid 2870651d-f259-5da6-aeda-ed34468900d5))
+    (pin "5" (uuid 7a8b7076-547d-52e8-bf98-cde3489c4737))
+    (pin "6" (uuid 3e178056-609e-5157-a9b4-b2779c1fa13c))
+    (pin "7" (uuid c95ad9d5-e731-5182-8e62-1432b1b49429))
+    (pin "8" (uuid 94c48644-f7b5-5a34-9a93-87936559994c))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/5b7e1c1a-2f0b-5a3c-9d6e-b5e0a1c2d301" (reference "U10") (unit 1))) (project "breath-sense-link" (path "/389f5e80-1343-55c9-9647-41a2f4e558a0" (reference "U-BREATH") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 139.7 88.9 90) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid a3505ed6-faca-5014-a527-dc7d038a5d70)
+    (property "Reference" "R1" (at 139.7 86.36 90) (effects (font (size 1.27 1.27))))
+    (property "Value" "1k 1%" (at 139.7 91.44 90) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Resistor_SMD:R_1206_3216Metric" (at 139.7 90.17 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 139.7 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-SER-BREATH-INST" (at 139.7 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 139.7 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Drawn_as" "R-SER-BREATH-INST" (at 139.7 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Instrument-side series protection on the BREATH leg. 1206 and >=250mW because a jack fault has to land somewhere" (at 139.7 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL" (at 139.7 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "1206W4F1001T5E" (at 139.7 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C4410" (at 139.7 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 139.7 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 92901f45-0787-5694-b18a-e4fe4820967a))
+    (pin "2" (uuid def747a8-226f-582b-bbb2-eb6bff353afd))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/5b7e1c1a-2f0b-5a3c-9d6e-b5e0a1c2d301" (reference "R38") (unit 1))) (project "breath-sense-link" (path "/389f5e80-1343-55c9-9647-41a2f4e558a0" (reference "R1") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 139.7 139.7 90) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 437ca704-5979-523d-bb48-a7b2bdbb1d47)
+    (property "Reference" "R1b" (at 139.7 137.16 90) (effects (font (size 1.27 1.27))))
+    (property "Value" "1k 1%" (at 139.7 142.24 90) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Resistor_SMD:R_1206_3216Metric" (at 139.7 140.97 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 139.7 139.7 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-SER-BREATH-INST" (at 139.7 139.7 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 139.7 139.7 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "THE TWIN IN THE AGND_SENSE LEG. Without it the return is not matched to the signal leg and the link's CMRR is set by that asymmetry rather than by the in-amp. Its AGND_INST end is a trace of its own from U-BREATH pin 3 (breath-sense-link.md, Where it sits)" (at 139.7 139.7 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL" (at 139.7 139.7 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "1206W4F1001T5E" (at 139.7 139.7 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C4410" (at 139.7 139.7 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 139.7 139.7 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid fed8c889-2dea-5336-a55c-0c9b8380325e))
+    (pin "2" (uuid e1758ba4-795b-52b1-9b63-cd4635f962ab))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/5b7e1c1a-2f0b-5a3c-9d6e-b5e0a1c2d301" (reference "R39") (unit 1))) (project "breath-sense-link" (path "/389f5e80-1343-55c9-9647-41a2f4e558a0" (reference "R1b") (unit 1))))
+  )
+  (symbol (lib_id "Device:D_Zener") (at 190.5 101.6 270) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid d583e54a-a986-5b45-b5ef-9d300389e3c4)
+    (property "Reference" "D-TVS-BREATH-SIG" (at 193.04 100.33 270) (effects (font (size 1.27 1.27)) (justify right)))
+    (property "Value" "PESD12VS1UA or equivalent 12V-standoff ESD diode" (at 193.04 102.87 270) (effects (font (size 1.27 1.27)) (justify right)))
+    (property "Footprint" "Diode_SMD:D_SOD-323" (at 190.5 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 190.5 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "D-TVS-BREATH" (at 190.5 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "A=2(A) K=1(K)" (at 190.5 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Drawn_as" "D-TVS-BREATH" (at 190.5 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "AT THE CONNECTOR, 12 V standoff - above the sensor's full scale so it never conducts in play. Anode to the PWR_GND plane at J-UMB, never to the analog island" (at 190.5 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "KiCad's diode convention: 1 cathode, 2 anode; a unidirectional ESD diode" (at 190.5 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Nexperia" (at 190.5 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "PESD12VS1UA,115" (at 190.5 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C131084" (at 190.5 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 190.5 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid e31c8c00-63d8-545e-bbb9-312cb0931edb))
+    (pin "2" (uuid 9fe1ab48-b9f9-558a-9954-a33a5eb459de))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/5b7e1c1a-2f0b-5a3c-9d6e-b5e0a1c2d301" (reference "D5") (unit 1))) (project "breath-sense-link" (path "/389f5e80-1343-55c9-9647-41a2f4e558a0" (reference "D-TVS-BREATH-SIG") (unit 1))))
+  )
+  (symbol (lib_id "Device:D_Zener") (at 190.5 152.4 270) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 7c5077f8-eeaf-5e61-b24e-dea5206bfdbd)
+    (property "Reference" "D-TVS-BREATH-RET" (at 193.04 151.13 270) (effects (font (size 1.27 1.27)) (justify right)))
+    (property "Value" "PESD12VS1UA or equivalent 12V-standoff ESD diode" (at 193.04 153.67 270) (effects (font (size 1.27 1.27)) (justify right)))
+    (property "Footprint" "Diode_SMD:D_SOD-323" (at 190.5 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 190.5 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "D-TVS-BREATH" (at 190.5 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "A=2(A) K=1(K)" (at 190.5 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "The second of the pair, on the AGND_SENSE conductor. Anode to the PWR_GND plane at J-UMB, never to the analog island" (at 190.5 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "KiCad's diode convention: 1 cathode, 2 anode; a unidirectional ESD diode" (at 190.5 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Nexperia" (at 190.5 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "PESD12VS1UA,115" (at 190.5 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C131084" (at 190.5 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 190.5 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 5e0bc39b-d1de-5508-a4ea-378238766c10))
+    (pin "2" (uuid 86a9f76b-6caa-543b-b60f-2f771c916a35))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/5b7e1c1a-2f0b-5a3c-9d6e-b5e0a1c2d301" (reference "D6") (unit 1))) (project "breath-sense-link" (path "/389f5e80-1343-55c9-9647-41a2f4e558a0" (reference "D-TVS-BREATH-RET") (unit 1))))
+  )
+  (wire (pts (xy 76.2 93.98) (xy 76.2 91.44)) (stroke (width 0) (type default)) (uuid 69ee1146-ff47-5372-82a7-9aeaee206447))
+  (hierarchical_label "VS" (shape input) (at 76.2 91.44 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid f8dd3259-7f0e-595a-a6f5-c3d717c7d054)
+    (property "Dir" "in" (at 76.2 91.44 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/breath-excitation-reference" (at 76.2 91.44 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "riso-ref-topology" (at 76.2 91.44 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 86.36 101.6) (xy 88.9 101.6)) (stroke (width 0) (type default)) (uuid 8351fdc3-202f-5afb-9bed-bb63083a8fef))
+  (hierarchical_label "SENSOR_RAW" (shape output) (at 88.9 101.6 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid eff19461-0bff-594d-b8d6-12bb9b30be01)
+    (property "Dir" "out" (at 88.9 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "carrier/breath-excitation-reference" (at 88.9 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "sensor-full-scale" (at 88.9 101.6 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 135.89 88.9) (xy 133.35 88.9)) (stroke (width 0) (type default)) (uuid ffd801af-f62b-563e-a318-0e88cefc8d79))
+  (hierarchical_label "SENSOR_BUFFERED_OUT" (shape input) (at 133.35 88.9 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 8e331827-7363-587e-8fcc-71858496d7fb)
+    (property "Dir" "in" (at 133.35 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/breath-excitation-reference" (at 133.35 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "sensor-full-scale" (at 133.35 88.9 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 143.51 88.9) (xy 146.05 88.9)) (stroke (width 0) (type default)) (uuid 357dc60f-0f4a-5eb9-aaf3-180a383aec49))
+  (hierarchical_label "BREATH_SENSE" (shape output) (at 146.05 88.9 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid aa8b1cbc-7c2a-589b-980c-80b987e39a88)
+    (property "Dir" "out" (at 146.05 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "module/breath-receive-stage" (at 146.05 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "sensor-full-scale" (at 146.05 88.9 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 190.5 97.79) (xy 190.5 95.25)) (stroke (width 0) (type default)) (uuid 150c07ad-512c-5929-9626-e1343b29c05f))
+  (hierarchical_label "BREATH_SENSE" (shape output) (at 190.5 95.25 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid be23b120-52b1-535a-9595-7f42acea2833)
+    (property "Dir" "out" (at 190.5 95.25 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "module/breath-receive-stage" (at 190.5 95.25 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "sensor-full-scale" (at 190.5 95.25 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 143.51 139.7) (xy 146.05 139.7)) (stroke (width 0) (type default)) (uuid 3546582a-e09e-5fa3-be57-ff8fe00f64cd))
+  (hierarchical_label "AGND_SENSE" (shape output) (at 146.05 139.7 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 27576ebb-fdcf-5bdb-9240-4e18fe4957cd)
+    (property "Dir" "out" (at 146.05 139.7 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "module/breath-receive-stage" (at 146.05 139.7 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "umbilical-pinmap" (at 146.05 139.7 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 190.5 148.59) (xy 190.5 146.05)) (stroke (width 0) (type default)) (uuid 3692c408-021f-5174-a6b5-955e31ba2d16))
+  (hierarchical_label "AGND_SENSE" (shape output) (at 190.5 146.05 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 10ac3135-078e-5132-bc26-db801e2bf5a5)
+    (property "Dir" "out" (at 190.5 146.05 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "module/breath-receive-stage" (at 190.5 146.05 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "umbilical-pinmap" (at 190.5 146.05 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 135.89 139.7) (xy 133.35 139.7)) (stroke (width 0) (type default)) (uuid e025c4bf-e13b-5448-a914-6a8927b4a7d4))
+  (hierarchical_label "AGND_INST" (shape passive) (at 133.35 139.7 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 299f4ad8-c356-55ac-960a-4dc1e07c576b)
+    (property "Dir" "ref" (at 133.35 139.7 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/power-entry-instrument" (at 133.35 139.7 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 76.2 109.22) (xy 76.2 111.76)) (stroke (width 0) (type default)) (uuid 0e2b5431-69e1-5ca9-bb4e-41e132436432))
+  (hierarchical_label "AGND_INST" (shape passive) (at 76.2 111.76 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 18c57344-2f78-5064-bb00-4eb615e45027)
+    (property "Dir" "ref" (at 76.2 111.76 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/power-entry-instrument" (at 76.2 111.76 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 190.5 105.41) (xy 190.5 107.95)) (stroke (width 0) (type default)) (uuid 35ea724e-1fb0-58a1-898a-f6b4dfc28432))
+  (hierarchical_label "PWR_GND" (shape passive) (at 190.5 107.95 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 6ed66ca7-98f2-53a3-beae-9fc38a0d7fbb)
+    (property "Dir" "ref" (at 190.5 107.95 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 190.5 107.95 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 190.5 156.21) (xy 190.5 158.75)) (stroke (width 0) (type default)) (uuid ac5817e1-18cd-50f2-b481-f2d634f5343c))
+  (hierarchical_label "PWR_GND" (shape passive) (at 190.5 158.75 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid beda7ea5-e86a-523c-9d25-f37070f44684)
+    (property "Dir" "ref" (at 190.5 158.75 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 190.5 158.75 0) (effects (font (size 1.27 1.27)) hide)))
+  (text "The instrument end of the breath link: every part here is on the main board. The umbilical conductors BREATH_SENSE and AGND_SENSE continue on interfaces/spi-link (J-UMB pins 1 and 2);\nthe module end (R-SER-BREATH, the in-amp) is module/breath-receive-stage. Which board carries which part: breath-sense-link.md, 'Which board places what'." (at 25.4 25.4 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid 64e48202-cd32-5d2a-8077-cc515e104fd0))
+  (text "FROM THE HAND-WRITTEN NETLIST THIS SHEET REPLACES (the part notes are on each part's Note field):\n\nAUTHORITATIVE for connectivity. THE DRAWING IS ON ANOTHER PAGE - carrier.md §2 - and the module half of this link is\ndrawn again on module/breath-receive-stage, which declares these same parts `foreign:` because the pole and the CMRR\nbudget are derived there.\n\nR-SER-BREATH IS NOT HERE. The 10k 0.1% pair is the MODULE-side series protection and module/breath-receive-stage places\nit; this circuit's rows are the instrument-side 1k pair and the sensor." (at 25.4 190.5 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid 3e3a73bf-6129-5e08-961e-e79a996a16cb))
+  (sheet_instances (path "/" (page "1")))
+)
