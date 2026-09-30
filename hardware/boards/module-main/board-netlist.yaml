@@ -1149,13 +1149,11 @@ components:
     sheet: power-entry
   U14:
     of: U-ISO
-    value: URB2412YMD-15WR3
+    value: RP20-2412SAW
     pins:
-    - CTRL
-    - GND
     - VIN
+    - GND
     - VO
-    - TRIM
     - 0V
     sheet: power-entry
   U2:
@@ -1846,10 +1844,6 @@ nets:
   - R7.2
   - U14.0V
   - U2.GND
-  U14.CTRL:
-  - U14.CTRL
-  U14.TRIM:
-  - U14.TRIM
   U2.PWRGD:
   - U2.PWRGD
   U3.VOUTF:
@@ -1865,8 +1859,6 @@ external_endpoints:
 - J1.GATE_16
 - J1.POS5_11
 - J1.POS5_12
-- U14.CTRL
-- U14.TRIM
 - U2.PWRGD
 - U3.VOUTF
 - U3.VOUTH
