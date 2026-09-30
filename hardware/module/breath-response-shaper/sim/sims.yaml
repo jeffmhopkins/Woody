@@ -35,6 +35,12 @@ vary:
   R-RESP-DIV-LO: {tol: from-value}
   R-RESP-IN: {tol: from-value}
   R-RESTORE-FB: {tol: from-value}
+  R-RESP: {tol: from-value}
+  R-RESP-FB: {tol: from-value}
+  R-RESTORE-IN: {tol: from-value}
+  # POT-RESP's track: the RV09 sheet states no resistance tolerance [datasheets/connectors/RV09AF-40.pdf];
+  # +/-20 % is the usual carbon-track figure [assumption]. It sets how hard the pot loads the divider
+  POT-RESP: {tol: [-0.2, 0.2]}
 
 sims:
   - name: curve
@@ -70,15 +76,20 @@ sims:
         why: "+1 at centre detent (breath-response-shaper.md, 'Settled before layout'), within the four 1 % resistors' 2 x 2 %"
       - expr: "max['lin_hard_pct'] < 0.5 and min['lin_hard_pct'] > -0.5"
         why: "linear across real playing at the detent, within 0.5 % - but not 'exactly': see the README, the divider's loading moves the true null off centre"
-  - name: clip
-    # fully exponential: where BREATH_SHAPED stops following the curve
+  - name: exp-end
+    # POT-RESP fully clockwise, fully exponential: the gain ratio at a hard blow and where
+    # BREATH_SHAPED stops following the curve, at every tolerance corner of the stage
     deck: shaper.cir
     set: {p_resp: 1.0}
-    vary: [is_d]
-    measures: [out_min, clip_in]
+    vary: [is_d, R-RESP, R-RESP-DIV-HI, R-RESP-DIV-LO, R-RESP-IN, R-RESP-FB, R-RESTORE-IN, R-RESTORE-FB, POT-RESP]
+    measures: [g_pp, g_hard, out_min, clip_in]
     post:
+      g_pp: "-at(w['out'], (1.0) * p['t_ramp'] / p['v_mag']) / 1.0"
+      g_hard: "-at(w['out'], (p['v_hard']) * p['t_ramp'] / p['v_mag']) / p['v_hard']"
       out_min: "trough(w['out'], 0, p['t_ramp'])"
       clip_in: "-cross(w['out'], trough(w['out'], 0, p['t_ramp']) + 0.05, 0) * p['v_mag'] / p['t_ramp']"
     asserts:
-      - expr: "max['clip_in'] < -8.0 and min['clip_in'] > -9.94"
-        why: "at the fully-exponential end BREATH_SHAPED clips between -8 V and the in-amp's full scale at every diode corner: later than the page's -7.4 V, because the curve is weaker than its table (README), and still inside the sensor's range, beyond real playing"
+      - expr: "min['g_hard'] >= 1.5"
+        why: "shaper-exp-gain: at least 1.5x at a hard blow at the fully-exponential end (owner, 2026-09-30: 'need 1.5x gain'), at every corner - the diode's spread, every resistor at its 1 % ends and POT-RESP's track at +/-20 %. BREATH_SHAPED over the in-amp's output, so the stage's linear-gain tolerance counts against it too"
+      - expr: "max['clip_in'] < -1.3 * p['v_hard'] and min['clip_in'] > -9.94"
+        why: "and BREATH_SHAPED clips only past 1.3x a hard blow at the in-amp (-6.03 V) at every corner: beyond real playing (~2.8 kPa, breath-output-stage.md), still inside the sensor's range"

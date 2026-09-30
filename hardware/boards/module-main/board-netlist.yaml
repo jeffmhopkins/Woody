@@ -781,7 +781,7 @@ components:
     sheet: breath-response-shaper
   R31:
     of: R-RESP
-    value: 15k 1%
+    value: 3.9k 1%
     pins:
     - 1
     - 2

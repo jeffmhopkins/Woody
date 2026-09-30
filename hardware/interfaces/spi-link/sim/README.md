@@ -83,7 +83,7 @@ more than 150 ns `[calc: 250 − 63 − 2 × 8 − 13]`.
 
 This README owns, in `config/figures.yaml`:
 
-- `cs-fall-reentry`: 0.10 V past V_IL at the cable node at the worst corner, none at the nominal; none at U-RX-MOD's input at any corner
+- `cs-fall-reentry`: 0.10 V past V_IL at the cable node at the worst corner, none at the nominal; none at the Schmitt receiver's input at any corner
 - `spi-pair-crosstalk`: 0.21-0.29 V nominal, 0.25-0.33 V worst corner, over a common-mode impedance of 70-140 ohm
 
 ## What a result is worth

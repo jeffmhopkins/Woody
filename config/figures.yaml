@@ -652,7 +652,7 @@ figures:
     forbidden: ["44–67 %", "65.4 %"]
   - id: cs-fall-reentry
     quantity: CS_MOD's falling edge at the module - how far it swings back up once past the threshold. At U-RX-MOD's Schmitt input (behind R-RX-CS and C-RX-CS) against the whole V_T spread; at the cable node against a plain TTL input's V_IL (0.8 V)
-    value: "0.10 V past V_IL at the cable node at the worst corner, none at the nominal; none at U-RX-MOD's input at any corner"
+    value: "0.10 V past V_IL at the cable node at the worst corner, none at the nominal; none at the Schmitt receiver's input at any corner"
     status: settled
     owner: hardware/interfaces/spi-link/sim/README.md
     derivation: "[sim] python3 tools/sim.py run hardware/interfaces/spi-link/sim, 2026-09-30, ngspice 42. Sim cs-edges: the netlisted path (pad as r_drv/tr_drv with U-TVS-SPI's 30 pF on its side, R-SPI-SER-CS, 2 m of Belden 1752A as a CPL line of its 100-ohm differential impedance, R-PULL-CS at the cable node, R-RX-CS and C-RX-CS into U-RX-MOD's input), 65 corners of pad resistance and edge, TVS, input and filter capacitance and cable impedance. At the Schmitt input the edge never swings back through the 74AHCT14's smallest hysteresis in its threshold band, and once past the band never returns to it. The cable node's 0.10 V is at the pad's default drive (35 ohm: 117 ohm of source against an 88-ohm line). What-if cs-edges-tvs-line (U-TVS-SPI at J-UMB, 100 ohm, no RC): 0.45 V nominal, 0.66 V worst corner."
@@ -665,12 +665,12 @@ figures:
     derivation: "[sim] python3 tools/sim.py run hardware/interfaces/spi-link/sim, 2026-09-30, ngspice 42. Sim pair-mosi-low: pair 4/5 as two coupled lossy lines (ngspice CPL), odd mode 50 ohm from Belden 1752A's 100-ohm differential impedance, even mode twice a common-mode impedance NO DATASHEET GIVES - swept 70/100/140 ohm from a two-wire estimate - 65 corners each, into R-RX-MOSI and C-RX-MOSI and U-RX-MOD's input. At the cable node the same glitch is 0.69-1.00 V nominal, 0.87-1.21 V worst corner: over a plain TTL input's 0.8 V V_IL, which is why the receiver is a Schmitt stage behind an RC. Held high, MOSI stays over the highest V_T- (1.7 V) by at least 1.24 V; every SCLK and MOSI edge makes one edge at the Schmitt input. What-if pair-without-rc: the Schmitt input on the cable node crosses its lowest V_T+ at every z_cm. E11 measures the cable."
     forbidden: ["0.89-1.52 V nominal", "1.15-1.71 V worst corner", "0.89–1.5 V"]
   - id: shaper-exp-gain
-    quantity: Breath response shaper at POT-RESP's fully-exponential end, gain ratio at a hard blow (in-amp -4.64 V)
-    value: "1.30x at a hard blow; clips from an in-amp output of -8.86 V"
+    quantity: Breath response shaper at POT-RESP's fully-exponential end - gain ratio (BREATH_SHAPED over the in-amp's output) at a hard blow (in-amp -4.64 V), and the in-amp output it clips from
+    value: "1.64x at a hard blow, 1.51x at the worst corner; clips from an in-amp output of -6.95 V, -6.51 V at the worst corner"
     status: settled
     owner: hardware/module/breath-response-shaper/sim/README.md
-    derivation: "[sim] python3 tools/sim.py run hardware/module/breath-response-shaper/sim, 2026-09-30, ngspice 42, TI's OPA2197 model and a behavioural D-RESP fitted to the 1N4448W's 0.62-0.72 V at 5 mA (1.29-1.31x over that spread). The page's table (1.494) assumed V_IN_HALF at exactly V_in/2; POT-RESP loads the R-RESP-DIV pair's 5 kohm midpoint to 0.41 V_in [calc]. The same run: the clip starts at an in-amp output of -8.86 V, not -7.4 V; at the centre detent the wiper sits at 0.39 V at full scale and the stage is linear within 0.25 % across real playing."
-    forbidden: ["targeting ~1.5× at a hard blow", "clip starts near an in-amp output of −7.4 V"]
+    derivation: "[sim] python3 tools/sim.py run hardware/module/breath-response-shaper/sim, 2026-09-30, ngspice 42, TI's OPA2197 model and a behavioural D-RESP fitted to the 1N4448W's 0.62-0.72 V at 5 mA. Sim exp-end: R-RESP 3.9k (owner, 2026-09-30: 'need 1.5x gain'), 513 corners - the diode's spread, every resistor of the stage at its 1 % ends, POT-RESP's track at +/-20 % [assumption: the RV09 sheet gives no tolerance]. The worst corner is the pot low and the stage's linear gain low; the pot's tolerance is most of the spread. The E24 value above, 4.3k, gives 1.49x there [sim, 2026-09-30, the same corners]."
+    forbidden: ["1.30x at a hard blow", "-8.86 V", "−8.86 V", "targeting ~1.5× at a hard blow", "clip starts near an in-amp output of −7.4 V", "[R-RESP 15k]", "`R-RESP` 15 k", "`R-RESP` at 15 kΩ", "R-RESP,module,15k", "about 7 kΩ would give 1.5×"]
   - id: adc-sample-kickback
     quantity: The MCP3202's sample capacitor against C-AA-ADC, the sampled value's shortfall at the sensor's full scale (a gain term)
     value: "2.6 LSB nominal, 3.3 LSB worst corner"

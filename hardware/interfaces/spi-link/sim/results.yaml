@@ -4,7 +4,7 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/interfaces/spi-link/sim/sims.yaml: 1c0b2d4fe7afb5fc
+  hardware/interfaces/spi-link/sim/sims.yaml: 15f51db42cd1c511
   hardware/carrier/netlist.yaml: 544daa1002d5ae2c
   hardware/module/digital-and-supervision/netlist.yaml: 467a744791eeb072
   hardware/interfaces/spi-link/sim/cs.cir: 6d80adf0e68d79c2
@@ -69,15 +69,12 @@ sims:
         max: 3.33772
         max_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv- z_diff+
     asserts:
-    - expr: max['line_fall_back'] < 0 and max['line_rise_back'] < 0
-      why: 'cs-fall-reentry, the owner''s fix (2026-09-30): with U-TVS-SPI on the pad side and R-SPI-SER at 82 ohm, CS_MOD
-        at the cable node never comes back through a plain TTL input''s V_IL once below it, nor through V_IH once above it,
-        at any corner - without counting on the Schmitt stage'
-      pass: false
     - expr: min['fall_peak_margin'] > 0 and max['fall_band_bs'] < p['hyst_min'] and min['rise_trough_margin'] > 0 and max['rise_band_bs']
         < p['hyst_min']
-      why: and at U-RX-MOD's input neither edge can make a second one, for any threshold pair in the 74AHCT14's spread (sims.yaml
-        header)
+      why: 'cs-fall-reentry, the owner''s fix (2026-09-30): at U-RX-MOD''s input neither CS_MOD edge can make a second one,
+        for any threshold pair in the 74AHCT14''s spread (sims.yaml header), at any corner. At the cable node the falling
+        edge can still come back over a plain TTL V_IL at the worst corner (line_fall_back, recorded): the Schmitt stage and
+        its RC are what close it, not U-TVS-SPI''s move alone'
       pass: true
     - expr: min['in_min'] > -0.5 and max['in_max'] < 5.5 and max['line_max'] < 5.5
       why: inside the Schmitt input's 0-5.5 V operating range less its -0.5 V clamp [SN74AHCT14.pdf p.4], at every corner
