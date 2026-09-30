@@ -80,7 +80,7 @@ of Cat5 at a speed the instrument turns out to need. > **The RC-corner arithmeti
 > against 2–5 ns edges, so this is a reflection problem and the RC corner is
 > the wrong model. Three reviewers agreed (`carrier.md`).
 
-The settled part is **`R-SPI-SER` ×3 at 100 Ω** — one each on `SCLK`, `MOSI`
+The settled part is **`R-SPI-SER` ×3** at `spi-series-r` — one each on `SCLK`, `MOSI`
 and `CS` at the driving end, a source match into the cable's own impedance.
 220 Ω drives the far end to **1.83–1.86 V** against the 74AHCT125's 2.0 V
 `V_IH`, dwelling ~20 ns per edge in the forbidden band, so it is not merely
@@ -569,7 +569,7 @@ cannot have.
 umbilical mid-note and watch the jack. If it parks quietly, this paragraph is
 right. If it does not, we find out before anything is bonded.
 
-**`R-SPI-SER` ×3, 100 Ω, at the driving end** — on `SCLK`, `MOSI` and `CS`
+**`R-SPI-SER` ×3, at `spi-series-r`, at the driving end** — on `SCLK`, `MOSI` and `CS`
 alike. Source termination into the cable's own ~100 Ω. It also makes
 SYNC-signal regeneration at the module unnecessary, which was the alternative
 under consideration.
@@ -975,6 +975,14 @@ each other lands at the moment nobody is looking.
 > where the DAC is looking (`spi-pair-crosstalk`, bracketed because the pair's
 > common-mode impedance is in no datasheet). The pairing decision stands until
 > E11 measures it; what closes it if the bench agrees is on `spi-link.md`.
+>
+> **Answered 2026-09-30 at the receiver, not in the cable** (owner: add a
+> buffer with hysteresis at the receiving end). The pairing stays. Each line
+> now reaches the module's 74AHCT125 through `U-RX-MOD`, a 74AHCT14 Schmitt
+> stage behind an RC (`hardware/module/digital-and-supervision/`), and
+> `spi-pair-crosstalk` is what arrives at its input — on the side of its
+> threshold band it belongs on, at every corner simulated. E11 still measures
+> the cable.
 
 > **What this section got wrong, and it is instructive.** The original
 > reasoning above is about the ~13 mm untwisted region inside an RJ45 plug,

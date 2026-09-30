@@ -11,9 +11,13 @@ last_reviewed: '2026-09-21'
 depends_on:
 - adr:0004
 - fig:dig-gnd-topology
+- fig:spi-pair-crosstalk
 - fig:spi-series-r
 - fig:umbilical-pinmap
+- refdes:C-RX-MOD
+- refdes:R-RX-MOD
 - refdes:R-SPI-PULL
+- refdes:U-RX-MOD
 - circuit:interfaces/spi-link
 - circuit:module/dac8568
 - circuit:module/link-supervision

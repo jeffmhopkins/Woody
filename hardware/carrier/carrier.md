@@ -245,18 +245,18 @@ and its two `J-CHAIN`. The section number is kept because other pages cite `carr
 ## §4 SPI egress to the umbilical
 
 ```
-  IO35 SCK  ──[R-SPI-SER 100R]───┬──── J-UMB pin 4   ┐ pair (4,5)
-  IO36 MOSI ──[R-SPI-SER 100R]───┼──── J-UMB pin 5   ┘
-  IO34 CS   ─┬─[R-SPI-SER 100R]──┼──── J-UMB pin 7   ┐ pair (7,8)
-             │                   │     J-UMB pin 8 ──┘ DIG_GND ── PWR_GND at J-UMB
-   [R-CS-PULL-INST 10k 1%] to 3V3 (J-MCU pin 13): CS held high while the ESP32 boots
-                                 │
-                        [U-TVS-SPI 4-ch array to PWR_GND]
+  IO35 SCK  ──┬──────[R-SPI-SER 82R]──── J-UMB pin 4   ┐ pair (4,5)
+  IO36 MOSI ──┼─┬────[R-SPI-SER 82R]──── J-UMB pin 5   ┘
+  IO34 CS   ──┼─┼─┬──[R-SPI-SER 82R]──── J-UMB pin 7   ┐ pair (7,8)
+              │ │ │                      J-UMB pin 8 ──┘ DIG_GND ── PWR_GND at J-UMB
+              │ │ ├── [R-CS-PULL-INST 10k 1%] to 3V3 (J-MCU pin 13): CS held high while the ESP32 boots
+              │ │ │
+        [U-TVS-SPI 4-ch array to PWR_GND]  on the PAD side of R-SPI-SER (cs-fall-reentry)
   IO37 MISO ── MCP3202 DOUT only (never leaves the board)
   IO39 CS   ── MCP3202 CS
 ```
 
-*The rest of §4 — `R-SPI-SER` and the 100 Ω derivation, the two SPI hosts and
+*The rest of §4 — `R-SPI-SER` and its derivation (`spi-series-r`), the two SPI hosts and
 what claims them, the loop budget and the IO_MUX note — moved verbatim to
 [`../interfaces/spi-link/`](../interfaces/spi-link/spi-link.md), which holds
 both ends of the link. The drawing above stays here: it also carries the
@@ -470,8 +470,8 @@ page and have no BOM entry yet.
 | `U-BREATH` | MPXV4006DP, case 1351-01, surface mount, soldered down | P1 to the tube, P2 open to the cavity | `[ds]` pp.1, 6, 7 |
 | `R-SER-BREATH-INST` | 1 kΩ | Output protection. **No series cap here** | `[repo]` |
 | `D-TVS-BREATH` ×2 | 12 V standoff, SOD-323 | `BREATH` and `AGND` legs | `[repo]` |
-| `R-SPI-SER` ×3 | **100 Ω** | Series at the driving end on `SCLK`, `MOSI`, `CS`. **Was drawn as three refdes that are not in the BOM, at 220 Ω, derived from an RC model** — see §4 | `[repo] bom.csv` |
-| `U-TVS-SPI` | SP0504BAHT, **SOT-23-5** | `SCLK`, `MOSI`, `CS` + spare, to `PWR_GND` | `[repo]` |
+| `R-SPI-SER` ×3 | `spi-series-r` | Series at the driving end on `SCLK`, `MOSI`, `CS`, between the pads and `J-UMB` — see §4 and `interfaces/spi-link` | `[repo] bom.csv` |
+| `U-TVS-SPI` | SP0504BAHT, **SOT-23-5** | `IO35`, `IO36`, `IO34` + spare, to `PWR_GND`: on the **pad side** of `R-SPI-SER` (owner, 2026-09-30; `cs-fall-reentry`) | `[repo]` |
 | **`J-CHAIN`** ×2 here | **2×6 1.27 mm shrouded IDC header, right-angle, through-hole** | **One per key-board ribbon (`CBL-CHAIN`), in the far band beside the LED row, under its key board's; the mates are on the key boards (`chain-connectors` in all). 4 signals, 5 alternating grounds, 3V3, 2 spare. Part open until M4. `key-chain-loom.md`** | ribbon decided (ADR 0017), part open |
 | `PCB-CARRIER` | 4-layer (ADR 0017 amendment), outline derived by the body CAD | The main board (ADR 0017). See *Still open* | `[repo]` `mechanical/drc.echo` "main board (derived)" |
 | `TP-*`, `LK-*` | none | A review (`D2`) asked for test points, shunt links and an LA header. **Not fitted** (owner, 2026-09-29): this is a one-off build, probed by hand at the parts' own pins | decided |

@@ -62,6 +62,6 @@ costs nothing but the pin assignment.
 to [`../dac8568/notes.md`](../dac8568/notes.md).*
 
 - **`SCLK` has no series resistor and `MOSI` does** — closed. It is
-  `R-SPI-SER` ×3, 100 Ω, one on each of `SCLK`, `MOSI` and `CS` at the driving
+  `R-SPI-SER` ×3, 100 Ω until 2026-09-30 (superseded: `spi-series-r`), one on each of `SCLK`, `MOSI` and `CS` at the driving
   end (`carrier.md`, `bom.csv`, and ADR 0004 now agrees). That also closes the
   back-powering path found separately in the power review.

@@ -123,25 +123,25 @@ components:
       states: interfaces/spi-link/spi-link.md, ''CS_MOD''s two pulls'''
   R-SPI-SER-CS:
     of: R-SPI-SER
-    value: 100R 1%
+    value: 82R 1%
     pins:
     - 1
     - 2
   R-SPI-SER-MOSI:
     of: R-SPI-SER
-    value: 100R 1%
+    value: 82R 1%
     pins:
     - 1
     - 2
   R-SPI-SER-SCLK:
     of: R-SPI-SER
-    value: 100R 1%
+    value: 82R 1%
     drawn_as: R-SPI-SER
     pins:
     - 1
     - 2
-    note: At the DRIVING end, which is this board. The far end's threshold is the 74AHCT125's TTL V_IH, not a ratio
-      of its rail
+    note: 'At the DRIVING end, which is this board, with U-TVS-SPI on its pad side. The far end''s receiver is the
+      module''s Schmitt stage, U-RX-MOD (74AHCT14): TTL thresholds, not a ratio of its rail'
   U-MCU-RT:
     value: ESP32-S3-Matrix
     pins:
@@ -179,12 +179,14 @@ components:
     - CH3
     - CH4
     - GND
-    note: On the umbilical side of the series resistors, where the cable's energy arrives
+    note: 'On the MCU side of R-SPI-SER, at the pads (owner, 2026-09-30): on the line side its capacitance reflected
+      CS_MOD''s returning edge back up through the far end''s V_IL (cs-fall-reentry, interfaces/spi-link/sim). R-SPI-SER
+      now stands between the cable and the clamp, and limits what a sustained fault on a conductor can push into
+      it'
 nets:
   CS_MOD:
   - port: CS_MOD
   - R-SPI-SER-CS.2
-  - U-TVS-SPI.CH3
   DEV_3V3:
   - port: DEV_3V3
   - J-MCU.13
@@ -231,16 +233,19 @@ nets:
   - R-CS-PULL-INST.2
   - R-SPI-SER-CS.1
   - U-MCU-RT.IO34
+  - U-TVS-SPI.CH3
   IO35:
   - port: IO35
   - J-MCU.10
   - R-SPI-SER-SCLK.1
   - U-MCU-RT.IO35
+  - U-TVS-SPI.CH1
   IO36:
   - port: IO36
   - J-MCU.12
   - R-SPI-SER-MOSI.1
   - U-MCU-RT.IO36
+  - U-TVS-SPI.CH2
   IO37:
   - port: IO37
   - J-MCU.18
@@ -260,7 +265,6 @@ nets:
   MOSI:
   - port: MOSI
   - R-SPI-SER-MOSI.2
-  - U-TVS-SPI.CH2
   PWR_GND:
   - port: PWR_GND
   - J-MCU.11
@@ -274,7 +278,6 @@ nets:
   SCLK:
   - port: SCLK
   - R-SPI-SER-SCLK.2
-  - U-TVS-SPI.CH1
   U0RXD:
   - port: U0RXD
   - J-MCU.21
