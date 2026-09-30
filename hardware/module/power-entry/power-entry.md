@@ -57,7 +57,7 @@ the two agree, and where they do not the netlist wins.*
        │                                                   │
        │                                    ┌──────────────┴─────────┐
        │                                    │ Vin               +Vo ├──┬── ISO_POS12 ──► U-LOADSW
-       │                                    │ [U-ISO URB2412YMD-15WR3]│ [C-ISO-OUT 100µF]  (umbilical-load-switch)
+       │                                    │ [U-ISO RPA20-2412SAW]   │ [C-ISO-OUT 100µF]  (umbilical-load-switch)
        │                                    │ GND                0V ├──┴── PWR_GND ──► umbilical pin 6
        │                                    └──────────────┬─────────┘           │
        │                                                   │               [NT-UMB-MOD] at the etherCON
@@ -169,54 +169,67 @@ instrument's power then leaves the rack on +12 V and returns on −12 V, and the
 rack's ground carries none of it. The comparison with a ground-sense conductor
 and with a balanced dummy load, and the residual, are ADR 0027's.
 
-**The part is MORNSUN's `URB2412YMD-15WR3`** `[ds MORNSUN-URB_YMD-15WR3.pdf]`:
-9–36 V in, 12 V at 1250 mA out, 1500 VDC, 25.4 × 25.4 × 11.7 mm. Its output,
+**The part is RECOM's `RPA20-2412SAW`** `[ds RECOM-RPA20-AW.pdf]` (owner,
+2026-09-30: *"I thought the point was to do a RECOM that was in stock"*):
+9–36 V in, 12 V at 1670 mA out, 1.6 kVDC, 25.4 × 25.4 × 10.2 mm on 5.6 mm
+pins `[PD-1, PD-5, PD-7, PD-8]`. **The plain part, no suffix: no CTRL pin**
+— always on — **and a Trim pin**, left open for 12 V `[PD-1 Note 2]`. It is
+end-of-life (last-time buy 6 July 2026), so spares are bought now, and its
+successor the RP20-2412SAW drops into the same holes; both are ADR 0027's.
+Its output,
 `ISO_POS12`, feeds the load switch, which is unchanged
 ([`umbilical-load-switch.md`](../umbilical-load-switch/umbilical-load-switch.md));
 its return is `PWR_GND`.
 
 | | `[calc]` | Source |
 |---|---|---|
-| Input voltage | 24.0 V nominal across the rails, 22.8 V at −5 % on both; less `PTC-ISO` (≤ 0.40 Ω × 0.21 A = 0.08 V), `D2` and `D4` (~0.23 V each at 0.21 A) and the bead and inductor → **~23.4 V typical, ≥ 22.2 V** | `[ds BOURNS-MF-MSMF.pdf p.1]`, `D-REVPOL`'s row |
-| Against its range | 9–36 V, start-up ≤ 9 V, under-voltage lockout 5.5–6.5 V: **13 V of margin** at the bottom | `[ds p.2]` |
-| Typical play | `umbilical-current` × 12 V ≈ **4.3 W** out; ~86 % at 20–30 % load → 5.0 W in → **~0.21 A on each of +12 V and −12 V** | `[ds p.4]`, efficiency vs load |
-| Clamp-legal worst (ADR 0005's table) | ~6.95 W out, ~88 % → **~0.36 A per rail** at 22.2 V | `[ds p.1]` |
-| Overload held just under the load switch's minimum trip, 0.78 A | 9.4 W → **~0.48 A per rail** | `R-ILIM`'s row |
-| Hot-plug, the load switch at its 1.10 A worst-case limit | 13.2 W for tens of ms → **~0.68 A per rail** | `umbilical-load-switch.md` |
-| Toggle off | no-load input **6 / 15 mA** typ/max | `[ds p.2]` |
-| Its limit against the load switch's | over-current at **110 / 150 / 190 %** of 1.25 A: the minimum, 1.375 A, is above the LT1641's 1.10 A worst-case trip, so the LT1641 decides every start and fault | `[ds p.2]` |
-| Output | 12 V ± 3 % max, 50/100 mV p-p ripple; the load switch's `ON` and `PWRGD` thresholds sit below its minimum with more margin than they had on the bus | `[ds p.2]`; the `hot-plug` sim holds `VCC` above `ON`'s turn-off at every corner |
-| Loss in the module | ~0.7 W in `U-ISO`, ~0.1 W in `D2`/`D4` | |
+| Input voltage | 24.0 V nominal across the rails, 22.8 V at −5 % on both; less `PTC-ISO` (≤ 0.40 Ω × 0.22 A = 0.09 V), `D2` and `D4` (~0.23 V each at 0.22 A) and the bead and inductor → **~23.4 V typical, ≥ 22.2 V** | `[ds BOURNS-MF-MSMF.pdf p.1]`, `D-REVPOL`'s row |
+| Against its range | 9–36 V; under-voltage lockout on at 8–9 V, off at 7–8 V: **13 V of margin** at the bottom | `[ds PD-2]` |
+| Typical play | `umbilical-current` × 12 V ≈ **4.3 W** out, 0.36 A of 1.67 A (~21 %); **~82 %** there (~81 % off the efficiency curve, ~0.95 W off the dissipation curve) → 5.26 W in → **~0.22 A on each of +12 V and −12 V** | `[ds PD-3]`, the RPA20-2412SAW's own curves at 24 V in |
+| Clamp-legal worst (ADR 0005's table) | ~6.95 W out (0.58 A), ~1.25 W lost → **~0.37 A per rail** at 22.2 V | `[ds PD-3]` |
+| Overload held just under the load switch's minimum trip, 0.78 A | 9.4 W, ~1.5 W lost → **~0.49 A per rail** | `R-ILIM`'s row; `[ds PD-3]` |
+| Hot-plug, the load switch at its 1.10 A worst-case limit | 13.2 W, ~1.85 W lost, for tens of ms → **~0.68 A per rail** | `umbilical-load-switch.md`; `[ds PD-3]` |
+| Toggle off | quiescent input **20 / 55 mA** typ/max | `[ds PD-2]` |
+| Its limit against the load switch's | over-current protection at **110–160 %** of 1.67 A, hiccup: the minimum, 1.84 A, is above the LT1641's 1.10 A worst-case trip, so the LT1641 decides every start and fault | `[ds PD-5]` |
+| Output | 12 V: accuracy ± 2.0 % max, line ± 0.2 % max, load ± 0.1 %, 0.02 %/K → **~± 3.1 %** over 40 K; 50 mV p-p ripple; the load switch's `ON` and `PWRGD` thresholds sit below its minimum with more margin than they had on the bus | `[ds PD-2, PD-5]`; the `hot-plug` sim holds `VCC` above `ON`'s turn-off at every corner |
+| RECOM's input fuse | *"Recommended fuse: 3A slow blow type"*, where *"input over-current protection is also required"* — `PTC-ISO` is it, sized for this branch | `[ds PD-5 Note 5]` |
+| Loss in the module | ~0.95 W in `U-ISO`, ~0.1 W in `D2`/`D4`; 12.5 K/W on a board in still air, so **~+12 °C** on its case; over-temperature protection at 110 °C | `[ds PD-5, PD-6]` |
 
 **The rack's −12 V carries the instrument now.** At typical play the module
-draws ~0.26 A from +12 V and ~0.25 A from −12 V (its own ~45 mA and ~40 mA
+draws ~0.27 A from +12 V and ~0.26 A from −12 V (its own ~45 mA and ~40 mA
 plus `U-ISO`), where it drew ~0.40 A and ~0.04 A. Check the case's −12 V
 rating: many Eurorack supplies give −12 V less than +12 V.
 
-**The input filter.** `U-ISO` reflects 30 mA of ripple current into its input
-`[ds p.2]` at 270 kHz — lower below half load `[ds p.3]`. `L-ISO-IN` (22 µH)
-with `C2` (100 µF 50 V electrolytic) and `C-ISO-IN` (4.7 µF) keeps it off the
-rails: at 100 kHz the inductor is 13.8 Ω against ~0.17 Ω of capacitor
-(`C-ISO-IN`'s 0.34 Ω in parallel with `C2`'s 0.34 Ω impedance
-`[ds NICHICON-UCM-SERIES-UCM1E101MCL1GS.pdf p.3]`), so **~1 %** reaches the
-rack, ~0.4 mA `[calc]`. It is damped by `C2`'s ESR: `f₀` = 1/(2π√(22 µH ×
-104.7 µF)) = 3.3 kHz, `Z₀` = √(L/C) = 0.46 Ω, against the converter's
-negative input resistance `V²/P` = 23.4² / 5.0 = **−110 Ω** — 200× the
+**The input filter.** `U-ISO` switches at 550 kHz `[ds PD-2]`; RECOM does
+not publish its reflected ripple current. Its own filter, for EN55032 Class A,
+is a fuse, a 1 µH choke and 47 µF/50 V electrolytic `[ds PD-7]` — no
+common-mode choke. `L-ISO-IN` (22 µH) with `C2` (100 µF 50 V electrolytic)
+and `C-ISO-IN` (4.7 µF) is that filter with more of both: at 550 kHz the
+inductor is 76 Ω against under 0.17 Ω of capacitor (`C-ISO-IN`'s 0.34 Ω at
+100 kHz, falling above it, in parallel with `C2`'s 0.34 Ω impedance
+`[ds NICHICON-UCM-SERIES-UCM1E101MCL1GS.pdf p.3]`), so **under 0.25 %** of
+whatever it reflects reaches the rack `[calc]`. It is damped by `C2`'s ESR:
+`f₀` = 1/(2π√(22 µH × 104.7 µF)) = 3.3 kHz, `Z₀` = √(L/C) = 0.46 Ω, against
+the converter's negative input resistance `V²/P` = 23.4² / 5.26 =
+**−104 Ω** — over 200× the
 filter's characteristic impedance, the same shape and margin as the
 instrument's own input LC `[calc]`. **`C2` must stay an electrolytic.**
 
 **The common mode.** The converter's switching drives current through its
-2000 pF isolation capacitance `[ds p.3]`. `C-ISO-Y` (1 nF, `ISO_VIN_POS` to
-`PWR_GND`, beside the converter — the datasheet's `CY` `[ds p.5]`) gives it a
+isolation capacitance, 1100 pF typ `[ds PD-5]`. `C-ISO-Y` (1 nF,
+`ISO_VIN_POS` to `PWR_GND`, beside the converter; RECOM's filter has none
+`[PD-7]`) gives it a
 way home there, instead of round `DIG_GND`, the star and the ribbon. At breath
 frequencies the barrier carries nothing measurable: the `gnd-isolated` sim puts
 under 0.3 nA in the tie.
 
 **Protection.** A reversed ribbon is blocked from both sides of the converter
 by `D2` and `D4`. A fault inside `U-ISO` or its input network is below the
-load switch, so it has its own fuse, `PTC-ISO` (next section). `U-ISO`'s own
-output protection is continuous and self-recovering `[ds p.2]`, but it never
-acts first: the load switch trips below it.
+load switch, so it has its own fuse, `PTC-ISO` (next section) — RECOM's
+input fuse `[PD-5 Note 5]`. `U-ISO`'s own short-circuit protection is
+continuous and self-recovering, its over-current protection hiccups, and it
+has over-temperature protection `[PD-5]`; it never acts first, because the
+load switch trips below its 1.84 A minimum.
 
 ## Fuses on the rails — `PTC-POS12`, `PTC-NEG12`, `PTC-ISO`
 
@@ -244,7 +257,7 @@ set divider's 5.21 V / 625 Ω = 8.3 mA — and `U-REG-LOGIC`'s ≤ 6 mA. That is
 | Part | Hold / trip at 23 °C | Hold at 50 / 60 °C | Must hold | Resistance → drop at the typical load | Voltage |
 |---|---|---|---|---|---|
 | `PTC-POS12`, `PTC-NEG12`: MF-MSMF020/60-2 | 0.20 / 0.40 A | **0.15 / 0.13 A** | 95 mA worst (+12 V) | 0.40 Ω min → **18 mV** at 45 mA; 6.0 Ω an hour after a trip (R1max) → **0.27 V** | 60 V: a short between the two analog rails puts 24 V across the pair |
-| `PTC-ISO`: MF-MSMF075/33X-2 | 0.75 / 1.5 A | **0.56 / 0.49 A** | 0.36 A clamp-legal worst; 0.48 A overload held under the load switch's trip (it holds at 50 °C and may trip at 60 °C — a fault state either way); 0.68 A hot-plug for tens of ms, below its trip current | 0.11–0.40 Ω → **≤ 0.09 V** at 0.21 A | 33 V: a shorted `U-ISO` input puts all 24 V across it |
+| `PTC-ISO`: MF-MSMF075/33X-2 | 0.75 / 1.5 A | **0.56 / 0.49 A** | 0.37 A clamp-legal worst; 0.49 A overload held under the load switch's trip (it holds at 50 °C and may trip at 60 °C — a fault state either way); 0.68 A hot-plug for tens of ms, below its trip current | 0.11–0.40 Ω → **≤ 0.09 V** at 0.22 A | 33 V: a shorted `U-ISO` input puts all 24 V across it |
 
 `[ds p.1, p.9]`. The previous page's "~0.1 V" was from memory; the datasheet
 says 18 mV on a fitted part and 0.27 V at its worst. **At that worst the
@@ -297,7 +310,7 @@ badly at current:
 | Bead | Carries | Impedance at 100 MHz |
 |---|---|---|
 | `FB1`, `FB3` | the analog rails, tens of mA | **~580–614 Ω** |
-| `FB2`, `FB4` | `U-ISO`'s input, ~0.21 A typical (~0.36 A clamp-legal) | **~440–480 Ω** (~310 Ω) |
+| `FB2`, `FB4` | `U-ISO`'s input, ~0.22 A typical (~0.37 A clamp-legal) | **~440–480 Ω** (~310 Ω) |
 
 `FB2` and `FB4` are the ones that matter, and they lose a quarter to a half of
 the impedance the part number advertises, because they carry the instrument's
@@ -367,15 +380,15 @@ one-ended electrically (`MECH-STANDOFF-MOD`).
 *(`L-BUCK-IN` and the umbilical's input LC moved with the load switch — they
 are in [`umbilical-load-switch.md`](../umbilical-load-switch/umbilical-load-switch.md).)*
 
-- **`U-ISO`'s source.** MORNSUN's datasheet is current (rev 2025.03.28-A/9),
-  but DigiKey lists the part "not for new designs" with one in stock, and the
-  part under that MPN at LCSC is another brand (`U-ISO`'s row). **Decided
-  by: owner** — buy the MORNSUN part through a MORNSUN channel, or move to
-  one of the row's alternates before layout (each needs its own footprint).
-- **The case's −12 V rating** against ~0.25 A typical and ~0.36 A clamp-legal
-  from this module. **Decided by: the owner's supply**, measured at E6.
-- **Where `U-ISO` sits on module-main**, 11.7 mm tall with its filter beside
-  it: a module CAD item (`config/module.yaml`), not decided here.
+- **`U-ISO`'s supply.** The RPA20-2412SAW is end-of-life: DigiKey had 20 on
+  2026-09-30 (`U-ISO`'s row). **Decided by: the order** — buy spares now. The
+  RP20-2412SAW drops into the same holes; moving to it swaps two pad numbers
+  and re-checks its electrical deltas (ADR 0027).
+- **The case's −12 V rating** against ~0.26 A typical and ~0.41 A clamp-legal
+  from this module (`U-ISO` plus the module's own ~40 mA). **Decided by: the owner's supply**, measured at E6.
+- **Where `U-ISO` sits on module-main**: on its rear face, 10.2 mm tall on
+  5.6 mm pins, with its filter parts beside it — `config/module.yaml` holds
+  the envelopes and the module CAD checks them.
 
 *(The entry bulk — 100 µF on +12 V and 47 µF on −12 V — is 2–5× the
 surveyed 10–22 µF, and it is kept: `C-BULK-RAIL` gives the reason. `C2`,

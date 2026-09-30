@@ -4,8 +4,8 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/power-entry/sim/sims.yaml: decce0996a9450bc
-  hardware/module/power-entry/netlist.yaml: d89bae6598d0b5dc
+  hardware/module/power-entry/sim/sims.yaml: e3433c1df045a671
+  hardware/module/power-entry/netlist.yaml: ccb32c181cd90840
   hardware/module/pitch-stage/netlist.yaml: 3d43eac2f5eabc29
   hardware/module/power-entry/sim/poweron.cir: f6dfa26bfaeb324a
   hardware/module/power-entry/sim/groundshift.cir: 4aae040d6b7e03a1
@@ -351,28 +351,28 @@ sims:
     corners: 1
     measures:
       err_cents:
-        nominal: 5.04e-09
-        min: 5.04e-09
+        nominal: 2.88e-09
+        min: 2.88e-09
         min_at: nominal
-        max: 5.04e-09
+        max: 2.88e-09
         max_at: nominal
       err_mv:
-        nominal: 4.2e-09
-        min: 4.2e-09
+        nominal: 2.4e-09
+        min: 2.4e-09
         min_at: nominal
-        max: 4.2e-09
+        max: 2.4e-09
         max_at: nominal
       tie_ua:
-        nominal: 0.000117084
-        min: 0.000117084
+        nominal: 6.67581e-05
+        min: 6.67581e-05
         min_at: nominal
-        max: 0.000117084
+        max: 6.67581e-05
         max_at: nominal
       rail_mv:
-        nominal: 9.3168
-        min: 9.3168
+        nominal: 9.6585
+        min: 9.6585
         min_at: nominal
-        max: 9.3168
+        max: 9.6585
         max_at: nominal
     asserts:
     - expr: max['err_cents'] < 0.01 and max['tie_ua'] < 1.0
@@ -383,28 +383,28 @@ sims:
     corners: 1
     measures:
       err_cents:
-        nominal: 9.6e-09
-        min: 9.6e-09
+        nominal: 5.52e-09
+        min: 5.52e-09
         min_at: nominal
-        max: 9.6e-09
+        max: 5.52e-09
         max_at: nominal
       err_mv:
-        nominal: 8.0e-09
-        min: 8.0e-09
+        nominal: 4.6e-09
+        min: 4.6e-09
         min_at: nominal
-        max: 8.0e-09
+        max: 4.6e-09
         max_at: nominal
       tie_ua:
-        nominal: 0.00022051
-        min: 0.00022051
+        nominal: 0.000125732
+        min: 0.000125732
         min_at: nominal
-        max: 0.00022051
+        max: 0.000125732
         max_at: nominal
       rail_mv:
-        nominal: 17.5467
-        min: 17.5467
+        nominal: 18.1907
+        min: 18.1907
         min_at: nominal
-        max: 17.5467
+        max: 18.1907
         max_at: nominal
     asserts:
     - expr: max['err_cents'] < 0.01 and max['tie_ua'] < 1.0
@@ -412,6 +412,38 @@ sims:
         cent, and under a microamp in the tie to the star (what is left is the isolation capacitance)'
       pass: true
   gnd-isolated[r_bus_seg=0.031,i_swing=0.195]:
+    corners: 1
+    measures:
+      err_cents:
+        nominal: 7.2e-09
+        min: 7.2e-09
+        min_at: nominal
+        max: 7.2e-09
+        max_at: nominal
+      err_mv:
+        nominal: 6.0e-09
+        min: 6.0e-09
+        min_at: nominal
+        max: 6.0e-09
+        max_at: nominal
+      tie_ua:
+        nominal: 6.67581e-05
+        min: 6.67581e-05
+        min_at: nominal
+        max: 6.67581e-05
+        max_at: nominal
+      rail_mv:
+        nominal: 9.6585
+        min: 9.6585
+        min_at: nominal
+        max: 9.6585
+        max_at: nominal
+    asserts:
+    - expr: max['err_cents'] < 0.01 and max['tie_ua'] < 1.0
+      why: 'ADR 0027: with the converter no breath-correlated current reaches the rack''s ground - under a hundredth of a
+        cent, and under a microamp in the tie to the star (what is left is the isolation capacitance)'
+      pass: true
+  gnd-isolated[r_bus_seg=0.031,i_swing=0.367]:
     corners: 1
     measures:
       err_cents:
@@ -427,48 +459,16 @@ sims:
         max: 1.2e-08
         max_at: nominal
       tie_ua:
-        nominal: 0.000117084
-        min: 0.000117084
+        nominal: 0.000125732
+        min: 0.000125732
         min_at: nominal
-        max: 0.000117084
+        max: 0.000125732
         max_at: nominal
       rail_mv:
-        nominal: 9.3168
-        min: 9.3168
+        nominal: 18.1907
+        min: 18.1907
         min_at: nominal
-        max: 9.3168
-        max_at: nominal
-    asserts:
-    - expr: max['err_cents'] < 0.01 and max['tie_ua'] < 1.0
-      why: 'ADR 0027: with the converter no breath-correlated current reaches the rack''s ground - under a hundredth of a
-        cent, and under a microamp in the tie to the star (what is left is the isolation capacitance)'
-      pass: true
-  gnd-isolated[r_bus_seg=0.031,i_swing=0.367]:
-    corners: 1
-    measures:
-      err_cents:
-        nominal: 2.64e-08
-        min: 2.64e-08
-        min_at: nominal
-        max: 2.64e-08
-        max_at: nominal
-      err_mv:
-        nominal: 2.2e-08
-        min: 2.2e-08
-        min_at: nominal
-        max: 2.2e-08
-        max_at: nominal
-      tie_ua:
-        nominal: 0.00022051
-        min: 0.00022051
-        min_at: nominal
-        max: 0.00022051
-        max_at: nominal
-      rail_mv:
-        nominal: 17.5467
-        min: 17.5467
-        min_at: nominal
-        max: 17.5467
+        max: 18.1907
         max_at: nominal
     asserts:
     - expr: max['err_cents'] < 0.01 and max['tie_ua'] < 1.0

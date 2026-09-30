@@ -15,8 +15,8 @@ values:
 include: [lt1641.inc]
 
 params:
-  v_bus:    {value: 12.0, source: "U-ISO's output, which feeds the load switch since ADR 0027: 12 V, +/-3 % max over 0-100 % load [datasheets/discrete-and-power/MORNSUN-URB_YMD-15WR3.pdf p.2] (vary)"}
-  r_bus:    {value: 0.1, source: "U-ISO's output resistance: load regulation +/-1 % max over 5-100 % load, 0.12 V across 1.19 A [calc from ds p.2]. A resistance, not the converter's loop: C-ISO-OUT carries the first hundreds of microseconds (transient recovery 300/500 us, p.2)"}
+  v_bus:    {value: 12.0, source: "U-ISO's output (RECOM RPA20-2412SAW), which feeds the load switch since ADR 0027: 12 V nominal [datasheets/discrete-and-power/RECOM-RPA20-AW.pdf PD-1] (vary)"}
+  r_bus:    {value: 0.007, source: "U-ISO's output resistance: load regulation +/-0.1 % for a 12 V output [ds PD-5], 12 mV across 1.67 A = 0.007 ohm [calc]. A resistance, not the converter's loop: C-ISO-OUT carries the first hundreds of microseconds (transient recovery 250 us typ for a 25 % step, PD-5)"}
   t_rise:   {value: 1.0e-3, source: "the bus rising at power-on [assumption: a PSU's soft start is slower, which is easier]"}
   r_ilim:   {value: 0.05, source: "R-ILIM's row is 'value from E6' (open): the page's working 50 mohm (umbilical-load-switch.md, 'Four things')"}
   vhi:      {value: 47.0e-3, source: "V_SENSETRIP at V_FB >= 0.5 V, 39/47/55 mV [LT1641.pdf p.2] (vary)"}
@@ -44,7 +44,7 @@ derived:
   r_fb_lo: "1.0e-3 if v['fb_open'] else v['R-FB-LO']"
 
 vary:
-  v_bus: {tol: [-0.03, 0.03], source: "U-ISO's +/-3 % output accuracy"}
+  v_bus: {tol: [-0.031, 0.031], source: "U-ISO's output: accuracy +/-2.0 % max + line +/-0.2 % max + load +/-0.1 % + tempco 0.02 %/K x 40 K (25 to 65 C in the module) = +/-3.1 % [calc from ds PD-5]"}
   vhi:   {tol: [-0.1702, 0.1702], source: "39 and 55 mV about 47"}
   vlo:   {tol: [-0.3333, 0.4167], source: "8 and 17 mV about 12"}
   igate: {tol: [-0.5, 1.0], source: "5 and 20 uA about 10"}

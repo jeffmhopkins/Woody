@@ -30,11 +30,13 @@ The `Dir` and `Peer` columns are defined once in
 **The load switch hangs on `U-ISO`'s isolated output, not on the bus** (ADR
 0027): `VCC`, `R-ILIM` and the `ON` divider on `ISO_POS12`, every return on
 `PWR_GND`, the converter's 0V. Nothing below changed value. What changed is
-the supply the analysis assumes, and it is better on every count: 12 V ± 3 %
-`[ds MORNSUN-URB_YMD-15WR3.pdf p.2]` instead of the bus's ± 5 %, and no rail
-fuse or entry diode between it and `VCC`. The converter's own current limit,
-at least 1.375 A `[p.2]`, is above this switch's 1.10 A worst-case trip, so
-this switch — not the converter — decides every start and every fault. The
+the supply the analysis assumes, and it is better on every count: RECOM's
+RPA20-2412SAW holds 12 V to ± 2.0 % accuracy, ± 0.2 % line, ± 0.1 % load and
+0.02 %/K `[ds RECOM-RPA20-AW.pdf PD-5]` — **~± 3.1 %** over 40 K `[calc]` —
+instead of the bus's ± 5 %, and no rail fuse or entry diode between it and
+`VCC`. The converter's own over-current protection is 110–160 % of 1.67 A
+`[PD-5]`: its minimum, 1.84 A, is above this switch's 1.10 A worst-case trip,
+so this switch — not the converter — decides every start and every fault. The
 `sim/` decks run from the converter, its output resistance and `C-ISO-OUT`, and
 the hot-plug holds `VCC` above the `ON` pin's turn-off at every corner.
 

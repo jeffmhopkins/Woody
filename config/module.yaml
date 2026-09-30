@@ -203,9 +203,9 @@ b2b:
     source: "[adr 0024] how far the tails stand out of the main board's rear face"
   # centre (x, y) and orientation: long axis along y, between the jack columns
   at:
-    value: [25.25, 75.5]
+    value: [25.25, 77.0]
     status: nominal
-    source: "[adr 0024] between the two jack columns, level with the middle jack row"
+    source: "[adr 0024] between the two jack columns, near the middle jack row; 1.5 above it (2026-09-30) so its tails clear U-ISO's body on the main board's rear face (iso.at)"
 
 # J-PWR-EURO, the 2 x 8 shrouded header, on the main board's REAR face.
 power:
@@ -276,10 +276,45 @@ tall:
   # Each: [x, y, kind] on the rear face - an envelope for the depth and
   # clash checks, NOT a placement; the layout places them.
   at:
-    value: [[10.0, 60.0, "cap"], [10.0, 70.0, "cap"], [40.0, 60.0, "cap"], [40.0, 70.0, "cap"],
+    value: [[40.0, 57.0, "cap"], [40.0, 67.0, "cap"], [40.0, 77.0, "cap"], [40.0, 87.0, "cap"],
             [25.25, 95.0, "trim"], [14.0, 95.0, "trim"], [36.5, 95.0, "trim"]]
     status: nominal
-    source: "[adr 0024] representative spots for the three trimmers and four bulk caps, so the depth check sees them; the layout moves them"
+    source: "[adr 0024] representative spots for the three trimmers and four bulk caps, so the depth check sees them; the layout moves them. The caps sit in the right-hand column (2026-09-30) because U-ISO and its filter take the left"
+
+# U-ISO, the instrument's isolated supply (ADR 0027): RECOM RPA20-2412SAW on the
+# main board's REAR face - 10.2 mm of body cannot go in the boards' gap. Its
+# pins stand out of the FRONT face, toward the jack board.
+iso:
+  body:
+    value: [25.4, 25.4, 10.2]
+    status: settled
+    source: "[ds] RECOM-RPA20-AW.pdf PD-7, PD-8: 25.4 x 25.4 x 10.2 mm without heat sink"
+  pin_l:
+    value: 5.6
+    status: settled
+    source: "[ds] RECOM-RPA20-AW.pdf PD-8: pins 5.60 below the body"
+  pin_d:
+    value: 1.0
+    status: settled
+    source: "[ds] RECOM-RPA20-AW.pdf PD-8: pin d1.0 +/-0.1"
+  # The fitted pins (plain RPA20 SAW: 1, 2, 4, 5, 6), offsets from the body's
+  # centre in the panel frame, in that order. The footprint's pattern
+  # (woody:Converter_DCDC_RECOM_RPA20-RP20-xxxxSAW_THT) turned a quarter so the
+  # input pins (1, 2) face down and the 4/5/6 row runs across the top: every
+  # tail then clears SW-POWER's lugs, which a column at either side would not.
+  pins:
+    value: [[-2.54, -10.16], [2.54, -10.16], [10.16, 10.16], [0.0, 10.16], [-10.16, 10.16]]
+    status: settled
+    source: "[ds] RECOM-RPA20-AW.pdf PD-8 recommended footprint: columns 20.32 apart, the 3/4 row 2.54 inside the body's edge; 2 and 1 at 7.62 and 12.70 from it, 4/5/6 at 0/10.16/20.32 [calc: offsets from the centre, turned 90 degrees]"
+  at:
+    value: [14.2, 50.6]
+    status: nominal
+    source: "[calc] the only 25.4 square on the rear face: its bottom edge boards.part_clear above the NE8FAV's tails (ec.y + 12.35 + 0.5 = 37.85, taken as 37.9), its left 0.5 inside the board's edge (1.5), so the centre is 1.5 + 12.7, 37.9 + 12.7; J-B2B-MOD moved up to clear its top. The layout places it"
+  # U-ISO's filter parts that stand tall: [x, y, kind, diameter or side, height, refdes]
+  filter:
+    value: [[6.0, 68.5, "can", 6.3, 7.7, "C-ISO-BULK"], [6.0, 76.5, "can", 6.3, 5.8, "C-ISO-OUT"], [15.0, 68.5, "box", 6.0, 2.8, "L-ISO-IN"]]
+    status: nominal
+    source: "[repo] the rows' packages: C-ISO-BULK SMD can 6.3 x 7.7, C-ISO-OUT 6.3 x 5.8, L-ISO-IN 6.0 x 6.0 x 2.8 (hardware/module/power-entry/bom.csv); placed just above U-ISO, where the layout will want them - an envelope, not a placement"
 
 # ----------------------------------------------------------- panel parts ----
 # PJ398SM (J-CV) - QingPu / Thonk drawing and the banked community STEP.

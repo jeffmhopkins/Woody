@@ -22,17 +22,21 @@ ECHO: "PCB", "module-jack", "standoff", "MECH-STANDOFF-MOD 3", 6.375, 17, 3.2, 6
 ECHO: "PCB", "module-main", "standoff", "MECH-STANDOFF-MOD 3", 6.375, 17, 3.2, 6, 7.7
 ECHO: "PCB", "module-jack", "standoff", "MECH-STANDOFF-MOD 4", 44.125, 17, 3.2, 6, 7.7
 ECHO: "PCB", "module-main", "standoff", "MECH-STANDOFF-MOD 4", 44.125, 17, 3.2, 6, 7.7
-ECHO: "PCB", "module-jack", "connector", "J-B2B-MOD", 25.25, 75.5, 0, 2, 10, 2.54, "long axis along y, pin 1 at the top left"
-ECHO: "PCB", "module-main", "connector", "J-B2B-MOD", 25.25, 75.5, 0, 2, 10, 2.54, "long axis along y, pin 1 at the top left"
+ECHO: "PCB", "module-jack", "connector", "J-B2B-MOD", 25.25, 77, 0, 2, 10, 2.54, "long axis along y, pin 1 at the top left"
+ECHO: "PCB", "module-main", "connector", "J-B2B-MOD", 25.25, 77, 0, 2, 10, 2.54, "long axis along y, pin 1 at the top left"
 ECHO: "PCB", "module-main", "connector", "J-UMBILICAL", 25.25, 25, 0, "NE8FAV, latch up"
 ECHO: "PCB", "module-main", "connector", "J-PWR-EURO", 42.5, 35, 0, "rear face, long axis along y, pin 1 (-12 V) at the bottom"
-ECHO: "PCB", "module-main", "tall", "cap", 10, 60, "rear face, an envelope - the layout places these"
-ECHO: "PCB", "module-main", "tall", "cap", 10, 70, "rear face, an envelope - the layout places these"
-ECHO: "PCB", "module-main", "tall", "cap", 40, 60, "rear face, an envelope - the layout places these"
-ECHO: "PCB", "module-main", "tall", "cap", 40, 70, "rear face, an envelope - the layout places these"
+ECHO: "PCB", "module-main", "tall", "cap", 40, 57, "rear face, an envelope - the layout places these"
+ECHO: "PCB", "module-main", "tall", "cap", 40, 67, "rear face, an envelope - the layout places these"
+ECHO: "PCB", "module-main", "tall", "cap", 40, 77, "rear face, an envelope - the layout places these"
+ECHO: "PCB", "module-main", "tall", "cap", 40, 87, "rear face, an envelope - the layout places these"
 ECHO: "PCB", "module-main", "tall", "trim", 25.25, 95, "rear face, an envelope - the layout places these"
 ECHO: "PCB", "module-main", "tall", "trim", 14, 95, "rear face, an envelope - the layout places these"
 ECHO: "PCB", "module-main", "tall", "trim", 36.5, 95, "rear face, an envelope - the layout places these"
+ECHO: "PCB", "module-main", "tall", "U-ISO", 14.2, 50.6, "rear face, RPA20-2412SAW body", [25.4, 25.4, 10.2], "; pins' tails out of the front face", 4
+ECHO: "PCB", "module-main", "tall", "C-ISO-BULK", 6, 68.5, "rear face, an envelope - the layout places these"
+ECHO: "PCB", "module-main", "tall", "C-ISO-OUT", 6, 76.5, "rear face, an envelope - the layout places these"
+ECHO: "PCB", "module-main", "tall", "L-ISO-IN", 15, 68.5, "rear face, an envelope - the layout places these"
 ECHO: "PCB", "module-main", "panel", "SW-POWER", 25.25, 49.5, "panel-mounted, wired; lever ON right, lugs in a line along the throw; lugs end", 4.4, "in front of the main board"
 ECHO: "PCB", "module-jack", "keepout", "barrel J-CV-PITCH", 15.75, 88.5, 3, "d, no copper under the barrel (Thonk's PJ398SM note)"
 ECHO: "PCB", "module-jack", "keepout", "barrel J-CV-BREATH", 34.75, 88.5, 3, "d, no copper under the barrel (Thonk's PJ398SM note)"
