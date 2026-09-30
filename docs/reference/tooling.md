@@ -106,6 +106,30 @@ the way it is). This is the working summary.
 once for both ends — or `figure: <id>`, which fails the build when that
 register figure no longer contains the number.
 
+**Outputs a Python tool makes** are `scripts:` entries in a spec: the tool,
+its arguments and **every file it reads** (`inputs`). cad.py runs it with
+`--out <file> --fingerprint <fp>`; the tool prints `READ: <path>` for each
+file it opens, and the build fails if one is not in `inputs` — the check
+OpenSCAD's depfile gets. Two tools use it, both for the module (ADR 0026):
+
+- **`tools/panel-art.py`** — the panel's printed artwork. Reads
+  `config/module.yaml` `art.*`, the zones `module.scad` exports to
+  `mechanical/module/export/panel-art.echo`, the cut `panel.dxf` and the
+  banked Inter TTFs; writes, by `--out`'s name, the SVG master (layers CUT,
+  UNDERBASE, SLATE, BAR, WHITE), the spot-colour PDF, the proof PNG, the
+  placement report and the render textures, all under
+  `mechanical/module/art/`. It **fails and writes nothing** on any placement
+  rule (its docstring lists them). `python3 tools/panel-art.py --check` runs
+  the rules and prints the report without writing — the loop for editing
+  a word or a size. Needs fontTools, shapely, ezdxf and `rsvg-convert`.
+- **`tools/render-module.py`** — the module's photographs, Cycles on the
+  CPU through `bpy` (Blender 5 as a Python module; `import bpy` under plain
+  `python3`). `--view hero|front|detail`. Each takes **tens of minutes** at
+  full size, so background `cad.py build` when they are stale. To iterate on
+  the scene, render into the scratchpad, never into `renders/`:
+  `python3 tools/render-module.py --view hero --percent 25 --samples 32 --out /tmp/…/hero.png`
+  (`--blend <file> --no-render` saves the scene to open in Blender).
+
 ### Adding things
 
 - **A new render**: add an entry to `mechanical/outputs.yaml` (source file,

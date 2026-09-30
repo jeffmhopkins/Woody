@@ -1,4 +1,4 @@
-ECHO: "DRC", "INFO", "tbd parameters in play", 17, ["panel_washer_t", "rail_band", "rail_depth", "power_ribbon_t", "tall_cap_h", "jack_nut_d", "jack_nut_h", "jack_plug_d", "knob_gap", "led_spacer_d", "led_proud", "toggle_nut_d", "toggle_nut_h", "ethercon_umb_od", "ethercon_umb_bend_k", "ethercon_screw_head_d", "ethercon_screw_head_h"]
+ECHO: "DRC", "INFO", "tbd parameters in play", 18, ["panel_washer_t", "rail_band", "rail_depth", "power_ribbon_t", "tall_cap_h", "jack_nut_d", "jack_nut_h", "jack_plug_d", "knob_gap", "led_spacer_d", "led_proud", "toggle_nut_d", "toggle_nut_h", "ethercon_umb_od", "ethercon_umb_bend_k", "ethercon_screw_head_d", "ethercon_screw_head_h", "art_resp_marks"]
 ECHO: "DRC", "INFO", "panel", [50.5, 128.5, 2], "mm: width, height, thickness (A-100, 10HP) - panel-width, panel-height-budget"
 ECHO: "DRC", "PASS", "knob to knob at the 14 mm budget", 3, "mm between knob skirts at KNOB-BREATH's maximum diameter (knob POT-GAIN / knob POT-OFFSET); ADR 0004 wants 3"
 ECHO: "DRC", "PASS", "knob to knob, the chosen knob", 5, "mm between the Thonk 1900h's 12 mm skirts (KNOB-BREATH, proposed)"
@@ -67,3 +67,12 @@ ECHO: "DRC", "PASS", "legend zone: J-CV-MOD4 legend", [9.25, 3, 0.5], "mm wide, 
 ECHO: "DRC", "PASS", "legend zone: LED-PANEL legend", [9.43751, 3, 1], "mm wide, high, and clear of the nearest face part (SW-POWER sweep)"
 ECHO: "DRC", "PASS", "legend zone: J-UMBILICAL legend", [13.7, 19.15, 0.5], "mm wide, high, and clear of the nearest face part (NE8MX)"
 ECHO: "DRC", "PASS", "legend zone: SW-POWER legend", [17.4125, 3, 1], "mm wide, high, and clear of the nearest face part (SW-POWER sweep)"
+ECHO: "DRC", "PASS", "art: gutter island A / island B", 1.2, "mm of black frame between the two islands"
+ECHO: "DRC", "PASS", "art: gutter island B / island C", 1.2, "mm of black frame between the two islands"
+ECHO: "DRC", "PASS", "art: islands clear of the panel screws' washers", 1, "mm, a washer anywhere along its slot"
+ECHO: "DRC", "PASS", "art: every control's legend zone inside one island", 12, "of 12 legend zones, by height and centre (the title is on the frame)"
+ECHO: "DRC", "PASS", "art: gutter A|B between the first row's nuts and the pot legends", [-0.15, 0.15], "mm: island A's foot below the pot legend bands' foot (<= 0), island B's top above the first row's nuts (jack.nut_d is tbd)"
+ECHO: "DRC", "PASS", "art zone: header breath", [48.5, 3, 0.5], "mm wide, high, and clear of the nearest face part or zone (knob POT-GAIN)"
+ECHO: "DRC", "PASS", "art zone: name", [24.56, 5.5, 0], "mm wide, high, and clear of the nearest face part or zone (title)"
+ECHO: "DRC", "PASS", "art zone: scale OFFSET-", [1.6, 1.6, 0.173612], "mm wide, high, and clear of the nearest face part or zone (knob POT-OFFSET)"
+ECHO: "DRC", "PASS", "art zone: scale OFFSET+", [1.6, 1.6, 0.173612], "mm wide, high, and clear of the nearest face part or zone (knob POT-OFFSET)"

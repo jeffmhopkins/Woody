@@ -42,6 +42,10 @@ functions and error budgets cannot be stated from one side.
   the standoffs, both connectors and each face's keep-outs — which is the
   board layout's input. `mechanical/module/README.md` has the pictures.
   Nothing has been cut yet.
+- **The panel's print is generated too** (ADR 0026): `mechanical/module/art/`
+  holds the spot-colour PDF and SVG master that go to the panel maker with
+  the DXF, made by `tools/panel-art.py` from the same CAD. One proof panel
+  before a run.
 - **Four layers, 1.6 mm, for the main board; two for the jack board** — the
   owner, 2026-09-30: *"Four layer in the module board is fine."* The ground
   scheme on it is `dig-gnd-topology` (`power-entry/`, *Grounding*). The jack
