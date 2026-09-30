@@ -64,9 +64,9 @@ dated italic note at each point it changes, and the amendment named in the
 | [0011](0011-licensing.md) | Licensing | Accepted |
 | [0012](0012-configuration-interface.md) | Configuration interface | Superseded by 0015 |
 | [0013](0013-two-mcu-split.md) | Two-MCU split | Superseded by 0015 |
-| [0014](0014-lighting.md) | Lighting | Accepted (geometry amended by 0016) |
+| [0014](0014-lighting.md) | Lighting | Accepted (geometry amended by 0016; the strip replaced, density and diffusion timing amended 2026-09-30 by 0028) |
 | [0015](0015-one-mcu-no-display.md) | One MCU, no display board | Accepted |
-| [0016](0016-one-strip-on-the-centre-board.md) | One LED strip, on the centre board | Accepted (placement amended by 0017) |
+| [0016](0016-one-strip-on-the-centre-board.md) | One LED strip, on the centre board | Accepted (placement amended by 0017; the strip replaced 2026-09-30 by 0028) |
 | [0017](0017-one-main-board.md) | One main board | Accepted (wiring details in 0018; key-chain connectors amended to through-hole IDC 2026-09-27) |
 | [0018](0018-main-board-wiring-decisions.md) | Main board wiring: five decisions | Accepted |
 | [0019](0019-kicad-sheets-are-the-source.md) | The KiCad sheets are the source of truth | Accepted, amended 2026-09-27 (the sheet names the bought part; migration in progress) |
@@ -78,3 +78,4 @@ dated italic note at each point it changes, and the amendment named in the
 | [0025](0025-the-cassette.md) | The cassette: the internals are one bonded unit, dropped into the shell | Accepted |
 | [0026](0026-module-panel-graphics.md) | The module panel's graphic language (dark Lifeforms-style islands, Inter lowercase, spot-colour UV print) | Accepted |
 | [0027](0027-isolated-instrument-supply.md) | The instrument's supply is isolated, drawn rail to rail | Accepted |
+| [0028](0028-on-board-leds.md) | The lights are thirteen LEDs on the main board, not a strip | Accepted |

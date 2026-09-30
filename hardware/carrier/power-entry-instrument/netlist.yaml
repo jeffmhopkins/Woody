@@ -37,8 +37,8 @@ components:
     pins:
     - 1
     - 2
-    note: At the J-LED feed point. Bulk belongs where the current swings, and the swing is at the strip. One strip
-      (ADR 0016)
+    note: 'At the LED row''s 12 V feed end. Bulk belongs where the current swings: the row''s PWM steps its whole
+      current at once, and each LED''s own 100 nF (C-LED) takes only the edges (ADR 0028)'
   D-REVSHUNT:
     value: SS34
     pins:

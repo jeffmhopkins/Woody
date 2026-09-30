@@ -441,6 +441,16 @@ module fuses its rails (`PTC-POS12`, `PTC-NEG12`, `PTC-ISO`). The load switch's
 current limit, ramp and latch are unchanged; the converter's own limit is
 above them, so they still decide every start and fault.
 
+## Amendment 2026-09-30 — the lights are thirteen LEDs on the main board (ADR 0028)
+
+The strip in the load table above is gone. The lights are thirteen
+WS2815B-V1 on the main board, still on 12 V direct, and their full-white
+current is the tracked figure `led-row-current` (blocked on E6). The table's
+strip rows, and the latched-full-white row in particular, are upper bounds
+sized for 60/m tape; a latched row now sits on 12 V at a fraction of that,
+and never on the 5 V buck. `umbilical-current` is not re-derived here: it
+is already an upper bound, and E6 measures it.
+
 ## Consequences
 
 - The highest-risk electrical subsystem in the project is deleted outright.

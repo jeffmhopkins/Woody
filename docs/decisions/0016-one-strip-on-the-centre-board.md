@@ -2,7 +2,12 @@
 
 **Status:** Accepted. Placement amended by [ADR 0017](0017-one-main-board.md): the
 centre board became the main board, and the strip runs down its centreline
-with the breath sensor at the mouth end.
+with the breath sensor at the mouth end. **The strip is replaced by
+[ADR 0028](0028-on-board-leds.md), 2026-09-30**: the option this page left
+open, "LEDs populated directly on the centre board", is taken — thirteen
+WS2815B-V1 in one row down the main board's centreline, on the same data
+line. One data line, the indirect light path and the cavity as the diffuser
+stand; `J-LED` and the `LED-STRIP` reel are gone.
 
 Amends [ADR 0014](0014-lighting.md): its geometry ("two runs, one chain") and
 its wiring choice (two independent data lines). Everything else in ADR 0014 —

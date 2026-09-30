@@ -298,10 +298,10 @@ nets:
   IO1:
     kind: signal
     domain: digital
-    carries: "LED data to the WS2815 strip (one, ADR 0016), ESP32 GPIO1 to the level shifter"
+    carries: "LED data to the main board's LED row (13 x WS2815B-V1, ADR 0028), ESP32 GPIO1 to the level shifter"
     driver: carrier/carrier
     receivers: [carrier/led-strip-drive]
-    note: "HIGH-IMPEDANCE THROUGH THE BOOTLOADER WINDOW, which is why R-LED-PD exists: OE is tied low, so a floating AHCT input becomes clean 5 V edges into the strip before any firmware runs"
+    note: "HIGH-IMPEDANCE THROUGH THE BOOTLOADER WINDOW, which is why R-LED-PD exists: OE is tied low, so a floating AHCT input becomes clean 5 V edges into the LED row before any firmware runs"
 
   U0TXD:
     kind: signal
@@ -440,7 +440,7 @@ nets:
 
   UMBILICAL_POS12:
     kind: power
-    carries: "The +12 V exported to the instrument, downstream of the load switch. ONE NODE all the way to the strips and the REF5050"
+    carries: "The +12 V exported to the instrument, downstream of the load switch. ONE NODE all the way to the LED row and the REF5050"
     figure: umbilical-current
     driver: module/umbilical-load-switch
     receivers:
@@ -454,7 +454,7 @@ nets:
       "Not fitted" against every row, including the presence detect that gated
       OE_MOD from this node. A deleted circuit is not a receiver.
 
-      The carrier's "+12V strip feed" and "+12V analog" are not separate nets:
+      The carrier's "+12V LED row feed" and "+12V analog" are not separate nets:
       D-REVSHUNT is a shunt across the pair and D-TVS-PWR is a clamp, so
       nothing is in series between J-UMB pin 3 and either tap. They were two
       more entries here until the netlist had to name both ends of each and

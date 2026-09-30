@@ -690,6 +690,17 @@ figures:
     rack_note: "Since ADR 0027 this current comes out of U-ISO, not off the bus +12 V: the rack supplies the same power rail to rail, ~0.21 A on each of +12 V and -12 V in typical play at ~86 % efficiency (power-entry.md, 'The instrument's supply'). The figure is still the instrument's current down the umbilical."
     false_positive_note: "392 mA is the MODULE total on +12 V (instrument + module), a DIFFERENT quantity from the 359 mA the instrument draws down the umbilical. Do not conflate. Figures quoted inside text that refutes them are allowed."
 
+  - id: led-row-current
+    quantity: The main board's LED row at full white, 13 x WS2815B-V1 on 12 V
+    value: "170-195 mA"
+    status: blocked
+    blocked_on: "An E6 current-probe measurement of the row at full white. The upper end is the datasheet's own bound, the lower end measurements of WS2815 tape; ADR 0014's reading of '15 mA' as per channel (45 mA per LED) would be three times the B-V1's stated maximum power and is not used."
+    owner: hardware/carrier/led-strip-drive/led-strip-drive.md
+    derivation: "Upper: 13 x 0.18 W / 12 V = 195 mA [ds datasheets/led/WS2815B-V1.pdf p.2, power consumption 0.1-0.18 W]. Lower: 13 x 13.1 mA = 170 mA [web https://www.ledlab.io/chips/ws2815, measured on WS2815 tape]. Blanked: under 2 mA each [ds p.3], ~26 mA for the row."
+    candidates: ["170-195 mA (the datasheet's bound and tape measurements)", "585 mA (13 x 45 mA, ADR 0014's per-channel reading of 15 mA)"]
+    decided_by: "E6, a current probe on the row's 12 V feed with all thirteen at full white"
+    forbidden: []
+
   - id: diode-split-rationale
     quantity: What the D1/D2 split actually buys
     value: "fault isolation and HF isolation (r_d 69 mohm at 392 mA)"
