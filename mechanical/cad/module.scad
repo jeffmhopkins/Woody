@@ -484,12 +484,13 @@ function legend_sep() = 1;     // drawing convention: 0.5 either side between ne
 // THE PRINTED GRAPHICS' ZONES (ADR 0026), derived like the legend zones.
 // Three grey ISLANDS - A the breath knobs, B the six outputs, C power and the
 // umbilical - with black gutters between them; a HEADER pill over A under the
-// title band, and one for B on the spine between the first row's plug grips;
-// the "mod" label on the spine between the four MOD jacks; the OFFSET knob's
-// two end marks; the maker strip left of the umbilical's drop zone.
+// title band; the NAME between the two top panel screws' washers, above the
+// title band (which carries the maker line - the owner, 2026-09-30); the
+// OFFSET knob's two end marks. Each jack's label is a pill in its own legend
+// zone, so it needs no zone of its own.
 // tools/panel-art.py reads these from panel-art.echo and sets the text in
 // them; nothing it draws may leave its zone.
-art_in = art_island_r / 2;                         // text and pads this far inside an island's edge
+art_in = art_island_r / 2;                         // a pill this far inside an island's edge
 knob_top = layout_pot_y + knob_d_max / 2;
 jack_grip_top = layout_jack_y0 + jack_plug_d / 2;
 jack_nut_bot = jacks[len(jacks) - 1][1][1] - jack_nut_d / 2;
@@ -499,7 +500,6 @@ gut_ab = (layout_jack_y0 + jack_nut_d / 2 + legend[1][1][1][1]) / 2;
 row_top = max(tog_sweep_r[2][1], tog[1] + toggle_nut_d / 2, legend[len(legend) - 1][1][2][1], led[1] + led_hole_d / 2);
 gut_bc = (jack_nut_bot + row_top) / 2;
 hdr_a = ["r", [art_frame, (knob_top + title_band[1] - art_header_h) / 2], [W - art_frame, (knob_top + title_band[1] + art_header_h) / 2]];
-spine = [jacks[0][1][0] + jack_plug_d / 2 + 0.5, jacks[1][1][0] - jack_plug_d / 2 - 0.5];   // x between the columns' plug grips, 0.5 clear (the legend zones' air)
 islands = [["island A", ["r", [art_frame, gut_ab + art_island_gap / 2], [W - art_frame, hdr_a[1][1] - art_island_gap / 2]], "island"],
            ["island B", ["r", [art_frame, gut_bc + art_island_gap / 2], [W - art_frame, gut_ab - art_island_gap / 2]], "island"],
            ["island C", ["r", [art_frame, clear_bot + art_frame], [W - art_frame, gut_bc - art_island_gap / 2]], "island"]];
@@ -507,12 +507,12 @@ mark_r = knob_d_max / 2 + art_mark_gap + art_mark_size / 2;
 mark_at = [for (s = [-1, 1]) pots[1] + mark_r * [s * sin(art_mark_angle), cos(art_mark_angle)]];
 art_zones = concat(islands,
     [["header breath", hdr_a, "header"],
-     ["header cv out", ["r", [spine[0], jacks[0][1][1] - art_header_h / 2], [spine[1], jacks[0][1][1] + art_header_h / 2]], "header"],
-     ["mod label", ["r", [spine[0], (jacks[2][1][1] + jacks[4][1][1] - rules_legend_h) / 2], [spine[1], (jacks[2][1][1] + jacks[4][1][1] + rules_legend_h) / 2]], "text"],
+     // the name: between the top washers' reach (a washer anywhere along its slot), 0.5 clear, from the
+     // title band's top to art.frame under the panel's top edge
+     ["name", ["r", [mounts[1][0] + (panel_slot_travel + panel_washer_od) / 2 + 0.5, clear_top],
+                    [mounts[3][0] - (panel_slot_travel + panel_washer_od) / 2 - 0.5, H - art_frame]], "text"],
      ["scale OFFSET-", rect_c(mark_at[0], art_mark_size, art_mark_size), "mark"],
-     ["scale OFFSET+", rect_c(mark_at[1], art_mark_size, art_mark_size), "mark"],
-     ["maker", ["r", [art_frame + art_in, clear_bot + art_frame + art_in],
-                     [min(ec[0] - ethercon_cable_d / 2, ec_holes[0][0] - ethercon_screw_head_d / 2) - 0.5, ec[1]]], "text"]]);
+     ["scale OFFSET+", rect_c(mark_at[1], art_mark_size, art_mark_size), "mark"]]);
 
 module drc_report() {
     echo("DRC", "INFO", "tbd parameters in play", len(module_tbd_params), module_tbd_params);
@@ -716,8 +716,6 @@ module drc_report() {
         drc(g[0] >= 0 && h >= need_h - 1e-6 && edge_gap(z[1]) >= art_frame - 1e-6, str("art zone: ", z[0]), [w, h, g[0]],
             str("mm wide, high, and clear of the nearest face part or zone (", g[2], ")"));
     }
-    dm = worst([for (a = art_zones) if (a[0] == "maker") [a[0], a[1]]], drop_zone);
-    drc(dm[0] >= 0, "art: the maker strip clear of the umbilical's drop zone", dm[0], "mm (ADR 0024 point 11: the NE8MX and its cable hang there)");
 }
 
 // The printed graphics' geometry, for tools/panel-art.py and the Blender

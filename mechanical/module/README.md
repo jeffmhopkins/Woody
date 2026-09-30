@@ -82,11 +82,12 @@ first line lists each one in play.
 
 ## The panel's print (ADR 0026)
 
-![The module in a slice of a black case: patched, the umbilical home, the rack LED lit](renders/photo-hero.png)
+![The module in a slice of a black case: patched, the umbilical home, the power LED lit](renders/photo-hero.png)
 
 The printed graphics follow Pittsburgh Modular's dark Lifeforms language —
 black anodise, three grey islands, light-grey header pills, white lowercase
-Inter, no boxed jacks, no scales but OFFSET's − and + — as an original design
+Inter, every jack's word knocked out of a light-grey pill (they are all
+outputs), no scales but OFFSET's − and + — as an original design
 ([ADR 0026](../../docs/decisions/0026-module-panel-graphics.md)). Nothing in
 it is drawn by hand:
 
@@ -101,7 +102,7 @@ datasheets/fonts/Inter-*.ttf ─────────────────
 ```
 
 - `module.scad` derives the islands, the header pills, the `mod` label, the
-  OFFSET marks and the maker strip from the layout, and `drc.echo` checks each
+  OFFSET marks and the name between the top screws from the layout, and `drc.echo` checks each
   (`art:` and `art zone:` rules). The legend zones ADR 0024 already had are
   exported with their positions too.
 - `tools/panel-art.py` sets the words and **fails** on any placement rule;

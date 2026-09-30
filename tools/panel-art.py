@@ -38,8 +38,9 @@ THE RULES it enforces, and FAILS on (the spec's check-list, ADR 0026):
     font size >= art.min.text; stem >= art.min.stroke (knocked-out text
     >= art.min.stroke_knockout), the stem measured off the banked font's `l`;
     contrast >= art.min.contrast (WCAG 2.1) for every ink a word is read
-    against; header text inside its pill with art.text_pad at each end; every
-    word but the title on an island; two words sharing a zone art.word_gap apart.
+    against; a pill's knocked-out word art.text_pad inside its ends; every
+    word but the name and the maker line on an island (those two off it);
+    two words sharing a zone art.word_gap apart.
 """
 import argparse
 import colorsys
@@ -317,9 +318,9 @@ def layout():
     low = (lambda s: s.lower()) if get("lowercase") else (lambda s: s)
     fonts = {"medium": Face(get("font.medium")), "semibold": Face(get("font.semibold"))}
     trk = get("tracking")
-    size = {k: get(f"size.{k}") for k in ("title", "header", "label", "row", "small")}
+    size = {k: get(f"size.{k}") for k in ("title", "header", "label", "row", "small", "maker")}
     ink = {k: get(f"ink.{k}") for k in ("panel", "slate", "bar", "white")}
-    pad_inset, word_gap, line_gap = get("pad_inset"), get("word_gap"), get("line_gap")
+    word_gap, line_gap = get("word_gap"), get("line_gap")
     art_in = get("island_r") / 2
 
     def Z(name):
@@ -346,16 +347,19 @@ def layout():
         items.append(it)
         return it
 
-    # -- title, on the frame
-    place("title", Z("title"), get("text.title"), "title", "semibold", tracking=0.0)
+    # -- the name, on the frame between the top screws; the maker line under it, subdued
+    it = place("name", Z("name"), get("text.title"), "title", "semibold", tracking=0.0)
+    it["frame"] = True
+    it = place("maker", Z("title"), get("text.maker"), "maker")
+    it["frame"] = True
+    it["ink"] = "BAR"
     # -- island A: header pill, knob labels, the OFFSET marks
     hdrs = []
-    for zname, key in (("header breath", "text.header_breath"), ("header cv out", "text.header_out")):
-        z = Z(zname)
-        hdrs.append((zname, rrect(*z, get("header_r"))))
-        it = place(zname, z, get(key), "header", "semibold")
-        it["knockout"] = True
-        it["pill"] = z
+    z = Z("header breath")
+    hdrs.append(("header breath", rrect(*z, get("header_r"))))
+    it = place("header breath", z, get("text.header_breath"), "header", "semibold")
+    it["knockout"] = True
+    it["pill"] = z
     pot_words = get("text.pots")
     for i, pz in enumerate(("POT-GAIN legend", "POT-OFFSET legend", "POT-RESP legend")):
         place(pz, Z(pz), pot_words[i], "label", v="top")
@@ -369,33 +373,22 @@ def layout():
             g = g.union(box(cx - bw / 2, cy - bl / 2, cx + bw / 2, cy + bl / 2))
         marks.append(dict(name=zname, zone=(x0, y0, x1, y1), text="-" if sign < 0 else "+", cls="mark",
                           size=None, weight=None, geom=g, knockout=False, stroke=bw))
-    # -- island B: the jacks
+    # -- island B: every jack an output, each word knocked out of a BAR pill
+    # filling its legend zone from the jack's side to art_in inside the island
     jw = get("text.jacks")
     jz = [["J-CV-PITCH legend", "J-CV-BREATH legend"], ["J-CV-MOD1 legend", "J-CV-MOD2 legend"], ["J-CV-MOD3 legend", "J-CV-MOD4 legend"]]
-    pads = []
     isl = {n: zones[n]["rect"] for n in zones if zones[n]["kind"] == "island"}
-    # The numerals' column is as wide as the widest of them, so every pad is one size.
-    num_w = max([set_line(fonts["semibold"], w, size["label"], trk)[1] for row in jw for w in row if w.isdigit()] or [0])
+    ix0, _, ix1, _ = isl["island B"]
     for r in range(3):
         for c in range(2):
             z = Z(jz[r][c])
-            word = jw[r][c]
-            toward = "right" if c == 0 else "left"       # toward the jack
-            if word.isdigit():
-                place(jz[r][c], z, word, "label", "semibold", h=toward)
-                # the write-on pad fills the rest of the zone, inside the island
-                ix0, _, ix1, _ = isl["island B"]
-                if c == 0:
-                    px0, px1 = max(z[0], ix0 + art_in), z[2] - num_w - get("pad_gap")
-                else:
-                    px0, px1 = z[0] + num_w + get("pad_gap"), min(z[2], ix1 - art_in)
-                pads.append((jz[r][c] + " pad", (px0, z[1] + pad_inset, px1, z[3] - pad_inset)))
-            else:
-                place(jz[r][c], z, word, "label", h=toward)
-    place("mod label", Z("mod label"), get("text.mod"), "label")
-    # -- island C: the LED and the toggle's words, the umbilical, the maker
+            pz = (max(z[0], ix0 + art_in), z[1], z[2], z[3]) if c == 0 else (z[0], z[1], min(z[2], ix1 - art_in), z[3])
+            hdrs.append((jz[r][c] + " pill", rrect(*pz, get("header_r"))))
+            it = place(jz[r][c], pz, jw[r][c], "header", "semibold")
+            it["knockout"] = True
+            it["pill"] = pz
+    # -- island C: the toggle's words (the LED beside it needs none), the umbilical
     z = Z("LED-PANEL legend")
-    place("LED-PANEL legend", z, get("text.led"), "row", h="left")
     off, on = get("text.toggle")
     place("SW-POWER off", z, off, "row", h="right")
     z = Z("SW-POWER legend")
@@ -407,25 +400,19 @@ def layout():
     fs = fonts["medium"]
     place("J-UMBILICAL note", z, u2, "small", h="left",
           baseline=a["baseline"] + fs.desc * a["size"] - line_gap - fs.asc * size["small"])
-    z = Z("maker")
-    lines = [s.strip() for s in get("text.maker").split(" / ")]
-    b = z[1] - fs.desc * size["small"]
-    for k, s in enumerate(reversed(lines)):
-        place(f"maker line {len(lines) - k}", z, s, "small", h="left", baseline=b)
-        b += (fs.asc - fs.desc) * size["small"] + line_gap
 
     # -- surfaces
     keep = panel.buffer(-get("min.print_cut"), quad_segs=24)          # where ink may be
     islands = unary_union([rrect(*r, get("island_r")) for r in isl.values()])
     pills = unary_union([p for _, p in hdrs])
-    padg = unary_union([rrect(*r, get("pad_r")) for _, r in pads])
     knock = unary_union([it["geom"] for it in items if it["knockout"]])
-    bar = pills.union(padg).difference(knock).intersection(keep)
-    slate = islands.difference(pills).difference(padg).intersection(keep)
-    white = unary_union([it["geom"] for it in items if not it["knockout"]] + [m["geom"] for m in marks])
+    bar_text = unary_union([it["geom"] for it in items if it.get("ink") == "BAR"])
+    bar = pills.difference(knock).union(bar_text).intersection(keep)
+    slate = islands.difference(pills).intersection(keep)
+    white = unary_union([it["geom"] for it in items if not it["knockout"] and it.get("ink") is None] + [m["geom"] for m in marks])
     layers = {"UNDERBASE": slate.union(bar), "SLATE": slate, "BAR": bar, "WHITE": white}
     return dict(W=W, H=H, T=T, panel=panel, zones=zones, keeps=keeps, parts=parts, items=items, marks=marks,
-                pads=pads, hdrs=hdrs, layers=layers, islands=islands, get=get, ink=ink, fonts=fonts, isl=isl,
+                hdrs=hdrs, layers=layers, islands=islands, get=get, ink=ink, fonts=fonts, isl=isl,
                 keep=keep)
 
 
@@ -468,9 +455,9 @@ def checks(L):
         floor = get("min.stroke_knockout") if it.get("knockout") else get("min.stroke")
         if stem is not None and stem < floor - EPS:
             fail(f"{it['name']}: stem {stem:.3f} mm, under {floor}")
-        if it["name"] == "title":
+        if it.get("frame"):
             if L["islands"].intersects(g):
-                fail("title: on an island - it belongs on the black frame")
+                fail(f"{it['name']}: on an island - it belongs on the black frame")
         elif not it.get("knockout") and not on_isl:
             fail(f"{it['name']}: '{it['text']}' is not wholly on an island")
         if it.get("knockout"):
@@ -486,15 +473,10 @@ def checks(L):
                 gap = get("word_gap") if words[i]["baseline"] == words[j]["baseline"] else get("line_gap")
                 if d < gap * 0.5 - EPS:
                     fail(f"{words[i]['name']} / {words[j]['name']}: {d:.3f} mm apart")
-    # pads inside their zones and the island
-    for n, r in L["pads"]:
-        if r[2] - r[0] < 2.0:
-            fail(f"{n}: {r[2] - r[0]:.2f} mm wide - too small to write on")
-        if not L["islands"].contains(box(*r)):
-            fail(f"{n}: not inside its island")
     # contrast
     pairs = [("WHITE on SLATE", ink["white"], ink["slate"]), ("WHITE on the anodise", ink["white"], ink["panel"]),
-             ("the anodise through BAR (knockout)", ink["panel"], ink["bar"])]
+             ("the anodise through BAR (knockout)", ink["panel"], ink["bar"]),
+             ("BAR on the anodise (the maker line)", ink["bar"], ink["panel"])]
     cons = [(n, contrast(a, b)) for n, a, b in pairs]
     for n, c in cons:
         if c < get("min.contrast") - EPS:
@@ -521,9 +503,11 @@ def report(L, fails, rows, cons):
     for n, t, sz, w, bb, air, dcut, near, stem, isl in rows:
         out.append(f"{n} | {t} | {sz if sz else '-'} {w or ''} | {bb[0]:.2f} {bb[1]:.2f} {bb[2]:.2f} {bb[3]:.2f} | "
                    f"{air:.2f} | {dcut:.2f} | {near[0]:.2f} {near[1]} | {stem:.3f} | {'yes' if isl else 'no'}")
-    out += ["", "pads (MOD write-on, BAR): x0 y0 x1 y1"]
-    for n, r in L["pads"]:
-        out.append(f"{n} | {r[0]:.2f} {r[1]:.2f} {r[2]:.2f} {r[3]:.2f} | {r[2] - r[0]:.2f} x {r[3] - r[1]:.2f}")
+    out += ["", "pills (BAR, words knocked out): x0 y0 x1 y1"]
+    for it in L["items"]:
+        if it.get("pill"):
+            r = it["pill"]
+            out.append(f"{it['name']} | {it['text']} | {r[0]:.2f} {r[1]:.2f} {r[2]:.2f} {r[3]:.2f} | {r[2] - r[0]:.2f} x {r[3] - r[1]:.2f}")
     out += ["", "contrast (WCAG 2.1, preview colours)"]
     out += [f"{n} | {c:.2f}:1" for n, c in cons]
     out += ["", "ink areas, mm^2"] + [f"{k} | {g.area:.1f}" for k, g in L["layers"].items()]

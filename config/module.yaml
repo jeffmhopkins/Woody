@@ -625,10 +625,10 @@ rules:
 # ------------------------------------------------------------------ art ----
 # THE PANEL'S PRINTED GRAPHICS (ADR 0026): a dark, three-tone language after
 # Pittsburgh Modular's black Lifeforms panels - black anodise, mid-grey
-# islands, light-grey header bars, white lowercase text, no scales, no boxes on
-# outputs. An ORIGINAL design in that grammar; nothing is traced.
-# module.scad derives every ZONE (islands, header pills, the mod label, the
-# OFFSET marks, the maker strip) from the layout above and these leaves, DRCs
+# islands, light-grey header bars, white lowercase text, no scales; every jack
+# an output, its word knocked out of a light-grey pill. An ORIGINAL design in that grammar; nothing is traced.
+# module.scad derives every ZONE (islands, the header pill, the name between
+# the top screws, the OFFSET marks) from the layout above and these leaves, DRCs
 # them, and echoes them to mechanical/module/export/panel-art.echo;
 # tools/panel-art.py sets the text in them and fails on any placement rule.
 art:
@@ -647,7 +647,7 @@ art:
     bar:
       value: "#D8D8DB"
       status: nominal
-      source: "[adr 0026] spot ink BAR, the header pills and MOD write-on pads: light grey, ~#D8 measured off the SV-1b's header bars [obs]; over the underbase"
+      source: "[adr 0026] spot ink BAR, the header pill, the jack pills and the maker line: light grey, ~#D8 measured off the SV-1b's header bars [obs]; over the underbase"
     white:
       value: "#EDEDED"
       status: nominal
@@ -660,7 +660,7 @@ art:
     semibold:
       value: "datasheets/fonts/Inter-SemiBold.ttf"
       status: settled
-      source: "[ds] Inter 4.1 SemiBold, as medium: the title, the section headers, the MOD numerals"
+      source: "[ds] Inter 4.1 SemiBold, as medium: the name, the header, the jack pills"
   lowercase:
     value: true
     status: settled
@@ -686,7 +686,11 @@ art:
     small:
       value: 2.0
       status: nominal
-      source: "[adr 0026] annotations and the maker line: the floor, art.min.text"
+      source: "[adr 0026] annotations: the floor, art.min.text"
+    maker:
+      value: 2.2
+      status: nominal
+      source: "[adr 0026] the maker line under the title: subdued against the title's 4.0 SemiBold WHITE by size, weight (Medium) and ink (BAR's light grey), above art.min.text"
   tracking:
     value: 0.02
     status: nominal
@@ -712,26 +716,14 @@ art:
     value: 0.8
     status: nominal
     source: "[adr 0026] header pill corner radius"
-  pad_r:
-    value: 0.5
-    status: nominal
-    source: "[adr 0026] MOD write-on pad corner radius"
-  pad_gap:
-    value: 0.8
-    status: nominal
-    source: "[adr 0026] between a MOD numeral and its write-on pad"
   text_pad:
     value: 0.4
     status: nominal
-    source: "[adr 0026] the least air between a header's knocked-out text and its pill's ends"
-  pad_inset:
-    value: 0.2
-    status: nominal
-    source: "[adr 0026] a MOD write-on pad this far inside its legend zone's top and bottom: 2.6 high in a 3.0 zone, room for three or four handwritten characters"
+    source: "[adr 0026] the least air between a pill's knocked-out text and the pill's ends"
   word_gap:
     value: 1.5
     status: nominal
-    source: "[adr 0026] the least air between two words sharing a zone ('rack' ... 'off', 'on' 'power')"
+    source: "[adr 0026] the least air between two words sharing a zone ('on' and 'power')"
   line_gap:
     value: 0.35
     status: nominal
@@ -800,31 +792,19 @@ art:
     title:
       value: "woody"
       status: settled
-      source: "[adr 0026] the instrument's name, top centre on the black frame"
+      source: "[adr 0026] the instrument's name, top centre on the black frame, between the two top panel screws - the owner, 2026-09-30"
     header_breath:
       value: "breath"
       status: settled
       source: "[adr 0026] island A's header: all three knobs shape breath (ADR 0004)"
-    header_out:
-      value: "cv out"
-      status: settled
-      source: "[adr 0026] island B's header: every jack is a CV output, so no jack is boxed"
     pots:
       value: ["gain", "offset", "curve"]
       status: settled
       source: "[adr 0026] POT-GAIN, POT-OFFSET, POT-RESP, left to right. The third is 'curve': the owner, 2026-09-30, 'Replace response with curve'"
     jacks:
-      value: [["pitch", "breath"], ["1", "2"], ["3", "4"]]
+      value: [["pitch", "breath"], ["mod 1", "mod 2"], ["mod 3", "mod 4"]]
       status: settled
-      source: "[adr 0026] as layout.jacks; a bare numeral is a MOD jack, set SemiBold beside a write-on pad (ADR 0004: 'numbered with a write-on strip')"
-    mod:
-      value: "mod"
-      status: settled
-      source: "[adr 0026] on the spine between the four MOD jacks, so they read mod 1-4"
-    led:
-      value: "rack"
-      status: settled
-      source: "[adr 0026] LED-PANEL is lit from the module's +12 V whether or not the instrument is on (hardware/module/panel-led)"
+      source: "[adr 0026] as layout.jacks, each knocked out of a BAR pill in its legend zone: every jack is an output, and the solid box marks an output - the owner, 2026-09-30"
     toggle:
       value: ["off", "on"]
       status: settled
@@ -838,11 +818,11 @@ art:
       status: settled
       source: "[adr 0026] J-UMBILICAL's legend zone, top left: the label and a small annotation"
     maker:
-      value: "WOODY / 2026"
+      value: "space coast synthesizers"
       status: settled
-      source: "[adr 0026] the owner, 2026-09-30. ' / ' breaks the line; art.lowercase sets it 'woody' over '2026'"
+      source: "[adr 0026] the owner, 2026-09-30: the maker line, in the title band under 'woody', subdued (art.size.maker, BAR ink)"
   resp_marks:
     value: false
     status: tbd
-    source: "[adr 0026] no end marks on the curve knob until its ends mean something a word can say"
-    decided_by: "hardware/module/breath-response-shaper.md stating which end of POT-RESP is linear"
+    source: "[adr 0026] no end marks on the curve knob yet. [repo] hardware/module/breath-response-shaper.md now names its ends - CCW logarithmic, CW exponential, the centre detent linear - but a word at art.size.small at POT-RESP's end stop (art.mark.angle) overlaps the 14 mm knob budget [calc: a 3.6 x 2.6 zone centred 8.3 out at 140 deg comes within ~6.2 of the pot's centre, inside the budget's 7.0]"
+    decided_by: "the owner: log/exp words below the knob beside 'curve', or glyphs small enough for art.mark.size"
