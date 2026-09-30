@@ -930,7 +930,9 @@ function pins_at(p, r) = len([for (k = bottom_keys) if (max(abs(key_xy(k)[0] - p
 // from the tube, ports towards the tail, beside the breath trap - the
 // shortest tube this body can have. The lower barb reaches the board's
 // surface (p.7), so the board has a slot in front of it.
-sensor_c = [cb_x[0] + 0.5 + boards_sensor_body / 2, cb_y[tube_side < 0 ? 1 : 0] + tube_side * (boards_sensor_leads / 2 + 0.5)];
+// Across: in from the board's edge by the wider of the lead tips and the land
+// pattern's pads, + 0.5 - the pads, not the leads, must keep off the edge.
+sensor_c = [cb_x[0] + 0.5 + boards_sensor_body / 2, cb_y[tube_side < 0 ? 1 : 0] + tube_side * (max(boards_sensor_leads, boards_sensor_land_w) / 2 + 0.5)];
 sensor_face_x = sensor_c[0] + boards_sensor_body / 2;
 p2_y = sensor_c[1] + boards_sensor_port_offset;
 p1_tip = [sensor_face_x + boards_sensor_port_l, sensor_c[1] - boards_sensor_port_offset, cb_top + boards_sensor_port_z[0]];
@@ -1149,6 +1151,8 @@ end_mount_in = 4;   // drawing convention: an end mount's centre in from the boa
 // The breath sensor's footprint along the body, its barbs included.
 sensor_keep_l = boards_sensor_body + boards_sensor_port_l;
 sensor_keep_cx = sensor_c[0] - boards_sensor_body / 2 + sensor_keep_l / 2;
+// J-UMB's insulator and the parts band in front of it, along the body.
+umb_band_d = boards_umb_joint_d + boards_umb_parts_d;
 function so_clear(p) = let(r = mb_keep_d / 2 + 0.5)
     !pins_at(p, r) && (abs(p[1] - W / 2) >= lighting_strip_w / 2 + r || p[0] < strip_x0 - r || p[0] > strip_x0 + strip_l + r)
     // a thumb switch's cutout in the bottom plate is an edge for the stud,
@@ -1164,7 +1168,9 @@ function so_clear(p) = let(r = mb_keep_d / 2 + 0.5)
     && min([for (cl = chain_ribbon_cls) let(sp = chain_span(chain_x(cl), chain_dir(cl)), x0 = sp[0], x1 = sp[1])
               rect_gap(p, [(x0 + x1) / 2, chain_y], [x1 - x0, boards_chain_hdr_l], 0)]) >= r + 1
     && max(abs(p[0] - (jm_x0 + jm_x1) / 2) - jm_sz[0] / 2, abs(p[1] - jm_y) - jm_sz[1] / 2) >= r
-    && max(abs(p[0] - (ua_x0 - boards_umb_joint_d / 2)) - boards_umb_joint_d / 2, abs(p[1] - ec_c[0]) - ju_l / 2) >= r + 1;
+    // J-UMB and, in front of it, the band its footprint and the parts that
+    // sit at the connector need (boards.umb_parts_d), not just its insulator
+    && max(abs(p[0] - (ua_x0 - umb_band_d / 2)) - umb_band_d / 2, abs(p[1] - ec_c[0]) - ju_l / 2) >= r + 1;
 function first_clear(cs) = let(ok = [for (c = cs) if (so_clear(c)) c]) len(ok) > 0 ? ok[0] : undef;
 // THE COLUMNS (ADR 0025) stand where the key boards' mounts are, and they are
 // vertical: the main board's mount IS the key board's. Each is also tried up
@@ -1175,10 +1181,10 @@ function first_clear(cs) = let(ok = [for (c = cs) if (so_clear(c)) c]) len(ok) >
 cb_cols = [for (m = columns()) [m, first_clear([for (i = [0 : 20]) m + [(i % 2 == 0 ? 1 : -1) * ceil(i / 2) / 10, 0]])]];
 n_cols = len(cb_cols);
 // And a pair at each end: at the mouth, and on the tongue before J-UMB, which
-// takes the umbilical's mating push. The U-bolt's clamp holds the middle
-// (ADR 0022 point 7).
+// takes the umbilical's mating push - behind the parts that sit at J-UMB.
+// The U-bolt's clamp holds the middle (ADR 0022 point 7).
 cb_ends = concat([for (y = [cb_y[0] + end_mount_in, cb_y[1] - end_mount_in]) first_clear([for (d = [0 : 1 : 20]) [cb_x[0] + 4 + d, y]])],
-                 [for (y = [tongue_y[0] + end_mount_in, tongue_y[1] - end_mount_in]) first_clear([for (d = [0 : 1 : 20]) [ua_x0 - boards_umb_joint_d - mb_keep_d / 2 - 2 - d, y]])]);
+                 [for (y = [tongue_y[0] + end_mount_in, tongue_y[1] - end_mount_in]) first_clear([for (d = [0 : 1 : 20]) [ua_x0 - umb_band_d - mb_keep_d / 2 - 2 - d, y]])]);
 // Every mount on the bottom plate: the columns first (n_cols of them), then the ends.
 cb_standoffs = concat([for (c = cb_cols) c[0]], [for (c = cb_ends) if (c != undef) c]);
 // The breath tube's lane (routing_3d), placed once the mounts it keeps clear of are.

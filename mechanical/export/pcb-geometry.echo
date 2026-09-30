@@ -33,7 +33,7 @@ ECHO: "PCB", "main", "chain", "J-CHAIN-LH", 79, 42.015, 1, 13.97, 7.86
 ECHO: "PCB", "main", "chain", "J-CHAIN-RH", 190.5, 42.015, 1, 13.97, 7.86
 ECHO: "PCB", "main", "connector", "J-MCU", 242.5, 250.3, 28.5, 21.54, 1
 ECHO: "PCB", "main", "connector", "J-UMB", 297.4, 299.9, 21.5, 8, 2.54, 1.25
-ECHO: "PCB", "main", "part", "U-BREATH", 14.15, 40.1, 0, 12.3, 17.8
+ECHO: "PCB", "main", "part", "U-BREATH", 14.15, 39.6, 0, 12.3, 17.8
 ECHO: "PCB", "main", "part", "REGULATOR-BLOCK", 236, 41.5, 0, 10, 15, 12.5
 ECHO: "PCB", "main", "strip", "LED", 20.75, 23.5, 220.25, 10
 ECHO: "PCB", "main", "standoff", "M2.5", 40, 11.1, 2.7, 6.1735, 4.9, "column"
@@ -46,8 +46,8 @@ ECHO: "PCB", "main", "standoff", "M2.5", 247.7, 11.1, 2.7, 6.1735, 4.9, "column"
 ECHO: "PCB", "main", "standoff", "M2.5", 247.7, 45.9, 2.7, 6.1735, 4.9, "column"
 ECHO: "PCB", "main", "standoff", "M2.5", 11.5, 11.5, 2.7, 6.17, 4.9, "end"
 ECHO: "PCB", "main", "standoff", "M2.5", 30.5, 45.5, 2.7, 6.17, 4.9, "end"
-ECHO: "PCB", "main", "standoff", "M2.5", 292.313, 13, 2.7, 6.17, 4.9, "end"
-ECHO: "PCB", "main", "standoff", "M2.5", 292.313, 30, 2.7, 6.17, 4.9, "end"
+ECHO: "PCB", "main", "standoff", "M2.5", 278.313, 13, 2.7, 6.17, 4.9, "end"
+ECHO: "PCB", "main", "standoff", "M2.5", 278.313, 30, 2.7, 6.17, 4.9, "end"
 ECHO: "PCB", "main", "ubolt", "M3", 133, 18.5, 4, 6.35085, 6
 ECHO: "PCB", "main", "ubolt", "M3", 133, 38.5, 4, 6.35085, 6
 ECHO: "PCB", "main", "keepout", "under key board left_hand", 36.4, 7.5, 125.3, 49.5, 15.5
