@@ -996,9 +996,12 @@ chain_z_up = chain_zk - boards_chain_plug_t / 2 - routing_chain_bend_r - routing
 chain_r = (chain_z_up - chain_z_low) / 2;        // the fold's radius
 function chain_dir(cl) = routing_chain_fold[search([cl], chain_ribbon_cls)[0]];
 // A header's footprint, from its mouth at x: [x0, x1] along the body - pins,
-// body, and the plug standing out of the mouth.
-function chain_span(x, d) = d > 0 ? [x - boards_chain_hdr_pin_back - 0.5, x + boards_chain_plug_proud]
-                                  : [x - boards_chain_plug_proud, x + boards_chain_hdr_pin_back + 0.5];
+// body, and the plug standing out of the mouth, with the same 0.5 margin at
+// both ends (the plug end had none, and the right hand's header on the main
+// board came within 0.4 of a thumb switch's pin stub, owner 2026-09-30: "Fix
+// the spacing").
+function chain_span(x, d) = d > 0 ? [x - boards_chain_hdr_pin_back - 0.5, x + boards_chain_plug_proud + 0.5]
+                                  : [x - boards_chain_plug_proud - 0.5, x + boards_chain_hdr_pin_back + 0.5];
 // Clear of every switch's pole and pins on both boards (their stubs stand
 // through the board, both faces), and of the key board's switch bodies on
 // top, where the key header's pin tails come through.
