@@ -22,6 +22,7 @@ case_depth_max = 45.5;  // settled; [ds] INTELLIJEL-PALETTE-CASE-MANUAL-2020-11-
 boards_t = 1.6;  // settled; [repo] PCB-MODULE, PCB-MODULE-JACK rows: 1.6 mm
 boards_side_margin = 1.0;  // nominal; [adr 0024] each board's side edge this far inside the panel's side edge, so a neighbour module's board cannot touch it
 boards_ec_clear = 1.0;  // nominal; [adr 0024] the jack board's notch this far clear of the NE8FAV's 25 x 25 body on each side
+boards_toggle_clear = 1.0;  // nominal; [adr 0024] the jack board's notch this far clear of SW-POWER's body on each side and above - the body is deeper than the jack board's depth, so it passes through the board
 boards_copper_edge = 0.5;  // nominal; [adr 0024] a pad's edge this far inside a board edge or cut-out (a fab-house edge clearance; the layout's own rules may be stricter)
 boards_part_clear = 0.5;  // nominal; [adr 0024] the least air between two parts' envelopes that the DRC accepts
 standoff_stock_l = 8.0;  // settled; [ds] WURTH-WA-SPAII-970080365-SPACER-M3-8MM-POLYAMIDE.pdf: 8.0 +/-0.1, M3 internal both ends
@@ -48,7 +49,7 @@ power_socket_w = 6.1;  // settled; [ds] TE 82012 p.52: body width 6.10 max
 power_socket_l = 24.82;  // settled; [calc] TE 82012 p.53: A = B + 7.04 (12-position: 19.74 = 12.70 + 7.04); 16-position B = 7 x 2.54 = 17.78, so A = 24.82
 power_ribbon_t = 1.0;  // tbd; [from memory] 1.27 mm-pitch flat cable, ~0.9 thick
 power_ribbon_w = 20.32;  // settled; [calc] 16 conductors x 1.27 mm pitch
-power_at = [42.5, 35.0];  // nominal; [adr 0024] low on the right, behind the jack board's right leg, clear of the NE8FAV's tails and of the lower right standoff screw's head; the ribbon folds down to the bus board
+power_at = [42.5, 35.0];  // nominal; [adr 0024] low on the right, behind the jack board's right leg, clear of the NE8FAV's tails (the NE8FAV is on the bottom row, centred) and of the lower right standoff screw's head; the ribbon folds down to the bus board behind the NE8FAV
 power_drop = 10.0;  // nominal; [adr 0024] how far below the panel's bottom edge the ribbon's envelope is drawn - toward the bus board, which the model does not draw
 tall_cap_d = 6.3;  // settled; [repo] C-BULK-RAIL 100 uF: CP_Radial_D6.3mm (the tallest of the four)
 tall_cap_h = 11.0;  // tbd; [from memory] a 6.3 x 11 25 V 100 uF can; the banked KiCad model is a generic 6.3 tall
@@ -110,7 +111,10 @@ ethercon_tab_back = 3.8;  // settled; [ds 3D] NEUTRIK-NE8FAV-3D.stp sliced 2026-
 ethercon_tab_bottom = 9.9;  // settled; [ds 3D] NE8FAV STEP: the tab's plate from 9.91 above the axis (to ethercon.tab_top)
 ethercon_tails = 3.4;  // settled; [ds 3D] NE8FAV STEP: z -21.7, i.e. 21.7 - 18.3 = 3.4 behind the PCB's front face [calc], over x +/-9.28, y -11.0..+12.35
 ethercon_pegs = [5.855, 3.0, 13.5];  // settled; [ds 3D] NE8FAV STEP: the two pegs below the flange span x +/-5.855, from 3.0 to 13.5 behind the flange face
-ethercon_cable_d = 20.1;  // settled; [repo] J-UMBILICAL-CABLE: NE8MX dia 20.1 (from NE8MX.pdf [ds])
+ethercon_cable_d = 20.1;  // settled; [ds] NE8MX.pdf: the cable shell's grip, dia 20.1 (J-UMBILICAL-CABLE)
+ethercon_plug_l_min = 50.0;  // settled; [ds] NE8MX.pdf: 50 long without the boot (type 2), 66.4 with it (type 1) - the shorter bounds how far the mated plug stands in front of the panel
+ethercon_umb_od = 6.0;  // tbd; [from memory] a stranded Cat5e STP patch lead's jacket, ~6 mm (CABLE-UMB); the NE8MX takes no less than 4.5 [repo J-UMBILICAL-CABLE]
+ethercon_umb_bend_k = 4.0;  // tbd; [from memory] ANSI/TIA-568 minimum bend radius for 4-pair twisted-pair cable, 4 x the cable's OD (patch cords are allowed tighter, so this is the conservative reading)
 ethercon_bore_clear = 0.2;  // nominal; [adr 0024] over the drawing's 22 MIN bore, for the cutter's kerf tolerance
 ethercon_screw_head_d = 5.5;  // tbd; [from memory] Neutrik's A-series mounting screw (MECH-ETHERCON-SCREW-MOD): a small countersunk/pan head
 ethercon_screw_head_h = 1.7;  // tbd; [from memory] as screw_head_d
@@ -121,9 +125,9 @@ layout_pot_pitch = 17.0;  // settled; [adr 0004] three 14 mm knobs with 3 mm gap
 layout_jack_y0 = 88.5;  // nominal; [adr 0024] the first jack row
 layout_jack_pitch_y = 13.0;  // settled; [adr 0004] panel table: jacks at 13 mm pitch
 layout_jack_pitch_x = 19.0;  // nominal; [adr 0024] the jacks lie on their sides, pins across, sleeve outward (a PJ398SM's footprint is 13.85 along its pin line [calc from its pads], so pins down a 13 mm column collide); 19 leaves J-B2B-MOD's pads between the columns with the DRC's clearance
-layout_ec_y = 39.5;  // nominal; [adr 0024] the NE8FAV's axis: as high as the tab clears the last jack's plug, as low as the toggle row allows
-layout_led_side = "left";  // nominal; [adr 0024] the LED in the strip left of the flange, level with the axis
-layout_toggle_y = 17.0;  // nominal; [adr 0024] the toggle row, centred, under the NE8FAV: its body clear of the rail band below and the pegs above
+layout_ec_y = 25.0;  // nominal; [adr 0024 point 11] the NE8FAV on the BOTTOM row, centred, so the NE8MX's cable drops below every control: its locating pegs 1.0 clear of the rail band (DRC 'parts behind the panel clear of the rail band')
+layout_led_side = "left";  // nominal; [adr 0024 point 11] the LED in the toggle's row, in the strip left of the toggle - on the jack board's left leg, where its lead spacer stands
+layout_toggle_y = 49.5;  // nominal; [adr 0024 point 11] the toggle's row, centred, ABOVE the NE8FAV: its lever's sweep clear of the PUSH tab below and of the last jack row's plug grips above, its body under the top of the jack board's notch
 layout_pots = ["POT-GAIN", "POT-OFFSET", "POT-RESP"];  // nominal; [adr 0004] 'three knobs across (gain, offset, response)', left to right
 layout_jacks = [["J-CV-PITCH", "J-CV-BREATH"], ["J-CV-MOD1", "J-CV-MOD2"], ["J-CV-MOD3", "J-CV-MOD4"]];  // nominal; [adr 0024] rows top to bottom, left then right: PITCH and BREATH on the row under the knobs that shape breath; MOD 1-4 below, read like text
 rules_web_min = 3.5;  // nominal; [adr 0024] the least aluminium between two cuts of DIFFERENT parts, or a cut and the panel edge: above the 3.09 ADR 0004 rejected ('a fit the panel passes and a stiffness test it does not') and the ~3.1 of a toggle beside the flange, below the 4.52 it accepted for the LED. Cuts inside one part's own pattern (the NE8FAV's bore and screws) and the standard mounting slots are exempt
@@ -136,5 +140,5 @@ rules_front_clear = 1.0;  // nominal; [adr 0024] the least air between two thing
 
 // Every value above with status tbd - a placeholder, not a number any
 // document gives. The module's DRC report lists these.
-module_tbd_params = ["panel_washer_t", "rail_band", "rail_depth", "power_ribbon_t", "tall_cap_h", "jack_nut_d", "jack_nut_h", "jack_plug_d", "knob_gap", "led_spacer_d", "led_proud", "toggle_nut_d", "toggle_nut_h", "ethercon_screw_head_d", "ethercon_screw_head_h"];
+module_tbd_params = ["panel_washer_t", "rail_band", "rail_depth", "power_ribbon_t", "tall_cap_h", "jack_nut_d", "jack_nut_h", "jack_plug_d", "knob_gap", "led_spacer_d", "led_proud", "toggle_nut_d", "toggle_nut_h", "ethercon_umb_od", "ethercon_umb_bend_k", "ethercon_screw_head_d", "ethercon_screw_head_h"];
 

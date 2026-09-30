@@ -67,8 +67,11 @@ pots = [for (i = [0 : 2]) [cx + (i - 1) * layout_pot_pitch, layout_pot_y]];
 jack_rows = len(layout_jacks);
 jacks = [for (r = [0 : jack_rows - 1], c = [0 : 1])
          [layout_jacks[r][c], [cx + (c - 0.5) * layout_jack_pitch_x, layout_jack_y0 - r * layout_jack_pitch_y]]];
-led = [layout_led_side == "left" ? (ec[0] - fl[0] / 2) / 2 : (W + ec[0] + fl[0] / 2) / 2, ec[1]];
+// THE BOTTOM ROW IS THE NE8FAV (ADR 0024 point 11): its cable drops below
+// every control. The toggle's row is above it, and the LED is in that row, in
+// the strip beside the toggle that the jack board's leg stands behind.
 tog = [cx, layout_toggle_y];
+led = [layout_led_side == "left" ? (ec[0] - fl[0] / 2) / 2 : (W + ec[0] + fl[0] / 2) / 2, tog[1]];
 // Neutrik's two screws: diagonally opposite, upper left and lower right seen
 // from the front (config/body.yaml ethercon.hole_dx/dy's source).
 ec_holes = [ec + [-ethercon_hole_dx, ethercon_hole_dy] / 2, ec + [ethercon_hole_dx, -ethercon_hole_dy] / 2];
@@ -103,6 +106,22 @@ b_x1 = W - boards_side_margin;
 b_y0 = rail_band;
 b_y1 = H - rail_band;
 notch = [ec[0] - fl[0] / 2 - boards_ec_clear, ec[0] + fl[0] / 2 + boards_ec_clear, ec[1] + fl[1] / 2 + boards_ec_clear];  // x0 x1 top; open to the bottom edge
+// ...and above it, narrower, the step SW-POWER's body passes through: its body
+// is deeper than the jack board's depth (ADR 0023). [x0, x1, y0, top]; y0 is
+// the notch's top, so the two are one cut-out.
+tnotch = [tog[0] - toggle_body[0] / 2 - boards_toggle_clear, tog[0] + toggle_body[0] / 2 + boards_toggle_clear,
+          notch[2], max(notch[2], tog[1] + toggle_body[1] / 2 + boards_toggle_clear)];
+notch_top = tnotch[3];
+// THE UMBILICAL'S DROP ZONE (ADR 0024 point 11), on the panel's face: the
+// mated NE8MX's grip, and the strip its width that the plug and its cable
+// hang in, from the axis down past the panel's bottom edge. How far in front
+// of the panel the plug stands, and how the cable bends, are below.
+drop_zone = [["NE8MX grip", ["c", ec, ethercon_cable_d / 2]],
+             ["NE8MX cable drop", ["r", [ec[0] - ethercon_cable_d / 2, -H], [ec[0] + ethercon_cable_d / 2, ec[1]]]]];
+plug_reach = ethercon_plug_l_min - ethercon_pcb_setback - T;   // the plug's back, in front of the panel's FRONT face, at least
+umb_bend_r = ethercon_umb_bend_k * ethercon_umb_od;
+// The tallest thing on the face (the knob, unless the toggle's lever is longer).
+front = max(knob_gap + knob_h, tog_proud + lev_len * cos(lev_ang), ethercon_tab_front - T, led_proud, jack_bushing_l - T);
 b2b_w = (b2b_rows - 1) * b2b_pitch;
 b2b_l = (b2b_pins - 1) * b2b_pitch;
 b2b_pin_l = b2b_protrude + boards_t + so_l + boards_t + b2b_tail;   // J-B2B-MOD's pins, derived
@@ -182,6 +201,7 @@ module jack_board_2d() {
     difference() {
         translate([b_x0, b_y0]) square([b_x1 - b_x0, b_y1 - b_y0]);
         translate([notch[0], b_y0 - 1]) square([notch[1] - notch[0], notch[2] - b_y0 + 1]);
+        translate([tnotch[0], tnotch[2] - EPS]) square([tnotch[1] - tnotch[0], tnotch[3] - tnotch[2] + EPS]);
         standoff_holes_2d();
     }
 }
@@ -342,7 +362,7 @@ module main_board_3d() {
     }
 }
 // The toggle is panel-mounted and wired (ADR 0023): body on the panel's rear
-// face, in the jack board's notch; lever thrown up.
+// face, through the step at the top of the jack board's notch; lever thrown up.
 module toggle_3d() {
     P(C_METAL, false, "SW-POWER") {
         box(tog[0] - toggle_body[0] / 2, tog[1] - toggle_body[1] / 2, zd(toggle_body[2]), tog[0] + toggle_body[0] / 2, tog[1] + toggle_body[1] / 2, zd(0));
@@ -426,8 +446,8 @@ washers = [for (m = mounts) ["panel washer", rect_c(m, panel_slot_travel + panel
 
 // LEGEND ZONES (ADR 0024), derived from what is around them: the title band
 // under the top washers; a band under each knob down to the first row's plug
-// grips; beside each jack on the panel's outer side; the LED's strip above
-// and below it; the strip right of the flange; either side of the toggle.
+// grips; beside each jack on the panel's outer side; between the LED and the
+// toggle; the strip right of the flange; right of the toggle.
 jl = jacks[0][1][0] - jack_plug_d / 2;     // the left column's plug edge
 jr = jacks[1][1][0] + jack_plug_d / 2;
 legend = concat(
@@ -438,9 +458,9 @@ legend = concat(
     [for (j = jacks) [str(j[0], " legend"),
         j[1][0] < cx ? ["r", [1, j[1][1] - rules_legend_h / 2], [jl - 0.5, j[1][1] + rules_legend_h / 2]]
                      : ["r", [jr + 0.5, j[1][1] - rules_legend_h / 2], [W - 1, j[1][1] + rules_legend_h / 2]], "jack"]],
-    [["LED-PANEL legend", ["r", [1, led[1] + led_hole_d / 2 + 1], [ec[0] - fl[0] / 2 - 0.5, ec_holes[0][1] - ethercon_screw_head_d / 2 - 0.5]], ""],
+    [["LED-PANEL legend", ["r", [led[0] + led_hole_d / 2 + 1, led[1] - rules_legend_h / 2], [tog[0] - toggle_nut_d / 2 - 1, led[1] + rules_legend_h / 2]], ""],
      ["J-UMBILICAL legend", ["r", [ec[0] + ethercon_cable_d / 2 + 0.5, ec_holes[1][1] + ethercon_screw_head_d / 2 + 0.5], [W - 1, ec[1] + fl[1] / 2]], ""],
-     ["SW-POWER legend", ["r", [tog[0] + toggle_nut_d / 2 + 1, tog[1] - rules_legend_h / 2], [mounts[2][0] + panel_slot_travel / 2, tog[1] + rules_legend_h / 2]], ""]]);
+     ["SW-POWER legend", ["r", [tog[0] + toggle_nut_d / 2 + 1, tog[1] - rules_legend_h / 2], [W - 1, tog[1] + rules_legend_h / 2]], ""]]);
 function legend_sep() = 1;     // drawing convention: 0.5 either side between neighbouring legend bands
 
 module drc_report() {
@@ -465,6 +485,21 @@ module drc_report() {
     drc(oo[0] >= rules_front_clear, "face parts clear of each other", oo[0], str("mm (", oo[1], " / ", oo[2], ")"));
     on = worst(ne8mx, [for (f = face_other) if (f[0] == "SW-POWER sweep" || f[0] == "LED-PANEL") f]);
     drc(on[0] >= rules_front_clear, "NE8MX clear of the toggle's sweep and the LED", on[0], str("mm (", on[2], "); it covers its own tab and screws by design"));
+    // THE OWNER'S RULE (2026-09-30, ADR 0024 point 11): "Power switch should not
+    // be underneath the connector." Nothing the player must reach - the toggle,
+    // the knobs, the jacks' plug grips, the LED - in the NE8MX's grip or the
+    // strip its plug and cable hang in, by a plug grip's clearance.
+    controls = concat(knobs_max, plugs,
+                      [["SW-POWER sweep", ["r", tog - [toggle_nut_d / 2, tog_sweep], tog + [toggle_nut_d / 2, tog_sweep]]],
+                       ["SW-POWER nut", ["c", tog, toggle_nut_d / 2]],
+                       ["LED-PANEL", ["c", led, led_hole_d / 2]]]);
+    dz = worst(controls, drop_zone);
+    drc(dz[0] >= rules_plug_gap_min, "no panel control under the umbilical: clear of the NE8MX's grip and its cable's drop zone", dz[0],
+        str("mm (", dz[1], " / ", dz[2], "); the zone is the NE8MX's ", ethercon_cable_d, " grip and a strip that wide from the axis down past the panel's bottom edge"));
+    drc(plug_reach >= front, "the umbilical's plug stands proud of every control", [plug_reach, front],
+        "mm in front of the panel's front face: the NE8MX's back at least (its short length, fully home to the NE8FAV's PCB face), against the tallest thing on the face - so no control gets out from under the cable by being taller, and the drop zone holds at every height");
+    echo("DRC", "INFO", "the umbilical's bend", [umb_bend_r, plug_reach + umb_bend_r - ethercon_umb_od / 2, ec[1] - umb_bend_r],
+         "mm: the cable's bend radius (tbd: umb_bend_k x umb_od); how far in front of the panel its hanging run stands, at least; and how far above the panel's bottom edge the bend has turned it straight down");
     fw = worst(concat(plugs, knobs_max, ne8mx, face_other, [["title band", ["r", [title_band[0], title_band[1]], [title_band[2], title_band[3]]]]]), washers);
     drc(fw[0] >= 0, "everything on the face clear of the panel screws' washers", fw[0],
         str("mm (", fw[1], "); a washer anywhere along its slot, panel_washer_od - the clear height panel-height-budget derives"));
@@ -517,11 +552,15 @@ module drc_report() {
     // ---- the boards
     drc(b_y0 >= rail_band && b_y1 <= H - rail_band, "boards inside the rail band", [b_y0, b_y1], "mm, the boards' bottom and top edges (rail.band is tbd)");
     drc(b_x0 >= 0 && b_x1 <= W, "boards inside the panel's width", [b_x0, W - b_x1], "mm inside each side edge");
-    echo("DRC", "INFO", "board outlines", [[b_x0, b_y0, b_x1, b_y1], notch], "mm: [x0, y0, x1, y1] of both; the jack board's notch [x0, x1, top], open to its bottom edge");
+    echo("DRC", "INFO", "board outlines", [[b_x0, b_y0, b_x1, b_y1], notch, tnotch], "mm: [x0, y0, x1, y1] of both; the jack board's notch [x0, x1, top], open to its bottom edge, and its step for SW-POWER [x0, x1, y0, top] above it");
     legw = [notch[0] - b_x0, b_x1 - notch[1]];
     echo("DRC", "INFO", "jack board legs beside the notch", legw, "mm wide, left and right");
     drc(notch[0] <= ec[0] - fl[0] / 2 - boards_ec_clear + 1e-6 && notch[2] >= ec[1] + fl[1] / 2 + boards_ec_clear - 1e-6,
         "jack board notch clear of the NE8FAV's body", boards_ec_clear, "mm each side and above");
+    tn = min(tog[0] - toggle_body[0] / 2 - tnotch[0], tnotch[1] - tog[0] - toggle_body[0] / 2, tnotch[3] - tog[1] - toggle_body[1] / 2);
+    drc(tn >= boards_toggle_clear - 1e-6 && tog[1] - toggle_body[1] / 2 >= ec[1] + fl[1] / 2 + boards_part_clear,
+        "jack board notch clear of SW-POWER's body", [tn, tog[1] - toggle_body[1] / 2 - ec[1] - fl[1] / 2],
+        "mm: the least of each side and above; and the toggle's body above the NE8FAV's body, behind the panel");
     // Behind the panel, inside the rail's depth: nothing may reach into the band.
     behind = concat([for (j = jacks) [j[0], j[1][1] - jack_body_w / 2, j[1][1] + jack_body_w / 2]],
                     [for (i = [0 : 2]) [layout_pots[i], pots[i][1] + pot_body[0], pots[i][1] + pot_body[1]]],
@@ -544,7 +583,8 @@ module drc_report() {
     hf = worst(heads, jb_face);
     drc(hf[0] >= boards_part_clear, "standoff screw heads clear of the jack board's front-face parts", hf[0], str("mm (", hf[2], ")"));
     j_edge = minv([for (s = standoff_at) min(s[0] - b_x0, b_x1 - s[0], s[1] - b_y0, b_y1 - s[1],
-                      (s[1] < notch[2] && s[0] > notch[0] - m3_head_d && s[0] < notch[1] + m3_head_d) ? min(abs(s[0] - notch[0]), abs(notch[1] - s[0])) : 1e9) - m3_head_d / 2]);
+                      (s[1] < notch[2] && s[0] > notch[0] - m3_head_d && s[0] < notch[1] + m3_head_d) ? min(abs(s[0] - notch[0]), abs(notch[1] - s[0])) : 1e9,
+                      (s[1] < tnotch[3] + m3_head_d && s[1] > tnotch[2] && s[0] > tnotch[0] - m3_head_d && s[0] < tnotch[1] + m3_head_d) ? min(abs(s[0] - tnotch[0]), abs(tnotch[1] - s[0]), abs(s[1] - tnotch[3])) : 1e9) - m3_head_d / 2]);
     drc(j_edge >= boards_copper_edge, "standoff screw heads inside the boards' edges and the notch", j_edge, "mm, a head's edge to the nearest board edge");
     mb_rear = concat([["J-PWR-EURO", rect_c(pw, power_w, power_l)],
                       ["J-UMBILICAL tails", ["r", ec + [-9.28, -11.0], ec + [9.28, 12.35]]],
@@ -568,8 +608,10 @@ module drc_report() {
         "mm: a PJ398SM's footprint along its pin line, against the column's pitch - pins down the column would put one jack's sleeve pad on the next one's tip pad");
     jpe = min([for (j = jacks) let(r = jack_fp_rect(j[1])) min(r[1][0] - b_x0, b_x1 - r[2][0])]);
     drc(jpe >= boards_copper_edge, "jack pads inside the board's side edges", jpe, "mm, a sleeve pad's edge to the board's edge");
-    nb = min([for (j = jacks) j[1][1] - fp_a]) - notch[2];
-    drc(nb >= boards_copper_edge, "lowest jacks above the notch", nb, "mm, the lowest footprint's edge to the notch's top edge");
+    nb = min([for (j = jacks) j[1][1] - fp_a]) - notch_top;
+    drc(nb >= boards_copper_edge, "lowest jacks above the notch", nb, "mm, the lowest footprint's edge to the notch's top edge (its step for SW-POWER)");
+    ln = min(led[0] - led_spacer_d / 2 - b_x0, notch[0] - led[0] - led_spacer_d / 2, tnotch[0] - led[0] - led_spacer_d / 2);
+    drc(ln >= boards_copper_edge, "LED spacer on the jack board's leg", ln, "mm, the spacer's edge to the leg's edges (the LED's leads are soldered in the leg)");
 
     // ---- depth
     ds = [["the mated power socket with its ribbon folded over it", depth_max_rear],
@@ -583,7 +625,6 @@ module drc_report() {
     drc(dmax + T <= case_depth_max, "depth from the panel's FRONT face, against the same", [dmax + T, case_depth_max - dmax - T],
         "mm - the Palette's manual does not say which face its 45.5 is from; this is the worse reading");
     echo("DRC", "INFO", "depths of the deep things", ds, "mm behind the rear face");
-    front = max(knob_gap + knob_h, tog_proud + lev_len * cos(lev_ang), ethercon_tab_front - T, led_proud, jack_bushing_l - T);
     echo("DRC", "INFO", "tallest thing in front of the panel", front, "mm from the front face (the knob, unless the toggle's lever is longer)");
 
     // ---- legend zones
@@ -604,6 +645,7 @@ module pcb_geometry() {
     for (b = [["module-jack", b_x0, b_y0, b_x1, b_y1], ["module-main", b_x0, b_y0, b_x1, b_y1]])
         echo("PCB", b[0], "board", "outline", b[1], b[2], b[3], b[4]);
     echo("PCB", "module-jack", "cutout", "notch", notch[0], b_y0, notch[1], notch[2], "open to the bottom edge; the NE8FAV's body passes");
+    echo("PCB", "module-jack", "cutout", "notch step", tnotch[0], tnotch[2], tnotch[1], tnotch[3], "on the notch's top edge, one cut-out with it; SW-POWER's body passes");
     echo("PCB", "module-jack", "board", "thickness", boards_t, "depth", jb_d, "side", "jacks, pots, LED on the front (toward the panel)");
     echo("PCB", "module-main", "board", "thickness", boards_t, "depth", mb_d, "side", "NE8FAV and J-B2B-MOD's insulator on the front; power header, trimmers, bulk caps on the rear");
     for (j = jacks) echo("PCB", "module-jack", "jack", j[0], j[1][0], j[1][1], jsgn(j[1]) > 0 ? 180 : 0,

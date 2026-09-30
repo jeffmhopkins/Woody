@@ -9,6 +9,12 @@ $k = 1.2;
 Z = 0.2;                       // drawing convention: layers stacked for the orthographic camera
 
 color(C_ALU) linear_extrude(Z) panel_2d();
+// The umbilical's drop zone (ADR 0024 point 11): the NE8MX's grip and the
+// strip it and its cable hang in, clipped to the panel. No control may be in it.
+color([0.95, 0.55, 0.15, 0.30]) translate([0, 0, 1.5 * Z]) linear_extrude(0.05) intersection() {
+    union() { translate(ec) circle(d = ethercon_cable_d); translate([ec[0] - ethercon_cable_d / 2, 0]) square([ethercon_cable_d, ec[1]]); }
+    square([W, H]);
+}
 // Legend zones.
 color([0.35, 0.55, 0.95, 0.45]) translate([0, 0, Z]) linear_extrude(0.05) legend_2d();
 // What stands on the face: knob budget, plug grips, the NE8MX, washers' reach.
@@ -40,7 +46,8 @@ cdim(ec, str("screws d", ethercon_hole_d, " at +/-", ethercon_hole_dx / 2), 0, -
 label([ec[0], ec[1] + (ethercon_tab_bottom + ethercon_tab_top) / 2, 3 * Z], "PUSH tab", size = 1.0);
 label([1, led[1] - 3.4, 3 * Z], str(led[0], ", ", led[1]), size = 1.05, halign = "left");
 label([1, led[1] - 5.2, 3 * Z], str("d", led_hole_d), size = 1.05, halign = "left");
-cdim(tog, str(tog[0], ", ", tog[1], "  d", toggle_hole_d, " flat ", toggle_flat), 0, -tog_sweep - 1.8);
+cdim(tog, str(tog[0], ", ", tog[1]), toggle_nut_d / 2 + 1, -3.2, "left");
+cdim(tog, str("d", toggle_hole_d, " flat ", toggle_flat), toggle_nut_d / 2 + 1, -5.0, "left");
 for (m = mounts) cdim(m, str(m[0], ", ", m[1]), m[0] < cx ? 5.5 : -5.5, 0, m[0] < cx ? "left" : "right");
 // Overall.
 dim([0, -6, 1], [W, -6, 1], str("W ", W, " (10HP)"), [0, -2.2, 0], size = 1.8);
@@ -50,3 +57,4 @@ dim([mount_x[0], -11, 1], [mount_x[1], -11, 1], str(panel_hole_n_hp, " HP = ", m
 label([cx, H + 8, 1], "MODULE PANEL - from the front, mm; 2 mm aluminium", size = 2.0);
 label([cx, H + 4.5, 1], "blue: legend zones - green: plug grips, NE8MX - grey: 14 mm knob budget - red: washer reach", size = 1.1);
 label([cx, H + 2.2, 1], "yellow: the NE8FAV's PUSH tab, in front of the panel - no slot (ADR 0024)", size = 1.1);
+label([cx, -17, 1], "orange: the umbilical's drop zone - the NE8MX's grip and the strip its cable hangs in; no control in it", size = 1.1);
