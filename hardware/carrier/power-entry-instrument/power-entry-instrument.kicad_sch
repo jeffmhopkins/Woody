@@ -1332,6 +1332,602 @@
 		)
 		(embedded_fonts no)
 	)
+    (symbol "Transistor_FET:AO3401A"
+          (pin_names
+            (hide yes))
+          (exclude_from_sim no)
+          (in_bom yes)
+          (on_board yes)
+          (property "Reference" "Q"
+            (at 5.08 1.905 0)
+            (effects
+              (font
+                (size 1.27 1.27))
+              (justify left)))
+          (property "Value" "AO3401A"
+            (at 5.08 0 0)
+            (effects
+              (font
+                (size 1.27 1.27))
+              (justify left)))
+          (property "Footprint" "Package_TO_SOT_SMD:SOT-23"
+            (at 5.08 -1.905 0)
+            (effects
+              (font
+                (size 1.27 1.27)
+                (italic yes))
+              (justify left)
+              (hide yes)))
+          (property "Datasheet" "http://www.aosmd.com/pdfs/datasheet/AO3401A.pdf"
+            (at 5.08 -3.81 0)
+            (effects
+              (font
+                (size 1.27 1.27))
+              (justify left)
+              (hide yes)))
+          (property "Description" "-4.0A Id, -30V Vds, P-Channel MOSFET, SOT-23"
+            (at 0 0 0)
+            (effects
+              (font
+                (size 1.27 1.27))
+              (hide yes)))
+          (property "ki_keywords" "P-Channel MOSFET"
+            (at 0 0 0)
+            (effects
+              (font
+                (size 1.27 1.27))
+              (hide yes)))
+          (property "ki_fp_filters" "SOT?23*"
+            (at 0 0 0)
+            (effects
+              (font
+                (size 1.27 1.27))
+              (hide yes)))
+          (symbol "AO3401A_0_1"
+            (polyline
+              (pts
+                (xy 0.254 1.905)
+                (xy 0.254 -1.905))
+              (stroke
+                (width 0.254)
+                (type default))
+              (fill
+                (type none)))
+            (polyline
+              (pts
+                (xy 0.254 0)
+                (xy -2.54 0))
+              (stroke
+                (width 0)
+                (type default))
+              (fill
+                (type none)))
+            (polyline
+              (pts
+                (xy 0.762 2.286)
+                (xy 0.762 1.27))
+              (stroke
+                (width 0.254)
+                (type default))
+              (fill
+                (type none)))
+            (polyline
+              (pts
+                (xy 0.762 1.778)
+                (xy 3.302 1.778)
+                (xy 3.302 -1.778)
+                (xy 0.762 -1.778))
+              (stroke
+                (width 0)
+                (type default))
+              (fill
+                (type none)))
+            (polyline
+              (pts
+                (xy 0.762 0.508)
+                (xy 0.762 -0.508))
+              (stroke
+                (width 0.254)
+                (type default))
+              (fill
+                (type none)))
+            (polyline
+              (pts
+                (xy 0.762 -1.27)
+                (xy 0.762 -2.286))
+              (stroke
+                (width 0.254)
+                (type default))
+              (fill
+                (type none)))
+            (circle
+              (center 1.651 0)
+              (radius 2.794)
+              (stroke
+                (width 0.254)
+                (type default))
+              (fill
+                (type none)))
+            (polyline
+              (pts
+                (xy 2.286 0)
+                (xy 1.27 0.381)
+                (xy 1.27 -0.381)
+                (xy 2.286 0))
+              (stroke
+                (width 0)
+                (type default))
+              (fill
+                (type outline)))
+            (polyline
+              (pts
+                (xy 2.54 2.54)
+                (xy 2.54 1.778))
+              (stroke
+                (width 0)
+                (type default))
+              (fill
+                (type none)))
+            (circle
+              (center 2.54 1.778)
+              (radius 0.254)
+              (stroke
+                (width 0)
+                (type default))
+              (fill
+                (type outline)))
+            (circle
+              (center 2.54 -1.778)
+              (radius 0.254)
+              (stroke
+                (width 0)
+                (type default))
+              (fill
+                (type outline)))
+            (polyline
+              (pts
+                (xy 2.54 -2.54)
+                (xy 2.54 0)
+                (xy 0.762 0))
+              (stroke
+                (width 0)
+                (type default))
+              (fill
+                (type none)))
+            (polyline
+              (pts
+                (xy 2.794 -0.508)
+                (xy 2.921 -0.381)
+                (xy 3.683 -0.381)
+                (xy 3.81 -0.254))
+              (stroke
+                (width 0)
+                (type default))
+              (fill
+                (type none)))
+            (polyline
+              (pts
+                (xy 3.302 -0.381)
+                (xy 2.921 0.254)
+                (xy 3.683 0.254)
+                (xy 3.302 -0.381))
+              (stroke
+                (width 0)
+                (type default))
+              (fill
+                (type none))))
+          (symbol "AO3401A_1_1"
+            (pin input line
+              (at -5.08 0 0)
+              (length 2.54)
+              (name "G"
+                (effects
+                  (font
+                    (size 1.27 1.27))))
+              (number "1"
+                (effects
+                  (font
+                    (size 1.27 1.27)))))
+            (pin passive line
+              (at 2.54 5.08 270)
+              (length 2.54)
+              (name "D"
+                (effects
+                  (font
+                    (size 1.27 1.27))))
+              (number "3"
+                (effects
+                  (font
+                    (size 1.27 1.27)))))
+            (pin passive line
+              (at 2.54 -5.08 90)
+              (length 2.54)
+              (name "S"
+                (effects
+                  (font
+                    (size 1.27 1.27))))
+              (number "2"
+                (effects
+                  (font
+                    (size 1.27 1.27))))))
+          (embedded_fonts no))
+    (symbol "Diode:1N4148W"
+          (pin_numbers
+            (hide yes))
+          (pin_names
+            (hide yes))
+          (exclude_from_sim no)
+          (in_bom yes)
+          (on_board yes)
+          (property "Reference" "D"
+            (at 0 2.54 0)
+            (effects
+              (font
+                (size 1.27 1.27))))
+          (property "Value" "1N4148W"
+            (at 0 -2.54 0)
+            (effects
+              (font
+                (size 1.27 1.27))))
+          (property "Footprint" "Diode_SMD:D_SOD-123"
+            (at 0 -4.445 0)
+            (effects
+              (font
+                (size 1.27 1.27))
+              (hide yes)))
+          (property "Datasheet" "https://www.vishay.com/docs/85748/1n4148w.pdf"
+            (at 0 0 0)
+            (effects
+              (font
+                (size 1.27 1.27))
+              (hide yes)))
+          (property "Description" "75V 0.15A Fast Switching Diode, SOD-123"
+            (at 0 0 0)
+            (effects
+              (font
+                (size 1.27 1.27))
+              (hide yes)))
+          (property "Sim.Device" "D"
+            (at 0 0 0)
+            (effects
+              (font
+                (size 1.27 1.27))
+              (hide yes)))
+          (property "Sim.Pins" "1=K 2=A"
+            (at 0 0 0)
+            (effects
+              (font
+                (size 1.27 1.27))
+              (hide yes)))
+          (property "ki_keywords" "diode"
+            (at 0 0 0)
+            (effects
+              (font
+                (size 1.27 1.27))
+              (hide yes)))
+          (property "ki_fp_filters" "D*SOD?123*"
+            (at 0 0 0)
+            (effects
+              (font
+                (size 1.27 1.27))
+              (hide yes)))
+          (symbol "1N4148W_0_1"
+            (polyline
+              (pts
+                (xy -1.27 1.27)
+                (xy -1.27 -1.27))
+              (stroke
+                (width 0.254)
+                (type default))
+              (fill
+                (type none)))
+            (polyline
+              (pts
+                (xy 1.27 1.27)
+                (xy 1.27 -1.27)
+                (xy -1.27 0)
+                (xy 1.27 1.27))
+              (stroke
+                (width 0.254)
+                (type default))
+              (fill
+                (type none)))
+            (polyline
+              (pts
+                (xy 1.27 0)
+                (xy -1.27 0))
+              (stroke
+                (width 0)
+                (type default))
+              (fill
+                (type none))))
+          (symbol "1N4148W_1_1"
+            (pin passive line
+              (at -3.81 0 0)
+              (length 2.54)
+              (name "K"
+                (effects
+                  (font
+                    (size 1.27 1.27))))
+              (number "1"
+                (effects
+                  (font
+                    (size 1.27 1.27)))))
+            (pin passive line
+              (at 3.81 0 180)
+              (length 2.54)
+              (name "A"
+                (effects
+                  (font
+                    (size 1.27 1.27))))
+              (number "2"
+                (effects
+                  (font
+                    (size 1.27 1.27))))))
+          (embedded_fonts no))
+    (symbol "Device:R"
+    		(pin_numbers
+    			(hide yes)
+    		)
+    		(pin_names
+    			(offset 0)
+    		)
+    		(exclude_from_sim no)
+    		(in_bom yes)
+    		(on_board yes)
+    		(property "Reference" "R"
+    			(at 2.032 0 90)
+    			(effects
+    				(font
+    					(size 1.27 1.27)
+    				)
+    			)
+    		)
+    		(property "Value" "R"
+    			(at 0 0 90)
+    			(effects
+    				(font
+    					(size 1.27 1.27)
+    				)
+    			)
+    		)
+    		(property "Footprint" ""
+    			(at -1.778 0 90)
+    			(effects
+    				(font
+    					(size 1.27 1.27)
+    				)
+    				(hide yes)
+    			)
+    		)
+    		(property "Datasheet" "~"
+    			(at 0 0 0)
+    			(effects
+    				(font
+    					(size 1.27 1.27)
+    				)
+    				(hide yes)
+    			)
+    		)
+    		(property "Description" "Resistor"
+    			(at 0 0 0)
+    			(effects
+    				(font
+    					(size 1.27 1.27)
+    				)
+    				(hide yes)
+    			)
+    		)
+    		(property "ki_keywords" "R res resistor"
+    			(at 0 0 0)
+    			(effects
+    				(font
+    					(size 1.27 1.27)
+    				)
+    				(hide yes)
+    			)
+    		)
+    		(property "ki_fp_filters" "R_*"
+    			(at 0 0 0)
+    			(effects
+    				(font
+    					(size 1.27 1.27)
+    				)
+    				(hide yes)
+    			)
+    		)
+    		(symbol "R_0_1"
+    			(rectangle
+    				(start -1.016 -2.54)
+    				(end 1.016 2.54)
+    				(stroke
+    					(width 0.254)
+    					(type default)
+    				)
+    				(fill
+    					(type none)
+    				)
+    			)
+    		)
+    		(symbol "R_1_1"
+    			(pin passive line
+    				(at 0 3.81 270)
+    				(length 1.27)
+    				(name "~"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    				(number "1"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    			)
+    			(pin passive line
+    				(at 0 -3.81 90)
+    				(length 1.27)
+    				(name "~"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    				(number "2"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    			)
+    		)
+    		(embedded_fonts no)
+    	)
+    (symbol "Device:C"
+    		(pin_numbers
+    			(hide yes)
+    		)
+    		(pin_names
+    			(offset 0.254)
+    		)
+    		(exclude_from_sim no)
+    		(in_bom yes)
+    		(on_board yes)
+    		(property "Reference" "C"
+    			(at 0.635 2.54 0)
+    			(effects
+    				(font
+    					(size 1.27 1.27)
+    				)
+    				(justify left)
+    			)
+    		)
+    		(property "Value" "C"
+    			(at 0.635 -2.54 0)
+    			(effects
+    				(font
+    					(size 1.27 1.27)
+    				)
+    				(justify left)
+    			)
+    		)
+    		(property "Footprint" ""
+    			(at 0.9652 -3.81 0)
+    			(effects
+    				(font
+    					(size 1.27 1.27)
+    				)
+    				(hide yes)
+    			)
+    		)
+    		(property "Datasheet" "~"
+    			(at 0 0 0)
+    			(effects
+    				(font
+    					(size 1.27 1.27)
+    				)
+    				(hide yes)
+    			)
+    		)
+    		(property "Description" "Unpolarized capacitor"
+    			(at 0 0 0)
+    			(effects
+    				(font
+    					(size 1.27 1.27)
+    				)
+    				(hide yes)
+    			)
+    		)
+    		(property "ki_keywords" "cap capacitor"
+    			(at 0 0 0)
+    			(effects
+    				(font
+    					(size 1.27 1.27)
+    				)
+    				(hide yes)
+    			)
+    		)
+    		(property "ki_fp_filters" "C_*"
+    			(at 0 0 0)
+    			(effects
+    				(font
+    					(size 1.27 1.27)
+    				)
+    				(hide yes)
+    			)
+    		)
+    		(symbol "C_0_1"
+    			(polyline
+    				(pts
+    					(xy -2.032 0.762) (xy 2.032 0.762)
+    				)
+    				(stroke
+    					(width 0.508)
+    					(type default)
+    				)
+    				(fill
+    					(type none)
+    				)
+    			)
+    			(polyline
+    				(pts
+    					(xy -2.032 -0.762) (xy 2.032 -0.762)
+    				)
+    				(stroke
+    					(width 0.508)
+    					(type default)
+    				)
+    				(fill
+    					(type none)
+    				)
+    			)
+    		)
+    		(symbol "C_1_1"
+    			(pin passive line
+    				(at 0 3.81 270)
+    				(length 2.794)
+    				(name "~"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    				(number "1"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    			)
+    			(pin passive line
+    				(at 0 -3.81 90)
+    				(length 2.794)
+    				(name "~"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    				(number "2"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    			)
+    		)
+    		(embedded_fonts no)
+    	)
   )
   (symbol (lib_id "Diode:SS34") (at 40.64 50.8 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
@@ -1497,14 +2093,14 @@
     (property "From" "module/umbilical-load-switch" (at 85.09 50.8 0) (effects (font (size 1.27 1.27)) hide))
     (property "Figure" "umbilical-current" (at 85.09 50.8 0) (effects (font (size 1.27 1.27)) hide)))
   (wire (pts (xy 142.24 46.99) (xy 142.24 44.45)) (stroke (width 0) (type default)) (uuid ec679c15-e9bc-5490-a16a-aac3cb3f0bb8))
-  (hierarchical_label "UMBILICAL_POS12" (shape input) (at 142.24 44.45 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 8d6d57f1-82ef-5b4b-a3a7-7fa739bc592a)
-    (property "Dir" "in" (at 142.24 44.45 0) (effects (font (size 1.27 1.27)) hide))
-    (property "From" "module/umbilical-load-switch" (at 142.24 44.45 0) (effects (font (size 1.27 1.27)) hide))
+  (hierarchical_label "INST_POS12" (shape output) (at 142.24 44.45 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 8d6d57f1-82ef-5b4b-a3a7-7fa739bc592a)
+    (property "Dir" "out" (at 142.24 44.45 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "carrier/led-strip-drive" (at 142.24 44.45 0) (effects (font (size 1.27 1.27)) hide))
     (property "Figure" "umbilical-current" (at 142.24 44.45 0) (effects (font (size 1.27 1.27)) hide)))
   (wire (pts (xy 193.04 46.99) (xy 193.04 44.45)) (stroke (width 0) (type default)) (uuid 3f650f5a-036a-5c56-ae31-f0a4a9246139))
-  (hierarchical_label "UMBILICAL_POS12" (shape input) (at 193.04 44.45 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid c86f3ae5-38de-5bce-8125-5d5277a14d7f)
-    (property "Dir" "in" (at 193.04 44.45 0) (effects (font (size 1.27 1.27)) hide))
-    (property "From" "module/umbilical-load-switch" (at 193.04 44.45 0) (effects (font (size 1.27 1.27)) hide))
+  (hierarchical_label "INST_POS12" (shape output) (at 193.04 44.45 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid c86f3ae5-38de-5bce-8125-5d5277a14d7f)
+    (property "Dir" "out" (at 193.04 44.45 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "carrier/led-strip-drive" (at 193.04 44.45 0) (effects (font (size 1.27 1.27)) hide))
     (property "Figure" "umbilical-current" (at 193.04 44.45 0) (effects (font (size 1.27 1.27)) hide)))
   (wire (pts (xy 193.04 54.61) (xy 193.04 57.15)) (stroke (width 0) (type default)) (uuid 56df7aa2-b829-536f-b886-5487b221174f))
   (symbol (lib_id "power:+12V") (at 193.04 57.15 180) (unit 1)
@@ -1606,5 +2202,191 @@
     (instances (project "power-entry-instrument" (path "/ba12e546-d582-5654-bb26-6a94a8f78514" (reference "#FLG05") (unit 1))))
   )
   (text "FROM THE HAND-WRITTEN NETLIST THIS SHEET REPLACES (verbatim; the part notes are on each part's Note field):\n\nAUTHORITATIVE for connectivity. The ASCII drawing in power-entry-instrument.md is a REPRESENTATION of this\nfile. THE STRIP FEED AND THE ANALOG FEED ARE NOT SEPARATE NETS. The Interfaces table names them separately\nbecause they leave toward different circuits, but D-REVSHUNT is a shunt across the pair and D-TVS-PWR is a\nclamp, so nothing sits in series between J-UMB pin 3 and either tap. One node: UMBILICAL_POS12, all the way\nfrom the module's load switch to the WS2815 feed points and the REF5050's VIN. hardware/nets.yaml carried two\nextra entries for it until this file had to name both ends of each.\n\nDrawn here for context, owned by carrier/breath-excitation-reference: the REF5050 and its two 10 uF. They are\nin this drawing because the +12 V node feeds them, not because this circuit contains them.\n\nNO `value:` - the row is open and offers 1N5817 or SS14, one of the two.\n\nOne node: the umbilical's +12 V, the two shunts across it, the strip feed points, the REF5050 and both OPA2197\nhalves, and the buck inductor.\n\n------------------------------------------------------------------\n\nTHE SINGLE TIE, and it is copper rather than a part. AGND_INST reaches PWR_GND at exactly one point on this\nboard - that is the whole content of the instrument half of dig-gnd-topology. On the board it is a net tie,\nNT-AGND: two nets that meet in copper at one place, which the layout's DRC then allows there and refuses\neverywhere else.\n\nThe far end is a 3 mm hole in an aluminium plate, not a net." (at 256.54 38.099999999999994 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid 084b05b0-c9b3-5308-81e0-03aee258b5a7))
+  (symbol (lib_id "Transistor_FET:AO3401A") (at 40.64 142.24 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 16d59f65-9d6f-5d54-abb8-6b0ff937fe05)
+    (property "Reference" "Q-INRUSH" (at 45.72 140.97 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "AO3401A" (at 45.72 143.51 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Package_TO_SOT_SMD:SOT-23" (at 40.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 40.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "Q-INRUSH" (at 40.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "G=1(G) S=2(S) D=3(D)" (at 40.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "HOT-PLUG INRUSH LIMITER. P-channel, SOURCE AT THE CONNECTOR, drain to the instrument's bulk: its body diode points back at the connector, so nothing charges C-STRIP-BULK or C-BUCK-IN except through the channel, and the channel opens only as fast as C-INRUSH-GD lets the drain rise (power-entry-instrument.md, Hot-plug inrush). V_GS is +/-12 V max: the 1:1 divider holds it at half the input" (at 40.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/discrete-and-power/AOS-AO3401A.pdf p.1: SOT-23, pin 1 (by the dot) G, S and D as drawn; KiCad's AO3401A symbol numbers 1 G, 2 S, 3 D" (at 40.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Alpha & Omega Semiconductor" (at 40.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "AO3401A" (at 40.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C15127" (at 40.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 40.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 98683813-4d64-5249-bb51-fdbaa6077a5b))
+    (pin "2" (uuid 6c91822c-8223-5eba-8677-9a0eaf39939f))
+    (pin "3" (uuid 4bd43a02-8766-5854-8496-5a0f54bfb132))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/4727eca5-0a6b-5761-98ac-51ca9f544ea2" (reference "Q1") (unit 1))) (project "power-entry-instrument" (path "/ba12e546-d582-5654-bb26-6a94a8f78514" (reference "Q-INRUSH") (unit 1))))
+  )
+  (wire (pts (xy 35.56 142.24) (xy 33.02 142.24)) (stroke (width 0) (type default)) (uuid ea00ba9a-6b35-57b1-a58a-e9274b8f14c9))
+  (label "INRUSH_GATE" (at 33.02 142.24 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 52f97f32-0561-535d-8efd-c5b96df5333a))
+  (wire (pts (xy 43.18 147.32) (xy 43.18 149.86)) (stroke (width 0) (type default)) (uuid c8a17163-ed96-57d2-849c-f3ec92fb74b7))
+  (hierarchical_label "UMBILICAL_POS12" (shape input) (at 43.18 149.86 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 0c997e06-3f9b-5b2f-9a36-8946da8ade4a)
+    (property "Dir" "in" (at 43.18 149.86 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/umbilical-load-switch" (at 43.18 149.86 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "umbilical-current" (at 43.18 149.86 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 43.18 137.16) (xy 43.18 134.62)) (stroke (width 0) (type default)) (uuid ef9f2cbc-91d8-5d14-bf77-7e702568abfc))
+  (hierarchical_label "INST_POS12" (shape output) (at 43.18 134.62 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid f1730af1-8c6f-554a-80af-2cc6a9edc082)
+    (property "Dir" "out" (at 43.18 134.62 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "carrier/led-strip-drive" (at 43.18 134.62 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "umbilical-current" (at 43.18 134.62 0) (effects (font (size 1.27 1.27)) hide)))
+  (symbol (lib_id "Device:R") (at 71.12 142.24 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 4282b608-99ff-5317-96d3-93e27863024c)
+    (property "Reference" "R-INRUSH-GS" (at 74.93 140.97 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "1M 1%" (at 74.93 143.51 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 71.12 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 71.12 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-INRUSH-GS" (at 71.12 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 71.12 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Gate to source: with R-INRUSH-G the divider that holds Q-INRUSH's V_GS at half the input once on, and the path that turns it off" (at 71.12 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "a resistor: either way round" (at 71.12 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL(Uniroyal Elec)" (at 71.12 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "0805W8F1004T5E" (at 71.12 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C17514" (at 71.12 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 71.12 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid fd558af2-02bf-54e8-a860-4c765deeef4f))
+    (pin "2" (uuid e23dc9a2-f7d9-5a17-b907-d748f6aca24b))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/4727eca5-0a6b-5761-98ac-51ca9f544ea2" (reference "R41") (unit 1))) (project "power-entry-instrument" (path "/ba12e546-d582-5654-bb26-6a94a8f78514" (reference "R-INRUSH-GS") (unit 1))))
+  )
+  (wire (pts (xy 71.12 138.43) (xy 71.12 135.89)) (stroke (width 0) (type default)) (uuid 7ac2af7e-e5a4-5cd2-ad3a-eed5dcf1b2be))
+  (hierarchical_label "UMBILICAL_POS12" (shape input) (at 71.12 135.89 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 6793fde6-5ab8-5d0f-865b-a14053f35e93)
+    (property "Dir" "in" (at 71.12 135.89 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/umbilical-load-switch" (at 71.12 135.89 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "umbilical-current" (at 71.12 135.89 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 71.12 146.05) (xy 71.12 148.59)) (stroke (width 0) (type default)) (uuid 63fb152a-d11c-587d-8401-5a496de41218))
+  (label "INRUSH_GATE" (at 71.12 148.59 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 72e2f7b8-1352-508b-a875-6b767b8c022b))
+  (symbol (lib_id "Device:R") (at 101.6 142.24 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 1027694f-da28-5816-9846-ad74ef2ead34)
+    (property "Reference" "R-INRUSH-G" (at 105.41 140.97 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "1M 1%" (at 105.41 143.51 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 101.6 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 101.6 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-INRUSH-G" (at 101.6 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 101.6 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Gate to PWR_GND: the current that sets the ramp, through C-INRUSH-GD, once Q-INRUSH is at its plateau" (at 101.6 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "a resistor: either way round" (at 101.6 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL(Uniroyal Elec)" (at 101.6 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "0805W8F1004T5E" (at 101.6 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C17514" (at 101.6 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 101.6 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 32362aed-81c7-5a25-8b64-a93155ec52dd))
+    (pin "2" (uuid b45cef1e-06e2-507d-952f-e6bff6adb094))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/4727eca5-0a6b-5761-98ac-51ca9f544ea2" (reference "R42") (unit 1))) (project "power-entry-instrument" (path "/ba12e546-d582-5654-bb26-6a94a8f78514" (reference "R-INRUSH-G") (unit 1))))
+  )
+  (wire (pts (xy 101.6 138.43) (xy 101.6 135.89)) (stroke (width 0) (type default)) (uuid 4cfc0820-e0fa-5ecd-bc72-8c2482370a3b))
+  (label "INRUSH_GATE" (at 101.6 135.89 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid e66dd51f-67e8-5dde-9086-5307c0d4f92c))
+  (wire (pts (xy 101.6 146.05) (xy 101.6 148.59)) (stroke (width 0) (type default)) (uuid 1406f7e3-891d-5adf-a8bb-7fe4d8bbd63f))
+  (hierarchical_label "PWR_GND" (shape passive) (at 101.6 148.59 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 537a66c4-778c-50cf-9682-a12a103cd42c)
+    (property "Dir" "ref" (at 101.6 148.59 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 101.6 148.59 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "umbilical-pinmap" (at 101.6 148.59 0) (effects (font (size 1.27 1.27)) hide)))
+  (symbol (lib_id "Device:C") (at 132.08 142.24 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 25e28d46-360b-5761-a5b8-d481e6f965c5)
+    (property "Reference" "C-INRUSH-GS" (at 135.89000000000001 140.97 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "1uF 50V X7R" (at 135.89000000000001 143.51 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 132.08 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 132.08 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-INRUSH-GS" (at 132.08 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 132.08 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Gate to source, AT LEAST 45x C-INRUSH-GD: when the plug makes contact the source jumps 12 V in microseconds, and the gate must follow it or the Miller capacitor turns the FET on hard. 1 uF against 22 nF holds the jump in V_GS to -0.26 V, under the 0.5 V minimum threshold" (at 132.08 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "a ceramic capacitor: either way round" (at 132.08 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Samsung Electro-Mechanics" (at 132.08 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "CL21B105KBFNNNE" (at 132.08 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C28323" (at 132.08 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 132.08 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 748b2d90-b11b-56f7-af1b-150702b5d3ad))
+    (pin "2" (uuid 0e4b0b43-2e1c-5ad1-9937-0a4da550cf6d))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/4727eca5-0a6b-5761-98ac-51ca9f544ea2" (reference "C38") (unit 1))) (project "power-entry-instrument" (path "/ba12e546-d582-5654-bb26-6a94a8f78514" (reference "C-INRUSH-GS") (unit 1))))
+  )
+  (wire (pts (xy 132.08 138.43) (xy 132.08 135.89)) (stroke (width 0) (type default)) (uuid 4feb2c53-bcf7-5d5a-808d-31bfc8d92bff))
+  (hierarchical_label "UMBILICAL_POS12" (shape input) (at 132.08 135.89 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 894bd328-5834-5b51-98a9-47e065425871)
+    (property "Dir" "in" (at 132.08 135.89 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/umbilical-load-switch" (at 132.08 135.89 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "umbilical-current" (at 132.08 135.89 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 132.08 146.05) (xy 132.08 148.59)) (stroke (width 0) (type default)) (uuid 4990ece8-9201-5086-802b-6f1cf03f8816))
+  (label "INRUSH_GATE" (at 132.08 148.59 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 768364a1-b8a3-560e-9ee7-bcfa28a9fc57))
+  (symbol (lib_id "Device:C") (at 162.56 142.24 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 49dd1e8c-f358-5ec6-ac85-17e143fa201b)
+    (property "Reference" "C-INRUSH-GD" (at 166.37 140.97 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "22nF 50V X7R" (at 166.37 143.51 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 162.56 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 162.56 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-INRUSH-GD" (at 162.56 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 162.56 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "The Miller capacitor: gate to drain, through R-INRUSH-GD. It sets the ramp: dV/dt = I(R-INRUSH-G) / C, about 400 V/s, 0.23 A into the instrument's 570 uF" (at 162.56 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "a ceramic capacitor: either way round" (at 162.56 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Samsung Electro-Mechanics" (at 162.56 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "CL21B223KBANNNC" (at 162.56 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C1729" (at 162.56 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 162.56 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 64faf3d7-aaad-51e9-a4bd-3a1f1778f549))
+    (pin "2" (uuid 7d8aed6e-4b61-5426-8d72-33d229a9db0d))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/4727eca5-0a6b-5761-98ac-51ca9f544ea2" (reference "C39") (unit 1))) (project "power-entry-instrument" (path "/ba12e546-d582-5654-bb26-6a94a8f78514" (reference "C-INRUSH-GD") (unit 1))))
+  )
+  (wire (pts (xy 162.56 138.43) (xy 162.56 135.89)) (stroke (width 0) (type default)) (uuid b454d026-26b8-568c-8f7f-56ec22359c6f))
+  (label "INRUSH_GATE" (at 162.56 135.89 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 4a87ae24-7fb4-59cf-9c25-035fe95f7a02))
+  (wire (pts (xy 162.56 146.05) (xy 162.56 148.59)) (stroke (width 0) (type default)) (uuid 6003fafc-e82d-5ded-907f-e7c56b6a937d))
+  (label "INRUSH_MILLER" (at 162.56 148.59 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid e18d9ced-39f8-5a68-a969-2113199d09e9))
+  (symbol (lib_id "Device:R") (at 193.04 142.24 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 2ebf95fe-283d-5eeb-8218-e94bc39addfc)
+    (property "Reference" "R-INRUSH-GD" (at 196.85 140.97 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "22R 1%" (at 196.85 143.51 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-INRUSH-GD" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Damps the plug: with the FET off, the connector is the cable's inductance into D-TVS-PWR's capacitance and the gate network, and without this it rings to twice the rail. 22 ohm holds it under D-TVS-PWR's 15 V standoff" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "a resistor: either way round" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL(Uniroyal Elec)" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "0805W8F220JT5E" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C17561" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid b59084f6-47e5-505f-abbd-50d4a4410ef2))
+    (pin "2" (uuid 79109643-5ed3-572c-b62b-cb4094f90ead))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/4727eca5-0a6b-5761-98ac-51ca9f544ea2" (reference "R43") (unit 1))) (project "power-entry-instrument" (path "/ba12e546-d582-5654-bb26-6a94a8f78514" (reference "R-INRUSH-GD") (unit 1))))
+  )
+  (wire (pts (xy 193.04 138.43) (xy 193.04 135.89)) (stroke (width 0) (type default)) (uuid d594a4f5-37a3-5d6a-967f-c92883d8a8f1))
+  (label "INRUSH_MILLER" (at 193.04 135.89 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 5f75d65a-bdff-55ab-bbbc-2a76a8aea945))
+  (wire (pts (xy 193.04 146.05) (xy 193.04 148.59)) (stroke (width 0) (type default)) (uuid 14d2811c-3590-577f-8e87-1d953dc22211))
+  (hierarchical_label "INST_POS12" (shape output) (at 193.04 148.59 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 9edf73a6-ef43-5a18-9a80-1ecb55cb070b)
+    (property "Dir" "out" (at 193.04 148.59 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "carrier/led-strip-drive" (at 193.04 148.59 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "umbilical-current" (at 193.04 148.59 0) (effects (font (size 1.27 1.27)) hide)))
+  (symbol (lib_id "Diode:1N4148W") (at 223.52 142.24 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 53fde79d-f210-50ed-ba75-4305ba4aa51c)
+    (property "Reference" "D-INRUSH-RST" (at 227.33 140.97 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "1N4148W" (at 227.33 143.51 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Diode_SMD:D_SOD-123" (at 223.52 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 223.52 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "D-INRUSH-RST" (at 223.52 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "K=1(K) A=2(A)" (at 223.52 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Resets the gate after an unplug: C-INRUSH-GS keeps V_GS while the instrument's capacitors drain, so the gate would be left below ground; this clamps it to -0.4 V, so once the input has fallen the next plug-in starts from off" (at 223.52 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/discrete-and-power/1N4148W.pdf: SOD-123, cathode band; KiCad pin 1 cathode" (at 223.52 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "ST(Semtech)" (at 223.52 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "1N4148W" (at 223.52 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C81598" (at 223.52 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 223.52 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 7356c697-1ba8-5c06-9ab7-7c2ea901a61d))
+    (pin "2" (uuid 424f83d7-9833-5947-91c9-e14e3e51dd31))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/4727eca5-0a6b-5761-98ac-51ca9f544ea2" (reference "D20") (unit 1))) (project "power-entry-instrument" (path "/ba12e546-d582-5654-bb26-6a94a8f78514" (reference "D-INRUSH-RST") (unit 1))))
+  )
+  (wire (pts (xy 219.71 142.24) (xy 217.17 142.24)) (stroke (width 0) (type default)) (uuid 27360735-f84c-52b9-b8ae-9099430ded4d))
+  (label "INRUSH_GATE" (at 217.17 142.24 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid fab0edbe-eeb5-5953-8198-dffd6a7b30e6))
+  (wire (pts (xy 227.33 142.24) (xy 229.87 142.24)) (stroke (width 0) (type default)) (uuid bace6dcd-55e0-5b18-a85a-f30041ed54eb))
+  (hierarchical_label "PWR_GND" (shape passive) (at 229.87 142.24 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 6433842c-b2e3-581a-ac57-80aa2330105f)
+    (property "Dir" "ref" (at 229.87 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 229.87 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "umbilical-pinmap" (at 229.87 142.24 0) (effects (font (size 1.27 1.27)) hide)))
+  (text "HOT-PLUG INRUSH LIMITER (power-entry-instrument.md, Hot-plug inrush): Q-INRUSH between the connector (UMBILICAL_POS12, D-REVSHUNT and D-TVS-PWR stay there) and everything that holds charge (INST_POS12: C-STRIP-BULK, L-BUCK-IN, the LED row, the analog block)." (at 40.64 127.0 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid c3a82d85-9b0f-58eb-861a-f76867eaef8e))
   (sheet_instances (path "/" (page "1")))
 )

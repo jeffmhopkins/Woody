@@ -8,9 +8,9 @@ circuit: carrier/breath-excitation-reference
 title: Breath excitation reference
 page: ../carrier.md
 ports:
-  UMBILICAL_POS12:
+  INST_POS12:
     dir: in
-    from: module/umbilical-load-switch
+    from: carrier/power-entry-instrument
   VS:
     dir: out
     to: interfaces/breath-sense-link
@@ -145,6 +145,10 @@ nets:
   - R-FBX-REF.1
   - R-ISO-REF.1
   - U-BUF.OUTA
+  INST_POS12:
+  - port: INST_POS12
+  - R-REF-IN.1
+  - U-BUF.V+
   REF_5V:
   - C-DEC-REF-VOUT.1
   - C-REF-OUT-VOUT.1
@@ -161,10 +165,6 @@ nets:
   SENSOR_RAW:
   - port: SENSOR_RAW
   - U-BUF.INB+
-  UMBILICAL_POS12:
-  - port: UMBILICAL_POS12
-  - R-REF-IN.1
-  - U-BUF.V+
   VS:
   - port: VS
   - C-DEC-SENSOR.1
