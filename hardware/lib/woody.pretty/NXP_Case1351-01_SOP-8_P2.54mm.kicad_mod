@@ -2,7 +2,7 @@
 	(version 20241229)
 	(generator "woody")
 	(layer "F.Cu")
-	(descr "NXP MPXV4006DP, case 1351-01: 8-lead gull-wing SOP at 2.54 mm pitch, both ports on one face. Land pattern derived in hardware/interfaces/breath-sense-link/breath-sense-link.md (Land pattern): Figure 6's 1.52 mm pad width and 2.54 pitch [ds datasheets/analog/MPXV4006DP.pdf p.6], lengthened inward to 2.80 mm for case 1351's shorter feet, rows 16.00 mm centre to centre. Body 12.3 square [ds p.7]. Pin 1 top left, counter-clockwise.")
+	(descr "NXP MPXV4006DP, case 1351-01: 8-lead gull-wing SOP at 2.54 mm pitch, both ports on one face. Land pattern derived in hardware/interfaces/breath-sense-link/breath-sense-link.md (Land pattern): Figure 6's 1.52 mm pad width and 2.54 pitch [ds datasheets/analog/MPXV4006DP.pdf p.6], lengthened inward to 2.80 mm for case 1351's shorter feet, rows 16.00 mm centre to centre. Body 12.3 square [ds p.7]. Pin 1 top left, counter-clockwise; the ports point to -y (the datasheet top view turned 180 deg), and the courtyard takes them in: F 6.60, N 4.57 and T 3.30 at their maximum [ds p.20].")
 	(tags "MPXV4006DP pressure sensor case 1351 SOP-8 2.54mm")
 	(attr smd)
 	(property "Reference" "REF**"
@@ -93,13 +93,113 @@
 	)
 	(fp_line
 		(start -9.65 -6.4)
+		(end -4.2 -6.4)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "4b9ee9ac-ceda-53f4-9609-c4a43d792c91")
+	)
+	(fp_line
+		(start -4.2 -6.4)
+		(end -4.2 -13)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "4bfaead7-de9b-599e-b1ce-bf0141b49567")
+	)
+	(fp_line
+		(start -4.2 -13)
+		(end 4.2 -13)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "1c1553cc-fa2b-52c7-aa72-075d0398d0c6")
+	)
+	(fp_line
+		(start 4.2 -13)
+		(end 4.2 -6.4)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "0e0fd343-b0b2-584d-92be-8b86507a0d42")
+	)
+	(fp_line
+		(start 4.2 -6.4)
 		(end 9.65 -6.4)
 		(stroke
 			(width 0.05)
 			(type solid)
 		)
 		(layer "F.CrtYd")
-		(uuid "fa3eeca4-e428-5cb7-a440-a3dbcb0311a0")
+		(uuid "072578a8-a5f8-5a9b-974a-292190524bb2")
+	)
+	(fp_line
+		(start -3.56 -6.15)
+		(end -3.56 -12.5)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "8ceaca93-6813-52c6-abd7-85ce1ca87c86")
+	)
+	(fp_line
+		(start -3.56 -12.5)
+		(end -0.76 -12.5)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "3e836f15-fc78-590b-9381-9e0b16716665")
+	)
+	(fp_line
+		(start -0.76 -12.5)
+		(end -0.76 -6.15)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "c0b853c6-a1e3-53cd-bc97-bdf232f84a41")
+	)
+	(fp_line
+		(start 0.76 -6.15)
+		(end 0.76 -12.5)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "2564110d-da00-5aba-8d87-5585afb41038")
+	)
+	(fp_line
+		(start 0.76 -12.5)
+		(end 3.56 -12.5)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "dd694594-5fb2-5482-819a-e3eadc54dc5a")
+	)
+	(fp_line
+		(start 3.56 -12.5)
+		(end 3.56 -6.15)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "151c9406-8f9f-5112-9a5f-efb5692405da")
 	)
 	(fp_line
 		(start 9.65 -6.4)
@@ -209,5 +309,16 @@
 		(size 2.8 1.52)
 		(layers "F.Cu" "F.Mask" "F.Paste")
 		(uuid "dd01e64a-8649-577d-9fd2-08b18a6fc47f")
+	)
+	(model "${KIPRJMOD}/../../lib/woody.3dshapes/NXP_Case1351-01_MPXV4006DP.step"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
 	)
 )

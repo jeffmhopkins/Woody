@@ -1,0 +1,333 @@
+(footprint "PinHeader_1x08_P2.54mm_Horizontal_Hanxia_PZ2.54-WZ"
+	(version 20241229)
+	(generator "woody")
+	(layer "F.Cu")
+	(descr "hanxia HX PZ2.54-1x8P WZ: 1x08 2.54 mm right-angle pin header, through-hole. From the banked drawing (datasheets/connectors/HANXIA-HX-PZ2.54-1x8P-WZ.pdf): 1.02 holes, insulator 2.50 square and (B - 0.2) 20.12 long, its mating face 4.30 in front of the tail row (so its back 1.80), posts 6.00 past it; pins 0.64 square. KiCad's PinHeader_1x08_P2.54mm_Horizontal has the same pads with the insulator 1.50 in front of the row")
+	(tags "pin header 2.54mm right-angle hanxia PZ2.54 1x08")
+	(property "Reference" "REF**"
+		(at 4.5 -2.6 0)
+		(layer "F.SilkS")
+		(uuid "2bfe51c2-30e9-5b32-aee8-2701d45d7d4e")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "HX PZ2.54-1x8P WZ"
+		(at 4.5 20.6 0)
+		(layer "F.Fab")
+		(uuid "787b17c6-32fe-5dd9-a70b-2f82cd0e588c")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "63d84f90-1e3b-5e01-a9fa-b447eec5c87b")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "0ce3c2ae-2f9e-5328-ad19-43c710872036")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr through_hole)
+	(fp_rect
+		(start 1.8 -1.17)
+		(end 4.3 18.95)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "c7177951-5cbb-594f-968e-d60968453b77")
+	)
+	(fp_line
+		(start 4.3 -0.32)
+		(end 10.3 -0.32)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "07b05073-db34-5df3-8760-f234c6bcecdd")
+	)
+	(fp_line
+		(start 4.3 0.32)
+		(end 10.3 0.32)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "72b17f30-f7e9-5d07-a505-f9ce645dc904")
+	)
+	(fp_line
+		(start 4.3 2.22)
+		(end 10.3 2.22)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "7b23e88f-30c2-5ba0-9548-ac44840cdbf3")
+	)
+	(fp_line
+		(start 4.3 2.86)
+		(end 10.3 2.86)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "a08f9bde-0218-5062-80a9-25834a067010")
+	)
+	(fp_line
+		(start 4.3 4.76)
+		(end 10.3 4.76)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "001aa48a-1a5b-532e-99da-f5bdeddbc7f7")
+	)
+	(fp_line
+		(start 4.3 5.4)
+		(end 10.3 5.4)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "184ae7ad-564b-50c6-8fe3-be5e13bf3cbe")
+	)
+	(fp_line
+		(start 4.3 7.3)
+		(end 10.3 7.3)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "6981c901-7543-54c7-8bc6-6f1b09bcd6db")
+	)
+	(fp_line
+		(start 4.3 7.94)
+		(end 10.3 7.94)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "65ec8124-6b16-51d6-a967-68a30197a6d6")
+	)
+	(fp_line
+		(start 4.3 9.84)
+		(end 10.3 9.84)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "c4527e58-2329-53d8-91f1-7881a2a9ebcf")
+	)
+	(fp_line
+		(start 4.3 10.48)
+		(end 10.3 10.48)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "2cc9478c-b5be-5a49-a606-b1ea7776ac10")
+	)
+	(fp_line
+		(start 4.3 12.38)
+		(end 10.3 12.38)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "eb9dac73-731c-59e3-8da7-2d366b12d549")
+	)
+	(fp_line
+		(start 4.3 13.02)
+		(end 10.3 13.02)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "f3be39f0-477e-5aa7-ab30-6f6c29d99183")
+	)
+	(fp_line
+		(start 4.3 14.92)
+		(end 10.3 14.92)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "0922fd53-7f8b-565f-ad0a-91b4847aa558")
+	)
+	(fp_line
+		(start 4.3 15.56)
+		(end 10.3 15.56)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "57ccda87-4862-596a-af45-1ffa426e081b")
+	)
+	(fp_line
+		(start 4.3 17.46)
+		(end 10.3 17.46)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "e7a4b48f-d3b2-5f53-b72a-69bc475aa374")
+	)
+	(fp_line
+		(start 4.3 18.1)
+		(end 10.3 18.1)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "d48a2a9f-e3de-5b48-9675-f19ece538683")
+	)
+	(fp_rect
+		(start 1.68 -1.29)
+		(end 4.42 19.07)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.SilkS")
+		(uuid "a2ed2a29-f495-52a0-b32c-5def400ee5b8")
+	)
+	(fp_line
+		(start -1.35 -0.85)
+		(end -1.35 0.85)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "83d5ffc6-1fe8-5906-aa4c-2253065de780")
+	)
+	(fp_rect
+		(start -1.6 -1.42)
+		(end 10.55 19.2)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.CrtYd")
+		(uuid "bd0dc052-32b7-5272-8dc6-bab45464181b")
+	)
+	(pad "1" thru_hole rect
+		(at 0 0)
+		(size 1.7 1.7)
+		(drill 1.02)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "91184b85-cb44-5fbe-94bc-945dcdb8242d")
+	)
+	(pad "2" thru_hole oval
+		(at 0 2.54)
+		(size 1.7 1.7)
+		(drill 1.02)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "5e6b60e2-ced4-5e79-ac7c-a09ad7459fe3")
+	)
+	(pad "3" thru_hole oval
+		(at 0 5.08)
+		(size 1.7 1.7)
+		(drill 1.02)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "571f2f99-dca4-5f97-98c7-263334cd8511")
+	)
+	(pad "4" thru_hole oval
+		(at 0 7.62)
+		(size 1.7 1.7)
+		(drill 1.02)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "24215f53-5509-5f41-bf64-e089db6e8c48")
+	)
+	(pad "5" thru_hole oval
+		(at 0 10.16)
+		(size 1.7 1.7)
+		(drill 1.02)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "0c597bb2-a8a5-5cc9-9cc9-8a224d32e6e1")
+	)
+	(pad "6" thru_hole oval
+		(at 0 12.7)
+		(size 1.7 1.7)
+		(drill 1.02)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "1a331925-6a35-5da1-819a-26c214c846be")
+	)
+	(pad "7" thru_hole oval
+		(at 0 15.24)
+		(size 1.7 1.7)
+		(drill 1.02)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "8ea7701e-4b57-5082-8a60-f3fd2f9d61e5")
+	)
+	(pad "8" thru_hole oval
+		(at 0 17.78)
+		(size 1.7 1.7)
+		(drill 1.02)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "33157d74-5e76-51af-b8db-54877bd565c5")
+	)
+	(model "${KIPRJMOD}/../../lib/woody.3dshapes/Hanxia_HX_PZ2.54-1x8P_WZ.step"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
+	(embedded_fonts no)
+)
