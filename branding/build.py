@@ -9,7 +9,7 @@ The mark is defined once, in SPEC below, and built as filled polygons in millime
     export/spec.json                    the numbers below plus the measured result
     export/png/scs-mark-{black,white}.png   transparent PNGs for screens and documents
     export/print/scs-mark-test-print-100pct.pdf   Letter, print at 100 %
-    export/renders/*.png                simulated laser etch on procedural wood
+    export/renders/*.png                simulated laser etch, and epoxy colour fill, on procedural wood
 
 Run:  python3 branding/build.py        (requirements: branding/requirements.txt)
 Output is deterministic: an unchanged SPEC rebuilds byte-identical files, so a diff
@@ -19,7 +19,15 @@ Do not edit anything under export/ by hand; change SPEC and rebuild.
 """
 import json
 import math as M
+import os
+import sys
 from pathlib import Path
+
+# ezdxf writes its CLASS table in set-iteration order, which follows Python's per-process
+# hash randomisation: without a fixed seed the DXF reorders between runs. The seed can only
+# be set before the interpreter starts, so re-launch once with it pinned.
+if __name__ == "__main__" and os.environ.get("PYTHONHASHSEED") != "0":
+    os.execve(sys.executable, [sys.executable, *sys.argv], {**os.environ, "PYTHONHASHSEED": "0"})
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
@@ -43,6 +51,9 @@ SPEC = dict(
     moon_radius=3.76,            # mm
     moon_angle_deg=-122.0,       # moon position on the ring centreline; 0 = right, negative = up
 )
+# Colour-fill scheme for dark woods: the etch is filled with pigmented epoxy and sanded flush.
+EPOXY = dict(wave=(252, 76, 2), moon=(252, 76, 2), ring=(18, 18, 20))   # orange, orange, black
+
 PANEL_WIDTH = 57.0   # top panel width the mark is laid out for, mm (render and test print only)
 
 
@@ -177,7 +188,12 @@ WOODS = {
     "dark-walnut": dict(base=(96, 62, 42), zone=(62, 39, 26), zone_amt=0.6, line=(45, 28, 19),
                         fam=[(0.9, 0.10, 0.35), (2.6, 0.35, 0.45)], warp=0.8, eye=0.15,
                         pores=0.45, etch=(20, 13, 9), seed=11),
+    "dark-oak": dict(base=(84, 56, 36), zone=(52, 34, 22), zone_amt=0.55, line=(34, 22, 14),
+                     fam=[(0.8, 0.12, 0.45), (2.4, 0.5, 0.55), (5.5, 0.9, 0.35)], warp=1.2, eye=0.35,
+                     pores=0.7, etch=(18, 12, 8), seed=21),
 }
+BURN_RENDERS = ("bocote", "dark-walnut")          # plain laser etch
+EPOXY_RENDERS = ("dark-oak", "dark-walnut")       # colour-filled, see EPOXY
 
 
 def wood(kind, w, h, ppmm):
@@ -224,22 +240,65 @@ def etch_onto(img, mask, kind, rng, ppmm):
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
+def split_mark(mark):
+    """(wave, moon, [ring arcs]): the wave is the widest part, the moon the smallest."""
+    ps = parts(mark)
+    wave = max(ps, key=lambda p: p.bounds[2] - p.bounds[0])
+    moon = min(ps, key=lambda p: p.area)
+    return wave, moon, [p for p in ps if p is not wave and p is not moon]
+
+
+def epoxy_onto(img, mask, rgb, ppmm, rng):
+    """Flush, glossy pigmented fill: slight depth tint at the edges, a soft specular sheen
+    (weaker on dark colours), and a thin charred rim left by the etch."""
+    h, w = mask.shape
+    rgb = np.array(rgb, float)
+    m8 = Image.fromarray((mask * 255).astype(np.uint8))
+    inner = np.asarray(m8.filter(ImageFilter.MinFilter(3))
+                       .filter(ImageFilter.GaussianBlur(ppmm * 0.35))).astype(float) / 255
+    col = rgb * (0.82 + 0.18 * inner[..., None])
+    yy, xx = np.mgrid[0:h, 0:w]
+    spec = np.exp(-(((xx - 0.35 * w) * 0.8 + (yy - 0.3 * h) * 0.6) / (0.22 * w)) ** 2)
+    col = col + (255 - col) * (0.06 + 0.22 * rgb.mean() / 255) * spec[..., None] * inner[..., None]
+    col = col * (1 + 0.02 * rng.normal(0, 1, (h, w)))[..., None]
+    rim = np.clip(np.asarray(m8.filter(ImageFilter.MaxFilter(3))).astype(float) / 255 - mask, 0, 1)
+    out = img * (1 - mask[..., None]) + col * mask[..., None]
+    return np.clip(out * (1 - 0.55 * rim[..., None]), 0, 255)
+
+
+def pair_image(tiles, gap):
+    w, h = tiles[0].size
+    out = Image.new("RGB", (len(tiles) * w + (len(tiles) - 1) * gap, h), (243, 241, 236))
+    for i, t in enumerate(tiles):
+        out.paste(t, (i * (w + gap), 0))
+    return out
+
+
 def write_renders(mark, folder, ppmm=16, panel_len=80.0):
     _, _, W, H = mark.bounds
     ox, oy = (PANEL_WIDTH - W) / 2, (panel_len - H) / 2
     w, h = int(PANEL_WIDTH * ppmm), int(panel_len * ppmm)
     mask = rasterize(mark, ppmm, PANEL_WIDTH, panel_len, ox, oy)[:h, :w]
     tiles = []
-    for kind in WOODS:
+    for kind in BURN_RENDERS:
         img, rng = wood(kind, w, h, ppmm)
         tile = Image.fromarray(etch_onto(img, mask, kind, rng, ppmm))
         tile.save(folder / f"scs-mark-on-{kind}.png", optimize=True)
         tiles.append(tile)
-    gap = int(4 * ppmm)
-    pair = Image.new("RGB", (2 * w + gap, h), (243, 241, 236))
-    pair.paste(tiles[0], (0, 0))
-    pair.paste(tiles[1], (w + gap, 0))
-    pair.save(folder / "scs-mark-on-woods.png", optimize=True)
+    pair_image(tiles, int(4 * ppmm)).save(folder / "scs-mark-on-woods.png", optimize=True)
+
+    wave, moon, ring = split_mark(mark)
+    masks = {name: rasterize(unary_union(g), ppmm, PANEL_WIDTH, panel_len, ox, oy)[:h, :w]
+             for name, g in (("ring", ring), ("moon", [moon]), ("wave", [wave]))}
+    tiles = []
+    for kind in EPOXY_RENDERS:
+        img, rng = wood(kind, w, h, ppmm)
+        for name in ("ring", "moon", "wave"):
+            img = epoxy_onto(img, masks[name], EPOXY[name], ppmm, rng)
+        tile = Image.fromarray(img.astype(np.uint8))
+        tile.save(folder / f"scs-mark-epoxy-on-{kind}.png", optimize=True)
+        tiles.append(tile)
+    pair_image(tiles, int(4 * ppmm)).save(folder / "scs-mark-epoxy-on-dark-woods.png", optimize=True)
 
 
 # --------------------------------------------------------------------------- test print

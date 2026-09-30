@@ -24,7 +24,7 @@ edit it by hand: change `SPEC` in `build.py` and rebuild.
 | [`export/spec.json`](export/spec.json) | Every construction number, plus the measured overall size. |
 | [`export/print/scs-mark-test-print-100pct.pdf`](export/print/scs-mark-test-print-100pct.pdf) | US Letter. Print at 100 % and measure the 50 mm bar first. It includes the mark at actual size, a cut-out outline for checking position, the mark on a panel outline, and 45 mm / 36 mm comparisons. |
 | [`export/png/scs-mark-black.png`](export/png/scs-mark-black.png), [`scs-mark-white.png`](export/png/scs-mark-white.png) | Transparent PNGs, 2000 px wide, for screens and documents on light or dark backgrounds. |
-| [`export/renders/`](export/renders/) | Simulated laser etch at true scale on procedurally generated bocote and dark walnut textures. **Illustrative only**: the wood is synthetic, not photographed. |
+| [`export/renders/`](export/renders/) | True-scale renders on procedurally generated wood textures. **Illustrative only**: the wood is synthetic, not photographed. `scs-mark-on-*`: plain laser etch on bocote and dark walnut. `scs-mark-epoxy-on-*`: the colour-fill scheme below, on dark oak and dark walnut. |
 
 ## Geometry
 
@@ -61,6 +61,35 @@ wood. The pointed wave tips will come out slightly soft over their last
 - **Test on an offcut of the same board first** to set the depth and check
   that the tips come out cleanly.
 
+## Colour fill (dark woods)
+
+On dark wood the etch can be filled with pigmented epoxy and sanded flush.
+The scheme is set in `EPOXY` in `build.py`:
+
+| Part | Colour | sRGB |
+|---|---|---|
+| Wave | Orange | `#FC4C02` |
+| Moon | Orange | `#FC4C02` |
+| Ring | Black | `#121214` |
+
+![Colour-filled mark on dark oak and dark walnut](export/renders/scs-mark-epoxy-on-dark-woods.png)
+
+The orange carries the mark and the black ring reads as a gloss a shade darker
+than the wood, so the eye goes to the sound and the moon first. The sRGB
+values are screen references; match the pigment against a poured test coupon,
+not the screen.
+
+- Etch **deeper than for a plain burn**, about 0.8–1.5 mm, so the fill has
+  something to key into.
+- **Seal the etched wood first** (a thin coat of dewaxed shellac), or the
+  pigment wicks into the grain around the edges.
+- Two colours means **two pours**: mask the ring, pour and cure the orange,
+  then pour the black. The 2.0 mm clearances keep the colours apart.
+- Pour slightly proud, cure, **sand flush** (220 then 400 grit), then finish
+  as normal.
+- Use **UV-stable pigment**. Bright oranges fade, and some are fluorescent,
+  which fades faster.
+
 ## Rebuilding
 
 ```sh
@@ -69,7 +98,8 @@ python3 branding/build.py
 ```
 
 The build is **deterministic**: with `SPEC` unchanged it rewrites every file
-byte for byte (no timestamps in the PDF or DXF, seeded textures). A diff
+byte for byte (no timestamps in the PDF or DXF, seeded textures, and a pinned
+Python hash seed, which the DXF writer's table order depends on). A diff
 under `export/` therefore always means the mark itself changed.
 
 ## Licence
