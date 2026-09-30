@@ -70,12 +70,65 @@ body never marks a module picture stale, nor the reverse.
 | `export/panel.dxf` | **Generated.** The panel as it goes to the cutter |
 | `export/jack-board.dxf`, `export/main-board.dxf` | **Generated.** The boards' outlines, with the standoff holes |
 | [`export/pcb-geometry.echo`](export/pcb-geometry.echo) | **Generated.** Where every board-mounted part is, each face's keep-outs and height limits - the board layout's input, in the body's `pcb-geometry.echo` format |
-| `renders/*.png` | **Generated.** Every image on this page |
+| [`export/panel-art.echo`](export/panel-art.echo) | **Generated.** Every legend and graphics zone's position, every keep-out on the face, where each part sits - the artwork's and the photographs' input (ADR 0026) |
+| `art/` | **Generated** by `tools/panel-art.py`: the print PDF and SVG, the proof, the placement report, the render textures |
+| `blender/studio_small_08_1k.hdr` | The photographs' light probe, banked (Poly Haven, CC0) |
+| `renders/*.png` | **Generated.** Every image on this page; `photo-*.png` by `tools/render-module.py` |
 
 The clash check and the DRC use **envelopes** from `config/module.yaml`, not
 the vendor meshes (`vendor=false`); the meshes are for the pictures. So a
 clean clash is only as good as the envelopes, and several are `tbd` — the DRC's
 first line lists each one in play.
+
+## The panel's print (ADR 0026)
+
+![The module in a slice of a black case: patched, the umbilical home, the rack LED lit](renders/photo-hero.png)
+
+The printed graphics follow Pittsburgh Modular's dark Lifeforms language —
+black anodise, three grey islands, light-grey header pills, white lowercase
+Inter, no boxed jacks, no scales but OFFSET's − and + — as an original design
+([ADR 0026](../../docs/decisions/0026-module-panel-graphics.md)). Nothing in
+it is drawn by hand:
+
+```
+config/module.yaml art.*  ──┐
+cad/module.scad (part=art) ─┴─> export/panel-art.echo ─┐   every zone's position, every keep-out, every part
+export/panel.dxf ──────────────────────────────────────┼─> tools/panel-art.py ─┬─> art/panel-art.pdf   spot inks, to the panel maker
+datasheets/fonts/Inter-*.ttf ──────────────────────────┘                        ├─> art/panel-art.svg   the master, Inkscape layers
+                                                                                ├─> art/panel-art.png   the proof
+                                                                                ├─> art/panel-art-check.txt   every word's zone and air
+                                                                                └─> art/tex-*.png ─> tools/render-module.py ─> renders/photo-*.png
+```
+
+- `module.scad` derives the islands, the header pills, the `mod` label, the
+  OFFSET marks and the maker strip from the layout, and `drc.echo` checks each
+  (`art:` and `art zone:` rules). The legend zones ADR 0024 already had are
+  exported with their positions too.
+- `tools/panel-art.py` sets the words and **fails** on any placement rule;
+  its report, `art/panel-art-check.txt`, gives every word's ink box, its air
+  inside its zone, its distance to a cut and to the nearest keep-out, its
+  stem, and each ink pair's contrast. The words themselves are
+  `config/module.yaml` `art.text.*` — the knobs read *gain, offset, curve*.
+- **To the panel maker**: `export/panel.dxf` (the cut) with
+  `art/panel-art.pdf` (UV print, "use white ink" and "underprint white" on).
+  A 1:1 paper print of the PDF over a cut template first, then one proof panel.
+
+![The artwork proofed on the anodise, the cuts shown light](art/panel-art.png)
+
+The photographs are Cycles renders of a scripted scene
+(`tools/render-module.py`, Blender as a Python module): the panel is
+`panel.dxf` extruded, the print is the same textures at
+`art.texture.px_mm`, the NE8FAV, the NE8MX and the jacks are the banked
+vendor solids, and the knob, the toggle's lever, the nuts, the patch cables
+and the case are modelled from `config/module.yaml`. The studio light probe
+is Poly Haven's *studio_small_08* (CC0, Sergej Majboroda,
+https://polyhaven.com/a/studio_small_08), banked at 1k in `blender/`. Each
+render takes tens of minutes on a CPU; `cad.py build` redoes one only when
+something it shows moved.
+
+| | |
+|---|---|
+| ![Straight on, orthographic, no patch cables: the print against the parts](renders/photo-front.png) Straight on — for checking the print against the parts | ![Close-up of the breath knobs and the outputs' header](renders/photo-detail.png) The breath knobs, the OFFSET marks, the `cv out` pill |
 
 ## The views
 

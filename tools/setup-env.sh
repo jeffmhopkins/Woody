@@ -82,9 +82,12 @@ for m in Capacitor_SMD.3dshapes/C_0805_2012Metric.step \
 done
 
 # --- Python packages: Pillow stamps renders; gmsh meshes STEP; manifold3d,
-# trimesh and numpy run the clash check.
-python3 - <<'EOF' || pip install --break-system-packages -q pillow gmsh manifold3d trimesh numpy shapely
-import PIL, gmsh, manifold3d, trimesh, numpy, shapely
+# trimesh and numpy run the clash check; fontTools, shapely and ezdxf set the
+# module's panel artwork (tools/panel-art.py, with librsvg2-bin's rsvg-convert);
+# bpy - Blender as a Python module - renders its photographs (tools/render-module.py).
+python3 - <<'EOF' || pip install --break-system-packages -q pillow gmsh manifold3d trimesh numpy shapely fonttools ezdxf
+import PIL, gmsh, manifold3d, trimesh, numpy, shapely, fontTools, ezdxf
 EOF
+python3 -c "import bpy" 2>/dev/null || pip install --break-system-packages -q bpy
 
 echo "setup-env: OpenSCAD $(openscad --version 2>&1 | awk '{print $3}'), KiCad $(kicad-cli version)"
