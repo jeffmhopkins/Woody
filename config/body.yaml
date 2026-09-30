@@ -541,7 +541,7 @@ boards:
   main_neck_min:
     value: 8.0
     status: tbd
-    source: "[calc] ~20 nets cross the station (the key chain's 12 conductors, the breath sensor's lines, the strip's data, power) at 0.25 track / 0.25 gap is 10 mm on one layer, 5 mm on two; plus 0.5 mm copper keep-out from each cut edge is 6; 8 leaves room for a ground return beside them"
+    source: "[calc] ~20 nets cross the station (the key chain's 12 conductors, the breath sensor's lines, the LED row's data and backup lines, power) at 0.25 track / 0.25 gap is 10 mm on one layer, 5 mm on two; plus 0.5 mm copper keep-out from each cut edge is 6; 8 leaves room for a ground return beside them"
     decided_by: "M4 main board layout - the real net count and track widths"
   matrix_t:
     value: 1.6
@@ -772,8 +772,9 @@ hardware:
   #   the key board; a spacer (kb_spacer_*); the key plate; an M2.5 low-head
   #   screw down through the key plate into the standoff (col_screw_*), its head
   #   in a blind pocket in the oak top's underside (col_pocket_*).
-  # The main board's four END MOUNTS, a pair at the mouth and a pair on the
-  # tongue: the same stud, spacer and board, and a nut (mb_nut_*).
+  # The main board's END MOUNTS, at the mouth and a pair on the tongue: the
+  # same stud, spacer and board, and a nut (mb_nut_*). An end mount with a
+  # column within end_mount_merge_d is dropped; drc.echo gives the count.
   stud_hole:
     value: 2.5
     status: settled
@@ -912,19 +913,22 @@ hardware:
     value: 0.2
     status: nominal
     source: "how far a spacer or a standoff can sit off its axis: (the bore - the thread) / 2 - the spacer's 2.6 (+0.1) on an M2.5 gives at most 0.1 [calc from the catalogue under kb_spacer_od]; held at 0.2, and every PCB keep-out grows by it on every side"
+  end_mount_merge_d:
+    value: 12
+    status: settled
+    source: "an end mount is dropped when a column's mount stands within this distance of it: the column already holds the board there, and two studs side by side add a part and a hole for no support (owner, 2026-09-30: \"there's one spot where we have double standoffs right next to each other ... Good to reduce it to the one standoff there\"). The mouth end mount at (32.5, 45.5) stood 7.5 from the column at (40, 45.9); the nearest any other end mount comes to a column is 28.5 [calc from mechanical/export/pcb-geometry.echo at 064c49f: hypot(40 - 32.5, 45.9 - 45.5) = 7.51; hypot(40 - 11.5, 11.1 - 11.5) = 28.50]. 12 is about two mount keep-outs (mb_keep_d, 6.57 [calc: 6.17 + 2 x 0.2]) and sits well between the two; drc.echo reports each end mount dropped"
   kb_mount_inset:
     value: 3.6
     status: tbd
     source: "a column's centre in from both edges of its key board: the standoff across its corners (col_standoff_af / cos 30) and kb_mount_float, with 0.5 of board outside the keep-out [calc: 5.77 / 2 + 0.2 + 0.5 = 3.585]"
     decided_by: "M4, with the board's first fit"
-  # THE U-BOLT IS M3 (2026-09-26), sized by the main board, not by the load.
-  # Its nuts stand on the main board's top face, beside the LED strip on the
-  # centreline, and keep boards.board_clear round their corners. Measured
-  # [calc], interior 45, strip 10 wide on the centreline, span 20:
-  #   M5 (nut 8 AF):   keep-out edge 1.12 mm UNDER the strip
-  #   M4 (nut 7 AF):   keep-out edge 0.54 under the strip; clearing it needs a
-  #                    span of 21.1+, which nothing else bounds (ADR 0025)
-  #   M3 (nut 5.5 AF): keep-out edge 0.33 clear of the strip
+  # THE U-BOLT IS M3 until the strap hardware is chosen. Its nuts stand on
+  # the main board's top face and keep boards.board_clear round their corners.
+  # The LED strip that held it to M3 is gone (ADR 0028): the LED row is shifted
+  # so the station falls midway between two LEDs, so a bigger nut's keep-out
+  # reaches nothing on the centreline (drc.echo 'LED row off the U-bolt
+  # station'). What bounds it now is the neck of board between the legs
+  # ('main board neck at the U-bolt station') and the thumb recesses.
   # Load: ADR 0009's mass table puts the body at ~825 g, ~8 N on the strap;
   # a factor of 10 for a jerk is 80 N. An M3 leg of 4.6 steel proofs at
   # ~1.1 kN [from memory: 5.03 mm2 stress area x 225 MPa], and there are two.
@@ -933,7 +937,7 @@ hardware:
   ubolt_rod_d:
     value: 3.0
     status: tbd
-    source: "M3 [calc above]. ADR 0009 gives no U-bolt size; M5 puts the nuts' keep-out on the main board under the LED strip at any span that fits, M4 only below a 21.1 span (drc 'LED strip clear of the U-bolt nuts')"
+    source: "M3 [calc above]; ADR 0009 gives no U-bolt size. No longer bounded by the lights (ADR 0028); M4 or M5 must still leave the neck ('main board neck at the U-bolt station') and clear the thumb recesses"
     decided_by: "M4, from the strap hardware chosen - small M3 U-bolts are sold for model and tube clamps [from memory]; a bent M3 rod or a stainless M3 threaded rod does the same job"
   ubolt_hole_clear:
     value: 0.5
@@ -943,7 +947,7 @@ hardware:
   ubolt_span:
     value: 20.0
     status: tbd
-    source: "leg centre to leg centre, legs across the body. Narrower pulls the nuts toward the LED strip; wider takes the legs toward the thumb recesses (drc 'U-bolt legs clear of the thumb recesses') and the main board's edge"
+    source: "leg centre to leg centre, legs across the body. Narrower pulls the nuts toward the centreline and shrinks the neck between the legs; wider takes the legs toward the thumb recesses (drc 'U-bolt legs clear of the thumb recesses') and the main board's edge"
     decided_by: "M4"
   ubolt_drop:
     value: 18.0
@@ -1059,24 +1063,29 @@ routing:
 
 # ------------------------------------------------------------ lighting ----
 lighting:
-  strip_w:
-    value: 10.0
+  # THE LED ROW (ADR 0028): thirteen WS2815B-V1 reflowed on the main board's
+  # top face, one row down the centreline, LEDs up, lighting both acrylic
+  # sides through the cavity. LED 1 is at the tail end, where the data
+  # arrives; the row is shifted along the body so the U-bolt station falls
+  # midway between two LEDs (drc.echo 'LED row off the U-bolt station').
+  led_count:
+    value: 13
+    status: settled
+    source: "owner, 2026-09-30 (ADR 0028): thirteen LEDs, the count the 60/m strip gave over the same run"
+  led_pitch:
+    value: 16.67
     status: tbd
-    source: "hardware/carrier/carrier.md '~10 mm' [from memory there]; the strip geometry row is BLOCKED in datasheets/MANIFEST.csv"
-    decided_by: "the strip in hand"
-  strip_t:
-    value: 2.5
-    status: tbd
-    source: "WS2815 strip thickness, bare IP30 [from memory]; the MANIFEST strip-geometry row is BLOCKED"
-    decided_by: "the strip in hand"
-  # ONE STRIP, ON THE MAIN BOARD (ADR 0016, ADR 0017): LEDs up, down the
-  # centreline, lighting both acrylic sides through the cavity.
-  strip_inset:
-    value: 1.0
-    status: nominal
-    source: "the strip's tail end in from the main board's end - a model choice"
-  strip_per_m:
-    value: 60
-    status: tbd
-    source: "LEDs per metre; hardware/unplaced.csv LED-STRIP orders 60/m"
-    decided_by: "M6 prototype - how evenly the cavity diffuses decides whether 30/m is enough"
+    source: "centre to centre along the body: the strip's 60/m [calc: 1000 / 60 = 16.67], which ADR 0014 chose for how it diffuses"
+    decided_by: "the side-light diffusion test (ROADMAP), before the main board's layout: a strip offcut at board height under a white-masked mock key board, with the real acrylic at the side distance"
+  led_body:
+    value: [5.4, 5.0]
+    status: settled
+    source: "the WS2815B-V1's body along the body and across it, 5.40 +/-0.05 x 5.00 +/-0.05 [ds datasheets/led/WS2815B-V1.pdf p.2]"
+  led_h:
+    value: 1.65
+    status: settled
+    source: "the WS2815B-V1's height above the board, 1.65 +/-0.05 [ds datasheets/led/WS2815B-V1.pdf p.2]"
+  led_court:
+    value: [6.9, 5.5]
+    status: settled
+    source: "the footprint's courtyard, woody:LED_WS2815B-V1_PLCC6_5.4x5.0mm_P1.6mm [repo hardware/lib/woody.pretty]: the pads' 6.4 across and the body's 5.0, each with KiCad's 0.25 margin a side"

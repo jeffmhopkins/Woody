@@ -224,7 +224,7 @@ into the board, not into SMT pads.
 **Where they sit** — `mechanical/DESIGN.md` and the model `[repo]`: on each key
 board the header hangs from the board's **underside directly over the main
 board's header** — stacked, at the same position along the body — both in the
-far band beside the LED strip, **both mouths facing the same way along the
+far band beside the LED row, **both mouths facing the same way along the
 body**. Each header stands `boards.chain_hdr_h` off its board with its mouth
 centred `boards.chain_hdr_mouth_z` above it; its pin rows are **behind the
 body's back face**, the tails bending down behind it (`boards.chain_hdr_pin_back`,
@@ -245,7 +245,7 @@ leaves downward**, so the two exits face each other across the gap between
 the plugs (*Pin numbering*, below). Each end turns out along the body and the
 ribbon folds back on itself into a **flat hairpin lying along the body,
 both legs between the two plugs' heights**, running the same way to the
-fold, so it never stands across the LED strip's light. Which way each hand's
+fold, so it never stands across the LED row's light. Which way each hand's
 hairpin folds is `config/body.yaml` `routing.chain_fold`, which says why.
 Leg and fold radius: `mechanical/drc.echo` "key-chain ribbon closed:
 hairpin leg and fold radius", held to the cable's bend radius by "key-chain
@@ -487,7 +487,7 @@ argument is `carrier.md` §2's, and the numbers are
 
 **A ground return per clocked signal** `[repo] 0001 fix 1`, on the main board
 as on the ribbons: route `SCK` and `SH/LD` over unbroken ground, away from the
-strip's data and 12 V feed and the breath signal (ADR 0017's routing note).
+LED row's data and 12 V feed and the breath signal (ADR 0017's routing note).
 
 ### The 32 bits, and which board each is on
 

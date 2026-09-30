@@ -61,7 +61,7 @@ the ribbon to it (*The Matrix and the umbilical at the tail end*, below).
    │  §2              │   │  §1         │        │  §4        │
    └──────────────────┘   └──────┬──────┘        └─────┬──────┘
                                  │                     │
-              +12V ──────────────┼─────────────────────┼──── J-LED (strip)      
+              +12V ──────────────┼─────────────────────┼──── the LED row        
                5V ───────────────┤                     │
                                  │                     │
        ┌─────────────────────────▼─────────────────────▼──────────────┐
@@ -265,8 +265,8 @@ The section number is kept because other pages cite `carrier.md` §4.*
 
 ---
 
-*§5 LED data — the 74AHCT125 gates, `R-LED-PD`, `R-LED-SER`, `J-LED` and
-the WS2815 `V_IH`/`BI` argument — moved verbatim to
+*§5 LED data — the 74AHCT125 gates, `R-LED-PD`, `R-LED-SER`, the LED row
+(`D-LED`, `C-LED`, ADR 0028) and its `V_IH` and backup-line argument — is
 [`led-strip-drive/`](led-strip-drive/led-strip-drive.md). §6 service header —
 `HDR-SERVICE` — is in [`service-uart/`](service-uart/service-uart.md).*
 
@@ -472,7 +472,7 @@ page and have no BOM entry yet.
 | `D-TVS-BREATH` ×2 | 12 V standoff, SOD-323 | `BREATH` and `AGND` legs | `[repo]` |
 | `R-SPI-SER` ×3 | **100 Ω** | Series at the driving end on `SCLK`, `MOSI`, `CS`. **Was drawn as three refdes that are not in the BOM, at 220 Ω, derived from an RC model** — see §4 | `[repo] bom.csv` |
 | `U-TVS-SPI` | SP0504BAHT, **SOT-23-5** | `SCLK`, `MOSI`, `CS` + spare, to `PWR_GND` | `[repo]` |
-| **`J-CHAIN`** ×2 here | **2×6 1.27 mm shrouded IDC header, right-angle, through-hole** | **One per key-board ribbon (`CBL-CHAIN`), in the far band beside the LED strip, under its key board's; the mates are on the key boards (`chain-connectors` in all). 4 signals, 5 alternating grounds, 3V3, 2 spare. Part open until M4. `key-chain-loom.md`** | ribbon decided (ADR 0017), part open |
+| **`J-CHAIN`** ×2 here | **2×6 1.27 mm shrouded IDC header, right-angle, through-hole** | **One per key-board ribbon (`CBL-CHAIN`), in the far band beside the LED row, under its key board's; the mates are on the key boards (`chain-connectors` in all). 4 signals, 5 alternating grounds, 3V3, 2 spare. Part open until M4. `key-chain-loom.md`** | ribbon decided (ADR 0017), part open |
 | `PCB-CARRIER` | 4-layer (ADR 0017 amendment), outline derived by the body CAD | The main board (ADR 0017). See *Still open* | `[repo]` `mechanical/drc.echo` "main board (derived)" |
 | `TP-*`, `LK-*` | none | A review (`D2`) asked for test points, shunt links and an LA header. **Not fitted** (owner, 2026-09-29): this is a one-off build, probed by hand at the parts' own pins | decided |
 
@@ -481,7 +481,7 @@ page and have no BOM entry yet.
 `breath-adc/`;
 `U-REF-BREATH`, `C-REF-OUT` and `R-FB-REF`/`R-FBX-REF`/`C-FB-REF` to
 `breath-excitation-reference/`; `U-LVLSHIFT`, `R-LED-PD`, `R-LED-SER` and
-`J-LED` to `led-strip-drive/`; `U-BUCK`, `L-BUCK-IN`, `C-BUCK-IN`,
+the strip's pads (since replaced by the LED row, ADR 0028) to `led-strip-drive/`; `U-BUCK`, `L-BUCK-IN`, `C-BUCK-IN`,
 `D-USBOR`, `D-REVSHUNT`, `D-TVS-PWR` and `C-STRIP-BULK` to
 `power-entry-instrument/`; `HDR-SERVICE` to `service-uart/`. `U-BUF` stayed: one half of it is the reference
 buffer and the other is the breath buffer.*
@@ -491,7 +491,7 @@ buffer and the other is the breath buffer.*
 ## What plugs into this board
 
 **There are no internal looms** (ADR 0017). The key chain is two IDC
-ribbons, the LED strip is on this board (ADR 0016), the console is a header on
+ribbons, the LEDs are parts of this board (ADR 0028), the console is a header on
 it, and power arrives down the umbilical. What terminates here:
 
 | From | Conductors | Connector |
@@ -499,7 +499,6 @@ it, and power arrives down the umbilical. What terminates here:
 | The two key boards, one IDC ribbon each (`CBL-CHAIN`) | `chain-conductors` each: four chain signals, five alternating grounds, 3V3, two spare — `key-chain-loom.md` | `J-CHAIN` IDC header, one per ribbon here; `chain-connectors` counts both ends |
 | The Matrix, on the lid | 24 | `J-MCU` |
 | The umbilical, from the tail cap | 8 | `J-UMB` |
-| WS2815 strip — on this board (ADR 0016): 12 V, GND, `DI`, `BI` to ground | 4 | `J-LED` |
 | The console, and the Matrix's `EN` and `IO0` | 5 | `HDR-SERVICE` |
 
 The Matrix and the umbilical are the section above. The board's outline and
@@ -516,7 +515,7 @@ Ordered by what blocks what. The first two block layout.
   envelopes in `config/body.yaml` are `[from memory]`. Decided at M4 with the
   parts.
 - **The board outline** is now derived by the body CAD (the main board,
-  ADR 0017, `mechanical/DESIGN.md`), with the strip on it (ADR 0016). What is still open
+  ADR 0017, `mechanical/DESIGN.md`), with the LED row on it (ADR 0028). What is still open
   is the routing inside that outline.
 - **E11 on the real ribbon**: breath output clean while the matrix is
   exercised, which is what shows the four grounds share the return as

@@ -2,6 +2,19 @@
 
 **Status:** Accepted. Geometry and data-line wiring amended by
 [ADR 0016](0016-one-strip-on-the-centre-board.md): one strip, on the centre board.
+The strip itself replaced 2026-09-30 by [ADR 0028](0028-on-board-leds.md):
+thirteen WS2815B-V1 on the main board, 12 V, backup-chained.
+
+> **Note, 2026-09-30 (ADR 0028).** The lights are no longer a strip. The 12 V
+> rail, the level shifter, the backup data line, the shared clamp and
+> blank-at-boot all stand. Three things here do not: the density (the row's
+> count and pitch are `lighting.led_count` / `lighting.led_pitch`, fixed at
+> board fabrication); the diffusion prototype's timing (it moves ahead of the
+> main board's layout, ROADMAP); and the per-LED current. This page's reading
+> of the WS2815's "15 mA" as per channel, 45 mA per LED, would be three
+> times the WS2815B-V1's own maximum power `[ds datasheets/led/WS2815B-V1.pdf
+> p.2]`; the row's current is now the tracked figure `led-row-current`,
+> blocked on an E6 measurement.
 
 ## Requirement
 

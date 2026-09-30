@@ -24,7 +24,7 @@ The `Dir` and `Peer` columns are defined once in
 |---|---|---|---|---|
 | `UMBILICAL +12V` at `J-UMB` | in | `module/umbilical-load-switch` | `umbilical-pinmap`, `umbilical-current` | Arrives down the umbilical from the module's load switch. `D-REVSHUNT` sits at the connector, ahead of `L-BUCK-IN` |
 | `PWR_GND` at `J-UMB` | ref | `module/power-entry` | `umbilical-pinmap` | This board's only supply return, down the umbilical to the module star |
-| `+12V` strip feed | out | `carrier/led-strip-drive` | — | Taken direct off the input node. `C-STRIP-BULK` is this circuit's part. **The same net as the row above** — `D-REVSHUNT` is a shunt and `D-TVS-PWR` a clamp, so nothing is in series between `J-UMB` pin 3 and this tap |
+| `+12V` LED row feed | out | `carrier/led-strip-drive` | `led-row-current` | Taken direct off the input node. `C-STRIP-BULK` is this circuit's part. **The same net as the row above** — `D-REVSHUNT` is a shunt and `D-TVS-PWR` a clamp, so nothing is in series between `J-UMB` pin 3 and this tap |
 | `+12V` analog | out | `carrier/breath-excitation-reference` | — | REF5050 `VIN`, and the V+ of both OPA2197 halves. **Also the same net**, for the same reason |
 | 5 V, buck A | out | `J-MCU`, `carrier/led-strip-drive` | `matrix-led-current` | Through `D-USBOR` and `J-MCU`, down three conductors of `CBL-MCU-RIBBON` onto the dev board's 5 V pad and `TP2`, and on to the 74AHCT125 |
 | `PWR_GND` pour | ref | `carrier/service-uart`, `carrier/led-strip-drive`, `carrier/carrier`, `interfaces/breath-sense-link` | `dig-gnd-topology` | Layer 2, §2. The whole board returns here, and the breath link's two clamps, and so do the plates: the bottom plate through this board's mounts, the key plate through the cassette's columns to the same mounts (ADR 0022, ADR 0025). **`carrier/breath-adc` and `carrier/breath-excitation-reference` are no longer listed**: both of those pages say their return is `AGND_INST`, which reaches this pour on the **single tie** and is a different node everywhere else — and that distinction is the whole point of the star |
@@ -41,8 +41,8 @@ the two agree, and where they do not the netlist wins.*
                      │   cathode to +12V   │
                      ├──[D-TVS-PWR SMAJ15A]┤
                      │                     │
-                     ├─────────────────────┼──── WS2815 strip, direct
-                     │                     │     (J-LED)
+                     ├─────────────────────┼──── the LED row, direct
+                     │                     │     (13 × WS2815B-V1)
                      │                     │     [C-STRIP-BULK 470 µF 25V]
                      │                     │
                      ├──[REF5050]──┬────────┼──── §2 analog (its VIN through R-REF-IN and a
@@ -160,14 +160,18 @@ keys scanning, at both ends of the link.
 
 ---
 
-## Strip bulk at the feed points
+## Bulk at the LED row's feed
 
-*Moved verbatim from `carrier.md`'s LED section, now `led-strip-drive.md`,
-where it sat beside the LED data drive.*
-
-**`C-STRIP-BULK` (470 µF 25 V) sits at the strip feed point**, which is on
+**`C-STRIP-BULK` (470 µF 25 V) sits at the LED row's feed end**, on
 this board — "bulk capacitance belongs where the current swings" `[repo] 0014`.
-One strip since ADR 0016, so one capacitor. A 10 × 10 mm SMD can is a height
+The lights are thirteen LEDs on this board since ADR 0028, each with its own
+100 nF (`C-LED`), which take the edges; this one takes the row's PWM step.
+The row switches its whole current at the LEDs' PWM rate: at
+`led-row-current`'s upper end, a 250 µs half-period drawn from this
+capacitor alone would sag it by about 0.1 V `[calc: 0.195 A × 250 µs /
+470 µF = 0.10 V]` — the umbilical and the load switch supply most of it, so
+that is the worst case, and the value stays. The ~2 kHz rate is the WS2815's
+`[ds datasheets/led/WS2815B-V1.pdf p.1, 'scan frequency is of 2KHz']`. A 10 × 10 mm SMD can is a height
 item; it goes in the regulator block (`config/body.yaml` `boards.tall_h`) and
 `mechanical/drc.echo` says whether that fits.
 
@@ -186,7 +190,7 @@ named as they stand; **proposed** rows have no BOM entry yet.*
 | `D-USBOR` | SS14 | **Between the buck and the dev board's 5V pin** — the OR node is that pin, and USB can back-feed it | `[repo]` |
 | `D-REVSHUNT` | SS34 | At the connector, ahead of `L-BUCK-IN` | `[repo]` |
 | `D-TVS-PWR` | SMAJ15A | Across the power pair | `[repo]` |
-| `C-STRIP-BULK` | 470 µF 25 V (UCW1E471MNL1GS) | At the strip feed point, which is this board (one strip, ADR 0016) | `[repo]` |
+| `C-STRIP-BULK` | 470 µF 25 V (UCW1E471MNL1GS) | At the LED row's feed end, on this board (ADR 0028) | `[repo]`, `[calc]` |
 
 ---
 

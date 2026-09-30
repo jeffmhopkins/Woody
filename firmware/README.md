@@ -122,7 +122,7 @@ fresh silicone. Everything here exists so that it never has to be the answer.
 
 ## The lights are instrument-side, and so is everything about them
 
-**The strip and the matrix read the MCU's own digitised breath value.** Not
+**The LED row and the matrix read the MCU's own digitised breath value.** Not
 the jack, not anything that has been through the module's panel knobs — there
 is no return path for that and no reason to want one. The lights show what the
 player is doing; the knobs scale what the rack receives. See ADR 0014.

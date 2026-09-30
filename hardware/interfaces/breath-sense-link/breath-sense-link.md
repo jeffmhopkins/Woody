@@ -156,7 +156,7 @@ under a key board: the room it has is `mechanical/drc.echo` "breath sensor fits
 at the mouth end". **The buffered breath signal runs the board's length to
 `J-UMB`** (ADR 0017), so `U-BUF` sits beside the sensor and what makes the run
 is the buffer's output, never `SENSOR_RAW`. Route it over its own ground, clear
-of the strip's data and 12 V and the chain's clock; **E11 is the test**.
+of the LED row's data and 12 V and the chain's clock; **E11 is the test**.
 
 **`AGND_SENSE` is taken at the sensor's own `GND` pin** (U-BREATH pin 3),
 not at the star, and runs beside the buffered output as the pair's partner

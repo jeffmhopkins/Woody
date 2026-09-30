@@ -136,11 +136,15 @@ Several things can claim each end, and the largest wins:
   behind it counts twice, and the gap between the hands copies the result** —
   a straight USB-C plug cost about 24 mm of body, which is why the plug is
   right-angle (`openings.usb_plug_l`).
-- **One LED strip, on the main board** (ADR 0016, ADR 0017): LEDs up down
-  the board's centreline, between the thumb switches' two rows of pins, from
-  past the breath sensor to the board's tail end, lighting both sides through
-  the cavity. How evenly the cavity lights the sides is an M6 prototype
-  question.
+- **The lights are a row of LEDs on the main board** (ADR 0028; before it
+  one strip, ADR 0016): `lighting.led_count` WS2815B-V1 at `lighting.led_pitch`,
+  LEDs up down the board's centreline, between the thumb switches' two rows
+  of pins, from past the breath sensor to short of J-MCU, lighting both sides
+  through the cavity. The row is shifted along the body so the U-bolt station
+  falls midway between two LEDs (*"LED row on the main board"*, *"LED row off
+  the U-bolt station"*). How evenly the cavity lights the sides is the
+  diffusion test's question, and it now comes before the main board's layout,
+  because the count and pitch are fixed when the board is made.
 - **Every outer oak edge is rounded, as if sanded** (owner, 2026-09-26):
   the top and bottom panels' long edges, the lips beside the acrylic, and
   both end caps' outer faces and corners, at `stack.edge_r`. It goes on after
@@ -161,12 +165,18 @@ Several things can claim each end, and the largest wins:
   from the mouth cap to the end of the right hand, the full width inside the
   sides. Its parts face up; the two key boards connect to it by ribbons (below);
   the Matrix's ribbon ends on it, and a **tongue** runs on from its tail end
-  to the etherCON's adapter, carrying J-UMB (ADR 0021). It is clamped in the
+  to the etherCON's adapter, carrying J-UMB (ADR 0021): as wide as the
+  adapter, except that on the side where the adapter's edge falls just inside
+  the board's, it runs flush with the board's edge (owner, 2026-09-30;
+  *"main board's tongue flush with its edge on the near side of the
+  adapter"*). It is clamped in the
   U-bolt's stack, on a spacer from the bottom plate with a washer and the nut
   above, with a clearance hole for each leg (ADR 0022 point 7, ADR 0025). It
   has no edge notches. Every one of its mounts is on the bottom plate: a
-  column under each of the key boards' corners, and a pair at the mouth and a
-  pair on the tongue with a nut (ADR 0022 point 8, ADR 0025; *"main board
+  column under each of the key boards' corners, and end mounts at the mouth
+  and on the tongue with a nut — an end mount with a column within
+  `hardware.end_mount_merge_d` is dropped (*"end mounts dropped beside a
+  column"*) (ADR 0022 point 8, ADR 0025; *"main board
   mounts on the bottom plate"*). Each mount is the stud, the spacer and the
   board, on a plated `PWR_GND` hole that grounds both plates. Its underside
   faces the grounded bottom plate over its whole length (*"main board
@@ -174,14 +184,14 @@ Several things can claim each end, and the largest wins:
   bottom plate"*). It is as thin as the key boards and as deep below its
   switches' seat (*"main board mount sets its depth"*); the soldered thumb
   switches carry it between the mounts. The near row of thumb switches is
-  turned 180° so their pins point away from the LED strip.
+  turned 180° so their pins point away from the centreline and the LED row.
   (Before it: a centre board stacked between the thumb boards and the key
   boards — that history is in git and ADR 0017.)
 - **Its parts have room** — `drc.echo` prints the height under the key boards
   and where none is overhead, and both clear the regulator block and the
   breath sensor. **The breath sensor is at the mouth end** (owner, with this
   board), beside the breath trap, ports toward the tail: the thumb switches'
-  pins leave the strip the centreline band, and the sensor is too wide to sit
+  pins leave the LED row the centreline band, and the sensor is too wide to sit
   beside it (*"breath sensor fits at the mouth end"*; the mouth end also
   claims room for it, *"what the mouth end needs"*).
 - **Board clearances are real ones** (`boards.board_clear`): the owner
@@ -294,13 +304,13 @@ only as good as those envelopes. Group the report's lines by these causes
    (ADR 0017's amendment): a 2×6 1.27 mm shrouded right-angle header on each
    board (`boards.chain_hdr_*`), the key board's **hanging from its underside
    directly over the main board's** — stacked, at the same place along the
-   body — both in the far band beside the LED strip and **both mouths facing
+   body — both in the far band beside the LED row and **both mouths facing
    the same way along the body**, clear of the switch pins above and below.
    The ribbon comes out of both plugs and **folds back on itself: closed, it
    is a flat hairpin lying along the body**: the `-RN2` cable leaves the main
    board's socket upward and the key board's downward, facing each other,
    and both legs lie between the two plugs' heights, running the same way to
-   the fold, so it never stands across the LED strip's light
+   the fold, so it never stands across the LED row's light
    (`renders/section-ribbon.png`; *"key-chain ribbon closed: hairpin leg and
    fold radius"*, *"key-chain ribbon fold no tighter than its bend radius"*,
    *"key-chain ribbon hairpin inside the body"*, *"key-chain ribbon hairpin
@@ -325,18 +335,17 @@ only as good as those envelopes. Group the report's lines by these causes
    is what sends the two ends' cables toward each other; that makes the key
    board's pin numbers differ from the main board's — `key-chain-loom.md`
    says how.
-3. **The breath tube** is short: mouth cap, trap, then across over the strip
-   and back onto the sensor's port, all in the mouth band; the board has a
+3. **The breath tube** is short: mouth cap, trap, then across over the LED
+   row (*"breath tube crosses the LED row clear of it"*) and back onto the sensor's port, all in the mouth band; the board has a
    slot in front of the sensor's lower port.
 4. **The U-bolt has the middle station to itself** (ADR 0025: the lid
    screws that shared it, and the backplate, are gone). Its legs pass the oak
    bottom and the bottom plate, which spreads its pull over the oak (*"U-bolt
-   spacers bear on the bottom plate"*). **The U-bolt is M3, and the main
-   board sized it**, not the load: its nuts stand on the main board's top face
-   beside the LED strip, an M5 nut's keep-out reaches under the strip, and an
-   M4's clears it only at a wider span, which the fasteners' window no longer
-   forbids (`hardware.ubolt_rod_d` has the arithmetic; *"LED strip clear of
-   the U-bolt nuts"*). The board is in the U-bolt's clamp: a spacer fills the
+   spacers bear on the bottom plate"*). **The U-bolt is M3 until the strap
+   hardware is chosen.** The LED strip that held it to M3 is gone (ADR 0028):
+   no LED stands between the legs, so a bigger nut reaches nothing on the
+   centreline, and what bounds its size is the neck of board between the legs
+   and the thumb recesses (`hardware.ubolt_rod_d`). The board is in the U-bolt's clamp: a spacer fills the
    bottom plate to its underside (*"main board in the U-bolt's clamp"*), and
    *"main board neck at the U-bolt station"* gives the board every trace
    between the two halves must cross. (The stations ran through
@@ -352,7 +361,7 @@ only as good as those envelopes. Group the report's lines by these causes
    0021): the etherCON is soldered to its adapter, and J-UMB, a right-angle
    header, is soldered into the adapter and the tongue (*"J-UMB on the main
    board's tongue…"*, *"J-UMB's row lands on the adapter clear of the
-   etherCON's footprint"*). The LED strip stops short of J-MCU. The rows are
+   etherCON's footprint"*). The LED row stops short of J-MCU. The rows are
    `J-MCU` and `CBL-MCU-RIBBON` (`hardware/carrier/`), `J-UMBILICAL-INST`,
    `J-UMB` and `PCB-UMB-ADAPTER` (`hardware/interfaces/spi-link/`).
 6. **The tail is clear.** The etherCON and its adapter, J-UMB, the USB-C
@@ -380,7 +389,7 @@ placed from. The main board's the same way: `export/main-board.dxf` is its
 outline, with the tongue, notches, holes and the sensor's slot, and its
 `main` entries in `export/pcb-geometry.echo` place the thumb switches (from
 below), both chain headers, J-MCU, J-UMB, the sensor, the regulator block,
-the strip and the mounts, with how tall parts may stand under each key board
+each LED of the row and the mounts, with how tall parts may stand under each key board
 and where nothing may.
 
 ## Not modelled yet

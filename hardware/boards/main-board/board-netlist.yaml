@@ -149,6 +149,41 @@ components:
     - 1
     - 2
     sheet: sw-
+  C25:
+    of: C-LED
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: led-strip-drive
+  C26:
+    of: C-LED
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: led-strip-drive
+  C27:
+    of: C-LED
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: led-strip-drive
+  C28:
+    of: C-LED
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: led-strip-drive
+  C29:
+    of: C-LED
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: led-strip-drive
   C3:
     of: C-DECOUPLE-CARRIER
     value: 100nF
@@ -156,6 +191,62 @@ components:
     - 1
     - 2
     sheet: breath-adc
+  C30:
+    of: C-LED
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: led-strip-drive
+  C31:
+    of: C-LED
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: led-strip-drive
+  C32:
+    of: C-LED
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: led-strip-drive
+  C33:
+    of: C-LED
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: led-strip-drive
+  C34:
+    of: C-LED
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: led-strip-drive
+  C35:
+    of: C-LED
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: led-strip-drive
+  C36:
+    of: C-LED
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: led-strip-drive
+  C37:
+    of: C-LED
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: led-strip-drive
   C4:
     of: C-REF-OUT
     value: 10uF
@@ -205,6 +296,106 @@ components:
     - A
     - K
     sheet: breath-excitation-reference
+  D10:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    sheet: led-strip-drive
+  D11:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    sheet: led-strip-drive
+  D12:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    sheet: led-strip-drive
+  D13:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    sheet: led-strip-drive
+  D14:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    sheet: led-strip-drive
+  D15:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    sheet: led-strip-drive
+  D16:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    sheet: led-strip-drive
+  D17:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    sheet: led-strip-drive
+  D18:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    sheet: led-strip-drive
+  D19:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    sheet: led-strip-drive
   D2:
     of: D-REVSHUNT
     value: SS34
@@ -240,6 +431,36 @@ components:
     - A
     - K
     sheet: breath-sense-link
+  D7:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    sheet: led-strip-drive
+  D8:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    sheet: led-strip-drive
+  D9:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    sheet: led-strip-drive
   FB1:
     of: FB-CHAIN
     value: Ferrite bead 600R @ 100MHz
@@ -291,15 +512,6 @@ components:
     - 4
     - 5
     sheet: service-uart
-  J3:
-    of: J-LED
-    value: 4 solder pads
-    pins:
-    - POS12
-    - GND
-    - DI
-    - BI
-    sheet: led-strip-drive
   J4:
     of: J-CHAIN
     value: 12-way
@@ -1082,8 +1294,56 @@ nets:
   /led-strip-drive/GATE_A_OUT:
   - R11.1
   - U6.1Y
+  /led-strip-drive/LED_D1:
+  - D7.DO
+  - D8.DIN1
+  - D9.DIN2
+  /led-strip-drive/LED_D10:
+  - D16.DO
+  - D17.DIN1
+  - D18.DIN2
+  /led-strip-drive/LED_D11:
+  - D17.DO
+  - D18.DIN1
+  - D19.DIN2
+  /led-strip-drive/LED_D12:
+  - D18.DO
+  - D19.DIN1
+  /led-strip-drive/LED_D2:
+  - D10.DIN2
+  - D8.DO
+  - D9.DIN1
+  /led-strip-drive/LED_D3:
+  - D10.DIN1
+  - D11.DIN2
+  - D9.DO
+  /led-strip-drive/LED_D4:
+  - D10.DO
+  - D11.DIN1
+  - D12.DIN2
+  /led-strip-drive/LED_D5:
+  - D11.DO
+  - D12.DIN1
+  - D13.DIN2
+  /led-strip-drive/LED_D6:
+  - D12.DO
+  - D13.DIN1
+  - D14.DIN2
+  /led-strip-drive/LED_D7:
+  - D13.DO
+  - D14.DIN1
+  - D15.DIN2
+  /led-strip-drive/LED_D8:
+  - D14.DO
+  - D15.DIN1
+  - D16.DIN2
+  /led-strip-drive/LED_D9:
+  - D15.DO
+  - D16.DIN1
+  - D17.DIN2
   /led-strip-drive/LED_DI:
-  - J3.DI
+  - D7.DIN1
+  - D8.DIN2
   - R11.2
   /power-entry-instrument/BUCK_A_OUT:
   - D4.A
@@ -1115,6 +1375,34 @@ nets:
   - C11.1
   - L1.2
   - U5.IN
+  D10.1:
+  - D10.1
+  D11.1:
+  - D11.1
+  D12.1:
+  - D12.1
+  D13.1:
+  - D13.1
+  D14.1:
+  - D14.1
+  D15.1:
+  - D15.1
+  D16.1:
+  - D16.1
+  D17.1:
+  - D17.1
+  D18.1:
+  - D18.1
+  D19.1:
+  - D19.1
+  D19.DO:
+  - D19.DO
+  D7.1:
+  - D7.1
+  D8.1:
+  - D8.1
+  D9.1:
+  - D9.1
   DEV_3V3:
   - A1.P3V3
   - C13.1
@@ -1178,17 +1466,42 @@ nets:
   - C22.2
   - C23.2
   - C24.2
+  - C25.2
+  - C26.2
+  - C27.2
+  - C28.2
+  - C29.2
+  - C30.2
+  - C31.2
+  - C32.2
+  - C33.2
+  - C34.2
+  - C35.2
+  - C36.2
+  - C37.2
+  - D10.GND
+  - D11.GND
+  - D12.GND
+  - D13.GND
+  - D14.GND
+  - D15.GND
+  - D16.GND
+  - D17.GND
+  - D18.GND
+  - D19.GND
   - D2.A
   - D3.A
   - D5.A
   - D6.A
+  - D7.GND
+  - D7.DIN2
+  - D8.GND
+  - D9.GND
   - J1.11
   - J1.15
   - J1.2
   - J1.9
   - J2.3
-  - J3.BI
-  - J3.GND
   - J4.1
   - J4.3
   - J4.5
@@ -1274,9 +1587,34 @@ nets:
   - U9.CH4
   UMBILICAL_POS12:
   - C10.1
+  - C25.1
+  - C26.1
+  - C27.1
+  - C28.1
+  - C29.1
+  - C30.1
+  - C31.1
+  - C32.1
+  - C33.1
+  - C34.1
+  - C35.1
+  - C36.1
+  - C37.1
+  - D10.VDD
+  - D11.VDD
+  - D12.VDD
+  - D13.VDD
+  - D14.VDD
+  - D15.VDD
+  - D16.VDD
+  - D17.VDD
+  - D18.VDD
+  - D19.VDD
   - D2.K
   - D3.K
-  - J3.POS12
+  - D7.VDD
+  - D8.VDD
+  - D9.VDD
   - J6.3
   - L1.1
   - R6.1
@@ -1287,6 +1625,20 @@ nets:
   - R8.1
   - U10.VS
 external_endpoints:
+- D10.1
+- D11.1
+- D12.1
+- D13.1
+- D14.1
+- D15.1
+- D16.1
+- D17.1
+- D18.1
+- D19.1
+- D19.DO
+- D7.1
+- D8.1
+- D9.1
 - J4.11
 - J4.12
 - J5.11

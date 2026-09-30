@@ -250,6 +250,30 @@ And, answering the follow-up questions:
   shorter ribbon lets the model put them, and the left-hand board has no bonded
   mount.
 
+## Note, 2026-09-30 — one standoff where there were two
+
+The owner, 2026-09-30:
+
+> "there's one spot where we have double standoffs right next to each other,
+> probably from top key board. Good to reduce it to the one standoff there"
+
+The mouth end mount nearer the far edge stood beside the left hand's first
+column, the one under the key board's mount. The column already holds the
+board there, so the end mount is gone. The rule is general, so this cannot
+come back: an end mount is dropped when a column's mount stands within
+`hardware.end_mount_merge_d`. *"End mounts dropped beside a column"* in
+`mechanical/drc.echo` names each one dropped and how far it stood from the
+column, and *"main board mounts on the bottom plate"* gives the count that
+`MECH-MB-STUD`, `MECH-MB-SPACER` and `MECH-MB-NUT` follow. The other mouth
+end mount and the tongue pair stay.
+
+The same day, on a marked-up render of the main board: *"I'm ok with it being
+more narrow, but ... my red line is inset just slightly which is not
+needed."* The tongue stays narrow, but on the side where it stepped in by a
+millimetre and a half from the main board's edge it now runs flush
+(ADR 0021's dated note; *"main board's tongue flush with its edge on the near
+side of the adapter"*). The tongue's mounts do not move.
+
 ## Open, and what decides each
 
 | Item | Decided by |

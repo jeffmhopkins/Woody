@@ -2,7 +2,7 @@
 // resolve against the top-level file, which is why figures sit beside it.
 // The main board - the one long board at the thumb level that carries the
 // thumb switches and everything the carrier did (ADR 0017) - picked out: the
-// oak top and key plate off, the board, its parts, the LED strip, the key
+// oak top and key plate off, the board, its parts, the LED row, the key
 // boards' ribbons, its mounts and the breath sensor in bright yellow, everything else faded,
 // each labelled from the same variables that place it. fig_view = "plan" is
 // the labelled view from above; "3d" is a perspective with only the title.
@@ -14,7 +14,7 @@ origin = "centre";
 fig_view = "plan";
 // A literal list: an override is evaluated where the model first assigns
 // highlight, before the model's own variables exist.
-highlight = ["main board", "parts main board", "tall parts main board", "breath sensor", "LED strip",
+highlight = ["main board", "parts main board", "tall parts main board", "breath sensor", "LED row",
              "J-CHAIN left_hand main board", "J-CHAIN right_hand main board", "IDC plug left_hand main board", "IDC plug right_hand main board",
              "ribbon left_hand", "ribbon right_hand",
              "main board stud*", "main board spacer*", "main board nut*", "column standoff*"];
@@ -32,7 +32,7 @@ module fig() {
         offset(-0.4) cb_2d();
     }
     if (fig_view == "plan") {
-        callout([gap_x[0] + 10, W / 2, z], [gap_x[0] + 12, bot - 10, z], "LED strip - lights both sides", size = s2);
+        callout([gap_x[0] + 10, W / 2, z], [gap_x[0] + 12, bot - 10, z], "LED row (13) - lights both sides", size = s2);
         callout([tall_c[0][0], tall_c[0][1], z], [tall_c[0][0] - 2, top, z], "regulator + bulk caps", size = s2, halign = "right");
         callout([sensor_c[0], sensor_c[1], z], [sensor_c[0] - 2, top, z], "breath sensor (mouth end)", size = s2, halign = "left");
         callout([mb_chain("left_hand")[0], chain_y, z], [mb_chain("left_hand")[0] + 2, bot, z], "ribbon to the LH key board", size = s2);

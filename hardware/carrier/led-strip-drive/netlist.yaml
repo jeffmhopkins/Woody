@@ -5,7 +5,7 @@
 # (part fields, sheet text) or on led-strip-drive.md.
 
 circuit: carrier/led-strip-drive
-title: LED strip drive
+title: LED drive and the LED row
 page: led-strip-drive.md
 ports:
   IO1:
@@ -15,14 +15,14 @@ ports:
     dir: in
     from: carrier/power-entry-instrument
     figure: matrix-led-current
-  UMBILICAL_POS12:
-    dir: in
-    from: module/umbilical-load-switch
-    figure: umbilical-current
   PWR_GND:
     dir: ref
     from: module/power-entry
     figure: dig-gnd-topology
+  UMBILICAL_POS12:
+    dir: in
+    from: module/umbilical-load-switch
+    figure: umbilical-current
 components:
   C-DECOUPLE-LED:
     of: C-DECOUPLE-CARRIER
@@ -32,29 +32,280 @@ components:
     - 1
     - 2
     note: AT the package, not near it
-  J-LED:
-    value: 4 solder pads
+  C-LED-1:
+    of: C-LED
+    value: 100nF
     pins:
-    - POS12
+    - 1
+    - 2
+    note: 'AT the LED''s VDD pin (2) to its GND pin (5): one per LED, the vendor''s 100 nF bypass'
+  C-LED-10:
+    of: C-LED
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: 'AT the LED''s VDD pin (2) to its GND pin (5): one per LED, the vendor''s 100 nF bypass'
+  C-LED-11:
+    of: C-LED
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: 'AT the LED''s VDD pin (2) to its GND pin (5): one per LED, the vendor''s 100 nF bypass'
+  C-LED-12:
+    of: C-LED
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: 'AT the LED''s VDD pin (2) to its GND pin (5): one per LED, the vendor''s 100 nF bypass'
+  C-LED-13:
+    of: C-LED
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: 'AT the LED''s VDD pin (2) to its GND pin (5): one per LED, the vendor''s 100 nF bypass'
+  C-LED-2:
+    of: C-LED
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: 'AT the LED''s VDD pin (2) to its GND pin (5): one per LED, the vendor''s 100 nF bypass'
+  C-LED-3:
+    of: C-LED
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: 'AT the LED''s VDD pin (2) to its GND pin (5): one per LED, the vendor''s 100 nF bypass'
+  C-LED-4:
+    of: C-LED
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: 'AT the LED''s VDD pin (2) to its GND pin (5): one per LED, the vendor''s 100 nF bypass'
+  C-LED-5:
+    of: C-LED
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: 'AT the LED''s VDD pin (2) to its GND pin (5): one per LED, the vendor''s 100 nF bypass'
+  C-LED-6:
+    of: C-LED
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: 'AT the LED''s VDD pin (2) to its GND pin (5): one per LED, the vendor''s 100 nF bypass'
+  C-LED-7:
+    of: C-LED
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: 'AT the LED''s VDD pin (2) to its GND pin (5): one per LED, the vendor''s 100 nF bypass'
+  C-LED-8:
+    of: C-LED
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: 'AT the LED''s VDD pin (2) to its GND pin (5): one per LED, the vendor''s 100 nF bypass'
+  C-LED-9:
+    of: C-LED
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: 'AT the LED''s VDD pin (2) to its GND pin (5): one per LED, the vendor''s 100 nF bypass'
+  D-LED-1:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
     - GND
-    - DI
-    - BI
-    note: 'Four solder pads, no connector (BOM row J-LED): the strip''s leads solder straight in. Strip power passes
-      through them and is carrier/power-entry-instrument''s net, not this circuit''s'
+    note: 'On the main board''s top face, one row on the centreline (ADR 0028); positions from the body CAD (pcb-geometry.echo,
+      led). DIN1 from the LED before''s DO; DIN2, the backup input, from the LED before''s DIN1, so one dead LED
+      is passed over (the WS2815 recommended circuit, datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none).
+      Pin 1 is NC. MSL 5a: baked before reflow'
+  D-LED-10:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    note: 'On the main board''s top face, one row on the centreline (ADR 0028); positions from the body CAD (pcb-geometry.echo,
+      led). DIN1 from the LED before''s DO; DIN2, the backup input, from the LED before''s DIN1, so one dead LED
+      is passed over (the WS2815 recommended circuit, datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none).
+      Pin 1 is NC. MSL 5a: baked before reflow'
+  D-LED-11:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    note: 'On the main board''s top face, one row on the centreline (ADR 0028); positions from the body CAD (pcb-geometry.echo,
+      led). DIN1 from the LED before''s DO; DIN2, the backup input, from the LED before''s DIN1, so one dead LED
+      is passed over (the WS2815 recommended circuit, datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none).
+      Pin 1 is NC. MSL 5a: baked before reflow'
+  D-LED-12:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    note: 'On the main board''s top face, one row on the centreline (ADR 0028); positions from the body CAD (pcb-geometry.echo,
+      led). DIN1 from the LED before''s DO; DIN2, the backup input, from the LED before''s DIN1, so one dead LED
+      is passed over (the WS2815 recommended circuit, datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none).
+      Pin 1 is NC. MSL 5a: baked before reflow'
+  D-LED-13:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    note: 'On the main board''s top face, one row on the centreline (ADR 0028); positions from the body CAD (pcb-geometry.echo,
+      led). DIN1 from the LED before''s DO; DIN2, the backup input, from the LED before''s DIN1, so one dead LED
+      is passed over (the WS2815 recommended circuit, datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none).
+      Pin 1 is NC. MSL 5a: baked before reflow'
+  D-LED-2:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    note: 'On the main board''s top face, one row on the centreline (ADR 0028); positions from the body CAD (pcb-geometry.echo,
+      led). DIN1 from the LED before''s DO; DIN2, the backup input, from the LED before''s DIN1, so one dead LED
+      is passed over (the WS2815 recommended circuit, datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none).
+      Pin 1 is NC. MSL 5a: baked before reflow'
+  D-LED-3:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    note: 'On the main board''s top face, one row on the centreline (ADR 0028); positions from the body CAD (pcb-geometry.echo,
+      led). DIN1 from the LED before''s DO; DIN2, the backup input, from the LED before''s DIN1, so one dead LED
+      is passed over (the WS2815 recommended circuit, datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none).
+      Pin 1 is NC. MSL 5a: baked before reflow'
+  D-LED-4:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    note: 'On the main board''s top face, one row on the centreline (ADR 0028); positions from the body CAD (pcb-geometry.echo,
+      led). DIN1 from the LED before''s DO; DIN2, the backup input, from the LED before''s DIN1, so one dead LED
+      is passed over (the WS2815 recommended circuit, datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none).
+      Pin 1 is NC. MSL 5a: baked before reflow'
+  D-LED-5:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    note: 'On the main board''s top face, one row on the centreline (ADR 0028); positions from the body CAD (pcb-geometry.echo,
+      led). DIN1 from the LED before''s DO; DIN2, the backup input, from the LED before''s DIN1, so one dead LED
+      is passed over (the WS2815 recommended circuit, datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none).
+      Pin 1 is NC. MSL 5a: baked before reflow'
+  D-LED-6:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    note: 'On the main board''s top face, one row on the centreline (ADR 0028); positions from the body CAD (pcb-geometry.echo,
+      led). DIN1 from the LED before''s DO; DIN2, the backup input, from the LED before''s DIN1, so one dead LED
+      is passed over (the WS2815 recommended circuit, datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none).
+      Pin 1 is NC. MSL 5a: baked before reflow'
+  D-LED-7:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    note: 'On the main board''s top face, one row on the centreline (ADR 0028); positions from the body CAD (pcb-geometry.echo,
+      led). DIN1 from the LED before''s DO; DIN2, the backup input, from the LED before''s DIN1, so one dead LED
+      is passed over (the WS2815 recommended circuit, datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none).
+      Pin 1 is NC. MSL 5a: baked before reflow'
+  D-LED-8:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    note: 'On the main board''s top face, one row on the centreline (ADR 0028); positions from the body CAD (pcb-geometry.echo,
+      led). DIN1 from the LED before''s DO; DIN2, the backup input, from the LED before''s DIN1, so one dead LED
+      is passed over (the WS2815 recommended circuit, datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none).
+      Pin 1 is NC. MSL 5a: baked before reflow'
+  D-LED-9:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    note: 'On the main board''s top face, one row on the centreline (ADR 0028); positions from the body CAD (pcb-geometry.echo,
+      led). DIN1 from the LED before''s DO; DIN2, the backup input, from the LED before''s DIN1, so one dead LED
+      is passed over (the WS2815 recommended circuit, datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none).
+      Pin 1 is NC. MSL 5a: baked before reflow'
   R-LED-PD:
     value: 10k 1%
     pins:
     - 1
     - 2
     note: PULL-DOWN, and it cannot be added later. GPIO1 is high-impedance for the bootloader window, OE is tied
-      low, and an AHCT input floating near its threshold becomes clean 5 V edges into the strip on a 12 V rail before
-      any firmware runs
+      low, and an AHCT input floating near its threshold becomes clean 5 V edges into the LED row on a 12 V rail
+      before any firmware runs
   R-LED-SER:
     value: 330R
     pins:
     - 1
     - 2
-    note: Series into the strip's DI, the vendor's recommended circuit
+    note: Series at the driver into LED 1 DIN1 and LED 2 DIN2 (the backup input), damping the edge at its source
   U-LVLSHIFT:
     value: 74AHCT125
     pins:
@@ -73,8 +324,8 @@ components:
     - VCC
     - GND
     note: 'ON THE 5 V RAIL, and that is the point: TTL thresholds mean a 3.3 V input reads high, and the output
-      is ~4.4 V minimum into a WS2815 that wants 3.15-3.85 V. Gates B, C and D are spare (ADR 0016: one strip) -
-      the head of the strip grounds its BI rather than being driven'
+      (~4.4 V minimum) clears the WS2815B-V1 V_IH (2.7 V min) and stays under its 5.7 V logic-input maximum. Gates
+      B, C and D are spare: the row has one data line, and LED 1 grounds its DIN2 rather than having it driven'
 nets:
   GATE_A_OUT:
   - R-LED-SER.1
@@ -87,14 +338,87 @@ nets:
   - port: IO1
   - R-LED-PD.1
   - U-LVLSHIFT.1A
+  LED_D1:
+  - D-LED-1.DO
+  - D-LED-2.DIN1
+  - D-LED-3.DIN2
+  LED_D2:
+  - D-LED-2.DO
+  - D-LED-3.DIN1
+  - D-LED-4.DIN2
+  LED_D3:
+  - D-LED-3.DO
+  - D-LED-4.DIN1
+  - D-LED-5.DIN2
+  LED_D4:
+  - D-LED-4.DO
+  - D-LED-5.DIN1
+  - D-LED-6.DIN2
+  LED_D5:
+  - D-LED-5.DO
+  - D-LED-6.DIN1
+  - D-LED-7.DIN2
+  LED_D6:
+  - D-LED-6.DO
+  - D-LED-7.DIN1
+  - D-LED-8.DIN2
+  LED_D7:
+  - D-LED-7.DO
+  - D-LED-8.DIN1
+  - D-LED-9.DIN2
+  LED_D8:
+  - D-LED-10.DIN2
+  - D-LED-8.DO
+  - D-LED-9.DIN1
+  LED_D9:
+  - D-LED-10.DIN1
+  - D-LED-11.DIN2
+  - D-LED-9.DO
+  LED_D10:
+  - D-LED-10.DO
+  - D-LED-11.DIN1
+  - D-LED-12.DIN2
+  LED_D11:
+  - D-LED-11.DO
+  - D-LED-12.DIN1
+  - D-LED-13.DIN2
+  LED_D12:
+  - D-LED-12.DO
+  - D-LED-13.DIN1
   LED_DI:
-  - J-LED.DI
+  - D-LED-1.DIN1
+  - D-LED-2.DIN2
   - R-LED-SER.2
   PWR_GND:
   - port: PWR_GND
   - C-DECOUPLE-LED.2
-  - J-LED.BI
-  - J-LED.GND
+  - C-LED-1.2
+  - C-LED-10.2
+  - C-LED-11.2
+  - C-LED-12.2
+  - C-LED-13.2
+  - C-LED-2.2
+  - C-LED-3.2
+  - C-LED-4.2
+  - C-LED-5.2
+  - C-LED-6.2
+  - C-LED-7.2
+  - C-LED-8.2
+  - C-LED-9.2
+  - D-LED-1.GND
+  - D-LED-1.DIN2
+  - D-LED-10.GND
+  - D-LED-11.GND
+  - D-LED-12.GND
+  - D-LED-13.GND
+  - D-LED-2.GND
+  - D-LED-3.GND
+  - D-LED-4.GND
+  - D-LED-5.GND
+  - D-LED-6.GND
+  - D-LED-7.GND
+  - D-LED-8.GND
+  - D-LED-9.GND
   - R-LED-PD.2
   - U-LVLSHIFT.1OE
   - U-LVLSHIFT.3OE
@@ -106,7 +430,34 @@ nets:
   - U-LVLSHIFT.3A
   UMBILICAL_POS12:
   - port: UMBILICAL_POS12
-  - J-LED.POS12
+  - C-LED-1.1
+  - C-LED-10.1
+  - C-LED-11.1
+  - C-LED-12.1
+  - C-LED-13.1
+  - C-LED-2.1
+  - C-LED-3.1
+  - C-LED-4.1
+  - C-LED-5.1
+  - C-LED-6.1
+  - C-LED-7.1
+  - C-LED-8.1
+  - C-LED-9.1
+  - D-LED-1.VDD
+  - D-LED-10.VDD
+  - D-LED-11.VDD
+  - D-LED-12.VDD
+  - D-LED-13.VDD
+  - D-LED-2.VDD
+  - D-LED-3.VDD
+  - D-LED-4.VDD
+  - D-LED-5.VDD
+  - D-LED-6.VDD
+  - D-LED-7.VDD
+  - D-LED-8.VDD
+  - D-LED-9.VDD
+  DO:
+  - D-LED-13.DO
   2Y:
   - U-LVLSHIFT.2Y
   3Y:
@@ -117,3 +468,4 @@ external_endpoints:
 - 2Y
 - 3Y
 - 4Y
+- DO

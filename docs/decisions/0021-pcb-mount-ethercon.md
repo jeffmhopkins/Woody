@@ -103,7 +103,14 @@ ADR 0004 counted every contact interface as a cost.
 - **The main board is longer, by the tongue.** The tongue is as wide as the
   adapter and notched where the last lid screws pass. It has standoffs
   under J-UMB's end. *(Since ADR 0025: no notches; the tongue's pair of mounts
-  stands on the bottom plate, which stops short of J-UMB.)*
+  stands on the bottom plate, which stops short of J-UMB.)* *(2026-09-30,
+  the owner, on a marked-up render: "I'm ok with it being more narrow, but
+  ... my red line is inset just slightly which is not needed." On the side
+  where the adapter's edge falls just inside the main board's, the tongue
+  now runs straight on from the main board's edge with no step; the other
+  side keeps its step to the adapter's width. `mechanical/drc.echo`
+  *"main board's tongue flush with its edge on the near side of the
+  adapter"* says which side and by how much.)*
 - **Taking the main board out means unscrewing the etherCON from outside
   first.** The connector, the adapter and the board come out as one piece.
   The nose sits in the cap's bore, so the assembly slides back before it

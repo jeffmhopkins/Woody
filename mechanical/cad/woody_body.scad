@@ -30,7 +30,7 @@ show_caps = true;
 show_keys = true;
 show_boards = true;
 show_hardware = true;
-show_strips = true;
+show_leds = true;
 highlight = [];   // solid ids to draw bright yellow, the rest faded (fig_centre.scad)
 show_routing = true;
 ghost_shell = false;  // draw the shell translucent to see inside
@@ -790,8 +790,11 @@ module pcb_geometry() {
     echo("PCB", "main", "part", "U-BREATH", sensor_c[0], sensor_c[1], 0, boards_sensor_body, boards_sensor_leads);
     // The regulator block's envelope: centre, along x, across y, height.
     echo("PCB", "main", "part", "REGULATOR-BLOCK", tall_c[0][0], tall_c[0][1], 0, tall_sz[0], tall_sz[1], boards_tall_h);
-    // The LED strip lying on the top face: start x, band's lower y, length, width.
-    echo("PCB", "main", "strip", "LED", strip_x0, strip_y, strip_l, lighting_strip_w);
+    // THE LED ROW (ADR 0028), one record per LED, numbered along the data
+    // line from the tail: centre, rotation (180 = its data inputs toward the
+    // tail, where the data comes from), courtyard along and across, height.
+    for (n = [1 : lighting_led_count]) let(c = led_xy(n))
+        echo("PCB", "main", "led", str("LED", n), c[0], c[1], 180, lighting_led_court[0], lighting_led_court[1], lighting_led_h);
     // Each mount (ADR 0022, ADR 0025), all on the bottom plate: centre, hole,
     // what bears on the top face (a column's standoff or an end mount's nut,
     // across its corners, with float), what bears on the underside (the
@@ -859,13 +862,13 @@ module tail_equipment() {
         [x_in1 - openings_usb_ext_depth - 4, usb_c[0], usb_c[1]], [x_in1 - openings_usb_ext_depth, usb_c[0], usb_c[1]]], 4);
 }
 
-// ONE LED STRIP, lying on the main board (owner, 2026-09-26: "one led
-// strip, on the center board. It'll diffuse to both sides" - ADR 0016). It
-// runs down the board's centreline, between the thumb switches' two rows of
-// pins, LEDs up, and lights both acrylic sides through the cavity. Placed
-// with the main board below.
-module led_strips() {
-    P(C_LED, false, "LED strip") translate([strip_x0, strip_y, cb_top]) cube([strip_l, lighting_strip_w, lighting_strip_t]);
+// THE LED ROW (ADR 0028): thirteen WS2815B-V1 on the main board's top face,
+// down the centreline between the thumb switches' two rows of pins, LEDs up,
+// lighting both acrylic sides through the cavity (ADR 0016's light path).
+// Placed with the main board below.
+module led_row() {
+    P(C_LED, false, "LED row") for (n = [1 : lighting_led_count]) let(c = led_xy(n))
+        translate([c[0] - lighting_led_body[0] / 2, c[1] - lighting_led_body[1] / 2, cb_top]) cube([lighting_led_body[0], lighting_led_body[1], lighting_led_h]);
 }
 
 // ------------------------------------------------------------ routing -----
@@ -949,23 +952,36 @@ module sensor_3d() {
     }
 }
 sensor_room = under_keys(sensor_c, [boards_sensor_body, boards_sensor_leads]) ? cb_room : gap_room;
-// The strip: the centreline band between the thumb switches' two rows of
-// pins, from past the sensor to the board's tail end.
-strip_y = W / 2 - lighting_strip_w / 2;
-strip_x0 = sensor_c[0] + boards_sensor_lead_row / 2 + boards_board_clear;
 jm_x1 = cb_x[1] - 1;                               // J-MCU's mouth, at the main board's tail edge
 jm_x0 = jm_x1 - boards_mcu_conn_w;
-strip_l = min(cb_x[1] - lighting_strip_inset, jm_x0 - boards_board_clear) - strip_x0;
+// THE LED ROW (ADR 0028): on the centreline, between the thumb switches' two
+// rows of pins, from past the sensor to short of J-MCU. led_span is where the
+// LEDs' centres may go. The row at lighting.led_pitch is centred in it, then
+// shifted to the nearest place where the U-bolt station falls midway between
+// two LEDs, so no LED stands between the legs; if no such place fits the
+// span, it stays centred and drc.echo 'LED row off the U-bolt station' fails.
+led_y = W / 2;
+led_span = [sensor_c[0] + boards_sensor_lead_row / 2 + boards_board_clear + lighting_led_court[0] / 2,
+            min(cb_x[1], jm_x0 - boards_board_clear) - lighting_led_court[0] / 2];
+led_run = (lighting_led_count - 1) * lighting_led_pitch;
+led_centred = (led_span[0] + led_span[1] - led_run) / 2;
+led_fits = [for (j = [0 : lighting_led_count - 2]) let(x0 = ubolt_c[0] - (j + 0.5) * lighting_led_pitch)
+            if (x0 >= led_span[0] - 1e-6 && x0 + led_run <= led_span[1] + 1e-6) x0];
+led_x0 = len(led_fits) == 0 ? led_centred
+       : [for (x = led_fits) if (abs(x - led_centred) == min([for (y = led_fits) abs(y - led_centred)])) x][0];
+// LED n, numbered along the data line: LED 1 at the tail end, where the data
+// arrives from U-LVLSHIFT; LED led_count nearest the mouth.
+function led_xy(n) = [led_x0 + (lighting_led_count - n) * lighting_led_pitch, led_y];
 
 // THE KEY BOARDS ARE ON RIBBONS (owner, 2026-09-26: ribbons rather than
 // blind-mating stacking headers, so the lid comes off with them attached -
 // ADR 0017). THROUGH-HOLE IDC, STACKED (owner, 2026-09-27, ADR 0017 amended):
 // on each board a right-angle 1.27 mm shrouded header, the key board's
 // hanging from its underside directly over the main board's, both mouths
-// facing the same way along the body, in the far band beside the LED strip.
+// facing the same way along the body, in the far band beside the LED row.
 // The ribbon runs out of one plug, folds back on itself and into the other:
 // a flat hairpin lying along the body between the two plugs' heights, so it
-// never stands across the strip's light. Its length is what the lid needs
+// never stands across the LED row's light. Its length is what the lid needs
 // laid off to the side with the ribbon still plugged in (routing.chain_service);
 // closed, that length is the hairpin's legs.
 far_s = tube_side < 0 ? 1 : -1;                  // the far side, away from the tube
@@ -996,9 +1012,12 @@ chain_z_up = chain_zk - boards_chain_plug_t / 2 - routing_chain_bend_r - routing
 chain_r = (chain_z_up - chain_z_low) / 2;        // the fold's radius
 function chain_dir(cl) = routing_chain_fold[search([cl], chain_ribbon_cls)[0]];
 // A header's footprint, from its mouth at x: [x0, x1] along the body - pins,
-// body, and the plug standing out of the mouth.
-function chain_span(x, d) = d > 0 ? [x - boards_chain_hdr_pin_back - 0.5, x + boards_chain_plug_proud]
-                                  : [x - boards_chain_plug_proud, x + boards_chain_hdr_pin_back + 0.5];
+// body, and the plug standing out of the mouth, with the same 0.5 margin at
+// both ends (the plug end had none, and the right hand's header on the main
+// board came within 0.4 of a thumb switch's pin stub, owner 2026-09-30: "Fix
+// the spacing").
+function chain_span(x, d) = d > 0 ? [x - boards_chain_hdr_pin_back - 0.5, x + boards_chain_plug_proud + 0.5]
+                                  : [x - boards_chain_plug_proud - 0.5, x + boards_chain_hdr_pin_back + 0.5];
 // Clear of every switch's pole and pins on both boards (their stubs stand
 // through the board, both faces), and of the key board's switch bodies on
 // top, where the key header's pin tails come through.
@@ -1116,8 +1135,10 @@ module cb_2d() {
         union() {
             translate([cb_x[0], cb_y[0]]) square([cb_x[1] - cb_x[0], cb_y[1] - cb_y[0]]);
             // THE TONGUE (ADR 0021): on to the etherCON's adapter, as wide as
-            // it, carrying J-UMB against the adapter's rear face.
-            translate([cb_x[1] - EPS, tongue_y[0]]) square([ua_x0 - cb_x[1] + EPS, tongue_y[1] - tongue_y[0]]);
+            // it, carrying J-UMB against the adapter's rear face - and on the
+            // side where the adapter's edge falls just inside the main board's,
+            // straight on from the main board's edge, with no step (tongue_board_y).
+            translate([cb_x[1] - EPS, tongue_board_y[0]]) square([ua_x0 - cb_x[1] + EPS, tongue_board_y[1] - tongue_board_y[0]]);
         }
         // The slot in front of the sensor's lower port.
         translate(port_slot_c - port_slot_sz / 2 - [EPS, 0]) square(port_slot_sz);
@@ -1145,6 +1166,12 @@ mcu_path = concat([[mcu_x, matrix_board_z - boards_matrix_harness_h]],
 ju_l = 8 * 2.54;
 ju_row_z = cb_top + boards_umb_joint_row_h;
 tongue_y = [ec_c[0] - ec_fl[0] / 2, ec_c[0] + ec_fl[0] / 2];
+// The tongue's own edges: the adapter's width, except that on the side where
+// the adapter's edge steps in less from the main board's, the tongue runs
+// flush with the main board's edge (owner, 2026-09-30: "my red line is inset
+// just slightly which is not needed"). The other side keeps its step.
+tongue_flush_lo = tongue_y[0] - cb_y[0] <= cb_y[1] - tongue_y[1];
+tongue_board_y = tongue_flush_lo ? [cb_y[0], tongue_y[1]] : [tongue_y[0], cb_y[1]];
 // THE MAIN BOARD'S MOUNTS (ADR 0022, ADR 0025), all on the bottom plate: what
 // a mount keeps clear round its centre - a column's standoff or an end
 // mount's nut on the top face, the spacer under the board, and the float.
@@ -1156,7 +1183,9 @@ sensor_keep_cx = sensor_c[0] - boards_sensor_body / 2 + sensor_keep_l / 2;
 // J-UMB's insulator and the parts band in front of it, along the body.
 umb_band_d = boards_umb_joint_d + boards_umb_parts_d;
 function so_clear(p) = let(r = mb_keep_d / 2 + 0.5)
-    !pins_at(p, r) && (abs(p[1] - W / 2) >= lighting_strip_w / 2 + r || p[0] < strip_x0 - r || p[0] > strip_x0 + strip_l + r)
+    !pins_at(p, r)
+    // each LED of the row, by its courtyard (ADR 0028)
+    && min([for (n = [1 : lighting_led_count]) rect_gap(p, led_xy(n), lighting_led_court, 0)]) >= r
     // a thumb switch's cutout in the bottom plate is an edge for the stud,
     // and its housing and latches stand under the board beside the spacer,
     // which keeps 0.5 from the cutout as the key plate's spacers do
@@ -1185,13 +1214,17 @@ function first_clear(cs) = let(ok = [for (c = cs) if (so_clear(c)) c]) len(ok) >
 // nudge the main board's mount instead; a column cannot lean).
 cb_cols = [for (m = columns()) [m, first_clear([for (i = [0 : 20]) m + [(i % 2 == 0 ? 1 : -1) * ceil(i / 2) / 10, 0]])]];
 n_cols = len(cb_cols);
-// And a pair at each end: at the mouth, and on the tongue before J-UMB, which
+// And a pair tried at each end (one may be dropped beside a column, below): at the mouth, and on the tongue before J-UMB, which
 // takes the umbilical's mating push - behind the parts that sit at J-UMB.
 // The U-bolt's clamp holds the middle (ADR 0022 point 7).
 cb_ends = concat([for (y = [cb_y[0] + end_mount_in, cb_y[1] - end_mount_in]) first_clear([for (d = [0 : 1 : 30]) [cb_x[0] + 4 + d, y]])],
                  [for (y = [tongue_y[0] + end_mount_in, tongue_y[1] - end_mount_in]) first_clear([for (d = [0 : 1 : 20]) [ua_x0 - umb_band_d - mb_keep_d / 2 - 2 - d, y]])]);
+// An end mount with a column's mount within hardware.end_mount_merge_d is
+// dropped: the column already holds the board there (owner, 2026-09-30).
+function near_col(p) = min([for (c = cb_cols) norm(p - c[0])]);
+cb_ends_dropped = [for (c = cb_ends) if (c != undef && near_col(c) < hardware_end_mount_merge_d) c];
 // Every mount on the bottom plate: the columns first (n_cols of them), then the ends.
-cb_standoffs = concat([for (c = cb_cols) c[0]], [for (c = cb_ends) if (c != undef) c]);
+cb_standoffs = concat([for (c = cb_cols) c[0]], [for (c = cb_ends) if (c != undef && near_col(c) >= hardware_end_mount_merge_d) c]);
 // The breath tube's lane (routing_3d), placed once the mounts it keeps clear of are.
 tube_y = lane_y(routing_tube_lane, routing_tube_od);
 module centre_board_3d() {
@@ -1209,7 +1242,7 @@ module centre_board_3d() {
         for (c = tall_c) translate(c) square(tall_sz + [1, 1], center = true);
         for (c = cb_standoffs) translate(c) circle(d = mb_keep_d + 1);
         for (u = ubolt_legs()) translate(u) circle(r = ubolt_keep_r);   // the U-bolt's washer and nut
-        translate([strip_x0 - 0.5, strip_y - 0.5]) square([strip_l + 1, lighting_strip_w + 1]);
+        for (n = [1 : lighting_led_count]) translate(led_xy(n)) square(lighting_led_court, center = true);
     }
     P([0.30, 0.30, 0.55], false, "tall parts main board")
         translate([tall_c[0][0] - tall_sz[0] / 2, tall_c[0][1] - tall_sz[1] / 2, cb_top]) cube([tall_sz[0], tall_sz[1], boards_tall_h]);
@@ -1255,7 +1288,7 @@ module routing_3d() {
     trap_y = lane_y(routing_tube_lane, routing_trap_d);   // inboard of the mouth-end mounts, like the tube
     // The trap sits in the mouth band, above the main board and before the
     // first key board. The sensor is beside it on the far side (ADR 0017):
-    // from the trap the tube turns across, over the strip, and back onto the
+    // from the trap the tube turns across, over the LED row, and back onto the
     // sensor's port, which faces the tail.
     trap_x0 = x_lh0 - board_lead - boards_board_clear - routing_trap_l;
     trap_z = z_floor + cavity_h / 2;
@@ -1299,7 +1332,7 @@ module hardware_3d() {
 module assembly() {
     if (show_keys) { keys_3d(); bottom_plate_3d(); }
     if (show_boards) { cluster_boards(); tail_equipment(); }
-    if (show_strips) translate([0, 0, e_mb]) led_strips();
+    if (show_leds) translate([0, 0, e_mb]) led_row();
     if (show_routing) routing_3d();
     if (show_boards) { parts_3d(); translate([0, 0, e_mb]) { sensor_3d(); centre_board_3d(); } ribbons_3d(); tail_wiring_3d(); }
     if (show_hardware) hardware_3d();
@@ -1360,10 +1393,11 @@ module drc_report() {
         drc(undef, "equal bands (mouth = between hands)", band,
             str("mm each; set by the ", band == mouth_req ? "mouth end" : "minimum gap",
                 " - mouth needs ", mouth_req, ", gap minimum ", layout_gap, "; the tail is sized on its own"));
-    drc(undef, "LED strip on the main board (derived)", strip_l,
-        str("mm, one strip lighting both sides (ADR 0016) - ", floor(strip_l * lighting_strip_per_m / 1000), " LEDs at ", lighting_strip_per_m, "/m"));
-    drc(p1_tip[2] - routing_tube_od * 0.4 >= cb_top + lighting_strip_t + boards_board_clear, "breath tube crosses the strip clear of it",
-        p1_tip[2] - routing_tube_od * 0.4 - cb_top - lighting_strip_t, "mm above the strip's top face");
+    drc(led_x0 >= led_span[0] - 1e-6 && led_x0 + led_run <= led_span[1] + 1e-6, "LED row on the main board",
+        [lighting_led_count, lighting_led_pitch, led_xy(lighting_led_count)[0], led_xy(1)[0], led_span],
+        "LEDs (ADR 0028), their pitch, the mouth-end and tail-end LED's centre along the body, and the span their centres may take (past the breath sensor to short of J-MCU)");
+    drc(p1_tip[2] - routing_tube_od * 0.4 >= cb_top + lighting_led_h + boards_board_clear, "breath tube crosses the LED row clear of it",
+        p1_tip[2] - routing_tube_od * 0.4 - cb_top - lighting_led_h, "mm above the LEDs' top faces, wherever it crosses the centreline");
     // Each run's end keys put half a cap into the neighbouring band - the
     // ADR 0009 table counts runs centre to centre.
     lh = xs(cluster_keys("left_hand")); rh = xs(cluster_keys("right_hand"));
@@ -1462,9 +1496,12 @@ module drc_report() {
     neck_out = strips(sort_lo(cuts_out), cb_y[0], cb_y[1]);
     drc(total(neck) >= boards_main_neck_min, "main board neck at the U-bolt station", [neck, total(neck), total(neck_out)],
         str("mm of board across the station, strip by strip, their total on the inner layers, and on the outer layers less 0.5 copper keep-out round each washer and nut; every trace from one half to the other passes here (boards.main_neck_min ", boards_main_neck_min, ")"));
-    strip_hole = min([for (u = ubolt_legs()) abs(u[1] - W / 2) - ubolt_keep_r - lighting_strip_w / 2]);
-    drc(strip_hole >= 0, "LED strip clear of the U-bolt nuts", [strip_hole, strip_hole + boards_board_clear],
-        "mm, the strip's edge to the nearest nut's parts keep-out (negative = the strip overlaps it), and to the nut's corners");
+    // THE LED ROW OFF THE STATION (ADR 0028): the station midway between two
+    // LEDs, and every LED clear of the nuts' keep-out.
+    led_dx = [for (n = [1 : lighting_led_count]) abs(led_xy(n)[0] - ubolt_c[0]) - lighting_led_court[0] / 2];
+    led_nut = min([for (n = [1 : lighting_led_count], u = ubolt_legs()) rect_gap(u, led_xy(n), lighting_led_court, 0)]) - ubolt_keep_r;
+    drc(len(led_fits) > 0 && led_nut >= 0, "LED row off the U-bolt station", [min(led_dx), led_nut, led_x0 - led_centred],
+        "mm from the station's centreline to the nearest LED's courtyard along the body, from any LED's courtyard to a U-bolt nut's parts keep-out, and how far the row is shifted from centred in its span to put the station midway between two LEDs");
 
     // Sides in grooves
     drc(undef, "interior width between the acrylic sides", u_w, "mm - was the full width less two sides; the oak lips now come off it too");
@@ -1497,7 +1534,10 @@ module drc_report() {
     drc(len([for (o = col_off) if (o != 0) 1]) == 0 && len([for (c = cb_ends) if (c == undef) 1]) == 0,
         "columns vertical: the main board's mounts under the key boards'", [col_off, len([for (c = cb_ends) if (c != undef) 1])],
         "mm each column's key-board mount must move along the body for its foot on the main board to be clear (0 = vertical where it stands; undef = nothing clear within 1 mm), and the end mounts found (mouth pair, tongue pair)");
-    drc(len(cb_standoffs) == n_cols + 4, "main board mounts on the bottom plate", len(cb_standoffs),
+    drc(len([for (c = cb_ends) if (c != undef) 1]) - len(cb_ends_dropped) == len(cb_standoffs) - n_cols,
+        "end mounts dropped beside a column", [len(cb_ends_dropped), cb_ends_dropped, [for (c = cb_ends_dropped) near_col(c)]],
+        str("end mounts dropped (count, where, mm to the nearest column) because a column's mount stands within hardware.end_mount_merge_d = ", hardware_end_mount_merge_d, " mm of them"));
+    drc(len(cb_standoffs) == n_cols + 4 - len(cb_ends_dropped), "main board mounts on the bottom plate", len(cb_standoffs),
         str("mounts (ADR 0025): ", n_cols, " columns (stud, spacer, board, standoff) and ", len(cb_standoffs) - n_cols,
             " end mounts (stud, spacer, board, nut), all on the bottom plate; the U-bolt's clamp holds the middle, and the soldered thumb switches carry the board between them"));
     // THE MAIN BOARD'S DEPTH (ADR 0022): its mount on the bottom plate is the
@@ -1526,6 +1566,10 @@ module drc_report() {
     drc(tongue_y[1] - tongue_y[0] >= ju_l + 2 * boards_board_clear && ua_x0 > cb_x[1], "J-UMB on the main board's tongue, against the etherCON's adapter",
         [ua_x0 - cb_x[1], tongue_y[1] - tongue_y[0] - ju_l],
         "mm: the tongue's length past the main board, and its width less J-UMB's pin row");
+    drc(tongue_board_y[0] >= cb_y[0] && tongue_board_y[1] <= cb_y[1] && (tongue_board_y[0] == cb_y[0] || tongue_board_y[1] == cb_y[1]),
+        "main board's tongue flush with its edge on the near side of the adapter",
+        [tongue_flush_lo ? "low y" : "high y", tongue_flush_lo ? tongue_y[0] - cb_y[0] : cb_y[1] - tongue_y[1], tongue_flush_lo ? cb_y[1] - tongue_y[1] : tongue_y[0] - cb_y[0]],
+        "the side run straight through (owner, 2026-09-30), the step it no longer has (mm), and the step the other side keeps (mm)");
     // Where J-UMB's row meets the adapter, in the connector's own frame:
     // between G below the axis and the peg line through it, a pad's worth
     // (a pitch) clear of each, and above the adapter's lower edge.
