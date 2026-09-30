@@ -4,15 +4,15 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/power-entry/sim/sims.yaml: 28d96627d62e74c0
+  hardware/module/power-entry/sim/sims.yaml: 4e4b731c2ec914e4
   hardware/module/power-entry/netlist.yaml: c381da6d9e4ec030
   hardware/module/pitch-stage/netlist.yaml: 3d43eac2f5eabc29
-  hardware/module/power-entry/sim/poweron.cir: ec479159c3458acc
+  hardware/module/power-entry/sim/poweron.cir: 08faa8101c0daca5
   datasheets/discrete-and-power/LM317L-ti-pspice-snvmaw3.lib: 52c881eccf059881
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
 ngspice: '42'
 sims:
-  as-netlisted:
+  d3-reversed:
     corners: 1
     measures:
       v_pos12:
@@ -59,11 +59,10 @@ sims:
         max_at: nominal
     asserts:
     - expr: nom['v_neg12'] > -1.0
-      why: 'RECORDED FINDING: D3 as netlisted (anode at the bus -12 V pin, cathode towards the module) is reverse-biased by
-        the rail it is meant to pass, so MODULE_ANALOG_NEG12 never arrives. If this starts failing, the netlist has been corrected
-        - re-read power-entry.md'
+      why: 'WHAT-IF: D3 with its anode at the bus -12 V pin is reverse-biased by the rail it is meant to pass, so MODULE_ANALOG_NEG12
+        never arrives - which is why the netlist has it cathode to the bus'
       pass: true
-  d3-flipped[dt_neg=-0.001]:
+  as-netlisted[dt_neg=-0.001]:
     corners: 1
     measures:
       v_pos12:
@@ -123,7 +122,7 @@ sims:
       why: 'pitch-stage.md ''Power-on is 0.000 V'': with the DAC at its reset zero scale and V_ref at 0 V the jack stays within
         100 mV of 0 V through the whole power-up, whichever rail arrives first'
       pass: true
-  d3-flipped[dt_neg=0.0]:
+  as-netlisted[dt_neg=0.0]:
     corners: 1
     measures:
       v_pos12:
@@ -183,7 +182,7 @@ sims:
       why: 'pitch-stage.md ''Power-on is 0.000 V'': with the DAC at its reset zero scale and V_ref at 0 V the jack stays within
         100 mV of 0 V through the whole power-up, whichever rail arrives first'
       pass: true
-  d3-flipped[dt_neg=0.005]:
+  as-netlisted[dt_neg=0.005]:
     corners: 1
     measures:
       v_pos12:

@@ -31,7 +31,7 @@ params:
   d_n:        {value: 1.1}
   d_rs:       {value: 0.256}
   d_is:       {value: 4.8e-4}
-  d3_flip:    {value: 0}
+  d3_flip:    {value: 1, source: "1 = D3 as netlisted since 2026-09-30 (K at the bus, A at the module - hardware/module/power-entry/netlist.yaml); 0 = the reversed drawing it replaced"}
   t_neg_rise: {value: 2.0e-3}
 
 derived:
@@ -43,8 +43,11 @@ derived:
   d3_flipped: "1.0 if v['d3_flip'] else 1e-6"
 
 sims:
-  - name: as-netlisted
+  - name: d3-reversed
+    # WHAT-IF: D3 fitted the wrong way round (anode at the bus), as the sheet drew it until
+    # 2026-09-30. Kept so the failure it causes stays on record.
     deck: poweron.cir
+    set: {d3_flip: 0}
     vary: []
     measures: [v_pos12, v_neg12, avdd_final, avdd_peak, t_avdd_floor, jack_peak, jack_trough]
     post:
@@ -57,12 +60,11 @@ sims:
       jack_trough: "trough(w['jack'], 0, p['t_end'])"
     asserts:
       - expr: "nom['v_neg12'] > -1.0"
-        why: "RECORDED FINDING: D3 as netlisted (anode at the bus -12 V pin, cathode towards the module) is reverse-biased by the rail it is meant to pass, so MODULE_ANALOG_NEG12 never arrives. If this starts failing, the netlist has been corrected - re-read power-entry.md"
-  - name: d3-flipped
-    # D3 anode at the module, cathode at the bus: the orientation that passes -12 V and
-    # blocks a reversed ribbon. Run at the -12 V rail arriving early, together and late.
+        why: "WHAT-IF: D3 with its anode at the bus -12 V pin is reverse-biased by the rail it is meant to pass, so MODULE_ANALOG_NEG12 never arrives - which is why the netlist has it cathode to the bus"
+  - name: as-netlisted
+    # D3 anode at the module, cathode at the bus (the netlist): the orientation that passes
+    # -12 V and blocks a reversed ribbon. Run at the -12 V rail arriving early, together and late.
     deck: poweron.cir
-    set: {d3_flip: 1}
     sweep: {dt_neg: [-1.0e-3, 0.0, 5.0e-3]}
     vary: []
     measures: [v_pos12, v_neg12, avdd_final, avdd_peak, t_avdd_floor, jack_peak, jack_trough, i_dac_pin]

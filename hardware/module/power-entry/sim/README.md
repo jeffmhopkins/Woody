@@ -20,17 +20,17 @@ stage on those rails with the DAC at its power-on-reset zero scale.
 
 | Sim | What | Holds |
 |---|---|---|
-| `as-netlisted` | the rails, `DAC_AVDD` and the pitch jack | **a recorded finding**: `MODULE_ANALOG_NEG12` never arrives |
-| `d3-flipped[dt_neg=…]` | the same with `D3` the other way round, the −12 V rail arriving 1 ms early, together, and 5 ms late | `DAC_AVDD` settles at or above `dac-rail`'s hard floor and never reaches the DAC8568's 6 V absolute maximum; the pitch jack stays within 100 mV of 0 V throughout |
+| `as-netlisted[dt_neg=…]` | the rails, `DAC_AVDD` and the pitch jack, the −12 V rail arriving 1 ms early, together, and 5 ms late | `DAC_AVDD` settles at or above `dac-rail`'s hard floor and never reaches the DAC8568's 6 V absolute maximum; the pitch jack stays within 100 mV of 0 V throughout |
+| `d3-reversed` | a what-if: `D3` fitted with its anode at the bus | `MODULE_ANALOG_NEG12` never arrives |
 
-**`D3` is netlisted backwards.** Its anode is on the bus −12 V pin and its
-cathode towards the module, so the rail it is meant to pass reverse-biases it:
-as netlisted the module's −12 V node sits at about +0.3 V (leakage and the
-loads), and every op-amp on it runs single-supply. A reverse-protection diode
-on a negative rail has its anode on the module side and its cathode on the bus.
-The drawing on `power-entry.md` shows no direction, so only the netlist says
-this. **The fix is the netlist's (and, once migrated, the sheet's): swap `D3`'s
-pins.** `d3-flipped` is that fix, simulated.
+**`D3` must have its cathode at the bus.** The rail it passes flows out of the
+module into the bus's −12 V, so a diode with its anode at the bus is
+reverse-biased by it: the module's −12 V node then sits at about +0.3 V
+(leakage and the loads), and every op-amp on it runs single-supply. This run
+found the sheet drawn that way; the sheet was corrected on 2026-09-30, and
+`d3-reversed` keeps the failure on record. **The deck types `D3`'s orientation
+(`d3_flip`) rather than reading it from the netlist**, so a change to `D3` on
+the sheet must be mirrored in `sims.yaml`.
 
 ## What it does not show
 

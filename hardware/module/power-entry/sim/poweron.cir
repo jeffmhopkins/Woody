@@ -7,7 +7,9 @@
 * THAT LAST IS THE PAGE'S CLAIM, NOT THE DATASHEET'S: with the internal reference
 * disabled (its default, SBAS430 p.1) the pin is VREFIN, an input - what it sits at
 * then is not modelled here and is reported as open.
-* d3_flip = 1 fits D3 the other way round (a what-if: see sims.yaml). Every node starts
+* D3's orientation is TYPED HERE, not read from the netlist: d3_flip = 1 is the netlist's
+* (K at the bus, A towards the module); d3_flip = 0 is the old, reversed drawing, kept as a
+* what-if (see sims.yaml). Every node starts
 * at 0 V (uic): that is what a power-on is.
 VP12 bp12 0 PWL(0 0 {{t_pos0}} 0 {{t_pos_end}} {{v_bus}})
 VN12 bn12 0 PWL(0 0 {{t_neg0}} 0 {{t_neg_end}} {{v_bus_neg}})
@@ -16,7 +18,8 @@ D1 bp12 p12d D5817
 RFB1 p12d p12 {{r_fb}}
 C1 p12 0 {{C1}}
 RLP p12 0 {{r_load_pos}}
-* D3 AS NETLISTED: A at the bus -12 V pin, K towards the module
+* D3: d3_flipped = the netlist's orientation (K at the bus -12 V pin, A towards the module);
+* d3_as_net = the reversed what-if. Only one is fitted (the other's m is 1e-6)
 D3N bn12 n12d D5817 m={{d3_as_net}}
 D3F n12d bn12 D5817 m={{d3_flipped}}
 RD3OFF n12d bn12 1e12
