@@ -649,6 +649,53 @@ def check_chain_main(doc, js, loom, lnet, rel):
                 problems.append(f"chain: main-board wires {jref}.{k} (J-CHAIN) to {got}; {rel} puts {key}.{k} on {want}")
     if seen != {"LH", "RH"}:
         problems.append(f"chain: main-board has J-CHAIN for {sorted(seen)}, not both ribbons")
+    problems += check_chain_main_parts(bnet, doc, loom, rel)
+    return problems
+
+
+# The loom's parts that sit on the main board beside its two headers. The loom's sheet is
+# placed by no board (key-chain-loom.md, "which board places what"), so the main board draws
+# its own copies; each must be one of them, pin for pin.
+CHAIN_MAIN_ROWS = ("R-CHAIN-SER", "R-SER-TERM", "FB-CHAIN", "U-TVS-CHAIN")
+
+
+def check_chain_main_parts(bnet, doc, loom, rel):
+    """Every loom part of CHAIN_MAIN_ROWS against the main board: one main-board part of the
+    same BOM row with every pin on the net the loom puts that pin on (under the main board's
+    name for it; a pin alone on its net on both sides is an unused channel). One to one,
+    so a missing, extra or crossed part fails - two series resistors swapped between IO38
+    and IO7 is two wrong nets, not a pass."""
+    problems = []
+    lpin = {}
+    for net, nodes in loom["nets"].items():
+        members = [n for n in nodes if isinstance(n, str)]
+        for n in members:
+            lpin[n] = (MAIN_ALIAS.get(net, net), len(members))
+    for row in CHAIN_MAIN_ROWS:
+        lparts = sorted(r for r, c in loom["components"].items() if c.get("of", r) == row)
+        bparts = sorted(r for r, c in doc["components"].items() if c.get("of") == row)
+        unmatched = list(bparts)
+        for lp in lparts:
+            pins = [str(p) for p in loom["components"][lp].get("pins", [])]
+
+            def fits(bp):
+                for p in pins:
+                    lnet, lsize = lpin.get(f"{lp}.{p}", (None, 0))
+                    bn, bsize = bnet.get(f"{bp}.{p}", (None, 0))
+                    if lsize <= 1 and bsize <= 1:
+                        continue
+                    if bn != lnet:
+                        return False
+                return True
+
+            hit = next((bp for bp in unmatched if fits(bp)), None)
+            if hit is None:
+                want = ", ".join(f"{p}={lpin.get(f'{lp}.{p}', (None,))[0]}" for p in pins)
+                problems.append(f"chain: main-board has no {row} wired as {rel}'s {lp} ({want})")
+            else:
+                unmatched.remove(hit)
+        for bp in unmatched:
+            problems.append(f"chain: main-board {bp} ({row}) matches no part on {rel}")
     return problems
 
 

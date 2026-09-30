@@ -30,7 +30,7 @@ The `Dir` and `Peer` columns are defined once in
 | `MODULE ANALOG +12V` | out | `module/pitch-stage`, `module/breath-receive-stage`, `module/breath-output-stage`, `module/breath-response-shaper`, `module/mod-channels` | — | After `PTC-POS12`, `D1`, `FB1`, `C1`. The panel LED is not on it: it hangs on the load switch's output (`module/panel-led`) |
 | `MODULE ANALOG −12V` | out | `module/pitch-stage`, `module/breath-receive-stage`, `module/breath-output-stage`, `module/breath-response-shaper`, `module/mod-channels` | — | After `PTC-NEG12`, `D3`, `FB3`, `C3` |
 | `DAC AVDD` | out | `module/dac8568`, `module/breath-receive-stage`, `module/breath-output-stage`, `interfaces/spi-link` | `dac-rail` | The LM317 output. Selected on the bench, per the figure's floor. **Not `module/digital-and-supervision`**, whose 74AHCT125 runs from `LOGIC_5V` |
-| `LOGIC_5V` | out | `module/digital-and-supervision` | — | `U-REG-LOGIC`'s output, made here from the analog +12 V: the level shifter only. See *The logic 5 V* |
+| `LOGIC_5V` | out | `module/digital-and-supervision` | — | `U-REG-LOGIC`'s output, made here from the analog +12 V: the SPI receiver and level shifter only. See *The logic 5 V* |
 | `ISO_POS12` | out | `module/umbilical-load-switch` | `umbilical-current` | `U-ISO`'s isolated +12 V (ADR 0027): `U-LOADSW`'s `VCC`, the top of `R-ILIM` and of the `ON` divider hang off it. Until 2026-09-30 the load switch took the bus +12 V ahead of the diodes, `BUS_POS12_RAW`, which is now a net of this circuit only |
 | `PWR_GND` | ref | `module/umbilical-load-switch`, `carrier/power-entry-instrument` | `umbilical-current`, `dig-gnd-topology` | `U-ISO`'s isolated return and the umbilical's pin 6, on its own layer-4 copper. It meets `DIG_GND` at the etherCON (`NT-UMB-MOD`) and nothing else — see *Grounding* |
 | `AGND_MOD` | ref | `module/dac8568`, `module/pitch-stage`, `module/breath-receive-stage`, `module/breath-output-stage`, `module/breath-response-shaper`, `module/mod-channels`, `module/panel-led` | `dig-gnd-topology` | The module analog ground. Joins the star through `NT-AGND-MOD` and nowhere else — see *Grounding* |
@@ -49,7 +49,7 @@ the two agree, and where they do not the netlist wins.*
   +12V ├──[PTC-POS12]──[D1 1N5817]──[FB1]──[C1 100µF]──┬── MODULE ANALOG +12V
        │                                               │   OPA2197 ×7, INA828
        │                                               ├──[U-REG-DAC LM317LZ]── DAC AVDD
-       │                                               └──[U-REG-LOGIC]── LOGIC_5V, 74AHCT125 only
+       │                                               └──[U-REG-LOGIC]── LOGIC_5V, the SPI receiver only
        │
        ├──[PTC-ISO]──[D2 1N5817]──[FB2]──[L-ISO-IN 22µH]──┬── ISO_VIN_POS
        │                                                   │
@@ -275,8 +275,9 @@ arithmetic above.
 The owner, 2026-09-30: *"Create the 5v locally"*, and *"We keep the standard
 header, we just don't use the 5 volt. This keeps commonality of all the
 Eurorack cable connectors."* So `J-PWR-EURO` stays the 16-pin A-100 header
-(ADR 0023 point 3), its +5 V pins are no-connects, and the one 5 V load on the
-module — the 74AHCT125 (`U-LVL-MOD`) — runs from `LOGIC_5V`, made here.
+(ADR 0023 point 3), its +5 V pins are no-connects, and the 5 V loads on the
+module — the SPI receiver `U-RX-MOD` (74AHCT14) and the 74AHCT125 (`U-LVL-MOD`)
+it drives — run from `LOGIC_5V`, made here.
 **`DAC AVDD` is not on it**: the DAC keeps its own LM317 rail, `dac-rail`.
 
 **The part is ADI's `ADP7118AUJZ-5.0`** (TSOT-5), off the protected analog
@@ -285,9 +286,9 @@ module — the 74AHCT125 (`U-LVL-MOD`) — runs from `LOGIC_5V`, made here.
 
 | | `[calc]` | Source |
 |---|---|---|
-| Load | 74AHCT125 `I_CC` 20 µA, plus `ΔI_CC` 1.5 mA per input held at 3.4 V × 3 driven inputs = 4.5 mA; two 10 kΩ pull-downs on `SCLK_DAC`/`DIN` at 5 V, 1 mA when high; switching 3 × 10 pF × 5 V × 2 MHz ≈ 0.3 mA. **≤ 6 mA** | `[ds SN74AHCT125.pdf p.4]` |
+| Load | `I_CC` 20 µA each for the 74AHCT14 and the 74AHCT125. `ΔI_CC` 1.5 mA per input held at 3.4 V × the 74AHCT14's 3 cable-side inputs = 4.5 mA (the 74AHCT125's inputs are now driven rail to rail, so it adds none); two 10 kΩ pull-downs on `SCLK_DAC`/`DIN` at 5 V, 1 mA when high; switching 9 gate outputs × 10 pF × 5 V × 2 MHz ≈ 0.9 mA. **≈ 6.5 mA.** The cable-side inputs idle at about 3.0–3.2 V, below the 3.4 V the `ΔI_CC` row is stated at, where the supply-current curve is higher: the bench confirms it | `[ds SN74AHCT125.pdf p.4, SN74AHCT14.pdf p.5 and Figure 6-1]` |
 | Headroom | Input ≥ 11.4 V − `D1` ≈ 11.0 V against 5.0 V out: 6 V, where the dropout is 30/60 mV typ/max at 10 mA | `[ds ADI-ADP7118.pdf p.3]` |
-| Dissipation | (12.4 − 5.0) V × 6 mA = **44 mW**; θJA 170 °C/W gives **+7.5 °C** | `[ds p.5]` |
+| Dissipation | (12.4 − 5.0) V × 6.5 mA = **48 mW**; θJA 170 °C/W gives **+8.2 °C** — at twice the load, still under +17 °C | `[ds p.5]` |
 | Input rating | 20 V max against a 12.6 V bus maximum | `[ds p.3]` |
 | Noise | 11 µV rms, 10 Hz–100 kHz — more than a logic rail needs; it keeps the level shifter's supply from being the noisiest node beside the DAC | `[ds p.3]` |
 | Capacitors | more than 1.5 µF in and out under all conditions; 4.7 µF X7R in 1206 keeps it at 12 V of DC bias | `[ds p.4]` |

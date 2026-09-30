@@ -1,0 +1,55 @@
+* The instrument powered from the module, as netlisted at both ends: U-ISO (a 12 V
+* source that soft-starts over t_iso and cannot deliver more than its over-current
+* threshold i_ocp: its output resistance r_bus, clamped), C-ISO-OUT, the load switch
+* (module/umbilical-load-switch, with umbilical-load-switch/sim's behavioural LT1641),
+* the umbilical's +12 V and PWR_GND conductors (R and L each), and the instrument's input:
+* C-STRIP-BULK at the input node, L-BUCK-IN, C-BUCK-IN, the buck (a constant-power load
+* above its input minimum) and the 12 V loads (the LED row and the analog block, a
+* current at v_nom, resistive below it). cold = 1: everything starts from 0 (the rack powers up with the instrument
+* plugged in). cold = 0: the module is running, its FET already enhanced, and the
+* instrument is plugged in (hot-plug). D-REVSHUNT and D-TVS-PWR are left out:
+* reverse-biased, and under the SMAJ15A's standoff (the run measures the input's peak).
+VSET set 0 PWL(0 {{v_set0}} {{t_iso}} {{v_bus}})
+BISO 0 isx I = min({{i_ocp}}, max(0, (V(set) - V(vcc)) / {{r_bus}}))
+VIM isx vcc DC 0
+CISO vcc ciso {{C-ISO-OUT}}
+RCISO ciso 0 {{esr_iso}}
+CDEC vcc 0 {{C-DECOUPLE-LOADSW}}
+RILIM vcc sense {{R-ILIM}}
+XU vcc sense gdrv fb timer on pwrgd 0 LT1641B vlo={{vlo}} vhi={{vhi}} igate={{igate}} dvg={{dvg}} gm={{gm}} itup={{itup}} itdn={{itdn}}
+RGS gdrv gnode {{R-GATE-SER}}
+RGC gdrv gcm {{R-GATE-COMP}}
+CGATE gcm 0 {{C-GATE-LOADSW}}
+CTIMER timer 0 {{C-TIMER-LOADSW}}
+M1 sense gnode out out QPASS
+CISS gnode out {{c_iss}}
+RFBH out fb {{R-FB-HI}}
+RFBL fb 0 {{R-FB-LO}}
+* the umbilical
+RCP out cp1 {{r_cable}}
+LCP cp1 inp {{l_cable}}
+RCN ig cn1 {{r_cable}}
+LCN cn1 0 {{l_cable}}
+* the instrument
+CSTRIP inp cs1 {{C-STRIP-BULK}}
+RCSTRIP cs1 ig {{esr_strip}}
+B12 inp ig I = {{i_12}} * max(0, min(1, V(inp,ig) / {{v_nom}}))
+LBIN inp lb1 {{L-BUCK-IN}}
+RLBIN lb1 cb {{r_lbin}}
+CBUCK cb cb1 {{C-BUCK-IN}}
+RCBUCK cb1 ig {{esr_buck}}
+BBUCK cb ig I = {{p_buck}} / max(V(cb,ig), 1) * 0.5 * (1 + tanh((V(cb,ig) - {{v_on}}) / 0.1))
+.model QPASS NMOS(level=1 vto={{v_th}} kp={{kp}})
+.ic v(out)=0 v(inp)=0 v(cb)=0 v(timer)=0 v(gcm)={{v_gate0}} v(gdrv)={{v_gate0}} v(gnode)={{v_gate0}} v(xu.latch)=0 v(vcc)={{v_bus0}}
+.options method=gear rshunt=1e10
+.control
+tran 5u {{t_end}} 0 20u uic
+wrdata vinst.dat v(cb) - v(ig)
+wrdata vin.dat v(inp) - v(ig)
+wrdata iiso.dat i(VIM)
+wrdata latch.dat v(xu.latch)
+wrdata timer.dat v(timer)
+wrdata vcc.dat v(vcc)
+quit
+.endc
+.end

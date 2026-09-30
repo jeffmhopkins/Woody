@@ -360,10 +360,10 @@ figures:
 
   - id: spi-series-r
     quantity: SPI series resistor at the driving end
-    value: "100 ohm, R-SPI-SER, qty 3"
+    value: "82 ohm, R-SPI-SER, qty 3"
     status: settled
     owner: hardware/interfaces/spi-link/spi-link.md
-    derivation: "2 m of Cat5 is a 100-ohm transmission line. At 220R the far end's first step is 1.83 V against a 2.0 V V_IH, dwelling ~20 ns per edge in the forbidden band. 68R is ideal but draws 48 mA against a 40 mA pad spec."
+    derivation: "2 m of Cat5 is a 100-ohm transmission line. With the pad's own 17-35 ohm, 82 ohm puts the source at 99-117 ohm against the line's 88-112 ohm: the far end's first rising step is 3.04-3.32 V and the falling one 0.00-0.26 V [calc, against 100 ohm: 3.3 x 2 x 100/(R_s + 100) and 3.3 x (R_s - 100)/(R_s + 100)]. At 220R the rising first step is 1.83 V against a 2.0 V V_IH. Short-circuit current 3.3 V / (82 + 17) = 33 mA at the pad's strongest drive, under its 40 mA. Chosen with U-TVS-SPI on the pad side (owner, 2026-09-30; cs-fall-reentry, interfaces/spi-link/sim)."
     # "220 Ω with\n~200 pF" was carried here as ONE pattern with the corpus's
     # hard wrap baked into it, so it could never match the line-joined stream
     # the checker searches - indistinguishable in every report from a pattern
@@ -374,7 +374,7 @@ figures:
     # capacitance - a live, correct, entirely unrelated statement. The second
     # half of that wrapped phrase was never distinctive; it only looked
     # distinctive while it was glued to the first.
-    forbidden: ["R-MOSI-SER at 220", "R-MOSI-SER` at 220", "R-SCLK-SER", "R-CS-SER", "220 Ω with"]
+    forbidden: ["R-MOSI-SER at 220", "R-MOSI-SER` at 220", "R-SCLK-SER", "R-CS-SER", "220 Ω with", "R-SPI-SER,controller,100R", "`R-SPI-SER` ×3 at 100 Ω", "`R-SPI-SER` ×3 | **100 Ω**", "and the value is 100 Ω", "[R-SPI-SER 100R]", "**100 Ω** is the answer"]
     false_positive_note: >
       "~200 pF" is NOT a usable pattern for this figure. It is also the
       breath pair's cable capacitance at 0003:405. Do not re-add it.
@@ -384,7 +384,7 @@ figures:
     value: "1,2 BREATH/AGND | 3,6 +12V/PWR_GND | 4,5 SCLK/MOSI | 7,8 CS/DIG_GND"
     status: settled
     owner: docs/decisions/0004-cv-interface-module.md
-    derivation: "CS must have a ground partner: it frames the word, MISO is deleted so a mis-frame is unreadable and sticky. SCLK+MOSI is safe by construction - MOSI is only sampled on a SCLK edge."
+    derivation: "CS must have a ground partner: it frames the word, MISO is deleted so a mis-frame is unreadable and sticky. SCLK+MOSI share a pair: what they couple into each other arrives with the SCLK edge the DAC samples on, and is closed at the receiver (U-RX-MOD, spi-pair-crosstalk)."
     forbidden: ["| MOSI / CS |", "4 MOSI   5 CS", "7 SCLK     8 DIG_GND", "MOSI/CS on 4", "SCLK      / DIG_GND", "MOSI      / CS"]
     false_positive_note_2: "The two code-block spellings were added 2026-09-21 after ADR 0004's own 'Revised conductor budget' block was found still carrying the OLD pairing - SCLK/DIG_GND and MOSI/CS - 730 lines above its own corrected table. The pattern list matched the table-cell spelling with pipes and missed the code-block spelling with runs of spaces. Fourth time a forbidden pattern has missed a different formatting of the same value."
     false_positive_note: "'SCLK / MOSI / CS' is a legitimate list of three signals. Match the pin-table cell."
@@ -650,6 +650,48 @@ figures:
     owner: hardware/module/pitch-stage/sim/README.md
     derivation: "[sim] python3 tools/sim.py run hardware/module/pitch-stage/sim, 2026-09-30, ngspice 42 with TI's OPA2197 PSpice model. Sim step-mult, nominal: the stage as netlisted with the other jack's C-FILT-MOD-1 (82 nF) or C-OUT-BREATH (330 nF) on PITCH; corners of C-FB-PITCH, C-FILT-PITCH and R-OUT-PROT move it about 1 point. The loop's phase margin is 69.3 deg at 10 MHz at every load (sim loop): the AC sweep cannot see it. With the other output's R-OUT-PROT to its driver also on the jack: 15.3 % and 41.8 %."
     forbidden: ["44–67 %", "65.4 %"]
+  - id: cs-fall-reentry
+    quantity: CS_MOD's falling edge at the module - how far it swings back up once past the threshold. At U-RX-MOD's Schmitt input (behind R-RX-CS and C-RX-CS) against the whole V_T spread; at the cable node against a plain TTL input's V_IL (0.8 V)
+    value: "0.10 V past V_IL at the cable node at the worst corner, none at the nominal; none at the Schmitt receiver's input at any corner"
+    status: settled
+    owner: hardware/interfaces/spi-link/sim/README.md
+    derivation: "[sim] python3 tools/sim.py run hardware/interfaces/spi-link/sim, 2026-09-30, ngspice 42. Sim cs-edges: the netlisted path (pad as r_drv/tr_drv with U-TVS-SPI's 30 pF on its side, R-SPI-SER-CS, 2 m of Belden 1752A as a CPL line of its 100-ohm differential impedance, R-PULL-CS at the cable node, R-RX-CS and C-RX-CS into U-RX-MOD's input), 65 corners of pad resistance and edge, TVS, input and filter capacitance and cable impedance. At the Schmitt input the edge never swings back through the 74AHCT14's smallest hysteresis in its threshold band, and once past the band never returns to it. The cable node's 0.10 V is at the pad's default drive (35 ohm: 117 ohm of source against an 88-ohm line). What-if cs-edges-tvs-line (U-TVS-SPI at J-UMB, 100 ohm, no RC): 0.45 V nominal, 0.66 V worst corner."
+    forbidden: ["0.42 V nominal, 0.63 V worst corner", "0.42 V past it at the nominal"]
+  - id: spi-pair-crosstalk
+    quantity: MOSI at U-RX-MOD's Schmitt input (behind R-RX-MOSI and C-RX-MOSI) while SCLK switches in the same pair, MOSI held low (peak) - against the input's lowest V_T+, 0.9 V
+    value: "0.21-0.29 V nominal, 0.25-0.33 V worst corner, over a common-mode impedance of 70-140 ohm"
+    status: settled
+    owner: hardware/interfaces/spi-link/sim/README.md
+    derivation: "[sim] python3 tools/sim.py run hardware/interfaces/spi-link/sim, 2026-09-30, ngspice 42. Sim pair-mosi-low: pair 4/5 as two coupled lossy lines (ngspice CPL), odd mode 50 ohm from Belden 1752A's 100-ohm differential impedance, even mode twice a common-mode impedance NO DATASHEET GIVES - swept 70/100/140 ohm from a two-wire estimate - 65 corners each, into R-RX-MOSI and C-RX-MOSI and U-RX-MOD's input. At the cable node the same glitch is 0.69-1.00 V nominal, 0.87-1.21 V worst corner: over a plain TTL input's 0.8 V V_IL, which is why the receiver is a Schmitt stage behind an RC. Held high, MOSI stays over the highest V_T- (1.7 V) by at least 1.24 V; every SCLK and MOSI edge makes one edge at the Schmitt input. What-if pair-without-rc: the Schmitt input on the cable node crosses its lowest V_T+ at every z_cm. E11 measures the cable."
+    forbidden: ["0.89-1.52 V nominal", "1.15-1.71 V worst corner", "0.89–1.5 V"]
+  - id: shaper-exp-gain
+    quantity: Breath response shaper at POT-RESP's fully-exponential end - gain ratio (BREATH_SHAPED over the in-amp's output) at a hard blow (in-amp -4.64 V), and the in-amp output it clips from
+    value: "1.64x at a hard blow, 1.51x at the worst corner; clips from an in-amp output of -6.95 V, -6.51 V at the worst corner"
+    status: settled
+    owner: hardware/module/breath-response-shaper/sim/README.md
+    derivation: "[sim] python3 tools/sim.py run hardware/module/breath-response-shaper/sim, 2026-09-30, ngspice 42, TI's OPA2197 model and a behavioural D-RESP fitted to the 1N4448W's 0.62-0.72 V at 5 mA. Sim exp-end: R-RESP 3.9k (owner, 2026-09-30: 'need 1.5x gain'), 513 corners - the diode's spread, every resistor of the stage at its 1 % ends, POT-RESP's track at +/-20 % [assumption: the RV09 sheet gives no tolerance]. The worst corner is the pot low and the stage's linear gain low; the pot's tolerance is most of the spread. The E24 value above, 4.3k, gives 1.49x there [sim, 2026-09-30, the same corners]."
+    forbidden: ["1.30x at a hard blow", "-8.86 V", "−8.86 V", "targeting ~1.5× at a hard blow", "clip starts near an in-amp output of −7.4 V", "[R-RESP 15k]", "`R-RESP` 15 k", "`R-RESP` at 15 kΩ", "R-RESP,module,15k", "about 7 kΩ would give 1.5×"]
+  - id: adc-sample-kickback
+    quantity: The MCP3202's sample capacitor against C-AA-ADC, the sampled value's shortfall at the sensor's full scale (a gain term)
+    value: "2.6 LSB nominal, 3.3 LSB worst corner"
+    status: settled
+    owner: hardware/carrier/breath-adc/sim/README.md
+    derivation: "[sim] python3 tools/sim.py run hardware/carrier/breath-adc/sim, 2026-09-30, ngspice 42. Sim kickback: the netlisted divider and C-AA-ADC, the MCP3202's input as its datasheet's R_SS 1 kohm and C_SAMPLE 20 pF (typicals, varied), 1.5 clocks at 900 kHz once per 250 us, discharged between samples (the worst case). The page's 480 uV/V is the average current alone; each sample also takes 20 pF/47 nF of C-AA-ADC's charge [calc]."
+    forbidden: ["about 2 LSB at full scale"]
+  - id: instrument-input-z-margin
+    quantity: The buck's negative input resistance (-103 ohm) over the peak impedance it sees at C-BUCK-IN
+    value: "55x worst corner, 180x nominal (peak 0.57 ohm at 3.8 kHz)"
+    status: settled
+    owner: hardware/carrier/power-entry-instrument/sim/README.md
+    derivation: "[sim] python3 tools/sim.py run hardware/carrier/power-entry-instrument/sim, 2026-09-30, ngspice 42. Sim input-z: C-BUCK-IN, L-BUCK-IN, C-STRIP-BULK at the input node, the umbilical's two conductors (R and L from Belden 1752A, R to 28 AWG) and the load switch and C-ISO-OUT behind them; C-BUCK-IN's ESR swept from a third of its 100 kHz maximum to its 120 Hz maximum, C-STRIP-BULK's likewise. Peak 0.57 ohm at 3.8 kHz nominal."
+    forbidden: []
+  - id: hotplug-iso-ocp
+    quantity: Time U-ISO spends at its lowest over-current threshold (1.84 A, hiccup) when the instrument is plugged into a running module
+    value: "120-168 us at every corner"
+    status: settled
+    owner: hardware/carrier/power-entry-instrument/sim/README.md
+    derivation: "[sim] python3 tools/sim.py run hardware/carrier/power-entry-instrument/sim, 2026-09-30, ngspice 42. Sim hot-plug: U-ISO as a 12 V source clamped at 110 % of 1.67 A (RPA20-AW PD-5), C-ISO-OUT, umbilical-load-switch/sim's behavioural LT1641 with Q-LOADSW's banked PSMN2R0-30YLE figures, the cable and the instrument's input with a constant-power buck. The FET is already enhanced, so C-STRIP-BULK charges from C-ISO-OUT before the LT1641 takes the gate back. Whether the RPA20 hiccups depends on its unpublished over-current delay: E6 decides."
+    forbidden: []
   - id: loop-budget
     quantity: Real-time loop, one pass
     value: "196-241 us of 250 us"

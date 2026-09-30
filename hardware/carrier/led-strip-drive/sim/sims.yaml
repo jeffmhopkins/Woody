@@ -1,0 +1,52 @@
+# The LED row's data line: U-LVLSHIFT through R-LED-SER into the two inputs LED_DI feeds
+# (D-LED-1's DIN1, D-LED-2's DIN2), against the WS2815B-V1's thresholds and its shortest
+# pulse, T0H. The rest of the row is re-timed by each LED and is not this circuit's
+# edge. Values from this circuit's netlist. Run:
+#   python3 tools/sim.py run hardware/carrier/led-strip-drive/sim
+title: LED row data line - edge and the shortest pulse at the first LED
+values:
+  netlist: hardware/carrier/led-strip-drive/netlist.yaml
+
+params:
+  vcc:     {value: 5.0, source: "U-LVLSHIFT's rail, the buck's 5 V (led-strip-drive.md)"}
+  r_out:   {value: 70.0, source: "the 74AHCT125's output resistance: (4.5 - 3.94) V / 8 mA = 70 ohm at 25 C, 88 ohm over temperature (3.8 V), 55 ohm sinking (0.44 V / 8 mA) [calc, datasheets/logic/SN74AHCT125.pdf p.3] (vary)"}
+  tr_out:  {value: 3.0e-9, source: "the gate's own edge into a light load [assumption: tPLH is 3.8-5.5 ns into 15 pF, p.4] (vary)"}
+  c_in:    {value: 15.0e-12, source: "the WS2815B-V1's input capacity C_I, 15 pF max [datasheets/led/WS2815B-V1.pdf p.3]"}
+  n_in:    {value: 2, source: "LED_DI feeds two inputs, D-LED-1 DIN1 and D-LED-2 DIN2 (netlist)"}
+  c_trace: {value: 5.0e-12, source: "LED_DI's trace from U-LVLSHIFT to D-LED-1 and on to D-LED-2 [assumption: the layout is not drawn] (vary)"}
+  t_hi:    {value: 220.0e-9, source: "T0H's minimum, 220 ns [WS2815B-V1.pdf p.3, Data Transfer Time]: the shortest high the row must read"}
+  t_lo:    {value: 900.0e-9, source: "T0L's minimum, 900 ns [same]"}
+  vih:     {value: 2.7, source: "the WS2815B-V1's V_IH min at VDD 12 V [same, p.3]"}
+  vil:     {value: 1.5, source: "its V_IL max [same]"}
+
+derived:
+  t_hi_w: "v['t_hi'] - v['tr_out']"
+  t_per: "v['t_hi'] + v['t_lo'] + 2 * v['tr_out']"
+  c_in_total: "v['n_in'] * v['c_in']"
+
+vary:
+  r_out:   {tol: [-0.21, 0.25]}
+  tr_out:  {tol: [-0.67, 0.67]}
+  c_trace: {tol: [-0.5, 1.0]}
+
+sims:
+  - name: t0h
+    deck: data.cir
+    measures: [t_rise, t_fall, hi_short, hi_long, v_max, v_min]
+    post:
+      # 10-90 % edges at the LED's inputs
+      t_rise: "cross(w['di'], 0.9 * p['vcc'], 40e-9) - cross(w['di'], 0.1 * p['vcc'], 40e-9)"
+      t_fall: "cross(w['di'], 0.1 * p['vcc'], cross(w['di'], 0.9 * p['vcc'], 40e-9) + 50e-9) - cross(w['di'], 0.9 * p['vcc'], cross(w['di'], 0.9 * p['vcc'], 40e-9) + 50e-9)"
+      # the shortest high an input anywhere in its threshold window could read: above V_IH
+      # min from rising to falling; and the longest: above V_IL max
+      hi_short: "cross(w['di'], p['vih'], cross(w['di'], p['vih'], 40e-9) + 20e-9) - cross(w['di'], p['vih'], 40e-9)"
+      hi_long: "cross(w['di'], p['vil'], cross(w['di'], p['vil'], 40e-9) + 20e-9) - cross(w['di'], p['vil'], 40e-9)"
+      v_max: "peak(w['di'], 0, 1.5e-6)"
+      v_min: "trough(w['di'], 0, 1.5e-6)"
+    asserts:
+      - expr: "max['t_rise'] < 40e-9 and max['t_fall'] < 40e-9"
+        why: "the page's ~22 ns edge (330 ohm x 30 pF, x 2.2), a tenth of T0H, holds with the gate's own resistance and a trace added: under 40 ns at every corner"
+      - expr: "min['hi_short'] > 0.9 * p['t_hi'] and max['hi_long'] < 1.2 * p['t_hi']"
+        why: "a 220 ns high arrives as 198-264 ns or better wherever in 1.5-2.7 V the LED's threshold sits: the edge moves the pulse by a few nanoseconds, a small fraction of T0H's 220-380 ns window"
+      - expr: "max['v_max'] < 5.7 and min['v_min'] > -0.3"
+        why: "inside the WS2815B-V1's logic-input absolute maximum, -0.3 to 5.7 V [ds p.2]: an RC, nothing rings"

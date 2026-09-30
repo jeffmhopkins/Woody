@@ -140,18 +140,23 @@ be right before the boards are ordered, and firmware has to be told the pattern.
 
 ## Still open
 
-*The two items from `cluster-boards.md`'s `Still open` list that belong to this
-circuit, moved verbatim 2026-09-21. `§4` is this page.*
-
 - **Whether the reserved spare-switch positions** (`config/key-layout.yaml`
   `spare_bits_switches`) **are ever fitted.** Their bits are decided and wired
   — `sw+` `sw−` on `right_thumb` (`allocation.yaml`), networks fitted — and
-  there are no cutouts for them (owner, 2026-09-26, ADR 0010). Where on the
-  body a switch would go, and so whether fitting one is worth recutting
-  `PLATE-BOTTOM` and the oak bottom, is an M2 decision with hands on the mule.
-- **Whether the last 3 free bits should be marker bits too**, making it 11.
-  The argument that took the marker from 6 to 8 — a free bit has no plate
-  cutout and the body bonds shut, so it can never become a switch — applies to
-  these three unchanged, and strapping them costs *nothing* where pulling them
-  costs three resistors. Against: a pulled bit can still be jumpered at
-  bring-up, and 8 was decided deliberately. Left at 8/3 rather than drifting.
+  there are no cutouts for them (owner, 2026-09-26, ADR 0010). **Closed at M2**,
+  with hands on the mule: where on the body a switch would go, and so whether
+  fitting one is worth recutting `PLATE-BOTTOM` and the oak bottom. Nothing
+  on a board waits on it.
+
+**Decided: the last 3 free bits stay pulled up, not strapped** (8 marker bits,
+3 free, as `config/key-layout.yaml` has them). `[calc over allocation.yaml]`
+Strapping them would add no fault the marker cannot already see: every
+device already carries one bit wired high and one wired low, which is what
+makes a dead, unclocked, stuck-high or stuck-low device fail its own frame,
+and the only devices holding free bits (`left_thumb`, `left_hand`) have both.
+Three more straps would raise the single-bit-flip catch from 8 in 32 to 11 in
+32 and nothing else. A pulled-up free bit reads high on every good frame
+anyway, so firmware may check it as a high marker at no cost to the board,
+while the pull-up keeps it usable as an input: since ADR 0025 the body opens
+by cutting its silicone, so a free bit is no longer one that can never become
+a switch. Both key boards are laid out with it (`R11`).

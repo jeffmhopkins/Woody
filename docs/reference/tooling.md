@@ -707,6 +707,18 @@ so.
   measures the swing back through the final value against the first dip.
 - **A diverged run reports a number too.** `sim.py` refuses any measure that is
   not finite or is beyond 1e12.
+- **A switched-in capacitor must be switched out.** A 1 GF injection capacitor
+  left in place when the same deck is re-used closed-loop for another AC
+  question grounds the (−) input at every frequency that matters: the −12 V
+  rail's path to the breath jack read 0.67 V/V instead of 0.42. The deck makes
+  it a parameter and opens it (`breath-output-stage/sim`, 2026-09-30).
+- **A DC sweep into a clip loses the macromodel.** TI's OPA2197 model found no
+  operating point where the response shaper's output saturates; a slow
+  transient ramp of the input does the same job (`breath-response-shaper/sim`).
+- **A current source is not a load.** A fixed current drawn from a node that
+  starts at 0 V drives it negative and trips everything upstream; a load that
+  is off until its supply arrives is a current scaled by the voltage
+  (`power-entry-instrument/sim`).
 - **A threshold test must not mix parts.** "Never below VT− max after crossing
   VT+ min" fails on a perfect edge, because across the datasheet's spread VT−
   max is above VT+ min. The test is the waveform's swing back after its first
@@ -723,3 +735,10 @@ so.
 | the pitch stage's step into a passive mult, and its loop at the same loads | `hardware/module/pitch-stage/sim/` |
 | rack power-on: the rails, the LM317L's `DAC_AVDD` (TI's model) and the pitch jack | `hardware/module/power-entry/sim/` |
 | the umbilical load switch's start, with a behavioural LT1641 built from its datasheet | `hardware/module/umbilical-load-switch/sim/` |
+| SCLK, MOSI and CS_MOD over the umbilical as coupled lossy lines (ngspice `CPL`), from a banked Cat5e datasheet, into the module's 74AHCT125 | `hardware/interfaces/spi-link/sim/` |
+| the four mod channels and their shared reference: range, a stale or wrong `V_ref`, a step and the loop into a passive mult, crosstalk | `hardware/module/mod-channels/sim/` |
+| the breath output stage: its offset table, gain ends, clip, a step and the loop into a passive mult, and the −12 V rail's path to the jack | `hardware/module/breath-output-stage/sim/` |
+| the response shaper's curve at `POT-RESP`'s ends and centre, and its clip, with a behavioural 1N4148W | `hardware/module/breath-response-shaper/sim/` |
+| the breath ADC's anti-alias filter, its time constant, and the MCP3202's sample capacitor against it | `hardware/carrier/breath-adc/sim/` |
+| the instrument's input LC against the buck's negative resistance, and its start from `U-ISO` through the load switch and the cable, cold and hot-plugged | `hardware/carrier/power-entry-instrument/sim/` |
+| the LED row's data line: its edge and `T0H` at the first LED | `hardware/carrier/led-strip-drive/sim/` |

@@ -162,7 +162,8 @@ netlist and two clones differ.
 ### 2. Simulate — headless, runs today
 
 Independent of everything else; `ngspice` needs no allowlist change. Ranked by
-what the claim costs if wrong. **All five have run** (2026-09-30), each in its
+what the claim costs if wrong. **All five have run** (2026-09-30), and so
+have the rows after them, the next ranking down; each in its
 circuit's `sim/` with its own README, under `tools/sim.py` (`tooling.md` §5);
 what each found is in the register, not here:
 
@@ -173,6 +174,13 @@ what each found is in the register, not here:
 | **Pitch transient into a passive mult** | `module/pitch-stage/sim` | `pitch-mult-overshoot`. **The AC sweep is structurally blind to it**: the phase margin is the same at every load |
 | **Power-on / reset transient** | `module/power-entry/sim` | **`D3` is netlisted backwards** and the −12 V rail never arrives; with it reversed, `DAC_AVDD` keeps `dac-rail`'s floor and the pitch jack stays at 0 V |
 | **Behavioural LT1641** | `module/umbilical-load-switch/sim` | Starts at every datasheet corner, cold and hot-plug; with `FB` unconnected it latches off, as the page says |
+| **SPI over the umbilical** | `interfaces/spi-link/sim` | `cs-fall-reentry`, `spi-pair-crosstalk`. **`CS_MOD`'s falling edge re-enters the band; `SCLK` couples into `MOSI` at the DAC's sampling edge.** Both for E11 and the owner |
+| **Mod channels** | `module/mod-channels/sim` | Law to 0.1 mV, no clip, no overshoot into any mult (`C-FILT-MOD` is outside the loop); the jack reads 1 % low into 100 kΩ |
+| **Breath output stage** | `module/breath-output-stage/sim` | The offset table to 1 mV; 95.6° at every load; the −12 V rail reaches the jack at the page's 4.1 mV |
+| **Response shaper** | `module/breath-response-shaper/sim` | `shaper-exp-gain`: the curve is weaker than its table, because the pot loads the `V_in/2` divider |
+| **Breath ADC** | `carrier/breath-adc/sim` | 564 Hz, 55 dB, τ 282 µs as the page says; `adc-sample-kickback` is more than its "about 2 LSB" |
+| **Instrument power entry** | `carrier/power-entry-instrument/sim` | `instrument-input-z-margin`; starts cold and hot. **A hot-plug drives `U-ISO` to its over-current threshold** (`hotplug-iso-ocp`): E6 |
+| **LED data** | `carrier/led-strip-drive/sim` | A third slower edge than the page's, still a small fraction of `T0H` |
 
 > **The CMRR row's stated reason was refuted and the ranking survives on a
 > different one.** It read *"unretrofittable inside a bonded body"*. ADR 0009

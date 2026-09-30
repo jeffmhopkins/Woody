@@ -7,7 +7,8 @@ Everything below the `## Interfaces` table was **moved verbatim**: nothing was
 reworded, no value was edited and no open question was closed.
 
 Three conductors and a return leave the carrier, cross 2 m of Cat5 and arrive
-at a 74AHCT125 with no hysteresis. The series resistors are chosen at the
+at `U-RX-MOD`, a 74AHCT14 Schmitt stage behind an RC, which drives the
+module's 74AHCT125 (owner, 2026-09-30). The series resistors are chosen at the
 driving end against a threshold at the receiving end, the pulls exist on both
 sides of that buffer, and the pin pairing is an argument about what couples
 into what inside the cable — none of which can be read from one end alone.
@@ -38,7 +39,7 @@ The `Dir` and `Peer` columns are defined once in
 | `MOSI` | instrument → module | out | `J-MCU` IO36 → `module/digital-and-supervision` | `umbilical-pinmap`, `spi-series-r` | On `J-UMB`. Pulled **down**, both sides. Sampled only on a `SCLK` edge, which is why it shares that pair |
 | `CS_MOD` | instrument → module | out | `J-MCU` IO34 → `module/digital-and-supervision` | `umbilical-pinmap`, `spi-series-r` | On `J-UMB`. Pulled **up at both ends of the cable** — `R-CS-PULL-INST` to 3V3 on the main board, `R-CS-PULL-MOD` to `LOGIC_5V` at the module (*`CS_MOD`'s two pulls*, below) — and on the DAC side of the buffer. The one that must not glitch. Shares a pair with `DIG_GND`. **Not `CS_ADC`**, the MCP3202's, which never leaves the carrier |
 | `DIG_GND` | instrument ↔ module | ref | `carrier/carrier` (its `PWR_GND`, at `J-UMB`) ↔ `module/power-entry` | `umbilical-pinmap`, `dig-gnd-topology` | On `J-UMB` pin 8. `CS_MOD`'s return partner. **Tied to the main board's ground at `J-UMB`** (ADR 0018). Where it ties at the **module** end is `dig-gnd-topology` |
-| `U-TVS-SPI` | instrument | — | — | — | This circuit's own part: on all three signals, to `PWR_GND`, at the connector |
+| `U-TVS-SPI` | instrument | — | — | `cs-fall-reentry` | This circuit's own part: on all three signals, to `PWR_GND`, on the **pad side** of `R-SPI-SER` (`IO35`, `IO36`, `IO34`), close to `J-UMB` |
 | `J-UMBILICAL-INST`, `PCB-UMB-ADAPTER`, `J-UMB` | instrument | — | — | `umbilical-pinmap` | This circuit's own parts: the instrument's etherCON, the adapter board it is soldered to, and the header that joins the adapter to the main board. See *The instrument's connector*, below |
 | `MISO` | instrument | — | `carrier/breath-adc` | — | IO37 is the MCP3202's `DOUT` and **never leaves the board**. ADR 0004 deleted `MISO` from the umbilical, which is why nothing reads the DAC back |
 | SPI2 host | instrument | — | `carrier/breath-adc`, `module/dac8568` | `loop-budget` | One host, two devices, two clocks. The ADC's limit is a fact about a part on the instrument board that constrains the link's budget |
@@ -93,8 +94,8 @@ mated contact inside the body. So:
 - **The pairs stay side by side on the adapter.** The pairing is the argument
   on this page, and the adapter's few millimetres are the last stretch of the
   same line.
-- **The clamps drawn "at the connector"** — `U-TVS-SPI` here, `D-REVSHUNT`
-  and `D-TVS-PWR` on
+- **The clamps drawn "at the connector"** — `U-TVS-SPI` here (on the pad
+  side of `R-SPI-SER`, beside `J-UMB`), `D-REVSHUNT` and `D-TVS-PWR` on
   [`power-entry-instrument`](../../carrier/power-entry-instrument/power-entry-instrument.md) —
   are on the main board at `J-UMB`, not on the adapter.
 - **The +12 V and `PWR_GND` path is rated above the module's current-limit
@@ -123,6 +124,38 @@ pin map and all eight of its nets: each net is `J-UMB`, `J-UMB-INST` and
 `J-UMB`'s part is chosen (the row in this circuit's [`bom.csv`](bom.csv));
 its drawing settles the insulator in `config/body.yaml` `boards.umb_joint_*`.
 
+## Simulated — `sim/`, 2026-09-30, and what the owner decided
+
+The three lines with the cable as lossy transmission lines from a banked
+Cat5e datasheet (`sim/README.md`). The first run found two hazards; the owner
+decided both on 2026-09-30 (*"Fix, add buffer"*), and the run now holds the
+netlist to them:
+
+- **`CS_MOD`'s falling edge came back up through the band.** The source
+  (`R-SPI-SER` and the pad) sat above the line's 100 Ω, so the falling edge's
+  first step landed only just under `V_IL`, and `U-TVS-SPI`'s capacitance on
+  the line side of `R-SPI-SER` reflected the returning wave back up through
+  it. **`U-TVS-SPI` is now on the pad side of `R-SPI-SER`, and `R-SPI-SER` is
+  `spi-series-r`**; at the receiver's input the edge is clean at every corner
+  (`cs-fall-reentry`). At the cable node, where a plain TTL input would sit,
+  a small swing back remains at the worst corner — the receiver below is what
+  closes it.
+- **`SCLK` and `MOSI` in one pair couple, and where it lands is the DAC's
+  sampling edge.** Each `SCLK` edge puts a round-trip-long glitch on a static
+  `MOSI` at the module, including on the falling edge the DAC clocks `DIN` on
+  `[ds DAC8568CIPW.pdf p.6]`. **The pairing stays; the module end now has a
+  receiver with hysteresis**, `U-RX-MOD` (74AHCT14, TTL-compatible
+  thresholds, no input clamp to `VCC`), each input behind `R-RX-MOD` and
+  `C-RX-MOD`, on `module/digital-and-supervision`. What reaches its input is
+  `spi-pair-crosstalk`, on the right side of its threshold band at every
+  common-mode impedance swept and every corner. **The RC is needed**: with the
+  Schmitt input straight on the cable the glitch crosses its lowest `V_T+`
+  (`sim/`, `pair-without-rc`). The RC delays each line by the same parts, and
+  the timing it costs against the DAC is in `sim/README.md`.
+
+The even-mode impedance is in no datasheet, so the size is bracketed, not
+known; E11 scopes the real cable at `U-RX-MOD`'s inputs.
+
 ---
 
 ## From the instrument end — `carrier.md` §4
@@ -131,7 +164,9 @@ its drawing settles the insulator in `config/body.yaml` `boards.umb_joint_*`.
 throughout means `carrier.md` as it stood before the move, and the drawing it
 names is still in [`carrier.md`](../../carrier/carrier.md) §4.*
 
-**All three are `R-SPI-SER`, and the value is 100 Ω.** The refdes matters:
+**All three are `R-SPI-SER`, and the value is 82 Ω** (`spi-series-r`; the
+owner's decision of 2026-09-30, below this verbatim section's table, which
+stops at 100 Ω). The refdes matters:
 this page previously drew `R-SCLK-SER`, `R-MOSI-SER` and `R-CS-SER`, **none
 of which exist in `bom.csv`**, while the BOM carries `R-SPI-SER` at qty 3
 used by no schematic. Same three parts, two naming schemes, neither side
@@ -148,16 +183,26 @@ costs `[calc]`:
 |---|---|---|
 | **220 Ω** | **1.83–1.86 V** | **below threshold, dwelling ~20 ns per edge in the forbidden band** |
 | 100 Ω | **2.75 V** | clean single step |
+| **82 Ω** (2026-09-30) | **3.04–3.32 V** with the pad's 17–35 Ω `[calc]` | clean single step; the falling edge's first step 0.00–0.26 V |
 | 68 Ω | 3.25 V | clean, but **48 mA fault current against a 40 mA pad spec** |
 
-**100 Ω** is the answer: it resolves in one transit and draws 33 mA into a
-clamp. 68 Ω is electrically ideal and exceeds what the pin can source.
+The answer was 100 Ω until 2026-09-30, and is now **82 Ω**: the simulation
+found the falling edge was the tight one, and 82 Ω with `U-TVS-SPI` moved to
+the pad side is what the owner chose (*Simulated*, above). 3.3 V / 82 Ω alone
+is 40 mA, at the pad's limit; the pad's own output resistance, 17 Ω at its
+strongest drive setting and 35 Ω at the default, brings a shorted conductor's
+current to 33 mA or 28 mA `[calc; ds ESP32-S3-datasheet-v2.2.pdf p.65]`, and
+33 mA through 82 Ω is 90 mW in the 1206's 1/4 W. With the clamp now behind
+it, `R-SPI-SER` is also the first thing an ESD strike on a conductor meets;
+the banked resistor sheet gives no pulse rating, so the ESD test at E11
+decides whether a pulse-rated part is needed there.
 (ADR 0004's old "7.9 MHz corner" was the figure for 100 Ω all along, quoted
 against 220 Ω — the schematic review caught that separately.)
 
-The receiving end has no hysteresis, which is what makes the dwell matter:
-a 74AHCT125 given 20 ns in its indeterminate band on every clock edge is
-being asked to guess.
+The receiving end had no hysteresis when this was written, which is what made
+the dwell matter: a 74AHCT125 given 20 ns in its indeterminate band on every
+clock edge was being asked to guess. It now receives through `U-RX-MOD`, a
+Schmitt stage (2026-09-30).
 
 ### The two SPI hosts, and what claims them
 
@@ -233,6 +278,9 @@ line; "this page" in it means that page as it stood before the move.*
 > samples `MOSI` on a `SCLK` edge, so coupling between them lands where it
 > is not being looked at.
 
+*Simulated 2026-09-30 and not borne out: the coupling lands with the edge the
+DAC samples on (`spi-pair-crosstalk`, *Simulated* above).*
+
 ## Pulls on **both** sides of the buffer — six, not three
 
 The original three were on the cable side, to stop the buffer's inputs floating
@@ -258,10 +306,11 @@ resistors, one at each end of the cable, both pulling up**:
 | Part | Where | To | Value |
 |---|---|---|---|
 | `R-CS-PULL-INST` | main board (`carrier/carrier`), `IO34` beside `J-MCU` pins 13/14, on the MCU side of `R-SPI-SER-CS` | `DEV_3V3` | 10 kΩ |
-| `R-CS-PULL-MOD` (`R-PULL-CS` on the sheet) | module main board (`module/digital-and-supervision`), at the buffer's `3A` | `LOGIC_5V` | 100 kΩ |
+| `R-CS-PULL-MOD` (`R-PULL-CS` on the sheet) | module main board (`module/digital-and-supervision`), at the cable node, ahead of `R-RX-CS` and `U-RX-MOD` | `LOGIC_5V` | 100 kΩ |
 
-**Why up at the module, not the proposed weak pull-down.** The 74AHCT125 does
-not invert: `3A` drives `3Y`, which is the DAC's `SYNC`, active low. A
+**Why up at the module, not the proposed weak pull-down.** The receive path
+does not invert — `U-RX-MOD` inverts twice, and the 74AHCT125's `3A` drives
+`3Y`, which is the DAC's `SYNC`, active low. A
 pull-down at the module would hold `SYNC` **low — selected —** whenever the
 umbilical is out, leaving the DAC's shift register listening to whatever
 reaches `SCLK` ("When `SYNC` goes low, it enables the input shift register,
@@ -271,7 +320,7 @@ pull-down's one advantage — no current into an unpowered instrument — is kep
 by making the module's pull-up **weak** instead.
 
 **The four states of the link** `[calc]`, from `V_IH` 2.0 V / `V_IL` 0.8 V and
-±1 µA input current at the buffer `[ds SN74AHCT125.pdf p.3, p.4]`:
+±1 µA input current at the receiver `[ds SN74AHCT125.pdf p.3, p.4; SN74AHCT14.pdf p.5]` (the TTL thresholds are the 74AHCT125's; `U-RX-MOD`'s spread, 0.5–2.1 V `[SN74AHCT14.pdf p.5]`, reads every row the same way):
 
 | State | `CS_MOD` at the buffer | `SYNC` | Current into the instrument |
 |---|---|---|---|

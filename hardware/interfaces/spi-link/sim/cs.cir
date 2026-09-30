@@ -1,0 +1,32 @@
+* CS_MOD from IO34 to the module's receiver, as netlisted: the pad (a source behind
+* r_drv, its own edge tr_drv), R-CS-PULL-INST to 3V3 and U-TVS-SPI on the pad side,
+* R-SPI-SER-CS, the instrument's trace at J-UMB, pair 7/8 of the cable (CS against its
+* own return DIG_GND: one line of the pair's differential impedance, ngspice CPL with
+* the conductor's resistance), the module's trace and R-PULL-CS to LOGIC_5V at the cable
+* node (rx), then R-RX-CS and C-RX-CS to U-RX-MOD's first Schmitt input (cin) and that
+* input's capacitance. CS falls at 50 ns (a frame starts) and rises at 600 ns (it ends).
+* What-ifs, not the netlist: tvs_line = 1 puts U-TVS-SPI back on the line side of
+* R-SPI-SER, at J-UMB.
+VPAD pad 0 PWL(0 {{vdd}} 50n {{vdd}} {{t_fall_e}} 0 600n 0 {{t_rise_e}} {{vdd}})
+RDRV pad a {{r_drv}}
+RPUI a v33 {{R-CS-PULL-INST}}
+V33 v33 0 {{vdd}}
+CTVSP a 0 {{c_tvs_pad}}
+RSER a j {{R-SPI-SER-CS}}
+CTVS j 0 {{c_tvs_line}}
+CINST j 0 {{c_inst}}
+P1 j 0 rx 0 UMB
+.model UMB CPL length={{len}} R={{r_per_m}} L={{l_1}} G=0 C={{c_1}}
+CMOD rx 0 {{c_mod}}
+RPUM rx v5 {{R-PULL-CS}}
+V5 v5 0 {{v5}}
+RRX rx cin {{r_rx}}
+CRXF cin 0 {{c_rxf}}
+CRX cin 0 {{c_rx}}
+.control
+tran 50p {{t_end}}
+wrdata rx.dat v(rx)
+wrdata cin.dat v(cin)
+quit
+.endc
+.end

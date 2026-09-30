@@ -1,0 +1,19 @@
+{
+  "ring_centre_radius": 18.0,
+  "ring_width": 3.6,
+  "wave_width": 2.8,
+  "wave_amplitude": 6.2,
+  "wave_cycle_half_span": 23.5,
+  "wave_half_length": 27.0,
+  "taper_length": 9.0,
+  "taper_profile": 0.8,
+  "wave_gap": 2.0,
+  "moon_gap": 2.0,
+  "moon_radius": 3.76,
+  "moon_angle_deg": -122.0,
+  "overall_width_mm": 54.0,
+  "overall_height_mm": 39.6,
+  "separate_parts": 5,
+  "panel_width_mm": 57.0,
+  "side_margin_mm": 1.5
+}

@@ -1,0 +1,39 @@
+* The response shaper, as netlisted: the in-amp's output (EIN, -1 x VMAG: the sweep runs
+* from 0 V to the in-amp's full scale in t_ramp, slow against the op-amps: a transient
+* ramp, because a DC sweep loses the macromodel's operating point where the output clips)
+* into R-RESP-IN and the R-RESP-DIV pair; U-RESP half A inverting at -R-RESP-FB/R-RESP-IN
+* to V_SHAPED; POT-RESP from V_IN_HALF (CW) to V_SHAPED (CCW), its wiper through R-RESP
+* and the antiparallel D-RESP pair into the virtual ground; half B restoring at
+* -R-RESTORE-FB/R-RESTORE-IN to BREATH_SHAPED. TI's OPA2197 model for both halves.
+* D-RESP is BEHAVIOURAL (no vendor model banked): a SPICE diode fitted to the banked
+* datasheets' forward voltage (sims.yaml says which). POT-RESP is two resistors about its
+* wiper; p_resp is its rotation from CCW (0, fully log) to CW (1, fully exp).
+VPOS pos 0 {{v_pos}}
+VNEG neg 0 {{v_neg}}
+VMAG mag 0 PWL(0 0 {{t_ramp}} {{v_mag}})
+EIN in 0 mag 0 -1
+RDH in vhalf {{R-RESP-DIV-HI}}
+RDL vhalf 0 {{R-RESP-DIV-LO}}
+RIN in vg {{R-RESP-IN}}
+RFB vg vsh {{R-RESP-FB}}
+XA 0 vg pos neg vsh OPAx197
+RPCW vhalf wip {{r_pot_cw}}
+RPCCW wip vsh {{r_pot_ccw}}
+RRESP wip db {{R-RESP}}
+DA vg db DRESP
+DB db vg DRESP
+RRI vsh rs {{R-RESTORE-IN}}
+RRF rs out {{R-RESTORE-FB}}
+XB 0 rs pos neg out OPAx197
+RLOAD out 0 {{r_load}}
+.model DRESP D(IS={{is_d}} N={{n_d}} RS={{rs_d}} CJO=1.5p)
+.options rshunt=1e10
+.control
+tran 1u {{t_ramp}} 0 2u
+wrdata out.dat v(out)
+wrdata wip.dat v(wip)
+wrdata vsh.dat v(vsh)
+wrdata idiode.dat (v(wip)-v(db))/{{R-RESP}}
+quit
+.endc
+.end

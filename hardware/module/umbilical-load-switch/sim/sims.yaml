@@ -18,7 +18,7 @@ params:
   v_bus:    {value: 12.0, source: "U-ISO's output (RECOM RPA20-2412SAW), which feeds the load switch since ADR 0027: 12 V nominal [datasheets/discrete-and-power/RECOM-RPA20-AW.pdf PD-1] (vary)"}
   r_bus:    {value: 0.007, source: "U-ISO's output resistance: load regulation +/-0.1 % for a 12 V output [ds PD-5], 12 mV across 1.67 A = 0.007 ohm [calc]. A resistance, not the converter's loop: C-ISO-OUT carries the first hundreds of microseconds (transient recovery 250 us typ for a 25 % step, PD-5)"}
   t_rise:   {value: 1.0e-3, source: "the bus rising at power-on [assumption: a PSU's soft start is slower, which is easier]"}
-  r_ilim:   {value: 0.05, source: "R-ILIM's row is 'value from E6' (open): the page's working 50 mohm (umbilical-load-switch.md, 'Four things')"}
+  r_ilim:   {value: 0.05, source: "R-ILIM, 50 mohm 1 % (RALEC LR1206-21R050F4): its bom.csv row"}
   vhi:      {value: 47.0e-3, source: "V_SENSETRIP at V_FB >= 0.5 V, 39/47/55 mV [LT1641.pdf p.2] (vary)"}
   vlo:      {value: 12.0e-3, source: "V_SENSETRIP at V_FB = 0, 8/12/17 mV [p.2] (vary)"}
   igate:    {value: 10.0e-6, source: "I_GATEUP, 5/10/20 uA [p.2] (vary)"}
@@ -26,9 +26,9 @@ params:
   itdn:     {value: 3.0e-6,  source: "I_TIMERON, 1.5/3/5 uA [p.2]"}
   dvg:      {value: 4.5, source: "dV_GATE, VCC 10.8-20 V: 4.5 V min (no typical) [p.2]; the guaranteed minimum, so the FET is judged at it"}
   gm:       {value: 0.1, source: "the current-limit amplifier's transconductance: NOT IN THE DATASHEET [assumption, 0.1 A/V: a 10 uA error at 0.1 mV]"}
-  v_th:     {value: 2.0, source: "Q-LOADSW is not chosen: a logic-level threshold [assumption]"}
-  r_dson:   {value: 0.05, source: "the page's assumption, R_DS(on) ~50 mohm (umbilical-load-switch.md, 'Sizing the FB divider'), here at dV_GATE min"}
-  c_iss:    {value: 1.0e-9, source: "the page's 'bare C_iss (~1 nF)' [assumption: the FET is not chosen]"}
+  v_th:     {value: 2.15, source: "Q-LOADSW PSMN2R0-30YLE, V_GS(th) 1.3/1.7/2.15 V at 25 C [ds NEXPERIA-PSMN2R0-30YLE.pdf p.4]: the maximum, the least gate overdrive"}
+  r_dson:   {value: 0.0035, source: "Q-LOADSW PSMN2R0-30YLE, R_DSon 3.5 mohm max at V_GS 4.5 V, 25 C [ds NEXPERIA-PSMN2R0-30YLE.pdf p.4], here at dV_GATE min"}
+  c_iss:    {value: 5.217e-9, source: "Q-LOADSW PSMN2R0-30YLE, C_iss 5217 pF typ at V_DS 15 V [ds NEXPERIA-PSMN2R0-30YLE.pdf p.4]; in parallel with C-GATE"}
   r_lbin:   {value: 0.05, source: "L-BUCK-IN's DCR [assumption]"}
   i_load:   {value: {fig: umbilical-current}, source: "the instrument's current, typical play (an upper bound, blocked on E6)"}
   v_buck_min: {value: 8.0, source: "R-78E5.0-1.0 input minimum, 8 V [datasheets/discrete-and-power/R-78E5.0-1.0.pdf]: the load is modelled as arriving there"}

@@ -284,6 +284,27 @@ components:
     - 1
     - 2
     sheet: power-entry
+  C47:
+    of: C-RX-MOD
+    value: 47pF C0G
+    pins:
+    - 1
+    - 2
+    sheet: digital-and-supervision
+  C48:
+    of: C-RX-MOD
+    value: 47pF C0G
+    pins:
+    - 1
+    - 2
+    sheet: digital-and-supervision
+  C49:
+    of: C-RX-MOD
+    value: 47pF C0G
+    pins:
+    - 1
+    - 2
+    sheet: digital-and-supervision
   C5:
     of: C-REG-ADJ
     value: 10uF
@@ -291,6 +312,13 @@ components:
     - 1
     - 2
     sheet: power-entry
+  C50:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: digital-and-supervision
   C6:
     of: C-REG-OUT
     value: 1uF
@@ -753,7 +781,7 @@ components:
     sheet: breath-response-shaper
   R31:
     of: R-RESP
-    value: 15k 1%
+    value: 3.9k 1%
     pins:
     - 1
     - 2
@@ -1024,6 +1052,20 @@ components:
     - 1
     - 2
     sheet: breath-receive-stage
+  R68:
+    of: R-RX-MOD
+    value: 1k 1%
+    pins:
+    - 1
+    - 2
+    sheet: digital-and-supervision
+  R69:
+    of: R-RX-MOD
+    value: 1k 1%
+    pins:
+    - 1
+    - 2
+    sheet: digital-and-supervision
   R7:
     of: R-FB-LO
     value: 5.11k 1%
@@ -1031,6 +1073,13 @@ components:
     - 1
     - 2
     sheet: umbilical-load-switch
+  R70:
+    of: R-RX-MOD
+    value: 1k 1%
+    pins:
+    - 1
+    - 2
+    sheet: digital-and-supervision
   R8:
     of: R-CLR-PU
     value: 10k 1%
@@ -1157,6 +1206,25 @@ components:
     - TRIM
     - VO
     sheet: power-entry
+  U15:
+    of: U-RX-MOD
+    value: 74AHCT14
+    pins:
+    - 1A
+    - 1Y
+    - 2A
+    - 2Y
+    - 3A
+    - 3Y
+    - 4A
+    - 4Y
+    - 5A
+    - 5Y
+    - 6A
+    - 6Y
+    - VCC
+    - GND
+    sheet: digital-and-supervision
   U2:
     of: U-LOADSW
     value: LT1641-1IS8
@@ -1299,7 +1367,7 @@ nets:
   /CS_MOD:
   - J3.7
   - R12.1
-  - U4.3A
+  - R70.1
   /DAC_AVDD:
   - C11.1
   - C6.1
@@ -1363,7 +1431,7 @@ nets:
   /MOSI:
   - J3.5
   - R11.1
-  - U4.2A
+  - R69.1
   /OFFSET_WIPER:
   - J2.9
   - R23.1
@@ -1387,7 +1455,7 @@ nets:
   /SCLK:
   - J3.4
   - R10.1
-  - U4.1A
+  - R68.1
   /SCLK_DAC:
   - R13.1
   - U3.SCLK
@@ -1476,6 +1544,36 @@ nets:
   /dac8568/LDAC:
   - R9.1
   - U3.LDAC
+  /digital-and-supervision/CS_BUF:
+  - U15.6Y
+  - U4.3A
+  /digital-and-supervision/CS_N:
+  - U15.5Y
+  - U15.6A
+  /digital-and-supervision/CS_RC:
+  - C49.1
+  - R70.2
+  - U15.5A
+  /digital-and-supervision/MOSI_BUF:
+  - U15.4Y
+  - U4.2A
+  /digital-and-supervision/MOSI_N:
+  - U15.3Y
+  - U15.4A
+  /digital-and-supervision/MOSI_RC:
+  - C48.1
+  - R69.2
+  - U15.3A
+  /digital-and-supervision/SCLK_BUF:
+  - U15.2Y
+  - U4.1A
+  /digital-and-supervision/SCLK_N:
+  - U15.1Y
+  - U15.2A
+  /digital-and-supervision/SCLK_RC:
+  - C47.1
+  - R68.2
+  - U15.1A
   /mod-channels/MINUS_1:
   - R39.2
   - R40.1
@@ -1732,6 +1830,10 @@ nets:
   - C12.2
   - C41.2
   - C42.2
+  - C47.2
+  - C48.2
+  - C49.2
+  - C50.2
   - J3.8
   - NT2.1
   - NT3.2
@@ -1740,6 +1842,7 @@ nets:
   - R13.2
   - R14.2
   - U13.GND
+  - U15.GND
   - U4.1OE
   - U4.3OE
   - U4.4A
@@ -1768,9 +1871,11 @@ nets:
   LOGIC_5V:
   - C12.1
   - C42.1
+  - C50.1
   - R12.2
   - U13.SENSE
   - U13.VOUT
+  - U15.VCC
   - U4.VCC
   MODULE_ANALOG_NEG12:
   - C17.1

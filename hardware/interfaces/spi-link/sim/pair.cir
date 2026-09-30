@@ -1,0 +1,44 @@
+* SCLK (IO35) and MOSI (IO36) to the module's receiver, as netlisted: each pad (a source
+* behind r_drv, its edge tr_drv) with U-TVS-SPI's channel on the pad side, its R-SPI-SER
+* and the instrument's trace at J-UMB; then pair 4/5 of the cable, SCLK and MOSI TWISTED
+* TOGETHER and returning on the other pairs - two coupled lines (ngspice CPL: the odd
+* mode z_diff/2 from the cable's datasheet, the even mode 2 z_cm, swept); at the module
+* the trace and each line's R-SPI-PULL to DIG_GND at the cable node (srx, mrx), then
+* R-RX-MOD and C-RX-MOD to U-RX-MOD's first Schmitt input (sin, min) and its capacitance.
+* SCLK runs at f_clk from low (mode 1: idle low). MOSI is held at mosi0; with opp = 1 it
+* changes to mosi1 on SCLK's second rising edge, the edge a mode-1 host launches data on.
+* What-ifs, not the netlist: tvs_line = 1 puts U-TVS-SPI on the line side of R-SPI-SER;
+* no_rc = 1 takes R-RX-MOD and C-RX-MOD out (the Schmitt input straight on the cable).
+VS spad 0 PULSE(0 {{vdd}} {{t_r1}} {{tr_drv}} {{tr_drv}} {{t_hi}} {{t_per}})
+RDS spad sa {{r_drv}}
+CTSP sa 0 {{c_tvs_pad}}
+RSS sa sj {{R-SPI-SER-SCLK}}
+CTS sj 0 {{c_tvs_line}}
+CIS sj 0 {{c_inst}}
+VM mpad 0 PWL(0 {{mosi0}} {{t_r2}} {{mosi0}} {{t_r2_e}} {{mosi1}})
+RDM mpad ma {{r_drv}}
+CTMP ma 0 {{c_tvs_pad}}
+RSM ma mj {{R-SPI-SER-MOSI}}
+CTM mj 0 {{c_tvs_line}}
+CIM mj 0 {{c_inst}}
+P1 sj mj 0 srx mrx 0 PAIR
+.model PAIR CPL length={{len}} R={{r_per_m}} 0 {{r_per_m}} L={{l_s}} {{l_m}} {{l_s}} G=0 0 0 C={{c_s}} {{c_m}} {{c_s}}
+CMS srx 0 {{c_mod}}
+RPS srx 0 {{R-PULL-SCLK}}
+RRS srx sin {{r_rx}}
+CFS sin 0 {{c_rxf}}
+CRS sin 0 {{c_rx}}
+CMM mrx 0 {{c_mod}}
+RPM mrx 0 {{R-PULL-MOSI}}
+RRM mrx min {{r_rx}}
+CFM min 0 {{c_rxf}}
+CRM min 0 {{c_rx}}
+.control
+tran 50p {{t_end}}
+wrdata srx.dat v(srx)
+wrdata mrx.dat v(mrx)
+wrdata sin.dat v(sin)
+wrdata min.dat v(min)
+quit
+.endc
+.end
