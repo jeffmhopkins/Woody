@@ -7,6 +7,16 @@ The decisions it realises are [ADR 0023](../../docs/decisions/0023-module-etherc
 (the panel layout and the stack). It goes as far as the line before board
 layout: outlines, positions, keep-outs and the cut file, not copper.
 
+**The etherCON is the panel's bottom row** (ADR 0024 point 11, the owner's
+instruction of 2026-09-30: *"Power switch should not be underneath the
+connector"*). The toggle and the LED are the row above it, so the umbilical's
+plug and cable drop below every control. The panel drawing shades that drop
+zone, and `drc.echo` holds the rule that keeps controls out of it: *no panel
+control under the umbilical: clear of the NE8MX's grip and its cable's drop
+zone*, with *the umbilical's plug stands proud of every control* beside it.
+Behind the panel, the jack board's notch clears the NE8FAV and steps up
+narrower for the toggle's body.
+
 ![The module, three-quarter front](renders/hero.png)
 
 ## The one rule, as for the body
@@ -63,7 +73,7 @@ first line lists each one in play.
 
 ![The panel drawing: cuts, centres, legend zones, the washers' reach along their slots](renders/panel.png)
 
-![Both boards seen from the panel: the jack board's notch, the standoffs, J-B2B-MOD, the parts on each face](renders/boards.png)
+![Both boards seen from the panel: the jack board's notch and its step for the toggle, the standoffs, J-B2B-MOD, the parts on each face](renders/boards.png)
 
 ![Side section through the panel's centre, with every depth and the Palette's limit read both ways](renders/section.png)
 

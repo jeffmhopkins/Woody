@@ -27,8 +27,8 @@ tag(led + [0, 3.5], "LED-PANEL");
 for (s = standoff_at) { fill(C_METAL) translate(s) circle(d = m3_head_d); tag(s + [0, -4.2], "standoff"); }
 fill("Gold") r2(b2b_at - [b2b_w, b2b_l] / 2 - [1.27, 1.27], b2b_at + [b2b_w, b2b_l] / 2 + [1.27, 1.27]);
 tag(b2b_at + [0, -b2b_l / 2 - 2.6], "J-B2B-MOD", 1.2);
-tag([cx, notch[2] - 6], "notch: NE8FAV", 1.3);
-tag([cx, notch[2] - 8.2], "and SW-POWER pass", 1.3);
+tag([cx, notch[2] - 6], "notch: the NE8FAV", 1.3);
+tag([cx, tog[1]], "SW-POWER", 1.1);
 tag([cx, -6], str("JACK BOARD - ", b_x1 - b_x0, " x ", b_y1 - b_y0, ", ", jb_d, " behind the panel"), 1.5);
 
 // ---- main board

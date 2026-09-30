@@ -120,6 +120,10 @@ boards:
     value: 1.0
     status: nominal
     source: "[adr 0024] the jack board's notch this far clear of the NE8FAV's 25 x 25 body on each side"
+  toggle_clear:
+    value: 1.0
+    status: nominal
+    source: "[adr 0024] the jack board's notch this far clear of SW-POWER's body on each side and above - the body is deeper than the jack board's depth, so it passes through the board"
   copper_edge:
     value: 0.5
     status: nominal
@@ -248,7 +252,7 @@ power:
   at:
     value: [42.5, 35.0]
     status: nominal
-    source: "[adr 0024] low on the right, behind the jack board's right leg, clear of the NE8FAV's tails and of the lower right standoff screw's head; the ribbon folds down to the bus board"
+    source: "[adr 0024] low on the right, behind the jack board's right leg, clear of the NE8FAV's tails (the NE8FAV is on the bottom row, centred) and of the lower right standoff screw's head; the ribbon folds down to the bus board behind the NE8FAV"
   drop:
     value: 10.0
     status: nominal
@@ -497,7 +501,22 @@ ethercon:
   cable_d:
     value: 20.1
     status: settled
-    source: "[repo] J-UMBILICAL-CABLE: NE8MX dia 20.1 (from NE8MX.pdf [ds])"
+    source: "[ds] NE8MX.pdf: the cable shell's grip, dia 20.1 (J-UMBILICAL-CABLE)"
+  # The mated plug and its cable, for the drop zone (ADR 0024 point 11).
+  plug_l_min:
+    value: 50.0
+    status: settled
+    source: "[ds] NE8MX.pdf: 50 long without the boot (type 2), 66.4 with it (type 1) - the shorter bounds how far the mated plug stands in front of the panel"
+  umb_od:
+    value: 6.0
+    status: tbd
+    source: "[from memory] a stranded Cat5e STP patch lead's jacket, ~6 mm (CABLE-UMB); the NE8MX takes no less than 4.5 [repo J-UMBILICAL-CABLE]"
+    decided_by: "CABLE-UMB bought: read its jacket"
+  umb_bend_k:
+    value: 4.0
+    status: tbd
+    source: "[from memory] ANSI/TIA-568 minimum bend radius for 4-pair twisted-pair cable, 4 x the cable's OD (patch cords are allowed tighter, so this is the conservative reading)"
+    decided_by: "CABLE-UMB's datasheet, or TIA-568.2 banked"
   bore_clear:
     value: 0.2
     status: nominal
@@ -546,17 +565,17 @@ layout:
     status: nominal
     source: "[adr 0024] the jacks lie on their sides, pins across, sleeve outward (a PJ398SM's footprint is 13.85 along its pin line [calc from its pads], so pins down a 13 mm column collide); 19 leaves J-B2B-MOD's pads between the columns with the DRC's clearance"
   ec_y:
-    value: 39.5
+    value: 25.0
     status: nominal
-    source: "[adr 0024] the NE8FAV's axis: as high as the tab clears the last jack's plug, as low as the toggle row allows"
+    source: "[adr 0024 point 11] the NE8FAV on the BOTTOM row, centred, so the NE8MX's cable drops below every control: its locating pegs 1.0 clear of the rail band (DRC 'parts behind the panel clear of the rail band')"
   led_side:
     value: "left"
     status: nominal
-    source: "[adr 0024] the LED in the strip left of the flange, level with the axis"
+    source: "[adr 0024 point 11] the LED in the toggle's row, in the strip left of the toggle - on the jack board's left leg, where its lead spacer stands"
   toggle_y:
-    value: 17.0
+    value: 49.5
     status: nominal
-    source: "[adr 0024] the toggle row, centred, under the NE8FAV: its body clear of the rail band below and the pegs above"
+    source: "[adr 0024 point 11] the toggle's row, centred, ABOVE the NE8FAV: its lever's sweep clear of the PUSH tab below and of the last jack row's plug grips above, its body under the top of the jack board's notch"
   pots:
     value: ["POT-GAIN", "POT-OFFSET", "POT-RESP"]
     status: nominal
