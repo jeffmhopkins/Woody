@@ -47,6 +47,7 @@ What each circuit does, and why, is on its page:
 
 The root sheet places, once per instance:
 - **the six carrier circuits**;
+- **`breath-sense-link`**, whose parts are all on this board;
 - **the two thumb registers** (`REG-LT`, `REG-RT`);
 - **one key network per thumb key**, plus one at each of the right thumb's
   two reserved spare positions (`sw+`, `sw-`);
@@ -56,7 +57,6 @@ The registers' inputs are wired as `hardware/cluster/key-marker-and-bits/allocat
 says. Its own parts are the interface circuits' main-board halves:
 - from key-chain-loom: both `J-CHAIN` headers, the series resistors, the
   SER terminator, the two beads and the clamp;
-- from breath-sense-link: the sensor, its series pair and its two ESD diodes;
 - from spi-link: `J-UMB`.
 
 On this board the chain's return is `PWR_GND` and its 3V3 is `DEV_3V3`
@@ -84,7 +84,7 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 | C10 | `C-STRIP-BULK` | power-entry-instrument |
 | D1 | `D-REF-CLAMP` | breath-excitation-reference |
 | D2 | `D-REVSHUNT` | power-entry-instrument |
-| D5, D6 | `D-TVS-BREATH` | root |
+| D5, D6 | `D-TVS-BREATH` | breath-sense-link |
 | D3 | `D-TVS-PWR` | power-entry-instrument |
 | D4 | `D-USBOR` | power-entry-instrument |
 | FB1, FB2 | `FB-CHAIN` | root |
@@ -107,12 +107,12 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 | R10 | `R-LED-PD` | led-strip-drive |
 | R11 | `R-LED-SER` | led-strip-drive |
 | R6 | `R-REF-IN` | breath-excitation-reference |
-| R38, R39 | `R-SER-BREATH-INST` | root |
+| R38, R39 | `R-SER-BREATH-INST` | breath-sense-link |
 | R37 | `R-SER-TERM` | root |
 | R1, R2, R3 | `R-SPI-SER` | carrier |
 | SW1, SW2, SW3, SW4, SW5, SW6, SW7, SW8, SW9, SW10 | `SW1-n` | LT1, LT2, LT3, LT4, RT1, RT2, RT3, RT4, sw+, sw- |
 | U2 | `U-ADC` | breath-adc |
-| U10 | `U-BREATH` | root |
+| U10 | `U-BREATH` | breath-sense-link |
 | U5 | `U-BUCK` | power-entry-instrument |
 | U3 | `U-BUF` | breath-excitation-reference |
 | U7, U8 | `U-KEYS` | REG-LT, REG-RT |

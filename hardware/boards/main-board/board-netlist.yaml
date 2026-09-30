@@ -232,12 +232,14 @@ components:
     pins:
     - A
     - K
+    sheet: breath-sense-link
   D6:
     of: D-TVS-BREATH
     value: PESD12VS1UA or equivalent 12V-standoff ESD diode
     pins:
     - A
     - K
+    sheet: breath-sense-link
   FB1:
     of: FB-CHAIN
     value: Ferrite bead 600R @ 100MHz
@@ -582,12 +584,14 @@ components:
     pins:
     - 1
     - 2
+    sheet: breath-sense-link
   R39:
     of: R-SER-BREATH-INST
     value: 1k 1%
     pins:
     - 1
     - 2
+    sheet: breath-sense-link
   R4:
     of: R-ADCDIV-U
     value: 10k 1%
@@ -717,6 +721,7 @@ components:
     - VS
     - VOUT
     - GND
+    sheet: breath-sense-link
   U2:
     of: U-ADC
     value: MCP3202-CI/SN
