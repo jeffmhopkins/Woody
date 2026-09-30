@@ -1,174 +1,181 @@
-# AUTHORITATIVE for connectivity. The ASCII drawing in breath-output-stage.md
-# is a REPRESENTATION of this file, not the other way round.
-#
-# Hand-authored YAML is the first step and KiCad is generated from it later,
-# so this is the file to edit. If this and the drawing disagree, THIS WINS and
-# the drawing is the defect - see hardware/README.md.
-#
-# tools/check-netlist.py proves: every refdes here exists in bom.csv with a
-# matching value; every net has at least two endpoints; every declared pin is
-# used exactly once; and every `[REFDES value]` label in the page's drawing
-# agrees with this file.
+# GENERATED from hardware/module/breath-output-stage/breath-output-stage.kicad_sch by tools/kicad.py - DO NOT EDIT.
+# The KiCad sheet is authoritative for this circuit: edit it in KiCad 9, then run
+#   python3 tools/kicad.py export hardware/module/breath-output-stage
+# Every note and argument that used to live in this file is on the sheet
+# (part fields, sheet text) or on breath-output-stage.md.
 
 circuit: module/breath-output-stage
 title: Breath output stage
 page: breath-output-stage.md
-
-# Nets that cross this circuit's boundary. These must match the page's
-# ## Interfaces table - that table is how a reader matches the two.
 ports:
-  BREATH_INAMP_OUT: {dir: in,  from: module/breath-receive-stage, note: "0 to inamp-full-scale, rest at 0"}
-  DAC_AVDD:         {dir: in,  from: module/power-entry, figure: dac-rail}
-  MODULE_ANALOG_POS12:          {dir: in,  from: module/power-entry}
-  MODULE_ANALOG_NEG12:          {dir: in,  from: module/power-entry}
-  AGND_MOD:             {dir: ref, from: module/power-entry}
-
+  MODULE_ANALOG_NEG12:
+    dir: in
+    from: module/power-entry
+  MODULE_ANALOG_POS12:
+    dir: in
+    from: module/power-entry
+  AGND_MOD:
+    dir: ref
+    from: module/power-entry
+  BREATH_INAMP_OUT:
+    dir: in
+    from: module/breath-receive-stage
+    note: 0 to inamp-full-scale, rest at 0
+  DAC_AVDD:
+    dir: in
+    from: module/power-entry
+    figure: dac-rail
 components:
-
-  POT-GAIN:
-    value: "50k"
-    pins: [CW, W, CCW]          # CW = signal end, CCW = floor end
-    note: "Attenuator, not a feedback rheostat. 0.125 to 1.000 with R-GAIN-FLOOR"
-
-  R-GAIN-FLOOR:
-    value: "7.15k 1%"
-    pins: [1, 2]
-    note: "Sets the 0.5x floor: 7.15/(50+7.15) = 0.125"
-
-  # ONE OPA2197 PACKAGE, BOTH HALVES: A buffers the gain pot's wiper, B is the
-  # summer. Its supply pins are netted, with one C-DECOUPLE at each.
-  U-BREATH-OPA:
-    of: U-OPA-PITCH
-    value: "OPA2197"
-    pins: [INA+, INA-, OUTA, INB+, INB-, OUTB, V+, V-]
-    note: "Half A is the unity follower that buffers the wiper so R-IN does not load the pot. Half B is the inverting summer, fixed x4 = R-FB/R-IN"
-
-  C-DEC-BREATH-POS:
-    of: C-DECOUPLE
-    value: "100nF"
-    pins: [1, 2]
-    note: "V+ to the star, at the pin"
-
   C-DEC-BREATH-NEG:
     of: C-DECOUPLE
-    value: "100nF"
-    pins: [1, 2]
-    note: "V- to the star, at the pin"
-
-  R-BREATH-IN:
-    value: "10k 1%"
-    drawn_as: R-IN
-    pins: [1, 2]
-
-  POT-OFFSET:
-    value: "10k linear"
-    pins: [CW, W, CCW]
-    note: "Wiper UNBUFFERED - its R/4 source impedance is why zero sits ~20 deg past centre"
-
-  R-BREATH-OFF:
-    value: "21.0k 1%"
-    drawn_as: R-OFF
-    pins: [1, 2]
-
-  R-BREATH-OFFNEG:
-    value: "95.3k 1%"
-    drawn_as: R-OFFNEG
-    pins: [1, 2]
-
-  R-BREATH-FB:
-    value: "40.2k 1%"
-    drawn_as: R-FB
-    pins: [1, 2]
-    note: "40.2k, NOT 40k - 40k is not an E96 value and cannot be ordered"
-
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: V- to the star, at the pin
+  C-DEC-BREATH-POS:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: V+ to the star, at the pin
+  C-OUT-BREATH:
+    value: 330nF film
+    pins:
+    - 1
+    - 2
   D-JACK-CLAMP:
-    value: "BAV99"
-    pins: [A, K, C]             # dual series diode: anode, cathode, common
-    note: "One of qty 6, one per CV output"
-
-  R-OUT-PROT:
-    value: "1k 1%, >=500mW"
-    pins: [1, 2]
-    note: "The only part at real risk from a jack fault - see its BOM row"
-
+    value: BAV99
+    pins:
+    - A
+    - K
+    - C
+    note: One of qty 6, one per CV output
   J-CV-BREATH:
     of: J-CV
-    value: "PJ398SM"
-    pins: [TIP, SLEEVE]
-    note: "THE JACK IS THIS CIRCUIT'S PART - module/panel owns the hole. Third pin, the normalling contact, unused"
-
-  C-OUT-BREATH:
-    value: "330nF film"
-    pins: [1, 2]
-
+    value: PJ398SM
+    pins:
+    - TIP
+    - SLEEVE
+    note: THE JACK IS THIS CIRCUIT'S PART - module/panel owns the hole. Third pin, the normalling contact, unused
+  POT-GAIN:
+    value: 50k
+    pins:
+    - CW
+    - W
+    - CCW
+    note: Attenuator, not a feedback rheostat. 0.125 to 1.000 with R-GAIN-FLOOR
+  POT-OFFSET:
+    value: 10k linear
+    pins:
+    - CW
+    - W
+    - CCW
+    note: Wiper UNBUFFERED - its R/4 source impedance is why zero sits ~20 deg past centre
+  R-BREATH-FB:
+    value: 40.2k 1%
+    drawn_as: R-FB
+    pins:
+    - 1
+    - 2
+    note: 40.2k, NOT 40k - 40k is not an E96 value and cannot be ordered
+  R-BREATH-IN:
+    value: 10k 1%
+    drawn_as: R-IN
+    pins:
+    - 1
+    - 2
+  R-BREATH-OFF:
+    value: 21.0k 1%
+    drawn_as: R-OFF
+    pins:
+    - 1
+    - 2
+  R-BREATH-OFFNEG:
+    value: 95.3k 1%
+    drawn_as: R-OFFNEG
+    pins:
+    - 1
+    - 2
+  R-GAIN-FLOOR:
+    value: 7.15k 1%
+    pins:
+    - 1
+    - 2
+    note: 'Sets the 0.5x floor: 7.15/(50+7.15) = 0.125'
+  R-OUT-PROT:
+    value: 1k 1%, >=500mW
+    pins:
+    - 1
+    - 2
+    note: The only part at real risk from a jack fault - see its BOM row
+  U-BREATH-OPA:
+    of: U-OPA-PITCH
+    value: OPA2197
+    pins:
+    - INA+
+    - INA-
+    - OUTA
+    - INB+
+    - INB-
+    - OUTB
+    - V+
+    - V-
+    note: Half A is the unity follower that buffers the wiper so R-IN does not load the pot. Half B is the inverting
+      summer, fixed x4 = R-FB/R-IN
 nets:
-
-  BREATH_INAMP_OUT:
-    - port: BREATH_INAMP_OUT
-    - POT-GAIN.CW
-
-  GAIN_FLOOR:
-    - POT-GAIN.CCW
-    - R-GAIN-FLOOR.1
-
-  GAIN_WIPER:
-    - POT-GAIN.W
-    - U-BREATH-OPA.INA+
-
-  BUF_OUT:
-    - U-BREATH-OPA.OUTA
-    - U-BREATH-OPA.INA-             # unity follower: output tied to inverting input
-    - R-BREATH-IN.1
-
-  DAC_AVDD:
-    - port: DAC_AVDD
-    - POT-OFFSET.CW
-
-  OFFSET_WIPER:
-    - POT-OFFSET.W
-    - R-BREATH-OFF.1
-
-  MODULE_ANALOG_NEG12:
-    - port: MODULE_ANALOG_NEG12
-    - R-BREATH-OFFNEG.1
-    - D-JACK-CLAMP.A
-    - U-BREATH-OPA.V-
-    - C-DEC-BREATH-NEG.1
-
-  MODULE_ANALOG_POS12:
-    - port: MODULE_ANALOG_POS12
-    - D-JACK-CLAMP.K
-    - U-BREATH-OPA.V+
-    - C-DEC-BREATH-POS.1
-
-  SUM_NODE:
-    - R-BREATH-IN.2
-    - R-BREATH-OFF.2
-    - R-BREATH-OFFNEG.2
-    - R-BREATH-FB.1
-    - U-BREATH-OPA.INB-
-
-  BREATH_OUT:
-    - U-BREATH-OPA.OUTB
-    - R-BREATH-FB.2
-    - D-JACK-CLAMP.C
-    - R-OUT-PROT.1
-
-  JACK_TIP:
-    - R-OUT-PROT.2
-    - C-OUT-BREATH.1
-    - J-CV-BREATH.TIP
-
   AGND_MOD:
-    - port: AGND_MOD
-    - R-GAIN-FLOOR.2
-    - POT-OFFSET.CCW
-    - U-BREATH-OPA.INB+
-    - C-OUT-BREATH.2
-    - J-CV-BREATH.SLEEVE
-    - C-DEC-BREATH-POS.2
-    - C-DEC-BREATH-NEG.2
-
-# THE CLAMP'S RAILS ARE THE MODULE'S SUPPLY: "D-JACK-CLAMP returns to both
-# rails" (the page's Interfaces table), netted as pitch-stage and mod-channels
-# net theirs.
+  - port: AGND_MOD
+  - C-DEC-BREATH-NEG.2
+  - C-DEC-BREATH-POS.2
+  - C-OUT-BREATH.2
+  - J-CV-BREATH.SLEEVE
+  - POT-OFFSET.CCW
+  - R-GAIN-FLOOR.2
+  - U-BREATH-OPA.INB+
+  BREATH_INAMP_OUT:
+  - port: BREATH_INAMP_OUT
+  - POT-GAIN.CW
+  DAC_AVDD:
+  - port: DAC_AVDD
+  - POT-OFFSET.CW
+  GAIN_FLOOR:
+  - POT-GAIN.CCW
+  - R-GAIN-FLOOR.1
+  GAIN_WIPER:
+  - POT-GAIN.W
+  - U-BREATH-OPA.INA+
+  JACK_TIP:
+  - C-OUT-BREATH.1
+  - J-CV-BREATH.TIP
+  - R-OUT-PROT.2
+  MODULE_ANALOG_NEG12:
+  - port: MODULE_ANALOG_NEG12
+  - C-DEC-BREATH-NEG.1
+  - D-JACK-CLAMP.A
+  - R-BREATH-OFFNEG.1
+  - U-BREATH-OPA.V-
+  MODULE_ANALOG_POS12:
+  - port: MODULE_ANALOG_POS12
+  - C-DEC-BREATH-POS.1
+  - D-JACK-CLAMP.K
+  - U-BREATH-OPA.V+
+  OFFSET_WIPER:
+  - POT-OFFSET.W
+  - R-BREATH-OFF.1
+  BREATH_OUT:
+  - D-JACK-CLAMP.C
+  - R-BREATH-FB.2
+  - R-OUT-PROT.1
+  - U-BREATH-OPA.OUTB
+  BUF_OUT:
+  - R-BREATH-IN.1
+  - U-BREATH-OPA.OUTA
+  - U-BREATH-OPA.INA-
+  SUM_NODE:
+  - R-BREATH-FB.1
+  - R-BREATH-IN.2
+  - R-BREATH-OFF.2
+  - R-BREATH-OFFNEG.2
+  - U-BREATH-OPA.INB-

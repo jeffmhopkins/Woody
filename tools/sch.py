@@ -555,8 +555,9 @@ class Sheet:
                 x, y, dx, dy, typ = self.pinpos[p]
                 # On a source sheet a spare whose net has its own name keeps it, as a label:
                 # tools/kicad.py exports a lone labelled pin as an external endpoint.
+                # (A board's sub-sheet pin, `sheet:PIN`, has no part pin to name it: a no-connect.)
                 if nname in ext and len(plist) == 1 and not (self.hier and nname in self.lay.get("hier_endpoints", [])) \
-                        and not (self.hier and nname != p.rsplit(".", 1)[1]):
+                        and not (self.hier and "." in p and nname != p.rsplit(".", 1)[1]):
                     self.no_connect((x, y))
                     continue
                 end = (snap(x + dx * STUB), snap(y + dy * STUB))

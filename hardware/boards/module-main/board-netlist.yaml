@@ -1090,13 +1090,13 @@ nets:
   - J3.2
   - R16.1
   /BREATH_INAMP_OUT:
-  - J2.11
+  - J2.1
   - R27.1
   - R29.1
   - U6.OUT
   /BREATH_JACK:
   - C22.1
-  - J2.3
+  - J2.14
   - R26.2
   /BREATH_SENSE:
   - D5.C
@@ -1109,7 +1109,7 @@ nets:
   /DAC_AVDD:
   - C11.1
   - C6.1
-  - J2.15
+  - J2.12
   - R1.1
   - R15.2
   - R8.1
@@ -1145,49 +1145,49 @@ nets:
   - U3.DIN
   - U4.2Y
   /GAIN_FLOOR:
-  - J2.13
+  - J2.7
   - R21.1
   /GAIN_WIPER:
-  - J2.12
+  - J2.3
   - U7.INA+
   /MOD1_JACK:
   - C36.1
-  - J2.4
+  - J2.15
   - R41.2
   /MOD2_JACK:
   - C37.1
-  - J2.6
+  - J2.16
   - R46.2
   /MOD3_JACK:
   - C38.1
-  - J2.7
+  - J2.17
   - R51.2
   /MOD4_JACK:
   - C39.1
-  - J2.8
+  - J2.20
   - R56.2
   /MOSI:
   - J3.5
   - R11.1
   - U4.2A
   /OFFSET_WIPER:
-  - J2.14
+  - J2.9
   - R23.1
   /PITCH_JACK:
   - C29.1
-  - J2.1
+  - J2.11
   - R34.2
   - RV3.CCW
   /RESP_V_IN_HALF:
-  - J2.17
+  - J2.4
   - R29.2
   - R30.1
   /RESP_V_SHAPED:
-  - J2.19
+  - J2.8
   - R28.2
   - U8.OUTA
   /RESP_WIPER:
-  - J2.18
+  - J2.6
   - R31.1
   /SCLK:
   - J3.4
@@ -1438,10 +1438,10 @@ nets:
   - C6.2
   - C7.2
   - J2.10
-  - J2.16
+  - J2.13
+  - J2.18
   - J2.2
   - J2.5
-  - J2.9
   - JP1.2
   - NT1.1
   - R18.2
@@ -1546,7 +1546,7 @@ nets:
   - D6.K
   - D9.K
   - FB1.2
-  - J2.20
+  - J2.19
   - U1.IN
   - U10.V+
   - U11.V+

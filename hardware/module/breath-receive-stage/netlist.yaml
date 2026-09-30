@@ -1,225 +1,253 @@
-# AUTHORITATIVE for connectivity. The ASCII drawing in
-# breath-receive-stage.md is a REPRESENTATION of this file.
-#
-# SCOPE. That drawing spans two boards deliberately - it shows the sensor, its
-# buffer and R1/R1b at the instrument end so the differential pole and the
-# CMRR budget can be derived in one place. THOSE PARTS ARE NOT THIS CIRCUIT'S
-# and are not components here; they arrive as ports. The same is true of the
-# output stage block at the bottom, which is module/breath-output-stage.
+# GENERATED from hardware/module/breath-receive-stage/breath-receive-stage.kicad_sch by tools/kicad.py - DO NOT EDIT.
+# The KiCad sheet is authoritative for this circuit: edit it in KiCad 9, then run
+#   python3 tools/kicad.py export hardware/module/breath-receive-stage
+# Every note and argument that used to live in this file is on the sheet
+# (part fields, sheet text) or on breath-receive-stage.md.
 
 circuit: module/breath-receive-stage
 title: Breath receive stage
 page: breath-receive-stage.md
-
 ports:
-  BREATH_SENSE:     {dir: in,  from: interfaces/breath-sense-link, figure: sensor-full-scale}
-  AGND_SENSE:       {dir: in,  from: interfaces/breath-sense-link}
-  BREATH_INAMP_OUT: {dir: out, to: module/breath-output-stage, figure: inamp-full-scale}
-  DAC_AVDD:         {dir: in,  from: module/power-entry, figure: dac-rail}
-  MODULE_ANALOG_POS12:          {dir: in,  from: module/power-entry}
-  MODULE_ANALOG_NEG12:          {dir: in,  from: module/power-entry}
-  AGND_MOD:             {dir: ref, from: module/power-entry}
-
-# Parts this page DRAWS for context and does not own. The drawing spans two
-# boards on purpose, so R1/R1b and the sensor appear in it; they are
-# interfaces/breath-sense-link's rows and must not be counted, netted or
-# ordered here. Declaring them keeps the drawing checkable without pretending
-# they are ours.
+  BREATH_SENSE:
+    dir: in
+    from: interfaces/breath-sense-link
+    figure: sensor-full-scale
+  AGND_SENSE:
+    dir: in
+    from: interfaces/breath-sense-link
+  BREATH_INAMP_OUT:
+    dir: out
+    to: module/breath-output-stage
+    figure: inamp-full-scale
+  DAC_AVDD:
+    dir: in
+    from: module/power-entry
+    figure: dac-rail
+  MODULE_ANALOG_POS12:
+    dir: in
+    from: module/power-entry
+  MODULE_ANALOG_NEG12:
+    dir: in
+    from: module/power-entry
+  AGND_MOD:
+    dir: ref
+    from: module/power-entry
 foreign:
-  R1:   {owner: interfaces/breath-sense-link, row: R-SER-BREATH-INST}
-  R1b:  {owner: interfaces/breath-sense-link, row: R-SER-BREATH-INST}
-  C:    {owner: module/breath-output-stage,   row: C-OUT-BREATH}
-
+  R1:
+    owner: interfaces/breath-sense-link
+    row: R-SER-BREATH-INST
+  R1b:
+    owner: interfaces/breath-sense-link
+    row: R-SER-BREATH-INST
+  C:
+    owner: module/breath-output-stage
+    row: C-OUT-BREATH
 components:
-
-  R2:
-    of: R-SER-BREATH            # qty 2: R2 and R3 are the two instances
-    value: "10k 0.1%"
-    drawn_as: R2
-    pins: [1, 2]
-    note: "Module-side series protection, IN+ leg"
-
-  R3:
-    of: R-SER-BREATH
-    value: "10k 0.1%"
-    drawn_as: R3
-    pins: [1, 2]
-    note: "Module-side series protection, IN- leg"
-
-  R4:
-    of: R-BIAS-INAMP            # qty 2: R4 and R5
-    value: "1M 1%"
-    drawn_as: R4
-    pins: [1, 2]
-    note: "Common-mode bias return on IN+. With the 11k source this is the 1M/(1M+11k) divider that makes the EFFECTIVE gain 2.16106 rather than the raw 2.185"
-
-  R5:
-    of: R-BIAS-INAMP
-    value: "1M 1%"
-    drawn_as: R5
-    pins: [1, 2]
-    note: "Common-mode bias return on IN-"
-
   C-CM-IN+:
-    of: C-CM-BREATH             # qty 2, one per leg
-    value: "1.5nF"
-    drawn_as: C_cm              # the drawing spells a subscript with _
-    pins: [1, 2]
-
+    of: C-CM-BREATH
+    value: 1.5nF
+    drawn_as: C_cm
+    pins:
+    - 1
+    - 2
   C-CM-IN-:
     of: C-CM-BREATH
-    value: "1.5nF"
-    drawn_as: C_cm              # both legs carry the same label and value
-    pins: [1, 2]
-
-  C-DIFF-BREATH:
-    value: "15nF"
-    drawn_as: C_diff
-    pins: [1, 2]
-
-  D-CLAMP-IN+:
-    of: D-CLAMP-BREATH          # qty 2, one per input leg
-    value: "BAV99"
-    pins: [A, K, C]
-    note: "Clamps IN+ to the rails. NOT the jack clamp - that is D-JACK-CLAMP on the output stage"
-
-  D-CLAMP-IN-:
-    of: D-CLAMP-BREATH
-    value: "BAV99"
-    pins: [A, K, C]
-
-  U-DIFFRX:
-    value: "INA828IDR"
-    pins: [IN+, IN-, REF, RG1, RG2, OUT, V+, V-]
-    note: "REF must be driven from a LOW source impedance - below 5 ohm per the datasheet - because RREF sits in series with an internal 40k arm"
-
-  R-GAIN-INAMP:
-    value: "42.2k 0.1%"
-    drawn_as: R_G
-    pins: [1, 2]
-    note: "Sets the raw G = 1 + 50k/42.2k = 2.185"
-
-  TRIM-BREATH-ZERO:
-    value: "10k multiturn cermet"
-    pins: [CW, W, CCW]
-    note: "Nulls the sensor pedestal. Range and derivation are the tracked figure breath-zero-ref"
-
-  # ONE OPA2197 PACKAGE. Half A buffers the trimmer wiper into the in-amp's
-  # REF; half B is one of the module's two spare halves (breath-output-stage.md:
-  # "ten of twelve halves used across the module, two spare"), tied off as a
-  # follower on the star so it cannot oscillate or rail.
-  U-REF-BUF:
-    of: U-OPA-PITCH
-    value: "OPA2197"
-    pins: [INA+, INA-, OUTA, INB+, INB-, OUTB, V+, V-]
-    note: "Half A buffers the trimmer wiper into the in-amp REF pin: a bare divider there degrades CMRR one-for-one. Half B is spare, a follower with its input on the star"
-
-  C-DEC-REFBUF-POS:
-    of: C-DECOUPLE
-    value: "100nF"
-    pins: [1, 2]
-    note: "OPA2197 V+ to the star, at the pin"
-
-  C-DEC-REFBUF-NEG:
-    of: C-DECOUPLE
-    value: "100nF"
-    pins: [1, 2]
-    note: "OPA2197 V- to the star, at the pin"
-
-  C-DEC-INAMP-POS:
-    of: C-DECOUPLE
-    value: "100nF"
-    pins: [1, 2]
-    note: "INA828 V+ to the star, at the pin"
-
+    value: 1.5nF
+    drawn_as: C_cm
+    pins:
+    - 1
+    - 2
   C-DEC-INAMP-NEG:
     of: C-DECOUPLE
-    value: "100nF"
-    pins: [1, 2]
-    note: "INA828 V- to the star, at the pin"
-
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: INA828 V- to the star, at the pin
+  C-DEC-INAMP-POS:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: INA828 V+ to the star, at the pin
+  C-DEC-REFBUF-NEG:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: OPA2197 V- to the star, at the pin
+  C-DEC-REFBUF-POS:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: OPA2197 V+ to the star, at the pin
+  C-DIFF-BREATH:
+    value: 15nF
+    drawn_as: C_diff
+    pins:
+    - 1
+    - 2
+  D-CLAMP-IN+:
+    of: D-CLAMP-BREATH
+    value: BAV99
+    pins:
+    - A
+    - K
+    - C
+    note: Clamps IN+ to the rails. NOT the jack clamp - that is D-JACK-CLAMP on the output stage
+  D-CLAMP-IN-:
+    of: D-CLAMP-BREATH
+    value: BAV99
+    pins:
+    - A
+    - K
+    - C
+  R-GAIN-INAMP:
+    value: 42.2k 0.1%
+    drawn_as: R_G
+    pins:
+    - 1
+    - 2
+    note: Sets the raw G = 1 + 50k/42.2k = 2.185
+  R2:
+    of: R-SER-BREATH
+    value: 10k 0.1%
+    drawn_as: R2
+    pins:
+    - 1
+    - 2
+    note: Module-side series protection, IN+ leg
+  R3:
+    of: R-SER-BREATH
+    value: 10k 0.1%
+    drawn_as: R3
+    pins:
+    - 1
+    - 2
+    note: Module-side series protection, IN- leg
+  R4:
+    of: R-BIAS-INAMP
+    value: 1M 1%
+    drawn_as: R4
+    pins:
+    - 1
+    - 2
+    note: Common-mode bias return on IN+. With the 11k source this is the 1M/(1M+11k) divider that makes the EFFECTIVE
+      gain 2.16106 rather than the raw 2.185
+  R5:
+    of: R-BIAS-INAMP
+    value: 1M 1%
+    drawn_as: R5
+    pins:
+    - 1
+    - 2
+    note: Common-mode bias return on IN-
+  TRIM-BREATH-ZERO:
+    value: 10k multiturn cermet
+    pins:
+    - CW
+    - W
+    - CCW
+    note: Nulls the sensor pedestal. Range and derivation are the tracked figure breath-zero-ref
+  U-DIFFRX:
+    value: INA828IDR
+    pins:
+    - IN+
+    - IN-
+    - REF
+    - RG1
+    - RG2
+    - OUT
+    - V+
+    - V-
+    note: REF must be driven from a LOW source impedance - below 5 ohm per the datasheet - because RREF sits in
+      series with an internal 40k arm
+  U-REF-BUF:
+    of: U-OPA-PITCH
+    value: OPA2197
+    pins:
+    - INA+
+    - INA-
+    - OUTA
+    - INB+
+    - INB-
+    - OUTB
+    - V+
+    - V-
+    note: 'Half A buffers the trimmer wiper into the in-amp REF pin: a bare divider there degrades CMRR one-for-one.
+      Half B is spare, a follower with its input on the star'
 nets:
-
-  BREATH_SENSE:
-    - port: BREATH_SENSE
-    - R3.1
-    - D-CLAMP-IN-.C
-
-  AGND_SENSE:
-    - port: AGND_SENSE
-    - R2.1
-    - D-CLAMP-IN+.C
-
-  IN_POS:
-    - R2.2
-    - R4.1
-    - C-CM-IN+.1
-    - C-DIFF-BREATH.1
-    - U-DIFFRX.IN+
-
-  IN_NEG:
-    - R3.2
-    - R5.1
-    - C-CM-IN-.1
-    - C-DIFF-BREATH.2
-    - U-DIFFRX.IN-
-
-  GAIN_SET:
-    - R-GAIN-INAMP.1
-    - U-DIFFRX.RG1
-  GAIN_SET_B:
-    - R-GAIN-INAMP.2
-    - U-DIFFRX.RG2
-
-  TRIM_WIPER:
-    - TRIM-BREATH-ZERO.W
-    - U-REF-BUF.INA+
-
-  REF_DRIVE:
-    - U-REF-BUF.OUTA
-    - U-REF-BUF.INA-
-    - U-DIFFRX.REF
-
-  BREATH_INAMP_OUT:
-    - U-DIFFRX.OUT
-    - port: BREATH_INAMP_OUT
-
-  DAC_AVDD:
-    - port: DAC_AVDD
-    - TRIM-BREATH-ZERO.CW
-
-  MODULE_ANALOG_POS12:
-    - port: MODULE_ANALOG_POS12
-    - U-DIFFRX.V+
-    - U-REF-BUF.V+
-    - C-DEC-REFBUF-POS.1
-    - C-DEC-INAMP-POS.1
-    - D-CLAMP-IN+.K
-    - D-CLAMP-IN-.K
-
-  MODULE_ANALOG_NEG12:
-    - port: MODULE_ANALOG_NEG12
-    - U-DIFFRX.V-
-    - U-REF-BUF.V-
-    - C-DEC-REFBUF-NEG.1
-    - C-DEC-INAMP-NEG.1
-    - D-CLAMP-IN+.A
-    - D-CLAMP-IN-.A
-
   AGND_MOD:
-    - port: AGND_MOD
-    - R4.2
-    - R5.2
-    - C-CM-IN+.2
-    - C-CM-IN-.2
-    - TRIM-BREATH-ZERO.CCW
-    - U-REF-BUF.INB+
-    - C-DEC-REFBUF-POS.2
-    - C-DEC-REFBUF-NEG.2
-    - C-DEC-INAMP-POS.2
-    - C-DEC-INAMP-NEG.2
-
-  # The spare half's follower loop.
+  - port: AGND_MOD
+  - C-CM-IN+.2
+  - C-CM-IN-.2
+  - C-DEC-INAMP-NEG.2
+  - C-DEC-INAMP-POS.2
+  - C-DEC-REFBUF-NEG.2
+  - C-DEC-REFBUF-POS.2
+  - R4.2
+  - R5.2
+  - TRIM-BREATH-ZERO.CCW
+  - U-REF-BUF.INB+
+  AGND_SENSE:
+  - port: AGND_SENSE
+  - D-CLAMP-IN+.C
+  - R2.1
+  BREATH_INAMP_OUT:
+  - port: BREATH_INAMP_OUT
+  - U-DIFFRX.OUT
+  BREATH_SENSE:
+  - port: BREATH_SENSE
+  - D-CLAMP-IN-.C
+  - R3.1
+  DAC_AVDD:
+  - port: DAC_AVDD
+  - TRIM-BREATH-ZERO.CW
+  GAIN_SET:
+  - R-GAIN-INAMP.1
+  - U-DIFFRX.RG1
+  GAIN_SET_B:
+  - R-GAIN-INAMP.2
+  - U-DIFFRX.RG2
+  IN_NEG:
+  - C-CM-IN-.1
+  - C-DIFF-BREATH.2
+  - R3.2
+  - R5.1
+  - U-DIFFRX.IN-
+  IN_POS:
+  - C-CM-IN+.1
+  - C-DIFF-BREATH.1
+  - R2.2
+  - R4.1
+  - U-DIFFRX.IN+
+  MODULE_ANALOG_NEG12:
+  - port: MODULE_ANALOG_NEG12
+  - C-DEC-INAMP-NEG.1
+  - C-DEC-REFBUF-NEG.1
+  - D-CLAMP-IN+.A
+  - D-CLAMP-IN-.A
+  - U-DIFFRX.V-
+  - U-REF-BUF.V-
+  MODULE_ANALOG_POS12:
+  - port: MODULE_ANALOG_POS12
+  - C-DEC-INAMP-POS.1
+  - C-DEC-REFBUF-POS.1
+  - D-CLAMP-IN+.K
+  - D-CLAMP-IN-.K
+  - U-DIFFRX.V+
+  - U-REF-BUF.V+
+  REF_DRIVE:
+  - U-DIFFRX.REF
+  - U-REF-BUF.OUTA
+  - U-REF-BUF.INA-
   SPARE_B_OUT:
-    - U-REF-BUF.OUTB
-    - U-REF-BUF.INB-
+  - U-REF-BUF.INB-
+  - U-REF-BUF.OUTB
+  TRIM_WIPER:
+  - TRIM-BREATH-ZERO.W
+  - U-REF-BUF.INA+
