@@ -1438,7 +1438,15 @@ def cmd_check(bdir):
         bad.append(f"error: [{v['type']}]{sev} {v['description']} - " + "; ".join(i["description"] for i in v.get("items", [])))
     for v in d.get("unconnected_items", []):
         bad.append(f"error: [unconnected] " + "; ".join(i["description"] for i in v.get("items", [])))
+    # a part layout.yaml not_on_board: names (with its reason) is a note, not a failure;
+    # a missing footprint it does not name is still an error
+    skip = lay.get("not_on_board") or {}
+    notes = []
     for v in d.get("schematic_parity", []):
+        m = re.match(r"Missing footprint (\S+)", v["description"])
+        if m and m.group(1) in skip:
+            notes.append(f"note: {m.group(1)} is on the sheets, not on this board - {skip[m.group(1)]}")
+            continue
         bad.append(f"error: [parity] {v['description']} - " + "; ".join(i["description"] for i in v.get("items", [])))
     board = pcbnew.LoadBoard(pcb)
     bad += check_rules(board, bdir, name, lay)
@@ -1447,9 +1455,16 @@ def cmd_check(bdir):
     bad += check_tracks(board)
     bad += check_connect_first(board, lay)
     comps, _ = sheet_netlist(os.path.join(bdir, name + ".kicad_sch"))
-    bad += check_cad(board, lay, cad_geometry(lay["cluster"]), comps)
+    if lay.get("kind") == "main":
+        import pcb_main
+        bad += pcb_main.check_cad(board, lay, comps)
+    else:
+        bad += check_cad(board, lay, cad_geometry(lay["cluster"]), comps)
+    if lay.get("planes") or lay.get("islands"):
+        import pcb_main
+        bad += pcb_main.check_planes(board, lay)
     print(f"pcb: {os.path.relpath(pcb, ROOT)}: {len(bad)} error(s)")
-    for b in bad:
+    for b in notes + bad:
         print("  " + b)
     return 1 if bad else 0
 

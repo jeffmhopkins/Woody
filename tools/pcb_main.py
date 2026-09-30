@@ -396,3 +396,260 @@ def courtyard_body(fp):
     c = fp.GetCourtyard(layer)
     return unary_union([Polygon([to_body(*xy_mm(c.Outline(i).CPoint(j))) for j in range(c.Outline(i).PointCount())])
                         for i in range(c.OutlineCount())])
+
+
+# ------------------------------------------------------------------ checking
+
+def copper_near(board, disc_pcb, layer, but_net=None, skip_ref=None):
+    """Every piece of copper on `layer` within a PCB-mm shapely region, as 'what' strings:
+    tracks, vias, pads (not `skip_ref`'s) and filled zones, other than `but_net`'s."""
+    hits = set()
+    for t in board.GetTracks():
+        if t.IsOnLayer(layer) and t.GetNetname() != but_net and pcb.item_shape(t, layer).intersects(disc_pcb):
+            hits.add(f"{t.GetNetname()} {'via' if isinstance(t, pcbnew.PCB_VIA) else 'track'}")
+    for f in board.GetFootprints():
+        if f.GetReference() == skip_ref:
+            continue
+        for p in f.Pads():
+            if p.IsOnLayer(layer) and p.GetNetname() != but_net and pcb.item_shape(p, layer).intersects(disc_pcb):
+                hits.add(f"{f.GetReference()} pad {p.GetNumber()}")
+    for z in board.Zones():
+        if not z.GetIsRuleArea() and z.IsOnLayer(layer) and z.GetNetname() != but_net and z.GetFilledPolysList(layer).OutlineCount() \
+                and pcb.shapely_of(z.GetFilledPolysList(layer)).intersects(disc_pcb):
+            hits.add(f"{z.GetNetname()} pour")
+    return sorted(hits)
+
+
+def check_cad(board, lay, comps):
+    """The body CAD still agrees with the main board: thickness, outline, and every
+    switch, chain header, connector, the sensor, LED, mount and U-bolt leg where - and
+    which way up - it puts them; no copper where the mounts' and legs' hardware bears;
+    every top-face part inside its height room."""
+    bad = []
+    geo = geometry(lay["cluster"])
+    body = yaml.safe_load(open(os.path.join(ROOT, "config", "body.yaml")))
+    t_cfg = float(body["switch"]["pcb_t"]["value"])
+    t_pcb = pcbnew.ToMM(board.GetDesignSettings().GetBoardThickness())
+    if abs(geo.get("thickness", -1) - t_cfg) > 1e-6:
+        bad.append(f"error: [cad] pcb-geometry.echo says the main board is {geo.get('thickness')} mm, config/body.yaml switch.pcb_t {t_cfg:g} - run: python3 tools/cad.py build")
+    if abs(t_pcb - t_cfg) > 1e-6:
+        bad.append(f"error: [cad] the board is {t_pcb:g} mm thick, the body CAD's main board {t_cfg:g} (switch.pcb_t)")
+    ol = pcbnew.SHAPE_POLY_SET()
+    if not board.GetBoardPolygonOutlines(ol):
+        bad.append("error: [cad] the Edge.Cuts outline is not closed")
+    else:
+        from shapely.geometry import MultiLineString
+        cad = MultiLineString([(to_pcb(*a), to_pcb(*b)) for a, b in outline_segments(lay, geo)])
+        off = pcb.shapely_of(ol).boundary.hausdorff_distance(cad)
+        if off > 0.05:
+            bad.append(f"error: [cad] the Edge.Cuts outline is up to {off:.2f} mm from the body CAD's (mechanical/export/{lay['outline']}, less the mounts' holes)")
+    fp_of = {f.GetReference(): f for f in board.GetFootprints()}
+    below = float(body["switch"]["thumb_pcb_below_seat"]["value"])
+    for key, (x, y, r) in geo["switches"].items():
+        ref = pcb.ref_of(comps, "SW1-n", key)
+        fp = fp_of.get(ref)
+        if fp is None:
+            bad.append(f"error: [cad] {key}'s switch {ref} is not on the board")
+            continue
+        got = to_body(*xy_mm(fp.GetPosition()))
+        if math.hypot(got[0] - x, got[1] - y) > 0.05 or not fp.IsFlipped():
+            bad.append(f"error: [cad] {ref} ({key}) is at body {tuple(round(v, 2) for v in got)}{'' if fp.IsFlipped() else ' on the TOP'}; "
+                       f"the body CAD puts it at ({x}, {y}), underneath")
+        # its pins where the CAD's mirrored switch has them: a copy placed afresh
+        probe = pcbnew.BOARD()
+        cp = pcb.load_fp(fp.GetFPID().GetLibNickname().wx_str() + ":" + fp.GetFPID().GetLibItemName().wx_str())
+        place_switch(probe, cp, x, y, r)
+        want = {p.GetNumber(): pad_body(p) for p in cp.Pads() if p.GetNumber()}
+        have = {p.GetNumber(): pad_body(p) for p in fp.Pads() if p.GetNumber()}
+        if any(math.hypot(have[n][0] - want[n][0], have[n][1] - want[n][1]) > 0.05 for n in want):
+            bad.append(f"error: [cad] {ref} ({key})'s pins are not where the body CAD's switch, turned {r:g} deg and hanging face down, has them")
+        models = fp.Models()
+        for i in range(len(models)):
+            if abs(models[i].m_Offset.z - below) > 1e-6:
+                bad.append(f"error: [cad] {ref}'s 3D model sits {models[i].m_Offset.z:g} mm off; config/body.yaml switch.thumb_pcb_below_seat is {below:g}")
+    for cname, ch in geo["chains"].items():
+        side = cname.split("-")[-1]
+        refs = [r for r, c in comps.items() if c["row"] == "J-CHAIN" and r in fp_of
+                and fp_of[r].FindPadByNumber("10").GetNetname().endswith("_" + side)]
+        if len(refs) != 1:
+            bad.append(f"error: [cad] {cname}: expected one J-CHAIN on the {side} chain's 3V3, found {refs}")
+            continue
+        fp = fp_of[refs[0]]
+        (tx, ty), d = pcb.chain_target({"chain": ch})
+        got = pcb.pads_centre(fp)
+        p1, p2 = fp.FindPadByNumber("1").GetPosition(), fp.FindPadByNumber("2").GetPosition()
+        if math.hypot(got[0] - tx, got[1] - ty) > 0.05 or pcbnew.ToMM(p2.x - p1.x) * d <= 0 or fp.IsFlipped():
+            bad.append(f"error: [cad] {refs[0]} ({cname})'s pads centre at {tuple(round(v, 2) for v in got)}{' on the bottom' if fp.IsFlipped() else ''}; "
+                       f"the body CAD puts them at ({tx:.2f}, {ty:.2f}) facing {'+' if d > 0 else '-'}x, on top")
+    for cad, spec in (lay.get("connectors") or {}).items():
+        ref = pcb.ref_of(comps, spec["row"])
+        fp = fp_of[ref]
+        c = geo["connectors"][cad]
+        xs = [pad_body(p)[0] for p in fp.Pads()]
+        ys = [pad_body(p)[1] for p in fp.Pads()]
+        want_x = {"x0": c[0], "x1": c[1]}[spec["back_row_from"]] + spec["back_row_at"]
+        if abs(min(xs) - want_x) > 0.05 or abs((min(ys) + max(ys)) / 2 - c[2]) > 0.05:
+            bad.append(f"error: [cad] {ref} ({cad})'s back pad row is at x {min(xs):.2f}, centred y {(min(ys) + max(ys)) / 2:.2f}; "
+                       f"the body CAD and layout.yaml connectors: put it at x {want_x:.2f}, y {c[2]}")
+    for cad, spec in (lay.get("cad_parts") or {}).items():
+        ref = pcb.ref_of(comps, spec["row"])
+        cx, cy = to_body(*pcb.pads_centre(fp_of[ref]))
+        x, y = geo["parts"][cad][:2]
+        if math.hypot(cx - x, cy - y) > 0.05:
+            bad.append(f"error: [cad] {ref} ({cad})'s pads centre at ({cx:.2f}, {cy:.2f}); the body CAD puts it at ({x}, {y})")
+    if geo["leds"]:
+        order = led_chain(comps, _nets_of(board))
+        for n, ref in enumerate(order, 1):
+            x, y, r = geo["leds"][n][:3]
+            fp = fp_of[ref]
+            got = to_body(*xy_mm(fp.GetPosition()))
+            if math.hypot(got[0] - x, got[1] - y) > 0.05 or abs((fp.GetOrientationDegrees() - r) % 360) > 0.01 or fp.IsFlipped():
+                bad.append(f"error: [cad] {ref} (LED{n} along the data chain) is at {tuple(round(v, 2) for v in got)} turned "
+                           f"{fp.GetOrientationDegrees():g}; the body CAD puts LED{n} at ({x}, {y}) turned {r:g}, on top")
+    clear = float(lay["rules"]["clearance"])
+    mount = lay["mounts"]
+    for i, (x, y, hole, top, under, kind) in enumerate(geo["standoffs"], 1):
+        fp = fp_of.get(f"H{i}")
+        got = None if fp is None else to_body(*xy_mm(fp.GetPosition()))
+        if got is None or math.hypot(got[0] - x, got[1] - y) > 0.05:
+            bad.append(f"error: [cad] mount H{i} ({kind}) is at {got}; the body CAD puts it at ({x}, {y})")
+            continue
+        drilled = [p for p in fp.Pads() if p.GetDrillSize().x > 0]
+        if not drilled or any(p.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH or abs(pcbnew.ToMM(p.GetDrillSize().x) - hole) > 0.01 for p in drilled):
+            bad.append(f"error: [cad] H{i} must be a plated {hole:g} mm hole (ADR 0025)")
+        for p in fp.Pads():
+            if p.GetNetname() != mount["net"]:
+                bad.append(f"error: [cad] H{i} pad on '{p.GetNetname()}', not {mount['net']} - every mount grounds the plates")
+        px, py = to_pcb(x, y)
+        for L, dia in ((pcbnew.F_Cu, top), (pcbnew.B_Cu, under)):
+            hits = copper_near(board, Point(px, py).buffer(dia / 2 + clear - 0.02), L, mount["net"], f"H{i}")
+            if hits:
+                bad.append(f"error: [cad] {', '.join(hits)} under mount H{i}'s {'standoff or nut' if L == pcbnew.F_Cu else 'spacer'} on "
+                           f"{board.GetLayerName(L)} - the hardware bonds {mount['net']} there")
+    ub = lay.get("ubolt") or {}
+    for j, (x, y, hole, top, under) in enumerate(geo["ubolts"], 1):
+        px, py = to_pcb(x, y)
+        for L, dia in ((pcbnew.F_Cu, top), (pcbnew.B_Cu, under)):
+            hits = copper_near(board, Point(px, py).buffer(dia / 2 + ub["copper_keepout"] - 0.02), L)
+            if hits:
+                bad.append(f"error: [cad] {', '.join(hits)} within the U-bolt leg {j}'s {'washer and nut' if L == pcbnew.F_Cu else 'spacer'} "
+                           f"keep-out on {board.GetLayerName(L)} (the leg is outside metal on the strap)")
+    bad += check_heights(board, lay, geo)
+    return bad
+
+
+def _nets_of(board):
+    """(net, [(ref, pad)]) from the board itself, for checks that need the sheets' nets."""
+    out = {}
+    for f in board.GetFootprints():
+        for p in f.Pads():
+            out.setdefault(p.GetNetname(), []).append((f.GetReference(), p.GetNumber()))
+    return list(out.items())
+
+
+def check_heights(board, lay, geo):
+    """Every top-face part inside its height room: under a key board, where none is
+    overhead, and under the Matrix ribbon's level run (pcb-geometry.echo keep-outs),
+    each part's height from layout.yaml heights: by footprint name."""
+    bad = []
+    k = geo["keepouts"]
+    rooms = [(box(*v[:4]), v[4], name) for name, v in k.items() if name.startswith("under key board") or name == "Matrix ribbon"]
+    else_room = k["elsewhere"][4]
+    heights = lay.get("heights") or {}
+    for fp in board.GetFootprints():
+        if fp.IsFlipped() or fp.GetReference().startswith("H"):
+            continue
+        name = fp.GetFPID().GetLibItemName().wx_str()
+        h = next((v for key, v in heights.items() if key in name), None)
+        if h is None:
+            bad.append(f"error: [height] {fp.GetReference()} ({name}) has no height in layout.yaml heights:")
+            continue
+        cy = courtyard_body(fp)
+        if cy.is_empty:
+            continue
+        room, where = else_room, "where no key board is overhead"
+        for rect, r, nm in rooms:
+            if cy.intersects(rect) and cy.intersection(rect).area > 1e-3 and r < room:
+                if nm == "Matrix ribbon" and fp.GetReference() == "J1":
+                    continue
+                room, where = r, nm
+        if h > room + 1e-6:
+            bad.append(f"error: [height] {fp.GetReference()} stands {h:g} mm; its room ({where}) is {room:g}")
+    return bad
+
+
+def check_planes(board, lay):
+    """The planes and the island as layout.yaml says: each plane and island zone on its
+    layer and net; every pad of an island's net on the island (but its off_island: ones),
+    every via of it inside the island and every other plane net's via outside the moat;
+    ONE tie between the island and its plane, the named net tie; and no signal track on
+    an outer layer crossing a split in its reference plane (layer 1 over layer 2, layer 4
+    over layer 3) - except across a moat at its tie's window, or a pair where it crosses."""
+    bad = []
+    zones = [z for z in board.Zones() if not z.GetIsRuleArea()]
+    for pl in lay.get("planes") or []:
+        if not any(z.GetLayerName() == pl["layer"] and z.GetNetname() == pl["net"] for z in zones):
+            bad.append(f"error: [planes] no {pl['net']} plane on {pl['layer']}")
+    pair_nets = {n for pr in lay.get("pairs") or [] for n in pr["nets"]}
+    plane_nets = {pl["net"] for pl in lay.get("planes") or []} | {s["net"] for s in lay.get("islands") or []}
+    isl = island_polys(lay)
+    for spec, p, moat in isl:
+        P = Polygon([to_pcb(x, y) for x, y in p.exterior.coords])
+        M = Polygon([to_pcb(x, y) for x, y in moat.exterior.coords])
+        if not any(z.GetLayerName() == spec["layer"] and z.GetNetname() == spec["net"] for z in zones):
+            bad.append(f"error: [island] no {spec['net']} island on {spec['layer']}")
+        for f in board.GetFootprints():
+            for pad in f.Pads():
+                name = f"{f.GetReference()}.{pad.GetNumber()}"
+                c = Point(*xy_mm(pad.GetPosition()))
+                if pad.GetNetname() == spec["net"] and name not in spec.get("off_island", []) and not P.contains(c):
+                    bad.append(f"error: [island] {name} is {spec['net']} but off its island - it would return through the plane")
+                if pad.GetNetname() in plane_nets - {spec["net"]} and pad.GetNetname() != "UMBILICAL_POS12" and P.contains(c) \
+                        and f.GetReference() != spec["tie"]:
+                    bad.append(f"error: [island] {name} ({pad.GetNetname()}) stands on the {spec['net']} island")
+        for v in board.GetTracks():
+            if not isinstance(v, pcbnew.PCB_VIA):
+                continue
+            c = Point(*xy_mm(v.GetPosition()))
+            if v.GetNetname() == spec["net"] and not P.contains(c):
+                bad.append(f"error: [island] a {spec['net']} via at ({c.x:.2f}, {c.y:.2f}) is off the island")
+            if v.GetNetname() in plane_nets - {spec["net"], "UMBILICAL_POS12"} and M.contains(c):
+                bad.append(f"error: [island] a {v.GetNetname()} via at ({c.x:.2f}, {c.y:.2f}) is on the island or its moat")
+        # the ties: every net-tie footprint joining the island's net to another
+        ties = [f.GetReference() for f in board.GetFootprints() if f.IsNetTie()
+                and spec["net"] in {pd.GetNetname() for pd in f.Pads()} and len({pd.GetNetname() for pd in f.Pads()}) > 1]
+        if ties != [spec["tie"]]:
+            bad.append(f"error: [island] {spec['net']} is tied to its plane by {ties or 'nothing'}; layout.yaml says one tie, {spec['tie']}")
+    # splits: each reference layer's fill, its antipads (holes under a few mm2) closed
+    ref_of_layer = {pcbnew.F_Cu: "In1.Cu", pcbnew.B_Cu: "In2.Cu"}
+    fills = {}
+    for L, ref in ref_of_layer.items():
+        polys = []
+        for z in zones:
+            if z.GetLayerName() == ref and z.GetFilledPolysList(z.GetLayer()).OutlineCount():
+                g = pcb.shapely_of(z.GetFilledPolysList(z.GetLayer()))
+                for part in (g.geoms if g.geom_type == "MultiPolygon" else [g]):
+                    polys.append(Polygon(part.exterior.coords, [h.coords for h in part.interiors if Polygon(h).area > 4.0]))
+        fills[L] = polys
+    windows, moats = [], []
+    for spec, p, moat in isl:
+        moats.append(Polygon([to_pcb(x, y) for x, y in moat.exterior.coords]).difference(
+            Polygon([to_pcb(x, y) for x, y in p.exterior.coords]).buffer(-0.05)))
+        tie = board.FindFootprintByReference(spec["tie"])
+        if tie:
+            windows.append(Point(*xy_mm(tie.GetPosition())).buffer(spec["tie_window"]))
+    crossings = {}
+    for t in board.GetTracks():
+        if type(t) is not pcbnew.PCB_TRACK or t.GetLayer() not in fills or t.GetNetname() in plane_nets - pair_nets:
+            continue
+        g = pcb.item_shape(t, t.GetLayer())
+        if any(g.within(pl) for pl in fills[t.GetLayer()]):
+            continue
+        if any(g.within(w) for w in windows) or (t.GetNetname() in pair_nets and any(g.intersects(m) for m in moats)):
+            continue
+        c = g.centroid
+        crossings.setdefault((t.GetNetname(), board.GetLayerName(t.GetLayer())), []).append(f"({c.x:.1f}, {c.y:.1f})")
+    for (net, layer), where in sorted(crossings.items()):
+        bad.append(f"error: [split] {net} on {layer} crosses a split in its reference plane ({ref_of_layer[board.GetLayerID(layer)]}) "
+                   f"at {', '.join(where[:4])}{' ...' if len(where) > 4 else ''}")
+    return bad

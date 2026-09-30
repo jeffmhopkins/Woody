@@ -81,6 +81,16 @@ for m in Capacitor_SMD.3dshapes/C_0805_2012Metric.step \
   fi
 done
 
+# --- Freerouting for tools/pcb.py's `route: freerouting` (the main board;
+# tools/pcb_freeroute.py). v2.1.0 is the last release that runs on Java 21; its
+# SHA-256 is checked there.
+fr="$HOME/.cache/woody/freerouting-2.1.0.jar"
+if [ ! -s "$fr" ]; then
+  mkdir -p "$(dirname "$fr")"
+  curl -fsSL -o "$fr.part" "https://github.com/freerouting/freerouting/releases/download/v2.1.0/freerouting-2.1.0.jar"
+  mv "$fr.part" "$fr"
+fi
+
 # --- Python packages: Pillow stamps renders; gmsh meshes STEP; manifold3d,
 # trimesh and numpy run the clash check; fontTools, shapely and ezdxf set the
 # module's panel artwork (tools/panel-art.py, with librsvg2-bin's rsvg-convert);

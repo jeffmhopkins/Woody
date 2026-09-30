@@ -1182,6 +1182,27 @@ def route_pair(board, lay, obs, spec):
     return report
 
 
+def moat_keepout(board, lay):
+    """Over each island's moat, on the layer whose reference plane the island is (layer
+    1 over layer 2), no track may cross but at the tie's window (a disc round the net
+    tie, layout.yaml tie_window) and where the pairs already cross: a rule area, so
+    the autorouter keeps off it and KiCad's DRC holds anyone who edits the board."""
+    import pcb
+    import pcb_main
+    above = {"In1.Cu": "F.Cu", "In2.Cu": "B.Cu"}
+    for spec in lay.get("islands") or []:
+        p = Polygon(spec["outline"])
+        ring = p.buffer(spec["moat"], join_style=2).difference(p.buffer(-0.05, join_style=2))
+        tie = board.FindFootprintByReference(spec["tie"])
+        tx, ty = pcb_main.to_body(TO(tie.GetPosition().x), TO(tie.GetPosition().y))
+        ring = ring.difference(Point(tx, ty).buffer(spec["tie_window"]))
+        for t in board.GetTracks():
+            if type(t) is pcbnew.PCB_TRACK and t.GetNetname() in {n for pr in lay.get("pairs") or [] for n in pr["nets"]}:
+                a, b = (pcb_main.to_body(TO(v.x), TO(v.y)) for v in (t.GetStart(), t.GetEnd()))
+                ring = ring.difference(LineString([a, b]).buffer(TO(t.GetWidth()) / 2 + 0.6))
+        pcb_main.rule_area(board, ring, f"{spec['net']} moat", [above[spec["layer"]]])
+
+
 def prepare(board, lay):
     """A multi-layer board's own routing before the autorouter (tools/pcb.py
     `route: freerouting`): the pairs, then every plane net's fanout. Returns the report."""
@@ -1190,6 +1211,7 @@ def prepare(board, lay):
     for spec in lay.get("pairs") or []:
         report += route_pair(board, lay, obs, spec)
     report += fanout(board, lay, obs)
+    moat_keepout(board, lay)
     for r in report:
         print("route: " + r)
     return report
