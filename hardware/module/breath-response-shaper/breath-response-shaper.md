@@ -54,6 +54,12 @@ approximately linear.** Turn either way and the wiper develops a voltage
 proportional to the signal, which drives that branch into one leg or the
 other.
 
+> **That holds for an ideal `V/2` source, and the netlist's is not one.** The
+> `R-RESP-DIV` pair is a 5 kΩ source and the pot loads it, so the wiper's zero
+> lands about 5 % of the rotation clockwise of `p = 0.5` for every input, and
+> at the detent itself the stage is linear within 0.25 % across real playing
+> rather than exactly `[sim]` (the note under *Scaling*, `sim/README.md`).
+
 ```
                               R1 20k
    in-amp out ──┬──────────[====]────┬───── X (virtual gnd)
@@ -88,7 +94,9 @@ loud; the top compresses.
 **Centre detent** → wiper at 0 V → no diode current → **linear**, exactly.
 This is the one place a centre detent is honestly warranted on this panel,
 and unlike `POT-OFFSET` (whose detent the review found lands ~20° off its
-true zero) this null is set by the topology, not by resistor tolerance.
+true zero) this null is set by the topology, not by resistor tolerance — to
+within the divider's loading, which puts it about 14° off the click and costs
+0.25 % of linearity at a hard blow `[sim]`.
 
 ## Scaling — and the mistake this nearly shipped with
 
@@ -111,6 +119,18 @@ acts across the playing range rather than above it `[calc]`:
 | *mf* | 3.50 V | 1.75 V | 77 µA | 1.440 |
 | hard blow | 4.64 V | 2.32 V | 115 µA | 1.494 |
 | full scale | 9.94 V | 4.97 V | 291 µA | 1.586 |
+
+> **Simulated 2026-09-30, and the table over-states the curve** (`sim/`). It
+> computes the diode branch from a node at exactly `V_in/2`. On the netlist
+> that node is the `R-RESP-DIV` pair's midpoint, a 5 kΩ source, and
+> `POT-RESP`'s 50 kΩ track from it to `V_shaped` loads it to about 0.41 `V_in`
+> at the CW end `[calc]`. The fully-exponential gain at a hard blow is
+> `shaper-exp-gain`, not the 1.494 above, and the curve is not exactly linear
+> below the knee (1.07× at *pp*). The same loading moves the centre detent's
+> null about 5 % of the rotation clockwise: at the detent the stage is linear
+> within 0.25 % across real playing, not exactly — the diodes see a few
+> hundred millivolts at full scale and barely conduct. The table is kept as the
+> arithmetic it is; `sim/README.md` has the curve as netlisted.
 
 ## What this is, stated honestly
 
@@ -149,14 +169,12 @@ divider — two more parts per side, piecewise, and no thermal behaviour.
 - **Where it inserts** is between the in-amp and `POT-GAIN`, for the reason
   given above: the scale there is fixed by the in-amp, so the knee sits at a
   known fraction of full breath and the gain knob cannot move it.
-- **Headroom.** At the full-exponential end the stage's gain ratio reaches
-  1.586 at sensor full scale (the table above), so `BREATH_SHAPED` would be
-  about −15.8 V and clips at the OPA2197's ~−11.5 V `[calc]`. Interpolating
-  the table's ratio between a hard blow (1.494) and full scale (1.586), the
-  clip starts near an in-amp output of −7.4 V (1.54 × 7.4 = 11.4), about 3/4
-  of the sensor's range — beyond the ~2.8 kPa that real
-  playing reaches (`breath-output-stage.md`). The linear and log settings
-  never clip.
+- **Headroom.** At the full-exponential end `BREATH_SHAPED` clips at the
+  OPA2197's rail before the in-amp reaches its full scale. Where it starts is
+  `shaper-exp-gain` `[sim]` (`sim/`): about nine-tenths of the sensor's range,
+  beyond the ~2.8 kPa that real playing reaches (`breath-output-stage.md`).
+  The table's arithmetic put it earlier, at three-quarters, because the table
+  over-states the curve (below). The linear and log settings never clip.
 - **Diode matching** is not a requirement: breath is unipolar, so only one of
   the pair conducts in play; the second is there for the power-on and fault
   excursions. `D-RESP` is Vishay's `1N4148W` (row).
@@ -165,6 +183,8 @@ divider — two more parts per side, piecewise, and no thermal behaviour.
 
 ## Still open
 
-- **`R-RESP` at 15 kΩ is a first sizing**, targeting ~1.5× at a hard blow.
-  It sets how strong "fully exponential" feels. **Decided by: E10**, with a
+- **`R-RESP` at 15 kΩ is a first sizing**, made for ~1.5× at a hard blow on
+  the table's unloaded arithmetic; as netlisted it gives `shaper-exp-gain`
+  `[sim]`, and about 7 kΩ would give 1.5× (`sim/README.md`). It sets how
+  strong "fully exponential" feels. **Decided by: E10**, with a
   real player and the sensor — 15 kΩ is what is fitted until then.

@@ -98,6 +98,24 @@ Margin: |R_neg| / Z_peak = 103 / 0.85 ≈ 120× (42 dB), worst case
 > Substituting a low-ESR ceramic raises Q and the paragraph stops being true.
 > The BOM row says electrolytic; keep it that way.
 
+**Simulated 2026-09-30** (`sim/`). The margin holds — `instrument-input-z-margin`
+— but not for the reason above. The ESR range above is two datasheet
+*maxima*, and a real part sits below its maximum, so it is not a worst case.
+The run sweeps `C-BUCK-IN`'s ESR down to a third of its 100 kHz maximum and
+adds what this derivation leaves out: `C-STRIP-BULK` at the input node ahead of
+the LC, and the umbilical's resistance behind it. Those set the peak. Keep
+the electrolytic anyway.
+
+**Start-up, from the module's isolated converter** (ADR 0027), also in `sim/`:
+cold and hot-plugged, through the load switch, the cable and this input, the
+instrument starts at every corner and the buck's input never falls back once
+it is running. **A hot-plug into a running module drives `U-ISO` to its
+lowest over-current threshold** for `hotplug-iso-ocp`: `C-STRIP-BULK` charges
+from `C-ISO-OUT` through the already-enhanced FET before the LT1641 takes the
+gate back. Whether the RPA20 hiccups on that depends on its over-current
+delay, which RECOM does not publish. **E6 decides**, with a current probe on
+`U-ISO`'s output during a hot-plug.
+
 **Regulator loading** `[calc]`, from ADR 0005's load table:
 
 ```

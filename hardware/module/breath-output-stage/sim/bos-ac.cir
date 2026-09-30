@@ -1,0 +1,44 @@
+* The same stage as bos.cir, for two AC questions at once, at the input v_in0:
+*  - the summer's loop gain, broken at half B's (-) input by THE STATED BREAK (a)
+*    (tools/sim.py): LBRK carries the DC operating point, CINJ the test signal,
+*    T = -V(sum)/V(inm); VNEG carries no AC in this run;
+*  - with rail = 1 instead, VNEG carries 1 V of AC and the loop is closed (LBRK shorted
+*    by RCLOSE, CINJ open): the jack's response to the -12 V rail, which since ADR 0027
+*    moves with breath (breath-output-stage.md).
+VPOS pos 0 {{v_pos}}
+VNEG neg 0 DC {{v_neg}} AC {{rail}}
+VAVDD avdd 0 {{v_avdd}}
+VIN in 0 DC {{v_in0}}
+RGCW in gw {{r_gain_cw}}
+RGCCW gw gf {{r_gain_ccw}}
+RFLOOR gf 0 {{R-GAIN-FLOOR}}
+XA gw bufo pos neg bufo OPAx197
+RIN bufo sum {{R-BREATH-IN}}
+ROCW avdd ow {{r_off_cw}}
+ROCCW ow 0 {{r_off_ccw}}
+ROFF ow sum {{R-BREATH-OFF}}
+ROFFN neg sum {{R-BREATH-OFFNEG}}
+RFB sum out {{R-BREATH-FB}}
+XB 0 inm pos neg out OPAx197
+LBRK sum inm {{l_brk}}
+RCLOSE sum inm {{r_close}}
+CINJ inm inj {{c_inj}}
+VINJ inj 0 DC 0 AC {{inj}}
+ROUT out jack {{R-OUT-PROT}}
+COUT jack 0 {{C-OUT-BREATH}}
+RLOAD jack 0 {{r_load}}
+CMULT jack 0 {{c_mult}}
+RMULT jack 0 {{r_mult}}
+.options method=gear rshunt=1e10
+.control
+ac dec 100 1 100meg
+let t = -v(sum)/v(inm)
+let tdb = db(t)
+let tph = 180/pi*cph(t)
+let railg = mag(v(jack))
+wrdata tdb.dat tdb
+wrdata tph.dat tph
+wrdata railg.dat railg
+quit
+.endc
+.end

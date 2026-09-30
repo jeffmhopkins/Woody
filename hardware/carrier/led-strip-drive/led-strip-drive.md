@@ -147,7 +147,11 @@ now, so the case is weaker than it was for a strip; it stays, as one 0805.
 `[ds WS2815B-V1.pdf p.3, C_I]`: 330 Ω × 30 pF = 9.9 ns, a 10–90 % edge of
 2.2 × 9.9 ≈ 22 ns, a tenth of the shortest pulse the LED must see
 (`T0H`, 220 ns minimum `[same, p.3, Data Transfer Time]`), so a few pF of
-trace more does not reach it. Into a shorted data pin it holds the gate to
+trace more does not reach it. **Simulated 2026-09-30** (`sim/`): with the gate's own
+output resistance and a trace added the edge is about a third slower than
+this, still a small fraction of `T0H`, and a 220 ns high arrives within a few
+nanoseconds of itself at either end of the LED's threshold window — so the
+firmware's `T0H` must sit clear of the 220 ns minimum, not on it. Into a shorted data pin it holds the gate to
 5 V / 330 Ω ≈ 15 mA, inside its ±25 mA absolute maximum
 `[ds datasheets/logic/SN74AHCT125.pdf p.3]`; at 100 Ω, the bottom of the
 useful range, a short would be 50 mA, past it.

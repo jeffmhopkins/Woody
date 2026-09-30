@@ -135,7 +135,10 @@ cancels in the ratio:
 | Zero point | **±50.5 mV** | 1.6× *better* |
 | Span | **19.703–20.303 V** (−1.49 %/+1.52 %) | 1.33× *better* |
 
-So the redraw improved both and the page claimed neither. About ±18 cents per
+So the redraw improved both and the page claimed neither. **Both are at the op-amp output.**
+`R-OUT-PROT` is outside the loop, so at the jack the span is also divided by
+the load: 1 kΩ into a 100 kΩ input reads 1 % low `[calc]`, confirmed in `sim/`
+(`range`), where the output follows the law to 0.1 mV and neither end clips. About ±18 cents per
 octave if a channel is assigned to something pitch-like.
 
 **"One matching requirement instead of two" is true by count and misleading.**
