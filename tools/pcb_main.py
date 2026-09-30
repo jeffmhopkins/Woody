@@ -227,7 +227,10 @@ def copper_zone(board, net, layer, poly_body, priority=0, name=""):
         z.SetAssignedPriority(priority)
         z.SetZoneName(name or net)
         z.SetMinThickness(MM(0.25))
-        z.SetPadConnection(pcbnew.ZONE_CONNECTION_THT_THERMAL)
+        # solid to through-hole pins: on an inner plane a thermal only starves the pin
+        # (a 1.27 mm header leaves room for one spoke, and KiCad's DRC asks two), and
+        # the pins are hand-soldered from the outer faces, where no plane is
+        z.SetPadConnection(pcbnew.ZONE_CONNECTION_FULL)
         z.SetThermalReliefGap(MM(0.3))
         z.SetThermalReliefSpokeWidth(MM(0.4))
         outline_into(z.Outline(), g)
@@ -588,7 +591,7 @@ def check_planes(board, lay):
     bad = []
     zones = [z for z in board.Zones() if not z.GetIsRuleArea()]
     for pl in lay.get("planes") or []:
-        if not any(z.GetLayerName() == pl["layer"] and z.GetNetname() == pl["net"] for z in zones):
+        if not any(board.GetLayerName(z.GetLayer()) == pl["layer"] and z.GetNetname() == pl["net"] for z in zones):
             bad.append(f"error: [planes] no {pl['net']} plane on {pl['layer']}")
     pair_nets = {n for pr in lay.get("pairs") or [] for n in pr["nets"]}
     plane_nets = {pl["net"] for pl in lay.get("planes") or []} | {s["net"] for s in lay.get("islands") or []}
@@ -596,7 +599,7 @@ def check_planes(board, lay):
     for spec, p, moat in isl:
         P = Polygon([to_pcb(x, y) for x, y in p.exterior.coords])
         M = Polygon([to_pcb(x, y) for x, y in moat.exterior.coords])
-        if not any(z.GetLayerName() == spec["layer"] and z.GetNetname() == spec["net"] for z in zones):
+        if not any(board.GetLayerName(z.GetLayer()) == spec["layer"] and z.GetNetname() == spec["net"] for z in zones):
             bad.append(f"error: [island] no {spec['net']} island on {spec['layer']}")
         for f in board.GetFootprints():
             for pad in f.Pads():
@@ -620,32 +623,57 @@ def check_planes(board, lay):
                 and spec["net"] in {pd.GetNetname() for pd in f.Pads()} and len({pd.GetNetname() for pd in f.Pads()}) > 1]
         if ties != [spec["tie"]]:
             bad.append(f"error: [island] {spec['net']} is tied to its plane by {ties or 'nothing'}; layout.yaml says one tie, {spec['tie']}")
-    # splits: each reference layer's fill, its antipads (holes under a few mm2) closed
+    # splits. A SPLIT is a gap in the reference plane's copper that a return current
+    # would have to go round: a moat round an island, or the edge of a pour. Antipads -
+    # the clearance holes round every other net's via and pin, merged or not - are not
+    # counted (a track to a connector's inner pin always crosses its neighbours'), so
+    # each fill counts by its outer boundary, and each moat by itself.
     ref_of_layer = {pcbnew.F_Cu: "In1.Cu", pcbnew.B_Cu: "In2.Cu"}
     fills = {}
     for L, ref in ref_of_layer.items():
         polys = []
         for z in zones:
-            if z.GetLayerName() == ref and z.GetFilledPolysList(z.GetLayer()).OutlineCount():
-                g = pcb.shapely_of(z.GetFilledPolysList(z.GetLayer()))
-                for part in (g.geoms if g.geom_type == "MultiPolygon" else [g]):
-                    polys.append(Polygon(part.exterior.coords, [h.coords for h in part.interiors if Polygon(h).area > 4.0]))
+            if board.GetLayerName(z.GetLayer()) == ref and z.GetFilledPolysList(z.GetLayer()).OutlineCount():
+                # KiCad keeps a fill FRACTURED - each hole joined to the outline by a
+                # zero-width slit - so unfracture a copy, or every antipad is a notch
+                ps = pcbnew.SHAPE_POLY_SET(z.GetFilledPolysList(z.GetLayer()))
+                ps.Unfracture()
+                g = pcb.shapely_of(ps)
+                polys += [Polygon(part.exterior.coords) for part in (g.geoms if g.geom_type == "MultiPolygon" else [g])]
         fills[L] = polys
-    windows, moats = [], []
+    windows, moats = [], {pcbnew.F_Cu: [], pcbnew.B_Cu: []}
     for spec, p, moat in isl:
-        moats.append(Polygon([to_pcb(x, y) for x, y in moat.exterior.coords]).difference(
+        above = pcbnew.F_Cu if spec["layer"] == "In1.Cu" else pcbnew.B_Cu
+        moats[above].append(Polygon([to_pcb(x, y) for x, y in moat.exterior.coords]).difference(
             Polygon([to_pcb(x, y) for x, y in p.exterior.coords]).buffer(-0.05)))
         tie = board.FindFootprintByReference(spec["tie"])
         if tie:
             windows.append(Point(*xy_mm(tie.GetPosition())).buffer(spec["tie_window"]))
+    # where a track lands - its own net's vias and pads - it sits in that item's own
+    # clearance hole in the plane: not a split, so those ends are left out of the test
+    lands = {}
+    for v in board.GetTracks():
+        if isinstance(v, pcbnew.PCB_VIA):
+            lands.setdefault(v.GetNetname(), []).append(Point(*xy_mm(v.GetPosition())).buffer(pcbnew.ToMM(v.GetWidth(pcbnew.F_Cu)) / 2 + 0.6))
+    for f in board.GetFootprints():
+        for pd in f.Pads():
+            b_ = pd.GetBoundingBox()
+            lands.setdefault(pd.GetNetname(), []).append(box(pcbnew.ToMM(b_.GetLeft()) - 0.6, pcbnew.ToMM(b_.GetTop()) - 0.6,
+                                                             pcbnew.ToMM(b_.GetRight()) + 0.6, pcbnew.ToMM(b_.GetBottom()) + 0.6))
+    lands = {n: unary_union(v) for n, v in lands.items()}
     crossings = {}
     for t in board.GetTracks():
         if type(t) is not pcbnew.PCB_TRACK or t.GetLayer() not in fills or t.GetNetname() in plane_nets - pair_nets:
             continue
-        g = pcb.item_shape(t, t.GetLayer())
-        if any(g.within(pl) for pl in fills[t.GetLayer()]):
+        g = pcb.item_shape(t, t.GetLayer()).buffer(-0.05)
+        if t.GetNetname() in lands:
+            g = g.difference(lands[t.GetNetname()])
+        if g.is_empty:
             continue
-        if any(g.within(w) for w in windows) or (t.GetNetname() in pair_nets and any(g.intersects(m) for m in moats)):
+        # over a moat: allowed where it crosses inside its tie's window, or as a pair
+        on_moat = unary_union([g.intersection(m) for m in moats[t.GetLayer()]])
+        bad_moat = not on_moat.is_empty and not (t.GetNetname() in pair_nets or on_moat.within(unary_union(windows)))
+        if any(g.within(pl) for pl in fills[t.GetLayer()]) and not bad_moat:
             continue
         c = g.centroid
         crossings.setdefault((t.GetNetname(), board.GetLayerName(t.GetLayer())), []).append(f"({c.x:.1f}, {c.y:.1f})")

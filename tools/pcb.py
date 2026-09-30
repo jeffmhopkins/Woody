@@ -684,8 +684,8 @@ def add_silk_generic(board, lay, comps):
         for it in fp.GraphicalItems():
             if it.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS):
                 b = it.GetBoundingBox()
-                keep[it.GetLayer() == pcbnew.F_SilkS].append(_box(pcbnew.ToMM(b.GetLeft()) - 0.1, pcbnew.ToMM(b.GetTop()) - 0.1,
-                                                                   pcbnew.ToMM(b.GetRight()) + 0.1, pcbnew.ToMM(b.GetBottom()) + 0.1))
+                keep[it.GetLayer() == pcbnew.F_SilkS].append(_box(pcbnew.ToMM(b.GetLeft()) - 0.2, pcbnew.ToMM(b.GetTop()) - 0.2,
+                                                                   pcbnew.ToMM(b.GetRight()) + 0.2, pcbnew.ToMM(b.GetBottom()) + 0.2))
         for top, cl in ((True, pcbnew.F_CrtYd), (False, pcbnew.B_CrtYd)):
             cy = fp.GetCourtyard(cl)
             if cy.OutlineCount():
@@ -697,6 +697,12 @@ def add_silk_generic(board, lay, comps):
             for top, L in ((True, pcbnew.F_Cu), (False, pcbnew.B_Cu)):
                 if p.IsOnLayer(L) or p.HasHole():
                     keep[top].append(g)
+    # the vias, where the board is routed: silk on one prints onto its tent
+    for v in board.GetTracks():
+        if isinstance(v, pcbnew.PCB_VIA):
+            c, r = v.GetPosition(), pcbnew.ToMM(v.GetWidth(pcbnew.F_Cu)) / 2 + 0.1
+            for top in (True, False):
+                keep[top].append(_box(pcbnew.ToMM(c.x) - r, pcbnew.ToMM(c.y) - r, pcbnew.ToMM(c.x) + r, pcbnew.ToMM(c.y) + r))
     trees = {t: STRtree(v) for t, v in keep.items()}
     placed = {True: [], False: []}
     skipped = []
@@ -749,6 +755,35 @@ def add_silk_generic(board, lay, comps):
             placed[True].append(g)
     if skipped:
         print(f"pcb: silk - no clear place for {len(skipped)} reference(s), left on the fab layer only: {', '.join(skipped)}")
+
+
+def post_route(path, bdir):
+    """A routed multi-layer board (route: freerouting), saved at `path`: the tracks tidied
+    (pcb_route.tidy), then its silkscreen - after routing, so every label keeps off every
+    via; the autorouter cannot see silk - and any stroke of a footprint's own silk on a
+    via removed, named."""
+    import pcb_route
+    name = os.path.basename(bdir)
+    lay = layout_yaml(bdir)
+    comps, _ = sheet_netlist(os.path.join(bdir, name + ".kicad_sch"))
+    board = pcbnew.LoadBoard(path)
+    pcb_route.tidy(board, lay)
+    add_silk_generic(board, lay, comps)
+    from shapely.geometry import Point as _P
+    vias = [_P(pcbnew.ToMM(v.GetPosition().x), pcbnew.ToMM(v.GetPosition().y)).buffer(pcbnew.ToMM(v.GetWidth(pcbnew.F_Cu)) / 2)
+            for v in board.GetTracks() if isinstance(v, pcbnew.PCB_VIA)]
+    gone = {}
+    for fp in board.GetFootprints():
+        for it in list(fp.GraphicalItems()):
+            if it.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS) and isinstance(it, pcbnew.PCB_SHAPE):
+                g = item_shape(it, it.GetLayer())
+                if any(g.intersects(v) for v in vias):
+                    fp.Remove(it)
+                    gone.setdefault(fp.GetReference(), 0)
+                    gone[fp.GetReference()] += 1
+    if gone:
+        print("pcb: silk adapted - library silk on a via removed: " + ", ".join(f"{r} ({n})" for r, n in sorted(gone.items())))
+    pcbnew.SaveBoard(path, board)
 
 
 def keepout(board, px, py, r, n=32):
@@ -819,7 +854,8 @@ def build(bdir):
         board, fps, netinfo, lay, comps, _ = pcb_main.build(bdir, lay)
         if lay.get("fab"):
             fit_footprint_silk(board, lay["fab"])
-        add_silk_generic(board, lay, comps)
+        if not lay.get("route"):
+            add_silk_generic(board, lay, comps)       # else after routing (post_route), clear of the vias
         return board, fps, netinfo, lay
     cluster, suffix = lay["cluster"], lay["suffix"]
     geo = cad_geometry(cluster)
@@ -1005,16 +1041,19 @@ def cmd_layout(bdir, force=False, route=True):
         if route == "freerouting":
             # in a fresh process, which loads the board with the net classes just written
             r = subprocess.run([sys.executable, "-c", f"import sys, json; sys.path.insert(0, {here!r}); "
-                                f"import pcb_freeroute; print('UNROUTED=' + json.dumps(pcb_freeroute.route({tmp!r})))"],
+                                f"import pcb_freeroute, pcb; print('UNROUTED=' + json.dumps(pcb_freeroute.route({tmp!r}))); pcb.post_route({tmp!r}, {bdir!r})"],
                                capture_output=True, text=True)
             print(r.stdout.rstrip())
             if r.returncode or "UNROUTED=" not in r.stdout:
                 sys.exit(f"pcb: the Freerouting round trip failed:\n{r.stderr[-3000:]}")
-            unrouted = json.loads(r.stdout.rsplit("UNROUTED=", 1)[1].splitlines()[0])
         if route:
             # zones are filled in a fresh process: an in-process fill of a just-built board crashes
             subprocess.run([sys.executable, "-c", f"import sys; sys.path.insert(0, {here!r}); "
                             f"import pcb_route; pcb_route.fill_zones({tmp!r})"], check=True)
+        if route == "freerouting":
+            # what is still unconnected once the planes are filled: KiCad's own count
+            unrouted = sorted({"; ".join(i["description"] for i in v.get("items", []))
+                               for v in drc(tmp).get("unconnected_items", [])})
         if lay.get("fab"):
             set_stackup(tmp, lay["fab"], board.GetDesignSettings().GetBoardThickness() / 1e6, lay.get("stackup"))
             # fit_footprint_silk adapts the library footprints' silkscreen to the board
@@ -1568,7 +1607,12 @@ def cmd_render(bdir):
                             "--quality", "high", "--zoom", "1.6", "-o", o, pcb],
                            capture_output=True, text=True, env=env, check=True)
             outs.append(o)
-        for layers, tag, mirror in (("F.Cu,Edge.Cuts", "copper-top", False), ("B.Cu,Edge.Cuts,B.Fab", "copper-bottom", True)):
+        # every copper layer: a key board's two, a four-layer board's inner planes between
+        # (seen from above, as the top is)
+        inner = [f"In{k}.Cu" for k in range(1, pcbnew.LoadBoard(pcb).GetCopperLayerCount() - 1)]
+        plots = [("F.Cu,Edge.Cuts", "copper-top", False)] + [(f"{L},Edge.Cuts", f"copper-in{k}", False) for k, L in enumerate(inner, 1)] \
+            + [("B.Cu,Edge.Cuts,B.Fab", "copper-bottom", True)]
+        for layers, tag, mirror in plots:
             svg = os.path.join(t, tag + ".svg")
             args = ["kicad-cli", "pcb", "export", "svg", "--layers", layers, "--page-size-mode", "2",
                     "--exclude-drawing-sheet", "-o", svg, pcb]
@@ -1583,7 +1627,7 @@ def cmd_render(bdir):
         # JLCPCB asks - the standoff holes stay unplated (ADR 0020) except a bond_mount.
         fab = os.path.join(t, "fab")
         os.makedirs(fab)
-        subprocess.run(["kicad-cli", "pcb", "export", "gerbers", "--no-protel-ext", "--layers", "F.Cu,B.Cu,F.Paste,B.Paste,F.Silkscreen,B.Silkscreen,F.Mask,B.Mask,Edge.Cuts", "-o", fab + "/", pcb],
+        subprocess.run(["kicad-cli", "pcb", "export", "gerbers", "--no-protel-ext", "--layers", ",".join(["F.Cu"] + inner + ["B.Cu", "F.Paste", "B.Paste", "F.Silkscreen", "B.Silkscreen", "F.Mask", "B.Mask", "Edge.Cuts"]), "-o", fab + "/", pcb],
                        capture_output=True, text=True, env=env, check=True)
         subprocess.run(["kicad-cli", "pcb", "export", "drill", "--format", "excellon", "--excellon-separate-th", "-o", fab + "/", pcb],
                        capture_output=True, text=True, env=env, check=True)

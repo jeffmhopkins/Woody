@@ -33,8 +33,16 @@ import pcbnew
 JAR_URL = "https://github.com/freerouting/freerouting/releases/download/v2.1.0/freerouting-2.1.0.jar"
 JAR_SHA256 = "2c07d58f75dac03782664081e7a58b41c25400d871a9fcf166a2ea6fe60d5def"
 JAR = os.path.join(os.path.expanduser("~"), ".cache", "woody", "freerouting-2.1.0.jar")
-PASSES = 100          # a bound on passes, not time: it stops itself after 10 passes without gain
-TIMEOUT_S = 1800      # the backstop, for a hung JVM
+PASSES = 25           # asked for; Freerouting 2.1.0 does not honour it in batch (a run went to pass 52) - the job timeout bounds it
+JOB_TIMEOUT = "00:40:00"   # Freerouting's own bound: it stops the job and still writes the session
+                           # (a shell timeout's kill writes nothing); HH:MM:SS - "25m" parses as no timeout
+TIMEOUT_S = 40 * 60 + 180  # the backstop, for a hung JVM
+# Its costs. Its defaults give each signal layer a preferred direction and charge 2.5x
+# against it, and a via 50: on a board 300 mm long and 42 across nearly every run is
+# along it, so the defaults crowd everything onto layer 1 and leave layer 4 empty (the
+# first main-board run: 18 connections unrouted, layer 4 all but bare). Along or across
+# is nearly even here, and a via is cheap.
+SCORING = {"default_undesired_direction_trace_cost": 1.2, "via_costs": 20}
 
 
 def jar():
@@ -58,8 +66,10 @@ def route(path):
                 exp.Remove(z)
         if not pcbnew.ExportSpecctraDSN(exp, dsn):
             sys.exit("pcb: KiCad's Specctra DSN export failed")
-        r = subprocess.run(["java", "-jar", j, "-de", dsn, "-do", ses, "-mp", str(PASSES),
-                            "--gui.enabled=false", "-da"], capture_output=True, text=True, timeout=TIMEOUT_S, cwd=t)
+        r = subprocess.run(["java", f"-Duser.home={t}", "-jar", j, "-de", dsn, "-do", ses, "-mp", str(PASSES),
+                            f"--router.max_passes={PASSES}", "--gui.enabled=false", "-da",
+                            f"--router.job_timeout={JOB_TIMEOUT}"] + [f"--router.scoring.{k}={v}" for k, v in SCORING.items()],
+                           capture_output=True, text=True, timeout=TIMEOUT_S, cwd=t)
         log = (r.stdout + r.stderr).splitlines()
         if not os.path.exists(ses):
             sys.exit("pcb: Freerouting wrote no session file:\n" + "\n".join(log[-30:]))

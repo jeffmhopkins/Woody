@@ -1,9 +1,13 @@
 """A small two-layer grid router for simple boards - tools/pcb.py's `route: true`.
 
-Not a general autorouter, and not meant for the main board (ADR 0017's analog
-return rules want a hand; docs/reference/pcb-pipeline.md). It is enough for a
-key board: a handful of short digital nets and one power rail, on a board
-whose ground is two poured planes.
+Not a general autorouter. It is enough for a key board: a handful of short
+digital nets and one power rail, on a board whose ground is two poured planes.
+
+A MULTI-LAYER BOARD (the main board, `route: freerouting`) takes only the
+pieces at the end of this file from it, the ones an autorouter would get wrong:
+each plane net's pad to its plane by its own via (`fanout`), a pair of nets
+side by side (`route_pair`), and the moat's keep-out round an analog island
+(`moat_keepout`). Freerouting routes the rest (tools/pcb_freeroute.py).
 
 HOW IT WORKS
   * Both copper layers become grids (GRID mm). A cell is blocked for a net
@@ -73,23 +77,30 @@ def pad_geom(pad):
 def board_outline(board):
     segs = [(TO(d.GetStart().x), TO(d.GetStart().y), TO(d.GetEnd().x), TO(d.GetEnd().y))
             for d in board.GetDrawings() if d.GetLayer() == pcbnew.Edge_Cuts]
-    # chain the segments into one ring
-    pts = [(segs[0][0], segs[0][1]), (segs[0][2], segs[0][3])]
-    rest = segs[1:]
+    # chain the segments into rings: the outline, and any cut-out inside it (a
+    # multi-layer board's routed holes); a key board has the one ring
+    rings, rest = [], segs
     while rest:
-        x, y = pts[-1]
-        for i, s in enumerate(rest):
-            if math.hypot(s[0] - x, s[1] - y) < 1e-3:
-                pts.append((s[2], s[3]))
-                rest.pop(i)
-                break
-            if math.hypot(s[2] - x, s[3] - y) < 1e-3:
-                pts.append((s[0], s[1]))
-                rest.pop(i)
-                break
-        else:
-            raise SystemExit("route: board outline is not one closed ring")
-    return Polygon(pts)
+        pts = [(rest[0][0], rest[0][1]), (rest[0][2], rest[0][3])]
+        rest = rest[1:]
+        while math.hypot(pts[-1][0] - pts[0][0], pts[-1][1] - pts[0][1]) >= 1e-3:
+            x, y = pts[-1]
+            for i, s in enumerate(rest):
+                if math.hypot(s[0] - x, s[1] - y) < 1e-3:
+                    pts.append((s[2], s[3]))
+                    rest.pop(i)
+                    break
+                if math.hypot(s[2] - x, s[3] - y) < 1e-3:
+                    pts.append((s[0], s[1]))
+                    rest.pop(i)
+                    break
+            else:
+                raise SystemExit("route: board outline is not closed")
+        rings.append(pts)
+    if len(rings) == 1:
+        return Polygon(rings[0])
+    rings.sort(key=lambda r: -Polygon(r).area)
+    return Polygon(rings[0], rings[1:])
 
 
 class Router:
@@ -1180,6 +1191,60 @@ def route_pair(board, lay, obs, spec):
                     lay_track(board, obs, net, a, b, w, L)
     print(f"route: pair {' / '.join(nets)} - {centre.length:.1f} mm side by side on {spec['layer']}")
     return report
+
+
+def tidy(board, lay):
+    """After an autorouter: what it leaves that the checks fail - zero-length and
+    duplicated tracks, tracks with an end that reaches nothing of their net (dangling),
+    two tracks of a net meeting at under 90 degrees (square_joins, as on a key board),
+    and collinear runs in pieces (merge_tracks)."""
+    key = lambda v: (v.x, v.y)
+    n0 = n1 = n2 = 0
+    seen = set()
+    for t in [t for t in board.GetTracks() if type(t) is pcbnew.PCB_TRACK]:
+        k = (t.GetNetname(), t.GetLayer(), t.GetWidth()) + tuple(sorted([key(t.GetStart()), key(t.GetEnd())]))
+        if t.GetStart() == t.GetEnd() or k in seen:
+            board.Delete(t)         # Delete, not Remove: a Remove from a LOADED board crashes the next walk of it
+            n0 += 1
+            continue
+        seen.add(k)
+    # dangling ends, repeatedly: an end touches another track of the net (its end or its
+    # body), a via of the net, or a pad of the net on its layer - or it goes
+    pads = [(p, p.GetNetname()) for fp in board.GetFootprints() for p in fp.Pads()]
+    while True:
+        tracks = [t for t in board.GetTracks() if type(t) is pcbnew.PCB_TRACK]
+        vias = [v for v in board.GetTracks() if isinstance(v, pcbnew.PCB_VIA)]
+        gone = []
+        for t in tracks:
+            if t.IsLocked():
+                continue
+            for e in (t.GetStart(), t.GetEnd()):
+                net, L = t.GetNetname(), t.GetLayer()
+                ok = any(u is not t and u.GetNetname() == net and u.GetLayer() == L and u.HitTest(e, 1000) for u in tracks) \
+                    or any(v.GetNetname() == net and v.HitTest(e, 1000) for v in vias) \
+                    or any(n == net and p.IsOnLayer(L) and p.HitTest(e) for p, n in pads)
+                if not ok:
+                    gone.append(t)
+                    break
+        for t in gone:
+            board.Delete(t)
+        n1 += len(gone)
+        if not gone:
+            break
+    # a via that nothing reaches but its own plane is a plane via; one with no plane and
+    # nothing on either face is debris
+    r = Router(board, lay)
+    for t in board.GetTracks():
+        if isinstance(t, pcbnew.PCB_VIA):
+            c = Point(TO(t.GetPosition().x), TO(t.GetPosition().y))
+            r.copper.append((t.GetNetname(), {TOP, BOT}, c.buffer(TO(t.GetWidth(pcbnew.F_Cu)) / 2), "track"))
+        elif t.GetLayer() in LAYERS:
+            a, b = t.GetStart(), t.GetEnd()
+            g = LineString([(TO(a.x), TO(a.y)), (TO(b.x), TO(b.y))]).buffer(TO(t.GetWidth()) / 2)
+            r.copper.append((t.GetNetname(), {LAYERS.index(t.GetLayer())}, g, "track"))
+    n2 = r.square_joins()
+    n3 = merge_tracks(board)
+    print(f"route: tidy - {n0} empty or doubled track(s), {n1} dangling, {n2} acute join(s) squared, {n3} joint(s) merged")
 
 
 def moat_keepout(board, lay):

@@ -424,10 +424,72 @@ because a via in a pad wicks its solder away; **no via goes under silkscreen**
 path at an acute angle is left out, the path already ending inside the pad;
 and the mount holes' copper keep-outs (ADR 0020) are obstacles on both layers.
 **It proves nothing about itself** — KiCad's DRC and `pcb.py check` do. It is
-for simple digital boards like the key boards. **The main board's analog
-routing is done by hand** (`docs/reference/pcb-pipeline.md`). The module's
+for simple digital boards like the key boards; the main board uses only its
+fanout, pair and moat pieces and Freerouting for the rest (*The main board*,
+above). The module's
 own header docstring still says every single-sided ground pad gets a via;
 step 6 is what the code does.
+
+### The main board — `kind: main` (`tools/pcb_main.py`)
+
+A board whose `layout.yaml` says `kind: main` is built by `tools/pcb_main.py`
+and checked by the same `pcb.py check`, with more. The key boards' own path is
+unchanged: their `layout.yaml` names no kind.
+
+| What | From |
+|---|---|
+| Outline | `mechanical/export/main-board.dxf` less each mount's hole (the mount's footprint drills it); the U-bolt legs' holes and the sensor slot stay in Edge.Cuts, routed and unplated |
+| Thumb switches | `pcb-geometry.echo` `main` `switch`, on the **underside**: seen from above a switch hanging face down is the key-board footprint mirrored about the body's x axis, then turned by the CAD's rotation; the KiCad rotation that puts pins 1 and 2 there is found, not assumed. Model height `switch.thumb_pcb_below_seat` |
+| Both `J-CHAIN` | `main` `chain`, on the top (`place_chain(..., bottom=False)`); each is the header whose pin 10 is its own side's chain 3V3 |
+| `J-MCU`, `J-UMB` | `main` `connector` and `layout.yaml` `connectors:` — the pad row farthest from the mouth at a stated offset from the insulator's face (the placeholder footprints; re-check the offset when a real footprint replaces one) |
+| `U-BREATH` | `main` `part`, its pads centred there, turned by `cad_parts:` |
+| The LED row | `main` `led`, LED *n* the *n*th along the data chain (found from the netlist: DI of the first is the one net no LED drives); each `C-LED` at `led_caps:` offset |
+| Mounts | `main` `standoff`, **every one plated on `PWR_GND`** (`mounts:`), on the top face so their courtyard keeps parts off the standoff or nut; rule areas keep every track and via off what bears on each face |
+| U-bolt legs | `main` `ubolt`: outer-layer rule areas round the washer and nut above and the spacer below, grown by `ubolt: copper_keepout`; the planes run past |
+| Keep-outs | `keepouts:` — the chain ribbons' plug and fold, and the regulator block, as footprint rule areas (their own parts cut out); heights by `heights:` against the echo's rooms (`check_heights`) |
+| Key networks | the key boards' T (`networks:`, with `t_parts`), on the top face; `spare:` places the T of a position with no switch |
+| Parts the board does not carry | `not_on_board:`, each with its reason; `check` prints them as notes, and any other missing footprint is still an error |
+| Layers and stackup | `layers: 4`, `stackup:` (the board house's named stack, banked); plane layers are set to KiCad's *power* type |
+| Planes, islands | `planes:` (a zone per layer and net), `islands:` (an island zone over a polygon, cut out of its plane with a `moat`, one `tie`, a `tie_window`, the pads allowed `off_island`) |
+| Net classes | `net_classes:`, written into the `.kicad_pro` with a pattern per net |
+
+**Routing (`route: freerouting`).** In this order:
+1. **`pairs:`** — `pcb_route.route_pair`: two nets side by side on one layer,
+   routed as one fat track (two widths and the gap) by A* through the `through:`
+   points, then split into two offset legs, each leg joined to its own pads by a
+   single track of its net. Locked.
+2. **`fanout:`** — `pcb_route.fanout`: every SMD pad of a plane net gets its own
+   via into its plane on a short straight stub, the nearest legal spot, the via
+   inside its plane's region (an island's via on the island, a `PWR_GND` via off
+   the island and its moat). Through-hole pads meet the plane themselves. Locked.
+3. **`moat_keepout`** — a rule area over each moat on the layer above it, but for
+   the tie's window and where a pair crosses.
+4. **Freerouting** (`tools/pcb_freeroute.py`, v2.1.0, the last release on Java
+   21; `tools/setup-env.sh` fetches it and the tool checks its SHA-256): KiCad's
+   own Specctra DSN export, Freerouting headless, KiCad's own SES import. The
+   planes go as planes and the power layers as *power*, so only layers 1 and 4
+   are routed; locked copper goes as fixed wiring. A rule area that keeps out
+   only footprints is taken off the exported copy (KiCad exports it as a routing
+   keep-out). What it leaves unrouted is printed by name; the board is written
+   anyway, and `check` fails on each connection until it is routed by hand.
+5. Zones filled, stackup written, as for a key board.
+
+`layout --no-route` builds and places only (a cheap re-run after a footprint
+changes).
+
+**`check` adds** for a main board (`pcb_main.check_cad`, `check_heights`,
+`check_planes`): every switch underside with its pins where the body CAD's
+mirrored switch has them; each chain header, connector, the sensor and each LED
+where the echo puts it; each mount plated on its net with no other net's
+copper under its hardware on either face; no copper of any net inside a U-bolt
+leg's outer-layer keep-out; every top part inside its height room; each plane
+and island zone present; every island-net pad on the island (but `off_island`)
+and every island via inside it, no other plane net's via on it or its moat;
+**exactly one tie**, the named net tie; and **no signal track on layer 1 or 4
+crossing a split in its reference plane** (layer 2 under layer 1, layer 3 under
+layer 4) — a track must lie wholly within one filled area of its reference
+layer, antipads (holes under 4 mm²) closed; the tie's window and a pair's
+crossing of its moat are exempt.
 
 ### Learned the hard way
 
@@ -541,8 +603,9 @@ Each render is generated; what it is rendered from is the source.
   The interfaces migrated on 2026-09-29. The boards still draw their own
   halves of them rather than placing the interface sheets, which span boards
   (each interface page says which board draws which part). The main board is a project placing its circuit sheets
-  (2026-09-29); **its layout is next**, and `tools/pcb.py` has no main-board
-  mode yet (`hardware/boards/main-board/README.md`, *Open*).
+  (2026-09-29); `tools/pcb.py` lays it out in its `kind: main` mode (*The main
+  board*, above), and what that first layout left open is in
+  `hardware/boards/main-board/README.md`, *Open*.
 - **The BOM fragments** become exports once every board is in KiCad, because
   a row's quantity is a count over all of them (ADR 0019).
 - **The right-hand key board's layout**, the same way as the left-hand one
