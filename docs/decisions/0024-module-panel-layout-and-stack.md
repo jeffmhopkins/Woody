@@ -2,7 +2,8 @@
 
 **Status:** Accepted, 2026-09-29. **Amended 2026-09-30** by the owner's
 instruction (point 11): the etherCON is the bottom row, the toggle and the LED
-are the row above it. Made with the module's mechanical CAD, "up to
+are the row above it; **and again the same day** (point 12): the toggle throws
+left–right. Made with the module's mechanical CAD, "up to
 the line before board layout". It takes ADR 0023's two-board decision to
 positions and lengths, and it **reverses one of 0023's consequences**: the
 panel has no slot for the NE8FAV's PUSH tab (point 3).
@@ -31,9 +32,10 @@ checked rather than asserted.
    the middle knob: PITCH and BREATH on the first row, under the knobs that
    shape breath, then MOD 1–4 read like text (`layout.jacks`). Then the
    toggle, centred, on a row it shares only with the power LED (in the strip
-   to its left), lever thrown up for on. The NE8FAV last, centred, latch up,
-   on the bottom row. *Amended 2026-09-30, point 11: this point first had the
-   NE8FAV above the toggle, with the LED beside its flange.* The rows'
+   to its left), its lever thrown **right** for on (point 12). The NE8FAV
+   last, centred, latch up, on the bottom row. *Amended 2026-09-30, point 11:
+   this point first had the NE8FAV above the toggle, with the LED beside its
+   flange; and point 12: the lever threw up for on.* The rows'
    heights are `layout.*` leaves; what they must clear is in the DRC's panel
    section.
 2. **Legend zones are part of the layout** and are derived from what is
@@ -142,6 +144,42 @@ checked rather than asserted.
     different order, so its value is unchanged; its `toggle_row` note says
     where the LED now is.
 
+12. **The power toggle throws left–right** — amended 2026-09-30. The owner:
+    *"I think power switch should just go left to right and [not] up and down
+    to avoid inadvertent triggering."* A lever that throws up and down is
+    thrown by anything dragged down the panel — a hand reaching for a jack, a
+    patch cable pulled out and down, the NE8MX's own cable being mated below
+    it. Across the panel, none of those push along the throw.
+
+    **ON is to the right**, toward the POWER legend; OFF is to the left,
+    toward the LED (`layout.toggle_on`). The M2011 is ON in NKK's *Down*
+    position, the lever away from the bushing's keyway (`NKK-SERIES-M-TOGGLE.pdf`
+    p.5, A56, the circuit table's position icons), and the D4 bushing's flat
+    is drawn where the S4's keyway is, across from the lever (p.7, A58). **So
+    the flat is on the left**, and the panel's D-hole is turned to put it
+    there. The model derives the flat, the sweep, the body and its lugs from
+    that one leaf, so they cannot disagree with each other again — and they
+    did: the layout of 2026-09-29 drew the flat up and called up ON, which by
+    NKK's own table is OFF. The D4's hardware is two hex nuts and a
+    lockwasher with no locking ring (p.7's hardware table), so the flat is the
+    only anti-rotation feature and the panel needs no second hole.
+
+    **What turned with it.** On the face, the sweep now lies along the row,
+    toward the LED and the POWER legend; both legend zones are derived from
+    it and are narrower by what it gained (DRC: *legend zone: LED-PANEL
+    legend*, *legend zone: SW-POWER legend*). Across the row it is now the
+    nut, so the lever is further from the PUSH tab below and the last jack
+    row's plug grips above (DRC: *face parts clear of each other*, *plugs and
+    knobs clear of the NE8MX, the PUSH tab, the toggle, the LED and the
+    A-screws*) and from the drop zone (DRC: *no panel control under the
+    umbilical*). Behind the panel, NKK's terminal field lies along the throw,
+    so the body is now wide and short: the jack board's step for it is wider
+    and lower (DRC: *board outlines*, *jack board notch clear of SW-POWER's
+    body*), which gives back room under the lowest jacks (DRC: *lowest jacks
+    above the notch*); the main board's wiring keep-out turns with it
+    (`pcb-geometry.echo`). The row's height is unchanged, and so is
+    `panel-height-budget`.
+
 ## Consequences
 
 - **The module has its own model, config, outputs and ledger**
@@ -173,5 +211,5 @@ checked rather than asserted.
 | Which toggle lug wires go to which board | The board layout; the DRC gives the lugs' clearance in front of the main board |
 | The knob's bore depth and its gap to the panel (`knob.gap`) | The first fit, with the knob in hand |
 | The panel's legends | The artwork, inside the zones this record fixes |
-| Whether a thumb on the PUSH tab has room under the toggle's lever (point 11: the lever's sweep is the DRC's *face parts clear of each other* above the tab) | The 1:1 paper check with the NE8MX in hand, then the first panel |
+| Whether a thumb on the PUSH tab has room under the toggle (points 11 and 12: the sweep's lower edge, now the nut's, is in the DRC's *face parts clear of each other* above the tab) | The 1:1 paper check with the NE8MX in hand, then the first panel |
 | The umbilical's jacket and bend radius (`ethercon.umb_od`, `umb_bend_k`) | CABLE-UMB bought, and its datasheet |
