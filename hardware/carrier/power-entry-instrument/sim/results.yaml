@@ -4,7 +4,7 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/carrier/power-entry-instrument/sim/sims.yaml: d95b491158ecb76c
+  hardware/carrier/power-entry-instrument/sim/sims.yaml: 849986a764f89f9b
   hardware/carrier/power-entry-instrument/netlist.yaml: 2ced35d8a0373a19
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
   hardware/module/power-entry/netlist.yaml: ccb32c181cd90840
@@ -207,7 +207,7 @@ sims:
         threshold, no fault latch'
       pass: true
   replug-early:
-    corners: 5
+    corners: 33
     measures:
       latched:
         nominal: 0.0
@@ -223,16 +223,16 @@ sims:
         max_at: nominal
       t_at_ocp:
         nominal: 0.000157346
-        min: 0.000135729
-        min_at: r_cable+ vto_q+
-        max: 0.000157346
-        max_at: nominal
+        min: 9.70094e-05
+        min_at: dvg- igate+ r_cable+ vhi- vto_q-
+        max: 0.000452873
+        max_at: dvg+ igate+ r_cable- vhi+ vto_q+
       vcc_min:
         nominal: 11.645
-        min: 11.6436
-        min_at: r_cable- vto_q+
-        max: 11.7118
-        max_at: r_cable+ vto_q+
+        min: 10.2304
+        min_at: dvg+ igate+ r_cable- vhi+ vto_q-
+        max: 11.7355
+        max_at: dvg- igate- r_cable+ vhi- vto_q+
     asserts:
     - expr: max['latched'] < 0.5 and min['vcc_min'] > 9.90
       why: the restart completes without the fault latch and VCC stays above the ON pin's turn-off
