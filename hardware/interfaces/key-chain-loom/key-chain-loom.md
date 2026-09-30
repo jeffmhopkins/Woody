@@ -210,10 +210,10 @@ and `key-layout.yaml`'s order stands.
 
 **The parts** (owner, 2026-09-27; ADR 0017's amendment). `J-CHAIN` is a
 2×6, 1.27 mm pitch, **shrouded, keyed, right-angle, through-hole** IDC
-header; the stand-in is Samtec SHF-106-01-L-D-RA
+header; the part is Samtec SHF-106-01-L-D-RA
 `[datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf, the full print]`.
 `CBL-CHAIN` is a flat IDC ribbon, 12 conductors at 0.635 mm, with a 2×6 IDC
-socket at each end, bought as an assembled length; the stand-in is Samtec
+socket at each end, bought as an assembled length; the part is Samtec
 **FFSD-06-D-xx.xx-01-N-RN2** — `xx.xx` is the length code below, in
 inches, and **`-RN2`, the notch reversed on the second socket, is what sets
 the pin map and which way each end's cable leaves** (below)
@@ -510,25 +510,50 @@ and none of it moved.
 
 ## Still open
 
-- **The `J-CHAIN` part**, decided at M4: a 2×6 1.27 mm shrouded, keyed,
-  right-angle through-hole header inside `boards.chain_hdr_*`, the same part
-  at all four positions (stand-in Samtec SHF-106-01-L-D-RA, full print
-  banked). The pin map is the cable's, not the header's (above).
-- **The `CBL-CHAIN` part**, decided at M4: stand-in Samtec
-  `FFSD-06-D-<code>-01-N-RN2`, assembled, where `<code>` is `drc.echo`
-  "key-chain cable to order (FFSD length code)", in inches. **Meter every
-  cable before it is first powered**, not only the first: conductor 10 must
-  reach the far socket's position 3, and conductor 2 its position 11. A
-  standard cable goes in without any mechanical sign (above).
-  `boards.chain_plug_proud` is measured on the first mated pair; it decides
-  whether the cable clears the shroud's mouth.
-- **`R-CHAIN-SER`** (E14) — above. **`U-TVS-CHAIN`** and the fuse are
-  decided (ADR 0018); what is left of them is two tests — the LDO's short
-  limit at E1 and `FB-CHAIN`'s ring at E14 — and the bead's part number.
-- **The main board's hop inputs float with a ribbon unplugged.** With a ribbon out,
-  `right_thumb`'s or `left_thumb`'s `SER` — the main-board end of that
-  ribbon's pin 8 — has nothing on it. It costs nothing in play (the lid is on)
-  and the markers show the missing board as a failed frame, not a wrong note.
-  **Decided by** whether the main board is ever run with a ribbon unplugged at
-  bring-up for long enough to care; if so, a pull-up on each ribbon's pin 8 at
-  the main board.
+Each item says what closes it and when. Nothing here waits on a derivation
+that could be done on paper.
+
+- **`J-CHAIN`'s supply — the first order.** The part is decided (a 2×6
+  1.27 mm shrouded, keyed, right-angle through-hole header inside
+  `boards.chain_hdr_*`, the same at all four positions; Samtec
+  SHF-106-01-L-D-RA, full print banked) and its footprint is laid out on both
+  key boards. What is open is buying it: DigiKey held **8** at $2.83 with a
+  4-week factory lead time `[web https://www.digikey.com/en/products/detail/samtec-inc/SHF-106-01-L-D-RA/8410402, 2026-09-30]`
+  — an instrument takes `chain-connectors`, so eight is one build and its
+  spares — and JLC/LCSC none (the key board's README, *Ordering it*). Buy them
+  with the first key-board order; failing DigiKey, Samtec direct. A stocked
+  alternative is **not** a drop-in: it changes a footprint on three boards, so
+  it would be a new decision, not this one.
+- **`CBL-CHAIN`'s fit — M4, the first mated pair.** The part and its order
+  code are decided: `FFSD-06-D-<code>-01-N-RN2`, `<code>` being `drc.echo`
+  "key-chain cable to order (FFSD length code)" written `XX.XX`. The print
+  allows any overall length in that field above a 1.00 in minimum, and
+  states increments only for the daisy-chain option (1.00 in), which this
+  cable does not use `[datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf,
+  sheet 1, the part-number block and note 11]`; Samtec's own site has FFSD-06-D product
+  pages at non-round lengths such as 31.90 `[web search result
+  https://www.samtec.com/products/ffsd-06-d-31.90-01-n, 2026-09-30; the page
+  itself answered HTTP 429, so its content is unread]`.
+  What only the hardware can close is `boards.chain_plug_proud`, the mated
+  socket's stand-out from the shroud's mouth, which the print does not
+  dimension and which decides whether the cable clears the mouth: **measured
+  on the first mated pair at M4.** Every cable is metered before it is first
+  powered (conductor 10 to the far socket's position 3, conductor 2 to its
+  position 11), because a standard cable goes in without any mechanical sign
+  (above) — that is a bring-up step, not an open item.
+- **`R-CHAIN-SER`'s value — E14.** Scope `SCK` at the `left_hand` register on
+  the real main board and ribbons (above). 100 Ω is fitted either way.
+- **Two tests of decided parts.** `U-TVS-CHAIN` and the absent fuse are
+  decided (ADR 0018) and `FB-CHAIN` is Murata's BLM21SP601SN1D (its row):
+  **E1** shorts one ribbon's 3V3 through 1 Ω and confirms the LDO limits and
+  the Matrix restarts (above); **E14** scopes the key board's VCC while the
+  chain shifts, against `sim/`'s `rail-as-ordered`.
+- **The main board's hop inputs float with a ribbon unplugged — the owner.**
+  With a ribbon out, `right_thumb`'s or `left_thumb`'s `SER` — the main-board
+  end of that ribbon's pin 8 — has nothing on it. It costs nothing in play
+  (the lid is on) and the markers show the missing board as a failed frame,
+  not a wrong note. The fix, if wanted, is a 10 kΩ pull-up on each ribbon's
+  pin 8 at the main board, the part `R-SER-TERM` already is: a missing board
+  then shifts in all ones, which its low marker bit fails cleanly, and a
+  fitted board's `QH` drives it at `[calc]` 3.3 V / 10 kΩ = 0.33 mA. **Decided
+  by: owner** — two 0805s on the main board, whose sheet is being reworked.
