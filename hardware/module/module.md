@@ -42,9 +42,12 @@ functions and error budgets cannot be stated from one side.
   the standoffs, both connectors and each face's keep-outs — which is the
   board layout's input. `mechanical/module/README.md` has the pictures.
   Nothing has been cut yet.
-- **Two layers or four** is undecided and gates the grounding scheme. It is
-  upstream of `power-entry/`'s `dig-gnd-topology`, which is tracked as
-  `disputed` for exactly this reason.
+- **Four layers, 1.6 mm, for the main board; two for the jack board** — the
+  owner, 2026-09-30: *"Four layer in the module board is fine."* The ground
+  scheme on it is `dig-gnd-topology` (`power-entry/`, *Grounding*). The jack
+  board has one ground, `AGND_MOD`, and needs no second layer pair.
+- **The bus +5 V is not used** (owner, 2026-09-30): the module makes its own
+  (`power-entry/`, *The logic 5 V*) and keeps the 16-pin header (ADR 0023).
 - ~~`hardware/unplaced.csv` holds this board's principal ICs.~~ **Fixed
   2026-09-21.** The DAC, the in-amp, the LM317, the entry diodes, the beads,
   the bulk caps, both load-switch capacitors and the level shifter are now

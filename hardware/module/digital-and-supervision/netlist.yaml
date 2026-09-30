@@ -29,7 +29,7 @@ ports:
   SYNC:
     dir: out
     to: module/dac8568
-  BUS_5V:
+  LOGIC_5V:
     dir: in
     from: module/power-entry
   DAC_AVDD:
@@ -112,10 +112,6 @@ components:
       TTL thresholds, V_IH 2.0V min, not ratioed to VCC, and there is NO INPUT CLAMP TO VCC, which is what makes
       back-driving an unpowered module safe
 nets:
-  BUS_5V:
-  - port: BUS_5V
-  - C-DEC-LVL.1
-  - U-LVL-MOD.VCC
   CS_MOD:
   - port: CS_MOD
   - R-PULL-CS.1
@@ -140,6 +136,10 @@ nets:
   - port: DIN
   - R-PULL-DIN.1
   - U-LVL-MOD.2Y
+  LOGIC_5V:
+  - port: LOGIC_5V
+  - C-DEC-LVL.1
+  - U-LVL-MOD.VCC
   MOSI:
   - port: MOSI
   - R-PULL-MOSI.1

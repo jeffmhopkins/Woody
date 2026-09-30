@@ -233,6 +233,12 @@ phase 2  3.99 → 12 V at 940 mA less 360 mA load  = 2.2mF x 8.01 V / 580 mA
 **The `TIMER` must exceed 47.5 ms on worst-case silicon.** That is the
 requirement; 62 ms was an artefact of the unconnected `FB`.
 
+**The 2.2 mF this section sizes against is a bound, not the instrument.** The
+instrument's input as netlisted is `C-STRIP-BULK` 470 µF plus `C-BUCK-IN`
+100 µF, **570 µF** `[repo, carrier/power-entry-instrument/netlist.yaml]`;
+2.2 mF is 3.9× that, so every charging time and current on this page is an
+upper bound, and the sims run both.
+
 > **Simulated 2026-09-30, behaviourally — [`sim/`](sim/README.md).** Every
 > datasheet corner starts, cold and hot-plug, and `FB` unconnected latches off
 > as §5 says. Two things this section assumes did not survive the deck. **The

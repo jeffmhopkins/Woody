@@ -28,7 +28,7 @@ The `Dir` and `Peer` columns are defined once in
 | in-amp output | in | `module/breath-receive-stage` | `inamp-full-scale`, `breath-working-point` | The drawing's `in-amp out`. `R1` and the `2 × 10 k` divider that makes `V_in/2` both hang on it |
 | `BREATH_SHAPED` | out | `module/breath-output-stage` | — | The restoring half's output, into `POT-GAIN` — the top of the gain attenuator — on `J-B2B-MOD` pin 1. Equal to the in-amp's output at centre detent. Where it inserts is argued below |
 | `MODULE ANALOG +12V`, `MODULE ANALOG −12V` | in | `module/power-entry` | — | `U-RESP`'s two halves — the last two on the module |
-| `AGND_MOD` | ref | `module/power-entry` | `dig-gnd-topology` | The module analog star. The `2 × 10 k` divider's bottom leg returns to it. The module ground plan is unsettled — see the figure |
+| `AGND_MOD` | ref | `module/power-entry` | `dig-gnd-topology` | The module analog star. The `2 × 10 k` divider's bottom leg returns to it. It meets the module's other grounds only at the star — see the figure |
 | `POT-RESP` | — | `module/panel` | `panel-width`, `panel-height-budget` | The third pot and the third knob — a panel cutout, not a net that leaves this circuit. What that costs the panel is on the panel page |
 
 ## The property the circuit is built around

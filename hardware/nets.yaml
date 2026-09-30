@@ -434,8 +434,9 @@ nets:
       AT THE INSTRUMENT END IT IS THE MAIN BOARD'S GROUND: tied to PWR_GND at
       J-UMB (ADR 0018), which carrier/carrier declares by putting this port on
       its PWR_GND net. The name is kept because at the module end conductor 8
-      is its own net, and where it meets AGND_MOD there is dig-gnd-topology,
-      which is still disputed and is not settled by the instrument end.
+      is its own net: a layer-2 plane that meets AGND_MOD and PWR_GND only at
+      the module's star, through NT-DIG-MOD (dig-gnd-topology, settled
+      2026-09-30).
 
   UMBILICAL_POS12:
     kind: power
@@ -517,12 +518,12 @@ nets:
       - module/pitch-stage
       - module/breath-response-shaper
 
-  BUS_5V:
+  LOGIC_5V:
     kind: power
-    carries: "Eurorack +5 V after FB4/C4. The level shifter only - the one rail with no local regulation"
+    carries: "The module's own 5 V, U-REG-LOGIC from the analog +12 V. The level shifter only"
     driver: module/power-entry
     receivers: [module/digital-and-supervision]
-    note: "interfaces/spi-link names this rail in its Interfaces table with Dir '-' and says it 'reaches no part of this circuit'. A '-' row is context, not a connection, and it was seeded here as one"
+    note: "Replaces BUS_5V (2026-09-30): the bus +5 V is not used, and J-PWR-EURO's +5 V pins are no-connects"
 
   DAC_AVDD:
     kind: power
@@ -549,9 +550,9 @@ nets:
       - module/pitch-stage
       - module/breath-response-shaper
     note: >
-      Where AGND_MOD and DIG_GND meet is the tracked figure dig-gnd-topology
-      and is DISPUTED. This file records which circuits reference the net; it
-      does NOT settle the topology and must not be read as settling it.
+      AGND_MOD meets DIG_GND and PWR_GND only at the star, through
+      NT-AGND-MOD - the tracked figure dig-gnd-topology, settled 2026-09-30.
+      This file records which circuits reference the net.
 
   # ======================================================================
   # MODULE: DAC and CV
@@ -674,6 +675,11 @@ nets:
 # treated as a missing net, and so nobody re-adds it from an old drawing.
 # ----------------------------------------------------------------------
 retired:
+  BUS_5V:
+    was: "Eurorack +5 V after FB4/C4, for the level shifter"
+    why: >
+      The module makes its own 5 V (LOGIC_5V, U-REG-LOGIC) and does not use the
+      bus +5 V (owner, 2026-09-30); J-PWR-EURO's +5 V pins are no-connects.
   OE_MOD:
     was: "Four buffer enables, gated by a presence comparator"
     why: >

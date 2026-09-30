@@ -112,12 +112,22 @@ go; the *reasons* above are about positions, so re-read them when
   that net them (the jacks and pots to their stages, `LED-PANEL` to
   `panel-led`, `SW-POWER` to `umbilical-load-switch`).
 
+## Decided 2026-09-30
+
+- **Four layers, 1.6 mm** (owner). The ground scheme is `dig-gnd-topology`:
+  one star at `J-PWR-EURO`'s ground pins, `NT-AGND-MOD` and `NT-DIG-MOD` the
+  only ties ([`power-entry.md`](../../module/power-entry/power-entry.md),
+  *Grounding*).
+- **Standoff pads**: the metal standoffs (owner) land on pads on **no net**
+  on this board — plated, clear of every plane. The jack board's are
+  `AGND_MOD`.
+- **`J-B2B-MOD`** is Samtec `TSW-110-09-G-D` (row), insulator on this board's
+  front face.
+- **Both `SW-POWER` lugs** wire to this board, beside `U-LOADSW`.
+
 ## Open, and what decides each
 
 | Item | Decided by |
 |---|---|
-| `RN-PITCH` (`R-PRECISION`, LT5400) has no MPN on the symbol | Its BOM row's selection |
-| `J-B2B-MOD` has no MPN: a long-pin header or a stock one with its insulator moved | `mechanical/module/drc.echo`, *J-B2B-MOD pin length (derived)* |
-| Whether the standoffs carry ground between the boards (metal or nylon) | The layout's grounding scheme (ADR 0024) |
-| 2 × 8 or 2 × 5 power header: whether the module keeps the bus +5 V | `digital-and-supervision.md`, *the bus +5 V rail* (ADR 0023) |
-| The bus's CV and Gate pins (13–16) are unused, on no net | Nothing: the module takes no bus CV |
+| The metal standoffs' part (the CAD's `standoff.*` still cites the polyamide spacer) | The module CAD owner; the pads' nets are settled below |
+| The bus's +5 V, CV and Gate pins (11–16) are unused, on no net | Nothing: the module makes its own 5 V and takes no bus CV (ADR 0023 point 3, amended) |

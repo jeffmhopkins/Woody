@@ -26,9 +26,9 @@ The `Dir` and `Peer` columns are defined once in
 | `SCLK` | in | `interfaces/spi-link` | `umbilical-pinmap`, `spi-series-r` | From the instrument, arriving on `J-UMBILICAL` (`J-UMB-MOD` in the spi-link netlist). Pulled **down**, cable side and DAC side. **Not `SCLK_DAC`**, this buffer's output |
 | `MOSI` | in | `interfaces/spi-link` | `umbilical-pinmap`, `spi-series-r` | From the instrument, arriving on `J-UMBILICAL` (`J-UMB-MOD` in the spi-link netlist). Pulled **down**, both sides. Shares a pair with `SCLK` |
 | `CS_MOD` | in | `interfaces/spi-link` | `umbilical-pinmap`, `spi-series-r` | From the instrument, arriving on `J-UMBILICAL` (`J-UMB-MOD` in the spi-link netlist). Pulled **up**, both sides. Shares a pair with `DIG_GND` |
-| `DIG_GND` | ref | `interfaces/spi-link`, `module/power-entry` | `umbilical-pinmap`, `dig-gnd-topology` | `CS_MOD`'s return partner. Where it ties is the disputed figure, not a fact this page settles |
+| `DIG_GND` | ref | `interfaces/spi-link`, `module/power-entry` | `umbilical-pinmap`, `dig-gnd-topology` | `CS_MOD`'s return partner, and the plane this circuit sits over. It meets the other grounds only at the star (`NT-DIG-MOD`, on `module/power-entry`'s page) |
 | `SCLK_DAC`, `DIN`, `SYNC` | out | `module/dac8568`, `interfaces/spi-link` | — | **Sourced here** — the 74AHCT125 (`U-LVL-MOD`) is this circuit's part. The DAC-side three of the six `R-SPI-PULL` sit on these |
-| bus `+5V` after `FB4`/`C4` | in | `module/power-entry` | — | Through `FB4` and `C4`. Supplies the 74AHCT125 and nothing else, and it is the one rail with no diode. Open — see below |
+| `LOGIC_5V` | in | `module/power-entry` | — | The module's own 5 V (`U-REG-LOGIC`). Supplies the 74AHCT125 and nothing else. The bus +5 V is not used |
 | `OE_MOD` ×4 | ref | `module/link-supervision` | — | This buffer's four enables, tied to `GND` and permanently enabled. The circuit that used to gate them is not fitted. **Not `OE_INST`**, the carrier level shifter's |
 
 ## The circuit
@@ -57,7 +57,7 @@ block below is where the DAC box was.*
    │            │  │  │                   │
    └── 8 DIG_GND│  │  │              ┌────┴─────────┐
         │   [R-SPI-PULL x3]          │  74AHCT125   │
-        │    SCLK↓ MOSI↓ CS↑         │  bus +5V     │
+        │    SCLK↓ MOSI↓ CS↑         │  LOGIC_5V    │
         │        │  │  │             │  OE x4 → GND │  tied ENABLED
         │    DIG_GND                 └────┬─────────┘
         │                                 │
@@ -67,7 +67,7 @@ block below is where the DAC box was.*
         │                                                 as the three above
         │                                 │
         │
-        └── analog star, single tie (ADR 0004)
+        └── the star, through NT-DIG-MOD (dig-gnd-topology)
 
    NOT HERE ANY MORE: the 74HC123 frame watchdog and the LM311 presence
    comparator. Both deleted; see "What this redraw changed".
@@ -109,15 +109,13 @@ and neither end of a cable states it alone. The drawing above stays here.*
   benign direction. Still worth measuring, and the DAC service routine still
   belongs in IRAM.
 
-> **Still open — the bus +5 V rail.** Three reviewers independently want it
-> dropped: it is what makes a reversed 16-pin ribbon dangerous (module
-> ground lands on bus +5 V and +12 V), **zero of eight** surveyed published
-> designs take a sub-12 V rail from the bus, and it is the only rail here
-> with no reverse protection — on a branch whose bulk capacitor vents when
-> reverse-biased. It exists for this one 74AHCT125. Deriving it locally from
-> the protected +12 V is one TO-92 and two capacitors, and would allow a
-> 10-pin header. **Not changed here, because it is a rail change and a
-> connector change, not a drawing correction.**
+**The bus +5 V rail — settled 2026-09-30.** Three reviewers wanted it dropped:
+it made a reversed 16-pin ribbon dangerous, **zero of eight** surveyed
+published designs take a sub-12 V rail from the bus, and it was the only rail
+with no reverse protection. The owner: *"Create the 5v locally"* and *"We keep
+the standard header, we just don't use the 5 volt."* So the 74AHCT125 runs
+from `LOGIC_5V`, `U-REG-LOGIC` on `module/power-entry`, and `J-PWR-EURO`'s
++5 V pins are no-connects (ADR 0023 point 3).
 
 *(Supervision — the deleted frame watchdog, the deleted presence detect, and
 what restoring either would cost — is in

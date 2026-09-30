@@ -235,13 +235,6 @@ components:
     - 1
     - 2
     sheet: mod-channels
-  C4:
-    of: C-BULK-RAIL
-    value: 47uF
-    pins:
-    - 1
-    - 2
-    sheet: power-entry
   C40:
     of: C-ON-LOADSW
     value: 100nF
@@ -249,6 +242,20 @@ components:
     - 1
     - 2
     sheet: umbilical-load-switch
+  C41:
+    of: C-LOGIC-REG
+    value: 4.7uF
+    pins:
+    - 1
+    - 2
+    sheet: power-entry
+  C42:
+    of: C-LOGIC-REG
+    value: 4.7uF
+    pins:
+    - 1
+    - 2
+    sheet: power-entry
   C5:
     of: C-REG-ADJ
     value: 10uF
@@ -411,13 +418,6 @@ components:
     - 1
     - 2
     sheet: power-entry
-  FB4:
-    of: FB-IN
-    value: 600R @ 100MHz
-    pins:
-    - 1
-    - 2
-    sheet: power-entry
   J1:
     of: J-PWR-EURO
     value: 2x8 2.54mm shrouded box header (16-pin)
@@ -484,6 +484,13 @@ components:
     sheet: dac8568
   NT1:
     of: NT-AGND-MOD
+    value: net tie
+    pins:
+    - 1
+    - 2
+    sheet: power-entry
+  NT2:
+    of: NT-DIG-MOD
     value: net tie
     pins:
     - 1
@@ -1053,6 +1060,16 @@ components:
     - V+
     - V-
     sheet: mod-channels
+  U13:
+    of: U-REG-LOGIC
+    value: ADP7118AUJZ-5.0
+    pins:
+    - VIN
+    - GND
+    - EN
+    - SENSE
+    - VOUT
+    sheet: power-entry
   U2:
     of: U-LOADSW
     value: LT1641-1IS8
@@ -1468,10 +1485,6 @@ nets:
   - R62.2
   - R63.2
   - U9.INA+
-  /power-entry/BUS_5V_IN:
-  - FB4.1
-  - J1.POS5_11
-  - J1.POS5_12
   /power-entry/NEG12_D3:
   - D3.K
   - J1.NEG12_1
@@ -1588,11 +1601,6 @@ nets:
   - U7.INB+
   - U8.INA+
   - U8.INB+
-  BUS_5V:
-  - C12.1
-  - C4.1
-  - FB4.2
-  - U4.VCC
   BUS_POS12_RAW:
   - C10.1
   - D1.A
@@ -1604,12 +1612,15 @@ nets:
   - U2.VCC
   DIG_GND:
   - C12.2
-  - C4.2
+  - C41.2
+  - C42.2
   - J3.8
+  - NT2.1
   - R10.2
   - R11.2
   - R13.2
   - R14.2
+  - U13.GND
   - U4.1OE
   - U4.3OE
   - U4.4A
@@ -1624,6 +1635,16 @@ nets:
   - J1.GATE_15
   J1.GATE_16:
   - J1.GATE_16
+  J1.POS5_11:
+  - J1.POS5_11
+  J1.POS5_12:
+  - J1.POS5_12
+  LOGIC_5V:
+  - C12.1
+  - C42.1
+  - U13.SENSE
+  - U13.VOUT
+  - U4.VCC
   MODULE_ANALOG_NEG12:
   - C17.1
   - C19.1
@@ -1662,6 +1683,7 @@ nets:
   - C30.1
   - C32.1
   - C34.1
+  - C41.1
   - C7.1
   - D10.K
   - D11.K
@@ -1676,6 +1698,8 @@ nets:
   - U10.V+
   - U11.V+
   - U12.V+
+  - U13.VIN
+  - U13.EN
   - U5.V+
   - U6.V+
   - U7.V+
@@ -1695,6 +1719,7 @@ nets:
   - J1.GND_8
   - J3.6
   - NT1.2
+  - NT2.2
   - R58.2
   - R7.2
   - U2.GND
@@ -1713,6 +1738,8 @@ external_endpoints:
 - J1.CV_14
 - J1.GATE_15
 - J1.GATE_16
+- J1.POS5_11
+- J1.POS5_12
 - R12.2
 - U2.PWRGD
 - U3.VOUTF
