@@ -4,7 +4,7 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/carrier/breath-adc/sim/sims.yaml: bb9aab2723bc49b4
+  hardware/carrier/breath-adc/sim/sims.yaml: 88c5c221beb75cf8
   hardware/carrier/breath-adc/netlist.yaml: 936c53388d7b1686
   hardware/carrier/breath-adc/sim/adc-ac.cir: 92db36d52ceba839
   hardware/carrier/breath-adc/sim/adc.cir: 3d5f71307efa775a
@@ -69,10 +69,9 @@ sims:
         max_at: C-AA-ADC+ R-ADCDIV-L+ R-ADCDIV-U- c_sample- r_ss-
     asserts:
     - expr: min['err_lsb'] > -4 and max['err_lsb'] < 0
-      why: 'a pure gain term, as the page says, but larger than its ''about 2 LSB'': 2.6 LSB at the nominal and 3.3 at the
-        worst corner (C_SAMPLE and R_SS are typicals only). The page''s average-current model (80 nA/V through 6 kohm) leaves
-        out the instantaneous share each sample takes from C-AA-ADC, 20 pF/47 nF of it [calc: 0.043 %, 1.5 LSB at full scale],
-        which the next sample finds only partly restored'
+      why: 'a pure gain term, under 4 LSB at every corner (adc-sample-kickback; C_SAMPLE and R_SS are typicals only). The
+        average-current model (80 nA/V through 6 kohm) leaves out the instantaneous share each sample takes from C-AA-ADC,
+        20 pF/47 nF of it [calc: 0.043 %, 1.5 LSB at full scale], which the next sample finds only partly restored'
       pass: true
     - expr: min['settle_frac'] > 0.9999
       why: 'C_SAMPLE charges fully inside t_SAMPLE (1.5 clocks at 900 kHz, 1.67 us against R_SS x C_SAMPLE = 20 ns): what

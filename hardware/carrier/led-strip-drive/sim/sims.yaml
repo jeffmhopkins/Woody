@@ -47,6 +47,6 @@ sims:
       - expr: "max['t_rise'] < 40e-9 and max['t_fall'] < 40e-9"
         why: "the page's ~22 ns edge (330 ohm x 30 pF, x 2.2), a tenth of T0H, holds with the gate's own resistance and a trace added: under 40 ns at every corner"
       - expr: "min['hi_short'] > 0.9 * p['t_hi'] and max['hi_long'] < 1.2 * p['t_hi']"
-        why: "a 220 ns T0H arrives as 200-264 ns wherever in its window the LED's threshold sits: the edge moves the pulse by a small fraction of T0H's 220-380 ns spec"
+        why: "a 220 ns high arrives as 198-264 ns or better wherever in 1.5-2.7 V the LED's threshold sits: the edge moves the pulse by a few nanoseconds, a small fraction of T0H's 220-380 ns window"
       - expr: "max['v_max'] < 5.7 and min['v_min'] > -0.3"
         why: "inside the WS2815B-V1's logic-input absolute maximum, -0.3 to 5.7 V [ds p.2]: an RC, nothing rings"

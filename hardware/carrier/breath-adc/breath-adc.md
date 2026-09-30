@@ -85,9 +85,16 @@ attenuation at the R-78E5.0's ~330 kHz switching rate = 20·log10(330k/564) = 55
 
 ```
 I_avg = 20 pF × 4 kHz = 80 nA per volt
-ΔV    = 80 nA/V × 6 kΩ = 480 µV/V = 0.048 % — about 2 LSB at full scale,
+ΔV    = 80 nA/V × 6 kΩ = 480 µV/V = 0.048 %, the average current's share,
         proportional to V_in, therefore a pure constant gain term
 ```
+
+**Simulated** (`sim/`, 2026-09-30): the shortfall at full scale is
+`adc-sample-kickback`, larger than the average-current line above because each
+sample also takes 20 pF/47 nF of `C-AA-ADC`'s charge at once `[calc]`, which
+the 282 µs time constant has not fully restored by the next. Still a pure gain
+term. The same run confirms the 564 Hz corner, the 55 dB at the buck's rate
+and τ = 282 µs.
 
 Invisible: the zero is auto-tracked in firmware and the span is set by a panel
 knob `[repo] 0003, 0006`.

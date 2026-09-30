@@ -123,6 +123,33 @@ pin map and all eight of its nets: each net is `J-UMB`, `J-UMB-INST` and
 `J-UMB`'s part is chosen (the row in this circuit's [`bom.csv`](bom.csv));
 its drawing settles the insulator in `config/body.yaml` `boards.umb_joint_*`.
 
+## Simulated — `sim/`, 2026-09-30
+
+The three lines as netlisted, with the cable as lossy transmission lines from
+a banked Cat5e datasheet (`sim/README.md`). Two results contradict this page,
+and both are E11's to confirm on the real cable:
+
+- **`CS_MOD`'s falling edge re-enters the 0.8–2.0 V band**
+  (`cs-fall-reentry`). The rising edge's first step, below, is the easy one:
+  the source (`R-SPI-SER` and the pad) is above the line's 100 Ω, so the
+  falling edge's first step lands only just under `V_IL`, and `U-TVS-SPI`'s
+  capacitance on the line side of `R-SPI-SER` reflects the returning wave back
+  up through it. A what-if with `U-TVS-SPI` on the pad side of `R-SPI-SER` and
+  82 Ω there is clean at every corner. **A decision for the owner**, not
+  made here: it moves a protection part.
+- **`SCLK` and `MOSI` in one pair couple, and where it lands is the DAC's
+  sampling edge** (`spi-pair-crosstalk`). The pair is two coupled lines over a
+  return on other pairs; each `SCLK` edge puts a round-trip-long glitch on a
+  static `MOSI` at the module that crosses the buffer's thresholds at the
+  worst corner of every common-mode impedance swept, including on the falling
+  edge the DAC clocks `DIN` on `[ds DAC8568CIPW.pdf p.6]`. When `MOSI` falls as
+  `SCLK` rises, `SCLK`'s edge crawls through the band in round-trip steps and
+  can swing back. The even-mode impedance is in no datasheet, so the size is
+  bracketed, not known. Nothing in the netlist closes it outright: the what-if
+  above plus a capacitor at each receiver narrows it to tens of millivolts at
+  the top of the range. **A decision for the owner**: a receiver with
+  hysteresis, or measure first at E11.
+
 ---
 
 ## From the instrument end — `carrier.md` §4
@@ -232,6 +259,9 @@ line; "this page" in it means that page as it stood before the move.*
 > Pairing `SCLK` with `MOSI` is safe *by construction*: the receiver only
 > samples `MOSI` on a `SCLK` edge, so coupling between them lands where it
 > is not being looked at.
+
+*Simulated 2026-09-30 and not borne out: the coupling lands with the edge the
+DAC samples on (`spi-pair-crosstalk`, *Simulated* above).*
 
 ## Pulls on **both** sides of the buffer — six, not three
 

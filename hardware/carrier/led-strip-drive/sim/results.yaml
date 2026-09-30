@@ -4,7 +4,7 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/carrier/led-strip-drive/sim/sims.yaml: 0946bef220755f21
+  hardware/carrier/led-strip-drive/sim/sims.yaml: 4c322fbf55b1004f
   hardware/carrier/led-strip-drive/netlist.yaml: 9776e112c4c2b885
   hardware/carrier/led-strip-drive/sim/data.cir: 5eace363e6537ca4
 ngspice: '42'
@@ -54,8 +54,8 @@ sims:
         trace added: under 40 ns at every corner'
       pass: true
     - expr: min['hi_short'] > 0.9 * p['t_hi'] and max['hi_long'] < 1.2 * p['t_hi']
-      why: 'a 220 ns T0H arrives as 200-264 ns wherever in its window the LED''s threshold sits: the edge moves the pulse
-        by a small fraction of T0H''s 220-380 ns spec'
+      why: 'a 220 ns high arrives as 198-264 ns or better wherever in 1.5-2.7 V the LED''s threshold sits: the edge moves
+        the pulse by a few nanoseconds, a small fraction of T0H''s 220-380 ns window'
       pass: true
     - expr: max['v_max'] < 5.7 and min['v_min'] > -0.3
       why: 'inside the WS2815B-V1''s logic-input absolute maximum, -0.3 to 5.7 V [ds p.2]: an RC, nothing rings'

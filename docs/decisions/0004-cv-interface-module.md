@@ -968,6 +968,14 @@ only corruption in the digital path that does not self-heal on the next
 receiver samples `MOSI` only on a `SCLK` edge, so whatever they couple into
 each other lands at the moment nobody is looking.
 
+> **Simulated 2026-09-30, and the premise does not hold**
+> (`hardware/interfaces/spi-link/sim/`). A glitch coupled from a `SCLK` edge
+> arrives at the module *with* that edge and lasts a cable round trip, and the
+> DAC clocks `DIN` on `SCLK`'s falling edge — so the coupling lands exactly
+> where the DAC is looking (`spi-pair-crosstalk`, bracketed because the pair's
+> common-mode impedance is in no datasheet). The pairing decision stands until
+> E11 measures it; what closes it if the bench agrees is on `spi-link.md`.
+
 > **What this section got wrong, and it is instructive.** The original
 > reasoning above is about the ~13 mm untwisted region inside an RJ45 plug,
 > and that reasoning is sound — a reviewer costed that effect at **15 mV**.

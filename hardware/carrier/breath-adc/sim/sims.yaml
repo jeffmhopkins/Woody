@@ -78,6 +78,6 @@ sims:
       settle_frac: "at(w['cs'], p['t_first'] + 11 * p['t_loop'] + p['t_sample'] - 20e-9) / at(w['adc'], p['t_first'] + 11 * p['t_loop'] + p['t_sample'] - 20e-9)"
     asserts:
       - expr: "min['err_lsb'] > -4 and max['err_lsb'] < 0"
-        why: "a pure gain term, as the page says, but larger than its 'about 2 LSB': 2.6 LSB at the nominal and 3.3 at the worst corner (C_SAMPLE and R_SS are typicals only). The page's average-current model (80 nA/V through 6 kohm) leaves out the instantaneous share each sample takes from C-AA-ADC, 20 pF/47 nF of it [calc: 0.043 %, 1.5 LSB at full scale], which the next sample finds only partly restored"
+        why: "a pure gain term, under 4 LSB at every corner (adc-sample-kickback; C_SAMPLE and R_SS are typicals only). The average-current model (80 nA/V through 6 kohm) leaves out the instantaneous share each sample takes from C-AA-ADC, 20 pF/47 nF of it [calc: 0.043 %, 1.5 LSB at full scale], which the next sample finds only partly restored"
       - expr: "min['settle_frac'] > 0.9999"
         why: "C_SAMPLE charges fully inside t_SAMPLE (1.5 clocks at 900 kHz, 1.67 us against R_SS x C_SAMPLE = 20 ns): what it holds is C-AA-ADC's voltage, not a partial charge"
