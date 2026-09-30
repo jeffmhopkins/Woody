@@ -81,7 +81,11 @@ def route(path, edge):
                     if g.GetLayer() == lid:
                         ps = pcbnew.SHAPE_POLY_SET()
                         g.TransformShapeToPolygon(ps, lid, 0, pcbnew.FromMM(0.005), pcbnew.ERROR_OUTSIDE)
-                        pcb_main.rule_area(exp, to_body(pcb.shapely_of(ps).buffer(edge)), f"{fp.GetReference()} copper (router only)", [name])
+                        # less its own pads and a margin round them, so the router can still reach them
+                        own = __import__("shapely.ops").ops.unary_union([pcb_route.pad_geom_on(p, lid) for p in fp.Pads() if p.IsOnLayer(lid)]).buffer(edge)
+                        keep = pcb.shapely_of(ps).buffer(edge).difference(own)
+                        if not keep.is_empty:
+                            pcb_main.rule_area(exp, to_body(keep), f"{fp.GetReference()} copper (router only)", [name])
         if not pcbnew.ExportSpecctraDSN(exp, dsn):
             sys.exit("pcb: KiCad's Specctra DSN export failed")
         r = subprocess.run(["java", f"-Duser.home={t}", "-jar", j, "-de", dsn, "-do", ses, "-mp", str(PASSES),

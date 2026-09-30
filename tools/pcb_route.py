@@ -844,7 +844,10 @@ class Obstacles:
                         ps = pcbnew.SHAPE_POLY_SET()
                         g.TransformShapeToPolygon(ps, lid, 0, MM(0.005), pcbnew.ERROR_OUTSIDE)
                         import pcb
-                        self.items.append((pcb.shapely_of(ps).buffer(self.clear), None, {L}, "keepout"))
+                        # less the footprint's own pads grown by the clearance (which already holds
+                        # every other net off them): a stub or track starts inside its pad
+                        own = unary_union([pad_geom_on(p, lid) for p in fp.Pads() if p.IsOnLayer(lid)]).buffer(self.clear)
+                        self.items.append((pcb.shapely_of(ps).buffer(self.clear).difference(own), None, {L}, "keepout"))
         silk = [d for d in board.GetDrawings() if d.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS)]
         for fp in board.GetFootprints():
             silk += [g for g in fp.GraphicalItems() if g.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS)]
