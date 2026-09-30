@@ -155,8 +155,11 @@ slightly non-linear in rotation. For an offset knob that is feel, not error.
 **Why −12 V is acceptable here and would not be on pitch.** ADR 0006 moved the
 *pitch* offset off a rail divider because 50 mV of rail movement is 12.5 cents
 of transposition. Here 50 mV moves the jack by `40.2k/95.3k × 50 mV` = **21 mV,
-0.21 % of span** — and the −12 V rail carries no LED current, because the
-strips run from +12 V.
+0.21 % of span**. The −12 V rail does carry the instrument's LED current
+now: `U-ISO` draws rail to rail (ADR 0027), so both rails move with breath,
+by 9.7 mV at the header (ADR 0027's residual table). Through this divider
+that is `40.2k/95.3k × 9.7 mV` = **4.1 mV, 0.04 % of span** `[calc]`, and it
+follows breath, as this output does.
 
 ## Values
 
