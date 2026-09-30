@@ -9,8 +9,8 @@ VPOS pos 0 {{v_pos}}
 VNEG neg 0 {{v_neg}}
 VREFO vrefout 0 {{v_refout}}
 XRB vrefout vrefb pos neg vrefb OPAx197
-R1 vrefb minus {{R1}}
-R2 minus gtm {{R2}}
+R1 vrefb minus {{RN-PITCH}}
+R2 minus gtm {{RN-PITCH}}
 RTG gtm jack {{r_trim_gain}}
 VDAC dac 0 DC {{v_dac0}}
 RBD dac 0 {{R-BIAS-DAC}}

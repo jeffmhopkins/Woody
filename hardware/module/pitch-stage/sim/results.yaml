@@ -5,11 +5,11 @@
 inputs:
   tools/sim.py: 0312a1077b9afa80
   hardware/module/pitch-stage/sim/sims.yaml: 08875776ff6de91e
-  hardware/module/pitch-stage/netlist.yaml: 70250bae9e3ce8e5
-  hardware/module/mod-channels/netlist.yaml: 452f00393ff76c56
-  hardware/module/breath-output-stage/netlist.yaml: b8d1434daa4ab4eb
-  hardware/module/pitch-stage/sim/pitch-step.cir: 5ffdc5b19d6736c5
-  hardware/module/pitch-stage/sim/pitch-loop.cir: 3d503bd910defefb
+  hardware/module/pitch-stage/netlist.yaml: 5e973b705640beea
+  hardware/module/mod-channels/netlist.yaml: 8f44cca2ddd7a7e3
+  hardware/module/breath-output-stage/netlist.yaml: 6abcd3966d555eb6
+  hardware/module/pitch-stage/sim/pitch-step.cir: 701f5d46a0ceeea6
+  hardware/module/pitch-stage/sim/pitch-loop.cir: 30fa956a4b129717
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
 ngspice: '42'
 sims:

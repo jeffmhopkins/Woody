@@ -3,10 +3,10 @@
 # its inputs (hashed below), so a value changed on the sheet makes it stale.
 
 inputs:
-  tools/sim.py: 733f2d1eb8ffd2bf
-  hardware/module/breath-receive-stage/sim/sims.yaml: db9793ca26c7bf43
-  hardware/interfaces/breath-sense-link/netlist.yaml: f72908fa787ffaa2
-  hardware/module/breath-receive-stage/netlist.yaml: c36001e8feabcbf3
+  tools/sim.py: 0312a1077b9afa80
+  hardware/module/breath-receive-stage/sim/sims.yaml: 5be525e753cc5d3d
+  hardware/interfaces/breath-sense-link/netlist.yaml: 8320b43e2705cffc
+  hardware/module/breath-receive-stage/netlist.yaml: d437885d68c0f6ee
   hardware/module/breath-receive-stage/sim/cmrr.cir: 0c582bd5096fd228
   datasheets/analog/INA828-ti-pspice-sbomag5c.lib: 6ae6e0285c98dc1e
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
@@ -87,7 +87,7 @@ sims:
     asserts:
     - expr: abs(nom['cmrr_dc'] - 60.2) < 1 and min['cmrr_dc'] < 58.5
       why: the page's 60.2 dB without R1b reproduces at the nominal - and the worst corner is BELOW the 58.5 dB requirement,
-        so the '1.7 dB of margin' was a nominal, not a worst case
+        so the margin the page claimed over it was a nominal's, not a worst case's
       pass: true
   cmrr-ccm-5pct:
     corners: 257

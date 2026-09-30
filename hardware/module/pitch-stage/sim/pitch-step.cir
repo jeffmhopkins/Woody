@@ -1,4 +1,4 @@
-* The pitch stage, as netlisted, stepped: U-PITCH-AMP non-inverting (R1, R2 + TRIM-GAIN
+* The pitch stage, as netlisted, stepped: U-PITCH-AMP non-inverting (RN-PITCH R1, R2 + TRIM-GAIN
 * from the JACK, C-FB-PITCH from the op-amp output), R-OUT-PROT inside the DC loop,
 * C-FILT-PITCH at the jack; the reference follower U-PITCH-REFBUF at the bottom of R1;
 * the DAC channel through R-OPAMP-IN / C-AA-PITCH with R-BIAS-DAC at the pin. TI's
@@ -12,8 +12,8 @@ VPOS pos 0 {{v_pos}}
 VNEG neg 0 {{v_neg}}
 VREFO vrefout 0 {{v_refout}}
 XRB vrefout vrefb pos neg vrefb OPAx197
-R1 vrefb minus {{R1}}
-R2 minus gtm {{R2}}
+R1 vrefb minus {{RN-PITCH}}
+R2 minus gtm {{RN-PITCH}}
 RTG gtm jack {{r_trim_gain}}
 VDAC dac 0 PWL(0 {{v_dac0}} {{t_step}} {{v_dac0}} {{t_step_e}} {{v_dac1}})
 RBD dac 0 {{R-BIAS-DAC}}

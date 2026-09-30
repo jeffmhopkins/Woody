@@ -3,9 +3,9 @@
 # its inputs (hashed below), so a value changed on the sheet makes it stale.
 
 inputs:
-  tools/sim.py: 733f2d1eb8ffd2bf
+  tools/sim.py: 0312a1077b9afa80
   hardware/module/umbilical-load-switch/sim/sims.yaml: 6e644e59b14f33d5
-  hardware/module/umbilical-load-switch/netlist.yaml: c6aabb0f80868160
+  hardware/module/umbilical-load-switch/netlist.yaml: b44104f520816931
   hardware/carrier/power-entry-instrument/netlist.yaml: 5b86ee8e390c5833
   hardware/module/umbilical-load-switch/sim/loadswitch.cir: 051e9e92d2f484a8
   hardware/module/umbilical-load-switch/sim/lt1641.inc: 59be165ccd4451a6

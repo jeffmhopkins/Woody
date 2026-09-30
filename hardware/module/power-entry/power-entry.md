@@ -187,6 +187,13 @@ isolated, is in ADR 0004.
 *(`L-BUCK-IN` and the umbilical's input LC moved with the load switch — they
 are in [`umbilical-load-switch.md`](../umbilical-load-switch/umbilical-load-switch.md).)*
 
+- **`D3` is wired backwards in the netlist exported from the sheet.** Its anode
+  is on the bus −12 V pin and its cathode towards `FB3`, so the rail it exists
+  to pass reverse-biases it and `MODULE ANALOG −12V` never arrives
+  (simulated, [`sim/`](sim/README.md), `as-netlisted`). A negative rail's
+  reverse-protection diode has its anode on the module side. **Swap `D3`'s
+  pins on the sheet and re-export**; `d3-flipped` in the same sim is that fix,
+  and with it the rails, `dac-rail`'s floor and the pitch jack's 0 V all hold.
 - **No fuse on the analog rails.** The load switch covers only the umbilical
   branch. Mutable, Telex and others fit PTCs on their entry rails; ADR 0005's
   deletion argument was about the *instrument-end* polyfuse and does not reach

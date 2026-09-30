@@ -33,8 +33,8 @@ RDAC avdd 0 {{r_dac}}
 * the pitch stage on those rails
 VREFO vrefout 0 0
 XRB vrefout vrefb p12 n12 vrefb OPAx197
-R1 vrefb minus {{R1}}
-R2 minus jack {{R2}}
+R1 vrefb minus {{RN-PITCH}}
+R2 minus jack {{RN-PITCH}}
 VDAC dac 0 0
 RBD dac 0 {{R-BIAS-DAC}}
 RIN dac plus {{R-OPAMP-IN}}

@@ -234,6 +234,16 @@ phase 2  3.99 → 12 V at 940 mA less 360 mA load  = 2.2mF x 8.01 V / 580 mA
 **The `TIMER` must exceed 47.5 ms on worst-case silicon.** That is the
 requirement; 62 ms was an artefact of the unconnected `FB`.
 
+> **Simulated 2026-09-30, behaviourally — [`sim/`](sim/README.md).** Every
+> datasheet corner starts, cold and hot-plug, and `FB` unconnected latches off
+> as §5 says. Two things this section assumes did not survive the deck. **The
+> hot-plug start is not all in current limit**: once the amplifier has pulled
+> `GATE` down, `C-GATE` sets the slew as in a cold start and the `TIMER` peaks
+> in millivolts, so 47.5 ms is a safe bound, not the start. **And 2.2 mF is in
+> no netlist**: the instrument's input holds `C-STRIP-BULK` and `C-BUCK-IN`
+> (`carrier/power-entry-instrument`). The deck runs both. The amplifier's own
+> dynamics are the one thing the model assumed, so E6 decides.
+
 ### The two capacitors — **values set 2026-09-21, no longer blocked**
 
 ```
