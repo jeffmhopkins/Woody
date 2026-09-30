@@ -34,15 +34,14 @@ JAR_URL = "https://github.com/freerouting/freerouting/releases/download/v2.1.0/f
 JAR_SHA256 = "2c07d58f75dac03782664081e7a58b41c25400d871a9fcf166a2ea6fe60d5def"
 JAR = os.path.join(os.path.expanduser("~"), ".cache", "woody", "freerouting-2.1.0.jar")
 PASSES = 25           # asked for; Freerouting 2.1.0 does not honour it in batch (a run went to pass 52) - the job timeout bounds it
-JOB_TIMEOUT = "00:40:00"   # Freerouting's own bound: it stops the job and still writes the session
+JOB_TIMEOUT = "00:20:00"   # Freerouting's own bound: it stops the job and still writes the session
                            # (a shell timeout's kill writes nothing); HH:MM:SS - "25m" parses as no timeout
-TIMEOUT_S = 40 * 60 + 180  # the backstop, for a hung JVM
-# Its costs. Its defaults give each signal layer a preferred direction and charge 2.5x
-# against it, and a via 50: on a board 300 mm long and 42 across nearly every run is
-# along it, so the defaults crowd everything onto layer 1 and leave layer 4 empty (the
-# first main-board run: 18 connections unrouted, layer 4 all but bare). Along or across
-# is nearly even here, and a via is cheap.
-SCORING = {"default_undesired_direction_trace_cost": 1.2, "via_costs": 20}
+TIMEOUT_S = 20 * 60 + 180  # the backstop, for a hung JVM
+# Its costs, left at its own defaults. Tried on the first main-board layout: a flatter
+# direction cost (1.2 against 2.5) and cheaper vias (20 against 50) left 25-31
+# connections unrouted where the defaults left 16-18, in the same time. What it leaves
+# goes to pcb_route.complete.
+SCORING = {}
 
 
 def jar():
@@ -54,8 +53,8 @@ def jar():
     return JAR
 
 
-def route(path):
-    """Route the saved board at `path` in place. Returns Freerouting's own last lines."""
+def route(path, edge):
+    """Route the saved board at `path` in place; `edge` its copper-to-edge clearance, mm."""
     j = jar()
     t = tempfile.mkdtemp(prefix="freeroute-")
     try:
@@ -63,7 +62,16 @@ def route(path):
         exp = pcbnew.LoadBoard(path)
         for z in list(exp.Zones()):
             if z.GetIsRuleArea() and not (z.GetDoNotAllowTracks() or z.GetDoNotAllowVias()):
-                exp.Remove(z)
+                exp.Delete(z)          # Delete, not Remove: a Remove from a loaded board breaks the next walk of it
+        # the DSN carries no copper-to-edge clearance (the board outline is the router's
+        # boundary, copper allowed to its line): a keep-out band inside every edge,
+        # outline and cut-outs, as wide as the board's edge clearance
+        import pcb_main
+        import pcb_route
+        outline = pcb_route.board_outline_with_holes(exp)
+        band = outline.difference(outline.buffer(-edge, join_style=2))
+        to_body = lambda g: __import__("shapely").ops.transform(lambda x, y, z=None: pcb_main.to_body(x, y), g)
+        pcb_main.rule_area(exp, to_body(band.buffer(0.01)), "edge clearance (router only)", ["F.Cu", "B.Cu"])
         if not pcbnew.ExportSpecctraDSN(exp, dsn):
             sys.exit("pcb: KiCad's Specctra DSN export failed")
         r = subprocess.run(["java", f"-Duser.home={t}", "-jar", j, "-de", dsn, "-do", ses, "-mp", str(PASSES),

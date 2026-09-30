@@ -758,15 +758,27 @@ def add_silk_generic(board, lay, comps):
 
 
 def post_route(path, bdir):
-    """A routed multi-layer board (route: freerouting), saved at `path`: the tracks tidied
-    (pcb_route.tidy), then its silkscreen - after routing, so every label keeps off every
-    via; the autorouter cannot see silk - and any stroke of a footprint's own silk on a
-    via removed, named."""
+    """A routed multi-layer board (route: freerouting), saved at `path` with its zones
+    filled: the tracks tidied (pcb_route.tidy); every connection KiCad still counts
+    missing tried once more (pcb_route.complete); then its silkscreen - after routing, so
+    every label keeps off every via, which the autorouter cannot see - and any stroke of
+    a footprint's own silk on a via removed, named."""
     import pcb_route
     name = os.path.basename(bdir)
     lay = layout_yaml(bdir)
     comps, _ = sheet_netlist(os.path.join(bdir, name + ".kicad_sch"))
     board = pcbnew.LoadBoard(path)
+    pcb_route.tidy(board, lay)
+    pcbnew.SaveBoard(path, board)
+    miss = []
+    for v in drc(path).get("unconnected_items", []):
+        it = v.get("items", [])
+        m = re.search(r"\[([^\]]+)\]", it[0]["description"]) if len(it) == 2 else None
+        if m:
+            miss.append((m.group(1), (it[0]["pos"]["x"], it[0]["pos"]["y"]), (it[1]["pos"]["x"], it[1]["pos"]["y"])))
+    board = pcbnew.LoadBoard(path)
+    failed = pcb_route.complete(board, lay, miss)
+    print(f"route: complete - {len(miss) - len(failed)} of {len(miss)} connection(s) the autorouter left, routed")
     pcb_route.tidy(board, lay)
     add_silk_generic(board, lay, comps)
     from shapely.geometry import Point as _P
@@ -1041,11 +1053,19 @@ def cmd_layout(bdir, force=False, route=True):
         if route == "freerouting":
             # in a fresh process, which loads the board with the net classes just written
             r = subprocess.run([sys.executable, "-c", f"import sys, json; sys.path.insert(0, {here!r}); "
-                                f"import pcb_freeroute, pcb; print('UNROUTED=' + json.dumps(pcb_freeroute.route({tmp!r}))); pcb.post_route({tmp!r}, {bdir!r})"],
+                                f"import pcb_freeroute; print('UNROUTED=' + json.dumps(pcb_freeroute.route({tmp!r}, {float(lay['rules']['edge_clearance'])!r})))"],
                                capture_output=True, text=True)
             print(r.stdout.rstrip())
             if r.returncode or "UNROUTED=" not in r.stdout:
                 sys.exit(f"pcb: the Freerouting round trip failed:\n{r.stderr[-3000:]}")
+            # the planes filled, so KiCad's count of what is missing is right; then what
+            # the autorouter left, tidied and tried again, and the silkscreen (post_route)
+            for step in (f"import pcb_route; pcb_route.fill_zones({tmp!r})", f"import pcb; pcb.post_route({tmp!r}, {bdir!r})"):
+                r = subprocess.run([sys.executable, "-c", f"import sys; sys.path.insert(0, {here!r}); " + step],
+                                   capture_output=True, text=True)
+                print("\n".join(l for l in r.stdout.splitlines() if not l.startswith("route: WARNING")))
+                if r.returncode:
+                    sys.exit(f"pcb: {step.split(';')[1].strip()} failed:\n{r.stderr[-3000:]}")
         if route:
             # zones are filled in a fresh process: an in-process fill of a just-built board crashes
             subprocess.run([sys.executable, "-c", f"import sys; sys.path.insert(0, {here!r}); "

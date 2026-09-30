@@ -468,14 +468,29 @@ unchanged: their `layout.yaml` names no kind.
    21; `tools/setup-env.sh` fetches it and the tool checks its SHA-256): KiCad's
    own Specctra DSN export, Freerouting headless, KiCad's own SES import. The
    planes go as planes and the power layers as *power*, so only layers 1 and 4
-   are routed; locked copper goes as fixed wiring. A rule area that keeps out
-   only footprints is taken off the exported copy (KiCad exports it as a routing
-   keep-out). What it leaves unrouted is printed by name; the board is written
-   anyway, and `check` fails on each connection until it is routed by hand.
-5. Zones filled, stackup written, as for a key board.
+   are routed; locked copper goes as fixed wiring. On the exported copy only: a
+   rule area that keeps out only footprints is taken off (KiCad exports it as a
+   routing keep-out), and a keep-out band as wide as the edge clearance goes
+   inside every edge (the DSN has no copper-to-edge rule). Bounded by
+   Freerouting's own `--router.job_timeout` (20 min), which still writes the
+   session; its pass limit is not honoured in batch, and a shell timeout's kill
+   writes nothing. Its costs are its defaults: a flatter direction cost and
+   cheaper vias were tried and left more unrouted.
+5. Zones filled, then `pcb.post_route`: `pcb_route.tidy` (doubled, zero-length
+   and dangling tracks removed; acute joins squared and collinear runs merged, as
+   on a key board); **`pcb_route.complete`** - every connection KiCad's DRC still
+   counts missing, routed by A* on both outer layers at once on the lazy 0.2 mm
+   grid, a via wherever `Obstacles.via_ok` allows, from one item and then, if
+   that search is boxed in, from the other; no rip-up, so it takes the room the
+   autorouter left; then the silkscreen, clear of every via, and any stroke of a
+   footprint's own silk on a via removed and named.
+6. Zones filled again, stackup written, as for a key board. Whatever is still
+   unconnected is printed by name; the board is written anyway, and `check`
+   fails on each connection until it is routed by hand.
 
 `layout --no-route` builds and places only (a cheap re-run after a footprint
-changes).
+changes). A whole layout of the main board takes about 35 minutes, most of it
+Freerouting's.
 
 **`check` adds** for a main board (`pcb_main.check_cad`, `check_heights`,
 `check_planes`): every switch underside with its pins where the body CAD's
@@ -492,6 +507,20 @@ layer, antipads (holes under 4 mm²) closed; the tie's window and a pair's
 crossing of its moat are exempt.
 
 ### Learned the hard way
+
+- **A zone's fill is FRACTURED**: KiCad joins each hole to the outline by a
+  zero-width slit, so read as a polygon every antipad is a notch in the plane's
+  edge, and a split check calls every track to a via a crossing. Unfracture a
+  copy (`SHAPE_POLY_SET.Unfracture()`) first (`pcb_main.check_planes`).
+- **`BOARD.Remove()` on a board loaded from a file** can crash the next walk of
+  it (`GetFootprints`), silently; `Delete()` does not (`pcb_route.tidy`).
+- **Freerouting ignores its pass limit in batch** and a shell `timeout` kill
+  writes no session at all: bound it with `--router.job_timeout=HH:MM:SS`, which
+  stops the job and still writes the session (a form like `20m` parses as no
+  timeout).
+- **Freerouting cannot see silkscreen or the edge clearance**: the main board's
+  labels go on after routing, and the export carries a keep-out band inside every
+  edge.
 
 - **KiCad's zone filler crashes Python, silently,** on a board built in the
   same process: the file was never written. Fill in a fresh process after

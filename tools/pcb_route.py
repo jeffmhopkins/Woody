@@ -849,6 +849,7 @@ class Obstacles:
         from shapely.prepared import prep
         self.inner = prep(self.outline.buffer(-self.edge))
         self._tree = None
+        self._via_inner = None
 
     def add(self, geom, net, layers, kind):
         self.items.append((geom, net, layers, kind))
@@ -872,27 +873,39 @@ class Obstacles:
             self._tree = STRtree([it[0] for it in self.items])
         return [self.items[i] for i in self._tree.query(g.buffer(pad))]
 
+    def within(self, p, d):
+        """The entries whose geometry comes within d of p: one indexed query, exact."""
+        from shapely.strtree import STRtree
+        if self._tree is None:
+            self._tree = STRtree([it[0] for it in self.items])
+        return [self.items[i] for i in self._tree.query(p, predicate="dwithin", distance=d)]
+
     def via_ok(self, x, y, net):
         """A via of `net` at (x, y): its copper clear of every other net by the clearance,
         off every SMD pad (its own net's too: a via in a pad wicks its solder), its hole
         the board house's hole-to-hole from every other, off silkscreen and keep-outs,
         and inside the board by the edge clearance."""
-        v = Point(x, y).buffer(self.via / 2, 16)
-        if not self.inner.contains(v):
+        p = Point(x, y)
+        if self._via_inner is None:
+            from shapely.prepared import prep
+            self._via_inner = prep(self.outline.buffer(-(self.edge + self.via / 2)))
+        if not self._via_inner.contains(p):
             return False
-        hole = Point(x, y).buffer(self.drill / 2, 16)
-        for g, n, ls, kind in self.near(v):
+        rv, rd = self.via / 2, self.drill / 2
+        reach = max(rd + max(self.h2h, self.clear), rv + max(self.clear, self.hclear, OWN_PAD_GAP))
+        for g, n, ls, kind in self.within(p, reach):
+            d = g.distance(p)
             if kind in ("hole", "vhole", "npth"):
                 gap = self.h2h if kind != "vhole" else max(self.h2h, self.clear)
-                if g.distance(hole) < gap - 1e-6 or (kind == "npth" and g.distance(v) < self.hclear):
+                if d < rd + gap - 1e-6 or (kind == "npth" and d < rv + self.hclear):
                     return False
             elif kind in ("keepout", "silk"):
-                if g.intersects(v):
+                if d < rv:
                     return False
             elif kind == "smd" and n == net:
-                if g.distance(v) < OWN_PAD_GAP:
+                if d < rv + OWN_PAD_GAP:
                     return False
-            elif n != net and g.distance(v) < self.clear - 1e-6:
+            elif n != net and d < rv + self.clear - 1e-6:
                 return False
         return True
 
@@ -1063,12 +1076,11 @@ class Grid:
             p = Point(*self.xy((i, j)))
             ok = self.inner.contains(p)
             if ok:
-                for g, n, ls, kind in self.obs.near(p, self.rad):
+                for g, n, ls, kind in self.obs.within(p, self.rad - 1e-4):
                     if self.L not in ls or kind in ("silk", "hole", "vhole") or (n in self.own and kind != "keepout"):
                         continue
-                    if g.distance(p) < self.rad:
-                        ok = False
-                        break
+                    ok = False
+                    break
             self.cache[(i, j)] = ok
         return self.cache[(i, j)]
 
@@ -1245,6 +1257,117 @@ def tidy(board, lay):
     n2 = r.square_joins()
     n3 = merge_tracks(board)
     print(f"route: tidy - {n0} empty or doubled track(s), {n1} dangling, {n2} acute join(s) squared, {n3} joint(s) merged")
+
+
+def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
+    """After the autorouter: each connection KiCad still counts missing - `unconnected`,
+    [(net, (x, y), (x, y))], the two copper items' positions from its DRC - routed by
+    A* on both outer layers at once, on the lazy 0.2 mm grid, a via wherever one is legal
+    (Obstacles.via_ok) and costing VIA, from the copper at the first position to the copper
+    at the second. No rip-up: it takes what room the autorouter left. Returns the ones it
+    could not route."""
+    obs = Obstacles(board, lay)
+    classes = lay.get("net_classes") or {}
+    width_of = lambda net: next((c["track"] for c in classes.values() if net in c["nets"]), lay["rules"]["track"])
+    failed = []
+    for net, pa, pb in unconnected:
+        w = width_of(net)
+        grids = {L: Grid(obs, L, w / 2, own={net}) for L in ("F", "B")}
+        vcache = {}
+
+        def via_ok(i, j):
+            if (i, j) not in vcache:
+                x, y = grids["F"].xy((i, j))
+                vcache[(i, j)] = obs.via_ok(x, y, net)
+            return vcache[(i, j)]
+
+        def cells_of(p):
+            """The cells on the copper of `net` at p (a pad or a track end), per layer."""
+            x, y = p
+            out = set()
+            for g, n, ls, kind in obs.near(Point(x, y), 0.05):
+                if n == net and kind in ("pad", "smd", "track", "via") and g.distance(Point(x, y)) < 0.05:
+                    gx0, gy0, gx1, gy1 = g.bounds
+                    g_ = g.buffer(-0.02)
+                    c0, c1 = grids["F"].cell(gx0, gy0), grids["F"].cell(gx1, gy1)
+                    for i in range(c0[0], c1[0] + 1):
+                        for j in range(c0[1], c1[1] + 1):
+                            if g_.contains(Point(*grids["F"].xy((i, j)))):
+                                out |= {(L, i, j) for L in ls}
+            return out
+        src, dst = cells_of(pa), cells_of(pb)
+        if not src or not dst:
+            failed.append((net, pa, pb, "its copper was not found"))
+            continue
+        moves = [(1, 0, 1), (-1, 0, 1), (0, 1, 1), (0, -1, 1), (1, 1, DIAG), (1, -1, DIAG), (-1, 1, DIAG), (-1, -1, DIAG)]
+
+        def search(src, dst, target):
+            ti, tj = grids["F"].cell(*target)
+            h = lambda i, j: math.hypot(i - ti, j - tj)
+            openq, came, cost, seen = [], {}, {}, set()
+            for s_ in src:
+                cost[s_] = 0
+                heapq.heappush(openq, (h(s_[1], s_[2]), 0, s_, None))
+            while openq and len(seen) < budget:
+                f, g, cur, pd = heapq.heappop(openq)
+                if cur in seen:
+                    continue
+                seen.add(cur)
+                if cur in dst:
+                    path = [cur]
+                    while path[-1] in came:
+                        path.append(came[path[-1]])
+                    return path[::-1], len(seen)
+                L, i, j = cur
+                gr = grids[L]
+                for di, dj, c in moves:
+                    nxt = (L, i + di, j + dj)
+                    if nxt in seen or not (gr.free(i + di, j + dj) or nxt in dst):
+                        continue
+                    if di and dj and not (gr.free(i + di, j) and gr.free(i, j + dj)):
+                        continue
+                    ng = g + c + (TURN.get(steps45(pd, (di, dj)), 0) if pd else 0)
+                    if ng < cost.get(nxt, 1e18):
+                        cost[nxt], came[nxt] = ng, cur
+                        heapq.heappush(openq, (ng + h(i + di, j + dj), ng, nxt, (di, dj)))
+                O = "B" if L == "F" else "F"
+                nxt = (O, i, j)
+                if nxt not in seen and via_ok(i, j) and (grids[O].free(i, j) or nxt in dst):
+                    ng = g + VIA
+                    if ng < cost.get(nxt, 1e18):
+                        cost[nxt], came[nxt] = ng, cur
+                        heapq.heappush(openq, (ng + h(i, j), ng, nxt, None))
+            return None, len(seen)
+        # from the first item; if that search is boxed in early, from the second (a
+        # pad walled in on one side can still be reached from outside)
+        budget = max_nodes + per_mm * math.dist(pa, pb)     # a long connection gets a longer search
+        path, nseen = search(src, dst, pb)
+        if path is None and nseen < budget:
+            path, n2 = search(dst, src, pa)
+            nseen += n2
+            if path is not None:
+                path = path[::-1]
+        seen = range(nseen)
+        goal = path[-1] if path else None
+        if goal is None:
+            failed.append((net, pa, pb, "no way through the room the autorouter left"))
+            print(f"route: complete - {net} ({pa[0]:.1f}, {pa[1]:.1f}) to ({pb[0]:.1f}, {pb[1]:.1f}): no way ({len(seen)} cells searched)", flush=True)
+            continue
+        print(f"route: complete - {net} ({pa[0]:.1f}, {pa[1]:.1f}) to ({pb[0]:.1f}, {pb[1]:.1f}): routed", flush=True)
+        # runs per layer, a via between
+        k = 0
+        while k < len(path):
+            m = k
+            while m + 1 < len(path) and path[m + 1][0] == path[k][0]:
+                m += 1
+            run = [p[1:] for p in path[k:m + 1]]
+            pts = [grids["F"].xy(c) for c in corners(run)]
+            for a, b in zip(pts, pts[1:]):
+                lay_track(board, obs, net, a, b, w, path[k][0])
+            if m + 1 < len(path):
+                lay_via(board, obs, net, *grids["F"].xy(path[m][1:]), locked=False)
+            k = m + 1
+    return failed
 
 
 def moat_keepout(board, lay):

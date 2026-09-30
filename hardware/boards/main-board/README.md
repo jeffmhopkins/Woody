@@ -13,8 +13,11 @@ is part of the cassette (ADR 0025): every one of its mounts stands on the one
 bottom plate, and eight of them are columns up to the key boards (ADR 0022 as
 amended).
 
-> **Status: schematic done, layout not started.** The sheets are the source
-> and pass KiCad's ERC. Every part has its footprint and bought part on its
+> **Status: first layout written by `tools/pcb.py` (`kind: main`), not yet
+> clean.** `main-board.kicad_pcb` is placed from the body CAD and `layout.yaml`,
+> four layers, planes and the analog island in, routed by the tool and
+> Freerouting; what `pcb.py check` still fails on is under *Open*, below. The
+> sheets are the source and pass KiCad's ERC. Every part has its footprint and bought part on its
 > symbol (`Footprint`, `Manufacturer`, `MPN`, `LCSC`, `Assembly`), from
 > selections whose datasheets are banked, except those under *Open*. The
 > board's outline and every placement the body fixes are exported
@@ -48,6 +51,8 @@ What each circuit does, and why, is on its page:
 | `*.sch.png` | Renders, recorded in `hardware/SHEETS.csv` |
 | `fp-lib-table` | Registers `hardware/lib/woody.pretty` (the KS-33, `J-CHAIN`, MPXV4006DP and WS2815B-V1 footprints) for this project |
 | `sym-lib-table` | Registers `hardware/lib/woody.kicad_sym` (the WS2815B-V1's symbol) for this project |
+| `layout.yaml` | **First-layout input** for `tools/pcb.py layout` (`kind: main`): placement of everything the body CAD does not place, the stackup, planes, the `AGND_INST` island and its tie, the breath pair, net classes, keep-outs, heights. Once the board exists it records how the first layout was made (`docs/reference/tooling.md` §4, *The main board*) |
+| `main-board.kicad_pcb`, `main-board.kicad_pro` | **The PCB, source from now on** — written once by `layout`, edited in KiCad after; `pcb.py check` holds it to the sheets, the body CAD and `layout.yaml` |
 
 The root sheet places, once per instance:
 - **the six carrier circuits**;
