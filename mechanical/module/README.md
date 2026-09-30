@@ -85,7 +85,7 @@ first line lists each one in play.
 ![The module in a slice of a black case: patched, the umbilical home, the power LED lit](renders/photo-hero.png)
 
 The printed graphics follow Pittsburgh Modular's dark Lifeforms language —
-black anodise, three grey islands, light-grey header pills, white lowercase
+black anodise, three grey islands, a light-grey header pill, white lowercase
 Inter, every jack's word knocked out of a light-grey pill (they are all
 outputs), no scales but OFFSET's − and + — as an original design
 ([ADR 0026](../../docs/decisions/0026-module-panel-graphics.md)). Nothing in
