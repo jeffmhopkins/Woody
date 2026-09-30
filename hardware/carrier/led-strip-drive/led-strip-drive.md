@@ -77,6 +77,19 @@ has no framing beyond a reset gap, so that is random pixel data — the exact
 state the thermal clamp exists to prevent, at the moment no firmware is
 running to clamp it. One 0805, and it cannot be added later.
 
+**Decided: fitted, 10 kΩ.** The hole is confirmed on paper: the ESP32-S3's
+GPIO1 comes out of reset with its input enabled and **neither weak pull
+enabled**, at reset and after it `[ds datasheets/logic/ESP32-S3-datasheet-v2.2.pdf
+p.16, the pin table: GPIO1 "IE", where GPIO0 is "WPU, IE"]`. So no test at E1
+could make the part unnecessary — a board that happens to show no stray
+pixels is a floating input that happened to sit still. The value `[calc]`:
+held against the buffer's input leakage, ±1 µA over temperature
+`[ds datasheets/logic/SN74AHCT125.pdf p.4, I_I]`, 10 kΩ keeps the input at
+10 mV, against a 0.8 V `V_IL` `[same, p.3]`; and IO1 drives it at
+3.3 V / 10 kΩ = 0.33 mA when firmware takes the line high, a negligible load.
+Anything from about 1 kΩ to a few hundred kΩ would work; 10 kΩ is the value
+already on the sheet and a JLC Basic part.
+
 The module page has the same idea for the same reason: `R-SPI-PULL`, six of
 them, both sides of its 74AHCT125 `[repo] digital-and-supervision.md`.
 
@@ -130,6 +143,14 @@ connection comes from the WS2815's "Recommended application circuit"
 **`R-LED-SER`** (330 Ω, at the buffer) damps the fastest edge in the
 instrument at its source and protects the buffer's output. The run is short
 now, so the case is weaker than it was for a strip; it stays, as one 0805.
+**Decided: 330 Ω.** `[calc]` It drives two LED inputs, 15 pF each
+`[ds WS2815B-V1.pdf p.3, C_I]`: 330 Ω × 30 pF = 9.9 ns, a 10–90 % edge of
+2.2 × 9.9 ≈ 22 ns, a tenth of the shortest pulse the LED must see
+(`T0H`, 220 ns minimum `[same, p.3, Data Transfer Time]`), so a few pF of
+trace more does not reach it. Into a shorted data pin it holds the gate to
+5 V / 330 Ω ≈ 15 mA, inside its ±25 mA absolute maximum
+`[ds datasheets/logic/SN74AHCT125.pdf p.3]`; at 100 Ω, the bottom of the
+useful range, a short would be 50 mA, past it.
 
 ### Decoupling
 
@@ -176,8 +197,8 @@ rail, so it cannot fold the buck back and stop blank-at-boot from running.
 | Ref | Value | Job | Confidence |
 |---|---|---|---|
 | `U-LVLSHIFT` | 74AHCT125 SOIC-14 | LED data, 5 V rail. One gate used | `[repo]`, `[ds]` |
-| **`R-LED-PD`** | **10 kΩ** | **Holds the row's data low through reset** | proposed; E1 decides |
-| **`R-LED-SER`** | **330 Ω** (useful range 100–330) | **Damps the data line at its source** | proposed |
+| **`R-LED-PD`** | **10 kΩ** | **Holds the row's data low through reset** | `[ds]`, `[calc]` |
+| **`R-LED-SER`** | **330 Ω** | **Damps the data line at its source** | `[ds]`, `[calc]` |
 | `D-LED-1` … `D-LED-13` | WS2815B-V1 (LCSC C5446699) | The row: 12 V, backup-chained. **The body's chamfer marks pin 4, not pin 1** (footprint `woody:LED_WS2815B-V1_PLCC6_5.4x5.0mm_P1.6mm`, `hardware/lib/README.md`) | `[ds]` |
 | `C-LED-1` … `C-LED-13` | 100 nF X7R 50 V 0805 | One at each LED's `VDD` | `[ds]` |
 
