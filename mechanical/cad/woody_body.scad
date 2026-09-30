@@ -1185,13 +1185,17 @@ function first_clear(cs) = let(ok = [for (c = cs) if (so_clear(c)) c]) len(ok) >
 // nudge the main board's mount instead; a column cannot lean).
 cb_cols = [for (m = columns()) [m, first_clear([for (i = [0 : 20]) m + [(i % 2 == 0 ? 1 : -1) * ceil(i / 2) / 10, 0]])]];
 n_cols = len(cb_cols);
-// And a pair at each end: at the mouth, and on the tongue before J-UMB, which
+// And a pair tried at each end (one may be dropped beside a column, below): at the mouth, and on the tongue before J-UMB, which
 // takes the umbilical's mating push - behind the parts that sit at J-UMB.
 // The U-bolt's clamp holds the middle (ADR 0022 point 7).
 cb_ends = concat([for (y = [cb_y[0] + end_mount_in, cb_y[1] - end_mount_in]) first_clear([for (d = [0 : 1 : 30]) [cb_x[0] + 4 + d, y]])],
                  [for (y = [tongue_y[0] + end_mount_in, tongue_y[1] - end_mount_in]) first_clear([for (d = [0 : 1 : 20]) [ua_x0 - umb_band_d - mb_keep_d / 2 - 2 - d, y]])]);
+// An end mount with a column's mount within hardware.end_mount_merge_d is
+// dropped: the column already holds the board there (owner, 2026-09-30).
+function near_col(p) = min([for (c = cb_cols) norm(p - c[0])]);
+cb_ends_dropped = [for (c = cb_ends) if (c != undef && near_col(c) < hardware_end_mount_merge_d) c];
 // Every mount on the bottom plate: the columns first (n_cols of them), then the ends.
-cb_standoffs = concat([for (c = cb_cols) c[0]], [for (c = cb_ends) if (c != undef) c]);
+cb_standoffs = concat([for (c = cb_cols) c[0]], [for (c = cb_ends) if (c != undef && near_col(c) >= hardware_end_mount_merge_d) c]);
 // The breath tube's lane (routing_3d), placed once the mounts it keeps clear of are.
 tube_y = lane_y(routing_tube_lane, routing_tube_od);
 module centre_board_3d() {
@@ -1497,7 +1501,10 @@ module drc_report() {
     drc(len([for (o = col_off) if (o != 0) 1]) == 0 && len([for (c = cb_ends) if (c == undef) 1]) == 0,
         "columns vertical: the main board's mounts under the key boards'", [col_off, len([for (c = cb_ends) if (c != undef) 1])],
         "mm each column's key-board mount must move along the body for its foot on the main board to be clear (0 = vertical where it stands; undef = nothing clear within 1 mm), and the end mounts found (mouth pair, tongue pair)");
-    drc(len(cb_standoffs) == n_cols + 4, "main board mounts on the bottom plate", len(cb_standoffs),
+    drc(len([for (c = cb_ends) if (c != undef) 1]) - len(cb_ends_dropped) == len(cb_standoffs) - n_cols,
+        "end mounts dropped beside a column", [len(cb_ends_dropped), cb_ends_dropped, [for (c = cb_ends_dropped) near_col(c)]],
+        str("end mounts dropped (count, where, mm to the nearest column) because a column's mount stands within hardware.end_mount_merge_d = ", hardware_end_mount_merge_d, " mm of them"));
+    drc(len(cb_standoffs) == n_cols + 4 - len(cb_ends_dropped), "main board mounts on the bottom plate", len(cb_standoffs),
         str("mounts (ADR 0025): ", n_cols, " columns (stud, spacer, board, standoff) and ", len(cb_standoffs) - n_cols,
             " end mounts (stud, spacer, board, nut), all on the bottom plate; the U-bolt's clamp holds the middle, and the soldered thumb switches carry the board between them"));
     // THE MAIN BOARD'S DEPTH (ADR 0022): its mount on the bottom plate is the

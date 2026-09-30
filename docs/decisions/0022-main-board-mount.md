@@ -204,7 +204,9 @@ screwed into the wood. For this board that means:
   onto it clamps the board and carries the key board and the key plate above.
   A column is vertical: the main board's mount no longer moves toward the mouth
   at the first thumb row. The key board's mount moves instead
-  (`boards.kb_end_margin`). The mouth pair and the tongue pair keep a nut.
+  (`boards.kb_end_margin`). The end mounts, at the mouth and on the tongue,
+  keep a nut; one at the mouth was later dropped beside a column (ADR 0025,
+  2026-09-30 note).
   *"Main board mounts on the bottom plate"* gives the count, and *"columns
   vertical: the main board's mounts under the key boards'"* the check.
 - **The U-bolt's backplate and the under-board washer are gone** (point 7).
