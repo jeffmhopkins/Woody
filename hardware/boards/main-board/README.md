@@ -148,8 +148,8 @@ finish, and every other open item:
 What the first layout settled, and where it is held:
 - **Four layers** (ADR 0017 amendment 2026-09-29), JLCPCB's stack
   `JLC04161H-7628` [ds `datasheets/fab/JLCPCB-IMPEDANCE-STACKUPS.pdf`]. Layer 2 `PWR_GND`, layer 3
-  the +12 V (`UMBILICAL_POS12`), the rails that are tracks in `layout.yaml`
-  `net_classes:`. **`AGND_INST` is an island on layer 2** round the analog block,
+  the +12 V behind `Q-INRUSH` (`INST_POS12`, `power-entry-instrument.md` §1a); the +12 V
+  ahead of it and the other rails are tracks (`layout.yaml` `net_classes:`). **`AGND_INST` is an island on layer 2** round the analog block,
   its moat bridged once by `NT-AGND` (NT2) beside `U-ADC`, between its VSS and its
   digital pins (`power-entry-instrument.md` §2); `check` fails a second tie, an
   island pad off the island, and any layer-1 track crossing the moat but at the
@@ -167,6 +167,13 @@ What the first layout settled, and where it is held:
   `R-SPI-SER`, where its three channels now are.
 - **The thumb switches on the underside**, where the body CAD puts them, the near
   row turned 180° (ADR 0022).
+- **`U-BREATH`'s ports point to the tail**, as the body CAD and
+  `breath-sense-link.md` (*Mounting*) put them, which turns its pins 1–4 (`VS`,
+  `GND`, `Vout`) to the board's far edge, away from the rest of the analog block;
+  the island reaches round them (`layout.yaml` `cad_parts:`, `islands:`).
+- **`Q-INRUSH` and its gate network** on the tongue between `HDR-SERVICE` and the
+  end mount, behind the clamps at `J-UMB`; its drain meets the layer-3 plane by
+  vias (`layout.yaml` `parts:`).
 
 ## Revisions
 

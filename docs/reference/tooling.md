@@ -447,7 +447,7 @@ unchanged: their `layout.yaml` names no kind.
 | Outline | `mechanical/export/main-board.dxf` less each mount's hole (the mount's footprint drills it); the U-bolt legs' holes and the sensor slot stay in Edge.Cuts, routed and unplated |
 | Thumb switches | `pcb-geometry.echo` `main` `switch`, on the **underside**: seen from above a switch hanging face down is the key-board footprint mirrored about the body's x axis, then turned by the CAD's rotation; the KiCad rotation that puts pins 1 and 2 there is found, not assumed. Model height `switch.thumb_pcb_below_seat` |
 | Both `J-CHAIN` | `main` `chain`, on the top (`place_chain(..., bottom=False)`); each is the header whose pin 10 is its own side's chain 3V3 |
-| `J-MCU`, `J-UMB` | `main` `connector` and `layout.yaml` `connectors:` — the pad row farthest from the mouth at a stated offset from the insulator's face (the placeholder footprints; re-check the offset when a real footprint replaces one) |
+| `J-MCU`, `J-UMB` | `main` `connector` and `layout.yaml` `connectors:` — the pad row farthest from the mouth at a stated offset from the insulator's face, a figure of each footprint (`hardware/lib/README.md`): re-check it when a footprint changes, and `check` fails the row if it moved |
 | `U-BREATH` | `main` `part`, its pads centred there, turned by `cad_parts:` |
 | The LED row | `main` `led`, LED *n* the *n*th along the data chain (found from the netlist: DI of the first is the one net no LED drives); each `C-LED` at `led_caps:` offset |
 | Mounts | `main` `standoff`, **every one plated on `PWR_GND`** (`mounts:`), on the top face so their courtyard keeps parts off the standoff or nut; rule areas keep every track and via off what bears on each face |
