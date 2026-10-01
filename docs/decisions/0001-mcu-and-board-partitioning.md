@@ -501,7 +501,11 @@ A5-2 and A5-3).
   it; a series resistor at `left_thumb`'s `QH` is the owner's option and is
   not fitted. `key-chain-loom.md`, *The hop hold time*. A failure there is a
   framing error the marker reports — the second firmware rule above is what
-  makes it visible.
+  makes it visible. *(Amended the same day, owner: **the resistor is fitted.**
+  `R-HOP-SER`, 2.2 kΩ, at `left_thumb`'s `QH` on the main board; the hop now
+  holds with the `CLK`→`QH` delay taken as zero, at every corner and on both
+  edges — `hop-hold-lt-to-rh` asserts it, and `hop-hold-without-series-r`
+  records the race without it.)*
 - **Both firmware rules above, and every other condition the hardware places
   on firmware, are now listed in `firmware/README.md`, *What the hardware
   requires*.** The README said "fire immediately on press" until this date,

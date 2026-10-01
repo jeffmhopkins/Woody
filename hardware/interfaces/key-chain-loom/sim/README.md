@@ -27,8 +27,8 @@ filled by `tools/sim.py`; `results.yaml` is generated.
 | `sck-to-key-board` | SCK at the register: no swing back through its hysteresis (no double clock), no overshoot past its clamp |
 | `sck-without-series-resistor` | the same with `R-CHAIN-SER` shorted: at the strong-drive corner it double-clocks and passes the clamp. This is what the resistor is for (recorded) |
 | `qh-to-main-board` | QH, with no series resistor, at the next register's SER: no false edge, no overshoot past its clamp |
-| `hop-hold-lt-to-rh` | the one hop whose downstream register is clocked later (`left_thumb` → `right_hand`), at the worst threshold pair, with **no** propagation delay: the clock skew is 6–12 ns and the data beats `right_hand`'s clock, so the hop holds only if `left_thumb`'s `CLK`→`QH` delay is at least ~11 ns (`need_tpd`, asserted under 12 ns). TI publishes no minimum; E14 decides (`key-chain-loom.md`, *The hop hold time*) |
-| `hop-hold-with-series-r` | a what-if: 2.2 kΩ at `left_thumb`'s `QH`, the owner's option. The hop then holds with no propagation delay at all (recorded) |
+| `hop-hold-lt-to-rh` | the one hop whose downstream register is clocked later (`left_thumb` → `right_hand`), at the worst threshold pair, with **no** propagation delay, `R-HOP-SER` fitted as netlisted (2.2 kΩ at `left_thumb`'s `QH`, owner 2026-10-01): the data reaches `right_hand`'s `SER` after its clock at every corner and on both edges (`hold_margin` > 0), and within 100 ns of it (`ser_delay`) |
+| `hop-hold-without-series-r` | a what-if: `QH` straight into the ribbon, as until 2026-10-01. The clock skew is 6–12 ns and the data beats `right_hand`'s clock, so the hop would hold only on a `CLK`→`QH` delay of ~11 ns that TI does not publish (recorded, asserted to fail) |
 
 ## What a result is worth, and what is assumed
 

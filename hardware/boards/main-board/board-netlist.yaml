@@ -896,6 +896,12 @@ components:
     - 1
     - 2
     sheet: power-entry-instrument
+  R44:
+    of: R-HOP-SER
+    value: 2k2 1%
+    pins:
+    - 1
+    - 2
   R5:
     of: R-ADCDIV-L
     value: 15k 1%
@@ -1181,9 +1187,12 @@ nets:
   /HOP_LH_LT:
   - J4.8
   - U7.SER
+  /HOP_LT_QH:
+  - R44.1
+  - U7.QH
   /HOP_LT_RH:
   - J5.6
-  - U7.QH
+  - R44.2
   /HOP_RH_RT:
   - J5.8
   - U8.SER

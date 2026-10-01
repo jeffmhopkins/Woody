@@ -122,10 +122,11 @@ derived:
   r_trim_gain: "max(v.get('TRIM-GAIN', 0) * v['t_gain'], 1e-3)"
   r_toff_cw: "max(v.get('TRIM-OFFSET', 0) * (1 - v['w_offset']), 1e-3)"
   r_toff_ccw: "max(v.get('TRIM-OFFSET', 0) * v['w_offset'], 1e-3)"
-  k_cm: "1.0 - v['l_leak'] / (2.0 * v['L-CM-ISO'])"
+  k_cm: "(1.0 - v['l_leak'] / (2.0 * v['L-CM-ISO'])) if 'L-CM-ISO' in v else 0.0"
   r_neg_iso: "v['v_iso_in']**2 / v['p_iso_in']"
-  r_trim_e7: "max(v['R-REG-SET-LO'] / ((v['v_dac_set'] - 50.0e-6 * v['R-REG-SET-LO']) / 1.25 - 1.0) - v['R-REG-SET-HI'], v['r_trim_end'])"
-  r_trim: "(1.0e9 if v['trim_fault'] == 2 else v['TRIM-DAC-RAIL'] if v['trim_fault'] == 1 else v['r_trim_e7'] if v['trim_cw'] < 0 else max(v['TRIM-DAC-RAIL'] * (1.0 - v['trim_cw']), v['r_trim_end']))"
+  r_trim_e7: "max(v['R-REG-SET-LO'] / ((v['v_dac_set'] - 50.0e-6 * v['R-REG-SET-LO']) / 1.25 - 1.0) - v['R-REG-SET-HI'], v['r_trim_end']) if 'R-REG-SET-LO' in v else 0.0"
+  # (the guards: sims that import these params without this circuit's netlist - panel-led/sim - never use them)
+  r_trim: "0.0 if 'TRIM-DAC-RAIL' not in v else (1.0e9 if v['trim_fault'] == 2 else v['TRIM-DAC-RAIL'] if v['trim_fault'] == 1 else v['r_trim_e7'] if v['trim_cw'] < 0 else max(v['TRIM-DAC-RAIL'] * (1.0 - v['trim_cw']), v['r_trim_end']))"
 
 vary:
   v_ref:      {tol: [-0.04, 0.04], source: "1.20 and 1.30 V about 1.25"}

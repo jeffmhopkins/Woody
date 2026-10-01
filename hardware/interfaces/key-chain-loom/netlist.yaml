@@ -179,6 +179,14 @@ components:
     pins:
     - 1
     - 2
+  R-HOP-SER:
+    value: 2k2 1%
+    pins:
+    - 1
+    - 2
+    note: 'At left_thumb''s QH on the main board, before HOP_LT_RH leaves for the right_hand ribbon (owner, 2026-10-01;
+      pre-layout review A5-2): its RC with the ribbon delays the hop''s data past right_hand''s clock, so the hop
+      holds with no CLK-to-QH delay at all (key-chain-loom.md, The hop hold time; key-chain-loom/sim hop-hold-lt-to-rh)'
   R-SER-TERM:
     value: 10k
     pins:
@@ -266,11 +274,14 @@ nets:
   - port: CHAIN_SER_LT
   - J-CHAIN-KEY-LH.5
   - J-CHAIN-MAIN-LH.8
-  HOP_LT_RH:
+  HOP_LT_QH:
   - port: CHAIN_QH_LT
+  - R-HOP-SER.1
+  HOP_LT_RH:
   - port: CHAIN_SER_RH
   - J-CHAIN-KEY-RH.7
   - J-CHAIN-MAIN-RH.6
+  - R-HOP-SER.2
   HOP_RH_RT:
   - port: CHAIN_QH_RH
   - port: CHAIN_SER_RT
