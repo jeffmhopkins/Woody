@@ -5,9 +5,9 @@
 inputs:
   tools/sim.py: 0312a1077b9afa80
   hardware/module/power-entry/sim/sims.yaml: e3433c1df045a671
-  hardware/module/power-entry/netlist.yaml: ccb32c181cd90840
+  hardware/module/power-entry/netlist.yaml: 060c3ed04d45d9a8
   hardware/module/pitch-stage/netlist.yaml: 3d43eac2f5eabc29
-  hardware/module/power-entry/sim/poweron.cir: f6dfa26bfaeb324a
+  hardware/module/power-entry/sim/poweron.cir: e68b60e487d6e0df
   hardware/module/power-entry/sim/groundshift.cir: 4aae040d6b7e03a1
   datasheets/discrete-and-power/LM317L-ti-pspice-snvmaw3.lib: 52c881eccf059881
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51

@@ -31,8 +31,8 @@ C3 n12 0 {{C3}}
 RLN n12 0 {{r_load_neg}}
 * DAC_AVDD
 XREG p12 adj avdd LM317L_TRANS
-RSH avdd adj {{R-REG-SET-LO}}
-RSL adj 0 {{R-REG-SET-HI}}
+RSH avdd adj {{R-REG-SET-HI}}
+RSL adj 0 {{R-REG-SET-LO}}
 CADJ adj 0 {{C-REG-ADJ}}
 CREG avdd 0 {{C-REG-OUT}}
 RDAC avdd 0 {{r_dac}}
