@@ -560,17 +560,35 @@ class Router:
                             continue
                         if acute_closed(self.board, net, layer, (px, py), (ax, ay), (bx, by), max(ta.GetWidth(), tb.GetWidth())):
                             continue
-                        k = (ax * bx + ay * by) / (la * la)      # the foot of fb's perpendicular on P->fa
-                        if not 0.02 < k < 0.98:
-                            continue
-                        X = pcbnew.VECTOR2I(int(px + k * ax), int(py + k * ay))
+                        # the whole of tb turned onto the foot of its far end's perpendicular;
+                        # failing that (no room), only its first part: tb split at Q, a fraction
+                        # of the way along, and P..Q turned - a short square step, then tb's
+                        # own line from Q at an obtuse join
                         L = LAYERS.index(layer)
-                        seg = LineString([(TO(X.x), TO(X.y)), (TO(fb.x), TO(fb.y))])
-                        body = seg.buffer(TO(tb.GetWidth()) / 2)
-                        g = seg.buffer(TO(tb.GetWidth()) / 2 + self.clear)
-                        if any(n != net and L in ls and g.intersects(o) for (n, ls, o, _) in self.copper) \
-                                or any(body.intersects(h) for h in self.holes) or not self.inside.contains(body):
+                        found = None
+                        for frac in (1.0, 0.5, 0.3, 0.15):
+                            Q = pcbnew.VECTOR2I(int(px + frac * bx), int(py + frac * by))
+                            k = frac * (ax * bx + ay * by) / (la * la)      # the foot of Q's perpendicular on P->fa
+                            if not 0.02 < k < 0.98:
+                                continue
+                            X = pcbnew.VECTOR2I(int(px + k * ax), int(py + k * ay))
+                            if math.hypot(Q.x - X.x, Q.y - X.y) < MM(0.1):
+                                continue
+                            seg = LineString([(TO(X.x), TO(X.y)), (TO(Q.x), TO(Q.y))])
+                            body = seg.buffer(TO(tb.GetWidth()) / 2)
+                            g = seg.buffer(TO(tb.GetWidth()) / 2 + self.clear)
+                            if any(n != net and L in ls and g.intersects(o) for (n, ls, o, _) in self.copper) \
+                                    or any(body.intersects(h) for h in self.holes) or not self.inside.contains(body):
+                                continue
+                            found = (frac, Q, X)
+                            break
+                        if not found:
                             continue
+                        frac, Q, X = found
+                        if frac < 1.0:
+                            t2 = self.split(tb, Q)
+                            if (tb.GetStart().x, tb.GetStart().y) != (px, py):
+                                tb = t2                         # tb ran fb -> P: its P half is the second
                         if (tb.GetStart().x, tb.GetStart().y) == (px, py):
                             tb.SetStart(X)
                         else:

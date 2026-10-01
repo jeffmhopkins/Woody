@@ -4,6 +4,7 @@
     python3 tools/pcb.py layout hardware/boards/key-board-lh   # write <board>.kicad_pcb (refuses if it exists; --force)
     python3 tools/pcb.py check  hardware/boards/key-board-lh   # DRC + schematic parity + fab limits + CAD agreement
     python3 tools/pcb.py render hardware/boards/key-board-lh   # 3D top/bottom and 2D copper PNGs, fab/ (refuses a board that fails check)
+    python3 tools/pcb.py finish hardware/boards/main-board     # a routed board's missing connections tried again, with rip-up
 
 WHERE THINGS COME FROM - nothing on this board is typed in by hand twice:
 
@@ -32,6 +33,7 @@ the ribbon connector - is on the BOTTOM, facing the main board.
 import math
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -792,16 +794,17 @@ def post_route(path, bdir):
     board = pcbnew.LoadBoard(path)
     pcb_route.tidy(board, lay)
     pcbnew.SaveBoard(path, board)
-    miss = []
-    for v in drc(path).get("unconnected_items", []):
-        it = v.get("items", [])
-        m = re.search(r"\[([^\]]+)\]", it[0]["description"]) if len(it) == 2 else None
-        if m:
-            miss.append((m.group(1), (it[0]["pos"]["x"], it[0]["pos"]["y"]), (it[1]["pos"]["x"], it[1]["pos"]["y"])))
+    miss = unconnected_of(path)
     board = pcbnew.LoadBoard(path)
     failed = pcb_route.complete(board, lay, miss)
     print(f"route: complete - {len(miss) - len(failed)} of {len(miss)} connection(s) the autorouter left, routed")
     pcb_route.tidy(board, lay)
+    if failed:
+        # what complete could not route: rip-up, kept only where DRC counts fewer problems
+        pcbnew.SaveBoard(path, board)
+        _fill(path)
+        print(f"route: rescue - {rescue(path, bdir)} kept")
+        board = pcbnew.LoadBoard(path)
     add_silk_generic(board, lay, comps)
     from shapely.geometry import Point as _P
     vias = [_P(pcbnew.ToMM(v.GetPosition().x), pcbnew.ToMM(v.GetPosition().y)).buffer(pcbnew.ToMM(v.GetWidth(pcbnew.F_Cu)) / 2)
@@ -818,6 +821,131 @@ def post_route(path, bdir):
     if gone:
         print("pcb: silk adapted - library silk on a via removed: " + ", ".join(f"{r} ({n})" for r, n in sorted(gone.items())))
     pcbnew.SaveBoard(path, board)
+
+
+def unconnected_of(path):
+    """KiCad's own list of what is missing on a saved board: (net, (x, y), (x, y)), the
+    two copper items' positions from its DRC."""
+    miss = []
+    for v in drc(path).get("unconnected_items", []):
+        it = v.get("items", [])
+        m = re.search(r"\[([^\]]+)\]", it[0]["description"]) if len(it) == 2 else None
+        if m:
+            miss.append((m.group(1), (it[0]["pos"]["x"], it[0]["pos"]["y"]), (it[1]["pos"]["x"], it[1]["pos"]["y"])))
+    return miss
+
+
+def _fill(path):
+    here = os.path.dirname(os.path.abspath(__file__))
+    subprocess.run([sys.executable, "-c", f"import sys; sys.path.insert(0, {here!r}); "
+                    f"import pcb_route; pcb_route.fill_zones({path!r})"], check=True)
+
+
+def rescue(path, bdir, radii=(1.5, 3.0, 5.0)):
+    """Rip-up for what pcb_route.complete could not route, on a saved, filled board: for
+    each connection still missing, the unlocked tracks and vias of OTHER nets within
+    `radii` of it (never a plane net's, never locked copper: the pair and the fanout) are
+    taken up, the missing connection routed first, then everything that left missing
+    routed again (complete) and tidied. The result is kept only if KiCad's DRC then
+    counts fewer problems - unconnected items and violations together - than before;
+    otherwise the board is left as it was. Returns how many were kept."""
+    import pcb_route
+    from shapely.geometry import Point, box
+    lay = layout_yaml(bdir)
+    planes = set(lay.get("fanout") or []) | {pl["net"] for pl in lay.get("planes") or []}
+    score = lambda p: (lambda d: len(d.get("unconnected_items", [])) + len(d.get("violations", [])))(drc(p))
+    base, kept, tried = score(path), 0, set()
+    # the trial board beside its own project file, so DRC reads the same rules
+    tdir = tempfile.mkdtemp(prefix=".rescue-", dir=os.path.dirname(path))
+    tmp = os.path.join(tdir, os.path.basename(path))
+    for f in (path[:-len(".kicad_pcb")] + ".kicad_pro", os.path.join(bdir, "fp-lib-table"), os.path.join(bdir, "sym-lib-table")):
+        if os.path.exists(f):
+            shutil.copy(f, tdir)
+    progress = True
+    while progress:
+        progress = False
+        for net, pa, pb in unconnected_of(path):
+            key = (net, round(pa[0], 1), round(pa[1], 1), round(pb[0], 1), round(pb[1], 1))
+            if key in tried:
+                continue
+            tried.add(key)
+            for r in radii:
+                board = pcbnew.LoadBoard(path)
+                # round its two ends - where a connection is walled in - and, for a short
+                # hop, the ground between them
+                region = Point(pa).buffer(r).union(Point(pb).buffer(r))
+                if math.dist(pa, pb) < 10:
+                    region = region.union(box(min(pa[0], pb[0]), min(pa[1], pb[1]), max(pa[0], pb[0]), max(pa[1], pb[1])).buffer(r))
+                victims = []
+                for t in board.GetTracks():
+                    if t.IsLocked() or t.GetNetname() in planes or t.GetNetname() == net:
+                        continue
+                    bb = t.GetBoundingBox()
+                    if region.intersects(box(bb.GetLeft() / 1e6, bb.GetTop() / 1e6, bb.GetRight() / 1e6, bb.GetBottom() / 1e6)):
+                        victims.append(t)
+                if not victims:
+                    continue
+                hit, nv = {t.GetNetname() for t in victims}, len(victims)
+                for t in victims:
+                    board.Delete(t)
+                if pcb_route.complete(board, lay, [(net, pa, pb)]):
+                    continue
+                pcbnew.SaveBoard(tmp, board)
+                _fill(tmp)
+                b2 = pcbnew.LoadBoard(tmp)
+                pcb_route.complete(b2, lay, [m for m in unconnected_of(tmp) if m[0] in hit])
+                pcb_route.tidy(b2, lay)
+                pcbnew.SaveBoard(tmp, b2)
+                _fill(tmp)
+                s2 = score(tmp)
+                if s2 < base:
+                    print(f"route: rescue - {net} ({pa[0]:.1f}, {pa[1]:.1f}): {nv} item(s) taken up within {r} mm "
+                          f"and routed again; problems {base} -> {s2}", flush=True)
+                    os.replace(tmp, path)
+                    base, kept, progress = s2, kept + 1, True
+                    break
+            if progress:
+                break           # the list moved: read it again
+    shutil.rmtree(tdir, ignore_errors=True)
+    return kept
+
+
+def cmd_finish(bdir):
+    """A routed board's missing connections tried again, in place: tidy, complete, then
+    rescue (rip-up), zones refilled. For a re-run after hand edits, or after a layout
+    left connections for hand routing; it never adds or moves a part."""
+    import pcb_route
+    name = os.path.basename(bdir)
+    path = os.path.join(bdir, name + ".kicad_pcb")
+    lay = layout_yaml(bdir)
+    t = tempfile.mkdtemp(prefix=".finish-", dir=bdir)
+    try:
+        tmp = os.path.join(t, name + ".kicad_pcb")
+        shutil.copy(path, tmp)
+        shutil.copy(os.path.join(bdir, name + ".kicad_pro"), os.path.join(t, name + ".kicad_pro"))
+        for f in ("fp-lib-table", "sym-lib-table"):
+            if os.path.exists(os.path.join(bdir, f)):
+                shutil.copy(os.path.join(bdir, f), os.path.join(t, f))
+        board = pcbnew.LoadBoard(tmp)
+        pcb_route.tidy(board, lay)
+        pcbnew.SaveBoard(tmp, board)
+        _fill(tmp)
+        miss = unconnected_of(tmp)
+        board = pcbnew.LoadBoard(tmp)
+        failed = pcb_route.complete(board, lay, miss)
+        print(f"route: complete - {len(miss) - len(failed)} of {len(miss)} connection(s) routed")
+        pcb_route.tidy(board, lay)
+        pcbnew.SaveBoard(tmp, board)
+        _fill(tmp)
+        print(f"route: rescue - {rescue(tmp, bdir)} kept")
+        left = sorted({"; ".join(i["description"] for i in v.get("items", [])) for v in drc(tmp).get("unconnected_items", [])})
+        os.replace(tmp, path)
+    finally:
+        shutil.rmtree(t, ignore_errors=True)
+    print(f"pcb: {len(left)} connection(s) left for hand routing" + (":" if left else ""))
+    for u in left:
+        print("  " + u)
+    print(f"pcb: wrote {os.path.relpath(path, ROOT)}")
 
 
 def keepout(board, px, py, r, n=32):
@@ -1567,14 +1695,20 @@ def assembly_files(bdir, name, fab):
     comps, _ = kicad.kicad_netlist(root)
     pos = {r["Ref"]: r for r in csv.DictReader(open(os.path.join(fab, name + "-pos.csv")))}
     machine, hand, none = {}, [], []
+    # a part the sheets carry and this board does not (layout.yaml not_on_board:, with
+    # its reason) is neither ordered nor fitted here
+    elsewhere = yaml.safe_load(open(os.path.join(bdir, "layout.yaml"))).get("not_on_board") or {}
     for ref in sorted(comps):
+        if ref in elsewhere:
+            continue
         f = comps[ref]["fields"]
         how = f.get("Assembly", "")
         if how == "none":
             # nothing is bought for it - so it must be a part nothing is bought for: a test
             # pad, a fiducial, "Exclude from BOM" ticked. Otherwise `none` drops a real part
             # from the order and the hand list both, and every check passes (K7-3).
-            if comps[ref]["in_bom"]:
+            # a net tie is copper drawn in the board: its BOM row records the tie, nothing is bought
+            if comps[ref]["in_bom"] and not comps[ref]["footprint"].startswith("NetTie:"):
                 sys.exit(f"pcb: {ref} is Assembly = none but in the BOM - machine or hand, or tick "
                          f"'Exclude from BOM' on its symbol if nothing is bought for it")
             none.append(ref)
@@ -1733,9 +1867,10 @@ def missing_models(board, bdir, env):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) >= 3 and sys.argv[1] in ("layout", "check", "render"):
+    if len(sys.argv) >= 3 and sys.argv[1] in ("layout", "check", "render", "finish"):
         d = os.path.join(ROOT, sys.argv[2].rstrip("/"))
         sys.exit({"layout": lambda: cmd_layout(d, "--force" in sys.argv, "--no-route" not in sys.argv), "check": lambda: cmd_check(d),
+                  "finish": lambda: cmd_finish(d),
                   "render": lambda: cmd_render(d, sys.argv[sys.argv.index("--preview") + 1] if "--preview" in sys.argv else None)}[sys.argv[1]]() or 0)
     print(__doc__)
     sys.exit(2)

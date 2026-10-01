@@ -487,15 +487,24 @@ unchanged: their `layout.yaml` names no kind.
    on a key board); **`pcb_route.complete`** - every connection KiCad's DRC still
    counts missing, routed by A* on both outer layers at once on the lazy 0.2 mm
    grid, a via wherever `Obstacles.via_ok` allows, from one item and then, if
-   that search is boxed in, from the other; no rip-up, so it takes the room the
-   autorouter left; then the silkscreen, clear of every via, and any stroke of a
-   footprint's own silk on a via removed and named.
+   that search is boxed in, from the other; it takes the room the autorouter
+   left. What it cannot route goes to **`pcb.rescue`**, a rip-up: round each
+   end of the missing connection (and, for a hop under 10 mm, the ground
+   between) the unlocked tracks and vias of other nets are taken up at 1.5, 3
+   and 5 mm, never a plane net's or locked copper; the missing connection is
+   routed first and the nets taken up are routed again (`complete`), and the
+   result is kept only when KiCad's DRC counts fewer problems, unconnected and
+   violations together, than before. Then the silkscreen, clear of every via,
+   and any stroke of a footprint's own silk on a via removed and named.
 6. Zones filled again, stackup written, as for a key board. Whatever is still
    unconnected is printed by name; the board is written anyway, and `check`
    fails on each connection until it is routed by hand.
 
 `layout --no-route` builds and places only (a cheap re-run after a footprint
-changes). A whole layout of the main board takes about 35 minutes, most of it
+changes). **`pcb.py finish <board>`** runs the tidy, `complete` and `rescue`
+again on the board as it stands, in place, and prints what is still missing:
+for after a hand edit, or to try again without re-running Freerouting. It
+never adds or moves a part. A whole layout of the main board takes about 35 minutes, most of it
 Freerouting's.
 
 **`check` adds** for a main board (`pcb_main.check_cad`, `check_heights`,

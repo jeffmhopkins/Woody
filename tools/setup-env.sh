@@ -89,6 +89,7 @@ for m in Capacitor_SMD.3dshapes/C_0805_2012Metric.step \
          Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.step \
          Package_SO.3dshapes/SOIC-14_3.9x8.7mm_P1.27mm.step \
          Package_TO_SOT_SMD.3dshapes/SOT-23-5.step \
+         Package_TO_SOT_SMD.3dshapes/SOT-23.step \
          Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x05_P2.54mm_Vertical.step \
          Converter_DCDC.3dshapes/Converter_DCDC_RECOM_R-78E-0.5_THT.step; do
   if [ ! -s "$models/$m" ]; then
