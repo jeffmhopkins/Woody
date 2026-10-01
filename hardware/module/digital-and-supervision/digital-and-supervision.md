@@ -89,7 +89,10 @@ gates, three signals, none spare.
   `[ds SN74AHCT14.pdf p.5]` — against a 3.3 V link, so a 3.3 V high clears the
   top of the band and 0 V the bottom. **No input clamp to `VCC`**, like the
   74AHCT125 (`I_IK` for `VI < 0` only, p.4; `I_I` ±1 µA at `VCC` = 0 V, p.5):
-  a powered instrument on an unpowered module back-drives nothing. A 74HCT14
+  a powered instrument on an unpowered module back-drives nothing through
+  the receiver. (`R-PULL-CS` is a path of its own: `CS_MOD` held at 3.3 V by
+  the instrument feeds `LOGIC_5V` through it, at most 3.3 V / 100 kΩ = 33 µA
+  `[calc]`.) A 74HCT14
   has the thresholds and not that property. TI `SN74AHCT14DR`, in stock at
   JLCPCB/LCSC (C141316) on 2026-09-30.
 - **Why the RC.** The pair's crosstalk at the cable node is larger than a
