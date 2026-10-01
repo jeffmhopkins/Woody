@@ -4,7 +4,9 @@
 instruction (point 11): the etherCON is the bottom row, the toggle and the LED
 are the row above it; **and again the same day** (point 12): the toggle throws
 left–right. **Amended 2026-10-01** (point 13): BREATH and PITCH change
-places, and so do MOD 2 and MOD 3. Made with the module's mechanical CAD, "up to
+places, and so do MOD 2 and MOD 3; **and again the same day** (point 14): the
+panel's material and finish, which ADR 0026 point 8 cited as specified here
+and which this record had never written down. Made with the module's mechanical CAD, "up to
 the line before board layout". It takes ADR 0023's two-board decision to
 positions and lengths, and it **reverses one of 0023's consequences**: the
 panel has no slot for the NE8FAV's PUSH tab (point 3).
@@ -42,11 +44,11 @@ checked rather than asserted.
    section.
 2. **Legend zones are part of the layout** and are derived from what is
    around them, never drawn freehand: the title band; a band under each knob;
-   a zone beside each jack on the panel's outer side (the MOD write-on strip
-   of ADR 0004 was these four; *amended 2026-10-01: the strip is dropped,
-   each zone now holds the jack's printed pill —
-   [ADR 0026](0026-module-panel-graphics.md) point 4*); a zone between the LED and the toggle; the
-   strip right of the flange; one right of the toggle. `rules.legend_h` and `rules.legend_w` are
+   a zone beside each jack on the panel's outer side; a zone between the LED
+   and the toggle; the strip right of the flange; one right of the toggle.
+   *Amended 2026-10-01: the four MOD jacks' zones were ADR 0004's write-on
+   strip; ADR 0026 point 4 dropped the strip, and each zone carries its
+   jack's printed pill.* `rules.legend_h` and `rules.legend_w` are
    their minimum sizes; each zone is DRC'd against every knob, plug grip,
    nut, screw head, the NE8MX and the washers.
 3. **No slot for the PUSH tab.** Sliced from the banked STEP
@@ -204,6 +206,17 @@ checked rather than asserted.
     [`module-main/README.md`](../../hardware/boards/module-main/README.md#j-b2b-mod--the-allocation).
     The DAC channels (ADR 0006) are untouched: MOD 2 is still MOD 2, at a
     new place on the panel.
+14. **The panel is 2 mm aluminium, black-anodised, CNC-cut and UV-printed by
+    one front-panel vendor** — amended 2026-10-01. ADR 0026 point 8 prints
+    on "the black-anodised 2 mm aluminium ADR 0024 already specifies", but
+    this record gave only the thickness (`panel.t`, Doepfer's). It is
+    written here so the cite resolves: the anodise is the dark ground the
+    artwork's knocked-out words read against (ADR 0026 point 1), and the
+    vendor that anodises, cuts from `export/panel.dxf` and UV-prints
+    `art/panel-art.pdf` with a white underprint is one order (Front Panel
+    Express, Schaeffer class), not the key plate's laser or waterjet shop.
+    One proof panel first, after the 1:1 paper check. `PANEL`'s BOM row
+    orders it so.
 
 ## Consequences
 
@@ -242,10 +255,12 @@ they add no second ground tie between the boards
 *Grounding*). The part itself, and `config/module.yaml`'s `standoff.*` (which
 still cite the polyamide spacer's datasheet), follow from the module CAD.*
 
+*2026-10-01: the panel's legends, once open here, are decided by ADR 0026,
+inside the zones this record fixes.*
+
 | Item | Decided by |
 |---|---|
 | The rail band and the rail's depth (`rail.*`) | A rail maker's drawing banked, or the target case measured |
 | The knob's bore depth and its gap to the panel (`knob.gap`) | The first fit, with the knob in hand |
-| The panel's legends | The artwork, inside the zones this record fixes |
 | Whether a thumb on the PUSH tab has room under the toggle (points 11 and 12: the sweep's lower edge, now the nut's, is in the DRC's *face parts clear of each other* above the tab) | The 1:1 paper check with the NE8MX in hand, then the first panel |
 | The umbilical's jacket and bend radius (`ethercon.umb_od`, `umb_bend_k`) | CABLE-UMB bought, and its datasheet |
