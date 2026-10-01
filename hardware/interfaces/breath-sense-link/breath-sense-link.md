@@ -243,8 +243,8 @@ there, and **neither appeared on this page** — the page that says of itself
 directions.
 
 **`R1b` — the twin 1 kΩ in the `AGND` leg.** `bom.csv` carries
-`R-SER-BREATH-INST` at **qty 2**, and `breath-receive-stage.md`'s 482 Hz
-differential pole is derived with 1 kΩ in *both* legs. Only one was drawn.
+`R-SER-BREATH-INST` at **qty 2**, and the ~459 Hz
+differential pole (*Component values*) is derived with 1 kΩ in *both* legs. Only one was drawn.
 
 Its real job is **source-impedance balance on the twisted pair** — 1 kΩ
 against ~0 Ω is what a difference amplifier's CMRR actually responds to —
@@ -314,7 +314,7 @@ section, commissioning and the `CLR` section.*
 | **R1b** | 1 kΩ 1 %, 1206 | **Its twin in the `AGND` leg.** Free, and it is what keeps CMRR from collapsing — see below |
 | **R2, R3** | 10 kΩ 0.1 % | Module-side series protection. **Matched** — but see below |
 | **R4, R5** | 1 MΩ | **Common-mode bias return.** Without these the in-amp's inputs float when the cable is unplugged and it saturates to a rail |
-| **C_diff** | 15 nF C0G | **482 Hz** differential pole (not 531 — `R1b` makes both legs 11 kΩ), **ahead of the in-amp** |
+| **C_diff** | 15 nF C0G | **~459 Hz** differential pole, **ahead of the in-amp**: 2 × 11 kΩ against 15 nF plus the two `C_cm` in series across the pair, 0.75 nF `[calc: 1/(2π × 22 kΩ × 15.75 nF)]`. Not 482 Hz, which left `C_cm` out; not 531, which had no `R1b` |
 | **C_cm** | 1.5 nF C0G ×2 | Common-mode poles, deliberately 1/10 of C_diff |
 | **R_G** | 42.2 kΩ 0.1 % | INA828, `G = 1 + 50k/R_G` = **2.185** |
 | **REF** | buffered trimmer, **0 → +1.0 V** | Nulls the pedestal *ahead* of the gain pot, which is what makes the panel knobs independent. Range covers the sensor's whole 0.152–0.378 V spec band, not just its typical. From the LM317 rail, never `VREFOUT`, and never a bare divider — see above |
@@ -373,8 +373,9 @@ error term on its own:
 ```
 
 That is the **entire** 60 dB budget, spent by one unmatched resistor, with
-every other term still to come. The 0.1 % module-side parts buy 94 dB and this
-throws away fifty times that.
+every other term still to come. What `R1b` buys back is about **13.5 dB** at the
+worst corner, not the 34 dB between this term and the 0.1 % parts' 94 dB: with
+it fitted the floor is the 1 MΩ bias pair's ~73 dB `[sim, breath-link-cmrr]`.
 
 **`R1b` fixes it for nothing.** The `AGND` leg carries no signal current — the
 in-amp's input is gigaohms — so a matching 1 kΩ in it changes the differential
@@ -411,16 +412,11 @@ prevent the amplifier slewing on out-of-band energy.
 
 ---
 
-## Where the two ends disagree
+## Where the two ends disagree — closed 2026-09-30
 
-*Both halves are above, verbatim, and neither was edited: `carrier.md` §2 files
-a correction against the receive page's own case for `R1b` — "fifty times"
-against about 13 dB — and the sentence it is answering is in "`R1` is a 1206,
-and it has a twin". They are now adjacent instead of two files apart. **No
-winner was picked here**, which is not the same as their agreeing.*
-
-**What closes it: the breath-link CMRR simulation** (the INA828 receive stage
-with both 1 kΩ legs and the 1 MΩ bias pair at their tolerances), in progress
-on 2026-09-30. Its CMRR with `R1b` fitted and with `R1b` shorted is the number
-both statements are estimating; whichever it matches stands, and the other is
-corrected to it.
+`carrier.md` §2 filed a correction against the receive page's case for `R1b` —
+"fifty times" against about 13 dB. **The breath-link CMRR simulation settled
+it**: `R1b` buys about 13.5 dB of worst case, so "about 13 dB" stands and "fifty
+times" is withdrawn (`breath-link-cmrr`,
+`hardware/module/breath-receive-stage/sim/README.md`). The quoted correction
+earlier on this page is kept as the record of the argument.

@@ -79,17 +79,27 @@ other.
                    │            │
                    │        [R-RESP 3.9k]
                    │            │
-                   └──────[▷|◁]─┴──► X          D-RESP, 1N4148 antiparallel
+                   └──────[▷|◁]─┴──► X          D-RESP, 1N4448W antiparallel
                         two diodes
 ```
 
 **CW (wiper toward `V_in/2`)** → the branch injects extra *input* current
 at high breath → gain rises with pressure → **expansive, "exponential"**.
-Harder to get loud; more expression at the top.
+More expression at the top.
 
 **CCW (wiper toward `V_shaped`)** → extra *feedback* current at high breath
-→ gain falls with pressure → **compressive, "logarithmic"**. Easier to get
-loud; the top compresses.
+→ gain falls with pressure → **compressive, "logarithmic"**. The top
+compresses.
+
+**The knob changes the level as well as the shape.** The stage's gain is
+above 1 at every breath level at CW (×1.11 at *pp* to `shaper-exp-gain` at a
+hard blow) and below 1 at every level at CCW (×0.82 at *pp* to ×0.44 at a hard
+blow) `[sim, sim/README.md]`. So **at a fixed GAIN setting, CW is louder at
+every breath level and CCW quieter**; "harder to get loud" (CW) and "easier to
+get loud" (CCW) describe the curve only once GAIN has been re-set to put a hard
+blow back where it was. What that does one stage later, at the commissioned
+gain, is `breath-chain-curve-clip`, and whether it should is open with the owner
+(`breath-output-stage.md`, *Headroom*).
 
 **Centre detent** → wiper at 0 V → no diode current → **linear**, exactly.
 This is the one place a centre detent is honestly warranted on this panel,
@@ -152,7 +162,7 @@ divider — two more parts per side, piecewise, and no thermal behaviour.
 | | |
 |---|---|
 | Op-amp | **Both remaining OPA2197 halves** — one shapes at ÷2 inverting, one restores ×2 inverting to put scale and polarity back |
-| Passives | `POT-RESP` 50 k lin (same part as `POT-GAIN`), `R-RESP` 3.9 k, `D-RESP` ×2 1N4148, R1 20 k, R2 10 k, divider 2 × 10 k |
+| Passives | `POT-RESP` 50 k lin (same part as `POT-GAIN`), `R-RESP` 3.9 k, `D-RESP` ×2 1N4448W, R1 20 k, R2 10 k, divider 2 × 10 k |
 | Panel | **A third pot and a third knob** |
 
 ## Settled before layout — 2026-09-30
@@ -176,11 +186,18 @@ divider — two more parts per side, piecewise, and no thermal behaviour.
 - **Headroom.** At the full-exponential end `BREATH_SHAPED` clips at the
   OPA2197's rail before the in-amp reaches its full scale. Where it starts is
   `shaper-exp-gain` `[sim]` (`sim/`): about seven-tenths of the sensor's range
-  with `R-RESP` at 3.9 kΩ, and at least 1.3× a hard blow at every corner —
-  beyond the ~2.8 kPa that real playing reaches (`breath-output-stage.md`). The linear and log settings never clip.
+  with `R-RESP` at 3.9 kΩ, and at least 1.3× a hard blow at every corner,
+  where a hard blow is the 2.8 kPa candidate of the disputed
+  `breath-working-point` (open until E2; at its 3–4 kPa candidate the nominal
+  clip is within 5 % of a hard blow). The linear and log settings never clip
+  here. **That is `BREATH_SHAPED` only:** one stage later, at the GAIN
+  commissioning sets, the exp end puts the jack on the rail inside real
+  playing — `breath-chain-curve-clip`, and *Headroom* on
+  `breath-output-stage.md`.
 - **Diode matching** is not a requirement: breath is unipolar, so only one of
   the pair conducts in play; the second is there for the power-on and fault
-  excursions. `D-RESP` is Vishay's `1N4148W` (row).
+  excursions. `D-RESP` is Vishay's `1N4448W` (row): the part whose
+  guaranteed forward-voltage window the 1.5× floor is simulated against.
 - **The pot** is Alpha's centre-click RV09 on the R0904N footprint
   (`POT-RESP` row).
 
@@ -191,3 +208,10 @@ divider — two more parts per side, piecewise, and no thermal behaviour.
   that floor on 2026-09-30, and `R-RESP` is 3.9 kΩ to hold it at every
   simulated corner (`shaper-exp-gain`, `sim/`). A stronger curve is a lower
   `R-RESP`, and it moves the clip earlier.
+- **"A hard blow" is a candidate, not a measurement.** The 1.5× floor, the
+  clip margin and `R-RESP`'s value are all evaluated at an in-amp output of
+  −4.64 V, which is `breath-working-point`'s 2.8 kPa candidate. E2 decides it;
+  `R-RESP` is re-checked then (`shaper-exp-gain`, `conditional_on`).
+- **The floor at temperature.** The simulated corners are at 27 °C. Below
+  about 20 °C inside the case the worst-stacked corner dips under 1.5×
+  (`shaper-exp-gain`, `diode_note`); E10 judges the curve on a real module.

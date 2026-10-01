@@ -10,7 +10,11 @@ halves of `U-RESP` are TI's OPA2197 model. **`D-RESP` is behavioural**: no
 1N4148W SPICE model could be banked (fragment R38 records the URLs tried), so
 it is a SPICE diode fitted to the banked sheets — the 1N4448W's guaranteed
 0.62–0.72 V at 5 mA sets its saturation current, swept across that window, and
-its emission coefficient (1.8) is an assumption. The in-amp's output is swept
+its emission coefficient (1.8) is an assumption. **The 1N4448W is the part
+bought** (since 2026-10-01): a 1N4148W, which guarantees only a maximum, gave
+1.477× at the worst corner at its own 0.715 V-at-1 mA limit. The runs are at
+27 °C; the knee moves up as the module cools, and the worst corner is 1.496×
+at 15 °C (`shaper-exp-gain`, its `diode_note`). The in-amp's output is swept
 from 0 V to `inamp-full-scale` as a slow ramp.
 
 ## What it shows
