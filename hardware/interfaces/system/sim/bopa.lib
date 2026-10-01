@@ -11,12 +11,14 @@
 *  - the supply's error, input-referred: pk0 per volt of (V+ - V-) away from ps_vs0, and a
 *    derivative term ptau (an RC differentiator on r_psd), the 20 dB/decade TI's model shows
 *    above ~10 Hz; BOPA's are ps_k0 / ps_tau, the INA828's amplifiers' ina_ps_k0 / ina_ps_tau.
-*    A second differentiator (c_psm) cancels what the gain stages below add of their own: the
-*    supplies' midpoint moving against the output, 1 / (2 pi GBW) of its slope, which made
-*    V+ and V- rejection differ by 10 dB where TI's model has them equal. Taken against
-*    the output, it leaves the in-amp's CMRR alone (taken against in-, it cost 14 dB at
-*    2 kHz, which inamp-check now bounds); it also removes the GBW lag of a moving output,
-*    which no scenario here measures (their signals are held)
+*    The gain stages below add a term of their own, the midpoint moving against the output
+*    at 1 / (2 pi GBW) of its slope: it adds to V+'s error and subtracts from V-'s. TI's
+*    model has the two equal. ptau is fitted so that the smaller, V-'s, is TI's: V+ is
+*    then pessimistic, and neither is ever better than TI's (sim opamp-check). Cancelling
+*    the term instead was tried three ways and each broke something else: against the
+*    absolute midpoint it read the floating instrument's movement as input; against in- it
+*    cost the in-amp 14 dB of CMRR; against the output it made a zero-lag amplifier that
+*    rang on the SPI edges.
 *  - two gain stages about the supplies' midpoint, so no node's own conductance is many
 *    decades below what drives it: a slew-limited transconductance gm_op into r1_op || c1_op
 *    (gain a1_op, the dominant pole), then a smooth limiter of gain a2_op that stops the output
@@ -39,10 +41,7 @@ Bmid mid 0 V = 0.5 * (V(vcc) + V(vee))
 Bsd sd 0 V = V(vcc) - V(vee)
 Cpd sd dd {ptau / {{r_psd}}}
 Rpd dd 0 {{r_psd}}
-Bmr mr 0 V = V(mid) - V(out)
-Cpm mr dm {{c_psm}}
-Rpm dm 0 {{r_psd}}
-Bps eps 0 V = pk0 * (V(sd) - {{ps_vs0}}) + V(dd) - V(dm)
+Bps eps 0 V = pk0 * (V(sd) - {{ps_vs0}}) + V(dd)
 Bg1 mid x1 I = {{i_slew}} * tanh({{gm_op}} * (V(inp) - V(inn) + V(eps)) / {{i_slew}})
 R1 x1 mid {{r1_op}}
 C1 x1 mid {{c1_op}}

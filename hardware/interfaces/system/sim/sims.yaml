@@ -85,7 +85,7 @@ params:
   # --- bopa.lib: the behavioural OPA2197 (BOPA) and INA828 (BINA)
   ps_k0:    {value: 3.0e-6, source: "OPA2197 PSRR, +-3 uV/V max over -40 to 125 C [datasheets/analog/OPA2197.pdf, SBOS737C p.7]"}
   ps_vs0:   {value: 24.0, source: "the supply the dc term is taken about: the module's +-12 V (only a constant offset elsewhere)"}
-  ps_tau:   {value: 1.1e-8, source: "PSRR's 20 dB/decade term, fitted to TI's OPA2197 macromodel (datasheets/analog/OPAx197-ti-pspice-sboma34d.lib) as a follower at +-12 V: -83.3 dB at 1 kHz [calc: 10^(-83.3/20) / (2 pi 1 kHz) = 1.09e-8 s]; sim opamp-check holds it there"}
+  ps_tau:   {value: 1.92e-8, source: "PSRR's 20 dB/decade term, fitted to TI's OPA2197 macromodel (datasheets/analog/OPAx197-ti-pspice-sboma34d.lib) as a follower at +-12 V, on V- (-77.3 dB at 2 kHz): the gain stages' own midpoint term subtracts from V-'s error and adds to V+'s (bopa.lib), so V- is fitted and V+ comes out ~8 dB pessimistic. [calc: TI's 1.09e-8 s plus half of 1 / (2 pi GBW), 0.80e-8 s]; sim opamp-check holds it"}
   gm_op:    {value: 1.0e-4, source: "the input stage's transconductance [model parameter: it sets only the scale of r1_op and c1_op]"}
   a1_op:    {value: 1000.0, source: "the first stage's gain; the second's is aol_op over it [model parameter: splits the gain so the solver sees no node a decade-span below its drive]"}
   aol_op:   {value: 3.16e5, source: "OPA2197 open-loop gain, 110 dB min over -40 to 125 C [OPA2197.pdf p.7]"}
@@ -98,7 +98,7 @@ params:
   c_ic:     {value: 6.4e-12, source: "OPA2197 common-mode input capacitance, 6.4 pF [OPA2197.pdf p.7]"}
   iq_op:    {value: 1.0e-3, source: "OPA2197 quiescent current per amplifier, 1 mA typ (1.3 max) [OPA2197.pdf p.8]"}
   ina_ps_k0:  {value: 1.58e-6, source: "BINA's supply error at dc, in its difference amplifier (the input pair's cancel): the INA828's PSRR, 110 dB min RTI at G = 1 [datasheets/analog/INA828IDR.pdf, Electrical Characteristics] [calc: the difference amplifier's noise gain is 2; 10^(-110/20) / 2 = 1.58e-6]"}
-  ina_ps_tau: {value: 1.4e-9, source: "BINA's PSRR 20 dB/decade term, fitted to TI's INA828 macromodel (datasheets/analog/INA828-ti-pspice-sbomag5c.lib) at 10 kHz (-75.1 dB at the output, G = 2.18), where it is worst, so that BINA is never better than TI's model from 100 Hz to 10 kHz; sim inamp-check holds it"}
+  ina_ps_tau: {value: 1.4e-9, source: "BINA's PSRR 20 dB/decade term, fitted to TI's INA828 macromodel (datasheets/analog/INA828-ti-pspice-sbomag5c.lib) at 10 kHz before the gain stages' midpoint term (bopa.lib) was kept; with that term the difference amplifier's V+ rejection is up to ~30 dB worse than TI's at 2 kHz - pessimistic, and under a microvolt at the in-amp's output for every rail ripple these scenarios make; sim inamp-check holds it never better than TI's"}
   ina_d:    {value: 6.3e-5, source: "BINA's difference-amplifier mismatch for the INA828's minimum CMRR, 90 dB at dc, G = 1 [datasheets/analog/INA828IDR.pdf, Electrical Characteristics] [calc: a unity difference amplifier's common-mode gain is d/2; 2 x 10^(-90/20) = 6.3e-5]"}
   ina_cm:   {value: 8.75e-14, source: "BINA's CMRR roll-off, a capacitance across the REF leg, fitted to TI's INA828 macromodel (datasheets/analog/INA828-ti-pspice-sbomag5c.lib) at RG 42.2 kohm: -93.1 dB at 2 kHz [calc: tau = 10^(-93.1/20) / (2 pi 2 kHz) = 1.75e-9 s; C = 2 tau / 40 kohm]; sim inamp-check holds it there"}
   # --- the instrument's copper and parts not in another sim
@@ -200,7 +200,6 @@ derived:
   i_slew: "v['sr_op'] * v['gm_op'] / (2 * math.pi * v['gbw_op'])"
   r_ina_ref: "40.0e3 * (1 + v['ina_d'])"
   r_psd: "10.0e3"
-  c_psm: "1.0 / (2 * math.pi * v['gbw_op']) / v['r_psd']"
   # --- the timeline
   t_iso_up: "v['t_sig0'] + v['t_iso']"
   t_led0: "v['t_settle']"
