@@ -90,6 +90,10 @@ arrows); either way, one class is boxed.
    the LED's `rack` label goes, because the LED is not rack power — it is lit
    while the toggle is on **and** the load switch delivers
    (`hardware/module/panel-led`), so it belongs to the power row it sits in.
+   **On 2026-10-01**, after the photographs, the owner cut two more:
+   `power` after `on` ("on/off is fine") and the umbilical's `umbilical` /
+   `to instrument` ("No need to say umbilical to instrument"). Island C now
+   carries only `off` and `on`; the etherCON is its own label.
    Every word is an `art.text.*` leaf, `settled`.
 8. **Production: UV print on the black-anodised 2 mm aluminium ADR 0024
    already specifies**, CNC-cut from `export/panel.dxf` by the same vendor,

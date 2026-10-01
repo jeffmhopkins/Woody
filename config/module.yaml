@@ -614,7 +614,7 @@ layout:
   toggle_on:
     value: "right"
     status: settled
-    source: "[adr 0024 point 12] the owner, 2026-09-30: the lever throws LEFT-RIGHT, across the panel, 'to avoid inadvertent triggering'. ON is thrown RIGHT, toward the POWER legend; OFF left, toward the LED. The M2011 is ON in NKK's 'Down' position, the lever away from the bushing's keyway [ds NKK-SERIES-M-TOGGLE.pdf p.5 (A56), the circuit table's position icons], and the D4 flat sits where S4's keyway does, across from the drawn lever [ds p.7 (A58), the D4 and S4 front views] - so the flat is on the LEFT. The model derives the flat, the sweep, the body's and lugs' orientation from this one leaf"
+    source: "[adr 0024 point 12] the owner, 2026-09-30: the lever throws LEFT-RIGHT, across the panel, 'to avoid inadvertent triggering'. ON is thrown RIGHT, toward its 'on' legend; OFF left, toward the LED. The M2011 is ON in NKK's 'Down' position, the lever away from the bushing's keyway [ds NKK-SERIES-M-TOGGLE.pdf p.5 (A56), the circuit table's position icons], and the D4 flat sits where S4's keyway does, across from the drawn lever [ds p.7 (A58), the D4 and S4 front views] - so the flat is on the LEFT. The model derives the flat, the sweep, the body's and lugs' orientation from this one leaf"
   pots:
     value: ["POT-GAIN", "POT-OFFSET", "POT-RESP"]
     status: nominal
@@ -758,11 +758,11 @@ art:
   word_gap:
     value: 1.5
     status: nominal
-    source: "[adr 0026] the least air between two words sharing a zone ('on' and 'power')"
+    source: "[adr 0026] the least air between two words sharing a baseline (the report's word-spacing rule)"
   line_gap:
     value: 0.35
     status: nominal
-    source: "[adr 0026] between one line's descender and the next line's ascender (the umbilical's two lines, the maker's)"
+    source: "[adr 0026] between one line's descender and the next line's ascender (the maker line under the name)"
   # The rasters the Blender scene maps onto the panel (tools/render-module.py).
   texture:
     px_mm:
@@ -844,14 +844,6 @@ art:
       value: ["off", "on"]
       status: settled
       source: "[adr 0026] words, not IEC 60417 O / I - the owner, 2026-09-30. OFF at the LED legend zone's right end, ON at the start of SW-POWER's"
-    power:
-      value: "power"
-      status: settled
-      source: "[adr 0026] after 'on': the system's only power switch (ADR 0004)"
-    umbilical:
-      value: ["umbilical", "to instrument"]
-      status: settled
-      source: "[adr 0026] J-UMBILICAL's legend zone, top left: the label and a small annotation"
     maker:
       value: "space coast synthesizers"
       status: settled

@@ -320,7 +320,6 @@ def layout():
     trk = get("tracking")
     size = {k: get(f"size.{k}") for k in ("title", "header", "label", "row", "small", "maker")}
     ink = {k: get(f"ink.{k}") for k in ("panel", "slate", "bar", "white")}
-    word_gap, line_gap = get("word_gap"), get("line_gap")
     art_in = get("island_r") / 2
 
     def Z(name):
@@ -387,19 +386,12 @@ def layout():
             it = place(jz[r][c], pz, jw[r][c], "header", "semibold")
             it["knockout"] = True
             it["pill"] = pz
-    # -- island C: the toggle's words (the LED beside it needs none), the umbilical
+    # -- island C: the toggle's two words only - the LED, the switch's purpose
+    # and the umbilical need none (the owner, 2026-10-01)
     z = Z("LED-PANEL legend")
     off, on = get("text.toggle")
     place("SW-POWER off", z, off, "row", h="right")
-    z = Z("SW-POWER legend")
-    it_on = place("SW-POWER on", z, on, "row", h="left")
-    place("SW-POWER power", z, get("text.power"), "row", h="left", dx=it_on["adv"] + word_gap)
-    z = Z("J-UMBILICAL legend")
-    u1, u2 = get("text.umbilical")
-    a = place("J-UMBILICAL legend", z, u1, "label", h="left", v="top")
-    fs = fonts["medium"]
-    place("J-UMBILICAL note", z, u2, "small", h="left",
-          baseline=a["baseline"] + fs.desc * a["size"] - line_gap - fs.asc * size["small"])
+    place("SW-POWER on", Z("SW-POWER legend"), on, "row", h="left")
 
     # -- surfaces
     keep = panel.buffer(-get("min.print_cut"), quad_segs=24)          # where ink may be

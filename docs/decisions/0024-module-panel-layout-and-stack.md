@@ -152,7 +152,7 @@ checked rather than asserted.
     patch cable pulled out and down, the NE8MX's own cable being mated below
     it. Across the panel, none of those push along the throw.
 
-    **ON is to the right**, toward the POWER legend; OFF is to the left,
+    **ON is to the right**, toward its `on` legend; OFF is to the left,
     toward the LED (`layout.toggle_on`). The M2011 is ON in NKK's *Down*
     position, the lever away from the bushing's keyway (`NKK-SERIES-M-TOGGLE.pdf`
     p.5, A56, the circuit table's position icons), and the D4 bushing's flat
@@ -166,7 +166,7 @@ checked rather than asserted.
     only anti-rotation feature and the panel needs no second hole.
 
     **What turned with it.** On the face, the sweep now lies along the row,
-    toward the LED and the POWER legend; both legend zones are derived from
+    toward the LED and the `on` legend; both legend zones are derived from
     it and are narrower by what it gained (DRC: *legend zone: LED-PANEL
     legend*, *legend zone: SW-POWER legend*). Across the row it is now the
     nut, so the lever is further from the PUSH tab below and the last jack
