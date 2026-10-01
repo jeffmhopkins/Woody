@@ -829,22 +829,6 @@ def setup(sc, members, view, preview):
     return co
 
 
-def caption(png, text):
-    """A line of text in the picture's lower left, on a dark band: what the
-    picture shows that the instrument does not (cad.py's stamp goes under it)."""
-    from PIL import Image, ImageDraw, ImageFont
-    img = Image.open(png).convert("RGB")
-    d = ImageDraw.Draw(img, "RGBA")
-    f = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
-    font = ImageFont.truetype(f, max(12, img.width // 96)) if os.path.exists(f) else ImageFont.load_default()
-    x0, y0, x1, y1 = d.textbbox((0, 0), text, font=font)
-    pad = font.size // 2
-    y = img.height - (y1 - y0) - 3 * pad
-    d.rectangle([pad, y - pad, pad + (x1 - x0) + 2 * pad, y + (y1 - y0) + pad + 2], fill=(18, 18, 20, 170))
-    d.text((2 * pad, y - y0 // 2), text, fill=(230, 230, 228), font=font)
-    img.save(png, optimize=True)
-
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--view", choices=sorted(VIEWS))
@@ -874,9 +858,6 @@ def main():
     import time
     t0 = time.time()
     bpy.ops.render.render(write_still=True)
-    if cfg_value(yaml.safe_load(open(os.path.join(ROOT, CONFIG), encoding="utf-8")), "render.side_glass") == "clear-smoke" \
-            and any(not o.hide_render and o.name.startswith("side ") for o in bpy.data.objects):
-        caption(sc.render.filepath, "Sides rendered clear to show the inside; the instrument's sides are frosted (ADR 0009).")
     print(f"render-instrument: {a.view} rendered in {time.time() - t0:.0f} s", flush=True)
     print(f"TOOL: render-instrument.py; Blender {bpy.app.version_string} (bpy), Cycles {sc.cycles.samples} spp adaptive, OIDN")
     return 0

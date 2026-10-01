@@ -474,7 +474,11 @@ def check_depfile(o, deps_abs, inputs):
 def stamp(png, o, fp, provisional):
     from PIL import Image, ImageDraw, ImageFont
     img = Image.open(png).convert("RGB")
-    band = 34 if provisional else 22
+    # `note:` in the spec - one line under the stamp for what the picture shows
+    # that the design does not (a render-only material, say). Outputs without
+    # one are stamped exactly as before.
+    note = o.get("note")
+    band = (34 if provisional else 22) + (15 if note else 0)
     out = Image.new("RGB", (img.width, img.height + band), (250, 250, 250))
     out.paste(img, (0, 0))
     d = ImageDraw.Draw(out)
@@ -491,6 +495,8 @@ def stamp(png, o, fp, provisional):
         d.text((8, y0 + 19), "PROVISIONAL LAYOUT - key positions are null in "
                "config/key-layout.yaml; keys sit on the provisional layout in "
                "config/body.yaml until M2/M3", fill=(170, 40, 20), font=fb)
+    if note:
+        d.text((8, y0 + band - 15), note, fill=(40, 70, 140), font=fb)
     # Deterministic PNG: no timestamps, no text chunks.
     out.save(png, optimize=True)
 

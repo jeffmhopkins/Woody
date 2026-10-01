@@ -278,6 +278,7 @@ scripts:
                            mechanical/module/blender/studio_small_08_1k.hdr]
     out: mechanical/renders/photo-hero.png
     stamp: Woody body
+    note: "Sides rendered clear (config/render.yaml side_glass) to show the inside; the instrument's sides are frosted (ADR 0009)."
     layout_sensitive: true
   - name: photo-open
     title: Oak top, key plate and the near side off - the cassette and its boards in the shell
@@ -285,6 +286,7 @@ scripts:
     inputs: *photo_inputs
     out: mechanical/renders/photo-open.png
     stamp: Woody body
+    note: "Sides rendered clear (config/render.yaml side_glass) to show the inside; the instrument's sides are frosted (ADR 0009)."
     layout_sensitive: true
   - name: photo-exploded
     title: The whole instrument pulled apart along its stack - shell, cassette, boards, plates, keys, lid
@@ -292,6 +294,7 @@ scripts:
     inputs: *photo_inputs
     out: mechanical/renders/photo-exploded.png
     stamp: Woody body
+    note: "Sides rendered clear (config/render.yaml side_glass) to show the inside; the instrument's sides are frosted (ADR 0009)."
     layout_sensitive: true
   - name: photo-cassette
     title: The cassette alone, pulled apart in its build order - bottom plate, spacers, main board, standoffs, key boards, spacers, key plate, screws
@@ -306,6 +309,7 @@ scripts:
     inputs: *photo_inputs
     out: mechanical/renders/photo-board-mouth.png
     stamp: Woody body
+    note: "Sides rendered clear (config/render.yaml side_glass) to show the inside; the instrument's sides are frosted (ADR 0009)."
     layout_sensitive: true
   - name: photo-board-tail
     title: The main board's tail end, key boards off - J-MCU, the regulator, J-UMB on the tongue, the etherCON on its adapter
@@ -313,6 +317,7 @@ scripts:
     inputs: *photo_inputs
     out: mechanical/renders/photo-board-tail.png
     stamp: Woody body
+    note: "Sides rendered clear (config/render.yaml side_glass) to show the inside; the instrument's sides are frosted (ADR 0009)."
     layout_sensitive: true
   - name: photo-underside
     title: From below, the oak bottom off - the bottom plate, its windows under the through-hole tails, the thumb keys
@@ -320,4 +325,5 @@ scripts:
     inputs: *photo_inputs
     out: mechanical/renders/photo-underside.png
     stamp: Woody body
+    note: "Sides rendered clear (config/render.yaml side_glass) to show the inside; the instrument's sides are frosted (ADR 0009)."
     layout_sensitive: true
