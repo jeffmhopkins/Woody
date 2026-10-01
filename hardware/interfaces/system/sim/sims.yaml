@@ -87,7 +87,7 @@ params:
   aol_op:   {value: 3.16e5, source: "OPA2197 open-loop gain, 110 dB min over -40 to 125 C [OPA2197.pdf p.7]"}
   gbw_op:   {value: 10.0e6, source: "OPA2197 unity-gain bandwidth, 10 MHz [OPA2197.pdf p.8]"}
   sr_op:    {value: 20.0e6, source: "OPA2197 slew rate, 20 V/us [OPA2197.pdf p.8]"}
-  v_hr:     {value: 0.6, source: "the integrator's clamp sits this far inside each rail, so that with its diode the output stops at about the rail (a rail-to-rail output) [model parameter]"}
+  v_hr:     {value: 0.025, source: "the limiter stops the open-loop output this far inside each rail: the OPA2197's swing from either rail, 25 mV max with no load [datasheets/analog/OPA2197.pdf, SBOS737C p.8]; a load adds r_o's drop (375 ohm, more than the datasheet's 125 mV at 10 kohm, so the model is the pessimistic one)"}
   r_o:      {value: {fig: opa2197-output-impedance}, source: "the open-loop output impedance (opa2197-output-impedance)"}
   i_sc:     {value: 0.065, source: "OPA2197 short-circuit current, +-65 mA [OPA2197.pdf p.8]"}
   c_id:     {value: 1.6e-12, source: "OPA2197 differential input capacitance, 1.6 pF [OPA2197.pdf p.7]"}
@@ -283,6 +283,15 @@ sims:
       iso_ma: "(peak(w['iiso'], p['t_meas0'], p['t_end_led']) - trough(w['iiso'], p['t_meas0'], p['t_end_led'])) * 1e3"
       pre_pitch_cents: "(peak(w['jp'], p['t_pre0'], p['t_led0']) - trough(w['jp'], p['t_pre0'], p['t_led0'])) * 1200"
       pre_breath_mv: "(peak(w['jb'], p['t_pre0'], p['t_led0']) - trough(w['jb'], p['t_pre0'], p['t_led0'])) * 1e3"
+    asserts: &led_asserts
+      - expr: "max['pitch_cents'] < 0.01"
+        why: "ROADMAP M8's 'pitch scoped while the LEDs sweep', simulated: the pitch jack moves under 0.01 cents p-p, ADR 0027's residual for everything the instrument's supply does to pitch, at every corner of the rack's PSU, C2's ESR, the LED bulk's ESR and the cable's gauge"
+      - expr: "max['breath_mv'] < 0.1 * p['breath_noise'] * 1e3"
+        why: "the breath jack moves under a tenth of the sensor's own noise at the jack (breath-receive-stage.md, 'Noise at the jack', ~10 mV p-p)"
+      - expr: "max['hdr_pos_mv'] < p['rail_led_bound'] * 1e3 and max['hdr_neg_mv'] < p['rail_led_bound'] * 1e3"
+        why: "the case's +-12 V at the module's header ripple under ADR 0027's bound for the LED row, 13 mV p-p (A4-13)"
+      - expr: "max['pre_pitch_cents'] < 0.01 * min['pitch_cents'] and max['pre_breath_mv'] < 0.01 * min['breath_mv']"
+        why: "the solver's floor, the same window before the LEDs start, is under 1 % of every result: what is measured is the LEDs"
   - name: led-pattern
     # the row stepping between blank and full white at 200 Hz, 50 % - a light pattern
     # sweeping inside the breath and pitch bands, where no filter helps
@@ -291,6 +300,7 @@ sims:
     vary: [r_psu, esr_c2, k_gauge]
     measures: [pitch_cents, breath_mv, mod_mv, hdr_pos_mv, hdr_neg_mv, rail_pos_mv, rail_neg_mv, ins_mv, vs_uv, ina_uv, gnd_cm_mv, iso_ma, pre_pitch_cents, pre_breath_mv]
     post: *led_post
+    asserts: *led_asserts
   - name: led-off
     # the floor: the same run with the row blank throughout
     deck: led.cir
@@ -298,12 +308,15 @@ sims:
     vary: []
     measures: [pitch_cents, breath_mv, mod_mv, rail_pos_mv, rail_neg_mv]
     post: *led_post
+    asserts:
+      - expr: "nom['pitch_cents'] < 1.0e-4 and nom['breath_mv'] < 1.0e-3"
+        why: "with the row blank the jacks are still (under 1e-4 cents, 1 uV): led-pwm's numbers are the LEDs', not the deck's"
   - name: burst
     deck: burst.cir
     set: {pad_clamp: 1.0e-9}
     vary: [k_gauge]
     measures: [breath_dev_mv, pitch_dev_cents, ina_dev_uv, agnd_mv, mod_swing, sclk_rx_max, pre_breath_mv]
-    post:
+    post: &burst_post
       breath_dev_mv: "max(peak(w['jb'], p['t_b0'], p['t_end_burst']) - at(w['jb'], p['t_b0']), at(w['jb'], p['t_b0']) - trough(w['jb'], p['t_b0'], p['t_end_burst'])) * 1e3"
       pitch_dev_cents: "max(peak(w['jp'], p['t_b0'], p['t_end_burst']) - at(w['jp'], p['t_b0']), at(w['jp'], p['t_b0']) - trough(w['jp'], p['t_b0'], p['t_end_burst'])) * 1200"
       ina_dev_uv: "max(peak(w['ina'], p['t_b0'], p['t_end_burst']) - at(w['ina'], p['t_b0']), at(w['ina'], p['t_b0']) - trough(w['ina'], p['t_b0'], p['t_end_burst'])) * 1e6"
@@ -311,12 +324,29 @@ sims:
       mod_swing: "peak(w['jm1'], p['t_b0'], p['t_end_burst']) - trough(w['jm1'], p['t_b0'], p['t_end_burst'])"
       sclk_rx_max: "peak(w['srx'], p['t_b0'], p['t_end_burst'])"
       pre_breath_mv: "(peak(w['jb'], 0, p['t_b0']) - trough(w['jb'], 0, p['t_b0'])) * 1e3"
+    asserts:
+      - expr: "max['breath_dev_mv'] < 0.1 * p['breath_noise'] * 1e3"
+        why: "a burst of DAC frames at the link's full rate moves the breath jack under a tenth of the sensor's own noise (breath-receive-stage.md, ~10 mV p-p), at every cable gauge"
+      - expr: "max['pitch_dev_cents'] < 0.1 * fig['pitch-cents-budget']"
+        why: "pitch held while mod channel 1 steps 2 V at every frame and the clock runs: the pitch jack moves under a tenth of pitch-cents-budget"
+      - expr: "min['mod_swing'] > 3.0"
+        why: "the burst is real: mod channel 1's jack follows the frames"
+  - name: burst-spi
+    # the same burst with no DAC output moving: the SPI edges alone
+    deck: burst.cir
+    set: {pad_clamp: 1.0e-9, v_mod_step: 0.0}
+    vary: []
+    measures: [breath_dev_mv, pitch_dev_cents, ina_dev_uv, agnd_mv, mod_swing, sclk_rx_max, pre_breath_mv]
+    post: *burst_post
+    asserts:
+      - expr: "max['breath_dev_mv'] < 0.1 * p['breath_noise'] * 1e3 and max['pitch_dev_cents'] < 0.1 * fig['pitch-cents-budget']"
+        why: "the SPI edges alone: breath under a tenth of the sensor's noise, pitch under a tenth of pitch-cents-budget"
   - name: hot-plug
     deck: plug.cir
-    set: {pad_hiz: 1}
+    set: {pad_hiz: 1, p_kpa: 0.0}
     sweep: {dt_mate: [0.0, 1.0e-3]}
     vary: [k_gauge]
-    measures: [pitch_dev_cents, pre_pitch_cents, mod_dev_mv, breath_absent, breath_rest, breath_over_mv, iso_peak, hdr_dip_mv, sclk_rx_max, mosi_rx_max, cs_rx_min, cs_rx_end, latched, t_inst_up]
+    measures: [pitch_dev_cents, pre_pitch_cents, mod_dev_mv, breath_absent, breath_rest, breath_over_mv, iso_peak, hdr_dip_mv, sclk_rx_max, mosi_rx_max, sclk_sel_max, mosi_sel_max, cs_rx_min, cs_rx_end, latched, t_inst_up]
     post:
       pitch_dev_cents: "max(peak(w['jp'], p['t_plug'], p['t_end_plug']) - at(w['jp'], p['t_plug']), at(w['jp'], p['t_plug']) - trough(w['jp'], p['t_plug'], p['t_end_plug'])) * 1200"
       pre_pitch_cents: "(peak(w['jp'], p['t_save_plug'], p['t_plug']) - trough(w['jp'], p['t_save_plug'], p['t_plug'])) * 1200"
@@ -328,15 +358,31 @@ sims:
       hdr_dip_mv: "(at(w['hdrp'], p['t_plug']) - trough(w['hdrp'], p['t_plug'], p['t_end_plug'])) * 1e3"
       sclk_rx_max: "peak(w['srx'], p['t_plug'], p['t_end_plug'])"
       mosi_rx_max: "peak(w['mrx'], p['t_plug'], p['t_end_plug'])"
+      sclk_sel_max: "peak(w['srx'], cross(w['crx'], p['vtm_max'], p['t_plug']), p['t_end_plug'])"
+      mosi_sel_max: "peak(w['mrx'], cross(w['crx'], p['vtm_max'], p['t_plug']), p['t_end_plug'])"
       cs_rx_min: "trough(w['crx'], p['t_plug'], p['t_end_plug'])"
       cs_rx_end: "at(w['crx'], p['t_end_plug'] - 1e-4)"
       latched: "peak(w['latch'], p['t_plug'], p['t_end_plug'])"
       t_inst_up: "cross(w['ins'], 0.9 * p['v_bus'], p['t_plug']) - p['t_plug']"
+    asserts:
+      - expr: "max['latched'] < 0.5 and max['iso_peak'] < 0.5 * p['i_ocp']"
+        why: "the instrument plugged into a running module starts without the LT1641's fault latch, and U-ISO stays under half its over-current threshold - in the whole system, as hotplug-iso-ocp says on power-entry-instrument/sim's smaller deck"
+      - expr: "max['sclk_sel_max'] < p['vtp_min'] and max['mosi_sel_max'] < p['vtp_min']"
+        why: "the contact puts a spike on SCLK and MOSI at U-RX-MOD's input (sclk_rx_max), but it is over before CS_MOD falls through V_T- max: once the DAC could be selected, neither line reaches the lowest V_T+ (spi-link.md, 'The four states of the link')"
+      - expr: "min['cs_rx_end'] > p['vtp_max']"
+        why: "once the instrument is up, CS_MOD at the receiver is above V_T+ max: deselected at every part"
+      - expr: "max['pitch_dev_cents'] < 0.1 * fig['pitch-cents-budget'] and max['mod_dev_mv'] < 1.0"
+        why: "a hot-plug does not move the held pitch by a tenth of pitch-cents-budget, nor a held mod CV by 1 mV"
+      - expr: "abs(max['breath_rest']) < 0.2 and abs(min['breath_rest']) < 0.2 and max['breath_absent'] < 0"
+        why: "the breath jack is below 0 V with no instrument and ends near 0 V (POT-OFFSET's true zero) with one at rest: no gate is held open either side of a plug-in"
   - name: cable-check
     deck: cable.cir
     sweep: {z_cm: [70, 100, 140]}
     vary: []
-    measures: [pk_l, pk_c, tr_l, tr_c, ar_l, ar_c, cm_l, cm_c]
+    measures: [tr_l, tr_c, ar_l, ar_c, cm_l, cm_c, r_tr, r_ar, r_cm]
+    asserts:
+      - expr: "abs(max['r_tr'] - 1) < 0.05 and abs(min['r_tr'] - 1) < 0.05 and abs(max['r_ar'] - 1) < 0.05 and abs(min['r_ar'] - 1) < 0.05 and abs(max['r_cm'] - 1) < 0.05 and abs(min['r_cm'] - 1) < 0.05"
+        why: "the two-section lumped umbilical the scenarios use is within 5 % of ngspice's CPL lossy-line model on what reaches the in-amp from an SCLK edge - its peak, its integral and its common mode - at every common-mode impedance"
   - name: opamp-check
     deck: opamp-check.cir
     vary: []
@@ -352,6 +398,9 @@ sims:
       bopa_neg_2k: "at(w['bn'], 2.0e3)"
       ti_neg_10k: "at(w['tn'], 1.0e4)"
       bopa_neg_10k: "at(w['bn'], 1.0e4)"
+    asserts:
+      - expr: "abs(nom['bopa_pos_1k'] - nom['ti_pos_1k']) < 1 and abs(nom['bopa_pos_2k'] - nom['ti_pos_2k']) < 1 and abs(nom['bopa_pos_10k'] - nom['ti_pos_10k']) < 1 and abs(nom['bopa_neg_2k'] - nom['ti_neg_2k']) < 1 and abs(nom['bopa_neg_10k'] - nom['ti_neg_10k']) < 1"
+        why: "BOPA's supply rejection is TI's OPA2197 macromodel's to 1 dB, from either rail, 1 to 10 kHz: the band the LED row's ripple lives in"
   - name: inamp-check
     deck: inamp-check.cir
     vary: []
@@ -369,3 +418,8 @@ sims:
       bina_pos_2k: "at(w['bp'], 2.0e3)"
       ti_pos_10k: "at(w['tp'], 1.0e4)"
       bina_pos_10k: "at(w['bp'], 1.0e4)"
+    asserts:
+      - expr: "nom['bina_cm_100'] > nom['ti_cm_100'] - 1 and nom['bina_cm_2k'] > nom['ti_cm_2k'] - 1 and nom['bina_cm_10k'] > nom['ti_cm_10k'] - 1"
+        why: "BINA's common-mode rejection is never more than 1 dB better than TI's INA828 macromodel, 100 Hz to 10 kHz (at dc it is the datasheet's minimum, worse than TI's typical)"
+      - expr: "nom['bina_pos_100'] > nom['ti_pos_100'] - 1 and nom['bina_pos_2k'] > nom['ti_pos_2k'] - 1 and nom['bina_pos_10k'] > nom['ti_pos_10k'] - 1"
+        why: "nor is its rejection of V+"

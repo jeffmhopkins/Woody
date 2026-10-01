@@ -42,7 +42,7 @@ VDM3 dacm3 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_mod_code}})
 VDM4 dacm4 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_mod_code}})
 VPLG plug 0 1
 VPPL pplug 0 1
-.options method=gear reltol=3e-3
+.options method=gear abstol=1e-6
 .control
 tran {{t_step_out}} {{t_end_burst}} {{t_save0}} {{t_max_step}} uic
 wrdata jp.dat v(xs.jp)

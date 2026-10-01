@@ -84,6 +84,10 @@ let cml = (v(lp) + v(ln)) / 2
 let cmc = (v(cp) + v(cn)) / 2
 meas tran cm_l max cml
 meas tran cm_c max cmc
+let r_tr = tr_l / tr_c
+let r_ar = ar_l / ar_c
+let r_cm = cm_l / cm_c
+print r_tr r_ar r_cm
 quit
 .endc
 .end

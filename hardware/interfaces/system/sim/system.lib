@@ -121,13 +121,14 @@ LFB4 fn fb4b {{l_fb_iso}}
 RFB4P fn fb4b {{r_fb_peak}}
 RFB4 fb4b d4a {{r_fb_dcr}}
 D4 d4a bneg D5817
+* The three capacitors WITHOUT the ESL power-entry/sim gives them: it matters at U-ISO's
+* 550 kHz switching, which this deck does not model (U-ISO is a source), and C-ISO-Y's
+* nanohenry against U-ISO's 1.1 nF barrier is an undamped loop that stalls ngspice at the
+* SPI edges' sub-nanosecond steps (README, "Solver").
 C2 vinp c2a {{C2}}
-RC2 c2a c2b {{esr_c2}}
-LC2 c2b vinn {{l_esl_el}}
-CISOIN vinp cin1 {{C-ISO-IN}}
-LCIN cin1 vinn {{l_esl_cer}}
-CY vinp cya {{C-ISO-Y}}
-LCY cya pgi {{l_esl_cer}}
+RC2 c2a vinn {{esr_c2}}
+CISOIN vinp vinn {{C-ISO-IN}}
+CY vinp pgi {{C-ISO-Y}}
 CISOB vinn pgi {{c_iso}}
 * U-ISO, BEHAVIOURAL: its output a source at its set point behind its load regulation (r_bus),
 * clamped at its lowest over-current threshold (i_ocp), then its transient response as a
