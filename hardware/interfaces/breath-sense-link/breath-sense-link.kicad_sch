@@ -15,6 +15,145 @@
     (comment 4 "Ports are hierarchical labels (Dir, From/To, Figure). Every part is the main board's - breath-sense-link.md")
   )
   (lib_symbols
+    (symbol "Device:C"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0.254)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "C"
+			(at 0.635 2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "C"
+			(at 0.635 -2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 0.9652 -3.81 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "cap capacitor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "C_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "C_0_1"
+			(polyline
+				(pts
+					(xy -2.032 0.762) (xy 2.032 0.762)
+				)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -2.032 -0.762) (xy 2.032 -0.762)
+				)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "C_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 2.794)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 2.794)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
     (symbol "Device:D_Zener"
 		(pin_numbers
 			(hide yes)
@@ -715,5 +854,86 @@
     (property "From" "module/power-entry" (at 190.5 158.75 0) (effects (font (size 1.27 1.27)) hide)))
   (text "The instrument end of the breath link: every part here is on the main board. The umbilical conductors BREATH_SENSE and AGND_SENSE continue on interfaces/spi-link (J-UMB pins 1 and 2);\nthe module end (R-SER-BREATH, the in-amp) is module/breath-receive-stage. Which board carries which part: breath-sense-link.md, 'Which board places what'." (at 25.4 25.4 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid 64e48202-cd32-5d2a-8077-cc515e104fd0))
   (text "FROM THE HAND-WRITTEN NETLIST THIS SHEET REPLACES (the part notes are on each part's Note field):\n\nAUTHORITATIVE for connectivity. THE DRAWING IS ON ANOTHER PAGE - carrier.md §2 - and the module half of this link is\ndrawn again on module/breath-receive-stage, which declares these same parts `foreign:` because the pole and the CMRR\nbudget are derived there.\n\nR-SER-BREATH IS NOT HERE. The 10k 0.1% pair is the MODULE-side series protection and module/breath-receive-stage places\nit; this circuit's rows are the instrument-side 1k pair and the sensor." (at 25.4 190.5 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid 3e3a73bf-6129-5e08-961e-e79a996a16cb))
+  (symbol (lib_id "Device:C") (at 76.2 165.1 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid cbf3fbe4-746a-4e68-92e0-500584186015)
+    (property "Reference" "C-SENSOR-VS-BULK" (at 78.74000000000001 163.82999999999998 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "1uF" (at 78.74000000000001 166.37 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 76.2 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 76.2 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-SENSOR-VS-BULK" (at 76.2 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 76.2 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "NXP's Figure 3 decoupling, 1.0 uF on VS: AT U-BREATH pin 2, returning to pin 3's AGND_INST (owner, 2026-10-01, A1-5) [ds datasheets/analog/MPXV4006DP.pdf p.5, Figure 3]" (at 76.2 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Samsung Electro-Mechanics" (at 76.2 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "CL21B105KBFNNNE" (at 76.2 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C28323" (at 76.2 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 76.2 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid acebf015-cfb9-4d50-ab25-dd7144431efd))
+    (pin "2" (uuid 58a1a130-6989-4188-a19b-b83637d7d3d8))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/5b7e1c1a-2f0b-5a3c-9d6e-b5e0a1c2d301" (reference "C201") (unit 1))) (project "breath-sense-link" (path "/389f5e80-1343-55c9-9647-41a2f4e558a0" (reference "C-SENSOR-VS-BULK") (unit 1))))
+  )
+  (wire (pts (xy 76.2 161.29) (xy 76.2 158.75)) (stroke (width 0) (type default)) (uuid c7023f54-7b88-439c-8b75-28f2caa62ea2))
+  (hierarchical_label "VS" (shape input) (at 76.2 158.75 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid fc437cdb-b6ee-4cae-85ad-07981e74755d)
+    (property "Dir" "in" (at 76.2 158.75 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/breath-excitation-reference" (at 76.2 158.75 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "riso-ref-topology" (at 76.2 158.75 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 76.2 168.91) (xy 76.2 171.45)) (stroke (width 0) (type default)) (uuid adf08515-8abb-49c2-8db3-8bc414aab25f))
+  (hierarchical_label "AGND_INST" (shape passive) (at 76.2 171.45 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 31ac53a7-dc36-490a-848d-87c77e906dbf)
+    (property "Dir" "ref" (at 76.2 171.45 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/power-entry-instrument" (at 76.2 171.45 0) (effects (font (size 1.27 1.27)) hide)))
+  (symbol (lib_id "Device:C") (at 101.6 165.1 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 33855bbc-5e1b-4e7e-9276-5005d716f83e)
+    (property "Reference" "C-SENSOR-VS-HF" (at 104.14 163.82999999999998 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "10nF" (at 104.14 166.37 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 101.6 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 101.6 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-SENSOR-VS-HF" (at 101.6 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 101.6 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "NXP's Figure 3 decoupling, 0.01 uF on VS, beside C-SENSOR-VS-BULK at U-BREATH pin 2 [ds datasheets/analog/MPXV4006DP.pdf p.5, Figure 3]" (at 101.6 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Samsung Electro-Mechanics" (at 101.6 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "CL21C103JBFNNNE" (at 101.6 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C27071" (at 101.6 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 101.6 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid a72fafad-3538-4a51-8675-bbdd266e41ee))
+    (pin "2" (uuid 72244c73-9c88-479a-a348-4f1000b369b1))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/5b7e1c1a-2f0b-5a3c-9d6e-b5e0a1c2d301" (reference "C202") (unit 1))) (project "breath-sense-link" (path "/389f5e80-1343-55c9-9647-41a2f4e558a0" (reference "C-SENSOR-VS-HF") (unit 1))))
+  )
+  (wire (pts (xy 101.6 161.29) (xy 101.6 158.75)) (stroke (width 0) (type default)) (uuid 7c420c65-4389-4876-84fa-d6cded70bc34))
+  (hierarchical_label "VS" (shape input) (at 101.6 158.75 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid c830ce03-4a9b-4132-9d20-e0e596cdd43b)
+    (property "Dir" "in" (at 101.6 158.75 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/breath-excitation-reference" (at 101.6 158.75 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "riso-ref-topology" (at 101.6 158.75 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 101.6 168.91) (xy 101.6 171.45)) (stroke (width 0) (type default)) (uuid 90822282-f2cc-42a1-aa15-effc11a62333))
+  (hierarchical_label "AGND_INST" (shape passive) (at 101.6 171.45 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid e8f643ea-42a5-4f4a-a851-37b58f30194c)
+    (property "Dir" "ref" (at 101.6 171.45 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/power-entry-instrument" (at 101.6 171.45 0) (effects (font (size 1.27 1.27)) hide)))
+  (symbol (lib_id "Device:C") (at 127.0 165.1 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 016204c4-e1d0-47ba-b5a0-9d7e78410a88)
+    (property "Reference" "C-SENSOR-OUT" (at 129.54 163.82999999999998 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "470pF" (at 129.54 166.37 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 127.0 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 127.0 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-SENSOR-OUT" (at 127.0 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 127.0 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "NXP's Figure 3 output capacitor, 470 pF on Vout: at U-BREATH pin 4, ahead of U-BUF B's input, so neither the link nor the ADC sees it [ds datasheets/analog/MPXV4006DP.pdf p.5, Figure 3]" (at 127.0 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "YAGEO" (at 127.0 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "CC0805JRNPOYBN471" (at 127.0 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C277525" (at 127.0 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 127.0 165.1 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 01b1ed7a-6009-4329-bb8a-a7fd6521f4c7))
+    (pin "2" (uuid 0b4db12a-805e-4240-a1e6-b384faba6674))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/5b7e1c1a-2f0b-5a3c-9d6e-b5e0a1c2d301" (reference "C203") (unit 1))) (project "breath-sense-link" (path "/389f5e80-1343-55c9-9647-41a2f4e558a0" (reference "C-SENSOR-OUT") (unit 1))))
+  )
+  (wire (pts (xy 127.0 161.29) (xy 127.0 158.75)) (stroke (width 0) (type default)) (uuid 4aec6c7f-d699-4194-b8d4-f03629e41020))
+  (hierarchical_label "SENSOR_RAW" (shape output) (at 127.0 158.75 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 0cea4bf9-498e-4013-b357-43c0a3bfc8dd)
+    (property "Dir" "out" (at 127.0 158.75 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "carrier/breath-excitation-reference" (at 127.0 158.75 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "sensor-full-scale" (at 127.0 158.75 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 127.0 168.91) (xy 127.0 171.45)) (stroke (width 0) (type default)) (uuid 0ca6fd65-5d83-4a32-bd8d-48fd72040418))
+  (hierarchical_label "AGND_INST" (shape passive) (at 127.0 171.45 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 5abdbe30-32cb-424d-8877-92efc6650a54)
+    (property "Dir" "ref" (at 127.0 171.45 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/power-entry-instrument" (at 127.0 171.45 0) (effects (font (size 1.27 1.27)) hide)))
   (sheet_instances (path "/" (page "1")))
 )

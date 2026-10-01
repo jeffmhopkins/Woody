@@ -440,14 +440,14 @@ components:
     sheet: breath-output-stage
   D7:
     of: D-RESP
-    value: 1N4148
+    value: 1N4448W
     pins:
     - A
     - K
     sheet: breath-response-shaper
   D8:
     of: D-RESP
-    value: 1N4148
+    value: 1N4448W
     pins:
     - A
     - K

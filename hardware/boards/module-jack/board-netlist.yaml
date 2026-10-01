@@ -122,7 +122,7 @@ nets:
   - J7.18
   - J7.2
   - J7.5
-  - RV2.CCW
+  - RV2.CW
   /BREATH_JACK:
   - J2.TIP
   - J7.11
@@ -131,7 +131,7 @@ nets:
   - RV1.CW
   /DAC_AVDD:
   - J7.12
-  - RV2.CW
+  - RV2.CCW
   /GAIN_FLOOR:
   - J7.7
   - RV1.CCW

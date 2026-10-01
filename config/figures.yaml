@@ -162,7 +162,8 @@ figures:
     status: settled
     owner: hardware/module/breath-receive-stage/breath-receive-stage.md
     derivation: "0.265 V typical pedestal x 2.16106 EFFECTIVE in-amp gain = 0.5727 V. The effective gain is the one inamp-full-scale uses: G = 1 + 50k/42.2k = 2.18483, times the 1M/(1M+11k) bias divider = 2.16106."
-    forbidden: ["+0.437 V", "~0.437 V", "0.437 V nulls", "to ~0.579 V", "+0.579 V", "0.579 V"]
+    forbidden: ["+0.437 V", "~0.437 V", "0.437 V nulls", "to ~0.579 V", "+0.579 V", "0.579 V", "0.332 V to 0.826 V", "0.332-0.826V", "band's 0.826 V", "less 0.2 to 1.7 V"]
+    forbidden_note: "The last four are the pedestal BAND and the instrument-absent level computed with the raw gain 2.18483 or the retired 0.437 V (A1-9, A1-10, 2026-10-01): at the effective gain the band is 0.328-0.817 V."
     companion: "sensor-full-scale sets the 0.265 V pedestal; inamp-full-scale uses the same 2.16106 effective gain."
     escape_note: |
       THREE VALUES FOR ONE QUANTITY, IN FIVE PLACES, FOUND 2026-09-21 BY A
@@ -671,6 +672,18 @@ figures:
     owner: hardware/module/breath-response-shaper/sim/README.md
     derivation: "[sim] python3 tools/sim.py run hardware/module/breath-response-shaper/sim, 2026-09-30, ngspice 42, TI's OPA2197 model and a behavioural D-RESP fitted to the 1N4448W's 0.62-0.72 V at 5 mA. Sim exp-end: R-RESP 3.9k (owner, 2026-09-30: 'need 1.5x gain'), 513 corners - the diode's spread, every resistor of the stage at its 1 % ends, POT-RESP's track at +/-20 % [assumption: the RV09 sheet gives no tolerance]. The worst corner is the pot low and the stage's linear gain low; the pot's tolerance is most of the spread. The E24 value above, 4.3k, gives 1.49x there [sim, 2026-09-30, the same corners]."
     forbidden: ["1.30x at a hard blow", "-8.86 V", "−8.86 V", "targeting ~1.5× at a hard blow", "clip starts near an in-amp output of −7.4 V", "[R-RESP 15k]", "`R-RESP` 15 k", "`R-RESP` at 15 kΩ", "R-RESP,module,15k", "about 7 kΩ would give 1.5×"]
+    conditional_on: "breath-working-point (disputed, decided_by E2). 'A hard blow' here is an in-amp output of -4.64 V, which is that figure's 2.8 kPa candidate [calc: 4.64 / 2.16106 / 0.7665 = 2.80 kPa]. The ratio is a property of the in-amp voltage and stands as stated AT that voltage; what E2 can move is which voltage a hard blow is. A higher working point raises the ratio (it rises with level until the clip) and brings the clip closer: at the 3-4 kPa candidate a hard blow is -4.97 to -6.63 V at the in-amp, the last within 5 % of the nominal clip. R-RESP's 3.9k was sized at 2.8 kPa and is re-checked when E2 reports (A8-4, 2026-10-01)."
+    diode_note: "The bought D-RESP is the 1N4448W since 2026-10-01 (owner, A1-3), the part whose guaranteed 0.62-0.72 V at 5 mA the fit uses. At 27 C the worst corner holds 1.5066x; the fit's temperature coefficient (SPICE default) puts it at 1.496x at 15 C and 1.482x at 0 C [sim, docs/review/2026-10-01-pre-layout-review/VERIFIED-F1.md A1-3]. A 1N4148W at its own 0.715 V-at-1 mA limit gave 1.477x at 27 C."
+
+  - id: breath-chain-curve-clip
+    quantity: Where BREATH_OUT clips when POT-RESP is turned after commissioning - the shaper and the breath output stage together, GAIN at noon (2.156x), OFFSET at its zero, nominal parts
+    value: "fully clockwise (exp): from an in-amp output of -3.51 V, 0.76x a hard blow; at the centre click: from -5.54 V, 1.19x; fully counter-clockwise (log): never, and a hard blow reaches 4.36 V"
+    status: settled
+    owner: hardware/module/breath-output-stage/sim/README.md
+    derivation: "[sim] python3 tools/sim.py run hardware/module/breath-output-stage/sim, 2026-10-01, ngspice 42, TI's OPA2197 model for all four halves, the shaper's behavioural D-RESP (params_from its sims.yaml). Sims chain and chain-centre: both netlists, the in-amp's output ramped from 0 V to inamp-full-scale. 'A hard blow' is -4.64 V at the in-amp, breath-working-point's 2.8 kPa candidate. Reproduces the 2026-10-01 review's chain.cir (A1-1) to 0.03 V."
+    conditional_on: "breath-working-point (disputed, E2): the clip is an in-amp voltage; how much of real playing lies past it is E2's"
+    open: "Whether commissioning should be done at a curve setting other than the centre click, or the stage rescaled, is the owner's (A1-1, docs/review/2026-10-01-pre-layout-review/VERIFIED-F1.md). Until then breath-output-stage.md says to re-set GAIN after moving the curve knob."
+    forbidden: []
   - id: adc-sample-kickback
     quantity: The MCP3202's sample capacitor against C-AA-ADC, the sampled value's shortfall at the sensor's full scale (a gain term)
     value: "2.6 LSB nominal, 3.3 LSB worst corner"

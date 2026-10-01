@@ -27,6 +27,14 @@ ports:
     dir: ref
     from: carrier/power-entry-instrument
 components:
+  C-DEC-BUF:
+    of: C-DECOUPLE-CARRIER
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: 'U-BUF''s +12 V supply pin to the analog star, at the pin: the op-amp''s own bypass, which the LED row''s
+      decouplers on the same net are not (A8-1, 2026-10-01)'
   C-DEC-REF-VIN:
     of: C-DECOUPLE-CARRIER
     value: 100nF
@@ -133,6 +141,7 @@ nets:
   - R-FBX-REF.2
   AGND_INST:
   - port: AGND_INST
+  - C-DEC-BUF.2
   - C-DEC-REF-VIN.2
   - C-DEC-REF-VOUT.2
   - C-DEC-SENSOR.2
@@ -147,6 +156,7 @@ nets:
   - U-BUF.OUTA
   INST_POS12:
   - port: INST_POS12
+  - C-DEC-BUF.1
   - R-REF-IN.1
   - U-BUF.V+
   REF_5V:

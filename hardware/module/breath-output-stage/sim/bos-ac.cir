@@ -14,8 +14,8 @@ RGCCW gw gf {{r_gain_ccw}}
 RFLOOR gf 0 {{R-GAIN-FLOOR}}
 XA gw bufo pos neg bufo OPAx197
 RIN bufo sum {{R-BREATH-IN}}
-ROCW avdd ow {{r_off_cw}}
-ROCCW ow 0 {{r_off_ccw}}
+ROCW 0 ow {{r_off_cw}}
+ROCCW ow avdd {{r_off_ccw}}
 ROFF ow sum {{R-BREATH-OFF}}
 ROFFN neg sum {{R-BREATH-OFFNEG}}
 RFB sum out {{R-BREATH-FB}}

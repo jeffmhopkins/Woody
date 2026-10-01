@@ -226,15 +226,23 @@ code; see the `U-DAC` BOM row.)*
 > 1 MΩ bias resistors hold the in-amp's *inputs* at module `AGND`, so with the
 > instrument absent the in-amp rests at `V_REF` = `breath-zero-ref` — the trimmed null
 > for a sensor pedestal that is not there — and the gain-and-offset stage then
-> puts the jack at the **OFFSET knob's position less 0.2 to 1.7 V**, depending
-> on where GAIN is set (`breath-receive-stage.md`,
+> puts the jack at the **OFFSET knob's position less 0.29 to 2.3 V**, depending
+> on where GAIN is set — `breath-zero-ref` through the stage's 0.503× to 4.02×
+> `[calc: 0.573 × 0.503, 0.573 × 4.02]`, and up to 3.3 V with `REF` trimmed to
+> the top of the pedestal band (`breath-receive-stage.md`,
 > `breath-output-stage.md`).
+>
+> *Amended 2026-10-01 (pre-layout review, A1-10): the range was computed from
+> the retired `REF` and did not follow `breath-zero-ref` when it moved; the
+> standing level below is recomputed with it.*
 >
 > **Five of six outputs have a defined power-on state; breath does not, and
 > that is accepted.** The alternative is a defeat switch or a relay on the jack,
 > which is a part and a failure mode for a condition — rack powered, instrument
 > absent — in which nothing is being played. What it costs is that a patch left
-> connected can wake with up to 5 V of standing breath CV. E10 is where that
+> connected can wake with up to about 7 V of standing breath CV — OFFSET fully
+> counter-clockwise at −4.91 V less 2.3 V at full GAIN `[calc]`, about 8 V with
+> `REF` at the band's top. E10 is where that
 > gets observed rather than discovered (`ROADMAP.md`).
 
 **Specify the full orderable part number in the BOM**, not "DAC8568". The grade
@@ -778,8 +786,8 @@ the easy half:
 | Breath | 1 kΩ | 330 nF film | ~480 Hz |
 
 Breath is the odd one because it never passes through the DAC: it has no
-zero-order-hold image to attenuate, and it is already a 482 Hz channel by the
-time it reaches the module (`hardware/module/breath-receive-stage/breath-receive-stage.md`). This
+zero-order-hold image to attenuate, and it is already a ~460 Hz channel by the
+time it reaches the module (`hardware/interfaces/breath-sense-link/breath-sense-link.md`, *Component values*; 482 Hz until 2026-10-01, which left the common-mode capacitors out). This
 ADR's earlier "~2 kHz for breath" is superseded by that page.
 
 ## Firmware defaults and bring-up rules
