@@ -1211,11 +1211,23 @@ def check_sim():
                            capture_output=True, text=True, cwd=ROOT, timeout=60)
     except Exception as e:
         return [f"could not run tools/sim.py check: {e}"]
-    if r.returncode == 0:
-        return []
-    msgs = [l.strip() for l in (r.stdout + "\n" + r.stderr).splitlines()
-            if l.strip() and not l.strip().startswith("sim: PASS") and not l.strip().startswith("sim: FAIL")]
-    return msgs or [f"tools/sim.py check exited {r.returncode} and said nothing parseable - run it directly"]
+    msgs = []
+    if r.returncode != 0:
+        msgs = [l.strip() for l in (r.stdout + "\n" + r.stderr).splitlines()
+                if l.strip() and not l.strip().startswith("sim: PASS") and not l.strip().startswith("sim: FAIL")]
+        msgs = msgs or [f"tools/sim.py check exited {r.returncode} and said nothing parseable - run it directly"]
+    # and the record of what is simulated at all (docs/reference/tooling.md section 5,
+    # "Coverage"): a circuit with parts and no sim/ must say what covers it, or why nothing need
+    try:
+        c = subprocess.run([sys.executable, os.path.join(ROOT, "tools/sim_coverage.py")],
+                           capture_output=True, text=True, cwd=ROOT, timeout=60)
+    except Exception as e:
+        return msgs + [f"could not run tools/sim_coverage.py: {e}"]
+    if c.returncode != 0:
+        cm = [l.strip() for l in (c.stdout + "\n" + c.stderr).splitlines()
+              if l.strip() and not l.strip().startswith("sim coverage:")]
+        msgs += cm or [f"tools/sim_coverage.py exited {c.returncode} and said nothing parseable - run it directly"]
+    return msgs
 
 
 def main():

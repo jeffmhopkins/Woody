@@ -562,6 +562,7 @@ Each render is generated; what it is rendered from is the source.
 python3 tools/sim.py run [<sim dir> ...]   # run every sim/sims.yaml, or those named; write results.yaml
 python3 tools/sim.py check                 # no ngspice: each results.yaml matches its inputs and passed
 python3 tools/sim.py show <sim dir>        # a results.yaml as a table
+python3 tools/sim_coverage.py              # the Coverage table below against the tree
 ```
 
 A circuit's `sim/` holds three things:
@@ -656,3 +657,51 @@ so.
 | the breath ADC's anti-alias filter, its time constant, and the MCP3202's sample capacitor against it | `hardware/carrier/breath-adc/sim/` |
 | the instrument's input LC against the buck's negative resistance, and its start from `U-ISO` through the load switch and the cable, cold and hot-plugged | `hardware/carrier/power-entry-instrument/sim/` |
 | the LED row's data line: its edge and `T0H` at the first LED | `hardware/carrier/led-strip-drive/sim/` |
+| the module's two 5 V rails at power-on and power-off, and `SYNC` at the DAC between them (TI's SN74AHCT125 model and the DAC8568's IBIS clamp) | `hardware/module/digital-and-supervision/sim/` |
+| the DAC8568's power-on glitch and its 3-state reference, into the pitch and mod jacks | `hardware/module/dac8568/sim/` |
+| the breath link's TVS diodes: CMRR, `PWR_GND` rejection, leakage | `hardware/interfaces/breath-sense-link/sim/` |
+| the panel LED's current, its start, and its return against the pitch reference | `hardware/module/panel-led/sim/` |
+
+### Coverage — every circuit and board
+
+**`tools/sim_coverage.py` reads the table below**, and `check-staleness.py`
+runs it. Every circuit whose `netlist.yaml` has a part, and every board with a `board-netlist.yaml`, must
+have a row, and the row must be true: `own` needs that directory's `sim/`;
+`covered` must name at least one existing `sim/` directory in backticks, and
+says what in it covers what; `n/a` says why in one sentence. A circuit that
+grows a `sim/` while its row still says `covered` or `n/a` fails too. Added
+2026-10-01, when the owner asked "All the spice was done?" and, for every
+circuit without a `sim/`, the answer was written nowhere.
+
+| Circuit | Simulated | What, or why not |
+|---|---|---|
+| `carrier/carrier` | covered | `hardware/interfaces/spi-link/sim/`: every sim reads this netlist for `R-SPI-SER-*`, `R-CS-PULL-INST` and `U-TVS-SPI`. The rest are a connector (`J-MCU`), a net tie and the bought Matrix, whose pads are those sims' `r_drv`/`tr_drv` |
+| `carrier/breath-adc` | own | |
+| `carrier/breath-excitation-reference` | own | |
+| `carrier/led-strip-drive` | own | |
+| `carrier/power-entry-instrument` | own | |
+| `carrier/service-uart` | n/a | One connector and no part with a value; `EN` and `IO0`'s pulls are the Matrix's own, not this BOM's |
+| `cluster/key-marker-and-bits` | covered | `hardware/boards/key-board-lh/sim/`: the free bit's `R-KEY-PU` is in the board deck, and `m_free_high` holds it over `V_T+` max with every key open and every key pressed |
+| `cluster/key-register` | covered | `hardware/boards/key-board-lh/sim/` (`U-KEYS`'s inputs against their thresholds) and `hardware/interfaces/key-chain-loom/sim/` (`C-DECOUPLE-165` against `U-KEYS`'s `C_pd` on the rail; `QH` over the ribbon) |
+| `cluster/key-switch-network` | own | |
+| `interfaces/breath-sense-link` | own | its TVS diodes; the link's CMRR with `R1`/`R1b` is `hardware/module/breath-receive-stage/sim/` |
+| `interfaces/key-chain-loom` | own | |
+| `interfaces/spi-link` | own | |
+| `module/breath-output-stage` | own | |
+| `module/breath-receive-stage` | own | |
+| `module/breath-response-shaper` | own | |
+| `module/dac8568` | own | power-on; its `SYNC` pin against `DAC_AVDD` is `hardware/module/digital-and-supervision/sim/` |
+| `module/digital-and-supervision` | own | power sequencing; the receiver's signals are `hardware/interfaces/spi-link/sim/` |
+| `module/link-supervision` | n/a | No parts: the record of two deleted circuits |
+| `module/mod-channels` | own | |
+| `module/panel` | n/a | No electrical parts: the panel itself |
+| `module/panel-led` | own | |
+| `module/pitch-stage` | own | |
+| `module/power-entry` | own | |
+| `module/umbilical-load-switch` | own | |
+| `boards/key-board-lh` | own | |
+| `boards/key-board-rh` | own | |
+| `boards/main-board` | covered | its placed circuits, each by its own row; its root-sheet parts (`FB-CHAIN`, `R-CHAIN-SER`, `R-SER-TERM`, `U-TVS-CHAIN`) are `hardware/interfaces/key-chain-loom/sim/`'s, except `R-SER-TERM`, a static 10 kΩ pull-up on `SER`, which that sim drives instead and nothing simulates |
+| `boards/module-main` | n/a | Places circuit sheets, each covered by its own row; its own parts are two connectors |
+| `boards/module-jack` | n/a | Places circuit sheets, each covered by its own row; its own part is a connector |
+| `boards/umb-adapter` | n/a | Two connectors and the copper between them; the umbilical's SPI conductors are lossy lines in `interfaces/spi-link`'s sim |
