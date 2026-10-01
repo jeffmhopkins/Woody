@@ -142,6 +142,8 @@ b2b_w = (b2b_rows - 1) * b2b_pitch;
 b2b_l = (b2b_pins - 1) * b2b_pitch;
 b2b_pin_l = b2b_protrude + boards_t + so_l + boards_t + b2b_tail;   // J-B2B-MOD's pins, derived
 // U-ISO (ADR 0027) on the main board's rear face; its pins' tails out of the front face.
+// A trimmer's envelope [x, y, height]: a 3296 (trim) or TRIM-RESP's 3224W (trim_smd).
+function trim_sz(t) = t[2] == "trim_smd" ? tall_trim_smd : tall_trim;
 iso_tail = iso_pin_l - boards_t;           // derived: the pins stand this far out of the front face
 iso_rect = rect_c(iso_at, iso_body[0], iso_body[1]);
 // A toroid's envelope on the board: its terminals' cross, turned by f[8]
@@ -384,7 +386,7 @@ module main_board_3d() {
         // Tall parts: envelopes for the depth and clash checks, not placements.
         for (i = [0 : len(tall_at) - 1]) let(t = tall_at[i]) {
             if (t[2] == "cap") P(C_CAP, false, str("tall cap ", i + 1)) cyl([t[0], t[1]], tall_cap_d, mb_z0, mb_z0 - tall_cap_h);
-            else P(C_TRIM, false, str("tall trimmer ", i + 1)) box(t[0] - tall_trim[0] / 2, t[1] - tall_trim[1] / 2, mb_z0, t[0] + tall_trim[0] / 2, t[1] + tall_trim[1] / 2, mb_z0 - tall_trim[2]);
+            else let(sz = trim_sz(t)) P(C_TRIM, false, str("tall trimmer ", i + 1)) box(t[0] - sz[0] / 2, t[1] - sz[1] / 2, mb_z0, t[0] + sz[0] / 2, t[1] + sz[1] / 2, mb_z0 - sz[2]);
         }
         // U-ISO, RECOM RPA20-2412SAW (ADR 0027): the body on the rear face, the pins' tails out of the front.
         P(C_METAL, false, "U-ISO") box(iso_at[0] - iso_body[0] / 2, iso_at[1] - iso_body[1] / 2, mb_z0,
@@ -669,7 +671,7 @@ module drc_report() {
                       ["J-UMBILICAL tails", ["r", ec + [-9.28, -11.0], ec + [9.28, 12.35]]],
                       ["J-B2B-MOD tails", rect_c(b2b_at, b2b_w + 2.54, b2b_l + 2.54)]],
                      [for (i = [0 : len(tall_at) - 1]) let(t = tall_at[i]) [str("tall ", t[2], " ", i + 1),
-                        t[2] == "cap" ? ["c", [t[0], t[1]], tall_cap_d / 2] : rect_c([t[0], t[1]], tall_trim[0], tall_trim[1])]],
+                        t[2] == "cap" ? ["c", [t[0], t[1]], tall_cap_d / 2] : rect_c([t[0], t[1]], trim_sz(t)[0], trim_sz(t)[1])]],
                      [["U-ISO", iso_rect]], iso_filter_env);
     ie = min(iso_rect[1][0] - b_x0, b_x1 - iso_rect[2][0], iso_rect[1][1] - b_y0, b_y1 - iso_rect[2][1]);
     drc(ie >= 0, "U-ISO on the main board", ie, "mm, its body's edge inside the board's nearest edge");
@@ -682,6 +684,24 @@ module drc_report() {
     drc(hr[0] >= boards_part_clear, "standoff screw heads clear of the main board's rear-face parts", hr[0], str("mm (", hr[2], ")"));
     rr = worst(mb_rear, mb_rear, true);
     drc(rr[0] >= boards_part_clear, "main board rear-face parts clear of each other", rr[0], str("mm (", rr[1], " / ", rr[2], ")"));
+    // Every trimmer is adjusted from BEHIND with the module out of the rack:
+    // its slot faces away from the board, and nothing but the power ribbon
+    // is behind the rear face. A screwdriver's shaft goes straight in, so a
+    // TALLER part beside it must stand off by the shaft's radius - checked
+    // against each trimmer's centre (the slot is inside the body), and the
+    // ribbon's fold must not be over it.
+    let(tr = [for (i = [0 : len(tall_at) - 1]) let(t = tall_at[i]) if (t[2] != "cap") [i, t]],
+        hts = concat([for (i = [0 : len(tall_at) - 1]) let(t = tall_at[i]) t[2] == "cap" ? tall_cap_h : trim_sz(t)[2]],
+                     [iso_body[2]], [for (f = iso_filter) f[4]]),
+        envs = concat([for (i = [0 : len(tall_at) - 1]) let(t = tall_at[i]) t[2] == "cap" ? ["c", [t[0], t[1]], tall_cap_d / 2] : rect_c([t[0], t[1]], trim_sz(t)[0], trim_sz(t)[1])],
+                      [iso_rect], [for (e = iso_filter_env) e[1]]),
+        fold = [pw[0] + power_socket_w / 2 - power_ribbon_w, b_y0, pw[0] + power_socket_w / 2, pw[1] + power_socket_l / 2],
+        acc = [for (q = tr) let(t = q[1], h = trim_sz(t)[2],
+                   d = min(concat([for (k = [0 : len(envs) - 1]) if (k != q[0] && hts[k] > h) gap2(["c", [t[0], t[1]], 0], envs[k])], [1e9])),
+                   under = t[0] > fold[0] && t[0] < fold[2] && t[1] > fold[1] && t[1] < fold[3])
+                 [str(t[2], " ", q[0] + 1), under ? -1 : d - rules_driver_d / 2]])
+        drc(min([for (a = acc) a[1]]) >= 0, "trimmers adjustable from behind", acc,
+            str("mm from each trimmer's centre to the nearest TALLER rear-face part, less a ", rules_driver_d, " mm screwdriver's radius (rules.driver_d), with the module out of the rack; -1 = under the power ribbon's fold"));
     mb_front = [["J-UMBILICAL body", ["r", ec - fl / 2, ec + fl / 2]], ["J-B2B-MOD", rect_c(b2b_at, b2b_w + 2.54, b2b_l + 2.54)]];
     sf = worst([for (s = sp) ["standoff", s[1]]], mb_front);
     drc(sf[0] >= boards_part_clear, "standoffs clear of the NE8FAV and J-B2B-MOD between the boards", sf[0], str("mm (", sf[2], ")"));

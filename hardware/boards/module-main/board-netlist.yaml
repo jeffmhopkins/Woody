@@ -306,8 +306,8 @@ components:
     - 2
     sheet: digital-and-supervision
   C5:
-    of: C-REG-ADJ
-    value: 10uF
+    of: C-SET-DAC
+    value: 100nF
     pins:
     - 1
     - 2
@@ -319,9 +319,16 @@ components:
     - 1
     - 2
     sheet: digital-and-supervision
+  C51:
+    of: C-REG-DAC
+    value: 10uF
+    pins:
+    - 1
+    - 2
+    sheet: power-entry
   C6:
-    of: C-REG-OUT
-    value: 1uF
+    of: C-REG-DAC
+    value: 10uF
     pins:
     - 1
     - 2
@@ -621,8 +628,8 @@ components:
     - S3
     sheet: umbilical-load-switch
   R1:
-    of: R-REG-SET-HI
-    value: 150R 0.1%
+    of: R-SET-DAC
+    value: 52.3k 0.1%
     pins:
     - 1
     - 2
@@ -697,13 +704,6 @@ components:
     - 1
     - 2
     sheet: breath-receive-stage
-  R2:
-    of: R-REG-SET-LO
-    value: 523R 0.1%
-    pins:
-    - 1
-    - 2
-    sheet: power-entry
   R20:
     of: R-GAIN-INAMP
     value: 42.2k 0.1%
@@ -790,7 +790,7 @@ components:
     sheet: breath-response-shaper
   R31:
     of: R-RESP
-    value: 3.9k 1%
+    value: 2.7k 1%
     pins:
     - 1
     - 2
@@ -846,7 +846,7 @@ components:
     sheet: mod-channels
   R39:
     of: R-MODGAIN-IN
-    value: 10k 1%
+    value: 10k 0.1%
     pins:
     - 1
     - 2
@@ -860,7 +860,7 @@ components:
     sheet: umbilical-load-switch
   R40:
     of: R-MODGAIN-FB
-    value: 30k 1%
+    value: 30k 0.1%
     pins:
     - 1
     - 2
@@ -888,14 +888,14 @@ components:
     sheet: mod-channels
   R44:
     of: R-MODGAIN-IN
-    value: 10k 1%
+    value: 10k 0.1%
     pins:
     - 1
     - 2
     sheet: mod-channels
   R45:
     of: R-MODGAIN-FB
-    value: 30k 1%
+    value: 30k 0.1%
     pins:
     - 1
     - 2
@@ -923,7 +923,7 @@ components:
     sheet: mod-channels
   R49:
     of: R-MODGAIN-IN
-    value: 10k 1%
+    value: 10k 0.1%
     pins:
     - 1
     - 2
@@ -937,7 +937,7 @@ components:
     sheet: umbilical-load-switch
   R50:
     of: R-MODGAIN-FB
-    value: 30k 1%
+    value: 30k 0.1%
     pins:
     - 1
     - 2
@@ -965,14 +965,14 @@ components:
     sheet: mod-channels
   R54:
     of: R-MODGAIN-IN
-    value: 10k 1%
+    value: 10k 0.1%
     pins:
     - 1
     - 2
     sheet: mod-channels
   R55:
     of: R-MODGAIN-FB
-    value: 30k 1%
+    value: 30k 0.1%
     pins:
     - 1
     - 2
@@ -1142,13 +1142,13 @@ components:
     - CCW
     sheet: pitch-stage
   RV4:
-    of: TRIM-DAC-RAIL
-    value: 50R
+    of: TRIM-RESP
+    value: 10k 10% sealed SMD cermet
     pins:
-    - CCW
-    - W
     - CW
-    sheet: power-entry
+    - W
+    - CCW
+    sheet: breath-response-shaper
   SW1:
     of: SW-POWER
     value: NKK M2011SD4G01
@@ -1158,11 +1158,19 @@ components:
     sheet: umbilical-load-switch
   U1:
     of: U-REG-DAC
-    value: LM317LZ
+    value: LT3042EMSE
     pins:
     - IN
+    - IN_2
+    - EN
+    - PG
+    - ILIM
+    - PGFB
+    - SET
+    - GND
+    - OUTS
     - OUT
-    - ADJ
+    - EP
     sheet: power-entry
   U10:
     of: U-OPA-PITCH
@@ -1390,11 +1398,11 @@ nets:
   - C12.1
   - C6.1
   - J2.12
-  - R1.1
   - R15.2
   - R66.1
   - R8.1
   - U1.OUT
+  - U1.OUTS
   - U3.AVDD
   - U4.VCC
   /DAC_CH1:
@@ -1545,7 +1553,11 @@ nets:
   /breath-response-shaper/DIODE_BRANCH:
   - D7.K
   - D8.A
+  - RV4.CW
+  /breath-response-shaper/RESP_TRIM:
   - R31.2
+  - RV4.CCW
+  - RV4.W
   /breath-response-shaper/RESTORE_SUM:
   - R59.2
   - R60.1
@@ -1709,6 +1721,10 @@ nets:
   - F2.1
   - J1.POS12_10
   - J1.POS12_9
+  /power-entry/DAC_REG_SET:
+  - C5.1
+  - R1.1
+  - U1.SET
   /power-entry/ISO_FB2:
   - FB2.2
   - L1.1
@@ -1750,15 +1766,6 @@ nets:
   /power-entry/POS12_PTC2:
   - D2.A
   - F2.2
-  /power-entry/REG_ADJ:
-  - C5.1
-  - R2.1
-  - RV4.CCW
-  - RV4.W
-  - U1.ADJ
-  /power-entry/REG_TRIM:
-  - R1.2
-  - RV4.CW
   /umbilical-load-switch/FB:
   - R6.2
   - R7.1
@@ -1820,6 +1827,7 @@ nets:
   - C39.2
   - C43.2
   - C5.2
+  - C51.2
   - C6.2
   - C7.2
   - J2.10
@@ -1829,9 +1837,9 @@ nets:
   - J2.5
   - JP1.2
   - NT1.1
+  - R1.2
   - R18.2
   - R19.2
-  - R2.2
   - R21.2
   - R30.2
   - R33.2
@@ -1849,6 +1857,9 @@ nets:
   - RN1.EP
   - RV1.CCW
   - RV2.CCW
+  - U1.EP
+  - U1.ILIM
+  - U1.GND
   - U12.INB+
   - U3.GND
   - U5.INB+
@@ -1943,6 +1954,7 @@ nets:
   - C32.1
   - C34.1
   - C41.1
+  - C51.1
   - C7.1
   - D10.K
   - D11.K
@@ -1954,6 +1966,9 @@ nets:
   - D9.K
   - FB1.2
   - U1.IN
+  - U1.IN_2
+  - U1.EN
+  - U1.PGFB
   - U10.V+
   - U11.V+
   - U12.V+
@@ -1977,6 +1992,8 @@ nets:
   - R7.2
   - U14.0V
   - U2.GND
+  U1.PG:
+  - U1.PG
   U14.TRIM:
   - U14.TRIM
   U2.PWRGD:
@@ -1994,6 +2011,7 @@ external_endpoints:
 - J1.GATE_16
 - J1.POS5_11
 - J1.POS5_12
+- U1.PG
 - U14.TRIM
 - U2.PWRGD
 - U3.VOUTF

@@ -117,9 +117,10 @@ its pin. `U-RX-MOD` stays on `LOGIC_5V`.
 
 - **Why.** The DAC8568's digital inputs are rated to `AVDD + 0.3 V`
   `[ds DAC8568CIPW.pdf p.2]`, and *"no device pin should be brought high before
-  power is applied to the device"* `[p.31]`. `LOGIC_5V` arrives first at
+  power is applied to the device"* `[p.38]`. `LOGIC_5V` arrives first at
   power-on and leaves last at power-off (the ADP7118's 380 µs soft start against
-  the LM317L's `C-REG-ADJ` start; the LM317L's larger dropout on the way down),
+  `U-REG-DAC`'s `R-SET-DAC` × `C-SET-DAC` soft start; its larger dropout, on a
+  higher output, on the way down),
   and `SYNC` idles high. On the DAC's own rail the buffer's output high is that
   rail, so `SYNC`, `SCLK_DAC` and `DIN` cannot be above it, on or off.
   [`sim/`](sim/README.md), `rails-and-sync`, holds this as a requirement on all
@@ -140,7 +141,7 @@ its pin. `U-RX-MOD` stays on `LOGIC_5V`.
 - **What it costs.** In steady state the buffer's inputs sit at `LOGIC_5V`
   while its `VCC` is `dac-rail`, a fraction of a volt above — far over its
   `V_IH`, with a `ΔI_CC` well under the datasheet's 3.4 V row. Its current, and
-  the switching and pull currents of its outputs, now come off the LM317L
+  the switching and pull currents of its outputs, now come off `U-REG-DAC`
   instead of the ADP7118: re-derived on
   [`power-entry.md`](../power-entry/power-entry.md), *The DAC rail's load*. The
   switching current sits on the DAC's supply, which is why `DAC_AVDD` reaches

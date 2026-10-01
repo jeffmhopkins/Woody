@@ -9,9 +9,8 @@ values:
     - hardware/module/power-entry/netlist.yaml
     - hardware/module/pitch-stage/netlist.yaml
 models:
-  - datasheets/discrete-and-power/LM317L-ti-pspice-snvmaw3.lib
   - datasheets/analog/OPAx197-ti-pspice-sboma34d.lib
-include: [hardware/module/pitch-stage/sim/pitch-stage.lib]
+include: [hardware/module/pitch-stage/sim/pitch-stage.lib, lt3042.lib]
 spiceinit: [set ngbehavior=psa]
 
 params:
@@ -19,7 +18,7 @@ params:
   v_bus_neg:  {value: -12.0}
   t_rise:     {value: 2.0e-3, source: "the bus rising [assumption: a rack PSU's soft start is slower]"}
   dt_neg:     {value: 0.0, source: "the -12 V rail's delay behind +12 V, negative if it leads (swept: a PSU brings its rails up in no promised order)"}
-  t_end:      {value: 100.0e-3, source: "C-REG-ADJ makes DAC_AVDD settle over tens of ms"}
+  t_end:      {value: 100.0e-3, source: "C-SET-DAC's soft start makes DAC_AVDD settle over tens of ms"}
   r_fb:       {value: 0.1, source: "FB-IN's DC resistance [assumption: the netlist value '600R @ 100MHz' is not a DC figure]"}
   r_load_pos: {value: 200.0, source: "the module's +12 V analog load, 60 mA [assumption: no figure registers it]"}
   r_load_neg: {value: 200.0, source: "the -12 V analog load, 60 mA [assumption]"}
@@ -43,7 +42,7 @@ params:
   w_offset:   {value: 0.5, source: "pitch-stage.lib: TRIM-OFFSET at mid-travel"}
 
   # --- PTC-POS12 / PTC-NEG12 in the power-on deck (ADR 0027) ----------------------------
-  r_ptc:      {value: 0.4, source: "MF-MSMF020/60: Rmin 0.40 ohm, a fitted part's resistance [datasheets/discrete-and-power/BOURNS-MF-MSMF.pdf p.1]. R1max, 6.0 ohm an hour after a trip, is the page's DC arithmetic: TI's LM317L transient model does not converge with it in series at dt_neg = -1 ms or +5 ms (ngspice 42, 'timestep too small' inside the model), so it is not claimed here"}
+  r_ptc:      {value: 0.4, source: "MF-MSMF020/60: Rmin 0.40 ohm, a fitted part's resistance [datasheets/discrete-and-power/BOURNS-MF-MSMF.pdf p.1]. R1max, 6.0 ohm an hour after a trip, is the sim ptc-tripped"}
   # --- groundshift.cir: the rack's copper and the instrument's current -------------------
   v_rail:     {value: 12.0}
   v_rail_neg: {value: -12.0}
@@ -51,7 +50,7 @@ params:
   r_rib_rail: {value: 0.050, source: "one rail's two ribbon conductors: 0.232 x 0.3 / 2 + 2 x 15 mohm / 2 [calc, same basis]"}
   r_bus_rail: {value: 0.031, source: "a bus-board trace, 1 oz, 4 mm wide, 0.25 m: 1.72e-8 x 0.25 / (0.004 x 35e-6) [calc, docs/review/2026-09-21-hardware-and-standards-review/B3-power-entry-practice.md]"}
   r_bus_seg:  {value: 0.031, source: "the bus-board ground between this module's tap and the receiver's: 0 (the next slot - 1 mohm, since ngspice will not take 0) to the whole 0.25 m trace [calc, as r_bus_rail] (swept)"}
-  i_mod_pos:  {value: 0.037, source: "the module's own +12 V analog load, module-own-draw (power-entry.md, 'Fuses on the rails')"}
+  i_mod_pos:  {value: 0.032, source: "the module's own +12 V analog load, module-own-draw (power-entry.md, 'Fuses on the rails')"}
   i_mod_neg:  {value: 0.020, source: "the module's own -12 V analog load, module-own-draw (power-entry.md, 'Fuses on the rails')"}
   i_q:        {value: 0.212, source: "the instrument at rest, 212 mA [repo, ADR 0005 load table, quiescent - an upper bound since ADR 0015]"}
   i_swing:    {value: 0.195, source: "the breath-correlated swing: 0.195 A, the thirteen WS2815B-V1 on the main board at full white, the top of led-row-current (blocked on E6's measurement); 0.367 A, ADR 0005's quiescent-to-clamp-legal-worst swing, the one the 7-18 cent estimate used [repo] (swept)"}
@@ -63,15 +62,23 @@ params:
   topo:       {value: 1, source: "0 before, 1 isolated (the design), 2 ground sense, 3 balanced load - groundshift.cir's header"}
   bal_frac:   {value: 0.01, source: "topo 3: a dummy load that holds the instrument's total to 1 % of the swing [assumption]"}
   t_gs:       {value: 1.0}
-  # --- the DAC rail's trim (pre-layout review A8-8; owner, 2026-10-01) -------------------
-  v_dac_set:  {value: {fig: dac-rail}, source: "what E7 trims DAC_AVDD to"}
-  trim_cw:    {value: -1.0, source: "TRIM-DAC-RAIL's travel from its CCW end, 0 to 1; -1 = where E7 sets it (derived r_trim_e7). Clockwise takes resistance out of the OUT-to-ADJ leg and raises the rail"}
-  trim_fault: {value: 0, source: "0 none; 1 the wiper open (its strap to pin 1 leaves the whole track in the leg); 2 the track open (the leg open)"}
-  r_trim_end: {value: 2.0, source: "the 3224's absolute minimum resistance, 1 % or 2 ohm whichever is greater [datasheets/discrete-and-power/BOURNS-3224-TRIMPOT.pdf p.1]: what is left in the leg at the CW end"}
-  v_ref:      {value: 1.25, source: "the LM317L's reference, 1.20/1.25/1.30 V min/typ/max over line, load and temperature [datasheets/discrete-and-power/LM317LZ.pdf p.5] (vary)"}
-  i_adj:      {value: 50.0e-6, source: "its ADJ current, 50 uA typ / 100 uA max [same, p.5] (vary: 0 to 100 uA)"}
+  # --- the DAC rail, U-REG-DAC (LT3042): precision-set, no trim (owner, 2026-10-01) -------
+  v_dac_set:  {value: {fig: dac-rail}, source: "the rail's nominal: I_SET x R-SET-DAC"}
+  v_dac_lo:   {value: 5.0, source: "dac-rail's floor: the DAC8568 C grade is specified for AVDD 5.0-5.5 V only, because its 0-5 V output range at the internal reference x 2 needs AVDD >= 5 V [datasheets/analog/DAC8568CIPW.pdf p.3, p.4]"}
+  v_dac_hi:   {value: 5.5, source: "the same window's top [same, p.4]"}
+  v_margin:   {value: 0.05, source: "the margin asked of every corner inside that window (owner's brief, F8)"}
+  i_set:      {value: 100.0e-6, source: "the LT3042's SET current, 98/100/102 uA over 2-20 V in, 0-15 V out, 1-200 mA and temperature [datasheets/discrete-and-power/ADI-LT3042.pdf p.3] (vary)"}
+  k_vos:      {value: 1.0, source: "OUT - SET, the offset: v_os = 2 mV x (k_vos - 1), +-2 mV over the same conditions [same, p.3] (vary: 0 to 2)"}
+  k_leak:     {value: 1.0, source: "leakage at the SET node, out of it positive: i_leak = 100 nA x (k_leak - 1) [assumption: the datasheet's own example, 100 nA = 0.1 % (p.14); C-SET-DAC's 5 Gohm minimum is 1 nA of it, WALSIN-MLCC-GENERAL-NP0-X7R.pdf p.13; the rest is the board, guarded] (vary: 0 to 2)"}
+  v_in_dac:   {value: 12.0, source: "U-REG-DAC's input, the protected analog +12 V (vary: 10.8 V, a tripped PTC-POS12 and D1 - power-entry.md, Fuses - to 12.6 V, the bus maximum)"}
+  v_uvlo_dac: {value: 2.0, source: "the LT3042's input UVLO, rising, 2 V max (1.78 typ); EN/UV on IN trips first, 1.18-1.32 V [ds ADI-LT3042.pdf p.3]"}
+  v_do_dac:   {value: 0.3, source: "its dropout, 300 mV max at 1-50 mA over temperature [same, p.3]"}
+  i_lim_dac:  {value: 0.22, source: "its internal current limit, 220 mA min at VIN 2 V (300 typ at 12 V) [same, p.4]"}
+  i_gnd_dac:  {value: 3.5e-3, source: "its GND pin current, 3.5 mA max at 1 mA load, 5 mA max at 50 mA [same, p.3]"}
+  gm_dac:     {value: 10.0, source: "the pass element's error gain, A/V [assumption: stiff; the loop's dynamics are not the question]"}
+  rset_fault: {value: 0, source: "0 none; 1 R-SET-DAC open; 2 C-SET-DAC shorted (SET to ground)"}
   v_dac_absmax: {value: 6.0, source: "the DAC8568's absolute maximum, AVDD to GND -0.3 to +6 V [datasheets/analog/DAC8568CIPW.pdf p.2]"}
-  r_dac_load: {value: 1300.0, source: "DAC_AVDD's loads other than the divider, ~4 mA (power-entry.md, The DAC rail's load) as a resistance [calc: 5.2 / 4.0e-3]. It does not move the set point - the regulator holds OUT - and gives the node a load"}
+  r_dac_load: {value: 1300.0, source: "DAC_AVDD's load, ~4 mA (power-entry.md, The DAC rail's load) as a resistance [calc: 5.2 / 4.0e-3] (vary: 585 ohm, ~9 mA, the ceiling with U-LVL-MOD's inputs at their Delta-I_CC bound, to 2.6 kohm, ~2 mA)"}
   # --- cm.cir / isoin.cir: U-ISO's input, common mode and differential (A4-1) -------------
   l_leak:     {value: 3.9e-6, source: "L-CM-ISO's leakage inductance, 3.9 uH typ [datasheets/discrete-and-power/BOURNS-PM3700-CM-CHOKE.pdf p.1]: the pair's differential inductance"}
   r_cm_dcr:   {value: 0.020, source: "its DCR per winding, 0.020 ohm max [same]"}
@@ -87,7 +94,7 @@ params:
   l_fb_iso:   {value: 0.85e-6, source: "FB2 / FB4 at ~0.22 A: ~0.85 uH [same, the 250 mA curve]"}
   r_fb_peak:  {value: 650.0, source: "the beads' resistive peak [same]"}
   r_fb_dcr:   {value: 0.05, source: "the beads' DC resistance, 0.080 ohm max (FB-IN's row) [assumption: typical]"}
-  r_d_light:  {value: 2.8, source: "D1 / D3's small-signal resistance at the analog rails' ~37 mA: diode-split-rationale"}
+  r_d_light:  {value: 3.2, source: "D1 / D3's small-signal resistance at the analog rails' ~32 mA: diode-split-rationale"}
   r_d_iso:    {value: 0.55, source: "D2 / D4's at U-ISO's ~0.22 A input: diode-split-rationale"}
   r_ptc_rail: {value: 0.4, source: "PTC-POS12 / PTC-NEG12 fitted, Rmin 0.40 ohm [datasheets/discrete-and-power/BOURNS-MF-MSMF.pdf p.1]"}
   r_ptc_iso:  {value: 0.11, source: "PTC-ISO fitted, Rmin 0.11 ohm [same]"}
@@ -124,16 +131,20 @@ derived:
   r_toff_ccw: "max(v.get('TRIM-OFFSET', 0) * v['w_offset'], 1e-3)"
   k_cm: "(1.0 - v['l_leak'] / (2.0 * v['L-CM-ISO'])) if 'L-CM-ISO' in v else 0.0"
   r_neg_iso: "v['v_iso_in']**2 / v['p_iso_in']"
-  r_trim_e7: "max(v['R-REG-SET-LO'] / ((v['v_dac_set'] - 50.0e-6 * v['R-REG-SET-LO']) / 1.25 - 1.0) - v['R-REG-SET-HI'], v['r_trim_end']) if 'R-REG-SET-LO' in v else 0.0"
+  v_os: "2.0e-3 * (v['k_vos'] - 1.0)"
+  i_leak: "100.0e-9 * (v['k_leak'] - 1.0)"
   # (the guards: sims that import these params without this circuit's netlist - panel-led/sim - never use them)
-  r_trim: "0.0 if 'TRIM-DAC-RAIL' not in v else (1.0e9 if v['trim_fault'] == 2 else v['TRIM-DAC-RAIL'] if v['trim_fault'] == 1 else v['r_trim_e7'] if v['trim_cw'] < 0 else max(v['TRIM-DAC-RAIL'] * (1.0 - v['trim_cw']), v['r_trim_end']))"
+  r_set_eff: "(1.0e12 if v['rset_fault'] == 1 else v['R-SET-DAC']) if 'R-SET-DAC' in v else 0.0"
+  r_cset_eff: "1.0e-3 if v['rset_fault'] == 2 else 1.0e12"
 
 vary:
-  v_ref:      {tol: [-0.04, 0.04], source: "1.20 and 1.30 V about 1.25"}
-  i_adj:      {tol: [-1.0, 1.0], source: "0 and 100 uA about 50"}
-  R-REG-SET-HI: {tol: [-0.001, 0.001], source: "0.1 %"}
-  R-REG-SET-LO: {tol: [-0.001, 0.001], source: "0.1 %"}
-  TRIM-DAC-RAIL: {tol: [-0.1, 0.1], source: "the 3224's resistance tolerance, +-10 % [BOURNS-3224-TRIMPOT.pdf p.1]"}
+  i_set:      {tol: [-0.02, 0.02], source: "98 and 102 uA about 100"}
+  k_vos:      {tol: [-1.0, 1.0], source: "-2 and +2 mV"}
+  k_leak:     {tol: [-1.0, 1.0], source: "100 nA into and out of SET"}
+  R-SET-DAC:  {tol: [-0.002, 0.002], source: "+-0.1 % initial and +-25 ppm/C over 40 C of drift from 25 C, 0.1 % [calc: 25e-6 x 40]; the ARG05's [datasheets/discrete-and-power/VIKING-ARG-THIN-FILM-RESISTOR.pdf p.3]"}
+  C-SET-DAC:  {tol: [-0.05, 0.05], source: "NP0 +-5 % [WALSIN-MLCC-GENERAL-NP0-X7R.pdf p.2]"}
+  v_in_dac:   {tol: [-0.1, 0.05], source: "10.8 to 12.6 V about 12"}
+  r_dac_load: {tol: [-0.55, 1.0], source: "585 ohm to 2.6 kohm about 1.3 kohm"}
   r_cm_core:  {tol: [-0.7222, 1.0], source: "500 ohm to 3.6 kohm about 1.8 kohm"}
   L-CM-ISO:   {tol: [-0.3, 0.3], source: "1.0 mH MINIMUM at 1 kHz [BOURNS-PM3700-CM-CHOKE.pdf p.1]; at 550 kHz the ferrite's permeability falls [assumption: -30 %], and the core loss carries the rest"}
   l_rib:      {tol: [-0.6667, 2.3333], source: "0.1 to 1 uH about 0.3"}
@@ -259,7 +270,7 @@ sims:
       jack_trough_off: "trough(w['jack'], p['t_off'], p['t_end_off'])"
     asserts:
       - expr: "max['jack_peak_off'] < 0.1 and min['jack_trough_off'] > -0.1"
-        why: "the pitch jack stays within 100 mV of 0 V while the analog rails come down, whichever falls first: C-BULK-RAIL's 100 uF / 47 uF split keeps the two decays close (each rail reaches half in 16-20 ms), and the jack only moves once the op-amps are out of supply. The rails' order itself is recorded, not asserted"
+        why: "the pitch jack stays within 100 mV of 0 V while the analog rails come down, whichever falls first: C-BULK-RAIL's 100 uF / 47 uF split keeps the two decays close (each rail reaches half in 16-23 ms), and the jack only moves once the op-amps are out of supply. The rails' order itself is recorded, not asserted"
 
   # ---- U-ISO's input: the common-mode choke and C-ISO-Y (pre-layout review A4-1; owner, 2026-10-01)
   - name: cm-loop
@@ -313,75 +324,80 @@ sims:
       - expr: "max['rack_550k'] < 1.0"
         why: "under 1 % of the converter's reflected current at its 550 kHz fundamental reaches the rack's +12 V conductor"
 
-  # ---- DAC_AVDD's trim (pre-layout review A8-8; owner, 2026-10-01) -------------------------
-  # dacrail.cir, behavioural: the LM317L's datasheet limits, the divider's tolerances and the
-  # trimmer's. Each end of the travel at every corner; where E7 sets it; and its two failures.
-  - name: dac-trim-cw
+  # ---- DAC_AVDD: U-REG-DAC, the LT3042, precision-set (owner, 2026-10-01) ------------------
+  # dacrail.cir, DC, behavioural (lt3042.lib): every corner of the datasheet's guaranteed SET
+  # current and offset, R-SET-DAC's tolerance and drift, SET leakage, the input and the load.
+  - name: dac-rail-spread
     deck: dacrail.cir
-    set: {trim_cw: 1.0}
-    vary: [v_ref, i_adj, R-REG-SET-HI, R-REG-SET-LO, TRIM-DAC-RAIL]
+    vary: [i_set, k_vos, k_leak, R-SET-DAC, v_in_dac, r_dac_load]
     measures: [v_avdd]
     asserts:
-      - expr: "min['v_avdd'] >= p['v_dac_set'] + 0.05"
-        why: "fully clockwise, DAC_AVDD is above dac-rail by 50 mV or more at every corner of V_REF, I_ADJ and the divider: E7 can always reach the set point from below"
-      - expr: "max['v_avdd'] < p['v_dac_absmax']"
-        why: "and under the DAC8568's 6 V absolute maximum at every corner: no setting of the trimmer can damage the DAC. It can sit above the C grade's 5.5 V operating maximum - with the LM317L's +-4 % reference, a travel that always reaches the set point cannot also stay inside 5.00-5.50 V (power-entry.md, The DAC rail's trim)"
-  - name: dac-trim-ccw
+      - expr: "min['v_avdd'] >= p['v_dac_lo'] + p['v_margin'] and max['v_avdd'] <= p['v_dac_hi'] - p['v_margin']"
+        why: "NOTHING TO TRIM: at every corner of the LT3042's guaranteed SET current (98-102 uA) and offset (+-2 mV) over line, load and temperature, R-SET-DAC's 0.1 % and its drift, 100 nA of SET leakage either way, the input from a tripped fuse to the bus maximum and the rail's whole load range, DAC_AVDD sits inside the DAC8568 C grade's 5.00-5.50 V with 50 mV or more to spare at both ends"
+      - expr: "abs(nom['v_avdd'] - p['v_dac_set']) < 0.005"
+        why: "and its nominal is dac-rail"
+  - name: dac-rail-aged
+    # R-SET-DAC at its endurance limit, +-0.5 % after 1000 h at full rated power and 70 C
+    # [VIKING-ARG-THIN-FILM-RESISTOR.pdf p.3] on top of its 0.1 % - it runs at 0.4 % of its rating
     deck: dacrail.cir
-    set: {trim_cw: 0.0}
-    vary: [v_ref, i_adj, R-REG-SET-HI, R-REG-SET-LO, TRIM-DAC-RAIL]
+    set: {}
+    vary: [i_set, k_vos, k_leak, R-SET-DAC]
+    tol: {R-SET-DAC: [-0.007, 0.007]}
     measures: [v_avdd]
     asserts:
-      - expr: "max['v_avdd'] <= p['v_dac_set'] - 0.05"
-        why: "fully counter-clockwise, DAC_AVDD is below dac-rail by 50 mV or more at every corner: E7 can always reach the set point from above"
-  - name: dac-trim-centre
-    # the trimmer as it ships, wiper at 50 % [BOURNS-3224-TRIMPOT.pdf p.1]: recorded
+      - expr: "min['v_avdd'] >= p['v_dac_lo'] and max['v_avdd'] <= p['v_dac_hi']"
+        why: "even with R-SET-DAC aged to its endurance limit as well, at every corner of the LT3042's limits, DAC_AVDD stays inside 5.00-5.50 V"
+  - name: dac-rail-open-rset
+    # FAILURE: R-SET-DAC open. The SET current charges the SET node until it runs out of input
     deck: dacrail.cir
-    set: {trim_cw: 0.5}
-    vary: [v_ref, i_adj, R-REG-SET-HI, R-REG-SET-LO, TRIM-DAC-RAIL]
+    set: {rset_fault: 1}
+    vary: [i_set, v_in_dac]
     measures: [v_avdd]
     asserts:
-      - expr: "max['v_avdd'] < p['v_dac_absmax']"
-        why: "a unit powered before E7, with the trimmer where it ships, cannot damage the DAC"
-  - name: dac-trim-e7
-    # where E7 leaves it: trimmed to dac-rail at the part's own V_REF and I_ADJ (nominal); the
-    # fixed resistors' tolerance about that - the reference's spread is what the trim removed
+      - expr: "min['v_avdd'] > p['v_dac_absmax']"
+        why: "RECORDED, NOT FAIL-SAFE: an open R-SET-DAC drives DAC_AVDD UP to the input less the dropout, over the DAC8568's 6 V absolute maximum. It is the one single failure that does - the same class as the LM317L's open R-REG-SET-LO it replaced - and it is a fixed thin-film part, never adjusted (power-entry.md, The DAC rail)"
+  - name: dac-rail-short-cset
+    # FAILURE: C-SET-DAC shorted (or R-SET-DAC shorted): SET at ground
     deck: dacrail.cir
-    vary: [R-REG-SET-HI, R-REG-SET-LO]
+    set: {rset_fault: 2}
+    vary: [k_vos]
     measures: [v_avdd]
     asserts:
-      - expr: "abs(nom['v_avdd'] - p['v_dac_set']) < 0.01 and min['v_avdd'] >= 5.0 and max['v_avdd'] <= 5.5"
-        why: "trimmed, DAC_AVDD is at dac-rail and inside the DAC8568 C grade's 5.0-5.5 V"
-  - name: dac-trim-open-wiper
-    deck: dacrail.cir
-    set: {trim_fault: 1}
-    vary: [v_ref, i_adj, R-REG-SET-HI, R-REG-SET-LO, TRIM-DAC-RAIL]
-    measures: [v_avdd]
-    asserts:
-      - expr: "max['v_avdd'] < p['v_dac_set']"
-        why: "FAIL-SAFE: an open wiper leaves the whole track in the OUT-to-ADJ leg (the wiper is strapped to pin 1), so the rail goes DOWN, never up"
-  - name: dac-trim-open-track
-    deck: dacrail.cir
-    set: {trim_fault: 2}
-    vary: [v_ref, i_adj, R-REG-SET-HI, R-REG-SET-LO, TRIM-DAC-RAIL]
-    measures: [v_avdd]
-    asserts:
-      - expr: "max['v_avdd'] < 2.0"
-        why: "FAIL-SAFE: an open track opens the OUT-to-ADJ leg and the LM317L falls to its reference, about 1.3 V - down, never up"
-  - name: trim-ends-poweron
-    # poweron.cir with the trimmer at either end: TI's transient model, the jack and the
-    # rail's overshoot on the way up
+      - expr: "max['v_avdd'] < 0.5"
+        why: "FAIL-SAFE: a shorted C-SET-DAC or R-SET-DAC puts SET at ground and DAC_AVDD goes DOWN, to the offset - the DAC simply stops"
+  - name: dac-rail-startup
+    # poweron.cir across the soft start's spread: how DAC_AVDD arrives, and the pitch jack
     deck: poweron.cir
-    sweep: {trim_cw: [0.0, 1.0]}
-    vary: []
-    measures: [avdd_final, avdd_peak, jack_peak, jack_trough]
+    vary: [i_set, R-SET-DAC, C-SET-DAC]
+    measures: [avdd_final, avdd_peak, t_avdd_floor, t_avdd_45, jack_peak, jack_trough]
     post:
+      avdd_final: "at(w['avdd'], p['t_end'])"
+      avdd_peak: "peak(w['avdd'], 0, p['t_end'])"
+      t_avdd_floor: "cross(w['avdd'], 5.0, 0)"
+      t_avdd_45: "cross(w['avdd'], 4.5, 0)"
+      jack_peak: "peak(w['jack'], 0, p['t_end'])"
+      jack_trough: "trough(w['jack'], 0, p['t_end'])"
+    asserts:
+      - expr: "max['avdd_peak'] <= p['v_dac_hi'] and min['avdd_final'] >= p['v_dac_lo']"
+        why: "the soft start does not overshoot: DAC_AVDD rises to its set point and never above the C grade's 5.5 V on the way, at every corner of the SET current, R-SET-DAC and C-SET-DAC"
+      - expr: "max['t_avdd_floor'] < 0.05"
+        why: "and it is over the 5.00 V floor within 50 ms of the bus at every corner (R-SET-DAC x C-SET-DAC, ~5 ms, sets the pace). The instrument's own supply comes through U-ISO and the load switch, whose start alone takes 42 ms or more (umbilical-load-switch/sim, cold-start t_up), and firmware re-writes the DAC's reference-enable and clear-code registers periodically (firmware/README.md); the SPI pins' order against LOGIC_5V is digital-and-supervision/sim's"
+      - expr: "max['jack_peak'] < 0.1 and min['jack_trough'] > -0.1"
+        why: "and the pitch jack stays within 100 mV of 0 V through the power-up at every corner"
+  - name: ptc-tripped
+    # PTC-POS12 and PTC-NEG12 at R1max, 6.0 ohm an hour after a trip [BOURNS-MF-MSMF.pdf p.1]
+    deck: poweron.cir
+    set: {r_ptc: 6.0}
+    vary: []
+    measures: [v_pos12, avdd_final, avdd_peak, jack_peak, jack_trough]
+    post:
+      v_pos12: "at(w['p12'], p['t_end'])"
       avdd_final: "at(w['avdd'], p['t_end'])"
       avdd_peak: "peak(w['avdd'], 0, p['t_end'])"
       jack_peak: "peak(w['jack'], 0, p['t_end'])"
       jack_trough: "trough(w['jack'], 0, p['t_end'])"
     asserts:
-      - expr: "max['avdd_peak'] < p['v_dac_absmax']"
-        why: "at either end of the trimmer DAC_AVDD never reaches the DAC8568's 6 V absolute maximum on the way up"
-      - expr: "max['jack_peak'] < 0.1 and min['jack_trough'] > -0.1"
-        why: "and the pitch jack stays within 100 mV of 0 V through the power-up wherever the trimmer is"
+      - expr: "nom['avdd_final'] >= p['v_dac_lo'] and nom['avdd_peak'] <= p['v_dac_hi']"
+        why: "with both rail fuses at their worst an hour after a trip, U-REG-DAC still has its headroom and DAC_AVDD comes up inside the window (the LM317L model it replaced would not converge here)"
+      - expr: "nom['jack_peak'] < 0.1 and nom['jack_trough'] > -0.1"
+        why: "and the pitch jack stays within 100 mV of 0 V"

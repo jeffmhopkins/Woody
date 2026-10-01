@@ -45,6 +45,7 @@ ECHO: "DRC", "PASS", "U-ISO on the main board", 0.5, "mm, its body's edge inside
 ECHO: "DRC", "PASS", "U-ISO's filter parts on the main board", [["C-ISO-BULK", 1.85], ["C-ISO-OUT", 1.85], ["L-ISO-IN", 11], ["L-CM-ISO", 2.24903]], "mm, each envelope's edge inside the board's nearest edge, against boards.copper_edge (L-CM-ISO's turned 45 degrees: config/module.yaml iso.filter)"
 ECHO: "DRC", "PASS", "standoff screw heads clear of the main board's rear-face parts", 1.015, "mm (J-PWR-EURO)"
 ECHO: "DRC", "PASS", "main board rear-face parts clear of each other", 0.55, "mm (J-UMBILICAL tails / U-ISO)"
+ECHO: "DRC", "PASS", "trimmers adjustable from behind", [["trim 5", 11.4609], ["trim 6", 20.4099], ["trim 7", 7.36041], ["trim_smd 8", 3.235]], "mm from each trimmer's centre to the nearest TALLER rear-face part, less a 3 mm screwdriver's radius (rules.driver_d), with the module out of the rack; -1 = under the power ribbon's fold"
 ECHO: "DRC", "PASS", "standoffs clear of the NE8FAV and J-B2B-MOD between the boards", 2.9109, "mm (J-UMBILICAL body)"
 ECHO: "DRC", "PASS", "J-B2B-MOD's pads clear of the jacks' footprints", 1.16, "mm (J-CV-BREATH footprint), between the two jack columns"
 ECHO: "DRC", "PASS", "jack footprints clear of each other", 4, "mm (J-CV-BREATH footprint / J-CV-MOD1 footprint): body and pads, 13.85 along the pin line, which lies across the panel"

@@ -273,13 +273,18 @@ tall:
     value: [9.53, 4.83, 10.03]
     status: settled
     source: "[ds] BOURNS-3296-TRIMPOT.pdf via R26: 3296W body 9.53 x 4.83 x 10.03"
+  trim_smd:
+    value: [4.8, 3.9, 5.3]
+    status: nominal
+    source: "[ds] BOURNS-3224-TRIMPOT.pdf p.1, 3224W Top Adjust: 4.8 x 3.9 over the terminals in plan, 5.3 tall including the terminals' bend, its adjustment slot (D1.5) on top, facing away from the board. TRIM-RESP (RV4, 3224W-1-103E). Read off the drawing's three views, whose projection is not labelled: the slot view is taken as the top"
+    decided_by: "the part in hand"
   # Each: [x, y, kind] on the rear face - an envelope for the depth and
   # clash checks, NOT a placement; the layout places them.
   at:
     value: [[36.0, 73.0, "cap"], [44.5, 73.0, "cap"], [36.0, 83.0, "cap"], [44.5, 83.0, "cap"],
-            [25.25, 95.0, "trim"], [14.0, 95.0, "trim"], [36.5, 95.0, "trim"]]
+            [25.25, 95.0, "trim"], [14.0, 95.0, "trim"], [36.5, 95.0, "trim"], [46.0, 95.0, "trim_smd"]]
     status: nominal
-    source: "[adr 0024] representative spots for the three trimmers and four bulk caps, so the depth check sees them; the layout moves them. The caps sit on the right (2026-09-30) because U-ISO and its filter take the left, and in two columns above L-CM-ISO (2026-10-01), which takes the right-hand room above J-PWR-EURO"
+    source: "[adr 0024] representative spots for the three 3296 trimmers, TRIM-RESP's 3224W (trim_smd) and four bulk caps, so the depth check sees them; the layout moves them. Every trimmer is on the rear face and adjusted from behind with the module out of the rack (mechanical/module/drc.echo 'trimmers adjustable from behind'). The caps sit on the right (2026-09-30) because U-ISO and its filter take the left, and in two columns above L-CM-ISO (2026-10-01), which takes the right-hand room above J-PWR-EURO"
 
 # U-ISO, the instrument's isolated supply (ADR 0027): RECOM RPA20-2412SAW on the
 # main board's REAR face - 10.2 mm of body cannot go in the boards' gap. Its
@@ -629,6 +634,11 @@ layout:
 # The thresholds module.scad's DRC measures against. Each is a design choice
 # or a banked limit, never a measured value.
 rules:
+  driver_d:
+    value: 3.0
+    status: nominal
+    source: "[from memory] the shaft of a small flat trimmer screwdriver, 2.5-3 mm; the larger taken. A trimmer is adjustable from behind when nothing TALLER stands within its radius of the trimmer's centre (mechanical/module/drc.echo 'trimmers adjustable from behind')"
+    decided_by: "the screwdriver in hand at E7"
   web_min:
     value: 3.5
     status: nominal

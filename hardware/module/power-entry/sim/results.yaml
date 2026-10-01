@@ -4,29 +4,29 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/power-entry/sim/sims.yaml: 8f66e76db0535618
-  hardware/module/power-entry/netlist.yaml: 230ba168c2bf4b8a
+  hardware/module/power-entry/sim/sims.yaml: f06800eed96cd1d5
+  hardware/module/power-entry/netlist.yaml: 78440e2b6a1c1e45
   hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
-  hardware/module/power-entry/sim/poweron.cir: b650aae1f588bf36
+  hardware/module/power-entry/sim/poweron.cir: 7e310ad1820d6b68
   hardware/module/power-entry/sim/groundshift.cir: 4aae040d6b7e03a1
   hardware/module/power-entry/sim/poweroff.cir: aa8a3991ce4d5a85
   hardware/module/power-entry/sim/cm.cir: bf15e91728c95a53
   hardware/module/power-entry/sim/isoin.cir: 3069b0d75d37455f
-  hardware/module/power-entry/sim/dacrail.cir: 706d98652da88c12
+  hardware/module/power-entry/sim/dacrail.cir: 00875ad3e9b9af2c
   hardware/module/pitch-stage/sim/pitch-stage.lib: 1ec92350c5c2c2cc
-  datasheets/discrete-and-power/LM317L-ti-pspice-snvmaw3.lib: 52c881eccf059881
+  hardware/module/power-entry/sim/lt3042.lib: 2664843cbe66f3e8
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
-  figure:dac-rail: 5.20 V
+  figure:dac-rail: 5.23 V
 ngspice: '42'
 sims:
   d3-reversed:
     corners: 1
     measures:
       v_pos12:
-        nominal: 11.8053
-        min: 11.8053
+        nominal: 11.8099
+        min: 11.8099
         min_at: nominal
-        max: 11.8053
+        max: 11.8099
         max_at: nominal
       v_neg12:
         nominal: 0.294643
@@ -35,22 +35,22 @@ sims:
         max: 0.294643
         max_at: nominal
       avdd_final:
-        nominal: 5.18481
-        min: 5.18481
+        nominal: 5.22982
+        min: 5.22982
         min_at: nominal
-        max: 5.18481
+        max: 5.22982
         max_at: nominal
       avdd_peak:
-        nominal: 5.18481
-        min: 5.18481
+        nominal: 5.22982
+        min: 5.22982
         min_at: nominal
-        max: 5.18481
+        max: 5.22982
         max_at: nominal
       t_avdd_floor:
-        nominal: 0.0164037
-        min: 0.0164037
+        nominal: 0.0167962
+        min: 0.0167962
         min_at: nominal
-        max: 0.0164037
+        max: 0.0167962
         max_at: nominal
       jack_peak:
         nominal: 0.321674
@@ -59,10 +59,10 @@ sims:
         max: 0.321674
         max_at: nominal
       jack_trough:
-        nominal: 5.15246e-06
-        min: 5.15246e-06
+        nominal: 5.15247e-06
+        min: 5.15247e-06
         min_at: nominal
-        max: 5.15246e-06
+        max: 5.15247e-06
         max_at: nominal
     asserts:
     - expr: nom['v_neg12'] > -1.0
@@ -73,10 +73,10 @@ sims:
     corners: 1
     measures:
       v_pos12:
-        nominal: 11.8053
-        min: 11.8053
+        nominal: 11.8099
+        min: 11.8099
         min_at: nominal
-        max: 11.8053
+        max: 11.8099
         max_at: nominal
       v_neg12:
         nominal: -11.8157
@@ -85,40 +85,40 @@ sims:
         max: -11.8157
         max_at: nominal
       avdd_final:
-        nominal: 5.18481
-        min: 5.18481
+        nominal: 5.22982
+        min: 5.22982
         min_at: nominal
-        max: 5.18481
+        max: 5.22982
         max_at: nominal
       avdd_peak:
-        nominal: 5.18481
-        min: 5.18481
+        nominal: 5.22982
+        min: 5.22982
         min_at: nominal
-        max: 5.18481
+        max: 5.22982
         max_at: nominal
       t_avdd_floor:
-        nominal: 0.0174038
-        min: 0.0174038
+        nominal: 0.0177963
+        min: 0.0177963
         min_at: nominal
-        max: 0.0174038
+        max: 0.0177963
         max_at: nominal
       jack_peak:
-        nominal: 0.00648138
-        min: 0.00648138
+        nominal: 0.00639469
+        min: 0.00639469
         min_at: nominal
-        max: 0.00648138
+        max: 0.00639469
         max_at: nominal
       jack_trough:
-        nominal: -0.0383487
-        min: -0.0383487
+        nominal: -0.0369788
+        min: -0.0369788
         min_at: nominal
-        max: -0.0383487
+        max: -0.0369788
         max_at: nominal
       i_dac_pin:
-        nominal: 2.21989e-09
-        min: 2.21989e-09
+        nominal: 2.1101e-09
+        min: 2.1101e-09
         min_at: nominal
-        max: 2.21989e-09
+        max: 2.1101e-09
         max_at: nominal
     asserts:
     - expr: min['avdd_final'] >= 5.0 and max['avdd_peak'] < 6.0
@@ -133,10 +133,10 @@ sims:
     corners: 1
     measures:
       v_pos12:
-        nominal: 11.8053
-        min: 11.8053
+        nominal: 11.8099
+        min: 11.8099
         min_at: nominal
-        max: 11.8053
+        max: 11.8099
         max_at: nominal
       v_neg12:
         nominal: -11.8157
@@ -145,40 +145,40 @@ sims:
         max: -11.8157
         max_at: nominal
       avdd_final:
-        nominal: 5.18481
-        min: 5.18481
+        nominal: 5.22982
+        min: 5.22982
         min_at: nominal
-        max: 5.18481
+        max: 5.22982
         max_at: nominal
       avdd_peak:
-        nominal: 5.18481
-        min: 5.18481
+        nominal: 5.22982
+        min: 5.22982
         min_at: nominal
-        max: 5.18481
+        max: 5.22982
         max_at: nominal
       t_avdd_floor:
-        nominal: 0.0164038
-        min: 0.0164038
+        nominal: 0.0167962
+        min: 0.0167962
         min_at: nominal
-        max: 0.0164038
+        max: 0.0167962
         max_at: nominal
       jack_peak:
-        nominal: 0.00296126
-        min: 0.00296126
+        nominal: 0.00296246
+        min: 0.00296246
         min_at: nominal
-        max: 0.00296126
+        max: 0.00296246
         max_at: nominal
       jack_trough:
-        nominal: -0.0049266
-        min: -0.0049266
+        nominal: -0.00476812
+        min: -0.00476812
         min_at: nominal
-        max: -0.0049266
+        max: -0.00476812
         max_at: nominal
       i_dac_pin:
-        nominal: 1.22535e-09
-        min: 1.22535e-09
+        nominal: 1.11802e-09
+        min: 1.11802e-09
         min_at: nominal
-        max: 1.22535e-09
+        max: 1.11802e-09
         max_at: nominal
     asserts:
     - expr: min['avdd_final'] >= 5.0 and max['avdd_peak'] < 6.0
@@ -193,10 +193,10 @@ sims:
     corners: 1
     measures:
       v_pos12:
-        nominal: 11.8053
-        min: 11.8053
+        nominal: 11.8099
+        min: 11.8099
         min_at: nominal
-        max: 11.8053
+        max: 11.8099
         max_at: nominal
       v_neg12:
         nominal: -11.8157
@@ -205,22 +205,22 @@ sims:
         max: -11.8157
         max_at: nominal
       avdd_final:
-        nominal: 5.18481
-        min: 5.18481
+        nominal: 5.22982
+        min: 5.22982
         min_at: nominal
-        max: 5.18481
+        max: 5.22982
         max_at: nominal
       avdd_peak:
-        nominal: 5.18481
-        min: 5.18481
+        nominal: 5.22982
+        min: 5.22982
         min_at: nominal
-        max: 5.18481
+        max: 5.22982
         max_at: nominal
       t_avdd_floor:
-        nominal: 0.0164038
-        min: 0.0164038
+        nominal: 0.0167962
+        min: 0.0167962
         min_at: nominal
-        max: 0.0164038
+        max: 0.0167962
         max_at: nominal
       jack_peak:
         nominal: 0.075141
@@ -229,16 +229,16 @@ sims:
         max: 0.075141
         max_at: nominal
       jack_trough:
-        nominal: -0.00947451
-        min: -0.00947451
+        nominal: -0.00946345
+        min: -0.00946345
         min_at: nominal
-        max: -0.00947451
+        max: -0.00946345
         max_at: nominal
       i_dac_pin:
-        nominal: 3.91031e-09
-        min: 3.91031e-09
+        nominal: 3.9102e-09
+        min: 3.9102e-09
         min_at: nominal
-        max: 3.91031e-09
+        max: 3.9102e-09
         max_at: nominal
     asserts:
     - expr: min['avdd_final'] >= 5.0 and max['avdd_peak'] < 6.0
@@ -369,16 +369,16 @@ sims:
         max: 2.0e-09
         max_at: nominal
       tie_ua:
-        nominal: 6.67518e-05
-        min: 6.67518e-05
+        nominal: 6.67507e-05
+        min: 6.67507e-05
         min_at: nominal
-        max: 6.67518e-05
+        max: 6.67507e-05
         max_at: nominal
       rail_mv:
-        nominal: 9.6576
-        min: 9.6576
+        nominal: 9.6574
+        min: 9.6574
         min_at: nominal
-        max: 9.6576
+        max: 9.6574
         max_at: nominal
     asserts:
     - expr: max['err_cents'] < 0.01 and max['tie_ua'] < 1.0
@@ -401,16 +401,16 @@ sims:
         max: 4.0e-09
         max_at: nominal
       tie_ua:
-        nominal: 0.00012572
-        min: 0.00012572
+        nominal: 0.000125718
+        min: 0.000125718
         min_at: nominal
-        max: 0.00012572
+        max: 0.000125718
         max_at: nominal
       rail_mv:
-        nominal: 18.189
-        min: 18.189
+        nominal: 18.1887
+        min: 18.1887
         min_at: nominal
-        max: 18.189
+        max: 18.1887
         max_at: nominal
     asserts:
     - expr: max['err_cents'] < 0.01 and max['tie_ua'] < 1.0
@@ -433,16 +433,16 @@ sims:
         max: 6.0e-09
         max_at: nominal
       tie_ua:
-        nominal: 6.67518e-05
-        min: 6.67518e-05
+        nominal: 6.67506e-05
+        min: 6.67506e-05
         min_at: nominal
-        max: 6.67518e-05
+        max: 6.67506e-05
         max_at: nominal
       rail_mv:
-        nominal: 9.6576
-        min: 9.6576
+        nominal: 9.6574
+        min: 9.6574
         min_at: nominal
-        max: 9.6576
+        max: 9.6574
         max_at: nominal
     asserts:
     - expr: max['err_cents'] < 0.01 and max['tie_ua'] < 1.0
@@ -465,16 +465,16 @@ sims:
         max: 1.2e-08
         max_at: nominal
       tie_ua:
-        nominal: 0.00012572
-        min: 0.00012572
+        nominal: 0.000125718
+        min: 0.000125718
         min_at: nominal
-        max: 0.00012572
+        max: 0.000125718
         max_at: nominal
       rail_mv:
-        nominal: 18.189
-        min: 18.189
+        nominal: 18.1887
+        min: 18.1887
         min_at: nominal
-        max: 18.189
+        max: 18.1887
         max_at: nominal
     asserts:
     - expr: max['err_cents'] < 0.01 and max['tie_ua'] < 1.0
@@ -697,10 +697,10 @@ sims:
     corners: 1
     measures:
       t_pos_half:
-        nominal: 0.0201153
-        min: 0.0201153
+        nominal: 0.0229642
+        min: 0.0229642
         min_at: nominal
-        max: 0.0201153
+        max: 0.0229642
         max_at: nominal
       t_neg_half:
         nominal: 0.0163361
@@ -715,25 +715,25 @@ sims:
         max: 0.0770419
         max_at: nominal
       jack_trough_off:
-        nominal: 1.09541e-05
-        min: 1.09541e-05
+        nominal: 1.15729e-05
+        min: 1.15729e-05
         min_at: nominal
-        max: 1.09541e-05
+        max: 1.15729e-05
         max_at: nominal
     asserts:
     - expr: max['jack_peak_off'] < 0.1 and min['jack_trough_off'] > -0.1
       why: 'the pitch jack stays within 100 mV of 0 V while the analog rails come down, whichever falls first: C-BULK-RAIL''s
-        100 uF / 47 uF split keeps the two decays close (each rail reaches half in 16-20 ms), and the jack only moves once
+        100 uF / 47 uF split keeps the two decays close (each rail reaches half in 16-23 ms), and the jack only moves once
         the op-amps are out of supply. The rails'' order itself is recorded, not asserted'
       pass: true
   poweroff[dt_neg_off=0.0]:
     corners: 1
     measures:
       t_pos_half:
-        nominal: 0.0201153
-        min: 0.0201153
+        nominal: 0.0229642
+        min: 0.0229642
         min_at: nominal
-        max: 0.0201153
+        max: 0.0229642
         max_at: nominal
       t_neg_half:
         nominal: 0.0163361
@@ -748,25 +748,25 @@ sims:
         max: 0.0770419
         max_at: nominal
       jack_trough_off:
-        nominal: 1.09541e-05
-        min: 1.09541e-05
+        nominal: 1.15729e-05
+        min: 1.15729e-05
         min_at: nominal
-        max: 1.09541e-05
+        max: 1.15729e-05
         max_at: nominal
     asserts:
     - expr: max['jack_peak_off'] < 0.1 and min['jack_trough_off'] > -0.1
       why: 'the pitch jack stays within 100 mV of 0 V while the analog rails come down, whichever falls first: C-BULK-RAIL''s
-        100 uF / 47 uF split keeps the two decays close (each rail reaches half in 16-20 ms), and the jack only moves once
+        100 uF / 47 uF split keeps the two decays close (each rail reaches half in 16-23 ms), and the jack only moves once
         the op-amps are out of supply. The rails'' order itself is recorded, not asserted'
       pass: true
   poweroff[dt_neg_off=0.002]:
     corners: 1
     measures:
       t_pos_half:
-        nominal: 0.0201154
-        min: 0.0201154
+        nominal: 0.0229643
+        min: 0.0229643
         min_at: nominal
-        max: 0.0201154
+        max: 0.0229643
         max_at: nominal
       t_neg_half:
         nominal: 0.0183361
@@ -781,55 +781,55 @@ sims:
         max: 0.0770419
         max_at: nominal
       jack_trough_off:
-        nominal: 1.1858e-05
-        min: 1.1858e-05
+        nominal: 1.23289e-05
+        min: 1.23289e-05
         min_at: nominal
-        max: 1.1858e-05
+        max: 1.23289e-05
         max_at: nominal
     asserts:
     - expr: max['jack_peak_off'] < 0.1 and min['jack_trough_off'] > -0.1
       why: 'the pitch jack stays within 100 mV of 0 V while the analog rails come down, whichever falls first: C-BULK-RAIL''s
-        100 uF / 47 uF split keeps the two decays close (each rail reaches half in 16-20 ms), and the jack only moves once
+        100 uF / 47 uF split keeps the two decays close (each rail reaches half in 16-23 ms), and the jack only moves once
         the op-amps are out of supply. The rails'' order itself is recorded, not asserted'
       pass: true
   cm-loop:
     corners: 17
     measures:
       star_550k:
-        nominal: 1.38764
-        min: 0.629576
+        nominal: 1.39148
+        min: 0.630581
         min_at: C-ISO-Y+ L-CM-ISO+ l_rib+ r_cm_core+
-        max: 5.41275
+        max: 5.42166
         max_at: C-ISO-Y- L-CM-ISO- l_rib- r_cm_core-
       star_1650k:
-        nominal: 0.427208
-        min: 0.189242
+        nominal: 0.427627
+        min: 0.189441
         min_at: C-ISO-Y+ L-CM-ISO- l_rib+ r_cm_core+
-        max: 1.69287
+        max: 1.69376
         max_at: C-ISO-Y- L-CM-ISO+ l_rib- r_cm_core-
       star_5500k:
-        nominal: 0.0554933
-        min: 0.0374734
+        nominal: 0.0555981
+        min: 0.0375476
         min_at: C-ISO-Y+ L-CM-ISO- l_rib+ r_cm_core+
-        max: 0.188519
+        max: 0.188687
         max_at: C-ISO-Y- L-CM-ISO+ l_rib- r_cm_core-
       y_550k:
         nominal: 100.291
         min: 100.183
         min_at: C-ISO-Y+ L-CM-ISO+ l_rib- r_cm_core-
-        max: 100.505
+        max: 100.506
         max_at: C-ISO-Y- L-CM-ISO- l_rib+ r_cm_core-
       agnd_550k:
-        nominal: 0.283641
-        min: 0.078467
+        nominal: 0.276151
+        min: 0.0761889
         min_at: C-ISO-Y+ L-CM-ISO+ l_rib- r_cm_core+
-        max: 2.1908
+        max: 2.16263
         max_at: C-ISO-Y- L-CM-ISO- l_rib+ r_cm_core-
       star_peak:
-        nominal: 1.53196
-        min: 0.70091
+        nominal: 1.53666
+        min: 0.702085
         min_at: C-ISO-Y+ L-CM-ISO+ l_rib+ r_cm_core+
-        max: 5.93846
+        max: 5.94919
         max_at: C-ISO-Y- L-CM-ISO- l_rib- r_cm_core-
     asserts:
     - expr: max['star_550k'] < p['cm_bound'] and max['star_1650k'] < p['cm_bound'] and max['star_5500k'] < p['cm_bound']
@@ -845,14 +845,14 @@ sims:
     corners: 9
     measures:
       star_550k:
-        nominal: 30.6161
-        min: 14.6262
+        nominal: 30.6988
+        min: 14.6452
         min_at: L-CM-ISO+ l_rib+ r_cm_core+
-        max: 77.733
+        max: 77.8607
         max_at: L-CM-ISO- l_rib- r_cm_core-
       y_550k:
         nominal: 101.282
-        min: 67.5962
+        min: 67.5968
         min_at: L-CM-ISO+ l_rib- r_cm_core-
         max: 109.418
         max_at: L-CM-ISO- l_rib+ r_cm_core+
@@ -897,158 +897,159 @@ sims:
     - expr: max['rack_550k'] < 1.0
       why: under 1 % of the converter's reflected current at its 550 kHz fundamental reaches the rack's +12 V conductor
       pass: true
-  dac-trim-cw:
-    corners: 33
+  dac-rail-spread:
+    corners: 65
     measures:
       v_avdd:
-        nominal: 5.57714
-        min: 5.32075
-        min_at: R-REG-SET-HI+ R-REG-SET-LO- TRIM-DAC-RAIL- i_adj- v_ref-
-        max: 5.83427
-        max_at: R-REG-SET-HI- R-REG-SET-LO+ TRIM-DAC-RAIL- i_adj+ v_ref+
+        nominal: 5.22954
+        min: 5.107
+        min_at: R-SET-DAC- i_set- k_leak+ k_vos- r_dac_load- v_in_dac-
+        max: 5.35225
+        max_at: R-SET-DAC+ i_set+ k_leak- k_vos+ r_dac_load+ v_in_dac-
     asserts:
-    - expr: min['v_avdd'] >= p['v_dac_set'] + 0.05
-      why: 'fully clockwise, DAC_AVDD is above dac-rail by 50 mV or more at every corner of V_REF, I_ADJ and the divider:
-        E7 can always reach the set point from below'
+    - expr: min['v_avdd'] >= p['v_dac_lo'] + p['v_margin'] and max['v_avdd'] <= p['v_dac_hi'] - p['v_margin']
+      why: 'NOTHING TO TRIM: at every corner of the LT3042''s guaranteed SET current (98-102 uA) and offset (+-2 mV) over
+        line, load and temperature, R-SET-DAC''s 0.1 % and its drift, 100 nA of SET leakage either way, the input from a tripped
+        fuse to the bus maximum and the rail''s whole load range, DAC_AVDD sits inside the DAC8568 C grade''s 5.00-5.50 V
+        with 50 mV or more to spare at both ends'
       pass: true
-    - expr: max['v_avdd'] < p['v_dac_absmax']
-      why: 'and under the DAC8568''s 6 V absolute maximum at every corner: no setting of the trimmer can damage the DAC. It
-        can sit above the C grade''s 5.5 V operating maximum - with the LM317L''s +-4 % reference, a travel that always reaches
-        the set point cannot also stay inside 5.00-5.50 V (power-entry.md, The DAC rail''s trim)'
+    - expr: abs(nom['v_avdd'] - p['v_dac_set']) < 0.005
+      why: and its nominal is dac-rail
       pass: true
-  dac-trim-ccw:
-    corners: 33
+  dac-rail-aged:
+    corners: 17
     measures:
       v_avdd:
-        nominal: 4.5449
-        min: 4.25617
-        min_at: R-REG-SET-HI+ R-REG-SET-LO- TRIM-DAC-RAIL+ i_adj- v_ref-
-        max: 4.84519
-        max_at: R-REG-SET-HI- R-REG-SET-LO+ TRIM-DAC-RAIL- i_adj+ v_ref+
+        nominal: 5.22954
+        min: 5.08188
+        min_at: R-SET-DAC- i_set- k_leak+ k_vos-
+        max: 5.37874
+        max_at: R-SET-DAC+ i_set+ k_leak- k_vos+
     asserts:
-    - expr: max['v_avdd'] <= p['v_dac_set'] - 0.05
-      why: 'fully counter-clockwise, DAC_AVDD is below dac-rail by 50 mV or more at every corner: E7 can always reach the
-        set point from above'
+    - expr: min['v_avdd'] >= p['v_dac_lo'] and max['v_avdd'] <= p['v_dac_hi']
+      why: even with R-SET-DAC aged to its endurance limit as well, at every corner of the LT3042's limits, DAC_AVDD stays
+        inside 5.00-5.50 V
       pass: true
-  dac-trim-centre:
-    corners: 33
-    measures:
-      v_avdd:
-        nominal: 5.01186
-        min: 4.72926
-        min_at: R-REG-SET-HI+ R-REG-SET-LO- TRIM-DAC-RAIL+ i_adj- v_ref-
-        max: 5.30118
-        max_at: R-REG-SET-HI- R-REG-SET-LO+ TRIM-DAC-RAIL- i_adj+ v_ref+
-    asserts:
-    - expr: max['v_avdd'] < p['v_dac_absmax']
-      why: a unit powered before E7, with the trimmer where it ships, cannot damage the DAC
-      pass: true
-  dac-trim-e7:
+  dac-rail-open-rset:
     corners: 5
     measures:
       v_avdd:
-        nominal: 5.2
-        min: 5.2
-        min_at: R-REG-SET-HI- R-REG-SET-LO-
-        max: 5.2
-        max_at: nominal
+        nominal: 11.6991
+        min: 10.4992
+        min_at: i_set- v_in_dac-
+        max: 12.299
+        max_at: i_set- v_in_dac+
     asserts:
-    - expr: abs(nom['v_avdd'] - p['v_dac_set']) < 0.01 and min['v_avdd'] >= 5.0 and max['v_avdd'] <= 5.5
-      why: trimmed, DAC_AVDD is at dac-rail and inside the DAC8568 C grade's 5.0-5.5 V
+    - expr: min['v_avdd'] > p['v_dac_absmax']
+      why: 'RECORDED, NOT FAIL-SAFE: an open R-SET-DAC drives DAC_AVDD UP to the input less the dropout, over the DAC8568''s
+        6 V absolute maximum. It is the one single failure that does - the same class as the LM317L''s open R-REG-SET-LO it
+        replaced - and it is a fixed thin-film part, never adjusted (power-entry.md, The DAC rail)'
       pass: true
-  dac-trim-open-wiper:
-    corners: 33
+  dac-rail-short-cset:
+    corners: 3
     measures:
       v_avdd:
-        nominal: 4.5449
-        min: 4.25617
-        min_at: R-REG-SET-HI+ R-REG-SET-LO- TRIM-DAC-RAIL+ i_adj- v_ref-
-        max: 4.84519
-        max_at: R-REG-SET-HI- R-REG-SET-LO+ TRIM-DAC-RAIL- i_adj+ v_ref+
+        nominal: 9.99923e-08
+        min: 3.60522e-16
+        min_at: k_vos-
+        max: 0.00199995
+        max_at: k_vos+
     asserts:
-    - expr: max['v_avdd'] < p['v_dac_set']
-      why: 'FAIL-SAFE: an open wiper leaves the whole track in the OUT-to-ADJ leg (the wiper is strapped to pin 1), so the
-        rail goes DOWN, never up'
+    - expr: max['v_avdd'] < 0.5
+      why: 'FAIL-SAFE: a shorted C-SET-DAC or R-SET-DAC puts SET at ground and DAC_AVDD goes DOWN, to the offset - the DAC
+        simply stops'
       pass: true
-  dac-trim-open-track:
-    corners: 33
-    measures:
-      v_avdd:
-        nominal: 1.27615
-        min: 1.2
-        min_at: R-REG-SET-HI- R-REG-SET-LO- TRIM-DAC-RAIL- i_adj- v_ref-
-        max: 1.35235
-        max_at: R-REG-SET-HI- R-REG-SET-LO+ TRIM-DAC-RAIL- i_adj+ v_ref+
-    asserts:
-    - expr: max['v_avdd'] < 2.0
-      why: 'FAIL-SAFE: an open track opens the OUT-to-ADJ leg and the LM317L falls to its reference, about 1.3 V - down, never
-        up'
-      pass: true
-  trim-ends-poweron[trim_cw=0.0]:
-    corners: 1
+  dac-rail-startup:
+    corners: 9
     measures:
       avdd_final:
-        nominal: 4.531
-        min: 4.531
-        min_at: nominal
-        max: 4.531
-        max_at: nominal
+        nominal: 5.22982
+        min: 5.11497
+        min_at: C-SET-DAC+ R-SET-DAC- i_set-
+        max: 5.34508
+        max_at: C-SET-DAC- R-SET-DAC+ i_set+
       avdd_peak:
-        nominal: 4.531
-        min: 4.531
-        min_at: nominal
-        max: 4.531
-        max_at: nominal
+        nominal: 5.22982
+        min: 5.11497
+        min_at: C-SET-DAC+ R-SET-DAC- i_set-
+        max: 5.34508
+        max_at: C-SET-DAC- R-SET-DAC+ i_set+
+      t_avdd_floor:
+        nominal: 0.0167962
+        min: 0.014095
+        min_at: C-SET-DAC- R-SET-DAC+ i_set+
+        max: 0.0212533
+        max_at: C-SET-DAC+ R-SET-DAC- i_set-
+      t_avdd_45:
+        nominal: 0.010753
+        min: 0.00963607
+        min_at: C-SET-DAC- R-SET-DAC+ i_set+
+        max: 0.012063
+        max_at: C-SET-DAC+ R-SET-DAC- i_set-
       jack_peak:
-        nominal: 0.00296126
-        min: 0.00296126
+        nominal: 0.00296246
+        min: 0.00296246
         min_at: nominal
-        max: 0.00296126
+        max: 0.00296246
         max_at: nominal
       jack_trough:
-        nominal: -0.0049266
-        min: -0.0049266
+        nominal: -0.00476812
+        min: -0.00476812
         min_at: nominal
-        max: -0.0049266
+        max: -0.00476812
         max_at: nominal
     asserts:
-    - expr: max['avdd_peak'] < p['v_dac_absmax']
-      why: at either end of the trimmer DAC_AVDD never reaches the DAC8568's 6 V absolute maximum on the way up
+    - expr: max['avdd_peak'] <= p['v_dac_hi'] and min['avdd_final'] >= p['v_dac_lo']
+      why: 'the soft start does not overshoot: DAC_AVDD rises to its set point and never above the C grade''s 5.5 V on the
+        way, at every corner of the SET current, R-SET-DAC and C-SET-DAC'
+      pass: true
+    - expr: max['t_avdd_floor'] < 0.05
+      why: and it is over the 5.00 V floor within 50 ms of the bus at every corner (R-SET-DAC x C-SET-DAC, ~5 ms, sets the
+        pace). The instrument's own supply comes through U-ISO and the load switch, whose start alone takes 42 ms or more
+        (umbilical-load-switch/sim, cold-start t_up), and firmware re-writes the DAC's reference-enable and clear-code registers
+        periodically (firmware/README.md); the SPI pins' order against LOGIC_5V is digital-and-supervision/sim's
       pass: true
     - expr: max['jack_peak'] < 0.1 and min['jack_trough'] > -0.1
-      why: and the pitch jack stays within 100 mV of 0 V through the power-up wherever the trimmer is
+      why: and the pitch jack stays within 100 mV of 0 V through the power-up at every corner
       pass: true
-  trim-ends-poweron[trim_cw=1.0]:
+  ptc-tripped:
     corners: 1
     measures:
-      avdd_final:
-        nominal: 5.5612
-        min: 5.5612
+      v_pos12:
+        nominal: 11.4526
+        min: 11.4526
         min_at: nominal
-        max: 5.5612
+        max: 11.4526
+        max_at: nominal
+      avdd_final:
+        nominal: 5.22982
+        min: 5.22982
+        min_at: nominal
+        max: 5.22982
         max_at: nominal
       avdd_peak:
-        nominal: 5.5612
-        min: 5.5612
+        nominal: 5.22982
+        min: 5.22982
         min_at: nominal
-        max: 5.5612
+        max: 5.22982
         max_at: nominal
       jack_peak:
-        nominal: 0.00296126
-        min: 0.00296126
+        nominal: 0.00299516
+        min: 0.00299516
         min_at: nominal
-        max: 0.00296126
+        max: 0.00299516
         max_at: nominal
       jack_trough:
-        nominal: -0.0049266
-        min: -0.0049266
+        nominal: -0.0043501
+        min: -0.0043501
         min_at: nominal
-        max: -0.0049266
+        max: -0.0043501
         max_at: nominal
     asserts:
-    - expr: max['avdd_peak'] < p['v_dac_absmax']
-      why: at either end of the trimmer DAC_AVDD never reaches the DAC8568's 6 V absolute maximum on the way up
+    - expr: nom['avdd_final'] >= p['v_dac_lo'] and nom['avdd_peak'] <= p['v_dac_hi']
+      why: with both rail fuses at their worst an hour after a trip, U-REG-DAC still has its headroom and DAC_AVDD comes up
+        inside the window (the LM317L model it replaced would not converge here)
       pass: true
-    - expr: max['jack_peak'] < 0.1 and min['jack_trough'] > -0.1
-      why: and the pitch jack stays within 100 mV of 0 V through the power-up wherever the trimmer is
+    - expr: nom['jack_peak'] < 0.1 and nom['jack_trough'] > -0.1
+      why: and the pitch jack stays within 100 mV of 0 V
       pass: true

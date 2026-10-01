@@ -20,7 +20,7 @@ The `Dir` and `Peer` columns are defined once in
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
 | `BREATH_SHAPED` | in | `module/breath-response-shaper` | `inamp-full-scale`, `breath-working-point` | The in-amp's output after the response shaper, into the top of `POT-GAIN`; equal to it at `POT-RESP`'s centre detent, so everything below that quotes the in-amp column holds there. Resting at 0 V, because the pedestal is nulled at the in-amp's `REF` |
-| `DAC AVDD` | in | `module/power-entry` | `dac-rail` | `POT-OFFSET`'s counter-clockwise end, straight from the LM317 — no buffer of its own — and the positive leg of the offset pair. The drawing labels the node with the figure's name; the value belongs to `dac-rail` and not to a net name |
+| `DAC AVDD` | in | `module/power-entry` | `dac-rail` | `POT-OFFSET`'s counter-clockwise end, straight from `U-REG-DAC` — no buffer of its own — and the positive leg of the offset pair. The drawing labels the node with the figure's name; the value belongs to `dac-rail` and not to a net name |
 | `MODULE ANALOG +12V`, `MODULE ANALOG −12V` | in | `module/power-entry` | — | Op-amp supplies, and `D-JACK-CLAMP` returns to both rails. `R-OFFNEG`'s fixed leg is on −12 V. Both rails carry the instrument's supply current since ADR 0027, so neither is quiet; what that costs at the jack is under *Offset* |
 | `AGND_MOD` | ref | `module/power-entry` | `dig-gnd-topology` | The module analog star, drawn `AGND(module)`. `R-GAIN-FLOOR`, the summer's (+) input and `C-OUT-BREATH` all return here. It meets the module's other grounds only at the star — see the figure |
 | `BREATH_OUT` | out | `module/panel` | — | The panel jack. Feedback comes from the op-amp output, so `R-OUT-PROT` isolates `C-OUT-BREATH` from the loop. **Not `BREATH_SENSE`**, the umbilical conductor that arrives at the in-amp |
@@ -157,7 +157,7 @@ toward `+` drove the jack to −4.91 V.
 > zero**, which is worse than no detent — so `POT-OFFSET` has none (its row).
 
 `R-OFFNEG` pulls a constant from −12 V; `R-OFF` pushes a variable from the
-LM317's rail, `dac-rail`. **No extra op-amp half, and no negative reference to
+DAC rail, `dac-rail`. **No extra op-amp half, and no negative reference to
 generate** — which is what makes ±5 V cost two resistors instead of a part.
 
 **This wiper does *not* need buffering.** Its source impedance varies from 0 at
@@ -206,11 +206,14 @@ sum has to fit in ±11.5 V.
 
 **The curve knob is in that sum too.** `POT-RESP` sits ahead of `POT-GAIN`, and
 the response shaper is not only a shape: at a hard blow it multiplies the
-in-amp's output by ×0.44 at its log end and by `shaper-exp-gain` at its exp end.
+in-amp's output by ×0.49 at its log end and by `shaper-exp-gain` at its exp end
+(both with `TRIM-RESP` as commissioned, `breath-response-shaper.md`).
 With GAIN left at the noon the commissioning steps below set, turning the curve
 knob fully clockwise puts `BREATH_OUT` on the rail inside real playing — from
-about three-quarters of a hard blow, `breath-chain-curve-clip` `[sim, chain]`.
-At the log end even GAIN's 4× top leaves a hard blow near 8 V. Until the owner
+about four-fifths of a hard blow, `breath-chain-curve-clip` `[sim, chain]`; a
+`TRIM-RESP` left at either end of its travel moves that clip, and the figure
+gives both ends. At the log end even GAIN's 4× top leaves a hard blow near 9 V
+`[calc: 0.49 × 4.64 × 4.02 = 9.1]`. Until the owner
 settles how commissioning and the curve knob relate (open, decided by the owner:
 `docs/review/2026-10-01-pre-layout-review/VERIFIED-F1.md`, A1-1, which carries
 the options with numbers), **re-set GAIN after moving the curve knob.**
@@ -230,8 +233,9 @@ the options with numbers), **re-set GAIN after moving the curve knob.**
   part waits for it.
 - **`POT-OFFSET` has no centre detent**, because its zero is not at centre
   (above). A detent would need the wiper buffered first.
-- **Commissioning order** is three steps: `TRIM-BREATH-ZERO` for the
-  pedestal, then GAIN for the span, then OFFSET for where it rests — and
+- **Commissioning order** is four steps: `TRIM-BREATH-ZERO` for the
+  pedestal, `TRIM-RESP` for the curve's exp end (`breath-response-shaper.md`,
+  *Commissioning*), then GAIN for the span, then OFFSET for where it rests — and
   `POT-RESP` at its centre click while doing it. The first is internal and
   set once; the others are performance controls. **Moving `POT-RESP` afterwards
   moves the level as well as the curve** (*Headroom*, above): which curve

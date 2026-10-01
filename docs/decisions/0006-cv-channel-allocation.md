@@ -150,7 +150,7 @@ Three things make this cheap rather than awkward:
 
 - **Superseded.** This bullet used to claim a gain of 4 from an LT5400 ratio —
   **superseded 2026-09-21.** The mod channels are built from `R-MODGAIN-IN` and
-  `R-MODGAIN-FB`, 10k/30k 1 % discretes, in a two-resistor non-inverting form at **k = 3**, referenced to
+  `R-MODGAIN-FB`, 10k/30k discretes (0.1 % since 2026-10-01), in a two-resistor non-inverting form at **k = 3**, referenced to
   **3.3333 V**. `pitch-stage.md` also shows the LT5400 route is arithmetically
   impossible here — pitch already uses two of its four sections.
 - **The 3.3333 V reference point comes from a buffered DAC channel**, not
@@ -218,11 +218,12 @@ code; see the `U-DAC` BOM row.)*
 >
 > **And it carries a requirement the ADR did not know: the C grade is
 > specified only for AVDD = 5.0 V to 5.5 V**, where A/B are specified from
-> 2.7 V. E7 trims the LM317 to `dac-rail`, inside that window — but
-> `TRIM-DAC-RAIL`'s travel reaches below 5.00 V on every part (`dac-rail`'s
-> derivation, amended 2026-10-01), and a setting
-> below 5.00 V puts the part out of spec. **5.00 V is a hard floor on that
-> bench step**, which nothing in the roadmap said. `bom.csv` carries it now.
+> 2.7 V. `U-REG-DAC` holds `dac-rail` inside that window on every part with
+> nothing to adjust (the LT3042 since 2026-10-01; `dac-rail`'s derivation), and
+> anything below 5.00 V puts the part out of spec. **5.00 V is a hard floor**,
+> which nothing in the roadmap said. `bom.csv` carries it now. *(Until
+> 2026-10-01 the rail was an LM317 set at the E7 bench step, whose range reached
+> below the floor.)*
 >
 > *(A second rider, not binding today: on C/D an external `VREFIN` must stay
 > below AVDD/2. The internal reference is used, so this only forecloses a
@@ -447,9 +448,11 @@ Consequences:
 - Still use a low-drift op-amp (OPA2197-class, not TL072) — offset drift on
   pitch is drift in tuning.
 
-The mod channels run on ordinary discretes, specified at 1 %
-(`mod-channels.md`); nobody's ear cares whether a modulation CV moves a few
-cents' equivalent with temperature.
+The mod channels run on discretes, not a matched network: two thin-film
+resistors per channel, specified at 0.1 % and 25 ppm/°C from one series since
+2026-10-01 (owner, pre-layout review A2-12; `mod-channels.md`) — the part the
+sheet already bought, so the specification costs nothing. Nobody's ear cares
+whether a modulation CV moves a few cents' equivalent with temperature.
 
 This is materially less expensive and less work than treating all six as
 precision outputs.
@@ -672,7 +675,7 @@ divider on the same rail. **Sixty-six decibels off the right node** — the rati
 **Divide the offset trimmer from the DAC8568's `VREFOUT` instead**, buffered by
 the spare OPA2197 half. Three things follow, and the third is the good one:
 
-- `VREFOUT` is a 2.5 V reference inside the part, off the LM317's own rail (`dac-rail`) —
+- `VREFOUT` is a 2.5 V reference inside the part, off the DAC's own rail (`dac-rail`) —
   it does not carry LED current and it does not move when a neighbouring module
   powers up.
 - Buffering it matters for drive: the follower is what lets the trim network
@@ -702,8 +705,8 @@ Two more mechanisms land on the same jack, and they add to the one above:
 > **The 1N5817 row is refuted and struck through, 2026-09-21.** The `V_f`
 > modulation is real and independently confirmed. The **20 cents is not**: it
 > implies ~21 % pitch sensitivity to the +12 V rail, and pitch full scale is
-> set by the DAC's *internal* reference off the LM317, not by +12 V. The real
-> path runs through the LM317's line regulation and the OPA2197's guaranteed
+> set by the DAC's *internal* reference off its own regulator, not by +12 V. The real
+> path runs through that regulator's line regulation and the OPA2197's guaranteed
 > worst-case PSRR, and lands **five orders of magnitude below the smallest
 > other term in this table**. Every number in that chain is the tracked figure
 > `diode-split-rationale`, owned by `power-entry.md`, and is deliberately not

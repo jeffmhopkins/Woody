@@ -119,7 +119,7 @@ components:
     pins:
     - 1
     - 2
-    note: 'PULL-UP TO DAC_AVDD, the LM317''s rail, NOT bus +5V: a pull-up belongs on its consumer''s rail, and on
+    note: 'PULL-UP TO DAC_AVDD, U-REG-DAC''s rail, NOT bus +5V: a pull-up belongs on its consumer''s rail, and on
       the bus rail a reversed ribbon reaches the DAC''s SYNC pin and turns a buffer failure into a DAC failure'
   R-RX-CS:
     of: R-RX-MOD

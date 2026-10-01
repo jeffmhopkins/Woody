@@ -398,7 +398,7 @@ AC feeding what is here a DC-accurate output.
 
 *(A third benefit used to be listed here — the `REF` pin as an injection point
 for a firmware ambient-zero. That mechanism is deleted; `REF` carries a
-**commissioning trimmer**, buffered, derived from the LM317's rail (`dac-rail`). It must tie **hard**, or to a buffer: source impedance on an
+**commissioning trimmer**, buffered, derived from the DAC rail (`dac-rail`). It must tie **hard**, or to a buffer: source impedance on an
 in-amp's `REF` pin adds directly to its internal network and degrades CMRR
 one-for-one, so a divider there would have been the same class of mistake as a
 single-ended capacitor on one input leg.)*
@@ -638,11 +638,11 @@ touched by firmware at all: the in-amp's `REF` pin carries a trimmer set once at
 commissioning, and the panel OFFSET knob is the performance control
 (`hardware/module/breath-receive-stage/breath-receive-stage.md`).
 
-**That trimmer is referenced to the LM317's rail (`dac-rail`), deliberately, and not
+**That trimmer is referenced to the DAC rail (`dac-rail`), deliberately, and not
 to the DAC's `VREFOUT`.** `VREFOUT` is the DAC8568's internal reference, which
 is *disabled at power-on until firmware writes an enable* — deriving the breath
 zero from it would make the analog breath path depend on a DAC register, which
-is exactly what this section says it does not. The LM317 rail is up whenever
+is exactly what this section says it does not. The DAC rail is up whenever
 +12 V is.
 
 **An earlier revision drove `REF` from DAC channel 6** and called it "digital
