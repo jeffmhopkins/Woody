@@ -1,0 +1,43 @@
+* SCENARIO 1, "pitch scoped while the LEDs sweep" (ROADMAP M8, ADR 0006): the whole system
+* (system.lib) on the lumped umbilical, breath held at p_kpa, pitch held (the DAC at v_dac0,
+* jack 0 V), the mod channels at mid-scale, the SPI idle (SCLK and MOSI low, CS high), and
+* the LED row switching between blank and lit: a PWM at f_led with duty d_led, every LED in
+* the row in phase (the worst case: WS2815s run their own oscillators, so in reality they
+* drift in and out of phase). The run is a power-on (system.lib) with the instrument
+* plugged in; everything settles by t_led0, and then the row starts.
+XC m1 m2 m3 m4 m5 m6 m7 m8 i1 i2 i3 i4 i5 i6 i7 i8 UMB_LUMPED
+XS m1 m2 m3 m4 m5 m6 m7 m8 i1 i2 i3 i4 i5 i6 i7 i8
++ ledctl sclkctl mosictl csctl dsck ddin dsync dacp dacm1 dacm2 dacm3 dacm4 plug pplug SYS
+VLED ledctl 0 PULSE(0 {{led_amp}} {{t_led0}} {{t_led_edge}} {{t_led_edge}} {{t_led_on}} {{t_led_per}})
+VSCK sclkctl 0 0
+VMOS mosictl 0 0
+VCSC csctl 0 1
+VDSK dsck 0 0
+VDDI ddin 0 0
+VDSY dsync 0 1
+VDP dacp 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_dac0}})
+VDM1 dacm1 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_mod_code}})
+VDM2 dacm2 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_mod_code}})
+VDM3 dacm3 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_mod_code}})
+VDM4 dacm4 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_mod_code}})
+VPLG plug 0 1
+VPPL pplug 0 1
+.options method=gear abstol=1e-6
+.control
+tran {{t_step_out}} {{t_end_led}} {{t_save0}} {{t_max_step}} uic
+wrdata jp.dat v(xs.jp)
+wrdata jb.dat v(xs.jb)
+wrdata jm1.dat v(xs.jm1)
+wrdata hdrp.dat v(xs.bpos) - v(xs.star)
+wrdata hdrn.dat v(xs.bneg) - v(xs.star)
+wrdata p12.dat v(xs.p12) - v(xs.agnd)
+wrdata n12.dat v(xs.n12) - v(xs.agnd)
+wrdata ins.dat v(xs.ins) - v(xs.ig)
+wrdata vs.dat v(xs.vs) - v(xs.sg)
+wrdata ina.dat v(xs.inaout) - v(xs.agnd)
+wrdata iiso.dat (v(xs.isd) - v(xs.isop)) / {{r_sns}}
+wrdata igm.dat v(xs.ig) - v(xs.pge)
+wrdata agj.dat v(xs.agj)
+quit
+.endc
+.end
