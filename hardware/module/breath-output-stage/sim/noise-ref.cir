@@ -1,0 +1,48 @@
+* THE EXCITATION REFERENCE'S NOISE AT VS, as netlisted (carrier/breath-excitation-reference):
+* TI's REF5050 model on R-REF-IN and its capacitors, U-BUF half A (TI's OPA2197, quieted as
+* noise.cir does it) with R-ISO-REF and its split feedback, VS's capacitors and the sensor's
+* 10 mA - the circuit noise.cir replaces by vs_nom and a generator, e_vs. This deck finds its
+* operating point alone, which noise.cir cannot with the rest of the chain beside it.
+VINST inst12 0 {{v_inst}}
+RRIN inst12 refvin {{R-REF-IN}}
+CRVIN refvin 0 {{C-REF-OUT-VIN}}
+CDVIN refvin 0 {{C-DEC-REF-VIN}}
+XREF refvin ntemp 0 ntrim ref5v REF5050
+RTEMP ntemp 0 1G
+RTRIM ntrim 0 1G
+CROUT ref5v 0 {{C-REF-OUT-VOUT}}
+CDVOUT ref5v 0 {{C-DEC-REF-VOUT}}
+XBR ref5v refm inst12 0 bufo OPAx197
+RFX bufo acm {{R-FBX-REF}}
+CF acm refm {{C-FB-REF}}
+RF vs refm {{R-FB-REF}}
+RISO bufo vs {{R-ISO-REF}}
+CDS vs 0 {{C-DEC-SENSOR}}
+CVSB vs 0 {{C-SENSOR-VS-BULK}}
+CVSH vs 0 {{C-SENSOR-VS-HF}}
+ISENS vs 0 DC {{i_sensor}}
+VDUM nin 0 DC 0 AC 1
+RDUM nin 0 1k
+.options method=gear rshunt=1e10
+.control
+set opaq = ( r_r1 r_r10 r_r11 r_r12 r_r13 r_r14 r_r15 r_r16 r_r17 r_r18 r_r19 r_r2 r_r20 r_r21 r_r22 r_r23 r_r24 r_r3 r_r32 r_r33 r_r34 r_r35 r_r36 r_r4 r_r40 r_r41 r_r42 r_r43 r_r46 r_r47 r_r48 r_r49 r_r5 r_r50 r_r51 r_r52 r_r53 r_r54 r_r55 r_r56 r_r57 r_r58 r_r59 r_r6 r_r60 r_r61 r_r62 r_r63 r_r64 r_r65 r_r66 r_r67 r_r68 r_r69 r_r7 r_r70 r_r71 r_r72 r_r73 r_r74 r_r75 r_r76 r_r77 r_r78 r_r79 r_r8 r_r80 r_r81 r_r82 r_r83 r_r84 r_r85 r_r86 r_r87 r_r88 r_r89 r_r9 r_r90 r_r91 r_r92 r_r_diff r_rdummy r_rx r_rx1 r_rx2 r_rx3 r_rx4 )
+foreach r $opaq
+  alter r.xbr.{$r} noisy = 0
+end
+alter rtemp noisy = 0
+alter rtrim noisy = 0
+op
+let vs_op = v(vs)
+print vs_op
+* the datasheet's band, 10 Hz to 1 kHz, and the audio band
+noise v(vs) vdum dec 20 10 1k 1
+let vs_rms_10_1k = onoise_total
+print vs_rms_10_1k
+noise v(vs) vdum dec 20 {{f_au_lo}} {{f_au_hi}} 1
+let vs_rms_au = onoise_total
+print vs_rms_au
+setplot previous
+wrdata vsn.dat onoise_spectrum
+quit
+.endc
+.end

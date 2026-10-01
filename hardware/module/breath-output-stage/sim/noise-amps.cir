@@ -1,0 +1,49 @@
+* THE MODELS' NOISE AGAINST THEIR DATASHEETS, as noise.cir quiets them: an OPA2197 half as a
+* follower, and the INA828 at G = 1 (R_G open) and G = 1 + 50k/R_G = 1001, its spec's two
+* conditions (SBOS792A p.5: e_NO at G = 1, e_NI at G = 100 and up, R_G's own noise excluded,
+* so R_G is noiseless here). Spot densities at 1 kHz, the datasheets' frequency.
+VP pos 0 {{v_pos}}
+VN neg 0 {{v_neg}}
+VI1 i1 0 DC 0 AC 1
+XO1 i1 o1 pos neg o1 OPAx197
+VI2 i2 0 DC 0 AC 1
+XI2 i2 0 pos neg o2 0 g2a g2b INA828
+RG2 g2a g2b 1e12
+VI3 i3 0 DC 0 AC 1
+XI3 i3 0 pos neg o3 0 g3a g3b INA828
+RG3 g3a g3b {{r_g_1001}}
+.options method=gear rshunt=1e10
+.control
+* every R_NOISELESS instance silenced, as in noise.cir (which says why)
+set opaq = ( r_r1 r_r10 r_r11 r_r12 r_r13 r_r14 r_r15 r_r16 r_r17 r_r18 r_r19 r_r2 r_r20 r_r21 r_r22 r_r23 r_r24 r_r3 r_r32 r_r33 r_r34 r_r35 r_r36 r_r4 r_r40 r_r41 r_r42 r_r43 r_r46 r_r47 r_r48 r_r49 r_r5 r_r50 r_r51 r_r52 r_r53 r_r54 r_r55 r_r56 r_r57 r_r58 r_r59 r_r6 r_r60 r_r61 r_r62 r_r63 r_r64 r_r65 r_r66 r_r67 r_r68 r_r69 r_r7 r_r70 r_r71 r_r72 r_r73 r_r74 r_r75 r_r76 r_r77 r_r78 r_r79 r_r8 r_r80 r_r81 r_r82 r_r83 r_r84 r_r85 r_r86 r_r87 r_r88 r_r89 r_r9 r_r90 r_r91 r_r92 r_r_diff r_rdummy r_rx r_rx1 r_rx2 r_rx3 r_rx4 )
+set inaq = ( r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 r11 r12 r13 r14 r15 r16 r17 r18 r19 r20 r21 r22 r23 r24 r25 r26 r29 r31 r32 r39 r40 r41 r42 r43 r46 r48 r49 r56 r57 r58 r59 r60 r61 r62 r63 r64 r65 r66 r67 r68 r69 r70 r71 r72 r73 r74 r75 r76 r77 r78 r79 r80 r81 r82 r83 r84 r85 r86 r87 r88 r89 r90 r91 r92 r93 r94 r95 r96 r97 r98 r99 r100 r101 r102 r103 r104 r105 r106 r107 r108 r109 r110 r111 r112 r113 r114 r115 r116 r117 r118 r119 r120 r121 r122 r123 r124 r125 r126 r127 r128 r129 r130 r131 r132 r133 r134 r135 r136 r137 r138 r139 r140 r141 r142 r143 r144 r145 r146 r147 r148 r149 r150 r151 r152 r153 r154 r155 r156 r157 r158 r159 r160 r161 r162 r163 r164 r165 r166 r168 rb1 rb2 rdc1 rdc2 rdc3 rdummy1 rdummy2 rdummy3 rf1 rf2 rmid rsrc1 rsrc2 rsrc3 rsrc4 rx1 rx2 rx3 )
+foreach r $opaq
+  alter r.xo1.{$r} noisy = 0
+end
+foreach x xi2 xi3
+  foreach r $inaq
+    alter r.{$x}.{$r} noisy = 0
+  end
+end
+alter rg2 noisy = 0
+alter rg3 noisy = 0
+noise v(o1) vi1 dec 10 1k 1k
+let opa_1k = onoise_spectrum * 1e9
+print opa_1k
+noise v(o2) vi2 dec 10 1k 1k
+let ina_eno_1k = onoise_spectrum * 1e9
+print ina_eno_1k
+noise v(o3) vi3 dec 10 1k 1k
+let ina_eni_1k = inoise_spectrum * 1e9
+print ina_eni_1k
+
+* and the unquieted follower, which is why the lists exist
+foreach r $opaq
+  alter r.xo1.{$r} noisy = 1
+end
+noise v(o1) vi1 dec 10 1k 1k
+let opa_1k_unquiet = onoise_spectrum * 1e9
+print opa_1k_unquiet
+quit
+.endc
+.end

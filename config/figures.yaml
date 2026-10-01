@@ -702,6 +702,16 @@ figures:
     conditional_on: "breath-working-point (disputed, E2): the clip is an in-amp voltage; how much of real playing lies past it is E2's"
     open: "Whether commissioning should be done at a curve setting other than the centre click, or the stage rescaled, is the owner's (A1-1, docs/review/2026-10-01-pre-layout-review/VERIFIED-F1.md). Until then breath-output-stage.md says to re-set GAIN after moving the curve knob."
     forbidden: ["-3.51 V, 0.76x", "−3.51 V, 0.76×", "0.76× — inside real playing", "a hard blow reaches 4.36 V", "| 0.436× | 4.36 V", "about 7.7 V at full scale"]
+  - id: breath-jack-noise
+    quantity: Noise at the breath jack, sensor to jack, at the commissioned setting (POT-RESP at its centre click, GAIN at noon, OFFSET at its zero, TRIM-RESP commissioned), and at the instrument's ADC_IN
+    value: "0.29 mV rms over 1-459 Hz (-91 dB of 10 V, about 1.9 mV peak-to-peak) and 0.32 mV rms over 20 Hz-20 kHz, at rest and at a hard blow alike; all but 11 uV rms of it the sensor's, on an assumed sensor noise; ADC_IN 0.082 LSB rms"
+    status: settled
+    owner: hardware/module/breath-output-stage/sim/README.md
+    derivation: "[sim] python3 tools/sim.py run hardware/module/breath-output-stage/sim, 2026-10-01, ngspice 42. Sim noise: the chain as netlisted across six circuits (TI's OPA2197 and INA828 models with their R_NOISELESS resistors silenced, which ngspice 42 does not do; noise-amps holds them to their datasheets), cut at the INA828's output into two pieces and recombined. Control band 1 Hz to the link's pole (459 Hz): 0.293 mV rms total, 0.2929 mV the sensor's, 11.2 uV the electronics' (DAC_AVDD's SET-pin noise 7.8, VS through the sensor's ratio 5.5, the receive stage 4.3, the shaper 2.8, this stage 2.6 uV). 20 Hz-20 kHz 0.321 mV. Fully counter-clockwise a hard blow gives 0.108 mV; fully clockwise at noon gain the jack is clipped (breath-chain-curve-clip). ADC_IN: 66 uV rms over 1 Hz-1 MHz, 0.082 LSB of the MCP3202 at 3.3 V. [calc] 20 log(0.293 mV / 10 V) = -90.7 dB; x 6.6 = 1.9 mV pk-pk."
+    conditional_on: "THE SENSOR'S NOISE, AN ASSUMPTION: no MPXV4006DP datasheet gives one; NXP's AN1646 (measured on the MPX5006) gives '4 or 5 counts on a 10-bit A/D' over 500 Hz-1 MHz, taken as 5 counts pk-pk, Gaussian, white from DC: 3.70 uV/rtHz, an upper bound in the breath band. The electronics' 11 uV does not depend on it. Also breath-working-point (disputed, E2) for what 'a hard blow' is."
+    open: "No page states a noise requirement; a limit is the owner's (what the breath CV drives decides it: e.g. -80 dB of 10 V in the audio band, which this clears by 10 dB). E11's scope of the jack measures the sensor's term."
+    forbidden: ["about 10 mV peak-to-peak", "electronics add about 6 µV rms", "≈250 nV/√Hz over ~500 Hz"]
+    forbidden_note: "The A1-16 estimate (pre-layout review, 2026-10-01): the sensor's raw pk-pk behind the link's pole times 4.66, and the electronics at 250 nV/rtHz over 500 Hz, without the DAC_AVDD term."
   - id: adc-sample-kickback
     quantity: The MCP3202's sample capacitor against C-AA-ADC, the sampled value's shortfall at the sensor's full scale (a gain term)
     value: "2.6 LSB nominal, 3.3 LSB worst corner"

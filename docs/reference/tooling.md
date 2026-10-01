@@ -653,6 +653,21 @@ so.
   starts at 0 V drives it negative and trips everything upstream; a load that
   is off until its supply arrives is a current scaled by the voltage
   (`power-entry-instrument/sim`).
+- **TI's "noiseless" resistors are noisy in ngspice 42.** TI's macromodels mark
+  their bookkeeping resistors `R_NOISELESS` with PSpice's `T_ABS=-273.15`, which
+  ngspice 42 ignores for noise: an OPA2197 follower read 868 nV/√Hz, all of it
+  one 2.2 Ω resistor, against the datasheet's 5.5. A `.noise` deck silences each
+  one by name with `alter … noisy = 0` and proves the result against the
+  datasheet (`breath-output-stage/sim`, `noise.cir` and `noise-amps`, 2026-10-01).
+- **A long chain of macromodels may find no operating point as one circuit**
+  even where each piece does. The breath chain, sensor to jack, does not; cut at
+  an op-amp output into two disconnected pieces in one deck, each converges, and
+  the noise is recombined as piece A's spectrum × piece B's |H|² plus piece B's
+  own (`breath-output-stage/sim/noise.cir`). A non-zero `gminsteps` other than
+  the default switches ngspice to spice3 gmin stepping, which helped one piece
+  and broke another; `itl1=1000 itl2=1000 gminsteps=0` (no gmin stepping, straight
+  to source stepping) found both, at rest and at a hard blow, in under a second
+  where the failing gmin attempts had taken ten.
 - **A threshold test must not mix parts.** "Never below VT− max after crossing
   VT+ min" fails on a perfect edge, because across the datasheet's spread VT−
   max is above VT+ min. The test is the waveform's swing back after its first
@@ -672,7 +687,7 @@ so.
 | the umbilical load switch's start, with a behavioural LT1641 built from its datasheet | `hardware/module/umbilical-load-switch/sim/` |
 | SCLK, MOSI and CS_MOD over the umbilical as coupled lossy lines (ngspice `CPL`), from a banked Cat5e datasheet, through each line's pull and `R-RX-MOD`/`C-RX-MOD` into the receiver `U-RX-MOD` (74AHCT14) | `hardware/interfaces/spi-link/sim/` |
 | the four mod channels and their shared reference: range, a stale or wrong `V_ref`, a step and the loop into a passive mult, crosstalk | `hardware/module/mod-channels/sim/` |
-| the breath output stage: its offset table, gain ends, clip, a step and the loop into a passive mult, the −12 V rail's path to the jack, and the chain — the response shaper and this stage one after the other, at the commissioned setting and across `POT-RESP` | `hardware/module/breath-output-stage/sim/` |
+| the breath output stage: its offset table, gain ends, clip, a step and the loop into a passive mult, the −12 V rail's path to the jack, and the chain — the response shaper and this stage one after the other, at the commissioned setting and across `POT-RESP`; and the whole breath chain's noise, sensor to jack and to the instrument's ADC, per stage (TI's OPA2197, INA828 and REF5050 models, each held to its datasheet) | `hardware/module/breath-output-stage/sim/` |
 | the response shaper's curve at `POT-RESP`'s ends and centre, and its clip, with a behavioural `D-RESP` fitted to the 1N4448W's guaranteed window; `TRIM-RESP` commissioned in the deck (bisected to its target per corner) and at both ends of its travel, 0–40 °C | `hardware/module/breath-response-shaper/sim/` |
 | the breath ADC's anti-alias filter, its time constant, and the MCP3202's sample capacitor against it | `hardware/carrier/breath-adc/sim/` |
 | the instrument's input LC against the buck's negative resistance, and its start from `U-ISO` through the load switch and the cable, cold and hot-plugged | `hardware/carrier/power-entry-instrument/sim/` |
