@@ -8,7 +8,7 @@ inputs:
   hardware/module/panel-led/netlist.yaml: 5a2fba94bdeabd3f
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
   hardware/module/panel-led/sim/led.cir: 1f677a26d971c1ff
-  hardware/module/power-entry/sim/sims.yaml: 4b9e184c206aa08b
+  hardware/module/power-entry/sim/sims.yaml: e471145ca3848b47
   figure:dac-rail: 5.23 V
 ngspice: '42'
 sims:
