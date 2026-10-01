@@ -360,6 +360,59 @@ ribbons in both directions**, so it tells "a ribbon is unplugged" from
 "one bit is stuck", which the static marker cannot. Fit the resistor; E4
 decides whether firmware uses it.
 
+**How firmware drives it** (2026-10-01, pre-layout review A5-4). Not as SPI3's
+`MOSI`: in mode 2 a host launches `MOSI` on the rising edge, which is the edge
+`left_hand` samples `SER` on, with 0 ns of hold `[ds
+SN74HCS165-ti-scls828a.pdf p.7]`. `IO33` and `SCK` each pass an `R-CHAIN-SER`
+into different loads, and `SCK`'s is the heavier (both thumbs, two ribbons
+and `U-TVS-CHAIN`, against one ribbon and one input), so the new bit can
+arrive first and the pattern read back shifted by one. The self-test drives
+`IO33` as a GPIO and changes it only while `SCK` is idle; a constant level
+shifted through the whole chain, then the other level, is exact, and a
+walking pattern accepts a one-bit shift. `firmware/README.md`, *What the
+hardware requires*, carries it.
+
+## The hop hold time
+
+*Added 2026-10-01 (pre-layout review A5-2; `sim/`, `hop-hold-lt-to-rh`).*
+
+Every page argued the hop's **setup** — `QH` → next `SER` is data sampled a
+whole period later. The **hold** is the other side of the same edge: the
+downstream register samples `SER` on the `CLK`↑ that makes the upstream `QH`
+change, so `QH` must not reach it before its own clock does. Two of the three
+hops cannot race: `left_hand` → `left_thumb` and `right_hand` → `right_thumb`
+feed a main-board register, which is clocked first. The third,
+**`left_thumb` → `right_hand` (`HOP_LT_RH`)**, feeds a key-board register
+clocked at the far end of its ribbon, through `R-CHAIN-SER`'s RC.
+
+The ribbon's flight is the same for `SCK` and for the hop, so it cancels. What
+is left is the thresholds: the registers' `V_T+` can sit anywhere in a band
+that is a large fraction of `VCC`, and on an RC edge that is time. With
+`left_thumb` clocking at the lowest `V_T+` and `right_hand` at the highest, the
+run gives **6–12 ns of clock skew** and the hop's data **reaching
+`right_hand`'s `SER` 1–5 ns after `left_thumb`'s clock** — before
+`right_hand`'s clock, at every corner. **The hop holds only on `left_thumb`'s
+`CLK`→`QH` propagation delay, which must be at least ~11 ns** (`need_tpd`, the
+run's assertion against 12 ns). **TI publishes a maximum only** (16/18 ns at
+4.5 V, 32/45 ns at 2 V `[ds p.7]`), so nothing guarantees it.
+
+**It is probably fine and it is not known.** An HC-family register's delay at
+3.3 V is unlikely to be under 11 ns `[judgment, from memory]`, and the
+thresholds of two registers on one board are unlikely to sit at opposite ends
+of the band. A failure would duplicate a bit and shift the frame, which the
+marker reports as a framing error, not a wrong note. **E14 decides**, on the
+real boards: scope `right_hand`'s `CLK` (its `J-CHAIN` pin 11) against
+`left_thumb`'s `QH` at `right_hand`'s `SER` (pin 7), both at the register's
+pins, and show `SER` still steady for at least 1 ns after `CLK` crosses mid-rail
+at both edges of the data, with the marker counter at zero over a long run.
+
+**The owner's option if E14 is tight, or before layout:** a series resistor
+at `left_thumb`'s `QH` on `HOP_LT_RH`. At 2.2 kΩ the hop holds with no
+propagation delay at all, by 3–13 ns rising and 12–22 ns falling
+(`hop-hold-with-series-r`, recorded), and its data still arrives within
+30 ns of a 1 µs period. Not fitted: a part on the main board's sheet, which is
+the owner's call (`docs/review/2026-10-01-pre-layout-review/VERIFIED-F3.md`).
+
 **The other hops' inputs get no pull-up** (owner, 2026-09-30: "B"). With a
 ribbon unplugged, `right_thumb`'s or `left_thumb`'s `SER` — the main-board end
 of that ribbon's pin 8 — floats. It costs nothing in play, because the lid is

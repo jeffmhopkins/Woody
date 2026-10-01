@@ -4,13 +4,14 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/interfaces/key-chain-loom/sim/sims.yaml: 2c9f3e5b84fbb5d3
+  hardware/interfaces/key-chain-loom/sim/sims.yaml: 6a3d25f44c04b95f
   hardware/boards/key-board-lh/board-netlist.yaml: 83dd5aa2b99e144f
   hardware/interfaces/key-chain-loom/sim/rail.cir: 537b273e07928b72
   hardware/interfaces/key-chain-loom/sim/edge.cir: af73f23cc4332e65
   hardware/interfaces/key-chain-loom/sim/rail-ac.cir: 3bc2f2ac7bb9405b
   hardware/interfaces/key-chain-loom/sim/sck.cir: a04949a3038b52ce
   hardware/interfaces/key-chain-loom/sim/qh.cir: 8c6cb42b05dc8c84
+  hardware/interfaces/key-chain-loom/sim/hold.cir: 383655180bf34f85
   datasheets/discrete-and-power/BLM21SP601SN1-murata-spice.lib: e858b365fef2f77b
   hardware/cluster/key-switch-network/sim/sims.yaml: 28274e715669f42e
   bom:R-CHAIN-SER: 100R 1%
@@ -256,3 +257,125 @@ sims:
     - expr: max['v_over'] < p['vcc_over'] and min['v_under'] > -0.5
       why: and without overshoot past its input clamp
       pass: true
+  hop-hold-lt-to-rh[q_up=1]:
+    corners: 65
+    measures:
+      clk_skew:
+        nominal: 9.12599e-09
+        min: 5.67385e-09
+        min_at: c_main- c_tvs- r_drv- r_qh- tr_drv+ tr_qh+
+        max: 1.21471e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh+
+      ser_delay:
+        nominal: 2.71613e-09
+        min: 1.24037e-09
+        min_at: c_main- c_tvs- r_drv+ r_qh- tr_drv- tr_qh-
+        max: 3.65213e-09
+        max_at: c_main+ c_tvs+ r_drv+ r_qh+ tr_drv- tr_qh+
+      hold_margin:
+        nominal: -6.40986e-09
+        min: -1.08986e-08
+        min_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
+        max: -2.02851e-09
+        max_at: c_main- c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
+      need_tpd:
+        nominal: 6.40986e-09
+        min: 2.02851e-09
+        min_at: c_main- c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
+        max: 1.08986e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
+    asserts:
+    - expr: max['need_tpd'] < p['tpd_bench']
+      why: 'A5-2: the hop holds at every corner if left_thumb''s CLK-to-QH delay is at least tpd_bench. TI publishes no minimum,
+        so this is NOT a guarantee: it is the number E14 must confirm (key-chain-loom.md, ''The hop hold time''), and this
+        assertion fails if the clock''s skew between the boards grows past it'
+      pass: true
+  hop-hold-lt-to-rh[q_up=0]:
+    corners: 65
+    measures:
+      clk_skew:
+        nominal: 9.12599e-09
+        min: 5.67385e-09
+        min_at: c_main- c_tvs- r_drv- r_qh- tr_drv+ tr_qh+
+        max: 1.21471e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh+
+      ser_delay:
+        nominal: 3.7617e-09
+        min: 1.565e-09
+        min_at: c_main- c_tvs- r_drv+ r_qh- tr_drv- tr_qh-
+        max: 5.02505e-09
+        max_at: c_main+ c_tvs+ r_drv+ r_qh+ tr_drv- tr_qh+
+      hold_margin:
+        nominal: -5.36429e-09
+        min: -1.05739e-08
+        min_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
+        max: -6.56517e-10
+        max_at: c_main- c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
+      need_tpd:
+        nominal: 5.36429e-09
+        min: 6.56517e-10
+        min_at: c_main- c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
+        max: 1.05739e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
+    asserts:
+    - expr: max['need_tpd'] < p['tpd_bench']
+      why: 'A5-2: the hop holds at every corner if left_thumb''s CLK-to-QH delay is at least tpd_bench. TI publishes no minimum,
+        so this is NOT a guarantee: it is the number E14 must confirm (key-chain-loom.md, ''The hop hold time''), and this
+        assertion fails if the clock''s skew between the boards grows past it'
+      pass: true
+  hop-hold-with-series-r[q_up=1]:
+    corners: 65
+    measures:
+      clk_skew:
+        nominal: 9.12598e-09
+        min: 5.67385e-09
+        min_at: c_main- c_tvs- r_drv- r_qh- tr_drv+ tr_qh+
+        max: 1.21471e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
+      ser_delay:
+        nominal: 1.79147e-08
+        min: 1.53518e-08
+        min_at: c_main- c_tvs- r_drv+ r_qh- tr_drv- tr_qh-
+        max: 1.91243e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh+ tr_drv- tr_qh+
+      hold_margin:
+        nominal: 8.78874e-09
+        min: 3.21293e-09
+        min_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
+        max: 1.34426e-08
+        max_at: c_main- c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
+      need_tpd:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 0.0
+        max_at: nominal
+    asserts: []
+  hop-hold-with-series-r[q_up=0]:
+    corners: 65
+    measures:
+      clk_skew:
+        nominal: 9.12598e-09
+        min: 5.67385e-09
+        min_at: c_main- c_tvs- r_drv- r_qh- tr_drv+ tr_qh+
+        max: 1.21471e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
+      ser_delay:
+        nominal: 2.65644e-08
+        min: 2.38141e-08
+        min_at: c_main- c_tvs- r_drv+ r_qh- tr_drv- tr_qh-
+        max: 2.79807e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh+ tr_drv- tr_qh+
+      hold_margin:
+        nominal: 1.74384e-08
+        min: 1.16752e-08
+        min_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
+        max: 2.23012e-08
+        max_at: c_main- c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
+      need_tpd:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 0.0
+        max_at: nominal
+    asserts: []

@@ -363,7 +363,7 @@ figures:
     value: "82 ohm, R-SPI-SER, qty 3"
     status: settled
     owner: hardware/interfaces/spi-link/spi-link.md
-    derivation: "2 m of Cat5 is a 100-ohm transmission line. With the pad's own 17-35 ohm, 82 ohm puts the source at 99-117 ohm against the line's 88-112 ohm: the far end's first rising step is 3.04-3.32 V and the falling one 0.00-0.26 V [calc, against 100 ohm: 3.3 x 2 x 100/(R_s + 100) and 3.3 x (R_s - 100)/(R_s + 100)]. At 220R the rising first step is 1.83 V against a 2.0 V V_IH. Short-circuit current 3.3 V / (82 + 17) = 33 mA at the pad's strongest drive, under its 40 mA. Chosen with U-TVS-SPI on the pad side (owner, 2026-09-30; cs-fall-reentry, interfaces/spi-link/sim)."
+    derivation: "2 m of Cat5 is a 100-ohm transmission line. With the pad's own 17-35 ohm, 82 ohm puts the source at 99-117 ohm against the line's 88-112 ohm: the far end's first rising step is 3.04-3.32 V and the falling one 0.00-0.26 V [calc, against 100 ohm: 3.3 x 2 x 100/(R_s + 100) and 3.3 x (R_s - 100)/(R_s + 100)]. At 220R the rising first step is 1.83 V against a 2.0 V V_IH. Short-circuit current 3.3 V / (82 + 17) = 33 mA at the pad's strongest drive (the datasheet's 40 mA there is a typical drive figure, not a limit: ESP32-S3 datasheet Table 5-4 against Table 5-1). Chosen with U-TVS-SPI on the pad side (owner, 2026-09-30; cs-fall-reentry, interfaces/spi-link/sim)."
     # "220 Ω with\n~200 pF" was carried here as ONE pattern with the corpus's
     # hard wrap baked into it, so it could never match the line-joined stream
     # the checker searches - indistinguishable in every report from a pattern
@@ -695,11 +695,11 @@ figures:
     false_positive_note: "Both spellings are the value before Q-INRUSH, when every hot-plug reached the threshold. A page narrating that history names the figure instead of the number."
   - id: loop-budget
     quantity: Real-time loop, one pass
-    value: "196-241 us of 250 us"
+    value: "186-227 us of 250 us"
     status: settled
     owner: docs/reference/latency-budget.md
-    derivation: "Bus time 148-155 us PLUS ESP-IDF per-transaction overhead (24 us interrupt / 9 us polling) which no document counted. 291 us with driver defaults - does not close. Polling transactions on an acquired bus are not an optimisation, they are what makes 4 kHz reachable."
-    forbidden: ["key chain 16 µs", "chain read | < 10", "SAR ADC conversion ~50", "ADC 24 µs + key chain 16", "136 µs", "136 us", "54 % duty"]
+    derivation: "[calc] Polling transactions, 9 us ESP-IDF overhead each. SPI2: six DAC frames (6 x 32 bits at 2 MHz = 96 us) and one ADC read (24 clocks at 0.9 MHz = 26.7 us), seven transactions; SPI3: the key chain (32 bits at 1 MHz = 32 us), one. Chain concurrent on SPI3: 7 x 9 + 96 + 26.7 = 185.7 us; serialised: 8 x 9 + 96 + 26.7 + 32 = 226.7 us. Interrupt-driven (24 us each) it is 290.7 us concurrent and 346.7 us serialised - does not close. Polling transactions on an acquired bus are not an optimisation, they are what makes 4 kHz reachable. Re-derived 2026-10-01 (pre-layout review A5-13): the range before did not reproduce from any transaction count."
+    forbidden: ["key chain 16 µs", "chain read | < 10", "SAR ADC conversion ~50", "ADC 24 µs + key chain 16", "136 µs", "136 us", "54 % duty", "196–241 µs", "196-241 us", "196–241", "196-241", "DAC update + settle | ~60 µs", "~24 µs, 18 clocks", "**~24 µs** | 18 clocks"]
     false_positive_note: "50-200 us appears legitimately in text that REFUTES it. Match unrefuted bookings only."
     escape_note: |
       THE OWNER DID NOT STATE THIS FIGURE, AND THE CHECK PASSED IT ANYWAY.
