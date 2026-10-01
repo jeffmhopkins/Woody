@@ -663,11 +663,11 @@ figures:
     forbidden: ["1.7 dB of margin", "1.7 dB of claimed margin"]
   - id: pitch-mult-overshoot
     quantity: Pitch jack overshoot on an octave step, into a passive mult to another output's jack capacitor
-    value: "41.8 % at 82 nF, 64.1 % at 330 nF"
+    value: "41.6 % at 82 nF, 64.0 % at 330 nF"
     status: settled
     owner: hardware/module/pitch-stage/sim/README.md
-    derivation: "[sim] python3 tools/sim.py run hardware/module/pitch-stage/sim, 2026-09-30, ngspice 42 with TI's OPA2197 PSpice model. Sim step-mult, nominal: the stage as netlisted with the other jack's C-FILT-MOD-1 (82 nF) or C-OUT-BREATH (330 nF) on PITCH; corners of C-FB-PITCH, C-FILT-PITCH and R-OUT-PROT move it about 1 point. The loop's phase margin is 69.3 deg at 10 MHz at every load (sim loop): the AC sweep cannot see it. With the other output's R-OUT-PROT to its driver also on the jack: 15.3 % and 41.8 %."
-    forbidden: ["44–67 %", "65.4 %"]
+    derivation: "[sim] python3 tools/sim.py run hardware/module/pitch-stage/sim, 2026-10-01, ngspice 42 with TI's OPA2197 PSpice model. Sim step-mult, nominal: the stage as netlisted (pitch-stage.lib: the V_ref trim network and follower, R-GAIN-CTR, both trims at mid-travel, D-ESD-PITCH) with the other jack's C-FILT-MOD-1 (82 nF) or C-OUT-BREATH (330 nF) on PITCH; corners of C-FB-PITCH, C-FILT-PITCH, R-OUT-PROT and D-ESD-PITCH's capacitance move it about 1 point. The loop's phase margin is 69.3 deg at 10 MHz at every load (sim loop): the AC sweep cannot see it. With the other output's R-OUT-PROT to its driver also on the jack: 15.1 % and 41.6 %."
+    forbidden: ["44–67 %", "65.4 %", "41.8 % at 82 nF", "64.1 % at 330 nF"]
   - id: cs-fall-reentry
     quantity: CS_MOD's falling edge at the module - how far it swings back up once past the threshold. At U-RX-MOD's Schmitt input (behind R-RX-CS and C-RX-CS) against the whole V_T spread; at the cable node against a plain TTL input's V_IL (0.8 V)
     value: "0.10 V past V_IL at the cable node at the worst corner, none at the nominal; none at the Schmitt receiver's input at any corner"

@@ -96,6 +96,12 @@ earlier revision of this ADR said 3 W). Over 2 m of 24 AWG, round trip ~0.34 Ω:
 | **12 V** | 359 mA | 122 mV cable + 400 mV Schottky + 60 mV | **~11.4 V** | **5%** |
 | 5 V | 862 mA | ~290 mV cable alone | ~4.7 V | 6%+ |
 
+*(Amended 2026-10-01: the 12 V row subtracts the module's entry Schottky,
+which the umbilical's feed no longer passes through — since ADR 0027 it is
+`U-ISO`'s isolated 12 V through the load switch, so about 11.8 V arrives
+`[calc: 12 − 0.122 − 0.06]`, within `U-ISO`'s ±3.1 % (`power-entry.md`). The
+comparison with 5 V stands.)*
+
 The same power at a lower voltage means proportionally more current, and drop
 scales with current. At 5 V the instrument would see **~4.7 V** — *outside* the
 MPXV4006DP's 5.00 ±0.25 V specification, and that sensor is **ratiometric**, so

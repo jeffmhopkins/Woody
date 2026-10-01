@@ -48,11 +48,11 @@ lead drives nothing into that pair; and it **failed toward "present"** on the
 most likely single fault in its own chain.
 
 **`OE` is tied enabled**, which is what every surveyed Eurorack module does.
-The floating-CMOS case it was protecting against is what the six `R-SPI-PULL`
-resistors are for. The panel LED becomes an ordinary power indicator.
+The floating-CMOS case it was protecting against is what the module's SPI
+pulls are for — the five `R-SPI-PULL` and `R-PULL-CS`. The panel LED becomes an ordinary power indicator.
 
 **The knowing moved to the instrument**, which digitises breath anyway and has
-a display to report on. The accepted loss is that the instrument's ADC reads
+its LEDs (ADR 0028) and USB (ADR 0015) to report on. The accepted loss is that the instrument's ADC reads
 *before* the umbilical, so a broken conductor in the cable is invisible to it —
 audible immediately, and in a replaceable part rather than a sealed one. Full
 reasoning in ADR 0004.

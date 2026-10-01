@@ -241,7 +241,8 @@ each other — which is both cheaper and more useful.
 ## Still open
 
 - **Per-channel scale and offset are firmware, not hardware.** ADR 0006 puts
-  source, scale, offset, curve and slew on the instrument's display. This stage
+  source, scale, offset, curve and slew in the instrument's configuration
+  (over USB, ADR 0015). This stage
   is a fixed ±10 V window and stays that way.
 - **Whether all four channels need the full ±10 V.** They are generic by
   decision, so yes for now — but if E10 finds that nothing in the rack wants

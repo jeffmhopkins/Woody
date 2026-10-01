@@ -197,7 +197,7 @@ came out of the analog design review specifically.
 | **Breath zero vs cavity temperature** | M8 | The DP's reference port is open to the cavity, so the cavity must leak. Watch the zero during the same soak — a walking zero means it is sealing more than assumed. **The body opens, so a vent can be added at M8 or afterwards** — and a body that closes on a gasket rather than an adhesive is likelier to leak enough on its own (ADR 0003, ADR 0009) |
 | **PSRAM mode on the ESP32-S3-Matrix** | E1 | **No longer a gate** — settled on paper two ways: the vendor board file exposes GPIO33–40 as headers, which octal PSRAM makes impossible, and `R2` is Espressif's suffix for 2 MB *quad*; and the vendor schematic (`datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-SCHEMATIC.pdf`) marks `U66` as `ESP32-S3FH4R2`, quad PSRAM in the package. 17 broken out; the spares are ADR 0007's pin table. Print the pin list anyway; it costs thirty seconds and catches a silent board revision (ADR 0007) |
 | **DAC saturation vs AVDD** | E7 | Full scale is 5.000 V from the internal reference at gain 2, *independent* of AVDD — what AVDD decides is whether the output buffer can reach it. Raise the top codes and find where they start compressing; that measurement is also what selects the LM317's divider (ADR 0004, ADR 0005) |
-| **Pitch DC load sweep: open / 100k / 50k / 33k** | E9 | Quantifies the 1 kΩ divider error against the real patch, and tells you how much a re-mult actually shifts tuning (ADR 0006) |
+| **Pitch DC load sweep: open / 100k / 50k / 33k** | E9 | Verifies a zero: with DC feedback tapped at the jack the 1 kΩ divider error is zero by construction for any load (`pitch-stage.md`; `sim/`'s `dc-transfer`), so a re-mult should not shift tuning. Any shift measured here is a fault in the tap or the loop |
 | **Pitch stability into worst-case cable capacitance** | E9 | **A GATE, not a reassurance** — and this row used to say the opposite. The pitch stage now *is* the in-loop version: DC feedback is tapped at the jack, so the 1 kΩ and the patch cable are inside the loop and `C-FB-PITCH` is what compensates it. Sweep the load: open, 100 kΩ, a passive mult, a short (ADR 0006) |
 | **Inrush with a current probe, on switch-on *and* hot-plug** | E6 | Sizes the load switch's current limit from measurement rather than from a guess (ADR 0005) |
 | **Pitch jack while sweeping the LEDs, and while the rack is busy** | E6 / E9 | The test the plan was missing: the one measurement for this class scoped *breath*, the channel that is immune. Four routes put LED current onto pitch and two are fixed in hardware; this measures the two ground terms that are left — the module's own pour (5.7–7.2 cents) and the rack's shared bus return (~4.8) — rather than trusting the figures (ADR 0004, ADR 0006) |
@@ -326,8 +326,9 @@ page, its `bom.csv` fragment and its `circuit.yaml`.
 4. **Decoupling is not netted.** Supply pins arrive through `rails:`, so the
    per-pin decouplers have no pin to hang on and `C-DECOUPLE` and
    `C-DECOUPLE-CARRIER` will read short until that changes.
-5. **The seventh `R-OPAMP-IN` has no home** — `pitch-stage.md`'s "Still
-   open".
+5. **`R-OPAMP-IN` is six**, settled on `pitch-stage.md` ("Settled
+   2026-09-30"): the pitch reference follower's clamp-current protection is
+   `R-VREF-SER`.
 
 ## Open items blocking work
 

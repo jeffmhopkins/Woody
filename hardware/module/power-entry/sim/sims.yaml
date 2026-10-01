@@ -54,7 +54,7 @@ params:
   i_mod_pos:  {value: 0.037, source: "the module's own +12 V analog load, module-own-draw (power-entry.md, 'Fuses on the rails')"}
   i_mod_neg:  {value: 0.020, source: "the module's own -12 V analog load, module-own-draw (power-entry.md, 'Fuses on the rails')"}
   i_q:        {value: 0.212, source: "the instrument at rest, 212 mA [repo, ADR 0005 load table, quiescent - an upper bound since ADR 0015]"}
-  i_swing:    {value: 0.195, source: "the breath-correlated swing: 0.195 A, the thirteen WS2815B-V1 on the main board at full white, 170-195 mA at 12 V [owner brief 2026-09-30, not yet in the corpus]; 0.367 A, ADR 0005's quiescent-to-clamp-legal-worst swing, the one the 7-18 cent estimate used [repo] (swept)"}
+  i_swing:    {value: 0.195, source: "the breath-correlated swing: 0.195 A, the thirteen WS2815B-V1 on the main board at full white, the top of led-row-current (blocked on E6's measurement); 0.367 A, ADR 0005's quiescent-to-clamp-legal-worst swing, the one the 7-18 cent estimate used [repo] (swept)"}
   f_b:        {value: 2.0, source: "one breath 0 -> full -> 0 in 0.5 s [assumption: the frequency does not enter a resistive result]"}
   eta:        {value: 0.82, source: "U-ISO at ~21 % load (umbilical-current x 12 V = 4.3 W of 20 W, 0.36 A of 1.67 A): ~81 % off the RPA20-2412SAW's efficiency curve at 24 V in and ~0.95 W off its dissipation curve (4.3 / 5.26 = 0.82) [datasheets/discrete-and-power/RECOM-RPA20-AW.pdf PD-3]"}
   v_iso:      {value: 12.0, source: "U-ISO's output [ds PD-1]"}

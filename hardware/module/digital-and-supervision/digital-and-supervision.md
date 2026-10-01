@@ -27,7 +27,7 @@ The `Dir` and `Peer` columns are defined once in
 | `MOSI` | in | `interfaces/spi-link` | `umbilical-pinmap`, `spi-series-r` | From the instrument, arriving on `J-UMBILICAL` (`J-UMB-MOD` in the spi-link netlist). Pulled **down**, both sides. Shares a pair with `SCLK` |
 | `CS_MOD` | in | `interfaces/spi-link` | `umbilical-pinmap`, `spi-series-r` | From the instrument, arriving on `J-UMBILICAL` (`J-UMB-MOD` in the spi-link netlist). Pulled **up**, both sides: `R-PULL-CS` (100 kΩ to `LOGIC_5V`) here, and 10 kΩ to 3V3 at the instrument. Shares a pair with `DIG_GND` |
 | `DIG_GND` | ref | `interfaces/spi-link`, `module/power-entry` | `umbilical-pinmap`, `dig-gnd-topology` | `CS_MOD`'s return partner, and the plane this circuit sits over. It meets the other grounds only at the star (`NT-DIG-MOD`, on `module/power-entry`'s page) |
-| `SCLK_DAC`, `DIN`, `SYNC` | out | `module/dac8568`, `interfaces/spi-link` | — | **Sourced here** — the 74AHCT125 (`U-LVL-MOD`) is this circuit's part, driven by `U-RX-MOD`. The DAC-side three of the six `R-SPI-PULL` sit on these |
+| `SCLK_DAC`, `DIN`, `SYNC` | out | `module/dac8568`, `interfaces/spi-link` | — | **Sourced here** — the 74AHCT125 (`U-LVL-MOD`) is this circuit's part, driven by `U-RX-MOD`. The DAC-side three of the five `R-SPI-PULL` sit on these |
 | `LOGIC_5V` | in | `module/power-entry` | — | The module's own 5 V (`U-REG-LOGIC`). Supplies `U-RX-MOD` and the top of `R-PULL-CS`, and nothing else — **not** the 74AHCT125 (next row). The bus +5 V is not used |
 | `DAC_AVDD` | in | `module/power-entry` | `dac-rail` | The DAC's own rail. `U-LVL-MOD`'s `VCC`, decoupled at the pin by `C-DEC-LVL`, and the top of `R-PULL-SYNC` — so nothing this circuit drives into the DAC can be above the DAC's supply. See *The buffer's supply* |
 | `OE_MOD` ×4 | ref | `module/link-supervision` | — | This buffer's four enables, tied to `GND` and permanently enabled. The circuit that used to gate them is not fitted. **Not `OE_INST`**, the carrier level shifter's |
@@ -60,8 +60,8 @@ block below is where the DAC box was.*
    │            │         ►|o = one gate of [U-RX-MOD 74AHCT14],
    │            │         Schmitt, two per signal     ┌─────┴────────┐
    └── 8 DIG_GND│                                     │  74AHCT125   │
-        │   [R-SPI-PULL x3]                           │  DAC_AVDD    │
-        │    SCLK↓ MOSI↓ CS↑(100k)                    │  OE x4 → GND │  tied ENABLED
+        │   [R-SPI-PULL x2] SCLK↓ MOSI↓               │  DAC_AVDD    │
+        │   [R-PULL-CS 100k] CS↑                      │  OE x4 → GND │  tied ENABLED
         │    at the cable node                        └────┬─────────┘
         │                                                  │
         │                                         [R-SPI-PULL x3]
@@ -101,9 +101,10 @@ gates, three signals, none spare.
   glitch into a few hundred millivolts at the input (`spi-pair-crosstalk`,
   `interfaces/spi-link/sim`, which also runs the input straight on the cable
   and shows it crossing). 1 kΩ is near-open to the line, so the source
-  termination is unchanged; against the 10 kΩ pull-downs the settled high at
-  the input is 3.3 × 10k / 11.1k = 2.97 V, over the 2.1 V top of the band
-  `[calc]`. The delay it costs against the DAC's timing is in that sim's
+  termination is unchanged; the 10 kΩ pull-downs sit at the cable node, ahead
+  of `R-RX-MOD`, and the gate input draws no current, so the settled high at
+  the input is the cable node's, 3.3 × 10k / (10k + 82 Ω `R-SPI-SER` + ~35 Ω
+  of pad) ≈ 3.26 V, over the 2.1 V top of the band `[calc]`. The delay it costs against the DAC's timing is in that sim's
   README.
 - **Supply.** `LOGIC_5V`, decoupled at the pin by `C-DEC-RX`; what it adds to
   `U-REG-LOGIC`'s load is on `module/power-entry`.

@@ -42,6 +42,8 @@ two spare.**
 >   jack-side ESD clamp, `D-ESD-PITCH`, for the LT5400 (`pitch-stage.md`).
 > - **Power-on "0 V"** is to the DAC's zero-code error.
 > - **Labelling** follows ADR 0026: six word pills, no write-on strip.
+> - **The instrument's display** is gone (ADR 0015): configuration is over
+>   USB, and the sentences below that set ranges "on the display" say so.
 > - **Channel numbers** in prose below are *outputs*, not DAC channels:
 >   "every output but pitch" replaces "channels 2–6", which collided with the
 >   DAC's own numbering (ch 2–5 are Mod 1–4, ch 6 is spare).
@@ -60,7 +62,8 @@ reason to design into a hard limit of four.
 
 Mod channels are generic rather than fixed-function — a gate can be assigned to
 one if wanted, without the design being *limited* to a gate. Per-channel source,
-scale, offset, curve and slew are set on the instrument's display.
+scale, offset, curve and slew are set in the instrument's configuration
+(over USB since ADR 0015, which removed the display).
 
 ## Why dedicating pitch and breath is better than full genericity
 
@@ -97,7 +100,7 @@ modulation, ever, with firmware unable to recover any of it. **The stage is
 bipolar instead, spanning −10 to +10 V.**
 
 The point is not to *output* ±10 V routinely — it is to be **able** to, with
-firmware selecting the actual range per channel from the instrument's display:
+firmware selecting the actual range per channel in the instrument's configuration:
 0–5 V, 0–8 V, 0–10 V, ±5 V, ±2.5 V. Most patches will use 0–8 V or ±5 V, which
 are the de-facto Eurorack conventions; the extra span is headroom, not a default.
 
@@ -354,8 +357,8 @@ different sensor. A held pianissimo has breath noise in it; an instrument on a
 stand does not.
 
 **And log the accumulated correction.** The zero is allowed to move; it is not
-allowed to move silently. A running total, visible on the display and in the
-web app, turns all three concealed failures into a number that walks — which is
+allowed to move silently. A running total, reported in the instrument's
+configuration (over USB; there is no display or web app since ADR 0015), turns all three concealed failures into a number that walks — which is
 the diagnostic the design otherwise does not have.
 
 It is also now an *honest* diagnostic, which it was not before. While the same
@@ -845,7 +848,7 @@ hardware.
 **Default every mod and breath range to 0–8 V.** The mod channels *can* do
 ±10 V, but that is headroom, not a default — 0–8 V is the de-facto Eurorack
 convention and is what most patches want. **Bipolar is opt-in per channel**, set
-explicitly from the display, so nothing sends a negative voltage into a patch
+explicitly in the configuration, so nothing sends a negative voltage into a patch
 that was not asked to receive one.
 
 **Put the two pitch calibration anchor points inside the musically used range**,
@@ -881,7 +884,8 @@ does not degrade gracefully — it loses its impedance entirely and becomes a wi
 
 Every jack's word — `breath`, `pitch`, `mod 1` … `mod 4` — is printed in a
 pill on the panel, in the order ADR 0024 point 13 fixes, with the
-instrument's display as the authority on what is actually routed where
+instrument's configuration (over USB, ADR 0015) as the authority on what is
+actually routed where
 (ADR 0026 points 4 and 7). *(Amended 2026-10-01: this said pitch and breath
 silkscreened and the mods on a write-on strip, which ADR 0026 dropped.)*
 
