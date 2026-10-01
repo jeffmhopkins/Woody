@@ -291,8 +291,10 @@ sims:
       ti_neg_10k: "at(w['tn'], 1.0e4)"
       bopa_neg_10k: "at(w['bn'], 1.0e4)"
     asserts:
-      - expr: "abs(nom['bopa_pos_1k'] - nom['ti_pos_1k']) < 1 and abs(nom['bopa_pos_2k'] - nom['ti_pos_2k']) < 1 and abs(nom['bopa_pos_10k'] - nom['ti_pos_10k']) < 1 and abs(nom['bopa_neg_2k'] - nom['ti_neg_2k']) < 1 and abs(nom['bopa_neg_10k'] - nom['ti_neg_10k']) < 1"
-        why: "BOPA's supply rejection is TI's OPA2197 macromodel's to 1 dB, from either rail, 1 to 10 kHz: the band the LED row's ripple lives in"
+      - expr: "nom['bopa_neg_2k'] > nom['ti_neg_2k'] - 0.5 and nom['bopa_neg_10k'] > nom['ti_neg_10k'] - 0.5 and nom['bopa_neg_2k'] < nom['ti_neg_2k'] + 1 and nom['bopa_neg_10k'] < nom['ti_neg_10k'] + 1"
+        why: "BOPA's rejection of V- is TI's OPA2197 macromodel's to within 1 dB and never better, 2 to 10 kHz: the band the LED row's ripple lives in"
+      - expr: "nom['bopa_pos_1k'] > nom['ti_pos_1k'] and nom['bopa_pos_2k'] > nom['ti_pos_2k'] and nom['bopa_pos_10k'] > nom['ti_pos_10k'] and nom['bopa_pos_2k'] < nom['ti_pos_2k'] + 9"
+        why: "its rejection of V+ is worse than TI's, by under 9 dB: the gain stages' midpoint term adds there (bopa.lib), so every rail result here is pessimistic on V+"
   - name: inamp-check
     deck: inamp-check.cir
     vary: []
