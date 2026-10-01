@@ -46,6 +46,9 @@ cdim(ec, str("screws d", ethercon_hole_d, " at +/-", ethercon_hole_dx / 2), 0, -
 label([ec[0], ec[1] + (ethercon_tab_bottom + ethercon_tab_top) / 2, 3 * Z], "PUSH tab", size = 1.0);
 label([1, led[1] - 3.4, 3 * Z], str(led[0], ", ", led[1]), size = 1.05, halign = "left");
 label([1, led[1] - 5.2, 3 * Z], str("d", led_hole_d), size = 1.05, halign = "left");
+// The panel standoffs' self-clinching studs (ADR 0024 point 15): the flush head shows on the face.
+for (q = panel_standoff_at) { ring(q, panel_standoff_stud_head_d, "DarkSlateGray");
+    cdim(q, str("stud ", q[0], ", ", q[1], " d", panel_standoff_stud_hole_d), 0, panel_standoff_stud_head_d / 2 + 0.8); }
 // The lever's sweep (ADR 0024 point 12), and which way is ON.
 color("DarkRed") translate([0, 0, 2 * Z]) linear_extrude(0.05) difference() {
     translate(tog_sweep_r[1]) square(tog_sweep_r[2] - tog_sweep_r[1]);
