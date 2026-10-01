@@ -309,9 +309,10 @@ parts:
   # U-TVS-SPI clamps the pad side of R-SPI-SER (IO35, IO36, IO34 - spi-link), so it
   # stands on the J-MCU side of the resistors, below the chain's, clear of the column mount
   U1:  [256.5, 17.5, 0]
-  R34: [254.2, 23.8, 90]    # R-CHAIN-SER SCK
-  R35: [257.2, 23.8, 90]    # R-CHAIN-SER SH/LD
-  R36: [260.2, 23.8, 90]    # R-CHAIN-SER SER (the chain's end)
+  # the chain's series resistors turned so their J-MCU end (pad 1) faces J-MCU above
+  R34: [254.2, 23.8, 270]   # R-CHAIN-SER SCK
+  R35: [257.2, 23.8, 270]   # R-CHAIN-SER SH/LD
+  R36: [260.2, 23.8, 270]   # R-CHAIN-SER SER (the chain's end)
   J2:  [262.6, 16.6, 90]    # HDR-SERVICE, on the tongue, reached with the lid off
   # --- the regulator block (the echo's REGULATOR-BLOCK) holds U-BUCK alone; the
   # buck's input LC and C-STRIP-BULK where their height fits (README, Open)
