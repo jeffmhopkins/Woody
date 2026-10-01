@@ -261,12 +261,12 @@ components:
     note: 'The module analog +12 V''s fuse: J-PWR-EURO +12 V, then this, then D1. Sized on power-entry.md, ''Fuses
       on the rails'''
   R-REG-SET-HI:
-    value: 475R 0.1%
+    value: 150R 0.1%
     pins:
     - 1
     - 2
   R-REG-SET-LO:
-    value: 150R 0.1%
+    value: 475R 0.1%
     pins:
     - 1
     - 2

@@ -613,7 +613,7 @@ components:
     sheet: umbilical-load-switch
   R1:
     of: R-REG-SET-HI
-    value: 475R 0.1%
+    value: 150R 0.1%
     pins:
     - 1
     - 2
@@ -690,7 +690,7 @@ components:
     sheet: breath-receive-stage
   R2:
     of: R-REG-SET-LO
-    value: 150R 0.1%
+    value: 475R 0.1%
     pins:
     - 1
     - 2
@@ -1370,6 +1370,7 @@ nets:
   - R70.1
   /DAC_AVDD:
   - C11.1
+  - C12.1
   - C6.1
   - J2.12
   - R1.1
@@ -1378,6 +1379,7 @@ nets:
   - R8.1
   - U1.OUT
   - U3.AVDD
+  - U4.VCC
   /DAC_CH1:
   - R32.1
   - R33.1
@@ -1869,14 +1871,12 @@ nets:
   J1.POS5_12:
   - J1.POS5_12
   LOGIC_5V:
-  - C12.1
   - C42.1
   - C50.1
   - R12.2
   - U13.SENSE
   - U13.VOUT
   - U15.VCC
-  - U4.VCC
   MODULE_ANALOG_NEG12:
   - C17.1
   - C19.1

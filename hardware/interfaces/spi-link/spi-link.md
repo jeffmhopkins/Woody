@@ -13,8 +13,13 @@ driving end against a threshold at the receiving end, the pulls exist on both
 sides of that buffer, and the pin pairing is an argument about what couples
 into what inside the cable — none of which can be read from one end alone.
 
-The buffer's supply is the module's own `LOGIC_5V` (`U-REG-LOGIC`,
-`module/power-entry`); the bus +5 V is not used (owner, 2026-09-30).
+The buffer's supply is `DAC_AVDD`, the DAC's own rail (owner, 2026-10-01), so
+nothing it drives into the DAC can sit above the DAC's supply while the rails
+come up or go down; the receiver ahead of it, and `R-CS-PULL-MOD`, are on the
+module's own `LOGIC_5V` (`U-REG-LOGIC`, `module/power-entry`). The bus +5 V is
+not used (owner, 2026-09-30). Why, in
+[`digital-and-supervision.md`](../../module/digital-and-supervision/digital-and-supervision.md),
+*The buffer's supply*.
 
 **The carrier end's drawing is not redrawn here.** It is in
 [`carrier.md`](../../carrier/carrier.md) §4 and also carries the MCP3202's
@@ -45,7 +50,7 @@ The `Dir` and `Peer` columns are defined once in
 | SPI2 host | instrument | — | `carrier/breath-adc`, `module/dac8568` | `loop-budget` | One host, two devices, two clocks. The ADC's limit is a fact about a part on the instrument board that constrains the link's budget |
 | `SCLK_DAC`, `DIN`, `SYNC` | module | — | `module/digital-and-supervision` → `module/dac8568` | — | **Not sourced here.** The 74AHCT125 is on `module/digital-and-supervision`, which owns that row; these three are a module-board net and do not cross the umbilical. The DAC-side three of the six `R-SPI-PULL` — this circuit's `bom.csv` — sit on them |
 | `DAC AVDD` | module | in | `module/power-entry` | `dac-rail` | What the DAC-side `CS` pull returns to, **not** bus `+5V`: on the bus rail a reversed ribbon reaches the DAC's `SYNC` pin. See this circuit's `bom.csv` |
-| `LOGIC_5V` | module | in | `module/power-entry` → `module/digital-and-supervision` | — | The module's own 5 V (`U-REG-LOGIC`): the 74AHCT125's supply, and the top of `R-CS-PULL-MOD` — the rail of the part that pull holds. The bus +5 V is not used |
+| `LOGIC_5V` | module | in | `module/power-entry` → `module/digital-and-supervision` | — | The module's own 5 V (`U-REG-LOGIC`): the receiver `U-RX-MOD`'s supply, and the top of `R-CS-PULL-MOD` — the rail of the part that pull holds. Not the 74AHCT125's, which is on `DAC_AVDD`. The bus +5 V is not used |
 | `OE_MOD` ×4 | module | — | `module/digital-and-supervision` | — | The module buffer's four enables, tied to `GND` and permanently enabled. On that circuit's part, so they reach nothing here; the circuit that used to gate them, `module/link-supervision`, is not fitted. **Not `OE_INST`** |
 
 ## The sheet, and which board places what

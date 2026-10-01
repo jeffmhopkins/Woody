@@ -29,8 +29,8 @@ The `Dir` and `Peer` columns are defined once in
 | `+12V`, `-12V`, `GND` on `J-PWR-EURO` | in | Eurorack bus board | — | 16-pin shrouded keyed IDC. `GND` is the star point, `BUS_GND` on the sheet — a net of this circuit only. **Its +5 V, CV and Gate pins are not used** — no-connects (owner, 2026-09-30; ADR 0023 point 3) |
 | `MODULE ANALOG +12V` | out | `module/pitch-stage`, `module/breath-receive-stage`, `module/breath-output-stage`, `module/breath-response-shaper`, `module/mod-channels` | — | After `PTC-POS12`, `D1`, `FB1`, `C1`. The panel LED is not on it: it hangs on the load switch's output (`module/panel-led`) |
 | `MODULE ANALOG −12V` | out | `module/pitch-stage`, `module/breath-receive-stage`, `module/breath-output-stage`, `module/breath-response-shaper`, `module/mod-channels` | — | After `PTC-NEG12`, `D3`, `FB3`, `C3` |
-| `DAC AVDD` | out | `module/dac8568`, `module/breath-receive-stage`, `module/breath-output-stage`, `interfaces/spi-link` | `dac-rail` | The LM317 output. Selected on the bench, per the figure's floor. **Not `module/digital-and-supervision`**, whose 74AHCT125 runs from `LOGIC_5V` |
-| `LOGIC_5V` | out | `module/digital-and-supervision` | — | `U-REG-LOGIC`'s output, made here from the analog +12 V: the SPI receiver and level shifter only. See *The logic 5 V* |
+| `DAC AVDD` | out | `module/dac8568`, `module/breath-receive-stage`, `module/breath-output-stage`, `module/digital-and-supervision`, `interfaces/spi-link` | `dac-rail` | The LM317 output. Selected on the bench, per the figure's floor. Also the supply of the 74AHCT125 (`U-LVL-MOD`) that drives the DAC's SPI pins, so they can never sit above it — see *The DAC rail's load* |
+| `LOGIC_5V` | out | `module/digital-and-supervision` | — | `U-REG-LOGIC`'s output, made here from the analog +12 V: the SPI receiver `U-RX-MOD` and `CS_MOD`'s pull-up only — not the level shifter, which is on `DAC AVDD`. See *The logic 5 V* |
 | `ISO_POS12` | out | `module/umbilical-load-switch` | `umbilical-current` | `U-ISO`'s isolated +12 V (ADR 0027): `U-LOADSW`'s `VCC`, the top of `R-ILIM` and of the `ON` divider hang off it. Until 2026-09-30 the load switch took the bus +12 V ahead of the diodes, `BUS_POS12_RAW`, which is now a net of this circuit only |
 | `PWR_GND` | ref | `module/umbilical-load-switch`, `carrier/power-entry-instrument` | `umbilical-current`, `dig-gnd-topology` | `U-ISO`'s isolated return and the umbilical's pin 6, on its own layer-4 copper. It meets `DIG_GND` at the etherCON (`NT-UMB-MOD`) and nothing else — see *Grounding* |
 | `AGND_MOD` | ref | `module/dac8568`, `module/pitch-stage`, `module/breath-receive-stage`, `module/breath-output-stage`, `module/breath-response-shaper`, `module/mod-channels`, `module/panel-led` | `dig-gnd-topology` | The module analog ground. Joins the star through `NT-AGND-MOD` and nowhere else — see *Grounding* |
@@ -248,21 +248,21 @@ element from it to ground, `C-ISO-Y`, hangs on the +12 V side of the fuse.
 **The analog rails' load** `[calc]`, worst case: fourteen OPA2197 channels at
 1.3 mA max `[ds OPA2197.pdf p.8]` = 18.2 mA on both rails; the INA828,
 0.65 mA (0.85 mA over temperature) `[ds INA828IDR.pdf p.6]`, on both; on +12 V
-only, the LM317 branch — the DAC's 2.0 mA max `[ds DAC8568CIPW.pdf p.5]`, the
-set divider's 5.21 V / 625 Ω = 8.3 mA — and `U-REG-LOGIC`'s ≤ 6 mA. That is
-**~35 mA on +12 V and ~20 mA on −12 V** with the jacks open, and on +12 V
-**~95 mA** with all six jacks shorted at full scale through their 1 kΩ
+only, the LM317 branch, ~12.4 mA (*The DAC rail's load*, below), and
+`U-REG-LOGIC`'s ~5.1 mA. That is
+**~37 mA on +12 V and ~20 mA on −12 V** with the jacks open, and on +12 V
+**~97 mA** with all six jacks shorted at full scale through their 1 kΩ
 `R-OUT-PROT` (6 × 10 mA).
 
 | Part | Hold / trip at 23 °C | Hold at 50 / 60 °C | Must hold | Resistance → drop at the typical load | Voltage |
 |---|---|---|---|---|---|
-| `PTC-POS12`, `PTC-NEG12`: MF-MSMF020/60-2 | 0.20 / 0.40 A | **0.15 / 0.13 A** | 95 mA worst (+12 V) | 0.40 Ω min → **18 mV** at 45 mA; 6.0 Ω an hour after a trip (R1max) → **0.27 V** | 60 V: a short between the two analog rails puts 24 V across the pair |
+| `PTC-POS12`, `PTC-NEG12`: MF-MSMF020/60-2 | 0.20 / 0.40 A | **0.15 / 0.13 A** | 97 mA worst (+12 V) | 0.40 Ω min → **18 mV** at 45 mA; 6.0 Ω an hour after a trip (R1max) → **0.27 V** | 60 V: a short between the two analog rails puts 24 V across the pair |
 | `PTC-ISO`: MF-MSMF075/33X-2 | 0.75 / 1.5 A | **0.56 / 0.49 A** | 0.37 A clamp-legal worst; 0.49 A overload held under the load switch's trip (it holds at 50 °C and may trip at 60 °C — a fault state either way); 0.68 A hot-plug for tens of ms, below its trip current | 0.11–0.40 Ω → **≤ 0.09 V** at 0.22 A | 33 V: a shorted `U-ISO` input puts all 24 V across it |
 
 `[ds p.1, p.9]`. The previous page's "~0.1 V" was from memory; the datasheet
 says 18 mV on a fitted part and 0.27 V at its worst. **At that worst the
 rails still work**: +12 V analog ≥ 11.4 − 0.27 − `D1` − `FB1` ≈ 10.9 V
-(10.5 V with all six jacks shorted, 0.57 V across the fuse), above the
+(10.5 V with all six jacks shorted, 0.58 V across the fuse), above the
 breath output's 10 V swing and the LM317's and the ADP7118's dropout. **The
 load switch no longer sees any of it**: its `ON` divider is on `U-ISO`'s
 regulated output, and `U-ISO`'s input has 13 V of margin. The `as-netlisted`
@@ -276,9 +276,12 @@ The owner, 2026-09-30: *"Create the 5v locally"*, and *"We keep the standard
 header, we just don't use the 5 volt. This keeps commonality of all the
 Eurorack cable connectors."* So `J-PWR-EURO` stays the 16-pin A-100 header
 (ADR 0023 point 3), its +5 V pins are no-connects, and the 5 V loads on the
-module — the SPI receiver `U-RX-MOD` (74AHCT14) and the 74AHCT125 (`U-LVL-MOD`)
-it drives — run from `LOGIC_5V`, made here.
-**`DAC AVDD` is not on it**: the DAC keeps its own LM317 rail, `dac-rail`.
+module's SPI receiver `U-RX-MOD` (74AHCT14) runs from `LOGIC_5V`, made here.
+**`DAC AVDD` is not on it**: the DAC keeps its own LM317 rail, `dac-rail`, and
+so does the 74AHCT125 (`U-LVL-MOD`) that drives the DAC's pins, because
+`LOGIC_5V` comes up first and goes down last (owner, 2026-10-01;
+[`digital-and-supervision.md`](../digital-and-supervision/digital-and-supervision.md),
+*The buffer's supply*).
 
 **The part is ADI's `ADP7118AUJZ-5.0`** (TSOT-5), off the protected analog
 +12 V, `EN` tied to `VIN`, `SENSE` to `VOUT` at the part, ground on
@@ -286,11 +289,11 @@ it drives — run from `LOGIC_5V`, made here.
 
 | | `[calc]` | Source |
 |---|---|---|
-| Load | `I_CC` 20 µA each for the 74AHCT14 and the 74AHCT125. `ΔI_CC` 1.5 mA per input held at 3.4 V × the 74AHCT14's 3 cable-side inputs = 4.5 mA (the 74AHCT125's inputs are now driven rail to rail, so it adds none); two 10 kΩ pull-downs on `SCLK_DAC`/`DIN` at 5 V, 1 mA when high; switching 9 gate outputs × 10 pF × 5 V × 2 MHz ≈ 0.9 mA. **≈ 6.5 mA.** The cable-side inputs idle at about 3.0–3.2 V, below the 3.4 V the `ΔI_CC` row is stated at, where the supply-current curve is higher: the bench confirms it | `[ds SN74AHCT125.pdf p.4, SN74AHCT14.pdf p.5 and Figure 6-1]` |
+| Load | `I_CC` 20 µA for the 74AHCT14. `ΔI_CC` 1.5 mA per input held at 3.4 V × its 3 cable-side inputs = 4.5 mA; switching its 6 gate outputs × 10 pF × 5 V × 2 MHz ≈ 0.6 mA; `R-PULL-CS`, at most (5.0 − 3.3) V / 100 kΩ = 17 µA with an instrument holding `CS_MOD` high. **≈ 5.1 mA.** The cable-side inputs idle at about 3.0–3.2 V, below the 3.4 V the `ΔI_CC` row is stated at, where the supply-current curve is higher: the bench confirms it | `[ds SN74AHCT125.pdf p.4, SN74AHCT14.pdf p.5 and Figure 6-1]` |
 | Headroom | Input ≥ 11.4 V − `D1` ≈ 11.0 V against 5.0 V out: 6 V, where the dropout is 30/60 mV typ/max at 10 mA | `[ds ADI-ADP7118.pdf p.3]` |
-| Dissipation | (12.4 − 5.0) V × 6.5 mA = **48 mW**; θJA 170 °C/W gives **+8.2 °C** — at twice the load, still under +17 °C | `[ds p.5]` |
+| Dissipation | (12.4 − 5.0) V × 5.1 mA = **38 mW**; θJA 170 °C/W gives **+6.4 °C** — at twice the load, still under +13 °C | `[ds p.5]` |
 | Input rating | 20 V max against a 12.6 V bus maximum | `[ds p.3]` |
-| Noise | 11 µV rms, 10 Hz–100 kHz — more than a logic rail needs; it keeps the level shifter's supply from being the noisiest node beside the DAC | `[ds p.3]` |
+| Noise | 11 µV rms, 10 Hz–100 kHz — more than a logic rail needs | `[ds p.3]` |
 | Capacitors | more than 1.5 µF in and out under all conditions; 4.7 µF X7R in 1206 keeps it at 12 V of DC bias | `[ds p.4]` |
 
 The few milliamps come off the analog +12 V after `D1`/`FB1`/`C1`; the
@@ -319,6 +322,44 @@ supply. *(Until ADR 0027 `FB2` carried all of `umbilical-current` and read
 about half the nameplate.)* That is not a reason to change the part — it is a reason not to
 believe "600 Ω" anywhere in this drawing. Read off the banked drawing rev E,
 `datasheets/discrete-and-power/MI1206K601R-10-ferrite-bead.pdf`.
+
+## The DAC rail's load — `U-REG-DAC`
+
+`U-REG-DAC` is TI's LM317L in TO-92 (`LM317LZ`), set to `dac-rail` by
+`R-REG-SET-HI` (150 Ω, `OUT` to `ADJ`) and `R-REG-SET-LO` (475 Ω, `ADJ` to
+ground, the one E7 selects). Since 2026-10-01 it also supplies `U-LVL-MOD`,
+the 74AHCT125 that drives the DAC's `SYNC`, `SCLK` and `DIN`
+([`digital-and-supervision.md`](../digital-and-supervision/digital-and-supervision.md),
+*The buffer's supply*).
+
+| | `[calc]` | Source |
+|---|---|---|
+| The DAC and the dividers | the DAC8568's 2.0 mA max; the set divider, 5.21 V / 625 Ω = 8.3 mA; `POT-OFFSET` (10 kΩ to `AGND_MOD`), 0.52 mA; `R-ZERO-TOP` and `TRIM-BREATH-ZERO` (52.2 kΩ), 0.10 mA. `R-PULL-SYNC` draws 0.52 mA while `SYNC` is low, as it always did. **≈ 11.0 mA** | `[ds DAC8568CIPW.pdf p.5]`; the netlists |
+| `U-LVL-MOD` | `I_CC` 20 µA max; `SCLK_DAC` and `DIN` high into their 10 kΩ pull-downs, 5.21 / 10k = 0.52 mA each, **1.04 mA** with both high; switching 3 outputs × 10 pF × 5.21 V × 2 MHz ≈ 0.31 mA. **≈ 1.4 mA** at most, about half that on average | `[ds SN74AHCT125.pdf p.4]` |
+| Its inputs | driven from `LOGIC_5V`, 5.0 V against a `VCC` of 5.21 V: a fraction of a volt under `VCC`, where the input stage barely conducts `[from memory]`. The datasheet bounds it only at 3.4 V, 1.5 mA per input; three inputs at that bound would add **4.5 mA**, the ceiling below. The bench measures it at E7, with the rail | `[ds SN74AHCT125.pdf p.4]` |
+| Total | **≈ 12.4 mA**; 16.9 mA at the `ΔI_CC` ceiling. The LM317L is rated to 100 mA and needs 2.5 mA at most to regulate, which the set divider alone draws | `[ds LM317LZ.pdf p.4, p.5]` |
+| Dissipation | (12.4 − 5.21) V × 12.4 mA = **89 mW**; 122 mW at the ceiling. θJA 139.5 °C/W in TO-92 (LP) gives **+12 °C**, +17 °C at the ceiling (it was 79 mW, +11 °C, without the buffer) | `[ds LM317LZ.pdf p.4]` |
+| Dropout | input ≥ 10.9 V at the worst (a tripped fuse, *Fuses* above) against 5.21 V out: 5.7 V, over the 2.5 V minimum differential at any of these currents | `[ds LM317LZ.pdf p.4]` |
+| Load regulation | 5 mV/V typ at 25 °C and 10 mV/V typ over temperature, at `VO` ≥ 5 V, for 2.5–100 mA and 5–35 V in together (TI gives no maximum): 26 / 52 mV over 97.5 mA, so at most **0.27 / 0.53 mV/mA**. The buffer's 1.4 mA moves `dac-rail` by 0.37 / 0.75 mV — set at E7 with the buffer fitted, so it is inside the selection | `[ds LM317LZ.pdf p.5]` |
+
+**The noise it adds to `DAC AVDD`.** The buffer's DC current changes with what
+it is sending: `SCLK_DAC` and `DIN` swing 0 to 1.04 mA of pull-down current at
+SPI rate, and its edges draw their charge (~52 pC per edge into 10 pF) from
+`C-DEC-LVL`, about 0.5 mV on 100 nF, refilled before the next edge. Through the
+LM317L's output resistance the frame-rate part is at most **0.55 mV**. What it
+reaches:
+
+- **The DAC's outputs** — through its internal reference, whose line
+  regulation is under 10 µV/V `[ds DAC8568CIPW.pdf p.4, p.45]`: 0.55 mV ×
+  10 µV/V = **5.5 nV**, under 10⁻⁴ of a 16-bit step `[calc]`. Full scale is
+  the reference's, not `AVDD`'s. The DAC's own logic sat on this rail already.
+- **The ratiometric loads** — `POT-OFFSET` and `TRIM-BREATH-ZERO` take a
+  fraction of `DAC AVDD` directly, so 0.55 mV is 105 ppm of their setting, in
+  breath CV, not pitch, at most ~1 mV on a 10 V swing.
+
+So the buffer reaches `DAC AVDD` on **its own branch from `C-REG-OUT`**, with
+`C-DEC-LVL` at its pin — never daisy-chained through the DAC's `AVDD` pin or
+`C-DEC-DAC` — so its edges are not drawn through the copper the DAC sees.
 
 ## Grounding — four layers, one star (owner, 2026-09-30)
 

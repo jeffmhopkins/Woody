@@ -536,7 +536,7 @@ nets:
 
   LOGIC_5V:
     kind: power
-    carries: "The module's own 5 V, U-REG-LOGIC from the analog +12 V. The level shifter only"
+    carries: "The module's own 5 V, U-REG-LOGIC from the analog +12 V. The SPI receiver U-RX-MOD and R-PULL-CS only; the level shifter U-LVL-MOD is on DAC_AVDD"
     driver: module/power-entry
     receivers: [module/digital-and-supervision]
     note: "Replaces BUS_5V (2026-09-30): the bus +5 V is not used, and J-PWR-EURO's +5 V pins are no-connects"
@@ -550,7 +550,7 @@ nets:
       - module/dac8568
       - module/breath-output-stage
       - module/breath-receive-stage
-      - module/digital-and-supervision   # the DAC-side SYNC pull-up returns here, not to bus +5V
+      - module/digital-and-supervision   # U-LVL-MOD's VCC (C-DEC-LVL) and R-PULL-SYNC: nothing driving the DAC's pins sits above its supply
 
   AGND_MOD:
     kind: reference

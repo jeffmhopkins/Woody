@@ -152,7 +152,9 @@ parts terms:
   — not the rack's +5 V bus. See below.
 - **74AHCT125** for the shifter, running from the **bus +5 V rail** — the *same
   part* as the instrument's LED data lines (ADR 0014), with a spare gate left
-  over.
+  over. *(Amended: the bus +5 V is not used since 2026-09-30 (ADR 0023 point 3),
+  and since 2026-10-01 the shifter runs from the DAC's own `DAC_AVDD` — see the
+  amendment under "The 74AHCT125 stays on the bus +5 V rail" below.)*
 
 One part number shared across both boards rather than one more to source.
 
@@ -221,6 +223,22 @@ there keeps its switching current off the DAC's supply, and it means the only
 thing hanging on the unprotected bus +5 V pin is a $0.30 buffer. A reversed or
 row-offset ribbon that puts +12 V onto that pin kills the buffer and nothing
 else, which is why the +5 V entry gets no protection network of its own.
+
+> **Amended 2026-10-01 — the shifter is on `DAC_AVDD`.** The bus +5 V went
+> first (2026-09-30, ADR 0023 point 3: the module makes `LOGIC_5V` with
+> `U-REG-LOGIC`). Then a simulation of the two local rails found that
+> `LOGIC_5V` arrives first and leaves last, so with the shifter on it the
+> DAC's `SYNC` — idle high — sat over the DAC's `AVDD + 0.3 V` absolute
+> maximum for milliseconds at every power-up and power-down
+> `[SBAS430E p.2, p.31]`. The owner chose to run the 74AHCT125 from the DAC's
+> own rail: its outputs then cannot exceed the DAC's supply, and the drive
+> argument above is unchanged — on `dac-rail` its high is the DAC's own `AVDD`,
+> far over `0.625 × AVDD`. What this paragraph wanted to avoid, the buffer's
+> switching current on the DAC's supply, is now accepted and bounded:
+> `power-entry.md`, *The DAC rail's load*, puts it at ~1.4 mA and under 1 mV,
+> 5.5 nV at the DAC's output through its reference. The record is
+> `hardware/module/digital-and-supervision/`, *The buffer's supply*, and its
+> `sim/`.
 
 ### Module parts, chosen for build ease
 
