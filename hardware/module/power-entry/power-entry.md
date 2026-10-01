@@ -49,10 +49,14 @@ the two agree, and where they do not the netlist wins.*
   +12V ├──[PTC-POS12]──[D1 1N5817]──[FB1]──[C1 100µF]──┬── MODULE ANALOG +12V
        │                                               │   OPA2197 ×7, INA828
        │                                               ├──[U-REG-DAC LM317LZ]── DAC AVDD
+       │                                               │   trimmed by [TRIM-DAC-RAIL 50R]
        │                                               └──[U-REG-LOGIC]── LOGIC_5V, the SPI receiver only
        │
-       ├──[PTC-ISO]──[D2 1N5817]──[FB2]──[L-ISO-IN 22µH]──┬── ISO_VIN_POS
+       ├──[PTC-ISO]──[D2 1N5817]──[FB2]──[L-ISO-IN 22µH]──┐
        │                                                   │
+       │               [L-CM-ISO 1mH], one winding in each leg, dots on the filter side
+       │                                                   │
+       │                                                   ├── ISO_VIN_POS
        │                   [C2 100µF] and [C-ISO-IN 4.7µF] across the 24 V
        │                                                   │
        │                                    ┌──────────────┴─────────┐
@@ -61,9 +65,10 @@ the two agree, and where they do not the netlist wins.*
        │                                    │ GND                0V ├──┴── PWR_GND ──► umbilical pin 6
        │                                    └──────────────┬─────────┘           │
        │                                                   │               [NT-UMB-MOD] at the etherCON
-       │                                    [C-ISO-Y 1nF], ISO_VIN_POS to PWR_GND │
+       │                                   [C-ISO-Y 22nF], ISO_VIN_POS to PWR_GND │
        │                                                   │               DIG_GND ──► umbilical pin 8
        │                                               ISO_VIN_NEG                │
+       │                                   the choke's −12 V winding              │
        │                                                   │               [NT-DIG-MOD] at the star
   -12V ├──[D4 1N5817]──[FB4]───────────────────────────────┘                      │
        │   (cathode to the bus)                                                   │

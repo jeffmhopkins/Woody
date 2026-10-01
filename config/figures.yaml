@@ -391,15 +391,15 @@ figures:
     false_positive_note: "'SCLK / MOSI / CS' is a legitimate list of three signals. Match the pin-table cell."
 
   - id: dac-rail
-    quantity: LM317 DAC AVDD rail
-    value: "5.21 V"
+    quantity: LM317 DAC AVDD rail, as E7 trims it
+    value: "5.20 V"
     status: settled
     owner: hardware/module/power-entry/power-entry.md
-    derivation: "1.25 x (1 + 475/150) = 5.208 V from the divider; plus I_ADJ x R-REG-SET-LO, 50 uA typ / 100 uA max x 475 ohm = 24 / 48 mV [ds LM317LZ.pdf p.5], so 5.23 V typical. TI's transient model gives 5.219 V (hardware/module/digital-and-supervision/sim). Static worst case with the 0.1 % divider and TI's limits (V_REF 1.20-1.30 V, I_ADJ 0-100 uA): 4.99-5.47 V [calc: 1.20 x (1 + 475 x 0.999/(150 x 1.001)); 1.30 x (1 + 475 x 1.001/(150 x 0.999)) + 47.5 mV]."
-    forbidden: ["0.66 V worst-case spread", "worst case spans 0.66V", "5.25V]", "local 5.25 V regulator", "own 5.25 V regulator", "LM317's own 5.25 V", "5.25V DAC regulator", "set to 5.25V", "LDO set to 5.25"]
-    false_positive_note: "The MPXV4006DP's supply spec is legitimately 4.75-5.25 V. Match the regulator, not the numeral."
-    floor: "5.00 V, HARD. The DAC8568's C grade is specified only for AVDD 5.0-5.5 V (SBAS430E, datasheets/analog/DAC8568CIPW.pdf). E7 selects R-REG-SET-LO on the bench across the derivation's 4.99-5.47 V static spread and must not land below 5.00 V. Added 2026-09-21; nothing in the roadmap knew this."
-    note: "bom.csv's U-REG-DAC DESCRIPTION field said 'set to 5.25V' until 2026-09-21 - the forbidden list matched the notes field's phrasings and not this one, which is why it survived. Both phrasings are listed now."
+    derivation: "Set at E7 with TRIM-DAC-RAIL (owner, 2026-10-01: 'Can we just do trim pot to help?'), a 50 ohm 12-turn rheostat in the OUT-to-ADJ leg with R-REG-SET-HI 150 ohm, over R-REG-SET-LO 523 ohm. AVDD = V_REF x (1 + R-REG-SET-LO / (R-REG-SET-HI + r_trim)) + I_ADJ x R-REG-SET-LO. Across TI's limits (V_REF 1.20-1.30 V, I_ADJ 0-100 uA [ds LM317LZ.pdf p.5]), the 0.1 % divider and the trimmer's +-10 % [ds BOURNS-3224-TRIMPOT.pdf p.1]: fully clockwise >= 5.32 V and fully counter-clockwise <= 4.85 V at every corner, so the set point is reachable on every part; the whole travel spans 4.26-5.89 V at the extremes, 4.54-5.58 V typical [calc; hardware/module/power-entry/sim dac-trim-*]. The travel cannot also stay inside 5.00-5.50 V: the reference alone spans 8 % [calc: 1.30 / 1.20], the window 10 %."
+    forbidden: ["0.66 V worst-case spread", "worst case spans 0.66V", "5.25V]", "local 5.25 V regulator", "own 5.25 V regulator", "LM317's own 5.25 V", "5.25V DAC regulator", "set to 5.25V", "LDO set to 5.25", "5.21 V", "5.21V", "4.99-5.47 V", "4.99–5.47 V", "475R 0.1%"]
+    false_positive_note: "The MPXV4006DP's supply spec is legitimately 4.75-5.25 V. Match the regulator, not the numeral. '5.21' as a bare number also appears in unrelated derivations; the patterns carry the unit."
+    floor: "5.00 V, HARD, and 6.0 V absolute. The DAC8568's C grade is specified only for AVDD 5.0-5.5 V and its absolute maximum is 6 V (SBAS430E, datasheets/analog/DAC8568CIPW.pdf). E7 trims to the value above; no setting of the trimmer reaches 6 V at any corner, and an open wiper or track takes the rail down (power-entry/sim dac-trim-open-*)."
+    note: "The 5.25 V patterns: bom.csv's U-REG-DAC description said 'set to 5.25V' until 2026-09-21. The 5.21 V, 4.99-5.47 V and 475R patterns are the fixed divider the trimmer replaced on 2026-10-01."
 
   - id: module-own-draw
     quantity: The module's own analog rail draw, jacks open (U-ISO and the instrument excluded)
