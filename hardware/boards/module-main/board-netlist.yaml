@@ -790,7 +790,7 @@ components:
     sheet: breath-response-shaper
   R31:
     of: R-RESP
-    value: 3.9k 1%
+    value: 2.7k 1%
     pins:
     - 1
     - 2
@@ -846,7 +846,7 @@ components:
     sheet: mod-channels
   R39:
     of: R-MODGAIN-IN
-    value: 10k 1%
+    value: 10k 0.1%
     pins:
     - 1
     - 2
@@ -860,7 +860,7 @@ components:
     sheet: umbilical-load-switch
   R40:
     of: R-MODGAIN-FB
-    value: 30k 1%
+    value: 30k 0.1%
     pins:
     - 1
     - 2
@@ -888,14 +888,14 @@ components:
     sheet: mod-channels
   R44:
     of: R-MODGAIN-IN
-    value: 10k 1%
+    value: 10k 0.1%
     pins:
     - 1
     - 2
     sheet: mod-channels
   R45:
     of: R-MODGAIN-FB
-    value: 30k 1%
+    value: 30k 0.1%
     pins:
     - 1
     - 2
@@ -923,7 +923,7 @@ components:
     sheet: mod-channels
   R49:
     of: R-MODGAIN-IN
-    value: 10k 1%
+    value: 10k 0.1%
     pins:
     - 1
     - 2
@@ -937,7 +937,7 @@ components:
     sheet: umbilical-load-switch
   R50:
     of: R-MODGAIN-FB
-    value: 30k 1%
+    value: 30k 0.1%
     pins:
     - 1
     - 2
@@ -965,14 +965,14 @@ components:
     sheet: mod-channels
   R54:
     of: R-MODGAIN-IN
-    value: 10k 1%
+    value: 10k 0.1%
     pins:
     - 1
     - 2
     sheet: mod-channels
   R55:
     of: R-MODGAIN-FB
-    value: 30k 1%
+    value: 30k 0.1%
     pins:
     - 1
     - 2
@@ -1141,6 +1141,14 @@ components:
     - W
     - CCW
     sheet: pitch-stage
+  RV4:
+    of: TRIM-RESP
+    value: 10k 10% sealed SMD cermet
+    pins:
+    - CW
+    - W
+    - CCW
+    sheet: breath-response-shaper
   SW1:
     of: SW-POWER
     value: NKK M2011SD4G01
@@ -1545,7 +1553,11 @@ nets:
   /breath-response-shaper/DIODE_BRANCH:
   - D7.K
   - D8.A
+  - RV4.CW
+  /breath-response-shaper/RESP_TRIM:
   - R31.2
+  - RV4.CCW
+  - RV4.W
   /breath-response-shaper/RESTORE_SUM:
   - R59.2
   - R60.1

@@ -129,10 +129,13 @@ The module sits in the rack on a short ribbon with negligible drop, so the bus
 +5 V rail is free and convenient. It is used — but **only for the 74AHCT125
 level shifter**, around 10 mA.
 
-**The DAC gets its own LM317LZ at `dac-rail`, off its own reverse-protection
-diode on the +12 V rail.** It is trimmed at E7 (`TRIM-DAC-RAIL`), not set
-from a tolerance stack — see ADR 0004 *(amended 2026-10-01: it was a divider
-selected on the bench)*.
+**The DAC gets its own regulator at `dac-rail`, off its own reverse-protection
+diode on the +12 V rail.** *(Amended 2026-10-01, the owner: a precision-set LDO
+that needs no adjustment. It is ADI's LT3042, `U-REG-DAC`, set by `R-SET-DAC`
+inside the DAC's 5.00–5.50 V window on every part; nothing is trimmed or
+selected at E7, which measures it and records it. It was an LM317LZ, with a
+divider selected on the bench and then a trimmer — both superseded: ADR 0004;
+`power-entry.md`, *The DAC rail*.)*
 
 **The reason is headroom, not accuracy**, and this ADR said the opposite. It
 claimed "the DAC8568's full-scale output *is* its supply, so a rail the rack is

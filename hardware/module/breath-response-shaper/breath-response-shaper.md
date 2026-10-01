@@ -77,7 +77,9 @@ other.
                    │            │
                    │          wiper
                    │            │
-                   │        [R-RESP 3.9k]
+                   │        [R-RESP 2.7k]
+                   │            │
+                   │        [TRIM-RESP 10k]     wiper strapped to its CCW end
                    │            │
                    └──────[▷|◁]─┴──► X          D-RESP, 1N4448W antiparallel
                         two diodes
@@ -93,8 +95,8 @@ compresses.
 
 **The knob changes the level as well as the shape.** The stage's gain is
 above 1 at every breath level at CW (×1.11 at *pp* to `shaper-exp-gain` at a
-hard blow) and below 1 at every level at CCW (×0.82 at *pp* to ×0.44 at a hard
-blow) `[sim, sim/README.md]`. So **at a fixed GAIN setting, CW is louder at
+hard blow) and below 1 at every level at CCW (×0.83 at *pp* to ×0.49 at a hard
+blow) `[sim, sim/README.md, TRIM-RESP as commissioned]`. So **at a fixed GAIN setting, CW is louder at
 every breath level and CCW quieter**; "harder to get loud" (CW) and "easier to
 get loud" (CCW) describe the curve only once GAIN has been re-set to put a hard
 blow back where it was. What that does one stage later, at the commissioned
@@ -136,7 +138,7 @@ acts across the playing range rather than above it `[calc]`:
 > `POT-RESP`'s 50 kΩ track from it to `V_shaped` loads it to about 0.41 `V_in`
 > at the CW end `[calc]`. The fully-exponential gain at a hard blow is
 > `shaper-exp-gain`, not the 1.494 above, and the curve is not exactly linear
-> below the knee (1.11× at *pp*, with `R-RESP` at 3.9 kΩ). The same loading moves the centre detent's
+> below the knee (1.11× at *pp*, with `TRIM-RESP` as commissioned). The same loading moves the centre detent's
 > null about 5 % of the rotation clockwise: at the detent the stage is linear
 > within 0.3 % across real playing, not exactly — the diodes see a few
 > hundred millivolts at full scale and barely conduct. The table is kept as the
@@ -162,7 +164,7 @@ divider — two more parts per side, piecewise, and no thermal behaviour.
 | | |
 |---|---|
 | Op-amp | **Both remaining OPA2197 halves** — one shapes at ÷2 inverting, one restores ×2 inverting to put scale and polarity back |
-| Passives | `POT-RESP` 50 k lin (same part as `POT-GAIN`), `R-RESP` 3.9 k, `D-RESP` ×2 1N4448W, R1 20 k, R2 10 k, divider 2 × 10 k |
+| Passives | `POT-RESP` 50 k lin (same part as `POT-GAIN`), `R-RESP` 2.7 k and `TRIM-RESP` 10 k in series, `D-RESP` ×2 1N4448W, R1 20 k, R2 10 k, divider 2 × 10 k |
 | Panel | **A third pot and a third knob** |
 
 ## Settled before layout — 2026-09-30
@@ -176,17 +178,36 @@ divider — two more parts per side, piecewise, and no thermal behaviour.
   (`inamp-full-scale`) with breath; `V_shaped` = −½ × that, positive; the
   restoring half gives it back negative, as the in-amp had it. The output
   stage downstream is unchanged, so the jack's sense is unchanged.
-- **`R-RESP` is 3.9 kΩ** (owner, 2026-09-30: *"need 1.5x gain"*): the E24
-  value that gives at least 1.5× at a hard blow at the fully-exponential end
-  at every simulated corner, `shaper-exp-gain` `[sim]`. The table above (*Scaling*) was
+- **The diode branch is trimmed: `R-RESP` 2.7 kΩ fixed, `TRIM-RESP` 10 kΩ in
+  series** (owner, 2026-10-01, *"with trimmer again?"*, pre-layout review A1-3).
+  The owner requires at least 1.5× at a hard blow at the fully-exponential end
+  (2026-09-30: *"need 1.5x gain"*), and no fixed value can hold it everywhere:
+  the diode's guaranteed spread, the 1 % resistors, `POT-RESP`'s track and the
+  temperature move that gain by more than the margin any one value leaves —
+  the best fixed value held 1.5× at 27 °C and fell under it below about 20 °C.
+  So each unit is set at commissioning (*Commissioning*, below) to
+  `shaper-exp-gain`'s target, and the sim proves three things at every corner
+  of the stage `[sim, sim/]`: the target is **reachable** — the trimmer's
+  clockwise end is above it and its counter-clockwise end below it, from a
+  15 °C to a 30 °C workshop; a unit trimmed there **holds the 1.5× floor at
+  0 °C**; and the trimmer's strongest end still clips `BREATH_SHAPED` only
+  past 1.3× a hard blow (*Headroom*, next). The table above (*Scaling*) was
   sized at 15 kΩ on unloaded arithmetic and is kept as that arithmetic.
+- **`TRIM-RESP` fails safe.** Its wiper is strapped to its counter-clockwise
+  end, so clockwise lowers the branch's resistance and raises the gain — the
+  panel knob's sense — and an open wiper leaves the whole track in series:
+  the exp end then bends *less* (the trimmer's CCW end, `sim/`), never more. A
+  track that opens altogether takes the branch out and leaves the stage
+  linear. It is a Bourns 3224W, sealed and 12-turn (`TRIM-RESP` row), on the
+  main board's rear face beside the other trimmers.
 - **Where it inserts** is between the in-amp and `POT-GAIN`, for the reason
   given above: the scale there is fixed by the in-amp, so the knee sits at a
   known fraction of full breath and the gain knob cannot move it.
 - **Headroom.** At the full-exponential end `BREATH_SHAPED` clips at the
   OPA2197's rail before the in-amp reaches its full scale. Where it starts is
-  `shaper-exp-gain` `[sim]` (`sim/`): about seven-tenths of the sensor's range
-  with `R-RESP` at 3.9 kΩ, and at least 1.3× a hard blow at every corner,
+  `shaper-exp-gain` `[sim]` (`sim/`): about three-quarters of the sensor's range
+  as commissioned, and at least 1.3× a hard blow at every corner — at 40 °C,
+  and with `TRIM-RESP` at its strongest end as well as where it is set,
   where a hard blow is the 2.8 kPa candidate of the disputed
   `breath-working-point` (open until E2; at its 3–4 kPa candidate the nominal
   clip is within 5 % of a hard blow). The linear and log settings never clip
@@ -205,13 +226,38 @@ divider — two more parts per side, piecewise, and no thermal behaviour.
 
 - **How strong "fully exponential" feels is E10's to judge, with a real
   player and the sensor** — but not below 1.5× at a hard blow: the owner set
-  that floor on 2026-09-30, and `R-RESP` is 3.9 kΩ to hold it at every
-  simulated corner (`shaper-exp-gain`, `sim/`). A stronger curve is a lower
-  `R-RESP`, and it moves the clip earlier.
+  that floor on 2026-09-30, and `TRIM-RESP` is set to hold it
+  (`shaper-exp-gain`, `sim/`). A stronger curve is a higher target, within the
+  trimmer's clockwise end, and it moves the clip earlier.
 - **"A hard blow" is a candidate, not a measurement.** The 1.5× floor, the
-  clip margin and `R-RESP`'s value are all evaluated at an in-amp output of
-  −4.64 V, which is `breath-working-point`'s 2.8 kPa candidate. E2 decides it;
-  `R-RESP` is re-checked then (`shaper-exp-gain`, `conditional_on`).
-- **The floor at temperature.** The simulated corners are at 27 °C. Below
-  about 20 °C inside the case the worst-stacked corner dips under 1.5×
-  (`shaper-exp-gain`, `diode_note`); E10 judges the curve on a real module.
+  clip margin, the trimmer's range and the commissioning point are all
+  evaluated at an in-amp output of −4.64 V, which is `breath-working-point`'s
+  2.8 kPa candidate. E2 decides it; the range is re-checked then
+  (`shaper-exp-gain`, `conditional_on`).
+
+## Commissioning — `TRIM-RESP`
+
+Once, at build (ROADMAP E10), after `TRIM-BREATH-ZERO` and before the panel
+GAIN — on the bench with the module out of the rack, where the trimmers on the
+main board's rear face can be reached, at room temperature (the sim covers a
+15–30 °C workshop):
+
+1. **`POT-RESP` fully clockwise.** The trim acts on the exp end only; at the
+   centre click the branch carries almost no current.
+2. **Hold the in-amp at a hard blow with a known DC, not a breath.** With the
+   instrument unplugged, drive the umbilical's breath pair — `BREATH_SENSE`
+   against `AGND_SENSE` (`umbilical-pinmap`) — from a bench supply through a
+   breakout, and raise it until the in-amp's output reads −4.64 V
+   (`breath-working-point`'s candidate) at `R-RESP-IN`'s input end. A breath
+   cannot be held to the 1 % this needs; a supply can, and the ratio below
+   does not care what pressure a volt stands for.
+3. **Turn `TRIM-RESP` until `BREATH_SHAPED` reads the target times that
+   voltage** — `shaper-exp-gain`'s target, read at `U-RESP` pin 7 (or
+   `R-RESTORE-FB`'s output end). Clockwise raises it. One meter, two readings:
+   both are DC.
+4. Note the temperature. The sim's corners assume 15–30 °C; outside that,
+   re-check against `sim/`.
+
+`TRIM-RESP` ranges from about 2.7 kΩ to 12.7 kΩ in the branch; a unit that
+cannot reach the target from either end is outside every simulated corner,
+and the first suspect is `POT-RESP`'s track (measure it, CW lug to CCW lug).

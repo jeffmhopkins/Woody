@@ -41,6 +41,8 @@ derived:
   k1: "v['R2-1'] / v['R1-1']"
 
 vary:
+  # R-MODGAIN-IN and R-MODGAIN-FB at their value fields' tolerance: 0.1 % since 2026-10-01
+  # (A2-12, the owner), the RT0805BRD07 the sheet buys
   R1-1:  {tol: from-value}
   R2-1:  {tol: from-value}
   C-FILT-MOD-1: {tol: [-0.05, 0.05], source: "C0G +/-5 % [assumption: the netlist value states none]"}
@@ -63,8 +65,8 @@ sims:
     asserts:
       - expr: "max['law_err_lo'] < 0.01 and min['law_err_lo'] > -0.01 and max['law_err_hi'] < 0.01 and min['law_err_hi'] > -0.01"
         why: "the op-amp output follows the page's law 4 Vdac - 3 V_ref within 10 mV at both ends of the DAC's range, at every resistor corner: neither end clips on +-12 V"
-      - expr: "min['span_out'] > 19.70 and max['span_out'] < 20.31"
-        why: "the span at the op-amp output is inside the page's 19.703-20.303 V worst case"
+      - expr: "min['span_out'] > 19.96 and max['span_out'] < 20.04"
+        why: "the span at the op-amp output is inside the page's 19.970-20.030 V worst case, at R-MODGAIN-IN and R-MODGAIN-FB's 0.1 % (owner, 2026-10-01, A2-12)"
       - expr: "max['jack_hi'] < max['out_hi'] - 0.09"
         why: "RECORDED, not a requirement: R-OUT-PROT is outside the loop, so a 100 kohm input on the jack reads 1 % low (1k/101k) - a load-dependent span error, the page's mod-jack-range"
   - name: clr-ref-stale
