@@ -29,7 +29,9 @@ in the repository are under the session scratchpad (`F1/sim/chain.py`,
 | A8-1 | **CONFIRMED** | Partly fixed: `C-DEC-BUF` 100 nF drawn at `U-BUF.V+` (excitation sheet, main board `C204`), `C-DECOUPLE-CARRIER` now 6 placed of 8 bought. **HANDED**: the row's qty and notes (in `carrier/led-strip-drive/bom.csv`) and `carrier.md`'s "two R-78E5.0 bucks" | `check-netlist --strict` was 5/8, now 6/8; ADR 0015 one buck (`U-BUCK` qty 1, its input has `C-BUCK-IN`) |
 | A8-4 | **CONFIRMED** | Fixed: `shaper-exp-gain` carries `conditional_on: breath-working-point` with what E2 moves (`R-RESP` re-checked then); the shaper page and sims cite the dispute | `[calc]` 4.64 / 2.16106 / 0.7665 = 2.80 kPa |
 
-**Counts:** 18 owned ids — 18 confirmed (A1-11 in all four parts), 0 partly, 0
+| A9-13 (handed from F5) | **CONFIRMED** | Fixed: "the table below" → "the table above (*Scaling*)" on `breath-response-shaper.md` | The 15 kΩ table sits under *Scaling*, before the bullet that cites it |
+
+**Counts:** 18 owned ids (plus A9-13, handed in) — 18 confirmed (A1-11 in all four parts), 0 partly, 0
 refuted, 0 duplicate. One is an owner decision (A1-1); A1-2's wording is fixed
 but which behaviour is intended rides on A1-1.
 

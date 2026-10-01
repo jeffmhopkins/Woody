@@ -178,7 +178,7 @@ divider — two more parts per side, piecewise, and no thermal behaviour.
   stage downstream is unchanged, so the jack's sense is unchanged.
 - **`R-RESP` is 3.9 kΩ** (owner, 2026-09-30: *"need 1.5x gain"*): the E24
   value that gives at least 1.5× at a hard blow at the fully-exponential end
-  at every simulated corner, `shaper-exp-gain` `[sim]`. The table below was
+  at every simulated corner, `shaper-exp-gain` `[sim]`. The table above (*Scaling*) was
   sized at 15 kΩ on unloaded arithmetic and is kept as that arithmetic.
 - **Where it inserts** is between the in-amp and `POT-GAIN`, for the reason
   given above: the scale there is fixed by the in-amp, so the knee sits at a
