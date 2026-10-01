@@ -6,7 +6,7 @@
 * instrument then starts as power-entry-instrument/sim's hot-plug does (Q-INRUSH's ramp,
 * the buck, the 3V3), its SPI pads high-impedance (the ESP32 unpowered, then in reset:
 * no frame inside the run), its LED row blank (R-LED-PD holds the data line through the
-* boot), and its breath front end comes up at the held pressure.
+* boot), and its breath front end comes up at rest (p_kpa 0: nobody blows while plugging in).
 XC m1 m2 m3 m4 m5 m6 m7 m8 i1 i2 i3 i4 i5 i6 i7 i8 UMB_LUMPED
 XS m1 m2 m3 m4 m5 m6 m7 m8 i1 i2 i3 i4 i5 i6 i7 i8
 + ledctl sclkctl mosictl csctl dsck ddin dsync dacp dacm1 dacm2 dacm3 dacm4 plug pplug SYS

@@ -9,6 +9,10 @@ two places until 2026-09-21, and each is now one directory.
 | [`spi-link/`](spi-link/spi-link.md) | Carrier SPI egress → umbilical → the module's 74AHCT125 |
 | [`key-chain-loom/`](key-chain-loom/key-chain-loom.md) | Main board → the two key boards, one 1.27 mm IDC ribbon each; the thumb clusters' part is main-board traces |
 
+[`system/sim/`](system/sim/README.md) is not a circuit: it is the simulation of
+all of them together — instrument, umbilical and module in one deck, built
+from every circuit's exported netlist.
+
 ## Why these are not filed under a board
 
 Because their numbers cannot be derived from one side.

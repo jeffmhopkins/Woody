@@ -368,7 +368,7 @@ CIGS j3 gq {{C-INRUSH-GS}}
 CIGD gq gdm {{C-INRUSH-GD}}
 RIGD gdm ins {{R-INRUSH-GD}}
 DRST ig gq DRESET
-* INST_POS12: C-STRIP-BULK; the LED row (thirteen WS2815B-V1 and their C-LED, as one: the
+* INST_POS12: C-STRIP-BULK; the LED row (n:D-LED WS2815B-V1 and their C-LED, as one: the
 * row's current, blank to lit as ledctl, on smoothly above v_led_on so it is a load)
 * returning across the plane to J-UMB; L-BUCK-IN, C-BUCK-IN and the buck, a constant power
 * above its input minimum

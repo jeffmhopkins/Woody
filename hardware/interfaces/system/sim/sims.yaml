@@ -6,13 +6,16 @@
 # idealised. Run (long: background it):
 #   python3 tools/sim.py run hardware/interfaces/system/sim
 #
-# THREE SCENARIOS, each asserted, and one check on the model itself:
+# THREE SCENARIOS, each asserted, and three checks on the models themselves:
 #   led-*      steady breath and a held pitch while the LED row switches (the M8 bench
 #              test "pitch scoped while the LEDs sweep", ROADMAP.md M8, ADR 0006)
-#   burst      a burst of DAC frames on the SPI while breath is held: what reaches breath
+#   burst*     a burst of DAC frames on the SPI while breath is held: what reaches breath
+#              and pitch (burst-spi: the same with no DAC output moving)
 #   hot-plug   the instrument plugged into a running module: what the module's jacks do
 #   cable-check  the lumped umbilical the long runs use, against ngspice's CPL line with
 #              the same matrices, on SCLK's edge into the breath pair
+#   opamp-check, inamp-check  the behavioural OPA2197 and INA828 (bopa.lib) against TI's
+#              macromodels, on the supply and common-mode rejection every scenario uses
 title: The system - instrument, umbilical and module in one deck
 values:
   netlist:
@@ -101,7 +104,7 @@ params:
   c_tvs_pwr: {value: 1.0e-9, source: "D-TVS-PWR's capacitance at 0 V (power-entry-instrument/sim's c_tvs, renamed here because spi-link/sim's c_tvs is U-TVS-SPI's)"}
   r_isl:    {value: 0.005, source: "AGND_INST island copper, sensor pin 3 to the reference, and on to NT-AGND [assumption: a few mm of plane]"}
   r_plane:  {value: 0.005, source: "the instrument's PWR_GND plane, from the LED row and from NT-AGND to J-UMB [assumption: 1 oz plane, tens of mm]"}
-  i_row_full: {value: 0.195, source: "the LED row lit, the top of led-row-current (13 x 0.18 W / 12 V, datasheets/led/WS2815B-V1.pdf p.2; the figure is blocked on E6)"}
+  i_row_full: {value: 0.195, source: "the LED row lit: the top of led-row-current's range (a register range: sim.py cites only its first number, so the top is written here and moves with it by hand) [datasheets/led/WS2815B-V1.pdf p.2; the figure is blocked on E6]"}
   i_led_blank: {value: 2.0e-3, source: "one WS2815B-V1 blanked, under 2 mA [ds WS2815B-V1.pdf p.3, as led-row-current's derivation reads it]"}
   v_led_on: {value: 9.0, source: "the LED row's current taken as on smoothly above 9 V of INST_POS12 [assumption: a load, not a source, while the rail comes up; the running rail is ~11.9 V, far above it]"}
   v_logic_on: {value: 6.0, source: "U-REG-LOGIC (ADP7118) taken as regulating once +12 V is past 6 V [assumption: 5 V out plus its dropout; the start is not what any scenario measures]"}
@@ -135,14 +138,14 @@ params:
   p_trim:   {value: 0.5, source: "TRIM-RESP at mid-travel: the shaper's commissioning (breath-response-shaper/sim) is not repeated here; the curve's exact gain does not move what a disturbance does"}
   v_zero:   {value: {fig: breath-zero-ref}, source: "TRIM-BREATH-ZERO's wiper set to null the typical pedestal (breath-zero-ref)"}
   v_ref7:   {value: {fig: mod-reference}, source: "DAC channel 7, the mod channels' reference (mod-reference)"}
-  pad_clamp: {value: 1, source: "the ESP32 pads' ESD clamps to 3V3 and to ground, as an area factor: 1 fitted; burst sets 1e-9 (out). Inside 0-3.3 V they carry nothing, and with them in, nanosecond edges every 250 ns stall the solver (a stiff node, README)"}
+  pad_clamp: {value: 1, source: "the ESP32 pads' ESD clamps to 3V3 and to ground, as an area factor: 1 fitted; the burst sets 1e-9 (out): between 0 and 3.3 V they carry nothing, and the burst's pads never leave that range"}
   pad_hiz:  {value: 0, source: "1: the ESP32's three SPI pads high-impedance (unpowered, or in reset: IO34-36 have no pull, ESP32-S3 datasheet p.17, as spi-link.md reads it)"}
   # --- scenario 2, the SPI burst (burst.cir); the pads' timing from spi-link/sim (f_clk, tr_drv)
   n_frames: {value: 8, source: "back-to-back DAC frames: every channel written once, the most firmware sends in one loop (loop-budget counts six)"}
   t_b_skip: {value: 0.2e-3, source: "the burst starts this long after t_settle"}
   t_chain:  {value: 20.0e-9, source: "U-RX-MOD's two gates and U-LVL-MOD, pad to DAC pin [calc: within spi-link/sim's 2-29 ns chain spread]"}
   t_lvl_edge: {value: 3.0e-9, source: "U-LVL-MOD's (74AHCT125) output edge [assumption: an AHCT output into a few pF]"}
-  v_mod_step: {value: 2.0, source: "mod channel 1's code step at each frame's end: 2.5 to 4.5 V at the DAC, 0 to +8 V at the jack (inside mod-jack-range)"}
+  v_mod_step: {value: 2.0, source: "mod channel 1's code step at each frame's end: 2.5 to 4.5 V at the DAC (mod_swing measures what reaches the jack)"}
   t_dac_dly: {value: 1.0e-7, source: "the DAC's output starts to move this long after SYNC rises [assumption: of the order of the DAC's digital delay; its output then slews over t_dac_edge, so the figure moves nothing measured]"}
   t_dac_edge: {value: 2.7e-6, source: "the DAC's output slewing that step at 0.75 V/us typ [datasheets/analog/DAC8568CIPW.pdf, Slew rate] [calc: 2.0 / 0.75]"}
   t_b_tail: {value: 1.5e-3, source: "the run goes on this long after the burst: past the link's ~460 Hz pole and C-OUT-BREATH"}
@@ -153,7 +156,7 @@ params:
   # --- cable-check (cable.cir)
   t_cc0:    {value: 10.0e-9}
   # --- budgets the scenarios are held to (each the corpus's, by name)
-  pitch_led_bound: {value: 0.001, source: "ADR 0027, 'What is left, and the residual', the LED row's PWM row: 'under 0.001 cents here' at the pitch jack"}
+  pitch_bound: {value: 0.01, source: "ADR 0027, 'What is left, and the residual': 'Residual breath-correlated pitch error: under 0.01 cents' - everything the instrument's supply may do to the pitch jack"}
   rail_led_bound: {value: 0.013, source: "ADR 0027, same row: 'about 13 mV p-p at most on the rails by the review's bound (A4-13)' - the case's +-12 V, at the module's header"}
   breath_noise: {value: 0.010, source: "breath-receive-stage.md, 'Noise at the jack': the sensor's own noise, about 10 mV peak-to-peak at the jack; the electronics are to add nothing beside it"}
 
@@ -284,7 +287,7 @@ sims:
       pre_pitch_cents: "(peak(w['jp'], p['t_pre0'], p['t_led0']) - trough(w['jp'], p['t_pre0'], p['t_led0'])) * 1200"
       pre_breath_mv: "(peak(w['jb'], p['t_pre0'], p['t_led0']) - trough(w['jb'], p['t_pre0'], p['t_led0'])) * 1e3"
     asserts: &led_asserts
-      - expr: "max['pitch_cents'] < 0.01"
+      - expr: "max['pitch_cents'] < p['pitch_bound']"
         why: "ROADMAP M8's 'pitch scoped while the LEDs sweep', simulated: the pitch jack moves under 0.01 cents p-p, ADR 0027's residual for everything the instrument's supply does to pitch, at every corner of the rack's PSU, C2's ESR, the LED bulk's ESR and the cable's gauge"
       - expr: "max['breath_mv'] < 0.1 * p['breath_noise'] * 1e3"
         why: "the breath jack moves under a tenth of the sensor's own noise at the jack (breath-receive-stage.md, 'Noise at the jack', ~10 mV p-p)"

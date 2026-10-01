@@ -653,6 +653,23 @@ so.
   starts at 0 V drives it negative and trips everything upstream; a load that
   is off until its supply arrives is a current scaled by the voltage
   (`power-entry-instrument/sim`).
+- **One flat subcircuit shares one node namespace.** In the system deck the
+  instrument's reference capacitor's ESR node and the module's −12 V
+  decoupler's were both `crn1`: 60 mA of the instrument's return ran through
+  the rack's ground, the LED row "moved pitch" by 0.1 cents, and every run
+  converged. Name a node by its section, and look for collisions when
+  two blocks are pasted into one `.subckt` (`hardware/interfaces/system/sim/`).
+- **An op-amp model's output limit is the datasheet's swing, not a guess.** A
+  behavioural limiter 0.6 V inside the rails clipped a follower at 0.28 V on a
+  single 12 V supply; the breath sensor's buffer sat 0.33 V high and every
+  breath result was on a half-saturated stage. The OPA2197 swings to 25 mV
+  (`hardware/interfaces/system/sim/`, `v_hr`).
+- **A big deck with nanosecond edges dies at its smallest steps.** The system
+  deck ran millisecond LED edges and failed "timestep too small" at every SPI
+  edge, wherever the edge was — a 3 ns pulse into a 3 pF load with no path to
+  anything else did it. What fixed it: `abstol=1e-6` (results unchanged to
+  0.1 % on the LED scenario) and no nanohenry ESL on capacitors whose loop has
+  no resistance.
 - **A threshold test must not mix parts.** "Never below VT− max after crossing
   VT+ min" fails on a perfect edge, because across the datasheet's spread VT−
   max is above VT+ min. The test is the waveform's swing back after its first
@@ -681,6 +698,7 @@ so.
 | the DAC8568's power-on glitch and its 3-state reference, into the pitch and mod jacks | `hardware/module/dac8568/sim/` |
 | the breath link's TVS diodes: CMRR, `PWR_GND` rejection, leakage | `hardware/interfaces/breath-sense-link/sim/` |
 | the panel LED's current and its start | `hardware/module/panel-led/sim/` |
+| the whole system, instrument to jacks, from the exported netlists: the rack, `module/power-entry` with `U-ISO`, the load switch, the umbilical's eight conductors as coupled lines, the instrument's power entry with `Q-INRUSH`, its buck and LED row, the breath sensor, buffer and link, the SPI pads and receiver, and the module's breath chain, DAC stages and ground star; three scenarios — the LED row switching (ROADMAP M8's "pitch scoped while the LEDs sweep"), a burst of DAC frames, and a hot-plug — with behavioural op-amps and in-amp held to TI's models | `hardware/interfaces/system/sim/` |
 
 ### Coverage — every circuit and board
 
@@ -724,4 +742,4 @@ circuit without a `sim/`, the answer was written nowhere.
 | `boards/main-board` | covered | its placed circuits, each by its own row; its root-sheet parts (`FB-CHAIN`, `R-CHAIN-SER`, `R-SER-TERM`, `U-TVS-CHAIN`) are `hardware/interfaces/key-chain-loom/sim/`'s, except `R-SER-TERM`, a static 10 kΩ pull-up on `SER`, which that sim drives instead and nothing simulates |
 | `boards/module-main` | n/a | Places circuit sheets, each covered by its own row; its own parts are two connectors |
 | `boards/module-jack` | n/a | Places circuit sheets, each covered by its own row; its own part is a connector |
-| `boards/umb-adapter` | n/a | Two connectors and the copper between them; the umbilical's SPI conductors are lossy lines in `interfaces/spi-link`'s sim |
+| `boards/umb-adapter` | covered | Two connectors and the copper between them: all eight of the umbilical's conductors are coupled lines in `hardware/interfaces/system/sim/`, and its SPI conductors CPL lines in `hardware/interfaces/spi-link/sim/` |

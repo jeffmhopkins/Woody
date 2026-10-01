@@ -1,14 +1,14 @@
 * SCENARIO 2, a burst of DAC frames while breath is held: the whole system (system.lib) on
-* the umbilical as ngspice CPL lines (the lumped form stalls the solver at the nanosecond
-* steps these edges need), from its DC operating point, the LED row blank, pitch held (jack
-* 0 V). At t_b0 the ESP32 sends n_frames back-to-back DAC frames on SPI2 at f_clk, mode 1:
+* the lumped umbilical, powered up (system.lib) and settled, the LED row blank, pitch held
+* (jack 0 V). At t_b0 the ESP32 sends n_frames back-to-back DAC frames on SPI2 at f_clk, mode 1:
 * SCLK runs while CS_MOD is low, MOSI changes on every SCLK rising edge (the most edges
 * the link can carry), CS_MOD is high for one clock period between frames (no more than
 * the firmware contract's t_csh + t_csw, spi-link/sim). U-LVL-MOD's three outputs repeat
 * the pads' timeline t_chain later, into the DAC's pins. Each frame's end steps mod channel
 * 1 between v_mod_code and v_mod_code + v_mod_step; pitch and the other channels hold.
-* Every edge is a PULSE timed as t_b0 plus an offset, summed by ngspice (sims.yaml). A PWL
-* repeated with r=0 stalled the solver at its second period, every time.
+* Every edge is a PULSE timed as t_b0 plus an offset, which ngspice sums in double precision
+* (sims.yaml): six figures cannot place a nanosecond edge a third of a second into a run.
+* abstol=1e-6, as in every scenario here (README, "Solver").
 XC m1 m2 m3 m4 m5 m6 m7 m8 i1 i2 i3 i4 i5 i6 i7 i8 UMB_LUMPED
 XS m1 m2 m3 m4 m5 m6 m7 m8 i1 i2 i3 i4 i5 i6 i7 i8
 + ledctl sclkctl mosictl csctl dsck ddin dsync dacp dacm1 dacm2 dacm3 dacm4 plug pplug SYS

@@ -1,12 +1,10 @@
 * SCENARIO 1, "pitch scoped while the LEDs sweep" (ROADMAP M8, ADR 0006): the whole system
 * (system.lib) on the lumped umbilical, breath held at p_kpa, pitch held (the DAC at v_dac0,
 * jack 0 V), the mod channels at mid-scale, the SPI idle (SCLK and MOSI low, CS high), and
-* the LED row switching between blank and lit: a PWM at f_led with duty d_led, all thirteen
-* in phase (the worst case: WS2815s run their own oscillators, so in reality they drift in
-* and out of phase). The run is a cold start (uic): the rack powers up with the instrument
-* plugged in, everything settles by t_led0, and then the row starts. TI's OPA2197 model
-* finds no DC operating point in this deck (README), and a power-up is one the models
-* take as poweron.cir does.
+* the LED row switching between blank and lit: a PWM at f_led with duty d_led, every LED in
+* the row in phase (the worst case: WS2815s run their own oscillators, so in reality they
+* drift in and out of phase). The run is a power-on (system.lib) with the instrument
+* plugged in; everything settles by t_led0, and then the row starts.
 XC m1 m2 m3 m4 m5 m6 m7 m8 i1 i2 i3 i4 i5 i6 i7 i8 UMB_LUMPED
 XS m1 m2 m3 m4 m5 m6 m7 m8 i1 i2 i3 i4 i5 i6 i7 i8
 + ledctl sclkctl mosictl csctl dsck ddin dsync dacp dacm1 dacm2 dacm3 dacm4 plug pplug SYS

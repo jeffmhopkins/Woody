@@ -8,13 +8,17 @@
 * BOPA, one OPA2197 channel: pins in+ in- V+ V- out.
 *  - its input capacitances, differential and common-mode (Zid 100 Mohm || 1.6 pF, Zic
 *    1e13 ohm || 6.4 pF [OPA2197.pdf p.7]), to V- here
-*  - the supply's error, input-referred: ps_k0 per volt of (V+ - V-) away from ps_vs0, and a
-*    derivative term ps_tau (an RC differentiator, r_psd c_psd = ps_tau, good to ~14 MHz), the
-*    20 dB/decade TI's model shows above ~10 Hz
+*  - the supply's error, input-referred: pk0 per volt of (V+ - V-) away from ps_vs0, and a
+*    derivative term ptau (an RC differentiator on r_psd), the 20 dB/decade TI's model shows
+*    above ~10 Hz; BOPA's are ps_k0 / ps_tau, the INA828's amplifiers' ina_ps_k0 / ina_ps_tau.
+*    A second differentiator (c_psm) cancels what the gain stages below add of their own: the
+*    supplies' midpoint moving under the output, 1 / (2 pi GBW) of its slope, which made
+*    V+ and V- rejection differ by 10 dB where TI's model has them equal
 *  - two gain stages about the supplies' midpoint, so no node's own conductance is many
 *    decades below what drives it: a slew-limited transconductance gm_op into r1_op || c1_op
 *    (gain a1_op, the dominant pole), then a smooth limiter of gain a2_op that stops the output
-*    v_hr inside each rail (a rail-to-rail output). Aol = a1_op a2_op, GBW = gm_op a2_op /
+*    v_hr inside each rail (the datasheet's swing; the limit is kept positive while the
+*    supply is below 2 v_hr, so an unpowered amplifier's gain never changes sign). Aol = a1_op a2_op, GBW = gm_op a2_op /
 *    (2 pi c1_op), slew = i_slew a2_op / c1_op
 *  - a push-pull output from the rails themselves, r_o open loop (opa2197-output-impedance),
 *    limited at i_sc, alive only while the supply is (an unpowered amplifier sources nothing):
@@ -48,8 +52,8 @@ Bsnk out vee I = 0.5 * (sqrt(V(io) * V(io) + 1e-14) - V(io))
 Bq vcc vee I = {{iq_op}} * tanh((V(vcc) - V(vee)) / 2)
 .ends
 *
-* BOPAI, the BOPA core without its input capacitances: the INA828's input amplifiers, which
-* TI does not give separately
+* BOPAI, the BOPA core without its input capacitances and with the INA828's supply
+* rejection: the INA828's three amplifiers, which TI does not give separately
 .subckt BOPAI inp inn vcc vee out
 XC inp inn vcc vee out BOPAC pk0={{ina_ps_k0}} ptau={{ina_ps_tau}}
 .ends
@@ -57,7 +61,7 @@ XC inp inn vcc vee out BOPAC pk0={{ina_ps_k0}} ptau={{ina_ps_tau}}
 * BINA, the INA828: its datasheet's three-amplifier topology [INA828IDR.pdf, Functional
 * Block Diagram]: two input amplifiers (BOPAI) with their 25 kohm feedback and RG between
 * their inverting inputs (G = 1 + 50 kohm / RG, so the netlist's R-GAIN-INAMP sets it), and a
-* difference amplifier of four 40 kohm resistors to OUT and REF. Its CMRR is a mismatch,
+* difference amplifier (BOPAI too) of four 40 kohm resistors to OUT and REF. Its CMRR is a mismatch,
 * ina_d in the REF leg (the datasheet's minimum at dc), and a capacitance across it, ina_cm
 * (the roll-off TI's model shows; sim inamp-check holds it there). Pins: in+ in- V+ V- out
 * ref rg1 rg2.
