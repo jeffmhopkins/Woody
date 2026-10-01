@@ -56,11 +56,18 @@ the sheet must be mirrored in `sims.yaml`.
   `pitch-stage.md` says it is 0 V, so the jack sits at 0 V. The DAC8568's
   datasheet says the internal reference is disabled by default and the pin is
   then `VREFIN`, an input. The deck holds it at 0 V, which is the page's claim,
-  not a finding; what a disabled reference pin presents to `TRIM-OFFSET` is
-  open until the bench (E9) or a model of the pin says.
+  not a finding. **Bracketed since 2026-10-01 by
+  [`dac8568/sim`](../../dac8568/sim/)**: the pin as 3-state with
+  `C-VREF-DAC` and ±1 µA of leakage moves the parked jack about 9 mV per
+  µA; the real leakage is still the bench's (E9).
 - The DAC's outputs before its own power-on reset has run: the deck holds the
   channel at zero scale from the start. `R-BIAS-DAC` is what the page relies on
-  for that window.
+  for that window. The datasheet's power-on glitch is in
+  [`dac8568/sim`](../../dac8568/sim/).
+- **`LOGIC_5V` and the DAC's SPI pins.** `U-REG-LOGIC` is not in this deck;
+  its race with `DAC_AVDD`, and the requirement that `SYNC`, `SCLK_DAC` and
+  `DIN` stay under `DAC_AVDD + 0.3 V` through it, are
+  [`digital-and-supervision/sim`](../../digital-and-supervision/sim/)'s.
 
 ## What a result is worth
 

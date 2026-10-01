@@ -7,7 +7,7 @@ inputs:
   hardware/carrier/power-entry-instrument/sim/sims.yaml: 849986a764f89f9b
   hardware/carrier/power-entry-instrument/netlist.yaml: 2ced35d8a0373a19
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
-  hardware/module/power-entry/netlist.yaml: ccb32c181cd90840
+  hardware/module/power-entry/netlist.yaml: 060c3ed04d45d9a8
   hardware/carrier/power-entry-instrument/sim/pei-z.cir: a1aee2ada3397cc1
   hardware/carrier/power-entry-instrument/sim/pei-start.cir: e2387246ee8256e5
   hardware/module/umbilical-load-switch/sim/lt1641.inc: 59be165ccd4451a6

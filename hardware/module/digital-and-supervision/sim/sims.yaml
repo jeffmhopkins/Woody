@@ -1,0 +1,107 @@
+# The module's logic power: LOGIC_5V (U-REG-LOGIC, U-RX-MOD's supply) against DAC_AVDD
+# (U-REG-DAC, the DAC8568's and U-LVL-MOD's), at rack power-on and power-off, and what the
+# SPI buffer's three outputs - SYNC, SCLK_DAC, DIN - do to the DAC's pins while the two
+# rails disagree. Values from the three netlists the path runs through: module/power-entry
+# (both regulators and their parts), this circuit (R-PULL-CS, R-RX-CS, C-RX-CS, the
+# DAC-side pulls, C-DEC-LVL) and module/dac8568. Run:
+#   python3 tools/sim.py run hardware/module/digital-and-supervision/sim
+#
+# THE REQUIREMENT. The DAC8568's datasheet: "No device pin should be brought high before
+# power is applied to the device" [ds DAC8568CIPW.pdf p.31], and its absolute maximum for a
+# digital input is AVDD + 0.3 V [p.2]. LOGIC_5V arrives first and leaves last; SYNC idles
+# HIGH (CS_MOD is pulled up at both ends), and an instrument powered on its own can hold
+# SCLK and MOSI high. U-LVL-MOD (74AHCT125) therefore runs from DAC_AVDD, the DAC's own
+# rail, so none of its outputs can be over the DAC's supply on the way up or down.
+title: Module logic power - LOGIC_5V against DAC_AVDD, and the DAC's SPI pins between them
+values:
+  netlist:
+    - hardware/module/power-entry/netlist.yaml
+    - hardware/module/digital-and-supervision/netlist.yaml
+    - hardware/module/dac8568/netlist.yaml
+models:
+  - datasheets/discrete-and-power/LM317L-ti-pspice-snvmaw3.lib
+  # TI's behavioural SN74AHCT125 (SCLM256, generated from datasheet values, typical at 25 C):
+  # its output resistance and its supply-dependent drive are what matter here. NOT used for
+  # U-RX-MOD: TI's SN74AHCT14 model (SCLM253, banked beside it) is the family's generic
+  # AHC model, with CMOS thresholds - V_T+ 2.8 V at VCC 4.5 V - where the part's datasheet
+  # gives TTL ones, 0.9-1.9 V [ds SN74AHCT14.pdf p.5]
+  - datasheets/logic/SN74AHCT125-ti-pspice-sclm256.cir
+# the bus, the 1N5817 fit, the PTC, the bead, the module's analog load and the DAC's supply
+# current are module/power-entry/sim's, stated once there
+params_from: [hardware/module/power-entry/sim/sims.yaml]
+spiceinit: [set ngbehavior=psa]
+
+params:
+  t_off:      {value: 60.0e-3, source: "the bus switches off here: DAC_AVDD has settled by ~15 ms (power-entry/sim, as-netlisted, t_avdd_floor)"}
+  t_fall:     {value: 1.0e-3, source: "the bus falling at switch-off [assumption]. Not swept: once the bus is below the module's +12 V node D1 blocks, and the node decays on C1 and the module's own load whatever the bus does"}
+  t_end:      {value: 90.0e-3, source: "30 ms after switch-off the +12 V node is near 2.7 V, under every threshold in question; TI's LM317L model stops converging a few ms later, with its input near 2 V"}
+  # --- U-REG-LOGIC, ADP7118AUJZ-5.0, BEHAVIOURAL [datasheets/discrete-and-power/ADI-ADP7118.pdf]
+  v_out_ldo:  {value: 5.0, source: "the fixed 5.0 V option [ds p.1, ordering guide]"}
+  v_uvlo:     {value: 2.69, source: "UVLO rising, max 2.69 V [ds p.3]; falling 2.2 V min - the hysteresis is left out, so the model turns off 0.5 V late on the way down (the conservative side here: LOGIC_5V stays up longer)"}
+  t_ss:       {value: 380.0e-6, source: "start-up time, EN rising to 90 % of VOUT, 380 us typ at VOUT = 5 V with SS open; the TSOT package has no SS pin [ds p.3, p.15]. A linear soft start over t_ss (vary)"}
+  i_lim:      {value: 0.25, source: "current limit, 250 mA min (360 typ) [ds p.3]"}
+  v_do:       {value: 0.06, source: "dropout, 60 mV max at 10 mA [ds p.3]"}
+  gm_ldo:     {value: 10.0, source: "the pass element's error gain, A/V [assumption: stiff; the regulation loop's dynamics are not the question]"}
+  r_logic:    {value: 980.0, source: "LOGIC_5V's load, about 5.1 mA at 5 V [repo, power-entry.md 'The logic 5 V', the Load row: 5.0 / 5.1 mA]; a resistance so it is off until the rail arrives (tooling.md section 5)"}
+  k_l5:       {value: 0, source: "0: U-LVL-MOD's VCC on DAC_AVDD, as netlisted; 1: a WHAT-IF with it on LOGIC_5V, the wiring the requirement exists to exclude"}
+  # --- the DAC8568's logic input pins
+  k_clamp:    {value: 1.0, source: "the pin's power clamp is TI's IBIS model's input_5p0v [POWER Clamp] table, typ column [datasheets/analog/DAC8568-ti-ibis-sbam030.ibs]; its min and max columns are 0.8 and 1.2 times it near 2 V over AVDD (vary)"}
+  c_pin:      {value: 3.0e-12, source: "DAC8568 logic input pin capacitance, 3 pF max [ds DAC8568CIPW.pdf p.4]"}
+
+derived:
+  t_up_end: "1e-6 + v['t_rise']"
+  t_off_end: "v['t_off'] + v['t_fall']"
+  i_ss: "v['v_out_ldo'] * 1e-9 / v['t_ss']"
+
+vary:
+  t_ss:    {tol: [-0.5, 1.0]}
+  k_clamp: {tol: [-0.2, 0.2]}
+
+sims:
+  - name: rails-and-sync
+    # As netlisted. CS_MOD held up by R-PULL-CS (no instrument; with one it is held up to
+    # 3.3 V, so SYNC is high either way); SCLK_BUF and MOSI_BUF held HIGH, the worst case
+    # (seq.cir). Power-on, a 60 ms hold, power-off.
+    deck: seq.cir
+    measures: [t_l5_up, t_avdd_up, over_on, over_off, oversc_on, oversc_off, overdin_on, overdin_off, i_esd_max, l5_peak, l5_final, avdd_final]
+    post: &post
+      # when each rail reaches 4.5 V on the way up (the 74AHCT parts' VCC minimum)
+      t_l5_up: "cross(w['l5'], 4.5, 0)"
+      t_avdd_up: "cross(w['avdd'], 4.5, 0)"
+      # each DAC input's excursion over DAC_AVDD, on and off; the DAC's abs max is +0.3 V
+      over_on: "peak(w['over'], 0, p['t_off'])"
+      over_off: "peak(w['over'], p['t_off'], p['t_end'])"
+      oversc_on: "peak(w['oversc'], 0, p['t_off'])"
+      oversc_off: "peak(w['oversc'], p['t_off'], p['t_end'])"
+      overdin_on: "peak(w['overdin'], 0, p['t_off'])"
+      overdin_off: "peak(w['overdin'], p['t_off'], p['t_end'])"
+      # the most any of the three pins' power clamps conducts into DAC_AVDD, on or off
+      i_esd_max: "max(peak(w['iesd'], 0, p['t_end']), peak(w['iesdsc'], 0, p['t_end']), peak(w['iesddin'], 0, p['t_end']))"
+      # U-LVL-MOD's inputs sit at LOGIC_5V: its highest, against the part's VI rating
+      l5_peak: "peak(w['l5'], 0, p['t_end'])"
+      l5_final: "at(w['l5'], p['t_off'] - 1e-3)"
+      avdd_final: "at(w['avdd'], p['t_off'] - 1e-3)"
+    asserts:
+      - expr: "min['l5_final'] > 4.9 and max['l5_final'] < 5.1 and min['avdd_final'] >= 5.0"
+        why: "both rails settle where their pages say: LOGIC_5V at the ADP7118's 5.0 V, DAC_AVDD at or over dac-rail's 5.00 V floor, at every corner"
+      - expr: "max['over_on'] <= 0.3 and max['over_off'] <= 0.3 and max['oversc_on'] <= 0.3 and max['oversc_off'] <= 0.3 and max['overdin_on'] <= 0.3 and max['overdin_off'] <= 0.3"
+        why: "REQUIREMENT: SYNC, SCLK_DAC and DIN each stay at or under DAC_AVDD + 0.3 V, the DAC8568's absolute maximum for a digital input [ds DAC8568CIPW.pdf p.2], at every instant of power-on and power-off and at every corner - 'no device pin should be brought high before power is applied to the device' [p.31]. Holds because U-LVL-MOD runs from DAC_AVDD (digital-and-supervision.md, 'The buffer's supply')"
+      - expr: "max['i_esd_max'] < 1e-6"
+        why: "and so no DAC input's power clamp carries current into DAC_AVDD at any corner (under 1 uA; it was 10-17 mA with the buffer on LOGIC_5V)"
+      - expr: "max['l5_peak'] <= 5.5"
+        why: "U-LVL-MOD's inputs, driven from LOGIC_5V, stay inside the 74AHCT125's recommended VI of 0 to 5.5 V, whatever its VCC is doing: the input has no clamp to VCC (I_IK for VI < 0 only; I_I +/-1 uA at VI = 5.5 V for VCC 0 to 5.5 V) [ds SN74AHCT125.pdf p.3, p.4]"
+      - expr: "max['t_l5_up'] < min['t_avdd_up']"
+        why: "context, not the requirement: LOGIC_5V still arrives first at every corner - the ADP7118's 380 us soft start against the LM317L's C-REG-ADJ start of milliseconds - which is why the buffer cannot be on it"
+  - name: what-if-lvl-on-logic-5v
+    # A WHAT-IF, not the netlist: U-LVL-MOD's VCC on LOGIC_5V. Kept so the requirement is
+    # seen to bite: the same deck and assertion fail on the wiring it excludes
+    deck: seq.cir
+    set: {k_l5: 1}
+    # k_clamp only: TI's model does not finish inside the tool's 300 s at t_ss+ on this
+    # wiring, and the soft start's spread is the as-netlisted sim's to cover
+    vary: [k_clamp]
+    measures: [over_on, over_off, oversc_on, oversc_off, overdin_on, overdin_off, i_esd_max]
+    post: *post
+    asserts:
+      - expr: "min['over_on'] > 0.3 and min['over_off'] > 0.3 and min['oversc_on'] > 0.3 and min['overdin_on'] > 0.3"
+        why: "WHAT-IF: with the buffer on LOGIC_5V every DAC input it drives high sits over AVDD + 0.3 V at power-on at every corner, and SYNC again at power-off - the excluded wiring, so a regression that put it back would be caught by rails-and-sync"

@@ -145,6 +145,11 @@ not an option**. No jumper, no unpopulated fallback footprint. A module that
 also worked in cases without a +5 V rail would be engineering for a case this
 instrument is never in (see the design scope in the README).
 
+> *Amended: no longer the case. The bus +5 V is not used (owner, 2026-09-30;
+> ADR 0023 point 3) — the module makes its own `LOGIC_5V` — and the level
+> shifter runs from the DAC's `DAC_AVDD` since 2026-10-01
+> (`hardware/module/digital-and-supervision/`, *The buffer's supply*).*
+
 ### The load table, measured against nothing yet
 
 Every number in this section was low. ADR 0005 originally said 250 mA and

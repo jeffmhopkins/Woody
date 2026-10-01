@@ -320,7 +320,6 @@ def layout():
     trk = get("tracking")
     size = {k: get(f"size.{k}") for k in ("title", "header", "label", "row", "small", "maker")}
     ink = {k: get(f"ink.{k}") for k in ("panel", "slate", "bar", "white")}
-    word_gap, line_gap = get("word_gap"), get("line_gap")
     art_in = get("island_r") / 2
 
     def Z(name):
@@ -376,10 +375,13 @@ def layout():
     # -- island B: every jack an output, each word knocked out of a BAR pill
     # filling its legend zone from the jack's side to art_in inside the island
     jw = get("text.jacks")
-    jz = [["J-CV-PITCH legend", "J-CV-BREATH legend"], ["J-CV-MOD1 legend", "J-CV-MOD2 legend"], ["J-CV-MOD3 legend", "J-CV-MOD4 legend"]]
+    # the zones in layout.jacks' order, so text.jacks reads in the same order
+    jz = [[f"{j} legend" for j in row] for row in leaf(cfg["layout"], "jacks")]
     isl = {n: zones[n]["rect"] for n in zones if zones[n]["kind"] == "island"}
     ix0, _, ix1, _ = isl["island B"]
-    for r in range(3):
+    if [len(r) for r in jw] != [len(r) for r in jz]:
+        raise SystemExit("panel-art: art.text.jacks and layout.jacks are not the same shape")
+    for r in range(len(jz)):
         for c in range(2):
             z = Z(jz[r][c])
             pz = (max(z[0], ix0 + art_in), z[1], z[2], z[3]) if c == 0 else (z[0], z[1], min(z[2], ix1 - art_in), z[3])
@@ -387,19 +389,12 @@ def layout():
             it = place(jz[r][c], pz, jw[r][c], "header", "semibold")
             it["knockout"] = True
             it["pill"] = pz
-    # -- island C: the toggle's words (the LED beside it needs none), the umbilical
+    # -- island C: the toggle's two words only - the LED, the switch's purpose
+    # and the umbilical need none (the owner, 2026-10-01)
     z = Z("LED-PANEL legend")
     off, on = get("text.toggle")
     place("SW-POWER off", z, off, "row", h="right")
-    z = Z("SW-POWER legend")
-    it_on = place("SW-POWER on", z, on, "row", h="left")
-    place("SW-POWER power", z, get("text.power"), "row", h="left", dx=it_on["adv"] + word_gap)
-    z = Z("J-UMBILICAL legend")
-    u1, u2 = get("text.umbilical")
-    a = place("J-UMBILICAL legend", z, u1, "label", h="left", v="top")
-    fs = fonts["medium"]
-    place("J-UMBILICAL note", z, u2, "small", h="left",
-          baseline=a["baseline"] + fs.desc * a["size"] - line_gap - fs.asc * size["small"])
+    place("SW-POWER on", Z("SW-POWER legend"), on, "row", h="left")
 
     # -- surfaces
     keep = panel.buffer(-get("min.print_cut"), quad_segs=24)          # where ink may be

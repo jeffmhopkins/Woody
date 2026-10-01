@@ -1,0 +1,29 @@
+* The panel LED on the load switch's output, as netlisted: U-ISO's output (a source at its
+* set point), the load switch as its sense resistor R-ILIM and Q-LOADSW's on-resistance,
+* the instrument's breath-following current drawn from UMBILICAL_POS12 behind it, and
+* R-LED-PANEL into LED-PANEL (BEHAVIOURAL: a diode fitted to its banked datasheet). The
+* LED's return crosses J-B2B-MOD's ground pins (r_b2b) to the main board's AGND_MOD,
+* node 0 - the pitch stage's reference - so whatever its current does across those pins
+* is a movement of the jack board's ground against the pitch stage's.
+* Breath: 0 -> 1 -> 0 over one period of f_b, a raised cosine (as groundshift.cir).
+VISO iso 0 {{v_iso_out}}
+RLS iso umb {{r_switch}}
+* (scaled by the rail, so it is a load and not a source while the output comes up)
+BINST umb 0 I = ({{i_q}} + {{i_swing}} * 0.5 * (1 - cos(6.283185307 * {{f_b}} * time))) * max(V(umb), 0) / {{v_iso}}
+RLED umb anode {{R-LED-PANEL}}
+VVF anode a2 {{vf_shift}}
+DLED a2 jgnd DLTL
+VILED jgnd jgnd2 0
+RB2B jgnd2 0 {{r_b2b}}
+.model DLTL D(Is={{led_is}} N={{led_n}} Rs={{led_rs}})
+.control
+tran 1m {{t_b}} 0 1m
+wrdata iled.dat i(VILED)
+wrdata jgnd.dat v(jgnd2)
+wrdata umb.dat v(umb)
+* the start: the output swept from 0, as the LT1641 brings it up
+dc VISO 0 {{v_iso_out}} 0.01
+wrdata start.dat i(VILED)
+quit
+.endc
+.end

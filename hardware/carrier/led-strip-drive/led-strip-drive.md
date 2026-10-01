@@ -203,7 +203,7 @@ rail, so it cannot fold the buck back and stop blank-at-boot from running.
 | `U-LVLSHIFT` | 74AHCT125 SOIC-14 | LED data, 5 V rail. One gate used | `[repo]`, `[ds]` |
 | **`R-LED-PD`** | **10 kΩ** | **Holds the row's data low through reset** | `[ds]`, `[calc]` |
 | **`R-LED-SER`** | **330 Ω** | **Damps the data line at its source** | `[ds]`, `[calc]` |
-| `D-LED-1` … `D-LED-13` | WS2815B-V1 (LCSC C5446699) | The row: 12 V, backup-chained. **The body's chamfer marks pin 4, not pin 1** (footprint `woody:LED_WS2815B-V1_PLCC6_5.4x5.0mm_P1.6mm`, `hardware/lib/README.md`) | `[ds]` |
+| `D-LED-1` … `D-LED-13` | WS2815B-V1 (LCSC C5446699) | The row: 12 V, backup-chained. **The body's chamfer marks pin 1 (NC)**, as the sheet's numbered pin drawing places it (footprint `woody:LED_WS2815B-V1_PLCC6_5.4x5.0mm_P1.6mm`, `hardware/lib/README.md`) | `[ds]` |
 | `C-LED-1` … `C-LED-13` | 100 nF X7R 50 V 0805 | One at each LED's `VDD` | `[ds]` |
 
 Where the LEDs sit is the body CAD's: `config/body.yaml` `lighting.*` and the

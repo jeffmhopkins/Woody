@@ -1,0 +1,69 @@
+# The DAC8568 at rack power-on, before firmware writes: what its outputs and its 3-state
+# reference pin do to the pitch jack and a mod jack. Values from the three netlists the
+# path runs through: module/dac8568 (C-VREF-DAC), module/pitch-stage and
+# module/mod-channels. Run:
+#   python3 tools/sim.py run hardware/module/dac8568/sim
+#
+# THE CLAIMS. ADR 0006's power-on table: pitch "exactly 0 V", mod 1-4 "exactly 0 V", both
+# terms of each difference being zero. pitch-stage.md, "Power-on is 0.000 V": VREFOUT is
+# 3-state until firmware enables the reference, and TRIM-OFFSET's track holds it at 0 V.
+# module/power-entry/sim already holds the pitch jack within 100 mV through the rails'
+# arrival, with the DAC channel and VREFOUT as ideal 0 V sources; its README names what
+# that leaves open, and this answers it: the DAC's own power-on glitch, and a reference
+# pin that is 3-state rather than 0 V.
+title: DAC8568 power-on - its glitch and its 3-state reference, into the pitch and mod jacks
+values:
+  netlist:
+    - hardware/module/dac8568/netlist.yaml
+    - hardware/module/pitch-stage/netlist.yaml
+    - hardware/module/mod-channels/netlist.yaml
+models:
+  - datasheets/analog/OPAx197-ti-pspice-sboma34d.lib
+spiceinit: [set ngbehavior=psa]
+
+params:
+  v_pos:    {value: 12.0, source: "MODULE_ANALOG_POS12 (netlist)"}
+  v_neg:    {value: -12.0, source: "MODULE_ANALOG_NEG12 (netlist)"}
+  g_pitch:  {value: 0.018, source: "the DAC8568's power-on glitch, reset to zero scale: ~18 mVpp on channel C in Figure 57 (AVDD 5.5 V, 470 pF || 2 kohm); the table gives 10 mV at the same load [ds DAC8568CIPW.pdf p.3, p.17]. The larger, either sign (vary)"}
+  g_mod:    {value: 0.018, source: "the same, on mod channel 1's DAC output (vary, either sign)"}
+  g_ref:    {value: 0.018, source: "the same, on channel 7, the mod channels' shared reference (vary, either sign - opposite to g_mod is the worst)"}
+  w_g:      {value: 1.0e-4, source: "the glitch's width: a spike narrower than a 4 ms division in Figure 57 [ds p.17, read off the plot] (vary 50-300 us)"}
+  t_g:      {value: 5.0e-3, source: "when the glitch comes: the rails are settled by then; its timing against them is power-entry/sim's question"}
+  t_end:    {value: 15.0e-3}
+  i_leak:   {value: 0.0, source: "VREFOUT's leakage while 3-state: NOT PUBLISHED. Swept -1, 0 and +1 uA - the DAC's logic inputs' +-1 uA [ds p.4] as a scale [assumption]; the result is per microamp, so a bench number rescales it"}
+  w_off:    {value: 0.5, source: "TRIM-OFFSET's wiper at mid-travel (pitch-stage.md: V_ref 2.500 V there)"}
+  r_trim_gain: {value: 1.0e-3, source: "TRIM-GAIN at its 0-ohm end, as pitch-stage/sim"}
+  r_vco:    {value: 100.0e3, source: "one VCO input [assumption, as pitch-stage/sim]"}
+
+derived:
+  r_to_cw: "max(v['TRIM-OFFSET'] * (1 - v['w_off']), 1e-3)"
+  r_to_ccw: "max(v['TRIM-OFFSET'] * v['w_off'], 1e-3)"
+
+vary:
+  g_pitch: {tol: [-2.0, 0.0]}
+  g_mod:   {tol: [-2.0, 0.0]}
+  g_ref:   {tol: [-2.0, 0.0]}
+  w_g:     {tol: [-0.5, 2.0]}
+
+sims:
+  - name: poweron
+    deck: poweron.cir
+    sweep: {i_leak: [-1.0e-6, 0.0, 1.0e-6]}
+    measures: [pitch_peak, pitch_trough, pitch_final, mod_peak, mod_trough, mod_final, vref_final]
+    post:
+      pitch_peak: "peak(w['jack'], 1e-3, p['t_end'])"
+      pitch_trough: "trough(w['jack'], 1e-3, p['t_end'])"
+      pitch_final: "at(w['jack'], p['t_end'])"
+      mod_peak: "peak(w['modjack'], 1e-3, p['t_end'])"
+      mod_trough: "trough(w['modjack'], 1e-3, p['t_end'])"
+      mod_final: "at(w['modjack'], p['t_end'])"
+      vref_final: "at(w['vrefout'], p['t_end'])"
+    asserts:
+      - expr: "max['pitch_peak'] < 0.1 and min['pitch_trough'] > -0.1"
+        why: "pitch-stage.md 'Power-on is 0.000 V', held to power-entry/sim's 100 mV screen: through the DAC's power-on glitch at either sign and width, and with up to 1 uA of leakage out of or into the 3-state reference pin, the pitch jack stays within 100 mV of 0 V"
+      - expr: "abs(max['mod_final']) < 0.002 and abs(min['mod_final']) < 0.002"
+        why: "ADR 0006 'Mod 1-4: exactly 0 V': once the glitch has passed, both terms are zero and the mod jack sits within the op-amp's offset of 0 V (the reference pin's leakage does not reach it)"
+      - expr: "max['mod_peak'] < 0.15 and min['mod_trough'] > -0.15"
+        why: "RECORDED (2026-10-01): the mod jack is not 'exactly 0 V' THROUGH power-on - the glitch on its channel and on channel 7, at opposite signs, reaches it at 4 and 3 times (4 x Vdac - 3 x Vref7) for a fraction of a millisecond, about 0.12 V at the worst corner; it parks at 0 V after. The bound is what the run found, not a requirement"
+      - expr: "abs(max['pitch_final']) < 0.015 and abs(min['pitch_final']) < 0.015"
+        why: "parked, the pitch jack sits within 15 mV of 0 V with 1 uA of reference-pin leakage either way: about 9 mV per microamp through TRIM-OFFSET's track, so the page's 0.000 V holds against power-entry/sim's 100 mV screen up to ~10 uA"

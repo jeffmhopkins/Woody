@@ -3,7 +3,8 @@
 **Status:** Accepted, 2026-09-29. **Amended 2026-09-30** by the owner's
 instruction (point 11): the etherCON is the bottom row, the toggle and the LED
 are the row above it; **and again the same day** (point 12): the toggle throws
-left–right. Made with the module's mechanical CAD, "up to
+left–right. **Amended 2026-10-01** (point 13): BREATH and PITCH change
+places, and so do MOD 2 and MOD 3. Made with the module's mechanical CAD, "up to
 the line before board layout". It takes ADR 0023's two-board decision to
 positions and lengths, and it **reverses one of 0023's consequences**: the
 panel has no slot for the NE8FAV's PUSH tab (point 3).
@@ -29,8 +30,9 @@ checked rather than asserted.
 1. **The panel, top to bottom, is ADR 0004's five rows, placed.** A title band
    under the top screws' washers. The three pots across, gain, offset,
    response (`layout.pots`). Six jacks in two columns of three that straddle
-   the middle knob: PITCH and BREATH on the first row, under the knobs that
-   shape breath, then MOD 1–4 read like text (`layout.jacks`). Then the
+   the middle knob: BREATH and PITCH on the first row, under the knobs that
+   shape breath, BREATH on the left; then MOD 1 and MOD 2 down the left
+   column and MOD 3 and MOD 4 down the right (`layout.jacks`, point 13). Then the
    toggle, centred, on a row it shares only with the power LED (in the strip
    to its left), its lever thrown **right** for on (point 12). The NE8FAV
    last, centred, latch up, on the bottom row. *Amended 2026-09-30, point 11:
@@ -152,7 +154,7 @@ checked rather than asserted.
     patch cable pulled out and down, the NE8MX's own cable being mated below
     it. Across the panel, none of those push along the throw.
 
-    **ON is to the right**, toward the POWER legend; OFF is to the left,
+    **ON is to the right**, toward its `on` legend; OFF is to the left,
     toward the LED (`layout.toggle_on`). The M2011 is ON in NKK's *Down*
     position, the lever away from the bushing's keyway (`NKK-SERIES-M-TOGGLE.pdf`
     p.5, A56, the circuit table's position icons), and the D4 bushing's flat
@@ -166,7 +168,7 @@ checked rather than asserted.
     only anti-rotation feature and the panel needs no second hole.
 
     **What turned with it.** On the face, the sweep now lies along the row,
-    toward the LED and the POWER legend; both legend zones are derived from
+    toward the LED and the `on` legend; both legend zones are derived from
     it and are narrower by what it gained (DRC: *legend zone: LED-PANEL
     legend*, *legend zone: SW-POWER legend*). Across the row it is now the
     nut, so the lever is further from the PUSH tab below and the last jack
@@ -180,6 +182,26 @@ checked rather than asserted.
     above the notch*); the main board's wiring keep-out turns with it
     (`pcb-geometry.echo`). The row's height is unchanged, and so is
     `panel-height-budget`.
+
+13. **BREATH and PITCH change places, and MOD 2 and MOD 3** — amended
+    2026-10-01. The owner: *"swap the breath and pitch Jack locations"* and
+    *"swap mod 2 and 3 position"*. The first row is BREATH on the left, PITCH
+    on the right; the MOD jacks run down the columns, 1 and 2 on the left,
+    3 and 4 on the right. Point 1 first had PITCH on the left and the MOD
+    jacks across the rows. Each pill moves with its jack (ADR 0026,
+    `art.text.jacks`).
+
+    **Only names moved.** The six positions, the columns' pitch and every
+    clearance are the same, so every DRC rule passes at the same value; only
+    the part each rule names changed. **`J-B2B-MOD`'s allocation follows the
+    jacks** — `BREATH_JACK` and `PITCH_JACK` trade pins, as do `MOD2_JACK` and
+    `MOD3_JACK` — so each jack's tip still lands on its own column's side of
+    the header, and no jack-board trace has to cross the header between its
+    pads. That costs four labels on the main board's sheet and nothing in a
+    layout, since neither board has one yet; the allocation and why are in
+    [`module-main/README.md`](../../hardware/boards/module-main/README.md#j-b2b-mod--the-allocation).
+    The DAC channels (ADR 0006) are untouched: MOD 2 is still MOD 2, at a
+    new place on the panel.
 
 ## Consequences
 
