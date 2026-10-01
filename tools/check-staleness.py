@@ -1190,8 +1190,14 @@ def check_cad():
         return [f"could not run tools/cad.py check: {e}"]
     if r.returncode == 0:
         return []
-    msgs = [l.rstrip() for l in (r.stdout + "\n" + r.stderr).splitlines()
-            if l.strip() and not l.strip().startswith("PASS")]
+    # cad.py check prints one indented line per problem, then a one-line
+    # "FAIL <n> CAD output problem(s) of <m> outputs" summary. The summary is
+    # not a problem: counting it reported "2 cad" for one stale photo
+    # (pre-layout review A9-11). It is still kept when it is all there is.
+    lines = [l.rstrip() for l in (r.stdout + "\n" + r.stderr).splitlines()
+             if l.strip() and not l.strip().startswith("PASS")]
+    msgs = [l for l in lines if not re.match(r"FAIL \d+ CAD output problem", l.strip())]
+    msgs = msgs or lines
     return msgs or [f"tools/cad.py check exited {r.returncode} and said nothing "
                     f"parseable - it probably crashed. Run it directly"]
 

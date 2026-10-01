@@ -27,6 +27,7 @@ import csv, os, re, sys
 
 ID = re.compile(r"\b([A-Z]\d{1,2}[-.]\d{1,3})\b")
 SEV = re.compile(r"\b(high|critical|blocking|medium|low|advisory)\b", re.I)
+SEV_LINE = re.compile(r"^\s*[-*>]?\s*\**Severity\**\s*:?\s*\**\s*(high|critical|blocking|medium|low|advisory)\b", re.I)
 
 # A finding is INTRODUCED where its id leads a line or a bold run, and merely
 # CITED anywhere else. Both matter and they are different numbers: the first
@@ -59,8 +60,22 @@ def harvest(path):
     except Exception:
         return out
     slice_id = os.path.basename(path).split("-")[0]
+    current = None
     for n, line in enumerate(lines, 1):
+        # "**Severity:** low" under a finding's heading is how the
+        # 2026-10-01 wave (and its README's rules) state severity. The
+        # headline search below never saw it, so the ledger's severity column
+        # came out empty for 147 of 148 findings, and the one it filled was
+        # WRONG: A9-6's headline says "settled high" (a logic level) and was
+        # filed as a high-severity finding. An explicit Severity line wins.
+        sl = SEV_LINE.match(line)
+        if sl and current in out:
+            out[current]["severity"] = sl.group(1).lower()
+            out[current]["severity_explicit"] = True
+            continue
         intro = INTRO.match(line) or INTRO_HEAD.match(line)
+        if intro:
+            current = intro.group(1).replace(".", "-")
         for fid in {m.replace(".", "-") for m in ID.findall(line)}:
             rec = out.setdefault(fid, {"id": fid, "slice": slice_id,
                                        "line": "", "severity": "",
@@ -70,7 +85,8 @@ def harvest(path):
                 text = re.sub(r"[*`>#\[\]|]", " ", line).strip()
                 rec["headline"] = re.sub(r"\s+", " ", text)[:220]
                 sev = SEV.search(line)
-                rec["severity"] = sev.group(1).lower() if sev else ""
+                if not rec.get("severity_explicit"):
+                    rec["severity"] = sev.group(1).lower() if sev else ""
     return out
 
 
@@ -80,8 +96,10 @@ def main():
     wave = sys.argv[1].rstrip("/")
     home, cited = {}, {}
     for f in sorted(os.listdir(wave)):
-        if not f.endswith(".md") or f in ("README.md", "VERIFIED.md",
-                                          "STATUS.md", "FINDINGS.md"):
+        # VERIFIED-<fixer>.md and STATUS-*.md are verification, not reports:
+        # a fix round splits VERIFIED.md per fixer (2026-10-01).
+        if (not f.endswith(".md") or f in ("README.md", "FINDINGS.md")
+                or f.startswith(("VERIFIED", "STATUS"))):
             continue
         for fid, rec in harvest(os.path.join(wave, f)).items():
             cited.setdefault(fid, set()).add(rec["slice"])
@@ -99,10 +117,9 @@ def main():
     # Has this finding been answered anywhere in the wave's own verification?
     # BY ID. Prose restatement is what let a quarter look like a whole.
     verified_text = ""
-    for name in ("VERIFIED.md", "STATUS.md"):
-        p = os.path.join(wave, name)
-        if os.path.exists(p):
-            verified_text += open(p, encoding="utf-8").read()
+    for name in sorted(os.listdir(wave)):
+        if name.endswith(".md") and name.startswith(("VERIFIED", "STATUS")):
+            verified_text += open(os.path.join(wave, name), encoding="utf-8").read()
 
     # *** MATCH WHOLE IDS, NOT SUBSTRINGS. ***
     #
@@ -146,10 +163,16 @@ def main():
             w.writerow(hdr)
             w.writerows(text_rows)
 
-    n_open = sum(1 for r in rows if r["verdict"] == "NOT ADDRESSED")
-    print(f"FINDINGS: {len(rows)} findings from "
-          f"{len({r['slice'] for r in rows})} slices | "
-          f"{len(rows) - n_open} addressed by id | {n_open} NOT ADDRESSED")
+    # Count introduced findings and cited-only ids apart. Lumped together, the
+    # 2026-10-01 wave read "148 findings from 10 slices": 11 of the 148 were
+    # ids cited in passing (a datasheet fragment "R39-1", an old wave's
+    # "C3-2") and the tenth "slice" was the joined label "A1|A8".
+    intro = [r for r in rows if r["line"] != ""]
+    n_open = sum(1 for r in intro if r["verdict"] == "NOT ADDRESSED")
+    print(f"FINDINGS: {len(intro)} findings from "
+          f"{len({r['slice'] for r in intro})} slices | "
+          f"{len(intro) - n_open} addressed by id | {n_open} NOT ADDRESSED | "
+          f"{len(rows) - len(intro)} ids cited only")
     return 0
 
 
