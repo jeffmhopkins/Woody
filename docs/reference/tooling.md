@@ -668,7 +668,7 @@ so.
 | the reference buffer's loop, output impedance and load step, and TI's Figure 56 (TI's OPA2197 and REF5050 models) | `hardware/carrier/breath-excitation-reference/sim/` |
 | the breath link's CMRR across the umbilical, both ends' parts at every tolerance corner (TI's INA828 and OPA2197) | `hardware/module/breath-receive-stage/sim/` |
 | the pitch stage's step into a passive mult, and its loop at the same loads | `hardware/module/pitch-stage/sim/` |
-| rack power-on: the rails, the LM317L's `DAC_AVDD` (TI's model) and the pitch jack | `hardware/module/power-entry/sim/` |
+| rack power-on: the rails, `DAC_AVDD` from `U-REG-DAC` (the LT3042, behavioural, its set-point spread and soft start) and the pitch jack | `hardware/module/power-entry/sim/` |
 | the umbilical load switch's start, with a behavioural LT1641 built from its datasheet | `hardware/module/umbilical-load-switch/sim/` |
 | SCLK, MOSI and CS_MOD over the umbilical as coupled lossy lines (ngspice `CPL`), from a banked Cat5e datasheet, through each line's pull and `R-RX-MOD`/`C-RX-MOD` into the receiver `U-RX-MOD` (74AHCT14) | `hardware/interfaces/spi-link/sim/` |
 | the four mod channels and their shared reference: range, a stale or wrong `V_ref`, a step and the loop into a passive mult, crosstalk | `hardware/module/mod-channels/sim/` |

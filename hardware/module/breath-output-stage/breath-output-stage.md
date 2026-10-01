@@ -20,7 +20,7 @@ The `Dir` and `Peer` columns are defined once in
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
 | `BREATH_SHAPED` | in | `module/breath-response-shaper` | `inamp-full-scale`, `breath-working-point` | The in-amp's output after the response shaper, into the top of `POT-GAIN`; equal to it at `POT-RESP`'s centre detent, so everything below that quotes the in-amp column holds there. Resting at 0 V, because the pedestal is nulled at the in-amp's `REF` |
-| `DAC AVDD` | in | `module/power-entry` | `dac-rail` | `POT-OFFSET`'s counter-clockwise end, straight from the LM317 — no buffer of its own — and the positive leg of the offset pair. The drawing labels the node with the figure's name; the value belongs to `dac-rail` and not to a net name |
+| `DAC AVDD` | in | `module/power-entry` | `dac-rail` | `POT-OFFSET`'s counter-clockwise end, straight from `U-REG-DAC` — no buffer of its own — and the positive leg of the offset pair. The drawing labels the node with the figure's name; the value belongs to `dac-rail` and not to a net name |
 | `MODULE ANALOG +12V`, `MODULE ANALOG −12V` | in | `module/power-entry` | — | Op-amp supplies, and `D-JACK-CLAMP` returns to both rails. `R-OFFNEG`'s fixed leg is on −12 V. Both rails carry the instrument's supply current since ADR 0027, so neither is quiet; what that costs at the jack is under *Offset* |
 | `AGND_MOD` | ref | `module/power-entry` | `dig-gnd-topology` | The module analog star, drawn `AGND(module)`. `R-GAIN-FLOOR`, the summer's (+) input and `C-OUT-BREATH` all return here. It meets the module's other grounds only at the star — see the figure |
 | `BREATH_OUT` | out | `module/panel` | — | The panel jack. Feedback comes from the op-amp output, so `R-OUT-PROT` isolates `C-OUT-BREATH` from the loop. **Not `BREATH_SENSE`**, the umbilical conductor that arrives at the in-amp |
@@ -157,7 +157,7 @@ toward `+` drove the jack to −4.91 V.
 > zero**, which is worse than no detent — so `POT-OFFSET` has none (its row).
 
 `R-OFFNEG` pulls a constant from −12 V; `R-OFF` pushes a variable from the
-LM317's rail, `dac-rail`. **No extra op-amp half, and no negative reference to
+DAC rail, `dac-rail`. **No extra op-amp half, and no negative reference to
 generate** — which is what makes ±5 V cost two resistors instead of a part.
 
 **This wiper does *not* need buffering.** Its source impedance varies from 0 at

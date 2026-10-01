@@ -162,7 +162,7 @@ the isolation capacitance at breath frequency. What the model leaves out, each
 | Residual | Size |
 |---|---|
 | The module's own CV outputs driving their receivers: the breath jack's 0–10 V into 100 kΩ is 0.1 mA, returning through the bus between the receiver and the PSU | 0.1 mA × 48 mΩ (ribbon + whole bus) = 4.8 µV → **0.006 cents** — the module's own signal, not the instrument's supply |
-| The ±12 V rails at the header move by 9.7 mV (0.195 A swing) as `U-ISO`'s input current follows breath `[sim, rail_mv]` | OPA2197 at 3 µV/V worst `[SBOS737C p.8]` → 29 nV → **0.00003 cents**; the LM317 at 0.02 %/V passes 1.9 µV to `DAC_AVDD`, which does not set full scale (ADR 0005) |
+| The ±12 V rails at the header move by 9.7 mV (0.195 A swing) as `U-ISO`'s input current follows breath `[sim, rail_mv]` | OPA2197 at 3 µV/V worst `[SBOS737C p.8]` → 29 nV → **0.00003 cents**; `U-REG-DAC` (the LT3042 since 2026-10-01, at most 0.108 mV/V `[ds ADI-LT3042.pdf p.3; calc]`) passes 1.0 µV to `DAC_AVDD`, which does not set full scale (ADR 0005) |
 | `U-ISO`'s switching, 550 kHz `[ds PD-2]` | out of band, behind the input filter — see `power-entry.md`. Its common-mode part is behind `L-CM-ISO` and goes home through `C-ISO-Y`: under 10 % of it crosses the star at every corner `power-entry/sim`'s `cm-loop` sweeps (amendments 2026-10-01, below) |
 | The LED row's PWM, ~2 kHz scan and ~4 kHz refresh `[ds WS2815B-V1.pdf p.1]` | not breath-correlated in level but in the audio band, reflected through `U-ISO`'s input LC (f₀ ~3.3 kHz, `power-entry.md`) onto the case's ±12 V: about 13 mV p-p at most on the rails by the review's bound (A4-13), under 0.001 cents here and an audible-band tone for other modules. **Not analysed beyond that bound; E6 scopes it** |
 

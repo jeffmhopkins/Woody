@@ -10,7 +10,7 @@ circuits. **The circuits own their own values** — nothing here restates one.
 
 | Directory | What it is |
 |---|---|
-| [`power-entry/`](power-entry/power-entry.md) | Rack ±12 V in: the three diodes, the beads, the LM317 rail, and the grounding origin |
+| [`power-entry/`](power-entry/power-entry.md) | Rack ±12 V in: the three diodes, the beads, the DAC rail (`U-REG-DAC`), and the grounding origin |
 | [`umbilical-load-switch/`](umbilical-load-switch/umbilical-load-switch.md) | The LT1641 that ramps and current-limits the +12 V sent up the umbilical |
 | [`dac8568/`](dac8568/dac8568.md) | The converter: `CLR`, the `LDAC` strap, the grade lock |
 | [`digital-and-supervision/`](digital-and-supervision/digital-and-supervision.md) | The module end of the SPI receive path |

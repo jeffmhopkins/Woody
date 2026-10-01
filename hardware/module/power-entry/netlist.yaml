@@ -40,7 +40,8 @@ components:
     pins:
     - 1
     - 2
-    note: At the LM317's input pin. One of the board-wide C-DECOUPLE row
+    note: 'At U-REG-DAC''s (LT3042) IN pins, beside C-REG-IN: the HF part of the input bypass. One of the board-wide
+      C-DECOUPLE row'
   C-ISO-IN:
     value: 4.7uF 50V
     pins:
@@ -80,19 +81,33 @@ components:
     - 1
     - 2
     note: 'U-REG-LOGIC output capacitor, the same part: more than 1.5 uF required (ADP7118.pdf p.4)'
-  C-REG-ADJ:
+  C-REG-IN:
+    of: C-REG-DAC
     value: 10uF
     pins:
     - 1
     - 2
-    note: ON THE ADJUSTMENT PIN, and THE DRAWING DOES NOT SHOW IT. The rail's ripple-rejection claim depends on
-      it being fitted
+    note: 'U-REG-DAC''s (LT3042) input capacitor, at its IN pins: at least 4.7 uF [ds ADI-LT3042.pdf p.17]. The
+      same part as C-REG-OUT; 50 V so it keeps more than 4.7 uF at 12 V of DC bias. C1''s 100 uF is on the same
+      node, further away'
   C-REG-OUT:
-    value: 1uF
-    drawn_as: C
+    of: C-REG-DAC
+    value: 10uF
     pins:
     - 1
     - 2
+    note: 'U-REG-DAC''s (LT3042) output capacitor, at OUT with OUTS Kelvin-tied to it: at least 4.7 uF, ESR under
+      50 mohm and ESL under 2 nH for stability [ds ADI-LT3042.pdf p.15]. 10 uF 50 V X7R in 1206 so it stays over
+      4.7 uF at dac-rail''s DC bias. U-LVL-MOD''s C-DEC-LVL takes its own branch from here, not through the DAC''s
+      pin'
+  C-SET-DAC:
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: 'Across R-SET-DAC: filters I_SET''s and the resistor''s noise, and soft-starts the rail, tau = R-SET-DAC
+      x C-SET-DAC. NP0/C0G, not X7R: no piezo response and no DC-bias loss at the SET pin, and its leakage (5 Gohm
+      min) is 0.001 % of I_SET (ds ADI-LT3042.pdf p.14, p.16)'
   C1:
     of: C-BULK-RAIL
     value: 100uF
@@ -279,26 +294,14 @@ components:
     - 2
     note: 'The module analog +12 V''s fuse: J-PWR-EURO +12 V, then this, then D1. Sized on power-entry.md, ''Fuses
       on the rails'''
-  R-REG-SET-HI:
-    value: 150R 0.1%
+  R-SET-DAC:
+    value: 52.3k 0.1%
     pins:
     - 1
     - 2
-  R-REG-SET-LO:
-    value: 523R 0.1%
-    pins:
-    - 1
-    - 2
-  TRIM-DAC-RAIL:
-    value: 50R
-    pins:
-    - CCW
-    - W
-    - CW
-    note: 'DAC_AVDD''s trim (owner, 2026-10-01: ''Can we just do trim pot to help?''), a rheostat in the LM317L''s
-      OUT-to-ADJ leg with R-REG-SET-HI. WIPER STRAPPED TO PIN 1 (CCW), pin 3 to R-REG-SET-HI: clockwise raises the
-      rail; an open wiper leaves the whole track in circuit and an open track opens the leg, and both take the rail
-      DOWN. E7 trims DAC_AVDD to dac-rail (power-entry.md, The DAC rail)'
+    note: 'SETS DAC_AVDD: I_SET (98-102 uA) x 52.3 kohm (power-entry.md, The DAC rail). Thin film +-0.1 % +-25 ppm/C.
+      AN OPEN HERE DRIVES THE RAIL UP towards the +12 V input - the one failure that does; its ground end Kelvin
+      to C-REG-OUT''s'
   U-ISO:
     value: RPA20-2412SAW
     pins:
@@ -313,13 +316,24 @@ components:
       has no CTRL pin (PD-1 Note 2): always on; Trim open = 12 V nominal. Input fuse per RECOM''s PD-5 Note 5: PTC-ISO.
       The RP20-2412SAW drops into the same holes (footprint''s descr)'
   U-REG-DAC:
-    value: LM317LZ
-    drawn_as: LM317LZ
+    value: LT3042EMSE
     pins:
     - IN
+    - IN_2
+    - EN
+    - PG
+    - ILIM
+    - PGFB
+    - SET
+    - GND
+    - OUTS
     - OUT
-    - ADJ
-    note: Minimum load current differs by manufacturer - see the row. The ~13mA here clears every reading
+    - EP
+    note: 'DAC_AVDD = I_SET x R-SET-DAC, no adjustment (owner, 2026-10-01). EN/UV and PGFB tied to IN: always on,
+      fast start-up and power-good off, so the 2 mA start-up current can never be left on (p.12, p.18). PG open.
+      ILIM to GND: the internal limit. OUTS Kelvin to C-REG-OUT; R-SET-DAC''s and C-SET-DAC''s ground returns to
+      C-REG-OUT''s ground; guard ring round SET at OUT''s potential (p.14-15). Exposed pad soldered to AGND_MOD
+      copper'
   U-REG-LOGIC:
     value: ADP7118AUJZ-5.0
     pins:
@@ -335,12 +349,16 @@ nets:
   AGND_MOD:
   - port: AGND_MOD
   - C-DEC-REG-IN.2
-  - C-REG-ADJ.2
+  - C-REG-IN.2
   - C-REG-OUT.2
+  - C-SET-DAC.2
   - C1.2
   - C3.2
   - NT-AGND-MOD.1
-  - R-REG-SET-LO.2
+  - R-SET-DAC.2
+  - U-REG-DAC.EP
+  - U-REG-DAC.ILIM
+  - U-REG-DAC.GND
   BUS_GND:
   - J-PWR-EURO.GND_3
   - J-PWR-EURO.GND_4
@@ -363,8 +381,12 @@ nets:
   DAC_AVDD:
   - port: DAC_AVDD
   - C-REG-OUT.1
-  - R-REG-SET-HI.1
   - U-REG-DAC.OUT
+  - U-REG-DAC.OUTS
+  DAC_REG_SET:
+  - C-SET-DAC.1
+  - R-SET-DAC.1
+  - U-REG-DAC.SET
   DIG_GND:
   - port: DIG_GND
   - C-LOGIC-IN.2
@@ -409,9 +431,13 @@ nets:
   - port: MODULE_ANALOG_POS12
   - C-DEC-REG-IN.1
   - C-LOGIC-IN.1
+  - C-REG-IN.1
   - C1.1
   - FB1.2
   - U-REG-DAC.IN
+  - U-REG-DAC.IN_2
+  - U-REG-DAC.EN
+  - U-REG-DAC.PGFB
   - U-REG-LOGIC.VIN
   - U-REG-LOGIC.EN
   NEG12_D4:
@@ -441,15 +467,6 @@ nets:
   - C-ISO-Y.2
   - NT-UMB-MOD.1
   - U-ISO.0V
-  REG_ADJ:
-  - C-REG-ADJ.1
-  - R-REG-SET-LO.1
-  - TRIM-DAC-RAIL.CCW
-  - TRIM-DAC-RAIL.W
-  - U-REG-DAC.ADJ
-  REG_TRIM:
-  - R-REG-SET-HI.2
-  - TRIM-DAC-RAIL.CW
   POS5_11:
   - J-PWR-EURO.POS5_11
   POS5_12:
@@ -464,11 +481,14 @@ nets:
   - J-PWR-EURO.GATE_16
   TRIM:
   - U-ISO.TRIM
+  PG:
+  - U-REG-DAC.PG
 external_endpoints:
 - CV_13
 - CV_14
 - GATE_15
 - GATE_16
+- PG
 - POS5_11
 - POS5_12
 - TRIM

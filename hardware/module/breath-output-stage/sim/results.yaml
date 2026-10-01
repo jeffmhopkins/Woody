@@ -15,30 +15,30 @@ inputs:
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
   hardware/module/breath-response-shaper/sim/sims.yaml: fc02a3ddd36b774a
   figure:inamp-full-scale: -9.94 V
-  figure:dac-rail: 5.20 V
+  figure:dac-rail: 5.23 V
 ngspice: '42'
 sims:
   offset[p_off=0.0]:
     corners: 17
     measures:
       out:
-        nominal: -4.89229
-        min: -5.67926
+        nominal: -4.94972
+        min: -5.74122
         min_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG+ v_avdd+
-        max: -4.31992
+        max: -4.37404
         max_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG- v_avdd-
       jack:
-        nominal: -4.84385
-        min: -5.62303
+        nominal: -4.90071
+        min: -5.68438
         min_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG+ v_avdd+
-        max: -4.27715
+        max: -4.33073
         max_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG- v_avdd-
       page_err:
-        nominal: 8.25356e-05
-        min: 7.70116e-05
-        min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd-
-        max: 8.25356e-05
-        max_at: nominal
+        nominal: 8.26171e-05
+        min: 7.96885e-05
+        min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd+
+        max: 9.15581e-05
+        max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd-
     asserts:
     - expr: max['page_err'] < 0.01 and min['page_err'] > -0.01
       why: the op-amp output agrees with the page's offset table and its derivation (-4.89 V CCW, +0.61 V at centre, 0 at
@@ -49,23 +49,23 @@ sims:
     corners: 17
     measures:
       out:
-        nominal: 0.614321
-        min: 0.262548
+        nominal: 0.588661
+        min: 0.235438
         min_at: R-BREATH-FB- R-BREATH-OFF- R-BREATH-OFFNEG+ v_avdd+
-        max: 0.883128
+        max: 0.858434
         max_at: R-BREATH-FB+ R-BREATH-OFF+ R-BREATH-OFFNEG- v_avdd-
       jack:
-        nominal: 0.608238
-        min: 0.259948
+        nominal: 0.582833
+        min: 0.233107
         min_at: R-BREATH-FB- R-BREATH-OFF- R-BREATH-OFFNEG+ v_avdd+
-        max: 0.874384
+        max: 0.849935
         max_at: R-BREATH-FB+ R-BREATH-OFF+ R-BREATH-OFFNEG- v_avdd-
       page_err:
-        nominal: 7.07578e-05
-        min: 6.79434e-05
-        min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd-
-        max: 7.07578e-05
-        max_at: nominal
+        nominal: 7.07943e-05
+        min: 6.91502e-05
+        min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd+
+        max: 7.51208e-05
+        max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd-
     asserts:
     - expr: max['page_err'] < 0.01 and min['page_err'] > -0.01
       why: the op-amp output agrees with the page's offset table and its derivation (-4.89 V CCW, +0.61 V at centre, 0 at
@@ -76,23 +76,23 @@ sims:
     corners: 17
     measures:
       out:
-        nominal: -0.000521122
-        min: -0.394984
+        nominal: -0.0297278
+        min: -0.426465
         min_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG+ v_avdd+
-        max: 0.291394
+        max: 0.263287
         max_at: R-BREATH-FB+ R-BREATH-OFF+ R-BREATH-OFFNEG- v_avdd-
       jack:
-        nominal: -0.000515962
-        min: -0.391073
+        nominal: -0.0294335
+        min: -0.422243
         min_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG+ v_avdd+
-        max: 0.288509
+        max: 0.260681
         max_at: R-BREATH-FB+ R-BREATH-OFF+ R-BREATH-OFFNEG- v_avdd-
       page_err:
-        nominal: 7.16781e-05
-        min: 6.85744e-05
-        min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd-
-        max: 7.16781e-05
-        max_at: nominal
+        nominal: 7.17194e-05
+        min: 6.99559e-05
+        min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd+
+        max: 7.65438e-05
+        max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd-
     asserts:
     - expr: max['page_err'] < 0.01 and min['page_err'] > -0.01
       why: the op-amp output agrees with the page's offset table and its derivation (-4.89 V CCW, +0.61 V at centre, 0 at
@@ -115,10 +115,10 @@ sims:
         max: 5.11311
         max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd-
       page_err:
-        nominal: 6.78213e-05
-        min: 6.69381e-05
+        nominal: 6.78113e-05
+        min: 6.69281e-05
         min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd+
-        max: 6.87081e-05
+        max: 6.86981e-05
         max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd-
     asserts:
     - expr: max['page_err'] < 0.01 and min['page_err'] > -0.01
@@ -191,26 +191,26 @@ sims:
     corners: 1
     measures:
       out:
-        nominal: -4.89229
-        min: -4.89229
+        nominal: -4.94972
+        min: -4.94972
         min_at: nominal
-        max: -4.89229
+        max: -4.94972
         max_at: nominal
     asserts: []
   step-mult[mult=0]:
     corners: 1
     measures:
       overshoot_pct:
-        nominal: 0.00511388
-        min: 0.00511388
+        nominal: 0.00506831
+        min: 0.00506831
         min_at: nominal
-        max: 0.00511388
+        max: 0.00506831
         max_at: nominal
       t_settle:
-        nominal: 0.00218406
-        min: 0.00218406
+        nominal: 0.00218368
+        min: 0.00218368
         min_at: nominal
-        max: 0.00218406
+        max: 0.00218368
         max_at: nominal
     asserts:
     - expr: max['overshoot_pct'] < 1
@@ -220,16 +220,16 @@ sims:
     corners: 1
     measures:
       overshoot_pct:
-        nominal: 0.00635473
-        min: 0.00635473
+        nominal: 0.00629859
+        min: 0.00629859
         min_at: nominal
-        max: 0.00635473
+        max: 0.00629859
         max_at: nominal
       t_settle:
-        nominal: 0.00223207
-        min: 0.00223207
+        nominal: 0.00223269
+        min: 0.00223269
         min_at: nominal
-        max: 0.00223207
+        max: 0.00223269
         max_at: nominal
     asserts:
     - expr: max['overshoot_pct'] < 1
@@ -239,16 +239,16 @@ sims:
     corners: 1
     measures:
       overshoot_pct:
-        nominal: 0.0217541
-        min: 0.0217541
+        nominal: 0.0216395
+        min: 0.0216395
         min_at: nominal
-        max: 0.0217541
+        max: 0.0216395
         max_at: nominal
       t_settle:
-        nominal: 0.00248334
-        min: 0.00248334
+        nominal: 0.00248272
+        min: 0.00248272
         min_at: nominal
-        max: 0.00248334
+        max: 0.00248272
         max_at: nominal
     asserts:
     - expr: max['overshoot_pct'] < 1
@@ -335,16 +335,16 @@ sims:
     corners: 1
     measures:
       out_hard:
-        nominal: 9.99257
-        min: 9.99257
+        nominal: 9.96337
+        min: 9.96337
         min_at: nominal
-        max: 9.99257
+        max: 9.96337
         max_at: nominal
       clip_in:
-        nominal: -5.5394
-        min: -5.5394
+        nominal: -5.55305
+        min: -5.55305
         min_at: nominal
-        max: -5.5394
+        max: -5.55305
         max_at: nominal
     asserts:
     - expr: nom['out_hard'] > 9.8 and nom['out_hard'] < 10.2
@@ -355,10 +355,10 @@ sims:
     corners: 1
     measures:
       out_hard:
-        nominal: 4.90171
-        min: 4.90171
+        nominal: 4.87251
+        min: 4.87251
         min_at: nominal
-        max: 4.90171
+        max: 4.87251
         max_at: nominal
       ratio_hard:
         nominal: 0.490068
@@ -377,10 +377,10 @@ sims:
     corners: 1
     measures:
       out_hard:
-        nominal: 8.44399
-        min: 8.44399
+        nominal: 8.41479
+        min: 8.41479
         min_at: nominal
-        max: 8.44399
+        max: 8.41479
         max_at: nominal
       ratio_hard:
         nominal: 0.84419
@@ -389,20 +389,20 @@ sims:
         max: 0.84419
         max_at: nominal
       clip_in:
-        nominal: -6.73251
-        min: -6.73251
+        nominal: -6.75014
+        min: -6.75014
         min_at: nominal
-        max: -6.73251
+        max: -6.75014
         max_at: nominal
     asserts: []
   chain[p_resp=0.5]:
     corners: 1
     measures:
       out_hard:
-        nominal: 9.99257
-        min: 9.99257
+        nominal: 9.96337
+        min: 9.96337
         min_at: nominal
-        max: 9.99257
+        max: 9.96337
         max_at: nominal
       ratio_hard:
         nominal: 0.999004
@@ -411,20 +411,20 @@ sims:
         max: 0.999004
         max_at: nominal
       clip_in:
-        nominal: -5.5394
-        min: -5.5394
+        nominal: -5.55305
+        min: -5.55305
         min_at: nominal
-        max: -5.5394
+        max: -5.55305
         max_at: nominal
     asserts: []
   chain[p_resp=0.75]:
     corners: 1
     measures:
       out_hard:
-        nominal: 10.9011
-        min: 10.9011
+        nominal: 10.8719
+        min: 10.8719
         min_at: nominal
-        max: 10.9011
+        max: 10.8719
         max_at: nominal
       ratio_hard:
         nominal: 1.08983
@@ -433,10 +433,10 @@ sims:
         max: 1.08983
         max_at: nominal
       clip_in:
-        nominal: -5.04737
-        min: -5.04737
+        nominal: -5.05903
+        min: -5.05903
         min_at: nominal
-        max: -5.04737
+        max: -5.05903
         max_at: nominal
     asserts: []
   chain[p_resp=1.0]:
@@ -455,20 +455,20 @@ sims:
         max: 1.55433
         max_at: nominal
       clip_in:
-        nominal: -3.66452
-        min: -3.66452
+        nominal: -3.6724
+        min: -3.6724
         min_at: nominal
-        max: -3.66452
+        max: -3.6724
         max_at: nominal
     asserts: []
   chain-trim[p_trim=0.0]:
     corners: 1
     measures:
       out_hard:
-        nominal: 11.9633
-        min: 11.9633
+        nominal: 11.9631
+        min: 11.9631
         min_at: nominal
-        max: 11.9633
+        max: 11.9631
         max_at: nominal
       ratio_hard:
         nominal: 1.33731
@@ -477,10 +477,10 @@ sims:
         max: 1.33731
         max_at: nominal
       clip_in:
-        nominal: -4.1665
-        min: -4.1665
+        nominal: -4.17592
+        min: -4.17592
         min_at: nominal
-        max: -4.1665
+        max: -4.17592
         max_at: nominal
     asserts: []
   chain-trim[p_trim=1.0]:
@@ -499,9 +499,9 @@ sims:
         max: 1.72331
         max_at: nominal
       clip_in:
-        nominal: -3.38026
-        min: -3.38026
+        nominal: -3.3873
+        min: -3.3873
         min_at: nominal
-        max: -3.38026
+        max: -3.3873
         max_at: nominal
     asserts: []

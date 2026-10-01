@@ -177,7 +177,8 @@ it moves with whatever else in the case is drawing from it. Two consequences:
   calibrated once against a real VCO (ADR 0006). A supply that shifts when
   another module powers up shifts the calibration with it.
 
-**So: an LM317LZ at `dac-rail`, fed from +12 V downstream of the module's own
+**So: an LM317LZ at `dac-rail`** *(superseded 2026-10-01 by the LT3042,
+below)*, **fed from +12 V downstream of the module's own
 reverse-protection diode** (its own — see the power tree below). TO-92, two
 resistors and two capacitors, ten-odd milliamps of load, under 100 mW — the
 lowest-effort regulator that exists, and it buys back both properties.
@@ -192,13 +193,21 @@ it is 4.99–5.47 V `[calc: 1.20 × (1 + 475·0.999/(150·1.001)); 1.30 × (1 +
 LM317LZ.pdf p.5]`, 0.48 V against the C grade's 5.0–5.5 V. A fixed 478 Ω would
 clear the bottom by 16 mV and the top by 1 mV before temperature `[calc]`,
 which is not a fit either: the bench still decides.)* *(Amended again
-2026-10-01, the owner: "Can we just do trim pot to help?" — **the divider is
-trimmed, not selected.** `TRIM-DAC-RAIL`, a 50 Ω 12-turn rheostat, sits in the
-`OUT`-to-`ADJ` leg with `R-REG-SET-HI`, over `R-REG-SET-LO` at 523 Ω, and E7
-trims `DAC AVDD` to `dac-rail`. Its travel reaches the set point on every part
+2026-10-01, the owner: "Can we just do trim pot to help?" — **the divider was
+trimmed, not selected** (superseded the same day, below). `TRIM-DAC-RAIL`, a
+50 Ω 12-turn rheostat, sat in the `OUT`-to-`ADJ` leg with `R-REG-SET-HI`, over
+`R-REG-SET-LO` at 523 Ω, and the bench step set `DAC AVDD` with it. Its travel reaches the set point on every part
 across TI's limits and never the DAC's 6 V absolute maximum, and an open
-wiper or track takes the rail down: `power-entry.md`, *The DAC rail's trim*;
-`power-entry/sim`'s `dac-trim-*`.)* Two reviewers found it independently and both are right.
+wiper or track took the rail down - its page section and `dac-trim-*` sims
+were replaced with it.)* *(Amended a third time 2026-10-01, the
+owner: a precision-set LDO that needs no adjustment. **The LM317L and the
+trimmer are superseded.** `U-REG-DAC` is ADI's LT3042, whose 100 µA `SET`
+current is guaranteed 98–102 µA over line, load and temperature; with
+`R-SET-DAC` (52.3 kΩ, 0.1 %) the rail lands at 5.11–5.35 V on every part,
+inside the C grade's window with nothing to adjust: `dac-rail`;
+`power-entry.md`, *The DAC rail*; `power-entry/sim`'s `dac-rail-spread`. The
+LP2951-class "better part" the next paragraph declines is, in the end, what
+was fitted.)* Two reviewers found it independently and both are right.
 
 They proposed an LP2951, or a second REF5050 buffered by an op-amp half. Both
 are declined, because the premise behind "no value fits" is a statistical
@@ -210,8 +219,9 @@ What is adopted is the free part of the fix:
 - **Shrink R2** — 150 Ω / 475 Ω instead of 240 Ω / 768 Ω — which halves the
   I_ADJ contribution to 24–48 mV.
 - **0.1 % divider parts**, which cost pennies and arrive in the same order.
-- **Select R2 on the bench at E7** *(superseded 2026-10-01 by the trimmer,
-  above: E7 trims to `dac-rail`)*, against the real DAC: raise the top codes
+- **Select R2 on the bench at E7** *(superseded 2026-10-01, by the trimmer and
+  then by the LT3042, above: E7 now measures `DAC_AVDD` and records it)*,
+  against the real DAC: raise the top codes
   and find where they start compressing against AVDD. That is the floor that
   actually matters, and it is measured rather than assumed — the "4.95 V floor"
   the review argued against was never derived from anything.
@@ -221,13 +231,13 @@ and if the selected value lands badly you find out at E7 with a meter, on a
 board with four screws in it.
 
 **The 74AHCT125 stays on the bus +5 V rail.** Its job is to get 3.3 V logic over
-the DAC's `V_INH` input threshold — **0.625 × AVDD = 3.25 V** at `dac-rail`.
+the DAC's `V_INH` input threshold — **0.625 × AVDD = 3.27 V** at `dac-rail`.
 An AHCT gate on a rail sagging to 4.75 V still drives 4.6 V, with well over a
 volt of margin.
 
 > *This read "0.7 × AVDD — 3.65 V" until 2026-09-21, which is the WRONG ROW.
 > SBAS430E p.4 splits `V_INH` in two: `0.7 × AVDD` applies for
-> 2.7 V ≤ AVDD < 4.5 V, and `0.625 × AVDD` for 4.5 V ≤ AVDD ≤ 5.5 V. The LM317
+> 2.7 V ≤ AVDD < 4.5 V, and `0.625 × AVDD` for 4.5 V ≤ AVDD ≤ 5.5 V. The DAC's
 > rail is `dac-rail`, which is in the second band. p.53's revision history
 > records TI splitting the parameter into two rows deliberately. The
 > conclusion survives — 3.3 V CMOS still cannot drive it — but the number
