@@ -46,6 +46,8 @@ params:
   tpd_lt:  {value: 0.0, source: "left_thumb's CLK-to-QH propagation delay. TI publishes a MAXIMUM only (16/18 ns at 4.5 V, 32/45 ns at 2 V) and no minimum [SN74HCS165-ti-scls828a.pdf p.7], so the deck (hold.cir) has none: it measures the hold margin without it: whatever tpd the part really has is added margin. need_tpd is what it must at least be"}
   c_lt_qh: {value: 3.0e-12, source: "left_thumb's QH trace on the main board to the right_hand J-CHAIN [assumption until the main board is laid out]"}
   q_up:    {value: 1, source: "1: left_thumb's QH rises at the clock; 0: it falls (each sim sets it)"}
+  r_hop:   {value: 0.0, source: "0: HOP_LT_RH as netlisted, QH straight into the ribbon. A WHAT-IF sets a series resistor at left_thumb's QH (an owner option, not a part)"}
+  tpd_bench: {value: 12.0e-9, source: "THE BENCH CRITERION: left_thumb's CLK-to-QH delay must be at least this for the hop to hold at the worst corner. Unpublished [SN74HCS165-ti-scls828a.pdf p.7 gives a maximum only]; E14 measures it (key-chain-loom.md, 'The hop hold time')"}
 
 vary:
   r_ldo:   {tol: [0.0, 4.0]}
@@ -80,6 +82,7 @@ derived:
   t_hi_end: "0.5e-6"
   vt_lt: "v['vtp_min']"
   c_shape: "v['tr_qh'] / 2.2 / 1000.0"
+  r_qh_hop: "v['r_qh'] + v['r_hop']"
   q0: "0.0 if v['q_up'] else v['vcc']"
   q1: "v['vcc'] if v['q_up'] else 0.0"
 
@@ -171,9 +174,23 @@ sims:
     deck: hold.cir
     vary: [r_drv, tr_drv, c_tvs, c_main, r_qh, tr_qh]
     sweep: {q_up: [1, 0]}
-    measures: [clk_skew, ser_delay, hold_margin, need_tpd]
-    post:
+    measures: &hold_meas [clk_skew, ser_delay, hold_margin, need_tpd]
+    asserts:
+      - expr: "max['need_tpd'] < p['tpd_bench']"
+        why: "A5-2: the hop holds at every corner if left_thumb's CLK-to-QH delay is at least tpd_bench. TI publishes no minimum, so this is NOT a guarantee: it is the number E14 must confirm (key-chain-loom.md, 'The hop hold time'), and this assertion fails if the clock's skew between the boards grows past it"
+    post: &hold_post
       clk_skew: "cross(w['rxr'], p['vtp_max'], 0) - cross(w['m'], p['vtp_min'], 0)"
       ser_delay: "(cross(w['ser'], p['vtp_min'], 0) if p['q_up'] else cross(w['ser'], p['vtm_max'], 0)) - cross(w['m'], p['vtp_min'], 0)"
       hold_margin: "(cross(w['ser'], p['vtp_min'], 0) if p['q_up'] else cross(w['ser'], p['vtm_max'], 0)) - cross(w['rxr'], p['vtp_max'], 0)"
       need_tpd: "max(0.0, cross(w['rxr'], p['vtp_max'], 0) - (cross(w['ser'], p['vtp_min'], 0) if p['q_up'] else cross(w['ser'], p['vtm_max'], 0)))"
+  - name: hop-hold-with-series-r
+    # A WHAT-IF, recorded: 2.2 kohm in series at left_thumb's QH on HOP_LT_RH, the option
+    # that makes the hop hold with no propagation delay at all (an owner decision, not
+    # the netlist). The data then reaches right_hand's SER after its RC, against a
+    # setup budget of a whole 1 us clock period
+    deck: hold.cir
+    vary: [r_drv, tr_drv, c_tvs, c_main, r_qh, tr_qh]
+    sweep: {q_up: [1, 0]}
+    set: {r_hop: 2200}
+    measures: *hold_meas
+    post: *hold_post

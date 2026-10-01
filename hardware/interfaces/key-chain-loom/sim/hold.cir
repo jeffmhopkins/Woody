@@ -21,17 +21,18 @@ CRXR rxr 0 {{ci}}
 CKBR rxr 0 {{c_kb}}
 * left_thumb's clock event, with no propagation delay at all (tpd_lt, sims.yaml), and its
 * output edge: a step at the crossing, shaped to tr_qh
-BTRIG trig 0 V = 0.5 * (1 + tanh((v(m) - {{vt_lt}}) * 400))
+BTRIG trig 0 V = 0.5 * (1 + tanh((v(m) - {{vt_lt}}) * 50))
 RSHP trig shp 1k
 CSHP shp 0 {{c_shape}}
 BQ qsrc 0 V = {{q0}} + ({{q1}} - {{q0}}) * v(shp)
-RQ qsrc qa {{r_qh}}
+RQ qsrc qa {{r_qh_hop}}
 CQA qa 0 {{c_lt_qh}}
 TQH qa 0 ser 0 Z0={{z0_ribbon}} TD={{td_rib}}
 CSER ser 0 {{ci}}
 CSKB ser 0 {{c_kb}}
+.options method=gear
 .control
-tran 20p 300n
+tran 20p 300n 0 20p
 wrdata rxr.dat v(rxr)
 wrdata m.dat v(m)
 wrdata ser.dat v(ser)
