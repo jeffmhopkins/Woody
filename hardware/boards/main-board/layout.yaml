@@ -343,7 +343,7 @@ route: astar
 # batch settings (2026-10-01: the same result at every cost and layer order tried).
 # A connection with no way through takes up the nets in its way and they are routed
 # again, each net at most this many times (pcb_route.complete).
-rip_up: 3
+rip_up: 6
 directions:
   layers: {F.Cu: horizontal, B.Cu: vertical}
   against_cost: 6.0
