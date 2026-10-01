@@ -1417,7 +1417,10 @@ def main():
         body = [f"UNRESOLVED, tracked deliberately ({len(unresolved)}) - not failures"]
         for f in unresolved:
             body.append(f"  [{f['status']:8s}] {f['id']}: {f['quantity']}")
-            body.append(f"             decided by: {f.get('decided_by','-')}")
+            # A blocked figure names its decider as `blocked_on`; reading only
+            # `decided_by` printed "decided by: -" for umbilical-current
+            # (pre-layout review A8-12).
+            body.append(f"             decided by: {f.get('decided_by') or f.get('blocked_on') or '-'}")
         body.append("")
         emit(body, detail_only=True)
 
