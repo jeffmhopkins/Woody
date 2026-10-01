@@ -807,7 +807,7 @@ so.
 | the module's two 5 V rails at power-on and power-off, and `SYNC` at the DAC between them (TI's SN74AHCT125 model and the DAC8568's IBIS clamp) | `hardware/module/digital-and-supervision/sim/` |
 | the DAC8568's power-on glitch and its 3-state reference, into the pitch and mod jacks | `hardware/module/dac8568/sim/` |
 | the breath link's TVS diodes: CMRR, `PWR_GND` rejection, leakage | `hardware/interfaces/breath-sense-link/sim/` |
-| the panel LED's current, its start, and its return against the pitch reference | `hardware/module/panel-led/sim/` |
+| the panel LED's current and its start | `hardware/module/panel-led/sim/` |
 
 ### Coverage — every circuit and board
 

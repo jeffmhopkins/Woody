@@ -407,6 +407,13 @@ components:
     - A
     - K
     sheet: power-entry
+  D16:
+    of: LED-PANEL
+    value: 0805 LED
+    pins:
+    - A
+    - K
+    sheet: panel-led
   D2:
     of: D-REVPOL
     value: 1N5817
@@ -1089,6 +1096,13 @@ components:
     - 1
     - 2
     sheet: digital-and-supervision
+  R71:
+    of: R-LED-PANEL
+    value: 2k2 1%
+    pins:
+    - 1
+    - 2
+    sheet: panel-led
   R8:
     of: R-CLR-PU
     value: 10k 1%
@@ -1493,12 +1507,12 @@ nets:
   - U4.3Y
   /UMBILICAL_POS12:
   - D14.A
-  - J2.19
   - J3.3
   - Q1.S
   - Q1.S2
   - Q1.S3
   - R6.1
+  - R71.1
   /VREFOUT:
   - C43.1
   - R62.1
@@ -1666,6 +1680,9 @@ nets:
   - R54.1
   - U10.OUTA
   - U10.INA-
+  /panel-led/LED_ANODE:
+  - D16.A
+  - R71.2
   /pitch-stage/AMP_OUT:
   - C28.1
   - D9.C
@@ -1830,6 +1847,7 @@ nets:
   - C51.2
   - C6.2
   - C7.2
+  - D16.K
   - J2.10
   - J2.13
   - J2.18
@@ -1908,6 +1926,8 @@ nets:
   - J1.POS5_11
   J1.POS5_12:
   - J1.POS5_12
+  J2.19:
+  - J2.19
   LOGIC_5V:
   - C42.1
   - C50.1
@@ -2011,6 +2031,7 @@ external_endpoints:
 - J1.GATE_16
 - J1.POS5_11
 - J1.POS5_12
+- J2.19
 - U1.PG
 - U14.TRIM
 - U2.PWRGD

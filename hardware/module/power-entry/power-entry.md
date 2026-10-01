@@ -411,7 +411,7 @@ follows `SET` `[ds ADI-LT3042.pdf p.14]`, so
 `DAC AVDD = I_SET × R-SET-DAC + V_OS`
 
 with no gain on any error, and `R-SET-DAC` is a 52.3 kΩ ±0.1 % ±25 ppm/°C
-thin-film part (Viking ARG05BTC5232) `[ds VIKING-ARG-THIN-FILM-RESISTOR.pdf p.3]`.
+thin-film part, Viking ARG05BTC5232, 0805 `[ds VIKING-ARG-THIN-FILM-RESISTOR.pdf p.3]`.
 
 | Term | Guaranteed limit | At the rail `[calc]` | Source |
 |---|---|---|---|
@@ -426,8 +426,8 @@ derivation has the arithmetic, and `power-entry/sim`'s `dac-rail-spread`
 holds it, 65 corners, with at least 50 mV to spare at both ends of 5.00–5.50 V.
 **Nothing is adjusted and nothing can be.** `R-SET-DAC` aged to its endurance
 limit as well — ±0.5 % after 1000 h at full rated power and 70 °C `[VIKING
-p.3]`, where it runs at 0.4 % of its rating — still lands inside
-(`dac-rail-aged`). The E grade is guaranteed from 0 °C to 125 °C, and −40 °C by
+p.4]`, where it runs at 0.4 % of its rating `[calc: 5.23² / 52.3 kΩ = 0.52 mW
+of 1/8 W]` — still lands inside (`dac-rail-aged`). The E grade is guaranteed from 0 °C to 125 °C, and −40 °C by
 design `[p.4 Note 9]`, which covers a rack.
 
 **How it is wired** `[ds ADI-LT3042.pdf p.12, p.18]`:
@@ -451,6 +451,15 @@ design `[p.4 Note 9]`, which covers a rack.
   `C-SET-DAC`'s grounds to `C-REG-OUT`'s ground; a guard ring round `SET` at
   `OUT`'s potential, both sides `[p.14–15]`; the exposed pad soldered to
   `AGND_MOD` copper.
+- **Layout, `R-SET-DAC`'s placement on `module-main`** — the mitigation for the
+  accepted open-circuit failure (*Its failures*), so it is a rule, not a
+  preference. **Keep it away from the standoffs, the connectors and the board
+  edges**, which is where a board bends when it is screwed down, plugged and
+  unplugged; and **orient its long axis parallel to the board's long edge**, so
+  the board's bending runs along the chip and not across its terminations. A
+  stress-free chip resistor opens by flex cracking, and the part's own bending
+  test goes to only 3 mm `[VIKING p.4]`. Inside the `SET` guard ring above,
+  with `C-SET-DAC` beside it.
 
 **Start-up.** `R-SET-DAC` × `C-SET-DAC` is 5.2 ms, and the rail follows `SET`
 up: over 4.5 V in 10–12 ms and over the 5.00 V floor in 14–21 ms after the bus,
@@ -478,6 +487,25 @@ up**, to the input less the dropout, 10.5–12.3 V, over the DAC's 6 V absolute
 maximum (`dac-rail-open-rset`, recorded). It is the one single failure that
 does — as an open `R-REG-SET-LO` was for the LM317L — and it is a fixed
 thin-film part with nothing to turn.
+
+**ACCEPTED, with no protection circuit — the owner, 2026-10-01: *"Good to
+accept them"*** (`dac-rail` at its nominal, and this failure). No clamp is
+drawn: a zener cannot be guaranteed between 5.35 V and 6.0 V at the LT3042's
+220 mA limit. It is mitigated two ways instead, and each is a rule:
+
+1. **The layout:** `R-SET-DAC` placed away from flex and oriented along the
+   board (*How it is wired*, Layout).
+2. **The first build:** `DAC AVDD` is measured **before `U-DAC` is fitted**
+   (and `U-LVL-MOD`, which runs from the same rail and has an absolute
+   maximum `V_CC` of 7 V `[ds SN74AHCT125.pdf, absolute maximum ratings]`), so an open `R-SET-DAC` — the rail reading ~11 V —
+   never reaches a DAC (ROADMAP E7). Both are machine-placed, so the first
+   board's assembly order leaves them off and they are hand-fitted after the
+   reading.
+
+**No special-purpose part.** The owner, 2026-10-01: *"no need for these
+specialized parts bifurcation"* — an anti-sulfur resistor here was judged
+unnecessary, so `R-SET-DAC` is the ordinary thin-film part above, and the
+mitigations are the placement and the first-build check.
 
 ### The DAC rail's load
 
@@ -551,14 +579,16 @@ instrument's return, about half each `[calc: two equal 24 AWG conductors,
 and move the jacks' reference with every breath. Since ADR 0027 it does not
 reach the plane beyond the etherCON at all.
 
-**The jack board stays two layers.** It carries the jacks, pots and LED and
+**The jack board stays two layers.** It carries the jacks and pots and
 one ground, `AGND_MOD`, which reaches it only on `J-B2B-MOD`'s five ground
 pins; nothing on it needs a second reference, so there is nothing for a
 second plane to separate (`PCB-MODULE-JACK`).
 
 **The standoffs are metal** (owner, 2026-09-30), so they could tie the boards'
-copper at four more points. **Their pads are on `AGND_MOD` on the jack board
-and on no net on the main board** — a plated ring with clearance from every
+copper at more points. **Their pads are on `AGND_MOD` on the jack board
+and on no net on the main board** — the main board's two low ones, which go to
+the panel (`MECH-PANEL-STANDOFF-MOD`, ADR 0024 point 15), included, so the
+panel is not a ground path either — a plated ring with clearance from every
 plane. On the jack board `AGND_MOD` is the only ground there is; on the main
 board any net would be a second inter-board tie: to `AGND_MOD` a parallel
 loop around the header's five ground pins, to `DIG_GND` or `PWR_GND` a second
@@ -591,13 +621,6 @@ are in [`umbilical-load-switch.md`](../umbilical-load-switch/umbilical-load-swit
 - **How much common-mode current `U-ISO` makes.** RECOM does not publish it,
   and every copper parasitic in `cm-loop` is an estimate. **Decided by: E6**,
   a current probe on the star tie with the converter loaded.
-- **`DAC AVDD`'s one up-going failure**, an open `R-SET-DAC`, takes the rail
-  to the input less the dropout, over the DAC's and `U-LVL-MOD`'s absolute
-  maxima (`dac-rail-open-rset`). The LM317L's open `R-REG-SET-LO` did the same
-  and was accepted as a fixed thin-film part. **Decided by: the owner** —
-  accept it on the same terms, or add an over-voltage clamp on `DAC AVDD`
-  (none is drawn: a zener cannot sit between 5.35 V and 6.0 V across its
-  tolerance and the LT3042's 220 mA limit).
 - **`C-REG-DAC`'s capacitance at 12 V of bias** is from memory: TDK's bias
   curve for CGA5L1X7R1H106K is not banked. **Decided by: banking it** (or a
   bench measurement at E6); the LT3042's 4.7 µF minimum is the bar.

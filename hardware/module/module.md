@@ -26,7 +26,8 @@ circuits. **The circuits own their own values** — nothing here restates one.
 **The module is two boards** (ADR 0023), and each circuit's KiCad sheet is
 its source (ADR 0019): [`module-main`](../boards/module-main/README.md)
 carries the etherCON, every IC, the trimmers and the power header;
-[`module-jack`](../boards/module-jack/README.md) the jacks, pots and LED.
+[`module-jack`](../boards/module-jack/README.md) the jacks and pots. The
+panel LED is on the main board, under a light pipe (ADR 0024 point 15).
 `J-B2B-MOD` joins them; its pin allocation is in the main board's README.
 
 The other half of the breath chain and of the SPI path are **not here**. They

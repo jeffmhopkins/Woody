@@ -47,10 +47,20 @@ As the left-hand board's table, for six keys:
 
 ## Ordering
 
-As the left-hand board, with this board's `fab/` files. It is a **separate
-design and a separate order**: one instrument needs one of each. For the
-hand assembly, buy **six** switches, not five. `J-CHAIN`'s stock (the
-left-hand page) has to cover both boards.
+The left-hand page's *Ordering it — JLCPCB* is the order sheet, with
+`key-board-rh` in every file name (`cd hardware/boards/key-board-rh/fab && zip
+/tmp/key-board-rh-gerbers.zip *.gbr *.drl *.gbrjob`). It is a **separate design
+and a separate order**: one instrument needs one of each. Put both in one cart
+so they ship together. What differs:
+
+- **The parts** (its step 4) are the same six LCSC parts, with the same Basic/Extended split, stock and rotation offsets. This board places R1–R12, C1–C8 and U1: six of each key part, `C-DECOUPLE-165` is C7, and `C-BULK-CHAIN` is C8.
+- **The placement preview** (its step 5): C8, not C7, is beside J1's 3V3 pin.
+- **The cost** (its step 6), *estimates*:
+  - The board is **wider than 100 mm** (its outline, `mechanical/export/key-board-rh.dxf`), so JLC's $2 price for 5 boards up to 100 × 100 mm `[web https://jlcpcb.com/, 2026-10-01]` does not apply. Expect a few dollars more for the bare boards (*estimate* `[from memory]`). The live quote decides.
+  - SMT joints: $0.19 [calc: (20 two-pad parts × 2 + U1's 16) = 56 joints × 2 boards × $0.0017].
+  - Parts, 2 boards: about $2.65 [calc: per board 6 × 0.0042 + 6 × 0.0046 + 6 × 0.0173 + 0.0189 + 0.0651 + 1.086 = $1.327, at the left-hand page's 2026-10-01 unit prices].
+  - Setup, stencil and the one Extended feeder fee are the same as the left-hand board's, and they are charged again: per design, not per cart.
+- **The hand assembly**: buy **six** switches, not five. `J-CHAIN`'s stock (the left-hand page) has to cover both boards.
 
 ## Bring-up
 

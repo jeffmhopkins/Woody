@@ -51,6 +51,7 @@ sys.modules.setdefault("pcb", sys.modules[__name__])    # pcb_main imports this 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FPDIRS = {"woody": os.path.join(ROOT, "hardware", "lib", "woody.pretty")}
 SYS_FP = "/usr/share/kicad/footprints"
+JLC_ROTATION = os.path.join(ROOT, "hardware", "lib", "jlc-rotation.csv")   # per-LCSC-part CPL offsets
 OX, OY = 60.0, 150.0
 MM = pcbnew.FromMM
 
@@ -1781,11 +1782,15 @@ def assembly_files(bdir, name, fab):
     placement (CPL) file of the same parts, and the list of parts fitted by hand.
     Part identity comes from the sheets' fields (Manufacturer, MPN, LCSC,
     Assembly = machine / hand / none); positions from KiCad's own placement
-    export. Rotation is KiCad's, uncorrected - the guide's Method 1
-    (datasheets/fab/JLCPCB-KICAD-BOM-CPL-GUIDE.pdf credits rotation fixes only
-    to a plugin this flow does not use), so JLC's placement preview is where
-    the part orientations are confirmed before the order. Returns the sheets read, so
-    the ledger ties these files to them as well as to the board."""
+    export. Rotation is translated to JLC's convention: a bottom part's angle is
+    mirrored, 180 - KiCad's (JLC reads it looking at the bottom; KiBot's
+    rot_footprint `mirror_bottom`, and kicad-jlcpcb-tools' fix_rotation), and
+    each LCSC part's offset between KiCad's footprint and JLC's own (its
+    EasyEDA footprint) is added from hardware/lib/jlc-rotation.csv. A machine
+    part with no row there is placed uncorrected and named on stdout, and JLC's
+    placement preview stays the final check either way. Returns the sheets
+    read (and the offset table), so the ledger ties these files to them as
+    well as to the board."""
     import csv
     import kicad
     root = os.path.join(bdir, name + ".kicad_sch")
@@ -1825,13 +1830,27 @@ def assembly_files(bdir, name, fab):
         w.writerow(["Comment", "Designator", "Footprint", "JLCPCB Part #"])
         for (val, fp, lcsc), refs in sorted(machine.items()):
             w.writerow([val, ",".join(refs), fp.split(":")[-1], lcsc])
+    offsets = {r["lcsc"]: r for r in csv.DictReader(open(JLC_ROTATION))}
+    unchecked = []
     with open(os.path.join(fab, name + "-cpl-jlc.csv"), "w", newline="") as fh:
         w = csv.writer(fh)
         w.writerow(["Designator", "Mid X", "Mid Y", "Layer", "Rotation"])
-        for refs in machine.values():
+        for (_, fp, lcsc), refs in machine.items():
+            o = offsets.get(lcsc)
+            if o and o["footprint"] != fp.split(":")[-1]:
+                sys.exit(f"pcb: {lcsc}'s rotation offset in {os.path.relpath(JLC_ROTATION, ROOT)} is for "
+                         f"{o['footprint']}, but {','.join(refs)} use {fp.split(':')[-1]}")
+            if not o:
+                unchecked += refs
             for ref in sorted(refs):
                 r = pos[ref]
-                w.writerow([ref, r["PosX"], r["PosY"], "Bottom" if r["Side"] == "bottom" else "Top", r["Rot"]])
+                rot = float(r["Rot"])
+                if r["Side"] == "bottom":
+                    rot = 180.0 - rot
+                rot = (rot + (float(o["rotation"]) if o else 0.0)) % 360.0
+                w.writerow([ref, r["PosX"], r["PosY"], "Bottom" if r["Side"] == "bottom" else "Top", f"{rot:.6f}"])
+    if unchecked:
+        print(f"pcb: no JLC rotation offset for {', '.join(sorted(unchecked))} - confirm them in JLC's preview")
     with open(os.path.join(fab, name + "-hand-assembly.csv"), "w", newline="") as fh:
         w = csv.writer(fh)
         w.writerow(["Designator", "Value", "Manufacturer", "MPN"])
@@ -1839,7 +1858,7 @@ def assembly_files(bdir, name, fab):
     if none:
         print(f"pcb: not in any order (Assembly = none: excluded from the BOM, or a net tie drawn in copper): {', '.join(none)}")
     subs = re.findall(r'\(property "Sheetfile" "([^"]+)"', open(root).read())
-    return [root] + sorted({os.path.normpath(os.path.join(bdir, s)) for s in subs})
+    return [root] + sorted({os.path.normpath(os.path.join(bdir, s)) for s in subs}) + [JLC_ROTATION]
 
 
 def cmd_render(bdir, preview=None):

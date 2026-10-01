@@ -116,14 +116,17 @@ boards:
     value: 1.0
     status: nominal
     source: "[adr 0024] each board's side edge this far inside the panel's side edge, so a neighbour module's board cannot touch it"
-  ec_clear:
-    value: 1.0
-    status: nominal
-    source: "[adr 0024] the jack board's notch this far clear of the NE8FAV's 25 x 25 body on each side"
   toggle_clear:
     value: 1.0
     status: nominal
-    source: "[adr 0024] the jack board's notch this far clear of SW-POWER's body on each side and above - the body is deeper than the jack board's depth, so it passes through the board"
+    source: "[adr 0024] the jack board's bottom edge at least this far above SW-POWER's body - the body is deeper than the jack board's depth, so the board must end above it"
+  # The jack board is a plain rectangle (ADR 0024 point 15, the owner,
+  # 2026-10-01): its bottom edge is the only number its outline adds to the
+  # boards' shared one, and it ends above the toggle's row.
+  jack_y0:
+    value: 57.5
+    status: nominal
+    source: "[calc] just below the bottom jack row's footprints: layout.jack_y0 - 2 x layout.jack_pitch_y = 62.5, less the footprint's half-width across the pin line, max(jack.body_w 9.0, the pads 2.6 / 3.1) / 2 = 4.5, gives 58.0; less boards.copper_edge 0.5 = 57.5. mechanical/module/drc.echo 'jack board bottom edge' checks both that and SW-POWER's body below it (boards.toggle_clear)"
   copper_edge:
     value: 0.5
     status: nominal
@@ -152,15 +155,56 @@ standoff:
     value: 3.2
     status: nominal
     source: "[calc] M3 clearance, the panel's own hole size"
-  # Where the four sit (x, y), panel frame. Two above the pots, between them;
-  # one in each of the jack board's legs beside the NE8FAV, low.
+  # Where the two between the boards sit (x, y), panel frame: above the pots,
+  # between them. The main board's two low mounting points are panel_standoff.
   at:
-    value: [[16.75, 114.8], [33.75, 114.8], [6.375, 17.0], [44.125, 17.0]]
+    value: [[16.75, 114.8], [33.75, 114.8]]
     status: nominal
-    source: "[adr 0024] placed by hand against the pots, the legs and the rail band; module.scad DRCs every one"
+    source: "[adr 0024] placed by hand against the pots and the rail band; module.scad DRCs every one"
+
+# The main board's two LOW mounting points (ADR 0024 point 15): the jack board
+# no longer reaches below the jacks, and the main board's rear face has no
+# room for a screw head between the NE8FAV's tails and the jacks (U-ISO, its
+# filter, L-CM-ISO and J-B2B-MOD's tails fill it), so these two go from the
+# panel's rear face straight to the main board, where the two in the jack
+# board's legs used to. A self-clinching stud in the panel, a metal M3
+# female-female spacer threaded onto it, a screw from the main board's rear.
+# The spacer's LENGTH is derived (the NE8FAV's setback: panel rear face to
+# main board front face), never set here.
+panel_standoff:
+  at:
+    value: [[6.375, 15.0], [44.125, 15.0]]
+    status: nominal
+    source: "[adr 0024] the old legs' standoffs' x, 2 lower (2026-10-01) so the right stud's flush head clears the J-UMBILICAL legend zone; module.scad DRCs the rail band, the main board's rear-face parts, the NE8FAV and the panel's face"
+  stock_l:
+    value: 20.0
+    status: tbd
+    source: "[from memory] M3 female-female hex spacers are stocked at 18 and 20 mm; the next stocked length over the derived one, faced to it (as standoff.stock_l)"
+    decided_by: "the metal spacer bought for MECH-PANEL-STANDOFF-MOD"
+  stud_l:
+    value: 8.0
+    status: settled
+    source: "[ds] PEM-FH-SELF-CLINCHING-STUDS.pdf, metric FH/FHS/FHA table: M3 length codes 6, 8, 10 ... (+-0.4); 8 taken (FHA-M3-8), its head flush in the panel's front face"
+  stud_hole_d:
+    value: 3.0
+    status: settled
+    source: "[ds] PEM-FH-SELF-CLINCHING-STUDS.pdf, metric table, M3: hole size in sheet 3 (+0.08)"
+  stud_head_d:
+    value: 4.6
+    status: settled
+    source: "[ds] PEM-FH-SELF-CLINCHING-STUDS.pdf, metric table, M3: head H 4.6 - flush in the front face, so it SHOWS on the panel"
+  stud_edge_min:
+    value: 5.6
+    status: settled
+    source: "[ds] PEM-FH-SELF-CLINCHING-STUDS.pdf, metric table, M3: min. distance hole C/L to edge 5.6"
+  stud_sheet_min:
+    value: 1.0
+    status: settled
+    source: "[ds] PEM-FH-SELF-CLINCHING-STUDS.pdf, metric table, M3: min. sheet thickness 1; FHA (aluminium) for aluminium sheet of HRB 50 or less"
 
 # The M3 pan-head screw, DIN 7985: the panel's four (MECH-PANEL-SCREW-MOD) and
-# the standoffs' eight, one each side of each standoff.
+# the standoffs' six (MECH-STANDOFF-SCREW-MOD): one each side of each standoff
+# between the boards, one from the main board's rear into each panel standoff.
 m3:
   head_d:
     value: 6.0
@@ -252,7 +296,7 @@ power:
   at:
     value: [42.5, 35.0]
     status: nominal
-    source: "[adr 0024] low on the right, behind the jack board's right leg, clear of the NE8FAV's tails (the NE8FAV is on the bottom row, centred) and of the lower right standoff screw's head; the ribbon folds down to the bus board behind the NE8FAV"
+    source: "[adr 0024] low on the right, clear of the NE8FAV's tails (the NE8FAV is on the bottom row, centred) and of the lower right panel standoff's screw head; the ribbon folds down to the bus board behind the NE8FAV"
   drop:
     value: 10.0
     status: nominal
@@ -425,44 +469,44 @@ knob:
     source: "[adr 0024] air between the knob's skirt and the panel face, so it turns without rubbing"
     decided_by: "the knob's bore depth, at the first fit"
 
-# LTL-4231N, 3 mm diffused. Held at its depth by MECH-LED-BEZEL-MOD taken as a
-# lead spacer from the jack board (ADR 0024): its length is derived, never set.
+# THE POWER LED (ADR 0024 point 15): an 0805 chip LED (LED-PANEL, Lite-On
+# LTST-C171GKT) on the MAIN board's front face, under a press-fit panel light
+# pipe (MECH-LED-BEZEL-MOD, Bivar PLP2-750) whose flange stops on the panel's
+# face. The jack board no longer reaches the toggle's row, and a through-hole
+# LED on the main board would put its leads under U-ISO's body.
 led:
-  spacer_d:
-    value: 4.0
-    status: tbd
-    source: "[from memory] a 3 mm LED's two-lead spacer, ~4 across"
-    decided_by: "the spacer bought for MECH-LED-BEZEL-MOD"
-
-  lens_d:
-    value: 3.0
-    status: settled
-    source: "[ds] LITEON-LTL-4231N-3MM-GREEN-DIFFUSED.pdf: 3.0"
-  flange_d:
-    value: 3.2
-    status: settled
-    source: "[ds] LTL-4231N: flange 3.2"
-  flange_t:
-    value: 1.0
-    status: settled
-    source: "[ds] LTL-4231N: 1.0"
-  l:
-    value: 5.55
-    status: settled
-    source: "[ds] LTL-4231N: 5.55 +/-0.3 lens tip to the flange's underside"
-  pitch:
-    value: 2.54
-    status: settled
-    source: "[ds] LTL-4231N: leads 2.54 nom."
   hole_d:
-    value: 3.2
+    value: 2.92
     status: settled
-    source: "[repo] panel-height-budget's toggle_row note: a D3.2 hole for the LED's lens. The flange is the same D3.2 (led.flange_d), so the panel does NOT stop it: MECH-LED-BEZEL-MOD, the lead spacer on the jack board, sets how far the lens stands proud (led.proud; ADR 0024 point 9; mechanical/module/drc.echo 'LED lead spacer length (derived)')"
-  proud:
-    value: 1.0
-    status: tbd
-    source: "[adr 0024] how far the lens stands in front of the panel face"
-    decided_by: "the first panel, looked at"
+    source: "[ds] BIVAR-PLP2-PANEL-PRESS-FIT-LIGHT-PIPE.pdf: recommended mounting hole D0.115 +0.003/-0.002 in (2.92 +0.08/-0.05), panel 0.047-0.093 in (1.19-2.36) thick"
+  flange_d:
+    value: 3.3
+    status: settled
+    source: "[ds] BIVAR PLP2: flange D0.130 (3.3), a dome - it stops on the panel's face"
+  flange_t:
+    value: 0.8
+    status: settled
+    source: "[ds] BIVAR PLP2: flange 0.030 (0.8) - how far the pipe stands in front of the panel"
+  pipe_d:
+    value: 2.8
+    status: settled
+    source: "[ds] BIVAR PLP2: light pipe D0.112 (2.8); its press-fit ribs D0.122 (3.1) REF"
+  pipe_l:
+    value: 19.0
+    status: settled
+    source: "[ds] BIVAR PLP2: X = body length, the flange's underside to the pipe's end; PLP2-750 = 0.750 (19.0). The longest stocked length that stops short of the LED: mechanical/module/drc.echo 'light pipe over the LED'"
+  pipe_tol:
+    value: 0.13
+    status: settled
+    source: "[ds] BIVAR PLP2: .XXX +-0.005 in"
+  smd:
+    value: [2.0, 1.25, 0.8]
+    status: settled
+    source: "[ds] LITEON-LTST-C171GKT-0805-GREEN.pdf p.1: 2.00 x 1.25, 0.80 tall, +-0.10"
+  smd_tol:
+    value: 0.1
+    status: settled
+    source: "[ds] LTST-C171GKT p.1: +-0.10 unless noted"
 
 # NKK M2011SD4G01 (SW-POWER), panel-mounted, wired.
 toggle:
@@ -612,11 +656,11 @@ layout:
   led_side:
     value: "left"
     status: nominal
-    source: "[adr 0024 point 11] the LED in the toggle's row, in the strip left of the toggle - on the jack board's left leg, where its lead spacer stands"
+    source: "[adr 0024 point 11] the LED in the toggle's row, in the strip left of the toggle; its light pipe reaches back to the main board (point 15)"
   toggle_y:
     value: 49.5
     status: nominal
-    source: "[adr 0024 point 11] the toggle's row, centred, ABOVE the NE8FAV: its lever's sweep clear of the PUSH tab below and of the last jack row's plug grips above, its body under the top of the jack board's notch"
+    source: "[adr 0024 point 11] the toggle's row, centred, ABOVE the NE8FAV: its lever's sweep clear of the PUSH tab below and of the last jack row's plug grips above, its body below the jack board's bottom edge (boards.jack_y0)"
   toggle_on:
     value: "right"
     status: settled

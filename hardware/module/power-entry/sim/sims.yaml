@@ -338,7 +338,8 @@ sims:
         why: "and its nominal is dac-rail"
   - name: dac-rail-aged
     # R-SET-DAC at its endurance limit, +-0.5 % after 1000 h at full rated power and 70 C
-    # [VIKING-ARG-THIN-FILM-RESISTOR.pdf p.3] on top of its 0.1 % - it runs at 0.4 % of its rating
+    # [VIKING-ARG-THIN-FILM-RESISTOR.pdf p.4], on top of its 0.1 % and its drift (0.2 %) -
+    # it runs at 0.4 % of its rating [calc: 5.23^2 / 52.3k = 0.52 mW of 1/8 W]
     deck: dacrail.cir
     set: {}
     vary: [i_set, k_vos, k_leak, R-SET-DAC]
@@ -355,7 +356,7 @@ sims:
     measures: [v_avdd]
     asserts:
       - expr: "min['v_avdd'] > p['v_dac_absmax']"
-        why: "RECORDED, NOT FAIL-SAFE: an open R-SET-DAC drives DAC_AVDD UP to the input less the dropout, over the DAC8568's 6 V absolute maximum. It is the one single failure that does - the same class as the LM317L's open R-REG-SET-LO it replaced - and it is a fixed thin-film part, never adjusted (power-entry.md, The DAC rail)"
+        why: "RECORDED, NOT FAIL-SAFE: an open R-SET-DAC drives DAC_AVDD UP to the input less the dropout, over the DAC8568's 6 V absolute maximum. It is the one single failure that does, and the owner accepted it 2026-10-01 with no clamp, mitigated by its placement on the board and E7 measuring the rail before U-DAC is fitted (power-entry.md, The DAC rail, Its failures)"
   - name: dac-rail-short-cset
     # FAILURE: C-SET-DAC shorted (or R-SET-DAC shorted): SET at ground
     deck: dacrail.cir

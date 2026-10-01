@@ -4,133 +4,85 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/panel-led/sim/sims.yaml: 543b91b2f2a1f8b9
-  hardware/module/panel-led/netlist.yaml: a79c04d85d3dfa0b
+  hardware/module/panel-led/sim/sims.yaml: ecef16a33a353bf9
+  hardware/module/panel-led/netlist.yaml: 5a2fba94bdeabd3f
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
-  hardware/module/panel-led/sim/led.cir: 40b2f61152ab155b
-  hardware/module/power-entry/sim/sims.yaml: f06800eed96cd1d5
+  hardware/module/panel-led/sim/led.cir: 1f677a26d971c1ff
+  hardware/module/power-entry/sim/sims.yaml: e471145ca3848b47
   figure:dac-rail: 5.23 V
 ngspice: '42'
 sims:
   led[i_swing=0.195]:
-    corners: 17
+    corners: 9
     measures:
       i_led:
-        nominal: 0.00456151
-        min: 0.00412751
-        min_at: R-LED-PANEL+ r_b2b+ v_set- vf20+
-        max: 0.00482255
-        max_at: R-LED-PANEL- r_b2b- v_set+ vf20-
+        nominal: 0.00458358
+        min: 0.00423895
+        min_at: R-LED-PANEL+ v_set- vf20+
+        max: 0.00484446
+        max_at: R-LED-PANEL- v_set+ vf20-
       i_led_pp:
-        nominal: 4.56201e-06
-        min: 4.37481e-06
-        min_at: R-LED-PANEL+ r_b2b+ v_set- vf20+
-        max: 4.75191e-06
-        max_at: R-LED-PANEL- r_b2b- v_set+ vf20-
+        nominal: 4.55535e-06
+        min: 4.36904e-06
+        min_at: R-LED-PANEL+ v_set- vf20+
+        max: 4.74489e-06
+        max_at: R-LED-PANEL- v_set+ vf20-
       v_on_100u:
-        nominal: 1.95412
-        min: 1.85193
-        min_at: R-LED-PANEL- r_b2b- v_set- vf20-
-        max: 2.45661
-        max_at: R-LED-PANEL+ r_b2b+ v_set- vf20+
+        nominal: 1.89091
+        min: 1.78853
+        min_at: R-LED-PANEL- v_set- vf20-
+        max: 2.19449
+        max_at: R-LED-PANEL+ v_set- vf20+
       v_on_1m:
-        nominal: 4.06013
-        min: 3.93753
-        min_at: R-LED-PANEL- r_b2b- v_set- vf20-
-        max: 4.58284
-        max_at: R-LED-PANEL+ r_b2b+ v_set- vf20+
-      gnd_pp_uv:
-        nominal: 0.0182481
-        min: 0.0174992
-        min_at: R-LED-PANEL+ r_b2b- v_set- vf20+
-        max: 0.0570227
-        max_at: R-LED-PANEL- r_b2b+ v_set+ vf20-
-      gnd_pp_cents:
-        nominal: 2.18977e-05
-        min: 2.0999e-05
-        min_at: R-LED-PANEL+ r_b2b- v_set- vf20+
-        max: 6.84272e-05
-        max_at: R-LED-PANEL- r_b2b+ v_set+ vf20-
-      gnd_dc_mv:
-        nominal: 0.018246
-        min: 0.0165101
-        min_at: R-LED-PANEL+ r_b2b- v_set- vf20+
-        max: 0.0578704
-        max_at: R-LED-PANEL- r_b2b+ v_set+ vf20-
+        nominal: 3.99902
+        min: 3.87787
+        min_at: R-LED-PANEL- v_set- vf20-
+        max: 4.32468
+        max_at: R-LED-PANEL+ v_set- vf20+
     asserts:
     - expr: min['i_led'] > 3.9e-3 and max['i_led'] < 5.0e-3
       why: 'panel-led.md''s ~4.5 mA holds within about 12 % over U-ISO''s +-3.1 %, R-LED-PANEL''s 1 % and the LED''s whole
         VF spread (it reads 4.5 mA with VF at the page''s 2.0 V): under 0.6 % of the 940 mA umbilical limit, and far inside
-        the LED''s 30 mA rating [ds p.2]'
+        the LED''s 30 mA rating [ds LTST-C171GKT p.2]'
       pass: true
     - expr: min['v_on_100u'] > 1.5 and max['v_on_100u'] < 2.6
       why: 'panel-led.md ''lights as the output passes about 2 V'': the LED reaches 0.1 mA with the output between 1.5 and
         2.6 V at every corner'
-      pass: true
-    - expr: max['gnd_pp_cents'] < 0.01
-      why: 'power-entry.md''s ''constant'': the LED''s current follows the breath only through the load switch''s drop and
-        U-ISO''s load regulation (i_led_pp, tens of uA at most), and across J-B2B-MOD''s ground pins that moves the jack board''s
-        ground against the pitch stage''s by under a hundredth of a cent - ADR 0027''s bar (power-entry/sim gnd-isolated).
-        The static part (gnd_dc_mv) is a fixed offset the pitch trim absorbs'
       pass: true
   led[i_swing=0.367]:
-    corners: 17
+    corners: 9
     measures:
       i_led:
-        nominal: 0.00456151
-        min: 0.00412751
-        min_at: R-LED-PANEL+ r_b2b+ v_set- vf20+
-        max: 0.00482255
-        max_at: R-LED-PANEL- r_b2b- v_set+ vf20-
+        nominal: 0.00458358
+        min: 0.00423895
+        min_at: R-LED-PANEL+ v_set- vf20+
+        max: 0.00484446
+        max_at: R-LED-PANEL- v_set+ vf20-
       i_led_pp:
-        nominal: 8.57954e-06
-        min: 8.22747e-06
-        min_at: R-LED-PANEL+ r_b2b+ v_set- vf20+
-        max: 8.93667e-06
-        max_at: R-LED-PANEL- r_b2b- v_set+ vf20-
+        nominal: 8.56701e-06
+        min: 8.21662e-06
+        min_at: R-LED-PANEL+ v_set- vf20+
+        max: 8.92347e-06
+        max_at: R-LED-PANEL- v_set+ vf20-
       v_on_100u:
-        nominal: 1.95429
-        min: 1.85288
-        min_at: R-LED-PANEL- r_b2b- v_set- vf20-
-        max: 2.45681
-        max_at: R-LED-PANEL+ r_b2b+ v_set- vf20+
+        nominal: 1.89154
+        min: 1.78982
+        min_at: R-LED-PANEL- v_set- vf20-
+        max: 2.19588
+        max_at: R-LED-PANEL+ v_set- vf20+
       v_on_1m:
-        nominal: 4.06043
-        min: 3.93808
-        min_at: R-LED-PANEL- r_b2b- v_set- vf20-
-        max: 4.58354
-        max_at: R-LED-PANEL+ r_b2b+ v_set- vf20+
-      gnd_pp_uv:
-        nominal: 0.0343182
-        min: 0.03291
-        min_at: R-LED-PANEL+ r_b2b- v_set- vf20+
-        max: 0.10724
-        max_at: R-LED-PANEL- r_b2b+ v_set+ vf20-
-      gnd_pp_cents:
-        nominal: 4.11818e-05
-        min: 3.9492e-05
-        min_at: R-LED-PANEL+ r_b2b- v_set- vf20+
-        max: 0.000128688
-        max_at: R-LED-PANEL- r_b2b+ v_set+ vf20-
-      gnd_dc_mv:
-        nominal: 0.018246
-        min: 0.0165101
-        min_at: R-LED-PANEL+ r_b2b- v_set- vf20+
-        max: 0.0578704
-        max_at: R-LED-PANEL- r_b2b+ v_set+ vf20-
+        nominal: 3.99904
+        min: 3.87939
+        min_at: R-LED-PANEL- v_set- vf20-
+        max: 4.32731
+        max_at: R-LED-PANEL+ v_set- vf20+
     asserts:
     - expr: min['i_led'] > 3.9e-3 and max['i_led'] < 5.0e-3
       why: 'panel-led.md''s ~4.5 mA holds within about 12 % over U-ISO''s +-3.1 %, R-LED-PANEL''s 1 % and the LED''s whole
         VF spread (it reads 4.5 mA with VF at the page''s 2.0 V): under 0.6 % of the 940 mA umbilical limit, and far inside
-        the LED''s 30 mA rating [ds p.2]'
+        the LED''s 30 mA rating [ds LTST-C171GKT p.2]'
       pass: true
     - expr: min['v_on_100u'] > 1.5 and max['v_on_100u'] < 2.6
       why: 'panel-led.md ''lights as the output passes about 2 V'': the LED reaches 0.1 mA with the output between 1.5 and
         2.6 V at every corner'
-      pass: true
-    - expr: max['gnd_pp_cents'] < 0.01
-      why: 'power-entry.md''s ''constant'': the LED''s current follows the breath only through the load switch''s drop and
-        U-ISO''s load regulation (i_led_pp, tens of uA at most), and across J-B2B-MOD''s ground pins that moves the jack board''s
-        ground against the pitch stage''s by under a hundredth of a cent - ADR 0027''s bar (power-entry/sim gnd-isolated).
-        The static part (gnd_dc_mv) is a fixed offset the pitch trim absorbs'
       pass: true

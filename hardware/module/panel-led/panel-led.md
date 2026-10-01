@@ -14,12 +14,20 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `UMBILICAL +12V` | in | `module/umbilical-load-switch` | `umbilical-current` | The LT1641's output, through `R-LED-PANEL` into `LED-PANEL`. It crosses to the jack board on `J-B2B-MOD` pin 19 |
-| `AGND_MOD` | ref | `module/power-entry` | `dig-gnd-topology` | The LED's cathode, back across `J-B2B-MOD`'s ground pins with every other jack-board return |
-| panel cutout | — | `module/panel` | `panel-height-budget` | A cutout, not a net. The LED sits in the toggle's row, left of the toggle (ADR 0024 point 11); the figure's `toggle_row` note is what establishes that the row fits |
+| `UMBILICAL +12V` | in | `module/umbilical-load-switch` | `umbilical-current` | The LT1641's output, through `R-LED-PANEL` into `LED-PANEL`, both on the main board since 2026-10-01 (ADR 0024 point 15); it no longer crosses `J-B2B-MOD` |
+| `AGND_MOD` | ref | `module/power-entry` | `dig-gnd-topology` | The LED's cathode, on the main board's `AGND_MOD` |
+| panel cutout | — | `module/panel` | `panel-height-budget` | A cutout, not a net: the light pipe's hole, in the toggle's row, left of the toggle (ADR 0024 point 11); the figure's `toggle_row` note is what establishes that the row fits |
 | comparator collector node | — | `module/link-supervision` | — | **Not fitted.** The deleted presence comparator shared this node |
 
 ## The circuit
+
+**Where it is.** `LED-PANEL` is an 0805 green chip LED (`LITEON-LTST-C171GKT-0805-GREEN.pdf`)
+on the **main board's front face**, under `MECH-LED-BEZEL-MOD`, a press-fit
+light pipe in the panel whose end stops just short of it (ADR 0024 point 15;
+`mechanical/module/drc.echo` *light pipe over the LED*). The jack board no
+longer reaches the toggle's row, and a through-hole LED on the main board
+would have its leads under `U-ISO`. How bright it looks through the pipe at
+this current is the first build's to see.
 
 `R-LED-PANEL` and `LED-PANEL` in series from the load switch's output to
 `AGND_MOD`. **Lit means the load switch is delivering**; dark means the toggle

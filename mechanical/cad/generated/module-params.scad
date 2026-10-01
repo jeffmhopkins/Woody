@@ -21,15 +21,22 @@ rail_depth = 10.0;  // tbd; [from memory] how far behind the panel's rear face a
 case_depth_max = 45.5;  // settled; [ds] INTELLIJEL-PALETTE-CASE-MANUAL-2020-11-30.pdf p.6: '3U modules, up to a depth of 45.5mm' (middle HP; 37.42 at each 1 HP edge). Taken as behind the panel's REAR face - the manual does not say which face; the DRC also reports the depth from the front face, which is 2 mm worse
 boards_t = 1.6;  // settled; [repo] PCB-MODULE, PCB-MODULE-JACK rows: 1.6 mm
 boards_side_margin = 1.0;  // nominal; [adr 0024] each board's side edge this far inside the panel's side edge, so a neighbour module's board cannot touch it
-boards_ec_clear = 1.0;  // nominal; [adr 0024] the jack board's notch this far clear of the NE8FAV's 25 x 25 body on each side
-boards_toggle_clear = 1.0;  // nominal; [adr 0024] the jack board's notch this far clear of SW-POWER's body on each side and above - the body is deeper than the jack board's depth, so it passes through the board
+boards_toggle_clear = 1.0;  // nominal; [adr 0024] the jack board's bottom edge at least this far above SW-POWER's body - the body is deeper than the jack board's depth, so the board must end above it
+boards_jack_y0 = 57.5;  // nominal; [calc] just below the bottom jack row's footprints: layout.jack_y0 - 2 x layout.jack_pitch_y = 62.5, less the footprint's half-width across the pin line, max(jack.body_w 9.0, the pads 2.6 / 3.1) / 2 = 4.5, gives 58.0; less boards.copper_edge 0.5 = 57.5. mechanical/module/drc.echo 'jack board bottom edge' checks both that and SW-POWER's body below it (boards.toggle_clear)
 boards_copper_edge = 0.5;  // nominal; [adr 0024] a pad's edge this far inside a board edge or cut-out (a fab-house edge clearance; the layout's own rules may be stricter)
 boards_part_clear = 0.5;  // nominal; [adr 0024] the least air between two parts' envelopes that the DRC accepts
 standoff_stock_l = 8.0;  // settled; [ds] WURTH-WA-SPAII-970080365-SPACER-M3-8MM-POLYAMIDE.pdf: 8.0 +/-0.1, M3 internal both ends
 standoff_tol = 0.1;  // settled; [ds] as stock_l: +/-0.1
 standoff_af = 6.0;  // settled; [ds] as stock_l: SW 6 (hex across flats)
 standoff_hole_d = 3.2;  // nominal; [calc] M3 clearance, the panel's own hole size
-standoff_at = [[16.75, 114.8], [33.75, 114.8], [6.375, 17.0], [44.125, 17.0]];  // nominal; [adr 0024] placed by hand against the pots, the legs and the rail band; module.scad DRCs every one
+standoff_at = [[16.75, 114.8], [33.75, 114.8]];  // nominal; [adr 0024] placed by hand against the pots and the rail band; module.scad DRCs every one
+panel_standoff_at = [[6.375, 15.0], [44.125, 15.0]];  // nominal; [adr 0024] the old legs' standoffs' x, 2 lower (2026-10-01) so the right stud's flush head clears the J-UMBILICAL legend zone; module.scad DRCs the rail band, the main board's rear-face parts, the NE8FAV and the panel's face
+panel_standoff_stock_l = 20.0;  // tbd; [from memory] M3 female-female hex spacers are stocked at 18 and 20 mm; the next stocked length over the derived one, faced to it (as standoff.stock_l)
+panel_standoff_stud_l = 8.0;  // settled; [ds] PEM-FH-SELF-CLINCHING-STUDS.pdf, metric FH/FHS/FHA table: M3 length codes 6, 8, 10 ... (+-0.4); 8 taken (FHA-M3-8), its head flush in the panel's front face
+panel_standoff_stud_hole_d = 3.0;  // settled; [ds] PEM-FH-SELF-CLINCHING-STUDS.pdf, metric table, M3: hole size in sheet 3 (+0.08)
+panel_standoff_stud_head_d = 4.6;  // settled; [ds] PEM-FH-SELF-CLINCHING-STUDS.pdf, metric table, M3: head H 4.6 - flush in the front face, so it SHOWS on the panel
+panel_standoff_stud_edge_min = 5.6;  // settled; [ds] PEM-FH-SELF-CLINCHING-STUDS.pdf, metric table, M3: min. distance hole C/L to edge 5.6
+panel_standoff_stud_sheet_min = 1.0;  // settled; [ds] PEM-FH-SELF-CLINCHING-STUDS.pdf, metric table, M3: min. sheet thickness 1; FHA (aluminium) for aluminium sheet of HRB 50 or less
 m3_head_d = 6.0;  // settled; [ds] ASPEN-DIN7985-ISO7045-PAN-HEAD-DIMENSION-TABLE.pdf: DIN 7985 M3 dk nominal max 6.0 (min 5.7) - the head MECH-PANEL-SCREW-MOD buys. The ISO 7045 head is smaller; the table banked is the DIN one
 m3_head_k = 2.52;  // settled; [ds] as head_d: DIN 7985 M3 k max 2.52 (nominal 2.4)
 b2b_rows = 2;  // settled; [repo] J-B2B-MOD: 2 x 10, 2.54 mm
@@ -49,7 +56,7 @@ power_socket_w = 6.1;  // settled; [ds] TE 82012 p.52: body width 6.10 max
 power_socket_l = 24.82;  // settled; [calc] TE 82012 p.53: A = B + 7.04 (12-position: 19.74 = 12.70 + 7.04); 16-position B = 7 x 2.54 = 17.78, so A = 24.82
 power_ribbon_t = 1.0;  // tbd; [from memory] 1.27 mm-pitch flat cable, ~0.9 thick
 power_ribbon_w = 20.32;  // settled; [calc] 16 conductors x 1.27 mm pitch
-power_at = [42.5, 35.0];  // nominal; [adr 0024] low on the right, behind the jack board's right leg, clear of the NE8FAV's tails (the NE8FAV is on the bottom row, centred) and of the lower right standoff screw's head; the ribbon folds down to the bus board behind the NE8FAV
+power_at = [42.5, 35.0];  // nominal; [adr 0024] low on the right, clear of the NE8FAV's tails (the NE8FAV is on the bottom row, centred) and of the lower right panel standoff's screw head; the ribbon folds down to the bus board behind the NE8FAV
 power_drop = 10.0;  // nominal; [adr 0024] how far below the panel's bottom edge the ribbon's envelope is drawn - toward the bus board, which the model does not draw
 tall_cap_d = 6.3;  // settled; [repo] C-BULK-RAIL 100 uF: CP_Radial_D6.3mm (the tallest of the four)
 tall_cap_h = 11.0;  // tbd; [from memory] a 6.3 x 11 25 V 100 uF can; the banked KiCad model is a generic 6.3 tall
@@ -84,14 +91,14 @@ knob_d = 12.0;  // settled; [ds] THONK-DAVIES-1900H-CLONE-T18-KNOB-PRODUCT-PAGE.
 knob_h = 16.0;  // settled; [ds] as d
 knob_d_max = 14.0;  // settled; [repo] KNOB-BREATH: 14 mm MAX; ADR 0004's knob table
 knob_gap = 1.0;  // tbd; [adr 0024] air between the knob's skirt and the panel face, so it turns without rubbing
-led_spacer_d = 4.0;  // tbd; [from memory] a 3 mm LED's two-lead spacer, ~4 across
-led_lens_d = 3.0;  // settled; [ds] LITEON-LTL-4231N-3MM-GREEN-DIFFUSED.pdf: 3.0
-led_flange_d = 3.2;  // settled; [ds] LTL-4231N: flange 3.2
-led_flange_t = 1.0;  // settled; [ds] LTL-4231N: 1.0
-led_l = 5.55;  // settled; [ds] LTL-4231N: 5.55 +/-0.3 lens tip to the flange's underside
-led_pitch = 2.54;  // settled; [ds] LTL-4231N: leads 2.54 nom.
-led_hole_d = 3.2;  // settled; [repo] panel-height-budget's toggle_row note: a D3.2 hole for the LED's lens. The flange is the same D3.2 (led.flange_d), so the panel does NOT stop it: MECH-LED-BEZEL-MOD, the lead spacer on the jack board, sets how far the lens stands proud (led.proud; ADR 0024 point 9; mechanical/module/drc.echo 'LED lead spacer length (derived)')
-led_proud = 1.0;  // tbd; [adr 0024] how far the lens stands in front of the panel face
+led_hole_d = 2.92;  // settled; [ds] BIVAR-PLP2-PANEL-PRESS-FIT-LIGHT-PIPE.pdf: recommended mounting hole D0.115 +0.003/-0.002 in (2.92 +0.08/-0.05), panel 0.047-0.093 in (1.19-2.36) thick
+led_flange_d = 3.3;  // settled; [ds] BIVAR PLP2: flange D0.130 (3.3), a dome - it stops on the panel's face
+led_flange_t = 0.8;  // settled; [ds] BIVAR PLP2: flange 0.030 (0.8) - how far the pipe stands in front of the panel
+led_pipe_d = 2.8;  // settled; [ds] BIVAR PLP2: light pipe D0.112 (2.8); its press-fit ribs D0.122 (3.1) REF
+led_pipe_l = 19.0;  // settled; [ds] BIVAR PLP2: X = body length, the flange's underside to the pipe's end; PLP2-750 = 0.750 (19.0). The longest stocked length that stops short of the LED: mechanical/module/drc.echo 'light pipe over the LED'
+led_pipe_tol = 0.13;  // settled; [ds] BIVAR PLP2: .XXX +-0.005 in
+led_smd = [2.0, 1.25, 0.8];  // settled; [ds] LITEON-LTST-C171GKT-0805-GREEN.pdf p.1: 2.00 x 1.25, 0.80 tall, +-0.10
+led_smd_tol = 0.1;  // settled; [ds] LTST-C171GKT p.1: +-0.10 unless noted
 toggle_hole_d = 6.5;  // settled; [register panel-toggle-hole] [ds] NKK-SERIES-M-TOGGLE.pdf p.7, D4 bushing
 toggle_flat = 5.8;  // settled; [register panel-toggle-hole] [ds] NKK Series M p.7: the D4 D-flat
 toggle_body = [7.9, 13.0, 9.4];  // settled; [ds] NKK Series M p.11 (A62), single pole: 7.9 across, 13.0 terminal field, 9.4 deep behind the bushing
@@ -133,8 +140,8 @@ layout_jack_y0 = 88.5;  // nominal; [adr 0024] the first jack row
 layout_jack_pitch_y = 13.0;  // settled; [adr 0004] panel table: jacks at 13 mm pitch
 layout_jack_pitch_x = 19.0;  // nominal; [adr 0024] the jacks lie on their sides, pins across, sleeve outward (a PJ398SM's footprint is 13.85 along its pin line [calc from its pads], so pins down a 13 mm column collide); 19 leaves J-B2B-MOD's pads between the columns with the DRC's clearance
 layout_ec_y = 25.0;  // nominal; [adr 0024 point 11] the NE8FAV on the BOTTOM row, centred, so the NE8MX's cable drops below every control: its locating pegs 1.0 clear of the rail band (DRC 'parts behind the panel clear of the rail band')
-layout_led_side = "left";  // nominal; [adr 0024 point 11] the LED in the toggle's row, in the strip left of the toggle - on the jack board's left leg, where its lead spacer stands
-layout_toggle_y = 49.5;  // nominal; [adr 0024 point 11] the toggle's row, centred, ABOVE the NE8FAV: its lever's sweep clear of the PUSH tab below and of the last jack row's plug grips above, its body under the top of the jack board's notch
+layout_led_side = "left";  // nominal; [adr 0024 point 11] the LED in the toggle's row, in the strip left of the toggle; its light pipe reaches back to the main board (point 15)
+layout_toggle_y = 49.5;  // nominal; [adr 0024 point 11] the toggle's row, centred, ABOVE the NE8FAV: its lever's sweep clear of the PUSH tab below and of the last jack row's plug grips above, its body below the jack board's bottom edge (boards.jack_y0)
 layout_toggle_on = "right";  // settled; [adr 0024 point 12] the owner, 2026-09-30: the lever throws LEFT-RIGHT, across the panel, 'to avoid inadvertent triggering'. ON is thrown RIGHT, toward its 'on' legend; OFF left, toward the LED. The M2011 is ON in NKK's 'Down' position, the lever away from the bushing's keyway [ds NKK-SERIES-M-TOGGLE.pdf p.5 (A56), the circuit table's position icons], and the D4 flat sits where S4's keyway does, across from the drawn lever [ds p.7 (A58), the D4 and S4 front views] - so the flat is on the LEFT. The model derives the flat, the sweep, the body's and lugs' orientation from this one leaf
 layout_pots = ["POT-GAIN", "POT-OFFSET", "POT-RESP"];  // nominal; [adr 0004] 'three knobs across (gain, offset, response)', left to right
 layout_jacks = [["J-CV-BREATH", "J-CV-PITCH"], ["J-CV-MOD1", "J-CV-MOD3"], ["J-CV-MOD2", "J-CV-MOD4"]];  // settled; [adr 0024 point 13] rows top to bottom, left then right: BREATH and PITCH on the row under the knobs that shape breath, BREATH on the left; MOD 1 and 2 down the left column, MOD 3 and 4 down the right. The owner, 2026-10-01: 'swap the breath and pitch Jack locations' and 'swap mod 2 and 3 position'
@@ -191,5 +198,5 @@ art_resp_marks = false;  // tbd; [adr 0026] no end marks on the curve knob yet. 
 
 // Every value above with status tbd - a placeholder, not a number any
 // document gives. The module's DRC report lists these.
-module_tbd_params = ["panel_washer_t", "rail_band", "rail_depth", "power_ribbon_t", "tall_cap_h", "jack_nut_d", "jack_nut_h", "jack_plug_d", "knob_gap", "led_spacer_d", "led_proud", "toggle_nut_d", "toggle_nut_h", "ethercon_umb_od", "ethercon_umb_bend_k", "ethercon_screw_head_d", "ethercon_screw_head_h", "art_resp_marks"];
+module_tbd_params = ["panel_washer_t", "rail_band", "rail_depth", "panel_standoff_stock_l", "power_ribbon_t", "tall_cap_h", "jack_nut_d", "jack_nut_h", "jack_plug_d", "knob_gap", "toggle_nut_d", "toggle_nut_h", "ethercon_umb_od", "ethercon_umb_bend_k", "ethercon_screw_head_d", "ethercon_screw_head_h", "art_resp_marks"];
 

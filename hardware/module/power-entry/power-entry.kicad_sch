@@ -3537,7 +3537,7 @@
     (property "Datasheet" "" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "R-SET-DAC" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "SETS DAC_AVDD: I_SET (98-102 uA) x 52.3 kohm (power-entry.md, The DAC rail). Thin film +-0.1 % +-25 ppm/C. AN OPEN HERE DRIVES THE RAIL UP towards the +12 V input - the one failure that does; its ground end Kelvin to C-REG-OUT's" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "SETS DAC_AVDD: I_SET (98-102 uA) x 52.3 kohm (power-entry.md, The DAC rail). Thin film +-0.1 % +-25 ppm/C. AN OPEN HERE DRIVES THE RAIL UP to ~11 V, over the DAC's 6 V abs max - accepted by the owner 2026-10-01 with no clamp, so LAYOUT: away from standoffs, connectors and board edges, its long axis parallel to the board's long edge (flex cracking is what opens a chip resistor); guard ring round SET at OUT's potential; ground end Kelvin to C-REG-OUT's" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "Viking Tech" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "ARG05BTC5232" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "LCSC" "C2758300" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))

@@ -32,7 +32,8 @@ The `Dir` and `Peer` columns are defined once in
 | `PITCH` jack | — | `module/pitch-stage` | `panel-height-budget` | A panel cutout. The net is that circuit's |
 | `BREATH_OUT` jack | — | `module/breath-output-stage` | `panel-height-budget` | A panel cutout. The net is that circuit's |
 | `MOD 1`–`MOD 4` jacks | — | `module/mod-channels` | `panel-height-budget` | Four cutouts in the jack rows. The nets are that circuit's |
-| `LED-PANEL` bezel | — | `module/panel-led` | `panel-height-budget` | In the toggle's row, left of the toggle (ADR 0024 point 11); the figure's `toggle_row` note is what establishes that the row fits |
+| `LED-PANEL` light pipe | — | `module/panel-led` | `panel-height-budget` | In the toggle's row, left of the toggle (ADR 0024 point 11); the figure's `toggle_row` note is what establishes that the row fits. A press-fit light pipe in the panel (`MECH-LED-BEZEL-MOD`, `led.hole_d`) over the LED on the main board (ADR 0024 point 15) |
+| panel studs | — | — | — | Two self-clinching studs (`MECH-PANEL-STUD-MOD`) holding the main board's low spacers (ADR 0024 point 15): two holes in the cut file, and two flush heads that show on the face, inside island C (`panel_standoff.*`) |
 | `SW-POWER` toggle | — | `module/umbilical-load-switch` | `panel-toggle-hole`, `panel-height-budget` | The shaped hole this page owns — it has to be in the DXF because it cannot be cut afterwards. The switch's net is that circuit's |
 | etherCON flange | — | — | `panel-width` | The umbilical connector's panel cutout |
 
@@ -52,8 +53,11 @@ jacks in two columns straddling the middle knob — BREATH and PITCH first,
 then MOD 1 and 2 down the left column and MOD 3 and 4 down the right (ADR 0024
 point 13) — **lying on their sides**, pins across, because a PJ398SM's
 footprint is longer than the column pitch; `SW-POWER` centred on a row of its
-own, in the shaped hole `panel-toggle-hole` gives, with `LED-PANEL` in the
-strip to its left; and the NE8FAV centred, latch up, **on the bottom row**.
+own, in the shaped hole `panel-toggle-hole` gives, with `LED-PANEL`'s light
+pipe in the strip to its left; and the NE8FAV centred, latch up, **on the
+bottom row**. Low on the left and right, beside the NE8FAV, two self-clinching
+studs hold the main board's low spacers (ADR 0024 point 15); their flush heads
+show.
 
 - **The toggle throws left–right, ON to the right** (ADR 0024 point 12, the
   owner's instruction of 2026-09-30, "to avoid inadvertent triggering"). The

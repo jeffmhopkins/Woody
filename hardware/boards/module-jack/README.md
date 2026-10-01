@@ -1,8 +1,14 @@
 # Module jack board — `module-jack`
 
 The Eurorack module's front board (ADR 0023), behind the panel where the
-jacks' bodies put it: the six jacks, the three pots and the power LED, and
-nothing else. It is a U whose notch clears the etherCON (ADR 0024).
+jacks' bodies put it: the six jacks and the three pots, and nothing else.
+
+**Its outline is a plain rectangle** (ADR 0024 point 15, the owner,
+2026-10-01): full width, from just below the bottom jack row's footprints
+(`config/module.yaml` `boards.jack_y0`, derived there) to the top edge it
+shares with the main board — `mechanical/module/export/jack-board.dxf`. The
+toggle's row and the etherCON are below it, so nothing passes through it;
+until 2026-10-01 it was a U whose legs reached down beside them.
 Everything it connects to is on [`module-main`](../module-main/README.md),
 through `J-B2B-MOD`.
 
@@ -17,7 +23,6 @@ It places:
   [`breath-response-shaper`](../../module/breath-response-shaper/breath-response-shaper.md)
   (`POT-RESP`) and [`mod-channels`](../../module/mod-channels/mod-channels.md)
   (`J-CV-MOD1`…`4`);
-- the whole of [`panel-led`](../../module/panel-led/panel-led.md);
 - **`J-B2B-MOD`** on its root sheet: the same header as the main board's, pin
   for pin. The allocation and its reasoning are in
   [`module-main/README.md`](../module-main/README.md#j-b2b-mod--the-allocation);
@@ -49,6 +54,11 @@ The same header is `J7` here and `J2` on the main board.
 | `*.sch.png` | Renders, recorded in `hardware/SHEETS.csv` |
 | `fp-lib-table`, `sym-lib-table` | Register `hardware/lib/` (the R0904N pot footprint) |
 
+
+**The standoff pads are on the sheet:** `H1` and `H2` (`MountingHole_3.2mm_M3_Pad`, Row `MECH-STANDOFF-MOD`, excluded from the BOM) on `AGND_MOD` — the two standoffs above the pots (`standoff.at`), which with the six jack nuts are all that hold this board. It has no low standoffs: the main board's two low mounting points go to the panel (`MECH-PANEL-STANDOFF-MOD`, ADR 0024 point 15). The main board's pads are on no net, so they need no symbol and are placed board-only by the layout.
+
+**The power LED is not on this board** since 2026-10-01: `LED-PANEL` is an 0805 on the main board's front face under a light pipe in the panel (ADR 0024 point 15), and `J-B2B-MOD` pin 19, which carried its supply, is spare and unconnected here.
+
 ## Decided 2026-09-30
 
 - **Two layers, 1.6 mm.** This board's only ground is `AGND_MOD`, arriving on
@@ -63,4 +73,3 @@ The same header is `J7` here and `J2` on the main board.
 | The pots and jacks have no LCSC number (Thonk and Song Huei/Alpha, bought by hand) | Nothing to decide: hand-placed, bought from the maker's stockists. `POT-GAIN`/`POT-OFFSET` are Song Huei R0904N with the 18-tooth **KC** shaft the T18 knob needs, `POT-RESP` Alpha's centre-click RV09 (rows) |
 | The pots' rotation sense (which end is clockwise). Checked 2026-09-30 against both banked drawings — `R0904N.pdf` p.2 and `RV09AF-40.pdf` p.3 draw pins 1-2-3 with the shaft at full CCW and say nothing about which end the wiper approaches, so the sheets' "CW toward pin 3" stays `[from memory]` | Goods-in, E10: turn each pot fully CCW and read pin 1 to 2 with an ohmmeter — near 0 Ω confirms the sheets; near the full track means swap `CW`/`CCW` on all three symbols before the legends are drawn |
 | Whether the reasons for `J-B2B-MOD`'s allocation still hold once the board is laid out. The panel layout is settled (ADR 0024 points 11–13), and the reasons were re-read against it | The layout, against `mechanical/module/export/pcb-geometry.echo` |
-| **The four standoff pads are not on the sheet yet.** They are decided (`AGND_MOD` here, above), but under ADR 0019 the sheet owns every connection, and no mounting-hole symbol carries them, so the netlist the layout imports does not tie them | A mounting-hole symbol per standoff on this board's sheet, on `AGND_MOD` (the main board's on no net), placed at `config/module.yaml` `standoff.at` |
