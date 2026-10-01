@@ -262,16 +262,23 @@ by schematic page, with the widths and rules already set.
 - `BREATH` / `AGND` from the connector to the in-amp — one keepout window
   enclosing **both** legs, not one each, or the pour asymmetry costs the
   capacitive matching the ±1 % spec exists to control
-- `PWR_GND` as a **trace, not a pour** — it is a two-terminal net whose own IR
-  drop is irrelevant and which must share copper with nothing
+- `PWR_GND` on **its own layer-4 copper**, sharing it with nothing — since
+  ADR 0027 it is the isolated supply's return, about a dozen pads from the
+  etherCON's pin 6 to `U-ISO` and the load switch, and it reaches the star
+  only through `DIG_GND` (`dig-gnd-topology`; `power-entry.md` *Grounding*)
 - `SENSE` / `R-ILIM` as a Kelvin pair — 47 mV across 50 mΩ, so 1 mΩ of trace is
   a 2 % shift in the current limit
 - The pitch feedback loop: tap at the jack, compensation cap from the op-amp
   *output*, protection resistor inside the DC loop
 
-**Star pad solid, everything else thermal.** A default 4-spoke relief on the
-star pad costs 0.053 cents at 359 mA — a quarter of the tightest pitch-budget
-candidate, from one DRC-passing pad.
+**Star pad solid, everything else thermal.** A relief's cost scales with the
+current through it, and since ADR 0027 the instrument's `umbilical-current`
+no longer crosses the star: it circulates on `PWR_GND`/`DIG_GND` back to
+the isolated supply. What crosses it is the module's own analog return
+(`power-entry.md`, *The analog rails' load*), tens of mA. A default 4-spoke
+relief priced 0.053 cents when it was 359 mA, so about 0.005 cents at 37 mA
+`[calc: 0.053 × 37 / 359]` — small now, and a solid star pad still costs
+nothing.
 
 ### 5. The update loop — and why it works here
 
