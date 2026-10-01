@@ -5,13 +5,13 @@
 inputs:
   tools/sim.py: 0312a1077b9afa80
   hardware/module/digital-and-supervision/sim/sims.yaml: d7520d417ddec617
-  hardware/module/power-entry/netlist.yaml: 9f2554bcba1d48b7
+  hardware/module/power-entry/netlist.yaml: 56b479e28aae437c
   hardware/module/digital-and-supervision/netlist.yaml: b4a891171540924f
   hardware/module/dac8568/netlist.yaml: 2619a0f3926942d3
   hardware/module/digital-and-supervision/sim/seq.cir: 90d6272d6aeabfbd
   hardware/module/power-entry/sim/lt3042.lib: 2664843cbe66f3e8
   datasheets/logic/SN74AHCT125-ti-pspice-sclm256.cir: d544311dc17d754b
-  hardware/module/power-entry/sim/sims.yaml: 4b9e184c206aa08b
+  hardware/module/power-entry/sim/sims.yaml: e471145ca3848b47
   figure:dac-rail: 5.23 V
 ngspice: '42'
 sims:

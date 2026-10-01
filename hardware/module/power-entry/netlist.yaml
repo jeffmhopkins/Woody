@@ -299,11 +299,11 @@ components:
     pins:
     - 1
     - 2
-    note: 'SETS DAC_AVDD: I_SET (98-102 uA) x 52.3 kohm (power-entry.md, The DAC rail). Thin film +-0.1 % +-25 ppm/K,
-      ANTI-SULFUR (ASTM B 809) - never a part without that claim. AN OPEN HERE DRIVES THE RAIL UP to ~11 V, over
-      the DAC''s 6 V abs max - accepted by the owner 2026-10-01 with no clamp, so LAYOUT: away from standoffs, connectors
-      and board edges, its long axis parallel to the board''s long edge (flex cracking is what opens a chip resistor);
-      guard ring round SET at OUT''s potential; ground end Kelvin to C-REG-OUT''s'
+    note: 'SETS DAC_AVDD: I_SET (98-102 uA) x 52.3 kohm (power-entry.md, The DAC rail). Thin film +-0.1 % +-25 ppm/C.
+      AN OPEN HERE DRIVES THE RAIL UP to ~11 V, over the DAC''s 6 V abs max - accepted by the owner 2026-10-01 with
+      no clamp, so LAYOUT: away from standoffs, connectors and board edges, its long axis parallel to the board''s
+      long edge (flex cracking is what opens a chip resistor); guard ring round SET at OUT''s potential; ground
+      end Kelvin to C-REG-OUT''s'
   U-ISO:
     value: RPA20-2412SAW
     pins:
