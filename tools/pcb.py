@@ -1832,7 +1832,7 @@ def assembly_files(bdir, name, fab):
         w.writerow(["Designator", "Value", "Manufacturer", "MPN"])
         w.writerows(hand)
     if none:
-        print(f"pcb: not in any order (Assembly = none, excluded from the BOM): {', '.join(none)}")
+        print(f"pcb: not in any order (Assembly = none: excluded from the BOM, or a net tie drawn in copper): {', '.join(none)}")
     subs = re.findall(r'\(property "Sheetfile" "([^"]+)"', open(root).read())
     return [root] + sorted({os.path.normpath(os.path.join(bdir, s)) for s in subs})
 
