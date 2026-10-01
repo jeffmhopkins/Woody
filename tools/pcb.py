@@ -5,6 +5,7 @@
     python3 tools/pcb.py check  hardware/boards/key-board-lh   # DRC + schematic parity + fab limits + CAD agreement
     python3 tools/pcb.py render hardware/boards/key-board-lh   # 3D top/bottom and 2D copper PNGs, fab/ (refuses a board that fails check)
     python3 tools/pcb.py finish hardware/boards/main-board     # a routed board's missing connections tried again, with rip-up
+    python3 tools/pcb.py update-footprints hardware/boards/main-board LED_WS2815B-V1_PLCC6_5.4x5.0mm_P1.6mm   # placed footprints from the library, same place and nets
 
 WHERE THINGS COME FROM - nothing on this board is typed in by hand twice:
 
@@ -801,14 +802,22 @@ def post_route(path, bdir):
     failed = pcb_route.complete(board, lay, miss)
     print(f"route: complete - {len(miss) - len(failed)} of {len(miss)} connection(s) the autorouter left, routed")
     pcb_route.tidy(board, lay)
-    if failed:
+    if failed and not lay.get("rip_up"):
         # what complete could not route: rip-up, kept only where DRC counts fewer problems
+        # (a board with complete's own rip-up, layout.yaml rip_up:, has had its chance)
         pcbnew.SaveBoard(path, board)
         _fill(path)
         print(f"route: rescue - {rescue(path, bdir)} kept")
         board = pcbnew.LoadBoard(path)
         pcb_route.tidy(board, lay)
     add_silk_generic(board, lay, comps)
+    silk_off_vias(board)
+    pcbnew.SaveBoard(path, board)
+
+
+def silk_off_vias(board):
+    """Any stroke of a footprint's own silkscreen over a via, removed and named: the
+    legend would print onto a tented hole."""
     from shapely.geometry import Point as _P
     vias = [_P(pcbnew.ToMM(v.GetPosition().x), pcbnew.ToMM(v.GetPosition().y)).buffer(pcbnew.ToMM(v.GetWidth(pcbnew.F_Cu)) / 2)
             for v in board.GetTracks() if isinstance(v, pcbnew.PCB_VIA)]
@@ -823,7 +832,71 @@ def post_route(path, bdir):
                     gone[fp.GetReference()] += 1
     if gone:
         print("pcb: silk adapted - library silk on a via removed: " + ", ".join(f"{r} ({n})" for r, n in sorted(gone.items())))
+
+
+def cmd_update_footprints(bdir, only):
+    """`update-footprints <board> <ref or footprint name>...`: each named footprint on the
+    board replaced by the library's current one, in the same place, side and turn, with
+    its reference, value, sheet path, BOM and DNP flags, its fields' placing and its pads'
+    nets - KiCad's "update footprint from library" for a board that is the source now.
+    Refused where the new footprint's pads differ in number, place or size (the copper
+    would no longer meet them: re-route instead). Then the board house's silk fitting and
+    silk off every via again. Copper and tracks are not touched."""
+    name = os.path.basename(bdir)
+    path = os.path.join(bdir, name + ".kicad_pcb")
+    lay = layout_yaml(bdir)
+    board = pcbnew.LoadBoard(path)
+    done = []
+    for fp in list(board.GetFootprints()):
+        lib = fp.GetFPID().GetLibNickname().wx_str()
+        item = fp.GetFPID().GetLibItemName().wx_str()
+        if fp.GetReference() not in only and item not in only:
+            continue
+        new = load_fp(f"{lib}:{item}")
+        board.Add(new)
+        pos = fp.GetPosition()
+        new.SetPosition(pos)
+        if fp.IsFlipped():
+            new.Flip(pos, pcbnew.FLIP_DIRECTION_LEFT_RIGHT)
+        new.SetOrientation(fp.GetOrientation())
+        geo = lambda f: sorted((p.GetNumber(), p.GetPosition().x, p.GetPosition().y, p.GetSize(p.GetPrincipalLayer()).x,
+                                p.GetSize(p.GetPrincipalLayer()).y) for p in f.Pads())
+        if geo(new) != geo(fp):
+            board.Delete(new)
+            sys.exit(f"pcb: {fp.GetReference()}'s library footprint {lib}:{item} has moved or resized pads - "
+                     f"re-route it (pcb.py layout), an update would leave its copper short")
+        new.SetReference(fp.GetReference())
+        new.SetValue(fp.GetValue())
+        for a, b in ((fp.Reference(), new.Reference()), (fp.Value(), new.Value())):
+            b.SetLayer(a.GetLayer())
+            b.SetTextSize(a.GetTextSize())
+            b.SetTextThickness(a.GetTextThickness())
+            b.SetPosition(a.GetPosition())
+            b.SetTextAngle(a.GetTextAngle())
+            b.SetVisible(a.IsVisible())
+        new.SetPath(fp.GetPath())
+        new.SetExcludedFromBOM(fp.IsExcludedFromBOM())
+        new.SetDNP(fp.IsDNP())
+        new.SetExcludedFromPosFiles(fp.IsExcludedFromPosFiles())
+        new.SetLocked(fp.IsLocked())
+        nets = {p.GetNumber(): p.GetNet() for p in fp.Pads()}
+        for p in new.Pads():
+            if p.GetNumber() in nets:
+                p.SetNet(nets[p.GetNumber()])
+        # a model's board-specific lift (the thumb switches') stays; its file and turn are the library's
+        old_m, new_m = fp.Models(), new.Models()
+        for i in range(min(len(old_m), len(new_m))):
+            if old_m[i].m_Filename == new_m[i].m_Filename:
+                new_m[i].m_Offset = old_m[i].m_Offset
+        board.Delete(fp)
+        done.append(new.GetReference())
+    if not done:
+        sys.exit(f"pcb: no footprint on {name} is {', '.join(only)}")
+    if lay.get("fab"):
+        fit_footprint_silk(board, lay["fab"])
+    silk_off_vias(board)
     pcbnew.SaveBoard(path, board)
+    print(f"pcb: {len(done)} footprint(s) updated from the library: {', '.join(sorted(done))}")
 
 
 def unconnected_of(path):
@@ -940,7 +1013,8 @@ def cmd_finish(bdir):
         pcb_route.tidy(board, lay)
         pcbnew.SaveBoard(tmp, board)
         _fill(tmp)
-        print(f"route: rescue - {rescue(tmp, bdir)} kept")
+        if not lay.get("rip_up"):
+            print(f"route: rescue - {rescue(tmp, bdir)} kept")
         left = sorted({"; ".join(i["description"] for i in v.get("items", [])) for v in drc(tmp).get("unconnected_items", [])})
         os.replace(tmp, path)
     finally:
@@ -1872,6 +1946,8 @@ def missing_models(board, bdir, env):
 
 
 if __name__ == "__main__":
+    if len(sys.argv) >= 4 and sys.argv[1] == "update-footprints":
+        sys.exit(cmd_update_footprints(os.path.join(ROOT, sys.argv[2].rstrip("/")), sys.argv[3:]) or 0)
     if len(sys.argv) >= 3 and sys.argv[1] in ("layout", "check", "render", "finish"):
         d = os.path.join(ROOT, sys.argv[2].rstrip("/"))
         sys.exit({"layout": lambda: cmd_layout(d, "--force" in sys.argv, "--no-route" not in sys.argv), "check": lambda: cmd_check(d),

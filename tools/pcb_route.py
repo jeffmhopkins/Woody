@@ -1256,10 +1256,6 @@ def one_sided(board, v, lay):
     return len(on) < 2
 
 
-def conn_dangling(board, t):
-    return board.GetConnectivity().TestTrackEndpointDangling(t, False)
-
-
 def tidy(board, lay):
     """After an autorouter: what it leaves that the checks fail - zero-length and
     duplicated tracks, tracks with an end that reaches nothing of their net (dangling),
@@ -1345,55 +1341,18 @@ def tidy(board, lay):
         n1 += len(gone)
         if not gone:
             break
-    # and KiCad's own test, the one its DRC reports: a track or via with an end that
-    # reaches nothing, or none at all, goes, until none is left
+    # and what KiCad's DRC calls dangling that the test above lets by: a track of no
+    # length, and a via met on one face only - by geometry, not by the board's own
+    # connectivity, which in one process does not follow tracks added or deleted
+    # (it took hundreds of live tracks, 2026-10-01)
     while True:
-        board.BuildConnectivity()
-        conn = board.GetConnectivity()
         gone = [t for t in board.GetTracks() if (type(t) is pcbnew.PCB_TRACK and t.GetLength() < 1000)
-                or conn.TestTrackEndpointDangling(t, False) or one_sided(board, t, lay)]
+                or one_sided(board, t, lay)]
         for t in gone:
             board.Delete(t)
         n1 += len(gone)
         if not gone:
             break
-    # a run of short tracks that joins nothing the rest of the copper does not
-    # already join - a router's hops between a via and the track it already sits on -
-    # goes, whole: it is where an off-grid end meets a grid one, and where clearance is lost
-    # (locked or not - Freerouting's session can come back locked - but never the
-    # pair's or a plane net's, which are the router's own deliberate copper)
-    keep = set(lay.get("fanout") or []) | {n for pr in lay.get("pairs") or [] for n in pr["nets"]}
-    short = [t for t in board.GetTracks() if type(t) is pcbnew.PCB_TRACK and t.GetNetname() not in keep
-             and t.GetLength() < MM(0.5)]
-    runs = []
-    for t in short:
-        ends = {(t.GetStart().x, t.GetStart().y), (t.GetEnd().x, t.GetEnd().y)}
-        joined = [r_ for r_ in runs if r_[0] == (t.GetNetname(), t.GetLayer()) and r_[1] & ends]
-        for r_ in joined:
-            runs.remove(r_)
-        runs.append(((t.GetNetname(), t.GetLayer()), set().union(ends, *(r_[1] for r_ in joined)),
-                     [t] + [u for r_ in joined for u in r_[2]]))
-    for _, _, ts in runs:
-        board.BuildConnectivity()
-        before = board.GetConnectivity().GetUnconnectedCount(True)
-        dang = sum(conn_dangling(board, u) for u in board.GetTracks()) - sum(conn_dangling(board, u) for u in ts)
-        ghosts = [(pcbnew.VECTOR2I(t.GetStart().x, t.GetStart().y), pcbnew.VECTOR2I(t.GetEnd().x, t.GetEnd().y),
-                   t.GetWidth(), t.GetLayer(), t.GetNet()) for t in ts]
-        for t in ts:
-            board.Delete(t)
-        board.BuildConnectivity()
-        if board.GetConnectivity().GetUnconnectedCount(True) > before or \
-                sum(conn_dangling(board, u) for u in board.GetTracks()) > dang:
-            for a_, b_, w_, l_, n_ in ghosts:
-                g = pcbnew.PCB_TRACK(board)
-                g.SetStart(a_)
-                g.SetEnd(b_)
-                g.SetWidth(w_)
-                g.SetLayer(l_)
-                g.SetNet(n_)
-                board.Add(g)
-        else:
-            n1 += len(ts)
     r = Router(board, lay)
     for t in board.GetTracks():
         if isinstance(t, pcbnew.PCB_VIA):

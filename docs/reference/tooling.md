@@ -485,8 +485,7 @@ this order (step 4 is Freerouting's only):
    cheaper vias were tried on the first layout and left more unrouted; it takes
    no layer direction in batch (step 5).
 5. Zones filled, then `pcb.post_route`: `pcb_route.tidy` (doubled, zero-length
-   and dangling tracks removed, a via met on one face only, runs of short hops
-   that join nothing new; acute joins squared, collinear runs merged, as on a key
+   and dangling tracks removed, and a via met on one face only; acute joins squared, collinear runs merged, as on a key
    board; and with `directions: chamfer`, each right-angle corner cut to two
    45-degree bends where the diagonal keeps its clearance); **`pcb_route.complete`**
    - every connection KiCad's DRC still counts missing (under `route: astar`,
@@ -541,6 +540,13 @@ crossing of its moat are exempt.
   zero-width slit, so read as a polygon every antipad is a notch in the plane's
   edge, and a split check calls every track to a via a crossing. Unfracture a
   copy (`SHAPE_POLY_SET.Unfracture()`) first (`pcb_main.check_planes`).
+- **A board's connectivity does not see a track deleted in the same process**:
+  `GetUnconnectedCount()` after `Delete()` and `BuildConnectivity()` gave the same
+  count with a link of a route gone, so a "delete it if nothing disconnects" test
+  deleted live routing and the dangling sweep then took the rest of each route
+  (2026-10-01). Its `TestTrackEndpointDangling` is as stale: `tidy` used it and
+  took hundreds of tracks just laid. Test geometrically, or by DRC on a saved copy
+  (`rescue`).
 - **`BOARD.Remove()` on a board loaded from a file** can crash the next walk of
   it (`GetFootprints`), silently; `Delete()` does not (`pcb_route.tidy`).
 - **Freerouting ignores its pass limit in batch** and a shell `timeout` kill
