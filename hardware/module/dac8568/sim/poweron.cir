@@ -1,0 +1,65 @@
+* The DAC8568 at power-on, into the pitch stage and one mod channel, as netlisted. The
+* analog rails are already up: they arrive milliseconds before DAC_AVDD (power-entry/sim).
+* The DAC is BEHAVIOURAL (TI publishes no SPICE model), and its supply is not modelled:
+*  - every channel at its power-on-reset zero scale, plus the datasheet's power-on glitch,
+*    a pulse of g_* at t_g as DAC_AVDD comes up, width w_g [ds DAC8568CIPW.pdf p.3
+*    and Figure 57]. Each channel's glitch is its own parameter, so they can be opposite;
+*  - VREFIN/VREFOUT with the internal reference off (its default): a 3-state pin
+*    [p.31], i.e. C-VREF-DAC and whatever leakage i_leak the pin has - the datasheet
+*    gives none, so it is swept.
+* The pitch stage in full (module/pitch-stage): TRIM-OFFSET as its two halves about the
+* wiper, R-VREF-SER, R-VREF-INJ, the V_ref follower (R-VREF-FB / R-VREF-GND), R-GAIN-CTR,
+* RN-PITCH, TRIM-GAIN at r_trim_gain, R-OPAMP-IN / C-AA-PITCH with R-BIAS-DAC at the pin,
+* C-FB-PITCH, R-OUT-PROT, C-FILT-PITCH, a VCO input. Mod channel 1 and the shared
+* reference follower (module/mod-channels), as mod-channels/sim's deck has them. TI's
+* OPA2197 model for every op-amp half. D-JACK-CLAMP is left out: reverse-biased.
+VPOS pos 0 {{v_pos}}
+VNEG neg 0 {{v_neg}}
+* the DAC's outputs: zero scale plus the power-on glitch
+B1 dac1 0 V = {{g_pitch}} * exp(-((time - {{t_g}}) / {{w_g}})^2)
+B2 dac2 0 V = {{g_mod}} * exp(-((time - {{t_g}}) / {{w_g}})^2)
+B7 dac7 0 V = {{g_ref}} * exp(-((time - {{t_g}}) / {{w_g}})^2)
+* VREFOUT: 3-state, its capacitor and its leakage
+CVREF vrefout 0 {{C-VREF-DAC}}
+ILEAK 0 vrefout DC {{i_leak}}
+* --- the pitch stage
+RTOCW vrefout wip {{r_to_cw}}
+RTOCCW wip 0 {{r_to_ccw}}
+RVSER vrefout vsum {{R-VREF-SER}}
+RVINJ wip vsum {{R-VREF-INJ}}
+XRB vsum vfb pos neg vbuf OPAx197
+RVFB vbuf vfb {{R-VREF-FB}}
+RVGND vfb 0 {{R-VREF-GND}}
+RGC vbuf r1b {{R-GAIN-CTR}}
+R1 r1b minus {{RN-PITCH}}
+R2 minus gtm {{RN-PITCH}}
+RTG gtm jack {{r_trim_gain}}
+RBD dac1 0 {{R-BIAS-DAC}}
+RIN dac1 plus {{R-OPAMP-IN}}
+CAA plus 0 {{C-AA-PITCH}}
+XAMP plus minus pos neg ampout OPAx197
+CFB ampout minus {{C-FB-PITCH}}
+ROUT ampout jack {{R-OUT-PROT}}
+CFILT jack 0 {{C-FILT-PITCH}}
+RVCO jack 0 {{r_vco}}
+* --- mod channel 1 and the shared reference
+RB7 dac7 0 {{R-BIAS-DAC-CH7}}
+RI7 dac7 refp {{R-OPAMP-IN-REF}}
+XREF refp vrefm pos neg vrefm OPAx197
+RBA dac2 0 {{R-BIAS-DAC-1}}
+RIA dac2 p1 {{R-OPAMP-IN-1}}
+R1A vrefm m1 {{R1-1}}
+R2A m1 o1 {{R2-1}}
+X1 p1 m1 pos neg o1 OPAx197
+ROA o1 j1 {{R-OUT-PROT-1}}
+CFA j1 0 {{C-FILT-MOD-1}}
+RVCO1 j1 0 {{r_vco}}
+.options method=gear rshunt=1e10
+.control
+tran 2u {{t_end}} 0 5u
+wrdata jack.dat v(jack)
+wrdata modjack.dat v(j1)
+wrdata vrefout.dat v(vrefout)
+quit
+.endc
+.end
