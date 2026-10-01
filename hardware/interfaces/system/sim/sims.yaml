@@ -35,6 +35,7 @@ models:
   - datasheets/analog/INA828-ti-pspice-sbomag5c.lib
 spiceinit: [set ngbehavior=psa]
 include:
+  - bopa.lib
   - system.lib
   - cable.lib
   - hardware/module/power-entry/sim/lt3042.lib
@@ -76,6 +77,20 @@ params:
   r_on_lvl: {value: 25.0, source: "U-LVL-MOD's (74AHCT125) output resistance [assumption: ~25 ohm at 5 V; SN74AHCT125.pdf gives V_OH 4.4 V at -8 mA, which is ~13-75 ohm across its range]"}
   r_trace_dac: {value: 0.1, source: "the trace from U-LVL-MOD to the DAC's pins [assumption]"}
   c_dac_pin: {value: 3.0e-12, source: "DAC8568 digital pin capacitance, 3 pF [datasheets/analog/DAC8568CIPW.pdf, Electrical Characteristics, Pin capacitance]"}
+  # --- bopa.lib: the behavioural OPA2197 (BOPA) and INA828 (BINA)
+  ps_k0:    {value: 3.0e-6, source: "OPA2197 PSRR, +-3 uV/V max over -40 to 125 C [datasheets/analog/OPA2197.pdf, SBOS737C p.7]"}
+  ps_vs0:   {value: 24.0, source: "the supply the dc term is taken about: the module's +-12 V (only a constant offset elsewhere)"}
+  ps_tau:   {value: 1.1e-8, source: "PSRR's 20 dB/decade term, fitted to TI's OPA2197 macromodel (datasheets/analog/OPAx197-ti-pspice-sboma34d.lib) as a follower at +-12 V: -83.3 dB at 1 kHz [calc: 10^(-83.3/20) / (2 pi 1 kHz) = 1.09e-8 s]; sim opamp-check holds it there"}
+  gm_op:    {value: 1.0e-3, source: "the input stage's transconductance [model parameter: it sets only the scale of rx_op and cx_op]"}
+  aol_op:   {value: 3.16e5, source: "OPA2197 open-loop gain, 110 dB min over -40 to 125 C [OPA2197.pdf p.7]"}
+  gbw_op:   {value: 10.0e6, source: "OPA2197 unity-gain bandwidth, 10 MHz [OPA2197.pdf p.8]"}
+  sr_op:    {value: 20.0e6, source: "OPA2197 slew rate, 20 V/us [OPA2197.pdf p.8]"}
+  v_hr:     {value: 0.6, source: "the integrator's clamp sits this far inside each rail, so that with its diode the output stops at about the rail (a rail-to-rail output) [model parameter]"}
+  r_o:      {value: {fig: opa2197-output-impedance}, source: "the open-loop output impedance (opa2197-output-impedance)"}
+  i_sc:     {value: 0.065, source: "OPA2197 short-circuit current, +-65 mA [OPA2197.pdf p.8]"}
+  iq_op:    {value: 1.0e-3, source: "OPA2197 quiescent current per amplifier, 1 mA typ (1.3 max) [OPA2197.pdf p.8]"}
+  ina_d:    {value: 6.3e-5, source: "BINA's difference-amplifier mismatch for the INA828's minimum CMRR, 90 dB at dc, G = 1 [datasheets/analog/INA828IDR.pdf, Electrical Characteristics] [calc: a unity difference amplifier's common-mode gain is d/2; 2 x 10^(-90/20) = 6.3e-5]"}
+  ina_cm:   {value: 8.75e-14, source: "BINA's CMRR roll-off, a capacitance across the REF leg, fitted to TI's INA828 macromodel (datasheets/analog/INA828-ti-pspice-sbomag5c.lib) at RG 42.2 kohm: -93.1 dB at 2 kHz [calc: tau = 10^(-93.1/20) / (2 pi 2 kHz) = 1.75e-9 s; C = 2 tau / 40 kohm]; sim inamp-check holds it there"}
   # --- the instrument's copper and parts not in another sim
   c_tvs_pwr: {value: 1.0e-9, source: "D-TVS-PWR's capacitance at 0 V (power-entry-instrument/sim's c_tvs, renamed here because spi-link/sim's c_tvs is U-TVS-SPI's)"}
   r_isl:    {value: 0.005, source: "AGND_INST island copper, sensor pin 3 to the reference, and on to NT-AGND [assumption: a few mm of plane]"}
@@ -87,13 +102,8 @@ params:
   f_led:    {value: 2000.0, source: "the WS2815's PWM ('scan frequency is of 2KHz', datasheets/led/WS2815B-V1.pdf p.1, as power-entry-instrument.md reads it)"}
   d_led:    {value: 0.5, source: "the PWM duty: 0.5 puts the most energy in its fundamental"}
   led_amp:  {value: 1.0, source: "1: the row switches between blank and lit; 0: it stays blank (the floor)"}
-  t_hold_ramp: {value: 1.0e-3, source: "the rack's rails, U-ISO's set point and the scaffold's sources ramp up over this at the start [assumption: a power-on, faster than a real PSU's soft start, which nothing measured depends on]"}
-  t_sig0:   {value: 2.0e-3, source: "the DAC's codes and VREFOUT ramp from 0 V from here, once the rails are up (the DAC powers up at zero scale, pitch-stage.md)"}
-  t_sig1:   {value: 3.0e-3}
-  t_release: {value: 0.25, source: "the scaffold lets go here: past the load switch's cold start (umbilical-load-switch/sim) and the instrument's (power-entry-instrument/sim, cold-start t_up 0.11-0.24 s across its corners)"}
-  r_hold:   {value: 10.0, source: "the scaffold's switches closed, 10 ohm: stiff against the op-amps' few mA, soft against the supply network once it is up [not a part]"}
-  k_hold_ins: {value: 1, source: "1: the scaffold holds INST_POS12 at its running value; 0: at 0 V (the instrument unplugged and unpowered, hot-plug)"}
-  t_settle: {value: 0.32, source: "every scenario's event comes this long into the run, 70 ms after the scaffold lets go; the slowest pole left, R-REF-IN against C-REF-OUT (~48 Hz), is 20 time constants gone by then, and each sim measures the settled floor before its event (pre_*)"}
+  t_settle: {value: 0.02, source: "every scenario starts from the deck's DC operating point and runs this long before anything happens; each sim measures the settled floor before its event (pre_*)"}
+  t_step_out: {value: 1.0e-7, source: "the solver's first and printing step [not a part]"}
   t_led_edge: {value: 1.0e-6, source: "the row's current edge [assumption: a WS2815's constant-current driver turning on]"}
   t_led_run: {value: 12.0e-3, source: "how long the LEDs run: 24 PWM periods"}
   t_led_skip: {value: 4.0e-3, source: "measures start this long after the LEDs do, past the input filters' settling (the slowest, U-ISO's input LC near 3 kHz)"}
@@ -166,17 +176,12 @@ derived:
   cl_c_mid_ref: "v['cl_cref'] * v['len'] / 2"
   c_unb_pwr_half: "max(v['c_unb_m'] * v['len'] * v['k_unb_pwr'] / 2, 1e-18)"
   c_unb_spi_half: "max(v['c_unb_m'] * v['len'] * v['k_unb_spi'] / 2, 1e-18)"
+  # --- bopa.lib
+  rx_op: "v['aol_op'] / v['gm_op']"
+  cx_op: "v['gm_op'] / (2 * math.pi * v['gbw_op'])"
+  i_slew: "v['sr_op'] * v['gm_op'] / (2 * math.pi * v['gbw_op'])"
+  r_ina_ref: "40.0e3 * (1 + v['ina_d'])"
   # --- the timeline
-  # the warm start's presets (each deck's .ic): estimates, overwritten by the settling
-  ic_p12: "v['v_rail'] - 0.3"
-  ic_n12: "v['v_rail_neg'] + 0.3"
-  ic_vin: "v['v_rail'] - 0.45"
-  ic_vinn: "v['v_rail_neg'] + 0.45"
-  ic_gate: "v['v_bus'] + v['dvg']"
-  ic_ins: "v['v_bus'] - 0.15"
-  ic_ins_hold: "(v['v_bus'] - 0.13) * v['k_hold_ins']"
-  t_release_e: "v['t_release'] + 1e-6"
-  ic_refvin: "v['v_bus'] - 0.45"
   t_led0: "v['t_settle']"
   t_save0: "v['t_settle'] - 3.0e-3"
   t_pre0: "v['t_settle'] - 2.0e-3"
@@ -287,7 +292,7 @@ sims:
       pre_breath_mv: "(peak(w['jb'], p['t_pre0'], p['t_b0']) - trough(w['jb'], p['t_pre0'], p['t_b0'])) * 1e3"
   - name: hot-plug
     deck: plug.cir
-    set: {k_hold_ins: 0, pad_hiz: 1}
+    set: {pad_hiz: 1}
     sweep: {dt_mate: [0.0, 1.0e-3]}
     vary: [k_gauge]
     measures: [pitch_dev_cents, pre_pitch_cents, mod_dev_mv, breath_absent, breath_rest, breath_over_mv, iso_peak, hdr_dip_mv, sclk_rx_max, mosi_rx_max, cs_rx_min, cs_rx_end, latched, t_inst_up]

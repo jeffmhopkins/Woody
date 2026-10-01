@@ -16,34 +16,18 @@
 * 0 blank to 1 lit), sclkctl / mosictl / csctl (the ESP32's pads, 0/1), dsck / ddin /
 * dsync (U-LVL-MOD's three outputs to the DAC, 0/1), dacp (the DAC's pitch channel, volts),
 * dacm1-dacm4 (the mod channels', volts), plug (every umbilical contact but +12 V, 0/1),
-* pplug (the +12 V contact, 0/1), hold (the start-up scaffold, 1 holding, below).
+* pplug (the +12 V contact, 0/1).
 .subckt SYS m1 m2 m3 m4 m5 m6 m7 m8 i1 i2 i3 i4 i5 i6 i7 i8
-+ ledctl sclkctl mosictl csctl dsck ddin dsync dacp dacm1 dacm2 dacm3 dacm4 plug pplug hold
-*
-* ============================ THE START-UP SCAFFOLD ============================
-* TI's macromodels draw their quiescent current whatever their supply, so a cold start
-* through D1/D3 or Q-INRUSH drives an unpowered rail negative and stalls the solver, and
-* no DC operating point of this deck is found (README). So while `hold` is 1, ideal sources
-* ramp the op-amps' rails (MODULE_ANALOG_POS12 / NEG12 on AGND_MOD, INST_POS12 on the
-* instrument's plane) to near their running values through switches of r_hold - soft, so
-* that once the real supply network behind them is up they carry almost nothing and
-* opening them is a small step. `hold` falls long before anything is measured, and from
-* then on the rails are the network's alone. Not a part.
-VHP hp agnd PWL(0 0 {{t_hold_ramp}} {{ic_p12}})
-SHP p12 hp hold 0 SHOLD
-VHN hn agnd PWL(0 0 {{t_hold_ramp}} {{ic_n12}})
-SHN n12 hn hold 0 SHOLD
-VHI hi ig PWL(0 0 {{t_hold_ramp}} {{ic_ins_hold}})
-SHI ins hi hold 0 SHOLD
++ ledctl sclkctl mosictl csctl dsck ddin dsync dacp dacm1 dacm2 dacm3 dacm4 plug pplug
 *
 * ================================ THE RACK ================================
 * the PSU (its output resistance r_psu), the bus to this module's tap with the other
 * modules' decoupling there, the power ribbon to the header; the bus ground from the tap
 * to the PSU end, where the receivers are (node 0)
-VPSUP psp 0 PWL(0 0 {{t_hold_ramp}} {{v_rail}})
+VPSUP psp 0 {{v_rail}}
 RPSUP psp rpp {{r_psu}}
 RBUSP rpp tapp {{r_bus_rail}}
-VPSUN psn 0 PWL(0 0 {{t_hold_ramp}} {{v_rail_neg}})
+VPSUN psn 0 {{v_rail_neg}}
 RPSUN psn rpn {{r_psu}}
 RBUSN rpn tapn {{r_bus_rail}}
 RBUSG tapg 0 {{r_bus_seg}}
@@ -63,8 +47,7 @@ LRIBG ribg tapg {{l_rib}}
 * ============================ MODULE POWER ENTRY ============================
 * +12 V analog: PTC-POS12, D1, FB1, C1 to AGND_MOD, C-LOGIC-IN to DIG_GND. FB1 and FB3 are
 * their DC resistance and C1 / C3 have no ESL here (2.2 uH is 28 mohm at 2 kHz, beside D1's
-* ~3 ohm): an inductor in an op-amp's supply stalls TI's models at a cold start, whose
-* quiescent currents are constant whatever the supply (README)
+* ~3 ohm; power-entry/sim's cm-loop and iso-input-z keep them, for the MHz questions)
 RPTCP bpos d1a {{r_ptc_rail}}
 D1 d1a fb1a D5817
 RFB1 fb1a p12 {{r_fb_dcr}}
@@ -126,7 +109,7 @@ CISOB vinn pgi {{c_iso}}
 * dynamic impedance (r_dyn parallel l_dyn); its input draws the output's power over its
 * efficiency, instantly - no loop delay, the most of every output current step that can
 * reach the rack
-VSETI seti pgi PWL(0 0 {{t_hold_ramp}} {{v_bus}})
+VSETI seti pgi {{v_bus}}
 BISO pgi isx I = min({{i_ocp}}, max(0, (V(seti, pgi) - V(isx, pgi)) / {{r_bus}}))
 RDYN isx isd {{r_dyn}}
 LDYN isx isd {{l_dyn}}
@@ -207,8 +190,8 @@ RPSY psy avdd {{R-PULL-SYNC}}
 *
 * ======================== MODULE: BREATH RECEIVE, SHAPER, OUTPUT ========================
 * breath-receive-stage: R3 from BREATH, R2 from AGND_SENSE, the bias pair, C_cm, C_diff,
-* D-CLAMP-IN+/- (BAV99, as the shaper's diode fit), the INA828 (TI) and its REF from
-* TRIM-BREATH-ZERO's wiper through U-REF-BUF (TI's OPA2197), the wiper at v_zero
+* D-CLAMP-IN+/- (BAV99, as the shaper's diode fit), the INA828 (bopa.lib's BINA) and its
+* REF from TRIM-BREATH-ZERO's wiper through U-REF-BUF, the wiper at v_zero
 RR3 m1 inneg {{R3}}
 RR2 m2 inpos {{R2}}
 RR4 inpos agnd {{R4}}
@@ -220,18 +203,18 @@ DCL1 m2 p12 DCLAMP
 DCL2 n12 m2 DCLAMP
 DCL3 m1 p12 DCLAMP
 DCL4 n12 m1 DCLAMP
-XINA inpos inneg p12 n12 inaout refdrv rg1 rg2 INA828
+XINA inpos inneg p12 n12 inaout refdrv rg1 rg2 BINA
 RGIN rg1 rg2 {{R-GAIN-INAMP}}
 RZT avdd ztop {{R-ZERO-TOP}}
 RTZCW ztop zw {{r_tz_cw}}
 RTZCCW zw agnd {{r_tz_ccw}}
-XRFB zw refdrv p12 n12 refdrv OPAx197
-* breath-response-shaper (chain.cir's, on AGND_MOD), TRIM-RESP at r_trim
+XRFB zw refdrv p12 n12 refdrv BOPA
+* breath-response-shaper (chain.cir's, on AGND_MOD; bopa.lib's BOPA for every OPA2197 here), TRIM-RESP at r_trim
 RDH inaout vhalf {{R-RESP-DIV-HI}}
 RDL vhalf agnd {{R-RESP-DIV-LO}}
 RRIN inaout vg {{R-RESP-IN}}
 RRFB vg vsh {{R-RESP-FB}}
-XSA agnd vg p12 n12 vsh OPAx197
+XSA agnd vg p12 n12 vsh BOPA
 RPCW vhalf wip {{r_pot_cw}}
 RPCCW wip vsh {{r_pot_ccw}}
 RRESP wip tr {{R-RESP}}
@@ -240,21 +223,21 @@ DRA vg db DRESP
 DRB db vg DRESP
 RRI vsh rs {{R-RESTORE-IN}}
 RRF rs shaped {{R-RESTORE-FB}}
-XSB agnd rs p12 n12 shaped OPAx197
+XSB agnd rs p12 n12 shaped BOPA
 * breath-output-stage: POT-GAIN, R-GAIN-FLOOR, the buffer, the summer with POT-OFFSET
 * (AGND_MOD at CW, DAC_AVDD at CCW) and R-BREATH-OFFNEG from -12 V, R-OUT-PROT, and on
 * the jack board C-OUT-BREATH; the jack into a receiver (r_load) at node 0
 RGCW shaped gw {{r_gain_cw}}
 RGCCW gw gf {{r_gain_ccw}}
 RFLOOR gf agnd {{R-GAIN-FLOOR}}
-XBA gw bufo p12 n12 bufo OPAx197
+XBA gw bufo p12 n12 bufo BOPA
 RBIN bufo bsum {{R-BREATH-IN}}
 ROCW agnd ow {{r_off_cw}}
 ROCCW ow avdd {{r_off_ccw}}
 ROFF ow bsum {{R-BREATH-OFF}}
 ROFFN n12 bsum {{R-BREATH-OFFNEG}}
 RBFB bsum bout {{R-BREATH-FB}}
-XBB agnd bsum p12 n12 bout OPAx197
+XBB agnd bsum p12 n12 bout BOPA
 RBOUT bout jb {{R-OUT-PROT}}
 CBOUT jb agj {{C-OUT-BREATH}}
 RBLD jb 0 {{r_load}}
@@ -262,7 +245,7 @@ RBLD jb 0 {{r_load}}
 * ============================ MODULE: THE DAC'S STAGES ============================
 * the DAC8568 as code-driven ideal sources on AGND_MOD (its pins' own glitch and
 * feedthrough, 0.1 nV-s, are not modelled); VREFOUT ideal at v_refout
-VVRO vro agnd PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_refout}})
+VVRO vro agnd {{v_refout}}
 * pitch-stage (pitch-stage.lib's PSTAGE, on AGND_MOD), TRIM-GAIN and TRIM-OFFSET where
 * t_gain and w_offset put them; C-FILT-PITCH and D-ESD-PITCH on the jack board
 BDP dpin agnd V = V(dacp)
@@ -271,7 +254,7 @@ RTOCW vro wipo {{r_toff_cw}}
 RTOCCW wipo agnd {{r_toff_ccw}}
 RINJ wipo vsum {{R-VREF-INJ}}
 RVSER vro vsum {{R-VREF-SER}}
-XRBP vsum vfb p12 n12 vrefb OPAx197
+XRBP vsum vfb p12 n12 vrefb BOPA
 RVFB vrefb vfb {{R-VREF-FB}}
 RVGND vfb agnd {{R-VREF-GND}}
 RCTR vrefb r1b {{R-GAIN-CTR}}
@@ -280,7 +263,7 @@ RN2 pminus gtm {{RN-PITCH}}
 RTG gtm jp {{r_trim_gain}}
 RINP dpin pplus {{R-OPAMP-IN}}
 CAAP pplus agnd {{C-AA-PITCH}}
-XPA pplus pminus p12 n12 pout OPAx197
+XPA pplus pminus p12 n12 pout BOPA
 CFBP pout pminus {{C-FB-PITCH}}
 ROUTP pout jp {{R-OUT-PROT}}
 CFLP jp agj {{C-FILT-PITCH}}
@@ -288,16 +271,16 @@ CESDP jp agj {{c_esd}}
 RVCOP jp 0 {{r_vco}}
 * mod-channels: DAC ch7 through R-OPAMP-IN-REF into the reference follower; each channel
 * x(1 + R-MODGAIN-FB/R-MODGAIN-IN) against it, R-OUT-PROT, C-FILT-MOD on the jack board
-VD7 d7 agnd PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_ref7}})
+VD7 d7 agnd {{v_ref7}}
 RBD7 d7 agnd {{R-BIAS-DAC-CH7}}
 RID7 d7 refp {{R-OPAMP-IN-REF}}
-XREFM refp vrefm p12 n12 vrefm OPAx197
+XREFM refp vrefm p12 n12 vrefm BOPA
 BDM1 dm1 agnd V = V(dacm1)
 RBM1 dm1 agnd {{R-BIAS-DAC-1}}
 RIM1 dm1 pm1 {{R-OPAMP-IN-1}}
 R1M1 vrefm mm1 {{R1-1}}
 R2M1 mm1 om1 {{R2-1}}
-XM1 pm1 mm1 p12 n12 om1 OPAx197
+XM1 pm1 mm1 p12 n12 om1 BOPA
 ROM1 om1 jm1 {{R-OUT-PROT-1}}
 CFM1 jm1 agj {{C-FILT-MOD-1}}
 RLM1 jm1 0 {{r_vco}}
@@ -306,7 +289,7 @@ RBM2 dm2 agnd {{R-BIAS-DAC-2}}
 RIM2 dm2 pm2 {{R-OPAMP-IN-2}}
 R1M2 vrefm mm2 {{R1-2}}
 R2M2 mm2 om2 {{R2-2}}
-XM2 pm2 mm2 p12 n12 om2 OPAx197
+XM2 pm2 mm2 p12 n12 om2 BOPA
 ROM2 om2 jm2 {{R-OUT-PROT-2}}
 CFM2 jm2 agj {{C-FILT-MOD-2}}
 RLM2 jm2 0 {{r_vco}}
@@ -315,7 +298,7 @@ RBM3 dm3 agnd {{R-BIAS-DAC-3}}
 RIM3 dm3 pm3 {{R-OPAMP-IN-3}}
 R1M3 vrefm mm3 {{R1-3}}
 R2M3 mm3 om3 {{R2-3}}
-XM3 pm3 mm3 p12 n12 om3 OPAx197
+XM3 pm3 mm3 p12 n12 om3 BOPA
 ROM3 om3 jm3 {{R-OUT-PROT-3}}
 CFM3 jm3 agj {{C-FILT-MOD-3}}
 RLM3 jm3 0 {{r_vco}}
@@ -324,7 +307,7 @@ RBM4 dm4 agnd {{R-BIAS-DAC-4}}
 RIM4 dm4 pm4 {{R-OPAMP-IN-4}}
 R1M4 vrefm mm4 {{R1-4}}
 R2M4 mm4 om4 {{R2-4}}
-XM4 pm4 mm4 p12 n12 om4 OPAx197
+XM4 pm4 mm4 p12 n12 om4 BOPA
 ROM4 om4 jm4 {{R-OUT-PROT-4}}
 CFM4 jm4 agj {{C-FILT-MOD-4}}
 RLM4 jm4 0 {{r_vco}}
@@ -375,7 +358,7 @@ BV33 v33 ig V = {{vdd}} * V(on5, ig)
 * the excitation (breath-excitation-reference): R-REF-IN and C-REF-OUT on REF_VIN; the
 * REF5050 BEHAVIOURAL (its line regulation, on smoothly past its dropout, its output
 * resistance); U-BUF half A
-* (TI's OPA2197) driving VS through R-ISO-REF with R-FB-REF, R-FBX-REF and C-FB-REF
+* (bopa.lib's BOPA) driving VS through R-ISO-REF with R-FB-REF, R-FBX-REF and C-FB-REF
 RRIN2 ins refvin {{R-REF-IN}}
 CRVIN refvin ag {{C-REF-OUT-VIN}}
 CDVIN refvin ag {{C-DEC-REF-VIN}}
@@ -386,7 +369,7 @@ CROUT ref5v crn1 {{C-REF-OUT-VOUT}}
 RCROUT crn1 ag {{esr_cref}}
 CDVOUT ref5v ag {{C-DEC-REF-VOUT}}
 CDBUF ins ag {{C-DEC-BUF}}
-XBUFA ref5v refminus ins ag bufout OPAx197
+XBUFA ref5v refminus ins ag bufout BOPA
 RFX bufout acmid {{R-FBX-REF}}
 CFR acmid refminus {{C-FB-REF}}
 RFR vs refminus {{R-FB-REF}}
@@ -402,7 +385,7 @@ RSENS vs sg {{r_sensor}}
 ESO sro sg vs sg {{k_sensor}}
 RSO sro sraw {{r_sens_out}}
 CSO sraw sg {{C-SENSOR-OUT}}
-XBUFB sraw sbo ins ag sbo OPAx197
+XBUFB sraw sbo ins ag sbo BOPA
 RR1 sbo j1 {{R1}}
 RR1B sg j2 {{R1b}}
 DTVS1 ig j1 DTVSB
@@ -450,5 +433,4 @@ CIC j7 ig {{c_inst}}
 .model DQBODY D(is={{is_body_q}} n=1)
 .model DRESET D(is={{is_rst}} n={{n_rst}})
 .model SPLUGM SW(vt=0.5 vh=0.1 ron=1m roff=1e9)
-.model SHOLD SW(vt=0.5 vh=0.1 ron={{r_hold}} roff=1e12)
 .ends SYS

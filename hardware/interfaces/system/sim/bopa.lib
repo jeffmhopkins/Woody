@@ -1,0 +1,53 @@
+* BEHAVIOURAL OPA2197 AND INA828 for the system deck, from their banked datasheets, each
+* parameter a sims.yaml param with its page. TI's macromodels are what every other sim in
+* this repository uses, and they are banked here too (models:); in this deck they find no
+* DC operating point and stall a cold start at random corners (README, "Why behavioural"),
+* so this directory's own sims hold these blocks to TI's models where it matters: PSRR
+* and CMRR against frequency (sims opamp-check and inamp-check).
+*
+* BOPA, one OPA2197 channel: pins in+ in- V+ V- out.
+*  - the supply's error, input-referred: ps_k0 per volt of (V+ - V-) away from ps_vs0, and a
+*    derivative term ps_tau, the 20 dB/decade TI's model shows above ~10 Hz
+*  - a transconductance stage, slew-limited (i_slew = SR x cx), into rx || cx about the
+*    supplies' midpoint: Aol = gm rx, GBW = gm / (2 pi cx)
+*  - the integrator clamped inside the rails (rail-to-rail output, v_hr from each)
+*  - a push-pull output from the rails themselves, r_o open loop (opa2197-output-impedance),
+*    limited at i_sc, alive only while the supply is (so an unpowered amplifier sources
+*    nothing): its load current is drawn from V+ or returned to V-, as a real output stage's
+*  - its quiescent current from V+ to V-, smoothly zero at zero supply
+.subckt BOPA inp inn vcc vee out
+Bmid mid 0 V = 0.5 * (V(vcc) + V(vee))
+Bps eps 0 V = {{ps_k0}} * (V(vcc) - V(vee) - {{ps_vs0}}) + {{ps_tau}} * ddt(V(vcc) - V(vee))
+Bgm mid x I = {{i_slew}} * tanh({{gm_op}} * (V(inp) - V(inn) + V(eps)) / {{i_slew}})
+Rx x mid {{rx_op}}
+Cx x mid {{cx_op}}
+Bxh xh 0 V = V(vcc) - {{v_hr}}
+Bxl xl 0 V = V(vee) + {{v_hr}}
+Dxh x xh DLIMOP
+Dxl xl x DLIMOP
+Bal al 0 V = 0.5 * (1 + tanh((V(vcc) - V(vee) - 2) / 0.5))
+Bio io 0 V = {{i_sc}} * tanh((V(x) - V(out)) / ({{i_sc}} * {{r_o}})) * V(al)
+Bsrc vcc out I = 0.5 * (V(io) + sqrt(V(io) * V(io) + 1e-14))
+Bsnk out vee I = 0.5 * (sqrt(V(io) * V(io) + 1e-14) - V(io))
+Bq vcc vee I = {{iq_op}} * tanh((V(vcc) - V(vee)) / 2)
+.model DLIMOP D(Is=1e-14 N=1)
+.ends
+*
+* BINA, the INA828: its datasheet's three-amplifier topology [INA828IDR.pdf, Functional
+* Block Diagram]: two input amplifiers with their 25 kohm feedback and RG between their
+* inverting inputs (G = 1 + 50 kohm / RG, so the netlist's R-GAIN-INAMP sets it), and a
+* difference amplifier of four 40 kohm resistors to OUT and REF. Its CMRR is a mismatch,
+* ina_d in the REF leg (the datasheet's minimum at dc), and a capacitance across it,
+* ina_cm (the roll-off TI's model shows). Pins: in+ in- V+ V- out ref rg1 rg2.
+.subckt BINA inp inn vcc vee out ref rg1 rg2
+XA1 inn rg1 vcc vee a1 BOPA
+RF1 a1 rg1 25k
+XA2 inp rg2 vcc vee a2 BOPA
+RF2 a2 rg2 25k
+R3 a1 n3 40k
+R4 n3 out 40k
+R5 a2 p3 40k
+R6 p3 ref {{r_ina_ref}}
+C6 p3 ref {{ina_cm}}
+XA3 p3 n3 vcc vee out BOPA
+.ends

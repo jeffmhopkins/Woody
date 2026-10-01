@@ -9,7 +9,7 @@
 * the other channels hold.
 XC m1 m2 m3 m4 m5 m6 m7 m8 i1 i2 i3 i4 i5 i6 i7 i8 UMB_LUMPED
 XS m1 m2 m3 m4 m5 m6 m7 m8 i1 i2 i3 i4 i5 i6 i7 i8
-+ ledctl sclkctl mosictl csctl dsck ddin dsync dacp dacm1 dacm2 dacm3 dacm4 plug pplug hold SYS
++ ledctl sclkctl mosictl csctl dsck ddin dsync dacp dacm1 dacm2 dacm3 dacm4 plug pplug SYS
 VLED ledctl 0 0
 * the pads: a free-running clock and data toggle, gated by the burst and by CS_MOD
 VCK ck 0 PULSE(0 1 {{t_b0}} {{tr_drv}} {{tr_drv}} {{t_hi}} {{t_per}})
@@ -30,17 +30,16 @@ BDSY dsync 0 V = 1 - V(gt2) * (1 - V(fr2))
 * the DAC: mod channel 1 toggles at each frame's end, inside the burst
 VUP up 0 PULSE(0 1 {{t_up0}} {{t_dac_edge}} {{t_dac_edge}} {{t_frame}} {{t_frame2}})
 VGU gu 0 PWL(0 0 {{t_gt0c}} 0 {{t_gt0ce}} 1 {{t_gu1}} 1 {{t_gu1e}} 0)
-BDM1 dacm1 0 V = {{v_mod_code}} * min(1, max(0, (time - {{t_sig0}}) / ({{t_sig1}} - {{t_sig0}}))) + {{v_mod_step}} * V(up) * V(gu)
-VDP dacp 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_dac0}})
-VDM2 dacm2 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_mod_code}})
-VDM3 dacm3 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_mod_code}})
-VDM4 dacm4 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_mod_code}})
+BDM1 dacm1 0 V = {{v_mod_code}} + {{v_mod_step}} * V(up) * V(gu)
+VDP dacp 0 {{v_dac0}}
+VDM2 dacm2 0 {{v_mod_code}}
+VDM3 dacm3 0 {{v_mod_code}}
+VDM4 dacm4 0 {{v_mod_code}}
 VPLG plug 0 1
 VPPL pplug 0 1
-VHOLD hold 0 PWL(0 1 {{t_release}} 1 {{t_release_e}} 0)
 .options method=gear rshunt=1e10
 .control
-tran {{t_max_step}} {{t_end_burst}} {{t_save0}} {{t_max_step}} uic
+tran {{t_step_out}} {{t_end_burst}} {{t_save0}} {{t_max_step}}
 wrdata jp.dat v(xs.jp)
 wrdata jb.dat v(xs.jb)
 wrdata jm1.dat v(xs.jm1)

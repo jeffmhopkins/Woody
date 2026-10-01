@@ -9,7 +9,7 @@
 * boot), and its breath front end comes up at the held pressure.
 XC m1 m2 m3 m4 m5 m6 m7 m8 i1 i2 i3 i4 i5 i6 i7 i8 UMB_LUMPED
 XS m1 m2 m3 m4 m5 m6 m7 m8 i1 i2 i3 i4 i5 i6 i7 i8
-+ ledctl sclkctl mosictl csctl dsck ddin dsync dacp dacm1 dacm2 dacm3 dacm4 plug pplug hold SYS
++ ledctl sclkctl mosictl csctl dsck ddin dsync dacp dacm1 dacm2 dacm3 dacm4 plug pplug SYS
 VLED ledctl 0 0
 VSCK sclkctl 0 0
 VMOS mosictl 0 0
@@ -17,17 +17,16 @@ VCSC csctl 0 0
 VDSK dsck 0 0
 VDDI ddin 0 0
 VDSY dsync 0 1
-VDP dacp 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_dac0}})
-VDM1 dacm1 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_mod_code}})
-VDM2 dacm2 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_mod_code}})
-VDM3 dacm3 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_mod_code}})
-VDM4 dacm4 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_mod_code}})
+VDP dacp 0 {{v_dac0}}
+VDM1 dacm1 0 {{v_mod_code}}
+VDM2 dacm2 0 {{v_mod_code}}
+VDM3 dacm3 0 {{v_mod_code}}
+VDM4 dacm4 0 {{v_mod_code}}
 VPLG plug 0 PWL(0 0 {{t_plug}} 0 {{t_plug_e}} 1)
 VPPL pplug 0 PWL(0 0 {{t_pplug}} 0 {{t_pplug_e}} 1)
-VHOLD hold 0 PWL(0 1 {{t_release}} 1 {{t_release_e}} 0)
 .options method=gear rshunt=1e10
 .control
-tran {{t_max_step_plug}} {{t_end_plug}} {{t_save_plug}} {{t_max_step_plug}} uic
+tran {{t_step_out}} {{t_end_plug}} {{t_save_plug}} {{t_max_step_plug}}
 wrdata jp.dat v(xs.jp)
 wrdata jb.dat v(xs.jb)
 wrdata jm1.dat v(xs.jm1)
