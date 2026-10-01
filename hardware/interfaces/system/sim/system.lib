@@ -4,6 +4,13 @@
 * parameter is filled from sims.yaml or of the sims it imports (params_from). What is
 * behavioural, and what is left out, is in this directory's README.
 *
+* EVERY RUN IS A POWER-ON (uic): the rack's rails ramp over t_ramp, U-ISO starts after them,
+* the DAC's codes and VREFOUT follow, the load switch and the instrument come up as they
+* do (umbilical-load-switch/sim, power-entry-instrument/sim), and each scenario's event
+* comes at t_settle, after all of it has settled. This deck has no robust DC operating
+* point (a constant-power buck behind a current-limited switch has more than one), and a
+* power-on has only one ending (README).
+*
 * NODES. Node 0 is the rack PSU's ground at the far end of the bus: the receiving
 * modules' ground, so every jack is read against node 0. Inside: star (BUS_GND, the
 * module's header ground), agnd (AGND_MOD on module-main), agj (AGND_MOD on the jack
@@ -24,10 +31,10 @@
 * the PSU (its output resistance r_psu), the bus to this module's tap with the other
 * modules' decoupling there, the power ribbon to the header; the bus ground from the tap
 * to the PSU end, where the receivers are (node 0)
-VPSUP psp 0 {{v_rail}}
+VPSUP psp 0 PWL(0 0 {{t_ramp}} {{v_rail}})
 RPSUP psp rpp {{r_psu}}
 RBUSP rpp tapp {{r_bus_rail}}
-VPSUN psn 0 {{v_rail_neg}}
+VPSUN psn 0 PWL(0 0 {{t_ramp}} {{v_rail_neg}})
 RPSUN psn rpn {{r_psu}}
 RBUSN rpn tapn {{r_bus_rail}}
 RBUSG tapg 0 {{r_bus_seg}}
@@ -60,6 +67,24 @@ D3 fb3a d3k D5817
 RFB3 n12 fb3a {{r_fb_dcr}}
 C3 n12 c3a {{C3}}
 RC3 c3a agnd {{esr_c3}}
+* every op-amp's own 100 nF on each rail (their netlists' C-DEC-*-POS / -NEG), on the rail nodes:
+* the module's analog rails are one node each here, so their copper between op-amps is not
+CDPBREATH p12 agnd {{C-DEC-BREATH-POS}}
+CDNBREATH n12 agnd {{C-DEC-BREATH-NEG}}
+CDPINAMP p12 agnd {{C-DEC-INAMP-POS}}
+CDNINAMP n12 agnd {{C-DEC-INAMP-NEG}}
+CDPMODA p12 agnd {{C-DEC-MODA-POS}}
+CDNMODA n12 agnd {{C-DEC-MODA-NEG}}
+CDPMODB p12 agnd {{C-DEC-MODB-POS}}
+CDNMODB n12 agnd {{C-DEC-MODB-NEG}}
+CDPMODC p12 agnd {{C-DEC-MODC-POS}}
+CDNMODC n12 agnd {{C-DEC-MODC-NEG}}
+CDPPITCH p12 agnd {{C-DEC-PITCH-POS}}
+CDNPITCH n12 agnd {{C-DEC-PITCH-NEG}}
+CDPREFBUF p12 agnd {{C-DEC-REFBUF-POS}}
+CDNREFBUF n12 agnd {{C-DEC-REFBUF-NEG}}
+CDPRESP p12 agnd {{C-DEC-RESP-POS}}
+CDNRESP n12 agnd {{C-DEC-RESP-NEG}}
 * the module's own analog draw not otherwise modelled (module-own-draw): the -12 V share
 * rail to rail, the rest of the +12 V share (the logic regulator's) into DIG_GND, each as a
 * resistance at the rails' nominal (a constant current would drive a cold rail negative)
@@ -109,7 +134,7 @@ CISOB vinn pgi {{c_iso}}
 * dynamic impedance (r_dyn parallel l_dyn); its input draws the output's power over its
 * efficiency, instantly - no loop delay, the most of every output current step that can
 * reach the rack
-VSETI seti pgi {{v_bus}}
+VSETI seti pgi PWL(0 0 {{t_sig0}} 0 {{t_iso_up}} {{v_bus}})
 BISO pgi isx I = min({{i_ocp}}, max(0, (V(seti, pgi) - V(isx, pgi)) / {{r_bus}}))
 RDYN isx isd {{r_dyn}}
 LDYN isx isd {{l_dyn}}
@@ -129,6 +154,10 @@ M1 sense gnode umbp umbp QPASS
 CISS gnode umbp {{c_iss}}
 RFBH umbp fb {{R-FB-HI}}
 RFBL fb pgi {{R-FB-LO}}
+* solver aids, not parts: a DC path for TIMER and for the gate network, which only current
+* sources and capacitors reach (1 nA at a volt: nothing beside the LT1641's microamps)
+RTMRX timer pgi 1e9
+RGATX gnode umbp 1e9
 * the panel LED on UMBILICAL_POS12, returning to AGND_MOD on module-main (panel-led/sim's diode)
 RLEDP umbp lp1 {{R-LED-PANEL}}
 VVFP lp1 lp2 {{vf_shift}}
@@ -190,8 +219,8 @@ RPSY psy avdd {{R-PULL-SYNC}}
 *
 * ======================== MODULE: BREATH RECEIVE, SHAPER, OUTPUT ========================
 * breath-receive-stage: R3 from BREATH, R2 from AGND_SENSE, the bias pair, C_cm, C_diff,
-* D-CLAMP-IN+/- (BAV99, as the shaper's diode fit), the INA828 (bopa.lib's BINA) and its
-* REF from TRIM-BREATH-ZERO's wiper through U-REF-BUF, the wiper at v_zero
+* D-CLAMP-IN+/- (BAV99, as the shaper's diode fit), the INA828 (bopa.lib's BINA) on
+* R-GAIN-INAMP, and its REF from TRIM-BREATH-ZERO's wiper through U-REF-BUF, the wiper at v_zero
 RR3 m1 inneg {{R3}}
 RR2 m2 inpos {{R2}}
 RR4 inpos agnd {{R4}}
@@ -245,7 +274,7 @@ RBLD jb 0 {{r_load}}
 * ============================ MODULE: THE DAC'S STAGES ============================
 * the DAC8568 as code-driven ideal sources on AGND_MOD (its pins' own glitch and
 * feedthrough, 0.1 nV-s, are not modelled); VREFOUT ideal at v_refout
-VVRO vro agnd {{v_refout}}
+VVRO vro agnd PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_refout}})
 * pitch-stage (pitch-stage.lib's PSTAGE, on AGND_MOD), TRIM-GAIN and TRIM-OFFSET where
 * t_gain and w_offset put them; C-FILT-PITCH and D-ESD-PITCH on the jack board
 BDP dpin agnd V = V(dacp)
@@ -271,7 +300,7 @@ CESDP jp agj {{c_esd}}
 RVCOP jp 0 {{r_vco}}
 * mod-channels: DAC ch7 through R-OPAMP-IN-REF into the reference follower; each channel
 * x(1 + R-MODGAIN-FB/R-MODGAIN-IN) against it, R-OUT-PROT, C-FILT-MOD on the jack board
-VD7 d7 agnd {{v_ref7}}
+VD7 d7 agnd PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_ref7}})
 RBD7 d7 agnd {{R-BIAS-DAC-CH7}}
 RID7 d7 refp {{R-OPAMP-IN-REF}}
 XREFM refp vrefm p12 n12 vrefm BOPA
@@ -365,8 +394,8 @@ CDVIN refvin ag {{C-DEC-REF-VIN}}
 RQREF refvin ag {{r_q_ref}}
 BREF r5i ag V = ({{v_ref}} + {{k_line}} * (V(refvin, ag) - {{v_refin_nom}})) * 0.5 * (1 + tanh((V(refvin, ag) - {{v_ref}} - {{v_do_ref}} - 0.5) / 0.15))
 RROUT r5i ref5v {{r_ref_out}}
-CROUT ref5v crn1 {{C-REF-OUT-VOUT}}
-RCROUT crn1 ag {{esr_cref}}
+CROUT ref5v cro1 {{C-REF-OUT-VOUT}}
+RCROUT cro1 ag {{esr_cref}}
 CDVOUT ref5v ag {{C-DEC-REF-VOUT}}
 CDBUF ins ag {{C-DEC-BUF}}
 XBUFA ref5v refminus ins ag bufout BOPA
@@ -395,28 +424,29 @@ DTVS2 ig j2 DTVSB
 RISL1 sg ag {{r_isl}}
 RISL2 ag atie {{r_isl}}
 RPLA atie ig {{r_plane}}
-* the SPI pads (carrier): IO35/IO36/IO34 behind r_drv (or high-impedance, pad_hiz), each
+* the SPI pads (carrier): IO35/IO36/IO34, each 3.3 V x its control (a linear source; a pad
+* has no output while pad_hiz) behind r_drv (or high-impedance, pad_hiz), each
 * pad's ESD clamps to 3V3 and to ground, U-TVS-SPI on the pad side, R-SPI-SER and the
 * trace to J-UMB; R-CS-PULL-INST to 3V3 on IO34
-BPS pads ig V = V(v33, ig) * V(sclkctl)
+EPS pads ig sclkctl 0 {{vdd}}
 RDS pads as {{r_drv_eff}}
-DCHS as v33 DPAD
-DCLS ig as DPAD
+DCHS as v33 DPAD {{pad_clamp}}
+DCLS ig as DPAD {{pad_clamp}}
 CTSS as ig {{c_tvs}}
 RSS as j4 {{R-SPI-SER-SCLK}}
 CIS j4 ig {{c_inst}}
-BPM padm ig V = V(v33, ig) * V(mosictl)
+EPM padm ig mosictl 0 {{vdd}}
 RDM padm am {{r_drv_eff}}
-DCHM am v33 DPAD
-DCLM ig am DPAD
+DCHM am v33 DPAD {{pad_clamp}}
+DCLM ig am DPAD {{pad_clamp}}
 CTSM am ig {{c_tvs}}
 RSM am j5 {{R-SPI-SER-MOSI}}
 CIM j5 ig {{c_inst}}
-BPC padc ig V = V(v33, ig) * V(csctl)
+EPC padc ig csctl 0 {{vdd}}
 RDC padc ac {{r_drv_eff}}
 RCSPI ac v33 {{R-CS-PULL-INST}}
-DCHC ac v33 DPAD
-DCLC ig ac DPAD
+DCHC ac v33 DPAD {{pad_clamp}}
+DCLC ig ac DPAD {{pad_clamp}}
 CTSC ac ig {{c_tvs}}
 RSC ac j7 {{R-SPI-SER-CS}}
 CIC j7 ig {{c_inst}}
@@ -427,7 +457,7 @@ CIC j7 ig {{c_inst}}
 .model DCLAMP D(Is={{is_d}} N={{n_d}} Rs={{rs_d}} Cjo=1.5p)
 .model DRESP D(IS={{is_d}} N={{n_d}} RS={{rs_d}} CJO=1.5p)
 .model DTVSB D(Is=1e-14 Cjo={{cj_sig}} Vj={{tvs_vj}} M={{tvs_m}} BV={{tvs_bv}})
-.model DPAD D(Is=1e-14 N=1)
+.model DPAD D(Is=1e-14 N=1 Rs=1 Cjo=1p)
 .model QPASS NMOS(level=1 vto={{v_th}} kp={{kp}})
 .model QINRUSH PMOS(level=1 vto={{vto_q}} kp={{kp_q}})
 .model DQBODY D(is={{is_body_q}} n=1)

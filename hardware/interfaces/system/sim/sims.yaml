@@ -64,6 +64,7 @@ params:
   v_iso_in_min: {value: 9.0, source: "U-ISO's input minimum, 9 V [ds PD-1]: below it the behavioural input stops scaling up (a solver guard; never reached here)"}
   # --- the umbilical (cable.lib): the matrices from spi-link/sim's z_diff, z_cm, nvp, r_per_m, len
   cl_lp_m:  {value: 3.0e-6, source: "the total mode's partial inductance per metre, the eight conductors against the room. NOT A CABLE PROPERTY: the instrument is isolated, so no current flows in that mode and the value only has to keep the matrix positive definite [assumption]. 1.2 uH/m made ngspice's CPL refuse the matrix ('forbidden combination', a degenerate eigenvalue set); 3 uH/m does not"}
+  l_dc:     {value: 1.0e-3, source: "the DC path beside each CPL conductor (cable.lib): a short at DC, 6 kohm at 1 MHz [not a part]"}
   k_gauge:  {value: 1.0, source: "CABLE-UMB's conductor resistance over Belden 1752A's 24 AWG maximum: its gauge is open, 26-28 AWG is 1.6-2.6x (power-entry-instrument/sim's r_cable range) (vary)"}
   c_unb_m:  {value: 1.6e-12, source: "Belden 1752A maximum capacitance unbalance, 160 pF/100 m [datasheets/connectors/BELDEN-1752A-CAT5E-PATCH-24AWG-STRANDED.pdf p.1]: the twist's imbalance, all of it from BREATH towards the aggressor (k_unb_pwr, k_unb_spi), the worst place for it"}
   k_unb_pwr: {value: 1, source: "1: the breath pair's whole unbalance towards the +12 V conductor"}
@@ -81,14 +82,19 @@ params:
   ps_k0:    {value: 3.0e-6, source: "OPA2197 PSRR, +-3 uV/V max over -40 to 125 C [datasheets/analog/OPA2197.pdf, SBOS737C p.7]"}
   ps_vs0:   {value: 24.0, source: "the supply the dc term is taken about: the module's +-12 V (only a constant offset elsewhere)"}
   ps_tau:   {value: 1.1e-8, source: "PSRR's 20 dB/decade term, fitted to TI's OPA2197 macromodel (datasheets/analog/OPAx197-ti-pspice-sboma34d.lib) as a follower at +-12 V: -83.3 dB at 1 kHz [calc: 10^(-83.3/20) / (2 pi 1 kHz) = 1.09e-8 s]; sim opamp-check holds it there"}
-  gm_op:    {value: 1.0e-3, source: "the input stage's transconductance [model parameter: it sets only the scale of rx_op and cx_op]"}
+  gm_op:    {value: 1.0e-4, source: "the input stage's transconductance [model parameter: it sets only the scale of r1_op and c1_op]"}
+  a1_op:    {value: 1000.0, source: "the first stage's gain; the second's is aol_op over it [model parameter: splits the gain so the solver sees no node a decade-span below its drive]"}
   aol_op:   {value: 3.16e5, source: "OPA2197 open-loop gain, 110 dB min over -40 to 125 C [OPA2197.pdf p.7]"}
   gbw_op:   {value: 10.0e6, source: "OPA2197 unity-gain bandwidth, 10 MHz [OPA2197.pdf p.8]"}
   sr_op:    {value: 20.0e6, source: "OPA2197 slew rate, 20 V/us [OPA2197.pdf p.8]"}
   v_hr:     {value: 0.6, source: "the integrator's clamp sits this far inside each rail, so that with its diode the output stops at about the rail (a rail-to-rail output) [model parameter]"}
   r_o:      {value: {fig: opa2197-output-impedance}, source: "the open-loop output impedance (opa2197-output-impedance)"}
   i_sc:     {value: 0.065, source: "OPA2197 short-circuit current, +-65 mA [OPA2197.pdf p.8]"}
+  c_id:     {value: 1.6e-12, source: "OPA2197 differential input capacitance, 1.6 pF [OPA2197.pdf p.7]"}
+  c_ic:     {value: 6.4e-12, source: "OPA2197 common-mode input capacitance, 6.4 pF [OPA2197.pdf p.7]"}
   iq_op:    {value: 1.0e-3, source: "OPA2197 quiescent current per amplifier, 1 mA typ (1.3 max) [OPA2197.pdf p.8]"}
+  ina_ps_k0:  {value: 1.58e-6, source: "BINA's supply error at dc, in its difference amplifier (the input pair's cancel): the INA828's PSRR, 110 dB min RTI at G = 1 [datasheets/analog/INA828IDR.pdf, Electrical Characteristics] [calc: the difference amplifier's noise gain is 2; 10^(-110/20) / 2 = 1.58e-6]"}
+  ina_ps_tau: {value: 1.4e-9, source: "BINA's PSRR 20 dB/decade term, fitted to TI's INA828 macromodel (datasheets/analog/INA828-ti-pspice-sbomag5c.lib) at 10 kHz (-75.1 dB at the output, G = 2.18), where it is worst, so that BINA is never better than TI's model from 100 Hz to 10 kHz; sim inamp-check holds it"}
   ina_d:    {value: 6.3e-5, source: "BINA's difference-amplifier mismatch for the INA828's minimum CMRR, 90 dB at dc, G = 1 [datasheets/analog/INA828IDR.pdf, Electrical Characteristics] [calc: a unity difference amplifier's common-mode gain is d/2; 2 x 10^(-90/20) = 6.3e-5]"}
   ina_cm:   {value: 8.75e-14, source: "BINA's CMRR roll-off, a capacitance across the REF leg, fitted to TI's INA828 macromodel (datasheets/analog/INA828-ti-pspice-sbomag5c.lib) at RG 42.2 kohm: -93.1 dB at 2 kHz [calc: tau = 10^(-93.1/20) / (2 pi 2 kHz) = 1.75e-9 s; C = 2 tau / 40 kohm]; sim inamp-check holds it there"}
   # --- the instrument's copper and parts not in another sim
@@ -102,7 +108,10 @@ params:
   f_led:    {value: 2000.0, source: "the WS2815's PWM ('scan frequency is of 2KHz', datasheets/led/WS2815B-V1.pdf p.1, as power-entry-instrument.md reads it)"}
   d_led:    {value: 0.5, source: "the PWM duty: 0.5 puts the most energy in its fundamental"}
   led_amp:  {value: 1.0, source: "1: the row switches between blank and lit; 0: it stays blank (the floor)"}
-  t_settle: {value: 0.02, source: "every scenario starts from the deck's DC operating point and runs this long before anything happens; each sim measures the settled floor before its event (pre_*)"}
+  t_ramp:   {value: 1.0e-3, source: "the rack's rails ramp up over this at power-on [assumption: a fast PSU; nothing measured depends on it]"}
+  t_sig0:   {value: 2.0e-3, source: "U-ISO starts, and the DAC's codes and VREFOUT ramp from 0 V, from here: once the rails are up (the DAC powers up at zero scale, pitch-stage.md)"}
+  t_sig1:   {value: 3.0e-3}
+  t_settle: {value: 0.32, source: "every scenario's event comes this long after power-on: past the load switch's cold start and the instrument's (power-entry-instrument/sim cold-start t_up, 0.11-0.24 s across its corners); each sim measures the settled floor just before its event (pre_*)"}
   t_step_out: {value: 1.0e-7, source: "the solver's first and printing step [not a part]"}
   t_led_edge: {value: 1.0e-6, source: "the row's current edge [assumption: a WS2815's constant-current driver turning on]"}
   t_led_run: {value: 12.0e-3, source: "how long the LEDs run: 24 PWM periods"}
@@ -126,6 +135,7 @@ params:
   p_trim:   {value: 0.5, source: "TRIM-RESP at mid-travel: the shaper's commissioning (breath-response-shaper/sim) is not repeated here; the curve's exact gain does not move what a disturbance does"}
   v_zero:   {value: {fig: breath-zero-ref}, source: "TRIM-BREATH-ZERO's wiper set to null the typical pedestal (breath-zero-ref)"}
   v_ref7:   {value: {fig: mod-reference}, source: "DAC channel 7, the mod channels' reference (mod-reference)"}
+  pad_clamp: {value: 1, source: "the ESP32 pads' ESD clamps to 3V3 and to ground, as an area factor: 1 fitted; burst sets 1e-9 (out). Inside 0-3.3 V they carry nothing, and with them in, nanosecond edges every 250 ns stall the solver (a stiff node, README)"}
   pad_hiz:  {value: 0, source: "1: the ESP32's three SPI pads high-impedance (unpowered, or in reset: IO34-36 have no pull, ESP32-S3 datasheet p.17, as spi-link.md reads it)"}
   # --- scenario 2, the SPI burst (burst.cir); the pads' timing from spi-link/sim (f_clk, tr_drv)
   n_frames: {value: 8, source: "back-to-back DAC frames: every channel written once, the most firmware sends in one loop (loop-budget counts six)"}
@@ -133,6 +143,7 @@ params:
   t_chain:  {value: 20.0e-9, source: "U-RX-MOD's two gates and U-LVL-MOD, pad to DAC pin [calc: within spi-link/sim's 2-29 ns chain spread]"}
   t_lvl_edge: {value: 3.0e-9, source: "U-LVL-MOD's (74AHCT125) output edge [assumption: an AHCT output into a few pF]"}
   v_mod_step: {value: 2.0, source: "mod channel 1's code step at each frame's end: 2.5 to 4.5 V at the DAC, 0 to +8 V at the jack (inside mod-jack-range)"}
+  t_dac_dly: {value: 1.0e-7, source: "the DAC's output starts to move this long after SYNC rises [assumption: of the order of the DAC's digital delay; its output then slews over t_dac_edge, so the figure moves nothing measured]"}
   t_dac_edge: {value: 2.7e-6, source: "the DAC's output slewing that step at 0.75 V/us typ [datasheets/analog/DAC8568CIPW.pdf, Slew rate] [calc: 2.0 / 0.75]"}
   t_b_tail: {value: 1.5e-3, source: "the run goes on this long after the burst: past the link's ~460 Hz pole and C-OUT-BREATH"}
   # --- scenario 3, the hot-plug (plug.cir)
@@ -164,6 +175,7 @@ derived:
   cl_cp: "(-0.5 / v['cl_lam_d'] + 0.375 / v['cl_lam_c'] + 0.125 / v['cl_lam_t']) / v['v_c']**2"
   cl_cx: "(-0.125 / v['cl_lam_c'] + 0.125 / v['cl_lam_t']) / v['v_c']**2"
   cl_cref: "v['cl_cs'] + v['cl_cp'] + 6 * v['cl_cx']"
+  cl_r_dc: "v['cl_r_m'] * v['len']"
   cl_r_sec: "v['cl_r_m'] * v['len'] / 2"
   cl_l_sec: "v['cl_lp_m'] * v['len'] / 2"
   cl_k_pair: "v['cl_l_pair'] / v['cl_lp_m']"
@@ -177,38 +189,46 @@ derived:
   c_unb_pwr_half: "max(v['c_unb_m'] * v['len'] * v['k_unb_pwr'] / 2, 1e-18)"
   c_unb_spi_half: "max(v['c_unb_m'] * v['len'] * v['k_unb_spi'] / 2, 1e-18)"
   # --- bopa.lib
-  rx_op: "v['aol_op'] / v['gm_op']"
-  cx_op: "v['gm_op'] / (2 * math.pi * v['gbw_op'])"
+  a2_op: "v['aol_op'] / v['a1_op']"
+  r1_op: "v['a1_op'] / v['gm_op']"
+  c1_op: "v['gm_op'] * v['aol_op'] / v['a1_op'] / (2 * math.pi * v['gbw_op'])"
   i_slew: "v['sr_op'] * v['gm_op'] / (2 * math.pi * v['gbw_op'])"
   r_ina_ref: "40.0e3 * (1 + v['ina_d'])"
+  r_psd: "10.0e3"
+  c_psm: "1.0 / (2 * math.pi * v['gbw_op']) / v['r_psd']"
   # --- the timeline
+  t_iso_up: "v['t_sig0'] + v['t_iso']"
   t_led0: "v['t_settle']"
-  t_save0: "v['t_settle'] - 3.0e-3"
-  t_pre0: "v['t_settle'] - 2.0e-3"
+  t_save0: "max(0.0, v['t_settle'] - 3.0e-3)"
+  t_pre0: "max(0.0, v['t_settle'] - 2.0e-3)"
   t_meas0: "v['t_settle'] + v['t_led_skip']"
   t_end_led: "v['t_settle'] + v['t_led_run']"
-  # burst.cir's timeline: SCLK rises at t_b0 + n t_per; CS_MOD is high for one period
-  # around every 33rd rising edge, which it suppresses; MOSI changes on every rising edge
+  # burst.cir's timeline. Every source is a PULSE whose delay is written t_b0 + an offset (a
+  # brace expression ngspice sums in double precision: six figures cannot place a nanosecond
+  # edge a third of a second into a run). SCLK rises at t_b0 + n/f_clk; MOSI changes on every
+  # rising edge; CS_MOD is high for one clock period around every 33rd rising edge, which it
+  # suppresses; U-LVL-MOD's copies are t_chain later; the DAC's mod channel 1 moves t_dac_dly
+  # after each SYNC rise.
   t_b0: "v['t_settle'] + v['t_b_skip']"
-  t_dt_per: "2.0 / v['f_clk']"
-  t_dt_hi: "1.0 / v['f_clk'] - v['tr_drv']"
-  t_frame: "33.0 / v['f_clk']"
-  t_frame2: "66.0 / v['f_clk']"
-  t_fr_hi: "1.0 / v['f_clk'] - v['tr_drv']"
-  t_fr0: "v['t_settle'] + v['t_b_skip'] + 31.75 / v['f_clk']"
-  t_gt0: "v['t_settle'] + v['t_b_skip'] - 0.25 / v['f_clk']"
-  t_gt0e: "v['t_settle'] + v['t_b_skip'] - 0.25 / v['f_clk'] + v['tr_drv']"
-  t_gt1: "v['t_settle'] + v['t_b_skip'] + 31.75 / v['f_clk'] + (v['n_frames'] - 1) * 33.0 / v['f_clk'] + 0.5 / v['f_clk']"
-  t_gt1e: "v['t_settle'] + v['t_b_skip'] + 31.75 / v['f_clk'] + (v['n_frames'] - 1) * 33.0 / v['f_clk'] + 0.5 / v['f_clk'] + v['tr_drv']"
-  t_b0c: "v['t_settle'] + v['t_b_skip'] + v['t_chain']"
-  t_fr0c: "v['t_settle'] + v['t_b_skip'] + 31.75 / v['f_clk'] + v['t_chain']"
-  t_gt0c: "v['t_settle'] + v['t_b_skip'] - 0.25 / v['f_clk'] + v['t_chain']"
-  t_gt0ce: "v['t_settle'] + v['t_b_skip'] - 0.25 / v['f_clk'] + v['t_chain'] + v['t_lvl_edge']"
-  t_gt1c: "v['t_settle'] + v['t_b_skip'] + 31.75 / v['f_clk'] + (v['n_frames'] - 1) * 33.0 / v['f_clk'] + 0.5 / v['f_clk'] + v['t_chain']"
-  t_gt1ce: "v['t_settle'] + v['t_b_skip'] + 31.75 / v['f_clk'] + (v['n_frames'] - 1) * 33.0 / v['f_clk'] + 0.5 / v['f_clk'] + v['t_chain'] + v['t_lvl_edge']"
-  t_up0: "v['t_settle'] + v['t_b_skip'] + 31.75 / v['f_clk'] + v['t_chain']"
-  t_gu1: "v['t_settle'] + v['t_b_skip'] + 31.75 / v['f_clk'] + (v['n_frames'] - 1) * 33.0 / v['f_clk'] + 0.5 / v['f_clk'] + v['t_chain'] + v['t_dac_edge']"
-  t_gu1e: "v['t_settle'] + v['t_b_skip'] + 31.75 / v['f_clk'] + (v['n_frames'] - 1) * 33.0 / v['f_clk'] + 0.5 / v['f_clk'] + v['t_chain'] + v['t_dac_edge'] + 1e-6"
+  b_hi: "0.5 / v['f_clk'] - v['tr_drv']"
+  b_per: "1.0 / v['f_clk']"
+  b_dhi: "1.0 / v['f_clk'] - v['tr_drv']"
+  b_dper: "2.0 / v['f_clk']"
+  b_fr: "31.75 / v['f_clk']"
+  b_frw: "1.0 / v['f_clk'] - v['tr_drv']"
+  b_frame: "33.0 / v['f_clk']"
+  b_gon: "-0.25 / v['f_clk']"
+  b_gw: "(v['n_frames'] - 1) * 33.0 / v['f_clk'] + 32.5 / v['f_clk'] - v['tr_drv']"
+  b_hi2: "0.5 / v['f_clk'] - v['t_lvl_edge']"
+  b_dhi2: "1.0 / v['f_clk'] - v['t_lvl_edge']"
+  b_fr2: "31.75 / v['f_clk'] + v['t_chain']"
+  b_frw2: "1.0 / v['f_clk'] - v['t_lvl_edge']"
+  b_gon2: "-0.25 / v['f_clk'] + v['t_chain']"
+  b_gw2: "(v['n_frames'] - 1) * 33.0 / v['f_clk'] + 32.5 / v['f_clk'] - v['t_lvl_edge']"
+  b_up: "31.75 / v['f_clk'] + v['t_chain'] + v['t_dac_dly']"
+  b_upw: "33.0 / v['f_clk'] - v['t_dac_edge']"
+  b_upper: "66.0 / v['f_clk']"
+  b_guw: "0.25 / v['f_clk'] + 31.75 / v['f_clk'] + (v['n_frames'] - 1) * 33.0 / v['f_clk'] + v['t_chain'] + v['t_dac_dly'] + v['t_dac_edge'] + 1.0e-6"
   t_end_burst: "v['t_settle'] + v['t_b_skip'] + v['n_frames'] * 33.0 / v['f_clk'] + v['t_b_tail']"
   # plug.cir's timeline
   t_plug: "v['t_settle']"
@@ -280,6 +300,7 @@ sims:
     post: *led_post
   - name: burst
     deck: burst.cir
+    set: {pad_clamp: 1.0e-9}
     vary: [k_gauge]
     measures: [breath_dev_mv, pitch_dev_cents, ina_dev_uv, agnd_mv, mod_swing, sclk_rx_max, pre_breath_mv]
     post:
@@ -289,7 +310,7 @@ sims:
       agnd_mv: "max(peak(w['agnd'], p['t_b0'], p['t_end_burst']) - at(w['agnd'], p['t_b0']), at(w['agnd'], p['t_b0']) - trough(w['agnd'], p['t_b0'], p['t_end_burst'])) * 1e3"
       mod_swing: "peak(w['jm1'], p['t_b0'], p['t_end_burst']) - trough(w['jm1'], p['t_b0'], p['t_end_burst'])"
       sclk_rx_max: "peak(w['srx'], p['t_b0'], p['t_end_burst'])"
-      pre_breath_mv: "(peak(w['jb'], p['t_pre0'], p['t_b0']) - trough(w['jb'], p['t_pre0'], p['t_b0'])) * 1e3"
+      pre_breath_mv: "(peak(w['jb'], 0, p['t_b0']) - trough(w['jb'], 0, p['t_b0'])) * 1e3"
   - name: hot-plug
     deck: plug.cir
     set: {pad_hiz: 1}
@@ -301,14 +322,14 @@ sims:
       pre_pitch_cents: "(peak(w['jp'], p['t_save_plug'], p['t_plug']) - trough(w['jp'], p['t_save_plug'], p['t_plug'])) * 1200"
       mod_dev_mv: "max(peak(w['jm1'], p['t_plug'], p['t_end_plug']) - at(w['jm1'], p['t_plug']), at(w['jm1'], p['t_plug']) - trough(w['jm1'], p['t_plug'], p['t_end_plug'])) * 1e3"
       breath_absent: "at(w['jb'], p['t_plug'])"
-      breath_rest: "at(w['jb'], p['t_end_plug'])"
-      breath_over_mv: "max(peak(w['jb'], p['t_plug'], p['t_end_plug']) - max(at(w['jb'], p['t_plug']), at(w['jb'], p['t_end_plug'])), min(at(w['jb'], p['t_plug']), at(w['jb'], p['t_end_plug'])) - trough(w['jb'], p['t_plug'], p['t_end_plug']), 0) * 1e3"
+      breath_rest: "at(w['jb'], p['t_end_plug'] - 1e-4)"
+      breath_over_mv: "max(peak(w['jb'], p['t_plug'], p['t_end_plug']) - max(at(w['jb'], p['t_plug']), at(w['jb'], p['t_end_plug'] - 1e-4)), min(at(w['jb'], p['t_plug']), at(w['jb'], p['t_end_plug'] - 1e-4)) - trough(w['jb'], p['t_plug'], p['t_end_plug']), 0) * 1e3"
       iso_peak: "peak(w['iiso'], p['t_plug'], p['t_end_plug'])"
       hdr_dip_mv: "(at(w['hdrp'], p['t_plug']) - trough(w['hdrp'], p['t_plug'], p['t_end_plug'])) * 1e3"
       sclk_rx_max: "peak(w['srx'], p['t_plug'], p['t_end_plug'])"
       mosi_rx_max: "peak(w['mrx'], p['t_plug'], p['t_end_plug'])"
       cs_rx_min: "trough(w['crx'], p['t_plug'], p['t_end_plug'])"
-      cs_rx_end: "at(w['crx'], p['t_end_plug'])"
+      cs_rx_end: "at(w['crx'], p['t_end_plug'] - 1e-4)"
       latched: "peak(w['latch'], p['t_plug'], p['t_end_plug'])"
       t_inst_up: "cross(w['ins'], 0.9 * p['v_bus'], p['t_plug']) - p['t_plug']"
   - name: cable-check
@@ -316,3 +337,35 @@ sims:
     sweep: {z_cm: [70, 100, 140]}
     vary: []
     measures: [pk_l, pk_c, tr_l, tr_c, ar_l, ar_c, cm_l, cm_c]
+  - name: opamp-check
+    deck: opamp-check.cir
+    vary: []
+    measures: [ti_pos_1k, bopa_pos_1k, ti_pos_2k, bopa_pos_2k, ti_pos_10k, bopa_pos_10k, ti_neg_2k, bopa_neg_2k, ti_neg_10k, bopa_neg_10k]
+    post:
+      ti_pos_1k: "at(w['tp'], 1.0e3)"
+      bopa_pos_1k: "at(w['bp'], 1.0e3)"
+      ti_pos_2k: "at(w['tp'], 2.0e3)"
+      bopa_pos_2k: "at(w['bp'], 2.0e3)"
+      ti_pos_10k: "at(w['tp'], 1.0e4)"
+      bopa_pos_10k: "at(w['bp'], 1.0e4)"
+      ti_neg_2k: "at(w['tn'], 2.0e3)"
+      bopa_neg_2k: "at(w['bn'], 2.0e3)"
+      ti_neg_10k: "at(w['tn'], 1.0e4)"
+      bopa_neg_10k: "at(w['bn'], 1.0e4)"
+  - name: inamp-check
+    deck: inamp-check.cir
+    vary: []
+    measures: [ti_cm_100, bina_cm_100, ti_cm_2k, bina_cm_2k, ti_cm_10k, bina_cm_10k, ti_pos_100, bina_pos_100, ti_pos_2k, bina_pos_2k, ti_pos_10k, bina_pos_10k]
+    post:
+      ti_cm_100: "at(w['tc'], 100.0)"
+      bina_cm_100: "at(w['bc'], 100.0)"
+      ti_cm_2k: "at(w['tc'], 2.0e3)"
+      bina_cm_2k: "at(w['bc'], 2.0e3)"
+      ti_cm_10k: "at(w['tc'], 1.0e4)"
+      bina_cm_10k: "at(w['bc'], 1.0e4)"
+      ti_pos_100: "at(w['tp'], 100.0)"
+      bina_pos_100: "at(w['bp'], 100.0)"
+      ti_pos_2k: "at(w['tp'], 2.0e3)"
+      bina_pos_2k: "at(w['bp'], 2.0e3)"
+      ti_pos_10k: "at(w['tp'], 1.0e4)"
+      bina_pos_10k: "at(w['bp'], 1.0e4)"

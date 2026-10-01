@@ -1,51 +1,58 @@
 * SCENARIO 2, a burst of DAC frames while breath is held: the whole system (system.lib) on
-* the lumped umbilical, cold-started as led.cir is, the LED row blank, pitch held (jack
+* the umbilical as ngspice CPL lines (the lumped form stalls the solver at the nanosecond
+* steps these edges need), from its DC operating point, the LED row blank, pitch held (jack
 * 0 V). At t_b0 the ESP32 sends n_frames back-to-back DAC frames on SPI2 at f_clk, mode 1:
 * SCLK runs while CS_MOD is low, MOSI changes on every SCLK rising edge (the most edges
-* the link can carry), CS_MOD high for one clock period between frames (t_csh + t_csw,
-* the firmware contract's minimums). U-LVL-MOD's three outputs repeat the pads' timeline
-* t_chain later, into the DAC's pins. Each frame's end updates mod channel 1, between
-* v_mod_code and v_mod_code + v_mod_step (the largest step its window allows); pitch and
-* the other channels hold.
+* the link can carry), CS_MOD is high for one clock period between frames (no more than
+* the firmware contract's t_csh + t_csw, spi-link/sim). U-LVL-MOD's three outputs repeat
+* the pads' timeline t_chain later, into the DAC's pins. Each frame's end steps mod channel
+* 1 between v_mod_code and v_mod_code + v_mod_step; pitch and the other channels hold.
+* Every edge is a PULSE timed as t_b0 plus an offset, summed by ngspice (sims.yaml). A PWL
+* repeated with r=0 stalled the solver at its second period, every time.
 XC m1 m2 m3 m4 m5 m6 m7 m8 i1 i2 i3 i4 i5 i6 i7 i8 UMB_LUMPED
 XS m1 m2 m3 m4 m5 m6 m7 m8 i1 i2 i3 i4 i5 i6 i7 i8
 + ledctl sclkctl mosictl csctl dsck ddin dsync dacp dacm1 dacm2 dacm3 dacm4 plug pplug SYS
 VLED ledctl 0 0
-* the pads: a free-running clock and data toggle, gated by the burst and by CS_MOD
-VCK ck 0 PULSE(0 1 {{t_b0}} {{tr_drv}} {{tr_drv}} {{t_hi}} {{t_per}})
-VDT dt 0 PULSE(0 1 {{t_b0}} {{tr_drv}} {{tr_drv}} {{t_dt_hi}} {{t_dt_per}})
-VFR fr 0 PULSE(0 1 {{t_fr0}} {{tr_drv}} {{tr_drv}} {{t_fr_hi}} {{t_frame}})
-VGT gt 0 PWL(0 0 {{t_gt0}} 0 {{t_gt0e}} 1 {{t_gt1}} 1 {{t_gt1e}} 0)
+* the pads: a free-running clock and data toggle, gated by the burst and by CS_MOD's
+* high window between frames
+VCK ck 0 PULSE(0 1 { {{t_b0}} } {{tr_drv}} {{tr_drv}} {{b_hi}} {{b_per}})
+VDT dt 0 PULSE(0 1 { {{t_b0}} } {{tr_drv}} {{tr_drv}} {{b_dhi}} {{b_dper}})
+VFR fr 0 PULSE(0 1 { {{t_b0}} + {{b_fr}} } {{tr_drv}} {{tr_drv}} {{b_frw}} {{b_frame}})
+VGT gt 0 PULSE(0 1 { {{t_b0}} + {{b_gon}} } {{tr_drv}} {{tr_drv}} {{b_gw}} 1)
 BSCK sclkctl 0 V = V(ck) * V(gt) * (1 - V(fr))
 BMOS mosictl 0 V = V(dt) * V(gt)
 BCSC csctl 0 V = 1 - V(gt) * (1 - V(fr))
-* U-LVL-MOD's outputs: the same, t_chain later; SYNC is CS_MOD's copy
-VCK2 ck2 0 PULSE(0 1 {{t_b0c}} {{t_lvl_edge}} {{t_lvl_edge}} {{t_hi}} {{t_per}})
-VDT2 dt2 0 PULSE(0 1 {{t_b0c}} {{t_lvl_edge}} {{t_lvl_edge}} {{t_dt_hi}} {{t_dt_per}})
-VFR2 fr2 0 PULSE(0 1 {{t_fr0c}} {{t_lvl_edge}} {{t_lvl_edge}} {{t_fr_hi}} {{t_frame}})
-VGT2 gt2 0 PWL(0 0 {{t_gt0c}} 0 {{t_gt0ce}} 1 {{t_gt1c}} 1 {{t_gt1ce}} 0)
+* U-LVL-MOD's outputs: the same, t_chain later, with its own edges; SYNC is CS_MOD's copy
+VCK2 ck2 0 PULSE(0 1 { {{t_b0}} + {{t_chain}} } {{t_lvl_edge}} {{t_lvl_edge}} {{b_hi2}} {{b_per}})
+VDT2 dt2 0 PULSE(0 1 { {{t_b0}} + {{t_chain}} } {{t_lvl_edge}} {{t_lvl_edge}} {{b_dhi2}} {{b_dper}})
+VFR2 fr2 0 PULSE(0 1 { {{t_b0}} + {{b_fr2}} } {{t_lvl_edge}} {{t_lvl_edge}} {{b_frw2}} {{b_frame}})
+VGT2 gt2 0 PULSE(0 1 { {{t_b0}} + {{b_gon2}} } {{t_lvl_edge}} {{t_lvl_edge}} {{b_gw2}} 1)
 BDSK dsck 0 V = V(ck2) * V(gt2) * (1 - V(fr2))
 BDDI ddin 0 V = V(dt2) * V(gt2)
 BDSY dsync 0 V = 1 - V(gt2) * (1 - V(fr2))
-* the DAC: mod channel 1 toggles at each frame's end, inside the burst
-VUP up 0 PULSE(0 1 {{t_up0}} {{t_dac_edge}} {{t_dac_edge}} {{t_frame}} {{t_frame2}})
-VGU gu 0 PWL(0 0 {{t_gt0c}} 0 {{t_gt0ce}} 1 {{t_gu1}} 1 {{t_gu1e}} 0)
-BDM1 dacm1 0 V = {{v_mod_code}} + {{v_mod_step}} * V(up) * V(gu)
-VDP dacp 0 {{v_dac0}}
-VDM2 dacm2 0 {{v_mod_code}}
-VDM3 dacm3 0 {{v_mod_code}}
-VDM4 dacm4 0 {{v_mod_code}}
+* the DAC: mod channel 1 toggles between v_mod_code and v_mod_code + v_mod_step at each
+* frame's end, inside the burst
+VUP up 0 PULSE(0 1 { {{t_b0}} + {{b_up}} } {{t_dac_edge}} {{t_dac_edge}} {{b_upw}} {{b_upper}})
+VGU gu 0 PULSE(0 1 { {{t_b0}} + {{b_gon}} } {{tr_drv}} {{tr_drv}} {{b_guw}} 1)
+VDM1R dm1r 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_mod_code}})
+BDM1 dacm1 0 V = V(dm1r) + {{v_mod_step}} * V(up) * V(gu)
+VDP dacp 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_dac0}})
+VDM2 dacm2 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_mod_code}})
+VDM3 dacm3 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_mod_code}})
+VDM4 dacm4 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_mod_code}})
 VPLG plug 0 1
 VPPL pplug 0 1
-.options method=gear rshunt=1e10
+.options method=gear reltol=3e-3
 .control
-tran {{t_step_out}} {{t_end_burst}} {{t_save0}} {{t_max_step}}
+tran {{t_step_out}} {{t_end_burst}} {{t_save0}} {{t_max_step}} uic
 wrdata jp.dat v(xs.jp)
 wrdata jb.dat v(xs.jb)
 wrdata jm1.dat v(xs.jm1)
 wrdata ina.dat v(xs.inaout) - v(xs.agnd)
 wrdata agnd.dat v(xs.agnd)
 wrdata srx.dat v(xs.srxi) - v(xs.dge)
+wrdata sck.dat v(sclkctl)
+wrdata syn.dat v(xs.psy) - v(xs.agnd)
 quit
 .endc
 .end

@@ -221,6 +221,25 @@ CUSI i1 i4 {{c_unb_spi_half}}
 
 .subckt UMB_CPL m1 m2 m3 m4 m5 m6 m7 m8 i1 i2 i3 i4 i5 i6 i7 i8
 P1 m1 m2 m3 m4 m5 m6 m7 m8 cr1 i1 i2 i3 i4 i5 i6 i7 i8 cr2 UMBCPL
+* ngspice's CPL carries no current at DC (its operating point leaves the instrument
+* unpowered): beside each conductor a DC path, its resistance in series with l_dc, which
+* is a short at DC and open by the microseconds these runs look at
+RDC1 m1 ld1 {{cl_r_dc}}
+LDC1 ld1 i1 {{l_dc}}
+RDC2 m2 ld2 {{cl_r_dc}}
+LDC2 ld2 i2 {{l_dc}}
+RDC3 m3 ld3 {{cl_r_dc}}
+LDC3 ld3 i3 {{l_dc}}
+RDC4 m4 ld4 {{cl_r_dc}}
+LDC4 ld4 i4 {{l_dc}}
+RDC5 m5 ld5 {{cl_r_dc}}
+LDC5 ld5 i5 {{l_dc}}
+RDC6 m6 ld6 {{cl_r_dc}}
+LDC6 ld6 i6 {{l_dc}}
+RDC7 m7 ld7 {{cl_r_dc}}
+LDC7 ld7 i7 {{l_dc}}
+RDC8 m8 ld8 {{cl_r_dc}}
+LDC8 ld8 i8 {{l_dc}}
 RCR1 cr1 0 1e12
 RCR2 cr2 0 1e12
 CUPM m1 m3 {{c_unb_pwr_half}}

@@ -17,16 +17,16 @@ VCSC csctl 0 0
 VDSK dsck 0 0
 VDDI ddin 0 0
 VDSY dsync 0 1
-VDP dacp 0 {{v_dac0}}
-VDM1 dacm1 0 {{v_mod_code}}
-VDM2 dacm2 0 {{v_mod_code}}
-VDM3 dacm3 0 {{v_mod_code}}
-VDM4 dacm4 0 {{v_mod_code}}
+VDP dacp 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_dac0}})
+VDM1 dacm1 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_mod_code}})
+VDM2 dacm2 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_mod_code}})
+VDM3 dacm3 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_mod_code}})
+VDM4 dacm4 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_mod_code}})
 VPLG plug 0 PWL(0 0 {{t_plug}} 0 {{t_plug_e}} 1)
 VPPL pplug 0 PWL(0 0 {{t_pplug}} 0 {{t_pplug_e}} 1)
-.options method=gear rshunt=1e10
+.options method=gear
 .control
-tran {{t_step_out}} {{t_end_plug}} {{t_save_plug}} {{t_max_step_plug}}
+tran {{t_step_out}} {{t_end_plug}} {{t_save_plug}} {{t_max_step_plug}} uic
 wrdata jp.dat v(xs.jp)
 wrdata jb.dat v(xs.jb)
 wrdata jm1.dat v(xs.jm1)
