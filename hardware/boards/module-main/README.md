@@ -85,9 +85,11 @@ Why this order:
   (ADR 0024: the pot row, then the jacks). The breath-gain chain
   (`BREATH_SHAPED`, `GAIN_WIPER`, `GAIN_FLOOR`) is the left column, on the
   gain pot's side; the response pot's three nets are the right column, on its
-  side; the offset pot, in the middle, closes the group. A ground row
-  (9–10 and 13) separates the pots' high-impedance wipers from the jack
-  outputs.
+  side; the offset pot, in the middle, closes the group (`OFFSET_WIPER` on
+  pin 9). The grounds on pins 10 and 13 stand between the pots' wipers and
+  the jack outputs below them, except in the left column, where
+  `OFFSET_WIPER` (9) is directly above `BREATH_JACK` (11) with no ground
+  between.
 - **Each jack on its own column's side**: `BREATH`, `MOD1`, `MOD2` are the
   left column of jacks and take odd pins; `PITCH`, `MOD3`, `MOD4` the right
   column and even pins. The order down the header is the jacks' order down
