@@ -1014,6 +1014,10 @@ def cmd_finish(bdir):
         orphans = pcb_route.plane_orphans(board, lay)
         if orphans:
             pcb_route.fanout(board, lay, pcb_route.Obstacles(board, lay), only=orphans)
+        new = pcb_route.unfanned(board, lay)
+        if new:
+            # a plane pad moved or added since the layout: its own via, as the fanout gives
+            pcb_route.fanout(board, lay, pcb_route.Obstacles(board, lay), only=new)
         pcb_route.tidy(board, lay)
         pcbnew.SaveBoard(tmp, board)
         _fill(tmp)

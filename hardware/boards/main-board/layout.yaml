@@ -252,9 +252,10 @@ parts:
   U4:  [14.3, 18.6, 0]      # U-REF-BREATH REF5050
   # VS's decoupling (MPXV4006DP Fig. 3, breath-sense-link.md): beside the sensor's pins at
   # the far edge, just past its leads' courtyard, the smallest nearest pin 2 (VS)
-  C202: [22.4, 47.4, 0]     # 10 nF on VS, nearest
-  C8:  [25.9, 47.4, 0]      # 100 nF on VS
-  C201: [28.9, 47.4, 90]    # 1 uF on VS
+  # each turned so its VS pad is on top: the three VS pads in one row, one straight track
+  C202: [21.7, 47.4, 270]   # 10 nF on VS, nearest
+  C8:  [23.9, 47.4, 270]    # 100 nF on VS
+  C201: [26.1, 47.4, 270]   # 1 uF on VS
   # SENSOR_RAW's 470 pF: pin 4 (Vout) is the leads' mouth-end corner, walled by the
   # sensor's own courtyard, so it stands at the other end of the net, at U-BUF's input
   C203: [21.8, 23.6, 90]    # 470 pF, SENSOR_RAW to AGND_INST, by U3 pin 5 (INB+)

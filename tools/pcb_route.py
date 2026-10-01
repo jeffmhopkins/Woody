@@ -1044,7 +1044,7 @@ def fanout(board, lay, obs, only=None):
         for pad in sorted(fp.Pads(), key=lambda p: p.GetNumber()):
             net = pad.GetNetname()
             name = f"{fp.GetReference()}.{pad.GetNumber()}"
-            through = name in (lay.get("fanout_through") or []) or (only is not None and name in only)
+            through = name in (lay.get("fanout_through") or []) or (only is not None and name in only and pad.HasHole())
             if only is not None and name not in only:
                 continue
             if net not in (lay.get("fanout") or []) or (pad.HasHole() and not through) or name in skip:
@@ -1641,6 +1641,25 @@ def plane_orphans(board, lay):
                     if q.GetNetname() == net and frag.buffer(0.05).contains(c):
                         out.append(f"{f.GetReference()}.{q.GetNumber()}")
     return sorted(set(out))
+
+
+def unfanned(board, lay):
+    """Plane-net SMD pads with no track of their net ending on them - a part moved or
+    added after the layout's fanout: each needs its via (fanout `only=`)."""
+    nets = set(lay.get("fanout") or [])
+    skip = {p for spec in lay.get("islands") or [] for p in spec.get("off_island", [])}
+    tracks = [t for t in board.GetTracks() if type(t) is pcbnew.PCB_TRACK and t.GetNetname() in nets]
+    out = []
+    for f in board.GetFootprints():
+        for q in f.Pads():
+            name = f"{f.GetReference()}.{q.GetNumber()}"
+            if q.GetNetname() not in nets or q.HasHole() or name in skip or f.IsNetTie():
+                continue
+            if any(h.HasHole() and h.GetNumber() == q.GetNumber() for h in f.Pads()):
+                continue        # a plated hole's face pad (a mount's): the hole meets the plane
+            if not any(t.GetNetname() == q.GetNetname() and (q.HitTest(t.GetStart()) or q.HitTest(t.GetEnd())) for t in tracks):
+                out.append(name)
+    return out
 
 
 def moat_keepout(board, lay):
