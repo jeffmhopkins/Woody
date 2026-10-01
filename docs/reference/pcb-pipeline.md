@@ -308,24 +308,27 @@ Assertions worth keeping beyond DRC, because each passes DRC on its own:
 - verify the **zip**, not the board directory; every check in the old plan sat
   upstream of the thing actually being shipped
 
-**The board is hand-assembled**, so no pick-and-place, no fab BOM format, no
-rotation-correction table. Gerbers and drill. Add an interactive HTML BOM —
-that is the artefact that helps *you*, and it runs headless.
+**The board is machine-assembled except its `hand` rows.** Each placed
+part's sheet field `Assembly` (`machine`/`hand`/`none`, ADR 0019) says which;
+`tools/pcb.py` writes the fab BOM and placement from it and requires an `LCSC`
+code on every machine part (`docs/reference/tooling.md` §4). Gerbers, drill,
+BOM and placement. An interactive HTML BOM still helps for the hand rows, and
+it runs headless.
 
 ## Two things that are not this pipeline
 
 **The 10HP panel is 2 mm aluminium**, laser or waterjet from DXF, same vendor
 and order as the key plate. Not a PCB. It belongs with the mechanical work.
 
-**2 layers or 4: the main board is decided, the module is not.** The main
+**2 layers or 4: both boards are decided, four layers each.** The main
 board is four layers (ADR 0017 amendment, 2026-09-29), and its ground is
-written in `power-entry-instrument.md` §2. The module board is still open: on
-two layers, two corpus requirements are mutually exclusive — `power-entry.md`
-wants the SPI return directly under its trace while ADR 0004 wants `PWR_GND`
-on its own copper *and* the analog return as its own region. Four layers
-dissolves it (`dig-gnd-topology`'s `proposed_if_four_layers`). This is the
-owner's cost decision and it gates the module's grounding, so it is upstream
-of stage 3 for that board.
+written in `power-entry-instrument.md` §2. The module's main board is four
+layers too (owner, 2026-09-30): its layer stack and the star it serves are
+`dig-gnd-topology`, owned by `power-entry.md` *Grounding* — read them there.
+On two layers `power-entry.md`'s SPI return under its trace and ADR 0004's
+separate `PWR_GND` and analog region could not both be met, which is why the
+layer count was upstream of stage 3. The module's jack board stays two layers
+(the same register entry).
 
 ## One warning about reading `datasheets/` programmatically
 
