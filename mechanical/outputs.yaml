@@ -244,6 +244,7 @@ exports:
   - {name: dxf-matrix-window, src: mechanical/cad/woody_body.scad, out: mechanical/export/matrix-window.dxf, defines: {part: "matrix_window"}}
   - {name: dxf-oak-rebates, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-rebates.dxf, defines: {part: "oak_rebates"}}
   - {name: dxf-oak-pockets, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-pockets.dxf, defines: {part: "oak_pockets"}}
+  - {name: dxf-oak-logo, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-logo.dxf, defines: {part: "oak_logo"}}
   - {name: dxf-key-board-lh, src: mechanical/cad/woody_body.scad, out: mechanical/export/key-board-lh.dxf, defines: {part: "key_board_left_hand"}}
   - {name: dxf-main-board, src: mechanical/cad/woody_body.scad, out: mechanical/export/main-board.dxf, defines: {part: "main_board"}}
   - {name: dxf-key-board-rh, src: mechanical/cad/woody_body.scad, out: mechanical/export/key-board-rh.dxf, defines: {part: "key_board_right_hand"}}
@@ -275,10 +276,18 @@ scripts:
                            datasheets/led/WS2815B-5050-3D.step, datasheets/mechanical/GATERON-KS-33-3D.step,
                            hardware/lib/woody.3dshapes/Hanxia_HX_PZ2.54-1x8P_WZ.step, hardware/lib/woody.3dshapes/NXP_Case1351-01_MPXV4006DP.step,
                            hardware/lib/woody.3dshapes/Samtec_SHF-106-01-L-D-RA.step, hardware/lib/woody.3dshapes/XKB_X1270WR-2x12A-9TV01.step,
-                           mechanical/module/blender/studio_small_08_1k.hdr]
+                           mechanical/module/blender/studio_small_08_1k.hdr,
+                           branding/export/scs-orbit-wave-mark.dxf, branding/export/spec.json, branding/build.py]
     out: mechanical/renders/photo-hero.png
     stamp: Woody body
     note: "Sides rendered clear (config/render.yaml side_glass) to show the inside; the instrument's sides are frosted (ADR 0009)."
+    layout_sensitive: true
+  - name: photo-logo
+    title: The maker's mark on the oak top, between the mouth cap and the first key - etched and filled in branding/'s colour-fill scheme
+    cmd: [tools/render-instrument.py, --view, logo]
+    inputs: *photo_inputs
+    out: mechanical/renders/photo-logo.png
+    stamp: Woody body
     layout_sensitive: true
   - name: photo-open
     title: Oak top, key plate and the near side off - the cassette and its boards in the shell

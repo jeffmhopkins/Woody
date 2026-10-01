@@ -44,7 +44,9 @@ ribbons, the Matrix, the etherCON and its adapter, USB-C, the breath tube.
 WHAT IT READS (each printed as `READ:`, cross-checked by cad.py): config/render.yaml;
 mechanical/cad/woody_body.scad and every file it reads (also cross-checked against
 OpenSCAD's own depfile); each board's .kicad_pcb, layout.yaml and every in-repository
-3D model it names; mechanical/module/blender/studio_small_08_1k.hdr.
+3D model it names; mechanical/module/blender/studio_small_08_1k.hdr; and
+branding/export/spec.json + branding/build.py, through cad.branding(), for the
+maker's mark's epoxy colours (`EPOXY`, branding/README.md 'Colour fill').
 
 Numbers below that are not read from those files are PICTURE conventions -
 cameras, lights, colours, the wood's figure - and are named as such.
@@ -240,7 +242,7 @@ def prepare(jobs):
 # config/render.yaml names these groups; a group it names that is not here,
 # or a solid in no group, fails the render.
 GROUPS = {
-    "oak top": ["oak top", "matrix window"],
+    "oak top": ["oak top", "matrix window", "logo fill *"],
     "oak bottom": ["oak bottom"],
     "side left": ["side left"],
     "side right": ["side right"],
@@ -272,6 +274,9 @@ SHELL = ["oak top", "oak bottom", "side left", "side right", "mouth cap", "tail 
 VIEWS = {
     "hero": dict(hide=["ribbons"], explode=None,
                  cam=(-0.62, -1.0, 0.40), lens=60, frame=None, size=(1920, 1080), leds=False),
+    # the maker's mark on the oak top (body.yaml logo), from the tail side so it reads upright
+    "logo": dict(hide=["ribbons"], explode=None,
+                 cam=(0.55, -0.40, 1.0), lens=60, frame=((0, 0, 30), (62, 57, 39)), size=(1920, 1080), leds=False),
     "open": dict(hide=["oak top", "key plate", "side left", "column screws"], explode=None,
                  cam=(-0.45, -1.0, 0.95), lens=60, frame=None, size=(1920, 1080), leds=False),
     "exploded": dict(hide=["ribbons"], explode="explode_instrument",
@@ -454,10 +459,26 @@ def oak(name, along="x"):
     return m
 
 
+def epoxy(name, rgb):
+    """The maker's mark's fill (body.yaml logo.fill): pigmented epoxy poured
+    into the etch, sanded flush and finished with the oak, so under the same
+    satin clearcoat. The COLOUR is branding's (`EPOXY` in branding/build.py,
+    read by cad.branding()); the sheen is a picture convention."""
+    return principled(name, "#%02X%02X%02X" % tuple(rgb), 0.30, 0.0, **{"Coat Weight": 0.2, "Coat Roughness": 0.3})
+
+
+def branding_colours():
+    rd(cad.BRANDING_SPEC)
+    rd(cad.BRANDING_BUILD)
+    return cad.branding()["epoxy"]
+
+
 class Mats:
     """PICTURE CONVENTIONS, each named for what it stands for."""
 
-    def __init__(self, side_glass):
+    def __init__(self, side_glass, fill):
+        self.fill_wave = epoxy("epoxy fill, the mark's wave and moon", fill["wave"])
+        self.fill_ring = epoxy("epoxy fill, the mark's ring", fill["ring"])
         self.oak_x = oak("oak, grain along the body")
         self.oak_y = oak("oak, grain across", "y")
         self.alu = brushed("aluminium, brushed", "#C9CBCE", 0.30, 0.55)
@@ -484,6 +505,7 @@ class Mats:
         M = self
         table = [
             (["oak top", "oak bottom"], M.oak_x), (["mouth cap", "tail cap"], M.oak_y),
+            (["logo fill wave and moon"], M.fill_wave), (["logo fill ring"], M.fill_ring),
             (["side *"], M.side), (["matrix window"], M.window),
             (["key plate", "bottom plate"], M.alu),
             (["column standoff *"], M.nickel), (["U-bolt"], M.steel),
@@ -636,7 +658,7 @@ def build(view, sdir, solids, boards):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     sc = bpy.context.scene
     sc.unit_settings.system = "METRIC"
-    M = Mats(cfg_value(cfg, "render.side_glass"))
+    M = Mats(cfg_value(cfg, "render.side_glass"), branding_colours())
 
     members = {g: [] for g in GROUPS}
     drawn = {}

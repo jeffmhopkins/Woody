@@ -50,7 +50,7 @@ figure = false;       // set true by a figure that includes this file
 origin = "mouth";
 
 LAYERS = ["plate_top", "oak_top", "oak_bottom", "oak_grooves", "plate_bottom", "side",
-          "mouth_cap", "tail_cap", "matrix_window", "oak_rebates", "oak_pockets"];
+          "mouth_cap", "tail_cap", "matrix_window", "oak_rebates", "oak_pockets", "oak_logo"];
 
 $fn = 40;
 EPS = 0.01;           // drawing convention: coplanar-face nudge
@@ -525,6 +525,62 @@ module oak_rebates_2d() { translate([-x_in0, 0]) translate(matrix_xy) square(mat
 col_pocket_depth = hardware_col_screw_head_h + hardware_col_pocket_clear;
 module oak_pockets_2d() { translate([-x_in0, 0]) for (m = columns()) translate(m) circle(d = hardware_col_pocket_d); }
 
+// THE MAKER'S MARK (owner, 2026-10-01: "Logo should be here, scale as
+// appropriate" - the plain oak between the mouth cap's seam and the first cap
+// slot; body.yaml `logo`). branding/'s artwork, etched logo.depth into the
+// oak top's playing face and, with logo.fill "epoxy", filled flush in
+// branding/README's colour-fill scheme. The band is DERIVED: the mouth cap's
+// inside face to the nearest top cap slot, so the mark follows the layout.
+// An etch, not a through-cut: exported on its own (oak_logo_2d), in the oak
+// panels' frame, for the laser - as the pockets and rebates are.
+// The literal path is the dependency: cad.py's walk and OpenSCAD's depfile
+// both read it, so it must name the file body.yaml's logo.artwork names.
+LOGO_DXF = "../../branding/export/scs-orbit-wave-mark.dxf";
+assert(LOGO_DXF == str("../../branding/export/", logo_artwork, ".dxf"),
+       "woody_body.scad imports a different mark from the one config/body.yaml logo.artwork names");
+logo_slot_x = min([for (k = top_keys) key_xy(k)[0]]) - (switch_keycap / 2 + stack_cap_clear);
+logo_band = [x_in0, logo_slot_x];
+logo_c = [(logo_band[0] + logo_band[1]) / 2, W / 2] + logo_offset;
+// the mark's extent on the body, along x across, from its frame turned and scaled
+function logo_extent(s) = s * [abs(cos(logo_rotation)) * branding_mark_size[0] + abs(sin(logo_rotation)) * branding_mark_size[1],
+                               abs(sin(logo_rotation)) * branding_mark_size[0] + abs(cos(logo_rotation)) * branding_mark_size[1]];
+logo_sz = logo_extent(logo_scale);
+module logo_art() translate(-branding_mark_size / 2) import(LOGO_DXF);
+// THE TWO POURS (branding/README 'Colour fill'): the ring one colour, the
+// wave and the moon another. The artwork is one layer of five outlines, so
+// the parts are told apart by their geometry: the ring's three arcs lie
+// wholly inside the ring's band, the wave and the moon both reach outside it.
+// Seeded with what lies outside the band, then grown back WITHIN THE ARTWORK
+// in steps smaller than its smallest clearance, which crosses the band along
+// the wave and through the moon but can never jump a gap to an arc.
+// Drawing convention: 0.2 mm of band margin so no chord of an arc's outline
+// seeds; steps of 0.6 of the clearance; enough of them to cross the band twice.
+logo_seed_m = 0.2;
+logo_step = 0.6 * branding_mark_gap;
+logo_steps = ceil(2 * (branding_mark_ring[1] + 2 * logo_seed_m) / logo_step) + 1;
+module logo_grow(n) {
+    if (n <= 0) children();
+    else intersection() { logo_art(); offset(r = logo_step, $fn = 12) logo_grow(n - 1) children(); }
+}
+module logo_wave_moon_art() {
+    logo_grow(logo_steps) difference() {
+        logo_art();
+        difference() {
+            circle(r = branding_mark_ring[0] + branding_mark_ring[1] / 2 + logo_seed_m, $fn = 360);
+            circle(r = branding_mark_ring[0] - branding_mark_ring[1] / 2 - logo_seed_m, $fn = 360);
+        }
+    }
+}
+module logo_ring_art() difference() { logo_art(); offset(delta = branding_mark_gap / 2) logo_wave_moon_art(); }
+// which = "all" (the etch), "wave_moon" or "ring" (the pours); model XY
+module logo_2d(which = "all") {
+    translate(logo_c) rotate(logo_rotation) scale(logo_scale)
+        if (which == "wave_moon") logo_wave_moon_art();
+        else if (which == "ring") logo_ring_art();
+        else logo_art();
+}
+module oak_logo_2d() { translate([-x_in0, 0]) logo_2d(); }
+
 // --------------------------------------------------------- features ------
 // Each key's square, unioned, then CLOSED (grow, shrink) so squares closer
 // than 2 x close merge into one outline that follows the keys round an
@@ -579,7 +635,14 @@ module lid(dz = 0) {
             translate([0, 0, -EPS]) linear_extrude(stack_groove_depth + EPS) oak_grooves_2d();
             translate([0, 0, -EPS]) linear_extrude(col_pocket_depth + EPS) oak_pockets_2d();
             translate([0, 0, oak_top_t - openings_matrix_acrylic_t]) linear_extrude(openings_matrix_acrylic_t + EPS) oak_rebates_2d();
+            translate([0, 0, oak_top_t - logo_depth]) linear_extrude(logo_depth + EPS) oak_logo_2d();
         } }
+        // the mark's fill, poured into the etch and sanded flush (body.yaml logo.fill)
+        if (logo_fill == "epoxy") {
+            assert(branding_epoxy_wave == branding_epoxy_moon, "branding's EPOXY now colours the wave and the moon apart - the logo draws them as one pour");
+            lam(T - logo_depth + explode, logo_depth, branding_epoxy_wave, true, "logo fill wave and moon") logo_2d("wave_moon");
+            lam(T - logo_depth + explode, logo_depth, branding_epoxy_ring, true, "logo fill ring") logo_2d("ring");
+        }
         lam(z_plate_bot + explode / 2, plate_thickness, C_ALU, false, "key plate")
             translate([plate_x0, plate_y0]) plate_top_2d();
     }
@@ -1830,6 +1893,30 @@ module drc_report() {
     echo("DRC", "INFO", "USB-C extension cable run, Matrix edge to receptacle", usb_run,
          "mm straight line; buy the shortest extension that reaches, with slack for the tail cap to come off");
 
+    // THE MAKER'S MARK (owner, 2026-10-01; body.yaml logo)
+    let(m = [logo_c[0] - logo_sz[0] / 2 - logo_band[0], logo_band[1] - (logo_c[0] + logo_sz[0] / 2),
+             logo_c[1] - logo_sz[1] / 2 - stack_edge_r, (W - stack_edge_r) - (logo_c[1] + logo_sz[1] / 2)],
+        unit = logo_extent(1),
+        s_max = min((logo_band[1] - logo_band[0] - 2 * logo_margin_min) / unit[0], (W - 2 * stack_edge_r - 2 * logo_margin_min) / unit[1])) {
+        echo("DRC", "INFO", "logo: the band it sits in and its size", [logo_band, logo_band[1] - logo_band[0], logo_sz, logo_c],
+             str("mm: the band along the body (the mouth cap's inside face to the first cap slot) and its length; the mark's extent along x across at scale ",
+                 logo_scale, " turned ", logo_rotation, " deg (its top to the mouth); its centre"));
+        drc(min(m) >= logo_margin_min, "logo fits its band (seam, cap slot, edge roundovers)", m,
+            str("mm of plain oak from the mark's extent to the mouth cap's seam, to the first cap slot, and to each long edge's roundover flat, against logo.margin_min; the largest scale that keeps it is ",
+                s_max));
+    }
+    let(skin = oak_top_t - logo_depth - col_pocket_depth,
+        box = min([for (p = columns()) rect_gap(p, logo_c, logo_sz, 0) - hardware_col_pocket_d / 2]),
+        ring = min([for (p = columns()) norm(p - logo_c) - logo_scale * (branding_mark_ring[0] + branding_mark_ring[1] / 2) - hardware_col_pocket_d / 2]))
+        drc(skin >= hardware_col_pocket_skin, "logo etch leaves wood over the column screw pockets", [skin, box, ring],
+            str("mm: the oak between the etch's floor (", logo_depth, " deep) and a pocket's (", col_pocket_depth,
+                " up from below), against hardware.col_pocket_skin - so it holds wherever they meet in plan; then the nearest pocket's clearance in plan to the mark's extent (negative = under its bounding box) and to the ring's outside edge"));
+    let(gap = logo_scale * branding_mark_gap)
+        echo("DRC", gap < logo_laser_min_gap ? "FAIL" : gap < branding_mark_gap ? "NOTE" : "PASS", "logo: smallest gap in the etch", gap,
+             str("mm of oak between two etched parts at scale ", logo_scale, ", against logo.laser_min_gap ", logo_laser_min_gap,
+                 gap < branding_mark_gap ? str("; under the mark's own ", branding_mark_gap, " at 100 % (branding/README.md, the laser guideline), so the etch test on an offcut (ROADMAP) confirms it holds and the two pours stay apart") : ""));
+    drc(undef, "logo etch depth and fill", [logo_depth, logo_fill], "mm, and what fills it (branding/README.md 'Colour fill': deeper than a plain burn, so the epoxy keys in)");
+
 }
 
 // ============================================================ dispatch ====
@@ -1845,6 +1932,9 @@ module part_2d(p) {
     else if (p == "matrix_window") matrix_window_2d();
     else if (p == "oak_rebates") oak_rebates_2d();
     else if (p == "oak_pockets") oak_pockets_2d();
+    else if (p == "oak_logo") oak_logo_2d();
+    else if (p == "oak_logo_wave_moon") translate([-x_in0, 0]) logo_2d("wave_moon");   // the two pours, apart: not exported, a check's handle
+    else if (p == "oak_logo_ring") translate([-x_in0, 0]) logo_2d("ring");
     else if (p == "key_board_left_hand") key_board_2d("left_hand");
     else if (p == "key_board_right_hand") key_board_2d("right_hand");
     else if (p == "main_board") cb_2d();
