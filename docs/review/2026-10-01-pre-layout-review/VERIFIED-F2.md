@@ -69,6 +69,19 @@ commit and the closing commit on this branch.
 | A5-9 | "six `R-SPI-PULL`" | **Fixed**: `digital-and-supervision.md` Interfaces row and drawing (two cable-side `R-SPI-PULL` plus `R-PULL-CS`); `link-supervision.md` |
 | A5-10 | `link-supervision.md` "a display to report on" | **Fixed** (LEDs, ADR 0028; USB, ADR 0015). **Also found and fixed:** ADR 0006 and `mod-channels.md` still set ranges "on the instrument's display", which ADR 0015 removed — now the configuration over USB |
 
+## Received from F5 (handed into this domain)
+
+| Item | Action |
+|---|---|
+| `power-entry.md` "`r_d` is 69 mΩ at 392 mA" (and the `D-REVPOL` row's "r_d 69 mohm") | **Fixed**: ~0.55 Ω in `D2` at 0.22 A, ~2.8 Ω in `D1` at 37 mA, citing `diode-split-rationale` (F5's re-derivation); both spellings added to that figure's `forbidden` |
+| `umbilical-load-switch.md` ≈327–330 described the 0805 C0G package defect already fixed in `C-TIMER-LOADSW` (A8-16) | **Fixed**: the paragraph now states the low-leakage requirement the row carries |
+| `C-BULK-RAIL` buys two different parts (100 µF, 47 µF) in one row | **Not split — not clean this round.** The row name is read by `config/module.yaml` (`C-BULK-RAIL` sets a module CAD envelope and its `decided_by`) and from there by `mechanical/cad/generated/module-params.scad`, so a split re-generates module CAD and stales the orchestrator's module photos, and changes both sheets' `Row` fields (re-export, every module sim that hashes `power-entry/netlist.yaml` re-runs). **Next:** split into `C-BULK-POS12` (C1, 100 µF, UCM1H101MCL1GS on the sheet) and `C-BULK-NEG12` (C3, 47 µF), with the module.yaml envelope pointed at the 100 µF row, in a round that also re-renders the module |
+| A9-5: `hardware/nets.yaml` (≈582, ≈706) and the `U-LVL-MOD` row "six R-SPI-PULL" | **Fixed**: five `R-SPI-PULL` and `R-PULL-CS` |
+
+Also: `power-entry/sim`'s new derived values now tolerate the two sims that
+import its params without the pitch netlist (`digital-and-supervision/sim`,
+`panel-led/sim` failed on it once, re-run and passing).
+
 ## Open, with what decides each
 
 - **A2-12** — the mod resistors' specification, 1 % or 0.1 %: the owner.
