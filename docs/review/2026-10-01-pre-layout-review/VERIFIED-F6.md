@@ -71,4 +71,10 @@ travel; nothing was changed in that direction.
 
 ## Gates at the head
 
-See the report; recorded there after the final runs.
+`check-netlist --strict` 0 problems (161 rows exact, `U-BREATH` 1/2 short, not
+this fixer's); `merge-bom --check` 0 problems (217 rows); `verify-datasheets`
+276 verified, 0 problems; `sim.py check` PASS, 20 dirs (re-run here:
+`pitch-stage`, `power-entry`, `breath-output-stage`, `digital-and-supervision`,
+`panel-led`, `umbilical-load-switch`, `power-entry-instrument`,
+`key-chain-loom`, all 0 failed); `check-staleness` PASS; `kicad.py check`
+PASS (22 sheets, 6 boards, 129 renders).

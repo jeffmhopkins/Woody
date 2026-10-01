@@ -4,7 +4,7 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/interfaces/key-chain-loom/sim/sims.yaml: 6a3d25f44c04b95f
+  hardware/interfaces/key-chain-loom/sim/sims.yaml: 4a7509ef24800751
   hardware/boards/key-board-lh/board-netlist.yaml: 83dd5aa2b99e144f
   hardware/interfaces/key-chain-loom/sim/rail.cir: 537b273e07928b72
   hardware/interfaces/key-chain-loom/sim/edge.cir: af73f23cc4332e65
@@ -15,6 +15,7 @@ inputs:
   datasheets/discrete-and-power/BLM21SP601SN1-murata-spice.lib: e858b365fef2f77b
   hardware/cluster/key-switch-network/sim/sims.yaml: 28274e715669f42e
   bom:R-CHAIN-SER: 100R 1%
+  bom:R-HOP-SER: 2k2 1%
   drc:key-chain ribbon length (derived): '49.65'
   figure:key-press-time: 9.87 us
   figure:key-release-time: 138.7 us
@@ -261,6 +262,78 @@ sims:
     corners: 65
     measures:
       clk_skew:
+        nominal: 9.12598e-09
+        min: 5.67385e-09
+        min_at: c_main- c_tvs- r_drv- r_qh- tr_drv+ tr_qh+
+        max: 1.21471e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
+      ser_delay:
+        nominal: 1.79147e-08
+        min: 1.53518e-08
+        min_at: c_main- c_tvs- r_drv+ r_qh- tr_drv- tr_qh-
+        max: 1.91243e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh+ tr_drv- tr_qh+
+      hold_margin:
+        nominal: 8.78874e-09
+        min: 3.21293e-09
+        min_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
+        max: 1.34426e-08
+        max_at: c_main- c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
+      need_tpd:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 0.0
+        max_at: nominal
+    asserts:
+    - expr: min['hold_margin'] > 0
+      why: 'A5-2: with R-HOP-SER at left_thumb''s QH the data reaches right_hand''s SER after right_hand''s clock at every
+        corner and on both edges, with left_thumb''s CLK-to-QH delay taken as ZERO - so the hop holds on no figure TI does
+        not publish'
+      pass: true
+    - expr: max['ser_delay'] < p['setup_budget']
+      why: and the resistor's RC still delivers the data within 100 ns of the clock, against a 1 us period
+      pass: true
+  hop-hold-lt-to-rh[q_up=0]:
+    corners: 65
+    measures:
+      clk_skew:
+        nominal: 9.12598e-09
+        min: 5.67385e-09
+        min_at: c_main- c_tvs- r_drv- r_qh- tr_drv+ tr_qh+
+        max: 1.21471e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
+      ser_delay:
+        nominal: 2.65644e-08
+        min: 2.38141e-08
+        min_at: c_main- c_tvs- r_drv+ r_qh- tr_drv- tr_qh-
+        max: 2.79807e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh+ tr_drv- tr_qh+
+      hold_margin:
+        nominal: 1.74384e-08
+        min: 1.16752e-08
+        min_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
+        max: 2.23012e-08
+        max_at: c_main- c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
+      need_tpd:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 0.0
+        max_at: nominal
+    asserts:
+    - expr: min['hold_margin'] > 0
+      why: 'A5-2: with R-HOP-SER at left_thumb''s QH the data reaches right_hand''s SER after right_hand''s clock at every
+        corner and on both edges, with left_thumb''s CLK-to-QH delay taken as ZERO - so the hop holds on no figure TI does
+        not publish'
+      pass: true
+    - expr: max['ser_delay'] < p['setup_budget']
+      why: and the resistor's RC still delivers the data within 100 ns of the clock, against a 1 us period
+      pass: true
+  hop-hold-without-series-r[q_up=1]:
+    corners: 65
+    measures:
+      clk_skew:
         nominal: 9.12599e-09
         min: 5.67385e-09
         min_at: c_main- c_tvs- r_drv- r_qh- tr_drv+ tr_qh+
@@ -285,12 +358,11 @@ sims:
         max: 1.08986e-08
         max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
     asserts:
-    - expr: max['need_tpd'] < p['tpd_bench']
-      why: 'A5-2: the hop holds at every corner if left_thumb''s CLK-to-QH delay is at least tpd_bench. TI publishes no minimum,
-        so this is NOT a guarantee: it is the number E14 must confirm (key-chain-loom.md, ''The hop hold time''), and this
-        assertion fails if the clock''s skew between the boards grows past it'
+    - expr: min['hold_margin'] < 0
+      why: 'WHAT-IF: without R-HOP-SER the data beats right_hand''s clock at the worst corner, and the hop holds only if left_thumb''s
+        unpublished CLK-to-QH delay is at least need_tpd - why the resistor is fitted'
       pass: true
-  hop-hold-lt-to-rh[q_up=0]:
+  hop-hold-without-series-r[q_up=0]:
     corners: 65
     measures:
       clk_skew:
@@ -318,64 +390,7 @@ sims:
         max: 1.05739e-08
         max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
     asserts:
-    - expr: max['need_tpd'] < p['tpd_bench']
-      why: 'A5-2: the hop holds at every corner if left_thumb''s CLK-to-QH delay is at least tpd_bench. TI publishes no minimum,
-        so this is NOT a guarantee: it is the number E14 must confirm (key-chain-loom.md, ''The hop hold time''), and this
-        assertion fails if the clock''s skew between the boards grows past it'
+    - expr: min['hold_margin'] < 0
+      why: 'WHAT-IF: without R-HOP-SER the data beats right_hand''s clock at the worst corner, and the hop holds only if left_thumb''s
+        unpublished CLK-to-QH delay is at least need_tpd - why the resistor is fitted'
       pass: true
-  hop-hold-with-series-r[q_up=1]:
-    corners: 65
-    measures:
-      clk_skew:
-        nominal: 9.12598e-09
-        min: 5.67385e-09
-        min_at: c_main- c_tvs- r_drv- r_qh- tr_drv+ tr_qh+
-        max: 1.21471e-08
-        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
-      ser_delay:
-        nominal: 1.79147e-08
-        min: 1.53518e-08
-        min_at: c_main- c_tvs- r_drv+ r_qh- tr_drv- tr_qh-
-        max: 1.91243e-08
-        max_at: c_main+ c_tvs+ r_drv+ r_qh+ tr_drv- tr_qh+
-      hold_margin:
-        nominal: 8.78874e-09
-        min: 3.21293e-09
-        min_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
-        max: 1.34426e-08
-        max_at: c_main- c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
-      need_tpd:
-        nominal: 0.0
-        min: 0.0
-        min_at: nominal
-        max: 0.0
-        max_at: nominal
-    asserts: []
-  hop-hold-with-series-r[q_up=0]:
-    corners: 65
-    measures:
-      clk_skew:
-        nominal: 9.12598e-09
-        min: 5.67385e-09
-        min_at: c_main- c_tvs- r_drv- r_qh- tr_drv+ tr_qh+
-        max: 1.21471e-08
-        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
-      ser_delay:
-        nominal: 2.65644e-08
-        min: 2.38141e-08
-        min_at: c_main- c_tvs- r_drv+ r_qh- tr_drv- tr_qh-
-        max: 2.79807e-08
-        max_at: c_main+ c_tvs+ r_drv+ r_qh+ tr_drv- tr_qh+
-      hold_margin:
-        nominal: 1.74384e-08
-        min: 1.16752e-08
-        min_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
-        max: 2.23012e-08
-        max_at: c_main- c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
-      need_tpd:
-        nominal: 0.0
-        min: 0.0
-        min_at: nominal
-        max: 0.0
-        max_at: nominal
-    asserts: []
