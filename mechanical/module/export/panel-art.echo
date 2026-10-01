@@ -3,11 +3,11 @@ ECHO: "PANEL", "zone", "title", 1, 117, 49.5, 122, "title"
 ECHO: "PANEL", "zone", "POT-GAIN legend", 0.25, 94, 16.25, 98.5, "legend"
 ECHO: "PANEL", "zone", "POT-OFFSET legend", 17.25, 94, 33.25, 98.5, "legend"
 ECHO: "PANEL", "zone", "POT-RESP legend", 34.25, 94, 50.25, 98.5, "legend"
-ECHO: "PANEL", "zone", "J-CV-PITCH legend", 1, 87, 10.25, 90, "jack"
-ECHO: "PANEL", "zone", "J-CV-BREATH legend", 40.25, 87, 49.5, 90, "jack"
+ECHO: "PANEL", "zone", "J-CV-BREATH legend", 1, 87, 10.25, 90, "jack"
+ECHO: "PANEL", "zone", "J-CV-PITCH legend", 40.25, 87, 49.5, 90, "jack"
 ECHO: "PANEL", "zone", "J-CV-MOD1 legend", 1, 74, 10.25, 77, "jack"
-ECHO: "PANEL", "zone", "J-CV-MOD2 legend", 40.25, 74, 49.5, 77, "jack"
-ECHO: "PANEL", "zone", "J-CV-MOD3 legend", 1, 61, 10.25, 64, "jack"
+ECHO: "PANEL", "zone", "J-CV-MOD3 legend", 40.25, 74, 49.5, 77, "jack"
+ECHO: "PANEL", "zone", "J-CV-MOD2 legend", 1, 61, 10.25, 64, "jack"
 ECHO: "PANEL", "zone", "J-CV-MOD4 legend", 40.25, 61, 49.5, 64, "jack"
 ECHO: "PANEL", "zone", "LED-PANEL legend", 8.975, 48, 18.4125, 51, "legend"
 ECHO: "PANEL", "zone", "J-UMBILICAL legend", 35.8, 18.35, 49.5, 37.5, "legend"
@@ -22,11 +22,11 @@ ECHO: "PANEL", "zone", "scale OFFSET+", 29.7851, 98.8418, 31.3851, 100.442, "mar
 ECHO: "PANEL", "keepout", "knob POT-GAIN", "c", 8.25, 106, 7
 ECHO: "PANEL", "keepout", "knob POT-OFFSET", "c", 25.25, 106, 7
 ECHO: "PANEL", "keepout", "knob POT-RESP", "c", 42.25, 106, 7
-ECHO: "PANEL", "keepout", "plug J-CV-PITCH", "c", 15.75, 88.5, 5
-ECHO: "PANEL", "keepout", "plug J-CV-BREATH", "c", 34.75, 88.5, 5
+ECHO: "PANEL", "keepout", "plug J-CV-BREATH", "c", 15.75, 88.5, 5
+ECHO: "PANEL", "keepout", "plug J-CV-PITCH", "c", 34.75, 88.5, 5
 ECHO: "PANEL", "keepout", "plug J-CV-MOD1", "c", 15.75, 75.5, 5
-ECHO: "PANEL", "keepout", "plug J-CV-MOD2", "c", 34.75, 75.5, 5
-ECHO: "PANEL", "keepout", "plug J-CV-MOD3", "c", 15.75, 62.5, 5
+ECHO: "PANEL", "keepout", "plug J-CV-MOD3", "c", 34.75, 75.5, 5
+ECHO: "PANEL", "keepout", "plug J-CV-MOD2", "c", 15.75, 62.5, 5
 ECHO: "PANEL", "keepout", "plug J-CV-MOD4", "c", 34.75, 62.5, 5
 ECHO: "PANEL", "keepout", "NE8MX", "c", 25.25, 25, 10.05
 ECHO: "PANEL", "keepout", "PUSH tab", "r", 20.25, 34.9, 30.25, 41.6
@@ -40,21 +40,21 @@ ECHO: "PANEL", "keepout", "panel washer", "r", 38.06, -0.5, 48.06, 6.5
 ECHO: "PANEL", "keepout", "panel washer", "r", 38.06, 122, 48.06, 129
 ECHO: "PANEL", "keepout", "NE8MX grip", "c", 25.25, 25, 10.05
 ECHO: "PANEL", "keepout", "NE8MX cable drop", "r", 15.2, -128.5, 35.3, 25
-ECHO: "PANEL", "keepout", "nut J-CV-PITCH", "c", 15.75, 88.5, 4
-ECHO: "PANEL", "keepout", "nut J-CV-BREATH", "c", 34.75, 88.5, 4
+ECHO: "PANEL", "keepout", "nut J-CV-BREATH", "c", 15.75, 88.5, 4
+ECHO: "PANEL", "keepout", "nut J-CV-PITCH", "c", 34.75, 88.5, 4
 ECHO: "PANEL", "keepout", "nut J-CV-MOD1", "c", 15.75, 75.5, 4
-ECHO: "PANEL", "keepout", "nut J-CV-MOD2", "c", 34.75, 75.5, 4
-ECHO: "PANEL", "keepout", "nut J-CV-MOD3", "c", 15.75, 62.5, 4
+ECHO: "PANEL", "keepout", "nut J-CV-MOD3", "c", 34.75, 75.5, 4
+ECHO: "PANEL", "keepout", "nut J-CV-MOD2", "c", 15.75, 62.5, 4
 ECHO: "PANEL", "keepout", "nut J-CV-MOD4", "c", 34.75, 62.5, 4
 ECHO: "PANEL", "keepout", "nut SW-POWER", "c", 25.25, 49.5, 4.6
 ECHO: "PANEL", "part", "POT-GAIN", 8.25, 106, "pot", 6, 12, 16, 1
 ECHO: "PANEL", "part", "POT-OFFSET", 25.25, 106, "pot", 6, 12, 16, 1
 ECHO: "PANEL", "part", "POT-RESP", 42.25, 106, "pot", 6, 12, 16, 1
-ECHO: "PANEL", "part", "J-CV-PITCH", 15.75, 88.5, "jack", 6.3, 8, 2, 3.5
-ECHO: "PANEL", "part", "J-CV-BREATH", 34.75, 88.5, "jack", 6.3, 8, 2, 3.5
+ECHO: "PANEL", "part", "J-CV-BREATH", 15.75, 88.5, "jack", 6.3, 8, 2, 3.5
+ECHO: "PANEL", "part", "J-CV-PITCH", 34.75, 88.5, "jack", 6.3, 8, 2, 3.5
 ECHO: "PANEL", "part", "J-CV-MOD1", 15.75, 75.5, "jack", 6.3, 8, 2, 3.5
-ECHO: "PANEL", "part", "J-CV-MOD2", 34.75, 75.5, "jack", 6.3, 8, 2, 3.5
-ECHO: "PANEL", "part", "J-CV-MOD3", 15.75, 62.5, "jack", 6.3, 8, 2, 3.5
+ECHO: "PANEL", "part", "J-CV-MOD3", 34.75, 75.5, "jack", 6.3, 8, 2, 3.5
+ECHO: "PANEL", "part", "J-CV-MOD2", 15.75, 62.5, "jack", 6.3, 8, 2, 3.5
 ECHO: "PANEL", "part", "J-CV-MOD4", 34.75, 62.5, "jack", 6.3, 8, 2, 3.5
 ECHO: "PANEL", "part", "LED-PANEL", 6.375, 49.5, "led", 3, 1
 ECHO: "PANEL", "part", "SW-POWER", 25.25, 49.5, "toggle", 1, 0, 10.5, 2.8, 25, 6.9, 9.2, 2
