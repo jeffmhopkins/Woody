@@ -543,7 +543,7 @@ nets:
 
   DAC_AVDD:
     kind: power
-    carries: "Local LM317 rail. Decouples DAC full scale from the rack's +/-5% +5 V"
+    carries: "Local LM317L rail for the DAC8568, its SPI buffer U-LVL-MOD and the breath stages' ratiometric pots. For headroom: the DAC's 5.000 V full scale is set by its reference and needs AVDD above it (ADR 0005)"
     figure: dac-rail
     driver: module/power-entry
     receivers:

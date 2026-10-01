@@ -18,7 +18,7 @@ source (no DAC8568 model is published, fragment R29).
 | Sim | What | Result |
 |---|---|---|
 | `range` | code 0 and full scale, at the corners of `R-MODGAIN-IN`/`-FB` | the op-amp output follows `4·Vdac − 3·V_ref` within 0.1 mV at both ends: **neither end clips** on ±12 V. Span 19.703–20.303 V, the page's figures exactly |
-| `range` (the jack) | the same at the jack, into a 100 kΩ input | **0.99 V/V**: `R-OUT-PROT` is outside the loop, so the jack reads 1 % low, −9.90…+9.90 V at the nominal — a load-dependent span error the page's tolerance section does not carry |
+| `range` (the jack) | the same at the jack, into a 100 kΩ input | **0.99 V/V**: `R-OUT-PROT` is outside the loop, so the jack reads 1 % low, −9.90…+9.90 V at the nominal — a load-dependent span error, which is `mod-jack-range` on the page's tolerance table |
 | `clr-ref-stale` | channel 7 at 0 V, a signal channel at full scale | the output pins at +11.97 V (+11.82 V at the jack) on the deck's ideal +12.0 V rail: the OPA2197 model swings to within 30 mV of it. The page's "+11.45 V" is the same clip on the module's rails less their Schottky drops (`notes.md`), so the two agree |
 | `wrong-ref-2v5` | the old 2.5 V written into channel 7 | −7.50 V at code 0; the top clips at the rail short of +12.5 V: the page's "clips positive" reproduces |
 | `step-mult`, `step-real-mult` | a 1 V step into a VCO, and passive mults to the BREATH, PITCH and another MOD jack | **no overshoot at any load** (under 0.02 %): `C-FILT-MOD` and whatever a patch adds sit behind `R-OUT-PROT`, outside the loop — unlike pitch (`pitch-mult-overshoot`) |

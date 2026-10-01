@@ -4,11 +4,13 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/power-entry/sim/sims.yaml: e3433c1df045a671
+  hardware/module/power-entry/sim/sims.yaml: 02499d163c67e7a7
   hardware/module/power-entry/netlist.yaml: 060c3ed04d45d9a8
-  hardware/module/pitch-stage/netlist.yaml: 3d43eac2f5eabc29
+  hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
   hardware/module/power-entry/sim/poweron.cir: e68b60e487d6e0df
   hardware/module/power-entry/sim/groundshift.cir: 4aae040d6b7e03a1
+  hardware/module/power-entry/sim/poweroff.cir: aa8a3991ce4d5a85
+  hardware/module/pitch-stage/sim/pitch-stage.lib: 1ec92350c5c2c2cc
   datasheets/discrete-and-power/LM317L-ti-pspice-snvmaw3.lib: 52c881eccf059881
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
 ngspice: '42'
@@ -351,28 +353,28 @@ sims:
     corners: 1
     measures:
       err_cents:
-        nominal: 2.88e-09
-        min: 2.88e-09
-        min_at: nominal
-        max: 2.88e-09
-        max_at: nominal
-      err_mv:
         nominal: 2.4e-09
         min: 2.4e-09
         min_at: nominal
         max: 2.4e-09
         max_at: nominal
-      tie_ua:
-        nominal: 6.67581e-05
-        min: 6.67581e-05
+      err_mv:
+        nominal: 2.0e-09
+        min: 2.0e-09
         min_at: nominal
-        max: 6.67581e-05
+        max: 2.0e-09
+        max_at: nominal
+      tie_ua:
+        nominal: 6.67518e-05
+        min: 6.67518e-05
+        min_at: nominal
+        max: 6.67518e-05
         max_at: nominal
       rail_mv:
-        nominal: 9.6585
-        min: 9.6585
+        nominal: 9.6576
+        min: 9.6576
         min_at: nominal
-        max: 9.6585
+        max: 9.6576
         max_at: nominal
     asserts:
     - expr: max['err_cents'] < 0.01 and max['tie_ua'] < 1.0
@@ -383,28 +385,28 @@ sims:
     corners: 1
     measures:
       err_cents:
-        nominal: 5.52e-09
-        min: 5.52e-09
+        nominal: 4.8e-09
+        min: 4.8e-09
         min_at: nominal
-        max: 5.52e-09
+        max: 4.8e-09
         max_at: nominal
       err_mv:
-        nominal: 4.6e-09
-        min: 4.6e-09
+        nominal: 4.0e-09
+        min: 4.0e-09
         min_at: nominal
-        max: 4.6e-09
+        max: 4.0e-09
         max_at: nominal
       tie_ua:
-        nominal: 0.000125732
-        min: 0.000125732
+        nominal: 0.00012572
+        min: 0.00012572
         min_at: nominal
-        max: 0.000125732
+        max: 0.00012572
         max_at: nominal
       rail_mv:
-        nominal: 18.1907
-        min: 18.1907
+        nominal: 18.189
+        min: 18.189
         min_at: nominal
-        max: 18.1907
+        max: 18.189
         max_at: nominal
     asserts:
     - expr: max['err_cents'] < 0.01 and max['tie_ua'] < 1.0
@@ -427,16 +429,16 @@ sims:
         max: 6.0e-09
         max_at: nominal
       tie_ua:
-        nominal: 6.67581e-05
-        min: 6.67581e-05
+        nominal: 6.67518e-05
+        min: 6.67518e-05
         min_at: nominal
-        max: 6.67581e-05
+        max: 6.67518e-05
         max_at: nominal
       rail_mv:
-        nominal: 9.6585
-        min: 9.6585
+        nominal: 9.6576
+        min: 9.6576
         min_at: nominal
-        max: 9.6585
+        max: 9.6576
         max_at: nominal
     asserts:
     - expr: max['err_cents'] < 0.01 and max['tie_ua'] < 1.0
@@ -459,16 +461,16 @@ sims:
         max: 1.2e-08
         max_at: nominal
       tie_ua:
-        nominal: 0.000125732
-        min: 0.000125732
+        nominal: 0.00012572
+        min: 0.00012572
         min_at: nominal
-        max: 0.000125732
+        max: 0.00012572
         max_at: nominal
       rail_mv:
-        nominal: 18.1907
-        min: 18.1907
+        nominal: 18.189
+        min: 18.189
         min_at: nominal
-        max: 18.1907
+        max: 18.189
         max_at: nominal
     asserts:
     - expr: max['err_cents'] < 0.01 and max['tie_ua'] < 1.0
@@ -686,4 +688,103 @@ sims:
     - expr: max['err_cents'] < 0.5
       why: option (c) at 1 % balance leaves a fraction of a cent - at the cost of burning the whole swing as heat all the
         time (ADR 0027)
+      pass: true
+  poweroff[dt_neg_off=-0.002]:
+    corners: 1
+    measures:
+      t_pos_half:
+        nominal: 0.0201153
+        min: 0.0201153
+        min_at: nominal
+        max: 0.0201153
+        max_at: nominal
+      t_neg_half:
+        nominal: 0.0163361
+        min: 0.0163361
+        min_at: nominal
+        max: 0.0163361
+        max_at: nominal
+      jack_peak_off:
+        nominal: 0.0770419
+        min: 0.0770419
+        min_at: nominal
+        max: 0.0770419
+        max_at: nominal
+      jack_trough_off:
+        nominal: 1.09541e-05
+        min: 1.09541e-05
+        min_at: nominal
+        max: 1.09541e-05
+        max_at: nominal
+    asserts:
+    - expr: max['jack_peak_off'] < 0.1 and min['jack_trough_off'] > -0.1
+      why: 'the pitch jack stays within 100 mV of 0 V while the analog rails come down, whichever falls first: C-BULK-RAIL''s
+        100 uF / 47 uF split keeps the two decays close (each rail reaches half in 16-20 ms), and the jack only moves once
+        the op-amps are out of supply. The rails'' order itself is recorded, not asserted'
+      pass: true
+  poweroff[dt_neg_off=0.0]:
+    corners: 1
+    measures:
+      t_pos_half:
+        nominal: 0.0201153
+        min: 0.0201153
+        min_at: nominal
+        max: 0.0201153
+        max_at: nominal
+      t_neg_half:
+        nominal: 0.0163361
+        min: 0.0163361
+        min_at: nominal
+        max: 0.0163361
+        max_at: nominal
+      jack_peak_off:
+        nominal: 0.0770419
+        min: 0.0770419
+        min_at: nominal
+        max: 0.0770419
+        max_at: nominal
+      jack_trough_off:
+        nominal: 1.09541e-05
+        min: 1.09541e-05
+        min_at: nominal
+        max: 1.09541e-05
+        max_at: nominal
+    asserts:
+    - expr: max['jack_peak_off'] < 0.1 and min['jack_trough_off'] > -0.1
+      why: 'the pitch jack stays within 100 mV of 0 V while the analog rails come down, whichever falls first: C-BULK-RAIL''s
+        100 uF / 47 uF split keeps the two decays close (each rail reaches half in 16-20 ms), and the jack only moves once
+        the op-amps are out of supply. The rails'' order itself is recorded, not asserted'
+      pass: true
+  poweroff[dt_neg_off=0.002]:
+    corners: 1
+    measures:
+      t_pos_half:
+        nominal: 0.0201154
+        min: 0.0201154
+        min_at: nominal
+        max: 0.0201154
+        max_at: nominal
+      t_neg_half:
+        nominal: 0.0183361
+        min: 0.0183361
+        min_at: nominal
+        max: 0.0183361
+        max_at: nominal
+      jack_peak_off:
+        nominal: 0.0770419
+        min: 0.0770419
+        min_at: nominal
+        max: 0.0770419
+        max_at: nominal
+      jack_trough_off:
+        nominal: 1.1858e-05
+        min: 1.1858e-05
+        min_at: nominal
+        max: 1.1858e-05
+        max_at: nominal
+    asserts:
+    - expr: max['jack_peak_off'] < 0.1 and min['jack_trough_off'] > -0.1
+      why: 'the pitch jack stays within 100 mV of 0 V while the analog rails come down, whichever falls first: C-BULK-RAIL''s
+        100 uF / 47 uF split keeps the two decays close (each rail reaches half in 16-20 ms), and the jack only moves once
+        the op-amps are out of supply. The rails'' order itself is recorded, not asserted'
       pass: true

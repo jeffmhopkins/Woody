@@ -21,7 +21,7 @@ The `Dir` and `Peer` columns are defined once in
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
 | `ISO_POS12` | in | `module/power-entry` | — | `U-LOADSW`'s `VCC`, the top of `R-ILIM` and of the `ON` divider. **`U-ISO`'s isolated 12 V since 2026-09-30 (ADR 0027)** — until then the Eurorack +12 V, taken ahead of the entry diodes |
-| `ON` | — | `module/panel` | — | **Not a crossing.** `SW-POWER` is this circuit's row and its net is this circuit's; [`panel.md`](../panel/panel.md) owns only the shaped hole and says so. The LT1641's undervoltage-lockout input, divided from the raw bus by `R-ON-HI`/`R-ON-LO` with the toggle in the top leg — see *The `ON` pin* below. Both of the toggle's lugs wire to the main board |
+| `ON` | — | `module/panel` | — | **Not a crossing.** `SW-POWER` is this circuit's row and its net is this circuit's; [`panel.md`](../panel/panel.md) owns only the shaped hole and says so. The LT1641's undervoltage-lockout input, divided from `ISO_POS12`, `U-ISO`'s isolated 12 V, by `R-ON-HI`/`R-ON-LO` with the toggle in the top leg — see *The `ON` pin* below. Both of the toggle's lugs wire to the main board |
 | `UMBILICAL +12V` | out | `carrier/power-entry-instrument`, `module/panel-led` | `umbilical-current` | The FET's source, down the Cat5 umbilical. What the far end needs is what sizes the `FB` divider. `module/panel-led` hangs the panel LED on it, so the LED is lit exactly while the switch is delivering |
 | `PWR_GND` | ref | `module/power-entry` | — | `C-TIMER`, `C-GATE`, `R-FB-LO`, `R-ON-LO` and `C-ON-LOADSW` return here: `U-ISO`'s isolated 0V, which meets the module's grounds only at the etherCON (`dig-gnd-topology`) |
 

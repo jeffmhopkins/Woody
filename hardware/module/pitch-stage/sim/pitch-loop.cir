@@ -1,37 +1,43 @@
-* The same stage's loop gain, broken at U-PITCH-AMP's (-) input by VOLTAGE INJECTION
+* The same stage's loop gain, broken at U-PITCH half B's (-) input by VOLTAGE INJECTION
 * (tools/sim.py, THE STATED BREAK (b)): VINJ in series between the feedback node and the
 * input, T = -V(minus)/V(inm). The 1 GH break found no operating point here at all (nor
 * did 1 kH, nor 1 mohm in its place: only a 0 V source converges), and injection is exact
 * where the input's impedance dwarfs the network's: at (-) the network is R1 || R2 = 5 kohm
 * at DC and C-FB-PITCH's reactance above the handover, 72 ohm at 1 MHz, against the
-* model's input. Same loads as pitch-step.cir.
+* model's input. Twice in one run, as pitch-step.cir: XA with D-ESD-PITCH, XB without.
+* The two loops share only ideal sources, so each injection sees its own loop alone.
 VPOS pos 0 {{v_pos}}
 VNEG neg 0 {{v_neg}}
 VREFO vrefout 0 {{v_refout}}
-XRB vrefout vrefb pos neg vrefb OPAx197
-R1 vrefb minus {{RN-PITCH}}
-R2 minus gtm {{RN-PITCH}}
-RTG gtm jack {{r_trim_gain}}
-VDAC dac 0 DC {{v_dac0}}
-RBD dac 0 {{R-BIAS-DAC}}
-RIN dac plus {{R-OPAMP-IN}}
-CAA plus 0 {{C-AA-PITCH}}
-XAMP plus inm pos neg ampout OPAx197
-CFB ampout minus {{C-FB-PITCH}}
-ROUT ampout jack {{R-OUT-PROT}}
-CFILT jack 0 {{C-FILT-PITCH}}
-CMULT jack 0 {{c_mult}}
-RVCO jack 0 {{r_vco}}
-RMULT jack 0 {{r_mult}}
-VINJ inm minus DC 0 AC 1
+VDAC dacpin 0 DC {{v_dac0}}
+RBD dacpin 0 {{R-BIAS-DAC}}
+XA vrefout dacpin jack pos neg vrefba ma ia PSTAGE
+VINJA ia ma DC 0 AC 1
+CESD jack 0 {{c_esd}}
+RESD jack 0 {{r_esd}}
+CCABA jack 0 {{c_cable_f}}
+CMULTA jack 0 {{c_mult}}
+RVCOA jack 0 {{r_vco}}
+RMULTA jack 0 {{r_mult}}
+XB vrefout dacpin jackb pos neg vrefbb mb ib PSTAGE
+VINJB ib mb DC 0 AC 1
+CCABB jackb 0 {{c_cable_f}}
+CMULTB jackb 0 {{c_mult}}
+RVCOB jackb 0 {{r_vco}}
+RMULTB jackb 0 {{r_mult}}
 .options method=gear rshunt=1e10
 .control
 ac dec 100 1 100meg
-let t = -v(minus)/v(inm)
+let t = -v(ma)/v(ia)
 let tdb = db(t)
 let tph = 180/pi*cph(t)
+let tb = -v(mb)/v(ib)
+let tdbb = db(tb)
+let tphb = 180/pi*cph(tb)
 wrdata tdb.dat tdb
 wrdata tph.dat tph
+wrdata tdbb.dat tdbb
+wrdata tphb.dat tphb
 quit
 .endc
 .end

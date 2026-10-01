@@ -400,6 +400,15 @@ figures:
     floor: "5.00 V, HARD. The DAC8568's C grade is specified only for AVDD 5.0-5.5 V (SBAS430E, datasheets/analog/DAC8568CIPW.pdf). E7 selects R-REG-SET on the bench across a 0.66 V worst-case spread and must not land below 5.00 V. Added 2026-09-21; nothing in the roadmap knew this."
     note: "bom.csv's U-REG-DAC DESCRIPTION field said 'set to 5.25V' until 2026-09-21 - the forbidden list matched the notes field's phrasings and not this one, which is why it survived. Both phrasings are listed now."
 
+  - id: module-own-draw
+    quantity: The module's own analog rail draw, jacks open (U-ISO and the instrument excluded)
+    value: "~37 mA on +12 V, ~20 mA on -12 V"
+    status: settled
+    owner: hardware/module/power-entry/power-entry.md
+    derivation: "power-entry.md 'Fuses on the rails' [calc]: fourteen OPA2197 channels at 1.3 mA max (SBOS737C p.8) = 18.2 mA on both rails; INA828 0.85 mA over temperature (p.6) on both; on +12 V only the LM317L branch ~12.4 mA ('The DAC rail's load') and U-REG-LOGIC ~5.1 mA. +12 V: 18.2 + 0.85 + 12.4 + 5.1 = 36.6 mA; -12 V: 18.2 + 0.85 = 19.1 mA. With all six jacks shorted at full scale, ~97 mA on +12 V."
+    forbidden: ["its own ~45 mA and ~40 mA", "U-ISO plus the module's own ~40 mA", "about 22mA against -12V's 10mA", "+12V analog, ~45mA"]
+    note: "Added 2026-10-01 (pre-layout review A3-6): the derived pair had an asserted twin, 45/40 mA, from ADR 0004's pre-ADR 0027 power table, and the rack totals and the power-entry sim were computed from that."
+
   - id: mod-reference
     quantity: Mod channel reference, DAC channel 7
     value: "3.3333 V"
@@ -422,6 +431,15 @@ figures:
       is 2.500 V. The value was only reachable by reading the sentence.
       That is the second time in this restructure that the document OWNING a
       figure was the one contradicting it.
+
+  - id: mod-jack-range
+    quantity: Mod channel output range at the jack, into one 100 kohm input
+    value: "+/-9.90 V nominal (+/-10.000 V at the op-amp output); worst-case span 19.51-20.10 V, -2.46/+0.51 %"
+    status: settled
+    owner: hardware/module/mod-channels/mod-channels.md
+    derivation: "R-OUT-PROT (1k) is outside the loop, so the jack is the op-amp output x 100k/101k = 0.990 [calc]. Op-amp output span 19.703-20.303 V at 1 % parts (mod-channels.md tolerance table) x 0.990 = 19.508-20.102 V [calc]; [sim] hardware/module/mod-channels/sim range: jack -9.9009/+9.9007 V nominal, 9.8026 and -9.7048 V at the worst corner (span 19.507 V). On a 1 V/oct assignment: -11.9 cents/oct nominal, -29.6/+6.1 worst [calc: 1200 x span error]."
+    forbidden: ["About ±18 cents per octave", "About +/-18 cents per octave"]
+    note: "Added 2026-10-01 (pre-layout review A2-1, owner: correct the docs only). The stated range had been the op-amp output's, and the cents figure the resistors' alone."
 
   - id: pitch-compensation
     quantity: C-FB-PITCH value and net

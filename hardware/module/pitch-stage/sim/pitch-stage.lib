@@ -1,0 +1,33 @@
+* The pitch stage as netlisted (hardware/module/pitch-stage/netlist.yaml), one subcircuit
+* every deck here instantiates - twice where a deck compares the stage with and without
+* D-ESD-PITCH. Ports: vrefout (the DAC's VREFOUT), dac (DAC ch1, after R-BIAS-DAC, which
+* the deck places at the source), jack (JACK_TIP), pos/neg (the analog rails), vrefb
+* (VREF_BUFFERED, brought out to measure), minus (MINUS_NODE) and inm (U-PITCH.INB-):
+* a closed loop ties minus to inm; pitch-loop.cir breaks it there.
+*
+* V_ref: TRIM-OFFSET across VREFOUT (CW) and AGND_MOD (CCW), its wiper at w_offset from
+* the AGND end, injecting through R-VREF-INJ against R-VREF-SER into U-PITCH half A,
+* at gain 1 + R-VREF-FB/R-VREF-GND. The stage: U-PITCH half B, R1 of RN-PITCH from
+* VREF_BUFFERED through R-GAIN-CTR, R2 of RN-PITCH plus TRIM-GAIN's CCW-W section
+* (t_gain of its track; its CW end is strapped to the wiper) from the JACK, C-FB-PITCH
+* from the op-amp output, R-OUT-PROT inside the DC loop, C-FILT-PITCH at the jack.
+* D-JACK-CLAMP is left out: reverse-biased inside +-12 V.
+.subckt PSTAGE vrefout dac jack pos neg vrefb minus inm
+RTOCW vrefout wip {{r_toff_cw}}
+RTOCCW wip 0 {{r_toff_ccw}}
+RINJ wip vsum {{R-VREF-INJ}}
+RSER vrefout vsum {{R-VREF-SER}}
+XRB vsum vfb pos neg vrefb OPAx197
+RVFB vrefb vfb {{R-VREF-FB}}
+RVGND vfb 0 {{R-VREF-GND}}
+RCTR vrefb r1b {{R-GAIN-CTR}}
+R1 r1b minus {{RN-PITCH}}
+R2 minus gtm {{RN-PITCH}}
+RTG gtm jack {{r_trim_gain}}
+RIN dac plus {{R-OPAMP-IN}}
+CAA plus 0 {{C-AA-PITCH}}
+XAMP plus inm pos neg ampout OPAx197
+CFB ampout minus {{C-FB-PITCH}}
+ROUT ampout jack {{R-OUT-PROT}}
+CFILT jack 0 {{C-FILT-PITCH}}
+.ends

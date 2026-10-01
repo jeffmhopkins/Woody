@@ -92,8 +92,10 @@ that three sections of an LT5400 give directly against the fourth.
 on a DAC channel (below).
 
 **Adopted, and it is drawn above.** Eight resistors instead of sixteen, and it
-lands on **exactly ±10.000 V** where the four-resistor version needed a 40.2 kΩ
-fudge to reach ±10.05 and still did not hit the number. The offset channel
+lands on **exactly ±10.000 V at the op-amp output** where the four-resistor
+version needed a 40.2 kΩ fudge and still did not hit the number. **At the jack
+it is less**, because `R-OUT-PROT` is outside the loop: `mod-jack-range`,
+below. The offset channel
 writes 3.3333 V instead of 2.500 V, and `R-OPAMP-IN` comes back — correctly
 this time, because the two-resistor form drives a true high-impedance (+) input
 where a 1 kΩ costs nothing, unlike the four-resistor version where the input
@@ -103,7 +105,7 @@ resistor *was* the gain network.
 |---|---|---|
 | Resistors | 16 | **8** |
 | Matching | two ratios per channel | **one** |
-| Range | ±10.05 V (40.2 kΩ fudge) | **exactly ±10.000 V** |
+| Range | missed ±10 V (40.2 kΩ fudge) | **exactly ±10.000 V at the op-amp output**; at a jack, `mod-jack-range` |
 | `R-OPAMP-IN` | unbalances it — 196 mV zero error | harmless, feeds a (+) input |
 | Safe on `CLR` | `4X − 4X` = **0 for ANY uniform state** | `4X − 3X` = **X** — 0 V only because the grade is zero-scale |
 
@@ -132,28 +134,43 @@ cancels in the ratio:
 
 | Term | Worst case | vs the four-resistor version |
 |---|---|---|
-| Zero point | **±50.5 mV** | 1.6× *better* |
-| Span | **19.703–20.303 V** (−1.49 %/+1.52 %) | 1.33× *better* |
+| Zero point, op-amp output | **±50.5 mV** | 1.6× *better* |
+| Span, op-amp output | **19.703–20.303 V** (−1.49 %/+1.52 %) | 1.33× *better* |
+| **At the jack, into one 100 kΩ input** | **`mod-jack-range`** | the load term, which the four-resistor version had too |
 
-So the redraw improved both and the page claimed neither. **Both are at the op-amp output.**
-`R-OUT-PROT` is outside the loop, so at the jack the span is also divided by
-the load: 1 kΩ into a 100 kΩ input reads 1 % low `[calc]`, confirmed in `sim/`
-(`range`), where the output follows the law to 0.1 mV and neither end clips. About ±18 cents per
-octave if a channel is assigned to something pitch-like.
+So the redraw improved both and the page claimed neither. **The first two rows
+are at the op-amp output.** `R-OUT-PROT` is outside the loop, so at the jack the
+whole transfer is also divided by the load: 1 kΩ into a 100 kΩ input reads
+100/101, 0.99 % low `[calc]`, confirmed in `sim/` (`range`), where the output
+follows the law to 0.1 mV and neither end clips. **That is `mod-jack-range`:**
+±9.90 V at the jack, and a worst-case span of 19.51–20.10 V, −2.46 %/+0.51 %
+`[calc: 19.703 × 100/101, 20.303 × 100/101; sim range, jack_lo/jack_hi]`.
+On something pitch-like that is −11.9 cents per octave nominal and −29.6 to
++6.1 cents per octave worst case `[calc: 1200 × the span error, 1 V/oct]`; the
+resistors alone are ±18, the load the rest. Firmware cannot buy the ±10 V back
+at a loaded jack: the DAC is already at 0 and full scale at the ends. It can
+scale anything inside it, which is what the per-channel range setting does.
 
 **"One matching requirement instead of two" is true by count and misleading.**
 The difference amp's zero was `2.5[b/(1+b) − b/(1+b)] = 0` for *any* absolute
-ratio — it depended only on leg-to-leg matching. The two-resistor zero is
-`2.5 − (10/3)k`, directly proportional to the ratio error. Fewer requirements,
+ratio — it depended only on leg-to-leg matching. The two-resistor zero, at the
+mid-scale code 2.5 V, is `2.5(1 + k) − (10/3)k = 2.5 − (5/6)k`: 0 at `k = 3`,
+and ∓50.5 mV for `k`'s ±0.0606 worst case `[calc]` — directly proportional to
+the ratio error. Fewer requirements,
 but the deleted one was buying something. ADR 0006 says these channels need to be "linear
 and repeatable, not calibrated", and they still are — but "repeatable" is doing
 more work than the old number implied, and anything pitch-like belongs on
 channel 1.
 
-Buying the four sets from one reel makes it much better than worst case for
-free, since reel-adjacent parts track.
+**The table is the 1 % specification. The sheet buys better:** Yageo
+`RT0805BRD07`, 0.1 % and 25 ppm/°C thin film, both values from one series and
+TCR grade (`R-MODGAIN-IN`). Two values cannot come off one reel; one series is
+what makes the two legs' tempcos match. At 0.1 % the op-amp-output rows shrink
+about tenfold `[calc: ±5.05 mV, ±0.15 %]`; the load row does not move. Whether
+the specification itself goes to 0.1 % is the owner's (pre-layout review
+A2-12).
 
-**On the range:** ±10.05 V uses the DAC's *full* 0–5 V span. ADR 0006's
+**On the range:** ±10.000 V uses the DAC's *full* 0–5 V span. ADR 0006's
 0.25–4.75 V window is a **pitch-channel reserve** — it exists to give firmware
 ±600 cents of offset authority on 1 V/oct — and does not apply here. Stated
 because the two numbers look contradictory side by side and are not.
