@@ -22,9 +22,13 @@ What each circuit does, and why, is on its page:
 - [`pitch-stage`](../../module/pitch-stage/pitch-stage.md), page `main`
 - [`mod-channels`](../../module/mod-channels/mod-channels.md), page `main`
 - [`panel-led`](../../module/panel-led/panel-led.md) — since 2026-10-01
-  (ADR 0024 point 15): `LED-PANEL`, an 0805, on this board's **front** face,
-  centred under the panel's light pipe (`MECH-LED-BEZEL-MOD`) at
-  `pcb-geometry.echo`'s `LED-PANEL`, with `R-LED-PANEL` beside it
+  (ADR 0024 points 15 and 16): `R-LED-PANEL` and **`J-LED-PANEL` (J4)**, a
+  JST B2B-XH-A on this board's **front** face at `pcb-geometry.echo`'s
+  `J-LED-PANEL`, below the LED. `LED-PANEL` itself (D16 on this sheet) is
+  a panel-mount indicator with **no footprint**: its lead plugs into J4,
+  **pin 1 the anode** (`LED_ANODE`), pin 2 the cathode (`AGND_MOD`) — put
+  `1` and `A` on the silk. Nothing taller than `pcb-geometry.echo`'s
+  *front: under LED-PANEL* keep-out goes under the LED
 
 ## Files — what is source, what is generated
 

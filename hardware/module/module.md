@@ -27,7 +27,8 @@ circuits. **The circuits own their own values** — nothing here restates one.
 its source (ADR 0019): [`module-main`](../boards/module-main/README.md)
 carries the etherCON, every IC, the trimmers and the power header;
 [`module-jack`](../boards/module-jack/README.md) the jacks and pots. The
-panel LED is on the main board, under a light pipe (ADR 0024 point 15).
+panel LED is in the panel on its own nut, its lead plugged into a header
+on the main board (ADR 0024 point 16).
 `J-B2B-MOD` joins them; its pin allocation is in the main board's README.
 
 The other half of the breath chain and of the SPI path are **not here**. They

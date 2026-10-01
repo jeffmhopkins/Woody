@@ -38,7 +38,7 @@ the anodise through BAR (knockout) | 12.09:1
 BAR on the anodise (the maker line) | 12.09:1
 
 ink areas, mm^2
-UNDERBASE | 4187.3
-SLATE | 3910.6
+UNDERBASE | 4169.2
+SLATE | 3892.5
 BAR | 276.7
 WHITE | 29.4

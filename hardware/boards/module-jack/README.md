@@ -57,7 +57,7 @@ The same header is `J7` here and `J2` on the main board.
 
 **The standoff pads are on the sheet:** `H1` and `H2` (`MountingHole_3.2mm_M3_Pad`, Row `MECH-STANDOFF-MOD`, excluded from the BOM) on `AGND_MOD` — the two standoffs above the pots (`standoff.at`), which with the six jack nuts are all that hold this board. It has no low standoffs: the main board's two low mounting points go to the panel (`MECH-PANEL-STANDOFF-MOD`, ADR 0024 point 15). The main board's pads are on no net, so they need no symbol and are placed board-only by the layout.
 
-**The power LED is not on this board** since 2026-10-01: `LED-PANEL` is an 0805 on the main board's front face under a light pipe in the panel (ADR 0024 point 15), and `J-B2B-MOD` pin 19, which carried its supply, is spare and unconnected here.
+**The power LED is not on this board** since 2026-10-01: `LED-PANEL` is a panel-mount indicator whose lead plugs into `J-LED-PANEL` on the main board's front face (ADR 0024 points 15 and 16), and `J-B2B-MOD` pin 19, which carried its supply, is spare and unconnected here.
 
 ## Decided 2026-09-30
 
