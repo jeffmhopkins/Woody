@@ -38,7 +38,7 @@ ECHO: "DRC", "INFO", "jack board legs beside the notch", [10.75, 10.75], "mm wid
 ECHO: "DRC", "PASS", "jack board notch clear of the NE8FAV's body", 1, "mm each side and above"
 ECHO: "DRC", "PASS", "jack board notch clear of SW-POWER's body", [1, 8.05], "mm: the least of each side and above; and the toggle's body above the NE8FAV's body, behind the panel"
 ECHO: "DRC", "PASS", "parts behind the panel clear of the rail band", 0.7, "mm (standoff screw head); rail.band is tbd"
-ECHO: "DRC", "PASS", "toggle's lugs in front of the main board", 4.4, "mm between the lugs' ends and the main board's front face - room for the wires' bends"
+ECHO: "DRC", "PASS", "toggle's lugs in front of the main board", [4.4, 2.4], "mm between the lugs' ends and the main board's front face - room for the wires' bends - with the body on the panel's rear face (ONE nut, on the front: fit it so); and if the D4 kit's second nut were fitted behind the panel, toggle.nut_h less (do not)"
 ECHO: "DRC", "PASS", "standoff screw heads clear of the jack board's front-face parts", 1.93406, "mm (POT-OFFSET)"
 ECHO: "DRC", "PASS", "standoff screw heads inside the boards' edges and the notch", 0.7, "mm, a head's edge to the nearest board edge"
 ECHO: "DRC", "PASS", "U-ISO on the main board", 0.5, "mm, its body's edge inside the board's nearest edge"
