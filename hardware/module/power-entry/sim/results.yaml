@@ -4,7 +4,7 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/power-entry/sim/sims.yaml: b3d1cdcb0d548e4c
+  hardware/module/power-entry/sim/sims.yaml: f06800eed96cd1d5
   hardware/module/power-entry/netlist.yaml: 78440e2b6a1c1e45
   hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
   hardware/module/power-entry/sim/poweron.cir: 7e310ad1820d6b68
@@ -723,7 +723,7 @@ sims:
     asserts:
     - expr: max['jack_peak_off'] < 0.1 and min['jack_trough_off'] > -0.1
       why: 'the pitch jack stays within 100 mV of 0 V while the analog rails come down, whichever falls first: C-BULK-RAIL''s
-        100 uF / 47 uF split keeps the two decays close (each rail reaches half in 16-20 ms), and the jack only moves once
+        100 uF / 47 uF split keeps the two decays close (each rail reaches half in 16-23 ms), and the jack only moves once
         the op-amps are out of supply. The rails'' order itself is recorded, not asserted'
       pass: true
   poweroff[dt_neg_off=0.0]:
@@ -756,7 +756,7 @@ sims:
     asserts:
     - expr: max['jack_peak_off'] < 0.1 and min['jack_trough_off'] > -0.1
       why: 'the pitch jack stays within 100 mV of 0 V while the analog rails come down, whichever falls first: C-BULK-RAIL''s
-        100 uF / 47 uF split keeps the two decays close (each rail reaches half in 16-20 ms), and the jack only moves once
+        100 uF / 47 uF split keeps the two decays close (each rail reaches half in 16-23 ms), and the jack only moves once
         the op-amps are out of supply. The rails'' order itself is recorded, not asserted'
       pass: true
   poweroff[dt_neg_off=0.002]:
@@ -789,7 +789,7 @@ sims:
     asserts:
     - expr: max['jack_peak_off'] < 0.1 and min['jack_trough_off'] > -0.1
       why: 'the pitch jack stays within 100 mV of 0 V while the analog rails come down, whichever falls first: C-BULK-RAIL''s
-        100 uF / 47 uF split keeps the two decays close (each rail reaches half in 16-20 ms), and the jack only moves once
+        100 uF / 47 uF split keeps the two decays close (each rail reaches half in 16-23 ms), and the jack only moves once
         the op-amps are out of supply. The rails'' order itself is recorded, not asserted'
       pass: true
   cm-loop:
@@ -1004,9 +1004,10 @@ sims:
         way, at every corner of the SET current, R-SET-DAC and C-SET-DAC'
       pass: true
     - expr: max['t_avdd_floor'] < 0.05
-      why: and it is over the 5.00 V floor within 50 ms of the bus at every corner (C-SET-DAC x R-SET-DAC, ~5 ms, sets the
-        pace; the instrument's own start through U-ISO and the load switch is later - digital-and-supervision/sim holds the
-        order against LOGIC_5V)
+      why: and it is over the 5.00 V floor within 50 ms of the bus at every corner (R-SET-DAC x C-SET-DAC, ~5 ms, sets the
+        pace). The instrument's own supply comes through U-ISO and the load switch, whose start alone takes 42 ms or more
+        (umbilical-load-switch/sim, cold-start t_up), and firmware re-writes the DAC's reference-enable and clear-code registers
+        periodically (firmware/README.md); the SPI pins' order against LOGIC_5V is digital-and-supervision/sim's
       pass: true
     - expr: max['jack_peak'] < 0.1 and min['jack_trough'] > -0.1
       why: and the pitch jack stays within 100 mV of 0 V through the power-up at every corner

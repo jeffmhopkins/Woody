@@ -479,7 +479,7 @@ maximum (`dac-rail-open-rset`, recorded). It is the one single failure that
 does — as an open `R-REG-SET-LO` was for the LM317L — and it is a fixed
 thin-film part with nothing to turn.
 
-### Its load
+### The DAC rail's load
 
 | | `[calc]` | Source |
 |---|---|---|
@@ -591,6 +591,16 @@ are in [`umbilical-load-switch.md`](../umbilical-load-switch/umbilical-load-swit
 - **How much common-mode current `U-ISO` makes.** RECOM does not publish it,
   and every copper parasitic in `cm-loop` is an estimate. **Decided by: E6**,
   a current probe on the star tie with the converter loaded.
+- **`DAC AVDD`'s one up-going failure**, an open `R-SET-DAC`, takes the rail
+  to the input less the dropout, over the DAC's and `U-LVL-MOD`'s absolute
+  maxima (`dac-rail-open-rset`). The LM317L's open `R-REG-SET-LO` did the same
+  and was accepted as a fixed thin-film part. **Decided by: the owner** —
+  accept it on the same terms, or add an over-voltage clamp on `DAC AVDD`
+  (none is drawn: a zener cannot sit between 5.35 V and 6.0 V across its
+  tolerance and the LT3042's 220 mA limit).
+- **`C-REG-DAC`'s capacitance at 12 V of bias** is from memory: TDK's bias
+  curve for CGA5L1X7R1H106K is not banked. **Decided by: banking it** (or a
+  bench measurement at E6); the LT3042's 4.7 µF minimum is the bar.
 
 *(The entry bulk — 100 µF on +12 V and 47 µF on −12 V — is 2–5× the
 surveyed 10–22 µF, and it is kept: `C-BULK-RAIL` gives the reason. `C2`,

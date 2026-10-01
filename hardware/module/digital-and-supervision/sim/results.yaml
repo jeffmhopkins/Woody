@@ -4,9 +4,9 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/digital-and-supervision/sim/sims.yaml: 5220639beaf2e194
+  hardware/module/digital-and-supervision/sim/sims.yaml: d7520d417ddec617
   hardware/module/power-entry/netlist.yaml: 78440e2b6a1c1e45
-  hardware/module/digital-and-supervision/netlist.yaml: 131fe3808d5d1b63
+  hardware/module/digital-and-supervision/netlist.yaml: b4a891171540924f
   hardware/module/dac8568/netlist.yaml: 2619a0f3926942d3
   hardware/module/digital-and-supervision/sim/seq.cir: 90d6272d6aeabfbd
   hardware/module/power-entry/sim/lt3042.lib: 2664843cbe66f3e8
@@ -162,7 +162,9 @@ sims:
         max: 0.0190158
         max_at: k_clamp+
     asserts:
-    - expr: min['over_on'] > 0.3 and min['over_off'] > 0.3 and min['oversc_on'] > 0.3 and min['overdin_on'] > 0.3
+    - expr: min['over_on'] > 0.3 and min['oversc_on'] > 0.3 and min['overdin_on'] > 0.3
       why: 'WHAT-IF: with the buffer on LOGIC_5V every DAC input it drives high sits over AVDD + 0.3 V at power-on at every
-        corner, and SYNC again at power-off - the excluded wiring, so a regression that put it back would be caught by rails-and-sync'
-      pass: false
+        corner - the excluded wiring, so a regression that put it back would be caught by rails-and-sync. At power-off it
+        is now about 0.25 V over, under the 0.3 V: the LT3042''s 0.3 V dropout lets DAC_AVDD follow LOGIC_5V down far closer
+        than the LM317L''s did (1.2 V over until 2026-10-01). Recorded, not asserted'
+      pass: true

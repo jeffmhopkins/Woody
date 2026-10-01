@@ -193,13 +193,13 @@ it is 4.99–5.47 V `[calc: 1.20 × (1 + 475·0.999/(150·1.001)); 1.30 × (1 +
 LM317LZ.pdf p.5]`, 0.48 V against the C grade's 5.0–5.5 V. A fixed 478 Ω would
 clear the bottom by 16 mV and the top by 1 mV before temperature `[calc]`,
 which is not a fit either: the bench still decides.)* *(Amended again
-2026-10-01, the owner: "Can we just do trim pot to help?" — **the divider is
-trimmed, not selected.** `TRIM-DAC-RAIL`, a 50 Ω 12-turn rheostat, sits in the
-`OUT`-to-`ADJ` leg with `R-REG-SET-HI`, over `R-REG-SET-LO` at 523 Ω, and E7
-trims `DAC AVDD` to `dac-rail`. Its travel reaches the set point on every part
+2026-10-01, the owner: "Can we just do trim pot to help?" — **the divider was
+trimmed, not selected** (superseded the same day, below). `TRIM-DAC-RAIL`, a
+50 Ω 12-turn rheostat, sat in the `OUT`-to-`ADJ` leg with `R-REG-SET-HI`, over
+`R-REG-SET-LO` at 523 Ω, and the bench step set `DAC AVDD` with it. Its travel reaches the set point on every part
 across TI's limits and never the DAC's 6 V absolute maximum, and an open
-wiper or track takes the rail down: `power-entry.md`, *The DAC rail's trim*;
-`power-entry/sim`'s `dac-trim-*`.)* *(Amended a third time 2026-10-01, the
+wiper or track took the rail down - its page section and `dac-trim-*` sims
+were replaced with it.)* *(Amended a third time 2026-10-01, the
 owner: a precision-set LDO that needs no adjustment. **The LM317L and the
 trimmer are superseded.** `U-REG-DAC` is ADI's LT3042, whose 100 µA `SET`
 current is guaranteed 98–102 µA over line, load and temperature; with
