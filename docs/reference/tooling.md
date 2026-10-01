@@ -543,7 +543,8 @@ Each render is generated; what it is rendered from is the source.
 
 - **The module's layout.** Its ten circuits are sheets and its two boards are
   projects (2026-09-30, `hardware/boards/module-main/README.md`); no
-  `.kicad_pcb` yet, and the panel layout they are placed from is being revised.
+  `.kicad_pcb` yet; they are placed from the panel layout in
+  `config/module.yaml` (ADRs 0024, 0026).
   The interfaces migrated on 2026-09-29. The boards still draw their own
   halves of them rather than placing the interface sheets, which span boards
   (each interface page says which board draws which part). The main board is a project placing its circuit sheets
@@ -551,10 +552,19 @@ Each render is generated; what it is rendered from is the source.
   mode yet (`hardware/boards/main-board/README.md`, *Open*).
 - **The BOM fragments** become exports once every board is in KiCad, because
   a row's quantity is a count over all of them (ADR 0019).
-- **The right-hand key board's layout**, the same way as the left-hand one
-  (§4); its sheets already carry footprints.
 - **The commit gate.** `check-staleness.py` runs `cad.py check` but not
   `kicad.py check`, because that needs KiCad installed; run it by hand.
+
+### Ordering: JLC's stock, not LCSC's
+
+**A machine-placed part is drawn from JLC's own parts library, whose stock is
+not LCSC's storefront stock.** On 2026-10-01 three codes read 0 on LCSC's
+product API while JLC held them by the hundred thousand (C28260 123,345;
+C28323 2,294,300, both Basic), and C51349 no longer resolved on LCSC at all
+while JLC held 4,931 [web: LCSC product API and the jlcpcb.com parts-search
+API, 2026-10-01]. Check a machine part at JLC — the parts search behind
+`https://jlcpcb.com/parts`, or `https://jlcpcb.com/partdetail/<code>`. A
+`hand` part is bought wherever it is stocked, and its row says where.
 
 ## §5. Circuit simulation — `tools/sim.py`
 
