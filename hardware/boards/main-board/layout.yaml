@@ -250,10 +250,13 @@ parts:
   U3:  [14.0, 25.8, 0]      # U-BUF OPA2197: A = the reference buffer, B = the breath buffer
   U4:  [14.3, 18.6, 0]      # U-REF-BREATH REF5050
   C8:  [22.4, 47.4, 0]      # 100 nF on VS, at the sensor's pin 2 (at the far edge since its ports face the tail), off its leads' courtyard
-  R7:  [8.9, 28.0, 90]      # R-ISO-REF, BUF_OUT -> VS
-  R8:  [8.9, 24.55, 90]     # R-FB-REF, DC feedback from VS
-  R9:  [8.9, 21.1, 90]      # R-FBX-REF, AC feedback
-  C9:  [8.9, 17.7, 90]      # C-FB-REF
+  # the feedback network is a ring (BUF_OUT - R7 - VS - R8 - REF_MINUS - C9 - AC_FB_MID
+  # - R9 - BUF_OUT): stacked so each pair of neighbouring pads shares its net and joins
+  # without a track round anything; VS from R8's foot to R7's head down layer 4
+  R7:  [8.9, 28.0, 90]      # R-ISO-REF: BUF_OUT (foot) -> VS (head)
+  R9:  [8.9, 24.55, 270]    # R-FBX-REF, AC feedback: BUF_OUT (head) -> AC_FB_MID (foot)
+  C9:  [8.9, 21.1, 90]      # C-FB-REF: REF_MINUS (foot) -> AC_FB_MID (head)
+  R8:  [8.9, 17.65, 90]     # R-FB-REF, DC feedback: VS (foot) -> REF_MINUS (head)
   C5:  [19.4, 20.9, 90]     # C-REF-OUT on REF_5V
   C7:  [19.2, 16.4, 90]     # 100 nF on REF_5V
   C4:  [17.2, 13.0, 0]      # C-REF-OUT on REF_VIN
