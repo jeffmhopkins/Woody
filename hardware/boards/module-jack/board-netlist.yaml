@@ -4,13 +4,6 @@
 board: module-jack
 title: Woody module jack board (hardware/boards/module-jack)
 components:
-  D1:
-    of: LED-PANEL
-    value: 3mm LED
-    pins:
-    - A
-    - K
-    sheet: panel-led
   D2:
     of: D-ESD-PITCH
     value: PESD15VL1BA
@@ -24,16 +17,6 @@ components:
     pins:
     - 1
   H2:
-    of: MECH-STANDOFF-MOD
-    value: M3 female-female hex spacer
-    pins:
-    - 1
-  H3:
-    of: MECH-STANDOFF-MOD
-    value: M3 female-female hex spacer
-    pins:
-    - 1
-  H4:
     of: MECH-STANDOFF-MOD
     value: M3 female-female hex spacer
     pins:
@@ -104,13 +87,6 @@ components:
     - 18
     - 19
     - 20
-  R1:
-    of: R-LED-PANEL
-    value: 2k2 1%
-    pins:
-    - 1
-    - 2
-    sheet: panel-led
   RV1:
     of: POT-GAIN
     value: 50k linear
@@ -137,12 +113,9 @@ components:
     sheet: breath-response-shaper
 nets:
   /AGND_MOD:
-  - D1.K
   - D2.K2
   - H1.1
   - H2.1
-  - H3.1
-  - H4.1
   - J1.SLEEVE
   - J2.SLEEVE
   - J3.SLEEVE
@@ -198,10 +171,7 @@ nets:
   /RESP_WIPER:
   - J7.6
   - RV3.W
-  /UMBILICAL_POS12:
+  J7.19:
   - J7.19
-  - R1.1
-  /panel-led/LED_ANODE:
-  - D1.A
-  - R1.2
-external_endpoints: []
+external_endpoints:
+- J7.19
