@@ -8,7 +8,7 @@ inputs:
   hardware/module/panel-led/netlist.yaml: a79c04d85d3dfa0b
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
   hardware/module/panel-led/sim/led.cir: 40b2f61152ab155b
-  hardware/module/power-entry/sim/sims.yaml: e3433c1df045a671
+  hardware/module/power-entry/sim/sims.yaml: 537d3cbdbb252312
 ngspice: '42'
 sims:
   led[i_swing=0.195]:

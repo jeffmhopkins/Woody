@@ -1,7 +1,7 @@
 # Module power entry — simulation
 
-`sims.yaml` says what is simulated and what every run must show; `poweron.cir`
-is the deck; `results.yaml` is what the last run found, **generated** by
+`sims.yaml` says what is simulated and what every run must show; `poweron.cir`,
+`poweroff.cir` and `groundshift.cir` are the decks; `results.yaml` is what the last run found, **generated** by
 `python3 tools/sim.py run hardware/module/power-entry/sim`.
 `python3 tools/sim.py show <this dir>` prints it as a table.
 `docs/reference/tooling.md` §5 explains the tool.
@@ -22,6 +22,7 @@ stage on those rails with the DAC at its power-on-reset zero scale.
 |---|---|---|
 | `as-netlisted[dt_neg=…]` | the rails, `DAC_AVDD` and the pitch jack, the −12 V rail arriving 1 ms early, together, and 5 ms late | `DAC_AVDD` settles at or above `dac-rail`'s hard floor and never reaches the DAC8568's 6 V absolute maximum; the pitch jack stays within 100 mV of 0 V throughout |
 | `d3-reversed` | a what-if: `D3` fitted with its anode at the bus | `MODULE_ANALOG_NEG12` never arrives |
+| `poweroff[dt_neg_off=…]` | `poweroff.cir`: rack power-off — the bus rails falling (−12 V 2 ms early, together, 2 ms late), `D1`/`D3` reverse-biasing, each analog rail decaying on `C1` or `C3` into `module-own-draw`, and the netlisted pitch stage (`pitch-stage/sim`'s `pitch-stage.lib`, trims at mid-travel) parked on them | the pitch jack within 100 mV of 0 V all the way down. **Recorded:** the two rails reach half in 16–20 ms of each other's order, −12 V slightly first; the jack moves (77 mV) only once the op-amps are out of supply |
 | `gnd-before[r_bus_seg=…,i_swing=…]` | `groundshift.cir`: the rack's copper — the bus board from the PSU to this module's tap, the power ribbon's rails and ground — with the instrument's breath-following current returning through the star, as it did until ADR 0027 | several cents of pitch error at every bus position and swing (4.2–21 cents over the sweep) |
 | `gnd-isolated[…]` | the same rack with the instrument behind `U-ISO`: its power drawn rail to rail, its output floating and tied to the star | under 0.01 cents, and under a microamp in the tie |
 | `gnd-sense[…]` | option (b): the pitch reference on a current-free ribbon conductor | the ribbon's share goes, the bus board's stays |

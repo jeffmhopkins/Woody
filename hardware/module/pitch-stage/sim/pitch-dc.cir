@@ -1,0 +1,29 @@
+* The pitch stage's DC transfer, as netlisted (pitch-stage.lib), over the DAC's usable
+* window - twice in one run, XA with D-ESD-PITCH (its leakage at the 15 V standoff as
+* r_esd), XB without, each into a VCO input (r_vco). The trims sit where t_gain and
+* w_offset put them. vrefba is V_ref, VREF_BUFFERED.
+* A TRANSIENT, NOT A .dc SWEEP: TI's OPA2197 model finds no operating point for this
+* stage away from jack 0 V (2026-10-01: at DAC 2.0 V, and at 0.25 V, ngspice fell back to
+* its transient op, which tools/sim.py refuses). So the run starts at v_dac0 (jack 0 V,
+* where it converges) and walks the DAC to the window's bottom, middle and top, holding
+* each for t_dc - long enough for the stage to settle into a VCO - and is read at the end
+* of each hold.
+VPOS pos 0 {{v_pos}}
+VNEG neg 0 {{v_neg}}
+VREFO vrefout 0 {{v_refout}}
+VDAC dacpin 0 PWL(0 {{v_dac0}} {{t_dc_a}} {{v_dac0}} {{t_dc_b}} {{v_lo}} {{t_dc}} {{v_lo}} {{t_dc2_b}} {{v_mid}} {{t_dc2}} {{v_mid}} {{t_dc3_b}} {{v_hi}} {{t_dc3}} {{v_hi}})
+RBD dacpin 0 {{R-BIAS-DAC}}
+XA vrefout dacpin jack pos neg vrefba ma ma PSTAGE
+RESD jack 0 {{r_esd}}
+RVCOA jack 0 {{r_vco}}
+XB vrefout dacpin jackb pos neg vrefbb mb mb PSTAGE
+RVCOB jackb 0 {{r_vco}}
+.options method=gear rshunt=1e10
+.control
+tran 1u {{t_dc3}} 0 1u
+wrdata jack.dat v(jack)
+wrdata jackb.dat v(jackb)
+wrdata vref.dat v(vrefba)
+quit
+.endc
+.end

@@ -167,8 +167,9 @@ components:
     pins:
     - 1
     - 2
-    note: THE UMBILICAL BRANCH. At its real operating current this bead gives roughly half its nameplate impedance
-      - see the FB-IN row, which is the only one of the four where that matters
+    note: 'U-ISO''s +12 V input leg; FB4 is its -12 V leg. They carry the converter''s input, ~0.22 A in typical
+      play, which puts them between the bias curve''s 0 and 250 mA traces (ferrite-bias-impedance): the two of the
+      four where DC bias matters - see the FB-IN row'
   FB3:
     of: FB-IN
     value: 600R @ 100MHz
@@ -218,8 +219,8 @@ components:
     pins:
     - 1
     - 2
-    note: 'The module analog star''s single tie to PWR_GND, at the power header''s ground pins (power-entry.md,
-      Grounding): copper only'
+    note: 'The module analog star''s single tie: AGND_MOD to BUS_GND, at the power header''s ground pins (power-entry.md,
+      Grounding): copper only. PWR_GND reaches the star only through NT-UMB-MOD and NT-DIG-MOD'
   NT-DIG-MOD:
     value: net tie
     pins:
@@ -299,8 +300,9 @@ components:
     - EN
     - SENSE
     - VOUT
-    note: 'The module''s own 5 V, for U-LVL-MOD: the bus +5 V is not used (owner, 2026-09-30). From the protected
-      analog +12 V; EN tied to VIN; SENSE to VOUT at the part. GND on DIG_GND, the logic''s return'
+    note: 'The module''s own 5 V, LOGIC_5V: the SPI receiver U-RX-MOD and CS_MOD''s pull-up (U-LVL-MOD is on DAC_AVDD);
+      the bus +5 V is not used (owner, 2026-09-30). From the protected analog +12 V; EN tied to VIN; SENSE to VOUT
+      at the part. GND on DIG_GND, the logic''s return'
 nets:
   AGND_MOD:
   - port: AGND_MOD

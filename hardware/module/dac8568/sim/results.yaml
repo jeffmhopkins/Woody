@@ -4,9 +4,9 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/dac8568/sim/sims.yaml: 56d5c21782bc1016
+  hardware/module/dac8568/sim/sims.yaml: 181b10d260df2708
   hardware/module/dac8568/netlist.yaml: 2619a0f3926942d3
-  hardware/module/pitch-stage/netlist.yaml: 3d43eac2f5eabc29
+  hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
   hardware/module/mod-channels/netlist.yaml: 8f44cca2ddd7a7e3
   hardware/module/dac8568/sim/poweron.cir: 9d8cb9e0511e4b97
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
@@ -64,8 +64,8 @@ sims:
         jack stays within 100 mV of 0 V'
       pass: true
     - expr: abs(max['mod_final']) < 0.002 and abs(min['mod_final']) < 0.002
-      why: 'ADR 0006 ''Mod 1-4: exactly 0 V'': once the glitch has passed, both terms are zero and the mod jack sits within
-        the op-amp''s offset of 0 V (the reference pin''s leakage does not reach it)'
+      why: 'ADR 0006 ''Mod 1-4: 0 V'': once the glitch has passed, both terms are zero and the mod jack sits within the op-amp''s
+        offset of 0 V (the reference pin''s leakage does not reach it)'
       pass: true
     - expr: max['mod_peak'] < 0.15 and min['mod_trough'] > -0.15
       why: 'RECORDED (2026-10-01): the mod jack is not ''exactly 0 V'' THROUGH power-on - the glitch on its channel and on
@@ -129,8 +129,8 @@ sims:
         jack stays within 100 mV of 0 V'
       pass: true
     - expr: abs(max['mod_final']) < 0.002 and abs(min['mod_final']) < 0.002
-      why: 'ADR 0006 ''Mod 1-4: exactly 0 V'': once the glitch has passed, both terms are zero and the mod jack sits within
-        the op-amp''s offset of 0 V (the reference pin''s leakage does not reach it)'
+      why: 'ADR 0006 ''Mod 1-4: 0 V'': once the glitch has passed, both terms are zero and the mod jack sits within the op-amp''s
+        offset of 0 V (the reference pin''s leakage does not reach it)'
       pass: true
     - expr: max['mod_peak'] < 0.15 and min['mod_trough'] > -0.15
       why: 'RECORDED (2026-10-01): the mod jack is not ''exactly 0 V'' THROUGH power-on - the glitch on its channel and on
@@ -194,8 +194,8 @@ sims:
         jack stays within 100 mV of 0 V'
       pass: true
     - expr: abs(max['mod_final']) < 0.002 and abs(min['mod_final']) < 0.002
-      why: 'ADR 0006 ''Mod 1-4: exactly 0 V'': once the glitch has passed, both terms are zero and the mod jack sits within
-        the op-amp''s offset of 0 V (the reference pin''s leakage does not reach it)'
+      why: 'ADR 0006 ''Mod 1-4: 0 V'': once the glitch has passed, both terms are zero and the mod jack sits within the op-amp''s
+        offset of 0 V (the reference pin''s leakage does not reach it)'
       pass: true
     - expr: max['mod_peak'] < 0.15 and min['mod_trough'] > -0.15
       why: 'RECORDED (2026-10-01): the mod jack is not ''exactly 0 V'' THROUGH power-on - the glitch on its channel and on

@@ -7,7 +7,7 @@ inputs:
   hardware/module/breath-output-stage/sim/sims.yaml: 66a2de1101610764
   hardware/module/breath-output-stage/netlist.yaml: 63517b01fa4c02a2
   hardware/module/breath-response-shaper/netlist.yaml: 347e949e5edad4c7
-  hardware/module/pitch-stage/netlist.yaml: 3d43eac2f5eabc29
+  hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
   hardware/module/mod-channels/netlist.yaml: 8f44cca2ddd7a7e3
   hardware/module/breath-output-stage/sim/bos.cir: e1b8c860686a0315
   hardware/module/breath-output-stage/sim/bos-ac.cir: fbdf6f423bb51ac3

@@ -11,6 +11,7 @@ values:
 models:
   - datasheets/discrete-and-power/LM317L-ti-pspice-snvmaw3.lib
   - datasheets/analog/OPAx197-ti-pspice-sboma34d.lib
+include: [hardware/module/pitch-stage/sim/pitch-stage.lib]
 spiceinit: [set ngbehavior=psa]
 
 params:
@@ -33,6 +34,13 @@ params:
   d_is:       {value: 4.8e-4}
   d3_flip:    {value: 1, source: "1 = D3 as netlisted since 2026-09-30 (K at the bus, A at the module - hardware/module/power-entry/netlist.yaml); 0 = the reversed drawing it replaced"}
   t_neg_rise: {value: 2.0e-3}
+  # --- poweroff.cir: the rails coming down (pre-layout review A3-14) ----------------------
+  t_off:      {value: 30.0e-3, source: "the rails up and settled before the bus goes"}
+  t_fall:     {value: 1.0e-3, source: "the bus falling to 0 V [assumption: a PSU's output collapsing into the rack's load]"}
+  dt_neg_off: {value: 0.0, source: "the -12 V rail's fall behind +12 V, negative if it leads (swept, as dt_neg)"}
+  t_end_off:  {value: 230.0e-3, source: "long enough for both rails to reach a few hundred mV on their bulk"}
+  t_gain:     {value: 0.5, source: "pitch-stage.lib: TRIM-GAIN at mid-travel (hardware/module/pitch-stage/sim)"}
+  w_offset:   {value: 0.5, source: "pitch-stage.lib: TRIM-OFFSET at mid-travel"}
 
   # --- PTC-POS12 / PTC-NEG12 in the power-on deck (ADR 0027) ----------------------------
   r_ptc:      {value: 0.4, source: "MF-MSMF020/60: Rmin 0.40 ohm, a fitted part's resistance [datasheets/discrete-and-power/BOURNS-MF-MSMF.pdf p.1]. R1max, 6.0 ohm an hour after a trip, is the page's DC arithmetic: TI's LM317L transient model does not converge with it in series at dt_neg = -1 ms or +5 ms (ngspice 42, 'timestep too small' inside the model), so it is not claimed here"}
@@ -43,10 +51,10 @@ params:
   r_rib_rail: {value: 0.050, source: "one rail's two ribbon conductors: 0.232 x 0.3 / 2 + 2 x 15 mohm / 2 [calc, same basis]"}
   r_bus_rail: {value: 0.031, source: "a bus-board trace, 1 oz, 4 mm wide, 0.25 m: 1.72e-8 x 0.25 / (0.004 x 35e-6) [calc, docs/review/2026-09-21-hardware-and-standards-review/B3-power-entry-practice.md]"}
   r_bus_seg:  {value: 0.031, source: "the bus-board ground between this module's tap and the receiver's: 0 (the next slot - 1 mohm, since ngspice will not take 0) to the whole 0.25 m trace [calc, as r_bus_rail] (swept)"}
-  i_mod_pos:  {value: 0.045, source: "the module's own +12 V analog load, ~45 mA [repo, the FB-IN row]"}
-  i_mod_neg:  {value: 0.040, source: "the module's -12 V load, ~40 mA [repo, ADR 0004 power table]"}
+  i_mod_pos:  {value: 0.037, source: "the module's own +12 V analog load, module-own-draw (power-entry.md, 'Fuses on the rails')"}
+  i_mod_neg:  {value: 0.020, source: "the module's own -12 V analog load, module-own-draw (power-entry.md, 'Fuses on the rails')"}
   i_q:        {value: 0.212, source: "the instrument at rest, 212 mA [repo, ADR 0005 load table, quiescent - an upper bound since ADR 0015]"}
-  i_swing:    {value: 0.195, source: "the breath-correlated swing: 0.195 A, the thirteen WS2815B-V1 on the main board at full white, 170-195 mA at 12 V [owner brief 2026-09-30, not yet in the corpus]; 0.367 A, ADR 0005's quiescent-to-clamp-legal-worst swing, the one the 7-18 cent estimate used [repo] (swept)"}
+  i_swing:    {value: 0.195, source: "the breath-correlated swing: 0.195 A, the thirteen WS2815B-V1 on the main board at full white, the top of led-row-current (blocked on E6's measurement); 0.367 A, ADR 0005's quiescent-to-clamp-legal-worst swing, the one the 7-18 cent estimate used [repo] (swept)"}
   f_b:        {value: 2.0, source: "one breath 0 -> full -> 0 in 0.5 s [assumption: the frequency does not enter a resistive result]"}
   eta:        {value: 0.82, source: "U-ISO at ~21 % load (umbilical-current x 12 V = 4.3 W of 20 W, 0.36 A of 1.67 A): ~81 % off the RPA20-2412SAW's efficiency curve at 24 V in and ~0.95 W off its dissipation curve (4.3 / 5.26 = 0.82) [datasheets/discrete-and-power/RECOM-RPA20-AW.pdf PD-3]"}
   v_iso:      {value: 12.0, source: "U-ISO's output [ds PD-1]"}
@@ -67,6 +75,14 @@ derived:
   k_sense: "1.0 if v['topo'] == 2 else 0.0"
   swing_frac: "v['bal_frac'] if v['topo'] == 3 else 1.0"
   dc_extra: "v['i_swing'] if v['topo'] == 3 else 0.0"
+  t_off_e: "v['t_off'] + v['t_fall']"
+  t_off_n: "v['t_off'] + max(v['dt_neg_off'], 0) + 1e-6"
+  t_off_ne: "v['t_off'] + max(v['dt_neg_off'], 0) + 1e-6 + v['t_fall']"
+  r_own_pos: "v['v_bus'] / v['i_mod_pos']"
+  r_own_neg: "-v['v_bus_neg'] / v['i_mod_neg']"
+  r_trim_gain: "max(v.get('TRIM-GAIN', 0) * v['t_gain'], 1e-3)"
+  r_toff_cw: "max(v.get('TRIM-OFFSET', 0) * (1 - v['w_offset']), 1e-3)"
+  r_toff_ccw: "max(v.get('TRIM-OFFSET', 0) * v['w_offset'], 1e-3)"
 
 sims:
   - name: d3-reversed
@@ -172,3 +188,18 @@ sims:
     asserts:
       - expr: "max['err_cents'] < 0.5"
         why: "option (c) at 1 % balance leaves a fraction of a cent - at the cost of burning the whole swing as heat all the time (ADR 0027)"
+  - name: poweroff
+    # the bus goes; each analog rail decays on its bulk into its own load. Which collapses
+    # first, and what the pitch jack does meanwhile (pre-layout review A3-14).
+    deck: poweroff.cir
+    sweep: {dt_neg_off: [-2.0e-3, 0.0, 2.0e-3]}
+    vary: []
+    measures: [t_pos_half, t_neg_half, jack_peak_off, jack_trough_off]
+    post:
+      t_pos_half: "cross(w['p12'], 6.0, p['t_off']) - p['t_off']"
+      t_neg_half: "cross(w['n12'], -6.0, p['t_off']) - p['t_off']"
+      jack_peak_off: "peak(w['jack'], p['t_off'], p['t_end_off'])"
+      jack_trough_off: "trough(w['jack'], p['t_off'], p['t_end_off'])"
+    asserts:
+      - expr: "max['jack_peak_off'] < 0.1 and min['jack_trough_off'] > -0.1"
+        why: "the pitch jack stays within 100 mV of 0 V while the analog rails come down, whichever falls first: C-BULK-RAIL's 100 uF / 47 uF split keeps the two decays close (each rail reaches half in 16-20 ms), and the jack only moves once the op-amps are out of supply. The rails' order itself is recorded, not asserted"

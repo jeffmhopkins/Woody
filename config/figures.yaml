@@ -395,11 +395,20 @@ figures:
     value: "5.21 V"
     status: settled
     owner: hardware/module/power-entry/power-entry.md
-    derivation: "1.25 x (1 + 475/150) = 5.208 V"
-    forbidden: ["5.25V]", "local 5.25 V regulator", "own 5.25 V regulator", "LM317's own 5.25 V", "5.25V DAC regulator", "set to 5.25V", "LDO set to 5.25"]
+    derivation: "1.25 x (1 + 475/150) = 5.208 V from the divider; plus I_ADJ x R-REG-SET-LO, 50 uA typ / 100 uA max x 475 ohm = 24 / 48 mV [ds LM317LZ.pdf p.5], so 5.23 V typical. TI's transient model gives 5.219 V (hardware/module/digital-and-supervision/sim). Static worst case with the 0.1 % divider and TI's limits (V_REF 1.20-1.30 V, I_ADJ 0-100 uA): 4.99-5.47 V [calc: 1.20 x (1 + 475 x 0.999/(150 x 1.001)); 1.30 x (1 + 475 x 1.001/(150 x 0.999)) + 47.5 mV]."
+    forbidden: ["0.66 V worst-case spread", "worst case spans 0.66V", "5.25V]", "local 5.25 V regulator", "own 5.25 V regulator", "LM317's own 5.25 V", "5.25V DAC regulator", "set to 5.25V", "LDO set to 5.25"]
     false_positive_note: "The MPXV4006DP's supply spec is legitimately 4.75-5.25 V. Match the regulator, not the numeral."
-    floor: "5.00 V, HARD. The DAC8568's C grade is specified only for AVDD 5.0-5.5 V (SBAS430E, datasheets/analog/DAC8568CIPW.pdf). E7 selects R-REG-SET on the bench across a 0.66 V worst-case spread and must not land below 5.00 V. Added 2026-09-21; nothing in the roadmap knew this."
+    floor: "5.00 V, HARD. The DAC8568's C grade is specified only for AVDD 5.0-5.5 V (SBAS430E, datasheets/analog/DAC8568CIPW.pdf). E7 selects R-REG-SET-LO on the bench across the derivation's 4.99-5.47 V static spread and must not land below 5.00 V. Added 2026-09-21; nothing in the roadmap knew this."
     note: "bom.csv's U-REG-DAC DESCRIPTION field said 'set to 5.25V' until 2026-09-21 - the forbidden list matched the notes field's phrasings and not this one, which is why it survived. Both phrasings are listed now."
+
+  - id: module-own-draw
+    quantity: The module's own analog rail draw, jacks open (U-ISO and the instrument excluded)
+    value: "~37 mA on +12 V, ~20 mA on -12 V"
+    status: settled
+    owner: hardware/module/power-entry/power-entry.md
+    derivation: "power-entry.md 'Fuses on the rails' [calc]: fourteen OPA2197 channels at 1.3 mA max (SBOS737C p.8) = 18.2 mA on both rails; INA828 0.85 mA over temperature (p.6) on both; on +12 V only the LM317L branch ~12.4 mA ('The DAC rail's load') and U-REG-LOGIC ~5.1 mA. +12 V: 18.2 + 0.85 + 12.4 + 5.1 = 36.6 mA; -12 V: 18.2 + 0.85 = 19.1 mA. With all six jacks shorted at full scale, ~97 mA on +12 V."
+    forbidden: ["its own ~45 mA and ~40 mA", "U-ISO plus the module's own ~40 mA", "about 22mA against -12V's 10mA", "+12V analog, ~45mA"]
+    note: "Added 2026-10-01 (pre-layout review A3-6): the derived pair had an asserted twin, 45/40 mA, from ADR 0004's pre-ADR 0027 power table, and the rack totals and the power-entry sim were computed from that."
 
   - id: mod-reference
     quantity: Mod channel reference, DAC channel 7
@@ -423,6 +432,15 @@ figures:
       is 2.500 V. The value was only reachable by reading the sentence.
       That is the second time in this restructure that the document OWNING a
       figure was the one contradicting it.
+
+  - id: mod-jack-range
+    quantity: Mod channel output range at the jack, into one 100 kohm input
+    value: "+/-9.90 V nominal (+/-10.000 V at the op-amp output); worst-case span 19.51-20.10 V, -2.46/+0.51 %"
+    status: settled
+    owner: hardware/module/mod-channels/mod-channels.md
+    derivation: "R-OUT-PROT (1k) is outside the loop, so the jack is the op-amp output x 100k/101k = 0.990 [calc]. Op-amp output span 19.703-20.303 V at 1 % parts (mod-channels.md tolerance table) x 0.990 = 19.508-20.102 V [calc]; [sim] hardware/module/mod-channels/sim range: jack -9.9009/+9.9007 V nominal, 9.8026 and -9.7048 V at the worst corner (span 19.507 V). On a 1 V/oct assignment: -11.9 cents/oct nominal, -29.6/+6.1 worst [calc: 1200 x span error]."
+    forbidden: ["About ±18 cents per octave", "About +/-18 cents per octave"]
+    note: "Added 2026-10-01 (pre-layout review A2-1, owner: correct the docs only). The stated range had been the op-amp output's, and the cents figure the resistors' alone."
 
   - id: pitch-compensation
     quantity: C-FB-PITCH value and net
@@ -646,11 +664,11 @@ figures:
     forbidden: ["1.7 dB of margin", "1.7 dB of claimed margin"]
   - id: pitch-mult-overshoot
     quantity: Pitch jack overshoot on an octave step, into a passive mult to another output's jack capacitor
-    value: "41.8 % at 82 nF, 64.1 % at 330 nF"
+    value: "41.6 % at 82 nF, 64.0 % at 330 nF"
     status: settled
     owner: hardware/module/pitch-stage/sim/README.md
-    derivation: "[sim] python3 tools/sim.py run hardware/module/pitch-stage/sim, 2026-09-30, ngspice 42 with TI's OPA2197 PSpice model. Sim step-mult, nominal: the stage as netlisted with the other jack's C-FILT-MOD-1 (82 nF) or C-OUT-BREATH (330 nF) on PITCH; corners of C-FB-PITCH, C-FILT-PITCH and R-OUT-PROT move it about 1 point. The loop's phase margin is 69.3 deg at 10 MHz at every load (sim loop): the AC sweep cannot see it. With the other output's R-OUT-PROT to its driver also on the jack: 15.3 % and 41.8 %."
-    forbidden: ["44–67 %", "65.4 %"]
+    derivation: "[sim] python3 tools/sim.py run hardware/module/pitch-stage/sim, 2026-10-01, ngspice 42 with TI's OPA2197 PSpice model. Sim step-mult, nominal: the stage as netlisted (pitch-stage.lib: the V_ref trim network and follower, R-GAIN-CTR, both trims at mid-travel, D-ESD-PITCH) with the other jack's C-FILT-MOD-1 (82 nF) or C-OUT-BREATH (330 nF) on PITCH; corners of C-FB-PITCH, C-FILT-PITCH, R-OUT-PROT and D-ESD-PITCH's capacitance move it about 1 point. The loop's phase margin is 69.3 deg at 10 MHz at every load (sim loop): the AC sweep cannot see it. With the other output's R-OUT-PROT to its driver also on the jack: 15.1 % and 41.6 %."
+    forbidden: ["44–67 %", "65.4 %", "41.8 % at 82 nF", "64.1 % at 330 nF"]
   - id: cs-fall-reentry
     quantity: CS_MOD's falling edge at the module - how far it swings back up once past the threshold. At U-RX-MOD's Schmitt input (behind R-RX-CS and C-RX-CS) against the whole V_T spread; at the cable node against a plain TTL input's V_IL (0.8 V)
     value: "0.10 V past V_IL at the cable node at the worst corner, none at the nominal; none at the Schmitt receiver's input at any corner"
@@ -764,7 +782,7 @@ figures:
     owner: hardware/module/power-entry/power-entry.md
     derivation: "Vf modulation is 120 mV: 0.24 V at 245 mA -> 0.36 V at 612 mA, digitised off Fig. 2 of Diodes Inc DS23001 Rev.8 (datasheets/discrete-and-power/1N5817.pdf). Reaches the jack as 120 mV -> LM317 line reg 0.52 mV/V -> 62 uV on AVDD -> OPA2197 PSRR 110.5 dB worst case -> 0.00044 cents. Pitch references the DAC's INTERNAL reference, not this rail. r_d [calc]: V = a ln(I) + b + Rs I fitted by least squares to the four points digitised off the same Fig. 2 (0.245 A 0.24 V, 0.612 A 0.36 V, 1.0 A 0.454 V, 3.0 A 0.746 V; residuals under 5 mV) gives a = 0.100 V and Rs = 0.093 ohm, so r_d = a/I + Rs = 0.100/0.22 + 0.093 = 0.55 ohm in D2 and 0.100/0.037 + 0.093 = 2.8 ohm in D1. Since ADR 0027 no diode carries the module's whole +12 V draw: D2 carries U-ISO's input (~0.22 A typical, power-entry.md) and D1 the analog rails (~37 mA, power-entry.md). The bulk term matters - a/I alone, with a = n V_T for n = 1, understates r_d several-fold. Either way HF isolation improves with r_d, so the conclusion stands."
     provenance_note: "This was 75-80 mV from a review agent's estimate until 2026-09-21. The 120 mV is read off the actual curve, and the digitisation is calibrated: the same extraction gives 0.454 V at 1.0 A and 0.746 V at 3.0 A against the datasheet's guaranteed maxima of 0.450 V and 0.750 V, so it is good to about +/-0.01 V - and the plotted curve sits essentially ON the max spec, so read these as typical-to-max. The conclusion is unchanged: 0.00044 cents is still five orders of magnitude below every other term in the table. SEPARATELY, 2026-09-21: the PSRR in this chain was 114 dB and that figure is NOT IN THE OPA2197 DATASHEET - SBOS737C p.8 specifies +-1 uV/V typ and +-3 uV/V max, i.e. 120 dB typ and 110.5 dB worst case. Using the guaranteed maximum scales the result by 1.50x, from 0.00029 to 0.00044 cents, and changes nothing. SBOS737C is banked at datasheets/analog/OPA2197.pdf."
-    forbidden: ["20 cents of breath-correlated", "20 cents of pitch bend", "about 20 cents", "by ~80mV", "by **~80 mV**", "A7 independently gets 75 mV", "0.00018 cents", "0.00027 cents", "0.00029 cents", "voltage by ~80 mV", "The 80 mV of", "computes 75 mV", "path is 75 mV", "75 mV → LM317", "39 µV on `AVDD`", "39 uV on AVDD"]
+    forbidden: ["20 cents of breath-correlated", "20 cents of pitch bend", "about 20 cents", "by ~80mV", "by **~80 mV**", "A7 independently gets 75 mV", "0.00018 cents", "0.00027 cents", "0.00029 cents", "voltage by ~80 mV", "The 80 mV of", "computes 75 mV", "path is 75 mV", "75 mV → LM317", "39 µV on `AVDD`", "39 uV on AVDD", "69 mΩ at 392 mA", "r_d 69 mohm"]
     false_positive_note: "DO NOT add a bare '80 mV' pattern. hardware/module/power-entry/power-entry.md states 80 mV twice as the LT1641 ON-pin comparator hysteresis (1.233 V falling / 1.313 V rising) - a completely unrelated quantity that happens to share the number. Every pattern here carries enough surrounding words to tell the two apart. power-entry.md's own 'This page said ~80 mV' is its refutation record and is correct as written."
     escape_note: |
       FOUR LIVE VALUES FOR ONE QUANTITY, FOUND 2026-09-21 BY A COLD AGENT.

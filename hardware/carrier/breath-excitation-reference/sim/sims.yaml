@@ -74,8 +74,8 @@ sims:
     asserts:
       - expr: "min['pm'] - 10 > 76"
         why: "the page's robustness claim (breath-excitation-reference.md: above 76 degrees across a 200x range of C_L) holds at every corner and load, after the +-10 degree screen a macromodel earns"
-      - expr: "abs(max['vs_dc'] - 5.0) < 5e-3 and abs(min['vs_dc'] - 5.0) < 5e-3"
-        why: "VS sits within 5 mV of 5.000 V at every corner: the reference's own 0.1 % initial accuracy, with nothing added by R-ISO-REF (the drop across it is outside the DC loop)"
+      - expr: "abs(max['vs_dc'] - 5.0) < 2.5e-3 and abs(min['vs_dc'] - 5.0) < 2.5e-3"
+        why: "VS sits within 2.5 mV of 5.000 V at every corner - the bought High grade's 0.05 % initial accuracy (ref5050-grade) - with nothing added by R-ISO-REF (the drop across it is outside the DC loop)"
   - name: zout-as-netlisted
     deck: ref-zout.cir
     vary: [R-ISO-REF, R-FB-REF, C-FB-REF]
@@ -156,8 +156,8 @@ sims:
     post:
       vref_dev: "max(peak(w['ref'], 0, p['t_ref_end']) - trough(w['ref'], 0, p['t_ref_end']), 0)"
     asserts:
-      - expr: "abs(nom['vref_op'] - 5.0) < 5e-3"
-        why: "the model's operating point is the running reference, within its 0.1 % initial accuracy of 5.000 V (A grade, SBOS410O Table 4-2) - the loop decks' 5.000 V source stands for this"
+      - expr: "abs(nom['vref_op'] - 5.0) < 2.5e-3"
+        why: "the model's operating point is the running reference, within the bought High grade's 0.05 % initial accuracy of 5.000 V (ref5050-grade: REF5050IDR, SBOS410O Table 4-2) - TI's model is not grade-specific and sits at 5.0025 V, on that edge; the loop decks' 5.000 V source stands for this"
       - expr: "nom['vref_dev'] < 1e-3"
         why: "a 1 V droop of the rail moves VOUT by under 1 mV (C-REF-OUT on VIN and VOUT, and the part's line regulation)"
   # --- what-ifs on the same deck, to reproduce the page's two hazard claims
