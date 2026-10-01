@@ -120,7 +120,7 @@ amp, recorded rather than adopted, and still the author's call — is in
 | **R1** | 10 kΩ 1 % | To the shared reference |
 | **R2** | **30 kΩ 1 %** | Feedback. `k = 3`, gain `1 + k` = **exactly 4** |
 | **V_ref** | **3.3333 V** from DAC ch7, buffered | Shared by all four. Intercept is `k · V_ref` = 10.000 V |
-| **C-FILT-MOD** | 82 nF C0G | 1.94 kHz, jack side of the 1 kΩ |
+| **C-FILT-MOD** | 82 nF C0G | 1.94 kHz, jack side of the 1 kΩ. The jacks are on the jack board and these are on module-main, so **place each at `J-B2B-MOD`**, at its jack's pin — the connector end is where a shunt is wanted |
 
 *(The four-resistor version this replaced, and the `R-OPAMP-IN` trap that only
 it had, are in [`notes.md`](notes.md).)*
