@@ -589,7 +589,7 @@
     (property "Pins_source" "datasheets/connectors/NEUTRIK-NE8FAV-DRAWING.pdf, PCB layout: contacts 1-8 as the RJ45's; G, the shield tab, is not a pin of the umbilical" (at 81.28 88.9 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "Neutrik" (at 81.28 88.9 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "NE8FAV" (at 81.28 88.9 0) (effects (font (size 1.27 1.27)) hide))
-    (property "LCSC" "" (at 81.28 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C368526" (at 81.28 88.9 0) (effects (font (size 1.27 1.27)) hide))
     (property "Assembly" "hand" (at 81.28 88.9 0) (effects (font (size 1.27 1.27)) hide))
     (pin "1" (uuid cb283346-4458-5b6c-9621-514b905e9a25))
     (pin "2" (uuid d40cf998-1aa3-5546-8566-4573c6f00ac3))

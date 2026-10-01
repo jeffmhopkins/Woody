@@ -31,9 +31,17 @@ Not tracked, and gitignored: `.staleness/`, `.staleness-report.txt`, `*.tmp`.
 
 ## §2. `tools/check-staleness.py` — the mechanical half of the one failure mode
 
-Run by a `PreToolUse` hook before every `git commit`, so forgetting it is
-visible rather than silent. It greps the corpus for values `config/figures.yaml`
-lists as `forbidden`, skipping lines whose wording refutes them.
+Surfaced by a `PreToolUse` hook, so forgetting it is visible rather than
+silent — but the hook fires before every `Bash` call, not only `git commit`,
+and it never blocks: a FAIL is reported and you are the one who stops
+(CLAUDE.md rule 2 says how that was found). It greps the corpus for values
+`config/figures.yaml` lists as `forbidden`, skipping prose whose wording
+refutes them (`.md` only — rule 2b). **It also reads the placed parts'
+identity fields on every KiCad sheet** — `Value`, `Manufacturer`, `MPN`,
+`LCSC`, `Note` — with no refutation exemption, because those fields are data
+and the exported `netlist.yaml` drops the bought-part ones (since 2026-10-01,
+pre-layout review A8-14: an MPN regressing to the worse REF5050 grade would
+have passed unseen).
 
 ### The trap: a forbidden list written from the document in front of you
 
@@ -215,9 +223,10 @@ ref,category,part,manufacturer,description,package,qty,status,source,adr,notes
 > number is `wc -l` on that file against `merge-bom.py --check`'s row total;
 > this paragraph carried "50 rows of 138" until 2026-09-22, when it was 32 of
 > 140, and the §4 closing note already admitted this section had gone stale
-> once before. Two of its clusters name circuits this corpus has no page for — six
-> identical jack-protection networks drawn three times, and nineteen
-> decoupling capacitors with no home.
+> once before. It holds mechanical parts, cables, the PCBs themselves and
+> parts deliberately not fitted — read the file, not a description of it.
+> (The two clusters this paragraph used to name, jack-protection networks and
+> homeless decoupling capacitors, have since been drawn and left it.)
 >
 > *This section described `bom.csv` as the file you edit for several hours
 > after it stopped being one. Found by a cold reviewer. It is the project's
@@ -233,9 +242,16 @@ ref,category,part,manufacturer,description,package,qty,status,source,adr,notes
   `merge-bom.py` does both, one level up: it now catches "two circuits both
   claim this refdes", with both file:line locations named, which the old
   same-file check could not see.
-- The `notes` column is append-only in practice: corrections are added after a
-  ` | ` with a date, and the superseded text is left in place. That is what
-  makes the checker's refutation detection work, and it is why rows are long.
+- **The `notes` column carries no history** (CLAUDE.md rule 2b). It says what
+  a builder must do, and nothing about what someone used to think: when a
+  value changes, *replace* the sentence. A retired value left in a `.csv` cell
+  is a defect to `check-staleness.py` whatever wording sits beside it — the
+  refutation exemption is for `.md` only. History goes to the circuit's
+  `notes.md` or to git. `python3 tools/audit-notes.py --regrown` flags rows
+  that have turned back into logs. (This bullet told editors the opposite —
+  append a dated correction and leave the superseded text — until
+  2026-10-01, a week after the rule changed. Found by the pre-layout review,
+  A8-6.)
 - **`TBD`/`open` must say what decides them.** Two rows are deliberately
   blocked on a datasheet and say so; that is correct, not a defect.
 
