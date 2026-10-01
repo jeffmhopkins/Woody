@@ -36,3 +36,7 @@ render:
             ["key plate", 0, 0, 34], ["column screws", 0, 0, 48]]
     status: nominal
     source: "picture convention: the cassette alone (ADR 0025) pulled apart up Z in its build order - bottom plate, main board spacers, main board, standoffs, key boards, spacers, key plate, screws"
+  side_glass:
+    value: clear-smoke
+    status: settled
+    source: "how the photographs draw the acrylic sides - clear-smoke (a clear, smoke-tinted sheet, so the cassette shows through) or frosted. RENDER ONLY: the instrument's sides are frosted, dark grey (ADR 0009 'Finishes'), and stay so. Owner, 2026-10-01: 'Can the acrylic be transparent with tint so we can see the insides?', then 'Frosted [shouldn't] be added for the renders, but they will be in real life' - every photograph with a side in it says so in a caption"

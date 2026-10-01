@@ -271,7 +271,7 @@ SHELL = ["oak top", "oak bottom", "side left", "side right", "mouth cap", "tail 
 # whether the LED row is lit.
 VIEWS = {
     "hero": dict(hide=["ribbons"], explode=None,
-                 cam=(-0.62, -1.0, 0.52), lens=60, frame=None, size=(1920, 1080), leds=False),
+                 cam=(-0.62, -1.0, 0.40), lens=60, frame=None, size=(1920, 1080), leds=False),
     "open": dict(hide=["oak top", "key plate", "side left", "column screws"], explode=None,
                  cam=(-0.45, -1.0, 0.95), lens=60, frame=None, size=(1920, 1080), leds=False),
     "exploded": dict(hide=["ribbons"], explode="explode_instrument",
@@ -351,12 +351,18 @@ def brushed(name, color, rough, aniso):
 
 
 def oak(name, along="x"):
-    """Flat-sawn oak under a very dark stain with the grain still showing, satin
-    oil (ADR 0009 'Finishes', 2026-09-28). PICTURE CONVENTION: the figure is
-    procedural, in object space (mm) - rings round a log axis parallel to the
-    grain, wandered by noise; open pores as dark streaks along it, rougher than
-    the face. `along`: the grain's axis, x along the body, y across (the caps)."""
-    m = principled(name, "#2a1a10", 0.42, 0.0, **{"Coat Weight": 0.25, "Coat Roughness": 0.32, "Specular IOR Level": 0.45})
+    """Oak under a dark stain, satin clearcoat (ADR 0009 'Finishes', 2026-09-28:
+    dark, the grain still showing). PICTURE CONVENTION, procedural, in object
+    space (mm), deliberately low contrast:
+      - fine straight grain: growth rings ~1.1 mm apart round a log axis far
+        below the board, so on a face they run as near-straight lines along
+        the grain, wandered gently by noise;
+      - open pores: thin dark streaks along the grain, rougher than the face;
+      - medullary rays: short, slightly lighter flecks along the grain - the
+        figure that tells oak from walnut or ash;
+      - on a face across the grain (an end) the same rings read as end grain.
+    `along`: the grain's axis - x along the body, y across (the end caps)."""
+    m = principled(name, "#2b1f16", 0.42, 0.0, **{"Coat Weight": 0.2, "Coat Roughness": 0.3, "Specular IOR Level": 0.4})
     N, Lk = nodes(m)
     b = N["Principled BSDF"]
     tc = N.new("ShaderNodeTexCoord")
@@ -364,15 +370,7 @@ def oak(name, along="x"):
     if along == "y":
         mp.inputs["Rotation"].default_value = (0, 0, math.radians(90))
     Lk.new(tc.outputs["Object"], mp.inputs["Vector"])
-    sep = N.new("ShaderNodeSeparateXYZ")
-    Lk.new(mp.outputs["Vector"], sep.inputs["Vector"])
-    wm = N.new("ShaderNodeMapping")
-    wm.inputs["Scale"].default_value = (0.006, 0.08, 0.08)
-    Lk.new(mp.outputs["Vector"], wm.inputs["Vector"])
-    wn = N.new("ShaderNodeTexNoise")
-    wn.inputs["Scale"].default_value = 1.0
-    wn.inputs["Detail"].default_value = 3.0
-    Lk.new(wm.outputs["Vector"], wn.inputs["Vector"])
+    P = mp.outputs["Vector"]
 
     def op(kind, a, b_=None):
         n = N.new("ShaderNodeMath")
@@ -385,46 +383,73 @@ def oak(name, along="x"):
             else:
                 Lk.new(v, n.inputs[i])
         return n.outputs[0]
-    # the log's axis below and beside the board, so its rings cross the face as arcs
-    yy = op("ADD", sep.outputs["Y"], 37.0)
-    zz = op("ADD", sep.outputs["Z"], 160.0)
+
+    def noise(scale_xyz, detail):
+        mm = N.new("ShaderNodeMapping")
+        mm.inputs["Scale"].default_value = scale_xyz
+        Lk.new(P, mm.inputs["Vector"])
+        nz = N.new("ShaderNodeTexNoise")
+        nz.inputs["Scale"].default_value = 1.0
+        nz.inputs["Detail"].default_value = detail
+        Lk.new(mm.outputs["Vector"], nz.inputs["Vector"])
+        return nz.outputs["Fac"]
+
+    def band(fac, lo, hi):
+        r = N.new("ShaderNodeMapRange")
+        r.inputs["From Min"].default_value = lo
+        r.inputs["From Max"].default_value = hi
+        Lk.new(fac, r.inputs["Value"])
+        return r.outputs["Result"]
+
+    def mixc(fac, a, colour):
+        n = N.new("ShaderNodeMix")
+        n.data_type = "RGBA"
+        Lk.new(fac, n.inputs["Factor"])
+        Lk.new(a, n.inputs["A"])
+        n.inputs["B"].default_value = srgb(colour)
+        return n.outputs["Result"]
+
+    sep = N.new("ShaderNodeSeparateXYZ")
+    Lk.new(P, sep.inputs["Vector"])
+    # rings round a log axis 300 mm below and 20 mm beside: near-straight lines on the face
+    yy = op("ADD", sep.outputs["Y"], 20.0)
+    zz = op("ADD", sep.outputs["Z"], 300.0)
     r = op("SQRT", op("ADD", op("MULTIPLY", yy, yy), op("MULTIPLY", zz, zz)))
-    r = op("ADD", r, op("MULTIPLY", op("SUBTRACT", wn.outputs["Fac"], 0.5), 14.0))
-    ring = op("FRACT", op("DIVIDE", r, 2.1))
+    r = op("ADD", r, op("MULTIPLY", op("SUBTRACT", noise((0.004, 0.05, 0.05), 4.0), 0.5), 6.0))
+    ring = op("FRACT", op("DIVIDE", r, 1.1))
     cr = N.new("ShaderNodeValToRGB")
     E = cr.color_ramp.elements
-    E[0].position, E[0].color = 0.0, srgb("#3d2616")
-    E[1].position, E[1].color = 0.62, srgb("#2e1c10")
-    E.new(0.86).color = srgb("#150d07")
-    E.new(1.0).color = srgb("#3d2616")
+    E[0].position, E[0].color = 0.0, srgb("#140d08")
+    E[1].position, E[1].color = 0.22, srgb("#2b1f16")
+    E.new(0.78).color = srgb("#302318")
+    E.new(1.0).color = srgb("#140d08")
     Lk.new(ring, cr.inputs["Fac"])
-    pm = N.new("ShaderNodeMapping")
-    pm.inputs["Scale"].default_value = (0.05, 2.2, 2.2)
-    Lk.new(mp.outputs["Vector"], pm.inputs["Vector"])
-    pn = N.new("ShaderNodeTexNoise")
-    pn.inputs["Scale"].default_value = 1.0
-    pn.inputs["Detail"].default_value = 2.0
-    Lk.new(pm.outputs["Vector"], pn.inputs["Vector"])
-    pr = N.new("ShaderNodeMapRange")
-    pr.inputs["From Min"].default_value = 0.56
-    pr.inputs["From Max"].default_value = 0.70
-    Lk.new(pn.outputs["Fac"], pr.inputs["Value"])
-    mix = N.new("ShaderNodeMix")
-    mix.data_type = "RGBA"
-    mix.blend_type = "MULTIPLY"
-    Lk.new(pr.outputs["Result"], mix.inputs["Factor"])
-    Lk.new(cr.outputs["Color"], mix.inputs["A"])
-    mix.inputs["B"].default_value = srgb("#5a5a5a")
-    Lk.new(mix.outputs["Result"], b.inputs["Base Color"])
+    base = cr.outputs["Color"]
+    # a slow colour drift across the plank
+    base = mixc(op("MULTIPLY", noise((0.01, 0.02, 0.02), 2.0), 0.5), base, "#21170f")
+    # pores: fine dark streaks along the grain
+    pore = band(noise((0.08, 3.5, 3.5), 1.0), 0.60, 0.72)
+    base = mixc(op("MULTIPLY", pore, 0.55), base, "#1a100a")
+    # medullary rays: short lighter flecks, long along the grain, thin across, scattered
+    vm = N.new("ShaderNodeMapping")
+    vm.inputs["Scale"].default_value = (0.35, 2.6, 2.6)
+    Lk.new(P, vm.inputs["Vector"])
+    vo = N.new("ShaderNodeTexVoronoi")
+    vo.inputs["Scale"].default_value = 1.0
+    Lk.new(vm.outputs["Vector"], vo.inputs["Vector"])
+    ray = op("MULTIPLY", band(vo.outputs["Distance"], 0.16, 0.05), band(noise((0.05, 0.4, 0.4), 1.0), 0.48, 0.62))
+    base = mixc(op("MULTIPLY", ray, 0.5), base, "#4a3828")
+    Lk.new(base, b.inputs["Base Color"])
     rr = N.new("ShaderNodeMapRange")
-    rr.inputs["To Min"].default_value = 0.40
-    rr.inputs["To Max"].default_value = 0.62
-    Lk.new(pr.outputs["Result"], rr.inputs["Value"])
+    rr.inputs["To Min"].default_value = 0.36
+    rr.inputs["To Max"].default_value = 0.55
+    Lk.new(pore, rr.inputs["Value"])
     Lk.new(rr.outputs["Result"], b.inputs["Roughness"])
     bump = N.new("ShaderNodeBump")
-    bump.inputs["Strength"].default_value = 0.12
-    bump.inputs["Distance"].default_value = 0.05 * MM
-    Lk.new(pr.outputs["Result"], bump.inputs["Height"])
+    bump.inputs["Strength"].default_value = 0.08
+    bump.inputs["Distance"].default_value = 0.04 * MM
+    bump.invert = True
+    Lk.new(pore, bump.inputs["Height"])
     Lk.new(bump.outputs["Normal"], b.inputs["Normal"])
     return m
 
@@ -432,23 +457,28 @@ def oak(name, along="x"):
 class Mats:
     """PICTURE CONVENTIONS, each named for what it stands for."""
 
-    def __init__(self):
+    def __init__(self, side_glass):
         self.oak_x = oak("oak, grain along the body")
         self.oak_y = oak("oak, grain across", "y")
         self.alu = brushed("aluminium, brushed", "#C9CBCE", 0.30, 0.55)
         self.steel = principled("stainless", "#B9BABC", 0.28, 1.0)
         self.nickel = principled("nickel", "#CFCDC8", 0.22, 1.0)
         self.zinc = principled("zinc-plated steel", "#AEB2B6", 0.34, 1.0)
-        self.side = principled("frosted acrylic, dark grey", "#4A4D52", 0.48, 0.0, **{"Transmission Weight": 0.7, "IOR": 1.49})
-        self.window = principled("frosted acrylic", "#E9ECEE", 0.55, 0.0, **{"Transmission Weight": 0.9, "IOR": 1.49})
+        # THE SIDES ARE FROSTED in the instrument (ADR 0009 'Finishes'); these
+        # photographs draw them clear on purpose (config/render.yaml render.side_glass)
+        if side_glass == "clear-smoke":
+            self.side = principled("acrylic, clear smoke (render only)", "#B3B8BE", 0.02, 0.0, **{"Transmission Weight": 1.0, "IOR": 1.49})
+        else:
+            self.side = principled("frosted acrylic, dark grey", "#4A4D52", 0.48, 0.0, **{"Transmission Weight": 0.7, "IOR": 1.49})
+        self.window = principled("frosted acrylic, the Matrix window", "#8A8F94", 0.32, 0.0, **{"Transmission Weight": 0.95, "IOR": 1.49})
         self.keycap = principled("PBT, black", "#141414", 0.62, 0.0, **{"Specular IOR Level": 0.4})
         self.black = principled("black plastic", "#151517", 0.42)
         self.ribbon = principled("ribbon PVC", "#9A9C9F", 0.5)
         self.silicone = principled("silicone tube", "#F2F0EA", 0.35, 0.0, **{"Transmission Weight": 0.6, "IOR": 1.41})
         self.matrix_pcb = principled("Matrix PCB", "#101012", 0.45, 0.0, **{"Coat Weight": 0.4})
-        self.matrix_led = principled("5050 LED", "#F1F0EA", 0.3)
+        self.matrix_led = principled("5050 LED", "#B9B4A2", 0.3)
         self.adapter = principled("adapter PCB", "#1E5B33", 0.4, 0.0, **{"Coat Weight": 0.4})
-        self.floor = principled("floor", "#1d1d20", 0.55)
+        self.floor = principled("floor", "#1d1d20", 0.9, 0.0, **{"Specular IOR Level": 0.25})
 
     def for_solid(self, sid):
         M = self
@@ -606,7 +636,7 @@ def build(view, sdir, solids, boards):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     sc = bpy.context.scene
     sc.unit_settings.system = "METRIC"
-    M = Mats()
+    M = Mats(cfg_value(cfg, "render.side_glass"))
 
     members = {g: [] for g in GROUPS}
     drawn = {}
@@ -668,6 +698,29 @@ def build(view, sdir, solids, boards):
     return sc, members, nleds
 
 
+def cyc(c, z, fwd, mat, R=1.0, reach=8.0, wide=14.0, back=3.0):
+    """PICTURE CONVENTION: a studio sweep - the floor under the subject curving
+    up (radius R) into a wall `reach` beyond it, square to the camera's
+    heading, so the background is seamless."""
+    hd = Vector((fwd.x, fwd.y, 0)).normalized()
+    side = Vector((-hd.y, hd.x, 0))
+    prof = [(-reach, 0.0)] + [(back + R * math.sin(t * math.pi / 32), R - R * math.cos(t * math.pi / 32)) for t in range(17)] + [(back + R, reach)]
+    bm = bmesh.new()
+    rows = []
+    for u in (-wide / 2, wide / 2):
+        rows.append([bm.verts.new(Vector((c.x, c.y, z)) + side * u + hd * a + Vector((0, 0, h))) for a, h in prof])
+    for i in range(len(prof) - 1):
+        bm.faces.new((rows[0][i], rows[0][i + 1], rows[1][i + 1], rows[1][i]))
+    for f in bm.faces:
+        f.smooth = True
+    me = bpy.data.meshes.new("cyc")
+    bm.to_mesh(me)
+    bm.free()
+    o = bpy.data.objects.new("cyc", me)
+    bpy.context.scene.collection.objects.link(o)
+    me.materials.append(mat)
+
+
 def setup(sc, members, view, preview):
     V = VIEWS[view]
     sc.render.engine = "CYCLES"
@@ -684,7 +737,7 @@ def setup(sc, members, view, preview):
     sc.cycles.seed = 0
     sc.view_settings.view_transform = "AgX"
     sc.view_settings.look = "AgX - Medium High Contrast"
-    sc.view_settings.exposure = -0.3 if V["leds"] else 0.0
+    sc.view_settings.exposure = -0.3 if V["leds"] else 0.3
     sc.render.image_settings.file_format = "PNG"
     sc.render.image_settings.color_depth = "8"
     sc.render.film_transparent = False
@@ -728,14 +781,15 @@ def setup(sc, members, view, preview):
         L.energy = power
         L.color = color
         o = bpy.data.objects.new(name, L)
+        o.visible_camera = False          # the softboxes light the subject; they are not in the picture
         sc.collection.objects.link(o)
         o.location = c + Vector(off)
         o.rotation_euler = (c - o.location).normalized().to_track_quat("-Z", "Y").to_euler()
     # picture: a big soft key from the upper front-left, a cool rim from behind,
     # a warm low fill, and a strip overhead to draw a highlight along the oak
     k = 0.25 if V["leds"] else 1.0
-    area("key", (-0.30, -0.45, 0.50), 14 * k, (1.0, 0.96, 0.92), 0.6)
-    area("rim", (0.35, 0.55, 0.30), 12 * k, (0.85, 0.92, 1.0), 0.3, 0.9)
+    area("key", (-0.30, -0.40, 0.55), 20 * k, (1.0, 0.96, 0.92), 0.6)
+    area("rim", (0.5, 1.6, 1.1), 20 * k, (0.85, 0.92, 1.0), 0.3, 0.9)
     area("fill", (0.35, -0.55, -0.05 if V["cam"][2] > 0 else -0.35), 3 * k, (1.0, 0.93, 0.86), 0.7)
     area("top", (0.0, -0.10, 0.55), 6 * k, (1, 1, 1), 0.9, 0.15)
     if V["cam"][2] < 0:     # looking up: a big soft panel below for the metal to reflect
@@ -743,8 +797,7 @@ def setup(sc, members, view, preview):
 
     # the floor, under the lowest part, unless the camera looks up at it
     if V["cam"][2] > 0:
-        bpy.ops.mesh.primitive_plane_add(size=60.0, location=(c.x, c.y, lo.z - 0.002))
-        bpy.context.object.data.materials.append(bpy.data.materials["floor"])
+        cyc(c, lo.z - 0.002, -Vector(V["cam"]).normalized(), bpy.data.materials["floor"])
 
     cam = bpy.data.cameras.new("cam")
     co = bpy.data.objects.new("cam", cam)
@@ -772,8 +825,24 @@ def setup(sc, members, view, preview):
         dist = max(dist, p.dot(d) + abs(p.dot(right)) / (tx * margin), p.dot(d) + abs(p.dot(up)) / (ty * margin))
     co.location = tgt + d * dist
     co.rotation_euler = fwd.to_track_quat("-Z", "Y").to_euler()
-    cam.clip_end = dist * 20
+    cam.clip_end = 100.0          # past the sweep
     return co
+
+
+def caption(png, text):
+    """A line of text in the picture's lower left, on a dark band: what the
+    picture shows that the instrument does not (cad.py's stamp goes under it)."""
+    from PIL import Image, ImageDraw, ImageFont
+    img = Image.open(png).convert("RGB")
+    d = ImageDraw.Draw(img, "RGBA")
+    f = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+    font = ImageFont.truetype(f, max(12, img.width // 96)) if os.path.exists(f) else ImageFont.load_default()
+    x0, y0, x1, y1 = d.textbbox((0, 0), text, font=font)
+    pad = font.size // 2
+    y = img.height - (y1 - y0) - 3 * pad
+    d.rectangle([pad, y - pad, pad + (x1 - x0) + 2 * pad, y + (y1 - y0) + pad + 2], fill=(18, 18, 20, 170))
+    d.text((2 * pad, y - y0 // 2), text, fill=(230, 230, 228), font=font)
+    img.save(png, optimize=True)
 
 
 def main():
@@ -805,6 +874,9 @@ def main():
     import time
     t0 = time.time()
     bpy.ops.render.render(write_still=True)
+    if cfg_value(yaml.safe_load(open(os.path.join(ROOT, CONFIG), encoding="utf-8")), "render.side_glass") == "clear-smoke" \
+            and any(not o.hide_render and o.name.startswith("side ") for o in bpy.data.objects):
+        caption(sc.render.filepath, "Sides rendered clear to show the inside; the instrument's sides are frosted (ADR 0009).")
     print(f"render-instrument: {a.view} rendered in {time.time() - t0:.0f} s", flush=True)
     print(f"TOOL: render-instrument.py; Blender {bpy.app.version_string} (bpy), Cycles {sc.cycles.samples} spp adaptive, OIDN")
     return 0
