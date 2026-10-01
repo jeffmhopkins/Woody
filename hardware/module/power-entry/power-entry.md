@@ -271,7 +271,8 @@ and a 200 mΩ rack supply — the case's rails move **6.7 mV p-p at the header**
 them; the module's analog rails 2.0 mV (+12 V) and 3.2 mV (−12 V); `DAC_AVDD`
 0.2 µV at an assumed 80 dB for the LT3042; and the jacks: **pitch 0.00096
 cents** (TI's OPA2197 model, with `DAC_AVDD`'s ripple passed whole to the
-DAC), mod 0.55 µV, breath 0.26 mV (through `R-OFFNEG` from −12 V). The
+DAC; against the module's own ground — a receiver at the PSU end of the bus
+sees `led-pwm-pitch`, `interfaces/system/sim`), mod 0.55 µV, breath 0.26 mV (through `R-OFFNEG` from −12 V). The
 review's ~13 mV bound (A4-13) took `C2`'s ESR as the only damping; it is not
 reached, and the filter needs no damper. On the review's own premise — no
 instrument bulk, the whole row out of `U-ISO` — a 200 mΩ supply would take

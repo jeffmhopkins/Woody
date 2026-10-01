@@ -396,6 +396,17 @@ both ends so there is no edge to shift, and when the instrument powers up its
 "acts as an interrupt, and the write sequence is ignored" `[ds DAC8568CIPW.pdf
 p.6]` — the first frame the firmware sends starts clean.
 
+The plug-in itself is a moment outside those four rows, and there **is** an
+edge to shift. As the contacts make, `SCLK` and `MOSI` spike past the lowest
+`V_T+` at `U-RX-MOD`'s input for a fraction of a microsecond `[sim]`
+(`hardware/interfaces/system/sim`, `hot-plug`). When every contact makes at
+once, the spike is over before `CS_MOD` falls through `V_T−` max. When `+12 V`
+makes a millisecond after the others, the spike lands with `CS_MOD` already
+at the second row's 0.45 V, so a low-threshold part can clock a bit into the
+DAC. The waveform shows one rising edge on each line. That is still harmless, for the reason the paragraph above gives: the
+instrument's 3V3 then pulls `CS_MOD` high (`cs_rx_end`), and that `SYNC` edge,
+before the 31st clock, discards the partial word.
+
 **`GPIO34` is not a strapping pin** — those are GPIO0, 3, 45 and 46
 `[ds ESP32-S3-datasheet-v2.2.pdf p.26]` — so the instrument's pull-up changes
 no boot mode. It is on the MCU side of `R-SPI-SER-CS` so the source

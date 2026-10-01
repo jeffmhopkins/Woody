@@ -1,0 +1,31 @@
+* BINA AGAINST TI'S INA828 MACROMODEL at the netlist's gain resistor R-GAIN-INAMP, REF at
+* 0 V, on the rack's rails: a common-mode signal to the output, then V+ ripple to the output.
+* The breath scenarios' common-mode (the instrument's ground moving against the module's)
+* reaches the breath jack through the first.
+VP p 0 DC {{v_rail}} AC 0
+VN n 0 DC {{v_rail_neg}} AC 0
+VCM c 0 DC 0 AC 1
+RT1 c ti 1e-3
+RB1 c bi 1e-3
+XT c ti p n ot 0 rt1 rt2 INA828
+RGT rt1 rt2 {{R-GAIN-INAMP}}
+XB c bi p n ob 0 rb1 rb2 BINA
+RGB rb1 rb2 {{R-GAIN-INAMP}}
+.options method=gear rshunt=1e10
+.control
+op
+ac dec 20 10 1meg
+let tc = db(v(ot))
+let bc = db(v(ob))
+wrdata tc.dat tc
+wrdata bc.dat bc
+alter @vcm[acmag] = 0
+alter @vp[acmag] = 1
+ac dec 20 10 1meg
+let tp = db(v(ot))
+let bp = db(v(ob))
+wrdata tp.dat tp
+wrdata bp.dat bp
+quit
+.endc
+.end

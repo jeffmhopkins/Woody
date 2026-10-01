@@ -1,0 +1,28 @@
+* BOPA AGAINST TI'S OPA2197 MACROMODEL: both as followers at 0 V on the rack's rails, the
+* supply's ripple to the output against frequency, V+ then V-. The system deck's every
+* rail-ripple result goes through this transfer, so it is the one bopa.lib must hold.
+VP p 0 DC {{v_rail}} AC 1
+VN n 0 DC {{v_rail_neg}} AC 0
+VI i 0 0
+XT i ot p n ot OPAx197
+XB i ob p n ob BOPA
+RLT ot 0 10k
+RLB ob 0 10k
+.options method=gear rshunt=1e10
+.control
+op
+ac dec 20 10 1meg
+let tp = db(v(ot))
+let bp = db(v(ob))
+wrdata tp.dat tp
+wrdata bp.dat bp
+alter @vp[acmag] = 0
+alter @vn[acmag] = 1
+ac dec 20 10 1meg
+let tn = db(v(ot))
+let bn = db(v(ob))
+wrdata tn.dat tn
+wrdata bn.dat bn
+quit
+.endc
+.end
