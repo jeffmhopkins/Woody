@@ -75,6 +75,7 @@ done
 models=/usr/share/kicad/3dmodels
 for m in Capacitor_SMD.3dshapes/C_0805_2012Metric.step \
          Resistor_SMD.3dshapes/R_0805_2012Metric.step \
+         Resistor_SMD.3dshapes/R_0603_1608Metric.step \
          Package_SO.3dshapes/SOIC-16_3.9x9.9mm_P1.27mm.step \
          Capacitor_SMD.3dshapes/C_1206_3216Metric.step \
          Capacitor_SMD.3dshapes/CP_Elec_10x10.step \

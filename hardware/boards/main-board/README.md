@@ -13,18 +13,20 @@ is part of the cassette (ADR 0025): every one of its mounts stands on the one
 bottom plate, and eight of them are columns up to the key boards (ADR 0022 as
 amended).
 
-> **Status: laid out and routed by `tools/pcb.py` (`kind: main`); `pcb.py
-> check` passes** - every connection routed, KiCad's DRC with schematic parity
-> clean, the planes, the island and its one tie, the mounts and every
-> CAD-placed part where the body puts them. Layer 1 runs along the board and
-> layer 4 across it (`layout.yaml` `directions:`; owner, 2026-10-01). Renders
-> and `fab/` are exported and ledgered (`hardware/SHEETS.csv`). The sheets are
-> the source and pass KiCad's ERC. Every part has its footprint and bought part
-> on its symbol (`Footprint`, `Manufacturer`, `MPN`, `LCSC`, `Assembly`), from
-> selections whose datasheets are banked. The board's outline and every
-> placement the body fixes are exported (`mechanical/export/main-board.dxf`,
-> the `main` entries in `mechanical/export/pcb-geometry.echo`). The thumb switch
-> positions are provisional until M2/M3, as the key boards' are.
+> **Status: laid out and routed by `tools/pcb.py` (`kind: main`) but for ONE
+> connection** - `IO34` from `J-MCU` pin 14 to the rest of its net (`R-SPI-SER`,
+> `U-TVS-SPI`), under *Open*. `pcb.py check` fails on that alone: KiCad's DRC with
+> schematic parity is otherwise clean, and the planes, the island and its one tie,
+> the mounts and every CAD-placed part pass. Layer 1 runs along the board and layer
+> 4 across it (`layout.yaml` `directions:`; owner, 2026-10-01). The board's renders
+> and `fab/` are not in the repository until `check` passes (`pcb.py render`
+> refuses before then). The sheets are the source and pass KiCad's ERC. Every part
+> has its footprint and bought part on its symbol (`Footprint`, `Manufacturer`,
+> `MPN`, `LCSC`, `Assembly`), from selections whose datasheets are banked. The
+> board's outline and every placement the body fixes are exported
+> (`mechanical/export/main-board.dxf`, the `main` entries in
+> `mechanical/export/pcb-geometry.echo`). The thumb switch positions are
+> provisional until M2/M3, as the key boards' are.
 
 What each circuit does, and why, is on its page:
 - [`carrier.md`](../../carrier/carrier.md), the board's own page, and its
@@ -156,6 +158,7 @@ finish, and every other open item:
 | **The LED row's places** are the body CAD's (`pcb-geometry.echo` `main` `led`, *"LED row on the main board"* in `mechanical/drc.echo`): one row on the centreline, LED 1 at the tail end where the data arrives, the U-bolt station midway between two LEDs. Laid out as it stands, and reshuffled if the diffusion test moves count or pitch (owner's choice (b), ADR 0028 amendment). **The WS2815B-V1's chamfer marks pin 1 (NC)**; the footprint's silk triangle marks the chamfer, and JLCPCB's own footprint agrees (`hardware/lib/README.md`), so the placement preview should need no rotation offset: pass it only when the chamfer lands on the triangle | Layout; the first order's placement preview |
 | **Passives may go on the underside** (owner, 2026-09-29). The underside faces the grounded bottom plate, `hardware.kb_spacer_l` below it, over the board's whole length since the cassette (ADR 0025). At `boards.board_clear` that leaves no room for a part (`mechanical/drc.echo` *"main board underside room over the bottom plate"*), so an underside part needs a **window cut through the bottom plate** under it, down to the oak (the second figure on that line), and must be clear of the thumb switches' housings, pins and the mounts' spacers. Through-hole tails face the plate too: the next row. The thumb switches are already underside parts | The layout; each window goes into the bottom plate's outline in the body CAD |
 | **Through-hole tails under the board** (2026-10-01): every part with plated through-hole pins pokes its tails out of the underside toward the grounded bottom plate — `J-CHAIN` ×2, `J-MCU`, `J-UMB`, `HDR-SERVICE` and `U-BUCK` (`config/body.yaml`, *THE THROUGH-HOLE TAILS UNDER THE MAIN BOARD*, says which and why these). `mechanical/drc.echo` *"through-hole tails under the main board clear of the bottom plate"* tests each against what is under it, and the body model draws them for `clash.txt`. `J-CHAIN`'s and `J-MCU`'s clear the plate as supplied. The plate ends short of `J-UMB`'s tail row, and has a window to the oak under `HDR-SERVICE` and under the regulator block (`pcb-geometry.echo` `main` `plate`). **`U-BUCK`'s pins are cut to `boards.tht_trim` below the board after soldering** — as supplied they reach the oak even through the window. `HDR-SERVICE` stands where `boards.service_hdr_at` puts it and `U-BUCK` inside the regulator block, or the window moves with them | A part moved off its window: move `boards.service_hdr_at` (or the block) and rebuild the body CAD; a new through-hole part: add it to `tht_tails` in `mechanical/cad/woody_body.scad` |
+| **`IO34`'s hop into `J-MCU` pin 14 is not routed.** `J-MCU`'s row toward the tail carries eleven signals at 1.27 mm, most of which turn back round its ends toward the mouth; the ADC's lines come down that side on layer 4 and `IO36` leaves pin 12 across pin 14's row, and every automatic re-route tried (rip-up, re-ordering, lanes reserved in front of the pins) walled in some other middle pin instead | Routed by hand in KiCad (a few millimetres round `IO36`'s escape from pin 12), or a layout with `R-SPI-SER`, `R-CHAIN-SER` and `U-TVS-SPI` moved further toward the tail to open the channel beside `J-MCU`; then `pcb.py render` |
 | **The references with no clear place on the silkscreen** stay on the fabrication layer; the layout names them when it writes the board | Hand-placed in KiCad, or room made round them |
 | **The umbilical adapter** (`PCB-UMB-ADAPTER`) is a separate small board: its schematic is [`../umb-adapter/`](../umb-adapter/README.md), not laid out | With this board's layout |
 
@@ -200,4 +203,5 @@ What the first layout settled, and where it is held:
 |---|---|---|---|
 | — | 2026-09-29 | Schematic: the carrier circuits migrated to KiCad and placed with the thumb clusters and the interfaces' main-board parts. Not laid out | git history of this directory |
 | A | 2026-09-30 | First layout by `tools/pcb.py` (`kind: main`): placed, four layers, planes and island, routed but for the connections under *Open* | `layout.yaml`, `main-board.kicad_pcb` |
+| C | 2026-10-02 | Re-laid out with fix rounds F1 (`U-BREATH` and `U-BUF` decoupling, `C201`-`C204`), F6 (`R44` at `REG-LT`'s `QH`) and F4 (`KS-33` 2.8 mm pads, by `pcb.py update-footprints --pads-resized`); `VS`'s caps turned so their `VS` pads share a row; all but one connection routed (*Open*) | `layout.yaml`, `main-board.kicad_pcb` |
 | B | 2026-10-01 | Re-laid out on the merged sheets (`Q-INRUSH`, `INST_POS12` the layer-3 plane) and footprints (`J-MCU`, `J-UMB`, the LED's chamfer at pin 1); `U-BREATH` turned so its ports face the tail; decouplers to their ICs' power pins; the reference's feedback network stacked as its ring; routed by the tool's own router with layer directions and rip-up, Freerouting dropped (owner: "routing is super sloppy... similar horizontal and vertical layers"); `pcb.py check` passes | `layout.yaml`, `main-board.kicad_pcb`, `docs/reference/tooling.md` §4 |
