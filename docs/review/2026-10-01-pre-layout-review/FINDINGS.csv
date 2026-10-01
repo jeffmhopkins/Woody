@@ -1,148 +1,148 @@
 id,slice,line,severity,verdict,headline
-A1-1,A1,19,,NOT ADDRESSED,"A1-1 - At the commissioned gain, POT-RESP fully CW clips the breath jack from ~75 % of a hard blow"
-A1-10,A1,135,,NOT ADDRESSED,A1-10 - ADR 0006's instrument-absent breath level still comes from the retired 0.437 V REF
-A1-11,A1,146,,NOT ADDRESSED,A1-11 - The shaper's insertion did not reach three neighbouring statements
-A1-12,A1,155,,NOT ADDRESSED,"A1-12 - breath-sense-link.md still records the R1b dispute as open (""in progress""), and ""fifty times"" is still live"
-A1-13,A1,163,,NOT ADDRESSED,"A1-13 - The ""482 Hz"" differential pole leaves out C_cm; the netlisted pole is ~459 Hz"
-A1-14,A1,169,,NOT ADDRESSED,"A1-14 - The output stage still calls DAC AVDD at POT-OFFSET ""buffered""; the netlist has the rail straight on the pot"
-A1-15,A1,178,,NOT ADDRESSED,A1-15 - breath-adc's worst-case injection current rounds the full scale down
-A1-16,A1,184,,NOT ADDRESSED,A1-16 - No page carries a noise budget for the breath jack
-A1-2,A1,35,,NOT ADDRESSED,"A1-2 - The shaper's ""harder to get loud"" (CW) and ""easier to get loud"" (CCW) are backwards at a fixed GAIN setting"
-A1-3,A1,48,,NOT ADDRESSED,A1-3 - The 1.5× floor holds only for a 1N4448W-grade diode at 27 °C; the bought 1N4148W at the bank's own VF limit gives 1.48×
-A1-4,A1,62,,NOT ADDRESSED,"A1-4 - The panel's OFFSET ""+"" mark sits at the end of travel that drives the breath jack negative"
-A1-5,A1,73,,NOT ADDRESSED,"A1-5 - The sensor's datasheet decoupling and output filter (Figure 3) is an unowned open decision with nothing on the sheet, at the layout gate"
-A1-6,A1,86,,NOT ADDRESSED,"A1-6 - breath-working-point is DISPUTED, but the shaper, output stage and their sims treat 2.8 kPa as fact and cite it to a document that does not contain it"
-A1-7,A1,100,,NOT ADDRESSED,"A1-7 - The analog jack's zero has no auto-zero, an unsourced drift figure, and a datasheet bound ~25× larger than the figure; it dominates the error budget"
-A1-8,A1,114,,NOT ADDRESSED,"A1-8 - The output stage's interface row still says −12 V ""carries no LED current""; its own body and ADR 0027 say it does"
-A1-9,A1,125,,NOT ADDRESSED,"A1-9 - The REF trim band ""0.332–0.826 V"" uses the raw gain 2.185, the error breath-zero-ref records"
-A2-1,A2,17,,NOT ADDRESSED,"A2-1 - Mod jacks: ""exactly ±10.000 V"" holds only at the op-amp output; at a 100 kΩ jack the range is ±9.90 V and the worst-case span error is −2.46 %, not the ±18 cents/oct stated"
-A2-10,A2,96,,NOT ADDRESSED,A2-10 - mod-channels.md restates the four-resistor ±10.05 V as the live range
-A2-11,A2,101,,NOT ADDRESSED,A2-11 - mod-channels.md's zero-point formula evaluates to −7.5 V
-A2-12,A2,107,,NOT ADDRESSED,"A2-12 - R-MODGAIN: the BOM says buy 0.1 % thin film; the value field, page, ADR and sim say 1 %; ""one reel"" contradicts itself"
-A2-13,A2,117,,NOT ADDRESSED,"A2-13 - R-PRECISION's ""TRIM-GAIN real authority 1.86–2.16 %"" is A-grade and unipolar; the ordered part is B grade and the trim is bipolar"
-A2-14,A2,123,,NOT ADDRESSED,"A2-14 - ADR 0006 ""Labelling"" and ADR 0004 ""Panel"" still describe silkscreen plus a write-on strip in the old order"
-A2-15,A2,130,,NOT ADDRESSED,A2-15 - module-photo-detail render is stale after the jack swap
-A2-16,A2,136,,NOT ADDRESSED,A2-16 - ROADMAP carries two pitch items the 2026-09-30 changes closed
-A2-17,A2,142,,NOT ADDRESSED,"A2-17 - ADR 0006: ""Mod 1–4 … Trimmed"" and the channel-number collisions"
-A2-18,A2,148,,NOT ADDRESSED,"A2-18 - ""Exactly 0 V"" at power-on is within the DAC's zero-code error, which the sim leaves out"
-A2-19,A2,155,,NOT ADDRESSED,"A2-19 - TRIM-OFFSET span ""about ±60 cents"" is −72/+60 cents"
-A2-2,A2,29,,NOT ADDRESSED,"A2-2 - PITCH jack tip reaches an LT5400 pin through at most 200 Ω and has no clamp; the ""check at layout"" item is only in notes.md"
-A2-20,A2,161,,NOT ADDRESSED,"A2-20 - ""At the jack"" means module-main's side of J-B2B-MOD"
-A2-3,A2,41,,NOT ADDRESSED,"A2-3 - ADR 0006's precision table and its conclusions are refuted by pitch-stage.md's corrected budget, and pitch-stage.md endorses the refuted 0.54"
-A2-4,A2,50,,NOT ADDRESSED,A2-4 - ADR 0006 describes the pre-2026-09-30 trims
-A2-5,A2,59,,NOT ADDRESSED,"A2-5 - ADR 0006 says the pitch jack node ""carries no capacitor at all""; C-FILT-PITCH 10 nF is on it"
-A2-6,A2,65,,NOT ADDRESSED,A2-6 - pitch-stage.md: the shelf's frequencies are the 1 nF values; with 2.2 nF the pole/zero are about 7.2/14.4 kHz
-A2-7,A2,73,,NOT ADDRESSED,"A2-7 - pitch-stage.md ""exact DC solve gives gain 2.020000 for every load"" matches no current configuration"
-A2-8,A2,79,,NOT ADDRESSED,"A2-8 - The pitch sim deck models the pre-2026-09-30 reference, not ""the stage as netlisted"""
-A2-9,A2,89,,NOT ADDRESSED,"A2-9 - pitch-stage.md drawing hangs R-GAIN-CTR/R1 from AGND, not from V_ref"
-A3-1,A3,27,,NOT ADDRESSED,"A3-1 - ""The LT1641 decides every start and every fault; U-ISO never acts first"" is contradicted by the replug-early sim"
-A3-10,A3,131,,NOT ADDRESSED,"A3-10 - dac-rail's derivation drops I_ADJ × R2, and the sim's ""every corner"" does not vary the LM317L"
-A3-11,A3,142,,NOT ADDRESSED,"A3-11 - ADR 0005's amendment still says the converter's limit is ""typical only"""
-A3-12,A3,150,,NOT ADDRESSED,"A3-12 - ADR 0004 still states ""D-REVPOL qty 3"""
-A3-13,A3,158,,NOT ADDRESSED,A3-13 - power-entry's Interfaces row names interfaces/spi-link as a DAC AVDD peer
-A3-14,A3,165,,NOT ADDRESSED,"A3-14 - Power-down order of the analog rails is argued, not simulated"
-A3-2,A3,44,,NOT ADDRESSED,"A3-2 - ""A reversed ribbon has no unprotected rail to land on"" holds only for a ±12 V swap, not a reversed 16-pin cable"
-A3-3,A3,60,,NOT ADDRESSED,A3-3 - The ON divider is still described as fed from the raw bus
-A3-4,A3,68,,NOT ADDRESSED,A3-4 - U-REG-LOGIC is still described as the level shifter's supply
-A3-5,A3,79,,NOT ADDRESSED,A3-5 - NT-AGND-MOD is described as a tie to PWR_GND; it ties to BUS_GND
-A3-6,A3,88,,NOT ADDRESSED,"A3-6 - The module's own rail draw is carried two ways: derived 37/20 mA, asserted 45/40 mA"
-A3-7,A3,102,,NOT ADDRESSED,A3-7 - The C-BULK-RAIL row's power-down argument uses stale currents and a deleted part
-A3-8,A3,112,,NOT ADDRESSED,"A3-8 - FB2's sheet note still calls it ""THE UMBILICAL BRANCH"", at half its nameplate"
-A3-9,A3,121,,NOT ADDRESSED,"A3-9 - DAC_AVDD's stated purpose, ""decouples DAC full scale from the rack's ±5 % +5 V"", is refuted twice"
-A4-1,A4,16,,NOT ADDRESSED,"A4-1 - C-ISO-Y does not give U-ISO 's switching common-mode current the ""way home beside the converter"" ADR 0027 claims; at 550 kHz the −12 V entry path through AGND_MOD and the star is about 20× lower in impedance"
-A4-10,A4,130,,NOT ADDRESSED,"A4-10 - ADR 0027 and the power-entry sim restate the LED row's current with the provenance "" owner brief, not yet in the corpus "" instead of citing led-row-current"
-A4-11,A4,139,,NOT ADDRESSED,"A4-11 - docs/reference/pcb-pipeline.md still tells the module layout "" PWR_GND as a trace … a two-terminal net"" and prices the star pad ""at 359 mA"""
-A4-12,A4,147,,NOT ADDRESSED,A4-12 - The instrument's arriving voltage is carried at two values; 11.4 V still subtracts a Schottky that has not been in the umbilical path since ADR 0027
-A4-13,A4,158,,NOT ADDRESSED,"A4-13 - The LED row's PWM (2 kHz scan, 4 kHz refresh) sits on U-ISO 's input-LC resonance (3.3 kHz); audio-band ripple reflected to the rack's ±12 V is not analysed"
-A4-14,A4,174,,NOT ADDRESSED,"A4-14 - The SPI analysis treats DIG_GND as ideal, but pin 8 carries about half the instrument's return; the offset fits in the margin. CABLE-UMB 's shield goes nowhere"
-A4-15,A4,186,,NOT ADDRESSED,"A4-15 - On USB power alone, INST_POS12 is dead, so there is no breath and no LEDs, while the LED buffer is live and can drive unpowered LED inputs"
-A4-2,A4,46,,NOT ADDRESSED,"A4-2 - ROADMAP's E6, E12 and LED-sweep rows still describe the pre-ADR-0027 module: the wrong ground rule at the layout gate, the wrong predicted magnitudes, and no −12 V check"
-A4-3,A4,61,,NOT ADDRESSED,"A4-3 - ADR 0005's amendment calls U-ISO 's current limit ""typical only on its datasheet""; the RPA20 sheet gives a range with a minimum"
-A4-4,A4,70,,NOT ADDRESSED,"A4-4 - The 13 WS2815B-V1 ( VDD absolute maximum 13.5 V) are the lowest-rated parts on INST_POS12 , and no part holds that node below 13.5 V except U-ISO 's regulation"
-A4-5,A4,84,,NOT ADDRESSED,"A4-5 - The load switch's Interfaces row still says the ON divider is ""divided from the raw bus"""
-A4-6,A4,92,,NOT ADDRESSED,"A4-6 - power-entry-instrument.md still sends the instrument's return ""to the module star"""
-A4-7,A4,100,,NOT ADDRESSED,"A4-7 - carrier.md's §2 drawing ends R1b at the ""analog star point""; the layout rule takes AGND_SENSE at the sensor's own GND pin"
-A4-8,A4,109,,NOT ADDRESSED,"A4-8 - firmware/README still describes ""the LED strip (one, ADR 0016)"""
-A4-9,A4,117,,NOT ADDRESSED,"A4-9 - The ""hot-plug at the LT1641's 1.10 A limit, ~0.68 A per rail for tens of ms"" rows describe a hot-plug that Q-INRUSH removed; the cases that remain are different"
-A5-1,A5,16,,NOT ADDRESSED,"A5-1 - The DAC's SYNC/SCLK edge timing (t8, t4) through the new RC receiver depends on a CS hold time and SPI mode that are written nowhere, and the sim's skew figure understates the cross-edge skew"
-A5-10,A5,107,,NOT ADDRESSED,"A5-10 - Two arguments that outlive their premise: the DAC-side pulls justified by an OE that can no longer be disabled, and ""a display to report on"""
-A5-11,A5,114,,NOT ADDRESSED,"A5-11 - ""SPI2 cannot use IO_MUX"" is from memory , and the banked datasheet refutes it: GPIO34–37 are FSPI IO_MUX pins, and the design has SCLK and MOSI swapped against them"
-A5-12,A5,122,,NOT ADDRESSED,"A5-12 - The ""40 mA pad limit"" the series-R choice is argued against is a typical drive figure, not a limit"
-A5-13,A5,129,,NOT ADDRESSED,"A5-13 - loop-budget does not reproduce from its own derivation, and the ADC and DAC terms disagree across pages"
-A5-14,A5,139,,NOT ADDRESSED,A5-14 - ADR 0001's Consequences still count 18 switches and 14 spare bits
-A5-2,A5,28,,NOT ADDRESSED,A5-2 - The key chain's hop hold race (QH changing on the same CLK↑ the next register samples SER on) is never analysed; every page argues only the setup side
-A5-3,A5,39,,NOT ADDRESSED,"A5-3 - The firmware contract ( firmware/README.md ) omits nearly every requirement the hardware places on firmware, and contradicts ADR 0001 on the press path"
-A5-4,A5,57,,NOT ADDRESSED,A5-4 - The chain self-test's SER input changes on the same CLK↑ that captures it
-A5-5,A5,67,,NOT ADDRESSED,"A5-5 - latency-budget.md , owner of loop-budget and scan-period , still argues from the two-MCU split that ADR 0015 superseded"
-A5-6,A5,77,high,NOT ADDRESSED,"A5-6 - R-RX-MOD 's ""settled high 2.97 V"" puts the 10 kΩ pull-down behind the 1 kΩ; the netlist has it at the cable node"
-A5-7,A5,85,,NOT ADDRESSED,"A5-7 - R-CS-PULL-MOD 's row still describes the node before the receiver: ""the rail of the part it holds, U-LVL-MOD"", against the 74AHCT125's 0.8 V V_IL"
-A5-8,A5,93,,NOT ADDRESSED,"A5-8 - The J-UMB BOM row calls the module ground topology ""still disputed""; dig-gnd-topology is settled"
-A5-9,A5,100,,NOT ADDRESSED,"A5-9 - ""Six R-SPI-PULL "" is a count that moved: the row is qty 5 since CS_MOD 's pull became its own row"
-A6-1,A6,18,,NOT ADDRESSED,"A6-1 - J-UMB's 3.00 mm tails stand over the grounded bottom plate, which they reach"
-A6-10,A6,121,,NOT ADDRESSED,A6-10 - MECH-SERVICECOVER is a live BOM row (qty 1) for a part ADR 0009 removed
-A6-11,A6,130,,NOT ADDRESSED,"A6-11 - The key boards' J-CHAIN footprints carry no 3D model, so their 3D renders omit the header"
-A6-12,A6,139,,NOT ADDRESSED,A6-12 - pcb-geometry's U-BREATH record cannot be used as a footprint placement as written
-A6-13,A6,149,,NOT ADDRESSED,A6-13 - Two DRC lines report figures that are not the margin they name
-A6-2,A6,32,,NOT ADDRESSED,"A6-2 - U-BUCK's and HDR-SERVICE's through-hole tails also cross the plate gap, and nothing lists them"
-A6-3,A6,44,,NOT ADDRESSED,"A6-3 - The WS2815B-V1 datasheet puts the chamfer at pin 1 on its pin-out drawing, so the footprint's ""chamfer = pin 4"" rotation guidance may reverse all 13 LEDs"
-A6-4,A6,57,,NOT ADDRESSED,"A6-4 - The regulator block is under the right-hand key board; drc.echo says ""beside the key boards"" and reports 7.7 mm spare against the wrong ceiling"
-A6-5,A6,69,,NOT ADDRESSED,"A6-5 - A1, NT1 and NT2 carry assembly flags that make pcb.py 's assembly export exit on the main board"
-A6-6,A6,81,,NOT ADDRESSED,A6-6 - lighting.led_court no longer matches the footprint it cites
-A6-7,A6,91,,NOT ADDRESSED,"A6-7 - The KS-33 pads are 2.6 mm, not the 2.8 mm (0.3 mm ring) that ADR 0020 Amendment 6 and the lib README state"
-A6-8,A6,102,,NOT ADDRESSED,"A6-8 - The J-MCU BOM row still says the part is open and the ribbon arrives ""from the mouth side"""
-A6-9,A6,112,,NOT ADDRESSED,"A6-9 - MECH-UBOLT, J-CHAIN and CBL-CHAIN notes still argue from the LED strip, and MECH-UBOLT cites a DRC line that no longer exists"
-A7-1,A7,17,,NOT ADDRESSED,A7-1 - module-photo-detail is stale and shows the pre-swap jack layout; check-staleness.py FAILs at REV
-A7-10,A7,90,,NOT ADDRESSED,A7-10 - R-ON-HI's row says the toggle's leg hangs off the raw bus +12 V; the sheet puts it on ISO_POS12
-A7-11,A7,98,,NOT ADDRESSED,"A7-11 - No assembly sequence for the module stack, and the stack is over-constrained in depth"
-A7-12,A7,109,,NOT ADDRESSED,A7-12 - Several face clearances pass at a hair over zero against tbd envelopes
-A7-13,A7,119,,NOT ADDRESSED,A7-13 - SW-POWER is modelled with its body flat on the panel (front nut only); NKK's D4 hardware includes a second hex nut
-A7-2,A7,27,,NOT ADDRESSED,"A7-2 - PANEL row specifies a bare laser/waterjet plate from the key-plate vendor; ADR 0026 specifies black anodise + UV print, CNC-cut by the print vendor"
-A7-3,A7,37,,NOT ADDRESSED,"A7-3 - J-B2B-MOD on the jack board enters from the rear but needs the front-side (unmirrored) pin map; nothing says so, and no check catches it"
-A7-4,A7,47,,NOT ADDRESSED,"A7-4 - CBL-PWR-EURO still says it is 16-way ""because ... it needs +5V"""
-A7-5,A7,54,,NOT ADDRESSED,A7-5 - KNOB-BREATH cites a part that does not exist and does not name the knob the CAD and art are built on
-A7-6,A7,61,,NOT ADDRESSED,"A7-6 - Both board READMEs still say the panel layout is ""being revised"""
-A7-7,A7,68,,NOT ADDRESSED,"A7-7 - ADR 0004's panel paragraph, and ADR 0024 point 2, still promise the MOD write-on strip that ADR 0026 dropped"
-A7-8,A7,75,,NOT ADDRESSED,"A7-8 - led.hole_d 's source says the LED flange ""stops behind the panel""; LED-PANEL's row and ADR 0024 point 9 say it cannot"
-A7-9,A7,82,,NOT ADDRESSED,A7-9 - Metal standoff pads on AGND_MOD are decided but are on neither sheet
-A8-1,A8,22,,NOT ADDRESSED,"A8-1 - C-DECOUPLE-CARRIER is bought ×8 but only 5 are drawn, and U-BUF (OPA2197) has no supply bypass"
-A8-10,A8,120,,NOT ADDRESSED,"A8-10 - tooling.md §5's ""Simulated"" table names the wrong receiver and leaves out one of the 20 sim directories"
-A8-11,A8,127,,NOT ADDRESSED,"A8-11 - diode-split-rationale quotes r_d at 392 mA, a +12 V current that ADR 0027 removed"
-A8-12,A8,137,,NOT ADDRESSED,A8-12 - Stale prose inside the registers themselves
-A8-13,A8,146,,NOT ADDRESSED,A8-13 - The owner of chain-connectors never states its value
-A8-14,A8,154,,NOT ADDRESSED,A8-14 - Nothing checks the bought-part identity fields that ADR 0019 puts on the sheet
-A8-15,A8,165,,NOT ADDRESSED,"A8-15 - check-staleness.py FAILs at REV, and miscounts the failure"
-A8-16,A8,172,,NOT ADDRESSED,A8-16 - The loadswitch-timer owner page still reports a BOM package defect that has been fixed
-A8-17,A8,179,,NOT ADDRESSED,"A8-17 - shaper-exp-gain 's ""worst corner"" bounds a proxy diode, not the part bought"
-A8-18,A8,187,,NOT ADDRESSED,A8-18 - Six BOM fragments are LF while the master is CRLF
-A8-19,A8,195,,NOT ADDRESSED,A8-19 - Small inconsistencies in the sheets' ordering fields and the ledgers
-A8-2,A8,33,,NOT ADDRESSED,"A8-2 - FB-IN (MI1206K601R-10) has zero LCSC stock, is machine-placed ×4, and the register figure is tied to that exact part"
-A8-3,A8,42,,NOT ADDRESSED,A8-3 - Other orderability gaps at LCSC (2026-10-01)
-A8-4,A8,54,,NOT ADDRESSED,"A8-4 - shaper-exp-gain is ""settled"" on a working point that is a candidate of the disputed breath-working-point"
-A8-5,A8,69,,NOT ADDRESSED,"A8-5 - The module board's layer count is ""still open"" on the PCB pipeline page, which cites a register field that no longer exists; ADR 0018 still calls dig-gnd-topology open"
-A8-6,A8,79,,NOT ADDRESSED,"A8-6 - repo-maintenance.md §4 still tells editors to keep history in BOM notes, against CLAUDE.md 2b"
-A8-7,A8,87,,NOT ADDRESSED,A8-7 - The REF5050 grade change did not reach its sim: assertions still cite the Standard grade's 0.1 %
-A8-8,A8,98,,NOT ADDRESSED,"A8-8 - R-REG-SET-LO is the E7 select-on-test part but the sheet machine-places a fixed SMD value, and the 0.66 V spread predates the 0.1 % divider"
-A8-9,A8,110,,NOT ADDRESSED,A8-9 - LCSC C51349 (both 22 µH inductors) no longer resolves on LCSC
-A9-1,A9,16,,NOT ADDRESSED,A9-1 - The module detail photograph was not re-rendered after the panel-word cut and the jack swap; the checker FAILs at REV
-A9-10,A9,96,,NOT ADDRESSED,"A9-10 - ADR 0027 restates the LED row's current with ""not yet in the corpus"", but it is now a registered figure"
-A9-11,A9,102,,NOT ADDRESSED,"A9-11 - check-staleness's CAD header and summary count the trailing FAIL line as a problem (""2 cad"" for one stale output)"
-A9-12,A9,109,,NOT ADDRESSED,"A9-12 - module-main README calls rows 9-10 and 13 ""a ground row"" separating the pot wipers from the jacks; pin 9 is OFFSET_WIPER, and after the swap BREATH_JACK sits directly below it"
-A9-13,A9,115,,NOT ADDRESSED,"A9-13 - The shaper page says ""the table below"" for the table above it"
-A9-2,A9,26,,NOT ADDRESSED,"A9-2 - The module's own analog rack draw is stated as ~45 mA / ~40 mA, but the page's own worked sum gives ~37 mA / ~20 mA; the totals built on it disagree between documents"
-A9-3,A9,37,,NOT ADDRESSED,"A9-3 - breath-output-stage still justifies R-OFFNEG's rail with ""that rail carries no LED current"", which ADR 0027 and the page's own corrected paragraph refute"
-A9-4,A9,46,,NOT ADDRESSED,A9-4 - The R-CS-PULL-MOD and U-REG-LOGIC BOM rows still describe the receive path from before U-RX-MOD and before U-LVL-MOD moved to DAC_AVDD
-A9-5,A9,55,,NOT ADDRESSED,"A9-5 - R-SPI-PULL went from six to five this round; two notes still say ""R-SPI-PULL's six"""
-A9-6,A9,62,high,NOT ADDRESSED,"A9-6 - The receiver's ""settled high"" arithmetic puts 1 kΩ and the retired 100 Ω in series with the pull-down"
-A9-7,A9,70,,NOT ADDRESSED,A9-7 - spi-link.md rejects 68 Ω on a fault-current convention the new 82 Ω row abandons
-A9-8,A9,80,,NOT ADDRESSED,"A9-8 - Q-INRUSH did not reach ADR 0027's consequences or power-entry.md's supply and fuse tables, which still call 0.68 A per rail ""a hot-plug"""
-A9-9,A9,88,,NOT ADDRESSED,"A9-9 - diode-split-rationale still quotes r_d ""at 392 mA"", a +12 V total that no diode carries since ADR 0027"
+A1-1,A1,19,high,recorded,"A1-1 - At the commissioned gain, POT-RESP fully CW clips the breath jack from ~75 % of a hard blow"
+A1-10,A1,135,low,recorded,A1-10 - ADR 0006's instrument-absent breath level still comes from the retired 0.437 V REF
+A1-11,A1,146,low,recorded,A1-11 - The shaper's insertion did not reach three neighbouring statements
+A1-12,A1,155,low,recorded,"A1-12 - breath-sense-link.md still records the R1b dispute as open (""in progress""), and ""fifty times"" is still live"
+A1-13,A1,163,advisory,recorded,"A1-13 - The ""482 Hz"" differential pole leaves out C_cm; the netlisted pole is ~459 Hz"
+A1-14,A1,169,advisory,recorded,"A1-14 - The output stage still calls DAC AVDD at POT-OFFSET ""buffered""; the netlist has the rail straight on the pot"
+A1-15,A1,178,advisory,recorded,A1-15 - breath-adc's worst-case injection current rounds the full scale down
+A1-16,A1,184,advisory,recorded,A1-16 - No page carries a noise budget for the breath jack
+A1-2,A1,35,medium,recorded,"A1-2 - The shaper's ""harder to get loud"" (CW) and ""easier to get loud"" (CCW) are backwards at a fixed GAIN setting"
+A1-3,A1,48,medium,recorded,A1-3 - The 1.5× floor holds only for a 1N4448W-grade diode at 27 °C; the bought 1N4148W at the bank's own VF limit gives 1.48×
+A1-4,A1,62,medium,recorded,"A1-4 - The panel's OFFSET ""+"" mark sits at the end of travel that drives the breath jack negative"
+A1-5,A1,73,high,recorded,"A1-5 - The sensor's datasheet decoupling and output filter (Figure 3) is an unowned open decision with nothing on the sheet, at the layout gate"
+A1-6,A1,86,medium,recorded,"A1-6 - breath-working-point is DISPUTED, but the shaper, output stage and their sims treat 2.8 kPa as fact and cite it to a document that does not contain it"
+A1-7,A1,100,medium,recorded,"A1-7 - The analog jack's zero has no auto-zero, an unsourced drift figure, and a datasheet bound ~25× larger than the figure; it dominates the error budget"
+A1-8,A1,114,low,recorded,"A1-8 - The output stage's interface row still says −12 V ""carries no LED current""; its own body and ADR 0027 say it does"
+A1-9,A1,125,low,recorded,"A1-9 - The REF trim band ""0.332–0.826 V"" uses the raw gain 2.185, the error breath-zero-ref records"
+A2-1,A2,17,medium,recorded,"A2-1 - Mod jacks: ""exactly ±10.000 V"" holds only at the op-amp output; at a 100 kΩ jack the range is ±9.90 V and the worst-case span error is −2.46 %, not the ±18 cents/oct stated"
+A2-10,A2,96,low,recorded,A2-10 - mod-channels.md restates the four-resistor ±10.05 V as the live range
+A2-11,A2,101,low,recorded,A2-11 - mod-channels.md's zero-point formula evaluates to −7.5 V
+A2-12,A2,107,low,recorded,"A2-12 - R-MODGAIN: the BOM says buy 0.1 % thin film; the value field, page, ADR and sim say 1 %; ""one reel"" contradicts itself"
+A2-13,A2,117,low,recorded,"A2-13 - R-PRECISION's ""TRIM-GAIN real authority 1.86–2.16 %"" is A-grade and unipolar; the ordered part is B grade and the trim is bipolar"
+A2-14,A2,123,low,recorded,"A2-14 - ADR 0006 ""Labelling"" and ADR 0004 ""Panel"" still describe silkscreen plus a write-on strip in the old order"
+A2-15,A2,130,low,recorded,A2-15 - module-photo-detail render is stale after the jack swap
+A2-16,A2,136,low,recorded,A2-16 - ROADMAP carries two pitch items the 2026-09-30 changes closed
+A2-17,A2,142,advisory,recorded,"A2-17 - ADR 0006: ""Mod 1–4 … Trimmed"" and the channel-number collisions"
+A2-18,A2,148,advisory,recorded,"A2-18 - ""Exactly 0 V"" at power-on is within the DAC's zero-code error, which the sim leaves out"
+A2-19,A2,155,advisory,recorded,"A2-19 - TRIM-OFFSET span ""about ±60 cents"" is −72/+60 cents"
+A2-2,A2,29,medium,recorded,"A2-2 - PITCH jack tip reaches an LT5400 pin through at most 200 Ω and has no clamp; the ""check at layout"" item is only in notes.md"
+A2-20,A2,161,advisory,recorded,"A2-20 - ""At the jack"" means module-main's side of J-B2B-MOD"
+A2-3,A2,41,medium,recorded,"A2-3 - ADR 0006's precision table and its conclusions are refuted by pitch-stage.md's corrected budget, and pitch-stage.md endorses the refuted 0.54"
+A2-4,A2,50,low,recorded,A2-4 - ADR 0006 describes the pre-2026-09-30 trims
+A2-5,A2,59,low,recorded,"A2-5 - ADR 0006 says the pitch jack node ""carries no capacitor at all""; C-FILT-PITCH 10 nF is on it"
+A2-6,A2,65,low,recorded,A2-6 - pitch-stage.md: the shelf's frequencies are the 1 nF values; with 2.2 nF the pole/zero are about 7.2/14.4 kHz
+A2-7,A2,73,low,recorded,"A2-7 - pitch-stage.md ""exact DC solve gives gain 2.020000 for every load"" matches no current configuration"
+A2-8,A2,79,low,recorded,"A2-8 - The pitch sim deck models the pre-2026-09-30 reference, not ""the stage as netlisted"""
+A2-9,A2,89,low,recorded,"A2-9 - pitch-stage.md drawing hangs R-GAIN-CTR/R1 from AGND, not from V_ref"
+A3-1,A3,27,medium,recorded,"A3-1 - ""The LT1641 decides every start and every fault; U-ISO never acts first"" is contradicted by the replug-early sim"
+A3-10,A3,131,advisory,recorded,"A3-10 - dac-rail's derivation drops I_ADJ × R2, and the sim's ""every corner"" does not vary the LM317L"
+A3-11,A3,142,low,recorded,"A3-11 - ADR 0005's amendment still says the converter's limit is ""typical only"""
+A3-12,A3,150,low,recorded,"A3-12 - ADR 0004 still states ""D-REVPOL qty 3"""
+A3-13,A3,158,low,recorded,A3-13 - power-entry's Interfaces row names interfaces/spi-link as a DAC AVDD peer
+A3-14,A3,165,advisory,recorded,"A3-14 - Power-down order of the analog rails is argued, not simulated"
+A3-2,A3,44,medium,recorded,"A3-2 - ""A reversed ribbon has no unprotected rail to land on"" holds only for a ±12 V swap, not a reversed 16-pin cable"
+A3-3,A3,60,low,recorded,A3-3 - The ON divider is still described as fed from the raw bus
+A3-4,A3,68,low,recorded,A3-4 - U-REG-LOGIC is still described as the level shifter's supply
+A3-5,A3,79,low,recorded,A3-5 - NT-AGND-MOD is described as a tie to PWR_GND; it ties to BUS_GND
+A3-6,A3,88,low,recorded,"A3-6 - The module's own rail draw is carried two ways: derived 37/20 mA, asserted 45/40 mA"
+A3-7,A3,102,low,recorded,A3-7 - The C-BULK-RAIL row's power-down argument uses stale currents and a deleted part
+A3-8,A3,112,low,recorded,"A3-8 - FB2's sheet note still calls it ""THE UMBILICAL BRANCH"", at half its nameplate"
+A3-9,A3,121,low,recorded,"A3-9 - DAC_AVDD's stated purpose, ""decouples DAC full scale from the rack's ±5 % +5 V"", is refuted twice"
+A4-1,A4,16,medium,recorded,"A4-1 - C-ISO-Y does not give U-ISO 's switching common-mode current the ""way home beside the converter"" ADR 0027 claims; at 550 kHz the −12 V entry path through AGND_MOD and the star is about 20× lower in impedance"
+A4-10,A4,130,low,recorded,"A4-10 - ADR 0027 and the power-entry sim restate the LED row's current with the provenance "" owner brief, not yet in the corpus "" instead of citing led-row-current"
+A4-11,A4,139,low,recorded,"A4-11 - docs/reference/pcb-pipeline.md still tells the module layout "" PWR_GND as a trace … a two-terminal net"" and prices the star pad ""at 359 mA"""
+A4-12,A4,147,advisory,recorded,A4-12 - The instrument's arriving voltage is carried at two values; 11.4 V still subtracts a Schottky that has not been in the umbilical path since ADR 0027
+A4-13,A4,158,advisory,recorded,"A4-13 - The LED row's PWM (2 kHz scan, 4 kHz refresh) sits on U-ISO 's input-LC resonance (3.3 kHz); audio-band ripple reflected to the rack's ±12 V is not analysed"
+A4-14,A4,174,advisory,recorded,"A4-14 - The SPI analysis treats DIG_GND as ideal, but pin 8 carries about half the instrument's return; the offset fits in the margin. CABLE-UMB 's shield goes nowhere"
+A4-15,A4,186,advisory,recorded,"A4-15 - On USB power alone, INST_POS12 is dead, so there is no breath and no LEDs, while the LED buffer is live and can drive unpowered LED inputs"
+A4-2,A4,46,medium,recorded,"A4-2 - ROADMAP's E6, E12 and LED-sweep rows still describe the pre-ADR-0027 module: the wrong ground rule at the layout gate, the wrong predicted magnitudes, and no −12 V check"
+A4-3,A4,61,low,recorded,"A4-3 - ADR 0005's amendment calls U-ISO 's current limit ""typical only on its datasheet""; the RPA20 sheet gives a range with a minimum"
+A4-4,A4,70,low,recorded,"A4-4 - The 13 WS2815B-V1 ( VDD absolute maximum 13.5 V) are the lowest-rated parts on INST_POS12 , and no part holds that node below 13.5 V except U-ISO 's regulation"
+A4-5,A4,84,low,recorded,"A4-5 - The load switch's Interfaces row still says the ON divider is ""divided from the raw bus"""
+A4-6,A4,92,low,recorded,"A4-6 - power-entry-instrument.md still sends the instrument's return ""to the module star"""
+A4-7,A4,100,low,recorded,"A4-7 - carrier.md's §2 drawing ends R1b at the ""analog star point""; the layout rule takes AGND_SENSE at the sensor's own GND pin"
+A4-8,A4,109,low,recorded,"A4-8 - firmware/README still describes ""the LED strip (one, ADR 0016)"""
+A4-9,A4,117,low,recorded,"A4-9 - The ""hot-plug at the LT1641's 1.10 A limit, ~0.68 A per rail for tens of ms"" rows describe a hot-plug that Q-INRUSH removed; the cases that remain are different"
+A5-1,A5,16,medium,recorded,"A5-1 - The DAC's SYNC/SCLK edge timing (t8, t4) through the new RC receiver depends on a CS hold time and SPI mode that are written nowhere, and the sim's skew figure understates the cross-edge skew"
+A5-10,A5,107,advisory,recorded,"A5-10 - Two arguments that outlive their premise: the DAC-side pulls justified by an OE that can no longer be disabled, and ""a display to report on"""
+A5-11,A5,114,advisory,recorded,"A5-11 - ""SPI2 cannot use IO_MUX"" is from memory , and the banked datasheet refutes it: GPIO34–37 are FSPI IO_MUX pins, and the design has SCLK and MOSI swapped against them"
+A5-12,A5,122,advisory,recorded,"A5-12 - The ""40 mA pad limit"" the series-R choice is argued against is a typical drive figure, not a limit"
+A5-13,A5,129,low,recorded,"A5-13 - loop-budget does not reproduce from its own derivation, and the ADC and DAC terms disagree across pages"
+A5-14,A5,139,advisory,recorded,A5-14 - ADR 0001's Consequences still count 18 switches and 14 spare bits
+A5-2,A5,28,medium,recorded,A5-2 - The key chain's hop hold race (QH changing on the same CLK↑ the next register samples SER on) is never analysed; every page argues only the setup side
+A5-3,A5,39,medium,recorded,"A5-3 - The firmware contract ( firmware/README.md ) omits nearly every requirement the hardware places on firmware, and contradicts ADR 0001 on the press path"
+A5-4,A5,57,low,recorded,A5-4 - The chain self-test's SER input changes on the same CLK↑ that captures it
+A5-5,A5,67,medium,recorded,"A5-5 - latency-budget.md , owner of loop-budget and scan-period , still argues from the two-MCU split that ADR 0015 superseded"
+A5-6,A5,77,low,recorded,"A5-6 - R-RX-MOD 's ""settled high 2.97 V"" puts the 10 kΩ pull-down behind the 1 kΩ; the netlist has it at the cable node"
+A5-7,A5,85,low,recorded,"A5-7 - R-CS-PULL-MOD 's row still describes the node before the receiver: ""the rail of the part it holds, U-LVL-MOD"", against the 74AHCT125's 0.8 V V_IL"
+A5-8,A5,93,low,recorded,"A5-8 - The J-UMB BOM row calls the module ground topology ""still disputed""; dig-gnd-topology is settled"
+A5-9,A5,100,low,recorded,"A5-9 - ""Six R-SPI-PULL "" is a count that moved: the row is qty 5 since CS_MOD 's pull became its own row"
+A6-1,A6,18,high,recorded,"A6-1 - J-UMB's 3.00 mm tails stand over the grounded bottom plate, which they reach"
+A6-10,A6,121,low,recorded,A6-10 - MECH-SERVICECOVER is a live BOM row (qty 1) for a part ADR 0009 removed
+A6-11,A6,130,low,recorded,"A6-11 - The key boards' J-CHAIN footprints carry no 3D model, so their 3D renders omit the header"
+A6-12,A6,139,advisory,recorded,A6-12 - pcb-geometry's U-BREATH record cannot be used as a footprint placement as written
+A6-13,A6,149,advisory,recorded,A6-13 - Two DRC lines report figures that are not the margin they name
+A6-2,A6,32,high,recorded,"A6-2 - U-BUCK's and HDR-SERVICE's through-hole tails also cross the plate gap, and nothing lists them"
+A6-3,A6,44,high,recorded,"A6-3 - The WS2815B-V1 datasheet puts the chamfer at pin 1 on its pin-out drawing, so the footprint's ""chamfer = pin 4"" rotation guidance may reverse all 13 LEDs"
+A6-4,A6,57,medium,recorded,"A6-4 - The regulator block is under the right-hand key board; drc.echo says ""beside the key boards"" and reports 7.7 mm spare against the wrong ceiling"
+A6-5,A6,69,medium,recorded,"A6-5 - A1, NT1 and NT2 carry assembly flags that make pcb.py 's assembly export exit on the main board"
+A6-6,A6,81,low,recorded,A6-6 - lighting.led_court no longer matches the footprint it cites
+A6-7,A6,91,low,recorded,"A6-7 - The KS-33 pads are 2.6 mm, not the 2.8 mm (0.3 mm ring) that ADR 0020 Amendment 6 and the lib README state"
+A6-8,A6,102,medium,recorded,"A6-8 - The J-MCU BOM row still says the part is open and the ribbon arrives ""from the mouth side"""
+A6-9,A6,112,low,recorded,"A6-9 - MECH-UBOLT, J-CHAIN and CBL-CHAIN notes still argue from the LED strip, and MECH-UBOLT cites a DRC line that no longer exists"
+A7-1,A7,17,medium,recorded,A7-1 - module-photo-detail is stale and shows the pre-swap jack layout; check-staleness.py FAILs at REV
+A7-10,A7,90,low,recorded,A7-10 - R-ON-HI's row says the toggle's leg hangs off the raw bus +12 V; the sheet puts it on ISO_POS12
+A7-11,A7,98,advisory,recorded,"A7-11 - No assembly sequence for the module stack, and the stack is over-constrained in depth"
+A7-12,A7,109,advisory,recorded,A7-12 - Several face clearances pass at a hair over zero against tbd envelopes
+A7-13,A7,119,advisory,recorded,A7-13 - SW-POWER is modelled with its body flat on the panel (front nut only); NKK's D4 hardware includes a second hex nut
+A7-2,A7,27,medium,recorded,"A7-2 - PANEL row specifies a bare laser/waterjet plate from the key-plate vendor; ADR 0026 specifies black anodise + UV print, CNC-cut by the print vendor"
+A7-3,A7,37,medium,recorded,"A7-3 - J-B2B-MOD on the jack board enters from the rear but needs the front-side (unmirrored) pin map; nothing says so, and no check catches it"
+A7-4,A7,47,low,recorded,"A7-4 - CBL-PWR-EURO still says it is 16-way ""because ... it needs +5V"""
+A7-5,A7,54,low,recorded,A7-5 - KNOB-BREATH cites a part that does not exist and does not name the knob the CAD and art are built on
+A7-6,A7,61,low,recorded,"A7-6 - Both board READMEs still say the panel layout is ""being revised"""
+A7-7,A7,68,low,recorded,"A7-7 - ADR 0004's panel paragraph, and ADR 0024 point 2, still promise the MOD write-on strip that ADR 0026 dropped"
+A7-8,A7,75,low,recorded,"A7-8 - led.hole_d 's source says the LED flange ""stops behind the panel""; LED-PANEL's row and ADR 0024 point 9 say it cannot"
+A7-9,A7,82,low,recorded,A7-9 - Metal standoff pads on AGND_MOD are decided but are on neither sheet
+A8-1,A8,22,medium,recorded,"A8-1 - C-DECOUPLE-CARRIER is bought ×8 but only 5 are drawn, and U-BUF (OPA2197) has no supply bypass"
+A8-10,A8,120,low,recorded,"A8-10 - tooling.md §5's ""Simulated"" table names the wrong receiver and leaves out one of the 20 sim directories"
+A8-11,A8,127,low,recorded,"A8-11 - diode-split-rationale quotes r_d at 392 mA, a +12 V current that ADR 0027 removed"
+A8-12,A8,137,low,recorded,A8-12 - Stale prose inside the registers themselves
+A8-13,A8,146,low,recorded,A8-13 - The owner of chain-connectors never states its value
+A8-14,A8,154,advisory,recorded,A8-14 - Nothing checks the bought-part identity fields that ADR 0019 puts on the sheet
+A8-15,A8,165,low,recorded,"A8-15 - check-staleness.py FAILs at REV, and miscounts the failure"
+A8-16,A8,172,low,recorded,A8-16 - The loadswitch-timer owner page still reports a BOM package defect that has been fixed
+A8-17,A8,179,low,recorded,"A8-17 - shaper-exp-gain 's ""worst corner"" bounds a proxy diode, not the part bought"
+A8-18,A8,187,advisory,recorded,A8-18 - Six BOM fragments are LF while the master is CRLF
+A8-19,A8,195,advisory,recorded,A8-19 - Small inconsistencies in the sheets' ordering fields and the ledgers
+A8-2,A8,33,medium,recorded,"A8-2 - FB-IN (MI1206K601R-10) has zero LCSC stock, is machine-placed ×4, and the register figure is tied to that exact part"
+A8-3,A8,42,low,recorded,A8-3 - Other orderability gaps at LCSC (2026-10-01)
+A8-4,A8,54,medium,recorded,"A8-4 - shaper-exp-gain is ""settled"" on a working point that is a candidate of the disputed breath-working-point"
+A8-5,A8,69,medium,recorded,"A8-5 - The module board's layer count is ""still open"" on the PCB pipeline page, which cites a register field that no longer exists; ADR 0018 still calls dig-gnd-topology open"
+A8-6,A8,79,medium,recorded,"A8-6 - repo-maintenance.md §4 still tells editors to keep history in BOM notes, against CLAUDE.md 2b"
+A8-7,A8,87,low,recorded,A8-7 - The REF5050 grade change did not reach its sim: assertions still cite the Standard grade's 0.1 %
+A8-8,A8,98,low,recorded,"A8-8 - R-REG-SET-LO is the E7 select-on-test part but the sheet machine-places a fixed SMD value, and the 0.66 V spread predates the 0.1 % divider"
+A8-9,A8,110,low,recorded,A8-9 - LCSC C51349 (both 22 µH inductors) no longer resolves on LCSC
+A9-1,A9,16,medium,recorded,A9-1 - The module detail photograph was not re-rendered after the panel-word cut and the jack swap; the checker FAILs at REV
+A9-10,A9,96,advisory,recorded,"A9-10 - ADR 0027 restates the LED row's current with ""not yet in the corpus"", but it is now a registered figure"
+A9-11,A9,102,advisory,recorded,"A9-11 - check-staleness's CAD header and summary count the trailing FAIL line as a problem (""2 cad"" for one stale output)"
+A9-12,A9,109,advisory,recorded,"A9-12 - module-main README calls rows 9-10 and 13 ""a ground row"" separating the pot wipers from the jacks; pin 9 is OFFSET_WIPER, and after the swap BREATH_JACK sits directly below it"
+A9-13,A9,115,advisory,recorded,"A9-13 - The shaper page says ""the table below"" for the table above it"
+A9-2,A9,26,low,recorded,"A9-2 - The module's own analog rack draw is stated as ~45 mA / ~40 mA, but the page's own worked sum gives ~37 mA / ~20 mA; the totals built on it disagree between documents"
+A9-3,A9,37,low,recorded,"A9-3 - breath-output-stage still justifies R-OFFNEG's rail with ""that rail carries no LED current"", which ADR 0027 and the page's own corrected paragraph refute"
+A9-4,A9,46,low,recorded,A9-4 - The R-CS-PULL-MOD and U-REG-LOGIC BOM rows still describe the receive path from before U-RX-MOD and before U-LVL-MOD moved to DAC_AVDD
+A9-5,A9,55,low,recorded,"A9-5 - R-SPI-PULL went from six to five this round; two notes still say ""R-SPI-PULL's six"""
+A9-6,A9,62,low,recorded,"A9-6 - The receiver's ""settled high"" arithmetic puts 1 kΩ and the retired 100 Ω in series with the pull-down"
+A9-7,A9,70,advisory,recorded,A9-7 - spi-link.md rejects 68 Ω on a fault-current convention the new 82 Ω row abandons
+A9-8,A9,80,low,recorded,"A9-8 - Q-INRUSH did not reach ADR 0027's consequences or power-entry.md's supply and fuse tables, which still call 0.68 A per rail ""a hot-plug"""
+A9-9,A9,88,low,recorded,"A9-9 - diode-split-rationale still quotes r_d ""at 392 mA"", a +12 V total that no diode carries since ADR 0027"
 C0-9,A6,,,NOT ADDRESSED,CITED ONLY - introduced in no report
 C1-2,A4,,,NOT ADDRESSED,CITED ONLY - introduced in no report
 C2-2,A4,,,NOT ADDRESSED,CITED ONLY - introduced in no report
 C3-1,A4,,,NOT ADDRESSED,CITED ONLY - introduced in no report
 C3-2,A4,,,NOT ADDRESSED,CITED ONLY - introduced in no report
 D3-2,A7,,,NOT ADDRESSED,CITED ONLY - introduced in no report
-E3-08,A1|A8,,,NOT ADDRESSED,CITED ONLY - introduced in no report
+E3-08,A1|A8,,,recorded,CITED ONLY - introduced in no report
 J2-14,A2,,,NOT ADDRESSED,CITED ONLY - introduced in no report
 J3-6,A4,,,NOT ADDRESSED,CITED ONLY - introduced in no report
 R39-1,A4,,,NOT ADDRESSED,CITED ONLY - introduced in no report

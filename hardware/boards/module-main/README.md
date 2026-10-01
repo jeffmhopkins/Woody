@@ -115,6 +115,27 @@ throwing left–right, the jack swap). The allocation is correct wherever the pa
 go; the *reasons* above are about positions, so re-read them when
 `pcb-geometry.echo` moves the pots, the jack columns or the header.
 
+
+## `R-SET-DAC` placement — a rule, not a preference
+
+The owner accepted (2026-10-01) that an open `R-SET-DAC` drives `DAC_AVDD` to
+about 11 V, over the DAC8568's 6 V absolute maximum, with no clamp. Layout is one
+of the three mitigations (`module/power-entry/power-entry.md`, *The DAC rail*,
+*Its failures*):
+
+- Keep `R-SET-DAC` (Vishay TNPW e3, 0603, anti-sulfur) **away from the
+  standoffs, the connectors and the board edges** — where the board flexes as it
+  is screwed down and the cables are plugged — because flex cracking is what
+  opens a chip resistor that carries no stress.
+- **Orient its long axis parallel to the board's long edge**, so bending runs
+  along the chip, not across its terminations.
+- Put it inside the `SET` guard ring at `OUT`'s potential, on both sides, with
+  `C-SET-DAC` beside it and both grounds Kelvin to `C-REG-OUT`'s
+  (`[ds ADI-LT3042.pdf p.14–15]`).
+- Never substitute a part without an anti-sulfur claim in its datasheet.
+- First build: order the assembly without `U-DAC` and `U-LVL-MOD`, measure
+  `DAC_AVDD` (ROADMAP E7), then hand-fit them.
+
 ## Circuits the boards do not place
 
 - [`link-supervision`](../../module/link-supervision/link-supervision.md) —
