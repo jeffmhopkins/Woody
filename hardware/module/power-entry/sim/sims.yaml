@@ -80,9 +80,9 @@ derived:
   t_off_ne: "v['t_off'] + max(v['dt_neg_off'], 0) + 1e-6 + v['t_fall']"
   r_own_pos: "v['v_bus'] / v['i_mod_pos']"
   r_own_neg: "-v['v_bus_neg'] / v['i_mod_neg']"
-  r_trim_gain: "max(v['TRIM-GAIN'] * v['t_gain'], 1e-3)"
-  r_toff_cw: "max(v['TRIM-OFFSET'] * (1 - v['w_offset']), 1e-3)"
-  r_toff_ccw: "max(v['TRIM-OFFSET'] * v['w_offset'], 1e-3)"
+  r_trim_gain: "max(v.get('TRIM-GAIN', 0) * v['t_gain'], 1e-3)"
+  r_toff_cw: "max(v.get('TRIM-OFFSET', 0) * (1 - v['w_offset']), 1e-3)"
+  r_toff_ccw: "max(v.get('TRIM-OFFSET', 0) * v['w_offset'], 1e-3)"
 
 sims:
   - name: d3-reversed
