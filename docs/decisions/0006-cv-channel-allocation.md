@@ -150,7 +150,7 @@ Three things make this cheap rather than awkward:
 
 - **Superseded.** This bullet used to claim a gain of 4 from an LT5400 ratio —
   **superseded 2026-09-21.** The mod channels are built from `R-MODGAIN-IN` and
-  `R-MODGAIN-FB`, 10k/30k 1 % discretes, in a two-resistor non-inverting form at **k = 3**, referenced to
+  `R-MODGAIN-FB`, 10k/30k discretes (0.1 % since 2026-10-01), in a two-resistor non-inverting form at **k = 3**, referenced to
   **3.3333 V**. `pitch-stage.md` also shows the LT5400 route is arithmetically
   impossible here — pitch already uses two of its four sections.
 - **The 3.3333 V reference point comes from a buffered DAC channel**, not
@@ -447,9 +447,11 @@ Consequences:
 - Still use a low-drift op-amp (OPA2197-class, not TL072) — offset drift on
   pitch is drift in tuning.
 
-The mod channels run on ordinary discretes, specified at 1 %
-(`mod-channels.md`); nobody's ear cares whether a modulation CV moves a few
-cents' equivalent with temperature.
+The mod channels run on discretes, not a matched network: two thin-film
+resistors per channel, specified at 0.1 % and 25 ppm/°C from one series since
+2026-10-01 (owner, pre-layout review A2-12; `mod-channels.md`) — the part the
+sheet already bought, so the specification costs nothing. Nobody's ear cares
+whether a modulation CV moves a few cents' equivalent with temperature.
 
 This is materially less expensive and less work than treating all six as
 precision outputs.

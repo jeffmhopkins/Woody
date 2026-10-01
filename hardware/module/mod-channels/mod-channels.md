@@ -5,7 +5,7 @@
 [pitch](../pitch-stage/pitch-stage.md).
 
 Four identical channels at `Vout = 4·Vdac − 3·V_ref`, `V_ref` = **3.3333 V**
-from DAC channel 7, built from `R-MODGAIN-IN` and `R-MODGAIN-FB`, 10k/30k 1 % discretes, in a
+from DAC channel 7, built from `R-MODGAIN-IN` and `R-MODGAIN-FB`, 10k/30k 0.1 % thin-film discretes, in a
 two-resistor non-inverting form at **k = 3**.
 
 > ADR 0006 originally specified `Vout = 4 × (Vdac − 2.5 V)` and contradicted
@@ -48,7 +48,7 @@ channel; the netlist writes out all four.*
                                    │
                           ┌────────┴────────┐
                           │                 │
-                     [R1 10k 1%]     (ch3, ch4, ch5
+                     [R1 10k 0.1%]   (ch3, ch4, ch5
                           │           identical)
                           │
    DAC ch2 ──[1k]──┐      │
@@ -59,7 +59,7 @@ channel; the netlist writes out all four.*
                    ┌──┤ −           │  │
                    │  └─────────────┘  │
                    │                   │
-                   └──[R2 30k 1%]──────┤
+                   └──[R2 30k 0.1%]────┤
                                        │
                             [D-JACK-CLAMP BAV99]── ±12 V
                                        │
@@ -117,8 +117,8 @@ amp, recorded rather than adopted, and still the author's call — is in
 
 | Ref | Value | Why |
 |---|---|---|
-| **R1** | 10 kΩ 1 % | To the shared reference |
-| **R2** | **30 kΩ 1 %** | Feedback. `k = 3`, gain `1 + k` = **exactly 4** |
+| **R1** | 10 kΩ 0.1 % | To the shared reference |
+| **R2** | **30 kΩ 0.1 %** | Feedback. `k = 3`, gain `1 + k` = **exactly 4** |
 | **V_ref** | **3.3333 V** from DAC ch7, buffered | Shared by all four. Intercept is `k · V_ref` = 10.000 V |
 | **C-FILT-MOD** | 82 nF C0G | 1.94 kHz, jack side of the 1 kΩ. The jacks are on the jack board and these are on module-main, so **place each at `J-B2B-MOD`**, at its jack's pin — the connector end is where a shunt is wanted |
 
@@ -130,45 +130,41 @@ it had, are in [`notes.md`](notes.md).)*
 point. The replacement enumerated "sixteen corners of four 1 % resistors",
 which is **the four-resistor circuit's answer, kept after the redraw**. There
 are two resistors and four corners, and in two of them same-sign tolerance
-cancels in the ratio:
+cancels in the ratio. **Both are specified 0.1 %** (owner, 2026-10-01, pre-layout
+review A2-12): Yageo `RT0805BRD07`, 0.1 % and 25 ppm/°C thin film, both values
+from one series and TCR grade (`R-MODGAIN-IN`). Two values cannot come off one
+reel; one series is what makes the two legs' tempcos match. At 0.1 %, `k` runs
+2.9940–3.0060 `[calc: 3 × 0.999/1.001, 3 × 1.001/0.999]`:
 
-| Term | Worst case | vs the four-resistor version |
-|---|---|---|
-| Zero point, op-amp output | **±50.5 mV** | 1.6× *better* |
-| Span, op-amp output | **19.703–20.303 V** (−1.49 %/+1.52 %) | 1.33× *better* |
-| **At the jack, into one 100 kΩ input** | **`mod-jack-range`** | the load term, which the four-resistor version had too |
+| Term | Worst case |
+|---|---|
+| Zero point, op-amp output | **±5.0 mV** `[calc: (5/6) × 0.0060]` |
+| Span, op-amp output | **19.970–20.030 V** (−0.15 %/+0.15 %) `[calc: 5 × (1 + k)]` |
+| **At the jack, into one 100 kΩ input** | **`mod-jack-range`** — the load term |
 
-So the redraw improved both and the page claimed neither. **The first two rows
-are at the op-amp output.** `R-OUT-PROT` is outside the loop, so at the jack the
-whole transfer is also divided by the load: 1 kΩ into a 100 kΩ input reads
-100/101, 0.99 % low `[calc]`, confirmed in `sim/` (`range`), where the output
-follows the law to 0.1 mV and neither end clips. **That is `mod-jack-range`:**
-±9.90 V at the jack, and a worst-case span of 19.51–20.10 V, −2.46 %/+0.51 %
-`[calc: 19.703 × 100/101, 20.303 × 100/101; sim range, jack_lo/jack_hi]`.
-On something pitch-like that is −11.9 cents per octave nominal and −29.6 to
-+6.1 cents per octave worst case `[calc: 1200 × the span error, 1 V/oct]`; the
-resistors alone are ±18, the load the rest. Firmware cannot buy the ±10 V back
-at a loaded jack: the DAC is already at 0 and full scale at the ends. It can
-scale anything inside it, which is what the per-channel range setting does.
+**The first two rows are at the op-amp output.** `R-OUT-PROT` is outside the
+loop, so at the jack the whole transfer is also divided by the load: 1 kΩ into
+a 100 kΩ input reads 100/101, 0.99 % low `[calc]`, confirmed in `sim/`
+(`range`), where the output follows the law to 0.1 mV and neither end clips.
+**That is `mod-jack-range`:** ±9.90 V at the jack, and a worst-case span of
+19.77–19.83 V, −1.14 %/−0.84 % `[calc: 19.970 × 100/101, 20.030 × 100/101;
+sim range, jack_lo/jack_hi]` — at 0.1 % the load is nearly all of it. On something pitch-like that is −11.9 cents per
+octave nominal and −13.7 to −10.1 worst case `[calc: 1200 × the span error,
+1 V/oct]`; the resistors alone are ±1.8, the load the rest. Firmware cannot buy
+the ±10 V back at a loaded jack: the DAC is already at 0 and full scale at the
+ends. It can scale anything inside it, which is what the per-channel range
+setting does.
 
 **"One matching requirement instead of two" is true by count and misleading.**
 The difference amp's zero was `2.5[b/(1+b) − b/(1+b)] = 0` for *any* absolute
 ratio — it depended only on leg-to-leg matching. The two-resistor zero, at the
 mid-scale code 2.5 V, is `2.5(1 + k) − (10/3)k = 2.5 − (5/6)k`: 0 at `k = 3`,
-and ∓50.5 mV for `k`'s ±0.0606 worst case `[calc]` — directly proportional to
+and ∓5.0 mV for `k`'s ±0.0060 worst case `[calc]` — directly proportional to
 the ratio error. Fewer requirements,
 but the deleted one was buying something. ADR 0006 says these channels need to be "linear
 and repeatable, not calibrated", and they still are — but "repeatable" is doing
-more work than the old number implied, and anything pitch-like belongs on
+more work than a count of requirements implies, and anything pitch-like belongs on
 channel 1.
-
-**The table is the 1 % specification. The sheet buys better:** Yageo
-`RT0805BRD07`, 0.1 % and 25 ppm/°C thin film, both values from one series and
-TCR grade (`R-MODGAIN-IN`). Two values cannot come off one reel; one series is
-what makes the two legs' tempcos match. At 0.1 % the op-amp-output rows shrink
-about tenfold `[calc: ±5.05 mV, ±0.15 %]`; the load row does not move. Whether
-the specification itself goes to 0.1 % is the owner's (pre-layout review
-A2-12).
 
 **On the range:** ±10.000 V uses the DAC's *full* 0–5 V span. ADR 0006's
 0.25–4.75 V window is a **pitch-channel reserve** — it exists to give firmware

@@ -4,8 +4,8 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/mod-channels/sim/sims.yaml: 24fd257f14d02e48
-  hardware/module/mod-channels/netlist.yaml: 8f44cca2ddd7a7e3
+  hardware/module/mod-channels/sim/sims.yaml: 7dccfa359b25af42
+  hardware/module/mod-channels/netlist.yaml: 00739b63d111a848
   hardware/module/breath-output-stage/netlist.yaml: 63517b01fa4c02a2
   hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
   hardware/module/mod-channels/sim/mod.cir: d1e903a7be7d8369
@@ -19,53 +19,54 @@ sims:
     measures:
       out_lo:
         nominal: -9.99986
-        min: -10.2019
+        min: -10.0199
         min_at: R1-1- R2-1+
-        max: -9.80184
+        max: -9.97988
         max_at: R1-1+ R2-1-
       out_hi:
         nominal: 9.99983
-        min: 9.90082
+        min: 9.98984
         min_at: R1-1+ R2-1-
-        max: 10.1008
+        max: 10.0098
         max_at: R1-1- R2-1+
       jack_lo:
         nominal: -9.90085
-        min: -10.1009
+        min: -9.92067
         min_at: R1-1- R2-1+
-        max: -9.70479
+        max: -9.88107
         max_at: R1-1+ R2-1-
       jack_hi:
         nominal: 9.90066
-        min: 9.80263
+        min: 9.89077
         min_at: R1-1+ R2-1-
-        max: 10.0007
+        max: 9.91057
         max_at: R1-1- R2-1+
       span_out:
         nominal: 19.9997
-        min: 19.7027
+        min: 19.9697
         min_at: R1-1+ R2-1-
-        max: 20.3027
+        max: 20.0297
         max_at: R1-1- R2-1+
       law_err_lo:
         nominal: 4.221e-05
-        min: 4.17182e-05
+        min: 4.21598e-05
         min_at: R1-1+ R2-1-
-        max: 4.26818e-05
+        max: 4.22198e-05
         max_at: R1-1- R2-1+
       law_err_hi:
         nominal: 5.204e-05
-        min: 5.156e-05
+        min: 5.199e-05
         min_at: R1-1- R2-1-
-        max: 5.251e-05
+        max: 5.209e-05
         max_at: R1-1+ R2-1+
     asserts:
     - expr: max['law_err_lo'] < 0.01 and min['law_err_lo'] > -0.01 and max['law_err_hi'] < 0.01 and min['law_err_hi'] > -0.01
       why: 'the op-amp output follows the page''s law 4 Vdac - 3 V_ref within 10 mV at both ends of the DAC''s range, at every
         resistor corner: neither end clips on +-12 V'
       pass: true
-    - expr: min['span_out'] > 19.70 and max['span_out'] < 20.31
-      why: the span at the op-amp output is inside the page's 19.703-20.303 V worst case
+    - expr: min['span_out'] > 19.96 and max['span_out'] < 20.04
+      why: the span at the op-amp output is inside the page's 19.970-20.030 V worst case, at R-MODGAIN-IN and R-MODGAIN-FB's
+        0.1 % (owner, 2026-10-01, A2-12)
       pass: true
     - expr: max['jack_hi'] < max['out_hi'] - 0.09
       why: 'RECORDED, not a requirement: R-OUT-PROT is outside the loop, so a 100 kohm input on the jack reads 1 % low (1k/101k)
