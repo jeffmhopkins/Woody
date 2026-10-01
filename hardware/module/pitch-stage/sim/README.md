@@ -46,7 +46,8 @@ its leakage at the 15 V standoff as 300 MΩ `[ds NEXPERIA-PESD15VL1BA.pdf p.4]`.
 The step is an ideal DAC edge, harder than the DAC8568's own settling, from
 jack 0 V to +1 V, one octave.
 
-**The result is `pitch-mult-overshoot`**, at the nominal; the corners move it
+**The result is `pitch-mult-overshoot`: 41.6 % at 82 nF, 64.0 % at 330 nF**,
+at the nominal; the corners move it
 by about a point either way. An octave step overshooting by 64 % is 7.7
 semitones `[calc: 0.64 × 12]`.
 

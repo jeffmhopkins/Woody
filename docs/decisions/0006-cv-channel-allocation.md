@@ -43,7 +43,8 @@ two spare.**
 > - **Power-on "0 V"** is to the DAC's zero-code error.
 > - **Labelling** follows ADR 0026: six word pills, no write-on strip.
 > - **The instrument's display** is gone (ADR 0015): configuration is over
->   USB, and the sentences below that set ranges "on the display" say so.
+>   USB, and the sentences below that set ranges "on the display" now say
+>   "in the configuration".
 > - **Channel numbers** in prose below are *outputs*, not DAC channels:
 >   "every output but pitch" replaces "channels 2–6", which collided with the
 >   DAC's own numbering (ch 2–5 are Mod 1–4, ch 6 is spare).
