@@ -584,14 +584,16 @@ instrument's return, about half each `[calc: two equal 24 AWG conductors,
 and move the jacks' reference with every breath. Since ADR 0027 it does not
 reach the plane beyond the etherCON at all.
 
-**The jack board stays two layers.** It carries the jacks, pots and LED and
+**The jack board stays two layers.** It carries the jacks and pots and
 one ground, `AGND_MOD`, which reaches it only on `J-B2B-MOD`'s five ground
 pins; nothing on it needs a second reference, so there is nothing for a
 second plane to separate (`PCB-MODULE-JACK`).
 
 **The standoffs are metal** (owner, 2026-09-30), so they could tie the boards'
-copper at four more points. **Their pads are on `AGND_MOD` on the jack board
-and on no net on the main board** — a plated ring with clearance from every
+copper at more points. **Their pads are on `AGND_MOD` on the jack board
+and on no net on the main board** — the main board's two low ones, which go to
+the panel (`MECH-PANEL-STANDOFF-MOD`, ADR 0024 point 15), included, so the
+panel is not a ground path either — a plated ring with clearance from every
 plane. On the jack board `AGND_MOD` is the only ground there is; on the main
 board any net would be a second inter-board tie: to `AGND_MOD` a parallel
 loop around the header's five ground pins, to `DIG_GND` or `PWR_GND` a second

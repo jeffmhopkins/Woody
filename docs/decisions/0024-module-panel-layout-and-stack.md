@@ -6,7 +6,9 @@ are the row above it; **and again the same day** (point 12): the toggle throws
 left–right. **Amended 2026-10-01** (point 13): BREATH and PITCH change
 places, and so do MOD 2 and MOD 3; **and again the same day** (point 14): the
 panel's material and finish, which ADR 0026 point 8 cited as specified here
-and which this record had never written down. Made with the module's mechanical CAD, "up to
+and which this record had never written down; **and again the same day**
+(point 15): the jack board is a plain rectangle ending above the toggle's
+row, so the LED and the two low standoffs moved off it. Made with the module's mechanical CAD, "up to
 the line before board layout". It takes ADR 0023's two-board decision to
 positions and lengths, and it **reverses one of 0023's consequences**: the
 panel has no slot for the NE8FAV's PUSH tab (point 3).
@@ -71,29 +73,35 @@ checked rather than asserted.
    their sides*, from the banked `PJ398SM.kicad_mod`). Across, the columns
    are `layout.jack_pitch_x` apart, which is what leaves J-B2B-MOD room
    between them.
-6. **The jack board is a U.** Its notch clears the NE8FAV's body by
-   `boards.ec_clear` and is open to the bottom edge; above it, a narrower
-   step of the same cut-out clears the toggle's body by
-   `boards.toggle_clear`, because that body is deeper than the jack board's
-   depth (ADR 0023) and passes through the board (DRC: *jack board notch
-   clear of SW-POWER's body*). Its two legs carry the LED and the lower
-   standoffs. Both boards have the
-   same outline, inside the rail band (`rail.band`) and `boards.side_margin`
-   inside the panel's sides.
+6. **The jack board is a plain rectangle** (point 15): full width, from just
+   below the bottom jack row's footprints (`boards.jack_y0`) to the top edge
+   it shares with the main board. SW-POWER's body, which is deeper than the
+   jack board's depth (ADR 0023), and the NE8FAV are below it, so nothing
+   passes through it (DRC: *jack board bottom edge*). The main board keeps
+   the full outline; both are inside the rail band (`rail.band`) and
+   `boards.side_margin` inside the panel's sides. *Amended 2026-10-01, point
+   15: this point first made the jack board a U whose notch and step let the
+   NE8FAV and the toggle's body through, its two legs carrying the LED and
+   the lower standoffs.*
 7. **J-B2B-MOD stands between the jack columns**, long axis vertical, and is
    soldered through both boards. Its pin length is derived (DRC: *J-B2B-MOD
    pin length (derived)*).
-8. **Four standoffs** (`standoff.at`): two above the pots, between them; one
-   low in each leg. **Their length is derived, not chosen** — the NE8FAV's
+8. **Two standoffs between the boards** (`standoff.at`), above the pots,
+   between them; **the main board's two low mounting points go to the
+   panel** (`panel_standoff.at`, point 15). *Amended 2026-10-01: there were
+   four between the boards, the low two in the jack board's legs.* **The
+   between-board length is derived, not chosen** — the NE8FAV's
    setback less the jack's body and the jack board (DRC: *standoff length
    (derived)*). It cannot be met by moving the jack board, because the jack's
    body fixes that board's depth just as the NE8FAV fixes the main board's.
    So the stock 8 mm spacer is **faced to length**, as the key boards' spacer
    is (DRC: *standoff faced from stock*). ADR 0023 left this open.
-9. **The LED is held by a lead spacer** standing on the jack board, which
-   stops its flange (its flange is the panel hole's size, so nothing on the
-   panel can). That is `MECH-LED-BEZEL-MOD`, and its length is derived (DRC:
-   *LED lead spacer length (derived)*).
+9. **The LED is an 0805 on the main board's front face under a press-fit
+   panel light pipe** (point 15): `MECH-LED-BEZEL-MOD` is the pipe, its
+   flange stops on the panel's face, and what it leaves over the LED is
+   checked (DRC: *light pipe over the LED*). *Amended 2026-10-01: this point
+   first held a 3 mm LED by a lead spacer standing on the jack board's left
+   leg.*
 10. **J-PWR-EURO is on the main board's rear face, low on the right**, long
     axis vertical, pin 1 (−12 V, red stripe) at the bottom as Doepfer wants.
     The ribbon folds over the socket's strain relief and down to the bus
@@ -112,9 +120,9 @@ checked rather than asserted.
     locating pegs clear the rail band), where its cable drops below every
     control, and the toggle's row moved above it (`layout.toggle_y`), its
     lever's sweep between the PUSH tab and the last jack row's plug grips.
-    The LED moved with the toggle, into the strip on the toggle's left, which
-    the jack board's left leg stands behind; the strip beside the flange no
-    longer carries anything but the umbilical's legend.
+    The LED moved with the toggle, into the strip on the toggle's left (since
+    point 15, a light pipe over an LED on the main board); the strip beside
+    the flange no longer carries anything but the umbilical's legend.
 
     **The rule is checkable now.** The *drop zone* is the NE8MX's grip
     (`ethercon.cable_d`, off `NE8MX.pdf`) and a strip that wide from the axis
@@ -136,9 +144,8 @@ checked rather than asserted.
 
     **What moved with it, behind the panel.** The main board's NE8FAV moves
     down with the panel's; its depth is unchanged (`ethercon.pcb_setback`).
-    The jack board's notch is shorter and gains the toggle's step, which is
-    what now sets the least room under the lowest jacks (DRC: *lowest jacks
-    above the notch*). J-B2B-MOD, the standoffs, J-PWR-EURO and its ribbon
+    The jack board's notch became shorter and gained the toggle's step
+    (both gone since point 15). J-B2B-MOD, the standoffs, J-PWR-EURO and its ribbon
     route did not need to move: each is re-checked by the rules it already
     had, and the header still clears the NE8FAV's tails, which are now below
     it and to its left. The depth against the Palette is unchanged, because
@@ -180,11 +187,9 @@ checked rather than asserted.
     knobs clear of the NE8MX, the PUSH tab, the toggle, the LED and the
     A-screws*) and from the drop zone (DRC: *no panel control under the
     umbilical*). Behind the panel, NKK's terminal field lies along the throw,
-    so the body is now wide and short: the jack board's step for it is wider
-    and lower (DRC: *board outlines*, *jack board notch clear of SW-POWER's
-    body*), which gives back room under the lowest jacks (DRC: *lowest jacks
-    above the notch*); the main board's wiring keep-out turns with it
-    (`pcb-geometry.echo`). The row's height is unchanged, and so is
+    so the body is now wide and short, and lower (since point 15 the jack
+    board ends above it: DRC *jack board bottom edge*); the main board's
+    wiring keep-out turns with it (`pcb-geometry.echo`). The row's height is unchanged, and so is
     `panel-height-budget`.
 
 13. **BREATH and PITCH change places, and MOD 2 and MOD 3** — amended
@@ -217,6 +222,50 @@ checked rather than asserted.
     Express, Schaeffer class), not the key plate's laser or waterjet shop.
     One proof panel first, after the 1:1 paper check. `PANEL`'s BOM row
     orders it so.
+15. **The jack board is a plain rectangle, ending above the toggle's row** —
+    amended 2026-10-01. The owner, looking at the boards' picture
+    (`renders/boards.png`): *"This cut out seems extra. Can we not rectangle
+    it out up higher?"* The U of point 6 existed only to let the NE8FAV's
+    body and SW-POWER's body through the board, and its two legs reached down
+    beside them to carry the LED and the lower standoffs. Ending the board
+    above the toggle's row removes the notch, the step and the legs together.
+
+    **The bottom edge** is `boards.jack_y0`: the bottom jack row's footprints
+    less `boards.copper_edge`, which leaves SW-POWER's body `boards.toggle_clear`
+    or more below it (DRC: *jack board bottom edge*, which reports both
+    margins and the NE8FAV's).
+
+    **The LED moved to the main board, under a light pipe.** On the main
+    board a through-hole LED's leads would come out of the rear face under
+    `U-ISO`'s body, which fills that face from the NE8FAV's tails to above
+    the toggle's row on the left (`iso.at`). So `LED-PANEL` became an 0805
+    (Lite-On LTST-C171GKT, the same GaP green as the 3 mm part it replaces)
+    on the main board's **front** face, and `MECH-LED-BEZEL-MOD` a press-fit
+    front-mount light pipe (Bivar PLP2-750) in the panel, its flange on the
+    face and its end just short of the LED (`led.*`; DRC: *light pipe over
+    the LED*, *LED-PANEL on the main board, under its light pipe*). The panel
+    hole is the pipe's (`led.hole_d`), smaller than the lens's was. The
+    `panel-led` circuit is placed on the main board's sheet now, and
+    `J-B2B-MOD` pin 19, which carried its supply, is **spare** on both
+    sheets; no other pin moved
+    ([`module-main/README.md`](../../hardware/boards/module-main/README.md#j-b2b-mod--the-allocation)).
+
+    **The main board's low mounting points go to the panel.** Moving the
+    jack board's lower standoffs up beside the jacks was tried and does not
+    fit: on the main board's rear face every place between the NE8FAV's tails
+    and the jack rows is taken by `U-ISO`, its filter, `L-CM-ISO`,
+    `J-PWR-EURO` and `J-B2B-MOD`'s tails, so there is nowhere for a screw
+    head. The two low points stay where the legs' standoffs were (2 mm lower,
+    clear of the umbilical's legend zone, `panel_standoff.at`) and are held
+    from the **panel**: a PEM FHA-M3-8 self-clinching stud in the panel, a
+    metal M3 spacer on it, faced to the NE8FAV's setback, and a screw from
+    the main board's rear (`MECH-PANEL-STUD-MOD`, `MECH-PANEL-STANDOFF-MOD`;
+    DRC: *panel standoff length (derived), faced from stock*, *panel studs:
+    sheet and edge distance (PEM)*, *panel standoffs clear of the NE8FAV,
+    SW-POWER, the LED and the jack board*). The jack board is held by its
+    six jack nuts and the two standoffs above the pots, which is all it
+    needs; its mounting pads are `H1` and `H2`. **The cost** is two flush
+    D4.6 stud heads on the panel's face, inside island C.
 
 ## Consequences
 
@@ -264,3 +313,6 @@ inside the zones this record fixes.*
 | The knob's bore depth and its gap to the panel (`knob.gap`) | The first fit, with the knob in hand |
 | Whether a thumb on the PUSH tab has room under the toggle (points 11 and 12: the sweep's lower edge, now the nut's, is in the DRC's *face parts clear of each other* above the tab) | The 1:1 paper check with the NE8MX in hand, then the first panel |
 | The umbilical's jacket and bend radius (`ethercon.umb_od`, `umb_bend_k`) | CABLE-UMB bought, and its datasheet |
+| Whether the panel vendor clinches the two studs and prints over their flush heads (point 15) | The panel vendor's quote; the proof panel |
+| The panel spacers' stocked length and part (`panel_standoff.stock_l`) | The metal spacer bought for `MECH-PANEL-STANDOFF-MOD` |
+| Whether the LED is bright enough through the light pipe at its 4.5 mA (point 15) | The first build, looked at; `R-LED-PANEL` comes down if not |
