@@ -23,7 +23,7 @@ The `Dir` and `Peer` columns are defined once in
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
 | `UMBILICAL +12V` at `J-UMB` | in | `module/umbilical-load-switch` | `umbilical-pinmap`, `umbilical-current` | Arrives down the umbilical from the module's load switch. On this board it is `J-UMB` pin 3, `D-REVSHUNT`, `D-TVS-PWR` and `Q-INRUSH`'s source and gate network — **nothing that stores charge** (§1a) |
-| `PWR_GND` at `J-UMB` | ref | `module/power-entry` | `umbilical-pinmap` | This board's only supply return, down the umbilical to the module star |
+| `PWR_GND` at `J-UMB` | ref | `module/power-entry` | `umbilical-pinmap`, `dig-gnd-topology` | This board's only supply return, down the umbilical to `U-ISO`'s 0V at the module (ADR 0027). It reaches the module's star only through `DIG_GND` and `NT-DIG-MOD`, and none of this board's DC current crosses the star (`dig-gnd-topology`) |
 | `INST_POS12`, the LED row feed | out | `carrier/led-strip-drive` | `led-row-current` | `Q-INRUSH`'s drain (§1a), which `C-STRIP-BULK`, this circuit's part, sits on. Nothing is in series between the drain and this tap |
 | `INST_POS12`, analog | out | `carrier/breath-excitation-reference` | — | REF5050 `VIN`, and the V+ of both OPA2197 halves. **The same node as the row above**, for the same reason |
 | 5 V, buck A | out | `J-MCU`, `carrier/led-strip-drive` | `matrix-led-current` | Through `D-USBOR` and `J-MCU`, down three conductors of `CBL-MCU-RIBBON` onto the dev board's 5 V pad and `TP2`, and on to the 74AHCT125 |
@@ -95,6 +95,12 @@ Constant-power load at typical play:
   226 mA × 5 V = 1.13 W out ÷ 0.90 = 1.26 W in at 11.4 V   [repo] 0005
   R_neg = −V²/P = −103 Ω
 Margin: |R_neg| / Z_peak = 103 / 0.85 ≈ 120× (42 dB), worst case
+
+The 11.4 V is ADR 0005's arriving voltage, which still subtracts the module's
+Schottky; since ADR 0027 that diode is on U-ISO's input, and the instrument
+sees U-ISO's 12 V less the load switch, the cable and Q-INRUSH, ~11.8 V
+(§1a). 11.4 V is the conservative side here: a lower input is a smaller
+|R_neg|, so the margin at ~11.8 V is larger, ~130×   [calc: 11.8² / 1.26 = 110 Ω]
 ```
 
 > **This result depends on `C-BUCK-IN` being an electrolytic with real ESR.**
@@ -245,6 +251,36 @@ At the LT1641's highest gate drive (`dV_GATE` 15 V, where `D-GATE-CLAMP`
 holds it) the unlimited hot-plug was 270–364 µs and pulled `VCC` to 10.15 V,
 0.25 V above the `ON` pin's turn-off: the old hazard was worse than the
 figure that recorded it, which was taken at the minimum gate drive.
+
+### The 13.5 V rating on this rail
+
+**The LED row's `VDD` absolute maximum is 13.5 V** `[ds
+datasheets/led/WS2815B-V1.pdf p.2]`, the lowest rating on `INST_POS12`, and
+**nothing on this board holds the rail below it**: `D-TVS-PWR`'s breakdown is
+16.7 V minimum `[ds LITTELFUSE-SMAJ-SERIES-SMAJ15A.pdf]`, and `U-ISO`'s own
+over-voltage protection starts at 13.8 V `[ds RECOM-RPA20-AW.pdf PD-5]`. In
+operation the rail is `U-ISO`'s regulation, 12 V +3.1 % at worst
+(`power-entry.md`), and a surge through the on FET into ~571 µF moves it by
+tenths of a volt; the plug's ring lands on `J-UMB` while `Q-INRUSH` is off
+(§1a). **What is not covered is a converter that fails regulating high**,
+anywhere between 13.5 V and its OVP: thirteen parts that cannot be reworked
+after reflow (ADR 0028) would see it unclamped. Recorded 2026-10-01
+(pre-layout review A4-4); whether that fault is in scope, and the options,
+are the owner's (`docs/review/2026-10-01-pre-layout-review/VERIFIED-F3.md`).
+
+### On USB power alone
+
+ADR 0005 keeps the USB OR so the instrument runs on the bench without a rack.
+**Since the analog block and the LED row moved to `INST_POS12`, USB alone runs
+the MCU, the matrix and the keys only**: no breath (the sensor, `U-REF-BREATH`
+and `U-BUF` are on `INST_POS12`) and no LED supply. The LED buffer
+`U-LVLSHIFT` is on the Matrix's own 5 V (`INST_5V_A`), which USB feeds, so it
+is live, and a write to the row would drive 5 V edges through `R-LED-SER`
+into LEDs with no supply, past their input rating referred to a supply that is
+absent `[ds WS2815B-V1.pdf p.2]`. **There is no 12 V sense; firmware gates the
+row on the breath reading instead** — with the rail up the ADC reads the
+sensor's zero-pressure offset, with it down near zero (`firmware/README.md`,
+*What the hardware requires*, *The lights*). Recorded 2026-10-01 (A4-15).
 
 ---
 
