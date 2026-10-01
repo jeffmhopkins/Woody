@@ -31,9 +31,17 @@ Not tracked, and gitignored: `.staleness/`, `.staleness-report.txt`, `*.tmp`.
 
 ## §2. `tools/check-staleness.py` — the mechanical half of the one failure mode
 
-Run by a `PreToolUse` hook before every `git commit`, so forgetting it is
-visible rather than silent. It greps the corpus for values `config/figures.yaml`
-lists as `forbidden`, skipping lines whose wording refutes them.
+Surfaced by a `PreToolUse` hook, so forgetting it is visible rather than
+silent — but the hook fires before every `Bash` call, not only `git commit`,
+and it never blocks: a FAIL is reported and you are the one who stops
+(CLAUDE.md rule 2 says how that was found). It greps the corpus for values
+`config/figures.yaml` lists as `forbidden`, skipping prose whose wording
+refutes them (`.md` only — rule 2b). **It also reads the placed parts'
+identity fields on every KiCad sheet** — `Value`, `Manufacturer`, `MPN`,
+`LCSC`, `Note` — with no refutation exemption, because those fields are data
+and the exported `netlist.yaml` drops the bought-part ones (since 2026-10-01,
+pre-layout review A8-14: an MPN regressing to the worse REF5050 grade would
+have passed unseen).
 
 ### The trap: a forbidden list written from the document in front of you
 
