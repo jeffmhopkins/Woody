@@ -49,6 +49,15 @@ The root sheet's own parts are the two connectors:
   umbilical and goes nowhere, as that sheet says.
 - **`J-B2B-MOD`**, below.
 
+**The jack filters sit at `J-B2B-MOD`** (pre-layout review A2-20, handed from
+F2): the jack board carries only the jacks, the pots, the LED and the header,
+so "at the jack" in `pitch-stage.md` and `mod-channels.md` means this board's
+side of the header. Place `C29` (`C-FILT-PITCH`) and `C36`–`C39`
+(`C-FILT-MOD`) against `J-B2B-MOD`'s `PITCH_JACK` and `MODn_JACK` pins, with
+the pitch stage's DC tap (`RV3`'s CCW end, `TRIM-GAIN`) taken there too, so the
+low-impedance shunt those pages argue for is at the connector the jack's wire
+leaves by.
+
 ## J-B2B-MOD — the allocation
 
 A 2 × 10 header soldered through both boards: **pin *k* is one conductor on
@@ -85,9 +94,11 @@ Why this order:
   (ADR 0024: the pot row, then the jacks). The breath-gain chain
   (`BREATH_SHAPED`, `GAIN_WIPER`, `GAIN_FLOOR`) is the left column, on the
   gain pot's side; the response pot's three nets are the right column, on its
-  side; the offset pot, in the middle, closes the group. A ground row
-  (9–10 and 13) separates the pots' high-impedance wipers from the jack
-  outputs.
+  side; the offset pot, in the middle, closes the group (`OFFSET_WIPER` on
+  pin 9). The grounds on pins 10 and 13 stand between the pots' wipers and
+  the jack outputs below them, except in the left column, where
+  `OFFSET_WIPER` (9) is directly above `BREATH_JACK` (11) with no ground
+  between.
 - **Each jack on its own column's side**: `BREATH`, `MOD1`, `MOD2` are the
   left column of jacks and take odd pins; `PITCH`, `MOD3`, `MOD4` the right
   column and even pins. The order down the header is the jacks' order down
@@ -98,8 +109,9 @@ Why this order:
 - **The LED's supply at the bottom**, because the LED is low in the jack
   board's left leg.
 
-What decides whether this changes: the panel layout (being revised now; the
-etherCON and the toggle move). The allocation is correct wherever the parts
+What decides whether this changes: the board layout. The panel layout is
+settled (ADR 0024 points 11–13: the etherCON at the bottom, the toggle
+throwing left–right, the jack swap). The allocation is correct wherever the parts
 go; the *reasons* above are about positions, so re-read them when
 `pcb-geometry.echo` moves the pots, the jack columns or the header.
 
@@ -126,7 +138,9 @@ go; the *reasons* above are about positions, so re-read them when
   on this board — plated, clear of every plane. The jack board's are
   `AGND_MOD`.
 - **`J-B2B-MOD`** is Samtec `TSW-110-09-G-D` (row), insulator on this board's
-  front face.
+  front face. On **both** boards its footprint goes on the top side, **not
+  mirrored** — the jack board's too, though the header's body is on that
+  board's rear ([`module-jack/README.md`](../module-jack/README.md)).
 - **Both `SW-POWER` lugs** wire to this board, beside `U-LOADSW`.
 
 ## Open, and what decides each

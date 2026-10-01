@@ -405,8 +405,8 @@ function thumb_pts(cl) = [for (k = cluster_keys(cl)) key_xy(k)];
 // thumb plates were - the cassette's floor. It carries the thumb switches'
 // cutouts, the U-bolt's leg holes and a stud at every one of the main
 // board's mounts, pressed in from its underside. Across, as the key plate;
-// along, from the mouth cap to short of J-UMB at the tongue's end: J-UMB's
-// through-hole tails stand below the tongue, and behind it the etherCON's
+// along, from the mouth cap to short of J-UMB's tail row at the tongue's end:
+// J-UMB's through-hole tails stand below the tongue, and behind it the etherCON's
 // adapter stands on the oak (the connector stands on the floor, ec_clear
 // above it). Frame: as the key plate's, model XY minus [x_in0, u_y0].
 // Its extent, bplate_x1 and bplate_y, is set below the etherCON's placement.
@@ -418,6 +418,8 @@ module plate_bottom_2d() {
             for (u = ubolt_legs()) translate(u) circle(d = ubolt_hole_d);
             // the main board's studs, pressed in from the plate's underside
             for (c = cb_standoffs) translate(c) circle(d = hardware_stud_hole);
+            // a window under each through-hole part whose tails would reach the plate
+            for (w = bplate_windows) translate([w[0], w[1]]) square([w[2] - w[0], w[3] - w[1]]);
         }
     }
 }
@@ -455,8 +457,13 @@ ec_c = [W / 2 + ethercon_offset_y, z_floor + ec_clear + ec_fl[1] / 2];    // eth
 ec_panel_x = L - ends_tail_cap_t;                  // the flange's front face, on the tail cap's inside face
 ec_pcb_x1 = ec_panel_x - ethercon_pcb_setback;     // the adapter's front face
 ua_x0 = ec_pcb_x1 - boards_umb_adapter_t;          // the adapter's rear face
-// The bottom plate's end, short of J-UMB, and its width, as the key plate's.
-bplate_x1 = ua_x0 - boards_umb_joint_d - boards_board_clear;
+// The bottom plate's end, short of J-UMB's TAILS, and its width, as the key
+// plate's. The tails stand below the tongue further than the plate is below
+// it, so the plate stops a pad and the parts clearance before the tail row,
+// and they stand over the oak (drc.echo 'through-hole tails under the main
+// board clear of the bottom plate').
+ju_tail_x = ua_x0 - boards_umb_joint_d - boards_umb_joint_row_back;   // J-UMB's tail row, along the body
+bplate_x1 = ju_tail_x - boards_pin_pad / 2 - boards_board_clear;
 bplate_y = [u_y0 + stack_groove_clear, W - u_y0 - stack_groove_clear];
 // The panel holes, upper left and lower right seen from the front ([ds]);
 // from the front, +Y is on the right. (Y, Z) on the tail face.
@@ -786,8 +793,22 @@ module pcb_geometry() {
     // height above the top face, where it meets the adapter.
     echo("PCB", "main", "connector", "J-UMB", ua_x0 - boards_umb_joint_d, ua_x0, ec_c[0], 8, 2.54, boards_umb_joint_row_h);
     // The breath sensor: its centre, the ports toward +x (the tail), its
-    // body and lead span; the slot in front of its lower port is in the DXF.
-    echo("PCB", "main", "part", "U-BREATH", sensor_c[0], sensor_c[1], 0, boards_sensor_body, boards_sensor_leads);
+    // body and lead span (the lead TIPS), and its land pattern's width
+    // across the pad rows (boards.sensor_land_w, wider than the lead span);
+    // the slot in front of its lower port is in the DXF. The 0 is the BODY
+    // frame's rotation (ports along +x), NOT a footprint rotation: the
+    // footprint has its ports at -y and its pad rows across x, so it goes
+    // down turned to put the ports at +x (KiCad 270 = -90; layout.yaml).
+    echo("PCB", "main", "part", "U-BREATH", sensor_c[0], sensor_c[1], 0, boards_sensor_body, boards_sensor_leads, boards_sensor_land_w);
+    // HDR-SERVICE (ADR 0018): pin 1, the pins running toward +x, the pitch and
+    // pin count - placed here because the bottom plate has a window under its
+    // tails (boards.service_hdr_at).
+    echo("PCB", "main", "part", "HDR-SERVICE", svc_at[0], svc_at[1], 0, boards_service_hdr_pins, 2.54);
+    // The bottom plate's windows under through-hole tails, and its end short
+    // of J-UMB's: what an underside part must also keep clear of.
+    let(n = [for (t = tht_tails) if (t[3] == "window") t[0]]) for (i = [0 : len(n) - 1]) let(w = bplate_windows[i])
+        echo("PCB", "main", "plate", str("window ", n[i]), w[0], w[1], w[2], w[3]);
+    echo("PCB", "main", "plate", "end", bplate_x1);
     // The regulator block's envelope: centre, along x, across y, height.
     echo("PCB", "main", "part", "REGULATOR-BLOCK", tall_c[0][0], tall_c[0][1], 0, tall_sz[0], tall_sz[1], boards_tall_h);
     // THE LED ROW (ADR 0028), one record per LED, numbered along the data
@@ -1117,12 +1138,15 @@ module tail_wiring_3d() {
 tall_sz = [boards_tall_w, boards_tall_l];   // along x, across y
 far_y = cb_y[tube_side < 0 ? 1 : 0] + tube_side * (boards_tall_l / 2 + 0.5);
 tall_c = [[jm_x0 - boards_board_clear - boards_tall_w / 2, far_y]];   // just in front of J-MCU
-// Is any key board overhead? Each key's board footprint taken as a
-// cluster_pcb_w square, unrotated - the window's gap-closing is ignored, so
-// this errs towards "clear"; the clash check has the real outline.
-function under_keys(c, sz) = len([for (cl = ["left_hand", "right_hand"], k = cluster_keys(cl))
-    if (abs(key_xy(k)[0] - c[0]) < (switch_cluster_pcb_w + sz[0]) / 2 && abs(key_xy(k)[1] - c[1]) < (switch_cluster_pcb_w + sz[1]) / 2) 1]) > 0;
+// Is any key board overhead? Tested against each key board's outline,
+// kb_rect - a full rectangle across the cavity since ADR 0025. (It used to
+// test per-key cluster_pcb_w squares, which predate those boards, and so
+// called the regulator block 'beside the key boards' while it stood wholly
+// under the right-hand one.)
+function under_keys(c, sz) = len([for (cl = ["left_hand", "right_hand"]) let(r = kb_rect(cl))
+    if (c[0] + sz[0] / 2 > r[0] && c[0] - sz[0] / 2 < r[2] && c[1] + sz[1] / 2 > r[1] && c[1] - sz[1] / 2 < r[3]) 1]) > 0;
 tall_room = under_keys(tall_c[0], tall_sz) ? cb_room : gap_room;
+
 // THE MAIN BOARD IS IN THE U-BOLT'S CLAMP (owner, 2026-09-29; ADR 0025): up each
 // leg the oak, the bottom plate, a spacer, the board, a washer, the nut. The
 // board has a clearance hole for the rod; the nut and its washer stand on the
@@ -1165,6 +1189,40 @@ mcu_path = concat([[mcu_x, matrix_board_z - boards_matrix_harness_h]],
 // boards.umb_joint_row_h above the main board.
 ju_l = 8 * 2.54;
 ju_row_z = cb_top + boards_umb_joint_row_h;
+
+// THE THROUGH-HOLE TAILS UNDER THE MAIN BOARD (ADR 0025): one record per part
+// with plated through-hole pins (config/body.yaml says which and why these):
+// [name, its tails' extent [x0, y0, x1, y1] in the body frame, how far they
+// stand below the board as fitted, and what the plate does under them -
+// "plate" (nothing: they clear it), "window" (a window through it to the oak)
+// or "end" (the plate stops short of them)].
+function grow(r, d) = [r[0] - d, r[1] - d, r[2] + d, r[3] + d];
+function pad_row(a, b) = [min(a[0], b[0]) - boards_pin_pad / 2, min(a[1], b[1]) - boards_pin_pad / 2,
+                          max(a[0], b[0]) + boards_pin_pad / 2, max(a[1], b[1]) + boards_pin_pad / 2];
+svc_at = boards_service_hdr_at;
+svc_end = svc_at + [(boards_service_hdr_pins - 1) * 2.54, 0];
+tht_tails = concat(
+    [for (cl = chain_ribbon_cls) [str("J-CHAIN-", cl == "left_hand" ? "LH" : "RH"), chain_tail_rect(cl), boards_chain_hdr_tail - switch_pcb_t, "plate"]],
+    [["J-MCU", [jm_x0, jm_y - jm_sz[1] / 2, jm_x1, jm_y + jm_sz[1] / 2], boards_mcu_conn_tail - switch_pcb_t, "plate"],
+     ["J-UMB", pad_row([ju_tail_x, ec_c[0] - ju_l / 2 + 1.27], [ju_tail_x, ec_c[0] + ju_l / 2 - 1.27]), boards_umb_joint_tail - switch_pcb_t, "end"],
+     ["HDR-SERVICE", pad_row(svc_at, svc_end), boards_service_hdr_tail - switch_pcb_t, "window"],
+     // U-BUCK stands in the regulator block (the layout keeps it there): the
+     // window is the block's; its tails are cut to boards.tht_trim
+     ["U-BUCK", [tall_c[0][0] - tall_sz[0] / 2, tall_c[0][1] - tall_sz[1] / 2, tall_c[0][0] + tall_sz[0] / 2, tall_c[0][1] + tall_sz[1] / 2],
+      min(boards_buck_tail - switch_pcb_t, boards_tht_trim), "window"]]);
+// The windows through the bottom plate, each the tails' extent and the parts
+// clearance round it; one that would leave less than boards.plate_web_min of
+// plate to the plate's edge opens to the edge instead.
+bplate_windows = [for (t = tht_tails) if (t[3] == "window") let(w = grow(t[1], boards_board_clear))
+    [w[0],
+     w[1] - bplate_y[0] < boards_plate_web_min ? bplate_y[0] - 1 : w[1],
+     w[2],
+     bplate_y[1] - w[3] < boards_plate_web_min ? bplate_y[1] + 1 : w[3]]];
+// What is under a part's tails: the oak where they stand inside a window or
+// past the plate's end, else the plate.
+function in_rect(r, w) = r[0] >= w[0] && r[1] >= w[1] && r[2] <= w[2] && r[3] <= w[3];
+function tails_over_oak(r) = r[0] - boards_board_clear >= bplate_x1 || len([for (w = bplate_windows) if (in_rect(grow(r, boards_board_clear), w)) 1]) > 0;
+function tails_floor(r) = tails_over_oak(r) ? z_floor : z_bplate_top;
 tongue_y = [ec_c[0] - ec_fl[0] / 2, ec_c[0] + ec_fl[0] / 2];
 // The tongue's own edges: the adapter's width, except that on the side where
 // the adapter's edge steps in less from the main board's, the tongue runs
@@ -1244,6 +1302,11 @@ module centre_board_3d() {
         for (u = ubolt_legs()) translate(u) circle(r = ubolt_keep_r);   // the U-bolt's washer and nut
         for (n = [1 : lighting_led_count]) translate(led_xy(n)) square(lighting_led_court, center = true);
     }
+    // the through-hole parts' tails under the board, as fitted, so clash.txt
+    // sees them against the bottom plate (drc.echo 'through-hole tails under
+    // the main board clear of the bottom plate')
+    for (t = tht_tails) P(C_STEEL, false, str("tails ", t[0]))
+        translate([t[1][0], t[1][1], cb_z - t[2]]) cube([t[1][2] - t[1][0], t[1][3] - t[1][1], t[2]]);
     P([0.30, 0.30, 0.55], false, "tall parts main board")
         translate([tall_c[0][0] - tall_sz[0] / 2, tall_c[0][1] - tall_sz[1] / 2, cb_top]) cube([tall_sz[0], tall_sz[1], boards_tall_h]);
     // THE MOUNTS (ADR 0022, ADR 0025), every one on the bottom plate: the stud,
@@ -1555,14 +1618,24 @@ module drc_report() {
     // any underside part (ADR 0017's amendment) stand in this gap.
     drc(undef, "main board underside room over the bottom plate", [cb_z - z_bplate_top - boards_board_clear, cb_z - z_floor - boards_board_clear],
         "mm an underside part may stand below the board, less the parts clearance (boards.board_clear): over the bottom plate, which now runs the board's length; and over a window cut through the plate to the oak, where a part needs it (ADR 0025)");
-    mb_tails = boards_chain_hdr_tail - switch_pcb_t;
-    drc(cb_z - z_bplate_top - mb_tails >= 0.5, "J-CHAIN pin tails clear of the bottom plate", cb_z - z_bplate_top - mb_tails,
-        "mm from the main board's chain headers' pin tails, through the board, to the grounded bottom plate");
+    // EVERY THROUGH-HOLE PART'S TAILS (tht_tails; config/body.yaml says which
+    // parts and why these): each against what is under it - the grounded
+    // bottom plate, or the oak where the plate has a window or has ended.
+    let(m = [for (t = tht_tails) [t[0], tails_over_oak(t[1]) ? "oak" : "plate", cb_z - tails_floor(t[1]) - t[2]]])
+        drc(min([for (r = m) r[2]]) >= boards_tail_clear, "through-hole tails under the main board clear of the bottom plate", m,
+            str("each part with through-hole pins: what is under its tails, and the mm from their tips, as fitted, to it (against boards.tail_clear ", boards_tail_clear,
+                "); U-BUCK's tails cut to boards.tht_trim ", boards_tht_trim, " below the board after soldering"));
+    drc(undef, "bottom-plate windows under through-hole tails", [for (t = tht_tails) if (t[3] == "window") t[0]],
+        "the parts whose tails need a window through the bottom plate to the oak (each the tails' extent and boards.board_clear round it, in plate-bottom.dxf; pcb-geometry.echo 'plate'); J-UMB's stand past the plate's end, which stops boards.board_clear short of its tail row's pads");
     drc(boards_tall_h <= tall_room, "regulator block fits where it stands", tall_room - boards_tall_h,
-        str("mm spare, ", under_keys(tall_c[0], tall_sz) ? "under a key board" : "beside the key boards, clear to the lid",
-            " [approx: key board footprints as squares; clash.txt is the check] - negative means low-profile parts"));
-    for (cl = chain_ribbon_cls) drc(chain_x(cl) != undef, str("chain headers on the ", cl, " boards clear of the switches"),
-                                    chain_x(cl) == undef ? "none found" : chain_x(cl), "mm along the body (the headers' mouths)");
+        str("mm spare, ", under_keys(tall_c[0], tall_sz) ? "under a key board's outline, up to its parts" : "where no key board is overhead, up to the lid",
+            " - negative means low-profile parts"));
+    for (cl = chain_ribbon_cls) let(x = chain_x(cl), d = chain_dir(cl), sp = x == undef ? undef : chain_span(x, d),
+                                    c = x == undef ? undef : [(sp[0] + sp[1]) / 2, chain_y], sz = x == undef ? undef : [sp[1] - sp[0], boards_chain_hdr_l])
+        drc(x != undef, str("chain headers on the ", cl, " boards clear of the switches"),
+            x == undef ? "none found" : [x, min([for (k = concat(cluster_keys(cl), bottom_keys), st = key_stubs(k)) rect_gap(st[0], c, sz, 0) - st[1]]),
+                                         chain_col_gap(sp, boards_chain_hdr_l) - col_keep_r],
+            "mm: the headers' mouths along the body; the header and its plug to the nearest switch's pins and pole (against 0.3); and to the nearest column's hex, off its axis (against 0.5)");
     drc(tongue_y[1] - tongue_y[0] >= ju_l + 2 * boards_board_clear && ua_x0 > cb_x[1], "J-UMB on the main board's tongue, against the etherCON's adapter",
         [ua_x0 - cb_x[1], tongue_y[1] - tongue_y[0] - ju_l],
         "mm: the tongue's length past the main board, and its width less J-UMB's pin row");
@@ -1654,13 +1727,16 @@ module drc_report() {
     // cutout, a U-bolt leg's hole and the plate's outline are all edges
     function bp_edge(p) = min(concat([for (k = bottom_keys) rect_gap(p, key_xy(k), [plate_cutout, plate_cutout], key_rot(k))],
                                      [for (u = ubolt_legs()) norm(p - u) - ubolt_hole_d / 2],
+                                     [for (w = bplate_windows) rect_gap(p, [(w[0] + w[2]) / 2, (w[1] + w[3]) / 2], [w[2] - w[0], w[3] - w[1]], 0)],
                                      [p[1] - bplate_y[0], bplate_y[1] - p[1], p[0] - x_in0, bplate_x1 - p[0]]));
     stud_edge = min([for (c = cb_standoffs) bp_edge(c)]);
     drc(stud_edge >= hardware_stud_edge, "bottom-plate studs clear of the plate's edges and cutouts", stud_edge,
-        "mm from a stud's centre to the nearest thumb switch cutout, U-bolt hole or plate edge, worst case, against hardware.stud_edge");
-    bsp = min([for (c = cb_standoffs, k = bottom_keys) rect_gap(c, key_xy(k), [plate_cutout, plate_cutout], key_rot(k))]) - hardware_kb_spacer_od / 2 - hardware_kb_mount_float;
+        "mm from a stud's centre to the nearest thumb switch cutout, U-bolt hole, tails' window or plate edge, worst case, against hardware.stud_edge");
+    bsp = min(concat([for (c = cb_standoffs, k = bottom_keys) rect_gap(c, key_xy(k), [plate_cutout, plate_cutout], key_rot(k))],
+                     [for (c = cb_standoffs, w = bplate_windows) rect_gap(c, [(w[0] + w[2]) / 2, (w[1] + w[3]) / 2], [w[2] - w[0], w[3] - w[1]], 0)]))
+          - hardware_kb_spacer_od / 2 - hardware_kb_mount_float;
     drc(bsp >= 0.5, "bottom-plate spacers clear of the thumb switch cutouts", bsp,
-        "mm from a spacer's edge, off its axis by hardware.kb_mount_float, to the nearest thumb switch cutout, worst case");
+        "mm from a spacer's edge, off its axis by hardware.kb_mount_float, to the nearest thumb switch cutout or tails' window, worst case");
     shank = hardware_stud_s - plate_thickness;
     drc(shank <= hardware_kb_spacer_l, "bottom-plate studs: unthreaded shank ends inside the spacer", shank,
         "mm of unthreaded shank above the plate, against the spacer it sits in - the main board and the standoff meet thread");

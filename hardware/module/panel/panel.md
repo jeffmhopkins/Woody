@@ -135,5 +135,7 @@ claim of "16–20 mm knobs" is withdrawn rather than quietly left standing.
 
 It also makes room for the op-amp package the *other* review finding
 needs: `A5` showed `POT-OFFSET`'s wiper is unbuffered, which is why its
-"zero at centre" actually sits ~20° past centre at +0.605 V. That fix
+"zero at centre" is not at centre — where it is, and which way of centre,
+is on [`breath-output-stage.md`](../breath-output-stage/breath-output-stage.md),
+which owns both numbers. That fix
 wants a half, and this stage takes the last two.
