@@ -271,7 +271,7 @@ module panel_3d() {
         // shank behind the rear face, inside its spacer.
         for (i = [0 : len(panel_standoff_at) - 1])
             P(C_METAL, false, str("panel stud ", i + 1)) {
-                cyl(panel_standoff_at[i], panel_standoff_stud_head_d, -EPS, 2 * EPS);
+                cyl(panel_standoff_at[i], panel_standoff_stud_head_d, 0, 5 * EPS);
                 cyl(panel_standoff_at[i], 3.0 - 0.02, -T + EPS, -panel_standoff_stud_l);   // the M3 shank (a nudge under the thread)
             }
     }
