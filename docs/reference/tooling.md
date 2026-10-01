@@ -430,9 +430,8 @@ because a via in a pad wicks its solder away; **no via goes under silkscreen**
 path at an acute angle is left out, the path already ending inside the pad;
 and the mount holes' copper keep-outs (ADR 0020) are obstacles on both layers.
 **It proves nothing about itself** — KiCad's DRC and `pcb.py check` do. It is
-for simple digital boards like the key boards; the main board uses only its
-fanout, pair and moat pieces and Freerouting for the rest (*The main board*,
-above). The module's
+for simple digital boards like the key boards; the main board uses its fanout,
+pair and moat pieces and `complete` for the rest (*The main board*, below). The module's
 own header docstring still says every single-sided ground pad gets a via;
 step 6 is what the code does.
 
@@ -516,9 +515,13 @@ this order (step 4 is Freerouting's only):
 `layout --no-route` builds and places only (a cheap re-run after a footprint
 changes). **`pcb.py finish <board>`** runs the tidy, `complete` and `rescue`
 again on the board as it stands, in place, and prints what is still missing:
-for after a hand edit, or to try again without re-running Freerouting. It
-never adds or moves a part. A whole layout of the main board takes about 35 minutes, most of it
-Freerouting's.
+for after a hand edit, or to try again without a whole layout. It never adds
+or moves a part. A whole layout of the main board takes one to two hours under
+`route: astar`, most of it `complete`'s rip-up; a `finish` twenty minutes to an
+hour. **`pcb.py update-footprints <board> <ref or footprint>...`** replaces placed
+footprints with the library's current ones in the same place, side and turn,
+keeping reference, value, sheet path and pad nets (KiCad's "update footprint
+from library"), and refuses one whose pads moved.
 
 **`check` adds** for a main board (`pcb_main.check_cad`, `check_heights`,
 `check_planes`): every switch underside with its pins where the body CAD's

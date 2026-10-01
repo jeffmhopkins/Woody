@@ -6,8 +6,9 @@ main board's first layout (2026-09-30) went another way**, and what it found
 bears on the argument below: `tools/pcb.py` (`kind: main`, `docs/reference/tooling.md`
 §4) lays what an autorouter cannot represent itself - the analog island and its
 one tie, each plane pin's own via, the breath pair side by side - locks it, and
-gives Freerouting only the digital remainder; a completion pass and hand routing
-take what it leaves (`hardware/boards/main-board/README.md`, *Open*). The star
+routes the digital remainder itself (2026-10-01: its own A* with layer
+directions and rip-up, after Freerouting would not keep a layer to a direction;
+`hardware/boards/main-board/README.md`). The star
 ground is not the autorouter's, so the objection below to autorouting the star
 does not reach that split of the work.
 
