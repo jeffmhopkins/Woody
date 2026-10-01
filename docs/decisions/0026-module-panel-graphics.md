@@ -93,7 +93,11 @@ arrows); either way, one class is boxed.
    **On 2026-10-01**, after the photographs, the owner cut two more:
    `power` after `on` ("on/off is fine") and the umbilical's `umbilical` /
    `to instrument` ("No need to say umbilical to instrument"). Island C now
-   carries only `off` and `on`; the etherCON is its own label.
+   carries only `off` and `on`; the etherCON is its own label. **Also on
+   2026-10-01** the owner moved four jacks (ADR 0024 point 13: BREATH and
+   PITCH trade places, and MOD 2 and MOD 3); each pill moves with its jack,
+   and `tools/panel-art.py` now reads the legend zones in `layout.jacks`'
+   order rather than a copy of it.
    Every word is an `art.text.*` leaf, `settled`.
 8. **Production: UV print on the black-anodised 2 mm aluminium ADR 0024
    already specifies**, CNC-cut from `export/panel.dxf` by the same vendor,

@@ -48,8 +48,9 @@ the one that goes to the cutter.
 
 Top to bottom it is ADR 0004's five rows: the title band under the top
 screws' washers; the three knobs across, gain, offset, response (legend *curve*, ADR 0026); the six
-jacks in two columns straddling the middle knob — PITCH and BREATH first,
-then MOD 1–4 — **lying on their sides**, pins across, because a PJ398SM's
+jacks in two columns straddling the middle knob — BREATH and PITCH first,
+then MOD 1 and 2 down the left column and MOD 3 and 4 down the right (ADR 0024
+point 13) — **lying on their sides**, pins across, because a PJ398SM's
 footprint is longer than the column pitch; `SW-POWER` centred on a row of its
 own, in the shaped hole `panel-toggle-hole` gives, with `LED-PANEL` in the
 strip to its left; and the NE8FAV centred, latch up, **on the bottom row**.
