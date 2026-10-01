@@ -31,13 +31,13 @@ VNEG neg 0 {{v_neg}}
 VINST inst12 0 {{v_inst}}
 * -- VS: vs_nom and the reference's noise
 VVS vsq 0 {{vs_nom}}
-EVS vs vsq nref 0 1
-RNREF nref 0 {{r_n_ref}}
+EVS vs vsq nref 0 {{g_n_ref}}
+RNREF nref 0 1k
 * -- the sensor (ratiometric; VPR is its ratio, k_off at rest) and U-BUF half B
 VPR press 0 DC {{k_off}} AC 1
 BSENS sx 0 V = V(vs) * V(press)
-ESN sraw sx nsen 0 1
-RNSEN nsen 0 {{r_n_sensor}}
+ESN sraw sx nsen 0 {{g_n_sensor}}
+RNSEN nsen 0 1k
 XBS sraw sbo inst12 0 sbo OPAx197
 * -- the instrument's ADC input
 RADU sbo adcin {{R-ADCDIV-U}}
@@ -58,8 +58,8 @@ XAMP inpos inneg pos neg in refdrv rg1 rg2 INA828
 RG rg1 rg2 {{R-GAIN-INAMP}}
 * -- DAC_AVDD: dac-rail, plus the SET pin's current noise and R-SET-DAC's own, through C-SET-DAC
 VAVDD avddq 0 {{v_avdd}}
-RNSET nset 0 {{r_n_set}}
-ESET nseti 0 nset 0 1
+RNSET nset 0 1k
+ESET nseti 0 nset 0 {{g_n_set}}
 RSET nseti nsetf {{R-SET-DAC}}
 CSET nsetf 0 {{C-SET-DAC}}
 EAVDD avdd avddq nsetf 0 1
@@ -104,7 +104,7 @@ ROUT out jack {{R-OUT-PROT}}
 COUT jack 0 {{C-OUT-BREATH}}
 RLOAD jack 0 {{r_load}}
 .model DRESP D(IS={{is_d}} N={{n_d}} RS={{rs_d}} CJO=1.5p)
-.options method=gear rshunt=1e10 itl1=1000 itl2=1000
+.options method=gear rshunt=1e10 itl1=1000 itl2=1000 gminsteps=0
 .control
 * TI's models mark their bookkeeping resistors noiseless with PSpice's T_ABS=-273.15 on
 * R_NOISELESS. ngspice 42 does not honour it for noise (an OPA2197 follower read 868 nV/rtHz,
@@ -182,22 +182,22 @@ print vs_op ina_op jack_op adc_op
 foreach bi 1 2
   if $bi = 1
     set bn = au
-    ac dec 20 {{f_au_lo}} {{f_au_hi}}
+    ac dec {{n_dec}} {{f_au_lo}} {{f_au_hi}}
     set pac = $curplot
-    noise v(in) vpr dec 20 {{f_au_lo}} {{f_au_hi}} 1
+    noise v(in) vpr dec {{n_dec}} {{f_au_lo}} {{f_au_hi}} 1
     setplot previous
     set pa = $curplot
-    noise v(jack) vinb dec 20 {{f_au_lo}} {{f_au_hi}} 1
+    noise v(jack) vinb dec {{n_dec}} {{f_au_lo}} {{f_au_hi}} 1
     setplot previous
     set pb = $curplot
   else
     set bn = cb
-    ac dec 20 {{f_cb_lo}} {{f_cb_hi}}
+    ac dec {{n_dec}} {{f_cb_lo}} {{f_cb_hi}}
     set pac = $curplot
-    noise v(in) vpr dec 20 {{f_cb_lo}} {{f_cb_hi}} 1
+    noise v(in) vpr dec {{n_dec}} {{f_cb_lo}} {{f_cb_hi}} 1
     setplot previous
     set pa = $curplot
-    noise v(jack) vinb dec 20 {{f_cb_lo}} {{f_cb_hi}} 1
+    noise v(jack) vinb dec {{n_dec}} {{f_cb_lo}} {{f_cb_hi}} 1
     setplot previous
     set pb = $curplot
   end
@@ -295,8 +295,13 @@ foreach bi 1 2
     wrdata jackne.dat e_jack_elec
   end
 end
+* the sensor's generator, read back at the sensor's own output (the check that found a 10
+* Gohm rshunt loading an 826 Mohm generator 8 % low)
+noise v(sraw) vpr dec 1 10 10
+let e_sens_chk = onoise_spectrum
+print e_sens_chk
 * the instrument's ADC input, across the whole band the converter samples
-noise v(adcin) vpr dec 20 {{f_cb_lo}} {{f_adc_hi}} 1
+noise v(adcin) vpr dec {{n_dec}} {{f_cb_lo}} {{f_adc_hi}} 1
 let n_adc_total = onoise_total
 let n_adc_sensor = onoise_total_rnsen
 let n_adc_lsb = onoise_total / {{v_adc_lsb}}

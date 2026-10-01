@@ -77,6 +77,7 @@ params:
   f_au_hi:  {value: 2.0e4}
   f_cb_lo:  {value: 1.0, source: "the control band's lower end: below 1 Hz is drift, the zero's (breath-receive-stage.md, Commissioning)"}
   f_adc_hi: {value: 1.0e6, source: "everything the converter samples folds into its 2 kHz: integrated to AN1646's 1 MHz, far past C-AA-ADC's pole"}
+  n_dec:    {value: 20, source: "points per decade of noise.cir's AC and noise analyses (integrated by the trapezoid rule)"}
   # the INA828 at G = 1001 for noise-amps: the datasheet's e_NI is specified at G = 100 and up
   r_g_1001: {value: 49.95, source: "50 kohm / 1001 [ds INA828 p.5, gain equation]"}
 
@@ -105,12 +106,13 @@ derived:
   r_z_ccw: "v['g_eff'] * v['vs_nom'] * v['k_off'] * (v['R-ZERO-TOP'] + v['TRIM-BREATH-ZERO']) / v['v_avdd']"
   r_z_cw: "v['TRIM-BREATH-ZERO'] - v['g_eff'] * v['vs_nom'] * v['k_off'] * (v['R-ZERO-TOP'] + v['TRIM-BREATH-ZERO']) / v['v_avdd']"
   r_shaper_in: "1 / (1 / v['R-RESP-IN'] + 1 / (v['R-RESP-DIV-HI'] + v['R-RESP-DIV-LO']))"
-  # white generators: a resistor whose thermal noise is the density wanted, buffered at unity
+  # white generators: a 1 kohm resistor's thermal noise times the gain that makes it the density
+  # wanted (a 1 kohm node, so rshunt's 10 Gohm cannot load it: an 826 Mohm generator read 8 % low)
   e_sensor: "v['an_counts'] * v['vs_nom'] / 1024 / v['an_crest'] / math.sqrt(v['an_f_hi'] - v['an_f_lo'])"
-  r_n_sensor: "v['e_sensor'] ** 2 / v['kt4']"
+  g_n_sensor: "v['e_sensor'] / math.sqrt(v['kt4'] * 1e3)"
   e_vs: "v['ref_en_rel'] * v['vs_nom'] / math.sqrt(v['ref_f_hi'] - v['ref_f_lo'])"
-  r_n_ref: "v['e_vs'] ** 2 / v['kt4']"
-  r_n_set: "(v['i_set_rms'] / math.sqrt(v['set_f_hi'] - v['set_f_lo']) * v['R-SET-DAC']) ** 2 / v['kt4']"
+  g_n_ref: "v['e_vs'] / math.sqrt(v['kt4'] * 1e3)"
+  g_n_set: "v['i_set_rms'] / math.sqrt(v['set_f_hi'] - v['set_f_lo']) * v['R-SET-DAC'] / math.sqrt(v['kt4'] * 1e3)"
   # the link's differential pole, the control band's top: 2 x 11 kohm against C_diff + C_cm/2
   f_cb_hi: "1 / (2 * math.pi * (v['R1'] + v['R3'] + v['R1b'] + v['R2']) * (v['C-DIFF-BREATH'] + v['C-CM-IN+'] * v['C-CM-IN-'] / (v['C-CM-IN+'] + v['C-CM-IN-'])))"
   v_adc_lsb: "v['v_adc_ref'] / 4096"
@@ -268,3 +270,61 @@ sims:
       out_hard: "at(w['out'], (-p['v_hard']) * p['t_ramp'] / p['v_mag'])"
       ratio_hard: "at(w['shaped'], (-p['v_hard']) * p['t_ramp'] / p['v_mag']) / p['v_hard']"
       clip_in: "-min(cross(w['out'], peak(w['out'], 0, p['t_ramp']) - 0.05, 0), p['t_ramp']) * p['v_mag'] / p['t_ramp']"
+  # --- NOISE (pre-layout review A1-16: the jack's noise was an estimate)
+  - name: noise
+    # the whole chain, sensor to jack, GAIN at noon and OFFSET at its zero, TRIM-RESP
+    # commissioned; POT-RESP at CCW, its centre click and CW; breath at rest and at a hard
+    # blow. Measures in V rms over the audio band (n_au_*, 20 Hz-20 kHz) and the control band
+    # (n_cb_*, 1 Hz to the link's pole, f_cb_hi), the total and each stage's share: sensor,
+    # ref (VS's noise through the sensor's ratio), sbuf (U-BUF B), link (R1, R1b), recv (the
+    # INA828, R_G, R2-R5), zero (TRIM-BREATH-ZERO, R-ZERO-TOP, U-REF-BUF), dac (DAC_AVDD by
+    # both its paths), shaper, out (this stage and the 100 kohm load), rest (what no stage
+    # claims); elec is everything but the sensor. db_* is 20 log(n / v_jack_fs), ppm_* the
+    # same as parts per million of it. e_* are the jack's density, V/rtHz, at 100 Hz and 1 kHz.
+    # n_adc_* is the instrument's ADC_IN, 1 Hz-1 MHz, total and in MCP3202 LSBs.
+    deck: noise.cir
+    set: {p_gain: 0.47, p_off: 0.432}
+    sweep: {p_resp: [0.0, 0.5, 1.0], level: [0, 1]}
+    vary: []
+    measures: [g_set, g_inc_rest, g_inc_hard, r_b, ina_op, jack_op,
+               n_au_total, n_au_sensor, n_au_elec, n_au_ref, n_au_sbuf, n_au_link, n_au_recv, n_au_zero, n_au_dac, n_au_shaper, n_au_out, n_au_rest, db_au, ppm_au,
+               n_cb_total, n_cb_sensor, n_cb_elec, n_cb_ref, n_cb_sbuf, n_cb_link, n_cb_recv, n_cb_zero, n_cb_dac, n_cb_shaper, n_cb_out, n_cb_rest, db_cb, ppm_cb,
+               e_100, e_1k, e_1k_elec, n_adc_total, n_adc_sensor, n_adc_lsb, e_sens_chk]
+    post:
+      e_100: "at(w['jackn'], 100.0)"
+      e_1k: "at(w['jackn'], 1000.0)"
+      e_1k_elec: "at(w['jackne'], 1000.0)"
+    asserts:
+      - expr: "nom['n_au_rest'] < 0.01 * nom['n_au_total'] and nom['n_cb_rest'] < 0.01 * nom['n_cb_total']"
+        why: "the bookkeeping closes: every noise source in the deck is in a named stage (under 1 % of the total is unclaimed)"
+      - expr: "abs(nom['e_sens_chk'] / p['e_sensor'] - 1) < 0.01"
+        why: "the sensor's generator is the density sims.yaml derives, read back at the sensor's output within 1 %"
+      - expr: "nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.1 * nom['n_au_sensor'])"
+        why: "THE JACK'S NOISE IS THE SENSOR'S (breath-receive-stage.md, Noise at the jack): every electronic term together is under a tenth of the sensor's, in both bands, at every curve setting and level - on AN1646's figure, an assumption (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b, the curve's slope there over its slope at rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow (breath-chain-curve-clip), and a jack on its rail passes no breath noise at all"
+      - expr: "nom['n_adc_lsb'] < 1"
+        why: "the instrument's own copy (ADC_IN behind C-AA-ADC) carries under 1 LSB rms of the MCP3202 at 3.3 V from the sensor and the electronics together"
+  - name: noise-amps
+    # TI's OPA2197 and INA828 models, quieted as noise.cir quiets them, against their datasheets
+    deck: noise-amps.cir
+    vary: []
+    measures: [opa_1k, opa_1k_unquiet, ina_eno_1k, ina_eni_1k]
+    asserts:
+      - expr: "nom['opa_1k'] > 0.8 * 5.5 and nom['opa_1k'] < 1.25 * 5.5"
+        why: "the quieted OPA2197 is its datasheet's 5.5 nV/rtHz at 1 kHz [datasheets/analog/OPA2197.pdf p.1] within 25 %"
+      - expr: "nom['opa_1k_unquiet'] > 100"
+        why: "and without the R_NOISELESS lists it is off by two orders of magnitude (ngspice 42 ignores PSpice's T_ABS): the lists are why the chain's numbers mean anything"
+      - expr: "nom['ina_eno_1k'] > 0.6 * 90 and nom['ina_eno_1k'] < 90 and nom['ina_eni_1k'] > 0.6 * 7 and nom['ina_eni_1k'] < 7"
+        why: "RECORDED: TI's INA828 model reads UNDER its datasheet's typicals, e_NO 90 nV/rtHz and e_NI 7 nV/rtHz at 1 kHz [datasheets/analog/INA828IDR.pdf p.5] - by about a quarter and an eighth. The chain's in-amp term is that much optimistic; the sensor assertion in `noise` has more margin than that"
+  - name: noise-ref
+    # TI's REF5050 model and U-BUF half A, as netlisted, alone: the excitation noise.cir replaces
+    deck: noise-ref.cir
+    vary: []
+    measures: [vs_op, vs_rms_10_1k, vs_rms_au, e_vs_100, e_vs_1k]
+    post:
+      e_vs_100: "at(w['vsn'], 100.0)"
+      e_vs_1k: "at(w['vsn'], 1000.0)"
+    asserts:
+      - expr: "abs(nom['vs_op'] - 5.0) < 2.5e-3"
+        why: "the operating point is the running reference (the reference sims' ref-startup test), not a collapsed one"
+      - expr: "nom['vs_rms_10_1k'] > 2 * p['ref_en_rel'] * p['vs_nom']"
+        why: "RECORDED: TI's REF5050 model (2011; its notes claim the 0.1-10 Hz noise only) is several times NOISIER at VS than the datasheet's 0.9 uVrms/V over 10 Hz-1 kHz [datasheets/analog/REF5050.pdf], almost all of it one 1.6 Mohm resistor in the model. noise.cir uses the datasheet; the README says what the jack would carry at the model's level"
