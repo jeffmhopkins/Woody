@@ -43,7 +43,9 @@ checked rather than asserted.
 2. **Legend zones are part of the layout** and are derived from what is
    around them, never drawn freehand: the title band; a band under each knob;
    a zone beside each jack on the panel's outer side (the MOD write-on strip
-   of ADR 0004 is these four); a zone between the LED and the toggle; the
+   of ADR 0004 was these four; *amended 2026-10-01: the strip is dropped,
+   each zone now holds the jack's printed pill —
+   [ADR 0026](0026-module-panel-graphics.md) point 4*); a zone between the LED and the toggle; the
    strip right of the flange; one right of the toggle. `rules.legend_h` and `rules.legend_w` are
    their minimum sizes; each zone is DRC'd against every knob, plug grip,
    nut, screw head, the NE8MX and the washers.
