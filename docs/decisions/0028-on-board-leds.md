@@ -123,9 +123,13 @@ the cavity as the diffuser (ADR 0014, ADR 0016). Two things move:
   house does this for moisture-sensitive LEDs `[web, via the study; not a
   per-order guarantee]`. After reflow they are not repairable, which is what
   the backup line is for.
-- **The body's chamfer marks pin 4, not pin 1** `[ds p.2]`. The footprint
-  (`hardware/lib`) draws it that way; check the assembler's rotation for
-  this part on the first order.
+- **The body's chamfer marks pin 1 (NC)** `[ds p.2, PIN Configuration]`.
+  The footprint (`hardware/lib`) draws it that way. *Amended 2026-10-01:*
+  this line said pin 4, read off the unnumbered mechanical view, and the
+  footprint followed it; an assembler matching the chamfer to that mark
+  would have put VDD on GND in all 13. The pre-layout review (A6-3) read
+  the numbered drawing, which JLCPCB's own footprint agrees with. Confirm
+  with a diode test on the first parts in hand.
 - **Operating range −40 to +65 °C** `[ds p.2]`, against an interior 10–20 K
   above ambient (ADR 0014). Fine in a room; worth remembering under stage
   lights.
@@ -139,7 +143,7 @@ the cavity as the diffuser (ADR 0014, ADR 0016). Two things move:
 |---|---|
 | The row's current at full white (`led-row-current`) | E6, a current probe on the row's feed |
 | `lighting.led_count` and `lighting.led_pitch` | The side-light diffusion test. **The layout no longer waits for it** (Amendment below, owner's choice (b)): if it moves them, the row is reshuffled |
-| Whether the assembler's rotation for the B-V1 matches the footprint (chamfer at pin 4) | The first board order's placement preview. JLCPCB's own footprint for the part puts its pin 1 at the chamfer, 180° from this footprint's 0°, and the footprint's silk triangle marks the chamfer so the preview can be checked by eye (`hardware/lib/README.md`) |
+| Whether the parts in hand have the chamfer at pin 1, as the footprint now draws | A diode test across pins 2 (VDD) and 5 (GND) on the first parts, then the first order's placement preview: JLCPCB's own footprint also puts pin 1 at the chamfer, and the silk triangle marks it so the preview can be checked by eye (`hardware/lib/README.md`) |
 | The U-bolt's size, now unbounded by the lights | ADR 0025's open item: the strap hardware chosen (M4) |
 
 ## Amendment, 2026-09-30 — the layout goes ahead of the diffusion test
