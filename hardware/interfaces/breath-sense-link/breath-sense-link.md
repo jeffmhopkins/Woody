@@ -90,6 +90,7 @@ every change here into `board-netlist.yaml`:
 | `U-BREATH` | `U-BREATH` | `U10` |
 | `R1`, `R1b` | `R-SER-BREATH-INST` | `R38`, `R39` |
 | `D-TVS-BREATH-SIG`, `D-TVS-BREATH-RET` | `D-TVS-BREATH` | `D5`, `D6` |
+| `C-SENSOR-VS-BULK`, `C-SENSOR-VS-HF`, `C-SENSOR-OUT` | their own rows | `C201`, `C202`, `C203` (added 2026-10-01; the board's layout has to place them) |
 
 The placement replaced five parts drawn on the board's root sheet; the board's
 flattened netlist was compared before and after, net by net and pin by pin,
@@ -168,6 +169,18 @@ and the star is common to both legs and cancels in the in-amp; taken at the
 star, it would be in the difference. Same net, `AGND_INST`, so the netlist
 does not change: it is a layout rule — `R1b`'s star end is a trace of its own
 from pin 3's pad, not a via into the pour. E11 is still the test of the whole run.
+
+### NXP's Figure 3, at the sensor
+
+**Fitted 2026-10-01 (owner): 1.0 µF and 0.01 µF on `VS`, 470 pF on `VOUT`,
+exactly as the datasheet draws them** `[ds datasheets/analog/MPXV4006DP.pdf p.5,
+Figure 3]` — the circuit its min/typ/max output curves were taken with.
+`C-SENSOR-VS-BULK` and `C-SENSOR-VS-HF` go at pin 2, returning to pin 3;
+`C-SENSOR-OUT` at pin 4, ahead of `U-BUF` B's follower, so neither the link
+nor the ADC divider sees it. AN1646's 750 Ω + 0.33 µF is **not** fitted: it
+would change the conditions the datasheet's accuracy was measured under. The
+`VS` pair is also the reference buffer's load; its loop and step with them are
+`breath-excitation-reference/sim` (`*-as-built`).
 
 ### Keeping the zero honest (Note 5)
 

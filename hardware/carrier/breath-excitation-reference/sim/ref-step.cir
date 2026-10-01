@@ -16,7 +16,7 @@ RFX bufout acmid {{R-FBX-REF}}
 CF acmid refminus {{C-FB-REF}}
 RF vs refminus {{R-FB-REF}}
 RISO bufout vs {{R-ISO-REF}}
-CL vs cln {{c_vs}}
+CL vs cln {{c_load}}
 RCL cln 0 {{esr_cvs}}
 ISENS vs 0 PULSE({{i_sensor}} {{i_sensor_hi}} {{t_step}} 10n 10n 1 2)
 * rshunt: 10 Gohm from every node to ground, so the macromodel's operating point is found

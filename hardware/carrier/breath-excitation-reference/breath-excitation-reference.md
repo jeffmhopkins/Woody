@@ -28,7 +28,7 @@ The `Dir` and `Peer` columns are defined once in
 | REF5050 `VOUT` | — | — | `cref-out-node` | Internal to this circuit. Which side of the buffer `C-REF-OUT` sits on. Settled, and it decides the whole compensation |
 | op-amp output | — | — | `opa2197-output-impedance` | Internal to this circuit. The impedance `R-ISO-REF` is sized against. Specified, not back-solved |
 | `VS` | out | `interfaces/breath-sense-link` | `riso-ref-topology` | `U-BREATH`'s excitation pin, drawn in `carrier.md` §2. Through `R-ISO-REF`. DC feedback is taken **here**, not at the op-amp output — which is what makes the DC error across `R-ISO-REF` zero |
-| `AGND_INST` | ref | `carrier/power-entry-instrument` | — | The instrument analog star, drawn `AGND-local` in `carrier.md` §2. `C-REF-OUT` and the sensor's 100 nF decoupler return to it |
+| `AGND_INST` | ref | `carrier/power-entry-instrument` | — | The instrument analog star, drawn `AGND-local` in `carrier.md` §2. `C-REF-OUT`, `C-DEC-SENSOR` and `C-DEC-BUF` (`U-BUF`'s +12 V bypass) return to it |
 
 ## `R-ISO-REF` and the compensation network
 
@@ -88,6 +88,14 @@ Two consequences to keep in mind at layout:
   near `R_ISO` at 2.5 kHz and a load step swings back through most of its own
   dip for about 3 ms (`sim/`, `step-with-10u-added`). If E13 finds the rail
   wants stiffening against strip PWM, re-run that sim with the part first.
+- **As built, `VS` carries about 1.11 µF**: `C-DEC-SENSOR` here plus NXP's
+  Figure 3 pair at the sensor, `C-SENSOR-VS-BULK` and `C-SENSOR-VS-HF`
+  (`interfaces/breath-sense-link`, fitted 2026-10-01). The margin rises and
+  `|Z_out|` at 500 Hz is unchanged; the same ~38 Ω peak moves down to about
+  7.6 kHz, so a load step swings back by about 45 % and settles in under
+  0.5 ms (`sim/`, `loop-as-built`, `zout-as-built`, `step-as-built`). The
+  sensor's draw is steady and the peak sits well above the 500 Hz breath
+  channel, so this is recorded, not a defect.
 
 *(The record of the two blockers that closed here on 2026-09-21, and of the two
 earlier notes they superseded, is in [`notes.md`](notes.md).)*
