@@ -51,3 +51,13 @@ may not touch.
 | module sheets' owner | A7-9 standoff mounting-hole symbols on both module sheets |
 | ADR 0004 owner | A7-7 dated pointer at line 713 |
 | orchestrator | A7-1: re-render the three module photos (stale from F4's config changes) |
+
+## Received from other fixers
+
+| From | Item | Verdict | Action | Evidence |
+|---|---|---|---|---|
+| F5 | A9-12: `J-B2B-MOD` is in `hardware/unplaced.csv` though both module sheets place it | **CONFIRMED** | commit — the row moved to `hardware/module/bom.csv` (the module-level fragment; `module.md` names the header); `merge-bom` 209 rows, 0 problems | J7 on `module-jack.kicad_sch`, J2 on `module-main` [board-netlist.yaml] |
+| F5 | `module-main/README.md` "a ground row (9–10 and 13)": pin 9 is `OFFSET_WIPER` | **CONFIRMED** | commit — the sentence now names the grounds (10, 13) and says `OFFSET_WIPER` (9) sits directly above `BREATH_JACK` (11) with no ground between | the README's own allocation table |
+| F5 | A6-5: `U-MCU-RT` has no identity fields on `carrier.kicad_sch` | **CONFIRMED** | commit — `Manufacturer` Waveshare, `MPN` ESP32-S3-Matrix, `LCSC` empty, `Assembly` hand (it is bought and fitted by hand, on the lid) via `tools/kicad.py set-field`; carrier and main board exported and rendered. Its `in_bom`/`on_board` flags left as they are (fields only, as handed) | [repo] `U-MCU-RT` BOM row: Waveshare, ESP32-S3-Matrix |
+| F5 | `config/key-layout.yaml:157` "the right thumb is only its three" → "its four" | **DEFERRED** | no change — F4 does not otherwise touch `key-layout.yaml`, and the edit re-fingerprints every body CAD output (a multi-hour rebuild). Decided by the next change that edits `key-layout.yaml` | |
+| F1 | `hardware/module/panel/panel.md` ~138: OFFSET's zero "~20° past centre" is now on the other side of centre | **CONFIRMED** | commit — the sentence cites `breath-output-stage.md`, which owns where the zero is, instead of restating it (CLAUDE.md rule 1) | F1's message; `POT-OFFSET` row already cites the page the same way |
