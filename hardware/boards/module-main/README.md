@@ -21,6 +21,10 @@ What each circuit does, and why, is on its page:
 - [`breath-response-shaper`](../../module/breath-response-shaper/breath-response-shaper.md), page `main`
 - [`pitch-stage`](../../module/pitch-stage/pitch-stage.md), page `main`
 - [`mod-channels`](../../module/mod-channels/mod-channels.md), page `main`
+- [`panel-led`](../../module/panel-led/panel-led.md) — since 2026-10-01
+  (ADR 0024 point 15): `LED-PANEL`, an 0805, on this board's **front** face,
+  centred under the panel's light pipe (`MECH-LED-BEZEL-MOD`) at
+  `pcb-geometry.echo`'s `LED-PANEL`, with `R-LED-PANEL` beside it
 
 ## Files — what is source, what is generated
 
@@ -50,7 +54,7 @@ The root sheet's own parts are the two connectors:
 - **`J-B2B-MOD`**, below.
 
 **The jack filters sit at `J-B2B-MOD`** (pre-layout review A2-20, handed from
-F2): the jack board carries only the jacks, the pots, the LED and the header,
+F2): the jack board carries only the jacks, the pots and the header,
 so "at the jack" in `pitch-stage.md` and `mod-channels.md` means this board's
 side of the header. Place `C29` (`C-FILT-PITCH`) and `C36`–`C39`
 (`C-FILT-MOD`) against `J-B2B-MOD`'s `PITCH_JACK` and `MODn_JACK` pins, with
@@ -66,10 +70,12 @@ fails if they differ (a pin moved on one sheet only would pass each board's
 ERC alone). The jack board's instance is marked `Assembly = none`; one header
 is bought.
 
-Fifteen signals cross, and five `AGND_MOD` pins, which is exactly 20: six
-jack tips, the three pots' eight nets and the LED's supply. Every return
-current of the jack board (the six sleeves, the offset pot's bottom end, the
-LED) comes back on the five ground pins. Pin 1 is at the top left
+Fourteen signals cross, and five `AGND_MOD` pins, and one pin is spare: six
+jack tips and the three pots' eight nets. Every return current of the jack
+board (the six sleeves, the offset pot's bottom end) comes back on the five
+ground pins. **Pin 19 is spare**, unconnected on both sheets, since the LED
+whose supply it carried moved to this board (ADR 0024 point 15); no other pin
+moved. Pin 1 is at the top left
 (`pcb-geometry.echo`, `J-B2B-MOD`); odd pins are the left column.
 
 | Pins | Left (odd) | Right (even) |
@@ -83,13 +89,13 @@ LED) comes back on the five ground pins. Pin 1 is at the top left
 | 13, 14 | `AGND_MOD` | `PITCH_JACK` |
 | 15, 16 | `MOD1_JACK` | `MOD3_JACK` |
 | 17, 18 | `MOD2_JACK` | `AGND_MOD` |
-| 19, 20 | `UMBILICAL_POS12` | `MOD4_JACK` |
+| 19, 20 | spare (no net) | `MOD4_JACK` |
 
 Why this order:
 - **Grounds interleaved on a diagonal** (2, 5, 10, 13, 18): each ground pin
   is next to three pins (the one across and the ones above and below it), so
-  five of them can border fifteen signals. Every signal has a ground beside it
-  except the LED's `UMBILICAL_POS12`, which is DC.
+  five of them can border the fourteen signals, and every signal has a ground
+  beside it.
 - **The pots' nets on the top rows**, because the pots are above the header
   (ADR 0024: the pot row, then the jacks). The breath-gain chain
   (`BREATH_SHAPED`, `GAIN_WIPER`, `GAIN_FLOOR`) is the left column, on the
@@ -106,8 +112,9 @@ Why this order:
   2026-10-01), their pins moved with them, on both sheets: keeping the
   pins would have put four jack-board traces across the header, between
   its pads, to reach the far column.
-- **The LED's supply at the bottom**, because the LED is low in the jack
-  board's left leg.
+- **Pin 19 stays spare rather than being reused**: renumbering would move
+  every pin below it on both sheets for nothing. It is free for a future net
+  that needs no ground beside it.
 
 What decides whether this changes: the board layout. The panel layout is
 settled (ADR 0024 points 11–13: the etherCON at the bottom, the toggle
@@ -156,7 +163,12 @@ of the two mitigations (`module/power-entry/power-entry.md`, *The DAC rail*,
   *Grounding*).
 - **Standoff pads**: the metal standoffs (owner) land on pads on **no net**
   on this board — plated, clear of every plane. The jack board's are
-  `AGND_MOD`.
+  `AGND_MOD`. Since 2026-10-01 (ADR 0024 point 15) this board has **four**:
+  the two `MECH-STANDOFF-MOD` above the pots, shared with the jack board, and
+  its two low mounting points, `MECH-PANEL-STANDOFF-MOD`, spacers from the
+  panel's rear face on self-clinching studs (`config/module.yaml`
+  `panel_standoff.at`; `pcb-geometry.echo` lists all four and their
+  keep-outs). The jack board no longer reaches down to them.
 - **`J-B2B-MOD`** is Samtec `TSW-110-09-G-D` (row), insulator on this board's
   front face. On **both** boards its footprint goes on the top side, **not
   mirrored** — the jack board's too, though the header's body is on that
@@ -167,7 +179,7 @@ of the two mitigations (`module/power-entry/power-entry.md`, *The DAC rail*,
 
 | Item | Decided by |
 |---|---|
-| The metal standoffs' part (the CAD's `standoff.*` still cites the polyamide spacer) | The module CAD owner; the pads' nets are settled above |
+| The metal standoffs' part (the CAD's `standoff.*` still cites the polyamide spacer), and the panel spacers' (`panel_standoff.stock_l`, tbd) | The module CAD owner; the pads' nets are settled above |
 | `U-ISO`'s exact place: RECOM RPA20-2412SAW, 25.4 × 25.4 × 10.2 mm on 5.6 mm pins `[ds RECOM-RPA20-AW.pdf PD-7, PD-8]`, on this board's **rear face** (too tall for the boards' gap), with `L-ISO-IN`, `C2`, `C-ISO-IN`, `C-ISO-OUT` and `C-ISO-Y` beside it, and `NT-UMB-MOD` at the etherCON's pins 6/8 (ADR 0027). The module CAD holds an envelope for it and its filter (`config/module.yaml` `iso.*`, lower left above the NE8FAV's tails, clash-checked) | The layout |
 | `U-ISO`'s supply: the RPA20 is end-of-life, 20 at DigiKey on 2026-09-30 (the row); the RP20-2412SAW drops into the same footprint with pads 4 and 6 swapped (ADR 0027) | The order — buy spares now |
 | The bus's +5 V, CV and Gate pins (11–16) are unused, on no net | Nothing: the module makes its own 5 V and takes no bus CV (ADR 0023 point 3, amended) |

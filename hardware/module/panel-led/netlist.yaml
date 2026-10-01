@@ -18,13 +18,14 @@ ports:
     figure: dig-gnd-topology
 components:
   LED-PANEL:
-    value: 3mm LED
+    value: 0805 LED
     pins:
     - A
     - K
     note: LIT = THE LOAD SWITCH IS DELIVERING. It hangs on UMBILICAL_POS12, the LT1641 output, so it is dark with
       the toggle off and dark when the -1 has latched on a fault - the one indication the latching design needs.
-      It does not say the instrument is plugged in
+      It does not say the instrument is plugged in. On the MAIN board's front face, under MECH-LED-BEZEL-MOD, the
+      panel light pipe (ADR 0024 point 15)
   R-LED-PANEL:
     value: 2k2 1%
     pins:

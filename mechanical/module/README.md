@@ -14,16 +14,19 @@ plug and cable drop below every control. The panel drawing shades that drop
 zone, and `drc.echo` holds the rule that keeps controls out of it: *no panel
 control under the umbilical: clear of the NE8MX's grip and its cable's drop
 zone*, with *the umbilical's plug stands proud of every control* beside it.
-Behind the panel, the jack board's notch clears the NE8FAV and steps up
-narrower for the toggle's body.
+Behind the panel, the jack board is a plain rectangle that ends just below
+the bottom jack row (ADR 0024 point 15, the owner, 2026-10-01: *"Can we not
+rectangle it out up higher?"*), above the toggle's body and the NE8FAV. The
+LED is an 0805 on the main board under a light pipe in the panel, and the
+main board's two low mounting points are spacers from the panel's rear face,
+on self-clinching studs.
 
 **The toggle throws left–right, ON to the right** (ADR 0024 point 12, the
 owner, 2026-09-30: *"to avoid inadvertent triggering"*). One leaf,
 `layout.toggle_on`, turns everything that turns with the switch: the panel
 hole's D-flat (on the OFF side, the left — NKK's M2011 is ON with its lever
 away from the flat), the lever's sweep and the legends derived from it, the
-body's terminal field and lugs, the jack board's step and the main board's
-wiring keep-out. The panel drawing outlines the sweep and marks ON.
+body's terminal field and lugs, and the main board's wiring keep-out. The panel drawing outlines the sweep and marks ON.
 
 ![The module, three-quarter front](renders/hero.png)
 
@@ -135,7 +138,7 @@ something it shows moved.
 
 ![The panel drawing: cuts, centres, legend zones, the washers' reach along their slots](renders/panel.png)
 
-![Both boards seen from the panel: the jack board's notch and its step for the toggle, the standoffs, J-B2B-MOD, the parts on each face](renders/boards.png)
+![Both boards seen from the panel: the jack board a plain rectangle above the toggle and the NE8FAV, the standoffs (two between the boards, two to the panel), J-B2B-MOD, the LED under its light pipe, the parts on each face](renders/boards.png)
 
 ![Side section through the panel's centre, with every depth and the Palette's limit read both ways](renders/section.png)
 
@@ -149,25 +152,30 @@ The stack can only be soldered in one order, and its depth is set by more
 than one part, so neither is left to the builder to discover
 (ADR 0024; the depths are `drc.echo`'s, not restated here).
 
-1. **The jack board's own parts first** — jacks, pots, the LED on its lead
-   spacer (`MECH-LED-BEZEL-MOD`). Their joints are on the board's rear face,
-   which ends up inside the gap between the boards.
-2. **`SW-POWER` on the panel**, one nut on the front and none behind
+1. **The jack board's own parts first** — jacks and pots. Their joints are
+   on the board's rear face, which ends up inside the gap between the boards.
+   (`LED-PANEL` is an 0805 on the main board, machine-placed.)
+2. **The panel's own hardware**: the two studs (`MECH-PANEL-STUD-MOD`,
+   clinched by the panel vendor), the light pipe pressed in from the front
+   (`MECH-LED-BEZEL-MOD`), and **`SW-POWER`**, one nut on the front and none behind
    (*toggle's lugs in front of the main board*), and its two wires soldered to
    its lugs, long enough to reach the main board.
-3. **Offer both boards up to the panel** with the standoffs loose and
+3. **Offer both boards up to the panel** with every standoff loose and
    `J-B2B-MOD` through both boards, **unsoldered**. Seat the jacks' bushings
    and the NE8FAV's flange against the panel: three things set the gap
    between the boards — the standoffs, the jacks' bodies against the panel
    and the NE8FAV's setback — and each board's thickness tolerance adds to
    it. **Face each standoff to the gap measured here**, not to the nominal
    (*standoff length (derived)*, *standoff faced from stock*), as the key
-   boards' spacers are.
+   boards' spacers are — and each panel spacer to the gap between the
+   panel's rear face and the main board with the NE8FAV seated (*panel
+   standoff length (derived), faced from stock*): the NE8FAV fixes that gap,
+   so a spacer that is off bends the board against the connector.
 4. **Take the panel off, stack the boards on the faced standoffs and solder
    `J-B2B-MOD`** — on the jack board's front face first: those joints sit in
    the slot between the jack bodies and cannot be reached once the panel is
    on. Then on the main board's rear face. The header, once soldered, freezes
    the gap.
-5. **Feed `SW-POWER`'s wires** through the jack board's step and solder them
-   to the main board from its rear, then fit the panel, the standoffs' screws
-   and the toggle's nut.
+5. **Feed `SW-POWER`'s wires** below the jack board's bottom edge and solder
+   them to the main board from its rear, then fit the panel (its two spacers
+   on their studs), the standoffs' screws and the toggle's nut.

@@ -8,8 +8,9 @@
 # THE CLAIMS. panel-led.md: "(12.0 - 2.0 V) / 2.2 kohm ~ 4.5 mA ... The LED lights as the
 # output passes about 2 V". power-entry.md, grounding: what NT-DIG-MOD carries is
 # "constant and the module's own - ... the panel LED's 4.5 mA the other way". The LED is
-# NOT on the -12 V rail: it hangs on UMBILICAL_POS12 and returns to AGND_MOD.
-title: Panel LED - its current, its start, and its return against the pitch reference
+# NOT on the -12 V rail: it hangs on UMBILICAL_POS12 and returns to AGND_MOD - on the MAIN
+# board since 2026-10-01 (ADR 0024 point 15), so its return no longer crosses J-B2B-MOD.
+title: Panel LED - its current and its start
 values:
   netlist:
     - hardware/module/panel-led/netlist.yaml
@@ -19,16 +20,16 @@ params_from: [hardware/module/power-entry/sim/sims.yaml]
 params:
   v_set:    {value: 12.0, source: "U-ISO's output, 12 V, +-3.1 % over 40 K: accuracy 2.0 %, line 0.2 %, load 0.1 %, 0.02 %/K [repo, power-entry.md U-ISO table; ds RECOM-RPA20-AW.pdf PD-2, PD-5] (vary)"}
   r_fet:    {value: 0.002, source: "Q-LOADSW (PSMN2R0-30YLE) on-resistance, 2 mohm max at VGS 10 V, 25 C [ds NEXPERIA-PSMN2R0-30YLE.pdf p.1]"}
-  # LED-PANEL, Lite-On LTL-4231N green, BEHAVIOURAL: n = 2 chosen (a GaP junction), Rs and
-  # Is fitted so VF is the table's 2.1 V typ at 20 mA [ds LITEON-LTL-4231N-3MM-GREEN-DIFFUSED.pdf
-  # p.3] and the curve of Fig. 2 rises ~0.15 V from 5 to 20 mA [p.4, read off the plot]
-  # [calc: nVt = 0.0514 V; 0.15 = 0.0514 ln 4 + 0.015 Rs -> Rs = 5.3 ohm;
-  #  2.1 = 0.0514 ln(0.02/Is) + 0.02 x 5.3 -> Is = 2.9e-19 A]
+  # LED-PANEL, Lite-On LTST-C171GKT, GaP green 0805, BEHAVIOURAL: n = 2 chosen (a GaP
+  # junction), Rs and Is fitted so VF is the table's 2.1 V typ at 20 mA
+  # [ds LITEON-LTST-C171GKT-0805-GREEN.pdf p.3] and the curve of Fig. 2 rises ~0.2 V from 5 to
+  # 20 mA [p.5, read off a raster plot by eye]
+  # [calc: nVt = 0.0514 V; 0.2 = 0.0514 ln 4 + 0.015 Rs -> Rs = 8.6 ohm;
+  #  2.1 = 0.0514 ln(0.02/Is) + 0.02 x 8.6 -> Is = 1.0e-18 A]
   led_n:    {value: 2.0}
-  led_rs:   {value: 5.3}
-  led_is:   {value: 2.9e-19}
-  vf20:     {value: 2.1, source: "VF at 20 mA, 2.1 V typ, 2.6 V max; no minimum [ds p.3]. Applied as a shift of the fitted curve (vary 2.0-2.6 V)"}
-  r_b2b:    {value: 0.004, source: "AGND_MOD across J-B2B-MOD: five ground pins (module-jack board-netlist) of a 2.54 mm header at ~20 mohm per mated contact [from memory] in parallel (vary to 3x)"}
+  led_rs:   {value: 8.6}
+  led_is:   {value: 1.0e-18}
+  vf20:     {value: 2.1, source: "VF at 20 mA, 2.1 V typ, 2.4 V max; no minimum [ds p.3]. Applied as a shift of the fitted curve (vary 2.0-2.4 V)"}
   t_b:      {value: 1.0}
 
 derived:
@@ -38,29 +39,25 @@ derived:
 
 vary:
   v_set:  {tol: [-0.031, 0.031]}
-  vf20:   {tol: [-0.048, 0.238]}
+  vf20:   {tol: [-0.048, 0.143]}
   R-LED-PANEL: {tol: from-value}
-  r_b2b:  {tol: [0.0, 2.0]}
 
 sims:
   - name: led
     deck: led.cir
     sweep: {i_swing: [0.195, 0.367]}
-    measures: [i_led, i_led_pp, v_on_100u, v_on_1m, gnd_pp_uv, gnd_pp_cents, gnd_dc_mv]
+    measures: [i_led, i_led_pp, v_on_100u, v_on_1m]
     post:
       i_led: "at(w['iled'], 0.0)"
       i_led_pp: "peak(w['iled'], 0, p['t_b']) - trough(w['iled'], 0, p['t_b'])"
       # the start: the output voltage at which the LED passes 0.1 mA (just visible) and 1 mA
       v_on_100u: "cross(w['start'], 1e-4, 0)"
       v_on_1m: "cross(w['start'], 1e-3, 0)"
-      # its return across J-B2B-MOD: the jack board's ground against the pitch stage's
-      gnd_pp_uv: "1e6 * (peak(w['jgnd'], 0, p['t_b']) - trough(w['jgnd'], 0, p['t_b']))"
-      gnd_pp_cents: "1200 * (peak(w['jgnd'], 0, p['t_b']) - trough(w['jgnd'], 0, p['t_b']))"
-      gnd_dc_mv: "1e3 * at(w['jgnd'], 0.0)"
     asserts:
       - expr: "min['i_led'] > 3.9e-3 and max['i_led'] < 5.0e-3"
-        why: "panel-led.md's ~4.5 mA holds within about 12 % over U-ISO's +-3.1 %, R-LED-PANEL's 1 % and the LED's whole VF spread (it reads 4.5 mA with VF at the page's 2.0 V): under 0.6 % of the 940 mA umbilical limit, and far inside the LED's 30 mA rating [ds p.2]"
+        why: "panel-led.md's ~4.5 mA holds within about 12 % over U-ISO's +-3.1 %, R-LED-PANEL's 1 % and the LED's whole VF spread (it reads 4.5 mA with VF at the page's 2.0 V): under 0.6 % of the 940 mA umbilical limit, and far inside the LED's 30 mA rating [ds LTST-C171GKT p.2]"
       - expr: "min['v_on_100u'] > 1.5 and max['v_on_100u'] < 2.6"
         why: "panel-led.md 'lights as the output passes about 2 V': the LED reaches 0.1 mA with the output between 1.5 and 2.6 V at every corner"
-      - expr: "max['gnd_pp_cents'] < 0.01"
-        why: "power-entry.md's 'constant': the LED's current follows the breath only through the load switch's drop and U-ISO's load regulation (i_led_pp, tens of uA at most), and across J-B2B-MOD's ground pins that moves the jack board's ground against the pitch stage's by under a hundredth of a cent - ADR 0027's bar (power-entry/sim gnd-isolated). The static part (gnd_dc_mv) is a fixed offset the pitch trim absorbs"
+  # The return across J-B2B-MOD (the jack board's ground against the pitch stage's) is no
+  # longer simulated: since 2026-10-01 the LED is on the main board and its current never
+  # crosses the header (ADR 0024 point 15). What it does to NT-DIG-MOD is power-entry/sim's.

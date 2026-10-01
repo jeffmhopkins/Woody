@@ -60,6 +60,7 @@ mb_d = ethercon_pcb_setback;
 mb_z1 = zd(mb_d);                          // main board front face
 mb_z0 = mb_z1 - boards_t;                  // main board rear face
 so_l = jb_z0 - mb_z1;                      // MECH-STANDOFF-MOD, derived (never a config value)
+pso_l = zd(0) - mb_z1;                     // MECH-PANEL-STANDOFF-MOD: the panel's rear face to the main board, derived
 
 // ---------------------------------------------------------- panel parts ----
 ec = [cx, layout_ec_y];
@@ -70,7 +71,8 @@ jacks = [for (r = [0 : jack_rows - 1], c = [0 : 1])
          [layout_jacks[r][c], [cx + (c - 0.5) * layout_jack_pitch_x, layout_jack_y0 - r * layout_jack_pitch_y]]];
 // THE BOTTOM ROW IS THE NE8FAV (ADR 0024 point 11): its cable drops below
 // every control. The toggle's row is above it, and the LED is in that row, in
-// the strip beside the toggle that the jack board's leg stands behind.
+// the strip beside the toggle: a light pipe in the panel over an LED on the
+// main board (point 15), since the jack board ends above the row.
 tog = [cx, layout_toggle_y];
 led = [layout_led_side == "left" ? (ec[0] - fl[0] / 2) / 2 : (W + ec[0] + fl[0] / 2) / 2, tog[1]];
 // Neutrik's two screws: diagonally opposite, upper left and lower right seen
@@ -104,10 +106,14 @@ tog_flat_rot = atan2(-tog_on[1], -tog_on[0]) - 90;  // dhole2d draws the flat at
 tog_sweep_r = ["r", tog - tog_xy(tog_sweep, toggle_nut_d / 2), tog + tog_xy(tog_sweep, toggle_nut_d / 2)];
 tog_proud = toggle_bushing_l - T;          // bushing stood in front of the panel
 
-// LED: lens tip led_proud in front of the face; its lead spacer (MECH-LED-BEZEL-MOD)
-// stands on the jack board and stops the flange's underside.
-led_fu = led_proud - led_l;                // z of the flange's underside
-led_spacer_l = led_fu - jb_z1;             // derived
+// LED (ADR 0024 point 15): LED-PANEL, an 0805 chip LED on the main board's
+// front face, under MECH-LED-BEZEL-MOD, a press-fit light pipe whose flange
+// stops on the panel's face. Its length is a stock one (led.pipe_l); what it
+// leaves over the LED is derived and DRC'd.
+led_top = mb_z1 + led_smd[2];              // the LED's top
+led_pipe_end = -led_pipe_l;                // the pipe's end (the flange's underside is the front face)
+led_gap = led_pipe_end - led_top;          // derived: air between the pipe and the LED
+led_gap_min = led_gap - led_pipe_tol - led_smd_tol;   // ...with the pipe long and the LED tall
 
 // Power header J-PWR-EURO on the main board's rear face, long axis along y.
 pw = power_at;
@@ -121,13 +127,11 @@ b_x0 = boards_side_margin;
 b_x1 = W - boards_side_margin;
 b_y0 = rail_band;
 b_y1 = H - rail_band;
-notch = [ec[0] - fl[0] / 2 - boards_ec_clear, ec[0] + fl[0] / 2 + boards_ec_clear, ec[1] + fl[1] / 2 + boards_ec_clear];  // x0 x1 top; open to the bottom edge
-// ...and above it, narrower, the step SW-POWER's body passes through: its body
-// is deeper than the jack board's depth (ADR 0023). [x0, x1, y0, top]; y0 is
-// the notch's top, so the two are one cut-out.
-tnotch = [tog[0] - tog_body[0] / 2 - boards_toggle_clear, tog[0] + tog_body[0] / 2 + boards_toggle_clear,
-          notch[2], max(notch[2], tog[1] + tog_body[1] / 2 + boards_toggle_clear)];
-notch_top = tnotch[3];
+// THE JACK BOARD IS A PLAIN RECTANGLE (ADR 0024 point 15, the owner,
+// 2026-10-01): full width, from just below the bottom jack row's footprints
+// to the top edge the main board shares. SW-POWER's body and the NE8FAV are
+// below it; nothing passes through it.
+jb_y0 = boards_jack_y0;
 // THE UMBILICAL'S DROP ZONE (ADR 0024 point 11), on the panel's face: the
 // mated NE8MX's grip, and the strip its width that the plug and its cable
 // hang in, from the axis down past the panel's bottom edge. How far in front
@@ -137,7 +141,7 @@ drop_zone = [["NE8MX grip", ["c", ec, ethercon_cable_d / 2]],
 plug_reach = ethercon_plug_l_min - ethercon_pcb_setback - T;   // the plug's back, in front of the panel's FRONT face, at least
 umb_bend_r = ethercon_umb_bend_k * ethercon_umb_od;
 // The tallest thing on the face (the knob, unless the toggle's lever is longer).
-front = max(knob_gap + knob_h, tog_proud + lev_len * cos(lev_ang), ethercon_tab_front - T, led_proud, jack_bushing_l - T);
+front = max(knob_gap + knob_h, tog_proud + lev_len * cos(lev_ang), ethercon_tab_front - T, led_flange_t, jack_bushing_l - T);
 b2b_w = (b2b_rows - 1) * b2b_pitch;
 b2b_l = (b2b_pins - 1) * b2b_pitch;
 b2b_pin_l = b2b_protrude + boards_t + so_l + boards_t + b2b_tail;   // J-B2B-MOD's pins, derived
@@ -215,6 +219,8 @@ module panel_2d() {
         for (j = jacks) translate(j[1]) circle(d = jack_hole_d);
         for (p = pots) translate(p) circle(d = pot_hole_d);
         translate(led) circle(d = led_hole_d);
+        // The panel standoffs' self-clinching studs (point 15): a plain hole; the head fills its displacement.
+        for (s = panel_standoff_at) translate(s) circle(d = panel_standoff_stud_hole_d);
         translate(tog) rotate(tog_flat_rot) dhole2d(toggle_hole_d, toggle_flat);
         translate(ec) circle(d = ethercon_bore_d + ethercon_bore_clear);
         for (h = ec_holes) translate(h) circle(d = ethercon_hole_d);
@@ -225,19 +231,18 @@ module panel_2d() {
     }
 }
 
-module standoff_holes_2d() { for (s = standoff_at) translate(s) circle(d = standoff_hole_d); }
+module standoff_holes_2d(set) { for (s = set) translate(s) circle(d = standoff_hole_d); }
 module jack_board_2d() {
     difference() {
-        translate([b_x0, b_y0]) square([b_x1 - b_x0, b_y1 - b_y0]);
-        translate([notch[0], b_y0 - 1]) square([notch[1] - notch[0], notch[2] - b_y0 + 1]);
-        translate([tnotch[0], tnotch[2] - EPS]) square([tnotch[1] - tnotch[0], tnotch[3] - tnotch[2] + EPS]);
-        standoff_holes_2d();
+        translate([b_x0, jb_y0]) square([b_x1 - b_x0, b_y1 - jb_y0]);
+        standoff_holes_2d(standoff_at);
     }
 }
 module main_board_2d() {
     difference() {
         translate([b_x0, b_y0]) square([b_x1 - b_x0, b_y1 - b_y0]);
-        standoff_holes_2d();
+        standoff_holes_2d(standoff_at);
+        standoff_holes_2d(panel_standoff_at);
     }
 }
 
@@ -262,6 +267,13 @@ module panel_3d() {
         // Nuts are envelopes round the bushing: bored to the panel hole, so a nut and its bushing never read as a clash.
         for (j = jacks) P(C_METAL, false, str("nut ", j[0])) difference() { cyl(j[1], jack_nut_d, 0, jack_nut_h, 6); cyl(j[1], jack_hole_d, -1, jack_nut_h + 1); }
         P(C_METAL, false, "nut SW-POWER") difference() { cyl(tog, toggle_nut_d, 0, toggle_nut_h, 6); cyl(tog, toggle_hole_d, -1, toggle_nut_h + 1); }
+        // The panel standoffs' studs: the head flush in the front face (drawn a hair proud, so it shows), the
+        // shank behind the rear face, inside its spacer.
+        for (i = [0 : len(panel_standoff_at) - 1])
+            P(C_METAL, false, str("panel stud ", i + 1)) {
+                cyl(panel_standoff_at[i], panel_standoff_stud_head_d, 0, 5 * EPS);
+                cyl(panel_standoff_at[i], 3.0 - 0.02, -T + EPS, -panel_standoff_stud_l);   // the M3 shank (a nudge under the thread)
+            }
     }
 }
 
@@ -314,21 +326,21 @@ module knob_3d(name, p) {
         cyl(p, pot_shaft_d + 0.02, knob_gap - 1, jb_z1 + pot_shaft_top);
     }
 }
-module led_3d() {
-    P(C_LED, false, "LED-PANEL") {
-        cyl(led, led_flange_d, led_fu, led_fu + led_flange_t);
-        cyl(led, led_lens_d, led_fu + led_flange_t, led_proud - led_lens_d / 2);
-        translate([led[0], led[1], led_proud - led_lens_d / 2]) sphere(d = led_lens_d);
+// The light pipe: its domed flange on the face, the pipe through the panel and
+// back to just short of the LED on the main board (drawn with the main board's layer).
+module led_pipe_3d() {
+    translate([0, 0, ex(2)]) P(C_LED, false, "MECH-LED-BEZEL-MOD") {
+        translate([led[0], led[1], 0]) scale([1, 1, 2 * led_flange_t / led_flange_d]) intersection() {
+            sphere(d = led_flange_d);
+            translate([-led_flange_d, -led_flange_d, 0]) cube([2 * led_flange_d, 2 * led_flange_d, led_flange_d]);
+        }
+        cyl(led, led_pipe_d, led_pipe_end, 0);
     }
-    P(C_NYLON, false, "LED spacer") cyl(led, led_spacer_d, jb_z1, led_fu);
-    P(C_METAL, false, "LED-PANEL leads")
-        box(led[0] - led_pitch / 2 - 0.3, led[1] - 0.3, jb_z0, led[0] + led_pitch / 2 + 0.3, led[1] + 0.3, jb_z0 - 1.5);
 }
 module jack_board_3d() {
     P(C_PCB, false, "jack board") slab(jb_z0, jb_z1) jack_board_2d();
     for (j = jacks) jack_3d(j);
     for (i = [0 : 2]) { pot_3d(layout_pots[i], pots[i]); knob_3d(layout_pots[i], pots[i]); }
-    led_3d();
     // Standoff screws' heads on the jack board's front face.
     for (i = [0 : len(standoff_at) - 1])
         P(C_METAL, false, str("standoff screw front ", i + 1)) cyl(standoff_at[i], m3_head_d, jb_z1, jb_z1 + m3_head_k);
@@ -347,6 +359,10 @@ module between_3d() {
         for (i = [0 : len(standoff_at) - 1])
             P(C_NYLON, false, str("standoff ", i + 1)) translate([standoff_at[i][0], standoff_at[i][1], mb_z1])
                 difference() { cylinder(d = standoff_af / cos(30), h = so_l, $fn = 6); translate([0, 0, -1]) cylinder(d = standoff_hole_d - 0.7, h = so_l + 2); }
+        // The main board's two low mounting points: a spacer from the panel's rear face, on its stud.
+        for (i = [0 : len(panel_standoff_at) - 1])
+            P(C_METAL, false, str("panel standoff ", i + 1)) translate([panel_standoff_at[i][0], panel_standoff_at[i][1], mb_z1])
+                difference() { cylinder(d = standoff_af / cos(30), h = pso_l, $fn = 6); translate([0, 0, -1]) cylinder(d = standoff_hole_d - 0.2, h = pso_l + 2); }
         P(C_BLACK, false, "J-B2B-MOD") box(b2b_at[0] - b2b_w / 2 - 1.27, b2b_at[1] - b2b_l / 2 - 1.27, mb_z1,
                                           b2b_at[0] + b2b_w / 2 + 1.27, b2b_at[1] + b2b_l / 2 + 1.27, mb_z1 + b2b_insulator_h);
         P(C_BRASS, false, "J-B2B-MOD pins") b2b_pins(mb_z1 + b2b_insulator_h, jb_z0);
@@ -378,6 +394,10 @@ module main_board_3d() {
         P(C_BRASS, false, "J-B2B-MOD tails") b2b_pins(mb_z0, mb_z0 - b2b_tail);
         for (i = [0 : len(standoff_at) - 1])
             P(C_METAL, false, str("standoff screw rear ", i + 1)) cyl(standoff_at[i], m3_head_d, mb_z0, mb_z0 - m3_head_k);
+        for (i = [0 : len(panel_standoff_at) - 1])
+            P(C_METAL, false, str("panel standoff screw rear ", i + 1)) cyl(panel_standoff_at[i], m3_head_d, mb_z0, mb_z0 - m3_head_k);
+        // LED-PANEL, the 0805 under the light pipe, on the front face.
+        P(C_LED, false, "LED-PANEL") box(led[0] - led_smd[0] / 2, led[1] - led_smd[1] / 2, mb_z1, led[0] + led_smd[0] / 2, led[1] + led_smd[1] / 2, led_top);
         // J-PWR-EURO: the shroud, its cavity open to the rear.
         P(C_BLACK, false, "J-PWR-EURO") difference() {
             box(pw[0] - power_w / 2, pw[1] - power_l / 2, mb_z0, pw[0] + power_w / 2, pw[1] + power_l / 2, mb_z0 - power_h);
@@ -403,7 +423,7 @@ module main_board_3d() {
     }
 }
 // The toggle is panel-mounted and wired (ADR 0023): body on the panel's rear
-// face, through the step at the top of the jack board's notch; lever thrown to
+// face, below the jack board's bottom edge; lever thrown to
 // ON (layout.toggle_on), its terminal field along the throw.
 module toggle_3d() {
     P(C_METAL, false, "SW-POWER") {
@@ -438,6 +458,7 @@ module assembly() {
     between_3d();
     main_board_3d();
     toggle_3d();
+    led_pipe_3d();
     power_plug_3d();
     if (show_plugs) plugs_3d();
     if (show_rails) rails_3d();
@@ -472,7 +493,8 @@ cuts_own = concat([for (j = jacks) [j[0], ["c", j[1], jack_hole_d / 2], ""]],
                   [for (i = [0 : 2]) [layout_pots[i], ["c", pots[i], pot_hole_d / 2], ""]],
                   [["LED-PANEL", ["c", led, led_hole_d / 2], ""], ["SW-POWER", ["c", tog, toggle_hole_d / 2], ""],
                    ["J-UMBILICAL bore", ["c", ec, (ethercon_bore_d + ethercon_bore_clear) / 2], "ec"]],
-                  [for (h = ec_holes) ["J-UMBILICAL screw", ["c", h, ethercon_hole_d / 2], "ec"]]);
+                  [for (h = ec_holes) ["J-UMBILICAL screw", ["c", h, ethercon_hole_d / 2], "ec"]],
+                  [for (s = panel_standoff_at) ["panel stud", ["c", s, panel_standoff_stud_hole_d / 2], ""]]);
 cuts_mount = [for (m = mounts) ["mount slot", rect_c(m, panel_slot_travel + panel_hole_d, panel_hole_d)]];
 
 // What stands on the panel's face, for spacing.
@@ -483,8 +505,9 @@ ne8mx = [["NE8MX", ["c", ec, ethercon_cable_d / 2]]];
 face_other = concat(
     [["PUSH tab", ["r", ec + [-ethercon_tab_w / 2, ethercon_tab_bottom], ec + [ethercon_tab_w / 2, ethercon_tab_top]]],
      ["SW-POWER sweep", tog_sweep_r],
-     ["LED-PANEL", ["c", led, led_lens_d / 2]]],
-    [for (h = ec_holes) ["A-screw head", ["c", h, ethercon_screw_head_d / 2]]]);
+     ["LED-PANEL", ["c", led, led_flange_d / 2]]],
+    [for (h = ec_holes) ["A-screw head", ["c", h, ethercon_screw_head_d / 2]]],
+    [for (s = panel_standoff_at) ["panel stud head", ["c", s, panel_standoff_stud_head_d / 2]]]);
 washers = [for (m = mounts) ["panel washer", rect_c(m, panel_slot_travel + panel_washer_od, panel_washer_od)]];
 
 // LEGEND ZONES (ADR 0024), derived from what is around them: the title band
@@ -612,8 +635,12 @@ module drc_report() {
     shaft_proud = jb_z1 + pot_shaft_top;
     drc(undef, "pot shaft stands in front of the panel", shaft_proud,
         str("mm; the knob's bore must be at least ", shaft_proud - knob_gap, " deep for it to sit knob.gap off the face - read it off the knob at the first fit"));
-    drc(led_spacer_l > 0, "LED lead spacer length (derived)", led_spacer_l,
-        "mm, the jack board's front face to the LED flange's underside - MECH-LED-BEZEL-MOD's length");
+    drc(led_gap_min > 0, "light pipe over the LED", [led_gap, led_gap_min],
+        str("mm of air between MECH-LED-BEZEL-MOD's end (", led_pipe_l, " behind its flange, on the face) and LED-PANEL's top on the main board, nominal and with the pipe ",
+            led_pipe_tol, " long and the LED ", led_smd_tol, " tall - it must not touch, or the press-fit flange stands off the face"));
+    ps_edge = minv([for (q = panel_standoff_at) min(q[0], W - q[0], q[1], H - q[1])]);
+    drc(T >= panel_standoff_stud_sheet_min && ps_edge >= panel_standoff_stud_edge_min, "panel studs: sheet and edge distance (PEM)", [T, ps_edge],
+        str("mm: the panel against the stud's ", panel_standoff_stud_sheet_min, " minimum sheet; each stud's centre to the nearest panel edge against PEM's ", panel_standoff_stud_edge_min));
 
     // ---- the stack
     echo("DRC", "INFO", "stack depths behind the panel's rear face", [jb_d, jb_d + boards_t, mb_d, mb_d + boards_t],
@@ -622,28 +649,36 @@ module drc_report() {
     face = standoff_stock_l - so_l;
     drc(abs(face) > standoff_tol ? (face > 0) : true, "standoff faced from stock", [standoff_stock_l, face],
         str("mm: the stock length, and what comes off it (a stock part is +/-", standoff_tol, "; face it and measure it, as the key boards' spacer)"));
+    pface = panel_standoff_stock_l - pso_l;
+    drc(pso_l > 0 && (abs(pface) > standoff_tol ? (pface > 0) : true), "panel standoff length (derived), faced from stock", [pso_l, panel_standoff_stock_l, pface],
+        "mm: the panel's rear face to the main board's front face = the NE8FAV's setback (MECH-PANEL-STANDOFF-MOD); the stock length (tbd); what comes off it. The NE8FAV fixes that gap, so the spacer must match it, not set it");
+    echo("DRC", "INFO", "panel stud in its spacer", [panel_standoff_stud_l - T, pso_l - (panel_standoff_stud_l - T)],
+         "mm: the stud's shank behind the panel's rear face (its length code taken from the flush head, PEM FH), and what is left of the spacer's length for the main board's screw");
     drc(undef, "J-B2B-MOD pin length (derived)", b2b_pin_l,
         str("mm = ", b2b_protrude, " proud of the jack board + ", boards_t, " + the gap + ", boards_t, " + ", b2b_tail, " out of the main board"));
 
     // ---- the boards
     drc(b_y0 >= rail_band && b_y1 <= H - rail_band, "boards inside the rail band", [b_y0, b_y1], "mm, the boards' bottom and top edges (rail.band is tbd)");
     drc(b_x0 >= 0 && b_x1 <= W, "boards inside the panel's width", [b_x0, W - b_x1], "mm inside each side edge");
-    echo("DRC", "INFO", "board outlines", [[b_x0, b_y0, b_x1, b_y1], notch, tnotch], "mm: [x0, y0, x1, y1] of both; the jack board's notch [x0, x1, top], open to its bottom edge, and its step for SW-POWER [x0, x1, y0, top] above it");
-    legw = [notch[0] - b_x0, b_x1 - notch[1]];
-    echo("DRC", "INFO", "jack board legs beside the notch", legw, "mm wide, left and right");
-    drc(notch[0] <= ec[0] - fl[0] / 2 - boards_ec_clear + 1e-6 && notch[2] >= ec[1] + fl[1] / 2 + boards_ec_clear - 1e-6,
-        "jack board notch clear of the NE8FAV's body", boards_ec_clear, "mm each side and above");
-    tn = min(tog[0] - tog_body[0] / 2 - tnotch[0], tnotch[1] - tog[0] - tog_body[0] / 2, tnotch[3] - tog[1] - tog_body[1] / 2);
-    drc(tn >= boards_toggle_clear - 1e-6 && tog[1] - tog_body[1] / 2 >= ec[1] + fl[1] / 2 + boards_part_clear,
-        "jack board notch clear of SW-POWER's body", [tn, tog[1] - tog_body[1] / 2 - ec[1] - fl[1] / 2],
-        "mm: the least of each side and above; and the toggle's body above the NE8FAV's body, behind the panel");
+    echo("DRC", "INFO", "board outlines", [[b_x0, jb_y0, b_x1, b_y1], [b_x0, b_y0, b_x1, b_y1]],
+         "mm: [x0, y0, x1, y1] of the jack board, a plain rectangle (ADR 0024 point 15), and of the main board");
+    // The jack board ends just below the bottom jack row and above everything in the toggle's row.
+    jfp_bot = min([for (j = jacks) j[1][1] - fp_a]);
+    tog_top = tog[1] + tog_body[1] / 2;
+    drc(jfp_bot - jb_y0 >= boards_copper_edge - 1e-6 && jb_y0 - tog_top >= boards_toggle_clear - 1e-6 && jb_y0 >= ec[1] + fl[1] / 2 + boards_part_clear,
+        "jack board bottom edge", [jb_y0, jfp_bot - jb_y0, jb_y0 - tog_top, jb_y0 - ec[1] - fl[1] / 2],
+        str("mm: the edge (boards.jack_y0); the bottom jack row's footprints above it (boards.copper_edge ", boards_copper_edge, "); it above SW-POWER's body (boards.toggle_clear ",
+            boards_toggle_clear, ") and above the NE8FAV's body - nothing passes through the board"));
+    drc(tog[1] - tog_body[1] / 2 >= ec[1] + fl[1] / 2 + boards_part_clear, "SW-POWER's body above the NE8FAV's", tog[1] - tog_body[1] / 2 - ec[1] - fl[1] / 2,
+        "mm between the two bodies, behind the panel");
     // Behind the panel, inside the rail's depth: nothing may reach into the band.
     behind = concat([for (j = jacks) [j[0], j[1][1] - jack_body_w / 2, j[1][1] + jack_body_w / 2]],
                     [for (i = [0 : 2]) [layout_pots[i], pots[i][1] + pot_body[0], pots[i][1] + pot_body[1]]],
                     [["SW-POWER", tog[1] - tog_body[1] / 2, tog[1] + tog_body[1] / 2],
                      ["J-UMBILICAL", ec[1] - fl[1] / 2 - ethercon_peg_below, ec[1] + fl[1] / 2],
-                     ["LED spacer", led[1] - led_spacer_d / 2, led[1] + led_spacer_d / 2]],
-                    [for (s = standoff_at) ["standoff screw head", s[1] - m3_head_d / 2, s[1] + m3_head_d / 2]]);
+                     ["MECH-LED-BEZEL-MOD", led[1] - led_pipe_d / 2, led[1] + led_pipe_d / 2]],
+                    [for (s = standoff_at) ["standoff screw head", s[1] - m3_head_d / 2, s[1] + m3_head_d / 2]],
+                    [for (s = panel_standoff_at) ["panel standoff", s[1] - standoff_af / cos(30) / 2, s[1] + standoff_af / cos(30) / 2]]);
     rb = [for (b = behind) [min(b[1] - rail_band, H - rail_band - b[2]), b[0]]];
     rbm = minv([for (r = rb) r[0]]);
     drc(rbm >= 0, "parts behind the panel clear of the rail band", rbm, str("mm (", [for (r = rb) if (r[0] == rbm) r[1]][0], "); rail.band is tbd"));
@@ -654,19 +689,21 @@ module drc_report() {
     // where it would move the body back by toggle.nut_h.
     drc(tl >= 0 && tl - toggle_nut_h >= 0, "toggle's lugs in front of the main board", [tl, tl - toggle_nut_h],
         "mm between the lugs' ends and the main board's front face - room for the wires' bends - with the body on the panel's rear face (ONE nut, on the front: fit it so); and if the D4 kit's second nut were fitted behind the panel, toggle.nut_h less (do not)");
-    // Standoffs: in a leg or above the pots, clear of everything on each face.
+    // Standoffs: two between the boards above the pots, two from the panel to
+    // the main board low down (ADR 0024 point 15), clear of everything on each face.
     sp = [for (s = standoff_at) [s, ["r", s - [standoff_af / cos(30), standoff_af] / 2, s + [standoff_af / cos(30), standoff_af] / 2]]];
+    psp = [for (s = panel_standoff_at) [s, ["c", s, standoff_af / cos(30) / 2]]];
     jb_face = concat([for (j = jacks) [j[0], jack_body_rect(j[1])]],
                      [for (i = [0 : 2]) [layout_pots[i], ["r", pots[i] + [-pot_body[2] / 2, pot_body[0]], pots[i] + [pot_body[2] / 2, pot_body[1]]]]],
-                     [["LED spacer", ["c", led, led_spacer_d / 2]],
-                      ["J-B2B-MOD", rect_c(b2b_at, b2b_w + 2.54, b2b_l + 2.54)]]);
+                     [["J-B2B-MOD", rect_c(b2b_at, b2b_w + 2.54, b2b_l + 2.54)]]);
     heads = [for (s = standoff_at) ["standoff screw head", ["c", s, m3_head_d / 2]]];
+    rheads = concat(heads, [for (s = panel_standoff_at) ["panel standoff screw head", ["c", s, m3_head_d / 2]]]);
     hf = worst(heads, jb_face);
     drc(hf[0] >= boards_part_clear, "standoff screw heads clear of the jack board's front-face parts", hf[0], str("mm (", hf[2], ")"));
-    j_edge = minv([for (s = standoff_at) min(s[0] - b_x0, b_x1 - s[0], s[1] - b_y0, b_y1 - s[1],
-                      (s[1] < notch[2] && s[0] > notch[0] - m3_head_d && s[0] < notch[1] + m3_head_d) ? min(abs(s[0] - notch[0]), abs(notch[1] - s[0])) : 1e9,
-                      (s[1] < tnotch[3] + m3_head_d && s[1] > tnotch[2] && s[0] > tnotch[0] - m3_head_d && s[0] < tnotch[1] + m3_head_d) ? min(abs(s[0] - tnotch[0]), abs(tnotch[1] - s[0]), abs(s[1] - tnotch[3])) : 1e9) - m3_head_d / 2]);
-    drc(j_edge >= boards_copper_edge, "standoff screw heads inside the boards' edges and the notch", j_edge, "mm, a head's edge to the nearest board edge");
+    j_edge = minv([for (s = standoff_at) min(s[0] - b_x0, b_x1 - s[0], s[1] - jb_y0, b_y1 - s[1]) - m3_head_d / 2]);
+    m_edge = minv([for (s = panel_standoff_at) min(s[0] - b_x0, b_x1 - s[0], s[1] - b_y0, b_y1 - s[1]) - m3_head_d / 2]);
+    drc(min(j_edge, m_edge) >= boards_copper_edge, "standoff screw heads inside the boards' edges", [j_edge, m_edge],
+        "mm, a head's edge to the nearest board edge: the standoffs between the boards (on the jack board), the panel standoffs (on the main board)");
     mb_rear = concat([["J-PWR-EURO", rect_c(pw, power_w, power_l)],
                       ["J-UMBILICAL tails", ["r", ec + [-9.28, -11.0], ec + [9.28, 12.35]]],
                       ["J-B2B-MOD tails", rect_c(b2b_at, b2b_w + 2.54, b2b_l + 2.54)]],
@@ -680,7 +717,7 @@ module drc_report() {
                                                          : min(e[1][1][0] - b_x0, b_x1 - e[1][2][0], e[1][1][1] - b_y0, b_y1 - e[1][2][1])]];
     drc(min([for (e = fe) e[1]]) >= boards_copper_edge, "U-ISO's filter parts on the main board", fe,
         "mm, each envelope's edge inside the board's nearest edge, against boards.copper_edge (L-CM-ISO's turned 45 degrees: config/module.yaml iso.filter)");
-    hr = worst(heads, mb_rear);
+    hr = worst(rheads, mb_rear);
     drc(hr[0] >= boards_part_clear, "standoff screw heads clear of the main board's rear-face parts", hr[0], str("mm (", hr[2], ")"));
     rr = worst(mb_rear, mb_rear, true);
     drc(rr[0] >= boards_part_clear, "main board rear-face parts clear of each other", rr[0], str("mm (", rr[1], " / ", rr[2], ")"));
@@ -705,6 +742,16 @@ module drc_report() {
     mb_front = [["J-UMBILICAL body", ["r", ec - fl / 2, ec + fl / 2]], ["J-B2B-MOD", rect_c(b2b_at, b2b_w + 2.54, b2b_l + 2.54)]];
     sf = worst([for (s = sp) ["standoff", s[1]]], mb_front);
     drc(sf[0] >= boards_part_clear, "standoffs clear of the NE8FAV and J-B2B-MOD between the boards", sf[0], str("mm (", sf[2], ")"));
+    // The panel standoffs stand in the whole depth from the panel to the main
+    // board: clear of the NE8FAV's body and pegs, the toggle's body and lugs,
+    // the light pipe, and below the jack board.
+    p_front = [["J-UMBILICAL body", ["r", ec - fl / 2 - [0, ethercon_peg_below], ec + fl / 2]],
+               ["SW-POWER body", rect_c(tog, tog_body[0], tog_body[1])],
+               ["MECH-LED-BEZEL-MOD", ["c", led, led_pipe_d / 2]],
+               ["LED-PANEL", rect_c(led, led_smd[0], led_smd[1])],
+               ["jack board", ["r", [b_x0, jb_y0], [b_x1, b_y1]]]];
+    pf = worst([for (s = psp) ["panel standoff", s[1]]], p_front);
+    drc(pf[0] >= boards_part_clear, "panel standoffs clear of the NE8FAV, SW-POWER, the LED and the jack board", pf[0], str("mm (", pf[2], "), across the corners of the hex"));
     jfp = [for (j = jacks) [str(j[0], " footprint"), jack_fp_rect(j[1])]];
     bj = worst([["J-B2B-MOD pads", rect_c(b2b_at, b2b_w + b2b_pad_d, b2b_l + b2b_pad_d)]], jfp);
     drc(bj[0] >= boards_part_clear, "J-B2B-MOD's pads clear of the jacks' footprints", bj[0], str("mm (", bj[2], "), between the two jack columns"));
@@ -715,10 +762,13 @@ module drc_report() {
         "mm: a PJ398SM's footprint along its pin line, against the column's pitch - pins down the column would put one jack's sleeve pad on the next one's tip pad");
     jpe = min([for (j = jacks) let(r = jack_fp_rect(j[1])) min(r[1][0] - b_x0, b_x1 - r[2][0])]);
     drc(jpe >= boards_copper_edge, "jack pads inside the board's side edges", jpe, "mm, a sleeve pad's edge to the board's edge");
-    nb = min([for (j = jacks) j[1][1] - fp_a]) - notch_top;
-    drc(nb >= boards_copper_edge, "lowest jacks above the notch", nb, "mm, the lowest footprint's edge to the notch's top edge (its step for SW-POWER)");
-    ln = min(led[0] - led_spacer_d / 2 - b_x0, notch[0] - led[0] - led_spacer_d / 2, tnotch[0] - led[0] - led_spacer_d / 2);
-    drc(ln >= boards_copper_edge, "LED spacer on the jack board's leg", ln, "mm, the spacer's edge to the leg's edges (the LED's leads are soldered in the leg)");
+    // LED-PANEL on the main board's front face, under its light pipe: clear of
+    // U-ISO's pins' tails (the body is on the rear face), the board's edge and the jack board above.
+    lr = rect_c(led, led_smd[0], led_smd[1]);
+    le = min(lr[1][0] - b_x0, worst([["LED-PANEL", lr]], [for (q = iso_pins) ["U-ISO tail", ["c", iso_at + q, iso_pin_d / 2]]])[0],
+             jb_y0 - led[1] - led_pipe_d / 2);
+    drc(le >= boards_copper_edge, "LED-PANEL on the main board, under its light pipe", le,
+        "mm, the least of: the LED's body to the board's edge, to U-ISO's nearest pin, and the pipe to the jack board's bottom edge");
 
     // ---- depth
     ds = [["the mated power socket with its ribbon folded over it", depth_max_rear],
@@ -793,7 +843,8 @@ module panel_art() {
                  else echo("PANEL", "keepout", k[0], "r", k[1][1][0], k[1][1][1], k[1][2][0], k[1][2][1]);
     for (i = [0 : 2]) echo("PANEL", "part", layout_pots[i], pots[i][0], pots[i][1], "pot", pot_shaft_d, knob_d, knob_h, knob_gap);
     for (j = jacks) echo("PANEL", "part", j[0], j[1][0], j[1][1], "jack", jack_hole_d, jack_nut_d, jack_nut_h, jack_bushing_l - T);
-    echo("PANEL", "part", "LED-PANEL", led[0], led[1], "led", led_lens_d, led_proud);
+    echo("PANEL", "part", "LED-PANEL", led[0], led[1], "led", led_flange_d, led_flange_t);
+    for (i = [0 : len(panel_standoff_at) - 1]) echo("PANEL", "part", str("panel stud ", i + 1), panel_standoff_at[i][0], panel_standoff_at[i][1], "stud", panel_standoff_stud_head_d);
     echo("PANEL", "part", "SW-POWER", tog[0], tog[1], "toggle", tog_on[0], tog_on[1], lev_len, lev_d, lev_ang, tog_proud, toggle_nut_d, toggle_nut_h);
     echo("PANEL", "part", "J-UMBILICAL", ec[0], ec[1], "ethercon", ethercon_cable_d, plug_reach);
     for (i = [0 : 1]) echo("PANEL", "part", str("A-screw ", i + 1), ec_holes[i][0], ec_holes[i][1], "screw", ethercon_screw_head_d, ethercon_screw_head_h);
@@ -807,20 +858,20 @@ module panel_art() {
 // (seen from the front, mm); KiCad's view of either board from the panel is
 // this with y negated.
 module pcb_geometry() {
-    for (b = [["module-jack", b_x0, b_y0, b_x1, b_y1], ["module-main", b_x0, b_y0, b_x1, b_y1]])
+    for (b = [["module-jack", b_x0, jb_y0, b_x1, b_y1], ["module-main", b_x0, b_y0, b_x1, b_y1]])
         echo("PCB", b[0], "board", "outline", b[1], b[2], b[3], b[4]);
-    echo("PCB", "module-jack", "cutout", "notch", notch[0], b_y0, notch[1], notch[2], "open to the bottom edge; the NE8FAV's body passes");
-    echo("PCB", "module-jack", "cutout", "notch step", tnotch[0], tnotch[2], tnotch[1], tnotch[3], "on the notch's top edge, one cut-out with it; SW-POWER's body passes");
-    echo("PCB", "module-jack", "board", "thickness", boards_t, "depth", jb_d, "side", "jacks, pots, LED on the front (toward the panel)");
-    echo("PCB", "module-main", "board", "thickness", boards_t, "depth", mb_d, "side", "NE8FAV and J-B2B-MOD's insulator on the front; power header, trimmers, bulk caps on the rear");
+    echo("PCB", "module-jack", "board", "thickness", boards_t, "depth", jb_d, "side", "jacks and pots on the front (toward the panel); a plain rectangle, no cut-out");
+    echo("PCB", "module-main", "board", "thickness", boards_t, "depth", mb_d, "side", "NE8FAV, LED-PANEL and J-B2B-MOD's insulator on the front; power header, trimmers, bulk caps on the rear");
     for (j = jacks) echo("PCB", "module-jack", "jack", j[0], j[1][0], j[1][1], jsgn(j[1]) > 0 ? 180 : 0,
                          "PJ398SM on its side: the angle (deg, from +x) from the barrel to the sleeve pad; pins 3, 2, 1 at this many mm along it", [-jack_pins[0], -jack_pins[1], -jack_pins[2]]);
     for (i = [0 : 2]) echo("PCB", "module-jack", "pot", layout_pots[i], pots[i][0], pots[i][1], 0, "R0904N, pins down at dy", pot_pins[0], "pitch", pot_pins[1]);
-    echo("PCB", "module-jack", "led", "LED-PANEL", led[0], led[1], 0, "leads along x, pitch", led_pitch, "spacer", led_spacer_l);
+    echo("PCB", "module-main", "led", "LED-PANEL", led[0], led[1], 0, "0805 on the FRONT face, centred under MECH-LED-BEZEL-MOD's light pipe (d", led_pipe_d, "); the pipe's end", led_gap, "above the LED");
     for (i = [0 : len(standoff_at) - 1]) {
         echo("PCB", "module-jack", "standoff", str("MECH-STANDOFF-MOD ", i + 1), standoff_at[i][0], standoff_at[i][1], standoff_hole_d, m3_head_d, so_l);
         echo("PCB", "module-main", "standoff", str("MECH-STANDOFF-MOD ", i + 1), standoff_at[i][0], standoff_at[i][1], standoff_hole_d, m3_head_d, so_l);
     }
+    for (i = [0 : len(panel_standoff_at) - 1])
+        echo("PCB", "module-main", "standoff", str("MECH-PANEL-STANDOFF-MOD ", i + 1), panel_standoff_at[i][0], panel_standoff_at[i][1], standoff_hole_d, m3_head_d, pso_l);
     for (b = ["module-jack", "module-main"])
         echo("PCB", b, "connector", "J-B2B-MOD", b2b_at[0], b2b_at[1], 0, b2b_rows, b2b_pins, b2b_pitch,
              b == "module-jack" ? "long axis along y, pin 1 at the top left; TOP side (F.Cu), NOT mirrored - the header's body is on this board's rear, but each pin is one straight conductor through both boards, so pin k sits at the same panel-frame place on both, and both KiCad top views are panel views: the same unmirrored pin map as the main board. Placed on B.Cu it mirrors, and every net lands one column over"
@@ -835,13 +886,13 @@ module pcb_geometry() {
     echo("PCB", "module-main", "panel", "SW-POWER", tog[0], tog[1], str("panel-mounted, wired, ONE nut on the front (the body on the panel's rear face; the D4 kit's second nut not fitted); lever ON ", layout_toggle_on, ", lugs in a line along the throw; lugs end"), zd(toggle_body[2] + toggle_lugs) - mb_z1, "in front of the main board");
     // Keep-outs: what each face must leave clear, and the height it allows.
     for (j = jacks) echo("PCB", "module-jack", "keepout", str("barrel ", j[0]), j[1][0], j[1][1], 3.0, "d, no copper under the barrel (Thonk's PJ398SM note)");
-    for (b = ["module-jack", "module-main"]) for (s = standoff_at)
+    for (b = ["module-jack", "module-main"]) for (s = b == "module-main" ? concat(standoff_at, panel_standoff_at) : standoff_at)
         echo("PCB", b, "keepout", "standoff head", s[0], s[1], m3_head_d + 2 * boards_part_clear,
              b == "module-jack" ? "d, no parts and no copper but the mount's own pad, which is AGND_MOD (metal standoffs; power-entry.md Grounding)"
                                 : "d, no parts and no copper but the mount's own pad, on no net (metal standoffs; power-entry.md Grounding)");
-    echo("PCB", "module-main", "keepout", "front: under the jack board", b_x0, b_y0, b_x1, b_y1, so_l - pot_legs + boards_t - boards_part_clear,
+    echo("PCB", "module-main", "keepout", "front: under the jack board", b_x0, jb_y0, b_x1, b_y1, so_l - pot_legs + boards_t - boards_part_clear,
          "max part height on the front face where the pots' legs are; ", so_l - (jack_tails - boards_t) - boards_part_clear, " under a jack's tails");
-    echo("PCB", "module-jack", "keepout", "rear: toward the main board", b_x0, b_y0, b_x1, b_y1, so_l - boards_part_clear, "max part height on the rear face, less whatever the main board puts under it");
+    echo("PCB", "module-jack", "keepout", "rear: toward the main board", b_x0, jb_y0, b_x1, b_y1, so_l - boards_part_clear, "max part height on the rear face, less whatever the main board puts under it");
     echo("PCB", "module-main", "keepout", "front: SW-POWER wiring", tog[0] - tog_body[0] / 2, tog[1] - tog_body[1] / 2, tog[0] + tog_body[0] / 2, tog[1] + tog_body[1] / 2,
          zd(toggle_body[2] + toggle_lugs) - mb_z1, "the lugs' ends above the front face");
     echo("PCB", "module-main", "keepout", "rear: ribbon fold", pw[0] + power_socket_w / 2 - power_ribbon_w, b_y0, pw[0] + power_socket_w / 2, pw[1] + power_socket_l / 2,
