@@ -1,0 +1,58 @@
+* One DAC frame's edges, all three lines together, as netlisted: SCLK and MOSI as pair.cir
+* (pads, U-TVS-SPI, R-SPI-SER, pair 4/5 as two coupled lines, the pulls, R-RX-MOD and
+* C-RX-MOD to U-RX-MOD's inputs sin, min) and CS_MOD as cs.cir (pad, R-CS-PULL-INST,
+* U-TVS-SPI, R-SPI-SER-CS, pair 7/8, R-PULL-CS, R-RX-CS and C-RX-CS to cin). Mode 1
+* (CPOL 0, CPHA 1): SCLK idles low, MOSI changes on SCLK's rising edge, the DAC samples
+* on the falling edge [DAC8568CIPW.pdf p.6]. At the pads:
+*   CS_MOD falls at t_cs0; SCLK rises t_css later (rise 1), falls half a period after
+*   (fall 1), rises again (rise 2) and falls (fall 2, the frame's LAST falling edge);
+*   CS_MOD rises t_csh after fall 2, stays high t_csw, and falls for the next frame,
+*   whose first SCLK edge comes t_css after that (rise 3, fall 3).
+*   MOSI rises at rise 1 and falls at rise 2.
+* Two clock pulses stand for 32: the edges are what is measured, and each has settled
+* (pair-* and cs-edges hold that) long before the next.
+VS spad 0 PWL(0 0 {{fr_r1}} 0 {{fr_r1e}} {{vdd}} {{fr_f1}} {{vdd}} {{fr_f1e}} 0 {{fr_r2}} 0 {{fr_r2e}} {{vdd}} {{fr_f2}} {{vdd}} {{fr_f2e}} 0 {{fr_r3}} 0 {{fr_r3e}} {{vdd}} {{fr_f3}} {{vdd}} {{fr_f3e}} 0)
+RDS spad sa {{r_drv}}
+CTSP sa 0 {{c_tvs}}
+RSS sa sj {{R-SPI-SER-SCLK}}
+CIS sj 0 {{c_inst}}
+VM mpad 0 PWL(0 0 {{fr_r1}} 0 {{fr_r1e}} {{vdd}} {{fr_r2}} {{vdd}} {{fr_r2e}} 0)
+RDM mpad ma {{r_drv}}
+CTMP ma 0 {{c_tvs}}
+RSM ma mj {{R-SPI-SER-MOSI}}
+CIM mj 0 {{c_inst}}
+P1 sj mj 0 srx mrx 0 PAIR
+.model PAIR CPL length={{len}} R={{r_per_m}} 0 {{r_per_m}} L={{l_s}} {{l_m}} {{l_s}} G=0 0 0 C={{c_s}} {{c_m}} {{c_s}}
+CMS srx 0 {{c_mod}}
+RPS srx 0 {{R-PULL-SCLK}}
+RRS srx sin {{R-RX-MOD}}
+CFS sin 0 {{C-RX-MOD}}
+CRS sin 0 {{c_rx}}
+CMM mrx 0 {{c_mod}}
+RPM mrx 0 {{R-PULL-MOSI}}
+RRM mrx min {{R-RX-MOD}}
+CFM min 0 {{C-RX-MOD}}
+CRM min 0 {{c_rx}}
+VPAD pad 0 PWL(0 {{vdd}} {{fr_cs0}} {{vdd}} {{fr_cs0e}} 0 {{fr_csr}} 0 {{fr_csre}} {{vdd}} {{fr_csf}} {{vdd}} {{fr_csfe}} 0)
+RDRV pad a {{r_drv}}
+RPUI a v33 {{R-CS-PULL-INST}}
+V33 v33 0 {{vdd}}
+CTVSP a 0 {{c_tvs}}
+RSER a j {{R-SPI-SER-CS}}
+CINST j 0 {{c_inst}}
+P2 j 0 rx 0 UMB
+.model UMB CPL length={{len}} R={{r_per_m}} L={{l_1}} G=0 C={{c_1}}
+CMOD rx 0 {{c_mod}}
+RPUM rx v5 {{R-PULL-CS}}
+V5 v5 0 {{v5}}
+RRX rx cin {{R-RX-MOD}}
+CRXF cin 0 {{C-RX-MOD}}
+CRX cin 0 {{c_rx}}
+.control
+tran 50p {{fr_frame_end}}
+wrdata sin.dat v(sin)
+wrdata min.dat v(min)
+wrdata cin.dat v(cin)
+quit
+.endc
+.end

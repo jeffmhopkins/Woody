@@ -48,7 +48,7 @@ The `Dir` and `Peer` columns are defined once in
 | `J-UMBILICAL-INST`, `PCB-UMB-ADAPTER`, `J-UMB` | instrument | — | — | `umbilical-pinmap` | This circuit's own parts: the instrument's etherCON, the adapter board it is soldered to, and the header that joins the adapter to the main board. See *The instrument's connector*, below |
 | `MISO` | instrument | — | `carrier/breath-adc` | — | IO37 is the MCP3202's `DOUT` and **never leaves the board**. ADR 0004 deleted `MISO` from the umbilical, which is why nothing reads the DAC back |
 | SPI2 host | instrument | — | `carrier/breath-adc`, `module/dac8568` | `loop-budget` | One host, two devices, two clocks. The ADC's limit is a fact about a part on the instrument board that constrains the link's budget |
-| `SCLK_DAC`, `DIN`, `SYNC` | module | — | `module/digital-and-supervision` → `module/dac8568` | — | **Not sourced here.** The 74AHCT125 is on `module/digital-and-supervision`, which owns that row; these three are a module-board net and do not cross the umbilical. The DAC-side three of the six `R-SPI-PULL` — this circuit's `bom.csv` — sit on them |
+| `SCLK_DAC`, `DIN`, `SYNC` | module | — | `module/digital-and-supervision` → `module/dac8568` | — | **Not sourced here.** The 74AHCT125 is on `module/digital-and-supervision`, which owns that row; these three are a module-board net and do not cross the umbilical. The DAC-side three of the five `R-SPI-PULL` — this circuit's `bom.csv` — sit on them |
 | `DAC AVDD` | module | in | `module/power-entry` | `dac-rail` | What the DAC-side `CS` pull returns to, **not** bus `+5V`: on the bus rail a reversed ribbon reaches the DAC's `SYNC` pin. See this circuit's `bom.csv` |
 | `LOGIC_5V` | module | in | `module/power-entry` → `module/digital-and-supervision` | — | The module's own 5 V (`U-REG-LOGIC`): the receiver `U-RX-MOD`'s supply, and the top of `R-CS-PULL-MOD` — the rail of the part that pull holds. Not the 74AHCT125's, which is on `DAC_AVDD`. The bus +5 V is not used |
 | `OE_MOD` ×4 | module | — | `module/digital-and-supervision` | — | The module buffer's four enables, tied to `GND` and permanently enabled. On that circuit's part, so they reach nothing here; the circuit that used to gate them, `module/link-supervision`, is not fitted. **Not `OE_INST`** |
@@ -161,6 +161,24 @@ netlist to them:
 The even-mode impedance is in no datasheet, so the size is bracketed, not
 known; E11 scopes the real cable at `U-RX-MOD`'s inputs.
 
+**The RC moves the frame edges, and firmware has to give `CS_MOD` room for
+it** (2026-10-01, pre-layout review A5-1; `sim/`, `frame-timing`). Through
+`R-RX-MOD` and `C-RX-MOD` a falling edge takes several times longer to reach
+the lowest `V_T−` than a rising edge takes to reach the lowest `V_T+`, so at a
+low-threshold corner `SYNC`'s rise arrives at the DAC early against the
+frame's last `SCLK` fall — the DAC's t8 — and a `SYNC` high pulse can shrink
+(t4). The half-period argument covers `DIN` against `SCLK`; it says nothing
+about `CS`, whose place against `SCLK` is set by the host. The run holds the
+DAC's t1, t4, t5, t8 and its clock and data times **at its pins**, for the
+worst pair of receiver thresholds and both gates' and the buffer's whole
+propagation spread, when the pads keep three intervals: `CS_MOD` falls by
+`SCLK`'s first rising edge, stays low 250 ns after the last falling edge,
+and stays high 250 ns between frames. Those three, SPI mode 1 and the
+device's 2 MHz are **firmware's**, written in `firmware/README.md` (*What the
+hardware requires*); `CS_MOD` released on the last edge loses the frame
+(`frame-timing-cs-released-at-last-edge`). E11 confirms the intervals at the
+pads and t8 at the DAC's pins.
+
 ---
 
 ## From the instrument end — `carrier.md` §4
@@ -189,15 +207,21 @@ costs `[calc]`:
 | **220 Ω** | **1.83–1.86 V** | **below threshold, dwelling ~20 ns per edge in the forbidden band** |
 | 100 Ω | **2.75 V** | clean single step |
 | **82 Ω** (2026-09-30) | **3.04–3.32 V** with the pad's 17–35 Ω `[calc]` | clean single step; the falling edge's first step 0.00–0.26 V |
-| 68 Ω | 3.25 V | clean, but **48 mA fault current against a 40 mA pad spec** |
+| 68 Ω | 3.25 V | clean, but **48 mA fault current**, above the pad's 40 mA typical drive — a characteristic, not a rating (below) |
 
 The answer was 100 Ω until 2026-09-30, and is now **82 Ω**: the simulation
 found the falling edge was the tight one, and 82 Ω with `U-TVS-SPI` moved to
 the pad side is what the owner chose (*Simulated*, above). 3.3 V / 82 Ω alone
-is 40 mA, at the pad's limit; the pad's own output resistance, 17 Ω at its
-strongest drive setting and 35 Ω at the default, brings a shorted conductor's
-current to 33 mA or 28 mA `[calc; ds ESP32-S3-datasheet-v2.2.pdf p.65]`, and
-33 mA through 82 Ω is 90 mW in the 1206's 1/4 W. With the clamp now behind
+is 40 mA, the pad's typical drive at its strongest setting; the pad's own
+output resistance, 17 Ω at its strongest drive setting and 35 Ω at the
+default, brings a shorted conductor's current to 33 mA or 28 mA `[calc; ds
+ESP32-S3-datasheet-v2.2.pdf p.65]`, and 33 mA through 82 Ω is 90 mW in the
+1206's 1/4 W. **The 40 mA is not a limit** (2026-10-01, A5-12): Table 5-4
+gives it as `I_OH` typical at `PAD_DRIVER` = 3, and the absolute maximum
+ratings give only a cumulative 1500 mA across all IO, with a footnote that
+the part survived every pin shorted to ground for 24 hours `[ds p.64,
+Table 5-1]`. The 68 Ω row's rejection was argued against it; 82 Ω does not
+need it, standing on `cs-fall-reentry`. With the clamp now behind
 it, `R-SPI-SER` is also the first thing an ESD strike on a conductor meets;
 the banked resistor sheet gives no pulse rating, so the ESD test at E11
 decides whether a pulse-rated part is needed there.
@@ -254,12 +278,18 @@ SPI3  keys   32 bits      @ 1.0 MHz =  32.0 µs, concurrent → 13 %
               SN74HCS165 datasheet p.7, against mode 2's 500 ns — noise)
 ```
 
-**SPI2 cannot use IO_MUX and does not need to.** The S3's FSPI IO_MUX pins are
-GPIO9–14 `[from memory]`, and the board spends GPIO10–13 on the QMI8658C and
-GPIO14 on the matrix `[board-def] circuitpython .../pins.c`. SPI2 on
-GPIO35/36/37 therefore routes through the GPIO matrix, capped around 40 MHz
-rather than 80 `[from memory]`. Irrelevant at 2 MHz; recorded so it is not
-rediscovered as a problem.
+**SPI2 on the GPIO matrix, and it does not matter.** This paragraph said
+the S3's FSPI IO_MUX pins were GPIO9–14 alone `[from memory]` and that SPI2
+therefore could not use IO_MUX here. **The banked datasheet says otherwise**
+(2026-10-01, A5-11): its IO MUX table gives a second FSPI set, GPIO34
+`FSPICS0`, GPIO35 `FSPID` (`MOSI`), GPIO36 `FSPICLK`, GPIO37 `FSPIQ`
+(`MISO`) `[ds ESP32-S3-datasheet-v2.2.pdf Table 2-4, p.21-22]`. This design
+matches it on `CS_MOD` (IO34) and `MISO` (IO37) and has **`SCLK` and `MOSI`
+the other way round** (IO35 is `SCLK`, IO36 `MOSI`), so SPI2 still routes
+through the GPIO matrix, whose ceiling is far above 2 MHz. Not swapped: the
+`J-MCU` ribbon order is chosen for shielding (`carrier.md`, *The pin map*),
+and at 2 MHz IO_MUX buys nothing. Whether ESP-IDF would use that second set
+at all is unverified `[from memory]`.
 
 ---
 
@@ -295,6 +325,13 @@ actually floating in that state are the **DAC's** `SCLK`, `DIN` and `SYNC` —
 which is the state the pulls were bought for, and the cable-side three do not
 reach it.
 
+*That premise is gone (2026-10-01, A5-10).* The buffer's `OE`s are tied on
+(`OE_MOD`, above), and its `VCC` is the DAC's own rail, so its outputs are
+driven whenever the DAC is powered. The DAC-side three now matter only if the
+buffer fails with its outputs open; they stay, as cheap insurance on the one
+failure that latches, not as a requirement. The receiver ahead of the buffer
+is now `U-RX-MOD`, and the cable-side pulls hold its inputs.
+
 Polarity is the same on both sides: `CS` up, `SCLK` and `MOSI` down. A stray
 edge on `CS` re-frames the 32-bit word, and a DAC8568 frame carries the
 software reset, the clear-code register and the internal-reference enable — so
@@ -324,20 +361,25 @@ p.6]`). Pulled up, an unplugged module's DAC ignores `SCLK` entirely. The
 pull-down's one advantage — no current into an unpowered instrument — is kept
 by making the module's pull-up **weak** instead.
 
-**The four states of the link** `[calc]`, from `V_IH` 2.0 V / `V_IL` 0.8 V and
-±1 µA input current at the receiver `[ds SN74AHCT125.pdf p.3, p.4; SN74AHCT14.pdf p.5]` (the TTL thresholds are the 74AHCT125's; `U-RX-MOD`'s spread, 0.5–2.1 V `[SN74AHCT14.pdf p.5]`, reads every row the same way):
+**The four states of the link** `[calc]`, at `U-RX-MOD`'s input (the pull
+holds that input, not the 74AHCT125's), with ±1 µA input current and its
+threshold spread, `V_T−` 0.5–1.7 V and `V_T+` 0.9–2.1 V
+`[ds SN74AHCT14.pdf p.5]`. Three rows read the same anywhere in that spread;
+the second does not (2026-10-01, A5-7):
 
 | State | `CS_MOD` at the buffer | `SYNC` | Current into the instrument |
 |---|---|---|---|
 | Umbilical out, module on | 5 V − 1 µA × 100 kΩ ≥ **4.9 V** | high, deselected | — |
-| Plugged in, instrument off (toggle off: its 3V3 is dead, ~0 V) | 5 V × 10k / 110k = **0.45 V** | low | 5 V / 110 kΩ = **45 µA**, into the dead rail through the 10 kΩ — the node is below the ESP32 pad's clamp, so almost none through the clamp |
+| Plugged in, instrument off (toggle off: its 3V3 is dead, ~0 V) | 5 V × 10k / 110k = **0.45 V**, only 50 mV under the lowest `V_T−` | low at most parts; **not guaranteed**, and harmless either way (below) | 5 V / 110 kΩ = **45 µA**, into the dead rail through the 10 kΩ — the node is below the ESP32 pad's clamp, so almost none through the clamp |
 | Instrument powered, ESP32 in reset or booting (`IO34` has no pull at reset, input-enabled only `[ds ESP32-S3-datasheet-v2.2.pdf p.17]`) | (3.3/10k + 5/100k) / (1/10k + 1/100k) = **3.45 V** | high, deselected | ≤ (5 − 3.3) / 100 kΩ = **17 µA** into the pad clamp |
 | Running | driven by `IO34`, push-pull | framed by firmware | ≤ 50 µA extra load on the pin |
 
 The second row is the one the old row was written about: a 10 kΩ pull-up to
 5 V at the module drove 430 µA through the ESP32's clamp and parked the node
 near 0.7 V. At 100 kΩ it is a tenth of that and goes into the rail, not the
-clamp. That state reads **selected**, and is harmless: `SCLK` is held low at
+clamp. That state reads **selected** at most parts — a dead 3V3 a few tens of
+millivolts up, or the resistors at their tolerance, can put 0.45 V inside the
+band — and either reading is harmless: `SCLK` is held low at
 both ends so there is no edge to shift, and when the instrument powers up its
 3V3 pulls `CS_MOD` high, and a `SYNC` rising edge before the 31st clock
 "acts as an interrupt, and the write sequence is ignored" `[ds DAC8568CIPW.pdf

@@ -4,11 +4,12 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/interfaces/spi-link/sim/sims.yaml: 15f51db42cd1c511
+  hardware/interfaces/spi-link/sim/sims.yaml: 87161a5d295990b6
   hardware/carrier/netlist.yaml: 544daa1002d5ae2c
   hardware/module/digital-and-supervision/netlist.yaml: 131fe3808d5d1b63
   hardware/interfaces/spi-link/sim/cs.cir: 6d80adf0e68d79c2
   hardware/interfaces/spi-link/sim/pair.cir: cfc09aa8410da84a
+  hardware/interfaces/spi-link/sim/frame.cir: ec78ae6eed0655e5
 ngspice: '42'
 sims:
   cs-edges:
@@ -848,4 +849,275 @@ sims:
         min_at: C-RX-MOD- c_rx- c_tvs+ r_drv+ tr_drv+ z_diff+
         max: 4.85889
         max_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv- z_diff-
+    asserts: []
+  frame-timing[z_cm=70]:
+    corners: 65
+    measures:
+      t1:
+        nominal: 4.07554e-07
+        min: 3.93454e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff-
+        max: 4.13657e-07
+        max_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv- z_diff+
+      t4:
+        nominal: 2.11208e-07
+        min: 2.0609e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff-
+        max: 2.12726e-07
+        max_at: C-RX-MOD- c_rx- c_tvs+ r_drv- tr_drv- z_diff+
+      t5:
+        nominal: 1.6344e-07
+        min: 1.47629e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv- z_diff-
+        max: 1.69499e-07
+        max_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv- z_diff+
+      t6:
+        nominal: 1.44945e-07
+        min: 1.27088e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff-
+        max: 1.52422e-07
+        max_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv- z_diff+
+      t7:
+        nominal: 2.16362e-07
+        min: 2.10047e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff+
+        max: 2.18755e-07
+        max_at: C-RX-MOD- c_rx- c_tvs- r_drv+ tr_drv+ z_diff-
+      t8:
+        nominal: 1.3776e-07
+        min: 1.20765e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff-
+        max: 1.45966e-07
+        max_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv- z_diff+
+      t9_rise:
+        nominal: 2.16362e-07
+        min: 2.10047e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff+
+        max: 2.18755e-07
+        max_at: C-RX-MOD- c_rx- c_tvs- r_drv+ tr_drv+ z_diff-
+      t9_fall:
+        nominal: 1.49539e-07
+        min: 1.32017e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv- z_diff-
+        max: 1.59002e-07
+        max_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv+ z_diff+
+      t10:
+        nominal: 1.67477e-07
+        min: 1.54335e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff+
+        max: 1.72445e-07
+        max_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv+ z_diff-
+      need_css:
+        nominal: -1.5044e-07
+        min: -1.56499e-07
+        min_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv- z_diff+
+        max: -1.34629e-07
+        max_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv- z_diff-
+      need_csh:
+        nominal: 1.2224e-07
+        min: 1.14034e-07
+        min_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv- z_diff+
+        max: 1.39235e-07
+        max_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff-
+      need_csw:
+        nominal: 1.18792e-07
+        min: 1.17274e-07
+        min_at: C-RX-MOD- c_rx- c_tvs+ r_drv- tr_drv- z_diff+
+        max: 1.2391e-07
+        max_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff-
+    asserts:
+    - expr: min['t5'] > p['dac_t5'] and min['t8'] > p['dac_t8'] and min['t4'] > p['dac_t4'] and min['t1'] > p['dac_t1']
+      why: 'A5-1: with the pads held to the firmware contract (CS_MOD falls by SCLK''s first rising edge, stays low 250 ns
+        past its last falling edge and high 250 ns between frames), the DAC8568 sees t5, t8, t4 and t1 at its pins at every
+        corner, for the worst pair of receiver thresholds and the whole gate-chain spread'
+      pass: true
+    - expr: min['t6'] > p['dac_t67'] and min['t7'] > p['dac_t67'] and min['t9_rise'] > p['dac_t9'] and min['t9_fall'] > p['dac_t9']
+        and min['t10'] > p['dac_t10']
+      why: and SCLK's high and low times and DIN's setup and hold, mode 1 at 2 MHz, likewise
+      pass: true
+  frame-timing[z_cm=100]:
+    corners: 65
+    measures:
+      t1:
+        nominal: 4.0904e-07
+        min: 3.9501e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff-
+        max: 4.15013e-07
+        max_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv- z_diff+
+      t4:
+        nominal: 2.11208e-07
+        min: 2.0609e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff-
+        max: 2.12726e-07
+        max_at: C-RX-MOD- c_rx- c_tvs+ r_drv- tr_drv- z_diff+
+      t5:
+        nominal: 1.62422e-07
+        min: 1.46649e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv- z_diff-
+        max: 1.68346e-07
+        max_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv- z_diff+
+      t6:
+        nominal: 1.46512e-07
+        min: 1.28324e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff-
+        max: 1.53851e-07
+        max_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv- z_diff+
+      t7:
+        nominal: 2.17974e-07
+        min: 2.11589e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv- z_diff+
+        max: 2.20361e-07
+        max_at: C-RX-MOD- c_rx- c_tvs- r_drv+ tr_drv- z_diff-
+      t8:
+        nominal: 1.39247e-07
+        min: 1.22321e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff-
+        max: 1.4732e-07
+        max_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv- z_diff+
+      t9_rise:
+        nominal: 2.17974e-07
+        min: 2.11589e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv- z_diff+
+        max: 2.20361e-07
+        max_at: C-RX-MOD- c_rx- c_tvs- r_drv+ tr_drv- z_diff-
+      t9_fall:
+        nominal: 1.48529e-07
+        min: 1.30784e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv- z_diff-
+        max: 1.57932e-07
+        max_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv+ z_diff+
+      t10:
+        nominal: 1.68989e-07
+        min: 1.55804e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff+
+        max: 1.73568e-07
+        max_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv+ z_diff-
+      need_css:
+        nominal: -1.49422e-07
+        min: -1.55346e-07
+        min_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv- z_diff+
+        max: -1.33649e-07
+        max_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv- z_diff-
+      need_csh:
+        nominal: 1.20753e-07
+        min: 1.1268e-07
+        min_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv- z_diff+
+        max: 1.37679e-07
+        max_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff-
+      need_csw:
+        nominal: 1.18792e-07
+        min: 1.17274e-07
+        min_at: C-RX-MOD- c_rx- c_tvs+ r_drv- tr_drv- z_diff+
+        max: 1.2391e-07
+        max_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff-
+    asserts:
+    - expr: min['t5'] > p['dac_t5'] and min['t8'] > p['dac_t8'] and min['t4'] > p['dac_t4'] and min['t1'] > p['dac_t1']
+      why: 'A5-1: with the pads held to the firmware contract (CS_MOD falls by SCLK''s first rising edge, stays low 250 ns
+        past its last falling edge and high 250 ns between frames), the DAC8568 sees t5, t8, t4 and t1 at its pins at every
+        corner, for the worst pair of receiver thresholds and the whole gate-chain spread'
+      pass: true
+    - expr: min['t6'] > p['dac_t67'] and min['t7'] > p['dac_t67'] and min['t9_rise'] > p['dac_t9'] and min['t9_fall'] > p['dac_t9']
+        and min['t10'] > p['dac_t10']
+      why: and SCLK's high and low times and DIN's setup and hold, mode 1 at 2 MHz, likewise
+      pass: true
+  frame-timing[z_cm=140]:
+    corners: 65
+    measures:
+      t1:
+        nominal: 4.10191e-07
+        min: 3.96127e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff-
+        max: 4.16048e-07
+        max_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv- z_diff+
+      t4:
+        nominal: 2.11208e-07
+        min: 2.0609e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff-
+        max: 2.12726e-07
+        max_at: C-RX-MOD- c_rx- c_tvs+ r_drv- tr_drv- z_diff+
+      t5:
+        nominal: 1.61618e-07
+        min: 1.46095e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv- z_diff-
+        max: 1.67508e-07
+        max_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv- z_diff+
+      t6:
+        nominal: 1.4755e-07
+        min: 1.29627e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff-
+        max: 1.5481e-07
+        max_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv- z_diff+
+      t7:
+        nominal: 2.18685e-07
+        min: 2.12723e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs- r_drv- tr_drv+ z_diff+
+        max: 2.20807e-07
+        max_at: C-RX-MOD- c_rx- c_tvs- r_drv+ tr_drv+ z_diff-
+      t8:
+        nominal: 1.40398e-07
+        min: 1.23437e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff-
+        max: 1.48356e-07
+        max_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv- z_diff+
+      t9_rise:
+        nominal: 2.18685e-07
+        min: 2.12723e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs- r_drv- tr_drv+ z_diff+
+        max: 2.20807e-07
+        max_at: C-RX-MOD- c_rx- c_tvs- r_drv+ tr_drv+ z_diff-
+      t9_fall:
+        nominal: 1.47567e-07
+        min: 1.30398e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv- z_diff-
+        max: 1.57017e-07
+        max_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv+ z_diff+
+      t10:
+        nominal: 1.70002e-07
+        min: 1.56751e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff+
+        max: 1.74595e-07
+        max_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv+ z_diff-
+      need_css:
+        nominal: -1.48618e-07
+        min: -1.54508e-07
+        min_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv- z_diff+
+        max: -1.33095e-07
+        max_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv- z_diff-
+      need_csh:
+        nominal: 1.19602e-07
+        min: 1.11644e-07
+        min_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv- z_diff+
+        max: 1.36563e-07
+        max_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff-
+      need_csw:
+        nominal: 1.18792e-07
+        min: 1.17274e-07
+        min_at: C-RX-MOD- c_rx- c_tvs+ r_drv- tr_drv- z_diff+
+        max: 1.2391e-07
+        max_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff-
+    asserts:
+    - expr: min['t5'] > p['dac_t5'] and min['t8'] > p['dac_t8'] and min['t4'] > p['dac_t4'] and min['t1'] > p['dac_t1']
+      why: 'A5-1: with the pads held to the firmware contract (CS_MOD falls by SCLK''s first rising edge, stays low 250 ns
+        past its last falling edge and high 250 ns between frames), the DAC8568 sees t5, t8, t4 and t1 at its pins at every
+        corner, for the worst pair of receiver thresholds and the whole gate-chain spread'
+      pass: true
+    - expr: min['t6'] > p['dac_t67'] and min['t7'] > p['dac_t67'] and min['t9_rise'] > p['dac_t9'] and min['t9_fall'] > p['dac_t9']
+        and min['t10'] > p['dac_t10']
+      why: and SCLK's high and low times and DIN's setup and hold, mode 1 at 2 MHz, likewise
+      pass: true
+  frame-timing-cs-released-at-last-edge:
+    corners: 65
+    measures:
+      t8:
+        nominal: -1.10753e-07
+        min: -1.2768e-07
+        min_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff-
+        max: -1.02678e-07
+        max_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv- z_diff+
+      need_csh:
+        nominal: 1.20753e-07
+        min: 1.12678e-07
+        min_at: C-RX-MOD- c_rx- c_tvs- r_drv- tr_drv- z_diff+
+        max: 1.3768e-07
+        max_at: C-RX-MOD+ c_rx+ c_tvs+ r_drv+ tr_drv+ z_diff-
     asserts: []

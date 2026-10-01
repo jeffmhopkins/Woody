@@ -1,0 +1,40 @@
+* The chain's one hop whose downstream register is clocked LATER than its upstream one:
+* left_thumb (main board) -> right_hand (key board), net HOP_LT_RH. SCK as sck.cir: the
+* GPIO behind its resistance, R-CHAIN-SER, the main board's node m (U-TVS-CHAIN, both
+* thumbs' CLK inputs, trace: left_thumb's CLK is here), and the two ribbons; right_hand's
+* CLK is at the far end of its ribbon (rxr). left_thumb's QH is launched when SCK at m
+* crosses left_thumb's own V_T+ (vt_lt), with no tpd (sims.yaml tpd_lt), as an edge of tr_qh behind the
+* register's output resistance; it goes out on the right_hand ribbon's conductor 6 (the
+* same ribbon, the same flight as SCK) to right_hand's SER input (ser). The register
+* samples SER when its CLK crosses its own V_T+; SER hold is 0 ns
+* [SN74HCS165-ti-scls828a.pdf p.7]. q_up = 1: QH rises; 0: QH falls.
+VDRV src 0 PULSE(0 {{vcc}} 20n {{tr_drv}} {{tr_drv}} 480n 1u)
+RDRV src a {{r_drv}}
+RSER a m {{R-CHAIN-SER}}
+CTVS m 0 {{c_tvs}}
+CMAIN m 0 {{c_main}}
+TLH m 0 rx 0 Z0={{z0_ribbon}} TD={{td_rib}}
+CRX rx 0 {{ci}}
+CKB rx 0 {{c_kb}}
+TRH m 0 rxr 0 Z0={{z0_ribbon}} TD={{td_rib}}
+CRXR rxr 0 {{ci}}
+CKBR rxr 0 {{c_kb}}
+* left_thumb's clock event, with no propagation delay at all (tpd_lt, sims.yaml), and its
+* output edge: a step at the crossing, shaped to tr_qh
+BTRIG trig 0 V = 0.5 * (1 + tanh((v(m) - {{vt_lt}}) * 400))
+RSHP trig shp 1k
+CSHP shp 0 {{c_shape}}
+BQ qsrc 0 V = {{q0}} + ({{q1}} - {{q0}}) * v(shp)
+RQ qsrc qa {{r_qh}}
+CQA qa 0 {{c_lt_qh}}
+TQH qa 0 ser 0 Z0={{z0_ribbon}} TD={{td_rib}}
+CSER ser 0 {{ci}}
+CSKB ser 0 {{c_kb}}
+.control
+tran 20p 300n
+wrdata rxr.dat v(rxr)
+wrdata m.dat v(m)
+wrdata ser.dat v(ser)
+quit
+.endc
+.end
