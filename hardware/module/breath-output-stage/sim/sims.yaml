@@ -17,8 +17,16 @@ values:
     - hardware/module/breath-response-shaper/netlist.yaml
     - hardware/module/pitch-stage/netlist.yaml
     - hardware/module/mod-channels/netlist.yaml
+    # the noise sims' chain, sensor to in-amp, and the DAC rail's SET parts
+    - hardware/module/breath-receive-stage/netlist.yaml
+    - hardware/interfaces/breath-sense-link/netlist.yaml
+    - hardware/carrier/breath-excitation-reference/netlist.yaml
+    - hardware/carrier/breath-adc/netlist.yaml
+    - hardware/module/power-entry/netlist.yaml
 models:
   - datasheets/analog/OPAx197-ti-pspice-sboma34d.lib
+  - datasheets/analog/INA828-ti-pspice-sbomag5c.lib
+  - datasheets/analog/REF5050-ti-pspice-slim175a.lib
 spiceinit: [set ngbehavior=psa]
 
 params:
@@ -40,6 +48,37 @@ params:
   r_open:   {value: 1.0e12}
   rail:     {value: 0}
   rail_mv:  {value: 9.7e-3, source: "the +-12 V rails' movement at the header as U-ISO's input current follows breath (ADR 0027, residual table, [sim, rail_mv])"}
+  # --- the noise sims (noise.cir, noise-amps.cir, noise-ref.cir)
+  v_inst:   {value: 12.0, source: "INST_POS12, U-BUF's supply and the REF5050's input (breath-excitation-reference netlist); the instrument's +12 V nominal"}
+  i_sensor: {value: 10.0e-3, source: "MPXV4006DP supply current, 10 mAdc max [datasheets/analog/MPXV4006DP.pdf, operating characteristics], as breath-excitation-reference/sim"}
+  vs_nom:   {value: 5.0, source: "REF5050 VOUT nominal [datasheets/analog/REF5050.pdf]; VS follows it through U-BUF A"}
+  k_off:    {value: 0.053, source: "the sensor's transfer V_out = V_S x (0.1533 P + 0.053) [datasheets/analog/MPXV4006DP.pdf p.4; sensor-full-scale's derivation]: its ratio at rest, the typical 0.265 V pedestal at 5 V"}
+  level:    {value: 0, source: "0: breath at rest; 1: a hard blow, the in-amp at v_hard (breath-working-point's 2.8 kPa candidate, disputed until E2)"}
+  # THE SENSOR'S NOISE IS AN ASSUMPTION. No MPXV4006DP datasheet states one. NXP's AN1646,
+  # measured on the MPX5006 (the same die family): its noise 'extends from 500 Hz to 1 MHz' and
+  # is '4 or 5 counts on a 10-bit A/D' at 5 V [datasheets/analog/MPXV4006-AN1646.pdf p.1].
+  # Taken as 5 counts peak-to-peak, Gaussian (pk-pk = 6.6 x rms), spread evenly over that band,
+  # and white below it too: an upper bound in the breath band, where AN1646 says there is less
+  an_counts: {value: 5.0, source: "AN1646 p.1, '4 or 5 counts on a 10-bit A/D' (the larger)"}
+  an_crest:  {value: 6.6, source: "peak-to-peak over rms for Gaussian noise read off a scope trace [assumption: the usual 6.6, 0.1 % of the time outside]"}
+  an_f_lo:   {value: 500.0, source: "AN1646 p.1, the noise band's lower end"}
+  an_f_hi:   {value: 1.0e6, source: "AN1646 p.1, its upper end"}
+  # the REF5050's noise, white at its datasheet's in-band figure (TI's model reads 5x that: noise-ref)
+  ref_en_rel: {value: 0.9e-6, source: "REF5050 High grade output noise 0.9 uVrms/V, 10 Hz to 1 kHz [datasheets/analog/REF5050.pdf, Electrical Characteristics, e_n]"}
+  ref_f_lo:  {value: 10.0, source: "that figure's band"}
+  ref_f_hi:  {value: 1.0e3, source: "that figure's band"}
+  # the LT3042's SET pin: its reference current's noise, white, into R-SET-DAC
+  i_set_rms: {value: 6.0e-9, source: "LT3042 reference current RMS output noise, 6 nA rms over 10 Hz to 100 kHz [datasheets/discrete-and-power/ADI-LT3042.pdf p.3]"}
+  set_f_lo:  {value: 10.0, source: "that figure's band"}
+  set_f_hi:  {value: 1.0e5, source: "that figure's band"}
+  v_jack_fs: {value: 10.0, source: "the jack at a hard blow at the commissioned setting, about 10 V (breath-output-stage.md, 'What it has to do'; chain-centre): the full scale a player's noise is measured against"}
+  v_adc_ref: {value: 3.3, source: "the MCP3202's reference is its VDD, DEV_3V3 (breath-adc netlist)"}
+  f_au_lo:  {value: 20.0, source: "the audio band, 20 Hz to 20 kHz: what reaches a VCA or a filter's cutoff as hiss"}
+  f_au_hi:  {value: 2.0e4}
+  f_cb_lo:  {value: 1.0, source: "the control band's lower end: below 1 Hz is drift, the zero's (breath-receive-stage.md, Commissioning)"}
+  f_adc_hi: {value: 1.0e6, source: "everything the converter samples folds into its 2 kHz: integrated to AN1646's 1 MHz, far past C-AA-ADC's pole"}
+  # the INA828 at G = 1001 for noise-amps: the datasheet's e_NI is specified at G = 100 and up
+  r_g_1001: {value: 49.95, source: "50 kohm / 1001 [ds INA828 p.5, gain equation]"}
 
 derived:
   t_step_e: "v['t_step'] + v['t_edge']"
@@ -57,6 +96,35 @@ derived:
   v_hard_mag: "-v['v_hard']"
   t_hard_c: "-v['v_hard'] * v['t_ramp'] / v['v_mag']"
   t_hard_c_run: "-v['v_hard'] * v['t_ramp'] / v['v_mag'] + 20e-6"
+  # --- the noise sims
+  kt4: "4 * 1.380649e-23 * (273.15 + v['temp_c'])"
+  # the in-amp's effective gain: 1 + 50k/R_G [ds INA828 p.5] times the bias divider R4/(R4 + R2 + R1b)
+  g_eff: "(1 + 50e3 / v['R-GAIN-INAMP']) * v['R4'] / (v['R4'] + v['R2'] + v['R1b'])"
+  k_op: "v['k_off'] + (v['v_hard_mag'] / (v['g_eff'] * v['vs_nom']) if v['level'] else 0.0)"
+  # TRIM-BREATH-ZERO's wiper where it nulls the pedestal (breath-zero-ref), as two resistors
+  r_z_ccw: "v['g_eff'] * v['vs_nom'] * v['k_off'] * (v['R-ZERO-TOP'] + v['TRIM-BREATH-ZERO']) / v['v_avdd']"
+  r_z_cw: "v['TRIM-BREATH-ZERO'] - v['g_eff'] * v['vs_nom'] * v['k_off'] * (v['R-ZERO-TOP'] + v['TRIM-BREATH-ZERO']) / v['v_avdd']"
+  r_shaper_in: "1 / (1 / v['R-RESP-IN'] + 1 / (v['R-RESP-DIV-HI'] + v['R-RESP-DIV-LO']))"
+  # white generators: a resistor whose thermal noise is the density wanted, buffered at unity
+  e_sensor: "v['an_counts'] * v['vs_nom'] / 1024 / v['an_crest'] / math.sqrt(v['an_f_hi'] - v['an_f_lo'])"
+  r_n_sensor: "v['e_sensor'] ** 2 / v['kt4']"
+  e_vs: "v['ref_en_rel'] * v['vs_nom'] / math.sqrt(v['ref_f_hi'] - v['ref_f_lo'])"
+  r_n_ref: "v['e_vs'] ** 2 / v['kt4']"
+  r_n_set: "(v['i_set_rms'] / math.sqrt(v['set_f_hi'] - v['set_f_lo']) * v['R-SET-DAC']) ** 2 / v['kt4']"
+  # the link's differential pole, the control band's top: 2 x 11 kohm against C_diff + C_cm/2
+  f_cb_hi: "1 / (2 * math.pi * (v['R1'] + v['R3'] + v['R1b'] + v['R2']) * (v['C-DIFF-BREATH'] + v['C-CM-IN+'] * v['C-CM-IN-'] / (v['C-CM-IN+'] + v['C-CM-IN-'])))"
+  v_adc_lsb: "v['v_adc_ref'] / 4096"
+  # the ramp for piece B's slope: at rest (0 to -0.1 V) and +-0.05 V about a hard blow
+  v_ramp_end: "-v['v_mag']"
+  v_in_r0: "0.0"
+  v_in_r1: "-0.1"
+  v_in_h0: "-(v['v_hard_mag'] - 0.05)"
+  v_in_h1: "-(v['v_hard_mag'] + 0.05)"
+  t_r0: "0.0"
+  t_r1: "0.1 * v['t_ramp'] / v['v_mag']"
+  t_h0: "(v['v_hard_mag'] - 0.05) * v['t_ramp'] / v['v_mag']"
+  t_h1: "(v['v_hard_mag'] + 0.05) * v['t_ramp'] / v['v_mag']"
+  t_inc_run: "(v['v_hard_mag'] + 0.05) * v['t_ramp'] / v['v_mag'] + 20e-6"
 
 vary:
   R-BREATH-FB:     {tol: from-value}

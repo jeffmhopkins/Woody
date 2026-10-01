@@ -1,0 +1,306 @@
+* THE BREATH CHAIN'S NOISE, sensor to jack, as netlisted across six circuits:
+* interfaces/breath-sense-link (the sensor, R1, R1b), carrier/breath-excitation-reference
+* (U-BUF half B, the sensor buffer), carrier/breath-adc (its divider and C-AA-ADC: a second
+* output, ADC_IN), module/breath-receive-stage (R2-R5, C_cm, C_diff, TI's INA828 model with
+* R-GAIN-INAMP, REF from TRIM-BREATH-ZERO through U-REF-BUF), module/breath-response-shaper
+* and this circuit (chain.cir's lines verbatim), into 100 kohm; DAC_AVDD from power-entry.
+* TWO PIECES, ONE DECK. TI's models find no operating point with the whole chain joined
+* (ngspice's gmin and source stepping fail and its transient op, which tools/sim.py refuses,
+* reported the in-amp at +0.42 V for a hard blow of -4.64 V). So the chain is cut at the
+* INA828's output, an op-amp output: piece A (sensor to in-amp, loaded by the shaper's input
+* resistance) and piece B (shaper to jack, driven by VINB) are disconnected in one netlist.
+* The jack's noise is piece A's spectrum at the in-amp's output times |H_B|^2, piece B's AC
+* gain, plus piece B's own: exact for sources this independent, since the in-amp's output
+* impedance is milliohms against R-RESP-IN's 20 kohm.
+* VS IS A SOURCE WITH A NOISE GENERATOR, e_vs: the REF5050 and U-BUF half A's loop find no
+* operating point beside the rest either (the reference sims record the same), so the
+* reference is its datasheet's in-band noise as a white generator; noise-ref runs TI's
+* REF5050 model with U-BUF A as netlisted, alone, and records how it compares.
+* THE SENSOR IS BEHAVIOURAL: no MPXV4006DP model exists. It is the datasheet's ratiometric
+* transfer, V(VS) x k (VPR is k), linearised by ngspice like any B source, so the reference's
+* noise reaches the jack as k times itself; its own noise is a white generator, e_sensor
+* (sims.yaml says where that number comes from), in series with its output. Ideal there:
+* its output impedance is not published, so C-SENSOR-OUT is left out.
+* DAC_AVDD is dac-rail plus the LT3042's SET-pin noise: the reference current's noise into
+* R-SET-DAC, both filtered by C-SET-DAC, followed at unity (its error amplifier's 2 nV/rtHz
+* is left out). The +-12 V rails and INST_POS12 are ideal: the -12 V rail's path to the
+* jack is the `rail` sim's. D-TVS-BREATH, D-CLAMP-BREATH and D-JACK-CLAMP are left out
+* (reverse-biased; their leakage noise is fA).
+VPOS pos 0 {{v_pos}}
+VNEG neg 0 {{v_neg}}
+VINST inst12 0 {{v_inst}}
+* -- VS: vs_nom and the reference's noise
+VVS vsq 0 {{vs_nom}}
+EVS vs vsq nref 0 1
+RNREF nref 0 {{r_n_ref}}
+* -- the sensor (ratiometric; VPR is its ratio, k_off at rest) and U-BUF half B
+VPR press 0 DC {{k_off}} AC 1
+BSENS sx 0 V = V(vs) * V(press)
+ESN sraw sx nsen 0 1
+RNSEN nsen 0 {{r_n_sensor}}
+XBS sraw sbo inst12 0 sbo OPAx197
+* -- the instrument's ADC input
+RADU sbo adcin {{R-ADCDIV-U}}
+RADL adcin 0 {{R-ADCDIV-L}}
+CAA adcin 0 {{C-AA-ADC}}
+* -- the link: both legs' series resistors (the cable's 0.2 ohm per conductor is balanced, left out)
+R1 sbo breath {{R1}}
+R1b 0 agsense {{R1b}}
+* -- the receive stage
+R3 breath inneg {{R3}}
+R2 agsense inpos {{R2}}
+R4 inpos 0 {{R4}}
+R5 inneg 0 {{R5}}
+CCMP inpos 0 {{C-CM-IN+}}
+CCMN inneg 0 {{C-CM-IN-}}
+CDIFF inpos inneg {{C-DIFF-BREATH}}
+XAMP inpos inneg pos neg in refdrv rg1 rg2 INA828
+RG rg1 rg2 {{R-GAIN-INAMP}}
+* -- DAC_AVDD: dac-rail, plus the SET pin's current noise and R-SET-DAC's own, through C-SET-DAC
+VAVDD avddq 0 {{v_avdd}}
+RNSET nset 0 {{r_n_set}}
+ESET nseti 0 nset 0 1
+RSET nseti nsetf {{R-SET-DAC}}
+CSET nsetf 0 {{C-SET-DAC}}
+EAVDD avdd avddq nsetf 0 1
+* -- TRIM-BREATH-ZERO at the wiper that nulls the pedestal, and U-REF-BUF
+RZT avdd ztop {{R-ZERO-TOP}}
+RZCW ztop zw {{r_z_cw}}
+RZCCW zw 0 {{r_z_ccw}}
+XRB zw refdrv pos neg refdrv OPAx197
+* -- piece A ends at the in-amp's output, loaded by the shaper's input resistance
+RLA in 0 {{r_shaper_in}}
+* -- piece B: the shaper's input, at rest (DC 0), ramped by VRMP in the transients
+VINB inb inr DC 0 AC 1
+VRMP inr 0 PWL(0 0 {{t_ramp}} {{v_ramp_end}})
+* -- the response shaper (chain.cir)
+RDH inb vhalf {{R-RESP-DIV-HI}}
+RDL vhalf 0 {{R-RESP-DIV-LO}}
+RRIN2 inb vg {{R-RESP-IN}}
+RRFB vg vsh {{R-RESP-FB}}
+XSA 0 vg pos neg vsh OPAx197
+RPCW vhalf wip {{r_pot_cw}}
+RPCCW wip vsh {{r_pot_ccw}}
+RRESP wip tr {{R-RESP}}
+RTRIMR tr db {{r_trim}}
+DA vg db DRESP
+DB db vg DRESP
+RRI vsh rs {{R-RESTORE-IN}}
+RRF rs shaped {{R-RESTORE-FB}}
+XSB 0 rs pos neg shaped OPAx197
+* -- this stage (chain.cir)
+RGCW shaped gw {{r_gain_cw}}
+RGCCW gw gf {{r_gain_ccw}}
+RFLOOR gf 0 {{R-GAIN-FLOOR}}
+XA gw bufo2 pos neg bufo2 OPAx197
+RIN bufo2 sum {{R-BREATH-IN}}
+ROCW 0 ow {{r_off_cw}}
+ROCCW ow avdd {{r_off_ccw}}
+ROFF ow sum {{R-BREATH-OFF}}
+ROFFN neg sum {{R-BREATH-OFFNEG}}
+RFB sum out {{R-BREATH-FB}}
+XB 0 sum pos neg out OPAx197
+ROUT out jack {{R-OUT-PROT}}
+COUT jack 0 {{C-OUT-BREATH}}
+RLOAD jack 0 {{r_load}}
+.model DRESP D(IS={{is_d}} N={{n_d}} RS={{rs_d}} CJO=1.5p)
+.options method=gear rshunt=1e10 itl1=1000 itl2=1000
+.control
+* TI's models mark their bookkeeping resistors noiseless with PSpice's T_ABS=-273.15 on
+* R_NOISELESS. ngspice 42 does not honour it for noise (an OPA2197 follower read 868 nV/rtHz,
+* all from one 2.2 ohm resistor, against the datasheet's 5.5), so each one is silenced by
+* name: every R_NOISELESS instance in the OPAx197 and INA828 subcircuits as banked (their
+* own noise generators sit in sub-subcircuits and stay). noise-amps holds the result to
+* each datasheet, and shows the follower without the lists.
+set opaq = ( r_r1 r_r10 r_r11 r_r12 r_r13 r_r14 r_r15 r_r16 r_r17 r_r18 r_r19 r_r2 r_r20 r_r21 r_r22 r_r23 r_r24 r_r3 r_r32 r_r33 r_r34 r_r35 r_r36 r_r4 r_r40 r_r41 r_r42 r_r43 r_r46 r_r47 r_r48 r_r49 r_r5 r_r50 r_r51 r_r52 r_r53 r_r54 r_r55 r_r56 r_r57 r_r58 r_r59 r_r6 r_r60 r_r61 r_r62 r_r63 r_r64 r_r65 r_r66 r_r67 r_r68 r_r69 r_r7 r_r70 r_r71 r_r72 r_r73 r_r74 r_r75 r_r76 r_r77 r_r78 r_r79 r_r8 r_r80 r_r81 r_r82 r_r83 r_r84 r_r85 r_r86 r_r87 r_r88 r_r89 r_r9 r_r90 r_r91 r_r92 r_r_diff r_rdummy r_rx r_rx1 r_rx2 r_rx3 r_rx4 )
+set inaq = ( r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 r11 r12 r13 r14 r15 r16 r17 r18 r19 r20 r21 r22 r23 r24 r25 r26 r29 r31 r32 r39 r40 r41 r42 r43 r46 r48 r49 r56 r57 r58 r59 r60 r61 r62 r63 r64 r65 r66 r67 r68 r69 r70 r71 r72 r73 r74 r75 r76 r77 r78 r79 r80 r81 r82 r83 r84 r85 r86 r87 r88 r89 r90 r91 r92 r93 r94 r95 r96 r97 r98 r99 r100 r101 r102 r103 r104 r105 r106 r107 r108 r109 r110 r111 r112 r113 r114 r115 r116 r117 r118 r119 r120 r121 r122 r123 r124 r125 r126 r127 r128 r129 r130 r131 r132 r133 r134 r135 r136 r137 r138 r139 r140 r141 r142 r143 r144 r145 r146 r147 r148 r149 r150 r151 r152 r153 r154 r155 r156 r157 r158 r159 r160 r161 r162 r163 r164 r165 r166 r168 rb1 rb2 rdc1 rdc2 rdc3 rdummy1 rdummy2 rdummy3 rf1 rf2 rmid rsrc1 rsrc2 rsrc3 rsrc4 rx1 rx2 rx3 )
+foreach x xbs xrb xsa xsb xa xb
+  foreach r $opaq
+    alter r.{$x}.{$r} noisy = 0
+  end
+end
+foreach r $inaq
+  alter r.xamp.{$r} noisy = 0
+end
+* commissioning, on piece B as chain.cir does it (a ramp from rest: piece B finds no
+* operating point at a hard blow): POT-RESP fully clockwise, TRIM-RESP bisected until a
+* hard blow gives g_trim at BREATH_SHAPED, at t_comm
+if {{trimmed}} > 0
+  let tr_lo = {{r_trim_end}}
+  let tr_hi = {{TRIM-RESP}}
+  alter rpcw = 1e-3
+  alter rpccw = {{POT-RESP}}
+  option temp={{t_comm}}
+  let k = 0
+  while k < 12
+    let mid = (tr_lo + tr_hi) / 2
+    alter rtrimr = mid
+    tran 2u {{t_hard_c_run}} 0 4u
+    meas tran vset find v(shaped) at={{t_hard_c}}
+    let g_set = -vset / {{v_hard_mag}}
+    if g_set > {{g_trim}}
+      let tr_lo = mid
+    else
+      let tr_hi = mid
+    end
+    let k = k + 1
+  end
+  print g_set
+  alter rpcw = {{r_pot_cw}}
+  alter rpccw = {{r_pot_ccw}}
+end
+option temp={{temp_c}}
+* piece B's incremental gain, in-amp output to BREATH_OUT, on the same ramp: at rest
+* (0 to -0.1 V) and across a hard blow (+-0.05 V about it). Its noise analysis below runs
+* at rest; at a hard blow everything upstream of it reaches the jack through r_b times
+* the gain at rest (the curve's slope there), and piece B's own sources are taken at rest
+tran 2u {{t_inc_run}} 0 4u
+meas tran o_r0 find v(out) at={{t_r0}}
+meas tran o_r1 find v(out) at={{t_r1}}
+meas tran o_h0 find v(out) at={{t_h0}}
+meas tran o_h1 find v(out) at={{t_h1}}
+let g_inc_rest = (o_r1 - o_r0) / ({{v_in_r1}} - {{v_in_r0}})
+let g_inc_hard = (o_h1 - o_h0) / ({{v_in_h1}} - {{v_in_h0}})
+let r_b = 1
+if {{level}} > 0
+  let r_b = g_inc_hard / g_inc_rest
+end
+print g_inc_rest g_inc_hard r_b
+set ptr = $curplot
+* the operating point: the pressure on piece A (rest or a hard blow); piece B at rest
+alter vpr dc = {{k_op}}
+op
+let vs_op = v(vs)
+let ina_op = v(in)
+let jack_op = v(jack)
+let adc_op = v(adcin)
+print vs_op ina_op jack_op adc_op
+* THE JACK, per band: |H_B|^2 (piece B, the in-amp's output to the jack, AC), piece A's
+* spectra at the in-amp's output times it, plus piece B's own at the jack.
+* The DAC rail reaches the jack two ways (TRIM-BREATH-ZERO into REF, and POT-OFFSET):
+* each of its two sources adds its two paths' amplitudes, the worst case for their phase.
+foreach bi 1 2
+  if $bi = 1
+    set bn = au
+    ac dec 20 {{f_au_lo}} {{f_au_hi}}
+    set pac = $curplot
+    noise v(in) vpr dec 20 {{f_au_lo}} {{f_au_hi}} 1
+    setplot previous
+    set pa = $curplot
+    noise v(jack) vinb dec 20 {{f_au_lo}} {{f_au_hi}} 1
+    setplot previous
+    set pb = $curplot
+  else
+    set bn = cb
+    ac dec 20 {{f_cb_lo}} {{f_cb_hi}}
+    set pac = $curplot
+    noise v(in) vpr dec 20 {{f_cb_lo}} {{f_cb_hi}} 1
+    setplot previous
+    set pa = $curplot
+    noise v(jack) vinb dec 20 {{f_cb_lo}} {{f_cb_hi}} 1
+    setplot previous
+    set pb = $curplot
+  end
+  setplot $pa
+  let hb2 = mag({$pac}.jack) * mag({$pac}.jack) * {$ptr}.r_b * {$ptr}.r_b
+  let hb = sqrt(hb2)
+  foreach x xbs xrb
+    let o_{$x} = 0 * hb2
+    foreach s x_u1.r4 x_u1.r5 x_u36.r1 x_u36.r2 x_u37.r1 x_u37.r2
+      let o_{$x} = o_{$x} + onoise_r.{$x}.{$s} * onoise_r.{$x}.{$s}
+    end
+    foreach s x_u1.d1 x_u1.d2
+      let o_{$x} = o_{$x} + onoise_d.{$x}.{$s} * onoise_d.{$x}.{$s}
+    end
+  end
+  let o_amp = 0 * hb2
+  foreach s xe_n3.r4 xe_n3.r5 xe_np.r4 xe_np.r5 xe_nn.r4 xe_nn.r5 xi_np.r4 xi_np.r5 xi_nn.r4 xi_nn.r5
+    let o_amp = o_amp + onoise_r.xamp.{$s} * onoise_r.xamp.{$s}
+  end
+  foreach s xe_n3.d1 xe_n3.d2 xe_np.d1 xe_np.d2 xe_nn.d1 xe_nn.d2 xi_np.d1 xi_np.d2 xi_nn.d1 xi_nn.d2
+    let o_amp = o_amp + onoise_d.xamp.{$s} * onoise_d.xamp.{$s}
+  end
+  let s_sensor = onoise_rnsen * onoise_rnsen * hb2
+  let s_ref = onoise_rnref * onoise_rnref * hb2
+  let s_sbuf = o_xbs * hb2
+  let s_link = (onoise_r1 * onoise_r1 + onoise_r1b * onoise_r1b) * hb2
+  let s_recv = o_amp
+  foreach d r2 r3 r4 r5 rg
+    let s_recv = s_recv + onoise_{$d} * onoise_{$d}
+  end
+  let s_recv = s_recv * hb2
+  let s_zero = o_xrb
+  foreach d rzt rzcw rzccw
+    let s_zero = s_zero + onoise_{$d} * onoise_{$d}
+  end
+  let s_zero = s_zero * hb2
+  let a_nset = onoise_rnset * hb
+  let a_set = onoise_rset * hb
+  let a_tot2 = onoise_spectrum * onoise_spectrum * hb2
+  setplot $pb
+  foreach x xsa xsb xa xb
+    let o_{$x} = 0 * onoise_spectrum
+    foreach s x_u1.r4 x_u1.r5 x_u36.r1 x_u36.r2 x_u37.r1 x_u37.r2
+      let o_{$x} = o_{$x} + onoise_r.{$x}.{$s} * onoise_r.{$x}.{$s}
+    end
+    foreach s x_u1.d1 x_u1.d2
+      let o_{$x} = o_{$x} + onoise_d.{$x}.{$s} * onoise_d.{$x}.{$s}
+    end
+  end
+  let s_shaper = o_xsa + o_xsb + onoise_da * onoise_da + onoise_db * onoise_db
+  foreach d rdh rdl rrin2 rrfb rpcw rpccw rresp rtrimr rri rrf
+    let s_shaper = s_shaper + onoise_{$d} * onoise_{$d}
+  end
+  let s_out = o_xa + o_xb
+  foreach d rgcw rgccw rfloor rin rocw roccw roff roffn rfb rout rload
+    let s_out = s_out + onoise_{$d} * onoise_{$d}
+  end
+  * the DAC rail: both paths of each of its two sources, coherently (worst case)
+  let s_dac = ({$pa}.a_nset + onoise_rnset) * ({$pa}.a_nset + onoise_rnset) + ({$pa}.a_set + onoise_rset) * ({$pa}.a_set + onoise_rset)
+  let s_dac_unc = {$pa}.a_nset * {$pa}.a_nset + onoise_rnset * onoise_rnset + {$pa}.a_set * {$pa}.a_set + onoise_rset * onoise_rset
+  let s_tot = {$pa}.a_tot2 + onoise_spectrum * onoise_spectrum - s_dac_unc + s_dac
+  let s_sens = {$pa}.s_sensor
+  let s_rest = s_tot - s_sens - {$pa}.s_ref - {$pa}.s_sbuf - {$pa}.s_link - {$pa}.s_recv - {$pa}.s_zero - s_dac - s_shaper - s_out
+  let nn = length(s_tot)
+  let i_tot = integ(s_tot)
+  let i_sens = integ(s_sens)
+  let i_ref = integ({$pa}.s_ref)
+  let i_sbuf = integ({$pa}.s_sbuf)
+  let i_link = integ({$pa}.s_link)
+  let i_recv = integ({$pa}.s_recv)
+  let i_zero = integ({$pa}.s_zero)
+  let i_dac = integ(s_dac)
+  let i_shaper = integ(s_shaper)
+  let i_out = integ(s_out)
+  let i_rest = integ(s_rest)
+  let n_{$bn}_total = sqrt(i_tot[nn-1])
+  let n_{$bn}_sensor = sqrt(i_sens[nn-1])
+  let n_{$bn}_elec = sqrt(i_tot[nn-1] - i_sens[nn-1])
+  let n_{$bn}_ref = sqrt(i_ref[nn-1])
+  let n_{$bn}_sbuf = sqrt(i_sbuf[nn-1])
+  let n_{$bn}_link = sqrt(i_link[nn-1])
+  let n_{$bn}_recv = sqrt(i_recv[nn-1])
+  let n_{$bn}_zero = sqrt(i_zero[nn-1])
+  let n_{$bn}_dac = sqrt(i_dac[nn-1])
+  let n_{$bn}_shaper = sqrt(i_shaper[nn-1])
+  let n_{$bn}_out = sqrt(i_out[nn-1])
+  let n_{$bn}_rest = sqrt(abs(i_rest[nn-1]))
+  let db_{$bn} = db(n_{$bn}_total / {{v_jack_fs}})
+  let ppm_{$bn} = 1e6 * n_{$bn}_total / {{v_jack_fs}}
+  print n_{$bn}_total n_{$bn}_sensor n_{$bn}_elec n_{$bn}_ref n_{$bn}_sbuf n_{$bn}_link n_{$bn}_recv n_{$bn}_zero n_{$bn}_dac n_{$bn}_shaper n_{$bn}_out n_{$bn}_rest db_{$bn} ppm_{$bn}
+  if $bi = 1
+    let e_jack = sqrt(s_tot)
+    wrdata jackn.dat e_jack
+    let e_jack_elec = sqrt(s_tot - s_sens)
+    wrdata jackne.dat e_jack_elec
+  end
+end
+* the instrument's ADC input, across the whole band the converter samples
+noise v(adcin) vpr dec 20 {{f_cb_lo}} {{f_adc_hi}} 1
+let n_adc_total = onoise_total
+let n_adc_sensor = onoise_total_rnsen
+let n_adc_lsb = onoise_total / {{v_adc_lsb}}
+print n_adc_total n_adc_sensor n_adc_lsb
+quit
+.endc
+.end
