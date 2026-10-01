@@ -1,0 +1,222 @@
+* The instrument's LED row PWM, reflected through U-ISO onto the rack's +-12 V and back into
+* this module's analog rails, DAC_AVDD and its jacks (pre-layout review A4-13). One run is
+* one PWM frequency, duty and pattern. As netlisted: every part value from the netlists,
+* every estimate in sims.yaml.
+*
+* A POWER-ON, NOT AN OPERATING POINT. Every node starts at 0 V (uic) and every supply ramps
+* up over t_ramp_pwm, as poweron.cir does; the run settles for t_end_pwm - t_win_pwm and the
+* ripple is read over the last t_win_pwm. TI's OPA2197 model found no operating point for
+* two or more instances beside this network (2026-10-01: gmin and source stepping both
+* failed, and the only way through was ngspice's transient op, which tools/sim.py refuses).
+*
+* THE LED ROW: thirteen WS2815B-V1, each a pulse of i_pix (its share of the row at full
+* white, less its quiescent) at the PWM frequency f_pwm and duty d_led, on top of the row's
+* quiescent; the first n_lit pulse, the rest sit blanked; their pulses start spread*k/13 of
+* a period apart (0: in phase, the worst; 1: evenly spread). Drawn at the row's feed, at
+* C-STRIP-BULK, behind Q-INRUSH, the umbilical, the load switch and C-ISO-OUT (k_row 1), or
+* straight from U-ISO's output (k_row 0, the review's bound: no instrument in the way).
+* The instrument: C-STRIP-BULK and, behind L-BUCK-IN and C-BUCK-IN, the buck as constant
+* power, as power-entry-instrument/sim's pei-z.cir places them; its other 12 V loads as a DC
+* current.
+*
+* U-ISO, BEHAVIOURAL: a 12 V source behind its output resistance; its input draws its
+* output power over eta from whatever voltage its input pins see (so its negative input
+* resistance is in the run), beside its own input capacitance. That assumes its loop
+* follows the PWM instantly, which passes the whole step to its input - the upper bound
+* (sims.yaml, eta and c_uiso_in, say why). Below a knee voltage, far under where any run
+* sits, they draw as resistors instead, so the ramp up from 0 V is benign.
+*
+* THE MODULE: U-ISO's input filter (C2, C-ISO-IN, L-CM-ISO's leakage, L-ISO-IN, FB2/FB4,
+* D2/D4, PTC-ISO) back to the header; the analog rails' entry (PTC-POS12/NEG12, D1/D3,
+* FB1/FB3, C1/C3, the regulators' input capacitors, module-own-draw); the ribbon, the bus
+* and the PSU with the rack's decoupling. The rack's ground carries none of U-ISO's current
+* (it flows rail to rail), so it is ideal here. DAC_AVDD is the LT3042's set point plus the
+* +12 V rail's ripple at the regulator's PSRR (psrr_ldo: lt3042.lib models none); each DAC
+* output carries DAC_AVDD's ripple at k_dac (the DAC8568 publishes no AC PSRR). The pitch
+* stage (pitch-stage.lib), mod channel 1 with its reference follower, and the breath
+* output stage's buffer and summer, each TI's OPA2197 model on the two analog rails.
+.param T={{t_pwm}} ton={{t_on}} ipix={{i_pix}} nlit={{n_lit}} sp={{spread}} t0={{t_ramp2_pwm}}
+* ---- the rack: PSU, its and the other modules' decoupling, the bus to this module's tap,
+* ---- the ribbon to the header
+VPSUP vpp 0 PWL(0 0 {{t_ramp_pwm}} {{v_bus}})
+RPSUP vpp busp {{r_psu}}
+CRP busp crp {{c_rack}}
+RCRP crp 0 {{esr_rack}}
+RBUSP busp tapp {{r_bus_rail}}
+RRIBP tapp ribp {{r_rib_rail}}
+LRIBP ribp hp {{l_rib}}
+VPSUN vpn 0 PWL(0 0 {{t_ramp_pwm}} {{v_bus_neg}})
+RPSUN vpn busn {{r_psu}}
+CRN busn crn {{c_rack}}
+RCRN crn 0 {{esr_rack}}
+RBUSN busn tapn {{r_bus_rail}}
+RRIBN tapn ribn {{r_rib_rail}}
+LRIBN ribn hn {{l_rib}}
+* ---- U-ISO's +12 V leg: PTC-ISO, D2, FB2, L-ISO-IN, then L-CM-ISO's winding
+RPTCI hp d2a {{r_ptc_iso}}
+D2 d2a d2k D5817
+LFB2 d2k fb2b {{l_fb_iso}}
+RFB2P d2k fb2b {{r_fb_peak}}
+RFB2 fb2b liso {{r_fb_dcr}}
+LISO liso lisb {{L-ISO-IN}}
+RLISO lisb fp {{r_liso}}
+* ---- the -12 V leg: L-CM-ISO's other winding, FB4, D4 (anode at the module)
+LFB4 fn fb4b {{l_fb_iso}}
+RFB4P fn fb4b {{r_fb_peak}}
+RFB4 fb4b d4a {{r_fb_dcr}}
+D4 d4a hn D5817
+* ---- L-CM-ISO, dots on the filter side: only its leakage is left differentially
+LCA fp ca {{L-CM-ISO}}
+RCA ca vinp {{r_cm_dcr}}
+LCB fn cb {{L-CM-ISO}}
+RCB cb vinn {{r_cm_dcr}}
+K1 LCA LCB {{k_cm}}
+* ---- at U-ISO's pins: C2, C-ISO-IN and the converter's own input capacitance
+C2 vinp c2a {{C2}}
+RC2 c2a c2b {{esr_c2}}
+LC2 c2b vinn {{l_esl_el}}
+CIN vinp cin1 {{C-ISO-IN}}
+LCIN cin1 vinn {{l_esl_cer}}
+CUIN vinp vinn {{c_uiso_in}}
+* ---- U-ISO: input = output power / eta
+BISO vinp viso_i I = max(v(iso0,pg)*i(VISO)*(-1), 0) / {{eta}} * v(vinp,vinn) / max(v(vinp,vinn), {{v_knee_iso}})**2
+VPRISO viso_i vinn 0
+VISO iso0 pg PWL(0 0 {{t_ramp_pwm}} 0 {{t_ramp2_pwm}} {{v_iso}})
+RTIE pg 0 {{r_tie}}
+RISO iso0 vcc {{r_bus}}
+CISO vcc ciso {{C-ISO-OUT}}
+RCISO ciso pg {{esr_iso}}
+* ---- the load switch on (R-ILIM, Q-LOADSW), the umbilical's two conductors
+RILIM vcc sns {{R-ILIM}}
+RDS sns out {{r_dson}}
+RCP out cp1 {{r_cable}}
+LCP cp1 inp {{l_cable}}
+RCN ig cn1 {{r_cable}}
+LCN cn1 pg {{l_cable}}
+* ---- the instrument: Q-INRUSH on, C-STRIP-BULK at the row's feed, L-BUCK-IN, C-BUCK-IN, the buck
+RQ inp ins {{r_on_z}}
+CSTRIP ins cs1 {{C-STRIP-BULK}}
+RCSTRIP cs1 ig {{esr_strip}}
+LBIN ins lb1 {{L-BUCK-IN}}
+RLBIN lb1 cbk {{r_lbin}}
+CBUCK cbk cb1 {{C-BUCK-IN}}
+RCBUCK cb1 ig {{esr_buck}}
+BBUCK cbk ig I = {{p_buck}} * v(cbk,ig) / max(v(cbk,ig), {{v_knee_buck}})**2
+IOTHER ins ig PWL(0 0 {{t_ramp_pwm}} 0 {{t_ramp2_pwm}} {{i_other}})
+* ---- the LED row: at the row's feed (k_row 1) or at U-ISO's output (k_row 0)
+RSELA ledf ins {{r_sel_row}}
+RSELB ledf vcc {{r_sel_iso}}
+RSELC ledr ig {{r_sel_row}}
+RSELD ledr pg {{r_sel_iso}}
+ILEDQ ledf ledr PWL(0 0 {{t_ramp_pwm}} 0 {{t_ramp2_pwm}} {{i_row_q}})
+ILED0 ledf ledr PULSE(0 {ipix*min(max(nlit-0,0),1)} {t0+0*sp*T/13} {{t_edge}} {{t_edge}} {ton} {T})
+ILED1 ledf ledr PULSE(0 {ipix*min(max(nlit-1,0),1)} {t0+1*sp*T/13} {{t_edge}} {{t_edge}} {ton} {T})
+ILED2 ledf ledr PULSE(0 {ipix*min(max(nlit-2,0),1)} {t0+2*sp*T/13} {{t_edge}} {{t_edge}} {ton} {T})
+ILED3 ledf ledr PULSE(0 {ipix*min(max(nlit-3,0),1)} {t0+3*sp*T/13} {{t_edge}} {{t_edge}} {ton} {T})
+ILED4 ledf ledr PULSE(0 {ipix*min(max(nlit-4,0),1)} {t0+4*sp*T/13} {{t_edge}} {{t_edge}} {ton} {T})
+ILED5 ledf ledr PULSE(0 {ipix*min(max(nlit-5,0),1)} {t0+5*sp*T/13} {{t_edge}} {{t_edge}} {ton} {T})
+ILED6 ledf ledr PULSE(0 {ipix*min(max(nlit-6,0),1)} {t0+6*sp*T/13} {{t_edge}} {{t_edge}} {ton} {T})
+ILED7 ledf ledr PULSE(0 {ipix*min(max(nlit-7,0),1)} {t0+7*sp*T/13} {{t_edge}} {{t_edge}} {ton} {T})
+ILED8 ledf ledr PULSE(0 {ipix*min(max(nlit-8,0),1)} {t0+8*sp*T/13} {{t_edge}} {{t_edge}} {ton} {T})
+ILED9 ledf ledr PULSE(0 {ipix*min(max(nlit-9,0),1)} {t0+9*sp*T/13} {{t_edge}} {{t_edge}} {ton} {T})
+ILED10 ledf ledr PULSE(0 {ipix*min(max(nlit-10,0),1)} {t0+10*sp*T/13} {{t_edge}} {{t_edge}} {ton} {T})
+ILED11 ledf ledr PULSE(0 {ipix*min(max(nlit-11,0),1)} {t0+11*sp*T/13} {{t_edge}} {{t_edge}} {ton} {T})
+ILED12 ledf ledr PULSE(0 {ipix*min(max(nlit-12,0),1)} {t0+12*sp*T/13} {{t_edge}} {{t_edge}} {ton} {T})
+* ---- the module's analog +12 V: PTC-POS12, D1, FB1, C1, the regulators' input capacitors
+RPTCP hp d1a {{r_ptc_rail}}
+D1 d1a d1k D5817
+LFB1 d1k fb1b {{l_fb_light}}
+RFB1P d1k fb1b {{r_fb_peak}}
+RFB1 fb1b p12 {{r_fb_dcr}}
+C1 p12 c1a {{C1}}
+RC1 c1a c1b {{esr_c1}}
+LC1 c1b 0 {{l_esl_el}}
+CRIN p12 0 {{C-REG-IN}}
+CDRI p12 0 {{C-DEC-REG-IN}}
+CLGI p12 0 {{C-LOGIC-IN}}
+RLP p12 0 {{r_own_pos}}
+* ---- the analog -12 V: C3, FB3, D3 (cathode at the bus), PTC-NEG12
+C3 n12 c3a {{C3}}
+RC3 c3a c3b {{esr_c3}}
+LC3 c3b 0 {{l_esl_el}}
+LFB3 n12 fb3b {{l_fb_light}}
+RFB3P n12 fb3b {{r_fb_peak}}
+RFB3 fb3b d3a {{r_fb_dcr}}
+D3 d3a d3k D5817
+RPTCN d3k hn {{r_ptc_rail}}
+RLN n12 0 {{r_own_neg}}
+* ---- each rail's ripple: the rail through a 1 ms high-pass (160 Hz, out of the band; the
+* ---- power-on's step through it has decayed by e^-20 before the window)
+CHPP p12 p12r 1u
+RHPP p12r 0 1k
+CHPN n12 n12r 1u
+RHPN n12r 0 1k
+* ---- the op-amps' supplies: each rail's DC plus its ripple. THE OP-AMPS HANG ON COPIES OF
+* ---- THE RAILS, so the stages see exactly the rails' ripple and the network does not see
+* ---- the macromodels: they draw nothing from it here; module-own-draw (r_own_pos,
+* ---- r_own_neg) is their current. Each copy is a ramped DC source plus a controlled source
+* ---- carrying the ripple
+VP12O p12x 0 PWL(0 0 {{t_ramp_pwm}} {{v_bus}})
+EP12O p12o p12x p12r 0 1
+VN12O n12x 0 PWL(0 0 {{t_ramp_pwm}} {{v_bus_neg}})
+EN12O n12o n12x n12r 0 1
+* ---- DAC_AVDD: the set point, plus +12 V's ripple at the LT3042's PSRR
+VAVDD avddx 0 PWL(0 0 {{t_ramp_pwm}} {{v_dac_set}})
+EAVDD avdd avddx p12r 0 {{k_ldo}}
+* ---- the DAC's outputs and VREFOUT: their codes plus DAC_AVDD's ripple at k_dac
+VVREF vrefx 0 PWL(0 0 {{t_ramp_pwm}} {{v_refout}})
+EVREF vrefout vrefx avdd avddx {{k_dac}}
+VDACP dacpx 0 PWL(0 0 {{t_ramp_pwm}} {{v_dac_pitch}})
+EDACP dacp dacpx avdd avddx {{k_dac}}
+VDAC7 dac7x 0 PWL(0 0 {{t_ramp_pwm}} {{v_dac_mod}})
+EDAC7 dac7 dac7x avdd avddx {{k_dac}}
+VDACM dacmx 0 PWL(0 0 {{t_ramp_pwm}} {{v_dac_mod}})
+EDACM dacm dacmx avdd avddx {{k_dac}}
+* ---- the pitch stage, into a VCO
+XP vrefout dacp jackp p12o n12o vrefb pm pm PSTAGE
+RVCOP jackp 0 {{r_vco}}
+* ---- mod channel 1 and the shared reference follower (U-MOD-A)
+RI7 dac7 refp {{R-OPAMP-IN-REF}}
+XMREF refp vrefm p12o n12o vrefm OPAx197
+RIM dacm pmod {{R-OPAMP-IN-1}}
+R1M vrefm mm {{R1-1}}
+R2M mm om {{R2-1}}
+XMOD pmod mm p12o n12o om OPAx197
+ROM om jackm {{R-OUT-PROT-1}}
+CFM jackm 0 {{C-FILT-MOD-1}}
+RVCOM jackm 0 {{r_vco}}
+* ---- the breath output stage: the buffer at a steady input, the summer with R-OFFNEG on -12 V
+* ---- and POT-OFFSET between AGND_MOD and DAC_AVDD
+VBIN bin 0 PWL(0 0 {{t_ramp_pwm}} {{v_breath_in}})
+XBA bin bbuf p12o n12o bbuf OPAx197
+RBIN bbuf bsum {{R-BREATH-IN}}
+RBOCW 0 bow {{r_boff_cw}}
+RBOCCW bow avdd {{r_boff_ccw}}
+RBOFF bow bsum {{R-BREATH-OFF}}
+RBOFFN n12o bsum {{R-BREATH-OFFNEG}}
+RBFB bsum bout {{R-BREATH-FB}}
+XBB 0 bsum p12o n12o bout OPAx197
+RBOUT bout jackb {{R-OUT-PROT}}
+CBOUT jackb 0 {{C-OUT-BREATH}}
+RBLOAD jackb 0 {{r_vco}}
+.model D5817 D(Is={{d_is}} N={{d_n}} Rs={{d_rs}} Cjo=110p BV=20)
+.options method=gear rshunt=1e10
+.control
+tran {{t_step_pwm}} {{t_end_pwm}} 0 {{t_step_pwm}} uic
+let iuin = i(VPRISO)
+let iuout = -i(VISO)
+wrdata hp.dat v(hp)
+wrdata hn.dat v(hn)
+wrdata tapp.dat v(tapp)
+wrdata tapn.dat v(tapn)
+wrdata p12.dat v(p12)
+wrdata n12.dat v(n12)
+wrdata avdd.dat v(avdd)
+wrdata jackp.dat v(jackp)
+wrdata jackm.dat v(jackm)
+wrdata jackb.dat v(jackb)
+wrdata iuin.dat iuin
+wrdata iuout.dat iuout
+quit
+.endc
+.end

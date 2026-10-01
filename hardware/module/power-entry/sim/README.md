@@ -1,14 +1,18 @@
 # Module power entry — simulation
 
 `sims.yaml` says what is simulated and what every run must show; `poweron.cir`,
-`poweroff.cir`, `groundshift.cir`, `cm.cir`, `isoin.cir` and `dacrail.cir` are the decks; `results.yaml` is what the last run found, **generated** by
+`poweroff.cir`, `groundshift.cir`, `cm.cir`, `isoin.cir`, `dacrail.cir` and `ledpwm.cir` are the decks; `results.yaml` is what the last run found, **generated** by
 `python3 tools/sim.py run hardware/module/power-entry/sim`.
 `python3 tools/sim.py show <this dir>` prints it as a table.
 `docs/reference/tooling.md` §5 explains the tool.
 
-**No part value is written here.** The deck reads this circuit's netlist and
+**No part value is written here.** The decks read this circuit's netlist and
 `module/pitch-stage`'s, because the claims being checked are about what the
-pitch jack does while this circuit's rails arrive.
+pitch jack does while this circuit's rails arrive; `ledpwm.cir` also reads
+`mod-channels`, `breath-output-stage`, `umbilical-load-switch` and
+`carrier/power-entry-instrument`, and takes the instrument side's estimates
+(cable, ESRs, `U-ISO`'s output resistance, the buck's power) from
+`power-entry-instrument/sim` and `umbilical-load-switch/sim` (`params_from`).
 
 ## What it shows
 
@@ -29,7 +33,11 @@ stage on those rails with the DAC at its power-on-reset zero scale.
 | `gnd-balanced[…]` | option (c): a dummy load holding the instrument's total constant to 1 % | a fraction of a cent, for 2.3–4.4 W of heat |
 | `cm-loop` | `cm.cir`: `U-ISO`'s 550 kHz common-mode current, driven through its 1100 pF isolation capacitance, home through `C-ISO-Y` or round the module's grounds and the star, with `L-CM-ISO` in the converter's input (pre-layout review A4-1), across the choke's core loss and inductance, the ribbon and `C-ISO-Y` | under the owner's 10 % across the star at 550 kHz, 1.65 MHz and 5.5 MHz, and nowhere above it from 500 kHz to 30 MHz |
 | `cm-loop-y-1n` | a what-if: the choke with the 1 nF `C-ISO-Y` it replaced | more than 10 % on the star at the core-loss corner — why `C-ISO-Y` is 22 nF |
-| `iso-input-z` | `isoin.cir`: the impedance `U-ISO` sees looking back into its input filter, `L-CM-ISO`'s leakage included, and the share of its input current that reaches the rack | over 20× inside the converter's −V²/P at every corner; under 1 % at the rack at 550 kHz |
+| `iso-input-z` | `isoin.cir`: the impedance `U-ISO` sees looking back into its input filter, `L-CM-ISO`'s leakage included, and the share of its input current that reaches the rack | over 20× inside the converter's −V²/P at every corner; under 1 % at the rack at 550 kHz; **no gain from 1 to 10 kHz** (at most 75 % reaches the rack: the LC's 3.1 kHz corner is overdamped by `D2`, `D4`, `PTC-ISO` and the beads in the same loop) |
+| `led-pwm[f_pwm=…]` | `ledpwm.cir`: the instrument's thirteen WS2815B-V1 pulsing in phase at half duty, 2–4 kHz and the LC's corner, through `C-STRIP-BULK`, the umbilical, the load switch, `U-ISO` (input = output power / η), its input filter and the rack; the rails at the header and the bus tap, the module's analog rails, `DAC_AVDD`, and the pitch, mod 1 and breath jacks (TI's OPA2197 model) | under the review's 13 mV on the case's rails; pitch under ADR 0027's 0.001 cents; mod 1 under one LSB; breath under 1 mV. **Recorded:** `led-pwm-rail-ripple`, worst at 2 kHz, `C2`'s highest ESR and a 200 mΩ supply |
+| `led-pwm-duty[d_led=…]` | the same at 2 kHz, duty 1/256 to 255/256 | the same; half duty is the worst |
+| `led-pwm-pattern[n_lit=…,spread=…]` | seven of thirteen lit; the thirteen's pulses spread over the period, as free-running oscillators land | the same; spread, the ripple falls ~150× |
+| `led-pwm-at-iso[f_pwm=…]` | a what-if, the review's premise: the row's whole current out of `U-ISO`, no instrument bulk | **recorded**: the header reaches 14–18 mV with a 200 mΩ supply — the review's 13 mV was not a bound on its own premise; the instrument's bulk is what keeps the design under it |
 | `dac-rail-spread` | `dacrail.cir`, DC: `DAC_AVDD` at every corner of the LT3042's guaranteed SET current (98–102 µA) and offset (±2 mV), `R-SET-DAC`'s 0.1 % and drift, 100 nA of SET leakage either way, the input from a tripped fuse to the bus maximum, and the load | inside the DAC8568 C grade's 5.00–5.50 V with 50 mV to spare at both ends, and nominally `dac-rail` — **no trim** |
 | `dac-rail-aged` | the same with `R-SET-DAC` at its ±0.5 % endurance limit as well (1000 h at rated power, 70 °C) | still inside 5.00–5.50 V |
 | `dac-rail-open-rset` | `R-SET-DAC` open | **recorded, not fail-safe**: the rail goes *up*, to the input less the dropout, over the DAC's 6 V absolute maximum — the one single failure that does |
@@ -77,6 +85,45 @@ found the sheet drawn that way; the sheet was corrected on 2026-09-30, and
 `d3-reversed` keeps the failure on record. **The deck types `D3`'s orientation
 (`d3_flip`) rather than reading it from the netlist**, so a change to `D3` on
 the sheet must be mirrored in `sims.yaml`.
+
+## The LED PWM runs (A4-13)
+
+**What the row draws.** Each WS2815B-V1 is a pulse of its share of
+`led-row-current`'s top end (`i_swing` / 13) less its 2 mA quiescent, on top
+of the quiescent, at duty = brightness / 256. The datasheet does not draw its
+output stage, so the pulse is the whole pixel's current whichever channels are
+lit — at a given brightness, white is the worst. Its oscillator tolerance is
+not published: the sweep covers the stated 2 kHz scan to 4 kHz refresh and
+the filter's corner, and the response falls monotonically with frequency
+across it, so a slower oscillator would be worse; at 1 kHz the filter passes
+75 % (`iso-input-z`) and the instrument's bulk keeps less.
+
+**`U-ISO` is behavioural, and conservative.** Its input draws its output power
+over η (0.82) from whatever its input pins see, instantly: its negative input
+resistance is in the run, and the whole PWM step reaches its input. A real
+loop (250 µs to recover from a 25 % step, `[ds PD-5]`) and its output
+capacitance would hold some of it back; and its incremental efficiency is
+higher than its average (off the dissipation curve, ~1.11 W in per W out
+against 1/0.82 = 1.22), so the step at its input is overstated by ~10 %. Its
+own input capacitance is not published: 4.7 µF assumed, nothing beside `C2`.
+
+**The op-amps hang on copies of the rails.** TI's OPA2197 model found no
+operating point with two or more instances beside this network, so the run is
+a power-on from 0 V (`uic`, every supply ramped over 1 ms, settled for 25 ms
+before the 10 ms window), and the five op-amps sit on the rails' DC plus each
+rail's ripple through a 1 ms high-pass, drawing nothing from the network
+(`module-own-draw` is their current). `DAC_AVDD` is its set point plus +12 V's
+ripple at 80 dB, an assumed floor under the LT3042's typical curves (100–118 dB
+at 1–10 kHz with 0.47 µF on SET; `C-SET-DAC` is 0.1 µF) since `lt3042.lib`
+has no PSRR; the DAC8568 publishes no AC supply rejection, so all of
+`DAC_AVDD`'s ripple is passed to `VREFOUT` and both DAC outputs. Even so
+`DAC_AVDD` moves by a fraction of a microvolt; pitch is set by the op-amps'
+rejection of the ±12 V ripple.
+
+**The rack is estimated.** Its copper, decoupling and PSU resistance are the
+`cm.cir`/`isoin.cir` params; `r_psu` at 200 mΩ is the worst corner of every
+measure, so a stiffer case does better. Its ground carries none of `U-ISO`'s
+current and is ideal here.
 
 ## What it does not show
 
