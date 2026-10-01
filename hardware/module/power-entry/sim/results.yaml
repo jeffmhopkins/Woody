@@ -4,8 +4,8 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/power-entry/sim/sims.yaml: 4b9e184c206aa08b
-  hardware/module/power-entry/netlist.yaml: 9f2554bcba1d48b7
+  hardware/module/power-entry/sim/sims.yaml: e471145ca3848b47
+  hardware/module/power-entry/netlist.yaml: 56b479e28aae437c
   hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
   hardware/module/power-entry/sim/poweron.cir: 7e310ad1820d6b68
   hardware/module/power-entry/sim/groundshift.cir: 4aae040d6b7e03a1
@@ -921,13 +921,13 @@ sims:
     measures:
       v_avdd:
         nominal: 5.22954
-        min: 5.09213
+        min: 5.08188
         min_at: R-SET-DAC- i_set- k_leak+ k_vos-
-        max: 5.36806
+        max: 5.37874
         max_at: R-SET-DAC+ i_set+ k_leak- k_vos+
     asserts:
     - expr: min['v_avdd'] >= p['v_dac_lo'] and max['v_avdd'] <= p['v_dac_hi']
-      why: even with R-SET-DAC aged to its long-term limit as well, at every corner of the LT3042's limits, DAC_AVDD stays
+      why: even with R-SET-DAC aged to its endurance limit as well, at every corner of the LT3042's limits, DAC_AVDD stays
         inside 5.00-5.50 V
       pass: true
   dac-rail-open-rset:
@@ -943,8 +943,8 @@ sims:
     - expr: min['v_avdd'] > p['v_dac_absmax']
       why: 'RECORDED, NOT FAIL-SAFE: an open R-SET-DAC drives DAC_AVDD UP to the input less the dropout, over the DAC8568''s
         6 V absolute maximum. It is the one single failure that does, and the owner accepted it 2026-10-01 with no clamp,
-        mitigated by an anti-sulfur part, its placement on the board, and E7 measuring the rail before U-DAC is fitted (power-entry.md,
-        The DAC rail, Its failures)'
+        mitigated by its placement on the board and E7 measuring the rail before U-DAC is fitted (power-entry.md, The DAC
+        rail, Its failures)'
       pass: true
   dac-rail-short-cset:
     corners: 3

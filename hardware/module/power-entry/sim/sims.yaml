@@ -141,7 +141,7 @@ vary:
   i_set:      {tol: [-0.02, 0.02], source: "98 and 102 uA about 100"}
   k_vos:      {tol: [-1.0, 1.0], source: "-2 and +2 mV"}
   k_leak:     {tol: [-1.0, 1.0], source: "100 nA into and out of SET"}
-  R-SET-DAC:  {tol: [-0.002, 0.002], source: "+-0.1 % initial and +-25 ppm/C over 40 C of drift from 25 C, 0.1 % [calc: 25e-6 x 40]; the TNPW0603 e3's (anti-sulfur) [datasheets/discrete-and-power/VISHAY-TNPW-E3-THIN-FILM-RESISTOR.pdf p.1, p.4]"}
+  R-SET-DAC:  {tol: [-0.002, 0.002], source: "+-0.1 % initial and +-25 ppm/C over 40 C of drift from 25 C, 0.1 % [calc: 25e-6 x 40]; the ARG05's [datasheets/discrete-and-power/VIKING-ARG-THIN-FILM-RESISTOR.pdf p.3]"}
   C-SET-DAC:  {tol: [-0.05, 0.05], source: "NP0 +-5 % [WALSIN-MLCC-GENERAL-NP0-X7R.pdf p.2]"}
   v_in_dac:   {tol: [-0.1, 0.05], source: "10.8 to 12.6 V about 12"}
   r_dac_load: {tol: [-0.55, 1.0], source: "585 ohm to 2.6 kohm about 1.3 kohm"}
@@ -337,17 +337,17 @@ sims:
       - expr: "abs(nom['v_avdd'] - p['v_dac_set']) < 0.005"
         why: "and its nominal is dac-rail"
   - name: dac-rail-aged
-    # R-SET-DAC at its long-term limit, +-0.3 % after 225 000 h at its full general-mode rated
-    # dissipation [VISHAY-TNPW-E3-THIN-FILM-RESISTOR.pdf p.2], on top of its 0.1 % and its drift
-    # (0.2 %) - it runs at 0.5 % of that rating [calc: 5.23^2 / 52.3k = 0.52 mW of 0.110 W]
+    # R-SET-DAC at its endurance limit, +-0.5 % after 1000 h at full rated power and 70 C
+    # [VIKING-ARG-THIN-FILM-RESISTOR.pdf p.4], on top of its 0.1 % and its drift (0.2 %) -
+    # it runs at 0.4 % of its rating [calc: 5.23^2 / 52.3k = 0.52 mW of 1/8 W]
     deck: dacrail.cir
     set: {}
     vary: [i_set, k_vos, k_leak, R-SET-DAC]
-    tol: {R-SET-DAC: [-0.005, 0.005]}
+    tol: {R-SET-DAC: [-0.007, 0.007]}
     measures: [v_avdd]
     asserts:
       - expr: "min['v_avdd'] >= p['v_dac_lo'] and max['v_avdd'] <= p['v_dac_hi']"
-        why: "even with R-SET-DAC aged to its long-term limit as well, at every corner of the LT3042's limits, DAC_AVDD stays inside 5.00-5.50 V"
+        why: "even with R-SET-DAC aged to its endurance limit as well, at every corner of the LT3042's limits, DAC_AVDD stays inside 5.00-5.50 V"
   - name: dac-rail-open-rset
     # FAILURE: R-SET-DAC open. The SET current charges the SET node until it runs out of input
     deck: dacrail.cir
@@ -356,7 +356,7 @@ sims:
     measures: [v_avdd]
     asserts:
       - expr: "min['v_avdd'] > p['v_dac_absmax']"
-        why: "RECORDED, NOT FAIL-SAFE: an open R-SET-DAC drives DAC_AVDD UP to the input less the dropout, over the DAC8568's 6 V absolute maximum. It is the one single failure that does, and the owner accepted it 2026-10-01 with no clamp, mitigated by an anti-sulfur part, its placement on the board, and E7 measuring the rail before U-DAC is fitted (power-entry.md, The DAC rail, Its failures)"
+        why: "RECORDED, NOT FAIL-SAFE: an open R-SET-DAC drives DAC_AVDD UP to the input less the dropout, over the DAC8568's 6 V absolute maximum. It is the one single failure that does, and the owner accepted it 2026-10-01 with no clamp, mitigated by its placement on the board and E7 measuring the rail before U-DAC is fitted (power-entry.md, The DAC rail, Its failures)"
   - name: dac-rail-short-cset
     # FAILURE: C-SET-DAC shorted (or R-SET-DAC shorted): SET at ground
     deck: dacrail.cir

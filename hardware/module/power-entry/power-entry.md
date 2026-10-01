@@ -410,32 +410,24 @@ follows `SET` `[ds ADI-LT3042.pdf p.14]`, so
 
 `DAC AVDD = I_SET × R-SET-DAC + V_OS`
 
-with no gain on any error, and `R-SET-DAC` is a 52.3 kΩ ±0.1 % ±25 ppm/K
-**anti-sulfur** thin-film part, Vishay TNPW060352K3BEEA, 0603 — *"Advanced
-sulfur resistance verified according to ASTM B 809"* `[ds
-VISHAY-TNPW-E3-THIN-FILM-RESISTOR.pdf p.1, p.4]`. Anti-sulfur because an open
-here is the one failure that drives the rail up (*Its failures*, below), and
-sulfur creeping into a chip resistor's silver electrode is the way a resistor
-opens on its own in service. 0603 because no 0805 or 1206 anti-sulfur part at
-this value and grade was in stock at JLC or LCSC on 2026-10-01
-(`datasheets/.manifest-R44-F9.csv` lists what was checked); the smaller chip is
-also the less flex-sensitive one.
+with no gain on any error, and `R-SET-DAC` is a 52.3 kΩ ±0.1 % ±25 ppm/°C
+thin-film part, Viking ARG05BTC5232, 0805 `[ds VIKING-ARG-THIN-FILM-RESISTOR.pdf p.3]`.
 
 | Term | Guaranteed limit | At the rail `[calc]` | Source |
 |---|---|---|---|
 | `I_SET` | 98–102 µA over 2–20 V in, 0–15 V out, 1–200 mA and temperature (99–101 µA at 25 °C) | ±105 mV | `[ds ADI-LT3042.pdf p.3]` |
 | `V_OS`, `OUT` − `SET` | ±2 mV over the same | ±2 mV | `[p.3]` |
-| `R-SET-DAC` | ±0.1 %, and ±25 ppm/K over 40 °C of drift from 25 °C: ±0.2 % | ±10 mV | `[TNPW p.1, p.4]` |
+| `R-SET-DAC` | ±0.1 %, and ±25 ppm/°C over 40 °C of drift from 25 °C: ±0.2 % | ±10 mV | `[VIKING p.3]` |
 | Leakage into or out of `SET` | 100 nA is 0.1 % `[p.14]`: `C-SET-DAC` (NP0, 5 GΩ minimum) is about 1 nA of it, the rest is the board, guarded | ±5 mV | `[WALSIN p.13]` |
 | Line, load, input | inside the `I_SET` and `V_OS` rows' conditions: 10.8 V (a tripped fuse) to 12.6 V in, 2–9 mA out | — | `[p.3]` |
 
 **At every corner of all of it, `DAC AVDD` is 5.11–5.35 V** — `dac-rail`'s
 derivation has the arithmetic, and `power-entry/sim`'s `dac-rail-spread`
 holds it, 65 corners, with at least 50 mV to spare at both ends of 5.00–5.50 V.
-**Nothing is adjusted and nothing can be.** `R-SET-DAC` aged to its long-term
-limit as well — ±0.3 % after 225 000 h at its full general-mode rated
-dissipation `[TNPW p.2]`, where it runs at 0.5 % of that rating `[calc: 5.23² /
-52.3 kΩ = 0.52 mW of 0.110 W]` — still lands inside (`dac-rail-aged`). The E grade is guaranteed from 0 °C to 125 °C, and −40 °C by
+**Nothing is adjusted and nothing can be.** `R-SET-DAC` aged to its endurance
+limit as well — ±0.5 % after 1000 h at full rated power and 70 °C `[VIKING
+p.4]`, where it runs at 0.4 % of its rating `[calc: 5.23² / 52.3 kΩ = 0.52 mW
+of 1/8 W]` — still lands inside (`dac-rail-aged`). The E grade is guaranteed from 0 °C to 125 °C, and −40 °C by
 design `[p.4 Note 9]`, which covers a rack.
 
 **How it is wired** `[ds ADI-LT3042.pdf p.12, p.18]`:
@@ -465,8 +457,8 @@ design `[p.4 Note 9]`, which covers a rack.
   edges**, which is where a board bends when it is screwed down, plugged and
   unplugged; and **orient its long axis parallel to the board's long edge**, so
   the board's bending runs along the chip and not across its terminations. A
-  stress-free chip resistor opens by flex cracking, and the part's own test
-  bends a board only 2 mm `[TNPW p.13]`. Inside the `SET` guard ring above,
+  stress-free chip resistor opens by flex cracking, and the part's own bending
+  test goes to only 3 mm `[VIKING p.4]`. Inside the `SET` guard ring above,
   with `C-SET-DAC` beside it.
 
 **Start-up.** `R-SET-DAC` × `C-SET-DAC` is 5.2 ms, and the rail follows `SET`
@@ -499,18 +491,21 @@ thin-film part with nothing to turn.
 **ACCEPTED, with no protection circuit — the owner, 2026-10-01: *"Good to
 accept them"*** (`dac-rail` at its nominal, and this failure). No clamp is
 drawn: a zener cannot be guaranteed between 5.35 V and 6.0 V at the LT3042's
-220 mA limit. It is mitigated three ways instead, and each is a rule:
+220 mA limit. It is mitigated two ways instead, and each is a rule:
 
-1. **The part:** anti-sulfur thin film (above) — never a substitute without
-   that claim in its datasheet.
-2. **The layout:** `R-SET-DAC` placed away from flex and oriented along the
+1. **The layout:** `R-SET-DAC` placed away from flex and oriented along the
    board (*How it is wired*, Layout).
-3. **The first build:** `DAC AVDD` is measured **before `U-DAC` is fitted**
+2. **The first build:** `DAC AVDD` is measured **before `U-DAC` is fitted**
    (and `U-LVL-MOD`, which runs from the same rail and has an absolute
    maximum `V_CC` of 7 V `[ds SN74AHCT125.pdf, absolute maximum ratings]`), so an open `R-SET-DAC` — the rail reading ~11 V —
    never reaches a DAC (ROADMAP E7). Both are machine-placed, so the first
    board's assembly order leaves them off and they are hand-fitted after the
    reading.
+
+**No special-purpose part.** The owner, 2026-10-01: *"no need for these
+specialized parts bifurcation"* — an anti-sulfur resistor here was judged
+unnecessary, so `R-SET-DAC` is the ordinary thin-film part above, and the
+mitigations are the placement and the first-build check.
 
 ### The DAC rail's load
 
