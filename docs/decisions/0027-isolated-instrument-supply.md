@@ -50,8 +50,8 @@ the bus board** to the rack's supply.
 
 That current is breath-correlated: the instrument's lights follow breath
 (ADR 0014), and since the owner's change of 2026-09-30 they are thirteen
-WS2815B-V1 on the main board, 170–195 mA at 12 V full white `[owner brief
-2026-09-30, not yet in the corpus]`. Every CV output of the module is a voltage
+WS2815B-V1 on the main board, `led-row-current` at 12 V full white (owned by
+`led-strip-drive.md`; cited since 2026-10-01, A4-10). Every CV output of the module is a voltage
 above the module's star; the receiving module (the VCO the pitch jack drives)
 reads it against *its* ground, which is the bus at its own tap. The drop the
 instrument's current makes between the two is in series with the pitch CV.
@@ -139,7 +139,9 @@ cost is a converter the size of a postage stamp.
 4. **`C-ISO-Y`, 1 nF across the barrier at the converter** (`ISO_VIN_POS` to
    `PWR_GND`), gives the switching common-mode current, driven through the
    converter's isolation capacitance (1100 pF typ `[ds PD-5]`), a way home beside
-   the converter instead of round the star and the ribbon.
+   the converter instead of round the star and the ribbon. *(Amended
+   2026-10-01, A4-1: at 1 nF it does not — see* The converter's common-mode
+   current *below. The decision stands; this point's claim does not.)*
 5. **The rails get fuses** (owner, same day: *"You're good to add the
    PTCs"*): `PTC-POS12` and `PTC-NEG12` on the module's analog rails, and
    `PTC-ISO` on the converter's +12 V leg, all at the header, ahead of the
@@ -156,7 +158,8 @@ the isolation capacitance at breath frequency. What the model leaves out, each
 |---|---|
 | The module's own CV outputs driving their receivers: the breath jack's 0–10 V into 100 kΩ is 0.1 mA, returning through the bus between the receiver and the PSU | 0.1 mA × 48 mΩ (ribbon + whole bus) = 4.8 µV → **0.006 cents** — the module's own signal, not the instrument's supply |
 | The ±12 V rails at the header move by 9.7 mV (0.195 A swing) as `U-ISO`'s input current follows breath `[sim, rail_mv]` | OPA2197 at 3 µV/V worst `[SBOS737C p.8]` → 29 nV → **0.00003 cents**; the LM317 at 0.02 %/V passes 1.9 µV to `DAC_AVDD`, which does not set full scale (ADR 0005) |
-| `U-ISO`'s switching, 550 kHz `[ds PD-2]` | out of band, behind the input filter — see `power-entry.md` |
+| `U-ISO`'s switching, 550 kHz `[ds PD-2]` | out of band, behind the input filter — see `power-entry.md`. **Its common-mode part is not behind that filter**: amendment 2026-10-01, below |
+| The LED row's PWM, ~2 kHz scan and ~4 kHz refresh `[ds WS2815B-V1.pdf p.1]` | not breath-correlated in level but in the audio band, reflected through `U-ISO`'s input LC (f₀ ~3.3 kHz, `power-entry.md`) onto the case's ±12 V: about 13 mV p-p at most on the rails by the review's bound (A4-13), under 0.001 cents here and an audible-band tone for other modules. **Not analysed beyond that bound; E6 scopes it** |
 
 **Residual breath-correlated pitch error: under 0.01 cents**, with the rack's
 copper as `sims.yaml` states it, the new LEDs' swing, and the receiver
@@ -177,7 +180,13 @@ constant; it is part of what the owner tunes out, as in every Eurorack module.
   analog load adds ~45 mA and ~40 mA. At the clamp-legal worst (ADR 0005)
   it is ~0.37 A per rail; an overload the load switch holds just under its
   0.78 A minimum trip is ~0.49 A per rail; a hot-plug start draws up to
-  ~0.68 A per rail for tens of milliseconds. **Check the case's −12 V
+  ~0.68 A per rail for tens of milliseconds. *(Amended 2026-10-01, A4-9: that
+  hot-plug is the one `Q-INRUSH` removed on 2026-09-30. A hot-plug now draws
+  `U-ISO` at `hotplug-iso-ocp`, about the clamp-legal load. What remains above
+  it is brief: a replug within tens of milliseconds (`replug-early`,
+  `power-entry-instrument/sim`) holds `U-ISO` at its over-current clamp for
+  0.1–0.45 ms, ~1.2 A per rail `[calc: 1.84 A × 12 V / 0.85 / 22.2 V]`, and a
+  `Q-INRUSH` short, which the LT1641's timer is sized for.)* **Check the case's −12 V
   rating** — many Eurorack supplies give −12 V less than +12 V. The rack
   total rises by the converter's ~0.95 W loss.
 - **The module dissipates ~1.05 W more**: `U-ISO` ~0.95 W, `D2`/`D4` ~0.1 W.
@@ -198,4 +207,67 @@ constant; it is part of what the owner tunes out, as in every Eurorack module.
 - **What the bench checks (E6/E11)**: the pitch jack against a second
   module's ground with the lights sweeping full scale — the measurement this
   decision predicts at under a hundredth of a cent — and the case's −12 V
-  under the instrument's load.
+  under the instrument's load. *(Amended 2026-10-01: and, with the
+  instrument drawing, a probe at 550 kHz on `AGND_MOD` against `BUS_GND` and
+  on the pitch jack (A4-1, below), and the case's +12 V and −12 V at 2–4 kHz
+  with the LED row at mid brightness (A4-13).)*
+
+## Amendment, 2026-10-01 — the converter's common-mode current
+
+From the pre-layout review (`docs/review/2026-10-01-pre-layout-review/`,
+A4-1, verified in `VERIFIED-F3.md`).
+
+**Point 4 claimed `C-ISO-Y` gives the switching common-mode current a way
+home beside the converter. At 1 nF it does not.** The netlist gives that
+current a second loop from `PWR_GND` back to the converter's input that never
+passes through `C-ISO-Y`: `NT-UMB-MOD` → `DIG_GND` → `NT-DIG-MOD` → `BUS_GND`
+→ `NT-AGND-MOD` → `AGND_MOD` → `C3` → `FB3` → `D3` → `PTC-NEG12` → `D4` →
+`FB4` → `ISO_VIN_NEG` (`module/power-entry/netlist.yaml`), and in parallel out
+through the ribbon to the rack's own decoupling and back on its ground. Every
+diode in it carries forward current, so it conducts AC. At 550 kHz
+`C-ISO-Y` is 289 Ω `[calc]`; that loop is a few ohms of bead, diode and
+capacitor.
+
+**An AC deck of the loop** (`docs/review/2026-10-01-pre-layout-review/F3-u-iso-cm-loop/`,
+ngspice, unit common-mode drive through the 1100 pF; the beads from the
+MI1206K601R-10's curve at their DC bias, the electrolytics with ESR and ESL,
+the ribbon at 0.1–1 µH a conductor — every parasitic an estimate, marked in
+the deck) gives, **as netlisted**:
+
+| | 550 kHz | 1.65 MHz | 5.5 MHz |
+|---|---|---|---|
+| through `C-ISO-Y` | 1–2 % | 12–24 % | resonant |
+| across the star (`BUS_GND` ↔ `DIG_GND`) | 88–98 % | ~100 % | 19–136 % |
+| of which through `AGND_MOD` (`C3`, `C1`) | 12–43 % | 26–53 % | 39–262 % |
+
+Shares above 100 % are circulating current in a resonance of `C-ISO-Y` with
+the loop's inductance. **The review's direction is confirmed and its 95 %
+reproduced.** How much current that is, RECOM does not publish (no Y-capacitor
+or choke in its filter, `[ds PD-7]`), and whether it matters depends on where
+`C1` and `C3` land against the analog block on `AGND_MOD`, which is a layout
+fact that does not exist yet.
+
+**Simply making `C-ISO-Y` bigger is worse, not better.** 10–47 nF puts the
+loop's series resonance on the fundamental or its third harmonic: at 47 nF
+the star carries three times the drive current at 550 kHz. Damping it helps
+only at hundreds of nanofarads.
+
+**OWNER — choose before the module layout** (the module's sheet is not this
+fixer's to change, and nothing has been changed):
+
+1. **A common-mode choke at `U-ISO`'s input**, between the converter's input
+   capacitors (`C2`, `C-ISO-IN`, with `C-ISO-Y` on the converter's side) and
+   `L-ISO-IN`/`FB4`. With ~1 mH common-mode the star's share falls to ~8 % at
+   550 kHz with `C-ISO-Y` at 1 nF, and under 1 % with 10 nF. One two-line SMD
+   choke rated above the converter's input current (≥ 1 A; the replug clamp
+   is brief), roughly $0.5–1.5 `[from memory]`, to be chosen and banked. Its
+   leakage inductance joins `L-ISO-IN`, so the input filter's damping
+   (`power-entry.md`) is re-simulated with it. **Recommended.**
+2. **`C-ISO-Y` 220 nF with ~1 Ω in series** (and the twin from `ISO_VIN_NEG`
+   if wanted): no new magnetics, the star's share ~45 % at 550 kHz and under
+   10 % above it. Two passives; a partial cure.
+3. **Leave it and measure** at E6/E11 (the probe in *Consequences*). Cheapest
+   now; a respin if it shows.
+
+Moving `C1`/`C3`'s grounds onto `BUS_GND` (the review's second option) takes
+the current off `AGND_MOD` but not off the star, so it is not listed alone.

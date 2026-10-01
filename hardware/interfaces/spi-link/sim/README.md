@@ -55,6 +55,8 @@ tolerance and the cable's impedance: 65 runs each.
 | `pair-mosi-low` | `SCLK` at 2 MHz, `MOSI` held low | **`MOSI` at the Schmitt input stays under 0.33 V** at every `z_cm` and corner, against a lowest `V_T+` of 0.9 V (`spi-pair-crosstalk`); at the cable node it reaches 1.21 V |
 | `pair-mosi-high` | the same, `MOSI` held high | stays at least 1.24 V over the highest `V_T−` |
 | `pair-opposite-mosi-falls`, `-rises` | `MOSI` changes as `SCLK` rises | both make one edge each at the Schmitt input, every corner |
+| `frame-timing` | one DAC frame's edges, all three lines (`frame.cir`), the pads held to the firmware contract: `CS_MOD` falls by `SCLK`'s first rising edge, stays low 250 ns after its last falling edge, high 250 ns between frames | **The DAC8568's t1, t4, t5, t8, t6/t7, t9 and t10 hold at its pins at every corner and `z_cm`**, for the worst pair of receiver thresholds per inequality and both gates' and the buffer's whole propagation spread. Tightest: t8 121 ns against 10, t4 206 ns against 80. What each pad interval must at least be: `CS_MOD`'s hold after the last fall 114–139 ns, its high time 117–124 ns, and it may fall up to 133 ns *after* the first rising edge (`need_*`) |
+| `frame-timing-cs-released-at-last-edge` | a what-if: `CS_MOD` released on `SCLK`'s last falling edge | **t8 is −103 to −128 ns**: `SYNC` rises at the DAC before the last falling edge does, and the frame is lost. Why the contract states a hold |
 | `pair-without-rc` | a what-if: the Schmitt input straight on the cable node | held low it crosses the lowest `V_T+` at every `z_cm` (by 0.69 V at 140 Ω); held high it dips past the highest `V_T−` at 140 Ω. **Hysteresis alone does not close it; the RC is why it is there** |
 
 Every `SCLK` edge reaches the lowest `V_T+` 28–39 ns after it leaves the pad and
@@ -64,6 +66,15 @@ at 2 MHz and its 6 ns setup, 4 ns hold and 13 ns `SYNC`-to-`SCLK` setup
 `[ds DAC8568CIPW.pdf p.7]`, a skew of up to 63 ns between two lines
 `[calc: 91 − 28]` plus two gates' 1–9 ns each `[ds SN74AHCT14.pdf p.6]` leaves
 more than 150 ns `[calc: 250 − 63 − 2 × 8 − 13]`.
+
+**That paragraph measured rising edges only, and covered `DIN` against
+`SCLK`, not `CS`** (2026-10-01, pre-layout review A5-1). A falling edge
+through the same RC reaches the lowest `V_T−` (0.5 V) much later than a rising
+edge reaches the lowest `V_T+` (0.9 V), so the skew *across* edge directions
+is larger than 63 ns, and where `CS_MOD` sits against `SCLK` is the host's
+choice, not the half-period's. `frame-timing` measures every one of the
+DAC's frame times across directions, at its pins, and holds them to a stated
+pad timing; `firmware/README.md` carries that timing as a requirement.
 
 ## What it says that the pages did not
 
@@ -85,6 +96,10 @@ This README owns, in `config/figures.yaml`:
 
 - `cs-fall-reentry`: 0.10 V past V_IL at the cable node at the worst corner, none at the nominal; none at the Schmitt receiver's input at any corner
 - `spi-pair-crosstalk`: 0.21-0.29 V nominal, 0.25-0.33 V worst corner, over a common-mode impedance of 70-140 ohm
+
+The `CS_MOD` timing `frame-timing` asserts is a firmware requirement, not a
+register figure: `firmware/README.md`, *What the hardware requires*, states it
+and cites this run.
 
 ## What a result is worth
 
