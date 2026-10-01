@@ -794,7 +794,8 @@ def post_route(path, bdir):
     board = pcbnew.LoadBoard(path)
     pcb_route.tidy(board, lay)
     pcbnew.SaveBoard(path, board)
-    miss = unconnected_of(path)
+    # the shortest connections first: they have the fewest ways round
+    miss = sorted(unconnected_of(path), key=lambda m: math.dist(m[1], m[2]))
     board = pcbnew.LoadBoard(path)
     failed = pcb_route.complete(board, lay, miss)
     print(f"route: complete - {len(miss) - len(failed)} of {len(miss)} connection(s) the autorouter left, routed")
@@ -1179,7 +1180,7 @@ def cmd_layout(bdir, force=False, route=True):
             print(f"pcb: could not route {', '.join(failed)} - move parts in layout.yaml and re-run; "
                   f"{os.path.relpath(out, ROOT)} {'left as it was' if os.path.exists(out) else 'not written'}")
             return 1
-    elif route == "freerouting":
+    elif route in ("freerouting", "astar"):
         # what is not left to the autorouter: each plane net's pad to its plane (fanout),
         # and the breath pair side by side (route_pair) - both then fixed for it
         import pcb_route
@@ -1203,13 +1204,15 @@ def cmd_layout(bdir, force=False, route=True):
         if route == "freerouting":
             # in a fresh process, which loads the board with the net classes just written
             r = subprocess.run([sys.executable, "-c", f"import sys, json; sys.path.insert(0, {here!r}); "
-                                f"import pcb_freeroute; print('UNROUTED=' + json.dumps(pcb_freeroute.route({tmp!r}, {float(lay['rules']['edge_clearance'])!r})))"],
+                                f"import pcb_freeroute; print('UNROUTED=' + json.dumps(pcb_freeroute.route({tmp!r}, {float(lay['rules']['edge_clearance'])!r}, {lay.get('directions')!r})))"],
                                capture_output=True, text=True)
             print(r.stdout.rstrip())
             if r.returncode or "UNROUTED=" not in r.stdout:
                 sys.exit(f"pcb: the Freerouting round trip failed:\n{r.stderr[-3000:]}")
+        if route in ("freerouting", "astar"):
             # the planes filled, so KiCad's count of what is missing is right; then what
-            # the autorouter left, tidied and tried again, and the silkscreen (post_route)
+            # the autorouter left (`astar`: every signal connection), routed by
+            # pcb_route.complete, tidied and tried again, and the silkscreen (post_route)
             for step in (f"import pcb_route; pcb_route.fill_zones({tmp!r})", f"import pcb; pcb.post_route({tmp!r}, {bdir!r})"):
                 r = subprocess.run([sys.executable, "-c", f"import sys; sys.path.insert(0, {here!r}); " + step],
                                    capture_output=True, text=True)
@@ -1220,7 +1223,7 @@ def cmd_layout(bdir, force=False, route=True):
             # zones are filled in a fresh process: an in-process fill of a just-built board crashes
             subprocess.run([sys.executable, "-c", f"import sys; sys.path.insert(0, {here!r}); "
                             f"import pcb_route; pcb_route.fill_zones({tmp!r})"], check=True)
-        if route == "freerouting":
+        if route in ("freerouting", "astar"):
             # what is still unconnected once the planes are filled: KiCad's own count
             unrouted = sorted({"; ".join(i["description"] for i in v.get("items", []))
                                for v in drc(tmp).get("unconnected_items", [])})

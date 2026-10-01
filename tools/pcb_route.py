@@ -1384,7 +1384,61 @@ def tidy(board, lay):
             r.copper.append((t.GetNetname(), {LAYERS.index(t.GetLayer())}, g, "track"))
     n2 = r.square_joins()
     n3 = merge_tracks(board, delete=True)
-    print(f"route: tidy - {n0} empty or doubled track(s), {n1} dangling, {n2} acute join(s) squared, {n3} joint(s) merged")
+    c = float((lay.get("directions") or {}).get("chamfer", 0))
+    n4 = chamfer(board, lay, c) if c else 0
+    print(f"route: tidy - {n0} empty or doubled track(s), {n1} dangling, {n2} acute join(s) squared, "
+          f"{n3} joint(s) merged, {n4} corner(s) chamfered")
+
+
+def chamfer(board, lay, size):
+    """Every right-angle corner where exactly two tracks of a net meet on a layer, with no
+    pad or via there, cut to two 45-degree bends: each track shortened by up to `size` mm
+    (never past half its length) and a diagonal laid between - where that diagonal keeps
+    its clearance to every other net (Obstacles.track_ok). Returns how many."""
+    obs = Obstacles(board, lay)
+    LN = {pcbnew.F_Cu: "F", pcbnew.B_Cu: "B"}
+    ends = {}
+    for t in board.GetTracks():
+        if type(t) is pcbnew.PCB_TRACK and t.GetLayer() in LN:
+            for e in (t.GetStart(), t.GetEnd()):
+                ends.setdefault((t.GetNetname(), t.GetLayer(), e.x, e.y), []).append(t)
+    holes = {(v.GetNetname(), v.GetPosition().x, v.GetPosition().y) for v in board.GetTracks() if isinstance(v, pcbnew.PCB_VIA)}
+    pads = [(p, p.GetNetname()) for f in board.GetFootprints() for p in f.Pads()]
+    n = 0
+    for (net, layer, x, y), ts in ends.items():
+        if len(ts) != 2 or (net, x, y) in holes or ts[0].IsLocked() or ts[1].IsLocked():
+            continue
+        P = pcbnew.VECTOR2I(x, y)
+        if any(nn == net and p.IsOnLayer(layer) and p.HitTest(P) for p, nn in pads):
+            continue
+        far = [t.GetEnd() if (t.GetStart().x, t.GetStart().y) == (x, y) else t.GetStart() for t in ts]
+        if any((f.x, f.y) == (x, y) for f in far):
+            continue
+        u = [((f.x - x) / math.hypot(f.x - x, f.y - y), (f.y - y) / math.hypot(f.x - x, f.y - y), math.hypot(f.x - x, f.y - y)) for f in far]
+        if abs(u[0][0] * u[1][0] + u[0][1] * u[1][1]) > 1e-3:
+            continue            # not a right angle
+        c = min(MM(size), u[0][2] / 2, u[1][2] / 2)
+        if c < MM(0.15):
+            continue
+        A = pcbnew.VECTOR2I(int(round(x + c * u[0][0])), int(round(y + c * u[0][1])))
+        B = pcbnew.VECTOR2I(int(round(x + c * u[1][0])), int(round(y + c * u[1][1])))
+        w = max(t.GetWidth() for t in ts)
+        if not obs.track_ok((TO(A.x), TO(A.y)), (TO(B.x), TO(B.y)), TO(w), net, LN[layer]):
+            continue
+        for t, E in zip(ts, (A, B)):
+            if (t.GetStart().x, t.GetStart().y) == (x, y):
+                t.SetStart(E)
+            else:
+                t.SetEnd(E)
+        d = pcbnew.PCB_TRACK(board)
+        d.SetStart(A)
+        d.SetEnd(B)
+        d.SetWidth(w)
+        d.SetLayer(layer)
+        d.SetNet(ts[0].GetNet())
+        board.Add(d)
+        n += 1
+    return n
 
 
 def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
@@ -1432,6 +1486,19 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
             failed.append((net, pa, pb, "its copper was not found"))
             continue
         moves = [(1, 0, 1), (-1, 0, 1), (0, 1, 1), (0, -1, 1), (1, 1, DIAG), (1, -1, DIAG), (-1, 1, DIAG), (-1, -1, DIAG)]
+        # layout.yaml directions: a step against its layer's preferred direction costs
+        # against_cost, a diagonal one half way between (a 45-degree corner stays cheap)
+        dirs = lay.get("directions") or {}
+        ag = float(dirs.get("against_cost", 1.0))
+        way = {{"F.Cu": "F", "B.Cu": "B"}[k]: v for k, v in (dirs.get("layers") or {}).items() if k in ("F.Cu", "B.Cu")}
+
+        def step_cost(L, di, dj, c):
+            if L not in way:
+                return c
+            along = di if way[L] == "horizontal" else dj
+            if di and dj:
+                return c * (1 + ag) / 2
+            return c if along else c * ag
 
         def search(src, dst, target):
             ti, tj = grids["F"].cell(*target)
@@ -1458,7 +1525,7 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
                         continue
                     if di and dj and not (gr.free(i + di, j) and gr.free(i, j + dj)):
                         continue
-                    ng = g + c + (TURN.get(steps45(pd, (di, dj)), 0) if pd else 0)
+                    ng = g + step_cost(L, di, dj, c) + (TURN.get(steps45(pd, (di, dj)), 0) if pd else 0)
                     if ng < cost.get(nxt, 1e18):
                         cost[nxt], came[nxt] = ng, cur
                         heapq.heappush(openq, (ng + h(i + di, j + dj), ng, nxt, (di, dj)))

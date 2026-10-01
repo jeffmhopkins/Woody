@@ -53,8 +53,31 @@ def jar():
     return JAR
 
 
-def route(path, edge):
-    """Route the saved board at `path` in place; `edge` its copper-to-edge clearance, mm."""
+def with_directions(dsn, d):
+    """Freerouting's own DSN scopes, which KiCad does not write: the trace angle (45
+    degree corners) and, per signal layer, its preferred direction and the cost of a
+    trace along it and against it (Freerouting reads them as its autoroute settings,
+    designforms/specctra/AutorouteSettings, the same scopes it writes)."""
+    rules = "".join(f" (layer_rule {L} (active on) (preferred_direction {way})"
+                    f" (preferred_direction_trace_costs 1.0) (against_preferred_direction_trace_costs {float(d['against_cost'])}))"
+                    for L, way in d["layers"].items())
+    add = (f"    (snap_angle {d.get('snap_angle', 'fortyfive_degree')})\n"
+           f"    (autoroute_settings (fanout off) (autoroute on) (postroute on) (vias on)"
+           f" (via_costs {int(d.get('via_cost', 50))}) (plane_via_costs 5) (start_ripup_costs 100) (start_pass_no 1){rules})\n")
+    # at the end of the structure scope, after the layers its rules name
+    text = open(dsn).read()
+    i, depth = text.index("(structure"), 0
+    for k in range(i, len(text)):
+        depth += {"(": 1, ")": -1}.get(text[k], 0)
+        if depth == 0:
+            break
+    open(dsn, "w").write(text[:k] + add + "  " + text[k:])
+
+
+def route(path, edge, directions=None):
+    """Route the saved board at `path` in place; `edge` its copper-to-edge clearance, mm.
+    `directions` (layout.yaml `directions:`): each signal layer's preferred direction and
+    the cost of a trace against it, written into the DSN's autoroute settings."""
     j = jar()
     t = tempfile.mkdtemp(prefix="freeroute-")
     try:
@@ -88,6 +111,8 @@ def route(path, edge):
                             pcb_main.rule_area(exp, to_body(keep), f"{fp.GetReference()} copper (router only)", [name])
         if not pcbnew.ExportSpecctraDSN(exp, dsn):
             sys.exit("pcb: KiCad's Specctra DSN export failed")
+        if directions:
+            with_directions(dsn, directions)
         r = subprocess.run(["java", f"-Duser.home={t}", "-jar", j, "-de", dsn, "-do", ses, "-mp", str(PASSES),
                             f"--router.max_passes={PASSES}", "--gui.enabled=false", "-da",
                             f"--router.job_timeout={JOB_TIMEOUT}"] + [f"--router.scoring.{k}={v}" for k, v in SCORING.items()],

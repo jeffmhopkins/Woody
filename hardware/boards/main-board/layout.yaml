@@ -327,8 +327,19 @@ silk:
   rev: "A"
   date: "2026-09-30"
 
-# Routing: route: freerouting - pcb_route.fanout and route_pair first (above),
-# then every other connection by Freerouting on layers 1 and 4 through a
-# Specctra DSN/SES round trip (tools/pcb_freeroute.py). A connection it leaves
-# is reported by name and check fails on it.
-route: freerouting
+# Routing: pcb_route.fanout and route_pair first (above), then every other
+# connection on layers 1 and 4 (directions: below); what is left gets a rip-up
+# (pcb.rescue). A connection still left is reported by name and check fails on it.
+route: astar
+
+# LAYER DIRECTIONS (owner, 2026-10-01, on the first routed preview: "similar horizontal
+# and vertical layers", as the key boards route): layer 1 runs along the board, layer
+# 4 across it, a via at each turn between them. route: astar - every signal connection
+# by pcb_route.complete, shortest first, a step against its layer's direction costing
+# against_cost; Freerouting (route: freerouting) does not take a direction from its
+# batch settings (2026-10-01: the same result at every cost and layer order tried).
+directions:
+  layers: {F.Cu: horizontal, B.Cu: vertical}
+  against_cost: 6.0
+  # each right-angle corner cut to two 45-degree bends, up to this far back (pcb_route.chamfer)
+  chamfer: 0.6

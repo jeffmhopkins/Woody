@@ -480,8 +480,14 @@ unchanged: their `layout.yaml` names no kind.
    inside every edge (the DSN has no copper-to-edge rule). Bounded by
    Freerouting's own `--router.job_timeout` (20 min), which still writes the
    session; its pass limit is not honoured in batch, and a shell timeout's kill
-   writes nothing. Its costs are its defaults: a flatter direction cost and
-   cheaper vias were tried and left more unrouted.
+   writes nothing. **Layer directions** (`layout.yaml` `directions:`, owner
+   2026-10-01): layer 1 along the board, layer 4 across it, as the key boards
+   route, written into the DSN as Freerouting's own `autoroute_settings` (a
+   `layer_rule` per layer: preferred direction, and the cost of a trace against
+   it) with `snap_angle fortyfive_degree`, at the end of the `structure` scope,
+   after the layers they name; `pcb_route.complete` costs its steps the same
+   way. Its other costs are its defaults: a flatter direction cost and cheaper
+   vias were tried on the first layout and left more unrouted.
 5. Zones filled, then `pcb.post_route`: `pcb_route.tidy` (doubled, zero-length
    and dangling tracks removed; acute joins squared and collinear runs merged, as
    on a key board); **`pcb_route.complete`** - every connection KiCad's DRC still
