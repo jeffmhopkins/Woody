@@ -842,7 +842,7 @@ def silk_off_vias(board):
         print("pcb: silk adapted - library silk on a via removed: " + ", ".join(f"{r} ({n})" for r, n in sorted(gone.items())))
 
 
-def cmd_update_footprints(bdir, only):
+def cmd_update_footprints(bdir, only, resized=False):
     """`update-footprints <board> <ref or footprint name>...`: each named footprint on the
     board replaced by the library's current one, in the same place, side and turn, with
     its reference, value, sheet path, BOM and DNP flags, its fields' placing and its pads'
@@ -867,12 +867,13 @@ def cmd_update_footprints(bdir, only):
         if fp.IsFlipped():
             new.Flip(pos, pcbnew.FLIP_DIRECTION_LEFT_RIGHT)
         new.SetOrientation(fp.GetOrientation())
-        geo = lambda f: sorted((p.GetNumber(), p.GetPosition().x, p.GetPosition().y, p.GetSize(p.GetPrincipalLayer()).x,
-                                p.GetSize(p.GetPrincipalLayer()).y) for p in f.Pads())
+        geo = lambda f: sorted((p.GetNumber(), p.GetPosition().x, p.GetPosition().y) + (() if resized else
+                               (p.GetSize(p.GetPrincipalLayer()).x, p.GetSize(p.GetPrincipalLayer()).y)) for p in f.Pads())
         if geo(new) != geo(fp):
             board.Delete(new)
             sys.exit(f"pcb: {fp.GetReference()}'s library footprint {lib}:{item} has moved or resized pads - "
-                     f"re-route it (pcb.py layout), an update would leave its copper short")
+                     f"re-route it (pcb.py layout), an update would leave its copper short; pads only resized "
+                     f"in place: --pads-resized, then check (a track now too near a bigger pad is a DRC error)")
         new.SetReference(fp.GetReference())
         new.SetValue(fp.GetValue())
         for a, b in ((fp.Reference(), new.Reference()), (fp.Value(), new.Value())):
@@ -1964,7 +1965,8 @@ def missing_models(board, bdir, env):
 
 if __name__ == "__main__":
     if len(sys.argv) >= 4 and sys.argv[1] == "update-footprints":
-        sys.exit(cmd_update_footprints(os.path.join(ROOT, sys.argv[2].rstrip("/")), sys.argv[3:]) or 0)
+        sys.exit(cmd_update_footprints(os.path.join(ROOT, sys.argv[2].rstrip("/")),
+                                       [a for a in sys.argv[3:] if not a.startswith("--")], "--pads-resized" in sys.argv) or 0)
     if len(sys.argv) >= 3 and sys.argv[1] in ("layout", "check", "render", "finish"):
         d = os.path.join(ROOT, sys.argv[2].rstrip("/"))
         sys.exit({"layout": lambda: cmd_layout(d, "--force" in sys.argv, "--no-route" not in sys.argv), "check": lambda: cmd_check(d),
