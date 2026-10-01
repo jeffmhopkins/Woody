@@ -1,0 +1,77 @@
+* The module's two 5 V rails at rack power-on and power-off, and what U-LVL-MOD's SYNC
+* output does to the DAC8568's SYNC pin between them. As netlisted:
+*  - the bus +12 V through PTC-POS12, D1 (1N5817, BEHAVIOURAL: power-entry/sim's fit),
+*    FB1 (its DC resistance) and C1, with the module's analog load;
+*  - DAC_AVDD: U-REG-DAC, TI's LM317L transient model, on R-REG-SET-LO / -HI with C-REG-ADJ
+*    and C-REG-OUT, the DAC's own supply current as a resistance (power-entry/sim's deck);
+*  - LOGIC_5V: U-REG-LOGIC, ADP7118 5.0 V, BEHAVIOURAL from its banked datasheet (no vendor
+*    model): EN tied to VIN, on above UVLO, its internal soft start, a pass element that
+*    sources only, with its dropout and current limit; C-LOGIC-IN / -OUT; the logic load;
+*  - CS_MOD idle: R-PULL-CS to LOGIC_5V (no instrument on the cable), R-RX-CS and C-RX-CS
+*    into U-RX-MOD (BEHAVIOURAL), driving U-LVL-MOD gate 3 (TI's SN74AHCT125 model);
+*  - SYNC: R-PULL-SYNC to DAC_AVDD, and the DAC8568's SYNC pin as its pin capacitance and
+*    its power clamp to AVDD, the I-V table of TI's IBIS model (TI publishes no SPICE model).
+* One cycle: the bus rises over t_rise, holds to t_off, falls over t_fall. uic: power-on.
+VP12 bp12 0 PWL(0 0 1u 0 {{t_up_end}} {{v_bus}} {{t_off}} {{v_bus}} {{t_off_end}} 0)
+RPTC1 bp12 bp12f {{r_ptc}}
+D1 bp12f p12d D5817
+RFB1 p12d p12 {{r_fb}}
+C1 p12 0 {{C1}}
+RLP p12 0 {{r_load_pos}}
+* DAC_AVDD
+XREG p12 adj avdd LM317L_TRANS
+RSH avdd adj {{R-REG-SET-LO}}
+RSL adj 0 {{R-REG-SET-HI}}
+CADJ adj 0 {{C-REG-ADJ}}
+CREG avdd 0 {{C-REG-OUT}}
+RDAC avdd 0 {{r_dac}}
+* LOGIC_5V: ADP7118, behavioural. ss charges while VIN is over UVLO (to 5 V in t_ss), and is
+* discharged below it; the pass element sources current only, up to i_lim, towards
+* min(ss, VIN - v_do)
+CLIN p12 0 {{C-LOGIC-IN}}
+Bss 0 ss I = (V(p12) > {{v_uvlo}}) ? ({{i_ss}} * (V(ss) < {{v_out_ldo}} ? 1 : 0)) : (-V(ss) * 1e-3)
+Css ss 0 1n
+Bldo p12 l5 I = max(0, min({{i_lim}}, {{gm_ldo}} * (min(V(ss), V(p12) - {{v_do}}) - V(l5))))
+CLOUT l5 0 {{C-LOGIC-OUT}}
+RL5 l5 0 {{r_logic}}
+* CS_MOD idle, into the receiver
+RPCS l5 csmod {{R-PULL-CS}}
+RRX csmod csrc {{R-RX-CS}}
+CRX csrc 0 {{C-RX-CS}}
+* U-RX-MOD gates 5-6, BEHAVIOURAL: CS_BUF at U-RX-MOD's supply when its input is high. Not
+* TI's 74AHCT14 model: that is a generic AHC model whose thresholds are not this part's
+* TTL ones (sims.yaml, models)
+Bcs csbuf 0 V = V(l5) * 0.5 * (1 + tanh(20 * (V(csrc) - 0.5 * V(l5))))
+* U-LVL-MOD gate 3: TI's SN74AHCT125 model, OE tied low. Its VCC is LOGIC_5V as netlisted
+* (k_avdd = 0); k_avdd = 1 is a WHAT-IF with it on DAC_AVDD. TI's model has no output clamp to
+* VCC; the datasheet's I_OK (VO > VCC) says the part has one, so it is added (DOCH)
+Bvb vbuf 0 V = {{k_avdd}} * V(avdd) + (1 - {{k_avdd}}) * V(l5)
+XLVL ydrv csbuf 0 vbuf 0 SN74AHCT125
+* the model's input-current term reads a global maxICC it never defines (TINA-TI supplies it):
+* the 74AHCT125's Delta-I_CC, 1.5 mA per input at 3.4 V [ds SN74AHCT125.pdf p.4]. Its inputs
+* here sit at the rails, where the term is zero
+.param maxicc = 1.5m
+DOCH ydrv vbuf DCLAMP
+* r_ser: a WHAT-IF series resistor at the DAC's input (1 mohm: none, as netlisted)
+RSER ydrv sync {{r_ser}}
+* SYNC at the DAC
+RPSYNC sync avdd {{R-PULL-SYNC}}
+CPIN sync 0 {{c_pin}}
+* the DAC's SYNC pin, its POWER clamp from TI's IBIS model (input_5p0v): current into the pin
+* against how far it is over AVDD, typ column, scaled by k_clamp for the min/max columns
+VIES sync syncd 0
+BESD syncd avdd I = {{k_clamp}} * pwl(V(syncd, avdd), -1, 0, 0.7025, 0, 0.745, 2.04961e-05, 0.77, 5.9866e-05, 0.83, 0.000175097, 0.9, 0.000345239, 0.996, 0.000645086, 1.0715, 0.000949736, 1.2065, 0.00161098, 1.359, 0.00241815, 1.5935, 0.00372301, 1.96, 0.00580486, 2.183, 0.0070934, 3.68, 0.0157434, 4.2245, 0.0188548, 5.0, 0.0236034, 10.0, 0.0472)
+.model D5817 D(Is={{d_is}} N={{d_n}} Rs={{d_rs}} Cjo=110p BV=20)
+.model DCLAMP D(Is=1e-14 N=1 Rs=5)
+.options method=gear rshunt=1e10
+.control
+tran 5u {{t_end}} 0 10u uic
+wrdata avdd.dat v(avdd)
+wrdata l5.dat v(l5)
+wrdata sync.dat v(sync)
+wrdata over.dat v(sync)-v(avdd)
+wrdata iesd.dat i(VIES)
+wrdata p12.dat v(p12)
+quit
+.endc
+.end

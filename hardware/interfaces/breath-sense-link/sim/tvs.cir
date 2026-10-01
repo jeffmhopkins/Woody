@@ -1,0 +1,60 @@
+* The breath link with its two ESD diodes, D-TVS-BREATH-SIG on BREATH_SENSE and
+* D-TVS-BREATH-RET on AGND_SENSE, both to PWR_GND at J-UMB - the parts
+* breath-receive-stage/sim's CMRR deck leaves out. Otherwise the same chain as netlisted:
+* the sensor buffer (an ideal source) through R1, the instrument's analog ground through
+* R1b, the module's R2/R3, R4/R5, C_cm, C_diff, the INA828 (TI's model) and its REF driver
+* (TI's OPA2197 model). Each TVS is a junction capacitance fitted to Figure 5 of its
+* banked datasheet (Cjo, Vj, M - sims.yaml) at the leg's own bias - the signal leg at the
+* sensor's voltage, the return leg at 0 V, so the two do not match - and a reverse leakage
+* i_rm, the datasheet's maximum, as a current to PWR_GND. tvs = 0 takes both out.
+* Three excitations, one at a time: VCM the instrument's ground against the module's (the
+* receive deck's), VSIG the signal, VPG PWR_GND against the instrument's analog ground
+* (the plane at J-UMB carries the LED row's and the buck's currents; its tie to the
+* analog island is under the ADC).
+VPOS pos 0 {{v_pos}}
+VNEG neg 0 {{v_neg}}
+VCM agndinst 0 DC 0 AC 1
+VSIG sensbuf agndinst DC {{v_sensor}} AC 0
+VPG pwrgnd agndinst DC 0 AC 0
+R1 sensbuf breath {{R1}}
+R1b agndinst agndsense {{R1b}}
+DTS pwrgnd breath DTVS_S m={{m_tvs}}
+DTR pwrgnd agndsense DTVS_R m={{m_tvs}}
+IRMS breath pwrgnd DC {{i_rm_on}}
+R3 breath inneg {{R3}}
+R2 agndsense inpos {{R2}}
+R4 inpos 0 {{R4}}
+R5 inneg 0 {{R5}}
+CCMP inpos 0 {{C-CM-IN+}}
+CCMN inneg 0 {{C-CM-IN-}}
+CDIFF inpos inneg {{C-DIFF-BREATH}}
+XAMP inpos inneg pos neg out refdrv rg1 rg2 INA828
+RG rg1 rg2 {{R-GAIN-INAMP}}
+VWIP wiper 0 {{v_ref_trim}}
+XREFB wiper refdrv pos neg refdrv OPAx197
+.model DTVS_S D(Is=1e-15 N=1 Cjo={{cj_sig}} Vj={{tvs_vj}} M={{tvs_m}} BV={{tvs_bv}})
+.model DTVS_R D(Is=1e-15 N=1 Cjo={{cj_ret}} Vj={{tvs_vj}} M={{tvs_m}} BV={{tvs_bv}})
+.options method=gear rshunt=1e10
+.control
+op
+let vo_leak = v(out)
+alter @irms[dc] = 0
+op
+let dv_leak = op1.vo_leak - v(out)
+print dv_leak
+ac dec 40 1 1meg
+let gcm = mag(v(out))
+wrdata gcm.dat gcm
+alter @vcm[acmag] = 0
+alter @vpg[acmag] = 1
+ac dec 40 1 1meg
+let gpg = mag(v(out))
+wrdata gpg.dat gpg
+alter @vpg[acmag] = 0
+alter @vsig[acmag] = 1
+ac dec 40 1 1meg
+let gdm = mag(v(out))
+wrdata gdm.dat gdm
+quit
+.endc
+.end

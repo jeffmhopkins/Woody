@@ -89,7 +89,10 @@ gates, three signals, none spare.
   `[ds SN74AHCT14.pdf p.5]` — against a 3.3 V link, so a 3.3 V high clears the
   top of the band and 0 V the bottom. **No input clamp to `VCC`**, like the
   74AHCT125 (`I_IK` for `VI < 0` only, p.4; `I_I` ±1 µA at `VCC` = 0 V, p.5):
-  a powered instrument on an unpowered module back-drives nothing. A 74HCT14
+  a powered instrument on an unpowered module back-drives nothing through
+  the receiver. (`R-PULL-CS` is a path of its own: `CS_MOD` held at 3.3 V by
+  the instrument feeds `LOGIC_5V` through it, at most 3.3 V / 100 kΩ = 33 µA
+  `[calc]`.) A 74HCT14
   has the thresholds and not that property. TI `SN74AHCT14DR`, in stock at
   JLCPCB/LCSC (C141316) on 2026-09-30.
 - **Why the RC.** The pair's crosstalk at the cable node is larger than a
@@ -119,6 +122,14 @@ and neither end of a cable states it alone. The drawing above stays here.*
 
 ## Still open
 
+- **`SYNC` is driven high before the DAC has its supply — open for the
+  owner, 2026-10-01.** `U-LVL-MOD` runs from `LOGIC_5V`, which arrives first
+  at power-on and leaves last at power-off, and `SYNC` idles high, so for
+  milliseconds each way the DAC's `SYNC` pin sits over its `AVDD + 0.3 V`
+  absolute maximum and feeds `DAC_AVDD` through its input protection
+  `[ds DAC8568CIPW.pdf p.2, p.31]`. Simulated, with the numbers and three
+  options, in [`sim/README.md`](sim/README.md); decided by the owner's choice
+  among them.
 - **An ESP32-S3 NVS commit or OTA write disables the instruction cache** and can
   stall non-IRAM code on both cores. With no watchdog there is no `CLR` to fire
   mid-note, so the consequence is now a *stalled refresh* rather than a reset:
