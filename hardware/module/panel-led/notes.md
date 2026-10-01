@@ -43,3 +43,19 @@ for "the load switch has latched" indicated nothing. The review proposed
 driving it from `TIMER` or `GATE`, pending the datasheet read that
 `C-TIMER` also needed. The datasheet, once banked, showed neither node holds
 a "latched" level; the output does.
+
+---
+
+## On the jack board, a 3 mm LED on a lead spacer — superseded 2026-10-01
+
+*Moved here when the jack board became a plain rectangle (ADR 0024 point 15).*
+
+From 2026-09-29 the LED was a Lite-On LTL-4231N, 3 mm green diffused, hand-
+soldered in the jack board's left leg on a two-lead spacer
+(`MECH-LED-BEZEL-MOD` was that spacer) whose length set how far the lens stood
+proud, because the LED's flange was the panel hole's own diameter. Its supply
+crossed to the jack board on `J-B2B-MOD` pin 19 and its return came back on
+the header's ground pins. The owner asked for the jack board to end above the
+toggle's row, which took the leg away; on the main board a through-hole LED's
+leads would have come out under `U-ISO`, so it became an 0805 under a panel
+light pipe and pin 19 became spare.

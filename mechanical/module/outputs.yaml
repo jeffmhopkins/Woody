@@ -82,7 +82,7 @@ renders:
     camera: [0, 0, 0, 0, 0, 0, 300]
     viewall: true
   - name: module-boards
-    title: Both boards seen from the panel - outlines, the notch, standoffs, J-B2B-MOD, the parts on each face
+    title: Both boards seen from the panel - outlines, standoffs, J-B2B-MOD, the LED, the parts on each face
     src: mechanical/cad/fig_module_boards.scad
     out: mechanical/module/renders/boards.png
     stamp: Woody module

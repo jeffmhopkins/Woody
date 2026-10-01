@@ -158,61 +158,189 @@ passes. Write the board's README from this one.
 
 ## Ordering it — JLCPCB
 
-Everything below was checked against JLCPCB's banked pages
-(`datasheets/fab/`) on 2026-09-27.
+This is the order sheet for **both** key boards. The right-hand board's
+page gives only what differs (its part counts and its cost line).
+JLC's limits and fees were read from the banked pages in `datasheets/fab/`
+(snapshots of 2026-09-27). Stock, prices and footprints were checked on
+2026-10-01. Anything marked `[from memory]` or *estimate* is to be confirmed
+on JLC's live order form.
 
-**What to upload:**
-1. **PCB:** `fab/` zipped: every `.gbr` file, both `.drl` files and the `.gbrjob`.
-2. **Assembly BOM:** `fab/key-board-lh-bom-jlc.csv`.
-3. **Assembly CPL:** `fab/key-board-lh-cpl-jlc.csv`.
+**Before you order, run the gates.** `python3 tools/pcb.py check
+hardware/boards/key-board-lh` must report 0 errors, and `python3 tools/kicad.py
+check` must PASS. A PASS means `fab/` was written from this board and these
+sheets, so it is the order. Then:
 
-**The bare board** — the options to pick:
+### 1. What to upload
 
-| Setting | Value | Why |
+| Upload | File | How |
 |---|---|---|
+| **Gerber** (the bare board) | a zip of `fab/`'s nine `.gbr` files, both `.drl` files and the `.gbrjob` | `cd hardware/boards/key-board-lh/fab && zip /tmp/key-board-lh-gerbers.zip *.gbr *.drl *.gbrjob`. Write the zip **outside** `fab/`: `kicad.py check` fails on any file in `fab/` that no tool wrote |
+| **BOM** (PCBA step) | `fab/key-board-lh-bom-jlc.csv` | Columns `Comment, Designator, Footprint, JLCPCB Part #`, as the banked guide asks `[datasheets/fab/JLCPCB-KICAD-BOM-CPL-GUIDE.pdf]` |
+| **CPL** (PCBA step) | `fab/key-board-lh-cpl-jlc.csv` | Columns `Designator, Mid X, Mid Y, Layer, Rotation`, mm. The rotations are already in JLC's convention (*4. Rotations*, below) |
+
+Do **not** upload `-pos.csv` (KiCad's own placement, with KiCad's
+rotations) or `-hand-assembly.csv`. They are for the builder.
+
+### 2. The PCB options, top to bottom on JLC's form
+
+The option names are as JLC's quote form showed them `[from memory]`.
+Where the form has an option that is not listed here, leave it at its default.
+
+| Option | Pick | Why |
+|---|---|---|
+| Base material | FR-4 | |
 | Layers | 2 | |
-| Quantity | 5, the fewest JLC makes `[from memory]`; assemble 2 | Economic PCBA assembles 2–30 boards `[datasheets/fab/JLCPCB-PCBA-CAPABILITIES.pdf, "PCB Specs for Economic PCB Assembly"]`. The right-hand board is a different design and a separate order (below) |
-| Thickness | `boards.key_board_t` | `config/body.yaml` (ADR 0020); a standard JLC thickness `[datasheets/fab/JLCPCB-PCB-CAPABILITIES.pdf]`. `pcb.py check` holds the stackup to it |
-| Material | FR-4 | |
-| Surface finish | HASL lead-free | At this thickness, Economic assembly offers HASL only `[JLCPCB-PCBA-CAPABILITIES.pdf]`. `layout.yaml` `fab: finish`, in the stackup and the Gerber job file |
-| Solder mask / silkscreen | Green / White | `layout.yaml` `fab:`. Economic assembly at this thickness offers green or black |
-| Copper | 1 oz | `layout.yaml` `fab: copper_oz` |
-| Outline | from the Gerbers | The outline is the body CAD's key board, `mechanical/export/key-board-lh.dxf`, which holds only the outline (its size is there). The four mount holes (M2.5) are footprints placed from `mechanical/export/pcb-geometry.echo`, in the NPTH drill file |
+| Dimensions | read from the Gerber (do not type them) | The outline is the body CAD's, `mechanical/export/key-board-lh.dxf` |
+| PCB qty | **5** (the fewest JLC makes `[from memory]`) | Two are assembled (*3. Assembly options*). The rest are bare spares for a re-work or a second build |
+| Product type | Industrial/Consumer electronics | |
+| Different design | 1 | |
+| Delivery format | Single PCB | Not a panel: Economic PCBA takes single boards from 10 × 10 mm `[datasheets/fab/JLCPCB-PCBA-CAPABILITIES.pdf]` |
+| PCB thickness | `boards.key_board_t` (`config/body.yaml`) | ADR 0020 Amendment 6. `pcb.py check` holds the stackup to it, and the `.gbrjob` carries it |
+| PCB colour | Green (`layout.yaml` `fab: mask`) | At this thickness Economic PCBA offers green with HASL or ENIG, 2–50 boards `[JLCPCB-PCBA-CAPABILITIES.pdf, "PCB Specs for Economic PCB Assembly"]` |
+| Silkscreen | White (`fab: silk`) | |
+| Material type | FR-4 TG135–140, the default | |
+| Surface finish | **LeadFree HASL** (`fab: finish`) | The stackup and the `.gbrjob` say it; Economic PCBA offers it at this thickness (above) |
+| Outer copper weight | 1 oz (`fab: copper_oz`) | Every limit in the DFM table (below) is JLC's 1 oz figure |
+| Via covering | Tented, the default | No via is a test point (the board has none, *Bring-up*) |
+| Min via hole size / diameter | the default (0.3 mm hole) | Both boards' vias are `layout.yaml` `rules: via_drill` / `via`, which JLC does not charge extra for (DFM table) |
+| Board outline tolerance | ±0.2 mm (regular) | The mounts are holes, not the outline; the outline only has to clear the cavity |
+| Confirm production file | **Yes** | JLC's engineer sends the production Gerber back. Check J1's pads (*Open*: their thin ring) before it is made |
+| Mark on PCB / Remove order number | **No** (JLC prints its number where it chooses) | Neither face is seen in the instrument. "Yes" costs extra `[from memory]`, and "Specify a location" needs a marker on the silkscreen that this board does not have |
+| Flying probe test | Fully test (the default for a 2-layer prototype) | |
+| Gold fingers, castellated holes, edge plating, impedance control | No / none | None of them is on this board |
 
-**The limits this board is held to.** JLCPCB's own limits are banked in
-`datasheets/fab/` and written into `layout.yaml` `fab:`. The first layout
-copied them into the board's design rules (`key-board-lh.kicad_pro`), and every
-`pcb.py check` compares the two, so neither can drift from the other
-unreported. To change a limit, change both: in KiCad's Board Setup and in
-`layout.yaml`, and say why. The silkscreen limits that KiCad's DRC does not
-test are checked by `pcb.py` itself (above).
+### 3. Assembly options (turn on "PCB Assembly")
 
-**Assembly: Economic PCBA, bottom side only**
+| Option | Pick | Why |
+|---|---|---|
+| PCBA type | **Economic** | Single-sided placement is all it needs `[JLCPCB-PCBA-CAPABILITIES.pdf]` |
+| Assembly side | **Bottom side** | Every machine-placed part is on the bottom, the side facing the main board |
+| PCBA qty | **2** | Economic assembles from 2 `[JLCPCB-PCBA-CAPABILITIES.pdf]`: one for the build, one spare |
+| Tooling holes | Added by JLCPCB | The board has none of its own |
+| Confirm parts placement | **Yes** | The rotations are corrected (*4*), but JLC's preview is still the last check, and this is the first order |
+| Stencil | included in Economic PCBA | Not a separate stencil order |
 
-- **Every machine-placed part is on the bottom** (the side facing the main board).
-  - The designators are the plain references on the silkscreen (R1, C6, U1); *The silkscreen*, below, maps each to its BOM row.
-- **Check every part's orientation in JLC's placement preview before you pay.**
-  - The CPL carries KiCad's own rotations, with KiCad's column headers renamed to JLC's (the banked guide's Method 1, `datasheets/fab/JLCPCB-KICAD-BOM-CPL-GUIDE.pdf`).
-  - That guide attributes automatic rotation corrections only to the Fabrication Toolkit plugin (its Method 2). This flow does not use the plugin, so **nothing corrects the rotations**: JLC's preview is the only check.
-  - Bottom-side parts are the ones most often shown wrong `[from memory]`, and every part here is on the bottom.
-  - The register's (U1) pin 1 is marked on the silkscreen, and that is the one to look at.
-  - Record any correction the first order needs in *Revisions* (below), so the next order does not rediscover it.
-- **Which parts are in the order.** The resistors and capacitors are JLC **Basic** parts. The register, TI's SN74HCS165DR, is an **Extended** part, not a "Preferred" one, so it carries JLC's feeder-loading fee on Economic assembly ("$3 per extended component", FAQ 6 `[datasheets/fab/JLCPCB-PCBA-FAQ.pdf]`).
-  - **Its stock at JLC is thin**: about 112 on 2026-09-27 and 112 again on 2026-09-30 `[web https://jlcpcb.com/partdetail/TexasInstruments-SN74HCS165DR/C2864745, 2026-09-27; JLC component-search API, 2026-09-30]`. Digi-Key held 5,845 at $0.73 the same day `[web https://www.digikey.com/en/products/detail/texas-instruments/SN74HCS165DR/13563029, 2026-09-27]`. **If JLC is short, buy it from Digi-Key** and either send it to JLC as a consigned part or leave it off the JLC order and fit it by hand (SOIC-16, 1.27 mm pitch).
-  - **Do not let JLC substitute a plain 74HC165** or a 74LV165A: the part must have Schmitt-trigger inputs with no input transition-rate limit (the `U-KEYS` row says why).
-  - Library status as of 2026-09-27 `[web, JLC part pages: jlcpcb.com/partdetail/…/C17408, …/C17520, …/C49678, …/C53134, …/C2864745, and JLC's component-search API]`. It can change, so check it at order.
-  - The other part numbers are not repeated here. They are on the sheets, and in `fab/key-board-lh-bom-jlc.csv`.
-- **Not in the order:**
-  - SW1-SW5 and J1 (`J-CHAIN`), which are in `fab/key-board-lh-hand-assembly.csv`;
-  - the mount holes, which are drill only.
-- **Bought separately, for the hand assembly.** Only the first two are on the hand list. Sourcing facts below were read on 2026-09-27; check stock at order.
-  - **The switches** (BOM row `SW1-n`): Gateron **KS-33H10B050NN-Y24**, Low Profile 2.0 Red, the code on the sheet and the hand list. **Order `-Y24` exactly.** The suffix is the bottom housing's colour, not a year: `-Y24` is black and `-Y31` white. The white-housing spec gives a longer total travel than the black one the body is drawn from (`switch.total_travel`), which would break the flush rule `[datasheets/mechanical/GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf; datasheets/mechanical/GATERON-KS-33-SPEC-WHITE-HOUSING-KS-33H10B050NN-Y31.pdf]`. Not the Silent, not the Low Profile 3.0. Gateron's own store sells the black-housing Red `[web https://www.gateron.com/products/gateron-ks-33-low-profile-switch-set, 2026-09-27]`; whether it ships from a US warehouse is unverified. US sellers found (e.g. LumeKeebs) sell "KS-33 2.0 Red" without naming the housing or the code `[web https://lumekeebs.com/products/gateron-ks-33-low-profile-2-0-mechanical-switches, 2026-09-27]`, so check the code on the packaging.
-  - **`J-CHAIN`**, Samtec SHF-106-01-L-D-RA. JLC/LCSC had none (C17202657, stock 0 `[web, JLC API, 2026-09-27]`). DigiKey SHF-106-01-L-D-RA-ND had **only 8 in stock**, with a **4-week factory lead time**, on 2026-09-27 and again on 2026-09-30 `[web https://www.digikey.com/en/products/detail/samtec-inc/SHF-106-01-L-D-RA/8410402]`. An instrument takes `chain-connectors` of them, two on this pair of key boards and two on the main board, so eight is one build and its spares; failing that, Samtec direct (reel variants and samples). Its sourcing is open (its BOM row, and *Open* below).
-  - **The corner mount hardware**: at each corner a spacer (`MECH-KB-SPACER`), and the column's standoff and screw (`MECH-COL-STANDOFF`, `MECH-COL-SCREW`), which are bought with the cassette. What each must be, the quantities and the sources are those rows in `hardware/unplaced.csv`; their prices are not repeated here. The spacers and standoffs are faced to length before fitting. The mount is described in *Assembling*, step 2.
-  - **`CBL-CHAIN`**, one per board, ordered as in *Assembling*, step 3.
-- **A US-sourced hand build.** The UNI-ROYAL resistors stay for JLC assembly: they are JLC **Basic** parts, with no feeder fee. No US distributor stocks them (DigiKey had no result `[web https://www.digikey.com/en/products/result?keywords=0805W8F1000T5E, 2026-09-27]`). For a board built by hand from US stock, use YAGEO RC0805FR-07100RL (100R) and RC0805FR-072K2L (2k2): DigiKey 311-100CRCT-ND / 311-2.20KCRCT-ND; LCSC C105577 / C114561, which are JLC **Extended** `[web https://www.digikey.com/en/products/result?keywords=RC0805FR-07100RL; …=RC0805FR-072K2L; https://jlcpcb.com/partdetail/YAGEO-RC0805FR07100RL/C105577; …/YAGEO-RC0805FR072K2L/C114561, all 2026-09-27]`. The capacitors' parts are already at DigiKey.
-- **One instrument needs two key boards.** The right-hand board is a separate design and a separate order: [`../key-board-rh/README.md`](../key-board-rh/README.md), which gives only what differs from this one.
-- **The sheets are the source of every part number.** To change a part, set its `LCSC`/`MPN` fields in the circuit sheet and re-render. The BOM row (`hardware/cluster/bom.csv` etc.) says what the part must be; the sheet says which one is bought.
+Then, in the BOM step, **confirm every row matched its LCSC number**. Leave
+the hand parts (switches, J1) out: they are not in the BOM file. Do not accept
+a substitute for U1 (below).
+
+### 4. The parts, and their rotations
+
+Every machine-placed part is in JLC's library, checked on 2026-10-01 `[web, JLC
+component-search API (jlcpcb.com/api/overseas-pcb-order/v1/shoppingCart/smtGood/selectSmtComponentList), 2026-10-01]`.
+The part numbers come from the sheets (`LCSC`, `MPN`), and the fab BOM is
+generated from them, so they are not repeated here.
+
+| BOM row | Refs (this board) | LCSC | Library | Stock at JLC, 2026-10-01 | Unit price, 2026-10-01 | KiCad → JLC rotation offset |
+|---|---|---|---|---|---|---|
+| `R-KEY-SER` | R1, R3, R5, R7, R9 | C17408 | **Basic** | 9.39 M | $0.0042 | 0 |
+| `R-KEY-PU` | R2, R4, R6, R8, R10, R11 | C17520 | **Basic** | 3.64 M | $0.0046 | 0 |
+| `C-KEY` | C1–C5 | C53134 | **Basic** | 202 k | $0.0173 | 0 |
+| `C-DECOUPLE-165` | C6 | C49678 | **Basic** | 19.3 M | $0.0189 | 0 |
+| `C-BULK-CHAIN` | C7 | C15850 | **Basic** | 5.01 M | $0.0651 | 0 |
+| `U-KEYS` | U1 | C2864745 | **Extended** (not Preferred) | **112** | $1.086 | **−90** |
+
+- **One Extended part, so one feeder fee per design**: $3 `[datasheets/fab/JLCPCB-PCBA-FAQ.pdf, FAQ 6]`. The Basic parts have none.
+- **U1's stock is thin**: 112 on 2026-09-27, 2026-09-30 and 2026-10-01. Both key-board designs take 2 each at a prototype run, so 4 in all.
+  - Digi-Key held 5,845 on 2026-09-27 `[web https://www.digikey.com/en/products/detail/texas-instruments/SN74HCS165DR/13563029, 2026-09-27]`.
+  - **If JLC is short, buy it there.** Then either send it to JLC as a consigned part, or leave it off the JLC order and fit it by hand (SOIC-16, 1.27 mm pitch).
+  - **Do not let JLC substitute a plain 74HC165** or a 74LV165A. The part must have Schmitt-trigger inputs with no input transition-rate limit (the `U-KEYS` row says why).
+- **Rotations.** `fab/*-cpl-jlc.csv` is no longer KiCad's raw angle. `tools/pcb.py render` makes two corrections (`hardware/lib/README.md`, *JLC's rotations*):
+  - A bottom part's angle is mirrored to 180° − KiCad's.
+  - The per-part offset in `hardware/lib/jlc-rotation.csv` is added, read from JLC's own footprint for that LCSC number, which is banked in `datasheets/` (each row names its file).
+  - The register's offset is **−90°**. JLC's SOIC-16 lies with its rows along x, pin 1 bottom left; KiCad's lies with its rows along y, pin 1 top left.
+  - The 0805s' pad 1 is at −x in both libraries, so their offset is 0.
+  - Before this correction, U1 would have shown a quarter-turn out in the preview.
+- **US-sourced hand build.** The UNI-ROYAL resistors stay for JLC assembly, because they are Basic parts with no feeder fee. No US distributor stocks them (DigiKey had no result `[web https://www.digikey.com/en/products/result?keywords=0805W8F1000T5E, 2026-09-27]`).
+  - For a board built by hand from US stock, use YAGEO RC0805FR-07100RL (100R) and RC0805FR-072K2L (2k2). DigiKey 311-100CRCT-ND / 311-2.20KCRCT-ND; LCSC C105577 / C114561, which are JLC **Extended** (233 k and 1.07 M in stock on 2026-10-01) `[web https://www.digikey.com/en/products/result?keywords=RC0805FR-07100RL; …=RC0805FR-072K2L, 2026-09-27; JLC component-search API, 2026-10-01]`.
+  - The capacitors' parts are already at DigiKey.
+- **To change a part**, set its `LCSC`/`MPN` fields in the circuit sheet and re-render. The BOM row (`hardware/cluster/bom.csv` etc.) says what the part must be; the sheet says which one is bought. A new LCSC number needs its row in `hardware/lib/jlc-rotation.csv`; until it has one, `render` names it on the console.
+
+### 5. The placement preview: what to check before paying
+
+JLC shows the bottom side with its own footprints drawn at the CPL's
+positions. Check:
+1. **Every part sits on its pads.** If every part is offset by the same amount, the origin is wrong. Stop: the CPL and the Gerbers share KiCad's page origin, so this should not happen.
+2. **U1's pin-1 mark** (JLC's dot or bevel) lands on the board's U1 pin-1 silk mark, at the register's corner nearest pin 1. Pins 1–8 run along one row and 9–16 back along the other. A quarter-turn means the offset is wrong; a half-turn means the bottom-side mirror is wrong. Either way, correct it in the preview and record it in *Revisions*.
+3. **The passives** sit along their pad pairs. None of them is polarised (all MLCC or chip resistors), so only the axis matters.
+4. **C7** (`C-BULK-CHAIN`) is beside J1's 3V3 pin.
+5. **No part is drawn at J1 or at the switches.** They are hand parts. If JLC has added them, it has matched a footprint it should not have: remove them.
+
+### 6. Cost estimate, one design, 5 PCBs with 2 assembled
+
+*Estimates.* JLC's live quote replaces this table.
+
+| Item | Left hand | Source |
+|---|---|---|
+| 5 bare PCBs, 2-layer, under 100 × 100 mm | $2.00 | `[web https://jlcpcb.com/, 2026-10-01: "From $2.00 / 5 pcs"]`. This board is inside 100 × 100 (its outline, `mechanical/export/key-board-lh.dxf`) |
+| Lead-free HASL surcharge | about $1–2 | *estimate* `[from memory]` |
+| PCBA setup | $8.00 | `[datasheets/fab/JLCPCB-PCBA-FAQ.pdf, FAQ 1]` |
+| Stencil | $1.50 | same |
+| SMT joints | $0.18 | [calc: (18 two-pad parts × 2 + U1's 16) = 52 joints × 2 boards × $0.0017] |
+| Extended-part feeder fee (U1) | $3.00 | FAQ 6 |
+| Machine-placed parts, 2 boards | about $2.61 | [calc: per board 5 × 0.0042 + 6 × 0.0046 + 5 × 0.0173 + 0.0189 + 0.0651 + 1.086 = $1.305, at the 2026-10-01 unit prices above; JLC adds attrition spares, so a little more] |
+| **JLC subtotal** | **about $18–19** | before shipping |
+| Shipping to the US | about $10–25 | *estimate* `[from memory]`. It depends on the method, and both designs ship together if ordered together |
+| Hand parts: J1 | $2.83 each | DigiKey SHF-106-01-L-D-RA-ND, 8 in stock, 4-week factory lead time `[web https://www.digikey.com/en/products/detail/samtec-inc/SHF-106-01-L-D-RA/8410402, 2026-10-01]` |
+| Hand parts: switches, `CBL-CHAIN`, mount hardware | not priced here | Below |
+
+### 7. Bought separately, for the hand assembly
+
+Only the first two are on `fab/key-board-lh-hand-assembly.csv`. Sourcing was
+read on 2026-09-27 except where dated; check stock at order.
+- **The switches** (BOM row `SW1-n`): Gateron **KS-33H10B050NN-Y24**, Low Profile 2.0 Red, the code on the sheet and the hand list.
+  - **Order `-Y24` exactly.** The suffix is the bottom housing's colour, not a year: `-Y24` is black and `-Y31` white.
+  - The white-housing spec gives a longer total travel than the black one the body is drawn from (`switch.total_travel`), which would break the flush rule `[datasheets/mechanical/GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf; datasheets/mechanical/GATERON-KS-33-SPEC-WHITE-HOUSING-KS-33H10B050NN-Y31.pdf]`.
+  - Not the Silent, and not the Low Profile 3.0.
+  - Gateron's own store sells the black-housing Red `[web https://www.gateron.com/products/gateron-ks-33-low-profile-switch-set, 2026-09-27]`. Whether it ships from a US warehouse is unverified, and its price could not be read on 2026-10-01 (the page carries none outside its script).
+  - US sellers found (e.g. LumeKeebs) sell "KS-33 2.0 Red" without naming the housing or the code `[web https://lumekeebs.com/products/gateron-ks-33-low-profile-2-0-mechanical-switches, 2026-09-27]`, so check the code on the packaging.
+- **`J-CHAIN`**, Samtec SHF-106-01-L-D-RA.
+  - JLC/LCSC has none: C17202657, stock 0 on 2026-09-27 and again on 2026-10-01 `[JLC component-search API]`.
+  - DigiKey had **only 8**, with a **4-week factory lead time**, on 2026-09-27, 2026-09-30 and 2026-10-01 (above).
+  - An instrument takes `chain-connectors` of them: two on this pair of key boards and two on the main board. Eight is one build and its spares. Failing that, buy from Samtec direct (reel variants and samples).
+  - Its sourcing is open (its BOM row, and *Open* below).
+- **The corner mount hardware.** At each corner: a spacer (`MECH-KB-SPACER`), and the column's standoff and screw (`MECH-COL-STANDOFF`, `MECH-COL-SCREW`), which are bought with the cassette.
+  - What each must be, the quantities and the sources are those rows in `hardware/unplaced.csv`; their prices are not repeated here.
+  - The spacers and standoffs are faced to length before fitting. The mount is described in *Assembling*, step 2.
+- **`CBL-CHAIN`**, one per board, ordered as in *Assembling*, step 3.
+
+### 8. DFM: JLC's limits against this board
+
+JLC's figures are from `datasheets/fab/JLCPCB-PCB-CAPABILITIES.pdf` (the
+2-layer, 1 oz rows). This board's figures are **read from the board**: the
+design rules in `key-board-lh.kicad_pro`, which `pcb.py check` holds equal to
+`layout.yaml` `rules:`/`fab:`, and which KiCad's DRC (0 errors, 0 warnings)
+proves every item meets. Where a figure is the smallest instance actually on
+the board, it was measured with `pcbnew` on 2026-10-01, and the right-hand
+board's are the same.
+
+| Rule | JLC (2-layer, 1 oz) | Held by (rule) | Smallest on the board | Margin |
+|---|---|---|---|---|
+| Layers / board size | 2; Economic PCBA ≥ 10 × 10 mm | — | 2 layers; outline from the body CAD | ok |
+| Thickness | a standard FR-4 thickness; at this one Economic PCBA takes green HASL/ENIG | `boards.key_board_t` | the stackup, held by `pcb.py check` | ok |
+| Track width | ≥ 0.10 | `rules: track_min` | `rules: track` (every signal track) | 2.5× |
+| Track/pad spacing | ≥ 0.10 (pad to track 0.10; SMD pad to pad 0.15) | `rules: clearance` | the rule (the pour is filled at it) | 2× |
+| Copper to routed edge | ≥ 0.20 | `rules: edge_clearance` | ≥ the rule (DRC) | +0.1 |
+| PTH drill | 0.15–6.3; ≥ 0.5 recommended for PTH | `rules: drill_min` | 0.70 (J1) | ok |
+| NPTH drill | ≥ 0.50 | — | the mount holes (`standoff_footprint`) and the switch poles | ok |
+| PTH annular ring | ≥ 0.18 absolute, 0.25 recommended | `fab: annular_min` | **0.185, J1's pads on the sides facing a neighbour** (the 1.07 pad across a 0.70 drill) | **+0.005: at the absolute minimum** (*Open*) |
+| Via hole / diameter | ≥ 0.15 / 0.25; diameter ≥ hole + 0.10 (0.15 preferred); a 0.2–0.25 hole under 0.45 costs more | `rules: via_drill`, `via`, `via_min` | the rule on every via (30 on this board, 33 on the right-hand one); ring 0.20 | ok, and no via surcharge |
+| Via hole to hole / pad hole to hole | ≥ 0.20 / 0.45 | `fab: hole_to_hole` | ≥ the rule (DRC) | ok |
+| PTH to track | ≥ 0.28 (0.35 recommended) | `fab: hole_clearance` | ≥ the rule (DRC) | at JLC's minimum by rule |
+| Mask expansion / bridge | 1:1 opening; bridge ≥ 0.10 between pads (green, 1 oz) | board setup: expansion 0 | the narrowest pad gap: 0.20 between J1's pads (1.27 pitch − 1.07 pad) | 2× |
+| Silkscreen line width | ≥ 0.15 | `fab: silk_line_min` | 0.15 (footprint strokes widened to it, `hardware/lib/README.md`) | at minimum |
+| Silkscreen text height | ≥ 1.0 (stroke ≥ 0.15, ratio 1:6 preferred) | `fab: silk_text_min` | 1.0 high, 0.18 stroke | at minimum height; stroke ok |
+| Pad to silkscreen | ≥ 0.15 | `fab: silk_to_pad` | ≥ the rule (DRC, and `pcb.py check`) | ok |
+| Hole tolerance | +0.13 / −0.08 | — | the switch-pin and J1 drills are sized for −0.08 (`hardware/lib/README.md`) | ok |
+
+Nothing on the board needs a non-standard option. The three items at JLC's
+minimum are the silk line, the silk text height and J1's ring. The silk ones
+are what JLC prints by default. J1's ring is an *Open* item, for JLC's review
+to accept.
+
+To change a limit, change it in KiCad's Board Setup **and** in `layout.yaml`,
+and say why. `pcb.py check` fails if the two differ. The silkscreen limits
+that KiCad's DRC does not test are checked by `pcb.py` itself (above).
 
 ## Assembling the rest by hand
 
@@ -331,6 +459,6 @@ a drill that did not fit) in the row.
 | The register's supply: JLC's stock is thin (above) | the first order |
 | J-CHAIN's supply: none at JLC, 8 at DigiKey (above); buy them with this order, or from Samtec. A stocked alternative is not a drop-in: its footprint is on three boards | the first order |
 | J-CHAIN's pads' ring is at JLC's absolute minimum on the sides facing a neighbour. The 1.27 mm pitch both ways leaves no room there. The pads are lengthened on their free side instead (`hardware/lib/README.md`, the IDC header's row); ask JLC's review to accept the thin side | the first order |
-| Part orientation in JLC's placement preview (above) | the first order |
+| Part orientation in JLC's placement preview. The CPL carries JLC's convention and each part's offset from JLC's own footprint (*Ordering*, 4), but no order has yet confirmed it | the first order's preview (*Ordering*, 5); record any correction in *Revisions* |
 | No 3D model of J-CHAIN in the renders (Samtec's is behind a login; `datasheets/.manifest-R12.csv` records the attempt) | nothing blocks on it |
 | The main board's end of the ribbon | the main board's layout |
