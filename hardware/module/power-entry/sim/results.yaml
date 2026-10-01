@@ -4,8 +4,8 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/power-entry/sim/sims.yaml: 02499d163c67e7a7
-  hardware/module/power-entry/netlist.yaml: 060c3ed04d45d9a8
+  hardware/module/power-entry/sim/sims.yaml: f9ba4996e8b0162c
+  hardware/module/power-entry/netlist.yaml: 6864dad18918ca38
   hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
   hardware/module/power-entry/sim/poweron.cir: e68b60e487d6e0df
   hardware/module/power-entry/sim/groundshift.cir: 4aae040d6b7e03a1

@@ -6,7 +6,7 @@ inputs:
   tools/sim.py: 0312a1077b9afa80
   hardware/module/breath-output-stage/sim/sims.yaml: 159de77a15642bfd
   hardware/module/breath-output-stage/netlist.yaml: f7243ba0d87adaa2
-  hardware/module/pitch-stage/netlist.yaml: 3d43eac2f5eabc29
+  hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
   hardware/module/mod-channels/netlist.yaml: 8f44cca2ddd7a7e3
   hardware/module/breath-output-stage/sim/bos.cir: 6e055f8d7892015b
   hardware/module/breath-output-stage/sim/bos-ac.cir: d69942b4e9b3308e

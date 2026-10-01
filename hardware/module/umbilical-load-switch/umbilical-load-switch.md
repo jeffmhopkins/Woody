@@ -324,11 +324,10 @@ R-78E5.0's input minimum `[repo]`, and by then `V_FB` is 1.00 V and the limit
 has been flat at 940 mA for 4 V of output. At 134 mA the slow corner **never
 enters current limit at all** — 134 mA is below the 240 mA foldback floor.
 
-And the two consequences that were flagged as conditional now both land: the
-**0805 C0G package in `bom.csv` is wrong for 10 µF by three orders of
-magnitude**, and at 10 µF this is an electrolytic or a large ceramic where
-**leakage is a meaningful fraction of the 3 µA pull-down** — specify a
-low-leakage part, or the timer never resets.
+And at 10 µF `C-TIMER-LOADSW` is an electrolytic or a large ceramic, where
+**leakage is a meaningful fraction of the 3 µA pull-down** — so its row
+specifies a low-leakage part (through-hole radial or 1210 ceramic), or the
+timer never resets.
 
 ### Three parts the datasheet's own application has and this page did not
 

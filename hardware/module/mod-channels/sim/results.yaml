@@ -4,10 +4,10 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/mod-channels/sim/sims.yaml: f2b4a40d580997cf
+  hardware/module/mod-channels/sim/sims.yaml: 24fd257f14d02e48
   hardware/module/mod-channels/netlist.yaml: 8f44cca2ddd7a7e3
   hardware/module/breath-output-stage/netlist.yaml: f7243ba0d87adaa2
-  hardware/module/pitch-stage/netlist.yaml: 3d43eac2f5eabc29
+  hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
   hardware/module/mod-channels/sim/mod.cir: d1e903a7be7d8369
   hardware/module/mod-channels/sim/mod-loop.cir: 0e5dc559dbb51807
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
@@ -69,7 +69,7 @@ sims:
       pass: true
     - expr: max['jack_hi'] < max['out_hi'] - 0.09
       why: 'RECORDED, not a requirement: R-OUT-PROT is outside the loop, so a 100 kohm input on the jack reads 1 % low (1k/101k)
-        - a load-dependent span error the page''s tolerance table does not carry'
+        - a load-dependent span error, the page''s mod-jack-range'
       pass: true
   clr-ref-stale:
     corners: 1

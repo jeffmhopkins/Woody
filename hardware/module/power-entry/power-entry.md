@@ -119,8 +119,8 @@ number scales the result by 1.50× and changes nothing.)* The
 already deleted. Two reviewers reached this independently.
 
 **Keep both diodes anyway**, for the reasons that do hold: fault isolation
-between the exported rail and the analog rail, and HF isolation (`r_d` is
-69 mΩ at 392 mA). Stated correctly they are still worth twenty cents. Left
+between the exported rail and the analog rail, and HF isolation (`r_d`
+~0.55 Ω in `D2` at 0.22 A and ~2.8 Ω in `D1` at 37 mA, `diode-split-rationale`). Stated correctly they are still worth twenty cents. Left
 as it was, the next reviewer who checks the arithmetic deletes the part.
 
 > ### The ground path this section dismisses is the real one
