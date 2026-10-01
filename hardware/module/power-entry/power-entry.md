@@ -232,13 +232,23 @@ the converter's negative input resistance `V²/P` = 23.4² / 5.26 =
 filter's characteristic impedance, the same shape and margin as the
 instrument's own input LC `[calc]`. **`C2` must stay an electrolytic.**
 
-**The common mode.** The converter's switching drives current through its
-isolation capacitance, 1100 pF typ `[ds PD-5]`. `C-ISO-Y` (1 nF,
-`ISO_VIN_POS` to `PWR_GND`, beside the converter; RECOM's filter has none
-`[PD-7]`) gives it a
-way home there, instead of round `DIG_GND`, the star and the ribbon. At breath
-frequencies the barrier carries nothing measurable: the `gnd-isolated` sim puts
-under 0.3 nA in the tie.
+**The common mode — open, the owner's.** The converter's switching drives
+current through its isolation capacitance, 1100 pF typ `[ds PD-5]`. `C-ISO-Y`
+(1 nF, `ISO_VIN_POS` to `PWR_GND`, beside the converter; RECOM's filter has
+none `[PD-7]`) was meant to give it a way home there. **At 1 nF it does not.**
+The netlist gives that current a second, low-impedance loop from `PWR_GND`
+back to the converter's input — `NT-UMB-MOD`, `DIG_GND`, `NT-DIG-MOD`, the
+star, `NT-AGND-MOD`, `C3`, `FB3`, `D3`, `D4`, `FB4` — and at 550 kHz `C-ISO-Y`
+is 289 Ω against a few ohms of it `[calc]`. An AC deck of the loop puts 1–2 %
+of the 550 kHz fundamental through `C-ISO-Y`, 88–98 % across the star and
+12–43 % through `AGND_MOD` as netlisted, every parasitic an estimate
+(`docs/review/2026-10-01-pre-layout-review/F3-u-iso-cm-loop/`). A larger
+`C-ISO-Y` alone resonates with that loop and is worse. How much current it
+is, RECOM does not publish. **The options and the recommendation — a
+common-mode choke at `U-ISO`'s input — are ADR 0027's 2026-10-01 amendment;
+the choice is the owner's, before the module layout**, and E6 probes it. At
+breath frequencies the barrier carries nothing measurable: the `gnd-isolated`
+sim puts under 0.3 nA in the tie.
 
 **Protection.** A reversed ribbon is blocked from both sides of the converter
 by `D2` and `D4`. A fault inside `U-ISO` or its input network is below the
