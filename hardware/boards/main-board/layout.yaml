@@ -89,8 +89,9 @@ islands:
     # its bottom edge stands off the board's (y 10.0, not 7.5): the strip of plane
     # left along the edge is what joins H9's corner to the rest of layer 2 - an
     # island down to the edge cut it off, and H9 with it
+    # the top corner reaches past the sensor's leads to C-DECOUPLE on VS (C8)
     outline: [[7.5, 15.6], [15.6, 15.6], [15.6, 10.0], [35.9, 10.0], [35.9, 15.2], [38.5, 15.2],
-              [38.5, 25.2], [20.3, 25.2], [20.3, 49.5], [7.5, 49.5]]
+              [38.5, 25.2], [20.3, 25.2], [20.3, 45.2], [24.6, 45.2], [24.6, 49.5], [7.5, 49.5]]
     # its one pad off the island: the breath pair's AGND leg ends at R-SER-BREATH-INST
     # beside J-UMB (breath-sense-link.md)
     off_island: [R39.1]
@@ -246,7 +247,7 @@ parts:
   # it and NT-AGND under it on the moat.
   U3:  [14.0, 25.8, 0]      # U-BUF OPA2197: A = the reference buffer, B = the breath buffer
   U4:  [14.3, 18.6, 0]      # U-REF-BREATH REF5050
-  C8:  [19.2, 27.3, 90]     # 100 nF on VS, at the sensor's pin 2
+  C8:  [22.4, 47.4, 0]      # 100 nF on VS, at the sensor's pin 2 (at the far edge since its ports face the tail), off its leads' courtyard
   R7:  [8.9, 28.0, 90]      # R-ISO-REF, BUF_OUT -> VS
   R8:  [8.9, 24.55, 90]     # R-FB-REF, DC feedback from VS
   R9:  [8.9, 21.1, 90]      # R-FBX-REF, AC feedback
@@ -259,11 +260,11 @@ parts:
   R6:  [27.5, 12.8, 0]      # R-REF-IN from +12 V
   U2:  [38.5, 21.0, 0]      # U-ADC MCP3202: pins 1-4 (CS, CH0, CH1, VSS) on the island, 5-8 on the plane
   NT2: [38.5, 16.3, 0]      # NT-AGND: pad 1 (AGND_INST) on the island, pad 2 (PWR_GND) past the moat
-  C1:  [33.3, 20.6, 90]     # C-AA-ADC, at CH0
-  R5:  [31.2, 20.6, 90]     # R-ADCDIV-L
-  R4:  [29.1, 20.6, 90]     # R-ADCDIV-U, from the breath buffer's output
+  C1:  [31.2, 20.6, 90]     # C-AA-ADC, at CH0
+  R5:  [29.1, 20.6, 90]     # R-ADCDIV-L
+  R4:  [27.0, 20.6, 90]     # R-ADCDIV-U, from the breath buffer's output
   C2:  [31.8, 16.4, 0]      # C-ADC-BULK
-  C3:  [32.3, 23.7, 0]      # the ADC's 100 nF; its 3V3 end to pin 8 across the moat by the tie
+  C3:  [33.4, 20.6, 270]    # the ADC's 100 nF beside U2, its VSS end at pin 4; its 3V3 end to pin 8 across the moat by the tie
   # --- at J-UMB (pin row x 295.9): the clamps and the breath pair's resistors in
   # two columns in front of it; the tongue's end mounts (x 278.3, y 13 / 30) behind
   # (config/body.yaml boards.umb_parts_d), D-TVS-PWR between them
@@ -305,16 +306,16 @@ parts:
   D4:  [225.6, 36.5, 180]   # D-USBOR, buck -> INST_5V_A
   C10: [221.2, 16.4, 0]     # C-STRIP-BULK 470 uF, at the LED row's feed (LED 1 end)
   U6:  [232.3, 16.4, 0]     # U-LVLSHIFT 74AHCT125
-  C12: [238.6, 20.4, 90]    # its 100 nF
+  C12: [237.7, 20.2, 270]   # its 100 nF, at VCC (pin 14) and GND (pin 13)
   R10: [238.6, 16.4, 90]    # R-LED-PD
   R11: [238.6, 12.4, 90]    # R-LED-SER, into LED 1's DI
   # --- the thumb registers, each in the near band between its hand's switches
   U7:  [70.0, 19.2, 90]     # REG-LT
-  C13: [76.8, 19.4, 90]
+  C13: [65.6, 24.2, 0]      # REG-LT's 100 nF, at VCC (pin 16) and GND (pin 15)
   R32: [63.2, 21.2, 90]     # FREE1 pull-up
   R33: [63.2, 17.3, 90]     # FREE2 pull-up
   U8:  [186.0, 19.2, 90]    # REG-RT
-  C14: [192.8, 19.4, 90]
+  C14: [181.6, 24.2, 0]     # REG-RT's 100 nF, at VCC (pin 16) and GND (pin 15)
   # --- the key chain's parts beside their J-CHAIN
   U9:  [64.6, 44.2, 0]      # U-TVS-CHAIN on SCK, SH/LD, SER_LH
   FB1: [66.4, 39.8, 90]     # FB-CHAIN, the LH ribbon's 3V3

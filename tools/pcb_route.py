@@ -1235,6 +1235,24 @@ def route_pair(board, lay, obs, spec):
     return report
 
 
+def one_sided(board, v, lay):
+    """A signal via whose copper is met on one layer only (KiCad's via_dangling): no
+    track end of its net at it on the other face, and no plane of its net. Not a
+    plated pad's - those join every layer."""
+    if not isinstance(v, pcbnew.PCB_VIA) or v.GetNetname() in {pl["net"] for pl in lay.get("planes") or []} | \
+            {s_["net"] for s_ in lay.get("islands") or []}:
+        return False
+    p, net, on = v.GetPosition(), v.GetNetname(), set()
+    for t in board.GetTracks():
+        if type(t) is pcbnew.PCB_TRACK and t.GetNetname() == net and (t.HitTest(p, 1000)):
+            on.add(t.GetLayer())
+    for f in board.GetFootprints():
+        for q in f.Pads():
+            if q.GetNetname() == net and q.HitTest(p):
+                on |= {L for L in (pcbnew.F_Cu, pcbnew.B_Cu) if q.IsOnLayer(L)}
+    return len(on) < 2
+
+
 def conn_dangling(board, t):
     return board.GetConnectivity().TestTrackEndpointDangling(t, False)
 
@@ -1330,7 +1348,7 @@ def tidy(board, lay):
         board.BuildConnectivity()
         conn = board.GetConnectivity()
         gone = [t for t in board.GetTracks() if (type(t) is pcbnew.PCB_TRACK and t.GetLength() < 1000)
-                or conn.TestTrackEndpointDangling(t, False)]
+                or conn.TestTrackEndpointDangling(t, False) or one_sided(board, t, lay)]
         for t in gone:
             board.Delete(t)
         n1 += len(gone)

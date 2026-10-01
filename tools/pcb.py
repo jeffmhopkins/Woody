@@ -794,8 +794,9 @@ def post_route(path, bdir):
     board = pcbnew.LoadBoard(path)
     pcb_route.tidy(board, lay)
     pcbnew.SaveBoard(path, board)
-    # the shortest connections first: they have the fewest ways round
-    miss = sorted(unconnected_of(path), key=lambda m: math.dist(m[1], m[2]))
+    # the long runs first, while the board's length is open to them (the buses along it),
+    # then the rest shortest first: they have the fewest ways round
+    miss = sorted(unconnected_of(path), key=lambda m: (math.dist(m[1], m[2]) < 40, math.dist(m[1], m[2])))
     board = pcbnew.LoadBoard(path)
     failed = pcb_route.complete(board, lay, miss)
     print(f"route: complete - {len(miss) - len(failed)} of {len(miss)} connection(s) the autorouter left, routed")
@@ -806,6 +807,7 @@ def post_route(path, bdir):
         _fill(path)
         print(f"route: rescue - {rescue(path, bdir)} kept")
         board = pcbnew.LoadBoard(path)
+        pcb_route.tidy(board, lay)
     add_silk_generic(board, lay, comps)
     from shapely.geometry import Point as _P
     vias = [_P(pcbnew.ToMM(v.GetPosition().x), pcbnew.ToMM(v.GetPosition().y)).buffer(pcbnew.ToMM(v.GetWidth(pcbnew.F_Cu)) / 2)
