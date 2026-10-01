@@ -119,6 +119,14 @@ and neither end of a cable states it alone. The drawing above stays here.*
 
 ## Still open
 
+- **`SYNC` is driven high before the DAC has its supply — open for the
+  owner, 2026-10-01.** `U-LVL-MOD` runs from `LOGIC_5V`, which arrives first
+  at power-on and leaves last at power-off, and `SYNC` idles high, so for
+  milliseconds each way the DAC's `SYNC` pin sits over its `AVDD + 0.3 V`
+  absolute maximum and feeds `DAC_AVDD` through its input protection
+  `[ds DAC8568CIPW.pdf p.2, p.31]`. Simulated, with the numbers and three
+  options, in [`sim/README.md`](sim/README.md); decided by the owner's choice
+  among them.
 - **An ESP32-S3 NVS commit or OTA write disables the instruction cache** and can
   stall non-IRAM code on both cores. With no watchdog there is no `CLR` to fire
   mid-note, so the consequence is now a *stalled refresh* rather than a reset:
