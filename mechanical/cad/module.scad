@@ -634,7 +634,12 @@ module drc_report() {
     rbm = minv([for (r = rb) r[0]]);
     drc(rbm >= 0, "parts behind the panel clear of the rail band", rbm, str("mm (", [for (r = rb) if (r[0] == rbm) r[1]][0], "); rail.band is tbd"));
     tl = zd(toggle_body[2] + toggle_lugs) - mb_z1;
-    drc(tl >= 0, "toggle's lugs in front of the main board", tl, "mm between the lugs' ends and the main board's front face - room for the wires' bends");
+    // SW-POWER is fitted with ONE nut, on the front: its body bears on the
+    // panel's rear face, as modelled. NKK's D4 hardware has a second hex nut
+    // [ds NKK-SERIES-M-TOGGLE.pdf p.7]; it is NOT fitted behind the panel,
+    // where it would move the body back by toggle.nut_h.
+    drc(tl >= 0 && tl - toggle_nut_h >= 0, "toggle's lugs in front of the main board", [tl, tl - toggle_nut_h],
+        "mm between the lugs' ends and the main board's front face - room for the wires' bends - with the body on the panel's rear face (ONE nut, on the front: fit it so); and if the D4 kit's second nut were fitted behind the panel, toggle.nut_h less (do not)");
     // Standoffs: in a leg or above the pots, clear of everything on each face.
     sp = [for (s = standoff_at) [s, ["r", s - [standoff_af / cos(30), standoff_af] / 2, s + [standoff_af / cos(30), standoff_af] / 2]]];
     jb_face = concat([for (j = jacks) [j[0], jack_body_rect(j[1])]],
@@ -780,17 +785,21 @@ module pcb_geometry() {
         echo("PCB", "module-main", "standoff", str("MECH-STANDOFF-MOD ", i + 1), standoff_at[i][0], standoff_at[i][1], standoff_hole_d, m3_head_d, so_l);
     }
     for (b = ["module-jack", "module-main"])
-        echo("PCB", b, "connector", "J-B2B-MOD", b2b_at[0], b2b_at[1], 0, b2b_rows, b2b_pins, b2b_pitch, "long axis along y, pin 1 at the top left");
+        echo("PCB", b, "connector", "J-B2B-MOD", b2b_at[0], b2b_at[1], 0, b2b_rows, b2b_pins, b2b_pitch,
+             b == "module-jack" ? "long axis along y, pin 1 at the top left; TOP side (F.Cu), NOT mirrored - the header's body is on this board's rear, but each pin is one straight conductor through both boards, so pin k sits at the same panel-frame place on both, and both KiCad top views are panel views: the same unmirrored pin map as the main board. Placed on B.Cu it mirrors, and every net lands one column over"
+                                : "long axis along y, pin 1 at the top left; top side (F.Cu), the insulator on this face");
     echo("PCB", "module-main", "connector", "J-UMBILICAL", ec[0], ec[1], 0, "NE8FAV, latch up");
     echo("PCB", "module-main", "connector", "J-PWR-EURO", pw[0], pw[1], 0, "rear face, long axis along y, pin 1 (-12 V) at the bottom");
     for (i = [0 : len(tall_at) - 1]) echo("PCB", "module-main", "tall", tall_at[i][2], tall_at[i][0], tall_at[i][1], "rear face, an envelope - the layout places these");
     echo("PCB", "module-main", "tall", "U-ISO", iso_at[0], iso_at[1], "rear face, RPA20-2412SAW body", iso_body, "; pins' tails out of the front face", iso_tail);
     for (f = iso_filter) echo("PCB", "module-main", "tall", f[5], f[0], f[1], "rear face, an envelope - the layout places these");
-    echo("PCB", "module-main", "panel", "SW-POWER", tog[0], tog[1], str("panel-mounted, wired; lever ON ", layout_toggle_on, ", lugs in a line along the throw; lugs end"), zd(toggle_body[2] + toggle_lugs) - mb_z1, "in front of the main board");
+    echo("PCB", "module-main", "panel", "SW-POWER", tog[0], tog[1], str("panel-mounted, wired, ONE nut on the front (the body on the panel's rear face; the D4 kit's second nut not fitted); lever ON ", layout_toggle_on, ", lugs in a line along the throw; lugs end"), zd(toggle_body[2] + toggle_lugs) - mb_z1, "in front of the main board");
     // Keep-outs: what each face must leave clear, and the height it allows.
     for (j = jacks) echo("PCB", "module-jack", "keepout", str("barrel ", j[0]), j[1][0], j[1][1], 3.0, "d, no copper under the barrel (Thonk's PJ398SM note)");
     for (b = ["module-jack", "module-main"]) for (s = standoff_at)
-        echo("PCB", b, "keepout", "standoff head", s[0], s[1], m3_head_d + 2 * boards_part_clear, "d, no parts or copper");
+        echo("PCB", b, "keepout", "standoff head", s[0], s[1], m3_head_d + 2 * boards_part_clear,
+             b == "module-jack" ? "d, no parts and no copper but the mount's own pad, which is AGND_MOD (metal standoffs; power-entry.md Grounding)"
+                                : "d, no parts and no copper but the mount's own pad, on no net (metal standoffs; power-entry.md Grounding)");
     echo("PCB", "module-main", "keepout", "front: under the jack board", b_x0, b_y0, b_x1, b_y1, so_l - pot_legs + boards_t - boards_part_clear,
          "max part height on the front face where the pots' legs are; ", so_l - (jack_tails - boards_t) - boards_part_clear, " under a jack's tails");
     echo("PCB", "module-jack", "keepout", "rear: toward the main board", b_x0, b_y0, b_x1, b_y1, so_l - boards_part_clear, "max part height on the rear face, less whatever the main board puts under it");

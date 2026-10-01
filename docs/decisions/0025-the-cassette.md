@@ -51,7 +51,8 @@ And, answering the follow-up questions:
    the same 1.20 mm aluminium, in the same place, on the oak bottom's inside
    face. It carries the thumb switches' cutouts, as the thumb plates did, the
    U-bolt's leg holes, and a stud at every one of the main board's mounts. It
-   runs from the mouth cap to just short of `J-UMB` at the tongue's end.
+   runs from the mouth cap to just short of `J-UMB` at the tongue's end
+   (*amended 2026-10-01: short of its tail row — the note of that date*).
    `J-UMB`'s through-hole tails stand below the tongue, and behind it the
    etherCON's adapter stands on the oak (`mechanical/export/plate-bottom.dxf`).
 3. **A column at each of the key boards' eight corners.** From the bottom:
@@ -239,8 +240,8 @@ And, answering the follow-up questions:
   nothing at `boards.board_clear` (*"main board underside room over the
   bottom plate"*). So an underside part, which ADR 0017's amendment allows,
   needs a window cut through the bottom plate under it. A window costs nothing
-  on a laser-cut plate. `J-CHAIN`'s tails clear the plate (*"J-CHAIN pin tails
-  clear of the bottom plate"*).
+  on a laser-cut plate. *Amended 2026-10-01: so does a through-hole tail that
+  reaches the plate — see the note of that date below.*
 - **Both plates are bonded metal to metal.** The screws' heads bear on the key
   plate's top face, and the studs' clinches and the spacers are in the bottom
   plate. So both plates are ordered un-anodised, or masked round each column
@@ -273,6 +274,26 @@ needed."* The tongue stays narrow, but on the side where it stepped in by a
 millimetre and a half from the main board's edge it now runs flush
 (ADR 0021's dated note; *"main board's tongue flush with its edge on the near
 side of the adapter"*). The tongue's mounts do not move.
+
+## Note, 2026-10-01 — the through-hole tails under the main board
+
+Point 2 stopped the plate "just short of `J-UMB`", and the rule cleared
+`J-UMB`'s insulator, not its tails: the tail row stands 1.80 in front of the
+insulator, over the plate, and its tails reach further below the board than
+the plate is (pre-layout review A6-1). `U-BUCK`'s and `HDR-SERVICE`'s tails
+did the same, and nothing listed them (A6-2). Only `J-CHAIN`'s were checked.
+
+So every main-board part with through-hole pins is now one record in the body
+CAD (`config/body.yaml`, *THE THROUGH-HOLE TAILS UNDER THE MAIN BOARD*), drawn
+in the model for the clash check and tested by one rule, *"through-hole tails
+under the main board clear of the bottom plate"*, against what is under each
+— the plate, or the oak. Where a part's tails reach the plate, the plate gives
+way, as an underside part's does: it ends a pad and `boards.board_clear` short
+of `J-UMB`'s tail row, and has a window to the oak under `HDR-SERVICE` and
+under the regulator block. `U-BUCK`'s pins are long enough to reach the oak
+even there, so they are **cut to `boards.tht_trim` after soldering**. The
+windows are in `plate-bottom.dxf` and in `pcb-geometry.echo` (`main`
+`plate`), so a layout that moves either part moves its window.
 
 ## Open, and what decides each
 

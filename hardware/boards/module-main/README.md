@@ -98,8 +98,9 @@ Why this order:
 - **The LED's supply at the bottom**, because the LED is low in the jack
   board's left leg.
 
-What decides whether this changes: the panel layout (being revised now; the
-etherCON and the toggle move). The allocation is correct wherever the parts
+What decides whether this changes: the board layout. The panel layout is
+settled (ADR 0024 points 11–13: the etherCON at the bottom, the toggle
+throwing left–right, the jack swap). The allocation is correct wherever the parts
 go; the *reasons* above are about positions, so re-read them when
 `pcb-geometry.echo` moves the pots, the jack columns or the header.
 
@@ -126,7 +127,9 @@ go; the *reasons* above are about positions, so re-read them when
   on this board — plated, clear of every plane. The jack board's are
   `AGND_MOD`.
 - **`J-B2B-MOD`** is Samtec `TSW-110-09-G-D` (row), insulator on this board's
-  front face.
+  front face. On **both** boards its footprint goes on the top side, **not
+  mirrored** — the jack board's too, though the header's body is on that
+  board's rear ([`module-jack/README.md`](../module-jack/README.md)).
 - **Both `SW-POWER` lugs** wire to this board, beside `U-LOADSW`.
 
 ## Open, and what decides each

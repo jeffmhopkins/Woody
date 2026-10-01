@@ -451,7 +451,7 @@ led:
   hole_d:
     value: 3.2
     status: settled
-    source: "[repo] panel-height-budget's toggle_row note: a D3.2 hole for the LED; the lens passes, the flange stops behind the panel"
+    source: "[repo] panel-height-budget's toggle_row note: a D3.2 hole for the LED's lens. The flange is the same D3.2 (led.flange_d), so the panel does NOT stop it: MECH-LED-BEZEL-MOD, the lead spacer on the jack board, sets how far the lens stands proud (led.proud; ADR 0024 point 9; mechanical/module/drc.echo 'LED lead spacer length (derived)')"
   proud:
     value: 1.0
     status: tbd
