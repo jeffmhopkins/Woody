@@ -142,7 +142,6 @@ finish, and every other open item:
 |---|---|
 | **The LED row's places** are the body CAD's (`pcb-geometry.echo` `main` `led`, *"LED row on the main board"* in `mechanical/drc.echo`): one row on the centreline, LED 1 at the tail end where the data arrives, the U-bolt station midway between two LEDs. Laid out as it stands, and reshuffled if the diffusion test moves count or pitch (owner's choice (b), ADR 0028 amendment). **The WS2815B-V1's chamfer marks pin 1 (NC)**; the footprint's silk triangle marks the chamfer, and JLCPCB's own footprint agrees (`hardware/lib/README.md`), so the placement preview should need no rotation offset: pass it only when the chamfer lands on the triangle | Layout; the first order's placement preview |
 | **Passives may go on the underside** (owner, 2026-09-29). The underside faces the grounded bottom plate, `hardware.kb_spacer_l` below it, over the board's whole length since the cassette (ADR 0025). At `boards.board_clear` that leaves no room for a part (`mechanical/drc.echo` *"main board underside room over the bottom plate"*), so an underside part needs a **window cut through the bottom plate** under it, down to the oak (the second figure on that line), and must be clear of the thumb switches' housings, pins and the mounts' spacers. Through-hole tails face the plate too: `J-CHAIN`'s clear it (*"J-CHAIN pin tails clear of the bottom plate"*), `J-MCU`'s must be checked against its drawing, and the plate stops short of `J-UMB`. The first layout needed none: every passive is on the top | A later layout that needs the room; each window goes into the bottom plate's outline in the body CAD |
-| **A series resistor on REG-LT's `QH`** (review A5-2, a 2.2 kΩ on the key chain's hop), pending the owner. The room east of `U7` pin 9 is kept for it (`layout.yaml` `parts: U7`) | The owner; then the sheets, and the part placed there |
 | **The references with no clear place on the silkscreen** stay on the fabrication layer; the layout names them when it writes the board | Hand-placed in KiCad, or room made round them |
 | **The umbilical adapter** (`PCB-UMB-ADAPTER`) is a separate small board: its schematic is [`../umb-adapter/`](../umb-adapter/README.md), not laid out | With this board's layout |
 
@@ -176,6 +175,7 @@ What the first layout settled, and where it is held:
   pins at the far edge, the smallest nearest pin 2, inside the island; `C203` on
   `SENSOR_RAW` at `U-BUF`'s input, since pin 4 is walled in by the sensor's own
   courtyard; `C204` at `U-BUF`'s `V+` (`layout.yaml` `parts:`).
+- **`R44`** (`R-HOP-SER`, fix round F6) at `REG-LT`'s `QH`, pin 9 (`layout.yaml` `parts:`).
 - **`Q-INRUSH` and its gate network** on the tongue between `HDR-SERVICE` and the
   end mount, behind the clamps at `J-UMB`; its drain meets the layer-3 plane by
   vias (`layout.yaml` `parts:`).

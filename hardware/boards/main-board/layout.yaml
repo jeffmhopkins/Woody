@@ -232,6 +232,7 @@ heights:
   C_0805: 1.35                 # [from memory]
   R_1206: 0.7                  # [from memory]
   R_0805: 0.6                  # [from memory]
+  R_0603: 0.55                 # [from memory]
   L_0805: 1.0                  # [from memory]
   NetTie: 0.05                 # copper only
   NXP_Case1351: 9.9            # [ds MPXV4006DP p.7, with its ports]
@@ -323,7 +324,8 @@ parts:
   R10: [238.6, 16.4, 90]    # R-LED-PD
   R11: [238.6, 12.4, 90]    # R-LED-SER, into LED 1's DI
   # --- the thumb registers, each in the near band between its hand's switches
-  U7:  [70.0, 19.2, 90]     # REG-LT; the room east of its pin 9 (QH, x 76-79) is kept for a series resistor on that line (review A5-2, pending the owner)
+  U7:  [70.0, 19.2, 90]     # REG-LT
+  R44: [76.9, 21.7, 0]      # R-HOP-SER, at U7's QH (pin 9): its pad 1 to the pin, pad 2 on toward J5 pin 6
   C13: [65.6, 24.2, 0]      # REG-LT's 100 nF, at VCC (pin 16) and GND (pin 15)
   R32: [63.2, 21.2, 90]     # FREE1 pull-up
   R33: [63.2, 17.3, 90]     # FREE2 pull-up
