@@ -563,7 +563,7 @@ on both. With `NT-UMB-MOD` at the connector, the half on pin 8 steps across to
 `PWR_GND` there and goes straight back to `U-ISO`: **no DC current of the
 instrument's crosses the `DIG_GND` plane, the star or the ribbon**. What
 `NT-DIG-MOD` carries is constant and the module's own — the level shifter's
-few mA back to the analog +12 V, and the panel LED's 4.5 mA the other way
+few mA back to the analog +12 V, and the panel LED's ~4.2 mA (3.8–4.8 mA, `hardware/module/panel-led/sim`) the other way
 (`module/panel-led` returns it to `AGND_MOD`) — plus the SPI edges' return.
 
 **Why not the proposal that bridged `AGND_MOD` to the plane under the DAC.**
