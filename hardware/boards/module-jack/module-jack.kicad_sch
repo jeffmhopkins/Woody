@@ -13,6 +13,113 @@
     (comment 4 "SOURCE - edit in KiCad 9; tools/kicad.py exports board-netlist.yaml")
   )
   (lib_symbols
+  	(symbol "Mechanical:MountingHole_Pad"
+  		(pin_numbers
+  			(hide yes)
+  		)
+  		(pin_names
+  			(offset 1.016)
+  			(hide yes)
+  		)
+  		(exclude_from_sim no)
+  		(in_bom no)
+  		(on_board yes)
+  		(property "Reference" "H"
+  			(at 0 6.35 0)
+  			(effects
+  				(font
+  					(size 1.27 1.27)
+  				)
+  			)
+  		)
+  		(property "Value" "MountingHole_Pad"
+  			(at 0 4.445 0)
+  			(effects
+  				(font
+  					(size 1.27 1.27)
+  				)
+  			)
+  		)
+  		(property "Footprint" ""
+  			(at 0 0 0)
+  			(effects
+  				(font
+  					(size 1.27 1.27)
+  				)
+  				(hide yes)
+  			)
+  		)
+  		(property "Datasheet" "~"
+  			(at 0 0 0)
+  			(effects
+  				(font
+  					(size 1.27 1.27)
+  				)
+  				(hide yes)
+  			)
+  		)
+  		(property "Description" "Mounting Hole with connection"
+  			(at 0 0 0)
+  			(effects
+  				(font
+  					(size 1.27 1.27)
+  				)
+  				(hide yes)
+  			)
+  		)
+  		(property "ki_keywords" "mounting hole"
+  			(at 0 0 0)
+  			(effects
+  				(font
+  					(size 1.27 1.27)
+  				)
+  				(hide yes)
+  			)
+  		)
+  		(property "ki_fp_filters" "MountingHole*Pad*"
+  			(at 0 0 0)
+  			(effects
+  				(font
+  					(size 1.27 1.27)
+  				)
+  				(hide yes)
+  			)
+  		)
+  		(symbol "MountingHole_Pad_0_1"
+  			(circle
+  				(center 0 1.27)
+  				(radius 1.27)
+  				(stroke
+  					(width 1.27)
+  					(type default)
+  				)
+  				(fill
+  					(type none)
+  				)
+  			)
+  		)
+  		(symbol "MountingHole_Pad_1_1"
+  			(pin input line
+  				(at 0 -2.54 90)
+  				(length 2.54)
+  				(name "1"
+  					(effects
+  						(font
+  							(size 1.27 1.27)
+  						)
+  					)
+  				)
+  				(number "1"
+  					(effects
+  						(font
+  							(size 1.27 1.27)
+  						)
+  					)
+  				)
+  			)
+  		)
+  		(embedded_fonts no)
+  	)
     (symbol "Connector_Generic:Conn_02x10_Odd_Even"
 		(pin_names
 			(offset 1.016)
@@ -678,6 +785,86 @@
 		(embedded_fonts no)
 	)
   )
+  (symbol (lib_id "Mechanical:MountingHole_Pad") (at 40.64 101.60 0) (unit 1)
+    (in_bom no) (on_board yes) (dnp no)
+    (uuid 60443489-e858-557f-938d-161c1f7a0515)
+    (property "Reference" "H1" (at 43.18 99.06 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "M3 female-female hex spacer" (at 43.18 96.52 0) (effects (font (size 1.27 1.27)) (justify left) hide))
+    (property "Footprint" "MountingHole:MountingHole_3.2mm_M3_Pad" (at 40.64 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 40.64 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "MECH-STANDOFF-MOD" (at 40.64 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1" (at 40.64 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "a mounting hole's one plated pad" (at 40.64 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "A metal standoff's pad (MECH-STANDOFF-MOD, owner 2026-09-30: metal). ON AGND_MOD on this board, and on NO NET on the main board, so the four make no second ground tie between the boards (dig-gnd-topology; power-entry.md, Grounding). Positions: config/module.yaml standoff.at. Plated, its pad under the standoff's face; nothing is bought for it here - the spacer is the BOM row" (at 40.64 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "" (at 40.64 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "" (at 40.64 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "" (at 40.64 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "none" (at 40.64 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid b82847e8-4214-5e18-879b-9da8ebcc82b7))
+    (instances (project "module-jack" (path "/f69c67ba-c380-5393-90d5-6d2847e300fb" (reference "H1") (unit 1))))
+  )
+  (wire (pts (xy 40.64 104.14) (xy 40.64 106.68)) (stroke (width 0) (type default)) (uuid c8bc69c1-9635-5482-866b-5f94ea6fd3bd))
+  (label "AGND_MOD" (at 40.64 106.68 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 1f99d979-015c-5776-a191-3496a1fa1395))
+  (symbol (lib_id "Mechanical:MountingHole_Pad") (at 53.34 101.60 0) (unit 1)
+    (in_bom no) (on_board yes) (dnp no)
+    (uuid ff87a46c-bf6b-5483-80f7-a197439d822f)
+    (property "Reference" "H2" (at 55.88 99.06 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "M3 female-female hex spacer" (at 55.88 96.52 0) (effects (font (size 1.27 1.27)) (justify left) hide))
+    (property "Footprint" "MountingHole:MountingHole_3.2mm_M3_Pad" (at 53.34 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 53.34 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "MECH-STANDOFF-MOD" (at 53.34 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1" (at 53.34 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "a mounting hole's one plated pad" (at 53.34 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "A metal standoff's pad (MECH-STANDOFF-MOD, owner 2026-09-30: metal). ON AGND_MOD on this board, and on NO NET on the main board, so the four make no second ground tie between the boards (dig-gnd-topology; power-entry.md, Grounding). Positions: config/module.yaml standoff.at. Plated, its pad under the standoff's face; nothing is bought for it here - the spacer is the BOM row" (at 53.34 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "" (at 53.34 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "" (at 53.34 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "" (at 53.34 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "none" (at 53.34 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid d8c91cf2-efe7-5ce8-8200-5adc51e97b5b))
+    (instances (project "module-jack" (path "/f69c67ba-c380-5393-90d5-6d2847e300fb" (reference "H2") (unit 1))))
+  )
+  (wire (pts (xy 53.34 104.14) (xy 53.34 106.68)) (stroke (width 0) (type default)) (uuid 8e94b6c3-281c-5201-a347-da3b9042c9be))
+  (label "AGND_MOD" (at 53.34 106.68 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 883cc4b3-7d8d-5691-9520-3a2a5bc831d6))
+  (symbol (lib_id "Mechanical:MountingHole_Pad") (at 66.04 101.60 0) (unit 1)
+    (in_bom no) (on_board yes) (dnp no)
+    (uuid 9095414a-c66c-5dc5-bbc1-2c5777a038df)
+    (property "Reference" "H3" (at 68.58 99.06 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "M3 female-female hex spacer" (at 68.58 96.52 0) (effects (font (size 1.27 1.27)) (justify left) hide))
+    (property "Footprint" "MountingHole:MountingHole_3.2mm_M3_Pad" (at 66.04 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 66.04 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "MECH-STANDOFF-MOD" (at 66.04 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1" (at 66.04 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "a mounting hole's one plated pad" (at 66.04 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "A metal standoff's pad (MECH-STANDOFF-MOD, owner 2026-09-30: metal). ON AGND_MOD on this board, and on NO NET on the main board, so the four make no second ground tie between the boards (dig-gnd-topology; power-entry.md, Grounding). Positions: config/module.yaml standoff.at. Plated, its pad under the standoff's face; nothing is bought for it here - the spacer is the BOM row" (at 66.04 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "" (at 66.04 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "" (at 66.04 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "" (at 66.04 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "none" (at 66.04 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 37cd288b-776d-50cd-97d2-34a50498c6f2))
+    (instances (project "module-jack" (path "/f69c67ba-c380-5393-90d5-6d2847e300fb" (reference "H3") (unit 1))))
+  )
+  (wire (pts (xy 66.04 104.14) (xy 66.04 106.68)) (stroke (width 0) (type default)) (uuid be90c36a-d8c2-5304-a4f3-cd7442cd6c27))
+  (label "AGND_MOD" (at 66.04 106.68 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 90b64bcb-ced3-50b2-9574-2d229ec478db))
+  (symbol (lib_id "Mechanical:MountingHole_Pad") (at 78.74 101.60 0) (unit 1)
+    (in_bom no) (on_board yes) (dnp no)
+    (uuid c19e3b7c-4410-5dfe-bf4a-8abab4d9345d)
+    (property "Reference" "H4" (at 81.28 99.06 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "M3 female-female hex spacer" (at 81.28 96.52 0) (effects (font (size 1.27 1.27)) (justify left) hide))
+    (property "Footprint" "MountingHole:MountingHole_3.2mm_M3_Pad" (at 78.74 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 78.74 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "MECH-STANDOFF-MOD" (at 78.74 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1" (at 78.74 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "a mounting hole's one plated pad" (at 78.74 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "A metal standoff's pad (MECH-STANDOFF-MOD, owner 2026-09-30: metal). ON AGND_MOD on this board, and on NO NET on the main board, so the four make no second ground tie between the boards (dig-gnd-topology; power-entry.md, Grounding). Positions: config/module.yaml standoff.at. Plated, its pad under the standoff's face; nothing is bought for it here - the spacer is the BOM row" (at 78.74 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "" (at 78.74 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "" (at 78.74 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "" (at 78.74 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "none" (at 78.74 101.60 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid ca1fc6a9-adbf-5891-b459-960d82edae41))
+    (instances (project "module-jack" (path "/f69c67ba-c380-5393-90d5-6d2847e300fb" (reference "H4") (unit 1))))
+  )
+  (wire (pts (xy 78.74 104.14) (xy 78.74 106.68)) (stroke (width 0) (type default)) (uuid 0586f8d8-0d14-5cbc-9300-c3d567a7fa7b))
+  (label "AGND_MOD" (at 78.74 106.68 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 275f1803-cfc9-55fb-91bc-651f3645b4ff))
   (symbol (lib_id "Connector_Generic:Conn_02x10_Odd_Even") (at 106.68 63.5 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 748dd2f3-b9e1-53da-97a5-1612bb838916)

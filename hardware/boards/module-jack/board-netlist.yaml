@@ -18,6 +18,26 @@ components:
     - K1
     - K2
     sheet: pitch-stage
+  H1:
+    of: MECH-STANDOFF-MOD
+    value: M3 female-female hex spacer
+    pins:
+    - 1
+  H2:
+    of: MECH-STANDOFF-MOD
+    value: M3 female-female hex spacer
+    pins:
+    - 1
+  H3:
+    of: MECH-STANDOFF-MOD
+    value: M3 female-female hex spacer
+    pins:
+    - 1
+  H4:
+    of: MECH-STANDOFF-MOD
+    value: M3 female-female hex spacer
+    pins:
+    - 1
   J1:
     of: J-CV
     value: PJ398SM
@@ -119,6 +139,10 @@ nets:
   /AGND_MOD:
   - D1.K
   - D2.K2
+  - H1.1
+  - H2.1
+  - H3.1
+  - H4.1
   - J1.SLEEVE
   - J2.SLEEVE
   - J3.SLEEVE

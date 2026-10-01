@@ -7,7 +7,7 @@ inputs:
   hardware/module/umbilical-load-switch/sim/sims.yaml: 85eec256fad8b2e5
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
   hardware/carrier/power-entry-instrument/netlist.yaml: 2ced35d8a0373a19
-  hardware/module/power-entry/netlist.yaml: 78440e2b6a1c1e45
+  hardware/module/power-entry/netlist.yaml: 9f2554bcba1d48b7
   hardware/module/umbilical-load-switch/sim/loadswitch.cir: a52911857b091c78
   hardware/module/umbilical-load-switch/sim/lt1641.inc: 59be165ccd4451a6
   figure:umbilical-current: 359 mA
