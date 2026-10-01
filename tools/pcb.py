@@ -805,6 +805,10 @@ def post_route(path, bdir):
     board = pcbnew.LoadBoard(path)
     failed = pcb_route.complete(board, lay, miss)
     print(f"route: complete - {len(miss) - len(failed)} of {len(miss)} connection(s) the autorouter left, routed")
+    # tidy on the board as saved, loaded afresh: run in the process that just laid the
+    # tracks it took hundreds of them for dangling and left a board KiCad's filler crashed on
+    pcbnew.SaveBoard(path, board)
+    board = pcbnew.LoadBoard(path)
     pcb_route.tidy(board, lay)
     if failed and not lay.get("rip_up"):
         # what complete could not route: rip-up, kept only where DRC counts fewer problems
@@ -1017,6 +1021,8 @@ def cmd_finish(bdir):
         board = pcbnew.LoadBoard(tmp)
         failed = pcb_route.complete(board, lay, miss)
         print(f"route: complete - {len(miss) - len(failed)} of {len(miss)} connection(s) routed")
+        pcbnew.SaveBoard(tmp, board)
+        board = pcbnew.LoadBoard(tmp)        # tidy on a fresh load (post_route says why)
         pcb_route.tidy(board, lay)
         pcbnew.SaveBoard(tmp, board)
         _fill(tmp)

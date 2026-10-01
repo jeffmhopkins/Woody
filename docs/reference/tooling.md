@@ -544,7 +544,10 @@ crossing of its moat are exempt.
   `GetUnconnectedCount()` after `Delete()` and `BuildConnectivity()` gave the same
   count with a link of a route gone, so a "delete it if nothing disconnects" test
   deleted live routing and the dangling sweep then took the rest of each route
-  (2026-10-01). Its `TestTrackEndpointDangling` is as stale: `tidy` used it and
+  (2026-10-01). And `tidy` run in the process that had just laid `complete`'s
+  tracks deleted dozens of them as dangling, where the same board saved and loaded
+  afresh lost none, and the filler then crashed on the result: save and reload
+  between them. Its `TestTrackEndpointDangling` is as stale: `tidy` used it and
   took hundreds of tracks just laid. Test geometrically, or by DRC on a saved copy
   (`rescue`).
 - **`BOARD.Remove()` on a board loaded from a file** can crash the next walk of
