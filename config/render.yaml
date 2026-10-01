@@ -1,0 +1,38 @@
+# The instrument's photographs - PICTURE CONVENTIONS, not design values.
+#
+# Consumed by tools/render-instrument.py only (mechanical/outputs.yaml
+# `scripts:`), which fingerprints every photograph against this file. Every
+# leaf carries value / status / source, as config/body.yaml's do.
+#
+# WHY NOT config/body.yaml. Every body render, export and the clash check are
+# fingerprinted against body.yaml's blob, and so are the module's photographs
+# (mechanical/module/outputs.yaml) - an explode distance there would mark
+# about fifty outputs stale that do not read it. Nothing here is a dimension
+# of the instrument; the geometry is the body CAD's, imported as it exports it.
+
+meta:
+  owner: tools/render-instrument.py
+  model: mechanical/cad/woody_body.scad
+
+# -------------------------------------------------------------- render -----
+render:
+  # PICTURE CONVENTIONS for tools/render-instrument.py's photographs, not
+  # design values: how far each group of parts moves in an exploded view.
+  # Kept here so no distance is typed into the tool (owner, 2026-10-01:
+  # "renders of the controller ... in various angles and explodes"). A group
+  # name is one tools/render-instrument.py GROUPS defines; mm.
+  explode_instrument:
+    value: [["oak bottom", 0, 0, -96], ["U-bolt nuts", 0, 0, -116], ["bottom plate", 0, 0, -62], ["main board spacers", 0, 0, -46],
+            ["main board", 0, 0, -30], ["thumb caps", 0, 0, -30], ["U-bolt", 0, 0, -8], ["column standoffs", 0, 0, -6],
+            ["key boards", 0, 0, 12], ["key-board spacers", 0, 0, 24], ["key plate", 0, 0, 36], ["keycaps", 0, 0, 52],
+            ["column screws", 0, 0, 64], ["Matrix", 0, 0, 74], ["oak top", 0, 0, 96],
+            ["side left", 0, -44, 0], ["side right", 0, 44, 0], ["mouth cap", -36, 0, 0], ["tail cap", 40, 0, 0],
+            ["tail equipment", 0, 0, -30]]
+    status: nominal
+    source: "picture convention: each group's [name, dx, dy, dz] from where it is assembled - the stack pulled apart up and down Z (its stacking axis), the sides out across Y and the end caps out along X so the stack shows between them"
+  explode_cassette:
+    value: [["bottom plate", 0, 0, -40], ["main board spacers", 0, 0, -26], ["main board", 0, 0, -12], ["thumb caps", 0, 0, -12],
+            ["U-bolt", 0, 0, 6], ["column standoffs", 0, 0, 2], ["key boards", 0, 0, 16], ["key-board spacers", 0, 0, 26],
+            ["key plate", 0, 0, 34], ["column screws", 0, 0, 48]]
+    status: nominal
+    source: "picture convention: the cassette alone (ADR 0025) pulled apart up Z in its build order - bottom plate, main board spacers, main board, standoffs, key boards, spacers, key plate, screws"
