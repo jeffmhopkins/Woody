@@ -26,7 +26,7 @@ params:
   v_avdd:   {value: {fig: dac-rail}, source: "DAC_AVDD, POT-OFFSET's CCW end (dac-rail); its CW end is AGND_MOD, so clockwise is positive at the jack"}
   r_load:   {value: 100.0e3, source: "one module input on the jack, 100 kohm [assumption: typical Eurorack, as pitch-stage/sim]"}
   p_gain:   {value: 0.47, source: "POT-GAIN's rotation from CCW; 0.47 is the page's working gain, 2.16x (breath-output-stage.md, 'Settled 2026-09-30')"}
-  p_off:    {value: 0.5, source: "POT-OFFSET's rotation from CCW (0, DAC_AVDD: -4.91 V) to CW (1, AGND_MOD: +5.06 V)"}
+  p_off:    {value: 0.5, source: "POT-OFFSET's rotation from CCW (0, DAC_AVDD: -4.89 V) to CW (1, AGND_MOD: +5.06 V)"}
   v_in0:    {value: 0.0}
   v_in1:    {value: 0.0}
   v_hard:   {value: -4.64, source: "the in-amp column's hard blow (breath-output-stage.md, 'What it has to do'): breath-working-point's 2.8 kPa candidate, disputed until E2; BREATH_SHAPED at POT-RESP's centre"}
@@ -58,15 +58,15 @@ vary:
   R-BREATH-OFF:    {tol: from-value}
   R-BREATH-OFFNEG: {tol: from-value}
   R-BREATH-IN:     {tol: from-value}
-  v_avdd:          {tol: [-0.04, 0.056], source: "dac-rail's floor 5.00 V to 5.50 V, the DAC8568 C grade's AVDD window (dac-rail's floor note)"}
+  v_avdd:          {tol: [-0.03846, 0.05769], source: "dac-rail's floor 5.00 V to 5.50 V, the DAC8568 C grade's AVDD window (dac-rail's floor note)"}
 
 sims:
   - name: offset
     # breath at rest (BREATH_SHAPED 0 V); POT-OFFSET at its ends, its centre and the
-    # page's zero (p = 0.433); the op-amp output, and the jack behind R-OUT-PROT
+    # page's zero (p = 0.432); the op-amp output, and the jack behind R-OUT-PROT
     deck: bos.cir
     set: {t_end: 0.2e-3, t_stepsize: 2.0e-6}
-    sweep: {p_off: [0.0, 0.5, 0.433, 1.0]}
+    sweep: {p_off: [0.0, 0.5, 0.432, 1.0]}
     vary: [R-BREATH-FB, R-BREATH-OFF, R-BREATH-OFFNEG, v_avdd]
     measures: [out, jack, page_err]
     post:
@@ -77,12 +77,12 @@ sims:
       page_err: "at(w['out'], p['t_end']) + p['R-BREATH-FB'] * (p['v_avdd'] * (1 - p['p_off']) / (p['R-BREATH-OFF'] + p['POT-OFFSET'] * p['p_off'] * (1 - p['p_off'])) + p['v_neg'] / p['R-BREATH-OFFNEG'])"
     asserts:
       - expr: "max['page_err'] < 0.01 and min['page_err'] > -0.01"
-        why: "the op-amp output agrees with the page's offset table and its derivation (-4.91 V CCW, +0.61 V at centre, 0 at p = 0.433, +5.06 V CW) within 10 mV at every corner - the wiper's own source impedance is the whole of the centre's offset"
+        why: "the op-amp output agrees with the page's offset table and its derivation (-4.89 V CCW, +0.61 V at centre, 0 at p = 0.432, +5.06 V CW) within 10 mV at every corner - the wiper's own source impedance is the whole of the centre's offset"
   - name: gain
     # offset at the page's zero; a 1 V breath step (small enough that 4x does not clip);
     # the gain is the op-amp output's change over the input's
     deck: bos.cir
-    set: {p_off: 0.433, v_in0: 0.0, v_in1: -1.0, t_end: 0.6e-3}
+    set: {p_off: 0.432, v_in0: 0.0, v_in1: -1.0, t_end: 0.6e-3}
     sweep: {p_gain: [0.0, 0.47, 1.0]}
     vary: [R-BREATH-FB, R-BREATH-IN]
     measures: [gain]
@@ -116,7 +116,7 @@ sims:
     # a hard-blow step at the working gain into a passive mult: C-OUT-BREATH is outside
     # the loop behind R-OUT-PROT, so the jack is an RC, whatever it is joined to
     deck: bos.cir
-    set: {p_off: 0.433, v_in0: 0.0, v_in1: -4.64, t_end: 3.0e-3}
+    set: {p_off: 0.432, v_in0: 0.0, v_in1: -4.64, t_end: 3.0e-3}
     sweep: {mult: [0, 1, 2]}
     vary: []
     measures: [overshoot_pct, t_settle]
@@ -128,7 +128,7 @@ sims:
         why: "no overshoot into any passive mult: the loop never sees the jack's capacitance"
   - name: loop
     deck: bos-ac.cir
-    set: {p_off: 0.433}
+    set: {p_off: 0.432}
     sweep: {mult: [0, 1, 2]}
     vary: []
     measures: [pm, fc]
@@ -141,7 +141,7 @@ sims:
   - name: rail
     # the -12 V rail's movement at breath rates, through R-BREATH-OFFNEG and the summer
     deck: bos-ac.cir
-    set: {p_off: 0.433, rail: 1}
+    set: {p_off: 0.432, rail: 1}
     vary: [R-BREATH-FB, R-BREATH-OFFNEG]
     measures: [rail_gain, jack_mv]
     post:
@@ -155,7 +155,7 @@ sims:
     # noon and OFFSET at its zero: the commissioned setting (breath-output-stage.md,
     # 'Settled 2026-09-30')
     deck: chain.cir
-    set: {p_resp: 0.5, p_gain: 0.47, p_off: 0.433}
+    set: {p_resp: 0.5, p_gain: 0.47, p_off: 0.432}
     vary: []
     measures: [out_hard, clip_in]
     post:
@@ -171,7 +171,7 @@ sims:
     # docs/review/2026-10-01-pre-layout-review/VERIFIED-F1.md). clip_in is the in-amp
     # output BREATH_OUT stops rising at; the in-amp's full scale where it never clips
     deck: chain.cir
-    set: {p_gain: 0.47, p_off: 0.433}
+    set: {p_gain: 0.47, p_off: 0.432}
     sweep: {p_resp: [0.0, 0.25, 0.5, 0.75, 1.0]}
     vary: []
     measures: [out_hard, ratio_hard, clip_in]

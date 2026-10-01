@@ -148,7 +148,7 @@ The cost is that a 5 V DAC wants roughly 3.5 V for a logic high while the
 instrument sends 3.3 V, so SPI needs shifting. That turns out to be free in
 parts terms:
 
-- **A local 5.21 V regulator off the protected +12 V rail** for the DAC's AVDD
+- **A local regulator off the protected +12 V rail, at `dac-rail`,** for the DAC's AVDD
   — not the rack's +5 V bus. See below.
 - **74AHCT125** for the shifter, running from the **bus +5 V rail** — the *same
   part* as the instrument's LED data lines (ADR 0014), with a spare gate left
@@ -177,7 +177,7 @@ it moves with whatever else in the case is drawing from it. Two consequences:
   calibrated once against a real VCO (ADR 0006). A supply that shifts when
   another module powers up shifts the calibration with it.
 
-**So: an LM317LZ set to ~5.21 V, fed from +12 V downstream of the module's own
+**So: an LM317LZ at `dac-rail`, fed from +12 V downstream of the module's own
 reverse-protection diode** (its own — see the power tree below). TO-92, two
 resistors and two capacitors, ten-odd milliamps of load, under 100 mW — the
 lowest-effort regulator that exists, and it buys back both properties.
@@ -185,8 +185,20 @@ lowest-effort regulator that exists, and it buys back both properties.
 **The tolerance argument here used to be wrong, and the answer is a meter, not
 a better part.** This ADR applied ±4 % to the *output* and ignored both the
 divider tolerance and the adjust-pin current. Done properly the worst-case
-spread is about 0.66 V against a window of roughly 0.55 V — **no nominal value
-fits on paper.** Two reviewers found it independently and both are right.
+spread was about 0.66 V against a window of roughly 0.55 V — **no nominal value
+fits on paper.** *(Amended 2026-10-01: with the adopted 150 Ω / 475 Ω at 0.1 %
+it is 4.99–5.47 V `[calc: 1.20 × (1 + 475·0.999/(150·1.001)); 1.30 × (1 +
+475·1.001/(150·0.999)) + 100 µA × 475 Ω; TI's V_REF and I_ADJ limits, ds
+LM317LZ.pdf p.5]`, 0.48 V against the C grade's 5.0–5.5 V. A fixed 478 Ω would
+clear the bottom by 16 mV and the top by 1 mV before temperature `[calc]`,
+which is not a fit either: the bench still decides.)* *(Amended again
+2026-10-01, the owner: "Can we just do trim pot to help?" — **the divider is
+trimmed, not selected.** `TRIM-DAC-RAIL`, a 50 Ω 12-turn rheostat, sits in the
+`OUT`-to-`ADJ` leg with `R-REG-SET-HI`, over `R-REG-SET-LO` at 523 Ω, and E7
+trims `DAC AVDD` to `dac-rail`. Its travel reaches the set point on every part
+across TI's limits and never the DAC's 6 V absolute maximum, and an open
+wiper or track takes the rail down: `power-entry.md`, *The DAC rail's trim*;
+`power-entry/sim`'s `dac-trim-*`.)* Two reviewers found it independently and both are right.
 
 They proposed an LP2951, or a second REF5050 buffered by an op-amp half. Both
 are declined, because the premise behind "no value fits" is a statistical
@@ -198,7 +210,8 @@ What is adopted is the free part of the fix:
 - **Shrink R2** — 150 Ω / 475 Ω instead of 240 Ω / 768 Ω — which halves the
   I_ADJ contribution to 24–48 mV.
 - **0.1 % divider parts**, which cost pennies and arrive in the same order.
-- **Select R2 on the bench at E7**, against the real DAC: raise the top codes
+- **Select R2 on the bench at E7** *(superseded 2026-10-01 by the trimmer,
+  above: E7 trims to `dac-rail`)*, against the real DAC: raise the top codes
   and find where they start compressing against AVDD. That is the floor that
   actually matters, and it is measured rather than assumed — the "4.95 V floor"
   the review argued against was never derived from anything.
@@ -208,7 +221,7 @@ and if the selected value lands badly you find out at E7 with a meter, on a
 board with four screws in it.
 
 **The 74AHCT125 stays on the bus +5 V rail.** Its job is to get 3.3 V logic over
-the DAC's `V_INH` input threshold — **0.625 × AVDD = 3.26 V** at AVDD = 5.21 V.
+the DAC's `V_INH` input threshold — **0.625 × AVDD = 3.25 V** at `dac-rail`.
 An AHCT gate on a rail sagging to 4.75 V still drives 4.6 V, with well over a
 volt of margin.
 
@@ -297,8 +310,10 @@ one draws its own analog current *plus* everything the instrument consumes:
 
 > **Amended 2026-09-30 — ADR 0027.** The instrument's current no longer comes
 > off the +12 V rail: an isolated converter draws its power rail to rail, so in
-> typical play the module takes ~0.26 A from +12 V and ~0.25 A from −12 V
-> (`power-entry.md`, *The instrument's supply*). The table above is the
+> typical play the module takes ~0.26 A from +12 V and ~0.24 A from −12 V —
+> `U-ISO`'s ~0.22 A on each plus the module's own `module-own-draw`, which
+> replaces the 45 mA and ~40 mA in the table (`power-entry.md`, *The
+> instrument's supply*; amended 2026-10-01). The table above is the
 > arrangement this section was written against; the series-resistor argument
 > below still holds, on both of the converter's legs.
 
@@ -340,7 +355,7 @@ Those are different problems and they want separate treatment:
 ```
 bus +12V ──┬──[1N5817]──[ferrite]──[bulk]──┬── module analog (op-amps)
            │                                │
-           │                                └──[LM317LZ 5.21V]── DAC AVDD
+           │                                └──[LM317LZ]─────── DAC AVDD
            │                                                      │
            │                                              VREFOUT ─┴─[½ OPA2197]
            │                                              → pitch offset divider
@@ -352,6 +367,14 @@ bus +12V ──┬──[1N5817]──[ferrite]──[bulk]──┬── modul
 bus -12V ──[1N5817]─────[ferrite]──[bulk]── module analog
 bus +5V  ────────────────[ferrite]──[bulk]── 74AHCT125 level shifter only
 ```
+
+> **Amended 2026-10-01 (pre-layout review A3-12).** This diagram is the power
+> tree before 2026-09-30. Since then: the bus +5 V is not used at all — the
+> module makes `LOGIC_5V` from its analog +12 V (`U-REG-LOGIC`), and the
+> 74AHCT125 is on `DAC AVDD`; the load switch hangs on `U-ISO`'s isolated
+> output, whose input is across the bus +12 V and −12 V (ADR 0027), not on the
+> bus +12 V; and each rail has a PTC at the header. The drawing that is kept
+> current is `hardware/module/power-entry/power-entry.md`'s.
 
 **Branch the two +12 V paths *before* the protection diode, each with its own
 diode, ferrite and bulk capacitance.** An earlier revision of this diagram
@@ -377,7 +400,8 @@ the exported umbilical rail and the module's own analog rail, and HF isolation
 between the two branches (`power-entry.md`). The split is visible by inspection
 of the diagram above and needs no ground path to matter, which is why four
 reviewers found it independently. A diode costs about twenty cents.
-(`D-REVPOL` qty 3, ADR 0006.)
+(`D-REVPOL` is qty 4 since ADR 0027: `D1`/`D3` for the module's analog ±12 V,
+`D2`/`D4` for the two legs of `U-ISO`'s input — `power-entry.md`.)
 
 **The effect that genuinely *is* breath-correlated is the shared ground path**,
 at 5.7–7.2 cents for the module's internal ground and ~4.8 cents for the rack
@@ -709,9 +733,11 @@ figure.
 ### Panel, top to bottom
 
 Five rows, top to bottom: label band; **three** knobs across (gain, offset,
-response); six jacks in two columns — **PITCH** and **BREATH** silkscreened,
-**MOD 1–4** numbered with a write-on strip; the etherCON **with the power LED
-beside it**; and the power switch on **a row of its own**. It is the system's
+response); six jacks in two columns — **BREATH** and **PITCH** across the
+top, **MOD 1–4** down the columns, each named in a printed pill (ADR 0024 point
+13, ADR 0026 points 4 and 7; amended 2026-10-01: this said PITCH and BREATH
+silkscreened and the mods on a write-on strip); the etherCON **with the power
+LED beside it**; and the power switch on **a row of its own**. It is the system's
 only power switch, since the instrument has none.
 
 *Amended 2026-09-30 by [ADR 0024](0024-module-panel-layout-and-stack.md)

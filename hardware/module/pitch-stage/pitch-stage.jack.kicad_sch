@@ -166,6 +166,156 @@
 		)
 		(embedded_fonts no)
 	)
+	(symbol "Device:D_TVS"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 1.016)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "D"
+			(at 0 2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "D_TVS"
+			(at 0 -2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Bidirectional transient-voltage-suppression diode"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "diode TVS thyrector"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "TO-???* *_Diode_* *SingleDiode* D_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "D_TVS_0_1"
+			(polyline
+				(pts
+					(xy -2.54 1.27) (xy -2.54 -1.27) (xy 2.54 1.27) (xy 2.54 -1.27) (xy -2.54 1.27)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0.508 1.27) (xy 0 1.27) (xy 0 -1.27) (xy -0.508 -1.27)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.27 0) (xy -1.27 0)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "D_TVS_1_1"
+			(pin passive line
+				(at -3.81 0 0)
+				(length 2.54)
+				(name "A1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 3.81 0 180)
+				(length 2.54)
+				(name "A2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
   )
   (symbol (lib_id "Connector_Audio:AudioJack2") (at 40.64 50.8 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
@@ -186,13 +336,39 @@
     (pin "T" (uuid 22050bfb-44c7-526b-8464-a2c6fca1419b))
     (instances (project "module-jack" (path "/f69c67ba-c380-5393-90d5-6d2847e300fb/deb60ac7-2399-5c17-a8b9-cc8927c73157" (reference "J1") (unit 1))) (project "pitch-stage.jack" (path "/777e1e5e-b5e8-55e6-8f24-0d55726d01d7" (reference "J-CV-PITCH") (unit 1))) (project "pitch-stage" (path "/818bd2a7-cdf3-5daa-834c-14911dcdaa31/3ca85165-8ff2-5b92-af7f-5128b21a9b40" (reference "J-CV-PITCH") (unit 1))))
   )
-  (wire (pts (xy 45.72 50.8) (xy 48.26 50.8)) (stroke (width 0) (type default)) (uuid 4b71a3a9-3549-5d53-8605-46869635eb74))
-  (hierarchical_label "JACK_TIP" (shape passive) (at 48.26 50.8 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid bdb377b0-10c4-5bfd-8e4e-a63905229ea3)
-    (property "Dir" "ref" (at 48.26 50.8 0) (effects (font (size 1.27 1.27)) hide)))
-  (wire (pts (xy 45.72 48.26) (xy 48.26 48.26)) (stroke (width 0) (type default)) (uuid 4cc52d68-7282-5b47-9fe9-7003af89e478))
-  (hierarchical_label "AGND_MOD" (shape passive) (at 48.26 48.26 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 4f61ef18-ff04-5514-b502-99c63a2de6a7)
-    (property "Dir" "ref" (at 48.26 48.26 0) (effects (font (size 1.27 1.27)) hide))
-    (property "From" "module/power-entry" (at 48.26 48.26 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Figure" "dig-gnd-topology" (at 48.26 48.26 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 45.72 50.8) (xy 55.88 50.8)) (stroke (width 0) (type default)) (uuid 4b71a3a9-3549-5d53-8605-46869635eb74))
+  (hierarchical_label "JACK_TIP" (shape passive) (at 63.5 50.8 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid bdb377b0-10c4-5bfd-8e4e-a63905229ea3)
+    (property "Dir" "ref" (at 63.5 50.8 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 45.72 48.26) (xy 78.74 48.26)) (stroke (width 0) (type default)) (uuid 4cc52d68-7282-5b47-9fe9-7003af89e478))
+  (hierarchical_label "AGND_MOD" (shape passive) (at 78.74 48.26 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 4f61ef18-ff04-5514-b502-99c63a2de6a7)
+    (property "Dir" "ref" (at 78.74 48.26 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 78.74 48.26 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 78.74 48.26 0) (effects (font (size 1.27 1.27)) hide)))
+  (symbol (lib_id "Device:D_TVS") (at 55.88 58.42 270) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid fd3db36c-19b2-5621-8c5c-7d0f127001d0)
+    (property "Reference" "D-ESD-PITCH" (at 58.42 57.15 270) (effects (font (size 1.27 1.27)) (justify right)))
+    (property "Value" "PESD15VL1BA" (at 58.42 59.69 270) (effects (font (size 1.27 1.27)) (justify right)))
+    (property "Footprint" "Diode_SMD:D_SOD-323" (at 55.88 58.42 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 55.88 58.42 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "D-ESD-PITCH" (at 55.88 58.42 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "K1=1(A1) K2=2(A2)" (at 55.88 58.42 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "JACK-SIDE ESD CLAMP for the LT5400 (owner, 2026-10-01). Bidirectional, tip to sleeve, AT THE JACK on this board, so a strike on the tip is clamped before it crosses J-B2B-MOD and reaches TRIM-GAIN and RN-PITCH, which has no internal ESD diodes (LT5400.pdf p.6; its Figure 1 second option, a bidirectional zener to ground at the connector). On the DC feedback node, so its leakage and capacitance sit inside the loop: no accuracy cost (pitch-stage.md, The jack-side ESD clamp)" (at 55.88 58.42 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/discrete-and-power/NEXPERIA-PESD15VL1BA.pdf Table 2 pinning: 1 K1 cathode (diode 1), 2 K2 cathode (diode 2); bidirectional and symmetric, so either way round" (at 55.88 58.42 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Nexperia" (at 55.88 58.42 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "PESD15VL1BA,115" (at 55.88 58.42 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C85378" (at 55.88 58.42 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 55.88 58.42 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid f677c14c-4a8b-5088-944d-10823ec8e519))
+    (pin "2" (uuid a55b8d74-6d22-58c3-a40a-7dadfc3e8342))
+    (instances (project "module-jack" (path "/f69c67ba-c380-5393-90d5-6d2847e300fb/deb60ac7-2399-5c17-a8b9-cc8927c73157" (reference "D2") (unit 1))) (project "pitch-stage.jack" (path "/777e1e5e-b5e8-55e6-8f24-0d55726d01d7" (reference "D-ESD-PITCH") (unit 1))) (project "pitch-stage" (path "/818bd2a7-cdf3-5daa-834c-14911dcdaa31/3ca85165-8ff2-5b92-af7f-5128b21a9b40" (reference "D-ESD-PITCH") (unit 1))))
+  )
+  (wire (pts (xy 55.88 50.8) (xy 63.5 50.8)) (stroke (width 0) (type default)) (uuid 10dbfbf8-2e21-5321-b5aa-ac804dfa05fc))
+  (wire (pts (xy 55.88 50.8) (xy 55.88 54.61)) (stroke (width 0) (type default)) (uuid 0ec5f9ef-d77d-58f7-a759-4ca94e72535c))
+  (wire (pts (xy 55.88 62.23) (xy 55.88 66.04)) (stroke (width 0) (type default)) (uuid fab4b11f-4a5f-5bbc-9ec6-650c395dd4e0))
+  (wire (pts (xy 55.88 66.04) (xy 78.74 66.04)) (stroke (width 0) (type default)) (uuid 9abc17c6-0462-5462-b591-5c5af4cfbe22))
+  (wire (pts (xy 78.74 66.04) (xy 78.74 48.26)) (stroke (width 0) (type default)) (uuid 152d8952-e501-5dce-8d75-b83c511aed7c))
+  (junction (at 55.88 50.8) (diameter 0) (color 0 0 0 0) (uuid 6eaa788b-038c-5440-9ed5-d9e57a9dfb1f))
+  (text "D-ESD-PITCH: the LT5400 has no ESD diodes, so a strike on the tip is clamped here, at the jack, before it crosses J-B2B-MOD" (at 40.64 76.2 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid 005cb515-a988-5a6e-82fb-ca1b93505e1d))
   (sheet_instances (path "/" (page "1")))
 )

@@ -103,7 +103,9 @@ question inside it is **still open** and is carried forward in
   > named remedy being a **BAV99** — which `D-JACK-CLAMP` already is. Pitch
   > feedback is tapped *at the jack*, i.e. exactly the datasheet's "external
   > connector" case, so check the clamp actually stands between the jack and
-  > every LT5400 pin when this is laid out.
+  > every LT5400 pin when this is laid out. *(Answered 2026-10-01: it did
+  > not — `D-JACK-CLAMP` is on the op-amp side of `R-OUT-PROT` — and
+  > `D-ESD-PITCH`, a bidirectional clamp at the jack, now does; `pitch-stage.md`.)*
   >
   > **Caveat on the revision.** This is rev **fa**, not the **fc** `bom.csv`
   > names canonical — `analog.com` is still unreachable and this came from an

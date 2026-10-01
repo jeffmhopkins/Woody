@@ -83,7 +83,7 @@ sims:
       avdd_final: "at(w['avdd'], p['t_off'] - 1e-3)"
     asserts:
       - expr: "min['l5_final'] > 4.9 and max['l5_final'] < 5.1 and min['avdd_final'] >= 5.0"
-        why: "both rails settle where their pages say: LOGIC_5V at the ADP7118's 5.0 V, DAC_AVDD at or over dac-rail's 5.00 V floor, at every corner"
+        why: "both rails settle where their pages say: LOGIC_5V at the ADP7118's 5.0 V, DAC_AVDD at or over dac-rail's 5.00 V floor, at every corner of k_clamp and t_ss - with TI's LM317L model at its own nominal V_REF and I_ADJ: the regulator's spread is not varied here, and its low corner is under the floor (dac-rail's derivation), which is why E7 sets R-REG-SET-LO on the bench"
       - expr: "max['over_on'] <= 0.3 and max['over_off'] <= 0.3 and max['oversc_on'] <= 0.3 and max['oversc_off'] <= 0.3 and max['overdin_on'] <= 0.3 and max['overdin_off'] <= 0.3"
         why: "REQUIREMENT: SYNC, SCLK_DAC and DIN each stay at or under DAC_AVDD + 0.3 V, the DAC8568's absolute maximum for a digital input [ds DAC8568CIPW.pdf p.2], at every instant of power-on and power-off and at every corner - 'no device pin should be brought high before power is applied to the device' [p.31]. Holds because U-LVL-MOD runs from DAC_AVDD (digital-and-supervision.md, 'The buffer's supply')"
       - expr: "max['i_esd_max'] < 1e-6"

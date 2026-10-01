@@ -29,7 +29,7 @@ The `Dir` and `Peer` columns are defined once in
 | `+12V`, `-12V`, `GND` on `J-PWR-EURO` | in | Eurorack bus board | — | 16-pin shrouded keyed IDC. `GND` is the star point, `BUS_GND` on the sheet — a net of this circuit only. **Its +5 V, CV and Gate pins are not used** — no-connects (owner, 2026-09-30; ADR 0023 point 3) |
 | `MODULE ANALOG +12V` | out | `module/pitch-stage`, `module/breath-receive-stage`, `module/breath-output-stage`, `module/breath-response-shaper`, `module/mod-channels` | — | After `PTC-POS12`, `D1`, `FB1`, `C1`. The panel LED is not on it: it hangs on the load switch's output (`module/panel-led`) |
 | `MODULE ANALOG −12V` | out | `module/pitch-stage`, `module/breath-receive-stage`, `module/breath-output-stage`, `module/breath-response-shaper`, `module/mod-channels` | — | After `PTC-NEG12`, `D3`, `FB3`, `C3` |
-| `DAC AVDD` | out | `module/dac8568`, `module/breath-receive-stage`, `module/breath-output-stage`, `module/digital-and-supervision`, `interfaces/spi-link` | `dac-rail` | The LM317 output. Selected on the bench, per the figure's floor. Also the supply of the 74AHCT125 (`U-LVL-MOD`) that drives the DAC's SPI pins, so they can never sit above it — see *The DAC rail's load* |
+| `DAC AVDD` | out | `module/dac8568`, `module/breath-receive-stage`, `module/breath-output-stage`, `module/digital-and-supervision` | `dac-rail` | The LM317 output. Selected on the bench, per the figure's floor. Also the supply of the 74AHCT125 (`U-LVL-MOD`) that drives the DAC's SPI pins, so they can never sit above it — see *The DAC rail's load* |
 | `LOGIC_5V` | out | `module/digital-and-supervision` | — | `U-REG-LOGIC`'s output, made here from the analog +12 V: the SPI receiver `U-RX-MOD` and `CS_MOD`'s pull-up only — not the level shifter, which is on `DAC AVDD`. See *The logic 5 V* |
 | `ISO_POS12` | out | `module/umbilical-load-switch` | `umbilical-current` | `U-ISO`'s isolated +12 V (ADR 0027): `U-LOADSW`'s `VCC`, the top of `R-ILIM` and of the `ON` divider hang off it. Until 2026-09-30 the load switch took the bus +12 V ahead of the diodes, `BUS_POS12_RAW`, which is now a net of this circuit only |
 | `PWR_GND` | ref | `module/umbilical-load-switch`, `carrier/power-entry-instrument` | `umbilical-current`, `dig-gnd-topology` | `U-ISO`'s isolated return and the umbilical's pin 6, on its own layer-4 copper. It meets `DIG_GND` at the etherCON (`NT-UMB-MOD`) and nothing else — see *Grounding* |
@@ -49,10 +49,14 @@ the two agree, and where they do not the netlist wins.*
   +12V ├──[PTC-POS12]──[D1 1N5817]──[FB1]──[C1 100µF]──┬── MODULE ANALOG +12V
        │                                               │   OPA2197 ×7, INA828
        │                                               ├──[U-REG-DAC LM317LZ]── DAC AVDD
+       │                                               │   trimmed by [TRIM-DAC-RAIL 50R]
        │                                               └──[U-REG-LOGIC]── LOGIC_5V, the SPI receiver only
        │
-       ├──[PTC-ISO]──[D2 1N5817]──[FB2]──[L-ISO-IN 22µH]──┬── ISO_VIN_POS
+       ├──[PTC-ISO]──[D2 1N5817]──[FB2]──[L-ISO-IN 22µH]──┐
        │                                                   │
+       │               [L-CM-ISO 1mH], one winding in each leg, dots on the filter side
+       │                                                   │
+       │                                                   ├── ISO_VIN_POS
        │                   [C2 100µF] and [C-ISO-IN 4.7µF] across the 24 V
        │                                                   │
        │                                    ┌──────────────┴─────────┐
@@ -61,9 +65,10 @@ the two agree, and where they do not the netlist wins.*
        │                                    │ GND                0V ├──┴── PWR_GND ──► umbilical pin 6
        │                                    └──────────────┬─────────┘           │
        │                                                   │               [NT-UMB-MOD] at the etherCON
-       │                                    [C-ISO-Y 1nF], ISO_VIN_POS to PWR_GND │
+       │                                   [C-ISO-Y 22nF], ISO_VIN_POS to PWR_GND │
        │                                                   │               DIG_GND ──► umbilical pin 8
        │                                               ISO_VIN_NEG                │
+       │                                   the choke's −12 V winding              │
        │                                                   │               [NT-DIG-MOD] at the star
   -12V ├──[D4 1N5817]──[FB4]───────────────────────────────┘                      │
        │   (cathode to the bus)                                                   │
@@ -119,8 +124,8 @@ number scales the result by 1.50× and changes nothing.)* The
 already deleted. Two reviewers reached this independently.
 
 **Keep both diodes anyway**, for the reasons that do hold: fault isolation
-between the exported rail and the analog rail, and HF isolation (`r_d` is
-69 mΩ at 392 mA). Stated correctly they are still worth twenty cents. Left
+between the exported rail and the analog rail, and HF isolation (`r_d`
+~0.55 Ω in `D2` at 0.22 A and ~2.8 Ω in `D1` at 37 mA, `diode-split-rationale`). Stated correctly they are still worth twenty cents. Left
 as it was, the next reviewer who checks the arithmetic deletes the part.
 
 > ### The ground path this section dismisses is the real one
@@ -156,8 +161,25 @@ negative rail's current flows out of the module into the bus, so its
 **cathode is on the bus pin and its anode on the module side**. The sheet had
 it the other way until 2026-09-30, which reverse-biased it in normal running
 (found by the analog sims, [`sim/`](sim/README.md)). **There is no +5 V
-branch**: the bus +5 V is not used, so a reversed ribbon has no unprotected
-rail to land on — the gap this paragraph used to accept is closed.
+branch**: the bus +5 V is not used.
+
+**What the diodes protect against, and what they cannot.** A ribbon that swaps
++12 V and −12 V — the 10-pin case, or a plug one row off — lands on `D1`–`D4`
+and nothing conducts. **A 16-pin cable fitted backwards at an unkeyed bus
+header is different, and nothing on this module can stop it.** Module pin *k*
+then meets bus pin 17 − *k* `[calc]`: the module's six ground pins (3–8) land
+on the bus's CV, +5 V and +12 V (14–9), so `BUS_GND` copper shorts the rack's
++12 V to its +5 V and CV, upstream of every fuse and diode here. `D1`–`D4` keep
+the module's own rails from conducting; the short is the rack's. Doepfer's own
+warning is that a wrongly turned cable *"will destroy the module"*
+`[ds DOEPFER-A100-TECHNICAL-DETAILS-a100t_e.html]`. This is the generic
+16-pin Eurorack hazard, kept with the 16-pin header for commonality (ADR 0023
+point 3); the header's keyed shroud prevents it at this end only. **Accepted
+by the owner, 2026-10-01** (pre-layout review A3-2): all six ground pins stay
+wired and no part is added — wiring fewer of them, so that a reversed cable
+lands the module's ground on CV rather than on the rack's supplies, was the
+alternative. The guard is the build: mark the red stripe at both ends of the
+cable (`J-PWR-EURO`'s row).
 
 ## The instrument's supply — `U-ISO` (ADR 0027)
 
@@ -188,48 +210,87 @@ its return is `PWR_GND`.
 | Typical play | `umbilical-current` × 12 V ≈ **4.3 W** out, 0.36 A of 1.67 A (~21 %); **~82 %** there (~81 % off the efficiency curve, ~0.95 W off the dissipation curve) → 5.26 W in → **~0.22 A on each of +12 V and −12 V** | `[ds PD-3]`, the RPA20-2412SAW's own curves at 24 V in |
 | Clamp-legal worst (ADR 0005's table) | ~6.95 W out (0.58 A), ~1.25 W lost → **~0.37 A per rail** at 22.2 V | `[ds PD-3]` |
 | Overload held just under the load switch's minimum trip, 0.78 A | 9.4 W, ~1.5 W lost → **~0.49 A per rail** | `R-ILIM`'s row; `[ds PD-3]` |
-| Hot-plug, the load switch at its 1.10 A worst-case limit | 13.2 W, ~1.85 W lost, for tens of ms → **~0.68 A per rail** | `umbilical-load-switch.md`; `[ds PD-3]` |
+| Hot-plug into a running module | `Q-INRUSH` holds the instrument's inrush, so `U-ISO` peaks at `hotplug-iso-ocp`, 0.49–0.54 A out → **~0.36 A per rail** `[calc: 0.54 × 12 / 0.82 / 22.2]` | `hotplug-iso-ocp`; `[ds PD-3]` |
+| An early replug, the load switch at its 1.10 A worst-case limit | 13.2 W, ~1.85 W lost, for tens of ms → **~0.68 A per rail** — the only case that reaches the limit (*Protection*, below) | `umbilical-load-switch.md`; `[ds PD-3]` |
 | Toggle off | quiescent input **20 / 55 mA** typ/max | `[ds PD-2]` |
-| Its limit against the load switch's | over-current protection at **110–160 %** of 1.67 A, hiccup: the minimum, 1.84 A, is above the LT1641's 1.10 A worst-case trip, so the LT1641 decides every start and fault | `[ds PD-5]` |
+| Its limit against the load switch's | over-current protection at **110–160 %** of 1.67 A, hiccup: the minimum, 1.84 A, is above the LT1641's 1.10 A worst-case trip, so the LT1641 decides every start and fault **except a replug inside `Q-INRUSH`'s window**, where the carrier's `replug-early` sim reaches `U-ISO`'s threshold (`hotplug-iso-ocp`) — see *Protection* | `[ds PD-5]` |
 | Output | 12 V: accuracy ± 2.0 % max, line ± 0.2 % max, load ± 0.1 %, 0.02 %/K → **~± 3.1 %** over 40 K; 50 mV p-p ripple; the load switch's `ON` and `PWRGD` thresholds sit below its minimum with more margin than they had on the bus | `[ds PD-2, PD-5]`; the `hot-plug` sim holds `VCC` above `ON`'s turn-off at every corner |
 | RECOM's input fuse | *"Recommended fuse: 3A slow blow type"*, where *"input over-current protection is also required"* — `PTC-ISO` is it, sized for this branch | `[ds PD-5 Note 5]` |
 | Loss in the module | ~0.95 W in `U-ISO`, ~0.1 W in `D2`/`D4`; 12.5 K/W on a board in still air, so **~+12 °C** on its case; over-temperature protection at 110 °C | `[ds PD-5, PD-6]` |
 
 **The rack's −12 V carries the instrument now.** At typical play the module
-draws ~0.27 A from +12 V and ~0.26 A from −12 V (its own ~45 mA and ~40 mA
-plus `U-ISO`), where it drew ~0.40 A and ~0.04 A. Check the case's −12 V
+draws ~0.26 A from +12 V and ~0.24 A from −12 V (its own `module-own-draw`,
+from *Fuses on the rails* below, plus `U-ISO`'s ~0.22 A on each) `[calc]`,
+where it drew ~0.40 A and ~0.04 A. Check the case's −12 V
 rating: many Eurorack supplies give −12 V less than +12 V.
 
 **The input filter.** `U-ISO` switches at 550 kHz `[ds PD-2]`; RECOM does
 not publish its reflected ripple current. Its own filter, for EN55032 Class A,
 is a fuse, a 1 µH choke and 47 µF/50 V electrolytic `[ds PD-7]` — no
 common-mode choke. `L-ISO-IN` (22 µH) with `C2` (100 µF 50 V electrolytic)
-and `C-ISO-IN` (4.7 µF) is that filter with more of both: at 550 kHz the
-inductor is 76 Ω against under 0.17 Ω of capacitor (`C-ISO-IN`'s 0.34 Ω at
+and `C-ISO-IN` (4.7 µF) is that filter with more of both, and since
+2026-10-01 `L-CM-ISO`'s leakage, 3.9 µH typ, is in series with it (*The
+common mode*, below): at 550 kHz the
+inductance is ~90 Ω against under 0.17 Ω of capacitor (`C-ISO-IN`'s 0.34 Ω at
 100 kHz, falling above it, in parallel with `C2`'s 0.34 Ω impedance
 `[ds NICHICON-UCM-SERIES-UCM1E101MCL1GS.pdf p.3]`), so **under 0.25 %** of
 whatever it reflects reaches the rack `[calc]`. It is damped by `C2`'s ESR:
-`f₀` = 1/(2π√(22 µH × 104.7 µF)) = 3.3 kHz, `Z₀` = √(L/C) = 0.46 Ω, against
+`f₀` = 1/(2π√(25.9 µH × 104.7 µF)) = 3.1 kHz, `Z₀` = √(L/C) = 0.50 Ω, against
 the converter's negative input resistance `V²/P` = 23.4² / 5.26 =
-**−104 Ω** — over 200× the
+**−104 Ω** — 200× the
 filter's characteristic impedance, the same shape and margin as the
 instrument's own input LC `[calc]`. **`C2` must stay an electrolytic.**
+`power-entry/sim`'s `iso-input-z` runs the filter as netlisted, with the
+diodes, the beads, `PTC-ISO`, the ribbon and the rack's supply behind it: the
+impedance the converter sees never exceeds 1.8 Ω anywhere from 100 Hz to
+2 MHz — it is highest at DC, set by the series resistance, so there is no
+resonant peak left — which is **58× or more** inside the −104 Ω at every
+corner of `C2`'s ESR, the ribbon, the choke and the supply; and 0.06 % of the
+converter's 550 kHz input current reaches the rack's +12 V conductor.
 
-**The common mode.** The converter's switching drives current through its
-isolation capacitance, 1100 pF typ `[ds PD-5]`. `C-ISO-Y` (1 nF,
-`ISO_VIN_POS` to `PWR_GND`, beside the converter; RECOM's filter has none
-`[PD-7]`) gives it a
-way home there, instead of round `DIG_GND`, the star and the ribbon. At breath
-frequencies the barrier carries nothing measurable: the `gnd-isolated` sim puts
-under 0.3 nA in the tie.
+**The common mode — `L-CM-ISO` and `C-ISO-Y` (owner, 2026-10-01).** The
+converter's switching drives current through its isolation capacitance,
+1100 pF typ `[ds PD-5]`. The netlist gives that current two ways back to the
+converter's input: `C-ISO-Y` (`ISO_VIN_POS` to `PWR_GND`, beside the
+converter; RECOM's filter has none `[PD-7]`), or a loop round the module —
+`NT-UMB-MOD`, `DIG_GND`, `NT-DIG-MOD`, the star, `NT-AGND-MOD`, `C3`, `FB3`,
+`D3`, the bus, `D4`, `FB4` — which is a few ohms at 550 kHz. Without a choke
+most of it took the loop and crossed the star, and a larger `C-ISO-Y` alone
+resonated with it (the deck that found it is
+`docs/review/2026-10-01-pre-layout-review/F3-u-iso-cm-loop/`; ADR 0027's
+2026-10-01 amendments). **`L-CM-ISO`** — Bourns PM3700-40-RC, 1 mH minimum,
+4 A, 0.020 Ω, between the filter and the converter's pins, one winding in each
+leg `[ds BOURNS-PM3700-CM-CHOKE.pdf p.1]` — puts its common-mode impedance in
+that loop, and **`C-ISO-Y` is 22 nF C0G** with it, so the current goes home
+beside the converter. `power-entry/sim`'s `cm-loop` holds the share crossing
+the star **under the owner's 10 %** at every corner of the choke's core loss
+(500 Ω to 3.6 kΩ per winding — the datasheet gives only its 20 dB band from
+500 kHz), its inductance (±30 %), the ribbon and `C-ISO-Y`: 0.6–5.4 % at
+550 kHz, under 1.7 % at 1.65 MHz, under 0.2 % at 5.5 MHz, and no resonance
+anywhere from 500 kHz to 30 MHz (peak 5.9 %). With the 1 nF the sheet carried
+before, the same choke leaves 15–78 % on the star (`cm-loop-y-1n`). Every
+copper parasitic in the deck is an estimate, and how much current it is
+RECOM does not publish: **E6 probes it** at the star. At breath frequencies
+the barrier carries nothing measurable: the `gnd-isolated` sim puts under
+0.3 nA in the tie.
 
 **Protection.** A reversed ribbon is blocked from both sides of the converter
 by `D2` and `D4`. A fault inside `U-ISO` or its input network is below the
 load switch, so it has its own fuse, `PTC-ISO` (next section) — RECOM's
 input fuse `[PD-5 Note 5]`. `U-ISO`'s own short-circuit protection is
 continuous and self-recovering, its over-current protection hiccups, and it
-has over-temperature protection `[PD-5]`; it never acts first, because the
-load switch trips below its 1.84 A minimum.
+has over-temperature protection `[PD-5]`. **The load switch acts first on
+every start and fault it sees from rest**, because it trips below `U-ISO`'s
+1.84 A minimum. **The exception is a replug inside `Q-INRUSH`'s window**: the
+carrier's `replug-early` sim (30 ms after an unplug) finds the instrument's
+bulk still charged and `Q-INRUSH` still enhanced, so the first current edge is
+set by `C-ISO-OUT`, the cable and the LT1641's loop response rather than its
+static trip, and it reaches `U-ISO`'s threshold (`hotplug-iso-ocp`, a recorded
+hazard). `U-ISO` then hiccups: at 1.84 A out its input is roughly
+1.84 × 12 / 0.85 / 22.2 ≈ 1.2 A per rail `[calc]`, under `PTC-ISO`'s 1.5 A
+trip, so probably benign — and the hiccup pulls `ON` under its turn-off, which
+un-latches the LT1641-1 for a fresh start. **E6 scopes it**: `ISO_POS12` and
+the LT1641's `ON` pin during a quick replug.
 
 ## Fuses on the rails — `PTC-POS12`, `PTC-NEG12`, `PTC-ISO`
 
@@ -250,14 +311,15 @@ element from it to ground, `C-ISO-Y`, hangs on the +12 V side of the fuse.
 0.65 mA (0.85 mA over temperature) `[ds INA828IDR.pdf p.6]`, on both; on +12 V
 only, the LM317 branch, ~12.4 mA (*The DAC rail's load*, below), and
 `U-REG-LOGIC`'s ~5.1 mA. That is
-**~37 mA on +12 V and ~20 mA on −12 V** with the jacks open, and on +12 V
+**~37 mA on +12 V and ~20 mA on −12 V** with the jacks open — the figure
+`module-own-draw` — and on +12 V
 **~97 mA** with all six jacks shorted at full scale through their 1 kΩ
 `R-OUT-PROT` (6 × 10 mA).
 
 | Part | Hold / trip at 23 °C | Hold at 50 / 60 °C | Must hold | Resistance → drop at the typical load | Voltage |
 |---|---|---|---|---|---|
-| `PTC-POS12`, `PTC-NEG12`: MF-MSMF020/60-2 | 0.20 / 0.40 A | **0.15 / 0.13 A** | 97 mA worst (+12 V) | 0.40 Ω min → **18 mV** at 45 mA; 6.0 Ω an hour after a trip (R1max) → **0.27 V** | 60 V: a short between the two analog rails puts 24 V across the pair |
-| `PTC-ISO`: MF-MSMF075/33X-2 | 0.75 / 1.5 A | **0.56 / 0.49 A** | 0.37 A clamp-legal worst; 0.49 A overload held under the load switch's trip (it holds at 50 °C and may trip at 60 °C — a fault state either way); 0.68 A hot-plug for tens of ms, below its trip current | 0.11–0.40 Ω → **≤ 0.09 V** at 0.22 A | 33 V: a shorted `U-ISO` input puts all 24 V across it |
+| `PTC-POS12`, `PTC-NEG12`: MF-MSMF020/60-2 | 0.20 / 0.40 A | **0.15 / 0.13 A** | 97 mA worst (+12 V) | 0.40 Ω min → **15 mV** at `module-own-draw`; 6.0 Ω an hour after a trip (R1max) → **≤ 0.27 V** | 60 V: a short between the two analog rails puts 24 V across the pair |
+| `PTC-ISO`: MF-MSMF075/33X-2 | 0.75 / 1.5 A | **0.56 / 0.49 A** | 0.37 A clamp-legal worst; 0.49 A overload held under the load switch's trip (it holds at 50 °C and may trip at 60 °C — a fault state either way); ~0.36 A on a hot-plug, and 0.68 A on an early replug for tens of ms, below its trip current | 0.11–0.40 Ω → **≤ 0.09 V** at 0.22 A | 33 V: a shorted `U-ISO` input puts all 24 V across it |
 
 `[ds p.1, p.9]`. The previous page's "~0.1 V" was from memory; the datasheet
 says 18 mV on a fitted part and 0.27 V at its worst. **At that worst the
@@ -325,22 +387,27 @@ believe "600 Ω" anywhere in this drawing. Read off the banked drawing rev E,
 
 ## The DAC rail's load — `U-REG-DAC`
 
-`U-REG-DAC` is TI's LM317L in TO-92 (`LM317LZ`), set to `dac-rail` by
-`R-REG-SET-HI` (150 Ω, `OUT` to `ADJ`) and `R-REG-SET-LO` (475 Ω, `ADJ` to
-ground, the one E7 selects). Since 2026-10-01 it also supplies `U-LVL-MOD`,
+`U-REG-DAC` is TI's LM317L in TO-92 (`LM317LZ`), trimmed to `dac-rail` by
+`R-REG-SET-HI` (150 Ω) and `TRIM-DAC-RAIL` (50 Ω) in series from `OUT` to
+`ADJ`, over `R-REG-SET-LO` (523 Ω, `ADJ` to ground) — *The DAC rail's trim*,
+below. It also supplies `U-LVL-MOD`,
 the 74AHCT125 that drives the DAC's `SYNC`, `SCLK` and `DIN`
 ([`digital-and-supervision.md`](../digital-and-supervision/digital-and-supervision.md),
 *The buffer's supply*).
 
+The table is at `dac-rail`; with the trimmer toward its clockwise end the
+divider draws up to ~0.7 mA more, which is the branch `module-own-draw`
+carries (~12.4 mA).
+
 | | `[calc]` | Source |
 |---|---|---|
-| The DAC and the dividers | the DAC8568's 2.0 mA max; the set divider, 5.21 V / 625 Ω = 8.3 mA; `POT-OFFSET` (10 kΩ to `AGND_MOD`), 0.52 mA; `R-ZERO-TOP` and `TRIM-BREATH-ZERO` (52.2 kΩ), 0.10 mA. `R-PULL-SYNC` draws 0.52 mA while `SYNC` is low, as it always did. **≈ 11.0 mA** | `[ds DAC8568CIPW.pdf p.5]`; the netlists |
-| `U-LVL-MOD` | `I_CC` 20 µA max; `SCLK_DAC` and `DIN` high into their 10 kΩ pull-downs, 5.21 / 10k = 0.52 mA each, **1.04 mA** with both high; switching 3 outputs × 10 pF × 5.21 V × 2 MHz ≈ 0.31 mA. **≈ 1.4 mA** at most, about half that on average | `[ds SN74AHCT125.pdf p.4]` |
-| Its inputs | driven from `LOGIC_5V`, 5.0 V against a `VCC` of 5.21 V: a fraction of a volt under `VCC`, where the input stage barely conducts `[from memory]`. The datasheet bounds it only at 3.4 V, 1.5 mA per input; three inputs at that bound would add **4.5 mA**, the ceiling below. The bench measures it at E7, with the rail | `[ds SN74AHCT125.pdf p.4]` |
-| Total | **≈ 12.4 mA**; 16.9 mA at the `ΔI_CC` ceiling. The LM317L is rated to 100 mA and needs 2.5 mA at most to regulate, which the set divider alone draws | `[ds LM317LZ.pdf p.4, p.5]` |
-| Dissipation | (12.4 − 5.21) V × 12.4 mA = **89 mW**; 122 mW at the ceiling. θJA 139.5 °C/W in TO-92 (LP) gives **+12 °C**, +17 °C at the ceiling (it was 79 mW, +11 °C, without the buffer) | `[ds LM317LZ.pdf p.4]` |
-| Dropout | input ≥ 10.9 V at the worst (a tripped fuse, *Fuses* above) against 5.21 V out: 5.7 V, over the 2.5 V minimum differential at any of these currents | `[ds LM317LZ.pdf p.4]` |
-| Load regulation | 5 mV/V typ at 25 °C and 10 mV/V typ over temperature, at `VO` ≥ 5 V, for 2.5–100 mA and 5–35 V in together (TI gives no maximum): 26 / 52 mV over 97.5 mA, so at most **0.27 / 0.53 mV/mA**. The buffer's 1.4 mA moves `dac-rail` by 0.37 / 0.75 mV — set at E7 with the buffer fitted, so it is inside the selection | `[ds LM317LZ.pdf p.5]` |
+| The DAC and the dividers | the DAC8568's 2.0 mA max; the set divider, 5.20 V / ~690 Ω (150 + ~17 + 523 Ω, the trimmer where E7 leaves it) = 7.5 mA; `POT-OFFSET` (10 kΩ to `AGND_MOD`), 0.52 mA; `R-ZERO-TOP` and `TRIM-BREATH-ZERO` (52.2 kΩ), 0.10 mA. `R-PULL-SYNC` draws 0.52 mA while `SYNC` is low. **≈ 10.2 mA** | `[ds DAC8568CIPW.pdf p.5]`; the netlists |
+| `U-LVL-MOD` | `I_CC` 20 µA max; `SCLK_DAC` and `DIN` high into their 10 kΩ pull-downs, 5.20 / 10k = 0.52 mA each, **1.04 mA** with both high; switching 3 outputs × 10 pF × 5.20 V × 2 MHz ≈ 0.31 mA. **≈ 1.4 mA** at most, about half that on average | `[ds SN74AHCT125.pdf p.4]` |
+| Its inputs | driven from `LOGIC_5V`, 5.0 V against a `VCC` of `dac-rail`: a fraction of a volt under `VCC`, where the input stage barely conducts `[from memory]`. The datasheet bounds it only at 3.4 V, 1.5 mA per input; three inputs at that bound would add **4.5 mA**, the ceiling below. The bench measures it at E7, with the rail | `[ds SN74AHCT125.pdf p.4]` |
+| Total | **≈ 11.6 mA**; 16.1 mA at the `ΔI_CC` ceiling. The LM317L is rated to 100 mA and needs 2.5 mA at most to regulate (ST's LM317L, 5 mA — `U-REG-DAC`'s row), which the set divider alone draws at any trimmer setting: 6.3 mA at the counter-clockwise end | `[ds LM317LZ.pdf p.4, p.5]` |
+| Dissipation | (12.4 − 5.20) V × 11.6 mA = **84 mW**; 116 mW at the ceiling. θJA 139.5 °C/W in TO-92 (LP) gives **+12 °C**, +16 °C at the ceiling | `[ds LM317LZ.pdf p.4]` |
+| Dropout | input ≥ 10.9 V at the worst (a tripped fuse, *Fuses* above) against 5.20 V out: 5.7 V, over the 2.5 V minimum differential at any of these currents | `[ds LM317LZ.pdf p.4]` |
+| Load regulation | 5 mV/V typ at 25 °C and 10 mV/V typ over temperature, at `VO` ≥ 5 V, for 2.5–100 mA and 5–35 V in together (TI gives no maximum): 26 / 52 mV over 97.5 mA, so at most **0.27 / 0.53 mV/mA**. The buffer's 1.4 mA moves `dac-rail` by 0.37 / 0.75 mV — trimmed at E7 with the buffer fitted, so it is inside the trim | `[ds LM317LZ.pdf p.5]` |
 
 **The noise it adds to `DAC AVDD`.** The buffer's DC current changes with what
 it is sending: `SCLK_DAC` and `DIN` swing 0 to 1.04 mA of pull-down current at
@@ -360,6 +427,50 @@ reaches:
 So the buffer reaches `DAC AVDD` on **its own branch from `C-REG-OUT`**, with
 `C-DEC-LVL` at its pin — never daisy-chained through the DAC's `AVDD` pin or
 `C-DEC-DAC` — so its edges are not drawn through the copper the DAC sees.
+
+## The DAC rail's trim — `TRIM-DAC-RAIL`
+
+The owner, 2026-10-01: *"Can we just do trim pot to help?"* With a fixed
+divider the LM317L's own limits — `V_REF` 1.20–1.30 V and `I_ADJ` up to
+100 µA `[ds LM317LZ.pdf p.5]` — put `DAC AVDD` anywhere in a spread about
+half a volt wide, against the DAC8568 C grade's 5.0–5.5 V. So the divider is
+trimmed, and **E7 trims `DAC AVDD` to `dac-rail`** with a meter on the rail.
+
+**The arrangement.** `AVDD = V_REF × (1 + R-REG-SET-LO / (R-REG-SET-HI +
+r_trim)) + I_ADJ × R-REG-SET-LO`. `TRIM-DAC-RAIL` — Bourns 3224W-1-500E, 50 Ω,
+12 turns, sealed, top adjust `[ds BOURNS-3224-TRIMPOT.pdf p.1]` — is a
+rheostat in the `OUT`-to-`ADJ` leg, its wiper strapped to its counter-clockwise
+end: **clockwise raises the rail**. It is in that leg, not the other, for its
+failures: an open wiper leaves the whole track in the leg, and an open track
+opens the leg, and **both take the rail down** — to the counter-clockwise end,
+or to about 1.3 V, where the DAC simply stops. The divider failure that
+drives the rail *up*, towards the +12 V input, is an open `R-REG-SET-LO`, and
+that is a fixed 0.1 % thin-film part.
+
+**The range, from `power-entry/sim`'s `dac-trim-*`** (behavioural regulator,
+every corner of `V_REF`, `I_ADJ`, the 0.1 % divider and the trimmer's ±10 %):
+
+| Trimmer | `DAC AVDD` at the corners | Typical |
+|---|---|---|
+| Fully clockwise | 5.32–5.83 V | 5.58 V |
+| As it ships, mid-travel | 4.73–5.30 V | 5.01 V |
+| Fully counter-clockwise | 4.26–4.85 V | 4.54 V |
+| Wiper open | as fully counter-clockwise | |
+| Track open | 1.20–1.35 V | |
+
+So the set point is reachable from both sides on every part, with 50 mV or
+more to spare, and **no setting reaches the DAC8568's 6 V absolute maximum**
+at any corner — the `trim-ends-poweron` sims add TI's transient model at both
+ends, with the pitch jack held within 100 mV of 0 V through the power-up.
+**What the travel cannot do is stay inside 5.00–5.50 V.** The reference alone
+spans 8 % (1.30 / 1.20), the window 10 %: a travel that reaches the set point
+on a 1.20 V part and on a 1.30 V part is at least 8 % wide, and on the 1.30 V
+part its top end is then 5.6 V or more `[calc]`. The choice made is the one
+that cannot damage anything — under the absolute maximum everywhere, reaching
+the set point everywhere — and the 5.0–5.5 V window is E7's to hit, by meter.
+About 12 turns cover ~1 V, ~85 mV a turn. The contact resistance moves by up
+to 3 Ω while the screw turns `[ds p.1]`, ~70 mV here `[calc: 1.25 × 523 /
+166.6² × 3]`: read the meter after the screw stops.
 
 ## Grounding — four layers, one star (owner, 2026-09-30)
 
@@ -426,11 +537,20 @@ are in [`umbilical-load-switch.md`](../umbilical-load-switch/umbilical-load-swit
   2026-09-30 (`U-ISO`'s row). **Decided by: the order** — buy spares now. The
   RP20-2412SAW drops into the same holes; moving to it swaps two pad numbers
   and re-checks its electrical deltas (ADR 0027).
-- **The case's −12 V rating** against ~0.26 A typical and ~0.41 A clamp-legal
-  from this module (`U-ISO` plus the module's own ~40 mA). **Decided by: the owner's supply**, measured at E6.
+- **The case's −12 V rating** against ~0.24 A typical and ~0.39 A clamp-legal
+  from this module (`U-ISO` plus `module-own-draw`) `[calc: 0.225 + 0.020;
+  0.37 + 0.020]`. **Decided by: the owner's supply**, measured at E6.
 - **Where `U-ISO` sits on module-main**: on its rear face, 10.2 mm tall on
   5.6 mm pins, with its filter parts beside it — `config/module.yaml` holds
-  the envelopes and the module CAD checks them.
+  the envelopes and the module CAD checks them. **`L-CM-ISO` has no envelope
+  there yet**: 21.6 mm over its terminals, 17.78 mm body, 11.43 mm tall, SMD,
+  between `L-ISO-IN` and the converter's input pins; and no footprint in
+  `hardware/lib` yet (`woody:L_CommonModeChoke_Bourns_PM3700`, four 3.18 mm
+  pads on a 21.59 mm cross, from the datasheet). **Decided by: the module
+  CAD's placement**, before the module layout.
+- **How much common-mode current `U-ISO` makes.** RECOM does not publish it,
+  and every copper parasitic in `cm-loop` is an estimate. **Decided by: E6**,
+  a current probe on the star tie with the converter loaded.
 
 *(The entry bulk — 100 µF on +12 V and 47 µF on −12 V — is 2–5× the
 surveyed 10–22 µF, and it is kept: `C-BULK-RAIL` gives the reason. `C2`,

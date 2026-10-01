@@ -7,7 +7,7 @@
 title: Key chain, main board to the left-hand key board
 values:
   netlist: hardware/boards/key-board-lh/board-netlist.yaml
-  bom: [R-CHAIN-SER]
+  bom: [R-CHAIN-SER, R-HOP-SER]
 params_from: [hardware/cluster/key-switch-network/sim/sims.yaml]
 include: [datasheets/discrete-and-power/BLM21SP601SN1-murata-spice.lib]
 
@@ -46,8 +46,9 @@ params:
   tpd_lt:  {value: 0.0, source: "left_thumb's CLK-to-QH propagation delay. TI publishes a MAXIMUM only (16/18 ns at 4.5 V, 32/45 ns at 2 V) and no minimum [SN74HCS165-ti-scls828a.pdf p.7], so the deck (hold.cir) has none: it measures the hold margin without it: whatever tpd the part really has is added margin. need_tpd is what it must at least be"}
   c_lt_qh: {value: 3.0e-12, source: "left_thumb's QH trace on the main board to the right_hand J-CHAIN [assumption until the main board is laid out]"}
   q_up:    {value: 1, source: "1: left_thumb's QH rises at the clock; 0: it falls (each sim sets it)"}
-  r_hop:   {value: 0.0, source: "0: HOP_LT_RH as netlisted, QH straight into the ribbon. A WHAT-IF sets a series resistor at left_thumb's QH (an owner option, not a part)"}
-  tpd_bench: {value: 12.0e-9, source: "THE BENCH CRITERION: left_thumb's CLK-to-QH delay must be at least this for the hop to hold at the worst corner. Unpublished [SN74HCS165-ti-scls828a.pdf p.7 gives a maximum only]; E14 measures it (key-chain-loom.md, 'The hop hold time')"}
+  hop_fit: {value: 1, source: "1: R-HOP-SER fitted at left_thumb's QH on HOP_LT_RH, as netlisted (owner, 2026-10-01); 0: the WHAT-IF without it, QH straight into the ribbon"}
+  tpd_bench: {value: 12.0e-9, source: "without R-HOP-SER, the CLK-to-QH delay left_thumb would need for the hop to hold at the worst corner. Unpublished [SN74HCS165-ti-scls828a.pdf p.7 gives a maximum only], which is why the resistor is fitted"}
+  setup_budget: {value: 100.0e-9, source: "the hop's data must reach right_hand's SER well inside the 1 us clock period (f_clk): a tenth of a half period [assumption: a generous bound, the setup itself is 1-2 orders smaller - SN74HCS165-ti-scls828a.pdf p.7]"}
 
 vary:
   r_ldo:   {tol: [0.0, 4.0]}
@@ -82,7 +83,7 @@ derived:
   t_hi_end: "0.5e-6"
   vt_lt: "v['vtp_min']"
   c_shape: "v['tr_qh'] / 2.2 / 1000.0"
-  r_qh_hop: "v['r_qh'] + v['r_hop']"
+  r_qh_hop: "v['r_qh'] + v['R-HOP-SER'] * v['hop_fit']"
   q0: "0.0 if v['q_up'] else v['vcc']"
   q1: "v['vcc'] if v['q_up'] else 0.0"
 
@@ -163,34 +164,38 @@ sims:
       - expr: "max['v_over'] < p['vcc_over'] and min['v_under'] > -0.5"
         why: "and without overshoot past its input clamp"
   - name: hop-hold-lt-to-rh
-    # A5-1/A5-2 of the 2026-10-01 pre-layout review. The one hop whose downstream register
-    # is clocked later than its upstream one: left_thumb on the main board feeds right_hand
+    # A5-2 of the 2026-10-01 pre-layout review. The one hop whose downstream register is
+    # clocked later than its upstream one: left_thumb on the main board feeds right_hand
     # over right_hand's ribbon, and right_hand's CLK arrives through the same ribbon. The
     # other two hops run the other way (their downstream register is on the main board,
     # clocked first) and cannot race. Worst thresholds on purpose: left_thumb clocks at
     # the LOWEST V_T+ (earliest), right_hand at the HIGHEST (latest), and right_hand's SER
-    # registers a change at the near edge of its band (earliest). tpd is zero (hold.cir):
-    # hold_margin is what the hop has without any propagation delay at all
+    # registers a change at the near edge of its band (earliest). tpd is ZERO (hold.cir):
+    # with R-HOP-SER fitted (owner, 2026-10-01) the hop must hold without any
+    # propagation delay at all
     deck: hold.cir
     vary: [r_drv, tr_drv, c_tvs, c_main, r_qh, tr_qh]
     sweep: {q_up: [1, 0]}
     measures: &hold_meas [clk_skew, ser_delay, hold_margin, need_tpd]
     asserts:
-      - expr: "max['need_tpd'] < p['tpd_bench']"
-        why: "A5-2: the hop holds at every corner if left_thumb's CLK-to-QH delay is at least tpd_bench. TI publishes no minimum, so this is NOT a guarantee: it is the number E14 must confirm (key-chain-loom.md, 'The hop hold time'), and this assertion fails if the clock's skew between the boards grows past it"
+      - expr: "min['hold_margin'] > 0"
+        why: "A5-2: with R-HOP-SER at left_thumb's QH the data reaches right_hand's SER after right_hand's clock at every corner and on both edges, with left_thumb's CLK-to-QH delay taken as ZERO - so the hop holds on no figure TI does not publish"
+      - expr: "max['ser_delay'] < p['setup_budget']"
+        why: "and the resistor's RC still delivers the data within 100 ns of the clock, against a 1 us period"
     post: &hold_post
       clk_skew: "cross(w['rxr'], p['vtp_max'], 0) - cross(w['m'], p['vtp_min'], 0)"
       ser_delay: "(cross(w['ser'], p['vtp_min'], 0) if p['q_up'] else cross(w['ser'], p['vtm_max'], 0)) - cross(w['m'], p['vtp_min'], 0)"
       hold_margin: "(cross(w['ser'], p['vtp_min'], 0) if p['q_up'] else cross(w['ser'], p['vtm_max'], 0)) - cross(w['rxr'], p['vtp_max'], 0)"
       need_tpd: "max(0.0, cross(w['rxr'], p['vtp_max'], 0) - (cross(w['ser'], p['vtp_min'], 0) if p['q_up'] else cross(w['ser'], p['vtm_max'], 0)))"
-  - name: hop-hold-with-series-r
-    # A WHAT-IF, recorded: 2.2 kohm in series at left_thumb's QH on HOP_LT_RH, the option
-    # that makes the hop hold with no propagation delay at all (an owner decision, not
-    # the netlist). The data then reaches right_hand's SER after its RC, against a
-    # setup budget of a whole 1 us clock period
+  - name: hop-hold-without-series-r
+    # A WHAT-IF, recorded: QH straight into the ribbon, as the netlist had it until
+    # 2026-10-01. The hop then holds only on a CLK-to-QH delay TI does not guarantee
     deck: hold.cir
     vary: [r_drv, tr_drv, c_tvs, c_main, r_qh, tr_qh]
     sweep: {q_up: [1, 0]}
-    set: {r_hop: 2200}
+    set: {hop_fit: 0}
     measures: *hold_meas
+    asserts:
+      - expr: "min['hold_margin'] < 0"
+        why: "WHAT-IF: without R-HOP-SER the data beats right_hand's clock at the worst corner, and the hop holds only if left_thumb's unpublished CLK-to-QH delay is at least need_tpd - why the resistor is fitted"
     post: *hold_post

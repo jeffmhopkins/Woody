@@ -1,0 +1,100 @@
+* U-ISO's common-mode loop, small signal, as netlisted (ADR 0027, pre-layout review A4-1).
+* The converter's switching node drives a unit AC voltage through its isolation capacitance
+* (c_iso, 1100 pF typ) onto PWR_GND. Two ways home to its input pins: C-ISO-Y beside the
+* converter, or round the module - NT-UMB-MOD, DIG_GND, NT-DIG-MOD, the star (BUS_GND),
+* NT-AGND-MOD, AGND_MOD, the -12 V entry (C3, FB3, D3, PTC-NEG12), the bus, then D4, FB4 and
+* L-CM-ISO's -12 V winding - and the +12 V side the same way through PTC-ISO, D2, FB2,
+* L-ISO-IN and the other winding. The measure is the share of the drive current that
+* crosses the star (VPROBE_STAR), and the share through C-ISO-Y.
+* L-CM-ISO: two windings of {{L-CM-ISO}} coupled at k = 1 - l_leak / (2 L) [the datasheet's
+* leakage is the differential inductance of the pair], each with its DCR, a core-loss
+* resistance across it (r_cm_core: the ferrite at 550 kHz is lossy, and the datasheet gives
+* only '20 dB from 500 kHz') and its winding capacitance.
+* Every copper inductance and the beads' bias points are estimates, as sims.yaml says.
+VCM s vinn AC 1
+CISO s pg {{c_iso}}
+* U-ISO's input capacitors, converter side
+CIN vinp cin1 {{C-ISO-IN}}
+LCIN cin1 vinn {{l_esl_cer}}
+C2 vinp c2a {{C2}}
+RC2 c2a c2b {{esr_c2}}
+LC2 c2b vinn {{l_esl_el}}
+* C-ISO-Y, ISO_VIN_POS to PWR_GND
+CY vinp cya {{C-ISO-Y}}
+LCY cya pg {{l_esl_cer}}
+* L-CM-ISO: +12 V winding vinp..fp, -12 V winding vinn..fn, dots on the filter side
+LCA fp ca {{L-CM-ISO}}
+RCA ca vinp {{r_cm_dcr}}
+LCB fn cb {{L-CM-ISO}}
+RCB cb vinn {{r_cm_dcr}}
+K1 LCA LCB {{k_cm}}
+RCOREA fp vinp {{r_cm_core}}
+RCOREB fn vinn {{r_cm_core}}
+CWA fp vinp {{c_cm_w}}
+CWB fn vinn {{c_cm_w}}
+* PWR_GND -> NT-UMB-MOD -> DIG_GND -> NT-DIG-MOD -> BUS_GND -> NT-AGND-MOD -> AGND_MOD
+LT1 pg dg {{l_trace}}
+LT2 dg bgx {{l_trace}}
+VPROBE_STAR bgx 0 0
+LT3 0 agx {{l_trace}}
+VPROBE_AGND agx ag 0
+* -12 V analog entry: C3 to MODULE_ANALOG_NEG12, FB3 (~40 mA), D3, PTC-NEG12
+C3 ag c3a {{C3}}
+RC3 c3a c3b {{esr_c3}}
+LC3 c3b n12 {{l_esl_el}}
+LFB3 n12 fb3 {{l_fb_light}}
+RFB3P n12 fb3 {{r_fb_peak}}
+RFB3 fb3 d3a {{r_fb_dcr}}
+RD3 d3a ptc3 {{r_d_light}}
+RPTCN ptc3 bneg {{r_ptc_rail}}
+* the converter's -12 V leg: D4, FB4 (~0.22 A), into L-CM-ISO's -12 V winding
+RD4 bneg d4a {{r_d_iso}}
+LFB4 d4a fb4 {{l_fb_iso}}
+RFB4P d4a fb4 {{r_fb_peak}}
+RFB4 fb4 fn {{r_fb_dcr}}
+* the converter's +12 V leg: PTC-ISO, D2, FB2, L-ISO-IN, into the other winding
+RPTCI bpos d2 {{r_ptc_iso}}
+RD2 d2 fb2a {{r_d_iso}}
+LFB2 fb2a fb2 {{l_fb_iso}}
+RFB2P fb2a fb2 {{r_fb_peak}}
+RFB2 fb2 liso {{r_fb_dcr}}
+LISO liso fp {{L-ISO-IN}}
+CISOP liso fp {{c_liso_par}}
+* +12 V analog entry: PTC-POS12, D1, FB1, C1 to AGND_MOD, C-LOGIC-IN to DIG_GND, C-DEC-REG-IN to AGND_MOD
+RPTCP bpos d1 {{r_ptc_rail}}
+RD1 d1 fb1 {{r_d_light}}
+LFB1 fb1 p12 {{l_fb_light}}
+RFB1P fb1 p12 {{r_fb_peak}}
+C1 p12 c1a {{C1}}
+RC1 c1a c1b {{esr_c1}}
+LC1 c1b ag {{l_esl_el}}
+CLI p12 cli {{C-LOGIC-IN}}
+LCLI cli dg {{l_esl_cer}}
+CDR p12 cdr {{C-DEC-REG-IN}}
+LCDR cdr ag {{l_esl_cer}}
+* the rack: the ribbon to the PSU and the other modules' decoupling, back on the ribbon's ground
+LRN bneg rn {{l_rib}}
+CRN rn rnc {{c_rack}}
+RCRN rnc rnd {{esr_rack}}
+LCRN rnd rg {{l_esl_rack}}
+LRP bpos rp {{l_rib}}
+CRP rp rpc {{c_rack}}
+RCRP rpc rpd {{esr_rack}}
+LCRP rpd rg {{l_esl_rack}}
+LRG rg bgr {{l_rib}}
+* the PSU holds each rail at DC: 1 Mohm to the star gives the solver an operating point and
+* nothing at these frequencies
+RDCP bpos 0 1e6
+RDCN bneg 0 1e6
+VPROBE_RACK bgr 0 0
+.control
+ac dec 100 100k 30meg
+let star = 100 * mag(i(VPROBE_STAR)) / mag(i(VCM))
+let yshare = 100 * mag(i(LCY)) / mag(i(VCM))
+let agnd = 100 * mag(i(VPROBE_AGND)) / mag(i(VCM))
+wrdata star.dat star
+wrdata yshare.dat yshare
+wrdata agnd.dat agnd
+quit
+.endc
+.end

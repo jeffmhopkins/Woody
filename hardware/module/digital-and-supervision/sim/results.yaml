@@ -4,42 +4,43 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/digital-and-supervision/sim/sims.yaml: 9c6597ee2460910b
-  hardware/module/power-entry/netlist.yaml: 060c3ed04d45d9a8
+  hardware/module/digital-and-supervision/sim/sims.yaml: 9cdb95d89ce7cc00
+  hardware/module/power-entry/netlist.yaml: 230ba168c2bf4b8a
   hardware/module/digital-and-supervision/netlist.yaml: 131fe3808d5d1b63
   hardware/module/dac8568/netlist.yaml: 2619a0f3926942d3
-  hardware/module/digital-and-supervision/sim/seq.cir: 77b2e45ec8af13f3
+  hardware/module/digital-and-supervision/sim/seq.cir: cc9521d328be5965
   datasheets/discrete-and-power/LM317L-ti-pspice-snvmaw3.lib: 52c881eccf059881
   datasheets/logic/SN74AHCT125-ti-pspice-sclm256.cir: d544311dc17d754b
-  hardware/module/power-entry/sim/sims.yaml: e3433c1df045a671
+  hardware/module/power-entry/sim/sims.yaml: 8f66e76db0535618
+  figure:dac-rail: 5.20 V
 ngspice: '42'
 sims:
   rails-and-sync:
     corners: 5
     measures:
       t_l5_up:
-        nominal: 0.000907309
-        min: 0.000883982
+        nominal: 0.000907432
+        min: 0.000883863
         min_at: k_clamp- t_ss-
-        max: 0.00124937
+        max: 0.00124949
         max_at: k_clamp- t_ss+
       t_avdd_up:
-        nominal: 0.0085572
-        min: 0.00855692
+        nominal: 0.00957913
+        min: 0.0095789
         min_at: k_clamp- t_ss+
-        max: 0.00855782
+        max: 0.00957961
         max_at: k_clamp- t_ss-
       over_on:
-        nominal: 7.14195e-08
-        min: 7.50665e-09
+        nominal: 2.16992e-07
+        min: 4.16985e-08
         min_at: k_clamp- t_ss-
-        max: 1.63908e-07
-        max_at: k_clamp- t_ss+
+        max: 2.16992e-07
+        max_at: nominal
       over_off:
-        nominal: -7.55388e-09
-        min: -7.55388e-09
+        nominal: -7.91888e-09
+        min: -7.91888e-09
         min_at: nominal
-        max: -7.54691e-09
+        max: -7.91582e-09
         max_at: k_clamp- t_ss-
       oversc_on:
         nominal: 0.0
@@ -48,10 +49,10 @@ sims:
         max: 0.0
         max_at: nominal
       oversc_off:
-        nominal: -7.62923e-07
-        min: -7.62923e-07
+        nominal: -7.99777e-07
+        min: -7.99777e-07
         min_at: nominal
-        max: -7.62219e-07
+        max: -7.99468e-07
         max_at: k_clamp- t_ss-
       overdin_on:
         nominal: 0.0
@@ -60,39 +61,41 @@ sims:
         max: 0.0
         max_at: nominal
       overdin_off:
-        nominal: -7.62923e-07
-        min: -7.62923e-07
+        nominal: -7.99777e-07
+        min: -7.99777e-07
         min_at: nominal
-        max: -7.62219e-07
+        max: -7.99468e-07
         max_at: k_clamp- t_ss-
       i_esd_max:
-        nominal: 5.21904e-10
-        min: 5.21904e-10
+        nominal: 5.18466e-10
+        min: 5.18466e-10
         min_at: k_clamp- t_ss-
-        max: 5.21904e-10
-        max_at: k_clamp- t_ss+
+        max: 5.18466e-10
+        max_at: nominal
       l5_peak:
-        nominal: 5.03447
-        min: 5.00198
+        nominal: 5.03075
+        min: 5.01963
         min_at: k_clamp- t_ss+
-        max: 5.09694
+        max: 5.07044
         max_at: k_clamp- t_ss-
       l5_final:
-        nominal: 5.00501
-        min: 5.00044
+        nominal: 5.00038
+        min: 4.99975
         min_at: k_clamp- t_ss+
-        max: 5.06653
+        max: 5.02883
         max_at: k_clamp- t_ss-
       avdd_final:
-        nominal: 5.21903
-        min: 5.21903
+        nominal: 5.18465
+        min: 5.18465
         min_at: k_clamp- t_ss-
-        max: 5.21903
+        max: 5.18465
         max_at: k_clamp- t_ss+
     asserts:
     - expr: min['l5_final'] > 4.9 and max['l5_final'] < 5.1 and min['avdd_final'] >= 5.0
       why: 'both rails settle where their pages say: LOGIC_5V at the ADP7118''s 5.0 V, DAC_AVDD at or over dac-rail''s 5.00
-        V floor, at every corner'
+        V floor, at every corner of k_clamp and t_ss - with TI''s LM317L model at its own nominal V_REF and I_ADJ: the regulator''s
+        spread is not varied here, and its low corner is under the floor (dac-rail''s derivation), which is why E7 sets R-REG-SET-LO
+        on the bench'
       pass: true
     - expr: max['over_on'] <= 0.3 and max['over_off'] <= 0.3 and max['oversc_on'] <= 0.3 and max['oversc_off'] <= 0.3 and
         max['overdin_on'] <= 0.3 and max['overdin_off'] <= 0.3
@@ -118,46 +121,46 @@ sims:
     corners: 3
     measures:
       over_on:
-        nominal: 3.40561
-        min: 3.38172
-        min_at: k_clamp-
-        max: 3.40561
+        nominal: 3.43989
+        min: 3.41642
+        min_at: k_clamp+
+        max: 3.43989
         max_at: nominal
       over_off:
-        nominal: 1.08825
-        min: 1.06221
+        nominal: 1.05866
+        min: 1.0341
         min_at: k_clamp+
-        max: 1.11622
+        max: 1.08639
         max_at: k_clamp-
       oversc_on:
-        nominal: 3.40561
-        min: 3.38172
-        min_at: k_clamp-
-        max: 3.40561
+        nominal: 3.43989
+        min: 3.41642
+        min_at: k_clamp+
+        max: 3.43989
         max_at: nominal
       oversc_off:
-        nominal: 1.08824
-        min: 1.0622
+        nominal: 1.05866
+        min: 1.0341
         min_at: k_clamp+
-        max: 1.11622
+        max: 1.08638
         max_at: k_clamp-
       overdin_on:
-        nominal: 3.40561
-        min: 3.38172
-        min_at: k_clamp-
-        max: 3.40561
+        nominal: 3.43989
+        min: 3.41642
+        min_at: k_clamp+
+        max: 3.43989
         max_at: nominal
       overdin_off:
-        nominal: 1.08824
-        min: 1.0622
+        nominal: 1.05866
+        min: 1.0341
         min_at: k_clamp+
-        max: 1.11622
+        max: 1.08638
         max_at: k_clamp-
       i_esd_max:
-        nominal: 0.0141579
-        min: 0.0112159
+        nominal: 0.014356
+        min: 0.0114838
         min_at: k_clamp-
-        max: 0.0168725
+        max: 0.0170644
         max_at: k_clamp+
     asserts:
     - expr: min['over_on'] > 0.3 and min['over_off'] > 0.3 and min['oversc_on'] > 0.3 and min['overdin_on'] > 0.3

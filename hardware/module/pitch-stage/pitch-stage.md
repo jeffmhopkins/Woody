@@ -23,19 +23,18 @@ The `Dir` and `Peer` columns are defined once in
 | `DAC ch1` | in | `module/dac8568` | `dac-rail` | Through `R-OPAMP-IN` into the (+) input |
 | `PITCH` | out | `module/panel` | `pitch-cents-budget` | The panel jack. **DC feedback is tapped here, not at the op-amp output** — so whatever is patched in sits inside the loop |
 | `MODULE ANALOG +12V`, `MODULE ANALOG −12V` | in | `module/power-entry` | — | `D-JACK-CLAMP` returns to both rails |
-| `AGND_MOD` | ref | `module/power-entry` | `dig-gnd-topology` | The module analog ground, drawn `AGND`. `C-AA-PITCH`, `C-FILT-PITCH`, the LT5400's exposed pad and its two spare sections go to it |
+| `AGND_MOD` | ref | `module/power-entry` | `dig-gnd-topology` | The module analog ground, drawn `AGND`. `C-AA-PITCH`, `C-FILT-PITCH`, `D-ESD-PITCH` (at the jack's sleeve), the LT5400's exposed pad and its two spare sections go to it |
 
 ## The circuit
 
 ```
-   VREFOUT ──┬──[R-VREF-SER 1k]──────────┬── (+) ½ OPA2197 ──┬── V_ref = 2.500 V
-   (2.500 V) │                           │   follower ×1.02  │   at mid-travel
-             │                           │                   │
-     [TRIM-OFFSET 10k]── wiper ──[R-VREF-INJ 22.1k]  (−)──┬──[R-VREF-FB 200R]
-     VREFOUT to AGND                                      │
-                                                  [R-VREF-GND 10k]── AGND
-                                                                     │
-                                                         [R-GAIN-CTR 100R]
+   VREFOUT ──┬──[R-VREF-SER 1k]────────┬── (+) ½ OPA2197 ────────────┬── V_ref = 2.500 V
+   (2.500 V) │                         │   follower ×1.02            │   at mid-travel
+             │                         │                             │
+   [TRIM-OFFSET 10k]                   │   (−)──┬──[R-VREF-FB 200R]──┤
+   VREFOUT to AGND                     │        │                    │
+             │                         │  [R-VREF-GND 10k]── AGND    │
+           wiper ──[R-VREF-INJ 22.1k]──┘                     [R-GAIN-CTR 100R]
                                                                      │
                                                               [R1 10k]  ┐ LT5400
                                                                      │  │ 1:1 pair
@@ -52,8 +51,10 @@ The `Dir` and `Peer` columns are defined once in
                               │                                                 │
                               │                              [R-OUT-PROT 1k, 1206]
                               │                                                 │
-                              └──[R2 10k]─[TRIM-GAIN 200R]──────────────────────┴── PITCH jack
-                                  LT5400   CW end strapped to its wiper           ← DC feedback
+                              └──[R2 10k]─[TRIM-GAIN 200R]──────────────────────┴──┬── PITCH jack
+                                  LT5400   CW end strapped to its wiper            │   ← DC feedback
+                                                                       [D-ESD-PITCH PESD15VL1BA]── AGND
+                                                                       at the jack: jack board
 ```
 
 ## It is a non-inverting amplifier, not a difference amplifier
@@ -88,7 +89,7 @@ and what that means for the mod channels — [`notes.md`](notes.md).)*
 
 `R-OPAMP-IN` costs nothing here: it feeds an op-amp's (+) input, which draws no
 current, so it contributes no gain error at all. It is pure clamp-current
-protection for the power-up window where the DAC is on 5.21 V and the op-amp is
+protection for the power-up window where the DAC is on `dac-rail` and the op-amp is
 on ±12 V (ADR 0006).
 
 ## Why the offset reference must be `VREFOUT` — the arithmetic, not the assertion
@@ -120,8 +121,11 @@ bottom of the range and is largest seven octaves up, where nobody is listening
 for absolute pitch. Referencing the offset to the same node the DAC references
 converts the worse error into the better one, for free.
 
-*(This is also why the ADR's "the DAC's internal reference is sufficient, at
-0.54 cents over 10 °C" survives: that figure is a gain term.)*
+*(This is why the DAC's internal reference, a gain term, is the largest entry
+in the budget below and still acceptable. ADR 0006's own reference figure and
+its "an order of magnitude inside the resistors" ranking predate the matched
+network and the corrected pivots; the budget below replaces both, and ADR 0006
+says so.)*
 
 ## Component values
 
@@ -145,7 +149,8 @@ from the VREFIN/VREFOUT pin (3-state output)"* `[ds DAC8568CIPW.pdf p.31]`, not
 0 V. What makes it 0 V is `TRIM-OFFSET`: its 10 kΩ track runs from that pin to
 `AGND_MOD`, so the undriven node sits at ground. With the C grade's zero-scale
 power-on, *both* terms are then zero and the jack sits at **0 V, a VCO's base
-note**, until that write. After it, `CLR` parks at −2.500 V. ADR 0006's power-on table asserts
+note** (to the DAC's zero-code error, +8 mV at most: ADR 0006's power-on
+table), until that write. After it, `CLR` parks at −2.500 V. ADR 0006's power-on table asserts
 "below −2 V" for both; they are different states, 2.5 V apart.
 
 **This is the same argument that moved the breath zero off `VREFOUT`, and it
@@ -182,7 +187,10 @@ V_ref = VREFOUT · [1 − a·(1 − w)] · (1 + g)
 | 0.5 (mid) | 0.0391 | 2.5002 V | +0.2 mV |
 | 1 (full CW) | 0.0433 | 2.5500 V | **+50 mV** |
 
-About ±60 cents of intercept, and the gain `1 + k` is untouched. **Its drift is
+72 cents of intercept one way and 60 the other `[calc: 60.4 mV and 49.8 mV
+at 1.2 cents/mV]` — asymmetric about the nominal, which costs nothing, and the gain `1 + k` is untouched.
+`sim/` measures both ends on the stage as netlisted (`trim-offset-ccw`,
+`trim-offset-cw`). **Its drift is
 small by construction**: the trimmer and `R-VREF-INJ` reach only `a` ≈ 4 % of
 `V_ref`, and the follower's gain ratio only `g/(1 + g)` ≈ 2 %, so 25 ppm/°C
 parts contribute a few ppm of `V_ref` over 10 °C — the *V_ref trim network*
@@ -210,8 +218,8 @@ So the loop is split, which is the standard arrangement:
 
 | Path | Frequency | What it does |
 |---|---|---|
-| `R2` + `TRIM-GAIN` from the **jack** | DC to ~16 kHz | Sets the transfer function against the load, whatever it is |
-| `C-FB-PITCH` **2.2 nF** from the **op-amp output** | above ~12 kHz | Takes over before `R-OUT-PROT` and the cable can put phase in the loop. This row said **1 nF / ~16 kHz** until 2026-09-21; the value went to 2.2 nF when `C-FILT-PITCH` was restored below, and this row did not follow |
+| `R2` + `TRIM-GAIN` from the **jack** | DC to ~7 kHz | Sets the transfer function against the load, whatever it is |
+| `C-FB-PITCH` **2.2 nF** from the **op-amp output** | above ~7 kHz | Takes over before `R-OUT-PROT` and the cable can put phase in the loop. The handover is `R2 + TRIM-GAIN` against 2.2 nF: 1/(2π · 10.1 kΩ · 2.2 nF) = 7.2 kHz `[calc]` |
 
 **`C-FB-PITCH` is not a filter, and an earlier version of this page said it
 was.** A capacitor across the feedback resistor of a **non-inverting** stage
@@ -221,7 +229,8 @@ cannot take the gain below unity:
 G(s) = 1 + (R2/R1)/(1 + sR2C) = (2 + sRC)/(1 + sRC)
 ```
 
-Pole at 15.9 kHz, **zero one octave above at 31.8 kHz**, flattening at gain 1.
+With `R` = `R2 + TRIM-GAIN` = 10.1 kΩ at mid-travel and `C` = 2.2 nF: pole at
+7.2 kHz, **zero one octave above at 14.3 kHz** `[calc]`, flattening at gain 1.
 **Maximum attenuation 6.02 dB, at any frequency, for any capacitor value.** It
 is a shelf, not a pole, and that is topology rather than component choice. The
 deleted 10 nF gave −16 dB at 100 kHz and −36 dB at 1 MHz.
@@ -294,8 +303,9 @@ module with two pots is trimmed the same way:
    gain at all — only the gain trim is shared.
 
 **The load no longer matters**, which is the point of the jack-side tap: the
-exact DC solve gives gain 2.020000 for every load from open circuit to 2 kΩ,
-with about 1 ppm of residual. An earlier version of this section said to trim
+exact DC solve gives the same gain for every load from open circuit to 2 kΩ,
+with about 1 ppm of residual — 2.000 with both trims at mid-travel, which
+`sim/` measures on the stage as netlisted (`dc-transfer`). An earlier version of this section said to trim
 against the real patch because the 1 kΩ divided against it. That error is gone.
 
 **Two new bounds to check at E9**, both created by the tap:
@@ -356,6 +366,43 @@ Nothing here approached the dynamic, LED- and breath-correlated terms that
 `power-entry.md` dealt with in the power tree and the ground plan; since ADR
 0027 those are below this budget, which now is the largest term in the pitch
 path.
+
+## The jack-side ESD clamp — `D-ESD-PITCH`
+
+**The jack tip reaches the LT5400.** `JACK_TIP` runs through `TRIM-GAIN`'s
+CCW–wiper section, 0–200 Ω, to `R2` of `RN-PITCH`, and the LT5400 is *"designed
+without explicit ESD internal protection diodes"*: ±1 kV human body, and *"ESD
+beyond this voltage can damage or degrade the device including causing
+pin-to-pin shorts"* `[ds LT5400.pdf p.6]`. `D-JACK-CLAMP` cannot help — it sits
+on the op-amp side of `R-OUT-PROT`, which is where it has to be (`bom.csv`).
+
+**So a bidirectional clamp sits at the jack**, tip to sleeve, on the module
+jack board's page of this circuit (`pitch-stage.jack.kicad_sch`) — the
+LT5400's own Figure 1 second option, *"bidirectional Zeners to ground"* at the
+connector `[ds LT5400.pdf p.6]`. The jack board carries no rails, so the
+first option (diodes to the supplies) is not available there, and a clamp to
+`AGND_MOD` cannot back-power the module the way a rail clamp at the jack did.
+A strike is clamped before it crosses `J-B2B-MOD` to module-main, where
+`C-FILT-PITCH` then holds whatever gets past.
+
+| Requirement | `PESD15VL1BA` `[ds NEXPERIA-PESD15VL1BA.pdf p.3–4]` |
+|---|---|
+| Bidirectional, not conducting anywhere a patch can put the jack: −2.5…+7.5 V driven, ±12 V from another module | V_RWM 15 V, V_BR 17.1 V min |
+| Below the LT5400's 80 V across any two pins `[ds LT5400.pdf p.2]` | V_CL 25 V at 1 A, 44 V at 5 A (8/20 µs); IEC 61000-4-2 30 kV contact |
+| Low leakage | I_RM 50 nA max at 15 V |
+| Low capacitance | 16 pF typ at 0 V |
+
+**It costs no accuracy and no stability.** It is on `JACK_TIP`, the DC
+feedback node, so its leakage is a load inside the loop like any VCO, and its
+capacitance is 0.16 % of `C-FILT-PITCH`'s 10 nF beside it. `sim/` runs every
+deck twice, with the clamp and without, and asserts the difference: under
+1 µV at the jack across the DAC's window, under 0.1 point of overshoot on an
+octave step into a VCO and 200 pF or 800 pF of cable, under 0.1° of phase margin
+at every load, with the clamp's capacitance taken to twice its typical.
+
+**Layout:** at the jack's tip and sleeve pads, before the trace leaves for
+`J-B2B-MOD`. `C-FILT-PITCH` on module-main belongs at `J-B2B-MOD` pin 14, not
+at the op-amp: the connector end is where the shunt is wanted.
 
 ## Settled 2026-09-30
 

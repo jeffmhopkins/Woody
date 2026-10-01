@@ -264,9 +264,9 @@ operation the rail is `U-ISO`'s regulation, 12 V +3.1 % at worst
 tenths of a volt; the plug's ring lands on `J-UMB` while `Q-INRUSH` is off
 (§1a). **What is not covered is a converter that fails regulating high**,
 anywhere between 13.5 V and its OVP: thirteen parts that cannot be reworked
-after reflow (ADR 0028) would see it unclamped. Recorded 2026-10-01
-(pre-layout review A4-4); whether that fault is in scope, and the options,
-are the owner's (`docs/review/2026-10-01-pre-layout-review/VERIFIED-F3.md`).
+after reflow (ADR 0028) would see it unclamped. **Accepted by the owner,
+2026-10-01** (pre-layout review A4-4): a converter that fails regulating high
+is out of scope, and no clamp is added (ADR 0027, its 2026-10-01 amendment).
 
 ### On USB power alone
 

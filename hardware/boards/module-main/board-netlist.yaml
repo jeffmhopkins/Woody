@@ -279,7 +279,7 @@ components:
     sheet: power-entry
   C46:
     of: C-ISO-Y
-    value: 1nF
+    value: 22nF
     pins:
     - 1
     - 2
@@ -580,6 +580,15 @@ components:
     - 1
     - 2
     sheet: power-entry
+  L2:
+    of: L-CM-ISO
+    value: 1mH
+    pins:
+    - IN_POS
+    - OUT_POS
+    - OUT_NEG
+    - IN_NEG
+    sheet: power-entry
   NT1:
     of: NT-AGND-MOD
     value: net tie
@@ -690,7 +699,7 @@ components:
     sheet: breath-receive-stage
   R2:
     of: R-REG-SET-LO
-    value: 475R 0.1%
+    value: 523R 0.1%
     pins:
     - 1
     - 2
@@ -1132,6 +1141,14 @@ components:
     - W
     - CCW
     sheet: pitch-stage
+  RV4:
+    of: TRIM-DAC-RAIL
+    value: 50R
+    pins:
+    - CCW
+    - W
+    - CW
+    sheet: power-entry
   SW1:
     of: SW-POWER
     value: NKK M2011SD4G01
@@ -1695,16 +1712,22 @@ nets:
   /power-entry/ISO_FB2:
   - FB2.2
   - L1.1
+  /power-entry/ISO_FILT_NEG:
+  - FB4.2
+  - L2.IN_NEG
+  /power-entry/ISO_FILT_POS:
+  - L1.2
+  - L2.IN_POS
   /power-entry/ISO_VIN_NEG:
   - C2.2
   - C44.2
-  - FB4.2
+  - L2.OUT_NEG
   - U14.GND
   /power-entry/ISO_VIN_POS:
   - C2.1
   - C44.1
   - C46.1
-  - L1.2
+  - L2.OUT_POS
   - U14.VIN
   /power-entry/NEG12_D4:
   - D15.A
@@ -1729,9 +1752,13 @@ nets:
   - F2.2
   /power-entry/REG_ADJ:
   - C5.1
-  - R1.2
   - R2.1
+  - RV4.CCW
+  - RV4.W
   - U1.ADJ
+  /power-entry/REG_TRIM:
+  - R1.2
+  - RV4.CW
   /umbilical-load-switch/FB:
   - R6.2
   - R7.1

@@ -1,0 +1,37 @@
+* Rack power-OFF at the module: the analog rails' order coming down, and the pitch jack
+* while they do. The bus rails rise as in poweron.cir, hold, and at t_off fall to 0 V
+* over t_fall (-12 V delayed by dt_neg_off: a PSU takes its rails down in no promised
+* order). D1 / D3 (the behavioural 1N5817 of poweron.cir) then reverse-bias, and each
+* module rail decays on its own bulk capacitor, C1 or C3, into its own load - the
+* module's own draw, module-own-draw, as a resistance at 12 V. The pitch stage is the
+* netlisted one, hardware/module/pitch-stage/sim/pitch-stage.lib, with the trims at
+* mid-travel, the DAC parked (zero scale) and VREFOUT held at 0 V: the jack's resting
+* state, so any excursion is the rails' doing. DAC_AVDD and LOGIC_5V's order is
+* hardware/module/digital-and-supervision/sim's; this deck is the +-12 V half.
+VP12 bp12 0 PWL(0 0 1e-6 0 {{t_rise}} {{v_bus}} {{t_off}} {{v_bus}} {{t_off_e}} 0)
+VN12 bn12 0 PWL(0 0 1e-6 0 {{t_rise}} {{v_bus_neg}} {{t_off_n}} {{v_bus_neg}} {{t_off_ne}} 0)
+RPTC1 bp12 bp12f {{r_ptc}}
+RPTC3 bn12 bn12f {{r_ptc}}
+D1 bp12f p12d D5817
+RFB1 p12d p12 {{r_fb}}
+C1 p12 0 {{C1}}
+RLP p12 0 {{r_own_pos}}
+D3 n12d bn12f D5817
+RFB3 n12d n12 {{r_fb}}
+C3 n12 0 {{C3}}
+RLN n12 0 {{r_own_neg}}
+VREFO vrefout 0 0
+VDAC dacpin 0 0
+RBD dacpin 0 {{R-BIAS-DAC}}
+XP vrefout dacpin jack p12 n12 vrefb m m PSTAGE
+RVCO jack 0 {{r_vco}}
+.model D5817 D(Is={{d_is}} N={{d_n}} Rs={{d_rs}} Cjo=110p BV=20)
+.options method=gear rshunt=1e10
+.control
+tran 10u {{t_end_off}} 0 20u uic
+wrdata p12.dat v(p12)
+wrdata n12.dat v(n12)
+wrdata jack.dat v(jack)
+quit
+.endc
+.end

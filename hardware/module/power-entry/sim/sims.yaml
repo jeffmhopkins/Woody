@@ -11,6 +11,7 @@ values:
 models:
   - datasheets/discrete-and-power/LM317L-ti-pspice-snvmaw3.lib
   - datasheets/analog/OPAx197-ti-pspice-sboma34d.lib
+include: [hardware/module/pitch-stage/sim/pitch-stage.lib]
 spiceinit: [set ngbehavior=psa]
 
 params:
@@ -33,6 +34,13 @@ params:
   d_is:       {value: 4.8e-4}
   d3_flip:    {value: 1, source: "1 = D3 as netlisted since 2026-09-30 (K at the bus, A at the module - hardware/module/power-entry/netlist.yaml); 0 = the reversed drawing it replaced"}
   t_neg_rise: {value: 2.0e-3}
+  # --- poweroff.cir: the rails coming down (pre-layout review A3-14) ----------------------
+  t_off:      {value: 30.0e-3, source: "the rails up and settled before the bus goes"}
+  t_fall:     {value: 1.0e-3, source: "the bus falling to 0 V [assumption: a PSU's output collapsing into the rack's load]"}
+  dt_neg_off: {value: 0.0, source: "the -12 V rail's fall behind +12 V, negative if it leads (swept, as dt_neg)"}
+  t_end_off:  {value: 230.0e-3, source: "long enough for both rails to reach a few hundred mV on their bulk"}
+  t_gain:     {value: 0.5, source: "pitch-stage.lib: TRIM-GAIN at mid-travel (hardware/module/pitch-stage/sim)"}
+  w_offset:   {value: 0.5, source: "pitch-stage.lib: TRIM-OFFSET at mid-travel"}
 
   # --- PTC-POS12 / PTC-NEG12 in the power-on deck (ADR 0027) ----------------------------
   r_ptc:      {value: 0.4, source: "MF-MSMF020/60: Rmin 0.40 ohm, a fitted part's resistance [datasheets/discrete-and-power/BOURNS-MF-MSMF.pdf p.1]. R1max, 6.0 ohm an hour after a trip, is the page's DC arithmetic: TI's LM317L transient model does not converge with it in series at dt_neg = -1 ms or +5 ms (ngspice 42, 'timestep too small' inside the model), so it is not claimed here"}
@@ -43,10 +51,10 @@ params:
   r_rib_rail: {value: 0.050, source: "one rail's two ribbon conductors: 0.232 x 0.3 / 2 + 2 x 15 mohm / 2 [calc, same basis]"}
   r_bus_rail: {value: 0.031, source: "a bus-board trace, 1 oz, 4 mm wide, 0.25 m: 1.72e-8 x 0.25 / (0.004 x 35e-6) [calc, docs/review/2026-09-21-hardware-and-standards-review/B3-power-entry-practice.md]"}
   r_bus_seg:  {value: 0.031, source: "the bus-board ground between this module's tap and the receiver's: 0 (the next slot - 1 mohm, since ngspice will not take 0) to the whole 0.25 m trace [calc, as r_bus_rail] (swept)"}
-  i_mod_pos:  {value: 0.045, source: "the module's own +12 V analog load, ~45 mA [repo, the FB-IN row]"}
-  i_mod_neg:  {value: 0.040, source: "the module's -12 V load, ~40 mA [repo, ADR 0004 power table]"}
+  i_mod_pos:  {value: 0.037, source: "the module's own +12 V analog load, module-own-draw (power-entry.md, 'Fuses on the rails')"}
+  i_mod_neg:  {value: 0.020, source: "the module's own -12 V analog load, module-own-draw (power-entry.md, 'Fuses on the rails')"}
   i_q:        {value: 0.212, source: "the instrument at rest, 212 mA [repo, ADR 0005 load table, quiescent - an upper bound since ADR 0015]"}
-  i_swing:    {value: 0.195, source: "the breath-correlated swing: 0.195 A, the thirteen WS2815B-V1 on the main board at full white, 170-195 mA at 12 V [owner brief 2026-09-30, not yet in the corpus]; 0.367 A, ADR 0005's quiescent-to-clamp-legal-worst swing, the one the 7-18 cent estimate used [repo] (swept)"}
+  i_swing:    {value: 0.195, source: "the breath-correlated swing: 0.195 A, the thirteen WS2815B-V1 on the main board at full white, the top of led-row-current (blocked on E6's measurement); 0.367 A, ADR 0005's quiescent-to-clamp-legal-worst swing, the one the 7-18 cent estimate used [repo] (swept)"}
   f_b:        {value: 2.0, source: "one breath 0 -> full -> 0 in 0.5 s [assumption: the frequency does not enter a resistive result]"}
   eta:        {value: 0.82, source: "U-ISO at ~21 % load (umbilical-current x 12 V = 4.3 W of 20 W, 0.36 A of 1.67 A): ~81 % off the RPA20-2412SAW's efficiency curve at 24 V in and ~0.95 W off its dissipation curve (4.3 / 5.26 = 0.82) [datasheets/discrete-and-power/RECOM-RPA20-AW.pdf PD-3]"}
   v_iso:      {value: 12.0, source: "U-ISO's output [ds PD-1]"}
@@ -55,6 +63,45 @@ params:
   topo:       {value: 1, source: "0 before, 1 isolated (the design), 2 ground sense, 3 balanced load - groundshift.cir's header"}
   bal_frac:   {value: 0.01, source: "topo 3: a dummy load that holds the instrument's total to 1 % of the swing [assumption]"}
   t_gs:       {value: 1.0}
+  # --- the DAC rail's trim (pre-layout review A8-8; owner, 2026-10-01) -------------------
+  v_dac_set:  {value: {fig: dac-rail}, source: "what E7 trims DAC_AVDD to"}
+  trim_cw:    {value: -1.0, source: "TRIM-DAC-RAIL's travel from its CCW end, 0 to 1; -1 = where E7 sets it (derived r_trim_e7). Clockwise takes resistance out of the OUT-to-ADJ leg and raises the rail"}
+  trim_fault: {value: 0, source: "0 none; 1 the wiper open (its strap to pin 1 leaves the whole track in the leg); 2 the track open (the leg open)"}
+  r_trim_end: {value: 2.0, source: "the 3224's absolute minimum resistance, 1 % or 2 ohm whichever is greater [datasheets/discrete-and-power/BOURNS-3224-TRIMPOT.pdf p.1]: what is left in the leg at the CW end"}
+  v_ref:      {value: 1.25, source: "the LM317L's reference, 1.20/1.25/1.30 V min/typ/max over line, load and temperature [datasheets/discrete-and-power/LM317LZ.pdf p.5] (vary)"}
+  i_adj:      {value: 50.0e-6, source: "its ADJ current, 50 uA typ / 100 uA max [same, p.5] (vary: 0 to 100 uA)"}
+  v_dac_absmax: {value: 6.0, source: "the DAC8568's absolute maximum, AVDD to GND -0.3 to +6 V [datasheets/analog/DAC8568CIPW.pdf p.2]"}
+  r_dac_load: {value: 1300.0, source: "DAC_AVDD's loads other than the divider, ~4 mA (power-entry.md, The DAC rail's load) as a resistance [calc: 5.2 / 4.0e-3]. It does not move the set point - the regulator holds OUT - and gives the node a load"}
+  # --- cm.cir / isoin.cir: U-ISO's input, common mode and differential (A4-1) -------------
+  l_leak:     {value: 3.9e-6, source: "L-CM-ISO's leakage inductance, 3.9 uH typ [datasheets/discrete-and-power/BOURNS-PM3700-CM-CHOKE.pdf p.1]: the pair's differential inductance"}
+  r_cm_dcr:   {value: 0.020, source: "its DCR per winding, 0.020 ohm max [same]"}
+  r_cm_core:  {value: 1800.0, source: "its core loss at 550 kHz as a resistance across each winding [assumption: the datasheet gives only '20 dB attenuation, 500 kHz - 40 MHz', which in a 50 ohm common-mode test is ~900 ohm of common-mode impedance, ~1.8 kohm per winding] (vary: 500 ohm to 3.6 kohm)"}
+  c_cm_w:     {value: 10.0e-12, source: "its winding capacitance [assumption: a toroid this size, 5-20 pF]"}
+  l_trace:    {value: 10.0e-9, source: "each copper segment PWR_GND - NT-UMB-MOD - DIG_GND - NT-DIG-MOD - star - NT-AGND-MOD [assumption: ~10 mm of plane path; the loop of docs/review/2026-10-01-pre-layout-review/F3-u-iso-cm-loop/]"}
+  l_esl_cer:  {value: 1.0e-9, source: "an 0805/1206 ceramic's ESL with its pads [assumption]"}
+  l_esl_el:   {value: 10.0e-9, source: "an SMD electrolytic's ESL [assumption]"}
+  esr_c2:     {value: 0.34, source: "C2 (UCM1H101MCL1GS): 0.34 ohm impedance at 100 kHz [datasheets/discrete-and-power/NICHICON-UCM-SERIES-UCM1E101MCL1GS.pdf p.3] (vary: a third of it, to 1.33 ohm, tan d 0.10 at 120 Hz [calc: 0.10 / (2 pi 120 x 100 uF)])"}
+  esr_c1:     {value: 0.4, source: "C1's ESR [assumption: a 100 uF 25 V radial electrolytic]"}
+  esr_c3:     {value: 0.7, source: "C3's ESR [assumption: a 47 uF 25 V radial electrolytic]"}
+  l_fb_light: {value: 2.2e-6, source: "FB1 / FB3 at tens of mA, below their peak: ~2.2 uH [datasheets/discrete-and-power/MI1206K601R-10-ferrite-bead.pdf, the 0 A curve, as F3-u-iso-cm-loop read it]"}
+  l_fb_iso:   {value: 0.85e-6, source: "FB2 / FB4 at ~0.22 A: ~0.85 uH [same, the 250 mA curve]"}
+  r_fb_peak:  {value: 650.0, source: "the beads' resistive peak [same]"}
+  r_fb_dcr:   {value: 0.05, source: "the beads' DC resistance, 0.080 ohm max (FB-IN's row) [assumption: typical]"}
+  r_d_light:  {value: 2.8, source: "D1 / D3's small-signal resistance at the analog rails' ~37 mA: diode-split-rationale"}
+  r_d_iso:    {value: 0.55, source: "D2 / D4's at U-ISO's ~0.22 A input: diode-split-rationale"}
+  r_ptc_rail: {value: 0.4, source: "PTC-POS12 / PTC-NEG12 fitted, Rmin 0.40 ohm [datasheets/discrete-and-power/BOURNS-MF-MSMF.pdf p.1]"}
+  r_ptc_iso:  {value: 0.11, source: "PTC-ISO fitted, Rmin 0.11 ohm [same]"}
+  r_liso:     {value: 0.05, source: "L-ISO-IN's DCR [assumption]"}
+  c_liso_par: {value: 3.0e-12, source: "L-ISO-IN's self-capacitance [assumption: SRF near 20 MHz]"}
+  l_rib:      {value: 0.3e-6, source: "one power-ribbon conductor, ~0.3 m [assumption: ~1 uH/m] (vary: 0.1 to 1 uH)"}
+  c_rack:     {value: 100.0e-6, source: "the PSU's and the other modules' decoupling at the far end of the ribbon, per rail [assumption]"}
+  esr_rack:   {value: 0.1, source: "its ESR [assumption]"}
+  l_esl_rack: {value: 20.0e-9, source: "its ESL [assumption]"}
+  r_psu:      {value: 0.05, source: "the rack PSU's output resistance below a few kHz, per rail [assumption: a regulated Eurorack supply, tens of milliohms] (vary: 10 to 200 mohm)"}
+  p_iso_in:   {value: 5.26, source: "U-ISO's input power at typical play (power-entry.md, The instrument's supply)"}
+  v_iso_in:   {value: 23.4, source: "U-ISO's input voltage at typical play (same)"}
+  cm_bound:   {value: 10.0, source: "the owner's bound, 2026-10-01: under 10 % of the converter's common-mode current crosses the star"}
+
 derived:
   t_pos0: "max(-v['dt_neg'], 0) + 1e-6"
   t_pos_end: "max(-v['dt_neg'], 0) + 1e-6 + v['t_rise']"
@@ -67,6 +114,32 @@ derived:
   k_sense: "1.0 if v['topo'] == 2 else 0.0"
   swing_frac: "v['bal_frac'] if v['topo'] == 3 else 1.0"
   dc_extra: "v['i_swing'] if v['topo'] == 3 else 0.0"
+  t_off_e: "v['t_off'] + v['t_fall']"
+  t_off_n: "v['t_off'] + max(v['dt_neg_off'], 0) + 1e-6"
+  t_off_ne: "v['t_off'] + max(v['dt_neg_off'], 0) + 1e-6 + v['t_fall']"
+  r_own_pos: "v['v_bus'] / v['i_mod_pos']"
+  r_own_neg: "-v['v_bus_neg'] / v['i_mod_neg']"
+  r_trim_gain: "max(v.get('TRIM-GAIN', 0) * v['t_gain'], 1e-3)"
+  r_toff_cw: "max(v.get('TRIM-OFFSET', 0) * (1 - v['w_offset']), 1e-3)"
+  r_toff_ccw: "max(v.get('TRIM-OFFSET', 0) * v['w_offset'], 1e-3)"
+  k_cm: "(1.0 - v['l_leak'] / (2.0 * v['L-CM-ISO'])) if 'L-CM-ISO' in v else 0.0"
+  r_neg_iso: "v['v_iso_in']**2 / v['p_iso_in']"
+  r_trim_e7: "max(v['R-REG-SET-LO'] / ((v['v_dac_set'] - 50.0e-6 * v['R-REG-SET-LO']) / 1.25 - 1.0) - v['R-REG-SET-HI'], v['r_trim_end']) if 'R-REG-SET-LO' in v else 0.0"
+  # (the guards: sims that import these params without this circuit's netlist - panel-led/sim - never use them)
+  r_trim: "0.0 if 'TRIM-DAC-RAIL' not in v else (1.0e9 if v['trim_fault'] == 2 else v['TRIM-DAC-RAIL'] if v['trim_fault'] == 1 else v['r_trim_e7'] if v['trim_cw'] < 0 else max(v['TRIM-DAC-RAIL'] * (1.0 - v['trim_cw']), v['r_trim_end']))"
+
+vary:
+  v_ref:      {tol: [-0.04, 0.04], source: "1.20 and 1.30 V about 1.25"}
+  i_adj:      {tol: [-1.0, 1.0], source: "0 and 100 uA about 50"}
+  R-REG-SET-HI: {tol: [-0.001, 0.001], source: "0.1 %"}
+  R-REG-SET-LO: {tol: [-0.001, 0.001], source: "0.1 %"}
+  TRIM-DAC-RAIL: {tol: [-0.1, 0.1], source: "the 3224's resistance tolerance, +-10 % [BOURNS-3224-TRIMPOT.pdf p.1]"}
+  r_cm_core:  {tol: [-0.7222, 1.0], source: "500 ohm to 3.6 kohm about 1.8 kohm"}
+  L-CM-ISO:   {tol: [-0.3, 0.3], source: "1.0 mH MINIMUM at 1 kHz [BOURNS-PM3700-CM-CHOKE.pdf p.1]; at 550 kHz the ferrite's permeability falls [assumption: -30 %], and the core loss carries the rest"}
+  l_rib:      {tol: [-0.6667, 2.3333], source: "0.1 to 1 uH about 0.3"}
+  esr_c2:     {tol: [-0.6667, 2.9], source: "0.11 to 1.33 ohm about 0.34"}
+  r_psu:      {tol: [-0.8, 3.0], source: "10 to 200 mohm about 50"}
+  C-ISO-Y:    {tol: [-0.05, 0.05], source: "C0G +-5 %"}
 
 sims:
   - name: d3-reversed
@@ -172,3 +245,143 @@ sims:
     asserts:
       - expr: "max['err_cents'] < 0.5"
         why: "option (c) at 1 % balance leaves a fraction of a cent - at the cost of burning the whole swing as heat all the time (ADR 0027)"
+  - name: poweroff
+    # the bus goes; each analog rail decays on its bulk into its own load. Which collapses
+    # first, and what the pitch jack does meanwhile (pre-layout review A3-14).
+    deck: poweroff.cir
+    sweep: {dt_neg_off: [-2.0e-3, 0.0, 2.0e-3]}
+    vary: []
+    measures: [t_pos_half, t_neg_half, jack_peak_off, jack_trough_off]
+    post:
+      t_pos_half: "cross(w['p12'], 6.0, p['t_off']) - p['t_off']"
+      t_neg_half: "cross(w['n12'], -6.0, p['t_off']) - p['t_off']"
+      jack_peak_off: "peak(w['jack'], p['t_off'], p['t_end_off'])"
+      jack_trough_off: "trough(w['jack'], p['t_off'], p['t_end_off'])"
+    asserts:
+      - expr: "max['jack_peak_off'] < 0.1 and min['jack_trough_off'] > -0.1"
+        why: "the pitch jack stays within 100 mV of 0 V while the analog rails come down, whichever falls first: C-BULK-RAIL's 100 uF / 47 uF split keeps the two decays close (each rail reaches half in 16-20 ms), and the jack only moves once the op-amps are out of supply. The rails' order itself is recorded, not asserted"
+
+  # ---- U-ISO's input: the common-mode choke and C-ISO-Y (pre-layout review A4-1; owner, 2026-10-01)
+  - name: cm-loop
+    # cm.cir: the converter's 550 kHz common-mode current, through its isolation capacitance,
+    # home beside it through C-ISO-Y or round the module's grounds and the star. At the
+    # fundamental and two harmonics, across the choke's core loss and inductance, the ribbon's
+    # inductance and C-ISO-Y's tolerance.
+    deck: cm.cir
+    vary: [r_cm_core, L-CM-ISO, l_rib, C-ISO-Y]
+    measures: [star_550k, star_1650k, star_5500k, y_550k, agnd_550k, star_peak]
+    post:
+      star_550k: "at(w['star'], 550e3)"
+      star_1650k: "at(w['star'], 1.65e6)"
+      star_5500k: "at(w['star'], 5.5e6)"
+      y_550k: "at(w['yshare'], 550e3)"
+      agnd_550k: "at(w['agnd'], 550e3)"
+      star_peak: "peak(w['star'], 500e3, 30e6)"
+    asserts:
+      - expr: "max['star_550k'] < p['cm_bound'] and max['star_1650k'] < p['cm_bound'] and max['star_5500k'] < p['cm_bound']"
+        why: "the owner's bound: under 10 % of U-ISO's common-mode current crosses the star at its 550 kHz fundamental and its 3rd and 10th harmonics, at every corner of the choke's core loss and inductance, the ribbon and C-ISO-Y - L-CM-ISO holds the loop off and C-ISO-Y takes the current home beside the converter"
+      - expr: "max['star_peak'] < p['cm_bound']"
+        why: "and nowhere from 500 kHz to 30 MHz: C-ISO-Y does not resonate with what is left of the loop (without the choke, 10-47 nF did - docs/review/2026-10-01-pre-layout-review/F3-u-iso-cm-loop/)"
+  - name: cm-loop-y-1n
+    # WHAT-IF: the choke with the 1 nF C-ISO-Y the sheet carried until 2026-10-01. Recorded:
+    # why the capacitor moved with the choke.
+    deck: cm.cir
+    set: {C-ISO-Y: 1.0e-9}
+    vary: [r_cm_core, L-CM-ISO, l_rib]
+    measures: [star_550k, y_550k]
+    post:
+      star_550k: "at(w['star'], 550e3)"
+      y_550k: "at(w['yshare'], 550e3)"
+    asserts:
+      - expr: "max['star_550k'] > p['cm_bound']"
+        why: "WHAT-IF: at 1 nF (289 ohm at 550 kHz) C-ISO-Y is not low enough against a lossy core's few hundred ohms, and more than the bound crosses the star at the core-loss corner - which is why it is 22 nF with the choke"
+  - name: iso-input-z
+    # isoin.cir: the impedance U-ISO sees looking back into its input filter, now with
+    # L-CM-ISO's leakage in series with L-ISO-IN, against the converter's negative input
+    # resistance; and how much of its reflected current reaches the rack.
+    deck: isoin.cir
+    vary: [esr_c2, l_rib, L-CM-ISO, r_psu]
+    measures: [z_peak, f_peak, margin, rack_550k]
+    post:
+      z_peak: "peak(w['zmag'], 100, 2e6)"
+      f_peak: "argpeak(w['zmag'], 100, 2e6)"
+      margin: "p['r_neg_iso'] / peak(w['zmag'], 100, 2e6)"
+      rack_550k: "at(w['rack'], 550e3)"
+    asserts:
+      - expr: "min['margin'] > 20"
+        why: "the input filter stays damped with the choke's leakage added: its impedance peak is over 20x (26 dB) below the converter's -V^2/P at every ESR, ribbon and choke corner, the bar power-entry-instrument/sim holds the instrument's own input LC to"
+      - expr: "max['rack_550k'] < 1.0"
+        why: "under 1 % of the converter's reflected current at its 550 kHz fundamental reaches the rack's +12 V conductor"
+
+  # ---- DAC_AVDD's trim (pre-layout review A8-8; owner, 2026-10-01) -------------------------
+  # dacrail.cir, behavioural: the LM317L's datasheet limits, the divider's tolerances and the
+  # trimmer's. Each end of the travel at every corner; where E7 sets it; and its two failures.
+  - name: dac-trim-cw
+    deck: dacrail.cir
+    set: {trim_cw: 1.0}
+    vary: [v_ref, i_adj, R-REG-SET-HI, R-REG-SET-LO, TRIM-DAC-RAIL]
+    measures: [v_avdd]
+    asserts:
+      - expr: "min['v_avdd'] >= p['v_dac_set'] + 0.05"
+        why: "fully clockwise, DAC_AVDD is above dac-rail by 50 mV or more at every corner of V_REF, I_ADJ and the divider: E7 can always reach the set point from below"
+      - expr: "max['v_avdd'] < p['v_dac_absmax']"
+        why: "and under the DAC8568's 6 V absolute maximum at every corner: no setting of the trimmer can damage the DAC. It can sit above the C grade's 5.5 V operating maximum - with the LM317L's +-4 % reference, a travel that always reaches the set point cannot also stay inside 5.00-5.50 V (power-entry.md, The DAC rail's trim)"
+  - name: dac-trim-ccw
+    deck: dacrail.cir
+    set: {trim_cw: 0.0}
+    vary: [v_ref, i_adj, R-REG-SET-HI, R-REG-SET-LO, TRIM-DAC-RAIL]
+    measures: [v_avdd]
+    asserts:
+      - expr: "max['v_avdd'] <= p['v_dac_set'] - 0.05"
+        why: "fully counter-clockwise, DAC_AVDD is below dac-rail by 50 mV or more at every corner: E7 can always reach the set point from above"
+  - name: dac-trim-centre
+    # the trimmer as it ships, wiper at 50 % [BOURNS-3224-TRIMPOT.pdf p.1]: recorded
+    deck: dacrail.cir
+    set: {trim_cw: 0.5}
+    vary: [v_ref, i_adj, R-REG-SET-HI, R-REG-SET-LO, TRIM-DAC-RAIL]
+    measures: [v_avdd]
+    asserts:
+      - expr: "max['v_avdd'] < p['v_dac_absmax']"
+        why: "a unit powered before E7, with the trimmer where it ships, cannot damage the DAC"
+  - name: dac-trim-e7
+    # where E7 leaves it: trimmed to dac-rail at the part's own V_REF and I_ADJ (nominal); the
+    # fixed resistors' tolerance about that - the reference's spread is what the trim removed
+    deck: dacrail.cir
+    vary: [R-REG-SET-HI, R-REG-SET-LO]
+    measures: [v_avdd]
+    asserts:
+      - expr: "abs(nom['v_avdd'] - p['v_dac_set']) < 0.01 and min['v_avdd'] >= 5.0 and max['v_avdd'] <= 5.5"
+        why: "trimmed, DAC_AVDD is at dac-rail and inside the DAC8568 C grade's 5.0-5.5 V"
+  - name: dac-trim-open-wiper
+    deck: dacrail.cir
+    set: {trim_fault: 1}
+    vary: [v_ref, i_adj, R-REG-SET-HI, R-REG-SET-LO, TRIM-DAC-RAIL]
+    measures: [v_avdd]
+    asserts:
+      - expr: "max['v_avdd'] < p['v_dac_set']"
+        why: "FAIL-SAFE: an open wiper leaves the whole track in the OUT-to-ADJ leg (the wiper is strapped to pin 1), so the rail goes DOWN, never up"
+  - name: dac-trim-open-track
+    deck: dacrail.cir
+    set: {trim_fault: 2}
+    vary: [v_ref, i_adj, R-REG-SET-HI, R-REG-SET-LO, TRIM-DAC-RAIL]
+    measures: [v_avdd]
+    asserts:
+      - expr: "max['v_avdd'] < 2.0"
+        why: "FAIL-SAFE: an open track opens the OUT-to-ADJ leg and the LM317L falls to its reference, about 1.3 V - down, never up"
+  - name: trim-ends-poweron
+    # poweron.cir with the trimmer at either end: TI's transient model, the jack and the
+    # rail's overshoot on the way up
+    deck: poweron.cir
+    sweep: {trim_cw: [0.0, 1.0]}
+    vary: []
+    measures: [avdd_final, avdd_peak, jack_peak, jack_trough]
+    post:
+      avdd_final: "at(w['avdd'], p['t_end'])"
+      avdd_peak: "peak(w['avdd'], 0, p['t_end'])"
+      jack_peak: "peak(w['jack'], 0, p['t_end'])"
+      jack_trough: "trough(w['jack'], 0, p['t_end'])"
+    asserts:
+      - expr: "max['avdd_peak'] < p['v_dac_absmax']"
+        why: "at either end of the trimmer DAC_AVDD never reaches the DAC8568's 6 V absolute maximum on the way up"
+      - expr: "max['jack_peak'] < 0.1 and min['jack_trough'] > -0.1"
+        why: "and the pitch jack stays within 100 mV of 0 V through the power-up wherever the trimmer is"

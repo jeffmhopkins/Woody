@@ -4,8 +4,9 @@
 # module/mod-channels. Run:
 #   python3 tools/sim.py run hardware/module/dac8568/sim
 #
-# THE CLAIMS. ADR 0006's power-on table: pitch "exactly 0 V", mod 1-4 "exactly 0 V", both
-# terms of each difference being zero. pitch-stage.md, "Power-on is 0.000 V": VREFOUT is
+# THE CLAIMS. ADR 0006's power-on table: pitch "0 V", mod 1-4 "0 V", both terms of each
+# difference being zero - to the DAC's zero-code error, which this model leaves out: its
+# channels are an exact 0 V plus the glitch (the table carries that error, [ds] p.3). pitch-stage.md, "Power-on is 0.000 V": VREFOUT is
 # 3-state until firmware enables the reference, and TRIM-OFFSET's track holds it at 0 V.
 # module/power-entry/sim already holds the pitch jack within 100 mV through the rails'
 # arrival, with the DAC channel and VREFOUT as ideal 0 V sources; its README names what
@@ -62,7 +63,7 @@ sims:
       - expr: "max['pitch_peak'] < 0.1 and min['pitch_trough'] > -0.1"
         why: "pitch-stage.md 'Power-on is 0.000 V', held to power-entry/sim's 100 mV screen: through the DAC's power-on glitch at either sign and width, and with up to 1 uA of leakage out of or into the 3-state reference pin, the pitch jack stays within 100 mV of 0 V"
       - expr: "abs(max['mod_final']) < 0.002 and abs(min['mod_final']) < 0.002"
-        why: "ADR 0006 'Mod 1-4: exactly 0 V': once the glitch has passed, both terms are zero and the mod jack sits within the op-amp's offset of 0 V (the reference pin's leakage does not reach it)"
+        why: "ADR 0006 'Mod 1-4: 0 V': once the glitch has passed, both terms are zero and the mod jack sits within the op-amp's offset of 0 V (the reference pin's leakage does not reach it)"
       - expr: "max['mod_peak'] < 0.15 and min['mod_trough'] > -0.15"
         why: "RECORDED (2026-10-01): the mod jack is not 'exactly 0 V' THROUGH power-on - the glitch on its channel and on channel 7, at opposite signs, reaches it at 4 and 3 times (4 x Vdac - 3 x Vref7) for a fraction of a millisecond, about 0.12 V at the worst corner; it parks at 0 V after. The bound is what the run found, not a requirement"
       - expr: "abs(max['pitch_final']) < 0.015 and abs(min['pitch_final']) < 0.015"

@@ -693,6 +693,15 @@ API, 2026-10-01]. Check a machine part at JLC — the parts search behind
 `https://jlcpcb.com/parts`, or `https://jlcpcb.com/partdetail/<code>`. A
 `hand` part is bought wherever it is stocked, and its row says where.
 
+**The exception: a machine part JLC does not hold, sourced for the order.**
+JLC's Global Sourcing (or consignment) buys a part into the assembly that
+neither its library nor LCSC has in stock; the part stays `machine` and keeps
+its MPN. It is used only where the part is chosen on a property its
+alternatives do not document, and its row says so. **`FB-IN`** (Laird
+MI1206K601R-10, `FB1`–`FB4` on `module/power-entry`) is ordered this way
+(owner, 2026-10-01): it is the bead whose datasheet publishes impedance under
+DC bias, and LCSC lists it at 0.
+
 ## §5. Circuit simulation — `tools/sim.py`
 
 ```
@@ -790,7 +799,7 @@ so.
 | the umbilical load switch's start, with a behavioural LT1641 built from its datasheet | `hardware/module/umbilical-load-switch/sim/` |
 | SCLK, MOSI and CS_MOD over the umbilical as coupled lossy lines (ngspice `CPL`), from a banked Cat5e datasheet, through each line's pull and `R-RX-MOD`/`C-RX-MOD` into the receiver `U-RX-MOD` (74AHCT14) | `hardware/interfaces/spi-link/sim/` |
 | the four mod channels and their shared reference: range, a stale or wrong `V_ref`, a step and the loop into a passive mult, crosstalk | `hardware/module/mod-channels/sim/` |
-| the breath output stage: its offset table, gain ends, clip, a step and the loop into a passive mult, and the −12 V rail's path to the jack | `hardware/module/breath-output-stage/sim/` |
+| the breath output stage: its offset table, gain ends, clip, a step and the loop into a passive mult, the −12 V rail's path to the jack, and the chain — the response shaper and this stage one after the other, at the commissioned setting and across `POT-RESP` | `hardware/module/breath-output-stage/sim/` |
 | the response shaper's curve at `POT-RESP`'s ends and centre, and its clip, with a behavioural `D-RESP` fitted to the 1N4448W's guaranteed window | `hardware/module/breath-response-shaper/sim/` |
 | the breath ADC's anti-alias filter, its time constant, and the MCP3202's sample capacitor against it | `hardware/carrier/breath-adc/sim/` |
 | the instrument's input LC against the buck's negative resistance, and its start from `U-ISO` through the load switch and the cable, cold and hot-plugged | `hardware/carrier/power-entry-instrument/sim/` |

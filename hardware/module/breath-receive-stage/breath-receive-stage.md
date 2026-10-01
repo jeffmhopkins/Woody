@@ -92,7 +92,7 @@ the two agree, and where they do not the netlist wins.*
                                  │  R_G 42.2k   │◄── G = 2.185  │   raw
                                  │              │               │
                                  │  REF ◄───────┼── ½ OPA2197 ◄─[TRIM-BREATH-ZERO]
-                                 │              │   buffered    from the LM317 5.21 V
+                                 │              │   buffered    from the LM317, dac-rail
                                  └──────┬───────┘   `breath-zero-ref` nulls it
                                         │  Vout = −2.16106·(V_BREATH − V_AGND) + V_REF
                                         │       = 0 V at rest, `inamp-full-scale` at full
@@ -138,7 +138,7 @@ omitted, which is the error `inamp-full-scale` already records for itself)* — 
 number**: 0.152–0.378 V, which needs `REF` anywhere from **0.328 V to
 0.817 V** `[calc: 0.152 × 2.16106, 0.378 × 2.16106]`. The band is the datasheet's own `V_off` min/typ/max
 `[datasheet MPXV4006DP p.4: "Voff 0.152 0.265 0.378 V"]`, and **its typical is
-0.265 V** — see `sensor-full-scale`. **Range the trimmer 0 → +1.0 V** — `R-ZERO-TOP`, 42.2 kΩ above the 10 kΩ track, does it: `5.21 × 10/52.2` = 0.998 V at the top, 0.915 V with the track 10 % low `[calc]`, still above the band's 0.817 V. An earlier revision specified
+0.265 V** — see `sensor-full-scale`. **Range the trimmer 0 → +1.0 V** — `R-ZERO-TOP`, 42.2 kΩ above the 10 kΩ track, does it: `dac-rail` × 10/52.2 = 0.996 V at the top, 0.914 V with the track 10 % low `[calc]`, still above the band's 0.817 V. An earlier revision specified
 0 → +0.6 V, which covers pedestals only to 0.275 V; a sensor at the top of its
 own datasheet band would have been un-nullable, leaving 1.4–5.6 % of span
 standing at the jack — the same band as the polarity showstopper this trimmer

@@ -23,7 +23,7 @@ feedback of `riso-ref-topology`, at the nominal and every tolerance corner.
 | `step-as-netlisted[c_vs=…]` | a 0.5 mA load step at `VS` | recovers without ringing through |
 | `step-with-10u-added` | the same with 10 µF added at `VS` | **a recorded finding**: it rings |
 | `loop-as-built`, `zout-as-built`, `step-as-built` | `VS` loaded with everything netlisted there — `C-DEC-SENSOR` and the sensor's Figure 3 pair from `interfaces/breath-sense-link`, ~1.11 µF | margin 122° minimum; 1.20 Ω at 500 Hz; the ~38 Ω peak at 7.6 kHz; **a recorded finding**: a load step rings back ~45 %, settled in 0.44 ms |
-| `reference-alone` | TI's REF5050 model, as netlisted, and a 1 V droop of +12 V | 5.000 V within 0.1 %; under 1 mV of disturbance |
+| `reference-alone` | TI's REF5050 model, as netlisted, and a 1 V droop of +12 V | 5.000 V within 0.05 %, the High grade's initial accuracy (`ref5050-grade`); under 1 mV of disturbance |
 | `loop-bare-follower`, `loop-in-loop-riso-only` | the two circuits the page rejects | both short of 45° |
 | `ti-figure-56` | TI's own Figure 56, as printed | TI's published 89° within the screen: the deck and the break are sound |
 
