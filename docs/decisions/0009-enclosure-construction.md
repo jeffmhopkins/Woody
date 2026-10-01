@@ -34,7 +34,10 @@ feels right.
 > which is the one it gives for dark woods like this stain; the top comes off
 > the board finished like the rest of the face. The band is derived - the
 > mouth cap's inside face to the first top cap slot - so the mark follows the
-> layout; its scale, turn, depth and fill are `config/body.yaml` `logo`, each
+> layout. **Sized to the keys (owner, same day):** "The circle diameter ... needs
+> to match the key size", the smallest that keeps its gaps etchable, matching
+> the ring's inside to the keycap - see `logo.scale`. Its scale, turn, depth
+> and fill are `config/body.yaml` `logo`, each
 > with its reasoning, and `mechanical/drc.echo` checks that it fits the band,
 > that the etch leaves wood over the column screws' pockets beneath it, and
 > what its smallest gap comes to once scaled. The etch is its own cut file,

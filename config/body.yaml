@@ -1163,10 +1163,10 @@ logo:
     status: settled
     source: "owner, 2026-10-01 ('use main's newest branding'): branding/export/scs-orbit-wave-mark.dxf, the Space Coast Synthesizers orbit-wave mark - five closed outlines, black = etched. woody_body.scad imports that file by a literal path (cad.py's dependency walk reads literals) and asserts it is this one"
   scale:
-    value: 0.72
-    status: nominal
-    source: "owner, 2026-10-01: 'scale as appropriate'. Turned across the body (rotation), the ring's height runs along it, so the band's length sets the scale; the largest that keeps margin_min to the seam and to the cap slot is about 0.73, and 0.72 keeps a quarter-millimetre more each end for the etch's spread and sanding the fill flush [calc in drc.echo 'logo fits its band']. The across margin to the roundover's flat is then not the limit. Scaling shrinks the mark's own clearances below branding/README's guideline - drc.echo 'logo: smallest gap in the etch'"
-    decided_by: "the etch test on an offcut of the top's own board (ROADMAP open item): if the fill bridges the scaled gaps, a smaller mark is no help - branding/build.py's gaps would widen instead"
+    value: 0.509
+    status: settled
+    source: "owner, 2026-10-01: 'The circle diameter of the instrument needs to match the key size in diameter' and 'the smallest possible without having that issue... I'm okay with the diameter being slightly bigger than the key... particularly if we're talking about just the inside of the circle diameter'. So the ring's INSIDE diameter equals the keycap (switch.keycap, 16.5): branding/README gives the ring a 36.0 centreline and 3.6 band, inside 32.4 at 100 %, so 16.5 / 32.4 = 0.509 [calc]; outside 20.2. The mark's own 2.0 clearances then scale to 1.02, just over logo.laser_min_gap, which is what 'without having that issue' asks - any smaller and the etch's parts run together [drc.echo 'logo: smallest gap in the etch']"
+    decided_by: "the etch test on an offcut of the top's own board (ROADMAP open item): it confirms the 1.02 mm gaps hold the two pours apart"
   rotation:
     value: 90
     status: nominal
