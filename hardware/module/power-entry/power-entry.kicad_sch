@@ -3471,7 +3471,7 @@
     (in_bom yes) (on_board yes) (dnp no)
     (uuid eb783af0-bd70-531e-ac33-c0a2e6a4a29a)
     (property "Reference" "U-REG-DAC" (at 237.49 181.61 0) (effects (font (size 1.27 1.27))))
-    (property "Value" "LT3042EMSE" (at 243.84 200.66 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "LT3042EMSE" (at 231.14 200.66 0) (effects (font (size 1.27 1.27))))
     (property "Footprint" "Package_SO:MSOP-10-1EP_3x3mm_P0.5mm_EP1.68x1.88mm" (at 243.84 180.34 0) (effects (font (size 1.27 1.27)) hide))
     (property "Datasheet" "" (at 243.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "U-REG-DAC" (at 243.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
