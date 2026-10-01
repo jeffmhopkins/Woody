@@ -179,6 +179,17 @@ hardware requires*); `CS_MOD` released on the last edge loses the frame
 (`frame-timing-cs-released-at-last-edge`). E11 confirms the intervals at the
 pads and t8 at the DAC's pins.
 
+**`DIG_GND` is not ideal, and the margin covers it** (2026-10-01, A4-14). The
+sims put the cable's return at one potential. Pins 6 and 8 are tied at both
+ends (`NT-DIG`, `NT-UMB-MOD`), so `DIG_GND` carries about half the
+instrument's supply return, and the instrument's ground sits above the
+module's by I·R of the two in parallel: about 32 mV in typical play at 24 AWG,
+and at worst about 0.26 V (an overload just under the load switch's trip, at
+28 AWG) `[calc: 0.36 A × 0.09 Ω; 1.10 A × 0.23 Ω]`. Against the tightest
+static margin the sims report — `MOSI` held low reaching the receiver at
+0.33 V against a lowest `V_T+` of 0.9 V, 0.57 V of room
+(`spi-pair-crosstalk`) — it fits.
+
 ---
 
 ## From the instrument end — `carrier.md` §4
