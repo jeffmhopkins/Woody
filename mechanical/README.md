@@ -49,6 +49,37 @@ picture's footer.
 
 ![The cassette alone, pulled apart in its build order](renders/photo-cassette.png)
 
+## The maker's mark
+
+![The maker's mark on the oak top, between the mouth cap and the first key](renders/photo-logo.png)
+
+The Space Coast Synthesizers orbit-wave mark ([`branding/`](../branding/README.md))
+sits on the oak top's playing face **between the mouth cap's seam and the
+first left-hand key's cap slot** (owner, 2026-10-01: "Logo should be here,
+scale as appropriate"; ADR 0009, *Amended 2026-10-01*). It is turned with
+its top to the mouth end, so it reads upright in the plan drawings and to an
+audience, its wave running across the body, and centred in that band. It is
+**etched and filled with epoxy** in branding's colour-fill scheme - the ring
+one pour, the wave and the moon the other - and sanded flush.
+
+Where each number lives, so none is restated here:
+
+- **Scale, turn, offset, etch depth, fill and margins**: `config/body.yaml`
+  `logo`, each with its reasoning. The scale is `logo.scale` of the artwork's
+  own size, which `branding/export/spec.json` owns.
+- **The band, the mark's size on the body, its margins, the oak left over
+  the column screws' pockets and its smallest gap once scaled**:
+  [`drc.echo`](drc.echo), the rules starting "logo".
+- **The artwork and its colours** are read from `branding/` by `tools/cad.py`
+  (`branding()`, into `cad/generated/params.scad`), never copied: the DXF is
+  imported as it is, the colours are `EPOXY` in `branding/build.py`.
+- **The laser file**: [`export/oak-logo.dxf`](export/oak-logo.dxf), the etch
+  in the oak panels' frame, as the pockets and rebates are.
+
+**Open:** scaled to fit, the mark's gaps are under branding's laser guideline,
+so an **etch test on an offcut** of the top's own board comes first (ROADMAP,
+*Bench measurements*).
+
 ## The one rule
 
 **Change the YAML, run the build, commit what it produced.** Never draw a
