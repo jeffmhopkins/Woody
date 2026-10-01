@@ -12,8 +12,11 @@
 *    derivative term ptau (an RC differentiator on r_psd), the 20 dB/decade TI's model shows
 *    above ~10 Hz; BOPA's are ps_k0 / ps_tau, the INA828's amplifiers' ina_ps_k0 / ina_ps_tau.
 *    A second differentiator (c_psm) cancels what the gain stages below add of their own: the
-*    supplies' midpoint moving under the output, 1 / (2 pi GBW) of its slope, which made
-*    V+ and V- rejection differ by 10 dB where TI's model has them equal
+*    supplies' midpoint moving against the output, 1 / (2 pi GBW) of its slope, which made
+*    V+ and V- rejection differ by 10 dB where TI's model has them equal. Taken against
+*    the output, it leaves the in-amp's CMRR alone (taken against in-, it cost 14 dB at
+*    2 kHz, which inamp-check now bounds); it also removes the GBW lag of a moving output,
+*    which no scenario here measures (their signals are held)
 *  - two gain stages about the supplies' midpoint, so no node's own conductance is many
 *    decades below what drives it: a slew-limited transconductance gm_op into r1_op || c1_op
 *    (gain a1_op, the dominant pole), then a smooth limiter of gain a2_op that stops the output
@@ -36,7 +39,7 @@ Bmid mid 0 V = 0.5 * (V(vcc) + V(vee))
 Bsd sd 0 V = V(vcc) - V(vee)
 Cpd sd dd {ptau / {{r_psd}}}
 Rpd dd 0 {{r_psd}}
-Bmr mr 0 V = V(mid) - V(inn)
+Bmr mr 0 V = V(mid) - V(out)
 Cpm mr dm {{c_psm}}
 Rpm dm 0 {{r_psd}}
 Bps eps 0 V = pk0 * (V(sd) - {{ps_vs0}}) + V(dd) - V(dm)

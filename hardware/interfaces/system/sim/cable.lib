@@ -15,6 +15,9 @@
 * UMB_LUMPED: two pi-sections, for the runs that last milliseconds (ngspice's CPL steps at
 * the line's own delay, ~10 ns, which no millisecond run can afford).
 * UMB_CPL: the same matrices as ngspice CPL; sim cable-check holds the lumped form to it.
+* Its self capacitance is cl_split larger: a perfect twist in one dielectric gives every
+* mode the same velocity, and CPL refuses that degenerate set at some impedances
+* ('forbidden combination of model parameters').
 .subckt UMB_LUMPED m1 m2 m3 m4 m5 m6 m7 m8 i1 i2 i3 i4 i5 i6 i7 i8
 R0_1 m1 r0_1 {{cl_r_sec}}
 L0_1 r0_1 c1 {{cl_l_sec}}
@@ -250,5 +253,5 @@ CUSI i1 i4 {{c_unb_spi_half}}
 + R={{cl_r_m}} 0 0 0 0 0 0 0 {{cl_r_m}} 0 0 0 0 0 0 {{cl_r_m}} 0 0 0 0 0 {{cl_r_m}} 0 0 0 0 {{cl_r_m}} 0 0 0 {{cl_r_m}} 0 0 {{cl_r_m}} 0 {{cl_r_m}}
 + L={{cl_lp}} {{cl_l_pair}} {{cl_l_x}} {{cl_l_x}} {{cl_l_x}} {{cl_l_x}} {{cl_l_x}} {{cl_l_x}} {{cl_lp}} {{cl_l_x}} {{cl_l_x}} {{cl_l_x}} {{cl_l_x}} {{cl_l_x}} {{cl_l_x}} {{cl_lp}} {{cl_l_x}} {{cl_l_x}} {{cl_l_pair}} {{cl_l_x}} {{cl_l_x}} {{cl_lp}} {{cl_l_pair}} {{cl_l_x}} {{cl_l_x}} {{cl_l_x}} {{cl_lp}} {{cl_l_x}} {{cl_l_x}} {{cl_l_x}} {{cl_lp}} {{cl_l_x}} {{cl_l_x}} {{cl_lp}} {{cl_l_pair}} {{cl_lp}}
 + G=0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-+ C={{cl_cs}} {{cl_cp}} {{cl_cx}} {{cl_cx}} {{cl_cx}} {{cl_cx}} {{cl_cx}} {{cl_cx}} {{cl_cs}} {{cl_cx}} {{cl_cx}} {{cl_cx}} {{cl_cx}} {{cl_cx}} {{cl_cx}} {{cl_cs}} {{cl_cx}} {{cl_cx}} {{cl_cp}} {{cl_cx}} {{cl_cx}} {{cl_cs}} {{cl_cp}} {{cl_cx}} {{cl_cx}} {{cl_cx}} {{cl_cs}} {{cl_cx}} {{cl_cx}} {{cl_cx}} {{cl_cs}} {{cl_cx}} {{cl_cx}} {{cl_cs}} {{cl_cp}} {{cl_cs}}
++ C={{cl_cs_cpl}} {{cl_cp}} {{cl_cx}} {{cl_cx}} {{cl_cx}} {{cl_cx}} {{cl_cx}} {{cl_cx}} {{cl_cs_cpl}} {{cl_cx}} {{cl_cx}} {{cl_cx}} {{cl_cx}} {{cl_cx}} {{cl_cx}} {{cl_cs_cpl}} {{cl_cx}} {{cl_cx}} {{cl_cp}} {{cl_cx}} {{cl_cx}} {{cl_cs_cpl}} {{cl_cp}} {{cl_cx}} {{cl_cx}} {{cl_cx}} {{cl_cs_cpl}} {{cl_cx}} {{cl_cx}} {{cl_cx}} {{cl_cs_cpl}} {{cl_cx}} {{cl_cx}} {{cl_cs_cpl}} {{cl_cp}} {{cl_cs_cpl}}
 .ends
