@@ -18,7 +18,7 @@ The link's signals — `SCLK`, `MOSI` and `CS_MOD` over the umbilical into
 ## What it shows
 
 Rack power-on and power-off at the module: `LOGIC_5V` (`U-REG-LOGIC`) against
-`DAC_AVDD` (`U-REG-DAC`, TI's LM317L model), and the three pins `U-LVL-MOD`
+`DAC_AVDD` (`U-REG-DAC`, the LT3042, behavioural: `power-entry/sim/lt3042.lib`), and the three pins `U-LVL-MOD`
 drives into the DAC8568 — `SYNC`, idle high, and `SCLK_DAC` and `DIN`, held
 high as an instrument powered on its own could hold them.
 
@@ -32,9 +32,12 @@ high as an instrument powered on its own could hold them.
 The DAC8568: *"No device pin should be brought high before power is applied to
 the device"* `[ds DAC8568CIPW.pdf p.31]`; a digital input's absolute maximum is
 `AVDD + 0.3 V` `[p.2]`. The ADP7118's 380 µs soft start puts `LOGIC_5V` up
-within about a millisecond of the bus, while the LM317L, slowed by
-`C-REG-ADJ`, takes several; at power-off the LM317L's 1.7 V larger dropout lets
-`DAC_AVDD` fall first.
+within about a millisecond of the bus, while `U-REG-DAC`, soft-started by
+`R-SET-DAC` × `C-SET-DAC` (~5 ms), takes several; at power-off its 0.3 V
+dropout against the ADP7118's 60 mV, on a higher output, lets `DAC_AVDD` fall
+first. *(Until 2026-10-01 `U-REG-DAC` was an LM317L, slowed by its `ADJ`
+capacitor, with a 1.7 V larger dropout: the same order, and the requirement
+below never depended on it.)*
 
 This sim first ran with `U-LVL-MOD` on `LOGIC_5V`, as the sheet then had it,
 and recorded the result as an open finding: `SYNC` driven up to about 3.4 V

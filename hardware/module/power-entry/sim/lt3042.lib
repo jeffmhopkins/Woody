@@ -1,0 +1,31 @@
+* U-REG-DAC, Analog Devices LT3042 - BEHAVIOURAL, built from its banked datasheet
+* [datasheets/discrete-and-power/ADI-LT3042.pdf]. No vendor model could be banked: ADI ships
+* LT-family models inside LTspice, and analog.com did not answer (fragment R43-F8, BLOCKED row).
+* As wired on module/power-entry: EN/UV and PGFB tied to IN (always on; fast start-up and
+* power-good off), PG open, ILIM to GND (the internal current limit), OUTS tied to OUT at
+* C-REG-OUT. Pins: in out set gnd. What is modelled:
+*  - on above the input UVLO, v_uvlo_dac (EN/UV on IN trips lower, 1.18-1.32 V) [p.3];
+*  - the 100 uA reference, i_set (98-102 uA over line, load and temperature [p.3]), leaving IN
+*    into SET; it needs the input a few hundred mV above SET to source;
+*  - the error amplifier as the unity-gain buffer it is [p.14]: the pass element sources only
+*    (reverse-current protected [p.22]), up to i_lim_dac, towards min(SET + v_os, IN - v_do_dac):
+*    v_os is OUT - SET, +-2 mV over everything [p.3]; v_do_dac the dropout, 300 mV max [p.3];
+*  - the output-overshoot recovery sink, up to 4 mA from OUT while OUTS is over SET and OUT over
+*    1.5 V [p.19];
+*  - the SET-to-OUTS protection clamp, a diode each way through the pins' 2 x 25 ohm [p.4 Note 7,
+*    p.22], which discharges C-SET-DAC into OUT when the input collapses;
+*  - its GND current, i_gnd_dac, from IN while on [p.3].
+* NOT modelled: the loop's dynamics (the pass element is a stiff transconductance, gm_dac, into
+* C-REG-OUT), noise, PSRR, the fast start-up path (wired off), foldback above 12 V of headroom.
+.subckt LT3042B in out set gnd
+Bon on gnd V = 0.5 * (1 + tanh(40 * (V(in, gnd) - {{v_uvlo_dac}})))
+Bset in set I = {{i_set}} * V(on, gnd) * 0.5 * (1 + tanh(20 * (V(in, set) - 0.3)))
+Bpass in out I = V(on, gnd) * max(0, min({{i_lim_dac}}, {{gm_dac}} * (min(V(set, gnd) + {{v_os}}, V(in, gnd) - {{v_do_dac}}) - V(out, gnd))))
+Bsink out gnd I = V(on, gnd) * (V(out, gnd) > 1.5 ? 1 : 0) * min(4m, max(0, {{gm_dac}} * (V(out, set) - {{v_os}} - 1m)))
+Bgnd in gnd I = {{i_gnd_dac}} * V(on, gnd)
+Dc1 set c1 DSETCL
+Rc1 c1 out 50
+Dc2 out c2 DSETCL
+Rc2 c2 set 50
+.model DSETCL D(Is=1e-14 N=1)
+.ends
