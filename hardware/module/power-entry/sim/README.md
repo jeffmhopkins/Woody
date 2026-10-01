@@ -1,7 +1,7 @@
 # Module power entry — simulation
 
 `sims.yaml` says what is simulated and what every run must show; `poweron.cir`,
-`poweroff.cir` and `groundshift.cir` are the decks; `results.yaml` is what the last run found, **generated** by
+`poweroff.cir`, `groundshift.cir`, `cm.cir`, `isoin.cir` and `dacrail.cir` are the decks; `results.yaml` is what the last run found, **generated** by
 `python3 tools/sim.py run hardware/module/power-entry/sim`.
 `python3 tools/sim.py show <this dir>` prints it as a table.
 `docs/reference/tooling.md` §5 explains the tool.
@@ -27,6 +27,11 @@ stage on those rails with the DAC at its power-on-reset zero scale.
 | `gnd-isolated[…]` | the same rack with the instrument behind `U-ISO`: its power drawn rail to rail, its output floating and tied to the star | under 0.01 cents, and under a microamp in the tie |
 | `gnd-sense[…]` | option (b): the pitch reference on a current-free ribbon conductor | the ribbon's share goes, the bus board's stays |
 | `gnd-balanced[…]` | option (c): a dummy load holding the instrument's total constant to 1 % | a fraction of a cent, for 2.3–4.4 W of heat |
+| `cm-loop` | `cm.cir`: `U-ISO`'s 550 kHz common-mode current, driven through its 1100 pF isolation capacitance, home through `C-ISO-Y` or round the module's grounds and the star, with `L-CM-ISO` in the converter's input (pre-layout review A4-1), across the choke's core loss and inductance, the ribbon and `C-ISO-Y` | under the owner's 10 % across the star at 550 kHz, 1.65 MHz and 5.5 MHz, and nowhere above it from 500 kHz to 30 MHz |
+| `cm-loop-y-1n` | a what-if: the choke with the 1 nF `C-ISO-Y` it replaced | more than 10 % on the star at the core-loss corner — why `C-ISO-Y` is 22 nF |
+| `iso-input-z` | `isoin.cir`: the impedance `U-ISO` sees looking back into its input filter, `L-CM-ISO`'s leakage included, and the share of its input current that reaches the rack | over 20× inside the converter's −V²/P at every corner; under 1 % at the rack at 550 kHz |
+| `dac-trim-cw`, `-ccw`, `-centre`, `-e7`, `-open-wiper`, `-open-track` | `dacrail.cir`: `DAC_AVDD` across `TRIM-DAC-RAIL`'s travel, BEHAVIOURAL — the LM317L as its defining equation at every corner of its datasheet `V_REF` and `I_ADJ`, the 0.1 % divider and the trimmer's ±10 % (pre-layout review A8-8) | the set point reachable from both ends with 50 mV to spare; under the DAC's 6 V absolute maximum at every setting; trimmed, inside 5.0–5.5 V; an open wiper or track takes the rail down |
+| `trim-ends-poweron[trim_cw=…]` | `poweron.cir` with the trimmer at either end | `DAC_AVDD` never reaches 6 V on the way up; the pitch jack within 100 mV of 0 V |
 
 **The power-on runs have the rail fuses in them** (`PTC-POS12`, `PTC-NEG12`,
 ADR 0027) at their fitted resistance, 0.40 Ω. At 6.0 Ω, their worst an hour
@@ -41,6 +46,23 @@ ngspice will not take 0) to the whole 0.25 m trace. They show where the
 instrument's current flows and what it moves, which is the question; they
 do not model the converter's switching (see ADR 0027 for why it is out of
 band) or any cable's inductance.
+
+**`cm.cir` and `isoin.cir` are small-signal and their copper is estimated.**
+The parts on the loop come from the netlist; every trace, ESL, bead bias point
+and the rack's own decoupling is a param marked `[assumption]` in `sims.yaml`,
+taken from the deck that found the problem
+(`docs/review/2026-10-01-pre-layout-review/F3-u-iso-cm-loop/`). `L-CM-ISO`'s
+core loss at 550 kHz is not published — only its 20 dB band from 500 kHz —
+so it is swept from 500 Ω to 3.6 kΩ per winding, and the low end is the one
+that sizes `C-ISO-Y`. Neither deck says how much current the converter makes:
+that is RECOM's to publish and E6's to measure.
+
+**`dacrail.cir` is behavioural on purpose.** TI's transient model has one
+reference voltage; the question is where the rail can land across the
+datasheet's limits, so the regulator is `OUT = ADJ + V_REF` with `I_ADJ`
+leaving the `ADJ` pin, and the corners are the datasheet's. Where E7 leaves
+the trimmer (`r_trim_e7`) is the setting that gives `dac-rail` at the nominal
+`V_REF` and `I_ADJ`; the transient decks use it unless a sim moves it.
 
 **`D3` must have its cathode at the bus.** The rail it passes flows out of the
 module into the bus's −12 V, so a diode with its anode at the bus is

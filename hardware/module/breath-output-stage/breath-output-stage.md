@@ -128,8 +128,8 @@ and positive — and their sum crosses zero at mid-rotation:
 
 | Pot | Wiper | Wiper source R | Offset at the jack |
 |---|---|---|---|
-| Full CCW | 5.21 V | 0 | **−4.91 V** |
-| **Centre** | 2.605 V | **2.5 kΩ** | **+0.61 V** |
+| Full CCW | `dac-rail` | 0 | **−4.89 V** |
+| **Centre** | 2.60 V | **2.5 kΩ** | **+0.61 V** |
 | Full CW | 0 V | 0 | **+5.06 V** |
 | **True zero** | — | 2.5 kΩ | **0 V at ~19° counter-clockwise of centre** |
 
@@ -143,11 +143,11 @@ toward `+` drove the jack to −4.91 V.
 > `POT-OFFSET`'s wiper is unbuffered, so its own source impedance —
 > `R_pot·p·(1−p)`, zero at both ends and **R/4 = 2.5 kΩ at centre** — sits in
 > series with `R-OFF`. The endpoints are exact because that term vanishes
-> there; the middle does not. `[calc]` `−40.2k × (2.605/(21.0k + 2.5k) −
-> 12/95.3k)` = **+0.606 V**, and the zero crossing lands where the wiper is 0.567
-> of the way from 0 V to `DAC AVDD`: rotation p = 0.433 from CCW, **18.7°
+> there; the middle does not. `[calc]` `−40.2k × (2.60/(21.0k + 2.5k) −
+> 12/95.3k)` = **+0.614 V**, and the zero crossing lands where the wiper is 0.568
+> of the way from 0 V to `DAC AVDD`: rotation p = 0.432 from CCW, **19.0°
 > counter-clockwise of centre on the R0904N's 280° track** `[ds R0904N-thonk.pdf:
-> 280° ± 10°]` — `(0.5 − 0.433) × 280°`. The distance matches `panel.md`'s
+> 280° ± 10°]` — `(0.5 − 0.432) × 280°`. The distance matches `panel.md`'s
 > independent derivation; the side is the one the 2026-10-01 swap of the pot's
 > ends gives.
 >
@@ -157,7 +157,7 @@ toward `+` drove the jack to −4.91 V.
 > zero**, which is worse than no detent — so `POT-OFFSET` has none (its row).
 
 `R-OFFNEG` pulls a constant from −12 V; `R-OFF` pushes a variable from the
-LM317's 5.21 V (`dac-rail`). **No extra op-amp half, and no negative reference to
+LM317's rail, `dac-rail`. **No extra op-amp half, and no negative reference to
 generate** — which is what makes ±5 V cost two resistors instead of a part.
 
 **This wiper does *not* need buffering.** Its source impedance varies from 0 at

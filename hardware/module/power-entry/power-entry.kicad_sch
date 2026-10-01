@@ -15,6 +15,642 @@
     (comment 4 "Ports are hierarchical labels (Dir, From/To, Figure); the module main board places this sheet")
   )
   (lib_symbols
+(symbol "Device:R_Potentiometer_Trim"
+		(pin_names
+			(offset 1.016)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "RV"
+			(at -4.445 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "R_Potentiometer_Trim"
+			(at -2.54 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Trim-potentiometer"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "resistor variable trimpot trimmer"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "Potentiometer*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "R_Potentiometer_Trim_0_1"
+			(rectangle
+				(start 1.016 2.54)
+				(end -1.016 -2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.524 0.762) (xy 1.524 -0.762)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 2.54 0) (xy 1.524 0)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "R_Potentiometer_Trim_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 1.27)
+				(name "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 1.27)
+				(name "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 3.81 0 180)
+				(length 1.27)
+				(name "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+(symbol "Filter:Choke_CommonMode_FerriteCore_1243"
+		(pin_names
+			(offset 0.254)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "FL"
+			(at 0 4.445 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Choke_CommonMode_FerriteCore_1243"
+			(at 0 -4.445 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 -6.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 -8.255 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Generic common-mode choke, ferrite core, 1243 pin order"
+			(at 4.064 -0.762 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "signal line filter"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "Choke_CommonMode_FerriteCore_1243_0_1"
+			(circle
+				(center -2.794 1.27)
+				(radius 0.254)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(polyline
+				(pts
+					(xy -2.794 0.381) (xy -2.286 0.381)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -2.794 -0.381) (xy -2.286 -0.381)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center -2.794 -1.27)
+				(radius 0.254)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(polyline
+				(pts
+					(xy -2.54 2.032) (xy -2.54 2.54)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -2.54 -2.032) (xy -2.54 -2.54)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(arc
+				(start -1.524 2.032)
+				(mid -2.032 1.5262)
+				(end -2.54 2.032)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(arc
+				(start -2.54 -2.032)
+				(mid -2.032 -1.5262)
+				(end -1.524 -2.032)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -1.778 0.381) (xy -1.27 0.381)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -1.778 -0.381) (xy -1.27 -0.381)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(arc
+				(start -0.508 2.032)
+				(mid -1.016 1.5262)
+				(end -1.524 2.032)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(arc
+				(start -1.524 -2.032)
+				(mid -1.016 -1.5262)
+				(end -0.508 -2.032)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -0.762 0.381) (xy -0.254 0.381)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -0.762 -0.381) (xy -0.254 -0.381)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(arc
+				(start 0.508 2.032)
+				(mid 0 1.5262)
+				(end -0.508 2.032)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(arc
+				(start -0.508 -2.032)
+				(mid 0 -1.5262)
+				(end 0.508 -2.032)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0.254 0.381) (xy 0.762 0.381)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0.254 -0.381) (xy 0.762 -0.381)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(arc
+				(start 1.524 2.032)
+				(mid 1.016 1.5262)
+				(end 0.508 2.032)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(arc
+				(start 0.508 -2.032)
+				(mid 1.016 -1.5262)
+				(end 1.524 -2.032)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.27 0.381) (xy 1.778 0.381)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.27 -0.381) (xy 1.778 -0.381)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(arc
+				(start 2.54 2.032)
+				(mid 2.032 1.5262)
+				(end 1.524 2.032)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(arc
+				(start 1.524 -2.032)
+				(mid 2.032 -1.5262)
+				(end 2.54 -2.032)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 2.286 0.381) (xy 2.794 0.381)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 2.286 -0.381) (xy 2.794 -0.381)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 2.54 2.54) (xy 2.54 2.032)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 2.54 -2.032) (xy 2.54 -2.54)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "Choke_CommonMode_FerriteCore_1243_1_1"
+			(pin passive line
+				(at -5.08 2.54 0)
+				(length 2.54)
+				(name "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 -2.54 0)
+				(length 2.54)
+				(name "4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 5.08 2.54 180)
+				(length 2.54)
+				(name "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 5.08 -2.54 180)
+				(length 2.54)
+				(name "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
     (symbol "Device:Polyfuse"
         (pin_numbers
           (hide yes))
@@ -2162,6 +2798,7 @@
     (property "Footprint" "Inductor_SMD:L_1206_3216Metric" (at 191.77 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "Datasheet" "" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "FB-IN" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "ORDERED AS MI1206K601R-10: JLC sources it through Global Sourcing / consignment (owner, 2026-10-01), so it stays machine-placed though LCSC lists 0 - see the FB-IN row" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "Drawn_as" "FB1" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "Laird" (at 193.04 142.24 0) (effects (font (size 1.27 1.27)) hide))
@@ -2182,7 +2819,7 @@
     (property "Row" "FB-IN" (at 243.84 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2" (at 243.84 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "Drawn_as" "FB2" (at 243.84 142.24 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "U-ISO's +12 V input leg; FB4 is its -12 V leg. They carry the converter's input, ~0.22 A in typical play, which puts them between the bias curve's 0 and 250 mA traces (ferrite-bias-impedance): the two of the four where DC bias matters - see the FB-IN row" (at 243.84 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "U-ISO's +12 V input leg; FB4 is its -12 V leg. They carry the converter's input, ~0.22 A in typical play, which puts them between the bias curve's 0 and 250 mA traces (ferrite-bias-impedance): the two of the four where DC bias matters - see the FB-IN row. ORDERED AS MI1206K601R-10: JLC sources it through Global Sourcing / consignment (owner, 2026-10-01), so it stays machine-placed though LCSC lists 0 - see the FB-IN row" (at 243.84 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "Laird" (at 243.84 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "MI1206K601R-10" (at 243.84 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "LCSC" "C2441375" (at 243.84 142.24 0) (effects (font (size 1.27 1.27)) hide))
@@ -2199,6 +2836,7 @@
     (property "Footprint" "Inductor_SMD:L_1206_3216Metric" (at 293.37 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "Datasheet" "" (at 294.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "FB-IN" (at 294.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "ORDERED AS MI1206K601R-10: JLC sources it through Global Sourcing / consignment (owner, 2026-10-01), so it stays machine-placed though LCSC lists 0 - see the FB-IN row" (at 294.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2" (at 294.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "Drawn_as" "FB3" (at 294.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "Laird" (at 294.64 142.24 0) (effects (font (size 1.27 1.27)) hide))
@@ -2310,14 +2948,14 @@
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 77c9db81-dec3-5cd1-b8e8-2e49aa09cc62)
     (property "Reference" "R-REG-SET-LO" (at 347.98 186.69 0) (effects (font (size 1.27 1.27)) (justify left)))
-    (property "Value" "475R 0.1%" (at 347.98 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "523R 0.1%" (at 347.98 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
     (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 344.17 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Datasheet" "" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "R-REG-SET-LO" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Manufacturer" "UNI-ROYAL(Uniroyal Elec)" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
-    (property "MPN" "TC0525B4750T5G" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
-    (property "LCSC" "C50670161" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "RESI" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "PTFR0805B523RN9" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C47116002" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Assembly" "machine" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (pin "1" (uuid 49c381f6-0757-544a-a399-718865720790))
     (pin "2" (uuid 04bb3d89-72c2-556e-b2cd-010d3eb8ab3f))
@@ -2453,7 +3091,7 @@
   (wire (pts (xy 243.84 195.58) (xy 243.84 198.12)) (stroke (width 0) (type default)) (uuid 9ab69784-24e9-5570-866a-f0cbdb621ec9))
   (label "REG_ADJ" (at 243.84 198.12 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 3888d0c8-661d-580d-a33e-07d1db9e770f))
   (wire (pts (xy 294.64 191.77) (xy 294.64 194.31)) (stroke (width 0) (type default)) (uuid e989af7d-1cbf-5247-8a34-3e15a36518d5))
-  (label "REG_ADJ" (at 294.64 194.31 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid ae80b9ab-6856-5ab0-b50f-bbfc3c2f3219))
+  (label "REG_TRIM" (at 294.64 194.31 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid ae80b9ab-6856-5ab0-b50f-bbfc3c2f3219))
   (wire (pts (xy 345.44 184.15) (xy 345.44 181.61)) (stroke (width 0) (type default)) (uuid 0534a7a3-f97d-530d-85a2-3771caad1760))
   (label "REG_ADJ" (at 345.44 181.61 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 55c577cf-0275-56ff-8c86-0c15d6179bf8))
   (wire (pts (xy 40.64 229.87) (xy 40.64 227.33)) (stroke (width 0) (type default)) (uuid 275ea6e3-671e-5928-9431-56a9b8e26439))
@@ -2745,7 +3383,7 @@
     (property "Row" "FB-IN" (at 243.84 325.12 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2" (at 243.84 325.12 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins_source" "a two-terminal bead" (at 243.84 325.12 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "The converter branch's -12 V leg, the partner of FB2" (at 243.84 325.12 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "The converter branch's -12 V leg, the partner of FB2. ORDERED AS MI1206K601R-10: JLC sources it through Global Sourcing / consignment (owner, 2026-10-01), so it stays machine-placed though LCSC lists 0 - see the FB-IN row" (at 243.84 325.12 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "Laird" (at 243.84 325.12 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "MI1206K601R-10" (at 243.84 325.12 0) (effects (font (size 1.27 1.27)) hide))
     (property "LCSC" "C2441375" (at 243.84 325.12 0) (effects (font (size 1.27 1.27)) hide))
@@ -2757,7 +3395,7 @@
   (wire (pts (xy 243.84 321.31) (xy 243.84 318.77)) (stroke (width 0) (type default)) (uuid 5af93efb-ed23-4140-ba98-9556f2e46267))
   (label "NEG12_D4" (at 243.84 318.77 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid e589476e-3aaa-48e9-afc0-bb45c2c94f3b))
   (wire (pts (xy 243.84 328.93) (xy 243.84 331.47)) (stroke (width 0) (type default)) (uuid dabb7ada-98c6-447e-a64e-7649295dcade))
-  (label "ISO_VIN_NEG" (at 243.84 331.47 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid e9441b97-1545-4e2b-b167-5f99793bf75d))
+  (label "ISO_FILT_NEG" (at 243.84 331.47 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid e9441b97-1545-4e2b-b167-5f99793bf75d))
   (symbol (lib_id "Device:L") (at 294.64 325.12 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid bba51979-083f-4ca9-8bed-c49135eaa16d)
@@ -2780,7 +3418,7 @@
   (wire (pts (xy 294.64 321.31) (xy 294.64 318.77)) (stroke (width 0) (type default)) (uuid a35ad753-64f8-4d53-9656-27b7a02ad30f))
   (label "ISO_FB2" (at 294.64 318.77 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 828a8061-4179-4013-af59-bdd46a7767f5))
   (wire (pts (xy 294.64 328.93) (xy 294.64 331.47)) (stroke (width 0) (type default)) (uuid e0e9998c-8542-47f3-b737-acfd5fc427c4))
-  (label "ISO_VIN_POS" (at 294.64 331.47 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid fa9470db-24b2-46f7-a948-e82e30b2fabd))
+  (label "ISO_FILT_POS" (at 294.64 331.47 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid fa9470db-24b2-46f7-a948-e82e30b2fabd))
   (symbol (lib_id "Device:C") (at 345.44 325.12 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 3d1bbafd-d57f-4197-ab94-f2b9b82e0ecc)
@@ -2870,16 +3508,16 @@
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 9a3133ec-12bb-4355-aad2-f66285fc48af)
     (property "Reference" "C-ISO-Y" (at 195.58 369.57 0) (effects (font (size 1.27 1.27)) (justify left)))
-    (property "Value" "1nF" (at 195.58 372.11 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "22nF" (at 195.58 372.11 0) (effects (font (size 1.27 1.27)) (justify left)))
     (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 193.04 370.84 0) (effects (font (size 1.27 1.27)) hide))
     (property "Datasheet" "" (at 193.04 370.84 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "C-ISO-Y" (at 193.04 370.84 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2" (at 193.04 370.84 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins_source" "a two-terminal capacitor" (at 193.04 370.84 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "Across the isolation barrier AT the converter, ISO_VIN_POS to PWR_GND: gives the switching common-mode current a 1 nF path home beside U-ISO instead of round the star and the ribbon (RECOM's RPA20 filter has no Y-capacitor, PD-7; one 1 nF here against its 1100pF isolation capacitance, PD-5). On the +12 V side so PTC-ISO covers it if it fails short" (at 193.04 370.84 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Manufacturer" "YAGEO" (at 193.04 370.84 0) (effects (font (size 1.27 1.27)) hide))
-    (property "MPN" "CC0805JRNPO9BN102" (at 193.04 370.84 0) (effects (font (size 1.27 1.27)) hide))
-    (property "LCSC" "C62774" (at 193.04 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Across the isolation barrier AT the converter, ISO_VIN_POS to PWR_GND: with L-CM-ISO in the loop it takes the 550 kHz current through U-ISO's isolation capacitance (1100 pF typ, RECOM-RPA20-AW.pdf PD-5) home beside the converter. 22 nF C0G 50 V, chosen with the choke by power-entry/sim 'cm-loop' (power-entry.md, The common mode). On the +12 V side so PTC-ISO covers it if it fails short" (at 193.04 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Murata" (at 193.04 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "GRM21B5C1H223JA01L" (at 193.04 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C77069" (at 193.04 370.84 0) (effects (font (size 1.27 1.27)) hide))
     (property "Assembly" "machine" (at 193.04 370.84 0) (effects (font (size 1.27 1.27)) hide))
     (pin "1" (uuid da4378be-c71a-4f66-9bf6-a3a281e6d442))
     (pin "2" (uuid 9dd9307e-fd2b-4eca-9e5c-f0a14e37212d))
@@ -2920,5 +3558,60 @@
     (property "To" "module/digital-and-supervision" (at 248.92 370.84 0) (effects (font (size 1.27 1.27)) hide))
     (property "Figure" "dig-gnd-topology" (at 248.92 370.84 0) (effects (font (size 1.27 1.27)) hide)))
   (text "ADDED 2026-09-30 (ADR 0027): the rail fuses (PTC-POS12, PTC-NEG12), the instrument's isolated supply - PTC-\nISO, D2, FB2, L-ISO-IN on the +12 leg, D4, FB4 on the -12 leg, C2 and C-ISO-IN across, U-ISO, C-ISO-OUT,\nC-ISO-Y - and NT-UMB-MOD. BUS_GND is the Eurorack ground as it arrives, the star: AGND_MOD (NT-AGND-MOD) and\nDIG_GND (NT-DIG-MOD) meet it, and PWR_GND - U-ISO's isolated return - meets DIG_GND at the etherCON (NT-UMB-\nMOD) and nothing else. So no DC current of the instrument's reaches BUS_GND, the ribbon or the rack. power-\nentry.md" (at 40.64 393.7 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid 1eb0ce46-dc74-42cb-b3d0-e438e7acfbe6))
+  (symbol (lib_id "Filter:Choke_CommonMode_FerriteCore_1243") (at 294.64 370.84 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid fb5673b9-f161-46d4-b301-6140077d44ce)
+    (property "Reference" "L-CM-ISO" (at 297.18 365.76 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "1mH" (at 297.18 375.91999999999996 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "woody:L_CommonModeChoke_Bourns_PM3700" (at 294.64 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 294.64 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "L-CM-ISO" (at 294.64 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "IN_POS=1(1) OUT_POS=2(2) OUT_NEG=3(3) IN_NEG=4(4)" (at 294.64 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/discrete-and-power/BOURNS-PM3700-CM-CHOKE.pdf p.1 Schematic: one winding 1-2, the other 4-3, polarity dots on 1 and 4. The symbol's 1243 variant draws the same windings with its dots on 1 and 4, so symbol pin n is the part's pin n. +12 V leg in on 1 out on 2; -12 V leg in on 4 out on 3: the supply and its return cancel, a common-mode current aids" (at 294.64 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "U-ISO's input common-mode choke (owner, 2026-10-01; ADR 0027): between the input filter (L-ISO-IN, FB4) and the converter's pins, so the 550 kHz current through U-ISO's isolation capacitance goes home through C-ISO-Y and not round NT-UMB-MOD, the star, AGND_MOD and the -12 V entry. Its leakage, 3.9 uH typ, adds to L-ISO-IN in the differential filter (power-entry.md)" (at 294.64 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Bourns" (at 294.64 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "PM3700-40-RC" (at 294.64 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C2662215" (at 294.64 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 294.64 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 86c9ebff-4e73-45ec-9bac-2a2b3d2392b2))
+    (pin "4" (uuid f9e07782-6cef-4fdb-98c4-653c13f95df7))
+    (pin "2" (uuid 0fa103a1-68f8-4f8d-9975-1f8d665f40a5))
+    (pin "3" (uuid 4b251bb0-eb29-442a-ab8f-947ddfd99142))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/c0f0f4e8-2456-5ca2-a9aa-c9e81c4bd91b" (reference "L2") (unit 1))) (project "power-entry" (path "/79e04111-e194-543b-9626-a5c2b61c4922" (reference "L-CM-ISO") (unit 1))))
+  )
+  (wire (pts (xy 289.56 368.3) (xy 287.02 368.3)) (stroke (width 0) (type default)) (uuid 3398ff28-b9dd-401b-8d51-3d357109ccb1))
+  (label "ISO_FILT_POS" (at 287.02 368.3 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 3235170a-9da7-4ab6-9d24-08fbbc2f5832))
+  (wire (pts (xy 289.56 373.38) (xy 287.02 373.38)) (stroke (width 0) (type default)) (uuid 4a5a31d5-4a12-4f3e-b3cc-9ae4204316a1))
+  (label "ISO_FILT_NEG" (at 287.02 373.38 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid e8149bc5-0822-4231-98ea-9f230d78f65f))
+  (wire (pts (xy 299.72 368.3) (xy 302.26 368.3)) (stroke (width 0) (type default)) (uuid 8a9fea30-4c3f-4e0f-845b-e9858c883cd7))
+  (label "ISO_VIN_POS" (at 302.26 368.3 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 45d2431a-77fa-4652-8b77-dbfd4ccaac22))
+  (wire (pts (xy 299.72 373.38) (xy 302.26 373.38)) (stroke (width 0) (type default)) (uuid ec3be6ea-5998-4c3e-809d-5aaa5ae2d2bb))
+  (label "ISO_VIN_NEG" (at 302.26 373.38 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 7decedf0-d546-46e8-a206-73cc30cf09a9))
+  (symbol (lib_id "Device:R_Potentiometer_Trim") (at 345.44 370.84 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 2d1c13da-8ac3-41aa-b63c-a68d8b65adab)
+    (property "Reference" "TRIM-DAC-RAIL" (at 347.98 365.76 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "50R" (at 347.98 375.91999999999996 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Potentiometer_SMD:Potentiometer_Bourns_3224W_Vertical" (at 345.44 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 345.44 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "TRIM-DAC-RAIL" (at 345.44 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "CCW=1(1) W=2(2) CW=3(3)" (at 345.44 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/discrete-and-power/BOURNS-3224-TRIMPOT.pdf p.1 schematic: 1 CCW, 2 wiper, 3 CW; clockwise moves the wiper toward 3" (at 345.44 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "DAC_AVDD's trim (owner, 2026-10-01: 'Can we just do trim pot to help?'), a rheostat in the LM317L's OUT-to-ADJ leg with R-REG-SET-HI. WIPER STRAPPED TO PIN 1 (CCW), pin 3 to R-REG-SET-HI: clockwise raises the rail; an open wiper leaves the whole track in circuit and an open track opens the leg, and both take the rail DOWN. E7 trims DAC_AVDD to dac-rail (power-entry.md, The DAC rail)" (at 345.44 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Bourns" (at 345.44 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "3224W-1-500E" (at 345.44 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C56340" (at 345.44 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 345.44 370.84 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid ece1e94f-af65-4f85-aab3-daeaa7710a55))
+    (pin "3" (uuid 9f881843-0d1d-4f4e-b0ad-020602eef014))
+    (pin "2" (uuid 154c5871-4ef3-4274-9bcc-d3238fc16387))
+    (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/c0f0f4e8-2456-5ca2-a9aa-c9e81c4bd91b" (reference "RV4") (unit 1))) (project "power-entry" (path "/79e04111-e194-543b-9626-a5c2b61c4922" (reference "TRIM-DAC-RAIL") (unit 1))))
+  )
+  (wire (pts (xy 345.44 367.03) (xy 345.44 364.49)) (stroke (width 0) (type default)) (uuid e1da0529-b249-4e2a-83af-4b6a80608bc0))
+  (label "REG_ADJ" (at 345.44 364.49 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid bb23036c-4122-454c-bdb4-fc79357de531))
+  (wire (pts (xy 345.44 374.65) (xy 345.44 377.19)) (stroke (width 0) (type default)) (uuid ddb63c9b-5351-4395-b475-98f291875993))
+  (label "REG_TRIM" (at 345.44 377.19 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid c7a7a8b1-7cba-4128-b20b-07af8fa0ff30))
+  (wire (pts (xy 349.25 370.84) (xy 351.79 370.84)) (stroke (width 0) (type default)) (uuid 9f798458-9db0-446c-8de9-0c44b17e2c23))
+  (label "REG_ADJ" (at 351.79 370.84 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid aa177d00-e081-4067-8a89-d1f4e34da22a))
   (sheet_instances (path "/" (page "1")))
 )

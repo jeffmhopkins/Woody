@@ -1,0 +1,56 @@
+* U-ISO's input filter, differential, small signal, as netlisted (ADR 0027; L-CM-ISO added
+* 2026-10-01). A 1 A AC current drawn across the converter's input pins (ISO_VIN_POS to
+* ISO_VIN_NEG) reads, in volts, the impedance the converter sees looking back: C2 and
+* C-ISO-IN at its pins, then L-CM-ISO's leakage (its two windings coupled at k_cm), L-ISO-IN
+* and FB2 in the +12 V leg, FB4 in the -12 V leg, D2 / D4 as their small-signal resistance,
+* PTC-ISO, and the ribbon to the rack's decoupling. The same run reads the share of the
+* drawn current that reaches the rack (the ribbon's +12 V conductor): the converter's
+* reflected ripple, which RECOM does not publish, attenuated by the filter.
+IAC vinn vinp DC 0 AC 1
+CIN vinp cin1 {{C-ISO-IN}}
+LCIN cin1 vinn {{l_esl_cer}}
+C2 vinp c2a {{C2}}
+RC2 c2a c2b {{esr_c2}}
+LC2 c2b vinn {{l_esl_el}}
+* L-CM-ISO, dots on the filter side: the supply current in at one dot and back out at the
+* other, so only the leakage is left
+LCA fp ca {{L-CM-ISO}}
+RCA ca vinp {{r_cm_dcr}}
+LCB fn cb {{L-CM-ISO}}
+RCB cb vinn {{r_cm_dcr}}
+K1 LCA LCB {{k_cm}}
+* +12 V leg back to the bus: L-ISO-IN, FB2, D2, PTC-ISO
+LISO fp lisa {{L-ISO-IN}}
+RLISO lisa fb2 {{r_liso}}
+LFB2 fb2 fb2b {{l_fb_iso}}
+RFB2P fb2 fb2b {{r_fb_peak}}
+RFB2 fb2b d2 {{r_fb_dcr}}
+RD2 d2 ptci {{r_d_iso}}
+RPTCI ptci bpos {{r_ptc_iso}}
+* -12 V leg: FB4, D4
+LFB4 fn fb4b {{l_fb_iso}}
+RFB4P fn fb4b {{r_fb_peak}}
+RFB4 fb4b d4 {{r_fb_dcr}}
+RD4 d4 bneg {{r_d_iso}}
+* the rack, each rail through its ribbon conductor to the PSU's and the other modules'
+* decoupling, which returns on the ribbon's ground (the reference)
+LRP bpos rp {{l_rib}}
+VPROBE_RACK rp rp1 0
+CRP rp1 rpc {{c_rack}}
+RCRP rpc 0 {{esr_rack}}
+LRN bneg rn {{l_rib}}
+CRN rn rnc {{c_rack}}
+RCRN rnc 0 {{esr_rack}}
+* the PSU itself, in parallel with that decoupling: its output resistance at low frequency
+* (r_psu), which is what holds each rail below the LC's corner
+RPSUP rp1 0 {{r_psu}}
+RPSUN rn 0 {{r_psu}}
+.control
+ac dec 200 100 2meg
+let zmag = mag(v(vinp) - v(vinn))
+let rack = 100 * mag(i(VPROBE_RACK))
+wrdata zmag.dat zmag
+wrdata rack.dat rack
+quit
+.endc
+.end

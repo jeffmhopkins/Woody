@@ -87,9 +87,10 @@ hops safe is what they carry.** `QH` → next `SER` is data, sampled at the
 is at most 14 ns and hold 0 ns over temperature `[same, p.7]`, so ringing on
 `QH`, whose round trip over a hop is a few nanoseconds, has had hundreds of
 nanoseconds to settle before it is sampled `[calc; judgment, not measured]`.
-That is the **setup** side; the **hold** side, at the same edge, rests on this
-part's unpublished minimum `CLK`→`QH` delay for one hop, `left_thumb` →
-`right_hand` (2026-10-01, A5-2: `key-chain-loom.md`, *The hop hold time*).
+That is the **setup** side; the **hold** side, at the same edge, is held for the
+one hop that races, `left_thumb` → `right_hand`, by `R-HOP-SER` on the main
+board rather than by this part's unpublished minimum `CLK`→`QH` delay
+(2026-10-01, A5-2: `key-chain-loom.md`, *The hop hold time*).
 Every register input the chain drives (`SER`, `CLK`, `SH/LD`) is a Schmitt
 input, hysteresis at least 0.2 V at 2 V and 0.4 V at 4.5 V `[same, p.6]`. The
 edge-sensitive nets, `SCK` and `SH/LD`, are driven by the MCU, not by this

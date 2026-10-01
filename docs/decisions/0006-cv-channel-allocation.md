@@ -218,9 +218,9 @@ code; see the `U-DAC` BOM row.)*
 >
 > **And it carries a requirement the ADR did not know: the C grade is
 > specified only for AVDD = 5.0 V to 5.5 V**, where A/B are specified from
-> 2.7 V. The LM317 sits at 5.21 V nominal so this passes — but E7 selects the
-> divider *on the bench* across the static spread `dac-rail` derives, whose
-> low corner is under 5.00 V, and a selection
+> 2.7 V. E7 trims the LM317 to `dac-rail`, inside that window — but
+> `TRIM-DAC-RAIL`'s travel reaches below 5.00 V on every part (`dac-rail`'s
+> derivation, amended 2026-10-01), and a setting
 > below 5.00 V puts the part out of spec. **5.00 V is a hard floor on that
 > bench step**, which nothing in the roadmap said. `bom.csv` carries it now.
 >
@@ -270,7 +270,7 @@ code; see the `U-DAC` BOM row.)*
 > which is a part and a failure mode for a condition — rack powered, instrument
 > absent — in which nothing is being played. What it costs is that a patch left
 > connected can wake with up to about 7 V of standing breath CV — OFFSET fully
-> counter-clockwise at −4.91 V less 2.3 V at full GAIN `[calc]`, about 8 V with
+> counter-clockwise at −4.89 V less 2.3 V at full GAIN `[calc]`, about 8 V with
 > `REF` at the band's top. E10 is where that
 > gets observed rather than discovered (`ROADMAP.md`).
 
@@ -672,7 +672,7 @@ divider on the same rail. **Sixty-six decibels off the right node** — the rati
 **Divide the offset trimmer from the DAC8568's `VREFOUT` instead**, buffered by
 the spare OPA2197 half. Three things follow, and the third is the good one:
 
-- `VREFOUT` is a 2.5 V reference inside the part, off the LM317's own 5.21 V —
+- `VREFOUT` is a 2.5 V reference inside the part, off the LM317's own rail (`dac-rail`) —
   it does not carry LED current and it does not move when a neighbouring module
   powers up.
 - Buffering it matters for drive: the follower is what lets the trim network
@@ -872,7 +872,7 @@ Three items that are cheap, are invisible once the board is fabbed, and cannot
 be added afterwards.
 
 **1 kΩ in series with each op-amp's non-inverting input where the DAC drives
-it.** The DAC runs from its own 5.21 V regulator and the op-amps from ±12 V, so
+it.** The DAC runs from its own regulator (`dac-rail`) and the op-amps from ±12 V, so
 the two supplies do not come up or collapse together. A driven DAC output into
 an op-amp whose rails are absent forces current through the input clamp
 structure; 1 kΩ bounds it, and it is outside the feedback path so it costs
