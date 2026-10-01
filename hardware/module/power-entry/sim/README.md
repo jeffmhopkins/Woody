@@ -31,7 +31,7 @@ stage on those rails with the DAC at its power-on-reset zero scale.
 | `cm-loop-y-1n` | a what-if: the choke with the 1 nF `C-ISO-Y` it replaced | more than 10 % on the star at the core-loss corner — why `C-ISO-Y` is 22 nF |
 | `iso-input-z` | `isoin.cir`: the impedance `U-ISO` sees looking back into its input filter, `L-CM-ISO`'s leakage included, and the share of its input current that reaches the rack | over 20× inside the converter's −V²/P at every corner; under 1 % at the rack at 550 kHz |
 | `dac-rail-spread` | `dacrail.cir`, DC: `DAC_AVDD` at every corner of the LT3042's guaranteed SET current (98–102 µA) and offset (±2 mV), `R-SET-DAC`'s 0.1 % and drift, 100 nA of SET leakage either way, the input from a tripped fuse to the bus maximum, and the load | inside the DAC8568 C grade's 5.00–5.50 V with 50 mV to spare at both ends, and nominally `dac-rail` — **no trim** |
-| `dac-rail-aged` | the same with `R-SET-DAC` at its ±0.5 % endurance limit as well | still inside 5.00–5.50 V |
+| `dac-rail-aged` | the same with `R-SET-DAC` at its ±0.3 % long-term limit as well (TNPW e3, 225 000 h at rated dissipation) | still inside 5.00–5.50 V |
 | `dac-rail-open-rset` | `R-SET-DAC` open | **recorded, not fail-safe**: the rail goes *up*, to the input less the dropout, over the DAC's 6 V absolute maximum — the one single failure that does |
 | `dac-rail-short-cset` | `C-SET-DAC` (or `R-SET-DAC`) shorted | the rail goes down, to the offset |
 | `dac-rail-startup` | `poweron.cir` across the SET current, `R-SET-DAC` and `C-SET-DAC` | the soft start never overshoots the window; over the 5.00 V floor within 50 ms; the pitch jack within 100 mV of 0 V |

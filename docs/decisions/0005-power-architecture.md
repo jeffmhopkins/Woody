@@ -137,6 +137,15 @@ selected at E7, which measures it and records it. It was an LM317LZ, with a
 divider selected on the bench and then a trimmer — both superseded: ADR 0004;
 `power-entry.md`, *The DAC rail*.)*
 
+*(Amended 2026-10-01, the owner: "Good to accept them" — `dac-rail` at its
+nominal, and **the open-`R-SET-DAC` failure**, which drives the rail up to
+~11 V over the DAC8568's 6 V absolute maximum, **accepted with no protection
+circuit**. It is mitigated three ways: `R-SET-DAC` is an anti-sulfur thin-film
+part; on `module-main` it is kept away from standoffs, connectors and board
+edges and oriented along the board's long edge, inside the `SET` guard ring;
+and on the first build `DAC_AVDD` is measured before `U-DAC` and `U-LVL-MOD`
+are fitted (ROADMAP E7). `power-entry.md`, *The DAC rail*, *Its failures*.)*
+
 **The reason is headroom, not accuracy**, and this ADR said the opposite. It
 claimed "the DAC8568's full-scale output *is* its supply, so a rail the rack is
 allowed to move ±5 % moves the top of the pitch range and the pitch calibration
