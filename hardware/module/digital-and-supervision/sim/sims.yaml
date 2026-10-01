@@ -19,6 +19,12 @@ values:
     - hardware/module/dac8568/netlist.yaml
 models:
   - datasheets/discrete-and-power/LM317L-ti-pspice-snvmaw3.lib
+  # TI's behavioural SN74AHCT125 (SCLM256, generated from datasheet values, typical at 25 C):
+  # its output resistance and its supply-dependent drive are what matter here. NOT used for
+  # U-RX-MOD: TI's SN74AHCT14 model (SCLM253, banked beside it) is the family's generic
+  # AHC model, with CMOS thresholds - V_T+ 2.8 V at VCC 4.5 V - where the part's datasheet
+  # gives TTL ones, 0.9-1.9 V [ds SN74AHCT14.pdf p.5]
+  - datasheets/logic/SN74AHCT125-ti-pspice-sclm256.cir
 # the bus, the 1N5817 fit, the PTC, the bead, the module's analog load and the DAC's supply
 # current are module/power-entry/sim's, stated once there
 params_from: [hardware/module/power-entry/sim/sims.yaml]
@@ -36,14 +42,11 @@ params:
   v_do:       {value: 0.06, source: "dropout, 60 mV max at 10 mA [ds p.3]"}
   gm_ldo:     {value: 10.0, source: "the pass element's error gain, A/V [assumption: stiff; the regulation loop's dynamics are not the question]"}
   r_logic:    {value: 770.0, source: "LOGIC_5V's load, about 6.5 mA at 5 V [repo, power-entry.md 'The logic 5 V', the Load row: 5.0 / 6.5 mA]; a resistance so it is off until the rail arrives (tooling.md section 5)"}
-  # --- U-LVL-MOD (74AHCT125), BEHAVIOURAL
-  r_oh:       {value: 50.0, source: "the 74AHCT125's high-side output resistance: (4.5 - 3.94) V / 8 mA = 70 ohm at 25 C, (4.5 - 3.8) / 8 mA = 87 ohm over temperature [calc, ds SN74AHCT125.pdf p.3]; less at typical (vary 25-87)"}
   k_avdd:     {value: 0, source: "0: U-LVL-MOD's VCC on LOGIC_5V, as netlisted; 1: a WHAT-IF with it on DAC_AVDD (its supply current, part of the logic load, is not moved with it)"}
   r_ser:      {value: 1.0e-3, source: "a WHAT-IF series resistor at the DAC's SYNC pin; 1 mohm is none, as netlisted"}
-  # --- the DAC8568's SYNC pin, BEHAVIOURAL
+  # --- the DAC8568's SYNC pin
+  k_clamp:    {value: 1.0, source: "the pin's power clamp is TI's IBIS model's input_5p0v [POWER Clamp] table, typ column [datasheets/analog/DAC8568-ti-ibis-sbam030.ibs]; its min and max columns are 0.8 and 1.2 times it near 2 V over AVDD (vary)"}
   c_pin:      {value: 3.0e-12, source: "DAC8568 logic input pin capacitance, 3 pF max [ds DAC8568CIPW.pdf p.4]"}
-  is_esd:     {value: 1.0e-14, source: "the pin's ESD diode to AVDD: NOT PUBLISHED. A small on-chip junction [assumption] (vary over three decades): it sets how far over AVDD the pin sits while it conducts, not whether it conducts"}
-  rs_esd:     {value: 10.0, source: "its series resistance [assumption]"}
 
 derived:
   t_up_end: "1e-6 + v['t_rise']"
@@ -51,9 +54,8 @@ derived:
   i_ss: "v['v_out_ldo'] * 1e-9 / v['t_ss']"
 
 vary:
-  r_oh:   {tol: [-0.5, 0.74]}
-  t_ss:   {tol: [-0.5, 1.0]}
-  is_esd: {tol: [-0.9, 99.0]}
+  t_ss:    {tol: [-0.5, 1.0]}
+  k_clamp: {tol: [-0.2, 0.2]}
 
 sims:
   - name: rails-and-sync
@@ -85,7 +87,7 @@ sims:
       - expr: "max['t_l5_up'] < min['t_avdd_up']"
         why: "RECORDED FINDING (2026-10-01): LOGIC_5V arrives first at every corner - the ADP7118's 380 us soft start against the LM317L's C-REG-ADJ start of milliseconds"
       - expr: "min['over_on'] > 0.3 and min['over_off'] > 0.3"
-        why: "RECORDED FINDING, OPEN FOR THE OWNER (2026-10-01): at power-on SYNC is driven high from LOGIC_5V while DAC_AVDD is still rising, and the DAC's SYNC pin sits past its AVDD + 0.3 V absolute maximum [ds DAC8568CIPW.pdf p.2] at every corner, conducting into DAC_AVDD through its input protection (tens of mA, i_esd_on) for most of 10 ms; and again at power-off, where the LM317L's larger dropout lets DAC_AVDD fall first - the datasheet's 'no device pin should be brought high before power is applied' [p.31]. digital-and-supervision.md, 'Still open'. When the design changes this assertion fails, and is rewritten as the requirement"
+        why: "RECORDED FINDING, OPEN FOR THE OWNER (2026-10-01): at power-on SYNC is driven high from LOGIC_5V while DAC_AVDD is still rising, and the DAC's SYNC pin sits past its AVDD + 0.3 V absolute maximum [ds DAC8568CIPW.pdf p.2] at every corner, conducting into DAC_AVDD through its power clamp (over 10 mA, i_esd_on) for most of 10 ms; and again at power-off, where the LM317L's larger dropout lets DAC_AVDD fall first - the datasheet's 'no device pin should be brought high before power is applied' [p.31]. digital-and-supervision.md, 'Still open'. When the design changes this assertion fails, and is rewritten as the requirement"
   - name: what-if-lvl-on-avdd
     # A WHAT-IF, not the netlist: U-LVL-MOD's VCC moved to DAC_AVDD. Its outputs can then
     # never sit over the DAC's supply; U-RX-MOD stays on LOGIC_5V (the 74AHCT125's inputs
