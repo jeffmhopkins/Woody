@@ -70,10 +70,10 @@ LED) comes back on the five ground pins. Pin 1 is at the top left
 | 5, 6 | `AGND_MOD` | `RESP_WIPER` |
 | 7, 8 | `GAIN_FLOOR` | `RESP_V_SHAPED` |
 | 9, 10 | `OFFSET_WIPER` | `AGND_MOD` |
-| 11, 12 | `PITCH_JACK` | `DAC_AVDD` |
-| 13, 14 | `AGND_MOD` | `BREATH_JACK` |
-| 15, 16 | `MOD1_JACK` | `MOD2_JACK` |
-| 17, 18 | `MOD3_JACK` | `AGND_MOD` |
+| 11, 12 | `BREATH_JACK` | `DAC_AVDD` |
+| 13, 14 | `AGND_MOD` | `PITCH_JACK` |
+| 15, 16 | `MOD1_JACK` | `MOD3_JACK` |
+| 17, 18 | `MOD2_JACK` | `AGND_MOD` |
 | 19, 20 | `UMBILICAL_POS12` | `MOD4_JACK` |
 
 Why this order:
@@ -88,10 +88,13 @@ Why this order:
   side; the offset pot, in the middle, closes the group. A ground row
   (9–10 and 13) separates the pots' high-impedance wipers from the jack
   outputs.
-- **Each jack on its own column's side**: `PITCH`, `MOD1`, `MOD3` are the
-  left column of jacks and take odd pins; `BREATH`, `MOD2`, `MOD4` the right
+- **Each jack on its own column's side**: `BREATH`, `MOD1`, `MOD2` are the
+  left column of jacks and take odd pins; `PITCH`, `MOD3`, `MOD4` the right
   column and even pins. The order down the header is the jacks' order down
-  the panel.
+  the panel. When the owner moved four jacks (ADR 0024 point 13,
+  2026-10-01), their pins moved with them, on both sheets: keeping the
+  pins would have put four jack-board traces across the header, between
+  its pads, to reach the far column.
 - **The LED's supply at the bottom**, because the LED is low in the jack
   board's left leg.
 

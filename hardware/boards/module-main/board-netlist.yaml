@@ -1354,7 +1354,7 @@ nets:
   - U6.OUT
   /BREATH_JACK:
   - C22.1
-  - J2.14
+  - J2.11
   - R26.2
   /BREATH_SENSE:
   - D5.C
@@ -1418,11 +1418,11 @@ nets:
   - R41.2
   /MOD2_JACK:
   - C37.1
-  - J2.16
+  - J2.17
   - R46.2
   /MOD3_JACK:
   - C38.1
-  - J2.17
+  - J2.16
   - R51.2
   /MOD4_JACK:
   - C39.1
@@ -1437,7 +1437,7 @@ nets:
   - R23.1
   /PITCH_JACK:
   - C29.1
-  - J2.11
+  - J2.14
   - R34.2
   - RV3.CCW
   /RESP_V_IN_HALF:
