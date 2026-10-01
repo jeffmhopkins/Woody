@@ -261,7 +261,7 @@ components:
     - 2
   R1-1:
     of: R-MODGAIN-IN
-    value: 10k 1%
+    value: 10k 0.1%
     drawn_as: R1
     pins:
     - 1
@@ -269,7 +269,7 @@ components:
     note: To the shared reference. R2/R1 = k = 3, so gain is 1 + k = exactly 4
   R1-2:
     of: R-MODGAIN-IN
-    value: 10k 1%
+    value: 10k 0.1%
     drawn_as: R1
     pins:
     - 1
@@ -277,7 +277,7 @@ components:
     note: To the shared reference. R2/R1 = k = 3, so gain is 1 + k = exactly 4
   R1-3:
     of: R-MODGAIN-IN
-    value: 10k 1%
+    value: 10k 0.1%
     drawn_as: R1
     pins:
     - 1
@@ -285,7 +285,7 @@ components:
     note: To the shared reference. R2/R1 = k = 3, so gain is 1 + k = exactly 4
   R1-4:
     of: R-MODGAIN-IN
-    value: 10k 1%
+    value: 10k 0.1%
     drawn_as: R1
     pins:
     - 1
@@ -293,28 +293,28 @@ components:
     note: To the shared reference. R2/R1 = k = 3, so gain is 1 + k = exactly 4
   R2-1:
     of: R-MODGAIN-FB
-    value: 30k 1%
+    value: 30k 0.1%
     drawn_as: R2
     pins:
     - 1
     - 2
   R2-2:
     of: R-MODGAIN-FB
-    value: 30k 1%
+    value: 30k 0.1%
     drawn_as: R2
     pins:
     - 1
     - 2
   R2-3:
     of: R-MODGAIN-FB
-    value: 30k 1%
+    value: 30k 0.1%
     drawn_as: R2
     pins:
     - 1
     - 2
   R2-4:
     of: R-MODGAIN-FB
-    value: 30k 1%
+    value: 30k 0.1%
     drawn_as: R2
     pins:
     - 1
