@@ -620,9 +620,9 @@ layout:
     status: nominal
     source: "[adr 0004] 'three knobs across (gain, offset, response)', left to right"
   jacks:
-    value: [["J-CV-PITCH", "J-CV-BREATH"], ["J-CV-MOD1", "J-CV-MOD2"], ["J-CV-MOD3", "J-CV-MOD4"]]
-    status: nominal
-    source: "[adr 0024] rows top to bottom, left then right: PITCH and BREATH on the row under the knobs that shape breath; MOD 1-4 below, read like text"
+    value: [["J-CV-BREATH", "J-CV-PITCH"], ["J-CV-MOD1", "J-CV-MOD3"], ["J-CV-MOD2", "J-CV-MOD4"]]
+    status: settled
+    source: "[adr 0024 point 13] rows top to bottom, left then right: BREATH and PITCH on the row under the knobs that shape breath, BREATH on the left; MOD 1 and 2 down the left column, MOD 3 and 4 down the right. The owner, 2026-10-01: 'swap the breath and pitch Jack locations' and 'swap mod 2 and 3 position'"
 
 # ---------------------------------------------------------------- rules ----
 # The thresholds module.scad's DRC measures against. Each is a design choice
@@ -837,9 +837,9 @@ art:
       status: settled
       source: "[adr 0026] POT-GAIN, POT-OFFSET, POT-RESP, left to right. The third is 'curve': the owner, 2026-09-30, 'Replace response with curve'"
     jacks:
-      value: [["pitch", "breath"], ["mod 1", "mod 2"], ["mod 3", "mod 4"]]
+      value: [["breath", "pitch"], ["mod 1", "mod 3"], ["mod 2", "mod 4"]]
       status: settled
-      source: "[adr 0026] as layout.jacks, each knocked out of a BAR pill in its legend zone: every jack is an output, and the solid box marks an output - the owner, 2026-09-30"
+      source: "[adr 0026] as layout.jacks (each word follows its jack: the owner, 2026-10-01, ADR 0024 point 13), each knocked out of a BAR pill in its legend zone: every jack is an output, and the solid box marks an output - the owner, 2026-09-30"
     toggle:
       value: ["off", "on"]
       status: settled

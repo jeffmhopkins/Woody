@@ -375,10 +375,13 @@ def layout():
     # -- island B: every jack an output, each word knocked out of a BAR pill
     # filling its legend zone from the jack's side to art_in inside the island
     jw = get("text.jacks")
-    jz = [["J-CV-PITCH legend", "J-CV-BREATH legend"], ["J-CV-MOD1 legend", "J-CV-MOD2 legend"], ["J-CV-MOD3 legend", "J-CV-MOD4 legend"]]
+    # the zones in layout.jacks' order, so text.jacks reads in the same order
+    jz = [[f"{j} legend" for j in row] for row in leaf(cfg["layout"], "jacks")]
     isl = {n: zones[n]["rect"] for n in zones if zones[n]["kind"] == "island"}
     ix0, _, ix1, _ = isl["island B"]
-    for r in range(3):
+    if [len(r) for r in jw] != [len(r) for r in jz]:
+        raise SystemExit("panel-art: art.text.jacks and layout.jacks are not the same shape")
+    for r in range(len(jz)):
         for c in range(2):
             z = Z(jz[r][c])
             pz = (max(z[0], ix0 + art_in), z[1], z[2], z[3]) if c == 0 else (z[0], z[1], min(z[2], ix1 - art_in), z[3])
