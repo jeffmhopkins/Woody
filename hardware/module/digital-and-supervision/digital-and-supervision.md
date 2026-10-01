@@ -28,7 +28,8 @@ The `Dir` and `Peer` columns are defined once in
 | `CS_MOD` | in | `interfaces/spi-link` | `umbilical-pinmap`, `spi-series-r` | From the instrument, arriving on `J-UMBILICAL` (`J-UMB-MOD` in the spi-link netlist). Pulled **up**, both sides: `R-PULL-CS` (100 kΩ to `LOGIC_5V`) here, and 10 kΩ to 3V3 at the instrument. Shares a pair with `DIG_GND` |
 | `DIG_GND` | ref | `interfaces/spi-link`, `module/power-entry` | `umbilical-pinmap`, `dig-gnd-topology` | `CS_MOD`'s return partner, and the plane this circuit sits over. It meets the other grounds only at the star (`NT-DIG-MOD`, on `module/power-entry`'s page) |
 | `SCLK_DAC`, `DIN`, `SYNC` | out | `module/dac8568`, `interfaces/spi-link` | — | **Sourced here** — the 74AHCT125 (`U-LVL-MOD`) is this circuit's part, driven by `U-RX-MOD`. The DAC-side three of the six `R-SPI-PULL` sit on these |
-| `LOGIC_5V` | in | `module/power-entry` | — | The module's own 5 V (`U-REG-LOGIC`). Supplies `U-RX-MOD` and the 74AHCT125 and nothing else. The bus +5 V is not used |
+| `LOGIC_5V` | in | `module/power-entry` | — | The module's own 5 V (`U-REG-LOGIC`). Supplies `U-RX-MOD` and the top of `R-PULL-CS`, and nothing else — **not** the 74AHCT125 (next row). The bus +5 V is not used |
+| `DAC_AVDD` | in | `module/power-entry` | `dac-rail` | The DAC's own rail. `U-LVL-MOD`'s `VCC`, decoupled at the pin by `C-DEC-LVL`, and the top of `R-PULL-SYNC` — so nothing this circuit drives into the DAC can be above the DAC's supply. See *The buffer's supply* |
 | `OE_MOD` ×4 | ref | `module/link-supervision` | — | This buffer's four enables, tied to `GND` and permanently enabled. The circuit that used to gate them is not fitted. **Not `OE_INST`**, the carrier level shifter's |
 
 ## The circuit
@@ -59,7 +60,7 @@ block below is where the DAC box was.*
    │            │         ►|o = one gate of [U-RX-MOD 74AHCT14],
    │            │         Schmitt, two per signal     ┌─────┴────────┐
    └── 8 DIG_GND│                                     │  74AHCT125   │
-        │   [R-SPI-PULL x3]                           │  LOGIC_5V    │
+        │   [R-SPI-PULL x3]                           │  DAC_AVDD    │
         │    SCLK↓ MOSI↓ CS↑(100k)                    │  OE x4 → GND │  tied ENABLED
         │    at the cable node                        └────┬─────────┘
         │                                                  │
@@ -107,6 +108,43 @@ gates, three signals, none spare.
 - **Supply.** `LOGIC_5V`, decoupled at the pin by `C-DEC-RX`; what it adds to
   `U-REG-LOGIC`'s load is on `module/power-entry`.
 
+## The buffer's supply — `U-LVL-MOD` on `DAC_AVDD`
+
+The owner, 2026-10-01, on the three options [`sim/README.md`](sim/README.md) set out: *"go with option 1"*.
+**`U-LVL-MOD`'s `VCC` is `DAC_AVDD`**, the DAC's own rail, with `C-DEC-LVL` at
+its pin. `U-RX-MOD` stays on `LOGIC_5V`.
+
+- **Why.** The DAC8568's digital inputs are rated to `AVDD + 0.3 V`
+  `[ds DAC8568CIPW.pdf p.2]`, and *"no device pin should be brought high before
+  power is applied to the device"* `[p.31]`. `LOGIC_5V` arrives first at
+  power-on and leaves last at power-off (the ADP7118's 380 µs soft start against
+  the LM317L's `C-REG-ADJ` start; the LM317L's larger dropout on the way down),
+  and `SYNC` idles high. On the DAC's own rail the buffer's output high is that
+  rail, so `SYNC`, `SCLK_DAC` and `DIN` cannot be above it, on or off.
+  [`sim/`](sim/README.md), `rails-and-sync`, holds this as a requirement on all
+  three pins at every corner, with the other two driven high as a
+  self-powered instrument could hold them.
+- **Its inputs sit above its `VCC` while `DAC_AVDD` rises and falls, and that
+  is in the rating.** They come from `U-RX-MOD` at `LOGIC_5V`. The 74AHCT125's
+  input range is −0.5 to 7 V with no reference to `VCC`, its input clamp is for
+  `VI < 0` only, and `I_I` is ±1 µA at `VI` = 5.5 V for any `VCC` from 0 to
+  5.5 V `[ds SN74AHCT125.pdf p.3, p.4]` — no clamp to `VCC`, the same property
+  that makes back-driving an unpowered module safe. Nothing flows from
+  `LOGIC_5V` into `DAC_AVDD` through it.
+- **`SYNC`'s idle state.** `CS_MOD` is pulled up by `R-PULL-CS` to `LOGIC_5V`
+  (and by the instrument's 10 kΩ to 3.3 V when one is plugged in), so `CS_BUF`
+  is high and gate 3 drives `SYNC` to its own `VCC`, `DAC_AVDD`; `R-PULL-SYNC`
+  goes to the same rail. Neither reaches past `DAC_AVDD`, at any point of
+  power-up or power-down. `R-PULL-CS` itself touches only `U-RX-MOD`'s input.
+- **What it costs.** In steady state the buffer's inputs sit at `LOGIC_5V`
+  while its `VCC` is `dac-rail`, a fraction of a volt above — far over its
+  `V_IH`, with a `ΔI_CC` well under the datasheet's 3.4 V row. Its current, and
+  the switching and pull currents of its outputs, now come off the LM317L
+  instead of the ADP7118: re-derived on
+  [`power-entry.md`](../power-entry/power-entry.md), *The DAC rail's load*. The
+  switching current sits on the DAC's supply, which is why `DAC_AVDD` reaches
+  `U-LVL-MOD` on its own branch from `C-REG-OUT`, not through the DAC's pin.
+
 ## The pin map, and why the pairing is what it is
 
 *Moved verbatim from the tail of "What this redraw changed", 2026-09-21. The
@@ -122,14 +160,6 @@ and neither end of a cable states it alone. The drawing above stays here.*
 
 ## Still open
 
-- **`SYNC` is driven high before the DAC has its supply — open for the
-  owner, 2026-10-01.** `U-LVL-MOD` runs from `LOGIC_5V`, which arrives first
-  at power-on and leaves last at power-off, and `SYNC` idles high, so for
-  milliseconds each way the DAC's `SYNC` pin sits over its `AVDD + 0.3 V`
-  absolute maximum and feeds `DAC_AVDD` through its input protection
-  `[ds DAC8568CIPW.pdf p.2, p.31]`. Simulated, with the numbers and three
-  options, in [`sim/README.md`](sim/README.md); decided by the owner's choice
-  among them.
 - **An ESP32-S3 NVS commit or OTA write disables the instruction cache** and can
   stall non-IRAM code on both cores. With no watchdog there is no `CLR` to fire
   mid-note, so the consequence is now a *stalled refresh* rather than a reset:
@@ -141,9 +171,10 @@ and neither end of a cable states it alone. The drawing above stays here.*
 it made a reversed 16-pin ribbon dangerous, **zero of eight** surveyed
 published designs take a sub-12 V rail from the bus, and it was the only rail
 with no reverse protection. The owner: *"Create the 5v locally"* and *"We keep
-the standard header, we just don't use the 5 volt."* So the 74AHCT125 runs
-from `LOGIC_5V`, `U-REG-LOGIC` on `module/power-entry`, and `J-PWR-EURO`'s
-+5 V pins are no-connects (ADR 0023 point 3).
+the standard header, we just don't use the 5 volt."* So the module's 5 V
+logic runs from `LOGIC_5V`, `U-REG-LOGIC` on `module/power-entry`, and
+`J-PWR-EURO`'s +5 V pins are no-connects (ADR 0023 point 3). The 74AHCT125
+then moved to `DAC_AVDD` on 2026-10-01 — *The buffer's supply*, above.
 
 **The cable-side `CS` pull-up — settled 2026-09-30** (owner: *"Fix the SPI
 pull up"*). It had no rail on this board. It is now two pulls, both up: 10 kΩ

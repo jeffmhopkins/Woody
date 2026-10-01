@@ -64,10 +64,10 @@ the sheet must be mirrored in `sims.yaml`.
   channel at zero scale from the start. `R-BIAS-DAC` is what the page relies on
   for that window. The datasheet's power-on glitch is in
   [`dac8568/sim`](../../dac8568/sim/).
-- **`LOGIC_5V` and `SYNC`.** `U-REG-LOGIC` is not in this deck; its race with
-  `DAC_AVDD`, and what `SYNC` does to the DAC meanwhile, is
-  [`digital-and-supervision/sim`](../../digital-and-supervision/sim/)'s, and
-  open.
+- **`LOGIC_5V` and the DAC's SPI pins.** `U-REG-LOGIC` is not in this deck;
+  its race with `DAC_AVDD`, and the requirement that `SYNC`, `SCLK_DAC` and
+  `DIN` stay under `DAC_AVDD + 0.3 V` through it, are
+  [`digital-and-supervision/sim`](../../digital-and-supervision/sim/)'s.
 
 ## What a result is worth
 
