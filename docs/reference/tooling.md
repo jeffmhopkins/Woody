@@ -644,16 +644,17 @@ so.
 |---|---|
 | one key's network, with its press, release, filter and corners | `hardware/cluster/key-switch-network/sim/` |
 | the left-hand key board as wired, all keys released and pressed | `hardware/boards/key-board-lh/sim/` |
+| the right-hand key board as wired, generated from its board netlist with the left-hand board's models | `hardware/boards/key-board-rh/sim/` |
 | the key chain: its 3V3 rail (bead, ribbon, decoupling, the do-not-fit bulk capacitor) and SCK and QH over the ribbon | `hardware/interfaces/key-chain-loom/sim/` |
 | the reference buffer's loop, output impedance and load step, and TI's Figure 56 (TI's OPA2197 and REF5050 models) | `hardware/carrier/breath-excitation-reference/sim/` |
 | the breath link's CMRR across the umbilical, both ends' parts at every tolerance corner (TI's INA828 and OPA2197) | `hardware/module/breath-receive-stage/sim/` |
 | the pitch stage's step into a passive mult, and its loop at the same loads | `hardware/module/pitch-stage/sim/` |
 | rack power-on: the rails, the LM317L's `DAC_AVDD` (TI's model) and the pitch jack | `hardware/module/power-entry/sim/` |
 | the umbilical load switch's start, with a behavioural LT1641 built from its datasheet | `hardware/module/umbilical-load-switch/sim/` |
-| SCLK, MOSI and CS_MOD over the umbilical as coupled lossy lines (ngspice `CPL`), from a banked Cat5e datasheet, into the module's 74AHCT125 | `hardware/interfaces/spi-link/sim/` |
+| SCLK, MOSI and CS_MOD over the umbilical as coupled lossy lines (ngspice `CPL`), from a banked Cat5e datasheet, through each line's pull and `R-RX-MOD`/`C-RX-MOD` into the receiver `U-RX-MOD` (74AHCT14) | `hardware/interfaces/spi-link/sim/` |
 | the four mod channels and their shared reference: range, a stale or wrong `V_ref`, a step and the loop into a passive mult, crosstalk | `hardware/module/mod-channels/sim/` |
 | the breath output stage: its offset table, gain ends, clip, a step and the loop into a passive mult, and the −12 V rail's path to the jack | `hardware/module/breath-output-stage/sim/` |
-| the response shaper's curve at `POT-RESP`'s ends and centre, and its clip, with a behavioural 1N4148W | `hardware/module/breath-response-shaper/sim/` |
+| the response shaper's curve at `POT-RESP`'s ends and centre, and its clip, with a behavioural `D-RESP` fitted to the 1N4448W's guaranteed window | `hardware/module/breath-response-shaper/sim/` |
 | the breath ADC's anti-alias filter, its time constant, and the MCP3202's sample capacitor against it | `hardware/carrier/breath-adc/sim/` |
 | the instrument's input LC against the buck's negative resistance, and its start from `U-ISO` through the load switch and the cable, cold and hot-plugged | `hardware/carrier/power-entry-instrument/sim/` |
 | the LED row's data line: its edge and `T0H` at the first LED | `hardware/carrier/led-strip-drive/sim/` |

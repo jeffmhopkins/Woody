@@ -215,9 +215,10 @@ ref,category,part,manufacturer,description,package,qty,status,source,adr,notes
 > number is `wc -l` on that file against `merge-bom.py --check`'s row total;
 > this paragraph carried "50 rows of 138" until 2026-09-22, when it was 32 of
 > 140, and the §4 closing note already admitted this section had gone stale
-> once before. Two of its clusters name circuits this corpus has no page for — six
-> identical jack-protection networks drawn three times, and nineteen
-> decoupling capacitors with no home.
+> once before. It holds mechanical parts, cables, the PCBs themselves and
+> parts deliberately not fitted — read the file, not a description of it.
+> (The two clusters this paragraph used to name, jack-protection networks and
+> homeless decoupling capacitors, have since been drawn and left it.)
 >
 > *This section described `bom.csv` as the file you edit for several hours
 > after it stopped being one. Found by a cold reviewer. It is the project's
@@ -233,9 +234,16 @@ ref,category,part,manufacturer,description,package,qty,status,source,adr,notes
   `merge-bom.py` does both, one level up: it now catches "two circuits both
   claim this refdes", with both file:line locations named, which the old
   same-file check could not see.
-- The `notes` column is append-only in practice: corrections are added after a
-  ` | ` with a date, and the superseded text is left in place. That is what
-  makes the checker's refutation detection work, and it is why rows are long.
+- **The `notes` column carries no history** (CLAUDE.md rule 2b). It says what
+  a builder must do, and nothing about what someone used to think: when a
+  value changes, *replace* the sentence. A retired value left in a `.csv` cell
+  is a defect to `check-staleness.py` whatever wording sits beside it — the
+  refutation exemption is for `.md` only. History goes to the circuit's
+  `notes.md` or to git. `python3 tools/audit-notes.py --regrown` flags rows
+  that have turned back into logs. (This bullet told editors the opposite —
+  append a dated correction and leave the superseded text — until
+  2026-10-01, a week after the rule changed. Found by the pre-layout review,
+  A8-6.)
 - **`TBD`/`open` must say what decides them.** Two rows are deliberately
   blocked on a datasheet and say so; that is correct, not a defect.
 
