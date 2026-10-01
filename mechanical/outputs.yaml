@@ -256,3 +256,74 @@ clashes:
     src: mechanical/cad/woody_body.scad
     out: mechanical/clash.txt
     allow: mechanical/clash-allow.yaml
+
+# THE PHOTOGRAPHS (owner, 2026-10-01): tools/render-instrument.py, Blender
+# Cycles on the CPU, as the module's are (mechanical/module/outputs.yaml). The
+# shell and cassette are the body CAD's own solids, one STL per named solid;
+# the main board and the key boards are their .kicad_pcb, exported with every
+# part's 3D model and the copper, placed in the CAD's frame and checked
+# against its outline. Slow - tens of minutes each - so they rebuild only when
+# what they show moved. config/render.yaml holds the explode distances.
+scripts:
+  - name: photo-hero
+    title: The instrument, assembled, three-quarter view
+    cmd: [tools/render-instrument.py, --view, hero]
+    inputs: &photo_inputs [config/render.yaml, mechanical/cad/woody_body.scad, mechanical/cad/generated/params.scad, mechanical/cad/vendor/ks33.stl,
+                           hardware/boards/main-board/main-board.kicad_pcb, hardware/boards/main-board/layout.yaml,
+                           hardware/boards/key-board-lh/key-board-lh.kicad_pcb, hardware/boards/key-board-lh/layout.yaml,
+                           hardware/boards/key-board-rh/key-board-rh.kicad_pcb, hardware/boards/key-board-rh/layout.yaml,
+                           datasheets/led/WS2815B-5050-3D.step, datasheets/mechanical/GATERON-KS-33-3D.step,
+                           hardware/lib/woody.3dshapes/Hanxia_HX_PZ2.54-1x8P_WZ.step, hardware/lib/woody.3dshapes/NXP_Case1351-01_MPXV4006DP.step,
+                           hardware/lib/woody.3dshapes/Samtec_SHF-106-01-L-D-RA.step, hardware/lib/woody.3dshapes/XKB_X1270WR-2x12A-9TV01.step,
+                           mechanical/module/blender/studio_small_08_1k.hdr]
+    out: mechanical/renders/photo-hero.png
+    stamp: Woody body
+    note: "Sides rendered clear (config/render.yaml side_glass) to show the inside; the instrument's sides are frosted (ADR 0009)."
+    layout_sensitive: true
+  - name: photo-open
+    title: Oak top, key plate and the near side off - the cassette and its boards in the shell
+    cmd: [tools/render-instrument.py, --view, open]
+    inputs: *photo_inputs
+    out: mechanical/renders/photo-open.png
+    stamp: Woody body
+    note: "Sides rendered clear (config/render.yaml side_glass) to show the inside; the instrument's sides are frosted (ADR 0009)."
+    layout_sensitive: true
+  - name: photo-exploded
+    title: The whole instrument pulled apart along its stack - shell, cassette, boards, plates, keys, lid
+    cmd: [tools/render-instrument.py, --view, exploded]
+    inputs: *photo_inputs
+    out: mechanical/renders/photo-exploded.png
+    stamp: Woody body
+    note: "Sides rendered clear (config/render.yaml side_glass) to show the inside; the instrument's sides are frosted (ADR 0009)."
+    layout_sensitive: true
+  - name: photo-cassette
+    title: The cassette alone, pulled apart in its build order - bottom plate, spacers, main board, standoffs, key boards, spacers, key plate, screws
+    cmd: [tools/render-instrument.py, --view, cassette]
+    inputs: *photo_inputs
+    out: mechanical/renders/photo-cassette.png
+    stamp: Woody body
+    layout_sensitive: true
+  - name: photo-board-mouth
+    title: The main board in the cassette at the mouth end - breath sensor, the LED row lit under the left key board, the U-bolt
+    cmd: [tools/render-instrument.py, --view, board-mouth]
+    inputs: *photo_inputs
+    out: mechanical/renders/photo-board-mouth.png
+    stamp: Woody body
+    note: "Sides rendered clear (config/render.yaml side_glass) to show the inside; the instrument's sides are frosted (ADR 0009)."
+    layout_sensitive: true
+  - name: photo-board-tail
+    title: The main board's tail end, key boards off - J-MCU, the regulator, J-UMB on the tongue, the etherCON on its adapter
+    cmd: [tools/render-instrument.py, --view, board-tail]
+    inputs: *photo_inputs
+    out: mechanical/renders/photo-board-tail.png
+    stamp: Woody body
+    note: "Sides rendered clear (config/render.yaml side_glass) to show the inside; the instrument's sides are frosted (ADR 0009)."
+    layout_sensitive: true
+  - name: photo-underside
+    title: From below, the oak bottom off - the bottom plate, its windows under the through-hole tails, the thumb keys
+    cmd: [tools/render-instrument.py, --view, underside]
+    inputs: *photo_inputs
+    out: mechanical/renders/photo-underside.png
+    stamp: Woody body
+    note: "Sides rendered clear (config/render.yaml side_glass) to show the inside; the instrument's sides are frosted (ADR 0009)."
+    layout_sensitive: true

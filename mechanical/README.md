@@ -22,6 +22,33 @@ proves each one still shows the model it names.
 
 ![The mouth end close up: oak cap and sanded edges](renders/detail-mouth-end.png)
 
+## Photographs
+
+Rendered in Blender (Cycles) by [`tools/render-instrument.py`](../tools/render-instrument.py),
+ledgered and stamped like every other output here. The shell, plates, columns,
+keycaps and tail equipment are the body CAD's own solids, one per named solid;
+**the boards are the real ones** - each `.kicad_pcb` exported with every part's
+3D model, its copper, mask and silk (colours from its `layout.yaml` `fab:`),
+placed in the CAD's frame, and refused if its outline disagrees with the CAD's
+by more than 0.05 mm. Explode distances are picture conventions in
+[`config/render.yaml`](../config/render.yaml). The wood is ADR 0009's finish
+(dark stain, grain showing, satin) drawn procedurally - illustrative, not a
+photograph of a board. **Sides rendered clear to show the inside; the
+instrument's sides are frosted** (ADR 0009) - a render-only choice
+(`config/render.yaml` `side_glass`, owner 2026-10-01), said again in each
+picture's footer.
+
+![The instrument, three-quarter view](renders/photo-hero.png)
+
+| | |
+|---|---|
+| ![Open](renders/photo-open.png) Oak top, key plate and the near side off: the cassette in the shell | ![Underside](renders/photo-underside.png) From below, the oak bottom off: the bottom plate and its windows under the through-hole tails |
+| ![Mouth end](renders/photo-board-mouth.png) The main board at the mouth end, the LED row lit under the left key board | ![Tail end](renders/photo-board-tail.png) The tail end, key boards off: J-MCU, the regulator, J-UMB on the tongue, the etherCON's adapter |
+
+![The whole instrument pulled apart along its stack](renders/photo-exploded.png)
+
+![The cassette alone, pulled apart in its build order](renders/photo-cassette.png)
+
 ## The one rule
 
 **Change the YAML, run the build, commit what it produced.** Never draw a
