@@ -23,6 +23,26 @@ feels right.
 > the chosen sheet under the chosen LEDs, before the sides are ordered
 > (`SIDE-ACRYLIC`).
 
+> **Amended 2026-10-01 (owner): the maker's mark goes on the oak top.**
+> "Use main's newest branding for the logo on the top of the controller,
+> above the LH keys, between the keys and the end of the instrument" - and,
+> pointing at the plain oak between the mouth cap's seam and the first left
+> key's cap slot, **"Logo should be here, scale as appropriate."** The mark
+> is the Space Coast Synthesizers orbit-wave mark that `branding/` owns
+> (`branding/README.md`). It is **etched into the oak top's playing face and
+> filled flush with pigmented epoxy** in the README's colour-fill scheme,
+> which is the one it gives for dark woods like this stain; the top comes off
+> the board finished like the rest of the face. The band is derived - the
+> mouth cap's inside face to the first top cap slot - so the mark follows the
+> layout; its scale, turn, depth and fill are `config/body.yaml` `logo`, each
+> with its reasoning, and `mechanical/drc.echo` checks that it fits the band,
+> that the etch leaves wood over the column screws' pockets beneath it, and
+> what its smallest gap comes to once scaled. The etch is its own cut file,
+> `mechanical/export/oak-logo.dxf`, in the oak panels' frame. **Open:** the
+> scaled mark's gaps are under the README's laser guideline, so an etch test
+> on an offcut of the top's own board sets the depth and confirms the fill
+> stays in its two colours (ROADMAP, *Bench measurements*).
+
 ## Envelope
 
 **Width 2.25 inches (57 mm); thickness 39.0 mm, about 1.54 inches** — the

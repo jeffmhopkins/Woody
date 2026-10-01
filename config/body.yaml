@@ -1144,3 +1144,52 @@ lighting:
     value: [7.6, 6.1]
     status: settled
     source: "a centred rectangle round the footprint's courtyard, woody:LED_WS2815B-V1_PLCC6_5.4x5.0mm_P1.6mm [repo hardware/lib/woody.pretty]: the courtyard is x -3.45..3.80 and y -2.75..3.05 (7.25 x 5.80), off centre where it takes in the silk chamfer mark, so this is twice its larger half each way [calc: 2 x 3.80, 2 x 3.05], which covers it at either rotation"
+
+# ---------------------------------------------------------------- logo ----
+logo:
+  # THE MAKER'S MARK ON THE OAK TOP (owner, 2026-10-01: "Logo should be here,
+  # scale as appropriate", pointing at the plain oak between the mouth cap's
+  # seam and LH1's cap slot; earlier, "use main's newest branding for the logo
+  # on the top of the controller, above the LH keys, between the keys and the
+  # end of the instrument"). The mark is branding/'s, which owns its artwork,
+  # its size at 100 % and its clearances (branding/export/spec.json), its etch
+  # practice and its colour-fill scheme (branding/README.md; the colours are
+  # `EPOXY` in branding/build.py). tools/cad.py reads those into params.scad;
+  # nothing of the mark is restated here. The band it sits in is DERIVED - the
+  # mouth cap's inside face to the first top cap slot - so it follows the
+  # layout; drc.echo prints the band, the mark's size and every margin.
+  artwork:
+    value: "scs-orbit-wave-mark"
+    status: settled
+    source: "owner, 2026-10-01 ('use main's newest branding'): branding/export/scs-orbit-wave-mark.dxf, the Space Coast Synthesizers orbit-wave mark - five closed outlines, black = etched. woody_body.scad imports that file by a literal path (cad.py's dependency walk reads literals) and asserts it is this one"
+  scale:
+    value: 0.72
+    status: nominal
+    source: "owner, 2026-10-01: 'scale as appropriate'. Turned across the body (rotation), the ring's height runs along it, so the band's length sets the scale; the largest that keeps margin_min to the seam and to the cap slot is about 0.73, and 0.72 keeps a quarter-millimetre more each end for the etch's spread and sanding the fill flush [calc in drc.echo 'logo fits its band']. The across margin to the roundover's flat is then not the limit. Scaling shrinks the mark's own clearances below branding/README's guideline - drc.echo 'logo: smallest gap in the etch'"
+    decided_by: "the etch test on an offcut of the top's own board (ROADMAP open item): if the fill bridges the scaled gaps, a smaller mark is no help - branding/build.py's gaps would widen instead"
+  rotation:
+    value: 90
+    status: nominal
+    source: "degrees, the artwork turned so its top faces the mouth end: the mark reads upright in the plan drawings (mouthpiece at the top) and to an audience facing a player holding the instrument mouth-up, which is how a maker's mark on a played instrument is read; the player sees it inverted. Turned this way its wide axis (the wave) runs across the body, the only way it fits the band at a readable size - along the body its wave, not its ring, would have to fit the band's length, about three quarters of this scale [calc: the mark's height over its width, branding/export/spec.json]"
+  offset:
+    value: [0.0, 0.0]
+    status: nominal
+    source: "mm from the band's centre (along the body) and the centreline (across): centred, so the margins to the seam and the slot are equal"
+  margin_min:
+    value: 3.0
+    status: nominal
+    source: "owner's brief, 2026-10-01: at least ~3 mm of plain oak between the mark's extent and the mouth cap's seam, the first cap slot, and the long edges' roundover flat - less and the mark reads as crowded against a joint or a moving cap [drawing convention]"
+  depth:
+    value: 1.0
+    status: nominal
+    source: "etch depth into the oak top: branding/README.md 'Colour fill (dark woods)' - etched deeper than a plain burn (its 'Etching notes' range) so the epoxy has something to key into. drc.echo 'logo etch leaves wood over the column screw pockets' checks the oak left under it"
+    decided_by: "the etch test on an offcut (ROADMAP open item), which sets the depth the shop's laser gives"
+  fill:
+    value: "epoxy"
+    status: nominal
+    source: "branding/README.md 'Colour fill (dark woods)': the etch filled with pigmented epoxy and sanded flush, in its scheme (wave and moon one colour, ring another; `EPOXY` in branding/build.py), because the top is dark-stained oak (ADR 0009 'Finishes'). 'plain' = a bare etch, no fill solids drawn"
+  laser_min_gap:
+    value: 1.0
+    status: tbd
+    source: "the narrowest wall of oak a raster etch leaves standing between two etched areas without burning through or chipping out in oak [from memory - no banked figure]. drc.echo 'logo: smallest gap in the etch' fails under it, and notes the gap if it is under the mark's own clearance at 100 % (branding/README.md 'Geometry', the laser guideline)"
+    decided_by: "the etch test on an offcut (ROADMAP open item)"
