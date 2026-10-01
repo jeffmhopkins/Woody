@@ -12,6 +12,20 @@ dimensions, not a source of figures; `tools/lib-models.py --check` fails if a
 file no longer matches what the script builds. KiCad's own models are named
 with `${KICAD9_3DMODEL_DIR}` and installed by `tools/setup-env.sh`.
 
+**JLC's rotations.** `jlc-rotation.csv` holds, per LCSC part, the angle
+between KiCad's footprint at 0° and the footprint JLCPCB's placement preview
+draws for that part (its EasyEDA library footprint, banked in `datasheets/`
+and named in the row's `evidence`). `tools/pcb.py render` adds it to each
+machine-placed part's rotation in the board's `fab/*-cpl-jlc.csv`, after
+mirroring a bottom-side part's angle to 180° − KiCad's, which is how JLC
+reads the bottom (`[web https://kibot.readthedocs.io/en/master/configuration/filters/rot_footprint.html,
+2026-10-01]`, `mirror_bottom`; `[web https://raw.githubusercontent.com/Bouni/kicad-jlcpcb-tools/main/fabrication.py,
+2026-10-01]`, `fix_rotation`). A row names the KiCad footprint it was measured
+against, and `render` stops if a part with that LCSC number uses another. A
+machine-placed part with no row is placed uncorrected and named on the
+console. The CPL is ledgered against this file, so a changed row makes every
+board's `fab/` stale. JLC's preview is still the last check.
+
 On a board laid out by `tools/pcb.py`, every footprint's silkscreen — these
 and KiCad's own — is adapted to the board house (`fit_footprint_silk`): each
 stroke widened to `layout.yaml` `fab: silk_line_min`, and a stroke that then
