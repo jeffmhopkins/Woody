@@ -4,16 +4,16 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/breath-output-stage/sim/sims.yaml: afe0ade4f87a48d0
+  hardware/module/breath-output-stage/sim/sims.yaml: fb0ee71199457865
   hardware/module/breath-output-stage/netlist.yaml: 63517b01fa4c02a2
-  hardware/module/breath-response-shaper/netlist.yaml: 347e949e5edad4c7
+  hardware/module/breath-response-shaper/netlist.yaml: 3f6549b620f9e912
   hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
-  hardware/module/mod-channels/netlist.yaml: 8f44cca2ddd7a7e3
+  hardware/module/mod-channels/netlist.yaml: 00739b63d111a848
   hardware/module/breath-output-stage/sim/bos.cir: e1b8c860686a0315
   hardware/module/breath-output-stage/sim/bos-ac.cir: fbdf6f423bb51ac3
-  hardware/module/breath-output-stage/sim/chain.cir: 4e0ddaf4572786f9
+  hardware/module/breath-output-stage/sim/chain.cir: d8733238c14e0ff3
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
-  hardware/module/breath-response-shaper/sim/sims.yaml: 6b57567590dc779d
+  hardware/module/breath-response-shaper/sim/sims.yaml: fc02a3ddd36b774a
   figure:inamp-full-scale: -9.94 V
   figure:dac-rail: 5.20 V
 ngspice: '42'
@@ -335,16 +335,16 @@ sims:
     corners: 1
     measures:
       out_hard:
-        nominal: 9.99251
-        min: 9.99251
+        nominal: 9.99257
+        min: 9.99257
         min_at: nominal
-        max: 9.99251
+        max: 9.99257
         max_at: nominal
       clip_in:
-        nominal: -5.53952
-        min: -5.53952
+        nominal: -5.5394
+        min: -5.5394
         min_at: nominal
-        max: -5.53952
+        max: -5.5394
         max_at: nominal
     asserts:
     - expr: nom['out_hard'] > 9.8 and nom['out_hard'] < 10.2
@@ -355,109 +355,153 @@ sims:
     corners: 1
     measures:
       out_hard:
-        nominal: 4.36117
-        min: 4.36117
+        nominal: 4.90171
+        min: 4.90171
         min_at: nominal
-        max: 4.36117
+        max: 4.90171
         max_at: nominal
       ratio_hard:
-        nominal: 0.436029
-        min: 0.436029
+        nominal: 0.490068
+        min: 0.490068
         min_at: nominal
-        max: 0.436029
+        max: 0.490068
         max_at: nominal
       clip_in:
-        nominal: -9.85951
-        min: -9.85951
+        nominal: -9.87521
+        min: -9.87521
         min_at: nominal
-        max: -9.85951
+        max: -9.87521
         max_at: nominal
     asserts: []
   chain[p_resp=0.25]:
     corners: 1
     measures:
       out_hard:
-        nominal: 8.33937
-        min: 8.33937
+        nominal: 8.44399
+        min: 8.44399
         min_at: nominal
-        max: 8.33937
+        max: 8.44399
         max_at: nominal
       ratio_hard:
-        nominal: 0.833731
-        min: 0.833731
+        nominal: 0.84419
+        min: 0.84419
         min_at: nominal
-        max: 0.833731
+        max: 0.84419
         max_at: nominal
       clip_in:
-        nominal: -6.84229
-        min: -6.84229
+        nominal: -6.73251
+        min: -6.73251
         min_at: nominal
-        max: -6.84229
+        max: -6.73251
         max_at: nominal
     asserts: []
   chain[p_resp=0.5]:
     corners: 1
     measures:
       out_hard:
-        nominal: 9.99251
-        min: 9.99251
+        nominal: 9.99257
+        min: 9.99257
         min_at: nominal
-        max: 9.99251
+        max: 9.99257
         max_at: nominal
       ratio_hard:
-        nominal: 0.998997
-        min: 0.998997
+        nominal: 0.999004
+        min: 0.999004
         min_at: nominal
-        max: 0.998997
+        max: 0.999004
         max_at: nominal
       clip_in:
-        nominal: -5.53952
-        min: -5.53952
+        nominal: -5.5394
+        min: -5.5394
         min_at: nominal
-        max: -5.53952
+        max: -5.5394
         max_at: nominal
     asserts: []
   chain[p_resp=0.75]:
     corners: 1
     measures:
       out_hard:
-        nominal: 10.9653
-        min: 10.9653
+        nominal: 10.9011
+        min: 10.9011
         min_at: nominal
-        max: 10.9653
+        max: 10.9011
         max_at: nominal
       ratio_hard:
-        nominal: 1.09625
-        min: 1.09625
+        nominal: 1.08983
+        min: 1.08983
         min_at: nominal
-        max: 1.09625
+        max: 1.08983
         max_at: nominal
       clip_in:
-        nominal: -5.01761
-        min: -5.01761
+        nominal: -5.04737
+        min: -5.04737
         min_at: nominal
-        max: -5.01761
+        max: -5.04737
         max_at: nominal
     asserts: []
   chain[p_resp=1.0]:
     corners: 1
     measures:
       out_hard:
-        nominal: 11.9696
-        min: 11.9696
+        nominal: 11.9691
+        min: 11.9691
         min_at: nominal
-        max: 11.9696
+        max: 11.9691
         max_at: nominal
       ratio_hard:
-        nominal: 1.64086
-        min: 1.64086
+        nominal: 1.55433
+        min: 1.55433
         min_at: nominal
-        max: 1.64086
+        max: 1.55433
         max_at: nominal
       clip_in:
-        nominal: -3.50806
-        min: -3.50806
+        nominal: -3.66452
+        min: -3.66452
         min_at: nominal
-        max: -3.50806
+        max: -3.66452
+        max_at: nominal
+    asserts: []
+  chain-trim[p_trim=0.0]:
+    corners: 1
+    measures:
+      out_hard:
+        nominal: 11.9633
+        min: 11.9633
+        min_at: nominal
+        max: 11.9633
+        max_at: nominal
+      ratio_hard:
+        nominal: 1.33731
+        min: 1.33731
+        min_at: nominal
+        max: 1.33731
+        max_at: nominal
+      clip_in:
+        nominal: -4.1665
+        min: -4.1665
+        min_at: nominal
+        max: -4.1665
+        max_at: nominal
+    asserts: []
+  chain-trim[p_trim=1.0]:
+    corners: 1
+    measures:
+      out_hard:
+        nominal: 11.9699
+        min: 11.9699
+        min_at: nominal
+        max: 11.9699
+        max_at: nominal
+      ratio_hard:
+        nominal: 1.72331
+        min: 1.72331
+        min_at: nominal
+        max: 1.72331
+        max_at: nominal
+      clip_in:
+        nominal: -3.38026
+        min: -3.38026
+        min_at: nominal
+        max: -3.38026
         max_at: nominal
     asserts: []
