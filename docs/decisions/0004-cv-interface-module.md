@@ -148,7 +148,7 @@ The cost is that a 5 V DAC wants roughly 3.5 V for a logic high while the
 instrument sends 3.3 V, so SPI needs shifting. That turns out to be free in
 parts terms:
 
-- **A local 5.21 V regulator off the protected +12 V rail** for the DAC's AVDD
+- **A local regulator off the protected +12 V rail, at `dac-rail`,** for the DAC's AVDD
   — not the rack's +5 V bus. See below.
 - **74AHCT125** for the shifter, running from the **bus +5 V rail** — the *same
   part* as the instrument's LED data lines (ADR 0014), with a spare gate left
@@ -177,7 +177,7 @@ it moves with whatever else in the case is drawing from it. Two consequences:
   calibrated once against a real VCO (ADR 0006). A supply that shifts when
   another module powers up shifts the calibration with it.
 
-**So: an LM317LZ set to ~5.21 V, fed from +12 V downstream of the module's own
+**So: an LM317LZ at `dac-rail`, fed from +12 V downstream of the module's own
 reverse-protection diode** (its own — see the power tree below). TO-92, two
 resistors and two capacitors, ten-odd milliamps of load, under 100 mW — the
 lowest-effort regulator that exists, and it buys back both properties.
@@ -191,9 +191,14 @@ it is 4.99–5.47 V `[calc: 1.20 × (1 + 475·0.999/(150·1.001)); 1.30 × (1 +
 475·1.001/(150·0.999)) + 100 µA × 475 Ω; TI's V_REF and I_ADJ limits, ds
 LM317LZ.pdf p.5]`, 0.48 V against the C grade's 5.0–5.5 V. A fixed 478 Ω would
 clear the bottom by 16 mV and the top by 1 mV before temperature `[calc]`,
-which is not a fit either: the bench still decides. Whether E7 selects the part by rework of a
-machine-placed resistor or by fitting one by hand is open, the owner's
-(`R-REG-SET-LO`).)* Two reviewers found it independently and both are right.
+which is not a fit either: the bench still decides.)* *(Amended again
+2026-10-01, the owner: "Can we just do trim pot to help?" — **the divider is
+trimmed, not selected.** `TRIM-DAC-RAIL`, a 50 Ω 12-turn rheostat, sits in the
+`OUT`-to-`ADJ` leg with `R-REG-SET-HI`, over `R-REG-SET-LO` at 523 Ω, and E7
+trims `DAC AVDD` to `dac-rail`. Its travel reaches the set point on every part
+across TI's limits and never the DAC's 6 V absolute maximum, and an open
+wiper or track takes the rail down: `power-entry.md`, *The DAC rail's trim*;
+`power-entry/sim`'s `dac-trim-*`.)* Two reviewers found it independently and both are right.
 
 They proposed an LP2951, or a second REF5050 buffered by an op-amp half. Both
 are declined, because the premise behind "no value fits" is a statistical
@@ -205,7 +210,8 @@ What is adopted is the free part of the fix:
 - **Shrink R2** — 150 Ω / 475 Ω instead of 240 Ω / 768 Ω — which halves the
   I_ADJ contribution to 24–48 mV.
 - **0.1 % divider parts**, which cost pennies and arrive in the same order.
-- **Select R2 on the bench at E7**, against the real DAC: raise the top codes
+- **Select R2 on the bench at E7** *(superseded 2026-10-01 by the trimmer,
+  above: E7 trims to `dac-rail`)*, against the real DAC: raise the top codes
   and find where they start compressing against AVDD. That is the floor that
   actually matters, and it is measured rather than assumed — the "4.95 V floor"
   the review argued against was never derived from anything.
@@ -215,7 +221,7 @@ and if the selected value lands badly you find out at E7 with a meter, on a
 board with four screws in it.
 
 **The 74AHCT125 stays on the bus +5 V rail.** Its job is to get 3.3 V logic over
-the DAC's `V_INH` input threshold — **0.625 × AVDD = 3.26 V** at AVDD = 5.21 V.
+the DAC's `V_INH` input threshold — **0.625 × AVDD = 3.25 V** at `dac-rail`.
 An AHCT gate on a rail sagging to 4.75 V still drives 4.6 V, with well over a
 volt of margin.
 
@@ -349,7 +355,7 @@ Those are different problems and they want separate treatment:
 ```
 bus +12V ──┬──[1N5817]──[ferrite]──[bulk]──┬── module analog (op-amps)
            │                                │
-           │                                └──[LM317LZ 5.21V]── DAC AVDD
+           │                                └──[LM317LZ]─────── DAC AVDD
            │                                                      │
            │                                              VREFOUT ─┴─[½ OPA2197]
            │                                              → pitch offset divider

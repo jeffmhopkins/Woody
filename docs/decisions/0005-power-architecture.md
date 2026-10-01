@@ -129,9 +129,10 @@ The module sits in the rack on a short ribbon with negligible drop, so the bus
 +5 V rail is free and convenient. It is used — but **only for the 74AHCT125
 level shifter**, around 10 mA.
 
-**The DAC gets its own LM317LZ set to ~5.21 V, off its own reverse-protection
-diode on the +12 V rail.** Its divider value is selected on the bench at E7, not
-from a tolerance stack — see ADR 0004.
+**The DAC gets its own LM317LZ at `dac-rail`, off its own reverse-protection
+diode on the +12 V rail.** It is trimmed at E7 (`TRIM-DAC-RAIL`), not set
+from a tolerance stack — see ADR 0004 *(amended 2026-10-01: it was a divider
+selected on the bench)*.
 
 **The reason is headroom, not accuracy**, and this ADR said the opposite. It
 claimed "the DAC8568's full-scale output *is* its supply, so a rail the rack is
