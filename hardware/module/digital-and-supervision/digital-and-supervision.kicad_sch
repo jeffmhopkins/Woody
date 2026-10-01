@@ -1344,7 +1344,7 @@
     (property "Datasheet" "" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "R-SPI-PULL" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "PULL-UP TO DAC_AVDD, the LM317's rail, NOT bus +5V: a pull-up belongs on its consumer's rail, and on the bus rail a reversed ribbon reaches the DAC's SYNC pin and turns a buffer failure into a DAC failure" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "PULL-UP TO DAC_AVDD, U-REG-DAC's rail, NOT bus +5V: a pull-up belongs on its consumer's rail, and on the bus rail a reversed ribbon reaches the DAC's SYNC pin and turns a buffer failure into a DAC failure" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "UNI-ROYAL(Uniroyal Elec)" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "0805W8F1002T5E" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "LCSC" "C17414" (at 142.24 187.96 0) (effects (font (size 1.27 1.27)) hide))

@@ -4,98 +4,97 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/digital-and-supervision/sim/sims.yaml: 9cdb95d89ce7cc00
-  hardware/module/power-entry/netlist.yaml: 230ba168c2bf4b8a
+  hardware/module/digital-and-supervision/sim/sims.yaml: 5220639beaf2e194
+  hardware/module/power-entry/netlist.yaml: 78440e2b6a1c1e45
   hardware/module/digital-and-supervision/netlist.yaml: 131fe3808d5d1b63
   hardware/module/dac8568/netlist.yaml: 2619a0f3926942d3
-  hardware/module/digital-and-supervision/sim/seq.cir: cc9521d328be5965
-  datasheets/discrete-and-power/LM317L-ti-pspice-snvmaw3.lib: 52c881eccf059881
+  hardware/module/digital-and-supervision/sim/seq.cir: 90d6272d6aeabfbd
+  hardware/module/power-entry/sim/lt3042.lib: 2664843cbe66f3e8
   datasheets/logic/SN74AHCT125-ti-pspice-sclm256.cir: d544311dc17d754b
-  hardware/module/power-entry/sim/sims.yaml: 8f66e76db0535618
-  figure:dac-rail: 5.20 V
+  hardware/module/power-entry/sim/sims.yaml: f06800eed96cd1d5
+  figure:dac-rail: 5.23 V
 ngspice: '42'
 sims:
   rails-and-sync:
-    corners: 5
+    corners: 9
     measures:
       t_l5_up:
-        nominal: 0.000907432
-        min: 0.000883863
-        min_at: k_clamp- t_ss-
-        max: 0.00124949
-        max_at: k_clamp- t_ss+
+        nominal: 0.000915494
+        min: 0.000892367
+        min_at: C-SET-DAC+ k_clamp- t_ss-
+        max: 0.00125757
+        max_at: C-SET-DAC- k_clamp- t_ss+
       t_avdd_up:
-        nominal: 0.00957913
-        min: 0.0095789
-        min_at: k_clamp- t_ss+
-        max: 0.00957961
-        max_at: k_clamp- t_ss-
+        nominal: 0.0107571
+        min: 0.0102421
+        min_at: C-SET-DAC- k_clamp- t_ss+
+        max: 0.0112721
+        max_at: C-SET-DAC+ k_clamp- t_ss+
       over_on:
-        nominal: 2.16992e-07
-        min: 4.16985e-08
-        min_at: k_clamp- t_ss-
-        max: 2.16992e-07
-        max_at: nominal
+        nominal: 0.00229534
+        min: 0.000397108
+        min_at: C-SET-DAC+ k_clamp- t_ss-
+        max: 0.00499473
+        max_at: C-SET-DAC- k_clamp- t_ss+
       over_off:
-        nominal: -7.91888e-09
-        min: -7.91888e-09
-        min_at: nominal
-        max: -7.91582e-09
-        max_at: k_clamp- t_ss-
+        nominal: -1.81756e-08
+        min: -1.81845e-08
+        min_at: C-SET-DAC+ k_clamp- t_ss+
+        max: -1.81539e-08
+        max_at: C-SET-DAC- k_clamp- t_ss-
       oversc_on:
-        nominal: 0.0
+        nominal: 0.000178534
         min: 0.0
-        min_at: nominal
-        max: 0.0
+        min_at: C-SET-DAC- k_clamp- t_ss-
+        max: 0.000178534
         max_at: nominal
       oversc_off:
-        nominal: -7.99777e-07
-        min: -7.99777e-07
-        min_at: nominal
-        max: -7.99468e-07
-        max_at: k_clamp- t_ss-
+        nominal: -1.83536e-06
+        min: -1.83626e-06
+        min_at: C-SET-DAC+ k_clamp- t_ss+
+        max: -1.83317e-06
+        max_at: C-SET-DAC- k_clamp- t_ss-
       overdin_on:
-        nominal: 0.0
+        nominal: 0.000178534
         min: 0.0
-        min_at: nominal
-        max: 0.0
+        min_at: C-SET-DAC- k_clamp- t_ss-
+        max: 0.000178534
         max_at: nominal
       overdin_off:
-        nominal: -7.99777e-07
-        min: -7.99777e-07
-        min_at: nominal
-        max: -7.99468e-07
-        max_at: k_clamp- t_ss-
+        nominal: -1.83536e-06
+        min: -1.83626e-06
+        min_at: C-SET-DAC+ k_clamp- t_ss+
+        max: -1.83317e-06
+        max_at: C-SET-DAC- k_clamp- t_ss-
       i_esd_max:
-        nominal: 5.18466e-10
-        min: 5.18466e-10
-        min_at: k_clamp- t_ss-
-        max: 5.18466e-10
-        max_at: nominal
+        nominal: 5.2297e-10
+        min: 5.2297e-10
+        min_at: C-SET-DAC+ k_clamp- t_ss-
+        max: 5.22971e-10
+        max_at: C-SET-DAC- k_clamp- t_ss+
       l5_peak:
-        nominal: 5.03075
-        min: 5.01963
-        min_at: k_clamp- t_ss+
-        max: 5.07044
-        max_at: k_clamp- t_ss-
+        nominal: 5.02794
+        min: 5.0117
+        min_at: C-SET-DAC+ k_clamp- t_ss+
+        max: 5.0962
+        max_at: C-SET-DAC- k_clamp- t_ss-
       l5_final:
-        nominal: 5.00038
-        min: 4.99975
-        min_at: k_clamp- t_ss+
-        max: 5.02883
-        max_at: k_clamp- t_ss-
+        nominal: 5.00145
+        min: 4.99997
+        min_at: C-SET-DAC+ k_clamp- t_ss+
+        max: 5.06624
+        max_at: C-SET-DAC- k_clamp- t_ss-
       avdd_final:
-        nominal: 5.18465
-        min: 5.18465
-        min_at: k_clamp- t_ss-
-        max: 5.18465
-        max_at: k_clamp- t_ss+
+        nominal: 5.22964
+        min: 5.22959
+        min_at: C-SET-DAC+ k_clamp- t_ss-
+        max: 5.22967
+        max_at: C-SET-DAC- k_clamp- t_ss+
     asserts:
     - expr: min['l5_final'] > 4.9 and max['l5_final'] < 5.1 and min['avdd_final'] >= 5.0
       why: 'both rails settle where their pages say: LOGIC_5V at the ADP7118''s 5.0 V, DAC_AVDD at or over dac-rail''s 5.00
-        V floor, at every corner of k_clamp and t_ss - with TI''s LM317L model at its own nominal V_REF and I_ADJ: the regulator''s
-        spread is not varied here, and its low corner is under the floor (dac-rail''s derivation), which is why E7 sets R-REG-SET-LO
-        on the bench'
+        V floor, at every corner of k_clamp, t_ss and C-SET-DAC - the LT3042 at its nominal SET current here; its whole spread
+        is power-entry/sim''s dac-rail-spread, inside the window'
       pass: true
     - expr: max['over_on'] <= 0.3 and max['over_off'] <= 0.3 and max['oversc_on'] <= 0.3 and max['oversc_off'] <= 0.3 and
         max['overdin_on'] <= 0.3 and max['overdin_off'] <= 0.3
@@ -115,55 +114,55 @@ sims:
       pass: true
     - expr: max['t_l5_up'] < min['t_avdd_up']
       why: 'context, not the requirement: LOGIC_5V still arrives first at every corner - the ADP7118''s 380 us soft start
-        against the LM317L''s C-REG-ADJ start of milliseconds - which is why the buffer cannot be on it'
+        against the LT3042''s, R-SET-DAC x C-SET-DAC, ~5 ms - which is why the buffer cannot be on it'
       pass: true
   what-if-lvl-on-logic-5v:
     corners: 3
     measures:
       over_on:
-        nominal: 3.43989
-        min: 3.41642
+        nominal: 3.84856
+        min: 3.69804
         min_at: k_clamp+
-        max: 3.43989
-        max_at: nominal
+        max: 4.00569
+        max_at: k_clamp-
       over_off:
-        nominal: 1.05866
-        min: 1.0341
-        min_at: k_clamp+
-        max: 1.08639
-        max_at: k_clamp-
-      oversc_on:
-        nominal: 3.43989
-        min: 3.41642
-        min_at: k_clamp+
-        max: 3.43989
-        max_at: nominal
-      oversc_off:
-        nominal: 1.05866
-        min: 1.0341
-        min_at: k_clamp+
-        max: 1.08638
-        max_at: k_clamp-
-      overdin_on:
-        nominal: 3.43989
-        min: 3.41642
-        min_at: k_clamp+
-        max: 3.43989
-        max_at: nominal
-      overdin_off:
-        nominal: 1.05866
-        min: 1.0341
-        min_at: k_clamp+
-        max: 1.08638
-        max_at: k_clamp-
-      i_esd_max:
-        nominal: 0.014356
-        min: 0.0114838
+        nominal: 0.249587
+        min: 0.249257
         min_at: k_clamp-
-        max: 0.0170644
+        max: 0.249609
+        max_at: k_clamp+
+      oversc_on:
+        nominal: 3.84856
+        min: 3.69804
+        min_at: k_clamp+
+        max: 4.00569
+        max_at: k_clamp-
+      oversc_off:
+        nominal: 0.249583
+        min: 0.249252
+        min_at: k_clamp-
+        max: 0.249604
+        max_at: k_clamp+
+      overdin_on:
+        nominal: 3.84856
+        min: 3.69804
+        min_at: k_clamp+
+        max: 4.00569
+        max_at: k_clamp-
+      overdin_off:
+        nominal: 0.249583
+        min: 0.249252
+        min_at: k_clamp-
+        max: 0.249604
+        max_at: k_clamp+
+      i_esd_max:
+        nominal: 0.0167066
+        min: 0.0140836
+        min_at: k_clamp-
+        max: 0.0190158
         max_at: k_clamp+
     asserts:
     - expr: min['over_on'] > 0.3 and min['over_off'] > 0.3 and min['oversc_on'] > 0.3 and min['overdin_on'] > 0.3
       why: 'WHAT-IF: with the buffer on LOGIC_5V every DAC input it drives high sits over AVDD + 0.3 V at power-on at every
         corner, and SYNC again at power-off - the excluded wiring, so a regression that put it back would be caught by rails-and-sync'
-      pass: true
+      pass: false

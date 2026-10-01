@@ -105,5 +105,5 @@ sims:
     measures: [over_on, over_off, oversc_on, oversc_off, overdin_on, overdin_off, i_esd_max]
     post: *post
     asserts:
-      - expr: "min['over_on'] > 0.3 and min['over_off'] > 0.3 and min['oversc_on'] > 0.3 and min['overdin_on'] > 0.3"
-        why: "WHAT-IF: with the buffer on LOGIC_5V every DAC input it drives high sits over AVDD + 0.3 V at power-on at every corner, and SYNC again at power-off - the excluded wiring, so a regression that put it back would be caught by rails-and-sync"
+      - expr: "min['over_on'] > 0.3 and min['oversc_on'] > 0.3 and min['overdin_on'] > 0.3"
+        why: "WHAT-IF: with the buffer on LOGIC_5V every DAC input it drives high sits over AVDD + 0.3 V at power-on at every corner - the excluded wiring, so a regression that put it back would be caught by rails-and-sync. At power-off it is now about 0.25 V over, under the 0.3 V: the LT3042's 0.3 V dropout lets DAC_AVDD follow LOGIC_5V down far closer than the LM317L's did (1.2 V over until 2026-10-01). Recorded, not asserted"

@@ -45,7 +45,7 @@ The `Dir` and `Peer` columns are defined once in
 | `R1`, `R1b` (`R-SER-BREATH-INST`) | — | `interfaces/breath-sense-link` | — | Both legs' series resistance sets the differential pole against `C_diff`, and their match is what the bias pair's balance is measured against. Neither part is on this board |
 | `MPXV4006DP` and its `VS` reference buffer | — | `interfaces/breath-sense-link` | `sensor-full-scale`, `riso-ref-topology`, `cref-out-node`, `opa2197-output-impedance` | Sets the span this page multiplies and the pedestal `TRIM-BREATH-ZERO` nulls. Not this page's circuit — see [`notes.md`](notes.md) |
 | in-amp output | out | `module/breath-response-shaper`, `interfaces/breath-sense-link` | `inamp-full-scale` | **Owned here.** Into the response shaper, whose output (`BREATH_SHAPED`, equal to this node at centre detent) feeds the panel GAIN/OFFSET stage, which inverts |
-| `DAC AVDD` | in | `module/power-entry` | `dac-rail` | Feeds `TRIM-BREATH-ZERO` and its buffer. Never `VREFOUT`, which is disabled until firmware enables it. The drawing calls this node the LM317 rail |
+| `DAC AVDD` | in | `module/power-entry` | `dac-rail` | Feeds `TRIM-BREATH-ZERO` and its buffer. Never `VREFOUT`, which is disabled until firmware enables it. The drawing calls this node `dac-rail` |
 | `MODULE ANALOG +12V`, `MODULE ANALOG −12V` | in | `module/power-entry` | — | The INA828, both OPA2197 halves, and the BAV99 legs on the input pair and at the jack |
 | `AGND_MOD` | ref | `module/power-entry` | `dig-gnd-topology` | The module analog star, drawn `AGND(module)`. Where `R4`, `R5`, both `C_cm` and the output RC return |
 | `CLR` | — | — | — | **Reaches no part of this circuit**, which is the whole of what the `CLR` section below settles. It is `module/dac8568`'s |
@@ -92,7 +92,7 @@ the two agree, and where they do not the netlist wins.*
                                  │  R_G 42.2k   │◄── G = 2.185  │   raw
                                  │              │               │
                                  │  REF ◄───────┼── ½ OPA2197 ◄─[TRIM-BREATH-ZERO]
-                                 │              │   buffered    from the LM317, dac-rail
+                                 │              │   buffered    from U-REG-DAC, dac-rail
                                  └──────┬───────┘   `breath-zero-ref` nulls it
                                         │  Vout = −2.16106·(V_BREATH − V_AGND) + V_REF
                                         │       = 0 V at rest, `inamp-full-scale` at full
@@ -256,7 +256,7 @@ the output.
 
 **Nothing, and that is correct.** `CLR` reaches the DAC channels; breath touches
 none of them. `REF` is driven by `TRIM-BREATH-ZERO` through a buffer off the
-LM317 rail — not by a DAC channel — so there is no path by which a `CLR` can
+DAC rail — not by a DAC channel — so there is no path by which a `CLR` can
 yank the zero out from under the stage. An analog path cannot latch at a level
 the player is not producing: it follows the sensor, and the sensor follows the
 room.
@@ -273,7 +273,7 @@ watchdog (`ROADMAP.md`, E10).
 
 The gain/offset stage this page used to carry as three open points is drawn
 (`hardware/module/breath-output-stage/breath-output-stage.md`) and meets all
-three: its offset comes from the LM317 rail (`DAC AVDD`), not `VREFOUT`, so
+three: its offset comes from the DAC rail (`DAC AVDD`), not `VREFOUT`, so
 the jack does not step when firmware enables the DAC's reference; it spends two
 op-amp halves, a buffered attenuator ahead of the summer, so GAIN and OFFSET do
 not interact; and since 2026-09-30 the response shaper sits between this

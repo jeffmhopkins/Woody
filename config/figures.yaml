@@ -407,7 +407,7 @@ figures:
     status: settled
     owner: hardware/module/power-entry/power-entry.md
     derivation: "power-entry.md 'Fuses on the rails' [calc]: fourteen OPA2197 channels at 1.3 mA max (SBOS737C p.8) = 18.2 mA on both rails; INA828 0.85 mA over temperature (p.6) on both; on +12 V only the DAC rail's branch, U-REG-DAC (LT3042), ~8.2 mA ('The DAC rail's load': its ~4.5 mA load, its GND current at 3.6 mA max and its 0.1 mA SET current) and U-REG-LOGIC ~5.1 mA. +12 V: 18.2 + 0.85 + 8.2 + 5.1 = 32.4 mA; -12 V: 18.2 + 0.85 = 19.1 mA. With all six jacks shorted at full scale, ~92 mA on +12 V."
-    forbidden: ["its own ~45 mA and ~40 mA", "U-ISO plus the module's own ~40 mA", "about 22mA against -12V's 10mA", "+12V analog, ~45mA", "load adds ~45 mA and ~40 mA", "~37 mA on +12 V", "~97 mA** with all six", "97 mA worst (+12 V)", "LM317 branch, ~12.4 mA", "LM317L branch ~12.4 mA"]
+    forbidden: ["its own ~45 mA and ~40 mA", "U-ISO plus the module's own ~40 mA", "about 22mA against -12V's 10mA", "+12V analog, ~45mA", "load adds ~45 mA and ~40 mA", "~37 mA on +12 V", "~97 mA** with all six", "97 mA worst (+12 V)", "LM317 branch, ~12.4 mA", "LM317L branch ~12.4 mA", "~37mA against"]
     note: "Added 2026-10-01 (pre-layout review A3-6): the derived pair had an asserted twin, 45/40 mA, from ADR 0004's pre-ADR 0027 power table, and the rack totals and the power-entry sim were computed from that. Moved ~37 -> ~32 mA on +12 V on 2026-10-01 (F8): the LM317L branch, 12.4 mA with its 7.5 mA set divider, became the LT3042's ~8.2 mA."
 
   - id: mod-reference
