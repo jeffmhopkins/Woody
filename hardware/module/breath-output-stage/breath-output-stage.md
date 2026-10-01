@@ -171,7 +171,10 @@ of transposition. Here 50 mV moves the jack by `40.2k/95.3k × 50 mV` = **21 mV,
 now: `U-ISO` draws rail to rail (ADR 0027), so both rails move with breath,
 by 9.7 mV at the header (ADR 0027's residual table). Through this divider
 that is `40.2k/95.3k × 9.7 mV` = **4.1 mV, 0.04 % of span** `[calc]`, and it
-follows breath, as this output does.
+follows breath, as this output does. The same divider carries the instrument
+LED row's 2–4 kHz PWM off −12 V; behind `R-OUT-PROT` and `C-OUT-BREATH` it is
+a fraction of a millivolt at the jack (`power-entry.md`, *The LED row's PWM*,
+simulated in `power-entry/sim` `led-pwm`).
 
 ## Values
 

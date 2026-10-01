@@ -512,7 +512,7 @@ sims:
     asserts: *pwm_asserts
   - name: led-pwm-at-iso
     # WHAT-IF, the review's own premise: the row's whole current straight out of U-ISO, with
-    # no instrument bulk keeping any of it
+    # no instrument bulk keeping any of it. Recorded, not a requirement
     deck: ledpwm.cir
     set: {k_row: 0}
     sweep: {f_pwm: [2000.0, 3100.0, 4000.0]}
@@ -520,7 +520,7 @@ sims:
     measures: *pwm_measures
     post: *pwm_post
     asserts:
-      - expr: "max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv']"
-        why: "WHAT-IF: even with the row's whole current out of U-ISO the case's rails stay under the review's 13 mV: the input LC is damped by the loop's series resistance, not only by C2's ESR"
+      - expr: "max['hdr_neg_mv'] > p['rail_bound_mv']"
+        why: "RECORDED WHAT-IF: on the review's own premise - no instrument bulk - its 13 mV is not a bound: with a 200 mohm rack PSU the header reaches 14-18 mV p-p across the band, though the input LC has no gain there (iso-input-z rack_band). What holds the design well under it is C-STRIP-BULK keeping half or more of the row's current in the instrument (led-pwm's iuout_ma against this run's)"
       - expr: "max['pitch_cents'] < p['bench_bar_cents']"
         why: "and the pitch jack under the hundredth of a cent ADR 0027 tells the bench to expect (it reaches ~0.001 cents here, which is why the as-built runs, not this one, carry ADR 0027's 0.001)"

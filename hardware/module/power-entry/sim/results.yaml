@@ -4,19 +4,28 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/power-entry/sim/sims.yaml: e471145ca3848b47
+  hardware/module/power-entry/sim/sims.yaml: 7479149434b90933
   hardware/module/power-entry/netlist.yaml: 56b479e28aae437c
   hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
+  hardware/module/mod-channels/netlist.yaml: 00739b63d111a848
+  hardware/module/breath-output-stage/netlist.yaml: 63517b01fa4c02a2
+  hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
+  hardware/carrier/power-entry-instrument/netlist.yaml: 2ced35d8a0373a19
   hardware/module/power-entry/sim/poweron.cir: 7e310ad1820d6b68
   hardware/module/power-entry/sim/groundshift.cir: 4aae040d6b7e03a1
   hardware/module/power-entry/sim/poweroff.cir: aa8a3991ce4d5a85
   hardware/module/power-entry/sim/cm.cir: bf15e91728c95a53
   hardware/module/power-entry/sim/isoin.cir: 3069b0d75d37455f
   hardware/module/power-entry/sim/dacrail.cir: 00875ad3e9b9af2c
+  hardware/module/power-entry/sim/ledpwm.cir: 0a98fb39d6373a84
   hardware/module/pitch-stage/sim/pitch-stage.lib: 1ec92350c5c2c2cc
   hardware/module/power-entry/sim/lt3042.lib: 2664843cbe66f3e8
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
+  hardware/module/umbilical-load-switch/sim/sims.yaml: 85eec256fad8b2e5
+  hardware/carrier/power-entry-instrument/sim/sims.yaml: 849986a764f89f9b
+  figure:umbilical-current: 359 mA
   figure:dac-rail: 5.23 V
+  figure:mod-reference: 3.3333 V
 ngspice: '42'
 sims:
   d3-reversed:
@@ -888,6 +897,18 @@ sims:
         min_at: L-CM-ISO- esr_c2+ l_rib+ r_psu-
         max: 0.0611912
         max_at: L-CM-ISO+ esr_c2- l_rib- r_psu+
+      rack_band:
+        nominal: 68.8377
+        min: 59.4284
+        min_at: L-CM-ISO+ esr_c2+ l_rib- r_psu+
+        max: 75.2267
+        max_at: L-CM-ISO- esr_c2- l_rib+ r_psu-
+      f_rack_band:
+        nominal: 1000.55
+        min: 1000.55
+        min_at: nominal
+        max: 1000.55
+        max_at: nominal
     asserts:
     - expr: min['margin'] > 20
       why: 'the input filter stays damped with the choke''s leakage added: its impedance peak is over 20x (26 dB) below the
@@ -896,6 +917,13 @@ sims:
       pass: true
     - expr: max['rack_550k'] < 1.0
       why: under 1 % of the converter's reflected current at its 550 kHz fundamental reaches the rack's +12 V conductor
+      pass: true
+    - expr: max['rack_band'] <= 100.0
+      why: 'NO GAIN IN THE LED ROW''S BAND: from 1 to 10 kHz the share of U-ISO''s input current that reaches the rack''s
+        +12 V conductor never exceeds 100 % at any corner. L-ISO-IN and L-CM-ISO''s leakage with C2 have their corner at ~3.1
+        kHz (power-entry.md), but D2, D4, PTC-ISO, the beads and the ribbon are in series in the same loop and hold it under
+        critical damping - the premise of the review''s ''~13 mV'' bound (A4-13: Q up to 1.35 on C2''s ESR alone) does not
+        hold. led-pwm runs the row''s current through it'
       pass: true
   dac-rail-spread:
     corners: 65
@@ -1053,4 +1081,1657 @@ sims:
       pass: true
     - expr: nom['jack_peak'] < 0.1 and nom['jack_trough'] > -0.1
       why: and the pitch jack stays within 100 mV of 0 V
+      pass: true
+  led-pwm[f_pwm=2000.0]:
+    corners: 5
+    measures:
+      hdr_pos_mv:
+        nominal: 2.7796
+        min: 1.9256
+        min_at: esr_c2- r_psu-
+        max: 6.3661
+        max_at: esr_c2+ r_psu+
+      hdr_neg_mv:
+        nominal: 2.8494
+        min: 1.9603
+        min_at: esr_c2- r_psu-
+        max: 6.6634
+        max_at: esr_c2+ r_psu+
+      tap_pos_mv:
+        nominal: 1.693
+        min: 0.8638
+        min_at: esr_c2- r_psu-
+        max: 5.1451
+        max_at: esr_c2+ r_psu+
+      tap_neg_mv:
+        nominal: 1.7354
+        min: 0.8792
+        min_at: esr_c2- r_psu-
+        max: 5.3856
+        max_at: esr_c2+ r_psu+
+      rail_pos_mv:
+        nominal: 0.8004
+        min: 0.632
+        min_at: esr_c2- r_psu-
+        max: 2.031
+        max_at: esr_c2+ r_psu+
+      rail_neg_mv:
+        nominal: 1.2236
+        min: 0.9509
+        min_at: esr_c2- r_psu-
+        max: 3.2171
+        max_at: esr_c2+ r_psu+
+      avdd_uv:
+        nominal: 0.08
+        min: 0.06
+        min_at: esr_c2- r_psu-
+        max: 0.2
+        max_at: esr_c2+ r_psu+
+      pitch_cents:
+        nominal: 0.000470386
+        min: 0.00034449
+        min_at: esr_c2- r_psu-
+        max: 0.000959611
+        max_at: esr_c2+ r_psu+
+      mod_uv:
+        nominal: 0.23
+        min: 0.17
+        min_at: esr_c2- r_psu-
+        max: 0.55
+        max_at: esr_c2+ r_psu+
+      breath_mv:
+        nominal: 0.12338
+        min: 0.0953
+        min_at: esr_c2- r_psu-
+        max: 0.26259
+        max_at: esr_c2+ r_psu+
+      iuin_ma:
+        nominal: 52.8309
+        min: 52.777
+        min_at: esr_c2- r_psu-
+        max: 53.0495
+        max_at: esr_c2+ r_psu+
+      iuout_ma:
+        nominal: 84.3436
+        min: 84.3415
+        min_at: esr_c2+ r_psu-
+        max: 84.3436
+        max_at: nominal
+    asserts:
+    - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
+        and max['tap_neg_mv'] < p['rail_bound_mv']
+      why: 'the review''s bound holds: the row''s PWM puts under 13 mV p-p on the case''s +12 V and -12 V, at this module''s
+        header and at its bus tap, at every corner (A4-13''s arithmetic took C2''s ESR as the input LC''s only damping; D2,
+        D4, PTC-ISO and the beads are in the same loop, and the instrument''s own bulk keeps most of the row''s current)'
+      pass: true
+    - expr: max['pitch_cents'] < p['pitch_bar_cents']
+      why: 'ADR 0027''s residual for the LED PWM: under 0.001 cents on the pitch jack - through the OPA2197s'' supply rejection
+        (TI''s model), and DAC_AVDD''s ripple passed whole to VREFOUT and the DAC''s output'
+      pass: true
+    - expr: max['mod_uv'] < p['mod_lsb_uv']
+      why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
+      pass: true
+    - expr: max['breath_mv'] < p['breath_bar_mv']
+      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
+        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      pass: true
+  led-pwm[f_pwm=2500.0]:
+    corners: 5
+    measures:
+      hdr_pos_mv:
+        nominal: 2.0532
+        min: 1.3463
+        min_at: esr_c2- r_psu-
+        max: 5.0803
+        max_at: esr_c2+ r_psu+
+      hdr_neg_mv:
+        nominal: 2.1028
+        min: 1.3696
+        min_at: esr_c2- r_psu-
+        max: 5.3047
+        max_at: esr_c2+ r_psu+
+      tap_pos_mv:
+        nominal: 1.2443
+        min: 0.6027
+        min_at: esr_c2- r_psu-
+        max: 4.0857
+        max_at: esr_c2+ r_psu+
+      tap_neg_mv:
+        nominal: 1.2743
+        min: 0.613
+        min_at: esr_c2- r_psu-
+        max: 4.2663
+        max_at: esr_c2+ r_psu+
+      rail_pos_mv:
+        nominal: 0.4948
+        min: 0.3772
+        min_at: esr_c2- r_psu-
+        max: 1.4765
+        max_at: esr_c2+ r_psu+
+      rail_neg_mv:
+        nominal: 0.7773
+        min: 0.5754
+        min_at: esr_c2- r_psu-
+        max: 2.3218
+        max_at: esr_c2+ r_psu+
+      avdd_uv:
+        nominal: 0.06
+        min: 0.04
+        min_at: esr_c2- r_psu-
+        max: 0.14
+        max_at: esr_c2+ r_psu+
+      pitch_cents:
+        nominal: 0.000388056
+        min: 0.000275472
+        min_at: esr_c2- r_psu-
+        max: 0.000843943
+        max_at: esr_c2+ r_psu+
+      mod_uv:
+        nominal: 0.17
+        min: 0.11
+        min_at: esr_c2- r_psu-
+        max: 0.43
+        max_at: esr_c2+ r_psu+
+      breath_mv:
+        nominal: 0.06252
+        min: 0.04727
+        min_at: esr_c2- r_psu-
+        max: 0.14624
+        max_at: esr_c2+ r_psu+
+      iuin_ma:
+        nominal: 46.088
+        min: 46.0359
+        min_at: esr_c2- r_psu-
+        max: 46.2941
+        max_at: esr_c2+ r_psu+
+      iuout_ma:
+        nominal: 73.6197
+        min: 73.6197
+        min_at: nominal
+        max: 73.6222
+        max_at: esr_c2+ r_psu+
+    asserts:
+    - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
+        and max['tap_neg_mv'] < p['rail_bound_mv']
+      why: 'the review''s bound holds: the row''s PWM puts under 13 mV p-p on the case''s +12 V and -12 V, at this module''s
+        header and at its bus tap, at every corner (A4-13''s arithmetic took C2''s ESR as the input LC''s only damping; D2,
+        D4, PTC-ISO and the beads are in the same loop, and the instrument''s own bulk keeps most of the row''s current)'
+      pass: true
+    - expr: max['pitch_cents'] < p['pitch_bar_cents']
+      why: 'ADR 0027''s residual for the LED PWM: under 0.001 cents on the pitch jack - through the OPA2197s'' supply rejection
+        (TI''s model), and DAC_AVDD''s ripple passed whole to VREFOUT and the DAC''s output'
+      pass: true
+    - expr: max['mod_uv'] < p['mod_lsb_uv']
+      why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
+      pass: true
+    - expr: max['breath_mv'] < p['breath_bar_mv']
+      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
+        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      pass: true
+  led-pwm[f_pwm=3100.0]:
+    corners: 5
+    measures:
+      hdr_pos_mv:
+        nominal: 1.5537
+        min: 0.9757
+        min_at: esr_c2- r_psu-
+        max: 4.0096
+        max_at: esr_c2+ r_psu+
+      hdr_neg_mv:
+        nominal: 1.5903
+        min: 0.9923
+        min_at: esr_c2- r_psu-
+        max: 4.1801
+        max_at: esr_c2+ r_psu+
+      tap_pos_mv:
+        nominal: 0.9372
+        min: 0.434
+        min_at: esr_c2- r_psu-
+        max: 3.2116
+        max_at: esr_c2+ r_psu+
+      tap_neg_mv:
+        nominal: 0.959
+        min: 0.4412
+        min_at: esr_c2- r_psu-
+        max: 3.3483
+        max_at: esr_c2+ r_psu+
+      rail_pos_mv:
+        nominal: 0.3585
+        min: 0.2369
+        min_at: esr_c2- r_psu-
+        max: 1.1183
+        max_at: esr_c2+ r_psu+
+      rail_neg_mv:
+        nominal: 0.5577
+        min: 0.3623
+        min_at: esr_c2- r_psu-
+        max: 1.7397
+        max_at: esr_c2+ r_psu+
+      avdd_uv:
+        nominal: 0.04
+        min: 0.02
+        min_at: esr_c2- r_psu-
+        max: 0.12
+        max_at: esr_c2+ r_psu+
+      pitch_cents:
+        nominal: 0.00031428
+        min: 0.000217818
+        min_at: esr_c2- r_psu-
+        max: 0.000709886
+        max_at: esr_c2+ r_psu+
+      mod_uv:
+        nominal: 0.12
+        min: 0.07
+        min_at: esr_c2- r_psu-
+        max: 0.33
+        max_at: esr_c2+ r_psu+
+      breath_mv:
+        nominal: 0.03285
+        min: 0.02394
+        min_at: esr_c2- r_psu-
+        max: 0.08527
+        max_at: esr_c2+ r_psu+
+      iuin_ma:
+        nominal: 38.6952
+        min: 38.6459
+        min_at: esr_c2- r_psu-
+        max: 38.8709
+        max_at: esr_c2+ r_psu+
+      iuout_ma:
+        nominal: 61.8291
+        min: 61.8257
+        min_at: esr_c2+ r_psu+
+        max: 61.8303
+        max_at: esr_c2+ r_psu-
+    asserts:
+    - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
+        and max['tap_neg_mv'] < p['rail_bound_mv']
+      why: 'the review''s bound holds: the row''s PWM puts under 13 mV p-p on the case''s +12 V and -12 V, at this module''s
+        header and at its bus tap, at every corner (A4-13''s arithmetic took C2''s ESR as the input LC''s only damping; D2,
+        D4, PTC-ISO and the beads are in the same loop, and the instrument''s own bulk keeps most of the row''s current)'
+      pass: true
+    - expr: max['pitch_cents'] < p['pitch_bar_cents']
+      why: 'ADR 0027''s residual for the LED PWM: under 0.001 cents on the pitch jack - through the OPA2197s'' supply rejection
+        (TI''s model), and DAC_AVDD''s ripple passed whole to VREFOUT and the DAC''s output'
+      pass: true
+    - expr: max['mod_uv'] < p['mod_lsb_uv']
+      why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
+      pass: true
+    - expr: max['breath_mv'] < p['breath_bar_mv']
+      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
+        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      pass: true
+  led-pwm[f_pwm=3500.0]:
+    corners: 5
+    measures:
+      hdr_pos_mv:
+        nominal: 1.3796
+        min: 0.8575
+        min_at: esr_c2- r_psu-
+        max: 3.5851
+        max_at: esr_c2+ r_psu+
+      hdr_neg_mv:
+        nominal: 1.4116
+        min: 0.8721
+        min_at: esr_c2- r_psu-
+        max: 3.7363
+        max_at: esr_c2+ r_psu+
+      tap_pos_mv:
+        nominal: 0.8308
+        min: 0.3797
+        min_at: esr_c2- r_psu-
+        max: 2.8715
+        max_at: esr_c2+ r_psu+
+      tap_neg_mv:
+        nominal: 0.85
+        min: 0.3859
+        min_at: esr_c2- r_psu-
+        max: 2.9924
+        max_at: esr_c2+ r_psu+
+      rail_pos_mv:
+        nominal: 0.3205
+        min: 0.1968
+        min_at: esr_c2- r_psu-
+        max: 0.9977
+        max_at: esr_c2+ r_psu+
+      rail_neg_mv:
+        nominal: 0.495
+        min: 0.2996
+        min_at: esr_c2- r_psu-
+        max: 1.5442
+        max_at: esr_c2+ r_psu+
+      avdd_uv:
+        nominal: 0.04
+        min: 0.02
+        min_at: esr_c2- r_psu-
+        max: 0.1
+        max_at: esr_c2+ r_psu+
+      pitch_cents:
+        nominal: 0.000280098
+        min: 0.000194773
+        min_at: esr_c2- r_psu-
+        max: 0.000721014
+        max_at: esr_c2+ r_psu+
+      mod_uv:
+        nominal: 0.11
+        min: 0.07
+        min_at: esr_c2- r_psu-
+        max: 0.29
+        max_at: esr_c2+ r_psu+
+      breath_mv:
+        nominal: 0.02444
+        min: 0.01726
+        min_at: esr_c2- r_psu-
+        max: 0.06826
+        max_at: esr_c2+ r_psu+
+      iuin_ma:
+        nominal: 34.7697
+        min: 34.7232
+        min_at: esr_c2- r_psu-
+        max: 34.9295
+        max_at: esr_c2+ r_psu+
+      iuout_ma:
+        nominal: 55.5586
+        min: 55.5545
+        min_at: esr_c2- r_psu-
+        max: 55.5586
+        max_at: nominal
+    asserts:
+    - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
+        and max['tap_neg_mv'] < p['rail_bound_mv']
+      why: 'the review''s bound holds: the row''s PWM puts under 13 mV p-p on the case''s +12 V and -12 V, at this module''s
+        header and at its bus tap, at every corner (A4-13''s arithmetic took C2''s ESR as the input LC''s only damping; D2,
+        D4, PTC-ISO and the beads are in the same loop, and the instrument''s own bulk keeps most of the row''s current)'
+      pass: true
+    - expr: max['pitch_cents'] < p['pitch_bar_cents']
+      why: 'ADR 0027''s residual for the LED PWM: under 0.001 cents on the pitch jack - through the OPA2197s'' supply rejection
+        (TI''s model), and DAC_AVDD''s ripple passed whole to VREFOUT and the DAC''s output'
+      pass: true
+    - expr: max['mod_uv'] < p['mod_lsb_uv']
+      why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
+      pass: true
+    - expr: max['breath_mv'] < p['breath_bar_mv']
+      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
+        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      pass: true
+  led-pwm[f_pwm=4000.0]:
+    corners: 5
+    measures:
+      hdr_pos_mv:
+        nominal: 1.2668
+        min: 0.7764
+        min_at: esr_c2- r_psu-
+        max: 3.3376
+        max_at: esr_c2+ r_psu+
+      hdr_neg_mv:
+        nominal: 1.2959
+        min: 0.7894
+        min_at: esr_c2- r_psu-
+        max: 3.4775
+        max_at: esr_c2+ r_psu+
+      tap_pos_mv:
+        nominal: 0.7623
+        min: 0.3426
+        min_at: esr_c2- r_psu-
+        max: 2.679
+        max_at: esr_c2+ r_psu+
+      tap_neg_mv:
+        nominal: 0.7798
+        min: 0.3482
+        min_at: esr_c2- r_psu-
+        max: 2.7908
+        max_at: esr_c2+ r_psu+
+      rail_pos_mv:
+        nominal: 0.293
+        min: 0.1703
+        min_at: esr_c2- r_psu-
+        max: 0.9162
+        max_at: esr_c2+ r_psu+
+      rail_neg_mv:
+        nominal: 0.45
+        min: 0.2573
+        min_at: esr_c2- r_psu-
+        max: 1.4129
+        max_at: esr_c2+ r_psu+
+      avdd_uv:
+        nominal: 0.02
+        min: 0.02
+        min_at: nominal
+        max: 0.1
+        max_at: esr_c2+ r_psu+
+      pitch_cents:
+        nominal: 0.000255133
+        min: 0.000180671
+        min_at: esr_c2- r_psu-
+        max: 0.00079039
+        max_at: esr_c2+ r_psu+
+      mod_uv:
+        nominal: 0.09
+        min: 0.05
+        min_at: esr_c2- r_psu-
+        max: 0.27
+        max_at: esr_c2+ r_psu+
+      breath_mv:
+        nominal: 0.01904
+        min: 0.01285
+        min_at: esr_c2- r_psu-
+        max: 0.05732
+        max_at: esr_c2+ r_psu+
+      iuin_ma:
+        nominal: 31.828
+        min: 31.7855
+        min_at: esr_c2- r_psu-
+        max: 31.9715
+        max_at: esr_c2+ r_psu+
+      iuout_ma:
+        nominal: 50.8583
+        min: 50.8542
+        min_at: esr_c2+ r_psu+
+        max: 50.8583
+        max_at: nominal
+    asserts:
+    - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
+        and max['tap_neg_mv'] < p['rail_bound_mv']
+      why: 'the review''s bound holds: the row''s PWM puts under 13 mV p-p on the case''s +12 V and -12 V, at this module''s
+        header and at its bus tap, at every corner (A4-13''s arithmetic took C2''s ESR as the input LC''s only damping; D2,
+        D4, PTC-ISO and the beads are in the same loop, and the instrument''s own bulk keeps most of the row''s current)'
+      pass: true
+    - expr: max['pitch_cents'] < p['pitch_bar_cents']
+      why: 'ADR 0027''s residual for the LED PWM: under 0.001 cents on the pitch jack - through the OPA2197s'' supply rejection
+        (TI''s model), and DAC_AVDD''s ripple passed whole to VREFOUT and the DAC''s output'
+      pass: true
+    - expr: max['mod_uv'] < p['mod_lsb_uv']
+      why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
+      pass: true
+    - expr: max['breath_mv'] < p['breath_bar_mv']
+      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
+        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      pass: true
+  led-pwm-duty[d_led=0.0039]:
+    corners: 5
+    measures:
+      hdr_pos_mv:
+        nominal: 0.0497
+        min: 0.0242
+        min_at: esr_c2- r_psu-
+        max: 0.1603
+        max_at: esr_c2+ r_psu+
+      hdr_neg_mv:
+        nominal: 0.0509
+        min: 0.0246
+        min_at: esr_c2- r_psu-
+        max: 0.1656
+        max_at: esr_c2+ r_psu+
+      tap_pos_mv:
+        nominal: 0.0289
+        min: 0.0109
+        min_at: esr_c2- r_psu-
+        max: 0.123
+        max_at: esr_c2+ r_psu+
+      tap_neg_mv:
+        nominal: 0.0296
+        min: 0.011
+        min_at: esr_c2- r_psu-
+        max: 0.1271
+        max_at: esr_c2+ r_psu+
+      rail_pos_mv:
+        nominal: 0.0132
+        min: 0.0095
+        min_at: esr_c2- r_psu-
+        max: 0.035
+        max_at: esr_c2+ r_psu+
+      rail_neg_mv:
+        nominal: 0.0191
+        min: 0.0138
+        min_at: esr_c2- r_psu-
+        max: 0.0528
+        max_at: esr_c2+ r_psu+
+      avdd_uv:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 0.0
+        max_at: nominal
+      pitch_cents:
+        nominal: 3.381e-05
+        min: 2.12748e-05
+        min_at: esr_c2- r_psu-
+        max: 8.28204e-05
+        max_at: esr_c2+ r_psu+
+      mod_uv:
+        nominal: 0.01
+        min: 0.01
+        min_at: nominal
+        max: 0.01
+        max_at: nominal
+      breath_mv:
+        nominal: 0.00163
+        min: 0.00117
+        min_at: esr_c2- r_psu-
+        max: 0.0039
+        max_at: esr_c2+ r_psu+
+      iuin_ma:
+        nominal: 11.0301
+        min: 11.0301
+        min_at: nominal
+        max: 11.0748
+        max_at: esr_c2- r_psu+
+      iuout_ma:
+        nominal: 17.7465
+        min: 17.7396
+        min_at: esr_c2+ r_psu+
+        max: 17.7885
+        max_at: esr_c2- r_psu+
+    asserts:
+    - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
+        and max['tap_neg_mv'] < p['rail_bound_mv']
+      why: 'the review''s bound holds: the row''s PWM puts under 13 mV p-p on the case''s +12 V and -12 V, at this module''s
+        header and at its bus tap, at every corner (A4-13''s arithmetic took C2''s ESR as the input LC''s only damping; D2,
+        D4, PTC-ISO and the beads are in the same loop, and the instrument''s own bulk keeps most of the row''s current)'
+      pass: true
+    - expr: max['pitch_cents'] < p['pitch_bar_cents']
+      why: 'ADR 0027''s residual for the LED PWM: under 0.001 cents on the pitch jack - through the OPA2197s'' supply rejection
+        (TI''s model), and DAC_AVDD''s ripple passed whole to VREFOUT and the DAC''s output'
+      pass: true
+    - expr: max['mod_uv'] < p['mod_lsb_uv']
+      why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
+      pass: true
+    - expr: max['breath_mv'] < p['breath_bar_mv']
+      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
+        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      pass: true
+  led-pwm-duty[d_led=0.1]:
+    corners: 5
+    measures:
+      hdr_pos_mv:
+        nominal: 1.01
+        min: 0.5918
+        min_at: esr_c2- r_psu-
+        max: 3.0261
+        max_at: esr_c2+ r_psu+
+      hdr_neg_mv:
+        nominal: 1.0333
+        min: 0.6018
+        min_at: esr_c2- r_psu-
+        max: 3.1406
+        max_at: esr_c2+ r_psu+
+      tap_pos_mv:
+        nominal: 0.6068
+        min: 0.2646
+        min_at: esr_c2- r_psu-
+        max: 2.395
+        max_at: esr_c2+ r_psu+
+      tap_neg_mv:
+        nominal: 0.6207
+        min: 0.2691
+        min_at: esr_c2- r_psu-
+        max: 2.4859
+        max_at: esr_c2+ r_psu+
+      rail_pos_mv:
+        nominal: 0.3066
+        min: 0.2215
+        min_at: esr_c2- r_psu-
+        max: 0.7442
+        max_at: esr_c2+ r_psu+
+      rail_neg_mv:
+        nominal: 0.4487
+        min: 0.3251
+        min_at: esr_c2- r_psu-
+        max: 1.143
+        max_at: esr_c2+ r_psu+
+      avdd_uv:
+        nominal: 0.03
+        min: 0.02
+        min_at: esr_c2- r_psu-
+        max: 0.07
+        max_at: esr_c2+ r_psu+
+      pitch_cents:
+        nominal: 0.000252614
+        min: 0.000158704
+        min_at: esr_c2- r_psu-
+        max: 0.000827116
+        max_at: esr_c2+ r_psu+
+      mod_uv:
+        nominal: 0.08
+        min: 0.06
+        min_at: esr_c2- r_psu-
+        max: 0.22
+        max_at: esr_c2+ r_psu+
+      breath_mv:
+        nominal: 0.03864
+        min: 0.02849
+        min_at: esr_c2- r_psu-
+        max: 0.09188
+        max_at: esr_c2+ r_psu+
+      iuin_ma:
+        nominal: 32.1865
+        min: 32.1459
+        min_at: esr_c2- r_psu-
+        max: 32.3231
+        max_at: esr_c2+ r_psu+
+      iuout_ma:
+        nominal: 51.6244
+        min: 51.6234
+        min_at: esr_c2- r_psu+
+        max: 51.6245
+        max_at: esr_c2+ r_psu+
+    asserts:
+    - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
+        and max['tap_neg_mv'] < p['rail_bound_mv']
+      why: 'the review''s bound holds: the row''s PWM puts under 13 mV p-p on the case''s +12 V and -12 V, at this module''s
+        header and at its bus tap, at every corner (A4-13''s arithmetic took C2''s ESR as the input LC''s only damping; D2,
+        D4, PTC-ISO and the beads are in the same loop, and the instrument''s own bulk keeps most of the row''s current)'
+      pass: true
+    - expr: max['pitch_cents'] < p['pitch_bar_cents']
+      why: 'ADR 0027''s residual for the LED PWM: under 0.001 cents on the pitch jack - through the OPA2197s'' supply rejection
+        (TI''s model), and DAC_AVDD''s ripple passed whole to VREFOUT and the DAC''s output'
+      pass: true
+    - expr: max['mod_uv'] < p['mod_lsb_uv']
+      why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
+      pass: true
+    - expr: max['breath_mv'] < p['breath_bar_mv']
+      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
+        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      pass: true
+  led-pwm-duty[d_led=0.25]:
+    corners: 5
+    measures:
+      hdr_pos_mv:
+        nominal: 1.9557
+        min: 1.3198
+        min_at: esr_c2- r_psu-
+        max: 4.7561
+        max_at: esr_c2+ r_psu+
+      hdr_neg_mv:
+        nominal: 2.0034
+        min: 1.3431
+        min_at: esr_c2- r_psu-
+        max: 4.97
+        max_at: esr_c2+ r_psu+
+      tap_pos_mv:
+        nominal: 1.1883
+        min: 0.5906
+        min_at: esr_c2- r_psu-
+        max: 3.8372
+        max_at: esr_c2+ r_psu+
+      tap_neg_mv:
+        nominal: 1.2172
+        min: 0.601
+        min_at: esr_c2- r_psu-
+        max: 4.01
+        max_at: esr_c2+ r_psu+
+      rail_pos_mv:
+        nominal: 0.6265
+        min: 0.4627
+        min_at: esr_c2- r_psu-
+        max: 1.4424
+        max_at: esr_c2+ r_psu+
+      rail_neg_mv:
+        nominal: 0.938
+        min: 0.6874
+        min_at: esr_c2- r_psu-
+        max: 2.2684
+        max_at: esr_c2+ r_psu+
+      avdd_uv:
+        nominal: 0.06
+        min: 0.05
+        min_at: esr_c2- r_psu-
+        max: 0.15
+        max_at: esr_c2+ r_psu+
+      pitch_cents:
+        nominal: 0.000351598
+        min: 0.000252928
+        min_at: esr_c2- r_psu-
+        max: 0.000741574
+        max_at: esr_c2+ r_psu+
+      mod_uv:
+        nominal: 0.17
+        min: 0.12
+        min_at: esr_c2- r_psu-
+        max: 0.4
+        max_at: esr_c2+ r_psu+
+      breath_mv:
+        nominal: 0.08653
+        min: 0.06594
+        min_at: esr_c2- r_psu-
+        max: 0.19268
+        max_at: esr_c2+ r_psu+
+      iuin_ma:
+        nominal: 42.2358
+        min: 42.1935
+        min_at: esr_c2- r_psu-
+        max: 42.4011
+        max_at: esr_c2+ r_psu+
+      iuout_ma:
+        nominal: 67.5993
+        min: 67.5981
+        min_at: esr_c2- r_psu+
+        max: 67.6003
+        max_at: esr_c2- r_psu-
+    asserts:
+    - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
+        and max['tap_neg_mv'] < p['rail_bound_mv']
+      why: 'the review''s bound holds: the row''s PWM puts under 13 mV p-p on the case''s +12 V and -12 V, at this module''s
+        header and at its bus tap, at every corner (A4-13''s arithmetic took C2''s ESR as the input LC''s only damping; D2,
+        D4, PTC-ISO and the beads are in the same loop, and the instrument''s own bulk keeps most of the row''s current)'
+      pass: true
+    - expr: max['pitch_cents'] < p['pitch_bar_cents']
+      why: 'ADR 0027''s residual for the LED PWM: under 0.001 cents on the pitch jack - through the OPA2197s'' supply rejection
+        (TI''s model), and DAC_AVDD''s ripple passed whole to VREFOUT and the DAC''s output'
+      pass: true
+    - expr: max['mod_uv'] < p['mod_lsb_uv']
+      why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
+      pass: true
+    - expr: max['breath_mv'] < p['breath_bar_mv']
+      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
+        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      pass: true
+  led-pwm-duty[d_led=0.75]:
+    corners: 5
+    measures:
+      hdr_pos_mv:
+        nominal: 2.0845
+        min: 1.4293
+        min_at: esr_c2- r_psu-
+        max: 4.947
+        max_at: esr_c2+ r_psu+
+      hdr_neg_mv:
+        nominal: 2.1354
+        min: 1.4545
+        min_at: esr_c2- r_psu-
+        max: 5.1709
+        max_at: esr_c2+ r_psu+
+      tap_pos_mv:
+        nominal: 1.2673
+        min: 0.6398
+        min_at: esr_c2- r_psu-
+        max: 3.993
+        max_at: esr_c2+ r_psu+
+      tap_neg_mv:
+        nominal: 1.2983
+        min: 0.651
+        min_at: esr_c2- r_psu-
+        max: 4.1735
+        max_at: esr_c2+ r_psu+
+      rail_pos_mv:
+        nominal: 0.6688
+        min: 0.5001
+        min_at: esr_c2- r_psu-
+        max: 1.516
+        max_at: esr_c2+ r_psu+
+      rail_neg_mv:
+        nominal: 1.0009
+        min: 0.7429
+        min_at: esr_c2- r_psu-
+        max: 2.3863
+        max_at: esr_c2+ r_psu+
+      avdd_uv:
+        nominal: 0.07
+        min: 0.05
+        min_at: esr_c2- r_psu-
+        max: 0.15
+        max_at: esr_c2+ r_psu+
+      pitch_cents:
+        nominal: 0.000372242
+        min: 0.000270613
+        min_at: esr_c2- r_psu-
+        max: 0.000773243
+        max_at: esr_c2+ r_psu+
+      mod_uv:
+        nominal: 0.17
+        min: 0.13
+        min_at: esr_c2- r_psu-
+        max: 0.42
+        max_at: esr_c2+ r_psu+
+      breath_mv:
+        nominal: 0.09254
+        min: 0.07125
+        min_at: esr_c2- r_psu-
+        max: 0.20173
+        max_at: esr_c2+ r_psu+
+      iuin_ma:
+        nominal: 42.4194
+        min: 42.3679
+        min_at: esr_c2- r_psu-
+        max: 42.6192
+        max_at: esr_c2+ r_psu+
+      iuout_ma:
+        nominal: 67.6003
+        min: 67.5984
+        min_at: esr_c2+ r_psu+
+        max: 67.6003
+        max_at: nominal
+    asserts:
+    - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
+        and max['tap_neg_mv'] < p['rail_bound_mv']
+      why: 'the review''s bound holds: the row''s PWM puts under 13 mV p-p on the case''s +12 V and -12 V, at this module''s
+        header and at its bus tap, at every corner (A4-13''s arithmetic took C2''s ESR as the input LC''s only damping; D2,
+        D4, PTC-ISO and the beads are in the same loop, and the instrument''s own bulk keeps most of the row''s current)'
+      pass: true
+    - expr: max['pitch_cents'] < p['pitch_bar_cents']
+      why: 'ADR 0027''s residual for the LED PWM: under 0.001 cents on the pitch jack - through the OPA2197s'' supply rejection
+        (TI''s model), and DAC_AVDD''s ripple passed whole to VREFOUT and the DAC''s output'
+      pass: true
+    - expr: max['mod_uv'] < p['mod_lsb_uv']
+      why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
+      pass: true
+    - expr: max['breath_mv'] < p['breath_bar_mv']
+      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
+        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      pass: true
+  led-pwm-duty[d_led=0.9]:
+    corners: 5
+    measures:
+      hdr_pos_mv:
+        nominal: 1.1035
+        min: 0.6692
+        min_at: esr_c2- r_psu-
+        max: 3.2356
+        max_at: esr_c2+ r_psu+
+      hdr_neg_mv:
+        nominal: 1.1288
+        min: 0.6805
+        min_at: esr_c2- r_psu-
+        max: 3.3587
+        max_at: esr_c2+ r_psu+
+      tap_pos_mv:
+        nominal: 0.6643
+        min: 0.2995
+        min_at: esr_c2- r_psu-
+        max: 2.562
+        max_at: esr_c2+ r_psu+
+      tap_neg_mv:
+        nominal: 0.6795
+        min: 0.3046
+        min_at: esr_c2- r_psu-
+        max: 2.6596
+        max_at: esr_c2+ r_psu+
+      rail_pos_mv:
+        nominal: 0.3381
+        min: 0.2487
+        min_at: esr_c2- r_psu-
+        max: 0.8066
+        max_at: esr_c2+ r_psu+
+      rail_neg_mv:
+        nominal: 0.4946
+        min: 0.3647
+        min_at: esr_c2- r_psu-
+        max: 1.2405
+        max_at: esr_c2+ r_psu+
+      avdd_uv:
+        nominal: 0.03
+        min: 0.03
+        min_at: nominal
+        max: 0.08
+        max_at: esr_c2+ r_psu+
+      pitch_cents:
+        nominal: 0.000277696
+        min: 0.000174481
+        min_at: esr_c2- r_psu-
+        max: 0.000903977
+        max_at: esr_c2+ r_psu+
+      mod_uv:
+        nominal: 0.08
+        min: 0.06
+        min_at: esr_c2- r_psu-
+        max: 0.24
+        max_at: esr_c2+ r_psu+
+      breath_mv:
+        nominal: 0.04315
+        min: 0.03238
+        min_at: esr_c2- r_psu-
+        max: 0.099
+        max_at: esr_c2+ r_psu+
+      iuin_ma:
+        nominal: 32.3934
+        min: 32.3391
+        min_at: esr_c2- r_psu-
+        max: 32.5834
+        max_at: esr_c2+ r_psu+
+      iuout_ma:
+        nominal: 51.6234
+        min: 51.6234
+        min_at: nominal
+        max: 51.6243
+        max_at: esr_c2- r_psu+
+    asserts:
+    - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
+        and max['tap_neg_mv'] < p['rail_bound_mv']
+      why: 'the review''s bound holds: the row''s PWM puts under 13 mV p-p on the case''s +12 V and -12 V, at this module''s
+        header and at its bus tap, at every corner (A4-13''s arithmetic took C2''s ESR as the input LC''s only damping; D2,
+        D4, PTC-ISO and the beads are in the same loop, and the instrument''s own bulk keeps most of the row''s current)'
+      pass: true
+    - expr: max['pitch_cents'] < p['pitch_bar_cents']
+      why: 'ADR 0027''s residual for the LED PWM: under 0.001 cents on the pitch jack - through the OPA2197s'' supply rejection
+        (TI''s model), and DAC_AVDD''s ripple passed whole to VREFOUT and the DAC''s output'
+      pass: true
+    - expr: max['mod_uv'] < p['mod_lsb_uv']
+      why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
+      pass: true
+    - expr: max['breath_mv'] < p['breath_bar_mv']
+      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
+        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      pass: true
+  led-pwm-duty[d_led=0.9961]:
+    corners: 5
+    measures:
+      hdr_pos_mv:
+        nominal: 0.053
+        min: 0.0281
+        min_at: esr_c2- r_psu-
+        max: 0.174
+        max_at: esr_c2+ r_psu+
+      hdr_neg_mv:
+        nominal: 0.0542
+        min: 0.0285
+        min_at: esr_c2- r_psu-
+        max: 0.1798
+        max_at: esr_c2+ r_psu+
+      tap_pos_mv:
+        nominal: 0.0312
+        min: 0.0125
+        min_at: esr_c2- r_psu-
+        max: 0.1337
+        max_at: esr_c2+ r_psu+
+      tap_neg_mv:
+        nominal: 0.0318
+        min: 0.0127
+        min_at: esr_c2- r_psu-
+        max: 0.1382
+        max_at: esr_c2+ r_psu+
+      rail_pos_mv:
+        nominal: 0.0147
+        min: 0.0109
+        min_at: esr_c2- r_psu-
+        max: 0.0384
+        max_at: esr_c2+ r_psu+
+      rail_neg_mv:
+        nominal: 0.0214
+        min: 0.0158
+        min_at: esr_c2- r_psu-
+        max: 0.0579
+        max_at: esr_c2+ r_psu+
+      avdd_uv:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 0.0
+        max_at: nominal
+      pitch_cents:
+        nominal: 3.54948e-05
+        min: 2.23356e-05
+        min_at: esr_c2- r_psu-
+        max: 8.84004e-05
+        max_at: esr_c2+ r_psu+
+      mod_uv:
+        nominal: 0.01
+        min: 0.01
+        min_at: nominal
+        max: 0.01
+        max_at: nominal
+      breath_mv:
+        nominal: 0.00186
+        min: 0.00137
+        min_at: esr_c2- r_psu-
+        max: 0.00427
+        max_at: esr_c2+ r_psu+
+      iuin_ma:
+        nominal: 11.1063
+        min: 11.092
+        min_at: esr_c2+ r_psu-
+        max: 11.1641
+        max_at: esr_c2- r_psu+
+      iuout_ma:
+        nominal: 17.7476
+        min: 17.7038
+        min_at: esr_c2+ r_psu+
+        max: 17.7867
+        max_at: esr_c2- r_psu+
+    asserts:
+    - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
+        and max['tap_neg_mv'] < p['rail_bound_mv']
+      why: 'the review''s bound holds: the row''s PWM puts under 13 mV p-p on the case''s +12 V and -12 V, at this module''s
+        header and at its bus tap, at every corner (A4-13''s arithmetic took C2''s ESR as the input LC''s only damping; D2,
+        D4, PTC-ISO and the beads are in the same loop, and the instrument''s own bulk keeps most of the row''s current)'
+      pass: true
+    - expr: max['pitch_cents'] < p['pitch_bar_cents']
+      why: 'ADR 0027''s residual for the LED PWM: under 0.001 cents on the pitch jack - through the OPA2197s'' supply rejection
+        (TI''s model), and DAC_AVDD''s ripple passed whole to VREFOUT and the DAC''s output'
+      pass: true
+    - expr: max['mod_uv'] < p['mod_lsb_uv']
+      why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
+      pass: true
+    - expr: max['breath_mv'] < p['breath_bar_mv']
+      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
+        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      pass: true
+  led-pwm-pattern[n_lit=7,spread=0.0]:
+    corners: 5
+    measures:
+      hdr_pos_mv:
+        nominal: 1.4492
+        min: 0.9971
+        min_at: esr_c2- r_psu-
+        max: 3.3554
+        max_at: esr_c2+ r_psu+
+      hdr_neg_mv:
+        nominal: 1.4856
+        min: 1.0151
+        min_at: esr_c2- r_psu-
+        max: 3.5121
+        max_at: esr_c2+ r_psu+
+      tap_pos_mv:
+        nominal: 0.8824
+        min: 0.4471
+        min_at: esr_c2- r_psu-
+        max: 2.7116
+        max_at: esr_c2+ r_psu+
+      tap_neg_mv:
+        nominal: 0.9045
+        min: 0.4551
+        min_at: esr_c2- r_psu-
+        max: 2.8383
+        max_at: esr_c2+ r_psu+
+      rail_pos_mv:
+        nominal: 0.4159
+        min: 0.3267
+        min_at: esr_c2- r_psu-
+        max: 1.0676
+        max_at: esr_c2+ r_psu+
+      rail_neg_mv:
+        nominal: 0.6349
+        min: 0.4913
+        min_at: esr_c2- r_psu-
+        max: 1.692
+        max_at: esr_c2+ r_psu+
+      avdd_uv:
+        nominal: 0.04
+        min: 0.04
+        min_at: nominal
+        max: 0.1
+        max_at: esr_c2+ r_psu+
+      pitch_cents:
+        nominal: 0.000252607
+        min: 0.000185855
+        min_at: esr_c2- r_psu-
+        max: 0.000513284
+        max_at: esr_c2+ r_psu+
+      mod_uv:
+        nominal: 0.13
+        min: 0.09
+        min_at: esr_c2- r_psu-
+        max: 0.29
+        max_at: esr_c2+ r_psu+
+      breath_mv:
+        nominal: 0.0643
+        min: 0.04942
+        min_at: esr_c2- r_psu-
+        max: 0.13838
+        max_at: esr_c2+ r_psu+
+      iuin_ma:
+        nominal: 28.3842
+        min: 28.3586
+        min_at: esr_c2- r_psu-
+        max: 28.4871
+        max_at: esr_c2+ r_psu+
+      iuout_ma:
+        nominal: 45.4156
+        min: 45.4143
+        min_at: esr_c2+ r_psu-
+        max: 45.4156
+        max_at: nominal
+    asserts:
+    - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
+        and max['tap_neg_mv'] < p['rail_bound_mv']
+      why: 'the review''s bound holds: the row''s PWM puts under 13 mV p-p on the case''s +12 V and -12 V, at this module''s
+        header and at its bus tap, at every corner (A4-13''s arithmetic took C2''s ESR as the input LC''s only damping; D2,
+        D4, PTC-ISO and the beads are in the same loop, and the instrument''s own bulk keeps most of the row''s current)'
+      pass: true
+    - expr: max['pitch_cents'] < p['pitch_bar_cents']
+      why: 'ADR 0027''s residual for the LED PWM: under 0.001 cents on the pitch jack - through the OPA2197s'' supply rejection
+        (TI''s model), and DAC_AVDD''s ripple passed whole to VREFOUT and the DAC''s output'
+      pass: true
+    - expr: max['mod_uv'] < p['mod_lsb_uv']
+      why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
+      pass: true
+    - expr: max['breath_mv'] < p['breath_bar_mv']
+      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
+        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      pass: true
+  led-pwm-pattern[n_lit=7,spread=1.0]:
+    corners: 5
+    measures:
+      hdr_pos_mv:
+        nominal: 0.6644
+        min: 0.5132
+        min_at: esr_c2- r_psu-
+        max: 1.3873
+        max_at: esr_c2+ r_psu+
+      hdr_neg_mv:
+        nominal: 0.6816
+        min: 0.5224
+        min_at: esr_c2- r_psu-
+        max: 1.4568
+        max_at: esr_c2+ r_psu+
+      tap_pos_mv:
+        nominal: 0.4088
+        min: 0.2311
+        min_at: esr_c2- r_psu-
+        max: 1.1324
+        max_at: esr_c2+ r_psu+
+      tap_neg_mv:
+        nominal: 0.4194
+        min: 0.2352
+        min_at: esr_c2- r_psu-
+        max: 1.1892
+        max_at: esr_c2+ r_psu+
+      rail_pos_mv:
+        nominal: 0.2659
+        min: 0.204
+        min_at: esr_c2- r_psu-
+        max: 0.5617
+        max_at: esr_c2+ r_psu+
+      rail_neg_mv:
+        nominal: 0.3918
+        min: 0.3019
+        min_at: esr_c2- r_psu-
+        max: 0.8514
+        max_at: esr_c2+ r_psu+
+      avdd_uv:
+        nominal: 0.02
+        min: 0.02
+        min_at: nominal
+        max: 0.06
+        max_at: esr_c2+ r_psu+
+      pitch_cents:
+        nominal: 0.000111689
+        min: 8.84832e-05
+        min_at: esr_c2- r_psu-
+        max: 0.000275554
+        max_at: esr_c2+ r_psu+
+      mod_uv:
+        nominal: 0.07
+        min: 0.05
+        min_at: esr_c2- r_psu-
+        max: 0.13
+        max_at: esr_c2+ r_psu+
+      breath_mv:
+        nominal: 0.03862
+        min: 0.02956
+        min_at: esr_c2- r_psu-
+        max: 0.08605
+        max_at: esr_c2+ r_psu+
+      iuin_ma:
+        nominal: 14.0251
+        min: 14.0052
+        min_at: esr_c2- r_psu-
+        max: 14.0948
+        max_at: esr_c2+ r_psu+
+      iuout_ma:
+        nominal: 22.5061
+        min: 22.5061
+        min_at: nominal
+        max: 22.5089
+        max_at: esr_c2- r_psu-
+    asserts:
+    - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
+        and max['tap_neg_mv'] < p['rail_bound_mv']
+      why: 'the review''s bound holds: the row''s PWM puts under 13 mV p-p on the case''s +12 V and -12 V, at this module''s
+        header and at its bus tap, at every corner (A4-13''s arithmetic took C2''s ESR as the input LC''s only damping; D2,
+        D4, PTC-ISO and the beads are in the same loop, and the instrument''s own bulk keeps most of the row''s current)'
+      pass: true
+    - expr: max['pitch_cents'] < p['pitch_bar_cents']
+      why: 'ADR 0027''s residual for the LED PWM: under 0.001 cents on the pitch jack - through the OPA2197s'' supply rejection
+        (TI''s model), and DAC_AVDD''s ripple passed whole to VREFOUT and the DAC''s output'
+      pass: true
+    - expr: max['mod_uv'] < p['mod_lsb_uv']
+      why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
+      pass: true
+    - expr: max['breath_mv'] < p['breath_bar_mv']
+      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
+        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      pass: true
+  led-pwm-pattern[n_lit=13,spread=0.0]:
+    corners: 5
+    measures:
+      hdr_pos_mv:
+        nominal: 2.7796
+        min: 1.9256
+        min_at: esr_c2- r_psu-
+        max: 6.3661
+        max_at: esr_c2+ r_psu+
+      hdr_neg_mv:
+        nominal: 2.8494
+        min: 1.9603
+        min_at: esr_c2- r_psu-
+        max: 6.6634
+        max_at: esr_c2+ r_psu+
+      tap_pos_mv:
+        nominal: 1.693
+        min: 0.8638
+        min_at: esr_c2- r_psu-
+        max: 5.1451
+        max_at: esr_c2+ r_psu+
+      tap_neg_mv:
+        nominal: 1.7354
+        min: 0.8792
+        min_at: esr_c2- r_psu-
+        max: 5.3856
+        max_at: esr_c2+ r_psu+
+      rail_pos_mv:
+        nominal: 0.8004
+        min: 0.632
+        min_at: esr_c2- r_psu-
+        max: 2.031
+        max_at: esr_c2+ r_psu+
+      rail_neg_mv:
+        nominal: 1.2236
+        min: 0.9509
+        min_at: esr_c2- r_psu-
+        max: 3.2171
+        max_at: esr_c2+ r_psu+
+      avdd_uv:
+        nominal: 0.08
+        min: 0.06
+        min_at: esr_c2- r_psu-
+        max: 0.2
+        max_at: esr_c2+ r_psu+
+      pitch_cents:
+        nominal: 0.000470386
+        min: 0.00034449
+        min_at: esr_c2- r_psu-
+        max: 0.000959611
+        max_at: esr_c2+ r_psu+
+      mod_uv:
+        nominal: 0.23
+        min: 0.17
+        min_at: esr_c2- r_psu-
+        max: 0.55
+        max_at: esr_c2+ r_psu+
+      breath_mv:
+        nominal: 0.12338
+        min: 0.0953
+        min_at: esr_c2- r_psu-
+        max: 0.26259
+        max_at: esr_c2+ r_psu+
+      iuin_ma:
+        nominal: 52.8309
+        min: 52.777
+        min_at: esr_c2- r_psu-
+        max: 53.0495
+        max_at: esr_c2+ r_psu+
+      iuout_ma:
+        nominal: 84.3436
+        min: 84.3415
+        min_at: esr_c2+ r_psu-
+        max: 84.3436
+        max_at: nominal
+    asserts:
+    - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
+        and max['tap_neg_mv'] < p['rail_bound_mv']
+      why: 'the review''s bound holds: the row''s PWM puts under 13 mV p-p on the case''s +12 V and -12 V, at this module''s
+        header and at its bus tap, at every corner (A4-13''s arithmetic took C2''s ESR as the input LC''s only damping; D2,
+        D4, PTC-ISO and the beads are in the same loop, and the instrument''s own bulk keeps most of the row''s current)'
+      pass: true
+    - expr: max['pitch_cents'] < p['pitch_bar_cents']
+      why: 'ADR 0027''s residual for the LED PWM: under 0.001 cents on the pitch jack - through the OPA2197s'' supply rejection
+        (TI''s model), and DAC_AVDD''s ripple passed whole to VREFOUT and the DAC''s output'
+      pass: true
+    - expr: max['mod_uv'] < p['mod_lsb_uv']
+      why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
+      pass: true
+    - expr: max['breath_mv'] < p['breath_bar_mv']
+      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
+        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      pass: true
+  led-pwm-pattern[n_lit=13,spread=1.0]:
+    corners: 5
+    measures:
+      hdr_pos_mv:
+        nominal: 0.0173
+        min: 0.006
+        min_at: esr_c2- r_psu-
+        max: 0.0421
+        max_at: esr_c2+ r_psu+
+      hdr_neg_mv:
+        nominal: 0.0177
+        min: 0.0062
+        min_at: esr_c2- r_psu-
+        max: 0.0434
+        max_at: esr_c2+ r_psu+
+      tap_pos_mv:
+        nominal: 0.009
+        min: 0.0022
+        min_at: esr_c2- r_psu-
+        max: 0.0288
+        max_at: esr_c2+ r_psu+
+      tap_neg_mv:
+        nominal: 0.0092
+        min: 0.0022
+        min_at: esr_c2- r_psu-
+        max: 0.0296
+        max_at: esr_c2+ r_psu+
+      rail_pos_mv:
+        nominal: 0.0025
+        min: 0.0008
+        min_at: esr_c2- r_psu-
+        max: 0.0063
+        max_at: esr_c2+ r_psu+
+      rail_neg_mv:
+        nominal: 0.0044
+        min: 0.0015
+        min_at: esr_c2- r_psu-
+        max: 0.0108
+        max_at: esr_c2+ r_psu+
+      avdd_uv:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 0.0
+        max_at: nominal
+      pitch_cents:
+        nominal: 2.25948e-05
+        min: 1.665e-05
+        min_at: esr_c2- r_psu-
+        max: 3.61548e-05
+        max_at: esr_c2+ r_psu+
+      mod_uv:
+        nominal: 0.01
+        min: 0.01
+        min_at: nominal
+        max: 0.01
+        max_at: nominal
+      breath_mv:
+        nominal: 0.00011
+        min: 9.0e-05
+        min_at: esr_c2- r_psu-
+        max: 0.00016
+        max_at: esr_c2+ r_psu+
+      iuin_ma:
+        nominal: 2.09378
+        min: 2.08926
+        min_at: esr_c2- r_psu-
+        max: 2.10514
+        max_at: esr_c2+ r_psu+
+      iuout_ma:
+        nominal: 3.35156
+        min: 3.35084
+        min_at: esr_c2- r_psu+
+        max: 3.3522
+        max_at: esr_c2+ r_psu+
+    asserts:
+    - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
+        and max['tap_neg_mv'] < p['rail_bound_mv']
+      why: 'the review''s bound holds: the row''s PWM puts under 13 mV p-p on the case''s +12 V and -12 V, at this module''s
+        header and at its bus tap, at every corner (A4-13''s arithmetic took C2''s ESR as the input LC''s only damping; D2,
+        D4, PTC-ISO and the beads are in the same loop, and the instrument''s own bulk keeps most of the row''s current)'
+      pass: true
+    - expr: max['pitch_cents'] < p['pitch_bar_cents']
+      why: 'ADR 0027''s residual for the LED PWM: under 0.001 cents on the pitch jack - through the OPA2197s'' supply rejection
+        (TI''s model), and DAC_AVDD''s ripple passed whole to VREFOUT and the DAC''s output'
+      pass: true
+    - expr: max['mod_uv'] < p['mod_lsb_uv']
+      why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
+      pass: true
+    - expr: max['breath_mv'] < p['breath_bar_mv']
+      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
+        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      pass: true
+  led-pwm-at-iso[f_pwm=2000.0]:
+    corners: 5
+    measures:
+      hdr_pos_mv:
+        nominal: 8.6715
+        min: 6.4946
+        min_at: esr_c2- r_psu-
+        max: 16.7627
+        max_at: esr_c2+ r_psu+
+      hdr_neg_mv:
+        nominal: 8.8814
+        min: 6.6083
+        min_at: esr_c2- r_psu-
+        max: 17.5644
+        max_at: esr_c2+ r_psu+
+      tap_pos_mv:
+        nominal: 5.3106
+        min: 2.8983
+        min_at: esr_c2- r_psu-
+        max: 13.6643
+        max_at: esr_c2+ r_psu+
+      tap_neg_mv:
+        nominal: 5.4396
+        min: 2.9489
+        min_at: esr_c2- r_psu-
+        max: 14.3207
+        max_at: esr_c2+ r_psu+
+      rail_pos_mv:
+        nominal: 3.2548
+        min: 2.348
+        min_at: esr_c2- r_psu-
+        max: 7.4748
+        max_at: esr_c2+ r_psu+
+      rail_neg_mv:
+        nominal: 4.9727
+        min: 3.5333
+        min_at: esr_c2- r_psu-
+        max: 11.2056
+        max_at: esr_c2+ r_psu+
+      avdd_uv:
+        nominal: 0.32
+        min: 0.24
+        min_at: esr_c2- r_psu-
+        max: 0.74
+        max_at: esr_c2+ r_psu+
+      pitch_cents:
+        nominal: 0.00107856
+        min: 0.000825192
+        min_at: esr_c2- r_psu-
+        max: 0.0034429
+        max_at: esr_c2+ r_psu+
+      mod_uv:
+        nominal: 0.77
+        min: 0.58
+        min_at: esr_c2- r_psu-
+        max: 1.5
+        max_at: esr_c2+ r_psu+
+      breath_mv:
+        nominal: 0.41352
+        min: 0.31971
+        min_at: esr_c2- r_psu-
+        max: 0.91646
+        max_at: esr_c2+ r_psu+
+      iuin_ma:
+        nominal: 105.257
+        min: 105.174
+        min_at: esr_c2+ r_psu-
+        max: 105.607
+        max_at: esr_c2+ r_psu+
+      iuout_ma:
+        nominal: 167.695
+        min: 167.695
+        min_at: nominal
+        max: 167.695
+        max_at: esr_c2- r_psu-
+    asserts:
+    - expr: max['hdr_neg_mv'] > p['rail_bound_mv']
+      why: 'RECORDED WHAT-IF: on the review''s own premise - no instrument bulk - its 13 mV is not a bound: with a 200 mohm
+        rack PSU the header reaches 14-18 mV p-p across the band, though the input LC has no gain there (iso-input-z rack_band).
+        What holds the design well under it is C-STRIP-BULK keeping half or more of the row''s current in the instrument (led-pwm''s
+        iuout_ma against this run''s)'
+      pass: true
+    - expr: max['pitch_cents'] < p['bench_bar_cents']
+      why: and the pitch jack under the hundredth of a cent ADR 0027 tells the bench to expect (it reaches ~0.001 cents here,
+        which is why the as-built runs, not this one, carry ADR 0027's 0.001)
+      pass: true
+  led-pwm-at-iso[f_pwm=3100.0]:
+    corners: 5
+    measures:
+      hdr_pos_mv:
+        nominal: 6.4262
+        min: 4.52
+        min_at: esr_c2- r_psu-
+        max: 14.3688
+        max_at: esr_c2+ r_psu+
+      hdr_neg_mv:
+        nominal: 6.5775
+        min: 4.5966
+        min_at: esr_c2- r_psu-
+        max: 15.0301
+        max_at: esr_c2+ r_psu+
+      tap_pos_mv:
+        nominal: 3.9012
+        min: 1.9929
+        min_at: esr_c2- r_psu-
+        max: 11.6724
+        max_at: esr_c2+ r_psu+
+      tap_neg_mv:
+        nominal: 3.9931
+        min: 2.0267
+        min_at: esr_c2- r_psu-
+        max: 12.209
+        max_at: esr_c2+ r_psu+
+      rail_pos_mv:
+        nominal: 1.799
+        min: 1.1623
+        min_at: esr_c2- r_psu-
+        max: 4.9332
+        max_at: esr_c2+ r_psu+
+      rail_neg_mv:
+        nominal: 2.7959
+        min: 1.7714
+        min_at: esr_c2- r_psu-
+        max: 7.6007
+        max_at: esr_c2+ r_psu+
+      avdd_uv:
+        nominal: 0.18
+        min: 0.12
+        min_at: esr_c2- r_psu-
+        max: 0.48
+        max_at: esr_c2+ r_psu+
+      pitch_cents:
+        nominal: 0.000965207
+        min: 0.000736822
+        min_at: esr_c2- r_psu-
+        max: 0.00351306
+        max_at: esr_c2+ r_psu+
+      mod_uv:
+        nominal: 0.53
+        min: 0.35
+        min_at: esr_c2- r_psu-
+        max: 1.25
+        max_at: esr_c2+ r_psu+
+      breath_mv:
+        nominal: 0.14994
+        min: 0.10866
+        min_at: esr_c2- r_psu-
+        max: 0.40735
+        max_at: esr_c2+ r_psu+
+      iuin_ma:
+        nominal: 104.879
+        min: 104.789
+        min_at: esr_c2- r_psu-
+        max: 105.29
+        max_at: esr_c2+ r_psu+
+      iuout_ma:
+        nominal: 167.342
+        min: 167.342
+        min_at: esr_c2+ r_psu-
+        max: 167.342
+        max_at: nominal
+    asserts:
+    - expr: max['hdr_neg_mv'] > p['rail_bound_mv']
+      why: 'RECORDED WHAT-IF: on the review''s own premise - no instrument bulk - its 13 mV is not a bound: with a 200 mohm
+        rack PSU the header reaches 14-18 mV p-p across the band, though the input LC has no gain there (iso-input-z rack_band).
+        What holds the design well under it is C-STRIP-BULK keeping half or more of the row''s current in the instrument (led-pwm''s
+        iuout_ma against this run''s)'
+      pass: true
+    - expr: max['pitch_cents'] < p['bench_bar_cents']
+      why: and the pitch jack under the hundredth of a cent ADR 0027 tells the bench to expect (it reaches ~0.001 cents here,
+        which is why the as-built runs, not this one, carry ADR 0027's 0.001)
+      pass: true
+  led-pwm-at-iso[f_pwm=4000.0]:
+    corners: 5
+    measures:
+      hdr_pos_mv:
+        nominal: 5.3451
+        min: 3.4875
+        min_at: esr_c2- r_psu-
+        max: 13.2775
+        max_at: esr_c2+ r_psu+
+      hdr_neg_mv:
+        nominal: 5.4679
+        min: 3.5458
+        min_at: esr_c2- r_psu-
+        max: 13.8567
+        max_at: esr_c2+ r_psu+
+      tap_pos_mv:
+        nominal: 3.2225
+        min: 1.5205
+        min_at: esr_c2- r_psu-
+        max: 10.7517
+        max_at: esr_c2+ r_psu+
+      tap_neg_mv:
+        nominal: 3.2966
+        min: 1.5459
+        min_at: esr_c2- r_psu-
+        max: 11.2179
+        max_at: esr_c2+ r_psu+
+      rail_pos_mv:
+        nominal: 1.3121
+        min: 0.7695
+        min_at: esr_c2- r_psu-
+        max: 3.9275
+        max_at: esr_c2+ r_psu+
+      rail_neg_mv:
+        nominal: 2.0343
+        min: 1.1608
+        min_at: esr_c2- r_psu-
+        max: 6.0627
+        max_at: esr_c2+ r_psu+
+      avdd_uv:
+        nominal: 0.14
+        min: 0.08
+        min_at: esr_c2- r_psu-
+        max: 0.39
+        max_at: esr_c2+ r_psu+
+      pitch_cents:
+        nominal: 0.000891151
+        min: 0.000670517
+        min_at: esr_c2- r_psu-
+        max: 0.00354026
+        max_at: esr_c2+ r_psu+
+      mod_uv:
+        nominal: 0.41
+        min: 0.25
+        min_at: esr_c2- r_psu-
+        max: 1.09
+        max_at: esr_c2+ r_psu+
+      breath_mv:
+        nominal: 0.08413
+        min: 0.05652
+        min_at: esr_c2- r_psu-
+        max: 0.25753
+        max_at: esr_c2+ r_psu+
+      iuin_ma:
+        nominal: 104.703
+        min: 104.592
+        min_at: esr_c2- r_psu-
+        max: 105.147
+        max_at: esr_c2+ r_psu+
+      iuout_ma:
+        nominal: 167.182
+        min: 167.182
+        min_at: esr_c2+ r_psu-
+        max: 167.182
+        max_at: nominal
+    asserts:
+    - expr: max['hdr_neg_mv'] > p['rail_bound_mv']
+      why: 'RECORDED WHAT-IF: on the review''s own premise - no instrument bulk - its 13 mV is not a bound: with a 200 mohm
+        rack PSU the header reaches 14-18 mV p-p across the band, though the input LC has no gain there (iso-input-z rack_band).
+        What holds the design well under it is C-STRIP-BULK keeping half or more of the row''s current in the instrument (led-pwm''s
+        iuout_ma against this run''s)'
+      pass: true
+    - expr: max['pitch_cents'] < p['bench_bar_cents']
+      why: and the pitch jack under the hundredth of a cent ADR 0027 tells the bench to expect (it reaches ~0.001 cents here,
+        which is why the as-built runs, not this one, carry ADR 0027's 0.001)
       pass: true
