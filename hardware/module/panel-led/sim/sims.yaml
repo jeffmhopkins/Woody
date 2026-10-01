@@ -5,11 +5,12 @@
 # instrument's current and the breath are module/power-entry/sim's (params_from). Run:
 #   python3 tools/sim.py run hardware/module/panel-led/sim
 #
-# THE CLAIMS. panel-led.md: "(12.0 - 2.0 V) / 2.2 kohm ~ 4.5 mA ... The LED lights as the
-# output passes about 2 V". power-entry.md, grounding: what NT-DIG-MOD carries is
-# "constant and the module's own - ... the panel LED's 4.5 mA the other way". The LED is
-# NOT on the -12 V rail: it hangs on UMBILICAL_POS12 and returns to AGND_MOD - on the MAIN
-# board since 2026-10-01 (ADR 0024 point 15), so its return no longer crosses J-B2B-MOD.
+# THE CLAIMS. panel-led.md: about 4.1-4.5 mA, (12.0 - 3.0 V) / 2.2 kohm to (12.0 - 2.0 V) /
+# 2.2 kohm across the two catalogues' V_F, and the LED lights as the output passes 2-3 V.
+# power-entry.md, grounding: what NT-DIG-MOD carries is "constant and the module's own - ...
+# the panel LED's current the other way". The LED is NOT on the -12 V rail: it hangs on
+# UMBILICAL_POS12 and returns to the MAIN board's AGND_MOD through J-LED-PANEL (ADR 0024
+# point 16: a panel-mount indicator on a lead), so its return does not cross J-B2B-MOD.
 title: Panel LED - its current and its start
 values:
   netlist:
@@ -20,16 +21,17 @@ params_from: [hardware/module/power-entry/sim/sims.yaml]
 params:
   v_set:    {value: 12.0, source: "U-ISO's output, 12 V, +-3.1 % over 40 K: accuracy 2.0 %, line 0.2 %, load 0.1 %, 0.02 %/K [repo, power-entry.md U-ISO table; ds RECOM-RPA20-AW.pdf PD-2, PD-5] (vary)"}
   r_fet:    {value: 0.002, source: "Q-LOADSW (PSMN2R0-30YLE) on-resistance, 2 mohm max at VGS 10 V, 25 C [ds NEXPERIA-PSMN2R0-30YLE.pdf p.1]"}
-  # LED-PANEL, Lite-On LTST-C171GKT, GaP green 0805, BEHAVIOURAL: n = 2 chosen (a GaP
-  # junction), Rs and Is fitted so VF is the table's 2.1 V typ at 20 mA
-  # [ds LITEON-LTST-C171GKT-0805-GREEN.pdf p.3] and the curve of Fig. 2 rises ~0.2 V from 5 to
-  # 20 mA [p.5, read off a raster plot by eye]
-  # [calc: nVt = 0.0514 V; 0.2 = 0.0514 ln 4 + 0.015 Rs -> Rs = 8.6 ohm;
-  #  2.1 = 0.0514 ln(0.02/Is) + 0.02 x 8.6 -> Is = 1.0e-18 A]
+  # LED-PANEL, Dialight 605-2211-110F, green, BEHAVIOURAL. NEITHER BANKED CATALOGUE GIVES A
+  # CURVE: 2 V at 15 mA [ds DIALIGHT-605-SERIES-PMI-CATALOG-2021-EXCERPT.pdf] and 3 V at 20 mA
+  # [ds DIALIGHT-605-SERIES-PMI-CATALOG-2026-EXCERPT.pdf p.2], one typical figure each. So the
+  # SHAPE is a GaP green junction's, kept from this circuit's previous LED: n = 2, Rs and Is
+  # fitted to 2.1 V at 20 mA and a ~0.2 V rise from 5 to 20 mA [calc: nVt = 0.0514 V;
+  # 0.2 = 0.0514 ln 4 + 0.015 Rs -> Rs = 8.6 ohm; 2.1 = 0.0514 ln(0.02/Is) + 0.02 x 8.6 ->
+  # Is = 1.0e-18 A] - and vf20 SHIFTS it across both catalogues' V_F.
   led_n:    {value: 2.0}
   led_rs:   {value: 8.6}
   led_is:   {value: 1.0e-18}
-  vf20:     {value: 2.1, source: "VF at 20 mA, 2.1 V typ, 2.4 V max; no minimum [ds p.3]. Applied as a shift of the fitted curve (vary 2.0-2.4 V)"}
+  vf20:     {value: 3.0, source: "VF at 20 mA: 3 V typ in the 2026 catalogue, 2 V at 15 mA in the 2021 one, no maximum in either [ds Dialight 605 pages]. Applied as a shift of the fitted curve (vary 2.0-3.4 V: the older figure, to the newer plus 0.4 V for a maximum neither gives)"}
   t_b:      {value: 1.0}
 
 derived:
@@ -39,7 +41,7 @@ derived:
 
 vary:
   v_set:  {tol: [-0.031, 0.031]}
-  vf20:   {tol: [-0.048, 0.143]}
+  vf20:   {tol: [-0.333, 0.133]}
   R-LED-PANEL: {tol: from-value}
 
 sims:
@@ -54,10 +56,10 @@ sims:
       v_on_100u: "cross(w['start'], 1e-4, 0)"
       v_on_1m: "cross(w['start'], 1e-3, 0)"
     asserts:
-      - expr: "min['i_led'] > 3.9e-3 and max['i_led'] < 5.0e-3"
-        why: "panel-led.md's ~4.5 mA holds within about 12 % over U-ISO's +-3.1 %, R-LED-PANEL's 1 % and the LED's whole VF spread (it reads 4.5 mA with VF at the page's 2.0 V): under 0.6 % of the 940 mA umbilical limit, and far inside the LED's 30 mA rating [ds LTST-C171GKT p.2]"
-      - expr: "min['v_on_100u'] > 1.5 and max['v_on_100u'] < 2.6"
-        why: "panel-led.md 'lights as the output passes about 2 V': the LED reaches 0.1 mA with the output between 1.5 and 2.6 V at every corner"
-  # The return across J-B2B-MOD (the jack board's ground against the pitch stage's) is no
-  # longer simulated: since 2026-10-01 the LED is on the main board and its current never
-  # crosses the header (ADR 0024 point 15). What it does to NT-DIG-MOD is power-entry/sim's.
+      - expr: "min['i_led'] > 3.5e-3 and max['i_led'] < 5.0e-3"
+        why: "panel-led.md's 4.1-4.5 mA holds over U-ISO's +-3.1 %, R-LED-PANEL's 1 % and both catalogues' V_F: under 0.6 % of the 940 mA umbilical limit, and inside either catalogue's operating current (15 or 20 mA) [ds Dialight 605 pages]"
+      - expr: "min['v_on_100u'] > 1.5 and max['v_on_100u'] < 3.6"
+        why: "panel-led.md 'lights as the output passes 2-3 V': the LED reaches 0.1 mA with the output between 1.5 and 3.6 V at every corner"
+  # The return across J-B2B-MOD is not simulated: the LED's current returns through
+  # J-LED-PANEL to the main board's AGND_MOD and never crosses that header (ADR 0024 points 15
+  # and 16). What it does to NT-DIG-MOD is power-entry/sim's.

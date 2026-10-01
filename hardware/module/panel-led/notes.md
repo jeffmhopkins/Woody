@@ -59,3 +59,20 @@ the header's ground pins. The owner asked for the jack board to end above the
 toggle's row, which took the leg away; on the main board a through-hole LED's
 leads would have come out under `U-ISO`, so it became an 0805 under a panel
 light pipe and pin 19 became spare.
+
+---
+
+## On the main board, an 0805 under a panel light pipe — superseded 2026-10-01
+
+*Moved here when the LED became a panel-mount indicator on a lead (ADR 0024
+point 16).*
+
+For part of 2026-10-01 the LED was a Lite-On LTST-C171GKT, an 0805 GaP green
+chip LED on the main board's front face, under `MECH-LED-BEZEL-MOD`, which
+was then a Bivar PLP2-750 press-fit light pipe in a D2.92 panel hole: its
+domed flange stood 0.8 on the face and its end stopped 0.5 short of the LED,
+19.0 behind the flange. The resistor was the same `R-LED-PANEL`, beside the
+LED, at about 4.5 mA. The owner: *"Let's remove power led light pipe and do a
+panel mount led with connector to header."* The 0805 and the pipe left the
+BOM; the LED moved into the panel on its own nut, and the board gained
+`J-LED-PANEL` for its lead.

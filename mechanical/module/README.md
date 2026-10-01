@@ -17,8 +17,10 @@ zone*, with *the umbilical's plug stands proud of every control* beside it.
 Behind the panel, the jack board is a plain rectangle that ends just below
 the bottom jack row (ADR 0024 point 15, the owner, 2026-10-01: *"Can we not
 rectangle it out up higher?"*), above the toggle's body and the NE8FAV. The
-LED is an 0805 on the main board under a light pipe in the panel, and the
-main board's two low mounting points are spacers from the panel's rear face,
+LED is a panel-mount indicator on its own nut, its lead plugged into a
+header on the main board's front face (ADR 0024 point 16: the owner,
+2026-10-01, *"remove power led light pipe and do a panel mount led with
+connector to header"*), and the main board's two low mounting points are spacers from the panel's rear face,
 on self-clinching studs.
 
 **The toggle throws left–right, ON to the right** (ADR 0024 point 12, the
@@ -138,7 +140,7 @@ something it shows moved.
 
 ![The panel drawing: cuts, centres, legend zones, the washers' reach along their slots](renders/panel.png)
 
-![Both boards seen from the panel: the jack board a plain rectangle above the toggle and the NE8FAV, the standoffs (two between the boards, two to the panel), J-B2B-MOD, the LED under its light pipe, the parts on each face](renders/boards.png)
+![Both boards seen from the panel: the jack board a plain rectangle above the toggle and the NE8FAV, the standoffs (two between the boards, two to the panel), J-B2B-MOD, J-LED-PANEL with the LED's nut and its lead's run outlined above it, the parts on each face](renders/boards.png)
 
 ![Side section through the panel's centre, with every depth and the Palette's limit read both ways](renders/section.png)
 
@@ -154,10 +156,14 @@ than one part, so neither is left to the builder to discover
 
 1. **The jack board's own parts first** — jacks and pots. Their joints are
    on the board's rear face, which ends up inside the gap between the boards.
-   (`LED-PANEL` is an 0805 on the main board, machine-placed.)
+   On the main board, `J-LED-PANEL` is hand-soldered (through-hole).
 2. **The panel's own hardware**: the two studs (`MECH-PANEL-STUD-MOD`,
-   clinched by the panel vendor), the light pipe pressed in from the front
-   (`MECH-LED-BEZEL-MOD`), and **`SW-POWER`**, one nut on the front and none behind
+   clinched by the panel vendor); **`LED-PANEL`** from the front, its nut and
+   lock washer behind — **mark its anode lead (the dot on the housing's
+   back) before cutting the leads** to `led.lead_cut`, then solder
+   `CBL-LED-PANEL`'s red wire to the anode, the black to the cathode, and
+   sleeve both (*LED-PANEL behind the panel: in front of the main board*);
+   and **`SW-POWER`**, one nut on the front and none behind
    (*toggle's lugs in front of the main board*), and its two wires soldered to
    its lugs, long enough to reach the main board.
 3. **Offer both boards up to the panel** with every standoff loose and
@@ -176,6 +182,9 @@ than one part, so neither is left to the builder to discover
    the slot between the jack bodies and cannot be reached once the panel is
    on. Then on the main board's rear face. The header, once soldered, freezes
    the gap.
-5. **Feed `SW-POWER`'s wires** below the jack board's bottom edge and solder
-   them to the main board from its rear, then fit the panel (its two spacers
+5. **Plug `CBL-LED-PANEL` into `J-LED-PANEL`** (pin 1, the red wire, the
+   anode) while the main board is still clear of the panel, and **feed
+   `SW-POWER`'s wires** below the jack board's bottom edge and solder
+   them to the main board from its rear; fold the LED's lead into the gap
+   (*CBL-LED-PANEL's run, LED to header*), then fit the panel (its two spacers
    on their studs), the standoffs' screws and the toggle's nut.

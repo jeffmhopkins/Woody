@@ -693,7 +693,7 @@ layout:
   led_side:
     value: "left"
     status: nominal
-    source: "[adr 0024 point 11] the LED in the toggle's row, in the strip left of the toggle; its light pipe reaches back to the main board (point 15)"
+    source: "[adr 0024 point 11] the LED in the toggle's row, in the strip left of the toggle; a panel-mount indicator on its own nut, its lead to J-LED-PANEL on the main board (point 16)"
   toggle_y:
     value: 49.5
     status: nominal

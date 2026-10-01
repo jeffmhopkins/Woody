@@ -1,9 +1,9 @@
 * The panel LED on the load switch's output, as netlisted: U-ISO's output (a source at its
 * set point), the load switch as its sense resistor R-ILIM and Q-LOADSW's on-resistance,
 * the instrument's breath-following current drawn from UMBILICAL_POS12 behind it, and
-* R-LED-PANEL into LED-PANEL (BEHAVIOURAL: a diode fitted to its banked datasheet). The
-* LED returns to the main board's AGND_MOD, node 0 - on the main board since 2026-10-01
-* (ADR 0024 point 15), so nothing of it crosses J-B2B-MOD.
+* R-LED-PANEL into LED-PANEL (BEHAVIOURAL: a diode shifted across its two banked catalogues'
+* V_F). The LED is on the panel, on a lead plugged into J-LED-PANEL, and returns to the main
+* board's AGND_MOD, node 0 (ADR 0024 point 16), so nothing of it crosses J-B2B-MOD.
 * Breath: 0 -> 1 -> 0 over one period of f_b, a raised cosine (as groundshift.cir).
 VISO iso 0 {{v_iso_out}}
 RLS iso umb {{r_switch}}
