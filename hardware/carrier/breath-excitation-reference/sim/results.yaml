@@ -4,11 +4,12 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/carrier/breath-excitation-reference/sim/sims.yaml: aac46d8728bf742c
-  hardware/carrier/breath-excitation-reference/netlist.yaml: b7ad67d71f9ef78b
-  hardware/carrier/breath-excitation-reference/sim/ref-loop.cir: 1d56e9e0c91fb8d1
-  hardware/carrier/breath-excitation-reference/sim/ref-zout.cir: 9ed8273eeb0b003e
-  hardware/carrier/breath-excitation-reference/sim/ref-step.cir: d1c4b5fda1a9c853
+  hardware/carrier/breath-excitation-reference/sim/sims.yaml: 44c6aca0896b4861
+  hardware/carrier/breath-excitation-reference/netlist.yaml: 2d5ee10b223dc95d
+  hardware/interfaces/breath-sense-link/netlist.yaml: 430f1e37ec9c97fa
+  hardware/carrier/breath-excitation-reference/sim/ref-loop.cir: 3b87404585d82f14
+  hardware/carrier/breath-excitation-reference/sim/ref-zout.cir: a1e3d0f0ca85e642
+  hardware/carrier/breath-excitation-reference/sim/ref-step.cir: 7be2e362873a4619
   hardware/carrier/breath-excitation-reference/sim/ref-startup.cir: 47aca5775655f26b
   hardware/carrier/breath-excitation-reference/sim/ti-fig56.cir: 9ef65d0dffd72c2c
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
@@ -336,6 +337,74 @@ sims:
         of zout-as-netlisted[c_vs=10.1u]) although the crossover phase margin barely moves - so ''may be added later'' needs
         this sim re-run with the added part, not the phase margin alone. If this assert starts failing, the ringing has gone:
         re-read the page'
+      pass: true
+  step-as-built:
+    corners: 5
+    measures:
+      dip_mv:
+        nominal: 6.64252
+        min: 6.48627
+        min_at: C-FB-REF- R-ISO-REF-
+        max: 6.79597
+        max_at: C-FB-REF+ R-ISO-REF+
+      ring_pct:
+        nominal: 45.3877
+        min: 44.2296
+        min_at: C-FB-REF+ R-ISO-REF-
+        max: 46.5824
+        max_at: C-FB-REF- R-ISO-REF+
+      t_settle:
+        nominal: 0.00043801
+        min: 0.00042731
+        min_at: C-FB-REF- R-ISO-REF-
+        max: 0.00044746
+        max_at: C-FB-REF+ R-ISO-REF+
+    asserts:
+    - expr: min['ring_pct'] > 30
+      why: 'RECORDED FINDING, not a requirement (A1-5, 2026-10-01): with Figure 3''s 1 uF at VS a load step rings back by
+        ~45 %, where 100 nF alone did not, though the phase margin rises. The sensor''s draw is steady, so it is the step
+        that is artificial - but if this assert starts failing the VS load has changed: re-read the page'
+      pass: true
+  zout-as-built:
+    corners: 9
+    measures:
+      z_500:
+        nominal: 1.19849
+        min: 1.11696
+        min_at: C-FB-REF- R-FB-REF- R-ISO-REF-
+        max: 1.28265
+        max_at: C-FB-REF+ R-FB-REF+ R-ISO-REF+
+      z_peak:
+        nominal: 37.8383
+        min: 37.5655
+        min_at: C-FB-REF+ R-FB-REF- R-ISO-REF-
+        max: 38.4348
+        max_at: C-FB-REF- R-FB-REF- R-ISO-REF+
+      f_peak:
+        nominal: 7585.78
+        min: 7585.78
+        min_at: nominal
+        max: 7943.28
+        max_at: C-FB-REF- R-FB-REF- R-ISO-REF-
+    asserts: []
+  loop-as-built:
+    corners: 33
+    measures:
+      pm:
+        nominal: 122.672
+        min: 122.369
+        min_at: C-FB-REF+ R-FB-REF+ R-ISO-REF- esr_cvs- i_sensor-
+        max: 123.034
+        max_at: C-FB-REF- R-FB-REF- R-ISO-REF+ esr_cvs+ i_sensor-
+      fc:
+        nominal: 1251950.0
+        min: 1232690.0
+        min_at: C-FB-REF- R-FB-REF- R-ISO-REF- esr_cvs- i_sensor-
+        max: 1275950.0
+        max_at: C-FB-REF+ R-FB-REF+ R-ISO-REF+ esr_cvs+ i_sensor-
+    asserts:
+    - expr: min['pm'] - 10 > 76
+      why: the page's robustness claim holds at the load as built, Figure 3's capacitors included
       pass: true
   reference-alone:
     corners: 1

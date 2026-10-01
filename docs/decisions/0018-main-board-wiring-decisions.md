@@ -53,8 +53,9 @@ only by the firmware clamp and the regulator (`U-BUCK`), so it all crosses
 5. **`DIG_GND` joins the main board's ground at `J-UMB`.** It is the SPI
    return. The three SPI lines are routed over unbroken ground from `J-MCU`
    to `J-UMB`, and the breath sense return is kept off that path. This decides
-   the **instrument** end only. The register's `dig-gnd-topology` dispute is
-   about the module end and stays open (`config/figures.yaml`).
+   the **instrument** end only. The module end is the register's
+   `dig-gnd-topology`, disputed when this was written and settled on
+   2026-09-30 (amendment below).
 
 ## Options considered
 
@@ -82,3 +83,12 @@ only by the firmware clamp and the regulator (`U-BUCK`), so it all crosses
   point cannot take a wire, its conductor moves to the matching pad.
 - **E11** (breath output clean while the matrix and LEDs are exercised) is
   still the test of decisions 1 and 5.
+
+## Amendment, 2026-10-01 — the module end is settled
+
+Decision 5 left the module end of `DIG_GND` to the register. The owner took
+the module's main board to four layers on 2026-09-30, and `dig-gnd-topology`
+was settled on it: its value, its layer stack and the reason the DAC's
+analog ground is not bridged to `DIG_GND` are in `config/figures.yaml`, owned
+by `hardware/module/power-entry/power-entry.md` *Grounding*. Nothing in
+decisions 1–5 changes. Found by the 2026-10-01 pre-layout review (A8-5).

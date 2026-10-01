@@ -2,8 +2,8 @@
   (uuid f3cf1183-3ccd-574d-a1a6-4d0a7c605c94)
   (paper "A4")
   (title_block
-    (title "Response control (PROPOSED) - the module jack board's page (hardware/module/breath-response-shaper)")
-    (comment 7 "title: Response control (PROPOSED)")
+    (title "Response control - the module jack board's page (hardware/module/breath-response-shaper)")
+    (comment 7 "title: Response control")
     (date "")
     (rev "")
     (company "Woody")

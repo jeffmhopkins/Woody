@@ -4,8 +4,8 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/breath-response-shaper/sim/sims.yaml: a45ccc0902dd5678
-  hardware/module/breath-response-shaper/netlist.yaml: a18f7ba1e024cab6
+  hardware/module/breath-response-shaper/sim/sims.yaml: 6b57567590dc779d
+  hardware/module/breath-response-shaper/netlist.yaml: 347e949e5edad4c7
   hardware/module/breath-response-shaper/sim/shaper.cir: d0741c6b7bd86d39
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
   figure:inamp-full-scale: -9.94 V
@@ -225,6 +225,6 @@ sims:
         over the in-amp''s output, so the stage''s linear-gain tolerance counts against it too'
       pass: true
     - expr: max['clip_in'] < -1.3 * p['v_hard'] and min['clip_in'] > -9.94
-      why: 'and BREATH_SHAPED clips only past 1.3x a hard blow at the in-amp (-6.03 V) at every corner: beyond real playing
-        (~2.8 kPa, breath-output-stage.md), still inside the sensor''s range'
+      why: 'and BREATH_SHAPED clips only past 1.3x a hard blow at the in-amp (-6.03 V) at every corner: beyond a hard blow
+        at breath-working-point''s 2.8 kPa candidate (disputed, open until E2), still inside the sensor''s range'
       pass: true

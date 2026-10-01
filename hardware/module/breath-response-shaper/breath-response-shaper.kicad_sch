@@ -2,10 +2,10 @@
   (uuid 97139bb3-9c58-5159-a2a9-3813e79c635b)
   (paper "A3")
   (title_block
-    (title "Response control (PROPOSED) (hardware/module/breath-response-shaper)")
+    (title "Response control (hardware/module/breath-response-shaper)")
     (comment 5 "circuit: module/breath-response-shaper")
     (comment 6 "page: breath-response-shaper.md")
-    (comment 7 "title: Response control (PROPOSED)")
+    (comment 7 "title: Response control")
     (date "")
     (rev "")
     (company "Woody")

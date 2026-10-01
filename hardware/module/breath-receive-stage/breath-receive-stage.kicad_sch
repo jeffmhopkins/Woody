@@ -1478,7 +1478,7 @@
   (wire (pts (xy 254.0 243.84) (xy 256.54 243.84)) (stroke (width 0) (type default)) (uuid 46816d73-d82f-5957-9662-5025a2e25953))
   (hierarchical_label "BREATH_INAMP_OUT" (shape output) (at 256.54 243.84 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 2c130b9c-590e-50b0-9161-c6d5b16203f2)
     (property "Dir" "out" (at 256.54 243.84 0) (effects (font (size 1.27 1.27)) hide))
-    (property "To" "module/breath-output-stage" (at 256.54 243.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "module/breath-response-shaper" (at 256.54 243.84 0) (effects (font (size 1.27 1.27)) hide))
     (property "Figure" "inamp-full-scale" (at 256.54 243.84 0) (effects (font (size 1.27 1.27)) hide)))
   (wire (pts (xy 91.44 328.93) (xy 91.44 331.47)) (stroke (width 0) (type default)) (uuid bd856c0b-fe61-57d7-9ec4-7b8e3f4185bb))
   (label "ZERO_TOP" (at 91.44 331.47 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 01cee9c3-c2e7-43fb-b410-ebe12320e820))

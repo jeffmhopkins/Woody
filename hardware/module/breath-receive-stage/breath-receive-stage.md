@@ -102,6 +102,13 @@ the two agree, and where they do not the netlist wins.*
                                         │  raw gain, which is not the result beside it.
                                         │
                                   ┌─────▼──────────────────────┐
+                                  │  RESPONSE SHAPER (curve)   │
+                                  │  POT-RESP, U-RESP: ×1 at   │
+                                  │  its click, log ↔ exp      │
+                                  │  either side               │
+                                  └─────┬──────────────────────┘
+                                        │  BREATH_SHAPED
+                                  ┌─────▼──────────────────────┐
                                   │  INVERTING gain + offset   │
                                   │  POT-GAIN (buffered        │
                                   │  attenuator) then          │
@@ -128,10 +135,10 @@ separate premises that were then withdrawn from under the swap — [`notes.md`](
 `breath-zero-ref` and so states it rather than citing it *(the line was wrong
 at +0.579 V until 2026-09-21: the same gain with the 1 MΩ bias divider
 omitted, which is the error `inamp-full-scale` already records for itself)* — but the pedestal is a **spec band, not a
-number**: 0.152–0.378 V, which needs `REF` anywhere from **0.332 V to
-0.826 V**. The band is the datasheet's own `V_off` min/typ/max
+number**: 0.152–0.378 V, which needs `REF` anywhere from **0.328 V to
+0.817 V** `[calc: 0.152 × 2.16106, 0.378 × 2.16106]`. The band is the datasheet's own `V_off` min/typ/max
 `[datasheet MPXV4006DP p.4: "Voff 0.152 0.265 0.378 V"]`, and **its typical is
-0.265 V** — see `sensor-full-scale`. **Range the trimmer 0 → +1.0 V** — `R-ZERO-TOP`, 42.2 kΩ above the 10 kΩ track, does it: `5.21 × 10/52.2` = 0.998 V at the top, 0.915 V with the track 10 % low `[calc]`, still above the band's 0.826 V. An earlier revision specified
+0.265 V** — see `sensor-full-scale`. **Range the trimmer 0 → +1.0 V** — `R-ZERO-TOP`, 42.2 kΩ above the 10 kΩ track, does it: `5.21 × 10/52.2` = 0.998 V at the top, 0.915 V with the track 10 % low `[calc]`, still above the band's 0.817 V. An earlier revision specified
 0 → +0.6 V, which covers pedestals only to 0.275 V; a sensor at the top of its
 own datasheet band would have been un-nullable, leaving 1.4–5.6 % of span
 standing at the jack — the same band as the polarity showstopper this trimmer
@@ -202,20 +209,44 @@ With the body at room temperature and no breath at the mouthpiece:
 
 1. **`TRIM-BREATH-ZERO`**, internal, until the in-amp output reads 0 V. Once,
    at build.
-2. **Panel GAIN** for the span the patch wants. The knob does more work than
-   this page used to say: real playing tops out around 2.8 kPa against the
-   sensor's 6 kPa range, so a hard blow reaches about **−4.7 V** at the in-amp,
-   not −10. The downstream stage is **0.5× to 4×**
-   (`breath-output-stage.md`), which puts the working point near 2.1× — in the
-   middle of the knob rather than at an end stop.
-3. **Panel OFFSET** for where you want the jack to rest — **±5 V, zero at
-   centre**. Because step 1 nulled the pedestal ahead of the gain pot, step 2
-   no longer disturbs this.
+2. **Panel GAIN** for the span the patch wants, with the curve knob at its
+   centre click. The knob does more work than this page used to say: real
+   playing tops out well under the sensor's 6 kPa range — how far is
+   `breath-working-point`, disputed until E2; at its 2.8 kPa candidate a hard
+   blow reaches about **−4.7 V** at the in-amp, not −10. The downstream stage
+   is **0.5× to 4×** (`breath-output-stage.md`), which puts the working point
+   near 2.16× — at noon rather than at an end stop. Moving the curve knob
+   afterwards moves the level too (`breath-output-stage.md`, *Headroom*).
+3. **Panel OFFSET** for where you want the jack to rest — **±5 V, clockwise
+   positive, zero about 19° counter-clockwise of centre** (the wiper is
+   unbuffered; `breath-output-stage.md`). Because step 1 nulled the pedestal
+   ahead of the gain pot, step 2 no longer disturbs this.
 
-Thermal drift afterwards is on the order of 20 mV in 10 V over a full warm-up —
-a quarter turn if it ever bothers you. **That figure is unverified**: it rests
-on an offset tempco of ~0.5 mV/K that the sensor family's datasheet apparently
-does not break out, and nxp.com was unreachable when this was written.
+**The zero afterwards is the sensor's, and nothing auto-zeroes it.** Only the
+digital copy re-zeroes in firmware (ADR 0003); the analog path is trimmed once,
+here. The sensor's datasheet bounds its whole error at **±2.46 % of `V_FSS`
+with auto-zero — and only within ±5 °C of the temperature it was zeroed at —
+and ±5.0 % without** `[ds MPXV4006DP.pdf p.4, Table 1 and Notes 4–5]`. Through
+the commissioned gain, sensor to jack ×4.66 `[calc: 2.16106 × 2.156]`, those
+are about **±0.53 V and ±1.07 V at the jack** `[calc: 0.0246 × 4.6 V × 4.66;
+0.050 × 4.6 V × 4.66]`. They are total-accuracy bounds, not a drift
+specification (the datasheet gives no `TcOffset` figure on its own), but they
+are the only bound banked, and the body warms by more than 5 °C. Every
+electronic term after the sensor comes to under 3 mV at the jack over 20 K
+(pre-layout review A1, 2026-10-01), so the zero budget is the sensor's. An
+earlier version of this paragraph said "on the order of 20 mV", from an
+unsourced ~0.5 mV/K; nothing supports that figure. **Open, decided by E2:** log
+the jack at rest across the 20-minute warm-up, at the commissioned gain, and set
+the pass threshold there — a positive drift holds a VCA open at rest, which is
+what `TRIM-BREATH-ZERO` exists to prevent. A bench drift beyond the threshold
+is answered by a lower GAIN or by re-trimming warm, not by a part.
+
+**Noise at the jack** is the sensor's too: about 10 mV peak-to-peak, 0.1 % of
+span — the MPX5006 family's 4–5 counts on a 10-bit converter at 5 V behind the
+link's ~460 Hz differential pole, times 4.66 `[ds MPXV4006-AN1646.pdf pp.1–2,
+measured on the MPX5006; an estimate]`. The electronics add about 6 µV rms
+`[calc: ≈250 nV/√Hz over ~500 Hz]`. E11's scope of the jack is the
+measurement.
 
 **E10 scopes the jack**, not the display. The two representations are calibrated
 separately on purpose, so a flat bar on the screen is no longer evidence about

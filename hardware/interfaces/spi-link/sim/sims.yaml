@@ -55,6 +55,21 @@ params:
   vtm_min: {value: 0.5, source: "negative-going threshold V_T-, lowest: 0.5 V at VCC 4.5 V [same]"}
   vtm_max: {value: 1.7, source: "V_T-, highest: 1.7 V at VCC 5.5 V (1.5 V at 4.5 V) [same]"}
   hyst_min: {value: 0.4, source: "V_T+ - V_T-, least: 0.4 V at 4.5 and 5.5 V [same]"}
+  # --- one DAC frame's edges (frame.cir): what firmware must hold at the pads, and the DAC's timing at its pins
+  t_css:   {value: 0.0, source: "FIRMWARE CONTRACT: CS_MOD falls no later than SCLK's first rising edge, at the pads (firmware/README.md, 'What the hardware requires'). Zero is the worst case it allows"}
+  t_csh:   {value: 250.0e-9, source: "FIRMWARE CONTRACT: CS_MOD stays low at least 250 ns (half a 2 MHz clock) after SCLK's last falling edge, at the pads (firmware/README.md). Each sim may set it"}
+  t_csw:   {value: 250.0e-9, source: "FIRMWARE CONTRACT: CS_MOD stays high at least 250 ns between two frames, at the pads (firmware/README.md)"}
+  tpd_rx_min: {value: 1.0e-9, source: "U-RX-MOD (74AHCT14) propagation delay, min, CL 15 pF, VCC 5 V +/- 0.5 V [datasheets/logic/SN74AHCT14.pdf p.6]; two gates per line"}
+  tpd_rx_max: {value: 8.0e-9, source: "the same, max [same]"}
+  tpd_lvl_min: {value: 1.0e-9, source: "U-LVL-MOD (74AHCT125) A to Y, min, CL 15 pF [datasheets/logic/SN74AHCT125.pdf p.4]"}
+  tpd_lvl_max: {value: 6.5e-9, source: "the same, max [same]"}
+  dac_t1:  {value: 10.0e-9, source: "DAC8568 t1, SCLK falling edge to SYNC falling edge, min [datasheets/analog/DAC8568CIPW.pdf p.7]"}
+  dac_t4:  {value: 80.0e-9, source: "t4, minimum SYNC high time [same]"}
+  dac_t5:  {value: 13.0e-9, source: "t5, SYNC to SCLK falling edge setup, min [same]"}
+  dac_t67: {value: 8.0e-9, source: "t6/t7, SCLK low and high time, min [same]"}
+  dac_t8:  {value: 10.0e-9, source: "t8, SCLK falling edge to SYNC rising edge, min [same]"}
+  dac_t9:  {value: 6.0e-9, source: "t9, data setup time, min [same]"}
+  dac_t10: {value: 4.0e-9, source: "t10, data hold time, min [same]"}
 
 derived:
   c_tvs_line: "v['c_tvs'] if v['tvs_line'] else 1e-15"
@@ -85,6 +100,29 @@ derived:
   t_rise_e: "600e-9 + v['tr_drv']"
   mosi0: "v['vdd'] * v['mosi_hi']"
   mosi1: "v['vdd'] * (1 - v['mosi_hi']) if v['opp'] else v['vdd'] * v['mosi_hi']"
+  # frame.cir's pad timeline
+  fr_cs0: "50e-9"
+  fr_cs0e: "50e-9 + v['tr_drv']"
+  fr_r1: "50e-9 + v['t_css']"
+  fr_r1e: "v['fr_r1'] + v['tr_drv']"
+  fr_f1: "v['fr_r1'] + 0.5 / v['f_clk']"
+  fr_f1e: "v['fr_f1'] + v['tr_drv']"
+  fr_r2: "v['fr_r1'] + 1.0 / v['f_clk']"
+  fr_r2e: "v['fr_r2'] + v['tr_drv']"
+  fr_f2: "v['fr_r1'] + 1.5 / v['f_clk']"
+  fr_f2e: "v['fr_f2'] + v['tr_drv']"
+  fr_csr: "v['fr_f2'] + v['t_csh']"
+  fr_csre: "v['fr_csr'] + v['tr_drv']"
+  fr_csf: "v['fr_csr'] + v['t_csw']"
+  fr_csfe: "v['fr_csf'] + v['tr_drv']"
+  fr_r3: "v['fr_csf'] + v['t_css']"
+  fr_r3e: "v['fr_r3'] + v['tr_drv']"
+  fr_f3: "v['fr_r3'] + 0.5 / v['f_clk']"
+  fr_f3e: "v['fr_f3'] + v['tr_drv']"
+  fr_frame_end: "v['fr_f3'] + 400e-9"
+  # one line's path from U-RX-MOD's input to the DAC pin: two 74AHCT14 gates and a 74AHCT125.
+  # Two lines can differ by every gate at its max against every gate at its min
+  chain_spread: "2 * (v['tpd_rx_max'] - v['tpd_rx_min']) + (v['tpd_lvl_max'] - v['tpd_lvl_min'])"
 
 vary:
   r_drv:  {tol: [-0.5, 0.0]}
@@ -196,3 +234,48 @@ sims:
     sweep: {z_cm: [70, 140], mosi_hi: [0, 1]}
     measures: [mosi_margin, mosi_in_peak]
     post: *pair_post
+  - name: frame-timing
+    # A5-1 of the 2026-10-01 pre-layout review. The DAC8568's frame timing at its own pins,
+    # through the receiver, with the pads held to the firmware contract (t_css, t_csh, t_csw).
+    # The RC delays a FALLING edge to the lowest V_T- (0.5 V) about six times longer than a
+    # rising edge to the lowest V_T+ (0.9 V), so a threshold corner moves one line's edge
+    # against another's; every measure takes the worst pair of thresholds for its own
+    # inequality and then subtracts the whole gate-chain spread (chain_spread). The
+    # receiver's threshold for each line can sit anywhere in the 74AHCT14's band.
+    deck: frame.cir
+    sweep: {z_cm: [70, 100, 140]}
+    measures: &frame_meas [t1, t4, t5, t6, t7, t8, t9_rise, t9_fall, t10, need_css, need_csh, need_csw]
+    post: &frame_post
+      # SYNC falls (CS_MOD at its latest V_T-) to the first SCLK fall (at its earliest)
+      t5: "cross(w['sin'], p['vtm_max'], p['fr_f1']) - cross(w['cin'], p['vtm_min'], p['fr_cs0']) - p['chain_spread']"
+      # SCLK high and low at the DAC
+      t7: "cross(w['sin'], p['vtm_max'], p['fr_f1']) - cross(w['sin'], p['vtp_max'], p['fr_r1']) - p['chain_spread']"
+      t6: "cross(w['sin'], p['vtp_min'], p['fr_r2']) - cross(w['sin'], p['vtm_min'], p['fr_f1']) - p['chain_spread']"
+      # DIN setup before SCLK falls: DIN rising (latest at V_T+ max) before fall 1; falling (latest at V_T- min) before fall 2
+      t9_rise: "cross(w['sin'], p['vtm_max'], p['fr_f1']) - cross(w['min'], p['vtp_max'], p['fr_r1']) - p['chain_spread']"
+      t9_fall: "cross(w['sin'], p['vtm_max'], p['fr_f2']) - cross(w['min'], p['vtm_min'], p['fr_r2']) - p['chain_spread']"
+      # DIN hold after fall 1: its next change, at rise 2, at its earliest (falling, V_T- max)
+      t10: "cross(w['min'], p['vtm_max'], p['fr_r2']) - cross(w['sin'], p['vtm_min'], p['fr_f1']) - p['chain_spread']"
+      # the frame's last SCLK fall (latest, V_T- min) to SYNC rising (earliest, V_T+ min)
+      t8: "cross(w['cin'], p['vtp_min'], p['fr_csr']) - cross(w['sin'], p['vtm_min'], p['fr_f2']) - p['chain_spread']"
+      # SYNC high: rising at its latest (V_T+ max), falling for the next frame at its earliest (V_T- max)
+      t4: "cross(w['cin'], p['vtm_max'], p['fr_csf']) - cross(w['cin'], p['vtp_max'], p['fr_csr']) - p['chain_spread']"
+      # the last SCLK fall (latest) to the next frame's SYNC fall (earliest)
+      t1: "cross(w['cin'], p['vtm_max'], p['fr_csf']) - cross(w['sin'], p['vtm_min'], p['fr_f2']) - p['chain_spread']"
+      # the least each pad interval could be and still meet the DAC: the contract value
+      # less the margin it leaves (negative: the interval could go below zero)
+      need_css: "p['t_css'] - ((cross(w['sin'], p['vtm_max'], p['fr_f1']) - cross(w['cin'], p['vtm_min'], p['fr_cs0']) - p['chain_spread']) - p['dac_t5'])"
+      need_csh: "p['t_csh'] - ((cross(w['cin'], p['vtp_min'], p['fr_csr']) - cross(w['sin'], p['vtm_min'], p['fr_f2']) - p['chain_spread']) - p['dac_t8'])"
+      need_csw: "p['t_csw'] - ((cross(w['cin'], p['vtm_max'], p['fr_csf']) - cross(w['cin'], p['vtp_max'], p['fr_csr']) - p['chain_spread']) - p['dac_t4'])"
+    asserts:
+      - expr: "min['t5'] > p['dac_t5'] and min['t8'] > p['dac_t8'] and min['t4'] > p['dac_t4'] and min['t1'] > p['dac_t1']"
+        why: "A5-1: with the pads held to the firmware contract (CS_MOD falls by SCLK's first rising edge, stays low 250 ns past its last falling edge and high 250 ns between frames), the DAC8568 sees t5, t8, t4 and t1 at its pins at every corner, for the worst pair of receiver thresholds and the whole gate-chain spread"
+      - expr: "min['t6'] > p['dac_t67'] and min['t7'] > p['dac_t67'] and min['t9_rise'] > p['dac_t9'] and min['t9_fall'] > p['dac_t9'] and min['t10'] > p['dac_t10']"
+        why: "and SCLK's high and low times and DIN's setup and hold, mode 1 at 2 MHz, likewise"
+  - name: frame-timing-cs-released-at-last-edge
+    # A WHAT-IF, recorded: CS_MOD released on SCLK's last falling edge at the pads (t_csh 0),
+    # the shortest hold a host might give. Why the contract states one
+    deck: frame.cir
+    set: {t_csh: 0.0}
+    measures: [t8, need_csh]
+    post: *frame_post

@@ -17,7 +17,7 @@ ports:
     from: interfaces/breath-sense-link
   BREATH_INAMP_OUT:
     dir: out
-    to: module/breath-output-stage
+    to: module/breath-response-shaper
     figure: inamp-full-scale
   MODULE_ANALOG_POS12:
     dir: in

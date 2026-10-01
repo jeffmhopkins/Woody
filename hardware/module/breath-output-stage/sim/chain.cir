@@ -1,0 +1,53 @@
+* The response shaper and this stage, one after the other, both as netlisted: the
+* in-amp's output (EIN, -1 x VMAG) ramps from 0 V to its full scale in t_ramp, slow
+* against the op-amps (a DC sweep loses TI's model where the output clips, as in
+* breath-response-shaper/sim). The shaper is that circuit's deck verbatim: R-RESP-IN and
+* the R-RESP-DIV pair, U-RESP half A at -R-RESP-FB/R-RESP-IN to V_SHAPED, POT-RESP from
+* V_IN_HALF (CW) to V_SHAPED (CCW), its wiper through R-RESP and the antiparallel D-RESP
+* pair into the virtual ground, half B restoring at -R-RESTORE-FB/R-RESTORE-IN to
+* BREATH_SHAPED. Then this stage as bos.cir draws it: POT-GAIN, R-GAIN-FLOOR, the buffer,
+* the summer with POT-OFFSET (AGND_MOD at CW, DAC_AVDD at CCW), R-OUT-PROT,
+* C-OUT-BREATH and the load. D-RESP is the shaper sim's behavioural diode. The output
+* measured is the op-amp's (BREATH_OUT): the jack is R-OUT-PROT's 1 % lower into
+* 100 kohm, and C-OUT-BREATH would lag a ramp this fast.
+VPOS pos 0 {{v_pos}}
+VNEG neg 0 {{v_neg}}
+VAVDD avdd 0 {{v_avdd}}
+VMAG mag 0 PWL(0 0 {{t_ramp}} {{v_mag}})
+EIN in 0 mag 0 -1
+RDH in vhalf {{R-RESP-DIV-HI}}
+RDL vhalf 0 {{R-RESP-DIV-LO}}
+RRIN in vg {{R-RESP-IN}}
+RRFB vg vsh {{R-RESP-FB}}
+XSA 0 vg pos neg vsh OPAx197
+RPCW vhalf wip {{r_pot_cw}}
+RPCCW wip vsh {{r_pot_ccw}}
+RRESP wip db {{R-RESP}}
+DA vg db DRESP
+DB db vg DRESP
+RRI vsh rs {{R-RESTORE-IN}}
+RRF rs shaped {{R-RESTORE-FB}}
+XSB 0 rs pos neg shaped OPAx197
+RGCW shaped gw {{r_gain_cw}}
+RGCCW gw gf {{r_gain_ccw}}
+RFLOOR gf 0 {{R-GAIN-FLOOR}}
+XA gw bufo pos neg bufo OPAx197
+RIN bufo sum {{R-BREATH-IN}}
+ROCW 0 ow {{r_off_cw}}
+ROCCW ow avdd {{r_off_ccw}}
+ROFF ow sum {{R-BREATH-OFF}}
+ROFFN neg sum {{R-BREATH-OFFNEG}}
+RFB sum out {{R-BREATH-FB}}
+XB 0 sum pos neg out OPAx197
+ROUT out jack {{R-OUT-PROT}}
+COUT jack 0 {{C-OUT-BREATH}}
+RLOAD jack 0 {{r_load}}
+.model DRESP D(IS={{is_d}} N={{n_d}} RS={{rs_d}} CJO=1.5p)
+.options method=gear rshunt=1e10
+.control
+tran 2u {{t_ramp}} 0 4u
+wrdata out.dat v(out)
+wrdata shaped.dat v(shaped)
+quit
+.endc
+.end

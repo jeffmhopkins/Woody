@@ -121,6 +121,34 @@ components:
     - 1
     - 2
     sheet: RT2
+  C201:
+    of: C-SENSOR-VS-BULK
+    value: 1uF
+    pins:
+    - 1
+    - 2
+    sheet: breath-sense-link
+  C202:
+    of: C-SENSOR-VS-HF
+    value: 10nF
+    pins:
+    - 1
+    - 2
+    sheet: breath-sense-link
+  C203:
+    of: C-SENSOR-OUT
+    value: 470pF
+    pins:
+    - 1
+    - 2
+    sheet: breath-sense-link
+  C204:
+    of: C-DECOUPLE-CARRIER
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: breath-excitation-reference
   C21:
     of: C-KEY
     value: 47nF
@@ -1292,6 +1320,7 @@ nets:
   - U3.INB-
   - U3.OUTB
   /SENSOR_RAW:
+  - C203.1
   - U10.VOUT
   - U3.INB+
   /U0RXD:
@@ -1417,6 +1446,10 @@ nets:
   AGND_INST:
   - C1.2
   - C2.2
+  - C201.2
+  - C202.2
+  - C203.2
+  - C204.2
   - C3.2
   - C4.2
   - C5.2
@@ -1502,6 +1535,7 @@ nets:
   - U6.VCC
   INST_POS12:
   - C10.1
+  - C204.1
   - C25.1
   - C26.1
   - C27.1
@@ -1688,6 +1722,8 @@ nets:
   - Q1.S
   - R41.1
   VS:
+  - C201.1
+  - C202.1
   - C8.1
   - R7.2
   - R8.1

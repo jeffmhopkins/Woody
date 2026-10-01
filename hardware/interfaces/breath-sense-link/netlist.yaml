@@ -35,6 +35,27 @@ ports:
     dir: ref
     from: module/power-entry
 components:
+  C-SENSOR-OUT:
+    value: 470pF
+    pins:
+    - 1
+    - 2
+    note: 'NXP''s Figure 3 output capacitor, 470 pF on Vout: at U-BREATH pin 4, ahead of U-BUF B''s input, so neither
+      the link nor the ADC sees it [ds datasheets/analog/MPXV4006DP.pdf p.5, Figure 3]'
+  C-SENSOR-VS-BULK:
+    value: 1uF
+    pins:
+    - 1
+    - 2
+    note: 'NXP''s Figure 3 decoupling, 1.0 uF on VS: AT U-BREATH pin 2, returning to pin 3''s AGND_INST (owner,
+      2026-10-01, A1-5) [ds datasheets/analog/MPXV4006DP.pdf p.5, Figure 3]'
+  C-SENSOR-VS-HF:
+    value: 10nF
+    pins:
+    - 1
+    - 2
+    note: NXP's Figure 3 decoupling, 0.01 uF on VS, beside C-SENSOR-VS-BULK at U-BREATH pin 2 [ds datasheets/analog/MPXV4006DP.pdf
+      p.5, Figure 3]
   D-TVS-BREATH-RET:
     of: D-TVS-BREATH
     value: PESD12VS1UA or equivalent 12V-standoff ESD diode
@@ -83,6 +104,9 @@ components:
 nets:
   AGND_INST:
   - port: AGND_INST
+  - C-SENSOR-OUT.2
+  - C-SENSOR-VS-BULK.2
+  - C-SENSOR-VS-HF.2
   - R1b.1
   - U-BREATH.GND
   AGND_SENSE:
@@ -102,7 +126,10 @@ nets:
   - R1.1
   SENSOR_RAW:
   - port: SENSOR_RAW
+  - C-SENSOR-OUT.1
   - U-BREATH.VOUT
   VS:
   - port: VS
+  - C-SENSOR-VS-BULK.1
+  - C-SENSOR-VS-HF.1
   - U-BREATH.VS

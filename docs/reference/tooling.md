@@ -669,7 +669,8 @@ Each render is generated; what it is rendered from is the source.
 
 - **The module's layout.** Its ten circuits are sheets and its two boards are
   projects (2026-09-30, `hardware/boards/module-main/README.md`); no
-  `.kicad_pcb` yet, and the panel layout they are placed from is being revised.
+  `.kicad_pcb` yet; they are placed from the panel layout in
+  `config/module.yaml` (ADRs 0024, 0026).
   The interfaces migrated on 2026-09-29. The boards still draw their own
   halves of them rather than placing the interface sheets, which span boards
   (each interface page says which board draws which part). The main board is a project placing its circuit sheets
@@ -678,10 +679,19 @@ Each render is generated; what it is rendered from is the source.
   `hardware/boards/main-board/README.md`, *Open*.
 - **The BOM fragments** become exports once every board is in KiCad, because
   a row's quantity is a count over all of them (ADR 0019).
-- **The right-hand key board's layout**, the same way as the left-hand one
-  (§4); its sheets already carry footprints.
 - **The commit gate.** `check-staleness.py` runs `cad.py check` but not
   `kicad.py check`, because that needs KiCad installed; run it by hand.
+
+### Ordering: JLC's stock, not LCSC's
+
+**A machine-placed part is drawn from JLC's own parts library, whose stock is
+not LCSC's storefront stock.** On 2026-10-01 three codes read 0 on LCSC's
+product API while JLC held them by the hundred thousand (C28260 123,345;
+C28323 2,294,300, both Basic), and C51349 no longer resolved on LCSC at all
+while JLC held 4,931 [web: LCSC product API and the jlcpcb.com parts-search
+API, 2026-10-01]. Check a machine part at JLC — the parts search behind
+`https://jlcpcb.com/parts`, or `https://jlcpcb.com/partdetail/<code>`. A
+`hand` part is bought wherever it is stocked, and its row says where.
 
 ## §5. Circuit simulation — `tools/sim.py`
 
@@ -771,16 +781,17 @@ so.
 |---|---|
 | one key's network, with its press, release, filter and corners | `hardware/cluster/key-switch-network/sim/` |
 | the left-hand key board as wired, all keys released and pressed | `hardware/boards/key-board-lh/sim/` |
+| the right-hand key board as wired, generated from its board netlist with the left-hand board's models | `hardware/boards/key-board-rh/sim/` |
 | the key chain: its 3V3 rail (bead, ribbon, decoupling, the do-not-fit bulk capacitor) and SCK and QH over the ribbon | `hardware/interfaces/key-chain-loom/sim/` |
 | the reference buffer's loop, output impedance and load step, and TI's Figure 56 (TI's OPA2197 and REF5050 models) | `hardware/carrier/breath-excitation-reference/sim/` |
 | the breath link's CMRR across the umbilical, both ends' parts at every tolerance corner (TI's INA828 and OPA2197) | `hardware/module/breath-receive-stage/sim/` |
 | the pitch stage's step into a passive mult, and its loop at the same loads | `hardware/module/pitch-stage/sim/` |
 | rack power-on: the rails, the LM317L's `DAC_AVDD` (TI's model) and the pitch jack | `hardware/module/power-entry/sim/` |
 | the umbilical load switch's start, with a behavioural LT1641 built from its datasheet | `hardware/module/umbilical-load-switch/sim/` |
-| SCLK, MOSI and CS_MOD over the umbilical as coupled lossy lines (ngspice `CPL`), from a banked Cat5e datasheet, into the module's 74AHCT125 | `hardware/interfaces/spi-link/sim/` |
+| SCLK, MOSI and CS_MOD over the umbilical as coupled lossy lines (ngspice `CPL`), from a banked Cat5e datasheet, through each line's pull and `R-RX-MOD`/`C-RX-MOD` into the receiver `U-RX-MOD` (74AHCT14) | `hardware/interfaces/spi-link/sim/` |
 | the four mod channels and their shared reference: range, a stale or wrong `V_ref`, a step and the loop into a passive mult, crosstalk | `hardware/module/mod-channels/sim/` |
 | the breath output stage: its offset table, gain ends, clip, a step and the loop into a passive mult, and the −12 V rail's path to the jack | `hardware/module/breath-output-stage/sim/` |
-| the response shaper's curve at `POT-RESP`'s ends and centre, and its clip, with a behavioural 1N4148W | `hardware/module/breath-response-shaper/sim/` |
+| the response shaper's curve at `POT-RESP`'s ends and centre, and its clip, with a behavioural `D-RESP` fitted to the 1N4448W's guaranteed window | `hardware/module/breath-response-shaper/sim/` |
 | the breath ADC's anti-alias filter, its time constant, and the MCP3202's sample capacitor against it | `hardware/carrier/breath-adc/sim/` |
 | the instrument's input LC against the buck's negative resistance, and its start from `U-ISO` through the load switch and the cable, cold and hot-plugged | `hardware/carrier/power-entry-instrument/sim/` |
 | the LED row's data line: its edge and `T0H` at the first LED | `hardware/carrier/led-strip-drive/sim/` |
