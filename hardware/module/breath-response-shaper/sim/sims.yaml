@@ -7,8 +7,12 @@
 # the banked datasheets: the 1N4448W's guaranteed window, 0.62-0.72 V at 5 mA
 # [datasheets/discrete-and-power/1N4448W.pdf p.2, Vishay; 1N4148W-DIOTEC.pdf p.2 agrees], sets IS;
 # N is an assumption. The bought part is the 1N4448W since 2026-10-01 (pre-layout review A1-3),
-# so the window fitted is the part's own specification. No temperature corner: the run is
-# at 27 C; shaper-exp-gain's diode_note records what 15 C and 0 C cost.
+# so the window fitted is the part's own specification. TEMPERATURE is a corner since
+# 2026-10-01 (A1-3): ngspice's `temp`, which moves the diode by the SPICE defaults (XTI 3,
+# EG 1.11 - an assumption, the sheet gives no tempco) and TI's model as it was built.
+# TRIM-RESP (since 2026-10-01, A1-3) is set at commissioning: `trimmed: 1` makes the deck
+# do the builder's step - POT-RESP fully clockwise, bisect the trimmer until a hard blow
+# gives g_trim at t_comm - before it measures (shaper.cir says how).
 title: Breath response shaper - the curve at POT-RESP's ends and centre
 values:
   netlist: hardware/module/breath-response-shaper/netlist.yaml
@@ -27,10 +31,21 @@ params:
   is_d:   {value: 2.76e-9, source: "fitted: 0.67 V at 5 mA with N = 1.8 [calc: 5e-3 / exp(0.67 / (1.8 x 0.02585))], the middle of the bought 1N4448W's 0.62-0.72 V window [datasheets/discrete-and-power/1N4448W.pdf p.2] (vary: 8.1 nA at 0.62 V, 0.94 nA at 0.72 V)"}
   t_ramp: {value: 10.0e-3, source: "the input ramp, 0 V to full scale: quasi-static (a breath is slower; the op-amps settle in microseconds)"}
   rs_d:   {value: 0.6, source: "series resistance [assumption: immaterial at the shaper's under 1 mA]"}
+  temp_c: {value: 27.0, source: "the circuit's temperature for the measured run, C (ngspice's temp; the models' nominal is 27)"}
+  t_cold: {value: 0.0, source: "the coldest the module is held to work at, C: the low end of 0-40 C inside the case [assumption: a cold stage; the brief's range, owner 2026-10-01]"}
+  trimmed: {value: 1, source: "1: TRIM-RESP set by the commissioning step before the run (shaper.cir); 0: TRIM-RESP at r_trim"}
+  g_trim: {value: 1.55, source: "THE COMMISSIONING TARGET, BREATH_SHAPED over the in-amp's output at a hard blow, POT-RESP fully CW (shaper-exp-gain, this directory's README owns it): the owner's 1.5x floor plus what 0 C takes from a unit trimmed warm and a meter's reading [sim, exp-end-trimmed: about 0.03 from 30 C to 0 C]"}
+  t_comm: {value: 22.0, source: "the workshop's temperature at commissioning, C [assumption: a room; exp-end-trimmed sweeps 15-30]"}
+  p_trim: {value: 1.0, source: "TRIM-RESP's rotation from CCW (0, its whole track in series, least gain) to CW (1, its end resistance, most gain); used when trimmed is 0"}
 
 derived:
   r_pot_cw: "max(v['POT-RESP'] * (1 - v['p_resp']), 1e-3)"
   r_pot_ccw: "max(v['POT-RESP'] * v['p_resp'], 1e-3)"
+  # the trimmer's end resistance, 1 % of its track or 2 ohm, whichever is greater [ds BOURNS-3224-TRIMPOT.pdf p.1]
+  r_trim_end: "max(0.01 * v['TRIM-RESP'], 2.0)"
+  r_trim: "max(v['TRIM-RESP'] * (1 - v['p_trim']), max(0.01 * v['TRIM-RESP'], 2.0))"
+  t_hard: "v['v_hard'] * v['t_ramp'] / v['v_mag']"
+  t_hard_run: "v['v_hard'] * v['t_ramp'] / v['v_mag'] + 20e-6"
 
 vary:
   is_d:  {tol: [-0.66, 1.93]}
@@ -44,11 +59,13 @@ vary:
   # POT-RESP's track: the RV09 sheet states no resistance tolerance [datasheets/connectors/RV09AF-40.pdf];
   # +/-20 % is the usual carbon-track figure [assumption]. It sets how hard the pot loads the divider
   POT-RESP: {tol: [-0.2, 0.2]}
+  # TRIM-RESP's track: +/-10 % [ds BOURNS-3224-TRIMPOT.pdf p.1]
+  TRIM-RESP: {tol: from-value}
 
 sims:
   - name: curve
     # the stage's gain ratio, BREATH_SHAPED over the in-amp's output, at the page's table's
-    # points; ratio 1 is the linear stage
+    # points; ratio 1 is the linear stage. TRIM-RESP as commissioned (trimmed, at t_comm)
     deck: shaper.cir
     sweep: {p_resp: [0.0, 0.5, 1.0]}
     vary: [is_d]
@@ -62,7 +79,8 @@ sims:
       i_hard: "abs(at(w['idiode'], (p['v_hard']) * p['t_ramp'] / p['v_mag']))"
       i_full: "abs(at(w['idiode'], (p['v_mag'] - 0.001) * p['t_ramp'] / p['v_mag']))"
   - name: centre
-    # the centre detent, with every resistor at its tolerance ends: how linear is "exactly"
+    # the centre detent, with every resistor at its tolerance ends: how linear is "exactly".
+    # TRIM-RESP commissioned; it carries almost no current here
     deck: shaper.cir
     set: {p_resp: 0.5}
     vary: [is_d, R-RESP-DIV-HI, R-RESP-DIV-LO, R-RESP-IN, R-RESTORE-FB]
@@ -79,20 +97,62 @@ sims:
         why: "+1 at centre detent (breath-response-shaper.md, 'Settled before layout'), within the four 1 % resistors' 2 x 2 %"
       - expr: "max['lin_hard_pct'] < 0.5 and min['lin_hard_pct'] > -0.5"
         why: "linear across real playing at the detent, within 0.5 % - but not 'exactly': see the README, the divider's loading moves the true null off centre"
-  - name: exp-end
-    # POT-RESP fully clockwise, fully exponential: the gain ratio at a hard blow and where
-    # BREATH_SHAPED stops following the curve, at every tolerance corner of the stage
+  - name: exp-end-trimmed
+    # THE BUILT MODULE: POT-RESP fully clockwise, TRIM-RESP set by the commissioning step at
+    # t_comm (15 C and 30 C, a cold and a warm workshop), then the gain at a hard blow at
+    # t_cold (g_cold) and the full ramp at 40 C (g_hard, and the clip: the warm end bends
+    # hardest and clips first), at every corner of the stage, the trimmer's track included
     deck: shaper.cir
-    set: {p_resp: 1.0}
+    sweep: {t_comm: [15.0, 30.0]}
+    set: {p_resp: 1.0, temp_c: 40.0}
+    vary: [is_d, R-RESP, R-RESP-DIV-HI, R-RESP-DIV-LO, R-RESP-IN, R-RESTORE-FB, POT-RESP, TRIM-RESP]
+    measures: [g_set, r_set, g_cold, g_hard, clip_in]
+    post:
+      g_hard: "-at(w['out'], (p['v_hard']) * p['t_ramp'] / p['v_mag']) / p['v_hard']"
+      clip_in: "-cross(w['out'], trough(w['out'], 0, p['t_ramp']) + 0.05, 0) * p['v_mag'] / p['t_ramp']"
+    asserts:
+      - expr: "min['g_set'] > p['g_trim'] - 0.003 and max['g_set'] < p['g_trim'] + 0.003"
+        why: "every corner CAN be trimmed to the target, from both sides: the bisection reached g_trim within 0.003 everywhere, so the trimmer's range covers the diode's spread, the 1 % resistors, POT-RESP's track at +/-20 % and its own at +/-10 %, commissioned at 15 C or 30 C"
+      - expr: "min['g_cold'] >= 1.5"
+        why: "shaper-exp-gain: the owner's 1.5x floor at a hard blow at the fully-exponential end (2026-09-30), held at 0 C by a unit trimmed at 15-30 C - the A1-3 residual this trimmer exists to close"
+      - expr: "max['clip_in'] < -1.3 * p['v_hard'] and min['clip_in'] > -9.94"
+        why: "and BREATH_SHAPED clips only past 1.3x a hard blow at the in-amp (-6.03 V) at every corner at 40 C: beyond a hard blow at breath-working-point's 2.8 kPa candidate (disputed, open until E2), still inside the sensor's range"
+  - name: exp-end-trim-cw
+    # TRIM-RESP at its clockwise end (end resistance only: the strongest bend there is),
+    # untrimmed, at a cool workshop's 15 C and at 40 C (g_cold at 0 C): can every corner
+    # reach the target, and does the strongest setting the trimmer allows still clip
+    # outside real playing
+    deck: shaper.cir
+    sweep: {temp_c: [15.0, 40.0]}
+    set: {p_resp: 1.0, trimmed: 0, p_trim: 1.0}
     vary: [is_d, R-RESP, R-RESP-DIV-HI, R-RESP-DIV-LO, R-RESP-IN, R-RESP-FB, R-RESTORE-IN, R-RESTORE-FB, POT-RESP]
-    measures: [g_pp, g_hard, out_min, clip_in]
+    measures: [g_pp, g_cold, g_hard, out_min, clip_in]
     post:
       g_pp: "-at(w['out'], (1.0) * p['t_ramp'] / p['v_mag']) / 1.0"
       g_hard: "-at(w['out'], (p['v_hard']) * p['t_ramp'] / p['v_mag']) / p['v_hard']"
       out_min: "trough(w['out'], 0, p['t_ramp'])"
       clip_in: "-cross(w['out'], trough(w['out'], 0, p['t_ramp']) + 0.05, 0) * p['v_mag'] / p['t_ramp']"
     asserts:
-      - expr: "min['g_hard'] >= 1.5"
-        why: "shaper-exp-gain: at least 1.5x at a hard blow at the fully-exponential end (owner, 2026-09-30: 'need 1.5x gain'), at every corner - the diode's spread, every resistor at its 1 % ends and POT-RESP's track at +/-20 %. BREATH_SHAPED over the in-amp's output, so the stage's linear-gain tolerance counts against it too"
+      - expr: "min['g_hard'] >= p['g_trim']"
+        why: "the target is reachable at every corner at any commissioning temperature from 15 C up: the trimmer's clockwise end gives at least g_trim there"
+      - expr: "min['g_cold'] >= 1.5"
+        why: "and even at 0 C the clockwise end holds the 1.5x floor at every corner"
       - expr: "max['clip_in'] < -1.3 * p['v_hard'] and min['clip_in'] > -9.94"
-        why: "and BREATH_SHAPED clips only past 1.3x a hard blow at the in-amp (-6.03 V) at every corner: beyond a hard blow at breath-working-point's 2.8 kPa candidate (disputed, open until E2), still inside the sensor's range"
+        why: "the strongest bend the trimmer allows still clips BREATH_SHAPED only past 1.3x a hard blow (-6.03 V at the in-amp) at every corner, 40 C included: the trimmer cannot put the shaper's own clip inside real playing"
+  - name: exp-end-trim-ccw
+    # TRIM-RESP at its counter-clockwise end - its whole track in series, the weakest bend, and
+    # what an open wiper gives: can every corner be brought DOWN to the target at a warm
+    # workshop's 30 C, and what does the fail-safe leave
+    deck: shaper.cir
+    set: {p_resp: 1.0, trimmed: 0, p_trim: 0.0, temp_c: 30.0}
+    vary: [is_d, R-RESP, R-RESP-DIV-HI, R-RESP-DIV-LO, R-RESP-IN, R-RESP-FB, R-RESTORE-IN, R-RESTORE-FB, POT-RESP, TRIM-RESP]
+    measures: [g_pp, g_hard, clip_in]
+    post:
+      g_pp: "-at(w['out'], (1.0) * p['t_ramp'] / p['v_mag']) / 1.0"
+      g_hard: "-at(w['out'], (p['v_hard']) * p['t_ramp'] / p['v_mag']) / p['v_hard']"
+      clip_in: "-min(cross(w['out'], trough(w['out'], 0, p['t_ramp']) + 0.05, 0), p['t_ramp']) * p['v_mag'] / p['t_ramp']"
+    asserts:
+      - expr: "max['g_hard'] <= p['g_trim']"
+        why: "every corner can be trimmed down to the target at 30 C: the counter-clockwise end gives no more than g_trim there"
+      - expr: "min['g_hard'] > 1.0"
+        why: "FAIL-SAFE: an open wiper is this end - the whole track in series - and still an expansive curve, gentler than trimmed, never a runaway"

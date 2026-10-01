@@ -4,9 +4,9 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/breath-response-shaper/sim/sims.yaml: 6b57567590dc779d
-  hardware/module/breath-response-shaper/netlist.yaml: 347e949e5edad4c7
-  hardware/module/breath-response-shaper/sim/shaper.cir: d0741c6b7bd86d39
+  hardware/module/breath-response-shaper/sim/sims.yaml: fc02a3ddd36b774a
+  hardware/module/breath-response-shaper/netlist.yaml: 3f6549b620f9e912
+  hardware/module/breath-response-shaper/sim/shaper.cir: 943e2328af022d74
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
   figure:inamp-full-scale: -9.94 V
 ngspice: '42'
@@ -15,173 +15,173 @@ sims:
     corners: 3
     measures:
       g_pp:
-        nominal: 0.821773
-        min: 0.767561
+        nominal: 0.834706
+        min: 0.789619
         min_at: is_d+
-        max: 0.871902
+        max: 0.878313
         max_at: is_d-
       g_mp:
-        nominal: 0.54665
-        min: 0.51941
+        nominal: 0.588785
+        min: 0.574322
         min_at: is_d+
-        max: 0.573895
+        max: 0.604007
         max_at: is_d-
       g_mf:
-        nominal: 0.479713
-        min: 0.459856
+        nominal: 0.529056
+        min: 0.522707
         min_at: is_d+
-        max: 0.499614
+        max: 0.535781
         max_at: is_d-
       g_hard:
-        nominal: 0.436029
-        min: 0.420892
+        nominal: 0.490068
+        min: 0.488924
         min_at: is_d+
-        max: 0.451209
+        max: 0.491319
         max_at: is_d-
       g_full:
-        nominal: 0.35916
-        min: 0.35199
-        min_at: is_d+
-        max: 0.366355
-        max_at: is_d-
-      i_hard:
-        nominal: 0.00013084
-        min: 0.000127318
+        nominal: 0.421434
+        min: 0.413357
         min_at: is_d-
-        max: 0.000134352
+        max: 0.429141
+        max_at: is_d+
+      i_hard:
+        nominal: 0.000118303
+        min: 0.000118013
+        min_at: is_d-
+        max: 0.000118568
         max_at: is_d+
       i_full:
-        nominal: 0.000318464
-        min: 0.000314889
-        min_at: is_d-
-        max: 0.000322027
-        max_at: is_d+
+        nominal: 0.000287517
+        min: 0.000283687
+        min_at: is_d+
+        max: 0.000291531
+        max_at: is_d-
     asserts: []
   curve[p_resp=0.5]:
     corners: 3
     measures:
       g_pp:
         nominal: 0.999799
-        min: 0.99956
+        min: 0.999561
         min_at: is_d+
         max: 0.999882
         max_at: is_d-
       g_mp:
-        nominal: 0.999721
-        min: 0.999264
+        nominal: 0.999722
+        min: 0.999266
         min_at: is_d+
         max: 0.999884
         max_at: is_d-
       g_mf:
-        nominal: 0.999516
-        min: 0.998717
+        nominal: 0.999518
+        min: 0.998727
         min_at: is_d+
         max: 0.999817
         max_at: is_d-
       g_hard:
-        nominal: 0.998997
-        min: 0.99754
+        nominal: 0.999004
+        min: 0.997583
         min_at: is_d+
-        max: 0.999623
+        max: 0.999624
         max_at: is_d-
       g_full:
-        nominal: 0.990698
-        min: 0.987517
+        nominal: 0.991101
+        min: 0.988243
         min_at: is_d+
-        max: 0.99358
+        max: 0.993766
         max_at: is_d-
       i_hard:
-        nominal: 2.28805e-07
-        min: 8.36893e-08
+        nominal: 2.2731e-07
+        min: 8.35474e-08
         min_at: is_d-
-        max: 5.66989e-07
+        max: 5.57007e-07
         max_at: is_d+
       i_full:
-        nominal: 4.6189e-06
-        min: 3.18627e-06
+        nominal: 4.41819e-06
+        min: 3.09417e-06
         min_at: is_d-
-        max: 6.19969e-06
+        max: 5.83878e-06
         max_at: is_d+
     asserts: []
   curve[p_resp=1.0]:
     corners: 3
     measures:
       g_pp:
-        nominal: 1.11436
-        min: 1.06429
+        nominal: 1.10541
+        min: 1.06142
         min_at: is_d-
-        max: 1.17758
+        max: 1.15751
         max_at: is_d+
       g_mp:
-        nominal: 1.47716
-        min: 1.43765
+        nominal: 1.41548
+        min: 1.39433
         min_at: is_d-
-        max: 1.51678
+        max: 1.43524
         max_at: is_d+
       g_mf:
-        nominal: 1.57579
-        min: 1.54659
+        nominal: 1.49914
+        min: 1.49061
         min_at: is_d-
-        max: 1.60496
+        max: 1.50703
         max_at: is_d+
       g_hard:
-        nominal: 1.64086
-        min: 1.61848
+        nominal: 1.55433
+        min: 1.55413
         min_at: is_d-
-        max: 1.66318
+        max: 1.55444
         max_at: is_d+
       g_full:
-        nominal: 1.2021
-        min: 1.20209
-        min_at: is_d+
-        max: 1.2021
-        max_at: is_d-
-      i_hard:
-        nominal: 0.000148686
-        min: 0.000143494
+        nominal: 1.20215
+        min: 1.20214
         min_at: is_d-
-        max: 0.000153865
+        max: 1.20216
+        max_at: is_d+
+      i_hard:
+        nominal: 0.000128611
+        min: 0.000128566
+        min_at: is_d-
+        max: 0.000128638
         max_at: is_d+
       i_full:
-        nominal: 0.000375791
-        min: 0.000370493
-        min_at: is_d-
-        max: 0.000381072
-        max_at: is_d+
+        nominal: 0.000324117
+        min: 0.000317512
+        min_at: is_d+
+        max: 0.000331187
+        max_at: is_d-
     asserts: []
   centre:
     corners: 33
     measures:
       g_hard:
-        nominal: 0.998997
-        min: 0.977843
+        nominal: 0.999004
+        min: 0.977869
         min_at: R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- is_d+
-        max: 1.0198
+        max: 1.01981
         max_at: R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB+ is_d-
       g_full:
-        nominal: 0.990698
-        min: 0.968119
+        nominal: 0.991101
+        min: 0.968586
         min_at: R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- is_d+
-        max: 1.01346
+        max: 1.01377
         max_at: R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB+ is_d-
       lin_hard_pct:
-        nominal: -0.0521107
-        min: -0.281368
+        nominal: -0.0514591
+        min: -0.274493
         min_at: R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN- R-RESTORE-FB- is_d+
-        max: 0.0164574
+        max: 0.0164926
         max_at: R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN+ R-RESTORE-FB+ is_d-
       lin_full_pct:
-        nominal: -0.882502
-        min: -1.50053
+        nominal: -0.84209
+        min: -1.41852
         min_at: R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN- R-RESTORE-FB- is_d+
-        max: -0.364547
+        max: -0.352655
         max_at: R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN+ R-RESTORE-FB+ is_d-
       wiper_full:
-        nominal: 0.363605
-        min: 0.313802
-        min_at: R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN+ R-RESTORE-FB+ is_d+
-        max: 0.413705
-        max_at: R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN- R-RESTORE-FB- is_d-
+        nominal: 0.367437
+        min: 0.317758
+        min_at: R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN+ R-RESTORE-FB- is_d+
+        max: 0.417399
+        max_at: R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN- R-RESTORE-FB+ is_d-
     asserts:
     - expr: min['g_hard'] > 0.97 and max['g_hard'] < 1.03
       why: +1 at centre detent (breath-response-shaper.md, 'Settled before layout'), within the four 1 % resistors' 2 x 2
@@ -191,40 +191,222 @@ sims:
       why: 'linear across real playing at the detent, within 0.5 % - but not ''exactly'': see the README, the divider''s loading
         moves the true null off centre'
       pass: true
-  exp-end:
+  exp-end-trimmed[t_comm=15.0]:
+    corners: 257
+    measures:
+      g_set:
+        nominal: 1.54996
+        min: 1.54985
+        min_at: POT-RESP- R-RESP- R-RESP-DIV-HI+ R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB- TRIM-RESP+ is_d-
+        max: 1.55016
+        max_at: POT-RESP- R-RESP- R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- TRIM-RESP+ is_d-
+      r_set:
+        nominal: 2587.09
+        min: 766.516
+        min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- TRIM-RESP- is_d-
+        max: 4313.39
+        max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB+ TRIM-RESP+ is_d+
+      g_cold:
+        nominal: 1.53669
+        min: 1.53447
+        min_at: POT-RESP- R-RESP- R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- TRIM-RESP- is_d+
+        max: 1.53844
+        max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB+ TRIM-RESP- is_d-
+      g_hard:
+        nominal: 1.57217
+        min: 1.5693
+        min_at: POT-RESP+ R-RESP+ R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB+ TRIM-RESP- is_d-
+        max: 1.57586
+        max_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- TRIM-RESP- is_d+
+      clip_in:
+        nominal: -7.28244
+        min: -7.34923
+        min_at: POT-RESP+ R-RESP+ R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB+ TRIM-RESP+ is_d+
+        max: -7.19426
+        max_at: POT-RESP- R-RESP- R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- TRIM-RESP+ is_d-
+    asserts:
+    - expr: min['g_set'] > p['g_trim'] - 0.003 and max['g_set'] < p['g_trim'] + 0.003
+      why: 'every corner CAN be trimmed to the target, from both sides: the bisection reached g_trim within 0.003 everywhere,
+        so the trimmer''s range covers the diode''s spread, the 1 % resistors, POT-RESP''s track at +/-20 % and its own at
+        +/-10 %, commissioned at 15 C or 30 C'
+      pass: true
+    - expr: min['g_cold'] >= 1.5
+      why: 'shaper-exp-gain: the owner''s 1.5x floor at a hard blow at the fully-exponential end (2026-09-30), held at 0 C
+        by a unit trimmed at 15-30 C - the A1-3 residual this trimmer exists to close'
+      pass: true
+    - expr: max['clip_in'] < -1.3 * p['v_hard'] and min['clip_in'] > -9.94
+      why: 'and BREATH_SHAPED clips only past 1.3x a hard blow at the in-amp (-6.03 V) at every corner at 40 C: beyond a hard
+        blow at breath-working-point''s 2.8 kPa candidate (disputed, open until E2), still inside the sensor''s range'
+      pass: true
+  exp-end-trimmed[t_comm=30.0]:
+    corners: 257
+    measures:
+      g_set:
+        nominal: 1.5501
+        min: 1.54986
+        min_at: POT-RESP+ R-RESP- R-RESP-DIV-HI+ R-RESP-DIV-LO+ R-RESP-IN+ R-RESTORE-FB- TRIM-RESP+ is_d-
+        max: 1.55013
+        max_at: POT-RESP- R-RESP+ R-RESP-DIV-HI- R-RESP-DIV-LO- R-RESP-IN- R-RESTORE-FB- TRIM-RESP+ is_d+
+      r_set:
+        nominal: 2852.95
+        min: 1005.8
+        min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- TRIM-RESP- is_d-
+        max: 4616.78
+        max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB+ TRIM-RESP- is_d+
+      g_cold:
+        nominal: 1.52412
+        min: 1.51978
+        min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- TRIM-RESP+ is_d+
+        max: 1.52735
+        max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB+ TRIM-RESP- is_d-
+      g_hard:
+        nominal: 1.5588
+        min: 1.55758
+        min_at: POT-RESP+ R-RESP+ R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB+ TRIM-RESP- is_d-
+        max: 1.56016
+        max_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- TRIM-RESP- is_d+
+      clip_in:
+        nominal: -7.34571
+        min: -7.41046
+        min_at: POT-RESP+ R-RESP+ R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB+ TRIM-RESP+ is_d+
+        max: -7.26248
+        max_at: POT-RESP- R-RESP- R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- TRIM-RESP- is_d-
+    asserts:
+    - expr: min['g_set'] > p['g_trim'] - 0.003 and max['g_set'] < p['g_trim'] + 0.003
+      why: 'every corner CAN be trimmed to the target, from both sides: the bisection reached g_trim within 0.003 everywhere,
+        so the trimmer''s range covers the diode''s spread, the 1 % resistors, POT-RESP''s track at +/-20 % and its own at
+        +/-10 %, commissioned at 15 C or 30 C'
+      pass: true
+    - expr: min['g_cold'] >= 1.5
+      why: 'shaper-exp-gain: the owner''s 1.5x floor at a hard blow at the fully-exponential end (2026-09-30), held at 0 C
+        by a unit trimmed at 15-30 C - the A1-3 residual this trimmer exists to close'
+      pass: true
+    - expr: max['clip_in'] < -1.3 * p['v_hard'] and min['clip_in'] > -9.94
+      why: 'and BREATH_SHAPED clips only past 1.3x a hard blow at the in-amp (-6.03 V) at every corner at 40 C: beyond a hard
+        blow at breath-working-point''s 2.8 kPa candidate (disputed, open until E2), still inside the sensor''s range'
+      pass: true
+  exp-end-trim-cw[temp_c=15.0]:
     corners: 513
     measures:
       g_pp:
-        nominal: 1.11436
-        min: 1.00562
+        nominal: 1.08337
+        min: 0.987792
         min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN+ R-RESTORE-FB- R-RESTORE-IN+ is_d-
-        max: 1.25109
+        max: 1.21452
+        max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-FB+ R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN- is_d+
+      g_cold:
+        nominal: 1.69274
+        min: 1.54909
+        min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN+ R-RESTORE-FB- R-RESTORE-IN+ is_d-
+        max: 1.82992
         max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-FB+ R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN- is_d+
       g_hard:
-        nominal: 1.64086
-        min: 1.50661
+        nominal: 1.7097
+        min: 1.5642
         min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN+ R-RESTORE-FB- R-RESTORE-IN+ is_d-
-        max: 1.76993
+        max: 1.84884
         max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-FB+ R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN- is_d+
       out_min:
         nominal: -11.9499
         min: -11.95
-        min_at: POT-RESP- R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN+ is_d-
+        min_at: POT-RESP- R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN+ is_d+
         max: -11.9497
-        max_at: POT-RESP+ R-RESP+ R-RESP-DIV-HI- R-RESP-DIV-LO- R-RESP-FB+ R-RESP-IN- R-RESTORE-FB- R-RESTORE-IN- is_d+
+        max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO- R-RESP-FB+ R-RESP-IN+ R-RESTORE-FB- R-RESTORE-IN+ is_d-
       clip_in:
-        nominal: -6.95355
-        min: -7.47926
+        nominal: -6.65757
+        min: -7.17529
         min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN+ R-RESTORE-FB- R-RESTORE-IN+ is_d-
-        max: -6.51313
+        max: -6.22759
         max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-FB+ R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN- is_d+
     asserts:
-    - expr: min['g_hard'] >= 1.5
-      why: 'shaper-exp-gain: at least 1.5x at a hard blow at the fully-exponential end (owner, 2026-09-30: ''need 1.5x gain''),
-        at every corner - the diode''s spread, every resistor at its 1 % ends and POT-RESP''s track at +/-20 %. BREATH_SHAPED
-        over the in-amp''s output, so the stage''s linear-gain tolerance counts against it too'
+    - expr: min['g_hard'] >= p['g_trim']
+      why: 'the target is reachable at every corner at any commissioning temperature from 15 C up: the trimmer''s clockwise
+        end gives at least g_trim there'
+      pass: true
+    - expr: min['g_cold'] >= 1.5
+      why: and even at 0 C the clockwise end holds the 1.5x floor at every corner
       pass: true
     - expr: max['clip_in'] < -1.3 * p['v_hard'] and min['clip_in'] > -9.94
-      why: 'and BREATH_SHAPED clips only past 1.3x a hard blow at the in-amp (-6.03 V) at every corner: beyond a hard blow
-        at breath-working-point''s 2.8 kPa candidate (disputed, open until E2), still inside the sensor''s range'
+      why: 'the strongest bend the trimmer allows still clips BREATH_SHAPED only past 1.3x a hard blow (-6.03 V at the in-amp)
+        at every corner, 40 C included: the trimmer cannot put the shaper''s own clip inside real playing'
+      pass: true
+  exp-end-trim-cw[temp_c=40.0]:
+    corners: 513
+    measures:
+      g_pp:
+        nominal: 1.17028
+        min: 1.03611
+        min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN+ R-RESTORE-FB- R-RESTORE-IN+ is_d-
+        max: 1.33263
+        max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-FB+ R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN- is_d+
+      g_cold:
+        nominal: 1.69274
+        min: 1.54909
+        min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN+ R-RESTORE-FB- R-RESTORE-IN+ is_d-
+        max: 1.82992
+        max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-FB+ R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN- is_d+
+      g_hard:
+        nominal: 1.7381
+        min: 1.58949
+        min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN+ R-RESTORE-FB- R-RESTORE-IN+ is_d-
+        max: 1.8805
+        max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-FB+ R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN- is_d+
+      out_min:
+        nominal: -11.9499
+        min: -11.95
+        min_at: POT-RESP- R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN+ R-RESTORE-FB+ R-RESTORE-IN+ is_d-
+        max: -11.9497
+        max_at: POT-RESP- R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN- R-RESTORE-FB- R-RESTORE-IN- is_d-
+      clip_in:
+        nominal: -6.592
+        min: -7.11305
+        min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN+ R-RESTORE-FB- R-RESTORE-IN+ is_d-
+        max: -6.15848
+        max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-FB+ R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN- is_d+
+    asserts:
+    - expr: min['g_hard'] >= p['g_trim']
+      why: 'the target is reachable at every corner at any commissioning temperature from 15 C up: the trimmer''s clockwise
+        end gives at least g_trim there'
+      pass: true
+    - expr: min['g_cold'] >= 1.5
+      why: and even at 0 C the clockwise end holds the 1.5x floor at every corner
+      pass: true
+    - expr: max['clip_in'] < -1.3 * p['v_hard'] and min['clip_in'] > -9.94
+      why: 'the strongest bend the trimmer allows still clips BREATH_SHAPED only past 1.3x a hard blow (-6.03 V at the in-amp)
+        at every corner, 40 C included: the trimmer cannot put the shaper''s own clip inside real playing'
+      pass: true
+  exp-end-trim-ccw:
+    corners: 1025
+    measures:
+      g_pp:
+        nominal: 1.08402
+        min: 0.998849
+        min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN+ R-RESTORE-FB- R-RESTORE-IN+ TRIM-RESP+
+          is_d-
+        max: 1.18611
+        max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-FB+ R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN- TRIM-RESP-
+          is_d+
+      g_hard:
+        nominal: 1.33895
+        min: 1.23769
+        min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN+ R-RESTORE-FB- R-RESTORE-IN+ TRIM-RESP+
+          is_d-
+        max: 1.44526
+        max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-FB+ R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN- TRIM-RESP-
+          is_d+
+      clip_in:
+        nominal: -8.587
+        min: -9.23375
+        min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN+ R-RESTORE-FB- R-RESTORE-IN+ TRIM-RESP+
+          is_d-
+        max: -8.00079
+        max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-FB+ R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN- TRIM-RESP-
+          is_d+
+    asserts:
+    - expr: max['g_hard'] <= p['g_trim']
+      why: 'every corner can be trimmed down to the target at 30 C: the counter-clockwise end gives no more than g_trim there'
+      pass: true
+    - expr: min['g_hard'] > 1.0
+      why: 'FAIL-SAFE: an open wiper is this end - the whole track in series - and still an expansive curve, gentler than
+        trimmed, never a runaway'
       pass: true

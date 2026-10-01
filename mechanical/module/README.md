@@ -142,3 +142,32 @@ something it shows moved.
 | | |
 |---|---|
 | ![The stack pulled apart](renders/exploded.png) The stack pulled apart | ![From behind](renders/rear.png) From behind: the power header, its socket and the ribbon folded down, `U-ISO` (RPA20-2412SAW, ADR 0027) with its filter parts, the trimmers and bulk caps (envelopes) |
+
+## Build order — the stack
+
+The stack can only be soldered in one order, and its depth is set by more
+than one part, so neither is left to the builder to discover
+(ADR 0024; the depths are `drc.echo`'s, not restated here).
+
+1. **The jack board's own parts first** — jacks, pots, the LED on its lead
+   spacer (`MECH-LED-BEZEL-MOD`). Their joints are on the board's rear face,
+   which ends up inside the gap between the boards.
+2. **`SW-POWER` on the panel**, one nut on the front and none behind
+   (*toggle's lugs in front of the main board*), and its two wires soldered to
+   its lugs, long enough to reach the main board.
+3. **Offer both boards up to the panel** with the standoffs loose and
+   `J-B2B-MOD` through both boards, **unsoldered**. Seat the jacks' bushings
+   and the NE8FAV's flange against the panel: three things set the gap
+   between the boards — the standoffs, the jacks' bodies against the panel
+   and the NE8FAV's setback — and each board's thickness tolerance adds to
+   it. **Face each standoff to the gap measured here**, not to the nominal
+   (*standoff length (derived)*, *standoff faced from stock*), as the key
+   boards' spacers are.
+4. **Take the panel off, stack the boards on the faced standoffs and solder
+   `J-B2B-MOD`** — on the jack board's front face first: those joints sit in
+   the slot between the jack bodies and cannot be reached once the panel is
+   on. Then on the main board's rear face. The header, once soldered, freezes
+   the gap.
+5. **Feed `SW-POWER`'s wires** through the jack board's step and solder them
+   to the main board from its rear, then fit the panel, the standoffs' screws
+   and the toggle's nut.

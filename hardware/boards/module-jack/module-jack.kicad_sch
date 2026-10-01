@@ -687,7 +687,7 @@
     (property "Datasheet" "" (at 106.68 63.5 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "J-B2B-MOD" (at 106.68 63.5 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2 3=3 4=4 5=5 6=6 7=7 8=8 9=9 10=10 11=11 12=12 13=13 14=14 15=15 16=16 17=17 18=18 19=19 20=20" (at 106.68 63.5 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "Soldered through both module boards, no mated contact (ADR 0023). Its pin k is the same conductor on both boards; tools/kicad.py check holds the two sheets to that. Allocation and reasoning: hardware/boards/module-main/README.md" (at 106.68 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Soldered through both module boards, no mated contact (ADR 0023). Its pin k is the same conductor on both boards; tools/kicad.py check holds the two sheets to that. LAYOUT: TOP side (F.Cu), NOT mirrored, though the header body is on this board's rear - both boards take the same unmirrored pin map (hardware/boards/module-jack/README.md). Allocation and reasoning: hardware/boards/module-main/README.md" (at 106.68 63.5 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins_source" "header position n on pin n, odd/even across the two rows as a 2x10 header numbers them" (at 106.68 63.5 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "Samtec" (at 106.68 63.5 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "TSW-110-09-G-D" (at 106.68 63.5 0) (effects (font (size 1.27 1.27)) hide))
