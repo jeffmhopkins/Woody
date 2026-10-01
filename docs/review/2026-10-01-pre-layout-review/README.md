@@ -3,10 +3,10 @@
 **Opened 2026-10-01**, before the boards are laid out and ordered. Nine cold
 agents. The owner's word: finish the design up to the line before layout.
 
-**Revision measured:** `REV` on `claude/car-instrument-cad-design-xvqwv2`.
+**Revision measured:** `13197f8` on `claude/car-instrument-cad-design-xvqwv2`.
 **`tools/` is pinned at the same revision**: reviewers run the checkers from a
-`git archive REV` copy, so a tooling commit landing while the wave runs cannot
-change a slice's verdict. Work that lands on the branch after `REV` (main-board
+`git archive 13197f8` copy, so a tooling commit landing while the wave runs cannot
+change a slice's verdict. Work that lands on the branch after `13197f8` (main-board
 routing, module photographs) is out of scope.
 
 ## Why this wave exists
