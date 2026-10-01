@@ -52,6 +52,7 @@ OWN_PAD_GAP = 0.05            # a via's ring to its own net's SMD pad: off it, n
 DIAG = 1.5
 TURN = {1: 0.8, 2: 2.5, 3: 20.0, 4: 40.0}      # by the angle between moves, in 45-degree steps
 VIA = 12.0
+SOFT = 40.0       # complete's rip-up: entering a cell another net's routing holds
 AGAINST = 0.35
 TOP, BOT = 0, 1
 LAYERS = [pcbnew.F_Cu, pcbnew.B_Cu]
@@ -647,6 +648,8 @@ def acute_closed(board, net, layer, p, a, c, width):
     half = math.acos(cos) / 2
     if not nb or half <= 0:
         return False
+    if math.sin(half) < 1e-3:
+        return True             # the two run out along each other: no wedge, an overlap merge_tracks takes
     d = (width / 2) / math.sin(half)
     m = pcbnew.VECTOR2I(int(p[0] + ux / nb * d), int(p[1] + uy / nb * d))
     for t in board.GetTracks():
@@ -1464,13 +1467,21 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
     [(net, (x, y), (x, y))], the two copper items' positions from its DRC - routed by
     A* on both outer layers at once, on the lazy 0.2 mm grid, a via wherever one is legal
     (Obstacles.via_ok) and costing VIA, from the copper at the first position to the copper
-    at the second. No rip-up: it takes what room the autorouter left. Returns the ones it
-    could not route."""
+    at the second. With layout.yaml `rip_up: n`, a connection with no way through is
+    searched again through other nets' copper, each cell of it costing SOFT: the nets that
+    path crosses are taken up whole (never a plane net's, the pair's or locked copper,
+    and each net at most n times), the connection laid, and theirs queued again, pad to
+    pad. Returns the ones it could not route."""
     obs = Obstacles(board, lay)
     classes = lay.get("net_classes") or {}
     width_of = lambda net: next((c["track"] for c in classes.values() if net in c["nets"]), lay["rules"]["track"])
     failed = []
-    for net, pa, pb in unconnected:
+    fixed = set(lay.get("fanout") or []) | {pl["net"] for pl in lay.get("planes") or []} | \
+        {s_["net"] for s_ in lay.get("islands") or []} | {n for pr in lay.get("pairs") or [] for n in pr["nets"]}
+    limit, rips = int(lay.get("rip_up", 0)), {}
+    queue = list(unconnected)
+    while queue:
+        net, pa, pb = queue.pop(0)
         w = width_of(net)
         grids = {L: Grid(obs, L, w / 2, own={net}) for L in ("F", "B")}
         vcache = {}
@@ -1504,6 +1515,28 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
             failed.append((net, pa, pb, "its copper was not found"))
             continue
         moves = [(1, 0, 1), (-1, 0, 1), (0, 1, 1), (0, -1, 1), (1, 1, DIAG), (1, -1, DIAG), (-1, 1, DIAG), (-1, -1, DIAG)]
+        soft_of = {}
+
+        def softc(L, i, j):
+            """None where the cell is closed by anything but another net's own unlocked
+            routing; else the extra cost of entering it, and the nets it would cross."""
+            if (L, i, j) not in soft_of:
+                gr = grids[L]
+                p = Point(*gr.xy((i, j)))
+                nets = set()
+                if not gr.inner.contains(p):
+                    soft_of[(L, i, j)] = None
+                    return None
+                for g, n, ls, kind in obs.within(p, gr.rad - 1e-4):
+                    if L not in ls or kind in ("silk", "hole", "vhole") or (n == net and kind != "keepout"):
+                        continue
+                    if kind in ("track", "via") and n and n not in fixed and not n.startswith("unconnected"):
+                        nets.add(n)
+                        continue
+                    nets = None
+                    break
+                soft_of[(L, i, j)] = nets
+            return soft_of[(L, i, j)]
         # layout.yaml directions: a step against its layer's preferred direction costs
         # against_cost, a diagonal one half way between (a 45-degree corner stays cheap)
         dirs = lay.get("directions") or {}
@@ -1518,7 +1551,7 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
                 return c * (1 + ag) / 2
             return c if along else c * ag
 
-        def search(src, dst, target):
+        def search(src, dst, target, soft=False):
             ti, tj = grids["F"].cell(*target)
             h = lambda i, j: math.hypot(i - ti, j - tj)
             openq, came, cost, seen = [], {}, {}, set()
@@ -1539,17 +1572,24 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
                 gr = grids[L]
                 for di, dj, c in moves:
                     nxt = (L, i + di, j + dj)
-                    if nxt in seen or not (gr.free(i + di, j + dj) or nxt in dst):
+                    extra = 0
+                    if nxt in seen:
                         continue
+                    if not (gr.free(i + di, j + dj) or nxt in dst):
+                        if not soft or softc(L, i + di, j + dj) is None:
+                            continue
+                        extra = SOFT
                     if di and dj and not (gr.free(i + di, j) and gr.free(i, j + dj)):
-                        continue
-                    ng = g + step_cost(L, di, dj, c) + (TURN.get(steps45(pd, (di, dj)), 0) if pd else 0)
+                        if not soft or softc(L, i + di, j) is None or softc(L, i, j + dj) is None:
+                            continue
+                    ng = g + extra + step_cost(L, di, dj, c) + (TURN.get(steps45(pd, (di, dj)), 0) if pd else 0)
                     if ng < cost.get(nxt, 1e18):
                         cost[nxt], came[nxt] = ng, cur
                         heapq.heappush(openq, (ng + h(i + di, j + dj), ng, nxt, (di, dj)))
                 O = "B" if L == "F" else "F"
                 nxt = (O, i, j)
-                if nxt not in seen and via_ok(i, j) and (grids[O].free(i, j) or nxt in dst):
+                if nxt not in seen and via_ok(i, j) and (grids[O].free(i, j) or nxt in dst
+                                                         or (soft and softc(O, i, j) is not None)):
                     ng = g + VIA
                     if ng < cost.get(nxt, 1e18):
                         cost[nxt], came[nxt] = ng, cur
@@ -1566,6 +1606,29 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
                 path = path[::-1]
         seen = range(nseen)
         goal = path[-1] if path else None
+        if goal is None and limit:
+            # rip-up: a way through other nets' routing, and those nets taken up whole
+            rp, _ = search(src, dst, pb, soft=True)
+            crossed = set().union(*(softc(*c) or set() for c in rp if not grids[c[0]].free(c[1], c[2]))) if rp else set()
+            if rp and crossed and all(rips.get(n, 0) < limit for n in crossed):
+                for t in list(board.GetTracks()):
+                    if t.GetNetname() in crossed and not t.IsLocked():
+                        board.Delete(t)
+                obs.items = [it for it in obs.items if not (it[1] in crossed and it[3] in ("track", "via", "vhole"))]
+                obs._tree = None
+                queue[:] = [(net, pa, pb)] + [q for q in queue if q[0] not in crossed]
+                for n in sorted(crossed):
+                    rips[n] = rips.get(n, 0) + 1
+                    pts = [(TO(q.GetPosition().x), TO(q.GetPosition().y)) for f in board.GetFootprints()
+                           for q in f.Pads() if q.GetNetname() == n]
+                    done, rest = pts[:1], pts[1:]
+                    while rest:         # pad to pad, the shortest tree
+                        a, b = min(((a, b) for a in done for b in rest), key=lambda ab: math.dist(*ab))
+                        queue.append((n, a, b))
+                        done.append(b)
+                        rest.remove(b)
+                print(f"route: complete - {net} ({pa[0]:.1f}, {pa[1]:.1f}): rip-up of {', '.join(sorted(crossed))}", flush=True)
+                continue
         if goal is None:
             failed.append((net, pa, pb, "no way through the room the autorouter left"))
             print(f"route: complete - {net} ({pa[0]:.1f}, {pa[1]:.1f}) to ({pb[0]:.1f}, {pb[1]:.1f}): no way ({len(seen)} cells searched)", flush=True)
@@ -1580,7 +1643,7 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
             run = [p[1:] for p in path[k:m + 1]]
             pts = [grids["F"].xy(c) for c in corners(run)]
             for a, b in zip(pts, pts[1:]):
-                lay_track(board, obs, net, a, b, w, path[k][0])
+                lay_track(board, obs, net, a, b, w, path[k][0], locked=False)
             if m + 1 < len(path):
                 lay_via(board, obs, net, *grids["F"].xy(path[m][1:]), locked=False)
             k = m + 1

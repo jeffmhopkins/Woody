@@ -459,7 +459,8 @@ unchanged: their `layout.yaml` names no kind.
 | Planes, islands | `planes:` (a zone per layer and net), `islands:` (an island zone over a polygon, cut out of its plane with a `moat`, one `tie`, a `tie_window`, the pads allowed `off_island`) |
 | Net classes | `net_classes:`, written into the `.kicad_pro` with a pattern per net |
 
-**Routing (`route: freerouting`).** In this order:
+**Routing (`route: astar`, the main board's; or `route: freerouting`).** In
+this order (step 4 is Freerouting's only):
 1. **`pairs:`** — `pcb_route.route_pair`: two nets side by side on one layer,
    routed as one fat track (two widths and the gap) by A* through the `through:`
    points, then split into two offset legs, each leg joined to its own pads by a
@@ -470,7 +471,7 @@ unchanged: their `layout.yaml` names no kind.
    the island and its moat). Through-hole pads meet the plane themselves. Locked.
 3. **`moat_keepout`** — a rule area over each moat on the layer above it, but for
    the tie's window and where a pair crosses.
-4. **Freerouting** (`tools/pcb_freeroute.py`, v2.1.0, the last release on Java
+4. **Freerouting**, `route: freerouting` only (`tools/pcb_freeroute.py`, v2.1.0, the last release on Java
    21; `tools/setup-env.sh` fetches it and the tool checks its SHA-256): KiCad's
    own Specctra DSN export, Freerouting headless, KiCad's own SES import. The
    planes go as planes and the power layers as *power*, so only layers 1 and 4
@@ -480,21 +481,28 @@ unchanged: their `layout.yaml` names no kind.
    inside every edge (the DSN has no copper-to-edge rule). Bounded by
    Freerouting's own `--router.job_timeout` (20 min), which still writes the
    session; its pass limit is not honoured in batch, and a shell timeout's kill
-   writes nothing. **Layer directions** (`layout.yaml` `directions:`, owner
-   2026-10-01): layer 1 along the board, layer 4 across it, as the key boards
-   route, written into the DSN as Freerouting's own `autoroute_settings` (a
-   `layer_rule` per layer: preferred direction, and the cost of a trace against
-   it) with `snap_angle fortyfive_degree`, at the end of the `structure` scope,
-   after the layers they name; `pcb_route.complete` costs its steps the same
-   way. Its other costs are its defaults: a flatter direction cost and cheaper
-   vias were tried on the first layout and left more unrouted.
+   writes nothing. Its costs are its defaults: a flatter direction cost and
+   cheaper vias were tried on the first layout and left more unrouted; it takes
+   no layer direction in batch (step 5).
 5. Zones filled, then `pcb.post_route`: `pcb_route.tidy` (doubled, zero-length
-   and dangling tracks removed; acute joins squared and collinear runs merged, as
-   on a key board); **`pcb_route.complete`** - every connection KiCad's DRC still
-   counts missing, routed by A* on both outer layers at once on the lazy 0.2 mm
-   grid, a via wherever `Obstacles.via_ok` allows, from one item and then, if
-   that search is boxed in, from the other; it takes the room the autorouter
-   left. What it cannot route goes to **`pcb.rescue`**, a rip-up: round each
+   and dangling tracks removed, a via met on one face only, runs of short hops
+   that join nothing new; acute joins squared, collinear runs merged, as on a key
+   board; and with `directions: chamfer`, each right-angle corner cut to two
+   45-degree bends where the diagonal keeps its clearance); **`pcb_route.complete`**
+   - every connection KiCad's DRC still counts missing (under `route: astar`,
+   every signal connection), shortest first, routed by A* on both outer layers at once on the lazy 0.2 mm
+   grid, a step against its layer's `directions:` costing `against_cost`, a via
+   wherever `Obstacles.via_ok` allows, from one item and then, if that search
+   is boxed in, from the other. With `rip_up: n`, a connection with no way
+   through is searched again through other nets' unlocked routing at a cost per
+   cell, the nets that path crosses are taken up whole and queued again pad to
+   pad, each at most n times.
+   **Why not Freerouting for the main board** (2026-10-01): its batch run takes
+   no direction - the same layer use at every `default_undesired_direction_trace_cost`
+   tried (2.5 to 50) and with the DSN's layers reordered, and a DSN
+   `autoroute_settings` scope zeroes its pass settings (pass 1 in 0.03 s, no
+   wiring); it laid layer 4 along the board and layer 1 every way, the preview
+   the owner called sloppy. What it cannot route goes to **`pcb.rescue`**, a rip-up: round each
    end of the missing connection (and, for a hop under 10 mm, the ground
    between) the unlocked tracks and vias of other nets are taken up at 1.5, 3
    and 5 mm, never a plane net's or locked copper; the missing connection is

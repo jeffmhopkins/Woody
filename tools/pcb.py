@@ -794,9 +794,9 @@ def post_route(path, bdir):
     board = pcbnew.LoadBoard(path)
     pcb_route.tidy(board, lay)
     pcbnew.SaveBoard(path, board)
-    # the long runs first, while the board's length is open to them (the buses along it),
-    # then the rest shortest first: they have the fewest ways round
-    miss = sorted(unconnected_of(path), key=lambda m: (math.dist(m[1], m[2]) < 40, math.dist(m[1], m[2])))
+    # the shortest connections first: they have the fewest ways round (a long run they
+    # wall in gets through by complete's rip-up, layout.yaml rip_up:)
+    miss = sorted(unconnected_of(path), key=lambda m: math.dist(m[1], m[2]))
     board = pcbnew.LoadBoard(path)
     failed = pcb_route.complete(board, lay, miss)
     print(f"route: complete - {len(miss) - len(failed)} of {len(miss)} connection(s) the autorouter left, routed")
