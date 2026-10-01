@@ -63,12 +63,13 @@ components:
     note: CW end at V_in/2, CCW end at V_shaped. At centre the wiper is at exactly 0 V FOR ANY INPUT, so the diode
       branch carries no current and the stage is linear by topology rather than by tolerance
   R-RESP:
-    value: 3.9k 1%
+    value: 2.7k 1%
     pins:
     - 1
     - 2
-    note: 'Sets how hard the curve bends: shaper-exp-gain, at least 1.5x at a hard blow at POT-RESP''s CW end at
-      every simulated corner (owner, 2026-09-30: 1.5x). module/breath-response-shaper/sim'
+    note: 'The fixed part of the diode branch, in series with TRIM-RESP: the trimmer''s clockwise end, where the
+      exp end bends hardest. Low enough that every simulated corner can be trimmed UP to shaper-exp-gain''s target,
+      high enough that BREATH_SHAPED still clips past 1.3x a hard blow there. module/breath-response-shaper/sim'
   R-RESP-DIV-HI:
     of: R-RESP-DIV
     value: 10k 1%
@@ -109,6 +110,16 @@ components:
     - 1
     - 2
     note: 'Input resistor of the restoring half: V_shaped into U-RESP B''s (-) input. With R-RESTORE-FB, x2 inverting'
+  TRIM-RESP:
+    value: 10k 10% sealed SMD cermet
+    pins:
+    - CW
+    - W
+    - CCW
+    note: 'IN SERIES with R-RESP, its wiper strapped to its CCW end, so clockwise LOWERS the branch''s resistance
+      and RAISES the exp end''s gain - the panel knob''s sense. An open wiper leaves the whole track in series:
+      LESS gain, never more. Set once at commissioning (E10) to shaper-exp-gain''s trimmed target at a hard blow,
+      POT-RESP fully CW. module/breath-response-shaper/sim'
   U-RESP:
     value: OPA2197IDR
     pins:
@@ -161,7 +172,11 @@ nets:
   DIODE_BRANCH:
   - D-RESP-A.K
   - D-RESP-B.A
+  - TRIM-RESP.CW
+  RESP_TRIM:
   - R-RESP.2
+  - TRIM-RESP.CCW
+  - TRIM-RESP.W
   RESTORE_SUM:
   - R-RESTORE-FB.1
   - R-RESTORE-IN.2
