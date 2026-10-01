@@ -7,8 +7,9 @@
 #   python3 tools/sim.py run hardware/module/breath-output-stage/sim
 # `mult`: 0 a module input alone, 1 a passive mult to the PITCH jack, 2 to a MOD jack.
 title: Breath output stage - offset, gain, clip, step, loop and rail
-# `chain` runs the response shaper ahead of this stage: its diode model, its ramp and
-# POT-RESP's rotation (p_resp, r_pot_cw, r_pot_ccw) come from its sims.yaml.
+# `chain` runs the response shaper ahead of this stage: its diode model, its ramp,
+# POT-RESP's rotation (p_resp, r_pot_cw, r_pot_ccw) and TRIM-RESP's commissioning (trimmed,
+# g_trim, t_comm, p_trim, r_trim) come from its sims.yaml.
 params_from: [hardware/module/breath-response-shaper/sim/sims.yaml]
 values:
   netlist:
@@ -52,6 +53,10 @@ derived:
   r_close: "1e-3 if v['rail'] else 1e12"
   l_brk: "1e-9 if v['rail'] else 1e9"
   c_inj: "1e-15 if v['rail'] else 1e9"
+  # chain.cir's commissioning step: a hard blow as this stage's v_hard (negative) gives it
+  v_hard_mag: "-v['v_hard']"
+  t_hard_c: "-v['v_hard'] * v['t_ramp'] / v['v_mag']"
+  t_hard_c_run: "-v['v_hard'] * v['t_ramp'] / v['v_mag'] + 20e-6"
 
 vary:
   R-BREATH-FB:     {tol: from-value}
@@ -153,7 +158,7 @@ sims:
   - name: chain-centre
     # the shaper and this stage one after the other, POT-RESP at its centre click, GAIN at
     # noon and OFFSET at its zero: the commissioned setting (breath-output-stage.md,
-    # 'Settled 2026-09-30')
+    # 'Settled 2026-09-30'); TRIM-RESP commissioned (the shaper's sims.yaml)
     deck: chain.cir
     set: {p_resp: 0.5, p_gain: 0.47, p_off: 0.433}
     vary: []
@@ -169,10 +174,26 @@ sims:
     # and where BREATH_OUT clips when the curve knob is turned after commissioning.
     # No assertion: whether CW may clip inside real playing is the owner's (A1-1,
     # docs/review/2026-10-01-pre-layout-review/VERIFIED-F1.md). clip_in is the in-amp
-    # output BREATH_OUT stops rising at; the in-amp's full scale where it never clips
+    # output BREATH_OUT stops rising at; the in-amp's full scale where it never clips.
+    # TRIM-RESP commissioned, as the module is built
     deck: chain.cir
     set: {p_gain: 0.47, p_off: 0.433}
     sweep: {p_resp: [0.0, 0.25, 0.5, 0.75, 1.0]}
+    vary: []
+    measures: [out_hard, ratio_hard, clip_in]
+    post:
+      out_hard: "at(w['out'], (-p['v_hard']) * p['t_ramp'] / p['v_mag'])"
+      ratio_hard: "at(w['shaped'], (-p['v_hard']) * p['t_ramp'] / p['v_mag']) / p['v_hard']"
+      clip_in: "-min(cross(w['out'], peak(w['out'], 0, p['t_ramp']) - 0.05, 0), p['t_ramp']) * p['v_mag'] / p['t_ramp']"
+  - name: chain-trim
+    # POT-RESP fully clockwise, GAIN at noon, with TRIM-RESP at either end of its travel
+    # instead of where commissioning sets it: how far a mis-set trimmer moves the jack's clip
+    # (p_trim 1: its end resistance, the strongest bend; 0: its whole track, which is also
+    # what an open wiper gives). No assertion, as for chain: whether the exp end may clip
+    # inside real playing at noon gain is the owner's (A1-1)
+    deck: chain.cir
+    set: {p_gain: 0.47, p_off: 0.433, p_resp: 1.0, trimmed: 0}
+    sweep: {p_trim: [0.0, 1.0]}
     vary: []
     measures: [out_hard, ratio_hard, clip_in]
     post:

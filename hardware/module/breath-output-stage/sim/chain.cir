@@ -3,9 +3,11 @@
 * against the op-amps (a DC sweep loses TI's model where the output clips, as in
 * breath-response-shaper/sim). The shaper is that circuit's deck verbatim: R-RESP-IN and
 * the R-RESP-DIV pair, U-RESP half A at -R-RESP-FB/R-RESP-IN to V_SHAPED, POT-RESP from
-* V_IN_HALF (CW) to V_SHAPED (CCW), its wiper through R-RESP and the antiparallel D-RESP
-* pair into the virtual ground, half B restoring at -R-RESTORE-FB/R-RESTORE-IN to
-* BREATH_SHAPED. Then this stage as bos.cir draws it: POT-GAIN, R-GAIN-FLOOR, the buffer,
+* V_IN_HALF (CW) to V_SHAPED (CCW), its wiper through R-RESP, TRIM-RESP and the
+* antiparallel D-RESP pair into the virtual ground, half B restoring at
+* -R-RESTORE-FB/R-RESTORE-IN to BREATH_SHAPED. TRIM-RESP is commissioned as that
+* circuit's deck does it when `trimmed` is 1 (POT-RESP fully clockwise, bisected until a
+* hard blow gives g_trim at BREATH_SHAPED, at t_comm), or sits at r_trim when it is 0. Then this stage as bos.cir draws it: POT-GAIN, R-GAIN-FLOOR, the buffer,
 * the summer with POT-OFFSET (AGND_MOD at CW, DAC_AVDD at CCW), R-OUT-PROT,
 * C-OUT-BREATH and the load. D-RESP is the shaper sim's behavioural diode. The output
 * measured is the op-amp's (BREATH_OUT): the jack is R-OUT-PROT's 1 % lower into
@@ -22,7 +24,8 @@ RRFB vg vsh {{R-RESP-FB}}
 XSA 0 vg pos neg vsh OPAx197
 RPCW vhalf wip {{r_pot_cw}}
 RPCCW wip vsh {{r_pot_ccw}}
-RRESP wip db {{R-RESP}}
+RRESP wip tr {{R-RESP}}
+RTRIM tr db {{r_trim}}
 DA vg db DRESP
 DB db vg DRESP
 RRI vsh rs {{R-RESTORE-IN}}
@@ -45,6 +48,31 @@ RLOAD jack 0 {{r_load}}
 .model DRESP D(IS={{is_d}} N={{n_d}} RS={{rs_d}} CJO=1.5p)
 .options method=gear rshunt=1e10
 .control
+if {{trimmed}} > 0
+  let tr_lo = {{r_trim_end}}
+  let tr_hi = {{TRIM-RESP}}
+  alter rpcw = 1e-3
+  alter rpccw = {{POT-RESP}}
+  option temp={{t_comm}}
+  let k = 0
+  while k < 12
+    let mid = (tr_lo + tr_hi) / 2
+    alter rtrim = mid
+    tran 2u {{t_hard_c_run}} 0 4u
+    meas tran vset find v(shaped) at={{t_hard_c}}
+    let g_set = -vset / {{v_hard_mag}}
+    if g_set > {{g_trim}}
+      let tr_lo = mid
+    else
+      let tr_hi = mid
+    end
+    let k = k + 1
+  end
+  print g_set
+  alter rpcw = {{r_pot_cw}}
+  alter rpccw = {{r_pot_ccw}}
+end
+option temp={{temp_c}}
 tran 2u {{t_ramp}} 0 4u
 wrdata out.dat v(out)
 wrdata shaped.dat v(shaped)
