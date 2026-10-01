@@ -26,10 +26,10 @@ render:
             ["main board", 0, 0, -30], ["thumb caps", 0, 0, -30], ["U-bolt", 0, 0, -8], ["column standoffs", 0, 0, -6],
             ["key boards", 0, 0, 12], ["key-board spacers", 0, 0, 24], ["key plate", 0, 0, 36], ["keycaps", 0, 0, 52],
             ["column screws", 0, 0, 64], ["Matrix", 0, 0, 74], ["oak top", 0, 0, 96],
-            ["side left", 0, -44, 0], ["side right", 0, 44, 0], ["mouth cap", -36, 0, 0], ["tail cap", 40, 0, 0],
+            ["side left", 0, -70, -150], ["side right", 0, 100, 10], ["mouth cap", -36, 0, 0], ["tail cap", 40, 0, 0],
             ["tail equipment", 0, 0, -30]]
     status: nominal
-    source: "picture convention: each group's [name, dx, dy, dz] from where it is assembled - the stack pulled apart up and down Z (its stacking axis), the sides out across Y and the end caps out along X so the stack shows between them"
+    source: "picture convention: each group's [name, dx, dy, dz] from where it is assembled - the stack pulled apart up and down Z (its stacking axis), the end caps out along X, and the acrylic sides out across Y - the near one (side left, toward the camera) also dropped below the stack so it does not hide it"
   explode_cassette:
     value: [["bottom plate", 0, 0, -40], ["main board spacers", 0, 0, -26], ["main board", 0, 0, -12], ["thumb caps", 0, 0, -12],
             ["U-bolt", 0, 0, 6], ["column standoffs", 0, 0, 2], ["key boards", 0, 0, 16], ["key-board spacers", 0, 0, 26],

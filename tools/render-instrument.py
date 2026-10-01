@@ -149,7 +149,8 @@ def export_solids(deps, jobs):
             m = re.match(r'ECHO: "SOLID", "(.*)"$', line.strip())
             if m and m.group(1) not in ids:
                 ids.append(m.group(1))
-    want = [s for s in ids if not fnm(s, NOT_PARTS)]
+    # a solid a board's export replaces is exported only if it is the board itself (its outline and height place the export)
+    want = [s for s in ids if not fnm(s, NOT_PARTS) and (not fnm(s, BOARD_OWNS) or s in BOARDS.values())]
     print(f"render-instrument: {len(want)} solids to export into {d}", flush=True)
 
     def one(sid):
@@ -274,16 +275,16 @@ VIEWS = {
     "open": dict(hide=["oak top", "key plate", "side left", "column screws"], explode=None,
                  cam=(-0.45, -1.0, 0.95), lens=60, frame=None, size=(1920, 1080), leds=False),
     "exploded": dict(hide=["ribbons"], explode="explode_instrument",
-                     cam=(-0.55, -1.0, 0.42), lens=50, frame=None, size=(1920, 1280), leds=False),
+                     cam=(-0.55, -1.0, 0.38), lens=50, frame=None, size=(1920, 1440), leds=False),
     "cassette": dict(hide=SHELL + ["keycaps", "thumb caps", "Matrix", "tail equipment", "ribbons", "U-bolt nuts"],
                      explode="explode_cassette", cam=(-0.5, -1.0, 0.62), lens=60, frame=None, size=(1920, 1200), leds=False),
     "board-mouth": dict(hide=["oak top", "key plate", "keycaps", "side left", "mouth cap", "column screws", "Matrix"], explode=None,
                         cam=(-0.95, -0.85, 0.42), lens=55, frame=((0, 0, 4), (150, 57, 34)), size=(1920, 1080), leds=True),
     "board-tail": dict(hide=["oak top", "key plate", "keycaps", "side left", "column screws", "key boards", "key-board spacers",
-                             "Matrix", "tail cap", "column standoffs"], explode=None,
+                             "Matrix", "tail cap", "column standoffs", "ribbons"], explode=None,
                        cam=(0.75, -0.95, 0.85), lens=55, frame=((205, 2, 5), (326, 55, 30)), size=(1920, 1080), leds=True),
     "underside": dict(hide=["oak bottom", "ribbons"], explode=None,
-                      cam=(-0.5, -0.85, -0.9), lens=60, frame=None, size=(1920, 1080), leds=False),
+                      cam=(-0.35, -0.55, -1.0), lens=50, frame=((100, 0, 0), (326, 57, 39)), size=(1920, 1080), leds=False),
 }
 
 
@@ -392,10 +393,10 @@ def oak(name, along="x"):
     ring = op("FRACT", op("DIVIDE", r, 2.1))
     cr = N.new("ShaderNodeValToRGB")
     E = cr.color_ramp.elements
-    E[0].position, E[0].color = 0.0, srgb("#4a2f1c")
-    E[1].position, E[1].color = 0.62, srgb("#3a2414")
-    E.new(0.86).color = srgb("#1c110a")
-    E.new(1.0).color = srgb("#4a2f1c")
+    E[0].position, E[0].color = 0.0, srgb("#3d2616")
+    E[1].position, E[1].color = 0.62, srgb("#2e1c10")
+    E.new(0.86).color = srgb("#150d07")
+    E.new(1.0).color = srgb("#3d2616")
     Lk.new(ring, cr.inputs["Fac"])
     pm = N.new("ShaderNodeMapping")
     pm.inputs["Scale"].default_value = (0.05, 2.2, 2.2)
@@ -447,7 +448,7 @@ class Mats:
         self.matrix_pcb = principled("Matrix PCB", "#101012", 0.45, 0.0, **{"Coat Weight": 0.4})
         self.matrix_led = principled("5050 LED", "#F1F0EA", 0.3)
         self.adapter = principled("adapter PCB", "#1E5B33", 0.4, 0.0, **{"Coat Weight": 0.4})
-        self.floor = principled("floor", "#262629", 0.6)
+        self.floor = principled("floor", "#1d1d20", 0.55)
 
     def for_solid(self, sid):
         M = self
@@ -548,24 +549,23 @@ def import_board(name, glb):
         if o.parent is None:
             o.parent = root
     bm = board_materials(name)
-    body = None
+    body = []
     for o in new:
         if o.type != "MESH":
             continue
-        layer = o.name.split(".")[0]
+        layer = o.data.name.split(".")[0]          # kicad-cli names the board's layers in the mesh, not the node
         if layer.startswith(name + "_"):
             key = layer[len(name) + 1:]
             o.data.materials.clear()
             o.data.materials.append(bm[{"soldermask": "mask", "silkscreen": "silk", "PCB": "pcb"}.get(key, key)])
-            if key == "PCB":
-                body = o
+            body.append(o)          # the laminate with its copper, mask and silk: the board as the CAD draws it
         else:
             for m in o.data.materials:      # the parts' own STEP colours, made less plastic-flat
                 if m and m.node_tree and "Principled BSDF" in m.node_tree.nodes:
                     bs = m.node_tree.nodes["Principled BSDF"]
                     if bs.inputs["Metallic"].default_value < 0.5:
                         bs.inputs["Roughness"].default_value = max(bs.inputs["Roughness"].default_value, 0.35)
-    if body is None:
+    if not any(o.data.name.startswith(name + "_PCB") for o in body):
         raise SystemExit(f"render-instrument: {name}'s export has no board body ({name}_PCB)")
     return root, body
 
@@ -588,8 +588,8 @@ def led_glow(root, name, lit):
             col = c.data.materials[0].node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value
             if not (col[0] > 0.8 and col[2] < col[0] - 0.15):
                 continue
-            rgb = colorsys.hsv_to_rgb(0.48 + 0.30 * i / max(1, len(xs) - 1), 0.7, 1.0)
-            kw = {"Emission Color": (*rgb, 1.0), "Emission Strength": 30.0} if lit else {"Transmission Weight": 0.5}
+            rgb = colorsys.hsv_to_rgb(0.48 + 0.30 * i / max(1, len(xs) - 1), 0.85, 1.0)
+            kw = {"Emission Color": (*rgb, 1.0), "Emission Strength": 7.0} if lit else {"Transmission Weight": 0.5}
             c.data.materials.clear()
             c.data.materials.append(principled(f"LED {r}", (0.9, 0.9, 0.85, 1.0), 0.15, 0.0, **kw))
             lenses += 1
@@ -636,7 +636,7 @@ def build(view, sdir, solids, boards):
         cad_board = trimesh.load(os.path.join(sdir, solids[BOARDS[name]]), force="mesh").bounds
         root, body = import_board(name, glb)
         bpy.context.view_layer.update()
-        lo, hi = world_bbox([body])
+        lo, hi = world_bbox(body)
         lo, hi = lo / MM, hi / MM
         off = [abs(lo[i] - cad_board[0][i]) for i in (0, 1)] + [abs(hi[i] - cad_board[1][i]) for i in (0, 1)]
         if max(off) > 0.05:
@@ -644,9 +644,10 @@ def build(view, sdir, solids, boards):
                              f"the body CAD's '{BOARDS[name]}' is [{cad_board[0][0]:.2f}..{cad_board[1][0]:.2f}] x "
                              f"[{cad_board[0][1]:.2f}..{cad_board[1][1]:.2f}] - the board and the CAD disagree")
         th_pcb, th_cad = hi[2] - lo[2], cad_board[1][2] - cad_board[0][2]
-        if abs(th_pcb - th_cad) > 0.05:
+        # kicad-cli lays the mask and silk as faces a few hundredths proud of the laminate
+        if abs(th_pcb - th_cad) > 0.1:
             raise SystemExit(f"render-instrument: {name} is {th_pcb:.2f} mm thick, the body CAD's board {th_cad:.2f}")
-        root.location.z = (cad_board[0][2] - lo[2]) * MM
+        root.location.z = ((cad_board[0][2] + cad_board[1][2]) - (lo[2] + hi[2])) / 2 * MM   # mid-planes together
         print(f"render-instrument: {name} at z {cad_board[0][2]:.2f} mm, plan agrees with the body CAD to {max(off):.3f} mm", flush=True)
         if name == "main-board":
             nleds = led_glow(root, name, V["leds"])
@@ -707,7 +708,7 @@ def setup(sc, members, view, preview):
     Lk.new(tc.outputs["Generated"], mp.inputs["Vector"])
     Lk.new(mp.outputs["Vector"], env.inputs["Vector"])
     probe = N.new("ShaderNodeBackground")
-    probe.inputs["Strength"].default_value = 0.35 if not V["leds"] else 0.12
+    probe.inputs["Strength"].default_value = 0.08 if V["leds"] else 0.6 if V["cam"][2] < 0 else 0.25
     Lk.new(env.outputs["Color"], probe.inputs["Color"])
     plain = N.new("ShaderNodeBackground")
     plain.inputs["Color"].default_value = srgb("#2a2a2d")
@@ -733,16 +734,16 @@ def setup(sc, members, view, preview):
     # picture: a big soft key from the upper front-left, a cool rim from behind,
     # a warm low fill, and a strip overhead to draw a highlight along the oak
     k = 0.25 if V["leds"] else 1.0
-    area("key", (-0.30, -0.45, 0.50), 90 * k, (1.0, 0.96, 0.92), 0.6)
-    area("rim", (0.35, 0.55, 0.30), 60 * k, (0.85, 0.92, 1.0), 0.3, 0.9)
-    area("fill", (0.35, -0.55, -0.05 if V["cam"][2] > 0 else -0.35), 18 * k, (1.0, 0.93, 0.86), 0.7)
-    area("top", (0.0, -0.10, 0.55), 30 * k, (1, 1, 1), 0.9, 0.15)
-    if V["cam"][2] < 0:
-        area("under", (0.0, -0.2, -0.5), 50, (1, 0.97, 0.94), 0.8)
+    area("key", (-0.30, -0.45, 0.50), 14 * k, (1.0, 0.96, 0.92), 0.6)
+    area("rim", (0.35, 0.55, 0.30), 12 * k, (0.85, 0.92, 1.0), 0.3, 0.9)
+    area("fill", (0.35, -0.55, -0.05 if V["cam"][2] > 0 else -0.35), 3 * k, (1.0, 0.93, 0.86), 0.7)
+    area("top", (0.0, -0.10, 0.55), 6 * k, (1, 1, 1), 0.9, 0.15)
+    if V["cam"][2] < 0:     # looking up: a big soft panel below for the metal to reflect
+        area("under", (0.05, -0.25, -0.45), 45, (1, 0.97, 0.94), 1.4, 0.6)
 
     # the floor, under the lowest part, unless the camera looks up at it
     if V["cam"][2] > 0:
-        bpy.ops.mesh.primitive_plane_add(size=8.0, location=(c.x, c.y, lo.z - 0.002))
+        bpy.ops.mesh.primitive_plane_add(size=60.0, location=(c.x, c.y, lo.z - 0.002))
         bpy.context.object.data.materials.append(bpy.data.materials["floor"])
 
     cam = bpy.data.cameras.new("cam")
