@@ -11,6 +11,13 @@ components:
     - A
     - K
     sheet: panel-led
+  D2:
+    of: D-ESD-PITCH
+    value: PESD15VL1BA
+    pins:
+    - K1
+    - K2
+    sheet: pitch-stage
   J1:
     of: J-CV
     value: PJ398SM
@@ -111,6 +118,7 @@ components:
 nets:
   /AGND_MOD:
   - D1.K
+  - D2.K2
   - J1.SLEEVE
   - J2.SLEEVE
   - J3.SLEEVE
@@ -154,6 +162,7 @@ nets:
   - J7.9
   - RV2.W
   /PITCH_JACK:
+  - D2.K1
   - J1.TIP
   - J7.14
   /RESP_V_IN_HALF:

@@ -59,6 +59,16 @@ components:
     - 1
     - 2
     note: The low-impedance shunt at the connector. Restored 2026-09-22 with C-FB-PITCH at 2.2nF
+  D-ESD-PITCH:
+    value: PESD15VL1BA
+    pins:
+    - K1
+    - K2
+    note: 'JACK-SIDE ESD CLAMP for the LT5400 (owner, 2026-10-01). Bidirectional, tip to sleeve, AT THE JACK on
+      this board, so a strike on the tip is clamped before it crosses J-B2B-MOD and reaches TRIM-GAIN and RN-PITCH,
+      which has no internal ESD diodes (LT5400.pdf p.6; its Figure 1 second option, a bidirectional zener to ground
+      at the connector). On the DC feedback node, so its leakage and capacitance sit inside the loop: no accuracy
+      cost (pitch-stage.md, The jack-side ESD clamp)'
   D-JACK-CLAMP:
     value: BAV99
     pins:
@@ -185,6 +195,7 @@ nets:
   - C-DEC-PITCH-NEG.2
   - C-DEC-PITCH-POS.2
   - C-FILT-PITCH.2
+  - D-ESD-PITCH.K2
   - J-CV-PITCH.SLEEVE
   - R-BIAS-DAC.2
   - R-VREF-GND.2
@@ -200,6 +211,7 @@ nets:
   - R-OPAMP-IN.1
   JACK_TIP:
   - C-FILT-PITCH.1
+  - D-ESD-PITCH.K1
   - J-CV-PITCH.TIP
   - R-OUT-PROT.2
   - TRIM-GAIN.CCW
