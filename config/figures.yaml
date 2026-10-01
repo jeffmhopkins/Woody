@@ -394,10 +394,10 @@ figures:
     value: "5.21 V"
     status: settled
     owner: hardware/module/power-entry/power-entry.md
-    derivation: "1.25 x (1 + 475/150) = 5.208 V"
-    forbidden: ["5.25V]", "local 5.25 V regulator", "own 5.25 V regulator", "LM317's own 5.25 V", "5.25V DAC regulator", "set to 5.25V", "LDO set to 5.25"]
+    derivation: "1.25 x (1 + 475/150) = 5.208 V from the divider; plus I_ADJ x R-REG-SET-LO, 50 uA typ / 100 uA max x 475 ohm = 24 / 48 mV [ds LM317LZ.pdf p.5], so 5.23 V typical. TI's transient model gives 5.219 V (hardware/module/digital-and-supervision/sim). Static worst case with the 0.1 % divider and TI's limits (V_REF 1.20-1.30 V, I_ADJ 0-100 uA): 4.99-5.47 V [calc: 1.20 x (1 + 475 x 0.999/(150 x 1.001)); 1.30 x (1 + 475 x 1.001/(150 x 0.999)) + 47.5 mV]."
+    forbidden: ["0.66 V worst-case spread", "worst case spans 0.66V", "5.25V]", "local 5.25 V regulator", "own 5.25 V regulator", "LM317's own 5.25 V", "5.25V DAC regulator", "set to 5.25V", "LDO set to 5.25"]
     false_positive_note: "The MPXV4006DP's supply spec is legitimately 4.75-5.25 V. Match the regulator, not the numeral."
-    floor: "5.00 V, HARD. The DAC8568's C grade is specified only for AVDD 5.0-5.5 V (SBAS430E, datasheets/analog/DAC8568CIPW.pdf). E7 selects R-REG-SET on the bench across a 0.66 V worst-case spread and must not land below 5.00 V. Added 2026-09-21; nothing in the roadmap knew this."
+    floor: "5.00 V, HARD. The DAC8568's C grade is specified only for AVDD 5.0-5.5 V (SBAS430E, datasheets/analog/DAC8568CIPW.pdf). E7 selects R-REG-SET-LO on the bench across the derivation's 4.99-5.47 V static spread and must not land below 5.00 V. Added 2026-09-21; nothing in the roadmap knew this."
     note: "bom.csv's U-REG-DAC DESCRIPTION field said 'set to 5.25V' until 2026-09-21 - the forbidden list matched the notes field's phrasings and not this one, which is why it survived. Both phrasings are listed now."
 
   - id: module-own-draw

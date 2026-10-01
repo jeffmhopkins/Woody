@@ -444,9 +444,17 @@ current never returns through the rack's ground and never moves the pitch CV
 the instrument's power on both rails, equal currents in each (the figures are
 `power-entry.md`'s, *The instrument's supply*), and the module fuses its rails
 (`PTC-POS12`, `PTC-NEG12`, `PTC-ISO`). The load switch's current limit, ramp
-and latch are unchanged; the converter's own limit is meant to sit above them
-— typical only on its datasheet, so E6 confirms it — so they still decide
-every start and fault.
+and latch are unchanged; the converter's own limit sits above them — the
+RPA20-2412SAW guarantees 110–160 % of its 1.67 A, a 1.84 A minimum against the
+LT1641's 1.10 A worst-case trip `[ds RECOM-RPA20-AW.pdf PD-5]` — so they decide
+every start and fault, **except a replug inside the instrument's `Q-INRUSH`
+window**, which reaches the converter's threshold (`hotplug-iso-ocp`;
+`power-entry.md`, *Protection*). E6 scopes that case.
+
+*(Amended 2026-10-01, pre-layout review A3-1 and A3-11: this paragraph said
+the converter's limit was "typical only", which described the RP20 that ADR
+0027 first named, and that the load switch decided every start without
+exception.)*
 
 ## Amendment 2026-09-30 — the lights are thirteen LEDs on the main board (ADR 0028)
 

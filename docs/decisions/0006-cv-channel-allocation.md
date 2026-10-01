@@ -215,7 +215,8 @@ code; see the `U-DAC` BOM row.)*
 > **And it carries a requirement the ADR did not know: the C grade is
 > specified only for AVDD = 5.0 V to 5.5 V**, where A/B are specified from
 > 2.7 V. The LM317 sits at 5.21 V nominal so this passes — but E7 selects the
-> divider *on the bench* across a 0.66 V worst-case spread, and a selection
+> divider *on the bench* across the static spread `dac-rail` derives, whose
+> low corner is under 5.00 V, and a selection
 > below 5.00 V puts the part out of spec. **5.00 V is a hard floor on that
 > bench step**, which nothing in the roadmap said. `bom.csv` carries it now.
 >
