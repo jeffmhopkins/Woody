@@ -1,0 +1,454 @@
+* THE SYSTEM, one subcircuit: the rack, the module and the instrument, as netlisted, joined
+* by the umbilical (cable.lib, instantiated by each deck between the m and i ports). Every
+* part value is a BOM row or reference filled from the netlists sims.yaml names; every model
+* parameter is filled from sims.yaml or of the sims it imports (params_from). What is
+* behavioural, and what is left out, is in this directory's README.
+*
+* NODES. Node 0 is the rack PSU's ground at the far end of the bus: the receiving
+* modules' ground, so every jack is read against node 0. Inside: star (BUS_GND, the
+* module's header ground), agnd (AGND_MOD on module-main), agj (AGND_MOD on the jack
+* board), dgnd (DIG_GND at NT-DIG-MOD), dge (DIG_GND at the etherCON, pin 8), pge
+* (PWR_GND at the etherCON, pin 6), pgi (PWR_GND at U-ISO's 0V), ig (the instrument's
+* PWR_GND plane at J-UMB), ag / sg (AGND_INST at the reference and at the sensor's pin 3).
+*
+* PORTS. m1-m8: J-UMB-MOD, the module's etherCON. i1-i8: J-UMB, the instrument's. The
+* rest are the deck's controls, each a voltage against node 0: ledctl (the LED row's PWM,
+* 0 blank to 1 lit), sclkctl / mosictl / csctl (the ESP32's pads, 0/1), dsck / ddin /
+* dsync (U-LVL-MOD's three outputs to the DAC, 0/1), dacp (the DAC's pitch channel, volts),
+* dacm1-dacm4 (the mod channels', volts), plug (every umbilical contact but +12 V, 0/1),
+* pplug (the +12 V contact, 0/1), hold (the start-up scaffold, 1 holding, below).
+.subckt SYS m1 m2 m3 m4 m5 m6 m7 m8 i1 i2 i3 i4 i5 i6 i7 i8
++ ledctl sclkctl mosictl csctl dsck ddin dsync dacp dacm1 dacm2 dacm3 dacm4 plug pplug hold
+*
+* ============================ THE START-UP SCAFFOLD ============================
+* TI's macromodels draw their quiescent current whatever their supply, so a cold start
+* through D1/D3 or Q-INRUSH drives an unpowered rail negative and stalls the solver, and
+* no DC operating point of this deck is found (README). So while `hold` is 1, ideal sources
+* ramp the op-amps' rails (MODULE_ANALOG_POS12 / NEG12 on AGND_MOD, INST_POS12 on the
+* instrument's plane) to near their running values through switches of r_hold - soft, so
+* that once the real supply network behind them is up they carry almost nothing and
+* opening them is a small step. `hold` falls long before anything is measured, and from
+* then on the rails are the network's alone. Not a part.
+VHP hp agnd PWL(0 0 {{t_hold_ramp}} {{ic_p12}})
+SHP p12 hp hold 0 SHOLD
+VHN hn agnd PWL(0 0 {{t_hold_ramp}} {{ic_n12}})
+SHN n12 hn hold 0 SHOLD
+VHI hi ig PWL(0 0 {{t_hold_ramp}} {{ic_ins_hold}})
+SHI ins hi hold 0 SHOLD
+*
+* ================================ THE RACK ================================
+* the PSU (its output resistance r_psu), the bus to this module's tap with the other
+* modules' decoupling there, the power ribbon to the header; the bus ground from the tap
+* to the PSU end, where the receivers are (node 0)
+VPSUP psp 0 PWL(0 0 {{t_hold_ramp}} {{v_rail}})
+RPSUP psp rpp {{r_psu}}
+RBUSP rpp tapp {{r_bus_rail}}
+VPSUN psn 0 PWL(0 0 {{t_hold_ramp}} {{v_rail_neg}})
+RPSUN psn rpn {{r_psu}}
+RBUSN rpn tapn {{r_bus_rail}}
+RBUSG tapg 0 {{r_bus_seg}}
+CRP tapp crp1 {{c_rack}}
+RCRP crp1 crp2 {{esr_rack}}
+LCRP crp2 tapg {{l_esl_rack}}
+CRN tapn crn1 {{c_rack}}
+RCRN crn1 crn2 {{esr_rack}}
+LCRN crn2 tapg {{l_esl_rack}}
+RRIBP tapp ribp {{r_rib_rail}}
+LRIBP ribp bpos {{l_rib}}
+RRIBN tapn ribn {{r_rib_rail}}
+LRIBN ribn bneg {{l_rib}}
+RRIBG star ribg {{r_rib_gnd}}
+LRIBG ribg tapg {{l_rib}}
+*
+* ============================ MODULE POWER ENTRY ============================
+* +12 V analog: PTC-POS12, D1, FB1, C1 to AGND_MOD, C-LOGIC-IN to DIG_GND. FB1 and FB3 are
+* their DC resistance and C1 / C3 have no ESL here (2.2 uH is 28 mohm at 2 kHz, beside D1's
+* ~3 ohm): an inductor in an op-amp's supply stalls TI's models at a cold start, whose
+* quiescent currents are constant whatever the supply (README)
+RPTCP bpos d1a {{r_ptc_rail}}
+D1 d1a fb1a D5817
+RFB1 fb1a p12 {{r_fb_dcr}}
+C1 p12 c1a {{C1}}
+RC1 c1a agnd {{esr_c1}}
+CLGI p12 dgnd {{C-LOGIC-IN}}
+* -12 V analog: PTC-NEG12, D3 (cathode at the bus), FB3, C3 to AGND_MOD
+RPTCN bneg d3k {{r_ptc_rail}}
+D3 fb3a d3k D5817
+RFB3 n12 fb3a {{r_fb_dcr}}
+C3 n12 c3a {{C3}}
+RC3 c3a agnd {{esr_c3}}
+* the module's own analog draw not otherwise modelled (module-own-draw): the -12 V share
+* rail to rail, the rest of the +12 V share (the logic regulator's) into DIG_GND, each as a
+* resistance at the rails' nominal (a constant current would drive a cold rail negative)
+ROWNR p12 n12 {{r_own_rr}}
+ROWNL p12 dgnd {{r_own_logic}}
+* LOGIC_5V: U-REG-LOGIC, behavioural (a 5 V source on DIG_GND, on smoothly once +12 V is up:
+* a kink in a source's law stalls the solver)
+BLOG l5 dgnd V = {{v5}} * 0.5 * (1 + tanh((V(p12, dgnd) - {{v_logic_on}}) / 0.3))
+CLGO l5 dgnd {{C-LOGIC-OUT}}
+* DAC_AVDD: U-REG-DAC, the LT3042 (power-entry/sim's lt3042.lib), R-SET-DAC, C-SET-DAC
+CRGI p12 agnd {{C-REG-IN}}
+XREG p12 avdd setd agnd LT3042B
+RSETD setd agnd {{R-SET-DAC}}
+CSETD setd agnd {{C-SET-DAC}}
+CRGO avdd agnd {{C-REG-OUT}}
+RDACL avdd agnd {{r_dac_load}}
+* U-ISO's input: PTC-ISO, D2, FB2, L-ISO-IN, L-CM-ISO on +12 V; D4 (cathode at the bus), FB4,
+* L-CM-ISO on -12 V; C2 and C-ISO-IN across its pins; C-ISO-Y to PWR_GND
+RPTCI bpos d2a {{r_ptc_iso}}
+D2 d2a fb2a D5817
+LFB2 fb2a fb2b {{l_fb_iso}}
+RFB2P fb2a fb2b {{r_fb_peak}}
+RFB2 fb2b liso {{r_fb_dcr}}
+LISO liso lisb {{L-ISO-IN}}
+RLISO lisb fp {{r_liso}}
+LCA fp cma {{L-CM-ISO}}
+RCA cma vinp {{r_cm_dcr}}
+LCB fn cmb {{L-CM-ISO}}
+RCB cmb vinn {{r_cm_dcr}}
+KCM LCA LCB {{k_cm}}
+RCOREA fp vinp {{r_cm_core}}
+RCOREB fn vinn {{r_cm_core}}
+LFB4 fn fb4b {{l_fb_iso}}
+RFB4P fn fb4b {{r_fb_peak}}
+RFB4 fb4b d4a {{r_fb_dcr}}
+D4 d4a bneg D5817
+C2 vinp c2a {{C2}}
+RC2 c2a c2b {{esr_c2}}
+LC2 c2b vinn {{l_esl_el}}
+CISOIN vinp cin1 {{C-ISO-IN}}
+LCIN cin1 vinn {{l_esl_cer}}
+CY vinp cya {{C-ISO-Y}}
+LCY cya pgi {{l_esl_cer}}
+CISOB vinn pgi {{c_iso}}
+* U-ISO, BEHAVIOURAL: its output a source at its set point behind its load regulation (r_bus),
+* clamped at its lowest over-current threshold (i_ocp), then its transient response as a
+* dynamic impedance (r_dyn parallel l_dyn); its input draws the output's power over its
+* efficiency, instantly - no loop delay, the most of every output current step that can
+* reach the rack
+VSETI seti pgi PWL(0 0 {{t_hold_ramp}} {{v_bus}})
+BISO pgi isx I = min({{i_ocp}}, max(0, (V(seti, pgi) - V(isx, pgi)) / {{r_bus}}))
+RDYN isx isd {{r_dyn}}
+LDYN isx isd {{l_dyn}}
+RSNS isd isop {{r_sns}}
+BIIN vinp vinn I = V(isop, pgi) * (V(isd, isop) / {{r_sns}}) / ({{eta}} * max(V(vinp, vinn), {{v_iso_in_min}}))
+CISOO isop cio1 {{C-ISO-OUT}}
+RCISOO cio1 pgi {{esr_iso}}
+* the umbilical load switch (umbilical-load-switch/sim's behavioural LT1641), running
+CDLS isop pgi {{C-DECOUPLE-LOADSW}}
+RILIM isop sense {{R-ILIM}}
+XU isop sense gdrv fb timer on pwrgd pgi LT1641B vlo={{vlo}} vhi={{vhi}} igate={{igate}} dvg={{dvg}} gm={{gm}} itup={{itup}} itdn={{itdn}}
+RGS gdrv gnode {{R-GATE-SER}}
+RGC gdrv gcm {{R-GATE-COMP}}
+CGATE gcm pgi {{C-GATE-LOADSW}}
+CTIMER timer pgi {{C-TIMER-LOADSW}}
+M1 sense gnode umbp umbp QPASS
+CISS gnode umbp {{c_iss}}
+RFBH umbp fb {{R-FB-HI}}
+RFBL fb pgi {{R-FB-LO}}
+* the panel LED on UMBILICAL_POS12, returning to AGND_MOD on module-main (panel-led/sim's diode)
+RLEDP umbp lp1 {{R-LED-PANEL}}
+VVFP lp1 lp2 {{vf_shift}}
+DLEDP lp2 agnd DLTL
+* THE GROUNDS (dig-gnd-topology): PWR_GND on layer 4 from U-ISO to the etherCON's pin 6;
+* NT-UMB-MOD to DIG_GND at pin 8; the DIG_GND plane to NT-DIG-MOD at the star; NT-AGND-MOD
+* from the star to AGND_MOD; J-B2B-MOD's ground pins to the jack board
+RPG4 pgi pge {{r_tie}}
+RNTU pge dge {{r_tie}}
+RDGP dge dgp {{r_tie}}
+LDGP dgp dgnd {{l_trace}}
+RNTD dgnd ntd {{r_tie}}
+LNTD ntd star {{l_trace}}
+RNTA star nta {{r_tie}}
+LNTA nta agnd {{l_trace}}
+RB2B agnd agj {{r_b2b}}
+* the patch cables' sleeves: each jack's sleeve to its receiver's ground at node 0
+RSLV agj 0 {{r_sleeve_eff}}
+*
+* ============================ MODULE: THE UMBILICAL'S NODES ============================
+RPIN6 m6 pge {{r_contact}}
+RPIN8 m8 dge {{r_contact}}
+RPIN3 m3 umbp {{r_contact}}
+* the SPI receiver (digital-and-supervision): each line's pull at the cable node, its RC and
+* U-RX-MOD's input
+CMS m4 dge {{c_mod}}
+RPS m4 dge {{R-PULL-SCLK}}
+RRS m4 srxi {{R-RX-SCLK}}
+CFS srxi dge {{C-RX-SCLK}}
+CRS srxi dge {{c_rx}}
+CMM m5 dge {{c_mod}}
+RPM m5 dge {{R-PULL-MOSI}}
+RRM m5 mrxi {{R-RX-MOSI}}
+CFM mrxi dge {{C-RX-MOSI}}
+CRM mrxi dge {{c_rx}}
+CMC m7 dge {{c_mod}}
+RPC m7 l5 {{R-PULL-CS}}
+RRC m7 crxi {{R-RX-CS}}
+CFC crxi dge {{C-RX-CS}}
+CRC crxi dge {{c_rx}}
+* U-LVL-MOD's outputs to the DAC (on DAC_AVDD and DIG_GND), each a pair of switched
+* resistances, through its trace into the DAC's pin capacitance on AGND_MOD; the DAC-side
+* pulls (R-PULL-SCLK-DAC and R-PULL-DIN to DIG_GND, R-PULL-SYNC to DAC_AVDD)
+BHS avdd osk I = V(dsck) * (V(avdd) - V(osk)) / {{r_on_lvl}}
+BLS osk dgnd I = (1 - V(dsck)) * (V(osk) - V(dgnd)) / {{r_on_lvl}}
+RTS osk psk {{r_trace_dac}}
+CPS psk agnd {{c_dac_pin}}
+RPSD psk dgnd {{R-PULL-SCLK-DAC}}
+BHD avdd odi I = V(ddin) * (V(avdd) - V(odi)) / {{r_on_lvl}}
+BLD odi dgnd I = (1 - V(ddin)) * (V(odi) - V(dgnd)) / {{r_on_lvl}}
+RTD odi pdi {{r_trace_dac}}
+CPD pdi agnd {{c_dac_pin}}
+RPDD pdi dgnd {{R-PULL-DIN}}
+BHY avdd osy I = V(dsync) * (V(avdd) - V(osy)) / {{r_on_lvl}}
+BLY osy dgnd I = (1 - V(dsync)) * (V(osy) - V(dgnd)) / {{r_on_lvl}}
+RTY osy psy {{r_trace_dac}}
+CPY psy agnd {{c_dac_pin}}
+RPSY psy avdd {{R-PULL-SYNC}}
+*
+* ======================== MODULE: BREATH RECEIVE, SHAPER, OUTPUT ========================
+* breath-receive-stage: R3 from BREATH, R2 from AGND_SENSE, the bias pair, C_cm, C_diff,
+* D-CLAMP-IN+/- (BAV99, as the shaper's diode fit), the INA828 (TI) and its REF from
+* TRIM-BREATH-ZERO's wiper through U-REF-BUF (TI's OPA2197), the wiper at v_zero
+RR3 m1 inneg {{R3}}
+RR2 m2 inpos {{R2}}
+RR4 inpos agnd {{R4}}
+RR5 inneg agnd {{R5}}
+CCMP inpos agnd {{C-CM-IN+}}
+CCMN inneg agnd {{C-CM-IN-}}
+CDIF inpos inneg {{C-DIFF-BREATH}}
+DCL1 m2 p12 DCLAMP
+DCL2 n12 m2 DCLAMP
+DCL3 m1 p12 DCLAMP
+DCL4 n12 m1 DCLAMP
+XINA inpos inneg p12 n12 inaout refdrv rg1 rg2 INA828
+RGIN rg1 rg2 {{R-GAIN-INAMP}}
+RZT avdd ztop {{R-ZERO-TOP}}
+RTZCW ztop zw {{r_tz_cw}}
+RTZCCW zw agnd {{r_tz_ccw}}
+XRFB zw refdrv p12 n12 refdrv OPAx197
+* breath-response-shaper (chain.cir's, on AGND_MOD), TRIM-RESP at r_trim
+RDH inaout vhalf {{R-RESP-DIV-HI}}
+RDL vhalf agnd {{R-RESP-DIV-LO}}
+RRIN inaout vg {{R-RESP-IN}}
+RRFB vg vsh {{R-RESP-FB}}
+XSA agnd vg p12 n12 vsh OPAx197
+RPCW vhalf wip {{r_pot_cw}}
+RPCCW wip vsh {{r_pot_ccw}}
+RRESP wip tr {{R-RESP}}
+RTRIM tr db {{r_trim}}
+DRA vg db DRESP
+DRB db vg DRESP
+RRI vsh rs {{R-RESTORE-IN}}
+RRF rs shaped {{R-RESTORE-FB}}
+XSB agnd rs p12 n12 shaped OPAx197
+* breath-output-stage: POT-GAIN, R-GAIN-FLOOR, the buffer, the summer with POT-OFFSET
+* (AGND_MOD at CW, DAC_AVDD at CCW) and R-BREATH-OFFNEG from -12 V, R-OUT-PROT, and on
+* the jack board C-OUT-BREATH; the jack into a receiver (r_load) at node 0
+RGCW shaped gw {{r_gain_cw}}
+RGCCW gw gf {{r_gain_ccw}}
+RFLOOR gf agnd {{R-GAIN-FLOOR}}
+XBA gw bufo p12 n12 bufo OPAx197
+RBIN bufo bsum {{R-BREATH-IN}}
+ROCW agnd ow {{r_off_cw}}
+ROCCW ow avdd {{r_off_ccw}}
+ROFF ow bsum {{R-BREATH-OFF}}
+ROFFN n12 bsum {{R-BREATH-OFFNEG}}
+RBFB bsum bout {{R-BREATH-FB}}
+XBB agnd bsum p12 n12 bout OPAx197
+RBOUT bout jb {{R-OUT-PROT}}
+CBOUT jb agj {{C-OUT-BREATH}}
+RBLD jb 0 {{r_load}}
+*
+* ============================ MODULE: THE DAC'S STAGES ============================
+* the DAC8568 as code-driven ideal sources on AGND_MOD (its pins' own glitch and
+* feedthrough, 0.1 nV-s, are not modelled); VREFOUT ideal at v_refout
+VVRO vro agnd PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_refout}})
+* pitch-stage (pitch-stage.lib's PSTAGE, on AGND_MOD), TRIM-GAIN and TRIM-OFFSET where
+* t_gain and w_offset put them; C-FILT-PITCH and D-ESD-PITCH on the jack board
+BDP dpin agnd V = V(dacp)
+RBDP dpin agnd {{R-BIAS-DAC}}
+RTOCW vro wipo {{r_toff_cw}}
+RTOCCW wipo agnd {{r_toff_ccw}}
+RINJ wipo vsum {{R-VREF-INJ}}
+RVSER vro vsum {{R-VREF-SER}}
+XRBP vsum vfb p12 n12 vrefb OPAx197
+RVFB vrefb vfb {{R-VREF-FB}}
+RVGND vfb agnd {{R-VREF-GND}}
+RCTR vrefb r1b {{R-GAIN-CTR}}
+RN1 r1b pminus {{RN-PITCH}}
+RN2 pminus gtm {{RN-PITCH}}
+RTG gtm jp {{r_trim_gain}}
+RINP dpin pplus {{R-OPAMP-IN}}
+CAAP pplus agnd {{C-AA-PITCH}}
+XPA pplus pminus p12 n12 pout OPAx197
+CFBP pout pminus {{C-FB-PITCH}}
+ROUTP pout jp {{R-OUT-PROT}}
+CFLP jp agj {{C-FILT-PITCH}}
+CESDP jp agj {{c_esd}}
+RVCOP jp 0 {{r_vco}}
+* mod-channels: DAC ch7 through R-OPAMP-IN-REF into the reference follower; each channel
+* x(1 + R-MODGAIN-FB/R-MODGAIN-IN) against it, R-OUT-PROT, C-FILT-MOD on the jack board
+VD7 d7 agnd PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_ref7}})
+RBD7 d7 agnd {{R-BIAS-DAC-CH7}}
+RID7 d7 refp {{R-OPAMP-IN-REF}}
+XREFM refp vrefm p12 n12 vrefm OPAx197
+BDM1 dm1 agnd V = V(dacm1)
+RBM1 dm1 agnd {{R-BIAS-DAC-1}}
+RIM1 dm1 pm1 {{R-OPAMP-IN-1}}
+R1M1 vrefm mm1 {{R1-1}}
+R2M1 mm1 om1 {{R2-1}}
+XM1 pm1 mm1 p12 n12 om1 OPAx197
+ROM1 om1 jm1 {{R-OUT-PROT-1}}
+CFM1 jm1 agj {{C-FILT-MOD-1}}
+RLM1 jm1 0 {{r_vco}}
+BDM2 dm2 agnd V = V(dacm2)
+RBM2 dm2 agnd {{R-BIAS-DAC-2}}
+RIM2 dm2 pm2 {{R-OPAMP-IN-2}}
+R1M2 vrefm mm2 {{R1-2}}
+R2M2 mm2 om2 {{R2-2}}
+XM2 pm2 mm2 p12 n12 om2 OPAx197
+ROM2 om2 jm2 {{R-OUT-PROT-2}}
+CFM2 jm2 agj {{C-FILT-MOD-2}}
+RLM2 jm2 0 {{r_vco}}
+BDM3 dm3 agnd V = V(dacm3)
+RBM3 dm3 agnd {{R-BIAS-DAC-3}}
+RIM3 dm3 pm3 {{R-OPAMP-IN-3}}
+R1M3 vrefm mm3 {{R1-3}}
+R2M3 mm3 om3 {{R2-3}}
+XM3 pm3 mm3 p12 n12 om3 OPAx197
+ROM3 om3 jm3 {{R-OUT-PROT-3}}
+CFM3 jm3 agj {{C-FILT-MOD-3}}
+RLM3 jm3 0 {{r_vco}}
+BDM4 dm4 agnd V = V(dacm4)
+RBM4 dm4 agnd {{R-BIAS-DAC-4}}
+RIM4 dm4 pm4 {{R-OPAMP-IN-4}}
+R1M4 vrefm mm4 {{R1-4}}
+R2M4 mm4 om4 {{R2-4}}
+XM4 pm4 mm4 p12 n12 om4 OPAx197
+ROM4 om4 jm4 {{R-OUT-PROT-4}}
+CFM4 jm4 agj {{C-FILT-MOD-4}}
+RLM4 jm4 0 {{r_vco}}
+*
+* ============================ THE PLUG ============================
+* J-UMB's contacts: every one but +12 V on `plug`, +12 V on `pplug`
+SP1 i1 j1 plug 0 SPLUGM
+SP2 i2 j2 plug 0 SPLUGM
+SP3 i3 j3 pplug 0 SPLUGM
+SP4 i4 j4 plug 0 SPLUGM
+SP5 i5 j5 plug 0 SPLUGM
+SP6 i6 ig plug 0 SPLUGM
+SP7 i7 j7 plug 0 SPLUGM
+SP8 i8 ig plug 0 SPLUGM
+*
+* ============================ THE INSTRUMENT ============================
+* J-UMB's +12 V node: D-TVS-PWR's capacitance, and Q-INRUSH with its gate network
+* (power-entry-instrument/sim's models)
+CTVSP j3 tvs1 {{c_tvs_pwr}}
+RTVSP tvs1 ig {{r_tvs}}
+MQ ins gq j3 j3 QINRUSH
+CQGS gq j3 {{c_iss_q}}
+CQGD gq ins {{c_rss_q}}
+DQB ins j3 DQBODY
+RIGS j3 gq {{R-INRUSH-GS}}
+RIG gq ig {{R-INRUSH-G}}
+CIGS j3 gq {{C-INRUSH-GS}}
+CIGD gq gdm {{C-INRUSH-GD}}
+RIGD gdm ins {{R-INRUSH-GD}}
+DRST ig gq DRESET
+* INST_POS12: C-STRIP-BULK; the LED row (thirteen WS2815B-V1 and their C-LED, as one: the
+* row's current, blank to lit as ledctl, on smoothly above v_led_on so it is a load)
+* returning across the plane to J-UMB; L-BUCK-IN, C-BUCK-IN and the buck, a constant power
+* above its input minimum
+CSTRIP ins cs1 {{C-STRIP-BULK}}
+RCSTRIP cs1 ig {{esr_strip}}
+CLEDS ins ledg {{c_led_row}}
+BLEDR ins ledg I = ({{i_row_blank}} + ({{i_row_full}} - {{i_row_blank}}) * V(ledctl)) * 0.5 * (1 + tanh((V(ins, ledg) - {{v_led_on}}) / 0.3))
+RLEDR ledg ig {{r_plane}}
+LBIN ins lb1 {{L-BUCK-IN}}
+RLBIN lb1 cb {{r_lbin}}
+CBUCK cb cb1 {{C-BUCK-IN}}
+RCBUCK cb1 ig {{esr_buck}}
+BBUCK cb ig I = {{p_buck}} / max(V(cb, ig), 1) * 0.5 * (1 + tanh((V(cb, ig) - {{v_on}}) / 0.1))
+* the buck's output as the Matrix's 3V3 (on with the buck): the pads' rail and R-CS-PULL-INST's
+BON on5 ig V = 0.5 * (1 + tanh((V(cb, ig) - {{v_on}}) / 0.1))
+BV33 v33 ig V = {{vdd}} * V(on5, ig)
+* the excitation (breath-excitation-reference): R-REF-IN and C-REF-OUT on REF_VIN; the
+* REF5050 BEHAVIOURAL (its line regulation, on smoothly past its dropout, its output
+* resistance); U-BUF half A
+* (TI's OPA2197) driving VS through R-ISO-REF with R-FB-REF, R-FBX-REF and C-FB-REF
+RRIN2 ins refvin {{R-REF-IN}}
+CRVIN refvin ag {{C-REF-OUT-VIN}}
+CDVIN refvin ag {{C-DEC-REF-VIN}}
+RQREF refvin ag {{r_q_ref}}
+BREF r5i ag V = ({{v_ref}} + {{k_line}} * (V(refvin, ag) - {{v_refin_nom}})) * 0.5 * (1 + tanh((V(refvin, ag) - {{v_ref}} - {{v_do_ref}} - 0.5) / 0.15))
+RROUT r5i ref5v {{r_ref_out}}
+CROUT ref5v crn1 {{C-REF-OUT-VOUT}}
+RCROUT crn1 ag {{esr_cref}}
+CDVOUT ref5v ag {{C-DEC-REF-VOUT}}
+CDBUF ins ag {{C-DEC-BUF}}
+XBUFA ref5v refminus ins ag bufout OPAx197
+RFX bufout acmid {{R-FBX-REF}}
+CFR acmid refminus {{C-FB-REF}}
+RFR vs refminus {{R-FB-REF}}
+RISO bufout vs {{R-ISO-REF}}
+CDS vs ag {{C-DEC-SENSOR}}
+* the sensor (breath-sense-link), BEHAVIOURAL: ratiometric with VS at the held pressure (a
+* linear VCVS), its supply current a resistance from VS to its own pin 3; NXP's Figure 3 capacitors; U-BUF half B
+* following SENSOR_RAW; R1 onto BREATH, R1b from pin 3 onto AGND_SENSE; D-TVS-BREATH to
+* the plane at J-UMB
+CVSB vs sg {{C-SENSOR-VS-BULK}}
+CVSH vs sg {{C-SENSOR-VS-HF}}
+RSENS vs sg {{r_sensor}}
+ESO sro sg vs sg {{k_sensor}}
+RSO sro sraw {{r_sens_out}}
+CSO sraw sg {{C-SENSOR-OUT}}
+XBUFB sraw sbo ins ag sbo OPAx197
+RR1 sbo j1 {{R1}}
+RR1B sg j2 {{R1b}}
+DTVS1 ig j1 DTVSB
+DTVS2 ig j2 DTVSB
+* AGND_INST, an island: the sensor's pin 3 to the reference block, to NT-AGND under the
+* ADC, and the plane from there to J-UMB
+RISL1 sg ag {{r_isl}}
+RISL2 ag atie {{r_isl}}
+RPLA atie ig {{r_plane}}
+* the SPI pads (carrier): IO35/IO36/IO34 behind r_drv (or high-impedance, pad_hiz), each
+* pad's ESD clamps to 3V3 and to ground, U-TVS-SPI on the pad side, R-SPI-SER and the
+* trace to J-UMB; R-CS-PULL-INST to 3V3 on IO34
+BPS pads ig V = V(v33, ig) * V(sclkctl)
+RDS pads as {{r_drv_eff}}
+DCHS as v33 DPAD
+DCLS ig as DPAD
+CTSS as ig {{c_tvs}}
+RSS as j4 {{R-SPI-SER-SCLK}}
+CIS j4 ig {{c_inst}}
+BPM padm ig V = V(v33, ig) * V(mosictl)
+RDM padm am {{r_drv_eff}}
+DCHM am v33 DPAD
+DCLM ig am DPAD
+CTSM am ig {{c_tvs}}
+RSM am j5 {{R-SPI-SER-MOSI}}
+CIM j5 ig {{c_inst}}
+BPC padc ig V = V(v33, ig) * V(csctl)
+RDC padc ac {{r_drv_eff}}
+RCSPI ac v33 {{R-CS-PULL-INST}}
+DCHC ac v33 DPAD
+DCLC ig ac DPAD
+CTSC ac ig {{c_tvs}}
+RSC ac j7 {{R-SPI-SER-CS}}
+CIC j7 ig {{c_inst}}
+*
+* ============================ MODELS ============================
+.model D5817 D(Is={{d_is}} N={{d_n}} Rs={{d_rs}} Cjo=110p BV=20)
+.model DLTL D(Is={{led_is}} N={{led_n}} Rs={{led_rs}})
+.model DCLAMP D(Is={{is_d}} N={{n_d}} Rs={{rs_d}} Cjo=1.5p)
+.model DRESP D(IS={{is_d}} N={{n_d}} RS={{rs_d}} CJO=1.5p)
+.model DTVSB D(Is=1e-14 Cjo={{cj_sig}} Vj={{tvs_vj}} M={{tvs_m}} BV={{tvs_bv}})
+.model DPAD D(Is=1e-14 N=1)
+.model QPASS NMOS(level=1 vto={{v_th}} kp={{kp}})
+.model QINRUSH PMOS(level=1 vto={{vto_q}} kp={{kp_q}})
+.model DQBODY D(is={{is_body_q}} n=1)
+.model DRESET D(is={{is_rst}} n={{n_rst}})
+.model SPLUGM SW(vt=0.5 vh=0.1 ron=1m roff=1e9)
+.model SHOLD SW(vt=0.5 vh=0.1 ron={{r_hold}} roff=1e12)
+.ends SYS

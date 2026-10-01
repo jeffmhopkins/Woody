@@ -1,0 +1,89 @@
+* CABLE-CHECK: the lumped umbilical (UMB_LUMPED, two pi-sections) against ngspice's CPL
+* line with the same per-metre matrices (UMB_CPL), side by side in one run, each between
+* the same two ends. The aggressor is SCLK: two clock periods from its pad (r_drv, tr_drv,
+* U-TVS-SPI, R-SPI-SER-SCLK) into pin 4, R-PULL-SCLK and R-RX-SCLK / C-RX-SCLK at the
+* module. MOSI held low by its pad, CS high by its pad; +12 V and PWR_GND as their
+* bulk (C-STRIP-BULK at the instrument, C-ISO-OUT at the module, AC shorts here). The
+* victim is the breath pair, terminated as netlisted: R1 / R1b to the instrument's
+* ground (the buffer's output and the sensor's pin, both near 0 ohm), R3 / R2, C_cm,
+* C-DIFF-BREATH and the 1 Mohm bias pair at the module. The measures are what reaches
+* the INA828's inputs, differentially: its peak and its integral (C-DIFF-BREATH and the
+* link's ~460 Hz pole make the in-amp see the charge, not the spike).
+.subckt TERMI i1 i2 i3 i4 i5 i6 i7 i8 drv
+VPWR i3 i6 0
+RD drv a {{r_drv}}
+CT a i6 {{c_tvs}}
+RS a i4 {{R-SPI-SER-SCLK}}
+CI4 i4 i6 {{c_inst}}
+RDM i6 am {{r_drv}}
+CTM am i6 {{c_tvs}}
+RSM am i5 {{R-SPI-SER-MOSI}}
+CI5 i5 i6 {{c_inst}}
+VCS cpad i6 {{vdd}}
+RDC cpad ac {{r_drv}}
+CTC ac i6 {{c_tvs}}
+RSC ac i7 {{R-SPI-SER-CS}}
+CI7 i7 i6 {{c_inst}}
+RB1 i1 i6 {{R1}}
+RB2 i2 i6 {{R1b}}
+RT8 i8 i6 {{r_contact}}
+.ends
+.subckt TERMM m1 m2 m3 m4 m5 m6 m7 m8 inp inn
+VPWR m3 m6 0
+RT6 m6 0 {{r_contact}}
+RT8 m8 0 {{r_contact}}
+CMS m4 0 {{c_mod}}
+RPS m4 0 {{R-PULL-SCLK}}
+RRS m4 srx {{R-RX-SCLK}}
+CFS srx 0 {{C-RX-SCLK}}
+CMM m5 0 {{c_mod}}
+RPM m5 0 {{R-PULL-MOSI}}
+RRM m5 mrx {{R-RX-MOSI}}
+CFM mrx 0 {{C-RX-MOSI}}
+CMC m7 0 {{c_mod}}
+RPC m7 l5 {{R-PULL-CS}}
+VL5 l5 0 {{v5}}
+RRC m7 crx {{R-RX-CS}}
+CFC crx 0 {{C-RX-CS}}
+RR3 m1 inn {{R3}}
+RR2 m2 inp {{R2}}
+RR4 inp 0 {{R4}}
+RR5 inn 0 {{R5}}
+CCMP inp 0 {{C-CM-IN+}}
+CCMN inn 0 {{C-CM-IN-}}
+CDIF inp inn {{C-DIFF-BREATH}}
+.ends
+* the instrument's ground floats, as the isolated instrument's does: 1 Gohm to node 0
+VCK ck 0 PULSE(0 {{vdd}} {{t_cc0}} {{tr_drv}} {{tr_drv}} {{t_hi}} {{t_per}})
+* lumped
+EDL dl gil ck 0 1
+XIL l1 l2 l3 l4 l5 l6 l7 l8 dl TERMI
+RGIL l6 gil 1e-3
+RFIL gil 0 1e9
+XCL ml1 ml2 ml3 ml4 ml5 ml6 ml7 ml8 l1 l2 l3 l4 l5 l6 l7 l8 UMB_LUMPED
+XML ml1 ml2 ml3 ml4 ml5 ml6 ml7 ml8 lp ln TERMM
+* CPL
+EDC dc gic ck 0 1
+XIC c1 c2 c3 c4 c5 c6 c7 c8 dc TERMI
+RGIC c6 gic 1e-3
+RFIC gic 0 1e9
+XCC mc1 mc2 mc3 mc4 mc5 mc6 mc7 mc8 c1 c2 c3 c4 c5 c6 c7 c8 UMB_CPL
+XMC mc1 mc2 mc3 mc4 mc5 mc6 mc7 mc8 cp cn TERMM
+.options method=gear
+.control
+tran 20p {{t_cc_end}}
+let dl = v(lp) - v(ln)
+let dc = v(cp) - v(cn)
+meas tran pk_l max dl
+meas tran tr_l min dl
+meas tran pk_c max dc
+meas tran tr_c min dc
+meas tran ar_l integ dl from=0 to={{t_cc_end}}
+meas tran ar_c integ dc from=0 to={{t_cc_end}}
+let cml = (v(lp) + v(ln)) / 2
+let cmc = (v(cp) + v(cn)) / 2
+meas tran cm_l max cml
+meas tran cm_c max cmc
+quit
+.endc
+.end

@@ -1,0 +1,45 @@
+* SCENARIO 3, the instrument hot-plugged into a running module: the whole system
+* (system.lib) on the lumped umbilical, the cable on the module, the instrument unplugged
+* while the rack powers up and the module settles (its load switch's FET enhanced into
+* nothing, every jack at its held value, the breath stage reading the absent instrument).
+* At t_plug every J-UMB contact but +12 V makes; +12 V makes dt_mate later. The
+* instrument then starts as power-entry-instrument/sim's hot-plug does (Q-INRUSH's ramp,
+* the buck, the 3V3), its SPI pads high-impedance (the ESP32 unpowered, then in reset:
+* no frame inside the run), its LED row blank (R-LED-PD holds the data line through the
+* boot), and its breath front end comes up at the held pressure.
+XC m1 m2 m3 m4 m5 m6 m7 m8 i1 i2 i3 i4 i5 i6 i7 i8 UMB_LUMPED
+XS m1 m2 m3 m4 m5 m6 m7 m8 i1 i2 i3 i4 i5 i6 i7 i8
++ ledctl sclkctl mosictl csctl dsck ddin dsync dacp dacm1 dacm2 dacm3 dacm4 plug pplug hold SYS
+VLED ledctl 0 0
+VSCK sclkctl 0 0
+VMOS mosictl 0 0
+VCSC csctl 0 0
+VDSK dsck 0 0
+VDDI ddin 0 0
+VDSY dsync 0 1
+VDP dacp 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_dac0}})
+VDM1 dacm1 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_mod_code}})
+VDM2 dacm2 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_mod_code}})
+VDM3 dacm3 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_mod_code}})
+VDM4 dacm4 0 PWL(0 0 {{t_sig0}} 0 {{t_sig1}} {{v_mod_code}})
+VPLG plug 0 PWL(0 0 {{t_plug}} 0 {{t_plug_e}} 1)
+VPPL pplug 0 PWL(0 0 {{t_pplug}} 0 {{t_pplug_e}} 1)
+VHOLD hold 0 PWL(0 1 {{t_release}} 1 {{t_release_e}} 0)
+.options method=gear rshunt=1e10
+.control
+tran {{t_max_step_plug}} {{t_end_plug}} {{t_save_plug}} {{t_max_step_plug}} uic
+wrdata jp.dat v(xs.jp)
+wrdata jb.dat v(xs.jb)
+wrdata jm1.dat v(xs.jm1)
+wrdata ina.dat v(xs.inaout) - v(xs.agnd)
+wrdata hdrp.dat v(xs.bpos) - v(xs.star)
+wrdata hdrn.dat v(xs.bneg) - v(xs.star)
+wrdata iiso.dat (v(xs.isd) - v(xs.isop)) / {{r_sns}}
+wrdata srx.dat v(xs.srxi) - v(xs.dge)
+wrdata mrx.dat v(xs.mrxi) - v(xs.dge)
+wrdata crx.dat v(xs.crxi) - v(xs.dge)
+wrdata ins.dat v(xs.ins) - v(xs.ig)
+wrdata latch.dat v(xs.xu.latch)
+quit
+.endc
+.end
