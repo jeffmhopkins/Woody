@@ -153,9 +153,11 @@ REF_VIN──┬─┤VIN VOUT├─┬── 5.000 V ─┤+IN                 
                      │                                     └───┬───────────┘
                      │                                    [100 nF] [C-ADC-BULK 10 µF]
                      │                                         │
-  J-UMB pin 2 AGND ──[R-SER-BREATH-INST 1k]──┴── analog star point
-                       R1b  ** WAS MISSING **      │
-                                                   └──[single tie]── PWR_GND
+  J-UMB pin 2 AGND ──[R-SER-BREATH-INST 1k]──┴── U-BREATH pin 3 (GND): its own
+                       R1b  ** WAS MISSING **      trace from that pad, NOT the star
+                                                   and not a via into the pour
+                                                   (AGND_SENSE, breath-sense-link.md)
+                            AGND_INST island ──── single tie, NT-AGND ──── PWR_GND
                             [D-TVS-BREATH ×2, AT THE CONNECTOR]
 ```
 

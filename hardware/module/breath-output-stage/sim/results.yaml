@@ -4,13 +4,17 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/breath-output-stage/sim/sims.yaml: 159de77a15642bfd
-  hardware/module/breath-output-stage/netlist.yaml: f7243ba0d87adaa2
-  hardware/module/pitch-stage/netlist.yaml: 3d43eac2f5eabc29
+  hardware/module/breath-output-stage/sim/sims.yaml: 66a2de1101610764
+  hardware/module/breath-output-stage/netlist.yaml: 63517b01fa4c02a2
+  hardware/module/breath-response-shaper/netlist.yaml: 347e949e5edad4c7
+  hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
   hardware/module/mod-channels/netlist.yaml: 8f44cca2ddd7a7e3
-  hardware/module/breath-output-stage/sim/bos.cir: 6e055f8d7892015b
-  hardware/module/breath-output-stage/sim/bos-ac.cir: d69942b4e9b3308e
+  hardware/module/breath-output-stage/sim/bos.cir: e1b8c860686a0315
+  hardware/module/breath-output-stage/sim/bos-ac.cir: fbdf6f423bb51ac3
+  hardware/module/breath-output-stage/sim/chain.cir: 4e0ddaf4572786f9
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
+  hardware/module/breath-response-shaper/sim/sims.yaml: 6b57567590dc779d
+  figure:inamp-full-scale: -9.94 V
   figure:dac-rail: 5.21 V
 ngspice: '42'
 sims:
@@ -18,27 +22,27 @@ sims:
     corners: 17
     measures:
       out:
-        nominal: 5.06198
-        min: 4.96174
-        min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd+
-        max: 5.16424
-        max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd-
+        nominal: -4.91144
+        min: -5.68271
+        min_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG+ v_avdd+
+        max: -4.32291
+        max_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG- v_avdd-
       jack:
-        nominal: 5.01186
-        min: 4.91261
-        min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd+
-        max: 5.11311
-        max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd-
+        nominal: -4.86281
+        min: -5.62645
+        min_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG+ v_avdd+
+        max: -4.28011
+        max_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG- v_avdd-
       page_err:
-        nominal: 6.78213e-05
-        min: 6.69381e-05
-        min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd+
-        max: 6.87081e-05
-        max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd-
+        nominal: 8.25628e-05
+        min: 8.0767e-05
+        min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd-
+        max: 8.46358e-05
+        max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd+
     asserts:
     - expr: max['page_err'] < 0.01 and min['page_err'] > -0.01
-      why: the op-amp output agrees with the page's offset table and its derivation (+5.06 V CCW, +0.61 V at centre, 0 at
-        p = 0.567, -4.91 V CW) within 10 mV at every corner - the wiper's own source impedance is the whole of the centre's
+      why: the op-amp output agrees with the page's offset table and its derivation (-4.91 V CCW, +0.61 V at centre, 0 at
+        p = 0.433, +5.06 V CW) within 10 mV at every corner - the wiper's own source impedance is the whole of the centre's
         offset
       pass: true
   offset[p_off=0.5]:
@@ -64,11 +68,11 @@ sims:
         max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd+
     asserts:
     - expr: max['page_err'] < 0.01 and min['page_err'] > -0.01
-      why: the op-amp output agrees with the page's offset table and its derivation (+5.06 V CCW, +0.61 V at centre, 0 at
-        p = 0.567, -4.91 V CW) within 10 mV at every corner - the wiper's own source impedance is the whole of the centre's
+      why: the op-amp output agrees with the page's offset table and its derivation (-4.91 V CCW, +0.61 V at centre, 0 at
+        p = 0.433, +5.06 V CW) within 10 mV at every corner - the wiper's own source impedance is the whole of the centre's
         offset
       pass: true
-  offset[p_off=0.567]:
+  offset[p_off=0.433]:
     corners: 17
     measures:
       out:
@@ -91,35 +95,35 @@ sims:
         max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd+
     asserts:
     - expr: max['page_err'] < 0.01 and min['page_err'] > -0.01
-      why: the op-amp output agrees with the page's offset table and its derivation (+5.06 V CCW, +0.61 V at centre, 0 at
-        p = 0.567, -4.91 V CW) within 10 mV at every corner - the wiper's own source impedance is the whole of the centre's
+      why: the op-amp output agrees with the page's offset table and its derivation (-4.91 V CCW, +0.61 V at centre, 0 at
+        p = 0.433, +5.06 V CW) within 10 mV at every corner - the wiper's own source impedance is the whole of the centre's
         offset
       pass: true
   offset[p_off=1.0]:
     corners: 17
     measures:
       out:
-        nominal: -4.91144
-        min: -5.68271
-        min_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG+ v_avdd+
-        max: -4.32291
-        max_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG- v_avdd-
+        nominal: 5.06198
+        min: 4.96174
+        min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd+
+        max: 5.16424
+        max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd-
       jack:
-        nominal: -4.86281
-        min: -5.62645
-        min_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG+ v_avdd+
-        max: -4.28011
-        max_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG- v_avdd-
+        nominal: 5.01186
+        min: 4.91261
+        min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd+
+        max: 5.11311
+        max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd-
       page_err:
-        nominal: 8.25628e-05
-        min: 8.0767e-05
-        min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd-
-        max: 8.46358e-05
-        max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd+
+        nominal: 6.78213e-05
+        min: 6.69381e-05
+        min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd+
+        max: 6.87081e-05
+        max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd-
     asserts:
     - expr: max['page_err'] < 0.01 and min['page_err'] > -0.01
-      why: the op-amp output agrees with the page's offset table and its derivation (+5.06 V CCW, +0.61 V at centre, 0 at
-        p = 0.567, -4.91 V CW) within 10 mV at every corner - the wiper's own source impedance is the whole of the centre's
+      why: the op-amp output agrees with the page's offset table and its derivation (-4.91 V CCW, +0.61 V at centre, 0 at
+        p = 0.433, +5.06 V CW) within 10 mV at every corner - the wiper's own source impedance is the whole of the centre's
         offset
       pass: true
   gain[p_gain=0.0]:
@@ -327,3 +331,133 @@ sims:
       why: 'the page''s 4.1 mV at the jack for 9.7 mV on the rail: R-BREATH-FB/R-BREATH-OFFNEG, less the 1 % R-OUT-PROT drop
         into the load'
       pass: true
+  chain-centre:
+    corners: 1
+    measures:
+      out_hard:
+        nominal: 9.99199
+        min: 9.99199
+        min_at: nominal
+        max: 9.99199
+        max_at: nominal
+      clip_in:
+        nominal: -5.53976
+        min: -5.53976
+        min_at: nominal
+        max: -5.53976
+        max_at: nominal
+    asserts:
+    - expr: nom['out_hard'] > 9.8 and nom['out_hard'] < 10.2
+      why: 'a hard blow reaches about 10 V at the commissioned setting (breath-output-stage.md, ''What it has to do''): the
+        shaper is +1 at its click and GAIN at noon is the 2.16x the page derives'
+      pass: true
+  chain[p_resp=0.0]:
+    corners: 1
+    measures:
+      out_hard:
+        nominal: 4.36065
+        min: 4.36065
+        min_at: nominal
+        max: 4.36065
+        max_at: nominal
+      ratio_hard:
+        nominal: 0.436029
+        min: 0.436029
+        min_at: nominal
+        max: 0.436029
+        max_at: nominal
+      clip_in:
+        nominal: -9.85951
+        min: -9.85951
+        min_at: nominal
+        max: -9.85951
+        max_at: nominal
+    asserts: []
+  chain[p_resp=0.25]:
+    corners: 1
+    measures:
+      out_hard:
+        nominal: 8.33886
+        min: 8.33886
+        min_at: nominal
+        max: 8.33886
+        max_at: nominal
+      ratio_hard:
+        nominal: 0.833731
+        min: 0.833731
+        min_at: nominal
+        max: 0.833731
+        max_at: nominal
+      clip_in:
+        nominal: -6.84261
+        min: -6.84261
+        min_at: nominal
+        max: -6.84261
+        max_at: nominal
+    asserts: []
+  chain[p_resp=0.5]:
+    corners: 1
+    measures:
+      out_hard:
+        nominal: 9.99199
+        min: 9.99199
+        min_at: nominal
+        max: 9.99199
+        max_at: nominal
+      ratio_hard:
+        nominal: 0.998997
+        min: 0.998997
+        min_at: nominal
+        max: 0.998997
+        max_at: nominal
+      clip_in:
+        nominal: -5.53976
+        min: -5.53976
+        min_at: nominal
+        max: -5.53976
+        max_at: nominal
+    asserts: []
+  chain[p_resp=0.75]:
+    corners: 1
+    measures:
+      out_hard:
+        nominal: 10.9648
+        min: 10.9648
+        min_at: nominal
+        max: 10.9648
+        max_at: nominal
+      ratio_hard:
+        nominal: 1.09625
+        min: 1.09625
+        min_at: nominal
+        max: 1.09625
+        max_at: nominal
+      clip_in:
+        nominal: -5.01782
+        min: -5.01782
+        min_at: nominal
+        max: -5.01782
+        max_at: nominal
+    asserts: []
+  chain[p_resp=1.0]:
+    corners: 1
+    measures:
+      out_hard:
+        nominal: 11.9696
+        min: 11.9696
+        min_at: nominal
+        max: 11.9696
+        max_at: nominal
+      ratio_hard:
+        nominal: 1.64086
+        min: 1.64086
+        min_at: nominal
+        max: 1.64086
+        max_at: nominal
+      clip_in:
+        nominal: -3.50803
+        min: -3.50803
+        min_at: nominal
+        max: -3.50803
+        max_at: nominal
+    asserts: []

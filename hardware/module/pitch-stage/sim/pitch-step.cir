@@ -1,35 +1,34 @@
-* The pitch stage, as netlisted, stepped: U-PITCH-AMP non-inverting (RN-PITCH R1, R2 + TRIM-GAIN
-* from the JACK, C-FB-PITCH from the op-amp output), R-OUT-PROT inside the DC loop,
-* C-FILT-PITCH at the jack; the reference follower U-PITCH-REFBUF at the bottom of R1;
-* the DAC channel through R-OPAMP-IN / C-AA-PITCH with R-BIAS-DAC at the pin. TI's
-* OPA2197 model for both halves. The jack drives a VCO input (r_vco) and, on a passive
-* mult, another output's jack: its C-FILT (c_mult) and, when r_mult is its R-OUT-PROT,
-* its driver held at 0 V. D-JACK-CLAMP is left out: reverse-biased inside +-12 V.
-* TRIM-OFFSET is at its CW end (V_ref = VREFOUT): its CCW end is the page's open item.
-* The DAC is an ideal source with a t_edge edge: its settling is slower than that, so
-* this is the harder step.
+* The pitch stage, as netlisted (pitch-stage.lib), stepped - twice in one run: XA as built,
+* with D-ESD-PITCH on its jack, and XB without it, on the same sources and the same load,
+* so the clamp's effect is one subtraction (d_overshoot) rather than two runs compared.
+* D-ESD-PITCH is its datasheet capacitance (c_esd) and its leakage at the 15 V standoff as
+* a resistance (r_esd): inside +-15 V it does not conduct, and the jack never leaves +-12 V.
+* The DAC is an ideal source with a t_edge edge: its settling is slower than that, so this
+* is the harder step. The jack drives a VCO input (r_vco), the patch cable's capacitance
+* (c_cable) and, on a passive mult, another output's jack: its C-FILT (c_mult) and, when
+* r_mult is its R-OUT-PROT, its driver held at 0 V.
 VPOS pos 0 {{v_pos}}
 VNEG neg 0 {{v_neg}}
 VREFO vrefout 0 {{v_refout}}
-XRB vrefout vrefb pos neg vrefb OPAx197
-R1 vrefb minus {{RN-PITCH}}
-R2 minus gtm {{RN-PITCH}}
-RTG gtm jack {{r_trim_gain}}
-VDAC dac 0 PWL(0 {{v_dac0}} {{t_step}} {{v_dac0}} {{t_step_e}} {{v_dac1}})
-RBD dac 0 {{R-BIAS-DAC}}
-RIN dac plus {{R-OPAMP-IN}}
-CAA plus 0 {{C-AA-PITCH}}
-XAMP plus minus pos neg ampout OPAx197
-CFB ampout minus {{C-FB-PITCH}}
-ROUT ampout jack {{R-OUT-PROT}}
-CFILT jack 0 {{C-FILT-PITCH}}
-CMULT jack 0 {{c_mult}}
-RVCO jack 0 {{r_vco}}
-RMULT jack 0 {{r_mult}}
+VDAC dacpin 0 PWL(0 {{v_dac0}} {{t_step}} {{v_dac0}} {{t_step_e}} {{v_dac1}})
+RBD dacpin 0 {{R-BIAS-DAC}}
+XA vrefout dacpin jack pos neg vrefba ma ma PSTAGE
+CESD jack 0 {{c_esd}}
+RESD jack 0 {{r_esd}}
+CCABA jack 0 {{c_cable_f}}
+CMULTA jack 0 {{c_mult}}
+RVCOA jack 0 {{r_vco}}
+RMULTA jack 0 {{r_mult}}
+XB vrefout dacpin jackb pos neg vrefbb mb mb PSTAGE
+CCABB jackb 0 {{c_cable_f}}
+CMULTB jackb 0 {{c_mult}}
+RVCOB jackb 0 {{r_vco}}
+RMULTB jackb 0 {{r_mult}}
 .options method=gear rshunt=1e10
 .control
 tran 100n {{t_end}} 0 100n
 wrdata jack.dat v(jack)
+wrdata jackb.dat v(jackb)
 quit
 .endc
 .end

@@ -66,7 +66,7 @@ sims:
       - expr: "min['span_out'] > 19.70 and max['span_out'] < 20.31"
         why: "the span at the op-amp output is inside the page's 19.703-20.303 V worst case"
       - expr: "max['jack_hi'] < max['out_hi'] - 0.09"
-        why: "RECORDED, not a requirement: R-OUT-PROT is outside the loop, so a 100 kohm input on the jack reads 1 % low (1k/101k) - a load-dependent span error the page's tolerance table does not carry"
+        why: "RECORDED, not a requirement: R-OUT-PROT is outside the loop, so a 100 kohm input on the jack reads 1 % low (1k/101k) - a load-dependent span error, the page's mod-jack-range"
   - name: clr-ref-stale
     # the review's failure: every signal channel refreshed after a CLR, channel 7 not
     deck: mod.cir

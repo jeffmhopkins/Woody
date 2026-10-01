@@ -960,6 +960,73 @@ def check_restated(files, spec):
                   key=lambda kv: (-len(kv[1]), kv[0]))
 
 
+SHEET_FIELDS = ("Value", "Manufacturer", "MPN", "LCSC", "Note")
+
+
+def sheet_field_values():
+    """(sheet, refdes, field, value) for every placed symbol's identity fields.
+
+    ADR 0019 puts each part's identity on its KiCad sheet - the bought part
+    (Manufacturer, MPN, LCSC) and its Note - and the exported netlist.yaml
+    carries none of the bought-part fields, so no other scan here reads them.
+    """
+    out = []
+    for dirpath, _, names in os.walk(os.path.join(ROOT, "hardware")):
+        for n in names:
+            if not n.endswith(".kicad_sch"):
+                continue
+            path = os.path.join(dirpath, n)
+            try:
+                txt = open(path, encoding="utf-8").read()
+            except Exception:
+                continue
+            for m in re.finditer(r'\n  \(symbol\s*\(lib_id "', txt):
+                i, depth = m.start() + 3, 0
+                while i < len(txt):
+                    c = txt[i]
+                    if c == '"':
+                        i += 1
+                        while i < len(txt) and txt[i] != '"':
+                            i += 2 if txt[i] == "\\" else 1
+                    elif c == "(":
+                        depth += 1
+                    elif c == ")":
+                        depth -= 1
+                        if depth == 0:
+                            break
+                    i += 1
+                block = txt[m.start():i + 1]
+                props = dict(re.findall(r'\(property "([^"]+)" "((?:[^"\\]|\\.)*)"', block))
+                ref = props.get("Reference", "?")
+                if ref.startswith("#"):
+                    continue
+                for f in SHEET_FIELDS:
+                    if props.get(f):
+                        out.append((os.path.relpath(path, ROOT), ref, f,
+                                    props[f].replace('\\"', '"')))
+    return out
+
+
+def check_sheet_fields(spec):
+    """Forbidden values in the identity fields the KiCad sheets own.
+
+    Pre-layout review A8-14: a sheet MPN regressing to REF5050AIDR - the
+    worse grade ref5050-grade exists to keep out - would have passed every
+    check here, because this tool read only .md/.csv/.yaml and the export
+    drops MPN, Manufacturer and LCSC. A sheet field is data, so CLAUDE.md 2b
+    applies: no refutation wording excuses a forbidden value in one.
+    """
+    problems = []
+    fields = sheet_field_values()
+    for fig in spec["figures"]:
+        for bad in fig.get("forbidden") or []:
+            for sheet, ref, f, val in fields:
+                if bad in val:
+                    problems.append(f"[{fig['id']}] {sheet} {ref} field {f} "
+                                    f"carries forbidden {bad!r}")
+    return problems
+
+
 def check_owners(spec):
     """Rule 1: the owning document STATES the figure. Assert it actually does.
 
@@ -1190,8 +1257,14 @@ def check_cad():
         return [f"could not run tools/cad.py check: {e}"]
     if r.returncode == 0:
         return []
-    msgs = [l.rstrip() for l in (r.stdout + "\n" + r.stderr).splitlines()
-            if l.strip() and not l.strip().startswith("PASS")]
+    # cad.py check prints one indented line per problem, then a one-line
+    # "FAIL <n> CAD output problem(s) of <m> outputs" summary. The summary is
+    # not a problem: counting it reported "2 cad" for one stale photo
+    # (pre-layout review A9-11). It is still kept when it is all there is.
+    lines = [l.rstrip() for l in (r.stdout + "\n" + r.stderr).splitlines()
+             if l.strip() and not l.strip().startswith("PASS")]
+    msgs = [l for l in lines if not re.match(r"FAIL \d+ CAD output problem", l.strip())]
+    msgs = msgs or lines
     return msgs or [f"tools/cad.py check exited {r.returncode} and said nothing "
                     f"parseable - it probably crashed. Run it directly"]
 
@@ -1263,6 +1336,7 @@ def main():
     pattern_problems, thin_patterns = check_patterns(spec)
     bomfig_problems = check_bom_figures(spec, bom_rows)
     restated = check_restated(files, spec)
+    sheet_problems = check_sheet_fields(spec)
     circuit_problems = (check_circuits(circuits, spec, bom_refs)
                         + check_verified_against(circuits))
     # LAST, because it now reports what actually ran rather than what the
@@ -1278,6 +1352,13 @@ def main():
         fail = True
         emit([f"GENERATED FILE EDITED BY HAND ({len(generated_problems)})"]
              + ["  " + p for p in generated_problems] + [""], detail_only=True)
+
+    if sheet_problems:
+        fail = True
+        emit([f"FORBIDDEN VALUES IN SHEET FIELDS ({len(sheet_problems)})",
+              "  A placed part's Value/Manufacturer/MPN/LCSC/Note on its KiCad sheet carries a "
+              "retired value. Fix it with `tools/kicad.py set-field`, then export.", ""]
+             + ["  " + p for p in sheet_problems] + [""], detail_only=True)
 
     if cad_problems:
         fail = True
@@ -1411,7 +1492,10 @@ def main():
         body = [f"UNRESOLVED, tracked deliberately ({len(unresolved)}) - not failures"]
         for f in unresolved:
             body.append(f"  [{f['status']:8s}] {f['id']}: {f['quantity']}")
-            body.append(f"             decided by: {f.get('decided_by','-')}")
+            # A blocked figure names its decider as `blocked_on`; reading only
+            # `decided_by` printed "decided by: -" for umbilical-current
+            # (pre-layout review A8-12).
+            body.append(f"             decided by: {f.get('decided_by') or f.get('blocked_on') or '-'}")
         body.append("")
         emit(body, detail_only=True)
 
@@ -1447,7 +1531,7 @@ def main():
               f"+ {len(bomfig_problems)} register-vs-bom "
               f"+ {len(datasheet_problems)} datasheets + {len(pattern_problems)} dead-patterns "
               f"+ {len(wiring_problems)} unwired "
-              f"+ {len(live)} stale + {len(bom_problems)} bom "
+              f"+ {len(live)} stale + {len(bom_problems)} bom + {len(sheet_problems)} sheet-fields "
               f"| corpus {cov} | {n_unres} unresolved (tracked) "
               f"| detail: .staleness/report.txt or --detail")
     else:

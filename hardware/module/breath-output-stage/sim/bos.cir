@@ -1,7 +1,7 @@
 * The breath gain and offset stage, as netlisted: BREATH_SHAPED into POT-GAIN (CW end),
 * its CCW end to R-GAIN-FLOOR, the wiper buffered by U-BREATH-OPA half A; the summer
 * (half B) takes R-BREATH-IN from the buffer, R-BREATH-OFF from POT-OFFSET's wiper
-* (DAC_AVDD at CW, AGND at CCW) and R-BREATH-OFFNEG from -12 V, with R-BREATH-FB from its
+* (AGND_MOD at CW, DAC_AVDD at CCW: clockwise is positive at the jack) and R-BREATH-OFFNEG from -12 V, with R-BREATH-FB from its
 * output; R-OUT-PROT to the jack, C-OUT-BREATH at the jack. TI's OPA2197 model.
 * A pot is two resistors about its wiper; p is the rotation from CCW (0) to CW (1).
 * D-JACK-CLAMP is left out: reverse-biased inside the rails. The input steps from v_in0
@@ -16,8 +16,8 @@ RGCCW gw gf {{r_gain_ccw}}
 RFLOOR gf 0 {{R-GAIN-FLOOR}}
 XA gw bufo pos neg bufo OPAx197
 RIN bufo sum {{R-BREATH-IN}}
-ROCW avdd ow {{r_off_cw}}
-ROCCW ow 0 {{r_off_ccw}}
+ROCW 0 ow {{r_off_cw}}
+ROCCW ow avdd {{r_off_ccw}}
 ROFF ow sum {{R-BREATH-OFF}}
 ROFFN neg sum {{R-BREATH-OFFNEG}}
 RFB sum out {{R-BREATH-FB}}

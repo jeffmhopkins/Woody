@@ -5,7 +5,7 @@
 # (part fields, sheet text) or on breath-response-shaper.md.
 
 circuit: module/breath-response-shaper
-title: Response control (PROPOSED)
+title: Response control
 page: breath-response-shaper.md
 ports:
   BREATH_INAMP_OUT:
@@ -42,7 +42,7 @@ components:
     note: V+ to the star, at the pin
   D-RESP-A:
     of: D-RESP
-    value: 1N4148
+    value: 1N4448W
     pins:
     - A
     - K
@@ -50,7 +50,7 @@ components:
       and fault excursions
   D-RESP-B:
     of: D-RESP
-    value: 1N4148
+    value: 1N4448W
     pins:
     - A
     - K

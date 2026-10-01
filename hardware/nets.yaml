@@ -543,7 +543,7 @@ nets:
 
   DAC_AVDD:
     kind: power
-    carries: "Local LM317 rail. Decouples DAC full scale from the rack's +/-5% +5 V"
+    carries: "Local LM317L rail for the DAC8568, its SPI buffer U-LVL-MOD and the breath stages' ratiometric pots. For headroom: the DAC's 5.000 V full scale is set by its reference and needs AVDD above it (ADR 0005)"
     figure: dac-rail
     driver: module/power-entry
     receivers:
@@ -579,7 +579,7 @@ nets:
   # saying to split them when a page needed them separately; the DAC netlist
   # is that page - each lands on its own pin and they cannot share a net.
   # interfaces/spi-link is a receiver on all three because the DAC-side three
-  # of the six R-SPI-PULL sit on them and are that circuit's rows.
+  # of the five R-SPI-PULL sit on them and are that circuit's rows.
 
   SCLK_DAC:
     kind: signal
@@ -703,5 +703,5 @@ retired:
       NOT FITTED. The comparator is deleted - its threshold sat inside the
       breath signal's own range, it locked out every standalone-module
       milestone, and it failed toward 'present'. OE is tied enabled. What it
-      was protecting against is what R-SPI-PULL's six resistors are for.
+      was protecting against is what the five R-SPI-PULL and R-PULL-CS are for.
     named_by: [module/link-supervision, module/digital-and-supervision, interfaces/spi-link]

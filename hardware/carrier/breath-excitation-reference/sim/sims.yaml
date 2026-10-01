@@ -12,7 +12,9 @@
 # So the block is lifted and the deck is built against the netlisted load.
 title: Breath excitation reference - the reference buffer's stability
 values:
-  netlist: hardware/carrier/breath-excitation-reference/netlist.yaml
+  netlist:
+    - hardware/carrier/breath-excitation-reference/netlist.yaml
+    - hardware/interfaces/breath-sense-link/netlist.yaml
 models:
   - datasheets/analog/OPAx197-ti-pspice-sboma34d.lib
   - datasheets/analog/REF5050-ti-pspice-slim175a.lib
@@ -27,6 +29,7 @@ params:
   v_pos_lo: {value: 11.0, source: "a 1 V droop of the instrument's +12 V [assumption, a test stimulus]"}
   t_ref_end: {value: 4.0e-3}
   c_vs:     {value: 100.0e-9, source: "the capacitance at VS: C-DEC-SENSOR as netlisted (each sim sets or sweeps it)"}
+  as_built: {value: 0, source: "1: the decks load VS with every capacitor netlisted there (c_load) instead of c_vs"}
   esr_cvs:  {value: 0.01, source: "an X7R MLCC's ESR near 1 MHz [from memory] (vary)"}
   esr_cref: {value: 0.01, source: "C-REF-OUT's ESR; the REF5050 needs <= 1.5 ohm (SBOS410O 8.4.1, cref-out-node) (vary)"}
   t_step:   {value: 20.0e-6}
@@ -52,6 +55,10 @@ derived:
   t_step_1u: "v['t_step'] + 1e-6"
   t_step_2: "v['t_step'] + 1e-3"
   t_step_2_1u: "v['t_step'] + 1e-3 + 1e-6"
+  # the capacitance the decks put at VS: c_vs, or with as_built = 1 everything netlisted there since
+  # NXP's Figure 3 was fitted (A1-5, 2026-10-01): C-DEC-SENSOR here, C-SENSOR-VS-BULK and
+  # C-SENSOR-VS-HF at the sensor (interfaces/breath-sense-link), about 1.11 uF
+  c_load: "(v['C-DEC-SENSOR'] + v['C-SENSOR-VS-BULK'] + v['C-SENSOR-VS-HF']) if v['as_built'] else v['c_vs']"
 
 sims:
   # --- as netlisted, across the page's load range: 47 nF to 10 uF, plus the "10 uF
@@ -67,8 +74,8 @@ sims:
     asserts:
       - expr: "min['pm'] - 10 > 76"
         why: "the page's robustness claim (breath-excitation-reference.md: above 76 degrees across a 200x range of C_L) holds at every corner and load, after the +-10 degree screen a macromodel earns"
-      - expr: "abs(max['vs_dc'] - 5.0) < 5e-3 and abs(min['vs_dc'] - 5.0) < 5e-3"
-        why: "VS sits within 5 mV of 5.000 V at every corner: the reference's own 0.1 % initial accuracy, with nothing added by R-ISO-REF (the drop across it is outside the DC loop)"
+      - expr: "abs(max['vs_dc'] - 5.0) < 2.5e-3 and abs(min['vs_dc'] - 5.0) < 2.5e-3"
+        why: "VS sits within 2.5 mV of 5.000 V at every corner - the bought High grade's 0.05 % initial accuracy (ref5050-grade) - with nothing added by R-ISO-REF (the drop across it is outside the DC loop)"
   - name: zout-as-netlisted
     deck: ref-zout.cir
     vary: [R-ISO-REF, R-FB-REF, C-FB-REF]
@@ -107,6 +114,39 @@ sims:
     asserts:
       - expr: "min['ring_pct'] > 50"
         why: "RECORDED FINDING, not a requirement: 10 uF at VS rings (R-ISO-REF with 10 uF against the DC loop, the Z_out peak of zout-as-netlisted[c_vs=10.1u]) although the crossover phase margin barely moves - so 'may be added later' needs this sim re-run with the added part, not the phase margin alone. If this assert starts failing, the ringing has gone: re-read the page"
+  - name: step-as-built
+    # the buffer into everything netlisted at VS (as_built), at every corner
+    deck: ref-step.cir
+    vary: [R-ISO-REF, C-FB-REF]
+    set: {as_built: 1}
+    measures: [dip_mv, ring_pct, t_settle]
+    post:
+      dip_mv: "(at(w['vs'], p['t_step']) - trough(w['vs'], p['t_step'], p['t_end'])) * 1e3"
+      ring_pct: "rebound(w['vs'], p['t_step'], p['t_end'])"
+      t_settle: "settling(w['vs'], p['t_step'], p['t_end'], 50e-6)"
+    asserts:
+      - expr: "min['ring_pct'] > 30"
+        why: "RECORDED FINDING, not a requirement (A1-5, 2026-10-01): with Figure 3's 1 uF at VS a load step rings back by ~45 %, where 100 nF alone did not, though the phase margin rises. The sensor's draw is steady, so it is the step that is artificial - but if this assert starts failing the VS load has changed: re-read the page"
+  - name: zout-as-built
+    deck: ref-zout.cir
+    vary: [R-ISO-REF, R-FB-REF, C-FB-REF]
+    set: {as_built: 1}
+    measures: [z_500, z_peak, f_peak]
+    post:
+      z_500: "at(w['zvs'], 500)"
+      z_peak: "peak(w['zvs'], 10, 10e6)"
+      f_peak: "argpeak(w['zvs'], 10, 10e6)"
+  - name: loop-as-built
+    deck: ref-loop.cir
+    vary: [R-ISO-REF, R-FB-REF, C-FB-REF, i_sensor, esr_cvs]
+    set: {as_built: 1}
+    measures: [pm, fc]
+    post:
+      pm: "phase_margin(w['tdb'], w['tph'])"
+      fc: "crossover(w['tdb'])"
+    asserts:
+      - expr: "min['pm'] - 10 > 76"
+        why: "the page's robustness claim holds at the load as built, Figure 3's capacitors included"
   - name: reference-alone
     # TI's REF5050 macromodel on its netlisted parts: its operating point, and a 1 V
     # droop of the +12 V rail and back
@@ -116,8 +156,8 @@ sims:
     post:
       vref_dev: "max(peak(w['ref'], 0, p['t_ref_end']) - trough(w['ref'], 0, p['t_ref_end']), 0)"
     asserts:
-      - expr: "abs(nom['vref_op'] - 5.0) < 5e-3"
-        why: "the model's operating point is the running reference, within its 0.1 % initial accuracy of 5.000 V (A grade, SBOS410O Table 4-2) - the loop decks' 5.000 V source stands for this"
+      - expr: "abs(nom['vref_op'] - 5.0) < 2.5e-3"
+        why: "the model's operating point is the running reference, within the bought High grade's 0.05 % initial accuracy of 5.000 V (ref5050-grade: REF5050IDR, SBOS410O Table 4-2) - TI's model is not grade-specific and sits at 5.0025 V, on that edge; the loop decks' 5.000 V source stands for this"
       - expr: "nom['vref_dev'] < 1e-3"
         why: "a 1 V droop of the rail moves VOUT by under 1 mV (C-REF-OUT on VIN and VOUT, and the part's line regulation)"
   # --- what-ifs on the same deck, to reproduce the page's two hazard claims

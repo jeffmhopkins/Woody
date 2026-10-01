@@ -10,7 +10,7 @@
 |---|---|---|---|---|
 | **Pitch** | DAC ch 1 | −2 to +7V, 1V/oct | none | Calibrated |
 | **Breath** | **analog, differential over the umbilical** | 0–10V, **offsettable ±5 V** | GAIN 0.5–4×, OFFSET ±5 V | Trimmed |
-| **Mod 1–4** | DAC ch 2–5 | **−10…+10V** | none — configured on the instrument | Trimmed |
+| **Mod 1–4** | DAC ch 2–5 | **−10…+10 V at the op-amp output**; at a loaded jack, `mod-jack-range` | none — configured on the instrument | Firmware-scaled, no trimmer |
 | *(internal)* | DAC ch 6 | — | — | **Spare** — was the breath ambient-zero |
 | *(internal)* | DAC ch 7 | — | — | Shared **3.3333 V** offset for mod 1–4 |
 
@@ -21,6 +21,33 @@ One further DAC channel drives an offset rather than a jack: the shared
 reference point the mod channels subtract from, **3.3333 V** now that they use
 the two-resistor form (`mod-channels.md`). **Six of eight channels used,
 two spare.**
+
+> **Amended 2026-10-01 (pre-layout review, A2-1, A2-3–A2-5, A2-14, A2-17,
+> A2-18).** Corrections in place below, each where its sentence is:
+>
+> - **Mod range.** ±10 V is the op-amp output. `R-OUT-PROT` is outside the mod
+>   loop, so a jack into one 100 kΩ input reads 0.99 of it — `mod-jack-range`,
+>   owned by `mod-channels.md`. Firmware cannot buy the difference back at the
+>   ends of the DAC's range; it scales freely inside it. Owner's decision:
+>   correct the documents, not the circuit.
+> - **"Trimmed"** on Mod 1–4 meant firmware scaling; they carry no trimmer
+>   (*Consequences elsewhere*, below).
+> - **The precision ranking** in *Calibration effort concentrates on one
+>   channel* is superseded by `pitch-cents-budget`: the DAC reference is the
+>   largest pitch drift term, not one tenth of the resistors'.
+> - **The trims** are described as built on 2026-09-30 (`pitch-stage.md`):
+>   `TRIM-GAIN` ±1 % about `R-GAIN-CTR`; `TRIM-OFFSET` across `VREFOUT`, ahead
+>   of the follower.
+> - **The pitch jack node carries `C-FILT-PITCH`**, and since 2026-10-01 a
+>   jack-side ESD clamp, `D-ESD-PITCH`, for the LT5400 (`pitch-stage.md`).
+> - **Power-on "0 V"** is to the DAC's zero-code error.
+> - **Labelling** follows ADR 0026: six word pills, no write-on strip.
+> - **The instrument's display** is gone (ADR 0015): configuration is over
+>   USB, and the sentences below that set ranges "on the display" now say
+>   "in the configuration".
+> - **Channel numbers** in prose below are *outputs*, not DAC channels:
+>   "every output but pitch" replaces "channels 2–6", which collided with the
+>   DAC's own numbering (ch 2–5 are Mod 1–4, ch 6 is spare).
 
 **Channel 6 was freed deliberately.** It drove a firmware ambient-zero into the
 breath in-amp's `REF` pin, and firmware reads breath *before* the umbilical
@@ -36,7 +63,8 @@ reason to design into a hard limit of four.
 
 Mod channels are generic rather than fixed-function — a gate can be assigned to
 one if wanted, without the design being *limited* to a gate. Per-channel source,
-scale, offset, curve and slew are set on the instrument's display.
+scale, offset, curve and slew are set in the instrument's configuration
+(over USB since ADR 0015, which removed the display).
 
 ## Why dedicating pitch and breath is better than full genericity
 
@@ -73,7 +101,7 @@ modulation, ever, with firmware unable to recover any of it. **The stage is
 bipolar instead, spanning −10 to +10 V.**
 
 The point is not to *output* ±10 V routinely — it is to be **able** to, with
-firmware selecting the actual range per channel from the instrument's display:
+firmware selecting the actual range per channel in the instrument's configuration:
 0–5 V, 0–8 V, 0–10 V, ±5 V, ±2.5 V. Most patches will use 0–8 V or ±5 V, which
 are the de-facto Eurorack conventions; the extra span is headroom, not a default.
 
@@ -191,7 +219,8 @@ code; see the `U-DAC` BOM row.)*
 > **And it carries a requirement the ADR did not know: the C grade is
 > specified only for AVDD = 5.0 V to 5.5 V**, where A/B are specified from
 > 2.7 V. The LM317 sits at 5.21 V nominal so this passes — but E7 selects the
-> divider *on the bench* across a 0.66 V worst-case spread, and a selection
+> divider *on the bench* across the static spread `dac-rail` derives, whose
+> low corner is under 5.00 V, and a selection
 > below 5.00 V puts the part out of spec. **5.00 V is a hard floor on that
 > bench step**, which nothing in the roadmap said. `bom.csv` carries it now.
 >
@@ -201,8 +230,8 @@ code; see the `U-DAC` BOM row.)*
 
 | Output | At rack power-on, before firmware writes | Why that is right |
 |---|---|---|
-| **Pitch** | **Exactly 0 V** — an ordinary, audible note | **Not subsonic. See below.** |
-| **Mod 1–4** | **Exactly 0 V** | Both terms of the difference are zero |
+| **Pitch** | **0 V** — an ordinary, audible note | **Not subsonic. See below.** To the DAC's zero-code error, 4 mV max per channel `[ds DAC8568CIPW.pdf p.3]` and positive on a single supply: +8 mV at most `[calc: 2 × 4 mV]` |
+| **Mod 1–4** | **0 V** | Both terms of the difference are zero — to the same error: −12 to +16 mV `[calc: 4·e − 3·e₇, each e 0–4 mV]` |
 | **Breath** | **Wherever the panel OFFSET knob was left, anywhere in ±5 V** | **Not a defined state — see below.** Breath never passes through the DAC, so no reset reaches it |
 
 > **The pitch row said "Bottom of its range, below −2 V — subsonic, a VCO
@@ -226,15 +255,23 @@ code; see the `U-DAC` BOM row.)*
 > 1 MΩ bias resistors hold the in-amp's *inputs* at module `AGND`, so with the
 > instrument absent the in-amp rests at `V_REF` = `breath-zero-ref` — the trimmed null
 > for a sensor pedestal that is not there — and the gain-and-offset stage then
-> puts the jack at the **OFFSET knob's position less 0.2 to 1.7 V**, depending
-> on where GAIN is set (`breath-receive-stage.md`,
+> puts the jack at the **OFFSET knob's position less 0.29 to 2.3 V**, depending
+> on where GAIN is set — `breath-zero-ref` through the stage's 0.503× to 4.02×
+> `[calc: 0.573 × 0.503, 0.573 × 4.02]`, and up to 3.3 V with `REF` trimmed to
+> the top of the pedestal band (`breath-receive-stage.md`,
 > `breath-output-stage.md`).
+>
+> *Amended 2026-10-01 (pre-layout review, A1-10): the range was computed from
+> the retired `REF` and did not follow `breath-zero-ref` when it moved; the
+> standing level below is recomputed with it.*
 >
 > **Five of six outputs have a defined power-on state; breath does not, and
 > that is accepted.** The alternative is a defeat switch or a relay on the jack,
 > which is a part and a failure mode for a condition — rack powered, instrument
 > absent — in which nothing is being played. What it costs is that a patch left
-> connected can wake with up to 5 V of standing breath CV. E10 is where that
+> connected can wake with up to about 7 V of standing breath CV — OFFSET fully
+> counter-clockwise at −4.91 V less 2.3 V at full GAIN `[calc]`, about 8 V with
+> `REF` at the band's top. E10 is where that
 > gets observed rather than discovered (`ROADMAP.md`).
 
 **Specify the full orderable part number in the BOM**, not "DAC8568". The grade
@@ -329,8 +366,8 @@ different sensor. A held pianissimo has breath noise in it; an instrument on a
 stand does not.
 
 **And log the accumulated correction.** The zero is allowed to move; it is not
-allowed to move silently. A running total, visible on the display and in the
-web app, turns all three concealed failures into a number that walks — which is
+allowed to move silently. A running total, reported in the instrument's
+configuration (over USB; there is no display or web app since ADR 0015), turns all three concealed failures into a number that walks — which is
 the diagnostic the design otherwise does not have.
 
 It is also now an *honest* diagnostic, which it was not before. While the same
@@ -346,7 +383,7 @@ requirements are withdrawn** — nothing left on the DAC needs that rate
 
 ## Breath knobs are analog, in the signal path
 
-With breath locked to channel 2 there is no genericity conflict, so the knobs
+With breath on a dedicated output of its own there is no genericity conflict, so the knobs
 sit directly in the analog path: zero latency, tactile, no firmware involvement,
 and **no return path needed over the umbilical**.
 
@@ -363,8 +400,8 @@ Firmware still shapes the response curve upstream of the DAC. The knobs fit the
 calibration table in NVS, and a two-point fit verified against a real VCO — not
 just a meter, because a meter will not catch a scaling error that sounds wrong.
 
-Channels 2–6 need only to be linear and repeatable. Nobody's ear cares whether a
-modulation CV is 2% off.
+Every output but pitch needs only to be linear and repeatable. Nobody's ear
+cares whether a modulation CV is 2% off.
 
 So the precision parts concentrate on channel 1. But **where** that budget goes
 is worth checking rather than assuming, and the arithmetic is not what it looks
@@ -378,7 +415,16 @@ Over a 10 °C swing on a 9 V span, against one semitone at 83.3 mV:
 | **Discrete resistors, 25 ppm/°C each, drifting oppositely** | **4.50 mV** | **5.40** |
 | Matched network, 1 ppm/°C tracking | 0.09 mV | 0.11 |
 
-**Resistor tracking dominates reference drift by roughly ten to one.** The gain
+> **Superseded 2026-10-01 by `pitch-cents-budget`** (`pitch-stage.md`, *What
+> limits accuracy*). This table put every term on one 9 V lever. A reference
+> drift pivots at 0 V and a ratio drift at +2.5 V, so they take different
+> levers, and with each on its own the DAC reference is the **largest** term in
+> the pitch path and the matched network one of the smallest. The ranking that
+> follows and the "buys nothing measurable" below rest on this table and are
+> refuted; buying the matched network still stands, on the page's reasons.
+
+**Two discrete resistors would be the largest term, and the matched network
+removes it.** The gain
 of a scaling stage is a resistor *ratio*, so what matters is not each resistor's
 absolute tempco but how well the two track each other — and two discrete parts
 do not track at all.
@@ -393,14 +439,17 @@ Consequences:
   with the reference at the bottom of the feedback divider, not the difference
   amp everyone had been assuming. Two matched resistors, not four, and the
   easiest ratio there is to match.
-- **The DAC's internal reference is sufficient.** At 0.54 cents over 10 °C it is
-  an order of magnitude inside the resistors, so a separate precision reference
-  buys nothing measurable. One fewer part.
+- **The DAC's internal reference is kept.** It is the largest drift term in
+  `pitch-cents-budget` and the only untrimmable one, and the budget is still
+  inside what the VCO does on its own. An external reference is the way to
+  attack it if that ever matters, and the matched network is what would make
+  doing so worthwhile (`pitch-stage.md`).
 - Still use a low-drift op-amp (OPA2197-class, not TL072) — offset drift on
   pitch is drift in tuning.
 
-Channels 2–6 run on ordinary 1% discretes; nobody's ear cares whether a
-modulation CV moves a few cents' equivalent with temperature.
+The mod channels run on ordinary discretes, specified at 1 %
+(`mod-channels.md`); nobody's ear cares whether a modulation CV moves a few
+cents' equivalent with temperature.
 
 This is materially less expensive and less work than treating all six as
 precision outputs.
@@ -445,12 +494,14 @@ when the pitch stage turned out to be an exact 1:1. **The trimmers stay**, and t
 than by deleting them. This ADR's own sentence — "any external resistor added
 to reach it puts its absolute tempco inside the ratio, exactly the failure the
 matched network was bought to prevent" — was a fair charge against a 1 kΩ
-trimmer contributing 5 % of the ratio. At **200 Ω** it contributes 2 %, which
-is ~2 ppm/°C against the LT5400's own drift, and it is no longer the largest
-term in the budget.
+trimmer contributing 5 % of the ratio. At **200 Ω**, centred by `R-GAIN-CTR`'s
+100 Ω in the other leg, it is **±1 %, bipolar**, and ~1 ppm/°C of ratio at
+mid-travel against the LT5400's own drift (`pitch-stage.md`), so it is no
+longer the largest term in the budget.
 
-Two percent is enough because jack-side feedback removed the load divider,
-which was what the ±5 % range existed to absorb.
+±1 % is enough because jack-side feedback removed the load divider, which was
+what the ±5 % range existed to absorb, and what is left to trim is the DAC's
+own gain error, ±0.15 % of FSR max `[ds DAC8568CIPW.pdf p.3]`.
 
 The offset trimmer also moved **ahead of the reference buffer**, where it scales
 `V_ref` and therefore the intercept alone. In its first position it injected
@@ -476,16 +527,18 @@ on its own** — a well-compensated analog VCO drifts around 0.35 cents/K, so
 the system, and the precision-network argument was over-engineering relative to
 the load it feeds.
 
-**Keep the trim range small — 5 to 10 % — around a fixed precision resistor.**
-The LT5400 can still set the nominal ratio exactly, with the trimmer providing
-only the adjustment; that keeps most of the matched-network benefit and adds
-trimmability.
+**Keep the trim range small around a fixed precision resistor.** The LT5400
+sets the nominal ratio exactly, with the trimmer providing only the adjustment;
+that keeps most of the matched-network benefit and adds trimmability. As
+built it is ±1 %, smaller than the 5–10 % this paragraph first asked for and
+than any row of the table above.
 
 ### The division of labour
 
 - **Trimmers set gain and offset.** Two per pitch channel, multiturn cermet.
-  **The offset trimmer divides down the DAC's buffered `VREFOUT`, not a supply
-  rail** — see below. This ADR named the trimmer "the offset authority for
+  **The offset trimmer works from the DAC's `VREFOUT`, not a supply rail** —
+  see below. As built it sits across `VREFOUT`, *ahead* of the follower, and
+  injects through `R-VREF-INJ` (`pitch-stage.md`, *The offset trim*). This ADR named the trimmer "the offset authority for
   pitch" and never said what it divides, and three reviewers independently
   found that the only source in the committed topology was a bare divider off
   ±12 V.
@@ -622,15 +675,18 @@ the spare OPA2197 half. Three things follow, and the third is the good one:
 - `VREFOUT` is a 2.5 V reference inside the part, off the LM317's own 5.21 V —
   it does not carry LED current and it does not move when a neighbouring module
   powers up.
-- Buffering it matters, and not only for drive. Hanging a *trimmer* directly on
-  `VREFOUT` would make the reference move as the trimmer is turned, coupling
-  the offset adjustment into the DAC's full-scale span. A follower breaks that.
+- Buffering it matters for drive: the follower is what lets the trim network
+  drive the bottom of the feedback divider. The trimmer itself does hang on
+  `VREFOUT`, ahead of the follower, and moving it moves the reference by a
+  negligible amount: its wiper-dependent load is about 0.1 mA at most
+  `[calc: 2.5 V / 23.1 kΩ]` against 30 µV/mA of load regulation
+  `[ds DAC8568CIPW.pdf p.4]`, about 3 µV, 1.3 ppm.
 - **The offset now tracks the DAC's own scale**, because the DAC's full scale
   *is* `2 × VREFOUT`. A drift in the reference moves gain and offset together,
   where the trimmer cancels both at once instead of fighting them separately.
 
-Cost: two resistors and the last spare op-amp half in `U-OPA-PITCH`. Free at
-layout, impossible after fab.
+Cost: four resistors and one op-amp half, `U-PITCH` half A. Free at layout,
+impossible after fab.
 
 ### And stop modulating the rail in the first place
 
@@ -659,7 +715,9 @@ Two more mechanisms land on the same jack, and they add to the one above:
 > banked 1N5817 curve as a different number, and none of the four terms here
 > followed. Four documents held four different values for one quantity.)*
 >
-> **`D-REVPOL` still goes to three, on the reasons that hold**: fault isolation
+> **`D-REVPOL` still goes to separate diodes, on the reasons that hold** — four
+> since ADR 0027, `D1`–`D4`: the module's analog ±12 V and the two legs of
+> `U-ISO`'s input (`power-entry.md`): fault isolation
 > between the exported umbilical rail and the module's own analog rail, so a
 > short in the instrument cannot pull the analog supply down with it, and HF
 > isolation between the two branches (`power-entry.md`). The part was never in
@@ -670,8 +728,10 @@ and they are the only *dynamic* ones. Two fixes, both free:
 
 - **Separate the Schottkys.** The shared diode is visible by inspection of
   ADR 0004's own power-tree diagram and needs no ground path to do its damage —
-  the branch point is *downstream* of the diode. `D-REVPOL` goes to three: one
-  for the module's analog +12 V, one for the umbilical feed, one for −12 V.
+  the branch point is *downstream* of the diode. `D-REVPOL` went to three for
+  this — the module's analog +12 V, the umbilical feed, −12 V — and is four
+  since ADR 0027 isolated the umbilical feed: `D1`/`D3` for the module's
+  analog ±12 V, `D2`/`D4` for the two legs of `U-ISO`'s input.
 - **Drive the lighting as a moving dot or bar on a constant-total-current
   field**, rather than by modulating brightness (ADR 0014). One firmware line.
   It removes the drive term from the two mechanisms above rather than treating
@@ -742,8 +802,9 @@ Consequences, all good:
 
 - **The load-divider error is gone**, for any load. The −11.9 and −23.5
   cents/octave figures below become historical.
-- **`TRIM-GAIN` shrinks to 200 Ω** (0 → +2 %), which drops its tempco
-  contribution to ~2 ppm/°C — *comparable to* the LT5400 instead of 4–20× it.
+- **`TRIM-GAIN` shrinks to 200 Ω** (±1 %, bipolar about `R-GAIN-CTR`), which
+  drops its tempco contribution to ~1 ppm/°C of ratio at mid-travel —
+  *comparable to* the LT5400 instead of 4–20× it.
   That answers this ADR's own objection to its own trimmer.
 - **The per-load affine preset stops being load-bearing.** It stays as a
   firmware convenience; it is no longer the only thing standing between the
@@ -764,8 +825,10 @@ the easy half:
   goes on the **jack side**, so the resistor isolates the op-amp from it; on
   the op-amp side it is a capacitive load inside the loop. **Pitch is now the
   exception** — its feedback is tapped at the jack, so that node is the
-  feedback node and carries no capacitor at all. Its filter sits *ahead* of the
-  op-amp instead (`C-AA-PITCH`), on a node with no loop around it.
+  feedback node. It carries `C-FILT-PITCH` all the same, which the loop
+  tolerates because `C-FB-PITCH` closes it on the op-amp output above the
+  handover; its reconstruction filter sits *ahead* of the op-amp
+  (`C-AA-PITCH`), on a node with no loop around it.
 - **Dielectric: C0G or film, never X7R.** X7R's DC-bias coefficient moves the
   corner by ~30 % at 10 V, and X7R is piezoelectric — in a pitch reconstruction
   filter that is a literal microphonic detuning element. Same price, same
@@ -778,8 +841,8 @@ the easy half:
 | Breath | 1 kΩ | 330 nF film | ~480 Hz |
 
 Breath is the odd one because it never passes through the DAC: it has no
-zero-order-hold image to attenuate, and it is already a 482 Hz channel by the
-time it reaches the module (`hardware/module/breath-receive-stage/breath-receive-stage.md`). This
+zero-order-hold image to attenuate, and it is already a ~460 Hz channel by the
+time it reaches the module (`hardware/interfaces/breath-sense-link/breath-sense-link.md`, *Component values*; 482 Hz until 2026-10-01, which left the common-mode capacitors out). This
 ADR's earlier "~2 kHz for breath" is superseded by that page.
 
 ## Firmware defaults and bring-up rules
@@ -794,7 +857,7 @@ hardware.
 **Default every mod and breath range to 0–8 V.** The mod channels *can* do
 ±10 V, but that is headroom, not a default — 0–8 V is the de-facto Eurorack
 convention and is what most patches want. **Bipolar is opt-in per channel**, set
-explicitly from the display, so nothing sends a negative voltage into a patch
+explicitly in the configuration, so nothing sends a negative voltage into a patch
 that was not asked to receive one.
 
 **Put the two pitch calibration anchor points inside the musically used range**,
@@ -828,8 +891,12 @@ does not degrade gracefully — it loses its impedance entirely and becomes a wi
 
 ## Labelling
 
-Channels 1 and 2 are silkscreened. Mod 1–4 are numbered with a write-on strip,
-with the instrument's display as the authority on what is actually routed where.
+Every jack's word — `breath`, `pitch`, `mod 1` … `mod 4` — is printed in a
+pill on the panel, in the order ADR 0024 point 13 fixes, with the
+instrument's configuration (over USB, ADR 0015) as the authority on what is
+actually routed where
+(ADR 0026 points 4 and 7). *(Amended 2026-10-01: this said pitch and breath
+silkscreened and the mods on a write-on strip, which ADR 0026 dropped.)*
 
 Optional later: an LED per jack tracking that channel's value, for instant
 visual confirmation of what is doing what. Costs a driver and six LEDs; not

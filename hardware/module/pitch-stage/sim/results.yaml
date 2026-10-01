@@ -4,49 +4,226 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/pitch-stage/sim/sims.yaml: 08875776ff6de91e
-  hardware/module/pitch-stage/netlist.yaml: 3d43eac2f5eabc29
+  hardware/module/pitch-stage/sim/sims.yaml: c1f4929d96c9b3af
+  hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
   hardware/module/mod-channels/netlist.yaml: 8f44cca2ddd7a7e3
   hardware/module/breath-output-stage/netlist.yaml: f7243ba0d87adaa2
-  hardware/module/pitch-stage/sim/pitch-step.cir: 701f5d46a0ceeea6
-  hardware/module/pitch-stage/sim/pitch-loop.cir: 30fa956a4b129717
+  hardware/module/pitch-stage/sim/pitch-dc.cir: 039c84f738bdb7d1
+  hardware/module/pitch-stage/sim/pitch-step.cir: 950f8c3e07d1df85
+  hardware/module/pitch-stage/sim/pitch-loop.cir: 16bdbdd86caa1f2a
+  hardware/module/pitch-stage/sim/pitch-stage.lib: 1ec92350c5c2c2cc
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
 ngspice: '42'
 sims:
-  step-vco:
-    corners: 9
+  dc-transfer:
+    corners: 1
+    measures:
+      gain:
+        nominal: 2.0
+        min: 2.0
+        min_at: nominal
+        max: 2.0
+        max_at: nominal
+      intercept:
+        nominal: -2.50017
+        min: -2.50017
+        min_at: nominal
+        max: -2.50017
+        max_at: nominal
+      vref:
+        nominal: 2.50022
+        min: 2.50022
+        min_at: nominal
+        max: 2.50022
+        max_at: nominal
+      d_esd_uv:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 0.0
+        max_at: nominal
+    asserts:
+    - expr: abs(nom['gain'] - 2) < 1e-4
+      why: at mid-travel TRIM-GAIN's 100 ohm matches R-GAIN-CTR and the stage's gain is 2.000 (pitch-stage.md, Component values)
+      pass: true
+    - expr: abs(nom['intercept'] + 2.5) < 1e-3
+      why: with TRIM-OFFSET at mid-travel the intercept is -2.500 V within 1 mV, 1.2 cents - the page's Vout = 2 Vdac - 2.500,
+        before any trimming
+      pass: true
+    - expr: max['d_esd_uv'] < 1
+      why: 'D-ESD-PITCH moves the jack by under 1 uV (0.0012 cents) anywhere in the window: its leakage is a load inside the
+        DC loop, which is tapped at the jack (pitch-stage.md, The jack-side ESD clamp)'
+      pass: true
+  trim-gain-ccw:
+    corners: 1
+    measures:
+      gain:
+        nominal: 1.9901
+        min: 1.9901
+        min_at: nominal
+        max: 1.9901
+        max_at: nominal
+    asserts:
+    - expr: abs(nom['gain'] - (1 + p['RN-PITCH'] / (p['RN-PITCH'] + p['R-GAIN-CTR']))) < 1e-4
+      why: TRIM-GAIN at 0 ohm gives 1 + R2/(R1 + R-GAIN-CTR) - one end of its +-1 % (pitch-stage.md, Component values)
+      pass: true
+  trim-gain-cw:
+    corners: 1
+    measures:
+      gain:
+        nominal: 2.0099
+        min: 2.0099
+        min_at: nominal
+        max: 2.0099
+        max_at: nominal
+    asserts:
+    - expr: abs(nom['gain'] - (1 + (p['RN-PITCH'] + p['TRIM-GAIN']) / (p['RN-PITCH'] + p['R-GAIN-CTR']))) < 1e-4
+      why: TRIM-GAIN at its full 200 ohm gives 1 + (R2 + 200)/(R1 + R-GAIN-CTR) - the other end
+      pass: true
+  trim-offset-ccw:
+    corners: 1
+    measures:
+      vref:
+        nominal: 2.43963
+        min: 2.43963
+        min_at: nominal
+        max: 2.43963
+        max_at: nominal
+      intercept:
+        nominal: -2.43958
+        min: -2.43958
+        min_at: nominal
+        max: -2.43958
+        max_at: nominal
+    asserts:
+    - expr: abs(nom['vref'] - p['v_refout'] * (1 - p['R-VREF-SER'] / (p['R-VREF-SER'] + p['R-VREF-INJ'])) * (1 + p['R-VREF-FB']
+        / p['R-VREF-GND'])) < 2e-4
+      why: the page's V_ref = VREFOUT [1 - a(1 - w)](1 + g) at w = 0 (pitch-stage.md, The offset trim)
+      pass: true
+  trim-offset-cw:
+    corners: 1
+    measures:
+      vref:
+        nominal: 2.55002
+        min: 2.55002
+        min_at: nominal
+        max: 2.55002
+        max_at: nominal
+      intercept:
+        nominal: -2.54997
+        min: -2.54997
+        min_at: nominal
+        max: -2.54997
+        max_at: nominal
+    asserts:
+    - expr: abs(nom['vref'] - p['v_refout'] * (1 + p['R-VREF-FB'] / p['R-VREF-GND'])) < 2e-4
+      why: the page's V_ref at w = 1, VREFOUT (1 + g)
+      pass: true
+  step-vco[c_cable=0]:
+    corners: 17
     measures:
       overshoot_pct:
-        nominal: 1.47167
-        min: 0.713296
-        min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT-
-        max: 2.42609
-        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+
+        nominal: 1.43061
+        min: 0.681797
+        min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT- c_esd-
+        max: 2.39468
+        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+ c_esd+
       t_settle:
-        nominal: 0.000126718
-        min: 0.000121018
-        min_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT-
-        max: 0.000132419
-        max_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+
+        nominal: 0.000127652
+        min: 0.000121852
+        min_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT- c_esd-
+        max: 0.000133352
+        max_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+ c_esd-
+      d_overshoot:
+        nominal: 0.013925
+        min: 0.010503
+        min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT- c_esd-
+        max: 0.032795
+        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+ c_esd+
     asserts:
     - expr: max['overshoot_pct'] < 5
-      why: into a VCO alone an octave step does not ring (under 5 %) at any corner
+      why: into a VCO and the cable an octave step does not ring (under 5 %) at any corner
       pass: true
-  step-mult[mult=1]:
-    corners: 9
+    - expr: max['d_overshoot'] < 0.1 and min['d_overshoot'] > -0.1
+      why: D-ESD-PITCH changes the step's overshoot by under 0.1 point at every corner and cable
+      pass: true
+  step-vco[c_cable=200pF]:
+    corners: 17
     measures:
       overshoot_pct:
-        nominal: 41.7722
-        min: 40.6628
-        min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT-
-        max: 42.9094
-        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+
+        nominal: 1.60835
+        min: 0.81858
+        min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT- c_esd-
+        max: 2.60191
+        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+ c_esd+
       t_settle:
-        nominal: 0.00118242
-        min: 0.00109952
-        min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT-
-        max: 0.00118292
-        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+
+        nominal: 0.000127852
+        min: 0.000122152
+        min_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT- c_esd-
+        max: 0.000133552
+        max_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+ c_esd-
+      d_overshoot:
+        nominal: 0.014364
+        min: 0.011224
+        min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT- c_esd-
+        max: 0.033296
+        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+ c_esd+
+    asserts:
+    - expr: max['overshoot_pct'] < 5
+      why: into a VCO and the cable an octave step does not ring (under 5 %) at any corner
+      pass: true
+    - expr: max['d_overshoot'] < 0.1 and min['d_overshoot'] > -0.1
+      why: D-ESD-PITCH changes the step's overshoot by under 0.1 point at every corner and cable
+      pass: true
+  step-vco[c_cable=800pF]:
+    corners: 17
+    measures:
+      overshoot_pct:
+        nominal: 2.16999
+        min: 1.27627
+        min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT- c_esd-
+        max: 3.2385
+        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+ c_esd+
+      t_settle:
+        nominal: 0.000128252
+        min: 0.000122652
+        min_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT- c_esd-
+        max: 0.000150452
+        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+ c_esd+
+      d_overshoot:
+        nominal: 0.015373
+        min: 0.012943
+        min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT- c_esd-
+        max: 0.034328
+        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+ c_esd+
+    asserts:
+    - expr: max['overshoot_pct'] < 5
+      why: into a VCO and the cable an octave step does not ring (under 5 %) at any corner
+      pass: true
+    - expr: max['d_overshoot'] < 0.1 and min['d_overshoot'] > -0.1
+      why: D-ESD-PITCH changes the step's overshoot by under 0.1 point at every corner and cable
+      pass: true
+  step-mult[mult=1]:
+    corners: 17
+    measures:
+      overshoot_pct:
+        nominal: 41.6368
+        min: 40.5252
+        min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT- c_esd-
+        max: 42.7797
+        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+ c_esd+
+      t_settle:
+        nominal: 0.00109045
+        min: 0.00109045
+        min_at: nominal
+        max: 0.00118745
+        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+ c_esd+
+      d_overshoot:
+        nominal: 0.003262
+        min: 0.003208
+        min_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+ c_esd-
+        max: 0.006711
+        max_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT- c_esd+
     asserts:
     - expr: min['overshoot_pct'] > 25
       why: 'RECORDED HAZARD, not a requirement (pitch-stage.md, ''It does not oscillate; it rings''): a passive mult to another
@@ -54,20 +231,26 @@ sims:
         the page'
       pass: true
   step-mult[mult=2]:
-    corners: 9
+    corners: 17
     measures:
       overshoot_pct:
-        nominal: 64.1083
-        min: 63.3
-        min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT-
-        max: 64.9334
-        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+
+        nominal: 63.9987
+        min: 63.1879
+        min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT- c_esd-
+        max: 64.827
+        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+ c_esd+
       t_settle:
-        nominal: 0.00419202
-        min: 0.00419202
+        nominal: 0.00421075
+        min: 0.00421075
         min_at: nominal
-        max: 0.00435072
-        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+
+        max: 0.00436815
+        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+ c_esd+
+      d_overshoot:
+        nominal: 0.000590131
+        min: 0.000584366
+        min_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+ c_esd-
+        max: 0.00129531
+        max_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT- c_esd+
     asserts:
     - expr: min['overshoot_pct'] > 25
       why: 'RECORDED HAZARD, not a requirement (pitch-stage.md, ''It does not oscillate; it rings''): a passive mult to another
@@ -75,94 +258,177 @@ sims:
         the page'
       pass: true
   step-real-mult[mult=1]:
-    corners: 9
+    corners: 17
     measures:
       overshoot_pct:
-        nominal: 15.2866
-        min: 14.2694
-        min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT+
-        max: 16.3568
-        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT-
+        nominal: 15.123
+        min: 14.1072
+        min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT+ c_esd-
+        max: 16.1954
+        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT- c_esd+
       t_settle:
-        nominal: 0.000574852
-        min: 0.000555652
-        min_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT-
-        max: 0.000593252
-        max_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+
+        nominal: 0.000577752
+        min: 0.000558552
+        min_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT- c_esd-
+        max: 0.000596152
+        max_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+ c_esd+
     asserts: []
   step-real-mult[mult=2]:
-    corners: 9
+    corners: 17
     measures:
       overshoot_pct:
-        nominal: 41.808
-        min: 40.8371
-        min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT+
-        max: 42.8159
-        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT-
+        nominal: 41.6375
+        min: 40.6652
+        min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT+ c_esd-
+        max: 42.648
+        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT- c_esd+
       t_settle:
-        nominal: 0.00229405
-        min: 0.00212415
-        min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT-
-        max: 0.00229405
+        nominal: 0.00229825
+        min: 0.00213365
+        min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT- c_esd-
+        max: 0.00229825
         max_at: nominal
     asserts: []
   loop[mult=0]:
-    corners: 9
+    corners: 17
     measures:
       pm:
-        nominal: 69.3402
-        min: 69.2927
-        min_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+
-        max: 69.39
-        max_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT-
+        nominal: 69.3326
+        min: 69.2851
+        min_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+ c_esd+
+        max: 69.3823
+        max_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT- c_esd-
       fc:
-        nominal: 9978820.0
-        min: 9977080.0
-        min_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT-
-        max: 9980480.0
-        max_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+
+        nominal: 9979040.0
+        min: 9977300.0
+        min_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT- c_esd-
+        max: 9980700.0
+        max_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+ c_esd+
+      d_pm:
+        nominal: -2.36983e-06
+        min: -5.84978e-06
+        min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT- c_esd+
+        max: -1.83264e-06
+        max_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT+ c_esd-
     asserts:
     - expr: min['pm'] - 10 > 45
       why: 'the loop''s phase margin clears 45 degrees after the +-10 degree screen at every load - which is the point: the
         same margin at 0, 82 nF and 330 nF, while the step rings (pcb-pipeline.md: ''the AC sweep is structurally blind'')'
+      pass: true
+    - expr: max['d_pm'] < 0.1 and min['d_pm'] > -0.1
+      why: D-ESD-PITCH moves the phase margin by under 0.1 degree at every load and corner
       pass: true
   loop[mult=1]:
-    corners: 9
+    corners: 17
     measures:
       pm:
-        nominal: 69.3389
-        min: 69.2914
-        min_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+
-        max: 69.3885
-        max_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT-
+        nominal: 69.3312
+        min: 69.2838
+        min_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+ c_esd+
+        max: 69.3809
+        max_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT- c_esd-
       fc:
-        nominal: 9979690.0
-        min: 9978020.0
-        min_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT-
-        max: 9981290.0
-        max_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+
+        nominal: 9979910.0
+        min: 9978240.0
+        min_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT- c_esd-
+        max: 9981500.0
+        max_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+ c_esd+
+      d_pm:
+        nominal: -5.17188e-08
+        min: -1.06401e-07
+        min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT- c_esd+
+        max: -5.02299e-08
+        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+ c_esd-
     asserts:
     - expr: min['pm'] - 10 > 45
       why: 'the loop''s phase margin clears 45 degrees after the +-10 degree screen at every load - which is the point: the
         same margin at 0, 82 nF and 330 nF, while the step rings (pcb-pipeline.md: ''the AC sweep is structurally blind'')'
       pass: true
+    - expr: max['d_pm'] < 0.1 and min['d_pm'] > -0.1
+      why: D-ESD-PITCH moves the phase margin by under 0.1 degree at every load and corner
+      pass: true
   loop[mult=2]:
-    corners: 9
+    corners: 17
     measures:
       pm:
-        nominal: 69.3387
-        min: 69.2913
-        min_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+
-        max: 69.3884
-        max_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT-
+        nominal: 69.3311
+        min: 69.2837
+        min_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+ c_esd+
+        max: 69.3807
+        max_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT- c_esd-
       fc:
-        nominal: 9979770.0
-        min: 9978100.0
-        min_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT-
-        max: 9981360.0
-        max_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+
+        nominal: 9979990.0
+        min: 9978320.0
+        min_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT- c_esd-
+        max: 9981580.0
+        max_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+ c_esd+
+      d_pm:
+        nominal: -3.92571e-09
+        min: -7.87982e-09
+        min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT- c_esd+
+        max: -3.65269e-09
+        max_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT+ c_esd-
     asserts:
     - expr: min['pm'] - 10 > 45
       why: 'the loop''s phase margin clears 45 degrees after the +-10 degree screen at every load - which is the point: the
         same margin at 0, 82 nF and 330 nF, while the step rings (pcb-pipeline.md: ''the AC sweep is structurally blind'')'
+      pass: true
+    - expr: max['d_pm'] < 0.1 and min['d_pm'] > -0.1
+      why: D-ESD-PITCH moves the phase margin by under 0.1 degree at every load and corner
+      pass: true
+  loop-cable[c_cable=200pF]:
+    corners: 17
+    measures:
+      pm:
+        nominal: 69.3325
+        min: 69.285
+        min_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+ c_esd+
+        max: 69.3822
+        max_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT- c_esd-
+      fc:
+        nominal: 9979060.0
+        min: 9977320.0
+        min_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT- c_esd-
+        max: 9980720.0
+        max_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+ c_esd+
+      d_pm:
+        nominal: -2.20004e-06
+        min: -5.4572e-06
+        min_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT- c_esd+
+        max: -1.73217e-06
+        max_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT- c_esd-
+    asserts:
+    - expr: min['pm'] - 10 > 45
+      why: the phase margin clears 45 degrees after the screen into the cable
+      pass: true
+    - expr: max['d_pm'] < 0.1 and min['d_pm'] > -0.1
+      why: D-ESD-PITCH moves the phase margin by under 0.1 degree into the cable
+      pass: true
+  loop-cable[c_cable=800pF]:
+    corners: 17
+    measures:
+      pm:
+        nominal: 69.3324
+        min: 69.285
+        min_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+ c_esd+
+        max: 69.3822
+        max_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT- c_esd-
+      fc:
+        nominal: 9979110.0
+        min: 9977380.0
+        min_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT- c_esd-
+        max: 9980760.0
+        max_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+ c_esd+
+      d_pm:
+        nominal: -2.65514e-06
+        min: -4.38927e-06
+        min_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT- c_esd+
+        max: -1.36025e-06
+        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+ c_esd-
+    asserts:
+    - expr: min['pm'] - 10 > 45
+      why: the phase margin clears 45 degrees after the screen into the cable
+      pass: true
+    - expr: max['d_pm'] < 0.1 and min['d_pm'] > -0.1
+      why: D-ESD-PITCH moves the phase margin by under 0.1 degree into the cable
       pass: true

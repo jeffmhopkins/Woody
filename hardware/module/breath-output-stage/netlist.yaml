@@ -72,8 +72,9 @@ components:
     - CW
     - W
     - CCW
-    note: Wiper UNBUFFERED - its R/4 source impedance is why zero sits ~19 deg past centre on the 280 deg track;
-      no centre detent for that reason
+    note: CW end on AGND_MOD and CCW end on DAC_AVDD, so clockwise moves the jack POSITIVE through the inverting
+      summer, as the panel's + mark says (swapped 2026-10-01, A1-4). Wiper UNBUFFERED - its R/4 source impedance
+      is why zero sits ~19 deg counter-clockwise of centre on the 280 deg track; no centre detent for that reason
   R-BREATH-FB:
     value: 40.2k 1%
     drawn_as: R-FB
@@ -132,7 +133,7 @@ nets:
   - C-DEC-BREATH-POS.2
   - C-OUT-BREATH.2
   - J-CV-BREATH.SLEEVE
-  - POT-OFFSET.CCW
+  - POT-OFFSET.CW
   - R-GAIN-FLOOR.2
   - U-BREATH-OPA.INB+
   BREATH_SHAPED:
@@ -140,7 +141,7 @@ nets:
   - POT-GAIN.CW
   DAC_AVDD:
   - port: DAC_AVDD
-  - POT-OFFSET.CW
+  - POT-OFFSET.CCW
   GAIN_FLOOR:
   - POT-GAIN.CCW
   - R-GAIN-FLOOR.1

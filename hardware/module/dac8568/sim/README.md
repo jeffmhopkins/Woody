@@ -25,13 +25,18 @@ default) with `C-VREF-DAC` and a leakage swept −1, 0 and +1 µA. This is what
 **What that means for the claims.** `pitch-stage.md`'s *Power-on is 0.000 V*
 holds as a parked state, and its mechanism — `TRIM-OFFSET` holding a 3-state
 pin — holds for any pin leakage under about 10 µA. ADR 0006's *mod 1–4
-exactly 0 V* is true of where the jacks park, not of the moment `DAC_AVDD`
+0 V* is true of where the jacks park, not of the moment `DAC_AVDD`
 arrives: a short spike of up to about 0.12 V is the datasheet's glitch,
 multiplied by the mod stage's gains. Neither is a design question; the spike
 is recorded.
 
 ## What it does not show
 
+- **The DAC's zero-code error.** Each channel is modelled as an exact 0 V plus
+  the glitch, so "mod jack parked within 2 mV" is a property of the model. The
+  datasheet's zero-code error, 1 mV typ and 4 mV max and positive on a single
+  supply `[ds DAC8568CIPW.pdf p.3]`, parks pitch up to +8 mV and a mod jack
+  between −12 and +16 mV `[calc]`; ADR 0006's power-on table carries it.
 - **`DAC_AVDD` itself.** The glitch is placed in time, not produced by a
   supply ramp: the DAC is behavioural and TI publishes no model. Whether
   `SYNC` disturbs the power-on reset while it back-feeds `DAC_AVDD` is

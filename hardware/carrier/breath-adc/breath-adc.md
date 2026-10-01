@@ -49,8 +49,9 @@ own supply:
 
 ```
 worst case, 3V3 at 0 and the clamp holding the pin at ~0.7 V, the buffer
-at the sensor's full scale (sensor-full-scale, rounded down here to 4.7 V):
-  (4.7 − 0.7) / 10 kΩ = 400 µA
+at the sensor's full scale (sensor-full-scale, 4.86 V - not rounded down,
+because this is a worst case):
+  (4.86 − 0.7) / 10 kΩ = 416 µA
 ```
 
 **The datasheet gives no injection-current rating to hold that against**:
