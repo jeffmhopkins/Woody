@@ -1,7 +1,8 @@
 * Rack power-on at the module, as netlisted: the bus rails at J-PWR-EURO rising (the
 * -12 V one delayed by dt_neg), D1 / D3 (1N5817, BEHAVIOURAL: fitted to the banked
 * curve, no vendor model could be banked), FB1 / FB3 as their DC resistance, C1 / C3,
-* the LM317L (TI's transient model) on R-REG-SET-HI / -LO with C-REG-ADJ and C-REG-OUT
+* the LM317L (TI's transient model) on R-REG-SET-HI and TRIM-DAC-RAIL (r_trim: where E7
+* sets it unless a sim moves it) over R-REG-SET-LO, with C-REG-ADJ and C-REG-OUT
 * making DAC_AVDD; and the pitch stage on those rails (module/pitch-stage, TI's OPA2197
 * model), with the DAC channel at its power-on-reset zero scale and VREFOUT at 0 V.
 * THAT LAST IS THE PAGE'S CLAIM, NOT THE DATASHEET'S: with the internal reference
@@ -31,7 +32,8 @@ C3 n12 0 {{C3}}
 RLN n12 0 {{r_load_neg}}
 * DAC_AVDD
 XREG p12 adj avdd LM317L_TRANS
-RSH avdd adj {{R-REG-SET-HI}}
+RSH avdd trim {{R-REG-SET-HI}}
+RTR trim adj {{r_trim}}
 RSL adj 0 {{R-REG-SET-LO}}
 CADJ adj 0 {{C-REG-ADJ}}
 CREG avdd 0 {{C-REG-OUT}}

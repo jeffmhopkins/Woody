@@ -44,14 +44,14 @@ copy — thresholds, note gating, mod routing, MIDI — is sampled, and pays for
 | **Pneumatic restrictor** | **? — sized at E2** | A deliberate low-pass, added to damp the tube's pipe mode (ADR 0003). **Not previously in this budget at all**, and the term most able to break it |
 | Pressure transducer | **~1 ms** | A property of the sensor, not the design |
 | Buffer and cable propagation | < 10 µs | |
-| Receive filter, **482 Hz** | **330 µs** | `1/(2πf)`. **Not 531 Hz** — that assumed 20 kΩ of series resistance, and adding `R1b` to the return leg makes both legs 11 kΩ. One pole, not two |
+| Receive filter, **459 Hz** | **347 µs** | `1/(2πf)`: 2 × 11 kΩ against `C_diff` 15 nF and the two `C_cm` in series (`breath-sense-link.md`, *Component values*). **Not 531 Hz** — that assumed 20 kΩ of series resistance, and adding `R1b` to the return leg makes both legs 11 kΩ. One pole, not two |
 | Output RC at the jack, 480 Hz | **332 µs** | |
-| **Total** | **~2.83 ms + restrictor** | |
+| **Total** | **~2.86 ms + restrictor** | |
 
 **The filter line used to read "< 0.2 ms" and it was the design's own
 specified corners that broke it.** Three reviewers found the same thing: a
 500 Hz pole has 318 µs of group delay by definition, and this path has two of
-them. The real figure is 632 µs — three times what was written, though still
+them. The real figure is 679 µs — three times what was written, though still
 inside the target.
 
 ### Breath digital copy (sampled)

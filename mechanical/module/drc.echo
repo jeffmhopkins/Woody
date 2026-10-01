@@ -42,6 +42,7 @@ ECHO: "DRC", "PASS", "toggle's lugs in front of the main board", [4.4, 2.4], "mm
 ECHO: "DRC", "PASS", "standoff screw heads clear of the jack board's front-face parts", 1.93406, "mm (POT-OFFSET)"
 ECHO: "DRC", "PASS", "standoff screw heads inside the boards' edges and the notch", 0.7, "mm, a head's edge to the nearest board edge"
 ECHO: "DRC", "PASS", "U-ISO on the main board", 0.5, "mm, its body's edge inside the board's nearest edge"
+ECHO: "DRC", "PASS", "U-ISO's filter parts on the main board", [["C-ISO-BULK", 1.85], ["C-ISO-OUT", 1.85], ["L-ISO-IN", 11], ["L-CM-ISO", 2.24903]], "mm, each envelope's edge inside the board's nearest edge, against boards.copper_edge (L-CM-ISO's turned 45 degrees: config/module.yaml iso.filter)"
 ECHO: "DRC", "PASS", "standoff screw heads clear of the main board's rear-face parts", 1.015, "mm (J-PWR-EURO)"
 ECHO: "DRC", "PASS", "main board rear-face parts clear of each other", 0.55, "mm (J-UMBILICAL tails / U-ISO)"
 ECHO: "DRC", "PASS", "standoffs clear of the NE8FAV and J-B2B-MOD between the boards", 2.9109, "mm (J-UMBILICAL body)"

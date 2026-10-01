@@ -39,14 +39,14 @@ The `Dir` and `Peer` columns are defined once in
 |---|---|---|---|---|---|
 | `SCK` (pin 2) | main → all four registers | out | MCU IO38 → `cluster/key-register` | `chain-conductors` | One net: two registers by trace, two over the ribbons. `R-CHAIN-SER` at the driving end |
 | `SH/LD` (pin 4) | main → all four registers | out | MCU IO7 → `cluster/key-register` | `chain-conductors` | One net, like `SCK`. A glitch here reloads every register mid-shift — the whole 32-bit word |
-| `SER` (pin 6) | main → key board | out | → `cluster/key-register` | `chain-connectors` | **The key board's own serial input**, on both ribbons. On the `right_hand` ribbon it is `left_thumb`'s `QH`; on the `left_hand` ribbon it is the chain end, `IO33` and `R-SER-TERM` |
+| `SER` (pin 6) | main → key board | out | → `cluster/key-register` | `chain-connectors` | **The key board's own serial input**, on both ribbons. On the `right_hand` ribbon it is `left_thumb`'s `QH`, through `R-HOP-SER`; on the `left_hand` ribbon it is the chain end, `IO33` and `R-SER-TERM` |
 | `QH` (pin 8) | key board → main | in | `cluster/key-register` → | `chain-connectors` | **The key board's own serial output**, on both ribbons. `right_hand`'s goes to `right_thumb`'s `SER`; `left_hand`'s to `left_thumb`'s |
 | `QH` of `right_thumb` | main board only | in → out | `cluster/key-register` → MCU IO40 | `marker-bits`, `free-bits` | Bit 0 onward. **Reaches no connector** — a trace from the register to the MCU's pins |
 | `GND` ×5 (pins 1, 3, 5, 7, 9) | both | ref | `cluster/key-register`, `cluster/key-switch-network`, `cluster/key-marker-and-bits` | `chain-conductors` | One between every signal, and against pin 10 |
 | `3V3` (pin 10) | main → key boards | out | MCU board's 3V3 (`DEV_3V3`) → `right_thumb`/`left_thumb` direct, and → one `FB-CHAIN` per ribbon → the key board's `cluster/key-register`, `cluster/key-switch-network`, `cluster/key-marker-and-bits`; shared with `carrier/breath-adc` | `key-pullup-qty` | **It is also the MCP3202's reference** — `carrier.md` §2 carries that argument. No fuse (ADR 0018) |
 | spare ×2 (pins 11, 12) | both | — | — | `chain-conductors` | ADR 0009's rule, free in a 12-way part |
 | `J-CHAIN`, `CBL-CHAIN` | both | — | — | `chain-connectors` | This circuit's connectors and cables |
-| `R-CHAIN-SER`, `R-SER-TERM`, `U-TVS-CHAIN`, `FB-CHAIN` | main | — | — | — | This circuit's parts, all on the main board |
+| `R-CHAIN-SER`, `R-SER-TERM`, `R-HOP-SER`, `U-TVS-CHAIN`, `FB-CHAIN` | main | — | — | — | This circuit's parts, all on the main board |
 | the 32 bits | all four registers | — | `cluster/key-marker-and-bits` | `marker-bits`, `free-bits` | Allocated in `config/key-layout.yaml`. The chain order is unchanged |
 
 Pin numbers in this table are the **main-board** header's. The key board's
@@ -76,6 +76,7 @@ by a cable that is not a part. Each board draws its own parts:
 | `J-CHAIN-MAIN-RH`, `J-CHAIN-MAIN-LH` | `J-CHAIN` | `hardware/boards/main-board` | `J5` (rail pin on `V3V3_CHAIN_RH`), `J4` (`V3V3_CHAIN_LH`) |
 | `R-CHAIN-SER-SCK`, `-SHLD`, `-SER` | `R-CHAIN-SER` | `main-board` | `R34`, `R35`, `R36` |
 | `R-SER-TERM` | `R-SER-TERM` | `main-board` | `R37` |
+| `R-HOP-SER` | `R-HOP-SER` | `main-board` | `R44` |
 | `FB-CHAIN-RH`, `FB-CHAIN-LH` | `FB-CHAIN` | `main-board` | `FB2`, `FB1` |
 | `U-TVS-CHAIN` | `U-TVS-CHAIN` | `main-board` | `U9` |
 | `J-CHAIN-KEY-RH` | `J-CHAIN` | `hardware/boards/key-board-rh` | `J1` |
@@ -88,8 +89,8 @@ root sheet.
 **What holds the boards to this sheet.** `tools/kicad.py check` holds every
 `J-CHAIN`, on all three boards, to this sheet's pin map (`check_chain`). On the
 main board `GND_CHAIN` is `PWR_GND` and `DEV_3V3` is itself. **The main
-board's other seven chain parts are held too** (`check_chain_main_parts`):
-every `R-CHAIN-SER`, `R-SER-TERM`, `FB-CHAIN` and `U-TVS-CHAIN` on this sheet
+board's other chain parts are held too** (`check_chain_main_parts`):
+every `R-CHAIN-SER`, `R-SER-TERM`, `R-HOP-SER`, `FB-CHAIN` and `U-TVS-CHAIN` on this sheet
 must be one main-board part of the same row with every pin on the same net,
 one to one, so a missing part, an extra one, or two series resistors swapped
 between `IO38` and `IO7` fails `tools/kicad.py check`. The sheet is not split:
@@ -169,7 +170,8 @@ and `key-layout.yaml`'s order stands.
    IO7   ──[R-CHAIN-SER 100R]──────► 4 SH/LD  both ribbons, and RT/LT SH/LD
 
    IO33  ──[R-CHAIN-SER 100R]──┬───► 6 SER    LEFT_HAND ribbon only
-                               │     (right_hand ribbon: 6 = LT's QH)
+                               │     (right_hand ribbon: 6 = LT's QH
+                               │      through [R-HOP-SER 2k2])
                         [R-SER-TERM 10k]
                                │
                               3V3     (the pull-up is on this net only)
@@ -389,29 +391,29 @@ The ribbon's flight is the same for `SCK` and for the hop, so it cancels. What
 is left is the thresholds: the registers' `V_T+` can sit anywhere in a band
 that is a large fraction of `VCC`, and on an RC edge that is time. With
 `left_thumb` clocking at the lowest `V_T+` and `right_hand` at the highest, the
-run gives **6–12 ns of clock skew** and the hop's data **reaching
-`right_hand`'s `SER` 1–5 ns after `left_thumb`'s clock** — before
-`right_hand`'s clock, at every corner. **The hop holds only on `left_thumb`'s
-`CLK`→`QH` propagation delay, which must be at least ~11 ns** (`need_tpd`, the
-run's assertion against 12 ns). **TI publishes a maximum only** (16/18 ns at
-4.5 V, 32/45 ns at 2 V `[ds p.7]`), so nothing guarantees it.
+run gives **6–12 ns of clock skew**. With `QH` straight into the ribbon the
+hop's data reached `right_hand`'s `SER` 1–5 ns after `left_thumb`'s clock —
+before `right_hand`'s, at every corner — so the hop held only on
+`left_thumb`'s `CLK`→`QH` delay, which had to be at least ~11 ns, and **TI
+publishes a maximum only** (16/18 ns at 4.5 V, 32/45 ns at 2 V `[ds p.7]`)
+(`hop-hold-without-series-r`, recorded).
 
-**It is probably fine and it is not known.** An HC-family register's delay at
-3.3 V is unlikely to be under 11 ns `[judgment, from memory]`, and the
-thresholds of two registers on one board are unlikely to sit at opposite ends
-of the band. A failure would duplicate a bit and shift the frame, which the
-marker reports as a framing error, not a wrong note. **E14 decides**, on the
-real boards: scope `right_hand`'s `CLK` (its `J-CHAIN` pin 11) against
-`left_thumb`'s `QH` at `right_hand`'s `SER` (pin 7), both at the register's
-pins, and show `SER` still steady for at least 1 ns after `CLK` crosses mid-rail
-at both edges of the data, with the marker counter at zero over a long run.
+**So `R-HOP-SER` is fitted** (owner, 2026-10-01): **2.2 kΩ at `left_thumb`'s
+`QH`, on the main board**, where `HOP_LT_QH` becomes `HOP_LT_RH` and leaves
+for the ribbon. Its RC with the ribbon and `right_hand`'s input holds the
+data past `right_hand`'s clock **with the propagation delay taken as zero**:
+by 3.2–13.4 ns on a rising bit and 11.7–22.3 ns on a falling one, at every
+corner of the driver, the clamp, the main board's load and the register's
+output (`hop-hold-lt-to-rh`, asserted), and the data still reaches `SER`
+within 28 ns of the clock, against a 1 µs period. Whatever delay the part
+really has is added margin.
 
-**The owner's option if E14 is tight, or before layout:** a series resistor
-at `left_thumb`'s `QH` on `HOP_LT_RH`. At 2.2 kΩ the hop holds with no
-propagation delay at all, by 3–13 ns rising and 12–22 ns falling
-(`hop-hold-with-series-r`, recorded), and its data still arrives within
-30 ns of a 1 µs period. Not fitted: a part on the main board's sheet, which is
-the owner's call (`docs/review/2026-10-01-pre-layout-review/VERIFIED-F3.md`).
+**E14 confirms it** on the real boards: scope `right_hand`'s `CLK` (its
+`J-CHAIN` pin 11) against the hop's data at `right_hand`'s `SER` (pin 7), both
+at the register's pins, and show `SER` still steady for at least 1 ns after
+`CLK` crosses mid-rail at both edges of the data, with the marker counter at
+zero over a long run. A failure would duplicate a bit and shift the frame,
+which the marker reports as a framing error, not a wrong note.
 
 **The other hops' inputs get no pull-up** (owner, 2026-09-30: "B"). With a
 ribbon unplugged, `right_thumb`'s or `left_thumb`'s `SER` — the main-board end

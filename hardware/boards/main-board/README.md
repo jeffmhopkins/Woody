@@ -81,12 +81,19 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 | C2 | `C-ADC-BULK` | breath-adc |
 | C11 | `C-BUCK-IN` | power-entry-instrument |
 | C13, C14 | `C-DECOUPLE-165` | REG-LT, REG-RT |
-| C25–C37 | `C-LED` | led-strip-drive |
-| C3, C6, C7, C8, C12 | `C-DECOUPLE-CARRIER` | breath-adc, breath-excitation-reference, led-strip-drive |
+| C3, C6–C8, C12, C204 | `C-DECOUPLE-CARRIER` | breath-adc, breath-excitation-reference, led-strip-drive |
 | C9 | `C-FB-REF` | breath-excitation-reference |
-| C15, C16, C17, C18, C19, C20, C21, C22, C23, C24 | `C-KEY` | LT1, LT2, LT3, LT4, RT1, RT2, RT3, RT4, sw+, sw- |
+| C39 | `C-INRUSH-GD` | power-entry-instrument |
+| C38 | `C-INRUSH-GS` | power-entry-instrument |
+| C15–C24 | `C-KEY` | LT1, LT2, LT3, LT4, RT1, RT2, RT3, RT4, sw+, sw- |
+| C25–C37 | `C-LED` | led-strip-drive |
 | C4, C5 | `C-REF-OUT` | breath-excitation-reference |
+| C203 | `C-SENSOR-OUT` | breath-sense-link |
+| C201 | `C-SENSOR-VS-BULK` | breath-sense-link |
+| C202 | `C-SENSOR-VS-HF` | breath-sense-link |
 | C10 | `C-STRIP-BULK` | power-entry-instrument |
+| D20 | `D-INRUSH-RST` | power-entry-instrument |
+| D7–D19 | `D-LED` | led-strip-drive |
 | D1 | `D-REF-CLAMP` | breath-excitation-reference |
 | D2 | `D-REVSHUNT` | power-entry-instrument |
 | D5, D6 | `D-TVS-BREATH` | breath-sense-link |
@@ -100,11 +107,17 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 | L1 | `L-BUCK-IN` | power-entry-instrument |
 | NT2 | `NT-AGND` | power-entry-instrument |
 | NT1 | `NT-DIG` | carrier |
+| Q1 | `Q-INRUSH` | power-entry-instrument |
 | R5 | `R-ADCDIV-L` | breath-adc |
 | R4 | `R-ADCDIV-U` | breath-adc |
-| R34, R35, R36 | `R-CHAIN-SER` | root |
+| R34–R36 | `R-CHAIN-SER` | root |
+| R40 | `R-CS-PULL-INST` | carrier |
 | R8 | `R-FB-REF` | breath-excitation-reference |
 | R9 | `R-FBX-REF` | breath-excitation-reference |
+| R44 | `R-HOP-SER` | root |
+| R42 | `R-INRUSH-G` | power-entry-instrument |
+| R43 | `R-INRUSH-GD` | power-entry-instrument |
+| R41 | `R-INRUSH-GS` | power-entry-instrument |
 | R7 | `R-ISO-REF` | breath-excitation-reference |
 | R12, R14, R16, R18, R20, R22, R24, R26, R28, R30, R32, R33 | `R-KEY-PU` | LT1, LT2, LT3, LT4, RT1, RT2, RT3, RT4, sw+, sw-, FREE1, FREE2 |
 | R13, R15, R17, R19, R21, R23, R25, R27, R29, R31 | `R-KEY-SER` | LT1, LT2, LT3, LT4, RT1, RT2, RT3, RT4, sw+, sw- |
@@ -113,8 +126,8 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 | R6 | `R-REF-IN` | breath-excitation-reference |
 | R38, R39 | `R-SER-BREATH-INST` | breath-sense-link |
 | R37 | `R-SER-TERM` | root |
-| R1, R2, R3 | `R-SPI-SER` | carrier |
-| SW1, SW2, SW3, SW4, SW5, SW6, SW7, SW8, SW9, SW10 | `SW1-n` | LT1, LT2, LT3, LT4, RT1, RT2, RT3, RT4, sw+, sw- |
+| R1–R3 | `R-SPI-SER` | carrier |
+| SW1–SW10 | `SW1-n` | LT1, LT2, LT3, LT4, RT1, RT2, RT3, RT4, sw+, sw- |
 | U2 | `U-ADC` | breath-adc |
 | U10 | `U-BREATH` | breath-sense-link |
 | U5 | `U-BUCK` | power-entry-instrument |

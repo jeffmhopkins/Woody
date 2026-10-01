@@ -84,7 +84,7 @@ the ribbon to it (*The Matrix and the umbilical at the tail end*, below).
 
 ---
 
-*§1 power entry — the reverse shunt, the TVS, the two R-78E5.0 bucks, the OR
+*§1 power entry — the reverse shunt, the TVS, the R-78E5.0 buck (one since ADR 0015), the OR
 diodes, the strip bulk, the plate bond and the input-LC damping analysis —
 moved verbatim to
 [`power-entry-instrument/`](power-entry-instrument/power-entry-instrument.md).*

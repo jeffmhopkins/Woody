@@ -656,7 +656,7 @@ def check_chain_main(doc, js, loom, lnet, rel):
 # The loom's parts that sit on the main board beside its two headers. The loom's sheet is
 # placed by no board (key-chain-loom.md, "which board places what"), so the main board draws
 # its own copies; each must be one of them, pin for pin.
-CHAIN_MAIN_ROWS = ("R-CHAIN-SER", "R-SER-TERM", "FB-CHAIN", "U-TVS-CHAIN")
+CHAIN_MAIN_ROWS = ("R-CHAIN-SER", "R-SER-TERM", "R-HOP-SER", "FB-CHAIN", "U-TVS-CHAIN")
 
 
 def check_chain_main_parts(bnet, doc, loom, rel):

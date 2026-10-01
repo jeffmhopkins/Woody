@@ -89,7 +89,7 @@ and what that means for the mod channels — [`notes.md`](notes.md).)*
 
 `R-OPAMP-IN` costs nothing here: it feeds an op-amp's (+) input, which draws no
 current, so it contributes no gain error at all. It is pure clamp-current
-protection for the power-up window where the DAC is on 5.21 V and the op-amp is
+protection for the power-up window where the DAC is on `dac-rail` and the op-amp is
 on ±12 V (ADR 0006).
 
 ## Why the offset reference must be `VREFOUT` — the arithmetic, not the assertion

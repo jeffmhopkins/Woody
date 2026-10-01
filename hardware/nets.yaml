@@ -163,7 +163,7 @@ nets:
   CHAIN_QH_LT:
     kind: signal
     domain: digital
-    carries: "left_thumb's QH, on the main board, out to the right_hand ribbon's conductor 6"
+    carries: "left_thumb's QH, on the main board, out through R-HOP-SER to the right_hand ribbon's conductor 6"
     driver: cluster/key-register
     receivers: [interfaces/key-chain-loom]
     per_board: true

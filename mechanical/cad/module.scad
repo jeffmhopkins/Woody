@@ -144,7 +144,14 @@ b2b_pin_l = b2b_protrude + boards_t + so_l + boards_t + b2b_tail;   // J-B2B-MOD
 // U-ISO (ADR 0027) on the main board's rear face; its pins' tails out of the front face.
 iso_tail = iso_pin_l - boards_t;           // derived: the pins stand this far out of the front face
 iso_rect = rect_c(iso_at, iso_body[0], iso_body[1]);
-iso_filter_env = [for (f = iso_filter) [f[5], f[2] == "can" ? ["c", [f[0], f[1]], f[3] / 2] : rect_c([f[0], f[1]], f[3], f[3])]];
+// A toroid's envelope on the board: its terminals' cross, turned by f[8]
+// degrees - the square that holds the terminals' outer corners, or the body,
+// whichever is wider: [x, y, "toroid", span, height, refdes, body d, terminal w, rot].
+function toroid_half(f) = max(f[6] / 2, let(a = f[8], t = [f[3] / 2, f[7] / 2])
+    max([for (q = [[t[0], t[1]], [t[0], -t[1]], [t[1], t[0]], [-t[1], t[0]]]) abs(q[0] * cos(a) - q[1] * sin(a))]));
+iso_filter_env = [for (f = iso_filter) [f[5], f[2] == "can" ? ["c", [f[0], f[1]], f[3] / 2]
+                                          : f[2] == "toroid" ? rect_c([f[0], f[1]], 2 * toroid_half(f), 2 * toroid_half(f))
+                                          : rect_c([f[0], f[1]], f[3], f[3])]];
 
 // --------------------------------------------------------------- colours ----
 C_ALU = [0.80, 0.81, 0.83];
@@ -385,6 +392,11 @@ module main_board_3d() {
         P(C_BRASS, false, "U-ISO tails") for (q = iso_pins) cyl(iso_at + q, iso_pin_d, mb_z1, mb_z1 + iso_tail, 16);
         for (f = iso_filter)
             if (f[2] == "can") P(C_CAP, false, f[5]) cyl([f[0], f[1]], f[3], mb_z0, mb_z0 - f[4]);
+            // a toroid: the body, and its four terminals on a cross at the board (2 tall, an estimate - the drawing does not dimension it)
+            else if (f[2] == "toroid") P(C_BLACK, false, f[5]) union() {
+                cyl([f[0], f[1]], f[6], mb_z0, mb_z0 - f[4]);
+                translate([f[0], f[1], mb_z0 - 2]) rotate(f[8]) for (r = [0, 90]) rotate(r) translate([-f[3] / 2, -f[7] / 2, 0]) cube([f[3], f[7], 2]);
+            }
             else P(C_BLACK, false, f[5]) box(f[0] - f[3] / 2, f[1] - f[3] / 2, mb_z0, f[0] + f[3] / 2, f[1] + f[3] / 2, mb_z0 - f[4]);
     }
 }
@@ -661,6 +673,11 @@ module drc_report() {
                      [["U-ISO", iso_rect]], iso_filter_env);
     ie = min(iso_rect[1][0] - b_x0, b_x1 - iso_rect[2][0], iso_rect[1][1] - b_y0, b_y1 - iso_rect[2][1]);
     drc(ie >= 0, "U-ISO on the main board", ie, "mm, its body's edge inside the board's nearest edge");
+    // U-ISO's filter parts inside the board, L-CM-ISO's pads among them
+    fe = [for (e = iso_filter_env) [e[0], e[1][0] == "c" ? min(e[1][1][0] - e[1][2] - b_x0, b_x1 - e[1][1][0] - e[1][2], e[1][1][1] - e[1][2] - b_y0, b_y1 - e[1][1][1] - e[1][2])
+                                                         : min(e[1][1][0] - b_x0, b_x1 - e[1][2][0], e[1][1][1] - b_y0, b_y1 - e[1][2][1])]];
+    drc(min([for (e = fe) e[1]]) >= boards_copper_edge, "U-ISO's filter parts on the main board", fe,
+        "mm, each envelope's edge inside the board's nearest edge, against boards.copper_edge (L-CM-ISO's turned 45 degrees: config/module.yaml iso.filter)");
     hr = worst(heads, mb_rear);
     drc(hr[0] >= boards_part_clear, "standoff screw heads clear of the main board's rear-face parts", hr[0], str("mm (", hr[2], ")"));
     rr = worst(mb_rear, mb_rear, true);
@@ -792,7 +809,9 @@ module pcb_geometry() {
     echo("PCB", "module-main", "connector", "J-PWR-EURO", pw[0], pw[1], 0, "rear face, long axis along y, pin 1 (-12 V) at the bottom");
     for (i = [0 : len(tall_at) - 1]) echo("PCB", "module-main", "tall", tall_at[i][2], tall_at[i][0], tall_at[i][1], "rear face, an envelope - the layout places these");
     echo("PCB", "module-main", "tall", "U-ISO", iso_at[0], iso_at[1], "rear face, RPA20-2412SAW body", iso_body, "; pins' tails out of the front face", iso_tail);
-    for (f = iso_filter) echo("PCB", "module-main", "tall", f[5], f[0], f[1], "rear face, an envelope - the layout places these");
+    for (f = iso_filter) if (f[2] == "toroid")
+        echo("PCB", "module-main", "tall", f[5], f[0], f[1], str("rear face, woody:L_CommonModeChoke_Bourns_PM3700 turned ", f[8], " degrees (its span over the terminals, ", f[3], ", does not fit square here); an envelope - the layout places it"));
+        else echo("PCB", "module-main", "tall", f[5], f[0], f[1], "rear face, an envelope - the layout places these");
     echo("PCB", "module-main", "panel", "SW-POWER", tog[0], tog[1], str("panel-mounted, wired, ONE nut on the front (the body on the panel's rear face; the D4 kit's second nut not fitted); lever ON ", layout_toggle_on, ", lugs in a line along the throw; lugs end"), zd(toggle_body[2] + toggle_lugs) - mb_z1, "in front of the main board");
     // Keep-outs: what each face must leave clear, and the height it allows.
     for (j = jacks) echo("PCB", "module-jack", "keepout", str("barrel ", j[0]), j[1][0], j[1][1], 3.0, "d, no copper under the barrel (Thonk's PJ398SM note)");

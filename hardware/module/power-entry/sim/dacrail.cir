@@ -1,0 +1,22 @@
+* DAC_AVDD's set point across TRIM-DAC-RAIL's travel and the LM317L's datasheet spread
+* (pre-layout review A8-8; owner, 2026-10-01). BEHAVIOURAL, deliberately: TI's transient
+* model (poweron.cir) has one reference voltage and one ADJ current, and what is asked here
+* is where the rail can land across the guaranteed limits, V_REF 1.20-1.30 V and I_ADJ up to
+* 100 uA [datasheets/discrete-and-power/LM317LZ.pdf p.5] - so the regulator is its
+* defining equation: OUT is driven (from the input, here ground) to v_ref above ADJ, and i_adj
+* leaves the ADJ pin into the divider.
+* The divider is the netlist's: R-REG-SET-HI and TRIM-DAC-RAIL (as a rheostat, r_trim) from
+* OUT to ADJ, R-REG-SET-LO from ADJ to ground. The load is the DAC rail's (r_dac_load).
+BREG avdd 0 V = V(adj) + {{v_ref}}
+IADJ 0 adj DC {{i_adj}}
+RSH avdd trim {{R-REG-SET-HI}}
+RTR trim adj {{r_trim}}
+RSL adj 0 {{R-REG-SET-LO}}
+RLOAD avdd 0 {{r_dac_load}}
+.control
+op
+let v_avdd = v(avdd)
+print v_avdd
+quit
+.endc
+.end

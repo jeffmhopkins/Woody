@@ -49,6 +49,15 @@ The root sheet's own parts are the two connectors:
   umbilical and goes nowhere, as that sheet says.
 - **`J-B2B-MOD`**, below.
 
+**The jack filters sit at `J-B2B-MOD`** (pre-layout review A2-20, handed from
+F2): the jack board carries only the jacks, the pots, the LED and the header,
+so "at the jack" in `pitch-stage.md` and `mod-channels.md` means this board's
+side of the header. Place `C29` (`C-FILT-PITCH`) and `C36`–`C39`
+(`C-FILT-MOD`) against `J-B2B-MOD`'s `PITCH_JACK` and `MODn_JACK` pins, with
+the pitch stage's DC tap (`RV3`'s CCW end, `TRIM-GAIN`) taken there too, so the
+low-impedance shunt those pages argue for is at the connector the jack's wire
+leaves by.
+
 ## J-B2B-MOD — the allocation
 
 A 2 × 10 header soldered through both boards: **pin *k* is one conductor on

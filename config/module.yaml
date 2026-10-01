@@ -276,10 +276,10 @@ tall:
   # Each: [x, y, kind] on the rear face - an envelope for the depth and
   # clash checks, NOT a placement; the layout places them.
   at:
-    value: [[40.0, 57.0, "cap"], [40.0, 67.0, "cap"], [40.0, 77.0, "cap"], [40.0, 87.0, "cap"],
+    value: [[36.0, 73.0, "cap"], [44.5, 73.0, "cap"], [36.0, 83.0, "cap"], [44.5, 83.0, "cap"],
             [25.25, 95.0, "trim"], [14.0, 95.0, "trim"], [36.5, 95.0, "trim"]]
     status: nominal
-    source: "[adr 0024] representative spots for the three trimmers and four bulk caps, so the depth check sees them; the layout moves them. The caps sit in the right-hand column (2026-09-30) because U-ISO and its filter take the left"
+    source: "[adr 0024] representative spots for the three trimmers and four bulk caps, so the depth check sees them; the layout moves them. The caps sit on the right (2026-09-30) because U-ISO and its filter take the left, and in two columns above L-CM-ISO (2026-10-01), which takes the right-hand room above J-PWR-EURO"
 
 # U-ISO, the instrument's isolated supply (ADR 0027): RECOM RPA20-2412SAW on the
 # main board's REAR face - 10.2 mm of body cannot go in the boards' gap. Its
@@ -312,9 +312,10 @@ iso:
     source: "[calc] the only 25.4 square on the rear face: its bottom edge boards.part_clear above the NE8FAV's tails (ec.y + 12.35 + 0.5 = 37.85, taken as 37.9), its left 0.5 inside the board's edge (1.5), so the centre is 1.5 + 12.7, 37.9 + 12.7; J-B2B-MOD moved up to clear its top. The layout places it"
   # U-ISO's filter parts that stand tall: [x, y, kind, diameter or side, height, refdes]
   filter:
-    value: [[6.0, 68.5, "can", 6.3, 7.7, "C-ISO-BULK"], [6.0, 76.5, "can", 6.3, 5.8, "C-ISO-OUT"], [15.0, 68.5, "box", 6.0, 2.8, "L-ISO-IN"]]
+    value: [[6.0, 68.5, "can", 6.3, 7.7, "C-ISO-BULK"], [6.0, 76.5, "can", 6.3, 5.8, "C-ISO-OUT"], [15.0, 68.5, "box", 6.0, 2.8, "L-ISO-IN"],
+            [38.2, 59.0, "toroid", 21.6, 11.43, "L-CM-ISO", 17.78, 4.0, 45]]
     status: nominal
-    source: "[repo] the rows' packages: C-ISO-BULK SMD can 6.3 x 7.7, C-ISO-OUT 6.3 x 5.8, L-ISO-IN 6.0 x 6.0 x 2.8 (hardware/module/power-entry/bom.csv); placed just above U-ISO, where the layout will want them - an envelope, not a placement"
+    source: "[repo] the rows' packages: C-ISO-BULK SMD can 6.3 x 7.7, C-ISO-OUT 6.3 x 5.8, L-ISO-IN 6.0 x 6.0 x 2.8 (hardware/module/power-entry/bom.csv); placed just above U-ISO, where the layout will want them - an envelope, not a placement. L-CM-ISO (Bourns PM3700-40-RC, owner 2026-10-01): [x, y, 'toroid', span over the terminals, height, refdes, body diameter, terminal width, rotation] = 21.6 +/-0.3 over the terminals, body D17.78, 11.43 max tall, terminals 4.0 wide [ds BOURNS-PM3700-CM-CHOKE.pdf p.1, Product Dimensions]. The only rear-face room for it is right of U-ISO and above J-PWR-EURO, and there its 21.6 span leaves nothing either side, so it is TURNED 45 degrees: the terminals then reach (10.8 + 2.0) / sqrt 2 = 9.05 each way [calc], and the body 8.89. The layout keeps the turn or finds other room; mechanical/module/drc.echo checks either"
 
 # ----------------------------------------------------------- panel parts ----
 # PJ398SM (J-CV) - QingPu / Thonk drawing and the banked community STEP.

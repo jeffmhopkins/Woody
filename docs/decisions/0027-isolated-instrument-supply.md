@@ -128,7 +128,10 @@ cost is a converter the size of a postage stamp.
    auto-retry — the behaviour ADR 0005 rejected. The converter's own
    over-current protection starts at 110 % of 1.67 A, 1.84 A `[ds PD-5]`,
    above the LT1641's 1.10 A worst-case trip, so the LT1641 decides every
-   start and every fault.
+   start and every fault **except a replug inside `Q-INRUSH`'s window**,
+   whose first edge reaches the converter's own threshold
+   (`hotplug-iso-ocp`; *Consequences*, the A4-9 amendment). *(Amended
+   2026-10-01, pre-layout review A3-1.)*
 3. **`PWR_GND` is the isolated return.** It is `U-ISO`'s 0V, the load
    switch's ground and the umbilical's pin 6, on its own layer-4 copper. It
    joins `DIG_GND` at the etherCON through `NT-UMB-MOD` (pins 6 and 8, the
@@ -141,7 +144,9 @@ cost is a converter the size of a postage stamp.
    converter's isolation capacitance (1100 pF typ `[ds PD-5]`), a way home beside
    the converter instead of round the star and the ribbon. *(Amended
    2026-10-01, A4-1: at 1 nF it does not — see* The converter's common-mode
-   current *below. The decision stands; this point's claim does not.)*
+   current *below. Decided by the owner the same day:* **`L-CM-ISO`, a 1 mH
+   common-mode choke at the converter's input, and `C-ISO-Y` at 22 nF** *—
+   the second amendment, below.)*
 5. **The rails get fuses** (owner, same day: *"You're good to add the
    PTCs"*): `PTC-POS12` and `PTC-NEG12` on the module's analog rails, and
    `PTC-ISO` on the converter's +12 V leg, all at the header, ahead of the
@@ -158,7 +163,7 @@ the isolation capacitance at breath frequency. What the model leaves out, each
 |---|---|
 | The module's own CV outputs driving their receivers: the breath jack's 0–10 V into 100 kΩ is 0.1 mA, returning through the bus between the receiver and the PSU | 0.1 mA × 48 mΩ (ribbon + whole bus) = 4.8 µV → **0.006 cents** — the module's own signal, not the instrument's supply |
 | The ±12 V rails at the header move by 9.7 mV (0.195 A swing) as `U-ISO`'s input current follows breath `[sim, rail_mv]` | OPA2197 at 3 µV/V worst `[SBOS737C p.8]` → 29 nV → **0.00003 cents**; the LM317 at 0.02 %/V passes 1.9 µV to `DAC_AVDD`, which does not set full scale (ADR 0005) |
-| `U-ISO`'s switching, 550 kHz `[ds PD-2]` | out of band, behind the input filter — see `power-entry.md`. **Its common-mode part is not behind that filter**: amendment 2026-10-01, below |
+| `U-ISO`'s switching, 550 kHz `[ds PD-2]` | out of band, behind the input filter — see `power-entry.md`. Its common-mode part is behind `L-CM-ISO` and goes home through `C-ISO-Y`: under 10 % of it crosses the star at every corner `power-entry/sim`'s `cm-loop` sweeps (amendments 2026-10-01, below) |
 | The LED row's PWM, ~2 kHz scan and ~4 kHz refresh `[ds WS2815B-V1.pdf p.1]` | not breath-correlated in level but in the audio band, reflected through `U-ISO`'s input LC (f₀ ~3.3 kHz, `power-entry.md`) onto the case's ±12 V: about 13 mV p-p at most on the rails by the review's bound (A4-13), under 0.001 cents here and an audible-band tone for other modules. **Not analysed beyond that bound; E6 scopes it** |
 
 **Residual breath-correlated pitch error: under 0.01 cents**, with the rack's
@@ -177,7 +182,7 @@ constant; it is part of what the owner tunes out, as in every Eurorack module.
   `umbilical-current` × 12 V ≈ 4.3 W out of `U-ISO`, ~82 % efficient at that
   load `[ds PD-3]`, from ~23.4 V → **~0.22 A on each of +12 V and −12 V**
   `[calc]`, where it was ~0.36 A on +12 V and none on −12 V. The module's own
-  analog load adds ~45 mA and ~40 mA. At the clamp-legal worst (ADR 0005)
+  analog load adds `module-own-draw`. At the clamp-legal worst (ADR 0005)
   it is ~0.37 A per rail; an overload the load switch holds just under its
   0.78 A minimum trip is ~0.49 A per rail; a hot-plug start draws up to
   ~0.68 A per rail for tens of milliseconds. *(Amended 2026-10-01, A4-9: that
@@ -194,7 +199,9 @@ constant; it is part of what the owner tunes out, as in every Eurorack module.
   **10.2 mm tall on 5.6 mm pins** `[ds PD-7, PD-8]`, too tall for the gap between
   module-main and the jack board, so it goes on module-main's **rear face**
   with `L-ISO-IN`, `C2`, `C-ISO-IN`, `C-ISO-OUT` beside it; the envelopes are
-  `config/module.yaml`'s.
+  `config/module.yaml`'s. *(Amended 2026-10-01: and `L-CM-ISO`, 21.6 mm over
+  its terminals and 11.43 mm tall, between `L-ISO-IN` and the converter's
+  input pins — its envelope is not in `config/module.yaml` yet.)*
 - **Supply**: the RPA20-2412SAW is end-of-life, 20 at DigiKey on
   2026-09-30 — **buy spares with the first order**. The RP20-2412SAW is the
   path after that, on the same footprint, with its lead time (11 weeks on
@@ -271,3 +278,42 @@ fixer's to change, and nothing has been changed):
 
 Moving `C1`/`C3`'s grounds onto `BUS_GND` (the review's second option) takes
 the current off `AGND_MOD` but not off the star, so it is not listed alone.
+
+## Amendment, 2026-10-01 (owner) — the choke is fitted
+
+The owner chose option 1 above: **a common-mode choke at `U-ISO`'s input.**
+
+- **`L-CM-ISO`, Bourns PM3700-40-RC** — 1.0 mH minimum, 4 A, 0.020 Ω a
+  winding, 3.9 µH leakage, 20 dB from 500 kHz to 40 MHz, SMD, LCSC C2662215
+  `[ds datasheets/discrete-and-power/BOURNS-PM3700-CM-CHOKE.pdf p.1]` —
+  between the input filter (`L-ISO-IN`, `FB4`) and the converter's pins, one
+  winding in each leg, so the supply current and its return cancel in the
+  core. 4 A against `PTC-ISO`'s 1.5 A trip: nothing the fuse passes heats it.
+- **`C-ISO-Y` is 22 nF C0G**, not 1 nF and not the 10 nF the review's deck
+  suggested. That deck modelled the choke as a lossless 1 mH; a ferrite at
+  550 kHz is lossy, and its datasheet gives only the 20 dB band. With the core
+  loss swept to 500 Ω a winding, 10 nF leaves ~11 % on the star and 22 nF
+  under 6 %. With the choke in the loop there is no resonance left for a
+  larger `C-ISO-Y` to find.
+- **What holds it**: `module/power-entry/sim`, `cm-loop` — the share of the
+  converter's common-mode current crossing the star is under the owner's
+  10 % at 550 kHz, 1.65 MHz and 5.5 MHz and anywhere from 500 kHz to 30 MHz,
+  at every corner of the choke's core loss and inductance, the ribbon and
+  `C-ISO-Y` (0.6–5.4 % at the fundamental); `cm-loop-y-1n` records the 1 nF
+  case failing. `iso-input-z` runs the input filter with the choke's leakage
+  in it: still damped, over 20× inside the converter's −104 Ω at every corner.
+  The copper in both decks is estimated, as in the review's.
+- **What is still open**: how much current the converter makes (RECOM does
+  not publish it) — E6's probe on the star stands; and the choke's place on
+  module-main, which the module CAD has not given it yet.
+
+## Amendment, 2026-10-01 (owner) — `INST_POS12` between 13.5 V and 16.7 V is accepted
+
+Pre-layout review A4-4: nothing clamps the instrument's rail between the
+WS2815B-V1's 13.5 V absolute maximum `[ds WS2815B-V1.pdf p.2]` and `D-TVS-PWR`'s
+16.7 V minimum breakdown; only a converter failing high would put it there,
+and `U-ISO`'s own over-voltage protection starts at 13.8 V `[ds
+RECOM-RPA20-AW.pdf PD-5]`. **The owner accepts it, 2026-10-01: no part is
+added.** A converter that fails regulating high is out of this design's
+scope; the LED row is what it would damage. The crowbar and the lower TVS
+that were weighed are in `docs/review/2026-10-01-pre-layout-review/VERIFIED-F3.md`.
