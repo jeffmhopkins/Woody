@@ -262,16 +262,23 @@ by schematic page, with the widths and rules already set.
 - `BREATH` / `AGND` from the connector to the in-amp — one keepout window
   enclosing **both** legs, not one each, or the pour asymmetry costs the
   capacitive matching the ±1 % spec exists to control
-- `PWR_GND` as a **trace, not a pour** — it is a two-terminal net whose own IR
-  drop is irrelevant and which must share copper with nothing
+- `PWR_GND` on **its own layer-4 copper**, sharing it with nothing — since
+  ADR 0027 it is the isolated supply's return, about a dozen pads from the
+  etherCON's pin 6 to `U-ISO` and the load switch, and it reaches the star
+  only through `DIG_GND` (`dig-gnd-topology`; `power-entry.md` *Grounding*)
 - `SENSE` / `R-ILIM` as a Kelvin pair — 47 mV across 50 mΩ, so 1 mΩ of trace is
   a 2 % shift in the current limit
 - The pitch feedback loop: tap at the jack, compensation cap from the op-amp
   *output*, protection resistor inside the DC loop
 
-**Star pad solid, everything else thermal.** A default 4-spoke relief on the
-star pad costs 0.053 cents at 359 mA — a quarter of the tightest pitch-budget
-candidate, from one DRC-passing pad.
+**Star pad solid, everything else thermal.** A relief's cost scales with the
+current through it, and since ADR 0027 the instrument's `umbilical-current`
+no longer crosses the star: it circulates on `PWR_GND`/`DIG_GND` back to
+the isolated supply. What crosses it is the module's own analog return
+(`power-entry.md`, *The analog rails' load*), tens of mA. A default 4-spoke
+relief priced 0.053 cents when it was 359 mA, so about 0.005 cents at 37 mA
+`[calc: 0.053 × 37 / 359]` — small now, and a solid star pad still costs
+nothing.
 
 ### 5. The update loop — and why it works here
 
@@ -308,24 +315,27 @@ Assertions worth keeping beyond DRC, because each passes DRC on its own:
 - verify the **zip**, not the board directory; every check in the old plan sat
   upstream of the thing actually being shipped
 
-**The board is hand-assembled**, so no pick-and-place, no fab BOM format, no
-rotation-correction table. Gerbers and drill. Add an interactive HTML BOM —
-that is the artefact that helps *you*, and it runs headless.
+**The board is machine-assembled except its `hand` rows.** Each placed
+part's sheet field `Assembly` (`machine`/`hand`/`none`, ADR 0019) says which;
+`tools/pcb.py` writes the fab BOM and placement from it and requires an `LCSC`
+code on every machine part (`docs/reference/tooling.md` §4). Gerbers, drill,
+BOM and placement. An interactive HTML BOM still helps for the hand rows, and
+it runs headless.
 
 ## Two things that are not this pipeline
 
 **The 10HP panel is 2 mm aluminium**, laser or waterjet from DXF, same vendor
 and order as the key plate. Not a PCB. It belongs with the mechanical work.
 
-**2 layers or 4: the main board is decided, the module is not.** The main
+**2 layers or 4: both boards are decided, four layers each.** The main
 board is four layers (ADR 0017 amendment, 2026-09-29), and its ground is
-written in `power-entry-instrument.md` §2. The module board is still open: on
-two layers, two corpus requirements are mutually exclusive — `power-entry.md`
-wants the SPI return directly under its trace while ADR 0004 wants `PWR_GND`
-on its own copper *and* the analog return as its own region. Four layers
-dissolves it (`dig-gnd-topology`'s `proposed_if_four_layers`). This is the
-owner's cost decision and it gates the module's grounding, so it is upstream
-of stage 3 for that board.
+written in `power-entry-instrument.md` §2. The module's main board is four
+layers too (owner, 2026-09-30): its layer stack and the star it serves are
+`dig-gnd-topology`, owned by `power-entry.md` *Grounding* — read them there.
+On two layers `power-entry.md`'s SPI return under its trace and ADR 0004's
+separate `PWR_GND` and analog region could not both be met, which is why the
+layer count was upstream of stage 3. The module's jack board stays two layers
+(the same register entry).
 
 ## One warning about reading `datasheets/` programmatically
 

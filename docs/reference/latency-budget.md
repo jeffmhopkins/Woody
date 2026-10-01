@@ -5,15 +5,20 @@ it is the thing most likely to be violated accidentally by a change that looks
 harmless — a blocking display refresh, an oversampled ADC, a filter corner set
 too low.
 
-> **The display and radio are on a separate MCU**
-> ([ADR 0013](../decisions/0013-two-mcu-split.md)), so neither can preempt the
-> loop these figures describe. That isolation is physical rather than a
-> scheduling discipline.
+> **One MCU, no radio** ([ADR 0015](../decisions/0015-one-mcu-no-display.md),
+> which superseded the two-MCU split of ADR 0013 on 2026-09-26). The 8×8
+> matrix and the LED row now share the ESP32-S3 with the loop these figures
+> describe, so what keeps them from preempting it is **a scheduling
+> discipline, not physics**: the output loop owns one core, and lighting
+> renders on the other through RMT (`firmware/README.md`, *Architecture
+> constraints*). A lighting update that blocks, or that is moved onto the
+> loop's core, is exactly the "blocking display refresh" above, and nothing in
+> the hardware stops it.
 >
-> What remains is the **current transient** a WiFi burst puts on the rail, which
-> reaches the analog section through shared power rather than shared CPU. Each
-> board gets its own regulator and local bulk capacitance for that reason. Verify
-> by measurement before trusting configuration-while-playing.
+> WiFi and BLE are never started, so there is no transmit burst. What remains
+> is the lights' own **current** — the LED row's PWM and the matrix — which
+> reaches the analog section through shared power and ground, not CPU.
+> E11 measures that (*Characterisation*, below).
 
 ## Target
 
@@ -57,7 +62,7 @@ Everything above as far as the sensor output — **~2.17 ms** — then:
 |---|---|---|
 | **Anti-alias filter, 564 Hz** | **282 µs** | `C-AA-ADC` against the divider's 6 kΩ. **Omitted entirely before**, like the restrictor |
 | Sampling period | **0–250 µs** | At a 4 kHz loop, a change waits up to one period to be seen. Mean 125 µs |
-| SAR ADC conversion | **~24 µs** | 18 clocks at the MCP3202's ~0.9 MHz ceiling on 3.3 V. **This row said 50–200 µs**, which is a generic SAR allowance and not this part — and it is the same read the loop-duty rule books at 24 µs. See the warning below |
+| SAR ADC read | **~27 µs** | One 24-clock (three-byte) transaction at the MCP3202's 0.9 MHz ceiling on 3.3 V, as `interfaces/spi-link` books it; the conversion itself is 18 of those clocks. **This row said 50–200 µs**, a generic SAR allowance and not this part, and then "~24 µs, 18 clocks", which costed the conversion and not the transaction the bus actually carries (2026-10-01, A5-13). See the warning below |
 | SPI to MCU + firmware | < 20 µs | |
 | SPI to DAC over umbilical | ~96 µs | Six 32-bit words at 2 MHz. The loop refreshes all of them every pass (`firmware/README.md`), so the whole burst is the latency, not one word |
 | DAC settling | ~10 µs | |
@@ -99,15 +104,15 @@ bottom of this page is the one that settles it.
 | **Note-on gate — two consecutive agreeing samples** | **+250 µs** | One whole loop period, **required by ADR 0001**. This row read "Debounce (press) — 0, fire immediately", which contradicted the ADR that specifies it |
 | Debounce (release) | filtered | Off the attack path by construction, which is the point of the asymmetry |
 | Firmware note resolution | < 20 µs | |
-| DAC update + settle | ~60 µs | |
+| DAC update + settle | ~106 µs | The six-word burst (~96 µs) and settling (~10 µs), booked as the breath table books it: firmware is not required to send the pitch word first. **This row said ~60 µs** against the breath table's ~106 µs for the same burst (2026-10-01, A5-13) |
 | Pitch filter (~10–20 kHz corner) | ~10 µs | |
-| **Total** | **~0.38–0.63 ms** | |
+| **Total** | **~0.42–0.67 ms** | |
 
 `[calc]` worst case `0.25 (sampling) + 0.032 (chain) + 0.25 (note-on gate) +
-0.02 (firmware) + 0.06 (DAC) + 0.01 (filter) = 0.622 ms`, plus the RC press
-time; best case is the same sum with the sampling period at zero, 0.372 ms.
-**Against the 5 ms target that is roughly 8× — five times the breath path's
-margin.** The key path is not the one at risk, and now the table says so
+0.02 (firmware) + 0.106 (DAC) + 0.01 (filter) = 0.668 ms`, plus the RC press
+time; best case is the same sum with the sampling period at zero, 0.418 ms.
+**Against the 5 ms target that is roughly 7.5× — nearly five times the breath
+path's margin.** The key path is not the one at risk, and now the table says so
 instead of leaving the reader to add it up.
 
 > **This table had no Total and omitted its two largest terms.** The sampling
@@ -118,8 +123,8 @@ instead of leaving the reader to add it up.
 > the shape this project keeps repeating: the fix lands where the editing is
 > happening and not where the reader looks.
 
-**Debounce asymmetrically.** Fire on the leading edge and filter only the
-release. Symmetric debounce puts its full window directly into the attack, which
+**Debounce asymmetrically.** Gate the leading edge only by ADR 0001's two
+agreeing samples, and filter only the release. Symmetric debounce puts its full window directly into the attack, which
 is the one place latency is audible.
 
 > **The note-on gate is not a debounce, and the difference now has a number
@@ -151,10 +156,9 @@ load-bearing enough that being wrong about them would change the design.
 | **SPI over the umbilical at length** | Logic analyser at the module end, cable at full length | Setup/hold margin, ringing, double-clocking. This is where a long cable bites, and it is invisible without an LA. Gates E11 |
 | **DAC settling and filter corners** | Scope a commanded step | Confirm settling to within an LSB, and that the pitch and breath filters actually sit where they were designed to |
 | **Rack rail ripple, both directions** | Scope +12V at the module with the instrument running | Incoming ripple lands on the CV outputs; outgoing noise from the local buck lands on every other module in the rack. Gates E6 |
-| **WiFi transmit transients** | Scope the rail during a TX burst with the radio enabled | Now the *only* path by which WiFi can affect the outputs (ADR 0013). Decides whether configuration-while-playing is usable |
-| **Inter-MCU UART link** | Logic analyser on the pair, under load | Frame integrity and whether status traffic is jitter-free at rate (ADR 0013) |
+| **Loop timing with the lights running** | A GPIO toggled at each pass's start and end, on a logic analyser, with the matrix and the LED row animating and USB configuration traffic flowing | The one MCU now carries the lights and the loop (ADR 0015). Confirms the pass stays inside `loop-budget` and that lighting on the other core never stretches it. Replaces the WiFi-burst and inter-MCU UART rows, whose radio and second MCU no longer exist |
 | **Umbilical link** | Logic analyser at the module end, cable at length | **2 MHz** — the 0.6 MHz this row used to give came from a 2 kHz mod rate and does not close at 4 kHz (ADR 0004). Confirm it is clean at the rate actually needed, and that RS-485 stays unnecessary |
-| **Breath channel noise** | Scope the breath jack while sweeping display brightness, LED animation and a WiFi burst | The end test for the analog breath decision. Any of those appearing on the output means AGND is picking up power return current, or the module is sensing against local ground (ADR 0003) |
+| **Breath channel noise** | Scope the breath jack while sweeping the matrix's brightness and the LED row's animation | The end test for the analog breath decision. Any of those appearing on the output means AGND is picking up power return current, or the module is sensing against local ground (ADR 0003) |
 | **End-to-end, in one shot** | Two scope channels: one on the sensor output, one on the CV jack | Measures the real gesture-to-output time directly instead of summing estimates. This is the number that actually matters, and it is the one measurement that validates or refutes the entire table above |
 
 A signal generator driving a known waveform into the ADC front end also
@@ -174,11 +178,29 @@ a hypothesis; a budget made of measurements is a constraint.
    thresholds, note gating, mod routing and MIDI, not for the breath jack.
 
    **The 8 kHz end of the old "4–8 kHz" range does not close.** Serialised,
-   the bus time alone is ADC 24 µs + key chain 32 µs + six DAC channels at
-   2 MHz 96 µs — already over the 125 µs period at 8 kHz before any driver
-   overhead. At 4 kHz one pass is **196–241 µs of 250 µs**, which is this
-   page's tracked figure `loop-budget`. Three documents used to disagree
+   the bus time alone is ADC 26.7 µs + key chain 32 µs + six DAC channels at
+   2 MHz 96 µs = 154.7 µs — already over the 125 µs period at 8 kHz before any
+   driver overhead. At 4 kHz one pass is **186–227 µs of 250 µs**, which is
+   this page's tracked figure `loop-budget`. Three documents used to disagree
    about this; 4 kHz is the number, and it is not comfortable.
+
+   **What the range is** `[calc]` (re-derived 2026-10-01, A5-13: the range this
+   paragraph carried until then did not reproduce from any transaction count).
+   Per pass: SPI2 carries seven transactions, six DAC frames (`6 × 32 bits at
+   2 MHz = 96 µs`) and one ADC read (`24 clocks at 0.9 MHz = 26.7 µs`); SPI3
+   carries one, the key chain (`32 bits at 1 MHz = 32 µs`). ESP-IDF's
+   per-transaction overhead is 9 µs polling and 24 µs interrupt-driven.
+
+   ```
+   polling, key chain concurrent on SPI3:  7 × 9 + 96 + 26.7           = 185.7 µs
+   polling, key chain serialised:          8 × 9 + 96 + 26.7 + 32      = 226.7 µs
+   interrupt, key chain concurrent:        7 × 24 + 96 + 26.7          = 290.7 µs
+   interrupt, key chain serialised:        8 × 24 + 96 + 26.7 + 32     = 346.7 µs
+   ```
+
+   The figure is the two polling rows: the low end needs the chain's
+   transaction in flight on SPI3 while SPI2 polls, the high end is the same
+   work one after another. Both interrupt rows miss the period.
 
    > **Until 2026-09-21 this paragraph was wrong twice over.** It totalled the
    > bus time as a superseded "136 µs" of 250 µs, and called that a
@@ -191,18 +213,19 @@ a hypothesis; a budget made of measurements is a constraint.
    > The old figure and the real one are different engineering situations -
    > half the period against nearly all of it - and this page, the figure's
    > own owner, carried the comfortable one. Found by
-   > tightening the owner check: the register said 196–241 µs and the owner
-   > stated neither number, passing only on the shared denominator.
+   > tightening the owner check: the register stated a range and the owner
+   > stated neither end of it, passing only on the shared denominator.
 
    > **⚠ This page gave two different figures for the same ADC read, and the
    > gap decides whether 4 kHz is buildable.** The table above said 50–200 µs
-   > and this rule says 24 µs. At 200 µs a pass costs **312 µs against a
+   > and this rule said 24 µs. At 200 µs a pass costs **312 µs against a
    > 250 µs period and the loop does not close**; even a mid-range 125 µs
    > leaves no margin.
    >
-   > 24 µs is the right number for the specified part — the MCP3202 needs 18
-   > clocks and tops out near 0.9 MHz at 3.3 V, so ~20 µs of conversion plus
-   > framing. 50–200 µs was a generic SAR allowance carried in from nowhere.
+   > ~27 µs is the right number for the specified part — a 24-clock
+   > transaction (18 for the conversion, byte-aligned) at the 0.9 MHz it tops
+   > out near on 3.3 V. 50–200 µs was a generic SAR allowance carried in from
+   > nowhere.
    >
    > **But the allowance was pointing at something real**, which the
    > characterisation table already names: *"datasheet conversion time
@@ -220,11 +243,15 @@ a hypothesis; a budget made of measurements is a constraint.
 2. **SAR ADC, never delta-sigma.** A delta-sigma's decimation filter has real
    group delay — potentially milliseconds — which would consume the entire
    budget on its own.
-3. **Display rendering never blocks the output loop.** Separate SPI host,
-   separate core. A full-screen refresh on a colour LCD is orders of magnitude
-   longer than the whole budget above.
-4. **The WiFi stack and display are on a different MCU entirely** (ADR 0013).
-   Nothing on the real-time board competes with the output loop.
+3. **Lighting never blocks the output loop.** The matrix and the LED row
+   render on the other core, through RMT, never on the loop's core and never
+   by a blocking write (`firmware/README.md`). Since ADR 0015 they share the
+   MCU with the loop, so this rule is the only thing between them and the
+   budget above.
+4. **There is no radio.** WiFi and BLE are never started (ADR 0015). Rule 4
+   used to say the WiFi stack and display were on a different MCU (ADR 0013);
+   that MCU is gone, and with it the physical isolation the rule leaned on —
+   rule 3 is what replaces it.
 5. **Pitch output filter stays fast** (10–20 kHz). A low corner is an audible
    glide on every note.
 6. **Smoothing happens in software**, where it can be set per channel according

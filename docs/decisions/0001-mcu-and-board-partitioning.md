@@ -399,7 +399,8 @@ The bit-by-bit assignment and levels are in
 That counter is the point. It is a framing check, not an error-detecting code —
 it cannot correct anything and will miss some corruptions — but it converts an
 invisible intermittent fault into a number on the display that says whether the
-looms are good. Without it, a marginal chain presents as occasional wrong notes
+looms are good. *(Amended 2026-10-01, A5-10: the display is the 8×8 matrix
+since ADR 0015; there is no other.)* Without it, a marginal chain presents as occasional wrong notes
 that are indistinguishable from playing mistakes.
 
 **The core split carries the WiFi stack too.** Sensor read, key scan and DAC
@@ -472,7 +473,7 @@ drop-in part instead.
   "the right price" for tail-mounted registers. The price is no longer paid.
 - **Chain is 4 registers, 32 bits, for 18 switches** (ADR 0010), **one per
   cluster board**. The 14 spare bits are free expansion for octave, mode and
-  hold inputs, **8 of them carry the marker pattern** and 3 stay free. *(Amended 2026-09-26: hold/preset became switch RT4, so the used and spare counts each moved by one — `config/key-layout.yaml` `chain` and `spare_bits*` own them; and since ADR 0017 the four registers sit two on the key boards and two on the main board.)* Full chain reads in
+  hold inputs, **8 of them carry the marker pattern** and 3 stay free. *(Amended 2026-10-01, A5-14: read both counts from `config/key-layout.yaml` `counts`, not from this line. The 14 is the spare count before RT4, and the bits this sentence leaves unaccounted are the reserved spare-switch bits.)* *(Amended 2026-09-26: hold/preset became switch RT4, so the used and spare counts each moved by one — `config/key-layout.yaml` `chain` and `spare_bits*` own them; and since ADR 0017 the four registers sit two on the key boards and two on the main board.)* Full chain reads in
   ~32 µs at 1 MHz, about 13 % of a 250 µs loop period. **1 MHz is the design
   rate and the chain should not be pushed much past it**: it crossed four
   connectors and ~265 mm of loom when this was written *(Amended 2026-09-26, ADR 0017: now main-board traces plus two ribbons, 1.27 mm IDC since 2026-09-27; the length is `mechanical/drc.echo` "main board (derived)")*, and HC165's slow edges are what make that an
@@ -483,3 +484,25 @@ drop-in part instead.
 - LED power and data run the length of the body too. Keep their ground return
   separate from the analog section and star-ground at one point, or the LEDs
   will be audible.
+
+## Amendment, 2026-10-01 — the hold side of the hop, and where firmware's rules live
+
+From the pre-layout review (`docs/review/2026-10-01-pre-layout-review/`,
+A5-2 and A5-3).
+
+- **The 2026-09-27 amendment argued the hop's setup, not its hold.** `QH` →
+  next `SER` is sampled a period after it changes — and also on the very edge
+  that changes it. For the one hop whose downstream register is clocked
+  later than its upstream one, `left_thumb` → `right_hand`, the threshold
+  spread on `SCK`'s RC edge puts the downstream clock up to ~12 ns behind,
+  and the hop holds only on the upstream register's minimum `CLK`→`QH` delay,
+  which TI does not publish. Simulated in
+  `hardware/interfaces/key-chain-loom/sim` (`hop-hold-lt-to-rh`); E14 measures
+  it; a series resistor at `left_thumb`'s `QH` is the owner's option and is
+  not fitted. `key-chain-loom.md`, *The hop hold time*. A failure there is a
+  framing error the marker reports — the second firmware rule above is what
+  makes it visible.
+- **Both firmware rules above, and every other condition the hardware places
+  on firmware, are now listed in `firmware/README.md`, *What the hardware
+  requires*.** The README said "fire immediately on press" until this date,
+  against the first rule here; it now carries the two-sample gate.

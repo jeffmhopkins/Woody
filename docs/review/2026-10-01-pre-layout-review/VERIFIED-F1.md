@@ -111,9 +111,9 @@ stage and is a redesign, not recommended at the layout gate.
 - **Orchestrator — `docs/reference/latency-budget.md:42` (A1-13)**: the receive
   filter is ~459 Hz, not 482 Hz: `1/(2π × 22 kΩ × 15.75 nF)`, 347 µs not
   330 µs. Check whether `loop-budget` or any total uses the 330 µs.
-- **Orchestrator — `docs/reference/tooling.md` §5 coverage table**: "with a
-  behavioural 1N4148W" → "1N4448W"; and add the breath output stage's `chain`
-  (shaper and stage together) to that row.
+- **Orchestrator — `docs/reference/tooling.md` §5 coverage table**: the
+  breath output stage's row can add `chain` (the shaper and the stage
+  together). (Its 1N4148W → 1N4448W wording had already landed by the merge.)
 - **Owner of `hardware/carrier/led-strip-drive/bom.csv` (A8-1)**: row
   `C-DECOUPLE-CARRIER` qty **8 → 6** and its enumeration: MCP3202
   (`C-DEC-ADC`), REF5050 IN and OUT (`C-DEC-REF-VIN`, `C-DEC-REF-VOUT`),
