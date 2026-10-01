@@ -793,6 +793,10 @@ def post_route(path, bdir):
     lay = layout_yaml(bdir)
     comps, _ = sheet_netlist(os.path.join(bdir, name + ".kicad_sch"))
     board = pcbnew.LoadBoard(path)
+    orphans = pcb_route.plane_orphans(board, lay)
+    if orphans:
+        # a plane pad its plane's fill cannot reach (antipads all round it): its own via
+        pcb_route.fanout(board, lay, pcb_route.Obstacles(board, lay), only=orphans)
     pcb_route.tidy(board, lay)
     pcbnew.SaveBoard(path, board)
     # the shortest connections first: they have the fewest ways round (a long run they
@@ -1003,6 +1007,9 @@ def cmd_finish(bdir):
             if os.path.exists(os.path.join(bdir, f)):
                 shutil.copy(os.path.join(bdir, f), os.path.join(t, f))
         board = pcbnew.LoadBoard(tmp)
+        orphans = pcb_route.plane_orphans(board, lay)
+        if orphans:
+            pcb_route.fanout(board, lay, pcb_route.Obstacles(board, lay), only=orphans)
         pcb_route.tidy(board, lay)
         pcbnew.SaveBoard(tmp, board)
         _fill(tmp)

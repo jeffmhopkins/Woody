@@ -1028,7 +1028,7 @@ def lay_track(board, obs, net, a, b, width, layer, locked=True):
     return t
 
 
-def fanout(board, lay, obs):
+def fanout(board, lay, obs, only=None):
     """Every SMD pad on a plane net (layout.yaml fanout:) gets its own via into that
     plane, on a short straight stub from the pad's centre: the nearest spot, searching
     away from the part first, where the via is legal (Obstacles.via_ok), inside its
@@ -1044,14 +1044,25 @@ def fanout(board, lay, obs):
         for pad in sorted(fp.Pads(), key=lambda p: p.GetNumber()):
             net = pad.GetNetname()
             name = f"{fp.GetReference()}.{pad.GetNumber()}"
-            if net not in (lay.get("fanout") or []) or pad.HasHole() or name in skip:
+            through = name in (lay.get("fanout_through") or []) or (only is not None and name in only)
+            if only is not None and name not in only:
                 continue
-            if any(q.HasHole() and q.GetNumber() == pad.GetNumber() for q in fp.Pads()):
+            if net not in (lay.get("fanout") or []) or (pad.HasHole() and not through) or name in skip:
+                continue
+            if not through and any(q.HasHole() and q.GetNumber() == pad.GetNumber() for q in fp.Pads()):
                 continue            # a plated hole's face pad (a mount's): the hole meets the plane
             L = "F" if pad.IsOnLayer(pcbnew.F_Cu) else "B"
             pg = pad_geom_on(pad, pcbnew.F_Cu if L == "F" else pcbnew.B_Cu)
             c = pg.centroid
             region = regions[net].buffer(-(obs.via / 2 + 0.3))
+            if only is not None:
+                # an orphan's via goes on the body of its plane's fill, not on its fragment
+                import pcb
+                for z in board.Zones():
+                    if not z.GetIsRuleArea() and z.IsFilled() and z.GetNetname() == net:
+                        fill = pcb.shapely_of(z.GetFilledPolysList(z.GetLayer()))
+                        body = max(getattr(fill, "geoms", [fill]), key=lambda g: g.area)
+                        region = region.intersection(body.buffer(-(obs.via / 2 + 0.3)))
             fc = Point(TO(fp.GetPosition().x), TO(fp.GetPosition().y))
             away = math.atan2(c.y - fc.y, c.x - fc.x) if fc.distance(c) > 0.05 else 0.0
             found = None
@@ -1609,6 +1620,29 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
     return failed
 
 
+def plane_orphans(board, lay):
+    """The plane-net pads standing on a FRAGMENT of their plane's fill - a piece the
+    antipads round them (a 1.27 mm header's neighbours, a row of vias) cut off from the
+    rest - on a board whose zones are filled: each needs its own via (fanout `only=`)."""
+    import pcb
+    out = []
+    for z in board.Zones():
+        if z.GetIsRuleArea() or not z.IsFilled():
+            continue
+        net = z.GetNetname()
+        if net not in (lay.get("fanout") or []):
+            continue
+        fill = pcb.shapely_of(z.GetFilledPolysList(z.GetLayer()))
+        parts = sorted(getattr(fill, "geoms", [fill]), key=lambda g: -g.area)
+        for frag in parts[1:]:
+            for f in board.GetFootprints():
+                for q in f.Pads():
+                    c = Point(TO(q.GetPosition().x), TO(q.GetPosition().y))
+                    if q.GetNetname() == net and frag.buffer(0.05).contains(c):
+                        out.append(f"{f.GetReference()}.{q.GetNumber()}")
+    return sorted(set(out))
+
+
 def moat_keepout(board, lay):
     """Over each island's moat, on the layer whose reference plane the island is (layer
     1 over layer 2), no track may cross but at the tie's window (a disc round the net
@@ -1637,8 +1671,10 @@ def prepare(board, lay):
     report = []
     for spec in lay.get("pairs") or []:
         report += route_pair(board, lay, obs, spec)
-    report += fanout(board, lay, obs)
+    # the moat's keep-out before the fanout, so no other plane net's via lands in it
     moat_keepout(board, lay)
+    obs = Obstacles(board, lay)
+    report += fanout(board, lay, obs)
     for r in report:
         print("route: " + r)
     return report
