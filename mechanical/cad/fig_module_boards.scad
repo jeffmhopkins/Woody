@@ -40,9 +40,12 @@ translate([DX, 0, 0]) {
     fill("Gold") r2(b2b_at - [b2b_w, b2b_l] / 2 - [1.27, 1.27], b2b_at + [b2b_w, b2b_l] / 2 + [1.27, 1.27]);
     for (s = standoff_at) fill(C_METAL) translate(s) circle(d = standoff_af / cos(30), $fn = 6);
     for (s = panel_standoff_at) { fill(C_METAL) translate(s) circle(d = standoff_af / cos(30), $fn = 6); tag(s + [0, 4.6], "to the panel", 1.1); }
-    fill(C_LED) r2(led - [led_smd[0], led_smd[1]] / 2, led + [led_smd[0], led_smd[1]] / 2);
-    outline("Green") translate(led) circle(d = led_pipe_d);
-    tag(led + [0, 3.2], "LED-PANEL", 1.1);
+    fill(C_NYLON) r2(hdr_rect[1], hdr_rect[2]);
+    tag(hdr + [0, -led_header[1] / 2 - 1.4], "J-LED-PANEL", 1.1);
+    tag(hdr + [-led_header_pitch / 2, 0], "1", 0.9);
+    outline("Green") translate(led) circle(d = led_nut_d, $fn = 6);
+    outline("Green") r2([led[0] - led_wire_d, hdr[1] + led_header[1] / 2], [led[0] + led_wire_d, led[1] - led_nut_d / 2]);
+    tag(led + [0, led_nut_d / 2 + 1.2], "LED-PANEL (panel)", 1.1);
     outline(C_PCB) r2([b_x0, jb_y0], [b_x1, b_y1]);
     tag([cx, jb_y0 - 1.6], "the jack board, above", 1.1);
     // Rear face, outlined.

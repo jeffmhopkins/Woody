@@ -1,0 +1,365 @@
+# FIRST-LAYOUT INPUT for the main board's PCB - tools/pcb.py layout, `kind: main`
+# (tools/pcb_main.py). hardware/boards/key-board-lh/layout.yaml is the worked
+# example and says what the shared keys mean; only what the main board adds or
+# does differently is explained here.
+#
+# FROM THE BODY CAD, NOT HERE (mechanical/export/pcb-geometry.echo, `main`
+# lines; the outline from mechanical/export/main-board.dxf): the thumb switches
+# (on the UNDERSIDE - they come in from below), both J-CHAIN headers, J-MCU,
+# J-UMB, U-BREATH, the thirteen LEDs, the eleven mounts, the two U-bolt legs,
+# the keep-outs and the board's thickness. Everything else is placed below, in
+# BODY coordinates (x along the body from the mouth, y across, mm, seen from
+# above), on the TOP face (parts face up; ADR 0017). Once the .kicad_pcb exists
+# it is the source; this file records how the first layout was made.
+
+kind: main
+cluster: main
+outline: main-board.dxf
+layers: 4
+
+# The key boards' rules and the same board house, so one order makes all three.
+rules:
+  track: 0.25
+  track_min: 0.2
+  clearance: 0.2
+  via: 0.7                  # 0.4 over the 0.3 drill, as the key boards' (their layout.yaml)
+  via_drill: 0.3
+  via_min: 0.66
+  drill_min: 0.3
+  edge_clearance: 0.3
+  power_track: 0.4
+
+fab:
+  house: JLCPCB
+  hole_clearance: 0.28
+  hole_to_hole: 0.45
+  annular_min: 0.18
+  silk_text_min: 1.0
+  silk_line_min: 0.15
+  silk_to_pad: 0.15
+  finish: "HAL lead-free"
+  mask: White               # ADR 0028 point 7: the top face is the LED row's first reflector; both faces, one order
+  silk: Black               # white legend does not read on white mask
+  copper_oz: 1
+
+# FOUR LAYERS (ADR 0017 amendment 2026-09-29): signal / ground / power / signal,
+# 1.6 mm. JLCPCB's standard 4-layer 1.6 mm stack JLC04161H-7628 [ds
+# datasheets/fab/JLCPCB-IMPEDANCE-STACKUPS.pdf, "4-Layer Impedance Control
+# Stackup", 1.6 mm, 1 oz outer, 0.5 oz inner]: its layers as the Gerber job file
+# reports them (pcb.py set_stackup). The finished thickness is the body CAD's
+# (switch.pcb_t), which check holds; these add to 1.586 mm of copper and
+# dielectric [calc: 2 x 0.035 + 2 x 0.2104 + 2 x 0.0152 + 1.065], the mask the rest.
+stackup:
+  name: JLC04161H-7628
+  outer_cu: 0.035
+  inner_cu: 0.0152
+  prepreg: {thickness: 0.2104, material: "7628", epsilon_r: 4.4}
+  core: {thickness: 1.065, material: FR4, epsilon_r: 4.6}
+
+# THE PLANES (hardware/carrier/power-entry-instrument/power-entry-instrument.md §2):
+# layer 2 is PWR_GND, one plane from J-UMB to the mouth end under every SPI,
+# chain and LED-data trace; layer 3 carries the rails. The rail that visits the
+# whole board is the +12 V behind Q-INRUSH (INST_POS12, power-entry-instrument.md
+# §1a: all thirteen LEDs and their caps, C-STRIP-BULK, L-BUCK-IN, the reference's
+# input and the buffer's supply), so it is the layer-3 plane, and a signal on
+# layer 4 has one unbroken plane over it. The +12 V ahead of Q-INRUSH
+# (UMBILICAL_POS12, J-UMB pin 3 to the clamps and Q-INRUSH's source) and the
+# lighter rails (DEV_3V3, INST_5V_A, BUCK_IN) are tracks: net_classes below.
+planes:
+  - {layer: In1.Cu, net: PWR_GND}
+  - {layer: In2.Cu, net: INST_POS12}
+
+# THE ANALOG ISLAND (same page, §2): AGND_INST on layer 2 under the analog block
+# only, a moat round it, bridged at ONE point by NT-AGND (NT2), which sits under
+# U-ADC (U2) between its VSS (pin 4, the island side) and its digital pins (5-8,
+# the plane side): the moat runs along U2's centreline. The outline (body mm)
+# keeps off the mouth-end mount H9 and the column mount at x 40 (both PWR_GND,
+# ADR 0025), and out of the band of LED13 (D19) and LED12's corner (the LEDs
+# return to PWR_GND). pcb.py check holds: every AGND_INST pad on the island but
+# the pair's far end, no other plane net's pad on it, one tie.
+islands:
+  - net: AGND_INST
+    layer: In1.Cu
+    tie: NT2
+    moat: 0.5
+    # layer-1 tracks may cross the moat only here (a disc round the tie: U2's CS and
+    # its supply) and as the breath pair (pairs: below); anywhere else a layer-1 track
+    # over the moat is a signal crossing a split in its reference plane
+    tie_window: 4.0
+    # its bottom edge stands off the board's (y 10.0, not 7.5): the strip of plane
+    # left along the edge is what joins H9's corner to the rest of layer 2 - an
+    # island down to the edge cut it off, and H9 with it
+    # the top corner reaches past the sensor's leads, over the strip above the sensor
+    # slot: C8 on VS, and the room kept for the datasheet's supply and output
+    # decoupling (MPXV4006DP Fig. 3: 1 uF + 10 nF on VS, 470 pF on Vout; README, Open)
+    outline: [[7.5, 15.6], [15.6, 15.6], [15.6, 10.0], [35.9, 10.0], [35.9, 15.2], [38.5, 15.2],
+              [38.5, 25.2], [20.3, 25.2], [20.3, 45.2], [30.6, 45.2], [30.6, 49.5], [7.5, 49.5]]
+    # its one pad off the island: the breath pair's AGND leg ends at R-SER-BREATH-INST
+    # beside J-UMB (breath-sense-link.md)
+    off_island: [R39.1]
+
+# THE BREATH PAIR (same page: "crosses the moat as a pair"): BREATH_SENSE's
+# source SENSOR_BUFFERED_OUT and the AGND leg, taken at the sensor's own GND pin
+# (U-BREATH pin 3), side by side on layer 1 over the plane to their series
+# resistors at J-UMB. Routed before everything else (pcb_route.route_pair).
+pairs:
+  - nets: [/SENSOR_BUFFERED_OUT, AGND_INST]
+    from: [U3.7, U10.3]
+    to: [R38.1, R39.1]
+    layer: F.Cu
+    width: 0.25
+    gap: 0.25
+    # out from between the sensor's pins and the buffer, over LED13's cap and along
+    # the board above the LED row's caps (body mm); the rest is the router's
+    through: [[23.0, 35.6]]
+
+# Net classes (the rest are the Default class, rules: track): the rails as
+# tracks. [calc] IPC-2221 outer layer, 1 oz, 10 C rise: I = 0.048 dT^0.44 A^0.725
+# -> 1.0 A (U-BUCK's rating, the most its 5 V path can carry; power-entry-
+# instrument.md "Regulator loading") needs 16.3 mil2 = 0.30 mm; 0.5 mm leaves
+# the drop along the 5 V path at 10 mV per 10 mm [calc: 0.5 mOhm/sq x 10/0.5
+# x 1.0 A = 10 mV]. UMBILICAL_POS12, J-UMB to Q-INRUSH, carries the whole
+# instrument, bounded by the module's LT1641 worst-case trip (power-entry-
+# instrument.md §1a, 1.10 A): 18.6 mil2 = 0.34 mm [calc: (1.10 / (0.048 x
+# 10^0.44))^(1/0.725) = 18.6 mil2; / 1.378 mil (1 oz) = 13.5 mil], so 0.5 mm
+# too. DEV_3V3 is the registers, the ADC and the chain's pull-ups
+# (the Matrix's regulator is on the Matrix), tens of mA: 0.3 mm.
+net_classes:
+  power5:
+    nets: [INST_5V_A, BUCK_IN, /power-entry-instrument/BUCK_A_OUT]
+    track: 0.5
+  power12_in:
+    nets: [UMBILICAL_POS12]
+    track: 0.5
+  rail3v3:
+    nets: [DEV_3V3]
+    track: 0.3
+  plane_nets:
+    # stubs from a pad to its plane via, and the pair's AGND leg (pairs:)
+    nets: [PWR_GND, INST_POS12, AGND_INST]
+    track: 0.4
+
+# Every SMD pad on a plane net gets its own via into the plane beside it, a
+# short stub away (pcb_route.fanout); a through-hole pad meets the plane itself.
+fanout: [PWR_GND, INST_POS12, AGND_INST]
+
+# Parts the sheets carry that this board does not: A1 is the Matrix, on the lid
+# (on the sheet for its pad-to-pin map, reached through J-MCU); SW9 and SW10 are
+# the spare positions' switches, not fitted (config/key-layout.yaml
+# spare_bits_switches) and given no place by the body CAD. check reports each
+# as a note, not an error; anything else missing from the board is an error.
+not_on_board:
+  A1: "the Matrix: on the lid, no footprint; J-MCU is its connector"
+  SW9: "sw+ spare switch: not fitted, no place in the body CAD"
+  SW10: "sw- spare switch: not fitted, no place in the body CAD"
+
+# The mounts: every one plated on PWR_GND, pads on both faces (ADR 0022 point 6,
+# ADR 0025; the README's Open table: not _Pad_Via, whose ring of vias breaks the
+# board house's hole-to-hole rule).
+mounts:
+  footprint: "MountingHole:MountingHole_2.7mm_M2.5_Pad_TopBottom"
+  net: PWR_GND
+
+# The U-bolt legs' holes are the DXF's (unplated, routed). On the outer layers no
+# copper within 0.5 mm of what bears there (the washer and nut above, the spacer
+# below), the margin the body CAD's neck rule takes (mechanical/cad/woody_body.scad,
+# "main board neck at the U-bolt station"); the planes run on past the holes.
+ubolt:
+  copper_keepout: 0.5
+
+# J-MCU and J-UMB, from the echo's insulator extent (x0, x1) and centre y. Each is
+# placed by its pad row farthest from the mouth - the connectors' mouths face the
+# tail - at `back_row_at` from x0 or x1. Both are the woody.pretty footprints
+# (hardware/lib/README.md). J-MCU: the body 5.40 along the body and its far tail
+# row 2.60 behind the body's back [ds XKB-X1270WR-2x12A-9TV01.pdf rev A1 side
+# view; config/body.yaml boards.mcu_conn_w], so 8.00 in front of the mouth face x1
+# [calc: 5.40 + 2.60]. J-UMB: the Hanxia header's pin row 1.80 in front of its
+# insulator [ds HANXIA-HX-PZ2.54-1x8P-WZ.pdf; calc: 4.30 mating face to tail - 2.50].
+connectors:
+  J-MCU: {row: J-MCU, rot: 0, back_row_from: x1, back_row_at: -8.00}
+  J-UMB: {row: J-UMB, rot: 0, back_row_from: x0, back_row_at: -1.80}
+
+# Parts the echo places by centre: U-BREATH, its pads centred there, turned so its
+# ports point to the tail (+x), as the body CAD and breath-sense-link.md
+# (Mounting) put them: the footprint's ports are at its -y, so 270. That puts
+# pins 1-4 (VS, GND, Vout) toward the far edge (high y), not the analog block;
+# the island reaches round them (islands: below).
+cad_parts:
+  U-BREATH: {row: U-BREATH, rot: 270}
+
+# Each LED's 100 nF (C-LED), 4.6 mm across the body from its LED's centre, over
+# its VDD and GND pads (ADR 0028). LED n is the nth along the data chain.
+led_caps: {row: C-LED, offset: [0.0, 4.6], rot: 0}
+
+# The key networks: the key boards' T, relative to each thumb switch. The far row
+# (at 0 deg): the junction 8.5 mm outboard of the switch centre, past its pins,
+# S toward pin 1. The near row is turned 180 deg (ADR 0022 point 5), and its T
+# turns with it. The spare positions (sw+, sw-) have no switch: their T's stand
+# beside REG-RT, the same shape.
+networks:
+  pattern: {offset: [0.0, 8.5], axis: x, leg: -1, c: -1}
+  except:
+    LT1: {at: [50.0, 10.0], leg: 1, c: 1}     # switch at 180 deg: the pattern turned with it
+    LT3: {at: [90.0, 10.0], leg: 1, c: 1}
+    RT1: {at: [158.0, 10.0], leg: 1, c: 1}
+    RT3: {at: [198.0, 10.0], leg: 1, c: 1}
+  spare:
+    sw+: {at: [168.4, 20.2], leg: 1, c: -1}
+    sw-: {at: [168.4, 11.2], leg: 1, c: 1}
+
+# Keep-outs from the body CAD (no footprint on the top face there): under each
+# chain ribbon's plug and fold but its own header; the regulator block but U-BUCK.
+keepouts:
+  "ribbon left_hand": {except_rows: [J-CHAIN]}
+  "ribbon right_hand": {except_rows: [J-CHAIN]}
+  "regulator block": {part: REGULATOR-BLOCK, except_rows: [U-BUCK]}
+
+# How tall each footprint family stands on the top face, for the height rooms
+# (pcb_main.check_heights): under the key boards, elsewhere, and under the Matrix
+# ribbon. Each with where it comes from.
+heights:
+  CP_Elec_10x10: 10.2          # [ds UCW1E471MNL1GS, 10.2 max]
+  CP_Elec_6.3x5.8: 5.8         # [ds UCM1E101MCL1GS]
+  SWPA6028: 2.8                # [ds SWPA6028S220MT]
+  D_SMC: 2.62                  # [from memory: DO-214AB max]
+  D_SMA: 2.3                   # [from memory: DO-214AC max]
+  RECOM_R-78E: 10.4            # [repo power-entry-instrument.md, U-BUCK upright]
+  SOIC: 1.75                   # [from memory: JEDEC MS-012 max]
+  SOT-23: 1.45                 # [from memory]
+  SOD-323: 1.1                 # [from memory]
+  SOD-123: 1.35                # [from memory]
+  C_1206: 1.8                  # [from memory: thickest 10 uF 1206]
+  C_0805: 1.35                 # [from memory]
+  R_1206: 0.7                  # [from memory]
+  R_0805: 0.6                  # [from memory]
+  R_0603: 0.55                 # [from memory]
+  L_0805: 1.0                  # [from memory]
+  NetTie: 0.05                 # copper only
+  NXP_Case1351: 9.9            # [ds MPXV4006DP p.7, with its ports]
+  PinHeader_1x05_P2.54mm_Vertical: 8.5   # [from memory: the header's pins above the board; the service lead's plug goes on with the lid off]
+  IDC-Header: 4.9              # [repo config/body.yaml boards.chain_hdr_*]
+  LED_WS2815B: 1.65            # [repo pcb-geometry.echo led height]
+  PinHeader_2x12: 5.1          # [repo config/body.yaml boards.mcu_conn_h]
+  PinHeader_1x08: 2.5          # [repo config/body.yaml boards.umb_joint_h]
+
+# Placement: TOP face, body coordinates, [x, y, rot] (rot CCW seen from above).
+parts:
+  # --- the analog island, at the mouth end. U-BREATH (the echo) at the top left; the
+  # buffer beside its pins 2-4, the reference under it, their feedback network down
+  # the mouth edge; U-ADC at the island's tail end with its input network in front of
+  # it and NT-AGND under it on the moat.
+  U3:  [14.0, 25.8, 0]      # U-BUF OPA2197: A = the reference buffer, B = the breath buffer
+  U4:  [14.3, 18.6, 0]      # U-REF-BREATH REF5050
+  # VS's decoupling (MPXV4006DP Fig. 3, breath-sense-link.md): beside the sensor's pins at
+  # the far edge, just past its leads' courtyard, the smallest nearest pin 2 (VS)
+  # each turned so its VS pad is on top: the three VS pads in one row, one straight track
+  C202: [21.7, 47.4, 270]   # 10 nF on VS, nearest
+  C8:  [23.9, 47.4, 270]    # 100 nF on VS
+  C201: [26.1, 47.4, 270]   # 1 uF on VS
+  # SENSOR_RAW's 470 pF: pin 4 (Vout) is the leads' mouth-end corner, walled by the
+  # sensor's own courtyard, so it stands at the other end of the net, at U-BUF's input
+  C203: [21.8, 23.6, 90]    # 470 pF, SENSOR_RAW to AGND_INST, by U3 pin 5 (INB+)
+  C204: [19.2, 25.0, 270]   # 100 nF, U3's V+ (pin 8, INST_POS12) to AGND_INST
+  # the feedback network is a ring (BUF_OUT - R7 - VS - R8 - REF_MINUS - C9 - AC_FB_MID
+  # - R9 - BUF_OUT): stacked so each pair of neighbouring pads shares its net and joins
+  # without a track round anything; VS from R8's foot to R7's head down layer 4
+  R7:  [8.9, 28.0, 90]      # R-ISO-REF: BUF_OUT (foot) -> VS (head)
+  R9:  [8.9, 24.55, 270]    # R-FBX-REF, AC feedback: BUF_OUT (head) -> AC_FB_MID (foot)
+  C9:  [8.9, 21.1, 90]      # C-FB-REF: REF_MINUS (foot) -> AC_FB_MID (head)
+  R8:  [8.9, 17.65, 90]     # R-FB-REF, DC feedback: VS (foot) -> REF_MINUS (head)
+  C5:  [19.4, 20.9, 90]     # C-REF-OUT on REF_5V
+  C7:  [19.2, 16.4, 90]     # 100 nF on REF_5V
+  C4:  [17.2, 13.0, 0]      # C-REF-OUT on REF_VIN
+  C6:  [31.5, 12.9, 0]      # 100 nF on REF_VIN, beside R-REF-IN (on the island, off its edge strip)
+  D1:  [22.5, 12.8, 0]      # D-REF-CLAMP on REF_VIN
+  R6:  [27.5, 12.8, 0]      # R-REF-IN from +12 V
+  U2:  [38.5, 21.0, 0]      # U-ADC MCP3202: pins 1-4 (CS, CH0, CH1, VSS) on the island, 5-8 on the plane
+  NT2: [38.5, 16.3, 0]      # NT-AGND: pad 1 (AGND_INST) on the island, pad 2 (PWR_GND) past the moat
+  C1:  [31.2, 20.6, 90]     # C-AA-ADC, at CH0
+  R5:  [29.1, 20.6, 90]     # R-ADCDIV-L
+  R4:  [27.0, 20.6, 90]     # R-ADCDIV-U, from the breath buffer's output
+  C2:  [31.8, 16.4, 0]      # C-ADC-BULK
+  C3:  [33.4, 20.6, 270]    # the ADC's 100 nF beside U2, its VSS end at pin 4; its 3V3 end to pin 8 across the moat by the tie
+  # --- at J-UMB (pin row x 295.9): the clamps and the breath pair's resistors in
+  # two columns in front of it; the tongue's end mounts (x 278.3, y 13 / 30) behind
+  # (config/body.yaml boards.umb_parts_d), D-TVS-PWR between them
+  D5:  [292.3, 30.39, 180]  # D-TVS-BREATH on BREATH_SENSE (pin 1)
+  D6:  [292.3, 27.85, 180]  # D-TVS-BREATH on AGND_SENSE (pin 2)
+  R38: [287.6, 30.39, 0]    # R-SER-BREATH-INST in BREATH
+  R39: [287.6, 27.85, 0]    # R-SER-BREATH-INST in AGND_SENSE
+  NT1: [293.0, 13.4, 90]    # NT-DIG at J-UMB pin 8 (ADR 0018)
+  D2:  [286.4, 20.0, 90]    # D-REVSHUNT, across pins 3 / 6, ahead of L-BUCK-IN
+  D3:  [278.3, 21.5, 90]    # D-TVS-PWR, between the tongue's end mounts
+  # --- Q-INRUSH and its gate network (power-entry-instrument.md §1a) behind the
+  # clamps, on the tongue between HDR-SERVICE and the end mount: its source from
+  # J-UMB pin 3 past D-REVSHUNT and D-TVS-PWR, its drain into the INST_POS12 plane
+  Q1:  [270.5, 21.8, 0]     # Q-INRUSH AO3401A
+  C38: [266.0, 26.3, 90]    # C-INRUSH-GS, source to gate
+  R41: [268.3, 26.3, 90]    # R-INRUSH-GS, source to gate
+  R42: [270.6, 26.3, 90]    # R-INRUSH-G, gate to ground
+  C39: [272.9, 26.3, 90]    # C-INRUSH-GD, the Miller leg's capacitor
+  R43: [272.9, 30.8, 90]    # R-INRUSH-GD, the Miller leg's damping, to the drain
+  D20: [268.8, 30.8, 90]    # D-INRUSH-RST, gate reset after an unplug
+  # --- the SPI and chain series resistors at their driving end, beside J-MCU, under
+  # the Matrix ribbon (each under its 2.15 mm room)
+  R1:  [254.2, 29.6, 90]    # R-SPI-SER SCLK
+  R2:  [257.2, 29.6, 90]    # R-SPI-SER MOSI
+  R3:  [260.2, 29.6, 90]    # R-SPI-SER CS_MOD
+  R40: [263.2, 29.6, 90]    # R-CS-PULL-INST, IO34 to 3V3 beside R-SPI-SER CS
+  # U-TVS-SPI clamps the pad side of R-SPI-SER (IO35, IO36, IO34 - spi-link), so it
+  # stands on the J-MCU side of the resistors, below the chain's, clear of the column mount
+  U1:  [256.5, 17.5, 0]
+  R34: [254.2, 23.8, 90]    # R-CHAIN-SER SCK
+  R35: [257.2, 23.8, 90]    # R-CHAIN-SER SH/LD
+  R36: [260.2, 23.8, 90]    # R-CHAIN-SER SER (the chain's end)
+  J2:  [262.6, 16.6, 90]    # HDR-SERVICE, on the tongue, reached with the lid off
+  # --- the regulator block (the echo's REGULATOR-BLOCK) holds U-BUCK alone; the
+  # buck's input LC and C-STRIP-BULK where their height fits (README, Open)
+  U5:  [232.58, 43.985, 270] # U-BUCK, its courtyard centred in the block
+  C11: [217.13, 42.6, 90]    # C-BUCK-IN 100 uF (5.8 mm tall)
+  L1:  [225.43, 43.6, 0]     # L-BUCK-IN 22 uH
+  D4:  [225.6, 36.5, 180]   # D-USBOR, buck -> INST_5V_A
+  C10: [221.2, 16.4, 0]     # C-STRIP-BULK 470 uF, at the LED row's feed (LED 1 end)
+  U6:  [232.3, 16.4, 0]     # U-LVLSHIFT 74AHCT125
+  C12: [237.7, 20.2, 270]   # its 100 nF, at VCC (pin 14) and GND (pin 13)
+  R10: [238.6, 16.4, 90]    # R-LED-PD
+  R11: [238.6, 12.4, 90]    # R-LED-SER, into LED 1's DI
+  # --- the thumb registers, each in the near band between its hand's switches
+  U7:  [70.0, 19.2, 90]     # REG-LT
+  R44: [76.9, 21.7, 0]      # R-HOP-SER, at U7's QH (pin 9): its pad 1 to the pin, pad 2 on toward J5 pin 6
+  C13: [65.6, 24.2, 0]      # REG-LT's 100 nF, at VCC (pin 16) and GND (pin 15)
+  R32: [63.2, 21.2, 90]     # FREE1 pull-up
+  R33: [63.2, 17.3, 90]     # FREE2 pull-up
+  U8:  [186.0, 19.2, 90]    # REG-RT
+  C14: [181.6, 24.2, 0]     # REG-RT's 100 nF, at VCC (pin 16) and GND (pin 15)
+  # --- the key chain's parts beside their J-CHAIN
+  U9:  [64.6, 44.2, 0]      # U-TVS-CHAIN on SCK, SH/LD, SER_LH
+  FB1: [66.4, 39.8, 90]     # FB-CHAIN, the LH ribbon's 3V3
+  R37: [62.0, 39.8, 90]     # R-SER-TERM on the LH ribbon's SER
+  FB2: [167.3, 41.5, 90]    # FB-CHAIN, the RH ribbon's 3V3
+
+silk:
+  at: [100.0, 45.5]
+  title: "WOODY main board"
+  rev: "A"
+  date: "2026-09-30"
+
+# Routing: pcb_route.fanout and route_pair first (above), then every other
+# connection on layers 1 and 4 (directions: below); what is left gets a rip-up
+# (pcb.rescue). A connection still left is reported by name and check fails on it.
+route: astar
+
+# LAYER DIRECTIONS (owner, 2026-10-01, on the first routed preview: "similar horizontal
+# and vertical layers", as the key boards route): layer 1 runs along the board, layer
+# 4 across it, a via at each turn between them. route: astar - every signal connection
+# by pcb_route.complete, shortest first, a step against its layer's direction costing
+# against_cost; Freerouting (route: freerouting) does not take a direction from its
+# batch settings (2026-10-01: the same result at every cost and layer order tried).
+# A connection with no way through takes up the nets in its way and they are routed
+# again, each net at most this many times (pcb_route.complete).
+rip_up: 10
+directions:
+  layers: {F.Cu: horizontal, B.Cu: vertical}
+  against_cost: 6.0
+  # each right-angle corner cut to two 45-degree bends, up to this far back (pcb_route.chamfer)
+  chamfer: 0.6

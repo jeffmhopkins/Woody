@@ -8,7 +8,9 @@ places, and so do MOD 2 and MOD 3; **and again the same day** (point 14): the
 panel's material and finish, which ADR 0026 point 8 cited as specified here
 and which this record had never written down; **and again the same day**
 (point 15): the jack board is a plain rectangle ending above the toggle's
-row, so the LED and the two low standoffs moved off it. Made with the module's mechanical CAD, "up to
+row, so the LED and the two low standoffs moved off it; **and again the
+same day** (point 16): the light pipe is gone, and the LED is a panel-mount
+indicator wired to a header on the main board. Made with the module's mechanical CAD, "up to
 the line before board layout". It takes ADR 0023's two-board decision to
 positions and lengths, and it **reverses one of 0023's consequences**: the
 panel has no slot for the NE8FAV's PUSH tab (point 3).
@@ -96,12 +98,14 @@ checked rather than asserted.
    body fixes that board's depth just as the NE8FAV fixes the main board's.
    So the stock 8 mm spacer is **faced to length**, as the key boards' spacer
    is (DRC: *standoff faced from stock*). ADR 0023 left this open.
-9. **The LED is an 0805 on the main board's front face under a press-fit
-   panel light pipe** (point 15): `MECH-LED-BEZEL-MOD` is the pipe, its
-   flange stops on the panel's face, and what it leaves over the LED is
-   checked (DRC: *light pipe over the LED*). *Amended 2026-10-01: this point
-   first held a 3 mm LED by a lead spacer standing on the jack board's left
-   leg.*
+9. **The LED is a panel-mount indicator, wired to a header on the main
+   board** (point 16): `LED-PANEL` is held in the panel by its own nut, and
+   its lead (`CBL-LED-PANEL`) plugs into `J-LED-PANEL` on the main board's
+   front face. What it stands behind the panel, and the lead's run, are
+   checked (DRC: *LED-PANEL behind the panel*, *CBL-LED-PANEL's run*).
+   *Amended 2026-10-01, twice: this point first held a 3 mm LED by a lead
+   spacer standing on the jack board's left leg; point 15 then made it an
+   0805 on the main board under a press-fit light pipe.*
 10. **J-PWR-EURO is on the main board's rear face, low on the right**, long
     axis vertical, pin 1 (−12 V, red stripe) at the bottom as Doepfer wants.
     The ribbon folds over the socket's strain relief and down to the bus
@@ -121,7 +125,7 @@ checked rather than asserted.
     control, and the toggle's row moved above it (`layout.toggle_y`), its
     lever's sweep between the PUSH tab and the last jack row's plug grips.
     The LED moved with the toggle, into the strip on the toggle's left (since
-    point 15, a light pipe over an LED on the main board); the strip beside
+    point 16, a panel-mount indicator in its own hole); the strip beside
     the flange no longer carries anything but the umbilical's legend.
 
     **The rule is checkable now.** The *drop zone* is the NE8MX's grip
@@ -235,7 +239,8 @@ checked rather than asserted.
     or more below it (DRC: *jack board bottom edge*, which reports both
     margins and the NE8FAV's).
 
-    **The LED moved to the main board, under a light pipe.** On the main
+    **The LED moved to the main board, under a light pipe** — *superseded
+    the same day by point 16; kept as the record of why.* On the main
     board a through-hole LED's leads would come out of the rear face under
     `U-ISO`'s body, which fills that face from the NE8FAV's tails to above
     the toggle's row on the left (`iso.at`). So `LED-PANEL` became an 0805
@@ -266,6 +271,42 @@ checked rather than asserted.
     six jack nuts and the two standoffs above the pots, which is all it
     needs; its mounting pads are `H1` and `H2`. **The cost** is two flush
     D4.6 stud heads on the panel's face, inside island C.
+
+16. **The LED is a panel-mount indicator with a lead to a header** —
+    amended 2026-10-01. The owner: *"Let's remove power led light pipe and do
+    a panel mount led with connector to header."* `MECH-LED-BEZEL-MOD` and
+    the 0805 under it are gone. `LED-PANEL` is a **Dialight 605-2211-110F**:
+    a 3 mm green LED recessed in a chrome M5 housing, in a D5.2 hole in the
+    panel (`led.hole_d`), its head standing `led.proud` on the face and its
+    nut on the rear face — the same place in the toggle's row, left of the
+    toggle. Its leads are cut short and soldered to **`CBL-LED-PANEL`**, a
+    two-wire lead with a JST XHP-2 that plugs into **`J-LED-PANEL`**, a JST
+    B2B-XH-A on the main board's **front** face, `led.header_below` below the
+    LED: pin 1 the anode (`LED_ANODE`), pin 2 the cathode (`AGND_MOD`).
+    `R-LED-PANEL` stays on the board beside it. It is plugged in **before**
+    the main board goes onto the panel studs.
+
+    **Why this part.** It is a stock panel indicator whose own drawing gives
+    the hole, the panel range (2 mm is inside its 3.5 mm maximum) and what
+    stands behind the panel, and its M5 hole leaves the panel's left edge a
+    web above `rules.web_min` where a 6 mm-hole bezel would not (DRC: *panel
+    web from a cut to the panel's edge*). Its two banked catalogue pages
+    disagree on the LED inside — 2 V, 15 mA, 70 mcd in 2021, 3 V, 20 mA,
+    900–1400 mcd in 2026 — so `R-LED-PANEL` was re-derived across both and
+    the panel-led sim re-run on both (`hardware/module/panel-led/sim`).
+
+    **Behind the panel.** The housing, its nut and the leads' sleeved
+    joints stand in the gap above the main board, below the jack board's
+    bottom edge; the header is far enough below the LED that its mated
+    housing is not under them, its tails on the rear face are below
+    `U-ISO`'s body, and the wires leave its top with room to turn before the
+    panel (DRC: *LED-PANEL behind the panel: in front of the main board*,
+    *… clear of the jack board, SW-POWER, the NE8FAV, the panel standoffs
+    and J-LED-PANEL*, *J-LED-PANEL on the main board's front face*,
+    *J-LED-PANEL's mated housing behind the panel*, *CBL-LED-PANEL's run, LED
+    to header*). The legend zone beside the LED is now measured from the
+    head's edge (DRC: *legend zone: LED-PANEL legend*); `off` still fits it
+    (`art/panel-art-check.txt`).
 
 ## Consequences
 
@@ -315,4 +356,5 @@ inside the zones this record fixes.*
 | The umbilical's jacket and bend radius (`ethercon.umb_od`, `umb_bend_k`) | CABLE-UMB bought, and its datasheet |
 | Whether the panel vendor clinches the two studs and prints over their flush heads (point 15) | The panel vendor's quote; the proof panel |
 | The panel spacers' stocked length and part (`panel_standoff.stock_l`) | The metal spacer bought for `MECH-PANEL-STANDOFF-MOD` |
-| Whether the LED is bright enough through the light pipe at its 4.5 mA (point 15) | The first build, looked at; `R-LED-PANEL` comes down if not |
+| Whether the LED reads right at its current (point 16): the two catalogues' parts differ by more than tenfold in intensity | The part in hand, looked at in a dim rack; `R-LED-PANEL` moves (up if the InGaN part glares, down if the 2021 part is dim) |
+| The LED's nut and lock washer (`led.nut_d`, `led.nut_h`, tbd) | The part in hand |

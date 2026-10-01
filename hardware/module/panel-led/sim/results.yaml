@@ -4,85 +4,84 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/panel-led/sim/sims.yaml: ecef16a33a353bf9
-  hardware/module/panel-led/netlist.yaml: 5a2fba94bdeabd3f
+  hardware/module/panel-led/sim/sims.yaml: 652a64f857dfee0b
+  hardware/module/panel-led/netlist.yaml: 90d3bf8e99aa8da8
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
-  hardware/module/panel-led/sim/led.cir: 1f677a26d971c1ff
-  hardware/module/power-entry/sim/sims.yaml: 4b9e184c206aa08b
+  hardware/module/panel-led/sim/led.cir: 09f6c8f740ea5f9f
+  hardware/module/power-entry/sim/sims.yaml: 7479149434b90933
   figure:dac-rail: 5.23 V
+  figure:mod-reference: 3.3333 V
 ngspice: '42'
 sims:
   led[i_swing=0.195]:
     corners: 9
     measures:
       i_led:
-        nominal: 0.00458358
-        min: 0.00423895
+        nominal: 0.00417826
+        min: 0.00379381
         min_at: R-LED-PANEL+ v_set- vf20+
-        max: 0.00484446
+        max: 0.00484364
         max_at: R-LED-PANEL- v_set+ vf20-
       i_led_pp:
-        nominal: 4.55535e-06
-        min: 4.36904e-06
+        nominal: 4.55311e-06
+        min: 4.36625e-06
         min_at: R-LED-PANEL+ v_set- vf20+
-        max: 4.74489e-06
+        max: 4.74488e-06
         max_at: R-LED-PANEL- v_set+ vf20-
       v_on_100u:
-        nominal: 1.89091
-        min: 1.78853
+        nominal: 2.79324
+        min: 1.79033
         min_at: R-LED-PANEL- v_set- vf20-
-        max: 2.19449
+        max: 3.19482
         max_at: R-LED-PANEL+ v_set- vf20+
       v_on_1m:
-        nominal: 3.99902
-        min: 3.87787
+        nominal: 4.90148
+        min: 3.87964
         min_at: R-LED-PANEL- v_set- vf20-
-        max: 4.32468
+        max: 5.325
         max_at: R-LED-PANEL+ v_set- vf20+
     asserts:
-    - expr: min['i_led'] > 3.9e-3 and max['i_led'] < 5.0e-3
-      why: 'panel-led.md''s ~4.5 mA holds within about 12 % over U-ISO''s +-3.1 %, R-LED-PANEL''s 1 % and the LED''s whole
-        VF spread (it reads 4.5 mA with VF at the page''s 2.0 V): under 0.6 % of the 940 mA umbilical limit, and far inside
-        the LED''s 30 mA rating [ds LTST-C171GKT p.2]'
+    - expr: min['i_led'] > 3.5e-3 and max['i_led'] < 5.0e-3
+      why: 'panel-led.md''s 4.1-4.5 mA holds over U-ISO''s +-3.1 %, R-LED-PANEL''s 1 % and both catalogues'' V_F: under 0.6
+        % of the 940 mA umbilical limit, and inside either catalogue''s operating current (15 or 20 mA) [ds Dialight 605 pages]'
       pass: true
-    - expr: min['v_on_100u'] > 1.5 and max['v_on_100u'] < 2.6
-      why: 'panel-led.md ''lights as the output passes about 2 V'': the LED reaches 0.1 mA with the output between 1.5 and
-        2.6 V at every corner'
+    - expr: min['v_on_100u'] > 1.5 and max['v_on_100u'] < 3.6
+      why: 'panel-led.md ''lights as the output passes 2-3 V'': the LED reaches 0.1 mA with the output between 1.5 and 3.6
+        V at every corner'
       pass: true
   led[i_swing=0.367]:
     corners: 9
     measures:
       i_led:
-        nominal: 0.00458358
-        min: 0.00423895
+        nominal: 0.00417826
+        min: 0.00379381
         min_at: R-LED-PANEL+ v_set- vf20+
-        max: 0.00484446
+        max: 0.00484364
         max_at: R-LED-PANEL- v_set+ vf20-
       i_led_pp:
-        nominal: 8.56701e-06
-        min: 8.21662e-06
+        nominal: 8.5628e-06
+        min: 8.21138e-06
         min_at: R-LED-PANEL+ v_set- vf20+
-        max: 8.92347e-06
+        max: 8.92346e-06
         max_at: R-LED-PANEL- v_set+ vf20-
       v_on_100u:
-        nominal: 1.89154
-        min: 1.78982
+        nominal: 2.7952
+        min: 1.7916
         min_at: R-LED-PANEL- v_set- vf20-
-        max: 2.19588
+        max: 3.19687
         max_at: R-LED-PANEL+ v_set- vf20+
       v_on_1m:
-        nominal: 3.99904
-        min: 3.87939
+        nominal: 4.90286
+        min: 3.88113
         min_at: R-LED-PANEL- v_set- vf20-
-        max: 4.32731
+        max: 5.32821
         max_at: R-LED-PANEL+ v_set- vf20+
     asserts:
-    - expr: min['i_led'] > 3.9e-3 and max['i_led'] < 5.0e-3
-      why: 'panel-led.md''s ~4.5 mA holds within about 12 % over U-ISO''s +-3.1 %, R-LED-PANEL''s 1 % and the LED''s whole
-        VF spread (it reads 4.5 mA with VF at the page''s 2.0 V): under 0.6 % of the 940 mA umbilical limit, and far inside
-        the LED''s 30 mA rating [ds LTST-C171GKT p.2]'
+    - expr: min['i_led'] > 3.5e-3 and max['i_led'] < 5.0e-3
+      why: 'panel-led.md''s 4.1-4.5 mA holds over U-ISO''s +-3.1 %, R-LED-PANEL''s 1 % and both catalogues'' V_F: under 0.6
+        % of the 940 mA umbilical limit, and inside either catalogue''s operating current (15 or 20 mA) [ds Dialight 605 pages]'
       pass: true
-    - expr: min['v_on_100u'] > 1.5 and max['v_on_100u'] < 2.6
-      why: 'panel-led.md ''lights as the output passes about 2 V'': the LED reaches 0.1 mA with the output between 1.5 and
-        2.6 V at every corner'
+    - expr: min['v_on_100u'] > 1.5 and max['v_on_100u'] < 3.6
+      why: 'panel-led.md ''lights as the output passes 2-3 V'': the LED reaches 0.1 mA with the output between 1.5 and 3.6
+        V at every corner'
       pass: true

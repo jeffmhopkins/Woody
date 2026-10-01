@@ -97,6 +97,12 @@ the 282 µs time constant has not fully restored by the next. Still a pure gain
 term. The same run confirms the 564 Hz corner, the 55 dB at the buck's rate
 and τ = 282 µs.
 
+**Noise at `ADC_IN`** is in `breath-jack-noise`, from the breath chain's noise
+sim (`hardware/module/breath-output-stage/sim/`, `noise`): this input shares
+the sensor, `VS` and `U-BUF` B with the jack, and what reaches the converter,
+integrated past `C-AA-ADC`'s pole because it folds everything it samples, is
+well under 1 LSB rms and almost all the sensor's.
+
 Invisible: the zero is auto-tracked in firmware and the span is set by a panel
 knob `[repo] 0003, 0006`.
 

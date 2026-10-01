@@ -430,12 +430,138 @@ because a via in a pad wicks its solder away; **no via goes under silkscreen**
 path at an acute angle is left out, the path already ending inside the pad;
 and the mount holes' copper keep-outs (ADR 0020) are obstacles on both layers.
 **It proves nothing about itself** — KiCad's DRC and `pcb.py check` do. It is
-for simple digital boards like the key boards. **The main board's analog
-routing is done by hand** (`docs/reference/pcb-pipeline.md`). The module's
+for simple digital boards like the key boards; the main board uses its fanout,
+pair and moat pieces and `complete` for the rest (*The main board*, below). The module's
 own header docstring still says every single-sided ground pad gets a via;
 step 6 is what the code does.
 
+### The main board — `kind: main` (`tools/pcb_main.py`)
+
+A board whose `layout.yaml` says `kind: main` is built by `tools/pcb_main.py`
+and checked by the same `pcb.py check`, with more. The key boards' own path is
+unchanged: their `layout.yaml` names no kind.
+
+| What | From |
+|---|---|
+| Outline | `mechanical/export/main-board.dxf` less each mount's hole (the mount's footprint drills it); the U-bolt legs' holes and the sensor slot stay in Edge.Cuts, routed and unplated |
+| Thumb switches | `pcb-geometry.echo` `main` `switch`, on the **underside**: seen from above a switch hanging face down is the key-board footprint mirrored about the body's x axis, then turned by the CAD's rotation; the KiCad rotation that puts pins 1 and 2 there is found, not assumed. Model height `switch.thumb_pcb_below_seat` |
+| Both `J-CHAIN` | `main` `chain`, on the top (`place_chain(..., bottom=False)`); each is the header whose pin 10 is its own side's chain 3V3 |
+| `J-MCU`, `J-UMB` | `main` `connector` and `layout.yaml` `connectors:` — the pad row farthest from the mouth at a stated offset from the insulator's face, a figure of each footprint (`hardware/lib/README.md`): re-check it when a footprint changes, and `check` fails the row if it moved |
+| `U-BREATH` | `main` `part`, its pads centred there, turned by `cad_parts:` |
+| The LED row | `main` `led`, LED *n* the *n*th along the data chain (found from the netlist: DI of the first is the one net no LED drives); each `C-LED` at `led_caps:` offset |
+| Mounts | `main` `standoff`, **every one plated on `PWR_GND`** (`mounts:`), on the top face so their courtyard keeps parts off the standoff or nut; rule areas keep every track and via off what bears on each face |
+| U-bolt legs | `main` `ubolt`: outer-layer rule areas round the washer and nut above and the spacer below, grown by `ubolt: copper_keepout`; the planes run past |
+| Keep-outs | `keepouts:` — the chain ribbons' plug and fold, and the regulator block, as footprint rule areas (their own parts cut out); heights by `heights:` against the echo's rooms (`check_heights`) |
+| Key networks | the key boards' T (`networks:`, with `t_parts`), on the top face; `spare:` places the T of a position with no switch |
+| Parts the board does not carry | `not_on_board:`, each with its reason; `check` prints them as notes, and any other missing footprint is still an error |
+| Layers and stackup | `layers: 4`, `stackup:` (the board house's named stack, banked); plane layers are set to KiCad's *power* type |
+| Planes, islands | `planes:` (a zone per layer and net), `islands:` (an island zone over a polygon, cut out of its plane with a `moat`, one `tie`, a `tie_window`, the pads allowed `off_island`) |
+| Net classes | `net_classes:`, written into the `.kicad_pro` with a pattern per net |
+
+**Routing (`route: astar`, the main board's; or `route: freerouting`).** In
+this order (step 4 is Freerouting's only):
+1. **`pairs:`** — `pcb_route.route_pair`: two nets side by side on one layer,
+   routed as one fat track (two widths and the gap) by A* through the `through:`
+   points, then split into two offset legs, each leg joined to its own pads by a
+   single track of its net. Locked.
+2. **`fanout:`** — `pcb_route.fanout`: every SMD pad of a plane net gets its own
+   via into its plane on a short straight stub, the nearest legal spot, the via
+   inside its plane's region (an island's via on the island, a `PWR_GND` via off
+   the island and its moat). Through-hole pads meet the plane themselves. Locked.
+3. **`moat_keepout`** — a rule area over each moat on the layer above it, but for
+   the tie's window and where a pair crosses.
+4. **Freerouting**, `route: freerouting` only (`tools/pcb_freeroute.py`, v2.1.0, the last release on Java
+   21; `tools/setup-env.sh` fetches it and the tool checks its SHA-256): KiCad's
+   own Specctra DSN export, Freerouting headless, KiCad's own SES import. The
+   planes go as planes and the power layers as *power*, so only layers 1 and 4
+   are routed; locked copper goes as fixed wiring. On the exported copy only: a
+   rule area that keeps out only footprints is taken off (KiCad exports it as a
+   routing keep-out), and a keep-out band as wide as the edge clearance goes
+   inside every edge (the DSN has no copper-to-edge rule). Bounded by
+   Freerouting's own `--router.job_timeout` (20 min), which still writes the
+   session; its pass limit is not honoured in batch, and a shell timeout's kill
+   writes nothing. Its costs are its defaults: a flatter direction cost and
+   cheaper vias were tried on the first layout and left more unrouted; it takes
+   no layer direction in batch (step 5).
+5. Zones filled, then `pcb.post_route`: `pcb_route.tidy` (doubled, zero-length
+   and dangling tracks removed, and a via met on one face only; acute joins squared, collinear runs merged, as on a key
+   board; and with `directions: chamfer`, each right-angle corner cut to two
+   45-degree bends where the diagonal keeps its clearance); **`pcb_route.complete`**
+   - every connection KiCad's DRC still counts missing (under `route: astar`,
+   every signal connection), shortest first, routed by A* on both outer layers at once on the lazy 0.2 mm
+   grid, a step against its layer's `directions:` costing `against_cost`, a via
+   wherever `Obstacles.via_ok` allows, from one item and then, if that search
+   is boxed in, from the other. With `rip_up: n`, a connection with no way
+   through is searched again through other nets' unlocked routing at a cost per
+   cell, the nets that path crosses are taken up whole and queued again pad to
+   pad, each at most n times.
+   **Why not Freerouting for the main board** (2026-10-01): its batch run takes
+   no direction - the same layer use at every `default_undesired_direction_trace_cost`
+   tried (2.5 to 50) and with the DSN's layers reordered, and a DSN
+   `autoroute_settings` scope zeroes its pass settings (pass 1 in 0.03 s, no
+   wiring); it laid layer 4 along the board and layer 1 every way, the preview
+   the owner called sloppy. What it cannot route goes to **`pcb.rescue`**, a rip-up: round each
+   end of the missing connection (and, for a hop under 10 mm, the ground
+   between) the unlocked tracks and vias of other nets are taken up at 1.5, 3
+   and 5 mm, never a plane net's or locked copper; the missing connection is
+   routed first and the nets taken up are routed again (`complete`), and the
+   result is kept only when KiCad's DRC counts fewer problems, unconnected and
+   violations together, than before. Then the silkscreen, clear of every via,
+   and any stroke of a footprint's own silk on a via removed and named.
+6. Zones filled again, stackup written, as for a key board. Whatever is still
+   unconnected is printed by name; the board is written anyway, and `check`
+   fails on each connection until it is routed by hand.
+
+`layout --no-route` builds and places only (a cheap re-run after a footprint
+changes). **`pcb.py finish <board>`** runs the tidy, `complete` and `rescue`
+again on the board as it stands, in place, and prints what is still missing:
+for after a hand edit, or to try again without a whole layout. It never adds
+or moves a part. A whole layout of the main board takes one to two hours under
+`route: astar`, most of it `complete`'s rip-up; a `finish` twenty minutes to an
+hour. **`pcb.py update-footprints <board> <ref or footprint>...`** replaces placed
+footprints with the library's current ones in the same place, side and turn,
+keeping reference, value, sheet path and pad nets (KiCad's "update footprint
+from library"), and refuses one whose pads moved.
+
+**`check` adds** for a main board (`pcb_main.check_cad`, `check_heights`,
+`check_planes`): every switch underside with its pins where the body CAD's
+mirrored switch has them; each chain header, connector, the sensor and each LED
+where the echo puts it; each mount plated on its net with no other net's
+copper under its hardware on either face; no copper of any net inside a U-bolt
+leg's outer-layer keep-out; every top part inside its height room; each plane
+and island zone present; every island-net pad on the island (but `off_island`)
+and every island via inside it, no other plane net's via on it or its moat;
+**exactly one tie**, the named net tie; and **no signal track on layer 1 or 4
+crossing a split in its reference plane** (layer 2 under layer 1, layer 3 under
+layer 4) — a track must lie wholly within one filled area of its reference
+layer, antipads (holes under 4 mm²) closed; the tie's window and a pair's
+crossing of its moat are exempt.
+
 ### Learned the hard way
+
+- **A zone's fill is FRACTURED**: KiCad joins each hole to the outline by a
+  zero-width slit, so read as a polygon every antipad is a notch in the plane's
+  edge, and a split check calls every track to a via a crossing. Unfracture a
+  copy (`SHAPE_POLY_SET.Unfracture()`) first (`pcb_main.check_planes`).
+- **A board's connectivity does not see a track deleted in the same process**:
+  `GetUnconnectedCount()` after `Delete()` and `BuildConnectivity()` gave the same
+  count with a link of a route gone, so a "delete it if nothing disconnects" test
+  deleted live routing and the dangling sweep then took the rest of each route
+  (2026-10-01). And `tidy` run in the process that had just laid `complete`'s
+  tracks deleted dozens of them as dangling, where the same board saved and loaded
+  afresh lost none, and the filler then crashed on the result: save and reload
+  between them. Its `TestTrackEndpointDangling` is as stale: `tidy` used it and
+  took hundreds of tracks just laid. Test geometrically, or by DRC on a saved copy
+  (`rescue`).
+- **`BOARD.Remove()` on a board loaded from a file** can crash the next walk of
+  it (`GetFootprints`), silently; `Delete()` does not (`pcb_route.tidy`).
+- **Freerouting ignores its pass limit in batch** and a shell `timeout` kill
+  writes no session at all: bound it with `--router.job_timeout=HH:MM:SS`, which
+  stops the job and still writes the session (a form like `20m` parses as no
+  timeout).
+- **Freerouting cannot see silkscreen or the edge clearance**: the main board's
+  labels go on after routing, and the export carries a keep-out band inside every
+  edge.
 
 - **KiCad's zone filler crashes Python, silently,** on a board built in the
   same process: the file was never written. Fill in a fresh process after
@@ -548,8 +674,9 @@ Each render is generated; what it is rendered from is the source.
   The interfaces migrated on 2026-09-29. The boards still draw their own
   halves of them rather than placing the interface sheets, which span boards
   (each interface page says which board draws which part). The main board is a project placing its circuit sheets
-  (2026-09-29); **its layout is next**, and `tools/pcb.py` has no main-board
-  mode yet (`hardware/boards/main-board/README.md`, *Open*).
+  (2026-09-29); `tools/pcb.py` lays it out in its `kind: main` mode (*The main
+  board*, above), and what that first layout left open is in
+  `hardware/boards/main-board/README.md`, *Open*.
 - **The BOM fragments** become exports once every board is in KiCad, because
   a row's quantity is a count over all of them (ADR 0019).
 - **The commit gate.** `check-staleness.py` runs `cad.py check` but not
@@ -670,6 +797,21 @@ so.
   anything else did it. What fixed it: `abstol=1e-6` (results unchanged to
   0.1 % on the LED scenario) and no nanohenry ESL on capacitors whose loop has
   no resistance.
+- **TI's "noiseless" resistors are noisy in ngspice 42.** TI's macromodels mark
+  their bookkeeping resistors `R_NOISELESS` with PSpice's `T_ABS=-273.15`, which
+  ngspice 42 ignores for noise: an OPA2197 follower read 868 nV/√Hz, all of it
+  one 2.2 Ω resistor, against the datasheet's 5.5. A `.noise` deck silences each
+  one by name with `alter … noisy = 0` and proves the result against the
+  datasheet (`breath-output-stage/sim`, `noise.cir` and `noise-amps`, 2026-10-01).
+- **A long chain of macromodels may find no operating point as one circuit**
+  even where each piece does. The breath chain, sensor to jack, does not; cut at
+  an op-amp output into two disconnected pieces in one deck, each converges, and
+  the noise is recombined as piece A's spectrum × piece B's |H|² plus piece B's
+  own (`breath-output-stage/sim/noise.cir`). A non-zero `gminsteps` other than
+  the default switches ngspice to spice3 gmin stepping, which helped one piece
+  and broke another; `itl1=1000 itl2=1000 gminsteps=0` (no gmin stepping, straight
+  to source stepping) found both, at rest and at a hard blow, in under a second
+  where the failing gmin attempts had taken ten.
 - **A threshold test must not mix parts.** "Never below VT− max after crossing
   VT+ min" fails on a perfect edge, because across the datasheet's spread VT−
   max is above VT+ min. The test is the waveform's swing back after its first
@@ -685,11 +827,11 @@ so.
 | the reference buffer's loop, output impedance and load step, and TI's Figure 56 (TI's OPA2197 and REF5050 models) | `hardware/carrier/breath-excitation-reference/sim/` |
 | the breath link's CMRR across the umbilical, both ends' parts at every tolerance corner (TI's INA828 and OPA2197) | `hardware/module/breath-receive-stage/sim/` |
 | the pitch stage's step into a passive mult, and its loop at the same loads | `hardware/module/pitch-stage/sim/` |
-| rack power-on: the rails, `DAC_AVDD` from `U-REG-DAC` (the LT3042, behavioural, its set-point spread and soft start) and the pitch jack | `hardware/module/power-entry/sim/` |
+| rack power-on: the rails, `DAC_AVDD` from `U-REG-DAC` (the LT3042, behavioural, its set-point spread and soft start) and the pitch jack; and the instrument's LED row PWM reflected through `U-ISO` onto the rack's ±12 V and into the module's rails and its pitch, mod and breath jacks | `hardware/module/power-entry/sim/` |
 | the umbilical load switch's start, with a behavioural LT1641 built from its datasheet | `hardware/module/umbilical-load-switch/sim/` |
 | SCLK, MOSI and CS_MOD over the umbilical as coupled lossy lines (ngspice `CPL`), from a banked Cat5e datasheet, through each line's pull and `R-RX-MOD`/`C-RX-MOD` into the receiver `U-RX-MOD` (74AHCT14) | `hardware/interfaces/spi-link/sim/` |
 | the four mod channels and their shared reference: range, a stale or wrong `V_ref`, a step and the loop into a passive mult, crosstalk | `hardware/module/mod-channels/sim/` |
-| the breath output stage: its offset table, gain ends, clip, a step and the loop into a passive mult, the −12 V rail's path to the jack, and the chain — the response shaper and this stage one after the other, at the commissioned setting and across `POT-RESP` | `hardware/module/breath-output-stage/sim/` |
+| the breath output stage: its offset table, gain ends, clip, a step and the loop into a passive mult, the −12 V rail's path to the jack, and the chain — the response shaper and this stage one after the other, at the commissioned setting and across `POT-RESP`; and the whole breath chain's noise, sensor to jack and to the instrument's ADC, per stage (TI's OPA2197, INA828 and REF5050 models, each held to its datasheet) | `hardware/module/breath-output-stage/sim/` |
 | the response shaper's curve at `POT-RESP`'s ends and centre, and its clip, with a behavioural `D-RESP` fitted to the 1N4448W's guaranteed window; `TRIM-RESP` commissioned in the deck (bisected to its target per corner) and at both ends of its travel, 0–40 °C | `hardware/module/breath-response-shaper/sim/` |
 | the breath ADC's anti-alias filter, its time constant, and the MCP3202's sample capacitor against it | `hardware/carrier/breath-adc/sim/` |
 | the instrument's input LC against the buck's negative resistance, and its start from `U-ISO` through the load switch and the cable, cold and hot-plugged | `hardware/carrier/power-entry-instrument/sim/` |

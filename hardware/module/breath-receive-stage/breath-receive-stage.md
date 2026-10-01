@@ -241,12 +241,16 @@ the pass threshold there — a positive drift holds a VCA open at rest, which is
 what `TRIM-BREATH-ZERO` exists to prevent. A bench drift beyond the threshold
 is answered by a lower GAIN or by re-trimming warm, not by a part.
 
-**Noise at the jack** is the sensor's too: about 10 mV peak-to-peak, 0.1 % of
-span — the MPX5006 family's 4–5 counts on a 10-bit converter at 5 V behind the
-link's ~460 Hz differential pole, times 4.66 `[ds MPXV4006-AN1646.pdf pp.1–2,
-measured on the MPX5006; an estimate]`. The electronics add about 6 µV rms
-`[calc: ≈250 nV/√Hz over ~500 Hz]`. E11's scope of the jack is the
-measurement.
+**Noise at the jack** is the sensor's too: `breath-jack-noise`, simulated
+sensor to jack across every stage (`../breath-output-stage/sim/`, `noise`),
+which also gives each stage's share. Every electronic term together is under
+a tenth of the sensor's, and the largest of them is not this page's in-amp
+but `DAC_AVDD`'s own noise, reaching the jack through `TRIM-BREATH-ZERO` and
+`POT-OFFSET`. The sensor's term rests on an assumption — no MPXV4006DP sheet
+states a noise figure, so the sim takes NXP's AN1646, measured on the
+MPX5006 `[ds MPXV4006-AN1646.pdf p.1]` — and **E11's scope of the jack is the
+measurement**. No page sets a limit; what decides one is what the breath CV
+drives (the sim's README).
 
 **E10 scopes the jack**, not the display. The two representations are calibrated
 separately on purpose, so a flat bar on the screen is no longer evidence about

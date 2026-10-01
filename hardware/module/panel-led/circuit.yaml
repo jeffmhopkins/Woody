@@ -12,6 +12,8 @@ depends_on:
 - fig:dig-gnd-topology
 - fig:umbilical-current
 - fig:panel-height-budget
+- refdes:CBL-LED-PANEL
+- refdes:J-LED-PANEL
 - refdes:LED-PANEL
 - refdes:PANEL
 - refdes:R-LED-PANEL

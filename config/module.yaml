@@ -469,44 +469,81 @@ knob:
     source: "[adr 0024] air between the knob's skirt and the panel face, so it turns without rubbing"
     decided_by: "the knob's bore depth, at the first fit"
 
-# THE POWER LED (ADR 0024 point 15): an 0805 chip LED (LED-PANEL, Lite-On
-# LTST-C171GKT) on the MAIN board's front face, under a press-fit panel light
-# pipe (MECH-LED-BEZEL-MOD, Bivar PLP2-750) whose flange stops on the panel's
-# face. The jack board no longer reaches the toggle's row, and a through-hole
-# LED on the main board would put its leads under U-ISO's body.
+# THE POWER LED (ADR 0024 point 16): a PANEL-MOUNT indicator, LED-PANEL, the
+# Dialight 605-2211-110F - a 3 mm green LED recessed in a chrome M5 housing,
+# held in the panel by its own nut - with its leads cut short, soldered to a
+# two-wire lead (CBL-LED-PANEL) whose JST XHP-2 plugs into J-LED-PANEL, a
+# B2B-XH-A on the main board's front face below it. The owner, 2026-10-01:
+# "remove power led light pipe and do a panel mount led with connector to
+# header". Two banked catalogue pages disagree on the housing's drawing; each
+# envelope here is the larger of the two.
 led:
   hole_d:
-    value: 2.92
+    value: 5.2
     status: settled
-    source: "[ds] BIVAR-PLP2-PANEL-PRESS-FIT-LIGHT-PIPE.pdf: recommended mounting hole D0.115 +0.003/-0.002 in (2.92 +0.08/-0.05), panel 0.047-0.093 in (1.19-2.36) thick"
-  flange_d:
-    value: 3.3
+    source: "[ds] DIALIGHT-605-SERIES-PMI-CATALOG-2026-EXCERPT.pdf p.1 and -2021-EXCERPT.pdf: mounting hole 0.205 in (5.2 mm), for the M5x0.5 housing"
+  panel_max:
+    value: 3.5
     status: settled
-    source: "[ds] BIVAR PLP2: flange D0.130 (3.3), a dome - it stops on the panel's face"
-  flange_t:
-    value: 0.8
+    source: "[ds] Dialight 605 (both catalogues): max panel thickness 0.138 in (3.5 mm)"
+  bezel_d:
+    value: 6.3
     status: settled
-    source: "[ds] BIVAR PLP2: flange 0.030 (0.8) - how far the pipe stands in front of the panel"
-  pipe_d:
-    value: 2.8
+    source: "[ds] Dialight 605 recessed: the bezel D0.248 (6.3) +-0.1 [2026 p.1]; D0.236 (6.0) [2021]. The larger"
+  proud:
+    value: 3.0
     status: settled
-    source: "[ds] BIVAR PLP2: light pipe D0.112 (2.8); its press-fit ribs D0.122 (3.1) REF"
-  pipe_l:
-    value: 19.0
+    source: "[ds] DIALIGHT-605-SERIES-PMI-CATALOG-2021-EXCERPT.pdf, recessed: the head 0.118 (3.0) in front of its shoulder, which bears on the panel's face; the LED sits 0.010 (0.3) inside its rim [2026 p.1]. The 2026 drawing does not dimension the head"
+  body_l:
+    value: 9.0
     status: settled
-    source: "[ds] BIVAR PLP2: X = body length, the flange's underside to the pipe's end; PLP2-750 = 0.750 (19.0). The longest stocked length that stops short of the LED: mechanical/module/drc.echo 'light pipe over the LED'"
-  pipe_tol:
-    value: 0.13
+    source: "[ds] Dialight 605 recessed: 0.354 (9.0) from the head's shoulder - the panel's front face - to the housing's back [2021]; 0.460 (11.7) overall less the head [2026] is shorter. The longer"
+  thread_d:
+    value: 5.0
     status: settled
-    source: "[ds] BIVAR PLP2: .XXX +-0.005 in"
-  smd:
-    value: [2.0, 1.25, 0.8]
+    source: "[ds] Dialight 605: M5x0.5 - the housing behind the head, and its rear collar drawn no wider"
+  nut_d:
+    value: 9.2
+    status: tbd
+    source: "[from memory] an M5 hex nut 8 across the flats is 9.2 across the corners; the catalogue draws the nut and lock washer but does not dimension them, and the photograph shows a nut wider than the D6.3 bezel"
+    decided_by: "the part in hand"
+  nut_h:
+    value: 2.5
+    status: tbd
+    source: "[from memory] a thin M5 nut and its lock washer, together - not dimensioned in either catalogue"
+    decided_by: "the part in hand"
+  lead_cut:
+    value: 3.0
+    status: nominal
+    source: "[adr 0024 point 16] the leads (0.889 in, 22.6 mm, beyond the housing [ds 2026 p.1]) are cut to this before the lead's wires are soldered on: uncut they would reach through the main board"
+  tail_l:
+    value: 6.0
+    status: nominal
+    source: "[adr 0024 point 16] the cut leads, the solder joints and the heat-shrink over them, beyond the housing's back: what stands behind the LED before the wires turn down. mechanical/module/drc.echo 'LED-PANEL behind the panel'"
+  tail_d:
+    value: 4.5
+    status: nominal
+    source: "[calc] the two sleeved joints side by side: 2.54 between the leads [from memory, a 3 mm LED's lead pitch] + one sleeve, ~1.9 over a 26 AWG joint"
+  wire_d:
+    value: 1.3
+    status: nominal
+    source: "[from memory] 26 AWG PVC hook-up wire, ~1.3 over the insulation - inside the 0.8-1.6 the SXH-001T-P0.6 crimp takes [web https://www.lcsc.com/product-detail/C140573.html, 2026-10-01 search summary: 0.9-1.9]"
+  cable_l:
+    value: 80
+    status: nominal
+    source: "[adr 0024 point 16] the lead's length, crimp to joint: enough to plug it into J-LED-PANEL with the main board held clear of the panel, folded into the gap once the board is home"
+  header_below:
+    value: 16.5
+    status: nominal
+    source: "[adr 0024 point 16] J-LED-PANEL's centre this far BELOW the LED's axis, on the same x: its mated housing clear of the LED's tail in plan, its pins' tails below U-ISO's body on the rear face, and its body clear of U-ISO's pin 1 tail and the low panel standoff on the front (mechanical/module/drc.echo 'J-LED-PANEL on the main board's front face')"
+  header:
+    value: [7.4, 5.75, 9.8]
     status: settled
-    source: "[ds] LITEON-LTST-C171GKT-0805-GREEN.pdf p.1: 2.00 x 1.25, 0.80 tall, +-0.10"
-  smd_tol:
-    value: 0.1
+    source: "[ds] JST-XH-SERIES.pdf p.3 table: B2B-XH-A, B = 7.4 along the row, A = 2.5 the pitch; p.1 'mounting height of 9.8 mm' - the header with its XHP housing mated. Across the row 5.75 [repo KiCad 9 Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical, F.Fab]"
+  header_pitch:
+    value: 2.5
     status: settled
-    source: "[ds] LTST-C171GKT p.1: +-0.10 unless noted"
+    source: "[ds] JST-XH-SERIES.pdf p.3 table: B2B-XH-A, A = 2.5"
 
 # NKK M2011SD4G01 (SW-POWER), panel-mounted, wired.
 toggle:
@@ -656,7 +693,7 @@ layout:
   led_side:
     value: "left"
     status: nominal
-    source: "[adr 0024 point 11] the LED in the toggle's row, in the strip left of the toggle; its light pipe reaches back to the main board (point 15)"
+    source: "[adr 0024 point 11] the LED in the toggle's row, in the strip left of the toggle; a panel-mount indicator on its own nut, its lead to J-LED-PANEL on the main board (point 16)"
   toggle_y:
     value: 49.5
     status: nominal
