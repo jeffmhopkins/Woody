@@ -1,7 +1,7 @@
 ECHO: "PCB", "module-jack", "board", "outline", 1, 57.5, 49.5, 118.5
 ECHO: "PCB", "module-main", "board", "outline", 1, 10, 49.5, 118.5
 ECHO: "PCB", "module-jack", "board", "thickness", 1.6, "depth", 9, "side", "jacks and pots on the front (toward the panel); a plain rectangle, no cut-out"
-ECHO: "PCB", "module-main", "board", "thickness", 1.6, "depth", 18.3, "side", "NE8FAV, LED-PANEL and J-B2B-MOD's insulator on the front; power header, trimmers, bulk caps on the rear"
+ECHO: "PCB", "module-main", "board", "thickness", 1.6, "depth", 18.3, "side", "NE8FAV, J-LED-PANEL and J-B2B-MOD's insulator on the front; power header, trimmers, bulk caps on the rear"
 ECHO: "PCB", "module-jack", "jack", "J-CV-BREATH", 15.75, 88.5, 180, "PJ398SM on its side: the angle (deg, from +x) from the barrel to the sleeve pad; pins 3, 2, 1 at this many mm along it", [-4.92, 3.38, 6.48]
 ECHO: "PCB", "module-jack", "jack", "J-CV-PITCH", 34.75, 88.5, 0, "PJ398SM on its side: the angle (deg, from +x) from the barrel to the sleeve pad; pins 3, 2, 1 at this many mm along it", [-4.92, 3.38, 6.48]
 ECHO: "PCB", "module-jack", "jack", "J-CV-MOD1", 15.75, 75.5, 180, "PJ398SM on its side: the angle (deg, from +x) from the barrel to the sleeve pad; pins 3, 2, 1 at this many mm along it", [-4.92, 3.38, 6.48]
@@ -11,7 +11,8 @@ ECHO: "PCB", "module-jack", "jack", "J-CV-MOD4", 34.75, 62.5, 0, "PJ398SM on its
 ECHO: "PCB", "module-jack", "pot", "POT-GAIN", 8.25, 106, 0, "R0904N, pins down at dy", -6.7, "pitch", 2.5
 ECHO: "PCB", "module-jack", "pot", "POT-OFFSET", 25.25, 106, 0, "R0904N, pins down at dy", -6.7, "pitch", 2.5
 ECHO: "PCB", "module-jack", "pot", "POT-RESP", 42.25, 106, 0, "R0904N, pins down at dy", -6.7, "pitch", 2.5
-ECHO: "PCB", "module-main", "led", "LED-PANEL", 6.375, 49.5, 0, "0805 on the FRONT face, centred under MECH-LED-BEZEL-MOD's light pipe (d", 2.8, "); the pipe's end", 0.5, "above the LED"
+ECHO: "PCB", "module-main", "connector", "J-LED-PANEL", 6.375, 33, 0, "JST B2B-XH-A, top entry, FRONT face, row along x: pin 1 (LED_ANODE) on the left seen from the panel, pin 2 (AGND_MOD) on the right; pitch", 2.5, "; mated height", 9.8
+ECHO: "PCB", "module-main", "panel", "LED-PANEL", 6.375, 49.5, "panel-mounted (Dialight 605), its lead plugged into J-LED-PANEL; its sleeved joints end", 5.3, "in front of the main board"
 ECHO: "PCB", "module-jack", "standoff", "MECH-STANDOFF-MOD 1", 16.75, 114.8, 3.2, 6, 7.7
 ECHO: "PCB", "module-main", "standoff", "MECH-STANDOFF-MOD 1", 16.75, 114.8, 3.2, 6, 7.7
 ECHO: "PCB", "module-jack", "standoff", "MECH-STANDOFF-MOD 2", 33.75, 114.8, 3.2, 6, 7.7
@@ -51,4 +52,5 @@ ECHO: "PCB", "module-main", "keepout", "standoff head", 44.125, 15, 7, "d, no pa
 ECHO: "PCB", "module-main", "keepout", "front: under the jack board", 1, 57.5, 49.5, 118.5, 5.1, "max part height on the front face where the pots' legs are; ", 5.3, " under a jack's tails"
 ECHO: "PCB", "module-jack", "keepout", "rear: toward the main board", 1, 57.5, 49.5, 118.5, 7.2, "max part height on the rear face, less whatever the main board puts under it"
 ECHO: "PCB", "module-main", "keepout", "front: SW-POWER wiring", 18.75, 45.55, 31.75, 53.45, 4.4, "the lugs' ends above the front face"
+ECHO: "PCB", "module-main", "keepout", "front: under LED-PANEL", 1.775, 44.9, 10.975, 54.1, 4.8, "max part height on the front face under the LED's housing and its sleeved joints"
 ECHO: "PCB", "module-main", "keepout", "rear: ribbon fold", 25.23, 10, 45.55, 47.41, 16.9, "max part height on the rear face under the ribbon (the socket's back)"

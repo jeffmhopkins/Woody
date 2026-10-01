@@ -409,7 +409,7 @@ components:
     sheet: power-entry
   D16:
     of: LED-PANEL
-    value: 0805 LED
+    value: 605-2211-110F
     pins:
     - A
     - K
@@ -580,6 +580,13 @@ components:
     - 6
     - 7
     - 8
+  J4:
+    of: J-LED-PANEL
+    value: JST B2B-XH-A
+    pins:
+    - 1
+    - 2
+    sheet: panel-led
   JP1:
     of: LK-CLR
     value: 2-pad solder link
@@ -1682,6 +1689,7 @@ nets:
   - U10.INA-
   /panel-led/LED_ANODE:
   - D16.A
+  - J4.1
   - R71.2
   /pitch-stage/AMP_OUT:
   - C28.1
@@ -1853,6 +1861,7 @@ nets:
   - J2.18
   - J2.2
   - J2.5
+  - J4.2
   - JP1.2
   - NT1.1
   - R1.2

@@ -17,15 +17,24 @@ ports:
     from: module/power-entry
     figure: dig-gnd-topology
 components:
+  J-LED-PANEL:
+    value: JST B2B-XH-A
+    pins:
+    - 1
+    - 2
+    note: 'LED-PANEL''s lead plugs in here (ADR 0024 point 16): pin 1 = LED_ANODE (the anode, the red wire), pin
+      2 = AGND_MOD (the cathode). Polarised by its shroud; mark pin 1 and A on the silk. On the main board''s FRONT
+      face, top entry, below the LED (mechanical/module/export/pcb-geometry.echo ''J-LED-PANEL'')'
   LED-PANEL:
-    value: 0805 LED
+    value: 605-2211-110F
     pins:
     - A
     - K
-    note: LIT = THE LOAD SWITCH IS DELIVERING. It hangs on UMBILICAL_POS12, the LT1641 output, so it is dark with
+    note: 'LIT = THE LOAD SWITCH IS DELIVERING. It hangs on UMBILICAL_POS12, the LT1641 output, so it is dark with
       the toggle off and dark when the -1 has latched on a fault - the one indication the latching design needs.
-      It does not say the instrument is plugged in. On the MAIN board's front face, under MECH-LED-BEZEL-MOD, the
-      panel light pipe (ADR 0024 point 15)
+      It does not say the instrument is plugged in. PANEL-MOUNTED (ADR 0024 point 16): no footprint on the board
+      - its leads are cut short and soldered to CBL-LED-PANEL, the lead that plugs into J-LED-PANEL, anode to pin
+      1'
   R-LED-PANEL:
     value: 2k2 1%
     pins:
@@ -34,8 +43,10 @@ components:
 nets:
   AGND_MOD:
   - port: AGND_MOD
+  - J-LED-PANEL.2
   - LED-PANEL.K
   LED_ANODE:
+  - J-LED-PANEL.1
   - LED-PANEL.A
   - R-LED-PANEL.2
   UMBILICAL_POS12:

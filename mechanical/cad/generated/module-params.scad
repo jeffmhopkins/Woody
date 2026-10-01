@@ -91,14 +91,22 @@ knob_d = 12.0;  // settled; [ds] THONK-DAVIES-1900H-CLONE-T18-KNOB-PRODUCT-PAGE.
 knob_h = 16.0;  // settled; [ds] as d
 knob_d_max = 14.0;  // settled; [repo] KNOB-BREATH: 14 mm MAX; ADR 0004's knob table
 knob_gap = 1.0;  // tbd; [adr 0024] air between the knob's skirt and the panel face, so it turns without rubbing
-led_hole_d = 2.92;  // settled; [ds] BIVAR-PLP2-PANEL-PRESS-FIT-LIGHT-PIPE.pdf: recommended mounting hole D0.115 +0.003/-0.002 in (2.92 +0.08/-0.05), panel 0.047-0.093 in (1.19-2.36) thick
-led_flange_d = 3.3;  // settled; [ds] BIVAR PLP2: flange D0.130 (3.3), a dome - it stops on the panel's face
-led_flange_t = 0.8;  // settled; [ds] BIVAR PLP2: flange 0.030 (0.8) - how far the pipe stands in front of the panel
-led_pipe_d = 2.8;  // settled; [ds] BIVAR PLP2: light pipe D0.112 (2.8); its press-fit ribs D0.122 (3.1) REF
-led_pipe_l = 19.0;  // settled; [ds] BIVAR PLP2: X = body length, the flange's underside to the pipe's end; PLP2-750 = 0.750 (19.0). The longest stocked length that stops short of the LED: mechanical/module/drc.echo 'light pipe over the LED'
-led_pipe_tol = 0.13;  // settled; [ds] BIVAR PLP2: .XXX +-0.005 in
-led_smd = [2.0, 1.25, 0.8];  // settled; [ds] LITEON-LTST-C171GKT-0805-GREEN.pdf p.1: 2.00 x 1.25, 0.80 tall, +-0.10
-led_smd_tol = 0.1;  // settled; [ds] LTST-C171GKT p.1: +-0.10 unless noted
+led_hole_d = 5.2;  // settled; [ds] DIALIGHT-605-SERIES-PMI-CATALOG-2026-EXCERPT.pdf p.1 and -2021-EXCERPT.pdf: mounting hole 0.205 in (5.2 mm), for the M5x0.5 housing
+led_panel_max = 3.5;  // settled; [ds] Dialight 605 (both catalogues): max panel thickness 0.138 in (3.5 mm)
+led_bezel_d = 6.3;  // settled; [ds] Dialight 605 recessed: the bezel D0.248 (6.3) +-0.1 [2026 p.1]; D0.236 (6.0) [2021]. The larger
+led_proud = 3.0;  // settled; [ds] DIALIGHT-605-SERIES-PMI-CATALOG-2021-EXCERPT.pdf, recessed: the head 0.118 (3.0) in front of its shoulder, which bears on the panel's face; the LED sits 0.010 (0.3) inside its rim [2026 p.1]. The 2026 drawing does not dimension the head
+led_body_l = 9.0;  // settled; [ds] Dialight 605 recessed: 0.354 (9.0) from the head's shoulder - the panel's front face - to the housing's back [2021]; 0.460 (11.7) overall less the head [2026] is shorter. The longer
+led_thread_d = 5.0;  // settled; [ds] Dialight 605: M5x0.5 - the housing behind the head, and its rear collar drawn no wider
+led_nut_d = 9.2;  // tbd; [from memory] an M5 hex nut 8 across the flats is 9.2 across the corners; the catalogue draws the nut and lock washer but does not dimension them, and the photograph shows a nut wider than the D6.3 bezel
+led_nut_h = 2.5;  // tbd; [from memory] a thin M5 nut and its lock washer, together - not dimensioned in either catalogue
+led_lead_cut = 3.0;  // nominal; [adr 0024 point 16] the leads (0.889 in, 22.6 mm, beyond the housing [ds 2026 p.1]) are cut to this before the lead's wires are soldered on: uncut they would reach through the main board
+led_tail_l = 6.0;  // nominal; [adr 0024 point 16] the cut leads, the solder joints and the heat-shrink over them, beyond the housing's back: what stands behind the LED before the wires turn down. mechanical/module/drc.echo 'LED-PANEL behind the panel'
+led_tail_d = 4.5;  // nominal; [calc] the two sleeved joints side by side: 2.54 between the leads [from memory, a 3 mm LED's lead pitch] + one sleeve, ~1.9 over a 26 AWG joint
+led_wire_d = 1.3;  // nominal; [from memory] 26 AWG PVC hook-up wire, ~1.3 over the insulation - inside the 0.8-1.6 the SXH-001T-P0.6 crimp takes [web https://www.lcsc.com/product-detail/C140573.html, 2026-10-01 search summary: 0.9-1.9]
+led_cable_l = 80;  // nominal; [adr 0024 point 16] the lead's length, crimp to joint: enough to plug it into J-LED-PANEL with the main board held clear of the panel, folded into the gap once the board is home
+led_header_below = 16.5;  // nominal; [adr 0024 point 16] J-LED-PANEL's centre this far BELOW the LED's axis, on the same x: its mated housing clear of the LED's tail in plan, its pins' tails below U-ISO's body on the rear face, and its body clear of U-ISO's pin 1 tail and the low panel standoff on the front (mechanical/module/drc.echo 'J-LED-PANEL on the main board's front face')
+led_header = [7.4, 5.75, 9.8];  // settled; [ds] JST-XH-SERIES.pdf p.3 table: B2B-XH-A, B = 7.4 along the row, A = 2.5 the pitch; p.1 'mounting height of 9.8 mm' - the header with its XHP housing mated. Across the row 5.75 [repo KiCad 9 Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical, F.Fab]
+led_header_pitch = 2.5;  // settled; [ds] JST-XH-SERIES.pdf p.3 table: B2B-XH-A, A = 2.5
 toggle_hole_d = 6.5;  // settled; [register panel-toggle-hole] [ds] NKK-SERIES-M-TOGGLE.pdf p.7, D4 bushing
 toggle_flat = 5.8;  // settled; [register panel-toggle-hole] [ds] NKK Series M p.7: the D4 D-flat
 toggle_body = [7.9, 13.0, 9.4];  // settled; [ds] NKK Series M p.11 (A62), single pole: 7.9 across, 13.0 terminal field, 9.4 deep behind the bushing
@@ -198,5 +206,5 @@ art_resp_marks = false;  // tbd; [adr 0026] no end marks on the curve knob yet. 
 
 // Every value above with status tbd - a placeholder, not a number any
 // document gives. The module's DRC report lists these.
-module_tbd_params = ["panel_washer_t", "rail_band", "rail_depth", "panel_standoff_stock_l", "power_ribbon_t", "tall_cap_h", "jack_nut_d", "jack_nut_h", "jack_plug_d", "knob_gap", "toggle_nut_d", "toggle_nut_h", "ethercon_umb_od", "ethercon_umb_bend_k", "ethercon_screw_head_d", "ethercon_screw_head_h", "art_resp_marks"];
+module_tbd_params = ["panel_washer_t", "rail_band", "rail_depth", "panel_standoff_stock_l", "power_ribbon_t", "tall_cap_h", "jack_nut_d", "jack_nut_h", "jack_plug_d", "knob_gap", "led_nut_d", "led_nut_h", "toggle_nut_d", "toggle_nut_h", "ethercon_umb_od", "ethercon_umb_bend_k", "ethercon_screw_head_d", "ethercon_screw_head_h", "art_resp_marks"];
 
