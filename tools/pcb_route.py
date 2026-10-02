@@ -1696,6 +1696,9 @@ def moat_keepout(board, lay):
             tie = board.FindFootprintByReference(t_)
             tx, ty = pcb_main.to_body(TO(tie.GetPosition().x), TO(tie.GetPosition().y))
             ring = ring.difference(Point(tx, ty).buffer(spec["tie_window"]))
+        for x, y, r in spec.get("windows") or []:
+            # a part that straddles the moat by design (the module's DAC): its pins' escapes
+            ring = ring.difference(Point(x, y).buffer(r))
         for t in board.GetTracks():
             if type(t) is pcbnew.PCB_TRACK and t.GetNetname() in {n for pr in lay.get("pairs") or [] for n in pr["nets"]}:
                 a, b = (pcb_main.to_body(TO(v.x), TO(v.y)) for v in (t.GetStart(), t.GetEnd()))

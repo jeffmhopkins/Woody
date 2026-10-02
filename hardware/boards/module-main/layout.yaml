@@ -251,7 +251,11 @@ islands:
     layer: In1.Cu
     ties: [NT2, NT3]
     moat: 0.5
-    tie_window: 3.0
+    tie_window: 4.5
+    # U-DAC straddles the moat (its digital pins on the island, GND on AGND_MOD): the
+    # moat's 0.5 mm is wider than the 0.21 mm between its pin rows' pads, so the layer-1
+    # keep-out over the moat is opened round it for its pins' escapes, as round a tie
+    windows: [[9.1, 56.5, 4.5]]
     outline: [[1.0, 10.0], [38.5, 10.0], [38.5, 37.6], [24.0, 37.6], [24.0, 56.25], [1.0, 56.25]]
     # J-LED-PANEL's pin 2 is the LED's return to AGND_MOD (panel-led.md: the module CAD
     # puts the header here, over the island); its pad stands in the island's copper with
@@ -399,7 +403,7 @@ silk:
 # layer direction in batch: an autoroute_settings scope with per-layer directions made
 # it route nothing on this board (2026-10-02, as on the controller's, tooling.md §4).
 route: astar
-rip_up: 3
+rip_up: 0
 directions:
   layers: {F.Cu: vertical, In2.Cu: horizontal, B.Cu: vertical}
   against_cost: 6.0

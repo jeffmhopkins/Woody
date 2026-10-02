@@ -656,6 +656,8 @@ def check_planes(board, lay):
             tie = board.FindFootprintByReference(t_)
             if tie:
                 windows.append(Point(*xy_mm(tie.GetPosition())).buffer(spec["tie_window"]))
+        for x, y, r in spec.get("windows") or []:
+            windows.append(Point(*to_pcb(x, y)).buffer(r))
     # where a track lands - its own net's vias and pads - it sits in that item's own
     # clearance hole in the plane: not a split, so those ends are left out of the test
     lands = {}
