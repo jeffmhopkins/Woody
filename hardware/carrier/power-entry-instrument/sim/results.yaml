@@ -4,15 +4,15 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/carrier/power-entry-instrument/sim/sims.yaml: 849986a764f89f9b
+  hardware/carrier/power-entry-instrument/sim/sims.yaml: 4c809ffb5bd82027
   hardware/carrier/power-entry-instrument/netlist.yaml: 2ced35d8a0373a19
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
-  hardware/module/power-entry/netlist.yaml: 56b479e28aae437c
+  hardware/module/power-entry/netlist.yaml: 4f808996f437e7cd
   hardware/carrier/power-entry-instrument/sim/pei-z.cir: a1aee2ada3397cc1
   hardware/carrier/power-entry-instrument/sim/pei-start.cir: e2387246ee8256e5
   hardware/module/umbilical-load-switch/sim/lt1641.inc: 59be165ccd4451a6
   hardware/module/umbilical-load-switch/sim/sims.yaml: 85eec256fad8b2e5
-  figure:umbilical-current: 359 mA
+  figure:umbilical-current: 374 mA
 ngspice: '42'
 sims:
   input-z:
@@ -52,17 +52,17 @@ sims:
         max: 0.0
         max_at: nominal
       t_up:
-        nominal: 0.16317
-        min: 0.107952
+        nominal: 0.163881
+        min: 0.108637
         min_at: igate+ itup- r_cable- t_iso- vto_q-
-        max: 0.237997
+        max: 0.238791
         max_at: igate- itup+ r_cable+ t_iso+ vto_q+
       i_iso_peak:
-        nominal: 0.514881
-        min: 0.497198
-        min_at: igate+ itup- r_cable+ t_iso+ vto_q+
-        max: 0.525351
-        max_at: igate- itup- r_cable- t_iso- vto_q-
+        nominal: 0.527967
+        min: 0.509825
+        min_at: igate+ itup- r_cable+ t_iso- vto_q+
+        max: 0.537843
+        max_at: igate- itup+ r_cable- t_iso- vto_q-
       t_at_ocp:
         nominal: 0.0
         min: 0.0
@@ -71,21 +71,21 @@ sims:
         max_at: nominal
       v_in_peak:
         nominal: 12.0
-        min: 11.6448
+        min: 11.6297
         min_at: igate- itup- r_cable+ t_iso+ vto_q-
         max: 12.0
         max_at: igate+ itup- r_cable- t_iso- vto_q+
       v_buck_dip:
-        nominal: 9.00115
-        min: 9.00016
-        min_at: igate+ itup- r_cable- t_iso- vto_q+
-        max: 9.00373
-        max_at: igate+ itup- r_cable- t_iso- vto_q-
+        nominal: 9.00002
+        min: 9.00002
+        min_at: nominal
+        max: 9.00406
+        max_at: igate- itup+ r_cable- t_iso- vto_q-
       vcc_min:
-        nominal: 11.9964
-        min: 11.9963
+        nominal: 11.9963
+        min: 11.9962
         min_at: igate- itup- r_cable- t_iso- vto_q-
-        max: 11.9965
+        max: 11.9964
         max_at: igate- itup- r_cable+ t_iso- vto_q+
     asserts:
     - expr: max['latched'] < 0.5
@@ -112,17 +112,17 @@ sims:
         max: 0.0
         max_at: nominal
       t_up:
-        nominal: 0.134709
-        min: 0.0932808
-        min_at: C-INRUSH-GD+ c_tvs- igate- r_cable- vhi- vto_q-
-        max: 0.181661
-        max_at: C-INRUSH-GD+ c_tvs+ igate+ r_cable+ vhi- vto_q+
+        nominal: 0.135421
+        min: 0.093976
+        min_at: C-INRUSH-GD+ c_tvs- igate+ r_cable- vhi- vto_q-
+        max: 0.182469
+        max_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ vhi- vto_q+
       i_iso_peak:
-        nominal: 0.514895
-        min: 0.490897
-        min_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ vhi- vto_q+
-        max: 0.544158
-        max_at: C-INRUSH-GD- c_tvs+ igate+ r_cable- vhi- vto_q-
+        nominal: 0.527965
+        min: 0.503573
+        min_at: C-INRUSH-GD+ c_tvs+ igate- r_cable+ vhi+ vto_q+
+        max: 0.556907
+        max_at: C-INRUSH-GD- c_tvs- igate+ r_cable- vhi- vto_q-
       t_at_ocp:
         nominal: 0.0
         min: 0.0
@@ -130,28 +130,28 @@ sims:
         max: 0.0
         max_at: nominal
       v_in_peak:
-        nominal: 13.6651
-        min: 12.9665
-        min_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ vhi- vto_q-
-        max: 14.2396
+        nominal: 13.6682
+        min: 12.9636
+        min_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ vhi+ vto_q-
+        max: 14.2382
         max_at: C-INRUSH-GD- c_tvs+ igate- r_cable- vhi- vto_q-
       v_buck_dip:
-        nominal: 9.00327
-        min: 9.00065
-        min_at: C-INRUSH-GD- c_tvs+ igate+ r_cable+ vhi- vto_q-
-        max: 9.00327
-        max_at: nominal
+        nominal: 9.00207
+        min: 9.00021
+        min_at: C-INRUSH-GD+ c_tvs+ igate- r_cable+ vhi+ vto_q+
+        max: 9.00241
+        max_at: C-INRUSH-GD- c_tvs- igate- r_cable- vhi- vto_q+
       vcc_min:
-        nominal: 11.9964
-        min: 11.9962
+        nominal: 11.9963
+        min: 11.9961
         min_at: C-INRUSH-GD- c_tvs- igate- r_cable- vhi- vto_q-
-        max: 11.9966
+        max: 11.9965
         max_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ vhi- vto_q+
       p_q_peak:
-        nominal: 1.63654
-        min: 1.52024
+        nominal: 1.66752
+        min: 1.55047
         min_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ vhi- vto_q+
-        max: 1.79256
+        max: 1.82206
         max_at: C-INRUSH-GD- c_tvs- igate+ r_cable- vhi- vto_q-
     asserts:
     - expr: max['latched'] < 0.5
@@ -184,10 +184,10 @@ sims:
         max: 0.0
         max_at: nominal
       i_iso_peak:
-        nominal: 0.514901
-        min: 0.49721
+        nominal: 0.527973
+        min: 0.509831
         min_at: r_cable+ vto_q+
-        max: 0.52129
+        max: 0.534298
         max_at: r_cable- vto_q-
       t_at_ocp:
         nominal: 0.0
@@ -196,10 +196,10 @@ sims:
         max: 0.0
         max_at: nominal
       vcc_min:
-        nominal: 11.9964
-        min: 11.9964
+        nominal: 11.9963
+        min: 11.9963
         min_at: r_cable- vto_q-
-        max: 11.9965
+        max: 11.9964
         max_at: r_cable+ vto_q+
     asserts:
     - expr: max['latched'] < 0.5 and max['i_iso_peak'] < 0.5 * p['i_ocp']
@@ -222,16 +222,16 @@ sims:
         max: 1.837
         max_at: nominal
       t_at_ocp:
-        nominal: 0.000157346
-        min: 9.70094e-05
-        min_at: dvg- igate+ r_cable+ vhi- vto_q-
-        max: 0.000452873
+        nominal: 0.000161155
+        min: 9.95638e-05
+        min_at: dvg- igate- r_cable+ vhi- vto_q-
+        max: 0.000456957
         max_at: dvg+ igate+ r_cable- vhi+ vto_q+
       vcc_min:
-        nominal: 11.645
-        min: 10.2304
-        min_at: dvg+ igate+ r_cable- vhi+ vto_q-
-        max: 11.7355
+        nominal: 11.6268
+        min: 10.2075
+        min_at: dvg+ igate+ r_cable- vhi+ vto_q+
+        max: 11.7297
         max_at: dvg- igate- r_cable+ vhi- vto_q+
     asserts:
     - expr: max['latched'] < 0.5 and min['vcc_min'] > 9.90
