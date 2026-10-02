@@ -56,10 +56,11 @@ signals; the analog rails route on layer 3"): 1 parts and signals; 2 the one
 plane, `AGND_MOD`, with a `DIG_GND` island; 3 signals and the analog ±12 V as
 0.4 mm tracks; 4 the rear parts, signals, and `PWR_GND`'s own copper. The
 first try kept +12 V as a layer-3 plane and routed on layers 1 and 4 only, as
-the controller's main board does; neither router completed it (50–60
-connections left), so layer 3 routes. Freerouting does the bulk and takes no
-layer direction, so the layers are not one-way as on the controller's board
-(`layout.yaml` `route:`).
+the controller's main board does (94 connections left). On three routing
+layers the directional router (`pcb_route.complete`: layer 1 vertical, 3
+horizontal, 4 vertical) left 74; Freerouting, which takes no layer direction
+in batch, routed most of the rest, so the committed board is not one-way on
+every layer (*Status*).
 
 **The floor plan**, seen from the panel:
 
