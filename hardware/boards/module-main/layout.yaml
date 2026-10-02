@@ -389,8 +389,9 @@ heights:
   MountingHole: 0.0
 
 silk:
-  at: [27.0, 112.0]
-  title: "WOODY module main board"
+  at: [[27.0, 112.0], [20.5, 111.0], [1.5, 112.5], [1.5, 96.5], [27.0, 96.5], [1.5, 45.0], [26.0, 44.5], [30.0, 112.5]]   # tried in turn
+  title: "WOODY mod-main"
+  search: true               # if none of at: is clear, the first clear place (pcb.add_silk_generic)
   rev: "A"
   date: "2026-10-02"
 
@@ -408,4 +409,3 @@ directions:
   layers: {F.Cu: vertical, In2.Cu: horizontal, B.Cu: vertical}
   against_cost: 6.0
   chamfer: 0.6
-no_rescue: true

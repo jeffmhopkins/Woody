@@ -730,11 +730,43 @@ def add_silk_generic(board, lay, comps):
         tb.SetRevision(t["rev"])
         tb.SetDate(t["date"])
         board.SetTitleBlock(tb)
-        x, y = to_pcb(*t["at"])
-        for i, line in enumerate([t["title"], f"rev {t['rev']}  {t['date']}"]):
-            g = _box(x, y + i * SILK_H * 1.8 - SILK_H / 2, x + text_w(line), y + i * SILK_H * 1.8 + SILK_H / 2)
-            if not free(True, g):
-                sys.exit(f"pcb: the silkscreen title at layout.yaml silk.at is not clear: {line!r}")
+        # silk.at: one place, or a list of places tried in turn (the first clear one)
+        ats = t["at"] if isinstance(t["at"][0], (list, tuple)) else [t["at"]]
+        lines = [t["title"], f"rev {t['rev']}  {t['date']}"]
+        for at in ats:
+            x, y = to_pcb(*at)
+            boxes = [_box(x, y + i * SILK_H * 1.8 - SILK_H / 2, x + text_w(line), y + i * SILK_H * 1.8 + SILK_H / 2) for i, line in enumerate(lines)]
+            if all(free(True, g) for g in boxes):
+                break
+        else:
+            if not t.get("search"):
+                sys.exit(f"pcb: the silkscreen title at layout.yaml silk.at is not clear: {lines[0]!r}")
+            # silk.search: the first clear place on a 0.5 mm scan of the board, top down
+            bb = board.GetBoardEdgesBoundingBox()
+            found = None
+            for face in (True, False):          # the top face first, then the rear
+                yy = pcbnew.ToMM(bb.GetTop()) + 1.0
+                while found is None and yy < pcbnew.ToMM(bb.GetBottom()) - 3:
+                    xx = pcbnew.ToMM(bb.GetLeft()) + 1.0
+                    while xx < pcbnew.ToMM(bb.GetRight()) - 5:
+                        # on the rear the text is mirrored: it runs leftward from its anchor
+                        boxes = [_box(xx, yy + i * SILK_H * 1.8 - SILK_H / 2, xx + text_w(line), yy + i * SILK_H * 1.8 + SILK_H / 2) for i, line in enumerate(lines)]
+                        if all(free(face, g) for g in boxes):
+                            found = (xx, yy, face)
+                            break
+                        xx += 0.5
+                    yy += 0.5
+                if found:
+                    break
+            if found is None:
+                sys.exit(f"pcb: no clear place on either silkscreen for the title {lines[0]!r}")
+            x, y, tface = found
+            print(f"pcb: silk - the title placed at the first clear place on the {'top' if tface else 'rear'}")
+            for i, (line, g) in enumerate(zip(lines, boxes)):
+                put(tface, line, x + (0 if tface else text_w(line)), y + i * SILK_H * 1.8, justify=-1)
+                placed[tface].append(g)
+            lines = []
+        for i, (line, g) in enumerate(zip(lines, boxes)):
             put(True, line, x, y + i * SILK_H * 1.8, justify=-1)
             placed[True].append(g)
     for fp in sorted(board.GetFootprints(), key=lambda f: f.GetReference()):
