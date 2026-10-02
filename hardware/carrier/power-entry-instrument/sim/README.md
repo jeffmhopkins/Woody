@@ -36,9 +36,9 @@ put `V_GS` at 16.5 V with the output at 12 V.)
 | Sim | What | Result |
 |---|---|---|
 | `input-z` | the impedance at `C-BUCK-IN`, looking back through `L-BUCK-IN`, `C-STRIP-BULK` and the cable | peak 0.57 Ω at 3.8 kHz at the nominal; **55× (35 dB) under the buck's −103 Ω at the worst corner**, 180× at the nominal |
-| `cold-start` | the rack powers up with the instrument plugged in | starts at every corner in 108–238 ms; `U-ISO` never above 0.53 A; the buck's input never falls back once it has started; nothing near `D-TVS-PWR`'s 15 V |
-| `hot-plug` | the instrument plugged into a running module, 65 corners | starts at every corner in 93–182 ms, no fault latch. **`U-ISO` peaks at 0.49–0.54 A at every corner, 3.4× under its 1.84 A over-current threshold** (`hotplug-iso-ocp`); `VCC` at the load switch does not move (11.996 V); the ring at `J-UMB` peaks at 14.2 V, under `D-TVS-PWR`'s standoff; `Q-INRUSH` dissipates 1.8 W at most |
-| `replug-late` | running, pulled, and put back 200 ms later | starts again from off: `U-ISO` 0.50–0.52 A |
+| `cold-start` | the rack powers up with the instrument plugged in | starts at every corner in 109–239 ms; `U-ISO` never above 0.54 A; the buck's input never falls back once it has started; nothing near `D-TVS-PWR`'s 15 V |
+| `hot-plug` | the instrument plugged into a running module, 65 corners | starts at every corner in 94–183 ms, no fault latch. **`U-ISO` peaks at 0.50–0.56 A at every corner, 3.3× under its 1.84 A over-current threshold** (`hotplug-iso-ocp`); `VCC` at the load switch does not move (11.996 V); the ring at `J-UMB` peaks at 14.2 V, under `D-TVS-PWR`'s standoff; `Q-INRUSH` dissipates 1.8 W at most |
+| `replug-late` | running, pulled, and put back 200 ms later | starts again from off: `U-ISO` 0.51–0.53 A |
 | `replug-early` | running, pulled, and put back 30 ms later | **A recorded hazard:** the bulk still holds a few volts and `Q-INRUSH` is still enhanced, so the replug reaches `U-ISO`'s threshold, as every hot-plug did before `Q-INRUSH`; see `results.yaml` for how long, and `VCC`'s dip, at every corner including the LT1641's highest gate drive |
 
 ## What it says that the page does not
@@ -73,7 +73,7 @@ put `V_GS` at 16.5 V with the output at 12 V.)
 This README owns, in `config/figures.yaml`:
 
 - `instrument-input-z-margin`: 55x worst corner, 180x nominal (peak 0.57 ohm at 3.8 kHz)
-- `hotplug-iso-ocp`: 0.49-0.54 A at every corner, 3.4x under the threshold and never at it
+- `hotplug-iso-ocp`: 0.50-0.56 A at every corner, 3.3x under the threshold and never at it
 
 ## What a result is worth
 

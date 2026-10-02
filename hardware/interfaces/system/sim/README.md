@@ -185,8 +185,8 @@ them, and each is `[sim]`. "Worst" is the worst corner.
   edges put 0.2 mV spikes on the in-amp's output, and the breath chain's
   filters take them down to that.
 - **A hot-plug is clean at the jacks.** The LT1641 does not latch, and
-  `U-ISO` peaks at about 0.34 A. That is under `hotplug-iso-ocp`'s
-  0.49–0.54 A, because this deck's `U-ISO` has its datasheet's transient
+  `U-ISO` peaks at about 0.34 A. That is under `hotplug-iso-ocp`,
+  because this deck's `U-ISO` has its datasheet's transient
   impedance where `power-entry-instrument/sim`'s is a stiff source. The held
   pitch and mod CVs move by microvolts. The breath jack sits at −1.3 V with no
   instrument and settles near 0 V once one is plugged in at rest, so no gate

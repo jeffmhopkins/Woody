@@ -201,10 +201,10 @@ Its ratings: V_DS −30 V against D-TVS-PWR's 24.4 V clamp [ds SMAJ15A p.2];
   C-INRUSH-GS carries the source's jump to it
 ```
 
-The run agrees with all of it and says more: `U-ISO` peaks at 0.49–0.54 A on
-a hot-plug at 65 corners (`hotplug-iso-ocp`) — the peak is the ramp's end,
+The run agrees with all of it and says more: `U-ISO` peaks at `hotplug-iso-ocp`
+on a hot-plug at 65 corners — the peak is the ramp's end,
 not the plug — `VCC` at the load switch does not move, the instrument is up in
-93–182 ms, and the ramp takes about 50 ms 10–90 %, slower than the arithmetic
+94–183 ms, and the ramp takes about 50 ms 10–90 %, slower than the arithmetic
 above because the loads come on during it. **`Q-INRUSH` dissipates 1.8 W at
 most, ~85 mJ a start**: the AO3401A's single-pulse rating at 50 ms is about
 12 W and its transient impedance there about 12 K/W `[ds p.4 Figures 10–11,
