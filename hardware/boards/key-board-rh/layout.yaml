@@ -33,8 +33,8 @@ fab:
   silk_line_min: 0.15
   silk_to_pad: 0.15
   finish: "HAL lead-free"    # Economic assembly's standard finish
-  mask: Green
-  silk: White
+  mask: White               # ADR 0028, 2026-10-02 amendment: the owner's white mask on the key boards too, matching the main board
+  silk: Black               # white legend does not read on white mask
   copper_oz: 1               # outer copper, in the stackup the Gerber job file carries
 
 standoff_footprint: "MountingHole:MountingHole_2.7mm_M2.5"

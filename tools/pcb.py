@@ -4,6 +4,7 @@
     python3 tools/pcb.py layout hardware/boards/key-board-lh   # write <board>.kicad_pcb (refuses if it exists; --force)
     python3 tools/pcb.py check  hardware/boards/key-board-lh   # DRC + schematic parity + fab limits + CAD agreement
     python3 tools/pcb.py render hardware/boards/key-board-lh   # 3D top/bottom and 2D copper PNGs, fab/ (refuses a board that fails check)
+    python3 tools/pcb.py stackup hardware/boards/key-board-lh  # mask/silk colours and finish rewritten from layout.yaml fab:
     python3 tools/pcb.py finish hardware/boards/main-board     # a routed board's missing connections tried again, with rip-up
     python3 tools/pcb.py update-footprints hardware/boards/main-board LED_WS2815B-V1_PLCC6_5.4x5.0mm_P1.6mm   # placed footprints from the library, same place and nets
 
@@ -1425,6 +1426,7 @@ def check_rules(board, bdir, name, lay):
     if pcbnew.ToMM(nc.GetClearance()) + 1e-4 < float(lay["rules"]["clearance"]):
         bad.append(f"error: [rules] the Default net class clearance is {pcbnew.ToMM(nc.GetClearance()):g} mm, "
                    f"under layout.yaml rules.clearance {lay['rules']['clearance']}")
+    bad += check_stackup(os.path.join(bdir, name + ".kicad_pcb"), lay.get("fab") or {})
     pro = os.path.join(bdir, name + ".kicad_pro")
     sev = json.load(open(pro))["board"]["design_settings"].get("rule_severities", {}) if os.path.exists(pro) else {}
     for test, level in sorted(sev.items()):
@@ -1433,6 +1435,41 @@ def check_rules(board, bdir, name, lay):
             bad.append(f"error: [rules] DRC test {test} is set to ignore in {name}.kicad_pro - {why}; "
                        f"set it back, or add it to tools/pcb.py IGNORE_OK with the reason")
     return bad
+
+
+def check_stackup(path, fab):
+    """The stackup's mask and silk colours and finish - what the Gerber job file tells
+    the board house - still those of layout.yaml fab:. set_stackup writes them only at
+    `layout`, so a fab: change made after that reached the order only by hand (the key
+    boards' 2026-10-02 move to white mask): `pcb.py stackup <board>` rewrites them."""
+    if not fab:
+        return []
+    m = re.search(r"\t\t\(stackup\n(.*?)\n\t\t\)\n", open(path).read(), re.S)
+    fix = "run: python3 tools/pcb.py stackup <board>"
+    if not m:
+        return [f"error: [stackup] the board has no stackup - {fix}"]
+    s, bad = m.group(1), []
+    for layer, want in (("F.Mask", fab["mask"]), ("B.Mask", fab["mask"]), ("F.SilkS", fab["silk"]), ("B.SilkS", fab["silk"])):
+        blk = re.search(rf'\(layer "{re.escape(layer)}"\n(.*?)\n\t\t\t\)', s, re.S)
+        c = re.search(r'\(color "([^"]*)"\)', blk.group(1)) if blk else None
+        have = c.group(1) if c else None
+        if have != want:
+            bad.append(f"error: [stackup] {layer} colour is {have!r}, layout.yaml fab: says {want!r} - {fix}")
+    fin = re.search(r'\(copper_finish "([^"]*)"\)', s)
+    if (fin.group(1) if fin else None) != fab["finish"]:
+        bad.append(f"error: [stackup] copper finish is {fin.group(1) if fin else None!r}, layout.yaml fab.finish says {fab['finish']!r} - {fix}")
+    return bad
+
+
+def cmd_stackup(bdir):
+    """Rewrite the stackup (mask and silk colours, finish, copper) from layout.yaml fab:
+    and stackup:, at the board's own thickness. Nothing else in the board is touched."""
+    name = os.path.basename(bdir)
+    pcb = os.path.join(bdir, name + ".kicad_pcb")
+    lay = layout_yaml(bdir)
+    t = pcbnew.ToMM(pcbnew.LoadBoard(pcb).GetDesignSettings().GetBoardThickness())
+    set_stackup(pcb, lay["fab"], t, lay.get("stackup"))
+    print(f"pcb: stackup of {os.path.relpath(pcb, ROOT)} written from layout.yaml fab: (mask {lay['fab']['mask']}, silk {lay['fab']['silk']})")
 
 
 def check_silk(board, fab):
@@ -1986,10 +2023,10 @@ if __name__ == "__main__":
     if len(sys.argv) >= 4 and sys.argv[1] == "update-footprints":
         sys.exit(cmd_update_footprints(os.path.join(ROOT, sys.argv[2].rstrip("/")),
                                        [a for a in sys.argv[3:] if not a.startswith("--")], "--pads-resized" in sys.argv) or 0)
-    if len(sys.argv) >= 3 and sys.argv[1] in ("layout", "check", "render", "finish"):
+    if len(sys.argv) >= 3 and sys.argv[1] in ("layout", "check", "render", "finish", "stackup"):
         d = os.path.join(ROOT, sys.argv[2].rstrip("/"))
         sys.exit({"layout": lambda: cmd_layout(d, "--force" in sys.argv, "--no-route" not in sys.argv), "check": lambda: cmd_check(d),
-                  "finish": lambda: cmd_finish(d),
+                  "finish": lambda: cmd_finish(d), "stackup": lambda: cmd_stackup(d),
                   "render": lambda: cmd_render(d, sys.argv[sys.argv.index("--preview") + 1] if "--preview" in sys.argv else None)}[sys.argv[1]]() or 0)
     print(__doc__)
     sys.exit(2)

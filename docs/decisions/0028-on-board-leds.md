@@ -52,7 +52,8 @@ The owner's decisions, 2026-09-30, relayed with the brief for this change:
    `[ds WS2815B-V1.pdf p.2]`.
 7. **White solder mask on the main board.** The top face is the row's first
    reflector (ADR 0016 named white mask as the cheap improvement). Recorded
-   on `PCB-CARRIER` and in `hardware/boards/main-board/README.md`.
+   on `PCB-CARRIER` and in `hardware/boards/main-board/README.md`. The key
+   boards are white too (*Amendment, 2026-10-02*).
 
 `R-LED-SER`, `R-LED-PD` and `C-STRIP-BULK` stay. The circuit, its derivation
 against the B-V1's `V_IH` and the row's current are
@@ -156,3 +157,28 @@ test moves its count or pitch. The test is still run before the board is
 ordered; what changes is that it no longer holds up placement and routing.
 A reshuffle moves thirteen LEDs, their capacitors and the one data chain
 between them along the centreline, which the layout keeps clear for it.
+
+## Amendment, 2026-10-02 — white mask on the key boards too
+
+**The owner, 2026-10-02:** "Keep white but we should also do it for the top
+key boards as well." Point 7 stands for the main board, and now covers both
+key boards (`hardware/boards/key-board-lh`, `key-board-rh`) as well: white
+solder mask on both faces, black legend, the same `fab:` mask and silk as the
+main board's `layout.yaml`. The key boards' undersides are what the row
+faces, so they are the cavity's second reflector — the "white solder mask on
+… the cavity side of the key … boards" that ADR 0016 named as the cheap
+improvement.
+
+The colour is held in each board's `layout.yaml` `fab:` and written into the
+board's stackup, which the Gerber job file carries to the board house;
+`tools/pcb.py check` now fails when the two disagree (`pcb.py stackup`
+rewrites it).
+
+**Open, and what decides it.** JLCPCB's Economic PCBA table lists white at
+1.6 mm only with **leaded** HASL, 5–30 boards
+`[ds datasheets/fab/JLCPCB-PCBA-CAPABILITIES.pdf, "PCB Specs for Economic
+PCB Assembly"]`, where the key boards' `fab: finish` is lead-free HASL and
+their order (`hardware/boards/key-board-lh/README.md`) is Economic. The
+quote form at order time decides: if it will not take white with lead-free
+HASL under Economic, the owner chooses between Standard PCBA and a leaded
+finish. The finish is not changed here.
