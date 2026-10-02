@@ -520,7 +520,9 @@ class Router:
         fixed = 0
         for rnd in range(60):
             changed = False
-            tracks = [t for t in self.board.GetTracks() if type(t) is pcbnew.PCB_TRACK]
+            # the outer layers' (an inner routing layer's joins are left as routed; check_tracks
+            # still tests them)
+            tracks = [t for t in self.board.GetTracks() if type(t) is pcbnew.PCB_TRACK and t.GetLayer() in LAYERS]
             # 1. a branch ending in the middle of a track: split the track there
             for t in tracks:
                 for e in (t.GetStart(), t.GetEnd()):
@@ -1488,6 +1490,10 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
                                 out |= {(L, i, j) for L in ls}
             return out
         src, dst = cells_of(pa), cells_of(pb)
+        if src & dst and {c[0] for c in src | dst} != {"F"} and any(c[0] == "F" for c in src | dst):
+            # the two items stand at one place on different faces (a front pad over a rear
+            # one): a path from the front copper to the rest, so a via joins them
+            src, dst = {c for c in src | dst if c[0] == "F"}, {c for c in src | dst if c[0] != "F"}
         # start and end only where a track may stand: a cell inside a pad can still be
         # within clearance of the next pin's copper (all of them, if none may)
         src = {c for c in src if grids[c[0]].free(c[1], c[2])} or src

@@ -399,7 +399,7 @@ silk:
 # layer direction in batch: an autoroute_settings scope with per-layer directions made
 # it route nothing on this board (2026-10-02, as on the controller's, tooling.md §4).
 route: astar
-rip_up: 10
+rip_up: 3
 directions:
   layers: {F.Cu: vertical, In2.Cu: horizontal, B.Cu: vertical}
   against_cost: 6.0
