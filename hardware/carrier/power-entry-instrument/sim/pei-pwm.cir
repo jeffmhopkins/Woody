@@ -1,0 +1,40 @@
+* The instrument's input LC driven by the LED row's PWM, at the operating point (#12 item 4).
+* U-ISO as a source at v_bus behind its output resistance, C-ISO-OUT; the load switch ON as
+* R-ILIM plus Q-LOADSW's R_DS(on); the umbilical's two conductors (R and L each); Q-INRUSH ON
+* at its lowest R_DS(on) (r_on_z, the least damping, as pei-z.cir takes it); then INST_POS12:
+* C-STRIP-BULK with its ESR, the LED row and the other 12 V loads, and behind L-BUCK-IN,
+* C-BUCK-IN with its ESR and the buck as a constant-power load (v_on and up, as pei-start.cir).
+* D-TVS-PWR's capacitance is left out (nF against C-STRIP-BULK's 470 uF).
+* THE ROW: thirteen WS2815B-V1 in phase, the row's quiescent plus a pulse of pw_i_row_pk at pw_f,
+* duty pw_duty, starting pw_t_start into the run. The buck's input power swings by pw_p_mx in phase
+* (led-pwm-matrix; 0 in led-pwm). The 12 V loads are currents at v_nom and up, resistive
+* below it, as pei-start.cir's are. U-ISO's loop is not modelled: it holds v_bus behind
+* r_bus, which is the stiffest the source can be and leaves the damping to the network.
+* Waveforms: vbuck is BUCK_IN (C-BUCK-IN), vpos12 is INST_POS12 (C-STRIP-BULK).
+VBUS set 0 DC {{v_bus}}
+RBUS set vcc {{r_bus}}
+CISO vcc ciso {{C-ISO-OUT}}
+RCISO ciso 0 {{esr_iso}}
+RSW vcc out {{pw_r_sw}}
+RCP out cp1 {{r_cable}}
+LCP cp1 inp {{l_cable}}
+RCN ig cn1 {{r_cable}}
+LCN cn1 0 {{l_cable}}
+RQ inp ins {{r_on_z}}
+CSTRIP ins cs1 {{C-STRIP-BULK}}
+RCSTRIP cs1 ig {{esr_strip}}
+VPW pw 0 PULSE(0 1 {{pw_t_start}} {{pw_t_edge}} {{pw_t_edge}} {{pw_t_high}} {{pw_t_period}})
+BROW ins ig I = ({{pw_i_other}} + {{pw_i_row_q}} + {{pw_i_row_pk}} * V(pw)) * max(0, min(1, V(ins,ig) / {{v_nom}}))
+LBIN ins lb1 {{L-BUCK-IN}}
+RLBIN lb1 cb {{r_lbin}}
+CBUCK cb cb1 {{C-BUCK-IN}}
+RCBUCK cb1 ig {{esr_buck}}
+BBUCK cb ig I = ({{p_buck}} + {{pw_p_mx}} * V(pw)) / max(V(cb,ig), 1) * 0.5 * (1 + tanh((V(cb,ig) - {{v_on}}) / 0.1))
+.options method=gear rshunt=1e10
+.control
+tran 1u {{pw_t_end}} 0 1u
+wrdata vbuck.dat v(cb) - v(ig)
+wrdata vpos12.dat v(ins) - v(ig)
+quit
+.endc
+.end

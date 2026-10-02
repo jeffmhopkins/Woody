@@ -1,0 +1,30 @@
+* The breath ADC's input through the power-up (#12 item 2), behavioural at every source:
+* INST_POS12 a ramp from 0 V to v12 over t_r12 (Q-INRUSH's Miller ramp); VS the REF5050 and
+* its buffer following it less v_do_ref, up to 5.000 V; the sensor ratiometric to VS (k_s);
+* U-BUF B following the sensor, clipped to its supply (k_rail 1: at its supply throughout);
+* then, as netlisted, R-ADCDIV-U, R-ADCDIV-L and C-AA-ADC at ADC_IN. The 5 V rail starts
+* when INST_POS12 passes the R-78E5.0's 8 V (t_b0) and ramps over t_ss; DEV_3V3 follows it
+* less the LDO's dropout (k_3v3 0: never). The MCP3202's CH0 clamps are diodes to VDD and
+* VSS; VDD is an ideal source, so it takes whatever the clamp pushes and stays where it is
+* (the most clamp current: a real 3V3 rail with nothing on it would be lifted instead).
+* Waveforms: iclamp is the current through the upper clamp into VDD; vover is ADC_IN - VDD.
+V12 v12 0 PWL(0 0 {{t_r12}} {{v12}})
+BVS vs 0 V = min({{vs_ref}}, max(0, V(v12) - {{v_do_ref}}))
+BBUF buf 0 V = {{k_rail}} * V(v12) + (1 - {{k_rail}}) * min(V(vs) * {{k_s}}, V(v12))
+RU buf adc {{R-ADCDIV-U}}
+RL adc 0 {{R-ADCDIV-L}}
+CAA adc 0 {{C-AA-ADC}}
+V5 v5 0 PWL(0 0 {{t_b0}} 0 {{t_b1}} 5)
+BV3 vdd 0 V = {{k_3v3}} * min(3.3, max(0, V(v5) - {{v_do_ldo}}))
+VIM vddc vdd DC 0
+DUP adc vddc DCLAMP
+DDN 0 adc DCLAMP
+.model DCLAMP D(is={{is_clamp}} n=1)
+.options method=gear rshunt=1e10
+.control
+tran 20u {{t_end_pu}} 0 20u
+wrdata iclamp.dat i(VIM)
+wrdata vover.dat v(adc) - v(vdd)
+quit
+.endc
+.end
