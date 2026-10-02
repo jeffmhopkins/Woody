@@ -316,8 +316,22 @@ def as_assembly(src, dst):
     from OCP.BRep import BRep_Builder
     from OCP.Quantity import Quantity_ColorRGBA
     from OCP.XCAFPrs import XCAFPrs_DocumentExplorer, XCAFPrs_DocumentExplorerFlags_OnlyLeafNodes
+    import shutil
+    from OCP.TDF import TDF_Label
     doc = read_xcaf(src)
     st = XCAFDoc_DocumentTool.ShapeTool_s(doc.Main())
+    # one level of assembly over coloured parts already exports as it is: copy it, so
+    # that what this rewrite cannot write survives (the STEP writer here drops a
+    # colour's alpha - the KS33 housing's translucency)
+    free = children(st.BaseLabel())
+    asms = [L for L in free if st.IsAssembly_s(L)]
+
+    def ref(c):
+        r = TDF_Label()
+        return r if st.GetReferredShape_s(c, r) else None
+    if asms and not any(st.IsAssembly_s(ref(c)) for A in asms for c in children(A) if ref(c) is not None):
+        shutil.copyfile(src, dst)
+        return "copied: already one assembly of parts"
     groups = {}
 
     def faces(shape):
