@@ -493,7 +493,16 @@ module ec_recess_2d() {
 usb_web_min = 2;   // drawing convention: oak between two tail-face cutouts
 usb_sz = openings_usb_slot_portrait ? [openings_usb_slot_h, openings_usb_slot_w] : [openings_usb_slot_w, openings_usb_slot_h];   // [across Y, height Z]
 usb_lane = [ec_c[0] + ec_fl[0] / 2, W - u_y0];   // flange edge to the side's inside face
-usb_c = [(usb_lane[0] + usb_lane[1]) / 2, z_floor + cavity_h / 2];
+// Centred in the cavity's height, UNLESS the main board runs on under it
+// (boards.main_tail "full", owner 2026-10-02): then the receptacle's body,
+// which reaches back to within boards.board_clear of the board's tail end,
+// stands at least boards.board_clear above the board's parts - the same
+// clearance a key board keeps from the parts under it. (The board's top face
+// is thumb_z, below; it is written out here because thumb_z comes later.)
+usb_over_board = boards_main_tail == "full" && x_in1 - openings_usb_ext_depth < ua_x0 + boards_board_clear;
+usb_board_top = z_floor + switch_thumb_pcb_below_seat + switch_pcb_t;   // = thumb_z = cb_top
+usb_c = [(usb_lane[0] + usb_lane[1]) / 2,
+         max(z_floor + cavity_h / 2, usb_over_board ? usb_board_top + boards_smt_h + boards_board_clear + usb_sz[1] / 2 : 0)];
 // THE OVERMOULD POCKET (openings.usb_overmold): from the tail face down to a
 // thin panel, so the plug's overmould reaches the receptacle, whose nose
 // passes the panel's slot with its face level with the pocket floor. A
@@ -901,6 +910,13 @@ module pcb_geometry() {
     echo("PCB", "main", "keepout", "elsewhere", cb_x[0], cb_y[0], ua_x0, cb_y[1], gap_room);
     for (cl = chain_ribbon_cls) let(sp = chain_span(chain_x(cl), chain_dir(cl)))
         echo("PCB", "main", "keepout", str("ribbon ", cl), sp[0], chain_y - boards_chain_hdr_l / 2, sp[1], chain_y + boards_chain_hdr_l / 2, 0);
+    // The corner under the USB-C extension's receptacle and its lead
+    // (boards.main_tail "full"): parts to boards.smt_h, which the receptacle
+    // clears by boards.board_clear (drc.echo 'main board's tail end runs full
+    // width beside the etherCON adapter').
+    if (boards_main_tail == "full")
+        echo("PCB", "main", "keepout", "USB-C receptacle and lead", cb_x[1], usb_c[0] - usb_sz[0] / 2 - boards_board_clear, ua_x0, cb_y[1],
+             usb_c[1] - usb_sz[1] / 2 - boards_board_clear - cb_top);
     echo("PCB", "main", "keepout", "Matrix ribbon", jm_x1, jm_y - routing_mcu_ribbon_w / 2, mcu_x, jm_y + routing_mcu_ribbon_w / 2,
          jm_z + e_mb - routing_mcu_ribbon_t / 2 - cb_top);
     echo("PCB", "main", "board", "thickness", switch_pcb_t, "smt_height_max", boards_smt_h,
@@ -1221,11 +1237,14 @@ module cb_2d() {
     difference() {
         union() {
             translate([cb_x[0], cb_y[0]]) square([cb_x[1] - cb_x[0], cb_y[1] - cb_y[0]]);
-            // THE TONGUE (ADR 0021): on to the etherCON's adapter, as wide as
-            // it, carrying J-UMB against the adapter's rear face - and on the
-            // side where the adapter's edge falls just inside the main board's,
-            // straight on from the main board's edge, with no step (tongue_board_y).
-            translate([cb_x[1] - EPS, tongue_board_y[0]]) square([ua_x0 - cb_x[1] + EPS, tongue_board_y[1] - tongue_board_y[0]]);
+            // THE TAIL END (ADR 0021 and its 2026-10-02 amendment): on to the
+            // etherCON's adapter, carrying J-UMB against the adapter's rear
+            // face. FULL WIDTH (boards.main_tail "full", owner 2026-10-02): the
+            // cut-away beside the old tongue held nothing at the board's height
+            // (drc.echo 'main board's tail end runs full width beside the
+            // etherCON adapter'). "tongue" keeps the old outline: the adapter's
+            // width, flush with the board's edge on the near side (tongue_board_y).
+            translate([cb_x[1] - EPS, cb_tail_y[0]]) square([ua_x0 - cb_x[1] + EPS, cb_tail_y[1] - cb_tail_y[0]]);
         }
         // The slot in front of the sensor's lower port.
         translate(port_slot_c - port_slot_sz / 2 - [EPS, 0]) square(port_slot_sz);
@@ -1293,6 +1312,8 @@ tongue_y = [ec_c[0] - ec_fl[0] / 2, ec_c[0] + ec_fl[0] / 2];
 // just slightly which is not needed"). The other side keeps its step.
 tongue_flush_lo = tongue_y[0] - cb_y[0] <= cb_y[1] - tongue_y[1];
 tongue_board_y = tongue_flush_lo ? [cb_y[0], tongue_y[1]] : [tongue_y[0], cb_y[1]];
+assert(boards_main_tail == "full" || boards_main_tail == "tongue", str("boards.main_tail is full or tongue, not ", boards_main_tail));
+cb_tail_y = boards_main_tail == "full" ? cb_y : tongue_board_y;   // the board's edges across, past the right-hand key board
 // THE MAIN BOARD'S MOUNTS (ADR 0022, ADR 0025), all on the bottom plate: what
 // a mount keeps clear round its centre - a column's standoff or an end
 // mount's nut on the top face, the spacer under the board, and the float.
@@ -1699,13 +1720,34 @@ module drc_report() {
             x == undef ? "none found" : [x, min([for (k = concat(cluster_keys(cl), bottom_keys), st = key_stubs(k)) rect_gap(st[0], c, sz, 0) - st[1]]),
                                          chain_col_gap(sp, boards_chain_hdr_l) - col_keep_r],
             "mm: the headers' mouths along the body; the header and its plug to the nearest switch's pins and pole (against 0.3); and to the nearest column's hex, off its axis (against 0.5)");
-    drc(tongue_y[1] - tongue_y[0] >= ju_l + 2 * boards_board_clear && ua_x0 > cb_x[1], "J-UMB on the main board's tongue, against the etherCON's adapter",
-        [ua_x0 - cb_x[1], tongue_y[1] - tongue_y[0] - ju_l],
-        "mm: the tongue's length past the main board, and its width less J-UMB's pin row");
-    drc(tongue_board_y[0] >= cb_y[0] && tongue_board_y[1] <= cb_y[1] && (tongue_board_y[0] == cb_y[0] || tongue_board_y[1] == cb_y[1]),
-        "main board's tongue flush with its edge on the near side of the adapter",
-        [tongue_flush_lo ? "low y" : "high y", tongue_flush_lo ? tongue_y[0] - cb_y[0] : cb_y[1] - tongue_y[1], tongue_flush_lo ? cb_y[1] - tongue_y[1] : tongue_y[0] - cb_y[0]],
-        "the side run straight through (owner, 2026-09-30), the step it no longer has (mm), and the step the other side keeps (mm)");
+    drc(cb_tail_y[1] - cb_tail_y[0] >= ju_l + 2 * boards_board_clear && ua_x0 > cb_x[1], "J-UMB on the main board's tongue, against the etherCON's adapter",
+        [ua_x0 - cb_x[1], cb_tail_y[1] - cb_tail_y[0] - ju_l],
+        str("mm: the board's length past the right-hand key board (the tongue, ", boards_main_tail == "full" ? "full width since 2026-10-02" : "the adapter's width",
+            "), and its width there less J-UMB's pin row"));
+    if (boards_main_tail == "tongue")
+        drc(tongue_board_y[0] >= cb_y[0] && tongue_board_y[1] <= cb_y[1] && (tongue_board_y[0] == cb_y[0] || tongue_board_y[1] == cb_y[1]),
+            "main board's tongue flush with its edge on the near side of the adapter",
+            [tongue_flush_lo ? "low y" : "high y", tongue_flush_lo ? tongue_y[0] - cb_y[0] : cb_y[1] - tongue_y[1], tongue_flush_lo ? cb_y[1] - tongue_y[1] : tongue_y[0] - cb_y[0]],
+            "the side run straight through (owner, 2026-09-30), the step it no longer has (mm), and the step the other side keeps (mm)");
+    // THE FULL-WIDTH TAIL END (owner, 2026-10-02). What stands over the corner
+    // the old tongue left cut away - past the right-hand key board, beside the
+    // adapter's width: the USB-C extension's receptacle (its back reaches the
+    // board's end) and its lead coming down to it from the Matrix, the Matrix
+    // ribbon's edge on its level run, and nothing else at the board's height
+    // (the etherCON and its adapter stand at and past the board's end, across
+    // the adapter's width only; the bottom plate is under the board, as
+    // everywhere). Each must stand boards.board_clear clear of the parts
+    // (boards.smt_h) the corner may now carry.
+    if (boards_main_tail == "full") let(
+        corner = [ua_x0 - cb_x[1], cb_y[1] - tongue_y[1]],
+        parts_top = cb_top + boards_smt_h,
+        rec_gap = usb_c[1] - usb_sz[1] / 2 - parts_top,
+        lead_gap = usb_c[1] - 2 - parts_top,   // the lead's 4 mm section (tail_wiring), lowest where it meets the receptacle
+        rec_back = x_in1 - openings_usb_ext_depth - ua_x0)
+        drc(tongue_y[0] >= cb_y[0] - 0.01 && (rec_back >= boards_board_clear || rec_gap >= boards_board_clear - 0.01) && lead_gap >= boards_board_clear - 0.01,
+            "main board's tail end runs full width beside the etherCON adapter",
+            [corner, rec_gap, lead_gap, rec_back],
+            "mm: the corner the old tongue cut away (along the body, across), now board; the USB-C receptacle's underside above the board's parts, and its lead's (against boards.board_clear); the receptacle's back past the board's end (negative = over the board, which is why it stands clear above it)");
     // Where J-UMB's row meets the adapter, in the connector's own frame:
     // between G below the axis and the peg line through it, a pad's worth
     // (a pitch) clear of each, and above the adapter's lower edge.

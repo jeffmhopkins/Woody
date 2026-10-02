@@ -114,6 +114,7 @@ boards_mcu_conn_l = 21.54;  // settled; J-MCU, the XKB X1270WR-2x12A-9TV01 box h
 boards_mcu_conn_w = 8.97;  // settled; the same header along the body with its tail pads: 5.40 body, its far tail row 2.60 behind the body's back (rev A1 side view) [ds XKB-X1270WR-2x12A-9TV01.pdf], and that row's pad reaching 0.965 past the hole, away from the body [repo hardware/lib/woody.pretty/IDC-Header_2x12_P1.27mm_XKB_X1270WR_Horizontal.kicad_mod; calc 5.40 + 2.60 + 0.965 = 8.965]
 boards_mcu_conn_h = 5.1;  // settled; the same header's height above the board [ds XKB-X1270WR-2x12A-9TV01.pdf]
 boards_umb_adapter_t = 1.6;  // tbd; the adapter board's thickness, a standard 2-layer board [from memory]; the NE8FAV's pin tails reach through it
+boards_main_tail = "full";  // settled; owner, 2026-10-02: 'I feel like it's not necessary, and that maybe we can get another LED down there'. full = the main board runs its whole width on to the adapter's rear face; tongue = the old outline, the adapter's width past the right-hand key board, flush on the near side
 boards_umb_joint_d = 2.5;  // settled; J-UMB's insulator along the body, behind the adapter: the hanxia HX PZ2.54-1x8P WZ's 2.50 mm square insulator [ds HANXIA-HX-PZ2.54-1x8P-WZ.pdf]
 boards_umb_joint_h = 2.5;  // settled; the same insulator's height on the main board [ds HANXIA-HX-PZ2.54-1x8P-WZ.pdf]
 boards_umb_joint_row_h = 1.25;  // settled; the header's pin row above the main board, at the middle of its 2.50 insulator [ds HANXIA-HX-PZ2.54-1x8P-WZ.pdf]; where the row meets the adapter
