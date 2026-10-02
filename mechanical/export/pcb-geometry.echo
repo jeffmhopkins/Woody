@@ -70,5 +70,6 @@ ECHO: "PCB", "main", "keepout", "under key board right_hand", 144.4, 7.5, 251.3,
 ECHO: "PCB", "main", "keepout", "elsewhere", 7.5, 7.5, 299.9, 49.5, 20.2
 ECHO: "PCB", "main", "keepout", "ribbon left_hand", 70.64, 35.03, 80.9, 49, 0
 ECHO: "PCB", "main", "keepout", "ribbon right_hand", 181.64, 35.03, 191.9, 49, 0
+ECHO: "PCB", "main", "keepout", "USB-C receptacle and lead", 251.3, 37.5, 299.9, 49.5, 2.62
 ECHO: "PCB", "main", "keepout", "Matrix ribbon", 250.3, 20.88, 273.4, 36.12, 2.15
 ECHO: "PCB", "main", "board", "thickness", 1.6, "smt_height_max", 2.62, "side", "parts on top; the thumb switches from below, their footprints on the underside"
