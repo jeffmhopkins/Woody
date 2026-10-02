@@ -64,7 +64,7 @@ nets:
     carries: "Chain return: the main board's ground, and five alternating grounds on each ribbon: main-board J-CHAIN pins 1/3/5/7/9, key-board pins 4/6/8/10/12"
     figure: chain-conductors
     origin: interfaces/key-chain-loom
-    note: "It is the main board's ground pour, carried to each key board by its ribbon's five grounds - a separate name for those conductors, not a separate node"
+    note: "It is the main board's ground pour, carried to each key board by its ribbon's five grounds - a separate name for those conductors, not a separate node. On the right-hand key board the Matrix's grounds join it too (its pad-row GND and TP3), so that board's pour reaches the main board by both its ribbons: CBL-MCU-RIBBON's four grounds and CBL-CHAIN's five (ADR 0021 amendment 2026-10-02)"
     reference: [cluster/key-register, cluster/key-switch-network]
 
   CHAIN_SCK:
@@ -320,7 +320,7 @@ nets:
   EN:
     kind: signal
     domain: digital
-    carries: "The Matrix's EN (its RESET net, CHIP_PU), from Key1's RESET-side terminal down CBL-MCU-RIBBON (J-MCU pin 24) to HDR-SERVICE pin 4 (ADR 0018)"
+    carries: "The Matrix's EN (its RESET net, CHIP_PU), from Key1's RESET-side terminal by a wire to the right-hand key board (W-MATRIX), down CBL-MCU-RIBBON (J-MCU pin 24) to HDR-SERVICE pin 4 (ADR 0018, ADR 0021 amendment 2026-10-02)"
     external_driver: "whatever is plugged into the service header, pulling to ground only"
     receivers: [carrier/carrier, carrier/service-uart]
     note: "Held up on the Matrix by R8, 10k to its 3V3, with no capacitor on it; Key1 pulls it to GND. Nothing in series"
@@ -328,7 +328,7 @@ nets:
   IO0:
     kind: signal
     domain: digital
-    carries: "The Matrix's GPIO0 (boot strap), from Key2's IO0-side terminal down CBL-MCU-RIBBON (J-MCU pin 23) to HDR-SERVICE pin 5 (ADR 0018)"
+    carries: "The Matrix's GPIO0 (boot strap), from Key2's IO0-side terminal by a wire to the right-hand key board (W-MATRIX), down CBL-MCU-RIBBON (J-MCU pin 23) to HDR-SERVICE pin 5 (ADR 0018, ADR 0021 amendment 2026-10-02)"
     external_driver: "whatever is plugged into the service header, pulling to ground only"
     receivers: [carrier/carrier, carrier/service-uart]
     note: "Held up on the Matrix by R10, 10k to its 3V3; Key2 (BOOT) pulls it to GND. Nothing in series"
@@ -339,7 +339,7 @@ nets:
     figure: matrix-led-current
     driver: carrier/power-entry-instrument
     receivers: [carrier/led-strip-drive, carrier/carrier]
-    note: "It reaches the 8x8 matrix through the dev board, so carrier/carrier is where it lands, through J-MCU and three conductors of CBL-MCU-RIBBON (two on the 5V pad, one on TP2)"
+    note: "It reaches the 8x8 matrix through the dev board, so carrier/carrier is where it lands, through J-MCU, three conductors of CBL-MCU-RIBBON and the right-hand key board, onto the Matrix's 5V pad (HDR-MATRIX) and TP2 (W-MATRIX)"
 
   VS:
     kind: signal

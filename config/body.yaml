@@ -617,15 +617,51 @@ boards:
     status: settled
     source: "[ds 3D] datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-3D.stp - the board spans z -0.8 to 0.8"
   # THE LED MATRIX IS ON THE TOP FACE, just past the last key (owner,
-  # 2026-09-26), face up against the oak top under its window, the key plate
-  # ending short of it; the connectors pass beneath it. A 24-way ribbon soldered to
-  # its pads runs to J-MCU on the main board (hardware/carrier/bom.csv
-  # CBL-MCU-RIBBON).
-  matrix_harness_h:
-    value: 2.5
-    status: tbd
-    source: "below the Matrix: the ribbon soldered straight to its pads, wires bent flat [from memory]. Crimp housings on a pin header stood ~16.5 and put a row across the patch plug"
-    decided_by: "M4, with the harness built"
+  # 2026-09-26), face up under its window in the oak top, the key plate
+  # ending short of it. SINCE 2026-10-02 IT IS MOUNTED ON THE RIGHT-HAND KEY
+  # BOARD (owner: "I think d is right for the matrix vs hand soldering"; ADR
+  # 0021 amendment "the Matrix on the right-hand key board"): that board runs
+  # on past its tail columns as two rails, one under each of the Matrix's pad
+  # rows, with the middle open for its back-side parts and the USB-C plug.
+  # Bare header pins join each pad row to its rail through a shim; a plain IDC
+  # ribbon runs from a header under the key board down to J-MCU.
+  matrix_mount:
+    value: "key_board_rh"
+    status: settled
+    source: "owner, 2026-10-02: 'I think d is right for the matrix vs hand soldering' - option (d) of ADR 0021's 2026-10-02 study, the Matrix on an extension of the right-hand key board. It replaces the 24-way ribbon soldered to the Matrix's pads (hardware/carrier/bom.csv CBL-MCU-RIBBON is now an IDC ribbon crimped at both ends)"
+  matrix_rail_in:
+    value: 1.3
+    status: nominal
+    source: "how far each rail of the right-hand key board's extension runs inward past its pad row's centre: the pin's pad, boards.pin_pad / 2 = 0.85, and 0.45 of board beyond it, over the layout's 0.3 edge clearance [calc]. The rest of the middle stays open for the Matrix's back-side parts (matrix_under_h, drawn 19 mm square) and the USB-C plug; drc.echo 'Matrix on the right-hand key board's rails' prints the gaps"
+    decided_by: "calipers on the Matrix's back-side parts, with matrix_under_h"
+  matrix_shim_t:
+    value: 0.8
+    status: nominal
+    source: "one strip under each pad row, between the rail and the Matrix, drilled on the pins: 0.8 mm FR-4, a standard board thickness [from memory]. The gap it stands in is derived (drc.echo 'Matrix shim on the extension's rails'): the Matrix's top against the oak less the key board's top. Thinner than the gap, so the Matrix stands that far under the oak, which takes the pins cut flush on its top face (its pad rows are under the oak, outside the window's opening) and the boards' thickness tolerance (boards.pcb_t_tol); a thicker stack bends the rails up against the oak and no further"
+    decided_by: "the first Matrix assembled on its board"
+  matrix_support:
+    value: "none"
+    status: nominal
+    source: "[calc] the Matrix's 37 mm cantilever past the tail columns needs no standoff. Two rails of 1.6 mm FR-4, each ~10.9 mm wide (the board's side to the pad row plus matrix_rail_in): I = 2 x 10.9 x 1.6^3 / 12 = 7.4 mm^4; with E ~20 GPa [from memory, FR-4 flexural] k = 3EI / L^3 = 3 x 20000 x 7.4 / 36.7^3 = 9.0 N/mm at the Matrix's centre. The Matrix ~4 g [from memory] and the rails' effective ~0.7 g sag 0.005 mm at 1 g and 0.26 mm under a 50 g jolt (9 MPa in the rails, against FR-4's ~400 MPa [from memory]); upward the oak top stops it at the shim's clearance. First mode ~0.22 kHz [calc: sqrt(9000 / 0.0047) / 2 pi], far above the shakes and jabs the IMU on the Matrix reads (ADR 0007) - but not stiff the way the lid was, so a key-click transient can ring it. 'standoff' = a pair of M2.5 standoffs from the main board (which runs full width under the rails since boards.main_tail 'full') to the rails' tips"
+    decided_by: "E-test on the first instrument assembled: tap the body and the keys with the IMU logging; a mode inside the gesture band, or ringing the firmware's filter does not remove, makes it 'standoff'"
+  mcu_plug_proud:
+    value: 1.5
+    status: nominal
+    source: "how far a mated IDC socket stands past its header's mouth, where the ribbon leaves the socket's back: the socket's height with its cover, 5.00 [ds YXCON-IDC3-24232A1AUC1-1.27MM-IDC-SOCKET.pdf], less the header shroud's inner depth, 3.50 [ds XKB-X1270WR-2x12A-9TV01.pdf; the drawing gives 3.70 and 3.50 inner without saying which is which, so the larger proud] [calc]"
+    decided_by: "the first pair mated"
+  # CBL-MCU-RIBBON's IDC socket, at each end (the same part both ends).
+  mcu_plug_t:
+    value: 3.05
+    status: settled
+    source: "the IDC socket's thickness across its two rows [ds YXCON-IDC3-24232A1AUC1-1.27MM-IDC-SOCKET.pdf]"
+  mcu_plug_l:
+    value: 19.44
+    status: settled
+    source: "the same socket's length, 1.27 x 12 positions + 4.2 [calc, ds YXCON-IDC3-24232A1AUC1-1.27MM-IDC-SOCKET.pdf]"
+  mcu_plug_h:
+    value: 5.0
+    status: settled
+    source: "the same socket's height along its pins, with its cover [ds YXCON-IDC3-24232A1AUC1-1.27MM-IDC-SOCKET.pdf]"
   matrix_under_h:
     value: 3.2
     status: tbd
@@ -690,6 +726,17 @@ openings:
     value: 15.0
     status: tbd
     source: "RIGHT-ANGLE USB-C plug on the extension (2026-09-26): the Matrix's edge to the far side of the moulding, where the lead turns across the body [from memory]. A straight plug is 25-30 and, doubled by the centred Matrix, added ~24 mm of body"
+    decided_by: "M4, against the extension bought"
+  # THE PLUG'S LEAD LEAVES DOWNWARD (2026-10-02). With the Matrix on the
+  # right-hand key board's rails, a lead leaving the right-angle plug across
+  # the body at the plug's height runs into the far rail; turned down, it
+  # leaves the plug's bottom, below the rails, and runs under the far rail to
+  # the receptacle beside the etherCON (drc.echo 'USB-C plug and lead clear of
+  # the right-hand key board's rails').
+  usb_plug_turn:
+    value: "down"
+    status: nominal
+    source: "down = a right-angle plug whose lead leaves toward the main board: openings.usb_slot_h along the body in front of the Matrix's mouth edge and openings.usb_plug_l down from its underside; across = the lead leaves across the body at the plug's height (usb_plug_l along the body), which the far rail now stands in. Right-angle USB-C plugs are sold both ways [from memory]"
     decided_by: "M4, against the extension bought"
   matrix_usb_to_tail:
     value: false

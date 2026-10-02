@@ -75,6 +75,70 @@ components:
     - 10
     - 11
     - 12
+  J2:
+    of: J-MCU-KB
+    value: 2x12 1.27mm shrouded box header
+    pins:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    - 17
+    - 18
+    - 19
+    - 20
+    - 21
+    - 22
+    - 23
+    - 24
+  J3:
+    of: HDR-MATRIX
+    value: 1x10 2.54mm header pins
+    pins:
+    - P5V
+    - GND
+    - P3V3
+    - IO7
+    - IO6
+    - IO5
+    - IO4
+    - IO3
+    - IO2
+    - IO1
+  J4:
+    of: HDR-MATRIX
+    value: 1x10 2.54mm header pins
+    pins:
+    - IO33
+    - IO34
+    - IO35
+    - IO36
+    - IO37
+    - IO38
+    - IO39
+    - IO40
+    - IO43
+    - IO44
+  J5:
+    of: W-MATRIX
+    value: 4 wire pads
+    pins:
+    - TP2
+    - TP3
+    - EN
+    - IO0
   R1:
     of: R-KEY-SER
     value: 100R 1%
@@ -229,12 +293,63 @@ nets:
   /CHAIN_SHLD:
   - J1.9
   - U1.SHLD
+  /DEV_3V3:
+  - J2.12
+  - J3.P3V3
+  /EN:
+  - J2.1
+  - J5.EN
   /HOP_LT_RH:
   - J1.7
   - U1.SER
   /HOP_RH_RT:
   - J1.5
   - U1.QH
+  /INST_5V_A:
+  - J2.22
+  - J2.24
+  - J2.8
+  - J3.P5V
+  - J5.TP2
+  /IO0:
+  - J2.2
+  - J5.IO0
+  /IO1:
+  - J2.21
+  - J3.IO1
+  /IO2:
+  - J2.20
+  - J3.IO2
+  /IO3:
+  - J2.18
+  - J3.IO3
+  /IO33:
+  - J2.6
+  - J4.IO33
+  /IO34:
+  - J2.11
+  - J4.IO34
+  /IO35:
+  - J2.15
+  - J4.IO35
+  /IO36:
+  - J2.13
+  - J4.IO36
+  /IO37:
+  - J2.7
+  - J4.IO37
+  /IO38:
+  - J2.17
+  - J4.IO38
+  /IO39:
+  - J2.9
+  - J4.IO39
+  /IO40:
+  - J2.5
+  - J4.IO40
+  /IO7:
+  - J2.19
+  - J3.IO7
   /KEY_RH1:
   - C1.1
   - R1.1
@@ -283,6 +398,12 @@ nets:
   /RH6/SWITCH_LEG:
   - R11.2
   - SW6.1
+  /U0RXD:
+  - J2.4
+  - J4.IO44
+  /U0TXD:
+  - J2.3
+  - J4.IO43
   GND_CHAIN:
   - C1.2
   - C2.2
@@ -297,6 +418,12 @@ nets:
   - J1.4
   - J1.6
   - J1.8
+  - J2.10
+  - J2.14
+  - J2.16
+  - J2.23
+  - J3.GND
+  - J5.TP3
   - SW1.2
   - SW2.2
   - SW3.2
@@ -310,6 +437,12 @@ nets:
   - J1.1
   J1.2:
   - J1.2
+  J3.IO4:
+  - J3.IO4
+  J3.IO5:
+  - J3.IO5
+  J3.IO6:
+  - J3.IO6
   U1.QH_BAR:
   - U1.QH_BAR
   V3V3_CHAIN_RH:
@@ -327,4 +460,7 @@ nets:
 external_endpoints:
 - J1.1
 - J1.2
+- J3.IO4
+- J3.IO5
+- J3.IO6
 - U1.QH_BAR
