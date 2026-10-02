@@ -63,6 +63,17 @@ jacks:
 # the jacks.
 connectors:
   J-B2B-MOD: {row: J-B2B-MOD, body: rear}
+# 3D models only (pcb.py render). The PJ398SM's model is the banked community one
+# (datasheets MANIFEST row THONKICONN-PJ398SM-BADPIXEL-3D), installed under KiCad's
+# name by tools/setup-env.sh; its origin is the bushing axis, not the sleeve pad, so
+# it moves 6.6 mm along the pin row: its pin tails at Y -4.9 / 3.4 / 6.7 [calc, OCP
+# bounds of the STEP's faces below z -1] against the footprint's T / TN / S at
+# 11.4 / 3.1 / 0 (a 0.2 mm pitch difference split both ends). J7's insulator is on
+# this board's rear (hardware/module/bom.csv J-B2B-MOD): the stock model is turned
+# over the x axis and dropped through the board, pin 1 kept at pin 1.
+models:
+  Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles: {offset: [0, -6.6, 0]}
+  PinHeader_2x10_P2.54mm_Vertical: {offset: [0, -22.86, -1.6], rotate: [180, 0, 0]}
 b2b:
   other: hardware/boards/module-main
 

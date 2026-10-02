@@ -71,7 +71,8 @@ done
 # now refuses instead. Add a line here when a board names a new one (the refusal lists
 # it). The KS-33's model is banked in datasheets/; the woody footprints' drawn
 # models are in hardware/lib/woody.3dshapes (tools/lib-models.py). The first three
-# are the key boards'; the rest the main board's (2026-09-30).
+# are the key boards'; the rest the main board's (2026-09-30); the 2x10 header the
+# module jack board's (2026-10-02).
 models=/usr/share/kicad/3dmodels
 for m in Capacitor_SMD.3dshapes/C_0805_2012Metric.step \
          Resistor_SMD.3dshapes/R_0805_2012Metric.step \
@@ -92,6 +93,7 @@ for m in Capacitor_SMD.3dshapes/C_0805_2012Metric.step \
          Package_TO_SOT_SMD.3dshapes/SOT-23-5.step \
          Package_TO_SOT_SMD.3dshapes/SOT-23.step \
          Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x05_P2.54mm_Vertical.step \
+         Connector_PinHeader_2.54mm.3dshapes/PinHeader_2x10_P2.54mm_Vertical.step \
          Converter_DCDC.3dshapes/Converter_DCDC_RECOM_R-78E-0.5_THT.step; do
   if [ ! -s "$models/$m" ]; then
     mkdir -p "$models/$(dirname "$m")"
@@ -99,6 +101,14 @@ for m in Capacitor_SMD.3dshapes/C_0805_2012Metric.step \
     mv "$models/$m.part" "$models/$m"
   fi
 done
+# The PJ398SM's model is not in kicad-packages3D at any tag (MANIFEST row
+# THONKICONN-PJ398SM-BADPIXEL-3D, checked 2026-09-29), so the banked community model
+# goes in under the name KiCad's footprint gives it (module-jack, 2026-10-02).
+pj=Connector_Audio.3dshapes/Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical.step
+if [ ! -s "$models/$pj" ]; then
+  mkdir -p "$models/$(dirname "$pj")"
+  cp "$(dirname "$0")/../datasheets/connectors/THONKICONN-PJ398SM-BADPIXEL-3D.step" "$models/$pj"
+fi
 
 # --- Freerouting for tools/pcb.py's `route: freerouting` (the main board;
 # tools/pcb_freeroute.py). v2.1.0 is the last release that runs on Java 21; its

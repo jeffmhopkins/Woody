@@ -252,6 +252,18 @@ def build(bdir, lay):
     for name, spec in (lay.get("connectors") or {}).items():
         if spec.get("body") == "rear":
             body_to_rear(fps[pcb.ref_of(comps, spec.get("row", name))])
+    # a 3D model whose origin is not the footprint's (a banked community model standing in
+    # for one KiCad's library names and does not ship): models: {footprint: {offset: [x, y,
+    # z] mm, rotate: [x, y, z] deg, reason, source}}. Only the render reads it.
+    for fpname, spec in (lay.get("models") or {}).items():
+        for fp in board.GetFootprints():
+            if fp.GetFPID().GetUniStringLibItemName() != fpname:
+                continue
+            ms = fp.Models()
+            for i in range(len(ms)):     # by index: iterating hands back copies
+                m = ms[i]
+                m.m_Offset = pcbnew.VECTOR3D(*[float(v) for v in spec.get("offset", [0, 0, 0])])
+                m.m_Rotation = pcbnew.VECTOR3D(*[float(v) for v in spec.get("rotate", [0, 0, 0])])
     if lay["mounts"].get("on_sheet"):
         for i, (nm, x, y, hole, head) in enumerate(geo["standoffs"]):
             ref = lay["mounts"]["on_sheet"][i]

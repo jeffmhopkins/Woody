@@ -58,7 +58,7 @@
 			)
 			(layer "dielectric 1"
 				(type "core")
-				(thickness 1.510)
+				(thickness 1.51)
 				(material "FR4")
 				(epsilon_r 4.5)
 				(loss_tangent 0.02)
@@ -901,7 +901,7 @@
 		(embedded_fonts no)
 		(model "${KICAD9_3DMODEL_DIR}/Connector_Audio.3dshapes/Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical.step"
 			(offset
-				(xyz 0 0 0)
+				(xyz 0 -6.6 0)
 			)
 			(scale
 				(xyz 1 1 1)
@@ -1251,7 +1251,7 @@
 		(embedded_fonts no)
 		(model "${KICAD9_3DMODEL_DIR}/Connector_Audio.3dshapes/Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical.step"
 			(offset
-				(xyz 0 0 0)
+				(xyz 0 -6.6 0)
 			)
 			(scale
 				(xyz 1 1 1)
@@ -1921,7 +1921,7 @@
 		(embedded_fonts no)
 		(model "${KICAD9_3DMODEL_DIR}/Connector_Audio.3dshapes/Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical.step"
 			(offset
-				(xyz 0 0 0)
+				(xyz 0 -6.6 0)
 			)
 			(scale
 				(xyz 1 1 1)
@@ -2591,7 +2591,7 @@
 		(embedded_fonts no)
 		(model "${KICAD9_3DMODEL_DIR}/Connector_Audio.3dshapes/Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical.step"
 			(offset
-				(xyz 0 0 0)
+				(xyz 0 -6.6 0)
 			)
 			(scale
 				(xyz 1 1 1)
@@ -3040,7 +3040,7 @@
 		(embedded_fonts no)
 		(model "${KICAD9_3DMODEL_DIR}/Connector_Audio.3dshapes/Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical.step"
 			(offset
-				(xyz 0 0 0)
+				(xyz 0 -6.6 0)
 			)
 			(scale
 				(xyz 1 1 1)
@@ -3103,7 +3103,7 @@
 			)
 		)
 		(path "/748dd2f3-b9e1-53da-97a5-1612bb838916")
-		(attr through_hole)
+		(attr through_hole exclude_from_bom)
 		(fp_line
 			(start -1.38 -1.38)
 			(end 0 -1.38)
@@ -3440,13 +3440,13 @@
 		(embedded_fonts no)
 		(model "${KICAD9_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_2x10_P2.54mm_Vertical.step"
 			(offset
-				(xyz 0 0 0)
+				(xyz 0 -22.86 -1.6)
 			)
 			(scale
 				(xyz 1 1 1)
 			)
 			(rotate
-				(xyz 0 0 0)
+				(xyz 180 0 0)
 			)
 		)
 	)
@@ -3790,7 +3790,7 @@
 		(embedded_fonts no)
 		(model "${KICAD9_3DMODEL_DIR}/Connector_Audio.3dshapes/Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical.step"
 			(offset
-				(xyz 0 0 0)
+				(xyz 0 -6.6 0)
 			)
 			(scale
 				(xyz 1 1 1)
