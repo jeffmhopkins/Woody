@@ -1694,6 +1694,11 @@ def prepare(board, lay):
     `route: freerouting`): the pairs, then every plane net's fanout. Returns the report."""
     obs = Obstacles(board, lay)
     report = []
+    import pcb
+    for gd in lay.get("guards") or []:
+        # a guard pour's own via (pcb_module: the module's SET guard), joining its faces
+        for x, y in gd.get("vias") or []:
+            lay_via(board, obs, gd["net"], *pcb.to_pcb(x, y))
     for spec in lay.get("pairs") or []:
         report += route_pair(board, lay, obs, spec)
     # the moat's keep-out before the fanout, so no other plane net's via lands in it

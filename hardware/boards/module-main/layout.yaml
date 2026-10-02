@@ -58,6 +58,13 @@ b2b:
   other: hardware/boards/module-jack
 
 parts:
+  C11:  [14.85, 58, 0]
+  C43:  [11.6, 62.5, 90]
+  C5:   [31.25, 102, 270]
+  R1:   [29, 100.75, 270]
+  C6:   [30.25, 106.75, 0]
+  C51:  [20.25, 104.25, 180]
+  C7:   [23, 107.25, 90]
   JP1:  [6.35, 78.25, 90, rear]
   C12:  [22.2, 53.5, 0]
   R14:  [8.45, 53, 270]
@@ -65,13 +72,9 @@ parts:
   C1:   [29.85, 88.5, 0, rear]
   C2:   [40.5, 50, 0]
   C3:   [40.6, 89.25, 0, rear]
-  C5:   [6.05, 63.5, 180]
-  C6:   [11.05, 63.5, 180]
-  C7:   [15.3, 65.25, 180]
   C8:   [3.8, 27.6, 0]
   C9:   [13.3, 28.35, 0, rear]
   C10:  [8.55, 25.1, 180]
-  C11:  [15.05, 56.75, 0]
   C13:  [2.55, 102.75, 90]
   C14:  [2.55, 98.75, 270, rear]
   C15:  [2.55, 102.75, 90, rear]
@@ -102,7 +105,6 @@ parts:
   C40:  [3.55, 25.1, 180]
   C41:  [22, 14.6, 90, rear]
   C42:  [30.25, 11.85, 0, rear]
-  C43:  [17.3, 59.5, 0]
   C44:  [14.2, 43.2, 0]
   C45:  [8.25, 68.5, 90, rear]
   C46:  [8.9, 40.44, 180]
@@ -110,7 +112,6 @@ parts:
   C48:  [23.5, 19.35, 180, rear]
   C49:  [34.75, 27.6, 0, rear]
   C50:  [35.75, 12.35, 0, rear]
-  C51:  [19.55, 65.75, 0]
   D1:   [46.85, 86.5, 270, rear]
   D2:   [29, 38.9, 90, rear]
   D3:   [37.35, 76.25, 90, rear]
@@ -139,7 +140,6 @@ parts:
   NT2:  [38.5, 33.2, 0]
   NT3:  [28.5, 30.35, 0, rear]
   Q1:   [12.5, 33, 0, rear]
-  R1:   [2.55, 63.75, 90]
   R3:   [9.8, 27.6, 180]
   R4:   [7.05, 35.35, 0, rear]
   R5:   [2.8, 31.6, 270, rear]
@@ -212,7 +212,7 @@ parts:
   RV3:  [36.5, 95, 0, rear]
   RV4:  [46, 95, 0, rear]
   SW1:  [4, 20, 0]
-  U1:   [19, 62.6, 0]
+  U1:   [26, 104, 0]
   U2:   [7, 27, 0, rear]
   U3:   [9.1, 57.8, 180]
   U4:   [16.5, 49.8, 0]
@@ -326,6 +326,16 @@ connect_first:
   - {pads: [U2.7, R3.2], max_mm: 8, why: "LT1641 SENSE Kelvin to R-ILIM's pad (umbilical-load-switch.md, 164112fc p.10)"}
   - {pads: [C6.1, U3.3], max_mm: 120, why: "the DAC's AVDD on its own branch from C-REG-OUT (power-entry.md, The DAC rail's load)"}
   - {pads: [C6.1, U4.14], max_mm: 120, why: "U-LVL-MOD's VCC on its own branch from C-REG-OUT, not through the DAC's pin (power-entry.md)"}
+
+# THE SET GUARD (power-entry.md, The DAC rail, Layout: "a guard ring round SET at
+# OUT's potential, both sides"): DAC_AVDD copper round R-SET-DAC (R1), C-SET-DAC (C5)
+# and U-REG-DAC's SET pin on both outer layers, filled round the SET node with the
+# clearance and joined to OUT/OUTS (pins 9, 10) on the front and by its via behind.
+guards:
+  - net: /DAC_AVDD
+    layers: [F.Cu, B.Cu]
+    outline: [[27.4, 98.6], [33.4, 98.6], [33.4, 105.4], [27.4, 105.4]]
+    vias: [[32.9, 105.0]]
 
 # How tall each footprint family stands (pcb_module.check_heights), each with its
 # source. Rooms: the front face is the main board's setback behind the panel, 18.3

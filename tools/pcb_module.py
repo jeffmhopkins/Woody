@@ -287,6 +287,12 @@ def build(bdir, lay):
         pcb_main.copper_zone(board, pl["net"], pl["layer"], region, 0, pl.get("name", pl["net"]))
     for spec, p, moat in isl:
         pcb_main.copper_zone(board, spec["net"], spec["layer"], p.intersection(outline), 1, spec["net"] + " island")
+    for gd in lay.get("guards") or []:
+        # a guard: copper at a node's own potential round a high-impedance node, on the
+        # faces named, filled round the node's pads and track with the clearance - here
+        # the LT3042's SET, at OUT's potential (power-entry.md, The DAC rail, Layout)
+        for L in gd["layers"]:
+            pcb_main.copper_zone(board, gd["net"], L, Polygon(gd["outline"]).intersection(outline), 3, gd["net"] + " guard")
     for po in lay.get("pours") or []:
         # an outer-layer pour over a region (the isolated return on the rear face)
         region = outline if po["outline"] == "board" else Polygon(po["outline"]).intersection(outline)

@@ -1014,7 +1014,7 @@ def cmd_route(bdir, chunk=30):
     lay = layout_yaml(bdir)
     comps, _ = sheet_netlist(os.path.join(bdir, name + ".kicad_sch"))
     board = pcbnew.LoadBoard(path)
-    if not any(True for _ in board.GetTracks()):
+    if not any(type(t) is pcbnew.PCB_TRACK for t in board.GetTracks()):     # a guard's locked via is not routing
         pcb_route.prepare(board, lay)
         pcbnew.SaveBoard(path, board)
         print("route: prepared (pairs, fanout, connect_first) - saved", flush=True)
