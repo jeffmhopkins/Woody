@@ -2,14 +2,16 @@
 
 **Status:** Split out of `carrier.md` 2026-09-21 (Phase B). **The lights are
 on the main board since 2026-09-30**
-([ADR 0028](../../../docs/decisions/0028-on-board-leds.md)): thirteen
-WS2815B-V1 in one row down the top face's centreline, on one data line, in
-place of the strip ADR 0016 laid there. The directory keeps its name. What the
+([ADR 0028](../../../docs/decisions/0028-on-board-leds.md)): WS2815B-V1
+on the top face, `lighting.led_count` of them on one data line — one in the
+tail corner beside the etherCON adapter, where the data arrives (ADR 0028's
+amendment of 2026-10-02), then one row down the centreline — in place of
+the strip ADR 0016 laid there. The directory keeps its name. What the
 circuit used to be is in [`notes.md`](notes.md).
 
 The 74AHCT125 that lifts the ESP32-S3's 3.3 V data to the LEDs, the pull-down
 that holds it quiet through reset, the series damping at the driver, and the
-row itself: thirteen LEDs, each with its 100 nF. **The 12 V feed and
+LEDs themselves, each with its 100 nF. **The 12 V feed and
 `C-STRIP-BULK` are not here** — they belong to
 [`power-entry-instrument`](../power-entry-instrument/power-entry-instrument.md).
 
@@ -32,7 +34,7 @@ The `Dir` and `Peer` columns are defined once in
 |---|---|---|---|---|
 | IO1 | in | `J-MCU` | — | High-impedance through the bootloader window; `R-LED-PD` is what holds it down in it. IO2 is spare (ADR 0016) |
 | 5 V | in | `carrier/power-entry-instrument` | `matrix-led-current` | The buck. The 74AHCT125's rail; TTL thresholds on this rail are why 3.3 V in reads high |
-| `INST_POS12` | in | `carrier/power-entry-instrument` (`C-STRIP-BULK` at the row's feed) | `umbilical-current`, `led-row-current` | Every LED's `VDD` and its 100 nF. Since ADR 0027 it is the module's isolated 12 V, through the load switch; on this board it is the node behind `Q-INRUSH`, the hot-plug inrush limiter, so the row's 1.3 µF of `C-LED` charges on its ramp and not off the plug |
+| `INST_POS12` | in | `carrier/power-entry-instrument` (`C-STRIP-BULK` at the row's feed) | `umbilical-current`, `led-row-current` | Every LED's `VDD` and its 100 nF. Since ADR 0027 it is the module's isolated 12 V, through the load switch; on this board it is the node behind `Q-INRUSH`, the hot-plug inrush limiter, so the LEDs' 1.4 µF of `C-LED` `[calc: 14 × 100 nF]` charges on its ramp and not off the plug |
 | `PWR_GND` | ref | `carrier/power-entry-instrument` | `dig-gnd-topology` | The LEDs' ground, LED 1's `DIN2`, the spare gates and enables |
 | `OE_INST` ×4 | ref | — | — | `U-LVLSHIFT`'s four enables, tied LOW on this board, which is why the pull-down is needed rather than optional. **Not `OE_MOD`**, the module buffer's |
 
@@ -55,10 +57,12 @@ the two agree, and where they do not the netlist wins.*
 
     LED k:  DIN1 = LED_D(k-1)   (the DO of the LED before)
             DIN2 = LED_D(k-2)   (the DIN1 of the LED before: the backup line)
-    D-LED-13's DO drives nothing.
+    D-LED-14's DO drives nothing.
+    D-LED-1 is the tail corner's LED; D-LED-2 to D-LED-14 the centreline
+    row from its tail end (pcb-geometry.echo 'led', in this order).
 
   each LED: VDD (pin 2) = +12V, GND (pin 5), pin 1 NC
-            [C-LED-1 100nF] ... [C-LED-13 100nF], one at each LED's VDD pin
+            [C-LED-1 100nF] ... [C-LED-14 100nF], one at each LED's VDD pin
 
   gates B, C, D SPARE, inputs tied to GND
   74AHCT125 rail = 5 V (TTL thresholds, so 3.3 V in reads high)
@@ -147,9 +151,11 @@ now, so the case is weaker than it was for a strip; it stays, as one 0805.
 `[ds WS2815B-V1.pdf p.3, C_I]`: 330 Ω × 30 pF = 9.9 ns, a 10–90 % edge of
 2.2 × 9.9 ≈ 22 ns, a tenth of the shortest pulse the LED must see
 (`T0H`, 220 ns minimum `[same, p.3, Data Transfer Time]`), so a few pF of
-trace more does not reach it. **Simulated 2026-09-30** (`sim/`): with the gate's own
-output resistance and a trace added the edge is about a third slower than
-this, still a small fraction of `T0H`, and a 220 ns high arrives within a few
+trace more does not reach it. **Simulated 2026-09-30, re-run 2026-10-02** (`sim/`): with the gate's own
+output resistance and the trace added — about 100 mm since the fourteenth
+LED, out to the tail corner and back to the row — the edge is about two
+thirds slower than this (37 ns nominal, 50 ns at the worst corner), still
+under a quarter of `T0H`, and a 220 ns high arrives within a few
 nanoseconds of itself at either end of the LED's threshold window — so the
 firmware's `T0H` must sit clear of the 220 ns minimum, not on it. Into a shorted data pin it holds the gate to
 5 V / 330 Ω ≈ 15 mA, inside its ±25 mA absolute maximum
@@ -171,15 +177,15 @@ white. Its derivation:
 
 - **The datasheet bounds it.** The B-V1's power consumption is 0.1–0.18 W
   per LED `[ds p.2, Absolute Maximum Ratings]`, so at 12 V a lit LED draws at
-  most 15 mA `[calc: 0.18 / 12 = 0.015 A]`, and thirteen at most 195 mA
-  `[calc: 13 × 15]`.
+  most 15 mA `[calc: 0.18 / 12 = 0.015 A]`, and the fourteen at most 210 mA
+  `[calc: 14 × 15]`.
 - **Measurements of WS2815 tape agree**: 13.1–13.7 mA per LED at full white
   (`[web https://www.ledlab.io/chips/ws2815]`,
   `[web https://auschristmaslighting.com/threads/power-requirements-for-ws2815-led-strips.14653/]`,
-  both via the trade study of 2026-09-29), so ~170 mA for the row
-  `[calc: 13 × 13.1]`.
-- **Blanked, it is not zero:** under 2 mA quiescent each `[ds p.3]`, ~26 mA
-  for the row `[calc]`, always on.
+  both via the trade study of 2026-09-29), so ~183 mA for the fourteen
+  `[calc: 14 × 13.1]`.
+- **Blanked, it is not zero:** under 2 mA quiescent each `[ds p.3]`, ~28 mA
+  for the fourteen `[calc: 14 × 2]`, always on.
 - **ADR 0014 read "15 mA" as per channel**, 45 mA per LED. On the B-V1 that
   reading would be 0.54 W per LED, three times the datasheet's own maximum
   `[calc: 0.045 × 12]`, so this page does not use it — but it is a reading of
@@ -203,9 +209,26 @@ rail, so it cannot fold the buck back and stop blank-at-boot from running.
 | `U-LVLSHIFT` | 74AHCT125 SOIC-14 | LED data, 5 V rail. One gate used | `[repo]`, `[ds]` |
 | **`R-LED-PD`** | **10 kΩ** | **Holds the row's data low through reset** | `[ds]`, `[calc]` |
 | **`R-LED-SER`** | **330 Ω** | **Damps the data line at its source** | `[ds]`, `[calc]` |
-| `D-LED-1` … `D-LED-13` | WS2815B-V1 (LCSC C5446699) | The row: 12 V, backup-chained. **The body's chamfer marks pin 1 (NC)**, as the sheet's numbered pin drawing places it (footprint `woody:LED_WS2815B-V1_PLCC6_5.4x5.0mm_P1.6mm`, `hardware/lib/README.md`) | `[ds]` |
-| `C-LED-1` … `C-LED-13` | 100 nF X7R 50 V 0805 | One at each LED's `VDD` | `[ds]` |
+| `D-LED-1` … `D-LED-14` | WS2815B-V1 (LCSC C5446699) | `D-LED-1` in the tail corner, then the row: 12 V, backup-chained. **The body's chamfer marks pin 1 (NC)**, as the sheet's numbered pin drawing places it (footprint `woody:LED_WS2815B-V1_PLCC6_5.4x5.0mm_P1.6mm`, `hardware/lib/README.md`) | `[ds]` |
+| `C-LED-1` … `C-LED-14` | 100 nF X7R 50 V 0805 | One at each LED's `VDD` | `[ds]` |
 
 Where the LEDs sit is the body CAD's: `config/body.yaml` `lighting.*` and the
-`led` records in `mechanical/export/pcb-geometry.echo`, checked by
-`mechanical/drc.echo` *"LED row on the main board"*.
+`led` records in `mechanical/export/pcb-geometry.echo` (numbered along the data
+line: `LED1` the corner's), checked by `mechanical/drc.echo` *"LED row on the
+main board"* and *"LED in the tail corner clear of its neighbours"*.
+
+### The LED in the tail corner
+
+Added 2026-10-02 (the owner: "Add it"; ADR 0028's amendment, after ADR 0021's
+study of the full-width tail). The row cannot light the tail's near side: the
+regulator block, 12.5 mm tall on that side in front of `J-MCU`, shadows it.
+**It is first on the data line**, because the data arrives at the tail:
+`R-LED-SER` → `D-LED-1` (the corner) → `D-LED-2` (the row's tail end) → … The
+backup line is ADR 0028 point 5 unchanged: `D-LED-1`'s `DIN2` to GND, and
+`D-LED-2`'s `DIN2` from the feed, `LED_DI`. So `R-LED-SER` still drives two
+inputs and the edge derivation above stands; the feed's trace is longer, about
+50 mm from `R-LED-SER` to the corner and 55 mm back along `LED_D1` to the row
+`[from ADR 0021's study]`: ~12 pF of trace `[from memory, ~1.2 pF/cm over a
+plane]` beside the inputs' 30 pF, which the simulation above already carries.
+It is about six times nearer the near side than the row is to either side, so
+firmware scales it down (`firmware/README.md`, *The lights*).
