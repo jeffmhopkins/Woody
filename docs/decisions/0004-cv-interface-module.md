@@ -314,14 +314,14 @@ one draws its own analog current *plus* everything the instrument consumes:
 
 | Rail | Draw |
 |---|---|
-| +12 V | **~404 mA typical** (45 mA module incl. the DAC regulator + **359 mA** instrument, derived in ADR 0005) — this row said "~320 mA (… ~275 instrument)" until 2026-09-21. Clamp-legal worst is higher. Measure at E6 before sizing the load switch** |
+| +12 V | **~419 mA typical** (45 mA module incl. the DAC regulator + `umbilical-current` instrument, 374 mA since the fourteenth LED of 2026-10-02, derived in ADR 0005) — this row said "~320 mA (… ~275 instrument)" until 2026-09-21. Clamp-legal worst is higher. Measure at E6 before sizing the load switch** |
 | −12 V | ~40 mA |
 | +5 V | ~10 mA (level shifter only) |
 
 > **Amended 2026-09-30 — ADR 0027.** The instrument's current no longer comes
 > off the +12 V rail: an isolated converter draws its power rail to rail, so in
-> typical play the module takes ~0.26 A from +12 V and ~0.24 A from −12 V —
-> `U-ISO`'s ~0.22 A on each plus the module's own `module-own-draw`, which
+> typical play the module takes ~0.27 A from +12 V and ~0.25 A from −12 V —
+> `U-ISO`'s ~0.23 A on each plus the module's own `module-own-draw`, which
 > replaces the 45 mA and ~40 mA in the table (`power-entry.md`, *The
 > instrument's supply*; amended 2026-10-01). The table above is the
 > arrangement this section was written against; the series-resistor argument

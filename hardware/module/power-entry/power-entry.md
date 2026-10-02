@@ -128,7 +128,7 @@ already deleted. Two reviewers reached this independently.
 
 **Keep both diodes anyway**, for the reasons that do hold: fault isolation
 between the exported rail and the analog rail, and HF isolation (`r_d`
-~0.55 Ω in `D2` at 0.22 A and ~3.2 Ω in `D1` at the analog rails' draw, `diode-split-rationale`). Stated correctly they are still worth twenty cents. Left
+~0.53 Ω in `D2` at 0.23 A and ~3.2 Ω in `D1` at the analog rails' draw, `diode-split-rationale`). Stated correctly they are still worth twenty cents. Left
 as it was, the next reviewer who checks the arithmetic deletes the part.
 
 > ### The ground path this section dismisses is the real one
@@ -208,9 +208,9 @@ its return is `PWR_GND`.
 
 | | `[calc]` | Source |
 |---|---|---|
-| Input voltage | 24.0 V nominal across the rails, 22.8 V at −5 % on both; less `PTC-ISO` (≤ 0.40 Ω × 0.22 A = 0.09 V), `D2` and `D4` (~0.23 V each at 0.22 A) and the bead and inductor → **~23.4 V typical, ≥ 22.2 V** | `[ds BOURNS-MF-MSMF.pdf p.1]`, `D-REVPOL`'s row |
+| Input voltage | 24.0 V nominal across the rails, 22.8 V at −5 % on both; less `PTC-ISO` (≤ 0.40 Ω × 0.23 A = 0.09 V), `D2` and `D4` (~0.23 V each at 0.23 A) and the bead and inductor → **~23.4 V typical, ≥ 22.2 V** | `[ds BOURNS-MF-MSMF.pdf p.1]`, `D-REVPOL`'s row |
 | Against its range | 9–36 V; under-voltage lockout on at 8–9 V, off at 7–8 V: **13 V of margin** at the bottom | `[ds PD-2]` |
-| Typical play | `umbilical-current` × 12 V ≈ **4.3 W** out, 0.36 A of 1.67 A (~21 %); **~82 %** there (~81 % off the efficiency curve, ~0.95 W off the dissipation curve) → 5.26 W in → **~0.22 A on each of +12 V and −12 V** | `[ds PD-3]`, the RPA20-2412SAW's own curves at 24 V in |
+| Typical play | `umbilical-current` × 12 V ≈ **4.5 W** out, 0.37 A of 1.67 A (~22 %); **~82 %** there (~81 % off the efficiency curve, ~0.97 W off the dissipation curve) → 5.47 W in → **~0.23 A on each of +12 V and −12 V** `[calc: 5.47 W / 23.4 V = 0.234 A]` | `[ds PD-3]`, the RPA20-2412SAW's own curves at 24 V in |
 | Clamp-legal worst (ADR 0005's table) | ~6.95 W out (0.58 A), ~1.25 W lost → **~0.37 A per rail** at 22.2 V | `[ds PD-3]` |
 | Overload held just under the load switch's minimum trip, 0.78 A | 9.4 W, ~1.5 W lost → **~0.49 A per rail** | `R-ILIM`'s row; `[ds PD-3]` |
 | Hot-plug into a running module | `Q-INRUSH` holds the instrument's inrush, so `U-ISO` peaks at `hotplug-iso-ocp`, 0.49–0.54 A out → **~0.36 A per rail** `[calc: 0.54 × 12 / 0.82 / 22.2]` | `hotplug-iso-ocp`; `[ds PD-3]` |
@@ -222,8 +222,8 @@ its return is `PWR_GND`.
 | Loss in the module | ~0.95 W in `U-ISO`, ~0.1 W in `D2`/`D4`; 12.5 K/W on a board in still air, so **~+12 °C** on its case; over-temperature protection at 110 °C | `[ds PD-5, PD-6]` |
 
 **The rack's −12 V carries the instrument now.** At typical play the module
-draws ~0.26 A from +12 V and ~0.24 A from −12 V (its own `module-own-draw`,
-from *Fuses on the rails* below, plus `U-ISO`'s ~0.22 A on each) `[calc]`,
+draws ~0.27 A from +12 V and ~0.25 A from −12 V (its own `module-own-draw`,
+from *Fuses on the rails* below, plus `U-ISO`'s ~0.23 A on each) `[calc]`,
 where it drew ~0.40 A and ~0.04 A. Check the case's −12 V
 rating: many Eurorack supplies give −12 V less than +12 V.
 
@@ -406,7 +406,7 @@ badly at current:
 | Bead | Carries | Impedance at 100 MHz |
 |---|---|---|
 | `FB1`, `FB3` | the analog rails, tens of mA | **~580–614 Ω** |
-| `FB2`, `FB4` | `U-ISO`'s input, ~0.22 A typical (~0.37 A clamp-legal) | **~440–480 Ω** (~310 Ω) |
+| `FB2`, `FB4` | `U-ISO`'s input, ~0.23 A typical (~0.37 A clamp-legal) | **~440–480 Ω** (~310 Ω) |
 
 `FB2` and `FB4` are the ones that matter, and they lose a quarter to a half of
 the impedance the part number advertises, because they carry the instrument's

@@ -49,8 +49,8 @@ module's star, **out through the power ribbon's ground conductors and along
 the bus board** to the rack's supply.
 
 That current is breath-correlated: the instrument's lights follow breath
-(ADR 0014), and since the owner's change of 2026-09-30 they are thirteen
-WS2815B-V1 on the main board, `led-row-current` at 12 V full white (owned by
+(ADR 0014), and since the owner's change of 2026-09-30 they are WS2815B-V1
+on the main board (fourteen since ADR 0028's amendment of 2026-10-02), `led-row-current` at 12 V full white (owned by
 `led-strip-drive.md`; cited since 2026-10-01, A4-10). Every CV output of the module is a voltage
 above the module's star; the receiving module (the VCO the pitch jack drives)
 reads it against *its* ground, which is the bus at its own tap. The drop the
@@ -179,9 +179,9 @@ constant; it is part of what the owner tunes out, as in every Eurorack module.
 ## Consequences
 
 - **The rack's −12 V now carries the instrument.** Typical play:
-  `umbilical-current` × 12 V ≈ 4.3 W out of `U-ISO`, ~82 % efficient at that
-  load `[ds PD-3]`, from ~23.4 V → **~0.22 A on each of +12 V and −12 V**
-  `[calc]`, where it was ~0.36 A on +12 V and none on −12 V. The module's own
+  `umbilical-current` × 12 V ≈ 4.5 W out of `U-ISO`, ~82 % efficient at that
+  load `[ds PD-3]`, from ~23.4 V → **~0.23 A on each of +12 V and −12 V**
+  `[calc: 4.49 W / 0.82 / 23.4 V = 0.234 A]`, where it was ~0.37 A on +12 V and none on −12 V. The module's own
   analog load adds `module-own-draw`. At the clamp-legal worst (ADR 0005)
   it is ~0.37 A per rail; an overload the load switch holds just under its
   0.78 A minimum trip is ~0.49 A per rail; a hot-plug start draws up to
