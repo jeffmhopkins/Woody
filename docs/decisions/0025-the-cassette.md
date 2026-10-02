@@ -273,7 +273,9 @@ more narrow, but ... my red line is inset just slightly which is not
 needed."* The tongue stays narrow, but on the side where it stepped in by a
 millimetre and a half from the main board's edge it now runs flush
 (ADR 0021's dated note; *"main board's tongue flush with its edge on the near
-side of the adapter"*). The tongue's mounts do not move.
+side of the adapter"*). The tongue's mounts do not move. *(2026-10-02: the
+tongue is gone, and the board runs full width to the adapter. See ADR 0021's
+amendment of that date. The mounts still do not move.)*
 
 ## Note, 2026-10-01 — the through-hole tails under the main board
 

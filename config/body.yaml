@@ -488,6 +488,20 @@ boards:
     status: tbd
     source: "the adapter board's thickness, a standard 2-layer board [from memory]; the NE8FAV's pin tails reach through it"
     decided_by: "M4, with the board ordered"
+  # THE MAIN BOARD'S TAIL END IS FULL WIDTH (owner, 2026-10-02; ADR 0021
+  # amendment). It used to narrow past the right-hand key board to a tongue
+  # as wide as the adapter, leaving a cut-away beside it. Owner: "can you
+  # explain why we have this cut out on the bottom main board? I feel like
+  # it's not necessary" and "I feel like the USB is high enough in the bottom
+  # of the controller that we can run a cable without having to muck around
+  # with the PCB". The cut-away's reason - the lid screws the tongue was
+  # notched round - went with ADR 0025, and nothing at the board's height
+  # occupies it (drc.echo 'main board's tail end runs full width beside the
+  # etherCON adapter').
+  main_tail:
+    value: "full"
+    status: settled
+    source: "owner, 2026-10-02: 'I feel like it's not necessary, and that maybe we can get another LED down there'. full = the main board runs its whole width on to the adapter's rear face; tongue = the old outline, the adapter's width past the right-hand key board, flush on the near side"
   umb_joint_d:
     value: 2.5
     status: settled
@@ -662,7 +676,11 @@ openings:
   # the etherCON's recess and the side (drc.echo, "USB-C extension
   # receptacle beside the etherCON flange", "tail cap web between the USB-C
   # cutout and the etherCON recess"). USB-C is reversible, so the
-  # receptacle's orientation costs the user nothing.
+  # receptacle's orientation costs the user nothing. Its height is DERIVED:
+  # centred in the cavity, unless the main board runs on under its back
+  # (boards.main_tail "full", 2026-10-02), when it stands boards.board_clear
+  # above the board's parts (drc.echo 'main board's tail end runs full width
+  # beside the etherCON adapter').
   usb_slot_portrait:
     value: true
     status: tbd
