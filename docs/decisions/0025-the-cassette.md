@@ -202,6 +202,13 @@ And, answering the follow-up questions:
   unplugged once it is cut free. Every page that says "with the lid off" now
   means with the oak top cut free. The ribbon's length rule is unchanged
   (*"Matrix ribbon length"*, `CBL-MCU-RIBBON`).
+
+  > **Amended 2026-10-02 (ADR 0021, *Amendment, 2026-10-02 (2)*): the Matrix
+  > is now in the cassette.** It is soldered to rails of the right-hand key
+  > board, under the same window. `CBL-MCU-RIBBON` is an IDC ribbon from that
+  > board's `J-MCU-KB` to `J-MCU`, plugged with the key plate raised like the
+  > key chain's ribbons (step 4 above). The bench test therefore has the
+  > Matrix in place, and cutting the oak top free no longer unplugs anything.
 - **The shell is the structure; the cassette only has to survive the bench.**
   A key press goes from the switch into the key board and the plate, down the
   columns in compression to the bottom plate, and into the oak bottom. Before,

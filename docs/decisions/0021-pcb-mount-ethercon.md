@@ -1,6 +1,7 @@
 # 0021 — The instrument's etherCON is PCB-mounted, on an adapter joined to the main board
 
-**Status:** Accepted. Decided by the owner, 2026-09-29. It settles ADR 0004's
+**Status:** Accepted. Decided by the owner, 2026-09-29; amended twice on
+2026-10-02 (below). It settles ADR 0004's
 open question *which etherCON variant at each end* **for the instrument's end
 only**. The module's end is still open, as ADR 0004 left it.
 
@@ -295,12 +296,125 @@ it cantilevers 37 mm past the board's tail columns to the Matrix's centre.
 `CBL-MCU-RIBBON` would become a plain IDC ribbon from a header under the
 extension straight down to `J-MCU`, with the same pin map. `EN`, `IO0` and
 the extra 5 V and GND still need short wires from the Matrix's button pads
-and test pads to the rails. The `D+`/`D−` problem is unchanged. **Not
-adopted.** Decided by the owner.
+and test pads to the rails. The `D+`/`D−` problem is unchanged. **Adopted
+by the owner the same day** (*Amendment, 2026-10-02 (2)*, below), which
+corrects two things this paragraph got wrong: the key board's header numbers
+the ribbon from the other edge, and the USB-C plug's lead must turn down.
 
 **Found doing this:** the Matrix has **no ESD protection on its USB-C**.
 `J1`'s D± run straight to the ESP32-S3
 `[ds WAVESHARE-ESP32-S3-MATRIX-SCHEMATIC.pdf, USB block]`, so the tail-face
 receptacle exposes the MCU's USB pins with nothing in between. `U-ESD-USB`'s
 note (*"Dev boards carry these"*) is wrong for this board. That is a finding
-for the owner and the BOM fragment's owner, not fixed here.
+for the owner and the BOM fragment's owner, not fixed here. **Decided in the
+next amendment: no ESD protection is added.**
+
+## Amendment, 2026-10-02 (2) — the Matrix on the right-hand key board; no USB ESD
+
+**Decided by the owner, 2026-10-02**, on the options above:
+
+> "I think d is right for the matrix vs hand soldering"
+> "I don't think we need the esd protection added to the USB though"
+
+### What is decided
+
+1. **The Matrix (`U-MCU-RT`) mounts on the right-hand key board**
+   (`config/body.yaml` `boards.matrix_mount`). Past its tail columns the board
+   runs on as **two rails**, one under each of the Matrix's pad rows, out to
+   the Matrix's tail edge. Each rail runs from the board's side to
+   `boards.matrix_rail_in` past its pad row. The middle stays open for the
+   Matrix's back-side parts and the USB-C plug. The Matrix stays where it was,
+   centred under its window. The rails are in `mechanical/export/key-board-rh.dxf`
+   and `pcb-geometry.echo` (`right_hand` `rail`).
+2. **Bare header pins join each pad row to its rail through a shim**
+   (`HDR-MATRIX` ×2, `MECH-MATRIX-SHIM` ×2). The shim is `boards.matrix_shim_t`,
+   a little under the gap. So the Matrix's top stands just under the oak, not
+   against it. That clearance takes the pins cut flush on the Matrix's top
+   face, because its pad rows sit under the oak, outside the window's opening,
+   and it takes the boards' thickness tolerance. drc.echo *"Matrix shim on the
+   extension's rails"* holds the shim to the gap.
+3. **Four short wires remain** (`W-MATRIX`): `TP2` and `TP3`, which share
+   the 5 V and ground current with the pad row, and `EN` and `IO0` at the two
+   buttons' pull-up terminals. None of these is on a pad row. They land on
+   four wire pads on the near rail.
+4. **The 24-wire ribbon soldered to the Matrix is gone.** `CBL-MCU-RIBBON` is
+   now a plain 24-way IDC ribbon, crimped at both ends. It runs from
+   `J-MCU-KB`, the same header as `J-MCU`, hung upside down from the key
+   board's underside straight above it, down to `J-MCU`. Its allocation is
+   unchanged (ADR 0018). **The paragraph above said "with the same pin map",
+   and that is wrong for the key board's end.** A header hung upside down
+   numbers the ribbon from the other edge, so `J-MCU-KB` pin *k* carries
+   `J-MCU` pin 25 − *k*. The key-board socket is crimped turned over, as the
+   key chain's `-RN2` cable reverses its key-board end (`key-chain-loom.md`).
+   The key board's sheet draws it that way, and `tools/kicad.py check`
+   (`check_matrix`) holds every pin of `J-MCU-KB`, `HDR-MATRIX` and
+   `W-MATRIX` to the carrier's netlist. The ribbon's length is drc.echo
+   *"Matrix ribbon length"*. It plugs at `J-MCU` with the key plate held
+   raised, as the key chain's ribbons do. Closed, it folds flat between `J-MCU`
+   and the USB-C plug (*"Matrix ribbon closed: its S between J-MCU and the
+   USB-C plug"*).
+5. **The Matrix's grounds join the key board's `GND_CHAIN` pour.** That is
+   the main board's ground under another name (`hardware/nets.yaml`). The
+   Matrix's return therefore has both ribbons' grounds in parallel, and a pour
+   on the key board instead of a track. A track along the rail would have
+   added several times the four conductors' resistance to the path that the
+   breath ADC's reference is regulated against (`carrier.md`). Its 5 V and
+   3V3 are power tracks (`layout.yaml` `power_nets`).
+6. **The USB-C plug's lead leaves downward** (`openings.usb_plug_turn`). The
+   paragraph above put the right-angle plug in the open middle and stopped
+   there. A lead leaving across the body at the plug's height runs into the
+   far rail. Turned down, the lead leaves below the rails and passes under
+   the far rail to the receptacle (drc.echo *"USB-C plug and lead clear of
+   the right-hand key board's rails"*). The plug then stands less far in front
+   of the Matrix, and the body's length does not move.
+7. **No ESD protection is added to the USB.** The Matrix's `D+`/`D−` reach
+   the ESP32-S3 with nothing between, and the tail-face receptacle exposes
+   them (*Found doing this*, above). The owner has heard that and accepts it.
+   `U-ESD-USB` stays out (`hardware/unplaced.csv`), and its note now says why.
+   Adding one later needs a board between the Matrix's USB-C and the
+   receptacle, which none of these options has.
+
+### The cantilever: no support, and what would change that
+
+The rails reach past the board's tail columns to the Matrix's centre
+(drc.echo *"Matrix on the right-hand key board's rails"*). Nothing holds the
+tip from below. `config/body.yaml` `boards.matrix_support` is `none`, and
+its source carries the arithmetic. The static sag is negligible, and the
+stress under a hard jolt is a small part of FR-4's strength. Upward, the oak
+top stops the Matrix within the shim's clearance. The first mode is a few
+hundred hertz, far above the shakes and jabs the Matrix's IMU is there to
+read (ADR 0007).
+
+**The risk is ringing, not strength.** On the lid the Matrix was as stiff as
+the body. On a cantilever, a key click can ring it, and the IMU is on the
+Matrix. **What decides it:** an E-test on the first assembled instrument.
+Tap the body and the keys with the IMU logging. If a mode falls inside the
+gesture band, or rings through the firmware's filter, the setting becomes
+`standoff`: a pair of M2.5 standoffs from the main board to the rails' tips.
+The main board runs full width under them (`boards.main_tail`), so there is
+room. The body CAD does not draw that case yet, and asserts so.
+
+### Other risks, each with what decides it
+
+- **The pad rows' side.** The body CAD puts the 5V..IO1 row on the near side
+  with the USB-C edge toward the mouth. It takes that from the vendor's
+  top-view pinout, `[ds WAVESHARE-ESP32-S3-MATRIX-pinout.png]`. A mirror
+  would put 5 V on IO pins. **Check it against the Matrix in hand before the
+  key board is ordered.**
+- **The open middle's width** depends on the Matrix's back-side parts,
+  `boards.matrix_under_h`, which is still `[from memory]`. The rails' inside
+  edges clear them by the margin the DRC above prints. Calipers on the board
+  decide `boards.matrix_rail_in`.
+- **The shim.** A stack thicker than the gap bends the rails up against the
+  oak. That is harmless, but it preloads the joints. The first Matrix
+  assembled on its board decides `boards.matrix_shim_t`.
+- **Assembly order.** The Matrix is soldered to the key board before the key
+  plate goes on, and a dead Matrix is a desolder of twenty pins and four wires
+  on the bench. The main board is not touched (`CBL-MCU-RIBBON`).
+
+### What this does not change
+
+`J-MCU`, its place and its pin map; the main board's outline; the Matrix's
+place under its window; ADR 0018's allocation. **What it leaves for others:**
+the main board's layout gains the keep-outs under the rails and the
+ribbon's fold (`pcb-geometry.echo`), with its re-layout.
