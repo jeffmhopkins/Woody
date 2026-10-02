@@ -1018,6 +1018,10 @@ def cmd_route(bdir, chunk=30):
         pcb_route.prepare(board, lay)
         pcbnew.SaveBoard(path, board)
         print("route: prepared (pairs, fanout, connect_first) - saved", flush=True)
+    if lay.get("escape"):
+        board = pcbnew.LoadBoard(path)
+        pcb_route.escape(board, lay)        # idempotent: a pad already left is skipped
+        pcbnew.SaveBoard(path, board)
     _fill(path)
     tried = set()
     while True:

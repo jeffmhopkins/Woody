@@ -1689,6 +1689,48 @@ def moat_keepout(board, lay):
         pcb_main.rule_area(board, ring, f"{spec['net']} moat", [above[spec["layer"]]])
 
 
+def escape(board, lay):
+    """layout.yaml escape: [refs] - a fine-pitch part's pads (0.5-0.65 mm: an MSOP, a
+    TSSOP) each get a short straight stub outward along the pad's long axis, past
+    its end, so the grid router starts from copper it can leave: on the 0.2 mm grid a
+    track in a 0.5 mm row has one legal line, the pad's own centre line, and the
+    grid seldom lands on it. Plane-net pads already fanned and pads on no net are
+    left; a stub that would come nearer another net than the clearance is left out.
+    Idempotent: a pad with a track already ending on it is skipped. Locked."""
+    obs = Obstacles(board, lay)
+    w = lay["rules"]["track_min"]
+    n = 0
+    for ref in lay.get("escape") or []:
+        fp = board.FindFootprintByReference(ref)
+        fc = (TO(fp.GetPosition().x), TO(fp.GetPosition().y))
+        for pad in fp.Pads():
+            net = pad.GetNetname()
+            if not net or net.startswith("unconnected") or pad.HasHole() or not pad.GetNumber():
+                continue
+            c = pad.GetPosition()
+            if any(type(t) is pcbnew.PCB_TRACK and t.GetNetname() == net and (pad.HitTest(t.GetStart()) or pad.HitTest(t.GetEnd()))
+                   for t in board.GetTracks()):
+                continue
+            L = "F" if pad.IsOnLayer(pcbnew.F_Cu) else "B"
+            g = pad_geom_on(pad, pcbnew.F_Cu if L == "F" else pcbnew.B_Cu)
+            x0, y0, x1, y1 = g.bounds
+            cx, cy = TO(c.x), TO(c.y)
+            if x1 - x0 >= y1 - y0:
+                d = (1.0 if cx > fc[0] else -1.0, 0.0)
+                reach = (x1 - x0) / 2
+            else:
+                d = (0.0, 1.0 if cy > fc[1] else -1.0)
+                reach = (y1 - y0) / 2
+            if abs(cx - fc[0]) < 0.05 and abs(cy - fc[1]) < 0.05:
+                continue                    # the exposed pad
+            end = (cx + d[0] * (reach + 0.6), cy + d[1] * (reach + 0.6))
+            if not obs.track_ok((cx, cy), end, w, net, L):
+                continue
+            lay_track(board, obs, net, (cx, cy), end, w, L)
+            n += 1
+    print(f"route: escape - {n} stub(s) out of fine-pitch pads")
+
+
 def prepare(board, lay):
     """A multi-layer board's own routing before the autorouter (tools/pcb.py
     `route: freerouting`): the pairs, then every plane net's fanout. Returns the report."""

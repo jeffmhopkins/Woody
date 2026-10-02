@@ -296,7 +296,7 @@ pairs:
 net_classes:
   supply:
     nets: [ISO_POS12, PWR_GND, /UMBILICAL_POS12, /umbilical-load-switch/SENSE_NODE,
-           /power-entry/BUS_POS12_RAW, /power-entry/BUS_NEG12_RAW, /power-entry/BUS_GND,
+           /power-entry/BUS_POS12_RAW, /power-entry/BUS_NEG12_RAW,
            /power-entry/POS12_PTC1, /power-entry/POS12_PTC2, /power-entry/NEG12_PTC3,
            /power-entry/POS12_D1, /power-entry/POS12_D2, /power-entry/NEG12_D4, /power-entry/NEG12_FB,
            /power-entry/ISO_FB2, /power-entry/ISO_FILT_POS, /power-entry/ISO_FILT_NEG,
@@ -313,6 +313,11 @@ net_classes:
     track: 0.4
 
 fanout: [AGND_MOD, MODULE_ANALOG_POS12, DIG_GND, PWR_GND]
+
+# The fine-pitch parts (pcb_route.escape): a stub out of each pad before the grid
+# router, which cannot start from inside a 0.5 or 0.65 mm row - U-REG-DAC (MSOP-10),
+# U-DAC (TSSOP-16), R-PRECISION (MSOP-8).
+escape: [U1, U3, RN1]
 
 # Each by its own track, routed first and held by check (power-entry.md, The DAC rail,
 # Layout): OUTS Kelvin to C-REG-OUT; R-SET-DAC's and C-SET-DAC's grounds to
