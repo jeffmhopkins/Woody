@@ -67,6 +67,13 @@ components:
     - 1
     - 2
     note: 'AT the LED''s VDD pin (2) to its GND pin (5): one per LED, the vendor''s 100 nF bypass'
+  C-LED-14:
+    of: C-LED
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: 'AT the LED''s VDD pin (2) to its GND pin (5): one per LED, the vendor''s 100 nF bypass'
   C-LED-2:
     of: C-LED
     value: 100nF
@@ -132,10 +139,11 @@ components:
     - DO
     - VDD
     - GND
-    note: 'On the main board''s top face, one row on the centreline (ADR 0028); positions from the body CAD (pcb-geometry.echo,
-      led). DIN1 from the LED before''s DO; DIN2, the backup input, from the LED before''s DIN1, so one dead LED
-      is passed over (the WS2815 recommended circuit, datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none).
-      Pin 1 is NC. MSL 5a: baked before reflow'
+    note: 'On the main board''s top face (ADR 0028): D-LED-1 in the tail corner beside the etherCON adapter (ADR
+      0028 amendment, 2026-10-02), D-LED-2 to the last one row down the centreline from its tail end; positions
+      from the body CAD (pcb-geometry.echo, led, numbered along this chain). DIN1 from the LED before''s DO; DIN2,
+      the backup input, from the LED before''s DIN1, so one dead LED is passed over (the WS2815 recommended circuit,
+      datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none). Pin 1 is NC. MSL 5a: baked before reflow'
   D-LED-10:
     of: D-LED
     value: WS2815B-V1
@@ -145,10 +153,11 @@ components:
     - DO
     - VDD
     - GND
-    note: 'On the main board''s top face, one row on the centreline (ADR 0028); positions from the body CAD (pcb-geometry.echo,
-      led). DIN1 from the LED before''s DO; DIN2, the backup input, from the LED before''s DIN1, so one dead LED
-      is passed over (the WS2815 recommended circuit, datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none).
-      Pin 1 is NC. MSL 5a: baked before reflow'
+    note: 'On the main board''s top face (ADR 0028): D-LED-1 in the tail corner beside the etherCON adapter (ADR
+      0028 amendment, 2026-10-02), D-LED-2 to the last one row down the centreline from its tail end; positions
+      from the body CAD (pcb-geometry.echo, led, numbered along this chain). DIN1 from the LED before''s DO; DIN2,
+      the backup input, from the LED before''s DIN1, so one dead LED is passed over (the WS2815 recommended circuit,
+      datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none). Pin 1 is NC. MSL 5a: baked before reflow'
   D-LED-11:
     of: D-LED
     value: WS2815B-V1
@@ -158,10 +167,11 @@ components:
     - DO
     - VDD
     - GND
-    note: 'On the main board''s top face, one row on the centreline (ADR 0028); positions from the body CAD (pcb-geometry.echo,
-      led). DIN1 from the LED before''s DO; DIN2, the backup input, from the LED before''s DIN1, so one dead LED
-      is passed over (the WS2815 recommended circuit, datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none).
-      Pin 1 is NC. MSL 5a: baked before reflow'
+    note: 'On the main board''s top face (ADR 0028): D-LED-1 in the tail corner beside the etherCON adapter (ADR
+      0028 amendment, 2026-10-02), D-LED-2 to the last one row down the centreline from its tail end; positions
+      from the body CAD (pcb-geometry.echo, led, numbered along this chain). DIN1 from the LED before''s DO; DIN2,
+      the backup input, from the LED before''s DIN1, so one dead LED is passed over (the WS2815 recommended circuit,
+      datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none). Pin 1 is NC. MSL 5a: baked before reflow'
   D-LED-12:
     of: D-LED
     value: WS2815B-V1
@@ -171,10 +181,11 @@ components:
     - DO
     - VDD
     - GND
-    note: 'On the main board''s top face, one row on the centreline (ADR 0028); positions from the body CAD (pcb-geometry.echo,
-      led). DIN1 from the LED before''s DO; DIN2, the backup input, from the LED before''s DIN1, so one dead LED
-      is passed over (the WS2815 recommended circuit, datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none).
-      Pin 1 is NC. MSL 5a: baked before reflow'
+    note: 'On the main board''s top face (ADR 0028): D-LED-1 in the tail corner beside the etherCON adapter (ADR
+      0028 amendment, 2026-10-02), D-LED-2 to the last one row down the centreline from its tail end; positions
+      from the body CAD (pcb-geometry.echo, led, numbered along this chain). DIN1 from the LED before''s DO; DIN2,
+      the backup input, from the LED before''s DIN1, so one dead LED is passed over (the WS2815 recommended circuit,
+      datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none). Pin 1 is NC. MSL 5a: baked before reflow'
   D-LED-13:
     of: D-LED
     value: WS2815B-V1
@@ -184,10 +195,25 @@ components:
     - DO
     - VDD
     - GND
-    note: 'On the main board''s top face, one row on the centreline (ADR 0028); positions from the body CAD (pcb-geometry.echo,
-      led). DIN1 from the LED before''s DO; DIN2, the backup input, from the LED before''s DIN1, so one dead LED
-      is passed over (the WS2815 recommended circuit, datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none).
-      Pin 1 is NC. MSL 5a: baked before reflow'
+    note: 'On the main board''s top face (ADR 0028): D-LED-1 in the tail corner beside the etherCON adapter (ADR
+      0028 amendment, 2026-10-02), D-LED-2 to the last one row down the centreline from its tail end; positions
+      from the body CAD (pcb-geometry.echo, led, numbered along this chain). DIN1 from the LED before''s DO; DIN2,
+      the backup input, from the LED before''s DIN1, so one dead LED is passed over (the WS2815 recommended circuit,
+      datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none). Pin 1 is NC. MSL 5a: baked before reflow'
+  D-LED-14:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    note: 'On the main board''s top face (ADR 0028): D-LED-1 in the tail corner beside the etherCON adapter (ADR
+      0028 amendment, 2026-10-02), D-LED-2 to the last one row down the centreline from its tail end; positions
+      from the body CAD (pcb-geometry.echo, led, numbered along this chain). DIN1 from the LED before''s DO; DIN2,
+      the backup input, from the LED before''s DIN1, so one dead LED is passed over (the WS2815 recommended circuit,
+      datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none). Pin 1 is NC. MSL 5a: baked before reflow'
   D-LED-2:
     of: D-LED
     value: WS2815B-V1
@@ -197,10 +223,11 @@ components:
     - DO
     - VDD
     - GND
-    note: 'On the main board''s top face, one row on the centreline (ADR 0028); positions from the body CAD (pcb-geometry.echo,
-      led). DIN1 from the LED before''s DO; DIN2, the backup input, from the LED before''s DIN1, so one dead LED
-      is passed over (the WS2815 recommended circuit, datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none).
-      Pin 1 is NC. MSL 5a: baked before reflow'
+    note: 'On the main board''s top face (ADR 0028): D-LED-1 in the tail corner beside the etherCON adapter (ADR
+      0028 amendment, 2026-10-02), D-LED-2 to the last one row down the centreline from its tail end; positions
+      from the body CAD (pcb-geometry.echo, led, numbered along this chain). DIN1 from the LED before''s DO; DIN2,
+      the backup input, from the LED before''s DIN1, so one dead LED is passed over (the WS2815 recommended circuit,
+      datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none). Pin 1 is NC. MSL 5a: baked before reflow'
   D-LED-3:
     of: D-LED
     value: WS2815B-V1
@@ -210,10 +237,11 @@ components:
     - DO
     - VDD
     - GND
-    note: 'On the main board''s top face, one row on the centreline (ADR 0028); positions from the body CAD (pcb-geometry.echo,
-      led). DIN1 from the LED before''s DO; DIN2, the backup input, from the LED before''s DIN1, so one dead LED
-      is passed over (the WS2815 recommended circuit, datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none).
-      Pin 1 is NC. MSL 5a: baked before reflow'
+    note: 'On the main board''s top face (ADR 0028): D-LED-1 in the tail corner beside the etherCON adapter (ADR
+      0028 amendment, 2026-10-02), D-LED-2 to the last one row down the centreline from its tail end; positions
+      from the body CAD (pcb-geometry.echo, led, numbered along this chain). DIN1 from the LED before''s DO; DIN2,
+      the backup input, from the LED before''s DIN1, so one dead LED is passed over (the WS2815 recommended circuit,
+      datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none). Pin 1 is NC. MSL 5a: baked before reflow'
   D-LED-4:
     of: D-LED
     value: WS2815B-V1
@@ -223,10 +251,11 @@ components:
     - DO
     - VDD
     - GND
-    note: 'On the main board''s top face, one row on the centreline (ADR 0028); positions from the body CAD (pcb-geometry.echo,
-      led). DIN1 from the LED before''s DO; DIN2, the backup input, from the LED before''s DIN1, so one dead LED
-      is passed over (the WS2815 recommended circuit, datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none).
-      Pin 1 is NC. MSL 5a: baked before reflow'
+    note: 'On the main board''s top face (ADR 0028): D-LED-1 in the tail corner beside the etherCON adapter (ADR
+      0028 amendment, 2026-10-02), D-LED-2 to the last one row down the centreline from its tail end; positions
+      from the body CAD (pcb-geometry.echo, led, numbered along this chain). DIN1 from the LED before''s DO; DIN2,
+      the backup input, from the LED before''s DIN1, so one dead LED is passed over (the WS2815 recommended circuit,
+      datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none). Pin 1 is NC. MSL 5a: baked before reflow'
   D-LED-5:
     of: D-LED
     value: WS2815B-V1
@@ -236,10 +265,11 @@ components:
     - DO
     - VDD
     - GND
-    note: 'On the main board''s top face, one row on the centreline (ADR 0028); positions from the body CAD (pcb-geometry.echo,
-      led). DIN1 from the LED before''s DO; DIN2, the backup input, from the LED before''s DIN1, so one dead LED
-      is passed over (the WS2815 recommended circuit, datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none).
-      Pin 1 is NC. MSL 5a: baked before reflow'
+    note: 'On the main board''s top face (ADR 0028): D-LED-1 in the tail corner beside the etherCON adapter (ADR
+      0028 amendment, 2026-10-02), D-LED-2 to the last one row down the centreline from its tail end; positions
+      from the body CAD (pcb-geometry.echo, led, numbered along this chain). DIN1 from the LED before''s DO; DIN2,
+      the backup input, from the LED before''s DIN1, so one dead LED is passed over (the WS2815 recommended circuit,
+      datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none). Pin 1 is NC. MSL 5a: baked before reflow'
   D-LED-6:
     of: D-LED
     value: WS2815B-V1
@@ -249,10 +279,11 @@ components:
     - DO
     - VDD
     - GND
-    note: 'On the main board''s top face, one row on the centreline (ADR 0028); positions from the body CAD (pcb-geometry.echo,
-      led). DIN1 from the LED before''s DO; DIN2, the backup input, from the LED before''s DIN1, so one dead LED
-      is passed over (the WS2815 recommended circuit, datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none).
-      Pin 1 is NC. MSL 5a: baked before reflow'
+    note: 'On the main board''s top face (ADR 0028): D-LED-1 in the tail corner beside the etherCON adapter (ADR
+      0028 amendment, 2026-10-02), D-LED-2 to the last one row down the centreline from its tail end; positions
+      from the body CAD (pcb-geometry.echo, led, numbered along this chain). DIN1 from the LED before''s DO; DIN2,
+      the backup input, from the LED before''s DIN1, so one dead LED is passed over (the WS2815 recommended circuit,
+      datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none). Pin 1 is NC. MSL 5a: baked before reflow'
   D-LED-7:
     of: D-LED
     value: WS2815B-V1
@@ -262,10 +293,11 @@ components:
     - DO
     - VDD
     - GND
-    note: 'On the main board''s top face, one row on the centreline (ADR 0028); positions from the body CAD (pcb-geometry.echo,
-      led). DIN1 from the LED before''s DO; DIN2, the backup input, from the LED before''s DIN1, so one dead LED
-      is passed over (the WS2815 recommended circuit, datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none).
-      Pin 1 is NC. MSL 5a: baked before reflow'
+    note: 'On the main board''s top face (ADR 0028): D-LED-1 in the tail corner beside the etherCON adapter (ADR
+      0028 amendment, 2026-10-02), D-LED-2 to the last one row down the centreline from its tail end; positions
+      from the body CAD (pcb-geometry.echo, led, numbered along this chain). DIN1 from the LED before''s DO; DIN2,
+      the backup input, from the LED before''s DIN1, so one dead LED is passed over (the WS2815 recommended circuit,
+      datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none). Pin 1 is NC. MSL 5a: baked before reflow'
   D-LED-8:
     of: D-LED
     value: WS2815B-V1
@@ -275,10 +307,11 @@ components:
     - DO
     - VDD
     - GND
-    note: 'On the main board''s top face, one row on the centreline (ADR 0028); positions from the body CAD (pcb-geometry.echo,
-      led). DIN1 from the LED before''s DO; DIN2, the backup input, from the LED before''s DIN1, so one dead LED
-      is passed over (the WS2815 recommended circuit, datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none).
-      Pin 1 is NC. MSL 5a: baked before reflow'
+    note: 'On the main board''s top face (ADR 0028): D-LED-1 in the tail corner beside the etherCON adapter (ADR
+      0028 amendment, 2026-10-02), D-LED-2 to the last one row down the centreline from its tail end; positions
+      from the body CAD (pcb-geometry.echo, led, numbered along this chain). DIN1 from the LED before''s DO; DIN2,
+      the backup input, from the LED before''s DIN1, so one dead LED is passed over (the WS2815 recommended circuit,
+      datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none). Pin 1 is NC. MSL 5a: baked before reflow'
   D-LED-9:
     of: D-LED
     value: WS2815B-V1
@@ -288,10 +321,11 @@ components:
     - DO
     - VDD
     - GND
-    note: 'On the main board''s top face, one row on the centreline (ADR 0028); positions from the body CAD (pcb-geometry.echo,
-      led). DIN1 from the LED before''s DO; DIN2, the backup input, from the LED before''s DIN1, so one dead LED
-      is passed over (the WS2815 recommended circuit, datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none).
-      Pin 1 is NC. MSL 5a: baked before reflow'
+    note: 'On the main board''s top face (ADR 0028): D-LED-1 in the tail corner beside the etherCON adapter (ADR
+      0028 amendment, 2026-10-02), D-LED-2 to the last one row down the centreline from its tail end; positions
+      from the body CAD (pcb-geometry.echo, led, numbered along this chain). DIN1 from the LED before''s DO; DIN2,
+      the backup input, from the LED before''s DIN1, so one dead LED is passed over (the WS2815 recommended circuit,
+      datasheets/led/WS2815.pdf p.4; the B-V1 sheet draws none). Pin 1 is NC. MSL 5a: baked before reflow'
   R-LED-PD:
     value: 10k 1%
     pins:
@@ -341,6 +375,7 @@ nets:
   - C-LED-11.1
   - C-LED-12.1
   - C-LED-13.1
+  - C-LED-14.1
   - C-LED-2.1
   - C-LED-3.1
   - C-LED-4.1
@@ -354,6 +389,7 @@ nets:
   - D-LED-11.VDD
   - D-LED-12.VDD
   - D-LED-13.VDD
+  - D-LED-14.VDD
   - D-LED-2.VDD
   - D-LED-3.VDD
   - D-LED-4.VDD
@@ -413,6 +449,10 @@ nets:
   LED_D12:
   - D-LED-12.DO
   - D-LED-13.DIN1
+  - D-LED-14.DIN2
+  LED_D13:
+  - D-LED-13.DO
+  - D-LED-14.DIN1
   LED_DI:
   - D-LED-1.DIN1
   - D-LED-2.DIN2
@@ -425,6 +465,7 @@ nets:
   - C-LED-11.2
   - C-LED-12.2
   - C-LED-13.2
+  - C-LED-14.2
   - C-LED-2.2
   - C-LED-3.2
   - C-LED-4.2
@@ -439,6 +480,7 @@ nets:
   - D-LED-11.GND
   - D-LED-12.GND
   - D-LED-13.GND
+  - D-LED-14.GND
   - D-LED-2.GND
   - D-LED-3.GND
   - D-LED-4.GND
@@ -457,7 +499,7 @@ nets:
   - U-LVLSHIFT.GND
   - U-LVLSHIFT.3A
   DO:
-  - D-LED-13.DO
+  - D-LED-14.DO
   2Y:
   - U-LVLSHIFT.2Y
   3Y:
