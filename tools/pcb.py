@@ -721,6 +721,21 @@ def add_silk_generic(board, lay, comps):
     def put(top, text, x, y, angle=0, justify=0):
         silk_text(board, text, x, y, top=top, angle=angle, justify=justify)
 
+    # the title block first, where layout.yaml puts it; the references then keep off it
+    t = lay.get("silk", {})
+    if t:
+        tb = board.GetTitleBlock()
+        tb.SetTitle(t["title"])
+        tb.SetRevision(t["rev"])
+        tb.SetDate(t["date"])
+        board.SetTitleBlock(tb)
+        x, y = to_pcb(*t["at"])
+        for i, line in enumerate([t["title"], f"rev {t['rev']}  {t['date']}"]):
+            g = _box(x, y + i * SILK_H * 1.8 - SILK_H / 2, x + text_w(line), y + i * SILK_H * 1.8 + SILK_H / 2)
+            if not free(True, g):
+                sys.exit(f"pcb: the silkscreen title at layout.yaml silk.at is not clear: {line!r}")
+            put(True, line, x, y + i * SILK_H * 1.8, justify=-1)
+            placed[True].append(g)
     for fp in sorted(board.GetFootprints(), key=lambda f: f.GetReference()):
         ref = fp.GetReference()
         c = comps.get(ref)
@@ -743,20 +758,6 @@ def add_silk_generic(board, lay, comps):
                 break
         else:
             skipped.append(ref)
-    t = lay.get("silk", {})
-    if t:
-        tb = board.GetTitleBlock()
-        tb.SetTitle(t["title"])
-        tb.SetRevision(t["rev"])
-        tb.SetDate(t["date"])
-        board.SetTitleBlock(tb)
-        x, y = to_pcb(*t["at"])
-        for i, line in enumerate([t["title"], f"rev {t['rev']}  {t['date']}"]):
-            g = _box(x, y + i * SILK_H * 1.8 - SILK_H / 2, x + text_w(line), y + i * SILK_H * 1.8 + SILK_H / 2)
-            if not free(True, g):
-                sys.exit(f"pcb: the silkscreen title at layout.yaml silk.at is not clear: {line!r}")
-            put(True, line, x, y + i * SILK_H * 1.8, justify=-1)
-            placed[True].append(g)
     # every label placed, proved as check_silk will judge it - its real stroked shape,
     # not its box, off every courtyard on its face and the board house's silk clearance
     # off every footprint's own silk; one that fails comes off and is named with the rest

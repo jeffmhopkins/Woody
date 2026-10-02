@@ -168,6 +168,20 @@ def _net_of(comps, ref, pad):
     return _NETS.get((ref, pad))
 
 
+def body_to_rear(fp):
+    """A part placed on the front face for its PIN MAP whose BODY is on the rear (the
+    jack board's J-B2B-MOD: its insulator is on the main board's side): its courtyard,
+    fab and silk drawn on the rear layers, unmirrored, so the courtyard tests see the
+    body where it is - not on the front among the jacks, where only its pins are."""
+    swap = {pcbnew.F_CrtYd: pcbnew.B_CrtYd, pcbnew.F_Fab: pcbnew.B_Fab, pcbnew.F_SilkS: pcbnew.B_SilkS}
+    for it in fp.GraphicalItems():
+        if it.GetLayer() in swap:
+            it.SetLayer(swap[it.GetLayer()])
+            if hasattr(it, "SetMirrored"):
+                it.SetMirrored(True)            # text on a rear layer reads from the rear
+    fp.BuildCourtyardCaches()
+
+
 def mount_holes(board, lay, geo):
     """The standoffs' pads: on the main board board-only footprints on NO net (metal
     standoffs, power-entry.md Grounding), on the jack board the sheet's own H1/H2 (on
@@ -210,6 +224,9 @@ def build(bdir, lay):
     for ref, want, rear, what in fixed_pads(geo, lay, comps):
         place_by_pads(board, fps[ref], want, rear)
         placed.add(ref)
+    for name, spec in (lay.get("connectors") or {}).items():
+        if spec.get("body") == "rear":
+            body_to_rear(fps[pcb.ref_of(comps, spec.get("row", name))])
     if lay["mounts"].get("on_sheet"):
         for i, (nm, x, y, hole, head) in enumerate(geo["standoffs"]):
             ref = lay["mounts"]["on_sheet"][i]
@@ -245,7 +262,8 @@ def build(bdir, lay):
         pcb_main.copper_zone(board, spec["net"], spec["layer"], p.intersection(outline), 1, spec["net"] + " island")
     for po in lay.get("pours") or []:
         # an outer-layer pour over a region (the isolated return on the rear face)
-        pcb_main.copper_zone(board, po["net"], po["layer"], Polygon(po["outline"]).intersection(outline), 2, po["net"] + " pour")
+        region = outline if po["outline"] == "board" else Polygon(po["outline"]).intersection(outline)
+        pcb_main.copper_zone(board, po["net"], po["layer"], region, 2, po["net"] + " pour")
     return board, fps, netinfo, lay, comps, outline
 
 
@@ -270,8 +288,13 @@ def keepouts(board, lay, geo):
         if name.startswith("barrel"):
             pcb_main.rule_area(board, Point(rest[0], rest[1]).buffer(rest[2] / 2, 32), name, LAY)
         elif name == "standoff head":
-            # the mount's own pad stands in it; the rule keeps every other track, via and pour off
-            pcb_main.rule_area(board, Point(rest[0], rest[1]).buffer(rest[2] / 2, 32), name, LAY, footprints=False)
+            # the mount's own pad stands in it. On no net (the main board) a rule area keeps
+            # every track, via and pour off. On a net (the jack board's AGND_MOD) its own
+            # net's pour must meet it, and a rule area cannot tell nets apart (nor exempt the
+            # mount's own footprint): its courtyard keeps parts off, and check_cad holds
+            # every other net's copper off the head
+            if not lay["mounts"].get("net"):
+                pcb_main.rule_area(board, Point(rest[0], rest[1]).buffer(rest[2] / 2, 32), name, LAY)
     for k in lay.get("keepouts") or []:
         pcb_main.rule_area(board, Polygon(k["outline"]), k["name"], k.get("layers", LAY),
                            footprints=k.get("footprints", False), copper=k.get("copper", True))
@@ -331,7 +354,7 @@ def check_cad(board, lay, comps):
         disc = Point(*to_pcb(x, y)).buffer(head / 2 + float(lay["rules"]["clearance"]) - 0.02)
         for L in range(board.GetCopperLayerCount()):
             lid = pcbnew.F_Cu if L == 0 else (pcbnew.B_Cu if L == board.GetCopperLayerCount() - 1 else pcbnew.In1_Cu + (L - 1) * 2)
-            hits = pcb_main.copper_near(board, disc, lid, None, ref)
+            hits = pcb_main.copper_near(board, disc, lid, net and ("/" + net if board.FindNet("/" + net) else net), ref)
             if hits:
                 bad.append(f"error: [cad] {', '.join(hits)} under {name}'s head ({ref}) on {board.GetLayerName(lid)} - "
                            "the metal standoff bears there")
