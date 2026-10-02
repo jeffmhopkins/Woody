@@ -676,7 +676,11 @@ openings:
   # the etherCON's recess and the side (drc.echo, "USB-C extension
   # receptacle beside the etherCON flange", "tail cap web between the USB-C
   # cutout and the etherCON recess"). USB-C is reversible, so the
-  # receptacle's orientation costs the user nothing.
+  # receptacle's orientation costs the user nothing. Its height is DERIVED:
+  # centred in the cavity, unless the main board runs on under its back
+  # (boards.main_tail "full", 2026-10-02), when it stands boards.board_clear
+  # above the board's parts (drc.echo 'main board's tail end runs full width
+  # beside the etherCON adapter').
   usb_slot_portrait:
     value: true
     status: tbd

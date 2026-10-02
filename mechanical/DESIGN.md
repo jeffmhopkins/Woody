@@ -165,11 +165,13 @@ Several things can claim each end, and the largest wins:
   registers and the carrier's circuits are on one board at the thumb level,
   from the mouth cap to the end of the right hand, the full width inside the
   sides. Its parts face up; the two key boards connect to it by ribbons (below);
-  the Matrix's ribbon ends on it, and a **tongue** runs on from its tail end
-  to the etherCON's adapter, carrying J-UMB (ADR 0021): as wide as the
-  adapter, except that on the side where the adapter's edge falls just inside
-  the board's, it runs flush with the board's edge (owner, 2026-09-30;
-  *"main board's tongue flush with its edge on the near side of the
+  the Matrix's ribbon ends on it, and it runs on past the right-hand key
+  board to the etherCON's adapter, carrying J-UMB (ADR 0021). **That tail
+  end is full width** (owner, 2026-10-02; `boards.main_tail`). It was a
+  tongue as wide as the adapter, narrowed for lid screws that ADR 0025
+  removed. The corner it gains held nothing at the board's height, and the
+  USB-C receptacle above it stands `boards.board_clear` over the board's
+  parts (*"main board's tail end runs full width beside the etherCON
   adapter"*). It is clamped in the
   U-bolt's stack, on a spacer from the bottom plate with a washer and the nut
   above, with a clearance hole for each leg (ADR 0022 point 7, ADR 0025). It
@@ -387,7 +389,7 @@ and the connector's envelope now comes from the IDC header's banked full print
 now exports each key board's outline (`export/key-board-*.dxf`) and its
 switch and connector positions (`export/pcb-geometry.echo`), which the PCB is
 placed from. The main board's the same way: `export/main-board.dxf` is its
-outline, with the tongue, notches, holes and the sensor's slot, and its
+outline, with its full-width tail end, holes and the sensor's slot, and its
 `main` entries in `export/pcb-geometry.echo` place the thumb switches (from
 below), both chain headers, J-MCU, J-UMB, the sensor, the regulator block,
 each LED of the row and the mounts, with how tall parts may stand under each key board
