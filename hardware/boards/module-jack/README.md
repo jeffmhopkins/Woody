@@ -80,6 +80,9 @@ The same header is `J7` here and `J2` on the main board.
 | `module-jack.kicad_sch` (+ the pages it places) | **Source** (ADR 0019) |
 | `board-netlist.yaml` | Exported (`python3 tools/kicad.py export hardware/boards/module-jack`), with KiCad's ERC |
 | `*.sch.png` | Renders, recorded in `hardware/SHEETS.csv` |
+| `module-jack.kicad_pcb`, `module-jack.kicad_pro` | **Source** since the first layout (`python3 tools/pcb.py layout`, then `route`): edit in KiCad 9; `python3 tools/pcb.py check hardware/boards/module-jack` holds it |
+| `layout.yaml` | How the first layout was made: the parts' places, the rules, planes and checks' inputs |
+| `module-jack.pcb-*.png`, `fab/` | Written by `python3 tools/pcb.py render`, recorded in `hardware/SHEETS.csv` |
 | `fp-lib-table`, `sym-lib-table` | Register `hardware/lib/` (the R0904N pot footprint) |
 
 

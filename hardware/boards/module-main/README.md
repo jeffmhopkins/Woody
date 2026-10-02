@@ -6,10 +6,13 @@ behind the jack board ([`module-jack`](../module-jack/README.md)), and
 `J-B2B-MOD` joins the two. Positions, outlines and keep-outs come from the
 module CAD (ADR 0024, `mechanical/module/export/`), not from this project.
 
-> **Status: schematic done, layout not started.** The sheets are the source
-> and pass KiCad's ERC. Every part has a footprint, and a bought part where one
-> is selected (`Footprint`, `Manufacturer`, `MPN`, `LCSC`, `Assembly` on each
-> symbol). The parts still missing one are listed under *Open*.
+> **Status: placed and routed by `tools/pcb.py` (`kind: module`), 2026-10-02 -
+> see *The layout* below for where it stands.** Four layers. The mask colour
+> is **not decided** (green in `layout.yaml` until the owner says; *Open*).
+> The sheets are the source and pass KiCad's ERC. Every part has a footprint,
+> and a bought part where one is selected (`Footprint`, `Manufacturer`, `MPN`,
+> `LCSC`, `Assembly` on each symbol). The parts still missing one are listed
+> under *Open*.
 
 What each circuit does, and why, is on its page:
 - [`power-entry`](../../module/power-entry/power-entry.md)
@@ -30,6 +33,65 @@ What each circuit does, and why, is on its page:
   `1` and `A` on the silk. Nothing taller than `pcb-geometry.echo`'s
   *front: under LED-PANEL* keep-out goes under the LED
 
+## The layout (2026-10-02)
+
+`layout.yaml` beside this file records how the first layout was made; the
+`.kicad_pcb` is the source now (`docs/reference/tooling.md` §4, *The module's
+boards*). Every part the module CAD fixes is placed by its pads from
+`mechanical/module/export/pcb-geometry.echo` and held there by `pcb.py
+check`: `J-UMBILICAL`, `J-B2B-MOD`, `J-LED-PANEL`, `J-PWR-EURO` (rear, pin 1
+at the bottom), `U-ISO` (rear, at `config/module.yaml` `iso.at` and
+`iso.pins`) and the four standoff pads (board-only, on no net). Every
+courtyard is inside the board.
+
+**Layers** (*Grounding*, `power-entry.md`): 1 parts and signals, running
+along the board; 2 `AGND_MOD`, with a `DIG_GND` island; 3 the analog +12 V;
+4 parts and signals across the board, and `PWR_GND`'s own copper. −12 V is a
+0.4 mm track (`layout.yaml` `net_classes:`).
+
+**The floor plan**, seen from the panel:
+
+| Where | What |
+|---|---|
+| Bottom, front | `J-UMBILICAL`; `J-LED-PANEL` and `SW-POWER`'s wire pads to its left; the fuses right of `J-PWR-EURO`'s tails; `NT-AGND-MOD` and `NT-DIG-MOD` at its ground pins (the star) |
+| Bottom, rear | the load switch (left), the SPI receiver, `U-REG-LOGIC` and `NT-UMB-MOD` under the etherCON's contacts, `J-PWR-EURO` (right) |
+| Middle | `U-ISO` on the rear with `L-CM-ISO` at the module CAD's envelope, turned 45°; the input filter (`L-ISO-IN`, the beads, `C-ISO-BULK`) on the front right, `D2`/`D-REVPOL` on the rear between; `U-LVL-MOD` and the DAC on the front left, the DAC on the island's edge |
+| Upper, front | the mod channels either side of `J-B2B-MOD` (MOD1/2 left, MOD3/4 right, as its columns), breath output left, pitch right with the LT5400 |
+| Top | breath receive (front left, by its trimmer), the DAC rail's LDO (front middle), the response shaper (rear right); the four trimmers on the rear where the module CAD holds their envelopes |
+
+**DIG_GND island** (`layout.yaml` `islands:`): the lower left of layer 2,
+under the etherCON's contacts, the receiver, `U-REG-LOGIC`, the load switch and
+`U-LVL-MOD`; its edge crosses `U-DAC` between its digital pins (1, 2, 15, 16)
+and its analog ones, `GND` (14) on `AGND_MOD` `[ds DAC8568CIPW.pdf p.49]`.
+Its ties are `NT-DIG-MOD` at the star and `NT-UMB-MOD` at the etherCON;
+`check` holds every `DIG_GND` pad on it and every other plane net's pad off
+it, but `J-LED-PANEL` pin 2, the panel LED's return to `AGND_MOD` by design,
+whose place is the module CAD's (`foreign_ok:`).
+
+### Every layout note in the corpus, and how it is met
+
+| Note | Where it says so | How |
+|---|---|---|
+| `R-SET-DAC` away from the standoffs, connectors and board edges | `power-entry.md`, *The DAC rail*; this README | front, top middle: ≥ 5 mm from every edge, standoff and connector (`pcb.py check`'s DRC does not test this: read off the placement, `layout.yaml` `parts:`) |
+| `R-SET-DAC`'s long axis parallel to the board's long edge | same | turned 90/270 (along y), the placement's only allowed turns for it |
+| Guard ring round `SET` at `OUT`'s potential, both sides | same | a `DAC_AVDD` pour on layers 1 and 4 round `R-SET-DAC`, `C-SET-DAC` and `SET` (`layout.yaml` `guards:`), joined to `OUT`/`OUTS` |
+| `OUTS` Kelvin to `C-REG-OUT`; `R-SET-DAC`'s and `C-SET-DAC`'s grounds to `C-REG-OUT`'s | same | `connect_first:` - each its own track, routed and locked first; `check` holds each to its `max_mm` |
+| LT3042 exposed pad to `AGND_MOD` | same | netlisted; its pad fans out into the layer-2 plane |
+| `U-LVL-MOD`'s `DAC_AVDD` on its own branch from `C-REG-OUT`, not through the DAC's pin | `power-entry.md`, *The DAC rail's load* | `connect_first: [C6.1, U4.14]` and `[C6.1, U3.3]`, separate tracks |
+| `C-VREF-DAC`, `C-DEC-LVL`, `C-DEC-RX` at their pins; every op-amp's decouplers at its supply pins | `dac8568.md`, `digital-and-supervision.md` | placed against the pin (2-4 mm) |
+| `C-FILT-PITCH` and `C-FILT-MOD` at `J-B2B-MOD`'s pins, not at the op-amp | `pitch-stage.md`, this README | placed against `J-B2B-MOD` pins 14, 15, 16, 17, 20 |
+| LT5400's exposed pad to `AGND_MOD` | `pitch-stage.md` | netlisted; fanned out to layer 2 |
+| The LT1641's `SENSE` and `VCC` Kelvin to `R-ILIM`'s pads, the tab short to `R-ILIM` | `umbilical-load-switch.md` | `connect_first: [U2.7, R3.2]`, `[U2.8, R3.1]`; `Q-LOADSW` beside `R-ILIM` |
+| `TRIM-RESP` and every trimmer on the rear, adjustable from behind | `breath-response-shaper.md`, `mechanical/module/drc.echo` | all four at the module CAD's envelopes on the rear |
+| `L-CM-ISO` between `L-ISO-IN` and the converter's input pins | ADR 0027, `power-entry.md` | in the circuit, yes. On the board the module CAD fixes it on the rear above `J-PWR-EURO`, so `ISO_VIN_POS`/`NEG` run back to `U-ISO`'s pins |
+| `C-ISO-Y` beside the converter | `power-entry.md` | at `U-ISO`'s pin 1, across the barrier |
+| `U-ISO`'s isolation: input side apart from output side | ADR 0027 | `layout.yaml` `isolation:` - a 2.0 mm functional gap on every layer, held by `check` (`check_isolation`); the `PWR_GND` pour drawn to keep it |
+| `PWR_GND` its own copper on layer 4, meeting `DIG_GND` only at the etherCON | `power-entry.md`, *Grounding* | a layer-4 pour under `U-ISO` and round the load switch; `NT-UMB-MOD` at pins 6/8 |
+| `DIG_GND` under the etherCON, `U-LVL-MOD`, `U-REG-LOGIC` and the SPI traces; `AGND_MOD` under the analog block; the DAC at the boundary | `power-entry.md`, *Grounding* | the island above |
+| The breath pair: `BREATH_SENSE` and `AGND_SENSE` symmetric | `breath-receive-stage.md` | `pairs:` - side by side on layer 4 from the etherCON's pins up the board's left edge |
+| `J-B2B-MOD` unmirrored on both boards | this README, `module-jack/README.md` | `check_b2b` against the jack board's `.kicad_pcb`, pin by pin |
+| Nothing taller than the CAD's rooms under the LED, the toggle's lugs, the jack board | `pcb-geometry.echo` keep-outs | `check_heights` (`layout.yaml` `heights:`, `rooms:`) |
+
 ## Files — what is source, what is generated
 
 | File | What it is |
@@ -37,6 +99,9 @@ What each circuit does, and why, is on its page:
 | `module-main.kicad_sch` (+ the circuit sheets it places) | **Source.** Every connection, and each part's identity (ADR 0019) |
 | `board-netlist.yaml` | Exported (`python3 tools/kicad.py export hardware/boards/module-main`), with KiCad's ERC over the whole hierarchy. Each part's `of` is its BOM row and `sheet` the circuit it belongs to, which is how a reference (`R17`) is looked up |
 | `*.sch.png` | Renders, recorded in `hardware/SHEETS.csv` |
+| `module-main.kicad_pcb`, `module-main.kicad_pro` | **Source** since the first layout (`python3 tools/pcb.py layout`, then `route`): edit in KiCad 9; `python3 tools/pcb.py check hardware/boards/module-main` holds it |
+| `layout.yaml` | How the first layout was made: the parts' places, the rules, planes and checks' inputs |
+| `module-main.pcb-*.png`, `fab/` | Written by `python3 tools/pcb.py render`, recorded in `hardware/SHEETS.csv` |
 | `fp-lib-table`, `sym-lib-table` | Register `hardware/lib/` (the NE8FAV footprint, the DAC8568 symbol) for this project |
 
 ## How the circuits are placed
@@ -184,6 +249,7 @@ of the two mitigations (`module/power-entry/power-entry.md`, *The DAC rail*,
 | Item | Decided by |
 |---|---|
 | The metal standoffs' part (the CAD's `standoff.*` still cites the polyamide spacer), and the panel spacers' (`panel_standoff.stock_l`, tbd) | The module CAD owner; the pads' nets are settled above |
-| `U-ISO`'s exact place: RECOM RPA20-2412SAW, 25.4 × 25.4 × 10.2 mm on 5.6 mm pins `[ds RECOM-RPA20-AW.pdf PD-7, PD-8]`, on this board's **rear face** (too tall for the boards' gap), with `L-ISO-IN`, `C2`, `C-ISO-IN`, `C-ISO-OUT` and `C-ISO-Y` beside it, and `NT-UMB-MOD` at the etherCON's pins 6/8 (ADR 0027). The module CAD holds an envelope for it and its filter (`config/module.yaml` `iso.*`, lower left above the NE8FAV's tails, clash-checked) | The layout |
+| The module CAD's envelopes against the layout: `U-ISO` and the trimmers are where the CAD holds them; the layout moved `L-CM-ISO` up 3.5 mm (to clear `J-B2B-MOD`'s pins and keep the isolation gap; still turned 45°), and put `C-ISO-BULK` and `L-ISO-IN` on the front by the input filter and the bulk caps on the rear upper right (`layout.yaml` `parts:`), so `config/module.yaml` `iso.filter` and `tall.at` no longer describe where they are and the CAD's clash and depth checks do not see them there | The module CAD owner: move the envelopes to the layout's places and re-run its checks |
+| The boards' mask colour (green in `layout.yaml` `fab:` until decided) | The owner, before the first order |
 | `U-ISO`'s supply: the RPA20 is end-of-life, 20 at DigiKey on 2026-09-30 (the row); the RP20-2412SAW drops into the same footprint with pads 4 and 6 swapped (ADR 0027) | The order — buy spares now |
 | The bus's +5 V, CV and Gate pins (11–16) are unused, on no net | Nothing: the module makes its own 5 V and takes no bus CV (ADR 0023 point 3, amended) |
