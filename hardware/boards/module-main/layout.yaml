@@ -58,27 +58,326 @@ b2b:
   other: hardware/boards/module-jack
 
 parts:
-  L2:  [38.15, 61.6, 0, rear]
-  RV1: [14.0, 95.0, 0, rear]
-  RV2: [25.25, 95.0, 0, rear]
-  RV3: [36.5, 95.0, 0, rear]
-  RV4: [46.0, 95.0, 0, rear]
-  SW1: [20.0, 44.6, 0]
-  C44: [14.2, 43.2, 0]
-  C46: [8.9, 40.44, 180]
-  U3:  [6.0, 50.0, 90]
-  U4:  [15.0, 52.5, 90]
-  U15: [30.0, 18.0, 0, rear]
-  U2:  [8.0, 24.0, 0, rear]
-  Q1:  [15.0, 31.0, 0, rear]
-  C2:  [40.5, 52.0, 0]
-  U6:  [9.0, 71.0, 0, rear]
-  U5:  [9.0, 81.0, 0, rear]
-  U11: [5.5, 67.5, 0]
-  U10: [14.5, 67.5, 0]
-  U7:  [14.5, 79.5, 0]
-  U12: [36.0, 67.0, 0]
-  RN1: [34.0, 80.0, 0]
-  U9:  [42.0, 80.0, 0]
-  U8:  [38.0, 104.0, 0, rear]
-  U1:  [40.0, 104.0, 0]
+  C43:  [10.7, 65.5, 90, rear]
+  JP1:  [17.45, 60.75, 0]
+  C1:   [29.85, 88.5, 0, rear]
+  C2:   [40.5, 50, 0]
+  C3:   [40.6, 89.25, 0, rear]
+  C5:   [45.75, 103.5, 0]
+  C6:   [44.25, 106.75, 0]
+  C7:   [37, 107.25, 90]
+  C8:   [3.55, 27.6, 0]
+  C9:   [13.3, 28.35, 0, rear]
+  C10:  [8.55, 25.1, 180]
+  C11:  [16.3, 57.6, 90]
+  C12:  [21.5, 52.5, 90]
+  C13:  [3.3, 72.75, 180, rear]
+  C14:  [4.3, 75.75, 90, rear]
+  C15:  [2.25, 75.75, 90, rear]
+  C16:  [14.55, 72, 0, rear]
+  C17:  [6.55, 75.75, 90, rear]
+  C18:  [12.3, 76.5, 270, rear]
+  C19:  [6.55, 85.75, 90, rear]
+  C20:  [17.05, 80.5, 270, rear]
+  C21:  [8.8, 77.5, 180]
+  C22:  [20.55, 89, 90]
+  C23:  [40.5, 99.25, 270, rear]
+  C24:  [35.5, 108.75, 90, rear]
+  C25:  [43.3, 82, 180, rear]
+  C26:  [40.8, 78, 0, rear]
+  C27:  [44.3, 75.25, 270]
+  C28:  [47.05, 80, 270]
+  C29:  [28.8, 78.75, 90, rear]
+  C30:  [17.8, 72, 90]
+  C31:  [11.8, 62.75, 270]
+  C32:  [8.8, 72, 90]
+  C33:  [4.05, 63.5, 0]
+  C34:  [39.3, 71.5, 90]
+  C35:  [33.55, 62.25, 270]
+  C36:  [20.8, 69.25, 270]
+  C37:  [20.8, 64.5, 270]
+  C38:  [30.8, 71, 0]
+  C39:  [28.05, 62.5, 0]
+  C40:  [3.55, 25.1, 180]
+  C41:  [31.5, 12.1, 180, rear]
+  C42:  [26.75, 12.1, 180, rear]
+  C44:  [14.2, 43.2, 0]
+  C45:  [16.55, 67.25, 0, rear]
+  C46:  [8.9, 40.44, 180]
+  C47:  [26.5, 19.1, 270, rear]
+  C48:  [26.5, 15.35, 270, rear]
+  C49:  [34.75, 27.6, 0, rear]
+  C50:  [35.75, 12.35, 0, rear]
+  C51:  [34.25, 104.25, 180]
+  D1:   [46.85, 86.5, 270, rear]
+  D2:   [29, 38.9, 90, rear]
+  D3:   [37.35, 76.25, 90, rear]
+  D4:   [3.2, 65.5, 0, rear]
+  D5:   [3.3, 69.5, 270, rear]
+  D6:   [16.8, 89, 270]
+  D7:   [37, 100, 180, rear]
+  D8:   [33, 101.75, 270, rear]
+  D9:   [43.8, 85, 270]
+  D10:  [14.8, 72.5, 270]
+  D11:  [3.05, 72.5, 270]
+  D12:  [8.55, 62.75, 90]
+  D13:  [35.05, 72, 270]
+  D14:  [2.55, 33.85, 270, rear]
+  D15:  [33, 38.9, 90, rear]
+  F1:   [46.85, 33.5, 270]
+  F2:   [46.85, 39.75, 90]
+  F3:   [46.85, 24, 270]
+  FB1:  [46.9, 89.25, 0, rear]
+  FB2:  [37.5, 58, 90]
+  FB3:  [41.6, 85, 0, rear]
+  FB4:  [40.5, 58, 90]
+  L1:   [31.5, 56, 0]
+  L2:   [38.2, 62.5, 45, rear]
+  NT1:  [39.6, 29.92, 180]
+  NT2:  [38.5, 33.2, 0]
+  NT3:  [28.5, 30.35, 0, rear]
+  Q1:   [12.5, 33, 0, rear]
+  R1:   [43, 100.5, 270]
+  R3:   [10.05, 27.6, 180]
+  R4:   [7.05, 35.35, 0, rear]
+  R5:   [2.25, 28.6, 270, rear]
+  R6:   [6.55, 22.85, 180]
+  R7:   [6.55, 22.85, 0, rear]
+  R8:   [2.2, 58.2, 90]
+  R9:   [14.05, 56.5, 90]
+  R10:  [23.5, 23.85, 180, rear]
+  R11:  [31.5, 30.6, 90, rear]
+  R12:  [35.75, 24.35, 270, rear]
+  R13:  [6.3, 53, 270]
+  R14:  [4.05, 53.25, 90]
+  R15:  [18.8, 43.25, 270]
+  R16:  [8.55, 65.5, 90, rear]
+  R17:  [6.3, 66.25, 90, rear]
+  R18:  [2.25, 79.5, 90, rear]
+  R19:  [8.8, 75.75, 90, rear]
+  R20:  [14.55, 75, 270, rear]
+  R21:  [20.3, 80.75, 180]
+  R22:  [13.8, 83.5, 0]
+  R23:  [20.3, 78.5, 180]
+  R24:  [17.55, 83.5, 180]
+  R25:  [15.8, 85.75, 0]
+  R26:  [20.55, 84.25, 270]
+  R27:  [30.75, 99.5, 90, rear]
+  R28:  [32.25, 105.25, 0, rear]
+  R29:  [27.75, 99, 180, rear]
+  R30:  [24, 99, 180, rear]
+  R31:  [43.5, 98.75, 0, rear]
+  R32:  [42.05, 75.25, 90]
+  R33:  [44.55, 72.25, 0]
+  R34:  [38.3, 91.5, 90]
+  R35:  [20.3, 60.25, 90]
+  R36:  [6.55, 72.25, 90]
+  R37:  [8.8, 75.25, 0]
+  R38:  [5.05, 75.75, 180]
+  R39:  [18.3, 72, 0, rear]
+  R40:  [18.3, 74.25, 180, rear]
+  R41:  [18.8, 75, 0]
+  R42:  [21.3, 70.25, 90, rear]
+  R43:  [30.3, 73.25, 0]
+  R44:  [17.55, 76.5, 180, rear]
+  R45:  [21.3, 74, 270, rear]
+  R46:  [15.3, 63.5, 0]
+  R47:  [29.55, 76.25, 90]
+  R48:  [32.55, 75.5, 0]
+  R49:  [29.3, 75.75, 0, rear]
+  R50:  [33.05, 75.75, 0, rear]
+  R51:  [11.8, 72.75, 90]
+  R52:  [35.8, 62.25, 90]
+  R53:  [38.8, 61.5, 0]
+  R54:  [39.8, 75.25, 270]
+  R55:  [41.55, 71.5, 270]
+  R56:  [30.3, 67.25, 270]
+  R57:  [10.3, 22.6, 270, rear]
+  R58:  [2.95, 22.85, 180]
+  R59:  [38.5, 108, 0, rear]
+  R60:  [43, 104, 270, rear]
+  R61:  [36.3, 83, 0]
+  R62:  [32.3, 85, 0]
+  R63:  [29.05, 91.5, 0]
+  R64:  [40.05, 84, 0]
+  R65:  [44.8, 89, 90]
+  R66:  [8.8, 90.25, 90, rear]
+  R68:  [26.5, 22.85, 270, rear]
+  R69:  [29.75, 24.6, 270, rear]
+  R70:  [31, 27.6, 0, rear]
+  R71:  [6.55, 37, 180]
+  RN1:  [34, 80, 0]
+  RV1:  [14, 95, 0, rear]
+  RV2:  [25.25, 95, 0, rear]
+  RV3:  [36.5, 95, 0, rear]
+  RV4:  [46, 95, 0, rear]
+  SW1:  [4, 20, 0]
+  U1:   [40, 104, 0]
+  U2:   [7, 27, 0, rear]
+  U3:   [9.1, 57.8, 180]
+  U4:   [16.5, 49.8, 0]
+  U5:   [9, 81, 0, rear]
+  U6:   [9, 71, 0, rear]
+  U7:   [14.5, 79.5, 0]
+  U8:   [38, 104, 0, rear]
+  U9:   [42, 80, 0]
+  U10:  [14.5, 67.5, 0]
+  U11:  [5.5, 67.5, 0]
+  U12:  [36, 67, 0]
+  U13:  [37.25, 15.6, 270, rear]
+  U15:  [31.5, 18, 0, rear]
+
+# THE PLANES (hardware/module/power-entry/power-entry.md, Grounding): layer 2 is
+# AGND_MOD under the analog block, with DIG_GND as an island under the etherCON's
+# pins, the SPI receiver, the regulator for LOGIC_5V, U-LVL-MOD and the DAC's
+# digital pins; layer 3 carries the analog +12 V, so a signal on layer 4 has an
+# unbroken plane over it. -12 V is a track (net_classes). PWR_GND, the isolated
+# return, is its own copper on layer 4 (pours: below).
+planes:
+  - {layer: In1.Cu, net: AGND_MOD}
+  - {layer: In2.Cu, net: MODULE_ANALOG_POS12}
+
+# DIG_GND on layer 2: the lower left of the board (frame mm) - under the etherCON's
+# contacts and the receiver on the rear, the isolated load switch on the rear, and
+# up the left under U-LVL-MOD to the DAC, whose moat runs across U-DAC between its
+# digital pins (1, 2, 15, 16, toward the island) and its analog ones, GND (14) on
+# AGND_MOD: the datasheet's split [ds DAC8568CIPW.pdf p.49]. Its right edge stops
+# short of J-PWR-EURO, where the star is: NT-DIG-MOD (NT2) straddles the moat there,
+# NT-AGND-MOD (NT1) beside it on the AGND side, both to the bus ground pins. Its
+# other tie is NT-UMB-MOD (NT3) at the etherCON's pins 6 and 8, to PWR_GND (ADR 0027).
+islands:
+  - net: DIG_GND
+    layer: In1.Cu
+    ties: [NT2, NT3]
+    moat: 0.5
+    tie_window: 3.0
+    outline: [[1.0, 10.0], [38.5, 10.0], [38.5, 37.6], [24.0, 37.6], [24.0, 56.25], [1.0, 56.25]]
+    # J-LED-PANEL's pin 2 is the LED's return to AGND_MOD (panel-led.md: the module CAD
+    # puts the header here, over the island); its pad stands in the island's copper with
+    # its own clearance, joined to AGND_MOD by a track
+    foreign_ok: {J4.2: "the panel LED's return: AGND_MOD by design (panel-led.md); J-LED-PANEL's place is the module CAD's"}
+
+# PWR_GND on layer 4 (power-entry.md, Grounding): under U-ISO's body and round the
+# load switch on the rear, joined by a strip at the board's left edge that keeps the
+# isolation gap (isolation:, below) from U-ISO's input pins.
+pours:
+  - {net: PWR_GND, layer: B.Cu, outline: [[1.0, 17.0], [16.0, 17.0], [16.0, 37.6], [8.5, 37.6], [8.5, 43.6], [27.0, 43.6], [27.0, 63.6], [1.0, 63.6]]}
+
+# U-ISO's barrier (ADR 0027): its input side - the filter after L-ISO-IN and the
+# converter's input pins - and its output side - the isolated +12 V, its return and
+# the load switch - keep this far apart on every layer. 2.0 mm is a FUNCTIONAL gap,
+# not a safety rating [from memory]: both sides are SELV (+-12 V), and they are
+# DC-tied at the etherCON and the star (NT3, NT2); what it keeps small is the stray
+# capacitance across the converter that L-CM-ISO and C-ISO-Y exist to manage.
+# C-ISO-Y (C46) bridges it by design.
+isolation:
+  gap: 2.0
+  input: [ISO_VIN_POS, ISO_VIN_NEG, ISO_FILT_POS, ISO_FILT_NEG]
+  output: [ISO_POS12, PWR_GND, UMBILICAL_POS12, ON, ON_SW, FB, GATE_DRIVE, GATE_NODE, SENSE_NODE, TIMER, GATE_COMP_MID]
+  bridge: [C46]
+
+# THE BREATH PAIR (breath-receive-stage.md: the in-amp's input pair symmetric):
+# BREATH_SENSE and AGND_SENSE from the etherCON's pins 1 and 2 side by side on the
+# rear to the receive stage's series resistors, up the board's left edge.
+pairs:
+  - nets: [/BREATH_SENSE, /AGND_SENSE]
+    from: [J3.1, J3.2]
+    to: [R17.1, R16.1]
+    layer: B.Cu
+    width: 0.25
+    gap: 0.25
+    through: [[18.5, 31.0], [2.3, 40.0], [2.3, 63.0]]
+
+# Net classes [calc, as the controller's main board, IPC-2221 outer 1 oz 10 C]: the
+# instrument's supply - ISO_POS12, PWR_GND, UMBILICAL_POS12, up to the LT1641's
+# 1.10 A worst-case trip (umbilical-load-switch.md) - 0.34 mm, so 0.5; U-ISO's input
+# (~0.37 A per rail, clamp-legal, power-entry.md) and the bus rails 0.5; -12 V to the
+# analog block (module-own-draw, tens of mA) 0.4; DAC_AVDD and LOGIC_5V (a few mA) 0.3.
+net_classes:
+  supply:
+    nets: [ISO_POS12, PWR_GND, /UMBILICAL_POS12, /umbilical-load-switch/SENSE_NODE,
+           /power-entry/BUS_POS12_RAW, /power-entry/BUS_NEG12_RAW, /power-entry/BUS_GND,
+           /power-entry/POS12_PTC1, /power-entry/POS12_PTC2, /power-entry/NEG12_PTC3,
+           /power-entry/POS12_D1, /power-entry/POS12_D2, /power-entry/NEG12_D4, /power-entry/NEG12_FB,
+           /power-entry/ISO_FB2, /power-entry/ISO_FILT_POS, /power-entry/ISO_FILT_NEG,
+           /power-entry/ISO_VIN_POS, /power-entry/ISO_VIN_NEG]
+    track: 0.5
+  rail12:
+    nets: [MODULE_ANALOG_NEG12]
+    track: 0.4
+  rails_low:
+    nets: [/DAC_AVDD, LOGIC_5V]
+    track: 0.3
+  plane_nets:
+    nets: [AGND_MOD, MODULE_ANALOG_POS12, DIG_GND]
+    track: 0.4
+
+fanout: [AGND_MOD, MODULE_ANALOG_POS12, DIG_GND, PWR_GND]
+
+# Each by its own track, routed first and held by check (power-entry.md, The DAC rail,
+# Layout): OUTS Kelvin to C-REG-OUT; R-SET-DAC's and C-SET-DAC's grounds to
+# C-REG-OUT's; U-LVL-MOD's DAC_AVDD on its own branch from C-REG-OUT, not through the
+# DAC's pin (The DAC rail's load); the DAC's own.
+connect_first:
+  - {pads: [U1.9, C6.1], max_mm: 6, why: "OUTS Kelvin to C-REG-OUT (power-entry.md)"}
+  - {pads: [R1.2, C6.2], max_mm: 8, why: "R-SET-DAC's ground to C-REG-OUT's (power-entry.md)"}
+  - {pads: [C5.2, C6.2], max_mm: 8, why: "C-SET-DAC's ground to C-REG-OUT's (power-entry.md)"}
+  - {pads: [C6.1, U3.3], max_mm: 120, why: "the DAC's AVDD on its own branch from C-REG-OUT (power-entry.md, The DAC rail's load)"}
+  - {pads: [C6.1, U4.14], max_mm: 120, why: "U-LVL-MOD's VCC on its own branch from C-REG-OUT, not through the DAC's pin (power-entry.md)"}
+
+# How tall each footprint family stands (pcb_module.check_heights), each with its
+# source. Rooms: the front face is the main board's setback behind the panel, 18.3
+# [repo mechanical/module/drc.echo, stack depths]; the rear, the case's 45.5
+# [repo config/module.yaml case.depth_max] less the board's rear face at 19.9 = 25.6
+# [calc]. The module CAD's keep-outs with a height (under the jack board, under the
+# toggle's lugs and the LED, over the ribbon's fold) are tighter where they apply.
+rooms: {front: 18.3, rear: 25.6}
+heights:
+  Neutrik_NE8FAV: 18.3                    # [repo drc.echo: the NE8FAV's setback is the main board's]
+  PinHeader_2x10: 2.54                    # [repo config/module.yaml b2b.insulator_h]
+  JST_XH_B2B: 9.8                         # [repo pcb-geometry.echo J-LED-PANEL mated height]
+  IDC-Header_2x08: 9.05                   # [repo config/module.yaml power.h]
+  Converter_DCDC_RECOM_RPA20: 10.2        # [repo config/module.yaml iso.body]
+  L_CommonModeChoke_Bourns_PM3700: 11.43  # [repo config/module.yaml iso.filter]
+  CP_Radial_D6.3mm: 11.0                  # [repo config/module.yaml tall.cap_h, tbd]
+  CP_Radial_D5.0mm: 11.0                  # [from memory: 5 x 11 can]
+  CP_Elec_6.3x7.7: 7.7                    # [repo config/module.yaml iso.filter]
+  CP_Elec_6.3x5.8: 5.8                    # [repo config/module.yaml iso.filter]
+  L_Sunlord_SWPA6028S: 2.8                # [repo config/module.yaml iso.filter]
+  Potentiometer_Bourns_3296W: 10.03       # [repo config/module.yaml tall.trim]
+  Potentiometer_Bourns_3224W: 5.3         # [repo config/module.yaml tall.trim_smd]
+  D_DO-41: 2.7                            # [from memory: DO-41 body diameter, lying flat]
+  Fuse_1812: 1.6                          # [from memory]
+  LFPAK56: 1.1                            # [from memory]
+  SOIC: 1.75                              # [from memory: JEDEC MS-012 max]
+  TSSOP: 1.2                              # [from memory]
+  MSOP: 1.1                               # [from memory]
+  TSOT-23: 1.0                            # [from memory]
+  SOT-23: 1.45                            # [from memory]
+  D_SOD-123: 1.35                         # [from memory]
+  C_1210: 2.5                             # [from memory]
+  C_1206: 1.8                             # [from memory: thickest 10 uF 1206]
+  C_0805: 1.35                            # [from memory]
+  L_1206: 1.1                             # [from memory]
+  R_1206: 0.7                             # [from memory]
+  R_0805: 0.6                             # [from memory]
+  SolderJumper: 0.05                      # copper only
+  NetTie: 0.05                            # copper only
+  SolderWire: 2.0                         # [from memory: a wire's end and its fillet]
+  MountingHole: 0.0
+
+silk:
+  at: [27.0, 112.0]
+  title: "WOODY module main board"
+  rev: "A"
+  date: "2026-10-02"
+
+# Routing as the controller's main board: the pair and every plane net's fanout first,
+# then every signal connection by pcb_route.complete, layer 1 along the board (the
+# module's long axis, vertical in KiCad), layer 4 across it, a via at each turn.
+route: astar
+rip_up: 10
+directions:
+  layers: {F.Cu: vertical, B.Cu: horizontal}
+  against_cost: 6.0
+  chamfer: 0.6

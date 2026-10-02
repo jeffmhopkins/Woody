@@ -5,6 +5,7 @@
     python3 tools/pcb.py check  hardware/boards/key-board-lh   # DRC + schematic parity + fab limits + CAD agreement
     python3 tools/pcb.py render hardware/boards/key-board-lh   # 3D top/bottom and 2D copper PNGs, fab/ (refuses a board that fails check)
     python3 tools/pcb.py finish hardware/boards/main-board     # a routed board's missing connections tried again, with rip-up
+    python3 tools/pcb.py route hardware/boards/module-main     # a placed board (layout --no-route) routed in place, resumably
     python3 tools/pcb.py update-footprints hardware/boards/main-board LED_WS2815B-V1_PLCC6_5.4x5.0mm_P1.6mm   # placed footprints from the library, same place and nets
 
 WHERE THINGS COME FROM - nothing on this board is typed in by hand twice:
@@ -995,6 +996,65 @@ def rescue(path, bdir, radii=(1.5, 3.0, 5.0)):
                 break           # the list moved: read it again
     shutil.rmtree(tdir, ignore_errors=True)
     return kept
+
+
+def cmd_route(bdir, chunk=30):
+    """`route <board>`: route a placed board IN PLACE, in steps that each save the board,
+    so a run that is killed (a container restart) resumes where it stopped: run it again.
+    For a board laid out with `layout --no-route`. In order, each done once: the pairs,
+    moat keep-outs, plane fanout and connect_first (pcb_route.prepare); then every
+    connection KiCad still counts missing, shortest first, by pcb_route.complete in
+    chunks, the zones filled and the board saved after each; then tidy, rip-up rescue
+    of what is left, the silkscreen (clear of every via) and the stackup. Prints what is
+    still unconnected; check fails on each."""
+    import json
+    import pcb_route
+    name = os.path.basename(bdir)
+    path = os.path.join(bdir, name + ".kicad_pcb")
+    lay = layout_yaml(bdir)
+    comps, _ = sheet_netlist(os.path.join(bdir, name + ".kicad_sch"))
+    board = pcbnew.LoadBoard(path)
+    if not any(True for _ in board.GetTracks()):
+        pcb_route.prepare(board, lay)
+        pcbnew.SaveBoard(path, board)
+        print("route: prepared (pairs, fanout, connect_first) - saved", flush=True)
+    _fill(path)
+    tried = set()
+    while True:
+        miss = sorted((m for m in unconnected_of(path) if (m[0], round(m[1][0], 1), round(m[1][1], 1), round(m[2][0], 1), round(m[2][1], 1)) not in tried),
+                      key=lambda m: math.dist(m[1], m[2]))
+        if not miss:
+            break
+        batch = miss[:chunk]
+        for m in batch:
+            tried.add((m[0], round(m[1][0], 1), round(m[1][1], 1), round(m[2][0], 1), round(m[2][1], 1)))
+        board = pcbnew.LoadBoard(path)
+        failed = pcb_route.complete(board, lay, batch)
+        pcbnew.SaveBoard(path, board)
+        board = pcbnew.LoadBoard(path)          # tidy on a fresh load (post_route says why)
+        pcb_route.tidy(board, lay)
+        pcbnew.SaveBoard(path, board)
+        _fill(path)
+        print(f"route: {len(batch) - len(failed)} of {len(batch)} routed this step; saved", flush=True)
+    left = unconnected_of(path)
+    if left and not lay.get("no_rescue"):
+        print(f"route: rescue - {rescue(path, bdir)} kept", flush=True)
+    board = pcbnew.LoadBoard(path)
+    pcb_route.tidy(board, lay)
+    for d in list(board.GetDrawings()):
+        if isinstance(d, pcbnew.PCB_TEXT) and d.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS):
+            board.Delete(d)                     # the labels again, clear of the vias as they now stand
+    add_silk_generic(board, lay, comps)
+    silk_off_vias(board)
+    pcbnew.SaveBoard(path, board)
+    _fill(path)
+    if lay.get("fab"):
+        set_stackup(path, lay["fab"], pcbnew.LoadBoard(path).GetDesignSettings().GetBoardThickness() / 1e6, lay.get("stackup"))
+    left = sorted({"; ".join(i["description"] for i in v.get("items", [])) for v in drc(path).get("unconnected_items", [])})
+    print(f"pcb: {len(left)} connection(s) left for hand routing" + (":" if left else ""))
+    for u in left:
+        print("  " + u)
+    print(f"pcb: wrote {os.path.relpath(path, ROOT)}")
 
 
 def cmd_finish(bdir):
@@ -2036,10 +2096,10 @@ if __name__ == "__main__":
     if len(sys.argv) >= 4 and sys.argv[1] == "update-footprints":
         sys.exit(cmd_update_footprints(os.path.join(ROOT, sys.argv[2].rstrip("/")),
                                        [a for a in sys.argv[3:] if not a.startswith("--")], "--pads-resized" in sys.argv) or 0)
-    if len(sys.argv) >= 3 and sys.argv[1] in ("layout", "check", "render", "finish"):
+    if len(sys.argv) >= 3 and sys.argv[1] in ("layout", "check", "render", "finish", "route"):
         d = os.path.join(ROOT, sys.argv[2].rstrip("/"))
         sys.exit({"layout": lambda: cmd_layout(d, "--force" in sys.argv, "--no-route" not in sys.argv), "check": lambda: cmd_check(d),
-                  "finish": lambda: cmd_finish(d),
+                  "finish": lambda: cmd_finish(d), "route": lambda: cmd_route(d),
                   "render": lambda: cmd_render(d, sys.argv[sys.argv.index("--preview") + 1] if "--preview" in sys.argv else None)}[sys.argv[1]]() or 0)
     print(__doc__)
     sys.exit(2)

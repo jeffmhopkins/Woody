@@ -999,7 +999,12 @@ def plane_regions(board, lay):
                 reg = reg.difference(moat)
         out[pl["net"]] = unary_union([out[pl["net"]], reg]) if pl["net"] in out else reg
     for spec, p, moat in isl:
-        out[spec["net"]] = p
+        out[spec["net"]] = unary_union([out[spec["net"]], p]) if spec["net"] in out and any(
+            s_["net"] == spec["net"] and s_ is not spec for s_, _, _ in isl) else p
+    # an outer-layer pour (the module's isolated return on the rear face): a via into it
+    for po in lay.get("pours") or []:
+        p = outline if po["outline"] == "board" else Polygon([pcb.to_pcb(x, y) for x, y in po["outline"]]).intersection(outline)
+        out[po["net"]] = unary_union([out[po["net"]], p]) if po["net"] in out else p
     return out
 
 
@@ -1673,9 +1678,10 @@ def moat_keepout(board, lay):
     for spec in lay.get("islands") or []:
         p = Polygon(spec["outline"])
         ring = p.buffer(spec["moat"], join_style=2).difference(p.buffer(-0.05, join_style=2))
-        tie = board.FindFootprintByReference(spec["tie"])
-        tx, ty = pcb_main.to_body(TO(tie.GetPosition().x), TO(tie.GetPosition().y))
-        ring = ring.difference(Point(tx, ty).buffer(spec["tie_window"]))
+        for t_ in pcb_main.ties_of(spec):
+            tie = board.FindFootprintByReference(t_)
+            tx, ty = pcb_main.to_body(TO(tie.GetPosition().x), TO(tie.GetPosition().y))
+            ring = ring.difference(Point(tx, ty).buffer(spec["tie_window"]))
         for t in board.GetTracks():
             if type(t) is pcbnew.PCB_TRACK and t.GetNetname() in {n for pr in lay.get("pairs") or [] for n in pr["nets"]}:
                 a, b = (pcb_main.to_body(TO(v.x), TO(v.y)) for v in (t.GetStart(), t.GetEnd()))
@@ -1694,6 +1700,24 @@ def prepare(board, lay):
     moat_keepout(board, lay)
     obs = Obstacles(board, lay)
     report += fanout(board, lay, obs)
+    # layout.yaml connect_first: on a multi-layer board too, each pad-to-pad connection
+    # by its own track before anything else (a Kelvin sense, a decoupling loop, a rail's
+    # own branch); pcb.py check holds each to its max_mm
+    for spec in lay.get("connect_first") or []:
+        pads = []
+        for p_ in spec["pads"]:
+            ref, num = p_.split(".")
+            pads.append(board.FindFootprintByReference(ref).FindPadByNumber(num))
+        if pads[0].GetNetname() != pads[1].GetNetname():
+            sys.exit(f"pcb: connect_first {spec['pads']} are not on one net")
+        at = [(TO(q.GetPosition().x), TO(q.GetPosition().y)) for q in pads]
+        if complete(board, lay, [(pads[0].GetNetname(), at[0], at[1])]):
+            report.append(f"connect_first {spec['pads'][0]} - {spec['pads'][1]} FAILED")
+        else:
+            for t in board.GetTracks():
+                if t.GetNetname() == pads[0].GetNetname():
+                    t.SetLocked(True)            # the autorouter and the rip-up keep it
+            print(f"route: connect_first {spec['pads'][0]} - {spec['pads'][1]} ok")
     for r in report:
         print("route: " + r)
     return report

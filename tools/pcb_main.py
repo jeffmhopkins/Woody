@@ -238,6 +238,13 @@ def copper_zone(board, net, layer, poly_body, priority=0, name=""):
         board.Add(z)
 
 
+def ties_of(spec):
+    """An island's net ties: `tie:` (one, the controller's) or `ties:` (a list - an island
+    that meets two other grounds, each at its own tie: the module's DIG_GND, at the star
+    and at the etherCON)."""
+    return spec.get("ties") or [spec["tie"]]
+
+
 def island_polys(lay):
     """layout.yaml islands: each as (spec, the island in body coords, the island grown by
     its moat - the hole it leaves in its plane)."""
@@ -585,7 +592,8 @@ def check_planes(board, lay):
     """The planes and the island as layout.yaml says: each plane and island zone on its
     layer and net; every pad of an island's net on the island (but its off_island: ones),
     every via of it inside the island and every other plane net's via outside the moat;
-    ONE tie between the island and its plane, the named net tie; and no signal track on
+    ONE tie between the island and its plane, the named net tie (or the ties a `ties:`
+    list names; a plane-net pad named in `foreign_ok:` may stand on it, with its reason); and no signal track on
     an outer layer crossing a split in its reference plane (layer 1 over layer 2, layer 4
     over layer 3) - except across a moat at its tie's window, or a pair where it crosses."""
     bad = []
@@ -610,7 +618,7 @@ def check_planes(board, lay):
                 if pad.GetNetname() == spec["net"] and name not in spec.get("off_island", []) and not P.contains(c):
                     bad.append(f"error: [island] {name} is {spec['net']} but off its island - it would return through the plane")
                 if pad.GetNetname() in plane_nets - {spec["net"]} - other and P.contains(c) \
-                        and f.GetReference() != spec["tie"]:
+                        and f.GetReference() not in ties_of(spec) and name not in spec.get("foreign_ok", {}):
                     bad.append(f"error: [island] {name} ({pad.GetNetname()}) stands on the {spec['net']} island")
         for v in board.GetTracks():
             if not isinstance(v, pcbnew.PCB_VIA):
@@ -623,8 +631,8 @@ def check_planes(board, lay):
         # the ties: every net-tie footprint joining the island's net to another
         ties = [f.GetReference() for f in board.GetFootprints() if f.IsNetTie()
                 and spec["net"] in {pd.GetNetname() for pd in f.Pads()} and len({pd.GetNetname() for pd in f.Pads()}) > 1]
-        if ties != [spec["tie"]]:
-            bad.append(f"error: [island] {spec['net']} is tied to its plane by {ties or 'nothing'}; layout.yaml says one tie, {spec['tie']}")
+        if sorted(ties) != sorted(ties_of(spec)):
+            bad.append(f"error: [island] {spec['net']} is tied by {ties or 'nothing'}; layout.yaml says {', '.join(ties_of(spec))}")
     # splits. A SPLIT is a gap the design puts in a reference plane, that a return
     # current would have to go round: a moat round an island, the plane's own edge, a
     # cut-out. So the reference is each plane and island zone's OUTLINE as drawn (the
@@ -641,9 +649,10 @@ def check_planes(board, lay):
         above = pcbnew.F_Cu if spec["layer"] == "In1.Cu" else pcbnew.B_Cu
         moats[above].append(Polygon([to_pcb(x, y) for x, y in moat.exterior.coords]).difference(
             Polygon([to_pcb(x, y) for x, y in p.exterior.coords]).buffer(-0.05)))
-        tie = board.FindFootprintByReference(spec["tie"])
-        if tie:
-            windows.append(Point(*xy_mm(tie.GetPosition())).buffer(spec["tie_window"]))
+        for t_ in ties_of(spec):
+            tie = board.FindFootprintByReference(t_)
+            if tie:
+                windows.append(Point(*xy_mm(tie.GetPosition())).buffer(spec["tie_window"]))
     # where a track lands - its own net's vias and pads - it sits in that item's own
     # clearance hole in the plane: not a split, so those ends are left out of the test
     lands = {}

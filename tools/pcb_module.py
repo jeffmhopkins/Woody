@@ -168,6 +168,31 @@ def _net_of(comps, ref, pad):
     return _NETS.get((ref, pad))
 
 
+def silk_off_others(board, gap):
+    """A footprint's own silkscreen strokes that come nearer ANOTHER part's pad opening
+    than the board house's silk-to-pad limit, or overlap another part's silk on the same
+    face, removed and named: on a board this dense a connector's outline reaches over the
+    parts beside it (pcb.fit_footprint_silk tests each footprint against its own pads)."""
+    from shapely.strtree import STRtree
+    faces = {pcbnew.F_SilkS: (pcbnew.F_Cu, pcbnew.F_Mask), pcbnew.B_SilkS: (pcbnew.B_Cu, pcbnew.B_Mask)}
+    gone = {}
+    for sl, (cu, mask) in faces.items():
+        pads = [(f.GetReference(), pcb.item_shape(p, mask, p.GetSolderMaskExpansion(mask)))
+                for f in board.GetFootprints() for p in f.Pads() if p.IsOnLayer(cu) or p.HasHole()]
+        silk = [(f.GetReference(), it, pcb.item_shape(it, sl)) for f in board.GetFootprints()
+                for it in f.GraphicalItems() if it.GetLayer() == sl and isinstance(it, pcbnew.PCB_SHAPE)]
+        ptree = STRtree([g for _, g in pads])
+        stree = STRtree([g for _, _, g in silk])
+        for ref, it, g in silk:
+            near = [pads[i][0] for i in ptree.query(g.buffer(gap)) if pads[i][0] != ref and g.distance(pads[i][1]) < gap]
+            near += [silk[i][0] for i in stree.query(g.buffer(gap)) if silk[i][0] != ref and g.distance(silk[i][2]) < gap]
+            if near:
+                it.GetParentFootprint().Remove(it)
+                gone.setdefault(ref, set()).update(near)
+    for ref, by in sorted(gone.items()):
+        print(f"pcb: silk adapted - {ref}: library silk near {', '.join(sorted(by))} removed")
+
+
 def body_to_rear(fp):
     """A part placed on the front face for its PIN MAP whose BODY is on the rear (the
     jack board's J-B2B-MOD: its insulator is on the main board's side): its courtyard,
@@ -248,6 +273,8 @@ def build(bdir, lay):
     for ref in missing:
         board.Remove(fps[ref])          # _partial: a placement study (not a layout)
     keepouts(board, lay, geo)
+    if lay.get("fab"):
+        silk_off_others(board, float(lay["fab"]["silk_to_pad"]))
     # planes, islands (pcb_main's, the same schema)
     isl = pcb_main.island_polys(lay)
     for pl in lay.get("planes") or []:
@@ -315,6 +342,10 @@ def check_cad(board, lay, comps):
         bad.append(f"error: [cad] pcb-geometry.echo says the board is {geo.get('thickness')} mm, config/module.yaml boards.t {t_cfg:g} - run: python3 tools/cad.py build")
     if abs(t_pcb - t_cfg) > 1e-6:
         bad.append(f"error: [cad] the board is {t_pcb:g} mm thick, the module CAD's {t_cfg:g} (boards.t)")
+    ce = float(cfg["boards"]["copper_edge"]["value"])
+    if float(lay["rules"]["edge_clearance"]) + 1e-6 < ce:
+        bad.append(f"error: [cad] layout.yaml rules.edge_clearance {lay['rules']['edge_clearance']} is under the module CAD's "
+                   f"copper-to-edge {ce:g} (config/module.yaml boards.copper_edge)")
     ol = pcbnew.SHAPE_POLY_SET()
     if not board.GetBoardPolygonOutlines(ol):
         bad.append("error: [cad] the Edge.Cuts outline is not closed")
@@ -359,6 +390,51 @@ def check_cad(board, lay, comps):
                 bad.append(f"error: [cad] {', '.join(hits)} under {name}'s head ({ref}) on {board.GetLayerName(lid)} - "
                            "the metal standoff bears there")
     bad += check_heights(board, lay, geo)
+    bad += check_isolation(board, lay)
+    return bad
+
+
+def check_isolation(board, lay):
+    """U-ISO's barrier (ADR 0027): on every copper layer, the converter's input side (the
+    nets layout.yaml isolation: input names) and its output side (output:) keep `gap`
+    apart - pads, tracks, vias and poured copper alike. The one part that bridges it by
+    design (C-ISO-Y, `bridge:`) is left out, with the copper within `gap` of its body."""
+    spec = lay.get("isolation")
+    if not spec:
+        return []
+    gap = float(spec["gap"])
+    norm = lambda n: n.lstrip("/").split("/")[-1]
+    ins, outs = set(spec["input"]), set(spec["output"])
+    skip = unary_union([pcb.shapely_of(f.GetCourtyard(pcbnew.B_CrtYd if f.IsFlipped() else pcbnew.F_CrtYd)).buffer(gap)
+                        for f in board.GetFootprints() if f.GetReference() in (spec.get("bridge") or [])]) \
+        if spec.get("bridge") else None
+    bad = []
+    for lid in board.GetEnabledLayers().CuStack():
+        side = {"in": [], "out": []}
+        for t in board.GetTracks():
+            n = norm(t.GetNetname())
+            if t.IsOnLayer(lid) and (n in ins or n in outs):
+                side["in" if n in ins else "out"].append(pcb.item_shape(t, lid))
+        for f in board.GetFootprints():
+            for q in f.Pads():
+                n = norm(q.GetNetname())
+                if q.IsOnLayer(lid) and (n in ins or n in outs) and f.GetReference() not in (spec.get("bridge") or []):
+                    side["in" if n in ins else "out"].append(pcb.item_shape(q, lid))
+        for z in board.Zones():
+            n = norm(z.GetNetname())
+            if not z.GetIsRuleArea() and z.IsOnLayer(lid) and (n in ins or n in outs) and z.GetFilledPolysList(lid).OutlineCount():
+                side["in" if n in ins else "out"].append(pcb.shapely_of(z.GetFilledPolysList(lid)))
+        if not side["in"] or not side["out"]:
+            continue
+        a, b = unary_union(side["in"]), unary_union(side["out"])
+        if skip is not None:
+            a, b = a.difference(skip), b.difference(skip)
+        d = a.distance(b) if not (a.is_empty or b.is_empty) else 1e9
+        if d + 1e-4 < gap:
+            from shapely.ops import nearest_points
+            pa, pb = nearest_points(a, b)
+            bad.append(f"error: [isolation] on {board.GetLayerName(lid)} U-ISO's input and output sides come {d:.2f} mm apart at "
+                       f"({pa.x:.2f}, {pa.y:.2f})-({pb.x:.2f}, {pb.y:.2f}); layout.yaml isolation: gap is {gap:g}")
     return bad
 
 
