@@ -390,15 +390,17 @@ silk:
   rev: "A"
   date: "2026-10-02"
 
-# Routing: the pair, the guard's via, every plane net's fanout and connect_first: first
-# (pcb_route.prepare); then Freerouting on layers 1, 3 and 4 (tools/pcb_freeroute.py),
-# and what it leaves by pcb_route.complete on the outer layers, with rip-up. The grid
-# router (route: astar), which keeps layer 1 along the board and layer 4 across it as
-# the controller's main board does, routes only the outer two layers and left 94
-# connections here; Freerouting takes no layer direction (tooling.md §4).
-route: freerouting
+# Routing as the controller's main board, on three layers: the pair, the guard's via,
+# every plane net's fanout and connect_first: first (pcb_route.prepare); then every
+# signal connection by pcb_route.complete, one preferred direction per layer - layer 1
+# along the board (the module's long axis, vertical in KiCad), layer 3 across it,
+# layer 4 along it - a via at each turn, a step against a layer's direction costing
+# against_cost; rip-up where it is boxed in. Freerouting (route: astar) takes no
+# layer direction in batch: an autoroute_settings scope with per-layer directions made
+# it route nothing on this board (2026-10-02, as on the controller's, tooling.md §4).
+route: astar
 rip_up: 10
 directions:
-  layers: {F.Cu: vertical, B.Cu: horizontal}
+  layers: {F.Cu: vertical, In2.Cu: horizontal, B.Cu: vertical}
   against_cost: 6.0
   chamfer: 0.6

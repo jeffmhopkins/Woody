@@ -845,16 +845,16 @@ class Obstacles:
             for pad in fp.Pads():
                 if pad.HasHole():
                     c = Point(TO(pad.GetPosition().x), TO(pad.GetPosition().y))
-                    self.items.append((c.buffer(TO(pad.GetDrillSize().x) / 2), "", {"F", "B"},
+                    self.items.append((c.buffer(TO(pad.GetDrillSize().x) / 2), "", {"F", "B", "I"},
                                        "npth" if pad.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH else "hole"))
                 if pad.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH:
                     continue
-                for L, lid in (("F", pcbnew.F_Cu), ("B", pcbnew.B_Cu)):
-                    if pad.IsOnLayer(lid):
+                for L, lid in (("F", pcbnew.F_Cu), ("B", pcbnew.B_Cu), ("I", pcbnew.In2_Cu)):
+                    if pad.IsOnLayer(lid) and (L != "I" or pad.HasHole()):
                         self.items.append((pad_geom_on(pad, lid), pad.GetNetname(), {L}, "pad" if pad.HasHole() else "smd"))
         for z in board.Zones():
             if z.GetIsRuleArea() and (z.GetDoNotAllowVias() or z.GetDoNotAllowTracks()):
-                ls = {k for k, lid in (("F", pcbnew.F_Cu), ("B", pcbnew.B_Cu)) if z.IsOnLayer(lid)}
+                ls = {k for k, lid in (("F", pcbnew.F_Cu), ("B", pcbnew.B_Cu), ("I", pcbnew.In2_Cu)) if z.IsOnLayer(lid)}
                 for i in range(z.Outline().OutlineCount()):
                     o = z.Outline().Outline(i)
                     self.items.append((Polygon([(TO(o.CPoint(k).x), TO(o.CPoint(k).y)) for k in range(o.PointCount())]),
@@ -894,8 +894,8 @@ class Obstacles:
         """A track or via already on the board, as an obstacle."""
         if isinstance(t, pcbnew.PCB_VIA):
             c = Point(TO(t.GetPosition().x), TO(t.GetPosition().y))
-            self.add(c.buffer(TO(t.GetWidth(pcbnew.F_Cu)) / 2, 16), t.GetNetname(), {"F", "B"}, "via")
-            self.add(c.buffer(TO(t.GetDrillValue()) / 2, 16), t.GetNetname(), {"F", "B"}, "vhole")
+            self.add(c.buffer(TO(t.GetWidth(pcbnew.F_Cu)) / 2, 16), t.GetNetname(), {"F", "B", "I"}, "via")
+            self.add(c.buffer(TO(t.GetDrillValue()) / 2, 16), t.GetNetname(), {"F", "B", "I"}, "vhole")
         else:
             # an inner layer's track (a board that routes layer 3) is an obstacle to vias only
             a, b = t.GetStart(), t.GetEnd()
@@ -1028,7 +1028,7 @@ def lay_track(board, obs, net, a, b, width, layer, locked=True):
     t.SetStart(pcbnew.VECTOR2I(MM(a[0]), MM(a[1])))
     t.SetEnd(pcbnew.VECTOR2I(MM(b[0]), MM(b[1])))
     t.SetWidth(MM(width))
-    t.SetLayer(pcbnew.F_Cu if layer == "F" else pcbnew.B_Cu)
+    t.SetLayer({"F": pcbnew.F_Cu, "B": pcbnew.B_Cu, "I": pcbnew.In2_Cu}[layer])
     t.SetNet(board.FindNet(net))
     t.SetLocked(locked)
     board.Add(t)
@@ -1458,10 +1458,13 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
         {s_["net"] for s_ in lay.get("islands") or []} | {n for pr in lay.get("pairs") or [] for n in pr["nets"]}
     limit, rips = int(lay.get("rip_up", 0)), {}
     queue = list(unconnected)
+    # the layers it routes: the outer two, and layer 3 where layout.yaml directions: names it
+    # (a four-layer board whose layer 3 is a routing layer, the module's)
+    routed = ["F", "B"] + (["I"] if "In2.Cu" in ((lay.get("directions") or {}).get("layers") or {}) else [])
     while queue:
         net, pa, pb = queue.pop(0)
         w = width_of(net)
-        grids = {L: Grid(obs, L, w / 2, own={net}) for L in ("F", "B")}
+        grids = {L: Grid(obs, L, w / 2, own={net}) for L in routed}
         vcache = {}
 
         def via_ok(i, j):
@@ -1519,7 +1522,7 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
         # against_cost, a diagonal one half way between (a 45-degree corner stays cheap)
         dirs = lay.get("directions") or {}
         ag = float(dirs.get("against_cost", 1.0))
-        way = {{"F.Cu": "F", "B.Cu": "B"}[k]: v for k, v in (dirs.get("layers") or {}).items() if k in ("F.Cu", "B.Cu")}
+        way = {{"F.Cu": "F", "B.Cu": "B", "In2.Cu": "I"}[k]: v for k, v in (dirs.get("layers") or {}).items() if k in ("F.Cu", "B.Cu", "In2.Cu")}
 
         def step_cost(L, di, dj, c):
             if L not in way:
@@ -1564,14 +1567,16 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
                     if ng < cost.get(nxt, 1e18):
                         cost[nxt], came[nxt] = ng, cur
                         heapq.heappush(openq, (ng + h(i + di, j + dj), ng, nxt, (di, dj)))
-                O = "B" if L == "F" else "F"
-                nxt = (O, i, j)
-                if nxt not in seen and via_ok(i, j) and (grids[O].free(i, j) or nxt in dst
-                                                         or (soft and softc(O, i, j) is not None)):
-                    ng = g + VIA
-                    if ng < cost.get(nxt, 1e18):
-                        cost[nxt], came[nxt] = ng, cur
-                        heapq.heappush(openq, (ng + h(i, j), ng, nxt, None))
+                for O in routed:
+                    if O == L:
+                        continue
+                    nxt = (O, i, j)
+                    if nxt not in seen and via_ok(i, j) and (grids[O].free(i, j) or nxt in dst
+                                                             or (soft and softc(O, i, j) is not None)):
+                        ng = g + VIA
+                        if ng < cost.get(nxt, 1e18):
+                            cost[nxt], came[nxt] = ng, cur
+                            heapq.heappush(openq, (ng + h(i, j), ng, nxt, None))
             return None, len(seen)
         # from the first item; if that search is boxed in early, from the second (a
         # pad walled in on one side can still be reached from outside)

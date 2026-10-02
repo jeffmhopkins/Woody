@@ -262,11 +262,11 @@
         "line_style": 0,
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
-        "name": "plane_nets",
+        "name": "supply",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": 3,
+        "priority": 0,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.4,
+        "track_width": 0.5,
         "via_diameter": 0.7,
         "via_drill": 0.3,
         "wire_width": 6
@@ -316,11 +316,11 @@
         "line_style": 0,
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
-        "name": "supply",
+        "name": "plane_nets",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": 0,
+        "priority": 3,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.5,
+        "track_width": 0.4,
         "via_diameter": 0.7,
         "via_drill": 0.3,
         "wire_width": 6
@@ -406,6 +406,10 @@
       },
       {
         "netclass": "rail12",
+        "pattern": "MODULE_ANALOG_POS12"
+      },
+      {
+        "netclass": "rail12",
         "pattern": "MODULE_ANALOG_NEG12"
       },
       {
@@ -419,10 +423,6 @@
       {
         "netclass": "plane_nets",
         "pattern": "AGND_MOD"
-      },
-      {
-        "netclass": "plane_nets",
-        "pattern": "MODULE_ANALOG_POS12"
       },
       {
         "netclass": "plane_nets",
