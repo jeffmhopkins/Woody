@@ -408,3 +408,4 @@ directions:
   layers: {F.Cu: vertical, In2.Cu: horizontal, B.Cu: vertical}
   against_cost: 6.0
   chamfer: 0.6
+no_rescue: true
