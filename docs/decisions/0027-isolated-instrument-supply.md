@@ -64,7 +64,7 @@ parameters with their provenance:
 
 | Breath swing | Receiver in the next slot | Receiver at the PSU end of a 0.25 m bus |
 |---|---|---|
-| 0.195 A (the new LEDs) | **4.2 cents** | **11.2 cents** |
+| 0.210 A (the LEDs, fourteen since ADR 0028's 2026-10-02 amendment) | **4.5 cents** | **12.1 cents** |
 | 0.367 A (ADR 0005's quiescent → clamp-legal worst) | **7.9 cents** | **21.1 cents** |
 
 `[sim; r_rib_gnd 17 mΩ, r_bus_seg 1–31 mΩ — sims.yaml gives each source;
@@ -94,11 +94,11 @@ burns whatever the LEDs do not, so the total never moves.
 
 | | (a) isolated supply | (b) ground sense | (c) balanced load |
 |---|---|---|---|
-| Breath-correlated pitch error, 0.195 A swing `[sim]` | **< 10⁻⁷ cents** in the model; **< 0.01 cents** with what the model leaves out (below) | 0.23 cents next slot, **7.3 cents** at the PSU end | 0.04–0.11 cents at 1 % balance |
+| Breath-correlated pitch error, 0.210 A swing `[sim]` | **< 10⁻⁷ cents** in the model; **< 0.01 cents** with what the model leaves out (below) | 0.25 cents next slot, **7.8 cents** at the PSU end | 0.05–0.12 cents at 1 % balance |
 | Same, 0.367 A swing `[sim]` | same | 0.44 / **13.7 cents** | 0.08–0.21 cents |
 | Removes the ribbon term | yes | yes | yes |
 | Removes the bus-board term | **yes** | **no** — the sense line ends at this module's tap, not the receiver's | yes |
-| Cost in power | the converter's loss, ~0.95 W, in the module | none | **2.3 W** (0.195 A × 12 V) to 4.4 W burned all the time, **inside the sealed wooden body**, which ADR 0005 already puts at 4.1 W |
+| Cost in power | the converter's loss, ~0.95 W, in the module | none | **2.5 W** (0.210 A × 12 V) to 4.4 W burned all the time, **inside the sealed wooden body**, which ADR 0005 already puts at 4.3 W |
 | Rack budget | −12 V now carries the instrument (below) | unchanged | +12 V always at its worst |
 | Parts | a converter, a filter, three fuses' worth of protection — module only | none, but one fewer ground conductor (+20 % ribbon resistance) and a non-standard reference | a current regulator and a heat sink in the instrument |
 | Depends on the receiver's position in the case | no | **yes** | no |
@@ -162,7 +162,7 @@ the isolation capacitance at breath frequency. What the model leaves out, each
 | Residual | Size |
 |---|---|
 | The module's own CV outputs driving their receivers: the breath jack's 0–10 V into 100 kΩ is 0.1 mA, returning through the bus between the receiver and the PSU | 0.1 mA × 48 mΩ (ribbon + whole bus) = 4.8 µV → **0.006 cents** — the module's own signal, not the instrument's supply |
-| The ±12 V rails at the header move by 9.7 mV (0.195 A swing) as `U-ISO`'s input current follows breath `[sim, rail_mv]` | OPA2197 at 3 µV/V worst `[SBOS737C p.8]` → 29 nV → **0.00003 cents**; `U-REG-DAC` (the LT3042 since 2026-10-01, at most 0.108 mV/V `[ds ADI-LT3042.pdf p.3; calc]`) passes 1.0 µV to `DAC_AVDD`, which does not set full scale (ADR 0005) |
+| The ±12 V rails at the header move by 10.4 mV (0.210 A swing) as `U-ISO`'s input current follows breath `[sim, rail_mv]` | OPA2197 at 3 µV/V worst `[SBOS737C p.8]` → 31 nV → **0.00004 cents**; `U-REG-DAC` (the LT3042 since 2026-10-01, at most 0.108 mV/V `[ds ADI-LT3042.pdf p.3; calc]`) passes 1.1 µV to `DAC_AVDD`, which does not set full scale (ADR 0005) |
 | `U-ISO`'s switching, 550 kHz `[ds PD-2]` | out of band, behind the input filter — see `power-entry.md`. Its common-mode part is behind `L-CM-ISO` and goes home through `C-ISO-Y`: under 10 % of it crosses the star at every corner `power-entry/sim`'s `cm-loop` sweeps (amendments 2026-10-01, below) |
 | The LED row's PWM, ~2 kHz scan and ~4 kHz refresh `[ds WS2815B-V1.pdf p.1]` | not breath-correlated in level but in the audio band, reflected through `U-ISO` and its input filter onto the case's ±12 V — an audible-band tone for other modules. **Simulated** (`power-entry/sim` `led-pwm`, amended 2026-10-01): the filter has no gain in the band and the instrument's bulk keeps half the row's current, so the rails and the pitch jack move by `led-pwm-rail-ripple` (`power-entry.md`, *The LED row's PWM*), not the review's ~13 mV bound (A4-13). That pitch figure is the jack against the module's own ground. A receiving module at the PSU end of the bus sees `led-pwm-pitch` (`interfaces/system/sim`, the whole system in one deck): about half of it is the jack board's ground moving under the receivers' as the ripple's return current splits between the ribbon and the patch-cable sleeves. At its worst corner it is over this section's 0.01 cents, and still more than fifty times under `pitch-cents-budget`. E6 scopes it |
 

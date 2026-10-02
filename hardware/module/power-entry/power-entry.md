@@ -251,32 +251,32 @@ resonant peak left — which is **58× or more** inside the −104 Ω at every
 corner of `C2`'s ESR, the ribbon, the choke and the supply; and 0.06 % of the
 converter's 550 kHz input current reaches the rack's +12 V conductor.
 
-**The LED row's PWM — `led-pwm-rail-ripple`.** The instrument's thirteen
-WS2815B-V1 pulse at 2 kHz scan / 4 kHz refresh `[ds WS2815B-V1.pdf p.1]`,
+**The LED row's PWM — `led-pwm-rail-ripple`.** The instrument's fourteen
+WS2815B-V1 (`lighting.led_count`) pulse at 2 kHz scan / 4 kHz refresh `[ds WS2815B-V1.pdf p.1]`,
 right on the filter's 3.1 kHz corner, and `U-ISO` passes whatever of that
 current reaches it to its input. `power-entry/sim`'s `led-pwm` runs the row's
-real waveform (13 × its share of `led-row-current`'s top end, in phase, at
+real waveform (each LED its share of `led-row-current`'s top end, in phase, at
 every duty from 1/256 to 255/256, at 2–4 kHz, and as seven lit or as
-thirteen spread over the period) through `C-STRIP-BULK`, the umbilical, the
+all fourteen spread over the period) through `C-STRIP-BULK`, the umbilical, the
 load switch, `U-ISO` as output power over efficiency, this filter and the
 rack. Two things keep it small. **The filter has no gain in the band**: `D2`,
 `D4`, `PTC-ISO` and the beads sit in series with `L-ISO-IN` and `C2`, so the
 loop is overdamped and from 1 to 10 kHz at most 75 % of the converter's input
 current reaches the rack (`iso-input-z`, `rack_band`); the corner is not a
 resonance. **And the instrument keeps half or more of the row's current** in
-`C-STRIP-BULK` (84 mA p-p of 169 reaches `U-ISO` at 2 kHz, less above).
-Worst — all thirteen in phase at half duty, 2 kHz, `C2` at its highest ESR
-and a 200 mΩ rack supply — the case's rails move **6.7 mV p-p at the header**
-(2.8 mV nominal) and 5.4 mV at the bus where a neighbouring module taps
-them; the module's analog rails 2.0 mV (+12 V) and 3.2 mV (−12 V); `DAC_AVDD`
-0.2 µV at an assumed 80 dB for the LT3042; and the jacks: **pitch 0.00096
+`C-STRIP-BULK` (91 mA p-p of 182 reaches `U-ISO` at 2 kHz, less above).
+Worst — all fourteen in phase at half duty, 2 kHz, `C2` at its highest ESR
+and a 200 mΩ rack supply — the case's rails move **7.2 mV p-p at the header**
+(3.1 mV nominal) and 5.8 mV at the bus where a neighbouring module taps
+them; the module's analog rails 2.2 mV (+12 V) and 3.5 mV (−12 V); `DAC_AVDD`
+0.2 µV at an assumed 80 dB for the LT3042; and the jacks: **pitch 0.0010
 cents** (TI's OPA2197 model, with `DAC_AVDD`'s ripple passed whole to the
 DAC; against the module's own ground — a receiver at the PSU end of the bus
-sees `led-pwm-pitch`, `interfaces/system/sim`), mod 0.55 µV, breath 0.26 mV (through `R-OFFNEG` from −12 V). The
+sees `led-pwm-pitch`, `interfaces/system/sim`), mod 0.59 µV, breath 0.28 mV (through `R-OFFNEG` from −12 V). The
 review's ~13 mV bound (A4-13) took `C2`'s ESR as the only damping; it is not
 reached, and the filter needs no damper. On the review's own premise — no
 instrument bulk, the whole row out of `U-ISO` — a 200 mΩ supply would take
-the header to 14–18 mV (`led-pwm-at-iso`, recorded). The rack's copper and
+the header to 15–19 mV (`led-pwm-at-iso`, recorded). The rack's copper and
 supply are estimates; E6 scopes the case's ±12 V with the row at mid
 brightness.
 
