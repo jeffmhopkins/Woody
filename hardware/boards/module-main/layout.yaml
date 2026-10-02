@@ -227,15 +227,16 @@ parts:
   U13:  [25.5, 14.1, 0, rear]
   U15:  [31.5, 18, 0, rear]
 
-# THE PLANES (hardware/module/power-entry/power-entry.md, Grounding): layer 2 is
-# AGND_MOD under the analog block, with DIG_GND as an island under the etherCON's
-# pins, the SPI receiver, the regulator for LOGIC_5V, U-LVL-MOD and the DAC's
-# digital pins; layer 3 carries the analog +12 V, so a signal on layer 4 has an
-# unbroken plane over it. -12 V is a track (net_classes). PWR_GND, the isolated
-# return, is its own copper on layer 4 (pours: below).
+# THE LAYERS (hardware/module/power-entry/power-entry.md, Grounding): "Layers 1 and 3
+# carry parts and signals; the analog rails route on layer 3 over the analog region."
+# Layer 2 is the one plane: AGND_MOD under the analog block, with DIG_GND as an island.
+# Layer 3 is a routing layer - signals, and the analog +12 V and -12 V as tracks
+# (net_classes:). Layer 4 carries the rear parts, signals, and PWR_GND, the isolated
+# return, as its own copper (pours: below). (Laid out first with +12 V as a layer-3
+# plane, two routing layers did not complete the board: 2026-10-02, 50-60 connections
+# left by both routers.)
 planes:
   - {layer: In1.Cu, net: AGND_MOD}
-  - {layer: In2.Cu, net: MODULE_ANALOG_POS12}
 
 # DIG_GND on layer 2: the lower left of the board (frame mm) - under the etherCON's
 # contacts and the receiver on the rear, the isolated load switch on the rear, and
@@ -303,16 +304,16 @@ net_classes:
            /power-entry/ISO_VIN_POS, /power-entry/ISO_VIN_NEG]
     track: 0.5
   rail12:
-    nets: [MODULE_ANALOG_NEG12]
+    nets: [MODULE_ANALOG_POS12, MODULE_ANALOG_NEG12]
     track: 0.4
   rails_low:
     nets: [/DAC_AVDD, LOGIC_5V]
     track: 0.3
   plane_nets:
-    nets: [AGND_MOD, MODULE_ANALOG_POS12, DIG_GND]
+    nets: [AGND_MOD, DIG_GND]
     track: 0.4
 
-fanout: [AGND_MOD, MODULE_ANALOG_POS12, DIG_GND, PWR_GND]
+fanout: [AGND_MOD, DIG_GND, PWR_GND]
 
 # The fine-pitch parts (pcb_route.escape): a stub out of each pad before the grid
 # router, which cannot start from inside a 0.5 or 0.65 mm row - U-REG-DAC (MSOP-10),
@@ -389,10 +390,13 @@ silk:
   rev: "A"
   date: "2026-10-02"
 
-# Routing as the controller's main board: the pair and every plane net's fanout first,
-# then every signal connection by pcb_route.complete, layer 1 along the board (the
-# module's long axis, vertical in KiCad), layer 4 across it, a via at each turn.
-route: astar
+# Routing: the pair, the guard's via, every plane net's fanout and connect_first: first
+# (pcb_route.prepare); then Freerouting on layers 1, 3 and 4 (tools/pcb_freeroute.py),
+# and what it leaves by pcb_route.complete on the outer layers, with rip-up. The grid
+# router (route: astar), which keeps layer 1 along the board and layer 4 across it as
+# the controller's main board does, routes only the outer two layers and left 94
+# connections here; Freerouting takes no layer direction (tooling.md §4).
+route: freerouting
 rip_up: 10
 directions:
   layers: {F.Cu: vertical, B.Cu: horizontal}

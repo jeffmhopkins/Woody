@@ -644,6 +644,9 @@ def check_planes(board, lay):
     fills = {}
     for L, ref in ref_of_layer.items():
         fills[L] = [pcb.shapely_of(z.Outline()) for z in zones if board.GetLayerName(z.GetLayer()) == ref]
+    # a layer whose neighbour carries no plane (the module's layer 3 is a routing layer):
+    # its reference is the next plane in, layer 2, whose splits the layer-1 test sees
+    fills = {L: v for L, v in fills.items() if v}
     windows, moats = [], {pcbnew.F_Cu: [], pcbnew.B_Cu: []}
     for spec, p, moat in isl:
         above = pcbnew.F_Cu if spec["layer"] == "In1.Cu" else pcbnew.B_Cu

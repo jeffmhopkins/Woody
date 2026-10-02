@@ -565,6 +565,8 @@ class Router:
                         # failing that (no room), only its first part: tb split at Q, a fraction
                         # of the way along, and P..Q turned - a short square step, then tb's
                         # own line from Q at an obtuse join
+                        if layer not in LAYERS:
+                            continue            # an inner routing layer (the module's layer 3): left as routed
                         L = LAYERS.index(layer)
                         found = None
                         for frac in (1.0, 0.5, 0.3, 0.15):
@@ -894,11 +896,12 @@ class Obstacles:
             c = Point(TO(t.GetPosition().x), TO(t.GetPosition().y))
             self.add(c.buffer(TO(t.GetWidth(pcbnew.F_Cu)) / 2, 16), t.GetNetname(), {"F", "B"}, "via")
             self.add(c.buffer(TO(t.GetDrillValue()) / 2, 16), t.GetNetname(), {"F", "B"}, "vhole")
-        elif t.GetLayer() in (pcbnew.F_Cu, pcbnew.B_Cu):
+        else:
+            # an inner layer's track (a board that routes layer 3) is an obstacle to vias only
             a, b = t.GetStart(), t.GetEnd()
             g = LineString([(TO(a.x), TO(a.y)), (TO(b.x), TO(b.y))]).buffer(TO(t.GetWidth()) / 2, 8) \
                 if (a.x, a.y) != (b.x, b.y) else Point(TO(a.x), TO(a.y)).buffer(TO(t.GetWidth()) / 2)
-            self.add(g, t.GetNetname(), {"F" if t.GetLayer() == pcbnew.F_Cu else "B"}, "track")
+            self.add(g, t.GetNetname(), {{pcbnew.F_Cu: "F", pcbnew.B_Cu: "B"}.get(t.GetLayer(), "I")}, "track")
 
     def near(self, g, pad=1.0):
         from shapely.strtree import STRtree

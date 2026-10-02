@@ -44,10 +44,15 @@ at the bottom), `U-ISO` (rear, at `config/module.yaml` `iso.at` and
 `iso.pins`) and the four standoff pads (board-only, on no net). Every
 courtyard is inside the board.
 
-**Layers** (*Grounding*, `power-entry.md`): 1 parts and signals, running
-along the board; 2 `AGND_MOD`, with a `DIG_GND` island; 3 the analog +12 V;
-4 parts and signals across the board, and `PWR_GND`'s own copper. −12 V is a
-0.4 mm track (`layout.yaml` `net_classes:`).
+**Layers** (*Grounding*, `power-entry.md`: "Layers 1 and 3 carry parts and
+signals; the analog rails route on layer 3"): 1 parts and signals; 2 the one
+plane, `AGND_MOD`, with a `DIG_GND` island; 3 signals and the analog ±12 V as
+0.4 mm tracks; 4 the rear parts, signals, and `PWR_GND`'s own copper. The
+first try kept +12 V as a layer-3 plane and routed on layers 1 and 4 only, as
+the controller's main board does; neither router completed it (50–60
+connections left), so layer 3 routes. Freerouting does the bulk and takes no
+layer direction, so the layers are not one-way as on the controller's board
+(`layout.yaml` `route:`).
 
 **The floor plan**, seen from the panel:
 
