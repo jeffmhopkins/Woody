@@ -349,7 +349,7 @@ their 1 kΩ `R-OUT-PROT` (6 × 10 mA) `[calc: 18.2 + 0.85 + 8.2 + 5.1 + 60]`.
 | Part | Hold / trip at 23 °C | Hold at 50 / 60 °C | Must hold | Resistance → drop at the typical load | Voltage |
 |---|---|---|---|---|---|
 | `PTC-POS12`, `PTC-NEG12`: MF-MSMF020/60-2 | 0.20 / 0.40 A | **0.15 / 0.13 A** | 92 mA worst (+12 V) | 0.40 Ω min → **13 mV** at `module-own-draw`; 6.0 Ω an hour after a trip (R1max) → **≤ 0.19 V** | 60 V: a short between the two analog rails puts 24 V across the pair |
-| `PTC-ISO`: MF-MSMF075/33X-2 | 0.75 / 1.5 A | **0.56 / 0.49 A** | 0.37 A clamp-legal worst; 0.49 A overload held under the load switch's trip (it holds at 50 °C and may trip at 60 °C — a fault state either way); ~0.36 A on a hot-plug, and 0.68 A on an early replug for tens of ms, below its trip current | 0.11–0.40 Ω → **≤ 0.09 V** at 0.22 A | 33 V: a shorted `U-ISO` input puts all 24 V across it |
+| `PTC-ISO`: MF-MSMF075/33X-2 | 0.75 / 1.5 A | **0.56 / 0.49 A** | 0.37 A clamp-legal worst; 0.49 A overload held under the load switch's trip (it holds at 50 °C and may trip at 60 °C — a fault state either way); ~0.36 A on a hot-plug, and 0.68 A on an early replug for tens of ms, below its trip current | 0.11–0.40 Ω → **≤ 0.09 V** at 0.23 A | 33 V: a shorted `U-ISO` input puts all 24 V across it |
 
 `[ds p.1, p.9]`. The previous page's "~0.1 V" was from memory; the datasheet
 gives 13 mV on a fitted part and 0.19 V at its worst `[calc: 0.40 and 6.0 Ω ×
