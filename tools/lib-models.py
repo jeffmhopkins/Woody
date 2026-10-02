@@ -303,23 +303,21 @@ def part_colours(path):
 
 
 def as_assembly(src, dst):
-    """Any STEP model rewritten as an ASSEMBLY of one part per colour, each part the
-    faces that colour covers - what kicad-cli's GLB export needs to carry a model's
-    colours (write(), above). KiCad's own library models put their colours on the
-    faces of one solid, and reach the GLB uncoloured. A model that is already an
-    assembly is copied as it is. The faces keep their geometry and placement; the
-    solids are not kept as solids (a render does not need them)."""
+    """Any STEP model rewritten as one flat ASSEMBLY with one part per colour, each part
+    the faces that colour covers, placed where the model's own tree puts them - what
+    kicad-cli's GLB export needs to carry a model's colours (write(), above). Two
+    shapes it drops: KiCad's own library models (colours on the faces of one solid)
+    reach the GLB with no material, and a nested assembly (Sunlord SWPA6028S) with no
+    mesh at all. Colours keep their alpha. The solids are not kept as solids: this
+    is for pictures, never for a clearance check."""
     from OCP.TopExp import TopExp_Explorer
     from OCP.TopAbs import TopAbs_FACE
     from OCP.TopoDS import TopoDS_Compound
     from OCP.BRep import BRep_Builder
-    import shutil
+    from OCP.Quantity import Quantity_ColorRGBA
+    from OCP.XCAFPrs import XCAFPrs_DocumentExplorer, XCAFPrs_DocumentExplorerFlags_OnlyLeafNodes
     doc = read_xcaf(src)
     st = XCAFDoc_DocumentTool.ShapeTool_s(doc.Main())
-    free = children(st.BaseLabel())
-    if any(st.IsAssembly_s(L) for L in free):
-        shutil.copyfile(src, dst)
-        return "copied (already an assembly)"
     groups = {}
 
     def faces(shape):
@@ -327,31 +325,45 @@ def as_assembly(src, dst):
         while e.More():
             yield e.Current(); e.Next()
 
-    for L in free:
-        base = label_colour(L)
-        own = {}                      # face -> colour, from the label's coloured sub-shapes
-        for k in children(L):
-            if st.IsSubShape_s(k) and label_colour(k):
+    def rgba(lab, style=None):
+        if style is not None and style.IsSetColorSurf():
+            c = style.GetColorSurfRGBA()
+            q = c.GetRGB()
+            return (q.Red(), q.Green(), q.Blue(), c.Alpha())
+        c = label_colour(lab)
+        return (*c, 1.0) if c else None
+
+    ex = XCAFPrs_DocumentExplorer(doc, XCAFPrs_DocumentExplorerFlags_OnlyLeafNodes)
+    while ex.More():
+        node = ex.Current()
+        ref, loc = node.RefLabel, node.Location
+        base = rgba(ref) or rgba(ref, node.Style)
+        own = {}                      # face -> colour, from the part's coloured sub-shapes
+        for k in children(ref):
+            if st.IsSubShape_s(k) and rgba(k):
                 for f in faces(st.GetShape_s(k)):
-                    own.setdefault(hash(f), []).append((f, label_colour(k)))
-        for f in faces(st.GetShape_s(L)):
+                    own.setdefault(hash(f), []).append((f, rgba(k)))
+        for f in faces(st.GetShape_s(ref)):
             hit = next((c for g, c in own.get(hash(f), []) if g.IsSame(f)), None)
-            groups.setdefault(hit or base, []).append(f)
+            groups.setdefault(hit or base or rgba(ref, node.Style), []).append(f.Moved(loc))
+        ex.Next()
+    if not groups:
+        raise SystemExit(f"{src}: no faces")
     out = TDocStd_Document(TCollection_ExtendedString("XmlOcaf"))
     ost = XCAFDoc_DocumentTool.ShapeTool_s(out.Main())
     oct_ = XCAFDoc_DocumentTool.ColorTool_s(out.Main())
     asm = ost.NewShape()
     name = os.path.splitext(os.path.basename(dst))[0]
     TDataStd_Name.Set_s(asm, TCollection_ExtendedString(name))
-    for i, (rgb, fs) in enumerate(sorted(groups.items(), key=lambda kv: (kv[0] is None, kv[0] or ()))):
+    for i, (c, fs) in enumerate(sorted(groups.items(), key=lambda kv: (kv[0] is None, kv[0] or ()))):
         b, comp = BRep_Builder(), TopoDS_Compound()
         b.MakeCompound(comp)
         for f in fs:
             b.Add(comp, f)
         lab = ost.AddShape(comp, False)
         TDataStd_Name.Set_s(lab, TCollection_ExtendedString(f"{name}_{i}"))
-        if rgb:
-            oct_.SetColor(lab, Quantity_Color(*rgb, Quantity_TOC_RGB), XCAFDoc_ColorSurf)
+        if c:
+            oct_.SetColor(lab, Quantity_ColorRGBA(Quantity_Color(*c[:3], Quantity_TOC_RGB), c[3]), XCAFDoc_ColorSurf)
         ost.AddComponent(asm, lab, TopLoc_Location())
     ost.UpdateAssemblies()
     save(out, name, dst)
