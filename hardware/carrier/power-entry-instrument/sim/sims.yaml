@@ -34,7 +34,7 @@ params:
   esr_buck: {value: 0.26, source: "C-BUCK-IN (UCM1E101MCL1GS): 0.26 ohm max at 100 kHz, 1.86 ohm (tan d 0.14) at 120 Hz [datasheets/discrete-and-power/NICHICON-UCM-SERIES-UCM1E101MCL1GS.pdf p.2, as the page reads it]. MAXIMA ONLY: a real part sits below them, so the low end is swept to a third of the 100 kHz figure [assumption] (vary)"}
   r_lbin:  {value: 0.05, source: "L-BUCK-IN's DCR [assumption, as umbilical-load-switch/sim]"}
   p_buck:  {value: 1.256, source: "the buck's input power at typical play: 226 mA x 5 V / 0.90 [calc from umbilical-current's derivation, ADR 0005]"}
-  i_12:    {value: 0.248, source: "the 12 V loads at typical play, 248 mA (umbilical-current's derivation, ADR 0005): the LEDs' lit share and the analog block"}
+  i_12:    {value: 0.263, source: "the 12 V loads at typical play, 263 mA (umbilical-current's derivation, ADR 0005, with the fourteenth LED's 15 mA): the LEDs' lit share and the analog block"}
   v_on:    {value: 8.0, source: "the R-78E5.0-1.0's input minimum, 8 V [datasheets/discrete-and-power/R-78E5.0-1.0.pdf p.1]: the buck modelled as drawing its power from there up (no UVLO hysteresis is published)"}
   v_nom:   {value: 11.4, source: "the buck's input at typical play, the page's 11.4 V"}
   t_end:   {value: 0.6}

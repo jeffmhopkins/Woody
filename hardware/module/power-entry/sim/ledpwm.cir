@@ -9,9 +9,9 @@
 * two or more instances beside this network (2026-10-01: gmin and source stepping both
 * failed, and the only way through was ngspice's transient op, which tools/sim.py refuses).
 *
-* THE LED ROW: thirteen WS2815B-V1, each a pulse of i_pix (its share of the row at full
+* THE LEDS: every WS2815B-V1 on the main board (n_led, the led-strip-drive netlist's count), each a pulse of i_pix (its share of the row at full
 * white, less its quiescent) at the PWM frequency f_pwm and duty d_led, on top of the row's
-* quiescent; the first n_lit pulse, the rest sit blanked; their pulses start spread*k/13 of
+* quiescent; the first n_lit pulse, the rest sit blanked; their pulses start spread*k/n_led of
 * a period apart (0: in phase, the worst; 1: evenly spread). Drawn at the row's feed, at
 * C-STRIP-BULK, behind Q-INRUSH, the umbilical, the load switch and C-ISO-OUT (k_row 1), or
 * straight from U-ISO's output (k_row 0, the review's bound: no instrument in the way).
@@ -35,7 +35,7 @@
 * output carries DAC_AVDD's ripple at k_dac (the DAC8568 publishes no AC PSRR). The pitch
 * stage (pitch-stage.lib), mod channel 1 with its reference follower, and the breath
 * output stage's buffer and summer, each TI's OPA2197 model on the two analog rails.
-.param T={{t_pwm}} ton={{t_on}} ipix={{i_pix}} nlit={{n_lit}} sp={{spread}} t0={{t_ramp2_pwm}}
+.param T={{t_pwm}} ton={{t_on}} ipix={{i_pix}} nlit={{n_lit}} sp={{spread}} t0={{t_ramp2_pwm}} nled={{n_led}}
 * ---- the rack: PSU, its and the other modules' decoupling, the bus to this module's tap,
 * ---- the ribbon to the header
 VPSUP vpp 0 PWL(0 0 {{t_ramp_pwm}} {{v_bus}})
@@ -109,19 +109,21 @@ RSELB ledf vcc {{r_sel_iso}}
 RSELC ledr ig {{r_sel_row}}
 RSELD ledr pg {{r_sel_iso}}
 ILEDQ ledf ledr PWL(0 0 {{t_ramp_pwm}} 0 {{t_ramp2_pwm}} {{i_row_q}})
-ILED0 ledf ledr PULSE(0 {ipix*min(max(nlit-0,0),1)} {t0+0*sp*T/13} {{t_edge}} {{t_edge}} {ton} {T})
-ILED1 ledf ledr PULSE(0 {ipix*min(max(nlit-1,0),1)} {t0+1*sp*T/13} {{t_edge}} {{t_edge}} {ton} {T})
-ILED2 ledf ledr PULSE(0 {ipix*min(max(nlit-2,0),1)} {t0+2*sp*T/13} {{t_edge}} {{t_edge}} {ton} {T})
-ILED3 ledf ledr PULSE(0 {ipix*min(max(nlit-3,0),1)} {t0+3*sp*T/13} {{t_edge}} {{t_edge}} {ton} {T})
-ILED4 ledf ledr PULSE(0 {ipix*min(max(nlit-4,0),1)} {t0+4*sp*T/13} {{t_edge}} {{t_edge}} {ton} {T})
-ILED5 ledf ledr PULSE(0 {ipix*min(max(nlit-5,0),1)} {t0+5*sp*T/13} {{t_edge}} {{t_edge}} {ton} {T})
-ILED6 ledf ledr PULSE(0 {ipix*min(max(nlit-6,0),1)} {t0+6*sp*T/13} {{t_edge}} {{t_edge}} {ton} {T})
-ILED7 ledf ledr PULSE(0 {ipix*min(max(nlit-7,0),1)} {t0+7*sp*T/13} {{t_edge}} {{t_edge}} {ton} {T})
-ILED8 ledf ledr PULSE(0 {ipix*min(max(nlit-8,0),1)} {t0+8*sp*T/13} {{t_edge}} {{t_edge}} {ton} {T})
-ILED9 ledf ledr PULSE(0 {ipix*min(max(nlit-9,0),1)} {t0+9*sp*T/13} {{t_edge}} {{t_edge}} {ton} {T})
-ILED10 ledf ledr PULSE(0 {ipix*min(max(nlit-10,0),1)} {t0+10*sp*T/13} {{t_edge}} {{t_edge}} {ton} {T})
-ILED11 ledf ledr PULSE(0 {ipix*min(max(nlit-11,0),1)} {t0+11*sp*T/13} {{t_edge}} {{t_edge}} {ton} {T})
-ILED12 ledf ledr PULSE(0 {ipix*min(max(nlit-12,0),1)} {t0+12*sp*T/13} {{t_edge}} {{t_edge}} {ton} {T})
+* one source per LED, fourteen lines, each silent past n_led: a fifteenth LED needs a line here
+ILED0 ledf ledr PULSE(0 {ipix*min(max(nlit-0,0),1)*min(max(nled-0,0),1)} {t0+0*sp*T/nled} {{t_edge}} {{t_edge}} {ton} {T})
+ILED1 ledf ledr PULSE(0 {ipix*min(max(nlit-1,0),1)*min(max(nled-1,0),1)} {t0+1*sp*T/nled} {{t_edge}} {{t_edge}} {ton} {T})
+ILED2 ledf ledr PULSE(0 {ipix*min(max(nlit-2,0),1)*min(max(nled-2,0),1)} {t0+2*sp*T/nled} {{t_edge}} {{t_edge}} {ton} {T})
+ILED3 ledf ledr PULSE(0 {ipix*min(max(nlit-3,0),1)*min(max(nled-3,0),1)} {t0+3*sp*T/nled} {{t_edge}} {{t_edge}} {ton} {T})
+ILED4 ledf ledr PULSE(0 {ipix*min(max(nlit-4,0),1)*min(max(nled-4,0),1)} {t0+4*sp*T/nled} {{t_edge}} {{t_edge}} {ton} {T})
+ILED5 ledf ledr PULSE(0 {ipix*min(max(nlit-5,0),1)*min(max(nled-5,0),1)} {t0+5*sp*T/nled} {{t_edge}} {{t_edge}} {ton} {T})
+ILED6 ledf ledr PULSE(0 {ipix*min(max(nlit-6,0),1)*min(max(nled-6,0),1)} {t0+6*sp*T/nled} {{t_edge}} {{t_edge}} {ton} {T})
+ILED7 ledf ledr PULSE(0 {ipix*min(max(nlit-7,0),1)*min(max(nled-7,0),1)} {t0+7*sp*T/nled} {{t_edge}} {{t_edge}} {ton} {T})
+ILED8 ledf ledr PULSE(0 {ipix*min(max(nlit-8,0),1)*min(max(nled-8,0),1)} {t0+8*sp*T/nled} {{t_edge}} {{t_edge}} {ton} {T})
+ILED9 ledf ledr PULSE(0 {ipix*min(max(nlit-9,0),1)*min(max(nled-9,0),1)} {t0+9*sp*T/nled} {{t_edge}} {{t_edge}} {ton} {T})
+ILED10 ledf ledr PULSE(0 {ipix*min(max(nlit-10,0),1)*min(max(nled-10,0),1)} {t0+10*sp*T/nled} {{t_edge}} {{t_edge}} {ton} {T})
+ILED11 ledf ledr PULSE(0 {ipix*min(max(nlit-11,0),1)*min(max(nled-11,0),1)} {t0+11*sp*T/nled} {{t_edge}} {{t_edge}} {ton} {T})
+ILED12 ledf ledr PULSE(0 {ipix*min(max(nlit-12,0),1)*min(max(nled-12,0),1)} {t0+12*sp*T/nled} {{t_edge}} {{t_edge}} {ton} {T})
+ILED13 ledf ledr PULSE(0 {ipix*min(max(nlit-13,0),1)*min(max(nled-13,0),1)} {t0+13*sp*T/nled} {{t_edge}} {{t_edge}} {ton} {T})
 * ---- the module's analog +12 V: PTC-POS12, D1, FB1, C1, the regulators' input capacitors
 RPTCP hp d1a {{r_ptc_rail}}
 D1 d1a d1k D5817

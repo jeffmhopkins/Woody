@@ -88,13 +88,13 @@ The rack supplies a regulated +5 V rail alongside ±12 V, so sending 5 V up the
 cable and deleting the instrument's buck converter looks attractive. **The drop
 maths says otherwise.**
 
-The instrument's load is **~4.1 W in typical play** (the load table below; an
+The instrument's load is **~4.3 W in typical play** (the load table below; an
 earlier revision of this ADR said 3 W). Over 2 m of 24 AWG, round trip ~0.34 Ω:
 
 | Delivered at | Current | Drop | Arrives as | Error |
 |---|---|---|---|---|
-| **12 V** | 359 mA | 122 mV cable + 400 mV Schottky + 60 mV | **~11.4 V** | **5%** |
-| 5 V | 862 mA | ~290 mV cable alone | ~4.7 V | 6%+ |
+| **12 V** | 374 mA | 127 mV cable `[calc: 0.34 Ω × 0.374 A]` + 400 mV Schottky + 60 mV | **~11.4 V** | **5%** |
+| 5 V | ~904 mA `[calc: 862 mA × 4.3 / 4.1, scaled with the load]` | ~310 mV cable alone | ~4.7 V | 6%+ |
 
 *(Amended 2026-10-01: the 12 V row subtracts the module's entry Schottky,
 which the umbilical's feed no longer passes through — since ADR 0027 it is
@@ -182,8 +182,8 @@ quiescent current, and no lighting clamp.
 | State | 5 V rail | 12 V direct | **Umbilical** | Body heat |
 |---|---|---|---|---|
 | Quiescent — booted, radio off, LEDs blanked | 180 mA | 123 mA | **212 mA** | 2.4 W |
-| Typical play | 226 mA | 248 mA | **359 mA** | 4.1 W |
-| Typical + live config over WiFi | 336 mA | 248 mA | **414 mA** | 4.7 W |
+| Typical play | 226 mA | 263 mA | **374 mA** | 4.3 W |
+| Typical + live config over WiFi | 336 mA | 263 mA | **429 mA** | 4.9 W |
 | **Clamp-legal worst** | 928 mA | 119 mA | **579 mA** | 6.5 W |
 | Clamp fails, strips latched full white (two runs — one since ADR 0016) | 1023 mA | 1023 mA | **~1522 mA** | ~17 W |
 
@@ -486,6 +486,18 @@ strip rows, and the latched-full-white row in particular, are upper bounds
 sized for 60/m tape; a latched row now sits on 12 V at a fraction of that,
 and never on the 5 V buck. `umbilical-current` is not re-derived here: it
 is already an upper bound, and E6 measures it.
+
+
+## Amendment 2026-10-02 — a fourteenth LED (ADR 0028 amendment)
+
+The owner added an LED in the main board's tail corner ("Add it",
+2026-10-02; ADR 0028's amendment of that date). It adds at most 15 mA at
+12 V `[calc: 0.18 W / 12 V, ds datasheets/led/WS2815B-V1.pdf p.2]` to every
+row of the load table that has the lights lit: the typical-play rows' 12 V
+column is 263 mA, `umbilical-current` follows (its derivation is in
+`config/figures.yaml`), and the WiFi row is 429 mA. The quiescent row (one
+more LED blanked, under 2 mA) and the strip-era clamp rows are upper bounds
+already and are not re-derived; E6 measures all of them.
 
 ## Consequences
 
