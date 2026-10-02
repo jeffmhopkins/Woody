@@ -1550,7 +1550,7 @@ module drc_report() {
     edge_cap = min([for (k = top_keys) min(key_xy(k)[1] - switch_keycap / 2 - stack_cap_clear, W - key_xy(k)[1] - switch_keycap / 2 - stack_cap_clear)]);
     drc(edge_cap >= 4, "oak between a cap slot and the body's long edge", edge_cap, "mm of oak top outside the slot");
     echo("DRC", "INFO", "oak top thickness (flush at full travel)", oak_top_t,
-         "mm = keycap_top_above_seat - total_travel; keycap height is tbd, so this is too");
+         "mm = keycap_top_above_seat - total_travel; the cap height matches the parts in hand by eye (owner, 2026-10-02); calipers settle it");
     drc(undef, "key cap stands proud of the top face at rest", switch_total_travel, "mm = the travel");
     drc(stack_cap_clear * 2 >= 0.015 * (switch_keycap + 2 * stack_cap_clear), "cap hole clearance beats oak cross-grain movement across the hole",
         stack_cap_clear, str("mm per side vs ", 0.015 * (switch_keycap + 2 * stack_cap_clear), " mm of movement at 1.5 % (ADR 0009)"));

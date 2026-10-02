@@ -729,3 +729,17 @@ as amended by ADR 0025).
 - `hardware.col_pocket_wall` and `col_pocket_skin` are placeholders from
   memory, as Amendment 3's were. They are settled at M2 by pocketing a scrap of
   the chosen wood beside a slot.
+**Amended 2026-10-02 (owner): the key plate stays.** With the KS-33 switches
+and MT165 caps in hand, the owner asked whether the aluminium plate was needed
+at all, since the oak top must be thick enough for the caps to finish flush.
+The section figures (`mechanical/renders/section-key.png`,
+`section-keycap.png`) show the plate sits *below* the seat, under the oak top,
+so it costs the wood nothing: the oak top's thickness is set by the cap's
+height above the seat less the travel (`drc.echo` "oak top thickness"). The
+owner matched the parts against the sections at scale - "everything seems to
+match up with the aluminum plate. I think we're good to keep the aluminum
+plate." The plate keeps its three jobs: it takes the keystroke load off the
+switches' solder joints, it is what the key boards hang from in the cassette
+(this ADR), and it holds the switches square to the oak's slots. Still open:
+the cap's height above the seat, by calipers on the parts in hand (M1), which
+sets the oak top's thickness exactly.
