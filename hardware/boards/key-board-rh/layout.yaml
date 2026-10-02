@@ -42,7 +42,11 @@ standoff_footprint: "MountingHole:MountingHole_2.7mm_M2.5"
 # Each key's network: the one pattern, as on the left-hand board.
 networks:
   pattern: {offset: [9.4, 0.0], axis: y, leg: -1, c: -1}
-  except: {}
+  # RH6's T would stand where J2 (J-MCU-KB) now hangs, straight above J-MCU
+  # (2026-10-02): it goes under the switch's tail-side edge instead, along x,
+  # S toward the switch's pin 1, C up toward the switch between its two pins.
+  except:
+    RH6: {at: [234.0, 10.0], axis: x, leg: -1, c: 1}
 
 # Placed as the left-hand board's, 108.0 further along the body - the key row's own
 # offset (pcb-geometry.echo) - so the register stands level with RH3, as it
@@ -72,6 +76,19 @@ parts:
   U1:  [204.0, 44.0, 90]     # U-KEYS, the register
   C7:  [197.5, 41.8, 90]     # C-DECOUPLE-165, beside pin 8 at the register's J-CHAIN end
   C8:  [178.0, 42.0, 90]     # C-BULK-CHAIN, beside J-CHAIN's 3V3 pin
+  # THE MATRIX (ADR 0021 amendment 2026-10-02; pcb-geometry.echo right_hand
+  # 'connector' J-MCU-KB, 'pins' HDR-MATRIX, 'rail'). Each entry is the
+  # footprint's pin 1, found by placing it on the bottom and matching its pads
+  # to the echo: J2's pins under J-MCU's own (pin 1 at the low-y end, its
+  # mouth toward the tail); J3 and J4 on the two pad rows, pin 1 at the
+  # Matrix's USB-C edge; J5's four wire pads on the near rail, past the key
+  # plate's end, where nothing stands over them but the oak. J5's place is
+  # nominal: the Matrix's TP2, TP3 and button pads, measured on the board in
+  # hand, decide it.
+  J2:  [242.3, 21.515, 0]    # J-MCU-KB
+  J3:  [272.97, 17.07, 270]  # HDR-MATRIX, the 5V..IO1 row
+  J4:  [272.97, 39.93, 270]  # HDR-MATRIX, the IO33..RX row
+  J5:  [276.0, 11.5, 0]      # W-MATRIX
 
 silk:
   at: [152.0, 12.5]
@@ -97,4 +114,6 @@ connect_first:
   - {pads: [U1.12, U1.8], max_mm: 20, why: "the low marker's strap to ground, boxed in between the high marker and RH6's line"}
   - {pads: [U1.15, U1.12], max_mm: 12, why: "CLK INH's strap to ground, boxed in between RH5's line and VCC"}
 ground_net: GND_CHAIN
-power_nets: [V3V3_CHAIN_RH]
+# The Matrix's 5 V and its 3V3 (the breath ADC's reference, carrier.md) at the
+# power width; its grounds are on GND_CHAIN, the pour (the sheet says why).
+power_nets: [V3V3_CHAIN_RH, INST_5V_A, DEV_3V3]

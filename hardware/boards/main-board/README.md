@@ -8,7 +8,8 @@ The one long board at the thumb level (ADR 0017). It carries:
 - the key chain's two ribbon headers;
 - `J-UMB`, where the umbilical arrives from the etherCON's adapter (ADR 0021).
 
-The Matrix is on the lid and reaches it by a ribbon into `J-MCU`. The board
+The Matrix is on the right-hand key board's rails (ADR 0021 amendment
+2026-10-02) and reaches it by an IDC ribbon from that board into `J-MCU`. The board
 is part of the cassette (ADR 0025): every one of its mounts stands on the one
 bottom plate, and eight of them are columns up to the key boards (ADR 0022 as
 amended).

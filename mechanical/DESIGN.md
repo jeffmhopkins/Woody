@@ -120,12 +120,22 @@ Several things can claim each end, and the largest wins:
   cover since 2026-09-26.)
 - **The tail is stacked** (owner, 2026-09-26: "it's unacceptable to go this
   long" and "the matrix can be up higher out of the way and still allow the
-  connectors"). The Matrix **sits against the oak top** under its window,
-  wired by a ribbon: the key plate stops short of it, so the board's top
-  face is on the oak and its LEDs stand up into the window opening, under the
-  acrylic (owner, same day: "led matrix tighter to the acrylic"). Under it:
-  the extension's **right-angle USB-C plug** off its mouth edge, and the
-  main board's tongue with J-UMB on it. Behind it, the etherCON (an NE8FAV,
+  connectors"). The Matrix **sits just under the oak top** below its window:
+  the key plate stops short of it, so the board's top face comes up to the
+  oak and its LEDs stand up into the window opening, under the acrylic
+  (owner, same day: "led matrix tighter to the acrylic"). **Since 2026-10-02
+  it is mounted on the right-hand key board** (ADR 0021 amendment;
+  `boards.matrix_mount`): that board runs on past its tail columns as two
+  rails under the Matrix's pad rows, header pins through a shim join them
+  (`boards.matrix_shim_t`, *"Matrix shim on the extension's rails"*), and
+  the rails' open middle takes the Matrix's back-side parts and the USB-C
+  plug (*"Matrix on the right-hand key board's rails"*). The rails cantilever
+  past the tail columns with no support (`boards.matrix_support` says why
+  and what would change it). Under the Matrix: the extension's
+  **right-angle USB-C plug** off its mouth edge, turned so its lead leaves
+  downward and passes under the far rail (`openings.usb_plug_turn`, *"USB-C
+  plug and lead clear of the right-hand key board's rails"*), and the main
+  board's tail end with J-UMB on it. Behind it, the etherCON (an NE8FAV,
   ADR 0021) on its **adapter board**, which stands the connector's full
   height parallel to the tail cap. The connector **stands on the floor**, and
   the body is thick enough for it (owner, same day: set the body rather than
@@ -165,7 +175,7 @@ Several things can claim each end, and the largest wins:
   registers and the carrier's circuits are on one board at the thumb level,
   from the mouth cap to the end of the right hand, the full width inside the
   sides. Its parts face up; the two key boards connect to it by ribbons (below);
-  the Matrix's ribbon ends on it, and it runs on past the right-hand key
+  the Matrix's ribbon comes down to it from the right-hand key board, and it runs on past the right-hand key
   board to the etherCON's adapter, carrying J-UMB (ADR 0021). **That tail
   end is full width** (owner, 2026-10-02; `boards.main_tail`). It was a
   tongue as wide as the adapter, narrowed for lid screws that ADR 0025
@@ -354,13 +364,15 @@ only as good as those envelopes. Group the report's lines by these causes
    between the two halves must cross. (The stations ran through
    the side strips until ADR 0016 removed them.)
 5. **The Matrix and the umbilical are wired onto the main board's tail
-   end** (owner, 2026-09-26). The Matrix, on the lid, has a flat 24-way
-   ribbon soldered to its pad rows, two test points and two button pads
-   (allocation on `CBL-MCU-RIBBON`, ADR 0018): out past its mouth edge, down
-   in the gap between the right-hand key board's end and the tail
-   equipment, and level into J-MCU beside the regulator block, over the
-   tongue, which keeps its parts out from under it; it unplugs there when
-   the lid comes off. **The umbilical has no cable inside the body** (ADR
+   end** (owner, 2026-09-26). The Matrix sits on the right-hand key board's
+   rails (owner, 2026-10-02, ADR 0021 amendment): header pins through its
+   pad rows (`HDR-MATRIX`) and four short wires from its test points and
+   button pads (`W-MATRIX`). A plain 24-way IDC ribbon (allocation on
+   `CBL-MCU-RIBBON`, ADR 0018) runs from `J-MCU-KB`, hung under that board
+   straight above J-MCU, down into J-MCU beside the regulator block. It
+   plugs there with the key plate raised, as the key chain's do (*"Matrix
+   ribbon length"*), and closed it folds flat between J-MCU and the USB-C
+   plug (*"Matrix ribbon closed: its S between J-MCU and the USB-C plug"*). **The umbilical has no cable inside the body** (ADR
    0021): the etherCON is soldered to its adapter, and J-UMB, a right-angle
    header, is soldered into the adapter and the tongue (*"J-UMB on the main
    board's tongue…"*, *"J-UMB's row lands on the adapter clear of the

@@ -218,9 +218,10 @@ fresh silicone. Everything here exists so that it never has to be the answer.
   header on the main board, with the body opened (ADR 0025 — there is no
   service cover since 2026-09-26), for watching a board that boots
   but misbehaves. (4) **Hardware boot-force on the same header**: `EN` and
-  `IO0` are not on the ESP32-S3-Matrix's pad rows, so two ribbon conductors
-  are soldered to its RESET and BOOT button pads and brought to
-  `HDR-SERVICE` (ADR 0018; `hardware/carrier/service-uart/`). Hold `IO0` low,
+  `IO0` are not on the ESP32-S3-Matrix's pad rows, so two short wires join
+  its RESET and BOOT button pads to the right-hand key board, which carries
+  the Matrix, and two ribbon conductors bring them to `HDR-SERVICE` (ADR 0018;
+  ADR 0021 amendment 2026-10-02; `hardware/carrier/service-uart/`). Hold `IO0` low,
   pulse `EN`, and the ROM download mode takes a UART flash over the console
   pair — so a corrupted *bootloader* is recovered with the body opened and the
   Matrix still in place. **Only pull `EN` and `IO0` to ground** (open-drain or

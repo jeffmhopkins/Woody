@@ -23,9 +23,12 @@ left-hand page holds, with `key-board-rh` for `key-board-lh` in every path.
 | The rail's reservoir | C7 | **C8** |
 | SER comes from / QH goes to | the main board / the left thumb (`/CHAIN_SER_LH`, `/HOP_LH_LT`) | the left thumb / the right thumb (`/HOP_LT_RH`, `/HOP_RH_RT`), `key-chain-loom.md` |
 | Its rail | `V3V3_CHAIN_LH` | `V3V3_CHAIN_RH` |
+| **The Matrix** | none | **carried on two rails past the tail columns** (owner, 2026-10-02; ADR 0021, *Amendment, 2026-10-02 (2)*): J3 and J4 are bare header pins through the Matrix's pad rows on a shim, J5 four wire pads for its `TP2`, `TP3`, `EN` and `IO0`, and J2 (`J-MCU-KB`) hangs under the board straight above the main board's `J-MCU`, the Matrix ribbon's key-board end. J2's pin k is `J-MCU` pin 25 − k; `tools/kicad.py check` holds all four parts to `hardware/carrier/netlist.yaml`. The Matrix's grounds join `GND_CHAIN`, and its 5 V and 3V3 are power tracks (`layout.yaml`) |
+| The outline | a rectangle | the rectangle and the two rails, from the body CAD; the rails' inside edges clear the Matrix's back-side parts and the USB-C plug (`mechanical/drc.echo` *"Matrix on the right-hand key board's rails"*) |
+| The key networks | the pattern, every key | **RH6's T is an exception**, under the switch's tail-side edge, because J2 stands where the pattern puts it (`layout.yaml`) |
 
 Everything else is the same part, placed the same way: every key's network
-the same T round its own switch (`layout.yaml` `networks:`, the same
+the same T round its own switch but RH6's (`layout.yaml` `networks:`, the same
 pattern), J1 where the body
 CAD puts it, the four corner mounts, the rules and the board house's limits.
 
@@ -44,6 +47,9 @@ As the left-hand board's table, for six keys:
 | U1 | `U-KEYS` | the register, SN74HCS165 |
 | J1 | `J-CHAIN` | the key chain's header |
 | H1-H4 | (board only) | the corner mounts' holes |
+| J2 | `J-MCU-KB` | the Matrix ribbon's key-board end, hung upside down |
+| J3, J4 | `HDR-MATRIX` | pins through the Matrix's 5V..IO1 and IO33..RX pad rows |
+| J5 | `W-MATRIX` | four wire pads: `TP2`, `TP3`, `EN`, `IO0` |
 
 ## Ordering
 
@@ -60,7 +66,8 @@ so they ship together. What differs:
   - SMT joints: $0.19 [calc: (20 two-pad parts × 2 + U1's 16) = 56 joints × 2 boards × $0.0017].
   - Parts, 2 boards: about $2.65 [calc: per board 6 × 0.0042 + 6 × 0.0046 + 6 × 0.0173 + 0.0189 + 0.0651 + 1.086 = $1.327, at the left-hand page's 2026-10-01 unit prices].
   - Setup, stencil and the one Extended feeder fee are the same as the left-hand board's, and they are charged again: per design, not per cart.
-- **The hand assembly**: buy **six** switches, not five. `J-CHAIN`'s stock (the left-hand page) has to cover both boards.
+- **The hand assembly**: buy **six** switches, not five. `J-CHAIN`'s stock (the left-hand page) has to cover both boards. Then the Matrix: J2 (`J-MCU-KB`, the same XKB header as `J-MCU`), and the Matrix on its pins and shims (`HDR-MATRIX`, `MECH-MATRIX-SHIM`, `W-MATRIX` say how), **before** the key plate goes on.
+- **Before ordering, check against the Matrix in hand** which side its 5V..IO1 row is on with the USB-C edge toward the mouth, and where its `TP2`, `TP3` and button pads are (ADR 0021 amendment, *Other risks*). A mirrored row puts 5 V on IO pins.
 
 ## Bring-up
 
@@ -84,5 +91,10 @@ every key closed is six keys' `key-scan-current`.
 
 ## Open, and what decides each
 
-The left-hand page's *Open* table holds for this board too. This board adds
-nothing to it.
+The left-hand page's *Open* table holds for this board too. This board adds:
+
+| Open | What decides it |
+|---|---|
+| The pad rows' side and the wire pads' place (J3, J4, J5) | the Matrix in hand, before the order |
+| The 3V3 track's width to J2: it adds to the breath ADC's reference drop (`hardware/carrier/carrier.md`, *The Matrix's wiring adds to it*) | widen it in KiCad before the order; `layout.yaml` `rules: power_track` is the router's |
+| A support under the rails' tips (`config/body.yaml` `boards.matrix_support`) | the IMU tap test on the first instrument (ROADMAP) |
