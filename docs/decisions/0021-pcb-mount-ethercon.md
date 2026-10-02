@@ -269,6 +269,35 @@ by the owner. A Matrix carrier board under the Matrix (headers on its pad
 rows, an IDC header to `J-MCU`) fits the height under the Matrix. It leaves
 the same `D+`/`D−` problem.
 
+**The Matrix on an extension of the right-hand key board** (owner's
+follow-up, 2026-10-02: *"would that be better to attach as a extension of
+the right hand PCB?"*). Heights from the body CAD:
+
+- The key board's top face is 30.5 (the plate's top, less
+  `switch.pcb_below_seat`).
+- The Matrix's underside is 31.4 (its top against the oak, less
+  `boards.matrix_t`).
+- So an extension would stand 0.9 mm below the Matrix's underside.
+- The Matrix's back-side parts (`boards.matrix_under_h`: its USB-C, the
+  ESP32-S3, the buttons) hang 3.2 mm, down to 28.2, through the board's
+  plane at 28.9–30.5.
+
+The extension therefore cannot lie flat under the Matrix. It would be two
+rails under the pad rows, at 28.5 ± 11.43 across, with the middle open for
+those parts. The opening also takes the extension cable's right-angle plug,
+which stands at 24.4–31.4 in front of the Matrix's mouth edge. The 0.9 mm
+gap needs bare header pins through both boards on a 0.9 mm shim. Without
+the shim, the Matrix sits on the rails and drops 0.9 mm from the oak, and
+its LED tops go from 2 to 2.9 mm under the acrylic. The key plate ends 1 mm
+short of the Matrix (`plate_x1`), above the board's plane, so it is not in
+the way. The extension adds about 46 mm to the board's 107 mm length, and
+it cantilevers 37 mm past the board's tail columns to the Matrix's centre.
+`CBL-MCU-RIBBON` would become a plain IDC ribbon from a header under the
+extension straight down to `J-MCU`, with the same pin map. `EN`, `IO0` and
+the extra 5 V and GND still need short wires from the Matrix's button pads
+and test pads to the rails. The `D+`/`D−` problem is unchanged. **Not
+adopted.** Decided by the owner.
+
 **Found doing this:** the Matrix has **no ESD protection on its USB-C**.
 `J1`'s D± run straight to the ESP32-S3
 `[ds WAVESHARE-ESP32-S3-MATRIX-SCHEMATIC.pdf, USB block]`, so the tail-face
